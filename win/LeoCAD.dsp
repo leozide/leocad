@@ -1020,6 +1020,10 @@ SOURCE=..\Common\image.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\libman.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\library.h
 # End Source File
 # Begin Source File
@@ -1172,6 +1176,19 @@ SOURCE=..\common\im_png.cpp
 SOURCE=..\Common\image.cpp
 # ADD CPP /I "./jpeglib"
 # SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\libman.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

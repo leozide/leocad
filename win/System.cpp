@@ -665,19 +665,35 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 		StepModeless->UpdateRange(nTime, nTotal);
 }
 
-void SystemUpdateMoveSnap(unsigned short nMoveSnap)
+void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap)
 {
 	// Status bar
-	char snap[11];
+	char snap[256];
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	CStatusBar* pStatusBar = (CStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
 
-	if (nMoveSnap)
-		wsprintf(snap, " Move x%i ", nMoveSnap);
+	if (MoveSnap)
+		wsprintf(snap, " M: %d R: %d ", MoveSnap, RotateSnap);
 	else
-		strcpy (snap, " Move /2 ");
+		wsprintf(snap, " M: /2 R: %d ", RotateSnap);
 
-	pStatusBar->SetPaneText(pStatusBar->CommandToIndex(ID_INDICATOR_SNAP), LPCSTR(snap));
+	int Index = pStatusBar->CommandToIndex(ID_INDICATOR_SNAP);
+	pStatusBar->SetPaneText(Index, LPCSTR(snap));
+
+	// Resize the pane to fit the text.
+	UINT nID, nStyle; int cxWidth;
+	HFONT hFont = (HFONT)pStatusBar->SendMessage(WM_GETFONT);
+	CClientDC dcScreen(NULL);
+	HGDIOBJ hOldFont = NULL;
+	if (hFont != NULL)
+		hOldFont = dcScreen.SelectObject(hFont);
+
+	pStatusBar->GetPaneInfo(Index, nID, nStyle, cxWidth);
+	cxWidth = dcScreen.GetTextExtent(snap).cx;
+	pStatusBar->SetPaneInfo(Index, nID, nStyle, cxWidth);
+
+	if (hOldFont != NULL)
+		dcScreen.SelectObject(hOldFont);
 }
 
 void SystemUpdatePaste(bool enable)

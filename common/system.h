@@ -71,7 +71,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera);
 void SystemUpdateCameraMenu(Camera* pCamera);
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
-void SystemUpdateMoveSnap(unsigned short nMoveSnap);
+void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);
 void SystemUpdateSelected(unsigned long flags);
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);

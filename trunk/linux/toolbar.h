@@ -1,12 +1,12 @@
 #ifndef _TOOLBAR_H_
 #define _TOOLBAR_H_
 
-void create_toolbars(GtkWidget *window, GtkWidget *vbox);
-void create_piecebar(GtkWidget *window, GtkWidget *hbox);
-void create_statusbar(GtkWidget *window, GtkWidget *vbox);
-void colorlist_set(int new_color);
-void groupsbar_set(int new_group);
-void piececombo_add(char* string);
+void create_toolbars (GtkWidget *window, GtkWidget *vbox);
+GtkWidget* create_piecebar (GtkWidget *window);
+void create_statusbar (GtkWidget *window, GtkWidget *vbox);
+void colorlist_set (int new_color);
+void groupsbar_set (int new_group);
+void piececombo_add (char* string);
 
 extern GtkWidget *label_message, *label_position, *label_snap, *label_step;
 

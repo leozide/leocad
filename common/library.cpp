@@ -2,17 +2,216 @@
 // Piece library management
 //
 
+#include "library.h"
+#include "file.h"
+#include "pieceinf.h"
+#include "texture.h"
+#include "config.h"
+
+// =============================================================================
+// PiecesLibrary class
+PiecesLibrary::PiecesLibrary ()
+{
+  strcpy (m_LibraryPath, "");
+  m_pMovedReference = NULL;
+  m_nMovedCount = 0;
+  m_pPieceIdx = NULL;
+  m_nPieceCount = 0;
+  m_pTextures = NULL;
+  m_nTextureCount = 0;
+}
+
+PiecesLibrary::~PiecesLibrary ()
+{
+  Unload ();
+}
+
+void PiecesLibrary::Unload ()
+{
+  strcpy (m_LibraryPath, "");
+
+  free (m_pMovedReference);
+  m_pMovedReference = NULL;
+  m_nMovedCount = 0;
+
+  delete [] m_pPieceIdx;
+  m_pPieceIdx = NULL;
+  m_nPieceCount = 0;
+
+  delete [] m_pTextures;
+  m_pTextures = NULL;
+  m_nTextureCount = 0;
+}
+
+bool PiecesLibrary::Load (const char *libpath)
+{
+  FileDisk idx;
+  char filename[LC_MAXPATH];
+  lcuint8 version;
+  lcuint16 count, movedcount;
+  lcuint32 binsize;
+  Texture* pTexture;
+  int i;
+
+  strcpy (m_LibraryPath, libpath);
+
+  // Make sure that the path ends with a '/'
+  i = strlen(m_LibraryPath)-1;
+  if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
+    strcat(m_LibraryPath, "/");
+
+  // Read the piece library index.
+  strcpy (filename, m_LibraryPath);
+  strcat (filename, "pieces.idx");
+
+  if (!idx.Open (filename, "rb"))
+    return false;
+
+  idx.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
+  idx.ReadShort (&movedcount, 1);
+  idx.ReadLong (&binsize, 1);
+  idx.ReadShort (&count, 1);
+  idx.Seek (32, SEEK_SET);
+  idx.ReadByte (&version, 1);
+
+  if ((version != 3) || (count == 0))
+  {
+    idx.Close();
+    return false;
+  }
+  idx.Seek (34, SEEK_SET); // skip update byte
+
+  // TODO: check .bin file size.
+
+  // Load piece indexes
+  delete [] m_pPieceIdx;
+  m_pPieceIdx = new PieceInfo[count];
+  m_nPieceCount = count;
+
+  // workaround for VC++ error C2538: new : cannot specify initializer for arrays
+  for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
+    pElements->LoadIndex (idx);
+
+  // Load moved files reference.
+  if (m_pMovedReference != NULL)
+    free(m_pMovedReference);
+  m_pMovedReference = (char*)malloc(18*movedcount);
+  memset (m_pMovedReference, 0, 18*movedcount);
+  m_nMovedCount = movedcount;
+
+  for (i = 0; i < movedcount; i++)
+  {
+    idx.Read (&m_pMovedReference[i*18], 8);
+    idx.Read (&m_pMovedReference[i*18+9], 8);
+  }
+
+  idx.Close();
+
+	// TODO: Load group configuration here
+
+	// Read the texture index.
+	strcpy(filename, m_LibraryPath);
+	strcat(filename, "textures.idx");
+
+	if (m_pTextures != NULL)
+	{
+		delete [] m_pTextures;
+		m_pTextures = NULL;
+		m_nTextureCount = 0;
+	}
+
+	if (!idx.Open(filename, "rb"))
+		return false;
+
+	idx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
+	idx.ReadLong (&binsize, 1);
+	idx.ReadShort (&count, 1);
+	idx.Seek(32, SEEK_SET);
+	idx.ReadByte (&version, 1);
+
+	if ((version != 1) || (count == 0))
+	{
+		idx.Close();
+		return false;
+	}
+	idx.Seek(34, SEEK_SET); // skip update byte
+
+	// TODO: check .bin file size.
+
+	m_pTextures = new Texture[count];
+	m_nTextureCount = count;
+	memset(m_pTextures, 0, count * sizeof(Texture));
+
+	for (pTexture = m_pTextures; count--; pTexture++)
+		pTexture->LoadIndex(&idx);
+
+	idx.Close();
+
+	return true;
+}
+
+// Remeber to make 'name' uppercase.
+PieceInfo* PiecesLibrary::FindPieceInfo (const char* name) const
+{
+  PieceInfo* pInfo;
+  int i;
+
+  for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
+    if (!strcmp (name, pInfo->m_strName))
+      return pInfo;
+
+  for (i = 0; i < m_nMovedCount; i++)
+  {
+    if (!strcmp (&m_pMovedReference[i*18], name))
+    {
+      char* tmp = &m_pMovedReference[i*18+9];
+
+      for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
+        if (!strcmp (tmp, pInfo->m_strName))
+          return pInfo;
+
+      break; // something went wrong.
+    }
+  }
+
+  return NULL;
+}
+
+PieceInfo* PiecesLibrary::GetPieceInfo (int index) const
+{
+  return &m_pPieceIdx[index];
+}
+
+int PiecesLibrary::GetPieceIndex (PieceInfo *pInfo) const
+{
+  return (((char*)pInfo - (char*)m_pPieceIdx) / sizeof (PieceInfo));
+}
+
+Texture* PiecesLibrary::FindTexture (const char* name) const
+{
+  for (int i = 0; i < m_nTextureCount; i++)
+    if (!strcmp (name, m_pTextures[i].m_strName))
+      return &m_pTextures[i];
+
+  return NULL;
+}
+
+
+
+
+
+
+
+
+
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "defines.h"
 #include "globals.h"
 #include "project.h"
 #include "matrix.h"
 #include "system.h"
-#include "file.h"
-#include "library.h"
-#include "pieceinf.h"
+
 
 // =============================================================================
 // LibraryDialog class
@@ -41,20 +240,21 @@ bool LibraryDialog::Initialize ()
 {
   FileDisk idx;
   char filename[LC_MAXPATH];
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
   // Read the piece library index.
-  strcpy(filename, project->GetLibraryPath());
+  strcpy(filename, pLib->GetLibraryPath());
   strcat(filename, "pieces.idx");
   if (!idx.Open(filename, "rb"))
     return false;
   idx.Seek(34, SEEK_SET); // skip update byte
 
-  m_nPieces = project->GetPieceLibraryCount();
+  m_nPieces = pLib->GetPieceCount();
   m_pPieces = (LC_LIBDLG_PIECEINFO*) malloc (sizeof (LC_LIBDLG_PIECEINFO) * m_nPieces);
   for (int i = 0; i < m_nPieces; i++)
   {
     LC_LIBDLG_PIECEINFO* inf = &m_pPieces[i];
-    inf->info = project->GetPieceInfo(i);
+    inf->info = pLib->GetPieceInfo(i);
     inf->current_groups = inf->info->m_nGroups;
 
     idx.Seek (85, SEEK_CUR);
@@ -157,7 +357,7 @@ void LibraryDialog::HandleCommand (int id)
 
       if (ReadLDrawPiece(filename, &piece))
       {
-	if (project->FindPieceInfo(piece.name) != NULL)
+	if (project->GetPiecesLibrary ()->FindPieceInfo(piece.name) != NULL)
 	  Sys_MessageBox ("Piece already exists in the library !");
 
 	if (SaveLDrawPiece(&piece))
@@ -1202,11 +1402,12 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 	unsigned long i, j, cs, binoff = 0, delta;
 	void* membuf;
 	short scale, sb[6];
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
-	strcpy(file1, project->GetLibraryPath());
+	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-b.old");
 	remove(file1);
-	strcpy(file2, project->GetLibraryPath());
+	strcpy(file2, pLib->GetLibraryPath());
 	strcat(file2, "pieces.bin");
 	rename(file2, file1);
 
@@ -1214,10 +1415,10 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 		(!newbin.Open(file2, "wb")))
 		return false;
 
-	strcpy(file1, project->GetLibraryPath());
+	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-i.old");
 	remove(file1);
-	strcpy(file2, project->GetLibraryPath());
+	strcpy(file2, pLib->GetLibraryPath());
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 
@@ -1584,11 +1785,12 @@ bool DeletePiece(char** names, int numpieces)
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
 	unsigned short count, deleted = 0, j;
 	void* membuf;
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
-	strcpy(file1, project->GetLibraryPath());
+	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-b.old");
 	remove(file1);
-	strcpy(file2, project->GetLibraryPath());
+	strcpy(file2, pLib->GetLibraryPath());
 	strcat(file2, "pieces.bin");
 	rename(file2, file1);
 
@@ -1596,10 +1798,10 @@ bool DeletePiece(char** names, int numpieces)
 		(!newbin.Open(file2, "wb")))
 		return false;
 
-	strcpy(file1, project->GetLibraryPath());
+	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-i.old");
 	remove(file1);
-	strcpy(file2, project->GetLibraryPath());
+	strcpy(file2, pLib->GetLibraryPath());
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 
@@ -1698,6 +1900,7 @@ bool LoadUpdate(const char* update)
 	unsigned long cs, group, binoff;
 	unsigned char bt;
 	void* membuf;
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
 	typedef struct
 	{
@@ -1707,10 +1910,10 @@ bool LoadUpdate(const char* update)
 	} LC_UPDATE_INFO;
 	LC_UPDATE_INFO* upinfo;
 
-	strcpy(file1, project->GetLibraryPath());
+	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-b.old");
 	remove(file1);
-	strcpy(file2, project->GetLibraryPath());
+	strcpy(file2, pLib->GetLibraryPath());
 	strcat(file2, "pieces.bin");
 	rename(file2, file1);
 
@@ -1718,10 +1921,10 @@ bool LoadUpdate(const char* update)
 		(!newbin.Open(file2, "wb")))
 		return false;
 
-	strcpy(file1, project->GetLibraryPath());
+	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-i.old");
 	remove(file1);
-	strcpy(file2, project->GetLibraryPath());
+	strcpy(file2, pLib->GetLibraryPath());
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 

@@ -24,6 +24,7 @@ class PieceInfo;
 class Matrix;
 class View;
 class Image;
+class PiecesLibrary;
 
 // Undo support
 
@@ -58,10 +59,6 @@ public:
 		{ return m_bAnimation; }
 	unsigned short GetCurrentTime ()
 	  { return m_bAnimation ? m_nCurFrame : m_nCurStep; }
-	int GetPieceLibraryCount()
-		{ return m_nPieceCount; }
-	const char* GetLibraryPath()
-		{ return m_LibraryPath; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
@@ -71,7 +68,6 @@ public:
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	Camera* GetCamera(int i);
-	PieceInfo* GetPieceInfo(int index);
 	void GetTimeRange(int* from, int* to)
 	{
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
@@ -87,6 +83,9 @@ public:
 		*ppLight = m_pLights;
 	}
 
+  PiecesLibrary* GetPiecesLibrary () const
+    { return m_pLibrary; }
+
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
 	void SetTitle (const char* lpszTitle);
 
@@ -97,8 +96,6 @@ public:
 
 	void Render(bool bToMemory);
 	void SetViewSize(int cx, int cy);
-	Texture* FindTexture (const char* name);
-	PieceInfo* FindPieceInfo (const char* name) const;
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
   Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
@@ -121,16 +118,9 @@ protected:
 	char m_strComments[256];
 
 	// Piece library
-	bool LoadPieceLibrary (char* libpath);
-	char m_LibraryPath[LC_MAXPATH];	// path to the library files
 	char m_AppPath[LC_MAXPATH];	// path to the LeoCAD executable
-	int m_nPieceCount;		// number of pieces
-	PieceInfo* m_pPieceIdx;	// index
-	int m_nTextureCount;
-	Texture* m_pTextures;
   TexFont m_ScreenFont;
-	char* m_pMovedReference;
-	int m_nMovedCount;
+  PiecesLibrary* m_pLibrary;
 
 	// Undo support
 	LC_UNDOINFO* m_pUndoList;

@@ -118,19 +118,20 @@ BOOL CLibraryDlg::OnInitDialog()
 
 	FileDisk idx;
 	char filename[LC_MAXPATH];
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
 	// Read the piece library index.
-	strcpy(filename, project->GetLibraryPath());
+	strcpy(filename, pLib->GetLibraryPath());
 	strcat(filename, "pieces.idx");
 	if (!idx.Open(filename, "rb"))
 		return FALSE;
 	idx.Seek(34, SEEK_SET); // skip update byte
 
-	m_Parts.SetSize(project->GetPieceLibraryCount());
-	for (int i = 0; i < project->GetPieceLibraryCount(); i++)
+	m_Parts.SetSize(pLib->GetPieceCount ());
+	for (int i = 0; i < pLib->GetPieceCount (); i++)
 	{
 		PARTGROUPINFO* inf = &m_Parts[i];
-		inf->info = project->GetPieceInfo(i);
+		inf->info = pLib->GetPieceInfo(i);
 		inf->group = inf->info->m_nGroups;
 
 		idx.Seek(85, SEEK_CUR);
@@ -324,7 +325,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 	  		if (ReadLDrawPiece(str, &piece))
 		  	{
-			  	if (project->FindPieceInfo(piece.name) != NULL)
+			  	if (project->GetPiecesLibrary ()->FindPieceInfo (piece.name) != NULL)
 				  	AfxMessageBox("Piece already exists in the library !", MB_OK|MB_ICONINFORMATION);
 
   				if (SaveLDrawPiece(&piece))
@@ -622,7 +623,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			DeletePiece(names, sel);
 			free(names);
 
-			CString str = project->GetLibraryPath();
+			CString str = project->GetPiecesLibrary ()->GetLibraryPath();
 			FileDisk newidx;
 			if (!newidx.Open(str + "pieces.idx", "rb"))
 			{
@@ -641,7 +642,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			for (i = 0; i < count; i++)
 			{
 				PARTGROUPINFO* inf = &m_Parts[i];
-				inf->info = project->GetPieceInfo(i);
+				inf->info = project->GetPiecesLibrary ()->GetPieceInfo(i);
 				inf->group = inf->info->m_nGroups;
 
 				newidx.Seek(85, SEEK_CUR);

@@ -14,6 +14,7 @@
 #include "pieceinf.h" // TODO: remove
 #include "config.h"
 #include "mainwnd.h"
+#include "library.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -180,9 +181,10 @@ BOOL CCADApp::InitInstance()
 				else
 					ar >> dw;
 
-				for (int j = 0; j < project->GetPieceLibraryCount(); j++)
+        PiecesLibrary *pLib = project->GetPiecesLibrary (); 
+				for (int j = 0; j < pLib->GetPieceCount (); j++)
 				{
-					PieceInfo* pInfo = project->GetPieceInfo(j);
+					PieceInfo* pInfo = pLib->GetPieceInfo (j);
 
 					if (strcmp (pInfo->m_strName, name) == 0)
 					{
@@ -310,7 +312,7 @@ void CCADApp::OnHelpUpdates()
 					else
 						str = "You are using the latest version of the program.\n";
 
-					if (lib > project->GetPieceLibraryCount())
+					if (lib > project->GetPiecesLibrary ()->GetPieceCount ())
 						str += "There's an updated piece library.";
 					else
 						str += "There are no new pieces.";

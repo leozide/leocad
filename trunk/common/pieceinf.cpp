@@ -624,7 +624,8 @@ void PieceInfo::LoadInformation()
     case LC_STUD:
     {
       int size;
-      Matrix mat((float*)(bytes+2));
+      Matrix mat;
+      mat.FromPacked ((float*)(bytes+2));
       unsigned short color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
@@ -771,7 +772,8 @@ void PieceInfo::LoadInformation()
     case LC_STUD2:
     {
       int size;
-      Matrix mat((float*)(bytes+2));
+      Matrix mat;
+      mat.FromPacked ((float*)(bytes+2));
       unsigned short color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
@@ -1006,7 +1008,8 @@ void PieceInfo::LoadInformation()
     case LC_STUD3:
     {
       int size;
-      Matrix mat((float*)(bytes+2));
+      Matrix mat;
+      mat.FromPacked ((float*)(bytes+2));
       unsigned short color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
@@ -1153,7 +1156,8 @@ void PieceInfo::LoadInformation()
     case LC_STUD4:
     {
       int size;
-      Matrix mat((float*)(bytes+2));
+      Matrix mat;
+      mat.FromPacked ((float*)(bytes+2));
       unsigned short color = ConvertColor(*(bytes+1));
 
       // Create the vertexes

@@ -92,40 +92,28 @@ double PointDistance (double x1, double y1, double z1, double x2, double y2, dou
 	return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
 }
 */
-Matrix::Matrix()
+
+// =============================================================================
+// Matrix class
+
+Matrix::Matrix ()
 {
-	LoadIdentity();
+  LoadIdentity();
 }
 
-// Expand from the .bin file
-Matrix::Matrix(float* floats)
+Matrix::Matrix (const float* mat)
 {
-	m[0] = floats[0];
-	m[1] = floats[1];
-	m[2] = floats[2];
-	m[3] = 0.0f;
-	m[4] = floats[3];
-	m[5] = floats[4];
-	m[6] = floats[5];
-	m[7] = 0.0f;
-	m[8] = floats[6];
-	m[9] = floats[7];
-	m[10] = floats[8];
-	m[11] = 0.0f;
-	m[12] = floats[9];
-	m[13] = floats[10];
-	m[14] = floats[11];
-	m[15] = 0.0f;
+  memcpy (&m[0], mat, sizeof(float[16]));
 }
 
-Matrix::Matrix(double mat[16])
+Matrix::Matrix (const double *mat)
 {
-	for (int i = 0; i < 16; i++)
-		m[i] = (float)mat[i];
+  for (int i = 0; i < 16; i++)
+    m[i] = (float)mat[i];
 }
 
-//	Create a matrix from axis-angle and a point
-Matrix::Matrix(float rot[4], float pos[3])
+// Create a matrix from axis-angle and a point
+Matrix::Matrix (const float *rot, const float *pos)
 {
 	float tmp[4] = { rot[0], rot[1], rot[2], rot[3]*DTOR };
 	float q[4];
@@ -189,19 +177,40 @@ Matrix::~Matrix()
 {
 }
 
-void Matrix::FromFloat(float* mat)
+// Expand from the .bin file
+void Matrix::FromPacked (const float *mat)
 {
-	memcpy (&m[0], mat, sizeof(float[16]));
+  m[0] = mat[0];
+  m[1] = mat[1];
+  m[2] = mat[2];
+  m[3] = 0.0f;
+  m[4] = mat[3];
+  m[5] = mat[4];
+  m[6] = mat[5];
+  m[7] = 0.0f;
+  m[8] = mat[6];
+  m[9] = mat[7];
+  m[10] = mat[8];
+  m[11] = 0.0f;
+  m[12] = mat[9];
+  m[13] = mat[10];
+  m[14] = mat[11];
+  m[15] = 0.0f;
+}
+
+void Matrix::FromFloat (const float* mat)
+{
+  memcpy (&m[0], mat, sizeof(float[16]));
 }
 
 void Matrix::LoadIdentity()
 {
-	memcpy (&m[0], &Identity, sizeof(float[16]));
+  memcpy (&m[0], &Identity, sizeof(float[16]));
 }
 
 void Matrix::Multiply(Matrix& m1, Matrix& m2)
 {
-	matmul (m, m1.m, m2.m);
+  matmul (m, m1.m, m2.m);
 }
 
 void Matrix::Rotate(float angle, float x, float y, float z)
@@ -308,7 +317,7 @@ void Matrix::TransformPoints (float p[], int n)
 	}
 }
 
-void Matrix::ConvertFromLDraw(float f[12])
+void Matrix::FromLDraw (const float *f)
 {
 	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
 	float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
@@ -321,166 +330,169 @@ void Matrix::ConvertFromLDraw(float f[12])
 	memcpy (&m[0], &trans[0], sizeof(m));
 }
 
-void Matrix::ConvertToLDraw(float f[12])
+void Matrix::ToLDraw (float *f) const
 {
-	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
-	float tmp[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
-	matmul(tmp, tmp, m);
-	matmul (tmp, tmp, trans);
-	f[0] = m[12]*25;	f[1] = -m[14]*25;	f[2] = m[13]*25;
-	f[3] = tmp[0];		f[4] = tmp[4];		f[5] = tmp[8];
-	f[6] = tmp[1];		f[7] = tmp[5];		f[8] = tmp[9];
-	f[9] = tmp[2];		f[10]= tmp[6];		f[11]= tmp[10];
+  float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
+  float tmp[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
+  matmul(tmp, tmp, m);
+  matmul (tmp, tmp, trans);
+  f[0] = m[12]*25; f[1] = -m[14]*25; f[2] = m[13]*25;
+  f[3] = tmp[0];   f[4] = tmp[4];    f[5] = tmp[8];
+  f[6] = tmp[1];   f[7] = tmp[5];    f[8] = tmp[9];
+  f[9] = tmp[2];   f[10]= tmp[6];    f[11]= tmp[10];
 }
 
-void Matrix::ReadFromFile(File* F)
+void Matrix::FileLoad (File& file)
 {
-	float tmp[12];
-	F->Read (&tmp, sizeof(tmp));
-	m[0] = tmp[0];	m[1] = tmp[1];	m[2] = tmp[2];
-	m[4] = tmp[3];	m[5] = tmp[4];	m[6] = tmp[5];
-	m[8] = tmp[6];	m[9] = tmp[7];	m[10]= tmp[8];
-	m[12]= tmp[9];	m[13]= tmp[10];	m[14]= tmp[11];
+  float tmp[12];
+
+  file.Read (&tmp, sizeof(tmp));
+
+  m[0] = tmp[0]; m[1] = tmp[1];  m[2] = tmp[2];
+  m[4] = tmp[3]; m[5] = tmp[4];  m[6] = tmp[5];
+  m[8] = tmp[6]; m[9] = tmp[7];  m[10]= tmp[8];
+  m[12]= tmp[9]; m[13]= tmp[10]; m[14]= tmp[11];
 }
 
-void Matrix::WriteToFile(File* F)
+void Matrix::FileSave (File& file) const
 {
-	float tmp[12];
-	tmp[0] = m[0];	tmp[1] = m[1];	tmp[2] = m[2];
-	tmp[3] = m[4];	tmp[4] = m[5];	tmp[5] = m[6];
-	tmp[6] = m[8];	tmp[7] = m[9];	tmp[8] = m[10];
-	tmp[9] = m[12];	tmp[10]= m[13];	tmp[11]= m[14];
-	F->Write (&tmp, sizeof(tmp));
+  float tmp[12];
+
+  tmp[0] = m[0];  tmp[1] = m[1];  tmp[2] = m[2];
+  tmp[3] = m[4];  tmp[4] = m[5];  tmp[5] = m[6];
+  tmp[6] = m[8];  tmp[7] = m[9];  tmp[8] = m[10];
+  tmp[9] = m[12]; tmp[10]= m[13]; tmp[11]= m[14];
+
+  file.Write (&tmp, sizeof(tmp));
 }
 
-void Matrix::GetEulerAngles(float rot[3])
+void Matrix::ToEulerAngles (float *rot) const
 {
-	double sinPitch, cosPitch, sinRoll, cosRoll, sinYaw, cosYaw;
-	float colMatrix[4][4];
+  double sinPitch, cosPitch, sinRoll, cosRoll, sinYaw, cosYaw;
+  float colMatrix[4][4];
 
-	colMatrix[0][0] = m[0];
-	colMatrix[0][1] = m[4];
-	colMatrix[0][2] = m[8];
-	colMatrix[0][3] = m[12];
-	
-	colMatrix[1][0] = m[1];
-	colMatrix[1][1] = m[5];
-	colMatrix[1][2] = m[9];
-	colMatrix[1][3] = m[13];
-	
-	colMatrix[2][0] = m[2];
-	colMatrix[2][1] = m[6];
-	colMatrix[2][2] = m[10];
-	colMatrix[2][3] = m[14];
+  colMatrix[0][0] = m[0];
+  colMatrix[0][1] = m[4];
+  colMatrix[0][2] = m[8];
+  colMatrix[0][3] = m[12];
 
-	colMatrix[3][0] = 0.0f;
-	colMatrix[3][1] = 0.0f;
-	colMatrix[3][2] = 0.0f;
-	colMatrix[3][3] = 1.0f;
+  colMatrix[1][0] = m[1];
+  colMatrix[1][1] = m[5];
+  colMatrix[1][2] = m[9];
+  colMatrix[1][3] = m[13];
 
-	sinPitch = -colMatrix[2][0];
-	cosPitch = sqrt(1 - sinPitch*sinPitch);
+  colMatrix[2][0] = m[2];
+  colMatrix[2][1] = m[6];
+  colMatrix[2][2] = m[10];
+  colMatrix[2][3] = m[14];
 
-	if (fabs(cosPitch) > 0.0005)
-	{
-		sinRoll = colMatrix[2][1] / cosPitch;
-		cosRoll = colMatrix[2][2] / cosPitch;
-		sinYaw = colMatrix[1][0] / cosPitch;
-		cosYaw = colMatrix[0][0] / cosPitch;
-	} 
-	else
-    {
-	    sinRoll = -colMatrix[1][2];
-		cosRoll = colMatrix[1][1];
-		sinYaw = 0;
-		cosYaw = 1;
-    }
+  colMatrix[3][0] = 0.0f;
+  colMatrix[3][1] = 0.0f;
+  colMatrix[3][2] = 0.0f;
+  colMatrix[3][3] = 1.0f;
 
-	rot[2] = (float)(RTOD*atan2 (sinYaw, cosYaw));
-	rot[1] = (float)(RTOD*atan2 (sinPitch, cosPitch));
-	rot[0] = (float)(RTOD*atan2 (sinRoll, cosRoll));
+  sinPitch = -colMatrix[2][0];
+  cosPitch = sqrt(1 - sinPitch*sinPitch);
 
-	if (rot[2] < 0) rot[2] += 360;
-	if (rot[1] < 0) rot[1] += 360;
-	if (rot[0] < 0) rot[0] += 360;
+  if (fabs(cosPitch) > 0.0005)
+  {
+    sinRoll = colMatrix[2][1] / cosPitch;
+    cosRoll = colMatrix[2][2] / cosPitch;
+    sinYaw = colMatrix[1][0] / cosPitch;
+    cosYaw = colMatrix[0][0] / cosPitch;
+  } 
+  else
+  {
+    sinRoll = -colMatrix[1][2];
+    cosRoll = colMatrix[1][1];
+    sinYaw = 0;
+    cosYaw = 1;
+  }
+
+  rot[2] = (float)(RTOD*atan2 (sinYaw, cosYaw));
+  rot[1] = (float)(RTOD*atan2 (sinPitch, cosPitch));
+  rot[0] = (float)(RTOD*atan2 (sinRoll, cosRoll));
+
+  if (rot[2] < 0) rot[2] += 360;
+  if (rot[1] < 0) rot[1] += 360;
+  if (rot[0] < 0) rot[0] += 360;
 }
 
-
-void Matrix::ToAxisAngle(float rot[4])
+void Matrix::ToAxisAngle (float *rot) const
 {
-	double matrix[3][4];
-	double q[4];
-	matrix[0][0] = m[0];
-	matrix[0][1] = m[4];
-	matrix[0][2] = m[8];
-	matrix[0][3] = m[12];
-	
-	matrix[1][0] = m[1];
-	matrix[1][1] = m[5];
-	matrix[1][2] = m[9];
-	matrix[1][3] = m[13];
-	
-	matrix[2][0] = m[2];
-	matrix[2][1] = m[6];
-	matrix[2][2] = m[10];
-	matrix[2][3] = m[14];
-	
-	double trace, s;
-	int i, j, k;
-	static int next[3] = {1, 2, 0};
-	
-	trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
-	
-	if (trace > 0.0) 
-	{
-		s = sqrt(trace + 1.0);
-		q[3] = s * 0.5;
-		s = 0.5 / s;
-		
-		q[0] = (matrix[2][1] - matrix[1][2]) * s;
-		q[1] = (matrix[0][2] - matrix[2][0]) * s;
-		q[2] = (matrix[1][0] - matrix[0][1]) * s;
-	} 
-	else 
-	{
-		i = 0;
-		if (matrix[1][1] > matrix[0][0])
-			i = 1;
-		if (matrix[2][2] > matrix[i][i])
-			i = 2;
-		
-		j = next[i];  
-		k = next[j];
-		
-		s = sqrt( (matrix[i][i] - (matrix[j][j]+matrix[k][k])) + 1.0 );
-		
-		q[i] = s * 0.5;
-		
-		s = 0.5 / s;
-		
-		q[3] = (matrix[k][j] - matrix[j][k]) * s;
-		q[j] = (matrix[j][i] + matrix[i][j]) * s;
-		q[k] = (matrix[k][i] + matrix[i][k]) * s;
-	}
+  double matrix[3][4];
+  double q[4];
+  matrix[0][0] = m[0];
+  matrix[0][1] = m[4];
+  matrix[0][2] = m[8];
+  matrix[0][3] = m[12];
 
-	double cos_angle = q[3];
-	rot[3] = (float)acos(cos_angle) * 2 * RTOD;
-	double sin_angle = sqrt( 1.0 - cos_angle * cos_angle );
-	if (fabs(sin_angle) < 1E-10)
-		sin_angle = 1;
+  matrix[1][0] = m[1];
+  matrix[1][1] = m[5];
+  matrix[1][2] = m[9];
+  matrix[1][3] = m[13];
 
-	rot[0] = (float)(q[0] / sin_angle);
-	rot[1] = (float)(q[1] / sin_angle);
-	rot[2] = (float)(q[2] / sin_angle);
+  matrix[2][0] = m[2];
+  matrix[2][1] = m[6];
+  matrix[2][2] = m[10];
+  matrix[2][3] = m[14];
 
-	if (fabs(rot[3]) < 1E-10)
-	{
-		rot[0] = rot[1] = rot[3] = 0;
-		rot[2] = 1;
-	}
+  double trace, s;
+  int i, j, k;
+  static int next[3] = {1, 2, 0};
+
+  trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
+
+  if (trace > 0.0) 
+  {
+    s = sqrt(trace + 1.0);
+    q[3] = s * 0.5;
+    s = 0.5 / s;
+
+    q[0] = (matrix[2][1] - matrix[1][2]) * s;
+    q[1] = (matrix[0][2] - matrix[2][0]) * s;
+    q[2] = (matrix[1][0] - matrix[0][1]) * s;
+  } 
+  else 
+  {
+    i = 0;
+    if (matrix[1][1] > matrix[0][0])
+      i = 1;
+    if (matrix[2][2] > matrix[i][i])
+      i = 2;
+
+    j = next[i];  
+    k = next[j];
+
+    s = sqrt( (matrix[i][i] - (matrix[j][j]+matrix[k][k])) + 1.0 );
+
+    q[i] = s * 0.5;
+
+    s = 0.5 / s;
+
+    q[3] = (matrix[k][j] - matrix[j][k]) * s;
+    q[j] = (matrix[j][i] + matrix[i][j]) * s;
+    q[k] = (matrix[k][i] + matrix[i][k]) * s;
+  }
+
+  double cos_angle = q[3];
+  rot[3] = (float)acos(cos_angle) * 2 * RTOD;
+  double sin_angle = sqrt( 1.0 - cos_angle * cos_angle );
+  if (fabs(sin_angle) < 1E-10)
+    sin_angle = 1;
+
+  rot[0] = (float)(q[0] / sin_angle);
+  rot[1] = (float)(q[1] / sin_angle);
+  rot[2] = (float)(q[2] / sin_angle);
+
+  if (fabs(rot[3]) < 1E-10)
+  {
+    rot[0] = rot[1] = rot[3] = 0;
+    rot[2] = 1;
+  }
 }
 
-void Matrix::FromEuler(float roll, float pitch, float yaw)
+void Matrix::FromEulerAngles (float roll, float pitch, float yaw)
 {
 	float  cosYaw, sinYaw, cosPitch, sinPitch, cosRoll, sinRoll;
 
@@ -513,11 +525,11 @@ void Matrix::FromEuler(float roll, float pitch, float yaw)
 }
 
 // Create a rotation matrix (angle is in degrees)
-void Matrix::FromAxisAngle(float axis[3], float angle)
+void Matrix::FromAxisAngle (const float *axis, float angle)
 {
-	if (angle == 0.0f)
-		return;
-	rotation_matrix(angle, axis[0], axis[1], axis[2], m);
+  if (angle == 0.0f)
+    return;
+  rotation_matrix (angle, axis[0], axis[1], axis[2], m);
 }
 
 bool Matrix::FromInverse(double* src)

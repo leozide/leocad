@@ -768,7 +768,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 			if (tf)
 			{
 				Matrix m1, m2;
-				m1.ConvertFromLDraw(fm);
+				m1.FromLDraw(fm);
 				m2.Multiply(*mat, m1);
 
 				decodefile(tf, &m2, (unsigned char)color, info, dir, piece);
@@ -882,7 +882,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		{
 			m1.LoadIdentity();
 			m2.LoadIdentity();
-			m1.ConvertFromLDraw(fm);
+			m1.FromLDraw(fm);
 			m2.Multiply(*mat, m1);
 
 			if (val == 0) // STUD.DAT
@@ -1076,7 +1076,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		{
 			m1.LoadIdentity();
 			m2.LoadIdentity();
-			m1.ConvertFromLDraw(fm);
+			m1.FromLDraw(fm);
 			m2.Multiply(*mat, m1);
 
 			decodeconnections (tf, &m2, (unsigned char)color, dir, piece);

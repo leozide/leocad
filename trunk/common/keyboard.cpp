@@ -104,6 +104,20 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_EDIT_ANGLE_SNAP_6, "Angle Snap 60", LC_KEYMOD1_SHIFT, LC_KEY_6, 0 },
 	{ LC_EDIT_ANGLE_SNAP_7, "Angle Snap 90", LC_KEYMOD1_SHIFT, LC_KEY_7, 0 },
 	{ LC_EDIT_ANGLE_SNAP_8, "Angle Snap 180", LC_KEYMOD1_SHIFT, LC_KEY_8, 0 },
+	{ LC_EDIT_ACTION_SELECT, "Select Mode", 0, 0, 0 },
+	{ LC_EDIT_ACTION_INSERT, "Insert Mode", 0, 0, 0 },
+	{ LC_EDIT_ACTION_LIGHT, "Light Mode", 0, 0, 0 },
+	{ LC_EDIT_ACTION_SPOTLIGHT, "Spotlight Mode", 0, 0, 0 },
+	{ LC_EDIT_ACTION_CAMERA, "Camera Mode", 0, 0, 0 },
+	{ LC_EDIT_ACTION_MOVE, "Move Mode", LC_KEYMOD1_SHIFT, LC_KEY_M, 0 },
+	{ LC_EDIT_ACTION_ROTATE, "Rotate Mode", LC_KEYMOD1_SHIFT, LC_KEY_R, 0 },
+	{ LC_EDIT_ACTION_ERASER, "Eraser Mode", LC_KEYMOD1_SHIFT, LC_KEY_E, 0 },
+	{ LC_EDIT_ACTION_PAINT, "Paint Mode", LC_KEYMOD1_SHIFT, LC_KEY_N, 0 },
+	{ LC_EDIT_ACTION_ZOOM, "Zoom Mode", LC_KEYMOD1_SHIFT, LC_KEY_Z, 0 },
+	{ LC_EDIT_ACTION_ZOOM_REGION, "Zoom Region Mode", 0, 0, 0 },
+	{ LC_EDIT_ACTION_PAN, "Pan Mode", LC_KEYMOD1_SHIFT, LC_KEY_P, 0 },
+	{ LC_EDIT_ACTION_ROTATE_VIEW, "Rotate View Mode", LC_KEYMOD1_SHIFT, LC_KEY_T, 0 },
+	{ LC_EDIT_ACTION_ROLL, "Roll Camera Mode", LC_KEYMOD1_SHIFT, LC_KEY_L, 0 },
 };
 
 const int KeyboardShortcutsCount = sizeof(DefaultKeyboardShortcuts)/sizeof(KeyboardShortcuts[0]);

@@ -547,7 +547,8 @@ void PieceInfo::LoadInformation()
 	unsigned long colors, *p;
 	bytes++;
 	p = (unsigned long*)bytes;
-	colors = GUINT32(*p);
+        *p = GUINT32(*p);
+	colors = *p;
 	p++;
 
 	while (colors--)
@@ -579,7 +580,8 @@ void PieceInfo::LoadInformation()
 	unsigned short colors, *p;
 	bytes++;
 	p = (unsigned short*)bytes;
-	colors = GUINT16(*p);
+	*p = GUINT16(*p);
+	colors = *p;
 	p++;
 
 	while (colors--)

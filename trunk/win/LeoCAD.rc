@@ -232,11 +232,11 @@ IDR_MAINFRAME MENU PRELOAD DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
-        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Merge...\tCtrl+M",           ID_FILE_MERGE
+        MENUITEM "&New",                        ID_FILE_NEW
+        MENUITEM "&Open...",                    ID_FILE_OPEN
+        MENUITEM "&Merge...",                   ID_FILE_MERGE
         MENUITEM SEPARATOR
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "&Save",                       ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM "Save Picture...",             ID_FILE_SAVEPICTURE
         MENUITEM "Sen&d...",                    ID_FILE_SEND_MAIL
@@ -263,12 +263,12 @@ BEGIN
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO
+        MENUITEM "&Undo",                       ID_EDIT_UNDO
+        MENUITEM "Redo",                        ID_EDIT_REDO
         MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "Cu&t",                        ID_EDIT_CUT
+        MENUITEM "&Copy",                       ID_EDIT_COPY
+        MENUITEM "&Paste",                      ID_EDIT_PASTE
         MENUITEM SEPARATOR
         MENUITEM "Select All",                  ID_EDIT_SELECTALL
         MENUITEM "Select None",                 ID_EDIT_SELECTNONE
@@ -284,13 +284,13 @@ BEGIN
         MENUITEM "Mirror...",                   ID_PIECE_MIRROR
         MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
         MENUITEM SEPARATOR
-        MENUITEM "Group...\tCtrl+G",            ID_PIECE_GROUP
-        MENUITEM "Ungroup\tCtrl+U",             ID_PIECE_UNGROUP
+        MENUITEM "Group...",                    ID_PIECE_GROUP
+        MENUITEM "Ungroup",                     ID_PIECE_UNGROUP
         MENUITEM "Remove From Group",           ID_PIECE_DETACH
         MENUITEM "Add To Group",                ID_PIECE_ATTACH
         MENUITEM "Edit Groups...",              ID_PIECE_EDITGROUPS
         MENUITEM SEPARATOR
-        MENUITEM "Hide Selected\tCtrl+H",       ID_PIECE_HIDESELECTED
+        MENUITEM "Hide Selected",               ID_PIECE_HIDESELECTED
         MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
         MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
     END
@@ -580,27 +580,12 @@ END
 
 IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
 BEGIN
-    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "F",            ID_VIEW_FULLSCREEN,     VIRTKEY, CONTROL, NOINVERT
-    "G",            ID_PIECE_GROUP,         VIRTKEY, CONTROL, NOINVERT
-    "H",            ID_PIECE_HIDESELECTED,  VIRTKEY, CONTROL, NOINVERT
-    "M",            ID_FILE_MERGE,          VIRTKEY, CONTROL, NOINVERT
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
-    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
-    "U",            ID_PIECE_UNGROUP,       VIRTKEY, CONTROL, NOINVERT
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     VK_DELETE,      ID_PIECE_DELETE,        VIRTKEY, NOINVERT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
     VK_F1,          ID_HELP,                VIRTKEY, NOINVERT
     VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT, NOINVERT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -1399,6 +1384,27 @@ BEGIN
     PUSHBUTTON      "Remove",ID_LIBTEX_REMOVE,169,41,50,14
 END
 
+IDD_PREFKEYBOARD DIALOG DISCARDABLE  0, 0, 246, 132
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Keyboard"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_KEYDLG_CMDLIST,7,7,85,113,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Current shortcuts:",IDC_STATIC,100,7,82,8
+    COMBOBOX        IDC_KEYDLG_COMBO,100,19,90,40,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Remove",IDC_KEYDLG_REMOVE,197,18,42,14,WS_DISABLED
+    LTEXT           "Press new shortcut:",IDC_STATIC,100,35,59,9
+    EDITTEXT        IDC_KEYDLG_KEYEDIT,100,47,90,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Assign",IDC_KEYDLG_ASSIGN,197,46,42,14,WS_DISABLED
+    EDITTEXT        IDC_KEYDLG_FILENAME,100,88,139,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Save...",IDC_KEYDLG_SAVE,100,106,42,14
+    PUSHBUTTON      "Load...",IDC_KEYDLG_LOAD,148,106,42,14
+    PUSHBUTTON      "Reset",IDC_KEYDLG_RESET,197,106,42,14
+    LTEXT           "Shortcuts File:",IDC_STATIC,100,76,139,8
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -1652,6 +1658,14 @@ BEGIN
         RIGHTMARGIN, 219
         TOPMARGIN, 7
         BOTTOMMARGIN, 194
+    END
+
+    IDD_PREFKEYBOARD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 124
     END
 END
 #endif    // APSTUDIO_INVOKED

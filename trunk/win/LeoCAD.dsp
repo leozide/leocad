@@ -182,6 +182,10 @@ SOURCE=.\Ipedit.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\keyedit.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Leocad.cpp
 # End Source File
 # Begin Source File
@@ -429,6 +433,10 @@ SOURCE=.\ImageDlg.h
 # Begin Source File
 
 SOURCE=.\Ipedit.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\keyedit.h
 # End Source File
 # Begin Source File
 
@@ -1020,6 +1028,10 @@ SOURCE=..\Common\image.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\keyboard.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\libman.h
 # End Source File
 # Begin Source File
@@ -1167,6 +1179,11 @@ SOURCE=..\common\im_png.cpp
 
 SOURCE=..\Common\image.cpp
 # ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\keyboard.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File

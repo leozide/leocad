@@ -26,6 +26,7 @@ CPreferencesSheet::CPreferencesSheet(CWnd* pWndParent)
 	AddPage(&m_PageDrawing);
 	AddPage(&m_PageScene);
 	AddPage(&m_PagePrint);
+	AddPage(&m_PageKeyboard);
 	SetActivePage(AfxGetApp()->GetProfileInt("Settings", "Page", 0));
 }
 
@@ -88,6 +89,8 @@ void CPreferencesSheet::OnDefault()
 		m_PageScene.UpdateData();
 	if (m_PagePrint.m_hWnd)
 		m_PagePrint.UpdateData();
+	if (m_PageKeyboard.m_hWnd)
+		m_PageKeyboard.UpdateData();
 
 	char str[LC_MAXPATH], st1[256], st2[256];
 	int i, j;

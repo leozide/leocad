@@ -1375,3 +1375,38 @@ HBITMAP CBMPMenu::LoadSysColorBitmap(int nResourceId)
 		return NULL;
 	return AfxLoadSysColorBitmap(hInst, hRsrc, FALSE);
 }
+
+BOOL CBMPMenu::ChangeMenuItemShortcut(const char *Shortcut, UINT nID)
+{
+	int nLoc;
+	CBMPMenuData *mdata;
+	
+	// Find the old CBMPMenuData structure:
+	CBMPMenu *psubmenu = FindMenuOption(nID,nLoc);
+	if (psubmenu && nLoc >= 0)
+		mdata = psubmenu->m_MenuList[nLoc];
+	else
+		return false;
+	ASSERT(mdata);
+
+	CString OldText = mdata->GetString();
+	nLoc = OldText.Find('\t');
+
+	// Remove old shortcut text
+	if (nLoc > 0)
+		OldText = OldText.Left(nLoc);
+
+	if (Shortcut)
+	{
+		OldText += '\t';
+		OldText += Shortcut;
+	}
+#ifdef UNICODE
+	mdata->SetWideString((LPCTSTR)OldText);//SK: modified for dynamic allocation
+#else
+	mdata->SetAnsiString(OldText);
+#endif
+
+	return (CMenu::ModifyMenu(nID,mdata->nFlags,nID,(LPCTSTR)mdata));
+}
+

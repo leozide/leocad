@@ -134,6 +134,7 @@
 #define IDR_PREVIEW                     221
 #define IDD_EDIT_GROUPS                 231
 #define IDD_LIBRARY_TEXTURES            234
+#define IDD_PREFKEYBOARD                235
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -409,18 +410,27 @@
 #define IDC_MF_LEGLANGLE                1229
 #define IDC_ABTDLG_HOMEPAGE             1229
 #define IDC_MF_LEGRANGLE                1230
+#define IDC_KEYDLG_CMDLIST              1230
 #define IDC_MF_SHOELANGLE               1231
 #define IDC_MF_SHOERANGLE               1232
 #define IDC_MF_HATSPIN                  1233
+#define IDC_KEYDLG_REMOVE               1233
 #define IDC_MF_HEADSPIN                 1234
 #define IDC_MF_NECKSPIN                 1235
 #define IDC_MF_ARMLSPIN                 1236
+#define IDC_KEYDLG_RESET                1236
 #define IDC_MF_ARMRSPIN                 1237
+#define IDC_KEYDLG_KEYEDIT              1237
 #define IDC_MF_HANDLSPIN                1238
+#define IDC_KEYDLG_ASSIGN               1238
 #define IDC_MF_HANDRSPIN                1239
+#define IDC_KEYDLG_COMBO                1239
 #define IDC_MF_TOOLLSPIN                1240
+#define IDC_KEYDLG_SAVE                 1240
 #define IDC_MF_TOOLRSPIN                1241
+#define IDC_KEYDLG_LOAD                 1241
 #define IDC_MF_LEGLSPIN                 1242
+#define IDC_KEYDLG_FILENAME             1242
 #define IDC_MF_LEGRSPIN                 1243
 #define IDC_MF_SHOELSPIN                1244
 #define IDC_MF_SHOERSPIN                1245
@@ -659,7 +669,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        235
 #define _APS_NEXT_COMMAND_VALUE         33158
-#define _APS_NEXT_CONTROL_VALUE         1230
+#define _APS_NEXT_CONTROL_VALUE         1243
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

@@ -5183,6 +5183,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						{
 							redraw = true;
 							pPiece->SetFrameShow(t+1);
+
+                                                        if (pPiece->IsSelected () && t == m_nCurFrame)
+                                                          pPiece->Select (false, false, false);
 						}
 					}
 					else
@@ -5190,8 +5193,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						unsigned char t = pPiece->GetStepShow();
 						if (t < 255)
 						{
-							redraw = true;
-							pPiece->SetStepShow(t+1);
+                                                  redraw = true;
+                                                  pPiece->SetStepShow(t+1);
+
+                                                  if (pPiece->IsSelected () && t == m_nCurStep)
+                                                    pPiece->Select (false, false, false);
 						}
 					}
 				}
@@ -5201,6 +5207,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
 				SystemRedrawView();
+                                UpdateSelection ();
 			}
 		} break;
 
@@ -5515,6 +5522,63 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			else
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
+
+                case LC_VIEW_STEP_INSERT:
+                {
+                  bool redraw = false;
+
+                  if (m_bAnimation)
+                    break;
+
+                  for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+                  {
+                    unsigned char t = pPiece->GetStepShow();
+
+                    if (t >= m_nCurStep && t < 255)
+                    {
+                      redraw = true;
+                      pPiece->SetStepShow (t+1);
+
+                      if (pPiece->IsSelected () && t == m_nCurStep)
+                        pPiece->Select (false, false, false);
+                    }
+                  }
+
+                  if (redraw)
+                  {
+                    SetModifiedFlag (true);
+                    CheckPoint ("Adding Step");
+                    SystemRedrawView ();
+                    UpdateSelection ();
+                  }
+                } break;
+
+                case LC_VIEW_STEP_DELETE:
+                {
+                  bool redraw = false;
+
+                  if (m_bAnimation)
+                    break;
+
+                  for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+                  {
+                    unsigned char t = pPiece->GetStepShow();
+
+                    if (t >= m_nCurStep && t > 1)
+                    {
+                      redraw = true;
+                      pPiece->SetStepShow (t-1);
+                    }
+                  }
+
+                  if (redraw)
+                  {
+                    SetModifiedFlag (true);
+                    CheckPoint ("Removing Step");
+                    SystemRedrawView ();
+                    UpdateSelection ();
+                  }
+                } break;
 
 		case LC_VIEW_STOP:
 		{

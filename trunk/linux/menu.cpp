@@ -229,6 +229,11 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_VIEW_STEP_NEXT, "menu_view_step_next");
   create_menu_item (menu_in_menu, "_Last", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_VIEW_STEP_LAST, "menu_view_step_last");
+  menu_separator (menu_in_menu);
+  create_menu_item (menu_in_menu, "_Insert", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_INSERT, "menu_view_step_insert");
+  create_menu_item (menu_in_menu, "_Delete", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_DELETE, "menu_view_step_delete");
 
   menu = create_sub_menu (menu_bar, "_Help", accel, &menu_accel);
   menu_tearoff (menu);

@@ -95,7 +95,8 @@ CBMPMenu::CBMPMenu()
 	m_bitmapBackground = RGB(192,192,192); //gray
 	m_bitmapBackgroundFlag=FALSE;
 	GetCPInfo(CP_ACP,&CPInfo);
-	m_List.Create (IDB_VIEWPORTS, 41, 0, RGB (192,192,192));
+	if (!m_List.m_hImageList)
+		m_List.Create (IDB_VIEWPORTS, 41, 0, RGB (192,192,192));
 }
 
 CBMPMenu::~CBMPMenu()
@@ -1410,3 +1411,18 @@ BOOL CBMPMenu::ChangeMenuItemShortcut(const char *Shortcut, UINT nID)
 	return (CMenu::ModifyMenu(nID,mdata->nFlags,nID,(LPCTSTR)mdata));
 }
 
+BOOL CBMPMenu::DeleteMenu(UINT nPosition, UINT nFlags)
+{
+	if (nFlags == MF_BYPOSITION)
+		m_MenuList.RemoveAt(nPosition);
+	else
+	{
+		int nLoc;
+	
+		CBMPMenu *psubmenu = FindMenuOption(nPosition, nLoc);
+		if (psubmenu && nLoc >= 0)
+			psubmenu->m_MenuList.RemoveAt(nLoc);
+	}
+
+	return (CMenu::DeleteMenu(nPosition, nFlags));
+}

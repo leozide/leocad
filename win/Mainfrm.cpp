@@ -1196,6 +1196,13 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_VIEW_STEP_DELETE,       // LC_VIEW_STEP_DELETE
 		ID_ANIMATOR_STOP,          // LC_VIEW_STOP
 		ID_ANIMATOR_PLAY,          // LC_VIEW_PLAY
+		ID_CAMERA_FIRST + 0,       // LC_VIEW_CAMERA_FRONT,
+		ID_CAMERA_FIRST + 1,       // LC_VIEW_CAMERA_BACK,
+		ID_CAMERA_FIRST + 2,       // LC_VIEW_CAMERA_TOP,
+		ID_CAMERA_FIRST + 3,       // LC_VIEW_CAMERA_BOTTOM,
+		ID_CAMERA_FIRST + 4,       // LC_VIEW_CAMERA_LEFT,
+		ID_CAMERA_FIRST + 5,       // LC_VIEW_CAMERA_RIGHT,
+		ID_CAMERA_FIRST + 6,       // LC_VIEW_CAMERA_MAIN,
 		0,                         // LC_VIEW_CAMERA_MENU
 		ID_VIEW_CAMERAS_RESET,     // LC_VIEW_CAMERA_RESET
 		0,                         // LC_VIEW_AUTOPAN
@@ -1207,6 +1214,25 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_SNAPMOVEMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
 		0,                         // LC_TOOLBAR_BACKGROUND
+		0,                         // LC_EDIT_MOVE_SNAP_0,
+		0,                         // LC_EDIT_MOVE_SNAP_1,
+		0,                         // LC_EDIT_MOVE_SNAP_2,
+		0,                         // LC_EDIT_MOVE_SNAP_3,
+		0,                         // LC_EDIT_MOVE_SNAP_4,
+		0,                         // LC_EDIT_MOVE_SNAP_5,
+		0,                         // LC_EDIT_MOVE_SNAP_6,
+		0,                         // LC_EDIT_MOVE_SNAP_7,
+		0,                         // LC_EDIT_MOVE_SNAP_8,
+		0,                         // LC_EDIT_MOVE_SNAP_9,
+		0,                         // LC_EDIT_ANGLE_SNAP_0,
+		0,                         // LC_EDIT_ANGLE_SNAP_1,
+		0,                         // LC_EDIT_ANGLE_SNAP_2,
+		0,                         // LC_EDIT_ANGLE_SNAP_3,
+		0,                         // LC_EDIT_ANGLE_SNAP_4,
+		0,                         // LC_EDIT_ANGLE_SNAP_5,
+		0,                         // LC_EDIT_ANGLE_SNAP_6,
+		0,                         // LC_EDIT_ANGLE_SNAP_7,
+		0,                         // LC_EDIT_ANGLE_SNAP_8,
 	};
 
 	m_bmpMenu.Attach(m_hMenuDefault);

@@ -1496,7 +1496,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 					pPiece->GetRotation(rotation);
 					Matrix mat(rotation, position);
 					mat.ToLDraw(f);
-					sprintf (buf, " 1 %d %.2g %.2g %.2g %.2g %.2g %.2g %.2g %.2g %.2g %.2g %.2g %.2g %s.DAT\r\n",
+					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
 						col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
 					file.Write(buf, strlen(buf));
 				}
@@ -6011,6 +6011,41 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 		} break;
 
+		case LC_VIEW_CAMERA_FRONT:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_FRONT);
+		} break;
+
+		case LC_VIEW_CAMERA_BACK:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_BACK);
+		} break;
+
+		case LC_VIEW_CAMERA_TOP:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_TOP);
+		} break;
+
+		case LC_VIEW_CAMERA_BOTTOM:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_UNDER);
+		} break;
+
+		case LC_VIEW_CAMERA_LEFT:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_LEFT);
+		} break;
+
+		case LC_VIEW_CAMERA_RIGHT:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_RIGHT);
+		} break;
+
+		case LC_VIEW_CAMERA_MAIN:
+		{
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_MAIN);
+		} break;
+
 		case LC_VIEW_CAMERA_MENU:
 		{
 			Camera* pCamera = m_pCameras;
@@ -6213,6 +6248,75 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
+		} break;
+
+		case LC_EDIT_MOVE_SNAP_0:
+		case LC_EDIT_MOVE_SNAP_1:
+		case LC_EDIT_MOVE_SNAP_2:
+		case LC_EDIT_MOVE_SNAP_3:
+		case LC_EDIT_MOVE_SNAP_4:
+		case LC_EDIT_MOVE_SNAP_5:
+		case LC_EDIT_MOVE_SNAP_6:
+		case LC_EDIT_MOVE_SNAP_7:
+		case LC_EDIT_MOVE_SNAP_8:
+		case LC_EDIT_MOVE_SNAP_9:
+		{
+			m_nMoveSnap = id - LC_EDIT_MOVE_SNAP_0;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_0:
+		{
+			m_nAngleSnap = 1;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_1:
+		{
+			m_nAngleSnap = 5;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_2:
+		{
+			m_nAngleSnap = 10;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_3:
+		{
+			m_nAngleSnap = 15;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_4:
+		{
+			m_nAngleSnap = 30;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_5:
+		{
+			m_nAngleSnap = 45;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_6:
+		{
+			m_nAngleSnap = 60;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_7:
+		{
+			m_nAngleSnap = 90;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_ANGLE_SNAP_8:
+		{
+			m_nAngleSnap = 180;
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 	}
 }
@@ -7019,76 +7123,10 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			{
 				m_nCurClipboard = nKey - 0x30;
 				SystemUpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
+				ret = true;
 			}
-			else
-			{
-				if (bShift)
-				{
-					switch (nKey)
-					{
-					case '0': m_nAngleSnap = 1; break;
-					case '1': m_nAngleSnap = 5; break;
-					case '2': m_nAngleSnap = 10; break;
-					case '3': m_nAngleSnap = 15; break;
-					case '4': m_nAngleSnap = 30; break;
-					case '5': m_nAngleSnap = 45; break;
-					case '6': m_nAngleSnap = 60; break;
-					case '7': m_nAngleSnap = 90; break;
-					case '8': m_nAngleSnap = 180; break;
-					}
-				}
-				else
-				{
-					m_nMoveSnap = nKey - 0x30;
-				}
-
-				SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-			}
-			ret = true;
 		} break;
 
-		case 'F':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_FRONT);
-			ret = true;
-		} break;
-		case 'B':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_BACK); break;
-			ret = true;
-		} break;
-		case 'T':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_TOP); break;
-			ret = true;
-		} break;
-		case 'U':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_UNDER); break;
-			ret = true;
-		} break;
-		case 'L':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_LEFT); break;
-			ret = true;
-		} break;
-		case 'R':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_RIGHT); break;
-			ret = true;
-		} break;
-		case 'M':
-		if (!bControl)
-		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_MAIN); break;
-			ret = true;
-		} break;
 
 		case KEY_PLUS: // case '+': case '=':
 		{

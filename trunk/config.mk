@@ -279,7 +279,7 @@ config:
 	@echo -n "Checking for png support... "
 	@echo "char png_read_info();" > pngtest.c
 	@echo "int main() { png_read_info(); return 0; }" >> pngtest.c
-	@if { (eval $(CC) pngtest.c -lpng -o pngtest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) pngtest.c -lz -lpng -o pngtest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
 	  (test -s pngtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_PNGLIB = yes" >> $(OSDIR)/config.mk; \

@@ -23,6 +23,7 @@
 #include "minifig.h"
 #include "config.h"
 #include "message.h"
+#include "curve.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p, int i)
@@ -1381,7 +1382,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			continue;
 
 		Matrix incmat, tmpmat;
-		incmat.ConvertFromLDraw(fmat);
+		incmat.FromLDraw(fmat);
 		tmpmat.Multiply(*prevmat, incmat);
 
 		if (cmd == 1)
@@ -1556,7 +1557,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 					pPiece->GetPosition(position);
 					pPiece->GetRotation(rotation);
 					Matrix mat(rotation, position);
-					mat.ConvertToLDraw(f);
+					mat.ToLDraw(f);
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
 						col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
 					file.Write(buf, strlen(buf));
@@ -1647,7 +1648,7 @@ bool Project::OnNewDocument()
 	CheckPoint("");
 
 	SystemUpdateRecentMenu(m_strRecentFiles);
-	SystemUpdateFocus(NULL, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 
 //	CWnd* pFrame = AfxGetMainWnd();
 //	if (pFrame != NULL)
@@ -2174,6 +2175,22 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	}
       }
     */
+    {
+      LC_RENDER_INFO info;
+      info.lighting = (m_nDetail & LC_DET_LIGHTING) != 0;
+      info.stipple = (m_nDetail & LC_DET_SCREENDOOR) != 0;
+      info.edges = (m_nDetail & LC_DET_BRICKEDGES) != 0;
+      info.fLineWidth = m_fLineWidth;
+
+      info.lastcolor = 255;
+      info.transparent = false;
+
+
+      float pos[] = { 0,0,0 };
+      Curve curve (NULL, pos, 0);
+      curve.Render (&info);
+    }
+
 		if (bShaded)
 		{
 			if (m_nScene & LC_SCENE_FLOOR)
@@ -2990,11 +3007,11 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 		{
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				if ((m_bAnimation && pPiece->GetFrameShow() == i) ||
-					(!m_bAnimation && pPiece->GetStepShow() == i))
-					pPiece->Select();
-				else
-					pPiece->UnSelect();
+                          if ((m_bAnimation && pPiece->GetFrameShow() == i) ||
+                              (!m_bAnimation && pPiece->GetStepShow() == i))
+                            pPiece->Select (true, false, false);
+                          else
+                            pPiece->Select (false, false, false);
 			}
 		}
 
@@ -3145,14 +3162,14 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			pPiece->GetPosition(pos);
 			pPiece->GetRotation(rot);
 			Matrix mat(rot, pos);
-			mat.GetEulerAngles(rot);
+			mat.ToEulerAngles(rot);
 
 			if (mod->pos[0] != pos[0] || mod->pos[1] != pos[1] || mod->pos[2] != pos[2])
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->pos, LC_PK_POSITION);
 
 			if (mod->rot[0] != rot[0] || mod->rot[1] != rot[1] || mod->rot[2] != rot[2])
 			{
-				mat.FromEuler(mod->rot[0], mod->rot[1], mod->rot[2]);
+				mat.FromEulerAngles (mod->rot[0], mod->rot[1], mod->rot[2]);
 				mat.ToAxisAngle(rot);
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 			}
@@ -3942,7 +3959,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			  pPiece->GetPosition(pos);
 			  pPiece->GetRotation(rot);
 			  Matrix mat(rot, pos);
-			  mat.ConvertToLDraw(fl);
+			  mat.ToLDraw(fl);
 
 			  // Slope needs to be handled correctly
 			  if (flags[idx] == 1)
@@ -4342,7 +4359,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->SetFrameShow(m_nCurFrame);
 				pPiece->SetStepShow(m_nCurStep);
 				AddPiece(pPiece);
-				pPiece->Select();
+				pPiece->Select(true, false, false);
 
 				j = (int)pPiece->GetGroup();
 				if (j != -1)
@@ -4403,7 +4420,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				pCamera = new Camera(8, pCamera);
 				pCamera->FileLoad(*file);
-				pCamera->Select();
+				pCamera->Select(true, false, false);
+				pCamera->GetTarget ()->Select(true, false, false);
 			}
 
 			// TODO: lights
@@ -4420,7 +4438,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			Piece* pPiece;
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-					pPiece->Select();
+					pPiece->Select(true, false, false);
 
 //	pFrame->UpdateInfo();
 			UpdateSelection();
@@ -4430,7 +4448,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_SELECT_NONE:
 		{
 			SelectAndFocusNone(false);
-			SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 			UpdateSelection();
 			SystemRedrawView();
 		} break;
@@ -4441,13 +4459,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 				{
-					if (pPiece->IsSelected())
-						pPiece->UnSelect();
-					else
-						pPiece->Select();
+                                  if (pPiece->IsSelected())
+                                    pPiece->Select(false, false, false);
+                                  else
+                                    pPiece->Select(true, false, false);
 				}
 
-			SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 			UpdateSelection();
 			SystemRedrawView();
 		} break;
@@ -4542,17 +4560,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					{
 						case LC_SELDLG_PIECE:
 						{
-							((Piece*)opts[i].pointer)->Select();
+							((Piece*)opts[i].pointer)->Select(true, false, false);
 						} break;
 
 						case LC_SELDLG_CAMERA:
 						{
-							((Camera*)opts[i].pointer)->Select();
+							((Camera*)opts[i].pointer)->Select(true, false, false);
 						} break;
 
 						case LC_SELDLG_LIGHT:
 						{
-							((Light*)opts[i].pointer)->Select();
+							((Light*)opts[i].pointer)->Select(true, false, false);
 						} break;
 
 						case LC_SELDLG_GROUP:
@@ -4561,7 +4579,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							pGroup = pGroup->GetTopGroup();
 							for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 								if (pPiece->GetTopGroup() == pGroup)
-									pPiece->Select();
+									pPiece->Select(true, false, false);
 						} break;
 					}
 				}
@@ -4607,8 +4625,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
-			pPiece->Focus();
-			SystemUpdateFocus(pPiece, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+			pPiece->Select (true, true, false);
+                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
 			UpdateSelection();
 			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
@@ -4625,7 +4643,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			if (RemoveSelectedObjects())
 			{
-				SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+                          messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 				UpdateSelection();
 				SystemRedrawView();
 				SetModifiedFlag(true);
@@ -4654,7 +4672,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					 m_nCurStep, m_nCurFrame, wiz.m_Colors[i]);
 		      pPiece->CreateName(m_pPieces);
 		      AddPiece(pPiece);
-		      pPiece->Select();
+		      pPiece->Select(true, false, false);
 
 		      pPiece->ChangeKey(1, false, false, wiz.m_Rotation[i], LC_PK_ROTATION);
 		      pPiece->ChangeKey(1, true, false, wiz.m_Rotation[i], LC_PK_ROTATION);
@@ -4691,7 +4709,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 
-				SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+                                messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 				UpdateSelection();
 				SystemRedrawView();
 				SetModifiedFlag(true);
@@ -5070,7 +5088,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (pPiece->IsSelected())
 					pPiece->Hide();
 			UpdateSelection();
-			SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 			SystemRedrawView();
 		} break;
 
@@ -5785,28 +5803,24 @@ void Project::RemoveEmptyGroups()
 
 void Project::SelectAndFocusNone(bool bFocusOnly)
 {
-	Piece* pPiece;
-	Camera* pCamera;
-	Light* pLight;
+  Piece* pPiece;
+  Camera* pCamera;
+  Light* pLight;
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (bFocusOnly)
-			pPiece->UnFocus();
-		else
-			pPiece->UnSelect();
+  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+    pPiece->Select (false, bFocusOnly, false);
 
-	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-		if (bFocusOnly)
-			pCamera->UnFocus();
-		else
-			pCamera->UnSelect();
+  for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+  {
+    pCamera->Select (false, bFocusOnly, false);
+    pCamera->GetTarget ()->Select (false, bFocusOnly, false);
+  }
 
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		if (bFocusOnly)
-			pLight->UnFocus();
-		else
-			pLight->UnSelect();
-
+  for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+  {
+    pLight->Select (false, bFocusOnly, false);
+    pLight->GetTarget ()->Select (false, bFocusOnly, false);
+  }
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 }
 
@@ -6504,15 +6518,15 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 			if (pFocus != NULL)
 			{
-				pFocus->Focus();
-				Group* pGroup = pFocus->GetTopGroup();
-				if (pGroup != NULL)
-				{
-					for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-						if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation) &&
-							pPiece->GetTopGroup() == pGroup)
-								pPiece->Select();
-				}
+                          pFocus->Select (true, true, false);
+                          Group* pGroup = pFocus->GetTopGroup();
+                          if (pGroup != NULL)
+                          {
+                            for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+                              if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation) &&
+                                  pPiece->GetTopGroup() == pGroup)
+                                pPiece->Select (true, false, false);
+                          }
 			}
 
 			UpdateSelection();
@@ -6708,33 +6722,21 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	    case LC_OBJECT_PIECE:
 	    {
 	      Piece* pPiece = (Piece*)ClickLine.pClosest;
-	      pPiece->Focus();
+	      pPiece->Select (true, true, false);
 	      Group* pGroup = pPiece->GetTopGroup();
 
 	      if (pGroup != NULL)
 		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		  if (pPiece->GetTopGroup() == pGroup)
-		    pPiece->Select();
+		    pPiece->Select (true, false, false);
 	    } break;
 
 	    case LC_OBJECT_CAMERA:
-	    {
-	      ((Camera*)ClickLine.pClosest)->FocusEye();
-	    } break;
-
 	    case LC_OBJECT_CAMERA_TARGET:
-	    {
-	      ((CameraTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
-	    } break;
-
 	    case LC_OBJECT_LIGHT:
-	    {
-	      ((Light*)ClickLine.pClosest)->FocusEye();
-	    } break;
-
 	    case LC_OBJECT_LIGHT_TARGET:
 	    {
-	      ((LightTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
+	      ClickLine.pClosest->Select (true, true, bControl);
 	    } break;
 	  }
 
@@ -6837,7 +6839,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	pPiece->CreateName(m_pPieces);
 	AddPiece(pPiece);
 	pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
-	pPiece->Focus();
+	pPiece->Select (true, true, false);
 	UpdateSelection();
 	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 	SystemUpdateFocus(pPiece, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
@@ -6867,7 +6869,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	pLight->m_pNext = m_pLights;
 	m_pLights = pLight;
 	SystemUpdateFocus (pLight, LC_LIGHT|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
-	pLight->FocusEye ();
+	pLight->Select (true, true, false);
 	UpdateSelection ();
       }
 
@@ -6896,7 +6898,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
-      pLight->FocusTarget();
+      pLight->GetTarget ()->Select (true, true, false);
       pLight->m_pNext = m_pLights;
       m_pLights = pLight;
       UpdateSelection();
@@ -6911,7 +6913,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
-      pCamera->FocusTarget();
+      pCamera->GetTarget ()->Select (true, true, false);
       UpdateSelection();
       SystemRedrawView();
       SystemUpdateFocus(pCamera, LC_CAMERA|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
@@ -7010,33 +7012,21 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
         case LC_OBJECT_PIECE:
 	{
 	  Piece* pPiece = (Piece*)ClickLine.pClosest;
-	  pPiece->Focus();
+	  pPiece->Select (true, true, false);
 	  Group* pGroup = pPiece->GetTopGroup();
 
 	  if (pGroup != NULL)
 	    for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	      if (pPiece->GetTopGroup() == pGroup)
-		pPiece->Select();
+		pPiece->Select (true, false, false);
 	} break;
 
         case LC_OBJECT_CAMERA:
-	{
-	  ((Camera*)ClickLine.pClosest)->FocusEye();
-	} break;
-
         case LC_OBJECT_CAMERA_TARGET:
-	{
-	  ((CameraTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
-	} break;
-
         case LC_OBJECT_LIGHT:
-	{
-	  ((Light*)ClickLine.pClosest)->FocusEye();
-	} break;
-
         case LC_OBJECT_LIGHT_TARGET:
 	{
-	  ((LightTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
+	  ClickLine.pClosest->Select (true, true, bControl);
 	} break;
       }
 

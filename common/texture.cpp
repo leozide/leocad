@@ -1,11 +1,10 @@
 // Texture object.
 //
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
-#else
-#include "GL/glu.h"
 #endif
+#include "GL/glu.h"
 #include <string.h>
 #include <stdlib.h>
 #include "file.h"
@@ -58,9 +57,9 @@ void Texture::LoadIndex(File* idx)
 	m_nID = 0;
 
 	idx->Read(m_strName, 8);
-	idx->Read(&m_nWidth, sizeof(m_nWidth));
-	idx->Read(&m_nHeight, sizeof(m_nHeight));
-	idx->Read(&bt, sizeof(bt));
+	idx->ReadShort(&m_nWidth, 1);
+	idx->ReadShort(&m_nHeight, 1);
+	idx->ReadByte(&bt, 1);
 
 	switch (bt)
 	{
@@ -69,7 +68,7 @@ void Texture::LoadIndex(File* idx)
 	case LC_RGBA: m_nType = GL_RGBA; break;
 	}
 
-	idx->Read(&m_nOffset, sizeof(m_nOffset));
+	idx->ReadLong(&m_nOffset, 1);
 }
 
 void Texture::Unload()
@@ -84,13 +83,12 @@ void Texture::Load(bool bFilter)
 {
 	unsigned char* bits;
 	char filename[LC_MAXPATH];
-	FILE* bin;
+	FileDisk bin;
 	int size;
 
 	strcpy(filename, project->GetLibraryPath());
 	strcat(filename, "textures.bin");
-	bin = fopen(filename, "rb");
-	if (bin == NULL)
+	if (!bin.Open(filename, "rb"))
 		return;
 
 	size = m_nWidth*m_nHeight;
@@ -100,9 +98,9 @@ void Texture::Load(bool bFilter)
 		size *= 4;
 	bits = (unsigned char*)malloc(size);
 
-	fseek(bin, m_nOffset, SEEK_SET);
-	fread(bits, 1, size, bin);
-	fclose(bin);
+	bin.Seek(m_nOffset, SEEK_SET);
+	bin.Read(bits, size);
+	bin.Close();
 
 	if (m_nID == 0)
 		glGenTextures(1, &m_nID);

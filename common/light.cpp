@@ -1,6 +1,6 @@
 // Light object.
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
 #endif
 #include <stdlib.h>

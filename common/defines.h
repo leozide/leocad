@@ -7,11 +7,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // System specific
 
-#if ! ( defined( _WINDOWS ) || defined( _LINUX ) )
+#if ! ( defined( LC_WINDOWS ) || defined( LC_LINUX ) || defined( LC_MACINTOSH ))
 #error  YOU NEED TO DEFINE YOUR OS
 #endif
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #define LC_MAXPATH _MAX_PATH
 #define KEY_SHIFT	VK_SHIFT
 #define KEY_CONTROL	VK_CONTROL
@@ -29,7 +29,7 @@
 #define KEY_MINUS	VK_SUBTRACT
 #endif
 
-#ifdef _LINUX
+#ifdef LC_LINUX
 #define LC_MAXPATH 1024 //FILENAME_MAX
 #define KEY_SHIFT	0x01
 #define KEY_CONTROL	0x02
@@ -52,7 +52,7 @@ char* strlwr(char* string);
 #endif
 
 // Endianess handling (files are little endian).
-#ifdef _BIG_ENDIAN
+#ifdef LC_BIG_ENDIAN
 unsigned short SwapSHORT(unsigned short x)
 { return (x>>8) | (x<<8); }
 unsigned long SwapLONG(unsigned long x)

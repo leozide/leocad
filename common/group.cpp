@@ -52,7 +52,7 @@ void Group::FileLoad(File* file)
 	file->Read(&version, 1);
 	file->Read(m_strName, 65);
 	file->Read(m_fCenter, 12);
-	file->Read(&i, 4);
+	file->ReadLong(&i, 1);
 	m_pGroup = (Group*)i;
 }
 
@@ -75,5 +75,5 @@ void Group::FileSave(File* file, Group* pGroups)
 			else
 				i++;
 	}
-	file->Write(&i, 4);
+	file->WriteLong(&i, 1);
 }

@@ -2,12 +2,11 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
-#else
+#endif
 #include <GL/gl.h>
 #include <GL/glu.h>
-#endif
 #include "tr.h"
 #include <math.h>
 
@@ -144,7 +143,7 @@ void TiledRender::Perspective(double fovy, double aspect, double zNear, double z
 
 void TiledRender::BeginTile()
 {
-	int matrixMode;
+	GLint matrixMode;
 	int tileWidth, tileHeight, tileWidthNB, tileHeightNB, border;
 	double left, right, bottom, top;
 	
@@ -158,7 +157,7 @@ void TiledRender::BeginTile()
 		glGetIntegerv(GL_VIEWPORT, m_ViewportSave);
 	}
 	
-	/* which tile (by row and column) we're about to render */
+	// which tile (by row and column) we're about to render
 	if (m_RowOrder == TR_BOTTOM_TO_TOP)
 	{
 		m_CurrentRow = m_CurrentTile / m_Columns;
@@ -172,7 +171,7 @@ void TiledRender::BeginTile()
 
 	border = m_TileBorder;
 	
-	/* Compute actual size of this tile with border */
+	// Compute actual size of this tile with border
 	if (m_CurrentRow < m_Rows-1)
 		tileHeight = m_TileHeight;
 	else
@@ -183,22 +182,22 @@ void TiledRender::BeginTile()
 	else
 		tileWidth = m_ImageWidth - (m_Columns-1) * (m_TileWidthNB) + 2 * border;
 	
-	/* tile size with No Border */
+	// tile size with No Border
 	tileWidthNB = tileWidth - 2 * border;
 	tileHeightNB = tileHeight - 2 * border;
 	
-	/* Save tile size, with border */
+	// Save tile size, with border
 	m_CurrentTileWidth = tileWidth;
 	m_CurrentTileHeight = tileHeight;
 	
-	glViewport(0, 0, tileWidth, tileHeight);  /* tile size including border */
+	glViewport(0, 0, tileWidth, tileHeight);  // tile size including border
 	
-	/* save current matrix mode */
+	// save current matrix mode
 	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-	/* compute projection parameters */
+	// compute projection parameters
 	left = m_Left + (m_Right - m_Left)
         * (m_CurrentColumn * m_TileWidthNB - border) / m_ImageWidth;
 	right = left + (m_Right - m_Left) * tileWidth / m_ImageWidth;
@@ -211,13 +210,13 @@ void TiledRender::BeginTile()
 	else
 		glOrtho(left, right, bottom, top, m_Near, m_Far);
 	
-	/* restore user's matrix mode */
+	// restore user's matrix mode
 	glMatrixMode((GLenum)matrixMode);
 }
 
 int TiledRender::EndTile()
 {
-	int prevRowLength, prevSkipRows, prevSkipPixels;
+	GLint prevRowLength, prevSkipRows, prevSkipPixels;
 	
 	// be sure OpenGL rendering is finished
 	glFlush();
@@ -284,9 +283,9 @@ void TiledRender::RasterPos3f(float x, float y, float z)
 	}
 	else 
 	{
-		double modelview[16], proj[16];
-		int viewport[4];
-		double winX, winY, winZ;
+		GLdouble modelview[16], proj[16];
+		GLint viewport[4];
+		GLdouble winX, winY, winZ;
 		
 		// Get modelview, projection and viewport
 		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
@@ -323,3 +322,8 @@ void TiledRender::RasterPos3f(float x, float y, float z)
 		}
 	}
 }
+
+
+
+
+

@@ -1028,7 +1028,7 @@ static bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlac
 	return true;
 }
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 //#include <windows.h>
 //#include <vfw.h>
 

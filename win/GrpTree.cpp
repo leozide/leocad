@@ -18,6 +18,7 @@ static char THIS_FILE[] = __FILE__;
 
 CGroupEditTree::CGroupEditTree()
 {
+  m_bDragging = FALSE;
 }
 
 CGroupEditTree::~CGroupEditTree()

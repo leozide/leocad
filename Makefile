@@ -89,6 +89,7 @@ help:
 	@echo   'Possible Targets are:'
 	@echo   '       help (this is it)'
 	@echo   '       all'
+	@echo   '       install'
 	@echo   '       binary'
 	@echo   '       source'
 	@echo   '       (binary and source can be called as'
@@ -99,10 +100,14 @@ help:
 	@echo
 
 ###  Rules to make various packaging
-.PHONY: binary binary-tgz source-zip source-tgz source
+.PHONY: binary binary-tgz source-zip source-tgz source install
 
 arch:
 	mkdir arch
+
+install: $(BIN)
+	install -c -m 0755 $(BIN) $(PREFIX)/bin
+	install -c -m 0644 docs/leocad.1 $(PREFIX)/man/man1
 
 binary: binary-zip binary-tgz
 
@@ -124,6 +129,7 @@ package-dir: arch all
 	cp README.txt leocad-$(VERSION)/README
 	cp docs/INSTALL.txt leocad-$(VERSION)/INSTALL
 	cp docs/LINUX.txt leocad-$(VERSION)/LINUX
+	cp docs/leocad.1 leocad-$(VERSION)
 
 arch/leocad-$(VERSION)-linux.zip: package-dir
 	rm -f $@

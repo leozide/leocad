@@ -420,76 +420,79 @@ void Matrix::ToEulerAngles (float *rot) const
 
 void Matrix::ToAxisAngle (float *rot) const
 {
-  double matrix[3][4];
-  double q[4];
-  matrix[0][0] = m[0];
-  matrix[0][1] = m[4];
-  matrix[0][2] = m[8];
-  matrix[0][3] = m[12];
+  float fTrace = m[0] + m[5] + m[10];
+  float fCos = 0.5*(fTrace-1.0);
+  rot[3] = acos (fCos);  // in [0,PI]
 
-  matrix[1][0] = m[1];
-  matrix[1][1] = m[5];
-  matrix[1][2] = m[9];
-  matrix[1][3] = m[13];
-
-  matrix[2][0] = m[2];
-  matrix[2][1] = m[6];
-  matrix[2][2] = m[10];
-  matrix[2][3] = m[14];
-
-  double trace, s;
-  int i, j, k;
-  static int next[3] = {1, 2, 0};
-
-  trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
-
-  if (trace > 0.0) 
+  if (rot[3] > 0.0)
   {
-    s = sqrt(trace + 1.0);
-    q[3] = s * 0.5;
-    s = 0.5 / s;
+    if (rot[3] < M_PI)
+    {
+      rot[0] = m[6] - m[9];
+      rot[1] = m[8] - m[2];
+      rot[2] = m[1] - m[4];
 
-    q[0] = (matrix[2][1] - matrix[1][2]) * s;
-    q[1] = (matrix[0][2] - matrix[2][0]) * s;
-    q[2] = (matrix[1][0] - matrix[0][1]) * s;
-  } 
-  else 
+      float inv = 1.0f/(float)sqrt(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+      rot[0] *= inv;
+      rot[1] *= inv;
+      rot[2] *= inv;
+    }
+    else
+    {
+      // angle is PI
+      float fHalfInverse;
+      if (m[0] >= m[5])
+      {
+        // r00 >= r11
+        if (m[0] >= m[10])
+        {
+          // r00 is maximum diagonal term
+          rot[0] = 0.5 * sqrt (m[0] - m[5] - m[10] + 1.0);
+          fHalfInverse = 0.5 / rot[0];
+          rot[1] = fHalfInverse * m[4];
+          rot[2] = fHalfInverse * m[8];
+        }
+        else
+        {
+          // r22 is maximum diagonal term
+          rot[2] = 0.5 * sqrt (m[10] - m[0] - m[5] + 1.0);
+          fHalfInverse = 0.5 / rot[2];
+          rot[0] = fHalfInverse * m[8];
+          rot[1] = fHalfInverse * m[9];
+        }
+      }
+      else
+      {
+        // r11 > r00
+        if (m[5] >= m[10])
+        {
+          // r11 is maximum diagonal term
+          rot[1] = 0.5 * sqrt (m[5] - m[0] - m[10] + 1.0);
+          fHalfInverse  = 0.5 / rot[1];
+          rot[0] = fHalfInverse * m[4];
+          rot[2] = fHalfInverse * m[9];
+        }
+        else
+        {
+          // r22 is maximum diagonal term
+          rot[2] = 0.5 * sqrt (m[10] - m[0] - m[5] + 1.0);
+          fHalfInverse = 0.5 / rot[2];
+          rot[0] = fHalfInverse * m[8];
+          rot[1] = fHalfInverse * m[9];
+        }
+      }
+    }
+  }
+  else
   {
-    i = 0;
-    if (matrix[1][1] > matrix[0][0])
-      i = 1;
-    if (matrix[2][2] > matrix[i][i])
-      i = 2;
-
-    j = next[i];  
-    k = next[j];
-
-    s = sqrt( (matrix[i][i] - (matrix[j][j]+matrix[k][k])) + 1.0 );
-
-    q[i] = s * 0.5;
-
-    s = 0.5 / s;
-
-    q[3] = (matrix[k][j] - matrix[j][k]) * s;
-    q[j] = (matrix[j][i] + matrix[i][j]) * s;
-    q[k] = (matrix[k][i] + matrix[i][k]) * s;
+    // The angle is 0 and the matrix is the identity.  Any axis will
+    // work, so just use the x-axis.
+    rot[0] = 0.0;
+    rot[1] = 0.0;
+    rot[2] = 1.0;
   }
 
-  double cos_angle = q[3];
-  rot[3] = (float)acos(cos_angle) * 2 * RTOD;
-  double sin_angle = sqrt( 1.0 - cos_angle * cos_angle );
-  if (fabs(sin_angle) < 1E-10)
-    sin_angle = 1;
-
-  rot[0] = (float)(q[0] / sin_angle);
-  rot[1] = (float)(q[1] / sin_angle);
-  rot[2] = (float)(q[2] / sin_angle);
-
-  if (fabs(rot[3]) < 1E-10)
-  {
-    rot[0] = rot[1] = rot[3] = 0;
-    rot[2] = 1;
-  }
+  rot[3] *= RTOD;
 }
 
 void Matrix::FromEulerAngles (float roll, float pitch, float yaw)

@@ -194,6 +194,26 @@ int String::CompareNoCase (const char *string) const
   return (((int)*ch) - ((int)*string));
 }
 
+int String::CompareNoCase(const char *string, int count) const
+{
+  char c1, c2, *ch = m_pData;
+
+  while (*ch && *string && count)
+  {
+    c1 = tolower (*ch);
+    c2 = tolower (*string);
+ 
+    if (c1 != c2)
+      return (c1 - c2);
+
+    ch++;
+    string++;
+    count--;
+  }
+
+  return (((int)*ch) - ((int)*string));
+}
+
 void String::MakeUpper ()
 {
   for (char *cp = m_pData; *cp; ++cp)

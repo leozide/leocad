@@ -1,5 +1,22 @@
 This is a changelog for developers only, not for ordinary users.
 
+18/11/2000
+        - Fixed Z buffer bug in the piece preview.
+        - Fixed blending in piece preview.
+
+12/11/2000
+        - Added the PtrArray class.
+        - Started adding the internal messaging system.
+        - Link with g++ instead of gcc.
+        - Moved all keyframer functions to the Object class.
+
+09/11/2000
+        - First implementation of the light classes.
+        - Added a const float* operator to the Vector class.
+        - Added functions to create transformation matrixes.
+        - Faster rendering of the camera objects.
+        - Added new minifig pieces.
+
 01/10/2000
 	- Added an option to save custom minifigs to the Minifig Wizard.
 

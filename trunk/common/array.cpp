@@ -81,6 +81,34 @@ void PtrArray<T>::Add (T* pObj)
   m_pData[m_nLength++] = pObj;
 }
 
+template <class T>
+void PtrArray<T>::AddSorted (T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData)
+{
+  int i;
+
+  for (i = 0; i < GetSize (); i++)
+    if (pFunc (pObj, m_pData[i], pData) < 0)
+    {
+      InsertAt (i, pObj);
+      return;
+    }
+
+  Add (pObj);
+}
+
+template <class T>
+void PtrArray<T>::InsertAt (int nIndex, T* pObj)
+{
+  if (nIndex >= m_nLength)
+    Expand (nIndex - m_nLength + 1);
+  else
+    Expand (1);
+
+  for (int i = m_nLength - 1; i > nIndex; i--)
+    m_pData[i] = m_pData[i-1];
+
+  m_pData[nIndex] = pObj;
+}
 
 
 

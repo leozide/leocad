@@ -8,6 +8,8 @@ class PtrArray
   PtrArray (int nSize = 0);
   ~PtrArray ();
 
+  typedef int (*LC_PTRARRAY_COMPARE_FUNC) (T* a, T* b, void* data);
+
   void SetSize (int nSize);
   int GetSize () const
     { return m_nLength; }
@@ -15,6 +17,8 @@ class PtrArray
   T* RemoveIndex (int nIndex);
   T* RemovePointer (T* pObj);
   void Add (T* pObj);
+  void AddSorted (T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData);
+  void InsertAt (int nIndex, T* pObj);
 
   T* operator [](int nIndex) const
     { return m_pData[nIndex]; }

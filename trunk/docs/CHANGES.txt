@@ -1,5 +1,8 @@
 This is a changelog for developers only, not for ordinary users.
 
+21/03/2001
+  - Improved Linux About dialog.
+
 15/03/2001
   - Fixed drawing area border not being drawn correctly.
 

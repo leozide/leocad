@@ -78,8 +78,9 @@ void CPOVDlg::OnOK()
 	if (m_strOut.GetLength() == 0)
 		return;
 
-	if (m_strLGEO[m_strLGEO.GetLength()-1] != '\\') 
-		m_strLGEO += "\\";
+	if (m_strLGEO.GetLength() > 0)
+		if (m_strLGEO[m_strLGEO.GetLength()-1] != '\\') 
+			m_strLGEO += "\\";
 
 	theApp.WriteProfileInt ("Settings", "POV Render", m_bRender);
 	theApp.WriteProfileString ("Settings", "POV-Ray", m_strPOV);

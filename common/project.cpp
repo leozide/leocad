@@ -385,11 +385,11 @@ bool Project::LoadPieceLibrary (char *libpath)
 		return false;
 
 	idx.Seek(-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
-	idx.Read(&movedcount, sizeof(movedcount));
-	idx.Read(&binsize, sizeof(binsize));
-	idx.Read(&count, sizeof(count));
-	idx.Seek(32, SEEK_SET);
-	idx.Read(&version, sizeof(version));
+	idx.ReadShort (&movedcount, 1);
+	idx.ReadLong (&binsize, 1);
+	idx.ReadShort (&count, 1);
+	idx.Seek (32, SEEK_SET);
+	idx.Read (&version, sizeof(version));
 
 	if ((version != 3) || (count == 0))
 	{

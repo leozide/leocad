@@ -30,17 +30,9 @@ IMPLEMENT_DYNCREATE(CCADView, CView)
 
 BEGIN_MESSAGE_MAP(CCADView, CView)
 	//{{AFX_MSG_MAP(CCADView)
-	ON_WM_ERASEBKGND()
 	ON_WM_CREATE()
-	ON_WM_PALETTECHANGED()
-	ON_WM_QUERYNEWPALETTE()
 	ON_WM_DESTROY()
-	ON_WM_SIZE()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
-	ON_WM_RBUTTONDOWN()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
@@ -48,8 +40,6 @@ BEGIN_MESSAGE_MAP(CCADView, CView)
 	ON_WM_MBUTTONDOWN()
 	ON_WM_TIMER()
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, OnFilePrintPreview)
-	ON_WM_RBUTTONUP()
-	ON_WM_LBUTTONDBLCLK()
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
@@ -755,11 +745,6 @@ CCADDoc* CCADView::GetDocument() // non-debug version is inline
 /////////////////////////////////////////////////////////////////////////////
 // CCADView message handlers
 
-BOOL CCADView::OnEraseBkgnd(CDC* /*pDC*/)
-{
-	return TRUE;
-}
-
 int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
   if (CView::OnCreate(lpCreateStruct) == -1)
@@ -768,151 +753,20 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
   m_pView = new View (project, NULL);
   m_pView->Create (m_hWnd);
 //  m_pView->OnInitialUpdate ();
-/*	
-    m_pDC = new CClientDC(this);
-    ASSERT(m_pDC != NULL);
 
-	PIXELFORMATDESCRIPTOR pfd = {
-		sizeof(PIXELFORMATDESCRIPTOR), 1,
-		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-		PFD_TYPE_RGBA, 24,				// RGBA, 24-bit color depth
-		0, 0, 0, 0, 0, 0,				// color bits ignored
-		0,								// no alpha buffer
-		0,								// shift bit ignored
-		0,								// no accumulation buffer
-		0, 0, 0, 0, 					// accum bits ignored
-		32, 							// 16(32)-bit z-buffer
-		0, 0,							// no stencil & auxiliary buffer
-		PFD_MAIN_PLANE, 0, 0, 0, 0 };	// layer masks ignored
-
-  int pixelformat = OpenGLChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
-	if (pixelformat == 0)
-	{
-		AfxMessageBox("ChoosePixelFormat failed");
-		return -1;
-	}
-
-	if (OpenGLSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
-	{
-		AfxMessageBox("SetPixelFormat failed");
-		return -1;
-	}
-
-	m_pPalette = new CPalette;
-	if (CreateRGBPalette(m_pDC->GetSafeHdc(), &m_pPalette))
-	{
-		m_pDC->SelectPalette(m_pPalette, FALSE);
-		m_pDC->RealizePalette();
-	}
-	else
-	{
-		delete m_pPalette;
-		m_pPalette = NULL;
-	}
-
-  m_hglRC = pfnwglCreateContext(m_pDC->m_hDC);
-	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
-
-  GL_InitializeExtensions ();
-  */
   SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
   return 0;
-}
-
-void CCADView::OnPaletteChanged(CWnd* pFocusWnd) 
-{
-  /*
-	// See if the change was caused by us and ignore it if not.
-	if (pFocusWnd != this)
-		OnQueryNewPalette();
-    */
-}
-
-BOOL CCADView::OnQueryNewPalette() 
-{
-  /*
-	if (m_pPalette)
-	{
-		m_pDC->SelectPalette(m_pPalette, FALSE);
-		if (m_pDC->RealizePalette() != 0)
-		{
-			// Some colors changed, so we need to do a repaint.
-			InvalidateRect(NULL, TRUE);
-		}
-	}
-*/
-	return TRUE;
 }
 
 void CCADView::OnDestroy() 
 {
   delete m_pView;
   m_pView = NULL;
-  /*
-	pfnwglMakeCurrent(NULL,  NULL);
 
-	if (m_hglRC)
-		pfnwglDeleteContext(m_hglRC);
-
-	if (m_pPalette)
-	{
-		CPalette palDefault;
-		palDefault.CreateStockObject(DEFAULT_PALETTE);
-		m_pDC->SelectPalette(&palDefault, FALSE);
-		delete m_pPalette;
-	}
-
-	if (m_pDC)
-		delete m_pDC;
-*/
-	KillTimer (IDT_LC_SAVETIMER);
+  KillTimer (IDT_LC_SAVETIMER);
 	
 	CView::OnDestroy();
-}
-
-void CCADView::OnSize(UINT nType, int cx, int cy) 
-{
-//	m_szView.cx = cx;
-//	m_szView.cy = cy;
-//	project->SetViewSize(cx, cy);
-	CView::OnSize(nType, cx, cy);
-}
-
-void CCADView::OnMouseMove(UINT nFlags, CPoint point) 
-{
-//	project->OnMouseMove(point.x, m_szView.cy - point.y - 1,
-//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
-}
-
-void CCADView::OnLButtonUp(UINT nFlags, CPoint point) 
-{
-//	project->OnLeftButtonUp(point.x, m_szView.cy - point.y - 1,
-//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
-}
-
-void CCADView::OnLButtonDown(UINT nFlags, CPoint point) 
-{
-//	project->OnLeftButtonDown(point.x, m_szView.cy - point.y - 1,
-//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
-}
-
-void CCADView::OnLButtonDblClk(UINT nFlags, CPoint point) 
-{
-//	project->OnLeftButtonDoubleClick(point.x, m_szView.cy - point.y - 1,
-//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
-}
-
-void CCADView::OnRButtonDown(UINT nFlags, CPoint point) 
-{
-//	project->OnRightButtonDown(point.x, m_szView.cy - point.y - 1,
-//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
-}
-
-void CCADView::OnRButtonUp(UINT nFlags, CPoint point) 
-{
-//	project->OnRightButtonUp(point.x, m_szView.cy - point.y - 1,
-//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnDropDown (NMHDR* pNotifyStruct, LRESULT* pResult)

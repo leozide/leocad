@@ -55,17 +55,9 @@ protected:
 	BOOL DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass* pPreviewViewClass, CPrintPreviewState* pState);
 	void* m_pPixels;
 	//{{AFX_MSG(CCADView)
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnPaletteChanged(CWnd* pFocusWnd);
-	afx_msg BOOL OnQueryNewPalette();
 	afx_msg void OnDestroy();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -73,8 +65,6 @@ protected:
 	afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnFilePrintPreview();
-	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	afx_msg void OnDropDown(NMHDR* pNotifyStruct, LRESULT* pResult);
 	afx_msg LONG OnSetStep(UINT lParam, LONG wParam);

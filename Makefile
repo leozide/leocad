@@ -46,16 +46,16 @@ bin:
 
 ### include the C/C++ include
 ###   dependencies
-include $(OBJ:.o=.d)
+-include $(OBJ:.o=.d)
 
 ### calculate C/C++ include
 ###   dependencies
 %.d: %.c
-	@./depend.sh $@ $(CC) $(CFLAGS) $(CPPFLAGS) -w $<
+	@./depend.sh $@ $(@D) $(CC) $(CFLAGS) $(CPPFLAGS) -w $<
 	@[ -s $@ ] || rm -f $@
 
 %.d: %.cpp
-	@./depend.sh $@ $(CXX) $(CXXFLAGS) $(CPPFLAGS) -w $<
+	@./depend.sh $@ $(@D) $(CXX) $(CXXFLAGS) $(CPPFLAGS) -w $<
 	@[ -s $@ ] || rm -f $@
 
 

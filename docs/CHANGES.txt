@@ -1,5 +1,8 @@
 This is a changelog for developers only, not for ordinary users.
 
+16/05/2001
+  - Fixed the way pieces are moved/rotated with the side cameras.
+
 26/03/2001
   - Reorganized the Image I/O functions, created a new Image class.
   - Fixed the return value of FileMem::Seek.

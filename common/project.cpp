@@ -4643,7 +4643,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Matrix mat(rot, pos);
 				mat.Translate(0, 0, pLast->GetPieceInfo()->m_fDimensions[2] - pLast->GetPieceInfo()->m_fDimensions[5]);
 				mat.GetTranslation(pos);
-				SnapPoint(&pos[0], &pos[1], &pos[2]);
+				SnapPoint (pos, NULL);
 				pPiece->Initialize(pos[0], pos[1], pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
 				pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
@@ -5923,7 +5923,7 @@ Camera* Project::GetCamera(int i)
 {
 	Camera* pCamera;
 
-	for (pCamera = m_pCameras; i--, pCamera; pCamera = pCamera->m_pNext)
+	for (pCamera = m_pCameras; i-- > 0 && pCamera; pCamera = pCamera->m_pNext)
 		;
 	return pCamera;
 }
@@ -6272,26 +6272,38 @@ void Project::StartTracking(int mode)
 	FileSave(m_pTrackFile, true);
 }
 
-void Project::SnapPoint(float *x, float *y, float *z)
+void Project::SnapPoint (float *point, float *reminder) const
 {
 	int i;
 
 	if (m_nSnap & LC_DRAW_SNAP_X)
 	{
-		i = (int)(*x/0.4f);
-		*x = 0.4f * i;
+		i = (int)(point[0]/0.4f);
+
+    if (reminder != NULL)
+      reminder[0] = point[0] - (0.4f * i);
+
+		point[0] = 0.4f * i;
 	}
 
 	if (m_nSnap & LC_DRAW_SNAP_Y)
 	{
-		i = (int)(*y/0.4f);
-		*y = 0.4f * i;
+		i = (int)(point[1]/0.4f);
+
+    if (reminder != NULL)
+      reminder[1] = point[1] - (0.4f * i);
+
+		point[1] = 0.4f * i;
 	}
 
 	if (m_nSnap & LC_DRAW_SNAP_Z)
 	{
-		i = (int)(*z/0.32f);
-		*z = 0.32f * i;
+		i = (int)(point[2]/0.4f);
+
+    if (reminder != NULL)
+      reminder[2] = point[2] - (0.4f * i);
+
+		point[2] = 0.4f * i;
 	}
 }
 
@@ -6627,15 +6639,15 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 			if (pFocus != NULL)
 			{
-                          pFocus->Select (true, true, false);
-                          Group* pGroup = pFocus->GetTopGroup();
-                          if (pGroup != NULL)
-                          {
-                            for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-                              if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation) &&
-                                  pPiece->GetTopGroup() == pGroup)
-                                pPiece->Select (true, false, false);
-                          }
+        pFocus->Select (true, true, false);
+        Group* pGroup = pFocus->GetTopGroup();
+        if (pGroup != NULL)
+        {
+          for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+            if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+                (pPiece->GetTopGroup() == pGroup))
+              pPiece->Select (true, false, false);
+        }
 			}
 
 			UpdateSelection();
@@ -6644,7 +6656,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			ret = true;
 		} break;
 
-		case KEY_UP:	case KEY_DOWN: case KEY_LEFT: 
+		case KEY_UP:    case KEY_DOWN: case KEY_LEFT: 
 		case KEY_RIGHT: case KEY_NEXT: case KEY_PRIOR:
 //		if (AnyObjectSelected(FALSE))
 		{
@@ -6703,72 +6715,115 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-				// TODO: rewrite this
+        Camera *camera = m_pViewCameras[m_nActiveViewport];
 
-				switch (nKey)
-				{
-					case KEY_UP: {
-						axis[1] = axis[2] = 0; axis[0] = -axis[0];
-					} break;
-					case KEY_DOWN: {
-						axis[1] = axis[2] = 0;
-					} break;
-					case KEY_LEFT: {
-						axis[0] = axis[2] = 0; axis[1] = -axis[1];
-					} break;
-					case KEY_RIGHT: {
-						axis[0] = axis[2] = 0;
-					} break;
-					case KEY_NEXT: {
-						axis[0] = axis[1] = 0; axis[2] = -axis[2];
-					} break;
-					case KEY_PRIOR: {
-						axis[0] = axis[1] = 0;
-					} break;
-				}
+        if (camera->IsSide ())
+        {
+          Matrix mat;
 
-				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
-				float ax, ay;
-				GLint viewport[4];
+          mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
+          mat.SetTranslation (0, 0, 0);
+          mat.Invert ();
+
+  				switch (nKey)
+	  			{
+		  			case KEY_UP:
+			  			axis[0] = axis[2] = 0;
+              break;
+
+            case KEY_DOWN:
+	  					axis[0] = axis[2] = 0; axis[1] = -axis[1];
+              break;
+
+            case KEY_LEFT:
+				  		axis[0] = -axis[0]; axis[1] = axis[2] = 0;
+              break;
+
+            case KEY_RIGHT:
+              axis[1] = axis[2] = 0;
+              break;
+
+            case KEY_NEXT:
+              axis[0] = axis[1] = 0; axis[2] = -axis[2];
+              break;
+
+            case KEY_PRIOR:
+              axis[0] = axis[1] = 0;
+              break;
+          }
+
+          mat.TransformPoints (axis, 1);
+        }
+        else
+        {
+
+          // TODO: rewrite this
+
+  				switch (nKey)
+	  			{
+		  			case KEY_UP: {
+			  			axis[1] = axis[2] = 0; axis[0] = -axis[0];
+				  	} break;
+					  case KEY_DOWN: {
+              axis[1] = axis[2] = 0;
+            } break;
+            case KEY_LEFT: {
+              axis[0] = axis[2] = 0; axis[1] = -axis[1];
+            } break;
+            case KEY_RIGHT: {
+              axis[0] = axis[2] = 0;
+            } break;
+            case KEY_NEXT: {
+              axis[0] = axis[1] = 0; axis[2] = -axis[2];
+            } break;
+            case KEY_PRIOR: {
+              axis[0] = axis[1] = 0;
+            } break;
+          }
+
+  				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
+	  			float ax, ay;
+		  		GLint viewport[4];
+
+          glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+          glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+          glGetIntegerv(GL_VIEWPORT, viewport);
+          gluUnProject( 5, 5, 0.1, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
+          gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
+          gluUnProject( 5,10, 0.1, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
 				
-				glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-				glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-				glGetIntegerv(GL_VIEWPORT, viewport);
-				gluUnProject( 5, 5, 0.1, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
-				gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
-				gluUnProject( 5,10, 0.1, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
+          Vector vx((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0);//p2[2] - p1[2] };
+          Vector x(1, 0, 0);
+          ax = vx.Angle(x);
 				
-				Vector vx((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0);//p2[2] - p1[2] };
-				Vector x(1, 0, 0);
-				ax = vx.Angle(x);
+          Vector vy((float)(p3[0] - p1[0]), (float)(p3[1] - p1[1]), 0);//p2[2] - p1[2] };
+          Vector y(0, -1, 0);
+          ay = vy.Angle(y);
 				
-				Vector vy((float)(p3[0] - p1[0]), (float)(p3[1] - p1[1]), 0);//p2[2] - p1[2] };
-				Vector y(0, -1, 0);
-				ay = vy.Angle(y);
+          if (ax > 135)
+            axis[0] = -axis[0];
 				
-				if (ax > 135)
-					axis[0] = -axis[0];
+          if (ay < 45)
+            axis[1] = -axis[1];
 				
-				if (ay < 45)
-					axis[1] = -axis[1];
-				
-				if (ax >= 45 && ax <= 135)
-				{
-					float tmp = axis[0];
-					
-					ax = vx.Angle(y);
-					if (ax > 90)
-					{
-						axis[0] = -axis[1];
-						axis[1] = tmp;
-					}
-					else
-					{
-						axis[0] = axis[1];
-						axis[1] = -tmp;
-					}
-				}
-			}
+          if (ax >= 45 && ax <= 135)
+          {
+            float tmp = axis[0];
+            
+            ax = vx.Angle(y);
+            if (ax > 90)
+            {
+              axis[0] = -axis[1];
+              axis[1] = tmp;
+            }
+            else
+            {
+              axis[0] = axis[1];
+              axis[1] = -tmp;
+            }
+          }
+        }
+      }
 
 			if (bShift)
 				RotateSelectedObjects(axis[0], axis[1], axis[2]);
@@ -6948,46 +7003,46 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
     {
       if (m_nCurAction == LC_ACTION_INSERT)
       {
-	Piece* pPiece = new Piece(m_pCurPiece);
-	SnapPoint(&m_fTrack[0], &m_fTrack[1], &m_fTrack[2]);
-	pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+        Piece* pPiece = new Piece(m_pCurPiece);
+        SnapPoint (m_fTrack, NULL);
+        pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
 
-	SelectAndFocusNone(false);
-	pPiece->CreateName(m_pPieces);
-	AddPiece(pPiece);
-	pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
-	pPiece->Select (true, true, false);
-	UpdateSelection();
-	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
-	SystemUpdateFocus(pPiece, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+        SelectAndFocusNone(false);
+        pPiece->CreateName(m_pPieces);
+        AddPiece(pPiece);
+        pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+        pPiece->Select (true, true, false);
+        UpdateSelection();
+        SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+        SystemUpdateFocus(pPiece, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
 
-	if (m_nSnap & LC_DRAW_MOVE)
-	  SetAction(LC_ACTION_MOVE);
+        if (m_nSnap & LC_DRAW_MOVE)
+          SetAction(LC_ACTION_MOVE);
       }
       else if (m_nCurAction == LC_ACTION_LIGHT)
       {
-	GLint max;
-	int count = 0;
-	Light *pLight;
+        GLint max;
+        int count = 0;
+        Light *pLight;
 
-	glGetIntegerv (GL_MAX_LIGHTS, &max);
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-	  count++;
+        glGetIntegerv (GL_MAX_LIGHTS, &max);
+        for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+          count++;
 
-	if (count == max)
-	  break;
+        if (count == max)
+          break;
 
-	SnapPoint(&m_fTrack[0], &m_fTrack[1], &m_fTrack[2]);
-	pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
+        SnapPoint (m_fTrack, NULL);
+        pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 
-	SelectAndFocusNone (false);
+        SelectAndFocusNone (false);
 
-	//	pLight->CreateName (m_pPieces);
-	pLight->m_pNext = m_pLights;
-	m_pLights = pLight;
-	SystemUpdateFocus (pLight, LC_LIGHT|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
-	pLight->Select (true, true, false);
-	UpdateSelection ();
+        //	pLight->CreateName (m_pPieces);
+        pLight->m_pNext = m_pLights;
+        m_pLights = pLight;
+        SystemUpdateFocus (pLight, LC_LIGHT|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+        pLight->Select (true, true, false);
+        UpdateSelection ();
       }
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
@@ -7064,7 +7119,10 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				}
 
 			if (sel)
+      {
 				StartTracking(LC_TRACK_START_LEFT);
+        m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
+      }
 		} break;
 
 		case LC_ACTION_ROTATE:
@@ -7075,6 +7133,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				if (pPiece->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_LEFT);
+          m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
 					break;
 				}
 		} break;
@@ -7127,24 +7186,24 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
       switch (ClickLine.pClosest->GetType ())
       {
         case LC_OBJECT_PIECE:
-	{
-	  Piece* pPiece = (Piece*)ClickLine.pClosest;
-	  pPiece->Select (true, true, false);
-	  Group* pGroup = pPiece->GetTopGroup();
+        {
+          Piece* pPiece = (Piece*)ClickLine.pClosest;
+          pPiece->Select (true, true, false);
+          Group* pGroup = pPiece->GetTopGroup();
 
-	  if (pGroup != NULL)
-	    for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-	      if (pPiece->GetTopGroup() == pGroup)
-		pPiece->Select (true, false, false);
-	} break;
+          if (pGroup != NULL)
+            for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+              if (pPiece->GetTopGroup() == pGroup)
+                pPiece->Select (true, false, false);
+        } break;
 
         case LC_OBJECT_CAMERA:
         case LC_OBJECT_CAMERA_TARGET:
         case LC_OBJECT_LIGHT:
         case LC_OBJECT_LIGHT_TARGET:
-	{
-	  ClickLine.pClosest->Select (true, true, bControl);
-	} break;
+        {
+          ClickLine.pClosest->Select (true, true, bControl);
+        } break;
       }
 
     UpdateSelection();
@@ -7213,7 +7272,10 @@ void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 				}
 
 			if (sel)
+      {
 				StartTracking(LC_TRACK_START_RIGHT);
+        m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
+      }
 		} break;
 
 		case LC_ACTION_ROTATE:
@@ -7224,6 +7286,7 @@ void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 				if (pPiece->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_RIGHT);
+          m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
 					break;
 				}
 		} break;
@@ -7312,30 +7375,71 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 		case LC_ACTION_MOVE:
 		{
-			// TODO: rewrite
+      Camera *camera = m_pViewCameras[m_nActiveViewport];
 
-			float mouse = 10.0f/(21-m_nMouse);
-			float delta[3] = {
-				(ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse,
-				(ptz - m_fTrack[2])*mouse };
-			float d[3] = { delta[0], delta[1], delta[2] };
+      if (camera->IsSide ())
+      {
+        Matrix mat;
+        float delta[3];
 
-			SnapPoint(&delta[0], &delta[1], &delta[2]);
+        mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
+        mat.SetTranslation (0, 0, 0);
+        mat.Invert ();
 
-			m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
-			m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
-			m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
-
-			if (m_nSnap & LC_DRAW_3DMOUSE)
-				MoveSelectedObjects(delta[0], delta[1], delta[2]);
-			else
-			{
 				if (m_nTracking == LC_TRACK_LEFT)
-					MoveSelectedObjects(delta[0], delta[1], 0);
-				else
-					MoveSelectedObjects(0, 0, delta[2]);
-			}
+        {
+          delta[0] = (float)(x - m_nDownX);
+          delta[1] = (float)(y - m_nDownY);
+          delta[2] = 0;
+        }
+        else
+        {
+          delta[0] = 0;
+          delta[1] = 0;
+          delta[2] = (float)(y - m_nDownY);
+        }
+
+        mat.TransformPoints (delta, 1);
+
+  			float mouse = 0.5f/(21-m_nMouse);
+        delta[0] = delta[0] * mouse + m_fTrack[0];
+        delta[1] = delta[1] * mouse + m_fTrack[1];
+        delta[2] = delta[2] * mouse + m_fTrack[2];
+
+        SnapPoint (delta, m_fTrack);
+
+				MoveSelectedObjects(delta[0], delta[1], delta[2]);
+
+        m_nDownX = x;
+  			m_nDownY = y;
+      }
+      else
+      {
+        // TODO: rewrite
+
+        float mouse = 10.0f/(21-m_nMouse);
+        float delta[3] = {
+          (ptx - m_fTrack[0])*mouse,
+          (pty - m_fTrack[1])*mouse,
+          (ptz - m_fTrack[2])*mouse };
+        float d[3] = { delta[0], delta[1], delta[2] };
+
+  			SnapPoint (delta, NULL);
+
+  			m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
+	  		m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
+		  	m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
+
+  			if (m_nSnap & LC_DRAW_3DMOUSE)
+	  			MoveSelectedObjects(delta[0], delta[1], delta[2]);
+		  	else
+			  {
+				  if (m_nTracking == LC_TRACK_LEFT)
+					  MoveSelectedObjects(delta[0], delta[1], 0);
+  				else
+	  				MoveSelectedObjects(0, 0, delta[2]);
+		  	}
+      }
 
 			SystemUpdateFocus(NULL, 0);
 			UpdateAllViews();
@@ -7343,6 +7447,59 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 		
 		case LC_ACTION_ROTATE:
 		{
+      Camera *camera = m_pViewCameras[m_nActiveViewport];
+
+      if (camera->IsSide ())
+      {
+        Matrix mat;
+        float delta[3];
+
+        mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
+        mat.SetTranslation (0, 0, 0);
+        mat.Invert ();
+
+				if (m_nTracking == LC_TRACK_LEFT)
+        {
+          delta[0] = (float)(x - m_nDownX);
+          delta[1] = (float)(y - m_nDownY);
+          delta[2] = 0;
+        }
+        else
+        {
+          delta[0] = 0;
+          delta[1] = 0;
+          delta[2] = (float)(y - m_nDownY);
+        }
+
+        mat.TransformPoints (delta, 1);
+
+  			float mouse = 36.0f/(21-m_nMouse);
+  			ldiv_t result;
+
+	  		for (int i = 0; i < 3; i++)
+  		  	if (m_nSnap & LC_DRAW_SNAP_A)
+	  		  {
+            delta[i] = delta[i] * mouse + m_fTrack[i];
+			  	  result = ldiv ((long)delta[i], m_nAngleSnap);
+  			  	delta[i] = (float)(result.quot * m_nAngleSnap);
+            m_fTrack[i] = (float)(result.rem);
+  	  		}
+	  	  	else
+		  	  {
+            delta[i] = delta[i] * mouse + m_fTrack[i];
+			  	  result = ldiv ((long)delta[i], 1);
+		  	  	delta[i] = (float)(result.quot);
+            m_fTrack[i] = (float)(result.rem);
+  		  	}
+
+				RotateSelectedObjects (delta[0], delta[1], delta[2]);
+
+        m_nDownX = x;
+  			m_nDownY = y;
+      }
+      else
+      {
+
 			// TODO: rewrite
 
 			float mouse = 360.0f/(21-m_nMouse);
@@ -7378,6 +7535,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				else
 					RotateSelectedObjects (0, 0, delta[2]);
 			}
+      }
 
 			SystemUpdateFocus(NULL, 0);
 			UpdateAllViews();

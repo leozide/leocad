@@ -48,7 +48,7 @@ class Matrix
 	void RotateCenter(float angle, float x, float y, float z, float px, float py, float pz);
 	bool FromInverse(double* src);
 	void CreatePerspective (float fovy, float aspect, float nearval, float farval);
-	void CreateLookat (float eye[3], float target[3], float up[3]);
+  void CreateLookat (const float *eye, const float *target, const float *up);
 
  public:
   float m[16];

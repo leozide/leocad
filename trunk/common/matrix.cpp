@@ -764,7 +764,7 @@ void Matrix::CreatePerspective (float fovy, float aspect, float nearval, float f
 #undef M
 }
 
-void Matrix::CreateLookat (float eye[3], float target[3], float up[3])
+void Matrix::CreateLookat (const float *eye, const float *target, const float *up)
 {
   float x[3], y[3], z[3];
   float mag;

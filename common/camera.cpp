@@ -36,73 +36,6 @@ static LC_CAMERA_KEY* AddNode (LC_CAMERA_KEY *node, unsigned short nTime, unsign
   return newnode;
 }
 
-static bool invert(double src[16], double inverse[16])
-{
-  double t;
-  int i, j, k, swap;
-  double tmp[4][4];
-
-  for (i = 0; i < 16; i++)
-    inverse[i] = 0.0;
-  inverse[0] = inverse[5] = inverse[10] = inverse[15] = 1.0;
-
-  for (i = 0; i < 4; i++)
-    for (j = 0; j < 4; j++)
-      tmp[i][j] = src[i*4+j];
-
-  for (i = 0; i < 4; i++) 
-  {
-    // look for largest element in column.
-    swap = i;
-    for (j = i + 1; j < 4; j++) 
-      if (fabs(tmp[j][i]) > fabs(tmp[i][i])) 
-	swap = j;
-
-    if (swap != i) 
-    {
-      // swap rows.
-      for (k = 0; k < 4; k++)
-      {
-	t = tmp[i][k];
-	tmp[i][k] = tmp[swap][k];
-	tmp[swap][k] = t;
-
-	t = inverse[i*4+k];
-	inverse[i*4+k] = inverse[swap*4+k];
-	inverse[swap*4+k] = t;
-      }
-    }
-
-    if (tmp[i][i] == 0) 
-    {
-      // The matrix is singular, which shouldn't happen.
-      return false;
-    }
-
-    t = tmp[i][i];
-    for (k = 0; k < 4; k++) 
-    {
-      tmp[i][k] /= t;
-      inverse[i*4+k] /= t;
-    }
-
-    for (j = 0; j < 4; j++) 
-    {
-      if (j != i) 
-      {
-	t = tmp[j][i];
-	for (k = 0; k < 4; k++) 
-	{
-	  tmp[j][k] -= tmp[i][k]*t;
-	  inverse[j*4+k] -= inverse[i*4+k]*t;
-	}
-      }
-    }
-  }
-
-  return true;
-}
-
 // =============================================================================
 // CameraTarget class
 
@@ -317,6 +250,8 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
 
 Camera::~Camera()
 {
+  if (m_nList != 0)
+    glDeleteLists (m_nList, 1);
   RemoveKeys ();
   delete m_pTarget;
 }
@@ -730,42 +665,31 @@ void Camera::CalculatePosition (unsigned short nTime, bool bAnimation, float eye
   upvec.ToFloat(up);
 }
 
-void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
+void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)
 {
   CalculatePosition(nTime, bAnimation, m_fEye, m_fTarget, m_fUp);
 
-  float len;
-  Vector upvec(m_fUp), sidevec;
-  Vector frontvec(m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
-  len = frontvec.Length();
-  sidevec.Cross(frontvec, upvec);
-  sidevec.Normalize();
-  upvec.Normalize();
-  frontvec.Normalize();
+  Vector frontvec (m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
+  float len = frontvec.Length();
 
-  double m[16], inverse[16];
-#define M(row,col)  m[col*4+row]
-  M(0,0) = sidevec.X();  M(0,1) = sidevec.Y();  M(0,2) = sidevec.Z();  M(0,3) = 0.0;
-  M(1,0) = upvec.X();    M(1,1) = upvec.Y();    M(1,2) = upvec.Z();    M(1,3) = 0.0;
-  M(2,0) = frontvec.X(); M(2,1) = frontvec.Y(); M(2,2) = frontvec.Z(); M(2,3) = 0.0;
-  M(3,0) = 0.0;          M(3,1) = 0.0;          M(3,2) = 0.0;          M(3,3) = 1.0;
-#undef M
-  invert(m, inverse);
+  Matrix mat;
+  mat.CreateLookat (m_fEye, m_fTarget, m_fUp);
+  mat.Invert ();
 
-  Matrix mat(inverse);
-  mat.SetTranslation(m_fEye[0], m_fEye[1], m_fEye[2]);
+  mat.SetTranslation (m_fEye[0], m_fEye[1], m_fEye[2]);
   BoundingBoxCalculate (&mat);
-  mat.SetTranslation(m_fTarget[0], m_fTarget[1], m_fTarget[2]);
+  mat.SetTranslation (m_fTarget[0], m_fTarget[1], m_fTarget[2]);
   m_pTarget->BoundingBoxCalculate (&mat);
+  mat.SetTranslation (0, 0, 0);
 
   if (m_nList == 0)
     m_nList = glGenLists(1);
 
   glNewList(m_nList, GL_COMPILE);
-		
+
   glPushMatrix();
   glTranslatef(m_fEye[0], m_fEye[1], m_fEye[2]);
-  glMultMatrixd(inverse);
+  glMultMatrixf(mat.m);
 
   glEnableClientState(GL_VERTEX_ARRAY);
   float verts[34][3] = {
@@ -781,11 +705,11 @@ void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
     { -0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f, -0.3f },
     { -0.3f, -0.3f,  0.3f }, { -0.3f, -0.3f, -0.3f },
     {  0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f, -0.3f },
-    { -0.3f, -0.3f,  0.6f }, { -0.3f,  0.3f,  0.6f },
-    {  0.0f,  0.0f,  0.3f }, { -0.3f, -0.3f,  0.6f },
-    {  0.3f, -0.3f,  0.6f }, {  0.0f,  0.0f,  0.3f },
-    {  0.3f,  0.3f,  0.6f }, {  0.3f, -0.3f,  0.6f },
-    {  0.3f,  0.3f,  0.6f }, { -0.3f,  0.3f,  0.6f } };
+    { -0.3f, -0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f },
+    {  0.0f,  0.0f, -0.3f }, { -0.3f, -0.3f, -0.6f },
+    {  0.3f, -0.3f, -0.6f }, {  0.0f,  0.0f, -0.3f },
+    {  0.3f,  0.3f, -0.6f }, {  0.3f, -0.3f, -0.6f },
+    {  0.3f,  0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f } };
   glVertexPointer (3, GL_FLOAT, 0, verts);
   glDrawArrays(GL_LINES, 0, 24);
   glDrawArrays(GL_LINE_STRIP, 24, 10);
@@ -795,7 +719,7 @@ void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 //	glVertex3f(0,0,len);
 //	glEnd();
 
-  glTranslatef(0, 0, len);
+  glTranslatef(0, 0, -len);
 
   glEndList();
 
@@ -861,30 +785,19 @@ void Camera::Render(float fLineWidth)
 
   if (IsSelected())
   {
-    double projection[16], modelview[16], inverse[16];
-
-    float len;
+    Matrix projection, modelview;
     Vector frontvec(m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
-    len = frontvec.Length();
+    float len = frontvec.Length();
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    gluPerspective(m_fovy, 1.33f, 0.01, len);
-    glGetDoublev(GL_PROJECTION_MATRIX, projection);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    gluLookAt(m_fEye[0], m_fEye[1], m_fEye[2], m_fTarget[0], m_fTarget[1], m_fTarget[2], m_fUp[0], m_fUp[1], m_fUp[2]);
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-    glPopMatrix();
+    glPushMatrix ();
 
-    glPushMatrix();
-    invert(modelview, inverse);
-    glMultMatrixd(inverse);
-    invert(projection, inverse);
-    glMultMatrixd(inverse);
+    modelview.CreateLookat (m_fEye, m_fTarget, m_fUp);
+    modelview.Invert ();
+    glMultMatrixf (modelview.m);
+
+    projection.CreatePerspective (m_fovy, 1.33f, 0.01, len);
+    projection.Invert ();
+    glMultMatrixf (projection.m);
 
     // draw the viewing frustum
     glBegin(GL_LINE_LOOP);

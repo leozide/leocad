@@ -125,6 +125,19 @@ typedef struct
 	unsigned short numentries;
 } CONNECTION_TYPE;
 
+// Minifig Wizard information
+
+typedef	enum {
+  MF_HAT, MF_HEAD, MF_TORSO, MF_NECK, MF_ARML, MF_ARMR, 
+  MF_HAND, MF_TOOL, MF_HIPS, MF_LEGL, MF_LEGR, MF_SHOE
+} MFW_TYPES;
+
+typedef struct {
+  char name[9];
+  char description[32];
+  int type;
+} MFW_PIECEINFO;
+
 
 // Select by Name dialog data
 

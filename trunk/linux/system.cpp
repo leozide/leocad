@@ -548,6 +548,7 @@ bool SystemDoDialog(int mode, void* param)
     } break;
 
     case LC_DLG_MINIFIG: {
+      return minifigdlg_execute(param) == LC_OK;
     } break;
 
     case LC_DLG_PROPERTIES: {

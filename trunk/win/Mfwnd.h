@@ -6,17 +6,6 @@
 
 #include "system.h"
 
-#define MFW_PIECES 76
-
-typedef	enum { MF_HAT, MF_HEAD, MF_TORSO, MF_NECK, MF_ARML, MF_ARMR, 
-	MF_HAND, MF_TOOL, MF_HIPS, MF_LEGL, MF_LEGR, MF_SHOE } MFTYPES;
-
-typedef struct {
-	char name[9];
-	char description[32];
-	int type;
-} MFPARTINFO;
-
 /////////////////////////////////////////////////////////////////////////////
 // CMinifigWnd window
 
@@ -25,7 +14,6 @@ class CMinifigWnd : public CWnd
 // Construction
 public:
 	CMinifigWnd();
-	static MFPARTINFO partinfo[];
 
 // Attributes
 protected:

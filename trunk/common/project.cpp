@@ -24,6 +24,7 @@
 #include "project.h"
 #include "image.h"
 #include "system.h"
+#include "globals.h"
 
 typedef struct
 {
@@ -4414,11 +4415,53 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_MINIFIG:
 		{
 			LC_MINIFIGDLG_OPTS opts;
+	 		const unsigned char colors[15] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
+			const float pos[15][3] = { {0,0,3.84f},{0,0,3.84f},{0,0,2.88f},{0,0,2.96f},{0,0,2.56f},{0,0,2.56f},{0.9f,-0.62f,1.76f},
+		{-0.9f,-0.62f,1.76f},{0.92f,-0.62f,1.76f},{-0.92f,-0.62f,1.76f},{0,0,1.6f},{0,0,1.12f},{0,0,1.12f},{0.42f,0,0},{-0.42f,0,0} };
+			int i;
+
+			for (i = 0; i < 15; i++)
+			{
+			    opts.info[i] = NULL;
+			    opts.colors[i] = colors[i];
+			    opts.pos[i][0] = pos[i][0];
+			    opts.pos[i][1] = pos[i][1];
+			    opts.pos[i][2] = pos[i][2];
+			    opts.rot[i][0] = 0;
+			    opts.rot[i][1] = 0;
+			    opts.rot[i][2] = 0;
+			}
+
+			for (i = 0; i < 13; i++)
+			{
+			    if (i == 3 || i == 7 || i == 8 || i == 9)
+			      continue;
+
+			    PieceInfo* pInfo = FindPieceInfo(mfwpieceinfo[i].name);
+			    if (pInfo == NULL)
+			      continue;
+
+			    if (i == 6)
+			    {
+				opts.info[6] = pInfo;
+				opts.info[7] = pInfo;
+				pInfo->AddRef();
+				pInfo->AddRef();
+				opts.rot[6][0] = 45;
+				opts.rot[6][2] = 90;
+				opts.rot[7][0] = 45;
+				opts.rot[7][2] = 90;
+			    }
+			    else
+			    {
+				opts.info[i] = pInfo;
+				pInfo->AddRef();
+			    }
+			}
 
 			if (SystemDoDialog(LC_DLG_MINIFIG, &opts))
 			{
 				SelectAndFocusNone(false);
-				int i;
 
 				for (i = 0; i < 15; i++)
 				{

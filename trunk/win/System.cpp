@@ -142,7 +142,7 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 
 				float fv;
 				char id[32];
-				File file(false);
+				FileDisk file;
 				file.Open(filename, "rb");
 				file.Read(id, 32);
 				sscanf(strchr(id, ' '), "%f", &fv);
@@ -1590,7 +1590,7 @@ File* SystemImportClipboard()
 		HANDLE hData = ::GetClipboardData(ClipboardFormat);
 		if (hData != NULL)
 		{
-			clip = new File(true);
+			clip = new FileMem();
 
 			BYTE* lpBuffer = (BYTE*)::GlobalLock(hData);
 			long nBufferSize = ::GlobalSize(hData);

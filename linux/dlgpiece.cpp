@@ -34,6 +34,7 @@ typedef struct
   GtkWidget *colors[LC_MFW_NUMITEMS];
   GtkWidget *angles[LC_MFW_NUMITEMS];
   GtkWidget *preview;
+  GtkWidget *combo;
 } LC_MINIFIGDLG_STRUCT;
 
 static gint minifigdlg_redraw (GtkWidget *widget, GdkEventExpose *event)
@@ -164,9 +165,91 @@ static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
   gtk_widget_draw (info->preview, NULL);
 }
 
+static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)
+{
+  char **names;
+  int count;
+  GList *lst = NULL;
+
+  s->opts->GetMinifigNames (&names, &count);
+  for (int i = 0; i < count; i++)
+    lst = g_list_append (lst, names[i]);
+
+  if (lst == NULL)
+    lst = g_list_append (lst, (void*)"");
+
+  gtk_combo_set_popdown_strings (GTK_COMBO (s->combo), lst);
+  g_list_free (lst);
+}
+
+static void minifigdlg_updateselection (LC_MINIFIGDLG_STRUCT* s)
+{
+  char *names[LC_MFW_NUMITEMS];
+  s->opts->GetSelections (names);
+
+  for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+  {
+    GtkList *list = GTK_LIST (GTK_COMBO (s->pieces[i])->list);
+    GtkWidget *child;
+    GList *children;
+    gchar* str;
+    int index = 0;
+
+    children = list->children;
+    while (children)
+    {
+      child = (GtkWidget*)children->data;
+      children = children->next;
+
+      gtk_label_get (GTK_LABEL (GTK_BIN (child)->child), &str);
+      if (strcmp (str, names[i]) == 0)
+      {
+	gtk_signal_handler_block_by_func (GTK_OBJECT (GTK_COMBO (s->pieces[i])->entry),
+					  GTK_SIGNAL_FUNC (minifigdlg_piece_changed), NULL);
+	gtk_entry_set_text (GTK_ENTRY (GTK_COMBO (s->pieces[i])->entry), names[i]);
+	gtk_list_select_item (GTK_LIST (GTK_COMBO (s->pieces[i])->list), index);
+	gtk_signal_handler_unblock_by_func (GTK_OBJECT (GTK_COMBO (s->pieces[i])->entry),
+					    GTK_SIGNAL_FUNC (minifigdlg_piece_changed), NULL);
+      }
+      index++;
+    }
+  }
+}
+
+static void minifigdlg_load (GtkWidget *widget, gpointer data)
+{
+  LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
+  if (s->opts->LoadMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry))) == false)
+    return;
+
+  for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+  {
+    set_button_pixmap2 (s->colors[i], FlatColorArray[s->opts->m_Colors[i]]);
+    if (s->angles[i] != NULL)
+      gtk_spin_button_set_value (GTK_SPIN_BUTTON (s->angles[i]), s->opts->m_Angles[i]);
+  }
+  minifigdlg_updateselection (s);
+  gtk_widget_draw (s->preview, NULL);
+}
+
+static void minifigdlg_save (GtkWidget *widget, gpointer data)
+{
+  LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
+  s->opts->SaveMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry)));
+  minifigdlg_updatecombo (s);
+}
+
+static void minifigdlg_delete (GtkWidget *widget, gpointer data)
+{
+  LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
+  s->opts->DeleteMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry)));
+  minifigdlg_updatecombo (s);
+}
+
 static void adj_changed (GtkAdjustment *adj, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* info = (LC_MINIFIGDLG_STRUCT*)data;
+  float val;
   int i;
 
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
@@ -177,7 +260,12 @@ static void adj_changed (GtkAdjustment *adj, gpointer data)
   if (i == LC_MFW_NUMITEMS)
     return;
 
-  info->opts->ChangeAngle (i, gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (info->angles[i])));
+  val = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (info->angles[i]));
+
+  if (val == info->opts->m_Angles[i])
+    return;
+
+  info->opts->ChangeAngle (i, val);
 
   if (info->preview != NULL)
     gtk_widget_draw (info->preview, NULL);
@@ -213,7 +301,10 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int idx, int num,
                     (GtkAttachOptions) GTK_FILL, (GtkAttachOptions) GTK_EXPAND, 0, 0);
 
   if ((num == LC_MFW_TORSO) || (num == LC_MFW_HIPS))
+  {
+    info->angles[num] = NULL;
     return;
+  }
 
   adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
   gtk_signal_connect (adj, "value_changed", GTK_SIGNAL_FUNC (adj_changed), info);
@@ -231,9 +322,8 @@ int minifigdlg_execute(void* param)
 {
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   LC_MINIFIGDLG_STRUCT s;
-  GtkWidget *dlg;
+  GtkWidget *dlg, *button;
   GtkWidget *vbox, *hbox, *frame, *table;
-  GtkWidget *button;
   int i;
 
   memset (&s, 0, sizeof (s));
@@ -279,9 +369,9 @@ int minifigdlg_execute(void* param)
   gtk_widget_set_events (GTK_WIDGET (s.preview), GDK_EXPOSURE_MASK);
 
   gtk_signal_connect (GTK_OBJECT (s.preview), "expose_event", 
-      GTK_SIGNAL_FUNC (minifigdlg_redraw), NULL);
+		      GTK_SIGNAL_FUNC (minifigdlg_redraw), NULL);
   gtk_signal_connect (GTK_OBJECT (s.preview), "configure_event",
-      GTK_SIGNAL_FUNC (minifigdlg_resize), NULL);
+		      GTK_SIGNAL_FUNC (minifigdlg_resize), NULL);
 
   frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);
@@ -311,6 +401,26 @@ int minifigdlg_execute(void* param)
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+  s.combo = gtk_combo_new ();
+  gtk_widget_show (s.combo);
+  gtk_box_pack_start (GTK_BOX (hbox), s.combo, FALSE, TRUE, 0);
+  gtk_signal_connect (GTK_OBJECT (GTK_COMBO (s.combo)->entry), "changed",
+		      GTK_SIGNAL_FUNC (minifigdlg_load), &s);
+
+  button = gtk_button_new_with_label ("Save");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+  		      GTK_SIGNAL_FUNC (minifigdlg_save), &s);
+  gtk_widget_show (button);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 70, 25);
+
+  button = gtk_button_new_with_label ("Delete");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+  		      GTK_SIGNAL_FUNC (minifigdlg_delete), &s);
+  gtk_widget_show (button);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 70, 25);
 
   button = gtk_button_new_with_label ("OK");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -351,9 +461,8 @@ int minifigdlg_execute(void* param)
     free (list);
   }
 
-  gtk_list_select_item (GTK_LIST (GTK_COMBO (s.pieces[LC_MFW_HAT])->list), 7);
-  gtk_list_select_item (GTK_LIST (GTK_COMBO (s.pieces[LC_MFW_HEAD])->list), 4);
-  gtk_list_select_item (GTK_LIST (GTK_COMBO (s.pieces[LC_MFW_TORSO])->list), 22);
+  minifigdlg_updatecombo (&s);
+  minifigdlg_updateselection (&s);
 
   return dlg_domodal(dlg, LC_CANCEL);
 }

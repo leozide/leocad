@@ -1,5 +1,32 @@
 This is a changelog for developers only, not for ordinary users.
 
+01/10/2000
+	- Added an option to save custom minifigs to the Minifig Wizard.
+
+30/09/2000
+	- Enabled the "Make Default" button of the preferences dialog (Linux).
+
+24/09/2000
+	- Finished adding the new minifig rotation options.
+
+20/09/2000
+	- Fixed the numeric keypad under Linux, thanks to Renaud Breard.
+	- Updated the Array dialog.
+
+18/09/2000
+	- Added new menu shortcuts.
+	- Fixed endianess bugs when loading piece information.
+	- Fixed piece preview mirrored image.
+	- Fixed some warning messages in FreeBSD.
+	- Added endian test to auto-configuration.
+	- Fixed gtk-config problem under FreeBSD.
+
+16/09/2000
+	- Added man page, thanks to Patrick Mahoney.
+	- Moved gif and jpg functions from image.cpp to separate files.
+	- Modified the Makefile to automatically check for libjpeg, zlib and
+          libpng. It also creates a config.h file with the options.
+
 15/09/2000
 	- Fixed problem with "focus follow mouse" in X, thanks to Renaud Breard.
 

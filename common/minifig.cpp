@@ -10,108 +10,108 @@
 #include "pieceinf.h"
 #include "globals.h"
 #include "project.h"
+#include "system.h"
 #include "matrix.h"
 
 // =============================================================================
 // Static variables
 
 static LC_MFW_PIECEINFO mfw_pieceinfo[] = {
-  { "3624", "Police Hat", LC_MFW_HAT },
-  { "3626BP01", "Smiley Face", LC_MFW_HEAD },
-  { "973", "Plain Torso", LC_MFW_TORSO },
-  { "3838", "Airtanks", LC_MFW_NECK },
-  { "976", "Left Arm", LC_MFW_LEFT_ARM },
-  { "975", "Right Arm", LC_MFW_RIGHT_ARM },
-  { "977", "Hand", LC_MFW_LEFT_HAND },
-  { "977", "Hand", LC_MFW_LEFT_HAND },
-  { "3899", "Cup", LC_MFW_LEFT_TOOL },
-  { "4528", "Frypan", LC_MFW_LEFT_TOOL },
-  { "970", "Hips", LC_MFW_HIPS },
-  { "972", "Left Leg", LC_MFW_LEFT_LEG }, 
-  { "971", "Right Leg", LC_MFW_RIGHT_LEG },
-  { "2599", "Flipper", LC_MFW_LEFT_SHOE },
-  { "6120", "Ski", LC_MFW_LEFT_SHOE },
-  { "4485", "Baseball Cap", LC_MFW_HAT },
-  { "3626B", "Plain Face", LC_MFW_HEAD },
-  { "3626BP02", "Woman Face", LC_MFW_HEAD },
-  { "973P11", "Dungarees", LC_MFW_TORSO },
-  { "973P47", "Castle Red/Gray Symbol", LC_MFW_TORSO }, 
-  { "973P51", "Blacktron II", LC_MFW_TORSO },
-  { "973P01", "Vertical Strips Red/Blue", LC_MFW_TORSO },
-  { "973P02", "Vertical Strips Blue/Red", LC_MFW_TORSO }, 
-  { "973P60", "Shell Logo", LC_MFW_TORSO },
-  { "973P61", "Gold Ice Planet Pattern", LC_MFW_TORSO }, 
-  { "4349", "Loudhailer", LC_MFW_LEFT_TOOL },
-  { "3962", "Radio", LC_MFW_LEFT_TOOL },
-  { "4529", "Saucepan", LC_MFW_LEFT_TOOL },
-  { "3959", "Space Gun", LC_MFW_LEFT_TOOL },
-  { "4360", "Space Laser Gun", LC_MFW_LEFT_TOOL },
-  { "4479", "Metal Detector", LC_MFW_LEFT_TOOL },
-  { "6246A", "Screwdriver", LC_MFW_LEFT_TOOL },
-  { "6246B", "Hammer", LC_MFW_LEFT_TOOL },
-  { "6246D", "Box Wrench", LC_MFW_LEFT_TOOL },
-  { "6246E", "Open End Wrench", LC_MFW_LEFT_TOOL },
-  { "3896", "Castle Helmet with Chin-Guard", LC_MFW_HAT },
-  { "3844", "Castle Helmet with Neck Protect", LC_MFW_HAT },
-  { "3833", "Construction Helmet", LC_MFW_HAT }, 
-  { "82359", "Skeleton Skull", LC_MFW_HEAD },
-  { "973P14", "'S' Logo", LC_MFW_TORSO },
-  { "973P16", "Airplane Logo", LC_MFW_TORSO }, 
-  { "973P52", "Blacktron I Pattern", LC_MFW_TORSO },
-  { "973P15", "Horizontal Stripes", LC_MFW_TORSO },
-  { "973P68", "Mtron Logo", LC_MFW_TORSO }, 
-  { "973P17", "Red V-Neck and Buttons", LC_MFW_TORSO },
-  { "973P63", "Robot Pattern", LC_MFW_TORSO },
-  { "973P18", "Suit and Tie ", LC_MFW_TORSO }, 
-  { "4736", "Jet-Pack with Stud On Front", LC_MFW_NECK },
-  { "4522", "Mallet", LC_MFW_LEFT_TOOL },
-  { "6246C", "Power Drill", LC_MFW_LEFT_TOOL },
-  { "4006", "Spanner/Screwdriver", LC_MFW_LEFT_TOOL },
-  { "194", "Hose Nozzle", LC_MFW_LEFT_TOOL },
-  { "2446", "Helmet", LC_MFW_HAT },
-  { "3840", "Vest", LC_MFW_NECK },
-  { "970P63", "Hips with Robot Pattern", LC_MFW_HIPS },
-  { "972P63", "Left Leg with Robot Pattern", LC_MFW_LEFT_LEG },
-  { "971P63", "Right Leg with Robot Pattern", LC_MFW_RIGHT_LEG },
-  { "2524", "Backpack Non-Opening", LC_MFW_NECK },
-  { "4497", "Spear", LC_MFW_LEFT_TOOL },
-  { "37", "Knife", LC_MFW_LEFT_TOOL },
-  { "38", "Harpoon", LC_MFW_LEFT_TOOL },
-  { "3626BP03", "Pointed Moustache", LC_MFW_HEAD },
-  { "3626BP04", "Sunglasses", LC_MFW_HEAD },
-  { "3626BP05", "Grin and Eyebrows", LC_MFW_HEAD }, 
-  { "973P19", "Train Chevron", LC_MFW_TORSO },
-  { "973P31", "Pirate Strips (Red/Cream)", LC_MFW_TORSO },
-  { "973P32", "Pirate Strips (Blue/Cream)", LC_MFW_TORSO },
-  { "973P33", "Pirate Strips (Red/Black)", LC_MFW_TORSO },
-  { "973P41", "Castle Chainmail", LC_MFW_TORSO },
-  { "973P62", "Silver Ice Planet", LC_MFW_TORSO },
-  { "6131", "Wizard Hat", LC_MFW_HAT },
-  { "973P20", "Waiter", LC_MFW_TORSO },
-  { "973P49", "Forestman Blue Collar", LC_MFW_TORSO },
-  { "973P48", "Forestman Maroon Collar", LC_MFW_TORSO },
-  { "973P50", "Forestman Black Collar", LC_MFW_TORSO },
-  { "3841", "Pickaxe", LC_MFW_LEFT_TOOL },
-  { "973P21", "Five Button Fire Fighter", LC_MFW_TORSO },
-  { "973P22", "Red Shirt and Suit", LC_MFW_TORSO },
-  { "973P34", "Open Jacket over Striped Vest", LC_MFW_TORSO },
-  { "973P46", "Forestman and Purse", LC_MFW_TORSO },
-  { "973P101", "SW Rebel Pilot", LC_MFW_TORSO },
-  { "4498", "Arrow Quiver", LC_MFW_NECK },
-  { "4499", "Bow with Arrow", LC_MFW_LEFT_TOOL },
-  { "3852", "Hairbrush", LC_MFW_LEFT_TOOL },
-  { "30152", "Magnifying Glass", LC_MFW_LEFT_TOOL },
-  { "973P23", "'S' Logo Yellow / Blue Pattern", LC_MFW_TORSO },
-  { "973P42", "Castle Crossed Pikes Pattern", LC_MFW_TORSO },
-  { "973P65", "Futuron Pattern", LC_MFW_TORSO },
-  { "973P25", "Red Cross & Stethoscope Pattern", LC_MFW_TORSO },
-  { "973P24", "Red Cross Pattern", LC_MFW_TORSO },
-  { "973P64", "Unitron Pattern", LC_MFW_TORSO },
-  { "4524", "Cape", LC_MFW_NECK },
-  { "2570", "Crossbow", LC_MFW_LEFT_TOOL },
-  { "3834", "Fire Helmet", LC_MFW_HAT },
-  { "2614", "Fishing Rod", LC_MFW_LEFT_TOOL }
-//	{ "770", "Shield Ovoid", LC_MFW_LEFT_TOOL }, 
+  { "2446", "Helmet", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3624", "Police Hat", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3833", "Construction Helmet", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3834", "Fire Helmet", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3844", "Castle Helmet with Neck Protect", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3896", "Castle Helmet with Chin-Guard", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "4485", "Baseball Cap", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "6131", "Wizard Hat", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3626B", "Plain Face", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3626BP01", "Smiley Face", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3626BP02", "Woman Face", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3626BP03", "Pointed Moustache", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3626BP04", "Sunglasses", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3626BP05", "Grin and Eyebrows", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f }, 
+  { "82359", "Skeleton Skull", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "973", "Plain Torso", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P01", "Vertical Strips Red/Blue", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P02", "Vertical Strips Blue/Red", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
+  { "973P11", "Dungarees", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P14", "'S' Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P15", "Horizontal Stripes", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P16", "Airplane Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P17", "Red V-Neck and Buttons", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P18", "Suit and Tie ", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P19", "Train Chevron", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P20", "Waiter", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P21", "Five Button Fire Fighter", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P22", "Red Shirt and Suit", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P23", "'S' Logo Yellow / Blue Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P24", "Red Cross Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P25", "Red Cross & Stethoscope Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P31", "Pirate Strips (Red/Cream)", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P32", "Pirate Strips (Blue/Cream)", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P33", "Pirate Strips (Red/Black)", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P34", "Open Jacket over Striped Vest", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P41", "Castle Chainmail", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P42", "Castle Crossed Pikes Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P46", "Forestman and Purse", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P47", "Castle Red/Gray Symbol", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
+  { "973P48", "Forestman Maroon Collar", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P49", "Forestman Blue Collar", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P50", "Forestman Black Collar", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P51", "Blacktron II", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P52", "Blacktron I Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P60", "Shell Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P61", "Gold Ice Planet Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P62", "Silver Ice Planet", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P63", "Robot Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P64", "Unitron Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P65", "Futuron Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P68", "Mtron Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
+  { "973P101", "SW Rebel Pilot", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "2524", "Backpack Non-Opening", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
+  { "3838", "Airtanks", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
+  { "3840", "Vest", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
+  { "4498", "Arrow Quiver", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 180.0f },
+  { "4524", "Cape", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
+  { "4736", "Jet-Pack with Stud On Front", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
+  { "976", "Left Arm", LC_MFW_LEFT_ARM, 0.0f, 0.0f, 2.56f, 0.0f, 0.0f, 0.0f },
+  { "975", "Right Arm", LC_MFW_RIGHT_ARM, 0.0f, 0.0f, 2.56f, 0.0f, 0.0f, 0.0f },
+  { "977", "Hand", LC_MFW_LEFT_HAND, 0.9f, -0.62f, 1.76f, 45.0f, 0.0f, 90.0f },
+  { "37", "Knife", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.58f, 45.0f, 0.0f, 0.0f },
+  { "38", "Harpoon", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.0f, 45.0f, 0.0f, 0.0f },
+  { "194", "Hose Nozzle", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.22f, 45.0f, 0.0f, 180.0f },
+  { "2570", "Crossbow", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.82f, 45.0f, 0.0f, 0.0f },
+  { "2614", "Fishing Rod", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.74f, 45.0f, 0.0f, 0.0f },
+  { "3841", "Pickaxe", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.24f, 45.0f, 0.0f, 180.0f },
+  { "3852", "Hairbrush", LC_MFW_LEFT_TOOL, 0.82f, -0.64f, 1.98f, 45.0f, 0.0f, -90.0f },
+  { "3899", "Cup", LC_MFW_LEFT_TOOL, -0.06f, -0.62f, 2.16f, 45.0f, 0.0f, 0.0f },
+  { "3959", "Space Gun", LC_MFW_LEFT_TOOL, 0.74f, -0.62f, 2.1f, 45.0f, 0.0f, 0.0f },
+  { "3962", "Radio", LC_MFW_LEFT_TOOL, 0.72f, -0.66f, 1.62f, 45.0f, 0.0f, 90.0f },
+  { "4006", "Spanner/Screwdriver", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 180.0f },
+  { "4349", "Loudhailer", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.28f, 45.0f, 0.0f, 0.0f },
+  { "4360", "Space Laser Gun", LC_MFW_LEFT_TOOL, 0.96f, -0.62f, 2.64f, 45.0f, 0.0f, -90.0f },
+  { "4479", "Metal Detector", LC_MFW_LEFT_TOOL, 0.74f, -0.64f, 2.64f, 45.0f, 0.0f, 90.0f },
+  { "4497", "Spear", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 3.48f, 45.0f, 0.0f, 90.0f },
+  { "4499", "Bow with Arrow", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.52f, 45.0f, 0.0f, -10.0f },
+  { "4522", "Mallet", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.72f, 45.0f, 0.0f, 0.0f },
+  { "4528", "Frypan", LC_MFW_LEFT_TOOL, 0.90f, -0.62f, 2.64f, -45.0f, 90.0f, 90.0f },
+  { "4529", "Saucepan", LC_MFW_LEFT_TOOL, 0.96f, -0.62f, 2.56f, -45.0f, 90.0f, 90.0f },
+  { "6246A", "Screwdriver", LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
+  { "6246B", "Hammer", LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
+  { "6246D", "Box Wrench", LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
+  { "6246E", "Open End Wrench", LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
+  { "6246C", "Power Drill", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.96f, 45.0f, 0.0f, 0.0f },
+  { "30152", "Magnifying Glass", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 3.76f, 45.0f, 0.0f, 0.0f },
+  { "970", "Hips", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
+  { "970P63", "Hips with Robot Pattern", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
+  { "972", "Left Leg", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f }, 
+  { "972P63", "Left Leg with Robot Pattern", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
+  { "971", "Right Leg", LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
+  { "971P63", "Right Leg with Robot Pattern", LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
+  { "2599", "Flipper", LC_MFW_LEFT_SHOE, 0.42f, -0.12f, 0.0f, 0.0f, 0.0f, 0.0f },
+  { "6120", "Ski", LC_MFW_LEFT_SHOE, 0.42f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
+//	{ "770", "Shield Ovoid", LC_MFW_LEFT_TOOL },
 //	2447      Minifig Helmet Visor
 };
 
@@ -122,47 +122,105 @@ static int mfw_pieces = sizeof (mfw_pieceinfo)/sizeof (LC_MFW_PIECEINFO);
 
 MinifigWizard::MinifigWizard ()
 {
-  const unsigned char colors[15] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
-  const float pos[15][3] = { {0,0,3.84f}, {0,0,3.84f}, {0,0,2.88f}, {0,0,2.96f}, {0,0,2.56f},
-			     {0,0,2.56f}, {0.9f,-0.62f,1.76f}, {-0.9f,-0.62f,1.76f}, {0.92f,-0.62f,1.76f},
-			     {-0.92f,-0.62f,1.76f}, {0,0,1.6f}, {0,0,1.12f}, {0,0,1.12f}, {0.42f,0,0},
-			     {-0.42f,0,0} };
+  const unsigned char colors[LC_MFW_NUMITEMS] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
+  const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "976", "975", "977", "977",
+					  "None", "None", "970", "972", "971", "None", "None" };
   int i;
 
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    m_Info[i] = NULL;
     m_Colors[i] = colors[i];
-    m_Pos[i][0] = pos[i][0];
-    m_Pos[i][1] = pos[i][1];
-    m_Pos[i][2] = pos[i][2];
-    m_Rot[i][0] = 0;
-    m_Rot[i][1] = 0;
-    m_Rot[i][2] = 0;
     m_Angles[i] = 0;
+
+    m_Info[i] = project->FindPieceInfo (pieces[i]);
+    if (m_Info[i] != NULL)
+      m_Info[i]->AddRef();
   }
 
-  m_Rot[6][0] = 45;
-  m_Rot[6][2] = 90;
-  m_Rot[7][0] = 45;
-  m_Rot[7][2] = 90;
+  m_MinifigCount = 0;
+  m_MinifigNames = NULL;
+  m_MinifigTemplates = NULL;
 
-  for (i = 0; i < 13; i++)
+  i = Sys_ProfileLoadInt ("MinifigWizard", "Version", 1);
+  if (i == 1)
   {
-    if (i == 3 || i == 8 || i == 9)
-      continue;
+    char *ptr, buf[32];
 
-    PieceInfo* pInfo = project->FindPieceInfo (mfw_pieceinfo[i].name);
-    if (pInfo == NULL)
-      continue;
+    m_MinifigCount = Sys_ProfileLoadInt ("MinifigWizard", "Count", 0);
+    m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
+    m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
 
-    m_Info[i] = pInfo;
-    pInfo->AddRef();
+    for (i = 0; i < m_MinifigCount; i++)
+    {
+      sprintf (buf, "Minifig%.2dName", i);
+      ptr = Sys_ProfileLoadString ("MinifigWizard", buf, buf);
+      m_MinifigNames[i] = (char*)malloc (strlen (ptr) + 1);
+      strcpy (m_MinifigNames[i], ptr);
+
+      m_MinifigTemplates[i] = (char*)malloc (768);
+      sprintf (buf, "Minifig%.2dColors", i);
+      ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
+      if (ptr[strlen (ptr) - 1] != ' ')
+	strcat (ptr, " ");
+      strcpy (m_MinifigTemplates[i], ptr);
+
+      sprintf (buf, "Minifig%.2dPieces", i);
+      ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
+      if (ptr[strlen (ptr) - 1] != ' ')
+	strcat (ptr, " ");
+      strcat (m_MinifigTemplates[i], ptr);
+
+      sprintf (buf, "Minifig%.2dAngles", i);
+      ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
+      strcat (m_MinifigTemplates[i], ptr);
+    }
   }
+  else
+    Sys_MessageBox ("Unknown Minifig Preferences.");
 }
 
 MinifigWizard::~MinifigWizard ()
 {
+  char *ptr, buf[32];
+  int i, j;
+
+  Sys_ProfileSaveInt ("MinifigWizard", "Version", 1);
+  Sys_ProfileSaveInt ("MinifigWizard", "Count", m_MinifigCount);
+
+  for (i = 0; i < m_MinifigCount; i++)
+  {
+    char *value;
+    ptr = m_MinifigTemplates[i];
+
+    sprintf (buf, "Minifig%.2dName", i);
+    Sys_ProfileSaveString ("MinifigWizard", buf, m_MinifigNames[i]);
+
+    value = ptr;
+    for (j = 0; j < LC_MFW_NUMITEMS; j++)
+      ptr = strchr (ptr, ' ') + 1;
+    *(--ptr) = '\0';
+
+    sprintf (buf, "Minifig%.2dColors", i);
+    Sys_ProfileSaveString ("MinifigWizard", buf, value);
+    ptr++;
+
+    value = ptr;
+    for (j = 0; j < LC_MFW_NUMITEMS; j++)
+      ptr = strchr (ptr, ' ') + 1;
+    *(--ptr) = '\0';
+
+    sprintf (buf, "Minifig%.2dPieces", i);
+    Sys_ProfileSaveString ("MinifigWizard", buf, value);
+    ptr++;
+
+    sprintf (buf, "Minifig%.2dAngles", i);
+    Sys_ProfileSaveString ("MinifigWizard", buf, ptr);
+
+    free (m_MinifigNames[i]);
+    free (m_MinifigTemplates[i]);
+  }
+  free (m_MinifigNames);
+  free (m_MinifigTemplates);
 }
 
 void MinifigWizard::Resize (int width, int height)
@@ -210,21 +268,73 @@ void MinifigWizard::Redraw ()
 
 void MinifigWizard::Calculate ()
 {
+  float pos[LC_MFW_NUMITEMS][3];
+  float rot[LC_MFW_NUMITEMS][3];
   Matrix mat, m2, m3;
 
+  // FIXME:
+  // Saucepan: tool rotate in wrong axis
+  // Frypan: tool rotate in wrong axis
+  // Cup: tool rotate not centered
+  // Metal Detector: tool rotate not centered
+  // Space Laser Gun: tool rotate not centered
+  // Hairbrush: tool rotate not centered
+
+  // Get the pieces in the right place
+  for (int type = 0; type < LC_MFW_NUMITEMS; type++)
+  {
+    PieceInfo* piece_info = m_Info[type];
+    const char *desc;
+    int j;
+
+    if (piece_info == NULL)
+      continue;
+
+    for (j = 0; j < mfw_pieces; j++)
+      if (strcmp (piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
+	break;
+
+    pos[type][0] = mfw_pieceinfo[j].x;
+    pos[type][1] = mfw_pieceinfo[j].y;
+    pos[type][2] = mfw_pieceinfo[j].z;
+    rot[type][0] = mfw_pieceinfo[j].rx;
+    rot[type][1] = mfw_pieceinfo[j].ry;
+    rot[type][2] = mfw_pieceinfo[j].rz;
+    desc = mfw_pieceinfo[j].description;
+
+    switch (type)
+    {
+    case LC_MFW_HAT:
+    case LC_MFW_HEAD:
+      if (m_Info[LC_MFW_NECK] != NULL)
+	pos[type][2] += 0.08f;
+      break;
+
+    case LC_MFW_RIGHT_HAND:
+    case LC_MFW_RIGHT_SHOE:
+      pos[type][0] = -pos[type][0];
+      break;
+
+    case LC_MFW_RIGHT_TOOL:
+      if (strcmp (piece_info->m_strName, "4499") == 0) // Bow with Arrow
+	rot[type][2] = -rot[type][2];
+      break;
+    }
+  }
+
   // hat
-  m_Position[LC_MFW_HAT][0] = m_Pos[LC_MFW_HAT][0];
-  m_Position[LC_MFW_HAT][1] = m_Pos[LC_MFW_HAT][1];
-  m_Position[LC_MFW_HAT][2] = m_Pos[LC_MFW_HAT][2];
+  m_Position[LC_MFW_HAT][0] = pos[LC_MFW_HAT][0];
+  m_Position[LC_MFW_HAT][1] = pos[LC_MFW_HAT][1];
+  m_Position[LC_MFW_HAT][2] = pos[LC_MFW_HAT][2];
   m_Rotation[LC_MFW_HAT][0] = 0.0f;
   m_Rotation[LC_MFW_HAT][1] = 0.0f;
   m_Rotation[LC_MFW_HAT][2] = -1.0f;
   m_Rotation[LC_MFW_HAT][3] = m_Angles[LC_MFW_HAT] + m_Angles[LC_MFW_HEAD];
 
   // head
-  m_Position[LC_MFW_HEAD][0] = m_Pos[LC_MFW_HEAD][0];
-  m_Position[LC_MFW_HEAD][1] = m_Pos[LC_MFW_HEAD][1];
-  m_Position[LC_MFW_HEAD][2] = m_Pos[LC_MFW_HEAD][2];
+  m_Position[LC_MFW_HEAD][0] = pos[LC_MFW_HEAD][0];
+  m_Position[LC_MFW_HEAD][1] = pos[LC_MFW_HEAD][1];
+  m_Position[LC_MFW_HEAD][2] = pos[LC_MFW_HEAD][2];
   m_Rotation[LC_MFW_HEAD][0] = 0.0f;
   m_Rotation[LC_MFW_HEAD][1] = 0.0f;
   m_Rotation[LC_MFW_HEAD][2] = -1.0f;
@@ -232,17 +342,17 @@ void MinifigWizard::Calculate ()
 
   // neck
   mat.LoadIdentity ();
-  mat.CreateOld (0,0,0,m_Rot[LC_MFW_NECK][0], m_Rot[LC_MFW_NECK][1], m_Rot[LC_MFW_NECK][2]);
+  mat.CreateOld (0,0,0,rot[LC_MFW_NECK][0], rot[LC_MFW_NECK][1], rot[LC_MFW_NECK][2]);
   mat.Rotate (m_Angles[LC_MFW_NECK], 0, 0, -1);
-  mat.SetTranslation (m_Pos[LC_MFW_NECK][0], m_Pos[LC_MFW_NECK][1],
-		      m_Pos[LC_MFW_NECK][2]);
+  mat.SetTranslation (pos[LC_MFW_NECK][0], pos[LC_MFW_NECK][1],
+		      pos[LC_MFW_NECK][2]);
   mat.ToAxisAngle (m_Rotation[LC_MFW_NECK]);
   mat.GetTranslation (m_Position[LC_MFW_NECK]);
 
   // torso
-  m_Position[LC_MFW_TORSO][0] = m_Pos[LC_MFW_TORSO][0];
-  m_Position[LC_MFW_TORSO][1] = m_Pos[LC_MFW_TORSO][1];
-  m_Position[LC_MFW_TORSO][2] = m_Pos[LC_MFW_TORSO][2];
+  m_Position[LC_MFW_TORSO][0] = pos[LC_MFW_TORSO][0];
+  m_Position[LC_MFW_TORSO][1] = pos[LC_MFW_TORSO][1];
+  m_Position[LC_MFW_TORSO][2] = pos[LC_MFW_TORSO][2];
   m_Rotation[LC_MFW_TORSO][0] = 0.0f;
   m_Rotation[LC_MFW_TORSO][1] = 0.0f;
   m_Rotation[LC_MFW_TORSO][2] = 1.0f;
@@ -251,15 +361,15 @@ void MinifigWizard::Calculate ()
   // left arm/hand/tool
   mat.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_LEFT_ARM], -1, 0, 0);
-  mat.SetTranslation (m_Pos[LC_MFW_LEFT_ARM][0], m_Pos[LC_MFW_LEFT_ARM][1],
-		      m_Pos[LC_MFW_LEFT_ARM][2]);
+  mat.SetTranslation (pos[LC_MFW_LEFT_ARM][0], pos[LC_MFW_LEFT_ARM][1],
+		      pos[LC_MFW_LEFT_ARM][2]);
   mat.ToAxisAngle (m_Rotation[LC_MFW_LEFT_ARM]);
   mat.GetTranslation (m_Position[LC_MFW_LEFT_ARM]);
 
-  mat.Translate (m_Pos[LC_MFW_LEFT_HAND][0]-m_Pos[LC_MFW_LEFT_ARM][0],
-		 m_Pos[LC_MFW_LEFT_HAND][1]-m_Pos[LC_MFW_LEFT_ARM][1],
-		 m_Pos[LC_MFW_LEFT_HAND][2]-m_Pos[LC_MFW_LEFT_ARM][2]);
-  m2.CreateOld (0,0,0,m_Rot[LC_MFW_LEFT_HAND][0],m_Rot[LC_MFW_LEFT_HAND][1],m_Rot[LC_MFW_LEFT_HAND][2]);
+  mat.Translate (pos[LC_MFW_LEFT_HAND][0]-pos[LC_MFW_LEFT_ARM][0],
+		 pos[LC_MFW_LEFT_HAND][1]-pos[LC_MFW_LEFT_ARM][1],
+		 pos[LC_MFW_LEFT_HAND][2]-pos[LC_MFW_LEFT_ARM][2]);
+  m2.CreateOld (0,0,0,rot[LC_MFW_LEFT_HAND][0],rot[LC_MFW_LEFT_HAND][1],rot[LC_MFW_LEFT_HAND][2]);
   m3.Multiply (mat, m2);
   m3.Translate (0,0,-0.16f);
   mat.LoadIdentity ();
@@ -269,12 +379,12 @@ void MinifigWizard::Calculate ()
   m2.ToAxisAngle (m_Rotation[LC_MFW_LEFT_HAND]);
   m2.GetTranslation (m_Position[LC_MFW_LEFT_HAND]);
 
-  m2.Translate (m_Pos[LC_MFW_LEFT_TOOL][0]-0.9f,
-		m_Pos[LC_MFW_LEFT_TOOL][1]-m_Pos[LC_MFW_LEFT_HAND][1],
-		m_Pos[LC_MFW_LEFT_TOOL][2]-m_Pos[LC_MFW_LEFT_HAND][2]);
-  m3.CreateOld (0,0,0,m_Rot[LC_MFW_LEFT_TOOL][0]-m_Rot[LC_MFW_LEFT_HAND][0],
-		m_Rot[LC_MFW_LEFT_TOOL][1]-m_Rot[LC_MFW_LEFT_HAND][1],
-		m_Rot[LC_MFW_LEFT_TOOL][2]-m_Rot[LC_MFW_LEFT_HAND][2]);
+  m2.Translate (pos[LC_MFW_LEFT_TOOL][0]-0.9f,
+		pos[LC_MFW_LEFT_TOOL][1]-pos[LC_MFW_LEFT_HAND][1],
+		pos[LC_MFW_LEFT_TOOL][2]-pos[LC_MFW_LEFT_HAND][2]);
+  m3.CreateOld (0,0,0,rot[LC_MFW_LEFT_TOOL][0]-rot[LC_MFW_LEFT_HAND][0],
+		rot[LC_MFW_LEFT_TOOL][1]-rot[LC_MFW_LEFT_HAND][1],
+		rot[LC_MFW_LEFT_TOOL][2]-rot[LC_MFW_LEFT_HAND][2]);
   mat.Multiply (m2, m3);
   m2.LoadIdentity ();
   m2.Rotate (m_Angles[LC_MFW_LEFT_TOOL], 0, 0, 1);
@@ -285,15 +395,15 @@ void MinifigWizard::Calculate ()
   // right arm/hand/tool
   mat.LoadIdentity (); m2.LoadIdentity (); m3.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_RIGHT_ARM], -1, 0, 0);
-  mat.SetTranslation (m_Pos[LC_MFW_RIGHT_ARM][0], m_Pos[LC_MFW_RIGHT_ARM][1],
-		      m_Pos[LC_MFW_RIGHT_ARM][2]);
+  mat.SetTranslation (pos[LC_MFW_RIGHT_ARM][0], pos[LC_MFW_RIGHT_ARM][1],
+		      pos[LC_MFW_RIGHT_ARM][2]);
   mat.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_ARM]);
   mat.GetTranslation (m_Position[LC_MFW_RIGHT_ARM]);
 
-  mat.Translate (m_Pos[LC_MFW_RIGHT_HAND][0]-m_Pos[LC_MFW_RIGHT_ARM][0],
-		 m_Pos[LC_MFW_RIGHT_HAND][1]-m_Pos[LC_MFW_RIGHT_ARM][1],
-		 m_Pos[LC_MFW_RIGHT_HAND][2]-m_Pos[LC_MFW_RIGHT_ARM][2]);
-  m2.CreateOld (0,0,0,m_Rot[LC_MFW_RIGHT_HAND][0],m_Rot[LC_MFW_RIGHT_HAND][1],m_Rot[LC_MFW_RIGHT_HAND][2]);
+  mat.Translate (pos[LC_MFW_RIGHT_HAND][0]-pos[LC_MFW_RIGHT_ARM][0],
+		 pos[LC_MFW_RIGHT_HAND][1]-pos[LC_MFW_RIGHT_ARM][1],
+		 pos[LC_MFW_RIGHT_HAND][2]-pos[LC_MFW_RIGHT_ARM][2]);
+  m2.CreateOld (0,0,0,rot[LC_MFW_RIGHT_HAND][0],rot[LC_MFW_RIGHT_HAND][1],rot[LC_MFW_RIGHT_HAND][2]);
   m3.Multiply (mat, m2);
   m3.Translate (0,0,-0.16f);
   mat.LoadIdentity ();
@@ -303,12 +413,12 @@ void MinifigWizard::Calculate ()
   m2.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_HAND]);
   m2.GetTranslation (m_Position[LC_MFW_RIGHT_HAND]);
 
-  m2.Translate (m_Pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
-		m_Pos[LC_MFW_RIGHT_TOOL][1]-m_Pos[LC_MFW_RIGHT_HAND][1],
-		m_Pos[LC_MFW_RIGHT_TOOL][2]-m_Pos[LC_MFW_RIGHT_HAND][2]);
-  m3.CreateOld (0,0,0,m_Rot[LC_MFW_RIGHT_TOOL][0]-m_Rot[LC_MFW_RIGHT_HAND][0],
-		m_Rot[LC_MFW_RIGHT_TOOL][1]-m_Rot[LC_MFW_RIGHT_HAND][1],
-		m_Rot[LC_MFW_RIGHT_TOOL][2]-m_Rot[LC_MFW_RIGHT_HAND][2]);
+  m2.Translate (pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
+		pos[LC_MFW_RIGHT_TOOL][1]-pos[LC_MFW_RIGHT_HAND][1],
+		pos[LC_MFW_RIGHT_TOOL][2]-pos[LC_MFW_RIGHT_HAND][2]);
+  m3.CreateOld (0,0,0,rot[LC_MFW_RIGHT_TOOL][0]-rot[LC_MFW_RIGHT_HAND][0],
+		rot[LC_MFW_RIGHT_TOOL][1]-rot[LC_MFW_RIGHT_HAND][1],
+		rot[LC_MFW_RIGHT_TOOL][2]-rot[LC_MFW_RIGHT_HAND][2]);
   mat.Multiply (m2, m3);
   m2.LoadIdentity ();
   m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
@@ -317,9 +427,9 @@ void MinifigWizard::Calculate ()
   m3.GetTranslation (m_Position[LC_MFW_RIGHT_TOOL]);
 
   // hips
-  m_Position[LC_MFW_HIPS][0] = m_Pos[LC_MFW_HIPS][0];
-  m_Position[LC_MFW_HIPS][1] = m_Pos[LC_MFW_HIPS][1];
-  m_Position[LC_MFW_HIPS][2] = m_Pos[LC_MFW_HIPS][2];
+  m_Position[LC_MFW_HIPS][0] = pos[LC_MFW_HIPS][0];
+  m_Position[LC_MFW_HIPS][1] = pos[LC_MFW_HIPS][1];
+  m_Position[LC_MFW_HIPS][2] = pos[LC_MFW_HIPS][2];
   m_Rotation[LC_MFW_HIPS][0] = 0.0f;
   m_Rotation[LC_MFW_HIPS][1] = 0.0f;
   m_Rotation[LC_MFW_HIPS][2] = 1.0f;
@@ -328,14 +438,14 @@ void MinifigWizard::Calculate ()
   // left leg/shoe
   mat.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_LEFT_LEG], -1, 0, 0);
-  mat.SetTranslation (m_Pos[LC_MFW_LEFT_LEG][0], m_Pos[LC_MFW_LEFT_LEG][1],
-		      m_Pos[LC_MFW_LEFT_LEG][2]);
+  mat.SetTranslation (pos[LC_MFW_LEFT_LEG][0], pos[LC_MFW_LEFT_LEG][1],
+		      pos[LC_MFW_LEFT_LEG][2]);
   mat.ToAxisAngle (m_Rotation[LC_MFW_LEFT_LEG]);
   mat.GetTranslation (m_Position[LC_MFW_LEFT_LEG]);
-  mat.Translate (m_Pos[LC_MFW_LEFT_SHOE][0]-m_Pos[LC_MFW_LEFT_LEG][0],
-		 m_Pos[LC_MFW_LEFT_SHOE][1]-m_Pos[LC_MFW_LEFT_LEG][1],
-		 m_Pos[LC_MFW_LEFT_SHOE][2]-m_Pos[LC_MFW_LEFT_LEG][2]);
-  m2.CreateOld (0,0,0,m_Rot[LC_MFW_LEFT_SHOE][0],m_Rot[LC_MFW_LEFT_SHOE][1],m_Rot[LC_MFW_LEFT_SHOE][2]);
+  mat.Translate (pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
+		 pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
+		 pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
+  m2.CreateOld (0,0,0,rot[LC_MFW_LEFT_SHOE][0],rot[LC_MFW_LEFT_SHOE][1],rot[LC_MFW_LEFT_SHOE][2]);
   m3.Multiply (mat, m2);
   mat.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_LEFT_SHOE], 0, 0, 1);
@@ -346,20 +456,39 @@ void MinifigWizard::Calculate ()
   // right leg/shoe
   mat.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_RIGHT_LEG], -1, 0, 0);
-  mat.SetTranslation (m_Pos[LC_MFW_RIGHT_LEG][0], m_Pos[LC_MFW_RIGHT_LEG][1],
-		      m_Pos[LC_MFW_RIGHT_LEG][2]);
+  mat.SetTranslation (pos[LC_MFW_RIGHT_LEG][0], pos[LC_MFW_RIGHT_LEG][1],
+		      pos[LC_MFW_RIGHT_LEG][2]);
   mat.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_LEG]);
   mat.GetTranslation (m_Position[LC_MFW_RIGHT_LEG]);
-  mat.Translate (m_Pos[LC_MFW_RIGHT_SHOE][0]-m_Pos[LC_MFW_RIGHT_LEG][0],
-		 m_Pos[LC_MFW_RIGHT_SHOE][1]-m_Pos[LC_MFW_RIGHT_LEG][1],
-		 m_Pos[LC_MFW_RIGHT_SHOE][2]-m_Pos[LC_MFW_RIGHT_LEG][2]);
-  m2.CreateOld (0,0,0,m_Rot[LC_MFW_RIGHT_SHOE][0],m_Rot[LC_MFW_RIGHT_SHOE][1],m_Rot[LC_MFW_RIGHT_SHOE][2]);
+  mat.Translate (pos[LC_MFW_RIGHT_SHOE][0]-pos[LC_MFW_RIGHT_LEG][0],
+		 pos[LC_MFW_RIGHT_SHOE][1]-pos[LC_MFW_RIGHT_LEG][1],
+		 pos[LC_MFW_RIGHT_SHOE][2]-pos[LC_MFW_RIGHT_LEG][2]);
+  m2.CreateOld (0,0,0,rot[LC_MFW_RIGHT_SHOE][0],rot[LC_MFW_RIGHT_SHOE][1],rot[LC_MFW_RIGHT_SHOE][2]);
   m3.Multiply (mat, m2);
   mat.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_RIGHT_SHOE], 0, 0, 1);
   m2.Multiply (m3, mat);
   m2.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_SHOE]);
   m2.GetTranslation (m_Position[LC_MFW_RIGHT_SHOE]);
+}
+
+void MinifigWizard::GetSelections (char **names)
+{
+  for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+  {
+    PieceInfo* piece_info = m_Info[i];
+    names[i] = "None";
+
+    if (piece_info == NULL)
+      continue;
+
+    for (int j = 0; j < mfw_pieces; j++)
+      if (strcmp (piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
+      {
+	names[i] = mfw_pieceinfo[j].description;
+	break;
+      }
+  }
 }
 
 void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
@@ -376,6 +505,8 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
     piece_info = project->FindPieceInfo (mfw_pieceinfo[i].name);
     if (piece_info == NULL)
       continue;
+
+    strcpy (mfw_pieceinfo[i].name, piece_info->m_strName);
 
     switch (type)
     {
@@ -415,8 +546,6 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
     }
 
     list[(*count)++] = mfw_pieceinfo[i].description;
-
-    if (i == 6) i++; // two hands are listed
   }
 
   // ugly sort
@@ -469,100 +598,6 @@ void MinifigWizard::ChangePiece (int type, const char *desc)
       m_Info[type]->DeRef();
     m_Info[type] = NULL;
   }
-
-  // Get the pieces in the right place
-  if (type == LC_MFW_NECK)
-  {
-    if (m_Info[3] != NULL)
-    {
-      m_Pos[0][2] = 3.92f;
-      m_Pos[1][2] = 3.92f;
- 
-      if (strcmp (piece_info->m_strName,"4498") == 0)
-	m_Rot[3][2] = 180.0f;
-      else
-	m_Rot[3][2] = 0.0f;
-    }
-    else
-    {
-      m_Pos[0][2] = 3.84f;
-      m_Pos[1][2] = 3.84f;
-    }
-  }
-
-  if (type == LC_MFW_LEFT_SHOE)
-  {
-    if (strcmp (desc, "Ski"))
-      m_Pos[13][1] = 0;
-    else
-      m_Pos[13][1] = -0.12f;
-  }
-
-  if (type == LC_MFW_RIGHT_SHOE)
-  {
-    if (strcmp (desc, "Ski"))
-      m_Pos[14][1] = 0;
-    else
-      m_Pos[14][1] = -0.12f;
-  }
-
-  if ((type == LC_MFW_LEFT_TOOL) || (type == LC_MFW_RIGHT_TOOL))
-    if (piece_info != NULL)
-    {
-      float rx = 45, ry = 0, rz = 0, x = 0.92f, y = -0.62f, z = 1.76f;
-
-      if (strcmp (piece_info->m_strName,"4529") == 0) // Saucepan (FIXME: tool rotate in wrong axis)
-	{ rx = -45; ry = 90; rz = 90; x = 0.96f; y = -0.62f; z = 2.56f; }
-      if (strcmp (piece_info->m_strName,"3899") == 0) // Cup (FIXME: tool rotate not centered)
-	{ x = -0.06f; y = -0.62f; z = 2.16f; }
-      if (strcmp (piece_info->m_strName,"4528") == 0) // Frypan (FIXME: tool rotate in wrong axis)
-	{ rx = -45; ry = 90; rz = 90; x = 0.9f; y = -0.62f; z = 2.64f; }
-      if (strcmp (piece_info->m_strName,"4479") == 0) // Metal Detector (FIXME: tool rotate not centered)
-	{ rz = 90; x = 0.74; y = -0.64f; z = 2.64f; }
-      if (strcmp (piece_info->m_strName,"3962") == 0) // Radio
-	{ rz = 90; x = 0.72f; y = -0.66f; z = 1.62f; }
-      if (strcmp (piece_info->m_strName,"4360") == 0) // Space Laser Gun (FIXME: tool rotate not centered)
-	{ rz = -90; x = 0.96f; y = -0.62f; z = 2.64f; }
-      if (strncmp (piece_info->m_strName,"6246",4) == 0) // Screw Driver, Hammer, Box Wrench, ...
-	{ x = 0.72f; y = -0.61f; z = 3.12f; rz = 90; }
-      if (strcmp (piece_info->m_strName,"4349") == 0) // Loudhailer
-	{ x = 0.72f; y = -0.64f; z = 2.28f; }
-      if (strcmp (piece_info->m_strName,"3959") == 0) // Space Gun
-	{ x = 0.74f; y = -0.62f; z = 2.1f; }
-      if (strcmp (piece_info->m_strName,"4522") == 0) // Mallet
-	{ x = 0.72f; y = -0.64f; z = 2.72f; }
-      if (strcmp (piece_info->m_strName,"194") == 0) // Hose Nozzle
-	{ rz = 180; x = 0.72f; y = -0.62f; z = 2.22f; }
-      if (strcmp (piece_info->m_strName,"4006") == 0) // Spanner/Screwdriver
-	{ rz = 180; x = 0.72f; y = -0.62f; z = 2.18f; }
-      if (strcmp (piece_info->m_strName,"6246C") == 0) // Power Drill
-	{ rx = 45; rz = 0; x = 0.72f; y = -0.62f; z = 1.96f; }
-      if (strcmp (piece_info->m_strName,"4497") == 0) // Spear
-	{ x = 0.72f; y = -0.64f; z = 3.48f; rz = 90; }
-      if (strcmp (piece_info->m_strName,"37") == 0) // Knife
-	{ x = 0.72f; y = -0.64f; z = 1.58f; }
-      if (strcmp (piece_info->m_strName,"38") == 0) // Harpoon
-	{ x = 0.72f; y = -0.64f; z = 1.0f; }
-      if (strcmp (piece_info->m_strName,"3841") == 0) // Pickaxe
-	{ z = 2.24f; y = -0.64f; x = 0.72f; rz = 180; }
-      if (strcmp (piece_info->m_strName,"4499") == 0) // Bow with Arrow
-	{ rz = ((type == LC_MFW_RIGHT_TOOL) ? 10.0f : -10.0f); x = 0.72f; z = 1.52f; }
-      if (strcmp (piece_info->m_strName,"3852") == 0) // Hairbrush (FIXME: tool rotate not centered)
-	{ rz = -90; x = 0.82f; y = -0.64f; z = 1.98f; }
-      if (strcmp (piece_info->m_strName,"30152") == 0) // Magnifying glass
-	{ z = 3.76f; y = -0.62f; x = 0.72f; }
-      if (strcmp (piece_info->m_strName,"2570") == 0) // Crossbow
-	{ z = 1.82f; y = -0.64f; x = 0.72f; }
-      if (strcmp (piece_info->m_strName,"2614") == 0) // Fishing Rod
-	{ z = 1.74f; y = -0.62f; x = 0.72f; }
-
-      m_Pos[type][0] = x;
-      m_Pos[type][1] = y;
-      m_Pos[type][2] = z;
-      m_Rot[type][0] = rx;
-      m_Rot[type][1] = ry;
-      m_Rot[type][2] = rz;
-    }
 }
 
 void MinifigWizard::ChangeColor (int type, int color)
@@ -573,4 +608,125 @@ void MinifigWizard::ChangeColor (int type, int color)
 void MinifigWizard::ChangeAngle (int type, float angle)
 {
   m_Angles[type] = angle;
+}
+
+void MinifigWizard::GetMinifigNames (char ***names, int *count)
+{
+  *count = m_MinifigCount;
+  *names = m_MinifigNames;
+}
+
+void MinifigWizard::SaveMinifig (const char* name)
+{
+  char tmp[16];
+  int i, j;
+
+  // check if the name is already being used
+  for (i = 0; i < m_MinifigCount; i++)
+    if (strcmp (m_MinifigNames[i], name) == 0)
+      break;
+
+  if (i == m_MinifigCount)
+  {
+    m_MinifigCount++;
+    m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
+    m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
+    m_MinifigNames[i] = (char*)malloc (strlen (name) + 1);
+    strcpy (m_MinifigNames[i], name);
+    m_MinifigTemplates[i] = (char*)malloc (768);
+  }
+  strcpy (m_MinifigTemplates[i], "");
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    sprintf (tmp, "%d ", m_Colors[j]);
+    strcat (m_MinifigTemplates[i], tmp);
+  }
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    if (m_Info[j] != NULL)
+      sprintf (tmp, "%s ", m_Info[j]->m_strName);
+    else
+      strcpy (tmp, "None ");
+    strcat (m_MinifigTemplates[i], tmp);
+  }
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    sprintf (tmp, "%f ", m_Angles[j]);
+    strcat (m_MinifigTemplates[i], tmp);
+  }
+}
+
+bool MinifigWizard::LoadMinifig (const char* name)
+{
+  char *ptr;
+  int i, j;
+
+  // check if the name is valid
+  for (i = 0; i < m_MinifigCount; i++)
+    if (strcmp (m_MinifigNames[i], name) == 0)
+      break;
+
+  if (i == m_MinifigCount)
+  {
+    //    Sys_MessageBox ("Unknown Minifig");
+    return false;
+  }
+  else
+    ptr = m_MinifigTemplates[i];
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+    if (m_Info[j] != NULL)
+      m_Info[j]->DeRef ();
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+    m_Colors[j] = strtol (ptr, &ptr, 10);
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    char *endptr;
+    ptr++;
+
+    endptr = strchr (ptr, ' ');
+    *endptr = '\0';
+    m_Info[j] = project->FindPieceInfo (ptr);
+    *endptr = ' ';
+    ptr = endptr;
+
+    if (m_Info[j] != NULL)
+      m_Info[j]->AddRef();
+  }
+
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+    m_Angles[j] = strtod (ptr, &ptr);
+
+  return true;
+}
+
+void MinifigWizard::DeleteMinifig (const char* name)
+{
+  int i;
+
+  // check if the name is valid
+  for (i = 0; i < m_MinifigCount; i++)
+    if (strcmp (m_MinifigNames[i], name) == 0)
+      break;
+
+  if (i == m_MinifigCount)
+  {
+    Sys_MessageBox ("Unknown Minifig");
+    return;
+  }
+
+  free (m_MinifigNames[i]);
+  free (m_MinifigTemplates[i]);
+  m_MinifigCount--;
+
+  for (; i < m_MinifigCount; i++)
+  {
+    m_MinifigNames[i] = m_MinifigNames[i+1];
+    m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
+  }
 }

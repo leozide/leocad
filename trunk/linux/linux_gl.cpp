@@ -45,7 +45,7 @@ PFNGLXGETPROCADDRESSARB pfnglXGetProcAddressARB;
 void* Sys_GLGetProc (const char *symbol)
 {
   void* func =  dlsym (gl_module, symbol);
-  char* error = dlerror ();
+  const char* error = dlerror ();
   if (error)
     printf ("Error loading OpenGL library.\n%s\n", error);
   return func;
@@ -61,7 +61,7 @@ void* Sys_GLGetExtension (const char *symbol)
 
 bool Sys_GLOpenLibrary (const char* libname)
 {
-  char *error;
+  const char *error;
 
   if (libname)
   {

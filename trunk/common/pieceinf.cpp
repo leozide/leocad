@@ -611,7 +611,7 @@ void PieceInfo::LoadInformation()
 	  longs = (unsigned long*)pGroup->drawinfo;
 
 	  for (ushorts = (unsigned short*)bytes; ushorts != p; ushorts++, longs++)
-	    *longs = GUINT16(*ushorts);
+	    *longs = *ushorts;//GUINT16(*ushorts);
 	}
 	else
 	{

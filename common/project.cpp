@@ -5823,6 +5823,38 @@ void Project::RemoveEmptyGroups()
 		RemoveEmptyGroups();
 }
 
+Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, float z)
+{
+  Group *pNewGroup = new Group();
+
+  if (name == NULL)
+  {
+    int i, max = 0;
+    char str[65];
+
+    for (Group *pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+      if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
+        if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
+          if (i > max)
+            max = i;
+    sprintf (str, "Group #%.2d", max+1);
+
+    strcpy (pNewGroup->m_strName, str);
+  }
+  else
+    strcpy (pNewGroup->m_strName, name);
+
+  pNewGroup->m_pNext = m_pGroups;
+  m_pGroups = pNewGroup;
+
+  pNewGroup->m_fCenter[0] = x;
+  pNewGroup->m_fCenter[1] = y;
+  pNewGroup->m_fCenter[2] = z;
+  pNewGroup->m_pGroup = pParent;
+
+  return pNewGroup;
+}
+
 void Project::SelectAndFocusNone(bool bFocusOnly)
 {
   Piece* pPiece;

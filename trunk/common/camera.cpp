@@ -52,6 +52,11 @@ void CameraTarget::MinIntersectDist (LC_CLICKLINE* pLine)
   }
 }
 
+void CameraTarget::Select (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  m_pParent->SelectTarget (bSelecting, bFocus, bMultiple);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Camera construction/destruction
 
@@ -214,7 +219,7 @@ void Camera::Initialize()
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 
-bool Camera::FileLoad(File& file)
+bool Camera::FileLoad (File& file)
 {
   unsigned char version, ch;
 
@@ -385,7 +390,7 @@ bool Camera::FileLoad(File& file)
   return true;
 }
 
-void Camera::FileSave(File& file)
+void Camera::FileSave (File& file) const
 {
   unsigned char ch = LC_CAMERA_SAVE_VERSION;
 
@@ -452,6 +457,58 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
 
     ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
   }
+}
+
+void Camera::Select (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  if (bSelecting == true)
+  {
+    if (bFocus == true)
+    {
+      m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED);
+
+      m_pTarget->Select (false, true, bMultiple);
+    }
+    else
+      m_nState |= LC_CAMERA_SELECTED;
+
+    if (bMultiple == false)
+      m_pTarget->Select (false, false, bMultiple);
+  }
+  else
+  {
+    if (bFocus == true)
+      m_nState &= ~(LC_CAMERA_FOCUSED);
+    else
+      m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED);
+  } 
+}
+
+void Camera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  // FIXME: the target should handle this
+
+  if (bSelecting == true)
+  {
+    if (bFocus == true)
+    {
+      m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED);
+
+      Select (false, true, bMultiple);
+    }
+    else
+      m_nState |= LC_CAMERA_TARGET_SELECTED;
+
+    if (bMultiple == false)
+      Select (false, false, bMultiple);
+  }
+  else
+  {
+    if (bFocus == true)
+      m_nState &= ~(LC_CAMERA_TARGET_FOCUSED);
+    else
+      m_nState &= ~(LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED);
+  } 
 }
 
 void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)

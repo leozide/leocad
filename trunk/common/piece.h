@@ -31,6 +31,12 @@ public:
   Piece (PieceInfo* pPieceInfo);
   ~Piece ();
 
+  void Select (bool bSelecting, bool bFocus, bool bMultiple);
+
+
+
+
+
 	Piece* m_pNext;
 	Piece* m_pLink;
 
@@ -40,16 +46,8 @@ public:
 		{ m_nState &= ~LC_PIECE_HIDDEN; }
 	bool IsHidden()
 		{ return (m_nState & LC_PIECE_HIDDEN) != 0; }
-	void Select()
-		{ m_nState |= LC_PIECE_SELECTED; } 
-	void UnSelect()
-		{ m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED); } 
 	bool IsSelected()
 		{ return (m_nState & LC_PIECE_SELECTED) != 0; }
-	void Focus()
-		{ m_nState |= LC_PIECE_FOCUSED|LC_PIECE_SELECTED; } 
-	void UnFocus()
-		{ m_nState &= ~LC_PIECE_FOCUSED; } 
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 

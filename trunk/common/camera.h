@@ -35,10 +35,15 @@ class CameraTarget : public Object
 {
  public:
   CameraTarget (Camera *pParent);
-  ~CameraTarget ();
+  virtual ~CameraTarget ();
 
  public:
   void MinIntersectDist (LC_CLICKLINE* pLine);
+  void Select (bool bSelecting, bool bFocus, bool bMultiple);
+  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+    {
+      // FIXME: move the position handling to the camera target
+    }
 
   Camera* GetParent () const
     { return m_pParent; }
@@ -73,12 +78,14 @@ class Camera : public Object
   void GetUpVec (float* up) const
     { memcpy(up, m_fUp, sizeof(m_fUp)); };
 
+  CameraTarget* GetTarget () const
+    { return m_pTarget; }
 
 
 
 
 
-public:
+ public:
 	Camera* m_pNext;
 	void Hide()
 		{ m_nState = LC_CAMERA_HIDDEN; }
@@ -98,26 +105,33 @@ public:
 		{ return (m_nState & LC_CAMERA_SELECTED) != 0; } 
 	bool IsTargetSelected()
 		{ return (m_nState & LC_CAMERA_TARGET_SELECTED) != 0; } 
-	void Select()
-		{ m_nState |= (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED); } 
-	void UnSelect()
-		{ m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED); } 
-	void UnFocus()
-		{ m_nState &= ~(LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_FOCUSED); } 
 	bool IsEyeFocused()
 		{ return (m_nState & LC_CAMERA_FOCUSED) != 0; } 
-	void FocusEye()
-		{ m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED); } 
 	bool IsTargetFocused()
 		{ return (m_nState & LC_CAMERA_TARGET_FOCUSED) != 0; } 
+
+        /*
+        void Select()
+          { m_nState |= (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED); } 
+        void UnSelect()
+          { m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED); } 
+	void UnFocus()
+		{ m_nState &= ~(LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_FOCUSED); } 
+	void FocusEye()
+		{ m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED); } 
 	void FocusTarget()
 		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
+        */
+
+        void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
  public:
   bool FileLoad (File& file);
-  void FileSave (File& file);
+  void FileSave (File& file) const;
+  void MinIntersectDist (LC_CLICKLINE* pLine);
+  void Select (bool bSelecting, bool bFocus, bool bMultiple);
 
-	void MinIntersectDist (LC_CLICKLINE* pLine);
+
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);

@@ -366,8 +366,72 @@ static void arraydlg_callback(GtkWidget *widget, gpointer data)
   *cur_ret = LC_OK;
 }
 
+static void arraydlg_adjtotal (GtkWidget *widget, gpointer data)
+{
+  LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
+  LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
+  char ctot[11];
+
+  if (GTK_TOGGLE_BUTTON (s->radio1)->active)
+    opts->nArrayDimension = 0;
+  if (GTK_TOGGLE_BUTTON (s->radio2)->active)
+    opts->nArrayDimension = 1;
+  if (GTK_TOGGLE_BUTTON (s->radio3)->active)
+    opts->nArrayDimension = 2;
+
+  gint tot = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (s->count1)) *
+        ((opts->nArrayDimension > 0) ? gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(s->count2)) : 1) *
+        ((opts->nArrayDimension > 1) ? gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(s->count3)) : 1);
+
+  sprintf (ctot, "%i", tot);
+
+  gtk_entry_set_text (GTK_ENTRY (s->total), ctot);
+}
+
+static void arraydlg_radiotoggled (GtkWidget *widget, gpointer data)
+{
+  LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
+  LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
+
+  if (GTK_TOGGLE_BUTTON (widget)->active == FALSE)
+    return;
+
+  arraydlg_adjtotal (widget, data);
+
+  if (opts->nArrayDimension > 0)
+  {
+    gtk_widget_set_sensitive (s->count2, TRUE);
+    gtk_widget_set_sensitive (s->offset_x2, TRUE);
+    gtk_widget_set_sensitive (s->offset_y2, TRUE);
+    gtk_widget_set_sensitive (s->offset_z2, TRUE);
+  }
+  else
+  {
+    gtk_widget_set_sensitive (s->count2, FALSE);
+    gtk_widget_set_sensitive (s->offset_x2, FALSE);
+    gtk_widget_set_sensitive (s->offset_y2, FALSE);
+    gtk_widget_set_sensitive (s->offset_z2, FALSE);
+  }
+
+  if (opts->nArrayDimension > 1)
+  {
+    gtk_widget_set_sensitive (s->count3, TRUE);
+    gtk_widget_set_sensitive (s->offset_x3, TRUE);
+    gtk_widget_set_sensitive (s->offset_y3, TRUE);
+    gtk_widget_set_sensitive (s->offset_z3, TRUE);
+  }
+  else
+  {
+    gtk_widget_set_sensitive (s->count3, FALSE);
+    gtk_widget_set_sensitive (s->offset_x3, FALSE);
+    gtk_widget_set_sensitive (s->offset_y3, FALSE);
+    gtk_widget_set_sensitive (s->offset_z3, FALSE);
+  }
+}
+
 int arraydlg_execute(void* param)
 {
+  GtkObject *adj;
   GtkWidget *dlg;
   GtkWidget *vbox1, *vbox2;
   GtkWidget *hbox1, *hbox2;
@@ -426,52 +490,55 @@ int arraydlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
 
-  s.move_x = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
+  s.move_x = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.move_x);
   gtk_table_attach (GTK_TABLE (table), s.move_x, 1, 2, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-  gtk_widget_set_usize (s.move_x, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.move_x), "0");
-
-  s.move_y = gtk_entry_new ();
+  gtk_widget_set_usize (s.move_x, 60, -2);
+ 
+  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
+  s.move_y = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.move_y);
   gtk_table_attach (GTK_TABLE (table), s.move_y, 2, 3, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.move_y, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.move_y), "0");
+  gtk_widget_set_usize (s.move_y, 60, -2);
 
-  s.move_z = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 4, 12, 12);
+  s.move_z = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.move_z);
   gtk_table_attach (GTK_TABLE (table), s.move_z, 3, 4, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.move_z, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.move_z), "0");
+  gtk_widget_set_usize (s.move_z, 60, -2);
 
   label = gtk_label_new ("Rotate");
   gtk_widget_show (label);
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
 
-  s.rotate_x = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
+  s.rotate_x = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (s.rotate_x), TRUE);
   gtk_widget_show (s.rotate_x);
   gtk_table_attach (GTK_TABLE (table), s.rotate_x, 1, 2, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-  gtk_widget_set_usize (s.rotate_x, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.rotate_x), "0");
+  gtk_widget_set_usize (s.rotate_x, 60, -2);
 
-  s.rotate_y = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
+  s.rotate_y = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (s.rotate_y), TRUE);
   gtk_widget_show (s.rotate_y);
   gtk_table_attach (GTK_TABLE (table), s.rotate_y, 2, 3, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.rotate_y, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.rotate_y), "0");
+  gtk_widget_set_usize (s.rotate_y, 60, -2);
 
-  s.rotate_z = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
+  s.rotate_z = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (s.rotate_z), TRUE);
   gtk_widget_show (s.rotate_z);
   gtk_table_attach (GTK_TABLE (table), s.rotate_z, 3, 4, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.rotate_z, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.rotate_z), "0");
+  gtk_widget_set_usize (s.rotate_z, 60, -2);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox2);
@@ -538,39 +605,51 @@ int arraydlg_execute(void* param)
   gtk_widget_show (s.radio1);
   gtk_table_attach (GTK_TABLE (table), s.radio1, 0, 1, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+  gtk_signal_connect (GTK_OBJECT (s.radio1), "toggled",
+		      GTK_SIGNAL_FUNC (arraydlg_radiotoggled), &s);
 
   s.radio2 = gtk_radio_button_new_with_label (radio_group, "2D");
   radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.radio2));
   gtk_widget_show (s.radio2);
   gtk_table_attach (GTK_TABLE (table), s.radio2, 0, 1, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+  gtk_signal_connect (GTK_OBJECT (s.radio2), "toggled",
+		      GTK_SIGNAL_FUNC (arraydlg_radiotoggled), &s);
 
   s.radio3 = gtk_radio_button_new_with_label (radio_group, "3D");
   radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.radio3));
   gtk_widget_show (s.radio3);
   gtk_table_attach (GTK_TABLE (table), s.radio3, 0, 1, 3, 4,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+  gtk_signal_connect (GTK_OBJECT (s.radio3), "toggled",
+		      GTK_SIGNAL_FUNC (arraydlg_radiotoggled), &s);
 
-  s.count1 = gtk_entry_new ();
+  adj = gtk_adjustment_new (10, 1, 1000, 1, 10, 1);
+  s.count1 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.count1);
   gtk_table_attach (GTK_TABLE (table), s.count1, 1, 2, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.count1, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.count1), "10");
+  gtk_widget_set_usize (s.count1, 60, -2);
+  gtk_signal_connect (GTK_OBJECT (adj), "value_changed",
+		      GTK_SIGNAL_FUNC (arraydlg_adjtotal), &s);
 
-  s.count2 = gtk_entry_new ();
+  adj = gtk_adjustment_new (1, 1, 1000, 1, 10, 1);
+  s.count2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.count2);
   gtk_table_attach (GTK_TABLE (table), s.count2, 1, 2, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.count2, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.count2), "1");
+  gtk_widget_set_usize (s.count2, 60, -2);
+  gtk_signal_connect (GTK_OBJECT (adj), "value_changed",
+		      GTK_SIGNAL_FUNC (arraydlg_adjtotal), &s);
 
-  s.count3 = gtk_entry_new ();
+  adj = gtk_adjustment_new (1, 1, 1000, 1, 10, 1);
+  s.count3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.count3);
   gtk_table_attach (GTK_TABLE (table), s.count3, 1, 2, 3, 4,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.count3, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.count3), "1");
+  gtk_widget_set_usize (s.count3, 60, -2);
+  gtk_signal_connect (GTK_OBJECT (adj), "value_changed",
+		      GTK_SIGNAL_FUNC (arraydlg_adjtotal), &s);
 
   label = gtk_label_new ("X");
   gtk_widget_show (label);
@@ -587,47 +666,50 @@ int arraydlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), label, 4, 5, 1, 2,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
 
-  s.offset_x2 = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
+  s.offset_x2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.offset_x2);
   gtk_table_attach (GTK_TABLE (table), s.offset_x2, 2, 3, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_x2, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.offset_x2), "0");
+  gtk_widget_set_usize (s.offset_x2, 60, -2);
 
-  s.offset_y2 = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
+  s.offset_y2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.offset_y2);
   gtk_table_attach (GTK_TABLE (table), s.offset_y2, 3, 4, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_y2, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.offset_y2), "0");
+  gtk_widget_set_usize (s.offset_y2, 60, -2);
 
-  s.offset_z2 = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 4, 12, 10);
+  s.offset_z2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.offset_z2);
   gtk_table_attach (GTK_TABLE (table), s.offset_z2, 4, 5, 2, 3,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_z2, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.offset_z2), "0");
+  gtk_widget_set_usize (s.offset_z2, 60, -2);
 
-  s.offset_x3 = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
+  s.offset_x3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.offset_x3);
   gtk_table_attach (GTK_TABLE (table), s.offset_x3, 2, 3, 3, 4,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_x3, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.offset_x3), "0");
+  gtk_widget_set_usize (s.offset_x3, 60, -2);
 
-  s.offset_y3 = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
+  s.offset_y3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.offset_y3);
   gtk_table_attach (GTK_TABLE (table), s.offset_y3, 3, 4, 3, 4,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_y3, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.offset_y3), "0");
+  gtk_widget_set_usize (s.offset_y3, 60, -2);
 
-  s.offset_z3 = gtk_entry_new ();
+  adj = gtk_adjustment_new (0, -1000, 1000, 4, 12, 10);
+  s.offset_z3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
   gtk_widget_show (s.offset_z3);
   gtk_table_attach (GTK_TABLE (table), s.offset_z3, 4, 5, 3, 4,
                     (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_z3, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.offset_z3), "0");
+  gtk_widget_set_usize (s.offset_z3, 60, -2);
+
+  // Initialize dialog
+  arraydlg_radiotoggled (s.radio1, &s);
 
   return dlg_domodal(dlg, LC_CANCEL);
 }

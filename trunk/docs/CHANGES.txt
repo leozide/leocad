@@ -1,5 +1,9 @@
 This is a changelog for developers only, not for ordinary users.
 
+16/12/2000
+        - Fixed AVI saving.
+        - Fixed rotation bug.
+
 15/12/2000
         - Fixed small bug in the texture font.
 

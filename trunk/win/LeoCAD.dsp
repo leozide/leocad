@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /I "./jpeglib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /MTd /W3 /Gm /GX /Zi /Od /I "../common" /I "../win" /I "./jpeglib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MTd /W3 /Gm /GX /Zi /Od /I "../common" /I "../win" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -207,6 +207,13 @@ InputPath=.\hlp\LeoCAD.hpj
 # Begin Source File
 
 SOURCE=.\Leocad.rc
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -988,6 +995,11 @@ SOURCE=..\Common\group.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\im_bmp.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\im_png.cpp
 # ADD CPP /I "./libpng" /I "./zlib"
 # SUBTRACT CPP /YX /Yc /Yu
@@ -995,6 +1007,7 @@ SOURCE=..\common\im_png.cpp
 # Begin Source File
 
 SOURCE=..\Common\image.cpp
+# ADD CPP /I "./jpeglib"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File

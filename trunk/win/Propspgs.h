@@ -4,6 +4,8 @@
 #ifndef __PROPSPGS_H__
 #define __PROPSPGS_H__
 
+#include "defines.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CPropertiesGeneral dialog
 
@@ -96,6 +98,8 @@ public:
 	char** names;
 	unsigned short* count;
 	int lines;
+	int col[LC_MAXCOLORS];
+	int totalcount[LC_MAXCOLORS];
 
 // Dialog Data
 	//{{AFX_DATA(CPropertiesPieces)
@@ -116,6 +120,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPropertiesPieces)
 	virtual BOOL OnInitDialog();
+	afx_msg void OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -27,6 +27,8 @@
 #include "LibDlg.h"
 #include "EdGrpDlg.h"
 #include "AboutDlg.h"
+#include "cadbar.h"
+#include "mainfrm.h"
 
 static CMenu menuPopups;
 static CStepDlg* StepModeless = NULL;
@@ -1689,4 +1691,37 @@ void SystemSwapBuffers()
 void SystemSetGroup(int group)
 {
 	AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, group+2, 0);
+}
+
+void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
+{
+	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
+
+	pStatusBar->ShowProgressBar(TRUE);
+	pStatusBar->SetProgressBarRange(nLower, nUpper);
+	pStatusBar->SetProgressBarStep(nStep);
+	pStatusBar->SetProgressBarPos(0);
+
+  ((CMainFrame*)AfxGetMainWnd())->SetStatusBarMessage(Text); 
+	((CMainFrame*)AfxGetMainWnd())->SetMessageText(Text);
+}
+
+void SytemEndProgressBar()
+{
+	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
+
+	pStatusBar->ShowProgressBar(FALSE);
+
+  ((CMainFrame*)AfxGetMainWnd())->SetStatusBarMessage(""); 
+	((CMainFrame*)AfxGetMainWnd())->SetMessageText(AFX_IDS_IDLEMESSAGE);
+}
+
+void SytemStepProgressBar()
+{
+	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
+
+	pStatusBar->StepProgressBar();
 }

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <afxrich.h>
+#include <afxpriv.h>
 #include "LeoCAD.h"
 #include "MainFrm.h"
 #include "Camera.h"
@@ -102,6 +103,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_FILE_PRINTPIECELIST, OnFilePrintPieceList)
 	ON_WM_ACTIVATEAPP()
 	ON_COMMAND(ID_VIEW_NEWVIEW, OnViewNewView)
+	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnPieceBar)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
@@ -985,6 +987,49 @@ void CMainFrame::OnActivateApp(BOOL bActive, HTASK hTask)
 	// Don't notify if we loose focus while on print preview
 	if (m_lpfnCloseProc == NULL)
 		project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
+}
+
+LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
+{
+	UINT nIDLast = m_nIDLastMessage;
+	m_nFlags &= ~WF_NOPOPMSG;
+
+	CWnd* pMessageBar = GetMessageBar();
+	if (pMessageBar != NULL)
+	{
+		LPCTSTR lpsz = NULL;
+		CString strMessage;
+
+		// set the message bar text
+		if (!m_strStatusBar.IsEmpty())
+		{
+			lpsz = m_strStatusBar;
+		}
+		else if (lParam != 0)
+		{
+			ASSERT(wParam == 0);    // can't have both an ID and a string
+			lpsz = (LPCTSTR)lParam; // set an explicit string
+		}
+		else if (wParam != 0)
+		{
+			// map SC_CLOSE to PREVIEW_CLOSE when in print preview mode
+			if (wParam == AFX_IDS_SCCLOSE && m_lpfnCloseProc != NULL)
+				wParam = AFX_IDS_PREVIEW_CLOSE;
+
+			// get message associated with the ID indicated by wParam
+			GetMessageString(wParam, strMessage);
+			lpsz = strMessage;
+		}
+		pMessageBar->SetWindowText(lpsz);
+
+		// update owner of the bar in terms of last message selected
+		m_nIDLastMessage = (UINT)wParam;
+		m_nIDTracking = (UINT)wParam;
+	}
+
+	m_nIDLastMessage = (UINT)wParam;    // new ID (or 0)
+	m_nIDTracking = (UINT)wParam;       // so F1 on toolbar buttons work
+	return nIDLast;
 }
 
 #include "view.h"

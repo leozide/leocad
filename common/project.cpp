@@ -715,6 +715,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
           file->ReadLong (&m_nScene, 1);
 
 	file->ReadLong (&count, 1);
+	SystemStartProgressBar(0, count, 1, "Loading project...");
+
 	while (count--)
 	{	
 		if (fv > 0.4f)
@@ -778,7 +780,9 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				SystemPieceComboAdd(pInfo->m_strDescription);
 			}
 		}
+		SytemStepProgressBar();
 	}
+	SytemEndProgressBar();
 
 	if (!bMerge)
 	{
@@ -2708,15 +2712,28 @@ void Project::RemovePiece(Piece* pPiece)
 
 void Project::CalculateStep()
 {
+	int PieceCount = 0;
 	Piece* pPiece;
 	Camera* pCamera;
 	Light* pLight;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
 		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+		PieceCount++;
+	}
+
+  SystemDoWaitCursor(1);
+	SystemStartProgressBar(0, PieceCount, 1, "Updating pieces...");
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
 		pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, false);
+		SytemStepProgressBar();
+	}
+
+	SytemEndProgressBar();
+  SystemDoWaitCursor(-1);
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);

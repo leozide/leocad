@@ -90,7 +90,6 @@ typedef enum {
 	LC_ACTION_LIGHT,
 	LC_ACTION_SPOTLIGHT,
 	LC_ACTION_CAMERA,
-	LC_ACTION_CURVE,
 	LC_ACTION_MOVE,
 	LC_ACTION_ROTATE,
 	LC_ACTION_ERASER,
@@ -99,7 +98,8 @@ typedef enum {
 	LC_ACTION_ZOOM_REGION,
 	LC_ACTION_PAN,
 	LC_ACTION_ROTATE_VIEW,
-	LC_ACTION_ROLL
+	LC_ACTION_ROLL,
+	LC_ACTION_CURVE
 } LC_ACTIONS;
 
 // Piece connections (complicated and wastes memory but fast).

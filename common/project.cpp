@@ -5561,62 +5561,47 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
-                case LC_VIEW_STEP_INSERT:
-                {
-                  bool redraw = false;
+    case LC_VIEW_STEP_INSERT:
+    {
+      for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+        pPiece->InsertTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-                  if (m_bAnimation)
-                    break;
+      for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+        pCamera->InsertTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-                  for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-                  {
-                    unsigned char t = pPiece->GetStepShow();
+      for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+        pLight->InsertTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-                    if (t >= m_nCurStep && t < 255)
-                    {
-                      redraw = true;
-                      pPiece->SetStepShow (t+1);
+      SetModifiedFlag (true);
+      if (m_bAnimation)
+        CheckPoint ("Adding Frame");
+      else
+        CheckPoint ("Adding Step");
+			CalculateStep ();
+      UpdateAllViews ();
+      UpdateSelection ();
+    } break;
 
-                      if (pPiece->IsSelected () && t == m_nCurStep)
-                        pPiece->Select (false, false, false);
-                    }
-                  }
+    case LC_VIEW_STEP_DELETE:
+    {
+      for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+        pPiece->RemoveTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-                  if (redraw)
-                  {
-                    SetModifiedFlag (true);
-                    CheckPoint ("Adding Step");
-                    UpdateAllViews ();
-                    UpdateSelection ();
-                  }
-                } break;
+      for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+        pCamera->RemoveTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-                case LC_VIEW_STEP_DELETE:
-                {
-                  bool redraw = false;
+      for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+        pLight->RemoveTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-                  if (m_bAnimation)
-                    break;
-
-                  for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-                  {
-                    unsigned char t = pPiece->GetStepShow();
-
-                    if (t >= m_nCurStep && t > 1)
-                    {
-                      redraw = true;
-                      pPiece->SetStepShow (t-1);
-                    }
-                  }
-
-                  if (redraw)
-                  {
-                    SetModifiedFlag (true);
-                    CheckPoint ("Removing Step");
-                    UpdateAllViews ();
-                    UpdateSelection ();
-                  }
-                } break;
+      SetModifiedFlag (true);
+      if (m_bAnimation)
+        CheckPoint ("Removing Frame");
+      else
+        CheckPoint ("Removing Step");
+			CalculateStep ();
+      UpdateAllViews ();
+      UpdateSelection ();
+    } break;
 
 		case LC_VIEW_STOP:
 		{

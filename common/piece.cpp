@@ -414,6 +414,64 @@ void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
   } 
 }
 
+void Piece::InsertTime (unsigned short start, bool animation, unsigned short time)
+{
+  if (animation)
+  {
+    if (m_nFrameShow >= start)
+      m_nFrameShow = min (m_nFrameShow + time, project->GetTotalFrames ());
+
+    if (m_nFrameHide >= start)
+      m_nFrameHide = min (m_nFrameHide + time, project->GetTotalFrames ());
+
+    if (m_nFrameShow > project->GetCurrentTime ())
+      Select (false, false, false);
+  }
+  else
+  {
+    if (m_nStepShow >= start)
+      m_nStepShow = min (m_nStepShow + time, 255);
+
+    if (m_nStepHide >= start)
+      m_nStepHide = min (m_nStepHide + time, 255);
+
+    if (m_nStepShow > project->GetCurrentTime ())
+      Select (false, false, false);
+  }
+
+  Object::InsertTime (start, animation, time);
+}
+
+void Piece::RemoveTime (unsigned short start, bool animation, unsigned short time)
+{
+  if (animation)
+  {
+    if (m_nFrameShow >= start)
+      m_nFrameShow = max (m_nFrameShow - time, 1);
+
+    if (m_nFrameHide == project->GetTotalFrames ())
+      m_nFrameHide = project->GetTotalFrames ();
+    else
+      m_nFrameHide = max (m_nFrameHide - time, 1);
+
+    if (m_nFrameHide < project->GetCurrentTime ())
+      Select (false, false, false);
+  }
+  else
+  {
+    if (m_nStepShow >= start)
+      m_nStepShow = max (m_nStepShow - time, 1);
+
+    if (m_nStepHide != 255)
+      m_nStepHide = max (m_nStepHide - time, 1);
+
+    if (m_nStepHide < project->GetCurrentTime ())
+      Select (false, false, false);
+  }
+
+  Object::RemoveTime (start, animation, time);
+}
+
 void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine)
 {
 	double t, t1, t2, x, y, z, plane[4];

@@ -10,7 +10,7 @@ typedef enum
   LC_MSG_FOCUS_CHANGED,
   //  LC_MSG_SELECTION_CHANGED,
   LC_MSG_COUNT
-} LC_MESSAGES;
+} LC_MSG_TYPES;
 
 typedef struct
 {

@@ -2432,10 +2432,10 @@ void Project::RenderOverlays(int Viewport)
 		glDisable(GL_DEPTH_TEST);
 
 		Camera* Cam = m_pViewCameras[Viewport];
-		Matrix Mat;
+		Matrix44 Mat;
 		int j;
 
-		Mat.CreateLookat(Cam->GetEyePos(), Cam->GetTargetPos(), Cam->GetUpVec());
+		Mat.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
 		Mat.Transpose3();
 		Mat.SetTranslation(m_OverlayCenter);
 
@@ -2444,33 +2444,37 @@ void Project::RenderOverlays(int Viewport)
 
 		for (j = 0; j < 32; j++)
 		{
-			float Point[3];
+			Point3 Pt;
 
-			Point[0] = (float)cos(2.0 * M_PI * j / 32) * 2.0f * m_OverlayScale;
-			Point[1] = (float)sin(2.0 * M_PI * j / 32) * 2.0f * m_OverlayScale;
-			Point[2] = 0.0f;
+			Pt.SetX((float)cos(2.0 * M_PI * j / 32) * 2.0f * m_OverlayScale);
+			Pt.SetY((float)sin(2.0 * M_PI * j / 32) * 2.0f * m_OverlayScale);
+			Pt.SetZ(0.0f);
 
-			Mat.TransformPoints(Point, 1);
+			Pt = Pt * Mat;
 
-			glVertex3fv(Point);
+			glVertex3f(Pt.GetX(), Pt.GetY(), Pt.GetZ());
 		}
 
 		glEnd();
 
 		glBegin(GL_LINE_LOOP);
-		glColor3f(0.1f, 0.1f, 0.1f);
+
+		if (m_OverlayMode == LC_OVERLAY_CAMERA)
+			glColor3f(0.8f, 0.8f, 0.0f);
+		else
+			glColor3f(0.1f, 0.1f, 0.1f);
 
 		for (j = 0; j < 32; j++)
 		{
-			float Point[3];
+			Point3 Pt;
 
-			Point[0] = (float)cos(2.0 * M_PI * j / 32) * 2.5f * m_OverlayScale;
-			Point[1] = (float)sin(2.0 * M_PI * j / 32) * 2.5f * m_OverlayScale;
-			Point[2] = 0.0f;
+			Pt.SetX((float)cos(2.0 * M_PI * j / 32) * 2.5f * m_OverlayScale);
+			Pt.SetY((float)sin(2.0 * M_PI * j / 32) * 2.5f * m_OverlayScale);
+			Pt.SetZ(0.0f);
 
-			Mat.TransformPoints(Point, 1);
+			Pt = Pt * Mat;
 
-			glVertex3fv(Point);
+			glVertex3f(Pt.GetX(), Pt.GetY(), Pt.GetZ());
 		}
 
 		glEnd();
@@ -2544,6 +2548,33 @@ void Project::RenderOverlays(int Viewport)
 			}
 
 			glEnd();
+		}
+
+		if (m_nTracking != LC_TRACK_NONE)
+		{
+			if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_Z))
+			{
+				Vector3 Tangent = m_OverlayTrackStart - m_OverlayCenter;
+
+				switch (m_OverlayMode)
+				{
+				case LC_OVERLAY_X:
+					Tangent = Vector3(0.0f, Tangent.GetZ(), -Tangent.GetY());
+					break;
+				case LC_OVERLAY_Y:
+					Tangent = Vector3(Tangent.GetY(), 0.0f, -Tangent.GetX());
+					break;
+				case LC_OVERLAY_Z:
+					Tangent = Vector3(Tangent.GetX(), -Tangent.GetY(), 0.0f);
+					break;
+				}
+
+				glBegin(GL_LINES);
+				glColor3f(0.8f, 0.8f, 0.0f);
+				glVertex3f(m_OverlayTrackStart.GetX(), m_OverlayTrackStart.GetY(), m_OverlayTrackStart.GetZ());
+				glVertex3f(m_OverlayTrackStart.GetX() + Tangent.GetX(), m_OverlayTrackStart.GetY() + Tangent.GetY(), m_OverlayTrackStart.GetZ() + Tangent.GetZ());
+				glEnd();
+			}
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -6159,7 +6190,7 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 }
 
-bool Project::GetSelectionCenter(float Center[3]) const
+bool Project::GetSelectionCenter(Point3& Center) const
 {
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	bool Selected = false;
@@ -6173,9 +6204,7 @@ bool Project::GetSelectionCenter(float Center[3]) const
 		}
 	}
 
-	Center[0] = (bs[0] + bs[3]) * 0.5f;
-	Center[1] = (bs[1] + bs[4]) * 0.5f;
-	Center[2] = (bs[2] + bs[5]) * 0.5f;
+	Center = Point3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 
 	return Selected;
 }
@@ -7381,32 +7410,43 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			bool sel = false;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
 				if (pPiece->IsSelected())
 				{
 					sel = true;
 					break;
 				}
+			}
 
 			if (!sel)
-			for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-				if (pCamera->IsSelected())
+			{
+				for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 				{
-					sel = true;
-					break;
+					if (pCamera->IsSelected())
+					{
+						sel = true;
+						break;
+					}
 				}
+			}
 
 			if (!sel)
-			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsSelected())
+			{
+				for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 				{
-					sel = true;
-					break;
+					if (pLight->IsSelected())
+					{
+						sel = true;
+						break;
+					}
 				}
+			}
 
 			if (sel)
-      {
+			{
 				StartTracking(LC_TRACK_START_LEFT);
-      }
+				m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
+			}
 		} break;
 
 		case LC_ACTION_ROTATE:
@@ -7414,11 +7454,14 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			Piece* pPiece;
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
 				if (pPiece->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_LEFT);
+					m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
 					break;
 				}
+			}
 		} break;
 
 		case LC_ACTION_ZOOM:
@@ -7724,6 +7767,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 					case LC_OVERLAY_YZ:
 						delta[0] = 0.0f;
 						break;
+					case LC_OVERLAY_CAMERA:
+						break;
 					}
 				}
 
@@ -7766,6 +7811,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 						break;
 					case LC_OVERLAY_YZ:
 						delta[0] = 0.0f;
+						break;
+					case LC_OVERLAY_CAMERA:
 						break;
 					}
 				}
@@ -7855,27 +7902,28 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				(ptz - m_fTrack[2])*mouse };
 			float d[3] = { delta[0], delta[1], delta[2] };
 
-				if (m_OverlayActive)
+			if (m_OverlayActive)
+			{
+				switch (m_OverlayMode)
 				{
-					switch (m_OverlayMode)
-					{
-					case LC_OVERLAY_XYZ:
-						break;
-					case LC_OVERLAY_X:
-						delta[1] = delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_Y:
-						delta[0] = delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_Z:
-						delta[0] = delta[1] = 0.0f;
-						break;
-					case LC_OVERLAY_XY:
-					case LC_OVERLAY_XZ:
-					case LC_OVERLAY_YZ:
-						break;
-					}
+				case LC_OVERLAY_XYZ:
+					break;
+				case LC_OVERLAY_X:
+					delta[1] = delta[2] = 0.0f;
+					break;
+				case LC_OVERLAY_Y:
+					delta[0] = delta[2] = 0.0f;
+					break;
+				case LC_OVERLAY_Z:
+					delta[0] = delta[1] = 0.0f;
+					break;
+				case LC_OVERLAY_XY:
+				case LC_OVERLAY_XZ:
+				case LC_OVERLAY_YZ:
+				case LC_OVERLAY_CAMERA:
+					break;
 				}
+			}
 
 			ldiv_t result;
 			for (int i = 0; i < 3; i++)
@@ -8134,7 +8182,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 		Point3 Closest = SegStart + u * Line;
 
 		int Mode = -1;
-		float Distance = (Closest - Center).LengthSquared();
+		float Distance = (Closest - Center).Length();
 		const float Epsilon = 0.25f * m_OverlayScale;
 
 		if (Distance > (2.5f * m_OverlayScale + Epsilon))
@@ -8143,7 +8191,8 @@ void Project::MouseUpdateOverlays(int x, int y)
 		}
 		else if (Distance > (2.5f * m_OverlayScale - Epsilon))
 		{
-			// TODO: Mode = LC_OVERLAY_VIEW;
+			m_OverlayTrackStart = Closest;
+			Mode = LC_OVERLAY_CAMERA;
 		}
 		else if (Distance < (2.0f * m_OverlayScale + Epsilon))
 		{
@@ -8167,6 +8216,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 			float x3 = m_OverlayCenter[0], y3 = m_OverlayCenter[1], z3 = m_OverlayCenter[2];
 			float r = 2.0f * m_OverlayScale;
 
+			// TODO: rewrite using vectors.
 			float a = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1) + (z2 - z1)*(z2 - z1);
 			float b = 2 * ((x2 - x1)*(x1 - x3) + (y2 - y1)*(y1 - y3) + (z2 - z1)*(z1 - z3));
 			float c = x3*x3 + y3*y3 + z3*z3 + x1*x1 + y1*y1 + z1*z1 - 2*(x3*x1 + y3*y1 + z3*z1) - r*r;
@@ -8193,7 +8243,13 @@ void Project::MouseUpdateOverlays(int x, int y)
 					if (Dot3(ViewDir, Dist) > 0.0f)
 						continue;
 
-					float dx = fabsf(Dist.GetX()), dy = fabsf(Dist.GetY()), dz = fabsf(Dist.GetZ());
+					// Check if we're close enough to one of the axis.
+					Dist.Normalize();
+					Dist.Abs();
+
+					float dx = Dist.GetX();
+					float dy = Dist.GetY();
+					float dz = Dist.GetZ();
 
 					if (dx < dy)
 					{
@@ -8220,6 +8276,29 @@ void Project::MouseUpdateOverlays(int x, int y)
 							if (dz < Epsilon)
 								Mode = LC_OVERLAY_Z;
 						}
+					}
+
+					if (Mode != LC_OVERLAY_XYZ)
+					{
+						switch (Mode)
+						{
+						case LC_OVERLAY_X:
+							Dist.SetX(0.0f);
+							break;
+						case LC_OVERLAY_Y:
+							Dist.SetY(0.0f);
+							break;
+						case LC_OVERLAY_Z:
+							Dist.SetZ(0.0f);
+							break;
+						}
+
+						Dist.Normalize();
+						Dist *= r;
+
+						m_OverlayTrackStart = Center + Dist;
+
+						break;
 					}
 				}
 			}

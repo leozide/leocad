@@ -452,7 +452,7 @@ void PieceInfo::LoadInformation()
 					{
 						p++; // color code
 						quads += LCUINT16(*p);
-						fixquads += LCUINT32(*p);
+						fixquads += LCUINT16(*p);
 						p += LCUINT16(*p) + 1;
 						p += LCUINT16(*p) + 1;
 						p += LCUINT16(*p) + 1;

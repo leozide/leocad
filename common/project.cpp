@@ -172,102 +172,102 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
   imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
   imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
-  for (i = 1; i < argc; i++)
-  {
-    char* param = argv[i];
+	for (i = 1; i < argc; i++)
+	{
+		char* param = argv[i];
 
     if (param[0] == '-')
-    {
-      if (((strcmp (param, "-l") == 0) || (strcmp (param, "--libpath") == 0)) && ((i+1) < argc))
-      {
-	i++;
-	libpath = argv[i];
-      }
-      else if ((strcmp (param, "-i") == 0) || (strcmp (param, "--image") == 0))
-      {
-	save_image = true;
+		{
+			if (((strcmp (param, "-l") == 0) || (strcmp (param, "--libpath") == 0)) && ((i+1) < argc))
+			{
+				i++;
+				libpath = argv[i];
+			}
+			else if ((strcmp (param, "-i") == 0) || (strcmp (param, "--image") == 0))
+			{
+				save_image = true;
 
-	if (((i+1) != argc) && (argv[i+1][0] != '-'))
-	{
-	  i++;
-	  strcpy (picture, argv[i]);
-	}
-      }
-      else if (((strcmp (param, "-w") == 0) || (strcmp (param, "--width") == 0)) && ((i+1) < argc))
-      {
-	int w;
-	i++;
-	if (sscanf(argv[i], "%d", &w) == 1)
-	  width = w;
-      }
-      else if (((strcmp (param, "-h") == 0) || (strcmp (param, "--height") == 0)) && ((i+1) < argc))
-      {
-	int h;
-	i++;
-	if (sscanf(argv[i], "%d", &h) == 1)
-	  height = h;
-      }
-      else if (((strcmp (param, "-f") == 0) || (strcmp (param, "--from") == 0)) && ((i+1) < argc))
-      {
-	int f;
-	i++;
-	if (sscanf(argv[i], "%d", &f) == 1)
-	  from = f;
-      }
-      else if (((strcmp (param, "-t") == 0) || (strcmp (param, "--to") == 0)) && ((i+1) < argc))
-      {
-	int t;
-	i++;
-	if (sscanf(argv[i], "%d", &t) == 1)
-	  to = t;
-      }
-      else if (strcmp (param, "--animation") == 0)
-	animation = 1;
-      else if (strcmp (param, "--instructions") == 0)
-	animation = 0;
-      else if (strcmp (param, "--highlight") == 0)
-	highlight = true;
-      else if ((strcmp (param, "-v") == 0) || (strcmp (param, "--version") == 0))
-      {
-	printf ("LeoCAD version "LC_VERSION" for "LC_VERSION_OSNAME"\n");
-	printf ("Copyright (c) 1996-2001, BT Software\n");
-        printf ("Compiled "__DATE__"\n");
+				if (((i+1) != argc) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					strcpy (picture, argv[i]);
+				}
+			}
+			else if (((strcmp (param, "-w") == 0) || (strcmp (param, "--width") == 0)) && ((i+1) < argc))
+			{
+				int w;
+				i++;
+				if (sscanf(argv[i], "%d", &w) == 1)
+					width = w;
+			}
+			else if (((strcmp (param, "-h") == 0) || (strcmp (param, "--height") == 0)) && ((i+1) < argc))
+			{
+				int h;
+				i++;
+				if (sscanf(argv[i], "%d", &h) == 1)
+					height = h;
+			}
+			else if (((strcmp (param, "-f") == 0) || (strcmp (param, "--from") == 0)) && ((i+1) < argc))
+			{
+				int f;
+				i++;
+				if (sscanf(argv[i], "%d", &f) == 1)
+					from = f;
+			}
+			else if (((strcmp (param, "-t") == 0) || (strcmp (param, "--to") == 0)) && ((i+1) < argc))
+			{
+				int t;
+				i++;
+				if (sscanf(argv[i], "%d", &t) == 1)
+					to = t;
+			}
+			else if (strcmp (param, "--animation") == 0)
+				animation = 1;
+			else if (strcmp (param, "--instructions") == 0)
+				animation = 0;
+			else if (strcmp (param, "--highlight") == 0)
+				highlight = true;
+			else if ((strcmp (param, "-v") == 0) || (strcmp (param, "--version") == 0))
+			{
+				printf ("LeoCAD version "LC_VERSION" for "LC_VERSION_OSNAME"\n");
+				printf ("Copyright (c) 1996-2003, BT Software\n");
+				printf ("Compiled "__DATE__"\n");
 
 #ifdef LC_HAVE_JPEGLIB
-        printf ("With JPEG support\n");
+				printf ("With JPEG support\n");
 #else
-        printf ("Without JPEG support\n");
+				printf ("Without JPEG support\n");
 #endif
 
 #ifdef LC_HAVE_PNGLIB
-        printf ("With PNG support\n");
+				printf ("With PNG support\n");
 #else
-        printf ("Without PNG support\n");
+				printf ("Without PNG support\n");
 #endif
 
 	return false;
-      }
-      else if ((strcmp (param, "-h") == 0) || (strcmp (param, "--help") == 0))
-      {
-      }
-      else
-	printf ("Unknown parameter: %s\n", param);
-    }
-    else
-    {
-      strcpy (m_strPathName, param);
+			}
+			else if ((strcmp (param, "-h") == 0) || (strcmp (param, "--help") == 0))
+			{
+			}
+			else
+				printf ("Unknown parameter: %s\n", param);
+		}
+		else
+		{
+			strcpy (m_strPathName, param);
 /*
-      if (m_strFileName.IsEmpty())
-	m_strFileName = pszParam;
-      else if (m_nShellCommand == FilePrintTo && m_strPrinterName.IsEmpty())
-	m_strPrinterName = pszParam;
-      else if (m_nShellCommand == FilePrintTo && m_strDriverName.IsEmpty())
-	m_strDriverName = pszParam;
-      else if (m_nShellCommand == FilePrintTo && m_strPortName.IsEmpty())
-	m_strPortName = pszParam;
+			if (m_strFileName.IsEmpty())
+				m_strFileName = pszParam;
+			else if (m_nShellCommand == FilePrintTo && m_strPrinterName.IsEmpty())
+				m_strPrinterName = pszParam;
+			else if (m_nShellCommand == FilePrintTo && m_strDriverName.IsEmpty())
+				m_strDriverName = pszParam;
+			else if (m_nShellCommand == FilePrintTo && m_strPortName.IsEmpty())
+				m_strPortName = pszParam;
 */
-    }
-  }
+		}
+	}
 
   // if the user specified a library, try to load it first
   if (libpath != NULL)
@@ -5096,6 +5096,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
+		case LC_VIEW_ZOOM:
+		{
+			m_pViewCameras[m_nActiveViewport]->DoZoom(nParam, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			SystemUpdateFocus(NULL, 0);
+			UpdateAllViews();
+		} break;
+
 		case LC_VIEW_ZOOMIN:
 		{
 			m_pViewCameras[m_nActiveViewport]->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
@@ -5890,6 +5897,7 @@ bool Project::SetActiveViewport(int px, int py)
 //				glDrawBuffer(GL_FRONT);
 //				RenderViewports(true);
 //				glDrawBuffer(GL_BACK);
+				UpdateAllViews();
 
 				return true;
 			}
@@ -6355,13 +6363,21 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 		case KEY_PLUS: // case '+': case '=':
 		{
-			HandleCommand(LC_VIEW_ZOOMIN, 0);
+			if (bShift)
+				HandleCommand(LC_VIEW_ZOOM, -10);
+			else
+				HandleCommand(LC_VIEW_ZOOM, -1);
+
 			ret = true;
 		} break;
 			
 		case KEY_MINUS: // case '-': case '_':
 		{
-			HandleCommand(LC_VIEW_ZOOMOUT, 0);
+			if (bShift)
+				HandleCommand(LC_VIEW_ZOOM, 10);
+			else
+				HandleCommand(LC_VIEW_ZOOM, 1);
+
 			ret = true;
 		} break;
 

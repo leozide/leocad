@@ -85,7 +85,7 @@ unsigned long SwapLONG(unsigned long x)
 #define ABS(a)	(((a) > 0) ? (a) : -(a))
 #endif
 
-#ifndef RGB
+#ifndef LC_WINDOWS
 #define RGB(r, g, b) ((unsigned long)(((unsigned char) (r) | ((unsigned short) (g) << 8))|(((unsigned long) (unsigned char) (b)) << 16))) 
 #endif 
 

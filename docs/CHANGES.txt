@@ -1,5 +1,9 @@
 This is a changelog for developers only, not for ordinary users.
 
+24/08/2000
+	- Updated the Windows version with the new Minifig Wizard.
+	- Fixed OpenGL problems on the Windows version.
+
 21/08/2000
 	- New options for the Minifig Wizard, now each piece can be rotated.
 

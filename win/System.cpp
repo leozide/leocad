@@ -308,29 +308,39 @@ void SystemDoWaitCursor(int nCode)
 	}
 }
 
+void Sys_BeginWait ()
+{
+  SystemDoWaitCursor (1);
+}
+
+void Sys_EndWait ()
+{
+  SystemDoWaitCursor (-1);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Profile Access
 
 // returns the store value or default
-int SystemGetProfileInt(const char* section, const char* entry, const int defaultvalue)
+int Sys_ProfileLoadInt(const char* section, const char* entry, const int defaultvalue)
 {
 	return theApp.GetProfileInt(section, entry, defaultvalue);
 }
 
 // returns true if successful
-bool SystemSetProfileInt(const char* section, const char* entry, const int value)
+bool Sys_ProfileSaveInt(const char* section, const char* entry, const int value)
 {
 	return theApp.WriteProfileInt(section, entry, value) ? true : false;
 }
 
-const char* SystemGetProfileString(const char* section, const char* entry, const char* defaultvalue)
+char* Sys_ProfileLoadString(const char* section, const char* entry, const char* defaultvalue)
 {
 	static CString str;
 	str = theApp.GetProfileString(section, entry, defaultvalue);
-	return (LPCSTR)str;
+	return (char*)(LPCSTR)str;
 }
 
-bool SystemSetProfileString(const char* section, const char* entry, const char* value)
+bool Sys_ProfileSaveString(const char* section, const char* entry, const char* value)
 {
 	return theApp.WriteProfileString(section, entry, value) ? true : false;
 }
@@ -1019,6 +1029,11 @@ int SystemDoMessageBox(char* prompt, int nMode)
 	return AfxMessageBox(prompt, nMode);
 }
 
+int Sys_MessageBox (const char* text, const char* caption, int type)
+{
+	return AfxMessageBox(text, type);
+}
+
 extern BOOL AFXAPI AfxFullPath(LPTSTR lpszPathOut, LPCTSTR lpszFileIn);
 
 bool SystemDoDialog(int nMode, void* param)
@@ -1360,7 +1375,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_ABOUT:
 		{
 			CAboutDlg dlg;
-			dlg.m_hViewDC = wglGetCurrentDC();
+			dlg.m_hViewDC = pfnwglGetCurrentDC();
 			dlg.DoModal();
 		} break;
 	}
@@ -1381,14 +1396,14 @@ typedef struct
 	HBITMAP oldhbm;
 } LC_RENDER;
 
-void* SystemStartRender(int width, int height)
+void* Sys_StartMemoryRender(int width, int height)
 {
 	LC_RENDER* render = (LC_RENDER*)malloc(sizeof(LC_RENDER));
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	CView* pView = pFrame->GetActiveView();
 	CDC* pDC = pView->GetDC();
-	render->oldhdc = wglGetCurrentDC();
-	render->oldhrc = wglGetCurrentContext();
+	render->oldhdc = pfnwglGetCurrentDC();
+	render->oldhrc = pfnwglGetCurrentContext();
 	render->hdc = CreateCompatibleDC(pDC->m_hDC);
 
 	// Preparing bitmap header for DIB section
@@ -1414,99 +1429,25 @@ void* SystemStartRender(int width, int height)
 		PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
 		0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 
-	int pixelformat = ChoosePixelFormat(render->hdc, &pfd);
-	DescribePixelFormat(render->hdc, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	SetPixelFormat(render->hdc, pixelformat, &pfd);
-    render->hrc = wglCreateContext(render->hdc);
-	wglMakeCurrent(render->hdc, render->hrc);
+	int pixelformat = pfnwglChoosePixelFormat(render->hdc, &pfd);
+	pfnwglDescribePixelFormat(render->hdc, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	pfnwglSetPixelFormat(render->hdc, pixelformat, &pfd);
+  render->hrc = pfnwglCreateContext(render->hdc);
+	pfnwglMakeCurrent(render->hdc, render->hrc);
 
 	return render;
 }
 
-void SystemFinishRender(void* param)
+void Sys_FinishMemoryRender(void* param)
 {
 	LC_RENDER* render = (LC_RENDER*)param;
 
-	wglMakeCurrent (render->oldhdc, render->oldhrc);
-	wglDeleteContext(render->hrc);
+	pfnwglMakeCurrent (render->oldhdc, render->oldhrc);
+	pfnwglDeleteContext(render->hrc);
 	SelectObject(render->hdc, render->oldhbm);
 	DeleteObject(render->hbm);
 	DeleteDC(render->hdc);
 	free(render);
-}
-
-LC_IMAGE* SystemGetRenderImage(void* param)
-{
-	LC_RENDER* render = (LC_RENDER*)param;
-	HANDLE hdib;
-	HDC hdc;
-	BITMAP bitmap;
-	UINT wLineLen;
-	DWORD dwSize, wColSize;
-	LPBITMAPINFOHEADER lpbi;
-	LPBYTE lpBits;
-
-	glFinish();
-	GetObject(render->hbm, sizeof(BITMAP), &bitmap);
-
-	// DWORD align the width of the DIB
-	// Figure out the size of the colour table
-	// Calculate the size of the DIB
-	wLineLen = (bitmap.bmWidth*24+31)/32 * 4;
-	wColSize = sizeof(RGBQUAD)*((24 <= 8) ? 1 << 24 : 0);
-	dwSize = sizeof(BITMAPINFOHEADER) + wColSize +
-		(DWORD)(UINT)wLineLen*(DWORD)(UINT)bitmap.bmHeight;
-
-	// Allocate room for a DIB and set the LPBI fields
-	hdib = GlobalAlloc(GHND, dwSize);
-	if (!hdib)
-		return NULL;
-
-	lpbi = (LPBITMAPINFOHEADER)GlobalLock(hdib);
-	lpbi->biSize = sizeof(BITMAPINFOHEADER);
-	lpbi->biWidth = bitmap.bmWidth;
-	lpbi->biHeight = bitmap.bmHeight;
-	lpbi->biPlanes = 1;
-	lpbi->biBitCount = (WORD)24;
-	lpbi->biCompression = BI_RGB;
-	lpbi->biSizeImage = dwSize - sizeof(BITMAPINFOHEADER) - wColSize;
-	lpbi->biXPelsPerMeter = 0;
-	lpbi->biYPelsPerMeter = 0;
-	lpbi->biClrUsed = (24 <= 8) ? 1 << 24 : 0;
-	lpbi->biClrImportant = 0;
-
-	// Get the bits from the bitmap and stuff them after the LPBI
-	lpBits = (LPBYTE)(lpbi+1)+wColSize;
-	hdc = CreateCompatibleDC(NULL);
-	GetDIBits(hdc, render->hbm, 0, bitmap.bmHeight,
-		lpBits, (LPBITMAPINFO)lpbi, DIB_RGB_COLORS);
-
-	// Fix this if GetDIBits messed it up....
-	lpbi->biClrUsed = (24 <= 8) ? 1 << 24 : 0;
-
-	DeleteDC(hdc);
-
-	LC_IMAGE* image = (LC_IMAGE*)malloc(bitmap.bmWidth*bitmap.bmHeight*3+sizeof(LC_IMAGE));
-	image->width = (unsigned short)bitmap.bmWidth;
-	image->height = (unsigned short)bitmap.bmHeight;
-	image->bits = (char*)image + sizeof(LC_IMAGE);
-
-	for (int i = 0; i < image->height; i++)
-	{
-		unsigned char* out = (unsigned char*)image->bits + (image->height-i-1)*image->width*3;
-		unsigned char* in = lpBits + i*wLineLen;
-		for (int j = 0; j < image->width*3; j += 3)
-		{
-			out[j] = in[j+2];
-			out[j+1] = in[j+1];
-			out[j+2] = in[j];
-		}
-	}
-
-	GlobalUnlock(hdib);
-	GlobalFree(hdib);
-
-	return image;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1596,4 +1537,29 @@ File* SystemImportClipboard()
 bool Sys_KeyDown (int key)
 {
   return GetKeyState (KEY_CONTROL) < 0;
+}
+
+void SystemPumpMessages()
+{
+	MSG msg;
+	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+long SystemGetTicks()
+{
+	return GetTickCount();
+}
+
+void SystemSwapBuffers()
+{
+	pfnwglSwapBuffers (pfnwglGetCurrentDC());
+}
+
+void SystemSetGroup(int group)
+{
+	AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, group+2, 0);
 }

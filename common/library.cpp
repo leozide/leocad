@@ -4,6 +4,7 @@
 
 #include <malloc.h>
 #include <string.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defines.h"
 #include "globals.h"

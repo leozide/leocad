@@ -91,6 +91,9 @@ BOOL CCADApp::InitInstance()
 	SetRegistryKey(_T("BT Software"));
 //	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
+  if (!GL_Initialize (NULL))
+    return FALSE;
+
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views.
 
@@ -111,19 +114,13 @@ BOOL CCADApp::InitInstance()
 	m_nCmdShow = SW_HIDE;
 	pDocTemplate->OpenDocumentFile(NULL);
 
-	// Try to find the piece library.
-	char* envp = ::getenv("LEOCAD_LIB");
-	if (envp == NULL)
-	{
-		static char app[LC_MAXPATH], *ptr;
-		GetModuleFileName (NULL, app, LC_MAXPATH);
-		ptr = strrchr(app,'\\');
-		if (ptr)
-			*(++ptr) = 0;
-		envp = app;
-	}
+	char app[LC_MAXPATH], *ptr;
+	GetModuleFileName (NULL, app, LC_MAXPATH);
+	ptr = strrchr(app,'\\');
+	if (ptr)
+		*(++ptr) = 0;
 
-	if (!project->Initialize(__argc, __targv, envp))
+	if (!project->Initialize(__argc, __targv, app, NULL))
 		return false;
 
 
@@ -264,7 +261,9 @@ int CCADApp::ExitInstance()
 	if (__hStdOut != NULL)
 		FreeConsole();
 #endif
-	
+
+	GL_Shutdown ();
+
 	return CWinApp::ExitInstance();
 }
 
@@ -281,7 +280,7 @@ void CCADApp::OnHelpUpdates()
 	DWORD dwBytesRead;
 	CString Contents;
 
-	HINTERNET hHttpFile = InternetOpenUrl(session, "http://www.geocities.com/Colosseum/3479/updates.txt", NULL, 0, 0, 0);
+	HINTERNET hHttpFile = InternetOpenUrl(session, "http://www.leocad.org", NULL, 0, 0, 0);
 
 	if (hHttpFile)
 	{
@@ -323,7 +322,7 @@ void CCADApp::OnHelpUpdates()
 
 void CCADApp::OnHelpHomePage() 
 {
-	ShellExecute(::GetDesktopWindow(), _T("open"), _T("http://www.geocities.com\\Colosseum\\3479\\leocad.htm"), NULL, NULL, SW_NORMAL); 
+	ShellExecute(::GetDesktopWindow(), _T("open"), _T("http://www.leocad.org"), NULL, NULL, SW_NORMAL); 
 }
 
 void CCADApp::OnHelpEmail() 

@@ -64,8 +64,8 @@ void CPiecePreview::OnPaint()
 	if (!IsWindowEnabled() || (m_pPieceInfo == NULL))
 		return;
 
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
 
 	if (m_pPalette)
 	{
@@ -73,7 +73,7 @@ void CPiecePreview::OnPaint()
 		m_pDC->RealizePalette();
 	}
 
-	wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
+	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	double aspect = (float)m_szView.cx/(float)m_szView.cy;
 	glViewport(0, 0, m_szView.cx, m_szView.cy);
@@ -95,9 +95,9 @@ void CPiecePreview::OnPaint()
 
 	m_pPieceInfo->RenderPiece(project->GetCurrentColor());
 
-    glFinish();
-	SwapBuffers(m_pDC->m_hDC);
-	wglMakeCurrent (oldDC, oldRC);
+  glFinish();
+	pfnwglSwapBuffers (m_pDC->m_hDC);
+	pfnwglMakeCurrent (oldDC, oldRC);
 }
 
 void CPiecePreview::OnSize(UINT nType, int cx, int cy) 
@@ -129,11 +129,11 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 		
-	int nPixelFormat = ChoosePixelFormat(m_pDC->m_hDC, &pfd);
+	int nPixelFormat = pfnwglChoosePixelFormat(m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return 0;
 
-	if (!SetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!pfnwglSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
 		return 0;
 
 	m_pPalette = new CPalette;
@@ -150,17 +150,17 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 		
 	// Create a rendering context.
-	m_hglRC = wglCreateContext(m_pDC->m_hDC);
+	m_hglRC = pfnwglCreateContext(m_pDC->m_hDC);
 	if (!m_hglRC)
 		return 0;
 
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
-	wglMakeCurrent (m_pDC->m_hDC, m_hglRC);
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
+	pfnwglMakeCurrent (m_pDC->m_hDC, m_hglRC);
 
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
-    glEnable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
@@ -172,8 +172,8 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	glDisable (GL_DITHER);
 	glShadeModel (GL_FLAT);
 
-	wglMakeCurrent(oldDC, oldRC);
-	wglShareLists(oldRC, m_hglRC);
+	pfnwglMakeCurrent (oldDC, oldRC);
+	pfnwglShareLists (oldRC, m_hglRC);
 
 	return 0;
 }
@@ -190,7 +190,7 @@ void CPiecePreview::OnDestroy()
 	}
 
 	if (m_hglRC)
-		wglDeleteContext(m_hglRC);
+		pfnwglDeleteContext(m_hglRC);
 	if (m_pDC)
 		delete m_pDC;
 

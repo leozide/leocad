@@ -23,8 +23,7 @@
 
 //#include <afxadv.h>			// CSharedFile
 
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include "opengl.h"
 
 #define IDT_LC_SAVETIMER		(WM_USER+200)
 #define IDT_LC_WHEELTIMER		(WM_USER+201)

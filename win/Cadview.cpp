@@ -141,7 +141,7 @@ void CCADView::OnDraw(CDC* /*pDC*/)
 	else
 		pDoc->Render(FALSE);
 
-	SwapBuffers(wglGetCurrentDC());
+	pfnwglSwapBuffers (pfnwglGetCurrentDC());
 */
 }
 
@@ -284,7 +284,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	bi.bmiHeader.biXPelsPerMeter = 2925;
 	bi.bmiHeader.biYPelsPerMeter = 2925;
 	
-    HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
+  HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
 	HBITMAP hBmOld = (HBITMAP)SelectObject(hMemDC, hBm);
 
     // Setting up a Pixel format for the DIB surface
@@ -292,14 +292,14 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 			1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = ChoosePixelFormat(hMemDC, &pfd);
-	DescribePixelFormat(hMemDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	SetPixelFormat(hMemDC, pixelformat, &pfd);
+	int pixelformat = pfnwglChoosePixelFormat(hMemDC, &pfd);
+	pfnwglDescribePixelFormat (hMemDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	pfnwglSetPixelFormat (hMemDC, pixelformat, &pfd);
 	
 	// Creating OpenGL context
-    HGLRC hmemrc = wglCreateContext(hMemDC);
-	wglMakeCurrent(hMemDC, hmemrc);
-//	if (!wglShareLists(m_hglRC, hmemrc))
+  HGLRC hmemrc = pfnwglCreateContext(hMemDC);
+	pfnwglMakeCurrent(hMemDC, hmemrc);
+//	if (!pfnwglShareLists(m_hglRC, hmemrc))
 //		pDoc->RebuildDisplayLists(TRUE);
 	project->RenderInitialize();
 
@@ -421,8 +421,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	project->m_nViewX = oldSizex;
 	project->m_nViewY = oldSizey;
 
-	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(hmemrc);
+	pfnwglMakeCurrent(NULL, NULL);
+	pfnwglDeleteContext(hmemrc);
 	SelectObject(hMemDC, hBmOld);
 	DeleteObject(hBm);
 	DeleteDC(hMemDC);
@@ -431,7 +431,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 	glFinish();
-//		wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
+//		pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);
 	lf.lfWeight = FW_REGULAR;
@@ -544,7 +544,7 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT page, BOOL bCat
 
 void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
+	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
 }
 
 void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView) 
@@ -582,9 +582,9 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 ///
 
 
-	wglMakeCurrent(NULL, NULL);
+	pfnwglMakeCurrent(NULL, NULL);
 
-	if (GetPixelFormat(m_pDC->GetSafeHdc()) == 0)
+	if (pfnwglGetPixelFormat(m_pDC->GetSafeHdc()) == 0)
 	{
 		delete m_pDC;
 		m_pDC = new CClientDC(this);
@@ -594,19 +594,19 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
  			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 	
-		int pixelformat = ChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
+		int pixelformat = pfnwglChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
 		if (pixelformat == 0)
 		{
 			AfxMessageBox("ChoosePixelFormat failed");
 		}
 
-		if (SetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
+		if (pfnwglSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
 		{
 			AfxMessageBox("SetPixelFormat failed");
 		}
 	}
 
-	if (wglMakeCurrent(m_pDC->m_hDC, m_hglRC) == FALSE)
+	if (pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC) == FALSE)
 	{
 		LPTSTR lpMsgBuf;
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -772,14 +772,14 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		0, 0,							// no stencil & auxiliary buffer
 		PFD_MAIN_PLANE, 0, 0, 0, 0 };	// layer masks ignored
 	
-	int pixelformat = ChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
+	int pixelformat = pfnwglChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
 	if (pixelformat == 0)
 	{
 		AfxMessageBox("ChoosePixelFormat failed");
 		return -1;
 	}
 
-	if (SetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
+	if (pfnwglSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
 	{
 		AfxMessageBox("SetPixelFormat failed");
 		return -1;
@@ -797,9 +797,10 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		m_pPalette = NULL;
 	}
 
-	m_hglRC = wglCreateContext(m_pDC->m_hDC);
-	wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
+	m_hglRC = pfnwglCreateContext(m_pDC->m_hDC);
+	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
+  GL_InitializeExtensions ();
 	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
 	return 0;
@@ -829,10 +830,10 @@ BOOL CCADView::OnQueryNewPalette()
 
 void CCADView::OnDestroy() 
 {
-	wglMakeCurrent(NULL,  NULL);
+	pfnwglMakeCurrent(NULL,  NULL);
 
 	if (m_hglRC)
-		wglDeleteContext(m_hglRC);
+		pfnwglDeleteContext(m_hglRC);
 
 	if (m_pPalette)
 	{

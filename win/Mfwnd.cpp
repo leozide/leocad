@@ -5,10 +5,7 @@
 #include "LeoCAD.h"
 #include "MFWnd.h"
 #include "Tools.h"
-#include "project.h"
-#include "globals.h"
-#include "Matrix.h"
-#include "pieceinf.h"
+#include "minifig.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,22 +43,22 @@ int CMinifigWnd::InitGL()
 	ASSERT(m_pDC != NULL);
 
 	// Fill in the Pixel Format Descriptor
-    PIXELFORMATDESCRIPTOR pfd;
+  PIXELFORMATDESCRIPTOR pfd;
 	memset(&pfd,0, sizeof(PIXELFORMATDESCRIPTOR));
 
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
-    pfd.nVersion = 1;
+  pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
+  pfd.nVersion = 1;
 	pfd.dwFlags  =  PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
+  pfd.cColorBits = 24;
 	pfd.cDepthBits = 24;
-    pfd.iLayerType = PFD_MAIN_PLANE;
+  pfd.iLayerType = PFD_MAIN_PLANE;
 
-    int nPixelFormat = ChoosePixelFormat(m_pDC->m_hDC, &pfd);
+  int nPixelFormat = pfnwglChoosePixelFormat(m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return -1 ;
 
-	if (!SetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!pfnwglSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
 		return -1 ;
 
 	m_pPal = new CPalette;
@@ -78,37 +75,16 @@ int CMinifigWnd::InitGL()
 	}
 
     // Create a rendering context.
-	m_hrc = wglCreateContext(m_pDC->m_hDC);
+	m_hrc = pfnwglCreateContext(m_pDC->m_hDC);
 	if (!m_hrc)
 		return -1;
 
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
-	wglShareLists(oldRC, m_hrc);
-	wglMakeCurrent (m_pDC->m_hDC, m_hrc);
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
+	pfnwglShareLists(oldRC, m_hrc);
+	pfnwglMakeCurrent (m_pDC->m_hDC, m_hrc);
 
-	CRect rc;
-	GetClientRect (&rc);
-
-	double aspect = (float)rc.right/(float)rc.bottom;
-	glViewport(0, 0, rc.right, rc.bottom);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(30.0f, aspect, 1.0f, 50.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
-	gluLookAt (0, -9, 4, 0, 5, 1, 0, 0, 1);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	float *bg = project->GetBackgroundColor();
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable (GL_DITHER);
-	glShadeModel (GL_FLAT);
-
-	wglMakeCurrent (oldDC, oldRC);
+	pfnwglMakeCurrent (oldDC, oldRC);
 
 	return 0;
 }
@@ -129,14 +105,14 @@ void CMinifigWnd::OnDestroy()
 {
 	if (m_pPal)
 	{
-	    CPalette palDefault;
+    CPalette palDefault;
 		palDefault.CreateStockObject(DEFAULT_PALETTE);
 		m_pDC->SelectPalette(&palDefault, FALSE);
 		delete m_pPal;
 	}
 
 	if (m_hrc)
-		wglDeleteContext(m_hrc);
+		pfnwglDeleteContext(m_hrc);
 	if (m_pDC)
 		delete m_pDC;
 
@@ -151,28 +127,16 @@ void CMinifigWnd::DrawScene()
 		m_pDC->RealizePalette();
 	}
 
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
-	wglMakeCurrent (m_pDC->m_hDC, m_hrc);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
+	pfnwglMakeCurrent (m_pDC->m_hDC, m_hrc);
 
-	for (int i = 0; i < 15; i++)
-	{
-		if (m_pFig->info[i] == NULL)
-			continue;
+	RECT rc;
+	GetClientRect (&rc);
 
-		glPushMatrix();
-		Matrix mat;
-		float rot[4];
-		mat.CreateOld(0,0,0, m_pFig->rot[i][0], m_pFig->rot[i][1], m_pFig->rot[i][2]);
-		mat.ToAxisAngle(rot);
-		glTranslatef(m_pFig->pos[i][0], m_pFig->pos[i][1], m_pFig->pos[i][2]);
-		glRotatef(rot[3], rot[0], rot[1], rot[2]);
-		m_pFig->info[i]->RenderPiece(m_pFig->colors[i]);
-		glPopMatrix();
-	}
+	m_pFig->Resize (rc.right, rc.bottom);
+  m_pFig->Redraw ();
 
-	glFinish();
-	SwapBuffers(m_pDC->m_hDC);
-	wglMakeCurrent (oldDC, oldRC);
+	pfnwglSwapBuffers (m_pDC->m_hDC);
+	pfnwglMakeCurrent (oldDC, oldRC);
 }

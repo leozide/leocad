@@ -784,14 +784,14 @@ void CPreferencesKeyboard::OnKeydlgRemove()
 
 	if (Sel == 0)
 	{
-		Cmd.Modifiers >>= 4;
+		Cmd.Flags = LC_KEYMOD_2TO1(Cmd.Flags);
 		Cmd.Key1 = Cmd.Key2;
 		Cmd.Key2 = 0;
 	}
 	else
 	{
 		Cmd.Key2 = 0;
-		Cmd.Modifiers &= 0x0f;
+		Cmd.Flags &= ~LC_KEYMOD2_MASK;
 	}
 
 	OnSelchangeKeydlgCmdlist();
@@ -812,8 +812,8 @@ void CPreferencesKeyboard::OnKeydlgAssign()
 
 		if (Cmd.Key1 == m_Edit.m_Key)
 		{
-			if ((((Cmd.Modifiers & LC_KEYMOD1_SHIFT) != 0) == m_Edit.m_Shift) &&
-			    (((Cmd.Modifiers & LC_KEYMOD1_CONTROL) != 0) == m_Edit.m_Control))
+			if ((((Cmd.Flags & LC_KEYMOD1_SHIFT) != 0) == m_Edit.m_Shift) &&
+			    (((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0) == m_Edit.m_Control))
 			{
 				Match = 1;
 			}
@@ -821,8 +821,8 @@ void CPreferencesKeyboard::OnKeydlgAssign()
 
 		if (Cmd.Key2 == m_Edit.m_Key)
 		{
-			if ((((Cmd.Modifiers & LC_KEYMOD2_SHIFT) != 0) == m_Edit.m_Shift) &&
-			    (((Cmd.Modifiers & LC_KEYMOD2_CONTROL) != 0) == m_Edit.m_Control))
+			if ((((Cmd.Flags & LC_KEYMOD2_SHIFT) != 0) == m_Edit.m_Shift) &&
+			    (((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0) == m_Edit.m_Control))
 			{
 				Match = 2;
 			}
@@ -844,14 +844,14 @@ void CPreferencesKeyboard::OnKeydlgAssign()
 				// Remove old shortcut.
 				if (Match == 1)
 				{
-					Cmd.Modifiers >>= 4;
+					Cmd.Flags = LC_KEYMOD_2TO1(Cmd.Flags);
 					Cmd.Key1 = Cmd.Key2;
 					Cmd.Key2 = 0;
 				}
 				else
 				{
 					Cmd.Key2 = 0;
-					Cmd.Modifiers |= 0x0f;
+					Cmd.Flags &= ~LC_KEYMOD2_MASK;
 				}
 			}
 		}
@@ -865,20 +865,20 @@ void CPreferencesKeyboard::OnKeydlgAssign()
 		Cmd.Key1 = m_Edit.m_Key;
 
 		if (m_Edit.m_Shift)
-			Cmd.Modifiers |= LC_KEYMOD1_SHIFT;
+			Cmd.Flags |= LC_KEYMOD1_SHIFT;
 
 		if (m_Edit.m_Control)
-			Cmd.Modifiers |= LC_KEYMOD1_CONTROL;
+			Cmd.Flags |= LC_KEYMOD1_CONTROL;
 	}
 	else
 	{
 		Cmd.Key2 = m_Edit.m_Key;
 
 		if (m_Edit.m_Shift)
-			Cmd.Modifiers |= LC_KEYMOD2_SHIFT;
+			Cmd.Flags |= LC_KEYMOD2_SHIFT;
 
 		if (m_Edit.m_Control)
-			Cmd.Modifiers |= LC_KEYMOD2_CONTROL;
+			Cmd.Flags |= LC_KEYMOD2_CONTROL;
 	}
 
 	m_Edit.ResetKey();
@@ -903,10 +903,10 @@ void CPreferencesKeyboard::OnSelchangeKeydlgCmdlist()
 	{
 		CString str;
 
-		if (Cmd.Modifiers & LC_KEYMOD1_SHIFT)
+		if (Cmd.Flags & LC_KEYMOD1_SHIFT)
 			str = "Shift+";
 
-		if (Cmd.Modifiers & LC_KEYMOD1_CONTROL)
+		if (Cmd.Flags & LC_KEYMOD1_CONTROL)
 			str += "Ctrl+";
 
 		str += GetKeyName(Cmd.Key1);
@@ -919,10 +919,10 @@ void CPreferencesKeyboard::OnSelchangeKeydlgCmdlist()
 		{
 			str = "";
 
-			if (Cmd.Modifiers & LC_KEYMOD2_SHIFT)
+			if (Cmd.Flags & LC_KEYMOD2_SHIFT)
 				str = "Shift+";
 
-			if (Cmd.Modifiers & LC_KEYMOD2_CONTROL)
+			if (Cmd.Flags & LC_KEYMOD2_CONTROL)
 				str += "Ctrl+";
 
 			str += GetKeyName(Cmd.Key2);

@@ -65,13 +65,13 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 //	{ LC_VIEW_STEP_SET, "", 0, 0, 0 },
 //	{ LC_VIEW_STOP, "", 0, 0, 0 },
 //	{ LC_VIEW_PLAY, "", 0, 0, 0 },
-	{ LC_VIEW_CAMERA_FRONT, "Camera Front", 0, LC_KEY_F, 0 },
-	{	LC_VIEW_CAMERA_BACK, "Camera Back", 0, LC_KEY_B, 0 },
-	{	LC_VIEW_CAMERA_TOP, "Camera Top", 0, LC_KEY_T, 0 },
-	{	LC_VIEW_CAMERA_BOTTOM, "Camera Bottom", 0, LC_KEY_U, 0 },
-	{	LC_VIEW_CAMERA_LEFT, "Camera Left", 0, LC_KEY_L, 0 },
-	{	LC_VIEW_CAMERA_RIGHT, "Camera Right", 0, LC_KEY_R, 0 },
-	{	LC_VIEW_CAMERA_MAIN, "Camera Main", 0, LC_KEY_M, 0 },
+	{ LC_VIEW_CAMERA_FRONT, "Camera Front", LC_KEYMOD_VIEWONLY, LC_KEY_F, 0 },
+	{	LC_VIEW_CAMERA_BACK, "Camera Back", LC_KEYMOD_VIEWONLY, LC_KEY_B, 0 },
+	{	LC_VIEW_CAMERA_TOP, "Camera Top", LC_KEYMOD_VIEWONLY, LC_KEY_T, 0 },
+	{	LC_VIEW_CAMERA_BOTTOM, "Camera Bottom", LC_KEYMOD_VIEWONLY, LC_KEY_U, 0 },
+	{	LC_VIEW_CAMERA_LEFT, "Camera Left", LC_KEYMOD_VIEWONLY, LC_KEY_L, 0 },
+	{	LC_VIEW_CAMERA_RIGHT, "Camera Right", LC_KEYMOD_VIEWONLY, LC_KEY_R, 0 },
+	{	LC_VIEW_CAMERA_MAIN, "Camera Main", LC_KEYMOD_VIEWONLY, LC_KEY_M, 0 },
 //	{ LC_VIEW_CAMERA_MENU, "", 0, 0, 0 },
 //	{ LC_VIEW_CAMERA_RESET, "", 0, 0, 0 },
 //	{ LC_VIEW_AUTOPAN, "", 0, 0, 0 },
@@ -130,10 +130,10 @@ bool SaveKeyboardShortcuts(const char* FileName)
 
 		if (Cmd.Key1)
 		{
-			if (Cmd.Modifiers & LC_KEYMOD1_SHIFT)
+			if (Cmd.Flags & LC_KEYMOD1_SHIFT)
 				str += "Shift+";
 
-			if (Cmd.Modifiers & LC_KEYMOD1_CONTROL)
+			if (Cmd.Flags & LC_KEYMOD1_CONTROL)
 				str += "Ctrl+";
 
 			str += "\"";
@@ -145,10 +145,10 @@ bool SaveKeyboardShortcuts(const char* FileName)
 		{
 			str += ",";
 
-			if (Cmd.Modifiers & LC_KEYMOD2_SHIFT)
+			if (Cmd.Flags & LC_KEYMOD2_SHIFT)
 				str += "Shift+";
 
-			if (Cmd.Modifiers & LC_KEYMOD2_CONTROL)
+			if (Cmd.Flags & LC_KEYMOD2_CONTROL)
 				str += "Ctrl+";
 
 			str += "\"";
@@ -179,7 +179,7 @@ bool LoadKeyboardShortcuts(const char* FileName)
 
 		Cmd.Key1 = 0;
 		Cmd.Key2 = 0;
-		Cmd.Modifiers = 0;
+		Cmd.Flags = DefaultKeyboardShortcuts[i].Flags & ~LC_KEYMOD_MASK;
 	}
 
 	char Line[1024];
@@ -203,13 +203,13 @@ bool LoadKeyboardShortcuts(const char* FileName)
 
 			if (!strncmp(ptr, "Shift+", 6))
 			{
-				Cmd.Modifiers |= LC_KEYMOD1_SHIFT;
+				Cmd.Flags |= LC_KEYMOD1_SHIFT;
 				ptr += 6;
 			}
 
 			if (!strncmp(ptr, "Ctrl+", 5))
 			{
-				Cmd.Modifiers |= LC_KEYMOD1_CONTROL;
+				Cmd.Flags |= LC_KEYMOD1_CONTROL;
 				ptr += 5;
 			}
 
@@ -218,8 +218,8 @@ bool LoadKeyboardShortcuts(const char* FileName)
 
 			if (ptr2 == NULL)
 			{
-				Cmd.Modifiers = 0;
-				continue;
+				Cmd.Flags &= ~(LC_KEYMOD1_SHIFT | LC_KEYMOD1_CONTROL);
+				break;
 			}
 
 			*ptr2 = 0;
@@ -228,18 +228,18 @@ bool LoadKeyboardShortcuts(const char* FileName)
 			ptr = ptr2 + 1;
 
 			if (*ptr != ',')
-				continue;
+				break;
 			ptr++;
 
 			if (!strncmp(ptr, "Shift+", 6))
 			{
-				Cmd.Modifiers |= LC_KEYMOD2_SHIFT;
+				Cmd.Flags |= LC_KEYMOD2_SHIFT;
 				ptr += 6;
 			}
 
 			if (!strncmp(ptr, "Ctrl+", 5))
 			{
-				Cmd.Modifiers |= LC_KEYMOD2_CONTROL;
+				Cmd.Flags |= LC_KEYMOD2_CONTROL;
 				ptr += 5;
 			}
 
@@ -248,12 +248,14 @@ bool LoadKeyboardShortcuts(const char* FileName)
 
 			if (ptr2 == NULL)
 			{
-				Cmd.Modifiers &= ~(LC_KEYMOD2_SHIFT | LC_KEYMOD2_CONTROL);
-				continue;
+				Cmd.Flags &= ~(LC_KEYMOD2_SHIFT | LC_KEYMOD2_CONTROL);
+				break;
 			}
 
 			*ptr2 = 0;
 			Cmd.Key2 = GetKeyFromName(ptr);
+
+			break;
 		}
 	}
 

@@ -65,6 +65,8 @@ static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, vo
     break;
   }
 
+	ctrl.SetRedraw(FALSE);
+
   // select the last line
   line = ctrl.GetLineCount ();
   index = ctrl.LineIndex (line - 1);
@@ -83,6 +85,7 @@ static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, vo
   index = ctrl.LineIndex (line - 1);
   ctrl.SetSel (index, index);
 
+	ctrl.SetRedraw(TRUE);
 	ctrl.InvalidateRect(NULL, FALSE);
 }
 
@@ -1108,14 +1111,32 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			bool Control = GetKeyState(VK_CONTROL) < 0;
 			bool Shift = GetKeyState(VK_SHIFT) < 0;
 
+			// Don't process key presses if the user is typing text.
+			if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()) ||
+				  m_wndPiecesBar.m_wndPiecesList.IsChild(GetFocus()))
+			{
+				if (!Control && (((pMsg->wParam >= 'A') && (pMsg->wParam <= 'Z')) || ((pMsg->wParam >= '0') && (pMsg->wParam <= '9'))))
+				{
+					return CFrameWnd::PreTranslateMessage(pMsg);
+				}
+			}
+
 			for (int i = 0; i < KeyboardShortcutsCount; i++)
 			{
 				LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
 
+				if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
+				{
+					if (GetFocus() != GetActiveView())
+					{
+						break;
+					}
+				}
+
 				if (pMsg->wParam == Cmd.Key1)
 				{
-					if ((Shift == ((Cmd.Modifiers & LC_KEYMOD1_SHIFT) != 0)) &&
-					    (Control == ((Cmd.Modifiers & LC_KEYMOD1_CONTROL) != 0)))
+					if ((Shift == ((Cmd.Flags & LC_KEYMOD1_SHIFT) != 0)) &&
+					    (Control == ((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0)))
 					{
 						project->HandleCommand(Cmd.ID, 0);
 						return true;
@@ -1124,8 +1145,8 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 				if (pMsg->wParam == Cmd.Key2)
 				{
-					if ((Shift == ((Cmd.Modifiers & LC_KEYMOD2_SHIFT) != 0)) &&
-					    (Control == ((Cmd.Modifiers & LC_KEYMOD2_CONTROL) != 0)))
+					if ((Shift == ((Cmd.Flags & LC_KEYMOD2_SHIFT) != 0)) &&
+					    (Control == ((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0)))
 					{
 						project->HandleCommand(Cmd.ID, 0);
 						return true;
@@ -1140,7 +1161,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 void CMainFrame::UpdateMenuAccelerators()
 {
-	DWORD CmdToID[] =
+	WORD CmdToID[] =
 	{
 		ID_FILE_NEW,               // LC_FILE_NEW
 		ID_FILE_OPEN,              // LC_FILE_OPEN
@@ -1240,7 +1261,7 @@ void CMainFrame::UpdateMenuAccelerators()
 	for (int i = 0; i < KeyboardShortcutsCount; i++)
 	{
 		LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
-		DWORD ID = CmdToID[Cmd.ID];
+		WORD ID = CmdToID[Cmd.ID];
 		String str;
 
 		if (ID == 0)
@@ -1248,21 +1269,21 @@ void CMainFrame::UpdateMenuAccelerators()
 
 		if (Cmd.Key1)
 		{
-			if (Cmd.Modifiers & LC_KEYMOD1_SHIFT)
+			if (Cmd.Flags & LC_KEYMOD1_SHIFT)
 				str += "Shift+";
 
-			if (Cmd.Modifiers & LC_KEYMOD1_CONTROL)
+			if (Cmd.Flags & LC_KEYMOD1_CONTROL)
 				str += "Ctrl+";
 
 			str += GetKeyName(Cmd.Key1);
 
 			if (Cmd.Key2)
 			{
-				str += ",";
-				if (Cmd.Modifiers & LC_KEYMOD2_SHIFT)
+				str += ", ";
+				if (Cmd.Flags & LC_KEYMOD2_SHIFT)
 					str += "Shift+";
 
-				if (Cmd.Modifiers & LC_KEYMOD2_CONTROL)
+				if (Cmd.Flags & LC_KEYMOD2_CONTROL)
 					str += "Ctrl+";
 
 				str += GetKeyName(Cmd.Key2);

@@ -421,18 +421,19 @@ void Matrix::ToEulerAngles (float *rot) const
 void Matrix::ToAxisAngle (float *rot) const
 {
   float fTrace = m[0] + m[5] + m[10];
-  float fCos = 0.5*(fTrace-1.0);
+  float inv, fCos = 0.5 * (fTrace - 1.0);
   rot[3] = acos (fCos);  // in [0,PI]
 
-  if (rot[3] > 0.0)
+  if (rot[3] > 0.01f)
   {
-    if (rot[3] < M_PI)
+    if (fabs (M_PI - rot[3]) > 0.01f)
     {
       rot[0] = m[6] - m[9];
       rot[1] = m[8] - m[2];
       rot[2] = m[1] - m[4];
 
-      float inv = 1.0f/(float)sqrt(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+      inv = 1.0f / (float)sqrt (rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+
       rot[0] *= inv;
       rot[1] *= inv;
       rot[2] *= inv;

@@ -13,7 +13,6 @@
 #include "pieceinf.h"
 #include "globals.h"
 #include "system.h"
-#include "library.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,17 +30,18 @@ static const float ver_flt = 0.3f;
 CLibraryDlg::CLibraryDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CLibraryDlg::IDD, pParent)
 {
-	m_bReload = FALSE;
-	m_bModified = FALSE;
 	m_pDragImage = NULL;
 	m_bDragging = FALSE;
-	m_strFile = theApp.GetProfileString("Settings", "Groups", "");
 
 	//{{AFX_DATA_INIT(CLibraryDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 }
 
+CLibraryDlg::~CLibraryDlg()
+{
+	delete m_pDragImage;
+}
 
 void CLibraryDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -117,30 +117,6 @@ BOOL CLibraryDlg::OnInitDialog()
 	m_TreeImages.Create(IDB_PARTICONS, 16, 0, RGB (0,128,128));
 	m_Tree.SetImageList(&m_TreeImages, TVSIL_NORMAL);
 
-	FileDisk idx;
-	char filename[LC_MAXPATH];
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
-
-	// Read the piece library index.
-	strcpy(filename, pLib->GetLibraryPath());
-	strcat(filename, "pieces.idx");
-	if (!idx.Open(filename, "rb"))
-		return FALSE;
-	idx.Seek(34, SEEK_SET); // skip update byte
-
-	m_Parts.SetSize(pLib->GetPieceCount ());
-	for (int i = 0; i < pLib->GetPieceCount (); i++)
-	{
-		PARTGROUPINFO* inf = &m_Parts[i];
-		inf->info = pLib->GetPieceInfo(i);
-		inf->group = inf->info->m_nGroups;
-
-		idx.Seek(85, SEEK_CUR);
-		idx.Read(&inf->defgroup , 4);
-		idx.Seek(8, SEEK_CUR);
-	}
-	idx.Close();
-
 	UpdateList();
 	UpdateTree();
 
@@ -153,26 +129,14 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	{
 		case ID_LIBDLG_FILE_RESET:
 		{
-			for (int i = 0; i < m_Parts.GetSize(); i++)
-			{
-				PARTGROUPINFO* inf = &m_Parts[i];
-				inf->group = inf->defgroup;
-			}
-			m_strFile.Empty();
-			m_nMaxGroups = 9;
-			
+			m_Manager.HandleCommand (LC_LIBDLG_FILE_RESET, 0);
+
 			m_ImageList.DeleteImageList();
 			m_ImageList.Create(IDB_PIECEBAR, 16, 0, 0x00ff00ff);
-			
-			CString str;
-			for (i = 0; i < 32; i++)
-			{
-				str.LoadString (ID_PIECE_GROUP01 + i);
-				strcpy (m_strGroups[i], str);
+
+			for (int i = 0; i < 32; i++)
 				m_nBitmaps[i] = min(i,9);
-			}
-			
-			m_bModified = FALSE;
+
 			UpdateList();
 			UpdateTree();
 
@@ -181,6 +145,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_FILE_OPEN:
 		{
+/*
 			CFileDialog dlg(TRUE, ".lgf\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 				"LeoCAD Group Files (*.lgf)|*.lgf|All Files (*.*)|*.*||",this);
 
@@ -255,19 +220,19 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				UpdateList();
 				UpdateTree();
 			}
-
+*/
 			return TRUE;
 		}
 
 		case ID_LIBDLG_FILE_SAVE:
 		{
-			DoSave(FALSE);
+			m_Manager.DoSave(false);
 			return TRUE;
 		}
 
 		case ID_LIBDLG_FILE_SAVEAS:
 		{
-			DoSave(TRUE);
+			m_Manager.DoSave(true);
 			return TRUE;
 		}
 
@@ -289,16 +254,8 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_FILE_MERGEUPDATE:
 		{
-			CFileDialog filedlg(TRUE, ".lup\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-				"LeoCAD Library Updates (*.lup)|*.lup|All Files (*.*)|*.*||", this);
-			if (filedlg.DoModal() != IDOK)
-				return TRUE;
-
-			project->GetPiecesLibrary ()->LoadUpdate(filedlg.GetPathName());
-
-// update m_Parts
+			m_Manager.HandleCommand (LC_LIBDLG_FILE_MERGEUPDATE, 0);
 			UpdateList();
-			m_bReload = TRUE;
 
 			return TRUE;
 		}
@@ -340,6 +297,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
   			SystemDoWaitCursor(-1);
 	  		FreeLDrawPiece(&piece);
       }
+// update m_Parts
 			return TRUE;
 		}
 
@@ -351,20 +309,16 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_GROUP_INSERT:
 		{
+/*
 			HTREEITEM hti = m_Tree.GetSelectedItem();
 			
 			if (hti)
 			{
 				DWORD dw = m_Tree.GetItemData(hti);
-				if (dw == 0) dw = 1;
-				
-				for (int i = 0; i < 32; i++)
-					if ((DWORD)(1 << i) == dw)
-					{
-						dw = i;
-						break;
-					}
-					
+				if (dw == 0)
+					dw = 1;
+				dw--;
+
 				CGroupDlg dlg(this);
 				if (dlg.DoModal() == IDOK)
 				{
@@ -400,7 +354,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 					UpdateList();
 				}
 			}
-
+*/
 			return TRUE;
 		}
 	
@@ -413,40 +367,15 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				DWORD dw = m_Tree.GetItemData(hti);
 				if (dw == 0)
 					return TRUE;
+				dw--;
 
 				CWaitCursor wc;
-				m_bModified = TRUE;
 
-				for (int i = 0; i < 32; i++)
-					if ((DWORD)(1 << i) == dw)
-					{
-						dw = i;
-						break;
-					}
-
-				for (i = dw; i < m_nMaxGroups; i++)
-				{
-					strcpy (m_strGroups[i], m_strGroups[i+1]);
+				for (int i = dw; i < m_Manager.GetGroupCount(); i++)
 					m_nBitmaps[i] = m_nBitmaps[i+1];
-				}
 
-				for (int j = 0; j < m_Parts.GetSize(); j++)
-				{
-					DWORD grp = m_Parts[j].group;
+				m_Manager.HandleCommand (LC_LIBDLG_GROUP_DELETE, dw);
 
-					for (i = dw+1; i < m_nMaxGroups; i++)
-					{
-						DWORD d = (1 << i);
-						if (grp & d)
-						{
-							grp &= ~d;
-							grp |= (1 << (i-1));
-						}
-					}
-					m_Parts[j].group = grp;
-				}
-
-				m_nMaxGroups--;
 				UpdateTree();
 				UpdateList();
 			}
@@ -456,6 +385,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_GROUP_RENAME:
 		{
+/*
 			HTREEITEM hti = m_Tree.GetSelectedItem();
 
 			if (hti)
@@ -463,14 +393,8 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				DWORD dw = m_Tree.GetItemData(hti);
 				if (dw == 0)
 					return TRUE;
-				
-				for (int i = 0; i < 32; i++)
-					if ((DWORD)(1 << i) == dw)
-					{
-						dw = i;
-						break;
-					}
-					
+				dw--;
+
 				CGroupDlg dlg(this);
 				if (dlg.DoModal() == IDOK)
 				{
@@ -479,7 +403,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 					m_bModified = TRUE;
 				}
 			}
-
+*/
 			return TRUE;
 		}
 
@@ -490,45 +414,19 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (hti)
 			{
 				DWORD dw = m_Tree.GetItemData(hti);
-				if (dw == 0)
-					dw = 1;
+				int j;
 
-				for (int i = 0; i < 32; i++)
-					if ((DWORD)(1 << i) == dw)
-					{
-						dw = i;
-						break;
-					}
+				if (dw == 0)
+					return TRUE;
+				dw--;
 
 				CWaitCursor wc;
-				m_bModified = TRUE;
 
-				char tmp[33];
-				int j;
-				strcpy (tmp, m_strGroups[i]);
-				strcpy (m_strGroups[i], m_strGroups[i-1]);
-				strcpy (m_strGroups[i-1], tmp);
-				j = m_nBitmaps[i];
-				m_nBitmaps[i] = m_nBitmaps[i-1];
-				m_nBitmaps[i-1] = j;
+				m_Manager.HandleCommand (LC_LIBDLG_GROUP_MOVEUP, dw);
 
-				for (j = 0; j < m_Parts.GetSize(); j++)
-				{
-					DWORD grp = m_Parts[j].group;
-					BOOL g1 = (grp & (1 << i)) != 0;
-					BOOL g2 = (grp & (1 << (i-1))) != 0;
-
-					if (g1)
-						grp |= (1 << (i-1));
-					else
-						grp &= ~(1 << (i-1));
-					if (g2)
-						grp |= (1 << i);
-					else
-						grp &= ~(1 << i);
-
-					m_Parts[j].group = grp;
-				}
+				j = m_nBitmaps[dw];
+				m_nBitmaps[dw] = m_nBitmaps[dw-1];
+				m_nBitmaps[dw-1] = j;
 
 				UpdateTree();
 				UpdateList();
@@ -543,45 +441,19 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (hti)
 			{
 				DWORD dw = m_Tree.GetItemData(hti);
-				if (dw == 0)
-					dw = 1;
+				int j;
 
-				for (int i = 0; i < 32; i++)
-					if ((DWORD)(1 << i) == dw)
-					{
-						dw = i;
-						break;
-					}
+				if (dw == 0)
+					return TRUE;
+				dw--;
 
 				CWaitCursor wc;
-				m_bModified = TRUE;
 
-				char tmp[33];
-				int j;
-				strcpy (tmp, m_strGroups[i]);
-				strcpy (m_strGroups[i], m_strGroups[i+1]);
-				strcpy (m_strGroups[i+1], tmp);
-				j = m_nBitmaps[i];
-				m_nBitmaps[i] = m_nBitmaps[i+1];
-				m_nBitmaps[i+1] = j;
+				m_Manager.HandleCommand (LC_LIBDLG_GROUP_MOVEDOWN, dw);
 
-				for (j = 0; j < m_Parts.GetSize(); j++)
-				{
-					DWORD grp = m_Parts[j].group;
-					BOOL g1 = (grp & (1 << i)) != 0;
-					BOOL g2 = (grp & (1 << (i+1))) != 0;
-
-					if (g1)
-						grp |= (1 << (i+1));
-					else
-						grp &= ~(1 << (i+1));
-					if (g2)
-						grp |= (1 << i);
-					else
-						grp &= ~(1 << i);
-
-					m_Parts[j].group = grp;
-				}
+				j = m_nBitmaps[dw];
+				m_nBitmaps[dw] = m_nBitmaps[dw+1];
+				m_nBitmaps[dw+1] = j;
 
 				UpdateTree();
 				UpdateList();
@@ -605,9 +477,6 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_PIECE_DELETE:
 		{
-			if (AfxMessageBox("Are you sure you want to delete ?", MB_ICONQUESTION | MB_YESNO) != IDYES)
-				return TRUE;
-
 			int i, sel = 0;
 
 			for (i = 0; i < m_List.GetItemCount(); i++)
@@ -621,46 +490,23 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			char** names = (char**)malloc(sel*sizeof(char**));
 
 			for (sel = 0, i = 0; i < m_List.GetItemCount(); i++)
+			{
+				PieceInfo* info;
+				lcuint32 group;
+
 				if (m_List.GetItemState(i, LVIS_SELECTED))
 				{
-					names[sel] = m_Parts[m_List.GetItemData(i)].info->m_strName;
+					m_Manager.GetPieceInfo (m_List.GetItemData(i), &info, &group);
+
+					names[sel] = info->m_strName;
 					sel++;
 				}
-			
-			project->GetPiecesLibrary ()->DeletePiece(names, sel);
+			}
+
+			m_Manager.DeletePieces (names, sel);
 			free(names);
 
-			CString str = project->GetPiecesLibrary ()->GetLibraryPath();
-			FileDisk newidx;
-			if (!newidx.Open(str + "pieces.idx", "rb"))
-			{
-				AfxMessageBox("Cannot open file.", MB_OK|MB_ICONERROR);
-				return TRUE;
-			}
-
-			unsigned short count;
-
-			// Reload the piece library index.
-			newidx.Seek(-2, SEEK_END);
-			newidx.Read(&count, 2);
-			newidx.Seek(34, SEEK_SET);
-
-			m_Parts.SetSize(count);
-			for (i = 0; i < count; i++)
-			{
-				PARTGROUPINFO* inf = &m_Parts[i];
-				inf->info = project->GetPiecesLibrary ()->GetPieceInfo(i);
-				inf->group = inf->info->m_nGroups;
-
-				newidx.Seek(85, SEEK_CUR);
-				newidx.Read(&inf->defgroup , 4);
-				newidx.Seek(8, SEEK_CUR);
-			}
-
-			newidx.Close();
-
 			UpdateList();
-			m_bReload = TRUE;
 
 			return TRUE;
 		}
@@ -679,9 +525,14 @@ void CLibraryDlg::UpdateList()
 	{
 		DWORD dw = m_Tree.GetItemData (hti);
 
-		for (int i = 0; i < m_Parts.GetSize(); i++)
+		for (int i = 0; i < m_Manager.GetPieceCount(); i++)
 		{
-			if ((dw != 0) && ((dw & m_Parts[i].group) == 0))
+			PieceInfo* info;
+			lcuint32 group;
+
+			m_Manager.GetPieceInfo (i, &info, &group);
+
+			if ((dw != 0) && (((1 << (dw-1)) & group) == 0))
 				continue;
 
 			LVITEM lvi;
@@ -689,7 +540,7 @@ void CLibraryDlg::UpdateList()
 			lvi.iItem = 0;
 			lvi.iSubItem = 0;
 			lvi.lParam = i;
-			lvi.pszText = m_Parts[i].info->m_strDescription;
+			lvi.pszText = info->m_strDescription;
 			m_List.InsertItem(&lvi);
 		}
 	}
@@ -710,22 +561,22 @@ void CLibraryDlg::UpdateTree()
 	tvs.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_PARAM;
 	HTREEITEM hRootItem = m_Tree.InsertItem(&tvs);
 
-	for (int i = 0; i < m_nMaxGroups; i++)
+	for (int i = 0; i < m_Manager.GetGroupCount(); i++)
 	{
 		TV_INSERTSTRUCT tvstruct;
 		tvstruct.hParent = hRootItem;
 		tvstruct.hInsertAfter = TVI_LAST;
 		tvstruct.item.iImage = 0;
 		tvstruct.item.iSelectedImage = 1;
-		tvstruct.item.lParam = (LONG)(1 << i);
-		tvstruct.item.pszText = m_strGroups[i];
+		tvstruct.item.lParam = i+1;
+		tvstruct.item.pszText = m_Manager.GetGroupName(i);
 		tvstruct.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_PARAM;
 		m_Tree.InsertItem(&tvstruct);
 	}
 	m_Tree.Expand (hRootItem, TVE_EXPAND);
 	m_Tree.SelectItem(hRootItem);
 }
-
+/*
 BOOL CLibraryDlg::DoSave(BOOL bAskName)
 {
 	if (bAskName || m_strFile.IsEmpty())
@@ -768,7 +619,7 @@ BOOL CLibraryDlg::DoSave(BOOL bAskName)
 //		m_bLoaded = TRUE;
 	return TRUE;
 }
-
+*/
 void CLibraryDlg::OnSelChangedTree(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
@@ -844,18 +695,12 @@ void CLibraryDlg::OnLButtonUp(UINT nFlags, CPoint point)
 		if (m_hDropItem)
 		{
 			DWORD dw = m_Tree.GetItemData(m_hDropItem);
-			BOOL bControl = (GetKeyState (VK_CONTROL) < 0);
+			bool bControl = (GetKeyState (VK_CONTROL) < 0);
 
 			for (int i = 0; i < m_List.GetItemCount(); i++)
 				if (m_List.GetItemState(i,LVIS_SELECTED))
-				{
-					m_bModified = TRUE;
+					m_Manager.SetPieceGroup(m_List.GetItemData(i), dw, bControl);
 
-					if (bControl)
-						m_Parts[m_List.GetItemData(i)].group |= dw;
-					else
-						m_Parts[m_List.GetItemData(i)].group = dw;
-				}
 			m_Tree.SelectDropTarget (NULL);
 			m_hDropItem = NULL;
 			UpdateList();
@@ -867,43 +712,20 @@ void CLibraryDlg::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CLibraryDlg::OnCancel() 
 {
-	if (m_bModified)
-		if (AfxMessageBox("Discard changes ?", MB_YESNO|MB_ICONQUESTION) == IDNO)
-			return;
+	// Check if it's ok to close the dialog
+	if (!m_Manager.SaveModified ())
+		return;
 
 	CDialog::OnCancel();
-
-	if (m_pDragImage)
-		delete m_pDragImage;
 }
 
 void CLibraryDlg::OnOK() 
 {
-	if (m_bModified)
-	switch(AfxMessageBox ("Save changes ?", MB_YESNOCANCEL|MB_ICONQUESTION))
-	{
-		case IDYES:
-		{
-			if (DoSave(FALSE) == FALSE)
-				return;
-		} break;
-		case IDNO:
-			break;
-		case IDCANCEL: 
-			return;
-	}
+	// Check if it's ok to close the dialog
+	if (!m_Manager.SaveModified ())
+		return;
 	
 	CDialog::OnOK();
-
-	for (int i = 0; i < m_Parts.GetSize(); i++)
-	{
-		PARTGROUPINFO* inf = &m_Parts[i];
-		inf->info->m_nGroups = inf->group;
-	}
-	theApp.WriteProfileString("Settings", "Groups", m_strFile);
-
-	if (m_pDragImage)
-		delete m_pDragImage;
 }
 
 BOOL CLibraryDlg::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
@@ -953,11 +775,11 @@ BOOL CLibraryDlg::ContinueModal()
 	DWORD dw = m_Tree.GetItemData (h);
 	BOOL bValid = (h != m_Tree.GetRootItem()) && (h != NULL);
 
-	EnableControl(ID_LIBDLG_GROUP_INSERT, m_nMaxGroups < 32);
+	EnableControl(ID_LIBDLG_GROUP_INSERT, m_Manager.GetGroupCount() < 32);
 	EnableControl(ID_LIBDLG_GROUP_RENAME, bValid);
-	EnableControl(ID_LIBDLG_GROUP_DELETE, bValid && m_nMaxGroups != 1);
+	EnableControl(ID_LIBDLG_GROUP_DELETE, bValid && m_Manager.GetGroupCount() != 1);
 	EnableControl(ID_LIBDLG_GROUP_MOVEUP, dw > 1);
-	EnableControl(ID_LIBDLG_GROUP_MOVEDOWN, (dw != 0) && (dw != (DWORD)(1 << (m_nMaxGroups-1))));
+	EnableControl(ID_LIBDLG_GROUP_MOVEDOWN, (dw != 0) && ((int)dw != m_Manager.GetGroupCount()));
 
 	return CDialog::ContinueModal();
 }

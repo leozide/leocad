@@ -2,10 +2,13 @@
 #define _LIBRARY_H_
 
 #include "defines.h"
+#include "str.h"
 
 class File;
 class Texture;
 class PieceInfo;
+
+#define LC_PIECESLIB_MAXGROUPS    32
 
 class PiecesLibrary
 {
@@ -19,9 +22,17 @@ public:
     { return m_nPieceCount; }
   int GetTextureCount () const
     { return m_nTextureCount; }
+  int GetGroupCount () const
+    { return m_nGroupCount; }
+  String& GetGroup (int i)
+    { return m_strGroups[i]; }
+	bool NeedsReload () const
+		{ return m_bNeedsReload; }
 
+	void CheckReload ();
   bool Load (const char* libpath);
   void Unload ();
+	bool LoadGroupConfig (const char* Filename);
 
 	// Search for stuff
   PieceInfo* FindPieceInfo (const char* name) const;
@@ -31,10 +42,12 @@ public:
   Texture* GetTexture (int index) const;
 
 	// File operations
-  bool DeletePiece (char** names, int numpieces);
+  bool DeletePieces (char** names, int numpieces);
   bool LoadUpdate (const char* update);
 	bool DeleteTextures (char** Names, int NumTextures);
 	bool ImportTexture (const char* Name);
+
+	static unsigned long GetDefaultPieceGroup (const char* name);
 
 protected:
   char m_LibraryPath[LC_MAXPATH];	// path to the library files
@@ -45,6 +58,13 @@ protected:
 	PieceInfo* m_pPieceIdx;	 // pieces array
 	int m_nTextureCount;     // number of textures
 	Texture* m_pTextures;    // textures array
+
+	// Groups stuff
+	int m_nGroupCount;
+	String m_strGroups[LC_PIECESLIB_MAXGROUPS];
+	char m_GroupsFile[LC_MAXPATH];
+
+	bool m_bNeedsReload;  // if the library files were changed and they need to be reloaded
 
 	bool ValidatePiecesFile (File& IdxFile, File& BinFile) const;
 	bool ValidateTexturesFile (File& IdxFile, File& BinFile) const;
@@ -57,6 +77,11 @@ protected:
 	static const char TexturesIdxHeader[32];
 	static const int TexturesFileVersion;
 };
+
+
+
+
+// ============================================================================
 
 // This should be cleaned and moved to the PiecesLibrary class
 typedef struct connection_s
@@ -105,101 +130,5 @@ typedef struct
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
 bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);
 void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
-
-// And this should be moved to a different file (libdlg.h ?)
-
-#include "basewnd.h"
-
-typedef enum {
-  LC_LIBDLG_FILE_RESET,
-  LC_LIBDLG_FILE_OPEN,
-  LC_LIBDLG_FILE_SAVE,
-  LC_LIBDLG_FILE_SAVEAS,
-  LC_LIBDLG_FILE_PRINTCATALOG,
-  LC_LIBDLG_FILE_MERGEUPDATE,
-  LC_LIBDLG_FILE_IMPORTPIECE,
-  LC_LIBDLG_FILE_RETURN,
-  LC_LIBDLG_FILE_CANCEL,
-  LC_LIBDLG_GROUP_INSERT,
-  LC_LIBDLG_GROUP_DELETE,
-  LC_LIBDLG_GROUP_EDIT,
-  LC_LIBDLG_GROUP_MOVEUP,
-  LC_LIBDLG_GROUP_MOVEDOWN,
-  LC_LIBDLG_PIECE_NEW,
-  LC_LIBDLG_PIECE_EDIT,
-  LC_LIBDLG_PIECE_DELETE
-} LC_LIBDLG_COMMANDS;
-
-class PieceInfo;
-class LibraryDialog;
-
-typedef struct
-{
-  PieceInfo* info;
-  unsigned long current_groups;
-  unsigned long default_groups;
-} LC_LIBDLG_PIECEINFO;
-
-#define LC_LIBDLG_MAXGROUPS 32
-#define LC_LIBDLG_MAXNAME   32
-
-typedef void (*PFNLIBDLGUPDATELISTFUNC) (LC_LIBDLG_PIECEINFO *piece_info, int count, int group, void *data);
-typedef void (*PFNLIBDLGUPDATETREEFUNC) (int num_groups, char str_groups[][LC_LIBDLG_MAXNAME+1], void *data);
-
-class LibraryDialog : public BaseWnd
-{
- public:
-  LibraryDialog ();
-  virtual ~LibraryDialog ();
-
-  void HandleCommand (int id);
-  bool DoSave (bool bAskName);
-  bool Initialize ();
-
-  void SetListFunc (PFNLIBDLGUPDATELISTFUNC func, void *data)
-    {
-      m_pUpdateListFunc = func;
-      m_pUpdateListData = data;
-    }
-
-  void SetTreeFunc (PFNLIBDLGUPDATETREEFUNC func, void *data)
-    {
-      m_pUpdateTreeFunc = func;
-      m_pUpdateTreeData = data;
-    }
-
-  void UpdateList ()
-    {
-      m_pUpdateListFunc (m_pPieces, m_nPieces, m_nCurrentGroup, m_pUpdateListData);
-    }
-
-  void UpdateTree ()
-    {
-      m_pUpdateTreeFunc (m_nGroups, m_strGroups, m_pUpdateTreeData);
-    }
-
-  void SetCurrentGroup (unsigned long group)
-    {
-      m_nCurrentGroup = group;
-      UpdateList ();
-    }
-
- protected:
-  void *m_pUpdateListData;
-  void *m_pUpdateTreeData;
-  PFNLIBDLGUPDATELISTFUNC m_pUpdateListFunc;
-  PFNLIBDLGUPDATETREEFUNC m_pUpdateTreeFunc;
-
-  int m_nPieces;
-  LC_LIBDLG_PIECEINFO* m_pPieces;
-
-  unsigned char m_nGroups;
-  char m_strGroups[LC_LIBDLG_MAXGROUPS][LC_LIBDLG_MAXNAME+1];
-  int m_nCurrentGroup;
-
-  bool m_bModified;
-  bool m_bReload;
-  char m_strFile[LC_MAXPATH];
-};
 
 #endif // _LIBRARY_H_

@@ -1,6 +1,8 @@
 #ifndef _MINIFIG_H_
 #define _MINIFIG_H_
 
+#include "glwindow.h"
+
 class PieceInfo;
 
 typedef	enum
@@ -32,14 +34,14 @@ typedef struct
   float rx, ry, rz;
 } LC_MFW_PIECEINFO;
 
-class MinifigWizard
+class MinifigWizard : public GLWindow
 {
  public:
-  MinifigWizard ();
+  MinifigWizard (GLWindow *share);
   ~MinifigWizard ();
 
-  void Redraw ();
-  void Resize (int width, int height);
+  void OnDraw ();
+
   void Calculate ();
   void GetDescriptions (int type, char ***names, int *count);
   void GetSelections (char **names);

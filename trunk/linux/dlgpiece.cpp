@@ -29,55 +29,13 @@
 
 typedef struct
 {
-  MinifigWizard* opts;
+  MinifigWizard* wizard;
   GtkWidget *pieces[LC_MFW_NUMITEMS];
   GtkWidget *colors[LC_MFW_NUMITEMS];
   GtkWidget *angles[LC_MFW_NUMITEMS];
   GtkWidget *preview;
   GtkWidget *combo;
 } LC_MINIFIGDLG_STRUCT;
-
-static gint minifigdlg_redraw (GtkWidget *widget, GdkEventExpose *event)
-{
-  LC_MINIFIGDLG_STRUCT* data;
-
-  // Draw only last expose.
-  if (event->count > 0)
-    return TRUE;
-
-  data = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "minifig");
-
-  if (!data)
-    return true;
-
-  if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-    return TRUE;
-
-  data->opts->Redraw ();
-
-  gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
-  gtk_gl_area_make_current(GTK_GL_AREA(drawing_area));                          
-
-  return TRUE;
-}
-
-// Setup the OpenGL projection
-static gint minifigdlg_resize (GtkWidget *widget, GdkEventConfigure *event)
-{
-  LC_MINIFIGDLG_STRUCT* data = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "minifig");
-
-  if (!data)
-    return TRUE;
-
-  if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-    return TRUE;
-
-  data->opts->Resize (widget->allocation.width, widget->allocation.height);
-
-  gtk_gl_area_make_current(GTK_GL_AREA(drawing_area));                          
-
-  return TRUE;
-}
 
 // User wants to add the minifig to the project
 static void minifigdlg_ok(GtkWidget *widget, gpointer data)
@@ -105,8 +63,8 @@ static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
     if (info->colors[i] == button)
       break;
 
-  info->opts->ChangeColor (i, GPOINTER_TO_INT (data));
-  gtk_widget_draw (info->preview, NULL);
+  info->wizard->ChangeColor (i, GPOINTER_TO_INT (data));
+  info->wizard->Redraw ();
   set_button_pixmap2 (button, FlatColorArray[(int)data]);
 }
 
@@ -160,9 +118,8 @@ static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
 
   desc = gtk_entry_get_text (GTK_ENTRY (widget));
 
-  info->opts->ChangePiece (i, desc);
-
-  gtk_widget_draw (info->preview, NULL);
+  info->wizard->ChangePiece (i, desc);
+  info->wizard->Redraw ();
 }
 
 static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)
@@ -171,7 +128,7 @@ static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)
   int count;
   GList *lst = NULL;
 
-  s->opts->GetMinifigNames (&names, &count);
+  s->wizard->GetMinifigNames (&names, &count);
   for (int i = 0; i < count; i++)
     lst = g_list_append (lst, names[i]);
 
@@ -185,7 +142,7 @@ static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)
 static void minifigdlg_updateselection (LC_MINIFIGDLG_STRUCT* s)
 {
   char *names[LC_MFW_NUMITEMS];
-  s->opts->GetSelections (names);
+  s->wizard->GetSelections (names);
 
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
@@ -219,30 +176,30 @@ static void minifigdlg_updateselection (LC_MINIFIGDLG_STRUCT* s)
 static void minifigdlg_load (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
-  if (s->opts->LoadMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry))) == false)
+  if (s->wizard->LoadMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry))) == false)
     return;
 
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    set_button_pixmap2 (s->colors[i], FlatColorArray[s->opts->m_Colors[i]]);
+    set_button_pixmap2 (s->colors[i], FlatColorArray[s->wizard->m_Colors[i]]);
     if (s->angles[i] != NULL)
-      gtk_spin_button_set_value (GTK_SPIN_BUTTON (s->angles[i]), s->opts->m_Angles[i]);
+      gtk_spin_button_set_value (GTK_SPIN_BUTTON (s->angles[i]), s->wizard->m_Angles[i]);
   }
   minifigdlg_updateselection (s);
-  gtk_widget_draw (s->preview, NULL);
+  s->wizard->Redraw ();
 }
 
 static void minifigdlg_save (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
-  s->opts->SaveMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry)));
+  s->wizard->SaveMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry)));
   minifigdlg_updatecombo (s);
 }
 
 static void minifigdlg_delete (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
-  s->opts->DeleteMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry)));
+  s->wizard->DeleteMinifig (gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (s->combo)->entry)));
   minifigdlg_updatecombo (s);
 }
 
@@ -262,13 +219,13 @@ static void adj_changed (GtkAdjustment *adj, gpointer data)
 
   val = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (info->angles[i]));
 
-  if (val == info->opts->m_Angles[i])
+  if (val == info->wizard->m_Angles[i])
     return;
 
-  info->opts->ChangeAngle (i, val);
+  info->wizard->ChangeAngle (i, val);
 
   if (info->preview != NULL)
-    gtk_widget_draw (info->preview, NULL);
+    info->wizard->Redraw ();
 }
 
 // Create a combo box with a color selection control
@@ -290,7 +247,7 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int idx, int num,
   color = info->colors[num] = gtk_button_new_with_label ("");
   gtk_widget_set_events (color, GDK_EXPOSURE_MASK);
   gtk_widget_show (color);
-  gtk_object_set_data (GTK_OBJECT (color), "color", &info->opts->m_Colors[num]);
+  gtk_object_set_data (GTK_OBJECT (color), "color", &info->wizard->m_Colors[num]);
   gtk_object_set_data (GTK_OBJECT (color), "info", info);
   gtk_widget_set_usize (color, 40, 25);
   gtk_signal_connect (GTK_OBJECT (color), "expose_event",
@@ -318,19 +275,18 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int idx, int num,
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spin), TRUE);
 }
 
-int minifigdlg_execute(void* param)
+int minifigdlg_execute (void* param)
 {
-  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
-  LC_MINIFIGDLG_STRUCT s;
-  GtkWidget *dlg, *button;
   GtkWidget *vbox, *hbox, *frame, *table;
+  GtkWidget *dlg, *button;
+  LC_MINIFIGDLG_STRUCT s;
   int i;
 
   memset (&s, 0, sizeof (s));
-  s.opts = (MinifigWizard*)param;
+  s.wizard = (MinifigWizard*)param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -364,14 +320,7 @@ int minifigdlg_execute(void* param)
   minifigdlg_createpair (&s, 6, LC_MFW_RIGHT_LEG, table);
   minifigdlg_createpair (&s, 7, LC_MFW_RIGHT_SHOE, table);
 
-  // Create new OpenGL widget.
-  s.preview = gtk_gl_area_share_new (attrlist, GTK_GL_AREA (drawing_area));
-  gtk_widget_set_events (GTK_WIDGET (s.preview), GDK_EXPOSURE_MASK);
-
-  gtk_signal_connect (GTK_OBJECT (s.preview), "expose_event", 
-		      GTK_SIGNAL_FUNC (minifigdlg_redraw), NULL);
-  gtk_signal_connect (GTK_OBJECT (s.preview), "configure_event",
-		      GTK_SIGNAL_FUNC (minifigdlg_resize), NULL);
+  s.wizard->Create (&s.preview);
 
   frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);
@@ -448,7 +397,7 @@ int minifigdlg_execute(void* param)
     GList* names = NULL;
     int count;
     char **list;
-    s.opts->GetDescriptions (i, &list, &count);
+    s.wizard->GetDescriptions (i, &list, &count);
 
     for (int j = 0; j < count; j++)
       names = g_list_append (names, list[j]);

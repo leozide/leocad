@@ -155,7 +155,8 @@ static int mfw_pieces = sizeof (mfw_pieceinfo)/sizeof (LC_MFW_PIECEINFO);
 // =============================================================================
 // MinifigWizard class
 
-MinifigWizard::MinifigWizard ()
+MinifigWizard::MinifigWizard (GLWindow *share)
+  : GLWindow (share)
 {
   const unsigned char colors[LC_MFW_NUMITEMS] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
   const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "976", "975", "977", "977",
@@ -258,30 +259,30 @@ MinifigWizard::~MinifigWizard ()
   free (m_MinifigTemplates);
 }
 
-void MinifigWizard::Resize (int width, int height)
-{
-  float aspect = (float)width/(float)height;
-  glViewport(0, 0, width, height);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(30.0f, aspect, 1.0f, 20.0f);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-	
-  gluLookAt (0, -9, 4, 0, 5, 1, 0, 0, 1);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  float *bg = project->GetBackgroundColor();
-  glClearColor(bg[0], bg[1], bg[2], bg[3]);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable (GL_DITHER);
-  glShadeModel (GL_FLAT);
-}
-
-void MinifigWizard::Redraw ()
+void MinifigWizard::OnDraw ()
 {
   int i;
+
+  if (!MakeCurrent ())
+    return;
+
+  float aspect = (float)m_nWidth/(float)m_nHeight;
+  glViewport (0, 0, m_nWidth, m_nHeight);
+  glMatrixMode (GL_PROJECTION);
+  glLoadIdentity ();
+  gluPerspective (30.0f, aspect, 1.0f, 20.0f);
+  glMatrixMode (GL_MODELVIEW);
+  glLoadIdentity ();
+	
+  gluLookAt (0, -9, 4, 0, 5, 1, 0, 0, 1);
+  glEnable (GL_DEPTH_TEST);
+  glDepthFunc (GL_LEQUAL);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  float *bg = project->GetBackgroundColor();
+  glClearColor (bg[0], bg[1], bg[2], bg[3]);
+  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glDisable (GL_DITHER);
+  glShadeModel (GL_FLAT);
 
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   Calculate ();
@@ -299,6 +300,8 @@ void MinifigWizard::Redraw ()
   }
 
   glFinish();
+
+  SwapBuffers ();
 }
 
 void MinifigWizard::Calculate ()

@@ -1206,11 +1206,63 @@ void Project::FileSave(File* file, bool bUndo)
 	}
 }
 
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep)
+void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
 {
-	char buf[256];
+  FileMem* CurFile = NULL;
+	char Buf[1024];
 
-	while (file->ReadString(buf, 256))
+	while (MPD.ReadString(Buf, 1024))
+  {
+    String Line(Buf);
+
+    Line.TrimLeft();
+
+    if (Line[0] != '0')
+    {
+      // Copy current line.
+      if (CurFile != NULL)
+        CurFile->Write(Buf, strlen(Buf));
+
+      continue;
+    }
+
+    Line.TrimRight();
+    Line = Line.Right(Line.GetLength() - 1);
+    Line.TrimLeft();
+
+    // Find where a subfile starts.
+    if (Line.CompareNoCase("FILE", 4) == 0)
+    {
+      Line = Line.Right(Line.GetLength() - 4);
+      Line.TrimLeft();
+
+      // Create a new file.
+      CurFile = new FileMem();
+      CurFile->SetFileName(Line);
+      FileArray.Add(CurFile);
+    }
+    else if (Line.CompareNoCase("ENDFILE", 7) == 0)
+    {
+      // File ends here.
+      CurFile = NULL;
+    }
+    else if (CurFile != NULL)
+    {
+      // Copy current line.
+      CurFile->Write(Buf, strlen(Buf));
+    }
+  }
+}
+
+void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray)
+{
+	char buf[1024];
+
+  // Save file offset.
+  lcuint32 Offset = file->GetPosition();
+  file->Seek(0, SEEK_SET);
+
+  while (file->ReadString(buf, 1024))
 	{
 		strupr(buf);
 		if (strstr(buf, "STEP"))
@@ -1242,11 +1294,12 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				cl = ConvertColor(color);
 
 			strcpy(pn, tmp);
-			ptr = strchr(tmp, '.');
+			ptr = strrchr(tmp, '.');
 
 			if (ptr != NULL)
 				*ptr = 0;
 
+      // See if it's a piece in the library
 			if (strlen(tmp) < 9)
 			{
 				char name[9];
@@ -1271,14 +1324,36 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				}
 			}
 
+      // Check for MPD files first.
+      if (read)
+      {
+        for (int i = 0; i < FileArray.GetSize(); i++)
+        {
+          if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+          {
+  					FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+  					read = false;
+            break;
+          }
+        }
+      }
+
+      // Try to read the file from disk.
 			if (read)
 			{
 				FileDisk tf;
-				if (tf.Open(pn, "rt"))
-					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep);
+
+        if (tf.Open(pn, "rt"))
+        {
+					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
+					read = false;
+        }
 			}
 		}
 	}
+
+  // Restore file offset.
+  file->Seek(Offset, SEEK_SET);
 }
 
 bool Project::DoFileSave()
@@ -1509,71 +1584,108 @@ bool Project::OnNewDocument()
 
 bool Project::OnOpenDocument (const char* lpszPathName)
 {
-	FileDisk file;
-	bool bSuccess = false;
+  FileDisk file;
+  bool bSuccess = false;
 
-	if (!file.Open(lpszPathName, "rb"))
-	{
-//		MessageBox("Failed to open file.");
-		return false;
-	}
+  if (!file.Open(lpszPathName, "rb"))
+  {
+//    MessageBox("Failed to open file.");
+    return false;
+  }
 
-	bool datfile = false;
-	char ext[4], *ptr;
-	memset(ext, 0, 4);
-	ptr = strrchr(lpszPathName, '.');
-	if (ptr != NULL)
-	{
-		strncpy(ext, ptr+1, 3);
-		strlwr(ext);
-	}
+  char ext[4], *ptr;
+  memset(ext, 0, 4);
+  ptr = strrchr(lpszPathName, '.');
+  if (ptr != NULL)
+  {
+    strncpy(ext, ptr+1, 3);
+    strlwr(ext);
+  }
 
-	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
-		datfile = true;
+  bool datfile = false;
+  bool mpdfile = false;
 
-	DeleteContents(false);
-	LoadDefaults(datfile);
-	SetModifiedFlag(true);  // dirty during loading
+  // Find out what file type we're loading.
+  if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+    datfile = true;
+  else if (strcmp(ext, "mpd") == 0)
+    mpdfile = true;
 
-	SystemDoWaitCursor(1);
-	if (file.GetLength() != 0)
-	{
-		if (datfile)
-		{
-			int ok = 0, step = 1;
-			Matrix mat;
-			FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step);
-			m_nCurStep = step;
-			SystemUpdateTime(false, m_nCurStep, 255);
-			SystemUpdateFocus(NULL);
-			UpdateSelection();
-			CalculateStep();
-			UpdateAllViews ();
+  // Delete the current project.
+  DeleteContents(false);
+  LoadDefaults(datfile || mpdfile);
+  SetModifiedFlag(true);  // dirty during loading
 
-			char msg[50];
-			sprintf(msg, "%d objects imported.", ok);
-//			AfxMessageBox(msg, MB_OK|MB_ICONINFORMATION);
-			bSuccess = true;
-		}
-		else
-			bSuccess = FileLoad(&file, false, false); // load me
-	}
-	file.Close();
-	SystemDoWaitCursor(-1);
+  SystemDoWaitCursor(1);
 
-	if (bSuccess == false)
-	{
-//		MessageBox("Failed to load.");
-		DeleteContents(false);   // remove failed contents
-		return false;
-	}
+  if (file.GetLength() != 0)
+  {
+    PtrArray<File> FileArray;
 
-        CheckPoint("");
-        m_nSaveTimer = 0;
+    // Unpack the MPD file.
+    if (mpdfile)
+    {
+      FileReadMPD(file, FileArray);
 
-	SetModifiedFlag(false);     // start off with unmodified
+      if (FileArray.GetSize() == 0)
+      {
+        file.Seek(0, SEEK_SET);
+        mpdfile = false;
+        datfile = true;
+        console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.");
+      }
+    }
 
-	return true;
+    if (datfile || mpdfile)
+    {
+      int ok = 0, step = 1;
+      Matrix mat;
+
+      if (mpdfile)
+        FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray);
+      else
+        FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
+
+      m_nCurStep = step;
+      SystemUpdateTime(false, m_nCurStep, 255);
+      SystemUpdateFocus(NULL);
+      UpdateSelection();
+      CalculateStep();
+      UpdateAllViews ();
+
+      console.PrintMisc("%d objects imported.", ok);
+      bSuccess = true;
+    }
+    else
+    {
+      // Load a LeoCAD file.
+      bSuccess = FileLoad(&file, false, false);
+    }
+
+    // Clean up.
+    if (mpdfile)
+    {
+      for (int i = 0; i < FileArray.GetSize(); i++)
+        delete FileArray[i];
+    }
+  }
+
+  file.Close();
+  SystemDoWaitCursor(-1);
+
+  if (bSuccess == false)
+  {
+//    MessageBox("Failed to load.");
+    DeleteContents(false);   // remove failed contents
+    return false;
+  }
+
+  CheckPoint("");
+  m_nSaveTimer = 0;
+
+  SetModifiedFlag(false);     // start off with unmodified
+
+  return true;
 }
 
 void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)

@@ -11,27 +11,19 @@
 GLuint Light::m_nSphereList = 0;
 GLuint Light::m_nTargetList = 0;
 
-// =============================================================================
-// Static functions
-
-static LC_LIGHT_KEY* AddNode (LC_LIGHT_KEY *node, unsigned short nTime, unsigned char nType)
+static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 {
-  LC_LIGHT_KEY* newnode = (LC_LIGHT_KEY*)malloc (sizeof (LC_LIGHT_KEY));
-
-  if (node)
-  {
-    newnode->next = node->next;
-    node->next = newnode;
-  }
-  else
-    newnode->next = NULL;
-
-  newnode->type = nType;
-  newnode->time = nTime;
-  newnode->param[0] = newnode->param[1] = newnode->param[2] = 0;
-
-  return newnode;
-}
+  { "Light Position", 3, LC_LK_POSITION },
+  { "Light Target", 3, LC_LK_TARGET },
+  { "Ambient Color", 3, LC_LK_AMBIENT },
+  { "Diffuse Color", 3, LC_LK_DIFFUSE },
+  { "Specular Color", 3, LC_LK_SPECULAR },
+  { "Constant Attenuation", 1, LC_LK_CONSTANT },
+  { "Linear Attenuation", 1, LC_LK_LINEAR },
+  { "Quadratic Attenuation", 1, LC_LK_QUADRATIC },
+  { "Spot Cutoff", 1, LC_LK_CUTOFF },
+  { "Spot Exponent", 1, LC_LK_EXPONENT }
+};
 
 // =============================================================================
 // CameraTarget class
@@ -65,67 +57,36 @@ void LightTarget::MinIntersectDist (LC_CLICKLINE* pLine)
 // =============================================================================
 // Light class
 
+// New positional light
 Light::Light (float px, float py, float pz)
   : Object (LC_OBJECT_LIGHT)
 {
-  LC_LIGHT_KEY *node;
-
   Initialize ();
 
-  m_pAnimationKeys = node = AddNode (NULL, 1, LK_POSITION);
-  node->param[0] = px;
-  node->param[1] = py;
-  node->param[2] = pz;
-  node = AddNode (node, 1, LK_COLOR);
-  node->param[0] = 1.0f;
-  node->param[1] = 1.0f;
-  node->param[2] = 1.0f;
+  float pos[] = { px, py, pz }, target[] = { 0, 0, 0 };
 
-  m_pInstructionKeys = node = AddNode (NULL, 1, LK_POSITION);
-  node->param[0] = px;
-  node->param[1] = py;
-  node->param[2] = pz;
-  node = AddNode (node, 1, LK_COLOR);
-  node->param[0] = 1.0f;
-  node->param[1] = 1.0f;
-  node->param[2] = 1.0f;
+  ChangeKey (1, false, true, pos, LC_LK_POSITION);
+  ChangeKey (1, false, true, target, LC_LK_TARGET);
+  ChangeKey (1, true, true, pos, LC_LK_POSITION);
+  ChangeKey (1, true, true, target, LC_LK_TARGET);
 
   m_fPos[3] = 0.0f;
+
   UpdatePosition (1, false);
 }
 
+// New directional light
 Light::Light (float px, float py, float pz, float tx, float ty, float tz)
   : Object (LC_OBJECT_LIGHT)
 {
-  LC_LIGHT_KEY *node;
-
   Initialize ();
 
-  m_pAnimationKeys = node = AddNode (NULL, 1, LK_POSITION);
-  node->param[0] = px;
-  node->param[1] = py;
-  node->param[2] = pz;
-  node = AddNode (node, 1, LK_TARGET);
-  node->param[0] = tx;
-  node->param[1] = ty;
-  node->param[2] = tz;
-  node = AddNode (node, 1, LK_COLOR);
-  node->param[0] = 1.0f;
-  node->param[1] = 1.0f;
-  node->param[2] = 1.0f;
+  float pos[] = { px, py, pz }, target[] = { tx, ty, tz };
 
-  m_pInstructionKeys = node = AddNode (NULL, 1, LK_POSITION);
-  node->param[0] = px;
-  node->param[1] = py;
-  node->param[2] = pz;
-  node = AddNode (node, 1, LK_TARGET);
-  node->param[0] = tx;
-  node->param[1] = ty;
-  node->param[2] = tz;
-  node = AddNode (node, 1, LK_COLOR);
-  node->param[0] = 1.0f;
-  node->param[1] = 1.0f;
-  node->param[2] = 1.0f;
+  ChangeKey (1, false, true, pos, LC_LK_POSITION);
+  ChangeKey (1, false, true, target, LC_LK_TARGET);
+  ChangeKey (1, true, true, pos, LC_LK_POSITION);
+  ChangeKey (1, true, true, target, LC_LK_TARGET);
 
   m_pTarget = new LightTarget (this);
   m_fPos[3] = 1.0f;
@@ -138,39 +99,46 @@ void Light::Initialize ()
   m_bEnabled = true;
   m_pNext = NULL;
   m_nState = 0;
-  m_pAnimationKeys = NULL;
-  m_pInstructionKeys = NULL;
   m_pTarget = NULL;
   m_nList = 0;
   memset (m_strName, 0, sizeof (m_strName));
-  m_fColor[3] = 1.0f;
+
+  m_fAmbient[3] = 1.0f;
+  m_fDiffuse[3] = 1.0f;
+  m_fSpecular[3] = 1.0f;
+
+  float *values[] = { m_fPos, m_fTarget, m_fAmbient, m_fDiffuse, m_fSpecular,
+                      &m_fConstant, &m_fLinear, &m_fQuadratic, &m_fCutoff, &m_fExponent };
+  RegisterKeys (values, light_key_info, LC_LK_COUNT);
+
+  // set the default values
+  float ambient[] = { 0, 0, 0 }, diffuse[] = { 0.8f, 0.8f, 0.8f }, specular[] = { 1, 1, 1 };
+  float constant = 1, linear = 0, quadratic = 0, cutoff = 30, exponent = 0;
+
+  ChangeKey (1, false, true, ambient, LC_LK_AMBIENT);
+  ChangeKey (1, false, true, diffuse, LC_LK_DIFFUSE);
+  ChangeKey (1, false, true, specular, LC_LK_SPECULAR);
+  ChangeKey (1, false, true, &constant, LC_LK_CONSTANT);
+  ChangeKey (1, false, true, &linear, LC_LK_LINEAR);
+  ChangeKey (1, false, true, &quadratic, LC_LK_QUADRATIC);
+  ChangeKey (1, false, true, &cutoff, LC_LK_CUTOFF);
+  ChangeKey (1, false, true, &exponent, LC_LK_EXPONENT);
+  ChangeKey (1, true, true, ambient, LC_LK_AMBIENT);
+  ChangeKey (1, true, true, diffuse, LC_LK_DIFFUSE);
+  ChangeKey (1, true, true, specular, LC_LK_SPECULAR);
+  ChangeKey (1, true, true, &constant, LC_LK_CONSTANT);
+  ChangeKey (1, true, true, &linear, LC_LK_LINEAR);
+  ChangeKey (1, true, true, &quadratic, LC_LK_QUADRATIC);
+  ChangeKey (1, true, true, &cutoff, LC_LK_CUTOFF);
+  ChangeKey (1, true, true, &exponent, LC_LK_EXPONENT);
 }
 
 Light::~Light ()
 {
   if (m_nList != 0)
     glDeleteLists (m_nList, 1);
-  RemoveKeys ();
+
   delete m_pTarget;
-}
-
-void Light::RemoveKeys ()
-{
-  LC_LIGHT_KEY *node, *prev;
-
-  for (node = m_pInstructionKeys; node;)
-  {
-    prev = node;
-    node = node->next;
-    free (prev);
-  }
-
-  for (node = m_pAnimationKeys; node;)
-  {
-    prev = node;
-    node = node->next;
-    free (prev);
-  }
 }
 
 void Light::MinIntersectDist (LC_CLICKLINE* pLine)
@@ -191,42 +159,6 @@ void Light::MinIntersectDist (LC_CLICKLINE* pLine)
     m_pTarget->MinIntersectDist (pLine);
 }
 
-void Light::ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, float param[3], unsigned char nKeyType)
-{
-  LC_LIGHT_KEY *node, *poskey = NULL, *newpos = NULL;
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
-
-  while (node)
-  {
-    if ((node->time <= nTime) &&
-	(node->type == nKeyType))
-      poskey = node;
-
-    node = node->next;
-  }
-
-  if (bAddKey)
-  {
-    if (poskey)
-    {
-      if (poskey->time != nTime)
-	newpos = AddNode(poskey, nTime, nKeyType);
-    }
-    else
-      newpos = AddNode(poskey, nTime, nKeyType);
-  }
-
-  if (newpos == NULL)
-    newpos = poskey;
-
-  newpos->param[0] = param[0];
-  newpos->param[1] = param[1];
-  newpos->param[2] = param[2];
-}
-
 void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
   if (IsEyeSelected())
@@ -235,7 +167,7 @@ void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
     m_fPos[1] += dy;
     m_fPos[2] += dz;
 
-    ChangeKey (nTime, bAnimation, bAddKey, m_fPos, LK_POSITION);
+    ChangeKey (nTime, bAnimation, bAddKey, m_fPos, LC_LK_POSITION);
   }
 
   if (IsTargetSelected())
@@ -244,80 +176,13 @@ void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
     m_fTarget[1] += dy;
     m_fTarget[2] += dz;
 
-    ChangeKey (nTime, bAnimation, bAddKey, m_fTarget, LK_TARGET);
+    ChangeKey (nTime, bAnimation, bAddKey, m_fTarget, LC_LK_TARGET);
   }
-}
-
-void Light::CalculatePosition (unsigned short nTime, bool bAnimation, float pos[3], float target[3], float color[3])
-{
-  LC_LIGHT_KEY *node, *pp = NULL, *np = NULL, *pt = NULL, *nt = NULL, *pc = NULL, *nc = NULL;
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
-
-  while (node && (!np || !nt || !nc))
-  {
-    if (node->time <= nTime)
-    {
-      switch (node->type)
-      {
-      case LK_POSITION: pp = node; break;
-      case LK_TARGET: pt = node; break;
-      case LK_COLOR: pc = node; break;
-      }
-    }
-    else
-    {
-      switch (node->type)
-      {
-      case LK_POSITION: if (np == NULL) np = node; break;
-      case LK_TARGET: if (nt == NULL) nt = node; break;
-      case LK_COLOR: if (nc == NULL) nc = node; break;
-      }
-    }
-
-    node = node->next;
-  }
-
-  // TODO: USE KEY IN/OUT WEIGHTS
-  if (bAnimation && (np != NULL) && (pp->time != nTime))
-  {
-    float t = (float)(nTime - pp->time)/(np->time - pp->time);
-    pos[0] = pp->param[0] + (np->param[0] - pp->param[0])*t;
-    pos[1] = pp->param[1] + (np->param[1] - pp->param[1])*t;
-    pos[2] = pp->param[2] + (np->param[2] - pp->param[2])*t;
-  }
-  else
-    memcpy (pos, pp->param, sizeof(float[3]));
-
-  if (m_pTarget != NULL)
-  {
-    if (bAnimation && (nt != NULL) && (pt->time != nTime))
-    {
-      float t = (float)(nTime - pt->time)/(nt->time - pt->time);
-      target[0] = pt->param[0] + (nt->param[0] - pt->param[0])*t;
-      target[1] = pt->param[1] + (nt->param[1] - pt->param[1])*t;
-      target[2] = pt->param[2] + (nt->param[2] - pt->param[2])*t;
-    }
-    else
-      memcpy (target, pt->param, sizeof(float[3]));
-  }
-
-  if (bAnimation && (nc != NULL) && (pc->time != nTime))
-  {
-    float t = (float)(nTime - pc->time)/(nc->time - pc->time);
-    color[0] = pc->param[0] + (nc->param[0] - pc->param[0])*t;
-    color[1] = pc->param[1] + (nc->param[1] - pc->param[1])*t;
-    color[2] = pc->param[2] + (nc->param[2] - pc->param[2])*t;
-  }
-  else
-    memcpy (color, pc->param, sizeof(float[3]));
 }
 
 void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 {
-  CalculatePosition (nTime, bAnimation, m_fPos, m_fTarget, m_fColor);
+  CalculateKeys (nTime, bAnimation);
   BoundingBoxCalculate (m_fPos);
 
   if (m_pTarget != NULL)
@@ -538,7 +403,7 @@ void Light::Render (float fLineWidth)
       modelview.Invert ();
       glMultMatrixf (modelview.m);
 
-      projection.CreatePerspective (90.0f, 1.0f, 0.01, len);
+      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01, len);
       projection.Invert ();
       glMultMatrixf (projection.m);
 
@@ -602,27 +467,22 @@ void Light::Setup (int index)
 
   glEnable (light);
   glLightfv (light, GL_POSITION, m_fPos);
-  //  glLightfv (light, GL_AMBIENT, m_fColor);
-  //  glLightfv (light, GL_DIFFUSE, m_fColor);
-  //  glLightfv (light, GL_SPECULAR, m_fColor);
 
-  float amb[]={0,0,0,1};
-  float diff[]={0,0,1,1};
-  float spec[]={1,1,1,1};
-  glLightfv (light, GL_AMBIENT, amb);
-  glLightfv (light, GL_DIFFUSE, diff);
-  glLightfv (light, GL_SPECULAR, spec);
+  glLightfv (light, GL_AMBIENT, m_fAmbient);
+  glLightfv (light, GL_DIFFUSE, m_fDiffuse);
+  glLightfv (light, GL_SPECULAR, m_fSpecular);
 
-  glLightf (light, GL_CONSTANT_ATTENUATION, 1);
-  glLightf (light, GL_LINEAR_ATTENUATION, 0);
-  glLightf (light, GL_QUADRATIC_ATTENUATION, 0);
+  glLightf (light, GL_CONSTANT_ATTENUATION, m_fConstant);
+  glLightf (light, GL_LINEAR_ATTENUATION, m_fLinear);
+  glLightf (light, GL_QUADRATIC_ATTENUATION, m_fQuadratic);
 
   if (m_pTarget != NULL)
   {
     Vector dir (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
     dir.Normalize ();
 
-    glLightf (light, GL_SPOT_CUTOFF, 30.0f);
+    glLightf (light, GL_SPOT_CUTOFF, m_fCutoff);
+    glLightf (light, GL_SPOT_EXPONENT, m_fExponent);
     glLightfv (light, GL_SPOT_DIRECTION, dir);
   }
 }

@@ -19,22 +19,17 @@ class PieceInfo;
 #define LC_PIECE_SELECTED	0x02
 #define LC_PIECE_FOCUSED	0x04
 
-typedef enum {	PK_POSITION, PK_ROTATION } PK_TYPES;
-
-typedef struct LC_PIECE_KEY {
-	unsigned short	time;
-	float			param[4];
-	unsigned char	type;
-	LC_PIECE_KEY*		next;
-} LC_PIECE_KEY;
+typedef enum {
+  LC_PK_POSITION,
+  LC_PK_ROTATION,
+  LC_PK_COUNT
+} LC_PK_TYPES;
 
 class Piece : public Object
 {
-
-
 public:
-	Piece(PieceInfo* pPieceInfo);
-	~Piece();
+  Piece (PieceInfo* pPieceInfo);
+  ~Piece ();
 
 	Piece* m_pNext;
 	Piece* m_pLink;
@@ -66,14 +61,13 @@ public:
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
-	void FileLoad(File* file, char* name);
-	void FileSave(File* file, Group* pGroups);
+	bool FileLoad(File& file, char* name);
+	void FileSave(File& file, Group* pGroups);
 
 	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers);
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	bool CalculatePositionRotation(unsigned short nTime, bool bAnimation, float pos[3], float rot[4]);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
-	void ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, float* param, unsigned char nKeyType);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+
 	void DoGroup(Group* pGroup);
 	void UnGroup(Group* pGroup);
 	Group* GetTopGroup();
@@ -155,12 +149,7 @@ public:
 */
 protected:
 	void LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine);
-	void RemoveKeys();
 	void BuildDrawInfo();
-
-	// Position
-	LC_PIECE_KEY* m_pAnimationKeys;
-	LC_PIECE_KEY* m_pInstructionKeys;
 
 	// Atributes
 	PieceInfo* m_pPieceInfo;

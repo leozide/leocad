@@ -1253,15 +1253,11 @@ bool GL_InitializeExtensions ()
 
 #include <math.h>
 
-#ifndef LC_WINDOWS
-#define APIENTRY
-#endif
-
 #ifndef M_PI
 #define M_PI  3.14159265
 #endif
 
-void APIENTRY gluLookAt (GLdouble ex, GLdouble ey, GLdouble ez, GLdouble cx, GLdouble cy, GLdouble cz,
+void gluLookAt (GLdouble ex, GLdouble ey, GLdouble ez, GLdouble cx, GLdouble cy, GLdouble cz,
 			 GLdouble ux, GLdouble uy, GLdouble uz)
 {
    GLdouble x[3], y[3], z[3] = { ex-cx, ey-cy, ez-cz };
@@ -1307,7 +1303,7 @@ void APIENTRY gluLookAt (GLdouble ex, GLdouble ey, GLdouble ez, GLdouble cx, GLd
    }
 }
 
-void APIENTRY gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
    GLdouble y = zNear * tan (fovy * M_PI / 360.0);
    glFrustum (-y*aspect, y*aspect, -y, y, zNear, zFar);
@@ -1490,7 +1486,7 @@ static GLboolean invert_matrix( const GLdouble *m, GLdouble *out )
 
 
 /* projection du point (objx,objy,obz) sur l'ecran (winx,winy,winz) */
-GLint APIENTRY gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
+GLint gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
                           const GLdouble model[16],const GLdouble proj[16],
                           const GLint viewport[4],
                           GLdouble *winx,GLdouble *winy,GLdouble *winz)
@@ -1520,7 +1516,7 @@ GLint APIENTRY gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
 
 
 /* transformation du point ecran (winx,winy,winz) en point objet */
-GLint APIENTRY gluUnProject(GLdouble winx,GLdouble winy,GLdouble winz,
+GLint gluUnProject(GLdouble winx,GLdouble winy,GLdouble winz,
                             const GLdouble model[16],const GLdouble proj[16],
                             const GLint viewport[4],
                             GLdouble *objx,GLdouble *objy,GLdouble *objz)

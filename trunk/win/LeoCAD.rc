@@ -609,7 +609,7 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 217, 122
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 217, 142
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About LeoCAD"
 FONT 8, "MS Sans Serif"
@@ -619,11 +619,13 @@ BEGIN
     LTEXT           "Copyright © 1996-2002, BT Software",IDC_STATIC,40,25,
                     119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,32,14,WS_GROUP
-    GROUPBOX        "System Information",IDC_STATIC,7,65,203,50
-    EDITTEXT        IDC_ABTDLG_INFO,14,79,190,30,ES_MULTILINE | 
+    GROUPBOX        "System Information",IDC_STATIC,7,85,203,50
+    EDITTEXT        IDC_ABTDLG_INFO,14,99,190,30,ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY
     LTEXT           "This program is protected by copyright law and international treaties.",
                     IDC_STATIC,40,40,151,19
+    LTEXT           "http://www.leocad.org",IDC_ABTDLG_HOMEPAGE,40,63,151,8,
+                    SS_NOTIFY
 END
 
 IDD_PROPGENERAL DIALOG DISCARDABLE  0, 0, 220, 105
@@ -1457,7 +1459,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 210
         TOPMARGIN, 7
-        BOTTOMMARGIN, 115
+        BOTTOMMARGIN, 135
     END
 
     IDD_PROPGENERAL, DIALOG

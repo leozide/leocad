@@ -407,6 +407,7 @@
 #define IDC_MF_TOOLRANGLE               1228
 #define ID_LIBTEX_LIST                  1228
 #define IDC_MF_LEGLANGLE                1229
+#define IDC_ABTDLG_HOMEPAGE             1229
 #define IDC_MF_LEGRANGLE                1230
 #define IDC_MF_SHOELANGLE               1231
 #define IDC_MF_SHOERANGLE               1232
@@ -657,8 +658,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        235
-#define _APS_NEXT_CONTROL_VALUE         1229
 #define _APS_NEXT_COMMAND_VALUE         33158
+#define _APS_NEXT_CONTROL_VALUE         1230
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

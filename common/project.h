@@ -146,6 +146,7 @@ protected:
 	bool RemoveSelectedObjects();
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine);
 	void SelectAndFocusNone(bool bFocusOnly);
+	bool GetSelectionCenter(float Center[3]) const;
 	void CalculateStep();
 	void MoveSelectedObjects(float x, float y, float z);
 	void RotateSelectedObjects(float x, float y, float z);
@@ -154,6 +155,7 @@ protected:
 	// Rendering
 	void RenderScene(bool bShaded, bool bDrawViewports);
 	void RenderViewports(bool bBackground, bool bLines);
+	void RenderOverlays();
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
@@ -176,6 +178,13 @@ protected:
 	float m_fTrack[3];
 	int m_nMouse;
 
+	typedef enum { LC_OVERLAY_XYZ, LC_OVERLAY_X, LC_OVERLAY_Y, LC_OVERLAY_Z, LC_OVERLAY_XY, LC_OVERLAY_XZ, LC_OVERLAY_YZ};
+	bool m_OverlayActive;
+	int m_OverlayMode;
+	float m_OverlayCenter[3];
+	float m_OverlayScale;
+	void MouseUpdateOverlays(int x, int y);
+
 	void LoadViewportProjection();
 	bool SetActiveViewport(int x, int y);
 	bool StopTracking(bool bAccept);
@@ -196,6 +205,7 @@ public:
 	void SetAction(int nAction);
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id, unsigned long nParam);
+	void HandleMessage(int Message, void* Data);
 
 protected:
 	// State variables

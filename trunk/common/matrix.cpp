@@ -198,7 +198,7 @@ float __LittleFloat (float l)
 void Matrix::FromPacked (const float *mat)
 {
 #ifdef LC_BIG_ENDIAN
-  for (int j = 0; j < 12; j++)
+  for (int i = 0; i < 12; i++)
     mat[i] = __LittleFloat (mat[i]);
 #endif
 

@@ -96,22 +96,16 @@ void CImageDlg::OnOK()
 	opts->to = m_nTo;
 	opts->multiple = m_nSingle != 0;
 
-	DWORD dwImage = m_nFormat;
-	if (m_bProgressive)
-		dwImage |= LC_IMAGE_PROGRESSIVE;
-	if (m_bTransparent)
-		dwImage |= LC_IMAGE_TRANSPARENT;
-	if (m_bHighcolor)
-		dwImage |= LC_IMAGE_HIGHCOLOR;
+	if (!m_bHTML)
+	{
+    DWORD dwImage = m_nFormat;
+    if (m_bProgressive)
+      dwImage |= LC_IMAGE_PROGRESSIVE;
+    if (m_bTransparent)
+      dwImage |= LC_IMAGE_TRANSPARENT;
+    if (m_bHighcolor)
+      dwImage |= LC_IMAGE_HIGHCOLOR;
 
-	if (m_bHTML)
-	{
-		theApp.WriteProfileInt("Default", "HTML Options", dwImage);
-		theApp.WriteProfileInt("Default", "HTML Width", m_nWidth);
-		theApp.WriteProfileInt("Default", "HTML Height", m_nHeight);
-	}
-	else
-	{
 		theApp.WriteProfileInt("Default", "Image Options", dwImage);
 		theApp.WriteProfileInt("Default", "Image Width", m_nWidth);
 		theApp.WriteProfileInt("Default", "Image Height", m_nHeight);

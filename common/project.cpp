@@ -3387,30 +3387,36 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 #endif
 		} break;
 
-		case LC_FILE_HTML:
-		{
-			LC_HTMLDLG_OPTS opts;
-			strcpy(opts.path, m_strPathName);
-			if (strlen(opts.path) > 0)
-			{
-				char* ptr = strrchr(opts.path, '/');
-				if (ptr == NULL)
-					ptr = strrchr(opts.path, '\\');
-				if (ptr)
-				{
-					ptr++;
-					*ptr = 0;
-				}
-			}
-			unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Options", 1|LC_IMAGE_TRANSPARENT);
+    case LC_FILE_HTML:
+    {
+      LC_HTMLDLG_OPTS opts;
+
+      strcpy (opts.path, Sys_ProfileLoadString ("Default", "HTML Path", ""));
+      if (strlen (opts.path) == 0)
+      {
+        strcpy (opts.path, m_strPathName);
+        if (strlen(opts.path) > 0)
+		  	{
+			  	char* ptr = strrchr(opts.path, '/');
+				  if (ptr == NULL)
+					  ptr = strrchr(opts.path, '\\');
+				  if (ptr)
+          {
+            ptr++;
+            *ptr = 0;
+          }
+  			}
+      }
+
+      unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
 			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
 			opts.imdlg.from = 1;
 			opts.imdlg.to = 1;
 			opts.imdlg.multiple = false;
-			opts.imdlg.width = Sys_ProfileLoadInt ("Default", "HTML Width", 256);
-			opts.imdlg.height = Sys_ProfileLoadInt ("Default", "HTML Height", 160);
+			opts.imdlg.width = Sys_ProfileLoadInt ("Default", "HTML Image Width", 256);
+			opts.imdlg.height = Sys_ProfileLoadInt ("Default", "HTML Image Height", 160);
 			opts.imdlg.imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
 			opts.imdlg.imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
 			opts.imdlg.imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
@@ -3418,49 +3424,65 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.imdlg.imopts.pause = 1;
 			opts.imdlg.imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
-                        unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
-                        opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
-                        opts.index = (ul & LC_HTML_INDEX) != 0;
-                        opts.images = (ul & LC_HTML_IMAGES) != 0;
-                        opts.listend = (ul & LC_HTML_LISTEND) != 0;
-                        opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
-                        opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
+      unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
+      opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
+      opts.index = (ul & LC_HTML_INDEX) != 0;
+      opts.images = (ul & LC_HTML_IMAGES) != 0;
+      opts.listend = (ul & LC_HTML_LISTEND) != 0;
+      opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
+      opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
 
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
 				FILE* f;
-				char* ext = ".bmp", fn[LC_MAXPATH];
+				char* ext, fn[LC_MAXPATH];
 				int i;
 				unsigned short last = GetLastStep();
 
-                                ul = 0;
-                                if (opts.singlepage) ul |= LC_HTML_SINGLEPAGE;
-                                if (opts.index) ul |= LC_HTML_INDEX;
-                                if (opts.images) ul |= LC_HTML_IMAGES;
-                                if (opts.listend) ul |= LC_HTML_LISTEND;
-                                if (opts.liststep) ul |= LC_HTML_LISTSTEP;
-                                if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
-                                Sys_ProfileSaveInt ("Default", "HTML Options", ul);
+        // Save HTML options
+        ul = 0;
+        if (opts.singlepage) ul |= LC_HTML_SINGLEPAGE;
+        if (opts.index) ul |= LC_HTML_INDEX;
+        if (opts.images) ul |= LC_HTML_IMAGES;
+        if (opts.listend) ul |= LC_HTML_LISTEND;
+        if (opts.liststep) ul |= LC_HTML_LISTSTEP;
+        if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
+        Sys_ProfileSaveInt ("Default", "HTML Options", ul);
+
+        // Save image options
+        ul = opts.imdlg.imopts.format;
+        if (opts.imdlg.imopts.interlaced)
+          ul |= LC_IMAGE_PROGRESSIVE;
+        if (opts.imdlg.imopts.transparent)
+          ul |= LC_IMAGE_TRANSPARENT;
+        if (opts.imdlg.imopts.truecolor)
+          ul |= LC_IMAGE_HIGHCOLOR;
+        Sys_ProfileSaveInt ("Default", "HTML Image Options", ul);
+			  Sys_ProfileSaveInt ("Default", "HTML Image Width", opts.imdlg.width);
+			  Sys_ProfileSaveInt ("Default", "HTML Image Height", opts.imdlg.height);
 
 				switch (opts.imdlg.imopts.format)
 				{
 				case LC_IMAGE_BMP: ext = ".bmp"; break;
+        default:
 				case LC_IMAGE_GIF: ext = ".gif"; break;
 				case LC_IMAGE_JPG: ext = ".jpg"; break;
 				case LC_IMAGE_PNG: ext = ".png"; break;
 				}
 
-                                i = strlen (opts.path);
-                                if (i && opts.path[i] != '/' && opts.path[i] != '\\')
-                                  strcat (opts.path, "/");
+        i = strlen (opts.path);
+        if (i && opts.path[i] != '/' && opts.path[i] != '\\')
+          strcat (opts.path, "/");
+        Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
+
 /*
 				// Create destination folder
-			    char *MyPath = strdup(dlg.m_strFolder);
-			    char *p = MyPath;
-				int psave;
-				while(*p)
-				{
-					while(*p && *p != '\\')
+        char *MyPath = strdup(dlg.m_strFolder);
+        char *p = MyPath;
+        int psave;
+        while(*p)
+        {
+          while(*p && *p != '\\')
 						++p;
 
 					psave = *p;
@@ -3476,6 +3498,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 				free(MyPath);
 */
+        main_window->BeginWait ();
+
 				if (opts.singlepage)
 				{
 					strcpy(fn, opts.path);
@@ -3654,6 +3678,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					Sys_FinishMemoryRender (render);
 					free (buf);
 				}
+        main_window->EndWait ();
 			}
 		} break;
 

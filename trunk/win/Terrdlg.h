@@ -50,6 +50,8 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTerrainDlg)
 	virtual BOOL OnInitDialog();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 
 	afx_msg LRESULT OnGridChange(WPARAM wParam, LPARAM lParam);

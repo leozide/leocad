@@ -2838,7 +2838,8 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 {
 	int oldx, oldy;
 	unsigned short oldtime;
-	void* render = Sys_StartMemoryRender(width, height);
+	void* render = Sys_StartMemoryRender (width, height);
+	unsigned char* buf = (unsigned char*)malloc (width*height*3);
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 	oldx = m_nViewX;
 	oldy = m_nViewY;
@@ -2878,8 +2879,12 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 		image->width = width;
 		image->height = height;
 		image->bits = (unsigned char*)image + sizeof(LC_IMAGE);
+
 		glPixelStorei (GL_PACK_ALIGNMENT, 1);
-		glReadPixels (0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,image->bits);
+		glReadPixels (0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
+
+		for (int row = 0; row < height; row++)
+		  memcpy ((unsigned char*)image->bits + (row*width), buf + ((height-row-1)*width), width);
 
 		images[i-from] = image;
 	}
@@ -2891,6 +2896,7 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 	else
 		m_nCurStep = (unsigned char)oldtime;
 	CalculateStep();
+	free (buf);
 	Sys_FinishMemoryRender (render);
 }
 
@@ -3412,6 +3418,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				{
 					int cx = 120, cy = 100;
 					void* render = Sys_StartMemoryRender (cx, cy);
+					unsigned char* buf = (unsigned char*)malloc (cx*cy*3);
 
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
@@ -3465,13 +3472,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						image->height = cy;
 						image->bits = (unsigned char*)image + sizeof(LC_IMAGE);
 						glPixelStorei (GL_PACK_ALIGNMENT, 1);
-						glReadPixels (0,0,cx,cy,GL_RGB,GL_UNSIGNED_BYTE,image->bits);
+						glReadPixels (0, 0, cx, cy, GL_RGB,GL_UNSIGNED_BYTE, buf);
+
+						for (int row = 0; row < cy; row++)
+						  memcpy ((unsigned char*)image->bits + (row*cx), buf + ((cy-row-1)*cx), cx);
 
 						sprintf(fn, "%s%s%s", opts.path, pInfo->m_strName, ext);
 						SaveImage(fn, image, &opts.imdlg.imopts);
 						free(image);
 					}
 					Sys_FinishMemoryRender (render);
+					free (buf);
 				}
 			}
 		} break;

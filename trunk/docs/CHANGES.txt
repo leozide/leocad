@@ -1,5 +1,17 @@
 This is a changelog for developers only, not for ordinary users.
 
+09/03/2002
+  - Moved the texture font to a class to allow support for multiple fonts.
+
+08/03/2002
+  - Fixed a crash in the Edit Groups Dialog.
+
+03/12/2001
+  - Added a console window for text messages.
+
+30/07/2001
+  - Fixed a small memory leak and improved the default mouse sensitivity.
+
 16/05/2001
   - Fixed the way pieces are moved/rotated with the side cameras.
 

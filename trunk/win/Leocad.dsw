@@ -1,9 +1,9 @@
-Microsoft Developer Studio Workspace File, Format Version 5.00
+Microsoft Developer Studio Workspace File, Format Version 6.00
 # WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
 
 ###############################################################################
 
-Project: "3dsftk"=.\3dsftk\3dsftk.dsp - Package Owner=<4>
+Project: "3dsftk"=".\3dsftk\3dsftk.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "LeoCAD"=.\LeoCAD.dsp - Package Owner=<4>
+Project: "LeoCAD"=".\LeoCAD.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,7 +39,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "jpeglib"=.\jpeglib\jpeglib.dsp - Package Owner=<4>
+Project: "jpeglib"=".\jpeglib\jpeglib.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libpng"=.\libpng\libpng.dsp - Package Owner=<4>
+Project: "libpng"=".\libpng\libpng.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +63,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "zlib"=.\zlib\zlib.dsp - Package Owner=<4>
+Project: "zlib"=".\zlib\zlib.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

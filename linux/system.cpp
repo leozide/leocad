@@ -78,6 +78,7 @@ int Sys_MessageBox (const char* text, const char* caption, int type)
   int mode = (type & LC_MB_TYPEMASK), ret, loop = 1;
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (window), "destroy",

@@ -1,5 +1,15 @@
 This is a changelog for developers only, not for ordinary users.
 
+15/09/2000
+	- Fixed problem with "focus follow mouse" in X, thanks to Renaud Breard.
+
+13/09/2000
+	- Fixed bug that caused image files to be saved upside down.
+
+12/09/2000
+	- Fixed bug when exporting POV-Ray files using LGEO.
+	- Changed GL library name under Linux from 'libGL.so.1' to 'libGL.so'.
+
 27/08/2000
 	- Save window position and size under Linux.
 

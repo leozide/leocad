@@ -241,6 +241,7 @@ int minifigdlg_execute(void* param)
   s.opts = (MinifigWizard*)param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",

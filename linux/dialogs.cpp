@@ -19,6 +19,7 @@
 #include "globals.h"
 #include "piece.h"
 #include "group.h"
+#include "main.h"
 
 // =============================================================================
 // Modal dialog functions
@@ -146,6 +147,7 @@ int msgbox_execute(char* text, int flags)
   int mode = flags & LC_MB_TYPEMASK, ret;
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (window), "destroy",
@@ -262,6 +264,7 @@ int filedlg_execute(char* caption, char* filename)
 {
   GtkWidget* dlg;
   dlg = gtk_file_selection_new (caption);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   filedlg_str = filename;
 
   gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(dlg)->ok_button),
@@ -301,6 +304,7 @@ int colorseldlg_execute(void* param)
   GtkWidget* dlg;
 
   dlg = gtk_color_selection_dialog_new ("Choose Color");
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_color_selection_set_color (GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG (dlg)->colorsel), dbl);
 
   gtk_signal_connect (GTK_OBJECT (GTK_COLOR_SELECTION_DIALOG (dlg)->ok_button),
@@ -372,6 +376,7 @@ int arraydlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -638,6 +643,7 @@ int aboutdlg_execute(void* param)
   char info[256];
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -764,6 +770,7 @@ int htmldlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -965,6 +972,7 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
   s.from_htmldlg = from_htmldlg;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -1213,6 +1221,7 @@ int povraydlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -1409,6 +1418,7 @@ int preferencesdlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -1913,6 +1923,7 @@ int propertiesdlg_execute(void* param)
   strcat(text, " Properties");
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2323,6 +2334,7 @@ int groupeditdlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2409,6 +2421,7 @@ int groupdlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2529,6 +2542,7 @@ int librarydlg_execute (void *param)
   LibraryDialog lib;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
   gtk_window_set_title (GTK_WINDOW (dlg), "Piece Library Manager");
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);

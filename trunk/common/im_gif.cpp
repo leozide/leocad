@@ -210,7 +210,7 @@ bool Image::LoadGIF (File& file)
   if ((hdrbuf[0] != 'G' || hdrbuf[1] != 'I' || hdrbuf[2] != 'F') ||
       ((hdrbuf[3] != '8' || hdrbuf[4] != '7' || hdrbuf[5] != 'a') &&
        (hdrbuf[3] != '8' || hdrbuf[4] != '9' || hdrbuf[5] != 'a')))
-    return NULL;
+    return false;
 
   source->input_file->Read(hdrbuf, 7);
   width = LM_to_uint(hdrbuf[0],hdrbuf[1]);

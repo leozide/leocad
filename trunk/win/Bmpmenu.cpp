@@ -377,7 +377,7 @@ void CBMPMenu::DrawItem (LPDRAWITEMSTRUCT lpDIS)
 				rect.top+m_iconY+2+dy);
 			CMenuItemInfo info;
 			info.fMask = MIIM_CHECKMARKS;
-			GetMenuItemInfo((HMENU)lpDIS->hwndItem,lpDIS->itemID,
+      ::GetMenuItemInfo((HMENU)lpDIS->hwndItem,lpDIS->itemID,
 				MF_BYCOMMAND, &info);
 			if(state&ODS_CHECKED || info.hbmpUnchecked) {
 				Draw3DCheckmark(pDC, rect2, state&ODS_SELECTED,

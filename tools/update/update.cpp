@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
 			if (update != 0)
 			{
 				message(&txt, "%s (%s) updated ", oldinfo[i].name, oldinfo[i].description);
+				strcpy (str, "");
 				if (update & UPDATE_DESCRIPTION)
 				{
 					strcat(str, "description");
@@ -236,7 +237,7 @@ int main(int argc, char* argv[])
 					free(newbuf);
 				}
 
-				message(&txt, "\n");
+				message(&txt, "%s\n", str);
 			}
 		}
 	}

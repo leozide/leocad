@@ -7,9 +7,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // System specific
 
-#if ! ( defined( LC_WINDOWS ) || defined( LC_LINUX ) || defined( LC_MACINTOSH ))
+#if !(defined(LC_WINDOWS) || defined(LC_LINUX))
 #error  YOU NEED TO DEFINE YOUR OS
 #endif
+
+// ============================================================================
+// Old defines (mostly deprecated).
 
 #ifdef LC_WINDOWS
 #define LC_MAXPATH 260 //_MAX_PATH

@@ -5,7 +5,9 @@
 #include "resource.h"
 #include "PrefPage.h"
 #include "Tools.h"
+#include "MainFrm.h"
 #include "defines.h"
+#include "keyboard.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -17,6 +19,7 @@ IMPLEMENT_DYNCREATE(CPreferencesDetail, CPropertyPage)
 IMPLEMENT_DYNCREATE(CPreferencesDrawing, CPropertyPage)
 IMPLEMENT_DYNCREATE(CPreferencesScene, CPropertyPage)
 IMPLEMENT_DYNCREATE(CPreferencesPrint, CPropertyPage)
+IMPLEMENT_DYNCREATE(CPreferencesKeyboard, CPropertyPage)
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesGeneral property page
@@ -686,4 +689,319 @@ void CPreferencesPrint::GetOptions(char* strHeader, char* strFooter)
 	AfxGetApp()->WriteProfileInt("Default","Print Columns", m_nInstCols);
 	AfxGetApp()->WriteProfileInt("Default","Catalog Rows", m_nCatRows);
 	AfxGetApp()->WriteProfileInt("Default","Catalog Columns", m_nCatCols);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesKeyboard property page
+
+CPreferencesKeyboard::CPreferencesKeyboard() : CPropertyPage(CPreferencesKeyboard::IDD)
+{
+	//{{AFX_DATA_INIT(CPreferencesKeyboard)
+	m_strFileName = _T("");
+	//}}AFX_DATA_INIT
+}
+
+CPreferencesKeyboard::~CPreferencesKeyboard()
+{
+}
+
+void CPreferencesKeyboard::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CPreferencesKeyboard)
+	DDX_Control(pDX, IDC_KEYDLG_KEYEDIT, m_Edit);
+	DDX_Control(pDX, IDC_KEYDLG_ASSIGN, m_Assign);
+	DDX_Control(pDX, IDC_KEYDLG_REMOVE, m_Remove);
+	DDX_Control(pDX, IDC_KEYDLG_CMDLIST, m_List);
+	DDX_Control(pDX, IDC_KEYDLG_COMBO, m_Combo);
+	DDX_Text(pDX, IDC_KEYDLG_FILENAME, m_strFileName);
+	//}}AFX_DATA_MAP
+}
+
+
+BEGIN_MESSAGE_MAP(CPreferencesKeyboard, CPropertyPage)
+	//{{AFX_MSG_MAP(CPreferencesKeyboard)
+	ON_BN_CLICKED(IDC_KEYDLG_REMOVE, OnKeydlgRemove)
+	ON_BN_CLICKED(IDC_KEYDLG_ASSIGN, OnKeydlgAssign)
+	ON_BN_CLICKED(IDC_KEYDLG_RESET, OnKeydlgReset)
+	ON_LBN_SELCHANGE(IDC_KEYDLG_CMDLIST, OnSelchangeKeydlgCmdlist)
+	ON_EN_CHANGE(IDC_KEYDLG_KEYEDIT, OnChangeKeydlgKeyedit)
+	ON_BN_CLICKED(IDC_KEYDLG_SAVE, OnKeydlgSave)
+	ON_BN_CLICKED(IDC_KEYDLG_LOAD, OnKeydlgLoad)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+
+void CPreferencesKeyboard::SetOptions()
+{
+	m_strFileName = AfxGetApp()->GetProfileString("Settings", "Keyboard", "");
+}
+
+void CPreferencesKeyboard::GetOptions()
+{
+	if (SaveKeyboardShortcuts(m_strFileName))
+	{
+		AfxGetApp()->WriteProfileString("Settings", "Keyboard", m_strFileName);
+	}
+	else
+	{
+		AfxMessageBox("Error saving Keyboard Shortcuts file.", MB_OK | MB_ICONEXCLAMATION);
+	}
+
+  ((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators();
+}
+
+BOOL CPreferencesKeyboard::OnInitDialog() 
+{
+	CPropertyPage::OnInitDialog();
+
+	// Fill the list with all commands available.
+	for (int i = 0; i < KeyboardShortcutsCount; i++)
+	{
+		int Index = m_List.AddString(KeyboardShortcuts[i].Description);
+		m_List.SetItemData(Index, i);
+	}
+
+	m_List.SetCurSel(0);
+	OnSelchangeKeydlgCmdlist();
+
+	return TRUE;
+}
+
+void CPreferencesKeyboard::OnKeydlgRemove() 
+{
+	int Sel = m_List.GetCurSel();
+
+	if (Sel == LB_ERR)
+		return;
+
+	LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[m_List.GetItemData(Sel)];
+
+	Sel = m_Combo.GetCurSel();
+
+	if (Sel == CB_ERR)
+		return;
+
+	if (Sel == 0)
+	{
+		Cmd.Modifiers >>= 4;
+		Cmd.Key1 = Cmd.Key2;
+		Cmd.Key2 = 0;
+	}
+	else
+	{
+		Cmd.Key2 = 0;
+		Cmd.Modifiers |= 0x0f;
+	}
+
+	OnSelchangeKeydlgCmdlist();
+}
+
+void CPreferencesKeyboard::OnKeydlgAssign() 
+{
+	int Sel = m_List.GetCurSel();
+
+	if (Sel == LB_ERR)
+		return;
+
+	// Check if this shortcut is not already assigned to someone else.
+	for (int i = 0; i < KeyboardShortcutsCount; i++)
+	{
+		LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
+		int Match = 0;
+
+		if (Cmd.Key1 == m_Edit.m_Key)
+		{
+			if ((((Cmd.Modifiers & LC_KEYMOD1_SHIFT) != 0) == m_Edit.m_Shift) &&
+			    (((Cmd.Modifiers & LC_KEYMOD1_CONTROL) != 0) == m_Edit.m_Control))
+			{
+				Match = 1;
+			}
+		}
+
+		if (Cmd.Key2 == m_Edit.m_Key)
+		{
+			if ((((Cmd.Modifiers & LC_KEYMOD2_SHIFT) != 0) == m_Edit.m_Shift) &&
+			    (((Cmd.Modifiers & LC_KEYMOD2_CONTROL) != 0) == m_Edit.m_Control))
+			{
+				Match = 2;
+			}
+		}
+
+		if (Match)
+		{
+			CString Msg;
+
+			Msg.Format("This shortcut is currently assigned to \"%s\", do you want to reassign it?",
+			           Cmd.Description);
+
+			if (AfxMessageBox(Msg, MB_YESNO | MB_ICONQUESTION) == IDNO)
+			{
+				return;
+			}
+			else
+			{
+				// Remove old shortcut.
+				if (Match == 1)
+				{
+					Cmd.Modifiers >>= 4;
+					Cmd.Key1 = Cmd.Key2;
+					Cmd.Key2 = 0;
+				}
+				else
+				{
+					Cmd.Key2 = 0;
+					Cmd.Modifiers |= 0x0f;
+				}
+			}
+		}
+	}
+
+	LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[m_List.GetItemData(Sel)];
+
+	// Assign new shortcut.
+	if (Cmd.Key1 == 0)
+	{
+		Cmd.Key1 = m_Edit.m_Key;
+
+		if (m_Edit.m_Shift)
+			Cmd.Modifiers |= LC_KEYMOD1_SHIFT;
+
+		if (m_Edit.m_Control)
+			Cmd.Modifiers |= LC_KEYMOD1_CONTROL;
+	}
+	else
+	{
+		Cmd.Key2 = m_Edit.m_Key;
+
+		if (m_Edit.m_Shift)
+			Cmd.Modifiers |= LC_KEYMOD2_SHIFT;
+
+		if (m_Edit.m_Control)
+			Cmd.Modifiers |= LC_KEYMOD2_CONTROL;
+	}
+
+	m_Edit.ResetKey();
+	OnSelchangeKeydlgCmdlist();
+}
+
+void CPreferencesKeyboard::OnSelchangeKeydlgCmdlist() 
+{
+	m_Combo.ResetContent();
+	m_Remove.EnableWindow(false);
+	m_Edit.SetWindowText("");
+
+	int Sel = m_List.GetCurSel();
+
+	if (Sel == LB_ERR)
+		return;
+
+	LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[m_List.GetItemData(Sel)];
+
+	// Update the combo box with the shortcuts for the current selection.
+	if (Cmd.Key1)
+	{
+		CString str;
+
+		if (Cmd.Modifiers & LC_KEYMOD1_SHIFT)
+			str = "Shift+";
+
+		if (Cmd.Modifiers & LC_KEYMOD1_CONTROL)
+			str += "Ctrl+";
+
+		str += GetKeyName(Cmd.Key1);
+
+		m_Combo.AddString(str);
+		m_Combo.SetCurSel(0);
+		m_Remove.EnableWindow(true);
+
+		if (Cmd.Key2)
+		{
+			str = "";
+
+			if (Cmd.Modifiers & LC_KEYMOD2_SHIFT)
+				str = "Shift+";
+
+			if (Cmd.Modifiers & LC_KEYMOD2_CONTROL)
+				str += "Ctrl+";
+
+			str += GetKeyName(Cmd.Key2);
+
+			m_Combo.AddString(str);
+		}
+	}
+
+	m_Assign.EnableWindow((Cmd.Key2 == 0) && m_Edit.m_Key);
+}
+
+void CPreferencesKeyboard::OnChangeKeydlgKeyedit() 
+{
+	if (m_Edit.m_Key == 0)
+	{
+		m_Assign.EnableWindow(false);
+		return;
+	}
+
+	int Sel = m_List.GetCurSel();
+
+	if (Sel == LB_ERR)
+		return;
+
+	LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[m_List.GetItemData(Sel)];
+
+	if (Cmd.Key2 != 0)
+	{
+		m_Assign.EnableWindow(false);
+		return;
+	}
+
+	m_Assign.EnableWindow(true);
+}
+
+void CPreferencesKeyboard::OnKeydlgReset() 
+{
+	if (AfxMessageBox("Are you sure you want to reset the Keyboard Shortcuts to the default settings?", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	{
+		ResetKeyboardShortcuts();
+		OnSelchangeKeydlgCmdlist();
+	}
+}
+
+void CPreferencesKeyboard::OnKeydlgSave() 
+{
+	UpdateData(TRUE);
+
+	CFileDialog dlg(FALSE, "*.lkb", m_strFileName, OFN_OVERWRITEPROMPT, "LeoCAD Keyboard Layout Files (*.lkb)|*.lkb||", this);
+
+	if (dlg.DoModal() == IDOK)
+	{
+		if (SaveKeyboardShortcuts(dlg.GetPathName()))
+		{
+			m_strFileName = dlg.GetPathName();
+			UpdateData(FALSE);
+		}
+		else
+		{
+			AfxMessageBox("Error saving file.", MB_OK | MB_ICONEXCLAMATION);
+		}
+	}
+}
+
+void CPreferencesKeyboard::OnKeydlgLoad() 
+{
+	CFileDialog dlg(TRUE, "*.lkb", m_strFileName, 0, "LeoCAD Keyboard Layout Files (*.lkb)|*.lkb||", this);
+
+	if (dlg.DoModal() == IDOK)
+	{
+		if (LoadKeyboardShortcuts(dlg.GetPathName()))
+		{
+			UpdateData(TRUE);
+			m_strFileName = dlg.GetPathName();
+			UpdateData(FALSE);
+		}
+		else
+		{
+			AfxMessageBox("Error loading file.", MB_OK | MB_ICONEXCLAMATION);
+		}
+	}
 }

@@ -4,6 +4,8 @@
 #ifndef __PREFPAGE_H__
 #define __PREFPAGE_H__
 
+#include "keyedit.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesGeneral dialog
 
@@ -271,6 +273,56 @@ protected:
 	//{{AFX_MSG(CPreferencesPrint)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnFooterButton();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesKeyboard dialog
+
+class CPreferencesKeyboard : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CPreferencesKeyboard)
+
+// Construction
+public:
+	void SetOptions();
+	void GetOptions();
+	CPreferencesKeyboard();
+	~CPreferencesKeyboard();
+
+// Dialog Data
+	//{{AFX_DATA(CPreferencesKeyboard)
+	enum { IDD = IDD_PREFKEYBOARD };
+	CKeyEdit	m_Edit;
+	CButton	m_Assign;
+	CButton	m_Remove;
+	CListBox	m_List;
+	CComboBox	m_Combo;
+	CString	m_strFileName;
+	//}}AFX_DATA
+
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CPreferencesKeyboard)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(CPreferencesKeyboard)
+	virtual BOOL OnInitDialog();
+	afx_msg void OnKeydlgRemove();
+	afx_msg void OnKeydlgAssign();
+	afx_msg void OnKeydlgReset();
+	afx_msg void OnSelchangeKeydlgCmdlist();
+	afx_msg void OnChangeKeydlgKeyedit();
+	afx_msg void OnKeydlgSave();
+	afx_msg void OnKeydlgLoad();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -13,6 +13,7 @@
 #include "mainwnd.h"
 #include "cadview.h"
 #include "console.h"
+#include "keyboard.h"
 
 #include "Print.h"
 
@@ -246,6 +247,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pMenu = CMenu::FromHandle (hMenu);
 	SetMenu (pMenu);
 	m_hMenuDefault = hMenu;
+
+	UpdateMenuAccelerators();
 
   messenger->Listen (&mainframe_listener, this);
 
@@ -1093,4 +1096,155 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	Edit.SetDefaultCharFormat(cf);
 
   return TRUE;
+}
+
+BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 
+{
+	// Check if the user pressed any accelerator.
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		if ((HIWORD(pMsg->lParam) & KF_REPEAT) == 0)
+		{
+			bool Control = GetKeyState(VK_CONTROL) < 0;
+			bool Shift = GetKeyState(VK_SHIFT) < 0;
+
+			for (int i = 0; i < KeyboardShortcutsCount; i++)
+			{
+				LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
+
+				if (pMsg->wParam == Cmd.Key1)
+				{
+					if ((Shift == ((Cmd.Modifiers & LC_KEYMOD1_SHIFT) != 0)) &&
+					    (Control == ((Cmd.Modifiers & LC_KEYMOD1_CONTROL) != 0)))
+					{
+						project->HandleCommand(Cmd.ID, 0);
+						return true;
+					}
+				}
+
+				if (pMsg->wParam == Cmd.Key2)
+				{
+					if ((Shift == ((Cmd.Modifiers & LC_KEYMOD2_SHIFT) != 0)) &&
+					    (Control == ((Cmd.Modifiers & LC_KEYMOD2_CONTROL) != 0)))
+					{
+						project->HandleCommand(Cmd.ID, 0);
+						return true;
+					}
+				}
+			}
+		}
+	}
+
+	return CFrameWnd::PreTranslateMessage(pMsg);
+}
+
+void CMainFrame::UpdateMenuAccelerators()
+{
+	DWORD CmdToID[] =
+	{
+		ID_FILE_NEW,               // LC_FILE_NEW
+		ID_FILE_OPEN,              // LC_FILE_OPEN
+		ID_FILE_MERGE,             // LC_FILE_MERGE
+		ID_FILE_SAVE,              // LC_FILE_SAVE
+		ID_FILE_SAVE_AS,           // LC_FILE_SAVEAS
+		ID_FILE_SAVEPICTURE,       // LC_FILE_PICTURE
+		ID_FILE_EXPORT_3DSTUDIO,   // LC_FILE_3DS
+		ID_FILE_EXPORT_HTML,       // LC_FILE_HTML
+		ID_FILE_EXPORT_POVRAY,     // LC_FILE_POVRAY
+		ID_FILE_EXPORT_WAVEFRONT,  // LC_FILE_WAVEFRONT
+		ID_FILE_PROPERTIES,        // LC_FILE_PROPERTIES
+		ID_FILE_TERRAINEDITOR,     // LC_FILE_TERRAIN
+		ID_FILE_EDITPIECELIBRARY,  // LC_FILE_LIBRARY
+		0,                         // LC_FILE_RECENT
+		ID_EDIT_UNDO,              // LC_EDIT_UNDO
+		ID_EDIT_REDO,              // LC_EDIT_REDO
+		ID_EDIT_CUT,               // LC_EDIT_CUT
+		ID_EDIT_COPY,              // LC_EDIT_COPY
+		ID_EDIT_PASTE,             // LC_EDIT_PASTE
+		ID_EDIT_SELECTALL,         // LC_EDIT_SELECT_ALL
+		ID_EDIT_SELECTNONE,        // LC_EDIT_SELECT_NONE
+		ID_EDIT_SELECTINVERT,      // LC_EDIT_SELECT_INVERT
+		ID_EDIT_SELECTBYNAME,      // LC_EDIT_SELECT_BYNAME
+		ID_PIECE_INSERT,           // LC_PIECE_INSERT
+		ID_PIECE_DELETE,           // LC_PIECE_DELETE
+		ID_PIECE_MINIFIGWIZARD,    // LC_PIECE_MINIFIG
+		ID_PIECE_ARRAY,            // LC_PIECE_ARRAY
+		ID_PIECE_COPYKEYS,         // LC_PIECE_COPYKEYS
+		ID_PIECE_GROUP,            // LC_PIECE_GROUP
+		ID_PIECE_UNGROUP,          // LC_PIECE_UNGROUP
+		ID_PIECE_ATTACH,           // LC_PIECE_GROUP_ADD
+		ID_PIECE_DETACH,           // LC_PIECE_GROUP_REMOVE
+		ID_PIECE_EDITGROUPS,       // LC_PIECE_GROUP_EDIT
+		ID_PIECE_HIDESELECTED,     // LC_PIECE_HIDE_SELECTED
+		ID_PIECE_HIDEUNSELECTED,   // LC_PIECE_HIDE_UNSELECTED
+		ID_PIECE_UNHIDEALL,        // LC_PIECE_UNHIDE_ALL
+		ID_PIECE_PREVIOUS,         // LC_PIECE_PREVIOUS
+		ID_PIECE_NEXT,             // LC_PIECE_NEXT
+		ID_VIEW_PREFERENCES,       // LC_VIEW_PREFERENCES
+		0,                         // LC_VIEW_ZOOM
+		ID_VIEW_ZOOMIN,            // LC_VIEW_ZOOMIN
+		ID_VIEW_ZOOMOUT,           // LC_VIEW_ZOOMOUT
+		ID_ZOOM_EXTENTS,           // LC_VIEW_ZOOMEXTENTS
+		0,                         // LC_VIEW_VIEWPORTS
+		ID_VIEW_STEP_NEXT,         // LC_VIEW_STEP_NEXT
+		ID_VIEW_STEP_PREVIOUS,     // LC_VIEW_STEP_PREVIOUS
+		ID_VIEW_STEP_FIRST,        // LC_VIEW_STEP_FIRST
+		ID_VIEW_STEP_LAST,         // LC_VIEW_STEP_LAST
+		ID_VIEW_STEP_CHOOSE,       // LC_VIEW_STEP_CHOOSE
+		0,                         // LC_VIEW_STEP_SET
+		ID_VIEW_STEP_INSERT,       // LC_VIEW_STEP_INSERT
+		ID_VIEW_STEP_DELETE,       // LC_VIEW_STEP_DELETE
+		ID_ANIMATOR_STOP,          // LC_VIEW_STOP
+		ID_ANIMATOR_PLAY,          // LC_VIEW_PLAY
+		0,                         // LC_VIEW_CAMERA_MENU
+		ID_VIEW_CAMERAS_RESET,     // LC_VIEW_CAMERA_RESET
+		0,                         // LC_VIEW_AUTOPAN
+		ID_APP_ABOUT,              // LC_HELP_ABOUT
+		0,                         // LC_TOOLBAR_ANIMATION
+		0,                         // LC_TOOLBAR_ADDKEYS
+		0,                         // LC_TOOLBAR_SNAPMENU
+		0,                         // LC_TOOLBAR_LOCKMENU
+		0,                         // LC_TOOLBAR_SNAPMOVEMENU
+		0,                         // LC_TOOLBAR_FASTRENDER
+		0,                         // LC_TOOLBAR_BACKGROUND
+	};
+
+	m_bmpMenu.Attach(m_hMenuDefault);
+
+	for (int i = 0; i < KeyboardShortcutsCount; i++)
+	{
+		LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
+		DWORD ID = CmdToID[Cmd.ID];
+		String str;
+
+		if (ID == 0)
+			continue;
+
+		if (Cmd.Key1)
+		{
+			if (Cmd.Modifiers & LC_KEYMOD1_SHIFT)
+				str += "Shift+";
+
+			if (Cmd.Modifiers & LC_KEYMOD1_CONTROL)
+				str += "Ctrl+";
+
+			str += GetKeyName(Cmd.Key1);
+
+			if (Cmd.Key2)
+			{
+				str += ",";
+				if (Cmd.Modifiers & LC_KEYMOD2_SHIFT)
+					str += "Shift+";
+
+				if (Cmd.Modifiers & LC_KEYMOD2_CONTROL)
+					str += "Ctrl+";
+
+				str += GetKeyName(Cmd.Key2);
+			}
+		}
+
+		m_bmpMenu.ChangeMenuItemShortcut(str, ID);
+	}
+
+	m_bmpMenu.Detach();
 }

@@ -27,6 +27,7 @@ public:
 	CPreferencesDrawing m_PageDrawing;
 	CPreferencesScene m_PageScene;
 	CPreferencesPrint m_PagePrint;
+	CPreferencesKeyboard m_PageKeyboard;
 
 	CTabCtrlWithDisable m_tabCtrl;
 

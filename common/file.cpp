@@ -400,6 +400,9 @@ int FileDisk::PutChar(int c)
 
 bool FileDisk::Open(const char *filename, const char *mode)
 {
+	if (*filename == 0)
+		return false;
+
   strcpy(FileName, filename);
 
   m_hFile = fopen(filename, mode);

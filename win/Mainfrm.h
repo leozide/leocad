@@ -34,6 +34,7 @@ public:
 	//{{AFX_VIRTUAL(CMainFrame)
 	public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
@@ -56,6 +57,7 @@ public:
 	CPiecesBar    m_wndPiecesBar;
   CSplitterWnd  m_wndSplitter;
 
+	void UpdateMenuAccelerators();
 	void SetStatusBarMessage(const char* Message)
 		{ m_strStatusBar = Message; }
 

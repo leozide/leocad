@@ -15,6 +15,7 @@
 #include "config.h"
 #include "mainwnd.h"
 #include "library.h"
+#include "keyboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -93,6 +94,8 @@ BOOL CCADApp::InitInstance()
 
 	SetRegistryKey(_T("BT Software"));
 //	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
+
+	InitKeyboardShortcuts();
 
   if (!GL_Initialize (NULL))
     return FALSE;

@@ -1382,6 +1382,7 @@ bool SystemDoDialog(int nMode, void* param)
 			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap, opts->nGridSize);
 			ps.m_PageScene.SetOptions(opts->nScene, opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 			ps.m_PagePrint.SetOptions(opts->strHeader, opts->strFooter);
+			ps.m_PageKeyboard.SetOptions();
 
 			if (ps.DoModal() == IDOK)
 			{
@@ -1390,6 +1391,7 @@ bool SystemDoDialog(int nMode, void* param)
 				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap, &opts->nGridSize);
 				ps.m_PageScene.GetOptions(&opts->nScene, &opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 				ps.m_PagePrint.GetOptions(opts->strHeader, opts->strFooter);
+				ps.m_PageKeyboard.GetOptions();
 				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_SETTINGS);
 				AfxGetApp()->WriteProfileInt("Settings", "Autosave", opts->nSaveInterval);
 				AfxGetApp()->WriteProfileInt("Default", "Mouse", opts->nMouse);

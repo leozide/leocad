@@ -608,6 +608,7 @@ void SystemRedrawView()
 
 void SystemPieceComboAdd(char* name)
 {
+  piececombo_add(name);
 }
 
 

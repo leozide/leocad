@@ -18,9 +18,10 @@ typedef enum
   LC_OBJECT_CAMERA_TARGET,
   LC_OBJECT_LIGHT,
   LC_OBJECT_LIGHT_TARGET,
+  LC_OBJECT_CURVE,
+  LC_OBJECT_CURVE_POINT,
   //  LC_OBJECT_GROUP,
   //  LC_OBJECT_GROUP_PIVOT,
-  //  LC_OBJECT_CURVE
 } LC_OBJECT_TYPE;
 
 // key handling
@@ -71,15 +72,20 @@ class Object
   Object (LC_OBJECT_TYPE nType);
   virtual ~Object ();
 
+ public:
+  // move the object
+  virtual void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
+  // check if the object intersects the ray
+  virtual void MinIntersectDist (LC_CLICKLINE* pLine) = 0;
+  // bSelecting is the action (add/remove), bFocus means "add focus if selecting"
+  // or "remove focus only if deselecting", bMultiple = Ctrl key is down
+  virtual void Select (bool bSelecting, bool bFocus, bool bMultiple) = 0;
+
+
 
   /*
-
-  // These functions must be implemented for each class
   virtual void UpdatePosition (unsigned short nTime, bool bAnimation) = 0;
   virtual void CompareBoundingBox (float *box) { };
-  virtual void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
-  virtual void FileSave (File* file) = 0;
-  virtual void FileLoad (File* file) = 0;
   virtual void Render (LC_RENDER_INFO* pInfo) = 0;
 
   // Query functions
@@ -91,6 +97,7 @@ class Object
     { return (m_nState & LC_OBJECT_HIDDEN) == 0; }
   const char* GetName() const
     { return m_strName; }
+
 
   // State change, most classes will have to replace these functions
   virtual void SetSelection (bool bSelect, void *pParam = NULL)
@@ -119,12 +126,8 @@ class Object
     }
   virtual bool SetColor (int nColor)
     { return false; };
-
-  // collision detection
-  virtual void MinIntersectDist (LC_CLICKLINE* pLine) = 0;
-  //  void BoxMinIntersectDist (LC_CLICKLINE* pLine);
-  //  void SphereMinIntersectDist (LC_CLICKLINE* pLine);
   */
+
   // determine the object type
   bool IsPiece () const
     { return m_nObjectType == LC_OBJECT_PIECE; }
@@ -132,21 +135,19 @@ class Object
     { return m_nObjectType == LC_OBJECT_CAMERA; }
   bool IsLight () const
     { return m_nObjectType == LC_OBJECT_LIGHT; }
-  /*
-  bool IsGroup () const
-    { return m_nObjectType == LC_OBJECT_GROUP; }
   bool IsCurve () const
     { return m_nObjectType == LC_OBJECT_CURVE; }
-  */
+
   LC_OBJECT_TYPE GetType () const
     { return m_nObjectType; }
+
   /*
   // For linked lists
   Object* m_pNext;
   Object* m_pNextRender;
   Object* m_pParent;
 
-  Object* GetTopAncestor ()
+  Object* GetTopAncestor () const
     { return m_pParent ? m_pParent->GetTopAncestor () : this; }
   */
 
@@ -155,12 +156,20 @@ class Object
   //  unsigned char m_nState;
 
   virtual bool FileLoad (File& file);
-  virtual void FileSave (File& file);
+  virtual void FileSave (File& file) const;
+
 
   // Key handling stuff
  public:
-  void CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value);
+  void CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value) const;
   void ChangeKey (unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
+
+  int GetKeyTypeCount () const
+    { return m_nKeyInfoCount; }
+  const LC_OBJECT_KEY_INFO* GetKeyTypeInfo (int index) const
+    { return &m_pKeyInfo[index]; };
+  const float* GetKeyTypeValue (int index) const
+    { return m_pKeyValues[index]; };
 
  protected:
   void RegisterKeys (float *values[], LC_OBJECT_KEY_INFO* info, int count);
@@ -176,6 +185,7 @@ class Object
   LC_OBJECT_KEY_INFO *m_pKeyInfo;
   int m_nKeyInfoCount;
 
+
   // Bounding box stuff
  protected:
   double BoundingBoxIntersectDist (LC_CLICKLINE* pLine) const;
@@ -188,6 +198,7 @@ class Object
 				      double *x, double *y, double *z) const;
   bool BoundingBoxPointInside (double x, double y, double z) const;
   float m_fBoxPlanes[4][6];
+
 
   // Object type
  private:

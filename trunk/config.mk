@@ -16,12 +16,13 @@ CPPFLAGS += -O2 -Wall
 # Add linker options, such as -L option to include jpeglib's libraries
 # LDFLAGS += -L/home/fred/jpeglib
 
-### Linux configuration
+### Linux and FreeBSD configuration
 
-ifeq ($(shell uname), Linux)
+ifneq ($(findstring $(shell uname), Linux, FreeBSD), )
 
 OS 	:= -DLC_LINUX
 OSDIR 	:= linux
+PREFIX  := /usr/local
 
 endif
 

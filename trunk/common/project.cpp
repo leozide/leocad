@@ -550,7 +550,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE | LC_DRAW_PREVIEW);
 	SystemUpdateSnap(m_nSnap);
 	m_nMoveSnap = 0;
-	SystemUpdateMoveSnap(m_nMoveSnap);
+	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
     m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
 	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
 	rgb = Sys_ProfileLoadInt ("Default", "Fog", 0xFFFFFF);
@@ -1069,7 +1069,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
-	SystemUpdateMoveSnap(m_nMoveSnap);
+	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_pCameras);
 	SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
 	UpdateSelection();
@@ -5780,7 +5780,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				else
 					m_nMoveSnap = (unsigned short)(nParam - 10)*5 + 10;
 			}
-			SystemUpdateMoveSnap(m_nMoveSnap);
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
 		case LC_TOOLBAR_BACKGROUND:
@@ -6459,6 +6459,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 	if (IsDrawing())
 		return false;
 
+	// FIXME: Almost all of this should go through the keyboard shortcut system.
 	switch (nKey)
 	{
 		case KEY_ESCAPE:
@@ -6490,8 +6491,27 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-				m_nMoveSnap = nKey - 0x30;
-				SystemUpdateMoveSnap(m_nMoveSnap);
+				if (bShift)
+				{
+					switch (nKey)
+					{
+					case '0': m_nAngleSnap = 1; break;
+					case '1': m_nAngleSnap = 5; break;
+					case '2': m_nAngleSnap = 10; break;
+					case '3': m_nAngleSnap = 15; break;
+					case '4': m_nAngleSnap = 30; break;
+					case '5': m_nAngleSnap = 45; break;
+					case '6': m_nAngleSnap = 60; break;
+					case '7': m_nAngleSnap = 90; break;
+					case '8': m_nAngleSnap = 180; break;
+					}
+				}
+				else
+				{
+					m_nMoveSnap = nKey - 0x30;
+				}
+
+				SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 			}
 			ret = true;
 		} break;

@@ -475,7 +475,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
   ignore_commands = false;
 }
 
-void SystemUpdateMoveSnap(unsigned short move_snap)
+void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
 {
   char text[11];
   if (move_snap)

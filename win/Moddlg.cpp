@@ -200,7 +200,12 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		case LC_OBJECT_CAMERA_TARGET:
 		{
 			float tmp[3];
-			Camera* pCamera = (Camera*)m_pObject;
+			Camera* pCamera;
+			if (m_nType == LC_OBJECT_CAMERA)
+				pCamera = (Camera*)m_pObject;
+			else
+				pCamera = ((CameraTarget*)m_pObject)->GetParent();
+
 			pCamera->GetEyePos(tmp);
 			m_fPosX = tmp[0];
 			m_fPosY = tmp[1];

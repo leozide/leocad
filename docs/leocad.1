@@ -1,0 +1,72 @@
+.TH LEOCAD 1 "20 July 2000"
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+.SH NAME
+LeoCAD \- CAD program using plastic bricks.
+.SH SYNOPSIS
+\fIleocad \fR [\fIfile\fR] [\fI\-l path\fR] \fIinfile [ -i outfile.ext \fR[\fI-w x\fR]\fI \fR[\fI-h y\fR] ]
+.SH "DESCRIPTION"
+This manual page documents briefly the \fILeoCAD \fRprogram.
+It was written for the Debian GNU/Linux distribution
+because the original program does not have a manual page.  The information
+in this manual page came from docs/LINUX.txt in the source archive.
+
+.PP
+\fILeoCAD \fR is a CAD program that uses plastic bricks similar to those found
+in many toys (but not any particular brand).  It supports animation
+as well as exportation to various file formats including POV-Ray.
+
+.SH OPTIONS
+.TP
+.B \-l path
+Use alternate pieces library found in \fIpath \fR.  The Debian version
+of \fILeoCAD \fRuses /usr/share/leocad/ as the default.
+
+.TP
+.B infile
+Loads the file \fIinfile\fR
+
+.TP
+.B \-i outfile.ext
+Saves a picture to \fIoutfile.ext \fR in the image format specified
+by \fIext\fR and exits. \fIext\fR can be gif, bmp, png or jpg.
+
+.TP
+.B \-w x
+Sets the width of the picture to \fIx\fR.
+
+.TP
+.B \-h y
+Sets the height of the picture to \fIy\fR.
+
+.TP
+.B \-\-libgl library
+Sets the name of the OpenGL dynamic library used by the program to \fIlibrary\fR.
+The default libraries are libGL.so and libMesaGL.so.
+
+.SH ENVIRONMENT
+``LEOCAD_LIB'' may be set to the path of the pieces library.
+
+.SH EXAMPLES
+.PP
+ $ leocad car.lcd -i car.png -w 640 -h 480
+.PP
+This will start LeoCAD, load the file "car.lcd," create a png called
+"car.png" with a resolution of 640x480 and exit when done.
+
+.SH FILES
+.TP
+.I ~/.leocad
+User preferences file
+
+.SH BUGS
+Lots of bugs so if you find one, please report it to the author.
+
+
+.SH AUTHOR
+\fILeoCAD \fRis written by Leonardo Zide <leo@gerf.org>.
+You can visit the LeoCAD homepage at http://www.leocad.org/
+
+This manual page was written by Patrick Mahoney <pat7@gmx.net>,
+for the Debian GNU/Linux system (but may be used by others).
+

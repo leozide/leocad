@@ -1,10 +1,11 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <png.h>
 #include "config.h"
-#include "typedefs.h"
+#include "image.h"
+#include "file.h"
 
 #ifdef LC_HAVE_PNGLIB
+
+#include <png.h>
 
 #define alpha_composite(composite, fg, alpha, bg) {			\
   unsigned short temp = ((unsigned short)(fg)*(unsigned short)(alpha) +	\
@@ -14,7 +15,19 @@
 
 // =============================================================================
 
-LC_IMAGE* OpenPNG(char* filename)
+static void user_read_fn (png_structp png_ptr, png_bytep data, png_size_t length)
+{
+  png_size_t check;
+
+  // Read() returns 0 on error, so it is OK to store this in a png_size_t
+  // instead of an int, which is what Read() actually returns.
+  check = (png_size_t)((File*)png_ptr->io_ptr)->Read (data, length);
+
+  if (check != length)
+    png_error(png_ptr, "Read Error");
+}
+
+bool Image::LoadPNG (File& file)
 {
   unsigned char sig[8], red, green, blue;
   unsigned char *image_data = NULL;
@@ -30,42 +43,32 @@ LC_IMAGE* OpenPNG(char* filename)
   int bit_depth, color_type;
   int image_channels;
   double gamma;
-  FILE* f;
 
-  f = fopen(filename, "rb");
-  if (f == NULL)
-    return NULL;
+  FreeData ();
 
-  fread(sig, 1, 8, f);
+  file.Read (sig, 8);
   if (!png_check_sig(sig, 8))
-  {
-    fclose(f);
-    return NULL;	// bad signature
-  }
+    return false;	// bad signature
 
   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if (!png_ptr)
-  {
-    fclose(f);
-    return NULL;	// out of memory
-  }
-
+    return false;	// out of memory
+ 
   info_ptr = png_create_info_struct(png_ptr);
   if (!info_ptr)
   {
     png_destroy_read_struct(&png_ptr, NULL, NULL);
-    fclose(f);
-    return NULL;	// out of memory
+    return false;	// out of memory
   }
 
   if (setjmp(png_ptr->jmpbuf))
   {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-    fclose(f);
-    return NULL;
+    return false;
   }
 
-  png_init_io(png_ptr, f);
+  png_set_read_fn(png_ptr, (void *)&file, user_read_fn);
+//  png_init_io(png_ptr, f);
   png_set_sig_bytes(png_ptr, 8);	// we already read the 8 signature bytes
 
   png_read_info(png_ptr, info_ptr);  // read all PNG info up to image data
@@ -75,8 +78,7 @@ LC_IMAGE* OpenPNG(char* filename)
   if (setjmp(png_ptr->jmpbuf))
   {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-    fclose(f);
-    return NULL;
+    return false;
   }
 
   if (png_get_valid(png_ptr, info_ptr, PNG_INFO_bKGD))
@@ -86,8 +88,7 @@ LC_IMAGE* OpenPNG(char* filename)
     if (setjmp (png_ptr->jmpbuf))
     {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-      fclose(f);
-      return NULL;
+      return false;
     }
 
     // however, it always returns the raw bKGD data, regardless of any
@@ -101,11 +102,11 @@ LC_IMAGE* OpenPNG(char* filename)
     else if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
     {
       if (bit_depth == 1)
-	red = green = blue = pBackground->gray? 255 : 0;
+        red = green = blue = pBackground->gray? 255 : 0;
       else if (bit_depth == 2)
-	red = green = blue = (255/3) * pBackground->gray;
+        red = green = blue = (255/3) * pBackground->gray;
       else // bit_depth == 4
-	red = green = blue = (255/15) * pBackground->gray;
+        red = green = blue = (255/15) * pBackground->gray;
     }
     else
     {
@@ -119,8 +120,7 @@ LC_IMAGE* OpenPNG(char* filename)
     if (setjmp (png_ptr->jmpbuf))
     {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-      fclose(f);
-      return NULL;
+      return false;
     }
 
     red = green = blue = 0;
@@ -154,16 +154,14 @@ LC_IMAGE* OpenPNG(char* filename)
   if ((image_data = (unsigned char*)malloc(image_rowbytes*height)) == NULL)
   {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-    fclose(f);
-    return NULL;
+    return false;
   }
 
   if ((row_pointers = (png_bytepp)malloc(height*sizeof(png_bytep))) == NULL)
   {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     free(image_data);
-    fclose(f);
-    return NULL;
+    return false;
   }
 
   // set the individual row_pointers to point at the correct offsets
@@ -182,84 +180,103 @@ LC_IMAGE* OpenPNG(char* filename)
 
   // done with PNG file, so clean up to minimize memory usage
   png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-  fclose(f);
 
   if (!image_data)
-    return NULL;
+    return false;
 
   // get our buffer set to hold data
-  LC_IMAGE* image = (LC_IMAGE*)malloc(width*height*3 + sizeof(LC_IMAGE));
+  m_pData = (unsigned char*)malloc(width*height*image_channels);
 
-  if (image == NULL)
+  if (m_pData == NULL)
   {
-    free(image_data);
-    return NULL;
+    free (image_data);
+    return false;
   }
 
-  image->width = (unsigned short)width;
-  image->height = (unsigned short)height;
-  image->bits = (char*)image + sizeof(LC_IMAGE);
+  m_nWidth = width;
+  m_nHeight = height;
+  if (image_channels == 3)
+    m_bAlpha = false;
+  else
+    m_bAlpha = true;
 
   for (row = 0; row < height; row++)
   {
     src = image_data + row*image_rowbytes;
-    dest = (unsigned char*)image->bits + row*image_rowbytes;
+    dest = m_pData + row*image_channels*width;
+
     if (image_channels == 3)
     {
       for (i = width; i > 0; i--)
       {
-	r = *src++;
-	g = *src++;
-	b = *src++;
-	*dest++ = r;
-	*dest++ = g;
-	*dest++ = b;
+        r = *src++;
+        g = *src++;
+        b = *src++;
+        *dest++ = r;
+        *dest++ = g;
+        *dest++ = b;
       }
     }
     else // if (image_channels == 4)
     {
       for (i = width; i > 0; i--)
       {
-	r = *src++;
-	g = *src++;
-	b = *src++;
-	a = *src++;
+        r = *src++;
+        g = *src++;
+        b = *src++;
+        a = *src++;
 
-	if (a == 255)
-	{
-	  *dest++ = r;
-	  *dest++ = g;
-	  *dest++ = b;
-	}
-	else if (a == 0)
-	{
-	  *dest++ = red;
-	  *dest++ = green;
-	  *dest++ = blue;
-	}
-	else
-	{
-	  // this macro (copied from png.h) composites the
-	  // foreground and background values and puts the
-	  // result into the first argument; there are no
-	  // side effects with the first argument
-	  alpha_composite(*dest++, r, a, red);
-	  alpha_composite(*dest++, g, a, green);
-	  alpha_composite(*dest++, b, a, blue);
-	}
+        if (a == 255)
+        {
+          *dest++ = r;
+          *dest++ = g;
+          *dest++ = b;
+        }
+        else if (a == 0)
+        {
+          *dest++ = red;
+          *dest++ = green;
+          *dest++ = blue;
+        }
+        else
+        {
+          // this macro (copied from png.h) composites the
+          // foreground and background values and puts the
+          // result into the first argument; there are no
+          // side effects with the first argument
+          alpha_composite(*dest++, r, a, red);
+          alpha_composite(*dest++, g, a, green);
+          alpha_composite(*dest++, b, a, blue);
+        }
+        *dest++ = a;
       }
     }
   }
 
   free(image_data);
-  return image;
+  return true;
 }
 
 // =============================================================================
 
-bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced, unsigned char* background)
+static void user_write_fn (png_structp png_ptr, png_bytep data, png_size_t length)
 {
-  FILE *fp;
+  png_uint_32 check;
+
+  check = ((File*)png_ptr->io_ptr)->Write (data, length);
+  if (check != length)
+  {
+    png_error(png_ptr, "Write Error");
+  }
+}
+
+static void user_flush_fn (png_structp png_ptr)
+{
+  ((File*)png_ptr->io_ptr)->Flush ();
+}
+
+bool Image::SavePNG (File& file, bool transparent, bool interlaced, unsigned char* background) const
+{
   png_structp png_ptr;
   png_infop info_ptr;
   png_bytepp row_pointers = NULL;
@@ -267,35 +284,27 @@ bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced,
   png_color_16 bg;
   int i;
 
-  fp = fopen(filename, "wb");
-  if (!fp)
-    return false;
-
   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if (!png_ptr)
-  {
-    fclose(fp);
     return false;
-  }
 
   info_ptr = png_create_info_struct(png_ptr);
   if (!info_ptr)
   {
     png_destroy_write_struct(&png_ptr, NULL);
-    fclose(fp);
     return false;
   }
 
   if (setjmp(png_ptr->jmpbuf))
   {
     png_destroy_write_struct(&png_ptr,  (png_infopp)NULL);
-    fclose(fp);
     return false;
   }
 
-  png_init_io(png_ptr, fp);
+//  png_init_io(png_ptr, fp);
+  png_set_write_fn (png_ptr, &file, user_write_fn, user_flush_fn);
 
-  png_set_IHDR (png_ptr, info_ptr, image->width, image->height, 8, 
+  png_set_IHDR (png_ptr, info_ptr, m_nWidth, m_nHeight, 8, 
 		transparent ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
 		interlaced ? PNG_INTERLACE_ADAM7 : PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -315,10 +324,9 @@ bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced,
 
   png_set_sBIT(png_ptr, info_ptr, &sig_bit);
 
-  if ((row_pointers = (png_bytepp)malloc(image->height*sizeof(png_bytep))) == NULL)
+  if ((row_pointers = (png_bytepp)malloc(m_nHeight*sizeof(png_bytep))) == NULL)
   {
     png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
-    fclose(fp);
     return false;
   }
 
@@ -326,33 +334,33 @@ bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced,
   if (transparent)
   {
     unsigned char *buf, *src, *dst, alpha;
-    dst = buf = (unsigned char*)malloc(image->width*image->height*4);
-    src = (unsigned char*)image->bits;
+    dst = buf = (unsigned char*)malloc (m_nWidth*m_nHeight*4);
+    src = m_pData;
 
-    for (i = 0; i < image->width*image->height; i++)
+    for (i = 0; i < m_nWidth*m_nHeight; i++)
     {
       if ((src[0] == background[0]) &&
-	  (src[1] == background[1]) &&
-	  (src[2] == background[2]))
-	alpha = 0;
+        (src[1] == background[1]) &&
+        (src[2] == background[2]))
+        alpha = 0;
       else
-	alpha = 255;
+        alpha = 255;
       *dst++ = *src++;
       *dst++ = *src++;
       *dst++ = *src++;
       *dst++ = alpha;
     }
 
-    for (i = 0; i < image->height; i++)
-      row_pointers[i] = buf + i*image->width*4;
+    for (i = 0; i < m_nHeight; i++)
+      row_pointers[i] = buf + i*m_nWidth*4;
     png_write_image(png_ptr, row_pointers);
 
     free(buf);
   }
   else
   {
-    for (i = 0; i < image->height; i++)
-      row_pointers[i] = (unsigned char*)image->bits + i*image->width*3;
+    for (i = 0; i < m_nHeight; i++)
+      row_pointers[i] = m_pData + i*m_nWidth*3;
     png_write_image(png_ptr, row_pointers);
   }
 
@@ -360,7 +368,6 @@ bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced,
 
   png_write_end(png_ptr, info_ptr);
   png_destroy_write_struct(&png_ptr, &info_ptr);
-  fclose(fp);
 
   return true;
 }

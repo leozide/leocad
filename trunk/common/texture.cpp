@@ -149,23 +149,22 @@ void Texture::Load(bool bFilter)
   free(bits);
 }
 
-bool Texture::LoadFromFile(char* strFilename, bool bFilter)
+bool Texture::LoadFromFile (char* strFilename, bool bFilter)
 {
-  LC_IMAGE* image = OpenImage(strFilename);
-
-  if (image != NULL)
+  Image image;
+  
+  if (image.FileLoad (strFilename))
   {
-    m_nWidth = image->width;
-    m_nHeight = image->height;
-    m_nFileSize = m_nWidth*m_nHeight*3;
-    m_nFormat = GL_RGB;
+    m_nWidth = image.Width ();
+    m_nHeight = image.Height ();
 
-    if (FinishLoadImage (bFilter, image->bits) == true)
-    {
-      free (image);
+    if (image.Alpha ())
+      m_nFormat = GL_RGBA;
+    else
+      m_nFormat = GL_RGB;
+
+    if (FinishLoadImage (bFilter, image.GetData ()) == true)
       return true;
-    }
-    free(image);
   }
 
   if (m_nID != 0)
@@ -173,6 +172,7 @@ bool Texture::LoadFromFile(char* strFilename, bool bFilter)
     glDeleteTextures(1, &m_nID);
     m_nID = 0;
   }
+
   m_nWidth = 0;
   m_nHeight = 0;
   m_nFileSize = 0;

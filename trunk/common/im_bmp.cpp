@@ -1,98 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "typedefs.h"
+#include "config.h"
 #include "quant.h"
+#include "image.h"
+#include "file.h"
 
 // ========================================================
 
-LC_IMAGE* OpenBMP (char* filename)
+bool Image::LoadBMP (File& file)
 {
-	int bmWidth;
-	int bmHeight;
-	unsigned char bmPlanes;
-	unsigned char bmBitsPixel;
-	typedef struct {
-		unsigned char rgbBlue;
-		unsigned char rgbGreen;
-		unsigned char rgbRed;
-		unsigned char rgbReserved;
-	} RGBQUAD;
-	unsigned char m1,m2;
-	unsigned long sizeimage;
-	short res1,res2;
-	long filesize, pixoff;
-	long bmisize, compression;
-	long xscale, yscale;
-	long colors, impcol;
-	LC_IMAGE* image;
-	unsigned long m_bytesRead = 0;
-	FILE *fp;
-	
-	fp = fopen(filename,"rb");
-	if (fp == NULL)
-		return NULL;
+  lcint32 bmWidth, bmHeight;
+  lcuint8 bmPlanes, bmBitsPixel, m1, m2;
+  typedef struct {
+    unsigned char rgbBlue;
+    unsigned char rgbGreen;
+    unsigned char rgbRed;
+    unsigned char rgbReserved;
+  } RGBQUAD;
+  lcint16 res1,res2;
+  lcint32 filesize, pixoff;
+  lcint32 bmisize, compression;
+  lcint32 xscale, yscale;
+  lcint32 colors, impcol, rc;
+  lcuint32 sizeimage, m_bytesRead = 0;
 
-	long rc;
-	rc = fread(&m1, 1, 1, fp);
+  FreeData ();
+
+	if (file.Read (&m1, 1) != 1)
+    return false;
 	m_bytesRead++;
-	if (rc == -1)
-	{
-		fclose(fp);
-		return NULL;
-	}
 
-	rc = fread(&m2, 1, 1, fp);
+	if (file.Read (&m2, 1) != 1)
+    return false;
 	m_bytesRead++;
-	if ((m1!='B') || (m2!='M'))
-	{
-		fclose(fp);
-		return NULL;
-	}
 
-	rc = fread((long*)&(filesize),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	if ((m1 != 'B') || (m2 != 'M'))
+		return false;
 
-	rc = fread((int*)&(res1),2,1,fp); m_bytesRead+=2;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(filesize), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((int*)&(res2),2,1,fp); m_bytesRead+=2;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadShort ((int*)&(res1), 1); m_bytesRead+=2;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(pixoff),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadShort ((int*)&(res2), 1); m_bytesRead+=2;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(bmisize),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(pixoff), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((long  *)&(bmWidth),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(bmisize), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(bmHeight),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(bmWidth), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((int*)&(bmPlanes),2,1,fp); m_bytesRead+=2;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(bmHeight), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((int*)&(bmBitsPixel),2,1,fp); m_bytesRead+=2;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadShort ((int*)&(bmPlanes), 1); m_bytesRead+=2;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(compression),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadShort ((int*)&(bmBitsPixel), 1); m_bytesRead+=2;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(sizeimage),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) {fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(compression), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(xscale),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(sizeimage), 1); m_bytesRead+=4;
+	if (rc != 1) {return false; }
 
-	rc = fread((long*)&(yscale),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(xscale), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(colors),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(yscale), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
-	rc = fread((long*)&(impcol),4,1,fp); m_bytesRead+=4;
-	if (rc != 1) { fclose(fp); return NULL; }
+	rc = file.ReadLong ((long*)&(colors), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
+
+	rc = file.ReadLong ((long*)&(impcol), 1); m_bytesRead+=4;
+	if (rc != 1) { return false; }
 
 	if (colors == 0)
 		colors = 1 << bmBitsPixel;
@@ -103,70 +91,61 @@ LC_IMAGE* OpenBMP (char* filename)
 	{
 		colormap = new RGBQUAD[colors];
 		if (colormap == NULL)
-		{
-			fclose(fp);
-			return NULL;
-		}
+			return false;
 
 		int i;
 		for (i = 0; i < colors; i++)
 		{
 			unsigned char r ,g, b, dummy;
 
-			rc = fread(&b, 1, 1, fp);
+			rc = file.Read (&b, 1);
 			m_bytesRead++;
 			if (rc!=1)
 			{
 				delete [] colormap;
-				fclose(fp);
-				return NULL;
+				return false;
 			}
 
-			rc = fread(&g, 1, 1, fp); 
+			rc = file.Read (&g, 1); 
 			m_bytesRead++;
 			if (rc!=1)
 			{
 				delete [] colormap;
-				fclose(fp);
-				return NULL;
+				return false;
 			}
 
-			rc = fread(&r, 1, 1, fp); 
+			rc = file.Read (&r, 1); 
 			m_bytesRead++;
 			if (rc != 1)
 			{
 				delete [] colormap;
-				fclose(fp);
-				return NULL;
+				return false;
 			}
 
-
-			rc = fread(&dummy, 1, 1, fp); 
+			rc = file.Read (&dummy, 1); 
 			m_bytesRead++;
 			if (rc != 1)
 			{
 				delete [] colormap;
-				fclose(fp);
-				return NULL;
+				return false;
 			}
 
-			colormap[i].rgbRed=r;
-			colormap[i].rgbGreen=g;
-			colormap[i].rgbBlue=b;
+			colormap[i].rgbRed = r;
+			colormap[i].rgbGreen = g;
+			colormap[i].rgbBlue = b;
 		}
 	}
 
 	if ((long)m_bytesRead > pixoff)
 	{
 		delete [] colormap;
-		fclose(fp);
-		return NULL;
+		return false;
 	}
 
 	while ((long)m_bytesRead < pixoff)
 	{
 		char dummy;
-		fread(&dummy,1,1,fp);
+		file.Read (&dummy, 1);
 		m_bytesRead++;
 	}
 
@@ -174,15 +153,15 @@ LC_IMAGE* OpenBMP (char* filename)
 	int h = bmHeight;
 
 	// set the output params
-	image = (LC_IMAGE*)malloc(w*h*3 + sizeof(LC_IMAGE));
+	m_pData = (unsigned char*)malloc (w*h*3);
 	long row_size = w * 3;
 
-	if (image != NULL) 
+	if (m_pData != NULL) 
 	{
-		image->width = w;
-		image->height = h;
-		image->bits = (char*)image + sizeof(LC_IMAGE);
-		unsigned char* outbuf = (unsigned char*)image->bits;
+		m_nWidth = w;
+		m_nHeight = h;
+    m_bAlpha = false;
+		unsigned char* outbuf = m_pData;
 		long row = 0;
 		long rowOffset = 0;
 
@@ -201,12 +180,12 @@ LC_IMAGE* OpenBMP (char* filename)
 						long offset = col * 3;
 						char pixel[3];
 
-						if (fread((void*)(pixel),1,3,fp)==3)
+						if (file.Read (pixel, 3) ==3)
 						{
 							// we swap red and blue here
-							*(outbuf + rowOffset + offset + 0)=pixel[2];		// r
-							*(outbuf + rowOffset + offset + 1)=pixel[1];		// g
-							*(outbuf + rowOffset + offset + 2)=pixel[0];		// b
+							*(outbuf + rowOffset + offset + 0) = pixel[2];		// r
+							*(outbuf + rowOffset + offset + 1) = pixel[1];		// g
+							*(outbuf + rowOffset + offset + 2) = pixel[0];		// b
 						}
 					}
 					m_bytesRead += row_size;
@@ -215,11 +194,10 @@ LC_IMAGE* OpenBMP (char* filename)
 					while ((m_bytesRead-pixoff)&3)
 					{
 						char dummy;
-						if (fread(&dummy,1,1,fp) != 1)
+						if (file.Read (&dummy, 1) != 1)
 						{
-							free(image);
-							fclose(fp);
-							return NULL;
+              FreeData ();
+							return false;
 						}
 						m_bytesRead++;
 					}
@@ -239,12 +217,11 @@ LC_IMAGE* OpenBMP (char* filename)
 						if (bit_count <= 0)
 						{
 							bit_count = 8;
-							if (fread(&inbyte,1,1,fp) != 1)
+							if (file.Read (&inbyte, 1) != 1)
 							{
-								free(image);
+                FreeData ();
 								delete [] colormap;
-								fclose(fp);
-								return NULL;
+								return false;
 							}
 							m_bytesRead++;
 						}
@@ -264,13 +241,12 @@ LC_IMAGE* OpenBMP (char* filename)
 					while ((m_bytesRead-pixoff)&3)
 					{
 						char dummy;
-						if (fread(&dummy,1,1,fp)!=1)
+						if (file.Read (&dummy, 1) != 1)
 						{
-							free(image);
+              FreeData ();
 							if (colormap)
 								delete [] colormap;
-							fclose(fp);
-							return NULL;
+							return false;
 						}
 						m_bytesRead++;
 					}
@@ -288,12 +264,12 @@ LC_IMAGE* OpenBMP (char* filename)
 			{
 				while (row < bmHeight)
 				{
-					c = getc(fp);
+					c = file.GetChar ();
 
 					if (c)
 					{
 						// encoded mode
-						c1 = getc(fp);
+						c1 = file.GetChar ();
 						for (i = 0; i < c; x++, i++)
 						{
 							*pp = colormap[c1].rgbRed; pp++;
@@ -304,7 +280,7 @@ LC_IMAGE* OpenBMP (char* filename)
 					else
 					{
 						// c==0x00,  escape codes
-						c = getc(fp);
+						c = file.GetChar ();
 
 						if (c == 0x00) // end of line
 						{
@@ -316,9 +292,9 @@ LC_IMAGE* OpenBMP (char* filename)
 							break; // end of pic
 						else if (c == 0x02) // delta
 						{
-							c = getc(fp);
+							c = file.GetChar ();
 							x += c;
-							c = getc(fp);
+							c = file.GetChar ();
 							row += c;
 							pp = outbuf + x*3 + (bmHeight-row-1)*bmWidth*3;
 						}
@@ -326,14 +302,14 @@ LC_IMAGE* OpenBMP (char* filename)
 						{
 							for (i = 0; i < c; x++, i++)
 							{
-								c1 = getc(fp);
+								c1 = file.GetChar ();
 								*pp = colormap[c1].rgbRed; pp++;
 								*pp = colormap[c1].rgbGreen; pp++;
 								*pp = colormap[c1].rgbBlue; pp++;
 							}
 					
 							if (c & 1)
-								getc(fp); // odd length run: read an extra pad byte
+								file.GetChar (); // odd length run: read an extra pad byte
 						}
 					}
 				}
@@ -342,12 +318,12 @@ LC_IMAGE* OpenBMP (char* filename)
 			{
 				while (row < bmHeight)
 				{
-					c = getc(fp);
+					c = file.GetChar ();
 
 					if (c)
 					{
 						// encoded mode
-						c1 = getc(fp);
+						c1 = file.GetChar ();
 						for (i = 0; i < c; x++, i++)
 						{
 							*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbRed; pp++;
@@ -358,7 +334,7 @@ LC_IMAGE* OpenBMP (char* filename)
 					else
 					{
 						// c==0x00,  escape codes
-						c = getc(fp);
+						c = file.GetChar ();
 
 						if (c == 0x00) // end of line
 						{
@@ -370,9 +346,9 @@ LC_IMAGE* OpenBMP (char* filename)
 							break; // end of pic
 						else if (c == 0x02) // delta
 						{
-							c = getc(fp);
+							c = file.GetChar ();
 							x += c;
-							c = getc(fp);
+							c = file.GetChar ();
 							row += c;
 							pp = outbuf + x*3 + (bmHeight-row-1)*bmWidth*3;
 						}
@@ -381,14 +357,14 @@ LC_IMAGE* OpenBMP (char* filename)
 							for (i = 0; i < c; x++, i++)
 							{
 							    if ((i&1) == 0)
-									c1 = getc(fp);
+									c1 = file.GetChar ();
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbRed; pp++;
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbGreen; pp++;
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbBlue; pp++;
 							}
 					
 							if (((c&3) == 1) || ((c&3) == 2))
-								getc(fp); // odd length run: read an extra pad byte
+								file.GetChar (); // odd length run: read an extra pad byte
 						}
 					}
 				}
@@ -397,89 +373,82 @@ LC_IMAGE* OpenBMP (char* filename)
 
 		if (colormap)
 			delete [] colormap;
-
-		fclose(fp);
     }
 
-	return image;
+	return true;
 }
 
 // ========================================================
 
-bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize)
+bool Image::SaveBMP (File& file, bool quantize) const
 {
-	FILE *fp;	
-	fp = fopen(filename, "wb");
-	if (fp == NULL) 
-		return false;
-
 	unsigned short bits;
 	unsigned long cmap, bfSize;
 	unsigned char pal[3][256], *colormappedbuffer = NULL;
 
 	if (quantize)
 	{
-		colormappedbuffer = (unsigned char*)malloc(image->width*image->height);
-		dl1quant((unsigned char*)image->bits, colormappedbuffer, image->width, image->height, 256, true, pal);
+		colormappedbuffer = (unsigned char*)malloc(m_nWidth*m_nHeight);
+		dl1quant (m_pData, colormappedbuffer, m_nWidth, m_nHeight, 256, true, pal);
 		bits = 8;
 		cmap = 256;
-		bfSize = 1078 + image->width*image->height;
+		bfSize = 1078 + m_nWidth*m_nHeight;
 	}
 	else
 	{
 		bits = 24;
 		cmap = 0;
-		bfSize = 54 + image->width*image->height*3;
+		bfSize = 54 + m_nWidth*m_nHeight*3;
 	} 
 
 	long byteswritten = 0;
 	long pixoff = 54 + cmap*4;
 	short res = 0;
 	char m1 ='B', m2 ='M';
-	fwrite(&m1, 1, 1, fp);		byteswritten++;	// B
-	fwrite(&m2, 1, 1, fp);		byteswritten++; // M
-	fwrite(&bfSize, 4, 1, fp);	byteswritten+=4;// bfSize
-	fwrite(&res, 2, 1, fp);		byteswritten+=2;// bfReserved1
-	fwrite(&res, 2, 1, fp);		byteswritten+=2;// bfReserved2
-	fwrite(&pixoff, 4, 1, fp);	byteswritten+=4;// bfOffBits
+	file.WriteByte (&m1, 1);       byteswritten++; // B
+	file.WriteByte (&m2, 1);       byteswritten++; // M
+	file.WriteLong (&bfSize, 1);   byteswritten+=4;// bfSize
+	file.WriteShort (&res, 1);     byteswritten+=2;// bfReserved1
+	file.WriteShort (&res, 1);     byteswritten+=2;// bfReserved2
+	file.WriteLong (&pixoff, 1);   byteswritten+=4;// bfOffBits
 
-	unsigned long biSize = 40, compress = 0, size = 0;
-	long width = image->width, height = image->height, pixels = 0;
-	unsigned short planes = 1;
-	fwrite(&biSize, 4, 1, fp);	byteswritten+=4;// biSize
-	fwrite(&width, 4, 1, fp);	byteswritten+=4;// biWidth
-	fwrite(&height, 4, 1, fp);	byteswritten+=4;// biHeight
-	fwrite(&planes, 2, 1, fp);	byteswritten+=2;// biPlanes
-	fwrite(&bits, 2, 1, fp);	byteswritten+=2;// biBitCount
-	fwrite(&compress, 4, 1, fp);byteswritten+=4;// biCompression
-	fwrite(&size, 4, 1, fp);	byteswritten+=4;// biSizeImage
-	fwrite(&pixels, 4, 1, fp);	byteswritten+=4;// biXPelsPerMeter
-	fwrite(&pixels, 4, 1, fp);	byteswritten+=4;// biYPelsPerMeter
-	fwrite(&cmap, 4, 1, fp);	byteswritten+=4;// biClrUsed
-	fwrite(&cmap, 4, 1, fp);	byteswritten+=4;// biClrImportant
+	lcuint32 biSize = 40, compress = 0, size = 0;
+	lcint32 width = m_nWidth, height = m_nHeight, pixels = 0;
+	lcuint16 planes = 1;
+	file.WriteLong (&biSize, 1);   byteswritten+=4;// biSize
+	file.WriteLong (&width, 1);    byteswritten+=4;// biWidth
+	file.WriteLong (&height, 1);   byteswritten+=4;// biHeight
+	file.WriteShort (&planes, 1);  byteswritten+=2;// biPlanes
+	file.WriteShort (&bits, 1);    byteswritten+=2;// biBitCount
+	file.WriteLong (&compress, 1); byteswritten+=4;// biCompression
+	file.WriteLong (&size, 1);     byteswritten+=4;// biSizeImage
+	file.WriteLong (&pixels, 1);   byteswritten+=4;// biXPelsPerMeter
+	file.WriteLong (&pixels, 1);   byteswritten+=4;// biYPelsPerMeter
+	file.WriteLong (&cmap, 1);     byteswritten+=4;// biClrUsed
+	file.WriteLong (&cmap, 1);     byteswritten+=4;// biClrImportant
 
 	if (quantize)
 	{
 		for (int i = 0; i < 256; i++) 
 		{
-			putc(pal[2][i], fp);
-			putc(pal[1][i], fp);
-			putc(pal[0][i], fp);
-			putc(0, fp);	// dummy
+			file.PutChar (pal[2][i]);
+			file.PutChar (pal[1][i]);
+			file.PutChar (pal[0][i]);
+			file.PutChar (0);	// dummy
 		}
 
-		for (int row = 0; row < image->height; row++) 
+		for (int row = 0; row < m_nHeight; row++) 
 		{
 			int pixbuf = 0;
 
-			for (int col = 0; col < image->width; col++) 
+			for (int col = 0; col < m_nWidth; col++) 
 			{
-				int offset = (image->height-row-1) * width + col;	// offset into our color-mapped RGB buffer
+				int offset = (m_nHeight-row-1) * width + col;	// offset into our color-mapped RGB buffer
 				unsigned char pval = *(colormappedbuffer + offset);
 
 				pixbuf = (pixbuf << 8) | pval;
 
-				putc(pixbuf, fp);
+				file.PutChar (pixbuf);
 				pixbuf = 0;
 				byteswritten++;
 			}
@@ -487,7 +456,7 @@ bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize)
 			// DWORD align
 			while ((byteswritten - pixoff) & 3)
 			{
-				putc(0, fp);
+				file.PutChar (0);
 				byteswritten++;
 			}
 		}
@@ -496,29 +465,28 @@ bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize)
 	}
 	else
 	{
-		unsigned long widthDW = (((image->width*24) + 31) / 32 * 4);
-		long row, row_size = image->width*3;
-		for (row = 0; row < image->height; row++) 
+		unsigned long widthDW = (((m_nWidth*24) + 31) / 32 * 4);
+		long row, row_size = m_nWidth*3;
+		for (row = 0; row < m_nHeight; row++) 
 		{
-			unsigned char* buf = (unsigned char*)image->bits+(image->height-row-1)*row_size;
+			unsigned char* buf = m_pData+(m_nHeight-row-1)*row_size;
 
 			// write a row
 			for (int col = 0; col < row_size; col += 3)
 			{
-				putc(buf[col+2], fp);
-				putc(buf[col+1], fp);
-				putc(buf[col], fp);
+				file.PutChar (buf[col+2]);
+				file.PutChar (buf[col+1]);
+				file.PutChar (buf[col]);
 			}
 			byteswritten += row_size;	
 
 			for (unsigned long count = row_size; count < widthDW; count++)
 			{
-				putc(0, fp);	// dummy
+				file.PutChar (0);	// dummy
 				byteswritten++;
 			}
 		}
 	}
 
-	fclose(fp);
 	return true;
 }

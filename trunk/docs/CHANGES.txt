@@ -1,5 +1,9 @@
 This is a changelog for developers only, not for ordinary users.
 
+26/03/2001
+  - Reorganized the Image I/O functions, created a new Image class.
+  - Fixed the return value of FileMem::Seek.
+
 23/03/2001
   - Update object keys when adding/removing steps.
   - Added an option to save HTML files with .html extension instead of .htm.

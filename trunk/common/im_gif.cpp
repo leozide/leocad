@@ -3,9 +3,7 @@
 #include "image.h"
 #include "quant.h"
 #include "file.h"
-extern "C" {
-#include <jpeglib.h>
-}
+#include "config.h"
 
 // =============================================================================
 
@@ -33,19 +31,19 @@ typedef struct
   int firstcode;	// first byte of oldcode's expansion
 
   // LZW symbol table and expansion stack
-  UINT16 FAR *symbol_head;	// => table of prefix symbols
-  UINT8  FAR *symbol_tail;	// => table of suffix bytes
-  UINT8  FAR *symbol_stack;	// => stack for symbol expansions
-  UINT8  FAR *sp;				// stack pointer
+  lcuint16 *symbol_head;	// => table of prefix symbols
+  lcuint8  *symbol_tail;	// => table of suffix bytes
+  lcuint8  *symbol_stack;	// => stack for symbol expansions
+  lcuint8  *sp;				// stack pointer
 
   // State for interlaced image processing
   bool is_interlaced;		// true if have interlaced image
 //	jvirt_sarray_ptr interlaced_image; // full image in interlaced order
   unsigned char* interlaced_image;
-  JDIMENSION cur_row_number;	// need to know actual row number
-  JDIMENSION pass2_offset;	// # of pixel rows in pass 1
-  JDIMENSION pass3_offset;	// # of pixel rows in passes 1&2
-  JDIMENSION pass4_offset;	// # of pixel rows in passes 1,2,3
+  lcuint32 cur_row_number;	// need to know actual row number
+  lcuint32 pass2_offset;	// # of pixel rows in pass 1
+  lcuint32 pass3_offset;	// # of pixel rows in passes 1&2
+  lcuint32 pass4_offset;	// # of pixel rows in passes 1,2,3
 
   File* input_file;
   bool first_interlace;
@@ -75,7 +73,7 @@ static int GetDataBlock (gif_source_ptr sinfo, char *buf)
 
 static int GetCode (gif_source_ptr sinfo)
 {
-  register INT32 accum;
+  register lcint32 accum;
   int offs, ret, count;
 
   while ((sinfo->cur_bit + sinfo->code_size) > sinfo->last_bit)
@@ -167,7 +165,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
     if (code > sinfo->max_code)
       incode = 0;		// prevent creation of loops in symbol table
     // this symbol will be defined as oldcode/firstcode
-    *(sinfo->sp++) = (UINT8) sinfo->firstcode;
+    *(sinfo->sp++) = (lcuint8) sinfo->firstcode;
     code = sinfo->oldcode;
   }
 
@@ -181,7 +179,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
   if ((code = sinfo->max_code) < LZW_TABLE_SIZE)
   {
     sinfo->symbol_head[code] = sinfo->oldcode;
-    sinfo->symbol_tail[code] = (UINT8) sinfo->firstcode;
+    sinfo->symbol_tail[code] = (lcuint8) sinfo->firstcode;
     sinfo->max_code++;
     if ((sinfo->max_code >= sinfo->limit_code) &&
 	(sinfo->code_size < MAX_LZW_BITS))
@@ -195,16 +193,18 @@ static int LZWReadByte (gif_source_ptr sinfo)
   return sinfo->firstcode;	// return first byte of symbol's expansion
 }
 
-LC_IMAGE* OpenGIF(File* file)
+bool Image::LoadGIF (File& file)
 {
   gif_source_ptr source;
   source = (gif_source_ptr)malloc (sizeof(gif_source_struct));
-  source->input_file = file;
+  source->input_file = &file;
 
   char hdrbuf[10];
   unsigned int width, height;
   int colormaplen, aspectRatio;
   int c;
+
+  FreeData ();
 
   source->input_file->Read(hdrbuf, 6);
   if ((hdrbuf[0] != 'G' || hdrbuf[1] != 'I' || hdrbuf[2] != 'F') ||
@@ -242,7 +242,7 @@ LC_IMAGE* OpenGIF(File* file)
 
       extlabel = source->input_file->GetChar();
       while (GetDataBlock(source, buf) > 0)
-	; // skip
+        ; // skip
       continue;
     }
 
@@ -259,9 +259,9 @@ LC_IMAGE* OpenGIF(File* file)
       colormaplen = 2 << (hdrbuf[8] & 0x07);
       for (int i = 0; i < colormaplen; i++) 
       {
-	source->colormap[0][i] = source->input_file->GetChar();
-	source->colormap[1][i] = source->input_file->GetChar();
-	source->colormap[2][i] = source->input_file->GetChar();
+        source->colormap[0][i] = source->input_file->GetChar();
+        source->colormap[1][i] = source->input_file->GetChar();
+        source->colormap[2][i] = source->input_file->GetChar();
       }
     }
 
@@ -272,9 +272,9 @@ LC_IMAGE* OpenGIF(File* file)
     break;
   }
 
-  source->symbol_head = (UINT16 FAR *) malloc(LZW_TABLE_SIZE * sizeof(UINT16));
-  source->symbol_tail = (UINT8 FAR *) malloc (LZW_TABLE_SIZE * sizeof(UINT8));
-  source->symbol_stack = (UINT8 FAR *) malloc (LZW_TABLE_SIZE * sizeof(UINT8));
+  source->symbol_head = (lcuint16*) malloc(LZW_TABLE_SIZE * sizeof(lcuint16));
+  source->symbol_tail = (lcuint8*) malloc (LZW_TABLE_SIZE * sizeof(lcuint8));
+  source->symbol_stack = (lcuint8*) malloc (LZW_TABLE_SIZE * sizeof(lcuint8));
   source->last_byte = 2; // make safe to "recopy last two bytes"
   source->last_bit = 0;	 // nothing in the buffer
   source->cur_bit = 0;	 // force buffer load on first call
@@ -296,11 +296,11 @@ LC_IMAGE* OpenGIF(File* file)
     source->first_interlace = false;
 
   source->buffer = (unsigned char*)malloc(width*3);
-  LC_IMAGE* image = (LC_IMAGE*)malloc(width*height*3 + sizeof(LC_IMAGE));
-  image->width = width;
-  image->height = height;
-  image->bits = (char*)image + sizeof(LC_IMAGE);
-  unsigned char* buf = (unsigned char*)image->bits;
+  m_pData = (unsigned char*)malloc(width*height*3);
+  m_nWidth = width;
+  m_nHeight = height;
+  m_bAlpha = false; // FIXME: create the alpha channel for transparent files
+  unsigned char* buf = m_pData;
 
   for (unsigned long scanline = 0; scanline < height; scanline++) 
   {
@@ -308,70 +308,70 @@ LC_IMAGE* OpenGIF(File* file)
     {
       if (source->first_interlace)
       {
-	register JSAMPROW sptr;
-	register JDIMENSION col;
-	JDIMENSION row;
+        register lcuint8 *sptr;
+        register lcuint32 col;
+        lcuint32 row;
 
-	for (row = 0; row < source->height; row++) 
-	{
-	  sptr = &source->interlaced_image[row*source->width];
-	  for (col = source->width; col > 0; col--) 
-	    *sptr++ = (JSAMPLE) LZWReadByte(source);
-	}
+        for (row = 0; row < source->height; row++) 
+        {
+          sptr = &source->interlaced_image[row*source->width];
+          for (col = source->width; col > 0; col--) 
+            *sptr++ = (lcuint8) LZWReadByte(source);
+        }
 
-	source->first_interlace = false;
-	source->cur_row_number = 0;
-	source->pass2_offset = (source->height + 7) / 8;
-	source->pass3_offset = source->pass2_offset + (source->height + 3) / 8;
-	source->pass4_offset = source->pass3_offset + (source->height + 1) / 4;
+        source->first_interlace = false;
+        source->cur_row_number = 0;
+        source->pass2_offset = (source->height + 7) / 8;
+        source->pass3_offset = source->pass2_offset + (source->height + 3) / 8;
+        source->pass4_offset = source->pass3_offset + (source->height + 1) / 4;
       }
 
       register int c;
-      register JSAMPROW sptr, ptr;
-      register JDIMENSION col;
-      JDIMENSION irow;
+      register lcuint8 *sptr, *ptr;
+      register lcuint32 col;
+      lcuint32 irow;
 
       // Figure out which row of interlaced image is needed, and access it.
       switch ((int) (source->cur_row_number & 7))
       {
         case 0:		// first-pass row
-	  irow = source->cur_row_number >> 3;
-	  break;
+          irow = source->cur_row_number >> 3;
+          break;
         case 4:		// second-pass row
-	  irow = (source->cur_row_number >> 3) + source->pass2_offset;
-	  break;
+          irow = (source->cur_row_number >> 3) + source->pass2_offset;
+          break;
         case 2:		// third-pass row
         case 6:
-	  irow = (source->cur_row_number >> 2) + source->pass3_offset;
-	  break;
+          irow = (source->cur_row_number >> 2) + source->pass3_offset;
+          break;
         default:	// fourth-pass row
-	  irow = (source->cur_row_number >> 1) + source->pass4_offset;
-	  break;
+          irow = (source->cur_row_number >> 1) + source->pass4_offset;
+          break;
       }
       sptr = &source->interlaced_image[irow*source->width];
       ptr = source->buffer;
       for (col = source->width; col > 0; col--) 
       {
-	c = GETJSAMPLE(*sptr++);
-	*ptr++ = source->colormap[0][c];
-	*ptr++ = source->colormap[1][c];
-	*ptr++ = source->colormap[2][c];
+        c = *sptr++;
+        *ptr++ = source->colormap[0][c];
+        *ptr++ = source->colormap[1][c];
+        *ptr++ = source->colormap[2][c];
       }
       source->cur_row_number++;	// for next time
     }
     else
     {
       register int c;
-      register JSAMPROW ptr;
-      register JDIMENSION col;
+      register lcuint8 *ptr;
+      register lcuint32 col;
 
       ptr = source->buffer;
       for (col = source->width; col > 0; col--)
       {
-	c = LZWReadByte(source);
-	*ptr++ = source->colormap[0][c];
-	*ptr++ = source->colormap[1][c];
-	*ptr++ = source->colormap[2][c];
+        c = LZWReadByte(source);
+        *ptr++ = source->colormap[0][c];
+        *ptr++ = source->colormap[1][c];
+        *ptr++ = source->colormap[2][c];
       }
     }
 
@@ -386,19 +386,19 @@ LC_IMAGE* OpenGIF(File* file)
   free(source->symbol_stack);
   free(source);
 
-  return image;
+  return true;
 }
 
 // =============================================================================
 
 #undef LZW_TABLE_SIZE
 #define	MAX_LZW_BITS 12
-typedef INT16 code_int;
+typedef lcint16 code_int;
 #define LZW_TABLE_SIZE	((code_int) 1 << MAX_LZW_BITS)
 #define HSIZE 5003
 typedef int hash_int;
 #define MAXCODE(n_bits)	(((code_int) 1 << (n_bits)) - 1)
-typedef INT32 hash_entry;
+typedef lcint32 hash_entry;
 #define HASH_ENTRY(prefix,suffix)  ((((hash_entry) (prefix)) << 8) | (suffix))
 
 typedef struct
@@ -406,7 +406,7 @@ typedef struct
   int n_bits;
   code_int maxcode;
   int init_bits;
-  INT32 cur_accum;
+  lcint32 cur_accum;
   int cur_bits;
   code_int waiting_code;
   bool first_byte;
@@ -414,7 +414,7 @@ typedef struct
   code_int EOFCode;
   code_int free_code;
   code_int *hash_code;
-  hash_entry FAR *hash_value;
+  hash_entry *hash_value;
   int bytesinpkt;
   char packetbuf[256];
   File* output_file;
@@ -424,10 +424,10 @@ typedef struct
 typedef gif_dest_struct* gif_dest_ptr;
 
 // Emit a 16-bit word, LSB first
-static void put_word(File* output_file, unsigned int w)
+static void put_word(File& output_file, unsigned int w)
 {
-  output_file->PutChar(w & 0xFF);
-  output_file->PutChar((w >> 8) & 0xFF);
+  output_file.PutChar(w & 0xFF);
+  output_file.PutChar((w >> 8) & 0xFF);
 }
 
 static void flush_packet(gif_dest_ptr dinfo)
@@ -442,7 +442,7 @@ static void flush_packet(gif_dest_ptr dinfo)
 
 static void output(gif_dest_ptr dinfo, code_int code)
 {
-  dinfo->cur_accum |= ((INT32) code) << dinfo->cur_bits;
+  dinfo->cur_accum |= ((lcint32) code) << dinfo->cur_bits;
   dinfo->cur_bits += dinfo->n_bits;
 
   while (dinfo->cur_bits >= 8)
@@ -475,7 +475,7 @@ static void compress_byte (gif_dest_ptr dinfo, int c)
   if (dinfo->first_byte)
   {
     dinfo->waiting_code = c;
-    dinfo->first_byte = FALSE;
+    dinfo->first_byte = false;
     return;
   }
 
@@ -528,43 +528,43 @@ static void compress_byte (gif_dest_ptr dinfo, int c)
   dinfo->waiting_code = c;
 }
 
-bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, unsigned char* background)
+bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned char* background) const
 {
   int InitCodeSize, FlagByte, i;
   unsigned char pal[3][256];
-  unsigned char* colormappedbuffer = (unsigned char*)malloc(image->width*image->height);
-  dl1quant((unsigned char*)image->bits, colormappedbuffer, image->width, image->height, 256, true, pal);
+  unsigned char* colormappedbuffer = (unsigned char*)malloc (m_nWidth*m_nHeight);
+  dl1quant (m_pData, colormappedbuffer, m_nWidth, m_nHeight, 256, true, pal);
 
   gif_dest_ptr dinfo;
   dinfo = (gif_dest_ptr) malloc (sizeof(gif_dest_struct));
-  dinfo->output_file = file;
-  dinfo->buffer = malloc(image->width*sizeof(JDIMENSION));
+  dinfo->output_file = &file;
+  dinfo->buffer = malloc(m_nWidth*sizeof(lcuint32));
   dinfo->hash_code = (code_int*) malloc(HSIZE * sizeof(code_int));
-  dinfo->hash_value = (hash_entry FAR*)malloc(HSIZE*sizeof(hash_entry));
+  dinfo->hash_value = (hash_entry*)malloc(HSIZE*sizeof(hash_entry));
 
   InitCodeSize = 8;
   // Write the GIF header.
-  file->PutChar('G');
-  file->PutChar('I');
-  file->PutChar('F');
-  file->PutChar('8');
-  file->PutChar(transparent ? '9' : '7');
-  file->PutChar('a');
+  file.PutChar('G');
+  file.PutChar('I');
+  file.PutChar('F');
+  file.PutChar('8');
+  file.PutChar(transparent ? '9' : '7');
+  file.PutChar('a');
   // Write the Logical Screen Descriptor
-  put_word(file, (unsigned int)image->width);
-  put_word(file, (unsigned int)image->height);
+  put_word(file, (unsigned int)m_nWidth);
+  put_word(file, (unsigned int)m_nHeight);
   FlagByte = 0x80;
   FlagByte |= (7) << 4; // color resolution
   FlagByte |= (7);	// size of global color table
-  file->PutChar(FlagByte);
-  file->PutChar(0); // Background color index
-  file->PutChar(0); // Reserved (aspect ratio in GIF89)
+  file.PutChar(FlagByte);
+  file.PutChar(0); // Background color index
+  file.PutChar(0); // Reserved (aspect ratio in GIF89)
   // Write the Global Color Map
   for (i = 0; i < 256; i++) 
   {
-    file->PutChar(pal[0][i]);
-    file->PutChar(pal[1][i]);
-    file->PutChar(pal[2][i]);
+    file.PutChar(pal[0][i]);
+    file.PutChar(pal[1][i]);
+    file.PutChar(pal[2][i]);
   }
 
   // Write out extension for transparent colour index, if necessary.
@@ -581,28 +581,28 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
 	break;
       }
 
-    file->PutChar('!');
-    file->PutChar(0xf9);
-    file->PutChar(4);
-    file->PutChar(1);
-    file->PutChar(0);
-    file->PutChar(0);
-    file->PutChar(index);
-    file->PutChar(0);
+    file.PutChar('!');
+    file.PutChar(0xf9);
+    file.PutChar(4);
+    file.PutChar(1);
+    file.PutChar(0);
+    file.PutChar(0);
+    file.PutChar(index);
+    file.PutChar(0);
   }
 
   // Write image separator and Image Descriptor
-  file->PutChar(',');
+  file.PutChar(',');
   put_word(file, 0);
   put_word(file, 0);
-  put_word(file, (unsigned int)image->width); 
-  put_word(file, (unsigned int)image->height);
+  put_word(file, (unsigned int)m_nWidth); 
+  put_word(file, (unsigned int)m_nHeight);
   // flag byte: interlaced
   if (interlaced)
-    file->PutChar(0x40);
+    file.PutChar(0x40);
   else
-    file->PutChar(0x00);
-  file->PutChar(InitCodeSize);// Write Initial Code Size byte
+    file.PutChar(0x00);
+  file.PutChar(InitCodeSize);// Write Initial Code Size byte
 
   // Initialize for LZW compression of image data
   dinfo->n_bits = dinfo->init_bits = InitCodeSize+1;
@@ -610,7 +610,7 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
   dinfo->ClearCode = ((code_int) 1 << (InitCodeSize));
   dinfo->EOFCode = dinfo->ClearCode + 1;
   dinfo->free_code = dinfo->ClearCode + 2;
-  dinfo->first_byte = TRUE;	
+  dinfo->first_byte = true;	
   dinfo->bytesinpkt = 0;
   dinfo->cur_accum = 0;
   dinfo->cur_bits = 0;
@@ -619,16 +619,16 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
 
   int scanline = 0;
   int pass = 0;
-  while (scanline < image->height)
+  while (scanline < m_nHeight)
   {
-    memcpy(dinfo->buffer, colormappedbuffer+(scanline*image->width), image->width);
+    memcpy(dinfo->buffer, colormappedbuffer+(scanline*m_nWidth), m_nWidth);
 
-    register JSAMPROW ptr;
-    register JDIMENSION col;
+    register lcuint8 *ptr;
+    register lcuint32 col;
 
     ptr = (unsigned char*)dinfo->buffer;
-    for (col = image->width; col > 0; col--) 
-      compress_byte(dinfo, GETJSAMPLE(*ptr++));
+    for (col = m_nWidth; col > 0; col--) 
+      compress_byte(dinfo, *ptr++);
 
     if (interlaced)
     {
@@ -637,7 +637,7 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
         case 0:
 	{
 	  scanline += 8;
-	  if (scanline >= image->height)
+	  if (scanline >= m_nHeight)
 	  {
 	    pass++;
 	    scanline = 4;
@@ -647,7 +647,7 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
         case 1:
 	{
 	  scanline += 8;
-	  if (scanline >= image->height)
+	  if (scanline >= m_nHeight)
 	  {
 	    pass++;
 	    scanline = 2;
@@ -657,7 +657,7 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
         case 2:
 	{
 	  scanline += 4;
-	  if (scanline >= image->height)
+	  if (scanline >= m_nHeight)
 	  {
 	    pass++;
 	    scanline = 1;
@@ -686,9 +686,9 @@ bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, uns
   }
 
   flush_packet(dinfo);
-  file->PutChar(0);
-  file->PutChar(';');
-  file->Flush();
+  file.PutChar(0);
+  file.PutChar(';');
+  file.Flush();
 
   free(dinfo->buffer);
   free(dinfo->hash_code);

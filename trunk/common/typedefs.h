@@ -181,14 +181,6 @@ typedef enum {
 	LC_IMAGE_AVI
 } LC_IMAGE_FORMATS;
 
-
-typedef struct
-{
-	unsigned short width;
-	unsigned short height;
-	void* bits;
-} LC_IMAGE;
-
 typedef struct
 {
 	unsigned char quality;

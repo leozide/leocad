@@ -435,28 +435,26 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 	  to = 255;
       }
 
-      LC_IMAGE** images;
-      images = (LC_IMAGE**)malloc (sizeof (LC_IMAGE*) * (to - from + 1));
+      Image* images = new Image[to - from + 1];
       CreateImages (images, width, height, from, to, highlight);
 
       for (i = 0; i <= to - from; i++)
       {
-	char filename[LC_MAXPATH];
+        char filename[LC_MAXPATH];
 
-	if (from != to)
-	{
-	  char* ext = strrchr (picture, '.');
-	  *ext = 0;
-	  sprintf (filename, "%s%02d.%s", picture, i+1, ext+1);
-	  *ext = '.';
-	}
-	else
-	  strcpy (filename, picture);
+        if (from != to)
+        {
+          char* ext = strrchr (picture, '.');
+          *ext = 0;
+          sprintf (filename, "%s%02d.%s", picture, i+1, ext+1);
+          *ext = '.';
+        }
+        else
+          strcpy (filename, picture);
 
-	SaveImage (filename, images[i], &imopts);
-	free (images[i]);
+        images[i].FileSave (filename, &imopts);
       }
-      free (images);
+      delete []images;
 
       return false;
     }
@@ -1343,16 +1341,16 @@ void Project::FileSave(File* file, bool bUndo)
 		{
 			pos = file->GetPosition();
 
-			LC_IMAGE* image;
+      Image* image = new Image[1];
 			LC_IMAGE_OPTS opts;
 			opts.interlaced = false;
 			opts.transparent = false;
 			opts.format = LC_IMAGE_GIF;
 
 			i = m_bAnimation ? m_nCurFrame : m_nCurStep;
-			CreateImages(&image, 120, 100, i, i, false);
-			SaveImage(file, image, &opts);
-			free(image);
+			CreateImages(image, 120, 100, i, i, false);
+			image[0].FileSave (*file, &opts);
+			delete []image;
 		}
 
 		file->WriteLong (&pos, 1);
@@ -2986,7 +2984,7 @@ unsigned char Project::GetLastStep()
 }
 
 // Create a series of pictures
-void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned short from, unsigned short to, bool hilite)
+void Project::CreateImages (Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {
 	int oldx, oldy;
 	unsigned short oldtime;
@@ -3026,19 +3024,7 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 
 		CalculateStep();
 		Render(true);
-
-		LC_IMAGE* image = (LC_IMAGE*)malloc(width*height*3+sizeof(LC_IMAGE));
-		image->width = width;
-		image->height = height;
-		image->bits = (unsigned char*)image + sizeof(LC_IMAGE);
-
-		glPixelStorei (GL_PACK_ALIGNMENT, 1);
-		glReadPixels (0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
-
-		for (int row = 0; row < height; row++)
-		  memcpy ((unsigned char*)image->bits + (row*width*3), buf + ((height-row-1)*width*3), width*3);
-
-		images[i-from] = image;
+    images[i-from].FromOpenGL (width, height);
 	}
 //	pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
 	m_nViewX = oldx;
@@ -3345,9 +3331,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				else
 					opts.from = opts.to = m_bAnimation ? m_nCurFrame : m_nCurStep;
 
-				LC_IMAGE** images;
-				images = (LC_IMAGE**)malloc(sizeof(LC_IMAGE*)*(opts.to-opts.from+1));
-				CreateImages(images, opts.width, opts.height, opts.from, opts.to, false);
+				Image* images = new Image[opts.to-opts.from+1];
+				CreateImages (images, opts.width, opts.height, opts.from, opts.to, false);
 
 				char *ptr, ext[4];
 				ptr = strrchr(opts.filename, '.');
@@ -3360,10 +3345,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (strcmp(ext, "avi") == 0)
 				{
 					SaveVideo(opts.filename, images, opts.to-opts.from+1, m_bAnimation ? m_nFPS : 60.0f/opts.imopts.pause);
-					
-					for (int i = 0; i <= opts.to-opts.from; i++)
-						free(images[i]);
-				}
+        }
 				else
 				{
 					for (int i = 0; i <= opts.to-opts.from; i++)
@@ -3374,16 +3356,15 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							char* ext = strrchr(opts.filename, '.');
 							*ext = 0;
 							sprintf(filename, "%s%02d.%s", opts.filename, i+1, ext+1);
-                                                        *ext = '.';
+              *ext = '.';
 						}
 						else
 							strcpy(filename, opts.filename);
 
-						SaveImage(filename, images[i], &opts.imopts);
-						free(images[i]);
+						images[i].FileSave (filename, &opts.imopts);
 					}
 				}
-				free(images);
+				delete []images;
 			}
 		} break;
 
@@ -3612,23 +3593,20 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 
 				// Save step pictures
-				LC_IMAGE** images;
-				images = (LC_IMAGE**)malloc(sizeof(LC_IMAGE*)*last);
-				CreateImages(images, opts.imdlg.width, opts.imdlg.height, 1, last, opts.highlight);
+				Image* images = new Image[last];
+				CreateImages (images, opts.imdlg.width, opts.imdlg.height, 1, last, opts.highlight);
 
 				for (i = 0; i < last; i++)
 				{
 					sprintf(fn, "%s%s-%02d%s", opts.path, m_strTitle, i+1, ext);
-					SaveImage(fn, images[i], &opts.imdlg.imopts);
-					free(images[i]);
+					images[i].FileSave (fn, &opts.imdlg.imopts);
 				}
-				free(images);
+				delete []images;
 
 				if (opts.images)
 				{
 					int cx = 120, cy = 100;
 					void* render = Sys_StartMemoryRender (cx, cy);
-					unsigned char* buf = (unsigned char*)malloc (cx*cy*3);
 
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
@@ -3677,22 +3655,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						pInfo->RenderPiece(m_nCurColor);
 						glFinish();
 
-						LC_IMAGE* image = (LC_IMAGE*)malloc(cx*cy*3+sizeof(LC_IMAGE));
-						image->width = cx;
-						image->height = cy;
-						image->bits = (unsigned char*)image + sizeof(LC_IMAGE);
-						glPixelStorei (GL_PACK_ALIGNMENT, 1);
-						glReadPixels (0, 0, cx, cy, GL_RGB,GL_UNSIGNED_BYTE, buf);
-
-						for (int row = 0; row < cy; row++)
-						  memcpy ((unsigned char*)image->bits + (row*cx*3), buf + ((cy-row-1)*cx*3), cx*3);
+						Image image;
+            image.FromOpenGL (cx, cy);
 
 						sprintf(fn, "%s%s%s", opts.path, pInfo->m_strName, ext);
-						SaveImage(fn, image, &opts.imdlg.imopts);
-						free(image);
+						image.FileSave (fn, &opts.imdlg.imopts);
 					}
 					Sys_FinishMemoryRender (render);
-					free (buf);
 				}
         main_window->EndWait ();
 			}

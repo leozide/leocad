@@ -734,7 +734,7 @@ bool PiecesLibrary::DeleteTextures (char** Names, int NumTextures)
 
 	for (i = 0; i < count; i++)
 	{
-		lcuint32 OldOffset, FileSize;
+		lcuint32 OldOffset, FileSize = 0;
 		lcuint16 Width, Height;
 		char TexName[9];
 		TexName[8] = 0;
@@ -799,7 +799,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 {
 	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 	FileDisk newbin, newidx, oldbin, oldidx;
-	lcuint32 FileSize, binsize, offset = 0;
+	lcuint32 FileSize = 0, binsize, offset = 0;
 	lcuint16 Width, Height, count, deleted = 0, i;
 	lcuint8 version, bt;
 	Image img;
@@ -871,7 +871,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 
 	for (i = 0; i < count; i++)
 	{
-		lcuint32 OldOffset, FileSize;
+		lcuint32 OldOffset;
 		lcuint16 Width, Height;
 		char TexName[9];
 		TexName[8] = 0;
@@ -1523,6 +1523,8 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 	{
 		if (count[i][0] || count[i][1] || count[i][2])
 			k++;
+		if (i == 16) i = -1;
+		if (i == 15) i = 23;
 	}
 
 	if (piece->verts_count > 65535)

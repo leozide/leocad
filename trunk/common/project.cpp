@@ -1493,7 +1493,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			if (iBad != -1)
 				newName[iBad] = 0;
 
-			strcpy(newName, ".lcd");
+			strcat(newName, ".lcd");
 		}
 
 		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &newName))

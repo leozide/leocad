@@ -19,7 +19,8 @@
 
 GtkWidget *piecepreview;
 GtkWidget *piecelist;
-GtkWidget *piececombo;
+GtkWidget *pieceentry;
+GtkWidget *piecemenu;
 GtkWidget *colorlist;
 GtkWidget *grouptoolbar;
 
@@ -329,6 +330,8 @@ static void fill_piecelist(int group)
   gtk_clist_freeze(GTK_CLIST(piecelist));
   gtk_clist_clear(GTK_CLIST(piecelist));
 
+  list_curgroup = group;
+
   for (int i = 0; i < project->GetPieceLibraryCount(); i++)
   {
     PieceInfo* pInfo = project->GetPieceInfo(i);
@@ -379,58 +382,80 @@ static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButt
   }
 }
 
-// Add a new piece to the combobox
-void piececombo_add(char* string)
+static void piececombo_popup_position (GtkMenu *menu, gint *x, gint *y, gpointer data)
 {
-  if (string == NULL)
+  gdk_window_get_origin (pieceentry->window, x, y);
+  *y += pieceentry->allocation.height;
+}
+
+static void piececombo_popup (GtkWidget *widget, gpointer data)
+{
+  if (piecemenu != NULL)
+    gtk_menu_popup (GTK_MENU (piecemenu), NULL, NULL, piececombo_popup_position, NULL, 1, GDK_CURRENT_TIME);
+}
+
+static void piececombo_selected (GtkWidget *widget, gpointer data)
+{
+  gchar *str;
+
+  gtk_label_get (GTK_LABEL (GTK_BIN (widget)->child), &str);
+  gtk_entry_set_text (GTK_ENTRY (pieceentry), str);
+}
+
+// Add a new piece to the combobox
+void piececombo_add (const char* str)
+{
+  if (str == NULL)
   {
     // Clear the list
-    gtk_list_clear_items (GTK_LIST(GTK_COMBO(piececombo)->list), 0, -1);
-    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(piececombo)->entry), "");
+    if (piecemenu != NULL)
+    {
+      gtk_widget_destroy (piecemenu);
+      piecemenu = NULL;
+    }
   }
   else
   {
-    GtkWidget *li;
-    GtkList *list = GTK_LIST(GTK_COMBO(piececombo)->list);
-    GtkWidget *child;
+    GtkWidget *item;
     GList *children;
-    gchar* str;
+    int pos = 0;
 
-    // Check if the string is already in the list
-    children = list->children;
+    if (piecemenu == NULL)
+      piecemenu = gtk_menu_new ();
+
+    children = gtk_container_children (GTK_CONTAINER (piecemenu));
+
     while (children)
     {
-      child = (GtkWidget*)children->data;
-      children = children->next;
+      gchar *label;
+      int i;
 
-      gtk_label_get(GTK_LABEL(GTK_BIN(child)->child), &str);
-      if (strcmp(str, string) == 0)
-	return;
+      gtk_label_get (GTK_LABEL (GTK_BIN (children->data)->child), &label);
+
+      i = strcmp (str, label);
+
+      if (i == 0)
+        return;
+      else if (i < 0)
+        break;
+
+      children = children->next;
+      pos++;
     }
 
-    // Add new entry
-    li = gtk_list_item_new_with_label(string);
-    gtk_widget_show(li);
-    gtk_container_add(GTK_CONTAINER(list), li);
-    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(piececombo)->entry), "");
+    item = gtk_menu_item_new_with_label (str);
+    gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (piececombo_selected), NULL);
+    gtk_widget_show (item);
+    gtk_menu_insert (GTK_MENU (piecemenu), item, pos);
   }
 }
 
-// TODO: make this work
-static void piececombo_changed(GtkWidget *widget, GtkWidget *entry)
+static void piececombo_changed (GtkWidget *widget, gpointer data)
 {
   char* str;
-  str = gtk_entry_get_text(GTK_ENTRY(entry));
-}
-
-// TODO: sometimes this is called twice ?
-static void piececombo_select(GtkList *list, GtkWidget *widget, gpointer data)
-{
   int i;
-  gchar* str;
 
-  gtk_label_get(GTK_LABEL(GTK_BIN(widget)->child), &str);
-  //  printf("%s\n", str);
+  str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
 
   for (i = 0; i < project->GetPieceLibraryCount(); i++)
   {
@@ -447,8 +472,8 @@ static void piececombo_select(GtkList *list, GtkWidget *widget, gpointer data)
 	  {
 	    if ((pInfo->m_nGroups & d) != 0)
 	    {
-	      groupsbar_set(k-1);
-	      k = 32;
+	      groupsbar_set (k-1);
+              break;
 	    }
 	    else
 	      d <<= 1;
@@ -456,8 +481,10 @@ static void piececombo_select(GtkList *list, GtkWidget *widget, gpointer data)
 	}
 
       // Select the piece
-      i = gtk_clist_find_row_from_data (GTK_CLIST(piecelist), pInfo);
-      gtk_clist_select_row (GTK_CLIST(piecelist), i, 0);
+      i = gtk_clist_find_row_from_data (GTK_CLIST (piecelist), pInfo);
+      gtk_clist_select_row (GTK_CLIST (piecelist), i, 0);
+      if (gtk_clist_row_is_visible (GTK_CLIST (piecelist), i) != GTK_VISIBILITY_FULL)
+        gtk_clist_moveto (GTK_CLIST (piecelist), i, 0, 0.5f, 0);
 
       return;
     }
@@ -641,7 +668,7 @@ GtkWidget* create_piecebar (GtkWidget *window)
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   gchar *titles[2] = { "Description", "Number" };
 
-  GtkWidget *vbox1, *vpan, *scroll_win, *frame;
+  GtkWidget *vbox1, *hbox, *vpan, *scroll_win, *frame, *button, *arrow;
 
   frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);
@@ -741,13 +768,23 @@ GtkWidget* create_piecebar (GtkWidget *window)
   gtk_widget_show(grouptoolbar);
 
   // Piece combo
-  piececombo = gtk_combo_new();
-  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->entry), "changed",
-		     GTK_SIGNAL_FUNC(piececombo_changed), GTK_COMBO(piececombo)->entry);
-  //  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->list), "select-child",
-  //	     GTK_SIGNAL_FUNC(piececombo_select), GTK_COMBO(piececombo)->list);
-  gtk_box_pack_start(GTK_BOX(vbox1), piececombo, FALSE, TRUE, 0);
-  gtk_widget_show(piececombo);
+  hbox = gtk_hbox_new (FALSE, 1);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 1);
+
+  pieceentry = gtk_entry_new ();
+  gtk_widget_show (pieceentry);
+  gtk_box_pack_start (GTK_BOX (hbox), pieceentry, TRUE, TRUE, 0);
+  gtk_signal_connect (GTK_OBJECT (pieceentry), "changed", GTK_SIGNAL_FUNC (piececombo_changed), NULL);
+
+  button = gtk_button_new ();
+  gtk_widget_show (button);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (piececombo_popup), NULL);
+
+  arrow = gtk_arrow_new (GTK_ARROW_DOWN, GTK_SHADOW_OUT);
+  gtk_widget_show (arrow);
+  gtk_container_add (GTK_CONTAINER (button), arrow);
 
   // Color list
   colorlist = gtk_drawing_area_new ();

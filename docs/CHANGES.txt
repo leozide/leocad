@@ -1,5 +1,8 @@
 This is a changelog for developers only, not for ordinary users.
 
+24/12/2000
+        - Fixed piece combo under linux.
+
 20/12/2000
         - Fixed crash when saving pictures of multiple steps.
 

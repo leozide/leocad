@@ -1,0 +1,1979 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\LeoCAD.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\idr_main.ico"
+IDR_PARTFRAME           ICON    DISCARDABLE     "res\\idr_part.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+IDB_PIECEBAR            BITMAP  DISCARDABLE     "res\\piecebar.bmp"
+IDB_VIEWPORTS           BITMAP  FIXED IMPURE    "res\\views.bmp"
+IDR_TOOLSBAR            BITMAP  DISCARDABLE     "res\\toolsbar.bmp"
+IDR_ANIMATORBAR         BITMAP  DISCARDABLE     "res\\animator.bmp"
+IDB_PARTICONS           BITMAP  DISCARDABLE     "res\\particon.bmp"
+IDB_AUTOPAN             BITMAP  DISCARDABLE     "res\\autopan.bmp"
+IDB_HELP                BITMAP  DISCARDABLE     "res\\help.bmp"
+IDB_HOME                BITMAP  DISCARDABLE     "res\\home.bmp"
+IDB_MAIL                BITMAP  DISCARDABLE     "res\\mail.bmp"
+IDB_INFO                BITMAP  DISCARDABLE     "res\\info.bmp"
+IDB_PIECE               BITMAP  DISCARDABLE     "res\\piece.bmp"
+IDB_CAMERA              BITMAP  DISCARDABLE     "res\\camera.bmp"
+IDB_LIGHT               BITMAP  DISCARDABLE     "res\\light.bmp"
+IDB_ZOOMIN              BITMAP  DISCARDABLE     "res\\zoomin.bmp"
+IDB_ZOOMOUT             BITMAP  DISCARDABLE     "res\\zoomout.bmp"
+IDB_GROUP               BITMAP  DISCARDABLE     "res\\group.bmp"
+IDB_UNGROUP             BITMAP  DISCARDABLE     "res\\ungroup.bmp"
+IDR_FULLSCREEN          BITMAP  DISCARDABLE     "res\\fullscr.bmp"
+IDB_FULLSCREEN          BITMAP  DISCARDABLE     "res\\fullscre.bmp"
+IDB_PHOTO               BITMAP  DISCARDABLE     "res\\photo.bmp"
+IDB_DELETE              BITMAP  DISCARDABLE     "res\\delete.bmp"
+IDB_PREFERENCES         BITMAP  DISCARDABLE     "res\\preferen.bmp"
+IDR_PIECEEDITOR         BITMAP  DISCARDABLE     "res\\pieceed.bmp"
+IDB_EDITOR_ICONS        BITMAP  DISCARDABLE     "res\\editor.bmp"
+IDR_LIBRARY             BITMAP  DISCARDABLE     "res\\library.bmp"
+IDR_TERRAIN             BITMAP  DISCARDABLE     "res\\terrain.bmp"
+IDR_PREVIEW             BITMAP  DISCARDABLE     "res\\preview.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    BUTTON      ID_FILE_PRINT
+    BUTTON      ID_FILE_PRINT_PREVIEW
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    BUTTON      ID_EDIT_UNDO
+    BUTTON      ID_EDIT_REDO
+    SEPARATOR
+    BUTTON      ID_LOCK_ON
+    BUTTON      ID_SNAP_ON
+    BUTTON      ID_SNAP_ANGLE
+    BUTTON      ID_RENDER_BOX
+    BUTTON      ID_RENDER_BACKGROUND
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+    BUTTON      ID_CONTEXT_HELP
+END
+
+IDR_TOOLSBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_ACTION_INSERT
+    BUTTON      ID_ACTION_LIGHT
+    BUTTON      ID_ACTION_SPOTLIGHT
+    BUTTON      ID_ACTION_CAMERA
+    SEPARATOR
+    BUTTON      ID_ACTION_SELECT
+    BUTTON      ID_ACTION_MOVE
+    BUTTON      ID_ACTION_ROTATE
+    BUTTON      ID_ACTION_REMOVE
+    BUTTON      ID_ACTION_PAINT
+    SEPARATOR
+    BUTTON      ID_ACTION_ZOOM
+    BUTTON      ID_ACTION_PAN
+    BUTTON      ID_ACTION_ROTATE_VIEW
+    BUTTON      ID_ACTION_ROLL
+    BUTTON      ID_ACTION_ZOOM_REGION
+    BUTTON      ID_ZOOM_EXTENTS
+    SEPARATOR
+    BUTTON      ID_PIECE_PREVIOUS
+    BUTTON      ID_PIECE_NEXT
+    BUTTON      ID_PIECE_MIRROR
+    BUTTON      ID_PIECE_ARRAY
+END
+
+IDR_ANIMATORBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_VIEW_STEP_FIRST
+    BUTTON      ID_VIEW_STEP_PREVIOUS
+    BUTTON      ID_ANIMATOR_PLAY
+    BUTTON      ID_ANIMATOR_STOP
+    BUTTON      ID_VIEW_STEP_NEXT
+    BUTTON      ID_VIEW_STEP_LAST
+    BUTTON      ID_ANIMATOR_TOGGLE
+    BUTTON      ID_ANIMATOR_KEY
+END
+
+IDR_FULLSCREEN TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_VIEW_FULLSCREEN
+END
+
+IDR_PIECEEDITOR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_EDITOR_FILE_NEW
+    BUTTON      ID_EDITOR_FILE_OPEN
+    BUTTON      ID_EDITOR_FILE_SAVE
+END
+
+IDR_LIBRARY TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_LIBDLG_FILE_RESET
+    BUTTON      ID_LIBDLG_FILE_OPEN
+    BUTTON      ID_LIBDLG_FILE_SAVE
+    BUTTON      ID_LIBDLG_FILE_PRINTCATALOG
+    SEPARATOR
+    BUTTON      ID_LIBDLG_GROUP_INSERT
+    BUTTON      ID_LIBDLG_GROUP_DELETE
+    BUTTON      ID_LIBDLG_GROUP_MOVEUP
+    BUTTON      ID_LIBDLG_GROUP_MOVEDOWN
+    BUTTON      ID_LIBDLG_GROUP_RENAME
+END
+
+IDR_TERRAIN TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_TERDLG_FILE_OPEN
+    BUTTON      ID_TERDLG_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_TERDLG_EDIT_ZOOM
+    BUTTON      ID_TERDLG_EDIT_PAN
+    BUTTON      ID_TERDLG_EDIT_ROTATE
+END
+
+IDR_PREVIEW TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_PREVIEW_PRINT
+    BUTTON      ID_PREVIEW_PREV
+    BUTTON      ID_PREVIEW_NEXT
+    BUTTON      ID_PREVIEW_ONEPAGE
+    BUTTON      ID_PREVIEW_TWOPAGES
+    BUTTON      ID_PREVIEW_ZOOMIN
+    BUTTON      ID_PREVIEW_ZOOMOUT
+    BUTTON      ID_PREVIEW_CLOSE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Merge...\tCtrl+M",           ID_FILE_MERGE
+        MENUITEM SEPARATOR
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Save Picture...",             ID_FILE_SAVEPICTURE
+        MENUITEM "Sen&d...",                    ID_FILE_SEND_MAIL
+        POPUP "Export"
+        BEGIN
+            MENUITEM "3D Studio...",                ID_FILE_EXPORT_3DSTUDIO
+            MENUITEM "HTML...",                     ID_FILE_EXPORT_HTML
+            MENUITEM "POV-Ray...",                  ID_FILE_EXPORT_POVRAY
+            MENUITEM "Wavefront...",                ID_FILE_EXPORT_WAVEFRONT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Propert&ies...",              ID_FILE_PROPERTIES
+        MENUITEM "Piece &Library Manager...",   ID_FILE_EDITPIECELIBRARY
+        MENUITEM "Terrain &Editor...",          ID_FILE_TERRAINEDITOR
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Piece Lis&t...",        ID_FILE_PRINTPIECELIST
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Select All",                  ID_EDIT_SELECTALL
+        MENUITEM "Select None",                 ID_EDIT_SELECTNONE
+        MENUITEM "Select Invert",               ID_EDIT_SELECTINVERT
+        MENUITEM "Select By Name...",           ID_EDIT_SELECTBYNAME
+    END
+    POPUP "&Piece"
+    BEGIN
+        MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
+        MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
+        MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
+        MENUITEM "Array...",                    ID_PIECE_ARRAY
+        MENUITEM "Mirror...",                   ID_PIECE_MIRROR
+        MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
+        MENUITEM SEPARATOR
+        MENUITEM "Group...\tCtrl+G",            ID_PIECE_GROUP
+        MENUITEM "Ungroup\tCtrl+U",             ID_PIECE_UNGROUP
+        MENUITEM "Remove From Group",           ID_PIECE_DETACH
+        MENUITEM "Add To Group",                ID_PIECE_ATTACH
+        MENUITEM "Edit Groups...",              ID_PIECE_EDITGROUPS
+        MENUITEM SEPARATOR
+        MENUITEM "Hide Selected\tCtrl+H",       ID_PIECE_HIDESELECTED
+        MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
+        MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "P&references...",             ID_VIEW_PREFERENCES
+        MENUITEM SEPARATOR
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
+        MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
+        MENUITEM "Pie&ces",                     ID_VIEW_PIECES_BAR
+        MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
+        MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
+        MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
+        POPUP "&Viewports"
+        BEGIN
+            MENUITEM "01",                          ID_VIEWPORT01
+            MENUITEM "02",                          ID_VIEWPORT02
+            MENUITEM "03",                          ID_VIEWPORT03
+            MENUITEM "04",                          ID_VIEWPORT04
+            MENUITEM "05",                          ID_VIEWPORT05
+            MENUITEM "06",                          ID_VIEWPORT06
+            MENUITEM "07",                          ID_VIEWPORT07
+            MENUITEM "08",                          ID_VIEWPORT08
+            , MENUBARBREAK
+            MENUITEM "09",                          ID_VIEWPORT09
+            MENUITEM "10",                          ID_VIEWPORT10
+            MENUITEM "11",                          ID_VIEWPORT11
+            MENUITEM "12",                          ID_VIEWPORT12
+            MENUITEM "13",                          ID_VIEWPORT13
+            MENUITEM "14",                          ID_VIEWPORT14
+        END
+        POPUP "C&ameras"
+        BEGIN
+            MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
+            MENUITEM "Reset",                       ID_VIEW_CAMERAS_RESET
+        END
+        POPUP "Ste&p"
+        BEGIN
+            MENUITEM "Ne&xt",                       ID_VIEW_STEP_NEXT
+            MENUITEM "&Previous",                   ID_VIEW_STEP_PREVIOUS
+            MENUITEM "Fi&rst",                      ID_VIEW_STEP_FIRST
+            MENUITEM "&Last",                       ID_VIEW_STEP_LAST
+            MENUITEM "Ch&oose...",                  ID_VIEW_STEP_CHOOSE
+            MENUITEM SEPARATOR
+            MENUITEM "&Insert",                     ID_VIEW_STEP_INSERT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Topics",                ID_HELP_FINDER
+        MENUITEM SEPARATOR
+        MENUITEM "LeoCAD Home page",            ID_HELP_LEOCADHOMEPAGE
+        MENUITEM "Send E-Mail",                 ID_HELP_SENDEMAIL
+        MENUITEM "Check for Updates",           ID_HELP_CHECKFORUPDATES
+        MENUITEM SEPARATOR
+        MENUITEM "&About LeoCAD...",            ID_APP_ABOUT
+    END
+END
+
+IDR_POPUPS MENU DISCARDABLE 
+BEGIN
+    POPUP "0"
+    BEGIN
+        MENUITEM "Preview Pieces",              ID_PIECEBAR_PREVIEW
+        MENUITEM "Zoom Preview",                ID_PIECEBAR_ZOOMPREVIEW
+        MENUITEM "Group Pieces",                ID_PIECEBAR_GROUP
+        MENUITEM "Show ComboBox",               ID_PIECEBAR_COMBOBOX
+        MENUITEM "Show Numbers",                ID_PIECEBAR_NUMBERS
+        MENUITEM "Show Subparts",               ID_PIECEBAR_SUBPARTS
+        MENUITEM SEPARATOR
+        MENUITEM "Standard",                    ID_VIEW_TOOLBAR
+        MENUITEM "Drawing",                     ID_VIEW_TOOLS_BAR
+        MENUITEM "Animation",                   ID_VIEW_ANIMATION_BAR
+        MENUITEM "Pieces",                      ID_VIEW_PIECES_BAR
+        MENUITEM "Modify",                      ID_VIEW_MODIFY_BAR
+        MENUITEM "Status Bar",                  ID_VIEW_STATUS_BAR
+    END
+    POPUP "1"
+    BEGIN
+        MENUITEM "Insert",                      ID_PIECE_INSERT
+        MENUITEM "Delete",                      ID_PIECE_DELETE
+        POPUP "Action"
+        BEGIN
+            MENUITEM "Insert",                      ID_ACTION_INSERT
+            MENUITEM "Light",                       ID_ACTION_LIGHT
+            MENUITEM "Spotlight",                   ID_ACTION_SPOTLIGHT
+            MENUITEM "Camera",                      ID_ACTION_CAMERA
+            MENUITEM SEPARATOR
+            MENUITEM "Select",                      ID_ACTION_SELECT
+            MENUITEM "Move",                        ID_ACTION_MOVE
+            MENUITEM "Rotate",                      ID_ACTION_ROTATE
+            MENUITEM "Eraser",                      ID_ACTION_REMOVE
+            MENUITEM "Paint",                       ID_ACTION_PAINT
+            MENUITEM SEPARATOR
+            MENUITEM "Zoom",                        ID_ACTION_ZOOM
+            MENUITEM "Pan",                         ID_ACTION_PAN
+            MENUITEM "Rotate View",                 ID_ACTION_ROTATE_VIEW
+            MENUITEM "Roll",                        ID_ACTION_ROLL
+            MENUITEM "Zoom Region",                 ID_ACTION_ZOOM_REGION
+            MENUITEM "Zoom Extents",                ID_ACTION_ZOOM_EXTENTS
+        END
+        POPUP "Cameras"
+        BEGIN
+            MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
+        END
+    END
+    POPUP "2"
+    BEGIN
+        MENUITEM "Snap X",                      ID_SNAP_SNAPX
+        MENUITEM "Snap Y",                      ID_SNAP_SNAPY
+        MENUITEM "Snap Z",                      ID_SNAP_SNAPZ
+        MENUITEM "Snap None",                   ID_SNAP_SNAPNONE
+        MENUITEM "Snap All",                    ID_SNAP_SNAPALL
+    END
+    POPUP "3"
+    BEGIN
+        MENUITEM "File Name",                   ID_PRINT_FILENAME
+        MENUITEM "Author",                      ID_PRINT_AUTHOR
+        MENUITEM "Description",                 ID_PRINT_DESCRIPTION
+        MENUITEM "Page Number",                 ID_PRINT_PAGENUMBER
+        MENUITEM SEPARATOR
+        MENUITEM "Current Time",                ID_PRINT_CURRENTTIME
+        MENUITEM "Current Date",                ID_PRINT_CURRENTDATE
+        MENUITEM SEPARATOR
+        MENUITEM "Left Align",                  ID_PRINT_LEFTALIGN
+        MENUITEM "Center",                      ID_PRINT_CENTER
+        MENUITEM "Right Align",                 ID_PRINT_RIGHTALIGN
+    END
+    POPUP "4"
+    BEGIN
+        MENUITEM "Standard",                    ID_VIEW_TOOLBAR
+        MENUITEM "Drawing",                     ID_VIEW_TOOLS_BAR
+        MENUITEM "Animation",                   ID_VIEW_ANIMATION_BAR
+        MENUITEM "Pieces",                      ID_VIEW_PIECES_BAR
+        MENUITEM "Modify",                      ID_VIEW_MODIFY_BAR
+        MENUITEM "Status Bar",                  ID_VIEW_STATUS_BAR
+    END
+    POPUP "5"
+    BEGIN
+        MENUITEM "Pieces",                      ID_MODDLG_PIECES
+        MENUITEM "Cameras",                     ID_MODDLG_CAMERAS
+        MENUITEM "Lights",                      ID_MODDLG_LIGHTS
+    END
+    POPUP "6"
+    BEGIN
+        MENUITEM "Add",                         ID_EDITOR_ADD
+        MENUITEM "Inline",                      ID_EDITOR_INLINE
+        MENUITEM "Inline All",                  ID_EDITOR_INLINE_ALL
+        MENUITEM "Connection...",               ID_EDITOR_CONNECTION
+    END
+    POPUP "7"
+    BEGIN
+        MENUITEM "1/2",                         ID_SNAP_12
+        MENUITEM "1",                           ID_SNAP_1
+        MENUITEM "2",                           ID_SNAP_2
+        MENUITEM "3",                           ID_SNAP_3
+        MENUITEM "4",                           ID_SNAP_4
+        MENUITEM "5",                           ID_SNAP_5
+        MENUITEM "6",                           ID_SNAP_6
+        MENUITEM "7",                           ID_SNAP_7
+        MENUITEM "8",                           ID_SNAP_8
+        MENUITEM "9",                           ID_SNAP_9
+        MENUITEM "10",                          ID_SNAP_10, MENUBREAK
+        MENUITEM "15",                          ID_SNAP_15
+        MENUITEM "20",                          ID_SNAP_20
+        MENUITEM "25",                          ID_SNAP_25
+        MENUITEM "30",                          ID_SNAP_30
+        MENUITEM "35",                          ID_SNAP_35
+        MENUITEM "40",                          ID_SNAP_40
+        MENUITEM "45",                          ID_SNAP_45
+        MENUITEM "50",                          ID_SNAP_50
+        MENUITEM "100",                         ID_SNAP_100
+    END
+    POPUP "8"
+    BEGIN
+        MENUITEM "2 Buttons",                   ID_LOCK_2BUTTONS
+        MENUITEM "3D Movement",                 ID_LOCK_3DMOVEMENT
+        MENUITEM SEPARATOR
+        MENUITEM "Lock X",                      ID_LOCK_LOCKX
+        MENUITEM "Lock Y",                      ID_LOCK_LOCKY
+        MENUITEM "Lock Z",                      ID_LOCK_LOCKZ
+        MENUITEM "Unlock All",                  ID_LOCK_UNLOCKALL
+    END
+END
+
+IDR_PIECEEDITOR MENU DISCARDABLE 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "New",                         ID_EDITOR_FILE_NEW
+        MENUITEM "Open...",                     ID_EDITOR_FILE_OPEN
+        MENUITEM "Save",                        ID_EDITOR_FILE_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "Return",                      ID_EDITOR_FILE_RETURN
+    END
+    POPUP "View"
+    BEGIN
+        MENUITEM "Fix Backfaces",               ID_EDITOR_VIEW_BACKFACES
+        MENUITEM "Background...",               ID_EDITOR_VIEW_BACKGROUND
+        MENUITEM "Connections",                 ID_EDITOR_VIEW_CONNECTIONS
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM SEPARATOR
+    END
+END
+
+IDR_LIBRARY MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Reset",                      ID_LIBDLG_FILE_RESET
+        MENUITEM "&Open...",                    ID_LIBDLG_FILE_OPEN
+        MENUITEM "&Save",                       ID_LIBDLG_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_LIBDLG_FILE_SAVEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Load &Bitmap",                ID_LIBDLG_FILE_LOADBITMAP
+        , GRAYED
+        MENUITEM "&Print Catalog...",           ID_LIBDLG_FILE_PRINTCATALOG
+        MENUITEM "Load &Update...",             ID_LIBDLG_FILE_MERGEUPDATE
+        MENUITEM SEPARATOR
+        MENUITEM "Re&turn",                     IDOK
+        MENUITEM "&Cancel",                     IDCANCEL
+    END
+    POPUP "&Group"
+    BEGIN
+        MENUITEM "Insert...",                   ID_LIBDLG_GROUP_INSERT
+        MENUITEM "Delete",                      ID_LIBDLG_GROUP_DELETE
+        MENUITEM "Rename...",                   ID_LIBDLG_GROUP_RENAME
+        MENUITEM SEPARATOR
+        MENUITEM "Move Up",                     ID_LIBDLG_GROUP_MOVEUP
+        MENUITEM "Move Down",                   ID_LIBDLG_GROUP_MOVEDOWN
+    END
+    POPUP "&Piece"
+    BEGIN
+        MENUITEM "&New",                        ID_LIBDLG_PIECE_NEW, GRAYED
+        MENUITEM "&Edit",                       ID_LIBDLG_PIECE_EDIT, GRAYED
+        MENUITEM "&Delete",                     ID_LIBDLG_PIECE_DELETE
+    END
+END
+
+IDR_TERRAIN MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open...",                    ID_TERDLG_FILE_OPEN, GRAYED
+        MENUITEM "&Save",                       ID_TERDLG_FILE_SAVE, GRAYED
+        MENUITEM "Save &As...",                 ID_TERDLG_FILE_SAVEAS
+        , GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Apply Changes",              IDOK
+        MENUITEM "&Discard Changes",            IDCANCEL
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Options...",                 ID_TERDLG_EDIT_PREFERENCES
+        MENUITEM "&Random",                     ID_TERDLG_EDIT_RANDOM
+        MENUITEM "Reset &Camera",               ID_TERDLG_EDIT_RESETCAMERA
+        MENUITEM SEPARATOR
+        MENUITEM "&Zoom",                       ID_TERDLG_EDIT_ZOOM
+        MENUITEM "&Pan",                        ID_TERDLG_EDIT_PAN
+        MENUITEM "Ro&tate",                     ID_TERDLG_EDIT_ROTATE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "Terrain &Help...",            ID_TERDLG_HELP
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_VIEW_FULLSCREEN,     VIRTKEY, CONTROL, NOINVERT
+    "G",            ID_PIECE_GROUP,         VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_PIECE_HIDESELECTED,  VIRTKEY, CONTROL, NOINVERT
+    "M",            ID_FILE_MERGE,          VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "U",            ID_PIECE_UNGROUP,       VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_PIECE_DELETE,        VIRTKEY, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_HELP,                VIRTKEY, NOINVERT
+    VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 217, 122
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About LeoCAD"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "LeoCAD Version 0.71.1",IDC_STATIC,40,10,119,8,
+                    SS_NOPREFIX
+    LTEXT           "Copyright © 1996-99, BT Software",IDC_STATIC,40,25,119,
+                    8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,32,14,WS_GROUP
+    GROUPBOX        "System Information",IDC_STATIC,7,65,203,50
+    EDITTEXT        IDC_ABTDLG_INFO,14,79,190,30,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "This program is protected by copyright law and international treaties.",
+                    IDC_STATIC,40,40,151,19
+END
+
+IDD_PROPGENERAL DIALOG DISCARDABLE  0, 0, 220, 105
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "MS-DOS Name:",IDC_STATIC,7,14,57,8,NOT WS_GROUP
+    LTEXT           "Location:",IDC_STATIC,7,27,57,8,NOT WS_GROUP
+    LTEXT           "Size:",IDC_STATIC,7,40,57,8,NOT WS_GROUP
+    LTEXT           "Created:",IDC_STATIC,7,53,57,8,NOT WS_GROUP
+    LTEXT           "Modified:",IDC_STATIC,7,66,57,8,NOT WS_GROUP
+    LTEXT           "Accessed:",IDC_STATIC,7,79,57,8,NOT WS_GROUP
+    LTEXT           "",IDC_PROP_GEN_DOSNAME,77,14,136,8,NOT WS_GROUP
+    LTEXT           "",IDC_PROP_GEN_LOCATION,77,27,136,8,NOT WS_GROUP
+    LTEXT           "",IDC_PROP_GEN_SIZE,77,40,136,8,NOT WS_GROUP
+    LTEXT           "",IDC_PROP_GEN_CREATED,77,53,136,8,NOT WS_GROUP
+    LTEXT           "",IDC_PROP_GEN_MODIFIED,77,66,136,8,NOT WS_GROUP
+    LTEXT           "",IDC_PROP_GEN_ACCESSED,77,79,136,8,NOT WS_GROUP
+END
+
+IDD_PROPSUMMARY DIALOG DISCARDABLE  0, 0, 220, 105
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Summary"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Author:",IDC_STATIC,13,15,50,8
+    LTEXT           "Description:",IDC_STATIC,13,32,50,8
+    LTEXT           "Comments:",IDC_STATIC,13,49,50,8
+    EDITTEXT        IDC_PROP_SUM_AUTHOR,71,14,136,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PROP_SUM_DESCRIPTION,71,31,136,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PROP_SUM_COMMENTS,71,47,136,50,ES_MULTILINE | 
+                    ES_WANTRETURN | WS_VSCROLL
+END
+
+IDD_PROPPIECES DIALOG DISCARDABLE  0, 0, 220, 105
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Pieces Used"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "List1",IDC_PROP_PIECES_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,7,206,90
+END
+
+IDD_SELECT_OBJECTS DIALOG DISCARDABLE  0, 0, 246, 170
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Objects"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_SELDLG_LIST,7,7,137,136,LBS_NOINTEGRALHEIGHT | 
+                    LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "All",IDC_SELDLG_ALL,12,150,38,11
+    PUSHBUTTON      "None",IDC_SELDLG_NONE,55,150,38,11
+    PUSHBUTTON      "Invert",IDC_SELDLG_INVERT,98,150,38,11
+    GROUPBOX        "Sort",IDC_STATIC,156,3,80,37
+    CONTROL         "By Name",IDC_SELDLG_NAME,"Button",BS_AUTORADIOBUTTON,
+                    172,15,53,8
+    CONTROL         "By Type",IDC_SELDLG_TYPE,"Button",BS_AUTORADIOBUTTON,
+                    172,26,53,8
+    GROUPBOX        "List Display",IDC_STATIC,156,46,80,65
+    CONTROL         "Pieces",IDC_SELDLG_PIECES,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,172,61,43,8
+    CONTROL         "Cameras",IDC_SELDLG_CAMERAS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,172,73,43,8
+    CONTROL         "Lights",IDC_SELDLG_LIGHTS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,172,85,43,8
+    CONTROL         "Groups",IDC_SELDLG_GROUPS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,172,97,43,8
+    EDITTEXT        IDC_SELDLG_EDIT,166,125,62,10,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Select",IDOK,152,149,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,198,149,41,14
+    GROUPBOX        "Quick Search",IDC_STATIC,156,113,80,30
+END
+
+IDD_ARRAY DIALOG DISCARDABLE  0, 0, 224, 170
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Array"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Array Transformation (Incremental)",IDC_STATIC,7,7,155,
+                    68
+    CTEXT           "X",IDC_STATIC,44,20,20,8
+    CTEXT           "Y",IDC_STATIC,84,20,20,8
+    CTEXT           "Z",IDC_STATIC,124,20,20,8
+    LTEXT           "Move",IDC_STATIC,13,36,26,8
+    EDITTEXT        IDC_ARRAY_MOVE_X,44,35,20,10,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_ARRAY_MOVE_X_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,66,34,7,
+                    12
+    EDITTEXT        IDC_ARRAY_MOVE_Y,84,35,20,10,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_ARRAY_MOVE_Y_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,106,34,7,
+                    12
+    EDITTEXT        IDC_ARRAY_MOVE_Z,124,35,20,10,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_ARRAY_MOVE_Z_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,146,34,7,
+                    12
+    LTEXT           "Rotate",IDC_STATIC,13,52,23,8
+    EDITTEXT        IDC_ARRAY_ROTATE_X,44,51,20,10,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_ARRAY_ROTATE_X_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,66,50,7,
+                    12
+    EDITTEXT        IDC_ARRAY_ROTATE_Y,84,51,20,10,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_ARRAY_ROTATE_Y_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,106,50,7,
+                    12
+    EDITTEXT        IDC_ARRAY_ROTATE_Z,124,51,20,10,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_ARRAY_ROTATE_Z_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,146,50,7,
+                    12
+    GROUPBOX        "Array Dimensions",IDC_STATIC,7,86,210,77
+    CTEXT           "Row Offsets",IDC_STATIC,90,98,100,8
+    CTEXT           "X",IDC_STATIC,90,111,20,8
+    CTEXT           "Y",IDC_STATIC,130,111,20,8
+    CTEXT           "Z",IDC_STATIC,170,111,20,8
+    CONTROL         "1D",IDC_ARRAY_1D,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    16,112,23,8
+    CONTROL         "2D",IDC_ARRAY_2D,"Button",BS_AUTORADIOBUTTON,16,128,23,
+                    8
+    CONTROL         "3D",IDC_ARRAY_3D,"Button",BS_AUTORADIOBUTTON,16,144,23,
+                    8
+    EDITTEXT        IDC_ARRAY_1D_COUNT,47,111,20,10,ES_AUTOHSCROLL | 
+                    ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_ARRAY_1D_COUNT_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,69,110,7,
+                    12
+    EDITTEXT        IDC_ARRAY_2D_COUNT,47,127,20,10,ES_AUTOHSCROLL | 
+                    ES_NUMBER | WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_2D_COUNT_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,69,126,7,12
+    EDITTEXT        IDC_ARRAY_2D_X,90,127,20,10,ES_AUTOHSCROLL | WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_2D_X_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,112,126,7,12
+    EDITTEXT        IDC_ARRAY_2D_Y,130,127,20,10,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_2D_Y_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,152,126,7,12
+    EDITTEXT        IDC_ARRAY_2D_Z,170,127,20,10,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_2D_Z_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,192,126,7,12
+    EDITTEXT        IDC_ARRAY_3D_COUNT,47,143,20,10,ES_AUTOHSCROLL | 
+                    ES_NUMBER | WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_3D_COUNT_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,69,142,7,12
+    EDITTEXT        IDC_ARRAY_3D_X,90,143,20,10,ES_AUTOHSCROLL | WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_3D_X_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,112,142,7,12
+    EDITTEXT        IDC_ARRAY_3D_Y,130,143,20,10,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_3D_Y_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,152,142,7,12
+    EDITTEXT        IDC_ARRAY_3D_Z,170,143,20,10,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    CONTROL         "Spin1",IDC_ARRAY_3D_Z_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    WS_DISABLED,192,142,7,12
+    DEFPUSHBUTTON   "OK",IDOK,172,13,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,172,30,41,14
+    LTEXT           "Total:",IDC_STATIC,171,54,22,8
+    CTEXT           "Count",IDC_STATIC,47,98,20,8
+    EDITTEXT        IDC_ARRAY_TOTAL,194,53,20,10,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY
+END
+
+IDD_STEP DIALOGEX 0, 0, 108, 41
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Step"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_STEP_EDIT,20,8,20,10,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_STEP_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,42,7,8,12
+    CONTROL         "Slider1",IDC_STEP_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,4,24,60,10
+    DEFPUSHBUTTON   "OK",IDOK,71,2,35,11
+    PUSHBUTTON      "Close",IDCANCEL,71,15,35,11
+    PUSHBUTTON      "Apply",IDAPPLY,71,28,35,11
+END
+
+IDD_MINIFIG DIALOG DISCARDABLE  0, 0, 300, 185
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Minifig Wizard"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,204,164,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,253,164,41,14
+    COMBOBOX        IDC_MF_HAT,7,11,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_HATCOLOR,76,11,22,12
+    COMBOBOX        IDC_MF_NECK,7,30,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_NECKCOLOR,76,30,22,12
+    COMBOBOX        IDC_MF_ARMR,7,49,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_ARMRCOLOR,76,49,22,12
+    COMBOBOX        IDC_MF_HANDR,7,68,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_HANDRCOLOR,76,68,22,12
+    COMBOBOX        IDC_MF_TOOLR,7,87,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_TOOLRCOLOR,76,87,22,12
+    COMBOBOX        IDC_MF_HIPS,7,106,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_HIPSCOLOR,76,106,22,12
+    COMBOBOX        IDC_MF_LEGR,7,125,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_LEGRCOLOR,76,125,22,12
+    COMBOBOX        IDC_MF_SHOER,7,144,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_SHOERCOLOR,76,144,22,12
+    PUSHBUTTON      "",IDC_MF_HEADCOLOR,202,18,22,12
+    COMBOBOX        IDC_MF_HEAD,228,18,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_TORSOCOLOR,202,36,22,12
+    COMBOBOX        IDC_MF_TORSO,228,36,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_ARMLCOLOR,202,54,22,12
+    COMBOBOX        IDC_MF_ARML,228,54,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_HANDLCOLOR,202,72,22,12
+    COMBOBOX        IDC_MF_HANDL,228,72,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_TOOLLCOLOR,202,90,22,12
+    COMBOBOX        IDC_MF_TOOLL,228,90,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_LEGLCOLOR,202,126,22,12
+    COMBOBOX        IDC_MF_LEGL,228,126,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_MF_SHOELCOLOR,202,144,22,12
+    COMBOBOX        IDC_MF_SHOEL,228,144,65,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_PREVIEWSTATIC,102,7,96,158,NOT WS_VISIBLE | NOT 
+                    WS_GROUP
+END
+
+IDD_HTML DIALOG DISCARDABLE  0, 0, 187, 159
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "HTML Options"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Layout",IDC_STATIC,7,7,118,55
+    CONTROL         "Single page",IDC_HTMDLG_SINGLEPAGE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,18,21,75,8
+    CONTROL         "One step per page",IDC_HTMDLG_ONESTEP,"Button",
+                    BS_AUTORADIOBUTTON,18,33,75,8
+    CONTROL         "Index page",IDC_HTMDLG_INDEX,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_GROUP | WS_TABSTOP,27,45,62,8
+    GROUPBOX        "Pieces list",IDC_STATIC,7,66,118,55
+    CONTROL         "After each step",IDC_HTMDLG_LIST_STEP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,18,80,79,8
+    CONTROL         "At the end",IDC_HTMDLG_LIST_END,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,18,92,79,8
+    CONTROL         "Create images",IDC_HTMDLG_LISTIMAGES,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_GROUP | WS_TABSTOP,27,
+                    104,60,8
+    CONTROL         "Highlight new pieces",IDC_HTMDLG_HIGHLIGHT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,128,84,8
+    LTEXT           "Output folder",IDC_STATIC,7,143,46,8
+    EDITTEXT        IDC_HTMDLG_OUTPUT,56,142,112,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_HTMDLG_BROWSEFOLDER,172,142,8,10
+    DEFPUSHBUTTON   "OK",IDOK,139,11,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,139,28,41,14
+    PUSHBUTTON      "Images...",IDC_HTMDLG_IMAGEOPTIONS,139,45,41,14
+END
+
+IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 187, 57
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Progress"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,139,36,41,14
+    LTEXT           "",IDC_PRGDLG_TEXT,7,7,173,8
+    CONTROL         "Progress1",IDC_PRGDLG_PROGRESS,"msctls_progress32",
+                    WS_BORDER,7,36,123,12
+    LTEXT           "",IDC_PRGDLG_TEXT2,7,19,173,8
+END
+
+IDD_GROUP DIALOG DISCARDABLE  0, 0, 170, 45
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Group Name"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_GRPDLG_NAME,15,17,90,10,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,122,7,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,122,24,41,14
+END
+
+IDD_PREFGENERAL DIALOG DISCARDABLE  0, 0, 230, 114
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Gamma correction",IDC_STATIC,7,15,59,8,WS_DISABLED
+    CONTROL         "Slider1",IDC_GENDLG_GAMMA,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,72,14,31,10
+    LTEXT           "Mouse sensitivity",IDC_STATIC,7,29,59,8
+    CONTROL         "Slider1",IDC_GENDLG_MOUSE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,72,28,31,10
+    CONTROL         "Autosave every",IDC_GENDLG_AUTOSAVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,50,60,8
+    EDITTEXT        IDC_GENDLG_SAVETIME,69,49,20,10,ES_AUTOHSCROLL
+    LTEXT           "minutes",IDC_STATIC,93,50,24,8
+    LTEXT           "Default models folder",IDC_STATIC,7,78,67,8
+    EDITTEXT        IDC_GENDLG_FOLDER,7,90,100,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_GENDLG_FOLDERBTN,109,90,8,10
+    GROUPBOX        "Pieces Toolbar",IDC_STATIC,131,7,92,93
+    CONTROL         "Show subparts",IDC_GENDLG_SUBPARTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,19,81,8
+    CONTROL         "Show piece numbers",IDC_GENDLG_NUMBERS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,32,81,8
+    CONTROL         "Enable preview",IDC_GENDLG_PREVIEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,45,81,8
+    CONTROL         "Auto zoom preview",IDC_GENDLG_ZOOM,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,58,81,8
+    CONTROL         "Sort pieces by group",IDC_GENDLG_GROUP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,71,81,8
+    CONTROL         "Show combobox",IDC_GENDLG_COMBO,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,84,81,8
+    CONTROL         "Create backups",IDC_GENDLG_BACKUP,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,65,60,8
+END
+
+IDD_PREFDRAWING DIALOG DISCARDABLE  0, 0, 230, 114
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Drawing Aids"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Base grid",IDC_AIDDLG_GRID,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,41,8
+    EDITTEXT        IDC_AIDDLG_GRIDSIZE,52,6,20,10,ES_AUTOHSCROLL
+    LTEXT           "units",IDC_STATIC,76,7,16,8
+    CONTROL         "Axis icon",IDC_AIDDLG_AXIS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,20,42,8
+    CONTROL         "Preview position",IDC_AIDDLG_PREVIEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,33,64,8
+    CONTROL         "Snap X",IDC_AIDDLG_SNAPX,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,46,42,8
+    CONTROL         "Snap Y",IDC_AIDDLG_SNAPY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,59,42,8
+    CONTROL         "Snap Z",IDC_AIDDLG_SNAPZ,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,72,42,8
+    CONTROL         "Angle snap",IDC_AIDDLG_SNAPA,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,85,46,8
+    EDITTEXT        IDC_AIDDLG_ANGLE,54,84,20,10,ES_AUTOHSCROLL
+    LTEXT           "degrees",IDC_STATIC,76,85,27,8
+    CONTROL         "Centimeter units",IDC_AIDDLG_CENTIMETERS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,98,70,8
+    CONTROL         "Collision detection",IDC_AIDDLG_COLLISION,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,112,7,100,8
+    CONTROL         "Switch to move after inserting",IDC_AIDDLG_MOVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,20,100,8
+    CONTROL         "Fixed direction keys",IDC_AIDDLG_FIXEDKEYS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,33,100,8
+    CONTROL         "Lock X",IDC_AIDDLG_LOCKX,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,112,46,100,8
+    CONTROL         "Lock Y",IDC_AIDDLG_LOCKY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,112,59,100,8
+    CONTROL         "Lock Z",IDC_AIDDLG_LOCKZ,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,112,72,100,8
+    CONTROL         "Mouse always moves in 3D",IDC_AIDDLG_3DMOUSE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,85,100,8
+END
+
+IDD_PREFDETAIL DIALOG DISCARDABLE  0, 0, 230, 114
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Details"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Draw edges",IDC_DETDLG_EDGES,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,60,8
+    CONTROL         "Dithering",IDC_DETDLG_DITHER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,20,60,8
+    CONTROL         "Lighting",IDC_DETDLG_LIGHTING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,33,60,8
+    CONTROL         "Smooth shading",IDC_DETDLG_SMOOTH,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,46,60,8
+    CONTROL         "Anti-aliasing",IDC_DETDLG_ANTIALIAS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,59,60,8
+    CONTROL         "Linear filtering",IDC_DETDLG_LINEAR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,72,60,8
+    CONTROL         "Screen door transparency",IDC_DETDLG_NOALPHA,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,85,97,8
+    CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,7,80,8
+    CONTROL         "Draw solid boxes",IDC_DETDLG_SOLID,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,20,80,8
+    CONTROL         "Remove hidden lines",IDC_DETDLG_HIDDEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,33,80,8
+    CONTROL         "Background rendering",IDC_DETDLG_BACKGROUND,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,46,80,8
+    LTEXT           "Line width",IDC_STATIC,111,63,34,8
+    EDITTEXT        IDC_DETDLG_LINE,149,62,20,10,ES_AUTOHSCROLL
+END
+
+IDD_PREFSCENE DIALOG DISCARDABLE  0, 0, 230, 114
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Scene"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Background",IDC_STATIC,7,7,133,99
+    CONTROL         "Solid Color",IDC_SCNDLG_SOLID,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,18,20,49,8
+    CONTROL         "Gradient",IDC_SCNDLG_GRADIENT,"Button",
+                    BS_AUTORADIOBUTTON,18,36,42,8
+    CONTROL         "Image",IDC_SCNDLG_IMAGE,"Button",BS_AUTORADIOBUTTON,18,
+                    52,42,8
+    PUSHBUTTON      "",IDC_SCNDLG_BGCOLOR,71,17,20,12,BS_BITMAP
+    PUSHBUTTON      "",IDC_SCNDLG_GRAD1,71,34,20,12,BS_BITMAP
+    PUSHBUTTON      "",IDC_SCNDLG_GRAD2,98,34,20,12,BS_BITMAP
+    CONTROL         "Tile",IDC_SCNDLG_BGTILE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,68,27,8
+    EDITTEXT        IDC_SCNDLG_BGIMAGE,24,84,100,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_SCNDLG_BGIMAGE_BROWSE,127,84,8,10
+    GROUPBOX        "Environment",IDC_STATIC,146,7,77,99
+    CONTROL         "Fog",IDC_SCNDLG_FOG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,154,20,27,8
+    PUSHBUTTON      "",IDC_SCNDLG_FOGCOLOR,193,18,20,12,BS_BITMAP
+    LTEXT           "Density",IDC_STATIC,163,36,25,8
+    EDITTEXT        IDC_SCNDLG_FOGDENSITY,193,35,20,10,ES_AUTOHSCROLL
+    LTEXT           "Ambient light",IDC_STATIC,150,53,42,8
+    PUSHBUTTON      "",IDC_SCNDLG_AMBIENTLIGHT,193,51,20,12,BS_BITMAP
+    CONTROL         "Draw Floor",IDC_SCNDLG_TERRAIN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,154,75,62,8
+END
+
+IDD_PREFPRINT DIALOG DISCARDABLE  0, 0, 230, 114
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Print"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Rows",IDC_STATIC,16,19,27,8
+    EDITTEXT        IDC_PRNDLG_INST_ROWS,48,18,20,10,ES_AUTOHSCROLL
+    LTEXT           "Columns",IDC_STATIC,16,36,27,8
+    EDITTEXT        IDC_PRNDLG_INST_COLS,48,35,20,10,ES_AUTOHSCROLL
+    LTEXT           "Header",IDC_STATIC,74,19,24,8
+    EDITTEXT        IDC_PRNDLG_HEADER,100,18,60,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_PRNDLG_HEADERBTN,162,18,8,10,BS_BITMAP
+    LTEXT           "Footer",IDC_STATIC,74,36,24,8
+    EDITTEXT        IDC_PRNDLG_FOOTER,100,35,60,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_PRNDLG_FOOTERBTN,162,35,8,10,BS_BITMAP
+    CONTROL         "Numbers",IDC_PRNDLG_NUMBERS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,181,19,39,8
+    CONTROL         "Border",IDC_PRNDLG_BORDER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,181,36,39,8
+    GROUPBOX        "Instructions",IDC_STATIC,7,7,216,47
+    GROUPBOX        "Catalog",IDC_STATIC,7,59,77,47
+    LTEXT           "Rows",IDC_STATIC,16,71,27,8
+    EDITTEXT        IDC_PRNDLG_CAT_ROWS,48,70,20,10,ES_AUTOHSCROLL
+    LTEXT           "Columns",IDC_STATIC,16,88,27,8
+    EDITTEXT        IDC_PRNDLG_CAT_COLS,48,87,20,10,ES_AUTOHSCROLL
+    GROUPBOX        "Margins (inches)",IDC_STATIC,99,59,124,47,WS_GROUP
+    LTEXT           "&Left:",IDC_STATIC,110,72,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_LEFT,137,71,20,10,ES_AUTOHSCROLL
+    LTEXT           "&Right:",IDC_STATIC,166,72,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_RIGHT,193,71,20,10,ES_AUTOHSCROLL
+    LTEXT           "&Top:",IDC_STATIC,110,89,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_TOP,137,88,20,10,ES_AUTOHSCROLL
+    LTEXT           "&Bottom:",IDC_STATIC,166,89,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_BOTTOM,193,88,20,10,ES_AUTOHSCROLL
+END
+
+IDD_OPENDLG_TEMPLATE DIALOGEX 0, 0, 77, 99
+STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_OPENDLG_PREVIEW,"Static",SS_BITMAP,2,34,17,15,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "stc32",stc32,0,0,1,99,NOT WS_VISIBLE
+    CTEXT           "Preview",IDC_OPENDLG_TEXT,2,20,60,8
+END
+
+IDD_MODIFY DIALOG DISCARDABLE  0, 0, 106, 92
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "",IDC_MODDLG_PIECE,4,4,12,12,BS_BITMAP
+    COMBOBOX        IDC_MODDLG_LIST,22,4,80,63,CBS_DROPDOWN | 
+                    CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Position",IDC_STATIC,4,21,24,8
+    EDITTEXT        IDC_MODDLG_POSX,34,20,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_POSY,58,20,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_POSZ,82,20,20,10,ES_AUTOHSCROLL
+    LTEXT           "Rotation",IDC_MODDLG_ROTATION,4,35,26,8
+    EDITTEXT        IDC_MODDLG_ROTX,34,34,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_ROTY,58,34,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_ROTZ,82,34,20,10,ES_AUTOHSCROLL
+    LTEXT           "Step",IDC_MODDLG_STEPFROM,4,49,26,8
+    EDITTEXT        IDC_MODDLG_UPX,34,48,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_UPY,58,48,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_UPZ,82,48,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_FROM,34,48,20,10,ES_AUTOHSCROLL
+    LTEXT           "to",IDC_MODDLG_STEPTO,59,49,20,8
+    EDITTEXT        IDC_MODDLG_TO,82,48,20,10,ES_AUTOHSCROLL
+    CONTROL         "Hidden",IDC_MODDLG_HIDDEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,4,64,34,8
+    LTEXT           "FOV",IDC_MODDLG_FOVSTATIC,59,63,20,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_MODDLG_FOV,82,62,20,10,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    PUSHBUTTON      "",IDC_MODDLG_COLOR,80,61,22,12
+    PUSHBUTTON      "Apply",IDC_MODDLG_APPLY,4,76,30,12
+    EDITTEXT        IDC_MODDLG_NEAR,58,76,20,10,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MODDLG_FAR,82,76,20,10,ES_AUTOHSCROLL
+    LTEXT           "Clip",IDC_MODDLG_PLANESSTATIC,40,77,15,8
+END
+
+IDD_IMAGE DIALOG DISCARDABLE  0, 0, 212, 142
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Image Options"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Pictures",IDC_STATIC,7,7,104,55
+    CONTROL         "Single",IDC_IMGDLG_SINGLE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,18,21,35,8
+    CONTROL         "Multiple",IDC_IMGDLG_MULTIPLE,"Button",
+                    BS_AUTORADIOBUTTON,18,33,35,8
+    LTEXT           "From",IDC_STATIC,27,45,19,8
+    EDITTEXT        IDC_IMGDLG_FROM,46,44,20,10,ES_AUTOHSCROLL
+    LTEXT           "To",IDC_STATIC,70,45,12,8
+    EDITTEXT        IDC_IMGDLG_TO,83,44,20,10,ES_AUTOHSCROLL
+    GROUPBOX        "Dimensions",IDC_STATIC,7,65,104,45
+    LTEXT           "Width",IDC_STATIC,18,79,24,8
+    EDITTEXT        IDC_IMGDLG_WIDTH,49,78,20,10,ES_AUTOHSCROLL
+    LTEXT           "Height",IDC_STATIC,18,93,24,8
+    EDITTEXT        IDC_IMGDLG_HEIGHT,49,92,20,10,ES_AUTOHSCROLL
+    GROUPBOX        "Format",IDC_STATIC,124,7,81,128
+    CONTROL         "Bitmap",IDC_IMGDLG_BMP,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,135,21,41,8
+    CONTROL         "GIF",IDC_IMGDLG_GIF,"Button",BS_AUTORADIOBUTTON,135,45,
+                    41,8
+    CONTROL         "JPEG",IDC_IMGDLG_JPG,"Button",BS_AUTORADIOBUTTON,135,69,
+                    41,8
+    CONTROL         "AVI",IDC_IMGDLG_AVI,"Button",BS_AUTORADIOBUTTON,135,105,
+                    41,8
+    CONTROL         "High color",IDC_IMGDLG_HIGHCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,144,33,49,8
+    CONTROL         "Transparent",IDC_IMGDLG_TRANSPARENT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,144,57,50,8
+    CONTROL         "Progressive",IDC_IMGDLG_PROGRESSIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,144,81,47,8
+    LTEXT           "Quality",IDC_STATIC,144,93,26,9
+    EDITTEXT        IDC_IMGDLG_QUALITY,172,92,20,10,ES_AUTOHSCROLL
+    LTEXT           "Pause",IDC_STATIC,144,117,26,9
+    EDITTEXT        IDC_IMGDLG_PAUSE,172,116,20,10,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,16,121,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,62,121,41,14
+END
+
+IDD_SAVEDLG_TEMPLATE DIALOG DISCARDABLE  0, 0, 280, 22
+STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "stc32",stc32,0,0,280,8,NOT WS_VISIBLE
+    CONTROL         "Save Preview",IDC_SAVEDLG_PREVIEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,97,10,64,8
+END
+
+IDD_EXPORTPOV DIALOGEX 0, 0, 195, 99
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTEXTHELP
+CAPTION "POV-Ray Export "
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_POVDLG_OUTPOV,13,75,97,10,ES_AUTOHSCROLL,0,
+                    HIDC_POVDLG_OUTPOV
+    PUSHBUTTON      "...",IDC_POVDLG_POVOUTBROWSE,115,75,8,10
+    CONTROL         "Render Scene",IDC_POVDLG_RENDER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,133,54,58,8,0,
+                    HIDC_POVDLG_RENDER
+    DEFPUSHBUTTON   "OK",IDOK,138,13,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,138,30,50,14
+    LTEXT           "LGEO Path",IDC_STATIC,13,9,66,8
+    EDITTEXT        IDC_POVDLG_LGEO,13,19,97,10,ES_AUTOHSCROLL,0,
+                    HIDC_POVDLG_LGEO
+    PUSHBUTTON      "...",IDC_POVDLG_LGEOBROWSE,115,19,8,10
+    LTEXT           "POV-Ray Executable",IDC_STATIC,13,37,66,8
+    EDITTEXT        IDC_POVDLG_POVRAY,13,47,97,10,ES_AUTOHSCROLL,0,
+                    HIDC_POVDLG_POVRAY
+    PUSHBUTTON      "...",IDC_POVDLG_POVBROWSE,115,47,8,10
+    LTEXT           "Output File",IDC_STATIC,13,65,66,8
+END
+
+IDD_SAVEPICTUREDLG_TEMPLATE DIALOG DISCARDABLE  0, 0, 280, 27
+STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "stc32",stc32,0,0,280,8,NOT WS_VISIBLE
+    PUSHBUTTON      "Options...",IDC_SAVEPICTURE_OPTIONS,222,8,50,14
+END
+
+IDD_PIECEEDITOR DIALOG DISCARDABLE  0, 0, 270, 186
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Piece Editor"
+MENU IDR_PIECEEDITOR
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "",IDC_EDITORSTATIC,7,7,120,148,NOT WS_VISIBLE | 
+                    WS_BORDER
+    CONTROL         "List1",IDC_EDTDLG_LIST,"SysListView32",LVS_REPORT | 
+                    WS_BORDER | WS_TABSTOP,144,7,119,80
+    PUSHBUTTON      "Add",ID_EDITOR_ADD,144,89,28,11
+    PUSHBUTTON      "Delete",IDC_BUTTON2,174,89,28,11
+    EDITTEXT        IDC_EDTDLG_CONNECTION,144,116,119,12,ES_AUTOHSCROLL
+    CONTROL         "Slider1",IDC_EDTDLG_VERT,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,128,7,10,148
+    CONTROL         "Slider2",IDC_EDTDLG_HORZ,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,7,157,120,10
+    LTEXT           "Connection",IDC_STATIC,144,106,50,8
+    DEFPUSHBUTTON   "Ok",IDOK,206,168,28,11,NOT WS_VISIBLE
+    PUSHBUTTON      "Cancel",IDCANCEL,235,168,28,11,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDTDLG_DESCRIPTION,144,132,119,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDTDLG_NAME,144,148,52,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Guess",ID_EDITOR_GUESS,204,89,28,11
+    PUSHBUTTON      "<-",ID_EDITOR_PREV,23,168,28,11
+    PUSHBUTTON      "Flip",ID_EDITOR_FLIP,54,168,28,11
+    PUSHBUTTON      "->",ID_EDITOR_NEXT,85,168,28,11
+END
+
+IDD_LIBRARY DIALOG DISCARDABLE  0, 0, 300, 200
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Piece Library Manager"
+MENU IDR_LIBRARY
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,90,152,16,10,NOT WS_VISIBLE
+    PUSHBUTTON      "Cancel",IDCANCEL,87,164,27,10,NOT WS_VISIBLE
+    CONTROL         "Tree1",IDC_LIBDLG_TREE,"SysTreeView32",TVS_HASLINES | 
+                    TVS_EDITLABELS | WS_BORDER | WS_TABSTOP,7,7,89,186
+    CONTROL         "List1",IDC_LIBDLG_LIST,"SysListView32",LVS_LIST | 
+                    LVS_SORTASCENDING | LVS_AUTOARRANGE | WS_BORDER | 
+                    WS_TABSTOP,102,7,191,186
+END
+
+IDD_TERRAIN DIALOG DISCARDABLE  0, 0, 320, 200
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Terrain Editor"
+MENU IDR_TERRAIN
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Terrain Grid",IDC_GRID,"TerrainCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,145,186
+    CTEXT           "Dummy",IDC_TERRAIN_DUMMY,153,7,160,186,SS_CENTERIMAGE | 
+                    NOT WS_VISIBLE | WS_DISABLED | WS_BORDER | NOT WS_GROUP
+END
+
+IDD_TERRAIN_OPTIONS DIALOG DISCARDABLE  0, 0, 234, 126
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Terrain Options"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Dimensions",IDC_STATIC,7,7,91,61
+    CTEXT           "X",IDC_STATIC,48,19,11,8
+    CTEXT           "Y",IDC_STATIC,74,18,11,8
+    LTEXT           "Patches",IDC_STATIC,13,34,28,8
+    EDITTEXT        IDC_TEROPT_XPAT,44,32,20,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TEROPT_YPAT,70,32,20,12,ES_AUTOHSCROLL
+    LTEXT           "Size (cm)",IDC_STATIC,13,48,28,8
+    EDITTEXT        IDC_TEROPT_XSIZE,44,47,20,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TEROPT_YSIZE,70,47,20,12,ES_AUTOHSCROLL
+    GROUPBOX        "Appearence",IDC_STATIC,106,7,121,112
+    LTEXT           "Color",IDC_STATIC,115,22,26,8
+    PUSHBUTTON      "",IDC_TEROPT_COLOR,144,20,20,12,BS_BITMAP
+    CONTROL         "Texture",IDC_TEROPT_TEXTURE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,112,40,39,8
+    EDITTEXT        IDC_TEROPT_TEXTURENAME,123,52,90,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_TEROPT_TEXTUREBROWSE,215,52,8,12
+    DEFPUSHBUTTON   "OK",IDOK,7,105,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,50,105,41,14
+    CONTROL         "Smooth",IDC_TEROPT_SMOOTH,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,178,22,37,8
+    EDITTEXT        IDC_EDIT1,151,72,20,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Repeat",IDC_STATIC,115,74,28,8,WS_DISABLED
+    CONTROL         "Flat",IDC_TEROPT_FLAT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,24,79,47,8
+    EDITTEXT        IDC_EDIT2,178,72,20,12,ES_AUTOHSCROLL | WS_DISABLED
+END
+
+IDD_EDIT_GROUPS DIALOG DISCARDABLE  0, 0, 193, 157
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit Groups"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,98,136,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,145,136,41,14
+    CONTROL         "Tree1",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
+                    WS_BORDER | WS_TABSTOP,7,7,179,122
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "BT Software\0"
+            VALUE "FileDescription", "LeoCAD\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "LeoCAD\0"
+            VALUE "LegalCopyright", "Copyright © 1996-99, BT Software\0"
+            VALUE "OriginalFilename", "LEOCAD.EXE\0"
+            VALUE "ProductName", "LeoCAD Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 210
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 115
+    END
+
+    IDD_PROPGENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 213
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 97
+    END
+
+    IDD_PROPSUMMARY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 213
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 97
+    END
+
+    IDD_PROPPIECES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 213
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 97
+    END
+
+    IDD_SELECT_OBJECTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_ARRAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 217
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_STEP, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 106
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 39
+    END
+
+    IDD_MINIFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 178
+    END
+
+    IDD_HTML, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 152
+    END
+
+    IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+    END
+
+    IDD_GROUP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 38
+    END
+
+    IDD_PREFGENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+
+    IDD_PREFDRAWING, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+
+    IDD_PREFDETAIL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+
+    IDD_PREFSCENE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+
+    IDD_PREFPRINT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+
+    IDD_MODIFY, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 102
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_IMAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 135
+    END
+
+    IDD_EXPORTPOV, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 188
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 92
+    END
+
+    IDD_PIECEEDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 263
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 179
+    END
+
+    IDD_LIBRARY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_TERRAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_TERRAIN_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 227
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 119
+    END
+
+    IDD_EDIT_GROUPS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 186
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 150
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_VSPLITBAR           CURSOR  DISCARDABLE     "res\\split.cur"
+IDC_ZOOM                CURSOR  DISCARDABLE     "res\\Zoom.cur"
+IDC_BRICK               CURSOR  DISCARDABLE     "res\\Brick.cur"
+IDC_CAMERA              CURSOR  DISCARDABLE     "res\\Camera.cur"
+IDC_ERASER              CURSOR  DISCARDABLE     "res\\Eraser.cur"
+IDC_SPOTLIGHT           CURSOR  DISCARDABLE     "res\\Light.cur"
+IDC_MOVE                CURSOR  DISCARDABLE     "res\\Move.cur"
+IDC_PAINT               CURSOR  DISCARDABLE     "res\\Paint.cur"
+IDC_PAN                 CURSOR  DISCARDABLE     "res\\Pan.cur"
+IDC_ANGLE               CURSOR  DISCARDABLE     "res\\Angle.cur"
+IDC_ROTATE              CURSOR  DISCARDABLE     "res\\Rotate.cur"
+IDC_LIGHT               CURSOR  DISCARDABLE     "res\\bulb.cur"
+IDC_ZOOM_REGION         CURSOR  DISCARDABLE     "res\\Zoomrect.cur"
+IDC_SELECT_GROUP        CURSOR  DISCARDABLE     "res\\SelctGrp.cur"
+IDC_SELECT              CURSOR  DISCARDABLE     "res\\select.cur"
+IDC_ROLL                CURSOR  DISCARDABLE     "res\\roll.cur"
+IDC_PAN_UP              CURSOR  DISCARDABLE     "res\\panup.cur"
+IDC_PAN_LEFT            CURSOR  DISCARDABLE     "res\\panleft.cur"
+IDC_PAN_DOWN            CURSOR  DISCARDABLE     "res\\pandown.cur"
+IDC_PAN_RIGHT           CURSOR  DISCARDABLE     "res\\panright.cur"
+IDC_PAN_ALL             CURSOR  DISCARDABLE     "res\\panall.cur"
+IDC_PAN_NE              CURSOR  DISCARDABLE     "res\\pan_ne.cur"
+IDC_PAN_NW              CURSOR  DISCARDABLE     "res\\pan_nw.cur"
+IDC_PAN_SE              CURSOR  DISCARDABLE     "res\\pan_se.cur"
+IDC_PAN_SW              CURSOR  DISCARDABLE     "res\\pan_sw.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_POSITION   " X: 0.00 Y: 0.00 Z:0.00 "
+    ID_INDICATOR_STEP       " Step 100 "
+    ID_INDICATOR_SNAP       " Snap x10 "
+    IDW_PIECEPREVIEW        "Preview of how a piece looks"
+    IDW_PIECESLIST          "Select the piece you want from this list"
+    IDW_GROUPSBAR           "Select the group of pieces that you want to see"
+    IDW_PIECESCOMBO         "Type the name or number of a piece"
+    IDW_COLORSLIST          "Select the color you want"
+    IDW_PIECEBAR_SPLITTER   "Adjust the size of the preview window"
+    IDS_CANNOT_OPEN_CLIPBOARD "Failed to open Clipboard!"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "LeoCAD\n\nLeoCAD\nLeoCAD Files (*.lcd)\n.lcd\nLeoCAD.Project\nLeoCAD Project"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "LeoCAD"
+    AFX_IDS_IDLEMESSAGE     "For Help, press F1"
+    AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+    ID_FILE_UPDATE          "Update the container to show any changes\nUpdate"
+    ID_FILE_SAVE_COPY_AS    "Save a copy of the active document with a new name\nSave Copy"
+    ID_FILE_SEND_MAIL       "Send the active document through electronic mail\nSend Mail"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+    ID_HELP_INDEX           "Opens Help\nHelp Topics"
+    ID_HELP_FINDER          "List Help topics\nHelp Topics"
+    ID_HELP_USING           "Display instructions about how to use help\nHelp"
+    ID_CONTEXT_HELP         "Display help for clicked on buttons, menus and windows\nHelp"
+    ID_HELP                 "Display help for current task or command\nHelp"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the standard toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SNAP_ON              "3D snap toggle\n3D Snap Toggle"
+    ID_SNAP_ANGLE           "Angle snap toggle\nAngle Snap Toggle"
+    ID_LIBDLG_FILE_PRINTCATALOG "Print Catalog"
+    ID_VIEWPORT01           "View"
+    ID_VIEWPORT02           "View"
+    ID_VIEWPORT03           "View"
+    ID_VIEWPORT04           "View"
+    ID_VIEWPORT05           "View"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEWPORT06           "View"
+    ID_VIEWPORT07           "View"
+    ID_VIEWPORT08           "View"
+    ID_VIEWPORT09           "View"
+    ID_VIEWPORT10           "View"
+    ID_VIEWPORT11           "View"
+    ID_VIEWPORT12           "View"
+    ID_VIEWPORT13           "View"
+    ID_VIEWPORT14           "View"
+    ID_PIECE_GROUP01        "Plates"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SNAP_SNAPX           "Snap X Toggle"
+    ID_SNAP_SNAPY           "Snap Y Toggle"
+    ID_SNAP_SNAPZ           "Snap Z Toggle"
+    ID_SNAP_SNAPALL         "Snap Toggle"
+    ID_SNAP_SNAPNONE        "Snap Toggle"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COLOR01             "Red"
+    IDS_COLOR02             "Orange"
+    IDS_COLOR03             "Green"
+    IDS_COLOR04             "Light Green"
+    IDS_COLOR05             "Blue"
+    IDS_COLOR06             "Light Blue"
+    IDS_COLOR07             "Yellow"
+    IDS_COLOR08             "White"
+    IDS_COLOR09             "Dark Gray"
+    IDS_COLOR10             "Black"
+    IDS_COLOR11             "Brown"
+    IDS_COLOR12             "Pink"
+    IDS_COLOR13             "Purple"
+    IDS_COLOR14             "Gold"
+    IDS_COLOR15             "Clear Red"
+    IDS_COLOR16             "Clear Orange"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COLOR17             "Clear Green"
+    IDS_COLOR18             "Clear Light Green"
+    IDS_COLOR19             "Clear Blue"
+    IDS_COLOR20             "Clear Light Blue"
+    IDS_COLOR21             "Clear Yellow"
+    IDS_COLOR22             "Clear White"
+    IDS_COLOR23             "Light Gray"
+    IDS_COLOR24             "Tan"
+    IDS_COLOR25             "Light Brown"
+    IDS_COLOR26             "Light Pink"
+    IDS_COLOR27             "Turquoise"
+    IDS_COLOR28             "Silver"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PIECE_GROUP02        "Bricks"
+    ID_PIECE_GROUP03        "Tiles"
+    ID_PIECE_GROUP04        "Slope Bricks"
+    ID_PIECE_GROUP05        "Technic"
+    ID_PIECE_GROUP06        "Space"
+    ID_PIECE_GROUP07        "Train"
+    ID_PIECE_GROUP08        "Other Bricks"
+    ID_PIECE_GROUP09        "Accessories"
+    ID_PIECE_GROUP10        "Group 10"
+    ID_PIECE_GROUP11        "Group 11"
+    ID_PIECE_GROUP12        "Group 12"
+    ID_PIECE_GROUP13        "Group 13"
+    ID_PIECE_GROUP14        "Group 14"
+    ID_PIECE_GROUP15        "Group 15"
+    ID_PIECE_GROUP16        "Group 16"
+    ID_PIECE_GROUP17        "Group 17"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PIECE_GROUP18        "Group 18"
+    ID_PIECE_GROUP19        "Group 19"
+    ID_PIECE_GROUP20        "Group 20"
+    ID_PIECE_GROUP21        "Group 21"
+    ID_PIECE_GROUP22        "Group 22"
+    ID_PIECE_GROUP23        "Group 23"
+    ID_PIECE_GROUP24        "Group 24"
+    ID_PIECE_GROUP25        "Group 25"
+    ID_PIECE_GROUP26        "Group 26"
+    ID_PIECE_GROUP27        "Group 27"
+    ID_PIECE_GROUP28        "Group 28"
+    ID_PIECE_GROUP29        "Group 29"
+    ID_PIECE_GROUP30        "Group 30"
+    ID_PIECE_GROUP31        "Group 31"
+    ID_PIECE_GROUP32        "Group 32"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_RENDER_BACKGROUND    "Fully renders the scene in the background\nBackground Render"
+    ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
+    ID_VIEW_STEP_FIRST      "Go to the first step or frame\nGo to Start"
+    ID_VIEW_STEP_LAST       "Go to the last step or frame\nGo to End"
+    ID_PIECE_HIDESELECTED   "Hide selected objects"
+    ID_PIECE_HIDEUNSELECTED "Hide objects that are not selected"
+    ID_PIECE_UNHIDEALL      "Unhide all objects"
+    ID_ANIMATOR_TOGGLE      "Toggle animation or instructions mode\nToggle Mode"
+    ID_ANIMATOR_KEY         "Add new animation keys\nAdd Keys"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CANNOT_GET_CLIPBOARD_DATA "Failed to get Clipboard data!"
+    IDS_CANCEL_PROMPT       "Are you sure you want to stop ?"
+    IDS_FAIL_ALLOC          "Could not allocate memory."
+    IDS_PROPSHT_CAPTION     "Preferences"
+    IDS_OPENFILE_ERROR      "Cannot open file !"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PIECE_ARRAY          "Make copies of the selected pieces\nArray"
+    ID_HELP_LEOCADHOMEPAGE  "Go to the LeoCAD Home page on the internet"
+    ID_HELP_CHECKFORUPDATES "Check for a newer version of the program on the internet"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_SELECTALL       "Select all objects"
+    ID_EDIT_SELECTNONE      "De-select everything"
+    ID_EDIT_SELECTINVERT    "Invert the current selection set"
+    ID_EDIT_SELECTBYNAME    "Select objects by name"
+    ID_VIEW_FULLSCREEN      "Toggle fullscreen mode\nFullscreen"
+    ID_VIEW_STEP_NEXT       "Advance one step or frame\nGo Foward"
+    ID_VIEW_STEP_PREVIOUS   "Go back one step or frame\nGo Back"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDR_PARTFRAME           "LeoCAD Piece Library Manager"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP_SENDEMAIL       "Send an e-mail message to the author of the program"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_PIECES_BAR      "Show or hide the pieces toolbar\nToggle PiecesBar"
+    ID_VIEW_TOOLS_BAR       "Show or hide the drawing toolbar\nToggle DrawingBar"
+    ID_VIEW_ANIMATION_BAR   "Show or hide the animation toolbar\nToggle AnimationBar"
+    ID_VIEW_MODIFY_BAR      "Show or hide the modify dialog\nToggle Modify Dialog"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_ZOOMIN          "Zoom In"
+    ID_VIEW_ZOOMOUT         "Zoom Out"
+    ID_PIECE_EDITGROUPS     "Edit groups"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
+    ID_ACTION_ROLL          "Roll view\nRoll"
+    ID_ZOOM_EXTENTS         "Zoom extents (hold CTRL to zoom all views)\nZoom Extents"
+    ID_ANIMATOR_PLAY        "Play animation sequence\nPlay"
+    ID_ANIMATOR_STOP        "Stop playing animation\nStop"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_ACTION_SELECT        "Select objects with the mouse\nSelect"
+    ID_ACTION_INSERT        "Add pieces to the project\nInsert"
+    ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
+    ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"
+    ID_ACTION_CAMERA        "Create a camera\nCamera"
+    ID_ACTION_MOVE          "Move objects\nMove"
+    ID_ACTION_ROTATE        "Rotate pieces\nRotate"
+    ID_ACTION_REMOVE        "Remove objects\nRemove"
+    ID_ACTION_PAINT         "Change piece color\nPaint"
+    ID_ACTION_ZOOM          "Zoom in or out\nZoom"
+    ID_ACTION_ZOOM_REGION   "Zoom region\nZoom Region"
+    ID_ACTION_PAN           "Pan\nPan"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_LIBDLG_GROUP_MOVEUP  "Move Group Up"
+    ID_LIBDLG_GROUP_MOVEDOWN "Move Group Down"
+    ID_LIBDLG_FILE_RESET    "Reset"
+    ID_LIBDLG_FILE_OPEN     "Open Configuration"
+    ID_LIBDLG_FILE_SAVE     "Save Configuration"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_LIBDLG_GROUP_INSERT  "New Group"
+    ID_LIBDLG_GROUP_DELETE  "Delete Group"
+    ID_LIBDLG_GROUP_RENAME  "Rename Group"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PIECE_COPYKEYS       "Copy position and rotation"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_CAMERAS_RESET   "Reset cameras to their original positions"
+    ID_PREVIEW_ONEPAGE      "Show only one page\nOne Page"
+    ID_PREVIEW_TWOPAGES     "Show two pages\nTwo Pages"
+    ID_PREVIEW_PRINT        "Print the current project\nPrint"
+    ID_PREVIEW_PREV         "Preview the previous page\nPrevious Page"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PREVIEW_NEXT         "Preview the next page\nNext Page"
+    ID_PREVIEW_ZOOMIN       "Zoom In\nZoom In"
+    ID_PREVIEW_ZOOMOUT      "Zoom out\nZoom Out"
+    ID_PREVIEW_CLOSE        "Close the print preview and return to the editor\nClose Preview"
+    ID_PIECE_PREVIOUS       "Make piece appear in the previous step\nShow in Previous Step"
+    ID_PIECE_NEXT           "Make piece appear in the next step\nShow in Next Step"
+    ID_LOCK_2BUTTONS        "Use the left button to move in the XY plane and the right button for the Z direction"
+    ID_LOCK_3DMOVEMENT      "Use the left mouse button to move in all directions"
+    ID_LOCK_LOCKX           "Prevents movement in the X direction"
+    ID_LOCK_LOCKY           "Prevents movement in the Y direction"
+    ID_LOCK_LOCKZ           "Prevents movement in the Z direction"
+    ID_LOCK_UNLOCKALL       "Allows movement in all directions"
+    ID_LOCK_ON              "Axis lock toggle\nAxis Lock Toggle"
+    ID_PIECE_MIRROR         "Mirror pieces\nMirror"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+#include "res\LeoCAD.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

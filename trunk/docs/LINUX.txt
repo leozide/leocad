@@ -1,0 +1,75 @@
+LeoCAD for Linux
+----------------
+
+  This is the only documentation you will find for the Linux version, I'll start
+writing some help files in HTML format soon but it's going to take a while (I really
+prefer to code and my english is not perfect). I strongly advise you to follow the
+online tutorial from my web page, it will at least get you started with the basic
+editing commands.
+
+  I still have to finish some dialogs, the printing routines and a few GUI items but
+all the rest should work fine. I'd also like to warn you that this is my first Linux
+program so if you find anything that doesn't behave as you expect, a bug or just have
+some suggestions, feel free to email me at leonardo@centroin.com.br
+
+  I hope you enjoy using LeoCAD as much as I enjoyed writing it,
+
+Leonardo
+
+
+
+INSTALLATION
+------------
+
+  Instalation should be very simple for most systems, first you need get the
+executable and the pieces library from my homepage (if you already have the library
+for the MS Windows version, you don't need to download it again).
+
+  Now you should unzip the files to a temporary directory (you probably already did
+that) and move the file 'leocad' to /usr/local/bin/ and the 4 files from the pieces
+library to /usr/share/LeoCAD/. If you wish to have the library files installed in
+another place, set the environment variable LEOCAD_LIB to that directory or start
+the program with the -l <path> option.
+
+  You need to have an OpenGL library, you can download Mesa from www.mesa3d.org if
+you don't have one already. You should also have GTK+ 1.2, it's available from
+www.gtk.org
+
+
+
+COMMAND LINE OPTIONS
+--------------------
+
+[filename]: Loads a file
+
+-l <path>: Tells the program to use the piece library located in the directory
+           pointed by <path>
+
+-i [filename]: Saves a picture and exit
+
+-w <x>: Use this width for the picture
+
+-h <y>: Use this height for the picture
+
+Example:
+
+  leocad car.lcd -i car.gif -w 640 -h 480 -l /mnt/c/leocad/
+
+  This will start LeoCAD, load the file "car.lcd", create a GIF file called "car.gif" 
+with a resolution of 640 x 480 using the pieces library in /mnt/c/leocad/ and exit
+when done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

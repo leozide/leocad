@@ -1,0 +1,25 @@
+/* XPM */
+static char *ac_pan[] = {
+/* columns rows colors chars-per-pixel */
+"16 15 4 1",
+"  c Gray0",
+". c Gray50",
+"X c Gray75",
+"o c Gray100",
+/* pixels */
+"XXXXXXX  XXXXXXX",
+"XXX .X oX.  XXXX",
+"XX XX. Xo oX XXX",
+"XX oX  oX Xo X X",
+"XXX oX Xo oX .o ",
+"XXX Xo oX Xo oX ",
+"X  X XoXoXoX Xo ",
+" oX  oXoXoXoXoX.",
+" XoX XoXoXoXoX.X",
+"X XoXoXoXoXoXo X",
+"XX XoXoXoXoXoX X",
+"XX.XXoXoXoXoX XX",
+"XXX oXoXoXoXo XX",
+"XXXX oXoXoXo XXX",
+"XXXXX oXoXoX XXX"
+};

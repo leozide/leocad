@@ -113,7 +113,7 @@ int CMinifigWnd::InitGL()
 	return 0;
 }
 
-BOOL CMinifigWnd::OnEraseBkgnd(CDC* pDC) 
+BOOL CMinifigWnd::OnEraseBkgnd(CDC* /*pDC*/) 
 {
 	return TRUE;
 }

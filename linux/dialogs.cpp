@@ -190,7 +190,7 @@ int msgbox_execute(char* text, int flags)
     gtk_widget_show (w); 
     ret = LC_CANCEL;
   }
-  else if (mode == LC_MB_YESNO)
+  else /* if (mode == LC_MB_YESNO) */
   {
     w = gtk_button_new_with_label ("Yes");
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
@@ -1937,7 +1937,7 @@ int propertiesdlg_execute(void* param)
     gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 2, 3,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
-    sprintf(text, "%.1fKB (%d bytes)", (float)buf.st_size/1024, buf.st_size);
+    sprintf(text, "%.1fKB (%d bytes)", (float)buf.st_size/1024, (int)buf.st_size);
     label = gtk_label_new (text);
     gtk_widget_show (label);
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
@@ -2230,8 +2230,8 @@ typedef struct
 
 static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 {
-  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
-  LC_GROUPEDITDLG_OPTS* opts = (LC_GROUPEDITDLG_OPTS*)s->data;
+  //  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
+  //  LC_GROUPEDITDLG_OPTS* opts = (LC_GROUPEDITDLG_OPTS*)s->data;
 
   *cur_ret = LC_OK;
 }

@@ -115,14 +115,16 @@ Camera::Camera()
 }
 
 // Start with a standard camera.
-Camera::Camera(int nType, Camera* pPrev)
+Camera::Camera(unsigned char nType, Camera* pPrev)
 {
 	if (nType > 7)
 		nType = 8;
 
 	char names[8][7] = { "Front", "Back",  "Top",  "Under", "Left", "Right", "Main", "User" };
-	float eyes[8][3] = { 50,0,0, -50,0,0, 0,0,50,  0,0,-50, 0,50,0, 0,-50,0, 10,10,5, 0,5,0 };
-	float ups [8][3] = {  0,0,1,   0,0,1, 1,0, 0, -1,0,  0,  0,0,1, 0,  0,1,  -0.2357f, -0.2357f, 0.94281f, 0,0,1 };
+	float eyes[8][3] = { { 50,0,0 }, { -50,0,0 }, { 0,0,50 }, { 0,0,-50 },
+			     { 0,50,0 }, { 0,-50,0 }, { 10,10,5}, { 0,5,0 }};
+	float ups [8][3] = {  { 0,0,1 }, { 0,0,1 }, { 1,0,0 }, { -1,0,0 }, { 0,0,1 },
+			      { 0,0,1 }, {-0.2357f, -0.2357f, 0.94281f }, { 0,0,1 }};
 	CAMERA_KEY* node;
 
 	Initialize();
@@ -304,10 +306,8 @@ void Camera::Initialize()
 	m_nType = LC_CAMERA_USER;
 
 	m_pTR = NULL;
-	for( int i = 0 ; i < sizeof(m_strName) ; i++ )
-	{
+	for (unsigned char i = 0 ; i < sizeof(m_strName) ; i++ )
 		m_strName[i] = 0;
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -490,7 +490,7 @@ void Camera::FileSave(File* file)
 	unsigned char ch = 5; // LeoCAD 0.70
 
 	file->Write(&ch, 1);
-	ch = strlen(m_strName);
+	ch = (unsigned char)strlen(m_strName);
 	file->Write(&ch, 1);
 	file->Write(m_strName, ch);
 
@@ -965,7 +965,7 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 	UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center)
+void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
 {
 	Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
 	sidevec.Cross(frontvec, upvec);

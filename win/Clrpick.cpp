@@ -60,7 +60,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CColorPicker message handlers
 
-LONG CColorPicker::OnSelEndOK(UINT lParam, LONG wParam)
+LONG CColorPicker::OnSelEndOK(UINT /*lParam*/, LONG wParam)
 {
 	m_bActive = FALSE;
 	SetColorIndex(wParam);
@@ -72,7 +72,7 @@ LONG CColorPicker::OnSelEndOK(UINT lParam, LONG wParam)
 	return TRUE;
 }
 
-LONG CColorPicker::OnSelEndCancel(UINT lParam, LONG wParam)
+LONG CColorPicker::OnSelEndCancel(UINT /*lParam*/, LONG wParam)
 {
     m_bActive = FALSE;
 

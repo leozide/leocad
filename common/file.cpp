@@ -63,7 +63,7 @@ char* FileMem::ReadString(char* pBuf, unsigned long nMax)
   if (m_nPosition >= m_nFileSize)
     return NULL;
 
-  while (--nMax)
+  while ((--nMax))
   {
     if (m_nPosition == m_nFileSize)
       break;

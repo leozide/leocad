@@ -635,7 +635,6 @@ void colorlist_set(int new_color)
 // Create what is the pieces toolbar in the Windows version as fixed items.
 void create_piecebar(GtkWidget *window, GtkWidget *hbox)
 {
-  GtkWidget *vbox;
   gchar *titles[2] = { "Description", "Number" };
   int attrlist[] =
   {
@@ -696,10 +695,6 @@ void create_piecebar(GtkWidget *window, GtkWidget *hbox)
   gtk_clist_set_hadjustment (GTK_CLIST (piecelist), NULL);
   gtk_clist_set_vadjustment (GTK_CLIST (piecelist), NULL);
   */
-
-  // Piece toolbar
-  GtkWidget* icon;
-  int i;
 
 #include "pixmaps/pi-acces.xpm"
 #include "pixmaps/pi-plate.xpm"

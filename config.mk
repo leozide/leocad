@@ -9,7 +9,7 @@ OS 		:= -D_LINUX
 OSDIR 		:= linux
 
 # (Add a -g for debugging)
-CPPFLAGS += -O2
+CPPFLAGS += -O2 -Wall
 
 # Add compile options, such as -I option to include jpeglib's headers
 # CPPFLAGS += -I/home/fred/jpeglib

@@ -120,7 +120,7 @@ BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
 /////////////////////////////////////////////////////////////////////////////
 // CCADView drawing
 
-void CCADView::OnDraw(CDC* pDC)
+void CCADView::OnDraw(CDC* /*pDC*/)
 {
 	project->Render(false);
 /*
@@ -746,7 +746,7 @@ CCADDoc* CCADView::GetDocument() // non-debug version is inline
 /////////////////////////////////////////////////////////////////////////////
 // CCADView message handlers
 
-BOOL CCADView::OnEraseBkgnd(CDC* pDC) 
+BOOL CCADView::OnEraseBkgnd(CDC* /*pDC*/)
 {
 	return TRUE;
 }
@@ -858,32 +858,32 @@ void CCADView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 }
 
-void CCADView::OnMouseMove(UINT nFlags, CPoint point) 
+void CCADView::OnMouseMove(UINT /*nFlags*/, CPoint point) 
 {
 	project->OnMouseMove(point.x, m_szView.cy - point.y - 1);
 }
 
-void CCADView::OnLButtonUp(UINT nFlags, CPoint point) 
+void CCADView::OnLButtonUp(UINT /*nFlags*/, CPoint point) 
 {
 	project->OnLeftButtonUp(point.x, m_szView.cy - point.y - 1);
 }
 
-void CCADView::OnLButtonDown(UINT nFlags, CPoint point) 
+void CCADView::OnLButtonDown(UINT /*nFlags*/, CPoint point) 
 {
 	project->OnLeftButtonDown(point.x, m_szView.cy - point.y - 1);
 }
 
-void CCADView::OnLButtonDblClk(UINT nFlags, CPoint point) 
+void CCADView::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) 
 {
 	project->OnLeftButtonDoubleClick(point.x, m_szView.cy - point.y - 1);
 }
 
-void CCADView::OnRButtonDown(UINT nFlags, CPoint point) 
+void CCADView::OnRButtonDown(UINT /*nFlags*/, CPoint point) 
 {
 	project->OnRightButtonDown(point.x, m_szView.cy - point.y - 1);
 }
 
-void CCADView::OnRButtonUp(UINT nFlags, CPoint point) 
+void CCADView::OnRButtonUp(UINT /*nFlags*/, CPoint point) 
 {
 	project->OnRightButtonUp(point.x, m_szView.cy - point.y - 1);
 }
@@ -914,7 +914,7 @@ void CCADView::OnDropDown (NMHDR* pNotifyStruct, LRESULT* pResult)
 	*pResult = TBDDRET_DEFAULT;
 }
 
-LONG CCADView::OnChangeCursor(UINT lParam, LONG wParam)
+LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 {
 	UINT c;
 
@@ -1010,7 +1010,7 @@ void CCADView::OnTimer(UINT nIDEvent)
 }
 
 // lParam -> new step/frame
-LONG CCADView::OnSetStep(UINT lParam, LONG wParam)
+LONG CCADView::OnSetStep(UINT lParam, LONG /*wParam*/)
 {
 	if (lParam > 0)
 		project->HandleCommand(LC_VIEW_STEP_SET, lParam);

@@ -139,10 +139,6 @@ BOOL CMinifigDlg::OnInitDialog()
 
 BOOL CMinifigDlg::DestroyWindow() 
 {
-	for (int i = 0; i < 15; i++)
-		if (m_pMFWnd->m_pFig->info[i])
-			m_pMFWnd->m_pFig->info[i]->DeRef();
-
 	m_pMFWnd->DestroyWindow();
 	delete m_pMFWnd;
 	

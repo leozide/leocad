@@ -37,7 +37,7 @@ class Camera
 {
 public:
 	Camera();
-	Camera(int nType, Camera* pPrev);
+	Camera(unsigned char nType, Camera* pPrev);
 	Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
 	Camera(float eye[3], float target[3], float up[3], Camera* pCamera);
 	~Camera();

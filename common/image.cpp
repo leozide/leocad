@@ -517,8 +517,10 @@ static LC_IMAGE* OpenGIF(File* file)
 		
 		if (c == '!') 
 		{
-			int extlabel = source->input_file->GetChar();
+			int extlabel;
 			char buf[256];
+
+			extlabel = source->input_file->GetChar();
 			while (GetDataBlock(source, buf) > 0)
 			    ; // skip
 			continue;

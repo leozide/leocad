@@ -1,3 +1,4 @@
+### $Id$
 ### ALL CONFIGURATION SHOULD IN CONFIG.MK, NOT HERE
 include config.mk
 
@@ -109,17 +110,18 @@ source-zip: arch/leocad-$(VERSION)-src.zip
 
 arch/leocad-$(VERSION)-linux.zip: arch all
 	rm -f $@
-	zip -r $@ bin docs examples
+	zip -r $@ *.txt bin docs examples -x 'CVS/*' -x '*/CVS/*'
 
 arch/leocad-$(VERSION)-linux.tgz: arch all
 	rm -f $@
-	tar cvzf $@ bin docs examples
+	tar --exclude=CVS -cvzf $@ *.txt bin docs examples
 
 arch/leocad-$(VERSION)-src.tgz: arch veryclean
 	rm -f $@
-	( cd .. ; tar --exclude=leocad/arch/\* -cvzf leocad/$@ leocad )
+	( cd .. ; tar --exclude=leocad/arch/\* --exclude=CVS \
+	-cvzf leocad/$@ leocad )
 
 arch/leocad-$(VERSION)-src.zip: arch veryclean
 	rm -f $@
-	( cd .. ; zip -r leocad/$@ leocad -x leocad/arch/\* )
+	( cd .. ; zip -r leocad/$@ leocad -x '*/arch/*' -x '*/CVS/*' )
 

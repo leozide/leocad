@@ -1,4 +1,5 @@
 #!/bin/sh
+# $Id$
 
 CC=$1
 shift

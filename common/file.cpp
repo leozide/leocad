@@ -402,7 +402,7 @@ void FileDisk::SetLength(unsigned long nNewLen)
 
 unsigned long FileMem::GetLength() const
 {
-  return m_nBufferSize;
+  return m_nFileSize;
 }
 
 unsigned long FileDisk::GetLength() const

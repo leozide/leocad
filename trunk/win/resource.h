@@ -6,6 +6,7 @@
 #define IDC_HTMDLG_IMAGEOPTIONS         3
 #define ID_EDITOR_PREV                  3
 #define ID_EDITOR_FLIP                  4
+#define IDC_EDITGRP_NEWGROUP            4
 #define ID_EDITOR_NEXT                  5
 #define IDD_ABOUTBOX                    100
 #define ID_INDICATOR_POSITION           102
@@ -650,7 +651,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        234
 #define _APS_NEXT_COMMAND_VALUE         33155
-#define _APS_NEXT_CONTROL_VALUE         1224
+#define _APS_NEXT_CONTROL_VALUE         1225
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

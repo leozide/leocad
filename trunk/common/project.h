@@ -64,8 +64,10 @@ public:
 		{ return m_LibraryPath; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
-	int GetCurrentColor()
+	int GetCurrentColor () const
 		{ return m_nCurColor; }
+  int GetCurrentGroup () const
+    { return m_nCurGroup; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	Camera* GetCamera(int i);
@@ -99,10 +101,11 @@ public:
 	PieceInfo* FindPieceInfo (const char* name) const;
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
+  Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
-        void AddView (View* pView);
-        void RemoveView (View* pView);
-        void UpdateAllViews (View* pSender = NULL);
+  void AddView (View* pView);
+  void RemoveView (View* pView);
+  void UpdateAllViews (View* pSender = NULL);
 
 // Implementation
 protected:

@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "leocad.h"
 #include "EdGrpDlg.h"
+#include "globals.h"
+#include "project.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,6 +38,7 @@ void CEditGroupsDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CEditGroupsDlg, CDialog)
 	//{{AFX_MSG_MAP(CEditGroupsDlg)
+	ON_BN_CLICKED(IDC_EDITGRP_NEWGROUP, OnEditgrpNewgroup)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -52,6 +55,50 @@ BOOL CEditGroupsDlg::OnInitDialog()
 
 	m_Tree.DeleteAllItems();
 	m_Tree.AddChildren(NULL, NULL);
-	
-	return TRUE;
+
+  return TRUE;
+}
+
+void CEditGroupsDlg::OnEditgrpNewgroup() 
+{
+  HTREEITEM hItem, hParent = NULL;
+  Group *pGroup, *pParent = NULL;
+  TVITEM item;
+  
+  hItem = m_Tree.GetSelectedItem ();
+
+  if (hItem != NULL)
+  {
+    item.hItem = hItem;
+    item.mask = TVIF_HANDLE | TVIF_PARAM;
+
+    if (m_Tree.GetItem (&item))
+    {
+      if (item.lParam < 0xFFFF)
+        hParent = m_Tree.GetParentItem (hItem);
+      else
+        hParent = hItem;
+    }
+  }
+
+  if (hParent)
+  {
+    item.hItem = hParent;
+    item.mask = TVIF_HANDLE | TVIF_PARAM;
+
+    if (m_Tree.GetItem (&item))
+      pParent = m_Tree.opts->groups[item.lParam - 0xFFFF];
+  }
+
+  pGroup = project->AddGroup (NULL, pParent, 0, 0, 0);
+
+  m_Tree.opts->groupcount++;
+  m_Tree.opts->groups = (Group**)realloc(m_Tree.opts->groups, m_Tree.opts->groupcount*sizeof(Group*));
+  m_Tree.opts->groupsgroups = (Group**)realloc(m_Tree.opts->groupsgroups, m_Tree.opts->groupcount*sizeof(Group*));
+
+  m_Tree.opts->groups[m_Tree.opts->groupcount-1] = pGroup;
+  m_Tree.opts->groupsgroups[m_Tree.opts->groupcount-1] = pParent;
+
+  m_Tree.DeleteAllItems();
+	m_Tree.AddChildren(NULL, NULL);
 }

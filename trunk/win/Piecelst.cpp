@@ -20,18 +20,29 @@ static char THIS_FILE[] = __FILE__;
 
 static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamSort)
 {
-	if ((lP1 < 0) || (lP2 < 0)) return 0;
+	int ret;
 
-	if (lParamSort == 0)
-		return strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
+	if ((lP1 < 0) || (lP2 < 0))
+		return 0;
 
-	return strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
+	if ((lParamSort & ~0xF0) == 0)
+		ret = strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
+	else
+		ret = strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
+
+	if (lParamSort & 0xF0)
+		return ret;
+	else
+		return -ret;
 }
 
 CPiecesList::CPiecesList()
 {
 	// TODO: Load from registry
 	memset(m_nLastPieces, 0, sizeof(m_nLastPieces));
+
+	m_nSortedCol = 0;
+	m_bAscending = FALSE;
 }
 
 CPiecesList::~CPiecesList()
@@ -56,7 +67,22 @@ END_MESSAGE_MAP()
 void CPiecesList::OnColumnclick(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	SortItems((PFNLVCOMPARE)ListViewCompareProc, pNMListView->iSubItem);
+
+	// set the sort order.
+	if (pNMListView->iSubItem == m_nSortedCol)
+		m_bAscending = !m_bAscending;
+	else
+		m_bAscending = TRUE;
+
+	// save the column index.
+	m_nSortedCol = pNMListView->iSubItem;
+
+	if (m_bAscending)
+		SortItems((PFNLVCOMPARE)ListViewCompareProc, m_nSortedCol);
+	else
+		SortItems((PFNLVCOMPARE)ListViewCompareProc, m_nSortedCol|0xF0);
+
+	m_HeaderCtrl.SetSortImage(m_nSortedCol, m_bAscending);
 	*pResult = 0;
 }
 
@@ -120,6 +146,12 @@ void CPiecesList::UpdateList()
 			SetItemText(idx, 1, tmp2);
 		}
 	}
+
+	if (m_bAscending)
+		SortItems((PFNLVCOMPARE)ListViewCompareProc, m_nSortedCol);
+	else
+		SortItems((PFNLVCOMPARE)ListViewCompareProc, m_nSortedCol|0xF0);
+
 	EnsureVisible(m_nLastPieces[pBar->m_nCurGroup], FALSE);
 	SetItemState (m_nLastPieces[pBar->m_nCurGroup], LVIS_SELECTED | LVIS_FOCUSED , LVIS_SELECTED | LVIS_FOCUSED);
 	SetRedraw (TRUE);
@@ -208,9 +240,9 @@ int CPiecesList::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
+
 	m_TitleTip.Create(this);
-	
+
 	return 0;
 }
 
@@ -226,4 +258,15 @@ void CPiecesList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 	else
 		CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CPiecesList::SubclassHeader()
+{
+	// Get the window handle to the existing header control.
+	HWND hWnd = GetDlgItem(0)->GetSafeHwnd();
+	ASSERT(hWnd);
+
+	// subclass the header control.
+	m_HeaderCtrl.SubclassWindow(hWnd);
+	m_HeaderCtrl.SetSortImage(0, FALSE);
 }

@@ -683,6 +683,7 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		CRect(0,0,0,0), this, IDW_PIECESLIST);
 
 	m_wndPiecesList.InsertColumn(0, "Description", LVCFMT_LEFT, 129, 0);
+	m_wndPiecesList.SubclassHeader();
 	if (m_bNumbers)
 		m_wndPiecesList.InsertColumn(1, "Number", LVCFMT_LEFT, 60, 1);
 

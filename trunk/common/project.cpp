@@ -26,6 +26,7 @@
 #include "curve.h"
 #include "mainwnd.h"
 #include "view.h"
+#include "library.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p, int i)
@@ -74,19 +75,15 @@ static LC_VIEWPORT viewports[14] = {
 
 Project::Project()
 {
+	int i;
+
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
-	m_pPieceIdx = NULL;
-	m_nPieceCount = 0;
-	m_pTextures = NULL;
-	m_nTextureCount = 0;
 	m_pPieces = NULL;
 	m_pCameras = NULL;
 	m_pLights = NULL;
 	m_pGroups = NULL;
-	m_pMovedReference = NULL;
-	m_nMovedCount = 0;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	m_nGridList = 0;
@@ -98,12 +95,11 @@ Project::Project()
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
-        if (messenger == NULL)
-          messenger = new Messenger ();
-        messenger->AddRef ();
+  if (messenger == NULL)
+    messenger = new Messenger ();
+  messenger->AddRef ();
 
-	int i;
-	for (i = 0; i < LC_CONNECTIONS; i++)
+  for (i = 0; i < LC_CONNECTIONS; i++)
 	{
 		m_pConnections[i].entries = NULL;
 		m_pConnections[i].numentries = 0;
@@ -111,6 +107,8 @@ Project::Project()
 
 	for (i = 0; i < 10; i++)
 		m_pClipboard[i] = NULL;
+
+  m_pLibrary = new PiecesLibrary ();
 }
 
 Project::~Project()
@@ -124,25 +122,6 @@ Project::~Project()
     m_pTrackFile = NULL;
   }
 
-	if (m_pPieceIdx != NULL)
-	{
-		PieceInfo* pInfo;
-		for (pInfo = m_pPieceIdx; m_nPieceCount--; pInfo++)
-			pInfo->~PieceInfo();
-		delete [] m_pPieceIdx;
-	}
-
-	if (m_pTextures != NULL)
-	{
-		Texture* pTexture;
-		for (pTexture = m_pTextures; m_nTextureCount--; pTexture++)
-			pTexture->~Texture();
-		delete [] m_pTextures;
-	}
-
-	if (m_pMovedReference != NULL)
-		free(m_pMovedReference);
-
 	for (int i = 0; i < 10; i++)
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
@@ -151,6 +130,7 @@ Project::~Project()
 
 	delete m_pTerrain;
 	delete m_pBackground;
+  delete m_pLibrary;
 }
 
 
@@ -290,11 +270,11 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 
   // if the user specified a library, try to load it first
   if (libpath != NULL)
-    loaded = LoadPieceLibrary (libpath);
+    loaded = m_pLibrary->Load (libpath);
 
   // if we couldn't find a library, try the executable path
   if (!loaded)
-    loaded = LoadPieceLibrary (binpath);
+    loaded = m_pLibrary->Load (binpath);
 
   if (!loaded)
   {
@@ -428,118 +408,6 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
     OnNewDocument();
 
   return true;
-}
-
-// Load the piece library
-bool Project::LoadPieceLibrary (char *libpath)
-{
-  FileDisk idx;
-  char filename[LC_MAXPATH];
-  lcuint8 version;
-  lcuint16 count, movedcount;
-  lcuint32 binsize;
-  Texture* pTexture;
-  int i;
-
-  strcpy (m_LibraryPath, libpath);
-
-  // Make sure that the path ends with a '/'
-  i = strlen(m_LibraryPath)-1;
-  if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
-    strcat(m_LibraryPath, "/");
-
-  // Read the piece library index.
-  strcpy (filename, m_LibraryPath);
-  strcat (filename, "pieces.idx");
-
-  if (!idx.Open (filename, "rb"))
-    return false;
-
-  idx.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
-  idx.ReadShort (&movedcount, 1);
-  idx.ReadLong (&binsize, 1);
-  idx.ReadShort (&count, 1);
-  idx.Seek (32, SEEK_SET);
-  idx.ReadByte (&version, 1);
-
-  if ((version != 3) || (count == 0))
-  {
-    idx.Close();
-    return false;
-  }
-  idx.Seek (34, SEEK_SET); // skip update byte
-
-  // TODO: check .bin file size.
-
-  // Load piece indexes
-  delete [] m_pPieceIdx;
-  m_pPieceIdx = new PieceInfo[count];
-  m_nPieceCount = count;
-
-  // workaround for VC++ error C2538: new : cannot specify initializer for arrays
-  for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
-    pElements->LoadIndex (idx);
-
-  // Load moved files reference.
-  if (m_pMovedReference != NULL)
-    free(m_pMovedReference);
-  m_pMovedReference = (char*)malloc(18*movedcount);
-  memset (m_pMovedReference, 0, 18*movedcount);
-  m_nMovedCount = movedcount;
-
-  for (i = 0; i < movedcount; i++)
-  {
-    idx.Read (&m_pMovedReference[i*18], 8);
-    idx.Read (&m_pMovedReference[i*18+9], 8);
-  }
-
-  idx.Close();
-
-	// TODO: Load group configuration here
-
-	// Read the texture index.
-	strcpy(filename, m_LibraryPath);
-	strcat(filename, "textures.idx");
-
-	if (m_pTextures != NULL)
-	{
-		// call the destructors
-          //		for (pTexture = m_pTextures; m_nTextureCount--; pTexture++)
-          //			pTexture->~Texture();
-		delete [] m_pTextures;
-	
-		m_pTextures = NULL;
-		m_nTextureCount = 0;
-	}
-
-	if (!idx.Open(filename, "rb"))
-		return false;
-
-	idx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
-	idx.ReadLong (&binsize, 1);
-	idx.ReadShort (&count, 1);
-	idx.Seek(32, SEEK_SET);
-	idx.ReadByte (&version, 1);
-
-	if ((version != 1) || (count == 0))
-	{
-		idx.Close();
-		return false;
-	}
-	idx.Seek(34, SEEK_SET); // skip update byte
-
-	// TODO: check .bin file size.
-
-	m_pTextures = new Texture[count];
-	m_nTextureCount = count;
-	memset(m_pTextures, 0, count * sizeof(Texture));
-
-	for (pTexture = m_pTextures; count--; pTexture++)
-		pTexture->LoadIndex(&idx);
-
-	idx.Close();
-
-	return true;
 }
 
 void Project::SetTitle(const char* lpszTitle)
@@ -839,7 +707,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			char name[9];
 			Piece* pPiece = new Piece(NULL);
 			pPiece->FileLoad(*file, name);
-			PieceInfo* pInfo = FindPieceInfo(name);
+			PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
 			if (pInfo)
 			{
 				pPiece->SetPieceInfo(pInfo);
@@ -878,7 +746,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
 
-			PieceInfo* pInfo = FindPieceInfo(name);
+			PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
 			if (pInfo != NULL)
 			{
 				Piece* pPiece = new Piece(pInfo);
@@ -1369,7 +1237,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				char name[9];
 				strcpy(name, tmp);
 
-				PieceInfo* pInfo = FindPieceInfo(name);
+				PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
 				if (pInfo != NULL)
 				{
 					float x, y, z, rot[4];
@@ -2055,7 +1923,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	m.SetTranslation(0,0,0);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_pTextures[0].MakeCurrent();
+	m_ScreenFont.MakeCurrent();
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_ALPHA_TEST);
 
@@ -2442,7 +2310,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 		if (!bBackground)
 			glEnable(GL_TEXTURE_2D);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_pTextures[0].MakeCurrent();
+		m_ScreenFont.MakeCurrent();
 		glEnable(GL_ALPHA_TEST);
 		glBegin(GL_QUADS);
 
@@ -2597,7 +2465,7 @@ void Project::RenderInitialize()
     char filename[LC_MAXPATH];
     FileDisk file;
 
-    strcpy (filename, m_LibraryPath);
+    strcpy (filename, m_pLibrary->GetLibraryPath ());
     strcat (filename, "sysfont.txf");
 
     if (file.Open (filename, "rb"))
@@ -2994,12 +2862,12 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext)
 	fputs("</tr>\n",f);
 
 	PieceInfo* pInfo;
-	for (int j = 0; j < m_nPieceCount; j++)
+	for (int j = 0; j < m_pLibrary->GetPieceCount (); j++)
 	{
 		bool Add = false;
 		int count[LC_MAXCOLORS];
 		memset (&count, 0, sizeof (count));
-		pInfo = &m_pPieceIdx[j];
+		pInfo = m_pLibrary->GetPieceInfo (j);
 
 		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		{
@@ -3613,10 +3481,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		  PieceInfo* pInfo;
 		  Piece* pPiece;
 		  FILE* f;
-		  char *conv = (char*)malloc (9*m_nPieceCount);
-		  char *flags = (char*)malloc (m_nPieceCount);
-		  memset (conv, 0, 9*m_nPieceCount);
-		  memset (flags, 0, m_nPieceCount);
+		  char *conv = (char*)malloc (9*m_pLibrary->GetPieceCount ());
+		  char *flags = (char*)malloc (m_pLibrary->GetPieceCount ());
+		  memset (conv, 0, 9*m_pLibrary->GetPieceCount());
+		  memset (flags, 0, m_pLibrary->GetPieceCount());
 
 		  // read LGEO conversion table
 		  if (strlen (opts.libpath))
@@ -3639,7 +3507,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		      u = (((unsigned char)(bt[3])|((unsigned short)(bt[2]) << 8))|
 			   (((unsigned long)(bt[1])) << 16)) + bt[0] * 16581375;
 		      sprintf(tmp, "%d", (int)u);
-		      pInfo = FindPieceInfo(tmp);
+		      pInfo = m_pLibrary->FindPieceInfo(tmp);
 
 		      fread(&tmp, 9, 1, f);
 		      if (tmp[8] != 0)
@@ -3647,9 +3515,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		      if (pInfo != NULL)
 		      {
-			int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
-			memcpy (&conv[idx*9], &tmp[1], 9);
-			flags[idx] = tmp[0];
+            int idx = m_pLibrary->GetPieceIndex (pInfo);
+            memcpy (&conv[idx*9], &tmp[1], 9);
+            flags[idx] = tmp[0];
 		      }
 		    }
 		    fclose (f);
@@ -3672,12 +3540,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		      if ((tmp[u] == 0) && (u != 0))
 		      {
 			u = 0;
-			pInfo = FindPieceInfo(tmp);
+			pInfo = m_pLibrary->FindPieceInfo(tmp);
 			fread(&tmp, 8, 1, f);
 
 			if (pInfo != NULL)
 			{
-			  int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			  int idx = m_pLibrary->GetPieceIndex (pInfo);
 			  memcpy(&conv[idx*9], tmp, 9);
 			}
 		      }
@@ -3709,7 +3577,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		      if (pNext == pPiece)
 		      {
-			int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			int idx = m_pLibrary->GetPieceIndex (pInfo);
 			char pat[] = "patterns/";
 			if (conv[idx*9+1] != 'p')
 			  strcpy(pat, "");
@@ -3752,7 +3620,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
 				pInfo = pPiece->GetPieceInfo();
-				int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+				int idx = m_pLibrary->GetPieceIndex (pInfo);
 				if (conv[idx*9] != 0)
 					continue;
 
@@ -3907,7 +3775,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 			  float fl[12], pos[3], rot[4];
 			  char name[20];
-			  int idx = (((char*)pPiece->GetPieceInfo() - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			  int idx = m_pLibrary->GetPieceIndex (pPiece->GetPieceInfo ());
 
 			  if (conv[idx*9] == 0)
 			  {
@@ -4058,16 +3926,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			strcpy(opts.strComments, m_strComments);
 			opts.strFilename = m_strPathName;
 
-			opts.lines = m_nPieceCount;
-			opts.count = (unsigned short*)malloc(m_nPieceCount*LC_MAXCOLORS*sizeof(unsigned short));
-			memset (opts.count, 0, m_nPieceCount*LC_MAXCOLORS*sizeof(unsigned short));
-			opts.names = (char**)malloc(m_nPieceCount*sizeof(char*));
-			for (int i = 0; i < m_nPieceCount; i++)
-				opts.names[i] = m_pPieceIdx[i].m_strDescription;
+			opts.lines = m_pLibrary->GetPieceCount();
+			opts.count = (unsigned short*)malloc(m_pLibrary->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
+			memset (opts.count, 0, m_pLibrary->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
+			opts.names = (char**)malloc(m_pLibrary->GetPieceCount()*sizeof(char*));
+			for (int i = 0; i < m_pLibrary->GetPieceCount(); i++)
+				opts.names[i] = m_pLibrary->GetPieceInfo (i)->m_strDescription;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				int idx = (((char*)pPiece->GetPieceInfo() - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+				int idx = m_pLibrary->GetPieceIndex (pPiece->GetPieceInfo ());
 				opts.count[idx*LC_MAXCOLORS+pPiece->GetColor()]++;
 			}
 
@@ -4295,7 +4163,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				char name[9];
 				Piece* pPiece = new Piece(NULL);
 				pPiece->FileLoad(*file, name);
-				PieceInfo* pInfo = FindPieceInfo(name);
+				PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
 				if (pInfo)
 				{
 					pPiece->SetPieceInfo(pInfo);
@@ -5879,11 +5747,6 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 }
 
-PieceInfo* Project::GetPieceInfo(int index)
-{
-	return &m_pPieceIdx[index];
-}
-
 Camera* Project::GetCamera(int i)
 {
 	Camera* pCamera;
@@ -5941,40 +5804,6 @@ void Project::GetFocusPosition(float* pos)
 	// TODO: light
 
 	pos[0] = pos[1] = pos[2] = 0.0f;
-}
-
-Texture* Project::FindTexture (const char* name)
-{
-  for (int i = 0; i < m_nTextureCount; i++)
-    if (!strcmp (name, m_pTextures[i].m_strName))
-      return &m_pTextures[i];
-
-  return NULL;
-}
-
-// Remeber to make 'name' uppercase.
-PieceInfo* Project::FindPieceInfo (const char* name) const
-{
-	PieceInfo* pInfo;
-	int i;
-
-	for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
-		if (!strcmp (name, pInfo->m_strName))
-			return pInfo;
-
-	for (i = 0; i < m_nMovedCount; i++)
-		if (!strcmp(&m_pMovedReference[i*18], name))
-		{
-			char* tmp = &m_pMovedReference[i*18+9];
-
-			for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
-				if (!strcmp (tmp, pInfo->m_strName))
-					return pInfo;
-
-			break; // something went wrong.
-		}
-
-	return NULL;
 }
 
 void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine)
@@ -6270,12 +6099,12 @@ void Project::SnapPoint (float *point, float *reminder) const
 
 	if (m_nSnap & LC_DRAW_SNAP_Z)
 	{
-		i = (int)(point[2]/0.4f);
+		i = (int)(point[2]/0.32f);
 
     if (reminder != NULL)
-      reminder[2] = point[2] - (0.4f * i);
+      reminder[2] = point[2] - (0.32f * i);
 
-		point[2] = 0.4f * i;
+		point[2] = 0.32f * i;
 	}
 }
 

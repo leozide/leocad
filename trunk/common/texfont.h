@@ -4,6 +4,8 @@
 class File;
 class Texture;
 
+#include "texture.h"
+
 class TexFont
 {
 public:
@@ -12,6 +14,8 @@ public:
 
   bool IsLoaded () const
     { return m_bLoaded; }
+  void MakeCurrent ()
+    { if (m_bLoaded) m_pTexture->MakeCurrent (); }
 
   bool FileLoad (File& file);
   void PrintText (float left, float top, const char* text) const;

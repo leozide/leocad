@@ -12,6 +12,7 @@
 #include "project.h"
 #include "system.h"
 #include "matrix.h"
+#include "library.h"
 
 // =============================================================================
 // Static variables
@@ -168,7 +169,7 @@ MinifigWizard::MinifigWizard (GLWindow *share)
     m_Colors[i] = colors[i];
     m_Angles[i] = 0;
 
-    m_Info[i] = project->FindPieceInfo (pieces[i]);
+    m_Info[i] = project->GetPiecesLibrary ()->FindPieceInfo (pieces[i]);
     if (m_Info[i] != NULL)
       m_Info[i]->AddRef();
   }
@@ -612,7 +613,7 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
   {
     PieceInfo* piece_info;
 
-    piece_info = project->FindPieceInfo (mfw_pieceinfo[i].name);
+    piece_info = project->GetPiecesLibrary ()->FindPieceInfo (mfw_pieceinfo[i].name);
     if (piece_info == NULL)
       continue;
 
@@ -695,7 +696,7 @@ void MinifigWizard::ChangePiece (int type, const char *desc)
   {
     if (strcmp (desc, mfw_pieceinfo[j].description) == 0)
     {
-      piece_info = project->FindPieceInfo (mfw_pieceinfo[j].name);
+      piece_info = project->GetPiecesLibrary ()->FindPieceInfo (mfw_pieceinfo[j].name);
       if (piece_info == NULL)
 	continue;
 
@@ -807,7 +808,7 @@ bool MinifigWizard::LoadMinifig (const char* name)
 
     endptr = strchr (ptr, ' ');
     *endptr = '\0';
-    m_Info[j] = project->FindPieceInfo (ptr);
+    m_Info[j] = project->GetPiecesLibrary ()->FindPieceInfo (ptr);
     *endptr = ' ';
     ptr = endptr;
 

@@ -1,6 +1,41 @@
 #ifndef _LIBRARY_H_
 #define _LIBRARY_H_
 
+#include "defines.h"
+
+class Texture;
+class PieceInfo;
+
+class PiecesLibrary
+{
+public:
+  PiecesLibrary ();
+  ~PiecesLibrary ();
+
+  const char* GetLibraryPath() const
+    { return m_LibraryPath; }
+  int GetPieceCount () const
+    { return m_nPieceCount; }
+
+  bool Load (const char* libpath);
+  void Unload ();
+
+  PieceInfo* FindPieceInfo (const char* name) const;
+  PieceInfo* GetPieceInfo (int index) const;
+  int GetPieceIndex (PieceInfo *pInfo) const;
+  Texture* FindTexture (const char* name) const;
+
+protected:
+  char m_LibraryPath[LC_MAXPATH];	// path to the library files
+
+	int m_nMovedCount;       // number of moved pieces
+  char* m_pMovedReference; // moved pieces list
+	int m_nPieceCount;       // number of pieces
+	PieceInfo* m_pPieceIdx;	 // pieces array
+	int m_nTextureCount;     // number of textures
+	Texture* m_pTextures;    // textures array
+};
+
 #include "basewnd.h"
 
 typedef enum {

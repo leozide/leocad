@@ -2884,7 +2884,7 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 		glReadPixels (0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 		for (int row = 0; row < height; row++)
-		  memcpy ((unsigned char*)image->bits + (row*width), buf + ((height-row-1)*width), width);
+		  memcpy ((unsigned char*)image->bits + (row*width*3), buf + ((height-row-1)*width*3), width*3);
 
 		images[i-from] = image;
 	}
@@ -3475,7 +3475,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						glReadPixels (0, 0, cx, cy, GL_RGB,GL_UNSIGNED_BYTE, buf);
 
 						for (int row = 0; row < cy; row++)
-						  memcpy ((unsigned char*)image->bits + (row*cx), buf + ((cy-row-1)*cx), cx);
+						  memcpy ((unsigned char*)image->bits + (row*cx*3), buf + ((cy-row-1)*cx*3), cx*3);
 
 						sprintf(fn, "%s%s%s", opts.path, pInfo->m_strName, ext);
 						SaveImage(fn, image, &opts.imdlg.imopts);

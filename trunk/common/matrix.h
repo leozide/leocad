@@ -28,10 +28,11 @@ class Matrix
   void ToEulerAngles (float *rot) const;
   void ToAxisAngle (float *rot) const;
 
-  void LoadIdentity ();
-  void Translate (float x, float y, float z);
-  void Multiply (Matrix& m1, Matrix& m2);
-  bool Invert ();
+  void LoadIdentity();
+  void Translate(float x, float y, float z);
+  void Multiply(Matrix& m1, Matrix& m2);
+  bool Invert();
+	void Transpose3();
 
 
 

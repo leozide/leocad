@@ -22,7 +22,6 @@ ifeq ($(shell uname), Linux)
 
 OS 	   := -DLC_LINUX
 OSDIR 	   := linux
-PREFIX     := /usr/local
 GTK_CONFIG := gtk-config
 
 endif
@@ -33,7 +32,6 @@ ifeq ($(shell uname), FreeBSD)
 
 OS 	   := -DLC_LINUX
 OSDIR 	   := linux
-PREFIX     := /usr/local
 GTK_CONFIG := gtk12-config
 CPPFLAGS   += -L/usr/local/lib
 
@@ -48,7 +46,20 @@ OSDIR 	:= beos
 
 endif
 
-.PHONY: config
+### Default directory
+
+ifeq ($(PREFIX), )
+PREFIX := /usr/local
+endif
+
+.PHONY: config config-help
+
+config-help:
+	@echo "This target attempts to detect your system settings,"
+	@echo "it will create $(OSDIR)/config.mk and $(OSDIR)/config.h"
+	@echo "Valid parameters and their default values are:"
+	@echo "  PREFIX=/usr/local"
+	@echo "  DESTDIR="
 
 ### Automatic configuration
 
@@ -57,6 +68,9 @@ config:
 
 	@echo "### LeoCAD configuration" > $(OSDIR)/config.mk
 	@echo "### Auto-generated file, DO NOT EDIT" >> $(OSDIR)/config.mk
+	@echo "" >> $(OSDIR)/config.mk
+	@echo "PREFIX := $(PREFIX)" >> $(OSDIR)/config.mk;
+	@echo "DESTDIR := $(DESTDIR)" >> $(OSDIR)/config.mk;
 	@echo "" >> $(OSDIR)/config.mk
 
 	@echo "//" > $(OSDIR)/config.h

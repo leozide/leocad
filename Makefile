@@ -45,7 +45,7 @@ bin:
 
 ### include the C/C++ include
 ###   dependencies
-ifeq ($(findstring $(MAKECMDGOALS), config clean veryclean spotless), )
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean spotless), )
 -include $(OBJ:.o=.d)
 endif
 
@@ -103,8 +103,10 @@ arch:
 	mkdir arch
 
 install: $(BIN)
-	install -c -m 0755 $(BIN) $(PREFIX)/bin
-	install -c -m 0644 docs/leocad.1 $(PREFIX)/man/man1
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -d $(DESTDIR)$(PREFIX)/share/man/man1
+	install -c -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin/
+	install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
 
 binary: binary-zip binary-tgz
 

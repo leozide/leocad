@@ -5,6 +5,7 @@
 #ifndef _PIECEINF_H_
 #define _PIECEINF_H_
 
+#include <stdio.h>
 #ifndef GLuint
 #include "opengl.h"
 #endif

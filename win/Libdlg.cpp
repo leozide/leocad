@@ -306,32 +306,38 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			CString filename;
 			LC_LDRAW_PIECE piece;
 
-			CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+			CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 				"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",this);
 			dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH);
+      dlg.m_ofn.nMaxFile = _MAX_PATH;
 
-			if (dlg.DoModal() != IDOK)
+      if (dlg.DoModal() != IDOK)
 				return TRUE;
-			filename.ReleaseBuffer();
 
-			SystemDoWaitCursor(1);
+      POSITION pos = dlg.GetStartPosition ();
 
-			if (ReadLDrawPiece(filename, &piece))
-			{
-				if (project->FindPieceInfo(piece.name) != NULL)
-					AfxMessageBox("Piece already exists in the library !", MB_OK|MB_ICONINFORMATION);
+      while (pos != NULL)
+      {
+        CString str = dlg.GetNextPathName (pos);
 
-				if (SaveLDrawPiece(&piece))
-					AfxMessageBox("Piece successfully imported.", MB_OK|MB_ICONINFORMATION);
-				else
-					AfxMessageBox("Error saving library.", MB_OK|MB_ICONINFORMATION);
-			}
-			else
-				AfxMessageBox("Error reading file", MB_OK|MB_ICONINFORMATION);
+  			SystemDoWaitCursor(1);
 
-			SystemDoWaitCursor(-1);
-			FreeLDrawPiece(&piece);
+	  		if (ReadLDrawPiece(str, &piece))
+		  	{
+			  	if (project->FindPieceInfo(piece.name) != NULL)
+				  	AfxMessageBox("Piece already exists in the library !", MB_OK|MB_ICONINFORMATION);
 
+  				if (SaveLDrawPiece(&piece))
+	  				AfxMessageBox("Piece successfully imported.", MB_OK|MB_ICONINFORMATION);
+		  		else
+			  		AfxMessageBox("Error saving library.", MB_OK|MB_ICONINFORMATION);
+  			}
+	  		else
+		  		AfxMessageBox("Error reading file", MB_OK|MB_ICONINFORMATION);
+
+  			SystemDoWaitCursor(-1);
+	  		FreeLDrawPiece(&piece);
+      }
 			return TRUE;
 		}
 

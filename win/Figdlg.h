@@ -56,6 +56,7 @@ protected:
 
 	afx_msg LONG OnColorSelEndOK(UINT lParam, LONG wParam);
 	void OnPieceSelEndOK(UINT nID);
+	void OnChangeAngle(UINT nID);
 
 	// Generated message map functions
 	//{{AFX_MSG(CMinifigDlg)

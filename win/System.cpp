@@ -309,14 +309,24 @@ void SystemDoWaitCursor(int nCode)
 }
 
 void Sys_BeginWait ()
+
 {
+
   SystemDoWaitCursor (1);
+
 }
 
+
+
 void Sys_EndWait ()
+
 {
+
   SystemDoWaitCursor (-1);
+
 }
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Profile Access
@@ -1030,9 +1040,14 @@ int SystemDoMessageBox(char* prompt, int nMode)
 }
 
 int Sys_MessageBox (const char* text, const char* caption, int type)
+
 {
+
 	return AfxMessageBox(text, type);
+
 }
+
+
 
 extern BOOL AFXAPI AfxFullPath(LPTSTR lpszPathOut, LPCTSTR lpszFileIn);
 
@@ -1479,14 +1494,6 @@ void SystemReleaseMouse()
 	ReleaseCapture();
 }
 
-// if (type == 255) -> don't change current type
-void SystemUpdateFocus(void* object, unsigned char type)
-{
-	CWnd* pFrame = AfxGetMainWnd();
-	if (pFrame != NULL)
-		pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)object, type);
-}
-
 void SystemExportClipboard(File* clip)
 {
 	if (clip == NULL)
@@ -1539,10 +1546,12 @@ bool Sys_KeyDown (int key)
   return GetKeyState (KEY_CONTROL) < 0;
 }
 
+
 void SystemPumpMessages()
 {
 	MSG msg;
-	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+
+  while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);

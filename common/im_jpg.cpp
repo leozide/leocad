@@ -1,7 +1,11 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "config.h"
 #include "image.h"
+
+#ifdef LC_HAVE_JPEGLIB
+
 extern "C" {
 #include <jpeglib.h>
 }
@@ -186,3 +190,5 @@ bool SaveJPG (char* filename, LC_IMAGE* image, int quality, bool progressive)
 
   return true;
 }
+
+#endif // LC_HAVE_JPEGLIB

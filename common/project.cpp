@@ -6220,36 +6220,43 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		} break;
 
 		case 'F':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_FRONT);
 			ret = true;
 		} break;
 		case 'B':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_BACK); break;
 			ret = true;
 		} break;
 		case 'T':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_TOP); break;
 			ret = true;
 		} break;
 		case 'U':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_UNDER); break;
 			ret = true;
 		} break;
 		case 'L':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_LEFT); break;
 			ret = true;
 		} break;
 		case 'R':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_RIGHT); break;
 			ret = true;
 		} break;
 		case 'M':
+		if (!bControl)
 		{
 			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_MAIN); break;
 			ret = true;

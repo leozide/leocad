@@ -900,7 +900,7 @@ typedef struct
   void* data;
   GtkWidget *single, *multiple, *index;
   GtkWidget *list_end, *list_step, *images;
-  GtkWidget *highlight, *directory;
+  GtkWidget *highlight, *htmlext, *directory;
 } LC_HTMLDLG_STRUCT;
 
 static void htmldlg_ok(GtkWidget *widget, gpointer data)
@@ -914,6 +914,7 @@ static void htmldlg_ok(GtkWidget *widget, gpointer data)
   opts->listend = (GTK_TOGGLE_BUTTON (s->list_end)->active) ? true : false;
   opts->liststep = (GTK_TOGGLE_BUTTON (s->list_step)->active) ? true : false;
   opts->highlight = (GTK_TOGGLE_BUTTON (s->highlight)->active) ? true : false;
+  opts->htmlext = (GTK_TOGGLE_BUTTON (s->htmlext)->active) ? true : false;
   strcpy(opts->path, gtk_entry_get_text (GTK_ENTRY (s->directory)));
 
   *cur_ret = LC_OK;
@@ -1056,6 +1057,10 @@ int htmldlg_execute (void* param)
   gtk_widget_show (s.highlight);
   gtk_box_pack_start (GTK_BOX (vbox), s.highlight, FALSE, TRUE, 0);
 
+  s.htmlext = gtk_check_button_new_with_label ("Save files with .html extension");
+  gtk_widget_show (s.htmlext);
+  gtk_box_pack_start (GTK_BOX (vbox), s.htmlext, FALSE, TRUE, 0);
+
   hbox = gtk_hbox_new (FALSE, 5);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
@@ -1086,6 +1091,7 @@ int htmldlg_execute (void* param)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.list_end), opts->listend);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.list_step), opts->liststep);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.highlight), opts->highlight);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.htmlext), opts->htmlext);
 
   gtk_toggle_button_toggled (GTK_TOGGLE_BUTTON (s.single));
   gtk_toggle_button_toggled (GTK_TOGGLE_BUTTON (s.list_step));

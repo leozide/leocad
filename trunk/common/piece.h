@@ -121,7 +121,7 @@ public:
 
 		if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
 		{
-			glColor3fv(FlatColorArray[m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+			glColor3ubv(FlatColorArray[m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED]);
 			glLineWidth(2*fLineWidth);
 			glPushAttrib(GL_POLYGON_BIT);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -131,7 +131,7 @@ public:
 		}
 		else
 		{
-			glColor3fv (FlatColorArray[m_nColor]);
+			glColor3ubv(FlatColorArray[m_nColor]);
 			glCallList(m_nBoxList);
 		}
 		glPopMatrix();

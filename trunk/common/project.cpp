@@ -3807,7 +3807,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			FILE* mat = fopen(buf, "wt");
 			fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
 			for (i = 0; i < LC_MAXCOLORS; i++)
-				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", altcolornames[i], FlatColorArray[i][0], FlatColorArray[i][1], FlatColorArray[i][2]);
+				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", altcolornames[i], (float)FlatColorArray[i][0]/255, (float)FlatColorArray[i][1]/255, (float)FlatColorArray[i][2]/255);
 			fclose(mat);
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)

@@ -1584,7 +1584,7 @@ void PieceInfo::RenderPiece(int nColor)
 		m_pTextures[sh].texture->MakeCurrent();
 
 		if (m_pTextures[sh].color == LC_COL_DEFAULT)
-			glColor3fv(FlatColorArray[nColor]);
+			glColor3ubv(FlatColorArray[nColor]);
 		if (nColor > 13 && nColor < 22)
 		{
 //			glEnable (GL_POLYGON_STIPPLE);
@@ -1634,7 +1634,7 @@ void PieceInfo::RenderPiece(int nColor)
 					curcolor = (unsigned short)*info;
 				info++;
 
-				glColor3fv(FlatColorArray[curcolor]);
+				glColor3ubv(FlatColorArray[curcolor]);
 				if (curcolor > 13 && curcolor < 22)
 				{
 //					glEnable (GL_POLYGON_STIPPLE);
@@ -1675,7 +1675,7 @@ void PieceInfo::RenderPiece(int nColor)
 					curcolor = *info;
 				info++;
 
-				glColor3fv(FlatColorArray[curcolor]);
+				glColor3ubv(FlatColorArray[curcolor]);
 				if (curcolor > 13 && curcolor < 22)
 				{
 //					glEnable (GL_POLYGON_STIPPLE);

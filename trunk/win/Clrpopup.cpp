@@ -31,7 +31,7 @@ CColorPopup::CColorPopup()
 
 COLORREF CColorPopup::GetColor(int nIndex)
 {
-	return RGB(FlatColorArray[nIndex][0]*255, FlatColorArray[nIndex][1]*255, FlatColorArray[nIndex][2]*255);
+	return RGB(FlatColorArray[nIndex][0], FlatColorArray[nIndex][1], FlatColorArray[nIndex][2]);
 }
 
 CColorPopup::CColorPopup(CPoint p, COLORREF crColor, CWnd* pParentWnd, BOOL bDefaultText, BOOL bCustomText)
@@ -83,9 +83,9 @@ void CColorPopup::Initialise()
 
     for (int i = 0; i < NUM_COLORS; i++)
     {
-		pLogPalette->palPalEntry[i].peRed   = (BYTE)(FlatColorArray[i][0]*255);
-		pLogPalette->palPalEntry[i].peGreen = (BYTE)(FlatColorArray[i][1]*255);
-		pLogPalette->palPalEntry[i].peBlue  = (BYTE)(FlatColorArray[i][2]*255);
+		pLogPalette->palPalEntry[i].peRed   = FlatColorArray[i][0];
+		pLogPalette->palPalEntry[i].peGreen = FlatColorArray[i][1];
+		pLogPalette->palPalEntry[i].peBlue  = FlatColorArray[i][2];
 		pLogPalette->palPalEntry[i].peFlags = 0;
     }
 

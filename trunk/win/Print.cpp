@@ -286,7 +286,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3fv (FlatColorArray[project->GetCurrentColor()]);
+			glColor3ubv(FlatColorArray[project->GetCurrentColor()]);
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
@@ -678,7 +678,7 @@ static void PrintPiecesThread(void* pv)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3fv (FlatColorArray[project->m_nCurColor]);
+			glColor3ubv(FlatColorArray[project->m_nCurColor]);
 
 			PieceInfo* pInfo = project->GetPieceInfo(node->actual);
 			node = node->next;

@@ -20,68 +20,68 @@ const char* altcolornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"ClearBlue", "ClearLightBlue", "ClearYellow", "ClearWhite",
 	"LightGray", "Tan", "LightBrown", "LightPink", "Turquoise", "Silver" };
 
-float FlatColorArray[31][3] = {
-	{ 0.65f,0.1f, 0.1f },  // 0 - Red
-	{ 1.0f, 0.5f, 0.2f },  // 1 - Orange
-	{ 0.1f, 0.4f, 0.1f },  // 2 - Green
-	{ 0.3f, 0.6f, 0.3f },  // 3 - Light Green
-	{ 0.0f, 0.2f, 0.7f },  // 4 - Blue
-	{ 0.2f, 0.4f, 0.9f },  // 5 - Light Blue
-	{ 0.8f, 0.8f, 0.0f },  // 6 - Yellow
-	{ 0.95f,0.95f,0.95f},  // 7 - White
-	{ 0.33f,0.3f, 0.3f },  // 8 - Dark Gray
-	{ 0.2f, 0.2f, 0.2f },  // 9 - Black
-	{ 0.4f, 0.2f, 0.2f },  //10 - Brown
-	{ 0.7f, 0.3f, 0.6f },  //11 - Pink
-	{ 0.6f, 0.2f, 0.6f },  //12 - Purple
-	{ 0.9f, 0.7f, 0.2f },  //13 - Gold
-	{ 0.6f, 0.1f, 0.1f },  //14 - Clear Red
-	{ 1.0f, 0.6f, 0.3f },  //15 - Clear Orange
-	{ 0.1f, 0.4f, 0.1f },  //16 - Clear Green
-	{ 0.6f, 0.7f, 0.3f },  //17 - Clear Light Green
-	{ 0.0f, 0.0f, 0.5f },  //18 - Clear Blue
-	{ 0.2f, 0.4f, 0.9f },  //19 - Clear Light Blue
-	{ 0.9f, 0.9f, 0.0f },  //20 - Clear Yellow
-	{ 0.9f, 0.9f, 0.9f },  //21 - Clear White
-	{ 0.55f,0.55f,0.55f},  //22 - Light Gray
-	{ 0.8f, 0.8f, 0.7f },  //23 - Tan
-	{ 0.6f, 0.4f, 0.4f },  //24 - Light Brown
-	{ 0.9f, 0.7f, 0.9f },  //25 - Light Pink
-	{ 0.1f, 0.7f, 0.8f },  //26 - Turquoise
-	{ 0.8f, 0.8f, 0.8f },  //27 - Silver
-	{ 0.0f, 0.0f, 0.0f },  //28 - Edges
-	{ 0.9f, 0.3f, 0.4f },  //29 - Selected
-	{ 0.4f, 0.3f, 0.9f }}; //30 - Focused
+unsigned char FlatColorArray[31][3] = {
+	{ 166,  25,  25 },  // 0 - Red
+	{ 255, 127,  51 },  // 1 - Orange
+	{  25, 102,  25 },  // 2 - Green
+	{  76, 153,  76 },  // 3 - Light Green
+	{   0,  51, 178 },  // 4 - Blue
+	{  51, 102, 229 },  // 5 - Light Blue
+	{ 204, 204,   0 },  // 6 - Yellow
+	{ 242, 242, 242 },  // 7 - White
+	{  84,  76,  76 },  // 8 - Dark Gray
+	{  51,  51,  51 },  // 9 - Black
+	{ 102,  51,  51 },  //10 - Brown
+	{ 178,  76, 153 },  //11 - Pink
+	{ 153,  51, 153 },  //12 - Purple
+	{ 229, 178,  51 },  //13 - Gold
+	{ 153,  25,  25 },  //14 - Clear Red
+	{ 255, 153,  76 },  //15 - Clear Orange
+	{  25, 102,  25 },  //16 - Clear Green
+	{ 153, 178,  76 },  //17 - Clear Light Green
+	{   0,   0, 127 },  //18 - Clear Blue
+	{  51, 102, 229 },  //19 - Clear Light Blue
+	{ 229, 229,   0 },  //20 - Clear Yellow
+	{ 229, 229, 229 },  //21 - Clear White
+	{ 140, 140, 140 },  //22 - Light Gray
+	{ 204, 204, 178 },  //23 - Tan
+	{ 153, 102, 102 },  //24 - Light Brown
+	{ 229, 178, 229 },  //25 - Light Pink
+	{  25, 178, 204 },  //26 - Turquoise
+	{ 204, 204, 204 },  //27 - Silver
+	{   0,   0,   0 },  //28 - Edges
+	{ 229,  76, 102 },  //29 - Selected
+	{ 102,  76, 229 }}; //30 - Focused
 
-float ColorArray[31][4] = {
-	{ 0.65f,0.1f, 0.1f, 1.0f },  // 0 - Red
-	{ 1.0f, 0.5f, 0.2f, 1.0f },  // 1 - Orange
-	{ 0.1f, 0.4f, 0.1f, 1.0f },  // 2 - Green
-	{ 0.3f, 0.6f, 0.3f, 1.0f },  // 3 - Light Green
-	{ 0.0f, 0.2f, 0.7f, 1.0f },  // 4 - Blue
-	{ 0.2f, 0.4f, 0.9f, 1.0f },  // 5 - Light Blue
-	{ 0.8f, 0.8f, 0.0f, 1.0f },  // 6 - Yellow
-	{ 0.95f,0.95f,0.95f,1.0f },  // 7 - White
-	{ 0.3f, 0.3f, 0.3f, 1.0f },  // 8 - Dark Gray
-	{ 0.1f, 0.1f, 0.1f, 1.0f },  // 9 - Black
-	{ 0.4f, 0.2f, 0.2f, 1.0f },  //10 - Brown
-	{ 0.7f, 0.3f, 0.6f, 1.0f },  //11 - Pink
-	{ 0.6f, 0.2f, 0.6f, 1.0f },  //12 - Purple
-	{ 0.9f, 0.7f, 0.2f, 1.0f },  //13 - Gold
-	{ 0.6f, 0.1f, 0.1f, 0.6f },  //14 - Clear Red
-	{ 1.0f, 0.6f, 0.3f, 0.6f },  //15 - Clear Orange
-	{ 0.1f, 0.4f, 0.1f, 0.6f },  //16 - Clear Green
-	{ 0.6f, 0.7f, 0.3f, 0.6f },  //17 - Clear Light Green
-	{ 0.0f, 0.0f, 0.5f, 0.6f },  //18 - Clear Blue
-	{ 0.2f, 0.4f, 0.9f, 0.6f },  //19 - Clear Light Blue
-	{ 0.9f, 0.9f, 0.0f, 0.6f },  //20 - Clear Yellow
-	{ 0.9f, 0.9f, 0.9f, 0.6f },  //21 - Clear White
-	{ 0.5f, 0.5f, 0.5f, 1.0f },  //22 - Light Gray
-	{ 0.8f, 0.8f, 0.7f, 1.0f },  //23 - Tan
-	{ 0.6f, 0.4f, 0.4f, 1.0f },  //24 - Light Brown
-	{ 0.9f, 0.7f, 0.9f, 1.0f },  //25 - Light Pink
-	{ 0.1f, 0.7f, 0.8f, 1.0f },  //26 - Turquoise
-	{ 0.8f, 0.8f, 0.8f, 1.0f },  //27 - Silver
-	{ 0.2f, 0.2f, 0.2f, 1.0f },  //28 - Edges
-	{ 0.9f, 0.3f, 0.4f, 1.0f },  //29 - Selected
-	{ 0.4f, 0.3f, 0.9f, 1.0f }}; //30 - Focused
+unsigned char ColorArray[31][4] = {
+	{ 166,  25,  25, 255 },  // 0 - Red
+	{ 255, 127,  51, 255 },  // 1 - Orange
+	{  25, 102,  25, 255 },  // 2 - Green
+	{  76, 153,  76, 255 },  // 3 - Light Green
+	{   0,  51, 178, 255 },  // 4 - Blue
+	{  51, 102, 229, 255 },  // 5 - Light Blue
+	{ 204, 204,   0, 255 },  // 6 - Yellow
+	{ 242, 242, 242, 255 },  // 7 - White
+	{  76,  76,  76, 255 },  // 8 - Dark Gray
+	{  25,  25,  25, 255 },  // 9 - Black
+	{ 102,  51,  51, 255 },  //10 - Brown
+	{ 178,  76, 153, 255 },  //11 - Pink
+	{ 153,  51, 153, 255 },  //12 - Purple
+	{ 229, 178,  51, 255 },  //13 - Gold
+	{ 153,  25,  25, 153 },  //14 - Clear Red
+	{ 255, 153,  76, 153 },  //15 - Clear Orange
+	{  25, 102,  25, 153 },  //16 - Clear Green
+	{ 153, 178,  76, 153 },  //17 - Clear Light Green
+	{   0,   0, 127, 153 },  //18 - Clear Blue
+	{  51, 102, 229, 153 },  //19 - Clear Light Blue
+	{ 229, 229,   0, 153 },  //20 - Clear Yellow
+	{ 229, 229, 229, 153 },  //21 - Clear White
+	{ 127, 127, 127, 255 },  //22 - Light Gray
+	{ 204, 204, 178, 255 },  //23 - Tan
+	{ 153, 102, 102, 255 },  //24 - Light Brown
+	{ 229, 178, 229, 255 },  //25 - Light Pink
+	{  25, 178, 204, 255 },  //26 - Turquoise
+	{ 204, 204, 204, 255 },  //27 - Silver
+	{  51,  51,  51, 255 },  //28 - Edges
+	{ 229,  76, 102, 255 },  //29 - Selected
+	{ 102,  76, 229, 255 }}; //30 - Focused

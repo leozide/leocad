@@ -21,9 +21,10 @@
 #include "group.h"
 #include "main.h"
 #include "config.h"
+#include "message.h"
 
 // =============================================================================
-// Modal dialog functions
+// Modal dialog helper functions
 
 void dialog_button_callback (GtkWidget *widget, gpointer data)
 {
@@ -35,7 +36,7 @@ void dialog_button_callback (GtkWidget *widget, gpointer data)
   ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
 
   *loop = 0;
-  *ret = (int)data;
+  *ret = GPOINTER_TO_INT (data);
 }
 
 gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
@@ -48,6 +49,142 @@ gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
 
   return TRUE;
 }
+
+// =============================================================================
+// MessageBox
+
+int msgbox_execute (const char* text, const char *caption, int flags)
+{
+  GtkWidget *window, *w, *vbox, *hbox;
+  GtkAccelGroup *group;
+  int mode = (flags & LC_MB_TYPEMASK), ret, loop = 1;
+  guint tmp_key;
+
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
+  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+  gtk_window_set_title (GTK_WINDOW (window), caption);
+  gtk_container_border_width (GTK_CONTAINER (window), 10);
+  gtk_object_set_data (GTK_OBJECT (window), "loop", &loop);
+  gtk_object_set_data (GTK_OBJECT (window), "ret", &ret);
+  gtk_widget_realize (window);
+
+  group = gtk_accel_group_new ();
+  gtk_window_add_accel_group (GTK_WINDOW (window), group);
+
+  vbox = gtk_vbox_new (FALSE, 10);
+  gtk_container_add (GTK_CONTAINER (window), vbox);
+  gtk_widget_show (vbox);
+ 
+  w = gtk_label_new (text);
+  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
+  gtk_label_set_justify (GTK_LABEL (w), GTK_JUSTIFY_LEFT);
+  gtk_widget_show (w);
+ 
+  w = gtk_hseparator_new ();
+  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
+  gtk_widget_show (w);
+ 
+  hbox = gtk_hbox_new (FALSE, 10);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
+  gtk_widget_show (hbox);
+ 
+  if (mode == LC_MB_OK)
+  {
+    w = gtk_button_new_with_label ("Ok");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+    ret = LC_OK;
+  }
+  else if (mode == LC_MB_OKCANCEL)
+  {
+    w = gtk_button_new_with_label ("Ok");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+
+    w = gtk_button_new_with_label ("Cancel");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
+    gtk_widget_show (w);
+    ret = LC_CANCEL;
+  }
+  else if (mode == LC_MB_YESNOCANCEL)
+  {
+    w = gtk_button_new_with_label ("");
+    tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (w)->child), "_Yes");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+    gtk_window_set_focus (GTK_WINDOW (window), w);
+
+    w = gtk_button_new_with_label ("");
+    tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (w)->child), "_No");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    gtk_widget_show (w);
+
+    w = gtk_button_new_with_label ("");
+    tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (w)->child), "_Cancel");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, GDK_Escape, 0, (GtkAccelFlags)0);
+    gtk_widget_show (w);
+    ret = LC_CANCEL;
+  }
+  else /* if (mode == LC_MB_YESNO) */
+  {
+    w = gtk_button_new_with_label ("Yes");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+ 
+    w = gtk_button_new_with_label ("No");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
+    gtk_widget_show (w);
+    ret = LC_NO;
+  }
+
+  gtk_widget_show (window);
+  gtk_grab_add (window);
+
+  while (loop)
+    gtk_main_iteration ();
+
+  gtk_grab_remove (window);
+  gtk_widget_destroy (window);
+
+  return ret;
+}
+
+
+
+
+// =============================================================================
 
 
 
@@ -102,7 +239,7 @@ static bool read_float(GtkWidget* widget, float* value, float min_value, float m
   }
 
   sprintf (buf, "Please enter a value between %g and %g", min_value, max_value);
-  msgbox_execute (buf, LC_MB_OK | LC_MB_ICONERROR);
+  msgbox_execute (buf, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
   gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
 
   return false;
@@ -127,7 +264,7 @@ static bool read_int(GtkWidget* widget, int* value, int min_value, int max_value
   }
 
   sprintf (buf, "Please enter a value between %d and %d", min_value, max_value);
-  msgbox_execute (buf, LC_MB_OK | LC_MB_ICONERROR);
+  msgbox_execute (buf, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
   gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
 
   return false;
@@ -138,112 +275,6 @@ static void write_int(GtkWidget* widget, int value)
   char buf[16];
   sprintf (buf, "%d", value);
   gtk_entry_set_text (GTK_ENTRY (widget), buf);
-}
-
-// Message box (TODO: use the one in system.cpp)
-
-int msgbox_execute(char* text, int flags)
-{
-  GtkWidget *window, *w, *vbox, *hbox;
-  int mode = flags & LC_MB_TYPEMASK, ret;
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_window_set_title (GTK_WINDOW (window), "LeoCAD");
-  gtk_container_border_width (GTK_CONTAINER (window), 10);
-  gtk_widget_realize (window);
-
-  vbox = gtk_vbox_new (FALSE, 10);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
-  w = gtk_label_new (text);
-  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
-  gtk_label_set_justify (GTK_LABEL (w), GTK_JUSTIFY_LEFT);
-  gtk_widget_show (w);
-
-  w = gtk_hseparator_new ();
-  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
-  gtk_widget_show (w);
-
-  hbox = gtk_hbox_new (FALSE, 10);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
-  gtk_widget_show (hbox);
-
-  if (mode == LC_MB_OK)
-  {
-    w = gtk_button_new_with_label ("Ok");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_OK));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
-    ret = LC_OK;
-  }
-  else if (mode ==  LC_MB_OKCANCEL)
-  {
-    w = gtk_button_new_with_label ("Ok");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_OK));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
-
-    w = gtk_button_new_with_label ("Cancel");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-    gtk_widget_show (w); 
-    ret = LC_CANCEL;
-  }
-  else if (mode == LC_MB_YESNOCANCEL)
-  {
-    w = gtk_button_new_with_label ("Yes");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_YES));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
-
-    w = gtk_button_new_with_label ("No");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_NO));
-    gtk_widget_show (w);
-
-    w = gtk_button_new_with_label ("Cancel");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-    gtk_widget_show (w); 
-    ret = LC_CANCEL;
-  }
-  else /* if (mode == LC_MB_YESNO) */
-  {
-    w = gtk_button_new_with_label ("Yes");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_YES));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
-
-    w = gtk_button_new_with_label ("No");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-			GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_NO));
-    gtk_widget_show (w);
-    ret = LC_NO;
-  }
-
-  return dlg_domodal(window, ret);
 }
 
 // File Open/Save/Merge dialog
@@ -2839,3 +2870,141 @@ int librarydlg_execute (void *param)
 }
 
 #endif
+
+// =============================================================================
+// Modify Dialog
+
+static GtkWidget* modifydlg;
+
+static void modifydlg_update_list (Object *obj)
+{
+  GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (modifydlg), "clist"));
+
+  gtk_clist_freeze (clist);
+  gtk_clist_clear (clist);
+
+  if (obj != NULL)
+  for (int i = 0; i < obj->GetKeyTypeCount (); i++)
+  {
+    const LC_OBJECT_KEY_INFO* info = obj->GetKeyTypeInfo (i);
+    const float *value = obj->GetKeyTypeValue (i);
+    const char *text[2];
+    char buf[64], tmp[16];
+
+    text[0] = info->description;
+    text[1] = buf;
+
+    for (int j = 0; j < info->size; j++)
+    {
+      if (j == 0)
+        strcpy (buf, "");
+      else
+        strcat (buf, " ");
+
+      sprintf (tmp, "%.2f", value[j]);
+      strcat (buf, tmp);
+    }
+
+    gtk_clist_append (clist, (char**)text);
+    //      row = gtk_clist_append (clist, &text);
+    //      gtk_clist_set_row_data (clist, row, GINT_TO_POINTER (i));
+  }
+
+  gtk_clist_thaw (clist);
+}
+
+static void modifydlg_listener (int message, void *data, void *user)
+{
+  if (message == LC_MSG_FOCUS_CHANGED)
+  {
+    modifydlg_update_list ((Object*)data);
+  }
+}
+
+static void modifydlg_create ()
+{
+  GtkWidget *dlg, *vbox, *hbox, *scr, *clist, *button, *entry;
+
+  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_title (GTK_WINDOW (dlg), "Modify");
+  //  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
+  //                      GTK_SIGNAL_FUNC (gtk_widget_hide), NULL);
+  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
+                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+  gtk_window_set_default_size (GTK_WINDOW (dlg), 250, 250);
+
+  vbox = gtk_vbox_new (FALSE, 5);
+  gtk_widget_show (vbox);
+  gtk_container_add (GTK_CONTAINER (dlg), vbox);
+  gtk_container_border_width (GTK_CONTAINER (vbox), 5);
+
+  scr = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  gtk_widget_show (scr);
+  gtk_box_pack_start (GTK_BOX (vbox), scr, TRUE, TRUE, 0);
+
+  clist = gtk_clist_new (2);
+  gtk_widget_show (clist);
+  gtk_container_add (GTK_CONTAINER (scr), clist);
+  //  gtk_clist_set_column_width (GTK_CLIST (list), 0, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist));
+  gtk_clist_set_column_title (GTK_CLIST (clist), 0, "Property");
+  gtk_clist_set_column_title (GTK_CLIST (clist), 1, "Value");
+  gtk_clist_set_column_auto_resize (GTK_CLIST (clist), 0, TRUE);
+  gtk_clist_set_selection_mode (GTK_CLIST (clist), GTK_SELECTION_BROWSE);
+  gtk_object_set_data (GTK_OBJECT (dlg), "clist", clist);
+
+  hbox = gtk_hbox_new (TRUE, 5);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+
+  entry = gtk_entry_new ();
+  gtk_widget_show (entry);
+  gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, TRUE, 0);
+  gtk_widget_set_usize (entry, 50, -2);
+
+  entry = gtk_entry_new ();
+  gtk_widget_show (entry);
+  gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, TRUE, 0);
+  gtk_widget_set_usize (entry, 50, -2);
+
+  entry = gtk_entry_new ();
+  gtk_widget_show (entry);
+  gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, TRUE, 0);
+  gtk_widget_set_usize (entry, 50, -2);
+
+  entry = gtk_entry_new ();
+  gtk_widget_show (entry);
+  gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, TRUE, 0);
+  gtk_widget_set_usize (entry, 50, -2);
+
+  hbox = gtk_hbox_new (FALSE, 5);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+
+  button = gtk_button_new_with_label ("Close");
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  //  gtk_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (), );
+
+  button = gtk_button_new_with_label ("Apply");
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  //  gtk_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (), );
+
+
+  modifydlg = dlg;
+  messenger->Listen (&modifydlg_listener, NULL);
+}
+
+void modifydlg_toggle ()
+{
+  if (modifydlg == NULL)
+    modifydlg_create ();
+
+  if (GTK_WIDGET_VISIBLE (modifydlg))
+    gtk_widget_hide (modifydlg);
+  else
+    gtk_widget_show (modifydlg);
+}

@@ -2,13 +2,22 @@
 #define _DIALOGS_H_
 
 // Dialog support functions
+void dialog_button_callback (GtkWidget *widget, gpointer data);
+gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data);
+
+// obsolete
 int dlg_domodal (GtkWidget* dlg, int def);
 void dlg_end (int ret);
 gint dlg_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data);
 void dlg_default_callback(GtkWidget *widget, gpointer data);
 
+void modifydlg_toggle ();
+
 // All dialogs
-int msgbox_execute(char* text, int mode);
+int openprojectdlg_execute (char* filename);
+int saveprojectdlg_execute (char* filename);
+int savepicturedlg_execute (void* param);
+int msgbox_execute (const char* text, const char *caption, int flags);
 int filedlg_execute(char* caption, char* filename);
 int arraydlg_execute(void* param);
 int aboutdlg_execute(void* param);

@@ -217,7 +217,9 @@ void PieceInfo::LoadIndex (File& file)
   m_pTextures = NULL;
 
   file.Read (m_strName, 8);
+  m_strName[8] = '\0';
   file.Read (m_strDescription, 64);
+  m_strDescription[64] = '\0';
   file.ReadShort (sh, 6);
   file.ReadByte (&m_nFlags, 1);
   file.ReadLong (&m_nGroups, 1);

@@ -629,23 +629,17 @@ void colorlist_set(int new_color)
   }
 }
 
-// Create what is the pieces toolbar in the Windows version as fixed items.
-void create_piecebar(GtkWidget *window, GtkWidget *hbox)
+// Create the pieces toolbar
+GtkWidget* create_piecebar (GtkWidget *window)
 {
+  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   gchar *titles[2] = { "Description", "Number" };
-  int attrlist[] =
-  {
-    GLX_RGBA,
-    GLX_DOUBLEBUFFER,
-    GLX_DEPTH_SIZE, 16,
-    0
-  };
 
-  GtkWidget *vbox1, *vpan, *scroll_win;
+  GtkWidget *vbox1, *vpan, *scroll_win, *frame;
 
-  GtkWidget* frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);
-  gtk_box_pack_end (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
 
   vbox1 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox1);
@@ -766,6 +760,8 @@ void create_piecebar(GtkWidget *window, GtkWidget *hbox)
 		      GTK_SIGNAL_FUNC(colorlist_key_press), NULL);
 
   gtk_widget_show(colorlist);
+
+  return frame;
 }
 
 // =========================================================

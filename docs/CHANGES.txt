@@ -1,5 +1,12 @@
 This is a changelog for developers only, not for ordinary users.
 
+25/08/2000
+	- Changes to the Linux version:
+	- The Pieces toolbar can now be resized when docked or detached from
+	  the main window.
+	- The toolbar menu now has the checkboxes correct.
+	- Remember toolbar state between sessions.
+
 24/08/2000
 	- Updated the Windows version with the new Minifig Wizard.
 	- Fixed OpenGL problems on the Windows version.

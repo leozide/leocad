@@ -1904,6 +1904,7 @@ static void BuildBSP(LC_BSPNODE* node, Piece* pList)
 
 void Project::RenderScene(bool bShaded, bool bDrawViewports)
 {
+	glViewport(0, 0, m_nViewX, m_nViewY);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (bDrawViewports)

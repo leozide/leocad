@@ -30,9 +30,11 @@ void OnCommandDirect(GtkWidget *w, gpointer data);
 #define ID_VIEW_TOOLBAR_STANDARD  20
 #define ID_VIEW_TOOLBAR_DRAWING   21
 #define ID_VIEW_TOOLBAR_ANIMATION 22
-#define ID_VIEW_TOOLBAR_BOTH      23
-#define ID_VIEW_TOOLBAR_ICONS     24
-#define ID_VIEW_TOOLBAR_TEXT      25
+#define ID_VIEW_TOOLBAR_PIECES    23
+#define ID_VIEW_TOOLBAR_FLOATING  24
+#define ID_VIEW_TOOLBAR_BOTH      25
+#define ID_VIEW_TOOLBAR_ICONS     26
+#define ID_VIEW_TOOLBAR_TEXT      27
 
 #define ID_CAMERA_FIRST        1001
 #define ID_CAMERA_LAST         1255

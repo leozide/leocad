@@ -16,6 +16,7 @@
 #include "toolbar.h"
 #include "globals.h"
 #include "main.h"
+#include "system.h"
 
 void create_main_menu (GtkObject *window, GtkWidget *vbox);
 
@@ -24,11 +25,26 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox);
 GtkWidget *main_window;
 GtkWidget *drawing_area;
 
+static GtkWidget* main_hbox;
+static GtkWidget* drawing_frame;
+static GtkWidget* drawing_parent;
+static GtkWidget* pieces_frame;
+static GtkWidget* pieces_parent;
+static gboolean   pieces_floating;
+static gboolean   pieces_visible;
+static gint       pieces_width;
+
 static char app_path[PATH_MAX];
 static char lib_path[] = "/usr/local/share/leocad/";
 bool ignore_commands = false;
 
-void init_paths (char *argv0)
+static void update_window_layout ();
+
+// =============================================================================
+// Static functions
+
+// try to find the path of the executable
+static void init_paths (char *argv0)
 {
   char temppath[PATH_MAX];
   char *home;
@@ -144,35 +160,66 @@ void OnCommand(GtkWidget* widget, gpointer data)
       if (!project->SaveModified())
 	break;
 
-      gtk_main_quit();
+      gtk_widget_destroy (main_window);
     } break;
 
-    case ID_SNAP_A: {
+    case ID_SNAP_A:
+    {
       project->HandleCommand(LC_TOOLBAR_SNAPMENU, 5);
     } break;
 
-    case ID_VIEW_TOOLBAR_STANDARD: {
+    case ID_VIEW_TOOLBAR_STANDARD:
+    {
       if (GTK_WIDGET_VISIBLE (main_toolbar.handle_box))
 	gtk_widget_hide (main_toolbar.handle_box);
       else
 	gtk_widget_show (main_toolbar.handle_box);
     } break;
 
-    case ID_VIEW_TOOLBAR_DRAWING: {
+    case ID_VIEW_TOOLBAR_DRAWING:
+    {
       if (GTK_WIDGET_VISIBLE (tool_toolbar.handle_box))
 	gtk_widget_hide (tool_toolbar.handle_box);
       else
 	gtk_widget_show (tool_toolbar.handle_box);
     } break;
 
-    case ID_VIEW_TOOLBAR_ANIMATION: {
-       if (GTK_WIDGET_VISIBLE (anim_toolbar.handle_box))
-	 gtk_widget_hide (anim_toolbar.handle_box);
-       else
-	 gtk_widget_show (anim_toolbar.handle_box);
+    case ID_VIEW_TOOLBAR_ANIMATION:
+    {
+      if (GTK_WIDGET_VISIBLE (anim_toolbar.handle_box))
+	gtk_widget_hide (anim_toolbar.handle_box);
+      else
+	gtk_widget_show (anim_toolbar.handle_box);
     } break;
 
-    case ID_VIEW_TOOLBAR_BOTH: {
+    case ID_VIEW_TOOLBAR_PIECES:
+    {
+      gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+
+      if (pieces_visible)
+      {
+	pieces_visible = FALSE;
+	gtk_widget_set_sensitive (GTK_WIDGET (widget), FALSE);
+      }
+      else
+      {
+	pieces_visible = TRUE;
+	gtk_widget_set_sensitive (GTK_WIDGET (widget), TRUE);
+      }
+      update_window_layout ();
+    } break;
+
+    case ID_VIEW_TOOLBAR_FLOATING:
+    {
+      if (pieces_floating)
+	pieces_floating = FALSE;
+      else
+	pieces_floating = TRUE;
+      update_window_layout ();
+    } break;
+
+    case ID_VIEW_TOOLBAR_BOTH:
+    {
       gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_BOTH);
       gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_TOOLBAR_BOTH);
       gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_TOOLBAR_BOTH);
@@ -181,7 +228,8 @@ void OnCommand(GtkWidget* widget, gpointer data)
       gtk_widget_set_usize (anim_toolbar.handle_box, -1, -1);
     } break;
 
-    case ID_VIEW_TOOLBAR_ICONS: {
+    case ID_VIEW_TOOLBAR_ICONS:
+    {
       gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_ICONS);
       gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_TOOLBAR_ICONS);
       gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_TOOLBAR_ICONS);
@@ -190,7 +238,8 @@ void OnCommand(GtkWidget* widget, gpointer data)
       gtk_widget_set_usize (anim_toolbar.handle_box, -1, -1);
     } break;
 
-    case ID_VIEW_TOOLBAR_TEXT: {
+    case ID_VIEW_TOOLBAR_TEXT:
+    {
       gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_TEXT);
       gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_TOOLBAR_TEXT);
       gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_TOOLBAR_TEXT);
@@ -327,9 +376,44 @@ static gint draw_view(GtkWidget *widget, GdkEventExpose *event)
 // Save the new size of the window.
 static gint reshape_view(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 {
-  project->SetViewSize(allocation->width, allocation->height);
+  project->SetViewSize (allocation->width, allocation->height);
 
   return TRUE;
+}
+
+static void main_destroy ()
+{
+  gpointer item;
+  int i = 0;
+
+  // Save toolbar state
+  Sys_ProfileSaveInt ("Toolbars", "Standard", ((GTK_WIDGET_VISIBLE (main_toolbar.handle_box)) ? 1 : 0));
+  Sys_ProfileSaveInt ("Toolbars", "Drawing", ((GTK_WIDGET_VISIBLE (tool_toolbar.handle_box)) ? 1 : 0));
+  Sys_ProfileSaveInt ("Toolbars", "Animation", ((GTK_WIDGET_VISIBLE (anim_toolbar.handle_box)) ? 1 : 0));
+  Sys_ProfileSaveInt ("Toolbars", "Pieces", (pieces_visible ? 1 : 0));
+  Sys_ProfileSaveInt ("Toolbars", "Floating", (pieces_floating ? 1 : 0));
+
+  if (pieces_parent != NULL)
+    Sys_ProfileSaveInt ("Toolbars", "PiecesWidth", pieces_frame->allocation.width);
+
+  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_icons");
+  if (GTK_CHECK_MENU_ITEM (item)->active)
+    i = 0;
+  else
+  {
+    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_both");
+    if (GTK_CHECK_MENU_ITEM (item)->active)
+      i = 1;
+    else
+    {
+      item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_text");
+      if (GTK_CHECK_MENU_ITEM (item)->active)
+	i = 2;
+    }
+  }
+  Sys_ProfileSaveInt ("Toolbars", "Style", i);
+
+  gtk_main_quit ();
 }
 
 static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
@@ -340,16 +424,141 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
   delete project;
   project = NULL;
 
-  gtk_main_quit ();
+  gtk_widget_destroy (main_window);
   return FALSE;
 }
 
-int main(int argc, char* argv[])
+static gint pieces_close (GtkWidget *widget, GdkEvent* event, gpointer data)
 {
-  GtkWidget *vbox, *hbox, *frame;
-  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
-  int i, j, k;
+  gpointer item;
+
+  pieces_visible = FALSE;
+
+  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_pieces");
+  gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), FALSE);
+
+  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+  gtk_widget_set_sensitive (GTK_WIDGET (item), FALSE);
+
+  update_window_layout ();
+
+  return FALSE;
+}
+
+// this function takes care of showing the pieces bar correctly
+static void update_window_layout ()
+{
+  // first thing we need to create the widgets
+  if (drawing_area == NULL)
+  {
+    int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
+
+    // Create a new OpenGL widget
+    drawing_area = GTK_WIDGET (gtk_gl_area_new (attrlist));
+
+    GTK_WIDGET_SET_FLAGS (drawing_area, GTK_CAN_FOCUS);
+
+    gtk_widget_set_events (GTK_WIDGET (drawing_area), GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK |
+			   GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK |
+			   GDK_POINTER_MOTION_HINT_MASK);
+
+    // Connect signal handlers
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "expose_event", 
+			GTK_SIGNAL_FUNC(draw_view), NULL);
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "size_allocate",
+			GTK_SIGNAL_FUNC(reshape_view), NULL);
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "realize",
+			GTK_SIGNAL_FUNC(init), NULL);
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "motion_notify_event",
+			GTK_SIGNAL_FUNC(motion_notify_event), NULL);
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "button_press_event",
+			GTK_SIGNAL_FUNC(button_press_event), NULL);
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "button_release_event",
+			GTK_SIGNAL_FUNC(button_release_event), NULL);
+    gtk_signal_connect (GTK_OBJECT (drawing_area), "key_press_event",
+			GTK_SIGNAL_FUNC(key_press_event), NULL);
+ 
+    // set minimum size
+    gtk_widget_set_usize (GTK_WIDGET (drawing_area), 100, 100);
+
+    drawing_frame = gtk_frame_new (NULL);
+    gtk_widget_show (drawing_frame);
+    //    gtk_container_add (GTK_CONTAINER (hbox), drawing_frame);
+    gtk_frame_set_shadow_type (GTK_FRAME (drawing_frame), GTK_SHADOW_IN);               
+
+    gtk_container_add (GTK_CONTAINER (drawing_frame), GTK_WIDGET (drawing_area));
+    gtk_widget_show (GTK_WIDGET (drawing_area));
+
+    // now create the pieces bar
+    pieces_frame = create_piecebar (main_window);
+  }
+  else
+  {
+    // if the widgets already exist, remove their parents
+    if (pieces_parent)
+      pieces_width = pieces_frame->allocation.width;
+
+    gtk_container_remove (GTK_CONTAINER (drawing_parent), drawing_frame);
+    if (pieces_parent != NULL)
+      gtk_container_remove (GTK_CONTAINER (pieces_parent), pieces_frame);
+
+    if (drawing_parent != main_hbox)
+      gtk_widget_destroy (drawing_parent);
+    else if (pieces_parent != NULL)
+      gtk_widget_destroy (pieces_parent);
+
+    pieces_parent = NULL;
+    drawing_parent = NULL;
+  }
+
+  // now add the widgets to their new parents
+  if (pieces_floating)
+  {
+    gtk_box_pack_start (GTK_BOX (main_hbox), drawing_frame, TRUE, TRUE, 0);
+    drawing_parent = main_hbox;
+
+    if (pieces_visible)
+    {
+      pieces_parent = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+      gtk_signal_connect (GTK_OBJECT (pieces_parent), "delete_event",
+			  GTK_SIGNAL_FUNC (pieces_close), NULL);
+      gtk_signal_connect (GTK_OBJECT (pieces_parent), "destroy",
+			  GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+      gtk_window_set_title (GTK_WINDOW (pieces_parent), "Pieces");
+      gtk_window_set_default_size (GTK_WINDOW (pieces_parent), pieces_width, -1);
+
+      gtk_container_add (GTK_CONTAINER (pieces_parent), pieces_frame);
+
+      gtk_widget_show (pieces_parent);
+    }
+  }
+  else
+  {
+    if (pieces_visible)
+    {
+      pieces_parent = drawing_parent = gtk_hpaned_new ();
+      gtk_paned_pack1 (GTK_PANED (drawing_parent), drawing_frame, TRUE, TRUE);
+      gtk_paned_pack2 (GTK_PANED (pieces_parent), pieces_frame, FALSE, FALSE);
+      gtk_widget_show (pieces_parent);
+      gtk_box_pack_start (GTK_BOX (main_hbox), pieces_parent, TRUE, TRUE, 0);
+
+      if (pieces_floating == FALSE)
+	gtk_paned_set_position (GTK_PANED (pieces_parent), main_window->allocation.width -
+				pieces_width - GTK_PANED (pieces_parent)->gutter_size);
+    }
+    else
+    {
+      gtk_box_pack_start (GTK_BOX (main_hbox), drawing_frame, TRUE, TRUE, 0);
+      drawing_parent = main_hbox;
+    }
+  }
+}
+
+int main (int argc, char* argv[])
+{
   char* libgl = NULL;
+  GtkWidget *vbox;
+  int i, j, k;
 
   // Parse and remove Linux arguments
   for (i = 1; i < argc; i++)
@@ -412,7 +621,7 @@ int main(int argc, char* argv[])
   gtk_window_set_default_size (GTK_WINDOW (main_window), 600, 400);
  
   gtk_signal_connect (GTK_OBJECT (main_window), "delete_event", (GtkSignalFunc) main_quit, NULL);
-  gtk_signal_connect (GTK_OBJECT (main_window), "destroy", (GtkSignalFunc) gtk_main_quit, NULL);
+  gtk_signal_connect (GTK_OBJECT (main_window), "destroy", (GtkSignalFunc) main_destroy, NULL);
 
   vbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (main_window), vbox);
@@ -424,62 +633,94 @@ int main(int argc, char* argv[])
 //  startup_message ("Creating Toolbars ...");
   create_toolbars (main_window, vbox);
 
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (vbox), hbox);
-  gtk_widget_show (hbox);
+  main_hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), main_hbox);
+  gtk_widget_show (main_hbox);
 
-  /* You should always delete gtk_gl_widget widgets before exit or else
-     GLX contexts are left undeleted, this may cause problems (=core dump)
-     in some systems.
-     Destroy method of objects is not automatically called on exit.
-     You need to manually enable this feature. Do gtk_quit_add_destroy()
-     for all your top level windows unless you are certain that they get
-     destroy signal by other means.
-  */
-  //  gtk_quit_add_destroy(1, GTK_OBJECT(main_window));
+  // load toolbar preferences and update the menu
+  int show;
+  ignore_commands = true;
 
-  // Create new OpenGL widget.
-  drawing_area = GTK_WIDGET(gtk_gl_area_new(attrlist));
+  show = Sys_ProfileLoadInt ("Toolbars", "Standard", 1);
+  if (show)
+  {
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_standard");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
+  }
+  else
+    gtk_widget_hide (main_toolbar.handle_box);
 
-  GTK_WIDGET_SET_FLAGS(drawing_area, GTK_CAN_FOCUS);
+  show = Sys_ProfileLoadInt ("Toolbars", "Drawing", 1);
+  if (show)
+  {
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_drawing");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
+  }
+  else
+    gtk_widget_hide (tool_toolbar.handle_box);
 
-  gtk_widget_set_events(GTK_WIDGET(drawing_area),
-			GDK_EXPOSURE_MASK |
-			GDK_KEY_PRESS_MASK |
-			GDK_BUTTON_PRESS_MASK |
-			GDK_BUTTON_RELEASE_MASK |
-			GDK_POINTER_MOTION_MASK |
-			GDK_POINTER_MOTION_HINT_MASK);
+  show = Sys_ProfileLoadInt ("Toolbars", "Animation", 1);
+  if (show)
+  {
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_animation");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
+  }
+  else
+    gtk_widget_hide (anim_toolbar.handle_box);
 
-  // Connect signal handlers
-  gtk_signal_connect(GTK_OBJECT(drawing_area), "expose_event", 
-      GTK_SIGNAL_FUNC(draw_view), NULL);
-  gtk_signal_connect(GTK_OBJECT(drawing_area), "size_allocate",//configure_event",
-      GTK_SIGNAL_FUNC(reshape_view), NULL);
-  gtk_signal_connect(GTK_OBJECT(drawing_area), "realize",
-      GTK_SIGNAL_FUNC(init), NULL);
-  gtk_signal_connect (GTK_OBJECT (drawing_area), "motion_notify_event",
-      GTK_SIGNAL_FUNC(motion_notify_event), NULL);
-  gtk_signal_connect (GTK_OBJECT (drawing_area), "button_press_event",
-      GTK_SIGNAL_FUNC(button_press_event), NULL);
-  gtk_signal_connect (GTK_OBJECT (drawing_area), "button_release_event",
-      GTK_SIGNAL_FUNC(button_release_event), NULL);
-  gtk_signal_connect (GTK_OBJECT (drawing_area), "key_press_event",
-      GTK_SIGNAL_FUNC(key_press_event), NULL);
- 
-  // set minimum size
-  gtk_widget_set_usize(GTK_WIDGET(drawing_area), 100,100);
+  show = Sys_ProfileLoadInt ("Toolbars", "Pieces", 1);
+  if (show)
+  {
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_pieces");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
+    pieces_visible = TRUE;
+  }
+  else
+  {
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+    gtk_widget_set_sensitive (GTK_WIDGET (widget), FALSE);
+  }
 
-  frame = gtk_frame_new ((char*)NULL);
-  gtk_widget_show (frame);
-  gtk_container_add (GTK_CONTAINER (hbox), frame);
-  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
+  show = Sys_ProfileLoadInt ("Toolbars", "PiecesFloating", 0);
+  if (show)
+  {
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
+    pieces_floating = TRUE;
+  }
 
-  gtk_container_add (GTK_CONTAINER (frame), GTK_WIDGET(drawing_area));
-  gtk_widget_show(GTK_WIDGET(drawing_area));
+  ignore_commands = false;
 
-  create_piecebar(main_window, hbox);
-  create_statusbar(main_window, vbox);
+  show = Sys_ProfileLoadInt ("Toolbars", "Style", 0);
+  gpointer item = NULL;
+
+  switch (show)
+  {
+  case 0:
+    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_icons");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
+    OnCommand (GTK_WIDGET (item), GINT_TO_POINTER (ID_VIEW_TOOLBAR_ICONS));
+    break;
+  case 1:
+    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_both");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
+    OnCommand (GTK_WIDGET (item), GINT_TO_POINTER (ID_VIEW_TOOLBAR_BOTH));
+    break;
+  case 2:
+    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_text");
+    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
+    OnCommand (GTK_WIDGET (item), GINT_TO_POINTER (ID_VIEW_TOOLBAR_TEXT));
+    break;
+  }
+
+  pieces_width = Sys_ProfileLoadInt ("Toolbars", "PiecesWidth", 210);
+  update_window_layout ();
+
+  // increase the reference count to allow changing parents when hiding the pieces bar
+  gtk_widget_ref (drawing_frame);
+  gtk_widget_ref (pieces_frame);
+
+  create_statusbar (main_window, vbox);
 //  gtk_box_pack_start (GTK_BOX (vbox), create_status_bar (), FALSE, TRUE, 2);
   //  GtkWidget* statusbar = gtk_statusbar_new ();
   //gtk_widget_show (statusbar);
@@ -494,7 +735,12 @@ int main(int argc, char* argv[])
                  &main_window->style->bg[GTK_STATE_NORMAL], icon32);
   gdk_window_set_icon (main_window->window, NULL, gdkpixmap, mask);
 
-  gtk_widget_show(GTK_WIDGET(main_window));
+  gtk_widget_show (GTK_WIDGET (main_window));
+
+  // get the splitter in the correct size, must be done after the widget has been realized
+  if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
+    gtk_paned_set_position (GTK_PANED (pieces_parent), main_window->allocation.width -
+			    pieces_width - GTK_PANED (pieces_parent)->gutter_size);
 
   if (project->Initialize (argc, argv, app_path, lib_path) == false)
   {
@@ -504,6 +750,9 @@ int main(int argc, char* argv[])
   }
 
   gtk_main();
+
+  gtk_widget_unref (drawing_frame);
+  gtk_widget_unref (pieces_frame);
 
   //  delete project;
   _exit (0); // FIXME !

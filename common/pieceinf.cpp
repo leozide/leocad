@@ -532,7 +532,7 @@ void PieceInfo::LoadInformation()
     pGroup->connections[bt] = 0xFFFF;
     while(bt--)
     {
-      unsigned short tmp = GUINT16(*bytes);
+      unsigned short tmp = GUINT16(*((unsigned short*)bytes));
       pGroup->connections[bt] = tmp;
       bytes += sizeof(unsigned short);
     }

@@ -777,8 +777,6 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	Camera* pFirst = pCamera;
-	char tmp[90];
-	const char* s = "FBTULRM";
 	int i;
 
 	while (pMainMenu->GetMenuItemCount())
@@ -802,12 +800,10 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	pCamera = pFirst;
 	for (i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
 	{
-		strcpy(tmp, pCamera->GetName());
-		strcat(tmp, "\t ");
-		tmp[strlen(tmp)-1] = s[i];
+		pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
+		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
 
-		pMainMenu->AppendODMenu(tmp, MF_ENABLED, i + ID_CAMERA_FIRST);
-		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, tmp);
+		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
 	}
 
 	pMainMenu->AppendODMenu("", MF_SEPARATOR);
@@ -816,6 +812,8 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	pPopupMenu->AppendMenu(MF_STRING, ID_VIEW_CAMERAS_RESET, "Reset");
 //	pMainMenu->AppendODMenu("Adjust...\t", MF_ENABLED, ID_VIEW_VIEWPOINT);
 //	pPopupMenu->AppendODMenu("Adjust...\t", MF_ENABLED, ID_VIEW_VIEWPOINT);
+
+  ((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators(); 
 }
 
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);

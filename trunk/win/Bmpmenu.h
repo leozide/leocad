@@ -116,6 +116,7 @@ public:
 	BOOL AppendODMenuW(wchar_t *lpstrText, UINT nFlags = MF_OWNERDRAW, UINT nID = 0, int nIconNormal = -1); // Owner-Drawn Append 
 	
 	BOOL ChangeMenuItemShortcut(const char *Shortcut, UINT nID);
+	BOOL DeleteMenu(UINT nPosition, UINT nFlags);
 	BOOL ModifyODMenuA(const char *lpstrText,UINT nID=0,int nIconNormal=-1);
 	BOOL ModifyODMenuA(const char *lpstrText,const char *OptionText,int nIconNormal);
 	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT nID=0,int nIconNormal=-1);

@@ -155,7 +155,7 @@ BOOL CPropertiesPieces::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	char tmp[4];
+	char tmp[64];
 	int i, j;
 	memset (&totalcount, 0, sizeof (totalcount));
 	for (i = 0; i < lines; i++)

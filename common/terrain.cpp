@@ -46,35 +46,26 @@ static float SolveDiff(int i, float t)
 	return 0;
 }
 
-static bool boxIsOutside(const PATCHBOX box, const float plane[4])
-{
-	float planeEqVal;
-	int i;
-	for (i = 0; i < 8; i++)
-	{
-		planeEqVal = 
-			plane[0]*box.corners[i][0] +
-			plane[1]*box.corners[i][1] +
-			plane[2]*box.corners[i][2] + plane[3];
-		if (planeEqVal > 0)
-			return false;
-	}
+/////////////////////////////////////////////////////////////////////////////
+// TerrainPatch functions
 
-	return true;
+TerrainPatch::TerrainPatch ()
+{
+	vertex = NULL;
+	normals = NULL;
+	coords = NULL;
+	index = NULL;
+	steps = 10;
+	visible = true;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// PATCH functions
-
-void PATCHBOX::InitBox(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+TerrainPatch::~TerrainPatch ()
 {
-	this->minX = minX;
-	this->maxY = maxY;
-	this->minY = minY;
-	this->maxX = maxX;
-	this->minZ = minZ;
-	this->maxZ = maxZ;
-	
+	FreeMemory ();
+}
+
+void TerrainPatch::InitBox(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+{
 	// Now make each corner point for convenient culling.
 	corners[0][0] = minX;
 	corners[1][0] = minX;
@@ -84,7 +75,7 @@ void PATCHBOX::InitBox(float minX, float maxX, float minY, float maxY, float min
 	corners[5][0] = maxX;
 	corners[6][0] = maxX;
 	corners[7][0] = maxX;
-	
+
 	corners[0][1] = minY;
 	corners[1][1] = minY;
 	corners[2][1] = maxY;
@@ -93,7 +84,7 @@ void PATCHBOX::InitBox(float minX, float maxX, float minY, float maxY, float min
 	corners[5][1] = minY;
 	corners[6][1] = maxY;
 	corners[7][1] = maxY;
-	
+
 	corners[0][2] = minZ;
 	corners[1][2] = maxZ;
 	corners[2][2] = minZ;
@@ -104,11 +95,26 @@ void PATCHBOX::InitBox(float minX, float maxX, float minY, float maxY, float min
 	corners[7][2] = maxZ;
 }
 
+bool TerrainPatch::BoxIsOutside(const float plane[4]) const
+{
+	float planeEqVal;
+
+	for (int i = 0; i < 8; i++)
+	{
+		planeEqVal = plane[0] * corners[i][0] + plane[1] * corners[i][1] + plane[2] * corners[i][2] + plane[3];
+
+		if (planeEqVal > 0)
+			return false;
+	}
+
+	return true;
+}
+
 #define controlsX(b, a) control[(a*4+b)*3]
 #define controlsY(b, a) control[(a*4+b)*3+1]
 #define controlsZ(b, a) control[(a*4+b)*3+2]
 
-void PATCH::Tesselate(bool bNormals)
+void TerrainPatch::Tesselate(bool bNormals)
 {
 	FreeMemory();
 
@@ -204,7 +210,7 @@ void PATCH::Tesselate(bool bNormals)
 #undef controlsY
 #undef controlsZ
 
-void PATCH::FreeMemory()
+void TerrainPatch::FreeMemory()
 {
 	if (vertex)
 	{
@@ -317,12 +323,7 @@ void Terrain::FreeMemory()
 	if (m_Patches)
 	{
 		for (i = 0; i < m_uPatches; i++)
-		{
-			for (int j = 0; j < m_vPatches; j++)
-				m_Patches[i][j].FreeMemory();
-
 			delete[] m_Patches[i];
-		}
 
 		delete[] m_Patches;
 		m_Patches = NULL;
@@ -332,8 +333,8 @@ void Terrain::FreeMemory()
 	{
 		for (i = 0; i < (m_uPatches*3)+1; i++)
 			delete[] m_pControl[i];
-		delete[] m_pControl;
 
+		delete[] m_pControl;
 		m_pControl = NULL;
 	}
 }
@@ -350,9 +351,9 @@ Terrain& Terrain::operator= (const Terrain& source)
 	m_uPatches = source.m_uPatches;
 	m_vPatches = source.m_vPatches;
 
-	m_Patches = new PATCH*[m_uPatches];
+	m_Patches = new TerrainPatch*[m_uPatches];
 	for (i = 0; i < m_uPatches; i++)
-		m_Patches[i] = new PATCH[m_vPatches];
+		m_Patches[i] = new TerrainPatch[m_vPatches];
 
 	int uCount = GetCountU(), vCount = GetCountV();
 
@@ -473,9 +474,9 @@ void Terrain::SetPatchCount(int uPatches, int vPatches)
 	m_uPatches = uPatches;
 	m_vPatches = vPatches;
 
-	m_Patches = new PATCH*[m_uPatches];
+	m_Patches = new TerrainPatch*[m_uPatches];
 	for (i = 0; i < m_uPatches; i++)
-		m_Patches[i] = new PATCH[m_vPatches];
+		m_Patches[i] = new TerrainPatch[m_vPatches];
 
 	SetControlPoints();
 	Tesselate();
@@ -508,7 +509,7 @@ void Terrain::SetControlPoints()
 			minZ = min(minZ, m_Patches[i][j].control[(a*4+b)*3+2]);
 			maxZ = max(maxZ, m_Patches[i][j].control[(a*4+b)*3+2]);
 		}
-		m_Patches[i][j].box.InitBox(minX, maxX, minY, maxY, minZ, maxZ);
+		m_Patches[i][j].InitBox(minX, maxX, minY, maxY, minZ, maxZ);
 	}
 }
 
@@ -749,40 +750,48 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 	float farPlane[4] = { -nearNormal[0]*invR, -nearNormal[1]*invR, -nearNormal[2]*invR, farD*invR };
 
 	for (int i = 0; i < m_uPatches; i++)
+	{
 		for (int j = 0; j < m_vPatches; j++)
 		{
 			m_Patches[i][j].visible = true;
-			if (boxIsOutside(m_Patches[i][j].box, leftPlane))
+
+			if (m_Patches[i][j].BoxIsOutside(leftPlane))
 			{
 				m_Patches[i][j].visible = false;
 				continue;
 			}
-			if (boxIsOutside(m_Patches[i][j].box, rightPlane))
+
+			if (m_Patches[i][j].BoxIsOutside(rightPlane))
 			{
 				m_Patches[i][j].visible = false;
 				continue;
 			}
-			if (boxIsOutside(m_Patches[i][j].box, nearPlane))
+
+			if (m_Patches[i][j].BoxIsOutside(nearPlane))
 			{
 				m_Patches[i][j].visible = false;
 				continue;
 			}
-			if (boxIsOutside(m_Patches[i][j].box, farPlane))
+
+			if (m_Patches[i][j].BoxIsOutside(farPlane))
 			{
 				m_Patches[i][j].visible = false;
 				continue;
 			}
-			if (boxIsOutside(m_Patches[i][j].box, bottomPlane))
+
+			if (m_Patches[i][j].BoxIsOutside(bottomPlane))
 			{
 				m_Patches[i][j].visible = false;
 				continue;
 			}
-			if (boxIsOutside(m_Patches[i][j].box, topPlane))
+
+			if (m_Patches[i][j].BoxIsOutside(topPlane))
 			{
 				m_Patches[i][j].visible = false;
 				continue;
 			}
 		}
+	}
 }
 
 void Terrain::LoadDefaults(bool bLinear)

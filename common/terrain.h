@@ -7,25 +7,15 @@
 
 #include "defines.h"
 
-typedef struct {
-	float corners[8][3];
-	float minX, minY, minZ;
-	float maxX, maxY, maxZ;
+class File;
+class Camera;
+class Texture;
 
-	void InitBox(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
-} PATCHBOX;
-
-typedef struct PATCH
+class TerrainPatch
 {
-	PATCH()
-	{
-		vertex = NULL;
-		normals = NULL;
-		coords = NULL;
-		index = NULL;
-		steps = 10;
-		visible = true;
-	};
+public:
+	TerrainPatch ();
+	~TerrainPatch ();
 
 	float control[48]; // 4x4 grid
 	unsigned short steps;
@@ -35,15 +25,16 @@ typedef struct PATCH
 	float* coords;
 	unsigned short* index;
 
-	PATCHBOX box;
 	bool visible;
+
+	void InitBox(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
+	bool BoxIsOutside(const float plane[4]) const;
 	void Tesselate(bool bNormals);
 	void FreeMemory();
-} PATCH;
 
-class File;
-class Camera;
-class Texture;
+protected:
+	float corners[8][3];
+};
 
 class Terrain
 {
@@ -81,7 +72,7 @@ protected:
 	void FindVisiblePatches(Camera* pCam, float aspect);
 
 	float** m_pControl;
-	PATCH** m_Patches;
+	TerrainPatch** m_Patches;
 	int m_uPatches;
 	int m_vPatches;
 	float m_uSize;

@@ -12,6 +12,7 @@
 #include "globals.h"
 #include "system.h"
 #include "pieceinf.h" // TODO: remove
+#include "config.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -91,12 +92,14 @@ BOOL CCADApp::InitInstance()
 	SetRegistryKey(_T("BT Software"));
 //	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
+
   if (!GL_Initialize (NULL))
+
     return FALSE;
+
 
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views.
-
 	CSingleDocTemplate* pDocTemplate;
 	pDocTemplate = new CSingleDocTemplate(
 		IDR_MAINFRAME,
@@ -296,7 +299,7 @@ void CCADApp::OnHelpUpdates()
 				{
 					CString str;
 
-					if (ver > LC_APP_VERSION)
+					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100)
 						str.Format("There's a new version (%0.2f) on the home page.\n", ver);
 					else
 						str = "You are using the latest version of the program.\n";

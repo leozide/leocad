@@ -390,7 +390,33 @@
 #define IDC_MF_LEGR                     1216
 #define IDC_MF_SHOEL                    1217
 #define IDC_MF_SHOER                    1218
-#define IDC_PREVIEWSTATIC               1220
+#define IDC_PREVIEWSTATIC               1219
+#define IDC_MF_HATANGLE                 1220
+#define IDC_MF_HEADANGLE                1221
+#define IDC_MF_NECKANGLE                1222
+#define IDC_MF_ARMLANGLE                1223
+#define IDC_MF_ARMRANGLE                1224
+#define IDC_MF_HANDLANGLE               1225
+#define IDC_MF_HANDRANGLE               1226
+#define IDC_MF_TOOLLANGLE               1227
+#define IDC_MF_TOOLRANGLE               1228
+#define IDC_MF_LEGLANGLE                1229
+#define IDC_MF_LEGRANGLE                1230
+#define IDC_MF_SHOELANGLE               1231
+#define IDC_MF_SHOERANGLE               1232
+#define IDC_MF_HATSPIN                  1233
+#define IDC_MF_HEADSPIN                 1234
+#define IDC_MF_NECKSPIN                 1235
+#define IDC_MF_ARMLSPIN                 1236
+#define IDC_MF_ARMRSPIN                 1237
+#define IDC_MF_HANDLSPIN                1238
+#define IDC_MF_HANDRSPIN                1239
+#define IDC_MF_TOOLLSPIN                1240
+#define IDC_MF_TOOLRSPIN                1241
+#define IDC_MF_LEGLSPIN                 1242
+#define IDC_MF_LEGRSPIN                 1243
+#define IDC_MF_SHOELSPIN                1244
+#define IDC_MF_SHOERSPIN                1245
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -621,7 +647,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        234
 #define _APS_NEXT_COMMAND_VALUE         33153
-#define _APS_NEXT_CONTROL_VALUE         1216
+#define _APS_NEXT_CONTROL_VALUE         1223
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

@@ -6,6 +6,7 @@
 #include "MainFrm.h"
 #include "Camera.h"
 #include "project.h"
+#include "message.h"
 #include "globals.h"
 
 #include "Print.h"
@@ -17,6 +18,26 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define TOOLBAR_VERSION 1
+
+/*
+// if (type == 255) -> don't change current type
+void SystemUpdateFocus(void* object, unsigned char type)
+{
+	CWnd* pFrame = AfxGetMainWnd();
+	if (pFrame != NULL)
+		pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)object, type);
+}
+*/
+
+void mainframe_listener (int message, void *data, void *user)
+{
+  if (message == LC_MSG_FOCUS_CHANGED)
+  {
+    CWnd* pFrame = AfxGetMainWnd();
+    if (pFrame != NULL)
+      pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)data, 0);
+  }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
@@ -177,6 +198,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pMenu = CMenu::FromHandle (hMenu);
 	SetMenu (pMenu);
 	m_hMenuDefault = hMenu;
+
+  messenger->Listen (&mainframe_listener, this);
 
 	return 0;
 }

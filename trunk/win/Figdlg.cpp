@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(CMinifigDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(CPN_SELENDOK, OnColorSelEndOK)
 	ON_CONTROL_RANGE(CBN_SELENDOK, IDC_MF_HAT, IDC_MF_SHOER, OnPieceSelEndOK)
+	ON_CONTROL_RANGE(EN_CHANGE, IDC_MF_HATANGLE, IDC_MF_SHOERANGLE, OnChangeAngle)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -89,17 +90,21 @@ BOOL CMinifigDlg::OnInitDialog()
     for (j = 0; j < count; j++)
 			pCombo->AddString (names[j]);
     free (names);
-
-    if (i == 6) i++;
 	}
 
-	for (i = IDC_MF_NECK; i <= IDC_MF_SHOER; i++)
-		((CComboBox*)GetDlgItem(i))->SetCurSel(0);
-	((CComboBox*)GetDlgItem(IDC_MF_HAT))->SetCurSel(6);
-	((CComboBox*)GetDlgItem(IDC_MF_HEAD))->SetCurSel(4);
-	((CComboBox*)GetDlgItem(IDC_MF_TORSO))->SetCurSel(18);
+  char *names[LC_MFW_NUMITEMS];
+  m_pMFWnd->m_pFig->GetSelections (names);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
+	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	{
+		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
+    pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
+  }
+
+  for (i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
+		((CSpinButtonCtrl*)GetDlgItem(i))->SetRange(-360, 360);
+
+  return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
@@ -123,7 +128,21 @@ void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
   char tmp[65];
   GetDlgItem(nID)->GetWindowText (tmp, 65);
-
 	m_pMFWnd->m_pFig->ChangePiece (nID-IDC_MF_HAT, tmp);
 	m_pMFWnd->PostMessage(WM_PAINT);
+}
+
+void CMinifigDlg::OnChangeAngle(UINT nID) 
+{
+  char tmp[65];
+  GetDlgItem(nID)->GetWindowText (tmp, 65);
+  if (m_pMFWnd)
+  {
+    int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_NECK,
+      LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND,
+      LC_MFW_RIGHT_HAND, LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL,
+      LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
+  	m_pMFWnd->m_pFig->ChangeAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
+	  m_pMFWnd->PostMessage(WM_PAINT);
+  }
 }

@@ -365,6 +365,10 @@ SOURCE=.\ColorLst.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Config.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Disabtab.h
 # End Source File
 # Begin Source File
@@ -974,6 +978,18 @@ SOURCE=..\common\im_bmp.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\im_gif.cpp
+# ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\im_jpg.cpp
+# ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\im_png.cpp
 # ADD CPP /I "./libpng" /I "./zlib"
 # SUBTRACT CPP /YX /Yc /Yu
@@ -1014,6 +1030,23 @@ SOURCE=..\Common\matrix.cpp
 # Begin Source File
 
 SOURCE=..\Common\matrix.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\message.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\message.h
 # End Source File
 # Begin Source File
 

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
+#include <locale.h>
 #include "opengl.h"
 #include "vector.h"
 #include "matrix.h"
@@ -631,15 +632,27 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	file->Seek(0, SEEK_SET);
 	file->Read(id, 32);
 	sscanf(&id[7], "%f", &fv);
+
+	// Fix the ugly floating point reading on computers with different decimal points.
+	if (fv == 0.0f)
+	{
+		lconv *loc = localeconv();
+		id[8] = loc->decimal_point[0];
+		sscanf(&id[7], "%f", &fv);
+
+		if (fv == 0.0f)
+			return false;
+	}
+
 	if (fv > 0.4f)
-          file->ReadFloat (&fv, 1);
+		file->ReadFloat (&fv, 1);
 
 	file->ReadLong (&rgb, 1);
 	if (!bMerge)
 	{
-          m_fBackground[0] = (float)((unsigned char) (rgb))/255;
-          m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-          m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+		m_fBackground[0] = (float)((unsigned char) (rgb))/255;
+		m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+		m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	}
 
 	if (fv < 0.6f) // old view

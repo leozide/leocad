@@ -5,26 +5,95 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <pwd.h>
+#include <unistd.h>
+#include <string.h>
+#include "opengl.h"
 #include "gtkglarea.h"
-#include "menu.h"
-#include "custom.h"
 #include "project.h"
 #include "toolbar.h"
 #include "globals.h"
 #include "main.h"
+
+void create_main_menu (GtkObject *window, GtkWidget *vbox);
 
 // Variables
 
 GtkWidget *main_window;
 GtkWidget *drawing_area;
 
-static char default_path[] = "/usr/share/LeoCAD/";
+static char default_path[PATH_MAX];
 bool ignore_commands = false;
+
+void init_paths (char *argv0)
+{
+  char temppath[PATH_MAX];
+  char *home;
+
+  home = getenv ("HOME");
+  if (home == NULL)
+  {
+    uid_t id = getuid();
+    struct passwd *pwd;
+
+    setpwent();
+    while ((pwd = getpwent()) != NULL)
+      if (pwd->pw_uid == id)
+      {
+	home = pwd->pw_dir;
+	break;
+      }
+    endpwent();
+  }
+
+  if (home == NULL)
+    home = ".";
+
+  strcpy (temppath, argv0);
+  if (!strrchr(temppath, '/'))
+  {
+    char *path;
+    char *last;
+    int found;
+
+    found = 0;
+    path = getenv("PATH");
+    do
+    {
+      temppath[0] = '\0';
+
+      last = strchr(path, ':');
+      if (!last)
+	last = path + strlen (path);
+
+      if (*path == '~')
+      {
+	strcpy(temppath, home);
+	++path;
+      }
+
+      if (last > (path+1))
+      {
+	strncat(temppath, path, (last-path));
+	strcat(temppath, "/");
+      }
+      strcat (temppath, "./");
+      strcat (temppath, argv0);
+
+      if (access(temppath, X_OK) == 0 )
+	++found;
+      path = last+1;
+
+    } while (*last && !found);
+  }
+  else
+    argv0 = strrchr(argv0, '/')+1;
+
+  if (realpath (temppath, default_path))
+    *(strrchr (default_path, '/')) = '\0';
+}
 
 // Functions
 
@@ -80,6 +149,54 @@ void OnCommand(GtkWidget* widget, gpointer data)
     case ID_SNAP_A: {
       project->HandleCommand(LC_TOOLBAR_SNAPMENU, 5);
     } break;
+
+    case ID_VIEW_TOOLBAR_STANDARD: {
+      if (GTK_WIDGET_VISIBLE (main_toolbar.handle_box))
+	gtk_widget_hide (main_toolbar.handle_box);
+      else
+	gtk_widget_show (main_toolbar.handle_box);
+    } break;
+
+    case ID_VIEW_TOOLBAR_DRAWING: {
+      if (GTK_WIDGET_VISIBLE (tool_toolbar.handle_box))
+	gtk_widget_hide (tool_toolbar.handle_box);
+      else
+	gtk_widget_show (tool_toolbar.handle_box);
+    } break;
+
+    case ID_VIEW_TOOLBAR_ANIMATION: {
+       if (GTK_WIDGET_VISIBLE (anim_toolbar.handle_box))
+	 gtk_widget_hide (anim_toolbar.handle_box);
+       else
+	 gtk_widget_show (anim_toolbar.handle_box);
+    } break;
+
+    case ID_VIEW_TOOLBAR_BOTH: {
+      gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_BOTH);
+      gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_TOOLBAR_BOTH);
+      gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_TOOLBAR_BOTH);
+      gtk_widget_set_usize (main_toolbar.handle_box, -1, -1);
+      gtk_widget_set_usize (tool_toolbar.handle_box, -1, -1);
+      gtk_widget_set_usize (anim_toolbar.handle_box, -1, -1);
+    } break;
+
+    case ID_VIEW_TOOLBAR_ICONS: {
+      gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_ICONS);
+      gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_TOOLBAR_ICONS);
+      gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_TOOLBAR_ICONS);
+      gtk_widget_set_usize (main_toolbar.handle_box, -1, -1);
+      gtk_widget_set_usize (tool_toolbar.handle_box, -1, -1);
+      gtk_widget_set_usize (anim_toolbar.handle_box, -1, -1);
+    } break;
+
+    case ID_VIEW_TOOLBAR_TEXT: {
+      gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_TEXT);
+      gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_TOOLBAR_TEXT);
+      gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_TOOLBAR_TEXT);
+      gtk_widget_set_usize (main_toolbar.handle_box, -1, -1);
+      gtk_widget_set_usize (tool_toolbar.handle_box, -1, -1);
+      gtk_widget_set_usize (anim_toolbar.handle_box, -1, -1);
+    } break;
   }
 }
 
@@ -89,12 +206,20 @@ static gint button_press_event (GtkWidget *widget, GdkEventButton *event)
   x = (int)event->x;
   y = widget->allocation.height - (int)event->y - 1;
 
-  if (event->button == 1)
-    project->OnLeftButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-			      (event->state & GDK_SHIFT_MASK) != 0);
-  if (event->button == 3)
-    project->OnRightButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-			       (event->state & GDK_SHIFT_MASK) != 0);
+  if (event->type == GDK_BUTTON_PRESS)
+  {
+    if (event->button == 1)
+      project->OnLeftButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+				(event->state & GDK_SHIFT_MASK) != 0);
+    if (event->button == 3)
+      project->OnRightButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+				 (event->state & GDK_SHIFT_MASK) != 0);
+  }
+  else if (event->type == GDK_2BUTTON_PRESS)
+  {
+    project->OnLeftButtonDoubleClick(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+				     (event->state & GDK_SHIFT_MASK) != 0);
+  }
 
   gtk_window_set_focus(GTK_WINDOW(main_window), drawing_area);
   
@@ -175,17 +300,12 @@ static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data
   return TRUE;
 }
 
-static gint init(GtkWidget *widget)
+static gint init (GtkWidget *widget)
 {
   // OpenGL functions can be called only if make_current returns true
-  if (gtk_gl_area_make_current(GTK_GL_AREA(widget)))
+  if (gtk_gl_area_make_current (GTK_GL_AREA (widget)))
   {
-    glViewport(0,0, widget->allocation.width, widget->allocation.height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0,100, 100,0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    GL_InitializeExtensions ();
   }
   
   return TRUE;
@@ -204,9 +324,9 @@ static gint draw_view(GtkWidget *widget, GdkEventExpose *event)
 }
 
 // Save the new size of the window.
-static gint reshape_view(GtkWidget *widget, GdkEventConfigure *event)
+static gint reshape_view(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 {
-  project->SetViewSize(widget->allocation.width, widget->allocation.height);
+  project->SetViewSize(allocation->width, allocation->height);
 
   return TRUE;
 }
@@ -225,20 +345,54 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
 
 int main(int argc, char* argv[])
 {
-  GtkWidget *vbox, *hbox;
+  GtkWidget *vbox, *hbox, *frame;
+  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
+  int i, j, k;
+  char* libgl = NULL;
 
-  int attrlist[] =
+  // Parse and remove Linux arguments
+  for (i = 1; i < argc; i++)
   {
-    GLX_RGBA,
-    GLX_DOUBLEBUFFER,
-    GLX_DEPTH_SIZE, 16,
-    0
-  };
+    char* param = argv[i];
+
+    if (param[0] == '-' && param[1] == '-')
+    {
+      param += 2;
+
+      if ((strcmp (param, "libgl") == 0) && (i != argc))
+      {
+	libgl = argv[i+1];
+	argv[i] = argv[i+1] = NULL;
+	i++;
+      }
+    }
+  }
+
+  for (i = 1; i < argc; i++)
+  {
+    for (k = i; k < argc; k++)
+      if (argv[k] != NULL)
+	break;
+
+    if (k > i)
+    {
+      k -= i;
+      for (j = i + k; j < argc; j++)
+	argv[j-k] = argv[j];
+      argc -= k;
+    }
+  }
+
+  init_paths (argv[0]);
 
   gtk_set_locale ();
   gtk_init (&argc, &argv);
 
+  atexit (GL_Shutdown);
   // Check if OpenGL is supported.
+  if (!GL_Initialize (libgl))
+    return 1;
+
   if (gdk_gl_query() == FALSE)
   {
     g_print("ERROR: OpenGL not supported\n");
@@ -246,7 +400,6 @@ int main(int argc, char* argv[])
   }
 
 //  startup_message ("Loading user preferences ...");
-  init_rc ();
   project = new Project();
 
   main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -255,8 +408,6 @@ int main(int argc, char* argv[])
 //  gtk_window_set_policy (GTK_WINDOW (window), TRUE, TRUE, FALSE);
   gtk_widget_realize (main_window);
 // read preferences
-  gtk_widget_set_usize (GTK_WIDGET(main_window), 400, 300);
-  gdk_window_resize (main_window->window, 600, 400);
   gtk_window_set_default_size (GTK_WINDOW (main_window), 600, 400);
  
   gtk_signal_connect (GTK_OBJECT (main_window), "delete_event", (GtkSignalFunc) main_quit, NULL);
@@ -267,7 +418,7 @@ int main(int argc, char* argv[])
   gtk_widget_show (vbox);
 
 //  startup_message ("Creating Main Menu ...");
-  create_main_menu(main_window, vbox);
+  create_main_menu (GTK_OBJECT (main_window), vbox);
 
 //  startup_message ("Creating Toolbars ...");
   create_toolbars (main_window, vbox);
@@ -284,7 +435,7 @@ int main(int argc, char* argv[])
      for all your top level windows unless you are certain that they get
      destroy signal by other means.
   */
-  gtk_quit_add_destroy(1, GTK_OBJECT(main_window));
+  //  gtk_quit_add_destroy(1, GTK_OBJECT(main_window));
 
   // Create new OpenGL widget.
   drawing_area = GTK_WIDGET(gtk_gl_area_new(attrlist));
@@ -302,7 +453,7 @@ int main(int argc, char* argv[])
   // Connect signal handlers
   gtk_signal_connect(GTK_OBJECT(drawing_area), "expose_event", 
       GTK_SIGNAL_FUNC(draw_view), NULL);
-  gtk_signal_connect(GTK_OBJECT(drawing_area), "configure_event",
+  gtk_signal_connect(GTK_OBJECT(drawing_area), "size_allocate",//configure_event",
       GTK_SIGNAL_FUNC(reshape_view), NULL);
   gtk_signal_connect(GTK_OBJECT(drawing_area), "realize",
       GTK_SIGNAL_FUNC(init), NULL);
@@ -315,10 +466,15 @@ int main(int argc, char* argv[])
   gtk_signal_connect (GTK_OBJECT (drawing_area), "key_press_event",
       GTK_SIGNAL_FUNC(key_press_event), NULL);
  
-  /* set minimum size */
+  // set minimum size
   gtk_widget_set_usize(GTK_WIDGET(drawing_area), 100,100);
 
-  gtk_container_add(GTK_CONTAINER(hbox),GTK_WIDGET(drawing_area));
+  frame = gtk_frame_new ((char*)NULL);
+  gtk_widget_show (frame);
+  gtk_container_add (GTK_CONTAINER (hbox), frame);
+  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
+
+  gtk_container_add (GTK_CONTAINER (frame), GTK_WIDGET(drawing_area));
   gtk_widget_show(GTK_WIDGET(drawing_area));
 
   create_piecebar(main_window, hbox);
@@ -327,6 +483,15 @@ int main(int argc, char* argv[])
   //  GtkWidget* statusbar = gtk_statusbar_new ();
   //gtk_widget_show (statusbar);
   //gtk_box_pack_start (GTK_BOX (vbox), statusbar, FALSE, TRUE, 0);   
+
+#include "pixmaps/icon32.xpm"
+
+  GdkPixmap *gdkpixmap;
+  GdkBitmap *mask;
+
+  gdkpixmap = gdk_pixmap_create_from_xpm_d (main_window->window, &mask,
+                 &main_window->style->bg[GTK_STATE_NORMAL], icon32);
+  gdk_window_set_icon (main_window->window, NULL, gdkpixmap, mask);
 
   gtk_widget_show(GTK_WIDGET(main_window));
 
@@ -338,22 +503,13 @@ int main(int argc, char* argv[])
   if (project->Initialize(argc, argv, path) == false)
   {
     delete project;
-    return 1;
+    //    return 1;
+    _exit (1);
   }
 
   gtk_main();
 
   //  delete project;
+  _exit (0); // FIXME !
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-

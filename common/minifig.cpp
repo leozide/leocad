@@ -129,7 +129,7 @@ MinifigWizard::MinifigWizard ()
 			     {-0.42f,0,0} };
   int i;
 
-  for (i = 0; i < 15; i++)
+  for (i = 0; i < LC_MFW_NUMITEMS; i++)
   {
     m_Info[i] = NULL;
     m_Colors[i] = colors[i];
@@ -139,33 +139,25 @@ MinifigWizard::MinifigWizard ()
     m_Rot[i][0] = 0;
     m_Rot[i][1] = 0;
     m_Rot[i][2] = 0;
+    m_Angles[i] = 0;
   }
+
+  m_Rot[6][0] = 45;
+  m_Rot[6][2] = 90;
+  m_Rot[7][0] = 45;
+  m_Rot[7][2] = 90;
 
   for (i = 0; i < 13; i++)
   {
-    if (i == 3 || i == 7 || i == 8 || i == 9)
+    if (i == 3 || i == 8 || i == 9)
       continue;
 
     PieceInfo* pInfo = project->FindPieceInfo (mfw_pieceinfo[i].name);
     if (pInfo == NULL)
       continue;
 
-    if (i == 6)
-    {
-      m_Info[6] = pInfo;
-      m_Info[7] = pInfo;
-      pInfo->AddRef();
-      pInfo->AddRef();
-      m_Rot[6][0] = 45;
-      m_Rot[6][2] = 90;
-      m_Rot[7][0] = 45;
-      m_Rot[7][2] = 90;
-    }
-    else
-    {
-      m_Info[i] = pInfo;
-      pInfo->AddRef();
-    }
+    m_Info[i] = pInfo;
+    pInfo->AddRef();
   }
 }
 
@@ -277,9 +269,9 @@ void MinifigWizard::Calculate ()
   m2.ToAxisAngle (m_Rotation[LC_MFW_LEFT_HAND]);
   m2.GetTranslation (m_Position[LC_MFW_LEFT_HAND]);
 
-  m2.Translate (m_Pos[LC_MFW_LEFT_TOOL][0]-m_Pos[LC_MFW_LEFT_ARM][0],
-		m_Pos[LC_MFW_LEFT_TOOL][1]-m_Pos[LC_MFW_LEFT_ARM][1],
-		m_Pos[LC_MFW_LEFT_TOOL][2]-m_Pos[LC_MFW_LEFT_ARM][2]);
+  m2.Translate (m_Pos[LC_MFW_LEFT_TOOL][0]-0.9f,
+		m_Pos[LC_MFW_LEFT_TOOL][1]-m_Pos[LC_MFW_LEFT_HAND][1],
+		m_Pos[LC_MFW_LEFT_TOOL][2]-m_Pos[LC_MFW_LEFT_HAND][2]);
   m3.CreateOld (0,0,0,m_Rot[LC_MFW_LEFT_TOOL][0]-m_Rot[LC_MFW_LEFT_HAND][0],
 		m_Rot[LC_MFW_LEFT_TOOL][1]-m_Rot[LC_MFW_LEFT_HAND][1],
 		m_Rot[LC_MFW_LEFT_TOOL][2]-m_Rot[LC_MFW_LEFT_HAND][2]);
@@ -291,7 +283,7 @@ void MinifigWizard::Calculate ()
   m3.GetTranslation (m_Position[LC_MFW_LEFT_TOOL]);
 
   // right arm/hand/tool
-  mat.LoadIdentity ();
+  mat.LoadIdentity (); m2.LoadIdentity (); m3.LoadIdentity ();
   mat.Rotate (m_Angles[LC_MFW_RIGHT_ARM], -1, 0, 0);
   mat.SetTranslation (m_Pos[LC_MFW_RIGHT_ARM][0], m_Pos[LC_MFW_RIGHT_ARM][1],
 		      m_Pos[LC_MFW_RIGHT_ARM][2]);
@@ -310,6 +302,19 @@ void MinifigWizard::Calculate ()
   m2.Multiply (m3, mat);
   m2.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_HAND]);
   m2.GetTranslation (m_Position[LC_MFW_RIGHT_HAND]);
+
+  m2.Translate (m_Pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
+		m_Pos[LC_MFW_RIGHT_TOOL][1]-m_Pos[LC_MFW_RIGHT_HAND][1],
+		m_Pos[LC_MFW_RIGHT_TOOL][2]-m_Pos[LC_MFW_RIGHT_HAND][2]);
+  m3.CreateOld (0,0,0,m_Rot[LC_MFW_RIGHT_TOOL][0]-m_Rot[LC_MFW_RIGHT_HAND][0],
+		m_Rot[LC_MFW_RIGHT_TOOL][1]-m_Rot[LC_MFW_RIGHT_HAND][1],
+		m_Rot[LC_MFW_RIGHT_TOOL][2]-m_Rot[LC_MFW_RIGHT_HAND][2]);
+  mat.Multiply (m2, m3);
+  m2.LoadIdentity ();
+  m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
+  m3.Multiply (mat, m2);
+  m3.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_TOOL]);
+  m3.GetTranslation (m_Position[LC_MFW_RIGHT_TOOL]);
 
   // hips
   m_Position[LC_MFW_HIPS][0] = m_Pos[LC_MFW_HIPS][0];
@@ -506,57 +511,50 @@ void MinifigWizard::ChangePiece (int type, const char *desc)
     {
       float rx = 45, ry = 0, rz = 0, x = 0.92f, y = -0.62f, z = 1.76f;
 
-      if (strcmp (piece_info->m_strName,"4529") == 0)
-	{ rx = -45; y = -1.14f; z = 2.36f; }
-      if (strcmp (piece_info->m_strName,"3899") == 0)
-	{ y = -1.64f; z = 1.38f; }
-      if (strcmp (piece_info->m_strName,"4528") == 0)
-	{ rx = -45; y = -1.26f; z = 2.36f; }
-      if (strcmp (piece_info->m_strName,"4479") == 0)
-	{ rz = 90; y = -1.22f; z = 2.44f; }
-      if (strcmp (piece_info->m_strName,"3962") == 0)
-	{ rz = 90; y = -0.7f; z = 1.62f; }
-      if (strcmp (piece_info->m_strName,"4360") == 0)
-	{ rz = -90; y = -1.22f; z = 2.44f; }
-      if (strncmp (piece_info->m_strName,"6246",4) == 0)
-	{ y = -1.82f; z = 2.72f; rz = 90; }
-      if (strcmp (piece_info->m_strName,"4349") == 0)
-	{ y = -1.16f; z = 2.0f; }
-      if (strcmp (piece_info->m_strName,"4479") == 0)
-	{ y = -1.42f; z = 2.26f; }
-      if (strcmp (piece_info->m_strName,"3959") == 0)
-	{ y = -1.0f; z = 1.88f; }
-      if (strcmp (piece_info->m_strName,"4522") == 0)
-	{ y = -1.64f; z = 2.48f; }
-      if (strcmp (piece_info->m_strName,"194") == 0)
-	{ rz = 180; y = -1.04f; z = 1.94f; }
-      if (strcmp (piece_info->m_strName,"4006") == 0)
-	{ rz = 180; y = -1.24f; z = 2.18f; }
-      if (strcmp (piece_info->m_strName,"6246C") == 0)
-	{ rx = 45; rz = 0; y = -0.86f; z = 1.78f; }
-      if (strcmp (piece_info->m_strName,"4497") == 0)
-	{ y = -2.16f; z = 3.08f; rz = 90; }
-      if (strcmp (piece_info->m_strName,"30092") == 0)
-	{ x = 0; rz = 180; }
-      if (strcmp (piece_info->m_strName,"37") == 0)
-	{ z = 1.52f; y = -0.64f; }
-      if (strcmp (piece_info->m_strName,"38") == 0)
-	{ z = 1.24f; y = -0.34f; }
-      if (strcmp (piece_info->m_strName,"3841") == 0)
-	{ z = 2.24f; y = -1.34f; rz = 180; }
-      if (strcmp (piece_info->m_strName,"4499") == 0)
-	{ rz = ((type == LC_MFW_RIGHT_TOOL) ? 10.0f : -10.0f); z = 1.52f; }
-      if (strcmp (piece_info->m_strName,"3852") == 0)
-	{ rz = -90; x = 0.90f; y = -0.8f; z = 1.84f; }
-      if (strcmp (piece_info->m_strName,"30152") == 0)
-	{ z = 3.06f; y = -2.16f; }                                      
-      if (strcmp (piece_info->m_strName,"2570") == 0)
-	{ z = 1.68f; y = -0.8f; }
-      if (strcmp (piece_info->m_strName,"2614") == 0)
-	{ z = 1.74f; y = -0.86f; }
-
-      if (type == LC_MFW_RIGHT_TOOL)
-	x = -x;
+      if (strcmp (piece_info->m_strName,"4529") == 0) // Saucepan (FIXME: tool rotate in wrong axis)
+	{ rx = -45; ry = 90; rz = 90; x = 0.96f; y = -0.62f; z = 2.56f; }
+      if (strcmp (piece_info->m_strName,"3899") == 0) // Cup (FIXME: tool rotate not centered)
+	{ x = -0.06f; y = -0.62f; z = 2.16f; }
+      if (strcmp (piece_info->m_strName,"4528") == 0) // Frypan (FIXME: tool rotate in wrong axis)
+	{ rx = -45; ry = 90; rz = 90; x = 0.9f; y = -0.62f; z = 2.64f; }
+      if (strcmp (piece_info->m_strName,"4479") == 0) // Metal Detector (FIXME: tool rotate not centered)
+	{ rz = 90; x = 0.74; y = -0.64f; z = 2.64f; }
+      if (strcmp (piece_info->m_strName,"3962") == 0) // Radio
+	{ rz = 90; x = 0.72f; y = -0.66f; z = 1.62f; }
+      if (strcmp (piece_info->m_strName,"4360") == 0) // Space Laser Gun (FIXME: tool rotate not centered)
+	{ rz = -90; x = 0.96f; y = -0.62f; z = 2.64f; }
+      if (strncmp (piece_info->m_strName,"6246",4) == 0) // Screw Driver, Hammer, Box Wrench, ...
+	{ x = 0.72f; y = -0.61f; z = 3.12f; rz = 90; }
+      if (strcmp (piece_info->m_strName,"4349") == 0) // Loudhailer
+	{ x = 0.72f; y = -0.64f; z = 2.28f; }
+      if (strcmp (piece_info->m_strName,"3959") == 0) // Space Gun
+	{ x = 0.74f; y = -0.62f; z = 2.1f; }
+      if (strcmp (piece_info->m_strName,"4522") == 0) // Mallet
+	{ x = 0.72f; y = -0.64f; z = 2.72f; }
+      if (strcmp (piece_info->m_strName,"194") == 0) // Hose Nozzle
+	{ rz = 180; x = 0.72f; y = -0.62f; z = 2.22f; }
+      if (strcmp (piece_info->m_strName,"4006") == 0) // Spanner/Screwdriver
+	{ rz = 180; x = 0.72f; y = -0.62f; z = 2.18f; }
+      if (strcmp (piece_info->m_strName,"6246C") == 0) // Power Drill
+	{ rx = 45; rz = 0; x = 0.72f; y = -0.62f; z = 1.96f; }
+      if (strcmp (piece_info->m_strName,"4497") == 0) // Spear
+	{ x = 0.72f; y = -0.64f; z = 3.48f; rz = 90; }
+      if (strcmp (piece_info->m_strName,"37") == 0) // Knife
+	{ x = 0.72f; y = -0.64f; z = 1.58f; }
+      if (strcmp (piece_info->m_strName,"38") == 0) // Harpoon
+	{ x = 0.72f; y = -0.64f; z = 1.0f; }
+      if (strcmp (piece_info->m_strName,"3841") == 0) // Pickaxe
+	{ z = 2.24f; y = -0.64f; x = 0.72f; rz = 180; }
+      if (strcmp (piece_info->m_strName,"4499") == 0) // Bow with Arrow
+	{ rz = ((type == LC_MFW_RIGHT_TOOL) ? 10.0f : -10.0f); x = 0.72f; z = 1.52f; }
+      if (strcmp (piece_info->m_strName,"3852") == 0) // Hairbrush (FIXME: tool rotate not centered)
+	{ rz = -90; x = 0.82f; y = -0.64f; z = 1.98f; }
+      if (strcmp (piece_info->m_strName,"30152") == 0) // Magnifying glass
+	{ z = 3.76f; y = -0.62f; x = 0.72f; }
+      if (strcmp (piece_info->m_strName,"2570") == 0) // Crossbow
+	{ z = 1.82f; y = -0.64f; x = 0.72f; }
+      if (strcmp (piece_info->m_strName,"2614") == 0) // Fishing Rod
+	{ z = 1.74f; y = -0.62f; x = 0.72f; }
 
       m_Pos[type][0] = x;
       m_Pos[type][1] = y;

@@ -13,6 +13,7 @@
 #include "system.h"
 #include "pieceinf.h" // TODO: remove
 #include "config.h"
+#include "mainwnd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -92,9 +93,7 @@ BOOL CCADApp::InitInstance()
 	SetRegistryKey(_T("BT Software"));
 //	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
-
   if (!GL_Initialize (NULL))
-
     return FALSE;
 
 	// Register the application's document templates.  Document templates
@@ -110,6 +109,7 @@ BOOL CCADApp::InitInstance()
   EnableShellOpen();
 	RegisterShellFileTypes(TRUE);
 
+  main_window = new MainWnd ();
 	project = new Project;
 
 	UINT cmdshow = m_nCmdShow;
@@ -240,6 +240,8 @@ BOOL CCADApp::InitInstance()
 		m_pMainWnd->ShowWindow(cmdshow);
 	m_pMainWnd->UpdateWindow();
 	project->HandleNotify(LC_ACTIVATE, 1);
+
+  main_window->UpdateMRU ();
 
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();

@@ -41,6 +41,20 @@ void Image::FreeData ()
   m_pData = NULL;
 }
 
+void Image::Allocate (int width, int height, bool alpha)
+{
+  FreeData ();
+
+  m_nWidth = width;
+  m_nHeight = height;
+  m_bAlpha = alpha;
+
+  if (m_bAlpha)
+    m_pData = (unsigned char*)malloc (width * height * 4);
+  else
+    m_pData = (unsigned char*)malloc (width * height * 3);
+}
+
 void Image::ResizePow2 ()
 {
   int i, shifted_x, shifted_y;
@@ -124,12 +138,11 @@ bool Image::FileLoad (File& file)
   file.Seek (-8, SEEK_CUR);
 
   // Check for the BMP header
-	if ((buf[0] == 'B') && (buf[1] == 'M'))
+  if ((buf[0] == 'B') && (buf[1] == 'M'))
   {
     if (!LoadBMP (file))
       return false;
 
-    ResizePow2 ();
     return true;
   }
 
@@ -139,7 +152,6 @@ bool Image::FileLoad (File& file)
     if (!LoadJPG (file))
       return false;
 
-    ResizePow2 ();
     return true;
   }
 #endif
@@ -153,20 +165,18 @@ bool Image::FileLoad (File& file)
     if (!LoadPNG (file))
       return false;
 
-    ResizePow2 ();
     return true;
   }
 #endif
 
   // Check for the GIF header
   if ((buf[0] == 'G') && (buf[1] == 'I') && (buf[2] == 'F') &&
-      (buf[3] == '8') && ((buf[4] != '7') || (buf[4] == '9')) &&
+      (buf[3] == '8') && ((buf[4] == '7') || (buf[4] == '9')) &&
       (buf[5] == 'a'))
   {
     if (!LoadGIF (file))
       return false;
 
-    ResizePow2 ();
     return true;
   }
 

@@ -155,6 +155,8 @@ bool Texture::LoadFromFile (char* strFilename, bool bFilter)
   
   if (image.FileLoad (strFilename))
   {
+    image.ResizePow2 ();
+
     m_nWidth = image.Width ();
     m_nHeight = image.Height ();
 

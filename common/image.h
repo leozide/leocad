@@ -19,6 +19,7 @@ public:
   void Resize (int width, int height);
   void ResizePow2 ();
   void FromOpenGL (int width, int height);
+  void Allocate (int width, int height, bool alpha);
 
   int Width () const
     { return m_nWidth; }

@@ -240,6 +240,11 @@ static void minifigdlg_piece_changed (GtkWidget *widget)
     {
       info->opts->pos[0][2] = 3.92f;
       info->opts->pos[1][2] = 3.92f;
+ 
+      if (strcmp (piece_info->m_strName,"4498") == 0)
+	info->opts->rot[3][2] = 180.0f;
+      else
+	info->opts->rot[3][2] = 0.0f;
     }
     else
     {
@@ -307,6 +312,12 @@ static void minifigdlg_piece_changed (GtkWidget *widget)
 	{ z = 1.24f; y = -0.34f; }
       if (strcmp (piece_info->m_strName,"3841") == 0)
 	{ z = 2.24f; y = -1.34f; rz = 180; }
+      if (strcmp (piece_info->m_strName,"4499") == 0)
+	{ rz = ((i == MFW_RIGHT_TOOL) ? 10 : -10); z = 1.52f; }
+      if (strcmp (piece_info->m_strName,"3852") == 0)
+	{ rz = -90; x = 0.90f; y = -0.8f; z = 1.84f; }
+      if (strcmp (piece_info->m_strName,"30152") == 0)
+	{ z = 3.06f; y = -2.16f; }                                      
 
       if (i == MFW_RIGHT_TOOL)
 	x = -x;
@@ -507,7 +518,7 @@ int minifigdlg_execute(void* param)
 
   gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_HAT])->list), 6);
   gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_HEAD])->list), 4);
-  gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_TORSO])->list), 16);
+  gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_TORSO])->list), 19);
 
   return dlg_domodal(dlg, LC_CANCEL);
 }

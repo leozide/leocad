@@ -745,16 +745,16 @@ int arraydlg_execute(void* param)
   return dlg_domodal(dlg, LC_CANCEL);
 }
 
+// =============================================================================
 // About Dialog
 
-int aboutdlg_execute(void* param)
+int aboutdlg_execute (void* param)
 {
 #include "pixmaps/icon32.xpm"
-  GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2, *hbox;
-  GtkWidget *frame, *w;
-  GtkWidget *table;
-  char info[256];
+  GtkWidget *dlg, *vbox1, *vbox2, *hbox, *frame, *scr, *w;
+  char info[512], buf[64];
+  GLboolean valueb;
+  GLint value;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
@@ -762,49 +762,46 @@ int aboutdlg_execute(void* param)
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
 		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 430, 190);
   gtk_window_set_title (GTK_WINDOW (dlg), "About LeoCAD");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
+
   gtk_widget_realize (dlg);
 
-  vbox1 = gtk_vbox_new (FALSE, 0);
+  vbox1 = gtk_vbox_new (FALSE, 10);
   gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (dlg), vbox1);
+  gtk_container_border_width (GTK_CONTAINER (vbox1), 5);
 
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_hbox_new (FALSE, 5);
   gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
-  gtk_widget_set_usize (hbox, -2, 60);
+  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
 
   w = new_pixmap (dlg, icon32);
   gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, TRUE, 0);
   gtk_widget_set_usize (w, 32, 32);
 
   vbox2 = gtk_vbox_new (TRUE, 0);
   gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 10);
 
   w = gtk_label_new ("LeoCAD for "LC_VERSION_OSNAME" Version "LC_VERSION);
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 
-  w = gtk_label_new ("Copyright (c) 1996-2000, BT Software");
+  w = gtk_label_new ("Copyright (c) 1996-2001, BT Software");
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 
-  table = gtk_table_new (1, 1, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (hbox), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
+  vbox2 = gtk_vbox_new (TRUE, 0);
+  gtk_widget_show (vbox2);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 5);
 
   w = gtk_button_new_with_label ("OK");
   gtk_widget_show (w);
   gtk_signal_connect (GTK_OBJECT (w), "clicked",
 		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_OK));
-  gtk_table_attach (GTK_TABLE (table), w, 0, 1, 0, 1,
-                    (GtkAttachOptions) GTK_EXPAND, (GtkAttachOptions) GTK_EXPAND, 0, 0);
-  gtk_widget_set_usize (w, 60, 40);
+  gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
+  gtk_widget_set_usize (w, 60, -2);
 
   gtk_widget_grab_focus (w);
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
@@ -815,26 +812,82 @@ int aboutdlg_execute(void* param)
   frame = gtk_frame_new ("System Information");
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (vbox1), frame, TRUE, TRUE, 0);
-  gtk_widget_set_usize (frame, -2, 100);
-  gtk_container_border_width (GTK_CONTAINER (frame), 10);
+  gtk_widget_set_usize (frame, -2, 150);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox2);
   gtk_container_add (GTK_CONTAINER (frame), vbox2);
   gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
 
-  strcpy(info, "OpenGL Version ");
-  strcat(info, (const char*)glGetString(GL_VERSION));
-  strcat(info, "\n");
-  strcat(info, (const char*)glGetString(GL_RENDERER));
-  strcat(info, " - ");
-  strcat(info, (const char*)glGetString(GL_VENDOR));
+  strcpy (info, "OpenGL Version ");
+  strcat (info, (const char*)glGetString (GL_VERSION));
+  strcat (info, "\n");
+  strcat (info, (const char*)glGetString (GL_RENDERER));
+  strcat (info, " - ");
+  strcat (info, (const char*)glGetString (GL_VENDOR));
+
+  strcat (info, "\n\nDisplay info:\n");
+  glGetIntegerv (GL_INDEX_BITS, &value);
+  sprintf (buf, "Bits per pixel: %i", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_RED_BITS, &value);
+  sprintf (buf, " (%i", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_GREEN_BITS, &value);
+  sprintf (buf, "-%i", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_BLUE_BITS, &value);
+  sprintf (buf, "-%i", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_ALPHA_BITS, &value);
+  sprintf (buf, "-%i)\n", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_DEPTH_BITS, &value);
+  sprintf (buf, "Depth buffer bits: %i\n", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_STENCIL_BITS, &value);
+  sprintf (buf, "Stencil bits: %i\n", value);
+  strcat (info, buf);
+  glGetIntegerv (GL_AUX_BUFFERS, &value);
+  sprintf (buf, "Auxillary buffers: %i\n", value);
+  strcat (info, buf);
+  glGetBooleanv (GL_STEREO, &valueb);
+  strcat (info, "Stereoscopic viewing: ");
+  if (valueb == GL_TRUE)
+    strcat (info, "Yes.\n");
+  else
+    strcat (info, "No.\n");
+
+  strcat (info, "Compiled Vertex Arrays: ");
+  if (GL_HasCompiledVertexArrays ())
+    strcat (info, "Supported.\n");
+  else
+    strcat (info, "Not supported.\n");
+
+  strcat (info, "Multitexturing: ");
+  if (GL_GetMultiTextures () > 1)
+  {
+    sprintf (buf, "Supported, %i texture units.\n", GL_GetMultiTextures ());
+    strcat (info, buf);
+  }
+  else
+    strcat (info, "Not supported.\n");
+  glGetIntegerv (GL_MAX_TEXTURE_SIZE, &value);
+  sprintf (buf, "Maximum texture size: %ix%i", value, value);
+  strcat (info, buf);
+
+  scr = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scr);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  gtk_box_pack_start (GTK_BOX (vbox2), scr, TRUE, TRUE, 0);
 
   w = gtk_text_new (NULL, NULL);
   gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (vbox2), w, TRUE, TRUE, 0);
-  gtk_text_insert (GTK_TEXT (w), NULL, NULL, NULL,
-                   info, strlen(info));
+  gtk_container_add (GTK_CONTAINER (scr), w);
+  gtk_text_insert (GTK_TEXT (w), NULL, NULL, NULL, info, strlen(info));
+
+  if (GTK_TEXT (w)->vadj != NULL)
+    gtk_adjustment_set_value (GTK_ADJUSTMENT (GTK_TEXT (w)->vadj), 0);
 
   return dlg_domodal(dlg, LC_OK);
 }

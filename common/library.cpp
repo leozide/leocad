@@ -2,9 +2,6 @@
 // Piece library management
 //
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
@@ -1204,8 +1201,8 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 
 		for (i = 12; i < 20; i++)
 		{
-			float tmp[1] = { tex->points[i] };
-			short sh[1] = { (short)tmp[0] };
+			float tmp = tex->points[i];
+			short sh[1] = { (short)tmp };
 			newbin.WriteShort(sh, 1);
 		}
 	}

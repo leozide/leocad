@@ -10,6 +10,8 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg);
 int povraydlg_execute(void* param);
 int preferencesdlg_execute(void* param);
 int propertiesdlg_execute(void* param);
+int groupeditdlg_execute(void* param);
+int groupdlg_execute(void* param);
 
 #endif // _DIALOGS_H_
 

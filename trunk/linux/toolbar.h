@@ -1,8 +1,10 @@
 #ifndef _TOOLBAR_H_
 #define _TOOLBAR_H_
 
+class GLWindow;
+
 void create_toolbars (GtkWidget *window, GtkWidget *vbox);
-GtkWidget* create_piecebar (GtkWidget *window);
+GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share);
 void create_statusbar (GtkWidget *window, GtkWidget *vbox);
 void colorlist_set (int new_color);
 void groupsbar_set (int new_group);

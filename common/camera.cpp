@@ -311,8 +311,8 @@ bool Camera::FileLoad (File& file)
 
       int snapshot; // BOOL under Windows
       int cam;
-      file.Read(&snapshot, 4);
-      file.Read(&cam, 4);
+      file.ReadLong (&snapshot, 1);
+      file.ReadLong (&cam, 1);
 //			if (cam == -1)
 //				node->pCam = NULL;
 //			else
@@ -337,41 +337,41 @@ bool Camera::FileLoad (File& file)
       float param[4];
       unsigned char type;
 
-      file.Read(&n, 4);
+      file.ReadLong (&n, 1);
       while (n--)
       {
-        file.Read(&time, 2);
-        file.Read(param, 12);
-        file.Read(&type, 1);
+        file.ReadShort (&time, 1);
+        file.ReadFloat (param, 3);
+        file.ReadByte (&type, 1);
 
         ChangeKey (time, false, true, param, type);
       }
 
-      file.Read(&n, 4);
+      file.ReadLong (&n, 1);
       while (n--)
       {
-        file.Read(&time, 2);
-        file.Read(param, 12);
-        file.Read(&type, 1);
+        file.ReadShort (&time, 1);
+        file.ReadFloat (param, 3);
+        file.ReadByte (&type, 1);
 
         ChangeKey (time, true, true, param, type);
       }
     }
 
-    file.Read(&m_fovy, 4);
-    file.Read(&m_zFar, 4);
-    file.Read(&m_zNear, 4);
+    file.ReadFloat (&m_fovy, 1);
+    file.ReadFloat (&m_zFar, 1);
+    file.ReadFloat (&m_zNear, 1);
 
     if (version < 5)
     {
-      file.Read(&n, 4);
+      file.ReadLong (&n, 1);
       if (n != 0)
 	m_nState |= LC_CAMERA_HIDDEN;
     }
     else
     {
-      file.Read(&m_nState, 1);
-      file.Read(&m_nType, 1);
+      file.ReadByte (&m_nState, 1);
+      file.ReadByte (&m_nType, 1);
     }
   }
 
@@ -380,9 +380,9 @@ bool Camera::FileLoad (File& file)
     unsigned long show;
     int user;
 
-    file.Read(&show, 4);
+    file.ReadLong (&show, 1);
 //			if (version > 2)
-    file.Read(&user, 4);
+    file.ReadLong (&user, 1);
     if (show == 0)
       m_nState |= LC_CAMERA_HIDDEN;
   }
@@ -399,15 +399,15 @@ void Camera::FileSave (File& file) const
   Object::FileSave (file);
 
   ch = (unsigned char)strlen(m_strName);
-  file.Write(&ch, 1);
-  file.Write(m_strName, ch);
+  file.Write (&ch, 1);
+  file.Write (m_strName, ch);
 
-  file.Write(&m_fovy, 4);
-  file.Write(&m_zFar, 4);
-  file.Write(&m_zNear, 4);
+  file.WriteFloat (&m_fovy, 1);
+  file.WriteFloat (&m_zFar, 1);
+  file.WriteFloat (&m_zNear, 1);
   // version 5
-  file.Write(&m_nState, 1);
-  file.Write(&m_nType, 1);
+  file.WriteByte (&m_nState, 1);
+  file.WriteByte (&m_nType, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -191,7 +191,7 @@ bool Piece::FileLoad (File& file, char* name)
       file.ReadLong (&keys, 1);
       while (keys--)
       {
-        file.Read (param, 16);
+        file.ReadFloat (param, 4);
         file.ReadShort (&time, 1);
         file.ReadByte (&type, 1);
 
@@ -201,7 +201,7 @@ bool Piece::FileLoad (File& file, char* name)
       file.ReadLong (&keys, 1);
       while (keys--)
       {
-        file.Read (param, 16);
+        file.ReadFloat (param, 4);
         file.ReadShort (&time, 1);
         file.ReadByte (&type, 1);
 
@@ -220,14 +220,14 @@ bool Piece::FileLoad (File& file, char* name)
           if (version > 3)
           {
             float m[16];
-            file.Read (m, sizeof(m));
+            file.ReadFloat (m, 16);
             mat.FromFloat (m);
           }
           else
           {
             float move[3], rotate[3];
-            file.Read (move, sizeof(float[3]));
-            file.Read (rotate, sizeof(float[3]));
+            file.ReadFloat (move, 3);
+            file.ReadFloat (rotate, 3);
             mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
           }
 
@@ -252,8 +252,8 @@ bool Piece::FileLoad (File& file, char* name)
       {
         Matrix mat;
         float move[3], rotate[3];
-        file.Read (move, sizeof(float[3]));
-        file.Read (rotate, sizeof(float[3]));
+        file.ReadFloat (move, 3);
+        file.ReadFloat (rotate, 3);
         mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
 
         mat.GetTranslation(&param[0], &param[1], &param[2]);

@@ -54,11 +54,11 @@ int CMinifigWnd::InitGL()
 	pfd.cDepthBits = 24;
   pfd.iLayerType = PFD_MAIN_PLANE;
 
-  int nPixelFormat = pfnwglChoosePixelFormat(m_pDC->m_hDC, &pfd);
+  int nPixelFormat = OpenGLChoosePixelFormat(m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return -1 ;
 
-	if (!pfnwglSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!OpenGLSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
 		return -1 ;
 
 	m_pPal = new CPalette;
@@ -133,10 +133,9 @@ void CMinifigWnd::DrawScene()
 
 	RECT rc;
 	GetClientRect (&rc);
-
 	m_pFig->Resize (rc.right, rc.bottom);
   m_pFig->Redraw ();
 
-	pfnwglSwapBuffers (m_pDC->m_hDC);
+	OpenGLSwapBuffers (m_pDC->m_hDC);
 	pfnwglMakeCurrent (oldDC, oldRC);
 }

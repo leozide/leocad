@@ -4,6 +4,13 @@
 // ============================================================================
 // WGL functions typedefs
 
+// these functions depend on the driver loaded
+BOOL OpenGLSwapBuffers (HDC hdc);
+int OpenGLChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR * ppfd);
+int OpenGLDescribePixelFormat(HDC hdc, int iPixelFormat, UINT nBytes, LPPIXELFORMATDESCRIPTOR ppfd);
+BOOL OpenGLSetPixelFormat(HDC hdc, int iPixelFormat, CONST PIXELFORMATDESCRIPTOR * ppfd);
+int OpenGLGetPixelFormat(HDC hdc);
+
 typedef int   (WINAPI* WGLCHOOSEPIXELFORMAT) (HDC, CONST PIXELFORMATDESCRIPTOR *);
 typedef int   (WINAPI* WGLDESCRIBEPIXELFORMAT) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
 typedef int   (WINAPI* WGLGETPIXELFORMAT)(HDC);
@@ -33,11 +40,11 @@ typedef BOOL  (WINAPI* WGLSETDEVICEGAMMARAMPEXT) (const unsigned char *pRed, con
 // ============================================================================
 // WGL extern declarations
 
-extern WGLCHOOSEPIXELFORMAT pfnwglChoosePixelFormat;
-extern WGLDESCRIBEPIXELFORMAT pfnwglDescribePixelFormat;
-extern WGLGETPIXELFORMAT pfnwglGetPixelFormat;
-extern WGLSETPIXELFORMAT pfnwglSetPixelFormat;
-extern WGLSWAPBUFFERS pfnwglSwapBuffers;
+//extern WGLCHOOSEPIXELFORMAT pfnwglChoosePixelFormat;
+//extern WGLDESCRIBEPIXELFORMAT pfnwglDescribePixelFormat;
+//extern WGLGETPIXELFORMAT pfnwglGetPixelFormat;
+//extern WGLSETPIXELFORMAT pfnwglSetPixelFormat;
+//extern WGLSWAPBUFFERS pfnwglSwapBuffers;
 extern WGLCOPYCONTEXT pfnwglCopyContext;
 extern WGLCREATECONTEXT pfnwglCreateContext;
 extern WGLCREATELAYERCONTEXT pfnwglCreateLayerContext;
@@ -65,11 +72,11 @@ extern WGLSETDEVICEGAMMARAMPEXT pfnwglSetDeviceGammaRampEXT;
 #undef wglUseFontBitmaps
 #undef wglUseFontOutlines
 
-#define wglChoosePixelFormat pfnwglChoosePixelFormat;
-#define wglDescribePixelFormat pfnwglDescribePixelFormat;
-#define wglGetPixelFormat pfnwglGetPixelFormat;
-#define wglSetPixelFormat pfnwglSetPixelFormat;
-#define wglSwapBuffers pfnwglSwapBuffers;
+//#define wglChoosePixelFormat pfnwglChoosePixelFormat;
+//#define wglDescribePixelFormat pfnwglDescribePixelFormat;
+//#define wglGetPixelFormat pfnwglGetPixelFormat;
+//#define wglSetPixelFormat pfnwglSetPixelFormat;
+//#define wglSwapBuffers pfnwglSwapBuffers;
 #define wglCopyContext pfnwglCopyContext;
 #define wglCreateContext pfnwglCreateContext;
 #define wglCreateLayerContext pfnwglCreateLayerContext;

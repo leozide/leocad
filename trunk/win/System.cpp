@@ -1444,9 +1444,9 @@ void* Sys_StartMemoryRender(int width, int height)
 		PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
 		0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 
-	int pixelformat = pfnwglChoosePixelFormat(render->hdc, &pfd);
-	pfnwglDescribePixelFormat(render->hdc, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	pfnwglSetPixelFormat(render->hdc, pixelformat, &pfd);
+	int pixelformat = OpenGLChoosePixelFormat(render->hdc, &pfd);
+	OpenGLDescribePixelFormat(render->hdc, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	OpenGLSetPixelFormat(render->hdc, pixelformat, &pfd);
   render->hrc = pfnwglCreateContext(render->hdc);
 	pfnwglMakeCurrent(render->hdc, render->hrc);
 
@@ -1565,7 +1565,7 @@ long SystemGetTicks()
 
 void SystemSwapBuffers()
 {
-	pfnwglSwapBuffers (pfnwglGetCurrentDC());
+	OpenGLSwapBuffers (pfnwglGetCurrentDC());
 }
 
 void SystemSetGroup(int group)

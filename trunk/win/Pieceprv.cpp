@@ -96,7 +96,7 @@ void CPiecePreview::OnPaint()
 	m_pPieceInfo->RenderPiece(project->GetCurrentColor());
 
   glFinish();
-	pfnwglSwapBuffers (m_pDC->m_hDC);
+	OpenGLSwapBuffers (m_pDC->m_hDC);
 	pfnwglMakeCurrent (oldDC, oldRC);
 }
 
@@ -111,7 +111,7 @@ void CPiecePreview::OnSize(UINT nType, int cx, int cy)
 
 int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	if (CWnd::OnCreate(lpCreateStruct) == -1)
+  if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
 	m_pDC = new CClientDC(this);
@@ -129,11 +129,11 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 		
-	int nPixelFormat = pfnwglChoosePixelFormat(m_pDC->m_hDC, &pfd);
+	int nPixelFormat = OpenGLChoosePixelFormat(m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return 0;
 
-	if (!pfnwglSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!OpenGLSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
 		return 0;
 
 	m_pPalette = new CPalette;
@@ -175,7 +175,7 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pfnwglMakeCurrent (oldDC, oldRC);
 	pfnwglShareLists (oldRC, m_hglRC);
 
-	return 0;
+  return 0;
 }
 
 void CPiecePreview::OnDestroy() 

@@ -97,7 +97,6 @@ BOOL CCADApp::InitInstance()
 
     return FALSE;
 
-
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views.
 	CSingleDocTemplate* pDocTemplate;
@@ -108,7 +107,7 @@ BOOL CCADApp::InitInstance()
 		RUNTIME_CLASS(CCADView));
 	AddDocTemplate(pDocTemplate);
 
-	EnableShellOpen();
+  EnableShellOpen();
 	RegisterShellFileTypes(TRUE);
 
 	project = new Project;
@@ -125,7 +124,6 @@ BOOL CCADApp::InitInstance()
 
 	if (!project->Initialize(__argc, __targv, app, NULL))
 		return false;
-
 
 	// TODO: move this to the project.
 	CString cfg = GetProfileString("Settings","Groups","");

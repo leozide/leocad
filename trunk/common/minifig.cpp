@@ -272,14 +272,6 @@ void MinifigWizard::Calculate ()
   float rot[LC_MFW_NUMITEMS][3];
   Matrix mat, m2, m3;
 
-  // FIXME:
-  // Saucepan: tool rotate in wrong axis
-  // Frypan: tool rotate in wrong axis
-  // Cup: tool rotate not centered
-  // Metal Detector: tool rotate not centered
-  // Space Laser Gun: tool rotate not centered
-  // Hairbrush: tool rotate not centered
-
   // Get the pieces in the right place
   for (int type = 0; type < LC_MFW_NUMITEMS; type++)
   {
@@ -379,18 +371,52 @@ void MinifigWizard::Calculate ()
   m2.ToAxisAngle (m_Rotation[LC_MFW_LEFT_HAND]);
   m2.GetTranslation (m_Position[LC_MFW_LEFT_HAND]);
 
-  m2.Translate (pos[LC_MFW_LEFT_TOOL][0]-0.9f,
-		pos[LC_MFW_LEFT_TOOL][1]-pos[LC_MFW_LEFT_HAND][1],
-		pos[LC_MFW_LEFT_TOOL][2]-pos[LC_MFW_LEFT_HAND][2]);
-  m3.CreateOld (0,0,0,rot[LC_MFW_LEFT_TOOL][0]-rot[LC_MFW_LEFT_HAND][0],
-		rot[LC_MFW_LEFT_TOOL][1]-rot[LC_MFW_LEFT_HAND][1],
-		rot[LC_MFW_LEFT_TOOL][2]-rot[LC_MFW_LEFT_HAND][2]);
-  mat.Multiply (m2, m3);
-  m2.LoadIdentity ();
-  m2.Rotate (m_Angles[LC_MFW_LEFT_TOOL], 0, 0, 1);
-  m3.Multiply (mat, m2);
-  m3.ToAxisAngle (m_Rotation[LC_MFW_LEFT_TOOL]);
-  m3.GetTranslation (m_Position[LC_MFW_LEFT_TOOL]);
+  if (m_Info[LC_MFW_LEFT_TOOL] != NULL)
+  {
+    m2.Translate (pos[LC_MFW_LEFT_TOOL][0]-0.9f,
+		  pos[LC_MFW_LEFT_TOOL][1]-pos[LC_MFW_LEFT_HAND][1],
+		  pos[LC_MFW_LEFT_TOOL][2]-pos[LC_MFW_LEFT_HAND][2]);
+    m3.CreateOld (0,0,0,rot[LC_MFW_LEFT_TOOL][0]-rot[LC_MFW_LEFT_HAND][0],
+		  rot[LC_MFW_LEFT_TOOL][1]-rot[LC_MFW_LEFT_HAND][1],
+		  rot[LC_MFW_LEFT_TOOL][2]-rot[LC_MFW_LEFT_HAND][2]);
+    mat.Multiply (m2, m3);
+    m2.LoadIdentity ();
+
+    // Center the rotation points
+    if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+      mat.Translate (0.11f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
+      mat.Translate (0, 0.8f, 0);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+      mat.Translate (0.26f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
+      mat.Translate (0, 0, -0.16f);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
+      mat.Translate (0, 0, -0.24f);
+
+    // Saucepan and Frypan have a different rotation axis
+    if ((strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) ||
+	(strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0))
+      m2.Rotate (m_Angles[LC_MFW_LEFT_TOOL], 0, -1, 0);
+    else
+      m2.Rotate (m_Angles[LC_MFW_LEFT_TOOL], 0, 0, 1);
+
+    m3.Multiply (mat, m2);
+
+    if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+      m3.Translate (-0.11f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
+      m3.Translate (0, -0.8f, 0);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+      m3.Translate (-0.26f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
+      m3.Translate (0, 0, 0.16f);
+    else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
+      m3.Translate (0, 0, 0.24f);
+
+    m3.ToAxisAngle (m_Rotation[LC_MFW_LEFT_TOOL]);
+    m3.GetTranslation (m_Position[LC_MFW_LEFT_TOOL]);
+  }
 
   // right arm/hand/tool
   mat.LoadIdentity (); m2.LoadIdentity (); m3.LoadIdentity ();
@@ -413,18 +439,52 @@ void MinifigWizard::Calculate ()
   m2.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_HAND]);
   m2.GetTranslation (m_Position[LC_MFW_RIGHT_HAND]);
 
-  m2.Translate (pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
-		pos[LC_MFW_RIGHT_TOOL][1]-pos[LC_MFW_RIGHT_HAND][1],
-		pos[LC_MFW_RIGHT_TOOL][2]-pos[LC_MFW_RIGHT_HAND][2]);
-  m3.CreateOld (0,0,0,rot[LC_MFW_RIGHT_TOOL][0]-rot[LC_MFW_RIGHT_HAND][0],
-		rot[LC_MFW_RIGHT_TOOL][1]-rot[LC_MFW_RIGHT_HAND][1],
-		rot[LC_MFW_RIGHT_TOOL][2]-rot[LC_MFW_RIGHT_HAND][2]);
-  mat.Multiply (m2, m3);
-  m2.LoadIdentity ();
-  m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
-  m3.Multiply (mat, m2);
-  m3.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_TOOL]);
-  m3.GetTranslation (m_Position[LC_MFW_RIGHT_TOOL]);
+  if (m_Info[LC_MFW_RIGHT_TOOL] != NULL)
+  {
+    m2.Translate (pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
+		  pos[LC_MFW_RIGHT_TOOL][1]-pos[LC_MFW_RIGHT_HAND][1],
+		  pos[LC_MFW_RIGHT_TOOL][2]-pos[LC_MFW_RIGHT_HAND][2]);
+    m3.CreateOld (0,0,0,rot[LC_MFW_RIGHT_TOOL][0]-rot[LC_MFW_RIGHT_HAND][0],
+		  rot[LC_MFW_RIGHT_TOOL][1]-rot[LC_MFW_RIGHT_HAND][1],
+		  rot[LC_MFW_RIGHT_TOOL][2]-rot[LC_MFW_RIGHT_HAND][2]);
+    mat.Multiply (m2, m3);
+    m2.LoadIdentity ();
+
+    // Center the rotation points
+    if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+      mat.Translate (0.11f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
+      mat.Translate (0, 0.8f, 0);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+      mat.Translate (0.26f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
+      mat.Translate (0, 0, -0.16f);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
+      mat.Translate (0, 0, -0.24f);
+
+    // Saucepan and Frypan have a different rotation axis
+    if ((strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) ||
+	(strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0))
+      m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, -1, 0);
+    else
+      m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
+
+    m3.Multiply (mat, m2);
+
+    if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+      m3.Translate (-0.11f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
+      m3.Translate (0, -0.8f, 0);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+      m3.Translate (-0.26f, 0, 0);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
+      m3.Translate (0, 0, 0.16f);
+    else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
+      m3.Translate (0, 0, 0.24f);
+
+    m3.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_TOOL]);
+    m3.GetTranslation (m_Position[LC_MFW_RIGHT_TOOL]);
+  }
 
   // hips
   m_Position[LC_MFW_HIPS][0] = pos[LC_MFW_HIPS][0];

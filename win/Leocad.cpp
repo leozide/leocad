@@ -305,20 +305,22 @@ void CCADApp::OnHelpUpdates()
 			
 			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
 			{
-				float ver, lib;
-				if (sscanf (szContents, "%f %f", &ver, &lib) == 2)
+				float ver;
+				int lib;
+
+				if (sscanf (szContents, "%f %d", &ver, &lib) == 2)
 				{
 					CString str;
 
-					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100)
-						str.Format("There's a new version (%0.2f) on the home page.\n", ver);
+					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100 + (float)LC_VERSION_PATCH/1000)
+						str.Format("There's a newer version of LeoCAD available for download (%0.3f).\n\n", ver);
 					else
-						str = "You are using the latest version of the program.\n";
+						str = "You are using the latest version of LeoCAD (" LC_VERSION ").\n";
 
 					if (lib > project->GetPiecesLibrary ()->GetPieceCount ())
-						str += "There's an updated piece library.";
+						str += "There are new pieces available.\n";
 					else
-						str += "There are no new pieces.";
+						str += "There are no new pieces available at this time.\n";
 
 					AfxMessageBox(str);
 				}

@@ -364,6 +364,84 @@ protected:
 
 
 // ============================================================================
+// Point3 and Vector3 Operators.
+
+// Comparison.
+inline bool operator==(const Point3& a, const Point3& b)
+{ return Compare3(a.GetValue(), b.GetValue()); }
+
+inline bool operator==(const Vector3& a, const Vector3& b)
+{ return Compare3(a.GetValue(), b.GetValue()); }
+
+// Multiply by a scalar.
+inline Vector3 operator*(const Vector3& a, float f)
+{ return Vector3(Multiply34(a.GetValue(), f)); }
+
+inline Vector3 operator*(float f, const Vector3& a)
+{ return Vector3(Multiply34(a.GetValue(), f)); }
+
+inline Point3 operator*(const Point3& a, float f)
+{ return Point3(Multiply34(a.GetValue(), f)); }
+
+inline Point3 operator*(float f, const Point3& a)
+{ return Point3(Multiply34(a.GetValue(), f)); }
+
+// Divide by a scalar.
+inline Vector3 operator/(const Vector3& a, float f)
+{ return Vector3(Divide34(a.GetValue(), f)); }
+
+inline Vector3 operator/(float f, const Vector3& a)
+{ return Vector3(Divide34(a.GetValue(), f)); }
+
+inline Point3 operator/(const Point3& a, float f)
+{ return Point3(Divide34(a.GetValue(), f)); }
+
+inline Point3 operator/(float f, const Point3& a)
+{ return Point3(Divide34(a.GetValue(), f)); }
+
+// Add vectors/points (return a point if either is a point).
+inline Point3 operator+(const Point3& a, const Point3& b)
+{ return Point3(Add34(a.GetValue(), b.GetValue())); }
+
+inline Point3 operator+(const Point3& a, const Vector3& b)
+{ return Point3(Add34(a.GetValue(), b.GetValue())); }
+
+inline Point3 operator+(const Vector3& a, const Point3& b)
+{ return Point3(Add34(a.GetValue(), b.GetValue())); }
+
+inline Vector3 operator+(const Vector3& a, const Vector3& b)
+{ return Vector3(Add34(a.GetValue(), b.GetValue())); }
+
+// Subtract vectors/points (return a vector if both arguments are the same type).
+inline Vector3 operator-(const Point3& a, const Point3& b)
+{ return Vector3(Subtract34(a.GetValue(), b.GetValue())); }
+
+inline Point3 operator-(const Point3& a, const Vector3& b)
+{ return Point3(Subtract34(a.GetValue(), b.GetValue())); }
+
+inline Point3 operator-(const Vector3& a, const Point3& b)
+{ return Point3(Subtract34(a.GetValue(), b.GetValue())); }
+
+inline Vector3 operator-(const Vector3& a, const Vector3& b)
+{ return Vector3(Subtract34(a.GetValue(), b.GetValue())); }
+
+// Negate.
+inline Vector3 operator-(const Vector3& a)
+{ return Vector3(Negate34(a.GetValue())); }
+
+inline Point3 operator-(const Point3& a)
+{ return Point3(Negate34(a.GetValue())); }
+
+// Dot product.
+inline float Dot3(const Vector3& a, const Vector3& b)
+{ return Dot3(a.GetValue(), b.GetValue()); }
+
+// Cross product.
+inline Vector3 Cross3(const Vector3& a, const Vector3& b)
+{ return Vector3(Cross3(a.GetValue(), b.GetValue())); }
+
+
+// ============================================================================
 // Quaternion class.
 
 class Quaternion
@@ -464,6 +542,48 @@ public:
 	inline Matrix33(const Vector3& Row0, const Vector3& Row1, const Vector3& Row2)
 		{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; }
 
+	inline void LoadIdentity()
+	{
+		m_Rows[0] = Vector3(1, 0, 0);
+		m_Rows[1] = Vector3(0, 1, 0);
+		m_Rows[2] = Vector3(0, 0, 1);
+	}
+
+	inline void FromAxisAngle(const Vector3& Axis, const float Radians)
+	{
+		float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+
+		s = sinf(Radians);
+		c = cosf(Radians);
+		mag = Axis.Length();
+
+		if (mag == 0.0f)
+		{
+			LoadIdentity();
+			return;
+		}
+
+		Vector3 Normal = Axis * (1.0f / mag);
+
+		xx = Normal[0] * Normal[0];
+		yy = Normal[1] * Normal[1];
+		zz = Normal[2] * Normal[2];
+		xy = Normal[0] * Normal[1];
+		yz = Normal[1] * Normal[2];
+		zx = Normal[2] * Normal[0];
+		xs = Normal[0] * s;
+		ys = Normal[1] * s;
+		zs = Normal[2] * s;
+		one_c = 1.0f - c;
+
+		m_Rows[0] = Vector3((one_c * xx) + c, (one_c * xy) - zs, (one_c * zx) + ys);
+		m_Rows[1] = Vector3((one_c * xy) + zs, (one_c * yy) + c, (one_c * yz) - xs);
+		m_Rows[2] = Vector3((one_c * zx) - ys, (one_c * yz) + xs, (one_c * zz) + c);
+	}
+
+	friend inline Vector3 operator*(const Vector3& a, const Matrix33& b)
+	{ return Vector3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ()); }
+
 protected:
 	Vector3 m_Rows[3];
 };
@@ -501,83 +621,6 @@ protected:
 	Float4 m_Rows[4];
 };
 
-
-// ============================================================================
-// Operators.
-
-// Comparison.
-inline bool operator==(const Point3& a, const Point3& b)
-{ return Compare3(a.GetValue(), b.GetValue()); }
-
-inline bool operator==(const Vector3& a, const Vector3& b)
-{ return Compare3(a.GetValue(), b.GetValue()); }
-
-// Multiply by a scalar.
-inline Vector3 operator*(const Vector3& a, float f)
-{ return Vector3(Multiply34(a.GetValue(), f)); }
-
-inline Vector3 operator*(float f, const Vector3& a)
-{ return Vector3(Multiply34(a.GetValue(), f)); }
-
-inline Point3 operator*(const Point3& a, float f)
-{ return Point3(Multiply34(a.GetValue(), f)); }
-
-inline Point3 operator*(float f, const Point3& a)
-{ return Point3(Multiply34(a.GetValue(), f)); }
-
-// Divide by a scalar.
-inline Vector3 operator/(const Vector3& a, float f)
-{ return Vector3(Divide34(a.GetValue(), f)); }
-
-inline Vector3 operator/(float f, const Vector3& a)
-{ return Vector3(Divide34(a.GetValue(), f)); }
-
-inline Point3 operator/(const Point3& a, float f)
-{ return Point3(Divide34(a.GetValue(), f)); }
-
-inline Point3 operator/(float f, const Point3& a)
-{ return Point3(Divide34(a.GetValue(), f)); }
-
-// Add vectors/points (return a point if either is a point).
-inline Point3 operator+(const Point3& a, const Point3& b)
-{ return Point3(Add34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator+(const Point3& a, const Vector3& b)
-{ return Point3(Add34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator+(const Vector3& a, const Point3& b)
-{ return Point3(Add34(a.GetValue(), b.GetValue())); }
-
-inline Vector3 operator+(const Vector3& a, const Vector3& b)
-{ return Vector3(Add34(a.GetValue(), b.GetValue())); }
-
-// Subtract vectors/points (return a vector if both arguments are the same type).
-inline Vector3 operator-(const Point3& a, const Point3& b)
-{ return Vector3(Subtract34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator-(const Point3& a, const Vector3& b)
-{ return Point3(Subtract34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator-(const Vector3& a, const Point3& b)
-{ return Point3(Subtract34(a.GetValue(), b.GetValue())); }
-
-inline Vector3 operator-(const Vector3& a, const Vector3& b)
-{ return Vector3(Subtract34(a.GetValue(), b.GetValue())); }
-
-// Negate.
-inline Vector3 operator-(const Vector3& a)
-{ return Vector3(Negate34(a.GetValue())); }
-
-inline Point3 operator-(const Point3& a)
-{ return Point3(Negate34(a.GetValue())); }
-
-// Dot product.
-inline float Dot3(const Vector3& a, const Vector3& b)
-{ return Dot3(a.GetValue(), b.GetValue()); }
-
-// Cross product.
-inline Vector3 Cross3(const Vector3& a, const Vector3& b)
-{ return Vector3(Cross3(a.GetValue(), b.GetValue())); }
 
 // ============================================================================
 // Other Functions.

@@ -2562,7 +2562,7 @@ void Project::RenderOverlays(int Viewport)
 
 			Pt = Pt * Mat;
 
-			glVertex3f(Pt.GetX(), Pt.GetY(), Pt.GetZ());
+			glVertex3f(Pt[0], Pt[1], Pt[2]);
 		}
 
 		glEnd();
@@ -2617,7 +2617,7 @@ void Project::RenderOverlays(int Viewport)
 					break;
 				}
 
-				if (Dot3(ViewDir, v1+v2) < 0.0f)
+				if (Dot3(ViewDir, v1+v2) <= 0.0f)
 				{
 					Point3 Pt1 = m_OverlayCenter + v1 * OverlayRotateRadius * OverlayScale;
 					Point3 Pt2 = m_OverlayCenter + v2 * OverlayRotateRadius * OverlayScale;
@@ -2643,15 +2643,15 @@ void Project::RenderOverlays(int Viewport)
 				{
 				case LC_OVERLAY_X:
 					Angle = m_MouseTotalDelta[0];
-					Tangent = Vector3(0.0f, -Normal.GetZ(), Normal.GetY());
+					Tangent = Vector3(0.0f, -Normal[2], Normal[1]);
 					break;
 				case LC_OVERLAY_Y:
 					Angle = m_MouseTotalDelta[1];
-					Tangent = Vector3(Normal.GetZ(), 0.0f, -Normal.GetX());
+					Tangent = Vector3(Normal[2], 0.0f, -Normal[0]);
 					break;
 				case LC_OVERLAY_Z:
 					Angle = m_MouseTotalDelta[2];
-					Tangent = Vector3(-Normal.GetY(), Normal.GetX(), 0.0f);
+					Tangent = Vector3(-Normal[1], Normal[0], 0.0f);
 					break;
 				}
 
@@ -2661,17 +2661,35 @@ void Project::RenderOverlays(int Viewport)
 					Angle = -Angle;
 				}
 
+				// Draw tangent arrow.
 				if (Angle > 0.0f)
 				{
-					Point3 Pt = m_OverlayCenter + Normal * m_OverlayScale[Viewport] * OverlayRotateRadius;
+					const float OverlayRotateArrowSize = 1.5f;
+					const float OverlayRotateArrowCapSize = 0.25f;
 
-					// TODO: scale
-					// TODO: draw cap
+					Point3 Pt = m_OverlayCenter + Normal * OverlayScale * OverlayRotateRadius;
+					Point3 Tip = Pt + Tangent * OverlayScale * OverlayRotateArrowSize;
+					Vector3 Arrow;
+					Matrix33 Rot;
 
 					glBegin(GL_LINES);
 					glColor3f(0.8f, 0.8f, 0.0f);
+
 					glVertex3f(Pt[0], Pt[1], Pt[2]);
-					glVertex3f(Pt[0] + Tangent[0], Pt[1] + Tangent[1], Pt[2] + Tangent[2]);
+					glVertex3f(Tip[0], Tip[1], Tip[2]);
+
+					Rot.FromAxisAngle(Normal, LC_PI * 0.15f);
+					Arrow = Tangent * Rot * OverlayRotateArrowCapSize;
+
+					glVertex3f(Tip[0], Tip[1], Tip[2]);
+					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
+
+					Rot.FromAxisAngle(Normal, -LC_PI * 0.15f);
+					Arrow = Tangent * Rot * OverlayRotateArrowCapSize;
+
+					glVertex3f(Tip[0], Tip[1], Tip[2]);
+					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
+
 					glEnd();
 				}
 
@@ -5642,6 +5660,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			m_pViewCameras[m_nActiveViewport]->DoZoom(nParam, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
+			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
 
@@ -5649,6 +5668,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			m_pViewCameras[m_nActiveViewport]->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
+			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
 
@@ -5656,6 +5676,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			m_pViewCameras[m_nActiveViewport]->DoZoom(1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
+			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
 
@@ -5789,6 +5810,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			SystemUpdateFocus(NULL);
+			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
 
@@ -5803,6 +5825,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			SystemUpdateViewport(nParam, m_nViewportMode);
 			m_nViewportMode = (unsigned char)nParam;
+			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
 
@@ -5997,6 +6020,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			SystemUpdateCurrentCamera(m_pViewCameras[m_nActiveViewport], pCamera, m_pCameras);
 			m_pViewCameras[m_nActiveViewport] = pCamera;
+			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
 
@@ -6030,6 +6054,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateCameraMenu(m_pCameras);
 			SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
 			SystemUpdateFocus(NULL);
+			UpdateOverlayScale();
 			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Reset Cameras");
@@ -6049,6 +6074,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			m_pViewCameras[m_nActiveViewport]->DoPan(x/4, y/4, 1, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			m_nDownY = y;
+			UpdateOverlayScale();
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 		} break;
@@ -6832,9 +6858,9 @@ void Project::MoveSelectedObjects(const Vector3& Delta)
 
 void Project::RotateSelectedObjects(const Vector3& Delta)
 {
-	float x = Delta.GetX();
-	float y = Delta.GetY();
-	float z = Delta.GetZ();
+	float x = Delta[0];
+	float y = Delta[1];
+	float z = Delta[2];
 
 	if (m_nSnap & LC_DRAW_LOCK_X)
 		x = 0;
@@ -7368,6 +7394,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				RotateSelectedObjects(axis[0], axis[1], axis[2]);
 			else
 				MoveSelectedObjects(axis[0], axis[1], axis[2]);
+			UpdateOverlayScale();
 			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint((bShift) ? "Rotating" : "Moving");
@@ -8634,9 +8661,9 @@ void Project::MouseUpdateOverlays(int x, int y)
 					Dist.Normalize();
 					Dist.Abs();
 
-					float dx = Dist.GetX();
-					float dy = Dist.GetY();
-					float dz = Dist.GetZ();
+					float dx = Dist[0];
+					float dy = Dist[1];
+					float dz = Dist[2];
 
 					if (dx < dy)
 					{

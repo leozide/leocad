@@ -148,6 +148,8 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 			  window, ID_VIEW_TOOLBAR_DRAWING, "menu_view_toolbar_drawing");
   create_check_menu_item (menu_in_menu, "Ani_mation", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommand), 
 			  window, ID_VIEW_TOOLBAR_ANIMATION, "menu_view_toolbar_animation");
+  create_check_menu_item (menu_in_menu, "Mo_dify", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_MODIFY, "menu_view_toolbar_modify");
   create_check_menu_item (menu_in_menu, "_Pieces", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommand), 
 			  window, ID_VIEW_TOOLBAR_PIECES, "menu_view_toolbar_pieces");
   menu_separator (menu_in_menu);

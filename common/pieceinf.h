@@ -43,9 +43,9 @@ unsigned char ConvertColor(int c);
 
 class PieceInfo
 {
-public:
-	PieceInfo();
-	~PieceInfo();
+ public:
+  PieceInfo (File& file);
+  ~PieceInfo ();
 
 	// Operations
 	void ZoomExtents();
@@ -54,7 +54,6 @@ public:
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
 
 	// Implementation
-	void LoadIndex(File* file);
 	GLuint AddRef();
 	void DeRef();
 
@@ -82,6 +81,7 @@ protected:
 	int m_nRef;
 	GLuint m_nBoxList;
 
+	void LoadIndex (File& file);
 	void LoadInformation();
 	void FreeInformation();
 /*

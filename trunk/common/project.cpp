@@ -204,158 +204,243 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
   if (env_path != NULL)
     libpath = env_path;
 
-	m_strPathName[0] = 0;
+  m_strPathName[0] = 0;
 
-	LC_IMAGE_OPTS imopts;
-	char picture[LC_MAXPATH];
-	picture[0] = 0;
+  LC_IMAGE_OPTS imopts;
+  char picture[LC_MAXPATH];
+  bool save_image = false;
+  picture[0] = 0;
 
-	unsigned long image = Sys_ProfileLoadInt  ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
-	int width = Sys_ProfileLoadInt ("Default", "Image Width", 640);
-	int height = Sys_ProfileLoadInt ("Default", "Image Height", 480);
+  unsigned long image = Sys_ProfileLoadInt  ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
+  int width = Sys_ProfileLoadInt ("Default", "Image Width", 640);
+  int height = Sys_ProfileLoadInt ("Default", "Image Height", 480);
 //	int width = Sys_ProfileLoadInt ("Default", "Image Width", GetSystemMetrics(SM_CXSCREEN));
 //	int height = Sys_ProfileLoadInt ("Default", "Image Height", GetSystemMetrics(SM_CYSCREEN));
-	imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-	imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-	imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-	imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
-	imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
+  unsigned short from = 0, to = 0;
+  int i, animation = -1;
+  bool highlight = false;
+  imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
+  imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
+  imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
+  imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
+  imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
-	for (int i = 1; i < argc; i++)
+  for (i = 1; i < argc; i++)
+  {
+    char* param = argv[i];
+
+    if (argv[i][0] == '-')
+    {
+      param++;
+
+      if (((strcmp (param, "l") == 0) || (strcmp (param, "-libpath") == 0)) && ((i+1) < argc))
+      {
+	i++;
+	libpath = argv[i];
+      }
+      else if ((strcmp (param, "i") == 0) || (strcmp (param, "-image") == 0))
+      {
+	save_image = true;
+
+	if (((i+1) != argc) && (argv[i+1][0] != '-'))
 	{
-		char* param = argv[i];
-
-		if (argv[i][0] == '-')
-		{
-			++param;
-
-			if ((strcmp (param, "l") == 0) && ((i+1) < argc))
-			{
-				i++;
-				libpath = argv[i];
-			}
-
-			if (strcmp (param, "i") == 0)
-			{
-				if (((i+1) != argc) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					strcpy(picture, argv[i]);
-				}
-				else
-					picture[0] = 1;
-			}
-
-			if ((strcmp (param, "w") == 0) && ((i+1) < argc))
-			{
-				int w;
-				i++;
-				if (sscanf(argv[i], "%d", &w) == 1)
-					width = w;
-			}
-
-			if ((strcmp (param, "h") == 0) && ((i+1) < argc))
-			{
-				int h;
-				i++;
-				if (sscanf(argv[i], "%d", &h) == 1)
-					height = h;
-			}
-		}
-		else
-		{
-			strcpy(m_strPathName, param);
-/*
-			if (m_strFileName.IsEmpty())
-				m_strFileName = pszParam;
-			else if (m_nShellCommand == FilePrintTo && m_strPrinterName.IsEmpty())
-				m_strPrinterName = pszParam;
-			else if (m_nShellCommand == FilePrintTo && m_strDriverName.IsEmpty())
-				m_strDriverName = pszParam;
-			else if (m_nShellCommand == FilePrintTo && m_strPortName.IsEmpty())
-				m_strPortName = pszParam;
-*/
-		}
+	  i++;
+	  strcpy (picture, argv[i]);
 	}
+      }
+      else if (((strcmp (param, "w") == 0) || (strcmp (param, "-width") == 0)) && ((i+1) < argc))
+      {
+	int w;
+	i++;
+	if (sscanf(argv[i], "%d", &w) == 1)
+	  width = w;
+      }
+      else if (((strcmp (param, "h") == 0) || (strcmp (param, "-height") == 0)) && ((i+1) < argc))
+      {
+	int h;
+	i++;
+	if (sscanf(argv[i], "%d", &h) == 1)
+	  height = h;
+      }
+      else if (((strcmp (param, "f") == 0) || (strcmp (param, "-from") == 0)) && ((i+1) < argc))
+      {
+	int f;
+	i++;
+	if (sscanf(argv[i], "%d", &f) == 1)
+	  from = f;
+      }
+      else if (((strcmp (param, "t") == 0) || (strcmp (param, "-to") == 0)) && ((i+1) < argc))
+      {
+	int t;
+	i++;
+	if (sscanf(argv[i], "%d", &t) == 1)
+	  to = t;
+      }
+      else if (strcmp (param, "-animation") == 0)
+	animation = 1;
+      else if (strcmp (param, "-instructions") == 0)
+	animation = 0;
+      else if (strcmp (param, "-highlight") == 0)
+	highlight = true;
+    }
+    else
+    {
+      strcpy (m_strPathName, param);
+/*
+      if (m_strFileName.IsEmpty())
+	m_strFileName = pszParam;
+      else if (m_nShellCommand == FilePrintTo && m_strPrinterName.IsEmpty())
+	m_strPrinterName = pszParam;
+      else if (m_nShellCommand == FilePrintTo && m_strDriverName.IsEmpty())
+	m_strDriverName = pszParam;
+      else if (m_nShellCommand == FilePrintTo && m_strPortName.IsEmpty())
+	m_strPortName = pszParam;
+*/
+    }
+  }
 
-	// if the user specified a library, try to load it first
-	if (libpath != NULL)
-	  loaded = LoadPieceLibrary (libpath);
+  // if the user specified a library, try to load it first
+  if (libpath != NULL)
+    loaded = LoadPieceLibrary (libpath);
 
-	// if we couldn't find a library, try the executable path
-	if (!loaded)
-	  loaded = LoadPieceLibrary (binpath);
+  // if we couldn't find a library, try the executable path
+  if (!loaded)
+    loaded = LoadPieceLibrary (binpath);
 
-	if (!loaded)
-	{
+  if (!loaded)
+  {
 #ifdef LC_WINDOWS
-	  // let's hope this message helps the users
-               SystemDoMessageBox("Cannot load piece library.\n"
+    // let's hope this message helps the users
+    SystemDoMessageBox("Cannot load piece library.\n"
       "Make sure that you have the PIECES.IDX file in the same "
       "folder where you installed the program.", LC_MB_OK|LC_MB_ICONERROR);
 #else
-		printf("Cannot load piece library !\n");
+    printf("Cannot load piece library !\n");
 #endif
-		return false;
+    return false;
+  }
+
+  SystemInit();
+
+  if (strlen(m_strPathName) && OnOpenDocument(m_strPathName))
+  {
+    SetPathName(m_strPathName, true);
+
+    if (save_image == true)
+    {
+      bool need_ext = false;
+
+      if (picture[0] == 0)
+      {
+	strcpy (picture, m_strPathName);
+	char *p = strrchr (picture, '.');
+	if (p != NULL)
+	  *p = 0;
+	need_ext = true;
+      }
+      else
+      {
+	char ext[5];
+	char *p = strrchr(picture, '.');
+	if (p != NULL)
+	  strcpy(ext, p+1);
+	strlwr(ext);
+
+	if ((strcmp(ext, "bmp") != 0) && (strcmp(ext, "gif") != 0) && 
+	    (strcmp(ext, "jpg") != 0) && (strcmp(ext, "jpeg") != 0) &&
+	    (strcmp(ext, "png") != 0))
+	  need_ext = true;
+      }
+
+      if (need_ext)
+	switch (imopts.format)
+	{
+	case LC_IMAGE_BMP: strcat(picture, ".bmp"); break;
+	case LC_IMAGE_GIF: strcat(picture, ".gif"); break;
+	case LC_IMAGE_JPG: strcat(picture, ".jpg"); break;
+	case LC_IMAGE_PNG: strcat(picture, ".png"); break;
 	}
 
-	SystemInit();
+      imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
+      imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
+      imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
 
-	if (strlen(m_strPathName) && OnOpenDocument(m_strPathName))
+      if (animation == 0)
+	m_bAnimation = false;
+      else if (animation == 1)
+	m_bAnimation = true;
+
+      if (to < from)
+      {
+	unsigned short tmp;
+	tmp = from;
+	from = to;
+	to = tmp;
+      }
+
+      if ((from == 0) && (to == 0))
+      {
+	if (m_bAnimation)
+	  from = to = m_nCurFrame;
+	else
+	  from = to = m_nCurStep;
+      }
+      else if ((from == 0) && (to != 0))
+      {
+	from = to;
+      }
+      else if ((from != 0) && (to == 0))
+      {
+	to = from;
+      }
+
+      if (m_bAnimation)
+      {
+	if (from > m_nTotalFrames)
+	  from = m_nTotalFrames;
+
+	if (to > m_nTotalFrames)
+	  to = m_nTotalFrames;
+      }
+      else
+      {
+	if (from > 255)
+	  from = 255;
+
+	if (to > 255)
+	  to = 255;
+      }
+
+      LC_IMAGE** images;
+      images = (LC_IMAGE**)malloc (sizeof (LC_IMAGE*) * (to - from + 1));
+      CreateImages (images, width, height, from, to, highlight);
+
+      for (i = 0; i <= to - from; i++)
+      {
+	char filename[LC_MAXPATH];
+
+	if (from != to)
 	{
-		SetPathName(m_strPathName, true);
-
-		if (picture[0] != 0)
-		{
-			bool need_ext = false;
-
-			if (picture[0] == 1)
-			{
-				strcpy(picture, m_strPathName);
-				char *p = strrchr(picture, '.');
-				if (p != NULL)
-					*p = 0;
-				need_ext = true;
-			}
-			else
-			{
-				char ext[5];
-				char *p = strrchr(picture, '.');
-				if (p != NULL)
-					strcpy(ext, p+1);
-				strlwr(ext);
-
-				if ((strcmp(ext, "bmp") != 0) && (strcmp(ext, "gif") != 0) && 
-					(strcmp(ext, "jpg") != 0) && (strcmp(ext, "jpeg") != 0) &&
-					(strcmp(ext, "png") != 0))
-				need_ext = true;
-			}
-
-			if (need_ext)
-				switch (imopts.format)
-				{
-				case LC_IMAGE_BMP: strcat(picture, ".bmp"); break;
-				case LC_IMAGE_GIF: strcat(picture, ".gif"); break;
-				case LC_IMAGE_JPG: strcat(picture, ".jpg"); break;
-				case LC_IMAGE_PNG: strcat(picture, ".png"); break;
-				}
-
-			imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
-			imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
-			imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
-
-			LC_IMAGE* image;
-			CreateImages(&image, width, height, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation ? m_nCurFrame : m_nCurStep, false);
-			SaveImage(picture, image, &imopts);
-			free(image);
-
-			return false;
-		}
+	  char* ext = strrchr (picture, '.');
+	  *ext = 0;
+	  sprintf (filename, "%s%02d.%s", picture, i+1, ext+1);
+	  *ext = '.';
 	}
 	else
-		OnNewDocument();
+	  strcpy (filename, picture);
 
-	return true;
+	SaveImage (filename, images[i], &imopts);
+	free (images[i]);
+      }
+      free (images);
+
+      return false;
+    }
+  }
+  else
+    OnNewDocument();
+
+  return true;
 }
 
 // Load the piece library
@@ -3218,7 +3303,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						{
 							char* ext = strrchr(opts.filename, '.');
 							*ext = 0;
-							sprintf(filename, "%s%02d.%s", opts.filename, i, ext+1);
+							sprintf(filename, "%s%02d.%s", opts.filename, i+1, ext+1);
 						}
 						else
 							strcpy(filename, opts.filename);

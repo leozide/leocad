@@ -50,7 +50,7 @@ class PieceInfo
   ~PieceInfo ();
 
 	// Operations
-	void ZoomExtents();
+	void ZoomExtents(float Fov, float Aspect);
 	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);

@@ -1539,47 +1539,133 @@ void PieceInfo::FreeInformation()
 	}
 }
 
-// Zoom extents for the preview window & print catalog
-void PieceInfo::ZoomExtents()
+// Zoom extents for the preview window and print catalog
+void PieceInfo::ZoomExtents(float Fov, float Aspect)
 {
-  Vector eye, target, front, right, up;
-  float mat[16];
+	float Eye[3] = { -100.0f, -100.0f, 50.0f };
 
-  // Initialize variables
-  target.FromFloat ((m_fDimensions[0] + m_fDimensions[3])*0.5f, (m_fDimensions[1] + m_fDimensions[4])*0.5f,
-		    (m_fDimensions[2] + m_fDimensions[5])*0.5f);
-  eye.FromFloat (-5, -5, 3);
-  up.FromFloat (0, 0, 1);
+	// Get perspective information.
+	float Alpha = Fov / 2.0f;
+	float HalfFovY = Fov / 2.0f;
+	HalfFovY = HalfFovY * 3.1415f / 180.0f;
+	float HalfFovX = (float)atan(tan(HalfFovY) * Aspect);
+	HalfFovX = HalfFovX * 180.0f / 3.1415f;
+	float Beta = HalfFovX;
 
-  // Calculate view matrix
-  front.FromFloat (eye.X () - target.X (), eye.Y () - target.Y (), eye.Z () - target.Z ());
-  front.Normalize ();
-  right.Cross (front, up);
-  right.Normalize ();
-  up.Cross (right, front);
-  up.Normalize ();
+	// Get vectors from the position.
+	float NonOrthoTop[3] = { 0.0f, 0.0f, 1.0f };
+	float Target[3] = { (m_fDimensions[0] + m_fDimensions[3])*0.5f, (m_fDimensions[1] + m_fDimensions[4])*0.5f,
+	                    (m_fDimensions[2] + m_fDimensions[5])*0.5f };
+	float Front[3] = { Target[0] - Eye[0], Target[1] - Eye[1], Target[2] - Eye[2]};
+	float Side[3];
+	Side[0] = NonOrthoTop[1]*Front[2] - NonOrthoTop[2]*Front[1];
+	Side[1] = NonOrthoTop[2]*Front[0] - NonOrthoTop[0]*Front[2];
+	Side[2] = NonOrthoTop[0]*Front[1] - NonOrthoTop[1]*Front[0];
+	
+	// Make sure the up vector is orthogonal.
+	float Top[3];
+	Top[0] = Front[1]*Side[2] - Front[2]*Side[1];
+	Top[1] = Front[2]*Side[0] - Front[0]*Side[2];
+	Top[2] = Front[0]*Side[1] - Front[1]*Side[0];
+	
+	// Calculate the plane normals.
+	Matrix Mat;
+	float TopNormal[3] = { -Top[0], -Top[1], -Top[2] };
+	Mat.FromAxisAngle(Side, -Alpha);
+	Mat.TransformPoints(TopNormal, 1);
 
-  mat[0] = -right.X (); mat[4] = -right.Y (); mat[8]  = -right.Z (); mat[12] = 0.0;
-  mat[1] = up.X ();     mat[5] = up.Y ();     mat[9]  = up.Z ();     mat[13] = 0.0;
-  mat[2] = front.X ();  mat[6] = front.Y ();  mat[10] = front.Z ();  mat[14] = 0.0;
-  mat[3] = 0.0;         mat[7] = 0.0;         mat[11] = 0.0;         mat[15] = 1.0;
+	float BottomNormal[3] = { Top[0], Top[1], Top[2] };
+	Mat.FromAxisAngle(Side, Alpha);
+	Mat.TransformPoints(BottomNormal, 1);
 
-  // Load matrix
-  glMatrixMode (GL_MODELVIEW);
-  glLoadIdentity ();
-  glMultMatrixf (mat);
-  glTranslatef (-eye.X (), -eye.Y (), -eye.Z ());
-  front.Scale (0.1f);
+	float RightNormal[3] = { Side[0], Side[1], Side[2] };
+	Mat.FromAxisAngle(Top, -Beta);
+	Mat.TransformPoints(RightNormal, 1);
 
-  // Zoom in
-  while (!BoxOutsideFrustum (m_fDimensions))
-    glTranslatef (front.X (), front.Y (), front.Z ());
+	float LeftNormal[3] = { -Side[0], -Side[1], -Side[2] };
+	Mat.FromAxisAngle(Top, Beta);
+	Mat.TransformPoints(LeftNormal, 1);
 
-  // Zoom out
-  do
-  {
-    glTranslatef (-front.X (), -front.Y (), -front.Z ());
-  } while (BoxOutsideFrustum (m_fDimensions));
+	// Calculate the plane offsets from the normals and the eye position.
+	float TopD = Eye[0]*-TopNormal[0] + Eye[1]*-TopNormal[1] + Eye[2]*-TopNormal[2];
+	float BottomD = Eye[0]*-BottomNormal[0] + Eye[1]*-BottomNormal[1] + Eye[2]*-BottomNormal[2];
+	float LeftD = Eye[0]*-LeftNormal[0] + Eye[1]*-LeftNormal[1] + Eye[2]*-LeftNormal[2];
+	float RightD = Eye[0]*-RightNormal[0] + Eye[1]*-RightNormal[1] + Eye[2]*-RightNormal[2];
+	
+	// Now generate the planes
+	float Inv;
+	Inv = 1.0f/(float)sqrt(TopNormal[0]*TopNormal[0]+TopNormal[1]*TopNormal[1]+TopNormal[2]*TopNormal[2]);
+	float TopPlane[4] = { TopNormal[0]*Inv, TopNormal[1]*Inv, TopNormal[2]*Inv, TopD*Inv };
+	Inv = 1.0f/(float)sqrt(BottomNormal[0]*BottomNormal[0]+BottomNormal[1]*BottomNormal[1]+BottomNormal[2]*BottomNormal[2]);
+	float BottomPlane[4] = { BottomNormal[0]*Inv, BottomNormal[1]*Inv, BottomNormal[2]*Inv, BottomD*Inv };
+	Inv = 1.0f/(float)sqrt(LeftNormal[0]*LeftNormal[0]+LeftNormal[1]*LeftNormal[1]+LeftNormal[2]*LeftNormal[2]);
+	float LeftPlane[4] = { LeftNormal[0]*Inv, LeftNormal[1]*Inv, LeftNormal[2]*Inv, LeftD*Inv };
+	Inv = 1.0f/(float)sqrt(RightNormal[0]*RightNormal[0]+RightNormal[1]*RightNormal[1]+RightNormal[2]*RightNormal[2]);
+	float RightPlane[4] = { RightNormal[0]*Inv, RightNormal[1]*Inv, RightNormal[2]*Inv, RightD*Inv };
+
+	float Verts[8][3] = {
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] } };
+
+	float SmallestU = 10000.0f;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float* Plane;
+
+		switch (i)
+		{
+		case 0: Plane = TopPlane; break;
+		case 1: Plane = BottomPlane; break;
+		case 2: Plane = LeftPlane; break;
+		case 3: Plane = RightPlane; break;
+		}
+
+		for (int j = 0; j < 8; j++)
+		{
+			Plane[3] = Verts[j][0]*-Plane[0] + Verts[j][1]*-Plane[1] + Verts[j][2]*-Plane[2];
+
+			// Intersect the eye line with the plane, NewEye = Eye + u * (Target - Eye)
+			float u = Eye[0] * Plane[0] + Eye[1] * Plane[1] + Eye[2] * Plane[2] + Plane[3];
+			u /= Front[0] * -Plane[0] + Front[1] * -Plane[1] + Front[2] * -Plane[2];
+
+			if (u < SmallestU)
+				SmallestU = u;
+		}
+	}
+
+	float NewEye[3];
+	NewEye[0] = Eye[0] + Front[0] * SmallestU;
+	NewEye[1] = Eye[1] + Front[1] * SmallestU;
+	NewEye[2] = Eye[2] + Front[2] * SmallestU;
+
+	Vector FrontVec, RightVec, UpVec;
+
+	// Calculate view matrix.
+	UpVec.FromFloat(Top);
+	UpVec.Normalize();
+	FrontVec.FromFloat(Front);
+	FrontVec.Normalize();
+	RightVec.FromFloat(Side);
+	RightVec.Normalize();
+
+  float ViewMat[16];
+  ViewMat[0] = -RightVec.X(); ViewMat[4] = -RightVec.Y(); ViewMat[8]  = -RightVec.Z(); ViewMat[12] = 0.0;
+  ViewMat[1] = UpVec.X();     ViewMat[5] = UpVec.Y();     ViewMat[9]  = UpVec.Z();     ViewMat[13] = 0.0;
+  ViewMat[2] = -FrontVec.X(); ViewMat[6] = -FrontVec.Y(); ViewMat[10] = -FrontVec.Z(); ViewMat[14] = 0.0;
+  ViewMat[3] = 0.0;           ViewMat[7] = 0.0;           ViewMat[11] = 0.0;           ViewMat[15] = 1.0;
+
+  // Load ViewMatrix
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glMultMatrixf(ViewMat);
+  glTranslatef(-NewEye[0], -NewEye[1], -NewEye[2]);
 }
 
 // Used by the print catalog and HTML instructions functions.
@@ -1658,17 +1744,17 @@ void PieceInfo::RenderPiece(int nColor)
 				if (curcolor > 13 && curcolor < 22)
 				{
 //					glEnable (GL_POLYGON_STIPPLE);
-                                  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                                  glEnable (GL_BLEND);
-                                  glDepthMask (GL_FALSE);
-                                  glColor4ubv (ColorArray[curcolor]);
+					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					glEnable (GL_BLEND);
+					glDepthMask (GL_FALSE);
+					glColor4ubv (ColorArray[curcolor]);
 				}
 				else
 				{
 //					glDisable (GL_POLYGON_STIPPLE);
-                                  glDepthMask (GL_TRUE);
-                                  glDisable (GL_BLEND);
-                                  glColor3ubv (FlatColorArray[curcolor]);
+					glDepthMask (GL_TRUE);
+					glDisable (GL_BLEND);
+					glColor3ubv (FlatColorArray[curcolor]);
 				}
 
 				if (*info)
@@ -1701,17 +1787,17 @@ void PieceInfo::RenderPiece(int nColor)
 				if (curcolor > 13 && curcolor < 22)
 				{
 //					glEnable (GL_POLYGON_STIPPLE);
-                                  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                                  glEnable (GL_BLEND);
-                                  glDepthMask (GL_FALSE);
-                                  glColor4ubv (ColorArray[curcolor]);
+					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					glEnable (GL_BLEND);
+					glDepthMask (GL_FALSE);
+					glColor4ubv (ColorArray[curcolor]);
 				}
 				else
 				{
 //					glDisable (GL_POLYGON_STIPPLE);
-                                  glDepthMask (GL_TRUE);
-                                  glDisable (GL_BLEND);
-                                  glColor3ubv(FlatColorArray[curcolor]);
+					glDepthMask (GL_TRUE);
+					glDisable (GL_BLEND);
+					glColor3ubv(FlatColorArray[curcolor]);
 				}
 
 				if (*info)
@@ -1726,8 +1812,8 @@ void PieceInfo::RenderPiece(int nColor)
 			}
 		}
 	}
-        // if glDepthMask is GL_FALSE then glClearBuffer (GL_DEPTH_BUFFER_BIT) doesn't work
-        glDepthMask (GL_TRUE);
+	// if glDepthMask is GL_FALSE then glClearBuffer (GL_DEPTH_BUFFER_BIT) doesn't work
+	glDepthMask (GL_TRUE);
 }
 
 void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* start)

@@ -1,5 +1,12 @@
 This is a changelog for developers only, not for ordinary users.
 
+30/12/2000
+        - Added Step Insert and Step Delete commands.
+
+29/12/2000
+        - Capture mouse events while dragging the cursor under linux.
+        - HTML Dialog improvements under linux.
+
 28/12/2000
         - Click on "Last Step" goes to the last used step instead of step 255.
         - Save HTML dialog options.

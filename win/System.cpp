@@ -1137,15 +1137,17 @@ bool SystemDoDialog(int nMode, void* param)
 
 					if ((strcmp(ext, "jpg") == 0) || (strcmp(ext, "jpeg") == 0) ||
 						(strcmp(ext, "bmp") == 0) || (strcmp(ext, "gif") == 0) ||
-						(strcmp(ext, "avi") == 0))
+						(strcmp(ext, "png") == 0) || (strcmp(ext, "avi") == 0))
 						return true;
 				}
-				switch(opts->imopts.format)
+
+				switch (opts->imopts.format)
 				{
-				case 0: strcat(opts->filename, ".bmp"); break;
-				case 1: strcat(opts->filename, ".gif"); break;
-				case 2: strcat(opts->filename, ".jpg"); break;
-				case 3: strcat(opts->filename, ".avi"); break;
+				case LC_IMAGE_BMP: strcat(opts->filename, ".bmp"); break;
+				case LC_IMAGE_GIF: strcat(opts->filename, ".gif"); break;
+				case LC_IMAGE_JPG: strcat(opts->filename, ".jpg"); break;
+				case LC_IMAGE_PNG: strcat(opts->filename, ".png"); break;
+				case LC_IMAGE_AVI: strcat(opts->filename, ".avi"); break;
 				}
 
 				return true;

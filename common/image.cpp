@@ -23,6 +23,7 @@ static LC_IMAGE* OpenGIF(File* file);
 static bool SaveJPG(char* filename, LC_IMAGE* image, int quality, bool progressive);
 static bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize);
 static bool SaveGIF(File* file, LC_IMAGE* image, bool transparent, bool interlaced, unsigned char* background);
+bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced, unsigned char* background);
 
 typedef struct bt_jpeg_error_mgr
 {
@@ -207,6 +208,9 @@ bool SaveImage(char* filename, LC_IMAGE* image, LC_IMAGE_OPTS* opts)
 
 	if (strcmp (ext, "bmp") == 0)
 		return SaveBMP(filename, image, opts->truecolor == false);
+
+	if (strcmp (ext, "png") == 0)
+		return SavePNG(filename, image, opts->transparent, opts->interlaced, opts->background);
 
 //	MessageBox (NULL, "Could not save file", "Error", MB_ICONSTOP);
 

@@ -6,7 +6,10 @@ CC=$3
 shift 3
 
 echo -n "$DEP $DIR/" > $DEP
-( $CC -MM $* || exit 1 ) >> $DEP
+if { !(eval $CC -MM $*) >> $DEP; }; then
+    rm -f $DEP;
+    exit 1;
+fi
 
 #sed -e 's@^\(.*\)\.o:@\1.d \1.o:@'
 

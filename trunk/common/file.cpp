@@ -39,7 +39,7 @@ unsigned long File::ReadShort (void* pBuf, unsigned long nCount)
 
 #ifdef LC_BIG_ENDIAN
   unsigned long i;
-  unsigned short* val = (unsigned short*)pBuf, x;
+  lcuint16* val = (lcuint16*)pBuf, x;
 
   for (i = 0; i < read; i++)
   {
@@ -61,7 +61,7 @@ unsigned long File::ReadLong (void* pBuf, unsigned long nCount)
 
 #ifdef LC_BIG_ENDIAN
   unsigned long i;
-  unsigned long* val = (unsigned long*)pBuf, x;
+  lcuint32* val = (lcuint32*)pBuf, x;
 
   for (i = 0; i < read; i++)
   {
@@ -147,7 +147,7 @@ unsigned long File::WriteShort (const void* pBuf, unsigned long nCount)
 {
 #ifdef LC_BIG_ENDIAN
   unsigned long wrote = 0, i;
-  unsigned short* val = (unsigned short*)pBuf, x;
+  lcuint16* val = (lcuint16*)pBuf, x;
 
   for (i = 0; i < nCount; i++)
   {
@@ -167,7 +167,7 @@ unsigned long File::WriteLong (const void* pBuf, unsigned long nCount)
 {
 #ifdef LC_BIG_ENDIAN
   unsigned long wrote = 0, i;
-  unsigned long* val = (unsigned long*)pBuf, x;
+  lcuint32* val = (lcuint32*)pBuf, x;
 
   for (i = 0; i < nCount; i++)
   {

@@ -1,4 +1,5 @@
-// Matrix class
+//
+// 4x4 Matrix class
 //
 
 #include <memory.h>
@@ -7,29 +8,30 @@
 #include "matrix.h"
 #include "file.h"
 #include "defines.h"
-#include "config.h"
+
+// =============================================================================
+// static functions
 
 static float Identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
 // Perform a 4x4 matrix multiplication  (product = a x b).
 // WARNING: (product != b) assumed
-static void matmul(float *product, const float *a, const float *b)
+static void matmul (float *product, const float *a, const float *b)
 {
-	int i;
+  int i;
 
-//	#define M(row,col)  m[col*4+row]
 #define A(row,col)  a[(col<<2)+row]
 #define B(row,col)  b[(col<<2)+row]
 #define P(row,col)  product[(col<<2)+row]
 
-	for (i = 0; i < 4; i++) 
-	{
-		float ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
-		P(i,0) = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
-		P(i,1) = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
-		P(i,2) = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
-		P(i,3) = ai0 * B(0,3) + ai1 * B(1,3) + ai2 * B(2,3) + ai3 * B(3,3);
-	}
+  for (i = 0; i < 4; i++) 
+  {
+    float ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
+    P(i,0) = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
+    P(i,1) = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
+    P(i,2) = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
+    P(i,3) = ai0 * B(0,3) + ai1 * B(1,3) + ai2 * B(2,3) + ai3 * B(3,3);
+  }
 
 #undef A
 #undef B
@@ -37,62 +39,56 @@ static void matmul(float *product, const float *a, const float *b)
 }
 
 // Generate a 4x4 transformation matrix from rotation parameters.
-static void rotation_matrix(double angle, float x, float y, float z, float m[] )
+static void rotation_matrix (double angle, float x, float y, float z, float m[] )
 {
-	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
-	
-	s = (float)sin (angle * DTOR);
-	c = (float)cos (angle * DTOR);
-	mag = (float)sqrt(x*x + y*y + z*z);
-	
-	if (mag == 0) 
-	{
-		// generate an identity matrix and return
-		memcpy(m, Identity, sizeof(float[16]));
-		return;
-	}
-	
-	x /= mag;
-	y /= mag;
-	z /= mag;
-	
-	xx = x * x;
-	yy = y * y;
-	zz = z * z;
-	xy = x * y;
-	yz = y * z;
-	zx = z * x;
-	xs = x * s;
-	ys = y * s;
-	zs = z * s;
-	one_c = 1.0f - c;
-	
-	m[0] = (one_c * xx) + c;
-	m[4] = (one_c * xy) - zs;
-	m[8] = (one_c * zx) + ys;
-	m[12]= 0;
-	
-	m[1] = (one_c * xy) + zs;
-	m[5] = (one_c * yy) + c;
-	m[9] = (one_c * yz) - xs;
-	m[13]= 0;
-	
-	m[2] = (one_c * zx) - ys;
-	m[6] = (one_c * yz) + xs;
-	m[10]= (one_c * zz) + c;
-	m[14]= 0;
-	
-	m[3] = 0;
-	m[7] = 0;
-	m[11]= 0;
-	m[15]= 1;
+  float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+
+  s = (float)sin (angle * DTOR);
+  c = (float)cos (angle * DTOR);
+  mag = (float)sqrt(x*x + y*y + z*z);
+
+  if (mag == 0) 
+  {
+    // generate an identity matrix and return
+    memcpy (m, Identity, sizeof(float[16]));
+    return;
+  }
+
+  x /= mag;
+  y /= mag;
+  z /= mag;
+
+  xx = x * x;
+  yy = y * y;
+  zz = z * z;
+  xy = x * y;
+  yz = y * z;
+  zx = z * x;
+  xs = x * s;
+  ys = y * s;
+  zs = z * s;
+  one_c = 1.0f - c;
+
+  m[0] = (one_c * xx) + c;
+  m[4] = (one_c * xy) - zs;
+  m[8] = (one_c * zx) + ys;
+  m[12]= 0;
+
+  m[1] = (one_c * xy) + zs;
+  m[5] = (one_c * yy) + c;
+  m[9] = (one_c * yz) - xs;
+  m[13]= 0;
+
+  m[2] = (one_c * zx) - ys;
+  m[6] = (one_c * yz) + xs;
+  m[10]= (one_c * zz) + c;
+  m[14]= 0;
+
+  m[3] = 0;
+  m[7] = 0;
+  m[11]= 0;
+  m[15]= 1;
 }
-/*
-double PointDistance (double x1, double y1, double z1, double x2, double y2, double z2)
-{
-	return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
-}
-*/
 
 // =============================================================================
 // Matrix class
@@ -178,42 +174,24 @@ Matrix::~Matrix()
 {
 }
 
-#ifdef LC_BIG_ENDIAN
-
-float __LittleFloat (float l)
-{
-  union { unsigned char b[4]; float f; } in, out;
-
-  in.f = l;
-  out.b[0] = in.b[3];
-  out.b[1] = in.b[2];
-  out.b[2] = in.b[1];
-  out.b[3] = in.b[0];
-
-  return out.f;
-}
-#else
-#define __LittleFloat(a) a
-#endif
-
 // Expand from the .bin file
 void Matrix::FromPacked (const float *mat)
 {
-  m[0] = __LittleFloat (mat[0]);
-  m[1] = __LittleFloat (mat[1]);
-  m[2] = __LittleFloat (mat[2]);
+  m[0] = mat[0];
+  m[1] = mat[1];
+  m[2] = mat[2];
   m[3] = 0.0f;
-  m[4] = __LittleFloat (mat[3]);
-  m[5] = __LittleFloat (mat[4]);
-  m[6] = __LittleFloat (mat[5]);
+  m[4] = mat[3];
+  m[5] = mat[4];
+  m[6] = mat[5];
   m[7] = 0.0f;
-  m[8] = __LittleFloat (mat[6]);
-  m[9] = __LittleFloat (mat[7]);
-  m[10] = __LittleFloat (mat[8]);
+  m[8] = mat[6];
+  m[9] = mat[7];
+  m[10] = mat[8];
   m[11] = 0.0f;
-  m[12] = __LittleFloat (mat[9]);
-  m[13] = __LittleFloat (mat[10]);
-  m[14] = __LittleFloat (mat[11]);
+  m[12] = mat[9];
+  m[13] = mat[10];
+  m[14] = mat[11];
   m[15] = 0.0f;
 }
 
@@ -222,78 +200,81 @@ void Matrix::FromFloat (const float* mat)
   memcpy (&m[0], mat, sizeof(float[16]));
 }
 
-void Matrix::LoadIdentity()
+void Matrix::LoadIdentity ()
 {
   memcpy (&m[0], &Identity, sizeof(float[16]));
 }
 
-void Matrix::Multiply(Matrix& m1, Matrix& m2)
+void Matrix::Multiply (Matrix& m1, Matrix& m2)
 {
   matmul (m, m1.m, m2.m);
 }
 
-void Matrix::Rotate(float angle, float x, float y, float z)
+void Matrix::Rotate (float angle, float x, float y, float z)
 {
-	if (angle == 0.0) return;
-	float rm[16];
-	rotation_matrix(angle, x, y, z, rm);
-	matmul(rm, rm, m);
-	memcpy (&m[0], &rm[0], sizeof(rm));
+  float rm[16];
 
-	for (int i = 0; i < 12; i++)
-		if (fabs (m[i]) < .001f)
-			m[i] = 0;
+  if (angle == 0.0)
+    return;
+
+  rotation_matrix(angle, x, y, z, rm);
+  matmul(rm, rm, m);
+  memcpy (&m[0], &rm[0], sizeof(rm));
+
+  for (int i = 0; i < 12; i++)
+    if (fabs (m[i]) < .001f)
+      m[i] = 0;
 }
 
-void Matrix::RotateCenter(float angle, float x, float y, float z, float px, float py, float pz)
+void Matrix::RotateCenter (float angle, float x, float y, float z, float px, float py, float pz)
 {
-	m[12] -= px;
-	m[13] -= py;
-	m[14] -= pz;
+  m[12] -= px;
+  m[13] -= py;
+  m[14] -= pz;
 
-	Rotate(angle, x, y, z);
+  Rotate (angle, x, y, z);
 
-	m[12] += px;
-	m[13] += py;
-	m[14] += pz;
+  m[12] += px;
+  m[13] += py;
+  m[14] += pz;
 }
 
-void Matrix::Translate(float x, float y, float z)
+void Matrix::Translate (float x, float y, float z)
 {
-	m[12] = m[0] * x + m[4] * y + m[8]  * z + m[12];
-	m[13] = m[1] * x + m[5] * y + m[9]  * z + m[13];
-	m[14] = m[2] * x + m[6] * y + m[10] * z + m[14];
-	m[15] = m[3] * x + m[7] * y + m[11] * z + m[15];
+  m[12] = m[0] * x + m[4] * y + m[8]  * z + m[12];
+  m[13] = m[1] * x + m[5] * y + m[9]  * z + m[13];
+  m[14] = m[2] * x + m[6] * y + m[10] * z + m[14];
+  m[15] = m[3] * x + m[7] * y + m[11] * z + m[15];
 }
 
-void Matrix::SetTranslation(float x, float y, float z)
+void Matrix::SetTranslation (float x, float y, float z)
 {
-	m[12] = x;
-	m[13] = y;
-	m[14] = z;
-	m[15] = 1;
+  m[12] = x;
+  m[13] = y;
+  m[14] = z;
+  m[15] = 1;
 }
 
-void Matrix::GetTranslation(float* x, float* y, float* z)
+void Matrix::GetTranslation (float* x, float* y, float* z)
 {
-	*x = m[12];
-	*y = m[13];
-	*z = m[14];
+  *x = m[12];
+  *y = m[13];
+  *z = m[14];
 }
 
-void Matrix::GetTranslation(float pos[3])
+void Matrix::GetTranslation (float pos[3])
 {
-	pos[0] = m[12];
-	pos[1] = m[13];
-	pos[2] = m[14];
+  pos[0] = m[12];
+  pos[1] = m[13];
+  pos[2] = m[14];
 }
 
-void Matrix::SetTranslation(float pos[3])
+void Matrix::SetTranslation (float pos[3])
 {
-	m[12] = pos[0];
-	m[13] = pos[1];
-	m[14] = pos[2];
-	m[15] = 1;
+  m[12] = pos[0];
+  m[13] = pos[1];
+  m[14] = pos[2];
+  m[15] = 1;
 }
 
 void Matrix::Create(float mx, float my, float mz, float rx, float ry, float rz)
@@ -338,23 +319,27 @@ void Matrix::TransformPoints (float p[], int n)
 
 void Matrix::FromLDraw (const float *f)
 {
-	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
-	float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
-	m[0] = f[3];	m[1] = f[6];	m[2] = f[9];
-	m[4] = f[4];	m[5] = f[7];	m[6] = f[10];
-	m[8] = f[5];	m[9] = f[8];	m[10]= f[11];
-	m[12]= f[0]/25;	m[13]= f[1]/25;	m[14]= f[2]/25;
-	matmul (m, m, t);
-	matmul (trans, trans, m);
-	memcpy (&m[0], &trans[0], sizeof(m));
+  float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
+  float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
+
+  m[0] = f[3];    m[1] = f[6];    m[2] = f[9];
+  m[4] = f[4];    m[5] = f[7];    m[6] = f[10];
+  m[8] = f[5];    m[9] = f[8];    m[10]= f[11];
+  m[12]= f[0]/25; m[13]= f[1]/25; m[14]= f[2]/25;
+
+  matmul (m, m, t);
+  matmul (trans, trans, m);
+  memcpy (&m[0], &trans[0], sizeof(m));
 }
 
 void Matrix::ToLDraw (float *f) const
 {
   float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
   float tmp[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
+
   matmul(tmp, tmp, m);
   matmul (tmp, tmp, trans);
+
   f[0] = m[12]*25; f[1] = -m[14]*25; f[2] = m[13]*25;
   f[3] = tmp[0];   f[4] = tmp[4];    f[5] = tmp[8];
   f[6] = tmp[1];   f[7] = tmp[5];    f[8] = tmp[9];
@@ -365,12 +350,12 @@ void Matrix::FileLoad (File& file)
 {
   float tmp[12];
 
-  file.Read (&tmp, sizeof(tmp));
+  file.ReadLong (&tmp, 12);
 
-  m[0] = tmp[0]; m[1] = tmp[1];  m[2] = tmp[2];
-  m[4] = tmp[3]; m[5] = tmp[4];  m[6] = tmp[5];
-  m[8] = tmp[6]; m[9] = tmp[7];  m[10]= tmp[8];
-  m[12]= tmp[9]; m[13]= tmp[10]; m[14]= tmp[11];
+  m[0] = tmp[0]; m[1] = tmp[1];  m[2] = tmp[2];  m[3] = 0.0f;
+  m[4] = tmp[3]; m[5] = tmp[4];  m[6] = tmp[5];  m[7] = 0.0f;
+  m[8] = tmp[6]; m[9] = tmp[7];  m[10]= tmp[8];  m[11]= 0.0f;
+  m[12]= tmp[9]; m[13]= tmp[10]; m[14]= tmp[11]; m[15]= 1.0f;
 }
 
 void Matrix::FileSave (File& file) const
@@ -382,7 +367,7 @@ void Matrix::FileSave (File& file) const
   tmp[6] = m[8];  tmp[7] = m[9];  tmp[8] = m[10];
   tmp[9] = m[12]; tmp[10]= m[13]; tmp[11]= m[14];
 
-  file.Write (&tmp, sizeof(tmp));
+  file.WriteLong (&tmp, 12);
 }
 
 void Matrix::ToEulerAngles (float *rot) const

@@ -28,7 +28,7 @@ typedef	enum
 typedef struct
 {
   char name[9];
-  char description[32];
+  char description[65];
   int type;
   float x, y, z;
   float rx, ry, rz;

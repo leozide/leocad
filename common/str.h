@@ -43,6 +43,7 @@ class String
   int Compare (const char *string) const
     { return strcmp (m_pData, string); }
   int CompareNoCase (const char *string) const;
+  int CompareNoCase (const char *string, int count) const;
  
   // simple sub-string extraction
   String& Mid (int first, int count) const;

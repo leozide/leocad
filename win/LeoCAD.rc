@@ -339,6 +339,7 @@ BEGIN
             MENUITEM "Ch&oose...",                  ID_VIEW_STEP_CHOOSE
             MENUITEM SEPARATOR
             MENUITEM "&Insert",                     ID_VIEW_STEP_INSERT
+            MENUITEM "&Delete",                     ID_VIEW_STEP_DELETE
         END
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN

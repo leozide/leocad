@@ -839,6 +839,14 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_VIEW_STEP_CHOOSE, 0);
 		} break;
 
+    case ID_VIEW_STEP_INSERT: {
+			project->HandleCommand(LC_VIEW_STEP_INSERT, 0);
+		} break;
+
+    case ID_VIEW_STEP_DELETE: {
+			project->HandleCommand(LC_VIEW_STEP_DELETE, 0);
+		} break;
+
 		case ID_ANIMATOR_STOP: {
 			project->HandleCommand(LC_VIEW_STOP, 0);
 		} break;

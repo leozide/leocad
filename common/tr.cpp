@@ -2,13 +2,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include "tr.h"
 #include <math.h>
+#include "opengl.h"
+#include "tr.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

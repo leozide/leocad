@@ -63,3 +63,39 @@ unsigned short piece count
 TEXTURES.BIN
 
 char[32] "LeoCAD texture data file"
+
+-----------------------------------------------------------
+
+UPDATExx.LUP
+
+char[32]       "LeoCAD piece library update"
+unsigned char  file version (currently = 2)
+unsigned char  updated number
+
+char[8]        piece name
+unsigned char  update type (del = 0, desc = 1, draw = 2, new = 4)
+
+desc:
+char[64]       description
+unsigned long  default group
+
+drawinfo:
+short[6]       bounding box (scaled)
+unsigned char  flags
+unsigned long  info size
+void*          data
+
+new:
+char[64]       description
+short[6]       bounding box (scaled)
+unsigned long  default group
+unsigned char  flags
+unsigned long  info size
+void*          data
+
+MOVED_DATA:
+char[8]        old name
+char[8]        new name
+
+unsigned short moved count
+unsigned short changes count

@@ -8,9 +8,16 @@
 #include "pieceinf.h"
 #include "texture.h"
 #include "config.h"
+#include "image.h"
+#include "system.h"
 
 // =============================================================================
 // PiecesLibrary class
+
+const char PiecesLibrary::TexturesBinHeader[32] = "LeoCAD texture data file\0\0\0\0\0\0\0";
+const char PiecesLibrary::TexturesIdxHeader[32] = "LeoCAD texture index file\0\0\0\0\0\0";
+const int PiecesLibrary::TexturesFileVersion = 1;
+
 PiecesLibrary::PiecesLibrary ()
 {
   strcpy (m_LibraryPath, "");
@@ -89,7 +96,6 @@ bool PiecesLibrary::Load (const char *libpath)
   m_pPieceIdx = new PieceInfo[count];
   m_nPieceCount = count;
 
-  // workaround for VC++ error C2538: new : cannot specify initializer for arrays
   for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
     pElements->LoadIndex (idx);
 
@@ -124,6 +130,8 @@ bool PiecesLibrary::Load (const char *libpath)
 	if (!idx.Open(filename, "rb"))
 		return false;
 
+	// FIXME: check header
+
 	idx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
 	idx.ReadLong (&binsize, 1);
 	idx.ReadShort (&count, 1);
@@ -150,6 +158,9 @@ bool PiecesLibrary::Load (const char *libpath)
 
 	return true;
 }
+
+// =============================================================================
+// Search functions
 
 // Remeber to make 'name' uppercase.
 PieceInfo* PiecesLibrary::FindPieceInfo (const char* name) const
@@ -197,8 +208,665 @@ Texture* PiecesLibrary::FindTexture (const char* name) const
   return NULL;
 }
 
+Texture* PiecesLibrary::GetTexture (int index) const
+{
+  return &m_pTextures[index];
+}
 
+// =============================================================================
+// Pieces handling stuff
 
+// Remove pieces from the library
+bool PiecesLibrary::DeletePiece (char** names, int numpieces)
+{
+	FileDisk newbin, newidx, oldbin, oldidx;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
+	lcuint16 count, deleted = 0, j;
+	void* membuf;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-b.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) ||
+		(!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-i.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) ||
+		(!newidx.Open(file2, "wb")))
+		return false;
+
+	oldidx.Seek(-2, SEEK_END);
+	oldidx.ReadShort(&count, 1);
+	oldidx.Seek(0, SEEK_SET);
+	oldidx.Read(tmp, 34);
+	newidx.Write(tmp, 34);
+	oldbin.Read(tmp, 32);
+	newbin.Write(tmp, 32);
+
+//	CProgressDlg dlg("Deleting");
+//	dlg.Create(this);
+//	dlg.SetRange (0, count);
+
+	for (j = 0; j < count; j++)
+	{
+//		dlg.StepIt();
+//		dlg.SetStatus(m_Parts[j].info->m_strDescription);
+
+//		if (dlg.CheckCancelButton())
+//			if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
+//				break;
+
+		char name[9];
+		int i;
+		name[8] = 0;
+		oldidx.Read(&name, 8);
+
+		for (i = 0; i < numpieces; i++)
+			if (strcmp(name, names[i]) == 0)
+				break;
+
+		if (i != numpieces)
+		{
+			oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
+			deleted++;
+			continue;
+		}
+
+		newidx.Write(name, 8);
+		oldidx.Read(tmp, 64+12+1+4);
+		newidx.Write(tmp, 64+12+1+4);
+
+		unsigned long binoff = newbin.GetLength(), size;
+		newidx.WriteLong(&binoff, 1);
+		oldidx.ReadLong(&binoff, 1);
+		oldidx.ReadLong(&size, 1);
+		newidx.WriteLong(&size, 1);
+
+		membuf = malloc(size);
+		oldbin.Seek(binoff, SEEK_SET);
+		oldbin.Read(membuf, size);
+		newbin.Write(membuf, size);
+		free(membuf);
+	}
+
+	// list of moved pieces
+	unsigned short moved, cs;
+
+	oldidx.Seek(-(2+4+2), SEEK_END);
+	oldidx.ReadShort(&moved, 1);
+	cs = 2+(moved*16);
+	oldidx.Seek(-(long)cs, SEEK_CUR);
+	membuf = malloc(cs);
+	oldidx.Read(membuf, cs);
+	newidx.Write(membuf, cs);
+	free(membuf);
+
+	// info at the end
+	unsigned long binoff = newbin.GetPosition();
+	newidx.WriteLong(&binoff, 1);
+	count -= deleted;
+	newidx.WriteShort(&count, 1);
+
+	oldidx.Close();
+	oldbin.Close();
+	newidx.Close();
+	newbin.Close();
+
+	return true;
+}
+
+// Load update
+bool PiecesLibrary::LoadUpdate (const char* update)
+{
+	FileDisk newbin, newidx, oldbin, oldidx, up;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
+	unsigned short changes, moved, count, i, j, newcount = 0;
+	unsigned long cs, group, binoff;
+	unsigned char bt;
+	void* membuf;
+
+	typedef struct
+	{
+		char name[9];
+		unsigned char type;
+		unsigned long offset;
+	} LC_UPDATE_INFO;
+	LC_UPDATE_INFO* upinfo;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-b.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) ||
+		(!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-i.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) ||
+		(!newidx.Open(file2, "wb")))
+		return false;
+
+	if (!up.Open(update, "rb"))
+		return false;
+
+	up.Seek(32, SEEK_SET);
+	up.ReadByte(&bt, 1);
+	if (bt != 2)
+		return false;	// wrong version
+
+	up.ReadByte(&bt, 1); // update number
+
+	up.Seek(-2, SEEK_END);
+	up.ReadShort(&changes, 1);
+	up.Seek(34, SEEK_SET);
+
+	oldidx.Seek(-2, SEEK_END);
+	oldidx.ReadShort(&count, 1);
+	oldidx.Seek(0, SEEK_SET);
+	oldidx.Read(tmp, 34);
+	newidx.Write(tmp, 33); // skip update byte
+	newidx.WriteByte(&bt, 1);
+	oldbin.Read(tmp, 32);
+	newbin.Write(tmp, 32);
+
+	upinfo = (LC_UPDATE_INFO*)malloc(sizeof(LC_UPDATE_INFO)*changes);
+	memset(upinfo, 0, sizeof(LC_UPDATE_INFO)*changes);
+
+	for (i = 0; i < changes; i++)
+	{
+		up.Read(&upinfo[i].name, 8);
+		up.Read(&upinfo[i].type, 1);
+		upinfo[i].offset = up.GetPosition();
+
+		if ((upinfo[i].type & LC_UPDATE_DESCRIPTION) ||
+			(upinfo[i].type & LC_UPDATE_NEWPIECE))
+			up.Seek(64+4, SEEK_CUR);
+
+		if ((upinfo[i].type & LC_UPDATE_DRAWINFO) ||
+			(upinfo[i].type & LC_UPDATE_NEWPIECE))
+		{
+			up.Seek(12+1, SEEK_CUR);
+			up.ReadLong(&cs, 1);
+			up.Seek(cs, SEEK_CUR);
+		}
+	}
+
+//	CProgressDlg dlg(_T("Updating Library"));
+//	dlg.Create(this);
+//	dlg.SetRange (0, count);
+
+	for (i = 0; i < count; i++)
+	{
+		char name[9];
+		name[8] = 0;
+		oldidx.Read (&name, 8);
+
+//		dlg.StepIt();
+//		if(dlg.CheckCancelButton())
+//			if(AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
+//			{
+//				free(upinfo);
+//				return TRUE;
+//			}
+
+		for (j = 0; j < changes; j++)
+		if (strcmp(name, upinfo[j].name) == 0)
+		{
+			if (upinfo[j].type == LC_UPDATE_DELETE)
+			{
+				oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
+				break;
+			}
+
+			newcount++;
+			up.Seek(upinfo[j].offset, SEEK_SET);
+			newidx.Write(name, 8);
+
+			// description
+			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
+			{
+				up.Read(&tmp, 64);
+				up.Read(&group, 4);
+				oldidx.Seek(64, SEEK_CUR);
+			}
+			else
+				oldidx.Read(&tmp, 64);
+			newidx.Write(tmp, 64);
+//			dlg.SetStatus(tmp);
+
+			// bounding box & flags
+			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
+			{
+				up.Read(&tmp, 12+1);
+				oldidx.Seek(12+1, SEEK_CUR);
+			}
+			else
+				oldidx.Read(&tmp, 12+1);
+			newidx.Write(tmp, 12+1);
+
+			// group
+			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
+				oldidx.Seek(4, SEEK_CUR);
+			else
+				oldidx.Read(&group, 4);
+			newidx.Write(&group, 4);
+
+			binoff = newbin.GetLength();
+			newidx.WriteLong(&binoff, 1);
+
+			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
+			{
+				up.ReadLong(&cs, 1);
+				oldidx.Seek(4+4, SEEK_CUR);
+
+				membuf = malloc(cs);
+				up.Read(membuf, cs);
+				newbin.Write(membuf, cs);
+				free(membuf);
+			}
+			else
+			{
+				oldidx.ReadLong(&binoff, 1);
+				oldidx.ReadLong(&cs, 1);
+
+				membuf = malloc(cs);
+				oldbin.Seek(binoff, SEEK_SET);
+				oldbin.Read(membuf, cs);
+				newbin.Write(membuf, cs);
+				free(membuf);
+			}
+			newidx.WriteLong(&cs, 1);
+			break;
+		}
+
+		// not changed, just copy
+		if (j == changes)
+		{
+			newcount++;
+			newidx.Write(name, 8);
+			oldidx.Read(tmp, 64+12+1+4);
+			newidx.Write(tmp, 64+12+1+4);
+			binoff = newbin.GetLength();
+			newidx.WriteLong(&binoff, 1);
+			oldidx.ReadLong(&binoff, 1);
+			oldidx.ReadLong(&cs, 1);
+			newidx.WriteLong(&cs, 1);
+
+//			tmp[64] = 0;
+//			dlg.SetStatus(tmp);
+
+			membuf = malloc(cs);
+			oldbin.Seek(binoff, SEEK_SET);
+			oldbin.Read(membuf, cs);
+			newbin.Write(membuf, cs);
+			free(membuf);
+		}
+	}
+
+	// now add new pieces
+	for (j = 0; j < changes; j++)
+		if (upinfo[j].type == LC_UPDATE_NEWPIECE)
+		{
+			newcount++;
+			newidx.Write(upinfo[j].name, 8);
+			up.Seek(upinfo[j].offset, SEEK_SET);
+			up.Read(&tmp, 64+12);
+			newidx.Write(tmp, 64+12);
+			up.Read(&group, 4);
+			up.Read(&bt, 1);
+			newidx.Write(&bt, 1);
+			newidx.Write(&group, 4);
+			binoff = newbin.GetLength();
+			newidx.WriteLong(&binoff, 1);
+
+			up.ReadLong(&cs, 1);
+			membuf = malloc(cs);
+			up.Read(membuf, cs);
+			newbin.Write(membuf, cs);
+			up.WriteLong(&cs, 1);
+			newidx.WriteLong(&cs, 1);
+			free (membuf);
+		}
+
+	up.Seek(-(2+2), SEEK_END);
+	up.ReadShort(&moved, 1);
+	cs = 2+moved*16;
+	up.Seek(-(long)(cs), SEEK_CUR);
+	membuf = malloc(cs);
+	up.Read(membuf, cs);
+	newidx.Write(membuf, cs);
+	free(membuf);
+
+	binoff = newbin.GetLength();
+	newidx.WriteLong(&binoff, 1);
+	newidx.WriteShort(&newcount, 1);
+
+	free(upinfo);
+	oldidx.Close();
+	oldbin.Close();
+	newidx.Close();
+	newbin.Close();
+	up.Close();
+
+	return true;
+}
+
+// =============================================================================
+// Textures handling stuff
+
+bool PiecesLibrary::DeleteTextures (char** Names, int NumTextures)
+{
+	char file1[LC_MAXPATH], file2[LC_MAXPATH];
+	FileDisk newbin, newidx, oldbin, oldidx;
+	lcuint32 binsize, offset = 0;
+  lcuint16 count, deleted = 0, i, j;
+	lcuint8 version, bt;
+
+	// Backup files
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "tex-b.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "textures.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) || (!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "tex-i.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "textures.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) || (!newidx.Open(file2, "wb")))
+		return false;
+
+	// Write the headers
+	newidx.Write (TexturesIdxHeader, sizeof (TexturesIdxHeader));
+	bt = 1; // version
+	newidx.WriteByte (&bt, 1);
+	bt = 0; // last update (unused for now)
+	newidx.WriteByte (&bt, 1);
+
+	newbin.Write (TexturesBinHeader, sizeof (TexturesBinHeader));
+	offset += sizeof (TexturesBinHeader);
+
+	oldidx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
+	oldidx.ReadLong (&binsize, 1);
+	oldidx.ReadShort (&count, 1);
+	oldidx.Seek(32, SEEK_SET);
+	oldidx.ReadByte (&version, 1);
+
+	if ((version != TexturesFileVersion) || (count == 0))
+		return false;
+
+	oldidx.Seek(34, SEEK_SET); // skip update byte
+
+	for (i = 0; i < count; i++)
+	{
+		lcuint32 OldOffset, FileSize;
+		lcuint16 Width, Height;
+		char TexName[9];
+		TexName[8] = 0;
+
+		oldidx.Read (TexName, 8);
+		oldidx.ReadShort (&Width, 1);
+		oldidx.ReadShort (&Height, 1);
+		oldidx.ReadByte (&bt, 1);
+
+		switch (bt)
+		{
+		case LC_INTENSITY:
+			FileSize = Width*Height;
+			break;
+
+		case LC_RGB:
+			FileSize = Width*Height*3;
+			break;
+
+		case LC_RGBA:
+			FileSize = Width*Height*4;
+			break;
+		}
+
+		oldidx.ReadLong(&OldOffset, 1);
+
+		for (j = 0; j < NumTextures; j++)
+			if (strcmp(TexName, Names[j]) == 0)
+				break;
+
+		if (j != NumTextures)
+		{
+			deleted++;
+			continue;
+		}
+
+		// Write index for this texture
+		newidx.Write (TexName, 8);
+		newidx.WriteShort (&Width, 1);
+		newidx.WriteShort (&Height, 1);
+		newidx.WriteByte (&bt, 1);
+		newidx.WriteLong (&offset, 1);
+
+		offset += FileSize;
+
+		// Copy texture data
+		void *membuf = malloc (FileSize);
+		oldbin.Seek (OldOffset, SEEK_SET);
+		oldbin.Read (membuf, FileSize);
+		newbin.Write (membuf, FileSize);
+		free (membuf);
+	}
+
+	newidx.WriteLong (&offset, 1);
+	count -= deleted;
+	newidx.WriteShort (&count, 1);
+
+	return true;
+}
+
+bool PiecesLibrary::ImportTexture (const char* Name)
+{
+	char file1[LC_MAXPATH], file2[LC_MAXPATH];
+	FileDisk newbin, newidx, oldbin, oldidx;
+	lcuint32 FileSize, binsize, offset = 0;
+	lcuint16 Width, Height, count, deleted = 0, i;
+	lcuint8 version, bt;
+	Image img;
+
+	if (!img.FileLoad (Name))
+		return false;
+
+	// Backup files
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "tex-b.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "textures.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) || (!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "tex-i.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "textures.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) || (!newidx.Open(file2, "wb")))
+		return false;
+
+	// Get the file name
+	char* p, NewTexName[9];
+
+	strcpy(file1, Name);
+	p = strrchr(file1, '.');
+	*p = 0;
+	p = strrchr(file1, '\\');
+	if (!p)
+		p = strrchr(file1, '/');
+	if (!p)
+		p = file1;
+	strupr(p);
+	p++;
+
+	memset(NewTexName, 0, 9);
+	strcpy(NewTexName, p);
+
+	if (FindTexture (NewTexName) != NULL)
+	  Sys_MessageBox ("Texture already exists in the library !");
+
+	// Write the headers
+	newidx.Write (TexturesIdxHeader, sizeof (TexturesIdxHeader));
+	bt = 1; // version
+	newidx.WriteByte (&bt, 1);
+	bt = 0; // last update (unused for now)
+	newidx.WriteByte (&bt, 1);
+
+	newbin.Write (TexturesBinHeader, sizeof (TexturesBinHeader));
+	offset += sizeof (TexturesBinHeader);
+
+	oldidx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
+	oldidx.ReadLong (&binsize, 1);
+	oldidx.ReadShort (&count, 1);
+	oldidx.Seek(32, SEEK_SET);
+	oldidx.ReadByte (&version, 1);
+
+	if (version != TexturesFileVersion)
+		return false;
+
+	oldidx.Seek(34, SEEK_SET); // skip update byte
+
+	for (i = 0; i < count; i++)
+	{
+		lcuint32 OldOffset, FileSize;
+		lcuint16 Width, Height;
+		char TexName[9];
+		TexName[8] = 0;
+
+		oldidx.Read (TexName, 8);
+		oldidx.ReadShort (&Width, 1);
+		oldidx.ReadShort (&Height, 1);
+		oldidx.ReadByte (&bt, 1);
+
+		switch (bt)
+		{
+		case LC_INTENSITY:
+			FileSize = Width*Height;
+			break;
+
+		case LC_RGB:
+			FileSize = Width*Height*3;
+			break;
+
+		case LC_RGBA:
+			FileSize = Width*Height*4;
+			break;
+		}
+
+		oldidx.ReadLong(&OldOffset, 1);
+
+		if (strcmp(TexName, NewTexName) == 0)
+		{
+			deleted++;
+			continue;
+		}
+
+		// Write index for this texture
+		newidx.Write (TexName, 8);
+		newidx.WriteShort (&Width, 1);
+		newidx.WriteShort (&Height, 1);
+		newidx.WriteByte (&bt, 1);
+		newidx.WriteLong (&offset, 1);
+
+		offset += FileSize;
+
+		// Copy texture data
+		void *membuf = malloc (FileSize);
+		oldbin.Seek (OldOffset, SEEK_SET);
+		oldbin.Read (membuf, FileSize);
+		newbin.Write (membuf, FileSize);
+		free (membuf);
+	}
+
+	// Save the new texture
+	Width = img.Width ();
+	Height = img.Height ();
+	count++;
+
+	// FIXME: This should be an option when you choose the file but I'll leave it hardcoded for now.
+	if (!strcmp (NewTexName, "SYSFONT"))
+	{
+		lcuint8* buf = img.GetData();
+		int w = img.Alpha () ? 4 : 3;
+
+		for (i = 0; i < Width*Height; i++)
+		{
+			if (buf[i*w] > 0 || buf[i*w+1] > 0 || buf[i*w+2] > 0)
+				bt = 255;
+			else
+				bt = 0;
+
+			newbin.WriteByte (&bt, 1);
+		}
+
+		FileSize = Width*Height;
+		bt = LC_INTENSITY;
+	}
+	else
+	{
+		if (img.Alpha ())
+		{
+			FileSize = Width*Height*4;
+			bt = LC_RGBA;
+		}
+		else
+		{
+			FileSize = Width*Height*3;
+			bt = LC_RGB;
+		}
+
+		newbin.Write (img.GetData(), FileSize);
+	}
+
+	newidx.Write (NewTexName, 8);
+	newidx.WriteShort (&Width, 1);
+	newidx.WriteShort (&Height, 1);
+	newidx.WriteByte (&bt, 1);
+	newidx.WriteLong (&offset, 1);
+
+	offset += FileSize;
+
+	newidx.WriteLong (&offset, 1);
+	count -= deleted;
+	newidx.WriteShort (&count, 1);
+
+	return true;
+}
 
 
 
@@ -211,7 +879,6 @@ Texture* PiecesLibrary::FindTexture (const char* name) const
 #include "globals.h"
 #include "project.h"
 #include "matrix.h"
-#include "system.h"
 
 
 // =============================================================================
@@ -337,7 +1004,7 @@ void LibraryDialog::HandleCommand (int id)
       if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
 	return;
 
-      LoadUpdate (filename);
+      project->GetPiecesLibrary ()->LoadUpdate (filename);
 
 // update m_Parts
       UpdateList();
@@ -1779,361 +2446,3 @@ void FreeLDrawPiece(LC_LDRAW_PIECE* piece)
 
 // ========================================================
 
-// Remove pieces from the library
-bool DeletePiece(char** names, int numpieces)
-{
-	FileDisk newbin, newidx, oldbin, oldidx;
-	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
-	unsigned short count, deleted = 0, j;
-	void* membuf;
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
-
-	strcpy(file1, pLib->GetLibraryPath());
-	strcat(file1, "pieces-b.old");
-	remove(file1);
-	strcpy(file2, pLib->GetLibraryPath());
-	strcat(file2, "pieces.bin");
-	rename(file2, file1);
-
-	if ((!oldbin.Open(file1, "rb")) ||
-		(!newbin.Open(file2, "wb")))
-		return false;
-
-	strcpy(file1, pLib->GetLibraryPath());
-	strcat(file1, "pieces-i.old");
-	remove(file1);
-	strcpy(file2, pLib->GetLibraryPath());
-	strcat(file2, "pieces.idx");
-	rename(file2, file1);
-
-	if ((!oldidx.Open(file1, "rb")) ||
-		(!newidx.Open(file2, "wb")))
-		return false;
-
-	oldidx.Seek(-2, SEEK_END);
-	oldidx.ReadShort(&count, 1);
-	oldidx.Seek(0, SEEK_SET);
-	oldidx.Read(tmp, 34);
-	newidx.Write(tmp, 34);
-	oldbin.Read(tmp, 32);
-	newbin.Write(tmp, 32);
-
-//	CProgressDlg dlg("Deleting");
-//	dlg.Create(this);
-//	dlg.SetRange (0, count);
-
-	for (j = 0; j < count; j++)
-	{
-//		dlg.StepIt();
-//		dlg.SetStatus(m_Parts[j].info->m_strDescription);
-
-//		if (dlg.CheckCancelButton())
-//			if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
-//				break;
-
-		char name[9];
-		int i;
-		name[8] = 0;
-		oldidx.Read(&name, 8);
-
-		for (i = 0; i < numpieces; i++)
-			if (strcmp(name, names[i]) == 0)
-				break;
-
-		if (i != numpieces)
-		{
-			oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
-			deleted++;
-			continue;
-		}
-
-		newidx.Write(name, 8);
-		oldidx.Read(tmp, 64+12+1+4);
-		newidx.Write(tmp, 64+12+1+4);
-
-		unsigned long binoff = newbin.GetLength(), size;
-		newidx.WriteLong(&binoff, 1);
-		oldidx.ReadLong(&binoff, 1);
-		oldidx.ReadLong(&size, 1);
-		newidx.WriteLong(&size, 1);
-
-		membuf = malloc(size);
-		oldbin.Seek(binoff, SEEK_SET);
-		oldbin.Read(membuf, size);
-		newbin.Write(membuf, size);
-		free(membuf);
-	}
-
-	// list of moved pieces
-	unsigned short moved, cs;
-
-	oldidx.Seek(-(2+4+2), SEEK_END);
-	oldidx.ReadShort(&moved, 1);
-	cs = 2+(moved*16);
-	oldidx.Seek(-(long)cs, SEEK_CUR);
-	membuf = malloc(cs);
-	oldidx.Read(membuf, cs);
-	newidx.Write(membuf, cs);
-	free(membuf);
-
-	// info at the end
-	unsigned long binoff = newbin.GetPosition();
-	newidx.WriteLong(&binoff, 1);
-	count -= deleted;
-	newidx.WriteShort(&count, 1);
-
-	oldidx.Close();
-	oldbin.Close();
-	newidx.Close();
-	newbin.Close();
-
-	return true;
-}
-
-// ========================================================
-
-// Load update
-bool LoadUpdate(const char* update)
-{
-	FileDisk newbin, newidx, oldbin, oldidx, up;
-	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
-	unsigned short changes, moved, count, i, j, newcount = 0;
-	unsigned long cs, group, binoff;
-	unsigned char bt;
-	void* membuf;
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
-
-	typedef struct
-	{
-		char name[9];
-		unsigned char type;
-		unsigned long offset;
-	} LC_UPDATE_INFO;
-	LC_UPDATE_INFO* upinfo;
-
-	strcpy(file1, pLib->GetLibraryPath());
-	strcat(file1, "pieces-b.old");
-	remove(file1);
-	strcpy(file2, pLib->GetLibraryPath());
-	strcat(file2, "pieces.bin");
-	rename(file2, file1);
-
-	if ((!oldbin.Open(file1, "rb")) ||
-		(!newbin.Open(file2, "wb")))
-		return false;
-
-	strcpy(file1, pLib->GetLibraryPath());
-	strcat(file1, "pieces-i.old");
-	remove(file1);
-	strcpy(file2, pLib->GetLibraryPath());
-	strcat(file2, "pieces.idx");
-	rename(file2, file1);
-
-	if ((!oldidx.Open(file1, "rb")) ||
-		(!newidx.Open(file2, "wb")))
-		return false;
-
-	if (!up.Open(update, "rb"))
-		return false;
-
-	up.Seek(32, SEEK_SET);
-	up.ReadByte(&bt, 1);
-	if (bt != 2)
-		return false;	// wrong version
-
-	up.ReadByte(&bt, 1); // update number
-
-	up.Seek(-2, SEEK_END);
-	up.ReadShort(&changes, 1);
-	up.Seek(34, SEEK_SET);
-
-	oldidx.Seek(-2, SEEK_END);
-	oldidx.ReadShort(&count, 1);
-	oldidx.Seek(0, SEEK_SET);
-	oldidx.Read(tmp, 34);
-	newidx.Write(tmp, 33); // skip update byte
-	newidx.WriteByte(&bt, 1);
-	oldbin.Read(tmp, 32);
-	newbin.Write(tmp, 32);
-
-	upinfo = (LC_UPDATE_INFO*)malloc(sizeof(LC_UPDATE_INFO)*changes);
-	memset(upinfo, 0, sizeof(LC_UPDATE_INFO)*changes);
-
-	for (i = 0; i < changes; i++)
-	{
-		up.Read(&upinfo[i].name, 8);
-		up.Read(&upinfo[i].type, 1);
-		upinfo[i].offset = up.GetPosition();
-
-		if ((upinfo[i].type & LC_UPDATE_DESCRIPTION) ||
-			(upinfo[i].type & LC_UPDATE_NEWPIECE))
-			up.Seek(64+4, SEEK_CUR);
-
-		if ((upinfo[i].type & LC_UPDATE_DRAWINFO) ||
-			(upinfo[i].type & LC_UPDATE_NEWPIECE))
-		{
-			up.Seek(12+1, SEEK_CUR);
-			up.ReadLong(&cs, 1);
-			up.Seek(cs, SEEK_CUR);
-		}
-	}
-
-//	CProgressDlg dlg(_T("Updating Library"));
-//	dlg.Create(this);
-//	dlg.SetRange (0, count);
-
-	for (i = 0; i < count; i++)
-	{
-		char name[9];
-		name[8] = 0;
-		oldidx.Read (&name, 8);
-
-//		dlg.StepIt();
-//		if(dlg.CheckCancelButton())
-//			if(AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
-//			{
-//				free(upinfo);
-//				return TRUE;
-//			}
-
-		for (j = 0; j < changes; j++)
-		if (strcmp(name, upinfo[j].name) == 0)
-		{
-			if (upinfo[j].type == LC_UPDATE_DELETE)
-			{
-				oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
-				break;
-			}
-
-			newcount++;
-			up.Seek(upinfo[j].offset, SEEK_SET);
-			newidx.Write(name, 8);
-
-			// description
-			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
-			{
-				up.Read(&tmp, 64);
-				up.Read(&group, 4);
-				oldidx.Seek(64, SEEK_CUR);
-			}
-			else
-				oldidx.Read(&tmp, 64);
-			newidx.Write(tmp, 64);
-//			dlg.SetStatus(tmp);
-
-			// bounding box & flags
-			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
-			{
-				up.Read(&tmp, 12+1);
-				oldidx.Seek(12+1, SEEK_CUR);
-			}
-			else
-				oldidx.Read(&tmp, 12+1);
-			newidx.Write(tmp, 12+1);
-
-			// group
-			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
-				oldidx.Seek(4, SEEK_CUR);
-			else
-				oldidx.Read(&group, 4);
-			newidx.Write(&group, 4);
-
-			binoff = newbin.GetLength();
-			newidx.WriteLong(&binoff, 1);
-
-			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
-			{
-				up.ReadLong(&cs, 1);
-				oldidx.Seek(4+4, SEEK_CUR);
-
-				membuf = malloc(cs);
-				up.Read(membuf, cs);
-				newbin.Write(membuf, cs);
-				free(membuf);
-			}
-			else
-			{
-				oldidx.ReadLong(&binoff, 1);
-				oldidx.ReadLong(&cs, 1);
-
-				membuf = malloc(cs);
-				oldbin.Seek(binoff, SEEK_SET);
-				oldbin.Read(membuf, cs);
-				newbin.Write(membuf, cs);
-				free(membuf);
-			}
-			newidx.WriteLong(&cs, 1);
-			break;
-		}
-
-		// not changed, just copy
-		if (j == changes)
-		{
-			newcount++;
-			newidx.Write(name, 8);
-			oldidx.Read(tmp, 64+12+1+4);
-			newidx.Write(tmp, 64+12+1+4);
-			binoff = newbin.GetLength();
-			newidx.WriteLong(&binoff, 1);
-			oldidx.ReadLong(&binoff, 1);
-			oldidx.ReadLong(&cs, 1);
-			newidx.WriteLong(&cs, 1);
-
-//			tmp[64] = 0;
-//			dlg.SetStatus(tmp);
-
-			membuf = malloc(cs);
-			oldbin.Seek(binoff, SEEK_SET);
-			oldbin.Read(membuf, cs);
-			newbin.Write(membuf, cs);
-			free(membuf);
-		}
-	}
-
-	// now add new pieces
-	for (j = 0; j < changes; j++)
-		if (upinfo[j].type == LC_UPDATE_NEWPIECE)
-		{
-			newcount++;
-			newidx.Write(upinfo[j].name, 8);
-			up.Seek(upinfo[j].offset, SEEK_SET);
-			up.Read(&tmp, 64+12);
-			newidx.Write(tmp, 64+12);
-			up.Read(&group, 4);
-			up.Read(&bt, 1);
-			newidx.Write(&bt, 1);
-			newidx.Write(&group, 4);
-			binoff = newbin.GetLength();
-			newidx.WriteLong(&binoff, 1);
-
-			up.ReadLong(&cs, 1);
-			membuf = malloc(cs);
-			up.Read(membuf, cs);
-			newbin.Write(membuf, cs);
-			up.WriteLong(&cs, 1);
-			newidx.WriteLong(&cs, 1);
-			free (membuf);
-		}
-
-	up.Seek(-(2+2), SEEK_END);
-	up.ReadShort(&moved, 1);
-	cs = 2+moved*16;
-	up.Seek(-(long)(cs), SEEK_CUR);
-	membuf = malloc(cs);
-	up.Read(membuf, cs);
-	newidx.Write(membuf, cs);
-	free(membuf);
-
-	binoff = newbin.GetLength();
-	newidx.WriteLong(&binoff, 1);
-	newidx.WriteShort(&newcount, 1);
-
-	free(upinfo);
-	oldidx.Close();
-	oldbin.Close();
-	newidx.Close();
-	newbin.Close();
-	up.Close();
-
-	return true;
-}

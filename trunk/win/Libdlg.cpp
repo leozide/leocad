@@ -7,6 +7,7 @@
 #include "GroupDlg.h"
 #include "Print.h"
 #include "Tools.h"
+#include "texdlg.h"
 #include "ProgDlg.h"
 #include "project.h"
 #include "pieceinf.h"
@@ -293,7 +294,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (filedlg.DoModal() != IDOK)
 				return TRUE;
 
-			LoadUpdate(filedlg.GetPathName());
+			project->GetPiecesLibrary ()->LoadUpdate(filedlg.GetPathName());
 
 // update m_Parts
 			UpdateList();
@@ -341,6 +342,12 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
       }
 			return TRUE;
 		}
+
+		case ID_LIBDLG_FILE_TEXTURES:
+		{
+			CTexturesDlg dlg;
+			dlg.DoModal();
+		} break;
 
 		case ID_LIBDLG_GROUP_INSERT:
 		{
@@ -620,7 +627,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 					sel++;
 				}
 			
-			DeletePiece(names, sel);
+			project->GetPiecesLibrary ()->DeletePiece(names, sel);
 			free(names);
 
 			CString str = project->GetPiecesLibrary ()->GetLibraryPath();

@@ -16,14 +16,24 @@ public:
     { return m_LibraryPath; }
   int GetPieceCount () const
     { return m_nPieceCount; }
+  int GetTextureCount () const
+    { return m_nTextureCount; }
 
   bool Load (const char* libpath);
   void Unload ();
 
+	// Search for stuff
   PieceInfo* FindPieceInfo (const char* name) const;
   PieceInfo* GetPieceInfo (int index) const;
   int GetPieceIndex (PieceInfo *pInfo) const;
   Texture* FindTexture (const char* name) const;
+  Texture* GetTexture (int index) const;
+
+	// File operations
+  bool DeletePiece (char** names, int numpieces);
+  bool LoadUpdate (const char* update);
+	bool DeleteTextures (char** Names, int NumTextures);
+	bool ImportTexture (const char* Name);
 
 protected:
   char m_LibraryPath[LC_MAXPATH];	// path to the library files
@@ -34,7 +44,62 @@ protected:
 	PieceInfo* m_pPieceIdx;	 // pieces array
 	int m_nTextureCount;     // number of textures
 	Texture* m_pTextures;    // textures array
+
+	// File headers
+	static const char TexturesBinHeader[32];
+	static const char TexturesIdxHeader[32];
+	static const int TexturesFileVersion;
 };
+
+// This should be cleaned and moved to the PiecesLibrary class
+typedef struct connection_s
+{
+	unsigned char type;
+	float pos[3];
+	float up[3];
+	connection_s* next;
+} connection_t;
+
+typedef struct group_s
+{
+	connection_t* connections[5];
+	void* drawinfo;
+	unsigned long infosize;
+	group_s* next;
+} group_t;
+
+typedef struct lineinfo_s
+{
+	unsigned char type;
+	unsigned char color;
+	float points[12];
+	lineinfo_s* next;
+} lineinfo_t;
+
+typedef struct texture_s
+{
+	float points[20];
+	unsigned char color;
+	char name[9];
+	texture_s* next;
+} texture_t;
+
+typedef struct
+{
+	float* verts;
+	unsigned int verts_count;
+	connection_t* connections;
+	group_t* groups;
+	texture_t* textures;
+	char name[9];
+	char description[65];
+} LC_LDRAW_PIECE;
+
+bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
+bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);
+void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
+
+// And this should be moved to a different file (libdlg.h ?)
 
 #include "basewnd.h"
 
@@ -129,54 +194,5 @@ class LibraryDialog : public BaseWnd
   bool m_bReload;
   char m_strFile[LC_MAXPATH];
 };
-
-typedef struct connection_s
-{
-	unsigned char type;
-	float pos[3];
-	float up[3];
-	connection_s* next;
-} connection_t;
-
-typedef struct group_s
-{
-	connection_t* connections[5];
-	void* drawinfo;
-	unsigned long infosize;
-	group_s* next;
-} group_t;
-
-typedef struct lineinfo_s
-{
-	unsigned char type;
-	unsigned char color;
-	float points[12];
-	lineinfo_s* next;
-} lineinfo_t;
-
-typedef struct texture_s
-{
-	float points[20];
-	unsigned char color;
-	char name[9];
-	texture_s* next;
-} texture_t;
-
-typedef struct
-{
-	float* verts;
-	unsigned int verts_count;
-	connection_t* connections;
-	group_t* groups;
-	texture_t* textures;
-	char name[9];
-	char description[65];
-} LC_LDRAW_PIECE;
-
-bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
-bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);
-void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
-bool DeletePiece(char** names, int numpieces);
-bool LoadUpdate(const char* update);
 
 #endif // _LIBRARY_H_

@@ -204,6 +204,7 @@ BEGIN
     BUTTON      ID_TERDLG_FILE_OPEN
     BUTTON      ID_TERDLG_FILE_SAVE
     SEPARATOR
+    BUTTON      ID_TERDLG_EDIT_SELECT
     BUTTON      ID_TERDLG_EDIT_ZOOM
     BUTTON      ID_TERDLG_EDIT_PAN
     BUTTON      ID_TERDLG_EDIT_ROTATE
@@ -248,7 +249,7 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Propert&ies...",              ID_FILE_PROPERTIES
-        MENUITEM "Piece &Library Manager...",   ID_FILE_EDITPIECELIBRARY
+        MENUITEM "Pieces &Library Manager...",  ID_FILE_EDITPIECELIBRARY
         MENUITEM "Terrain &Editor...",          ID_FILE_TERRAINEDITOR
         MENUITEM SEPARATOR
         MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
@@ -519,6 +520,7 @@ BEGIN
         MENUITEM "&Print Catalog...",           ID_LIBDLG_FILE_PRINTCATALOG
         MENUITEM "Load &Update...",             ID_LIBDLG_FILE_MERGEUPDATE
         MENUITEM "&Import Piece...",            ID_FILE_IMPORTPIECE
+        MENUITEM "Te&xtures...",                ID_LIBDLG_FILE_TEXTURES
         MENUITEM SEPARATOR
         MENUITEM "Re&turn",                     IDOK
         MENUITEM "&Cancel",                     IDCANCEL
@@ -558,6 +560,7 @@ BEGIN
         MENUITEM "&Random",                     ID_TERDLG_EDIT_RANDOM
         MENUITEM "Reset &Camera",               ID_TERDLG_EDIT_RESETCAMERA
         MENUITEM SEPARATOR
+        MENUITEM "&Select",                     ID_TERDLG_EDIT_SELECT
         MENUITEM "&Zoom",                       ID_TERDLG_EDIT_ZOOM
         MENUITEM "&Pan",                        ID_TERDLG_EDIT_PAN
         MENUITEM "Ro&tate",                     ID_TERDLG_EDIT_ROTATE
@@ -1380,6 +1383,19 @@ BEGIN
     PUSHBUTTON      "New",IDC_EDITGRP_NEWGROUP,7,136,41,14
 END
 
+IDD_LIBRARY_TEXTURES DIALOG DISCARDABLE  0, 0, 226, 201
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "LeoCAD Pieces Library Textures"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         ID_LIBTEX_LIST,7,7,152,187,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "Close",IDOK,169,7,50,14
+    PUSHBUTTON      "Add...",ID_LIBTEX_ADD,169,24,50,14
+    PUSHBUTTON      "Remove",ID_LIBTEX_REMOVE,169,41,50,14
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -1626,6 +1642,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 150
     END
+
+    IDD_LIBRARY_TEXTURES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 219
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 194
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1694,18 +1718,18 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_FILE_NEW             "Create a new document\nNew"
-    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_NEW             "Create a new project\nNew"
+    ID_FILE_OPEN            "Open an existing project\nOpen"
     ID_FILE_CLOSE           "Close the active document\nClose"
-    ID_FILE_SAVE            "Save the active document\nSave"
-    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_SAVE            "Save the active project\nSave"
+    ID_FILE_SAVE_AS         "Save the active project with a new name\nSave As"
     ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
     ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
-    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT           "Print the active project\nPrint"
     ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
     ID_FILE_UPDATE          "Update the container to show any changes\nUpdate"
     ID_FILE_SAVE_COPY_AS    "Save a copy of the active document with a new name\nSave Copy"
-    ID_FILE_SEND_MAIL       "Send the active document through electronic mail\nSend Mail"
+    ID_FILE_SEND_MAIL       "Send the active project through electronic mail\nSend Mail"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -1806,6 +1830,7 @@ BEGIN
     ID_SNAP_SNAPZ           "Snap Z Toggle"
     ID_SNAP_SNAPALL         "Snap Toggle"
     ID_SNAP_SNAPNONE        "Snap Toggle"
+    ID_FILE_SAVEPICTURE     "Save a picture"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -1918,6 +1943,7 @@ BEGIN
     ID_EDIT_SELECTNONE      "De-select everything"
     ID_EDIT_SELECTINVERT    "Invert the current selection set"
     ID_EDIT_SELECTBYNAME    "Select objects by name"
+    ID_FILE_MERGE           "Merge the contents of another project with the current one\nMerge"
     ID_VIEW_FULLSCREEN      "Toggle fullscreen mode\nFullscreen"
     ID_VIEW_STEP_NEXT       "Advance one step or frame\nGo Foward"
     ID_VIEW_STEP_PREVIOUS   "Go back one step or frame\nGo Back"
@@ -1943,6 +1969,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    ID_FILE_EDITPIECELIBRARY "Configure the LeoCAD Pieces Library"
     ID_VIEW_ZOOMIN          "Zoom In"
     ID_VIEW_ZOOMOUT         "Zoom Out"
     ID_PIECE_EDITGROUPS     "Edit groups"

@@ -6,15 +6,16 @@
 #include "opengl.h"
 
 static HMODULE gl_module;
+static bool gl_ignore_GDI = false;
 
 // ============================================================================
 // Function pointers
 
-WGLCHOOSEPIXELFORMAT pfnwglChoosePixelFormat;
-WGLDESCRIBEPIXELFORMAT pfnwglDescribePixelFormat;
-WGLGETPIXELFORMAT pfnwglGetPixelFormat;
-WGLSETPIXELFORMAT pfnwglSetPixelFormat;
-WGLSWAPBUFFERS pfnwglSwapBuffers;
+static WGLCHOOSEPIXELFORMAT pfnwglChoosePixelFormat;
+static WGLDESCRIBEPIXELFORMAT pfnwglDescribePixelFormat;
+static WGLGETPIXELFORMAT pfnwglGetPixelFormat;
+static WGLSETPIXELFORMAT pfnwglSetPixelFormat;
+static WGLSWAPBUFFERS pfnwglSwapBuffers;
 WGLCOPYCONTEXT pfnwglCopyContext;
 WGLCREATECONTEXT pfnwglCreateContext;
 WGLCREATELAYERCONTEXT pfnwglCreateLayerContext;
@@ -38,6 +39,46 @@ WGLSETDEVICEGAMMARAMPEXT pfnwglSetDeviceGammaRampEXT;
 // ============================================================================
 // Global functions
 
+BOOL OpenGLSwapBuffers (HDC hdc)
+{
+  if (!gl_ignore_GDI)
+    return SwapBuffers (hdc);
+  else
+    return pfnwglSwapBuffers (hdc);
+}
+
+int OpenGLChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR * ppfd)
+{
+  if (!gl_ignore_GDI)
+    return ChoosePixelFormat (hdc, ppfd);
+  else
+    return pfnwglChoosePixelFormat (hdc, ppfd); 
+}
+
+int OpenGLDescribePixelFormat(HDC hdc, int iPixelFormat, UINT nBytes, LPPIXELFORMATDESCRIPTOR ppfd)
+{
+  if (!gl_ignore_GDI)
+    return DescribePixelFormat (hdc, iPixelFormat, nBytes, ppfd);
+  else
+    return pfnwglDescribePixelFormat (hdc, iPixelFormat, nBytes, ppfd);
+}
+
+BOOL OpenGLSetPixelFormat(HDC hdc, int iPixelFormat, CONST PIXELFORMATDESCRIPTOR * ppfd)
+{
+  if (!gl_ignore_GDI)
+    return SetPixelFormat (hdc, iPixelFormat, ppfd);
+  else
+    return pfnwglSetPixelFormat (hdc, iPixelFormat, ppfd);
+}
+
+int OpenGLGetPixelFormat(HDC hdc)
+{
+  if (!gl_ignore_GDI)
+    return GetPixelFormat (hdc);
+  else
+    return pfnwglGetPixelFormat (hdc);
+}
+
 void* Sys_GLGetProc (const char *symbol)
 {
 	return GetProcAddress (gl_module, symbol);
@@ -51,13 +92,24 @@ void* Sys_GLGetExtension (const char *symbol)
 bool Sys_GLOpenLibrary (const char* libname)
 {
 	if (libname)
-		gl_module = LoadLibrary (libname);
+  {
+    gl_module = LoadLibrary (libname);
+
+    if (strcmp(libname, "opengl32.dll"))
+      gl_ignore_GDI = true;
+  }
 
 	if (gl_module == NULL)
+  {
 		gl_module = LoadLibrary ("opengl32.dll");
+    gl_ignore_GDI = false;
+  }
 
 	if (gl_module == NULL)
-		gl_module = LoadLibrary ("opengl.dll");
+  {
+    gl_module = LoadLibrary ("opengl.dll");
+    gl_ignore_GDI = true;
+  }
 
 	if (gl_module == NULL)
 		return false;

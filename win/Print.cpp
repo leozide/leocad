@@ -179,9 +179,9 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = pfnwglChoosePixelFormat(pMemDC->m_hDC, &pfd);
-	pfnwglDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	pfnwglSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
+	int pixelformat = OpenGLChoosePixelFormat(pMemDC->m_hDC, &pfd);
+	OpenGLDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	OpenGLSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
 	
 	// Creating a OpenGL context
   HGLRC hmemrc = pfnwglCreateContext(pMemDC->GetSafeHdc());
@@ -563,9 +563,9 @@ static void PrintPiecesThread(void* pv)
 
 	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = pfnwglChoosePixelFormat(pMemDC->m_hDC, &pfd);
-	pfnwglDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	pfnwglSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
+	int pixelformat = OpenGLChoosePixelFormat(pMemDC->m_hDC, &pfd);
+	OpenGLDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	OpenGLSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
   HGLRC hmemrc = pfnwglCreateContext(pMemDC->GetSafeHdc());
 	pfnwglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
 	double aspect = (float)picw/(float)h;

@@ -117,8 +117,8 @@ BOOL CreateRGBPalette(HDC hDC, CPalette **ppCPalette)
 	LOGPALETTE	*pPal;
 	WORD		n, i;
 
-	n = pfnwglGetPixelFormat(hDC);
-	pfnwglDescribePixelFormat(hDC, n, sizeof(pfd), &pfd);
+	n = OpenGLGetPixelFormat(hDC);
+	OpenGLDescribePixelFormat(hDC, n, sizeof(pfd), &pfd);
 
 	if (!(pfd.dwFlags & PFD_NEED_PALETTE)) return FALSE;
 

@@ -84,7 +84,7 @@ void CTerrainWnd::OnPaint()
 	m_pTerrain->Render(m_pCamera, aspect);
 
   glFlush();
-	pfnwglSwapBuffers (dc.m_hDC);
+	OpenGLSwapBuffers (dc.m_hDC);
 	pfnwglMakeCurrent (oldDC, oldRC);
 }
 
@@ -136,11 +136,11 @@ int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 		
-	int nPixelFormat = pfnwglChoosePixelFormat(m_pDC->m_hDC, &pfd);
+	int nPixelFormat = OpenGLChoosePixelFormat(m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return -1;
 
-	if (!pfnwglSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!OpenGLSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
 		return -1;
 
 	m_pPalette = new CPalette;

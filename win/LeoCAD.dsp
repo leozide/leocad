@@ -78,7 +78,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib gdi32.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -178,6 +178,13 @@ USERDEP__LEOCA="$(ProjDir)\hlp\AfxCore.rtf"	"$(ProjDir)\hlp\AfxPrint.rtf"
 # Begin Source File
 
 SOURCE=.\Leocad.rc
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

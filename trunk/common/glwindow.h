@@ -1,0 +1,37 @@
+#ifndef _GLWINDOW_H_
+#define _GLWINDOW_H_
+
+class GLWindow
+{
+ public:
+  GLWindow (GLWindow *share);
+  virtual ~GLWindow ();
+
+  void Create (void* data);
+  void DestroyContext ();
+
+  bool MakeCurrent ();
+  void SwapBuffers ();
+  void Redraw ();
+
+  virtual void OnDraw () { };
+  virtual void OnSize (int cx, int cy)
+    { m_nWidth = cx; m_nHeight = cy; };
+  virtual void OnInitialUpdate ();
+  virtual void OnLeftButtonDown (int x, int y, bool bControl, bool bShift) { };
+  virtual void OnLeftButtonUp (int x, int y, bool bControl, bool bShift) { };
+  virtual void OnLeftButtonDoubleClick (int x, int y, bool bControl, bool bShift) { };
+  virtual void OnRightButtonDown (int x, int y, bool bControl, bool bShift) { };
+  virtual void OnRightButtonUp (int x, int y, bool bControl, bool bShift) { };
+  virtual void OnMouseMove (int x, int y, bool bControl, bool bShift) { };
+
+ protected:
+  int m_nWidth;
+  int m_nHeight;
+
+ private:
+  void *m_pData;
+  GLWindow *m_pShare;
+};
+
+#endif // _GLWINDOW_H_

@@ -192,31 +192,28 @@ float __LittleFloat (float l)
 
   return out.f;
 }
+#else
+#define __LittleFloat(a) a
 #endif
 
 // Expand from the .bin file
 void Matrix::FromPacked (const float *mat)
 {
-#ifdef LC_BIG_ENDIAN
-  for (int i = 0; i < 12; i++)
-    mat[i] = __LittleFloat (mat[i]);
-#endif
-
-  m[0] = mat[0];
-  m[1] = mat[1];
-  m[2] = mat[2];
+  m[0] = __LittleFloat (mat[0]);
+  m[1] = __LittleFloat (mat[1]);
+  m[2] = __LittleFloat (mat[2]);
   m[3] = 0.0f;
-  m[4] = mat[3];
-  m[5] = mat[4];
-  m[6] = mat[5];
+  m[4] = __LittleFloat (mat[3]);
+  m[5] = __LittleFloat (mat[4]);
+  m[6] = __LittleFloat (mat[5]);
   m[7] = 0.0f;
-  m[8] = mat[6];
-  m[9] = mat[7];
-  m[10] = mat[8];
+  m[8] = __LittleFloat (mat[6]);
+  m[9] = __LittleFloat (mat[7]);
+  m[10] = __LittleFloat (mat[8]);
   m[11] = 0.0f;
-  m[12] = mat[9];
-  m[13] = mat[10];
-  m[14] = mat[11];
+  m[12] = __LittleFloat (mat[9]);
+  m[13] = __LittleFloat (mat[10]);
+  m[14] = __LittleFloat (mat[11]);
   m[15] = 0.0f;
 }
 

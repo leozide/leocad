@@ -175,9 +175,9 @@ unsigned char ConvertColor(int c)
 /////////////////////////////////////////////////////////////////////////////
 // PieceInfo construction/destruction
 
-PieceInfo::PieceInfo (File& file)
+PieceInfo::PieceInfo ()
 {
-  LoadIndex (file);
+  // Do nothing, initialization is done by LoadIndex ()
 }
 
 PieceInfo::~PieceInfo ()

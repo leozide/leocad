@@ -510,8 +510,12 @@ bool Project::LoadPieceLibrary (char *libpath)
 
   // Load piece indexes
   delete [] m_pPieceIdx;
-  m_pPieceIdx = new PieceInfo[count] (idx);
+  m_pPieceIdx = new PieceInfo[count];
   m_nPieceCount = count;
+
+  // workaround for VC++ error C2538: new : cannot specify initializer for arrays
+  for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
+    pElements->LoadIndex (idx);
 
   // Load moved files reference.
   if (m_pMovedReference != NULL)

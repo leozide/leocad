@@ -51,7 +51,7 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 
   create_menu_item (menu, "Propert_ies...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_PROPERTIES, "menu_file_properties");
-  create_menu_item (menu, "Piece _Library Manager...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+  create_menu_item (menu, "Pieces _Library Manager...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_LIBRARY, "menu_file_library");
   create_menu_item (menu, "Terrain _Editor...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_TERRAIN, "menu_file_terrain");

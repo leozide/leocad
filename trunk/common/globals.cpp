@@ -1,3 +1,4 @@
+//
 // Global variables common to all platforms.
 //
 

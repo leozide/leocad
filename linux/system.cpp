@@ -21,20 +21,6 @@
 // =============================================================================
 // Cursor functions
 
-void Sys_BeginWait ()
-{
-  GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-  gdk_window_set_cursor (main_window->window, cursor);
-  gdk_cursor_destroy (cursor);
-}
-
-void Sys_EndWait ()
-{
-  GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
-  gdk_window_set_cursor (main_window->window, cursor);
-  gdk_cursor_destroy (cursor);
-}
-
 /*
 void Sys_GetCursorPos (int *x, int *y)
 {
@@ -96,7 +82,7 @@ void Sys_FinishMemoryRender(void* param)
 {
   LC_RENDER* render = (LC_RENDER*)param;
 
-  gtk_gl_area_make_current (GTK_GL_AREA (drawing_area));
+  //  gtk_gl_area_make_current (GTK_GL_AREA (drawing_area));
 
   if (render->glxcontext == pfnglXGetCurrentContext ())
     pfnglXMakeCurrent (render->xdisplay, None, NULL);
@@ -189,7 +175,7 @@ void SystemUpdateViewport(int new_vp, int old_vp)
 {
   char buf[64];
   sprintf (buf, "menu_view_viewports_%02d", new_vp+1);
-  gpointer item = gtk_object_get_data (GTK_OBJECT (main_window), buf);
+  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), buf);
 
   ignore_commands = true;
   gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
@@ -358,14 +344,14 @@ void SystemUpdateUndoRedo(char* undo, char* redo)
   strcpy(text, "Undo ");
   if (undo)
     strcat(text, undo);
-  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_undo");
+  item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_undo");
   gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
   gtk_widget_set_sensitive (GTK_WIDGET (item), undo != NULL);
 
   strcpy(text, "Redo ");
   if (redo)
     strcat(text, redo);
-  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_redo");
+  item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_redo");
   gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
   gtk_widget_set_sensitive (GTK_WIDGET (item), redo != NULL);
 
@@ -384,7 +370,7 @@ void SystemUpdateSnap(const unsigned long snap)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
-  gpointer item = NULL, menu = gtk_object_get_data (GTK_OBJECT (main_window), "cameras_menu");
+  gpointer item = NULL, menu = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu");
   GList *lst = gtk_container_children (GTK_CONTAINER (menu));
 
   for (int i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
@@ -414,7 +400,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 
 void SystemUpdateCameraMenu(Camera* pCamera)
 {
-  GtkWidget *menu = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "cameras_menu"));
+  GtkWidget *menu = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu"));
   GtkWidget *item = NULL;
   Camera* pFirst = pCamera;
   GList *lst;
@@ -459,13 +445,13 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
   gtk_widget_set_sensitive (anim_toolbar.prev, nTime > 1);
   gtk_widget_set_sensitive (anim_toolbar.next, nTime < nTotal);
   gtk_widget_set_sensitive (anim_toolbar.last, nTime != nTotal);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_first"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_first"));
   gtk_widget_set_sensitive (item, nTime != 1);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_previous"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_previous"));
   gtk_widget_set_sensitive (item, nTime > 1);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_next"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_next"));
   gtk_widget_set_sensitive (item, nTime < nTotal);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_last"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_last"));
   gtk_widget_set_sensitive (item, nTime != nTotal);
 
   char text[11];
@@ -485,7 +471,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
   gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-  gpointer item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_copykeys");
+  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
   gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), 
       bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
   ignore_commands = false;
@@ -507,65 +493,65 @@ void SystemUpdateSelected(unsigned long flags)
   GtkWidget *item;
 
   // select all/none/invert/by name (menu)
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_all"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_all"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_none"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_none"));
   gtk_widget_set_sensitive (item, flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_invert"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_invert"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_byname"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_byname"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
 
   // cut, copy (menu/toolbar)
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_cut"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_cut"));
   gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_copy"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_copy"));
   gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   gtk_widget_set_sensitive (main_toolbar.cut, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   gtk_widget_set_sensitive (main_toolbar.copy, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
   // delete, array, hide sel/unsel, unhideall, copykeys (menu)
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_delete"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_delete"));
   gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_array"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_array"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_PIECE) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_hide_selected"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_hide_selected"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_PIECE) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_hide_unselected"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_hide_unselected"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_unhide_all"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_unhide_all"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_HIDDEN) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_copykeys"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys"));
   gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
   // groups (menu)
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_group"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_CANGROUP) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_ungroup"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_ungroup"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_GROUP) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group_add"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_group_add"));
   gtk_widget_set_sensitive (item, (flags & (LC_SEL_GROUP|LC_SEL_FOCUSGROUP)) == LC_SEL_GROUP);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group_remove"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_group_remove"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_FOCUSGROUP) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group_edit"));
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_group_edit"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
 
   gtk_widget_set_sensitive (tool_toolbar.prev, (flags & LC_SEL_PIECE) != 0);
   gtk_widget_set_sensitive (tool_toolbar.next, (flags & LC_SEL_PIECE) != 0);
 }
 
-void SystemUpdateRecentMenu(char names[4][LC_MAXPATH])
+void SystemUpdateRecentMenu (String names[4])
 {
-  GtkAccelGroup *accel = (GtkAccelGroup*)gtk_object_get_data (GTK_OBJECT (main_window), "file_menu_accel");
+  GtkAccelGroup *accel = (GtkAccelGroup*)gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "file_menu_accel");
   GtkWidget *item;
   char buf[32];
 
   for (int i = 0; i < 4; i++)
   {
     sprintf (buf, "menu_file_recent%d", i+1);
-    item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), buf));
+    item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), buf));
 
-    if (strlen (names[i]) == 0)
+    if (!names[i].IsEmpty ())
     {
       if (i == 0)
       {
@@ -580,7 +566,7 @@ void SystemUpdateRecentMenu(char names[4][LC_MAXPATH])
       char pattern[LC_MAXPATH+4], text[LC_MAXPATH+4];
       gint length;
 
-      sprintf (text, "%d- %s", i+1, names[i]);
+      sprintf (text, "%d- %s", i+1, (char*)names[i]);
       gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
  
       length = strlen (text);
@@ -599,7 +585,7 @@ void SystemUpdateRecentMenu(char names[4][LC_MAXPATH])
 void SystemUpdatePaste(bool enable)
 {
   gtk_widget_set_sensitive (main_toolbar.paste, enable);
-  GtkWidget *item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_paste"));
+  GtkWidget *item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_paste"));
   gtk_widget_set_sensitive (item, enable);
 }
 
@@ -706,13 +692,13 @@ void SystemDoWaitCursor(int code)
   if (code == 1)
   {
     GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-    gdk_window_set_cursor (main_window->window, cursor);
+    gdk_window_set_cursor (((GtkWidget*)(*main_window))->window, cursor);
     gdk_cursor_destroy (cursor);
   } 
   else
   {
     GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
-    gdk_window_set_cursor (main_window->window, cursor);
+    gdk_window_set_cursor (((GtkWidget*)(*main_window))->window, cursor);
     gdk_cursor_destroy (cursor);
   }
 }
@@ -728,7 +714,7 @@ File* SystemImportClipboard()
 
 void SystemSetWindowCaption(char* caption)
 {
-  gtk_window_set_title (GTK_WINDOW (main_window), caption);
+  gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), caption);
 }
 
 void SystemRedrawView()
@@ -752,6 +738,6 @@ void SystemReleaseMouse()
 
 void SystemSwapBuffers()
 {
-  if (drawing_area)
-    gtk_gl_area_swapbuffers (GTK_GL_AREA(drawing_area));
+  //  if (drawing_area)
+  //    gtk_gl_area_swapbuffers (GTK_GL_AREA(drawing_area));
 }

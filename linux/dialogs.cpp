@@ -1414,7 +1414,7 @@ typedef struct
   GtkWidget *scn_clrbackground, *scn_clrgrad1, *scn_clrgrad2, *scn_clrfog, *scn_clrambient;
 } LC_PREFERENCESDLG_STRUCT;
 
-static void preferencesdlg_ok(GtkWidget *widget, gpointer data)
+static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
 {
   LC_PREFERENCESDLG_STRUCT* s = (LC_PREFERENCESDLG_STRUCT*)data;
   LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)s->data;
@@ -1476,6 +1476,78 @@ static void preferencesdlg_ok(GtkWidget *widget, gpointer data)
   // char strPath[LC_MAXPATH];
 
   *cur_ret = LC_OK;
+}
+
+static void preferencesdlg_default (GtkWidget *widget, gpointer data)
+{
+  LC_PREFERENCESDLG_STRUCT* s = (LC_PREFERENCESDLG_STRUCT*)data;
+  LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)s->data;
+
+  unsigned long detail = 0;
+  float line_width;
+  if (GTK_TOGGLE_BUTTON (s->det_edges)->active) detail |= LC_DET_BRICKEDGES;
+  if (GTK_TOGGLE_BUTTON (s->det_dither)->active) detail |= LC_DET_DITHER;
+  if (GTK_TOGGLE_BUTTON (s->det_lighting)->active) detail |= LC_DET_LIGHTING;
+  if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
+  if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
+  if (GTK_TOGGLE_BUTTON (s->det_linear)->active) detail |= LC_DET_LINEAR;
+  if (GTK_TOGGLE_BUTTON (s->det_screen)->active) detail |= LC_DET_SCREENDOOR;
+  if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
+  if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
+  if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
+  if (GTK_TOGGLE_BUTTON (s->det_background)->active) detail |= LC_DET_BACKGROUND;
+  if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
+
+  unsigned long snap = 0;
+  int grid_size, angle_snap;
+  if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
+  if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
+  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
+  if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
+  if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
+  if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
+  if (GTK_TOGGLE_BUTTON (s->draw_angle)->active) snap |= LC_DRAW_SNAP_A;
+  if (GTK_TOGGLE_BUTTON (s->draw_centimeter)->active) snap |= LC_DRAW_CM_UNITS;
+  //  if (GTK_TOGGLE_BUTTON (s->draw_collision)->active) snap |= LC_DRAW_COLLISION;
+  if (GTK_TOGGLE_BUTTON (s->draw_move)->active) snap |= LC_DRAW_MOVE;
+  if (GTK_TOGGLE_BUTTON (s->draw_fixed)->active) snap |= LC_DRAW_MOVEAXIS;
+  if (GTK_TOGGLE_BUTTON (s->draw_lockx)->active) snap |= LC_DRAW_LOCK_X;
+  if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
+  if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
+  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
+  if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
+
+  int fog;
+  unsigned long scene = 0;
+  if (GTK_TOGGLE_BUTTON (s->scn_gradient)->active) scene |= LC_SCENE_GRADIENT;
+  if (GTK_TOGGLE_BUTTON (s->scn_image)->active) scene |= LC_SCENE_BG;
+  if (GTK_TOGGLE_BUTTON (s->scn_tile)->active) scene |= LC_SCENE_BG_TILE;
+  if (GTK_TOGGLE_BUTTON (s->scn_fog)->active) scene |= LC_SCENE_FOG;
+  if (GTK_TOGGLE_BUTTON (s->scn_floor)->active) scene |= LC_SCENE_FLOOR;
+  read_int (s->scn_density, &fog, 1, 100);
+
+  Sys_ProfileSaveInt ("Default", "Detail", detail);
+  Sys_ProfileSaveInt ("Default", "Line", (int)(line_width*100));
+  Sys_ProfileSaveInt ("Default", "Snap", snap);
+  Sys_ProfileSaveInt ("Default", "Angle", angle_snap);
+  Sys_ProfileSaveInt ("Default", "Grid", grid_size);
+  Sys_ProfileSaveInt ("Default", "Scene", scene);
+  Sys_ProfileSaveInt ("Default", "Density", fog);
+  Sys_ProfileSaveString("Default", "BMP", gtk_entry_get_text (GTK_ENTRY (s->scn_imagename)));
+  Sys_ProfileSaveInt ("Default", "Background",
+		      RGB (opts->fBackground[0]*255, opts->fBackground[1]*255, opts->fBackground[2]*255));
+  Sys_ProfileSaveInt ("Default", "Fog",
+		      RGB (opts->fFog[0]*255, opts->fFog[1]*255, opts->fFog[2]*255));
+  Sys_ProfileSaveInt ("Default", "Ambient",
+		      RGB (opts->fAmbient[0]*255, opts->fAmbient[1]*255, opts->fAmbient[2]*255));
+  Sys_ProfileSaveInt ("Default", "Gradient1",
+		      RGB (opts->fGrad1[0]*255, opts->fGrad1[1]*255, opts->fGrad1[2]*255));
+  Sys_ProfileSaveInt ("Default", "Gradient2",
+		      RGB (opts->fGrad2[0]*255, opts->fGrad2[1]*255, opts->fGrad2[2]*255));
+
+  // int nMouse;
+  // int nSaveInterval;
+  // char strPath[LC_MAXPATH];
 }
 
 static void preferencesdlg_color(GtkWidget *widget, gpointer data)
@@ -1869,16 +1941,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
 
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_set_usize (button, 80, 25);
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -1889,11 +1953,21 @@ int preferencesdlg_execute(void* param)
   gtk_widget_add_accelerator (button, "clicked", accel_group,
                               GDK_Escape, 0, GTK_ACCEL_VISIBLE);
 
+  button = gtk_button_new_with_label ("OK");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+		      GTK_SIGNAL_FUNC (preferencesdlg_ok), &s);
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  gtk_widget_set_usize (button, 80, 25);
+  gtk_widget_add_accelerator (button, "clicked", accel_group,
+                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+
   button = gtk_button_new_with_label ("Make Default");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+		      GTK_SIGNAL_FUNC (preferencesdlg_default), &s);
   gtk_widget_show (button);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_usize (button, -2, 25);
-  gtk_widget_set_sensitive (button, FALSE);
 
   // Set initial values
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_edges),

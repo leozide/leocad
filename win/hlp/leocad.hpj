@@ -65,9 +65,9 @@ HIDD_ABOUTBOX = HID_APP_ABOUT
 HIDR_MAINFRAME = main_index
 
 [MAP]
+#include ..\..\..\..\Program Files\Microsoft Visual Studio\VC98\MFC\Include\AFXHELP.HM
 #include ..\resource.hm
 #include <LeoCAD.hm>
-#include c:\devstudio\VC\mfc\include\Afxhelp.hm
 
 [WINDOWS]
 main="",(162,69,698,890),27904,,(r12632256),f2

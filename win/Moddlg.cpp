@@ -96,7 +96,7 @@ BOOL CModifyDialog::OnInitDialogBar()
 	UpdateData(FALSE); 
 	m_ctlCombo.LimitText(80);
 	m_ctlColor.SetColorIndex(0);
-	UpdateControls(LC_PIECE);
+	UpdateControls(LC_OBJECT_PIECE);
 	return TRUE; 
 }
 
@@ -136,18 +136,15 @@ void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler
 	UpdateDialogControls(pTarget, FALSE);
 }
 
-void CModifyDialog::UpdateInfo(void* pObject, BYTE nType)
+void CModifyDialog::UpdateInfo(Object* pObject)
 {
 	if ((GetStyle() & WS_VISIBLE) == 0)
 		return;
 
-	if (nType & LC_UPDATE_OBJECT)
-		m_pObject = pObject;
+	if (pObject == NULL)
+		pObject = project->GetFocusObject();
 
-	if (nType & LC_UPDATE_TYPE)
-		UpdateControls(nType & ~(LC_UPDATE_TYPE|LC_UPDATE_OBJECT));
-	else
-		UpdateControls(m_nType);
+	m_pObject = pObject;
 
 	if (m_pObject == NULL)
 	{
@@ -157,12 +154,16 @@ void CModifyDialog::UpdateInfo(void* pObject, BYTE nType)
 		UpdateData(FALSE);
 		return;
 	}
+	else
+	{
+		UpdateControls(m_pObject->GetType());
+	}
 
 	// TODO: CM UNITS
 
 	switch (m_nType)
 	{
-		case LC_PIECE:
+		case LC_OBJECT_PIECE:
 		{
 			float pos[3], rot[4];
 			Piece* pPiece = (Piece*)m_pObject;
@@ -194,7 +195,7 @@ void CModifyDialog::UpdateInfo(void* pObject, BYTE nType)
 			m_ctlCombo.SelectString(-1, pPiece->GetName());
 		} break;
 
-		case LC_CAMERA: case LC_CAMERA_TARGET:
+		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
 		{
 			float tmp[3];
 			Camera* pCamera = (Camera*)m_pObject;
@@ -218,9 +219,9 @@ void CModifyDialog::UpdateInfo(void* pObject, BYTE nType)
 			m_ctlCombo.SelectString(-1, pCamera->GetName());
 		} break;
 
-		case LC_LIGHT: case LC_LIGHT_TARGET:
+		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
 		{
-
+			// TODO: Lights.
 		} break;
 	}
 
@@ -250,16 +251,16 @@ void CModifyDialog::UpdateControls(BYTE nType)
 
 	int i;
 	UINT id = IDB_PIECE;
-	if (nType == LC_CAMERA || nType == LC_CAMERA_TARGET)
+	if (nType == LC_OBJECT_CAMERA || nType == LC_OBJECT_CAMERA_TARGET)
 		id = IDB_CAMERA;
-	if (nType == LC_LIGHT || nType == LC_LIGHT_TARGET)
+	if (nType == LC_OBJECT_LIGHT || nType == LC_OBJECT_LIGHT_TARGET)
 		id = IDB_LIGHT;
 	SendDlgItemMessage(IDC_MODDLG_PIECE, BM_SETIMAGE, IMAGE_BITMAP, 
 		(LPARAM)LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(id)));
 
 	switch (m_nType)
 	{
-		case LC_PIECE:
+		case LC_OBJECT_PIECE:
 		{
 			for (; pPiece; pPiece = pPiece->m_pNext)
 			{
@@ -283,7 +284,7 @@ void CModifyDialog::UpdateControls(BYTE nType)
 			GetDlgItem(IDC_MODDLG_FAR)->ShowWindow(SW_HIDE);
 		} break;
 
-		case LC_CAMERA: case LC_CAMERA_TARGET:
+		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
 		{
 			for (; pCamera; pCamera = pCamera->m_pNext)
 			{
@@ -307,9 +308,9 @@ void CModifyDialog::UpdateControls(BYTE nType)
 			GetDlgItem(IDC_MODDLG_FAR)->ShowWindow(SW_SHOW);
 		} break;
 
-		case LC_LIGHT: case LC_LIGHT_TARGET:
+		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
 		{
-
+			// TODO: Lights.
 		} break;
 	}
 }
@@ -319,9 +320,9 @@ void CModifyDialog::OnMenuClick(UINT nID)
 	m_pObject = NULL;
 	switch (nID - ID_MODDLG_PIECES)
 	{
-	case 0: UpdateControls(LC_PIECE); break;
-	case 1: UpdateControls(LC_CAMERA); break;
-	case 2: UpdateControls(LC_LIGHT); break;
+	case 0: UpdateControls(LC_OBJECT_PIECE); break;
+	case 1: UpdateControls(LC_OBJECT_CAMERA); break;
+	case 2: UpdateControls(LC_OBJECT_LIGHT); break;
 	}
 }
 
@@ -329,7 +330,7 @@ void CModifyDialog::OnSelendokModdlgList()
 {
 	void* pNew = m_ctlCombo.GetItemDataPtr(m_ctlCombo.GetCurSel());
 	if ((pNew != m_pObject) && (pNew != (void*)-1))
-		UpdateInfo(pNew, LC_UPDATE_OBJECT);
+		UpdateInfo((Object*)pNew);
 }
 
 void CModifyDialog::OnModdlgApply() 
@@ -340,7 +341,7 @@ void CModifyDialog::OnModdlgApply()
 
 	switch (m_nType)
 	{
-		case LC_PIECE: 
+		case LC_OBJECT_PIECE: 
 		{
 			LC_PIECE_MODIFY mod;
 
@@ -360,7 +361,7 @@ void CModifyDialog::OnModdlgApply()
 			project->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&mod);
 		} break;
 
-		case LC_CAMERA: case LC_CAMERA_TARGET:
+		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
 		{
 			LC_CAMERA_MODIFY mod;
 
@@ -382,9 +383,9 @@ void CModifyDialog::OnModdlgApply()
 			project->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&mod);
 		} break;
 
-		case LC_LIGHT: case LC_LIGHT_TARGET:
+		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
 		{
-
+			// TODO: Lights.
 		} break;
 	}
 //	pDoc->UpdateAllViews(NULL);

@@ -168,13 +168,6 @@ char* strlwr(char* string);
 #define LC_HTML_HIGHLIGHT       0x20
 #define LC_HTML_HTMLEXT         0x40
 
-// Bounding box owner (FIXME: cleanup)
-typedef enum { LC_PIECE, LC_CAMERA, LC_CAMERA_TARGET,
-		LC_LIGHT, LC_LIGHT_TARGET } LC_OBJ_TYPES;
-
-#define LC_UPDATE_OBJECT	0x40
-#define LC_UPDATE_TYPE		0x80
-
 // Piece library update
 #define LC_UPDATE_DELETE       0x00
 #define LC_UPDATE_DESCRIPTION  0x01

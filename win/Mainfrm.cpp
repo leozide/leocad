@@ -23,16 +23,6 @@ static char THIS_FILE[] = __FILE__;
 
 #define TOOLBAR_VERSION 1
 
-/*
-// if (type == 255) -> don't change current type
-void SystemUpdateFocus(void* object, unsigned char type)
-{
-	CWnd* pFrame = AfxGetMainWnd();
-	if (pFrame != NULL)
-		pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)object, type);
-}
-*/
-
 void mainframe_listener (int message, void *data, void *user)
 {
   if (message == LC_MSG_FOCUS_CHANGED)
@@ -426,7 +416,7 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 
 LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
-	m_wndModifyDlg.UpdateInfo((void*)lParam, (BYTE)wParam);
+	m_wndModifyDlg.UpdateInfo((Object*)lParam);
 
 	char str[128];
 	float pos[3];

@@ -1,6 +1,8 @@
 #ifndef _LIBRARY_H_
 #define _LIBRARY_H_
 
+#include "basewnd.h"
+
 typedef enum {
   LC_LIBDLG_FILE_RESET,
   LC_LIBDLG_FILE_OPEN,
@@ -37,7 +39,7 @@ typedef struct
 typedef void (*PFNLIBDLGUPDATELISTFUNC) (LC_LIBDLG_PIECEINFO *piece_info, int count, int group, void *data);
 typedef void (*PFNLIBDLGUPDATETREEFUNC) (int num_groups, char str_groups[][LC_LIBDLG_MAXNAME+1], void *data);
 
-class LibraryDialog
+class LibraryDialog : public BaseWnd
 {
  public:
   LibraryDialog ();

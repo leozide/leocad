@@ -2,14 +2,11 @@
 //
 
 #include <stdlib.h>
-#include "typedefs.h"
-#include "defines.h"
+#include "globals.h"
 
-class Project;
 Project* project;
-
-class Messenger;
 Messenger* messenger;
+MainWnd* main_window;
 
 const char* colornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"Light Green", "Blue", "Light Blue", "Yellow", "White",

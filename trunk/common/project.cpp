@@ -24,6 +24,8 @@
 #include "config.h"
 #include "message.h"
 #include "curve.h"
+#include "mainwnd.h"
+#include "view.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p, int i)
@@ -117,13 +119,6 @@ Project::Project()
 	for (i = 0; i < 10; i++)
 		m_pClipboard[i] = NULL;
 
-	char entry[8];
-	for (i = 0; i < 4; i++)
-	{
-		sprintf(entry, "File%d", i+1);
-		strcpy(m_strRecentFiles[i], Sys_ProfileLoadString ("RecentFiles", entry, ""));
-	}
-
 	// Create font table
 	float inv = 1.0f/128;
 	char *charlines[16] = { 
@@ -183,16 +178,7 @@ Project::~Project()
 	if (m_pMovedReference != NULL)
 		free(m_pMovedReference);
 
-	int i;
-	char entry[8];
-	for (i = 0; i < 4; i++)
-	{
-		sprintf(entry, "File%d", i+1);
-//		if (strlen(m_strRecentFiles[i]) > 0)
-			Sys_ProfileSaveString("RecentFiles", entry, m_strRecentFiles[i]);
-	}
-
-	for (i = 0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
 
@@ -498,7 +484,7 @@ bool Project::LoadPieceLibrary (char *libpath)
 	idx.ReadLong (&binsize, 1);
 	idx.ReadShort (&count, 1);
 	idx.Seek (32, SEEK_SET);
-	idx.Read (&version, sizeof(version));
+	idx.ReadByte (&version, 1);
 
 	if ((version != 3) || (count == 0))
 	{
@@ -560,10 +546,10 @@ bool Project::LoadPieceLibrary (char *libpath)
 		return false;
 
 	idx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
-	idx.Read(&binsize, sizeof(binsize));
-	idx.Read(&count, sizeof(count));
+	idx.ReadLong (&binsize, 1);
+	idx.ReadShort (&count, 1);
 	idx.Seek(32, SEEK_SET);
-	idx.Read(&version, sizeof(version));
+	idx.ReadByte (&version, 1);
 
 	if ((version != 1) || (count == 0))
 	{
@@ -586,7 +572,7 @@ bool Project::LoadPieceLibrary (char *libpath)
 	return true;
 }
 
-void Project::SetTitle(char* lpszTitle)
+void Project::SetTitle(const char* lpszTitle)
 {
 	strcpy(m_strTitle, lpszTitle);
 
@@ -758,7 +744,12 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strFooter, Sys_ProfileLoadString ("Default", "Footer", "Page &P"));
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
 	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
-	RenderInitialize();
+
+        for (int i = 0; i < m_ViewList.GetSize (); i++)
+        {
+          m_ViewList[i]->MakeCurrent ();
+          RenderInitialize();
+        }
 
 	if (cameras)
 	{
@@ -801,14 +792,14 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	file->Read(id, 32);
 	sscanf(&id[7], "%f", &fv);
 	if (fv > 0.4f)
-		file->Read(&fv, sizeof(fv));
+          file->ReadFloat (&fv, 1);
 
-	file->Read(&rgb, sizeof(rgb));
+	file->ReadLong (&rgb, 1);
 	if (!bMerge)
 	{
-		m_fBackground[0] = (float)((unsigned char) (rgb))/255;
-		m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+          m_fBackground[0] = (float)((unsigned char) (rgb))/255;
+          m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+          m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	}
 
 	if (fv < 0.6f) // old view
@@ -830,8 +821,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		}
 
 		double eye[3], target[3];
-		file->Read(&eye, sizeof(eye));
-		file->Read(&target, sizeof(target));
+		file->ReadDouble (&eye, 3);
+		file->ReadDouble (&target, 3);
 		float tmp[3] = { (float)eye[0], (float)eye[1], (float)eye[2] };
 		pCam->ChangeKey(1, false, false, tmp, LC_CK_EYE);
 		pCam->ChangeKey(1, true, false, tmp, LC_CK_EYE);
@@ -854,23 +845,23 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	}
 
 	if (bMerge)
-		file->Seek(32, SEEK_CUR);
+          file->Seek(32, SEEK_CUR);
 	else
 	{
-		file->Read(&i, 4); m_nAngleSnap = i;
-		file->Read(&m_nSnap, 4);
-		file->Read(&m_fLineWidth, 4);
-		file->Read(&m_nDetail, 4);
-		file->Read(&i, 4); m_nCurGroup = i;
-		file->Read(&i, 4); m_nCurColor = i;
-		file->Read(&i, 4); action = i;
-		file->Read(&i, 4); m_nCurStep = i;
+          file->ReadLong (&i, 1); m_nAngleSnap = i;
+          file->ReadLong (&m_nSnap, 1);
+          file->ReadFloat (&m_fLineWidth, 1);
+          file->ReadLong (&m_nDetail, 1);
+          file->ReadLong (&i, 1); m_nCurGroup = i;
+          file->ReadLong (&i, 1); m_nCurColor = i;
+          file->ReadLong (&i, 1); action = i;
+          file->ReadLong (&i, 1); m_nCurStep = i;
 	}
 
 	if (fv > 0.8f)
-		file->Read(&m_nScene, sizeof(m_nScene));
+          file->ReadLong (&m_nScene, 1);
 
-	file->Read(&count, sizeof(count));
+	file->ReadLong (&count, 1);
 	while (count--)
 	{	
 		if (fv > 0.4f)
@@ -907,12 +898,12 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			float pos[3], rot[3], param[4];
 			unsigned char color, step, group;
 		
-			file->Read(pos, sizeof(pos));
-			file->Read(rot, sizeof(rot));
-			file->Read(&color, sizeof(color));
+			file->ReadFloat (pos, 3);
+			file->ReadFloat (rot, 3);
+			file->ReadByte (&color, 1);
 			file->Read(name, sizeof(name));
-			file->Read(&step, sizeof(step));
-			file->Read(&group, sizeof(group));
+			file->ReadByte (&step, 1);
+			file->ReadByte (&group, 1);
 
 			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
@@ -940,67 +931,67 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	{
 		if (fv >= 0.4f)
 		{
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->Read(&sh, 2); else sh = ch;
-			if (sh > 100)
-				file->Seek(sh, SEEK_CUR);
-			else
-				file->Read(m_strAuthor, sh);
+                  file->Read(&ch, 1);
+                  if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+                  if (sh > 100)
+                    file->Seek(sh, SEEK_CUR);
+                  else
+                    file->Read(m_strAuthor, sh);
 
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->Read(&sh, 2); else sh = ch;
-			if (sh > 100)
-				file->Seek(sh, SEEK_CUR);
-			else
-				file->Read(m_strDescription, sh);
-				
-			file->Read(&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->Read(&sh, 2); else sh = ch;
-			if (sh > 255)
-				file->Seek(sh, SEEK_CUR);
-			else
-				file->Read(m_strComments, sh);
+                  file->Read(&ch, 1);
+                  if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+                  if (sh > 100)
+                    file->Seek(sh, SEEK_CUR);
+                  else
+                    file->Read(m_strDescription, sh);
+
+                  file->Read(&ch, 1);
+                  if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
+                  if (sh > 255)
+                    file->Seek(sh, SEEK_CUR);
+                  else
+                    file->Read(m_strComments, sh);
 		}
 	}
 	else
 	{
-		if (fv >= 0.4f)
-		{
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->Read(&sh, 2); else sh = ch;
-			file->Seek(sh, SEEK_CUR);
+          if (fv >= 0.4f)
+          {
+            file->Read (&ch, 1);
+            if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+            file->Seek (sh, SEEK_CUR);
 
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->Read(&sh, 2); else sh = ch;
-			file->Seek(sh, SEEK_CUR);
-				
-			file->Read(&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->Read(&sh, 2); else sh = ch;
-			file->Seek(sh, SEEK_CUR);
-		}
+            file->Read (&ch, 1);
+            if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+            file->Seek (sh, SEEK_CUR);
+
+            file->Read (&ch, 1);
+            if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
+            file->Seek (sh, SEEK_CUR);
+          }
 	}
 
 	if (fv >= 0.5f)
 	{
-		file->Read(&count, sizeof(count));
+          file->ReadLong (&count, 1);
 
-		Group* pGroup;
-		Group* pLastGroup = NULL;
-		for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-			pLastGroup = pGroup;
+          Group* pGroup;
+          Group* pLastGroup = NULL;
+          for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+            pLastGroup = pGroup;
 
-		pGroup = pLastGroup;
-		for (i = 0; i < count; i++)
-		{
-			if (pGroup)
-			{
-				pGroup->m_pNext = new Group();
-				pGroup = pGroup->m_pNext;
-			}
-			else
-				m_pGroups = pGroup = new Group();
-		}
-		pLastGroup = pLastGroup ? pLastGroup->m_pNext : m_pGroups;
+          pGroup = pLastGroup;
+          for (i = 0; i < count; i++)
+          {
+            if (pGroup)
+            {
+              pGroup->m_pNext = new Group();
+              pGroup = pGroup->m_pNext;
+            }
+            else
+              m_pGroups = pGroup = new Group();
+          }
+          pLastGroup = pLastGroup ? pLastGroup->m_pNext : m_pGroups;
 
 		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
 		{
@@ -1068,16 +1059,16 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			if (fv < 1.0f)
 			{
-				file->Read(&i, sizeof(i));
-				m_nViewportMode = i;
+                          file->ReadLong (&i, 1);
+                          m_nViewportMode = i;
 			}
 			else
 			{
-				file->Read(&m_nViewportMode, 1);
-				file->Read(&m_nActiveViewport, 1);
+                          file->ReadByte (&m_nViewportMode, 1);
+                          file->ReadByte (&m_nActiveViewport, 1);
 			}
 
-			file->Read(&count, 4);
+			file->ReadLong (&count, 1);
 			Camera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
@@ -1105,7 +1096,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			for (count = 0; count < 4; count++)
 			{
-				file->Read(&i, 4);
+				file->ReadLong (&i, 1);
 
 				Camera* pCam = m_pCameras;
 				while (i--)
@@ -1113,33 +1104,33 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				m_pViewCameras[count] = pCam;
 			}
 
-			file->Read(&rgb, sizeof(rgb));
+			file->ReadLong (&rgb, 1);
 			m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
 			m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv < 1.0f)
 			{
-				file->Read(&rgb, sizeof(rgb));
-				m_fFogDensity = (float)rgb/100;
+                          file->ReadLong (&rgb, 1);
+                          m_fFogDensity = (float)rgb/100;
 			}
 			else
-				file->Read(&m_fFogDensity, sizeof(m_fFogDensity));
+                          file->ReadFloat (&m_fFogDensity, 1);
 
 			if (fv < 1.3f)
 			{
-				file->Read(&ch, 1);
-				if (ch == 0xFF)
-					file->Read(&sh, 2);
-				sh = ch;
+                          file->ReadByte (&ch, 1);
+                          if (ch == 0xFF)
+                            file->ReadShort (&sh, 1);
+                          sh = ch;
 			}
 			else
-				file->Read(&sh, 2);
+                          file->ReadShort (&sh, 1);
 
 			if (sh < LC_MAXPATH)
-				file->Read(m_strBackground, sh);
+                          file->Read (m_strBackground, sh);
 			else
-				file->Seek(sh, SEEK_CUR);
+                          file->Seek (sh, SEEK_CUR);
 		}
 
 		if (fv >= 0.8f)
@@ -1152,56 +1143,60 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 		if (fv > 0.9f)
 		{
-			file->Read(&rgb, sizeof(rgb));
+			file->ReadLong (&rgb, 1);
 			m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 			m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv < 1.3f)
 			{
-				file->Read(&i, 4); m_bAnimation = (i != 0);
-				file->Read(&i, 4); m_bAddKeys = (i != 0);
-				file->Read(&m_nFPS, 1);
-				file->Read(&i, 4); m_nCurFrame = i;
-				file->Read(&m_nTotalFrames, 2);
-				file->Read(&i, 4); m_nGridSize = i;
-				file->Read(&i, 4); m_nMoveSnap = i;
+                          file->ReadLong (&i, 1); m_bAnimation = (i != 0);
+                          file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
+                          file->ReadByte (&m_nFPS, 1);
+                          file->ReadLong (&i, 1); m_nCurFrame = i;
+                          file->ReadShort (&m_nTotalFrames, 1);
+                          file->ReadLong (&i, 1); m_nGridSize = i;
+                          file->ReadLong (&i, 1); m_nMoveSnap = i;
 			}
 			else
 			{
-				file->Read(&ch, 1); m_bAnimation = (ch != 0);
-				file->Read(&ch, 1); m_bAddKeys = (ch != 0);
-				file->Read(&m_nFPS, 1);
-				file->Read(&m_nCurFrame, 2);
-				file->Read(&m_nTotalFrames, 2);
-				file->Read(&m_nGridSize, 2);
-				file->Read(&m_nMoveSnap, 2);
+                          file->ReadByte (&ch, 1); m_bAnimation = (ch != 0);
+                          file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
+                          file->ReadByte (&m_nFPS, 1);
+                          file->ReadShort (&m_nCurFrame, 1);
+                          file->ReadShort (&m_nTotalFrames, 1);
+                          file->ReadShort (&m_nGridSize, 1);
+                          file->ReadShort (&m_nMoveSnap, 1);
 			}
 		}
 			
 		if (fv > 1.0f)
 		{
-			file->Read(&rgb, sizeof(rgb));
-			m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
-			m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-			file->Read(&rgb, sizeof(rgb));
-			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
-			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+                  file->ReadLong (&rgb, 1);
+                  m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
+                  m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+                  m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+                  file->ReadLong (&rgb, 1);
+                  m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
+                  m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+                  m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
-			if (fv > 1.1f)
-				m_pTerrain->FileLoad(file);
-			else
-			{
-				file->Seek(4, SEEK_CUR);
-				file->Read(&ch, 1);
-				file->Seek(ch, SEEK_CUR);
-			}
+                  if (fv > 1.1f)
+                    m_pTerrain->FileLoad (file);
+                  else
+                  {
+                    file->Seek (4, SEEK_CUR);
+                    file->Read (&ch, 1);
+                    file->Seek (ch, SEEK_CUR);
+                  }
 		}
 	}
 
-	RenderInitialize();
+        for (int i = 0; i < m_ViewList.GetSize (); i++)
+        {
+          m_ViewList[i]->MakeCurrent ();
+          RenderInitialize();
+        }
 	CalculateStep();
 	if (!bUndo)
 		SelectAndFocusNone(false);
@@ -1222,7 +1217,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 	else
 		SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
-	SystemRedrawView();
+	UpdateAllViews ();
 
 	return true;
 }
@@ -1235,30 +1230,30 @@ void Project::FileSave(File* file, bool bUndo)
 	unsigned short sh;
 	int i, j;
 
-	file->Seek(0, SEEK_SET);
-	file->Write(LC_STR_VERSION, 32);
-	file->Write(&ver_flt, 4);
+	file->Seek (0, SEEK_SET);
+	file->Write (LC_STR_VERSION, 32);
+	file->WriteFloat (&ver_flt, 1);
 
 	rgb = FLOATRGB(m_fBackground);
-	file->Write(&rgb, 4);
+	file->WriteLong (&rgb, 1);
 
-	i = m_nAngleSnap; file->Write(&i, 4);
-	file->Write(&m_nSnap, 4);
-	file->Write(&m_fLineWidth, 4);
-	file->Write(&m_nDetail, 4);
-	i = m_nCurGroup; file->Write(&i, 4);
-	i = m_nCurColor; file->Write(&i, 4);
-	i = m_nCurAction; file->Write(&i, 4);
-	i = m_nCurStep; file->Write(&i, 4);
-	file->Write(&m_nScene, sizeof(m_nScene));
+	i = m_nAngleSnap; file->WriteLong (&i, 1);
+	file->WriteLong (&m_nSnap, 1);
+	file->WriteFloat (&m_fLineWidth, 1);
+	file->WriteLong (&m_nDetail, 1);
+	i = m_nCurGroup; file->WriteLong (&i, 1);
+	i = m_nCurColor; file->WriteLong (&i, 1);
+	i = m_nCurAction; file->WriteLong (&i, 1);
+	i = m_nCurStep; file->WriteLong (&i, 1);
+	file->WriteLong (&m_nScene, 1);
 
 	Piece* pPiece;
 	for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		i++;
-	file->Write(&i, 4);
+          i++;
+	file->WriteLong (&i, 1);
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		pPiece->FileSave(*file, m_pGroups);
+          pPiece->FileSave (*file, m_pGroups);
 
 	ch = strlen(m_strAuthor);
 	file->Write(&ch, 1);
@@ -1273,38 +1268,38 @@ void Project::FileSave(File* file, bool bUndo)
 	Group* pGroup;
 	for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 		i++;
-	file->Write(&i, 4);
+	file->WriteLong (&i, 1);
 
 	for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-		pGroup->FileSave(file, m_pGroups);
+          pGroup->FileSave(file, m_pGroups);
 
-	file->Write(&m_nViewportMode, 1);
-	file->Write(&m_nActiveViewport, 1);
+	file->WriteByte (&m_nViewportMode, 1);
+	file->WriteByte (&m_nActiveViewport, 1);
 
 	Camera* pCamera;
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-		i++;
-	file->Write(&i, 4);
+          i++;
+	file->WriteLong (&i, 1);
 
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-		pCamera->FileSave(*file);
+          pCamera->FileSave(*file);
 
 	for (j = 0; j < 4; j++)
 	{
-		for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-			if (pCamera == m_pViewCameras[j])
-				break;
-			else
-				i++;
+          for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+            if (pCamera == m_pViewCameras[j])
+              break;
+            else
+              i++;
 
-		file->Write(&i, 4);
+          file->WriteLong (&i, 1);
 	}
 
 	rgb = FLOATRGB(m_fFogColor);
-	file->Write(&rgb, 4);
-	file->Write(&m_fFogDensity, 4);
+	file->WriteLong (&rgb, 1);
+	file->WriteFloat (&m_fFogDensity, 1);
 	sh = strlen(m_strBackground);
-	file->Write(&sh, 2);
+	file->WriteShort (&sh, 1);
 	file->Write(m_strBackground, sh);
 	ch = strlen(m_strHeader);
 	file->Write(&ch, 1);
@@ -1314,21 +1309,21 @@ void Project::FileSave(File* file, bool bUndo)
 	file->Write(m_strFooter, ch);
 	// 0.60 (1.0)
 	rgb = FLOATRGB(m_fAmbient);
-	file->Write(&rgb, 4);
+	file->WriteLong (&rgb, 1);
 	ch = m_bAnimation;
 	file->Write(&ch, 1);
 	ch = m_bAddKeys;
-	file->Write(&ch, 1);
-	file->Write(&m_nFPS, 1);
-	file->Write(&m_nCurFrame, 2);
-	file->Write(&m_nTotalFrames, 2);
-	file->Write(&m_nGridSize, 2);
-	file->Write(&m_nMoveSnap, 2);
+	file->WriteByte (&ch, 1);
+	file->WriteByte (&m_nFPS, 1);
+	file->WriteShort (&m_nCurFrame, 1);
+	file->WriteShort (&m_nTotalFrames, 1);
+	file->WriteShort (&m_nGridSize, 1);
+	file->WriteShort (&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = FLOATRGB(m_fGradient1);
-	file->Write(&rgb, 4);
+	file->WriteLong (&rgb, 1);
 	rgb = FLOATRGB(m_fGradient2);
-	file->Write(&rgb, 4);
+	file->WriteLong (&rgb, 1);
 	// 0.64 (1.2)
 	m_pTerrain->FileSave(file);
 
@@ -1353,7 +1348,7 @@ void Project::FileSave(File* file, bool bUndo)
 			free(image);
 		}
 
-		file->Write(&pos, 4);
+		file->WriteLong (&pos, 1);
 		m_nSaveTimer = 0;
 	}
 }
@@ -1647,7 +1642,7 @@ bool Project::OnNewDocument()
 	LoadDefaults(true);
 	CheckPoint("");
 
-	SystemUpdateRecentMenu(m_strRecentFiles);
+        //	SystemUpdateRecentMenu(m_strRecentFiles);
         messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 
 //	CWnd* pFrame = AfxGetMainWnd();
@@ -1658,7 +1653,7 @@ bool Project::OnNewDocument()
 	return true;
 }
 
-bool Project::OnOpenDocument(char* lpszPathName)
+bool Project::OnOpenDocument (const char* lpszPathName)
 {
 	FileDisk file;
 	bool bSuccess = false;
@@ -1699,7 +1694,7 @@ bool Project::OnOpenDocument(char* lpszPathName)
 			SystemUpdateFocus(NULL, LC_PIECE|LC_UPDATE_TYPE|LC_UPDATE_OBJECT);
 			UpdateSelection();
 			CalculateStep();
-			SystemRedrawView();
+			UpdateAllViews ();
 
 			char msg[50];
 			sprintf(msg, "%d objects imported.", ok);
@@ -1708,9 +1703,6 @@ bool Project::OnOpenDocument(char* lpszPathName)
 		}
 		else
 			bSuccess = FileLoad(&file, false, false); // load me
-
-		CheckPoint("");
-		m_nSaveTimer = 0;
 	}
 	file.Close();
 	SystemDoWaitCursor(-1);
@@ -1722,18 +1714,21 @@ bool Project::OnOpenDocument(char* lpszPathName)
 		return false;
 	}
 
+        CheckPoint("");
+        m_nSaveTimer = 0;
+
 	SetModifiedFlag(false);     // start off with unmodified
 
 	return true;
 }
 
-void Project::SetPathName(char* lpszPathName, bool bAddToMRU)
+void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
 {
 	strcpy(m_strPathName, lpszPathName);
 
 	// always capture the complete file name including extension (if present)
-	char* lpszTemp = lpszPathName;
-	for (char* lpsz = lpszPathName; *lpsz != '\0'; lpsz++)
+	const char* lpszTemp = lpszPathName;
+	for (const char* lpsz = lpszPathName; *lpsz != '\0'; lpsz++)
 	{
 		// remember last directory/drive separator
 		if (*lpsz == '\\' || *lpsz == '/' || *lpsz == ':')
@@ -1745,21 +1740,7 @@ void Project::SetPathName(char* lpszPathName, bool bAddToMRU)
 
 	// add it to the file MRU list
 	if (bAddToMRU)
-	{
-		// update the MRU list, if an existing MRU string matches file name
-		int i;
-		for (i = 0; i < 3; i++)
-		{
-			if (strcmp(m_strRecentFiles[i], lpszPathName) == 0)
-				break;
-		}
-
-		// move MRU strings before this one down
-		for (; i > 0; i--)
-			strcpy(m_strRecentFiles[i], m_strRecentFiles[i-1]);
-		strcpy(m_strRecentFiles[0], lpszPathName);
-		SystemUpdateRecentMenu(m_strRecentFiles);
-	}
+          main_window->AddToMRU (lpszPathName);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1797,6 +1778,26 @@ void Project::CheckPoint (const char* text)
 	SystemUpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 }
 
+void Project::AddView (View* pView)
+{
+  m_ViewList.Add (pView);
+
+  pView->MakeCurrent ();
+  RenderInitialize ();
+}
+
+void Project::RemoveView (View* pView)
+{
+  m_ViewList.RemovePointer (pView);
+}
+
+void Project::UpdateAllViews (View* pSender)
+{
+  for (int i = 0; i < m_ViewList.GetSize (); i++)
+    if (m_ViewList[i] != pSender)
+      m_ViewList[i]->Redraw ();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Project rendering
 
@@ -1829,13 +1830,13 @@ void Project::Render(bool bToMemory)
 	m_bStopRender = false;
 	m_bRendering = true;
 	RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
-	SystemSwapBuffers();
+        //	SystemSwapBuffers();
 
 	if ((m_nDetail & LC_DET_FAST) && (m_nDetail & LC_DET_BACKGROUND))
 	{
 		RenderScene(true, true);
-		if (!m_bStopRender)
-			SystemSwapBuffers();
+                //		if (!m_bStopRender)
+                //			SystemSwapBuffers();
 	}
 	m_bRendering = false;
 
@@ -3198,7 +3199,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 
 			SetModifiedFlag(true);
 			CheckPoint("Modifying");
-			SystemRedrawView();
+			UpdateAllViews ();
 		} break;
 
 		case LC_CAMERA_MODIFIED:
@@ -3225,7 +3226,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			pCamera->m_zNear = mod->znear;
 			pCamera->m_zFar = mod->zfar;
 			pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-			SystemRedrawView();
+			UpdateAllViews ();
 		} break;
 
 		case LC_LIGHT_MODIFIED:
@@ -3245,7 +3246,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				return;  // leave the original one
 
 			OnNewDocument();
-			SystemRedrawView();
+			UpdateAllViews ();
 		} break;
 		
 		case LC_FILE_OPEN:
@@ -4185,29 +4186,26 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_RECENT:
 		{
-			if (!SaveModified())
-				break;  // leave the original one
+                  if (!SaveModified())
+                    break;  // leave the original one
 
 //	CWaitCursor wait;
-			bool bWasModified = IsModified();
-			SetModifiedFlag(false);  // not dirty for open
+                  bool bWasModified = IsModified();
+                  SetModifiedFlag(false);  // not dirty for open
+                  String filename = main_window->GetMRU (nParam);
 
-			if (!OnOpenDocument(m_strRecentFiles[nParam]))
-			{
-				// check if we corrupted the original document
-				if (!IsModified())
-					SetModifiedFlag(bWasModified);
-				else
-					OnNewDocument();
+                  if (!OnOpenDocument (filename))
+                  {
+                    // check if we corrupted the original document
+                    if (!IsModified ())
+                      SetModifiedFlag (bWasModified);
+                    else
+                      OnNewDocument ();
 
-				for (int i = nParam; i < 3; i++)
-					strcpy(m_strRecentFiles[i], m_strRecentFiles[i+1]);
-				memset(m_strRecentFiles[3], 0, LC_MAXPATH);
-				SystemUpdateRecentMenu(m_strRecentFiles);
-
-				return;  // open failed
-			}
-			SetPathName(m_strRecentFiles[nParam], false);
+                    main_window->RemoveFromMRU (nParam);
+                    return;  // open failed
+                  }
+                  SetPathName (filename, true);
 		} break;
 
 		case LC_EDIT_UNDO:
@@ -4327,7 +4325,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				RemoveSelectedObjects();
 				SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
 				UpdateSelection();
-				SystemRedrawView();
+				UpdateAllViews ();
 				SetModifiedFlag(true);
 				CheckPoint("Cutting");
 			}
@@ -4453,7 +4451,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CheckPoint("Pasting");
 			SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews ();
 		} break;
 
 		case LC_EDIT_SELECT_ALL:
@@ -4465,7 +4463,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 //	pFrame->UpdateInfo();
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews ();
 		} break;
 		
 		case LC_EDIT_SELECT_NONE:
@@ -4473,7 +4471,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SelectAndFocusNone(false);
                         messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 		
 		case LC_EDIT_SELECT_INVERT:
@@ -4490,7 +4488,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
                         messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_EDIT_SELECT_BYNAME:
@@ -4608,7 +4606,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 
 				UpdateSelection();
-				SystemRedrawView();
+				UpdateAllViews();
 //	pFrame->UpdateInfo();
 			}
 
@@ -4657,7 +4655,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SetAction(LC_ACTION_MOVE);
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
-			SystemRedrawView();
+			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
 		} break;
@@ -4668,7 +4666,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
                           messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 				UpdateSelection();
-				SystemRedrawView();
+				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Deleting");
 			}
@@ -4676,7 +4674,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_MINIFIG:
 		{
-		  MinifigWizard wiz;
+		  MinifigWizard wiz (m_ViewList[0]);
 		  int i;
 
 		  if (SystemDoDialog (LC_DLG_MINIFIG, &wiz))
@@ -4734,7 +4732,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
                                 messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 				UpdateSelection();
-				SystemRedrawView();
+				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Minifig");
 			}
@@ -4890,7 +4888,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SelectAndFocusNone(true);
 //				SystemUpdateFocus(NULL, 255);
 				UpdateSelection();
-				SystemRedrawView();
+				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Array");
 			}
@@ -4913,7 +4911,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			// TODO: cameras and lights
 
 			CalculateStep();
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_PIECE_GROUP:
@@ -5093,7 +5091,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SelectAndFocusNone(false);
 				SystemUpdateFocus(NULL, 0);
 				UpdateSelection();
-				SystemRedrawView();
+				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Editing");
 			}
@@ -5112,7 +5110,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					pPiece->Hide();
 			UpdateSelection();
                         messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_PIECE_HIDE_UNSELECTED:
@@ -5122,7 +5120,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (!pPiece->IsSelected())
 					pPiece->Hide();
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_PIECE_UNHIDE_ALL:
@@ -5131,7 +5129,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				pPiece->UnHide();
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_PIECE_PREVIOUS:
@@ -5165,7 +5163,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
-				SystemRedrawView();
+				UpdateAllViews();
 			}
 		} break;
 
@@ -5206,7 +5204,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
-				SystemRedrawView();
+				UpdateAllViews();
                                 UpdateSelection ();
 			}
 		} break;
@@ -5255,8 +5253,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				strcpy(m_strHeader, opts.strHeader);
 				SystemUpdateSnap(m_nSnap);
 
-				RenderInitialize();
-				SystemRedrawView();
+                                for (int i = 0; i < m_ViewList.GetSize (); i++)
+                                {
+                                  m_ViewList[i]->MakeCurrent ();
+                                  RenderInitialize();
+                                }
+				UpdateAllViews();
 			}
 		} break;
 
@@ -5264,14 +5266,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			m_pViewCameras[m_nActiveViewport]->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_VIEW_ZOOMOUT:
 		{
 			m_pViewCameras[m_nActiveViewport]->DoZoom(1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_VIEW_ZOOMEXTENTS:
@@ -5404,7 +5406,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPORTS:
@@ -5418,7 +5420,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			SystemUpdateViewport(nParam, m_nViewportMode);
 			m_nViewportMode = (unsigned char)nParam;
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_VIEW_STEP_NEXT:
@@ -5431,7 +5433,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 
 			if (m_bAnimation)
 				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -5449,7 +5451,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 
 			if (m_bAnimation)
 				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -5467,7 +5469,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 
 			if (m_bAnimation)
 				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -5485,7 +5487,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 
 			if (m_bAnimation)
 				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -5515,7 +5517,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 
 			if (m_bAnimation)
 				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -5548,7 +5550,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
                   {
                     SetModifiedFlag (true);
                     CheckPoint ("Adding Step");
-                    SystemRedrawView ();
+                    UpdateAllViews ();
                     UpdateSelection ();
                   }
                 } break;
@@ -5575,7 +5577,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
                   {
                     SetModifiedFlag (true);
                     CheckPoint ("Removing Step");
-                    SystemRedrawView ();
+                    UpdateAllViews ();
                     UpdateSelection ();
                   }
                 } break;
@@ -5608,8 +5610,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nCurFrame -= m_nTotalFrames;
 				CalculateStep();
 				SystemUpdateTime(true, m_nCurFrame, m_nTotalFrames);
-				RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
-				SystemSwapBuffers();
+                                //				RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
+                                //				SystemSwapBuffers();
+                                UpdateAllViews ();
 				SystemPumpMessages();
 			}
 			m_bRendering = false;
@@ -5626,7 +5629,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			SystemUpdateCurrentCamera(m_pViewCameras[m_nActiveViewport], pCamera, m_pCameras);
 			m_pViewCameras[m_nActiveViewport] = pCamera;
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_VIEW_CAMERA_RESET:
@@ -5659,7 +5662,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateCameraMenu(m_pCameras);
 			SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Reset Cameras");
 		} break;
@@ -5679,7 +5682,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_HELP_ABOUT:
@@ -5693,7 +5696,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			CalculateStep();
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 
 			SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 			if (m_bAnimation)
@@ -5812,7 +5815,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nDetail &= ~(LC_DET_FAST | LC_DET_BACKGROUND); 
 				else
 					m_nDetail |= LC_DET_FAST; 
-				SystemRedrawView();
+				UpdateAllViews();
 			}
 
 			SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
@@ -6626,7 +6629,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews();
 			SystemUpdateFocus(pFocus, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
 			ret = true;
 		} break;
@@ -6761,7 +6764,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				RotateSelectedObjects(axis[0], axis[1], axis[2]);
 			else
 				MoveSelectedObjects(axis[0], axis[1], axis[2]);
-			SystemRedrawView();
+			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint((bShift) ? "Rotating" : "Moving");
 			SystemUpdateFocus(NULL, 0);
@@ -6837,7 +6840,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	  }
 
 	UpdateSelection();
-	SystemRedrawView();
+	UpdateAllViews();
 	if (ClickLine.pClosest)
 	  SystemUpdateFocus(ClickLine.pClosest, ClickLine.pClosest->GetType()|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
 	else
@@ -6896,7 +6899,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	}
 
 	UpdateSelection();
-	SystemRedrawView();
+	UpdateAllViews();
 	SetModifiedFlag(true);
 	CheckPoint("Deleting");
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
@@ -6917,7 +6920,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	  SetModifiedFlag(true);
 	  CheckPoint("Painting");
 	  SystemUpdateFocus(NULL, 0);
-	  SystemRedrawView();
+	  UpdateAllViews();
 	}
       }
     } break;
@@ -6971,7 +6974,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
 			UpdateSelection();
-			SystemRedrawView();
+			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
     } break;
@@ -6998,7 +7001,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       pLight->m_pNext = m_pLights;
       m_pLights = pLight;
       UpdateSelection();
-      SystemRedrawView();
+      UpdateAllViews();
       SystemUpdateFocus(pLight, LC_LIGHT|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
     } break;
 
@@ -7011,7 +7014,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
       pCamera->GetTarget ()->Select (true, true, false);
       UpdateSelection();
-      SystemRedrawView();
+      UpdateAllViews();
       SystemUpdateFocus(pCamera, LC_CAMERA|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
     } break;
 
@@ -7127,7 +7130,7 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
       }
 
     UpdateSelection();
-    SystemRedrawView();
+    UpdateAllViews();
     if (ClickLine.pClosest)
       SystemUpdateFocus(ClickLine.pClosest, ClickLine.pClosest->GetType()|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
     else
@@ -7265,7 +7268,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			pLight->UpdatePosition (1, m_bAnimation);
 
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_ACTION_CAMERA:
@@ -7286,7 +7289,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			pCamera->UpdatePosition(1, m_bAnimation);
 
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_ACTION_MOVE:
@@ -7317,7 +7320,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			}
 
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 		
 		case LC_ACTION_ROTATE:
@@ -7350,7 +7353,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 			RotateSelectedObjects(delta[0], delta[1], delta[2]);
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 		
 		case LC_ACTION_ZOOM:
@@ -7361,7 +7364,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_pViewCameras[m_nActiveViewport]->DoZoom(y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 
 		case LC_ACTION_ZOOM_REGION:
@@ -7397,7 +7400,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			glVertex2i(rx, m_nDownY);
 			glEnd();
 
-			SystemSwapBuffers();
+                        //			SystemSwapBuffers();
 		} break;
 		
 		case LC_ACTION_PAN:
@@ -7409,7 +7412,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 		
 		case LC_ACTION_ROTATE_VIEW:
@@ -7444,7 +7447,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 		
 		case LC_ACTION_ROLL:
@@ -7455,7 +7458,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_pViewCameras[m_nActiveViewport]->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL, 0);
-			SystemRedrawView();
+			UpdateAllViews();
 		} break;
 		/*
     case LC_ACTION_CURVE:
@@ -7483,8 +7486,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
       pCurve->UpdatePosition(1, m_bAnimation);
 
       SystemUpdateFocus(NULL, 0);
-      SystemRedrawView();
+      UpdateAllViews();
     } break;
-		*/
+                */
 	}
 }

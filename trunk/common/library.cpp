@@ -21,6 +21,7 @@ static const char ver_str[32] = "LeoCAD Group Configuration File";
 static const float ver_flt = 0.3f;
 
 LibraryDialog::LibraryDialog ()
+  : BaseWnd (NULL, 0) // FIXME: set parent
 {
   m_nPieces = 0;
   m_pPieces = NULL;
@@ -152,7 +153,7 @@ void LibraryDialog::HandleCommand (int id)
       if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
 	return;
 
-      Sys_BeginWait ();
+      BeginWait ();
 
       if (ReadLDrawPiece(filename, &piece))
       {
@@ -167,7 +168,7 @@ void LibraryDialog::HandleCommand (int id)
       else
 	Sys_MessageBox ("Error reading file.");
 
-      Sys_EndWait ();
+      EndWait ();
       FreeLDrawPiece(&piece);
     } break;
 

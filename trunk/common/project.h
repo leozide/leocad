@@ -149,9 +149,23 @@ protected:
 	void SelectAndFocusNone(bool bFocusOnly);
 	bool GetSelectionCenter(Point3& Center) const;
 	void CalculateStep();
-	void MoveSelectedObjects(float x, float y, float z);
+	void MoveSelectedObjects(const Vector3& Delta);
 	void RotateSelectedObjects(float x, float y, float z);
-	void SnapPoint (float *point, float *reminder) const;
+	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
+
+	// Deprecated compatibility functions.
+	// TODO: Update function calls to use the math library.
+	inline void MoveSelectedObjects(float x, float y, float z)
+	{ MoveSelectedObjects(Vector3(x, y, z)); };
+	void SnapPoint(float *point, float *reminder) const
+	{
+		Vector3 Pt(point[0], point[1], point[2]);
+		Vector3 Rem;
+		if (reminder) Rem = Vector3(reminder[0], reminder[1], reminder[2]);
+		SnapVector(Pt, Rem);
+		point[0] = Pt[0]; point[1] = Pt[1]; point[2] = Pt[2];
+		if (reminder) { reminder[0] = Rem[0]; reminder[1] = Rem[1]; reminder[2] = Rem[2]; }
+	};
 
 	// Rendering
 	void RenderScene(bool bShaded, bool bDrawViewports);
@@ -178,6 +192,7 @@ protected:
 	int m_nDownY;
 	float m_fTrack[3];
 	int m_nMouse;
+	Vector3 m_MouseSnapLeftover;
 
 	// Mouse control overlays.
 	typedef enum
@@ -199,6 +214,7 @@ protected:
 	Point3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
 	void MouseUpdateOverlays(int x, int y);
+	void ActivateOverlay();
 
 	void LoadViewportProjection();
 	bool SetActiveViewport(int x, int y);

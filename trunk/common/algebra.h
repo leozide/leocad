@@ -72,6 +72,9 @@ public:
 	friend inline Float4 operator/(const Float4& a, float f)
 	{ return Float4(a.x/f, a.y/f, a.z/f, a.w/f); };
 
+	friend inline Float4 operator-(const Float4& a)
+	{ return Float4(-a.x, -a.y, -a.z, -a.w); };
+
 	// Dot product.
 	friend inline float Dot3(const Float4& a, const Float4& b)
 	{ return a.x*b.x + a.y*b.y + a.z*b.z; };
@@ -172,6 +175,12 @@ public:
 
 	friend inline Float4 operator/(const Float4& a, float f)
 	{ return Float4(_mm_div_ps(a.xyzw, _mm_load_ps1(&f))); };
+
+	friend inline Float4 operator-(const Float4& a)
+	{
+		static const __declspec(align(16)) unsigned int Mask[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+		return Float4(_mm_xor_ps(xyzw, *(__m128*)&Mask));
+	};
 
 	// Dot product.
 	friend inline float Dot3(const Float4& a, const Float4& b)
@@ -420,6 +429,13 @@ inline Point3 operator-(const Vector3& a, const Point3& b)
 
 inline Vector3 operator-(const Vector3& a, const Vector3& b)
 { return Vector3(a.GetValue()-b.GetValue()); };
+
+// Negate.
+inline Vector3 operator-(const Vector3& a)
+{ return Vector3(-a.GetValue()); }
+
+inline Point3 operator-(const Point3& a)
+{ return Point3(-a.GetValue()); }
 
 // Dot product.
 inline float Dot3(const Vector3& a, const Vector3& b)

@@ -2373,35 +2373,55 @@ void Project::RenderOverlays(int Viewport)
 	{
 		glDisable(GL_DEPTH_TEST);
 
-		float Arrows[6][3] = {
-			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] },
-			{ m_OverlayCenter[0] + m_OverlayScale, m_OverlayCenter[1], m_OverlayCenter[2] },
-			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] },
-			{ m_OverlayCenter[0], m_OverlayCenter[1] + m_OverlayScale, m_OverlayCenter[2] },
-			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] },
-			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] + m_OverlayScale }
-		};
+		// Draw a quad if we're moving on a plane.
+		if ((m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_XZ) || (m_OverlayMode == LC_OVERLAY_YZ))
+		{
+			glPushMatrix();
+			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+			if (m_OverlayMode == LC_OVERLAY_XZ)
+				glRotatef(90.0f, 0.0f, 0.0f, -1.0f);
+			else if (m_OverlayMode == LC_OVERLAY_XY)
+				glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
 
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+
+			glBegin(GL_QUADS);
+			glColor4f(0.8f, 0.8f, 0.0f, 0.3f);
+			glVertex3f(0.0f, 0.0f, 0.0f);
+			glVertex3f(0.0f, m_OverlayScale * 0.5f, 0.0f);
+			glVertex3f(0.0f, m_OverlayScale * 0.5f, m_OverlayScale * 0.5f);
+			glVertex3f(0.0f, 0.0f, m_OverlayScale * 0.5f);
+			glEnd();
+
+			glDisable(GL_BLEND);
+
+			glPopMatrix();
+		}
+
+		// Draw the arrows.
 		for (int i = 0; i < 3; i++)
 		{
-			if (m_OverlayMode == LC_OVERLAY_X + i)
+			switch (i)
 			{
-				glColor3f(0.8f, 0.8f, 0.0f);
-			}
-			else
-			{
-				switch (i)
-				{
-				case 0:
+			case 0:
+				if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_XZ))
+					glColor3f(0.8f, 0.8f, 0.0f);
+				else
 					glColor3f(0.8f, 0.0f, 0.0f);
-					break;
-				case 1:
+				break;
+			case 1:
+				if ((m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_YZ))
+					glColor3f(0.8f, 0.8f, 0.0f);
+				else
 					glColor3f(0.0f, 0.8f, 0.0f);
-					break;
-				case 2:
+				break;
+			case 2:
+				if ((m_OverlayMode == LC_OVERLAY_Z) || (m_OverlayMode == LC_OVERLAY_XZ) || (m_OverlayMode == LC_OVERLAY_YZ))
+					glColor3f(0.8f, 0.8f, 0.0f);
+				else
 					glColor3f(0.0f, 0.0f, 0.8f);
-					break;
-				}
+				break;
 			}
 
 			glPushMatrix();
@@ -3135,9 +3155,7 @@ void Project::UpdateSelection()
 
 	if (m_nTracking == LC_TRACK_NONE)
 	{
-		m_OverlayMode = LC_OVERLAY_XYZ;
-		m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
-		m_OverlayScale = 1.0f;
+		ActivateOverlay();
 	}
 
 	SystemUpdateSelected(flags);
@@ -6055,9 +6073,7 @@ void Project::SetAction(int nAction)
 
 	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE))
 	{
-		m_OverlayMode = LC_OVERLAY_XYZ;
-		m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
-		m_OverlayScale = 1.0f;
+		ActivateOverlay();
 
 		if (m_OverlayActive)
 			UpdateAllViews();
@@ -6556,53 +6572,51 @@ void Project::StartTracking(int mode)
 	FileSave(m_pTrackFile, true);
 }
 
-void Project::SnapPoint (float *point, float *reminder) const
+void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 {
-	int i;
-
 	if (m_nSnap & LC_DRAW_SNAP_X)
 	{
-		i = (int)(point[0]/0.4f);
-
-    if (reminder != NULL)
-      reminder[0] = point[0] - (0.4f * i);
-
-		point[0] = 0.4f * i;
+		int i = (int)(Delta[0] / 0.4f);
+		Leftover.SetX(Delta[0] - (0.4f * i));
+		Delta.SetX(0.4f * i);
 	}
 
 	if (m_nSnap & LC_DRAW_SNAP_Y)
 	{
-		i = (int)(point[1]/0.4f);
-
-    if (reminder != NULL)
-      reminder[1] = point[1] - (0.4f * i);
-
-		point[1] = 0.4f * i;
+		int i = (int)(Delta[1] / 0.4f);
+		Leftover.SetY(Delta[1] - (0.4f * i));
+		Delta.SetY(0.4f * i);
 	}
 
 	if (m_nSnap & LC_DRAW_SNAP_Z)
 	{
-		i = (int)(point[2]/0.32f);
-
-    if (reminder != NULL)
-      reminder[2] = point[2] - (0.32f * i);
-
-		point[2] = 0.32f * i;
+		int i = (int)(Delta[2] / 0.32f);
+		Leftover.SetZ(Delta[2] - (0.32f * i));
+		Delta.SetZ(0.32f * i);
 	}
 }
 
-void Project::MoveSelectedObjects(float x, float y, float z)
+void Project::MoveSelectedObjects(const Vector3& Delta)
 {
+	float x, y, z;
 	Piece* pPiece;
 	Camera* pCamera;
 	Light* pLight;
 
 	if (m_nSnap & LC_DRAW_LOCK_X)
 		x = 0;
+	else
+		x = Delta[0];
+
 	if (m_nSnap & LC_DRAW_LOCK_Y)
 		y = 0;
+	else
+		y = Delta[1];
+
 	if (m_nSnap & LC_DRAW_LOCK_Z)
 		z = 0;
+	else
+		z = Delta[2];
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		if (pCamera->IsSelected())
@@ -7175,6 +7189,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
   m_bTrackCancel = false;
   m_nDownX = x;
   m_nDownY = y;
+	m_MouseSnapLeftover = Vector3(0, 0, 0);
 
   LoadViewportProjection();
   glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
@@ -7710,129 +7725,202 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 		case LC_ACTION_MOVE:
 		{
-      Camera *camera = m_pViewCameras[m_nActiveViewport];
+			if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
+			{
+				Camera* Camera = m_pViewCameras[m_nActiveViewport];
 
-      if (camera->IsSide ())
-      {
-        Matrix mat;
-        float delta[3];
+				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
+				Vector3 ScreenY = Camera->GetUpVector();
+				ScreenX.Normalize();
+				Vector3 Dir1, Dir2;
+				bool SingleDir = true;
 
-        mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
-        mat.SetTranslation (0, 0, 0);
-        mat.Invert ();
-
-				if (m_nTracking == LC_TRACK_LEFT)
-        {
-          delta[0] = (float)(x - m_nDownX);
-          delta[1] = (float)(y - m_nDownY);
-          delta[2] = 0;
-        }
-        else
-        {
-          delta[0] = 0;
-          delta[1] = 0;
-          delta[2] = (float)(y - m_nDownY);
-        }
-
-        mat.TransformPoints (delta, 1);
-
-  			float mouse = 0.25f/(21-m_nMouse);
-        delta[0] = delta[0] * mouse + m_fTrack[0];
-        delta[1] = delta[1] * mouse + m_fTrack[1];
-        delta[2] = delta[2] * mouse + m_fTrack[2];
-
-        SnapPoint (delta, m_fTrack);
-
-				if (m_OverlayActive)
+				switch (m_OverlayMode)
 				{
-					switch (m_OverlayMode)
+				case LC_OVERLAY_X:
+					Dir1 = Vector3(1, 0, 0);
+					break;
+				case LC_OVERLAY_Y:
+					Dir1 = Vector3(0, 1, 0);
+					break;
+				case LC_OVERLAY_Z:
+					Dir1 = Vector3(0, 0, 1);
+					break;
+				case LC_OVERLAY_XY:
+					Dir1 = Vector3(1, 0, 0);
+					Dir2 = Vector3(0, 1, 0);
+					SingleDir = false;
+					break;
+				case LC_OVERLAY_XZ:
+					Dir1 = Vector3(1, 0, 0);
+					Dir2 = Vector3(0, 0, 1);
+					SingleDir = false;
+					break;
+				case LC_OVERLAY_YZ:
+					Dir1 = Vector3(0, 1, 0);
+					Dir2 = Vector3(0, 0, 1);
+					SingleDir = false;
+					break;
+				}
+
+				// Find out what direction the mouse is going to move stuff.
+				Vector3 MoveX, MoveY;
+
+				if (SingleDir)
+				{
+					float dx1 = Dot3(ScreenX, Dir1);
+					float dy1 = Dot3(ScreenY, Dir1);
+
+					if (fabsf(dx1) > fabsf(dy1))
 					{
-					case LC_OVERLAY_XYZ:
-						break;
-					case LC_OVERLAY_X:
-						delta[1] = delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_Y:
-						delta[0] = delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_Z:
-						delta[0] = delta[1] = 0.0f;
-						break;
-					case LC_OVERLAY_XY:
-						delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_XZ:
-						delta[1] = 0.0f;
-						break;
-					case LC_OVERLAY_YZ:
-						delta[0] = 0.0f;
-						break;
-					case LC_OVERLAY_CAMERA:
-						break;
+						if (dx1 >= 0.0f)
+							MoveX = Dir1;
+						else
+							MoveX = -Dir1;
+
+						MoveY = Vector3(0, 0, 0);
+					}
+					else
+					{
+						MoveX = Vector3(0, 0, 0);
+
+						if (dy1 > 0.0f)
+							MoveY = Dir1;
+						else
+							MoveY = -Dir1;
+					}
+				}
+				else
+				{
+					float dx1 = Dot3(ScreenX, Dir1);
+					float dy1 = Dot3(ScreenY, Dir1);
+					float dx2 = Dot3(ScreenX, Dir2);
+					float dy2 = Dot3(ScreenY, Dir2);
+
+					if (fabsf(dx1) > fabsf(dx2))
+					{
+						if (dx1 >= 0.0f)
+							MoveX = Dir1;
+						else
+							MoveX = -Dir1;
+
+						if (dy2 >= 0.0f)
+							MoveY = Dir2;
+						else
+							MoveY = -Dir2;
+					}
+					else
+					{
+						if (dx2 >= 0.0f)
+							MoveX = Dir2;
+						else
+							MoveX = -Dir2;
+
+						if (dy1 > 0.0f)
+							MoveY = Dir1;
+						else
+							MoveY = -Dir1;
 					}
 				}
 
-				MoveSelectedObjects(delta[0], delta[1], delta[2]);
+				MoveX *= (float)(x - m_nDownX) * 0.25f / (21 - m_nMouse);
+				MoveY *= (float)(y - m_nDownY) * 0.25f / (21 - m_nMouse);
 
-        m_nDownX = x;
-  			m_nDownY = y;
-      }
-      else
-      {
-        // TODO: rewrite
+				m_nDownX = x;
+				m_nDownY = y;
 
-        float mouse = 5.0f/(21-m_nMouse);
-        float delta[3] = {
-          (ptx - m_fTrack[0])*mouse,
-          (pty - m_fTrack[1])*mouse,
-          (ptz - m_fTrack[2])*mouse };
-        float d[3] = { delta[0], delta[1], delta[2] };
+				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
+				SnapVector(Delta, m_MouseSnapLeftover);
+				MoveSelectedObjects(Delta);
+			}
+			else
+			{
+				Camera *camera = m_pViewCameras[m_nActiveViewport];
 
-				if (m_OverlayActive)
+				// TODO: old 3D mouse movement code needs to be improved.
+				if (camera->IsSide ())
 				{
-					switch (m_OverlayMode)
-					{
-					case LC_OVERLAY_XYZ:
-						break;
-					case LC_OVERLAY_X:
-						delta[1] = delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_Y:
-						delta[0] = delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_Z:
-						delta[0] = delta[1] = 0.0f;
-						break;
-					case LC_OVERLAY_XY:
-						delta[2] = 0.0f;
-						break;
-					case LC_OVERLAY_XZ:
-						delta[1] = 0.0f;
-						break;
-					case LC_OVERLAY_YZ:
-						delta[0] = 0.0f;
-						break;
-					case LC_OVERLAY_CAMERA:
-						break;
-					}
-				}
+					Matrix mat;
+					float delta[3];
 
-				SnapPoint (delta, NULL);
+					mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
+					mat.SetTranslation (0, 0, 0);
+					mat.Invert ();
 
-  			m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
-	  		m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
-		  	m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
-
-  			if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
-	  			MoveSelectedObjects(delta[0], delta[1], delta[2]);
-		  	else
-				{
 					if (m_nTracking == LC_TRACK_LEFT)
-						MoveSelectedObjects(delta[0], delta[1], 0);
-  				else
-	  				MoveSelectedObjects(0, 0, delta[2]);
-		  	}
-      }
+					{
+						delta[0] = (float)(x - m_nDownX);
+						delta[1] = (float)(y - m_nDownY);
+						delta[2] = 0;
+					}
+					else
+					{
+						delta[0] = 0;
+						delta[1] = 0;
+						delta[2] = (float)(y - m_nDownY);
+					}
+
+					mat.TransformPoints (delta, 1);
+
+					float mouse = 0.25f/(21-m_nMouse);
+					delta[0] = delta[0] * mouse + m_fTrack[0];
+					delta[1] = delta[1] * mouse + m_fTrack[1];
+					delta[2] = delta[2] * mouse + m_fTrack[2];
+
+						SnapPoint (delta, m_fTrack);
+						
+					if (m_OverlayActive)
+					{
+						switch (m_OverlayMode)
+						{
+						case LC_OVERLAY_XYZ:
+							break;
+						case LC_OVERLAY_CAMERA:
+							break;
+						}
+					}
+
+					MoveSelectedObjects(delta[0], delta[1], delta[2]);
+
+					m_nDownX = x;
+					m_nDownY = y;
+				}
+				else
+				{
+					// TODO: rewrite
+
+					float mouse = 5.0f/(21-m_nMouse);
+					float delta[3] = { (ptx - m_fTrack[0])*mouse, (pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
+					float d[3] = { delta[0], delta[1], delta[2] };
+
+					if (m_OverlayActive)
+					{
+						switch (m_OverlayMode)
+						{
+						case LC_OVERLAY_XYZ:
+							break;
+						case LC_OVERLAY_CAMERA:
+							break;
+						}
+					}
+
+					SnapPoint (delta, NULL);
+
+					m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
+					m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
+					m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
+
+					if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
+						MoveSelectedObjects(delta[0], delta[1], delta[2]);
+					else
+					{
+						if (m_nTracking == LC_TRACK_LEFT)
+							MoveSelectedObjects(delta[0], delta[1], 0);
+						else
+							MoveSelectedObjects(0, 0, delta[2]);
+					}
+				}
+			}
 
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8135,12 +8223,33 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 			if ((Closest - Pt).LengthSquared() < 100.0f)
 			{
-				Mode = LC_OVERLAY_X + i - 1;
-				break;
+				// If we already know the mouse is close to another axis, select a plane.
+				if (Mode != -1)
+				{
+					if (Mode == LC_OVERLAY_X)
+					{
+						if (i == 2)
+						{
+							Mode = LC_OVERLAY_XY;
+						}
+						else
+						{
+							Mode = LC_OVERLAY_XZ;
+						}
+					}
+					else
+					{
+						Mode = LC_OVERLAY_YZ;
+					}
+
+					break;
+				}
+				else
+				{
+					Mode = LC_OVERLAY_X + i - 1;
+				}
 			}
 		}
-
-		// TODO: Check if the mouse is near the center and select a plane.
 
 		if (Mode == -1)
 		{
@@ -8311,3 +8420,31 @@ void Project::MouseUpdateOverlays(int x, int y)
 		}
 	}
 }
+
+void Project::ActivateOverlay()
+{
+	m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
+
+	if (m_OverlayActive)
+	{
+		m_OverlayMode = LC_OVERLAY_XYZ;
+
+		GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
+		GLdouble ModelMatrix[16], ProjMatrix[16];
+		GLint Viewport[4];
+
+		LoadViewportProjection();
+		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
+		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+		glGetIntegerv(GL_VIEWPORT, Viewport);
+
+		// Calculate the scaling factor by projecting the center to the front plane then
+		// projecting a point close to it back.
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &ScreenX, &ScreenY, &ScreenZ);
+		gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, Viewport, &PointX, &PointY, &PointZ);
+
+		Vector3 Dist((float)PointX - m_OverlayCenter[0], (float)PointY - m_OverlayCenter[1], (float)PointZ - m_OverlayCenter[2]);
+		m_OverlayScale = Dist.Length() * 5.0f;
+	}
+}
+

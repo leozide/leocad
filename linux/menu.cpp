@@ -1,406 +1,256 @@
-// Menu routines.
+// Menu Creation.
 //
 
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include "typedefs.h"
-#include "menu.h"
 #include "main.h"
-#include "toolbar.h"
-#include "custom.h"
+#include "gtkmisc.h"
 
-typedef enum { TB_BOTH, TB_ICONS, TB_TEXT, TB_TOOLBAR, TB_DRAWING, TB_ANIMATION, TB_STATUS };
-
-void toolbar_set_style (GtkWidget* widget, gpointer data)
+void create_main_menu (GtkObject *window, GtkWidget *vbox)
 {
-  if (main_toolbar.toolbar == NULL)
-    return;
+  GtkWidget *handle_box, *menu_bar, *menu, *menu_in_menu, *item;
+  GtkAccelGroup *accel, *menu_accel, *menu_in_menu_accel;
 
-  int id = (int)data;
-
-  switch (id)
-  {
-    case TB_BOTH: {
-      user_rc.toolbar_style = GTK_TOOLBAR_BOTH;
-    } break;
-
-    case TB_ICONS: {
-      user_rc.toolbar_style = GTK_TOOLBAR_ICONS;
-    } break;
-
-    case TB_TEXT: {
-      user_rc.toolbar_style = GTK_TOOLBAR_TEXT;
-    } break;
-
-    case TB_TOOLBAR:
-    {
-      if (user_rc.view_main_toolbar)
-      {
-	user_rc.view_main_toolbar = 0;
-	gtk_widget_hide (main_toolbar.handle_box);
-      }
-      else
-      {
-	user_rc.view_main_toolbar = 1;
-	gtk_widget_show (main_toolbar.handle_box);
-      }
-    } break;
-
-    case TB_DRAWING:
-    {
-      if (user_rc.view_tool_toolbar)
-      {
-	user_rc.view_tool_toolbar = 0;
-	gtk_widget_hide (tool_toolbar.handle_box);
-      }
-      else
-      {
-	user_rc.view_tool_toolbar = 1;
-	gtk_widget_show (tool_toolbar.handle_box);
-      }
-    } break;
-
-    case TB_ANIMATION:
-    {
-       if (user_rc.view_anim_toolbar)
-      {
-	user_rc.view_anim_toolbar = 0;
-	gtk_widget_hide (anim_toolbar.handle_box);
-      }
-      else
-      {
-	user_rc.view_anim_toolbar = 1;
-	gtk_widget_show (anim_toolbar.handle_box);
-      }
-   } break;
-
-    case TB_STATUS:
-    {
-    } break;
-  }
-
-  if (id == TB_BOTH || id == TB_ICONS || id ==TB_TEXT)
-  {
-    gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), user_rc.toolbar_style);
-    gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), user_rc.toolbar_style);
-    gtk_toolbar_set_style (GTK_TOOLBAR (anim_toolbar.toolbar), user_rc.toolbar_style);
-    gtk_widget_set_usize (main_toolbar.handle_box, -1, -1);
-    gtk_widget_set_usize (tool_toolbar.handle_box, -1, -1);
-    gtk_widget_set_usize (anim_toolbar.handle_box, -1, -1);
-  }
-}
-
-
-static void menu_separator (GtkWidget * menu)
-{
-  GtkWidget *menu_item = gtk_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), menu_item);
-  gtk_widget_set_sensitive (menu_item, FALSE);
-  gtk_widget_show (menu_item);
-}
-
-static void menu_tearoff (GtkWidget * menu)
-{
-  GtkWidget *menu_item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), menu_item);
-  gtk_widget_set_sensitive (menu_item, FALSE);
-  gtk_widget_show (menu_item);
-}
-
-static GtkWidget* create_sub_menu (GtkWidget * menu_bar, char *label, char RIGTH_JUSTIFY)
-{
-  GtkWidget *sub_menu = gtk_menu_item_new_with_label (label);
-  GtkWidget *menu = gtk_menu_new ();
-  gtk_menu_bar_append (GTK_MENU_BAR (menu_bar), sub_menu);
-  gtk_widget_show (sub_menu);
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (sub_menu), menu);
-  if (RIGTH_JUSTIFY)
-    gtk_menu_item_right_justify (GTK_MENU_ITEM (sub_menu));
-  return menu;
-}
-
-static GtkWidget* create_menu_item (GtkWidget * menu, gchar * label, gint sensitive_flag, 
-				    GtkSignalFunc this_func, gpointer this_func_data)
-{
-  GtkWidget *menu_item = gtk_menu_item_new_with_label (label);
-  gtk_menu_append (GTK_MENU (menu), menu_item);
-  gtk_widget_set_sensitive (menu_item, sensitive_flag);
-  gtk_widget_show (menu_item);
-  gtk_signal_connect (GTK_OBJECT (menu_item), "activate", GTK_SIGNAL_FUNC (this_func), this_func_data);
-  return menu_item;
-}
-
-static GtkWidget* create_check_menu_item (GtkWidget * menu, gchar * label, gint state_flag,
-					  GtkSignalFunc this_func, gpointer this_func_data)
-{
-  GtkWidget *menu_item = gtk_check_menu_item_new_with_label (label);
-  gtk_menu_append (GTK_MENU (menu), menu_item);
-  gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (menu_item), state_flag);
-  gtk_check_menu_item_set_show_toggle (GTK_CHECK_MENU_ITEM (menu_item), TRUE);
-  gtk_widget_show (menu_item);
-  gtk_signal_connect (GTK_OBJECT (menu_item), "activate", GTK_SIGNAL_FUNC (this_func), this_func_data);
-  return menu_item;
-}
-
-static GtkWidget* create_menu_radio_item (GtkWidget * menu, GtkWidget * last_radio, gchar * label,
-					  GtkSignalFunc this_func, gpointer this_func_data, gint state_flag)
-{
-  GtkWidget *menu_item;
-  if (last_radio == NULL)
-    menu_item = gtk_radio_menu_item_new_with_label ((GSList*)NULL, label);
-  else
-    menu_item = gtk_radio_menu_item_new_with_label (gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (last_radio)), label);
-  gtk_menu_append (GTK_MENU (menu), menu_item);
-  //gtk_check_menu_item_set_show_toggle (GTK_CHECK_MENU_ITEM (menu_item), TRUE);
-  gtk_widget_show (menu_item);
-  gtk_signal_connect (GTK_OBJECT (menu_item), "activate", GTK_SIGNAL_FUNC (this_func), this_func_data);
-  if (state_flag)
-    gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (menu_item), state_flag);
-
-  return menu_item;
-}
-
-static GtkWidget* create_menu_in_menu (GtkWidget * menu, gchar * label)
-{
-  GtkWidget *menu_item = gtk_menu_item_new_with_label (label);
-  GtkWidget *menu_in_menu = gtk_menu_new ();
-  gtk_menu_append (GTK_MENU (menu), menu_item);
-  gtk_widget_show (menu_item);
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), menu_in_menu);
-  return menu_in_menu;
-}
-
-MAINMENU main_menu;
-
-void create_main_menu(GtkWidget *window, GtkWidget *vbox)
-{
-  GtkWidget *handle_box, *menu, *menu_in_menu, *item;
-  GtkAccelGroup *accel = gtk_accel_group_get_default ();
-
+  accel = gtk_accel_group_get_default ();
   handle_box = gtk_handle_box_new ();
   gtk_box_pack_start (GTK_BOX (vbox), handle_box, FALSE, FALSE, 0);
   gtk_widget_show (handle_box);
 
-  main_menu.menu_bar = gtk_menu_bar_new ();
-  gtk_container_add (GTK_CONTAINER (handle_box), main_menu.menu_bar);
-  gtk_widget_show (main_menu.menu_bar);
+  menu_bar = gtk_menu_bar_new ();
+  gtk_container_add (GTK_CONTAINER (handle_box), menu_bar);
+  gtk_widget_show (menu_bar);
 
   // File menu
-  main_menu.file_menu = menu = create_sub_menu (main_menu.menu_bar, "File", FALSE);
+  menu = create_sub_menu (menu_bar, "_File", accel, &menu_accel);
   menu_tearoff (menu);
 
-  item = create_menu_item (menu, "New", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_NEW);
-  gtk_widget_add_accelerator (item, "activate", accel, 'N',
-         GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  item = create_menu_item (menu, "Open...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_OPEN);
-  gtk_widget_add_accelerator (item, "activate", accel, 'O',
-         GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  create_menu_item (menu, "Merge...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_MERGE);
+  create_menu_item (menu, "_New", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_NEW, "menu_file_new");
+  create_menu_item (menu, "_Open...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_OPEN, "menu_file_open");
+  create_menu_item (menu, "_Merge...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_MERGE, "menu_file_merge");
   menu_separator (menu);
 
-  item = create_menu_item (menu, "Save", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_SAVE);
-  gtk_widget_add_accelerator (item, "activate", accel, 'S',
-         GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  item = create_menu_item (menu, "Save As...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_SAVEAS);
-  item = create_menu_item (menu, "Save Picture...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_PICTURE);
+  create_menu_item (menu, "_Save", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_SAVE, "menu_file_save");
+  create_menu_item (menu, "Save _As...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_SAVEAS, "menu_file_saveas");
+  create_menu_item (menu, "Save Pic_ture...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_PICTURE, "menu_file_picture");
 
-  menu_in_menu = create_menu_in_menu (menu, "Export");
-  create_menu_item (menu_in_menu, "HTML...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_HTML);
-  create_menu_item (menu_in_menu, "POV-Ray...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_POVRAY);
-  create_menu_item (menu_in_menu, "Wavefront...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_WAVEFRONT);
+  menu_in_menu = create_menu_in_menu (menu, "Ex_port", menu_accel, &menu_in_menu_accel);
+  create_menu_item (menu_in_menu, "_HTML...", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_HTML, "menu_file_html");
+  create_menu_item (menu_in_menu, "_POV-Ray...", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_POVRAY, "menu_file_povray");
+  create_menu_item (menu_in_menu, "_Wavefront...", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_WAVEFRONT, "menu_file_wavefront");
   menu_separator (menu);
 
-  create_menu_item (menu, "Properties...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_PROPERTIES);
-  create_menu_item (menu, "Piece Library Manager...", TRUE,
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_LIBRARY);
-  create_menu_item (menu, "Terrain Editor...", TRUE, 
-         GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_FILE_TERRAIN);
+  create_menu_item (menu, "Propert_ies...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_PROPERTIES, "menu_file_properties");
+  create_menu_item (menu, "Piece _Library Manager...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_LIBRARY, "menu_file_library");
+  create_menu_item (menu, "Terrain _Editor...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_TERRAIN, "menu_file_terrain");
   menu_separator (menu);
 
-  main_menu.file_recent[0] = create_menu_item (menu, "Recent Files", FALSE, 
-      GTK_SIGNAL_FUNC (OnCommand), (void*)ID_FILE_RECENT1);
-  main_menu.file_recent[1] = create_menu_item (menu, "", TRUE, 
-      GTK_SIGNAL_FUNC (OnCommand), (void*)ID_FILE_RECENT2);
-  main_menu.file_recent[2] = create_menu_item (menu, "", TRUE, 
-      GTK_SIGNAL_FUNC (OnCommand), (void*)ID_FILE_RECENT3);
-  main_menu.file_recent[3] = create_menu_item (menu, "", TRUE,
-      GTK_SIGNAL_FUNC (OnCommand), (void*)ID_FILE_RECENT4);
-  gtk_widget_hide (main_menu.file_recent[1]);
-  gtk_widget_hide (main_menu.file_recent[2]);
-  gtk_widget_hide (main_menu.file_recent[3]);
+  create_menu_item (menu, "1", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+		    window, ID_FILE_RECENT1, "menu_file_recent1");
+  create_menu_item (menu, "2", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+		    window, ID_FILE_RECENT2, "menu_file_recent2");
+  create_menu_item (menu, "3", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+		    window, ID_FILE_RECENT3, "menu_file_recent3");
+  create_menu_item (menu, "4", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+		    window, ID_FILE_RECENT4, "menu_file_recent4");
+  gtk_object_set_data (window, "file_menu_accel", menu_accel);
 
   menu_separator (menu);
-  item = create_menu_item (menu, "Exit...", TRUE,
-      GTK_SIGNAL_FUNC (OnCommand), (void*)ID_FILE_EXIT);
-  gtk_widget_add_accelerator (item, "activate", accel, 'Q',
-       GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  create_menu_item (menu, "E_xit...", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+		    window, ID_FILE_EXIT, "menu_file_exit");
 
   // Edit menu
-  menu = create_sub_menu (main_menu.menu_bar, "Edit", FALSE);
+  menu = create_sub_menu (menu_bar, "_Edit", accel, &menu_accel);
   menu_tearoff (menu);
 
-  main_menu.edit_undo = create_menu_item (menu, "Undo", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_UNDO);
-  gtk_widget_add_accelerator (main_menu.edit_undo, "activate", accel, 'Z',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  main_menu.edit_redo = create_menu_item (menu, "Redo", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_REDO);
-  gtk_widget_add_accelerator (main_menu.edit_redo, "activate", accel, 'Y',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  create_menu_item (menu, "_Undo", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_UNDO, "menu_edit_undo");
+  create_menu_item (menu, "_Redo", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_REDO, "menu_edit_redo");
   menu_separator (menu);
 
-  main_menu.edit_cut = create_menu_item (menu, "Cut", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_CUT);
-  gtk_widget_add_accelerator (main_menu.edit_cut, "activate", accel, 'X',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  main_menu.edit_copy = create_menu_item (menu, "Copy", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_COPY);
-  gtk_widget_add_accelerator (main_menu.edit_copy, "activate", accel, 'C',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  main_menu.edit_paste = create_menu_item (menu, "Paste", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_PASTE);
-  gtk_widget_add_accelerator (main_menu.edit_paste, "activate", accel, 'V',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  create_menu_item (menu, "Cu_t", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_CUT, "menu_edit_cut");
+  create_menu_item (menu, "_Copy", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_COPY, "menu_edit_copy");
+  create_menu_item (menu, "_Paste", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_PASTE, "menu_edit_paste");
   menu_separator (menu);
 
-  main_menu.edit_select_all = create_menu_item (menu, "Select All", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_SELECT_ALL);
-  main_menu.edit_select_none = create_menu_item (menu, "Select None", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_SELECT_NONE);
-  main_menu.edit_select_invert = create_menu_item (menu, "Select Invert", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_SELECT_INVERT);
-  main_menu.edit_select_byname = create_menu_item (menu, "Select by Name...", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_EDIT_SELECT_BYNAME);
+  create_menu_item (menu, "Select _All", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_SELECT_ALL, "menu_edit_select_all");
+  create_menu_item (menu, "Select _None", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_SELECT_NONE, "menu_edit_select_none");
+  create_menu_item (menu, "Select _Invert", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_SELECT_INVERT, "menu_edit_select_invert");
+  create_menu_item (menu, "_Select by Name...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_EDIT_SELECT_BYNAME, "menu_edit_select_byname");
 
   // Piece menu
-  menu = create_sub_menu (main_menu.menu_bar, "Piece", FALSE);
+  menu = create_sub_menu (menu_bar, "_Piece", accel, &menu_accel);
   menu_tearoff (menu);
 
-  create_menu_item (menu, "Insert", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_INSERT);
-  main_menu.piece_delete = create_menu_item (menu, "Delete", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_DELETE);
-  create_menu_item (menu, "Minifig Wizard...", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_MINIFIG);
-  main_menu.piece_array = create_menu_item (menu, "Array...", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_ARRAY);
-  main_menu.piece_copy_keys = create_menu_item (menu, "Copy Keys", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_COPYKEYS);
+  create_menu_item (menu, "_Insert", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_INSERT, "menu_piece_insert");
+  create_menu_item (menu, "De_lete", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_DELETE, "menu_piece_delete");
+  create_menu_item (menu, "Minifig Wi_zard...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_MINIFIG, "menu_piece_minifig");
+  create_menu_item (menu, "Ar_ray...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_ARRAY, "menu_piece_array");
+  create_menu_item (menu, "_Copy Keys", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_COPYKEYS, "menu_piece_copykeys");
   menu_separator (menu);
 
-  main_menu.piece_group = create_menu_item (menu, "Group", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_GROUP);
-  gtk_widget_add_accelerator (main_menu.piece_group, "activate", accel, 'G',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  main_menu.piece_ungroup = create_menu_item (menu, "Ungroup", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_UNGROUP);
-  gtk_widget_add_accelerator (main_menu.piece_ungroup, "activate", accel, 'U',
-      GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  main_menu.piece_group_remove = create_menu_item (menu, "Remove from Group", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_GROUP_REMOVE);
-  main_menu.piece_group_add = create_menu_item (menu, "Add to Group", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_GROUP_ADD);
-  main_menu.piece_edit_groups = create_menu_item (menu, "Edit Groups...", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_GROUP_EDIT);
+  create_menu_item (menu, "_Group", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_GROUP, "menu_piece_group");
+  create_menu_item (menu, "_Ungroup", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_UNGROUP, "menu_piece_ungroup");
+  create_menu_item (menu, "Re_move from Group", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_GROUP_REMOVE, "menu_piece_group_remove");
+  create_menu_item (menu, "A_dd to Group", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_GROUP_ADD, "menu_piece_group_add");
+  create_menu_item (menu, "Edi_t Groups...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_GROUP_EDIT, "menu_piece_group_edit");
   menu_separator (menu);
   
-  main_menu.piece_hide_sel = create_menu_item (menu, "Hide Selected", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_HIDE_SELECTED);
-  main_menu.piece_hide_unsel = create_menu_item (menu, "Hide Unselected", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_HIDE_UNSELECTED);
-  main_menu.piece_unhide = create_menu_item (menu, "Unhide All", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_PIECE_UNHIDE_ALL);
+  create_menu_item (menu, "Hide _Selected", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_HIDE_SELECTED, "menu_piece_hide_selected");
+  create_menu_item (menu, "Hide U_nselected", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_HIDE_UNSELECTED, "menu_piece_hide_unselected");
+  create_menu_item (menu, "Unhide _All", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_UNHIDE_ALL, "menu_piece_unhide_all");
 
   // View menu
-  menu = create_sub_menu (main_menu.menu_bar, "View", FALSE);
+  menu = create_sub_menu (menu_bar, "_View", accel, &menu_accel);
   menu_tearoff (menu);
 
-  create_menu_item (menu, "Preferences...", TRUE,
-      GTK_SIGNAL_FUNC(OnCommandDirect), (void*)LC_VIEW_PREFERENCES);
+  create_menu_item (menu, "_Preferences...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_PREFERENCES, "menu_view_preferences");
   menu_separator (menu);
 
-  menu_in_menu = create_menu_in_menu (menu, "Toolbars");
-  create_check_menu_item (menu_in_menu, "Standard", user_rc.view_main_toolbar, 
-			  GTK_SIGNAL_FUNC(toolbar_set_style), (void*)TB_TOOLBAR);
-  create_check_menu_item (menu_in_menu, "Drawing", user_rc.view_tool_toolbar,
-			  GTK_SIGNAL_FUNC(toolbar_set_style), (void*)TB_DRAWING);
-  create_check_menu_item (menu_in_menu, "Animation", user_rc.view_anim_toolbar,
-			  GTK_SIGNAL_FUNC(toolbar_set_style), (void*)TB_ANIMATION);
-//  create_check_menu_item (menu_in_menu, "Modify", FALSE, GTK_SIGNAL_FUNC(OnCommand), NULL);
-//  create_check_menu_item (menu_in_menu, "Status Bar", FALSE, GTK_SIGNAL_FUNC(OnCommand), NULL);
+  menu_in_menu = create_menu_in_menu (menu, "Tool_bars", menu_accel, &menu_in_menu_accel);
+  create_check_menu_item (menu_in_menu, "S_tandard", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_STANDARD, "menu_view_toolbar_standard");
+  create_check_menu_item (menu_in_menu, "Dra_wing", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_DRAWING, "menu_view_toolbar_drawing");
+  create_check_menu_item (menu_in_menu, "Ani_mation", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_ANIMATION, "menu_view_toolbar_animation");
   menu_separator (menu_in_menu);
+  item = create_radio_menu_item (menu_in_menu, NULL, "Icons _and Text", menu_in_menu_accel,
+				 GTK_SIGNAL_FUNC (OnCommand), window,
+				 ID_VIEW_TOOLBAR_BOTH, "menu_view_toolbar_both");
+  item = create_radio_menu_item (menu_in_menu, item, "_Icons only", menu_in_menu_accel,
+				 GTK_SIGNAL_FUNC (OnCommand), window,
+				 ID_VIEW_TOOLBAR_ICONS, "menu_view_toolbar_icons");
+  item = create_radio_menu_item (menu_in_menu, item, "Te_xt only", menu_in_menu_accel,
+				 GTK_SIGNAL_FUNC (OnCommand), window,
+				 ID_VIEW_TOOLBAR_TEXT, "menu_view_toolbar_text");
 
-  item = create_menu_radio_item (menu_in_menu, (GtkWidget*)NULL, "Icons and Text", 
-      GTK_SIGNAL_FUNC (toolbar_set_style), (void*)TB_BOTH, user_rc.toolbar_style == GTK_TOOLBAR_BOTH);
-  item = create_menu_radio_item (menu_in_menu, item, "Icons only", 
-      GTK_SIGNAL_FUNC (toolbar_set_style), (void*)TB_ICONS, user_rc.toolbar_style == GTK_TOOLBAR_ICONS);
-  create_menu_radio_item (menu_in_menu, item, "Text only",
-      GTK_SIGNAL_FUNC (toolbar_set_style), (void*)TB_TEXT, user_rc.toolbar_style == GTK_TOOLBAR_TEXT);
-
-  create_menu_item (menu, "Zoom In", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_VIEW_ZOOMIN);
-  create_menu_item (menu, "Zoom Out", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_VIEW_ZOOMOUT);
-  create_menu_item (menu, "Zoom Extents", TRUE,
-      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_VIEW_ZOOMEXTENTS);
+  create_menu_item (menu, "Zoom _In", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_ZOOMIN, "menu_view_zoomin");
+  create_menu_item (menu, "Zoom _Out", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_ZOOMOUT, "menu_view_zoomout");
+  create_menu_item (menu, "Zoom E_xtents", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_ZOOMEXTENTS, "menu_view_zoomextents");
   menu_separator (menu);
 
-  menu_in_menu = create_menu_in_menu (menu, "Viewports");
+  menu_in_menu = create_menu_in_menu (menu, "Vie_wports", menu_accel, &menu_in_menu_accel);
+  item = create_radio_menu_pixmap (menu_in_menu, NULL, "vports01.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_01, "menu_view_viewports_01");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports02.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_02, "menu_view_viewports_02");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports03.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_03, "menu_view_viewports_03");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports04.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_04, "menu_view_viewports_04");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports05.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_05, "menu_view_viewports_05");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports06.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_06, "menu_view_viewports_06");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports07.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_07, "menu_view_viewports_07");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports08.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_08, "menu_view_viewports_08");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports09.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_09, "menu_view_viewports_09");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports10.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_10, "menu_view_viewports_10");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports11.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_11, "menu_view_viewports_11");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports12.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_12, "menu_view_viewports_12");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports13.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_13, "menu_view_viewports_13");
+  item = create_radio_menu_pixmap (menu_in_menu, item, "vports14.xpm", menu_in_menu_accel,
+				   GTK_SIGNAL_FUNC (OnCommand), window,
+				   ID_VIEW_VIEWPORTS_14, "menu_view_viewports_14");
 
-  for (int i = 0; i < 14; i++)
-  {
-    char str[20];
-    sprintf(str, "Viewports %d", i + 1);
-    main_menu.view_viewports[i] = create_menu_radio_item (menu_in_menu,
-        i == 0 ? (GtkWidget*)NULL : main_menu.view_viewports[i-1], str,
-        GTK_SIGNAL_FUNC(OnCommand), (void*)(i + ID_VIEW_VIEWPORTS_01), i == 0);
-  }
+  menu_in_menu = create_menu_in_menu (menu, "_Cameras", menu_accel, &menu_in_menu_accel);
+  gtk_object_set_data (window, "cameras_menu", menu_in_menu);
 
-  main_menu.view_cameras_popup = gtk_menu_item_new_with_label ("Cameras");
-  menu_in_menu = gtk_menu_new ();
-  gtk_menu_append (GTK_MENU (menu), main_menu.view_cameras_popup);
-  gtk_widget_show (main_menu.view_cameras_popup);
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (main_menu.view_cameras_popup), menu_in_menu);
-  create_menu_item (menu_in_menu, "Dummy", TRUE, GTK_SIGNAL_FUNC(OnCommand), (void*)NULL);
+  menu_in_menu = create_menu_in_menu (menu, "S_tep", menu_accel, &menu_in_menu_accel);
+  create_menu_item (menu_in_menu, "Fi_rst", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_FIRST, "menu_view_step_first");
+  create_menu_item (menu_in_menu, "Pre_vious", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_PREVIOUS, "menu_view_step_previous");
+  create_menu_item (menu_in_menu, "Ne_xt", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_NEXT, "menu_view_step_next");
+  create_menu_item (menu_in_menu, "_Last", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_LAST, "menu_view_step_last");
 
-  menu_in_menu = main_menu.view_step_popup = create_menu_in_menu (menu, "Step");
-  main_menu.view_step_first = create_menu_item (menu_in_menu, "First", TRUE,
-      GTK_SIGNAL_FUNC(OnCommandDirect), (void*)LC_VIEW_STEP_FIRST);
-  main_menu.view_step_prev = create_menu_item (menu_in_menu, "Previous", TRUE,
-      GTK_SIGNAL_FUNC(OnCommandDirect), (void*)LC_VIEW_STEP_PREVIOUS);
-  main_menu.view_step_next = create_menu_item (menu_in_menu, "Next", TRUE,
-      GTK_SIGNAL_FUNC(OnCommandDirect), (void*)LC_VIEW_STEP_NEXT);
-  main_menu.view_step_last = create_menu_item (menu_in_menu, "Last", TRUE,
-      GTK_SIGNAL_FUNC(OnCommandDirect), (void*)LC_VIEW_STEP_LAST);
-
-  menu = create_sub_menu (main_menu.menu_bar, "Help", FALSE);
+  menu = create_sub_menu (menu_bar, "_Help", accel, &menu_accel);
   menu_tearoff (menu);
-  create_menu_item (menu, "About", TRUE, GTK_SIGNAL_FUNC(OnCommandDirect), (void*)LC_HELP_ABOUT);
 
-  /*
-  item_factory = gtk_item_factory_new(GTK_TYPE_MENU_BAR, "<main>", accel_group);
+  create_menu_item (menu, "_About", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_HELP_ABOUT, "menu_help_about");
 
-  gtk_item_factory_create_items(item_factory, nmenu_items, main_menu_items, NULL);
-
-  gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
-
-  if (menubar)
-    *menubar = gtk_item_factory_get_widget(item_factory, "<main>");
-
-  gtk_container_add (GTK_CONTAINER (handle_box), *menubar);
-  gtk_widget_show(*menubar);
-  */
+  // TODO: read accelerators from a file
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_file_new"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'N', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_file_open"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'O', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_file_save"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'S', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_file_exit"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'Q', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_edit_undo"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'Z', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_edit_redo"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'Y', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_edit_cut"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'X', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_edit_copy"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'C', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_edit_paste"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'V', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_group"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'G', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_ungroup"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'U', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 }
-
-
-

@@ -12,7 +12,7 @@
 #endif
 
 #ifdef LC_WINDOWS
-#define LC_MAXPATH _MAX_PATH
+#define LC_MAXPATH 260 //_MAX_PATH
 #define KEY_SHIFT	VK_SHIFT
 #define KEY_CONTROL	VK_CONTROL
 #define KEY_ESCAPE	VK_ESCAPE

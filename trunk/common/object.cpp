@@ -111,7 +111,7 @@ bool Object::FileLoad (File& file)
   return true;
 }
 
-void Object::FileSave (File& file)
+void Object::FileSave (File& file) const
 {
   unsigned char version = LC_KEY_SAVE_VERSION;
   LC_OBJECT_KEY *node;
@@ -291,7 +291,7 @@ void Object::CalculateKeys (unsigned short nTime, bool bAnimation)
   }
 }
 
-void Object::CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value)
+void Object::CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value) const
 {
   LC_OBJECT_KEY *next = NULL, *prev = NULL, *node;
 

@@ -57,7 +57,13 @@ char* strlwr(char* string);
 /////////////////////////////////////////////////////////////////////////////
 // LeoCAD constants
 
-// Math numbers
+// Math numbers.
+#define LC_DTOR 0.017453f
+#define LC_RTOD 57.29578f
+#define LC_PI   3.141592f
+#define LC_2PI  6.283185f
+
+
 #define DTOR 0.017453f
 #define RTOD 57.29578f
 #define PI  3.14159265

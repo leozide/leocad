@@ -429,7 +429,7 @@ void SystemInit()
 // Viewport menu.
 void SystemUpdateViewport(int nNew, int nOld)
 {
-	CMenu* pMenu = GetMainMenu(3)->GetSubMenu(12);
+	CMenu* pMenu = GetMainMenu(2)->GetSubMenu(12);
 	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
 	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
 }
@@ -592,7 +592,7 @@ void SystemUpdateSelected(unsigned long flags)
 	pCtrl = &pBar->GetToolBarCtrl();
 	pCtrl->EnableButton(ID_PIECE_ARRAY, flags & LC_SEL_PIECE ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_PIECE_MIRROR, flags & LC_SEL_PIECE ? TRUE : FALSE);
-	pMenu = GetMainMenu(2);
+	pMenu = GetMainMenu(3);
 	pMenu->EnableMenuItem(ID_PIECE_DELETE, MF_BYCOMMAND | 
 		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_COPYKEYS, MF_BYCOMMAND | 
@@ -638,7 +638,7 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 	pCtrl->EnableButton(ID_VIEW_STEP_LAST, nTime != nTotal ? TRUE : FALSE);
 
 	// Main menu
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(3)->GetSubMenu(14);
+	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(14);
 
 	pMainMenu->EnableMenuItem(ID_VIEW_STEP_NEXT, MF_BYCOMMAND | 
 		(nTime < nTotal ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
@@ -734,7 +734,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 	// Menu
 	char* txt;
-	CMenu* pMenu = GetMainMenu(2);
+	CMenu* pMenu = GetMainMenu(3);
 	UINT nState = pMenu->GetMenuState(ID_PIECE_COPYKEYS, MF_BYCOMMAND);
 	nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
 
@@ -749,7 +749,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(3)->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i;
 
@@ -774,7 +774,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 // Update the list of cameras
 void SystemUpdateCameraMenu(Camera* pCamera)
 {
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(3)->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	Camera* pFirst = pCamera;
 	char tmp[90];

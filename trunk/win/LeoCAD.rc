@@ -275,25 +275,6 @@ BEGIN
         MENUITEM "Select Invert",               ID_EDIT_SELECTINVERT
         MENUITEM "Select By Name...",           ID_EDIT_SELECTBYNAME
     END
-    POPUP "&Piece"
-    BEGIN
-        MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
-        MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
-        MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
-        MENUITEM "Array...",                    ID_PIECE_ARRAY
-        MENUITEM "Mirror...",                   ID_PIECE_MIRROR
-        MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
-        MENUITEM SEPARATOR
-        MENUITEM "Group...",                    ID_PIECE_GROUP
-        MENUITEM "Ungroup",                     ID_PIECE_UNGROUP
-        MENUITEM "Remove From Group",           ID_PIECE_DETACH
-        MENUITEM "Add To Group",                ID_PIECE_ATTACH
-        MENUITEM "Edit Groups...",              ID_PIECE_EDITGROUPS
-        MENUITEM SEPARATOR
-        MENUITEM "Hide Selected",               ID_PIECE_HIDESELECTED
-        MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
-        MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
-    END
     POPUP "&View"
     BEGIN
         MENUITEM "P&references...",             ID_VIEW_PREFERENCES
@@ -345,6 +326,25 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
         MENUITEM "New View",                    ID_VIEW_NEWVIEW
+    END
+    POPUP "&Piece"
+    BEGIN
+        MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
+        MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
+        MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
+        MENUITEM "Array...",                    ID_PIECE_ARRAY
+        MENUITEM "Mirror...",                   ID_PIECE_MIRROR
+        MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
+        MENUITEM SEPARATOR
+        MENUITEM "Group...",                    ID_PIECE_GROUP
+        MENUITEM "Ungroup",                     ID_PIECE_UNGROUP
+        MENUITEM "Remove From Group",           ID_PIECE_DETACH
+        MENUITEM "Add To Group",                ID_PIECE_ATTACH
+        MENUITEM "Edit Groups...",              ID_PIECE_EDITGROUPS
+        MENUITEM SEPARATOR
+        MENUITEM "Hide Selected",               ID_PIECE_HIDESELECTED
+        MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
+        MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
     END
     POPUP "&Help"
     BEGIN

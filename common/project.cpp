@@ -3401,7 +3401,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					*ptr = 0;
 				}
 			}
-			unsigned long  image = Sys_ProfileLoadInt ("Default", "HTML Options", 1|LC_IMAGE_TRANSPARENT);
+			unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Options", 1|LC_IMAGE_TRANSPARENT);
 			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
@@ -3417,12 +3417,29 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.imdlg.imopts.pause = 1;
 			opts.imdlg.imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
+                        unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
+                        opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
+                        opts.index = (ul & LC_HTML_INDEX) != 0;
+                        opts.images = (ul & LC_HTML_IMAGES) != 0;
+                        opts.listend = (ul & LC_HTML_LISTEND) != 0;
+                        opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
+                        opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
+
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
 				FILE* f;
 				char* ext = ".bmp", fn[LC_MAXPATH];
 				int i;
 				unsigned short last = GetLastStep();
+
+                                ul = 0;
+                                if (opts.singlepage) ul |= LC_HTML_SINGLEPAGE;
+                                if (opts.index) ul |= LC_HTML_INDEX;
+                                if (opts.images) ul |= LC_HTML_IMAGES;
+                                if (opts.listend) ul |= LC_HTML_LISTEND;
+                                if (opts.liststep) ul |= LC_HTML_LISTSTEP;
+                                if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
+                                Sys_ProfileSaveInt ("Default", "HTML Options", ul);
 
 				switch (opts.imdlg.imopts.format)
 				{
@@ -3431,6 +3448,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				case LC_IMAGE_JPG: ext = ".jpg"; break;
 				case LC_IMAGE_PNG: ext = ".png"; break;
 				}
+
+                                i = strlen (opts.path);
+                                if (i && opts.path[i] != '/' && opts.path[i] != '\\')
+                                  strcat (opts.path, "/");
 /*
 				// Create destination folder
 			    char *MyPath = strdup(dlg.m_strFolder);
@@ -3552,7 +3573,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				// Save step pictures
 				LC_IMAGE** images;
 				images = (LC_IMAGE**)malloc(sizeof(LC_IMAGE*)*last);
-				CreateImages(images, opts.imdlg.width, opts.imdlg.height, 1, last, opts.hilite);
+				CreateImages(images, opts.imdlg.width, opts.imdlg.height, 1, last, opts.highlight);
 
 				for (i = 0; i < last; i++)
 				{
@@ -5452,7 +5473,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (m_bAnimation)
 				m_nCurFrame = m_nTotalFrames;
 			else
-				m_nCurStep = 255;
+				m_nCurStep = GetLastStep ();
 
 			CalculateStep();
 			UpdateSelection();

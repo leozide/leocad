@@ -859,13 +859,13 @@ static void htmldlg_ok(GtkWidget *widget, gpointer data)
   opts->images = (GTK_TOGGLE_BUTTON (s->images)->active) ? true : false;
   opts->listend = (GTK_TOGGLE_BUTTON (s->list_end)->active) ? true : false;
   opts->liststep = (GTK_TOGGLE_BUTTON (s->list_step)->active) ? true : false;
-  opts->hilite = (GTK_TOGGLE_BUTTON (s->highlight)->active) ? true : false;
+  opts->highlight = (GTK_TOGGLE_BUTTON (s->highlight)->active) ? true : false;
   strcpy(opts->path, gtk_entry_get_text (GTK_ENTRY (s->directory)));
 
   *cur_ret = LC_OK;
 }
 
-static void htmldlg_images(GtkWidget *widget, gpointer data)
+static void htmldlg_images (GtkWidget *widget, gpointer data)
 {
   LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
   LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)s->data;
@@ -873,7 +873,28 @@ static void htmldlg_images(GtkWidget *widget, gpointer data)
   imageoptsdlg_execute(&opts->imdlg ,true);
 }
 
-int htmldlg_execute(void* param)
+static void htmldlg_layout (GtkWidget *widget, gpointer data)
+{
+  LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
+
+  if (GTK_TOGGLE_BUTTON (s->single)->active)
+    gtk_widget_set_sensitive (s->index, FALSE);
+  else
+    gtk_widget_set_sensitive (s->index, TRUE);
+}
+
+static void htmldlg_list (GtkWidget *widget, gpointer data)
+{
+  LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
+
+  if (GTK_TOGGLE_BUTTON (s->list_end)->active ||
+      GTK_TOGGLE_BUTTON (s->list_step)->active)
+    gtk_widget_set_sensitive (s->images, TRUE);
+  else
+    gtk_widget_set_sensitive (s->images, FALSE);
+}
+
+int htmldlg_execute (void* param)
 {
   GtkWidget *dlg;
   GtkWidget *vbox1, *vbox2;
@@ -881,6 +902,7 @@ int htmldlg_execute(void* param)
   GtkWidget *frame, *label, *button;
   GSList *radio_group = (GSList*)NULL;
   LC_HTMLDLG_STRUCT s;
+  LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)param;
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -1004,6 +1026,24 @@ int htmldlg_execute(void* param)
   gtk_widget_show (s.directory);
   gtk_box_pack_end (GTK_BOX (hbox), s.directory, FALSE, TRUE, 0);
   gtk_widget_set_usize (s.directory, 210, -2);
+
+  gtk_signal_connect (GTK_OBJECT (s.single), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
+  gtk_signal_connect (GTK_OBJECT (s.multiple), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
+  gtk_signal_connect (GTK_OBJECT (s.list_step), "toggled", GTK_SIGNAL_FUNC (htmldlg_list), &s);
+  gtk_signal_connect (GTK_OBJECT (s.list_end), "toggled", GTK_SIGNAL_FUNC (htmldlg_list), &s);
+
+  if (opts->singlepage)
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.single), TRUE);
+  else
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.multiple), TRUE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.index), opts->index);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.images), opts->images);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.list_end), opts->listend);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.list_step), opts->liststep);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.highlight), opts->highlight);
+
+  gtk_toggle_button_toggled (GTK_TOGGLE_BUTTON (s.single));
+  gtk_toggle_button_toggled (GTK_TOGGLE_BUTTON (s.list_step));
 
   return dlg_domodal(dlg, LC_CANCEL);
 }

@@ -1,5 +1,9 @@
 This is a changelog for developers only, not for ordinary users.
 
+28/12/2000
+        - Click on "Last Step" goes to the last used step instead of step 255.
+        - Save HTML dialog options.
+
 24/12/2000
         - Fixed piece combo under linux.
 

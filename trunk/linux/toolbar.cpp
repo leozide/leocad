@@ -13,6 +13,7 @@
 #include "toolbar.h"
 #include "message.h"
 #include "preview.h"
+#include "library.h"
 
 // =============================================================================
 // Variables
@@ -242,7 +243,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 }
 
 // =========================================================
-
 // Pieces toolbar
 
 static bool list_subparts = false;
@@ -279,14 +279,16 @@ static void piecelist_setsort (GtkCList* clist, gint column)
 
 static void fill_piecelist(int group)
 {
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
+
   gtk_clist_freeze(GTK_CLIST(piecelist));
   gtk_clist_clear(GTK_CLIST(piecelist));
 
   list_curgroup = group;
 
-  for (int i = 0; i < project->GetPieceLibraryCount(); i++)
+  for (int i = 0; i < pLib->GetPieceCount (); i++)
   {
-    PieceInfo* pInfo = project->GetPieceInfo(i);
+    PieceInfo* pInfo = pLib->GetPieceInfo (i);
 
     if ((pInfo->m_strDescription[0] == '~') && !list_subparts)
       continue;
@@ -394,14 +396,15 @@ void piececombo_add (const char* str)
 
 static void piececombo_changed (GtkWidget *widget, gpointer data)
 {
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
   char* str;
   int i;
 
   str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
 
-  for (i = 0; i < project->GetPieceLibraryCount(); i++)
+  for (i = 0; i < pLib->GetPieceCount (); i++)
   {
-    PieceInfo* pInfo = project->GetPieceInfo(i);
+    PieceInfo* pInfo = pLib->GetPieceInfo (i);
  
     if (strcmp (str, pInfo->m_strDescription) == 0)
     {

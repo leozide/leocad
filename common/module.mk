@@ -2,4 +2,5 @@ SRC += common/boundbox.cpp common/camera.cpp common/file.cpp common/globals.cpp 
 
 #LIBS += -lGLU -lGL -ljpeg -lpng -lm -lX11
 # Work around for debian bug in mesag-dev
-LIBS += -lMesaGLU -lMesaGL -ljpeg -lpng -lz -lm -lX11
+LIBS += -lGLU -lGL -ljpeg -lpng -lz -lm -lX11
+

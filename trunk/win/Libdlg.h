@@ -7,6 +7,8 @@
 // LibDlg.h : header file
 //
 
+#include "libman.h"
+
 class PieceInfo;
 
 typedef struct {
@@ -24,11 +26,8 @@ class CLibraryDlg : public CDialog
 {
 // Construction
 public:
-	BOOL DoSave(BOOL bAskName);
 	CLibraryDlg(CWnd* pParent = NULL);   // standard constructor
-	BOOL m_bReload;
-	BOOL m_bModified;
-	CString m_strFile;
+	virtual ~CLibraryDlg();
 
 // Dialog Data
 	//{{AFX_DATA(CLibraryDlg)
@@ -53,12 +52,10 @@ public:
 	void UpdateTree();
 	void UpdateList();
 
-	BYTE m_nMaxGroups;
+//	BYTE m_nMaxGroups;
 	int m_nBitmaps[32];
-	char m_strGroups[32][33];
 	CImageList m_ImageList;
 
-	CArray<PARTGROUPINFO, PARTGROUPINFO> m_Parts;
 	CToolBar m_wndToolBar;
 	CImageList m_TreeImages;
 
@@ -66,6 +63,9 @@ public:
 	BOOL		m_bDragging;
 	int			m_nDragIndex;
 	HTREEITEM	m_hDropItem;
+
+protected:
+	LibraryManager m_Manager;
 
 protected:
 	// Generated message map functions

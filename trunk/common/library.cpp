@@ -1,12 +1,12 @@
 //
-// Piece library management
+// Pieces library management
 //
 
 #include <stdlib.h>
 #include "library.h"
 #include "file.h"
-#include "pieceinf.h"
 #include "texture.h"
+#include "pieceinf.h"
 #include "config.h"
 #include "image.h"
 #include "system.h"
@@ -31,11 +31,24 @@ PiecesLibrary::PiecesLibrary ()
   m_nPieceCount = 0;
   m_pTextures = NULL;
   m_nTextureCount = 0;
+	m_bNeedsReload = false;
 }
 
 PiecesLibrary::~PiecesLibrary ()
 {
   Unload ();
+}
+
+void PiecesLibrary::CheckReload ()
+{
+  char LibraryPath[LC_MAXPATH];
+
+	strcpy (LibraryPath, m_LibraryPath);
+
+	// FIXME: project will crash if we don't update the pieceinfos
+
+	Unload ();
+	Load (LibraryPath);
 }
 
 void PiecesLibrary::Unload ()
@@ -123,7 +136,20 @@ bool PiecesLibrary::Load (const char *libpath)
   idx.Close();
 	bin.Close();
 
-	// TODO: Load group configuration here
+	// Load groups configuration
+	if (!LoadGroupConfig (Sys_ProfileLoadString ("Settings", "Groups", "")))
+	{
+		m_strGroups[0] = "Plates";
+		m_strGroups[1] = "Bricks";
+		m_strGroups[2] = "Tiles";
+		m_strGroups[3] = "Slope Bricks";
+		m_strGroups[4] = "Technic";
+		m_strGroups[5] = "Space";
+		m_strGroups[6] = "Train";
+		m_strGroups[7] = "Other Bricks";
+		m_strGroups[8] = "Accessories";
+		m_nGroupCount = 9;
+	}
 
 	// Read the texture index.
 	strcpy(filename, m_LibraryPath);
@@ -168,6 +194,20 @@ bool PiecesLibrary::Load (const char *libpath)
 
 	idx.Close();
 	bin.Close();
+
+	m_bNeedsReload = false;
+
+	return true;
+}
+
+bool PiecesLibrary::LoadGroupConfig (const char* Filename)
+{
+	// FIXME:
+	return false;
+
+	
+	strcpy (m_GroupsFile, Filename);
+
 
 	return true;
 }
@@ -322,10 +362,88 @@ Texture* PiecesLibrary::GetTexture (int index) const
 }
 
 // =============================================================================
+
+unsigned long PiecesLibrary::GetDefaultPieceGroup (const char* name)
+{
+	char tmp[9];
+	strncpy(tmp, name, 9);
+//	tmp[8] = 0;
+
+	if (strstr(tmp,"Baseplate")	|| strstr(tmp,"Plate")	|| 
+		strstr(tmp,"Platform")) 
+		return 0x001;
+
+	if (strstr(tmp,"Brick")	|| strstr(tmp,"Cylin") ||
+		strstr(tmp,"Cone"))
+		return 0x002;
+	
+	if (strstr(tmp,"Tile"))
+		return 0x004;
+
+	if (strstr(tmp,"Slope"))
+		return 0x008;
+
+	if (strstr(tmp,"Technic")	|| strstr(tmp,"Crane")	||
+		strstr(tmp,"Wheel")		|| strstr(tmp,"Tyre")	||
+		strstr(tmp,"Electric"))
+		return 0x010;
+
+	// space & plane
+	if (strstr(tmp,"Space")		|| strstr(tmp,"Plane")	||
+		strstr(tmp,"Windscr")	|| strstr(tmp,"~2421")	||
+		strstr(tmp,"Wing")		|| strstr(tmp,"Wedge")	||
+		strstr(tmp,"Propellor")	|| strstr(tmp,"Rotor")	||
+		strstr(tmp,"Rack")		|| strstr(tmp,"Tail") ||
+    strstr(tmp,"Cockpit"))
+		return 0x020;
+
+	if (strstr(tmp,"Train"))
+		return 0x040;
+
+	// other parts
+	if (strstr(tmp,"Arch")		|| strstr(tmp,"Panel")	||
+		strstr(tmp,"Car")		|| strstr(tmp,"Window")	||
+		strstr(tmp,"Freestyle")	|| strstr(tmp,"Support")||
+		strstr(tmp,"Fence")		|| strstr(tmp,"Gate")	|| 
+		strstr(tmp,"Garage")	|| strstr(tmp,"Stairs")	||
+		strstr(tmp,"Bracket")	|| strstr(tmp,"Hinge")	||
+		strstr(tmp,"Homemaker")	|| strstr(tmp,"Rock")	|| 
+		strstr(tmp,"Cupboard")	|| strstr(tmp,"Storage")||
+		strstr(tmp,"Scala")		|| strstr(tmp,"Boat")	||
+		strstr(tmp,"Trailer")	|| strstr(tmp,"Box")	|| 
+		strstr(tmp,"Turntab")	|| strstr(tmp,"Winch")	|| 
+		strstr(tmp,"Door")		|| strstr(tmp,"Magnet") ||
+    strstr(tmp,"Staircase") || strstr(tmp,"Glass") ||
+    strstr(tmp,"Container"))
+		return 0x080;
+
+	// accessories
+	if (strstr(tmp,"Minifig")	|| strstr(tmp,"Antenna")||
+		strstr(tmp,"Ladder")	|| strstr(tmp,"Jack")	||
+		strstr(tmp,"Exhaust")	|| strstr(tmp,"Lever")	||
+		strstr(tmp,"Roadsign")	|| strstr(tmp,"Town")	|| 
+		strstr(tmp,"Leaves")	|| strstr(tmp,"Horse")	||
+		strstr(tmp,"Tree")		|| strstr(tmp,"Flower")	||
+		strstr(tmp,"Plant")		|| strstr(tmp,"Pannier")||
+		strstr(tmp,"Conveyor")	|| strstr(tmp,"Tractor")|| 
+		strstr(tmp,"Grab")		|| strstr(tmp,"Roller")	|| 
+		strstr(tmp,"Stretch")	|| strstr(tmp,"Tap ")	|| 
+		strstr(tmp,"Forklift")	|| strstr(tmp,"Flag")	|| 
+		strstr(tmp,"Belville")	|| strstr(tmp,"Light &")|| 
+		strstr(tmp,"Hose")		|| strstr(tmp,"Arm P")	|| 
+		strstr(tmp,"Brush")		|| strstr(tmp,"Castle")	||
+		strstr(tmp,"Tipper")	|| strstr(tmp,"Bar") ||
+		strstr(tmp,"Animal"))
+		return 0x100;
+
+	return 1;
+}
+
+// =============================================================================
 // Pieces handling stuff
 
 // Remove pieces from the library
-bool PiecesLibrary::DeletePiece (char** names, int numpieces)
+bool PiecesLibrary::DeletePieces (char** names, int numpieces)
 {
 	FileDisk newbin, newidx, oldbin, oldidx;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
@@ -430,6 +548,8 @@ bool PiecesLibrary::DeletePiece (char** names, int numpieces)
 	oldbin.Close();
 	newidx.Close();
 	newbin.Close();
+
+	m_bNeedsReload = true;
 
 	return true;
 }
@@ -676,6 +796,8 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 	newbin.Close();
 	up.Close();
 
+	m_bNeedsReload = true;
+
 	return true;
 }
 
@@ -791,6 +913,8 @@ bool PiecesLibrary::DeleteTextures (char** Names, int NumTextures)
 	newidx.WriteLong (&offset, 1);
 	count -= deleted;
 	newidx.WriteShort (&count, 1);
+
+	m_bNeedsReload = true;
 
 	return true;
 }
@@ -973,16 +1097,48 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 	count -= deleted;
 	newidx.WriteShort (&count, 1);
 
+	m_bNeedsReload = true;
+
 	return true;
 }
 
+// =============================================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =============================================================================
+// Stuff that needs to be reorganized
 
 
 #include <string.h>
-#include <stdlib.h>
 #include <math.h>
 #include "globals.h"
 #include "project.h"
@@ -995,309 +1151,8 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 static const char ver_str[32] = "LeoCAD Group Configuration File";
 static const float ver_flt = 0.3f;
 
-LibraryDialog::LibraryDialog ()
-  : BaseWnd (NULL, 0) // FIXME: set parent
-{
-  m_nPieces = 0;
-  m_pPieces = NULL;
-  m_nGroups = 0;
-  m_nCurrentGroup = 0;
-  m_bReload = false;
-  m_bModified = false;
-  strcpy (m_strFile, "");
-}
 
-LibraryDialog::~LibraryDialog ()
-{
-  free (m_pPieces);
-}
 
-bool LibraryDialog::Initialize ()
-{
-  FileDisk idx;
-  char filename[LC_MAXPATH];
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
-
-  // Read the piece library index.
-  strcpy(filename, pLib->GetLibraryPath());
-  strcat(filename, "pieces.idx");
-  if (!idx.Open(filename, "rb"))
-    return false;
-  idx.Seek(34, SEEK_SET); // skip update byte
-
-  m_nPieces = pLib->GetPieceCount();
-  m_pPieces = (LC_LIBDLG_PIECEINFO*) malloc (sizeof (LC_LIBDLG_PIECEINFO) * m_nPieces);
-  for (int i = 0; i < m_nPieces; i++)
-  {
-    LC_LIBDLG_PIECEINFO* inf = &m_pPieces[i];
-    inf->info = pLib->GetPieceInfo(i);
-    inf->current_groups = inf->info->m_nGroups;
-
-    idx.Seek (85, SEEK_CUR);
-    idx.ReadLong (&inf->default_groups, 1);
-    idx.Seek (8, SEEK_CUR);
-  }
-  idx.Close();
-
-  // FIX ME: get the current settings
-  strcpy (m_strGroups[0], "Plates");
-  strcpy (m_strGroups[1], "Bricks");
-  strcpy (m_strGroups[2], "Tiles");
-  strcpy (m_strGroups[3], "Slope Bricks");
-  strcpy (m_strGroups[4], "Technic");
-  strcpy (m_strGroups[5], "Space");
-  strcpy (m_strGroups[6], "Train");
-  strcpy (m_strGroups[7], "Other Bricks");
-  strcpy (m_strGroups[8], "Accessories");
-  m_nGroups = 9;
-
-  //  UpdateList();
-  UpdateTree();
-
-  return true;
-}
-
-void LibraryDialog::HandleCommand (int id)
-{
-  switch (id)
-  {
-  case LC_LIBDLG_FILE_RESET:
-    {
-      int i;
-
-      for (i = 0; i < m_nPieces; i++)
-	m_pPieces[i].current_groups = m_pPieces[i].default_groups;
-
-      strcpy (m_strFile, "");
-      m_nGroups = 9;
-      /*
-      m_ImageList.DeleteImageList();
-      m_ImageList.Create(IDB_PIECEBAR, 16, 0, 0x00ff00ff);
-
-      CString str;
-      for (i = 0; i < 32; i++)
-      {
-	str.LoadString (ID_PIECE_GROUP01 + i);
-	strcpy (m_strGroups[i], str);
-	m_nBitmaps[i] = min(i,9);
-      }
-      */
-      m_bModified = false;
-      UpdateList();
-      UpdateTree();
-    } break;
-
-  case LC_LIBDLG_FILE_OPEN:
-    {
-    } break;
-
-  case LC_LIBDLG_FILE_SAVE:
-    {
-    } break;
-
-  case LC_LIBDLG_FILE_SAVEAS:
-    {
-    } break;
-
-  case LC_LIBDLG_FILE_PRINTCATALOG:
-    {
-    } break;
-
-  case LC_LIBDLG_FILE_MERGEUPDATE:
-    {
-      char filename[LC_MAXPATH];
-
-      //      CFileDialog filedlg(TRUE, ".lup\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-      //			  "LeoCAD Library Updates (*.lup)|*.lup|All Files (*.*)|*.*||", this);
-      if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
-	return;
-
-      project->GetPiecesLibrary ()->LoadUpdate (filename);
-
-// update m_Parts
-      UpdateList();
-      m_bReload = true;
-    } break;
-
-  case LC_LIBDLG_FILE_IMPORTPIECE:
-    {
-      char filename[LC_MAXPATH];
-      LC_LDRAW_PIECE piece;
-
-      //      CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-      //		      "LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",this);
-      if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
-	return;
-
-      BeginWait ();
-
-      if (ReadLDrawPiece(filename, &piece))
-      {
-	if (project->GetPiecesLibrary ()->FindPieceInfo(piece.name) != NULL)
-	  Sys_MessageBox ("Piece already exists in the library !");
-
-	if (SaveLDrawPiece(&piece))
-	  Sys_MessageBox ("Piece successfully imported.");
-	else
-	  Sys_MessageBox ("Error saving library.");
-      }
-      else
-	Sys_MessageBox ("Error reading file.");
-
-      EndWait ();
-      FreeLDrawPiece(&piece);
-    } break;
-
-  case LC_LIBDLG_FILE_RETURN:
-    break;
-  case LC_LIBDLG_FILE_CANCEL:
-    break;
-  case LC_LIBDLG_GROUP_INSERT:
-    break;
-  case LC_LIBDLG_GROUP_DELETE:
-    break;
-  case LC_LIBDLG_GROUP_EDIT:
-    break;
-  case LC_LIBDLG_GROUP_MOVEUP:
-    break;
-  case LC_LIBDLG_GROUP_MOVEDOWN:
-    break;
-  case LC_LIBDLG_PIECE_NEW:
-    break;
-  case LC_LIBDLG_PIECE_EDIT:
-    break;
-  case LC_LIBDLG_PIECE_DELETE:
-    break;
-  }
-}
-
-bool LibraryDialog::DoSave (bool bAskName)
-{
-  if (bAskName || (strlen (m_strFile) == 0))
-  {
-    char filename[LC_MAXPATH];
-
-    //    CFileDialog dlg(FALSE, ".lgf\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-    //		    "LeoCAD Group Files (*.lgf)|*.lgf|All Files (*.*)|*.*||",this);
-    if (!SystemDoDialog (LC_DLG_FILE_SAVE, filename))
-      return false;
-    strcpy (m_strFile, filename);
-  }
-
-  /*
-  Sys_BeginWait ();
-  FileDisk f;
-  int i;
-
-  if (!f.Open (m_strFile, "wb"))
-    return false;
-
-  f.Write (ver_str, sizeof (ver_str));
-  f.Write (ver_flt, sizeof (ver_flt));
-  f.WriteByte (&m_nMaxGroups);
-
-  for (i = 0; i < m_nMaxGroups; i++)
-  {
-    f.Write (m_strGroups[i], sizeof(m_strGroups[i]));
-    ar << m_nBitmaps[i];
-  }
-
-	m_ImageList.Write(&ar);
-
-	ar << (int) m_Parts.GetSize();
-	for (i = 0; i < m_Parts.GetSize(); i++)
-	{
-		ar.Write (m_Parts[i].info->m_strName, sizeof(m_Parts[i].info->m_strName));
-		ar << m_Parts[i].group;
-	}
-	ar.Close();
-	f.Close();
-	m_bModified = FALSE;
-//		m_bLoaded = TRUE;
-
-	fclose (f);
-	Sys_EndWait ();
-  */
-  return true;
-}
-
-// =============================================================================
-
-static unsigned long GetDefaultPieceGroup(char* name)
-{
-	char tmp[9];
-	strncpy(tmp, name, 9);
-//	tmp[8] = 0;
-
-	if (strstr(tmp,"Baseplate")	|| strstr(tmp,"Plate")	|| 
-		strstr(tmp,"Platform")) 
-		return 0x001;
-
-	if (strstr(tmp,"Brick")	|| strstr(tmp,"Cylin") ||
-		strstr(tmp,"Cone"))
-		return 0x002;
-	
-	if (strstr(tmp,"Tile"))
-		return 0x004;
-
-	if (strstr(tmp,"Slope"))
-		return 0x008;
-
-	if (strstr(tmp,"Technic")	|| strstr(tmp,"Crane")	||
-		strstr(tmp,"Wheel")		|| strstr(tmp,"Tyre")	||
-		strstr(tmp,"Electric"))
-		return 0x010;
-
-	// space & plane
-	if (strstr(tmp,"Space")		|| strstr(tmp,"Plane")	||
-		strstr(tmp,"Windscr")	|| strstr(tmp,"~2421")	||
-		strstr(tmp,"Wing")		|| strstr(tmp,"Wedge")	||
-		strstr(tmp,"Propellor")	|| strstr(tmp,"Rotor")	||
-		strstr(tmp,"Rack")		|| strstr(tmp,"Tail") ||
-    strstr(tmp,"Cockpit"))
-		return 0x020;
-
-	if (strstr(tmp,"Train"))
-		return 0x040;
-
-	// other parts
-	if (strstr(tmp,"Arch")		|| strstr(tmp,"Panel")	||
-		strstr(tmp,"Car")		|| strstr(tmp,"Window")	||
-		strstr(tmp,"Freestyle")	|| strstr(tmp,"Support")||
-		strstr(tmp,"Fence")		|| strstr(tmp,"Gate")	|| 
-		strstr(tmp,"Garage")	|| strstr(tmp,"Stairs")	||
-		strstr(tmp,"Bracket")	|| strstr(tmp,"Hinge")	||
-		strstr(tmp,"Homemaker")	|| strstr(tmp,"Rock")	|| 
-		strstr(tmp,"Cupboard")	|| strstr(tmp,"Storage")||
-		strstr(tmp,"Scala")		|| strstr(tmp,"Boat")	||
-		strstr(tmp,"Trailer")	|| strstr(tmp,"Box")	|| 
-		strstr(tmp,"Turntab")	|| strstr(tmp,"Winch")	|| 
-		strstr(tmp,"Door")		|| strstr(tmp,"Magnet") ||
-    strstr(tmp,"Staircase") || strstr(tmp,"Glass") ||
-    strstr(tmp,"Container"))
-		return 0x080;
-
-	// accessories
-	if (strstr(tmp,"Minifig")	|| strstr(tmp,"Antenna")||
-		strstr(tmp,"Ladder")	|| strstr(tmp,"Jack")	||
-		strstr(tmp,"Exhaust")	|| strstr(tmp,"Lever")	||
-		strstr(tmp,"Roadsign")	|| strstr(tmp,"Town")	|| 
-		strstr(tmp,"Leaves")	|| strstr(tmp,"Horse")	||
-		strstr(tmp,"Tree")		|| strstr(tmp,"Flower")	||
-		strstr(tmp,"Plant")		|| strstr(tmp,"Pannier")||
-		strstr(tmp,"Conveyor")	|| strstr(tmp,"Tractor")|| 
-		strstr(tmp,"Grab")		|| strstr(tmp,"Roller")	|| 
-		strstr(tmp,"Stretch")	|| strstr(tmp,"Tap ")	|| 
-		strstr(tmp,"Forklift")	|| strstr(tmp,"Flag")	|| 
-		strstr(tmp,"Belville")	|| strstr(tmp,"Light &")|| 
-		strstr(tmp,"Hose")		|| strstr(tmp,"Arm P")	|| 
-		strstr(tmp,"Brush")		|| strstr(tmp,"Castle")	||
-		strstr(tmp,"Tipper")	|| strstr(tmp,"Bar") ||
-		strstr(tmp,"Animal"))
-		return 0x100;
-
-	return 1;
-}
 
 // ========================================================
 // Import LDraw piece
@@ -2466,7 +2321,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 	if (scale == 1000) bt |= 0x20; // LC_PIECE_MEDIUM
 	newidx.WriteByte(&bt, 1);
 
-	i = GetDefaultPieceGroup(piece->description);
+	i = PiecesLibrary::GetDefaultPieceGroup(piece->description);
 	newidx.WriteLong(&i, 1);
 	newidx.WriteLong(&binoff, 1);
 

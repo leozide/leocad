@@ -146,6 +146,7 @@ void CPropertiesPieces::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPropertiesPieces, CPropertyPage)
 	//{{AFX_MSG_MAP(CPropertiesPieces)
+	ON_NOTIFY(LVN_COLUMNCLICK, IDC_PROP_PIECES_LIST, OnColumnclickPropPiecesList)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -155,7 +156,7 @@ BOOL CPropertiesPieces::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 
 	char tmp[4];
-	int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
+	int i, j;
 	memset (&totalcount, 0, sizeof (totalcount));
 	for (i = 0; i < lines; i++)
 		for (j = 0; j < LC_MAXCOLORS; j++)
@@ -173,6 +174,8 @@ BOOL CPropertiesPieces::OnInitDialog()
 			str.LoadString(IDS_COLOR01 + i);
 			m_List.InsertColumn(ID, (LPCSTR)str, LVCFMT_LEFT, 80, 0);
 		}
+		else
+			col[i] = -1;
 	ID++;
 	m_List.InsertColumn(ID, "Total", LVCFMT_LEFT, 60, 0);
 
@@ -188,14 +191,16 @@ BOOL CPropertiesPieces::OnInitDialog()
 
 		char name[65];
 		LV_ITEM lvi;
-		lvi.mask = LVIF_TEXT;
+		lvi.mask = LVIF_TEXT|LVIF_PARAM;
 		lvi.iItem = 0;
 		lvi.iSubItem = 0;
 		lvi.pszText = name;
+		lvi.lParam = i;
 		strcpy (name, names[i]);
 		int idx = m_List.InsertItem(&lvi);
 
 		for (j = 0; j < LC_MAXCOLORS; j++)
+//			if (totalcount[j])
 			if (count[i*LC_MAXCOLORS+j])
 			{
 				sprintf (tmp, "%d", count[i*LC_MAXCOLORS+j]);
@@ -215,10 +220,11 @@ BOOL CPropertiesPieces::OnInitDialog()
 	char name[65];
 	strcpy (name, "Total");
 	LV_ITEM lvi;
-	lvi.mask = LVIF_TEXT;
+	lvi.mask = LVIF_TEXT|LVIF_PARAM;
 	lvi.iItem = m_List.GetItemCount();
 	lvi.iSubItem = 0;
 	lvi.pszText = name;
+	lvi.lParam = -1;
 	int idx = m_List.InsertItem(&lvi), total = 0;
 
 	for (i = 0; i < LC_MAXCOLORS; i++)
@@ -237,4 +243,82 @@ BOOL CPropertiesPieces::OnInitDialog()
 	m_List.SetItemText(idx, ID, tmp);
 	
 	return TRUE;
+}
+
+typedef struct
+{
+	CPropertiesPieces* page;
+	int color;
+} COMPARE_DATA;
+
+static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
+{
+	int i, a, b;
+	COMPARE_DATA* data = (COMPARE_DATA*)lParamData;
+
+	if (data->color == -1)
+	{
+		// check if we're comparing the "total" row
+		if (lP1 == -1)
+			return 1;
+		else if (lP2 == -1)
+			return -1;
+
+		return strcmpi(data->page->names[lP1], data->page->names[lP2]);
+	}
+
+	// last column
+	if (data->color == LC_MAXCOLORS)
+	{
+		a = b = 0;
+		for (i = 0; i < LC_MAXCOLORS; i++)
+		{
+			a += data->page->count[lP1*LC_MAXCOLORS+i];
+			b += data->page->count[lP2*LC_MAXCOLORS+i];
+		}
+	}
+	else
+	{
+		if (lP1 == -1)
+			a = data->page->totalcount[data->color];
+		else
+			a = data->page->count[lP1*LC_MAXCOLORS+data->color];
+		
+		if (lP2 == -1)
+			b = data->page->totalcount[data->color];
+		else
+			b = data->page->count[lP2*LC_MAXCOLORS+data->color];
+	}
+
+	if (a == b)
+		return 0;
+
+	if (a < b)
+		return -1;
+	else
+		return 1;
+}
+
+void CPropertiesPieces::OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	int i;
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	COMPARE_DATA data;
+
+	data.page = this;
+
+	if (pNMListView->iSubItem == 0)
+		data.color = -1;
+	else
+	{
+		for (i = 0; i < LC_MAXCOLORS; i++)
+			if (col[i] == pNMListView->iSubItem-1)
+				break;
+
+		data.color = i;
+	}
+
+	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)&data);
+
+	*pResult = 0;
 }

@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CPiecesList
+LastClass=CPropertiesPieces
 LastTemplate=CHeaderCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "leocad.h"
@@ -341,6 +341,9 @@ Type=0
 BaseClass=CPropertyPage
 HeaderFile=Propspgs.h
 ImplementationFile=Propspgs.cpp
+Filter=D
+VirtualFilter=idWC
+LastObject=CPropertiesPieces
 
 [CLS:CPropertiesSheet]
 Type=0

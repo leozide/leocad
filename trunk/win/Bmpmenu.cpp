@@ -1,5 +1,8 @@
 // BMPMenu.cpp : implementation file
-// Version : 2.3
+//
+// Based on Brent Corkum's BCMenu 2.3 class from 
+// http://www.rocscience.com/~corkum/BCMenu.html
+//
 
 #include "stdafx.h"
 #include "BMPMenu.h"
@@ -1414,14 +1417,29 @@ BOOL CBMPMenu::ChangeMenuItemShortcut(const char *Shortcut, UINT nID)
 BOOL CBMPMenu::DeleteMenu(UINT nPosition, UINT nFlags)
 {
 	if (nFlags == MF_BYPOSITION)
-		m_MenuList.RemoveAt(nPosition);
+	{
+		CBMPMenu* pSubMenu = (CBMPMenu*)GetSubMenu(nPosition);
+		if (pSubMenu == NULL)
+		{
+			UINT ID = GetMenuItemID(nPosition);
+			for (int i = 0; i < m_MenuList.GetSize(); i++)
+			{
+				if (m_MenuList[i]->nID == ID)
+				{
+					delete m_MenuList.GetAt(i);
+					m_MenuList.RemoveAt(i);
+					break;
+				}
+			}
+		}
+	}
 	else
 	{
 		int nLoc;
 	
 		CBMPMenu *psubmenu = FindMenuOption(nPosition, nLoc);
 		if (psubmenu && nLoc >= 0)
-			psubmenu->m_MenuList.RemoveAt(nLoc);
+			psubmenu->DeleteMenu(nLoc, MF_BYPOSITION);
 	}
 
 	return (CMenu::DeleteMenu(nPosition, nFlags));

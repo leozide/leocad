@@ -207,6 +207,7 @@ void SystemUpdateColorList(int new_color)
 
 void SystemUpdateRenderingMode(bool bBackground, bool bFast)
 {
+  ignore_commands = true;
   if (bFast)
   {
     gtk_widget_set_sensitive (main_toolbar.bg, TRUE);
@@ -219,6 +220,7 @@ void SystemUpdateRenderingMode(bool bBackground, bool bFast)
   }
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.fast), bFast);
+  ignore_commands = false;
 }
 
 void SystemUpdateUndoRedo(char* undo, char* redo)
@@ -323,12 +325,14 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 {
+  ignore_commands = true;
   gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
   gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
   gtk_label_set_text (GTK_LABEL(GTK_BIN(main_menu.piece_copy_keys)->child), 
       bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
+  ignore_commands = false;
 }
 
 void SystemUpdateMoveSnap(unsigned short move_snap)

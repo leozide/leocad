@@ -30,6 +30,9 @@ bool ignore_commands = false;
 
 void OnCommandDirect(GtkWidget *w, gpointer data)
 {
+  if (ignore_commands)
+    return;
+
   project->HandleCommand((LC_COMMANDS)(int)data, 0);
 }
 

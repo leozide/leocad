@@ -6,7 +6,7 @@
 #define _PIECEINF_H_
 
 #ifndef GLuint
-#include <GL/gl.h>
+#include "opengl.h"
 #endif
 
 #define LC_PIECE_COUNT		0x01 // Count this piece in the totals ?

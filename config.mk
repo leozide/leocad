@@ -5,8 +5,18 @@ include version.mk
 CC		:= gcc
 CXX		:= g++
 
+ifeq ($(shell uname), linux)
 OS 		:= -DLC_LINUX
-OSDIR 		:= linux
+OSDIR 	:= linux
+
+else
+
+ifeq ($(shell uname), BeOS)
+OS 		:= -DLC_BEOS
+OSDIR 	:= beos
+endif
+
+endif
 
 # (Add a -g for debugging)
 CPPFLAGS += -O2 -Wall

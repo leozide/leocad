@@ -36,6 +36,16 @@ MainWnd::~MainWnd ()
 
 void MainWnd::UpdateMRU ()
 {
+#ifdef LC_WINDOWS
+  // FIXME !!
+  void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
+  char names[4][LC_MAXPATH];
+
+  for (int i = 0; i < LC_MRU_MAX; i++)
+    strcpy (names[i], m_strMRU[i]);
+
+  SystemUpdateRecentMenu(names);
+#else
   for (int i = 0; i < LC_MRU_MAX; i++)
   {
     if (m_strMRU[i].IsEmpty ())
@@ -43,10 +53,10 @@ void MainWnd::UpdateMRU ()
       if (i == 0)
       {
         SetMenuItemText (LC_MAINWND_RECENT1, "Recent Files");
-	EnableMenuItem (LC_MAINWND_RECENT1, false);
+        EnableMenuItem (LC_MAINWND_RECENT1, false);
       }
       else
-	ShowMenuItem (LC_MAINWND_RECENT1+i, false);
+        ShowMenuItem (LC_MAINWND_RECENT1+i, false);
     }
     else
     {
@@ -58,6 +68,7 @@ void MainWnd::UpdateMRU ()
       SetMenuItemText (LC_MAINWND_RECENT1+i, text);
     }
   }
+#endif
 }
 
 void MainWnd::AddToMRU (const char *filename)

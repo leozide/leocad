@@ -17,6 +17,8 @@ class GLWindow
     { return m_nWidth; }
   int GetHeight () const
     { return m_nHeight; }
+  void* GetData () const
+    { return m_pData; }
 
   virtual void OnDraw () { };
   virtual void OnSize (int cx, int cy)

@@ -34,15 +34,6 @@ void PtrArray<T>::Expand (int nGrow)
 }
 
 template <class T>
-void PtrArray<T>::SetSize (int nSize)
-{
-  if (nSize > m_nLength)
-    Expand (nSize - m_nLength);
- 
-  m_nLength = nSize;
-}
-
-template <class T>
 T* PtrArray<T>::RemoveIndex (int nIndex)
 {
   T* ret = NULL;
@@ -104,16 +95,107 @@ void PtrArray<T>::InsertAt (int nIndex, T* pObj)
   else
     Expand (1);
 
+	m_nLength++;
   for (int i = m_nLength - 1; i > nIndex; i--)
     m_pData[i] = m_pData[i-1];
 
   m_pData[nIndex] = pObj;
 }
 
+// ============================================================================
+
+template <class T>
+ObjArray<T>::ObjArray(int Size, int Grow)
+{
+	m_Data = NULL;
+	m_Length = 0;
+	m_Alloc = 0;
+	m_Grow = Grow;
+
+	if (Size != 0)
+		Expand(Size);
+}
+
+template <class T>
+ObjArray<T>::~ObjArray ()
+{
+	delete[] m_Data;
+}
+
+template <class T>
+void ObjArray<T>::Expand(int Grow)
+{
+	if ((m_Length + Grow) > m_Alloc)
+	{
+		int NewSize = ((m_Length + Grow) / m_Grow + 1) * m_Grow;
+
+		T* NewData = new T[NewSize];
+
+		for (int i = 0; i < m_Length; i++)
+			NewData[i] = m_Data[i];
+
+		delete[] m_Data;
+		m_Data = NewData;
+		m_Alloc = NewSize;
+	}
+}
+
+template <class T>
+void ObjArray<T>::RemoveIndex(int Index)
+{
+	m_Length--;
+
+	for (int i = Index; i < m_Length; i++)
+		m_Data[i] = m_Data[i+1];
+}
+
+template <class T>
+void ObjArray<T>::Add(const T& Obj)
+{
+	Expand(1);
+	m_Data[m_Length++] = Obj;
+}
+
+template <class T>
+void ObjArray<T>::AddSorted (const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData)
+{
+	int i;
+
+	for (i = 0; i < GetSize(); i++)
+	{
+		if (Func(Obj, m_Data[i], SortData) < 0)
+		{
+			InsertAt (i, Obj);
+			return;
+		}
+	}
+
+	Add(Obj);
+}
+
+template <class T>
+void ObjArray<T>::InsertAt(int Index, const T& Obj)
+{
+	if (Index >= m_Length)
+		Expand(Index - m_Length + 1);
+	else
+		Expand(1);
+
+	m_nLength++;
+	for (int i = m_Length - 1; i > Index; i--)
+		m_Data[i] = m_Data[i-1];
+
+	m_Data[Index] = Obj;
+}
+
+
+
+
+
 
 
 /*
-// =============================================================================
+// ============================================================================
 // ObjectArray class
 
 ObjectArray::ObjectArray (unsigned long nSize)

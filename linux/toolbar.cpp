@@ -373,7 +373,7 @@ static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButt
   gtk_widget_draw(piecepreview, NULL);
 }
 
-// Add a new piece to the list
+// Add a new piece to the combobox
 void piececombo_add(char* string)
 {
   if (string == NULL)
@@ -410,6 +410,51 @@ void piececombo_add(char* string)
   }
 }
 
+static void piececombo_changed(GtkWidget *widget, GtkWidget *entry)
+{
+  char* str;
+  str = gtk_entry_get_text(GTK_ENTRY(entry));
+}
+
+static void piececombo_select(GtkList *list, GtkWidget *widget, gpointer data)
+{
+  int i;
+  gchar* str;
+
+  gtk_label_get(GTK_LABEL(GTK_BIN(widget)->child), &str);
+  //  printf("%s\n", str);
+
+  for (i = 0; i < project->GetPieceLibraryCount(); i++)
+  {
+    PieceInfo* pInfo = project->GetPieceInfo(i);
+ 
+    if (strcmp (str, pInfo->m_strDescription) == 0)
+    {
+      // Check if we need to change the current group
+      if ((list_groups) && (pInfo->m_nGroups != 0))
+	if ((pInfo->m_nGroups & (1 << list_curgroup)) == 0)
+	{
+	  unsigned long d = 1;
+	  for (int k = 1; k < 32; k++)
+	  {
+	    if ((pInfo->m_nGroups & d) != 0)
+	    {
+	      groupsbar_set(k-1);
+	      k = 32;
+	    }
+	    else
+	      d <<= 1;
+	  }
+	}
+
+      // Select the piece
+      i = gtk_clist_find_row_from_data (GTK_CLIST(piecelist), pInfo);
+      gtk_clist_select_row (GTK_CLIST(piecelist), i, 0);
+
+      return;
+    }
+  }
+}
 
 static void colorlist_draw_pixmap(GtkWidget *widget)
 {
@@ -433,9 +478,9 @@ static void colorlist_draw_pixmap(GtkWidget *widget)
     else
       rect.x = widget->allocation.width * (i-14) / 14;
 
-    c.red = (gushort)(FlatColorArray[i][0]*0xFFFF);
-    c.green = (gushort)(FlatColorArray[i][1]*0xFFFF);
-    c.blue = (gushort)(FlatColorArray[i][2]*0xFFFF);
+    c.red = (gushort)(FlatColorArray[i][0]*0xFF);
+    c.green = (gushort)(FlatColorArray[i][1]*0xFF);
+    c.blue = (gushort)(FlatColorArray[i][2]*0xFF);
     gdk_color_alloc(gtk_widget_get_colormap(widget), &c);
     gdk_gc_set_foreground(gc, &c);
 
@@ -688,6 +733,10 @@ void create_piecebar(GtkWidget *window, GtkWidget *hbox)
 
   // Piece combo
   piececombo = gtk_combo_new();
+  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->entry), "changed",
+		     GTK_SIGNAL_FUNC(piececombo_changed), GTK_COMBO(piececombo)->entry);
+  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->list), "select-child",
+		     GTK_SIGNAL_FUNC(piececombo_select), GTK_COMBO(piececombo)->list);
   gtk_box_pack_start(GTK_BOX(vbox1), piececombo, FALSE, TRUE, 0);
   gtk_widget_show(piececombo);
 

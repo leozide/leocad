@@ -44,9 +44,9 @@ static PIECE_KEY* AddNode (PIECE_KEY *node, unsigned short nTime, unsigned char 
 inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting, bool bNoAlpha)
 {
 	if (bLighting || !bNoAlpha)
-		glColor4fv(ColorArray[nColor]);
+		glColor4ubv(ColorArray[nColor]);
 	else
-		glColor3fv(FlatColorArray[nColor]);
+		glColor3ubv(FlatColorArray[nColor]);
 
 	if (nColor > 27)
 		return;

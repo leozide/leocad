@@ -395,9 +395,9 @@ void Export3DStudio()
 		InitMaterial3ds(&matr);
 		sprintf(matr->name, "Material%02d", i);
 
-		matr->ambient.r = matr->diffuse.r = FlatColorArray[i][0];
-		matr->ambient.g = matr->diffuse.g = FlatColorArray[i][1];
-		matr->ambient.b = matr->diffuse.b = FlatColorArray[i][2];
+		matr->ambient.r = matr->diffuse.r = (float)FlatColorArray[i][0]/255;
+		matr->ambient.g = matr->diffuse.g = (float)FlatColorArray[i][1]/255;
+		matr->ambient.b = matr->diffuse.b = (float)FlatColorArray[i][2]/255;
 		matr->specular.r = 0.9f;
 		matr->specular.g = 0.9f;
 		matr->specular.b = 0.9f;

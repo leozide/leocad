@@ -49,13 +49,13 @@ void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 	{
 		if (m_bLowRes)
 		{
-			HBRUSH hbr = CreateSolidBrush(RGB(255*FlatColorArray[x][0], 255*FlatColorArray[x][1], 255*FlatColorArray[x][2]));
+			HBRUSH hbr = CreateSolidBrush(RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
 			FillRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
 			DeleteObject (hbr);
 		}
 		else
 		{
-			SetBkColor(lpDIS->hDC, RGB(255*FlatColorArray[x][0], 255*FlatColorArray[x][1], 255*FlatColorArray[x][2]));
+			SetBkColor(lpDIS->hDC, RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
 			ExtTextOut(lpDIS->hDC, 0, 0, ETO_OPAQUE, &lpDIS->rcItem, NULL, 0, NULL);
 		}
 
@@ -79,7 +79,7 @@ void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 	if ((lpDIS->itemState & ODS_SELECTED) &&
 		(lpDIS->itemAction & (ODA_SELECT | ODA_DRAWENTIRE)))
 	{
-		HBRUSH hbr = CreateSolidBrush(RGB(255*(1-FlatColorArray[x][0]), 255*(1-FlatColorArray[x][1]), 255*(1-FlatColorArray[x][2])));
+		HBRUSH hbr = CreateSolidBrush(RGB(255-FlatColorArray[x][0], 255-FlatColorArray[x][1], 255-FlatColorArray[x][2]));
 		FrameRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
 		DeleteObject (hbr);
 	}

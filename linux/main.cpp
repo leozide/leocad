@@ -324,18 +324,30 @@ static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data
   {
     switch (event->keyval)
     {
+    case GDK_KP_0: code = '0'; break;
+    case GDK_KP_1: code = '1'; break;
+    case GDK_KP_2: code = '2'; break;
+    case GDK_KP_3: code = '3'; break;
+    case GDK_KP_4: code = '4'; break;
+    case GDK_KP_5: code = '5'; break;
+    case GDK_KP_6: code = '6'; break;
+    case GDK_KP_7: code = '7'; break;
+    case GDK_KP_8: code = '8'; break;
+    case GDK_KP_9: code = '9'; break;
+    case GDK_KP_Add: code = KEY_PLUS; break;
+    case GDK_KP_Subtract: code = KEY_MINUS; break;
     case GDK_Shift_L: case GDK_Shift_R: code = KEY_SHIFT; break;
     case GDK_Control_L: case GDK_Control_R: code = KEY_CONTROL; break;
     case GDK_Escape: code = KEY_ESCAPE; break;
     case GDK_Tab: code = KEY_TAB; break;
-    case GDK_Insert: code = KEY_INSERT; break;
-    case GDK_Delete: code = KEY_DELETE; break;
-    case GDK_Up: code = KEY_UP; break;
-    case GDK_Down: code = KEY_DOWN; break;
-    case GDK_Left: code = KEY_LEFT; break;
-    case GDK_Right: code = KEY_RIGHT; break;
-    case GDK_Prior: code = KEY_PRIOR; break;
-    case GDK_Next: code = KEY_NEXT; break;
+    case GDK_Insert: case GDK_KP_Insert: code = KEY_INSERT; break;
+    case GDK_Delete: case GDK_KP_Delete: code = KEY_DELETE; break;
+    case GDK_Up: case GDK_KP_Up: code = KEY_UP; break;
+    case GDK_Down: case GDK_KP_Down: code = KEY_DOWN; break;
+    case GDK_Left: case GDK_KP_Left: code = KEY_LEFT; break;
+    case GDK_Right: case GDK_KP_Right: code = KEY_RIGHT; break;
+    case GDK_Prior: case GDK_KP_Prior: code = KEY_PRIOR; break;
+    case GDK_Next:  case GDK_KP_Next: code = KEY_NEXT; break;
     }
   }
 

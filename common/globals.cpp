@@ -1,6 +1,8 @@
 // Global variables common to all platforms.
 //
 
+#include <stdlib.h>
+#include "typedefs.h"
 #include "defines.h"
 
 class Project;
@@ -85,3 +87,94 @@ unsigned char ColorArray[31][4] = {
 	{  51,  51,  51, 255 },  //28 - Edges
 	{ 229,  76, 102, 255 },  //29 - Selected
 	{ 102,  76, 229, 255 }}; //30 - Focused
+
+// =========================================================
+// Minifig Wizard options
+
+MFW_PIECEINFO mfwpieceinfo[] = {
+  { "3624", "Police Hat", MF_HAT },
+  { "3626BP01", "Smiley Face", MF_HEAD },
+  { "973", "Plain Torso", MF_TORSO },
+  { "3838", "Airtanks", MF_NECK },
+  { "976", "Left Arm", MF_ARML },
+  { "975", "Right Arm", MF_ARMR },
+  { "977", "Hand", MF_HAND },
+  { "977", "Hand", MF_HAND },
+  { "3899", "Cup", MF_TOOL },
+  { "4528", "Frypan", MF_TOOL },
+  { "970", "Hips", MF_HIPS },
+  { "972", "Left Leg", MF_LEGL }, 
+  { "971", "Right Leg", MF_LEGR },
+  { "2599", "Flipper", MF_SHOE },
+  { "6120", "Ski", MF_SHOE },
+  { "4485", "Baseball Cap", MF_HAT },
+  { "3626B", "Plain Face", MF_HEAD },
+  { "3626BP02", "Woman Face", MF_HEAD },
+  { "973P11", "Dungarees", MF_TORSO },
+  { "973P47", "Castle Red/Gray Symbol", MF_TORSO }, 
+  { "973P51", "Blacktron II", MF_TORSO },
+  { "973P01", "Vertical Strips Red/Blue", MF_TORSO },
+  { "973P02", "Vertical Strips Blue/Red", MF_TORSO }, 
+  { "973P60", "Shell Logo", MF_TORSO },
+  { "973P61", "Gold Ice Planet Pattern", MF_TORSO }, 
+  { "4349", "Loudhailer", MF_TOOL },
+  { "3962", "Radio", MF_TOOL },
+  { "4529", "Saucepan", MF_TOOL },
+  { "3959", "Space Gun", MF_TOOL },
+  { "4360", "Space Laser Gun", MF_TOOL },
+  { "4479", "Metal Detector", MF_TOOL },
+  { "6246A", "Screwdriver", MF_TOOL },
+  { "6246B", "Hammer", MF_TOOL },
+  { "6246D", "Box Wrench", MF_TOOL },
+  { "6246E", "Open End Wrench", MF_TOOL },
+  { "3896", "Castle Helmet with Chin-Guard", MF_HAT },
+  { "3844", "Castle Helmet with Neck Protect", MF_HAT },
+  { "3833", "Construction Helmet", MF_HAT }, 
+  { "82359", "Skeleton Skull", MF_HEAD },
+  { "973P14", "'S' Logo", MF_TORSO },
+  { "973P16", "Airplane Logo", MF_TORSO }, 
+  { "973P52", "Blacktron I Pattern", MF_TORSO },
+  { "973P15", "Horizontal Stripes", MF_TORSO },
+  { "973P68", "Mtron Logo", MF_TORSO }, 
+  { "973P17", "Red V-Neck and Buttons", MF_TORSO },
+  { "973P63", "Robot Pattern", MF_TORSO },
+  { "973P18", "Suit and Tie ", MF_TORSO }, 
+  { "4736", "Jet-Pack with Stud On Front", MF_NECK },
+  { "4522", "Mallet", MF_TOOL },
+  { "6246C", "Power Drill", MF_TOOL },
+  { "4006", "Spanner/Screwdriver", MF_TOOL },
+  { "194", "Hose Nozzle", MF_TOOL },
+  { "2446", "Helmet", MF_HAT },
+  { "3840", "Vest", MF_NECK },
+  { "970P63", "Hips with Robot Pattern", MF_HIPS },
+  { "972P63", "Left Leg with Robot Pattern", MF_LEGL },
+  { "971P63", "Right Leg with Robot Pattern", MF_LEGR },
+  { "2524", "Backpack Non-Opening", MF_NECK },
+  { "4497", "Spear", MF_TOOL },
+  { "37", "Knife", MF_TOOL },
+  { "38", "Harpoon", MF_TOOL },
+  { "3626BP03", "Pointed Moustache", MF_HEAD },
+  { "3626BP04", "Sunglasses", MF_HEAD },
+  { "3626BP05", "Grin and Eyebrows", MF_HEAD }, 
+  { "973P19", "Train Chevron", MF_TORSO },
+  { "973P31", "Pirate Strips (Red/Cream)", MF_TORSO },
+  { "973P32", "Pirate Strips (Blue/Cream)", MF_TORSO },
+  { "973P33", "Pirate Strips (Red/Black)", MF_TORSO },
+  { "973P41", "Castle Chainmail", MF_TORSO },
+  { "973P62", "Silver Ice Planet", MF_TORSO },
+  { "6131", "Wizard Hat", MF_HAT },
+  { "973P20", "Waiter", MF_TORSO },
+  { "973P49", "Forestman Blue Collar", MF_TORSO },
+  { "973P48", "Forestman Maroon Collar", MF_TORSO },
+  { "973P50", "Forestman Black Collar", MF_TORSO },
+  { "3841", "Pickaxe", MF_TOOL }
+};
+
+//	{ "770", "Shield Ovoid", MF_TOOL }, 
+//	2447.DAT      Minifig Helmet Visor
+
+
+
+
+
+

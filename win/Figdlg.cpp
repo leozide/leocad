@@ -82,11 +82,11 @@ BOOL CMinifigDlg::OnInitDialog()
 
 	for (i = 0; i < MFW_PIECES; i++)
 	{
-		PieceInfo* pInfo = project->FindPieceInfo(m_pMFWnd->partinfo[i].name);
+		PieceInfo* pInfo = project->FindPieceInfo(mfwpieceinfo[i].name);
 		if (pInfo != NULL)
 		{
 			UINT id = 0;
-			switch (m_pMFWnd->partinfo[i].type)
+			switch (mfwpieceinfo[i].type)
 			{
 				case MF_HAT: id = IDC_MF_HAT; break;
 				case MF_HEAD: id = IDC_MF_HEAD; break;
@@ -106,14 +106,14 @@ BOOL CMinifigDlg::OnInitDialog()
 			int pos;
 			if (i != 29)
 			{
-				pos = pCombo->AddString(m_pMFWnd->partinfo[i].description);
+				pos = pCombo->AddString(mfwpieceinfo[i].description);
 				pCombo->SetItemDataPtr(pos, pInfo);
 			}
 
 			if (id == IDC_MF_HANDL || id == IDC_MF_TOOLL || id == IDC_MF_SHOEL)
 			{
 				pCombo = (CComboBox*)GetDlgItem(id+1);
-				pos = pCombo->AddString(m_pMFWnd->partinfo[i].description);
+				pos = pCombo->AddString(mfwpieceinfo[i].description);
 				pCombo->SetItemDataPtr(pos, pInfo);
 			}
 			if (i == 6) i++;

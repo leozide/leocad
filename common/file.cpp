@@ -5,6 +5,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include "file.h"
+#include "defines.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // File construction/destruction
@@ -16,6 +17,102 @@ File::File()
 File::~File()
 {
 }
+
+// ========================================================
+
+unsigned long File::ReadByte(void* pBuf, unsigned long nCount)
+{
+	return Read(pBuf, nCount);
+}
+
+// Reads a 2-byte value
+unsigned long File::ReadShort(void* pBuf, unsigned long nCount)
+{
+	unsigned long read;
+
+	read = Read(pBuf, nCount*2)/2;
+
+#ifdef _BIG_ENDIAN
+	unsigned long i;
+	unsigned short* val = (unsigned short*)pBuf, x;
+
+	for (i = 0; i < read; i++)
+	{
+		x = *val;
+		*val = ((x>>8) | (x<<8));
+		val++;
+	}
+#endif
+
+	return read;
+}
+
+// Read a 4-byte value
+unsigned long File::ReadLong(void* pBuf, unsigned long nCount)
+{
+	unsigned long read;
+
+	read = Read(pBuf, nCount*4)/4;
+
+#ifdef _BIG_ENDIAN
+	unsigned long i;
+	unsigned long* val = (unsigned long*)pBuf, x;
+
+	for (i = 0; i < read; i++)
+	{
+		x = *val;
+		*val = ((x>>24) | ((x>>8) & 0xff00) | ((x<<8) & 0xff0000) | (x<<24));
+		val++;
+	}
+#endif
+
+	return read;
+}
+
+unsigned long File::WriteByte(const void* pBuf, unsigned long nCount)
+{
+	return Write(pBuf, nCount);
+}
+
+unsigned long File::WriteShort(const void* pBuf, unsigned long nCount)
+{
+#ifdef _BIG_ENDIAN
+	unsigned long wrote = 0, i;
+	unsigned short* val = (unsigned short*)pBuf, x;
+
+	for (i = 0; i < nCount; i++)
+	{
+		x = (((*val)>>8) | ((*val)<<8));
+		val++;
+		wrote += Write(&x, 2)/2;
+	}
+
+	return wrote;
+#else
+	return Write(pBuf, nCount*2);
+#endif
+}
+
+unsigned long File::WriteLong(const void* pBuf, unsigned long nCount)
+{
+#ifdef _BIG_ENDIAN
+	unsigned long wrote = 0, i;
+	unsigned long* val = (unsigned long*)pBuf, x;
+
+	for (i = 0; i < nCount; i++)
+	{
+		x = (((*val)>>24) | (((*val)>>8) & 0xff00) | (((*val)<<8) & 0xff0000) | ((*val)<<24));
+		val++;
+		wrote += Write(&x, 4)/4;
+	}
+
+	return wrote;
+#else
+	return Write(pBuf, nCount*4);
+#endif
+}
+
+// ========================================================
 
 FileMem::FileMem()
 {
@@ -319,5 +416,3 @@ unsigned long FileDisk::GetLength() const
 
   return nLen;
 }
-
-

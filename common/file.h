@@ -27,6 +27,13 @@ public:
 	virtual int GetChar()=0;
 	virtual int PutChar(int c)=0;
 
+	unsigned long ReadByte(void* pBuf, unsigned long nCount);
+	unsigned long ReadShort(void* pBuf, unsigned long nCount);
+	unsigned long ReadLong(void* pBuf, unsigned long nCount);
+	unsigned long WriteByte(const void* pBuf, unsigned long nCount);
+	unsigned long WriteShort(const void* pBuf, unsigned long nCount);
+	unsigned long WriteLong(const void* pBuf, unsigned long nCount);
+
 	virtual void Abort()=0;
 	virtual void Flush()=0;
 	virtual void Close()=0;

@@ -4,7 +4,7 @@ SRC += linux/profile.cpp linux/gdkgl.c linux/gtkglarea.c \
        linux/system.cpp linux/toolbar.cpp linux/gtkmisc.cpp \
        linux/linux_gl.cpp
 
-CFLAGS += $(shell gtk-config --cflags)
-CXXFLAGS += $(shell gtk-config --cflags)
-LIBS += $(shell gtk-config --libs)
+CFLAGS += $(shell $(GTK_CONFIG) --cflags)
+CXXFLAGS += $(shell $(GTK_CONFIG) --cflags)
+LIBS += $(shell $(GTK_CONFIG) --libs)
 

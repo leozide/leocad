@@ -251,21 +251,21 @@ bool Camera::FileLoad (File& file)
     double d[3];
     float f[3];
 
-    file.Read(d, sizeof(d));
+    file.ReadDouble (d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
     ChangeKey (1, false, true, f, LC_CK_EYE);
     ChangeKey (1, true, true, f, LC_CK_EYE);
 
-    file.Read(d, sizeof(d));
+    file.ReadDouble (d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
     ChangeKey (1, false, true, f, LC_CK_TARGET);
     ChangeKey (1, true, true, f, LC_CK_TARGET);
 
-    file.Read(d, sizeof(d));
+    file.ReadDouble (d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
@@ -283,10 +283,10 @@ bool Camera::FileLoad (File& file)
       double eye[3], target[3], up[3];
       float f[3];
 
-      file.Read(eye, sizeof(double[3]));
-      file.Read(target, sizeof(double[3]));
-      file.Read(up, sizeof(double[3]));
-      file.Read(&step, 1);
+      file.ReadDouble (eye, 3);
+      file.ReadDouble (target, 3);
+      file.ReadDouble (up, 3);
+      file.ReadByte (&step, 1);
 
       if (up[0] == 0 && up[1] == 0 && up[2] == 0)
 	up[2] = 1;
@@ -323,9 +323,9 @@ bool Camera::FileLoad (File& file)
   if (version < 4)
   {
     double d;
-    file.Read(&d, sizeof(d)); m_fovy = (float)d;
-    file.Read(&d, sizeof(d)); m_zFar = (float)d;
-    file.Read(&d, sizeof(d)); m_zNear= (float)d;
+    file.ReadDouble (&d, 1); m_fovy = (float)d;
+    file.ReadDouble (&d, 1); m_zFar = (float)d;
+    file.ReadDouble (&d, 1); m_zNear= (float)d;
   }
   else
   {

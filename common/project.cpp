@@ -333,6 +333,11 @@ bool Project::LoadPieceLibrary()
 	Texture* pTexture;
 	int i;
 
+	// Make sure that the path ends with a '/'
+	i = strlen(m_LibraryPath)-1;
+	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
+	  strcat(m_LibraryPath, '/');
+
 	// Read the piece library index.
 	strcpy(filename, m_LibraryPath);
 	strcat(filename, "pieces.idx");
@@ -3691,8 +3696,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			m_pViewCameras[m_nActiveViewport]->GetTarget(target);
 			m_pViewCameras[m_nActiveViewport]->GetUp(up);
 
-			fprintf(f, "\ncamera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n}\n\n",
-				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2]);
+			fprintf(f, "\ncamera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
+				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_pViewCameras[m_nActiveViewport]->m_fovy);
 			fprintf(f, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
 				m_fBackground[0], m_fBackground[1], m_fBackground[2]);
 

@@ -295,16 +295,18 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 				strlwr(ext);
 
 				if ((strcmp(ext, "bmp") != 0) && (strcmp(ext, "gif") != 0) && 
-					(strcmp(ext, "jpg") != 0) && (strcmp(ext, "jpeg") != 0))
+					(strcmp(ext, "jpg") != 0) && (strcmp(ext, "jpeg") != 0) &&
+					(strcmp(ext, "png") != 0))
 				need_ext = true;
 			}
 
 			if (need_ext)
 				switch (imopts.format)
 				{
-				case 0: strcat(picture, ".bmp"); break;
-				case 1: strcat(picture, ".gif"); break;
-				case 2: strcat(picture, ".jpg"); break;
+				case LC_IMAGE_BMP: strcat(picture, ".bmp"); break;
+				case LC_IMAGE_GIF: strcat(picture, ".gif"); break;
+				case LC_IMAGE_JPG: strcat(picture, ".jpg"); break;
+				case LC_IMAGE_PNG: strcat(picture, ".png"); break;
 				}
 
 			imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
@@ -3224,9 +3226,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				switch (opts.imdlg.imopts.format)
 				{
-				case 0: ext = ".bmp"; break;
-				case 1: ext = ".gif"; break;
-				case 2: ext = ".jpg"; break;
+				case LC_IMAGE_BMP: ext = ".bmp"; break;
+				case LC_IMAGE_GIF: ext = ".gif"; break;
+				case LC_IMAGE_JPG: ext = ".jpg"; break;
+				case LC_IMAGE_PNG: ext = ".png"; break;
 				}
 /*
 				// Create destination folder

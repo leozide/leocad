@@ -325,6 +325,7 @@
 #define IDC_IMGDLG_FROM                 1162
 #define IDC_IMGDLG_TO                   1163
 #define IDC_SAVEPICTURE_OPTIONS         1164
+#define IDC_IMGDLG_PNG                  1164
 #define IDC_MODDLG_STEPTO               1165
 #define IDC_MODDLG_FOVSTATIC            1166
 #define IDC_EDITORSTATIC                1167

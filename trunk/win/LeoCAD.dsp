@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "./libpng./zlib" /I "../common" /I "../win" /I "./jpeglib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /I "./jpeglib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -52,7 +52,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 vfw32.lib glu32.lib opengl32.lib jpeglib.lib 3dsftk.lib /nologo /subsystem:windows /map /machine:I386 /libpath:"./jpeglib/release" /libpath:"./3dsftk/release"
+# ADD LINK32 vfw32.lib glu32.lib opengl32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
 
 !ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
@@ -207,13 +207,6 @@ InputPath=.\hlp\LeoCAD.hpj
 # Begin Source File
 
 SOURCE=.\Leocad.rc
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

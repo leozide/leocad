@@ -6,6 +6,7 @@
 #include "typedefs.h"
 #include "opengl.h"
 #include "array.h"
+#include "algebra.h"
 
 typedef enum 
 {
@@ -146,7 +147,7 @@ protected:
 	bool RemoveSelectedObjects();
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine);
 	void SelectAndFocusNone(bool bFocusOnly);
-	bool GetSelectionCenter(float Center[3]) const;
+	bool GetSelectionCenter(Point3& Center) const;
 	void CalculateStep();
 	void MoveSelectedObjects(float x, float y, float z);
 	void RotateSelectedObjects(float x, float y, float z);
@@ -178,11 +179,25 @@ protected:
 	float m_fTrack[3];
 	int m_nMouse;
 
-	typedef enum { LC_OVERLAY_XYZ, LC_OVERLAY_X, LC_OVERLAY_Y, LC_OVERLAY_Z, LC_OVERLAY_XY, LC_OVERLAY_XZ, LC_OVERLAY_YZ};
-	bool m_OverlayActive;
+	// Mouse control overlays.
+	typedef enum
+	{
+		LC_OVERLAY_XYZ,
+		LC_OVERLAY_X,
+		LC_OVERLAY_Y,
+		LC_OVERLAY_Z,
+		LC_OVERLAY_XY,
+		LC_OVERLAY_XZ,
+		LC_OVERLAY_YZ,
+		LC_OVERLAY_CAMERA
+	} LC_OVERLAY_MODES;
+
 	int m_OverlayMode;
-	float m_OverlayCenter[3];
+	bool m_OverlayActive;
 	float m_OverlayScale;
+	Point3 m_OverlayCenter;
+	Point3 m_OverlayTrackStart;
+	Vector3 m_OverlayDelta;
 	void MouseUpdateOverlays(int x, int y);
 
 	void LoadViewportProjection();

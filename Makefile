@@ -110,11 +110,11 @@ source-zip: arch/leocad-$(VERSION)-src.zip
 
 arch/leocad-$(VERSION)-linux.zip: arch all
 	rm -f $@
-	zip -r $@ *.txt bin docs examples -x 'CVS/*' -x '*/CVS/*'
+	zip -r $@ *.txt bin docs examples -x 'CVS/*' -x '*/CVS/*' -x '*/core'
 
 arch/leocad-$(VERSION)-linux.tgz: arch all
 	rm -f $@
-	tar --exclude=CVS -cvzf $@ *.txt bin docs examples
+	tar --exclude=CVS -cvzf $@ *.txt bin docs examples --exclude=core
 
 arch/leocad-$(VERSION)-src.tgz: arch veryclean
 	rm -f $@

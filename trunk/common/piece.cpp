@@ -1,7 +1,7 @@
 // A piece object in the LeoCAD world.
 //
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
 #endif
 #include <stdlib.h>
@@ -99,19 +99,20 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 
 static bool lockarrays = false;
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 typedef void (APIENTRY * GLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 typedef void (APIENTRY * GLUNLOCKARRAYSEXTPROC) ();
 static GLLOCKARRAYSEXTPROC glLockArraysEXT = NULL;
 static GLUNLOCKARRAYSEXTPROC glUnlockArraysEXT = NULL;
 #else
+// TODO: get the entry point under different OS's
 #define glLockArraysEXT(a,b) {}
 #define glUnlockArraysEXT() {}
 #endif
 
 Piece::Piece(PieceInfo* pPieceInfo)
 {
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 	static bool first_time = true;
 
 	if (first_time)
@@ -198,13 +199,13 @@ void Piece::FileLoad(File* file, char* name)
 	PIECE_KEY *node;
 	unsigned char version, ch;
 
-	file->Read(&version, 1);
+	file->ReadByte(&version, 1);
 
 	if (version > 5)
 	{
 		unsigned long keys;
 
-		file->Read(&keys, 4);
+		file->ReadLong(&keys, 1);
 		for (node = NULL; keys--;)
 		{
 			if (node == NULL)
@@ -216,11 +217,11 @@ void Piece::FileLoad(File* file, char* name)
 				node = AddNode(node, 1, PK_POSITION);
 
 			file->Read(node->param, 16);
-			file->Read(&node->time, 2);
-			file->Read(&node->type, 1);
+			file->ReadShort(&node->time, 1);
+			file->ReadByte(&node->type, 1);
 		}
 
-		file->Read(&keys, 4);
+		file->ReadLong(&keys, 1);
 		for (node = NULL; keys--;)
 		{
 			if (node == NULL)
@@ -232,8 +233,8 @@ void Piece::FileLoad(File* file, char* name)
 				node = AddNode(node, 1, PK_POSITION);
 
 			file->Read(node->param, 16);
-			file->Read(&node->time, 2);
-			file->Read(&node->type, 1);
+			file->ReadShort(&node->time, 1);
+			file->ReadByte(&node->type, 1);
 		}
 	}
 	else
@@ -268,14 +269,14 @@ void Piece::FileLoad(File* file, char* name)
 				}
 
 				unsigned char b;
-				file->Read(&b, 1);
+				file->ReadByte(&b, 1);
 				node->time = b;
 				mat.GetTranslation(&node->param[0], &node->param[1], &node->param[2]);
 				node = AddNode(node, b, PK_ROTATION);
 				mat.ToAxisAngle(node->param);
 				
 				int bl;
-				file->Read(&bl, 4);
+				file->ReadLong(&bl, 1);
 			}
 		}
 		else
@@ -300,7 +301,7 @@ void Piece::FileLoad(File* file, char* name)
 
 	// Common to all versions.
 	file->Read(name, 9);
-	file->Read(&m_nColor, 1);
+	file->ReadByte(&m_nColor, 1);
 
 	if (version < 5)
 	{
@@ -308,28 +309,28 @@ void Piece::FileLoad(File* file, char* name)
 		m_nColor = conv[m_nColor];
 	}
 
-	file->Read(&m_nStepShow, 1);
+	file->ReadByte(&m_nStepShow, 1);
 	if (version > 1)
-		file->Read(&m_nStepHide, 1);
+		file->ReadByte(&m_nStepHide, 1);
 	else
 		m_nStepHide = 255;
 
 	if (version > 5)
 	{
-		file->Read(&m_nFrameShow, 2);
-		file->Read(&m_nFrameHide, 2);
+		file->ReadShort(&m_nFrameShow, 1);
+		file->ReadShort(&m_nFrameHide, 1);
 
 		if (version > 7)
 		{
-			file->Read(&m_nState, 1);
+			file->ReadByte(&m_nState, 1);
 			UnSelect();
-			file->Read(&ch, 1);
+			file->ReadByte(&ch, 1);
 			file->Read(m_strName, ch);
 		}
 		else
 		{
 			int hide;
-			file->Read(&hide, 4);
+			file->ReadLong(&hide, 1);
 			if (hide != 0)
 				m_nState |= LC_PIECE_HIDDEN;
 			file->Read(m_strName, 81);
@@ -338,7 +339,7 @@ void Piece::FileLoad(File* file, char* name)
 		// 7 (0.64)
 		int i = -1;
 		if (version > 6)
-			file->Read(&i, 4);
+			file->ReadLong(&i, 1);
 		m_pGroup = (Group*)i;
 	}
 	else
@@ -346,13 +347,13 @@ void Piece::FileLoad(File* file, char* name)
 		m_nFrameShow = 1;
 		m_nFrameHide = 65535;
 
-		file->Read(&ch, 1);
+		file->ReadByte(&ch, 1);
 		if (ch == 0)
 			m_pGroup = (Group*)-1;
 		else
 			m_pGroup = (Group*)ch;
 
-		file->Read(&ch, 1);
+		file->ReadByte(&ch, 1);
 		if (ch & 0x01)
 			m_nState |= LC_PIECE_HIDDEN;
 	}
@@ -364,42 +365,42 @@ void Piece::FileSave(File* file, Group* pGroups)
 	unsigned char ch = 8; // LeoCAD 0.70
 	unsigned long n;
 
-	file->Write(&ch, 1);
+	file->WriteByte(&ch, 1);
 
 	for (n = 0, node = m_pInstructionKeys; node; node = node->next)
 		n++;
-	file->Write(&n, 4);
+	file->WriteLong(&n, 1);
 
 	for (node = m_pInstructionKeys; node; node = node->next)
 	{
 		file->Write(node->param, 16);
-		file->Write(&node->time, 2);
-		file->Write(&node->type, 1);
+		file->WriteShort(&node->time, 1);
+		file->WriteByte(&node->type, 1);
 	}
 
 	for (n = 0, node = m_pAnimationKeys; node; node = node->next)
 		n++;
-	file->Write(&n, 4);
+	file->WriteLong(&n, 1);
 
 	for (node = m_pAnimationKeys; node; node = node->next)
 	{
 		file->Write(node->param, 16);
-		file->Write(&node->time, 2);
-		file->Write(&node->type, 1);
+		file->WriteShort(&node->time, 1);
+		file->WriteByte(&node->type, 1);
 	}
 
 	file->Write(m_pPieceInfo->m_strName, 9);
 
-	file->Write(&m_nColor, 1);
-	file->Write(&m_nStepShow, 1);
-	file->Write(&m_nStepHide, 1);
-	file->Write(&m_nFrameShow, 2);
-	file->Write(&m_nFrameHide, 2);
+	file->WriteByte(&m_nColor, 1);
+	file->WriteByte(&m_nStepShow, 1);
+	file->WriteByte(&m_nStepHide, 1);
+	file->WriteShort(&m_nFrameShow, 1);
+	file->WriteShort(&m_nFrameHide, 1);
 
 	// version 8
-	file->Write(&m_nState, 1);
+	file->WriteByte(&m_nState, 1);
 	ch = strlen(m_strName);
-	file->Write(&ch, 1);
+	file->WriteByte(&ch, 1);
 	file->Write(m_strName, ch);
 
 	// version 7
@@ -415,7 +416,7 @@ void Piece::FileSave(File* file, Group* pGroups)
 	}
 	else
 		i = -1;
-	file->Write(&i, 4);
+	file->WriteLong(&i, 1);
 }
 
 void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)

@@ -69,7 +69,7 @@ public:
 	int m_CurrentTileWidth, m_CurrentTileHeight;
 	int m_CurrentRow, m_CurrentColumn;
 
-	int m_ViewportSave[4];
+	GLint m_ViewportSave[4];
 };
 
 #endif // _TR_H_

@@ -1,12 +1,11 @@
 // Information about how to draw a piece and some more stuff.
 //
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
-#else
+#endif
 #include <GL/gl.h>
 #include <GL/glu.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -207,7 +206,6 @@ void PieceInfo::LoadIndex(File* file)
 		init = true;
 	}
 
-
 	// TODO: don't change ref. if we're reloading ?
 	m_nRef = 0;
 	m_nVertexCount = 0;
@@ -221,11 +219,11 @@ void PieceInfo::LoadIndex(File* file)
 
 	file->Read(m_strName, 8);
 	file->Read(m_strDescription, 64);
-	file->Read(sh, sizeof(sh));
-	file->Read(&m_nFlags, sizeof(m_nFlags));
-	file->Read(&m_nGroups, sizeof(m_nGroups));
-	file->Read(&m_nOffset, sizeof(m_nOffset));
-	file->Read(&m_nSize, sizeof(m_nSize));
+	file->ReadShort(sh, 6);
+	file->ReadByte(&m_nFlags, 1);
+	file->ReadLong(&m_nGroups, 1);
+	file->ReadLong(&m_nOffset, 1);
+	file->ReadLong(&m_nSize, 1);
 
 	scale = 100;
 	if (m_nFlags & LC_PIECE_MEDIUM) scale = 1000;
@@ -265,7 +263,7 @@ void PieceInfo::DeRef()
 
 void PieceInfo::LoadInformation()
 {
-	FILE* bin;
+	FileDisk bin;
 	char filename[LC_MAXPATH];
 	void* buf;
 	unsigned long verts, *longs, fixverts;
@@ -318,14 +316,13 @@ void PieceInfo::LoadInformation()
 	// Open pieces.bin and buffer the information we need.
 	strcpy(filename, project->GetLibraryPath());
 	strcat(filename, "pieces.bin");
-	bin = fopen(filename, "rb");
-	if (bin == NULL)
+	if (!bin.Open(filename, "rb"))
 		return;
 
 	buf = malloc(m_nSize);
-	fseek(bin, m_nOffset, SEEK_SET);
-	fread(buf, 1, m_nSize, bin);
-	fclose(bin);
+	bin.Seek(m_nOffset, SEEK_SET);
+	bin.Read(buf, m_nSize);
+	bin.Close();
 
 	shift  = 1.0f/(1<<14);
 	scale = 0.01f;
@@ -1491,10 +1488,10 @@ void PieceInfo::ZoomExtents()
 {
 	// TODO: Calculate this in the right way
 	bool out = false;
-	double modelMatrix[16], projMatrix[16];
-	double obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
+	GLdouble modelMatrix[16], projMatrix[16];
+	GLdouble obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
 	double View[3] = { -5, -5, 3 };
-	int	 viewport[4];
+	GLint viewport[4];
 	float v[24] = {
 		m_fDimensions[0], m_fDimensions[1], m_fDimensions[5],
 		m_fDimensions[3], m_fDimensions[1], m_fDimensions[5],

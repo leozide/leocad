@@ -32,7 +32,7 @@ unsigned long File::ReadShort(void* pBuf, unsigned long nCount)
 
 	read = Read(pBuf, nCount*2)/2;
 
-#ifdef _BIG_ENDIAN
+#ifdef LC_BIG_ENDIAN
 	unsigned long i;
 	unsigned short* val = (unsigned short*)pBuf, x;
 
@@ -54,7 +54,7 @@ unsigned long File::ReadLong(void* pBuf, unsigned long nCount)
 
 	read = Read(pBuf, nCount*4)/4;
 
-#ifdef _BIG_ENDIAN
+#ifdef LC_BIG_ENDIAN
 	unsigned long i;
 	unsigned long* val = (unsigned long*)pBuf, x;
 
@@ -76,7 +76,7 @@ unsigned long File::WriteByte(const void* pBuf, unsigned long nCount)
 
 unsigned long File::WriteShort(const void* pBuf, unsigned long nCount)
 {
-#ifdef _BIG_ENDIAN
+#ifdef LC_BIG_ENDIAN
 	unsigned long wrote = 0, i;
 	unsigned short* val = (unsigned short*)pBuf, x;
 
@@ -95,7 +95,7 @@ unsigned long File::WriteShort(const void* pBuf, unsigned long nCount)
 
 unsigned long File::WriteLong(const void* pBuf, unsigned long nCount)
 {
-#ifdef _BIG_ENDIAN
+#ifdef LC_BIG_ENDIAN
 	unsigned long wrote = 0, i;
 	unsigned long* val = (unsigned long*)pBuf, x;
 
@@ -112,7 +112,7 @@ unsigned long File::WriteLong(const void* pBuf, unsigned long nCount)
 #endif
 }
 
-// ========================================================
+// =========================================================
 
 FileMem::FileMem()
 {

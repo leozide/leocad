@@ -5,7 +5,7 @@ include version.mk
 CC		:= gcc
 CXX		:= g++
 
-OS 		:= -D_LINUX
+OS 		:= -DLC_LINUX
 OSDIR 		:= linux
 
 # (Add a -g for debugging)

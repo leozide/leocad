@@ -1,10 +1,9 @@
 // Camera object.
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
-#else
-#include "GL/glu.h"
 #endif
+#include "GL/glu.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

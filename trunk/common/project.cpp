@@ -1,12 +1,11 @@
 // Everything that is a part of a LeoCAD project goes here.
 //
 
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #include "stdafx.h"
-#else
+#endif
 #include <GL/gl.h>
 #include <GL/glu.h>
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -261,7 +260,7 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 
 	if (LoadPieceLibrary() == false)
 	{
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 		SystemDoMessageBox("Cannot load piece library.", LC_MB_OK|LC_MB_ICONERROR);
 #else
 		printf("Cannot load piece library !\n");
@@ -1676,7 +1675,7 @@ void Project::Render(bool bToMemory)
 //		return;
 
 #ifdef _DEBUG
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 #define BENCHMARK
 #endif
 #endif
@@ -1931,8 +1930,8 @@ glLightfv(GL_LIGHT0, GL_SPECULAR, one);
 			// There's got to be an easier way...
 			if (m_nSnap & LC_DRAW_AXIS)
 			{
-				double model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
-				int	viewport[4];
+				GLdouble model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
+				GLint viewport[4];
 				
 				glGetDoublev(GL_MODELVIEW_MATRIX, model);
 				glGetDoublev(GL_PROJECTION_MATRIX, proj);
@@ -3186,7 +3185,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_3DS:
 		{
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 			Export3DStudio();
 #endif
 		} break;
@@ -3747,7 +3746,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (opts.render)
 			{
-#ifdef _WINDOWS
+#ifdef LC_WINDOWS
 				// TODO: Linux support
 				char buf[600];
 				char tmp[LC_MAXPATH], out[LC_MAXPATH];
@@ -5056,10 +5055,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (m_pPieces == 0) break;
 
 			bool bControl = IsKeyDown(KEY_CONTROL);
-			double modelMatrix[16], projMatrix[16];
+			GLdouble modelMatrix[16], projMatrix[16];
 			float up[3], eye[3], target[3];
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			int	viewport[4], out, x, y, w, h;
+			GLint viewport[4], out, x, y, w, h;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
@@ -5734,9 +5733,9 @@ PieceInfo* Project::FindPieceInfo(char* name)
 
 BoundingBox* Project::FindObjectFromPoint(int x, int y)
 {
-	double px, py, pz, rx, ry, rz;
-	double modelMatrix[16], projMatrix[16];
-	int	viewport[4];
+	GLdouble px, py, pz, rx, ry, rz;
+	GLdouble modelMatrix[16], projMatrix[16];
+	GLint viewport[4];
 	Piece* pPiece;
 	Camera* pCamera;
 	Light* pLight;
@@ -6405,9 +6404,9 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					} break;
 				}
 
-				double modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
+				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
 				float ax, ay;
-				int	 viewport[4];
+				GLint viewport[4];
 				
 				glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 				glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
@@ -6465,8 +6464,8 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 void Project::OnLeftButtonDown(int x, int y)
 {
-	double modelMatrix[16], projMatrix[16], point[3];
-	int	viewport[4];
+	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLint viewport[4];
 
 	if (IsDrawing())
 		return;
@@ -6741,8 +6740,8 @@ void Project::OnLeftButtonDown(int x, int y)
 
 void Project::OnLeftButtonDoubleClick(int x, int y)
 {
-	double modelMatrix[16], projMatrix[16], point[3];
-	int	viewport[4];
+	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLint viewport[4];
 
 	if (IsDrawing())
 		return;
@@ -6817,8 +6816,8 @@ void Project::OnLeftButtonUp(int x, int y)
 
 void Project::OnRightButtonDown(int x, int y)
 {
-	double modelMatrix[16], projMatrix[16], point[3];
-	int	viewport[4];
+	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLint viewport[4];
 
 	if (StopTracking(false))
 		return;
@@ -6906,8 +6905,8 @@ void Project::OnMouseMove(int x, int y)
 	if (IsDrawing())
 		return;
 
-	double modelMatrix[16], projMatrix[16], tmp[3];
-	int	viewport[4];
+	GLdouble modelMatrix[16], projMatrix[16], tmp[3];
+	GLint viewport[4];
 	float ptx, pty, ptz;
 
 	LoadViewportProjection();

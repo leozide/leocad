@@ -91,16 +91,4 @@ inline long SystemGetTicks()
 
 void SystemSwapBuffers();
 
-inline bool IsKeyDown(int key)
-{
-  return false;//(GetKeyState(key) < 0);
-}
-
 #endif // _SYSTEM_H_
-
-
-
-
-
-
-

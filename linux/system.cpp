@@ -136,7 +136,9 @@ void SystemUpdateAction(int new_action, int old_action)
   case LC_ACTION_SELECT: button = tool_toolbar.select;
   {
     x = 0; y = 2;
-    if (IsKeyDown(KEY_CONTROL))
+    // TODO: FIX ME !!!
+    if (0)
+    //    if (IsKeyDown(KEY_CONTROL))
       xpm = cr_selm;
     else
       xpm = cr_sel;

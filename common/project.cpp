@@ -239,7 +239,7 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 				highlight = true;
 			else if ((strcmp (param, "-v") == 0) || (strcmp (param, "--version") == 0))
 			{
-				printf ("LeoCAD version "LC_VERSION" for "LC_VERSION_OSNAME"\n");
+				printf ("LeoCAD version " LC_VERSION_TEXT LC_VERSION_TAG " for "LC_VERSION_OSNAME"\n");
 				printf ("Copyright (c) 1996-2003, BT Software\n");
 				printf ("Compiled "__DATE__"\n");
 

@@ -79,7 +79,8 @@ config:
 	@echo "#define LC_VERSION_MINOR $(MINOR)" >> $(OSDIR)/config.h
 	@echo "#define LC_VERSION_PATCH $(PATCHLVL)" >> $(OSDIR)/config.h
 	@echo "#define LC_VERSION_OSNAME \"$(shell uname)\"" >> $(OSDIR)/config.h
-	@echo "#define LC_VERSION \"$(MAJOR).$(MINOR).$(PATCHLVL)\"" >> $(OSDIR)/config.h
+	@echo "#define LC_VERSION_TEXT \"$(MAJOR).$(MINOR).$(PATCHLVL)\"" >> $(OSDIR)/config.h
+	@echo "#define LC_VERSION_TAG \"$(VERSIONTAG)\"" >> $(OSDIR)/config.h
 	@echo "#define LC_INSTALL_PREFIX \"$(PREFIX)\"" >> $(OSDIR)/config.h
 	@echo "" >> $(OSDIR)/config.h
 

@@ -8,10 +8,11 @@
 #define _CONFIG_H_
 
 #define LC_VERSION_MAJOR 0
-#define LC_VERSION_MINOR 73
-#define LC_VERSION_PATCH 2
+#define LC_VERSION_MINOR 74
+#define LC_VERSION_PATCH 0
 #define LC_VERSION_OSNAME "Windows"
-#define LC_VERSION "0.73.2"
+#define LC_VERSION_TEXT "0.74"
+#define LC_VERSION_TAG "-beta"
 #define LC_INSTALL_PREFIX "C:\\leocad"
 
 typedef signed char lcint8;

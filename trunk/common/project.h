@@ -73,6 +73,8 @@ public:
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
 		*to = m_bAnimation ? m_nTotalFrames : 255;
 	}
+  unsigned short GetTotalFrames () const
+    { return m_nTotalFrames; }
 
 	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
 	{

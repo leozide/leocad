@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
+#include "globals.h"
+#include "project.h"
 #include "object.h"
 #include "matrix.h"
 #include "vector.h"
@@ -327,6 +329,83 @@ void Object::CalculateSingleKey (unsigned short nTime, bool bAnimation, int keyt
   else
     for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
       value[j] = prev->param[j];
+}
+
+void Object::InsertTime (unsigned short start, bool animation, unsigned short time)
+{
+  LC_OBJECT_KEY *node, *prev = NULL;
+  unsigned short last;
+  bool end[32];
+  int i;
+
+  for (i = 0; i < m_nKeyInfoCount; i++)
+    end[i] = false;
+
+  if (animation)
+  {
+    node = m_pAnimationKeys;
+    last = project->GetTotalFrames ();
+  }
+  else
+  {
+    node = m_pInstructionKeys;
+    last = 255;
+  }
+
+  for (; node != NULL; prev = node, node = node->next)
+  {
+    // skip everything before the start time
+    if ((node->time < start) || (node->time == 1))
+      continue;
+
+    // there's already a key at the end, delete this one
+    if (end[node->type])
+    {
+      prev->next = node->next;
+      free (node);
+      node = prev;
+
+      continue;
+    }
+
+    node->time += time;
+    if (node->time >= last)
+    {
+      node->time = last;
+      end[node->type] = true;
+    }
+  }
+}
+
+void Object::RemoveTime (unsigned short start, bool animation, unsigned short time)
+{
+  LC_OBJECT_KEY *node, *prev = NULL;
+
+  if (animation)
+    node = m_pAnimationKeys;
+  else
+    node = m_pInstructionKeys;
+
+  for (; node != NULL; prev = node, node = node->next)
+  {
+    // skip everything before the start time
+    if ((node->time < start) || (node->time == 1))
+      continue;
+
+    if (node->time < (start + time))
+    {
+      // delete this key
+      prev->next = node->next;
+      free (node);
+      node = prev;
+
+      continue;
+    }
+
+    node->time -= time;
+    if (node->time < 1)
+      node->time = 1;
+  }
 }
 
 // =============================================================================

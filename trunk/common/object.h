@@ -163,6 +163,8 @@ class Object
  public:
   void CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value) const;
   void ChangeKey (unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
+  virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
+  virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
 
   int GetKeyTypeCount () const
     { return m_nKeyInfoCount; }

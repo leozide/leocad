@@ -1,5 +1,8 @@
 This is a changelog for developers only, not for ordinary users.
 
+23/03/2001
+  - Update object keys when adding/removing steps.
+
 21/03/2001
   - Improved Linux About dialog.
 

@@ -176,5 +176,10 @@ typedef enum { LC_PIECE, LC_CAMERA, LC_CAMERA_TARGET,
 #define LC_UPDATE_OBJECT	0x40
 #define LC_UPDATE_TYPE		0x80
 
+// Piece library update
+#define LC_UPDATE_DELETE       0x00
+#define LC_UPDATE_DESCRIPTION  0x01
+#define LC_UPDATE_DRAWINFO     0x02
+#define LC_UPDATE_NEWPIECE     0x04
 
 #endif // _DEFINES_H_

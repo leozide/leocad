@@ -48,5 +48,6 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
 bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);
 void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
 bool DeletePiece(char** names, int numpieces);
+bool LoadUpdate(const char* update);
 
 #endif // _MISC_H_

@@ -87,13 +87,18 @@ void LibraryManager::HandleCommand (int id, int param)
 
 		case LC_LIBDLG_FILE_MERGEUPDATE:
 		{
-//			char filename[LC_MAXPATH];
+			LC_FILEOPENDLG_OPTS opts;
 
-			// FIXME: file extension
-//			if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
-//				return;
+			strcpy (opts.path, "");
+			opts.type = LC_FILEOPENDLG_LUP;
 
-//			project->GetPiecesLibrary ()->LoadUpdate (filename);
+			if (!SystemDoDialog (LC_DLG_FILE_OPEN, &opts))
+				return;
+
+			project->GetPiecesLibrary ()->LoadUpdate (opts.filenames[0]);
+
+			free (opts.filenames[0]);
+			free (opts.filenames);
 
 			// FIXME: update m_pPieces
 		} break;
@@ -127,7 +132,46 @@ void LibraryManager::HandleCommand (int id, int param)
 			break;
 
 		case LC_LIBDLG_GROUP_INSERT:
-			break;
+		{
+			char Name[64];
+			int i, Idx = (int)param;
+
+			if (m_nGroups == LC_PIECESLIB_MAXGROUPS)
+			{
+				SystemDoMessageBox ("Cannot add more groups!", LC_MB_OK|LC_MB_ICONINFORMATION);
+				return;
+			}
+
+			strcpy (Name, "New Group");
+
+			if (!SystemDoDialog (LC_DLG_GROUP, Name))
+				return;
+
+			for (i = m_nGroups; i > Idx; i--)
+				m_strGroups[i] = m_strGroups[i-1];
+
+			m_strGroups[i] = Name;
+
+			for (int j = 0; j < m_nPieces; j++)
+			{
+				lcuint32 grp = m_pPieces[j].CurrentGroups;
+
+				for (i = m_nGroups; i >= Idx; i--)
+				{
+					lcuint32 d = (1 << i);
+					if (grp & d)
+					{
+						grp &= ~d;
+						grp |= (1 << (i+1));
+					}
+				}
+				m_pPieces[j].CurrentGroups = grp;
+			}
+
+			m_nGroups++;
+			m_bModified = true;
+
+		} break;
 
 		case LC_LIBDLG_GROUP_DELETE:
 		{
@@ -166,7 +210,19 @@ void LibraryManager::HandleCommand (int id, int param)
 		} break;
 
 		case LC_LIBDLG_GROUP_EDIT:
-			break;
+		{
+			// TODO: Make this a group edit dialog where you can choose the icon.
+			char Name[64];
+			int i = (int)param;
+
+			strcpy (Name, m_strGroups[i]);
+
+			if (!SystemDoDialog (LC_DLG_GROUP, Name))
+				return;
+
+			m_strGroups[i] = Name;
+			m_bModified = true;
+		} break;
 
 		case LC_LIBDLG_GROUP_MOVEUP:
 		{

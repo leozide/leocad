@@ -1,5 +1,12 @@
 This is a changelog for developers only, not for ordinary users.
 
+10/10/2002
+  - Added a dialog to handle the textures in the library.
+
+26/08/2002
+  - Added an option to print the total pages on the header (&O).
+  - Fixed a bug with the step numbers when printing.
+
 09/03/2002
   - Moved the texture font to a class to allow support for multiple fonts.
 

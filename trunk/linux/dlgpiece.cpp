@@ -13,7 +13,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "opengl.h"
-#include "gtkglarea.h"
 #include "gtktools.h"
 #include "system.h"
 #include "typedefs.h"

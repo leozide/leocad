@@ -607,7 +607,6 @@ void colorlist_set(int new_color)
 // Create the pieces toolbar
 GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 {
-  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   gchar *titles[2] = { "Description", "Number" };
 
   GtkWidget *vbox1, *hbox, *vpan, *scroll_win, *frame, *button, *arrow;

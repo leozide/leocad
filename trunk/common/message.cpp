@@ -11,13 +11,13 @@ Messenger::Messenger ()
 
 Messenger::~Messenger ()
 {
-  for (unsigned int i = 0; i < m_Listeners.GetSize (); i++)
+  for (int i = 0; i < m_Listeners.GetSize (); i++)
     delete m_Listeners[i];
 }
 
 void Messenger::Dispatch (int message, void *data)
 {
-  for (unsigned int i = 0; i < m_Listeners.GetSize (); i++)
+  for (int i = 0; i < m_Listeners.GetSize (); i++)
     m_Listeners[i]->func (message, data, m_Listeners[i]->user);
 }
 

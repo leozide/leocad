@@ -7,8 +7,6 @@
 #include <X11/keysym.h>
 #include <sys/time.h>
 #include "opengl.h"
-#include "gdkgl.h"
-#include "gtkglarea.h"
 #include "gtkmisc.h"
 #include "camera.h"
 #include "project.h"

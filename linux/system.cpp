@@ -1,18 +1,253 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <GL/glx.h>
+#include <gdk/gdkx.h>
 #include <gtk/gtk.h>
+#include "opengl.h"
 #include "gdkgl.h"
 #include "gtkglarea.h"
+#include "gtkmisc.h"
 #include "camera.h"
 #include "project.h"
 #include "system.h"
 #include "main.h"
-#include "menu.h"
 #include "toolbar.h"
 #include "dialogs.h"
 #include "globals.h"
+
+// =============================================================================
+// Cursor functions
+
+/*
+void Sys_BeginWait ()
+{
+  GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
+  gdk_window_set_cursor (g_pParentWnd->m_pWidget->window, cursor);
+  gdk_cursor_destroy (cursor);
+}
+
+void Sys_EndWait ()
+{
+  GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
+  gdk_window_set_cursor (g_pParentWnd->m_pWidget->window, cursor);
+  gdk_cursor_destroy (cursor);
+}
+
+void Sys_GetCursorPos (int *x, int *y)
+{
+  gdk_window_get_pointer (NULL, x, y, NULL);
+}
+
+void Sys_SetCursorPos (int x, int y)
+{
+  XWarpPointer (GDK_DISPLAY(), None, GDK_ROOT_WINDOW(), 0, 0, 0, 0, x, y);
+}
+*/
+
+// =============================================================================
+// Message Boxes
+
+static void dialog_button_callback (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *parent;
+  int *loop, *ret;
+
+  parent = gtk_widget_get_toplevel (widget);
+  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
+  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
+
+  *loop = 0;
+  *ret = (int)data;
+}
+
+static gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
+{
+  int *loop;
+
+  gtk_widget_hide (widget);
+  loop = (int*)gtk_object_get_data (GTK_OBJECT (widget), "loop");
+  *loop = 0;
+
+  return TRUE;
+}
+
+int Sys_MessageBox (const char* text, const char* caption, int type)
+{
+  GtkWidget *window, *w, *vbox, *hbox;
+  int mode = (type & LC_MB_TYPEMASK), ret, loop = 1;
+
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
+  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+  gtk_window_set_title (GTK_WINDOW (window), caption);
+  gtk_container_border_width (GTK_CONTAINER (window), 10);
+  gtk_object_set_data (GTK_OBJECT (window), "loop", &loop);
+  gtk_object_set_data (GTK_OBJECT (window), "ret", &ret);
+  gtk_widget_realize (window);
+ 
+  vbox = gtk_vbox_new (FALSE, 10);
+  gtk_container_add (GTK_CONTAINER (window), vbox);
+  gtk_widget_show (vbox);
+ 
+  w = gtk_label_new (text);
+  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
+  gtk_label_set_justify (GTK_LABEL (w), GTK_JUSTIFY_LEFT);
+  gtk_widget_show (w);
+ 
+  w = gtk_hseparator_new ();
+  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
+  gtk_widget_show (w);
+ 
+  hbox = gtk_hbox_new (FALSE, 10);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
+  gtk_widget_show (hbox);
+ 
+  if (mode == LC_MB_OK)
+  {
+    w = gtk_button_new_with_label ("Ok");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+    ret = LC_OK;
+  }
+  else if (mode == LC_MB_OKCANCEL)
+  {
+    w = gtk_button_new_with_label ("Ok");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+
+    w = gtk_button_new_with_label ("Cancel");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
+    gtk_widget_show (w);
+    ret = LC_CANCEL;
+  }
+  else if (mode == LC_MB_YESNOCANCEL)
+  {
+    w = gtk_button_new_with_label ("Yes");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+ 
+    w = gtk_button_new_with_label ("No");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
+    gtk_widget_show (w);
+ 
+    w = gtk_button_new_with_label ("Cancel");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
+    gtk_widget_show (w);
+    ret = LC_CANCEL;
+  }
+  else /* if (mode == LC_MB_YESNO) */
+  {
+    w = gtk_button_new_with_label ("Yes");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
+    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (w);
+    gtk_widget_show (w);
+ 
+    w = gtk_button_new_with_label ("No");
+    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
+    gtk_signal_connect (GTK_OBJECT (w), "clicked",
+                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
+    gtk_widget_show (w);
+    ret = LC_NO;
+  }
+
+  gtk_widget_show (window);
+  gtk_grab_add (window);
+
+  while (loop)
+    gtk_main_iteration ();
+
+  gtk_grab_remove (window);
+  gtk_widget_destroy (window);
+
+  return ret;
+}
+
+// =============================================================================
+// Memory rendering
+
+typedef struct
+{
+  int width, height;
+  Display   *xdisplay;
+  GLXPixmap glxpixmap;
+  GLXContext glxcontext;
+  GdkPixmap *pixmap;
+  GdkVisual *visual;
+} LC_RENDER;
+
+void* Sys_StartMemoryRender(int width, int height)
+{
+  LC_RENDER* render = (LC_RENDER*) malloc (sizeof (LC_RENDER));
+  int attrlist[] = { GLX_RGBA, GLX_DEPTH_SIZE, 16, 0 };
+  XVisualInfo *vi;
+  Pixmap xpixmap;
+
+  render->width = width;
+  render->height = height;
+  render->xdisplay = GDK_DISPLAY();
+
+  vi = pfnglXChooseVisual (render->xdisplay, DefaultScreen (render->xdisplay), attrlist);
+
+  render->visual = gdkx_visual_get (vi->visualid);
+  render->glxcontext = pfnglXCreateContext (render->xdisplay, vi, NULL, True);
+  render->pixmap = gdk_pixmap_new (NULL, width, height, render->visual->depth);
+
+  xpixmap = ((GdkPixmapPrivate*)render->pixmap)->xwindow;
+  render->glxpixmap = pfnglXCreateGLXPixmap (render->xdisplay, vi, xpixmap);
+
+  XFree(vi);
+
+  pfnglXMakeCurrent (render->xdisplay, render->glxpixmap, render->glxcontext);
+
+  return render;
+}
+
+void Sys_FinishMemoryRender(void* param)
+{
+  LC_RENDER* render = (LC_RENDER*)param;
+
+  gtk_gl_area_make_current (GTK_GL_AREA (drawing_area));
+
+  if (render->glxcontext == pfnglXGetCurrentContext ())
+    pfnglXMakeCurrent (render->xdisplay, None, NULL);
+  pfnglXDestroyContext (render->xdisplay, render->glxcontext);
+
+  pfnglXDestroyGLXPixmap (render->xdisplay, render->glxpixmap);
+  pfnglXWaitGL();
+  gdk_pixmap_unref (render->pixmap);
+  pfnglXWaitX();
+  free(render);
+}
+
+
+
+
+
+
+
 
 // String
 char* strupr(char* string)
@@ -41,32 +276,26 @@ char* strlwr(char* string)
 
 
 
-// Profile
-int SystemGetProfileInt(const char* section, const char* entry, const int defaultvalue)
+
+
+void SystemPumpMessages()
 {
-  return defaultvalue;
 }
 
-bool SystemSetProfileInt(const char* section, const char* entry, const int value)
+long SystemGetTicks()
 {
-  return true;
-}
-
-bool SystemSetProfileString(const char* section, const char* entry, const char* value)
-{
-  return true;
-}
-
-const char* SystemGetProfileString(const char* section, const char* entry, const char* defaultvalue)
-{
-  return defaultvalue;
+  return 0;//GetTickCount();
 }
 
 // User Interface
 void SystemUpdateViewport(int new_vp, int old_vp)
 {
+  char buf[64];
+  sprintf (buf, "menu_view_viewports_%02d", new_vp+1);
+  gpointer item = gtk_object_get_data (GTK_OBJECT (main_window), buf);
+
   ignore_commands = true;
-  gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (main_menu.view_viewports[new_vp]), TRUE);  
+  gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
   ignore_commands = false;
 }
 
@@ -227,21 +456,25 @@ void SystemUpdateRenderingMode(bool bBackground, bool bFast)
 
 void SystemUpdateUndoRedo(char* undo, char* redo)
 {
+  gpointer item;
   char text[50];
 
   strcpy(text, "Undo ");
   if (undo)
     strcat(text, undo);
-  gtk_label_set_text (GTK_LABEL(GTK_BIN(main_menu.edit_undo)->child), text);
+  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_undo");
+  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
+  gtk_widget_set_sensitive (GTK_WIDGET (item), undo != NULL);
+
   strcpy(text, "Redo ");
   if (redo)
     strcat(text, redo);
-  gtk_label_set_text (GTK_LABEL(GTK_BIN(main_menu.edit_redo)->child), text);
+  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_redo");
+  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
+  gtk_widget_set_sensitive (GTK_WIDGET (item), redo != NULL);
 
   gtk_widget_set_sensitive (main_toolbar.undo, undo != NULL);
   gtk_widget_set_sensitive (main_toolbar.redo, redo != NULL);
-  gtk_widget_set_sensitive (main_menu.edit_undo, undo != NULL);
-  gtk_widget_set_sensitive (main_menu.edit_redo, redo != NULL);
 }
 
 void SystemUpdateSnap(const unsigned long snap)
@@ -255,65 +488,89 @@ void SystemUpdateSnap(const unsigned long snap)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
-  int i;
+  gpointer item = NULL, menu = gtk_object_get_data (GTK_OBJECT (main_window), "cameras_menu");
+  GList *lst = gtk_container_children (GTK_CONTAINER (menu));
 
-  for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+  for (int i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
     if (pNew == pCamera)
-      break;
+    {
+      if (i >= 7)
+	item = g_list_nth_data (lst, i-7);
+      else
+      {
+	guint len = g_list_length (lst);
 
-  ignore_commands = true;
-  gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (main_menu.view_cameras[i]), TRUE);  
-  ignore_commands = false;
+	if (len > 7)
+	  item = g_list_nth_data (lst, len - 7 + i);
+	else
+	  item = g_list_nth_data (lst, i);
+      }
+      break;
+    }
+
+  if (item)
+  {
+    ignore_commands = true;
+    gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
+    ignore_commands = false;
+  }
 }
 
 void SystemUpdateCameraMenu(Camera* pCamera)
 {
+  GtkWidget *menu = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "cameras_menu"));
+  GtkWidget *item = NULL;
   Camera* pFirst = pCamera;
-  gtk_menu_item_remove_submenu (GTK_MENU_ITEM (main_menu.view_cameras_popup));
-  GtkWidget *menu_item = NULL, *menu = gtk_menu_new ();
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (main_menu.view_cameras_popup), menu);
-
+  GList *lst;
   int i;
+
+  // empty the menu
+  while ((lst = gtk_container_children (GTK_CONTAINER (menu))) != NULL)
+    gtk_container_remove (GTK_CONTAINER (menu), GTK_WIDGET (lst->data));
+
+  // add user cameras
   for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
     if (i > 6)
     {
-      GSList* grp = menu_item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (menu_item)) : NULL;
-      menu_item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
-      gtk_menu_append (GTK_MENU (menu), menu_item);
-      gtk_widget_show (menu_item);
-      main_menu.view_cameras[i] = menu_item;
-      gtk_signal_connect (GTK_OBJECT (menu_item), "activate", GTK_SIGNAL_FUNC (OnCommand), (void*)(i + ID_CAMERA_FIRST));
+      GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
+      item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
+      gtk_menu_append (GTK_MENU (menu), item);
+      gtk_widget_show (item);
+      gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
+			  GINT_TO_POINTER (i + ID_CAMERA_FIRST));
     }
 
   if (i > 7)
-  {
-    GtkWidget* sep = gtk_menu_item_new ();
-    gtk_menu_append (GTK_MENU (menu), sep);
-    gtk_widget_set_sensitive (sep, FALSE);
-    gtk_widget_show (sep);
-  }
+    menu_separator (menu);
 
+  // add standard cameras
   for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
   {
-      GSList* grp = menu_item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (menu_item)) : NULL;
-      menu_item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
-      gtk_menu_append (GTK_MENU (menu), menu_item);
-      gtk_widget_show (menu_item);
-      main_menu.view_cameras[i] = menu_item;
-      gtk_signal_connect (GTK_OBJECT (menu_item), "activate", GTK_SIGNAL_FUNC (OnCommand), (void*)(i + ID_CAMERA_FIRST));
+    GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
+    item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
+    gtk_menu_append (GTK_MENU (menu), item);
+    gtk_widget_show (item);
+    gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
+			GINT_TO_POINTER (i + ID_CAMERA_FIRST));
   }
 }
 
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 {
+  GtkWidget *item;
+
   gtk_widget_set_sensitive (anim_toolbar.first, nTime != 1);
   gtk_widget_set_sensitive (anim_toolbar.prev, nTime > 1);
   gtk_widget_set_sensitive (anim_toolbar.next, nTime < nTotal);
   gtk_widget_set_sensitive (anim_toolbar.last, nTime != nTotal);
-  gtk_widget_set_sensitive (main_menu.view_step_first, nTime != 1);
-  gtk_widget_set_sensitive (main_menu.view_step_prev, nTime > 1);
-  gtk_widget_set_sensitive (main_menu.view_step_next, nTime < nTotal);
-  gtk_widget_set_sensitive (main_menu.view_step_last, nTime != nTotal);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_first"));
+  gtk_widget_set_sensitive (item, nTime != 1);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_previous"));
+  gtk_widget_set_sensitive (item, nTime > 1);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_next"));
+  gtk_widget_set_sensitive (item, nTime < nTotal);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_step_last"));
+  gtk_widget_set_sensitive (item, nTime != nTotal);
 
   char text[11];
   if (bAnimation)
@@ -332,7 +589,8 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
   gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-  gtk_label_set_text (GTK_LABEL(GTK_BIN(main_menu.piece_copy_keys)->child), 
+  gpointer item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_copykeys");
+  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), 
       bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
   ignore_commands = false;
 }
@@ -350,36 +608,51 @@ void SystemUpdateMoveSnap(unsigned short move_snap)
 
 void SystemUpdateSelected(unsigned long flags)
 {
+  GtkWidget *item;
+
   // select all/none/invert/by name (menu)
-  gtk_widget_set_sensitive (main_menu.edit_select_all, (flags & LC_SEL_UNSELECTED) != 0);
-  gtk_widget_set_sensitive (main_menu.edit_select_none, flags & 
-			    (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) != 0);
-  gtk_widget_set_sensitive (main_menu.edit_select_invert, (flags & LC_SEL_NO_PIECES) == 0);
-  gtk_widget_set_sensitive (main_menu.edit_select_byname, (flags & LC_SEL_NO_PIECES) == 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_all"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_none"));
+  gtk_widget_set_sensitive (item, flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_invert"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_select_byname"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
 
   // cut, copy (menu/toolbar)
-  gtk_widget_set_sensitive (main_menu.edit_cut, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
-  gtk_widget_set_sensitive (main_menu.edit_copy, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_cut"));
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_copy"));
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   gtk_widget_set_sensitive (main_toolbar.cut, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   gtk_widget_set_sensitive (main_toolbar.copy, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
   // delete, array, hide sel/unsel, unhideall, copykeys (menu)
-  gtk_widget_set_sensitive (main_menu.piece_delete, (flags & 
-			    (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_array, (flags & LC_SEL_PIECE) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_hide_sel, (flags & LC_SEL_PIECE) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_hide_unsel, (flags & LC_SEL_UNSELECTED) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_unhide, (flags & LC_SEL_HIDDEN) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_copy_keys, (flags & 
-			    (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_delete"));
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_array"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_PIECE) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_hide_selected"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_PIECE) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_hide_unselected"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_unhide_all"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_HIDDEN) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_copykeys"));
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
   // groups (menu)
-  gtk_widget_set_sensitive (main_menu.piece_group, (flags & LC_SEL_CANGROUP) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_ungroup, (flags & LC_SEL_GROUP) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_group_add, (flags &
-			    (LC_SEL_GROUP|LC_SEL_FOCUSGROUP)) == LC_SEL_GROUP);
-  gtk_widget_set_sensitive (main_menu.piece_group_remove, (flags & LC_SEL_FOCUSGROUP) != 0);
-  gtk_widget_set_sensitive (main_menu.piece_edit_groups, (flags & LC_SEL_NO_PIECES) == 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_CANGROUP) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_ungroup"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_GROUP) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group_add"));
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_GROUP|LC_SEL_FOCUSGROUP)) == LC_SEL_GROUP);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group_remove"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_FOCUSGROUP) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_piece_group_edit"));
+  gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
 
   gtk_widget_set_sensitive (tool_toolbar.prev, (flags & LC_SEL_PIECE) != 0);
   gtk_widget_set_sensitive (tool_toolbar.next, (flags & LC_SEL_PIECE) != 0);
@@ -387,26 +660,42 @@ void SystemUpdateSelected(unsigned long flags)
 
 void SystemUpdateRecentMenu(char names[4][LC_MAXPATH])
 {
-  if (strlen(names[0]) == 0)
-  {
-    gtk_label_set_text (GTK_LABEL(GTK_BIN(main_menu.file_recent[0])->child), "Recent Files");
-    gtk_widget_set_sensitive (main_menu.file_recent[0], FALSE);
-  }
-  else
-  {
-    gtk_label_set_text (GTK_LABEL(GTK_BIN(main_menu.file_recent[0])->child), names[0]);
-    gtk_widget_set_sensitive (main_menu.file_recent[0], TRUE);
-  }
+  GtkAccelGroup *accel = (GtkAccelGroup*)gtk_object_get_data (GTK_OBJECT (main_window), "file_menu_accel");
+  GtkWidget *item;
+  char buf[32];
 
-  for (int i = 1; i < 4; i++)
+  for (int i = 0; i < 4; i++)
   {
-    GtkWidget* menu_item = main_menu.file_recent[i];
-    if (strlen(names[i]) == 0)
-      gtk_widget_hide (menu_item);
+    sprintf (buf, "menu_file_recent%d", i+1);
+    item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), buf));
+
+    if (strlen (names[i]) == 0)
+    {
+      if (i == 0)
+      {
+	gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), "Recent Files");
+	gtk_widget_set_sensitive (item, FALSE);
+      }
+      else
+	gtk_widget_hide (item);
+    }
     else
     {
-      gtk_widget_show (menu_item);
-      gtk_label_set_text (GTK_LABEL(GTK_BIN(menu_item)->child), names[i]);
+      char pattern[LC_MAXPATH+4], text[LC_MAXPATH+4];
+      gint length;
+
+      sprintf (text, "%d- %s", i+1, names[i]);
+      gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
+ 
+      length = strlen (text);
+      memset (pattern, ' ', length);
+      pattern[length] = '\0';
+      pattern[0] = '_';
+      gtk_label_set_pattern (GTK_LABEL (GTK_BIN (item)->child), pattern);
+ 
+      gtk_widget_show (item);
+      gtk_widget_set_sensitive (item, TRUE);
+      gtk_widget_add_accelerator (item, "activate_item", accel, text[0], 0, (GtkAccelFlags)0);
     }
   }
 }
@@ -414,7 +703,8 @@ void SystemUpdateRecentMenu(char names[4][LC_MAXPATH])
 void SystemUpdatePaste(bool enable)
 {
   gtk_widget_set_sensitive (main_toolbar.paste, enable);
-  gtk_widget_set_sensitive (main_menu.edit_paste, enable);
+  GtkWidget *item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (main_window), "menu_edit_paste"));
+  gtk_widget_set_sensitive (item, enable);
 }
 
 void SystemUpdatePlay(bool play, bool stop)
@@ -433,75 +723,6 @@ void SystemUpdateFocus(void* object, unsigned char type)
  
   gtk_label_set (GTK_LABEL (label_position), text);
 }
-
-// Memory render
-typedef struct
-{
-  int width, height;
-  GdkGLPixmap *glpixmap;
-  GdkGLContext *context;
-  GdkPixmap *pixmap;
-} LC_RENDER;
-
-void* SystemStartRender(int width, int height)
-{
-  GdkVisual *visual;
-  LC_RENDER* render = (LC_RENDER*)malloc(sizeof(LC_RENDER));
-  int attrlist[] = { GLX_RGBA, GLX_DEPTH_SIZE, 16, 0 };
-  visual = gdk_gl_choose_visual(attrlist);
-
-  render->width = width;
-  render->height = height;
-  render->context = gdk_gl_context_new(visual);
-  render->pixmap = gdk_pixmap_new(NULL, width, height, visual->depth);
-  render->glpixmap = gdk_gl_pixmap_new(visual, render->pixmap);
-  gdk_gl_pixmap_make_current(render->glpixmap, render->context);
-
-  return render;
-}
-
-void SystemFinishRender(void* param)
-{
-  LC_RENDER* render = (LC_RENDER*)param;
-
-  gtk_gl_area_make_current(GTK_GL_AREA(drawing_area));
-  gdk_gl_context_unref(render->context);
-  gdk_gl_pixmap_unref(render->glpixmap);
-  gdk_pixmap_unref(render->pixmap);
-  free(render);
-}
-
-LC_IMAGE* SystemGetRenderImage(void* param)
-{
-  LC_RENDER* render = (LC_RENDER*)param;
-  LC_IMAGE* image = (LC_IMAGE*)malloc(sizeof(LC_IMAGE)+
-	      (render->width*render->height*3));
-
-  image->width = render->width;
-  image->height = render->height;
-  image->bits = (char*)image + sizeof(LC_IMAGE);
-
-  glFinish();
-
-  int x, y;
-  unsigned char* p = (unsigned char*)image->bits;
-
-  GdkImage* gi = gdk_image_get(render->pixmap, 0, 0,
-			       render->width, render->height);
-  for (y = 0; y < render->height; y++)
-  for (x = 0; x < render->width; x++)
-  {
-    guint32 ui = gdk_image_get_pixel (gi, x, y);
-    *p = (ui & 0xFF0000) >> 16; p++;
-    *p = (ui & 0x00FF00) >> 8; p++;
-    *p = (ui & 0x0000FF); p++;
-  }
-
-  gdk_image_destroy(gi);
-
-  return image;
-}
-
 
 void SystemInit()
 {
@@ -565,6 +786,10 @@ bool SystemDoDialog(int mode, void* param)
 
     case LC_DLG_PROPERTIES: {
       return propertiesdlg_execute(param) == LC_OK;
+    } break;
+
+    case LC_DLG_LIBRARY: {
+      return librarydlg_execute(param) == LC_OK;
     } break;
 
     case LC_DLG_SELECTBYNAME: {

@@ -3,10 +3,8 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
 #include <stdio.h>
+#include "opengl.h"
 #include "gtktools.h"
 #include "gtkglarea.h"
 #include "main.h"
@@ -14,7 +12,6 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "toolbar.h"
-#include "custom.h"
 
 // =========================================================
 
@@ -80,10 +77,10 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   // Main Toolbar
   main_toolbar.handle_box = gtk_handle_box_new ();
   gtk_box_pack_start (GTK_BOX (vbox), main_toolbar.handle_box, FALSE, FALSE, 0);
-  if (user_rc.view_main_toolbar)
+  //  if (user_rc.view_main_toolbar)
     gtk_widget_show (main_toolbar.handle_box);
   main_toolbar.toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), user_rc.toolbar_style);
+  //  gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), user_rc.toolbar_style);
   gtk_container_add (GTK_CONTAINER (main_toolbar.handle_box), main_toolbar.toolbar);
   gtk_widget_show (main_toolbar.toolbar);
 
@@ -142,11 +139,11 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   // Tools Toolbar
   tool_toolbar.handle_box = gtk_handle_box_new ();
   gtk_box_pack_start (GTK_BOX (vbox),tool_toolbar. handle_box, FALSE, FALSE, 0);
-  if (user_rc.view_tool_toolbar)
+  //  if (user_rc.view_tool_toolbar)
     gtk_widget_show (tool_toolbar.handle_box);
 
   tool_toolbar.toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), user_rc.toolbar_style);
+  //  gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), user_rc.toolbar_style);
   gtk_container_add (GTK_CONTAINER (tool_toolbar.handle_box), tool_toolbar.toolbar);
   gtk_widget_show (tool_toolbar.toolbar);
 
@@ -205,7 +202,7 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   // Animation Toolbar
   anim_toolbar.handle_box = gtk_handle_box_new ();
   gtk_box_pack_start (GTK_BOX (vbox), anim_toolbar.handle_box, FALSE, FALSE, 0);
-  if (user_rc.view_anim_toolbar)
+  //  if (user_rc.view_anim_toolbar)
     gtk_widget_show (anim_toolbar.handle_box);
 
   anim_toolbar.toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);

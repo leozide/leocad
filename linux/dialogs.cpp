@@ -10,7 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <pwd.h>
-#include <GL/gl.h>
+#include "opengl.h"
+#include "gtkmisc.h"
 #include "gtktools.h"
 #include "system.h"
 #include "dialogs.h"
@@ -19,6 +20,37 @@
 #include "piece.h"
 #include "group.h"
 
+// =============================================================================
+// Modal dialog functions
+
+void dialog_button_callback (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *parent;
+  int *loop, *ret;
+
+  parent = gtk_widget_get_toplevel (widget);
+  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
+  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
+
+  *loop = 0;
+  *ret = (int)data;
+}
+
+gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
+{
+  int *loop;
+
+  gtk_widget_hide (widget);
+  loop = (int*)gtk_object_get_data (GTK_OBJECT (widget), "loop");
+  *loop = 0;
+
+  return TRUE;
+}
+
+
+
+
+// TODO: remove old functions and replace with the above ones
 static int def_ret = 0;
 static int* cur_ret = NULL;
 
@@ -106,7 +138,7 @@ static void write_int(GtkWidget* widget, int value)
   gtk_entry_set_text (GTK_ENTRY (widget), buf);
 }
 
-// Message box
+// Message box (TODO: use the one in system.cpp)
 
 int msgbox_execute(char* text, int flags)
 {
@@ -906,15 +938,15 @@ static void imageoptsdlg_ok(GtkWidget *widget, gpointer data)
 
   if (s->from_htmldlg)
   {
-    SystemSetProfileInt("Default", "HTML Options", image);
-    SystemSetProfileInt("Default", "HTML Width", opts->width);
-    SystemSetProfileInt("Default", "HTML Height", opts->height);
+    Sys_ProfileSaveInt ("Default", "HTML Options", image);
+    Sys_ProfileSaveInt ("Default", "HTML Width", opts->width);
+    Sys_ProfileSaveInt ("Default", "HTML Height", opts->height);
   }
   else
   {
-    SystemSetProfileInt("Default", "Image Options", image);
-    SystemSetProfileInt("Default", "Image Width", opts->width);
-    SystemSetProfileInt("Default", "Image Height", opts->height);
+    Sys_ProfileSaveInt ("Default", "Image Options", image);
+    Sys_ProfileSaveInt ("Default", "Image Width", opts->width);
+    Sys_ProfileSaveInt ("Default", "Image Height", opts->height);
   }
 
   *cur_ret = LC_OK;
@@ -2425,7 +2457,214 @@ int groupdlg_execute(void* param)
   return dlg_domodal(dlg, LC_CANCEL);
 }
 
+// =============================================================================
+// Piece Library Dialog
+
+#if 0
+#include "library.h"
+#include "pieceinf.h"
+
+static void librarydlg_treefocus (GtkCTree *ctree, GtkCTreeNode *row, gint column, gpointer data)
+{
+  LibraryDialog *dlg = (LibraryDialog*)data;
+  dlg->SetCurrentGroup (GTK_CLIST (ctree)->focus_row - 1);
+}
+
+static void librarydlg_command (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *parent = gtk_widget_get_toplevel (widget);
+  LibraryDialog *dlg = (LibraryDialog*) gtk_object_get_data (GTK_OBJECT (parent), "lib");
+  int id = GPOINTER_TO_INT (data);
+
+  dlg->HandleCommand (id);
+}
+
+static void librarydlg_update_list (LC_LIBDLG_PIECEINFO *piece_info, int count, int group, void *data)
+{
+  GtkCList *clist = GTK_CLIST (data);
+  unsigned long flag = 1 << group;
+  int i, row;
+
+  gtk_clist_freeze (clist);
+  gtk_clist_clear (clist);
+
+  for (i = 0; i < count; i++)
+    if ((group == -1) || ((flag & piece_info[i].current_groups) != 0))
+    {
+      char *text = piece_info[i].info->m_strDescription;
+      row = gtk_clist_append (clist, &text);
+      gtk_clist_set_row_data (clist, row, GINT_TO_POINTER (i));
+    }
+
+  gtk_clist_thaw (clist);
+  clist->focus_row = 0;
+  gtk_clist_select_row (clist, 0, 0);
+}
+
+static void librarydlg_update_tree (int num_groups, char str_groups[][LC_LIBDLG_MAXNAME+1], void *data)
+{
+  GtkCTree *ctree = GTK_CTREE (data);
+  GtkCTreeNode *parent;
+  char *text = "Groups";
+
+  gtk_clist_freeze (GTK_CLIST (ctree));
+  gtk_clist_clear (GTK_CLIST (ctree));
+
+  parent = gtk_ctree_insert_node (ctree, NULL, NULL, &text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
+
+  for (int i = 0; i < num_groups; i++)
+  {
+    text = str_groups[i];
+    gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
+  }
+
+  gtk_clist_thaw (GTK_CLIST (ctree));
+}
+
+int librarydlg_execute (void *param)
+{
+  GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *item, *menu, *menubar, *handle;
+  GtkAccelGroup *accel, *menu_accel;
+  int loop = 1, ret = LC_CANCEL;
+  LibraryDialog lib;
+
+  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title (GTK_WINDOW (dlg), "Piece Library Manager");
+  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
+                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
+  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
+                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+  gtk_object_set_data (GTK_OBJECT (dlg), "loop", &loop);
+  gtk_object_set_data (GTK_OBJECT (dlg), "ret", &ret);
+  gtk_window_set_default_size (GTK_WINDOW (dlg), 500, 250);
+  accel = gtk_accel_group_get_default ();
+
+  vbox = gtk_vbox_new (FALSE, 5);
+  gtk_widget_show (vbox);
+  gtk_container_add (GTK_CONTAINER (dlg), vbox);
+
+  handle = gtk_handle_box_new ();
+  gtk_box_pack_start (GTK_BOX (vbox), handle, FALSE, FALSE, 0);
+  gtk_widget_show (handle);
+
+  menubar = gtk_menu_bar_new ();
+  gtk_container_add (GTK_CONTAINER (handle), menubar);
+  gtk_widget_show (menubar);
+  /*
+  // File menu
+  menu = create_sub_menu (menubar, "_File", accel, &menu_accel);
+  menu_tearoff (menu);
+
+  create_menu_item (menu, "_Reset", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_RESET);
+  create_menu_item (menu, "_Open...", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_OPEN);
+  create_menu_item (menu, "_Save", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_SAVE);
+  create_menu_item (menu, "Save _As...", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_SAVEAS);
+  menu_separator (menu);
+  item = create_menu_item (menu, "_Print Catalog...", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_PRINTCATALOG);
+  gtk_widget_set_sensitive (item, FALSE);
+  item = create_menu_item (menu, "Load _Update...", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_MERGEUPDATE);
+  item = create_menu_item (menu, "_Import Piece...", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_IMPORTPIECE);
+  menu_separator (menu);
+  item = create_menu_item (menu, "Re_turn", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_RETURN);
+  item = create_menu_item (menu, "_Cancel", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_CANCEL);
+
+  // Group menu
+  menu = create_sub_menu (menubar, "_Group", accel, &menu_accel);
+  menu_tearoff (menu);
+
+  create_menu_item (menu, "Insert...", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_INSERT);
+  create_menu_item (menu, "Delete", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_DELETE);
+  create_menu_item (menu, "Edit...", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_EDIT);
+  menu_separator (menu);
+  create_menu_item (menu, "Move Up", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_MOVEUP);
+  create_menu_item (menu, "Move Down", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_MOVEDOWN);
+
+  // Piece menu
+  menu = create_sub_menu (menubar, "_Piece", accel, &menu_accel);
+  menu_tearoff (menu);
+
+  item = create_menu_item (menu, "_New", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_NEW);
+  gtk_widget_set_sensitive (item, FALSE);
+  item = create_menu_item (menu, "_Edit", menu_accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_EDIT);
+  gtk_widget_set_sensitive (item, FALSE);
+  create_menu_item (menu, "_Delete", menu_accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_DELETE);
+  */
+  hsplit = gtk_hpaned_new ();
+  gtk_paned_set_gutter_size (GTK_PANED (hsplit), 12);
+  gtk_box_pack_start (GTK_BOX (vbox), hsplit, TRUE, TRUE, 0);
+  gtk_widget_show (hsplit);
+  gtk_container_set_border_width (GTK_CONTAINER (hsplit), 5);
+
+  ctree = gtk_ctree_new (1, 0);
+  gtk_object_set_data (GTK_OBJECT (dlg), "ctree", ctree);
+  gtk_widget_show (ctree);
+  gtk_paned_add1 (GTK_PANED (hsplit), ctree);
+  gtk_clist_column_titles_hide (GTK_CLIST (ctree));
+  gtk_clist_set_selection_mode (GTK_CLIST (ctree), GTK_SELECTION_BROWSE);
+  gtk_signal_connect (GTK_OBJECT (ctree), "tree_select_row",
+		      GTK_SIGNAL_FUNC (librarydlg_treefocus), &lib);
+  gtk_widget_set_usize (ctree, -1, 200);
+
+  scr = gtk_scrolled_window_new ((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
+  gtk_widget_show (scr);
+  gtk_paned_add2 (GTK_PANED (hsplit), scr);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
+  clist = gtk_clist_new (1);
+  gtk_widget_show (clist);
+  gtk_clist_set_selection_mode (GTK_CLIST (clist), GTK_SELECTION_BROWSE);
+  gtk_clist_set_auto_sort (GTK_CLIST (clist), TRUE);
+  gtk_container_add (GTK_CONTAINER (scr), clist);
+  gtk_clist_column_titles_hide (GTK_CLIST (clist));
+  gtk_paned_set_position (GTK_PANED (hsplit), 150);
+
+  // Initialize
+  gtk_object_set_data (GTK_OBJECT (dlg), "lib", &lib);
+  lib.SetListFunc (librarydlg_update_list, clist);
+  lib.SetTreeFunc (librarydlg_update_tree, ctree);
+  lib.Initialize ();
 
 
+  gtk_grab_add (dlg);
+  gtk_widget_show (dlg);
 
+  while (loop)
+    gtk_main_iteration ();
 
+  if (ret == LC_OK)
+  {
+
+  }
+
+  gtk_grab_remove (dlg);
+  gtk_widget_destroy (dlg);
+
+  return ret;
+}
+
+#else
+
+int librarydlg_execute (void *param)
+{
+  // TODO: FIXME !
+  return 0;
+}
+
+#endif

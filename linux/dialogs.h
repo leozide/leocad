@@ -20,6 +20,7 @@ int propertiesdlg_execute(void* param);
 int groupeditdlg_execute(void* param);
 int groupdlg_execute(void* param);
 int minifigdlg_execute(void* param);
+int librarydlg_execute(void* param);
 
 #endif // _DIALOGS_H_
 

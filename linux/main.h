@@ -8,13 +8,31 @@ extern bool ignore_commands;
 void OnCommand(GtkWidget *w, gpointer data);
 void OnCommandDirect(GtkWidget *w, gpointer data);
 
-#define ID_FILE_RECENT1           1
-#define ID_FILE_RECENT2           2
-#define ID_FILE_RECENT3           3
-#define ID_FILE_RECENT4           4
-#define ID_FILE_EXIT              5
-#define ID_VIEW_VIEWPORTS_01      6
-#define ID_VIEW_VIEWPORTS_14     19
+#define ID_FILE_RECENT1            1
+#define ID_FILE_RECENT2            2
+#define ID_FILE_RECENT3            3
+#define ID_FILE_RECENT4            4
+#define ID_FILE_EXIT               5
+#define ID_VIEW_VIEWPORTS_01       6
+#define ID_VIEW_VIEWPORTS_02       7
+#define ID_VIEW_VIEWPORTS_03       8
+#define ID_VIEW_VIEWPORTS_04       9
+#define ID_VIEW_VIEWPORTS_05      10
+#define ID_VIEW_VIEWPORTS_06      11
+#define ID_VIEW_VIEWPORTS_07      12
+#define ID_VIEW_VIEWPORTS_08      13
+#define ID_VIEW_VIEWPORTS_09      14
+#define ID_VIEW_VIEWPORTS_10      15
+#define ID_VIEW_VIEWPORTS_11      16
+#define ID_VIEW_VIEWPORTS_12      17
+#define ID_VIEW_VIEWPORTS_13      18
+#define ID_VIEW_VIEWPORTS_14      19
+#define ID_VIEW_TOOLBAR_STANDARD  20
+#define ID_VIEW_TOOLBAR_DRAWING   21
+#define ID_VIEW_TOOLBAR_ANIMATION 22
+#define ID_VIEW_TOOLBAR_BOTH      23
+#define ID_VIEW_TOOLBAR_ICONS     24
+#define ID_VIEW_TOOLBAR_TEXT      25
 
 #define ID_CAMERA_FIRST        1001
 #define ID_CAMERA_LAST         1255

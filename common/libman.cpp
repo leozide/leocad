@@ -87,47 +87,37 @@ void LibraryManager::HandleCommand (int id, int param)
 
 		case LC_LIBDLG_FILE_MERGEUPDATE:
 		{
-			char filename[LC_MAXPATH];
+//			char filename[LC_MAXPATH];
 
 			// FIXME: file extension
-			if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
-				return;
+//			if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
+//				return;
 
-			project->GetPiecesLibrary ()->LoadUpdate (filename);
+//			project->GetPiecesLibrary ()->LoadUpdate (filename);
 
 			// FIXME: update m_pPieces
 		} break;
 
 		case LC_LIBDLG_FILE_IMPORTPIECE:
 		{
-/*
-      char filename[LC_MAXPATH];
-      LC_LDRAW_PIECE piece;
+			LC_FILEOPENDLG_OPTS opts;
 
-      //      CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-      //		      "LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",this);
-      if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
-	return;
+			strcpy(opts.path, Sys_ProfileLoadString ("Default", "LDraw Pieces Path", ""));
+			opts.type = LC_FILEOPENDLG_DAT;
 
-      BeginWait ();
+			if (!SystemDoDialog (LC_DLG_FILE_OPEN, &opts))
+				return;
 
-      if (ReadLDrawPiece(filename, &piece))
-      {
-	if (project->GetPiecesLibrary ()->FindPieceInfo(piece.name) != NULL)
-	  Sys_MessageBox ("Piece already exists in the library !");
+			for (int i = 0; i < opts.numfiles; i++)
+			{
+				project->GetPiecesLibrary ()->ImportLDrawPiece (opts.filenames[i]);
+				free (opts.filenames[i]);
+			}
 
-	if (SaveLDrawPiece(&piece))
-	  Sys_MessageBox ("Piece successfully imported.");
-	else
-	  Sys_MessageBox ("Error saving library.");
-      }
-      else
-	Sys_MessageBox ("Error reading file.");
+			free (opts.filenames);
+			Sys_ProfileSaveString ("Default", "LDraw Pieces Path", opts.path);
 
-      EndWait ();
-      FreeLDrawPiece(&piece);
 			// FIXME: update m_pPieces
-*/
     } break;
 
 		case LC_LIBDLG_FILE_RETURN:

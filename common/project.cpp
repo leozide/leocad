@@ -1331,7 +1331,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			strcat(newName, ".lcd");
 		}
 
-		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &newName))
+		if (!SystemDoDialog(LC_DLG_FILE_SAVE_PROJECT, &newName))
 			return false; // don't even attempt to save
 	}
 
@@ -3051,7 +3051,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			char filename[LC_MAXPATH];
 			strcpy(filename, m_strModelsPath);
 
-			if (SystemDoDialog(LC_DLG_FILE_OPEN, filename))
+			if (SystemDoDialog(LC_DLG_FILE_OPEN_PROJECT, filename))
 			{
 				if (!SaveModified())
 					return;  // leave the original one
@@ -3079,7 +3079,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			char filename[LC_MAXPATH];
 			strcpy(filename, m_strModelsPath);
 
-			if (SystemDoDialog(LC_DLG_FILE_MERGE, filename))
+			if (SystemDoDialog(LC_DLG_FILE_MERGE_PROJECT, filename))
 			{
 				FileDisk file;
 				if (file.Open(filename, "rb"))

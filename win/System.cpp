@@ -1064,7 +1064,7 @@ bool SystemDoDialog(int nMode, void* param)
 {
 	switch (nMode)
 	{
-		case LC_DLG_FILE_OPEN:
+		case LC_DLG_FILE_OPEN_PROJECT:
 		{
 			char *defdir = (char*)param;
 			if (strlen(defdir))
@@ -1086,7 +1086,7 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 		
-		case LC_DLG_FILE_SAVE:
+		case LC_DLG_FILE_SAVE_PROJECT:
 		{
 			CFileDialog dlg(FALSE, "*.lcd", (char*)param, OFN_HIDEREADONLY|OFN_PATHMUSTEXIST|OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE,
 				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||");
@@ -1104,7 +1104,7 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 
-		case LC_DLG_FILE_MERGE:
+		case LC_DLG_FILE_MERGE_PROJECT:
 		{
 			char *defdir = (char*)param;
 			if (strlen(defdir))
@@ -1123,6 +1123,71 @@ bool SystemDoDialog(int nMode, void* param)
 				strcpy((char*)param, dlg.GetPathName());
 				return true;
 			}
+		} break;
+
+		case LC_DLG_FILE_OPEN:
+		{
+			LC_FILEOPENDLG_OPTS* opts = (LC_FILEOPENDLG_OPTS*)param;
+
+			if (opts->type == LC_FILEOPENDLG_DAT)
+			{
+				CString filename;
+
+				// FIXME: Use the PLM window as parent.
+				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
+					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",AfxGetMainWnd());
+				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 32);
+		    dlg.m_ofn.nMaxFile = _MAX_PATH;
+
+	      if (dlg.DoModal() == IDOK)
+				{
+		      POSITION pos = dlg.GetStartPosition ();
+					int count = 0;
+
+		      while (pos != NULL)
+					{
+						dlg.GetNextPathName (pos);
+						count++;
+					}
+
+					opts->filenames = (char**)malloc(count*sizeof(char*));
+					opts->numfiles = count;
+
+					pos = dlg.GetStartPosition ();
+					count = 0;
+
+		      while (pos != NULL)
+				  {
+		        CString str = dlg.GetNextPathName (pos);
+						opts->filenames[count] = (char*)malloc(LC_MAXPATH);
+						strcpy (opts->filenames[count], str);
+						count++;
+					}
+
+					// Get the file path.
+					strcpy (opts->path, opts->filenames[0]);
+					if (strlen (opts->path) > 0)
+					{
+						char* ptr = strrchr(opts->path, '/');
+						if (ptr == NULL)
+							ptr = strrchr(opts->path, '\\');
+						if (ptr)
+						{
+							ptr++;
+							*ptr = 0;
+						}
+					}
+
+					return true;
+				}
+			}
+			else
+			{
+//				if (opts->type == LC_FILEOPENDLG_LGF
+//					LC_FILEOPENDLG_LUP
+				// Not Implemented yet.
+			}
+
 		} break;
 
 		case LC_DLG_PICTURE_SAVE:

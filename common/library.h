@@ -46,6 +46,7 @@ public:
   bool LoadUpdate (const char* update);
 	bool DeleteTextures (char** Names, int NumTextures);
 	bool ImportTexture (const char* Name);
+	bool ImportLDrawPiece (const char* Filename);
 
 	static unsigned long GetDefaultPieceGroup (const char* name);
 

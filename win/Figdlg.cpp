@@ -19,6 +19,7 @@ CMinifigDlg::CMinifigDlg(void* param, CWnd* pParent /*=NULL*/)
 	: CDialog(CMinifigDlg::IDD, pParent)
 {
   m_pMinifig = (MinifigWizard*)param;
+	m_pMinifigWnd = NULL;
 
 	//{{AFX_DATA_INIT(CMinifigDlg)
 	//}}AFX_DATA_INIT
@@ -132,8 +133,12 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 BOOL CMinifigDlg::DestroyWindow() 
 {
-	m_pMinifigWnd->DestroyWindow();
-	delete m_pMinifigWnd;
+	if (m_pMinifigWnd)
+	{
+		m_pMinifigWnd->DestroyWindow();
+		delete m_pMinifigWnd;
+		m_pMinifigWnd = NULL;
+	}
 	
 	return CDialog::DestroyWindow();
 }

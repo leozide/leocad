@@ -98,6 +98,7 @@ public:
 	void SetViewSize(int cx, int cy);
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
+	Object* GetFocusObject() const;
   Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
   void AddView (View* pView);

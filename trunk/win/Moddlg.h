@@ -11,6 +11,8 @@
 
 #include "ClrPick.h"
 
+class Object;
+
 ///////////////////////////////////////////////////////////////////////////// 
 // CModifyDialog window 
 
@@ -61,14 +63,14 @@ public:
 // Implementation 
 public: 
 
-	void UpdateInfo(void* pObject, BYTE nType);
+	void UpdateInfo(Object* pObject);
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
 	BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID); 
 	BOOL Create(CWnd* pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID); 
 
 protected: 
 	virtual BOOL OnInitDialogBar(); 
-	void* m_pObject;
+	Object* m_pObject;
 	BYTE m_nType;
 
 protected: 
@@ -76,7 +78,7 @@ protected:
 	void OnMenuClick(UINT nID);
 
 	// Generated message map functions 
-	//{{AFX_MSG(CModifyDialog) 
+	//{{AFX_MSG(CModifyDialog)
 	afx_msg void OnModdlgPiece();
 	afx_msg void OnSelendokModdlgList();
 	afx_msg void OnModdlgApply();

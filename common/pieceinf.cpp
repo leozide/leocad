@@ -1,20 +1,18 @@
 // Information about how to draw a piece and some more stuff.
 //
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h> // TODO: remove, only needed by ZoomExtents()
+#include <math.h>
+#include "boundbox.h"
+#include "opengl.h"
 #include "texture.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
 #include "matrix.h"
+#include "vector.h"
 #include "defines.h"
 
 #define SIDES 16
@@ -38,7 +36,6 @@ static float costbl[SIDES];
 #define LC_STUD_RADIUS 0.24f
 #define LC_KNOB_RADIUS 0.32f
 //#define LC_STUD_TECH_RADIUS (LC_FLAT_HEIGHT/2)
-
 
 // Convert a color from LDraw to LeoCAD
 unsigned char ConvertColor(int c)
@@ -1412,76 +1409,44 @@ void PieceInfo::FreeInformation()
 // Zoom extents for the preview window & print catalog
 void PieceInfo::ZoomExtents()
 {
-	// TODO: Calculate this in the right way
-	bool out = false;
-	GLdouble modelMatrix[16], projMatrix[16];
-	GLdouble obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
-	double View[3] = { -5, -5, 3 };
-	GLint viewport[4];
-	float v[24] = {
-		m_fDimensions[0], m_fDimensions[1], m_fDimensions[5],
-		m_fDimensions[3], m_fDimensions[1], m_fDimensions[5],
-		m_fDimensions[0], m_fDimensions[1], m_fDimensions[2],
-		m_fDimensions[3], m_fDimensions[4], m_fDimensions[5],
-		m_fDimensions[3], m_fDimensions[4], m_fDimensions[2],
-		m_fDimensions[0], m_fDimensions[4], m_fDimensions[2],
-		m_fDimensions[0], m_fDimensions[4], m_fDimensions[5],
-		m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] };
+  Vector eye, target, front, right, up;
+  float mat[16];
 
-	gluLookAt (View[0], View[1], View[2], (m_fDimensions[0] + m_fDimensions[3])/2, (m_fDimensions[1] + m_fDimensions[4])/2, (m_fDimensions[2] + m_fDimensions[5])/2, 0, 0, 1);
-	glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-	glGetIntegerv(GL_VIEWPORT,viewport);
+  // Initialize variables
+  target.FromFloat ((m_fDimensions[0] + m_fDimensions[3])*0.5f, (m_fDimensions[1] + m_fDimensions[4])*0.5f,
+		    (m_fDimensions[2] + m_fDimensions[5])*0.5f);
+  eye.FromFloat (-5, -5, 3);
+  up.FromFloat (0, 0, 1);
 
-	gluUnProject((double)(viewport[2]/2),(double)(viewport[3]/2),0,
-		modelMatrix,projMatrix,viewport,&obj1x,&obj1y,&obj1z);
-	gluUnProject((double)(viewport[2]/2),(double)(viewport[3]/2),1,
-		modelMatrix,projMatrix,viewport,&obj2x,&obj2y,&obj2z);
+  // Calculate view matrix
+  front.FromFloat (eye.X () - target.X (), eye.Y () - target.Y (), eye.Z () - target.Z ());
+  front.Normalize ();
+  right.Cross (front, up);
+  right.Normalize ();
+  up.Cross (right, front);
+  up.Normalize ();
 
-	double d = 2*sqrt((obj2x-obj1x)*(obj2x-obj1x)+(obj2y-obj1y)*(obj2y-obj1y)+(obj2z-obj1z)*(obj2z-obj1z));
-	while (!out) // Zoom in
-	{
-		View[0] += (obj2x-obj1x)/d;
-		View[1] += (obj2y-obj1y)/d;
-		View[2] += (obj2z-obj1z)/d;
-		glLoadIdentity();
-		gluLookAt (View[0], View[1], View[2], (m_fDimensions[0] + m_fDimensions[3])/2, (m_fDimensions[1] + m_fDimensions[4])/2, (m_fDimensions[2] + m_fDimensions[5])/2, 0, 0, 1);
-		
-		for (int i = 0; i < 24; i+=3)
-		{
-			double winx, winy, winz;
-			if (gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz) == GL_TRUE)
-				if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
-					(winx > viewport[2] - 1) || (winy > viewport[3] - 1))
-					out = true;
-		}
-		
-		glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-		glGetIntegerv(GL_VIEWPORT,viewport);
-	}
+  mat[0] = right.X ();  mat[4] = right.Y ();  mat[8]  = right.Z ();  mat[12] = 0.0;
+  mat[1] = up.X ();     mat[5] = up.Y ();     mat[9]  = up.Z ();     mat[13] = 0.0;
+  mat[2] = front.X ();  mat[6] = front.Y ();  mat[10] = front.Z ();  mat[14] = 0.0;
+  mat[3] = 0.0;         mat[7] = 0.0;         mat[11] = 0.0;         mat[15] = 1.0;
 
-	while (out)
-	{
-		out = false;
-		View[0] -= (obj2x-obj1x)/d;
-		View[1] -= (obj2y-obj1y)/d;
-		View[2] -= (obj2z-obj1z)/d;
-		glLoadIdentity();
-		gluLookAt (View[0], View[1], View[2], (m_fDimensions[0] + m_fDimensions[3])/2, (m_fDimensions[1] + m_fDimensions[4])/2, (m_fDimensions[2] + m_fDimensions[5])/2, 0, 0, 1);
-		
-		for (int i = 0; i < 24; i+=3)
-		{
-			double winx, winy, winz;
-			if (gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz) == GL_TRUE)
-				if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
-					(winx > viewport[2] - 1) || (winy > viewport[3] - 1))
-					out = true;
-		}
-		glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-		glGetIntegerv(GL_VIEWPORT,viewport);
-	}
+  // Load matrix
+  glMatrixMode (GL_MODELVIEW);
+  glLoadIdentity ();
+  glMultMatrixf (mat);
+  glTranslatef (-eye.X (), -eye.Y (), -eye.Z ());
+  front.Scale (0.1f);
+
+  // Zoom in
+  while (!BoxOutsideFrustum (m_fDimensions))
+    glTranslatef (front.X (), front.Y (), front.Z ());
+
+  // Zoom out
+  do
+  {
+    glTranslatef (-front.X (), -front.Y (), -front.Z ());
+  } while (BoxOutsideFrustum (m_fDimensions));
 }
 
 // Used by the print catalog and HTML instructions functions.

@@ -3479,118 +3479,126 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		// Export to POV-Ray, swap X & Y from our cs to work with LGEO.
 		case LC_FILE_POVRAY:
 		{
-			LC_POVRAYDLG_OPTS opts;
-			if (!SystemDoDialog(LC_DLG_POVRAY, &opts))
-				break;
+		  LC_POVRAYDLG_OPTS opts;
+		  if (!SystemDoDialog(LC_DLG_POVRAY, &opts))
+		    break;
 
 //	CWaitCursor wc;
-			char fn[LC_MAXPATH], tmp[10], *ptr;
-			unsigned long u;
-			PieceInfo* pInfo;
-			Piece* pPiece;
-			FILE* f;
-			char* conv = (char*)malloc(9*m_nPieceCount);
-			memset(conv, 0, 9*m_nPieceCount);
+		  char fn[LC_MAXPATH], tmp[10], *ptr;
+		  unsigned long u;
+		  PieceInfo* pInfo;
+		  Piece* pPiece;
+		  FILE* f;
+		  char *conv = (char*)malloc (9*m_nPieceCount);
+		  char *flags = (char*)malloc (m_nPieceCount);
+		  memset (conv, 0, 9*m_nPieceCount);
+		  memset (flags, 0, m_nPieceCount);
 
-			// read LGEO conversion table
-			if (strlen(opts.libpath))
-			{
-				strcpy(fn, opts.libpath);
-				strcat(fn, "l2p_elmt.tab");
-				f = fopen(fn, "rb");
+		  // read LGEO conversion table
+		  if (strlen (opts.libpath))
+		  {
+		    strcpy (fn, opts.libpath);
+		    strcat (fn, "l2p_elmt.tab");
+		    f = fopen(fn, "rb");
 
-				if (f == NULL)
-				{
+		    if (f == NULL)
+		    {
+		      free (conv);
+		      free (flags);
 //					AfxMessageBox(IDS_OPENFILE_ERROR, MB_OK|MB_ICONSTOP);
-					return;
-				}
+		      return;
+		    }
 
-				unsigned char bt[4];
-				while (fread(&bt, 4, 1, f))
-				{
-					u = (((unsigned char)(bt[3])|((unsigned short)(bt[2]) << 8))|(((unsigned long)(bt[1])) << 16)) + bt[0] * 16581375;
-					sprintf(tmp, "%d", (int)u);
-					pInfo = FindPieceInfo(tmp);
+		    unsigned char bt[4];
+		    while (fread (&bt, 4, 1, f))
+		    {
+		      u = (((unsigned char)(bt[3])|((unsigned short)(bt[2]) << 8))|
+			   (((unsigned long)(bt[1])) << 16)) + bt[0] * 16581375;
+		      sprintf(tmp, "%d", (int)u);
+		      pInfo = FindPieceInfo(tmp);
 
-					fread(&tmp, 9, 1, f);
-					if (tmp[8] != 0)
-						fread(&tmp[9], 1, 1, f);
+		      fread(&tmp, 9, 1, f);
+		      if (tmp[8] != 0)
+			fread(&tmp[9], 1, 1, f);
 
-					if (pInfo != NULL)
-					{
-						int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
-						memcpy(&conv[idx*9], &tmp[1], 9);
-					}
-				}
-				fclose(f);
+		      if (pInfo != NULL)
+		      {
+			int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			memcpy (&conv[idx*9], &tmp[1], 9);
+			flags[idx] = tmp[0];
+		      }
+		    }
+		    fclose (f);
 
-				strcpy(fn, opts.libpath);
-				strcat(fn, "l2p_ptrn.tab");
-				f = fopen(fn, "rb");
-		
-				if (f == NULL)
-				{
+		    strcpy(fn, opts.libpath);
+		    strcat(fn, "l2p_ptrn.tab");
+		    f = fopen(fn, "rb");
+
+		    if (f == NULL)
+		    {
 //					AfxMessageBox(IDS_OPENFILE_ERROR, MB_OK|MB_ICONSTOP);
-					free(conv);
-					return;
-				}
+		      free (conv);
+		      free (flags);
+		      return;
+		    }
 
-				u = 0;
-				do 
-				{
-					if ((tmp[u] == 0) && (u != 0))
-					{
-						u = 0;
-						pInfo = FindPieceInfo(tmp);
-						fread(&tmp, 8, 1, f);
-				
-						if (pInfo != NULL)
-						{
-							int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
-							memcpy(&conv[idx*9], tmp, 9);
-						}
-					}
-					else
-						u++;
-				}	
-				while (fread(&tmp[u], 1, 1, f));
-				fclose(f);
-			}
+		    u = 0;
+		    do 
+		    {
+		      if ((tmp[u] == 0) && (u != 0))
+		      {
+			u = 0;
+			pInfo = FindPieceInfo(tmp);
+			fread(&tmp, 8, 1, f);
 
-			strcpy(fn, opts.outpath);
-			if ((ptr = strrchr (fn, '.')))
-				*ptr = 0;
-			strcat (fn, ".inc");
-			f = fopen(fn, "wt");
-			fputs("// Stuff that doesn't need to be changed\n\n", f);
-
-			if (strlen(opts.libpath))
-				fputs("#include \"lg_color.inc\"\n#include \"lg_defs.inc\"\n\n", f);
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			if (pInfo != NULL)
 			{
-				Piece* pNext;
-
-				for (pNext = m_pPieces; pNext; pNext = pNext->m_pNext)
-				{
-					pInfo = pNext->GetPieceInfo();
-
-					if (pNext == pPiece)
-					{
-						int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
-						char pat[] = "patterns/";
-						if (conv[idx*9+1] != 'p')
-							strcpy(pat, "");
-
-						if (conv[idx*9] != 0)
-							fprintf(f, "#include \"%s%s.inc\"\n", pat, &conv[idx*9]);
-						break;
-					}
-
-					if (pInfo == pPiece->GetPieceInfo())
-						break;
-				}
+			  int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			  memcpy(&conv[idx*9], tmp, 9);
 			}
+		      }
+		      else
+			u++;
+		    }	
+		    while (fread(&tmp[u], 1, 1, f));
+		    fclose(f);
+		  }
+
+		  strcpy(fn, opts.outpath);
+		  if ((ptr = strrchr (fn, '.')))
+		    *ptr = 0;
+		  strcat (fn, ".inc");
+		  f = fopen(fn, "wt");
+		  fputs("// Stuff that doesn't need to be changed\n\n", f);
+
+		  if (strlen(opts.libpath))
+		    fputs("#include \"lg_color.inc\"\n#include \"lg_defs.inc\"\n\n", f);
+
+		  // Add include files
+		  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		  {
+		    Piece* pNext;
+
+		    for (pNext = m_pPieces; pNext; pNext = pNext->m_pNext)
+		    {
+		      pInfo = pNext->GetPieceInfo();
+
+		      if (pNext == pPiece)
+		      {
+			int idx = (((char*)pInfo - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			char pat[] = "patterns/";
+			if (conv[idx*9+1] != 'p')
+			  strcpy(pat, "");
+
+			if (conv[idx*9] != 0)
+			  fprintf(f, "#include \"%s%s.inc\"\n", pat, &conv[idx*9]);
+			break;
+		      }
+
+		      if (pInfo == pPiece->GetPieceInfo())
+			break;
+		    }
+		  }
 
 			const char* lg_colors[28] = { "red", "Orange", "green", "mint", "blue", "LightBlue", "yellow", 
 				"white", "dark_grey", "black", "brown", "pink", "purple", "gold_chrome", "clear_red",
@@ -3773,35 +3781,45 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				float fl[12], pos[3], rot[4];
-				char name[20];
-				int idx = (((char*)pPiece->GetPieceInfo() - (char*)m_pPieceIdx)/sizeof(PieceInfo));
+			  float fl[12], pos[3], rot[4];
+			  char name[20];
+			  int idx = (((char*)pPiece->GetPieceInfo() - (char*)m_pPieceIdx)/sizeof(PieceInfo));
 
-				if (conv[idx*9] == 0)
-				{
-					char* ptr;
-					sprintf(name, "lc_%s", pPiece->GetPieceInfo()->m_strName);
-					while ((ptr = strchr(name, '-')))
-						*ptr = '_';
-				}
-				else
-				{
-					strcpy (name, &conv[idx*9]);
-					if (pPiece->IsTransparent())
-						strcat(name, "_clear");			
-				}
+			  if (conv[idx*9] == 0)
+			  {
+			    char* ptr;
+			    sprintf(name, "lc_%s", pPiece->GetPieceInfo()->m_strName);
+			    while ((ptr = strchr(name, '-')))
+			      *ptr = '_';
+			  }
+			  else
+			  {
+			    strcpy (name, &conv[idx*9]);
+			    if (pPiece->IsTransparent())
+			      strcat(name, "_clear");			
+			  }
 
-				pPiece->GetPosition(pos);
-				pPiece->GetRotation(rot);
-				Matrix mat(rot, pos);
-				mat.ConvertToLDraw(fl);
+			  pPiece->GetPosition(pos);
+			  pPiece->GetRotation(rot);
+			  Matrix mat(rot, pos);
+			  mat.ConvertToLDraw(fl);
 
-				fprintf(f, "object {\n %s\n texture { lg_%s } matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					name, lg_colors[pPiece->GetColor()], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
-					-fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+			  // Slope needs to be handled correctly
+			  if (flags[idx] == 1)
+			    fprintf (f, "merge {\n object {\n  %s\n  texture { lg_%s }\n }\n"
+				     " object {\n  %s_slope\n  texture { lg_%s normal { bumps 0.3 scale 0.02 } }\n }\n"
+				     " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
+				    name, lg_colors[pPiece->GetColor()], &conv[idx*9], lg_colors[pPiece->GetColor()],
+				     -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
+				     -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+			  else
+			    fprintf(f, "object {\n %s\n texture { lg_%s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
+				    name, lg_colors[pPiece->GetColor()], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
+				    -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
 			}
-			fclose(f);
-			free(conv);
+			fclose (f);
+			free (conv);
+			free (flags);
 
 			if (opts.render)
 			{

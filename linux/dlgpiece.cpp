@@ -188,138 +188,137 @@ static gint minifigdlg_color_expose (GtkWidget *widget)
 }
 
 // New piece was selected
-static void minifigdlg_piece_selection (GtkWidget *widget)
+static void minifigdlg_piece_changed (GtkWidget *widget)
 {
   LC_MINIFIGDLG_STRUCT* info;
-  PieceInfo* piece_info;
-  int i, j;
-
-  gtk_widget_hide (widget);
-  if (GTK_WIDGET_HAS_GRAB (widget))
-    gtk_grab_remove (widget);
-  //  gdk_pointer_ungrab (0);
+  PieceInfo* piece_info = NULL;
+  int i, j, piece_type;
+  char* desc;
 
   info = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "info");
   if (info == NULL)
     return;
 
-  // TODO: rewrite !!!
   for (i = 0; i < 15; i++)
-    if (GTK_COMBO (info->pieces[i])->popwin == widget)
+    if (GTK_COMBO (info->pieces[i])->entry == widget)
     {
-      char* desc = gtk_entry_get_text (GTK_ENTRY (GTK_COMBO (info->pieces[i])->entry));
-
-      for (j = 0; j < MFW_PIECES; j++)
-      {
-	piece_info = project->FindPieceInfo(mfwpieceinfo[j].name);
-	if (piece_info == NULL)
-	  continue;
-
-	if (strcmp (desc, mfwpieceinfo[j].description) == 0)
-        {
-	  if (info->opts->info[i])
-	    info->opts->info[i]->DeRef();
-	  info->opts->info[i] = piece_info;
-	  piece_info->AddRef();
-	  break;
-	}
-      }
-
-      if (j == MFW_PIECES)
-      {
-	if (info->opts->info[i])
-	  info->opts->info[i]->DeRef();
-	info->opts->info[i] = NULL;
-	break;
-      }
-
-      // Get the pieces in the right place
-      if (i == MFW_NECK)
-      {
-	if (info->opts->info[3] != NULL)
-	{
-	  info->opts->pos[0][2] = 3.92f;
-	  info->opts->pos[1][2] = 3.92f;
-	}
-	else
-	{
-	  info->opts->pos[0][2] = 3.84f;
-	  info->opts->pos[1][2] = 3.84f;
-	}
-      }
-
-      if (i == MFW_LEFT_SHOE)
-      {
-	if (strcmp (desc, "Ski"))
-	  info->opts->pos[13][1] = 0;
-	else
-	  info->opts->pos[13][1] = -0.12f;
-      }
-
-      if (i == MFW_RIGHT_SHOE)
-      {
-	if (strcmp (desc, "Ski"))
-	  info->opts->pos[14][1] = 0;
-	else
-	  info->opts->pos[14][1] = -0.12f;
-      }
-
-      if ((i == MFW_LEFT_TOOL) || (i == MFW_RIGHT_TOOL))
-	if (strcmp(desc, "None") != 0)
-	  {
-	    float rx = 45, ry = 0, rz = 0, x = 0.92f, y = -0.62f, z = 1.76f;
-
-	    if (strcmp (piece_info->m_strName,"4529") == 0)
-	      { rx = -45; y = -1.14f; z = 2.36f; }
-	    if (strcmp (piece_info->m_strName,"3899") == 0)
-	      { y = -1.64f; z = 1.38f; }
-	    if (strcmp (piece_info->m_strName,"4528") == 0)
-	      { rx = -45; y = -1.26f; z = 2.36f; }
-	    if (strcmp (piece_info->m_strName,"4479") == 0)
-	      { rz = 90; y = -1.22f; z = 2.44f; }
-	    if (strcmp (piece_info->m_strName,"3962") == 0)
-	      { rz = 90; y = -0.7f; z = 1.62f; }
-	    if (strcmp (piece_info->m_strName,"4360") == 0)
-	      { rz = -90; y = -1.22f; z = 2.44f; }
-	    if (strncmp (piece_info->m_strName,"6246",4) == 0)
-	      { y = -1.82f; z = 2.72f; rz = 90; }
-	    if (strcmp (piece_info->m_strName,"4349") == 0)
-	      { y = -1.16f; z = 2.0f; }
-	    if (strcmp (piece_info->m_strName,"4479") == 0)
-	      { y = -1.42f; z = 2.26f; }
-	    if (strcmp (piece_info->m_strName,"3959") == 0)
-	      { y = -1.0f; z = 1.88f; }
-	    if (strcmp (piece_info->m_strName,"4522") == 0)
-	      { y = -1.64f; z = 2.48f; }
-	    if (strcmp (piece_info->m_strName,"194") == 0)
-	      { rz = 180; y = -1.04f; z = 1.94f; }
-	    if (strcmp (piece_info->m_strName,"4006") == 0)
-	      { rz = 180; y = -1.24f; z = 2.18f; }
-	    if (strcmp (piece_info->m_strName,"6246C") == 0)
-	      { rx = 35; rz = 0; y = -2.36f; z = 1.08f; }
-	    if (strcmp (piece_info->m_strName,"4497") == 0)
-	      { y = -2.16f; z = 3.08f; rz = 90; }
-	    if (strcmp (piece_info->m_strName,"30092") == 0)
-	      { x = 0; rz = 180; }
-	    if (strcmp (piece_info->m_strName,"37") == 0)
-	      { z = 1.52f; y = -0.64f; }
-	    if (strcmp (piece_info->m_strName,"38") == 0)
-	      { z = 1.24f; y = -0.34f; }
-	    if (strcmp (piece_info->m_strName,"3841") == 0)
-	      { z = 2.24f; y = -1.34f; rz = 180; }
-
-	    if (i == MFW_RIGHT_TOOL)
-	      x = -x;
-
-	    info->opts->pos[i][0] = x;
-	    info->opts->pos[i][1] = y;
-	    info->opts->pos[i][2] = z;
-	    info->opts->rot[i][0] = rx;
-	    info->opts->rot[i][1] = ry;
-	    info->opts->rot[i][2] = rz;
-	  }
+      piece_type = i;
       break;
     }
+
+  desc = gtk_entry_get_text (GTK_ENTRY (widget));
+
+  for (j = 0; j < MFW_PIECES; j++)
+  {
+    if (strcmp (desc, mfwpieceinfo[j].description) == 0)
+    {
+      piece_info = project->FindPieceInfo(mfwpieceinfo[j].name);
+      if (piece_info == NULL)
+	continue;
+
+      if (info->opts->info[i])
+	info->opts->info[i]->DeRef();
+      info->opts->info[i] = piece_info;
+      piece_info->AddRef();
+      break;
+    }
+  }
+
+  // Piece not found ("None")
+  if (j == MFW_PIECES)
+  {
+    if (info->opts->info[i])
+      info->opts->info[i]->DeRef();
+    info->opts->info[i] = NULL;
+  }
+
+  // Get the pieces in the right place
+  // TODO: Find a way to make this cross-platform
+  if (i == MFW_NECK)
+  {
+    if (info->opts->info[3] != NULL)
+    {
+      info->opts->pos[0][2] = 3.92f;
+      info->opts->pos[1][2] = 3.92f;
+    }
+    else
+    {
+      info->opts->pos[0][2] = 3.84f;
+      info->opts->pos[1][2] = 3.84f;
+    }
+  }
+
+  if (i == MFW_LEFT_SHOE)
+  {
+    if (strcmp (desc, "Ski"))
+      info->opts->pos[13][1] = 0;
+    else
+      info->opts->pos[13][1] = -0.12f;
+  }
+
+  if (i == MFW_RIGHT_SHOE)
+  {
+    if (strcmp (desc, "Ski"))
+      info->opts->pos[14][1] = 0;
+    else
+      info->opts->pos[14][1] = -0.12f;
+  }
+
+  if ((i == MFW_LEFT_TOOL) || (i == MFW_RIGHT_TOOL))
+    if (piece_info != NULL)
+    {
+      float rx = 45, ry = 0, rz = 0, x = 0.92f, y = -0.62f, z = 1.76f;
+
+      if (strcmp (piece_info->m_strName,"4529") == 0)
+	{ rx = -45; y = -1.14f; z = 2.36f; }
+      if (strcmp (piece_info->m_strName,"3899") == 0)
+	{ y = -1.64f; z = 1.38f; }
+      if (strcmp (piece_info->m_strName,"4528") == 0)
+	{ rx = -45; y = -1.26f; z = 2.36f; }
+      if (strcmp (piece_info->m_strName,"4479") == 0)
+	{ rz = 90; y = -1.22f; z = 2.44f; }
+      if (strcmp (piece_info->m_strName,"3962") == 0)
+	{ rz = 90; y = -0.7f; z = 1.62f; }
+      if (strcmp (piece_info->m_strName,"4360") == 0)
+	{ rz = -90; y = -1.22f; z = 2.44f; }
+      if (strncmp (piece_info->m_strName,"6246",4) == 0)
+	{ y = -1.82f; z = 2.72f; rz = 90; }
+      if (strcmp (piece_info->m_strName,"4349") == 0)
+	{ y = -1.16f; z = 2.0f; }
+      if (strcmp (piece_info->m_strName,"4479") == 0)
+	{ y = -1.42f; z = 2.26f; }
+      if (strcmp (piece_info->m_strName,"3959") == 0)
+	{ y = -1.0f; z = 1.88f; }
+      if (strcmp (piece_info->m_strName,"4522") == 0)
+	{ y = -1.64f; z = 2.48f; }
+      if (strcmp (piece_info->m_strName,"194") == 0)
+	{ rz = 180; y = -1.04f; z = 1.94f; }
+      if (strcmp (piece_info->m_strName,"4006") == 0)
+	{ rz = 180; y = -1.24f; z = 2.18f; }
+      if (strcmp (piece_info->m_strName,"6246C") == 0)
+	{ rx = 35; rz = 0; y = -2.36f; z = 1.08f; }
+      if (strcmp (piece_info->m_strName,"4497") == 0)
+	{ y = -2.16f; z = 3.08f; rz = 90; }
+      if (strcmp (piece_info->m_strName,"30092") == 0)
+	{ x = 0; rz = 180; }
+      if (strcmp (piece_info->m_strName,"37") == 0)
+	{ z = 1.52f; y = -0.64f; }
+      if (strcmp (piece_info->m_strName,"38") == 0)
+	{ z = 1.24f; y = -0.34f; }
+      if (strcmp (piece_info->m_strName,"3841") == 0)
+	{ z = 2.24f; y = -1.34f; rz = 180; }
+
+      if (i == MFW_RIGHT_TOOL)
+	x = -x;
+
+      info->opts->pos[i][0] = x;
+      info->opts->pos[i][1] = y;
+      info->opts->pos[i][2] = z;
+      info->opts->rot[i][0] = rx;
+      info->opts->rot[i][1] = ry;
+      info->opts->rot[i][2] = rz;
+    }
+
   gtk_widget_draw (info->preview, NULL);
 }
 
@@ -338,9 +337,9 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidge
   gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
   gtk_widget_set_usize (combo, 60, 25);
   gtk_entry_set_editable (GTK_ENTRY (GTK_COMBO (combo)->entry), FALSE);
-  gtk_signal_connect (GTK_OBJECT (GTK_COMBO (combo)->popwin), "button_press_event",
-                      GTK_SIGNAL_FUNC (minifigdlg_piece_selection), NULL);
-  gtk_object_set_data (GTK_OBJECT (GTK_COMBO (combo)->popwin), "info", info);
+  gtk_signal_connect (GTK_OBJECT (GTK_COMBO (combo)->entry), "changed",
+                      GTK_SIGNAL_FUNC (minifigdlg_piece_changed), NULL);
+  gtk_object_set_data (GTK_OBJECT (GTK_COMBO (combo)->entry), "info", info);
 
   color = info->colors[num] = gtk_button_new_with_label ("");
   gtk_widget_set_events (color, GDK_EXPOSURE_MASK);

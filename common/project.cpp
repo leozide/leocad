@@ -6160,6 +6160,7 @@ bool Project::StopTracking(bool bAccept)
 		DeleteContents (true);
 		FileLoad (m_pTrackFile, true, false);
     delete m_pTrackFile;
+    m_pTrackFile = NULL;
 	}
 
 	return true;

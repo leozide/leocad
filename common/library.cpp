@@ -1398,6 +1398,10 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 
 	for (a = info->next; a; a = a->next)
 	{
+		// Fix the 'extended colors' that shouldn't be there in the first place.
+		if ((a->color > 16) && (a->color < 24))
+			a->color = 0;
+
 		count[a->color][a->type-2]++;
 		vert += a->type;
 	}

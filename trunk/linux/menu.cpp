@@ -6,9 +6,22 @@
 #include "typedefs.h"
 #include "main.h"
 #include "gtkmisc.h"
+#include "mainwnd.h"
+
 
 void create_main_menu (GtkObject *window, GtkWidget *vbox)
 {
+#include "pixmaps/st-new.xpm"
+#include "pixmaps/st-open.xpm"
+#include "pixmaps/st-save.xpm"
+#include "pixmaps/photo.xpm"
+#include "pixmaps/info.xpm"
+#include "pixmaps/st-undo.xpm"
+#include "pixmaps/st-redo.xpm"
+#include "pixmaps/st-cut.xpm"
+#include "pixmaps/st-copy.xpm"
+#include "pixmaps/st-paste.xpm"
+
   GtkWidget *handle_box, *menu_bar, *menu, *menu_in_menu, *item;
   GtkAccelGroup *accel, *menu_accel, *menu_in_menu_accel;
 
@@ -25,20 +38,20 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   menu = create_sub_menu (menu_bar, "_File", accel, &menu_accel);
   menu_tearoff (menu);
 
-  create_menu_item (menu, "_New", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_FILE_NEW, "menu_file_new");
-  create_menu_item (menu, "_Open...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_FILE_OPEN, "menu_file_open");
+  create_pixmap_menu_item (menu, "_New", st_new, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_FILE_NEW, "menu_file_new");
+  create_pixmap_menu_item (menu, "_Open...", st_open, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_FILE_OPEN, "menu_file_open");
   create_menu_item (menu, "_Merge...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_MERGE, "menu_file_merge");
   menu_separator (menu);
 
-  create_menu_item (menu, "_Save", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_FILE_SAVE, "menu_file_save");
+  create_pixmap_menu_item (menu, "_Save", st_save, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_FILE_SAVE, "menu_file_save");
   create_menu_item (menu, "Save _As...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_SAVEAS, "menu_file_saveas");
-  create_menu_item (menu, "Save Pic_ture...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_FILE_PICTURE, "menu_file_picture");
+  create_pixmap_menu_item (menu, "Save Pic_ture...", photo, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_FILE_PICTURE, "menu_file_picture");
 
   menu_in_menu = create_menu_in_menu (menu, "Ex_port", menu_accel, &menu_in_menu_accel);
   create_menu_item (menu_in_menu, "_HTML...", menu_in_menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
@@ -49,22 +62,29 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_FILE_WAVEFRONT, "menu_file_wavefront");
   menu_separator (menu);
 
-  create_menu_item (menu, "Propert_ies...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_FILE_PROPERTIES, "menu_file_properties");
+  create_pixmap_menu_item (menu, "Propert_ies...", info, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_FILE_PROPERTIES, "menu_file_properties");
   create_menu_item (menu, "Pieces _Library Manager...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_LIBRARY, "menu_file_library");
   create_menu_item (menu, "Terrain _Editor...", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_TERRAIN, "menu_file_terrain");
   menu_separator (menu);
 
-  create_menu_item (menu, "1", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
-		    window, ID_FILE_RECENT1, "menu_file_recent1");
-  create_menu_item (menu, "2", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
-		    window, ID_FILE_RECENT2, "menu_file_recent2");
-  create_menu_item (menu, "3", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
-		    window, ID_FILE_RECENT3, "menu_file_recent3");
-  create_menu_item (menu, "4", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
-		    window, ID_FILE_RECENT4, "menu_file_recent4");
+  BaseMenuItem base;
+  base.accel = menu_accel;
+
+  base.widget = create_menu_item (menu, "1", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+                                  window, ID_FILE_RECENT1, "menu_file_recent1");
+  main_window->SetMenuItem (LC_MAINWND_RECENT1, &base);
+  base.widget = create_menu_item (menu, "2", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+                                  window, ID_FILE_RECENT2, "menu_file_recent2");
+  main_window->SetMenuItem (LC_MAINWND_RECENT2, &base);
+  base.widget = create_menu_item (menu, "3", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+                                  window, ID_FILE_RECENT3, "menu_file_recent3");
+  main_window->SetMenuItem (LC_MAINWND_RECENT3, &base);
+  base.widget = create_menu_item (menu, "4", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+                                  window, ID_FILE_RECENT4, "menu_file_recent4");
+  main_window->SetMenuItem (LC_MAINWND_RECENT4, &base);
   gtk_object_set_data (window, "file_menu_accel", menu_accel);
 
   menu_separator (menu);
@@ -75,18 +95,18 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   menu = create_sub_menu (menu_bar, "_Edit", accel, &menu_accel);
   menu_tearoff (menu);
 
-  create_menu_item (menu, "_Undo", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_EDIT_UNDO, "menu_edit_undo");
-  create_menu_item (menu, "_Redo", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_EDIT_REDO, "menu_edit_redo");
+  create_pixmap_menu_item (menu, "_Undo", st_undo, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_EDIT_UNDO, "menu_edit_undo");
+  create_pixmap_menu_item (menu, "_Redo", st_redo, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_EDIT_REDO, "menu_edit_redo");
   menu_separator (menu);
 
-  create_menu_item (menu, "Cu_t", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_EDIT_CUT, "menu_edit_cut");
-  create_menu_item (menu, "_Copy", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_EDIT_COPY, "menu_edit_copy");
-  create_menu_item (menu, "_Paste", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_EDIT_PASTE, "menu_edit_paste");
+  create_pixmap_menu_item (menu, "Cu_t", st_cut, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_EDIT_CUT, "menu_edit_cut");
+  create_pixmap_menu_item (menu, "_Copy", st_copy, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_EDIT_COPY, "menu_edit_copy");
+  create_pixmap_menu_item (menu, "_Paste", st_paste, menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+                           window, LC_EDIT_PASTE, "menu_edit_paste");
   menu_separator (menu);
 
   create_menu_item (menu, "Select _All", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
@@ -172,6 +192,9 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   create_menu_item (menu, "Zoom E_xtents", menu_accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_VIEW_ZOOMEXTENTS, "menu_view_zoomextents");
   menu_separator (menu);
+
+  create_menu_item (menu, "_Create", menu_accel, GTK_SIGNAL_FUNC (OnCommand),
+		    window, ID_VIEW_CREATE, "menu_view_create");
 
   menu_in_menu = create_menu_in_menu (menu, "Vie_wports", menu_accel, &menu_in_menu_accel);
   item = create_radio_menu_pixmap (menu_in_menu, NULL, "vports01.xpm", menu_in_menu_accel,

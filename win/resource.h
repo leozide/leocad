@@ -347,7 +347,6 @@
 #define IDC_MF_TORSOCOLOR               1191
 #define IDC_GRID                        1191
 #define IDC_MF_NECKCOLOR                1192
-#define IDC_TERRAIN_DUMMY               1192
 #define IDC_MF_ARMLCOLOR                1193
 #define IDC_MF_ARMRCOLOR                1194
 #define IDC_MF_HANDLCOLOR               1195

@@ -24,6 +24,7 @@ CTerrainDlg::CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent /*=NULL*
 	//{{AFX_DATA_INIT(CTerrainDlg)
 	//}}AFX_DATA_INIT
 
+	m_pTerrainWnd = NULL;
 	m_pTerrain = pTerrain;
 	m_bLinear = bLinear;
 }
@@ -41,6 +42,8 @@ void CTerrainDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTerrainDlg, CDialog)
 	//{{AFX_MSG_MAP(CTerrainDlg)
+	ON_WM_SIZE()
+	ON_WM_SHOWWINDOW()
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_LC_EDIT_CLOSED, OnGridChange)
 END_MESSAGE_MAP()
@@ -53,54 +56,38 @@ BOOL CTerrainDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// Add the ToolBar.
-	if (!m_wndToolBar.Create(this) ||
-		!m_wndToolBar.LoadToolBar(IDR_TERRAIN))
+	if (!m_wndToolBar.Create(this) || !m_wndToolBar.LoadToolBar(IDR_TERRAIN))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
-	
+
 	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY);
-	
+
 	// We need to resize the dialog to make room for control bars.
 	// First, figure out how big the control bars are.
 	CRect rcClientStart;
 	CRect rcClientNow;
 	GetClientRect(rcClientStart);
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0, reposQuery, rcClientNow);
-	
+
 	// Now move all the controls so they are in the same relative
 	// position within the remaining client area as they would be
 	// with no control bars.
 	CPoint ptOffset(rcClientNow.left - rcClientStart.left, rcClientNow.top - rcClientStart.top); 
-	
-	CRect  rcChild;                                 
-	CWnd* pwndChild = GetWindow(GW_CHILD);
-	while (pwndChild)
-	{                               
-		pwndChild->GetWindowRect(rcChild);
-		ScreenToClient(rcChild);
-		rcChild.OffsetRect(ptOffset);
-		pwndChild->MoveWindow(rcChild, FALSE);
-		pwndChild = pwndChild->GetNextWindow();
-	}
-	
+
 	// Adjust the dialog window dimensions
 	CRect rcWindow;
 	GetWindowRect(rcWindow);
 	rcWindow.right += rcClientStart.Width() - rcClientNow.Width();
 	rcWindow.bottom += rcClientStart.Height() - rcClientNow.Height();
 	MoveWindow(rcWindow, FALSE);
-	
+
 	// And position the control bars
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
 
-	RECT r;
-	::GetWindowRect (::GetDlgItem(m_hWnd, IDC_TERRAIN_DUMMY), &r);
-	ScreenToClient (&r);
-
 	m_pTerrainWnd = new CTerrainWnd(m_pTerrain);
-	m_pTerrainWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 501);
+	m_pTerrainWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, CRect (0,0,20,20), this, 501);
 	m_pTerrainWnd->LoadTexture(m_bLinear);
 
 	m_Grid.SetControlPoints(m_pTerrain->GetCountU(), m_pTerrain->GetCountV(), m_pTerrain->GetControlPoints());
@@ -238,4 +225,35 @@ BOOL CTerrainDlg::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CTerrainDlg::OnSize(UINT nType, int cx, int cy) 
+{
+	CDialog::OnSize(nType, cx, cy);
+
+	// Fix the toolbar and menu.
+	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
+
+	if (m_pTerrainWnd)
+	{
+		CRect rcClient;
+
+		// Find out how much space is left.
+		RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0, reposQuery, rcClient);
+
+		m_Grid.MoveWindow (rcClient.left + 5, rcClient.top + 5, rcClient.Width()/2 - 7, rcClient.Height() - 10);
+		m_pTerrainWnd->MoveWindow (rcClient.left + rcClient.Width()/2 + 2, rcClient.top + 5, rcClient.Width()/2 - 7, rcClient.Height() - 10);
+	}
+}
+
+void CTerrainDlg::OnShowWindow(BOOL bShow, UINT nStatus) 
+{
+	CDialog::OnShowWindow(bShow, nStatus);
+
+	if (bShow)
+	{
+		CRect rcWindow;
+		GetWindowRect(rcWindow);
+		OnSize(SIZE_RESTORED, rcWindow.Width(), rcWindow.Height());
+	}
 }

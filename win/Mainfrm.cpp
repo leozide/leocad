@@ -93,12 +93,10 @@ CMainFrame::CMainFrame()
 {
 	m_pwndFullScrnBar = NULL;
 	m_bAutoMenuEnable = FALSE;
-  m_pMainWnd = new MainWnd ();
 }
 
 CMainFrame::~CMainFrame()
 {
-  delete m_pMainWnd;
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -205,7 +203,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
   messenger->Listen (&mainframe_listener, this);
 
-  m_pMainWnd->SetXID (this);
+  main_window->SetXID (this);
 
 	return 0;
 }

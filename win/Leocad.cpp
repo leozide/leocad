@@ -258,14 +258,18 @@ int CCADApp::ExitInstance()
 	{
 		project->HandleNotify(LC_ACTIVATE, 0);
 		delete project;
+    project = NULL;
 	}
+
+  delete main_window;
+  main_window = NULL;
+
+	GL_Shutdown ();
 
 #ifdef _DEBUG
 	if (__hStdOut != NULL)
 		FreeConsole();
 #endif
-
-	GL_Shutdown ();
 
 	return CWinApp::ExitInstance();
 }

@@ -22,7 +22,6 @@ class CMainFrame : public CFrameWnd
 protected: // create from serialization only
 	CMainFrame();
 	DECLARE_DYNCREATE(CMainFrame)
-  MainWnd* m_pMainWnd;
 
 // Attributes
 public:

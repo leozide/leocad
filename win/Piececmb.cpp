@@ -58,6 +58,9 @@ void CPiecesCombo::OnEditupdate()
 		{
 			pInfo = pLib->GetPieceInfo(i);
 
+			if ((pInfo->m_strDescription[0] == '~') && !pBar->m_bSubParts)
+				continue;
+
 			if (_strnicmp (str, pInfo->m_strDescription, n) == 0)
 			{
 				if (_stricmp (newstr, pInfo->m_strDescription) > 0)

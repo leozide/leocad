@@ -121,6 +121,7 @@ typedef struct
 {
 	float* verts;
 	unsigned int verts_count;
+	bool long_info;
 	connection_t* connections;
 	group_t* groups;
 	texture_t* textures;

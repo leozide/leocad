@@ -1392,6 +1392,7 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 	lineinfo_t *a, *b;
 	int i, j, k, v;
 	unsigned int count[256][3], vert = 0;
+	unsigned int quads = 0;
 	unsigned char* bytes;
 	memset (count, 0, sizeof(count));
 
@@ -1407,12 +1408,15 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 		if (count[i][0] || count[i][1] || count[i][2])
 			k++;
 
+		quads += count[i][2] * 4;
+
 		if (i == 16) i = -1;
 		if (i == 15) i = 23;
 	}
 
-	if (piece->verts_count > 65535)
+	if (piece->verts_count > 65535 || quads > 65535)
 	{
+		piece->long_info = true;
 		unsigned long* drawinfo;
 		pGroup->infosize = sizeof(unsigned long)*(vert + (k*4)+1) + 2;
 		pGroup->drawinfo = malloc(pGroup->infosize);
@@ -1429,13 +1433,10 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 				*drawinfo = i;
 				drawinfo++;
 
-				printf("%d ", i);
-
 				for (j = 4; j > 1; j--)
 				{
 					*drawinfo = count[i][j-2]*j;
 					drawinfo++;
-					printf("%d ", count[i][j-2]*j);
 
 					if (count[i][j-2] != 0)
 					{
@@ -1469,11 +1470,10 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 			if (i == 16) i = -1;
 			if (i == 15) i = 23;
 		}
-
-		printf("\n");
 	}
 	else
 	{
+		piece->long_info = false;
 		unsigned short* drawinfo;
 		pGroup->infosize = sizeof(unsigned short)*(vert + (k*4)+1) + 2;
 		pGroup->drawinfo = malloc(pGroup->infosize);
@@ -2031,6 +2031,7 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 	}
 
 	piece->verts = verts;
+	piece->long_info = false;
 	piece->verts_count = unique;
 
 	// Main group
@@ -2158,7 +2159,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 		{
 			if (*bytes == LC_MESH)
 			{
-				if (piece->verts_count > 65535)
+				if (piece->long_info)
 				{
 					unsigned long colors, *p;
 					p = (unsigned long*)(bytes + 1);

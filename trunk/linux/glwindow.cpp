@@ -63,8 +63,8 @@ static gint button_press_event (GtkWidget *widget, GdkEventButton *event, gpoint
   }
 
   gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)), widget);
-  gdk_pointer_grab (widget->window, FALSE,
-                    (GdkEventMask)(GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_POINTER_MOTION_MASK),
+  gdk_pointer_grab (widget->window, FALSE, (GdkEventMask)(GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|
+                    GDK_POINTER_MOTION_MASK|GDK_POINTER_MOTION_HINT_MASK),
                     NULL, NULL, GDK_CURRENT_TIME);
 
   return TRUE;
@@ -97,7 +97,10 @@ static gint pointer_motion_event (GtkWidget *widget, GdkEventMotion *event, gpoi
   int x, y;
 
   if (event->is_hint)
+  {
     gdk_window_get_pointer (event->window, &x, &y, &state);
+    state = (GdkModifierType)0;
+  }
   else
   {
     x = (int)event->x;
@@ -107,7 +110,6 @@ static gint pointer_motion_event (GtkWidget *widget, GdkEventMotion *event, gpoi
 
   y = widget->allocation.height - y - 1;
 
-  //  if (state)
   wnd->OnMouseMove (x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
 
   return TRUE;

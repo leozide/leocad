@@ -336,7 +336,7 @@ bool Project::LoadPieceLibrary()
 	// Make sure that the path ends with a '/'
 	i = strlen(m_LibraryPath)-1;
 	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
-	  strcat(m_LibraryPath, '/');
+	  strcat(m_LibraryPath, "/");
 
 	// Read the piece library index.
 	strcpy(filename, m_LibraryPath);
@@ -7066,3 +7066,16 @@ void Project::OnMouseMove(int x, int y)
 		} break;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

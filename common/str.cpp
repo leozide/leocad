@@ -198,7 +198,7 @@ int String::CompareNoCase(const char *string, int count) const
 {
   char c1, c2, *ch = m_pData;
 
-  while (*ch && *string && count)
+  while (*ch && *string)
   {
     c1 = tolower (*ch);
     c2 = tolower (*string);
@@ -209,6 +209,9 @@ int String::CompareNoCase(const char *string, int count) const
     ch++;
     string++;
     count--;
+
+    if (!count)
+      return 0;
   }
 
   return (((int)*ch) - ((int)*string));

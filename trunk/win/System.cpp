@@ -49,9 +49,15 @@ static void ShowLastError()
 static CMenu* GetMainMenu(int nIndex)
 {
 	CWnd* pFrame = AfxGetMainWnd();
+
 	if (pFrame == NULL)
 		return NULL;
+
 	CMenu* pMenu = pFrame->GetMenu();
+
+	if (pMenu == NULL)
+		return NULL;
+
 	return pMenu->GetSubMenu(nIndex);
 }
 
@@ -679,9 +685,11 @@ void SystemUpdatePaste(bool enable)
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
-	pMenu->EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | 
-		(enable ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-	pCtrl->EnableButton(ID_EDIT_PASTE, enable ? TRUE : FALSE);
+	if (pMenu != NULL)
+		pMenu->EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (enable ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+
+	if (pCtrl)
+		pCtrl->EnableButton(ID_EDIT_PASTE, enable ? TRUE : FALSE);
 }
 
 void SystemUpdatePlay(bool play, bool stop)
@@ -1263,7 +1271,7 @@ bool SystemDoDialog(int nMode, void* param)
 			CPreferencesSheet ps;
 			LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)param;
 
-			ps.m_PageGeneral.SetOptions(opts->nSaveInterval, opts->nMouse, opts->strPath);
+			ps.m_PageGeneral.SetOptions(opts->nSaveInterval, opts->nMouse, opts->strPath, opts->strUser);
 			ps.m_PageDetail.SetOptions(opts->nDetail, opts->fLineWidth);
 			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap, opts->nGridSize);
 			ps.m_PageScene.SetOptions(opts->nScene, opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
@@ -1271,7 +1279,7 @@ bool SystemDoDialog(int nMode, void* param)
 
 			if (ps.DoModal() == IDOK)
 			{
-				ps.m_PageGeneral.GetOptions(&opts->nSaveInterval, &opts->nMouse, opts->strPath);
+				ps.m_PageGeneral.GetOptions(&opts->nSaveInterval, &opts->nMouse, opts->strPath, opts->strUser);
 				ps.m_PageDetail.GetOptions(&opts->nDetail, &opts->fLineWidth);
 				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap, &opts->nGridSize);
 				ps.m_PageScene.GetOptions(&opts->nScene, &opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);

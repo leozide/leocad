@@ -418,8 +418,9 @@ BEGIN
         MENUITEM "File Name",                   ID_PRINT_FILENAME
         MENUITEM "Author",                      ID_PRINT_AUTHOR
         MENUITEM "Description",                 ID_PRINT_DESCRIPTION
-        MENUITEM "Page Number",                 ID_PRINT_PAGENUMBER
         MENUITEM SEPARATOR
+        MENUITEM "Page Number",                 ID_PRINT_PAGENUMBER
+        MENUITEM "Total Pages",                 ID_PRINT_TOTALPAGES
         MENUITEM "Current Time",                ID_PRINT_CURRENTTIME
         MENUITEM "Current Date",                ID_PRINT_CURRENTDATE
         MENUITEM SEPARATOR
@@ -981,42 +982,42 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,122,24,41,14
 END
 
-IDD_PREFGENERAL DIALOG DISCARDABLE  0, 0, 230, 114
+IDD_PREFGENERAL DIALOG DISCARDABLE  0, 0, 240, 114
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "Gamma correction",IDC_STATIC,7,15,59,8,WS_DISABLED
-    CONTROL         "Slider1",IDC_GENDLG_GAMMA,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,72,14,31,10
-    LTEXT           "Mouse sensitivity",IDC_STATIC,7,29,59,8
-    CONTROL         "Slider1",IDC_GENDLG_MOUSE,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,72,28,31,10
+    GROUPBOX        "Saving",IDC_STATIC,7,7,126,66
     CONTROL         "Autosave every",IDC_GENDLG_AUTOSAVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,50,60,8
-    EDITTEXT        IDC_GENDLG_SAVETIME,69,49,20,10,ES_AUTOHSCROLL
-    LTEXT           "minutes",IDC_STATIC,93,50,24,8
-    LTEXT           "Default models folder",IDC_STATIC,7,78,67,8
-    EDITTEXT        IDC_GENDLG_FOLDER,7,90,100,10,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_GENDLG_FOLDERBTN,109,90,8,10
-    GROUPBOX        "Pieces Toolbar",IDC_STATIC,131,7,92,93
-    CONTROL         "Show subparts",IDC_GENDLG_SUBPARTS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,140,19,81,8
-    CONTROL         "Show piece numbers",IDC_GENDLG_NUMBERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,140,32,81,8
-    CONTROL         "Enable preview",IDC_GENDLG_PREVIEW,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,140,45,81,8
-    CONTROL         "Auto zoom preview",IDC_GENDLG_ZOOM,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,140,58,81,8
-    CONTROL         "Sort pieces by group",IDC_GENDLG_GROUP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,140,71,81,8
-    CONTROL         "Show combobox",IDC_GENDLG_COMBO,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,140,84,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,17,63,8
+    EDITTEXT        IDC_GENDLG_SAVETIME,77,16,20,12,ES_AUTOHSCROLL
+    LTEXT           "minutes",IDC_STATIC,101,17,24,8
     CONTROL         "Create backups",IDC_GENDLG_BACKUP,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,65,60,8
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,12,32,65,8
+    LTEXT           "Default projects folder:",IDC_STATIC,12,45,72,8
+    EDITTEXT        IDC_GENDLG_FOLDER,12,57,100,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_GENDLG_FOLDERBTN,118,57,8,10
+    LTEXT           "Default user:",IDC_STATIC,11,77,44,8
+    EDITTEXT        IDC_GENDLG_USER,57,76,75,10,ES_AUTOHSCROLL
+    LTEXT           "Mouse sensitivity",IDC_STATIC,11,92,59,8
+    CONTROL         "Slider1",IDC_GENDLG_MOUSE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,76,91,31,10
+    GROUPBOX        "Pieces Toolbar",IDC_STATIC,141,7,92,93
+    CONTROL         "Show subparts",IDC_GENDLG_SUBPARTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,146,19,81,8
+    CONTROL         "Show piece numbers",IDC_GENDLG_NUMBERS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,146,32,81,8
+    CONTROL         "Enable preview",IDC_GENDLG_PREVIEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,146,45,81,8
+    CONTROL         "Auto zoom preview",IDC_GENDLG_ZOOM,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,146,58,81,8
+    CONTROL         "Sort pieces by group",IDC_GENDLG_GROUP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,146,71,81,8
+    CONTROL         "Show combobox",IDC_GENDLG_COMBO,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,146,84,81,8
 END
 
-IDD_PREFDRAWING DIALOG DISCARDABLE  0, 0, 230, 114
+IDD_PREFDRAWING DIALOG DISCARDABLE  0, 0, 240, 114
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Drawing Aids"
 FONT 8, "MS Sans Serif"
@@ -1036,64 +1037,64 @@ BEGIN
     CONTROL         "Snap Z",IDC_AIDDLG_SNAPZ,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,72,42,8
     CONTROL         "Angle snap",IDC_AIDDLG_SNAPA,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,85,46,8
-    EDITTEXT        IDC_AIDDLG_ANGLE,54,84,20,10,ES_AUTOHSCROLL
-    LTEXT           "degrees",IDC_STATIC,76,85,27,8
+                    WS_TABSTOP,7,85,49,8
+    EDITTEXT        IDC_AIDDLG_ANGLE,57,84,20,10,ES_AUTOHSCROLL
+    LTEXT           "degrees",IDC_STATIC,79,85,27,8
     CONTROL         "Centimeter units",IDC_AIDDLG_CENTIMETERS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,98,70,8
     CONTROL         "Collision detection",IDC_AIDDLG_COLLISION,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,112,7,100,8
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,122,7,111,8
     CONTROL         "Switch to move after inserting",IDC_AIDDLG_MOVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,20,100,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,122,20,111,8
     CONTROL         "Fixed direction keys",IDC_AIDDLG_FIXEDKEYS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,33,100,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,122,33,111,8
     CONTROL         "Lock X",IDC_AIDDLG_LOCKX,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,112,46,100,8
+                    WS_TABSTOP,122,46,111,8
     CONTROL         "Lock Y",IDC_AIDDLG_LOCKY,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,112,59,100,8
+                    WS_TABSTOP,122,59,111,8
     CONTROL         "Lock Z",IDC_AIDDLG_LOCKZ,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,112,72,100,8
+                    WS_TABSTOP,122,72,111,8
     CONTROL         "Mouse always moves in 3D",IDC_AIDDLG_3DMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,85,100,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,122,85,111,8
 END
 
-IDD_PREFDETAIL DIALOG DISCARDABLE  0, 0, 230, 114
+IDD_PREFDETAIL DIALOG DISCARDABLE  0, 0, 240, 114
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Details"
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Draw edges",IDC_DETDLG_EDGES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,7,60,8
+                    WS_TABSTOP,7,7,97,8
     CONTROL         "Dithering",IDC_DETDLG_DITHER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,20,60,8
+                    WS_TABSTOP,7,20,97,8
     CONTROL         "Lighting",IDC_DETDLG_LIGHTING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,33,60,8
+                    WS_TABSTOP,7,33,97,8
     CONTROL         "Smooth shading",IDC_DETDLG_SMOOTH,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,46,60,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,46,97,8
     CONTROL         "Anti-aliasing",IDC_DETDLG_ANTIALIAS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,59,60,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,59,97,8
     CONTROL         "Linear filtering",IDC_DETDLG_LINEAR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,72,60,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,72,97,8
     CONTROL         "Screen door transparency",IDC_DETDLG_NOALPHA,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,85,97,8
     CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,7,80,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,120,7,96,8
     CONTROL         "Draw solid boxes",IDC_DETDLG_SOLID,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,20,80,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,120,20,96,8
     CONTROL         "Remove hidden lines",IDC_DETDLG_HIDDEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,33,80,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,120,33,96,8
     CONTROL         "Background rendering",IDC_DETDLG_BACKGROUND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,46,80,8
-    LTEXT           "Line width",IDC_STATIC,111,63,34,8
-    EDITTEXT        IDC_DETDLG_LINE,149,62,20,10,ES_AUTOHSCROLL
+                    BS_AUTOCHECKBOX | WS_TABSTOP,120,46,96,8
+    LTEXT           "Line width",IDC_STATIC,119,63,34,8
+    EDITTEXT        IDC_DETDLG_LINE,157,62,20,10,ES_AUTOHSCROLL
 END
 
-IDD_PREFSCENE DIALOG DISCARDABLE  0, 0, 230, 114
+IDD_PREFSCENE DIALOG DISCARDABLE  0, 0, 240, 114
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Scene"
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Background",IDC_STATIC,7,7,133,99
+    GROUPBOX        "Background",IDC_STATIC,7,7,140,99
     CONTROL         "Solid Color",IDC_SCNDLG_SOLID,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,18,20,49,8
     CONTROL         "Gradient",IDC_SCNDLG_GRADIENT,"Button",
@@ -1105,21 +1106,21 @@ BEGIN
     PUSHBUTTON      "",IDC_SCNDLG_GRAD2,98,34,20,12,BS_BITMAP
     CONTROL         "Tile",IDC_SCNDLG_BGTILE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,25,68,27,8
-    EDITTEXT        IDC_SCNDLG_BGIMAGE,24,84,100,10,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_SCNDLG_BGIMAGE_BROWSE,127,84,8,10
-    GROUPBOX        "Environment",IDC_STATIC,146,7,77,99
+    EDITTEXT        IDC_SCNDLG_BGIMAGE,24,84,107,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_SCNDLG_BGIMAGE_BROWSE,134,84,8,10
+    GROUPBOX        "Environment",IDC_STATIC,156,7,77,99
     CONTROL         "Fog",IDC_SCNDLG_FOG,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,154,20,27,8
-    PUSHBUTTON      "",IDC_SCNDLG_FOGCOLOR,193,18,20,12,BS_BITMAP
-    LTEXT           "Density",IDC_STATIC,163,36,25,8
-    EDITTEXT        IDC_SCNDLG_FOGDENSITY,193,35,20,10,ES_AUTOHSCROLL
-    LTEXT           "Ambient light",IDC_STATIC,150,53,42,8
-    PUSHBUTTON      "",IDC_SCNDLG_AMBIENTLIGHT,193,51,20,12,BS_BITMAP
+                    WS_TABSTOP,164,20,27,8
+    PUSHBUTTON      "",IDC_SCNDLG_FOGCOLOR,203,18,20,12,BS_BITMAP
+    LTEXT           "Density",IDC_STATIC,173,36,25,8
+    EDITTEXT        IDC_SCNDLG_FOGDENSITY,203,35,20,10,ES_AUTOHSCROLL
+    LTEXT           "Ambient light",IDC_STATIC,160,53,42,8
+    PUSHBUTTON      "",IDC_SCNDLG_AMBIENTLIGHT,203,51,20,12,BS_BITMAP
     CONTROL         "Draw Floor",IDC_SCNDLG_TERRAIN,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,154,75,62,8
+                    WS_TABSTOP,164,75,62,8
 END
 
-IDD_PREFPRINT DIALOG DISCARDABLE  0, 0, 230, 114
+IDD_PREFPRINT DIALOG DISCARDABLE  0, 0, 240, 114
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Print"
 FONT 8, "MS Sans Serif"
@@ -1129,30 +1130,30 @@ BEGIN
     LTEXT           "Columns",IDC_STATIC,16,36,27,8
     EDITTEXT        IDC_PRNDLG_INST_COLS,48,35,20,10,ES_AUTOHSCROLL
     LTEXT           "Header",IDC_STATIC,74,19,24,8
-    EDITTEXT        IDC_PRNDLG_HEADER,100,18,60,10,ES_AUTOHSCROLL
-    PUSHBUTTON      "",IDC_PRNDLG_HEADERBTN,162,18,8,10,BS_BITMAP
+    EDITTEXT        IDC_PRNDLG_HEADER,100,18,67,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_PRNDLG_HEADERBTN,169,18,8,10,BS_BITMAP
     LTEXT           "Footer",IDC_STATIC,74,36,24,8
-    EDITTEXT        IDC_PRNDLG_FOOTER,100,35,60,10,ES_AUTOHSCROLL
-    PUSHBUTTON      "",IDC_PRNDLG_FOOTERBTN,162,35,8,10,BS_BITMAP
+    EDITTEXT        IDC_PRNDLG_FOOTER,100,35,67,10,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_PRNDLG_FOOTERBTN,169,35,8,10,BS_BITMAP
     CONTROL         "Numbers",IDC_PRNDLG_NUMBERS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,181,19,39,8
+                    WS_TABSTOP,187,19,40,8
     CONTROL         "Border",IDC_PRNDLG_BORDER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,181,36,39,8
-    GROUPBOX        "Instructions",IDC_STATIC,7,7,216,47
+                    WS_TABSTOP,187,36,40,8
+    GROUPBOX        "Instructions",IDC_STATIC,7,7,226,47
     GROUPBOX        "Catalog",IDC_STATIC,7,59,77,47
     LTEXT           "Rows",IDC_STATIC,16,71,27,8
     EDITTEXT        IDC_PRNDLG_CAT_ROWS,48,70,20,10,ES_AUTOHSCROLL
     LTEXT           "Columns",IDC_STATIC,16,88,27,8
     EDITTEXT        IDC_PRNDLG_CAT_COLS,48,87,20,10,ES_AUTOHSCROLL
-    GROUPBOX        "Margins (inches)",IDC_STATIC,99,59,124,47,WS_GROUP
-    LTEXT           "&Left:",IDC_STATIC,110,72,24,8
-    EDITTEXT        IDC_PRNDLG_MARGIN_LEFT,137,71,20,10,ES_AUTOHSCROLL
-    LTEXT           "&Right:",IDC_STATIC,166,72,24,8
-    EDITTEXT        IDC_PRNDLG_MARGIN_RIGHT,193,71,20,10,ES_AUTOHSCROLL
-    LTEXT           "&Top:",IDC_STATIC,110,89,24,8
-    EDITTEXT        IDC_PRNDLG_MARGIN_TOP,137,88,20,10,ES_AUTOHSCROLL
-    LTEXT           "&Bottom:",IDC_STATIC,166,89,24,8
-    EDITTEXT        IDC_PRNDLG_MARGIN_BOTTOM,193,88,20,10,ES_AUTOHSCROLL
+    GROUPBOX        "Margins (inches)",IDC_STATIC,109,59,124,47,WS_GROUP
+    LTEXT           "&Left:",IDC_STATIC,120,72,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_LEFT,147,71,20,10,ES_AUTOHSCROLL
+    LTEXT           "&Right:",IDC_STATIC,176,72,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_RIGHT,203,71,20,10,ES_AUTOHSCROLL
+    LTEXT           "&Top:",IDC_STATIC,120,89,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_TOP,147,88,20,10,ES_AUTOHSCROLL
+    LTEXT           "&Bottom:",IDC_STATIC,176,89,24,8
+    EDITTEXT        IDC_PRNDLG_MARGIN_BOTTOM,203,88,20,10,ES_AUTOHSCROLL
 END
 
 IDD_OPENDLG_TEMPLATE DIALOGEX 0, 0, 77, 99
@@ -1542,7 +1543,7 @@ BEGIN
     IDD_PREFGENERAL, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 223
+        RIGHTMARGIN, 233
         TOPMARGIN, 7
         BOTTOMMARGIN, 106
     END
@@ -1550,7 +1551,7 @@ BEGIN
     IDD_PREFDRAWING, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 223
+        RIGHTMARGIN, 233
         TOPMARGIN, 7
         BOTTOMMARGIN, 106
     END
@@ -1558,7 +1559,7 @@ BEGIN
     IDD_PREFDETAIL, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 223
+        RIGHTMARGIN, 233
         TOPMARGIN, 7
         BOTTOMMARGIN, 106
     END
@@ -1566,7 +1567,7 @@ BEGIN
     IDD_PREFSCENE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 223
+        RIGHTMARGIN, 233
         TOPMARGIN, 7
         BOTTOMMARGIN, 106
     END
@@ -1574,7 +1575,7 @@ BEGIN
     IDD_PREFPRINT, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 223
+        RIGHTMARGIN, 233
         TOPMARGIN, 7
         BOTTOMMARGIN, 106
     END

@@ -13,8 +13,8 @@ class CPreferencesGeneral : public CPropertyPage
 
 // Construction
 public:
-	void SetOptions(int nSaveTime, int nMouse, char* strFolder);
-	void GetOptions(int* nSaveTime, int* nMouse, char* strFolder);
+	void SetOptions(int nSaveInterval, int nMouse, const char* strFolder, const char* strUser);
+	void GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser);
 	CPreferencesGeneral();
 	~CPreferencesGeneral();
 
@@ -31,6 +31,8 @@ public:
 	CString	m_strFolder;
 	BOOL	m_bAutoSave;
 	BOOL	m_bCombo;
+	CString	m_bUser;
+	CString	m_strUser;
 	//}}AFX_DATA
 
 
@@ -273,7 +275,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 };
-
-
 
 #endif // __PREFPAGE_H__

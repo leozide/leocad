@@ -33,6 +33,7 @@ CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::
 	m_strFolder = _T("");
 	m_bAutoSave = FALSE;
 	m_bCombo = FALSE;
+	m_strUser = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -55,6 +56,8 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_GENDLG_FOLDER, m_strFolder);
 	DDX_Check(pDX, IDC_GENDLG_AUTOSAVE, m_bAutoSave);
 	DDX_Check(pDX, IDC_GENDLG_COMBO, m_bCombo);
+	DDX_Text(pDX, IDC_GENDLG_USER, m_strUser);
+	DDV_MaxChars(pDX, m_strUser, 100);
 	//}}AFX_DATA_MAP
 }
 
@@ -76,12 +79,13 @@ void CPreferencesGeneral::OnFolderBrowse()
 	}
 }
 
-void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, char* strFolder)
+void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* strFolder, const char* strUser)
 {
 	m_nSaveTime = nSaveInterval & ~LC_AUTOSAVE_FLAG;
 	m_bAutoSave = (nSaveInterval & LC_AUTOSAVE_FLAG) != 0;
 	m_nMouse = nMouse;
 	m_strFolder = strFolder;
+	m_strUser = strUser;
 
 	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 
 		PIECEBAR_PREVIEW|PIECEBAR_GROUP|PIECEBAR_COMBO|PIECEBAR_ZOOMPREVIEW);
@@ -93,12 +97,13 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, char* strFol
 	m_bZoom = (i & PIECEBAR_ZOOMPREVIEW) != 0;
 }
 
-void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder)
+void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
 {
 	if (m_bAutoSave) m_nSaveTime |= LC_AUTOSAVE_FLAG;
 	*nSaveTime = m_nSaveTime;
 	*nMouse = m_nMouse;
 	strcpy(strFolder, m_strFolder);
+	strcpy(strUser, m_strUser);
 
 	int i = 0;
 	if (m_bPreview) i |= PIECEBAR_PREVIEW;
@@ -630,6 +635,7 @@ void CPreferencesPrint::OnHeaderClick(UINT nID)
 	{
 	case ID_PRINT_FILENAME:		c[1] = 'F'; break;
 	case ID_PRINT_PAGENUMBER:	c[1] = 'P'; break;
+	case ID_PRINT_TOTALPAGES:	c[1] = 'O'; break;
 	case ID_PRINT_CURRENTTIME:	c[1] = 'T'; break;
 	case ID_PRINT_CURRENTDATE:	c[1] = 'D'; break;
 	case ID_PRINT_LEFTALIGN:	c[1] = 'L'; break;

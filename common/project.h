@@ -5,6 +5,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
+#include "texfont.h"
 #include "array.h"
 
 typedef enum 
@@ -94,7 +95,7 @@ public:
 
 	void Render(bool bToMemory);
 	void SetViewSize(int cx, int cy);
-	Texture* FindTexture(char* name);
+	Texture* FindTexture (const char* name);
 	PieceInfo* FindPieceInfo (const char* name) const;
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
@@ -124,6 +125,7 @@ protected:
 	PieceInfo* m_pPieceIdx;	// index
 	int m_nTextureCount;
 	Texture* m_pTextures;
+  TexFont m_ScreenFont;
 	char* m_pMovedReference;
 	int m_nMovedCount;
 

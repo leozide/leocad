@@ -963,9 +963,9 @@ SOURCE=.\hlp\ScMenu.bmp
 SOURCE=.\hlp\Scmin.bmp
 # End Source File
 # End Group
-# Begin Group "Common Files"
+# Begin Group "Common Header Files"
 
-# PROP Default_Filter ""
+# PROP Default_Filter "h"
 # Begin Source File
 
 SOURCE=..\common\array.h
@@ -976,12 +976,142 @@ SOURCE=..\common\basewnd.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\camera.cpp
-# SUBTRACT CPP /YX /Yc /Yu
+SOURCE=..\Common\camera.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\camera.h
+SOURCE=..\common\console.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\curve.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\defines.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\file.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\glwindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\group.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\image.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\library.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\light.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\mainwnd.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\matrix.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\message.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\minifig.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\object.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\opengl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\piece.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\pieceinf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\project.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\quant.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\str.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\system.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\terrain.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\texfont.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\texture.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\Tr.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\typedefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\vector.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\view.h
+# End Source File
+# End Group
+# Begin Group "Common Source Files"
+
+# PROP Default_Filter "c;cpp"
+# Begin Source File
+
+SOURCE=..\Common\camera.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -998,93 +1128,161 @@ SOURCE=..\common\console.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\common\console.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\common\curve.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\curve.h
-# End Source File
-# Begin Source File
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
-SOURCE=..\Common\defines.h
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\file.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\file.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\globals.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\globals.h
-# End Source File
-# Begin Source File
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
-SOURCE=..\common\glwindow.h
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\group.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\group.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_bmp.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_gif.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # ADD CPP /I "./jpeglib"
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_jpg.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # ADD CPP /I "./jpeglib"
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_png.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # ADD CPP /I "./libpng" /I "./zlib"
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# ADD CPP /I "./libpng" /I "./zlib"
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\image.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # ADD CPP /I "./jpeglib"
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\image.h
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\library.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\library.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1093,52 +1291,78 @@ SOURCE=..\Common\light.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\light.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\common\mainwnd.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\mainwnd.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\matrix.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\matrix.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\message.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\message.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\minifig.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\minifig.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\object.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\object.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1157,105 +1381,166 @@ SOURCE=..\common\opengl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\common\opengl.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\Common\piece.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\piece.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\pieceinf.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\pieceinf.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\project.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\project.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\quant.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\quant.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\str.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\str.h
-# End Source File
-# Begin Source File
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
-SOURCE=..\common\system.h
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\terrain.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\terrain.h
+SOURCE=..\common\texfont.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\texture.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\texture.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\Tr.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\Tr.h
-# End Source File
-# Begin Source File
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
-SOURCE=..\Common\typedefs.h
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\vector.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\Common\vector.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\view.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
 
-SOURCE=..\common\view.h
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

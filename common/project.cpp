@@ -69,14 +69,6 @@ static LC_VIEWPORT viewports[14] = {
   { 4,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.5f, 0.0f, 0.5f, 0.5f },
 	 { 0.0f, 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f, 0.5f } }}};// 4
 
-typedef struct 
-{
-  unsigned char width;
-  float left, right, top, bottom;
-} LC_TXFVERT;
-
-static LC_TXFVERT glyphs[93];
-
 /////////////////////////////////////////////////////////////////////////////
 // Project construction/destruction
 
@@ -119,40 +111,6 @@ Project::Project()
 
 	for (i = 0; i < 10; i++)
 		m_pClipboard[i] = NULL;
-
-	// Create font table
-	float inv = 1.0f/128;
-	char *charlines[16] = { 
-	"abcdefghijklmn", "opqrstuvwxyz0", "123456789ABC", "DEFGHIJKLMN", 
-	"OPQRSTUVWX", "YZ,.!;:<>/?{}@$%", "&*()-+=_[] #" };
-	unsigned char lefts[7][17] = { 
-	{ 1, 11, 21, 30, 40, 50, 56, 66, 76, 80, 84, 93, 97, 111, 121 },
-	{ 1, 11, 21, 31, 38, 47, 53, 63, 72, 86, 94, 103, 111, 120 },
-	{ 1, 10, 19, 28, 37, 46, 55, 64, 73, 82, 94, 106, 118, },
-	{ 1, 13, 24, 34, 47, 59, 64, 73, 84, 94, 108, 120 },
-	{ 1, 14, 25, 38, 50, 61, 71, 83, 94, 109, 120 },
-	{ 1, 12, 22, 26, 30, 35, 39, 43, 52, 61, 65, 75, 81, 87, 103, 112, 125 },
-	{ 3, 14, 23, 28, 33, 38, 47, 56, 65, 70, 75, 79, 88 } };
-	// tops = 1 20 39 58 77 96 112 (+16)
-	memset(glyphs, 0, sizeof(glyphs));
-
-	// ASCII 32-125
-	for (i = 32; i < 126; i++)
-	for (int x = 0; x < 7; x++)
-	for (int y = 0; charlines[x][y]; y++)
-	if (charlines[x][y] == i)
-	{
-		glyphs[i-32].width = lefts[x][y+1] - lefts[x][y];
-		glyphs[i-32].left = (float)lefts[x][y]*inv;
-		glyphs[i-32].right = (float)(lefts[x][y+1])*inv;
-		if (x != 6)
-			glyphs[i-32].top = (float)(1 + 19*x);
-		else
-			glyphs[i-32].top = 112;
-		glyphs[i-32].bottom = glyphs[i-32].top + 16;
-		glyphs[i-32].top *= inv;
-		glyphs[i-32].bottom *= inv;
-	}
 }
 
 Project::~Project()
@@ -2101,53 +2059,27 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_ALPHA_TEST);
 
-	LC_TXFVERT* glyph;
-
-	glPushMatrix();
+  glPushMatrix();
 	glTranslatef(1.4f*ds, 0, 0);
 	glMultMatrixf(m.m);
-	glyph = &glyphs['X'-32];
 	glBegin(GL_QUADS);
-	glTexCoord2f(glyph->left, glyph->top);
-	glVertex2f(0, 0.4f*ds);
-	glTexCoord2f(glyph->left, glyph->bottom);
-	glVertex2f(0, -0.4f*ds);
-	glTexCoord2f(glyph->right, glyph->bottom);
-	glVertex2f(glyph->width*ds/20, -0.4f*ds);
-	glTexCoord2f(glyph->right, glyph->top);
-	glVertex2f(glyph->width*ds/20, 0.4f*ds);
+  m_ScreenFont.PrintCharScaled (0.025f * ds, 'X');
 	glEnd();
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(0, 1.4f*ds, 0);
 	glMultMatrixf(m.m);
-	glyph = &glyphs['Y'-32];
 	glBegin(GL_QUADS);
-	glTexCoord2f(glyph->left, glyph->top);
-	glVertex2f(0, 0.4f*ds);
-	glTexCoord2f(glyph->left, glyph->bottom);
-	glVertex2f(0, -0.4f*ds);
-	glTexCoord2f(glyph->right, glyph->bottom);
-	glVertex2f(glyph->width*ds/20, -0.4f*ds);
-	glTexCoord2f(glyph->right, glyph->top);
-	glVertex2f(glyph->width*ds/20, 0.4f*ds);
+  m_ScreenFont.PrintCharScaled (0.025f * ds, 'Y');
 	glEnd();
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(0, 0, 1.4f*ds);
 	glMultMatrixf(m.m);
-	glyph = &glyphs['Z'-32];
 	glBegin(GL_QUADS);
-	glTexCoord2f(glyph->left, glyph->top);
-	glVertex2f(0, 0.4f*ds);
-	glTexCoord2f(glyph->left, glyph->bottom);
-	glVertex2f(0, -0.4f*ds);
-	glTexCoord2f(glyph->right, glyph->bottom);
-	glVertex2f(glyph->width*ds/20, -0.4f*ds);
-	glTexCoord2f(glyph->right, glyph->top);
-	glVertex2f(glyph->width*ds/20, 0.4f*ds);
+  m_ScreenFont.PrintCharScaled (0.025f * ds, 'Z');
 	glEnd();
 	glPopMatrix();
 
@@ -2521,24 +2453,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
 			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
 
-			float l = x+3, t = y+h-6;
-			for (const char* p = m_pViewCameras[vp]->GetName(); *p; p++)
-			{
-				if (*p < 32 || *p > 125)
-					continue;
-				if (glyphs[*p-32].width == 0)
-					continue;
-
-				glTexCoord2f(glyphs[*p-32].left, glyphs[*p-32].top);
-				glVertex2f(l, t);
-				glTexCoord2f(glyphs[*p-32].left, glyphs[*p-32].bottom);
-				glVertex2f(l, t-16);
-				glTexCoord2f(glyphs[*p-32].right, glyphs[*p-32].bottom);
-				glVertex2f(l + glyphs[*p-32].width, t-16);
-				glTexCoord2f(glyphs[*p-32].right, glyphs[*p-32].top);
-				glVertex2f(l + glyphs[*p-32].width, t);
-				l += glyphs[*p-32].width;
-			}
+      m_ScreenFont.PrintText (x + 3, y + h - 6, m_pViewCameras[vp]->GetName ());
 		}
 		glEnd();
 	
@@ -2676,8 +2591,19 @@ void Project::RenderInitialize()
 	else
 		glDisable (GL_FOG);
 
-	// Load font (always the first texture)
-	m_pTextures[0].Load(false);
+	// Load font
+  if (!m_ScreenFont.IsLoaded ())
+  {
+    char filename[LC_MAXPATH];
+    FileDisk file;
+
+    strcpy (filename, m_LibraryPath);
+    strcat (filename, "sysfont.txf");
+
+    if (file.Open (filename, "rb"))
+      m_ScreenFont.FileLoad (file);
+  }
+
 	glAlphaFunc(GL_GREATER, 0.0625);
 
 	if (m_nScene & LC_SCENE_FLOOR)
@@ -5985,13 +5911,13 @@ void Project::GetFocusPosition(float* pos)
 	pos[0] = pos[1] = pos[2] = 0.0f;
 }
 
-Texture* Project::FindTexture(char* name)
+Texture* Project::FindTexture (const char* name)
 {
-	for (int i = 0; i < m_nTextureCount; i++)
-		if (!strcmp (name, m_pTextures[i].m_strName))
-			return &m_pTextures[i];
+  for (int i = 0; i < m_nTextureCount; i++)
+    if (!strcmp (name, m_pTextures[i].m_strName))
+      return &m_pTextures[i];
 
-	return NULL;
+  return NULL;
 }
 
 // Remeber to make 'name' uppercase.

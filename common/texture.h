@@ -7,6 +7,8 @@
 
 class File;
 
+#include "opengl.h"
+
 typedef enum { LC_INTENSITY, LC_RGB, LC_RGBA } LC_TEXTURE_TYPES;
 
 class Texture

@@ -1,4 +1,3 @@
-LINUX.txt $Id$
 
 LeoCAD for Linux
 ----------------
@@ -43,25 +42,32 @@ need to download it again).
   Now you should unzip the files to a temporary directory (you
 probably already did that) and move the file 'leocad' to
 /usr/local/bin/ and the 4 files from the pieces library to
-/usr/share/LeoCAD/. If you wish to have the library files installed
-in another place, set the environment variable LEOCAD_LIB to
-that directory or start the program with the -l <path> option.
+/usr/local/share/leocad/. If you wish to have the library files
+installed in another place, set the environment variable LEOCAD_LIB
+to that directory or start the program with the -l <path> option.
 
-  You need to have an OpenGL library, you can download Mesa
-from www.mesa3d.org if you don't have one already (you'll need to
-create the symlinks described in the README). You should also have
-GTK+, it's available from www.gtk.org
+  You need to have an OpenGL library, you can download Mesa 3D
+from www.mesa3d.org if you don't have one already and you will also
+need GTK+ 1.2, it's available from www.gtk.org
 
-Current versions are:
-GTK+ 1.2
-MESA 3D 3.0
-LIBJPEG 6.0
-LIBPNG 1.0
-ZLIB 1.1
+  If you're using the precompiled version, then you will also need
+libjpeg, zlib and libpng. If you're compiling from the sources, the
+configuration utility will detect what libraries you have installed
+and only support those file formats.
+
+Current versions used are:
+GTK+ 1.2     http://www.gtk.org/
+MESA 3D 3.4  http://www.mesa3d.org/
+LIBJPEG 6.0  ftp://ftp.uu.net/graphics/jpeg/
+LIBPNG 1.0   http://www.libpng.org/pub/png/libpng.html
+ZLIB 1.1     http://www.info-zip.org/pub/infozip/zlib/
 
 
 COMMAND LINE OPTIONS
 --------------------
+
+  The man (1) page has a more complete description of all command line
+parameters available. This is just a list of the most used ones:
 
 [filename]: Loads a file
 
@@ -81,18 +87,3 @@ Example:
   This will start LeoCAD, load the file "car.lcd", create a GIF file
 called "car.gif" with a resolution of 640 x 480 using the pieces
 library in /mnt/c/leocad/ and exit when done.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -463,7 +463,7 @@ void CBMPMenu::MeasureItem(LPMEASUREITEMSTRUCT lpMIS)
 {
 	if (lpMIS->itemID >= ID_VIEWPORT01 && lpMIS->itemID <= ID_VIEWPORT14)
 	{
-		lpMIS->itemWidth = 31;
+		lpMIS->itemWidth = 35;
 		lpMIS->itemHeight = 33;
 		return;
 	}

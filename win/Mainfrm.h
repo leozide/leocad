@@ -15,11 +15,14 @@
 #include "BMPMenu.h"
 #include "ModDlg.h"
 
+class MainWnd;
+
 class CMainFrame : public CFrameWnd
 {
 protected: // create from serialization only
 	CMainFrame();
 	DECLARE_DYNCREATE(CMainFrame)
+  MainWnd* m_pMainWnd;
 
 // Attributes
 public:
@@ -71,6 +74,7 @@ protected:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	afx_msg void OnFilePrintPieceList();
 	afx_msg void OnActivateApp(BOOL bActive, HTASK hTask);
+	afx_msg void OnViewNewView();
 	//}}AFX_MSG
 
 	// Status bar

@@ -745,7 +745,7 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
 	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
 
-        for (int i = 0; i < m_ViewList.GetSize (); i++)
+        for (i = 0; i < m_ViewList.GetSize (); i++)
         {
           m_ViewList[i]->MakeCurrent ();
           RenderInitialize();
@@ -1192,7 +1192,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		}
 	}
 
-        for (int i = 0; i < m_ViewList.GetSize (); i++)
+        for (i = 0; i < m_ViewList.GetSize (); i++)
         {
           m_ViewList[i]->MakeCurrent ();
           RenderInitialize();

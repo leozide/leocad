@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CPiecesList
+LastClass=CMainFrame
 LastTemplate=CHeaderCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "leocad.h"
@@ -71,7 +71,7 @@ Resource8=IDR_ANIMATORBAR
 Resource9=IDD_LIBRARY
 Resource10=IDD_TERRAIN_OPTIONS
 Resource11=IDD_PREFPRINT
-Resource12=IDR_MAINFRAME
+Resource12=IDD_ABOUTBOX
 Resource13=IDD_EDIT_GROUPS
 Resource14=IDD_PROPGENERAL
 Resource15=IDD_PROPSUMMARY
@@ -97,7 +97,7 @@ Resource34=IDD_SAVEPICTUREDLG_TEMPLATE
 Resource35=IDD_PIECEEDITOR
 Class50=CGroupEditTree
 Class51=CSortHeaderCtrl
-Resource36=IDD_ABOUTBOX
+Resource36=IDR_MAINFRAME
 
 [CLS:CAboutDlg]
 Type=0
@@ -224,6 +224,9 @@ Type=0
 BaseClass=CFrameWnd
 HeaderFile=Mainfrm.h
 ImplementationFile=Mainfrm.cpp
+Filter=T
+VirtualFilter=fWC
+LastObject=ID_VIEW_NEWVIEW
 
 [CLS:CMinifigWnd]
 Type=0
@@ -1093,12 +1096,13 @@ Command73=ID_VIEW_STEP_LAST
 Command74=ID_VIEW_STEP_CHOOSE
 Command75=ID_VIEW_STEP_INSERT
 Command76=ID_VIEW_FULLSCREEN
-Command77=ID_HELP_FINDER
-Command78=ID_HELP_LEOCADHOMEPAGE
-Command79=ID_HELP_SENDEMAIL
-Command80=ID_HELP_CHECKFORUPDATES
-Command81=ID_APP_ABOUT
-CommandCount=81
+Command77=ID_VIEW_NEWVIEW
+Command78=ID_HELP_FINDER
+Command79=ID_HELP_LEOCADHOMEPAGE
+Command80=ID_HELP_SENDEMAIL
+Command81=ID_HELP_CHECKFORUPDATES
+Command82=ID_APP_ABOUT
+CommandCount=82
 
 [MNU:IDR_POPUPS]
 Type=1

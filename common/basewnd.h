@@ -2,6 +2,20 @@
 #define _BASEWND_H_
 
 #include <string.h>
+
+// FIXME: move this to another place
+#ifdef WIN32
+#include "stdafx.h"
+typedef CWnd* BaseWndXID;
+typedef struct
+{
+  CWnd* wnd;
+  int index;
+  UINT command;
+} BaseMenuItem;
+
+#else
+
 #include <gtk/gtk.h>
 typedef GtkWidget* BaseWndXID;
 typedef struct
@@ -9,6 +23,7 @@ typedef struct
   GtkWidget* widget;
   GtkAccelGroup* accel;
 } BaseMenuItem;
+#endif
 
 // =============================================================================
 // Message Box constants
@@ -56,10 +71,14 @@ class BaseWnd
 
   BaseWndXID GetXID () const
     { return m_pXID; }
+  void SetXID (BaseWndXID id)
+    { m_pXID = id; }
 
+#ifndef WIN32
   // FIXME: remove
   operator GtkWidget* () const
     { return m_pXID; }
+#endif
 
   BaseMenuItem* GetMenuItem (int id) const
     { return &m_pMenuItems[id]; }

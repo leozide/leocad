@@ -2,8 +2,9 @@
 // View the project contents
 //
 
-#include "view.h"
+#include <stdlib.h>
 #include "project.h"
+#include "view.h"
 
 View::View (Project *pProject, GLWindow *share)
   : GLWindow (share)

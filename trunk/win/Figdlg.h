@@ -12,7 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CMinifigDlg dialog
 
-class CMinifigWnd;
+class MinifigWizard;
 
 class CMinifigDlg : public CDialog
 {
@@ -51,8 +51,8 @@ public:
 
 // Implementation
 protected:
-	CMinifigWnd* m_pMFWnd;
-	void* m_pParam;
+	CWnd* m_pMinifigWnd;
+	MinifigWizard* m_pMinifig;
 
 	afx_msg LONG OnColorSelEndOK(UINT lParam, LONG wParam);
 	void OnPieceSelEndOK(UINT nID);

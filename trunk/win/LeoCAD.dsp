@@ -96,11 +96,20 @@ SOURCE=.\Aboutdlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\array.cpp
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=.\Arraydlg.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\Barcmdui.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\basewnd.cpp
 # End Source File
 # Begin Source File
 
@@ -145,6 +154,10 @@ SOURCE=.\Figdlg.cpp
 # Begin Source File
 
 SOURCE=.\Flatbar.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\glwindow.cpp
 # End Source File
 # Begin Source File
 
@@ -213,10 +226,6 @@ SOURCE=.\Libdlg.cpp
 # Begin Source File
 
 SOURCE=.\Mainfrm.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Mfwnd.cpp
 # End Source File
 # Begin Source File
 
@@ -438,10 +447,6 @@ SOURCE=.\Light.h
 # Begin Source File
 
 SOURCE=.\MainFrm.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Mfwnd.h
 # End Source File
 # Begin Source File
 
@@ -845,11 +850,19 @@ SOURCE=".\$(ProjDir)\hlp\AfxCore.rtf"
 # End Source File
 # Begin Source File
 
+SOURCE=".\$(ProjDir)\hlp\AfxCore.rtf"
+# End Source File
+# Begin Source File
+
 SOURCE=.\hlp\AfxCore.rtf
 # End Source File
 # Begin Source File
 
 SOURCE=.\hlp\AfxOleSv.rtf
+# End Source File
+# Begin Source File
+
+SOURCE=".\$(ProjDir)\hlp\AfxPrint.rtf"
 # End Source File
 # Begin Source File
 
@@ -965,6 +978,10 @@ SOURCE=..\common\array.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\basewnd.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\Common\camera.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
@@ -1002,6 +1019,10 @@ SOURCE=..\Common\globals.cpp
 # Begin Source File
 
 SOURCE=..\Common\globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\glwindow.h
 # End Source File
 # Begin Source File
 
@@ -1062,6 +1083,23 @@ SOURCE=..\Common\light.cpp
 # Begin Source File
 
 SOURCE=..\Common\light.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\mainwnd.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\mainwnd.h
 # End Source File
 # Begin Source File
 
@@ -1156,6 +1194,23 @@ SOURCE=..\Common\quant.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\str.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\str.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\system.h
 # End Source File
 # Begin Source File
@@ -1197,6 +1252,23 @@ SOURCE=..\Common\vector.cpp
 # Begin Source File
 
 SOURCE=..\Common\vector.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\view.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\view.h
 # End Source File
 # End Group
 # End Target

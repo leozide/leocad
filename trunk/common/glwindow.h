@@ -7,12 +7,16 @@ class GLWindow
   GLWindow (GLWindow *share);
   virtual ~GLWindow ();
 
-  void Create (void* data);
+  bool Create (void* data);
   void DestroyContext ();
 
   bool MakeCurrent ();
   void SwapBuffers ();
   void Redraw ();
+  int GetWidth () const
+    { return m_nWidth; }
+  int GetHeight () const
+    { return m_nHeight; }
 
   virtual void OnDraw () { };
   virtual void OnSize (int cx, int cy)

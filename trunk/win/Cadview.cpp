@@ -12,7 +12,8 @@
 #include "project.h"
 #include "globals.h"
 #include "system.h"
-#include "Camera.h"
+#include "camera.h"
+#include "view.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,6 +21,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);
 
 /////////////////////////////////////////////////////////////////////////////
 // CCADView
@@ -64,10 +66,8 @@ END_MESSAGE_MAP()
 CCADView::CCADView()
 {
 	m_pPixels = NULL;
-	m_pPalette = NULL;
-	m_hglRC = NULL;
-	m_pDC = NULL;
 	m_hCursor = NULL;
+  m_pView = NULL;
 }
 
 CCADView::~CCADView()
@@ -122,7 +122,16 @@ BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CCADView::OnDraw(CDC* /*pDC*/)
 {
-	project->Render(false);
+  static int added = 0;
+
+  if (!added)
+  {
+    m_pView->OnInitialUpdate ();
+    added = 1;
+  }
+
+//  m_pView->OnDraw ();
+//	project->Render(false);
 /*
 	CCADDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -241,7 +250,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		lpy*theApp.GetProfileInt("Default","Margin Bottom", 50)/100);
 
 	int w = rc.Width()/cols, h = rc.Height()/rows; // cell size
-	float viewaspect = (float)m_szView.cx/(float)m_szView.cy;
+	float viewaspect = (float)m_pView->GetWidth ()/(float)m_pView->GetHeight ();
 	int pw = w, ph = h; // picture
 	int mx = 0, my = 0; // offset
 
@@ -544,7 +553,7 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT page, BOOL bCat
 
 void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
+//	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
 }
 
 void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView) 
@@ -583,7 +592,7 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 
 
 	pfnwglMakeCurrent(NULL, NULL);
-
+/*
 	if (OpenGLGetPixelFormat(m_pDC->GetSafeHdc()) == 0)
 	{
 		delete m_pDC;
@@ -616,7 +625,7 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 		::MessageBox(NULL, lpMsgBuf, "Error", MB_OK|MB_ICONINFORMATION);
 		LocalFree(lpMsgBuf);	
 	}
-
+*/
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -755,7 +764,11 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
   if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
+
+  m_pView = new View (project, NULL);
+  m_pView->Create (m_hWnd);
+//  m_pView->OnInitialUpdate ();
+/*	
     m_pDC = new CClientDC(this);
     ASSERT(m_pDC != NULL);
 
@@ -801,6 +814,7 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
   GL_InitializeExtensions ();
+  */
   SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
   return 0;
@@ -808,13 +822,16 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CCADView::OnPaletteChanged(CWnd* pFocusWnd) 
 {
+  /*
 	// See if the change was caused by us and ignore it if not.
 	if (pFocusWnd != this)
 		OnQueryNewPalette();
+    */
 }
 
 BOOL CCADView::OnQueryNewPalette() 
 {
+  /*
 	if (m_pPalette)
 	{
 		m_pDC->SelectPalette(m_pPalette, FALSE);
@@ -824,12 +841,15 @@ BOOL CCADView::OnQueryNewPalette()
 			InvalidateRect(NULL, TRUE);
 		}
 	}
-
+*/
 	return TRUE;
 }
 
 void CCADView::OnDestroy() 
 {
+  delete m_pView;
+  m_pView = NULL;
+  /*
 	pfnwglMakeCurrent(NULL,  NULL);
 
 	if (m_hglRC)
@@ -845,7 +865,7 @@ void CCADView::OnDestroy()
 
 	if (m_pDC)
 		delete m_pDC;
-
+*/
 	KillTimer (IDT_LC_SAVETIMER);
 	
 	CView::OnDestroy();
@@ -853,46 +873,46 @@ void CCADView::OnDestroy()
 
 void CCADView::OnSize(UINT nType, int cx, int cy) 
 {
-	m_szView.cx = cx;
-	m_szView.cy = cy;
-	project->SetViewSize(cx, cy);
+//	m_szView.cx = cx;
+//	m_szView.cy = cy;
+//	project->SetViewSize(cx, cy);
 	CView::OnSize(nType, cx, cy);
 }
 
 void CCADView::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	project->OnMouseMove(point.x, m_szView.cy - point.y - 1,
-		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
+//	project->OnMouseMove(point.x, m_szView.cy - point.y - 1,
+//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	project->OnLeftButtonUp(point.x, m_szView.cy - point.y - 1,
-		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
+//	project->OnLeftButtonUp(point.x, m_szView.cy - point.y - 1,
+//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	project->OnLeftButtonDown(point.x, m_szView.cy - point.y - 1,
-		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
+//	project->OnLeftButtonDown(point.x, m_szView.cy - point.y - 1,
+//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
-	project->OnLeftButtonDoubleClick(point.x, m_szView.cy - point.y - 1,
-		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
+//	project->OnLeftButtonDoubleClick(point.x, m_szView.cy - point.y - 1,
+//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	project->OnRightButtonDown(point.x, m_szView.cy - point.y - 1,
-		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
+//	project->OnRightButtonDown(point.x, m_szView.cy - point.y - 1,
+//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnRButtonUp(UINT nFlags, CPoint point) 
 {
-	project->OnRightButtonUp(point.x, m_szView.cy - point.y - 1,
-		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
+//	project->OnRightButtonUp(point.x, m_szView.cy - point.y - 1,
+//		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnDropDown (NMHDR* pNotifyStruct, LRESULT* pResult)
@@ -1118,4 +1138,18 @@ void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 		}
 	}
 */
+}
+
+LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+  if (m_pView)
+  {
+    MSG msg;
+    msg.message = message;
+    msg.wParam = wParam;
+    msg.lParam = lParam;
+    GLWindowPreTranslateMessage (m_pView, &msg);
+  }
+	
+	return CView::WindowProc(message, wParam, lParam);
 }

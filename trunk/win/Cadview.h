@@ -5,6 +5,7 @@
 #ifndef _CADVIEW_H_
 #define _CADVIEW_H_
 
+class View;
 class CCADDoc;
 class CPreviewViewEx;
 
@@ -35,6 +36,7 @@ public:
 	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
 	virtual void OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView);
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -48,10 +50,7 @@ public:
 // Generated message map functions
 protected:
 	HCURSOR m_hCursor;
-	CSize m_szView;
-	HGLRC m_hglRC;
-	CClientDC* m_pDC;
-	CPalette* m_pPalette;
+  View* m_pView;
 
 	BOOL DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass* pPreviewViewClass, CPrintPreviewState* pState);
 	void* m_pPixels;

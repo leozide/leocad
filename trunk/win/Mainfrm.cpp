@@ -8,6 +8,7 @@
 #include "project.h"
 #include "message.h"
 #include "globals.h"
+#include "mainwnd.h"
 
 #include "Print.h"
 
@@ -56,6 +57,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_GETMINMAXINFO()
 	ON_COMMAND(ID_FILE_PRINTPIECELIST, OnFilePrintPieceList)
 	ON_WM_ACTIVATEAPP()
+	ON_COMMAND(ID_VIEW_NEWVIEW, OnViewNewView)
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnPieceBar)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
@@ -91,10 +93,12 @@ CMainFrame::CMainFrame()
 {
 	m_pwndFullScrnBar = NULL;
 	m_bAutoMenuEnable = FALSE;
+  m_pMainWnd = new MainWnd ();
 }
 
 CMainFrame::~CMainFrame()
 {
+  delete m_pMainWnd;
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -200,6 +204,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hMenuDefault = hMenu;
 
   messenger->Listen (&mainframe_listener, this);
+
+  m_pMainWnd->SetXID (this);
 
 	return 0;
 }
@@ -925,4 +931,78 @@ void CMainFrame::OnActivateApp(BOOL bActive, HTASK hTask)
 	CFrameWnd::OnActivateApp(bActive, hTask);
 	
 	project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
+}
+
+#include "glwindow.h"
+#include "view.h"
+
+BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);
+
+static LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  static CMapPtrToPtr WindowMap;
+  GLWindow *wnd;
+
+  if (uMsg == WM_CREATE)
+  {
+    View *view = new View (project, NULL);
+    view->Create (hwnd);
+
+    WindowMap.SetAt (hwnd, view);
+  }
+
+  wnd = (GLWindow*)WindowMap[hwnd];
+
+  if (wnd)
+  {
+    MSG msg;
+    msg.hwnd = hwnd;
+    msg.message = uMsg;
+    msg.wParam = wParam;
+    msg.lParam = lParam;
+
+    GLWindowPreTranslateMessage (wnd, &msg);
+
+    if (uMsg == WM_DESTROY)
+    {
+      WindowMap.RemoveKey (hwnd);
+      delete wnd;
+    }
+  }
+
+  return DefWindowProc (hwnd, uMsg, wParam, lParam);
+}
+
+void CMainFrame::OnViewNewView() 
+{
+	HINSTANCE hInst = AfxGetInstanceHandle();
+	WNDCLASS wndcls;
+  CWnd *pWnd;
+
+#define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
+#define FLOATING_CLASSNAME _T("LeoCADFloatingOpenGLClass")
+
+  // check if our class is registered
+	if(!(GetClassInfo (hInst, FLOATING_CLASSNAME, &wndcls)))
+	{
+  	if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
+	  {
+      // set our class name
+	  	wndcls.lpszClassName = FLOATING_CLASSNAME;
+      wndcls.lpfnWndProc = GLWindowProc;
+      wndcls.hIcon = LoadIcon (hInst, MAKEINTRESOURCE (IDR_MAINFRAME));
+
+  		// register class
+	  	if (!AfxRegisterClass (&wndcls))
+		  	AfxThrowResourceException();
+  	}
+		else
+			AfxThrowResourceException();
+  }
+
+  pWnd = new CWnd ();
+  pWnd->CreateEx (0, FLOATING_CLASSNAME, "LeoCAD",
+    WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
+    CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
+    m_hWnd, (HMENU)0, NULL);
 }

@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "LeoCAD.h"
 #include "FigDlg.h"
-#include "MFWnd.h"
 #include "minifig.h"
 
 #ifdef _DEBUG
@@ -19,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 CMinifigDlg::CMinifigDlg(void* param, CWnd* pParent /*=NULL*/)
 	: CDialog(CMinifigDlg::IDD, pParent)
 {
-	m_pParam = param;
+  m_pMinifig = (MinifigWizard*)param;
 
 	//{{AFX_DATA_INIT(CMinifigDlg)
 	//}}AFX_DATA_INIT
@@ -71,13 +70,12 @@ BOOL CMinifigDlg::OnInitDialog()
 	::GetWindowRect (::GetDlgItem(m_hWnd, IDC_PREVIEWSTATIC), &r);
 	ScreenToClient (&r);
 
-	m_pMFWnd = new CMinifigWnd;
-	m_pMFWnd->m_pFig = (MinifigWizard*)m_pParam;
-	m_pMFWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 501);
-	m_pMFWnd->InitGL();
+	m_pMinifigWnd = new CWnd;
+	m_pMinifigWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 501);
+	m_pMinifig->Create (m_pMinifigWnd);
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
-		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMFWnd->m_pFig->m_Colors[i]);
+		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
@@ -85,7 +83,7 @@ BOOL CMinifigDlg::OnInitDialog()
     char **names;
     int j, count;
 
-    m_pMFWnd->m_pFig->GetDescriptions (i, &names, &count);
+    m_pMinifig->GetDescriptions (i, &names, &count);
 
     for (j = 0; j < count; j++)
 			pCombo->AddString (names[j]);
@@ -93,7 +91,7 @@ BOOL CMinifigDlg::OnInitDialog()
 	}
 
   char *names[LC_MFW_NUMITEMS];
-  m_pMFWnd->m_pFig->GetSelections (names);
+  m_pMinifig->GetSelections (names);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
@@ -110,16 +108,16 @@ BOOL CMinifigDlg::OnInitDialog()
 
 BOOL CMinifigDlg::DestroyWindow() 
 {
-	m_pMFWnd->DestroyWindow();
-	delete m_pMFWnd;
+	m_pMinifigWnd->DestroyWindow();
+	delete m_pMinifigWnd;
 	
 	return CDialog::DestroyWindow();
 }
 
 LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 {
-	m_pMFWnd->m_pFig->ChangeColor (wParam-IDC_MF_HATCOLOR, lParam);
-	m_pMFWnd->PostMessage(WM_PAINT);
+	m_pMinifig->ChangeColor (wParam-IDC_MF_HATCOLOR, lParam);
+	m_pMinifig->Redraw ();
 
 	return TRUE;
 }
@@ -128,21 +126,21 @@ void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
   char tmp[65];
   GetDlgItem(nID)->GetWindowText (tmp, 65);
-	m_pMFWnd->m_pFig->ChangePiece (nID-IDC_MF_HAT, tmp);
-	m_pMFWnd->PostMessage(WM_PAINT);
+	m_pMinifig->ChangePiece (nID-IDC_MF_HAT, tmp);
+	m_pMinifig->Redraw ();
 }
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 
 {
   char tmp[65];
   GetDlgItem(nID)->GetWindowText (tmp, 65);
-  if (m_pMFWnd)
+  if (m_pMinifigWnd)
   {
     int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_NECK,
       LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND,
       LC_MFW_RIGHT_HAND, LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL,
       LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
-  	m_pMFWnd->m_pFig->ChangeAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
-	  m_pMFWnd->PostMessage(WM_PAINT);
+  	m_pMinifig->ChangeAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
+	  m_pMinifig->Redraw ();
   }
 }

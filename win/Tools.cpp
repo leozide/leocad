@@ -450,11 +450,11 @@ void Export3DStudio()
 				i = *info;
 				info++;
 
-				facecount += (*info)*2;
-				facemats[i] += (*info)*2;
+				facecount += (*info)*2/4;
+				facemats[i] += (*info)*2/4;
 				info += *info + 1;
-				facecount += (*info);
-				facemats[i] += (*info);
+				facecount += (*info)/3;
+				facemats[i] += (*info)/3;
 				info += *info + 1;
 				info += *info + 1;
 			}
@@ -521,60 +521,63 @@ void Export3DStudio()
 		mobj->nmats = i;
 		InitMeshObjField3ds (mobj, InitMatArray3ds);
 
-		UINT curface = 0;
 		i = 0;
 
 		for (j = 0; j < LC_COL_DEFAULT+1; j++)
-		if (facemats[j])
 		{
-			InitMatArrayIndex3ds (mobj, i, facemats[j]);
-			sprintf(mobj->matarray[i].name, "Material%02d", 
-				j == LC_COL_DEFAULT ? pPiece->GetColor() : j);
-			mobj->matarray[i].nfaces = facemats[j];
-
-			facecount = 0;
-
-			for (c = 0; c < pInfo->m_nGroupCount; c++)
+			if (facemats[j])
 			{
-				WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-				col = *info;
-				info++;
+				InitMatArrayIndex3ds (mobj, i, facemats[j]);
+				sprintf(mobj->matarray[i].name, "Material%02d", j == LC_COL_DEFAULT ? pPiece->GetColor() : j);
+				mobj->matarray[i].nfaces = facemats[j];
 
-				while (col--)
+				UINT curface = 0;
+				facecount = 0;
+
+				for (c = 0; c < pInfo->m_nGroupCount; c++)
 				{
-					if (j == *info)
-					{
-						info++;
-						for (UINT k = 0; k < *info; k += 4)
-						{
-							mobj->matarray[i].faceindex[facecount] = curface;
-							facecount++;
-							curface++;
-							mobj->matarray[i].faceindex[facecount] = curface;
-							facecount++;
-							curface++;
-						}
-						
-						info += *info + 1;
-						for (k = 0; k < *info; k += 3)
-						{
-							mobj->matarray[i].faceindex[facecount] = curface;
-							facecount++;
-							curface++;
-						}
-						info += *info + 1;
-					}
-					else
-					{
-						info++;
-						info += *info + 1;
-						info += *info + 1;
-					}
-					info += *info + 1;
-				}
-			}
+					WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
+					col = *info;
+					info++;
 
-			i++;
+					while (col--)
+					{
+						if (j == *info)
+						{
+							info++;
+							for (UINT k = 0; k < *info; k += 4)
+							{
+								mobj->matarray[i].faceindex[facecount] = curface;
+								facecount++;
+								curface++;
+								mobj->matarray[i].faceindex[facecount] = curface;
+								facecount++;
+								curface++;
+							}
+						
+							info += *info + 1;
+							for (k = 0; k < *info; k += 3)
+							{
+								mobj->matarray[i].faceindex[facecount] = curface;
+								facecount++;
+								curface++;
+							}
+							info += *info + 1;
+						}
+						else
+						{
+							info++;
+							curface += (*info)*2/4;
+							info += *info + 1;
+							curface += (*info)/3;
+							info += *info + 1;
+						}
+						info += *info + 1;
+					}
+				}
+
+				i++;
+			}
 		}
 	
 		FillMatrix3ds(mobj);

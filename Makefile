@@ -1,4 +1,3 @@
-### $Id$
 ### ALL CONFIGURATION SHOULD BE IN CONFIG.MK, NOT HERE
 include config.mk
 
@@ -9,6 +8,7 @@ MODULES := $(OSDIR) common
 ###   each of the modules
 CPPFLAGS += $(patsubst %,-I%,$(MODULES))
 CPPFLAGS += $(OS) -DVERSION=$(VERSION)
+CPPFLAGS += -g
 
 ### extra libraries if required
 LIBS :=
@@ -51,12 +51,12 @@ include $(OBJ:.o=.d)
 ### calculate C/C++ include
 ###   dependencies
 %.d: %.c
-	./depend.sh $(CC) $(CFLAGS) $(CPPFLAGS) $< > $@
-	[ -s $@ ] || rm -f $@
+	@./depend.sh $@ $(CC) $(CFLAGS) $(CPPFLAGS) -w $<
+	@[ -s $@ ] || rm -f $@
 
 %.d: %.cpp
-	./depend.sh $(CXX) $(CXXFLAGS) $(CPPFLAGS) $< > $@
-	[ -s $@ ] || rm -f $@
+	@./depend.sh $@ $(CXX) $(CXXFLAGS) $(CPPFLAGS) -w $<
+	@[ -s $@ ] || rm -f $@
 
 
 ### Various cleaning functions

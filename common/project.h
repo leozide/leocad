@@ -22,6 +22,7 @@ class Terrain;
 class PieceInfo;
 class Matrix;
 class View;
+class Image;
 
 // Undo support
 
@@ -159,7 +160,7 @@ protected:
 	void RenderViewports(bool bBackground, bool bLines);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
-	void CreateImages(LC_IMAGE** images, int width, int height, unsigned short from, unsigned short to, bool hilite);
+	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
 
 	inline bool IsDrawing()

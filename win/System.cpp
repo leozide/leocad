@@ -167,27 +167,28 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 							}
 							else
 							{
-								LC_IMAGE* image = OpenImage(&file, LC_IMAGE_GIF);
+								Image image;
+                
+                if (image.FileLoad (file))
+                {
+                  HWND hwndDesktop = GetDesktopWindow(); 
+                  HDC hdcDesktop = GetDC(hwndDesktop); 
+                  HDC hdcMem = CreateCompatibleDC(hdcDesktop); 
+                  hbm = CreateCompatibleBitmap(hdcDesktop, 120, 100);
+                  HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm); 
 
-								HWND hwndDesktop = GetDesktopWindow(); 
-								HDC hdcDesktop = GetDC(hwndDesktop); 
-								HDC hdcMem = CreateCompatibleDC(hdcDesktop); 
-								hbm = CreateCompatibleBitmap(hdcDesktop, 120, 100);
-								HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm); 
+                  for (int y = 0; y < 100; y++)
+                    for (int x = 0; x < 120; x++)
+                    {
+                      unsigned char* b = image.GetData () + (y*120+x)*3;
+                      SetPixelV(hdcMem, x, y, RGB(b[0], b[1], b[2]));
+                    }
 
-								for (int y = 0; y < 100; y++)
-								for (int x = 0; x < 120; x++)
-								{
-									unsigned char* b = (unsigned char*)image->bits + (y*120+x)*3;
-									SetPixelV(hdcMem, x, y, RGB(b[0], b[1], b[2]));
-								}
-
-								// Clean up
-								SelectObject(hdcMem, hbmOld); 
-								DeleteDC(hdcMem); 
-								ReleaseDC(hwndDesktop, hdcDesktop); 
-
-								free(image);
+                  // Clean up
+                  SelectObject(hdcMem, hbmOld); 
+                  DeleteDC(hdcMem); 
+                  ReleaseDC(hwndDesktop, hdcDesktop); 
+                }
 							}
 						}
 					}

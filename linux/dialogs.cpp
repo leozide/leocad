@@ -61,7 +61,7 @@ int msgbox_execute (const char* text, const char *caption, int flags)
   guint tmp_key;
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (window), "destroy",
@@ -296,7 +296,7 @@ int filedlg_execute(char* caption, char* filename)
 {
   GtkWidget* dlg;
   dlg = gtk_file_selection_new (caption);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   filedlg_str = filename;
 
   gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(dlg)->ok_button),
@@ -336,7 +336,7 @@ int colorseldlg_execute(void* param)
   GtkWidget* dlg;
 
   dlg = gtk_color_selection_dialog_new ("Choose Color");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_color_selection_set_color (GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG (dlg)->colorsel), dbl);
 
   gtk_signal_connect (GTK_OBJECT (GTK_COLOR_SELECTION_DIALOG (dlg)->ok_button),
@@ -472,7 +472,7 @@ int arraydlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -757,7 +757,7 @@ int aboutdlg_execute(void* param)
   char info[256];
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -839,6 +839,7 @@ int aboutdlg_execute(void* param)
   return dlg_domodal(dlg, LC_OK);
 }
 
+// =============================================================================
 // HTML Dialog
 
 typedef struct
@@ -897,8 +898,7 @@ static void htmldlg_list (GtkWidget *widget, gpointer data)
 int htmldlg_execute (void* param)
 {
   GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2;
-  GtkWidget *hbox;
+  GtkWidget *vbox, *vbox1, *vbox2, *hbox;
   GtkWidget *frame, *label, *button;
   GSList *radio_group = (GSList*)NULL;
   LC_HTMLDLG_STRUCT s;
@@ -906,29 +906,27 @@ int htmldlg_execute (void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 350, 320);
   gtk_window_set_title (GTK_WINDOW (dlg), "HTML Options");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
+
+  vbox = gtk_vbox_new (FALSE, 10);
+  gtk_widget_show (vbox);
+  gtk_container_add (GTK_CONTAINER (dlg), vbox);
+  gtk_container_border_width (GTK_CONTAINER (vbox), 10);
+
+  hbox = gtk_hbox_new (FALSE, 10);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
   vbox1 = gtk_vbox_new (FALSE, 10);
   gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox1);
-  gtk_container_border_width (GTK_CONTAINER (vbox1), 20);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox1, TRUE, TRUE, 0);
 
   frame = gtk_frame_new ("Layout");
   gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, TRUE, 0);
-  gtk_widget_set_usize (frame, 220, 100);
+  gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, TRUE, 0);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox2);
@@ -951,16 +949,14 @@ int htmldlg_execute (void* param)
 
   vbox2 = gtk_vbox_new (FALSE, 5);
   gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 10);
-  gtk_widget_set_usize (vbox2, 85, -2);
-  gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 0);
 
   button = gtk_button_new_with_label ("OK");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (htmldlg_ok), &s);
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, -2, 25);
+  gtk_widget_set_usize (button, 60, -2);
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
@@ -971,7 +967,7 @@ int htmldlg_execute (void* param)
 		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, -2, 25);
+  gtk_widget_set_usize (button, 60, -2);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
                               GDK_Escape, 0, GTK_ACCEL_VISIBLE);
 
@@ -980,16 +976,11 @@ int htmldlg_execute (void* param)
 		      GTK_SIGNAL_FUNC (htmldlg_images), &s);
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, -2, 25);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 60, -2);
 
   frame = gtk_frame_new ("Pieces List");
   gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, TRUE, 0);
-  gtk_widget_set_usize (frame, 220, 100);
+  gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, TRUE, 0);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox2);
@@ -1010,22 +1001,23 @@ int htmldlg_execute (void* param)
 
   s.highlight = gtk_check_button_new_with_label ("Highlight new pieces");
   gtk_widget_show (s.highlight);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.highlight, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), s.highlight, FALSE, TRUE, 0);
 
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_hbox_new (FALSE, 5);
   gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
-  gtk_widget_set_usize (hbox, -2, 30);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
   label = gtk_label_new ("Output directory");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
 
   s.directory = gtk_entry_new ();
   gtk_widget_show (s.directory);
-  gtk_box_pack_end (GTK_BOX (hbox), s.directory, FALSE, TRUE, 0);
-  gtk_widget_set_usize (s.directory, 210, -2);
+  gtk_box_pack_start (GTK_BOX (hbox), s.directory, TRUE, TRUE, 0);
+
+  button = gtk_button_new_with_label ("...");
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
 
   gtk_signal_connect (GTK_OBJECT (s.single), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
   gtk_signal_connect (GTK_OBJECT (s.multiple), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
@@ -1126,7 +1118,7 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
   s.from_htmldlg = from_htmldlg;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -1375,7 +1367,7 @@ int povraydlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -1644,7 +1636,7 @@ int preferencesdlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2151,7 +2143,7 @@ int propertiesdlg_execute(void* param)
   strcat(text, " Properties");
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2562,7 +2554,7 @@ int groupeditdlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2649,7 +2641,7 @@ int groupdlg_execute(void* param)
   s.data = param;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -2770,7 +2762,7 @@ int librarydlg_execute (void *param)
   LibraryDialog lib;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_window_set_title (GTK_WINDOW (dlg), "Piece Library Manager");
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
@@ -2966,7 +2958,7 @@ static void modifydlg_create ()
   GtkWidget *dlg, *vbox, *hbox, *scr, *clist, *button, *entry;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_window_set_title (GTK_WINDOW (dlg), "Modify");
   //  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
   //                      GTK_SIGNAL_FUNC (gtk_widget_hide), NULL);

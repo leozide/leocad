@@ -5,6 +5,7 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <pwd.h>
@@ -19,12 +20,15 @@
 #include "system.h"
 #include "config.h"
 #include "dialogs.h"
+#include "view.h"
+
+View* view;
 
 void create_main_menu (GtkObject *window, GtkWidget *vbox);
 
 // Variables
 
-GtkWidget *main_window;
+//GtkWidget *main_window;
 GtkWidget *drawing_area;
 
 static GtkWidget* main_hbox;
@@ -125,6 +129,11 @@ void OnCommandDirect(GtkWidget *w, gpointer data)
   project->HandleCommand((LC_COMMANDS)(int)data, 0);
 }
 
+static void view_destroy (GtkWidget *widget, gpointer data)
+{
+  delete (View*)data;
+}
+
 void OnCommand(GtkWidget* widget, gpointer data)
 {
   int id = (int)data;
@@ -168,6 +177,30 @@ void OnCommand(GtkWidget* widget, gpointer data)
       project->HandleCommand(LC_TOOLBAR_SNAPMENU, 5);
     } break;
 
+    case ID_VIEW_CREATE:
+    {
+      GtkWidget *wnd, *w, *frame;
+
+      wnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+      //      gtk_window_set_transient_for (GTK_WINDOW (wnd), GTK_WINDOW (((GtkWidget*)(*main_window))));
+      gtk_window_set_title (GTK_WINDOW (wnd), "View");
+      //      gtk_window_set_default_size (GTK_WINDOW (pieces_parent), pieces_width, -1);
+
+      frame = gtk_frame_new (NULL);
+      gtk_widget_show (frame);
+      gtk_container_add (GTK_CONTAINER (wnd), frame);
+      gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
+
+      View *v = new View (project, view);
+      v->Create (&w);
+
+      gtk_container_add (GTK_CONTAINER (frame), w);
+      gtk_widget_show (w);
+
+      gtk_signal_connect (GTK_OBJECT (wnd), "destroy", GTK_SIGNAL_FUNC (view_destroy), v);
+      gtk_widget_show (wnd);
+    } break;
+
     case ID_VIEW_TOOLBAR_STANDARD:
     {
       if (GTK_WIDGET_VISIBLE (main_toolbar.handle_box))
@@ -199,7 +232,7 @@ void OnCommand(GtkWidget* widget, gpointer data)
 
     case ID_VIEW_TOOLBAR_PIECES:
     {
-      gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+      gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_floating");
 
       if (pieces_visible)
       {
@@ -255,77 +288,6 @@ void OnCommand(GtkWidget* widget, gpointer data)
   }
 }
 
-static gint button_press_event (GtkWidget *widget, GdkEventButton *event)
-{
-  int x, y;
-  x = (int)event->x;
-  y = widget->allocation.height - (int)event->y - 1;
-
-  if (event->type == GDK_BUTTON_PRESS)
-  {
-    if (event->button == 1)
-      project->OnLeftButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-				(event->state & GDK_SHIFT_MASK) != 0);
-    if (event->button == 3)
-      project->OnRightButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-				 (event->state & GDK_SHIFT_MASK) != 0);
-  }
-  else if (event->type == GDK_2BUTTON_PRESS)
-  {
-    project->OnLeftButtonDoubleClick(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-				     (event->state & GDK_SHIFT_MASK) != 0);
-  }
-
-  gtk_window_set_focus (GTK_WINDOW (main_window), drawing_area);
-  gdk_pointer_grab (widget->window, FALSE,
-                    (GdkEventMask)(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK),
-                    NULL, NULL, GDK_CURRENT_TIME);
-
-  
-  return TRUE;
-}
-
-static gint button_release_event (GtkWidget *widget, GdkEventButton *event)
-{
-  int x, y;
-  x = (int)event->x;
-  y = widget->allocation.height - (int)event->y - 1;
-
-  gdk_pointer_ungrab (GDK_CURRENT_TIME);
-
-  if (event->button == 1)
-    project->OnLeftButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-			    (event->state & GDK_SHIFT_MASK) != 0);
-  if (event->button == 3)
-    project->OnRightButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-			     (event->state & GDK_SHIFT_MASK) != 0);
-
-  return TRUE;
-}
-
-static gint motion_notify_event (GtkWidget *widget, GdkEventMotion *event)
-{
-  int x, y;
-  GdkModifierType state;
-
-  if (event->is_hint)
-    gdk_window_get_pointer (event->window, &x, &y, &state);
-  else
-  {
-    x = (int)event->x;
-    y = (int)event->y;
-    state = (GdkModifierType)event->state;
-  }
-
-  y = widget->allocation.height - (int)event->y - 1;
-
-  //  if (state)
-  project->OnMouseMove(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
-		       (event->state & GDK_SHIFT_MASK) != 0);
-
-  return TRUE;
-}
-
 static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
   char code = 0;
@@ -373,45 +335,14 @@ static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data
   return TRUE;
 }
 
-static gint init (GtkWidget *widget)
-{
-  // OpenGL functions can be called only if make_current returns true
-  if (gtk_gl_area_make_current (GTK_GL_AREA (widget)))
-  {
-    GL_InitializeExtensions ();
-  }
-  
-  return TRUE;
-}
-
-// When widget is exposed it's contents are redrawn.
-static gint draw_view(GtkWidget *widget, GdkEventExpose *event)
-{
-  // Draw only last expose.
-  if (event->count > 0)
-    return TRUE;
-
-  project->Render(false);
-
-  return TRUE;
-}
-
-// Save the new size of the window.
-static gint reshape_view(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
-{
-  project->SetViewSize (allocation->width, allocation->height);
-
-  return TRUE;
-}
-
 static void main_destroy ()
 {
   gpointer item;
   int i = 0;
 
   // Save window position/size
-  Sys_ProfileSaveInt ("Window", "Width", main_window->allocation.width);
-  Sys_ProfileSaveInt ("Window", "Height", main_window->allocation.height);
+  Sys_ProfileSaveInt ("Window", "Width", ((GtkWidget*)(*main_window))->allocation.width);
+  Sys_ProfileSaveInt ("Window", "Height", ((GtkWidget*)(*main_window))->allocation.height);
 
   // Save toolbar state
   Sys_ProfileSaveInt ("Toolbars", "Standard", ((GTK_WIDGET_VISIBLE (main_toolbar.handle_box)) ? 1 : 0));
@@ -423,17 +354,17 @@ static void main_destroy ()
   if (pieces_parent != NULL)
     Sys_ProfileSaveInt ("Toolbars", "PiecesWidth", pieces_frame->allocation.width);
 
-  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_icons");
+  item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_icons");
   if (GTK_CHECK_MENU_ITEM (item)->active)
     i = 0;
   else
   {
-    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_both");
+    item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_both");
     if (GTK_CHECK_MENU_ITEM (item)->active)
       i = 1;
     else
     {
-      item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_text");
+      item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_text");
       if (GTK_CHECK_MENU_ITEM (item)->active)
 	i = 2;
     }
@@ -453,11 +384,14 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
 
   // save window position
   gint x, y;
-  gdk_window_get_root_origin (main_window->window, &x, &y);
+  gdk_window_get_root_origin (((GtkWidget*)(*main_window))->window, &x, &y);
   Sys_ProfileSaveInt ("Window", "PositionX", x);
   Sys_ProfileSaveInt ("Window", "PositionY", y);
 
-  gtk_widget_destroy (main_window);
+  gtk_widget_destroy (((GtkWidget*)(*main_window)));
+
+  delete main_window;
+  main_window = NULL;
 
   return FALSE;
 }
@@ -468,10 +402,10 @@ static gint pieces_close (GtkWidget *widget, GdkEvent* event, gpointer data)
 
   pieces_visible = FALSE;
 
-  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_pieces");
+  item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_pieces");
   gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), FALSE);
 
-  item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+  item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_floating");
   gtk_widget_set_sensitive (GTK_WIDGET (item), FALSE);
 
   update_window_layout ();
@@ -485,32 +419,14 @@ static void update_window_layout ()
   // first thing we need to create the widgets
   if (drawing_area == NULL)
   {
-    int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
-
-    // Create a new OpenGL widget
-    drawing_area = GTK_WIDGET (gtk_gl_area_new (attrlist));
-
-    GTK_WIDGET_SET_FLAGS (drawing_area, GTK_CAN_FOCUS);
+    view->Create (&drawing_area);
 
     gtk_widget_set_events (GTK_WIDGET (drawing_area), GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK |
 			   GDK_POINTER_MOTION_HINT_MASK);
 
-    // Connect signal handlers
-    gtk_signal_connect (GTK_OBJECT (drawing_area), "expose_event", 
-			GTK_SIGNAL_FUNC(draw_view), NULL);
-    gtk_signal_connect (GTK_OBJECT (drawing_area), "size_allocate",
-			GTK_SIGNAL_FUNC(reshape_view), NULL);
-    gtk_signal_connect (GTK_OBJECT (drawing_area), "realize",
-			GTK_SIGNAL_FUNC(init), NULL);
-    gtk_signal_connect (GTK_OBJECT (drawing_area), "motion_notify_event",
-			GTK_SIGNAL_FUNC(motion_notify_event), NULL);
-    gtk_signal_connect (GTK_OBJECT (drawing_area), "button_press_event",
-			GTK_SIGNAL_FUNC(button_press_event), NULL);
-    gtk_signal_connect (GTK_OBJECT (drawing_area), "button_release_event",
-			GTK_SIGNAL_FUNC(button_release_event), NULL);
     gtk_signal_connect (GTK_OBJECT (drawing_area), "key_press_event",
-			GTK_SIGNAL_FUNC(key_press_event), NULL);
+			GTK_SIGNAL_FUNC (key_press_event), NULL);
  
     // set minimum size
     gtk_widget_set_usize (GTK_WIDGET (drawing_area), 100, 100);
@@ -524,7 +440,7 @@ static void update_window_layout ()
     gtk_widget_show (GTK_WIDGET (drawing_area));
 
     // now create the pieces bar
-    pieces_frame = create_piecebar (main_window);
+    pieces_frame = create_piecebar (((GtkWidget*)(*main_window)), view);
   }
   else
   {
@@ -554,7 +470,7 @@ static void update_window_layout ()
     if (pieces_visible)
     {
       pieces_parent = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gtk_window_set_transient_for (GTK_WINDOW (pieces_parent), GTK_WINDOW (main_window));
+      gtk_window_set_transient_for (GTK_WINDOW (pieces_parent), GTK_WINDOW (((GtkWidget*)(*main_window))));
       gtk_signal_connect (GTK_OBJECT (pieces_parent), "delete_event",
 			  GTK_SIGNAL_FUNC (pieces_close), NULL);
       gtk_signal_connect (GTK_OBJECT (pieces_parent), "destroy",
@@ -578,7 +494,7 @@ static void update_window_layout ()
       gtk_box_pack_start (GTK_BOX (main_hbox), pieces_parent, TRUE, TRUE, 0);
 
       if (pieces_floating == FALSE)
-	gtk_paned_set_position (GTK_PANED (pieces_parent), main_window->allocation.width -
+	gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
 				pieces_width - GTK_PANED (pieces_parent)->gutter_size);
     }
     else
@@ -638,43 +554,45 @@ int main (int argc, char* argv[])
   if (!GL_Initialize (libgl))
     return 1;
 
-  if (gdk_gl_query() == FALSE)
+  if (pfnglXQueryExtension (GDK_DISPLAY (), NULL, NULL) != True)
   {
     g_print("ERROR: OpenGL not supported\n");
     return 1;
   }
 
 //  startup_message ("Loading user preferences ...");
-  project = new Project();
+  main_window = new MainWnd ();
+  project = new Project ();
+  view = new View (project, NULL);
 
-  main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (main_window), "LeoCAD");
-  gtk_container_border_width (GTK_CONTAINER (main_window), 0);
-  gtk_widget_realize (main_window);
+  //  main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), "LeoCAD");
+  gtk_container_border_width (GTK_CONTAINER (((GtkWidget*)(*main_window))), 0);
+  gtk_widget_realize (((GtkWidget*)(*main_window)));
 
   // Read window position and size
   x = Sys_ProfileLoadInt ("Window", "Width", 600);
   y = Sys_ProfileLoadInt ("Window", "Height", 400);
-  gtk_window_set_default_size (GTK_WINDOW (main_window), x, y);
+  gtk_window_set_default_size (GTK_WINDOW (((GtkWidget*)(*main_window))), x, y);
 
   x = Sys_ProfileLoadInt ("Window", "PositionX", -1);
   y = Sys_ProfileLoadInt ("Window", "PositionY", -1);
   if ((x != -1 && y != -1) &&
       (x < gdk_screen_width () && y < gdk_screen_height ()))
-    gtk_widget_set_uposition (main_window, x, y);
+    gtk_widget_set_uposition (((GtkWidget*)(*main_window)), x, y);
 
-  gtk_signal_connect (GTK_OBJECT (main_window), "delete_event", (GtkSignalFunc) main_quit, NULL);
-  gtk_signal_connect (GTK_OBJECT (main_window), "destroy", (GtkSignalFunc) main_destroy, NULL);
+  gtk_signal_connect (GTK_OBJECT (((GtkWidget*)(*main_window))), "delete_event", (GtkSignalFunc) main_quit, NULL);
+  gtk_signal_connect (GTK_OBJECT (((GtkWidget*)(*main_window))), "destroy", (GtkSignalFunc) main_destroy, NULL);
 
   vbox = gtk_vbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (main_window), vbox);
+  gtk_container_add (GTK_CONTAINER (((GtkWidget*)(*main_window))), vbox);
   gtk_widget_show (vbox);
 
 //  startup_message ("Creating Main Menu ...");
-  create_main_menu (GTK_OBJECT (main_window), vbox);
+  create_main_menu (GTK_OBJECT (((GtkWidget*)(*main_window))), vbox);
 
 //  startup_message ("Creating Toolbars ...");
-  create_toolbars (main_window, vbox);
+  create_toolbars (((GtkWidget*)(*main_window)), vbox);
 
   main_hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (vbox), main_hbox);
@@ -687,7 +605,7 @@ int main (int argc, char* argv[])
   show = Sys_ProfileLoadInt ("Toolbars", "Standard", 1);
   if (show)
   {
-    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_standard");
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_standard");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
   }
   else
@@ -696,7 +614,7 @@ int main (int argc, char* argv[])
   show = Sys_ProfileLoadInt ("Toolbars", "Drawing", 1);
   if (show)
   {
-    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_drawing");
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_drawing");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
   }
   else
@@ -705,7 +623,7 @@ int main (int argc, char* argv[])
   show = Sys_ProfileLoadInt ("Toolbars", "Animation", 1);
   if (show)
   {
-    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_animation");
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_animation");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
   }
   else
@@ -714,20 +632,20 @@ int main (int argc, char* argv[])
   show = Sys_ProfileLoadInt ("Toolbars", "Pieces", 1);
   if (show)
   {
-    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_pieces");
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_pieces");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
     pieces_visible = TRUE;
   }
   else
   {
-    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_floating");
     gtk_widget_set_sensitive (GTK_WIDGET (widget), FALSE);
   }
 
   show = Sys_ProfileLoadInt ("Toolbars", "PiecesFloating", 0);
   if (show)
   {
-    gpointer widget = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_floating");
+    gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_floating");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), TRUE);
     pieces_floating = TRUE;
   }
@@ -740,17 +658,17 @@ int main (int argc, char* argv[])
   switch (show)
   {
   case 0:
-    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_icons");
+    item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_icons");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
     OnCommand (GTK_WIDGET (item), GINT_TO_POINTER (ID_VIEW_TOOLBAR_ICONS));
     break;
   case 1:
-    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_both");
+    item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_both");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
     OnCommand (GTK_WIDGET (item), GINT_TO_POINTER (ID_VIEW_TOOLBAR_BOTH));
     break;
   case 2:
-    item = gtk_object_get_data (GTK_OBJECT (main_window), "menu_view_toolbar_text");
+    item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_text");
     gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
     OnCommand (GTK_WIDGET (item), GINT_TO_POINTER (ID_VIEW_TOOLBAR_TEXT));
     break;
@@ -763,7 +681,7 @@ int main (int argc, char* argv[])
   gtk_widget_ref (drawing_frame);
   gtk_widget_ref (pieces_frame);
 
-  create_statusbar (main_window, vbox);
+  create_statusbar (((GtkWidget*)(*main_window)), vbox);
 //  gtk_box_pack_start (GTK_BOX (vbox), create_status_bar (), FALSE, TRUE, 2);
   //  GtkWidget* statusbar = gtk_statusbar_new ();
   //gtk_widget_show (statusbar);
@@ -771,23 +689,26 @@ int main (int argc, char* argv[])
 
 #include "pixmaps/icon32.xpm"
 
+  main_window->UpdateMRU ();
+
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
 
-  gdkpixmap = gdk_pixmap_create_from_xpm_d (main_window->window, &mask,
-                 &main_window->style->bg[GTK_STATE_NORMAL], icon32);
-  gdk_window_set_icon (main_window->window, NULL, gdkpixmap, mask);
+  gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask,
+                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], icon32);
+  gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
 
-  gtk_widget_show (GTK_WIDGET (main_window));
+  gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));
 
   // get the splitter in the correct size, must be done after the widget has been realized
   if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
-    gtk_paned_set_position (GTK_PANED (pieces_parent), main_window->allocation.width -
+    gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
 			    pieces_width - GTK_PANED (pieces_parent)->gutter_size);
 
   if (project->Initialize (argc, argv, app_path, lib_path) == false)
   {
     delete project;
+    delete main_window;
     //    return 1;
     _exit (1);
   }

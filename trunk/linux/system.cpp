@@ -611,15 +611,15 @@ bool SystemDoDialog(int mode, void* param)
 {
   switch (mode)
   {
-    case LC_DLG_FILE_OPEN: {
+    case LC_DLG_FILE_OPEN_PROJECT: {
       return openprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
-    case LC_DLG_FILE_SAVE: {
+    case LC_DLG_FILE_SAVE_PROJECT: {
       return saveprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
-    case LC_DLG_FILE_MERGE: {
+    case LC_DLG_FILE_MERGE_PROJECT: {
       return openprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 

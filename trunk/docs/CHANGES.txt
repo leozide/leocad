@@ -1,4 +1,7 @@
-This is a changelog for developers only, not for ordinary users.
+This is a changelog for developers only, not for regular users.
+
+17/10/2002
+  - Fixed several bugs with the 3DS exporter.
 
 10/10/2002
   - Added a dialog to handle the textures in the library.

@@ -45,10 +45,13 @@ void PiecesLibrary::CheckReload ()
 
 	strcpy (LibraryPath, m_LibraryPath);
 
-	// FIXME: project will crash if we don't update the pieceinfos
+	if (m_bNeedsReload)
+	{
+		// FIXME: project will crash if we don't update the pieceinfos
 
-	Unload ();
-	Load (LibraryPath);
+		Unload ();
+		Load (LibraryPath);
+	}
 }
 
 void PiecesLibrary::Unload ()
@@ -1103,8 +1106,33 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 }
 
 // =============================================================================
+// LDraw support
 
+bool PiecesLibrary::ImportLDrawPiece (const char* Filename)
+{
+	LC_LDRAW_PIECE piece;
 
+	SystemDoWaitCursor(1);
+
+	if (ReadLDrawPiece (Filename, &piece))
+	{
+//		if (FindPieceInfo (piece.name) != NULL)
+//			Sys_MessageBox ("Piece already exists in the library !");
+
+		if (SaveLDrawPiece (&piece))
+			Sys_MessageBox ("Piece successfully imported.");
+		else
+			Sys_MessageBox ("Error saving library.");
+	}
+	else
+		Sys_MessageBox ("Error reading file.");
+
+	FreeLDrawPiece(&piece);
+
+	SystemDoWaitCursor(-1);
+
+	return true;
+}
 
 
 

@@ -173,7 +173,8 @@ typedef struct
 
 // Image
 
-typedef enum {
+typedef enum
+{
 	LC_IMAGE_BMP,
 	LC_IMAGE_GIF,
 	LC_IMAGE_JPG,
@@ -204,9 +205,10 @@ typedef struct
 } LC_IMAGEDLG_OPTS;
 
 typedef enum {
+	LC_DLG_FILE_OPEN_PROJECT,
+	LC_DLG_FILE_SAVE_PROJECT,
+	LC_DLG_FILE_MERGE_PROJECT,
 	LC_DLG_FILE_OPEN,
-	LC_DLG_FILE_SAVE,
-	LC_DLG_FILE_MERGE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
 	LC_DLG_POVRAY,
@@ -223,6 +225,21 @@ typedef enum {
 	LC_DLG_GROUP,
 	LC_DLG_ABOUT
 } LC_DIALOGS;
+
+typedef enum
+{
+	LC_FILEOPENDLG_DAT,
+	LC_FILEOPENDLG_LGF,
+	LC_FILEOPENDLG_LUP
+} LC_FILEOPENDLG_TYPES;
+
+typedef struct
+{
+	int type;
+	char path[LC_MAXPATH];
+	int numfiles;
+	char** filenames;
+} LC_FILEOPENDLG_OPTS;
 
 typedef struct
 {

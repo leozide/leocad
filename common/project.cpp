@@ -98,6 +98,7 @@ Project::Project()
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	m_nGridList = 0;
+  m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_pTerrain = new Terrain();
 	m_pBackground = new Texture();
@@ -159,6 +160,12 @@ Project::~Project()
 	DeleteContents(false);
 	SystemFinish();
 
+  if (m_pTrackFile)
+  {
+    delete m_pTrackFile;
+    m_pTrackFile = NULL;
+  }
+
 	if (m_pPieceIdx != NULL)
 	{
 		PieceInfo* pInfo;
@@ -182,7 +189,7 @@ Project::~Project()
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
 
-        messenger->DecRef ();
+  messenger->DecRef ();
 
 	delete m_pTerrain;
 	delete m_pBackground;
@@ -6150,8 +6157,9 @@ bool Project::StopTracking(bool bAccept)
 	}
 	else if (m_pTrackFile != NULL)
 	{
-		DeleteContents(true);
-		FileLoad(m_pTrackFile, true, false);
+		DeleteContents (true);
+		FileLoad (m_pTrackFile, true, false);
+    delete m_pTrackFile;
 	}
 
 	return true;
@@ -6268,7 +6276,12 @@ void Project::StartTracking(int mode)
 {
 	SystemCaptureMouse();
 	m_nTracking = mode;
-	m_pTrackFile = new FileMem;
+
+  if (m_pTrackFile != NULL)
+    m_pTrackFile->SetLength (0);
+  else
+  	m_pTrackFile = new FileMem;
+
 	FileSave(m_pTrackFile, true);
 }
 
@@ -7150,7 +7163,12 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 		{
 			SystemCaptureMouse();
 			m_nTracking = LC_TRACK_START_LEFT;
-			m_pTrackFile = NULL;
+
+      if (m_pTrackFile != NULL)
+      {
+        delete m_pTrackFile;
+  			m_pTrackFile = NULL;
+      }
 		} break;
 	}
 }
@@ -7401,7 +7419,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
         mat.TransformPoints (delta, 1);
 
-  			float mouse = 0.5f/(21-m_nMouse);
+  			float mouse = 0.25f/(21-m_nMouse);
         delta[0] = delta[0] * mouse + m_fTrack[0];
         delta[1] = delta[1] * mouse + m_fTrack[1];
         delta[2] = delta[2] * mouse + m_fTrack[2];
@@ -7417,7 +7435,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
       {
         // TODO: rewrite
 
-        float mouse = 10.0f/(21-m_nMouse);
+        float mouse = 5.0f/(21-m_nMouse);
         float delta[3] = {
           (ptx - m_fTrack[0])*mouse,
           (pty - m_fTrack[1])*mouse,

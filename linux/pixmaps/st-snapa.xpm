@@ -1,25 +1,23 @@
 /* XPM */
-static char *st_snapa[] = {
-/* columns rows colors chars-per-pixel */
-"16 15 4 1",
-"  c Gray0",
-". c #7f0000",
-"X c Gray50",
-"o c Gray75",
-/* pixels */
-"ooooooooooo oooo",
-"oooooooooo ooooo",
-"ooooooooo oooooo",
-"oooooooo     ooo",
-"ooooooo o   oooo",
-"ooXooo oo   oooo",
-"X....oooo oo ooo",
-"......oooooo ooo",
-"..Xo...oooooo oo",
-"..ooo..oooooo oo",
-"...ooo oooo     ",
-"o...ooo  ooo   o",
-"oo..ooooooooo oo",
-"  o ooo         ",
-"oooo  oooooooooo"
-};
+static char * st_snapa[] = {
+"16 15 5 1",
+". 	c None",
+"+	c #000000",
+"@	c #7F7F7F",
+"#	c #7F0000",
+"$	c #C0C0C0",
+"...........+....",
+"..........+.....",
+".........+......",
+"........+++++...",
+".......+.+++....",
+"..$...+..+++....",
+"@####....+..+...",
+"######......+...",
+"##@.###......+..",
+"##...##@.....+..",
+"###...+@@..+++++",
+".###...++...+++.",
+"..##@........+..",
+"++.+@@.+++++++++",
+"....++.........."};

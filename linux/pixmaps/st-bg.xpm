@@ -1,25 +1,23 @@
 /* XPM */
-static char *st_bg[] = {
-/* columns rows colors chars-per-pixel */
-"16 15 4 1",
-"  c Gray0",
-". c Gray50",
-"X c Gray75",
-"o c Gray100",
-/* pixels */
-"XXXXXXX  XXXXXXX",
-"XXXX. .oo. XXXXX",
-"XX .ooooooo. .XX",
-" .ooooooooooo. X",
-" X .oooooooX   X",
-" oX. .ooX   .  X",
-" XoXoX   . . . X",
-" oXoXoX . . .  X",
-" XoXoXo  . . . X",
-" oXoXoX . . .  X",
-" XoXoXo  . . . X",
-" .XoXoX . . .  X",
-"X. .oXo  . .  .X",
-"XXX. .X .   XXXX",
-"XXXXX.   .XXXXXX"
-};
+static char * st_bg[] = {
+"16 15 5 1",
+". 	c None",
+"+	c #000000",
+"@	c #7F7F7F",
+"#	c #FFFFFF",
+"$	c #BFBFBF",
+".......++.......",
+"....@+@##@+.....",
+"..+@#######@+@..",
+"+@###########@+.",
+"+$+@#######$+++.",
+"+#$@+@##$+++@++.",
+"+$#$#$+++@+@+@+.",
+"+#$#$#$+@+@+@++.",
+"+$#$#$#++@+@+@+.",
+"+#$#$#$+@+@+@++.",
+"+$#$#$#++@+@+@+.",
+"+@$#$#$+@+@+@++.",
+".@+@#$#++@+@++@.",
+"...@+@$+@+++....",
+".....@+++@......"};

@@ -1,25 +1,23 @@
 /* XPM */
-static char *ac_light[] = {
-/* columns rows colors chars-per-pixel */
-"16 15 4 1",
-"  c Gray0",
-". c Gray50",
-"X c Gray75",
-"o c Gray100",
-/* pixels */
-"XXXXX      XXXXX",
-"XXX. oooooX .XXX",
-"XXX oooooooX XXX",
-"XX oooooooooX XX",
-"XX ooooooooXo XX",
-"XX oooooooXoX XX",
-"XX oXooooXoXo XX",
-"XX. oXXoXoXo .XX",
-"XXX. ooXoXo .XXX",
-"XXXX .ooXo. XXXX",
-"XXXXX      XXXXX",
-"XXXXX Xo.. XXXXX",
-"XXXXX.    .XXXXX",
-"XXXXX Xo.. XXXXX",
-"XXXXXX    XXXXXX"
-};
+static char * ac_light[] = {
+"16 15 5 1",
+". 	c None",
+"+	c #000000",
+"@	c #7F7F7F",
+"#	c #FFFFFF",
+"$	c #BFBFBF",
+".....++++++.....",
+"...@+#####$+@...",
+"...+#######$+...",
+"..+#########$+..",
+"..+########$#+..",
+"..+#######$#$+..",
+"..+#$####$#$#+..",
+"..@+#$$#$#$#+@..",
+"...@+##$#$#+@...",
+"....+@##$#@+....",
+".....++++++.....",
+".....+$#@@+.....",
+".....@++++@.....",
+".....+$#@@+.....",
+"......++++......"};

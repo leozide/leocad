@@ -448,13 +448,13 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	pDC->SetTextAlign (TA_TOP|TA_LEFT|TA_NOUPDATECP);
  	rc.top -= pDC->GetDeviceCaps(LOGPIXELSY)*theApp.GetProfileInt("Default","Margin Top", 50)/200;
 	rc.bottom += pDC->GetDeviceCaps(LOGPIXELSY)*theApp.GetProfileInt("Default","Margin Bottom", 50)/200;
-	PrintHeader(FALSE, pDC->GetSafeHdc(), rc, pInfo->m_nCurPage, FALSE);
-	PrintHeader(TRUE, pDC->GetSafeHdc(), rc, pInfo->m_nCurPage, FALSE);
+	PrintHeader(FALSE, pDC->GetSafeHdc(), rc, pInfo->m_nCurPage, pInfo->GetMaxPage(), FALSE);
+	PrintHeader(TRUE, pDC->GetSafeHdc(), rc, pInfo->m_nCurPage, pInfo->GetMaxPage(), FALSE);
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 }
 
-void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT page, BOOL bCatalog)
+void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT nMaxPage, BOOL bCatalog)
 {
 	CString str,tmp;
 	UINT nFormat = DT_CENTER;
@@ -492,7 +492,7 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT page, BOOL bCat
 		{
 			tmp = str.Left (r);
 			if (bCatalog)
-				tmp += "LeoCAD Parts Catalog";
+				tmp += "LeoCAD Pieces Catalog";
 			else
 				tmp += project->m_strTitle;
 			tmp += str.Right(str.GetLength()-r-2);
@@ -533,7 +533,16 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT page, BOOL bCat
 		while ((r = str.Find("&P")) != -1)
 		{
 			char buf[5];
-			sprintf (buf, "%d", page);
+			sprintf (buf, "%d", nCurPage);
+			tmp = str.Left (r);
+			tmp += buf;
+			tmp += str.Right(str.GetLength()-r-2);
+			str = tmp;
+		}
+		while ((r = str.Find("&O")) != -1)
+		{
+			char buf[5];
+			sprintf (buf, "%d", nMaxPage);
 			tmp = str.Left (r);
 			tmp += buf;
 			tmp += str.Right(str.GetLength()-r-2);

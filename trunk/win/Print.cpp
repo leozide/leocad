@@ -350,8 +350,8 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 		CRect r2 = rectDraw;
 		r2.top -= GetDeviceCaps(PD->m_pd.hDC, LOGPIXELSY)*theApp.GetProfileInt("Default","Margin Top", 50)/200;
 		r2.bottom += GetDeviceCaps(PD->m_pd.hDC, LOGPIXELSY)*theApp.GetProfileInt("Default","Margin Bottom", 50)/200;
-		pView->PrintHeader(FALSE, PD->m_pd.hDC, r2, nCurPage, TRUE);
-		pView->PrintHeader(TRUE, PD->m_pd.hDC, r2, nCurPage, TRUE);
+		pView->PrintHeader(FALSE, PD->m_pd.hDC, r2, nCurPage, nEndPage, TRUE);
+		pView->PrintHeader(TRUE, PD->m_pd.hDC, r2, nCurPage, nEndPage, TRUE);
 
 		if (EndPage(PD->m_pd.hDC) < 0 || !_AfxAbortProc(PD->m_pd.hDC, 0))
 		{

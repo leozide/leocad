@@ -6,7 +6,7 @@ GtkWidget* create_piecebar (GtkWidget *window);
 void create_statusbar (GtkWidget *window, GtkWidget *vbox);
 void colorlist_set (int new_color);
 void groupsbar_set (int new_group);
-void piececombo_add (char* string);
+void piececombo_add (const char* str);
 
 extern GtkWidget *label_message, *label_position, *label_snap, *label_step;
 

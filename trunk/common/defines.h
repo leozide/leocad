@@ -92,7 +92,7 @@ unsigned long SwapLONG(unsigned long x)
 #define FLOATRGB(f) RGB(f[0]*255, f[1]*255, f[2]*255)
 
 #define LC_CONNECTIONS	2		// Different piece connections
-#define LC_APP_VERSION	0.71f	// Current version
+#define LC_APP_VERSION	0.72f	// Current version
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
 
 #define LC_MAXCOLORS	28	// Number of colors supported

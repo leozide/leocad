@@ -90,9 +90,11 @@ static gint button_press_event (GtkWidget *widget, GdkEventButton *event)
   y = widget->allocation.height - (int)event->y - 1;
 
   if (event->button == 1)
-    project->OnLeftButtonDown(x, y);
+    project->OnLeftButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+			      (event->state & GDK_SHIFT_MASK) != 0);
   if (event->button == 3)
-    project->OnRightButtonDown(x, y);
+    project->OnRightButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+			       (event->state & GDK_SHIFT_MASK) != 0);
 
   gtk_window_set_focus(GTK_WINDOW(main_window), drawing_area);
   
@@ -106,9 +108,11 @@ static gint button_release_event (GtkWidget *widget, GdkEventButton *event)
   y = widget->allocation.height - (int)event->y - 1;
 
   if (event->button == 1)
-    project->OnLeftButtonUp(x, y);
+    project->OnLeftButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+			    (event->state & GDK_SHIFT_MASK) != 0);
   if (event->button == 3)
-    project->OnRightButtonUp(x, y);
+    project->OnRightButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+			     (event->state & GDK_SHIFT_MASK) != 0);
 
   return TRUE;
 }
@@ -130,7 +134,8 @@ static gint motion_notify_event (GtkWidget *widget, GdkEventMotion *event)
   y = widget->allocation.height - (int)event->y - 1;
 
   //  if (state)
-  project->OnMouseMove(x, y);
+  project->OnMouseMove(x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+		       (event->state & GDK_SHIFT_MASK) != 0);
 
   return TRUE;
 }

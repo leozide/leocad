@@ -858,34 +858,40 @@ void CCADView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 }
 
-void CCADView::OnMouseMove(UINT /*nFlags*/, CPoint point) 
+void CCADView::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	project->OnMouseMove(point.x, m_szView.cy - point.y - 1);
+	project->OnMouseMove(point.x, m_szView.cy - point.y - 1,
+		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
-void CCADView::OnLButtonUp(UINT /*nFlags*/, CPoint point) 
+void CCADView::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	project->OnLeftButtonUp(point.x, m_szView.cy - point.y - 1);
+	project->OnLeftButtonUp(point.x, m_szView.cy - point.y - 1,
+		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
-void CCADView::OnLButtonDown(UINT /*nFlags*/, CPoint point) 
+void CCADView::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	project->OnLeftButtonDown(point.x, m_szView.cy - point.y - 1);
+	project->OnLeftButtonDown(point.x, m_szView.cy - point.y - 1,
+		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
-void CCADView::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) 
+void CCADView::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
-	project->OnLeftButtonDoubleClick(point.x, m_szView.cy - point.y - 1);
+	project->OnLeftButtonDoubleClick(point.x, m_szView.cy - point.y - 1,
+		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
-void CCADView::OnRButtonDown(UINT /*nFlags*/, CPoint point) 
+void CCADView::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	project->OnRightButtonDown(point.x, m_szView.cy - point.y - 1);
+	project->OnRightButtonDown(point.x, m_szView.cy - point.y - 1,
+		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
-void CCADView::OnRButtonUp(UINT /*nFlags*/, CPoint point) 
+void CCADView::OnRButtonUp(UINT nFlags, CPoint point) 
 {
-	project->OnRightButtonUp(point.x, m_szView.cy - point.y - 1);
+	project->OnRightButtonUp(point.x, m_szView.cy - point.y - 1,
+		(nFlags & MK_CONTROL) != 0, (nFlags & MK_SHIFT) != 0);
 }
 
 void CCADView::OnDropDown (NMHDR* pNotifyStruct, LRESULT* pResult)

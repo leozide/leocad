@@ -91,7 +91,7 @@ public:
 	void Render(bool bToMemory);
 	void SetViewSize(int cx, int cy);
 	Texture* FindTexture(char* name);
-	PieceInfo* FindPieceInfo(char* name);
+	PieceInfo* FindPieceInfo (const char* name) const;
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
 
@@ -179,12 +179,12 @@ protected:
 
 public:
 	// Call this functions from each OS
-	void OnLeftButtonDown(int x, int y);
-	void OnLeftButtonUp(int x, int y);
-	void OnLeftButtonDoubleClick(int x, int y);
-	void OnRightButtonDown(int x, int y);
-	void OnRightButtonUp(int x, int y);
-	void OnMouseMove(int x, int y);
+	void OnLeftButtonDown(int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonUp(int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift);
+	void OnRightButtonDown(int x, int y, bool bControl, bool bShift);
+	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
+	void OnMouseMove(int x, int y, bool bControl, bool bShift);
 	bool OnKeyDown(char nKey, bool bControl, bool bShift);
 
 	void SetAction(int nAction);

@@ -5065,7 +5065,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			if (m_pPieces == 0) break;
 
-			bool bControl = IsKeyDown(KEY_CONTROL);
+			// HACK !!! HACK !!! HACK
+#ifdef LC_WINDOWS
+			bool bControl = (GetKeyState(KEY_CONTROL) < 0);
+#else
+			bool bControl = false;
+#endif
 			GLdouble modelMatrix[16], projMatrix[16];
 			float up[3], eye[3], target[3];
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
@@ -5718,12 +5723,12 @@ Texture* Project::FindTexture(char* name)
 }
 
 // Remeber to make 'name' uppercase.
-PieceInfo* Project::FindPieceInfo(char* name)
+PieceInfo* Project::FindPieceInfo (const char* name) const
 {
 	PieceInfo* pInfo;
 	int i;
 
-	for (i = m_nPieceCount, pInfo = m_pPieceIdx; i--; pInfo++)
+	for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
 		if (!strcmp (name, pInfo->m_strName))
 			return pInfo;
 
@@ -5732,7 +5737,7 @@ PieceInfo* Project::FindPieceInfo(char* name)
 		{
 			char* tmp = &m_pMovedReference[i*18+9];
 
-			for (i = m_nPieceCount, pInfo = m_pPieceIdx; i--; pInfo++)
+			for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
 				if (!strcmp (tmp, pInfo->m_strName))
 					return pInfo;
 
@@ -6473,7 +6478,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 	return ret;
 }
 
-void Project::OnLeftButtonDown(int x, int y)
+void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
 	GLint viewport[4];
@@ -6511,7 +6516,7 @@ void Project::OnLeftButtonDown(int x, int y)
 
 			if (m_nCurAction == LC_ACTION_SELECT) 
 			{
-				SelectAndFocusNone(IsKeyDown(KEY_CONTROL));
+				SelectAndFocusNone(bControl);
 
 				if (pBox != NULL)
 				switch (pBox->GetOwnerType())
@@ -6749,7 +6754,7 @@ void Project::OnLeftButtonDown(int x, int y)
 	}
 }
 
-void Project::OnLeftButtonDoubleClick(int x, int y)
+void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
 	GLint viewport[4];
@@ -6773,7 +6778,7 @@ void Project::OnLeftButtonDoubleClick(int x, int y)
 
 //	if (m_nCurAction == LC_ACTION_SELECT) 
 	{
-		SelectAndFocusNone(IsKeyDown(KEY_CONTROL));
+		SelectAndFocusNone(bControl);
 
 		if (pBox != NULL)
 		switch (pBox->GetOwnerType())
@@ -6820,12 +6825,12 @@ void Project::OnLeftButtonDoubleClick(int x, int y)
 	}
 }
 
-void Project::OnLeftButtonUp(int x, int y)
+void Project::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
 	StopTracking(true);
 }
 
-void Project::OnRightButtonDown(int x, int y)
+void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
 	GLint viewport[4];
@@ -6894,14 +6899,14 @@ void Project::OnRightButtonDown(int x, int y)
 	}
 }
 
-void Project::OnRightButtonUp(int x, int y)
+void Project::OnRightButtonUp(int x, int y, bool bControl, bool bShift)
 {
 	if (!StopTracking(true) && !m_bTrackCancel)
 		SystemDoPopupMenu(1, -1, -1);
 	m_bTrackCancel = false;
 }
 
-void Project::OnMouseMove(int x, int y)
+void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
 	// && m_nAction != ACTION_INSERT
 	if (m_nTracking == LC_TRACK_NONE)

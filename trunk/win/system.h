@@ -103,9 +103,4 @@ inline void SystemSwapBuffers()
 	SwapBuffers(wglGetCurrentDC());
 }
 
-inline bool IsKeyDown(int key)
-{
-	return (GetKeyState(key) < 0);
-}
-
 #endif // _SYSTEM_H_

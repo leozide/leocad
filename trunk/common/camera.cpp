@@ -592,7 +592,7 @@ void Camera::Render(float fLineWidth)
     modelview.Invert ();
     glMultMatrixf (modelview.m);
 
-    projection.CreatePerspective (m_fovy, 1.33f, 0.01, len);
+    projection.CreatePerspective (m_fovy, 1.33f, 0.01f, len);
     projection.Invert ();
     glMultMatrixf (projection.m);
 

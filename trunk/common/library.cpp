@@ -276,7 +276,8 @@ static unsigned long GetDefaultPieceGroup(char* name)
 		strstr(tmp,"Windscr")	|| strstr(tmp,"~2421")	||
 		strstr(tmp,"Wing")		|| strstr(tmp,"Wedge")	||
 		strstr(tmp,"Propellor")	|| strstr(tmp,"Rotor")	||
-		strstr(tmp,"Rack")		|| strstr(tmp,"Tail"))
+		strstr(tmp,"Rack")		|| strstr(tmp,"Tail") ||
+    strstr(tmp,"Cockpit"))
 		return 0x020;
 
 	if (strstr(tmp,"Train"))
@@ -294,7 +295,9 @@ static unsigned long GetDefaultPieceGroup(char* name)
 		strstr(tmp,"Scala")		|| strstr(tmp,"Boat")	||
 		strstr(tmp,"Trailer")	|| strstr(tmp,"Box")	|| 
 		strstr(tmp,"Turntab")	|| strstr(tmp,"Winch")	|| 
-		strstr(tmp,"Door")		|| strstr(tmp,"Magnet"))
+		strstr(tmp,"Door")		|| strstr(tmp,"Magnet") ||
+    strstr(tmp,"Staircase") || strstr(tmp,"Glass") ||
+    strstr(tmp,"Container"))
 		return 0x080;
 
 	// accessories
@@ -312,7 +315,8 @@ static unsigned long GetDefaultPieceGroup(char* name)
 		strstr(tmp,"Belville")	|| strstr(tmp,"Light &")|| 
 		strstr(tmp,"Hose")		|| strstr(tmp,"Arm P")	|| 
 		strstr(tmp,"Brush")		|| strstr(tmp,"Castle")	||
-		strstr(tmp,"Tipper")	|| strstr(tmp,"Bar"))
+		strstr(tmp,"Tipper")	|| strstr(tmp,"Bar") ||
+		strstr(tmp,"Animal"))
 		return 0x100;
 
 	return 1;

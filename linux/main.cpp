@@ -18,6 +18,7 @@
 #include "main.h"
 #include "system.h"
 #include "config.h"
+#include "dialogs.h"
 
 void create_main_menu (GtkObject *window, GtkWidget *vbox);
 
@@ -189,6 +190,11 @@ void OnCommand(GtkWidget* widget, gpointer data)
 	gtk_widget_hide (anim_toolbar.handle_box);
       else
 	gtk_widget_show (anim_toolbar.handle_box);
+    } break;
+
+    case ID_VIEW_TOOLBAR_MODIFY:
+    {
+      modifydlg_toggle ();
     } break;
 
     case ID_VIEW_TOOLBAR_PIECES:
@@ -647,7 +653,8 @@ int main (int argc, char* argv[])
 
   x = Sys_ProfileLoadInt ("Window", "PositionX", -1);
   y = Sys_ProfileLoadInt ("Window", "PositionY", -1);
-  if (x != -1 && y != -1)
+  if ((x != -1 && y != -1) &&
+      (x < gdk_screen_width () && y < gdk_screen_height ()))
     gtk_widget_set_uposition (main_window, x, y);
 
   gtk_signal_connect (GTK_OBJECT (main_window), "delete_event", (GtkSignalFunc) main_quit, NULL);

@@ -5,7 +5,7 @@ static char *st_help[] = {
 "  c Gray0",
 ". c #00007f",
 "X c Gray50",
-"o c Gray75",
+"o c None",
 /* pixels */
 "o ooooooo.....Xo",
 "o  ooooo..ooX..X",

@@ -1,24 +1,21 @@
 /* XPM */
-static char *st_fast[] = {
-/* columns rows colors chars-per-pixel */
+static char * st_fast[] = {
 "16 15 3 1",
-"  c Gray0",
-". c Gray50",
-"X c Gray75",
-/* pixels */
-"XXXXXX.  .XXXXXX",
-"XXXX. XX.X .XXXX",
-"XX .XXXX.XXX .XX",
-"  XXXXXX.XXXX. X",
-" X .XXXX.XXX X X",
-" XX. .XXX. .XX X",
-" XXXXX.  XXXXX X",
-" XXXXXX .XXXXX X",
-" XXXXXX .XXXXX X",
-" XXXX.. X..XXX X",
-" X...XX XXX..X X",
-" .XXXXX XXXXXX X",
-"X. .XXX XXXX. .X",
-"XXX. .X X. .XXXX",
-"XXXXXX.  XXXXXXX"
-};
+". 	c None",
+"+	c #7F7F7F",
+"@	c #000000",
+"......+@@+......",
+"....+@..+.@+....",
+"..@+....+...@+..",
+"@@......+....+@.",
+"@.@+....+...@.@.",
+"@..+@+..++@+..@.",
+"@.....+@@.....@.",
+"@......@+.....@.",
+"@......@+.....@.",
+"@....++@.++...@.",
+"@.+++..@...++.@.",
+"@+.....@.....+@.",
+".+@+...@....+@+.",
+"...+@+.@.+@+....",
+"......+@@......."};

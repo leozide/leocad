@@ -1,17 +1,15 @@
 #ifndef _PROJECT_H_
 #define _PROJECT_H_
 
+#include "object.h"
 #include "defines.h"
 #include "typedefs.h"
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
-#include <GL/gl.h>
+#include "opengl.h"
 
 typedef enum 
 {
-	LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
-	LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
+  LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
+  LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
 } LC_MOUSE_TRACK;
 
 class Piece;
@@ -19,7 +17,6 @@ class Camera;
 class Light;
 class Group;
 class Texture;
-class BoundingBox;
 class Terrain;
 class PieceInfo;
 class Matrix;
@@ -55,6 +52,8 @@ public:
 	unsigned char GetLastStep();
 	bool IsAnimation()
 		{ return m_bAnimation; }
+	unsigned short GetCurrentTime ()
+	  { return m_bAnimation ? m_nCurFrame : m_nCurStep; }
 	int GetPieceLibraryCount()
 		{ return m_nPieceCount; }
 	const char* GetLibraryPath()
@@ -138,7 +137,7 @@ protected:
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();
-	BoundingBox* FindObjectFromPoint(int x, int y);
+	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
 	void MoveSelectedObjects(float x, float y, float z);

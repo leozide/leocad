@@ -10,7 +10,7 @@ class Piece;
 class Group;
 class PieceInfo;
 
-#include "boundbox.h"
+#include "object.h"
 #include "globals.h"
 #include "typedefs.h"
 #include "defines.h"
@@ -28,8 +28,10 @@ typedef struct PIECE_KEY {
 	PIECE_KEY*		next;
 } PIECE_KEY;
 
-class Piece
+class Piece : public Object
 {
+
+
 public:
 	Piece(PieceInfo* pPieceInfo);
 	~Piece();
@@ -56,7 +58,7 @@ public:
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 
-	void MinIntersectDist(CLICKLINE* pLine);
+	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
 	void CreateName(Piece* pPiece);
@@ -152,7 +154,7 @@ public:
 	}
 */
 protected:
-	void LineFacet(float* p1, float* p2, float* p3, float* p4, CLICKLINE* pLine);
+	void LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine);
 	void RemoveKeys();
 	void BuildDrawInfo();
 
@@ -162,7 +164,6 @@ protected:
 
 	// Atributes
 	PieceInfo* m_pPieceInfo;
-	BoundingBox m_BoundingBox;
 	Group* m_pGroup;
 
 	unsigned short m_nFrameShow;

@@ -1,9 +1,7 @@
-//
-//	light.h
-////////////////////////////////////////////////////
-
 #ifndef _LIGHT_H_
 #define _LIGHT_H_
+
+#include "object.h"
 
 #define LC_LIGHT_HIDDEN				0x01
 #define LC_LIGHT_SELECTED			0x02
@@ -12,7 +10,29 @@
 #define LC_LIGHT_TARGET_FOCUSED		0x10
 #define LC_LIGHT_ENABLED			0x20
 
-class Light
+class Light;
+class LightTarget;
+
+class LightTarget : public Object
+{
+ public:
+  LightTarget (Light *pParent);
+  ~LightTarget ();
+
+ public:
+  void MinIntersectDist (LC_CLICKLINE* pLine);
+
+  Light* GetParent () const
+    { return m_pParent; }
+
+ protected:
+  Light* m_pParent;
+
+  friend class Light; // FIXME: needed for BoundingBoxCalculate ()
+  // remove and use UpdatePosition instead
+};
+
+class Light : public Object
 {
 public:
 	Light();
@@ -37,14 +57,14 @@ public:
 	const char* GetName()
 		{ return m_strName; }
 
-	void MinIntersectDist(CLICKLINE* Line);
+	void MinIntersectDist(LC_CLICKLINE* Line);
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 
 protected:
 	void RemoveKeys();
 
-	BoundingBox m_BoundingBox;
-	BoundingBox m_TargetBoundingBox;
+	//	BoundingBox m_BoundingBox;
+	//	BoundingBox m_TargetBoundingBox;
 
 	unsigned char m_nState;
 	char m_strName[81];

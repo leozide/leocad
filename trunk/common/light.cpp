@@ -1,10 +1,6 @@
 // Light object.
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
 #include <stdlib.h>
-#include "boundbox.h"
 #include "light.h"
 #include "defines.h"
 
@@ -12,9 +8,10 @@
 // Camera construction/destruction
 
 Light::Light()
+  : Object (LC_OBJECT_LIGHT)
 {
-	m_BoundingBox.Initialize(this, LC_LIGHT);
-	m_TargetBoundingBox.Initialize(this, LC_LIGHT_TARGET);
+  //	m_BoundingBox.Initialize(this, LC_LIGHT);
+  //	m_TargetBoundingBox.Initialize(this, LC_LIGHT_TARGET);
 	m_pNext = NULL;
 	m_nState = 0;
 }
@@ -29,21 +26,21 @@ void Light::RemoveKeys()
 
 }
 
-void Light::MinIntersectDist(CLICKLINE* pLine)
+void Light::MinIntersectDist(LC_CLICKLINE* pLine)
 {
 	double dist;
 
 	if (m_nState & LC_LIGHT_HIDDEN)
 		return;
 
-	dist = m_BoundingBox.FindIntersectDist(pLine);
+	dist = BoundingBoxIntersectDist (pLine);
 
 	if (dist < pLine->mindist)
 	{
 		pLine->mindist = dist;
-		pLine->pClosest = &m_BoundingBox;
+		pLine->pClosest = this;
 	}
-	
+	/*	
 	dist = m_TargetBoundingBox.FindIntersectDist(pLine);
 
 	if (dist < pLine->mindist)
@@ -51,6 +48,7 @@ void Light::MinIntersectDist(CLICKLINE* pLine)
 		pLine->mindist = dist;
 		pLine->pClosest = &m_TargetBoundingBox;
 	}
+	*/
 }
 
 void Light::UpdatePosition(unsigned short nTime, bool bAnimation)

@@ -1,16 +1,12 @@
 // Everything that is a part of a LeoCAD project goes here.
 //
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
 #include <math.h>
+#include "opengl.h"
 #include "vector.h"
 #include "matrix.h"
 #include "pieceinf.h"
@@ -79,9 +75,9 @@ Project::Project()
 	m_nCurClipboard = 0;
 	m_pTerrain = new Terrain();
 	m_pBackground = new Texture();
-	m_nAutosave = SystemGetProfileInt("Settings", "Autosave", 10);
-	m_nMouse = SystemGetProfileInt("Default", "Mouse", 11);
-	strcpy(m_strModelsPath, SystemGetProfileString("Default", "Projects", ""));
+	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
+	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
+	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
 	int i;
 	for (i = 0; i < LC_CONNECTIONS; i++)
@@ -97,7 +93,7 @@ Project::Project()
 	for (i = 0; i < 4; i++)
 	{
 		sprintf(entry, "File%d", i+1);
-		strcpy(m_strRecentFiles[i], SystemGetProfileString("RecentFiles", entry, ""));
+		strcpy(m_strRecentFiles[i], Sys_ProfileLoadString ("RecentFiles", entry, ""));
 	}
 
 	// Create font table
@@ -165,7 +161,7 @@ Project::~Project()
 	{
 		sprintf(entry, "File%d", i+1);
 //		if (strlen(m_strRecentFiles[i]) > 0)
-			SystemSetProfileString("RecentFiles", entry, m_strRecentFiles[i]);
+			Sys_ProfileSaveString("RecentFiles", entry, m_strRecentFiles[i]);
 	}
 
 	for (i = 0; i < 10; i++)
@@ -190,12 +186,12 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 	char picture[LC_MAXPATH];
 	picture[0] = 0;
 
-	unsigned long image = SystemGetProfileInt ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
-	int width = SystemGetProfileInt("Default", "Image Width", 640);
-	int height = SystemGetProfileInt("Default", "Image Height", 480);
-//	int width = SystemGetProfileInt("Default", "Image Width", GetSystemMetrics(SM_CXSCREEN));
-//	int height = SystemGetProfileInt("Default", "Image Height", GetSystemMetrics(SM_CYSCREEN));
-	imopts.quality = SystemGetProfileInt("Default", "JPEG Quality", 70);
+	unsigned long image = Sys_ProfileLoadInt  ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
+	int width = Sys_ProfileLoadInt ("Default", "Image Width", 640);
+	int height = Sys_ProfileLoadInt ("Default", "Image Height", 480);
+//	int width = Sys_ProfileLoadInt ("Default", "Image Width", GetSystemMetrics(SM_CXSCREEN));
+//	int height = Sys_ProfileLoadInt ("Default", "Image Height", GetSystemMetrics(SM_CYSCREEN));
+	imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
 	imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
 	imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
 	imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
@@ -572,49 +568,49 @@ void Project::LoadDefaults(bool cameras)
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 	m_bUndoOriginal = true;
 	SystemUpdateUndoRedo(NULL, NULL);
-	m_nDetail = SystemGetProfileInt("Default", "Detail", LC_DET_BRICKEDGES);
+	m_nDetail = Sys_ProfileLoadInt ("Default", "Detail", LC_DET_BRICKEDGES);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
-	m_nAngleSnap = (unsigned short)SystemGetProfileInt("Default", "Angle", 30);
-	m_nSnap = SystemGetProfileInt("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE | LC_DRAW_PREVIEW);
+	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
+	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE | LC_DRAW_PREVIEW);
 	SystemUpdateSnap(m_nSnap);
 	m_nMoveSnap = 0;
 	SystemUpdateMoveSnap(m_nMoveSnap);
-    m_fLineWidth = (float)SystemGetProfileInt("Default", "Line", 100)/100;
-	m_fFogDensity = (float)SystemGetProfileInt("Default", "Density", 10)/100;
-	rgb = SystemGetProfileInt("Default", "Fog", 0xFFFFFF);
+    m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
+	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
+	rgb = Sys_ProfileLoadInt ("Default", "Fog", 0xFFFFFF);
 	m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
 	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fFogColor[3] = 1.0f;
-	m_nGridSize = (unsigned short)SystemGetProfileInt("Default", "Grid", 20);
-	rgb = SystemGetProfileInt("Default", "Ambient", 0x4B4B4B);
+	m_nGridSize = (unsigned short)Sys_ProfileLoadInt ("Default", "Grid", 20);
+	rgb = Sys_ProfileLoadInt ("Default", "Ambient", 0x4B4B4B);
 	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fAmbient[3] = 1.0f;
-	rgb = SystemGetProfileInt("Default", "Background", 0xFFFFFF);
+	rgb = Sys_ProfileLoadInt ("Default", "Background", 0xFFFFFF);
 	m_fBackground[0] = (float)((unsigned char) (rgb))/255;
 	m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fBackground[3] = 1.0f;
-	rgb = SystemGetProfileInt("Default", "Gradient1", 0xBF0000);
+	rgb = Sys_ProfileLoadInt ("Default", "Gradient1", 0xBF0000);
 	m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
 	m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	rgb = SystemGetProfileInt("Default", "Gradient2", 0xFFFFFF);
+	rgb = Sys_ProfileLoadInt ("Default", "Gradient2", 0xFFFFFF);
 	m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
 	m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	m_nFPS = SystemGetProfileInt("Default", "FPS", 24);
+	m_nFPS = Sys_ProfileLoadInt ("Default", "FPS", 24);
 	m_nCurStep = 1;
 	m_nCurFrame = 1;
 	m_nTotalFrames = 100;
 	SystemUpdateTime(false, 1, 255);
-	m_nScene = SystemGetProfileInt("Default", "Scene", 0);
+	m_nScene = Sys_ProfileLoadInt ("Default", "Scene", 0);
 	m_nSaveTimer = 0;
-	strcpy(m_strHeader, SystemGetProfileString("Default", "Header", ""));
-	strcpy(m_strFooter, SystemGetProfileString("Default", "Footer", "Page &P"));
-	strcpy(m_strBackground, SystemGetProfileString("Default", "BMP", ""));
+	strcpy(m_strHeader, Sys_ProfileLoadString ("Default", "Header", ""));
+	strcpy(m_strFooter, Sys_ProfileLoadString ("Default", "Footer", "Page &P"));
+	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
 	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
 	RenderInitialize();
 
@@ -1194,7 +1190,7 @@ void Project::FileSave(File* file, bool bUndo)
 	{
 		unsigned long pos = 0;
 
-		i = SystemGetProfileInt("Default", "Save Preview", 0);
+		i = Sys_ProfileLoadInt ("Default", "Save Preview", 0);
 		if (i != 0) 
 		{
 			pos = file->GetPosition();
@@ -2099,7 +2095,7 @@ glLightfv(GL_LIGHT0, GL_SPECULAR, one);
 			if (pList)
 			{
 				float eye[3];
-				m_pViewCameras[vp]->GetEye(eye);
+				m_pViewCameras[vp]->GetEyePos (eye);
 				BuildBSP(&tree, pList);
 				RenderBSP(&tree, eye, &bSel,
 					(m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_SCREENDOOR) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
@@ -2803,7 +2799,7 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 {
 	int oldx, oldy;
 	unsigned short oldtime;
-	void* render = SystemStartRender(width, height);
+	void* render = Sys_StartMemoryRender(width, height);
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 	oldx = m_nViewX;
 	oldy = m_nViewY;
@@ -2839,7 +2835,14 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 		CalculateStep();
 		Render(true);
 
-		images[i-from] = SystemGetRenderImage(render);
+		LC_IMAGE* image = (LC_IMAGE*)malloc(width*height*3+sizeof(LC_IMAGE));
+		image->width = width;
+		image->height = height;
+		image->bits = (unsigned char*)image + sizeof(LC_IMAGE);
+		glPixelStorei (GL_PACK_ALIGNMENT, 1);
+		glReadPixels (0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,image->bits);
+
+		images[i-from] = image;
 	}
 //	pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
 	m_nViewX = oldx;
@@ -2849,7 +2852,7 @@ void Project::CreateImages(LC_IMAGE** images, int width, int height, unsigned sh
 	else
 		m_nCurStep = (unsigned char)oldtime;
 	CalculateStep();
-	SystemFinishRender(render);
+	Sys_FinishMemoryRender (render);
 }
 
 void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext)
@@ -3017,7 +3020,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			else
 				pCamera->UnHide();
 
-			pCamera->GetUp(tmp);
+			pCamera->GetUpVec(tmp);
 
 			if (tmp[0] != mod->eye[0] || tmp[1] != mod->eye[1] || tmp[2] != mod->eye[2])
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->eye, CK_EYE);
@@ -3205,16 +3208,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					*ptr = 0;
 				}
 			}
-			unsigned long  image = SystemGetProfileInt ("Default", "HTML Options", 1|LC_IMAGE_TRANSPARENT);
+			unsigned long  image = Sys_ProfileLoadInt ("Default", "HTML Options", 1|LC_IMAGE_TRANSPARENT);
 			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
 			opts.imdlg.from = 1;
 			opts.imdlg.to = 1;
 			opts.imdlg.multiple = false;
-			opts.imdlg.width = SystemGetProfileInt("Default", "HTML Width", 256);
-			opts.imdlg.height = SystemGetProfileInt("Default", "HTML Height", 160);
-			opts.imdlg.imopts.quality = SystemGetProfileInt("Default", "JPEG Quality", 70);
+			opts.imdlg.width = Sys_ProfileLoadInt ("Default", "HTML Width", 256);
+			opts.imdlg.height = Sys_ProfileLoadInt ("Default", "HTML Height", 160);
+			opts.imdlg.imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
 			opts.imdlg.imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
 			opts.imdlg.imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
 			opts.imdlg.imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
@@ -3278,7 +3281,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					if (opts.listend)
 						CreateHTMLPieceList(f, 0, opts.images, ext);
 
-					fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.geocities.com/Colosseum/3479/leocad.htm\">LeoCAD</A></B></I><BR></HTML>\n", f);
+					fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\n", f);
 					fclose(f);
 				}
 				else
@@ -3298,7 +3301,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						if (opts.listend)
 							fprintf(f, "<A HREF=\"%s-pieces.htm\">Pieces Used</A><BR>\n", m_strTitle);
 
-						fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.geocities.com/Colosseum/3479/leocad.htm\">LeoCAD</A></B></I><BR></HTML>\n", f);
+						fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\n", f);
 						fclose(f);
 					}
 
@@ -3369,7 +3372,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (opts.images)
 				{
 					int cx = 120, cy = 100;
-					void* render = SystemStartRender(cx, cy);
+					void* render = Sys_StartMemoryRender (cx, cy);
 
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
@@ -3418,12 +3421,18 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						pInfo->RenderPiece(m_nCurColor);
 						glFinish();
 
-						LC_IMAGE* image = SystemGetRenderImage(render);
+						LC_IMAGE* image = (LC_IMAGE*)malloc(cx*cy*3+sizeof(LC_IMAGE));
+						image->width = cx;
+						image->height = cy;
+						image->bits = (unsigned char*)image + sizeof(LC_IMAGE);
+						glPixelStorei (GL_PACK_ALIGNMENT, 1);
+						glReadPixels (0,0,cx,cy,GL_RGB,GL_UNSIGNED_BYTE,image->bits);
+
 						sprintf(fn, "%s%s%s", opts.path, pInfo->m_strName, ext);
 						SaveImage(fn, image, &opts.imdlg.imopts);
 						free(image);
 					}
-					SystemFinishRender(render);
+					Sys_FinishMemoryRender (render);
 				}
 			}
 		} break;
@@ -3714,9 +3723,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			fprintf(f, "// File created by LeoCAD\n//\n\n#include \"%s.inc\"\n", ptr);
 			float eye[3], target[3], up[3];
-			m_pViewCameras[m_nActiveViewport]->GetEye(eye);
-			m_pViewCameras[m_nActiveViewport]->GetTarget(target);
-			m_pViewCameras[m_nActiveViewport]->GetUp(up);
+			m_pViewCameras[m_nActiveViewport]->GetEyePos (eye);
+			m_pViewCameras[m_nActiveViewport]->GetTargetPos (target);
+			m_pViewCameras[m_nActiveViewport]->GetUpVec (up);
 
 			fprintf(f, "\ncamera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
 				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_pViewCameras[m_nActiveViewport]->m_fovy);
@@ -5113,8 +5122,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (!bControl)
 					vp = 4;
 
-				pCam->GetTarget(target);
-				pCam->GetEye(eye);
+				pCam->GetTargetPos (target);
+				pCam->GetEyePos (eye);
 
 				up[0] = (bs[0] + bs[3])/2 - target[0];
 				up[1] = (bs[1] + bs[4])/2 - target[1];
@@ -5130,7 +5139,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				target[1] += up[1];
 				target[2] += up[2];
 
-				pCam->GetUp(up);
+				pCam->GetUpVec (up);
 				Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
 				frontvec.Normalize();
 				sidevec.Cross(frontvec, upvec);
@@ -5685,7 +5694,7 @@ void Project::GetFocusPosition(float* pos)
 	{
 		if (pCamera->IsEyeFocused())
 		{
-			pCamera->GetEye(pos);
+			pCamera->GetEyePos (pos);
 			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 			{
 				pos[0] /= 0.8f;
@@ -5697,7 +5706,7 @@ void Project::GetFocusPosition(float* pos)
 
 		if (pCamera->IsTargetFocused())
 		{
-			pCamera->GetTarget(pos);
+			pCamera->GetTargetPos (pos);
 			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 			{
 				pos[0] /= 0.8f;
@@ -5747,7 +5756,7 @@ PieceInfo* Project::FindPieceInfo (const char* name) const
 	return NULL;
 }
 
-BoundingBox* Project::FindObjectFromPoint(int x, int y)
+void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine)
 {
 	GLdouble px, py, pz, rx, ry, rz;
 	GLdouble modelMatrix[16], projMatrix[16];
@@ -5765,20 +5774,25 @@ BoundingBox* Project::FindObjectFromPoint(int x, int y)
 	gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &px, &py, &pz);
 	gluUnProject(x, y, 1, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
 
-	CLICKLINE ClickLine = { px, py, pz, rx-px, ry-py, rz-pz, DBL_MAX, NULL };
+	pLine->a1 = px;
+	pLine->b1 = py;
+	pLine->c1 = pz;
+	pLine->a2 = rx-px;
+	pLine->b2 = ry-py;
+	pLine->c2 = rz-pz;
+	pLine->mindist = DBL_MAX;
+	pLine->pClosest = NULL;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-			pPiece->MinIntersectDist(&ClickLine);
+			pPiece->MinIntersectDist(pLine);
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		if (pCamera != m_pViewCameras[m_nActiveViewport])
-			pCamera->MinIntersectDist(&ClickLine);
+			pCamera->MinIntersectDist(pLine);
 
 	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		pLight->MinIntersectDist(&ClickLine);
-
-	return ClickLine.pClosest;
+		pLight->MinIntersectDist(pLine);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -6480,163 +6494,167 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
+  GLdouble modelMatrix[16], projMatrix[16], point[3];
+  GLint viewport[4];
 
-	if (IsDrawing())
-		return;
+  if (IsDrawing())
+    return;
 
-	if (m_nTracking != LC_TRACK_NONE)
-		if (StopTracking(false))
-			return;
+  if (m_nTracking != LC_TRACK_NONE)
+    if (StopTracking(false))
+      return;
 
-	if (SetActiveViewport(x, y))
-		return;
+  if (SetActiveViewport(x, y))
+    return;
 
-	m_bTrackCancel = false;
-	m_nDownX = x;
-	m_nDownY = y;
+  m_bTrackCancel = false;
+  m_nDownX = x;
+  m_nDownY = y;
 
-	LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+  LoadViewportProjection();
+  glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+  glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+  glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+  gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+  m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
-	switch (m_nCurAction)
+  switch (m_nCurAction)
+  {
+    case LC_ACTION_SELECT:
+    case LC_ACTION_ERASER:
+    case LC_ACTION_PAINT:
+    {
+      LC_CLICKLINE ClickLine;
+      FindObjectFromPoint (x, y, &ClickLine);
+
+      if (m_nCurAction == LC_ACTION_SELECT) 
+      {
+	SelectAndFocusNone(bControl);
+
+	if (ClickLine.pClosest != NULL)
+	  switch (ClickLine.pClosest->GetType ())
+	  {
+	    case LC_OBJECT_PIECE:
+	    {
+	      Piece* pPiece = (Piece*)ClickLine.pClosest;
+	      pPiece->Focus();
+	      Group* pGroup = pPiece->GetTopGroup();
+
+	      if (pGroup != NULL)
+		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		  if (pPiece->GetTopGroup() == pGroup)
+		    pPiece->Select();
+	    } break;
+
+	    case LC_OBJECT_CAMERA:
+	    {
+	      ((Camera*)ClickLine.pClosest)->FocusEye();
+	    } break;
+
+	    case LC_OBJECT_CAMERA_TARGET:
+	    {
+	      ((CameraTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
+	    } break;
+
+	    case LC_OBJECT_LIGHT:
+	    {
+	      ((Light*)ClickLine.pClosest)->FocusEye();
+	    } break;
+
+	    case LC_OBJECT_LIGHT_TARGET:
+	    {
+	      ((LightTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
+	    } break;
+	  }
+
+	UpdateSelection();
+	SystemRedrawView();
+	if (ClickLine.pClosest)
+	  SystemUpdateFocus(ClickLine.pClosest, ClickLine.pClosest->GetType()|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+	else
+	  SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+      }
+
+      if ((m_nCurAction == LC_ACTION_ERASER) && (ClickLine.pClosest != NULL))
+      {
+	switch (ClickLine.pClosest->GetType ())
 	{
-		case LC_ACTION_SELECT:
-		case LC_ACTION_ERASER:
-		case LC_ACTION_PAINT:
-		{
-			BoundingBox* pBox;
-			pBox = FindObjectFromPoint(x, y);
-
-			if (m_nCurAction == LC_ACTION_SELECT) 
-			{
-				SelectAndFocusNone(bControl);
-
-				if (pBox != NULL)
-				switch (pBox->GetOwnerType())
-				{
-					case LC_PIECE:
-					{
-						Piece* pPiece = (Piece*)pBox->GetOwner();
-						pPiece->Focus();
-						Group* pGroup = pPiece->GetTopGroup();
-
-						if (pGroup != NULL)
-							for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-								if (pPiece->GetTopGroup() == pGroup)
-									pPiece->Select();
-					} break;
-
-					case LC_CAMERA:
-					{
-						((Camera*)pBox->GetOwner())->FocusEye();
-					} break;
-				
-					case LC_CAMERA_TARGET:
-					{
-						((Camera*)pBox->GetOwner())->FocusTarget();
-					} break;
-
-					case LC_LIGHT:
-					{
-						((Light*)pBox->GetOwner())->FocusEye();
-					} break;
-
-					case LC_LIGHT_TARGET:
-					{
-						((Light*)pBox->GetOwner())->FocusTarget();
-					} break;
-				}
-
-				UpdateSelection();
-				SystemRedrawView();
-				if (pBox)
-					SystemUpdateFocus(pBox->GetOwner(), pBox->GetOwnerType()|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
-				else
-					SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
-			}
-
-			if ((m_nCurAction == LC_ACTION_ERASER) && (pBox != NULL))
-			{
-				switch (pBox->GetOwnerType())
-				{
-					case LC_PIECE:
-					{
-						Piece* pPiece = (Piece*)pBox->GetOwner();
-						RemovePiece(pPiece);
-						delete pPiece;
+	  case LC_OBJECT_PIECE:
+	  {
+	    Piece* pPiece = (Piece*)ClickLine.pClosest;
+	    RemovePiece(pPiece);
+	    delete pPiece;
 //						CalculateStep();
-						RemoveEmptyGroups();
-					} break;
+	    RemoveEmptyGroups();
+	  } break;
 
-					case LC_CAMERA:
-					case LC_CAMERA_TARGET:
-					{
-						Camera* pCamera = (Camera*)pBox->GetOwner();
-						bool bCanDelete = pCamera->IsUser();
+	  case LC_OBJECT_CAMERA:
+	  case LC_OBJECT_CAMERA_TARGET:
+	  {
+	    Camera* pCamera;
+	    if (ClickLine.pClosest->GetType () == LC_OBJECT_CAMERA)
+	      pCamera = (Camera*)ClickLine.pClosest;
+	    else
+	      pCamera = ((CameraTarget*)ClickLine.pClosest)->GetParent();
+	    bool bCanDelete = pCamera->IsUser();
 
-						for (int i = 0; i < 4; i++)
-							if (pCamera == m_pViewCameras[i])
-								bCanDelete = false;
+	    for (int i = 0; i < 4; i++)
+	      if (pCamera == m_pViewCameras[i])
+		bCanDelete = false;
 
-						if (bCanDelete)
-						{
-							Camera* pPrev;
-							for (pPrev = m_pCameras; pPrev; pPrev = pPrev->m_pNext)
-								if (pPrev->m_pNext == pCamera)
-								{
-									pPrev->m_pNext = pCamera->m_pNext;
-									delete pCamera;
-									SystemUpdateCameraMenu(m_pCameras);
-									SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
-									break;
-								}
-						}
-					} break;
+	    if (bCanDelete)
+	    {
+	      Camera* pPrev;
+	      for (pPrev = m_pCameras; pPrev; pPrev = pPrev->m_pNext)
+		if (pPrev->m_pNext == pCamera)
+		{
+		  pPrev->m_pNext = pCamera->m_pNext;
+		  delete pCamera;
+		  SystemUpdateCameraMenu(m_pCameras);
+		  SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
+		  break;
+		}
+	    }
+	  } break;
 
-					case LC_LIGHT:
-					case LC_LIGHT_TARGET:
-					{ 
+	  case LC_OBJECT_LIGHT:
+	  case LC_OBJECT_LIGHT_TARGET:
+	  { 
 /*						pos = m_Lights.Find(pObject->m_pParent);
 						m_Lights.RemoveAt(pos);
 						delete pObject->m_pParent;
-*/					} break;
-				}
+*/	  } break;
+	}
 
-				UpdateSelection();
-				SystemRedrawView();
-				SetModifiedFlag(true);
-				CheckPoint("Deleting");
+	UpdateSelection();
+	SystemRedrawView();
+	SetModifiedFlag(true);
+	CheckPoint("Deleting");
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
-			}
+      }
 
-			if ((m_nCurAction == LC_ACTION_PAINT) && (pBox != NULL) && 
-				(pBox->GetOwnerType() == LC_PIECE))
-			{
-				Piece* pPiece = (Piece*)pBox->GetOwner();
+      if ((m_nCurAction == LC_ACTION_PAINT) && (ClickLine.pClosest != NULL) && 
+	  (ClickLine.pClosest->GetType() == LC_OBJECT_PIECE))
+      {
+	Piece* pPiece = (Piece*)ClickLine.pClosest;
 
-				if (pPiece->GetColor() != m_nCurColor)
-				{
-					bool bTrans = pPiece->IsTransparent();
-					pPiece->SetColor(m_nCurColor);
-					if (bTrans != pPiece->IsTransparent())
-						pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
+	if (pPiece->GetColor() != m_nCurColor)
+	{
+	  bool bTrans = pPiece->IsTransparent();
+	  pPiece->SetColor(m_nCurColor);
+	  if (bTrans != pPiece->IsTransparent())
+	    pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 
-					SetModifiedFlag(true);
-					CheckPoint("Painting");
-					SystemUpdateFocus(NULL, 0);
-					SystemRedrawView();
-				}
-			}
-		} break;
+	  SetModifiedFlag(true);
+	  CheckPoint("Painting");
+	  SystemUpdateFocus(NULL, 0);
+	  SystemRedrawView();
+	}
+      }
+    } break;
 
-		case LC_ACTION_INSERT:
+    case LC_ACTION_INSERT:
 //		case LC_ACTION_LIGHT:
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
@@ -6756,73 +6774,73 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
 void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
+  GLdouble modelMatrix[16], projMatrix[16], point[3];
+  GLint viewport[4];
 
-	if (IsDrawing())
-		return;
+  if (IsDrawing())
+    return;
 
-	if (SetActiveViewport(x, y))
-		return;
+  if (SetActiveViewport(x, y))
+    return;
 
-	LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+  LoadViewportProjection();
+  glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+  glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+  glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+  gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+  m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
-	BoundingBox* pBox;
-	pBox = FindObjectFromPoint(x, y);
+  LC_CLICKLINE ClickLine;
+  FindObjectFromPoint (x, y, &ClickLine);
 
-//	if (m_nCurAction == LC_ACTION_SELECT) 
+//  if (m_nCurAction == LC_ACTION_SELECT) 
+  {
+    SelectAndFocusNone(bControl);
+
+    if (ClickLine.pClosest != NULL)
+      switch (ClickLine.pClosest->GetType ())
+      {
+        case LC_OBJECT_PIECE:
 	{
-		SelectAndFocusNone(bControl);
+	  Piece* pPiece = (Piece*)ClickLine.pClosest;
+	  pPiece->Focus();
+	  Group* pGroup = pPiece->GetTopGroup();
 
-		if (pBox != NULL)
-		switch (pBox->GetOwnerType())
-		{
-			case LC_PIECE:
-			{
-				Piece* pPiece = (Piece*)pBox->GetOwner();
-				pPiece->Focus();
-				Group* pGroup = pPiece->GetTopGroup();
+	  if (pGroup != NULL)
+	    for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	      if (pPiece->GetTopGroup() == pGroup)
+		pPiece->Select();
+	} break;
 
-				if (pGroup != NULL)
-					for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-						if (pPiece->GetTopGroup() == pGroup)
-							pPiece->Select();
-			} break;
+        case LC_OBJECT_CAMERA:
+	{
+	  ((Camera*)ClickLine.pClosest)->FocusEye();
+	} break;
 
-			case LC_CAMERA:
-			{
-				((Camera*)pBox->GetOwner())->FocusEye();
-			} break;
+        case LC_OBJECT_CAMERA_TARGET:
+	{
+	  ((CameraTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
+	} break;
 
-			case LC_CAMERA_TARGET:
-			{
-				((Camera*)pBox->GetOwner())->FocusTarget();
-			} break;
+        case LC_OBJECT_LIGHT:
+	{
+	  ((Light*)ClickLine.pClosest)->FocusEye();
+	} break;
 
-			case LC_LIGHT:
-			{
-				((Light*)pBox->GetOwner())->FocusEye();
-			} break;
+        case LC_OBJECT_LIGHT_TARGET:
+	{
+	  ((LightTarget*)ClickLine.pClosest)->GetParent()->FocusTarget();
+	} break;
+      }
 
-			case LC_LIGHT_TARGET:
-			{
-				((Light*)pBox->GetOwner())->FocusTarget();
-			} break;
-		}
-
-		UpdateSelection();
-		SystemRedrawView();
-		if (pBox)
-			SystemUpdateFocus(pBox->GetOwner(), pBox->GetOwnerType()|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
-		else
-			SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
-	}
+    UpdateSelection();
+    SystemRedrawView();
+    if (ClickLine.pClosest)
+      SystemUpdateFocus(ClickLine.pClosest, ClickLine.pClosest->GetType()|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+    else
+      SystemUpdateFocus(NULL, LC_UPDATE_OBJECT);
+  }
 }
 
 void Project::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
@@ -6957,7 +6975,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				pCamera = pCamera->m_pNext;
 
 			float target[3];
-			pCamera->GetTarget(target);
+			pCamera->GetTargetPos (target);
 			target[0] += delta[0];
 			target[1] += delta[1];
 			target[2] += delta[2];
@@ -7100,9 +7118,9 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			if (m_pViewCameras[m_nActiveViewport]->IsSide())
 			{
 				float eye[3], target[3], up[3];
-				m_pViewCameras[m_nActiveViewport]->GetEye(eye);
-				m_pViewCameras[m_nActiveViewport]->GetTarget(target);
-				m_pViewCameras[m_nActiveViewport]->GetUp(up);
+				m_pViewCameras[m_nActiveViewport]->GetEyePos(eye);
+				m_pViewCameras[m_nActiveViewport]->GetTargetPos(target);
+				m_pViewCameras[m_nActiveViewport]->GetUpVec(up);
 				Camera* pCamera = new Camera(eye, target, up, m_pCameras);
 
 				m_pViewCameras[m_nActiveViewport] = pCamera;
@@ -7138,16 +7156,3 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 		} break;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

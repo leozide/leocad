@@ -289,7 +289,7 @@ void CCADApp::OnHelpUpdates()
 	DWORD dwBytesRead;
 	CString Contents;
 
-	HINTERNET hHttpFile = InternetOpenUrl(session, "http://www.leocad.org", NULL, 0, 0, 0);
+	HINTERNET hHttpFile = InternetOpenUrl(session, "http://www.leocad.org/updates.txt", NULL, 0, 0, 0);
 
 	if (hHttpFile)
 	{
@@ -313,15 +313,17 @@ void CCADApp::OnHelpUpdates()
 					if (lib > project->GetPieceLibraryCount())
 						str += "There's an updated piece library.";
 					else
-						str += "There are no new parts.";
+						str += "There are no new pieces.";
 
 					AfxMessageBox(str);
 				}
 				else
-					AfxMessageBox("Unknown information.");
+					AfxMessageBox("Unknown file information.");
 			}
 			InternetCloseHandle(hHttpFile);
 		}
+		else
+			AfxMessageBox("Could not connect.");
 	}
 	else
 		AfxMessageBox("Could not connect.");

@@ -320,7 +320,7 @@ bool Piece::FileLoad (File& file, char* name)
     if (ch == 0)
       m_pGroup = (Group*)-1;
     else
-      m_pGroup = (Group*)ch;
+      m_pGroup = (Group*)(unsigned long)ch;
 
     file.ReadByte(&ch, 1);
     if (ch & 0x01)

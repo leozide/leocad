@@ -1118,15 +1118,7 @@ SOURCE=..\Common\camera.cpp
 # Begin Source File
 
 SOURCE=..\common\console.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1180,15 +1172,7 @@ SOURCE=..\Common\image.cpp
 # Begin Source File
 
 SOURCE=..\common\libman.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1273,15 +1257,7 @@ SOURCE=..\Common\terrain.cpp
 # Begin Source File
 
 SOURCE=..\common\texfont.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

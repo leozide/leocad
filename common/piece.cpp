@@ -1,16 +1,13 @@
 // A piece object in the LeoCAD world.
 //
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include "opengl.h"
 #include "matrix.h"
 #include "pieceinf.h"
-#include "boundbox.h"
 #include "texture.h"
 #include "piece.h"
 #include "group.h"
@@ -122,6 +119,7 @@ static bool lockarrays = true;
 #endif
 
 Piece::Piece(PieceInfo* pPieceInfo)
+  : Object (LC_OBJECT_PIECE)
 {
 #if ! (defined (GL_EXT_compiled_vertex_array))
 
@@ -141,7 +139,6 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	}
 #endif
 
-	m_BoundingBox.Initialize(this, LC_PIECE);
 	m_pNext = NULL;
 	m_pPieceInfo = pPieceInfo;
 	m_nState = 0;
@@ -466,7 +463,7 @@ void Piece::CreateName(Piece* pPiece)
 	sprintf (m_strName, "%s #%.2d", m_pPieceInfo->m_strDescription, max+1);
 }
 
-void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, CLICKLINE* pLine)
+void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine)
 {
 	double t, t1, t2, x, y, z, plane[4];
 	plane[0] = ((p1[1]-p2[1])*(p3[2]-p2[2])) - ((p1[2]-p2[2])*(p3[1]-p2[1]));
@@ -542,18 +539,18 @@ void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, CLICKLINE* pLi
 					}
 
 					pLine->mindist = dist;
-					pLine->pClosest = &m_BoundingBox;
+					pLine->pClosest = this;
 				}
 			}
 		}
 	}
 }
 
-void Piece::MinIntersectDist(CLICKLINE* pLine)
+void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 {
 	double dist;
 
-	dist = m_BoundingBox.FindIntersectDist(pLine);
+	dist = BoundingBoxIntersectDist(pLine);
 	if (dist >= pLine->mindist)
 		return;
 
@@ -825,7 +822,7 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 //	if (CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation))
 	{
 		Matrix mat(m_fRotation, m_fPosition);
-		m_BoundingBox.CalculateBoundingBox(&mat, m_pPieceInfo->m_fDimensions);
+		BoundingBoxCalculate(&mat, m_pPieceInfo->m_fDimensions);
 		for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
 		{
 			mat.TransformPoint(m_pConnections[i].center, m_pPieceInfo->m_pConnections[i].center);

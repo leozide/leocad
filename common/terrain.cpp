@@ -1,14 +1,11 @@
 // Terrain: a Bezier surface.
 //
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-#endif
-#include <GL/gl.h>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "opengl.h"
 #include "defines.h"
 #include "terrain.h"
 #include "file.h"
@@ -578,7 +575,7 @@ void Terrain::Render(Camera* pCam, float aspect)
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
 		float eye[3];
-		pCam->GetEye(eye);
+		pCam->GetEyePos(eye);
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
 		glScalef(pCam->m_zFar, pCam->m_zFar, 1);
@@ -672,7 +669,7 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 {
 	// Get camera position information.
 	float eye[3];
-	pCam->GetEye(eye);
+	pCam->GetEyePos(eye);
 	
 	// Get perspective information.
 	float alpha = pCam->m_fovy / 2.0f;
@@ -684,8 +681,8 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 
 	// Get vector stuff from the position.
 	float nonOrthoTop[3], target[3];
-	pCam->GetUp(nonOrthoTop);
-	pCam->GetTarget(target);
+	pCam->GetUpVec(nonOrthoTop);
+	pCam->GetTargetPos(target);
 	float front[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]};
 	float side[3];
 	side[0] = nonOrthoTop[1]*front[2] - nonOrthoTop[2]*front[1];
@@ -790,7 +787,7 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 
 void Terrain::LoadDefaults(bool bLinear)
 {
-	unsigned long rgb = SystemGetProfileInt("Default", "Floor", RGB (0,191,0));
+	unsigned long rgb = Sys_ProfileLoadInt ("Default", "Floor", RGB (0,191,0));
 	m_fColor[0] = (float)((unsigned char) (rgb))/255;
 	m_fColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
@@ -798,7 +795,7 @@ void Terrain::LoadDefaults(bool bLinear)
 	m_uSize = 50;
 	m_vSize = 50;
 
-	strcpy(m_strTexture, SystemGetProfileString("Default", "FloorBMP", ""));
+	strcpy (m_strTexture, Sys_ProfileLoadString ("Default", "FloorBMP", ""));
 	m_pTexture->Unload();
 
 	m_nOptions = LC_TERRAIN_FLAT;

@@ -1,0 +1,8 @@
+The following people have contributed to LeoCAD:
+
+Author, Original Design:
+Leonard Zide
+
+Contributions:
+Christian Höltje <docwhat@gerf.org>
+

@@ -1,0 +1,27 @@
+/* XPM */
+static char *ac_zoom[] = {
+/* columns rows colors chars-per-pixel */
+"16 15 6 1",
+"  c Gray0",
+". c #00007f",
+"X c Gray50",
+"o c Blue",
+"O c Gray75",
+"+ c Gray100",
+/* pixels */
+"OOOO....OOOOOOOO",
+"OOX.OOOO.XOOOOOO",
+"OO.O+++OO OOOOOO",
+"O.O++OOOOO OOOOO",
+"O.O+OOOOOO OOOOO",
+"O.OOOOOO+O OOOOO",
+"O.OOOOO++X OOOOO",
+"OO.OO+++O OOOOOO",
+"OOX OOOX X OOOOO",
+"OOOO    .X+ OOOO",
+"OOOOOOOOO .oXOOO",
+"OOOOOOOOOO .oXOO",
+"OOOOOOOOOOO .oXO",
+"OOOOOOOOOOOO .oO",
+"OOOOOOOOOOOOO OO"
+};

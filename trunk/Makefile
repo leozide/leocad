@@ -1,13 +1,13 @@
 ### ALL CONFIGURATION SHOULD BE IN CONFIG.MK, NOT HERE
 include config.mk
+-include $(OSDIR)/config.mk
 
 ### Module directories
 MODULES := $(OSDIR) common
 
 ### look for include files in
 ###   each of the modules
-CPPFLAGS += $(patsubst %,-I%,$(MODULES))
-CPPFLAGS += $(OS) -DVERSION=$(VERSION)
+CPPFLAGS += $(patsubst %,-I%,$(MODULES)) $(OS)
 CPPFLAGS += -g
 
 ### extra libraries if required
@@ -48,18 +48,21 @@ bin:
 
 ### include the C/C++ include
 ###   dependencies
+ifeq ($(findstring $(MAKECMDGOALS), config clean veryclean spotless), )
 -include $(OBJ:.o=.d)
+endif
 
 ### calculate C/C++ include
 ###   dependencies
 %.d: %.c
+	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
 	@./depend.sh $@ $(@D) $(CC) $(CFLAGS) $(CPPFLAGS) -w $<
 	@[ -s $@ ] || rm -f $@
 
 %.d: %.cpp
+	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
 	@./depend.sh $@ $(@D) $(CXX) $(CXXFLAGS) $(CPPFLAGS) -w $<
 	@[ -s $@ ] || rm -f $@
-
 
 ### Various cleaning functions
 .PHONY: clean veryclean spotless all
@@ -72,7 +75,7 @@ veryclean: clean
 	rm -rf bin
 
 spotless: veryclean
-	rm -rf arch
+	rm -rf arch $(OSDIR)/config.mk $(OSDIR)/config.h
 
 
 ### dependency stuff is done automatically, so these do nothing.
@@ -113,19 +116,21 @@ source-tgz: arch/leocad-$(VERSION)-src.tgz
 
 source-zip: arch/leocad-$(VERSION)-src.zip
 
-
-
-arch/leocad-$(VERSION)-linux.zip: arch all
-	rm -f $@
-	zip -r $@ *.txt bin docs examples -x 'CVS/*' -x '*/CVS/*' -x '*/core'
-
-arch/leocad-$(VERSION)-linux.tgz: arch all
+### Create a directory with the files needed for a binary package
+package-dir: arch all
 	mkdir leocad-$(VERSION)
 	cp bin/leocad leocad-$(VERSION)
 	cp CREDITS.txt leocad-$(VERSION)/CREDITS
 	cp README.txt leocad-$(VERSION)/README
 	cp docs/INSTALL.txt leocad-$(VERSION)/INSTALL
 	cp docs/LINUX.txt leocad-$(VERSION)/LINUX
+
+arch/leocad-$(VERSION)-linux.zip: package-dir
+	rm -f $@
+	zip -r $@ leocad-$(VERSION)
+	rm -rf leocad-$(VERSION)
+
+arch/leocad-$(VERSION)-linux.tgz: package-dir
 	rm -f $@
 	tar -cvzf $@ leocad-$(VERSION)
 	rm -rf leocad-$(VERSION)

@@ -373,6 +373,44 @@ static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButt
   gtk_widget_draw(piecepreview, NULL);
 }
 
+// Add a new piece to the list
+void piececombo_add(char* string)
+{
+  if (string == NULL)
+  {
+    // Clear the list
+    gtk_list_clear_items (GTK_LIST(GTK_COMBO(piececombo)->list), 0, -1);
+    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(piececombo)->entry), "");
+  }
+  else
+  {
+    GtkWidget *li;
+    GtkList *list = GTK_LIST(GTK_COMBO(piececombo)->list);
+    GtkWidget *child;
+    GList *children;
+    gchar* str;
+
+    // Check if the string is already in the list
+    children = list->children;
+    while (children)
+    {
+      child = (GtkWidget*)children->data;
+      children = children->next;
+
+      gtk_label_get(GTK_LABEL(GTK_BIN(child)->child), &str);
+      if (strcmp(str, string) == 0)
+	return;
+    }
+
+    // Add new entry
+    li = gtk_list_item_new_with_label(string);
+    gtk_widget_show(li);
+    gtk_container_add(GTK_CONTAINER(list), li);
+    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(piececombo)->entry), "");
+  }
+}
+
+
 static void colorlist_draw_pixmap(GtkWidget *widget)
 {
   GdkGC* gc = gdk_gc_new(widget->window);
@@ -484,7 +522,7 @@ static gint colorlist_expose(GtkWidget *widget, GdkEventExpose *event)
 
 static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
-  int x = -100;
+  int x;
 
   switch (event->keyval)
   {
@@ -492,20 +530,20 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
     case GDK_Down: x = cur_color + 14; break;
     case GDK_Left: x = cur_color - 1; break;
     case GDK_Right: x = cur_color + 1; break;
+
+  default:
+    return TRUE;
   }
 
-  if (x != -100)
+  if ((x > -1) && (x < 28))
   {
-    if ((x > -1) && (x < 28))
-    {
-      cur_color = x;
-      colorlist_draw_pixmap(widget);
-      project->HandleNotify(LC_COLOR_CHANGED, x);
-      gtk_widget_draw(widget, NULL);
-      gtk_widget_draw(piecepreview, NULL);
-    }
-    gtk_signal_emit_stop_by_name (GTK_OBJECT(widget), "key_press_event");
+    cur_color = x;
+    colorlist_draw_pixmap(widget);
+    project->HandleNotify(LC_COLOR_CHANGED, x);
+    gtk_widget_draw(widget, NULL);
+    gtk_widget_draw(piecepreview, NULL);
   }
+  gtk_signal_emit_stop_by_name (GTK_OBJECT(widget), "key_press_event");
 
   return TRUE;
 }

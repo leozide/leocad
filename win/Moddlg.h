@@ -82,6 +82,7 @@ protected:
 	afx_msg void OnModdlgPiece();
 	afx_msg void OnSelendokModdlgList();
 	afx_msg void OnModdlgApply();
+	afx_msg void OnDropdownModdlgList();
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP() 

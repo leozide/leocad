@@ -589,11 +589,11 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
 	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
 
-        for (i = 0; i < m_ViewList.GetSize (); i++)
-        {
-          m_ViewList[i]->MakeCurrent ();
-          RenderInitialize();
-        }
+	for (i = 0; i < m_ViewList.GetSize (); i++)
+	{
+		m_ViewList[i]->MakeCurrent ();
+		RenderInitialize();
+	}
 
 	if (cameras)
 	{
@@ -701,21 +701,21 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	}
 
 	if (bMerge)
-          file->Seek(32, SEEK_CUR);
+		file->Seek(32, SEEK_CUR);
 	else
 	{
-          file->ReadLong (&i, 1); m_nAngleSnap = i;
-          file->ReadLong (&m_nSnap, 1);
-          file->ReadFloat (&m_fLineWidth, 1);
-          file->ReadLong (&m_nDetail, 1);
-          file->ReadLong (&i, 1); m_nCurGroup = i;
-          file->ReadLong (&i, 1); m_nCurColor = i;
-          file->ReadLong (&i, 1); action = i;
-          file->ReadLong (&i, 1); m_nCurStep = i;
+		file->ReadLong (&i, 1); m_nAngleSnap = i;
+		file->ReadLong (&m_nSnap, 1);
+		file->ReadFloat (&m_fLineWidth, 1);
+		file->ReadLong (&m_nDetail, 1);
+		file->ReadLong (&i, 1); m_nCurGroup = i;
+		file->ReadLong (&i, 1); m_nCurColor = i;
+		file->ReadLong (&i, 1); action = i;
+		file->ReadLong (&i, 1); m_nCurStep = i;
 	}
 
 	if (fv > 0.8f)
-          file->ReadLong (&m_nScene, 1);
+		file->ReadLong (&m_nScene, 1);
 
 	file->ReadLong (&count, 1);
 	SystemStartProgressBar(0, count, 1, "Loading project...");
@@ -791,67 +791,67 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	{
 		if (fv >= 0.4f)
 		{
-                  file->Read(&ch, 1);
-                  if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-                  if (sh > 100)
-                    file->Seek(sh, SEEK_CUR);
-                  else
-                    file->Read(m_strAuthor, sh);
+			file->Read(&ch, 1);
+			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			if (sh > 100)
+				file->Seek(sh, SEEK_CUR);
+			else
+				file->Read(m_strAuthor, sh);
 
-                  file->Read(&ch, 1);
-                  if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-                  if (sh > 100)
-                    file->Seek(sh, SEEK_CUR);
-                  else
-                    file->Read(m_strDescription, sh);
+			file->Read(&ch, 1);
+			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			if (sh > 100)
+				file->Seek(sh, SEEK_CUR);
+			else
+				file->Read(m_strDescription, sh);
 
-                  file->Read(&ch, 1);
-                  if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
-                  if (sh > 255)
-                    file->Seek(sh, SEEK_CUR);
-                  else
-                    file->Read(m_strComments, sh);
+			file->Read(&ch, 1);
+			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
+			if (sh > 255)
+				file->Seek(sh, SEEK_CUR);
+			else
+				file->Read(m_strComments, sh);
 		}
 	}
 	else
 	{
-          if (fv >= 0.4f)
-          {
-            file->Read (&ch, 1);
-            if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-            file->Seek (sh, SEEK_CUR);
+		if (fv >= 0.4f)
+		{
+			file->Read (&ch, 1);
+			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			file->Seek (sh, SEEK_CUR);
 
-            file->Read (&ch, 1);
-            if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-            file->Seek (sh, SEEK_CUR);
+			file->Read (&ch, 1);
+			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			file->Seek (sh, SEEK_CUR);
 
-            file->Read (&ch, 1);
-            if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
-            file->Seek (sh, SEEK_CUR);
-          }
+			file->Read (&ch, 1);
+			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
+			file->Seek (sh, SEEK_CUR);
+		}
 	}
 
 	if (fv >= 0.5f)
 	{
-          file->ReadLong (&count, 1);
+		file->ReadLong (&count, 1);
 
-          Group* pGroup;
-          Group* pLastGroup = NULL;
-          for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-            pLastGroup = pGroup;
+		Group* pGroup;
+		Group* pLastGroup = NULL;
+		for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+			pLastGroup = pGroup;
 
-          pGroup = pLastGroup;
-          for (i = 0; i < count; i++)
-          {
-            if (pGroup)
-            {
-              pGroup->m_pNext = new Group();
-              pGroup = pGroup->m_pNext;
-            }
-            else
-              m_pGroups = pGroup = new Group();
-          }
-          pLastGroup = pLastGroup ? pLastGroup->m_pNext : m_pGroups;
+		pGroup = pLastGroup;
+		for (i = 0; i < count; i++)
+		{
+			if (pGroup)
+			{
+				pGroup->m_pNext = new Group();
+				pGroup = pGroup->m_pNext;
+			}
+			else
+				m_pGroups = pGroup = new Group();
+		}
+		pLastGroup = pLastGroup ? pLastGroup->m_pNext : m_pGroups;
 
 		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
 		{
@@ -919,13 +919,13 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			if (fv < 1.0f)
 			{
-                          file->ReadLong (&i, 1);
-                          m_nViewportMode = i;
+				file->ReadLong (&i, 1);
+				m_nViewportMode = i;
 			}
 			else
 			{
-                          file->ReadByte (&m_nViewportMode, 1);
-                          file->ReadByte (&m_nActiveViewport, 1);
+				file->ReadByte (&m_nViewportMode, 1);
+				file->ReadByte (&m_nActiveViewport, 1);
 			}
 
 			file->ReadLong (&count, 1);
@@ -971,26 +971,26 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			if (fv < 1.0f)
 			{
-                          file->ReadLong (&rgb, 1);
-                          m_fFogDensity = (float)rgb/100;
+				file->ReadLong (&rgb, 1);
+				m_fFogDensity = (float)rgb/100;
 			}
 			else
-                          file->ReadFloat (&m_fFogDensity, 1);
+				file->ReadFloat (&m_fFogDensity, 1);
 
 			if (fv < 1.3f)
 			{
-                          file->ReadByte (&ch, 1);
-                          if (ch == 0xFF)
-                            file->ReadShort (&sh, 1);
-                          sh = ch;
+				file->ReadByte (&ch, 1);
+				if (ch == 0xFF)
+					file->ReadShort (&sh, 1);
+				sh = ch;
 			}
 			else
-                          file->ReadShort (&sh, 1);
+				file->ReadShort (&sh, 1);
 
 			if (sh < LC_MAXPATH)
-                          file->Read (m_strBackground, sh);
+				file->Read (m_strBackground, sh);
 			else
-                          file->Seek (sh, SEEK_CUR);
+				file->Seek (sh, SEEK_CUR);
 		}
 
 		if (fv >= 0.8f)
@@ -1010,53 +1010,53 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			if (fv < 1.3f)
 			{
-                          file->ReadLong (&i, 1); m_bAnimation = (i != 0);
-                          file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
-                          file->ReadByte (&m_nFPS, 1);
-                          file->ReadLong (&i, 1); m_nCurFrame = i;
-                          file->ReadShort (&m_nTotalFrames, 1);
-                          file->ReadLong (&i, 1); m_nGridSize = i;
-                          file->ReadLong (&i, 1); m_nMoveSnap = i;
+				file->ReadLong (&i, 1); m_bAnimation = (i != 0);
+				file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
+				file->ReadByte (&m_nFPS, 1);
+				file->ReadLong (&i, 1); m_nCurFrame = i;
+				file->ReadShort (&m_nTotalFrames, 1);
+				file->ReadLong (&i, 1); m_nGridSize = i;
+				file->ReadLong (&i, 1); m_nMoveSnap = i;
 			}
 			else
 			{
-                          file->ReadByte (&ch, 1); m_bAnimation = (ch != 0);
-                          file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
-                          file->ReadByte (&m_nFPS, 1);
-                          file->ReadShort (&m_nCurFrame, 1);
-                          file->ReadShort (&m_nTotalFrames, 1);
-                          file->ReadShort (&m_nGridSize, 1);
-                          file->ReadShort (&m_nMoveSnap, 1);
+				file->ReadByte (&ch, 1); m_bAnimation = (ch != 0);
+				file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
+				file->ReadByte (&m_nFPS, 1);
+				file->ReadShort (&m_nCurFrame, 1);
+				file->ReadShort (&m_nTotalFrames, 1);
+				file->ReadShort (&m_nGridSize, 1);
+				file->ReadShort (&m_nMoveSnap, 1);
 			}
 		}
 			
 		if (fv > 1.0f)
 		{
-                  file->ReadLong (&rgb, 1);
-                  m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
-                  m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-                  m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-                  file->ReadLong (&rgb, 1);
-                  m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
-                  m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-                  m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-
-                  if (fv > 1.1f)
-                    m_pTerrain->FileLoad (file);
-                  else
-                  {
-                    file->Seek (4, SEEK_CUR);
-                    file->Read (&ch, 1);
-                    file->Seek (ch, SEEK_CUR);
-                  }
+			file->ReadLong (&rgb, 1);
+			m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
+			m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+			m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+			file->ReadLong (&rgb, 1);
+			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
+			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+			
+			if (fv > 1.1f)
+				m_pTerrain->FileLoad (file);
+			else
+			{
+				file->Seek (4, SEEK_CUR);
+				file->Read (&ch, 1);
+				file->Seek (ch, SEEK_CUR);
+			}
 		}
 	}
 
-        for (i = 0; i < m_ViewList.GetSize (); i++)
-        {
-          m_ViewList[i]->MakeCurrent ();
-          RenderInitialize();
-        }
+	for (i = 0; i < m_ViewList.GetSize (); i++)
+	{
+		m_ViewList[i]->MakeCurrent ();
+		RenderInitialize();
+	}
 	CalculateStep();
 	if (!bUndo)
 		SelectAndFocusNone(false);
@@ -1109,11 +1109,11 @@ void Project::FileSave(File* file, bool bUndo)
 
 	Piece* pPiece;
 	for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-          i++;
+		i++;
 	file->WriteLong (&i, 1);
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-          pPiece->FileSave (*file, m_pGroups);
+		pPiece->FileSave (*file, m_pGroups);
 
 	ch = strlen(m_strAuthor);
 	file->Write(&ch, 1);
@@ -1131,28 +1131,28 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteLong (&i, 1);
 
 	for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-          pGroup->FileSave(file, m_pGroups);
+		pGroup->FileSave(file, m_pGroups);
 
 	file->WriteByte (&m_nViewportMode, 1);
 	file->WriteByte (&m_nActiveViewport, 1);
 
 	Camera* pCamera;
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-          i++;
+		i++;
 	file->WriteLong (&i, 1);
 
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-          pCamera->FileSave(*file);
+		pCamera->FileSave(*file);
 
 	for (j = 0; j < 4; j++)
 	{
-          for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-            if (pCamera == m_pViewCameras[j])
-              break;
-            else
-              i++;
+		for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+			if (pCamera == m_pViewCameras[j])
+				break;
+			else
+				i++;
 
-          file->WriteLong (&i, 1);
+		file->WriteLong (&i, 1);
 	}
 
 	rgb = FLOATRGB(m_fFogColor);
@@ -1817,7 +1817,9 @@ void Project::Render(bool bToMemory)
 #ifdef BENCHMARK
 	dwMillis = GetTickCount() - dwMillis;
 	char szMsg[30];
-	sprintf(szMsg, "%.4f sec", (float)dwMillis/1000);
+	static int FrameCount = 0;
+	FrameCount++;
+	sprintf(szMsg, "%d - %.4f sec", FrameCount, (float)dwMillis/1000);
 	AfxGetMainWnd()->SetWindowText(szMsg);
 #endif
 }
@@ -2772,45 +2774,69 @@ bool Project::RemoveSelectedObjects()
 	}
 
 	// Cameras can't be removed while being used or default
-	for (pPrev = NULL, pCamera = m_pCameras; pCamera; pPrev = pCamera, pCamera = pCamera->m_pNext)
+	for (pPrev = NULL, pCamera = m_pCameras; pCamera; )
 	{
-		if (pCamera->IsSelected() && pCamera->IsUser())
+		bool bCanDelete = true;
+		for (int i = 0; i < 4; i++)
 		{
-			bool bCanDelete = true;
-			for (int i = 0; i < 4; i++)
-				if (pCamera == m_pViewCameras[i])
-				{
-					bCanDelete = false;
-					break;
-				}
-
-			if (bCanDelete)
+			if (pCamera == m_pViewCameras[i])
 			{
-			  if (pPrev)
-			    ((Camera*)pPrev)->m_pNext = pCamera->m_pNext;
-			  else
-			    m_pCameras = pCamera->m_pNext;
-				delete pCamera;
-				pCamera = (Camera*)pPrev;
-				removed = true;
-				SystemUpdateCameraMenu(m_pCameras);
-				SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
+				bCanDelete = false;
+				break;
 			}
+		}
+
+		if (bCanDelete && pCamera->IsSelected() && pCamera->IsUser())
+		{
+			if (pPrev)
+			{
+				((Camera*)pPrev)->m_pNext = pCamera->m_pNext;
+				delete pCamera;
+				pCamera = ((Camera*)pPrev)->m_pNext;
+			}
+			else
+			{
+				m_pCameras = m_pCameras->m_pNext;
+				delete pCamera;
+				pCamera = m_pCameras;
+			}
+			
+			removed = true;
+
+			SystemUpdateCameraMenu(m_pCameras);
+			SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
+		}
+		else
+		{
+			pPrev = pCamera;
+			pCamera = pCamera->m_pNext;
 		}
 	}
 
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	for (pPrev = NULL, pLight = m_pLights; pLight; )
 	{
-/*
-		CLight* pLight = m_Lights.GetNext(pos1);
-		if (pLight->m_bSelected || pLight->m_bTargetSelected)
+		if (pLight->IsSelected())
 		{
-			CLight* tmp = m_Lights.GetAt(pos2);
-			m_Lights.RemoveAt(pos2);
-			delete tmp;
-			ret = TRUE;
+			if (pPrev)
+			{
+			  ((Light*)pPrev)->m_pNext = pLight->m_pNext;
+				delete pLight;
+				pLight = ((Light*)pPrev)->m_pNext;
+			}
+			else
+			{
+			  m_pLights = m_pLights->m_pNext;
+				delete pLight;
+				pLight = m_pLights;
+			}
+
+			removed = true;
 		}
-*/
+		else
+		{
+			pPrev = pLight;
+			pLight = pLight->m_pNext;
+		}
 	}
 
 	RemoveEmptyGroups();
@@ -6983,59 +7009,59 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       }
     } break;
 
-    case LC_ACTION_INSERT:
-    case LC_ACTION_LIGHT:
-    {
-      if (m_nCurAction == LC_ACTION_INSERT)
-      {
-        Piece* pPiece = new Piece(m_pCurPiece);
-        SnapPoint (m_fTrack, NULL);
-        pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+		case LC_ACTION_INSERT:
+		case LC_ACTION_LIGHT:
+		{
+			if (m_nCurAction == LC_ACTION_INSERT)
+			{
+				Piece* pPiece = new Piece(m_pCurPiece);
+				SnapPoint (m_fTrack, NULL);
+				pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
 
-        SelectAndFocusNone(false);
-        pPiece->CreateName(m_pPieces);
-        AddPiece(pPiece);
-        pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
-        pPiece->Select (true, true, false);
-        UpdateSelection();
-        SystemPieceComboAdd(m_pCurPiece->m_strDescription);
-        SystemUpdateFocus(pPiece);
+				SelectAndFocusNone(false);
+				pPiece->CreateName(m_pPieces);
+				AddPiece(pPiece);
+				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+				pPiece->Select (true, true, false);
+				UpdateSelection();
+				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+				SystemUpdateFocus(pPiece);
 
-        if (m_nSnap & LC_DRAW_MOVE)
-          SetAction(LC_ACTION_MOVE);
-      }
-      else if (m_nCurAction == LC_ACTION_LIGHT)
-      {
-        GLint max;
-        int count = 0;
-        Light *pLight;
+				if (m_nSnap & LC_DRAW_MOVE)
+					SetAction(LC_ACTION_MOVE);
+			}
+			else if (m_nCurAction == LC_ACTION_LIGHT)
+			{
+				GLint max;
+				int count = 0;
+				Light *pLight;
 
-        glGetIntegerv (GL_MAX_LIGHTS, &max);
-        for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-          count++;
+				glGetIntegerv (GL_MAX_LIGHTS, &max);
+				for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+					count++;
 
-        if (count == max)
-          break;
+				if (count == max)
+					break;
 
-        SnapPoint (m_fTrack, NULL);
-        pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
+				SnapPoint (m_fTrack, NULL);
+				pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 
-        SelectAndFocusNone (false);
+				SelectAndFocusNone (false);
 
-        //	pLight->CreateName (m_pPieces);
-        pLight->m_pNext = m_pLights;
-        m_pLights = pLight;
-        SystemUpdateFocus (pLight);
-        pLight->Select (true, true, false);
-        UpdateSelection ();
-      }
+				pLight->CreateName(m_pLights);
+				pLight->m_pNext = m_pLights;
+				m_pLights = pLight;
+				SystemUpdateFocus (pLight);
+				pLight->Select (true, true, false);
+				UpdateSelection ();
+			}
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
 			UpdateSelection();
 			UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
-    } break;
+		} break;
 
     case LC_ACTION_SPOTLIGHT:
     {

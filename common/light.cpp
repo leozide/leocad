@@ -147,6 +147,25 @@ Light::~Light ()
   delete m_pTarget;
 }
 
+void Light::CreateName(const Light* pLight)
+{
+	int i, max = 0;
+
+	for (; pLight; pLight = pLight->m_pNext)
+	{
+		if (strncmp (pLight->m_strName, "Light ", 6) == 0)
+		{
+			if (sscanf(pLight->m_strName + 6, " #%d", &i) == 1)
+			{
+				if (i > max)
+					max = i;
+			}
+		}
+	}
+
+	sprintf (m_strName, "Light #%.2d", max+1);
+}
+
 void Light::Select (bool bSelecting, bool bFocus, bool bMultiple)
 {
   if (bSelecting == true)

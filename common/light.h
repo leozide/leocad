@@ -57,10 +57,9 @@ class Light : public Object
   void Select (bool bSelecting, bool bFocus, bool bMultiple);
 
 
-
         void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
- public:
+public:
   Light* m_pNext;
 
   bool IsVisible()
@@ -94,6 +93,7 @@ class Light : public Object
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
   void Setup (int index);
+	void CreateName(const Light* pLight);
 
 protected:
   void Initialize ();

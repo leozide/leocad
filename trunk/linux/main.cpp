@@ -17,6 +17,7 @@
 #include "globals.h"
 #include "main.h"
 #include "system.h"
+#include "config.h"
 
 void create_main_menu (GtkObject *window, GtkWidget *vbox);
 
@@ -35,7 +36,7 @@ static gboolean   pieces_visible;
 static gint       pieces_width;
 
 static char app_path[PATH_MAX];
-static char lib_path[] = "/usr/local/share/leocad/";
+static char lib_path[] = LC_INSTALL_PREFIX"/share/leocad/";
 bool ignore_commands = false;
 
 static void update_window_layout ();

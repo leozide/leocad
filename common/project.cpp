@@ -3540,8 +3540,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			}
 		} break;
 
-                // FIXME: don't change the keys with ChangeKey()
-                // FIXME: even if pos == prevpos, the user might want to add a key
+		// FIXME: don't change the keys with ChangeKey()
+		// FIXME: even if pos == prevpos, the user might want to add a key
 
 		case LC_PIECE_MODIFIED:
 		{
@@ -3587,7 +3587,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 
 			SetModifiedFlag(true);
 			CheckPoint("Modifying");
-			UpdateAllViews ();
+			ActivateOverlay();
+			UpdateAllViews();
 		} break;
 
 		case LC_CAMERA_MODIFIED:

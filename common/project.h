@@ -60,6 +60,8 @@ public:
 		{ return m_bAnimation; }
 	unsigned short GetCurrentTime ()
 		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+	unsigned long GetSnapFlags() const
+		{ return m_nSnap; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const

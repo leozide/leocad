@@ -836,7 +836,7 @@ typedef struct
   bool from_htmldlg;
   GtkWidget *single, *multiple, *from, *to;
   GtkWidget *width, *height;
-  GtkWidget *bitmap, *gif, *jpg;
+  GtkWidget *bitmap, *gif, *jpg, *png;
   GtkWidget *highcolor, *transparent, *progressive, *quality;
 } LC_IMAGEOPTSDLG_STRUCT;
 
@@ -848,10 +848,12 @@ static void imageoptsdlg_ok(GtkWidget *widget, gpointer data)
 
   if ((GTK_TOGGLE_BUTTON (s->bitmap)->active))
     opts->imopts.format = LC_IMAGE_BMP;
-  if ((GTK_TOGGLE_BUTTON (s->gif)->active))
+  else if ((GTK_TOGGLE_BUTTON (s->gif)->active))
     opts->imopts.format = LC_IMAGE_GIF;
-  if ((GTK_TOGGLE_BUTTON (s->jpg)->active))
+  else if ((GTK_TOGGLE_BUTTON (s->jpg)->active))
     opts->imopts.format = LC_IMAGE_JPG;
+  else if ((GTK_TOGGLE_BUTTON (s->png)->active))
+    opts->imopts.format = LC_IMAGE_PNG;
   opts->imopts.transparent = (GTK_TOGGLE_BUTTON (s->transparent)->active) ? true : false;
   opts->imopts.interlaced = (GTK_TOGGLE_BUTTON (s->progressive)->active) ? true : false;
   opts->imopts.truecolor = (GTK_TOGGLE_BUTTON (s->highcolor)->active) ? true : false;
@@ -1079,6 +1081,12 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
   gtk_box_pack_start (GTK_BOX (hbox2), s.quality, FALSE, FALSE, 0);
   gtk_widget_set_usize (s.quality, 50, -2);
 
+  s.png = gtk_radio_button_new_with_label (radio_group2, "PNG");
+  radio_group2 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.png));
+  gtk_widget_show (s.png);
+  gtk_box_pack_start (GTK_BOX (vbox1), s.png, TRUE, TRUE, 0);
+
+
   switch (opts->imopts.format)
   {
     case LC_IMAGE_BMP:
@@ -1091,6 +1099,10 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
 
     case LC_IMAGE_JPG:
       gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.jpg), TRUE);
+    break;
+
+    case LC_IMAGE_PNG:
+      gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.png), TRUE);
     break;
   }
 

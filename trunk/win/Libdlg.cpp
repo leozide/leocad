@@ -276,9 +276,8 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_GROUP_INSERT:
 		{
-/*
 			HTREEITEM hti = m_Tree.GetSelectedItem();
-			
+
 			if (hti)
 			{
 				DWORD dw = m_Tree.GetItemData(hti);
@@ -286,42 +285,15 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 					dw = 1;
 				dw--;
 
-				CGroupDlg dlg(this);
-				if (dlg.DoModal() == IDOK)
-				{
-					CWaitCursor wc;
-					m_bModified = TRUE;
-						
-					for (i = m_nMaxGroups; i > (int)dw; i--)
-					{
-						strcpy (m_strGroups[i], m_strGroups[i-1]);
-						m_nBitmaps[i] = m_nBitmaps[i-1];
-					}
-					
-					strcpy (m_strGroups[i], dlg.m_strName);
-					m_nBitmaps[i] = 9;
-					
-					for (int j = 0; j < m_Parts.GetSize(); j++)
-					{
-						DWORD grp = m_Parts[j].group;
-						
-						for (i = m_nMaxGroups; i >= (int)dw; i--)
-						{
-							DWORD d = (1 << i);
-							if (grp & d)
-							{
-								grp &= ~d;
-								grp |= (1 << (i+1));
-							}
-						}
-						m_Parts[j].group = grp;
-					}
-					m_nMaxGroups++;
-					UpdateTree();
-					UpdateList();
-				}
+				m_Manager.HandleCommand (LC_LIBDLG_GROUP_INSERT, dw);
+
+				for (int i = m_Manager.GetGroupCount(); i > (int)dw; i--)
+					m_nBitmaps[i] = m_nBitmaps[i-1];
+				m_nBitmaps[i] = 9;
+
+				UpdateTree();
 			}
-*/
+
 			return TRUE;
 		}
 	
@@ -352,7 +324,6 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_GROUP_RENAME:
 		{
-/*
 			HTREEITEM hti = m_Tree.GetSelectedItem();
 
 			if (hti)
@@ -362,15 +333,10 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 					return TRUE;
 				dw--;
 
-				CGroupDlg dlg(this);
-				if (dlg.DoModal() == IDOK)
-				{
-					strcpy (m_strGroups[i], dlg.m_strName);
-					UpdateTree();
-					m_bModified = TRUE;
-				}
+				m_Manager.HandleCommand (LC_LIBDLG_GROUP_EDIT, dw);
+				UpdateTree();
 			}
-*/
+
 			return TRUE;
 		}
 

@@ -1129,13 +1129,15 @@ bool SystemDoDialog(int nMode, void* param)
 		{
 			LC_FILEOPENDLG_OPTS* opts = (LC_FILEOPENDLG_OPTS*)param;
 
+			if (strlen(opts->path))
+				_chdir(opts->path);
+
 			if (opts->type == LC_FILEOPENDLG_DAT)
 			{
 				CString filename;
 
-				// FIXME: Use the PLM window as parent.
 				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
-					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",AfxGetMainWnd());
+					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
 				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 32);
 		    dlg.m_ofn.nMaxFile = _MAX_PATH;
 
@@ -1180,12 +1182,51 @@ bool SystemDoDialog(int nMode, void* param)
 
 					return true;
 				}
+
+				return false;
 			}
 			else
 			{
-//				if (opts->type == LC_FILEOPENDLG_LGF
-//					LC_FILEOPENDLG_LUP
-				// Not Implemented yet.
+				const char *ext, *filter;
+
+				if (opts->type == LC_FILEOPENDLG_LGF)
+				{
+					ext = ".lgf\0";
+					filter = "LeoCAD Group Files (*.lgf)|*.lgf|All Files (*.*)|*.*||";
+				}
+				else
+				{
+					ext = ".lup\0";
+					filter = "LeoCAD Library Updates (*.lup)|*.lup|All Files (*.*)|*.*||";
+				}
+
+				CFileDialog dlg(TRUE, ext, NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, NULL);
+
+				if (dlg.DoModal() == IDOK)
+				{
+					opts->numfiles = 1;
+					opts->filenames = (char**)malloc(sizeof(char*));
+					opts->filenames[0] = (char*)malloc(LC_MAXPATH);
+					strcpy (opts->filenames[0], dlg.GetPathName ());
+
+					// Get the file path.
+					strcpy (opts->path, opts->filenames[0]);
+					if (strlen (opts->path) > 0)
+					{
+						char* ptr = strrchr(opts->path, '/');
+						if (ptr == NULL)
+							ptr = strrchr(opts->path, '\\');
+						if (ptr)
+						{
+							ptr++;
+							*ptr = 0;
+						}
+					}
+
+					return true;
+				}
+
+				return false;
 			}
 
 		} break;

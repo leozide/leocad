@@ -121,7 +121,7 @@ int openprojectdlg_execute (char* filename)
   int ret = LC_CANCEL, loop = 1, len;
 
   dlg = gtk_file_selection_new ("Open Project");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -214,7 +214,7 @@ int saveprojectdlg_execute (char* filename)
   int ret = LC_CANCEL, loop = 1;
 
   dlg = gtk_file_selection_new ("Save Project");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
@@ -278,7 +278,7 @@ int savepicturedlg_execute (void* param)
   opts->imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
   dlg = gtk_file_selection_new ("Save Picture");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (main_window));
+  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
                       GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",

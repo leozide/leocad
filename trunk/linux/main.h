@@ -1,7 +1,11 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-extern GtkWidget* main_window;
+// FIXME: clean up
+//extern GtkWidget* main_window;
+#include "mainwnd.h"
+#include "globals.h"
+
 extern GtkWidget* drawing_area;
 
 extern bool ignore_commands;
@@ -13,29 +17,30 @@ void OnCommandDirect(GtkWidget *w, gpointer data);
 #define ID_FILE_RECENT3            3
 #define ID_FILE_RECENT4            4
 #define ID_FILE_EXIT               5
-#define ID_VIEW_VIEWPORTS_01       6
-#define ID_VIEW_VIEWPORTS_02       7
-#define ID_VIEW_VIEWPORTS_03       8
-#define ID_VIEW_VIEWPORTS_04       9
-#define ID_VIEW_VIEWPORTS_05      10
-#define ID_VIEW_VIEWPORTS_06      11
-#define ID_VIEW_VIEWPORTS_07      12
-#define ID_VIEW_VIEWPORTS_08      13
-#define ID_VIEW_VIEWPORTS_09      14
-#define ID_VIEW_VIEWPORTS_10      15
-#define ID_VIEW_VIEWPORTS_11      16
-#define ID_VIEW_VIEWPORTS_12      17
-#define ID_VIEW_VIEWPORTS_13      18
-#define ID_VIEW_VIEWPORTS_14      19
-#define ID_VIEW_TOOLBAR_STANDARD  20
-#define ID_VIEW_TOOLBAR_DRAWING   21
-#define ID_VIEW_TOOLBAR_ANIMATION 22
-#define ID_VIEW_TOOLBAR_MODIFY    23
-#define ID_VIEW_TOOLBAR_PIECES    24
-#define ID_VIEW_TOOLBAR_FLOATING  25
-#define ID_VIEW_TOOLBAR_BOTH      26
-#define ID_VIEW_TOOLBAR_ICONS     27
-#define ID_VIEW_TOOLBAR_TEXT      28
+#define ID_VIEW_CREATE             6
+#define ID_VIEW_VIEWPORTS_01       7
+#define ID_VIEW_VIEWPORTS_02       8
+#define ID_VIEW_VIEWPORTS_03       9
+#define ID_VIEW_VIEWPORTS_04      10
+#define ID_VIEW_VIEWPORTS_05      11
+#define ID_VIEW_VIEWPORTS_06      12
+#define ID_VIEW_VIEWPORTS_07      13
+#define ID_VIEW_VIEWPORTS_08      14
+#define ID_VIEW_VIEWPORTS_09      15
+#define ID_VIEW_VIEWPORTS_10      16
+#define ID_VIEW_VIEWPORTS_11      17
+#define ID_VIEW_VIEWPORTS_12      18
+#define ID_VIEW_VIEWPORTS_13      19
+#define ID_VIEW_VIEWPORTS_14      20
+#define ID_VIEW_TOOLBAR_STANDARD  21
+#define ID_VIEW_TOOLBAR_DRAWING   22
+#define ID_VIEW_TOOLBAR_ANIMATION 23
+#define ID_VIEW_TOOLBAR_MODIFY    24
+#define ID_VIEW_TOOLBAR_PIECES    25
+#define ID_VIEW_TOOLBAR_FLOATING  26
+#define ID_VIEW_TOOLBAR_BOTH      27
+#define ID_VIEW_TOOLBAR_ICONS     28
+#define ID_VIEW_TOOLBAR_TEXT      29
 
 #define ID_CAMERA_FIRST        1001
 #define ID_CAMERA_LAST         1255

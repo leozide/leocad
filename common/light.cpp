@@ -55,6 +55,11 @@ void LightTarget::MinIntersectDist (LC_CLICKLINE* pLine)
   }
 }
 
+void LightTarget::Select (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  m_pParent->SelectTarget (bSelecting, bFocus, bMultiple);
+}
+
 // =============================================================================
 // Light class
 
@@ -140,6 +145,60 @@ Light::~Light ()
     glDeleteLists (m_nList, 1);
 
   delete m_pTarget;
+}
+
+void Light::Select (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  if (bSelecting == true)
+  {
+    if (bFocus == true)
+    {
+      m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED);
+
+      if (m_pTarget != NULL)
+        m_pTarget->Select (false, true, bMultiple);
+    }
+    else
+      m_nState |= LC_LIGHT_SELECTED;
+
+    if (bMultiple == false)
+      if (m_pTarget != NULL)
+        m_pTarget->Select (false, false, bMultiple);
+  }
+  else
+  {
+    if (bFocus == true)
+      m_nState &= ~(LC_LIGHT_FOCUSED);
+    else
+      m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED);
+  } 
+}
+
+void Light::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  // FIXME: the target should handle this
+
+  if (bSelecting == true)
+  {
+    if (bFocus == true)
+    {
+      m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED);
+
+      Select (false, true, bMultiple);
+    }
+    else
+      m_nState |= LC_LIGHT_TARGET_SELECTED;
+
+    if (bMultiple == false)
+      Select (false, false, bMultiple);
+  }
+  else
+  {
+    if (bFocus == true)
+      m_nState &= ~(LC_LIGHT_TARGET_FOCUSED);
+    else
+      m_nState &= ~(LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED);
+  } 
 }
 
 void Light::MinIntersectDist (LC_CLICKLINE* pLine)

@@ -31,6 +31,11 @@ class LightTarget : public Object
 
  public:
   void MinIntersectDist (LC_CLICKLINE* pLine);
+  void Select (bool bSelecting, bool bFocus, bool bMultiple);
+  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+    {
+      // FIXME: move the position handling to the light target
+    }
 
   Light* GetParent () const
     { return m_pParent; }
@@ -49,9 +54,11 @@ class Light : public Object
   Light (float px, float py, float pz, float tx, float ty, float tz);
   virtual ~Light ();
 
+  void Select (bool bSelecting, bool bFocus, bool bMultiple);
 
 
 
+        void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
  public:
   Light* m_pNext;
@@ -78,6 +85,9 @@ class Light : public Object
     { return m_strName; }
   void GetTargetPos (float *pos) const
     { memcpy (pos, m_fTarget, sizeof (float[3])); }
+  LightTarget* GetTarget () const
+    { return m_pTarget; }
+
 
   void Render (float fLineWidth);
   void MinIntersectDist (LC_CLICKLINE* Line);

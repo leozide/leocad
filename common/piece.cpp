@@ -292,7 +292,7 @@ bool Piece::FileLoad (File& file, char* name)
     if (version > 7)
     {
       file.ReadByte(&m_nState, 1);
-      UnSelect();
+      Select (false, false, false);
       file.ReadByte(&ch, 1);
       file.Read(m_strName, ch);
     }
@@ -394,6 +394,24 @@ void Piece::CreateName(Piece* pPiece)
 					max = i;
 
 	sprintf (m_strName, "%s #%.2d", m_pPieceInfo->m_strDescription, max+1);
+}
+
+void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
+{
+  if (bSelecting == true)
+  {
+    if (bFocus == true)
+      m_nState |= (LC_PIECE_FOCUSED|LC_PIECE_SELECTED);
+    else
+      m_nState |= LC_PIECE_SELECTED;
+  }
+  else
+  {
+    if (bFocus == true)
+      m_nState &= ~(LC_PIECE_FOCUSED);
+    else
+      m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
+  } 
 }
 
 void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine)

@@ -403,7 +403,7 @@ END_MESSAGE_MAP()
 void CPreferencesScene::OnBackgroundBrowse() 
 {
 	CFileDialog dlg(TRUE, NULL, m_strBackground, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-		"All Image Files|*.bmp;*.gif;*.jpg|JPEG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif|BMP Files (*.bmp)|*.bmp|All Files (*.*)|*.*||", this);
+		"All Image Files|*.bmp;*.gif;*.jpg;*.png|JPEG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif|BMP Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png|All Files (*.*)|*.*||", this);
 	if (dlg.DoModal() == IDOK)
 	{
 		UpdateData(TRUE);

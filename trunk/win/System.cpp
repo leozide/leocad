@@ -1105,7 +1105,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_PICTURE_SAVE:
 		{
 			CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE|OFN_EXPLORER,
-				"GIF Files (*.gif)|*.gif|JPEG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|Bitmap Files (*.bmp)|*.bmp|AVI Files (*.avi)|*.avi|All Files (*.*)|*.*||");
+				"GIF Files (*.gif)|*.gif|JPEG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|Bitmap Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png|AVI Files (*.avi)|*.avi|All Files (*.*)|*.*||");
 
 			DWORD dwImage = theApp.GetProfileInt ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
 			LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)param;

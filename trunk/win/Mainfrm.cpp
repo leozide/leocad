@@ -428,7 +428,7 @@ LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
 	m_wndModifyDlg.UpdateInfo((void*)lParam, (BYTE)wParam);
 
-	char str[32];
+	char str[128];
 	float pos[3];
 	project->GetFocusPosition(pos);
 	sprintf (str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);

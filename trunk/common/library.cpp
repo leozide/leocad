@@ -1402,10 +1402,11 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 	}
 
 	k = 0;
-	for (i = 0; i < 256; i++)
+	for (i = 16; i < 256; i++)
 	{
 		if (count[i][0] || count[i][1] || count[i][2])
 			k++;
+
 		if (i == 16) i = -1;
 		if (i == 15) i = 23;
 	}

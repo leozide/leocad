@@ -14,6 +14,8 @@
 #include "system.h"
 #include "camera.h"
 #include "view.h"
+#include "MainFrm.h"
+#include "PiecePrv.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -926,6 +928,32 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
 			nKey = nChar - VK_NUMPAD0 + 0x30;
 		} break;
+
+    // select the next/previous piece on the pieces list
+    case VK_HOME:
+    case VK_END:
+    {
+      CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd ();
+      CPiecesList& pList = pMain->m_wndPiecesBar.m_wndPiecesList;
+      LV_FINDINFO lvfi;
+      int sel;
+
+			lvfi.flags = LVFI_PARAM;
+			lvfi.lParam = (LPARAM)pMain->m_wndPiecesBar.m_wndPiecePreview.GetPieceInfo ();
+			sel = pList.FindItem (&lvfi);
+
+      if (sel != -1)
+      {
+        if (nChar == VK_HOME)
+          sel--;
+        else
+          sel++;
+
+  			pList.SetItemState (sel, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
+	  		pList.EnsureVisible (sel, FALSE);
+      }
+
+    } break;
 	}
 
 	project->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);

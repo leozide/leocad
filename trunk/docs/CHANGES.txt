@@ -1,5 +1,9 @@
 This is a changelog for developers only, not for ordinary users.
 
+21/02/2000
+  - New shortcuts: Home/End keys will change the Pieces List selection (win32).
+  - Fixed the creation and destruction of the MainWnd under win32.
+
 19/02/2000
   - The "Mouse moves in 3D" option now applies to rotations too.
 

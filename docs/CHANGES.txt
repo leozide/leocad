@@ -1,5 +1,8 @@
 This is a changelog for developers only, not for ordinary users.
 
+15/03/2001
+  - Fixed drawing area border not being drawn correctly.
+
 13/03/2001
   - Fixed texture font not visible on some video cards.
 

@@ -6,23 +6,23 @@
 #include <stdio.h>
 #include "opengl.h"
 #include "gtktools.h"
-#include "gtkglarea.h"
 #include "main.h"
 #include "globals.h" 
 #include "project.h"
 #include "pieceinf.h"
 #include "toolbar.h"
 #include "message.h"
+#include "preview.h"
 
 // =============================================================================
 // Variables
 
-GtkWidget *piecepreview;
 GtkWidget *piecelist;
 GtkWidget *pieceentry;
 GtkWidget *piecemenu;
 GtkWidget *colorlist;
 GtkWidget *grouptoolbar;
+PiecePreview *preview;
 
 TOOL_TOOLBAR tool_toolbar;
 MAIN_TOOLBAR main_toolbar;
@@ -250,58 +250,10 @@ static bool list_groups = true;
 static int  list_curgroup;
 static int  piecelist_col_sort = 0;
 static bool piecelist_ascending = true; 
-static PieceInfo* piece_info = NULL;
 static int cur_color = 0;
 static GdkPixmap* colorlist_pixmap = NULL;
 static GtkWidget* list_arrows[2];
 static GtkWidget* groups[9];
-
-// piece_preview drawing
-static gint draw_preview(GtkWidget *widget, GdkEventExpose *event)
-{
-  // Draw only last expose.
-  if (event->count > 0)
-    return TRUE;
-
-  if (piece_info == NULL)
-    return TRUE;
-
-  if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-    return TRUE;
-
-  glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glEnable(GL_POLYGON_OFFSET_FILL);
-  glPolygonOffset(0.5f, 0.1f);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
-  glDisable (GL_DITHER);
-  glShadeModel (GL_FLAT);
-
-  double aspect = (float)widget->allocation.width/(float)widget->allocation.height;
-  glViewport(0,0, widget->allocation.width, widget->allocation.height);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(30.0f, aspect, 1.0f, 100.0f);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  piece_info->ZoomExtents();
-
-  float pos[4] = { 0, 0, 10, 0 }, *bg = project->GetBackgroundColor();
-  glLightfv(GL_LIGHT0, GL_POSITION, pos);
-  glClearColor(bg[0], bg[1], bg[2], bg[3]);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  piece_info->RenderPiece(project->GetCurrentColor());
-
-  glFinish();
-  gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
-  gtk_gl_area_make_current(GTK_GL_AREA(drawing_area));
-
-  return TRUE;
-}
 
 // Called when the user clicked on the header of the piecelist
 static void piecelist_setsort (GtkCList* clist, gint column)
@@ -369,17 +321,7 @@ void groupsbar_set(int new_group)
 // Callback for the pieces list.
 static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButton *event, gpointer data)
 {
-  if (piece_info != NULL)
-    piece_info->DeRef();
-
-  piece_info = (PieceInfo*)gtk_clist_get_row_data(GTK_CLIST(piecelist), row);
-
-  if (piece_info != NULL)
-  {
-    piece_info->AddRef();
-    project->SetCurrentPiece(piece_info);
-    gtk_widget_draw(piecepreview, NULL);
-  }
+  preview->SetCurrentPiece ((PieceInfo*)gtk_clist_get_row_data (GTK_CLIST (piecelist), row));
 }
 
 static void piececombo_popup_position (GtkMenu *menu, gint *x, gint *y, gpointer data)
@@ -622,7 +564,7 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
     colorlist_draw_pixmap(widget);
     project->HandleNotify(LC_COLOR_CHANGED, x);
     gtk_widget_draw(widget, NULL);
-    gtk_widget_draw(piecepreview, NULL);
+    preview->Redraw ();
   }
   gtk_signal_emit_stop_by_name (GTK_OBJECT(widget), "key_press_event");
 
@@ -643,10 +585,10 @@ static gint colorlist_button_press(GtkWidget *widget, GdkEventButton *event)
       colorlist_draw_pixmap(widget);
       project->HandleNotify(LC_COLOR_CHANGED, x);
       gtk_widget_draw(widget, NULL);
-      gtk_widget_draw(piecepreview, NULL);
+      preview->Redraw ();
     }
   }
-  gtk_window_set_focus(GTK_WINDOW(main_window), widget);
+  gtk_window_set_focus(GTK_WINDOW(((GtkWidget*)(*main_window))), widget);
 
   return TRUE;
 }
@@ -658,12 +600,12 @@ void colorlist_set(int new_color)
     cur_color = new_color;
     colorlist_draw_pixmap(colorlist);
     gtk_widget_draw(colorlist, NULL);
-    gtk_widget_draw(piecepreview, NULL);
+    preview->Redraw ();
   }
 }
 
 // Create the pieces toolbar
-GtkWidget* create_piecebar (GtkWidget *window)
+GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 {
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   gchar *titles[2] = { "Description", "Number" };
@@ -683,14 +625,12 @@ GtkWidget* create_piecebar (GtkWidget *window)
   gtk_widget_show (vpan);
   gtk_box_pack_start (GTK_BOX (vbox1), vpan, TRUE, TRUE, 0);
 
-  piecepreview = GTK_WIDGET(gtk_gl_area_share_new(attrlist, GTK_GL_AREA(drawing_area)));
-  gtk_widget_set_events(GTK_WIDGET(piecepreview), GDK_EXPOSURE_MASK);
-  gtk_signal_connect(GTK_OBJECT(piecepreview), "expose_event",
-		     GTK_SIGNAL_FUNC(draw_preview), NULL);
-
-  gtk_widget_set_usize(GTK_WIDGET(piecepreview), 100, 100);
-  gtk_widget_show (piecepreview);
-  gtk_container_add (GTK_CONTAINER (vpan), piecepreview);
+  GtkWidget *w;
+  preview = new PiecePreview (share);
+  preview->Create (&w);
+  gtk_widget_set_usize (w, 100, 100);
+  gtk_widget_show (w);
+  gtk_container_add (GTK_CONTAINER (vpan), w);
 
   scroll_win = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scroll_win), 

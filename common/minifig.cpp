@@ -545,7 +545,7 @@ void MinifigWizard::ChangePiece (int type, const char *desc)
       if (strcmp (piece_info->m_strName,"3841") == 0)
 	{ z = 2.24f; y = -1.34f; rz = 180; }
       if (strcmp (piece_info->m_strName,"4499") == 0)
-	{ rz = ((type == LC_MFW_RIGHT_TOOL) ? 10 : -10); z = 1.52f; }
+	{ rz = ((type == LC_MFW_RIGHT_TOOL) ? 10.0f : -10.0f); z = 1.52f; }
       if (strcmp (piece_info->m_strName,"3852") == 0)
 	{ rz = -90; x = 0.90f; y = -0.8f; z = 1.84f; }
       if (strcmp (piece_info->m_strName,"30152") == 0)

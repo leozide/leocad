@@ -411,81 +411,83 @@ void PieceInfo::LoadInformation()
   // First we need to know the number of vertexes
   tmp = bytes;
   sh = m_nGroupCount;
-  lcuint32 quads = 0;
+  lcuint32 quads = 0, fixquads = 0;
   while (sh--)
   {
     bt = *bytes;
     bytes++;
     bytes += bt*sizeof(lcuint16);
 
-    while (*bytes)
-    {
+		while (*bytes)
+		{
       if (*bytes == LC_MESH)
       {
-	if (fixverts > 65535)
-	{
-	  lcuint32 colors, *p;
-	  p = (lcuint32*)(bytes + 1);
-	  colors = LCUINT32(*p);
-	  p++;
+				if ((fixverts > 65535) || (m_nFlags & LC_PIECE_LONGDATA))
+				{
+					lcuint32 colors, *p;
+					p = (lcuint32*)(bytes + 1);
+					colors = LCUINT32(*p);
+					p++;
 
-	  while (colors--)
-	  {
-	    p++; // color code
-	    quads += LCUINT32(*p);
-	    p += LCUINT32(*p) + 1;
-	    p += LCUINT32(*p) + 1;
-	    p += LCUINT32(*p) + 1;
-	  }
+					while (colors--)
+					{
+						p++; // color code
+						quads += LCUINT32(*p);
+						fixquads += LCUINT32(*p);
+						p += LCUINT32(*p) + 1;
+						p += LCUINT32(*p) + 1;
+						p += LCUINT32(*p) + 1;
+					}
 
-	  bytes = (unsigned char*)p;
-	}
-	else
-	{
-	  lcuint16 colors, *p;
-	  p = (lcuint16*)(bytes + 1);
-	  colors = LCUINT16(*p);
-	  p++;
+					bytes = (unsigned char*)p;
+				}
+				else
+				{
+					lcuint16 colors, *p;
+					p = (lcuint16*)(bytes + 1);
+					colors = LCUINT16(*p);
+					p++;
 
-	  while (colors--)
-	  {
-	    p++; // color code
-	    quads += LCUINT16(*p);
-	    p += LCUINT16(*p) + 1;
-	    p += LCUINT16(*p) + 1;
-	    p += LCUINT16(*p) + 1;
-	  }
+					while (colors--)
+					{
+						p++; // color code
+						quads += LCUINT16(*p);
+						fixquads += LCUINT32(*p);
+						p += LCUINT16(*p) + 1;
+						p += LCUINT16(*p) + 1;
+						p += LCUINT16(*p) + 1;
+					}
 
-	  bytes = (unsigned char*)p;
-	}
+					bytes = (unsigned char*)p;
+				}
       }
 
       if (*bytes == LC_STUD)
       {
-	verts += (2*SIDES)+1;
-	quads += 4*SIDES;
-	bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				verts += (2*SIDES)+1;
+				quads += 4*SIDES;
+				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
       }
 
       if (*bytes == LC_STUD2)
       {
-	verts += 4*SIDES;
-	quads += 12*SIDES;
-	bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				verts += 4*SIDES;
+				quads += 12*SIDES;
+				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
       }
 
       if (*bytes == LC_STUD3)
       {
-	verts += (2*SIDES)+1;
-	quads += 4*SIDES;
-	bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				verts += (2*SIDES)+1;
+				quads += 4*SIDES;
+				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
       }
 
       if (*bytes == LC_STUD4)
       {
-	verts += 4*SIDES;
-	quads += 12*SIDES;
-	bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				verts += 4*SIDES;
+				quads += 12*SIDES;
+				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
       }
     }
     bytes++; // should be 0
@@ -493,7 +495,7 @@ void PieceInfo::LoadInformation()
 
   m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
   m_nVertexCount = verts;
-  if ((verts > 65535) || (quads > 65535))
+  if ((verts > 65535) || (quads > 65535) || (fixquads > 65535))
     m_nFlags |= LC_PIECE_LONGDATA;
   else
     m_nFlags &= ~LC_PIECE_LONGDATA;
@@ -531,84 +533,84 @@ void PieceInfo::LoadInformation()
     switch (*bytes)
     {
     case LC_MESH:
-      if (fixverts > 65535)
+      if ((fixverts > 65535) || (fixquads > 65535))
       {
-	lcuint32 colors, *p;
-	bytes++;
-	p = (lcuint32*)bytes;
+				lcuint32 colors, *p;
+				bytes++;
+				p = (lcuint32*)bytes;
         *p = LCUINT32(*p);
-	colors = *p;
-	p++;
+				colors = *p;
+				p++;
 
-	while (colors--)
-	{
-	  *p = ConvertColor(LCUINT32(*p));
-	  p++; // color code
+				while (colors--)
+				{
+					*p = ConvertColor(LCUINT32(*p));
+					p++; // color code
 #ifdef LC_BIG_ENDIAN
-	  int f;
-	  f = LCUINT32(*p) + 1;
-	  while (f--) { *p = LCUINT32(*p); p++; };
-	  f = LCUINT32(*p) + 1;
-	  while (f--) { *p = LCUINT32(*p); p++; };
-	  f = LCUINT32(*p) + 1;
-	  while (f--) { *p = LCUINT32(*p); p++; };
+					int f;
+					f = LCUINT32(*p) + 1;
+					while (f--) { *p = LCUINT32(*p); p++; };
+					f = LCUINT32(*p) + 1;
+					while (f--) { *p = LCUINT32(*p); p++; };
+					f = LCUINT32(*p) + 1;
+					while (f--) { *p = LCUINT32(*p); p++; };
 #else
-	  p += LCUINT32(*p) + 1;
-	  p += LCUINT32(*p) + 1;
-	  p += LCUINT32(*p) + 1;
+					p += LCUINT32(*p) + 1;
+					p += LCUINT32(*p) + 1;
+					p += LCUINT32(*p) + 1;
 #endif
-	}
+				}
 
-	i = (unsigned char*)p - bytes;
-	pGroup->drawinfo = malloc(i);
-	memcpy(pGroup->drawinfo, bytes, i);
-	bytes = (unsigned char*)p;
+				i = (unsigned char*)p - bytes;
+				pGroup->drawinfo = malloc(i);
+				memcpy(pGroup->drawinfo, bytes, i);
+				bytes = (unsigned char*)p;
       }
       else
       {
-	lcuint16 colors, *p;
-	bytes++;
-	p = (lcuint16*)bytes;
-	*p = LCUINT16(*p);
-	colors = *p;
-	p++;
+				lcuint16 colors, *p;
+				bytes++;
+				p = (lcuint16*)bytes;
+				*p = LCUINT16(*p);
+				colors = *p;
+				p++;
 
-	while (colors--)
-	{
-	  *p = ConvertColor(LCUINT16(*p));
-	  p++; // color code
+				while (colors--)
+				{
+					*p = ConvertColor(LCUINT16(*p));
+					p++; // color code
 #ifdef LC_BIG_ENDIAN
-	  int f;
-	  f = LCUINT16(*p) + 1;
-	  while (f--) { *p = LCUINT16(*p); p++; };
-	  f = LCUINT16(*p) + 1;
-	  while (f--) { *p = LCUINT16(*p); p++; };
-	  f = LCUINT16(*p) + 1;
-	  while (f--) { *p = LCUINT16(*p); p++; };
+					int f;
+					f = LCUINT16(*p) + 1;
+					while (f--) { *p = LCUINT16(*p); p++; };
+					f = LCUINT16(*p) + 1;
+					while (f--) { *p = LCUINT16(*p); p++; };
+					f = LCUINT16(*p) + 1;
+					while (f--) { *p = LCUINT16(*p); p++; };
 #else
-	  p += *p + 1;
-	  p += *p + 1;
-	  p += *p + 1;
+					p += *p + 1;
+					p += *p + 1;
+					p += *p + 1;
 #endif
-	}
+				}
 
-	i = (unsigned char*)p - bytes;
+				i = (unsigned char*)p - bytes;
 
-	if (m_nFlags & LC_PIECE_LONGDATA)
-	{
-	  pGroup->drawinfo = malloc(i*sizeof(lcuint32)/sizeof(lcuint16));
-	  longs = (lcuint32*)pGroup->drawinfo;
+				if (m_nFlags & LC_PIECE_LONGDATA)
+				{
+					pGroup->drawinfo = malloc(i*sizeof(lcuint32)/sizeof(lcuint16));
+					longs = (lcuint32*)pGroup->drawinfo;
 
-	  for (ushorts = (lcuint16*)bytes; ushorts != p; ushorts++, longs++)
-	    *longs = *ushorts;//LCUINT16(*ushorts);
-	}
-	else
-	{
-	  pGroup->drawinfo = malloc(i);
-	  memcpy(pGroup->drawinfo, bytes, i);
-	}
+					for (ushorts = (lcuint16*)bytes; ushorts != p; ushorts++, longs++)
+						*longs = *ushorts;//LCUINT16(*ushorts);
+				}
+				else
+				{
+					pGroup->drawinfo = malloc(i);
+					memcpy(pGroup->drawinfo, bytes, i);
+				}
 
-	bytes = (unsigned char*)p;
+				bytes = (unsigned char*)p;
       }
       break;
 

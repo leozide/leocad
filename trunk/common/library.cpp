@@ -2346,9 +2346,17 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 	}
 	newidx.WriteShort(sb, 6);
 
-	bt = 0x01; // LC_PIECE_COUNT
-	if (scale == 10000) bt |= 0x10; // LC_PIECE_SMALL
-	if (scale == 1000) bt |= 0x20; // LC_PIECE_MEDIUM
+	// Calculate flags.
+	bt = LC_PIECE_COUNT;
+
+	if (scale == 10000)
+		bt |= LC_PIECE_SMALL;
+	else if (scale == 1000)
+		bt |= LC_PIECE_MEDIUM;
+
+	if (piece->long_info)
+		bt |= LC_PIECE_LONGDATA;
+
 	newidx.WriteByte(&bt, 1);
 
 	i = PiecesLibrary::GetDefaultPieceGroup(piece->description);

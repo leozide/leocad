@@ -5,6 +5,8 @@
 #ifndef _BOUNDBOX_H_
 #define _BOUNDBOX_H_
 
+bool BoxOutsideFrustum (float Dimensions[6]);
+
 class Matrix;
 class BoundingBox;
 

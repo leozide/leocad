@@ -19,9 +19,11 @@
 static LC_MFW_PIECEINFO mfw_pieceinfo[] = {
   { "2446", "Helmet", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3624", "Police Hat", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3629", "Cowboy Hat", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3833", "Construction Helmet", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3834", "Fire Helmet", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3844", "Castle Helmet with Neck Protect", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
+  { "3878", "Top Hat", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3896", "Castle Helmet with Chin-Guard", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "4485", "Baseball Cap", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "6131", "Wizard Hat", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
@@ -31,6 +33,7 @@ static LC_MFW_PIECEINFO mfw_pieceinfo[] = {
   { "3626BP03", "Pointed Moustache", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3626BP04", "Sunglasses", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "3626BP05", "Grin and Eyebrows", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f }, 
+  { "3626BP63", "Silver Robot", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "82359", "Skeleton Skull", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
   { "973", "Plain Torso", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P01", "Vertical Strips Red/Blue", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
@@ -47,13 +50,22 @@ static LC_MFW_PIECEINFO mfw_pieceinfo[] = {
   { "973P22", "Red Shirt and Suit", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P23", "'S' Logo Yellow / Blue Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P24", "Red Cross Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-  { "973P25", "Red Cross & Stethoscope Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P25", "Red Cross & Stethoscope", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P26", "Patch Pocket", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P27", "Autoroute Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P28", "Leather Jacket", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P31", "Pirate Strips (Red/Cream)", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P32", "Pirate Strips (Blue/Cream)", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P33", "Pirate Strips (Red/Black)", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P34", "Open Jacket over Striped Vest", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P35", "Imperial Guard", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P36", "Pirate Captain", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P37", "Imperial Guard Officer", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P41", "Castle Chainmail", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-  { "973P42", "Castle Crossed Pikes Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P42", "Castle Crossed Pikes", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P43", "Black Falcon Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P44", "Wolfman Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P45", "Studded Armor", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P46", "Forestman and Purse", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P47", "Castle Red/Gray Symbol", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
   { "973P48", "Forestman Maroon Collar", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
@@ -62,28 +74,39 @@ static LC_MFW_PIECEINFO mfw_pieceinfo[] = {
   { "973P51", "Blacktron II", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P52", "Blacktron I Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P60", "Shell Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-  { "973P61", "Gold Ice Planet Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P61", "Gold Ice Planet", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P62", "Silver Ice Planet", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P63", "Robot Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P64", "Unitron Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P65", "Futuron Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-  { "973P68", "Mtron Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
+  { "973P66", "Spyrius Pattern", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
+  { "973P68", "Mtron Logo", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "973P101", "SW Rebel Pilot", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "2524", "Backpack Non-Opening", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
   { "3838", "Airtanks", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
   { "3840", "Vest", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
   { "4498", "Arrow Quiver", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 180.0f },
+  { "4523", "D-Basket", LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
   { "4524", "Cape", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
   { "4736", "Jet-Pack with Stud On Front", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
+  { "30091", "Scuba Tank", LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
   { "976", "Left Arm", LC_MFW_LEFT_ARM, 0.0f, 0.0f, 2.56f, 0.0f, 0.0f, 0.0f },
   { "975", "Right Arm", LC_MFW_RIGHT_ARM, 0.0f, 0.0f, 2.56f, 0.0f, 0.0f, 0.0f },
   { "977", "Hand", LC_MFW_LEFT_HAND, 0.9f, -0.62f, 1.76f, 45.0f, 0.0f, 90.0f },
   { "37", "Knife", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.58f, 45.0f, 0.0f, 0.0f },
   { "38", "Harpoon", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.0f, 45.0f, 0.0f, 0.0f },
+  { "59", "Greatsword", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
   { "194", "Hose Nozzle", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.22f, 45.0f, 0.0f, 180.0f },
+  { "2530", "Cutlass", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
+  { "2561", "Musket", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.34f, 45.0f, 0.0f, 0.0f },
+  { "2562", "Flintlock Pistol", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
   { "2570", "Crossbow", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.82f, 45.0f, 0.0f, 0.0f },
   { "2614", "Fishing Rod", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.74f, 45.0f, 0.0f, 0.0f },
   { "3841", "Pickaxe", LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.24f, 45.0f, 0.0f, 180.0f },
+  { "3846", "Shield", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
+  { "3846P43", "Shield Black Falcon", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
+  { "3846P44", "Shield Wolfpack", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
+  { "3846P47", "Shield Red/Gray", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
   { "3852", "Hairbrush", LC_MFW_LEFT_TOOL, 0.82f, -0.64f, 1.98f, 45.0f, 0.0f, -90.0f },
   { "3899", "Cup", LC_MFW_LEFT_TOOL, -0.06f, -0.62f, 2.16f, 45.0f, 0.0f, 0.0f },
   { "3959", "Space Gun", LC_MFW_LEFT_TOOL, 0.74f, -0.62f, 2.1f, 45.0f, 0.0f, 0.0f },
@@ -102,17 +125,29 @@ static LC_MFW_PIECEINFO mfw_pieceinfo[] = {
   { "6246D", "Box Wrench", LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
   { "6246E", "Open End Wrench", LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
   { "6246C", "Power Drill", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.96f, 45.0f, 0.0f, 0.0f },
+  { "30132", "Revolver", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
+  { "30141", "Rifle", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, -10.0f },
   { "30152", "Magnifying Glass", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 3.76f, 45.0f, 0.0f, 0.0f },
+  { "30173", "Katana", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
   { "970", "Hips", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
   { "970P63", "Hips with Robot Pattern", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
+  { "773", "Wooden Leg", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
   { "972", "Left Leg", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f }, 
   { "972P63", "Left Leg with Robot Pattern", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
   { "971", "Right Leg", LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
   { "971P63", "Right Leg with Robot Pattern", LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
   { "2599", "Flipper", LC_MFW_LEFT_SHOE, 0.42f, -0.12f, 0.0f, 0.0f, 0.0f, 0.0f },
   { "6120", "Ski", LC_MFW_LEFT_SHOE, 0.42f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
-//	{ "770", "Shield Ovoid", LC_MFW_LEFT_TOOL },
-//	2447      Minifig Helmet Visor
+//  2447       Minifig Helmet Visor
+//  30090      Minifig Diver Mask
+//  { "770", "Shield Ovoid", LC_MFW_LEFT_TOOL },
+//  { "30362", "Robot Leg", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
+/*
+22       7  30304      Binoculars Space
+25       4  30162      Binoculars Town
+22   1   5  2542       Oar
+22   2   5  3836       Pushbroom
+*/
 };
 
 static int mfw_pieces = sizeof (mfw_pieceinfo)/sizeof (LC_MFW_PIECEINFO);
@@ -276,7 +311,6 @@ void MinifigWizard::Calculate ()
   for (int type = 0; type < LC_MFW_NUMITEMS; type++)
   {
     PieceInfo* piece_info = m_Info[type];
-    const char *desc;
     int j;
 
     if (piece_info == NULL)
@@ -292,7 +326,6 @@ void MinifigWizard::Calculate ()
     rot[type][0] = mfw_pieceinfo[j].rx;
     rot[type][1] = mfw_pieceinfo[j].ry;
     rot[type][2] = mfw_pieceinfo[j].rz;
-    desc = mfw_pieceinfo[j].description;
 
     switch (type)
     {
@@ -308,9 +341,17 @@ void MinifigWizard::Calculate ()
       break;
 
     case LC_MFW_RIGHT_TOOL:
-      if (strcmp (piece_info->m_strName, "4499") == 0) // Bow with Arrow
+      if ((strcmp (piece_info->m_strName, "4499") == 0) || // Bow with Arrow
+	  (strcmp (piece_info->m_strName, "30141") == 0))  // Rifle
 	rot[type][2] = -rot[type][2];
       break;
+
+    case LC_MFW_LEFT_LEG:
+      if (strcmp (piece_info->m_strName, "773") == 0) // Wooden Leg
+      {
+	rot[type][2] += 180;//= -pos[type][0];
+	//pos[type][0] += 0.8f;
+      }
     }
   }
 
@@ -496,22 +537,28 @@ void MinifigWizard::Calculate ()
   m_Rotation[LC_MFW_HIPS][3] = 0.0f;
 
   // left leg/shoe
-  mat.LoadIdentity ();
-  mat.Rotate (m_Angles[LC_MFW_LEFT_LEG], -1, 0, 0);
-  mat.SetTranslation (pos[LC_MFW_LEFT_LEG][0], pos[LC_MFW_LEFT_LEG][1],
-		      pos[LC_MFW_LEFT_LEG][2]);
-  mat.ToAxisAngle (m_Rotation[LC_MFW_LEFT_LEG]);
-  mat.GetTranslation (m_Position[LC_MFW_LEFT_LEG]);
-  mat.Translate (pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
-		 pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
-		 pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
-  m2.CreateOld (0,0,0,rot[LC_MFW_LEFT_SHOE][0],rot[LC_MFW_LEFT_SHOE][1],rot[LC_MFW_LEFT_SHOE][2]);
-  m3.Multiply (mat, m2);
-  mat.LoadIdentity ();
-  mat.Rotate (m_Angles[LC_MFW_LEFT_SHOE], 0, 0, 1);
+  mat.CreateOld (0,0,0,rot[LC_MFW_LEFT_LEG][0],rot[LC_MFW_LEFT_LEG][1],rot[LC_MFW_LEFT_LEG][2]);
+  m2.LoadIdentity ();
+  m2.Rotate (m_Angles[LC_MFW_LEFT_LEG], -1, 0, 0);
+  m2.SetTranslation (pos[LC_MFW_LEFT_LEG][0], pos[LC_MFW_LEFT_LEG][1],
+		     pos[LC_MFW_LEFT_LEG][2]);
+  m3.Multiply (m2, mat);
+  m3.ToAxisAngle (m_Rotation[LC_MFW_LEFT_LEG]);
+  m3.GetTranslation (m_Position[LC_MFW_LEFT_LEG]);
+  m3.Translate (pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
+		pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
+		pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
+  if (strcmp (m_Info[LC_MFW_LEFT_LEG]->m_strName, "773") == 0)
+    m3.Translate (-0.8f, 0, 0);
+  mat.CreateOld (0,0,0,rot[LC_MFW_LEFT_SHOE][0]-rot[LC_MFW_LEFT_LEG][0],
+		 rot[LC_MFW_LEFT_SHOE][1]-rot[LC_MFW_LEFT_LEG][1],
+		 rot[LC_MFW_LEFT_SHOE][2]-rot[LC_MFW_LEFT_LEG][2]);
   m2.Multiply (m3, mat);
-  m2.ToAxisAngle (m_Rotation[LC_MFW_LEFT_SHOE]);
-  m2.GetTranslation (m_Position[LC_MFW_LEFT_SHOE]);
+  m3.LoadIdentity ();
+  m3.Rotate (m_Angles[LC_MFW_LEFT_SHOE], 0, 0, 1);
+  mat.Multiply (m2, m3);
+  mat.ToAxisAngle (m_Rotation[LC_MFW_LEFT_SHOE]);
+  mat.GetTranslation (m_Position[LC_MFW_LEFT_SHOE]);
 
   // right leg/shoe
   mat.LoadIdentity ();
@@ -578,7 +625,6 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
     case LC_MFW_RIGHT_ARM:
     case LC_MFW_HIPS:
     case LC_MFW_LEFT_LEG:
-    case LC_MFW_RIGHT_LEG:
     case LC_MFW_LEFT_HAND:
     case LC_MFW_LEFT_TOOL:
     case LC_MFW_LEFT_SHOE:
@@ -593,6 +639,13 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
 
     case LC_MFW_RIGHT_TOOL:
       if (mfw_pieceinfo[i].type != LC_MFW_LEFT_TOOL)
+	continue;
+      break;
+
+    case LC_MFW_RIGHT_LEG:
+      if ((mfw_pieceinfo[i].type != LC_MFW_RIGHT_LEG) &&
+	  ((mfw_pieceinfo[i].type != LC_MFW_LEFT_LEG) ||
+	   (strcmp (mfw_pieceinfo[i].name, "773") != 0))) // Wooden Leg
 	continue;
       break;
 
@@ -760,7 +813,7 @@ bool MinifigWizard::LoadMinifig (const char* name)
   }
 
   for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    m_Angles[j] = strtod (ptr, &ptr);
+    m_Angles[j] = (float)strtod (ptr, &ptr);
 
   return true;
 }

@@ -155,7 +155,7 @@ bool GLWindow::Create (void *data)
   // choose visual
   visual = gdk_visual_get_system ();
   if (visual->depth < 16)
-    printf ("OpenGL fatal error: GtkRadiant needs a display with at least 16 bit colors.\n");
+    printf ("OpenGL fatal error: LeoCAD needs a display with at least 16 bit colors.\n");
 
   if (dpy == NULL)
   {

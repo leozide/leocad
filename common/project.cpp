@@ -1478,6 +1478,7 @@ bool Project::OnNewDocument()
 	SetTitle("Untitled");
 	DeleteContents(false);
 	memset(m_strPathName, 0, sizeof(m_strPathName)); // no path name yet
+	strcpy(m_strAuthor, Sys_ProfileLoadString ("Default", "User", ""));
 	SetModifiedFlag(false); // make clean
 	LoadDefaults(true);
 	CheckPoint("");
@@ -5031,6 +5032,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			LC_PREFERENCESDLG_OPTS opts;
 			opts.nMouse = m_nMouse;
 			opts.nSaveInterval = m_nAutosave;
+			strcpy(opts.strUser, Sys_ProfileLoadString ("Default", "User", ""));
 			strcpy(opts.strPath, m_strModelsPath);
 			opts.nDetail = m_nDetail;
 			opts.fLineWidth = m_fLineWidth;
@@ -5053,6 +5055,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				m_nMouse = opts.nMouse;
 				m_nAutosave = opts.nSaveInterval;
 				strcpy(m_strModelsPath, opts.strPath);
+				Sys_ProfileSaveString ("Default", "User", opts.strUser);
 				m_nDetail = opts.nDetail;
 				m_fLineWidth = opts.fLineWidth;
 				m_nSnap = opts.nSnap;
@@ -5070,11 +5073,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				strcpy(m_strHeader, opts.strHeader);
 				SystemUpdateSnap(m_nSnap);
 
-                                for (int i = 0; i < m_ViewList.GetSize (); i++)
-                                {
-                                  m_ViewList[i]->MakeCurrent ();
-                                  RenderInitialize();
-                                }
+				for (int i = 0; i < m_ViewList.GetSize (); i++)
+				{
+					m_ViewList[i]->MakeCurrent ();
+					RenderInitialize();
+				}
+
 				UpdateAllViews();
 			}
 		} break;

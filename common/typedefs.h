@@ -283,6 +283,7 @@ typedef struct
 {
 	int nMouse;
 	int nSaveInterval;
+	char strUser[101];
 	char strPath[LC_MAXPATH];
 	unsigned long nDetail;
 	float fLineWidth;

@@ -220,10 +220,11 @@ void Matrix::Rotate (float angle, float x, float y, float z)
   rotation_matrix(angle, x, y, z, rm);
   matmul(rm, rm, m);
   memcpy (&m[0], &rm[0], sizeof(rm));
-
+/*
   for (int i = 0; i < 12; i++)
     if (fabs (m[i]) < .001f)
       m[i] = 0;
+*/
 }
 
 void Matrix::RotateCenter (float angle, float x, float y, float z, float px, float py, float pz)

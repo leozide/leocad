@@ -2,17 +2,17 @@
 #
 include version.mk
 
-CC		:= gcc
-CXX		:= g++
+CC	:= gcc
+CXX	:= g++
 
-ifeq ($(shell uname), linux)
-OS 		:= -DLC_LINUX
+ifeq ($(shell uname), Linux)
+OS 	:= -DLC_LINUX
 OSDIR 	:= linux
 
 else
 
 ifeq ($(shell uname), BeOS)
-OS 		:= -DLC_BEOS
+OS 	:= -DLC_BEOS
 OSDIR 	:= beos
 endif
 

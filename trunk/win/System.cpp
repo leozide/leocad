@@ -46,22 +46,6 @@ static void ShowLastError()
 	LocalFree( lpMsgBuf );
 }
 
-/*
-typedef void (APIENTRY * GLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
-typedef void (APIENTRY * GLUNLOCKARRAYSEXTPROC) ();
-
-// Compiled vertex array function pointers.
-static GLLOCKARRAYSEXTPROC glLockArraysEXT;
-static GLUNLOCKARRAYSEXTPROC glUnlockArraysEXT;
-
-char* extensions = (char*)glGetString(GL_EXTENSIONS);
-if (strstr(extensions, "GL_EXT_compiled_vertex_array") != NULL)
-{
-	glLockArraysEXT = (GLLOCKARRAYSEXTPROC)wglGetProcAddress("glLockArraysEXT");
-	glUnlockArraysEXT = (GLUNLOCKARRAYSEXTPROC)wglGetProcAddress("glUnlockArraysEXT");
-}
-*/
-
 static CMenu* GetMainMenu(int nIndex)
 {
 	CWnd* pFrame = AfxGetMainWnd();
@@ -1607,4 +1591,9 @@ File* SystemImportClipboard()
 //		AfxMessageBox(IDS_CANNOT_OPEN_CLIPBOARD);
 
 	return clip;
+}
+
+bool Sys_KeyDown (int key)
+{
+  return GetKeyState (KEY_CONTROL) < 0;
 }

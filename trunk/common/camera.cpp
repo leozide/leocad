@@ -317,7 +317,8 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
 
 Camera::~Camera()
 {
-  RemoveKeys();
+  RemoveKeys ();
+  delete m_pTarget;
 }
 
 void Camera::Initialize()
@@ -593,7 +594,7 @@ void Camera::ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, flo
   newpos->param[2] = param[2];
 }
 
-void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
   if (IsSide())
   {
@@ -916,7 +917,6 @@ void Camera::MinIntersectDist(LC_CLICKLINE* pLine)
     return;
 
   dist = BoundingBoxIntersectDist (pLine);
-
   if (dist < pLine->mindist)
   {
     pLine->mindist = dist;

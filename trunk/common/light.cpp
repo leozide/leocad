@@ -10,8 +10,6 @@
 Light::Light()
   : Object (LC_OBJECT_LIGHT)
 {
-  //	m_BoundingBox.Initialize(this, LC_LIGHT);
-  //	m_TargetBoundingBox.Initialize(this, LC_LIGHT_TARGET);
 	m_pNext = NULL;
 	m_nState = 0;
 }

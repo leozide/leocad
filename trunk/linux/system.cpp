@@ -3,6 +3,7 @@
 #include <string.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
+#include <X11/keysym.h>
 #include "opengl.h"
 #include "gdkgl.h"
 #include "gtkglarea.h"
@@ -18,21 +19,21 @@
 // =============================================================================
 // Cursor functions
 
-/*
 void Sys_BeginWait ()
 {
   GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-  gdk_window_set_cursor (g_pParentWnd->m_pWidget->window, cursor);
+  gdk_window_set_cursor (main_window->window, cursor);
   gdk_cursor_destroy (cursor);
 }
 
 void Sys_EndWait ()
 {
   GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
-  gdk_window_set_cursor (g_pParentWnd->m_pWidget->window, cursor);
+  gdk_window_set_cursor (main_window->window, cursor);
   gdk_cursor_destroy (cursor);
 }
 
+/*
 void Sys_GetCursorPos (int *x, int *y)
 {
   gdk_window_get_pointer (NULL, x, y, NULL);
@@ -242,8 +243,27 @@ void Sys_FinishMemoryRender(void* param)
   free(render);
 }
 
+// =============================================================================
+// Misc stuff
 
+// FIXME: should have a table of LC_KEY_* defined
+bool Sys_KeyDown (int key)
+{
+  char keys[32];
+  int x;
 
+  XQueryKeymap (GDK_DISPLAY (), keys);
+
+  x = XKeysymToKeycode (GDK_DISPLAY (), XK_Control_L);
+  if (keys[x/8] & (1 << (x % 8)))
+    return true;
+
+  x = XKeysymToKeycode (GDK_DISPLAY (), XK_Control_R);
+  if (keys[x/8] & (1 << (x % 8)))
+    return true;
+
+  return false;
+}
 
 
 

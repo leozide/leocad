@@ -11,6 +11,3 @@ extern unsigned char FlatColorArray[31][3];
 extern unsigned char ColorArray[31][4];
 extern const char* colornames[LC_MAXCOLORS];
 extern const char* altcolornames[LC_MAXCOLORS];
-
-extern int MFW_PIECES;
-extern MFW_PIECEINFO mfwpieceinfo[];

@@ -24,7 +24,8 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox);
 GtkWidget *main_window;
 GtkWidget *drawing_area;
 
-static char default_path[PATH_MAX];
+static char app_path[PATH_MAX];
+static char lib_path[] = "/usr/local/share/leocad/";
 bool ignore_commands = false;
 
 void init_paths (char *argv0)
@@ -89,10 +90,10 @@ void init_paths (char *argv0)
     } while (*last && !found);
   }
   else
-    argv0 = strrchr(argv0, '/')+1;
+    argv0 = strrchr (argv0, '/') + 1;
 
-  if (realpath (temppath, default_path))
-    *(strrchr (default_path, '/')) = '\0';
+  if (realpath (temppath, app_path))
+    *(strrchr (app_path, '/') + 1) = '\0';
 }
 
 // Functions
@@ -495,12 +496,7 @@ int main(int argc, char* argv[])
 
   gtk_widget_show(GTK_WIDGET(main_window));
 
-  char* path;
-  path = getenv("LEOCAD_LIB");
-  if (path == NULL)
-    path = default_path;
-
-  if (project->Initialize(argc, argv, path) == false)
+  if (project->Initialize (argc, argv, app_path, lib_path) == false)
   {
     delete project;
     //    return 1;

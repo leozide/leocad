@@ -12,8 +12,239 @@
 #include "system.h"
 #include "file.h"
 #include "library.h"
+#include "pieceinf.h"
 
-// ========================================================
+// =============================================================================
+// LibraryDialog class
+
+static const char ver_str[32] = "LeoCAD Group Configuration File";
+static const float ver_flt = 0.3f;
+
+LibraryDialog::LibraryDialog ()
+{
+  m_nPieces = 0;
+  m_pPieces = NULL;
+  m_nGroups = 0;
+  m_nCurrentGroup = 0;
+  m_bReload = false;
+  m_bModified = false;
+  strcpy (m_strFile, "");
+}
+
+LibraryDialog::~LibraryDialog ()
+{
+  free (m_pPieces);
+}
+
+bool LibraryDialog::Initialize ()
+{
+  FileDisk idx;
+  char filename[LC_MAXPATH];
+
+  // Read the piece library index.
+  strcpy(filename, project->GetLibraryPath());
+  strcat(filename, "pieces.idx");
+  if (!idx.Open(filename, "rb"))
+    return false;
+  idx.Seek(34, SEEK_SET); // skip update byte
+
+  m_nPieces = project->GetPieceLibraryCount();
+  m_pPieces = (LC_LIBDLG_PIECEINFO*) malloc (sizeof (LC_LIBDLG_PIECEINFO) * m_nPieces);
+  for (int i = 0; i < m_nPieces; i++)
+  {
+    LC_LIBDLG_PIECEINFO* inf = &m_pPieces[i];
+    inf->info = project->GetPieceInfo(i);
+    inf->current_groups = inf->info->m_nGroups;
+
+    idx.Seek (85, SEEK_CUR);
+    idx.ReadLong (&inf->default_groups, 1);
+    idx.Seek (8, SEEK_CUR);
+  }
+  idx.Close();
+
+  // FIX ME: get the current settings
+  strcpy (m_strGroups[0], "Plates");
+  strcpy (m_strGroups[1], "Bricks");
+  strcpy (m_strGroups[2], "Tiles");
+  strcpy (m_strGroups[3], "Slope Bricks");
+  strcpy (m_strGroups[4], "Technic");
+  strcpy (m_strGroups[5], "Space");
+  strcpy (m_strGroups[6], "Train");
+  strcpy (m_strGroups[7], "Other Bricks");
+  strcpy (m_strGroups[8], "Accessories");
+  m_nGroups = 9;
+
+  //  UpdateList();
+  UpdateTree();
+
+  return true;
+}
+
+void LibraryDialog::HandleCommand (int id)
+{
+  switch (id)
+  {
+  case LC_LIBDLG_FILE_RESET:
+    {
+      int i;
+
+      for (i = 0; i < m_nPieces; i++)
+	m_pPieces[i].current_groups = m_pPieces[i].default_groups;
+
+      strcpy (m_strFile, "");
+      m_nGroups = 9;
+      /*
+      m_ImageList.DeleteImageList();
+      m_ImageList.Create(IDB_PIECEBAR, 16, 0, 0x00ff00ff);
+
+      CString str;
+      for (i = 0; i < 32; i++)
+      {
+	str.LoadString (ID_PIECE_GROUP01 + i);
+	strcpy (m_strGroups[i], str);
+	m_nBitmaps[i] = min(i,9);
+      }
+      */
+      m_bModified = false;
+      UpdateList();
+      UpdateTree();
+    } break;
+
+  case LC_LIBDLG_FILE_OPEN:
+    {
+    } break;
+
+  case LC_LIBDLG_FILE_SAVE:
+    {
+    } break;
+
+  case LC_LIBDLG_FILE_SAVEAS:
+    {
+    } break;
+
+  case LC_LIBDLG_FILE_PRINTCATALOG:
+    {
+    } break;
+
+  case LC_LIBDLG_FILE_MERGEUPDATE:
+    {
+      char filename[LC_MAXPATH];
+
+      //      CFileDialog filedlg(TRUE, ".lup\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+      //			  "LeoCAD Library Updates (*.lup)|*.lup|All Files (*.*)|*.*||", this);
+      if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
+	return;
+
+      LoadUpdate (filename);
+
+// update m_Parts
+      UpdateList();
+      m_bReload = true;
+    } break;
+
+  case LC_LIBDLG_FILE_IMPORTPIECE:
+    {
+      char filename[LC_MAXPATH];
+      LC_LDRAW_PIECE piece;
+
+      //      CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+      //		      "LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",this);
+      if (!SystemDoDialog (LC_DLG_FILE_OPEN, filename))
+	return;
+
+      Sys_BeginWait ();
+
+      if (ReadLDrawPiece(filename, &piece))
+      {
+	if (project->FindPieceInfo(piece.name) != NULL)
+	  Sys_MessageBox ("Piece already exists in the library !");
+
+	if (SaveLDrawPiece(&piece))
+	  Sys_MessageBox ("Piece successfully imported.");
+	else
+	  Sys_MessageBox ("Error saving library.");
+      }
+      else
+	Sys_MessageBox ("Error reading file.");
+
+      Sys_EndWait ();
+      FreeLDrawPiece(&piece);
+    } break;
+
+  case LC_LIBDLG_FILE_RETURN:
+    break;
+  case LC_LIBDLG_FILE_CANCEL:
+    break;
+  case LC_LIBDLG_GROUP_INSERT:
+    break;
+  case LC_LIBDLG_GROUP_DELETE:
+    break;
+  case LC_LIBDLG_GROUP_EDIT:
+    break;
+  case LC_LIBDLG_GROUP_MOVEUP:
+    break;
+  case LC_LIBDLG_GROUP_MOVEDOWN:
+    break;
+  case LC_LIBDLG_PIECE_NEW:
+    break;
+  case LC_LIBDLG_PIECE_EDIT:
+    break;
+  case LC_LIBDLG_PIECE_DELETE:
+    break;
+  }
+}
+
+bool LibraryDialog::DoSave (bool bAskName)
+{
+  if (bAskName || (strlen (m_strFile) == 0))
+  {
+    char filename[LC_MAXPATH];
+
+    //    CFileDialog dlg(FALSE, ".lgf\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+    //		    "LeoCAD Group Files (*.lgf)|*.lgf|All Files (*.*)|*.*||",this);
+    if (!SystemDoDialog (LC_DLG_FILE_SAVE, filename))
+      return false;
+    strcpy (m_strFile, filename);
+  }
+
+  /*
+  Sys_BeginWait ();
+  FileDisk f;
+  int i;
+
+  if (!f.Open (m_strFile, "wb"))
+    return false;
+
+  f.Write (ver_str, sizeof (ver_str));
+  f.Write (ver_flt, sizeof (ver_flt));
+  f.WriteByte (&m_nMaxGroups);
+
+  for (i = 0; i < m_nMaxGroups; i++)
+  {
+    f.Write (m_strGroups[i], sizeof(m_strGroups[i]));
+    ar << m_nBitmaps[i];
+  }
+
+	m_ImageList.Write(&ar);
+
+	ar << (int) m_Parts.GetSize();
+	for (i = 0; i < m_Parts.GetSize(); i++)
+	{
+		ar.Write (m_Parts[i].info->m_strName, sizeof(m_Parts[i].info->m_strName));
+		ar << m_Parts[i].group;
+	}
+	ar.Close();
+	f.Close();
+	m_bModified = FALSE;
+//		m_bLoaded = TRUE;
+
+	fclose (f);
+	Sys_EndWait ();
+  */
+  return true;
+}
+
+// =============================================================================
 
 static unsigned long GetDefaultPieceGroup(char* name)
 {

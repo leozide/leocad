@@ -27,6 +27,8 @@ OBJ := \
   $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
   $(patsubst %.cpp,%.o,$(filter %.cpp,$(SRC)))
 
+### use c++ for all files (the gtkglarea .c files will be removed shortly)
+CFLAGS += -x c++
 
 ### link the program
 .PHONY: all static

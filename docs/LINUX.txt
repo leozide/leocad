@@ -48,11 +48,16 @@ in another place, set the environment variable LEOCAD_LIB to
 that directory or start the program with the -l <path> option.
 
   You need to have an OpenGL library, you can download Mesa
-from www.mesa3d.org if you don't have one already. You should also
-have GTK+, it's available from www.gtk.org
+from www.mesa3d.org if you don't have one already (you'll need to
+create the symlinks described in the README). You should also have
+GTK+, it's available from www.gtk.org
 
 Current versions are:
 GTK+ 1.2
+MESA 3D 3.0
+LIBJPEG 6.0
+LIBPNG 1.0
+ZLIB 1.1
 
 
 COMMAND LINE OPTIONS

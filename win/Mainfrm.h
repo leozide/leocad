@@ -47,12 +47,14 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-protected:  // control bar embedded members
-	CCADStatusBar	m_wndStatusBar;
-	CFlatToolBar    m_wndStandardBar;
-	CFlatToolBar    m_wndToolsBar;
-	CFlatToolBar    m_wndAnimationBar;
-	CPiecesBar		m_wndPiecesBar;
+  // control bar embedded members
+	CCADStatusBar m_wndStatusBar;
+	CFlatToolBar  m_wndStandardBar;
+	CFlatToolBar  m_wndToolsBar;
+	CFlatToolBar  m_wndAnimationBar;
+	CPiecesBar    m_wndPiecesBar;
+
+protected:
 	CModifyDialog	m_wndModifyDlg;
 
 	CBMPMenu m_bmpMenu;

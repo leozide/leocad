@@ -1,6 +1,12 @@
 // Image I/O routines
 //
 
+#ifdef LC_WINDOWS
+#include <windows.h>
+#include <windowsx.h>
+//#include <mmsystem.h>
+#include <vfw.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -164,32 +170,164 @@ bool SaveImage(File* file, LC_IMAGE* image, LC_IMAGE_OPTS* opts)
 
 
 #ifdef LC_WINDOWS
-//#include <windows.h>
-//#include <vfw.h>
+#include "system.h"
 
 #define AVIIF_KEYFRAME	0x00000010L // this frame is a key frame.
+#define LPLPBI	LPBITMAPINFOHEADER *
+
+static HANDLE  MakeDib (HBITMAP hbitmap, LC_IMAGE *image)
+{
+	HANDLE              hdib ;
+	HDC                 hdc ;
+	BITMAP              bitmap ;
+	UINT                wLineLen ;
+	DWORD               dwSize ;
+	DWORD               wColSize ;
+	LPBITMAPINFOHEADER  lpbi ;
+	LPBYTE              lpBits ;
+  UINT bits = 24;
+	int i, j;
+
+	GetObject(hbitmap,sizeof(BITMAP),&bitmap) ;
+
+	// DWORD align the width of the DIB
+	// Figure out the size of the colour table
+	// Calculate the size of the DIB
+	wLineLen = (bitmap.bmWidth*bits+31)/32 * 4;
+	wColSize = sizeof(RGBQUAD)*((bits <= 8) ? 1<<bits : 0);
+	dwSize = sizeof(BITMAPINFOHEADER) + wColSize +
+		(DWORD)(UINT)wLineLen*(DWORD)(UINT)bitmap.bmHeight;
+
+	// Allocate room for a DIB and set the LPBI fields
+	hdib = GlobalAlloc(GHND,dwSize);
+	if (!hdib)
+		return hdib ;
+
+	lpbi = (LPBITMAPINFOHEADER)GlobalLock(hdib) ;
+
+	lpbi->biSize = sizeof(BITMAPINFOHEADER) ;
+	lpbi->biWidth = bitmap.bmWidth ;
+	lpbi->biHeight = bitmap.bmHeight ;
+	lpbi->biPlanes = 1 ;
+	lpbi->biBitCount = (WORD) bits ;
+	lpbi->biCompression = BI_RGB ;
+	lpbi->biSizeImage = dwSize - sizeof(BITMAPINFOHEADER) - wColSize ;
+	lpbi->biXPelsPerMeter = 0 ;
+	lpbi->biYPelsPerMeter = 0 ;
+	lpbi->biClrUsed = (bits <= 8) ? 1<<bits : 0;
+	lpbi->biClrImportant = 0 ;
+
+	// Get the bits from the bitmap and stuff them after the LPBI
+	lpBits = (LPBYTE)(lpbi+1)+wColSize ;
+
+	hdc = CreateCompatibleDC(NULL) ;
+
+	GetDIBits(hdc,hbitmap,0,bitmap.bmHeight,lpBits,(LPBITMAPINFO)lpbi, DIB_RGB_COLORS);
+
+  for (i = 0; i < lpbi->biHeight; i++)
+  {
+    unsigned char *src = (unsigned char*)image->bits + i * image->width * 3;
+    unsigned char *dst = lpBits + (lpbi->biHeight - i - 1) * wLineLen;
+
+    for (j = 0; j < lpbi->biWidth; j++)
+    {
+      dst[0] = src[2];
+      dst[1] = src[1];
+      dst[2] = src[0];
+
+      src += 3;
+      dst += 3;
+    }
+  }
+
+	// Fix this if GetDIBits messed it up....
+	lpbi->biClrUsed = (bits <= 8) ? 1<<bits : 0;
+
+	DeleteDC(hdc) ;
+	GlobalUnlock(hdib);
+
+	return hdib ;
+}
+
+// Walk through our array of LPBI's and free them
+static void FreeFrames(LPLPBI alpbi, int frames)
+{
+	int w;
+
+	if (!alpbi[0])
+		return;
+
+  // Don't free a frame if it's a duplicate of the previous one
+	for (w=0; w < frames; w++)
+		if (alpbi[w] && alpbi[w] != alpbi[w-1])
+			GlobalFreePtr(alpbi[w]);
+
+	for (w=0; w < frames; w++)
+		alpbi[w] = NULL;
+}
+
+// Fill an array of LPBI's with the frames for this movie
+static void MakeFrames (LPLPBI alpbi, LC_IMAGE **images, int frames)
+{
+	HBITMAP hbitmap, hbitmapOld;
+	HDC hdc, hdcMem;
+	int i;
+	RECT rc;
+
+	hdc = GetDC (NULL);
+	hdcMem = CreateCompatibleDC (NULL);
+
+	hbitmap = CreateCompatibleBitmap (hdc, images[0]->width, images[0]->height);
+
+	// Now walk through and make all the frames
+	for ( i=0; i < frames; i++ )
+  {
+		hbitmapOld = SelectBitmap(hdcMem, hbitmap);
+	
+		// Fill the whole frame with white
+		SetRect(&rc,0,0,images[0]->width,images[0]->height) ;
+		FillRect(hdcMem,&rc,GetStockBrush(WHITE_BRUSH));
+
+		SelectBitmap(hdcMem, hbitmapOld);
+
+    // Make this into a DIB and stuff it into the array
+		alpbi[i] = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hbitmap, images[i]));
+
+		// For an error, just duplicate the last frame if we can
+		if (alpbi[i] == NULL && i )
+			alpbi[i] = alpbi[i-1] ;
+	}
+
+	// Select all the old objects back and delete resources
+	DeleteBitmap(hbitmap) ;
+	DeleteObject(hdcMem) ;
+	ReleaseDC(NULL,hdc) ;
+}
 
 void SaveVideo(char* filename, LC_IMAGE** images, int count, float fps)
 {
-/*
 	AVISTREAMINFO strhdr;
 	PAVIFILE pfile = NULL;
 	PAVISTREAM ps = NULL, psCompressed = NULL;
 	AVICOMPRESSOPTIONS opts;
 	AVICOMPRESSOPTIONS FAR * aopts[1] = { &opts };
+	LPBITMAPINFOHEADER *plpbi;
 	_fmemset(&opts, 0, sizeof(opts));
 
 	// first let's make sure we are running on 1.1
 	WORD wVer = HIWORD(VideoForWindowsVersion());
 	if (wVer < 0x010a)
 	{
-		AfxMessageBox("Video for Windows 1.1 or later required", MB_OK|MB_ICONSTOP);
+		SystemDoMessageBox("Video for Windows 1.1 or later required", MB_OK|MB_ICONSTOP);
 		return;
 	}
 
 	AVIFileInit();
 
-	if (AVIFileOpen(&pfile, fn, OF_WRITE | OF_CREATE, NULL) == AVIERR_OK)
+  plpbi = (LPBITMAPINFOHEADER*) malloc (count*sizeof (LPBITMAPINFOHEADER));
+  MakeFrames (plpbi, images, count);
+
+	if (AVIFileOpen(&pfile, filename, OF_WRITE | OF_CREATE, NULL) == AVIERR_OK)
 	{
 		// Fill in the header for the video stream.
 		_fmemset(&strhdr, 0, sizeof(strhdr));
@@ -203,16 +341,17 @@ void SaveVideo(char* filename, LC_IMAGE** images, int count, float fps)
 
 		// And create the stream.
 		if (AVIFileCreateStream(pfile, &ps, &strhdr) == AVIERR_OK)
-		if (AVISaveOptions(AfxGetMainWnd()->m_hWnd, 0, 1, &ps, (LPAVICOMPRESSOPTIONS FAR *) &aopts))
+		if (AVISaveOptions(NULL, 0, 1, &ps, (LPAVICOMPRESSOPTIONS FAR *) &aopts))
+//		if (AVISaveOptions(AfxGetMainWnd()->m_hWnd, 0, 1, &ps, (LPAVICOMPRESSOPTIONS FAR *) &aopts))
 		if (AVIMakeCompressedStream(&psCompressed, ps, &opts, NULL) == AVIERR_OK)
 		if (AVIStreamSetFormat(psCompressed, 0, plpbi[0], plpbi[0]->biSize + plpbi[0]->biClrUsed * sizeof(RGBQUAD)) == AVIERR_OK)
 		{
-			float fPause = (float)AfxGetApp()->GetProfileInt("Default", "AVI Pause", 100)/100;
+			float fPause = (float)Sys_ProfileLoadInt("Default", "AVI Pause", 100)/100;
 			int time = (int)(fPause * 15);
 ///////////// set FPS
 			time = 1;
 		
-			for (int i = 0; i < nCount; i++) 
+			for (int i = 0; i < count; i++) 
 			{
 				if (AVIStreamWrite(psCompressed, i * time, 1, 
 					(LPBYTE) plpbi[i] +	plpbi[i]->biSize + plpbi[i]->biClrUsed * sizeof(RGBQUAD),
@@ -222,12 +361,13 @@ void SaveVideo(char* filename, LC_IMAGE** images, int count, float fps)
 		}
 	}
 	
+  FreeFrames (plpbi, count);
+
 	// Now close the file
 	if (ps) AVIStreamClose(ps);
 	if (psCompressed) AVIStreamClose(psCompressed);
 	if (pfile) AVIFileClose(pfile);
 	AVIFileExit();
-*/
 }
 #else
 void SaveVideo(char* filename, LC_IMAGE** images, int count, float fps)

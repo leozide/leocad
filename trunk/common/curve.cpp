@@ -285,7 +285,7 @@ Curve::Curve (PieceInfo *pInfo, const float *pos, unsigned char color)
 
 Curve::~Curve ()
 {
-  for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+  for (int i = 0; i < m_Points.GetSize (); i++)
     delete m_Points[i];
   glDeleteLists (m_nDisplayList, 1);
 }
@@ -316,7 +316,7 @@ void Curve::MinIntersectDist (LC_CLICKLINE* pLine)
 
 void Curve::UpdatePosition (unsigned short nTime, bool bAnimation)
 {
-  for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+  for (int i = 0; i < m_Points.GetSize (); i++)
     m_Points[i]->UpdatePosition (nTime, bAnimation);
 
   glNewList (m_nDisplayList, GL_COMPILE);
@@ -333,7 +333,7 @@ void Curve::UpdatePosition (unsigned short nTime, bool bAnimation)
 
 void Curve::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-  for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+  for (int i = 0; i < m_Points.GetSize (); i++)
     m_Points[i]->Move (nTime, bAnimation, bAddKey, dx, dy, dz);
 }
 
@@ -345,7 +345,7 @@ void Curve::Select (bool bSelecting, bool bFocus, bool bMultiple)
     {
       m_nState |= (LC_CURVE_SELECTED|LC_CURVE_FOCUSED);
 
-      for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+      for (int i = 0; i < m_Points.GetSize (); i++)
         m_Points[i]->Select (false, true, bMultiple);
     }
     else
@@ -358,7 +358,7 @@ void Curve::Select (bool bSelecting, bool bFocus, bool bMultiple)
     else
       m_nState &= ~(LC_CURVE_SELECTED);
 
-    for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+    for (int i = 0; i < m_Points.GetSize (); i++)
       m_Points[i]->Select (false, bFocus, bMultiple);
   }
 }
@@ -367,7 +367,7 @@ void Curve::DeselectOtherPoints (CurvePoint *pSender, bool bFocusOnly)
 {
   CurvePoint *pt;
 
-  for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+  for (int i = 0; i < m_Points.GetSize (); i++)
   {
     pt = m_Points[i];
     if (pt != pSender)
@@ -496,7 +496,7 @@ void Curve::TesselateHose ()
   glEnableClientState (GL_VERTEX_ARRAY);
   glVertexPointer (3, GL_FLOAT, 0, verts);
 
-  for (unsigned int i = 0; i < m_Points.GetSize () - 1; i++)
+  for (int i = 0; i < m_Points.GetSize () - 1; i++)
   {
     float a1, a2, angle_step; // axial rotation
 
@@ -672,7 +672,7 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
       }
     }
 
-    for (unsigned int i = 0; i < m_Points.GetSize (); i++)
+    for (int i = 0; i < m_Points.GetSize (); i++)
       m_Points[i]->Render (pInfo);
   }
 

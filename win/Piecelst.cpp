@@ -72,7 +72,7 @@ void CPiecesList::OnColumnclick(NMHDR* pNMHDR, LRESULT* pResult)
 	if (pNMListView->iSubItem == m_nSortedCol)
 		m_bAscending = !m_bAscending;
 	else
-		m_bAscending = TRUE;
+		m_bAscending = FALSE;
 
 	// save the column index.
 	m_nSortedCol = pNMListView->iSubItem;

@@ -7,6 +7,7 @@
 #include "PieceBar.h"
 #include "project.h"
 #include "pieceinf.h"
+#include "library.h"
 #include "globals.h"
 
 #ifdef _DEBUG
@@ -117,6 +118,7 @@ void CPiecesList::UpdateList()
 {
 	CWaitCursor wc;
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
 	SetRedraw (FALSE);
 	DeleteAllItems();
@@ -124,9 +126,9 @@ void CPiecesList::UpdateList()
 	LV_ITEM lvi;
 	lvi.mask = LVIF_TEXT | LVIF_PARAM;
 
-	for (int i = 0; i < project->GetPieceLibraryCount(); i++)
+	for (int i = 0; i < pLib->GetPieceCount(); i++)
 	{
-		PieceInfo* pInfo = project->GetPieceInfo(i);
+		PieceInfo* pInfo = pLib->GetPieceInfo(i);
 
 		if ((pInfo->m_strDescription[0] == '~') && !pBar->m_bSubParts)
 			continue;

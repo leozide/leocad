@@ -85,6 +85,7 @@ protected:
 	afx_msg void OnActivateApp(BOOL bActive, HTASK hTask);
 	afx_msg void OnViewNewView();
 	afx_msg LRESULT OnSetMessageString(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 	//}}AFX_MSG
 
 	// Status bar

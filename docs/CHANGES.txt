@@ -1,6 +1,24 @@
 This is a changelog for developers only, not for ordinary users.
 
+15/12/2000
+        - Fixed small bug in the texture font.
+
+03/12/2000
+        - Added Save Picture dialog to the linux version.
+        - Added an overwrite prompt when saving a project under linux.
+
+02/12/2000
+        - Added project loading preview to the linux version.
+
+24/11/2000
+        - Renamed several functions from the Matrix class.
+        - Added const to several functions.
+
+23/11/2000
+        - Now all object classes have a Select () function.
+
 18/11/2000
+        - Fixed animation playback under linux.
         - Fixed Z buffer bug in the piece preview.
         - Fixed blending in piece preview.
 

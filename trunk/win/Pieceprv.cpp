@@ -84,7 +84,7 @@ void CPiecePreview::OnPaint()
 	glLoadIdentity();
 
 	if (m_bZoomPreview)
-		m_pPieceInfo->ZoomExtents();
+		m_pPieceInfo->ZoomExtents(30.0f, (float)aspect);
 	else
 		gluLookAt (-5, -5, 4, 0, 0, 0, 0, 0, 1);
 

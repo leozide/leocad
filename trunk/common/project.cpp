@@ -3620,7 +3620,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						glEnable(GL_COLOR_MATERIAL);
 						glDisable (GL_DITHER);
 						glShadeModel(GL_FLAT);
-						pInfo->ZoomExtents();
+						pInfo->ZoomExtents(30.0f, aspect);
 
 						float pos[4] = { 0, 0, 10, 0 };
 						glLightfv(GL_LIGHT0, GL_POSITION, pos);

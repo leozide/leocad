@@ -293,7 +293,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
 			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
-			pInfo->ZoomExtents();
+			pInfo->ZoomExtents(30.0f, (float)aspect);
 
 			float pos[4] = { 0, 0, 10, 0 };
 			glLightfv(GL_LIGHT0, GL_POSITION, pos);
@@ -685,7 +685,7 @@ static void PrintPiecesThread(void* pv)
 
 			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
 			node = node->next;
-			pInfo->ZoomExtents();
+			pInfo->ZoomExtents(30.0f, (float)aspect);
 
 			float pos[4] = { 0, 0, 10, 0 };
 			glLightfv(GL_LIGHT0, GL_POSITION, pos);

@@ -260,7 +260,11 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 
 	if (LoadPieceLibrary() == false)
 	{
+#ifdef _WINDOWS
 		SystemDoMessageBox("Cannot load piece library.", LC_MB_OK|LC_MB_ICONERROR);
+#else
+		printf("Cannot load piece library !\n");
+#endif
 		return false;
 	}
 

@@ -74,7 +74,6 @@ void SystemUpdateSelected(unsigned long flags);
 void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
-void SystemUpdateFocus(void* object, unsigned char type);
 
 void SystemInit();
 void SystemFinish();

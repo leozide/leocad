@@ -4,6 +4,9 @@
 class Project;
 extern Project* project;
 
+class Messenger;
+extern Messenger* messenger;
+
 #include "defines.h"
 #include "typedefs.h"
 

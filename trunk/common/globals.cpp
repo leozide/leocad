@@ -8,6 +8,9 @@
 class Project;
 Project* project;
 
+class Messenger;
+Messenger* messenger;
+
 const char* colornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"Light Green", "Blue", "Light Blue", "Yellow", "White",
 	"Dark Gray", "Black", "Brown", "Pink", "Purple", "Gold",

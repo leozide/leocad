@@ -44,7 +44,9 @@ CTitleTip::~CTitleTip()
 BEGIN_MESSAGE_MAP(CTitleTip, CWnd)
 //{{AFX_MSG_MAP(CTitleTip)
 ON_WM_MOUSEMOVE()
-//}}AFX_MSG_MAP
+	ON_WM_CAPTURECHANGED()
+	ON_WM_ACTIVATEAPP()
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -217,10 +219,6 @@ BOOL CTitleTip::PreTranslateMessage(MSG* pMsg)
 		ShowWindow(SW_HIDE);
 		m_pParentWnd->PostMessage(pMsg->message, pMsg->wParam, pMsg->lParam);
 		return TRUE;
-	case WM_ACTIVATEAPP:
-		ReleaseCapture();
-		ShowWindow(SW_HIDE);
-		return TRUE;
 	}
 	
 	if (GetFocus() == NULL)
@@ -231,4 +229,25 @@ BOOL CTitleTip::PreTranslateMessage(MSG* pMsg)
 	}
 	
 	return CWnd::PreTranslateMessage(pMsg);
+}
+
+void CTitleTip::OnCaptureChanged(CWnd *pWnd) 
+{
+	if (pWnd != this)
+	{
+		ShowWindow(SW_HIDE);
+	}
+
+	CWnd::OnCaptureChanged(pWnd);
+}
+
+void CTitleTip::OnActivateApp(BOOL bActive, HTASK hTask) 
+{
+	CWnd::OnActivateApp(bActive, hTask);
+
+	if (!bActive)
+	{
+		ReleaseCapture();
+		ShowWindow(SW_HIDE);
+	}
 }

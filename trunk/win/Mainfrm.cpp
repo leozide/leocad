@@ -1115,17 +1115,22 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			// Don't process key presses if the user is typing text.
 			if (!Control)
 			{
-				if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()) ||
-					  m_wndPiecesBar.m_wndPiecesList.IsChild(GetFocus()))
-				{
-					return CFrameWnd::PreTranslateMessage(pMsg);
-				}
+				CWnd* Focus = GetFocus();
 
-				char Name[256];
-				GetClassName(GetFocus()->m_hWnd, Name, sizeof(Name));
-				if (!strcmp(Name, "Edit"))
+				if (Focus != NULL)
 				{
-					return CFrameWnd::PreTranslateMessage(pMsg);
+					if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(Focus) ||
+							m_wndPiecesBar.m_wndPiecesList.IsChild(Focus))
+					{
+						return CFrameWnd::PreTranslateMessage(pMsg);
+					}
+
+					char Name[256];
+					GetClassName(Focus->m_hWnd, Name, sizeof(Name));
+					if (!strcmp(Name, "Edit"))
+					{
+						return CFrameWnd::PreTranslateMessage(pMsg);
+					}
 				}
 			}
 

@@ -47,7 +47,9 @@ protected:
 protected:
         //{{AFX_MSG(CTitleTip)
         afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-        //}}AFX_MSG
+	afx_msg void OnCaptureChanged(CWnd *pWnd);
+	afx_msg void OnActivateApp(BOOL bActive, HTASK hTask);
+	//}}AFX_MSG
         DECLARE_MESSAGE_MAP()
 };
 

@@ -261,7 +261,7 @@ int CPiecesList::CellRectFromPoint(CPoint & point, RECT* cellrect, int* col) con
 
 void CPiecesList::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	if( nFlags == 0 )
+	if (nFlags == 0)
 	{
 		int row, col;
 		RECT cellrect;
@@ -269,7 +269,7 @@ void CPiecesList::OnMouseMove(UINT nFlags, CPoint point)
 		if (row != -1)
 		{
 			int offset = 7;
-			if( col == 0 ) 
+			if( col == 0 )
 			{
 				CRect rcLabel;
 				GetItemRect(row, &rcLabel, LVIR_LABEL);
@@ -277,7 +277,7 @@ void CPiecesList::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			cellrect.top--;
 
-			m_TitleTip.Show (cellrect, GetItemText(row, col), offset-1, GetItemState (row, LVIS_FOCUSED));
+			m_TitleTip.Show(cellrect, GetItemText(row, col), offset-1, GetItemState(row, LVIS_FOCUSED) && (col == 0));
 		}
 	}
 	

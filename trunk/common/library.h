@@ -3,6 +3,7 @@
 
 #include "defines.h"
 
+class File;
 class Texture;
 class PieceInfo;
 
@@ -45,7 +46,13 @@ protected:
 	int m_nTextureCount;     // number of textures
 	Texture* m_pTextures;    // textures array
 
+	bool ValidatePiecesFile (File& IdxFile, File& BinFile) const;
+	bool ValidateTexturesFile (File& IdxFile, File& BinFile) const;
+
 	// File headers
+	static const char PiecesBinHeader[32];
+	static const char PiecesIdxHeader[32];
+	static const int PiecesFileVersion;
 	static const char TexturesBinHeader[32];
 	static const char TexturesIdxHeader[32];
 	static const int TexturesFileVersion;

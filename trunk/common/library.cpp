@@ -10,10 +10,14 @@
 #include "config.h"
 #include "image.h"
 #include "system.h"
+#include "console.h"
 
 // =============================================================================
 // PiecesLibrary class
 
+const char PiecesLibrary::PiecesBinHeader[32] = "LeoCAD piece library data file\0";
+const char PiecesLibrary::PiecesIdxHeader[32] = "LeoCAD piece library index file";
+const int PiecesLibrary::PiecesFileVersion = 3;
 const char PiecesLibrary::TexturesBinHeader[32] = "LeoCAD texture data file\0\0\0\0\0\0\0";
 const char PiecesLibrary::TexturesIdxHeader[32] = "LeoCAD texture index file\0\0\0\0\0\0";
 const int PiecesLibrary::TexturesFileVersion = 1;
@@ -53,9 +57,8 @@ void PiecesLibrary::Unload ()
 
 bool PiecesLibrary::Load (const char *libpath)
 {
-  FileDisk idx;
+  FileDisk idx, bin;
   char filename[LC_MAXPATH];
-  lcuint8 version;
   lcuint16 count, movedcount;
   lcuint32 binsize;
   Texture* pTexture;
@@ -73,23 +76,28 @@ bool PiecesLibrary::Load (const char *libpath)
   strcat (filename, "pieces.idx");
 
   if (!idx.Open (filename, "rb"))
+	{
+		console.PrintError ("Cannot open Pieces Library file: %s.\n", filename);
     return false;
+	}
+
+  strcpy (filename, m_LibraryPath);
+  strcat (filename, "pieces.bin");
+
+  if (!bin.Open (filename, "rb"))
+	{
+		console.PrintError ("Cannot open Pieces Library file: %s.\n", filename);
+    return false;
+	}
+
+	if (!ValidatePiecesFile (idx, bin))
+		return false;
 
   idx.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
   idx.ReadShort (&movedcount, 1);
   idx.ReadLong (&binsize, 1);
   idx.ReadShort (&count, 1);
-  idx.Seek (32, SEEK_SET);
-  idx.ReadByte (&version, 1);
-
-  if ((version != 3) || (count == 0))
-  {
-    idx.Close();
-    return false;
-  }
-  idx.Seek (34, SEEK_SET); // skip update byte
-
-  // TODO: check .bin file size.
+  idx.Seek (34, SEEK_SET);
 
   // Load piece indexes
   delete [] m_pPieceIdx;
@@ -113,6 +121,7 @@ bool PiecesLibrary::Load (const char *libpath)
   }
 
   idx.Close();
+	bin.Close();
 
 	// TODO: Load group configuration here
 
@@ -128,24 +137,27 @@ bool PiecesLibrary::Load (const char *libpath)
 	}
 
 	if (!idx.Open(filename, "rb"))
+	{
+		console.PrintError ("Cannot open Textures Library file: %s.\n", filename);
 		return false;
+	}
 
-	// FIXME: check header
+  strcpy (filename, m_LibraryPath);
+  strcat (filename, "textures.bin");
+
+  if (!bin.Open (filename, "rb"))
+	{
+		console.PrintError ("Cannot open Textures Library file: %s.\n", filename);
+    return false;
+	}
+
+	if (!ValidateTexturesFile (idx, bin))
+		return false;
 
 	idx.Seek(-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
 	idx.ReadLong (&binsize, 1);
 	idx.ReadShort (&count, 1);
-	idx.Seek(32, SEEK_SET);
-	idx.ReadByte (&version, 1);
-
-	if ((version != 1) || (count == 0))
-	{
-		idx.Close();
-		return false;
-	}
-	idx.Seek(34, SEEK_SET); // skip update byte
-
-	// TODO: check .bin file size.
+	idx.Seek(34, SEEK_SET);
 
 	m_pTextures = new Texture[count];
 	m_nTextureCount = count;
@@ -155,6 +167,102 @@ bool PiecesLibrary::Load (const char *libpath)
 		pTexture->LoadIndex(&idx);
 
 	idx.Close();
+	bin.Close();
+
+	return true;
+}
+
+// Make sure the pieces library files are valid
+bool PiecesLibrary::ValidatePiecesFile (File& IdxFile, File& BinFile) const
+{
+	lcuint32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
+  lcuint16 count, movedcount;
+	lcuint8 version;
+	char header[32];
+
+  IdxFile.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
+  IdxFile.ReadShort (&movedcount, 1);
+	IdxFile.ReadLong (&binsize, 1);
+	IdxFile.ReadShort (&count, 1);
+	IdxFile.Seek (0, SEEK_SET);
+	IdxFile.Read (header, 32);
+	IdxFile.ReadByte (&version, 1);
+	IdxFile.Seek (IdxPos, SEEK_SET);
+
+	if (memcmp (header, PiecesIdxHeader, 32) != 0)
+	{
+		console.PrintError ("Invalid Pieces Library file.\n");
+		return false;
+	}
+
+	if (version != PiecesFileVersion)
+	{
+		console.PrintError ("Wrong version of the Pieces Library files.\n");
+		return false;
+	}
+
+	BinFile.Seek (0, SEEK_SET);
+	BinFile.Read (header, 32);
+	BinFile.Seek (BinPos, SEEK_SET);
+
+	if (memcmp (header, PiecesBinHeader, 32) != 0)
+	{
+		console.PrintError ("Invalid Pieces Library file.\n");
+		return false;
+	}
+
+	if (binsize != BinFile.GetLength ())
+	{
+		console.PrintError ("Wrong size of the Pieces Library file.\n");
+		return false;
+	}
+
+	return true;
+}
+
+// Make sure the textures library files are valid
+bool PiecesLibrary::ValidateTexturesFile (File& IdxFile, File& BinFile) const
+{
+	lcuint32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
+  lcuint16 count;
+	lcuint8 version;
+	char header[32];
+
+	IdxFile.Seek (-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
+	IdxFile.ReadLong (&binsize, 1);
+	IdxFile.ReadShort (&count, 1);
+	IdxFile.Seek (0, SEEK_SET);
+	IdxFile.Read (header, 32);
+	IdxFile.ReadByte (&version, 1);
+	IdxFile.Seek (IdxPos, SEEK_SET);
+
+	if (memcmp (header, TexturesIdxHeader, 32) != 0)
+	{
+		console.PrintError ("Invalid Textures Library file.\n");
+		return false;
+	}
+
+	if (version != TexturesFileVersion)
+	{
+		console.PrintError ("Wrong version of the Textures Library files.\n");
+		return false;
+	}
+
+	BinFile.Seek (0, SEEK_SET);
+	BinFile.Read (header, 32);
+	BinFile.Seek (BinPos, SEEK_SET);
+
+	if (memcmp (header, TexturesBinHeader, 32) != 0)
+	{
+		console.PrintError ("Invalid Textures Library file.\n");
+		return false;
+	}
+
+	if (binsize != BinFile.GetLength ())
+	{
+		console.PrintError ("Wrong size of the Textures Library files.\n");
+		return false;
+	}
 
 	return true;
 }
@@ -162,7 +270,7 @@ bool PiecesLibrary::Load (const char *libpath)
 // =============================================================================
 // Search functions
 
-// Remeber to make 'name' uppercase.
+// Remember to make 'name' uppercase.
 PieceInfo* PiecesLibrary::FindPieceInfo (const char* name) const
 {
   PieceInfo* pInfo;

@@ -81,11 +81,50 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
   return FALSE;
 }
 
+LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  static CMapPtrToPtr WindowMap;
+  GLWindow *wnd;
+
+  if (uMsg == WM_CREATE)
+  {
+    LPCREATESTRUCT cs = (LPCREATESTRUCT)lParam;
+
+    wnd = (GLWindow*)cs->lpCreateParams;
+    wnd->Create (hwnd);
+    wnd->IncRef ();
+
+    WindowMap.SetAt (hwnd, wnd);
+  }
+
+  wnd = (GLWindow*)WindowMap[hwnd];
+
+  if (wnd)
+  {
+    MSG msg;
+    msg.hwnd = hwnd;
+    msg.message = uMsg;
+    msg.wParam = wParam;
+    msg.lParam = lParam;
+
+    GLWindowPreTranslateMessage (wnd, &msg);
+
+    if (uMsg == WM_DESTROY)
+    {
+      WindowMap.RemoveKey (hwnd);
+      wnd->DecRef ();
+    }
+  }
+
+  return DefWindowProc (hwnd, uMsg, wParam, lParam);
+}
+
 // ============================================================================
 // GLWindow class
 
 GLWindow::GLWindow (GLWindow *share)
 {
+  m_nRef = 0;
   m_pShare = share;
   m_pData = (GLWindowPrivate*) malloc (sizeof (GLWindowPrivate));
   memset (m_pData, 0, sizeof (GLWindowPrivate));

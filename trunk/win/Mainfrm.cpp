@@ -933,51 +933,13 @@ void CMainFrame::OnActivateApp(BOOL bActive, HTASK hTask)
 	project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
 }
 
-#include "glwindow.h"
 #include "view.h"
-
-BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);
-
-static LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-  static CMapPtrToPtr WindowMap;
-  GLWindow *wnd;
-
-  if (uMsg == WM_CREATE)
-  {
-    View *view = new View (project, NULL);
-    view->Create (hwnd);
-
-    WindowMap.SetAt (hwnd, view);
-  }
-
-  wnd = (GLWindow*)WindowMap[hwnd];
-
-  if (wnd)
-  {
-    MSG msg;
-    msg.hwnd = hwnd;
-    msg.message = uMsg;
-    msg.wParam = wParam;
-    msg.lParam = lParam;
-
-    GLWindowPreTranslateMessage (wnd, &msg);
-
-    if (uMsg == WM_DESTROY)
-    {
-      WindowMap.RemoveKey (hwnd);
-      delete wnd;
-    }
-  }
-
-  return DefWindowProc (hwnd, uMsg, wParam, lParam);
-}
+LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 void CMainFrame::OnViewNewView() 
 {
 	HINSTANCE hInst = AfxGetInstanceHandle();
 	WNDCLASS wndcls;
-  CWnd *pWnd;
 
 #define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
 #define FLOATING_CLASSNAME _T("LeoCADFloatingOpenGLClass")
@@ -1000,9 +962,10 @@ void CMainFrame::OnViewNewView()
 			AfxThrowResourceException();
   }
 
-  pWnd = new CWnd ();
-  pWnd->CreateEx (0, FLOATING_CLASSNAME, "LeoCAD",
+  View *view = new View (project, NULL);
+
+  CreateWindowEx (0, FLOATING_CLASSNAME, "LeoCAD",
     WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
     CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
-    m_hWnd, (HMENU)0, NULL);
+    m_hWnd, (HMENU)0, hInst, view);
 }

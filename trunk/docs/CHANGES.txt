@@ -1,5 +1,11 @@
 This is a changelog for developers only, not for ordinary users.
 
+04/02/2000
+  - When multiple pieces are selected, rotate around the piece that has focus.
+  - Clicking on a piece with focus now deselects it.
+  - Only define LC_HAVE_PNGLIB if zlib is available.
+  - Don't compile jpeg or png support if libraries are not present.
+
 02/02/2001
 	- HTML dialog now correctly remembers the last settings
 	- Added step add/remove commands

@@ -175,63 +175,68 @@ unsigned char ConvertColor(int c)
 /////////////////////////////////////////////////////////////////////////////
 // PieceInfo construction/destruction
 
-PieceInfo::PieceInfo()
+PieceInfo::PieceInfo (File& file)
 {
-	// Not called, initialize in LoadIndex().
+  LoadIndex (file);
 }
 
-PieceInfo::~PieceInfo()
+PieceInfo::~PieceInfo ()
 {
-	FreeInformation();
+  FreeInformation ();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // File I/O
 
-void PieceInfo::LoadIndex(File* file)
+void PieceInfo::LoadIndex (File& file)
 {
-	short sh[6];
-	short scale;
+  static bool init = false;
+  short sh[6];
+  short scale;
 
-	static bool init = false;
-	if (!init)
-	{
-		for (int i = 0; i < SIDES; i++)
-		{
-			sintbl[i] = (float)sin((PI2*i)/(SIDES));
-			costbl[i] = (float)cos((PI2*i)/(SIDES));
-		}
-		init = true;
-	}
+  // Initialize sin/cos table
+  if (!init)
+  {
+    for (int i = 0; i < SIDES; i++)
+    {
+      sintbl[i] = (float)sin((PI2*i)/(SIDES));
+      costbl[i] = (float)cos((PI2*i)/(SIDES));
+    }
+    init = true;
+  }
 
-	// TODO: don't change ref. if we're reloading ?
-	m_nRef = 0;
-	m_nVertexCount = 0;
-	m_fVertexArray = NULL;
-	m_nConnectionCount = 0;
-	m_pConnections = NULL;
-	m_nGroupCount = 0;
-	m_pGroups = NULL;
-	m_nTextureCount = 0;
-	m_pTextures = NULL;
+  // TODO: don't change ref. if we're reloading ?
+  m_nRef = 0;
+  m_nVertexCount = 0;
+  m_fVertexArray = NULL;
+  m_nConnectionCount = 0;
+  m_pConnections = NULL;
+  m_nGroupCount = 0;
+  m_pGroups = NULL;
+  m_nTextureCount = 0;
+  m_pTextures = NULL;
 
-	file->Read(m_strName, 8);
-	file->Read(m_strDescription, 64);
-	file->ReadShort(sh, 6);
-	file->ReadByte(&m_nFlags, 1);
-	file->ReadLong(&m_nGroups, 1);
-	file->ReadLong(&m_nOffset, 1);
-	file->ReadLong(&m_nSize, 1);
+  file.Read (m_strName, 8);
+  file.Read (m_strDescription, 64);
+  file.ReadShort (sh, 6);
+  file.ReadByte (&m_nFlags, 1);
+  file.ReadLong (&m_nGroups, 1);
+  file.ReadLong (&m_nOffset, 1);
+  file.ReadLong (&m_nSize, 1);
 
-	scale = 100;
-	if (m_nFlags & LC_PIECE_MEDIUM) scale = 1000;
-	if (m_nFlags & LC_PIECE_SMALL)  scale = 10000;
-	m_fDimensions[0] = (float)sh[0]/scale;
-	m_fDimensions[1] = (float)sh[1]/scale;
-	m_fDimensions[2] = (float)sh[2]/scale;
-	m_fDimensions[3] = (float)sh[3]/scale;
-	m_fDimensions[4] = (float)sh[4]/scale;
-	m_fDimensions[5] = (float)sh[5]/scale;
+  if (m_nFlags & LC_PIECE_SMALL)
+    scale = 10000;
+  else if (m_nFlags & LC_PIECE_MEDIUM)
+    scale = 1000;
+  else
+    scale = 100;
+
+  m_fDimensions[0] = (float)sh[0]/scale;
+  m_fDimensions[1] = (float)sh[1]/scale;
+  m_fDimensions[2] = (float)sh[2]/scale;
+  m_fDimensions[3] = (float)sh[3]/scale;
+  m_fDimensions[4] = (float)sh[4]/scale;
+  m_fDimensions[5] = (float)sh[5]/scale;
 }
 
 GLuint PieceInfo::AddRef()

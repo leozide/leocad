@@ -281,13 +281,27 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 	animation = 0;
       else if (strcmp (param, "--highlight") == 0)
 	highlight = true;
-      else if ((strcmp (param, "-V") == 0) || (strcmp (param, "--version") == 0))
+      else if ((strcmp (param, "-v") == 0) || (strcmp (param, "--version") == 0))
       {
 	printf ("LeoCAD version "LC_VERSION" for "LC_VERSION_OSNAME"\n");
-	printf ("Copyright (c) 1996-2000, BT Software\n");
+	printf ("Copyright (c) 1996-2001, BT Software\n");
+        printf ("Compiled "__DATE__"\n");
+
+#ifdef LC_HAVE_JPEGLIB
+        printf ("With JPEG support\n");
+#else
+        printf ("Without JPEG support\n");
+#endif
+
+#ifdef LC_HAVE_PNGLIB
+        printf ("With PNG support\n");
+#else
+        printf ("Without PNG support\n");
+#endif
+
 	return false;
       }
-      else if ((strcmp (param, "-H") == 0) || (strcmp (param, "--help") == 0))
+      else if ((strcmp (param, "-h") == 0) || (strcmp (param, "--help") == 0))
       {
       }
       else
@@ -456,74 +470,63 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 // Load the piece library
 bool Project::LoadPieceLibrary (char *libpath)
 {
-	FileDisk idx;
-	char filename[LC_MAXPATH];
-	unsigned char version;
-	unsigned short count, movedcount;
-	unsigned long binsize;
-	PieceInfo* pElements;
-	Texture* pTexture;
-	int i;
+  FileDisk idx;
+  char filename[LC_MAXPATH];
+  lcuint8 version;
+  lcuint16 count, movedcount;
+  lcuint32 binsize;
+  Texture* pTexture;
+  int i;
 
-	strcpy (m_LibraryPath, libpath);
+  strcpy (m_LibraryPath, libpath);
 
-	// Make sure that the path ends with a '/'
-	i = strlen(m_LibraryPath)-1;
-	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
-	  strcat(m_LibraryPath, "/");
+  // Make sure that the path ends with a '/'
+  i = strlen(m_LibraryPath)-1;
+  if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
+    strcat(m_LibraryPath, "/");
 
-	// Read the piece library index.
-	strcpy(filename, m_LibraryPath);
-	strcat(filename, "pieces.idx");
+  // Read the piece library index.
+  strcpy (filename, m_LibraryPath);
+  strcat (filename, "pieces.idx");
 
-	if (!idx.Open(filename, "rb"))
-		return false;
+  if (!idx.Open (filename, "rb"))
+    return false;
 
-	idx.Seek(-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
-	idx.ReadShort (&movedcount, 1);
-	idx.ReadLong (&binsize, 1);
-	idx.ReadShort (&count, 1);
-	idx.Seek (32, SEEK_SET);
-	idx.ReadByte (&version, 1);
+  idx.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
+  idx.ReadShort (&movedcount, 1);
+  idx.ReadLong (&binsize, 1);
+  idx.ReadShort (&count, 1);
+  idx.Seek (32, SEEK_SET);
+  idx.ReadByte (&version, 1);
 
-	if ((version != 3) || (count == 0))
-	{
-		idx.Close();
-		return false;
-	}
-	idx.Seek(34, SEEK_SET); // skip update byte
+  if ((version != 3) || (count == 0))
+  {
+    idx.Close();
+    return false;
+  }
+  idx.Seek (34, SEEK_SET); // skip update byte
 
-	// TODO: check .bin file size.
-	
-	if (m_pPieceIdx != NULL)
-	{
-		// call the destructors
-		for (pElements = m_pPieceIdx; m_nPieceCount--; pElements++)
-			pElements->~PieceInfo();
-		delete [] m_pPieceIdx;
-	}
+  // TODO: check .bin file size.
 
-	m_pPieceIdx = new PieceInfo[count];
-	m_nPieceCount = count;
-	memset(m_pPieceIdx, 0, count * sizeof(PieceInfo));
+  // Load piece indexes
+  delete [] m_pPieceIdx;
+  m_pPieceIdx = new PieceInfo[count] (idx);
+  m_nPieceCount = count;
 
-	for (pElements = m_pPieceIdx; count--; pElements++)
-		pElements->LoadIndex(&idx);
+  // Load moved files reference.
+  if (m_pMovedReference != NULL)
+    free(m_pMovedReference);
+  m_pMovedReference = (char*)malloc(18*movedcount);
+  memset (m_pMovedReference, 0, 18*movedcount);
+  m_nMovedCount = movedcount;
 
-	// Load moved files reference.
-	if (m_pMovedReference != NULL)
-		free(m_pMovedReference);
-	m_pMovedReference = (char*)malloc(18*movedcount);
-	memset(m_pMovedReference, 0, 18*movedcount);
-	m_nMovedCount = movedcount;
+  for (i = 0; i < movedcount; i++)
+  {
+    idx.Read (&m_pMovedReference[i*18], 8);
+    idx.Read (&m_pMovedReference[i*18+9], 8);
+  }
 
-	for (i = 0; i < movedcount; i++)
-	{
-		idx.Read(&m_pMovedReference[i*18], 8);
-		idx.Read(&m_pMovedReference[i*18+9], 8);
-	}
-
-	idx.Close();
+  idx.Close();
 
 	// TODO: Load group configuration here
 
@@ -534,8 +537,8 @@ bool Project::LoadPieceLibrary (char *libpath)
 	if (m_pTextures != NULL)
 	{
 		// call the destructors
-		for (pTexture = m_pTextures; m_nTextureCount--; pTexture++)
-			pTexture->~Texture();
+          //		for (pTexture = m_pTextures; m_nTextureCount--; pTexture++)
+          //			pTexture->~Texture();
 		delete [] m_pTextures;
 	
 		m_pTextures = NULL;
@@ -6368,72 +6371,82 @@ void Project::MoveSelectedObjects(float x, float y, float z)
 
 void Project::RotateSelectedObjects(float x, float y, float z)
 {
-	if (m_nSnap & LC_DRAW_LOCK_X)
-		x = 0;
-	if (m_nSnap & LC_DRAW_LOCK_Y)
-		y = 0;
-	if (m_nSnap & LC_DRAW_LOCK_Z)
-		z = 0;
+  if (m_nSnap & LC_DRAW_LOCK_X)
+    x = 0;
+  if (m_nSnap & LC_DRAW_LOCK_Y)
+    y = 0;
+  if (m_nSnap & LC_DRAW_LOCK_Z)
+    z = 0;
 
-	if (x == 0 && y == 0 && z == 0)
-		return;
+  if (x == 0 && y == 0 && z == 0)
+    return;
 
-	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	float pos[3], rot[4];
-	int nSel = 0;
-	Piece* pPiece;
+  float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+  float pos[3], rot[4];
+  int nSel = 0;
+  Piece *pPiece, *pFocus = NULL;
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsSelected())
-		{
-                  /*
-                  pPiece->GetPosition (pos);
-                  if (pos[0] < bs[0]) bs[0] = pos[0];
-                  if (pos[1] < bs[1]) bs[1] = pos[1];
-                  if (pos[2] < bs[2]) bs[2] = pos[2];
-                  if (pos[0] > bs[3]) bs[3] = pos[0];
-                  if (pos[1] > bs[4]) bs[4] = pos[1];
-                  if (pos[2] > bs[5]) bs[5] = pos[2];
-                  */
-                  pPiece->CompareBoundingBox (bs);
-                  nSel++;
-		}
+  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+    if (pPiece->IsSelected())
+    {
+      if (pPiece->IsFocused ())
+        pFocus = pPiece;
+      /*
+        pPiece->GetPosition (pos);
+        if (pos[0] < bs[0]) bs[0] = pos[0];
+        if (pos[1] < bs[1]) bs[1] = pos[1];
+        if (pos[2] < bs[2]) bs[2] = pos[2];
+        if (pos[0] > bs[3]) bs[3] = pos[0];
+        if (pos[1] > bs[4]) bs[4] = pos[1];
+        if (pos[2] > bs[5]) bs[5] = pos[2];
+      */
+      pPiece->CompareBoundingBox (bs);
+      nSel++;
+    }
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-	{
-		if (!pPiece->IsSelected())
-			continue;
+  if (pFocus != NULL)
+  {
+    pFocus->GetPosition (pos);
+    bs[0] = bs[3] = pos[0];
+    bs[1] = bs[4] = pos[1];
+    bs[2] = bs[5] = pos[2];
+  }
 
-		pPiece->GetPosition(pos);
-		pPiece->GetRotation(rot);
-		Matrix m(rot, pos);
+  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+  {
+    if (!pPiece->IsSelected())
+      continue;
 
-		if (nSel == 1)
- 		{
-			if (!(m_nSnap & LC_DRAW_LOCK_X))
-				m.Rotate(x,1,0,0);
-			if (!(m_nSnap & LC_DRAW_LOCK_Y))
-				m.Rotate(y,0,1,0);
-			if (!(m_nSnap & LC_DRAW_LOCK_Z))
-				m.Rotate(z,0,0,1);
-		}
-		else
-		{
-			if (!(m_nSnap & LC_DRAW_LOCK_X))
-				m.RotateCenter(x,1,0,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-			if (!(m_nSnap & LC_DRAW_LOCK_Y))
-				m.RotateCenter(y,0,1,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-			if (!(m_nSnap & LC_DRAW_LOCK_Z))
-				m.RotateCenter(z,0,0,1,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-			m.GetTranslation(pos);
+    pPiece->GetPosition(pos);
+    pPiece->GetRotation(rot);
+    Matrix m(rot, pos);
 
-			// TODO: check if moved
-			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
-		}
+    if (nSel == 1)
+    {
+      if (!(m_nSnap & LC_DRAW_LOCK_X))
+        m.Rotate(x,1,0,0);
+      if (!(m_nSnap & LC_DRAW_LOCK_Y))
+        m.Rotate(y,0,1,0);
+      if (!(m_nSnap & LC_DRAW_LOCK_Z))
+        m.Rotate(z,0,0,1);
+    }
+    else
+    {
+      if (!(m_nSnap & LC_DRAW_LOCK_X))
+        m.RotateCenter(x,1,0,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
+      if (!(m_nSnap & LC_DRAW_LOCK_Y))
+        m.RotateCenter(y,0,1,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
+      if (!(m_nSnap & LC_DRAW_LOCK_Z))
+        m.RotateCenter(z,0,0,1,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
+      m.GetTranslation(pos);
 
-		m.ToAxisAngle(rot);
-		pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
-		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+      // TODO: check if moved
+      pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
+    }
+
+    m.ToAxisAngle(rot);
+    pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
+    pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 /*
 		for (POSITION pos2 = m_Pieces.GetHeadPosition(); pos2 != NULL;)
 		{
@@ -6447,11 +6460,11 @@ void Project::RotateSelectedObjects(float x, float y, float z)
 				wprintf("No Collision");
 		}
 */
-	}
+  }
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsSelected())
-			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+    if (pPiece->IsSelected())
+      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 }
 
 bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
@@ -6843,21 +6856,25 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
       if (m_nCurAction == LC_ACTION_SELECT) 
       {
-	SelectAndFocusNone(bControl);
-
 	if (ClickLine.pClosest != NULL)
+        {
 	  switch (ClickLine.pClosest->GetType ())
 	  {
 	    case LC_OBJECT_PIECE:
 	    {
 	      Piece* pPiece = (Piece*)ClickLine.pClosest;
-	      pPiece->Select (true, true, false);
 	      Group* pGroup = pPiece->GetTopGroup();
+              bool bFocus = pPiece->IsFocused ();
+
+              SelectAndFocusNone (bControl);
+
+              // if a piece has focus deselect it, otherwise set the focus
+              pPiece->Select (!bFocus, !bFocus, false);
 
 	      if (pGroup != NULL)
 		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		  if (pPiece->GetTopGroup() == pGroup)
-		    pPiece->Select (true, false, false);
+		    pPiece->Select (!bFocus, false, false);
 	    } break;
 
 	    case LC_OBJECT_CAMERA:
@@ -6865,9 +6882,13 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	    case LC_OBJECT_LIGHT:
 	    case LC_OBJECT_LIGHT_TARGET:
 	    {
+              SelectAndFocusNone (bControl);
 	      ClickLine.pClosest->Select (true, true, bControl);
 	    } break;
 	  }
+        }
+        else
+          SelectAndFocusNone (bControl);
 
 	UpdateSelection();
 	UpdateAllViews();

@@ -150,11 +150,14 @@ protected:
 	bool GetSelectionCenter(Point3& Center) const;
 	void CalculateStep();
 	void MoveSelectedObjects(const Vector3& Delta);
-	void RotateSelectedObjects(float x, float y, float z);
+	void RotateSelectedObjects(const Vector3& Delta);
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
+	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
 	// Deprecated compatibility functions.
 	// TODO: Update function calls to use the math library.
+	void RotateSelectedObjects(float x, float y, float z)
+	{ RotateSelectedObjects(Vector3(x, y, z)); };
 	inline void MoveSelectedObjects(float x, float y, float z)
 	{ MoveSelectedObjects(Vector3(x, y, z)); };
 	void SnapPoint(float *point, float *reminder) const
@@ -193,6 +196,7 @@ protected:
 	float m_fTrack[3];
 	int m_nMouse;
 	Vector3 m_MouseSnapLeftover;
+	Vector3 m_MouseTotalDelta;
 
 	// Mouse control overlays.
 	typedef enum
@@ -203,20 +207,20 @@ protected:
 		LC_OVERLAY_Z,
 		LC_OVERLAY_XY,
 		LC_OVERLAY_XZ,
-		LC_OVERLAY_YZ,
-		LC_OVERLAY_CAMERA
+		LC_OVERLAY_YZ
 	} LC_OVERLAY_MODES;
 
 	int m_OverlayMode;
 	bool m_OverlayActive;
-	float m_OverlayScale;
+	float m_OverlayScale[4];
 	Point3 m_OverlayCenter;
 	Point3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
 	void MouseUpdateOverlays(int x, int y);
 	void ActivateOverlay();
+	void UpdateOverlayScale();
 
-	void LoadViewportProjection();
+	void LoadViewportProjection(int Viewport);
 	bool SetActiveViewport(int x, int y);
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);

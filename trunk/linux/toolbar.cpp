@@ -746,8 +746,8 @@ void create_piecebar(GtkWidget *window, GtkWidget *hbox)
   piececombo = gtk_combo_new();
   gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->entry), "changed",
 		     GTK_SIGNAL_FUNC(piececombo_changed), GTK_COMBO(piececombo)->entry);
-  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->list), "select-child",
-		     GTK_SIGNAL_FUNC(piececombo_select), GTK_COMBO(piececombo)->list);
+  //  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(piececombo)->list), "select-child",
+  //	     GTK_SIGNAL_FUNC(piececombo_select), GTK_COMBO(piececombo)->list);
   gtk_box_pack_start(GTK_BOX(vbox1), piececombo, FALSE, TRUE, 0);
   gtk_widget_show(piececombo);
 

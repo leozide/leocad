@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <png.h>
+#include "config.h"
 #include "typedefs.h"
+
+#ifdef LC_HAVE_PNGLIB
 
 #define alpha_composite(composite, fg, alpha, bg) {			\
   unsigned short temp = ((unsigned short)(fg)*(unsigned short)(alpha) +	\
@@ -361,3 +364,5 @@ bool SavePNG(char* filename, LC_IMAGE* image, bool transparent, bool interlaced,
 
   return true;
 }
+
+#endif // LC_HAVE_PNGLIB

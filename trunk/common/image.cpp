@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "config.h"
 #include "image.h"
 #include "file.h"
 
@@ -96,12 +97,19 @@ LC_IMAGE* OpenImage(char* filename)
   }
   strlwr(ext);
 
+#ifdef LC_HAVE_JPEGLIB
   if ((strcmp(ext, "jpg") == 0) || (strcmp (ext, "jpeg") == 0))
     return ResizeImage(OpenJPG(filename));
+#endif
+
   if (strcmp(ext, "bmp") == 0)
     return ResizeImage(OpenBMP(filename));
+
+#ifdef LC_HAVE_PNGLIB
   if (strcmp(ext, "png") == 0)
     return ResizeImage(OpenPNG(filename));
+#endif
+
   if ((strcmp (ext, "gif") == 0) || (strcmp (ext, "tmp") == 0))
   {
     FileDisk file;
@@ -135,8 +143,10 @@ bool SaveImage(char* filename, LC_IMAGE* image, LC_IMAGE_OPTS* opts)
   }
   strlwr(ext);
 
+#ifdef LC_HAVE_JPEGLIB
   if ((strcmp (ext, "jpg") == 0) || (strcmp (ext, "jpeg") == 0))
     return SaveJPG(filename, image, opts->quality, opts->interlaced);
+#endif
 
   if (strcmp (ext, "gif") == 0)
   {
@@ -152,8 +162,10 @@ bool SaveImage(char* filename, LC_IMAGE* image, LC_IMAGE_OPTS* opts)
   if (strcmp (ext, "bmp") == 0)
     return SaveBMP(filename, image, opts->truecolor == false);
 
+#ifdef LC_HAVE_PNGLIB
   if (strcmp (ext, "png") == 0)
     return SavePNG(filename, image, opts->transparent, opts->interlaced, opts->background);
+#endif
 
 //	MessageBox (NULL, "Could not save file", "Error", MB_ICONSTOP);
 

@@ -1,5 +1,5 @@
 ### $Id$
-### ALL CONFIGURATION SHOULD IN CONFIG.MK, NOT HERE
+### ALL CONFIGURATION SHOULD BE IN CONFIG.MK, NOT HERE
 include config.mk
 
 ### Module directories
@@ -118,8 +118,15 @@ arch/leocad-$(VERSION)-linux.zip: arch all
 	zip -r $@ *.txt bin docs examples -x 'CVS/*' -x '*/CVS/*' -x '*/core'
 
 arch/leocad-$(VERSION)-linux.tgz: arch all
+	mkdir leocad-$(VERSION)
+	cp bin/leocad leocad-$(VERSION)
+	cp CREDITS.txt leocad-$(VERSION)/CREDITS
+	cp README.txt leocad-$(VERSION)/README
+	cp docs/INSTALL.txt leocad-$(VERSION)/INSTALL
+	cp docs/LINUX.txt leocad-$(VERSION)/LINUX
 	rm -f $@
-	tar --exclude=CVS -cvzf $@ *.txt bin docs examples --exclude=core
+	tar -cvzf $@ leocad-$(VERSION)
+	rm -rf leocad-$(VERSION)
 
 arch/leocad-$(VERSION)-src.tgz: arch veryclean
 	rm -f $@

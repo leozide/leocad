@@ -108,6 +108,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_ACTIVATEAPP()
 	ON_COMMAND(ID_VIEW_NEWVIEW, OnViewNewView)
 	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
+	ON_WM_DROPFILES()
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnPieceBar)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
@@ -1316,4 +1317,19 @@ void CMainFrame::UpdateMenuAccelerators()
 	}
 
 	m_bmpMenu.Detach();
+}
+
+void CMainFrame::OnDropFiles(HDROP hDropInfo) 
+{
+	SetActiveWindow();      // activate us first !
+	UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+
+	if (nFiles > 0)
+	{
+		TCHAR szFileName[_MAX_PATH];
+		::DragQueryFile(hDropInfo, 0, szFileName, _MAX_PATH);
+
+		project->OpenProject(szFileName);
+	}
+	::DragFinish(hDropInfo);
 }

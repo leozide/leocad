@@ -283,19 +283,20 @@ protected:
 	Texture* m_pBackground;
 
 protected:
-  // File load/save implementation.
-  bool DoSave(char* lpszPathName, bool bReplace);
-  bool DoFileSave();
-  bool FileLoad(File* file, bool bUndo, bool bMerge);
-  void FileSave(File* file, bool bUndo);
-  void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray);
-  void FileReadMPD(File& MPD, PtrArray<File>& FileArray) const;
+	// File load/save implementation.
+	bool DoSave(char* lpszPathName, bool bReplace);
+	bool DoFileSave();
+	bool FileLoad(File* file, bool bUndo, bool bMerge);
+	void FileSave(File* file, bool bUndo);
+	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray);
+	void FileReadMPD(File& MPD, PtrArray<File>& FileArray) const;
 
 public:
 	// File helpers
-	bool OnNewDocument ();
-	bool OnOpenDocument (const char* lpszPathName);
-	bool SaveModified ();
+	bool OnNewDocument();
+	bool OnOpenDocument(const char* FileName);
+	bool OpenProject(const char* FileName);
+	bool SaveModified();
 
 protected:
 	// mail enabling

@@ -1597,6 +1597,31 @@ bool Project::OnNewDocument()
 	return true;
 }
 
+bool Project::OpenProject(const char* FileName)
+{
+	if (!SaveModified())
+		return false;  // Leave the original one
+
+//	CWaitCursor wait;
+	bool WasModified = IsModified();
+	SetModifiedFlag(false);  // Not dirty for open
+
+	if (!OnOpenDocument(FileName))
+	{
+		// Check if we corrupted the original document
+		if (!IsModified())
+			SetModifiedFlag(WasModified);
+		else
+			OnNewDocument();
+
+		return false;  // Open failed
+	}
+
+	SetPathName(FileName, true);
+
+	return true;
+}
+
 bool Project::OnOpenDocument (const char* lpszPathName)
 {
   FileDisk file;
@@ -3626,24 +3651,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_OPEN_PROJECT, filename))
 			{
-				if (!SaveModified())
-					return;  // leave the original one
-
-//	CWaitCursor wait;
-				bool bWasModified = IsModified();
-				SetModifiedFlag(false);  // not dirty for open
-
-				if (!OnOpenDocument(filename))
-				{
-					// check if we corrupted the original document
-					if (!IsModified())
-						SetModifiedFlag(bWasModified);
-					else
-						OnNewDocument();
-
-					return;  // open failed
-				}
-				SetPathName(filename, true);
+				OpenProject(filename);
 			}
 		} break;
 		
@@ -4573,26 +4581,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_RECENT:
 		{
-                  if (!SaveModified())
-                    break;  // leave the original one
-
-//	CWaitCursor wait;
-                  bool bWasModified = IsModified();
-                  SetModifiedFlag(false);  // not dirty for open
-                  String filename = main_window->GetMRU (nParam);
-
-                  if (!OnOpenDocument (filename))
-                  {
-                    // check if we corrupted the original document
-                    if (!IsModified ())
-                      SetModifiedFlag (bWasModified);
-                    else
-                      OnNewDocument ();
-
-                    main_window->RemoveFromMRU (nParam);
-                    return;  // open failed
-                  }
-                  SetPathName (filename, true);
+			OpenProject(main_window->GetMRU(nParam));
 		} break;
 
 		case LC_EDIT_UNDO:

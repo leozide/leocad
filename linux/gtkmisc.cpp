@@ -7,6 +7,8 @@
 #include "gtkmisc.h"
 #include "globals.h"
 #include "project.h"
+#include "pixmenu.h"
+#include "gtktools.h"
 
 // =============================================================================
 // Pixmap functions
@@ -145,6 +147,38 @@ GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_
 
   item = gtk_menu_item_new_with_label ("");
   tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
+  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
+
+  gtk_widget_show (item);
+  gtk_container_add (GTK_CONTAINER (menu), item);
+  gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (func), GINT_TO_POINTER (id));
+
+  if (data != NULL)
+    gtk_object_set_data (window, data, item);
+
+  return item;
+}
+
+GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixmap, GtkAccelGroup *menu_accel,
+                                    GtkSignalFunc func, GtkObject *window, int id, const char* data)
+{
+  GtkWidget *item, *accel_label, *pixmap_widget;
+  guint tmp_key;
+
+  item = gtk_pixmap_menu_item_new ();
+
+  accel_label = gtk_accel_label_new (label);
+  gtk_misc_set_alignment (GTK_MISC (accel_label), 0.0, 0.5);
+
+  gtk_container_add (GTK_CONTAINER (item), accel_label);
+  gtk_accel_label_set_accel_widget (GTK_ACCEL_LABEL (accel_label), item);
+  gtk_widget_show (accel_label);
+
+  pixmap_widget = new_pixmap (GTK_WIDGET (window), pixmap);
+  gtk_widget_show (pixmap_widget);
+  gtk_pixmap_menu_item_set_pixmap (GTK_PIXMAP_MENU_ITEM (item), pixmap_widget);
+
+  tmp_key = gtk_label_parse_uline (GTK_LABEL (accel_label), label);
   gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
 
   gtk_widget_show (item);

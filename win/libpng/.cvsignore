@@ -1,5 +1,7 @@
 Debug
 Release
+msvc
+wince
 pngrio.c
 scripts
 announce

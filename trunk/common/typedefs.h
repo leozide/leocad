@@ -246,7 +246,7 @@ typedef struct
 	bool images;
 	bool listend;
 	bool liststep;
-	bool hilite;
+	bool highlight;
 	LC_IMAGEDLG_OPTS imdlg;
 } LC_HTMLDLG_OPTS;
 

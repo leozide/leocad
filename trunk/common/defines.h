@@ -169,10 +169,18 @@ unsigned long SwapLONG(unsigned long x)
 // Image Options
 #define LC_IMAGE_PROGRESSIVE	0x1000
 #define LC_IMAGE_TRANSPARENT	0x2000
-#define LC_IMAGE_HIGHCOLOR		0x4000
-#define LC_IMAGE_MASK			0x7000
+#define LC_IMAGE_HIGHCOLOR	0x4000
+#define LC_IMAGE_MASK		0x7000
 
-// Bounding box owner
+// HTML export options
+#define LC_HTML_SINGLEPAGE      0x01
+#define LC_HTML_INDEX           0x02
+#define LC_HTML_IMAGES          0x04
+#define LC_HTML_LISTEND         0x08
+#define LC_HTML_LISTSTEP        0x10
+#define LC_HTML_HIGHLIGHT       0x20
+
+// Bounding box owner (FIXME: cleanup)
 typedef enum { LC_PIECE, LC_CAMERA, LC_CAMERA_TARGET,
 		LC_LIGHT, LC_LIGHT_TARGET } LC_OBJ_TYPES;
 

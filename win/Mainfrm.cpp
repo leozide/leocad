@@ -80,6 +80,8 @@ static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, vo
   line = ctrl.GetLineCount ();
   index = ctrl.LineIndex (line - 1);
   ctrl.SetSel (index, index);
+
+	ctrl.InvalidateRect(NULL, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////

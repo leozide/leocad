@@ -38,6 +38,9 @@ public:
 	void FromAxisAngle(float axis[3], float angle);
 	void FromFloat(float* mat);
 	bool FromInverse(double* src);
+	void CreatePerspective (float fovy, float aspect, float nearval, float farval);
+	void CreateLookat (float eye[3], float target[3], float up[3]);
+	bool Invert ();
 
 	float m[16];
 };

@@ -289,7 +289,10 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 	if (!loaded)
 	{
 #ifdef LC_WINDOWS
-		SystemDoMessageBox("Cannot load piece library.", LC_MB_OK|LC_MB_ICONERROR);
+	  // let's hope this message helps the users
+               SystemDoMessageBox("Cannot load piece library.\n"
+      "Make sure that you have the PIECES.IDX file in the same "
+      "folder where you installed the program.", LC_MB_OK|LC_MB_ICONERROR);
 #else
 		printf("Cannot load piece library !\n");
 #endif

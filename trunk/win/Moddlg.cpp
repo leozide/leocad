@@ -198,15 +198,15 @@ void CModifyDialog::UpdateInfo(void* pObject, BYTE nType)
 		{
 			float tmp[3];
 			Camera* pCamera = (Camera*)m_pObject;
-			pCamera->GetEye(tmp);
+			pCamera->GetEyePos(tmp);
 			m_fPosX = tmp[0];
 			m_fPosY = tmp[1];
 			m_fPosZ = tmp[2];
-			pCamera->GetTarget(tmp);
+			pCamera->GetTargetPos(tmp);
 			m_fRotX = tmp[0];
 			m_fRotY = tmp[1];
 			m_fRotZ = tmp[2];
-			pCamera->GetUp(tmp);
+			pCamera->GetUpVec(tmp);
 			m_fUpX = tmp[0];
 			m_fUpY = tmp[1];
 			m_fUpZ = tmp[2];

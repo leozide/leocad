@@ -63,8 +63,8 @@ void CTerrainWnd::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
 
 	if (m_pPalette)
 	{
@@ -72,7 +72,7 @@ void CTerrainWnd::OnPaint()
 		m_pDC->RealizePalette();
 	}
 
-	wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
+	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -83,9 +83,9 @@ void CTerrainWnd::OnPaint()
 
 	m_pTerrain->Render(m_pCamera, aspect);
 
-    glFlush();
-	SwapBuffers(dc.m_hDC);
-	wglMakeCurrent (oldDC, oldRC);
+  glFlush();
+	pfnwglSwapBuffers (dc.m_hDC);
+	pfnwglMakeCurrent (oldDC, oldRC);
 }
 
 void CTerrainWnd::OnSize(UINT nType, int cx, int cy) 
@@ -109,7 +109,7 @@ void CTerrainWnd::OnDestroy()
 	}
 
 	if (m_hglRC)
-		wglDeleteContext(m_hglRC);
+		pfnwglDeleteContext(m_hglRC);
 	if (m_pDC)
 		delete m_pDC;
 
@@ -136,11 +136,11 @@ int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 		
-	int nPixelFormat = ChoosePixelFormat(m_pDC->m_hDC, &pfd);
+	int nPixelFormat = pfnwglChoosePixelFormat(m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return -1;
 
-	if (!SetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!pfnwglSetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
 		return -1;
 
 	m_pPalette = new CPalette;
@@ -156,13 +156,13 @@ int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 		
 	// Create a rendering context.
-	m_hglRC = wglCreateContext(m_pDC->m_hDC);
+	m_hglRC = pfnwglCreateContext(m_pDC->m_hDC);
 	if (!m_hglRC)
 		return -1;
 
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
-	wglMakeCurrent (m_pDC->m_hDC, m_hglRC);
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
+	pfnwglMakeCurrent (m_pDC->m_hDC, m_hglRC);
 
 	// Initialize OpenGL the way we want it.
 	float ambient [] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -184,19 +184,19 @@ int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_CULL_FACE);
 
-	wglMakeCurrent(oldDC, oldRC);
+	pfnwglMakeCurrent(oldDC, oldRC);
 
 	return 0;
 }
 
 void CTerrainWnd::LoadTexture(bool linear)
 {
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
+	HDC oldDC = pfnwglGetCurrentDC();
+	HGLRC oldRC = pfnwglGetCurrentContext();
 
-	wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
+	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 	m_pTerrain->LoadTexture(linear);
-	wglMakeCurrent(oldDC, oldRC);
+	pfnwglMakeCurrent(oldDC, oldRC);
 }
 
 void CTerrainWnd::OnLButtonDown(UINT nFlags, CPoint point) 

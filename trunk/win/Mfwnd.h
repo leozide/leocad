@@ -4,7 +4,8 @@
 // MFWind.h : header file
 //
 
-#include "system.h"
+//#include "system.h"
+class MinifigWizard;
 
 /////////////////////////////////////////////////////////////////////////////
 // CMinifigWnd window
@@ -25,7 +26,7 @@ protected:
 public:
 	void DrawScene();
 	int InitGL();
-	LC_MINIFIGDLG_OPTS* m_pFig;
+	MinifigWizard* m_pFig;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

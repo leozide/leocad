@@ -52,7 +52,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 vfw32.lib glu32.lib opengl32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
 
 !ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
@@ -78,7 +78,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vfw32.lib glu32.lib opengl32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /debug /machine:I386 /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /debug /machine:I386 /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
 # SUBTRACT LINK32 /profile
 
 !ENDIF 
@@ -174,39 +174,17 @@ SOURCE=.\Leocad.cpp
 
 SOURCE=.\hlp\LeoCAD.hpj
 USERDEP__LEOCA="$(ProjDir)\hlp\AfxCore.rtf"	"$(ProjDir)\hlp\AfxPrint.rtf"	
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-# Begin Custom Build - Making help file...
-OutDir=.\Release
-ProjDir=.
-TargetName=LeoCAD
-InputPath=.\hlp\LeoCAD.hpj
-
-"$(OutDir)\$(TargetName).hlp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	call "$(ProjDir)\makehelp.bat"
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
-# Begin Custom Build - Making help file...
-OutDir=.\Debug
-ProjDir=.
-TargetName=LeoCAD
-InputPath=.\hlp\LeoCAD.hpj
-
-"$(OutDir)\$(TargetName).hlp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	call "$(ProjDir)\makehelp.bat"
-
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\Leocad.rc
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -336,6 +314,10 @@ SOURCE=.\Transbar.cpp
 # Begin Source File
 
 SOURCE=.\Wheelwnd.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\win_gl.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -527,10 +509,6 @@ SOURCE=.\StepPop.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\system.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TerOpDlg.h
 # End Source File
 # Begin Source File
@@ -560,6 +538,10 @@ SOURCE=.\Transbar.h
 # Begin Source File
 
 SOURCE=.\WheelWnd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\win_gl.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -947,15 +929,6 @@ SOURCE=.\hlp\Scmin.bmp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\Common\boundbox.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=..\Common\boundbox.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\Common\camera.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
@@ -1044,6 +1017,57 @@ SOURCE=..\Common\matrix.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\minifig.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\minifig.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\object.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\object.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\opengl.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\opengl.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\Common\piece.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
@@ -1077,6 +1101,10 @@ SOURCE=..\Common\quant.cpp
 # Begin Source File
 
 SOURCE=..\Common\quant.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\system.h
 # End Source File
 # Begin Source File
 

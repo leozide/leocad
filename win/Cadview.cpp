@@ -391,7 +391,13 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		{
 			char tmp[4];
 			sprintf (tmp, "%d", nRenderTime);
-			pDC->TextOut(rc.left+(w*c)+(int)(pDC->GetDeviceCaps (LOGPIXELSX)/2), rc.top+(h*r)+(int)(pDC->GetDeviceCaps (LOGPIXELSY)), tmp, strlen (tmp));
+
+			CRect rcNumber (rc);
+			rcNumber.left += (w*c)+(int)(pDC->GetDeviceCaps (LOGPIXELSX)/2);
+			rcNumber.top += (h*r)+(int)(pDC->GetDeviceCaps (LOGPIXELSY)/2);
+
+			pDC->SetTextAlign (TA_TOP|TA_LEFT|TA_NOUPDATECP);
+			pDC->DrawText(tmp, strlen (tmp), rcNumber, DT_LEFT|DT_TOP|DT_SINGLELINE);
 		}
 
 		if (dwPrint & PRINT_BORDER)
@@ -933,6 +939,7 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
     case VK_HOME:
     case VK_END:
     {
+      /*
       CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd ();
       CPiecesList& pList = pMain->m_wndPiecesBar.m_wndPiecesList;
       LV_FINDINFO lvfi;
@@ -952,7 +959,7 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
   			pList.SetItemState (sel, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 	  		pList.EnsureVisible (sel, FALSE);
       }
-
+*/
     } break;
 	}
 

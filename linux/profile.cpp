@@ -121,8 +121,7 @@ static bool save_var (const char *section, const char *key, const char *value)
     fprintf (rc, "[%s]\n", section);
   }
 
-  fprintf (rc, "%s=%s\n", key, value);
-
+  found = false;
   while (old_rc.ReadString (line, 1024) != NULL)
   {
     ptr = strchr (line, '=');
@@ -132,16 +131,25 @@ static bool save_var (const char *section, const char *key, const char *value)
       *ptr = '\0';
 
       if (strcmp (line, key) == 0)
+      {
+	fprintf (rc, "%s=%s\n", key, value);
+	found = true;
 	break;
- 
-      *ptr = '=';
-      fputs (line, rc);
+      }
+      else
+      {
+	*ptr = '=';
+	fputs (line, rc);
+      }
     }
     else
-    {
-      fputs (line, rc);
-      break;
-    }
+      break; // reached end of section
+  }
+
+  if (!found)
+  {
+    fprintf (rc, "%s=%s\n", key, value);
+    fputs ("\n", rc);
   }
 
   while (old_rc.ReadString (line, 1024) != NULL)

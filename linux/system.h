@@ -89,10 +89,7 @@ inline long SystemGetTicks()
   return 0;//GetTickCount();
 }
 
-inline void SystemSwapBuffers()
-{
-  //	SwapBuffers(wglGetCurrentDC());
-}
+void SystemSwapBuffers();
 
 inline bool IsKeyDown(int key)
 {

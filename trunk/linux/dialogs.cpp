@@ -22,6 +22,7 @@
 #include "main.h"
 #include "config.h"
 #include "message.h"
+#include "libman.h"
 
 // =============================================================================
 // Modal dialog helper functions
@@ -2672,7 +2673,6 @@ int groupeditdlg_execute(void* param)
 }
 
 // =========================================================
-
 // Group Dialog
 
 typedef struct
@@ -2752,50 +2752,44 @@ int groupdlg_execute(void* param)
 // =============================================================================
 // Piece Library Dialog
 
-#if 0
+#if 1
 #include "library.h"
 #include "pieceinf.h"
 
-static void librarydlg_treefocus (GtkCTree *ctree, GtkCTreeNode *row, gint column, gpointer data)
+static void librarydlg_update_list (GtkWidget *dlg)
 {
-  LibraryDialog *dlg = (LibraryDialog*)data;
-  dlg->SetCurrentGroup (GTK_CLIST (ctree)->focus_row - 1);
-}
-
-static void librarydlg_command (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *parent = gtk_widget_get_toplevel (widget);
-  LibraryDialog *dlg = (LibraryDialog*) gtk_object_get_data (GTK_OBJECT (parent), "lib");
-  int id = GPOINTER_TO_INT (data);
-
-  dlg->HandleCommand (id);
-}
-
-static void librarydlg_update_list (LC_LIBDLG_PIECEINFO *piece_info, int count, int group, void *data)
-{
-  GtkCList *clist = GTK_CLIST (data);
-  unsigned long flag = 1 << group;
-  int i, row;
+  LibraryManager *lib = (LibraryManager*) gtk_object_get_data (GTK_OBJECT (dlg), "lib");
+  GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
+  GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (dlg), "list"));
+  int row, sel = GTK_CLIST (ctree)->focus_row;
 
   gtk_clist_freeze (clist);
   gtk_clist_clear (clist);
 
-  for (i = 0; i < count; i++)
-    if ((group == -1) || ((flag & piece_info[i].current_groups) != 0))
+  for (int i = 0; i < lib->GetPieceCount(); i++)
+  {
+    PieceInfo* info;
+    lcuint32 groups;
+
+    lib->GetPieceInfo (i, &info, &groups);
+
+    if ((sel == 0) || (((1 << (sel-1)) & groups) != 0))
     {
-      char *text = piece_info[i].info->m_strDescription;
+      char *text = info->m_strDescription;
       row = gtk_clist_append (clist, &text);
       gtk_clist_set_row_data (clist, row, GINT_TO_POINTER (i));
     }
+  }
 
   gtk_clist_thaw (clist);
   clist->focus_row = 0;
   gtk_clist_select_row (clist, 0, 0);
 }
 
-static void librarydlg_update_tree (int num_groups, char str_groups[][LC_LIBDLG_MAXNAME+1], void *data)
+static void librarydlg_update_tree (GtkWidget *dlg)
 {
-  GtkCTree *ctree = GTK_CTREE (data);
+  LibraryManager *lib = (LibraryManager*) gtk_object_get_data (GTK_OBJECT (dlg), "lib");
+  GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCTreeNode *parent;
   char *text = "Groups";
 
@@ -2804,13 +2798,29 @@ static void librarydlg_update_tree (int num_groups, char str_groups[][LC_LIBDLG_
 
   parent = gtk_ctree_insert_node (ctree, NULL, NULL, &text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
 
-  for (int i = 0; i < num_groups; i++)
+  for (int i = 0; i < lib->GetGroupCount(); i++)
   {
-    text = str_groups[i];
+    text = lib->GetGroupName(i);
     gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
   }
 
   gtk_clist_thaw (GTK_CLIST (ctree));
+}
+
+static void librarydlg_treefocus (GtkCTree *ctree, GtkCTreeNode *row, gint column, gpointer data)
+{
+  librarydlg_update_list (GTK_WIDGET (data));
+}
+
+static void librarydlg_command (GtkWidget *widget, gpointer data)
+{
+  /*
+  GtkWidget *parent = gtk_widget_get_toplevel (widget);
+  LibraryDialog *dlg = (LibraryDialog*) gtk_object_get_data (GTK_OBJECT (parent), "lib");
+  int id = GPOINTER_TO_INT (data);
+
+  dlg->HandleCommand (id);
+  */
 }
 
 int librarydlg_execute (void *param)
@@ -2818,7 +2828,7 @@ int librarydlg_execute (void *param)
   GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *item, *menu, *menubar, *handle;
   GtkAccelGroup *accel, *menu_accel;
   int loop = 1, ret = LC_CANCEL;
-  LibraryDialog lib;
+  LibraryManager lib;
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
@@ -2843,11 +2853,11 @@ int librarydlg_execute (void *param)
   menubar = gtk_menu_bar_new ();
   gtk_container_add (GTK_CONTAINER (handle), menubar);
   gtk_widget_show (menubar);
-  /*
+
   // File menu
   menu = create_sub_menu (menubar, "_File", accel, &menu_accel);
   menu_tearoff (menu);
-
+  /*
   create_menu_item (menu, "_Reset", menu_accel,
 		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_RESET);
   create_menu_item (menu, "_Open...", menu_accel,
@@ -2869,11 +2879,11 @@ int librarydlg_execute (void *param)
 			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_RETURN);
   item = create_menu_item (menu, "_Cancel", menu_accel,
 			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_CANCEL);
-
+  */
   // Group menu
   menu = create_sub_menu (menubar, "_Group", accel, &menu_accel);
   menu_tearoff (menu);
-
+  /*
   create_menu_item (menu, "Insert...", menu_accel,
 		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_INSERT);
   create_menu_item (menu, "Delete", menu_accel,
@@ -2885,11 +2895,11 @@ int librarydlg_execute (void *param)
 		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_MOVEUP);
   create_menu_item (menu, "Move Down", menu_accel,
 		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_MOVEDOWN);
-
+  */
   // Piece menu
   menu = create_sub_menu (menubar, "_Piece", accel, &menu_accel);
   menu_tearoff (menu);
-
+  /*
   item = create_menu_item (menu, "_New", menu_accel,
 			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_NEW);
   gtk_widget_set_sensitive (item, FALSE);
@@ -2912,8 +2922,9 @@ int librarydlg_execute (void *param)
   gtk_clist_column_titles_hide (GTK_CLIST (ctree));
   gtk_clist_set_selection_mode (GTK_CLIST (ctree), GTK_SELECTION_BROWSE);
   gtk_signal_connect (GTK_OBJECT (ctree), "tree_select_row",
-		      GTK_SIGNAL_FUNC (librarydlg_treefocus), &lib);
+		      GTK_SIGNAL_FUNC (librarydlg_treefocus), dlg);
   gtk_widget_set_usize (ctree, -1, 200);
+  gtk_object_set_data (GTK_OBJECT (dlg), "tree", ctree);
 
   scr = gtk_scrolled_window_new ((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
   gtk_widget_show (scr);
@@ -2922,18 +2933,17 @@ int librarydlg_execute (void *param)
 
   clist = gtk_clist_new (1);
   gtk_widget_show (clist);
-  gtk_clist_set_selection_mode (GTK_CLIST (clist), GTK_SELECTION_BROWSE);
+  gtk_clist_set_selection_mode (GTK_CLIST (clist), GTK_SELECTION_EXTENDED);
   gtk_clist_set_auto_sort (GTK_CLIST (clist), TRUE);
   gtk_container_add (GTK_CONTAINER (scr), clist);
   gtk_clist_column_titles_hide (GTK_CLIST (clist));
   gtk_paned_set_position (GTK_PANED (hsplit), 150);
+  gtk_object_set_data (GTK_OBJECT (dlg), "list", clist);
 
   // Initialize
   gtk_object_set_data (GTK_OBJECT (dlg), "lib", &lib);
-  lib.SetListFunc (librarydlg_update_list, clist);
-  lib.SetTreeFunc (librarydlg_update_tree, ctree);
-  lib.Initialize ();
 
+  librarydlg_update_tree (dlg);
 
   gtk_grab_add (dlg);
   gtk_widget_show (dlg);

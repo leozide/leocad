@@ -340,7 +340,7 @@ unsigned long FileDisk::Read(void* pBuf, unsigned long nCount)
 int FileMem::GetChar()
 {
   if (m_nPosition > m_nFileSize)
-    return 0;
+    return EOF;
 
   unsigned char* ret = (unsigned char*)m_pBuffer + m_nPosition;
   m_nPosition++;

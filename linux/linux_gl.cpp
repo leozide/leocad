@@ -73,7 +73,7 @@ bool Sys_GLOpenLibrary (const char* libname)
 
   if (gl_module == NULL)
   {
-    gl_module = dlopen ("libGL.so.1", RTLD_LAZY|RTLD_GLOBAL);
+    gl_module = dlopen ("libGL.so", RTLD_LAZY|RTLD_GLOBAL);
     error = dlerror ();
     if (error)
       printf ("Error loading OpenGL library.\n%s\n", error);
@@ -81,7 +81,7 @@ bool Sys_GLOpenLibrary (const char* libname)
 
   if (gl_module == NULL)
   {
-    gl_module = dlopen ("libMesaGL.so.1", RTLD_LAZY|RTLD_GLOBAL);
+    gl_module = dlopen ("libMesaGL.so", RTLD_LAZY|RTLD_GLOBAL);
     error = dlerror ();
     if (error)
       printf ("Error loading OpenGL library.\n%s\n", error);

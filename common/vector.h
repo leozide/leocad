@@ -33,6 +33,8 @@ class Vector
   Vector& operator=(const float *point);
   bool operator==(Vector& vec);
 
+  operator const float* () const
+    { return m_fPoint; }
   void ToFloat (float *point);
   void FromFloat (const float *point);
   void FromFloat (float x, float y, float z);

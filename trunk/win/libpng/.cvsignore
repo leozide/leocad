@@ -1,8 +1,10 @@
 Debug
+Release
 pngrio.c
 scripts
 announce
 changes
+configure
 example.c
 install
 knownbug
@@ -14,8 +16,11 @@ png.5
 png.c
 png.h
 pngasmrd.h
+pngbar.png
+pngbar.jpg
 pngconf.h
 pngerror.c
+pnggccrd.c
 pngget.c
 pngmem.c
 pngnow.png
@@ -36,4 +41,3 @@ pngwutil.c
 readme
 todo
 y2kinfo
-Release

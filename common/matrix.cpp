@@ -664,6 +664,15 @@ bool Matrix::FromInverse(double* src)
 	return true;
 }
 
+void Matrix::Transpose3()
+{
+	float tmp;
+
+	tmp = m[1]; m[1] = m[4]; m[4] = tmp;
+	tmp = m[2]; m[2] = m[8]; m[8] = tmp;
+	tmp = m[6]; m[6] = m[9]; m[9] = tmp;
+}
+
 bool Matrix::Invert ()
 {
   double t, inverse[16];

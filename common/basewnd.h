@@ -45,8 +45,8 @@ typedef struct
 
 #define LC_MB_ICONERROR          0x010
 #define LC_MB_ICONQUESTION       0x020
-#define LC_MB_ICONWARNING        0x040
-#define LC_MB_ICONINFORMATION    0x080
+#define LC_MB_ICONWARNING        0x030
+#define LC_MB_ICONINFORMATION    0x040
  
 #define LC_MB_TYPEMASK           0x00F
 #define LC_MB_ICONMASK           0x0F0

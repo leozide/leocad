@@ -29,6 +29,10 @@ CTerrainDlg::CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent /*=NULL*
 	m_bLinear = bLinear;
 }
 
+CTerrainDlg::~CTerrainDlg()
+{
+	delete m_pTerrainWnd;
+}
 
 void CTerrainDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -99,6 +103,7 @@ BOOL CTerrainDlg::OnInitDialog()
 
 LRESULT CTerrainDlg::OnGridChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
+	m_Grid.InvalidateRect(NULL, FALSE);
 	m_pTerrain->SetControlPoints();
 	m_pTerrain->Tesselate();
 

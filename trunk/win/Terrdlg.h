@@ -20,6 +20,7 @@ class CTerrainDlg : public CDialog
 // Construction
 public:
 	CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent = NULL);   // standard constructor
+	virtual ~CTerrainDlg();
 
 // Dialog Data
 	//{{AFX_DATA(CTerrainDlg)

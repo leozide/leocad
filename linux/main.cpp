@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <string.h>
 #include "opengl.h"
-#include "gtkglarea.h"
 #include "project.h"
 #include "toolbar.h"
 #include "globals.h"

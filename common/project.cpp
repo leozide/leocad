@@ -2636,6 +2636,7 @@ void Project::RenderOverlays(int Viewport)
 			if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_Z))
 			{
 				Vector3 Tangent, Normal = m_OverlayTrackStart - m_OverlayCenter;
+				Normal.Normalize();
 				float Angle;
 
 				switch (m_OverlayMode)
@@ -2662,10 +2663,15 @@ void Project::RenderOverlays(int Viewport)
 
 				if (Angle > 0.0f)
 				{
+					Point3 Pt = m_OverlayCenter + Normal * m_OverlayScale[Viewport] * OverlayRotateRadius;
+
+					// TODO: scale
+					// TODO: draw cap
+
 					glBegin(GL_LINES);
 					glColor3f(0.8f, 0.8f, 0.0f);
-					glVertex3f(m_OverlayTrackStart.GetX(), m_OverlayTrackStart.GetY(), m_OverlayTrackStart.GetZ());
-					glVertex3f(m_OverlayTrackStart.GetX() + Tangent.GetX(), m_OverlayTrackStart.GetY() + Tangent.GetY(), m_OverlayTrackStart.GetZ() + Tangent.GetZ());
+					glVertex3f(Pt[0], Pt[1], Pt[2]);
+					glVertex3f(Pt[0] + Tangent[0], Pt[1] + Tangent[1], Pt[2] + Tangent[2]);
 					glEnd();
 				}
 
@@ -6717,25 +6723,38 @@ void Project::StartTracking(int mode)
 
 void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 {
+	float SnapXY, SnapZ;
+
+	if (m_nMoveSnap > 0)
+	{
+		SnapXY = 0.8f * m_nMoveSnap;
+		SnapZ = 0.32f * m_nMoveSnap;
+	}
+	else
+	{
+		SnapXY = 0.4f;
+		SnapZ = 0.32f;
+	}
+
 	if (m_nSnap & LC_DRAW_SNAP_X)
 	{
-		int i = (int)(Delta[0] / 0.4f);
-		Leftover.SetX(Delta[0] - (0.4f * i));
-		Delta.SetX(0.4f * i);
+		int i = (int)(Delta[0] / SnapXY);
+		Leftover.SetX(Delta[0] - (SnapXY * i));
+		Delta.SetX(SnapXY * i);
 	}
 
 	if (m_nSnap & LC_DRAW_SNAP_Y)
 	{
-		int i = (int)(Delta[1] / 0.4f);
-		Leftover.SetY(Delta[1] - (0.4f * i));
-		Delta.SetY(0.4f * i);
+		int i = (int)(Delta[1] / SnapXY);
+		Leftover.SetY(Delta[1] - (SnapXY * i));
+		Delta.SetY(SnapXY * i);
 	}
 
 	if (m_nSnap & LC_DRAW_SNAP_Z)
 	{
-		int i = (int)(Delta[2] / 0.32f);
-		Leftover.SetZ(Delta[2] - (0.32f * i));
-		Delta.SetZ(0.32f * i);
+		int i = (int)(Delta[2] / SnapZ);
+		Leftover.SetZ(Delta[2] - (SnapZ * i));
+		Delta.SetZ(SnapZ * i);
 	}
 }
 
@@ -6868,13 +6887,13 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 		if (nSel == 1)
 		{
 			if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
-				q = q * Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR));
+				q = Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR)) * q;
 
 			if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
-				q = q * Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR));
+				q = Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR)) * q;
 
 			if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
-				q = q * Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR));
+				q = Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR)) * q;
 		}
 		else
 		{
@@ -8565,16 +8584,16 @@ void Project::MouseUpdateOverlays(int x, int y)
 		else if (Distance < (OverlayRotateRadius * OverlayScale + Epsilon))
 		{
 			// 3D rotation unless we're over one of the axis circles.
-			Mode = LC_OVERLAY_XYZ; // TODO: remember if you are inside the sphere and draw a translucent sphere.
+			Mode = LC_OVERLAY_XYZ;
 
 			// Point P on a line defined by two points P1 and P2 is described by P = P1 + u (P2 - P1)
-			// A sphere centered at P3 with radius r is described by (x - x3)2 + (y - y3)2 + (z - z3)2 = r2 
+			// A sphere centered at P3 with radius r is described by (x - x3)^2 + (y - y3)^2 + (z - z3)^2 = r^2 
 			// Substituting the equation of the line into the sphere gives a quadratic equation where:
-			// a = (x2 - x1)2 + (y2 - y1)2 + (z2 - z1)2 
+			// a = (x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2 
 			// b = 2[ (x2 - x1) (x1 - x3) + (y2 - y1) (y1 - y3) + (z2 - z1) (z1 - z3) ] 
 			// c = x32 + y32 + z32 + x12 + y12 + z12 - 2[x3 x1 + y3 y1 + z3 z1] - r2 
-			// The solutions to this quadratic are described by: (-b +- sqrt(b2 - 4 a c) / 2 a
-			// The exact behavior is determined by b * b - 4 * a * c 
+			// The solutions to this quadratic are described by: (-b +- sqrt(b^2 - 4 a c) / 2 a
+			// The exact behavior is determined by b^2 - 4 a c:
 			// If this is less than 0 then the line does not intersect the sphere. 
 			// If it equals 0 then the line is a tangent to the sphere intersecting it at one point
 			// If it is greater then 0 the line intersects the sphere at two points. 

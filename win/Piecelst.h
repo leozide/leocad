@@ -8,6 +8,7 @@
 //
 
 #include "TitleTip.h"
+#include "SortHead.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPiecesList window
@@ -23,6 +24,7 @@ public:
 
 // Operations
 public:
+	void SubclassHeader();
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -38,7 +40,12 @@ public:
 protected:
 	UINT m_nLastPieces[32];
 	int CellRectFromPoint(CPoint & point, RECT * cellrect, int * col) const;
+
+	BOOL m_bAscending;
+	int m_nSortedCol;
+
 	CTitleTip m_TitleTip;
+	CSortHeaderCtrl m_HeaderCtrl;
 
 	//{{AFX_MSG(CPiecesList)
 	afx_msg void OnColumnclick(NMHDR* pNMHDR, LRESULT* pResult);

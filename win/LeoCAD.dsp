@@ -207,13 +207,6 @@ InputPath=.\hlp\LeoCAD.hpj
 # Begin Source File
 
 SOURCE=.\Leocad.rc
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -286,6 +279,10 @@ SOURCE=.\Rmodel.cpp
 # Begin Source File
 
 SOURCE=.\Seldlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SortHead.cpp
 # End Source File
 # Begin Source File
 
@@ -507,6 +504,10 @@ SOURCE=.\RModel.h
 # Begin Source File
 
 SOURCE=.\SelDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SortHead.h
 # End Source File
 # Begin Source File
 

@@ -1632,7 +1632,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
         file.Seek(0, SEEK_SET);
         mpdfile = false;
         datfile = true;
-        console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.");
+        console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
       }
     }
 
@@ -1653,7 +1653,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       CalculateStep();
       UpdateAllViews ();
 
-      console.PrintMisc("%d objects imported.", ok);
+      console.PrintMisc("%d objects imported.\n", ok);
       bSuccess = true;
     }
     else

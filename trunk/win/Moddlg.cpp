@@ -31,6 +31,7 @@ BEGIN_MESSAGE_MAP(CModifyDialog, CDialogBar)
 	ON_BN_CLICKED(IDC_MODDLG_PIECE, OnModdlgPiece)
 	ON_CBN_SELENDOK(IDC_MODDLG_LIST, OnSelendokModdlgList)
 	ON_BN_CLICKED(IDC_MODDLG_APPLY, OnModdlgApply)
+	ON_CBN_DROPDOWN(IDC_MODDLG_LIST, OnDropdownModdlgList)
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_MODDLG_PIECES, ID_MODDLG_LIGHTS, OnMenuClick)
 END_MESSAGE_MAP() 
@@ -192,10 +193,11 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			m_bHidden = pPiece->IsHidden();
 			m_ctlColor.SetColorIndex(pPiece->GetColor());
 			UpdateData(FALSE);
-			m_ctlCombo.SelectString(-1, pPiece->GetName());
+			m_ctlCombo.SetWindowText(pPiece->GetName());
 		} break;
 
-		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
+		case LC_OBJECT_CAMERA:
+		case LC_OBJECT_CAMERA_TARGET:
 		{
 			float tmp[3];
 			Camera* pCamera = (Camera*)m_pObject;
@@ -216,10 +218,11 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			m_fFar = pCamera->m_zFar;
 			m_bHidden = !pCamera->IsVisible();
 			UpdateData(FALSE);
-			m_ctlCombo.SelectString(-1, pCamera->GetName());
+			m_ctlCombo.SetWindowText(pCamera->GetName());
 		} break;
 
-		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
+		case LC_OBJECT_LIGHT:
+		case LC_OBJECT_LIGHT_TARGET:
 		{
 			// TODO: Lights.
 		} break;
@@ -240,16 +243,11 @@ void CModifyDialog::OnModdlgPiece()
 
 void CModifyDialog::UpdateControls(BYTE nType)
 {
-	Piece* pPiece;
-	Camera* pCamera;
-	Light* pLight;
-	project->GetArrays(&pPiece, &pCamera, &pLight);
-	m_nType = nType;
+	if (m_nType == nType)
+		return;
 
-	m_ctlCombo.ResetContent();
 	DeleteObject((HBITMAP)SendDlgItemMessage(IDC_MODDLG_PIECE, BM_GETIMAGE, IMAGE_BITMAP, 0));
 
-	int i;
 	UINT id = IDB_PIECE;
 	if (nType == LC_OBJECT_CAMERA || nType == LC_OBJECT_CAMERA_TARGET)
 		id = IDB_CAMERA;
@@ -258,16 +256,12 @@ void CModifyDialog::UpdateControls(BYTE nType)
 	SendDlgItemMessage(IDC_MODDLG_PIECE, BM_SETIMAGE, IMAGE_BITMAP, 
 		(LPARAM)LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(id)));
 
-	switch (m_nType)
+	m_ctlCombo.SetWindowText("");
+
+	switch (nType)
 	{
 		case LC_OBJECT_PIECE:
 		{
-			for (; pPiece; pPiece = pPiece->m_pNext)
-			{
-				i = m_ctlCombo.AddString(pPiece->GetName());
-				m_ctlCombo.SetItemDataPtr(i, pPiece);
-			}
-
 			GetDlgItem(IDC_MODDLG_ROTATION)->SetWindowText(_T("Rotation")); 
 			GetDlgItem(IDC_MODDLG_STEPFROM)->SetWindowText(_T("Step"));
 			GetDlgItem(IDC_MODDLG_STEPTO)->ShowWindow(SW_SHOW);
@@ -284,14 +278,9 @@ void CModifyDialog::UpdateControls(BYTE nType)
 			GetDlgItem(IDC_MODDLG_FAR)->ShowWindow(SW_HIDE);
 		} break;
 
-		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
+		case LC_OBJECT_CAMERA:
+		case LC_OBJECT_CAMERA_TARGET:
 		{
-			for (; pCamera; pCamera = pCamera->m_pNext)
-			{
-				i = m_ctlCombo.AddString(pCamera->GetName());
-				m_ctlCombo.SetItemDataPtr(i, pCamera);
-			}
-
 			GetDlgItem(IDC_MODDLG_ROTATION)->SetWindowText(_T("Target"));
 			GetDlgItem(IDC_MODDLG_STEPFROM)->SetWindowText(_T("Up"));
 			GetDlgItem(IDC_MODDLG_STEPTO)->ShowWindow(SW_HIDE);
@@ -313,6 +302,8 @@ void CModifyDialog::UpdateControls(BYTE nType)
 			// TODO: Lights.
 		} break;
 	}
+
+	m_nType = nType;
 }
 
 void CModifyDialog::OnMenuClick(UINT nID)
@@ -397,3 +388,56 @@ void CModifyDialog::OnModdlgClose()
 	AfxGetMainWnd()->PostMessage(WM_COMMAND, ID_VIEW_MODIFY_BAR);
 }
 */
+
+void CModifyDialog::OnDropdownModdlgList() 
+{
+	Piece* pPiece;
+	Camera* pCamera;
+	Light* pLight;
+	int i;
+
+	project->GetArrays(&pPiece, &pCamera, &pLight);
+
+	m_ctlCombo.ResetContent();
+
+	switch (m_nType)
+	{
+		case LC_OBJECT_PIECE:
+		{
+			for (; pPiece; pPiece = pPiece->m_pNext)
+			{
+				i = m_ctlCombo.AddString(pPiece->GetName());
+				m_ctlCombo.SetItemDataPtr(i, pPiece);
+			}
+
+			if (m_pObject)
+				m_ctlCombo.SelectString(-1, ((Piece*)m_pObject)->GetName());
+		} break;
+
+		case LC_OBJECT_CAMERA:
+		case LC_OBJECT_CAMERA_TARGET:
+		{
+			for (; pCamera; pCamera = pCamera->m_pNext)
+			{
+				i = m_ctlCombo.AddString(pCamera->GetName());
+				m_ctlCombo.SetItemDataPtr(i, pCamera);
+			}
+
+			if (m_pObject)
+				m_ctlCombo.SelectString(-1, ((Camera*)m_pObject)->GetName());
+		} break;
+
+		case LC_OBJECT_LIGHT:
+		case LC_OBJECT_LIGHT_TARGET:
+		{
+			for (; pLight; pLight = pLight->m_pNext)
+			{
+				i = m_ctlCombo.AddString(pLight->GetName());
+				m_ctlCombo.SetItemDataPtr(i, pLight);
+			}
+
+			if (m_pObject)
+				m_ctlCombo.SelectString(-1, ((Light*)m_pObject)->GetName());
+		} break;
+	}
+}

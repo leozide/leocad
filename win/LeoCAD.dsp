@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /I "./jpeglib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "./libpng./zlib" /I "../common" /I "../win" /I "./jpeglib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -78,7 +78,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vfw32.lib glu32.lib opengl32.lib jpeglib.lib 3dsftk.lib /nologo /subsystem:windows /debug /machine:I386 /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug"
+# ADD LINK32 vfw32.lib glu32.lib opengl32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /debug /machine:I386 /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
 # SUBTRACT LINK32 /profile
 
 !ENDIF 
@@ -992,6 +992,12 @@ SOURCE=..\Common\group.cpp
 # Begin Source File
 
 SOURCE=..\Common\group.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\im_png.cpp
+# ADD CPP /I "./libpng" /I "./zlib"
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 

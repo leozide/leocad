@@ -18,6 +18,7 @@ extern "C" {
 
 static LC_IMAGE* OpenJPG(char* filename);
 static LC_IMAGE* OpenBMP(char* filename);
+LC_IMAGE* OpenPNG(char* filename);
 static LC_IMAGE* OpenGIF(File* file);
 static bool SaveJPG(char* filename, LC_IMAGE* image, int quality, bool progressive);
 static bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize);
@@ -155,6 +156,8 @@ LC_IMAGE* OpenImage(char* filename)
 		return ResizeImage(OpenJPG(filename));
 	if (strcmp(ext, "bmp") == 0)
 		return ResizeImage(OpenBMP(filename));
+	if (strcmp(ext, "png") == 0)
+		return ResizeImage(OpenPNG(filename));
 	if ((strcmp (ext, "gif") == 0) || (strcmp (ext, "tmp") == 0))
 	{
 		FileDisk file;

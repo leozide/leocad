@@ -4,6 +4,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+#include <string.h>
 #include "gtkmisc.h"
 #include "globals.h"
 #include "project.h"

@@ -26,10 +26,10 @@ class Matrix;
 
 typedef struct UNDOINFO
 {
-	File file;
+	FileMem file;
 	char strText[21];
 	UNDOINFO* pNext;
-	UNDOINFO() : file(true) { pNext = NULL; };
+	UNDOINFO() { pNext = NULL; };
 } UNDOINFO;
 
 class Project

@@ -18,7 +18,7 @@ echo // Frame Controls (IDW_*) >>"hlp\LeoCAD.hm"
 makehm IDW_,HIDW_,0x50000 resource.h >>"hlp\LeoCAD.hm"
 REM -- Make help for Project LEOCAD
 
-
+	
 echo Building Win32 Help files
 start /wait hcw /C /E /M "hlp\LeoCAD.hpj"
 if errorlevel 1 goto :Error

@@ -173,7 +173,27 @@ SOURCE=.\Leocad.cpp
 # Begin Source File
 
 SOURCE=.\hlp\LeoCAD.hpj
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
 USERDEP__LEOCA="$(ProjDir)\hlp\AfxCore.rtf"	"$(ProjDir)\hlp\AfxPrint.rtf"	
+# Begin Custom Build - Making help file...
+OutDir=.\Release
+ProjDir=.
+TargetName=LeoCAD
+InputPath=.\hlp\LeoCAD.hpj
+
+"$(OutDir)\$(TargetName).hlp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	call "$(ProjDir)\makehelp.bat"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+USERDEP__LEOCA="$(ProjDir)\hlp\AfxCore.rtf"	"$(ProjDir)\hlp\AfxPrint.rtf"	
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

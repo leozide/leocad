@@ -3438,11 +3438,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
       opts.listend = (ul & LC_HTML_LISTEND) != 0;
       opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
       opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
+      opts.htmlext = (ul & LC_HTML_HTMLEXT) != 0;
 
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
 				FILE* f;
-				char* ext, fn[LC_MAXPATH];
+				char *ext, *htmlext, fn[LC_MAXPATH];
 				int i;
 				unsigned short last = GetLastStep();
 
@@ -3454,6 +3455,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
         if (opts.listend) ul |= LC_HTML_LISTEND;
         if (opts.liststep) ul |= LC_HTML_LISTSTEP;
         if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
+        if (opts.htmlext) ul |= LC_HTML_HTMLEXT;
         Sys_ProfileSaveInt ("Default", "HTML Options", ul);
 
         // Save image options
@@ -3476,6 +3478,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				case LC_IMAGE_JPG: ext = ".jpg"; break;
 				case LC_IMAGE_PNG: ext = ".png"; break;
 				}
+
+        if (opts.htmlext)
+          htmlext = ".html";
+        else
+          htmlext = ".htm";
 
         i = strlen (opts.path);
         if (i && opts.path[i] != '/' && opts.path[i] != '\\')
@@ -3509,11 +3516,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				if (opts.singlepage)
 				{
-					strcpy(fn, opts.path);
-					strcat(fn, m_strTitle);
-					strcat(fn, ".htm");
-					f = fopen(fn, "wt");
-					fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
+					strcpy (fn, opts.path);
+					strcat (fn, m_strTitle);
+          strcat (fn, htmlext);
+					f = fopen (fn, "wt");
+					fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 					for (i = 1; i <= last; i++)
 					{
@@ -3534,18 +3541,19 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				{
 					if (opts.index)
 					{
-						strcpy(fn, opts.path);
-						strcat(fn, m_strTitle);
-						strcat(fn, "-index.htm");
-						f = fopen(fn, "wt");
+						strcpy (fn, opts.path);
+						strcat (fn, m_strTitle);
+						strcat (fn, "-index");
+            strcat (fn, htmlext);
+						f = fopen (fn, "wt");
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 						for (i = 1; i <= last; i++)
-							fprintf(f, "<A HREF=\"%s-%02d.htm\">Step %d<BR>\n</A>", m_strTitle, i, i);
+							fprintf(f, "<A HREF=\"%s-%02d%s\">Step %d<BR>\n</A>", m_strTitle, i, htmlext, i);
 
 						if (opts.listend)
-							fprintf(f, "<A HREF=\"%s-pieces.htm\">Pieces Used</A><BR>\n", m_strTitle);
+							fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A><BR>\n", m_strTitle, htmlext);
 
 						fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\n", f);
 						fclose(f);
@@ -3554,7 +3562,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					// Create each step
 					for (i = 1; i <= last; i++)
 					{
-						sprintf(fn, "%s%s-%02d.htm", opts.path, m_strTitle, i);
+						sprintf(fn, "%s%s-%02d%s", opts.path, m_strTitle, i, htmlext);
 						f = fopen(fn, "wt");
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, i);
@@ -3566,16 +3574,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
 						if (i != 1)
-							fprintf(f, "<A HREF=\"%s-%02d.htm\">Previous</A> ", m_strTitle, i-1);
+							fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
 
 						if (opts.index)
-							fprintf(f, "<A HREF=\"%s-index.htm\">Index</A> ", m_strTitle);
+							fprintf(f, "<A HREF=\"%s-index%s\">Index</A> ", m_strTitle, htmlext);
 
 						if (i != last)
-							fprintf(f, "<A HREF=\"%s-%02d.htm\">Next</A>", m_strTitle, i+1);
+							fprintf(f, "<A HREF=\"%s-%02d%s\">Next</A>", m_strTitle, i+1, htmlext);
 						else
 							if (opts.listend)
-								fprintf(f, "<A HREF=\"%s-pieces.htm\">Pieces Used</A>", m_strTitle);
+								fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A>", m_strTitle, htmlext);
 
 						fputs("<BR></HTML>\n",f);
 						fclose(f);
@@ -3583,19 +3591,20 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					if (opts.listend)
 					{
-						strcpy(fn, opts.path);
-						strcat(fn, m_strTitle);
-						strcat(fn, "-pieces.htm");
-						f = fopen(fn, "wt");
-						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
+						strcpy (fn, opts.path);
+						strcat (fn, m_strTitle);
+						strcat (fn, "-pieces");
+            strcat (fn, htmlext);
+						f = fopen (fn, "wt");
+						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 				
 						CreateHTMLPieceList(f, 0, opts.images, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
-						fprintf(f, "<A HREF=\"%s-%02d.htm\">Previous</A> ", m_strTitle, i-1);
+						fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
 
 						if (opts.index)
-							fprintf(f, "<A HREF=\"%s-index.htm\">Index</A> ", m_strTitle);
+							fprintf(f, "<A HREF=\"%s-index%s\">Index</A> ", m_strTitle, htmlext);
 
 						fputs("<BR></HTML>\n",f);
 						fclose(f);

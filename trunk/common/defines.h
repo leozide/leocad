@@ -179,6 +179,7 @@ unsigned long SwapLONG(unsigned long x)
 #define LC_HTML_LISTEND         0x08
 #define LC_HTML_LISTSTEP        0x10
 #define LC_HTML_HIGHLIGHT       0x20
+#define LC_HTML_HTMLEXT         0x40
 
 // Bounding box owner (FIXME: cleanup)
 typedef enum { LC_PIECE, LC_CAMERA, LC_CAMERA_TARGET,

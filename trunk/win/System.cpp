@@ -1173,14 +1173,15 @@ bool SystemDoDialog(int nMode, void* param)
 			LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)param;
 			CHTMLDlg dlg(&opts->imdlg);
 
-            dlg.m_nLayout = opts->singlepage ? 0 : 1;
-            dlg.m_bIndex = opts->index;
-            dlg.m_bImages = opts->images;
-            dlg.m_bListEnd = opts->listend;
-            dlg.m_bListStep = opts->liststep;
-            dlg.m_bHighlight = opts->highlight;
+      dlg.m_nLayout = opts->singlepage ? 0 : 1;
+      dlg.m_bIndex = opts->index;
+      dlg.m_bImages = opts->images;
+      dlg.m_bListEnd = opts->listend;
+      dlg.m_bListStep = opts->liststep;
+      dlg.m_bHighlight = opts->highlight;
+      dlg.m_bHtmlExt = opts->htmlext;
 
-            if (dlg.DoModal() == IDOK)
+      if (dlg.DoModal() == IDOK)
 			{
 				strcpy(opts->path, dlg.m_strFolder);
 				opts->singlepage = (dlg.m_nLayout == 0);
@@ -1189,6 +1190,7 @@ bool SystemDoDialog(int nMode, void* param)
 				opts->listend = dlg.m_bListEnd == TRUE;
 				opts->liststep = dlg.m_bListStep == TRUE;
 				opts->highlight = dlg.m_bHighlight == TRUE;
+        opts->htmlext = dlg.m_bHtmlExt == TRUE;
 				return true;
 			}
 		} break;

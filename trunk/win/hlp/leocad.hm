@@ -225,6 +225,7 @@ HID_LOCK_LOCKZ                          0x1817B
 HID_LOCK_UNLOCKALL                      0x1817C
 HID_LOCK_ON                             0x1817D
 HID_PIECE_MIRROR                        0x1817E
+HID_FILE_IMPORTPIECE                    0x18180
 HID_VIEW_PIECES_BAR                     0x1E821
 HID_VIEW_TOOLS_BAR                      0x1E822
 HID_VIEW_ANIMATION_BAR                  0x1E823

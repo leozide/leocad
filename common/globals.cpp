@@ -176,8 +176,20 @@ MFW_PIECEINFO mfwpieceinfo[] = {
   { "4498", "Arrow Quiver", MF_NECK },
   { "4499", "Bow with Arrow", MF_TOOL },
   { "3852", "Hairbrush", MF_TOOL },
-  { "30152", "Magnifying Glass", MF_TOOL }
+  { "30152", "Magnifying Glass", MF_TOOL },
+  { "973P23", "'S' Logo Yellow / Blue Pattern", MF_TORSO },
+  { "973P42", "Castle Crossed Pikes Pattern", MF_TORSO },
+  { "973P65", "Futuron Pattern", MF_TORSO },
+  { "973P25", "Red Cross & Stethoscope Pattern", MF_TORSO },
+  { "973P24", "Red Cross Pattern", MF_TORSO },
+  { "973P64", "Unitron Pattern", MF_TORSO },
+  { "4524", "Cape", MF_NECK },
+  { "2570", "Crossbow", MF_TOOL },
+  { "3834", "Fire Helmet", MF_HAT },
+  { "2614", "Fishing Rod", MF_TOOL }
 };
+
+int MFW_PIECES = sizeof(mfwpieceinfo)/sizeof(MFW_PIECEINFO);
 
 //	{ "770", "Shield Ovoid", MF_TOOL }, 
 //	2447      Minifig Helmet Visor

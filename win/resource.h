@@ -292,6 +292,7 @@
 #define IDC_GENDLG_FOLDERBTN            1131
 #define IDC_GENDLG_MOUSE                1132
 #define IDC_GENDLG_GAMMA                1133
+#define IDC_GENDLG_USER                 1133
 #define IDC_MODDLG_LIST                 1136
 #define IDC_MODDLG_COLOR                1137
 #define IDC_MODDLG_PIECE                1142
@@ -486,15 +487,16 @@
 #define ID_FILE_EDITPIECELIBRARY        32865
 #define ID_VIEW_ZOOMIN                  32866
 #define ID_VIEW_ZOOMOUT                 32867
-#define ID_PIECE_DETACH                 32870
-#define ID_PIECE_ATTACH                 32871
-#define ID_PIECE_EDITGROUP              32872
-#define ID_PIECE_EDITGROUPS             32872
-#define ID_VIEW_CAMERAS_DUMMY           32873
-#define ID_PRINT_FILENAME               32874
-#define ID_PRINT_AUTHOR                 32875
-#define ID_PRINT_DESCRIPTION            32876
-#define ID_PRINT_PAGENUMBER             32877
+#define ID_PIECE_DETACH                 32868
+#define ID_PIECE_ATTACH                 32869
+#define ID_PIECE_EDITGROUP              32870
+#define ID_PIECE_EDITGROUPS             32871
+#define ID_VIEW_CAMERAS_DUMMY           32872
+#define ID_PRINT_FILENAME               32873
+#define ID_PRINT_AUTHOR                 32874
+#define ID_PRINT_DESCRIPTION            32875
+#define ID_PRINT_PAGENUMBER             32876
+#define ID_PRINT_TOTALPAGES             32877
 #define ID_PRINT_CURRENTTIME            32878
 #define ID_PRINT_CURRENTDATE            32879
 #define ID_PRINT_LEFTALIGN              32880
@@ -655,8 +657,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        235
-#define _APS_NEXT_COMMAND_VALUE         33158
 #define _APS_NEXT_CONTROL_VALUE         1229
+#define _APS_NEXT_COMMAND_VALUE         33158
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

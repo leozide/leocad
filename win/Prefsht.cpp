@@ -95,10 +95,11 @@ void CPreferencesSheet::OnDefault()
 	unsigned long l;
 	unsigned short s1, s2;
 
-	m_PageGeneral.GetOptions(&i, &j, str);
+	m_PageGeneral.GetOptions(&i, &j, str, st1);
 	AfxGetApp()->WriteProfileInt("Settings", "Autosave", i);
 	AfxGetApp()->WriteProfileInt("Default", "Mouse", j);
 	AfxGetApp()->WriteProfileString("Default", "Projects", str);
+	AfxGetApp()->WriteProfileString("Default", "User", st1);
 	m_PageDetail.GetOptions(&l, &f);
 	AfxGetApp()->WriteProfileInt("Default", "Detail", l);
 	AfxGetApp()->WriteProfileInt("Default", "Line", (int)(f*100));

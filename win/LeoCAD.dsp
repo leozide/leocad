@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="LeoCAD" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 60000
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
@@ -25,7 +25,7 @@ CFG=LeoCAD - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=snCl.exe
+CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
@@ -51,7 +51,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=snLink.exe
+LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
 # ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libc.lib" /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
 
@@ -77,7 +77,7 @@ LINK32=snLink.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=snLink.exe
+LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib gdi32.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
 # SUBTRACT LINK32 /pdb:none
@@ -232,6 +232,10 @@ SOURCE=.\Piecebar.cpp
 # Begin Source File
 
 SOURCE=.\Piececmb.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\Piecelst.cpp
 # End Source File
 # Begin Source File
 
@@ -1228,19 +1232,6 @@ SOURCE=..\Common\piece.cpp
 
 SOURCE=..\Common\pieceinf.cpp
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\piecelst.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

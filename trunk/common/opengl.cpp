@@ -2,9 +2,11 @@
 // Routines to load the OpenGL libraries dynamically
 //
 
+#include <string.h>
+#include <stdio.h>
 #include "opengl.h"
 
-// This functions should be defined in (system)_gl.cpp
+// These functions should be defined in (system)_gl.cpp
 bool Sys_GLOpenLibrary (const char* libname);
 void Sys_GLCloseLibrary ();
 void* Sys_GLGetProc (const char *symbol);
@@ -349,32 +351,7 @@ PFNGLINITNAMES pfnglInitNames;
 PFNGLLOADNAME pfnglLoadName;
 PFNGLPUSHNAME pfnglPushName;
 PFNGLPOPNAME pfnglPopName;
-PFNGLBLENDEQUATIONEXT pfnglBlendEquationEXT;
-PFNGLBLENDCOLOREXT pfnglBlendColorEXT;
-PFNGLPOLYGONOFFSETEXT pfnglPolygonOffsetEXT;
-PFNGLVERTEXPOINTEREXT pfnglVertexPointerEXT;
-PFNGLNORMALPOINTEREXT pfnglNormalPointerEXT;
-PFNGLCOLORPOINTEREXT pfnglColorPointerEXT;
-PFNGLINDEXPOINTEREXT pfnglIndexPointerEXT;
-PFNGLTEXCOORDPOINTEREXT pfnglTexCoordPointerEXT;
-PFNGLEDGEFLAGPOINTEREXT pfnglEdgeFlagPointerEXT;
-PFNGLGETPOINTERVEXT pfnglGetPointervEXT;
-PFNGLARRAYELEMENTEXT pfnglArrayElementEXT;
-PFNGLDRAWARRAYSEXT pfnglDrawArraysEXT;
-PFNGLGENTEXTURESEXT pfnglGenTexturesEXT;
-PFNGLDELETETEXTURESEXT pfnglDeleteTexturesEXT;
-PFNGLBINDTEXTUREEXT pfnglBindTextureEXT;
-PFNGLPRIORITIZETEXTURESEXT pfnglPrioritizeTexturesEXT;
-PFNGLARETEXTURESRESIDENTEXT pfnglAreTexturesResidentEXT;
-PFNGLISTEXTUREEXT pfnglIsTextureEXT;
-PFNGLTEXIMAGE3DEXT pfnglTexImage3DEXT;
-PFNGLTEXSUBIMAGE3DEXT pfnglTexSubImage3DEXT;
-PFNGLCOPYTEXSUBIMAGE3DEXT pfnglCopyTexSubImage3DEXT;
-PFNGLCOLORTABLEEXT pfnglColorTableEXT;
-PFNGLCOLORSUBTABLEEXT pfnglColorSubTableEXT;
-PFNGLGETCOLORTABLEEXT pfnglGetColorTableEXT;
-PFNGLGETCOLORTABLEPARAMETERFVEXT pfnglGetColorTableParameterfvEXT;
-PFNGLGETCOLORTABLEPARAMETERIVEXT pfnglGetColorTableParameterivEXT;
+
 PFNGLACTIVETEXTUREARB pfnglActiveTextureARB;
 PFNGLCLIENTACTIVETEXTUREARB pfnglClientActiveTextureARB;
 PFNGLMULTITEXCOORD1DARB pfnglMultiTexCoord1dARB;
@@ -411,77 +388,13 @@ PFNGLMULTITEXCOORD4SARB pfnglMultiTexCoord4sARB;
 PFNGLMULTITEXCOORD4SVARB pfnglMultiTexCoord4svARB;
 PFNGLPOINTPARAMETERFEXT pfnglPointParameterfEXT;
 PFNGLPOINTPARAMETERFVEXT pfnglPointParameterfvEXT;
-PFNGLBLENDFUNCSEPARATEINGR pfnglBlendFuncSeparateINGR;
-PFNGLWINDOWPOS2IMESA pfnglWindowPos2iMESA;
-PFNGLWINDOWPOS2SMESA pfnglWindowPos2sMESA;
-PFNGLWINDOWPOS2FMESA pfnglWindowPos2fMESA;
-PFNGLWINDOWPOS2DMESA pfnglWindowPos2dMESA;
-PFNGLWINDOWPOS2IVMESA pfnglWindowPos2ivMESA;
-PFNGLWINDOWPOS2SVMESA pfnglWindowPos2svMESA;
-PFNGLWINDOWPOS2FVMESA pfnglWindowPos2fvMESA;
-PFNGLWINDOWPOS2DVMESA pfnglWindowPos2dvMESA;
-PFNGLWINDOWPOS3IMESA pfnglWindowPos3iMESA;
-PFNGLWINDOWPOS3SMESA pfnglWindowPos3sMESA;
-PFNGLWINDOWPOS3FMESA pfnglWindowPos3fMESA;
-PFNGLWINDOWPOS3DMESA pfnglWindowPos3dMESA;
-PFNGLWINDOWPOS3IVMESA pfnglWindowPos3ivMESA;
-PFNGLWINDOWPOS3SVMESA pfnglWindowPos3svMESA;
-PFNGLWINDOWPOS3FVMESA pfnglWindowPos3fvMESA;
-PFNGLWINDOWPOS3DVMESA pfnglWindowPos3dvMESA;
-PFNGLWINDOWPOS4IMESA pfnglWindowPos4iMESA;
-PFNGLWINDOWPOS4SMESA pfnglWindowPos4sMESA;
-PFNGLWINDOWPOS4FMESA pfnglWindowPos4fMESA;
-PFNGLWINDOWPOS4DMESA pfnglWindowPos4dMESA;
-PFNGLWINDOWPOS4IVMESA pfnglWindowPos4ivMESA;
-PFNGLWINDOWPOS4SVMESA pfnglWindowPos4svMESA;
-PFNGLWINDOWPOS4FVMESA pfnglWindowPos4fvMESA;
-PFNGLWINDOWPOS4DVMESA pfnglWindowPos4dvMESA;
-PFNGLRESIZEBUFFERSMESA pfnglResizeBuffersMESA;
-PFNGLDRAWRANGEELEMENTS pfnglDrawRangeElements;
-PFNGLTEXIMAGE3D pfnglTexImage3D;
-PFNGLTEXSUBIMAGE3D pfnglTexSubImage3D;
-PFNGLCOPYTEXSUBIMAGE3D pfnglCopyTexSubImage3D;
-PFNGLCOLORTABLE pfnglColorTable;
-PFNGLCOLORSUBTABLE pfnglColorSubTable;
-PFNGLCOLORTABLEPARAMETERIV pfnglColorTableParameteriv;
-PFNGLCOLORTABLEPARAMETERFV pfnglColorTableParameterfv;
-PFNGLCOPYCOLORSUBTABLE pfnglCopyColorSubTable;
-PFNGLCOPYCOLORTABLE pfnglCopyColorTable;
-PFNGLGETCOLORTABLE pfnglGetColorTable;
-PFNGLGETCOLORTABLEPARAMETERFV pfnglGetColorTableParameterfv;
-PFNGLGETCOLORTABLEPARAMETERIV pfnglGetColorTableParameteriv;
-PFNGLBLENDEQUATION pfnglBlendEquation;
-PFNGLBLENDCOLOR pfnglBlendColor;
-PFNGLHISTOGRAM pfnglHistogram;
-PFNGLRESETHISTOGRAM pfnglResetHistogram;
-PFNGLGETHISTOGRAM pfnglGetHistogram;
-PFNGLGETHISTOGRAMPARAMETERFV pfnglGetHistogramParameterfv;
-PFNGLGETHISTOGRAMPARAMETERIV pfnglGetHistogramParameteriv;
-PFNGLMINMAX pfnglMinmax;
-PFNGLRESETMINMAX pfnglResetMinmax;
-PFNGLGETMINMAX pfnglGetMinmax;
-PFNGLGETMINMAXPARAMETERFV pfnglGetMinmaxParameterfv;
-PFNGLGETMINMAXPARAMETERIV pfnglGetMinmaxParameteriv;
-PFNGLCONVOLUTIONFILTER1D pfnglConvolutionFilter1D;
-PFNGLCONVOLUTIONFILTER2D pfnglConvolutionFilter2D;
-PFNGLCONVOLUTIONPARAMETERF pfnglConvolutionParameterf;
-PFNGLCONVOLUTIONPARAMETERFV pfnglConvolutionParameterfv;
-PFNGLCONVOLUTIONPARAMETERI pfnglConvolutionParameteri;
-PFNGLCONVOLUTIONPARAMETERIV pfnglConvolutionParameteriv;
-PFNGLCOPYCONVOLUTIONFILTER1D pfnglCopyConvolutionFilter1D;
-PFNGLCOPYCONVOLUTIONFILTER2D pfnglCopyConvolutionFilter2D;
-PFNGLGETCONVOLUTIONFILTER pfnglGetConvolutionFilter;
-PFNGLGETCONVOLUTIONPARAMETERFV pfnglGetConvolutionParameterfv;
-PFNGLGETCONVOLUTIONPARAMETERIV pfnglGetConvolutionParameteriv;
-PFNGLSEPARABLEFILTER2D pfnglSeparableFilter2D;
-PFNGLGETSEPARABLEFILTER pfnglGetSeparableFilter;
 PFNGLLOCKARRAYSEXT pfnglLockArraysEXT;
 PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
 
 // =============================================================================
-// Global functions
+// Initialization functions
 
-void ShutdownOpenGL ()
+void GL_Shutdown ()
 {
   Sys_GLCloseLibrary ();
 
@@ -822,32 +735,6 @@ void ShutdownOpenGL ()
   pfnglPushName = NULL;
   pfnglPopName = NULL;
 
-  pfnglBlendEquationEXT = NULL;
-  pfnglBlendColorEXT = NULL;
-  pfnglPolygonOffsetEXT = NULL;
-  pfnglVertexPointerEXT = NULL;
-  pfnglNormalPointerEXT = NULL;
-  pfnglColorPointerEXT = NULL;
-  pfnglIndexPointerEXT = NULL;
-  pfnglTexCoordPointerEXT = NULL;
-  pfnglEdgeFlagPointerEXT = NULL;
-  pfnglGetPointervEXT = NULL;
-  pfnglArrayElementEXT = NULL;
-  pfnglDrawArraysEXT = NULL;
-  pfnglGenTexturesEXT = NULL;
-  pfnglDeleteTexturesEXT = NULL;
-  pfnglBindTextureEXT = NULL;
-  pfnglPrioritizeTexturesEXT = NULL;
-  pfnglAreTexturesResidentEXT = NULL;
-  pfnglIsTextureEXT = NULL;
-  pfnglTexImage3DEXT = NULL;
-  pfnglTexSubImage3DEXT = NULL;
-  pfnglCopyTexSubImage3DEXT = NULL;
-  pfnglColorTableEXT = NULL;
-  pfnglColorSubTableEXT = NULL;
-  pfnglGetColorTableEXT = NULL;
-  pfnglGetColorTableParameterfvEXT = NULL;
-  pfnglGetColorTableParameterivEXT = NULL;
   pfnglActiveTextureARB = NULL;
   pfnglClientActiveTextureARB = NULL;
   pfnglMultiTexCoord1dARB = NULL;
@@ -884,75 +771,11 @@ void ShutdownOpenGL ()
   pfnglMultiTexCoord4svARB = NULL;
   pfnglPointParameterfEXT = NULL;
   pfnglPointParameterfvEXT = NULL;
-  pfnglBlendFuncSeparateINGR = NULL;
-  pfnglWindowPos2iMESA = NULL;
-  pfnglWindowPos2sMESA = NULL;
-  pfnglWindowPos2fMESA = NULL;
-  pfnglWindowPos2dMESA = NULL;
-  pfnglWindowPos2ivMESA = NULL;
-  pfnglWindowPos2svMESA = NULL;
-  pfnglWindowPos2fvMESA = NULL;
-  pfnglWindowPos2dvMESA = NULL;
-  pfnglWindowPos3iMESA = NULL;
-  pfnglWindowPos3sMESA = NULL;
-  pfnglWindowPos3fMESA = NULL;
-  pfnglWindowPos3dMESA = NULL;
-  pfnglWindowPos3ivMESA = NULL;
-  pfnglWindowPos3svMESA = NULL;
-  pfnglWindowPos3fvMESA = NULL;
-  pfnglWindowPos3dvMESA = NULL;
-  pfnglWindowPos4iMESA = NULL;
-  pfnglWindowPos4sMESA = NULL;
-  pfnglWindowPos4fMESA = NULL;
-  pfnglWindowPos4dMESA = NULL;
-  pfnglWindowPos4ivMESA = NULL;
-  pfnglWindowPos4svMESA = NULL;
-  pfnglWindowPos4fvMESA = NULL;
-  pfnglWindowPos4dvMESA = NULL;
-  pfnglResizeBuffersMESA = NULL;
-  pfnglDrawRangeElements = NULL;
-  pfnglTexImage3D = NULL;
-  pfnglTexSubImage3D = NULL;
-  pfnglCopyTexSubImage3D = NULL;
-  pfnglColorTable = NULL;
-  pfnglColorSubTable = NULL;
-  pfnglColorTableParameteriv = NULL;
-  pfnglColorTableParameterfv = NULL;
-  pfnglCopyColorSubTable = NULL;
-  pfnglCopyColorTable = NULL;
-  pfnglGetColorTable = NULL;
-  pfnglGetColorTableParameterfv = NULL;
-  pfnglGetColorTableParameteriv = NULL;
-  pfnglBlendEquation = NULL;
-  pfnglBlendColor = NULL;
-  pfnglHistogram = NULL;
-  pfnglResetHistogram = NULL;
-  pfnglGetHistogram = NULL;
-  pfnglGetHistogramParameterfv = NULL;
-  pfnglGetHistogramParameteriv = NULL;
-  pfnglMinmax = NULL;
-  pfnglResetMinmax = NULL;
-  pfnglGetMinmax = NULL;
-  pfnglGetMinmaxParameterfv = NULL;
-  pfnglGetMinmaxParameteriv = NULL;
-  pfnglConvolutionFilter1D = NULL;
-  pfnglConvolutionFilter2D = NULL;
-  pfnglConvolutionParameterf = NULL;
-  pfnglConvolutionParameterfv = NULL;
-  pfnglConvolutionParameteri = NULL;
-  pfnglConvolutionParameteriv = NULL;
-  pfnglCopyConvolutionFilter1D = NULL;
-  pfnglCopyConvolutionFilter2D = NULL;
-  pfnglGetConvolutionFilter = NULL;
-  pfnglGetConvolutionParameterfv = NULL;
-  pfnglGetConvolutionParameteriv = NULL;
-  pfnglSeparableFilter2D = NULL;
-  pfnglGetSeparableFilter = NULL;
   pfnglLockArraysEXT = NULL;
   pfnglUnlockArraysEXT = NULL;
 }
 
-bool InitializeOpenGL (const char* libname)
+bool GL_Initialize (const char* libname)
 {
   if (Sys_GLOpenLibrary (libname) == false)
   {
@@ -1297,134 +1120,129 @@ bool InitializeOpenGL (const char* libname)
   pfnglPushName = (PFNGLPUSHNAME) Sys_GLGetProc ("glPushName");
   pfnglPopName = (PFNGLPOPNAME) Sys_GLGetProc ("glPopName");
 
-  pfnglBlendEquationEXT = (PFNGLBLENDEQUATIONEXT) Sys_GLGetExtension ("glBlendEquationEXT");
-  pfnglBlendColorEXT = (PFNGLBLENDCOLOREXT) Sys_GLGetExtension ("glBlendColorEXT");
-  pfnglPolygonOffsetEXT = (PFNGLPOLYGONOFFSETEXT) Sys_GLGetExtension ("glPolygonOffsetEXT");
-  pfnglVertexPointerEXT = (PFNGLVERTEXPOINTEREXT) Sys_GLGetExtension ("glVertexPointerEXT");
-  pfnglNormalPointerEXT = (PFNGLNORMALPOINTEREXT) Sys_GLGetExtension ("glNormalPointerEXT");
-  pfnglColorPointerEXT = (PFNGLCOLORPOINTEREXT) Sys_GLGetExtension ("glColorPointerEXT");
-  pfnglIndexPointerEXT = (PFNGLINDEXPOINTEREXT) Sys_GLGetExtension ("glIndexPointerEXT");
-  pfnglTexCoordPointerEXT = (PFNGLTEXCOORDPOINTEREXT) Sys_GLGetExtension ("glTexCoordPointerEXT");
-  pfnglEdgeFlagPointerEXT = (PFNGLEDGEFLAGPOINTEREXT) Sys_GLGetExtension ("glEdgeFlagPointerEXT");
-  pfnglGetPointervEXT = (PFNGLGETPOINTERVEXT) Sys_GLGetExtension ("glGetPointervEXT");
-  pfnglArrayElementEXT = (PFNGLARRAYELEMENTEXT) Sys_GLGetExtension ("glArrayElementEXT");
-  pfnglDrawArraysEXT = (PFNGLDRAWARRAYSEXT) Sys_GLGetExtension ("glDrawArraysEXT");
-  pfnglGenTexturesEXT = (PFNGLGENTEXTURESEXT) Sys_GLGetExtension ("glGenTexturesEXT");
-  pfnglDeleteTexturesEXT = (PFNGLDELETETEXTURESEXT) Sys_GLGetExtension ("glDeleteTexturesEXT");
-  pfnglBindTextureEXT = (PFNGLBINDTEXTUREEXT) Sys_GLGetExtension ("glBindTextureEXT");
-  pfnglPrioritizeTexturesEXT = (PFNGLPRIORITIZETEXTURESEXT) Sys_GLGetExtension ("glPrioritizeTexturesEXT");
-  pfnglAreTexturesResidentEXT = (PFNGLARETEXTURESRESIDENTEXT) Sys_GLGetExtension ("glAreTexturesResidentEXT");
-  pfnglIsTextureEXT = (PFNGLISTEXTUREEXT) Sys_GLGetExtension ("glIsTextureEXT");
-  pfnglTexImage3DEXT = (PFNGLTEXIMAGE3DEXT) Sys_GLGetExtension ("glTexImage3DEXT");
-  pfnglTexSubImage3DEXT = (PFNGLTEXSUBIMAGE3DEXT) Sys_GLGetExtension ("glTexSubImage3DEXT");
-  pfnglCopyTexSubImage3DEXT = (PFNGLCOPYTEXSUBIMAGE3DEXT) Sys_GLGetExtension ("glCopyTexSubImage3DEXT");
-  pfnglColorTableEXT = (PFNGLCOLORTABLEEXT) Sys_GLGetExtension ("glColorTableEXT");
-  pfnglColorSubTableEXT = (PFNGLCOLORSUBTABLEEXT) Sys_GLGetExtension ("glColorSubTableEXT");
-  pfnglGetColorTableEXT = (PFNGLGETCOLORTABLEEXT) Sys_GLGetExtension ("glGetColorTableEXT");
-  pfnglGetColorTableParameterfvEXT = (PFNGLGETCOLORTABLEPARAMETERFVEXT) Sys_GLGetExtension ("glGetColorTableParameterfvEXT");
-  pfnglGetColorTableParameterivEXT = (PFNGLGETCOLORTABLEPARAMETERIVEXT) Sys_GLGetExtension ("glGetColorTableParameterivEXT");
-  pfnglActiveTextureARB = (PFNGLACTIVETEXTUREARB) Sys_GLGetExtension ("glActiveTextureARB");
-  pfnglClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARB) Sys_GLGetExtension ("glClientActiveTextureARB");
-  pfnglMultiTexCoord1dARB = (PFNGLMULTITEXCOORD1DARB) Sys_GLGetExtension ("glMultiTexCoord1dARB");
-  pfnglMultiTexCoord1dvARB = (PFNGLMULTITEXCOORD1DVARB) Sys_GLGetExtension ("glMultiTexCoord1dvARB");
-  pfnglMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARB) Sys_GLGetExtension ("glMultiTexCoord1fARB");
-  pfnglMultiTexCoord1fvARB = (PFNGLMULTITEXCOORD1FVARB) Sys_GLGetExtension ("glMultiTexCoord1fvARB");
-  pfnglMultiTexCoord1iARB = (PFNGLMULTITEXCOORD1IARB) Sys_GLGetExtension ("glMultiTexCoord1iARB");
-  pfnglMultiTexCoord1ivARB = (PFNGLMULTITEXCOORD1IVARB) Sys_GLGetExtension ("glMultiTexCoord1ivARB");
-  pfnglMultiTexCoord1sARB = (PFNGLMULTITEXCOORD1SARB) Sys_GLGetExtension ("glMultiTexCoord1sARB");
-  pfnglMultiTexCoord1svARB = (PFNGLMULTITEXCOORD1SVARB) Sys_GLGetExtension ("glMultiTexCoord1svARB");
-  pfnglMultiTexCoord2dARB = (PFNGLMULTITEXCOORD2DARB) Sys_GLGetExtension ("glMultiTexCoord2dARB");
-  pfnglMultiTexCoord2dvARB = (PFNGLMULTITEXCOORD2DVARB) Sys_GLGetExtension ("glMultiTexCoord2dvARB");
-  pfnglMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARB) Sys_GLGetExtension ("glMultiTexCoord2fARB");
-  pfnglMultiTexCoord2fvARB = (PFNGLMULTITEXCOORD2FVARB) Sys_GLGetExtension ("glMultiTexCoord2fvARB");
-  pfnglMultiTexCoord2iARB = (PFNGLMULTITEXCOORD2IARB) Sys_GLGetExtension ("glMultiTexCoord2iARB");
-  pfnglMultiTexCoord2ivARB = (PFNGLMULTITEXCOORD2IVARB) Sys_GLGetExtension ("glMultiTexCoord2ivARB");
-  pfnglMultiTexCoord2sARB = (PFNGLMULTITEXCOORD2SARB) Sys_GLGetExtension ("glMultiTexCoord2sARB");
-  pfnglMultiTexCoord2svARB = (PFNGLMULTITEXCOORD2SVARB) Sys_GLGetExtension ("glMultiTexCoord2svARB");
-  pfnglMultiTexCoord3dARB = (PFNGLMULTITEXCOORD3DARB) Sys_GLGetExtension ("glMultiTexCoord3dARB");
-  pfnglMultiTexCoord3dvARB = (PFNGLMULTITEXCOORD3DVARB) Sys_GLGetExtension ("glMultiTexCoord3dvARB");
-  pfnglMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARB) Sys_GLGetExtension ("glMultiTexCoord3fARB");
-  pfnglMultiTexCoord3fvARB = (PFNGLMULTITEXCOORD3FVARB) Sys_GLGetExtension ("glMultiTexCoord3fvARB");
-  pfnglMultiTexCoord3iARB = (PFNGLMULTITEXCOORD3IARB) Sys_GLGetExtension ("glMultiTexCoord3iARB");
-  pfnglMultiTexCoord3ivARB = (PFNGLMULTITEXCOORD3IVARB) Sys_GLGetExtension ("glMultiTexCoord3ivARB");
-  pfnglMultiTexCoord3sARB = (PFNGLMULTITEXCOORD3SARB) Sys_GLGetExtension ("glMultiTexCoord3sARB");
-  pfnglMultiTexCoord3svARB = (PFNGLMULTITEXCOORD3SVARB) Sys_GLGetExtension ("glMultiTexCoord3svARB");
-  pfnglMultiTexCoord4dARB = (PFNGLMULTITEXCOORD4DARB) Sys_GLGetExtension ("glMultiTexCoord4dARB");
-  pfnglMultiTexCoord4dvARB = (PFNGLMULTITEXCOORD4DVARB) Sys_GLGetExtension ("glMultiTexCoord4dvARB");
-  pfnglMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARB) Sys_GLGetExtension ("glMultiTexCoord4fARB");
-  pfnglMultiTexCoord4fvARB = (PFNGLMULTITEXCOORD4FVARB) Sys_GLGetExtension ("glMultiTexCoord4fvARB");
-  pfnglMultiTexCoord4iARB = (PFNGLMULTITEXCOORD4IARB) Sys_GLGetExtension ("glMultiTexCoord4iARB");
-  pfnglMultiTexCoord4ivARB = (PFNGLMULTITEXCOORD4IVARB) Sys_GLGetExtension ("glMultiTexCoord4ivARB");
-  pfnglMultiTexCoord4sARB = (PFNGLMULTITEXCOORD4SARB) Sys_GLGetExtension ("glMultiTexCoord4sARB");
-  pfnglMultiTexCoord4svARB = (PFNGLMULTITEXCOORD4SVARB) Sys_GLGetExtension ("glMultiTexCoord4svARB");
-  pfnglPointParameterfEXT = (PFNGLPOINTPARAMETERFEXT) Sys_GLGetExtension ("glPointParameterfEXT");
-  pfnglPointParameterfvEXT = (PFNGLPOINTPARAMETERFVEXT) Sys_GLGetExtension ("glPointParameterfvEXT");
-  pfnglBlendFuncSeparateINGR = (PFNGLBLENDFUNCSEPARATEINGR) Sys_GLGetExtension ("glBlendFuncSeparateINGR");
-  pfnglWindowPos2iMESA = (PFNGLWINDOWPOS2IMESA) Sys_GLGetExtension ("glWindowPos2iMESA");
-  pfnglWindowPos2sMESA = (PFNGLWINDOWPOS2SMESA) Sys_GLGetExtension ("glWindowPos2sMESA");
-  pfnglWindowPos2fMESA = (PFNGLWINDOWPOS2FMESA) Sys_GLGetExtension ("glWindowPos2fMESA");
-  pfnglWindowPos2dMESA = (PFNGLWINDOWPOS2DMESA) Sys_GLGetExtension ("glWindowPos2dMESA");
-  pfnglWindowPos2ivMESA = (PFNGLWINDOWPOS2IVMESA) Sys_GLGetExtension ("glWindowPos2ivMESA");
-  pfnglWindowPos2svMESA = (PFNGLWINDOWPOS2SVMESA) Sys_GLGetExtension ("glWindowPos2svMESA");
-  pfnglWindowPos2fvMESA = (PFNGLWINDOWPOS2FVMESA) Sys_GLGetExtension ("glWindowPos2fvMESA");
-  pfnglWindowPos2dvMESA = (PFNGLWINDOWPOS2DVMESA) Sys_GLGetExtension ("glWindowPos2dvMESA");
-  pfnglWindowPos3iMESA = (PFNGLWINDOWPOS3IMESA) Sys_GLGetExtension ("glWindowPos3iMESA");
-  pfnglWindowPos3sMESA = (PFNGLWINDOWPOS3SMESA) Sys_GLGetExtension ("glWindowPos3sMESA");
-  pfnglWindowPos3fMESA = (PFNGLWINDOWPOS3FMESA) Sys_GLGetExtension ("glWindowPos3fMESA");
-  pfnglWindowPos3dMESA = (PFNGLWINDOWPOS3DMESA) Sys_GLGetExtension ("glWindowPos3dMESA");
-  pfnglWindowPos3ivMESA = (PFNGLWINDOWPOS3IVMESA) Sys_GLGetExtension ("glWindowPos3ivMESA");
-  pfnglWindowPos3svMESA = (PFNGLWINDOWPOS3SVMESA) Sys_GLGetExtension ("glWindowPos3svMESA");
-  pfnglWindowPos3fvMESA = (PFNGLWINDOWPOS3FVMESA) Sys_GLGetExtension ("glWindowPos3fvMESA");
-  pfnglWindowPos3dvMESA = (PFNGLWINDOWPOS3DVMESA) Sys_GLGetExtension ("glWindowPos3dvMESA");
-  pfnglWindowPos4iMESA = (PFNGLWINDOWPOS4IMESA) Sys_GLGetExtension ("glWindowPos4iMESA");
-  pfnglWindowPos4sMESA = (PFNGLWINDOWPOS4SMESA) Sys_GLGetExtension ("glWindowPos4sMESA");
-  pfnglWindowPos4fMESA = (PFNGLWINDOWPOS4FMESA) Sys_GLGetExtension ("glWindowPos4fMESA");
-  pfnglWindowPos4dMESA = (PFNGLWINDOWPOS4DMESA) Sys_GLGetExtension ("glWindowPos4dMESA");
-  pfnglWindowPos4ivMESA = (PFNGLWINDOWPOS4IVMESA) Sys_GLGetExtension ("glWindowPos4ivMESA");
-  pfnglWindowPos4svMESA = (PFNGLWINDOWPOS4SVMESA) Sys_GLGetExtension ("glWindowPos4svMESA");
-  pfnglWindowPos4fvMESA = (PFNGLWINDOWPOS4FVMESA) Sys_GLGetExtension ("glWindowPos4fvMESA");
-  pfnglWindowPos4dvMESA = (PFNGLWINDOWPOS4DVMESA) Sys_GLGetExtension ("glWindowPos4dvMESA");
-  pfnglResizeBuffersMESA = (PFNGLRESIZEBUFFERSMESA) Sys_GLGetExtension ("glResizeBuffersMESA");
-  pfnglDrawRangeElements = (PFNGLDRAWRANGEELEMENTS) Sys_GLGetExtension ("glDrawRangeElements");
-  pfnglTexImage3D = (PFNGLTEXIMAGE3D) Sys_GLGetExtension ("glTexImage3D");
-  pfnglTexSubImage3D = (PFNGLTEXSUBIMAGE3D) Sys_GLGetExtension ("glTexSubImage3D");
-  pfnglCopyTexSubImage3D = (PFNGLCOPYTEXSUBIMAGE3D) Sys_GLGetExtension ("glCopyTexSubImage3D");
-  pfnglColorTable = (PFNGLCOLORTABLE) Sys_GLGetExtension ("glColorTable");
-  pfnglColorSubTable = (PFNGLCOLORSUBTABLE) Sys_GLGetExtension ("glColorSubTable");
-  pfnglColorTableParameteriv = (PFNGLCOLORTABLEPARAMETERIV) Sys_GLGetExtension ("glColorTableParameteriv");
-  pfnglColorTableParameterfv = (PFNGLCOLORTABLEPARAMETERFV) Sys_GLGetExtension ("glColorTableParameterfv");
-  pfnglCopyColorSubTable = (PFNGLCOPYCOLORSUBTABLE) Sys_GLGetExtension ("glCopyColorSubTable");
-  pfnglCopyColorTable = (PFNGLCOPYCOLORTABLE) Sys_GLGetExtension ("glCopyColorTable");
-  pfnglGetColorTable = (PFNGLGETCOLORTABLE) Sys_GLGetExtension ("glGetColorTable");
-  pfnglGetColorTableParameterfv = (PFNGLGETCOLORTABLEPARAMETERFV) Sys_GLGetExtension ("glGetColorTableParameterfv");
-  pfnglGetColorTableParameteriv = (PFNGLGETCOLORTABLEPARAMETERIV) Sys_GLGetExtension ("glGetColorTableParameteriv");
-  pfnglBlendEquation = (PFNGLBLENDEQUATION) Sys_GLGetExtension ("glBlendEquation");
-  pfnglBlendColor = (PFNGLBLENDCOLOR) Sys_GLGetExtension ("glBlendColor");
-  pfnglHistogram = (PFNGLHISTOGRAM) Sys_GLGetExtension ("glHistogram");
-  pfnglResetHistogram = (PFNGLRESETHISTOGRAM) Sys_GLGetExtension ("glResetHistogram");
-  pfnglGetHistogram = (PFNGLGETHISTOGRAM) Sys_GLGetExtension ("glGetHistogram");
-  pfnglGetHistogramParameterfv = (PFNGLGETHISTOGRAMPARAMETERFV) Sys_GLGetExtension ("glGetHistogramParameterfv");
-  pfnglGetHistogramParameteriv = (PFNGLGETHISTOGRAMPARAMETERIV) Sys_GLGetExtension ("glGetHistogramParameteriv");
-  pfnglMinmax = (PFNGLMINMAX) Sys_GLGetExtension ("glMinmax");
-  pfnglResetMinmax = (PFNGLRESETMINMAX) Sys_GLGetExtension ("glResetMinmax");
-  pfnglGetMinmax = (PFNGLGETMINMAX) Sys_GLGetExtension ("glGetMinmax");
-  pfnglGetMinmaxParameterfv = (PFNGLGETMINMAXPARAMETERFV) Sys_GLGetExtension ("glGetMinmaxParameterfv");
-  pfnglGetMinmaxParameteriv = (PFNGLGETMINMAXPARAMETERIV) Sys_GLGetExtension ("glGetMinmaxParameteriv");
-  pfnglConvolutionFilter1D = (PFNGLCONVOLUTIONFILTER1D) Sys_GLGetExtension ("glConvolutionFilter1D");
-  pfnglConvolutionFilter2D = (PFNGLCONVOLUTIONFILTER2D) Sys_GLGetExtension ("glConvolutionFilter2D");
-  pfnglConvolutionParameterf = (PFNGLCONVOLUTIONPARAMETERF) Sys_GLGetExtension ("glConvolutionParameterf");
-  pfnglConvolutionParameterfv = (PFNGLCONVOLUTIONPARAMETERFV) Sys_GLGetExtension ("glConvolutionParameterfv");
-  pfnglConvolutionParameteri = (PFNGLCONVOLUTIONPARAMETERI) Sys_GLGetExtension ("glConvolutionParameteri");
-  pfnglConvolutionParameteriv = (PFNGLCONVOLUTIONPARAMETERIV) Sys_GLGetExtension ("glConvolutionParameteriv");
-  pfnglCopyConvolutionFilter1D = (PFNGLCOPYCONVOLUTIONFILTER1D) Sys_GLGetExtension ("glCopyConvolutionFilter1D");
-  pfnglCopyConvolutionFilter2D = (PFNGLCOPYCONVOLUTIONFILTER2D) Sys_GLGetExtension ("glCopyConvolutionFilter2D");
-  pfnglGetConvolutionFilter = (PFNGLGETCONVOLUTIONFILTER) Sys_GLGetExtension ("glGetConvolutionFilter");
-  pfnglGetConvolutionParameterfv = (PFNGLGETCONVOLUTIONPARAMETERFV) Sys_GLGetExtension ("glGetConvolutionParameterfv");
-  pfnglGetConvolutionParameteriv = (PFNGLGETCONVOLUTIONPARAMETERIV) Sys_GLGetExtension ("glGetConvolutionParameteriv");
-  pfnglSeparableFilter2D = (PFNGLSEPARABLEFILTER2D) Sys_GLGetExtension ("glSeparableFilter2D");
-  pfnglGetSeparableFilter = (PFNGLGETSEPARABLEFILTER) Sys_GLGetExtension ("glGetSeparableFilter");
-  pfnglLockArraysEXT = (PFNGLLOCKARRAYSEXT) Sys_GLGetExtension ("glLockArraysEXT");
-  pfnglUnlockArraysEXT = (PFNGLUNLOCKARRAYSEXT) Sys_GLGetExtension ("glUnlockArraysEXT");
+  return true;
+}
+
+// =============================================================================
+// Extensions support
+
+static GLint GL_MultiTextures = 1;
+static bool  GL_CompiledVertexArrays = false;
+static bool  GL_ClampToEdge = false;
+static bool  GL_PointParameters = false;
+
+static bool GL_ExtensionSupported (const char *extension)
+{
+  const GLubyte *extensions = NULL;
+  const GLubyte *start;
+  GLubyte *where, *terminator;
+
+  // Extension names should not have spaces.
+  where = (GLubyte *) strchr (extension, ' ');
+  if (where || *extension == '\0')
+    return false;
+
+  extensions = glGetString (GL_EXTENSIONS);
+
+  // It takes a bit of care to be fool-proof about parsing the
+  // OpenGL extensions string. Don't be fooled by sub-strings, etc.
+  for (start = extensions; ;)
+  {
+    where = (GLubyte *) strstr ((const char *) start, extension);
+    if (!where)
+      break;
+
+    terminator = where + strlen (extension);
+    if (where == start || *(where - 1) == ' ')
+      if (*terminator == ' ' || *terminator == '\0')
+	return true;
+
+    start = terminator;
+  }
+
+  return false;
+}
+
+int GL_GetMultiTextures ()
+{
+  return GL_MultiTextures;
+}
+
+bool GL_HasCompiledVertexArrays ()
+{
+  return GL_CompiledVertexArrays;
+}
+
+bool GL_HasClampToEdge ()
+{
+  return GL_ClampToEdge;
+}
+
+bool GL_HasPointParameters ()
+{
+  return GL_PointParameters;
+}
+
+// Extensions can only be initialized if there's a current OpenGL context.
+bool GL_InitializeExtensions ()
+{
+  if (GL_ExtensionSupported ("GL_ARB_multitexture"))
+  {
+    pfnglActiveTextureARB = (PFNGLACTIVETEXTUREARB) Sys_GLGetExtension ("glActiveTextureARB");
+    pfnglClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARB) Sys_GLGetExtension ("glClientActiveTextureARB");
+    pfnglMultiTexCoord1dARB = (PFNGLMULTITEXCOORD1DARB) Sys_GLGetExtension ("glMultiTexCoord1dARB");
+    pfnglMultiTexCoord1dvARB = (PFNGLMULTITEXCOORD1DVARB) Sys_GLGetExtension ("glMultiTexCoord1dvARB");
+    pfnglMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARB) Sys_GLGetExtension ("glMultiTexCoord1fARB");
+    pfnglMultiTexCoord1fvARB = (PFNGLMULTITEXCOORD1FVARB) Sys_GLGetExtension ("glMultiTexCoord1fvARB");
+    pfnglMultiTexCoord1iARB = (PFNGLMULTITEXCOORD1IARB) Sys_GLGetExtension ("glMultiTexCoord1iARB");
+    pfnglMultiTexCoord1ivARB = (PFNGLMULTITEXCOORD1IVARB) Sys_GLGetExtension ("glMultiTexCoord1ivARB");
+    pfnglMultiTexCoord1sARB = (PFNGLMULTITEXCOORD1SARB) Sys_GLGetExtension ("glMultiTexCoord1sARB");
+    pfnglMultiTexCoord1svARB = (PFNGLMULTITEXCOORD1SVARB) Sys_GLGetExtension ("glMultiTexCoord1svARB");
+    pfnglMultiTexCoord2dARB = (PFNGLMULTITEXCOORD2DARB) Sys_GLGetExtension ("glMultiTexCoord2dARB");
+    pfnglMultiTexCoord2dvARB = (PFNGLMULTITEXCOORD2DVARB) Sys_GLGetExtension ("glMultiTexCoord2dvARB");
+    pfnglMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARB) Sys_GLGetExtension ("glMultiTexCoord2fARB");
+    pfnglMultiTexCoord2fvARB = (PFNGLMULTITEXCOORD2FVARB) Sys_GLGetExtension ("glMultiTexCoord2fvARB");
+    pfnglMultiTexCoord2iARB = (PFNGLMULTITEXCOORD2IARB) Sys_GLGetExtension ("glMultiTexCoord2iARB");
+    pfnglMultiTexCoord2ivARB = (PFNGLMULTITEXCOORD2IVARB) Sys_GLGetExtension ("glMultiTexCoord2ivARB");
+    pfnglMultiTexCoord2sARB = (PFNGLMULTITEXCOORD2SARB) Sys_GLGetExtension ("glMultiTexCoord2sARB");
+    pfnglMultiTexCoord2svARB = (PFNGLMULTITEXCOORD2SVARB) Sys_GLGetExtension ("glMultiTexCoord2svARB");
+    pfnglMultiTexCoord3dARB = (PFNGLMULTITEXCOORD3DARB) Sys_GLGetExtension ("glMultiTexCoord3dARB");
+    pfnglMultiTexCoord3dvARB = (PFNGLMULTITEXCOORD3DVARB) Sys_GLGetExtension ("glMultiTexCoord3dvARB");
+    pfnglMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARB) Sys_GLGetExtension ("glMultiTexCoord3fARB");
+    pfnglMultiTexCoord3fvARB = (PFNGLMULTITEXCOORD3FVARB) Sys_GLGetExtension ("glMultiTexCoord3fvARB");
+    pfnglMultiTexCoord3iARB = (PFNGLMULTITEXCOORD3IARB) Sys_GLGetExtension ("glMultiTexCoord3iARB");
+    pfnglMultiTexCoord3ivARB = (PFNGLMULTITEXCOORD3IVARB) Sys_GLGetExtension ("glMultiTexCoord3ivARB");
+    pfnglMultiTexCoord3sARB = (PFNGLMULTITEXCOORD3SARB) Sys_GLGetExtension ("glMultiTexCoord3sARB");
+    pfnglMultiTexCoord3svARB = (PFNGLMULTITEXCOORD3SVARB) Sys_GLGetExtension ("glMultiTexCoord3svARB");
+    pfnglMultiTexCoord4dARB = (PFNGLMULTITEXCOORD4DARB) Sys_GLGetExtension ("glMultiTexCoord4dARB");
+    pfnglMultiTexCoord4dvARB = (PFNGLMULTITEXCOORD4DVARB) Sys_GLGetExtension ("glMultiTexCoord4dvARB");
+    pfnglMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARB) Sys_GLGetExtension ("glMultiTexCoord4fARB");
+    pfnglMultiTexCoord4fvARB = (PFNGLMULTITEXCOORD4FVARB) Sys_GLGetExtension ("glMultiTexCoord4fvARB");
+    pfnglMultiTexCoord4iARB = (PFNGLMULTITEXCOORD4IARB) Sys_GLGetExtension ("glMultiTexCoord4iARB");
+    pfnglMultiTexCoord4ivARB = (PFNGLMULTITEXCOORD4IVARB) Sys_GLGetExtension ("glMultiTexCoord4ivARB");
+    pfnglMultiTexCoord4sARB = (PFNGLMULTITEXCOORD4SARB) Sys_GLGetExtension ("glMultiTexCoord4sARB");
+    pfnglMultiTexCoord4svARB = (PFNGLMULTITEXCOORD4SVARB) Sys_GLGetExtension ("glMultiTexCoord4svARB");
+    glGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &GL_MultiTextures);
+  }
+
+  if (GL_ExtensionSupported ("GL_EXT_point_parameters"))
+  {
+    pfnglPointParameterfEXT = (PFNGLPOINTPARAMETERFEXT) Sys_GLGetExtension ("glPointParameterfEXT");
+    pfnglPointParameterfvEXT = (PFNGLPOINTPARAMETERFVEXT) Sys_GLGetExtension ("glPointParameterfvEXT");
+    GL_PointParameters = true;
+  }
+
+  if (GL_ExtensionSupported ("GL_EXT_compiled_vertex_array"))
+  {
+    pfnglLockArraysEXT = (PFNGLLOCKARRAYSEXT) Sys_GLGetExtension ("glLockArraysEXT");
+    pfnglUnlockArraysEXT = (PFNGLUNLOCKARRAYSEXT) Sys_GLGetExtension ("glUnlockArraysEXT");
+    GL_CompiledVertexArrays = true;
+  }
+
+  if (GL_ExtensionSupported ("GL_EXT_texture_edge_clamp"))
+  {
+    GL_ClampToEdge = true;
+  }
 
   return true;
 }
@@ -1435,8 +1253,16 @@ bool InitializeOpenGL (const char* libname)
 
 #include <math.h>
 
-void gluLookAt (GLdouble ex, GLdouble ey, GLdouble ez, GLdouble cx, GLdouble cy, GLdouble cz,
-		 GLdouble ux, GLdouble uy, GLdouble uz)
+#ifndef LC_WINDOWS
+#define APIENTRY
+#endif
+
+#ifndef M_PI
+#define M_PI  3.14159265
+#endif
+
+void APIENTRY gluLookAt (GLdouble ex, GLdouble ey, GLdouble ez, GLdouble cx, GLdouble cy, GLdouble cz,
+			 GLdouble ux, GLdouble uy, GLdouble uz)
 {
    GLdouble x[3], y[3], z[3] = { ex-cx, ey-cy, ez-cz };
    GLdouble inv;
@@ -1481,7 +1307,7 @@ void gluLookAt (GLdouble ex, GLdouble ey, GLdouble ez, GLdouble cx, GLdouble cy,
    }
 }
 
-void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+void APIENTRY gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
    GLdouble y = zNear * tan (fovy * M_PI / 360.0);
    glFrustum (-y*aspect, y*aspect, -y, y, zNear, zFar);
@@ -1664,7 +1490,7 @@ static GLboolean invert_matrix( const GLdouble *m, GLdouble *out )
 
 
 /* projection du point (objx,objy,obz) sur l'ecran (winx,winy,winz) */
-GLint GLAPIENTRY gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
+GLint APIENTRY gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
                           const GLdouble model[16],const GLdouble proj[16],
                           const GLint viewport[4],
                           GLdouble *winx,GLdouble *winy,GLdouble *winz)
@@ -1694,7 +1520,7 @@ GLint GLAPIENTRY gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
 
 
 /* transformation du point ecran (winx,winy,winz) en point objet */
-GLint GLAPIENTRY gluUnProject(GLdouble winx,GLdouble winy,GLdouble winz,
+GLint APIENTRY gluUnProject(GLdouble winx,GLdouble winy,GLdouble winz,
                             const GLdouble model[16],const GLdouble proj[16],
                             const GLint viewport[4],
                             GLdouble *objx,GLdouble *objy,GLdouble *objz)
@@ -1720,44 +1546,5 @@ GLint GLAPIENTRY gluUnProject(GLdouble winx,GLdouble winy,GLdouble winz,
     *objx=out[0]/out[3];
     *objy=out[1]/out[3];
     *objz=out[2]/out[3];
-    return GL_TRUE;
-}
-
-
-/*
- * New in GLU 1.3
- * This is like gluUnProject but also takes near and far DepthRange values.
- */
-GLint GLAPIENTRY
-gluUnProject4( GLdouble winx, GLdouble winy, GLdouble winz, GLdouble clipw,
-               const GLdouble modelMatrix[16],
-               const GLdouble projMatrix[16],
-               const GLint viewport[4],
-               GLclampd nearZ, GLclampd farZ,
-               GLdouble *objx, GLdouble *objy, GLdouble *objz, GLdouble *objw )
-{
-    /* matrice de transformation */
-    GLdouble m[16], A[16];
-    GLdouble in[4],out[4];
-    GLdouble z = nearZ + winz * (farZ - nearZ);
-
-    /* transformation coordonnees normalisees entre -1 et 1 */
-    in[0] = (winx-viewport[0])*2/viewport[2] - 1.0;
-    in[1] = (winy-viewport[1])*2/viewport[3] - 1.0;
-    in[2] = 2.0 * z - 1.0;
-    in[3] = clipw;
-
-    /* calcul transformation inverse */
-    matmul(A,projMatrix,modelMatrix);
-    invert_matrix(A,m);
-
-    /* d'ou les coordonnees objets */
-    transform_point(out,m,in);
-    if (out[3]==0.0)
-       return GL_FALSE;
-    *objx=out[0]/out[3];
-    *objy=out[1]/out[3];
-    *objz=out[2]/out[3];
-    *objw=out[3];
     return GL_TRUE;
 }

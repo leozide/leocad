@@ -324,14 +324,14 @@ void PieceInfo::LoadInformation()
 
   // hacks to get things working on big endian machines
 #ifdef LC_BIG_ENDIAN
-#define GUINT16(val)        ((guint16) ( \
-    (((guint16) (val) & (guint16) 0x00ffU) << 8) | \
-    (((guint16) (val) & (guint16) 0xff00U) >> 8)))
-#define GUINT32(val)        ((guint32) ( \
-    (((guint32) (val) & (guint32) 0x000000ffU) << 24) | \
-    (((guint32) (val) & (guint32) 0x0000ff00U) <<  8) | \
-    (((guint32) (val) & (guint32) 0x00ff0000U) >>  8) | \
-    (((guint32) (val) & (guint32) 0xff000000U) >> 24)))
+#define GUINT16(val)        ((unsigned short) ( \
+    (((unsigned short) (val) & (unsigned short) 0x00ffU) << 8) | \
+    (((unsigned short) (val) & (unsigned short) 0xff00U) >> 8)))
+#define GUINT32(val)        ((unsigned long) ( \
+    (((unsigned long) (val) & (unsigned long) 0x000000ffU) << 24) | \
+    (((unsigned long) (val) & (unsigned long) 0x0000ff00U) <<  8) | \
+    (((unsigned long) (val) & (unsigned long) 0x00ff0000U) >>  8) | \
+    (((unsigned long) (val) & (unsigned long) 0xff000000U) >> 24)))
 #define GINT16(val) ((gint16)GUINT16(val))
 #define GINT32(val) ((gint32)GUINT32(val))
 #else

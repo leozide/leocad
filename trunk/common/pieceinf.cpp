@@ -493,12 +493,17 @@ void PieceInfo::LoadInformation()
     bytes++; // should be 0
   }
 
-  m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
-  m_nVertexCount = verts;
-  if ((verts > 65535) || (quads > 65535) || (fixquads > 65535))
-    m_nFlags |= LC_PIECE_LONGDATA;
-  else
-    m_nFlags &= ~LC_PIECE_LONGDATA;
+	m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
+	m_nVertexCount = verts;
+	if ((verts > 65535) || (quads > 65535) || (fixquads > 65535))
+	{
+		if ((m_nFlags & LC_PIECE_LONGDATA) == 0)
+		{
+			m_nFlags |= LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME;
+		}
+	}
+	else
+		m_nFlags &= ~(LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME);
 
   // Copy the 'fixed' vertexes
   shorts = (lcint16*)(longs + 1);
@@ -1526,6 +1531,11 @@ void PieceInfo::FreeInformation()
 
 		free(m_pTextures);
 		m_pTextures = NULL;
+	}
+
+	if (m_nFlags & LC_PIECE_LONGDATA_RUNTIME)
+	{
+		m_nFlags &= ~(LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME);
 	}
 }
 

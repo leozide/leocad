@@ -642,3 +642,164 @@ bool Matrix::FromInverse(double* src)
 
 	return true;
 }
+
+bool Matrix::Invert ()
+{
+  double t, inverse[16];
+  int i, j, k, swap;
+  double tmp[4][4];
+
+  for (i = 0; i < 16; i++)
+    inverse[i] = 0.0;
+  inverse[0] = inverse[5] = inverse[10] = inverse[15] = 1.0;
+
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++)
+      tmp[i][j] = m[i*4+j];
+
+  for (i = 0; i < 4; i++) 
+  {
+    // look for largest element in column.
+    swap = i;
+    for (j = i + 1; j < 4; j++) 
+      if (fabs(tmp[j][i]) > fabs(tmp[i][i])) 
+	swap = j;
+
+    if (swap != i) 
+    {
+      // swap rows.
+      for (k = 0; k < 4; k++)
+      {
+	t = tmp[i][k];
+	tmp[i][k] = tmp[swap][k];
+	tmp[swap][k] = t;
+
+	t = inverse[i*4+k];
+	inverse[i*4+k] = inverse[swap*4+k];
+	inverse[swap*4+k] = t;
+      }
+    }
+
+    if (tmp[i][i] == 0) 
+    {
+      // The matrix is singular, which shouldn't happen.
+      return false;
+    }
+
+    t = tmp[i][i];
+    for (k = 0; k < 4; k++) 
+    {
+      tmp[i][k] /= t;
+      inverse[i*4+k] /= t;
+    }
+
+    for (j = 0; j < 4; j++) 
+    {
+      if (j != i) 
+      {
+	t = tmp[j][i];
+	for (k = 0; k < 4; k++) 
+	{
+	  tmp[j][k] -= tmp[i][k]*t;
+	  inverse[j*4+k] -= inverse[i*4+k]*t;
+	}
+      }
+    }
+  }
+
+  for (i = 0; i < 16; i++)
+    m[i] = (float)inverse[i];
+
+  return true;
+}
+
+void Matrix::CreatePerspective (float fovy, float aspect, float nearval, float farval)
+{
+  float left, right, bottom, top;
+  float x, y, a, b, c, d;
+
+  LoadIdentity ();
+
+  top = nearval * tan (fovy * M_PI / 360.0);
+  bottom = -top;
+
+  left = bottom * aspect;
+  right = top * aspect;
+
+  if ((nearval<=0.0 || farval<=0.0) || (nearval == farval) || (left == right) || (top == bottom))
+    return;
+
+  x = (2.0*nearval) / (right-left);
+  y = (2.0*nearval) / (top-bottom);
+  a = (right+left) / (right-left);
+  b = (top+bottom) / (top-bottom);
+  c = -(farval+nearval) / ( farval-nearval);
+  d = -(2.0*farval*nearval) / (farval-nearval);
+
+#define M(row,col)  m[col*4+row]
+  M(0,0) = x;     M(0,1) = 0.0F;  M(0,2) = a;      M(0,3) = 0.0F;
+  M(1,0) = 0.0F;  M(1,1) = y;     M(1,2) = b;      M(1,3) = 0.0F;
+  M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = c;      M(2,3) = d;
+  M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = -1.0F;  M(3,3) = 0.0F;
+#undef M
+}
+
+void Matrix::CreateLookat (float eye[3], float target[3], float up[3])
+{
+  float x[3], y[3], z[3];
+  float mag;
+
+  z[0] = eye[0] - target[0];
+  z[1] = eye[1] - target[1];
+  z[2] = eye[2] - target[2];
+  mag = sqrt (z[0]*z[0] + z[1]*z[1] + z[2]*z[2]);
+  if (mag)
+  {
+    z[0] /= mag;
+    z[1] /= mag;
+    z[2] /= mag;
+  }
+
+  y[0] = up[0];
+  y[1] = up[1];
+  y[2] = up[2];
+
+  // X vector = Y cross Z
+  x[0] =  y[1]*z[2] - y[2]*z[1];
+  x[1] = -y[0]*z[2] + y[2]*z[0];
+  x[2] =  y[0]*z[1] - y[1]*z[0];
+
+  // Recompute Y = Z cross X
+  y[0] =  z[1]*x[2] - z[2]*x[1];
+  y[1] = -z[0]*x[2] + z[2]*x[0];
+  y[2] =  z[0]*x[1] - z[1]*x[0];
+
+  mag = sqrt (x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+  if (mag)
+  {
+    x[0] /= mag;
+    x[1] /= mag;
+    x[2] /= mag;
+  }
+
+  mag = sqrt (y[0]*y[0] + y[1]*y[1] + y[2]*y[2]);
+  if (mag)
+  {
+    y[0] /= mag;
+    y[1] /= mag;
+    y[2] /= mag;
+  }
+
+#define M(row,col)  m[col*4+row]
+  M(0,0) = x[0];  M(0,1) = x[1];  M(0,2) = x[2];  M(0,3) = 0.0;
+  M(1,0) = y[0];  M(1,1) = y[1];  M(1,2) = y[2];  M(1,3) = 0.0;
+  M(2,0) = z[0];  M(2,1) = z[1];  M(2,2) = z[2];  M(2,3) = 0.0;
+  M(3,0) = 0.0;   M(3,1) = 0.0;   M(3,2) = 0.0;   M(3,3) = 1.0;
+#undef M
+
+  // Translate Eye to Origin
+  m[12] = m[0] * -eye[0] + m[4] * -eye[1] + m[8]  * -eye[2] + m[12];
+  m[13] = m[1] * -eye[0] + m[5] * -eye[1] + m[9]  * -eye[2] + m[13];
+  m[14] = m[2] * -eye[0] + m[6] * -eye[1] + m[10] * -eye[2] + m[14];
+  m[15] = m[3] * -eye[0] + m[7] * -eye[1] + m[11] * -eye[2] + m[15];
+}

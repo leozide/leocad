@@ -7,6 +7,9 @@ extern Project* project;
 class Messenger;
 extern Messenger* messenger;
 
+class MainWnd;
+extern MainWnd* main_window;
+
 #include "defines.h"
 #include "typedefs.h"
 

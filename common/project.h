@@ -5,6 +5,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
+#include "array.h"
 
 typedef enum 
 {
@@ -20,6 +21,7 @@ class Texture;
 class Terrain;
 class PieceInfo;
 class Matrix;
+class View;
 
 // Undo support
 
@@ -79,8 +81,8 @@ public:
 		*ppLight = m_pLights;
 	}
 
-	void SetPathName(char* lpszPathName, bool bAddToMRU);
-	void SetTitle(char* lpszTitle);
+	void SetPathName (const char* lpszPathName, bool bAddToMRU);
+	void SetTitle (const char* lpszTitle);
 
 public:
 	// Special notifications
@@ -94,13 +96,18 @@ public:
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
 
+        void AddView (View* pView);
+        void RemoveView (View* pView);
+        void UpdateAllViews (View* pSender = NULL);
+
 // Implementation
 protected:
 	// default implementation
 	char m_strTitle[LC_MAXPATH];
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;    // changed since last saved
-	char m_strRecentFiles[4][LC_MAXPATH];
+
+        PtrArray<View> m_ViewList;
 
 	char m_strAuthor[101];
 	char m_strDescription[101];
@@ -241,9 +248,9 @@ protected:
 
 public:
 	// File helpers
-	bool OnNewDocument();
-	bool OnOpenDocument(char* lpszPathName);
-	bool SaveModified();
+	bool OnNewDocument ();
+	bool OnOpenDocument (const char* lpszPathName);
+	bool SaveModified ();
 
 protected:
 	// mail enabling

@@ -15,10 +15,10 @@ void* Sys_StartMemoryRender (int width, int height);
 void Sys_FinishMemoryRender (void* param);
 
 // Cursor functions
-void Sys_BeginWait ();
-void Sys_EndWait ();
-void Sys_GetCursorPos (int *x, int *y);
-void Sys_SetCursorPos (int x, int y);
+//void Sys_GetCursorPos (int *x, int *y);
+//void Sys_SetCursorPos (int x, int y);
+
+// FIXME: moved to basewnd
 
 // Message Box
 #define LC_OK           1
@@ -46,6 +46,8 @@ void Sys_SetCursorPos (int x, int y);
 
 int Sys_MessageBox (const char* text, const char* caption="LeoCAD", int type=LC_MB_OK|LC_MB_ICONINFORMATION);
 
+// FIXME end
+
 // Misc stuff
 bool Sys_KeyDown (int key);
 
@@ -71,7 +73,6 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
 void SystemUpdateMoveSnap(unsigned short nMoveSnap);
 void SystemUpdateSelected(unsigned long flags);
-void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 
@@ -84,7 +85,7 @@ void SystemDoWaitCursor(int nCode);
 
 void SystemSetGroup(int nNew);
 void SystemSetWindowCaption(char* caption);
-void SystemRedrawView();
+//void SystemRedrawView();
 void SystemPieceComboAdd(char* name);
 
 void SystemCaptureMouse();
@@ -93,7 +94,7 @@ void SystemReleaseMouse();
 void SystemExportClipboard(File* clip);
 File* SystemImportClipboard();
 
-void SystemSwapBuffers();
+//void SystemSwapBuffers();
 void SystemPumpMessages();
 long SystemGetTicks();
 

@@ -180,19 +180,21 @@ void CBMPMenu::DrawItem (LPDRAWITEMSTRUCT lpDIS)
 	UINT u = ((CBMPMenuData*)(lpDIS->itemData))->nID;
 	if (u >= ID_VIEWPORT01 && u <= ID_VIEWPORT14)
 	{
+		int left = lpDIS->rcItem.left;
+
 		if (lpDIS->itemAction & ODA_DRAWENTIRE)
-			m_List.Draw (pDC, u - ID_VIEWPORT01, CPoint (lpDIS->rcItem.left+3,lpDIS->rcItem.top+1), ILD_NORMAL);
+			m_List.Draw (pDC, u - ID_VIEWPORT01, CPoint (left+3,lpDIS->rcItem.top+1), ILD_NORMAL);
 
 		if ((lpDIS->itemState & ODS_SELECTED) && (lpDIS->itemAction & (ODA_SELECT | ODA_DRAWENTIRE)))
-			m_List.Draw (pDC, u - ID_VIEWPORT01, CPoint (lpDIS->rcItem.left+3,lpDIS->rcItem.top+1), ILD_SELECTED);
+			m_List.Draw (pDC, u - ID_VIEWPORT01, CPoint (left+3,lpDIS->rcItem.top+1), ILD_SELECTED);
 
 		if (!(lpDIS->itemState & ODS_SELECTED) && (lpDIS->itemAction & ODA_SELECT))
-			m_List.Draw (pDC, u - ID_VIEWPORT01, CPoint (lpDIS->rcItem.left+3,lpDIS->rcItem.top+1), ILD_NORMAL);
+			m_List.Draw (pDC, u - ID_VIEWPORT01, CPoint (left+3,lpDIS->rcItem.top+1), ILD_NORMAL);
 
 		if (lpDIS->itemState & ODS_CHECKED) 
 		{
 			CBrush br(RGB(0,0,0));
-			pDC->FrameRect(CRect (lpDIS->rcItem.left+2,lpDIS->rcItem.top,lpDIS->rcItem.right-2,lpDIS->rcItem.bottom), &br);
+			pDC->FrameRect(CRect (left+2,lpDIS->rcItem.top,left+41+4,lpDIS->rcItem.bottom), &br);
 		}
 		return;
 	}
@@ -463,7 +465,7 @@ void CBMPMenu::MeasureItem(LPMEASUREITEMSTRUCT lpMIS)
 {
 	if (lpMIS->itemID >= ID_VIEWPORT01 && lpMIS->itemID <= ID_VIEWPORT14)
 	{
-		lpMIS->itemWidth = 35;
+		lpMIS->itemWidth = 41 + 8 - GetSystemMetrics(SM_CXMENUCHECK);
 		lpMIS->itemHeight = 33;
 		return;
 	}

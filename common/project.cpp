@@ -131,7 +131,7 @@ Project::Project()
 	"OPQRSTUVWX", "YZ,.!;:<>/?{}@$%", "&*()-+=_[] #" };
 	unsigned char lefts[7][17] = { 
 	{ 1, 11, 21, 30, 40, 50, 56, 66, 76, 80, 84, 93, 97, 111, 121 },
-	{ 1, 11, 21, 31, 38, 47, 53, 63, 72, 83, 94, 103, 111, 120 },
+	{ 1, 11, 21, 31, 38, 47, 53, 63, 72, 86, 94, 103, 111, 120 },
 	{ 1, 10, 19, 28, 37, 46, 55, 64, 73, 82, 94, 106, 118, },
 	{ 1, 13, 24, 34, 47, 59, 64, 73, 84, 94, 108, 120 },
 	{ 1, 14, 25, 38, 50, 61, 71, 83, 94, 109, 120 },
@@ -2175,6 +2175,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	}
       }
     */
+    /*
     {
       LC_RENDER_INFO info;
       info.lighting = (m_nDetail & LC_DET_LIGHTING) != 0;
@@ -2190,7 +2191,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
       Curve curve (NULL, pos, 0);
       curve.Render (&info);
     }
-
+    */
 		if (bShaded)
 		{
 			if (m_nScene & LC_SCENE_FLOOR)

@@ -25,7 +25,8 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
 {
   GtkWidget *parent = gtk_widget_get_toplevel (GTK_WIDGET (clist));
   char *filename, *p;
-  LC_IMAGE *image = NULL;
+  bool loaded = false;
+  Image image;
 
   filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION (parent));
 
@@ -56,18 +57,14 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
           {
             file.Seek (54, SEEK_CUR);
 
-            image = (LC_IMAGE*)malloc (120 * 100 * 3 + sizeof (LC_IMAGE));
-            image->width = 120;
-            image->height = 100;
-            image->bits = (unsigned char*)image + sizeof (LC_IMAGE);
-
-            file.Read (image->bits, 36000);
+            image.Allocate (120, 100, false);
+            file.Read (image.GetData (), 36000);
 
             for (int y = 0; y < 50; y++)
               for (int x = 0; x < 120; x++)
               {
-                unsigned char *from = (unsigned char*)image->bits + x*3 + y*360;
-                unsigned char *to = (unsigned char*)image->bits + x*3 + (100-y-1)*360;
+                unsigned char *from = image.GetData() + x*3 + y*360;
+                unsigned char *to = image.GetData() + x*3 + (100-y-1)*360;
                 unsigned char tmp[3] = { from[0], from[1], from[2] };
 
                 from[0] = to[2];
@@ -77,10 +74,11 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
                 to[1] = tmp[1];
                 to[2] = tmp[0];
               }
+            loaded = true;
           }
           else
           {
-            image = OpenImage (&file, LC_IMAGE_GIF);
+            loaded = image.FileLoad (file);
           }
         }
       }
@@ -88,7 +86,7 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
     file.Close();
   }
 
-  if (image == NULL)
+  if (loaded == false)
   {
     GtkWidget *w = GTK_WIDGET (preview);
     guchar row[360];
@@ -103,15 +101,12 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
     for (int y = 0; y < 100; y++)
       gtk_preview_draw_row (preview, row, 0, y, 120);
     gtk_widget_draw (w, NULL);
-
   }
   else
   {
     for (int y = 0; y < 100; y++)
-      gtk_preview_draw_row (preview, ((unsigned char*)image->bits)+y*360, 0, y, 120);
+      gtk_preview_draw_row (preview, image.GetData ()+y*360, 0, y, 120);
     gtk_widget_draw (GTK_WIDGET (preview), NULL);
-
-    free (image);
   }
 }
 
@@ -186,7 +181,7 @@ int openprojectdlg_execute (char* filename)
 
 static void saveprojectdlg_preview (GtkToggleButton *button, gpointer data)
 {
-  Sys_ProfileSaveInt ("Default", "SavePreview", gtk_toggle_button_get_active (button));
+  Sys_ProfileSaveInt ("Default", "Save Preview", gtk_toggle_button_get_active (button));
 }
 
 // used by the save project and save picture dialogs
@@ -231,7 +226,7 @@ int saveprojectdlg_execute (char* filename)
   gtk_widget_show (check);
   gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (dlg)->main_vbox), check, FALSE, FALSE, 0);
 
-  int i = Sys_ProfileLoadInt ("Default", "SavePreview", 0);
+  int i = Sys_ProfileLoadInt ("Default", "Save Preview", 0);
   if (i != 0) 
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check), TRUE);
   gtk_signal_connect (GTK_OBJECT (check), "toggled", GTK_SIGNAL_FUNC (saveprojectdlg_preview), NULL);

@@ -4567,15 +4567,15 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 				{
-					opts.f2D[0] *= 0.8f;
-					opts.f2D[1] *= 0.8f;
-					opts.f2D[2] *= 0.96f;
-					opts.f3D[0] *= 0.8f;
-					opts.f3D[1] *= 0.8f;
-					opts.f3D[2] *= 0.96f;
-					opts.fMove[0] *= 0.8f;
-					opts.fMove[1] *= 0.8f;
-					opts.fMove[2] *= 0.96f;
+					opts.f2D[0] *= 0.08f;
+					opts.f2D[1] *= 0.08f;
+					opts.f2D[2] *= 0.08f;
+					opts.f3D[0] *= 0.08f;
+					opts.f3D[1] *= 0.08f;
+					opts.f3D[2] *= 0.08f;
+					opts.fMove[0] *= 0.08f;
+					opts.fMove[1] *= 0.08f;
+					opts.fMove[2] *= 0.08f;
 				}
 
 				Piece *pPiece, *pFirst = NULL, *pLast = NULL;
@@ -5676,9 +5676,9 @@ void Project::GetFocusPosition(float* pos)
 			pPiece->GetPosition(pos);
 			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 			{
-				pos[0] /= 0.8f;
-				pos[1] /= 0.8f;
-				pos[2] /= 0.96f;
+				pos[0] /= 0.08f;
+				pos[1] /= 0.08f;
+				pos[2] /= 0.08f;
 			}
 			return;
 		}
@@ -5690,9 +5690,9 @@ void Project::GetFocusPosition(float* pos)
 			pCamera->GetEyePos (pos);
 			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 			{
-				pos[0] /= 0.8f;
-				pos[1] /= 0.8f;
-				pos[2] /= 0.96f;
+				pos[0] /= 0.08f;
+				pos[1] /= 0.08f;
+				pos[2] /= 0.08f;
 			}
 			return;
 		}
@@ -5702,9 +5702,9 @@ void Project::GetFocusPosition(float* pos)
 			pCamera->GetTargetPos (pos);
 			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 			{
-				pos[0] /= 0.8f;
-				pos[1] /= 0.8f;
-				pos[2] /= 0.96f;
+				pos[0] /= 0.08f;
+				pos[1] /= 0.08f;
+				pos[2] /= 0.08f;
 			}
 			return;
 		}

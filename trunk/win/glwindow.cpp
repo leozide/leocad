@@ -23,12 +23,6 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
   case WM_PAINT:
     wnd->OnDraw ();
     break;
-  case WM_CREATE:
-    wnd->OnInitialUpdate ();
-    break;
-  case WM_DESTROY:
-    wnd->DestroyContext ();
-    break;
   case WM_SIZE:
     wnd->OnSize (LOWORD (pMsg->lParam), HIWORD (pMsg->lParam));
     break;
@@ -56,6 +50,32 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
     wnd->OnMouseMove (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
       (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
     break;
+  case WM_ERASEBKGND:
+    return TRUE;
+  case WM_CREATE:
+    wnd->OnInitialUpdate ();
+    break;
+  case WM_DESTROY:
+    wnd->DestroyContext ();
+    break;
+  case WM_PALETTECHANGED:
+    if ((HWND)pMsg->wParam == pMsg->hwnd)  // Responding to own message.
+      break;
+  case WM_QUERYNEWPALETTE:
+    {
+      GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData ();
+
+    	if (prv->m_pPal)
+    	{
+    		prv->m_pDC->SelectPalette (prv->m_pPal, FALSE);
+    		if (prv->m_pDC->RealizePalette () != 0)
+		    {
+    			// Some colors changed, so we need to do a repaint.
+		    	InvalidateRect (prv->m_hWnd, NULL, TRUE);
+    		}
+    	}
+    	return TRUE;
+    } break;
   }
 
   return FALSE;

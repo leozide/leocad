@@ -12,15 +12,17 @@
 #include "CADView.h"
 #include "Tools.h"
 #include "Piece.h"
+#include "library.h"
 
 static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 {
 	CCADView* pView = (CCADView*)pMainFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOSELECTION|PD_ENABLEPRINTHOOK, pParent);
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
 	int bricks = 0;
-	for (int j = 0; j < project->GetPieceLibraryCount(); j++)
-		if (project->GetPieceInfo(j)->m_strDescription[0] != '~')
+	for (int j = 0; j < pLib->GetPieceCount (); j++)
+		if (pLib->GetPieceInfo(j)->m_strDescription[0] != '~')
 			bricks++;
 	int rows = theApp.GetProfileInt("Default", "Catalog Rows", 10);
 	int cols = theApp.GetProfileInt("Default", "Catalog Columns", 3);
@@ -201,9 +203,9 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 
 	start.next = NULL;
 	
-	for (j = 0; j < project->GetPieceLibraryCount(); j++)
+	for (j = 0; j < pLib->GetPieceCount (); j++)
 	{
-		char* desc = project->GetPieceInfo(j)->m_strDescription;
+		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
 
 		if (desc[0] != '~')
 			continue;
@@ -290,7 +292,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
-			PieceInfo* pInfo = project->GetPieceInfo(node->actual);
+			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
 			pInfo->ZoomExtents();
 
 			float pos[4] = { 0, 0, 10, 0 };
@@ -409,21 +411,22 @@ static void PrintPiecesThread(void* pv)
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
-	UINT *pieces = (UINT*)malloc(project->GetPieceLibraryCount()*28*sizeof(UINT));
+	UINT *pieces = (UINT*)malloc(pLib->GetPieceCount ()*28*sizeof(UINT));
 	int col[28];
-	memset (pieces, 0, project->GetPieceLibraryCount()*28*sizeof(UINT));
+	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
 	memset (&col, 0, sizeof (col));
 
 	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
 	{
-		int idx = (((char*)tmp->GetPieceInfo() - (char*)project->m_pPieceIdx)/sizeof(PieceInfo));
+		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
 		pieces[(idx*28)+tmp->GetColor()]++;
 		col[tmp->GetColor()]++;
 	}
 
 	int rows = 0, cols = 1, i, j;
-	for (i = 0; i < project->GetPieceLibraryCount(); i++)
+	for (i = 0; i < pLib->GetPieceCount (); i++)
 		for (j = 0; j < 28; j++)
 			if (pieces[(i*28)+j] > 0)
 			{
@@ -580,9 +583,9 @@ static void PrintPiecesThread(void* pv)
 	} start, *node, *previous, *news;
 	start.next = NULL;
 	
-	for (j = 0; j < project->GetPieceLibraryCount(); j++)
+	for (j = 0; j < pLib->GetPieceCount (); j++)
 	{
-		char* desc = project->GetPieceInfo(j)->m_strDescription;
+		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
 
 		if (desc[0] == '~')
 			continue;
@@ -680,7 +683,7 @@ static void PrintPiecesThread(void* pv)
 
 			glColor3ubv(FlatColorArray[project->m_nCurColor]);
 
-			PieceInfo* pInfo = project->GetPieceInfo(node->actual);
+			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
 			node = node->next;
 			pInfo->ZoomExtents();
 
@@ -702,7 +705,7 @@ static void PrintPiecesThread(void* pv)
 			int rowtotal = 0;
 			char tmp[5];
 	
-			int idx = (((char*)pInfo - (char*)project->m_pPieceIdx)/sizeof(PieceInfo));
+			int idx = (pLib->GetPieceIndex (pInfo));
 			for (i = 0; i < 28; i++)
 				if (pieces[(idx*28)+i])
 				{

@@ -18,7 +18,7 @@ protected: // create from serialization only
 // Attributes
 public:
 	CCADDoc* GetDocument();
-	void PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT page, BOOL bCatalog);
+	void PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT nMaxPage, BOOL bCatalog);
 
 // Operations
 public:

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <memory.h>
+#include <string.h>
 #include "quant.h"
 
 //#define FAST		// improves speed but uses a lot of memory

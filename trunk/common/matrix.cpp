@@ -3,6 +3,7 @@
 
 #include <memory.h>
 #include <math.h>
+#include <string.h>
 #include "matrix.h"
 #include "file.h"
 #include "defines.h"

@@ -3,6 +3,10 @@
 
 #include "defines.h"
 #include "typedefs.h"
+#ifdef LC_WINDOWS
+#include "stdafx.h"
+#endif
+#include <GL/gl.h>
 
 typedef enum 
 {

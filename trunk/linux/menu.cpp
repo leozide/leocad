@@ -253,8 +253,14 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   gtk_widget_add_accelerator (item, "activate", accel, 'C', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   item = GTK_WIDGET (gtk_object_get_data (window, "menu_edit_paste"));
   gtk_widget_add_accelerator (item, "activate", accel, 'V', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_array"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'R', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_group"));
   gtk_widget_add_accelerator (item, "activate", accel, 'G', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_ungroup"));
   gtk_widget_add_accelerator (item, "activate", accel, 'U', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_group_remove"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'M', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_group_add"));
+  gtk_widget_add_accelerator (item, "activate", accel, 'D', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 }

@@ -263,14 +263,14 @@ void PieceInfo::LoadInformation()
 {
   FileDisk bin;
   char filename[LC_MAXPATH];
-  void* buf;
-  unsigned long verts, *longs, fixverts;
-  unsigned char *bytes, *tmp, bt;
-  unsigned short *ushorts, sh;
-  float scale, shift;
-  short* shorts;
   CONNECTIONINFO* pConnection;
   DRAWGROUP* pGroup;
+  void* buf;
+  lcuint32 verts, *longs, fixverts;
+  lcuint16 *ushorts, sh;
+  lcuint8 *bytes, *tmp, bt;
+  float scale, shift;
+  lcint16* shorts;
   int i, j;
 
   // We don't want memory leaks.
@@ -322,37 +322,18 @@ void PieceInfo::LoadInformation()
   bin.Read(buf, m_nSize);
   bin.Close();
 
-  // hacks to get things working on big endian machines
-#ifdef LC_BIG_ENDIAN
-#define GUINT16(val)        ((unsigned short) ( \
-    (((unsigned short) (val) & (unsigned short) 0x00ffU) << 8) | \
-    (((unsigned short) (val) & (unsigned short) 0xff00U) >> 8)))
-#define GUINT32(val)        ((unsigned long) ( \
-    (((unsigned long) (val) & (unsigned long) 0x000000ffU) << 24) | \
-    (((unsigned long) (val) & (unsigned long) 0x0000ff00U) <<  8) | \
-    (((unsigned long) (val) & (unsigned long) 0x00ff0000U) >>  8) | \
-    (((unsigned long) (val) & (unsigned long) 0xff000000U) >> 24)))
-#define GINT16(val) ((short)GUINT16(val))
-#define GINT32(val) ((long)GUINT32(val))
-#else
-#define GUINT16(val) val
-#define GUINT32(val) val
-#define GINT16(val) val
-#define GINT32(val) val
-#endif
-
   shift  = 1.0f/(1<<14);
   scale = 0.01f;
   if (m_nFlags & LC_PIECE_MEDIUM) scale = 0.001f;
   if (m_nFlags & LC_PIECE_SMALL)  scale = 0.0001f;
-  longs = (unsigned long*)buf;
-  fixverts = verts = GUINT32(*longs);
+  longs = (lcuint32*)buf;
+  fixverts = verts = LCUINT32(*longs);
   bytes = (unsigned char*)(longs + 1);
-  bytes += verts * sizeof(short) * 3;
+  bytes += verts * sizeof(lcint16) * 3;
 
   // Read connections
-  m_nConnectionCount = GUINT16(*((unsigned short*)bytes));
-  bytes += sizeof (unsigned short);
+  m_nConnectionCount = LCUINT16(*((lcuint16*)bytes));
+  bytes += sizeof (lcuint16);
   m_pConnections = (CONNECTIONINFO*)malloc (m_nConnectionCount * sizeof(CONNECTIONINFO));
 
   sh = m_nConnectionCount;
@@ -361,18 +342,18 @@ void PieceInfo::LoadInformation()
     pConnection->type = *bytes;
     bytes++;
 
-    shorts = (short*)bytes;
-    pConnection->center[0] = (float)(GINT16(*shorts))*scale;
+    shorts = (lcint16*)bytes;
+    pConnection->center[0] = (float)(LCINT16(*shorts))*scale;
     shorts++;
-    pConnection->center[1] = (float)(GINT16(*shorts))*scale;
+    pConnection->center[1] = (float)(LCINT16(*shorts))*scale;
     shorts++;
-    pConnection->center[2] = (float)(GINT16(*shorts))*scale;
+    pConnection->center[2] = (float)(LCINT16(*shorts))*scale;
     shorts++;
-    pConnection->normal[0] = (float)(GINT16(*shorts))*shift;
+    pConnection->normal[0] = (float)(LCINT16(*shorts))*shift;
     shorts++;
-    pConnection->normal[1] = (float)(GINT16(*shorts))*shift;
+    pConnection->normal[1] = (float)(LCINT16(*shorts))*shift;
     shorts++;
-    pConnection->normal[2] = (float)(GINT16(*shorts))*shift;
+    pConnection->normal[2] = (float)(LCINT16(*shorts))*shift;
     shorts++;
 
     bytes = (unsigned char*)shorts;
@@ -394,40 +375,40 @@ void PieceInfo::LoadInformation()
     strcpy(name, (char*)bytes);
     tex->texture = project->FindTexture(name);
 
-    shorts = (short*)(bytes + 8);
+    shorts = (lcint16*)(bytes + 8);
     for (i = 0; i < 4; i++)
     {
-      tex->vertex[i][0] = (float)GINT16(shorts[0])*scale;
-      tex->vertex[i][1] = (float)GINT16(shorts[1])*scale;
-      tex->vertex[i][2] = (float)GINT16(shorts[2])*scale;
+      tex->vertex[i][0] = (float)LCINT16(shorts[0])*scale;
+      tex->vertex[i][1] = (float)LCINT16(shorts[1])*scale;
+      tex->vertex[i][2] = (float)LCINT16(shorts[2])*scale;
       shorts += 3;
     }
 
     for (i = 0; i < 4; i++)
     {
-      tex->coords[i][0] = (float)GINT16(shorts[0]);
-      tex->coords[i][1] = (float)GINT16(shorts[1]);
+      tex->coords[i][0] = (float)LCINT16(shorts[0]);
+      tex->coords[i][1] = (float)LCINT16(shorts[1]);
       shorts += 2;
     }
 
-    bytes += 8 + 20*sizeof(unsigned short);
+    bytes += 8 + 20*sizeof(lcuint16);
   }
 
   // Read groups
-  m_nGroupCount = GUINT16(*((unsigned short*)bytes));
-  bytes += sizeof(unsigned short);
+  m_nGroupCount = LCUINT16(*((lcuint16*)bytes));
+  bytes += sizeof(lcuint16);
   m_pGroups = (DRAWGROUP*)malloc(sizeof(DRAWGROUP)*m_nGroupCount);
   memset(m_pGroups, 0, sizeof(DRAWGROUP)*m_nGroupCount);
 
   // First we need to know the number of vertexes
   tmp = bytes;
   sh = m_nGroupCount;
-  unsigned long quads = 0;
+  lcuint32 quads = 0;
   while (sh--)
   {
     bt = *bytes;
     bytes++;
-    bytes += bt*sizeof(unsigned short);
+    bytes += bt*sizeof(lcuint16);
 
     while (*bytes)
     {
@@ -435,36 +416,36 @@ void PieceInfo::LoadInformation()
       {
 	if (fixverts > 65535)
 	{
-	  unsigned long colors, *p;
-	  p = (unsigned long*)(bytes + 1);
-	  colors = GUINT32(*p);
+	  lcuint32 colors, *p;
+	  p = (lcuint32*)(bytes + 1);
+	  colors = LCUINT32(*p);
 	  p++;
 
 	  while (colors--)
 	  {
 	    p++; // color code
-	    quads += GUINT32(*p);
-	    p += GUINT32(*p) + 1;
-	    p += GUINT32(*p) + 1;
-	    p += GUINT32(*p) + 1;
+	    quads += LCUINT32(*p);
+	    p += LCUINT32(*p) + 1;
+	    p += LCUINT32(*p) + 1;
+	    p += LCUINT32(*p) + 1;
 	  }
 
 	  bytes = (unsigned char*)p;
 	}
 	else
 	{
-	  unsigned short colors, *p;
-	  p = (unsigned short*)(bytes + 1);
-	  colors = GUINT16(*p);
+	  lcuint16 colors, *p;
+	  p = (lcuint16*)(bytes + 1);
+	  colors = LCUINT16(*p);
 	  p++;
 
 	  while (colors--)
 	  {
 	    p++; // color code
-	    quads += GUINT16(*p);
-	    p += GUINT16(*p) + 1;
-	    p += GUINT16(*p) + 1;
-	    p += GUINT16(*p) + 1;
+	    quads += LCUINT16(*p);
+	    p += LCUINT16(*p) + 1;
+	    p += LCUINT16(*p) + 1;
+	    p += LCUINT16(*p) + 1;
 	  }
 
 	  bytes = (unsigned char*)p;
@@ -510,14 +491,14 @@ void PieceInfo::LoadInformation()
     m_nFlags &= ~LC_PIECE_LONGDATA;
 
   // Copy the 'fixed' vertexes
-  shorts = (short*)(longs + 1);
-  for (verts = 0; verts < GUINT32(*longs); verts++)
+  shorts = (lcint16*)(longs + 1);
+  for (verts = 0; verts < LCUINT32(*longs); verts++)
   {
-    m_fVertexArray[verts*3] = (float)GINT16(*shorts)*scale;
+    m_fVertexArray[verts*3] = (float)LCINT16(*shorts)*scale;
     shorts++;
-    m_fVertexArray[verts*3+1] = (float)GINT16(*shorts)*scale;
+    m_fVertexArray[verts*3+1] = (float)LCINT16(*shorts)*scale;
     shorts++;
-    m_fVertexArray[verts*3+2] = (float)GINT16(*shorts)*scale;
+    m_fVertexArray[verts*3+2] = (float)LCINT16(*shorts)*scale;
     shorts++;
   }
 
@@ -532,9 +513,9 @@ void PieceInfo::LoadInformation()
     pGroup->connections[bt] = 0xFFFF;
     while(bt--)
     {
-      unsigned short tmp = GUINT16(*((unsigned short*)bytes));
+      lcuint16 tmp = LCUINT16(*((lcuint16*)bytes));
       pGroup->connections[bt] = tmp;
-      bytes += sizeof(unsigned short);
+      bytes += sizeof(lcuint16);
     }
 
     // Currently there's only one type of drawinfo (mesh or stud)
@@ -544,29 +525,29 @@ void PieceInfo::LoadInformation()
     case LC_MESH:
       if (fixverts > 65535)
       {
-	unsigned long colors, *p;
+	lcuint32 colors, *p;
 	bytes++;
-	p = (unsigned long*)bytes;
-        *p = GUINT32(*p);
+	p = (lcuint32*)bytes;
+        *p = LCUINT32(*p);
 	colors = *p;
 	p++;
 
 	while (colors--)
 	{
-	  *p = ConvertColor(GUINT32(*p));
+	  *p = ConvertColor(LCUINT32(*p));
 	  p++; // color code
 #ifdef LC_BIG_ENDIAN
 	  int f;
-	  f = GUINT32(*p) + 1;
-	  while (f--) { *p = GUINT32(*p); p++; };
-	  f = GUINT32(*p) + 1;
-	  while (f--) { *p = GUINT32(*p); p++; };
-	  f = GUINT32(*p) + 1;
-	  while (f--) { *p = GUINT32(*p); p++; };
+	  f = LCUINT32(*p) + 1;
+	  while (f--) { *p = LCUINT32(*p); p++; };
+	  f = LCUINT32(*p) + 1;
+	  while (f--) { *p = LCUINT32(*p); p++; };
+	  f = LCUINT32(*p) + 1;
+	  while (f--) { *p = LCUINT32(*p); p++; };
 #else
-	  p += GUINT32(*p) + 1;
-	  p += GUINT32(*p) + 1;
-	  p += GUINT32(*p) + 1;
+	  p += LCUINT32(*p) + 1;
+	  p += LCUINT32(*p) + 1;
+	  p += LCUINT32(*p) + 1;
 #endif
 	}
 
@@ -577,25 +558,25 @@ void PieceInfo::LoadInformation()
       }
       else
       {
-	unsigned short colors, *p;
+	lcuint16 colors, *p;
 	bytes++;
-	p = (unsigned short*)bytes;
-	*p = GUINT16(*p);
+	p = (lcuint16*)bytes;
+	*p = LCUINT16(*p);
 	colors = *p;
 	p++;
 
 	while (colors--)
 	{
-	  *p = ConvertColor(GUINT16(*p));
+	  *p = ConvertColor(LCUINT16(*p));
 	  p++; // color code
 #ifdef LC_BIG_ENDIAN
 	  int f;
-	  f = GUINT16(*p) + 1;
-	  while (f--) { *p = GUINT16(*p); p++; };
-	  f = GUINT16(*p) + 1;
-	  while (f--) { *p = GUINT16(*p); p++; };
-	  f = GUINT16(*p) + 1;
-	  while (f--) { *p = GUINT16(*p); p++; };
+	  f = LCUINT16(*p) + 1;
+	  while (f--) { *p = LCUINT16(*p); p++; };
+	  f = LCUINT16(*p) + 1;
+	  while (f--) { *p = LCUINT16(*p); p++; };
+	  f = LCUINT16(*p) + 1;
+	  while (f--) { *p = LCUINT16(*p); p++; };
 #else
 	  p += *p + 1;
 	  p += *p + 1;
@@ -607,11 +588,11 @@ void PieceInfo::LoadInformation()
 
 	if (m_nFlags & LC_PIECE_LONGDATA)
 	{
-	  pGroup->drawinfo = malloc(i*sizeof(unsigned long)/sizeof(unsigned short));
-	  longs = (unsigned long*)pGroup->drawinfo;
+	  pGroup->drawinfo = malloc(i*sizeof(lcuint32)/sizeof(lcuint16));
+	  longs = (lcuint32*)pGroup->drawinfo;
 
-	  for (ushorts = (unsigned short*)bytes; ushorts != p; ushorts++, longs++)
-	    *longs = *ushorts;//GUINT16(*ushorts);
+	  for (ushorts = (lcuint16*)bytes; ushorts != p; ushorts++, longs++)
+	    *longs = *ushorts;//LCUINT16(*ushorts);
 	}
 	else
 	{
@@ -627,8 +608,11 @@ void PieceInfo::LoadInformation()
     {
       int size;
       Matrix mat;
+
+      for (i = 0; i < 12; i++)
+        ((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
       mat.FromPacked ((float*)(bytes+2));
-      unsigned short color = ConvertColor(*(bytes+1));
+      lcuint16 color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
       for (i = 0; i < SIDES; i++)
@@ -652,8 +636,8 @@ void PieceInfo::LoadInformation()
 
       if (m_nFlags & LC_PIECE_LONGDATA)
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned long)*size);
-	longs = (unsigned long*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
+	longs = (lcuint32*)pGroup->drawinfo;
 
 	longs[0] = 2; // colors
 	longs[1] = color;
@@ -662,18 +646,18 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[3+i*4] = (unsigned long)verts + i;
+	  longs[3+i*4] = (lcuint32)verts + i;
 	  if (i == SIDES-1)
 	  {
-	    longs[4+i*4] = (unsigned long)verts;
-	    longs[5+i*4] = (unsigned long)verts + SIDES;
+	    longs[4+i*4] = (lcuint32)verts;
+	    longs[5+i*4] = (lcuint32)verts + SIDES;
 	  }
 	  else
 	  {
-	    longs[4+i*4] = (unsigned long)verts + i + 1;
-	    longs[5+i*4] = (unsigned long)verts + SIDES + i + 1;
+	    longs[4+i*4] = (lcuint32)verts + i + 1;
+	    longs[5+i*4] = (lcuint32)verts + SIDES + i + 1;
 	  }
-	  longs[6+i*4] = (unsigned long)verts + SIDES + i;
+	  longs[6+i*4] = (lcuint32)verts + SIDES + i;
 	}
 	j += 4*SIDES;
 	longs[j] = SIDES*3;
@@ -681,12 +665,12 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*3] = (unsigned short)verts + 2*SIDES;
-	  longs[1+j+i*3] = (unsigned short)verts + SIDES + i;
+	  longs[j+i*3] = (lcuint16)verts + 2*SIDES;
+	  longs[1+j+i*3] = (lcuint16)verts + SIDES + i;
 	  if (i == SIDES-1)
-	    longs[2+j+i*3] = (unsigned short)verts + SIDES;
+	    longs[2+j+i*3] = (lcuint16)verts + SIDES;
 	  else
-	    longs[2+j+i*3] = (unsigned short)verts + SIDES + i + 1;
+	    longs[2+j+i*3] = (lcuint16)verts + SIDES + i + 1;
 	}
 
 	j += 3*SIDES;
@@ -698,11 +682,11 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)verts + i;
+	  longs[j+i*4] = (lcuint32)verts + i;
 	  if (i == SIDES-1)
-	    longs[1+j+i*4] = (unsigned long)verts;
+	    longs[1+j+i*4] = (lcuint32)verts;
 	  else
-	    longs[1+j+i*4] = (unsigned long)verts + i + 1;
+	    longs[1+j+i*4] = (lcuint32)verts + i + 1;
 
 	  longs[2+j+i*4] = longs[j+i*4] + SIDES;
 	  longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
@@ -710,8 +694,8 @@ void PieceInfo::LoadInformation()
       }
       else
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned short)*size);
-	ushorts = (unsigned short*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint16)*size);
+	ushorts = (lcuint16*)pGroup->drawinfo;
 
 	ushorts[0] = 2; // colors
 	ushorts[1] = color;
@@ -720,18 +704,18 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[3+i*4] = (unsigned short)(verts + i);
+	  ushorts[3+i*4] = (lcuint16)(verts + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[4+i*4] = (unsigned short)verts;
-	    ushorts[5+i*4] = (unsigned short)verts + SIDES;
+	    ushorts[4+i*4] = (lcuint16)verts;
+	    ushorts[5+i*4] = (lcuint16)verts + SIDES;
 	  }
 	  else
 	  {
-	    ushorts[4+i*4] = (unsigned short)verts + i + 1;
-	    ushorts[5+i*4] = (unsigned short)verts + SIDES + i + 1;
+	    ushorts[4+i*4] = (lcuint16)verts + i + 1;
+	    ushorts[5+i*4] = (lcuint16)verts + SIDES + i + 1;
 	  }
-	  ushorts[6+i*4] = (unsigned short)verts + SIDES + i;
+	  ushorts[6+i*4] = (lcuint16)verts + SIDES + i;
 	}
 	j += 4*SIDES;
 	ushorts[j] = SIDES*3;
@@ -739,12 +723,12 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*3] = (unsigned short)verts + 2*SIDES;
-	  ushorts[1+j+i*3] = (unsigned short)verts + SIDES + i;
+	  ushorts[j+i*3] = (lcuint16)verts + 2*SIDES;
+	  ushorts[1+j+i*3] = (lcuint16)verts + SIDES + i;
 	  if (i == SIDES-1)
-	    ushorts[2+j+i*3] = (unsigned short)verts + SIDES;
+	    ushorts[2+j+i*3] = (lcuint16)verts + SIDES;
 	  else
-	    ushorts[2+j+i*3] = (unsigned short)verts + SIDES + i + 1;
+	    ushorts[2+j+i*3] = (lcuint16)verts + SIDES + i + 1;
 	}
 
 	j += 3*SIDES;
@@ -756,11 +740,11 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)verts + i;
+	  ushorts[j+i*4] = (lcuint16)verts + i;
 	  if (i == SIDES-1)
-	    ushorts[1+j+i*4] = (unsigned short)verts;
+	    ushorts[1+j+i*4] = (lcuint16)verts;
 	  else
-	    ushorts[1+j+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[1+j+i*4] = (lcuint16)verts + i + 1;
 
 	  ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
 	  ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
@@ -775,8 +759,11 @@ void PieceInfo::LoadInformation()
     {
       int size;
       Matrix mat;
+
+      for (i = 0; i < 12; i++)
+        ((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
       mat.FromPacked ((float*)(bytes+2));
-      unsigned short color = ConvertColor(*(bytes+1));
+      lcuint16 color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
       for (i = 0; i < SIDES; i++)
@@ -808,8 +795,8 @@ void PieceInfo::LoadInformation()
 
       if (m_nFlags & LC_PIECE_LONGDATA)
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned long)*size);
-	longs = (unsigned long*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
+	longs = (lcuint32*)pGroup->drawinfo;
 
 	longs[0] = 2; // colors
 	longs[1] = color;
@@ -819,54 +806,54 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)(verts + SIDES + i);
+	  longs[j+i*4] = (lcuint32)(verts + SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + SIDES;
-	    longs[j+2+i*4] = (unsigned long)verts;
+	    longs[j+1+i*4] = (lcuint32)verts + SIDES;
+	    longs[j+2+i*4] = (lcuint32)verts;
 	  }
 	  else
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + SIDES + i + 1;
-	    longs[j+2+i*4] = (unsigned long)verts + i + 1;
+	    longs[j+1+i*4] = (lcuint32)verts + SIDES + i + 1;
+	    longs[j+2+i*4] = (lcuint32)verts + i + 1;
 	  }
-	  longs[j+3+i*4] = (unsigned long)verts + i;
+	  longs[j+3+i*4] = (lcuint32)verts + i;
 	}
 	j += 4*SIDES;
 
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)(verts + 2*SIDES + i);
+	  longs[j+i*4] = (lcuint32)(verts + 2*SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + 2*SIDES;
-	    longs[j+2+i*4] = (unsigned long)verts + 3*SIDES;
+	    longs[j+1+i*4] = (lcuint32)verts + 2*SIDES;
+	    longs[j+2+i*4] = (lcuint32)verts + 3*SIDES;
 	  }
 	  else
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + 2*SIDES + i + 1;
-	    longs[j+2+i*4] = (unsigned long)verts + 3*SIDES + i + 1;
+	    longs[j+1+i*4] = (lcuint32)verts + 2*SIDES + i + 1;
+	    longs[j+2+i*4] = (lcuint32)verts + 3*SIDES + i + 1;
 	  }
-	  longs[j+3+i*4] = (unsigned long)verts + 3*SIDES + i;
+	  longs[j+3+i*4] = (lcuint32)verts + 3*SIDES + i;
 	}
 	j += 4*SIDES;
 
 	// ring
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)(verts + i);
+	  longs[j+i*4] = (lcuint32)(verts + i);
 	  if (i == SIDES-1)
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts;
-	    longs[j+2+i*4] = (unsigned long)verts + 3*SIDES;
+	    longs[j+1+i*4] = (lcuint32)verts;
+	    longs[j+2+i*4] = (lcuint32)verts + 3*SIDES;
 	  }
 	  else
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + i + 1;
-	    longs[j+2+i*4] = (unsigned long)verts + 3*SIDES + i + 1;
+	    longs[j+1+i*4] = (lcuint32)verts + i + 1;
+	    longs[j+2+i*4] = (lcuint32)verts + 3*SIDES + i + 1;
 	  }
-	  longs[j+3+i*4] = (unsigned long)verts + 3*SIDES + i;
+	  longs[j+3+i*4] = (lcuint32)verts + 3*SIDES + i;
 	}
 	j += 4*SIDES;
 
@@ -880,11 +867,11 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)verts + i;
+	  longs[j+i*4] = (lcuint32)verts + i;
 	  if (i == SIDES-1)
-	    longs[1+j+i*4] = (unsigned long)verts;
+	    longs[1+j+i*4] = (lcuint32)verts;
 	  else
-	    longs[1+j+i*4] = (unsigned long)verts + i + 1;
+	    longs[1+j+i*4] = (lcuint32)verts + i + 1;
 
 	  longs[2+j+i*4] = longs[j+i*4] + SIDES;
 	  longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
@@ -894,11 +881,11 @@ void PieceInfo::LoadInformation()
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)verts + 2*SIDES + i;
+	  longs[j+i*4] = (lcuint32)verts + 2*SIDES + i;
 	  if (i == SIDES-1)
-	    longs[1+j+i*4] = (unsigned long)verts + 2*SIDES;
+	    longs[1+j+i*4] = (lcuint32)verts + 2*SIDES;
 	  else
-	    longs[1+j+i*4] = (unsigned long)verts + 2*SIDES + i + 1;
+	    longs[1+j+i*4] = (lcuint32)verts + 2*SIDES + i + 1;
 
 	  longs[2+j+i*4] = longs[j+i*4] + SIDES;
 	  longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
@@ -906,8 +893,8 @@ void PieceInfo::LoadInformation()
       }
       else
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned short)*size);
-	ushorts = (unsigned short*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint16)*size);
+	ushorts = (lcuint16*)pGroup->drawinfo;
 
 	ushorts[0] = 2; // colors
 	ushorts[1] = color;
@@ -917,54 +904,54 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)(verts + SIDES + i);
+	  ushorts[j+i*4] = (lcuint16)(verts + SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + SIDES;
-	    ushorts[j+2+i*4] = (unsigned short)verts;
+	    ushorts[j+1+i*4] = (lcuint16)verts + SIDES;
+	    ushorts[j+2+i*4] = (lcuint16)verts;
 	  }
 	  else
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + SIDES + i + 1;
-	    ushorts[j+2+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[j+1+i*4] = (lcuint16)verts + SIDES + i + 1;
+	    ushorts[j+2+i*4] = (lcuint16)verts + i + 1;
 	  }
-	  ushorts[j+3+i*4] = (unsigned short)verts + i;
+	  ushorts[j+3+i*4] = (lcuint16)verts + i;
 	}
 	j += 4*SIDES;
 
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)(verts + 3*SIDES + i);
+	  ushorts[j+i*4] = (lcuint16)(verts + 3*SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + 3*SIDES;
-	    ushorts[j+2+i*4] = (unsigned short)verts + 2*SIDES;
+	    ushorts[j+1+i*4] = (lcuint16)verts + 3*SIDES;
+	    ushorts[j+2+i*4] = (lcuint16)verts + 2*SIDES;
 	  }
 	  else
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + 3*SIDES + i + 1;
-	    ushorts[j+2+i*4] = (unsigned short)verts + 2*SIDES + i + 1;
+	    ushorts[j+1+i*4] = (lcuint16)verts + 3*SIDES + i + 1;
+	    ushorts[j+2+i*4] = (lcuint16)verts + 2*SIDES + i + 1;
 	  }
-	  ushorts[j+3+i*4] = (unsigned short)verts + 2*SIDES + i;
+	  ushorts[j+3+i*4] = (lcuint16)verts + 2*SIDES + i;
 	}
 	j += 4*SIDES;
 
 	// ring
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)(verts + i);
+	  ushorts[j+i*4] = (lcuint16)(verts + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts;
-	    ushorts[j+2+i*4] = (unsigned short)verts + 3*SIDES;
+	    ushorts[j+1+i*4] = (lcuint16)verts;
+	    ushorts[j+2+i*4] = (lcuint16)verts + 3*SIDES;
 	  }
 	  else
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + i + 1;
-	    ushorts[j+2+i*4] = (unsigned short)verts + 3*SIDES + i + 1;
+	    ushorts[j+1+i*4] = (lcuint16)verts + i + 1;
+	    ushorts[j+2+i*4] = (lcuint16)verts + 3*SIDES + i + 1;
 	  }
-	  ushorts[j+3+i*4] = (unsigned short)verts + 3*SIDES + i;
+	  ushorts[j+3+i*4] = (lcuint16)verts + 3*SIDES + i;
 	}
 	j += 4*SIDES;
 
@@ -978,11 +965,11 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)verts + i;
+	  ushorts[j+i*4] = (lcuint16)verts + i;
 	  if (i == SIDES-1)
-	    ushorts[1+j+i*4] = (unsigned short)verts;
+	    ushorts[1+j+i*4] = (lcuint16)verts;
 	  else
-	    ushorts[1+j+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[1+j+i*4] = (lcuint16)verts + i + 1;
 
 	  ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
 	  ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
@@ -992,11 +979,11 @@ void PieceInfo::LoadInformation()
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)verts + 2*SIDES + i;
+	  ushorts[j+i*4] = (lcuint16)verts + 2*SIDES + i;
 	  if (i == SIDES-1)
-	    ushorts[1+j+i*4] = (unsigned short)verts + 2*SIDES;
+	    ushorts[1+j+i*4] = (lcuint16)verts + 2*SIDES;
 	  else
-	    ushorts[1+j+i*4] = (unsigned short)verts + 2*SIDES + i + 1;
+	    ushorts[1+j+i*4] = (lcuint16)verts + 2*SIDES + i + 1;
 
 	  ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
 	  ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
@@ -1011,8 +998,11 @@ void PieceInfo::LoadInformation()
     {
       int size;
       Matrix mat;
+
+      for (i = 0; i < 12; i++)
+        ((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
       mat.FromPacked ((float*)(bytes+2));
-      unsigned short color = ConvertColor(*(bytes+1));
+      lcuint16 color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
       for (i = 0; i < SIDES; i++)
@@ -1036,8 +1026,8 @@ void PieceInfo::LoadInformation()
 
       if (m_nFlags & LC_PIECE_LONGDATA)
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned long)*size);
-	longs = (unsigned long*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
+	longs = (lcuint32*)pGroup->drawinfo;
 
 	longs[0] = 2; // colors
 	longs[1] = color;
@@ -1046,18 +1036,18 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[3+i*4] = (unsigned long)verts + SIDES + i;
+	  longs[3+i*4] = (lcuint32)verts + SIDES + i;
 	  if (i == SIDES-1)
 	  {
-	    longs[4+i*4] = (unsigned long)verts + SIDES;
-	    longs[5+i*4] = (unsigned long)verts;
+	    longs[4+i*4] = (lcuint32)verts + SIDES;
+	    longs[5+i*4] = (lcuint32)verts;
 	  }
 	  else
 	  {
-	    longs[4+i*4] = (unsigned long)verts + SIDES + i + 1;
-	    longs[5+i*4] = (unsigned long)verts + i + 1;
+	    longs[4+i*4] = (lcuint32)verts + SIDES + i + 1;
+	    longs[5+i*4] = (lcuint32)verts + i + 1;
 	  }
-	  longs[6+i*4] = (unsigned long)verts + i;
+	  longs[6+i*4] = (lcuint32)verts + i;
 	}
 	j += 4*SIDES;
 	longs[j] = SIDES*3;
@@ -1066,11 +1056,11 @@ void PieceInfo::LoadInformation()
 	for (i = 0; i < SIDES; i++)
 	{
 	  if (i == SIDES-1)
-	    longs[j+i*3] = (unsigned short)verts + SIDES;
+	    longs[j+i*3] = (lcuint16)verts + SIDES;
 	  else
-	    longs[j+i*3] = (unsigned short)verts + SIDES + i + 1;
-	  longs[1+j+i*3] = (unsigned short)verts + SIDES + i;
-	  longs[2+j+i*3] = (unsigned short)verts + 2*SIDES;
+	    longs[j+i*3] = (lcuint16)verts + SIDES + i + 1;
+	  longs[1+j+i*3] = (lcuint16)verts + SIDES + i;
+	  longs[2+j+i*3] = (lcuint16)verts + 2*SIDES;
 	}
 
 	j += 3*SIDES;
@@ -1082,11 +1072,11 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)verts + i;
+	  longs[j+i*4] = (lcuint32)verts + i;
 	  if (i == SIDES-1)
-	    longs[1+j+i*4] = (unsigned long)verts;
+	    longs[1+j+i*4] = (lcuint32)verts;
 	  else
-	    longs[1+j+i*4] = (unsigned long)verts + i + 1;
+	    longs[1+j+i*4] = (lcuint32)verts + i + 1;
 
 	  longs[2+j+i*4] = longs[j+i*4] + SIDES;
 	  longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
@@ -1094,8 +1084,8 @@ void PieceInfo::LoadInformation()
       }
       else
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned short)*size);
-	ushorts = (unsigned short*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint16)*size);
+	ushorts = (lcuint16*)pGroup->drawinfo;
 
 	ushorts[0] = 2; // colors
 	ushorts[1] = color;
@@ -1104,18 +1094,18 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[3+i*4] = (unsigned short)(verts + SIDES + i);
+	  ushorts[3+i*4] = (lcuint16)(verts + SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[4+i*4] = (unsigned short)verts + SIDES;
-	    ushorts[5+i*4] = (unsigned short)verts;
+	    ushorts[4+i*4] = (lcuint16)verts + SIDES;
+	    ushorts[5+i*4] = (lcuint16)verts;
 	  }
 	  else
 	  {
-	    ushorts[4+i*4] = (unsigned short)verts + SIDES + i + 1;
-	    ushorts[5+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[4+i*4] = (lcuint16)verts + SIDES + i + 1;
+	    ushorts[5+i*4] = (lcuint16)verts + i + 1;
 	  }
-	  ushorts[6+i*4] = (unsigned short)verts + i;
+	  ushorts[6+i*4] = (lcuint16)verts + i;
 	}
 	j += 4*SIDES;
 	ushorts[j] = SIDES*3;
@@ -1124,11 +1114,11 @@ void PieceInfo::LoadInformation()
 	for (i = 0; i < SIDES; i++)
 	{
 	  if (i == SIDES-1)
-	    ushorts[j+i*3] = (unsigned short)verts + SIDES;
+	    ushorts[j+i*3] = (lcuint16)verts + SIDES;
 	  else
-	    ushorts[j+i*3] = (unsigned short)verts + SIDES + i + 1;
-	  ushorts[1+j+i*3] = (unsigned short)verts + SIDES + i;
-	  ushorts[2+j+i*3] = (unsigned short)verts + 2*SIDES;
+	    ushorts[j+i*3] = (lcuint16)verts + SIDES + i + 1;
+	  ushorts[1+j+i*3] = (lcuint16)verts + SIDES + i;
+	  ushorts[2+j+i*3] = (lcuint16)verts + 2*SIDES;
 	}
 
 	j += 3*SIDES;
@@ -1140,11 +1130,11 @@ void PieceInfo::LoadInformation()
 
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)verts + i;
+	  ushorts[j+i*4] = (lcuint16)verts + i;
 	  if (i == SIDES-1)
-	    ushorts[1+j+i*4] = (unsigned short)verts;
+	    ushorts[1+j+i*4] = (lcuint16)verts;
 	  else
-	    ushorts[1+j+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[1+j+i*4] = (lcuint16)verts + i + 1;
 
 	  ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
 	  ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
@@ -1159,8 +1149,11 @@ void PieceInfo::LoadInformation()
     {
       int size;
       Matrix mat;
+
+      for (i = 0; i < 12; i++)
+        ((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
       mat.FromPacked ((float*)(bytes+2));
-      unsigned short color = ConvertColor(*(bytes+1));
+      lcuint16 color = ConvertColor(*(bytes+1));
 
       // Create the vertexes
       for (i = 0; i < SIDES; i++)
@@ -1192,8 +1185,8 @@ void PieceInfo::LoadInformation()
 
       if (m_nFlags & LC_PIECE_LONGDATA)
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned long)*size);
-	longs = (unsigned long*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
+	longs = (lcuint32*)pGroup->drawinfo;
 
 	longs[0] = 2; // colors
 	longs[1] = color;
@@ -1203,54 +1196,54 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)(verts + i);
+	  longs[j+i*4] = (lcuint32)(verts + i);
 	  if (i == SIDES-1)
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts;
-	    longs[j+2+i*4] = (unsigned long)verts + SIDES;
+	    longs[j+1+i*4] = (lcuint32)verts;
+	    longs[j+2+i*4] = (lcuint32)verts + SIDES;
 	  }
 	  else
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + i + 1;
-	    longs[j+2+i*4] = (unsigned long)verts + SIDES + i + 1;
+	    longs[j+1+i*4] = (lcuint32)verts + i + 1;
+	    longs[j+2+i*4] = (lcuint32)verts + SIDES + i + 1;
 	  }
-	  longs[j+3+i*4] = (unsigned long)verts + SIDES + i;
+	  longs[j+3+i*4] = (lcuint32)verts + SIDES + i;
 	}
 	j += 4*SIDES;
 
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)(verts + 3*SIDES + i);
+	  longs[j+i*4] = (lcuint32)(verts + 3*SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + 3*SIDES;
-	    longs[j+2+i*4] = (unsigned long)verts + 2*SIDES;
+	    longs[j+1+i*4] = (lcuint32)verts + 3*SIDES;
+	    longs[j+2+i*4] = (lcuint32)verts + 2*SIDES;
 	  }
 	  else
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + 3*SIDES + i + 1;
-	    longs[j+2+i*4] = (unsigned long)verts + 2*SIDES + i + 1;
+	    longs[j+1+i*4] = (lcuint32)verts + 3*SIDES + i + 1;
+	    longs[j+2+i*4] = (lcuint32)verts + 2*SIDES + i + 1;
 	  }
-	  longs[j+3+i*4] = (unsigned long)verts + 2*SIDES + i;
+	  longs[j+3+i*4] = (lcuint32)verts + 2*SIDES + i;
 	}
 	j += 4*SIDES;
 
 	// ring
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)(verts + 3*SIDES + i);
+	  longs[j+i*4] = (lcuint32)(verts + 3*SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + 3*SIDES;
-	    longs[j+2+i*4] = (unsigned long)verts;
+	    longs[j+1+i*4] = (lcuint32)verts + 3*SIDES;
+	    longs[j+2+i*4] = (lcuint32)verts;
 	  }
 	  else
 	  {
-	    longs[j+1+i*4] = (unsigned long)verts + 3*SIDES + i + 1;
-	    longs[j+2+i*4] = (unsigned long)verts + i + 1;
+	    longs[j+1+i*4] = (lcuint32)verts + 3*SIDES + i + 1;
+	    longs[j+2+i*4] = (lcuint32)verts + i + 1;
 	  }
-	  longs[j+3+i*4] = (unsigned long)verts + i;
+	  longs[j+3+i*4] = (lcuint32)verts + i;
 	}
 	j += 4*SIDES;
 
@@ -1264,11 +1257,11 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)verts + i;
+	  longs[j+i*4] = (lcuint32)verts + i;
 	  if (i == SIDES-1)
-	    longs[1+j+i*4] = (unsigned long)verts;
+	    longs[1+j+i*4] = (lcuint32)verts;
 	  else
-	    longs[1+j+i*4] = (unsigned long)verts + i + 1;
+	    longs[1+j+i*4] = (lcuint32)verts + i + 1;
 
 	  longs[2+j+i*4] = longs[j+i*4] + SIDES;
 	  longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
@@ -1278,11 +1271,11 @@ void PieceInfo::LoadInformation()
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  longs[j+i*4] = (unsigned long)verts + 2*SIDES + i;
+	  longs[j+i*4] = (lcuint32)verts + 2*SIDES + i;
 	  if (i == SIDES-1)
-	    longs[1+j+i*4] = (unsigned long)verts + 2*SIDES;
+	    longs[1+j+i*4] = (lcuint32)verts + 2*SIDES;
 	  else
-	    longs[1+j+i*4] = (unsigned long)verts + 2*SIDES + i + 1;
+	    longs[1+j+i*4] = (lcuint32)verts + 2*SIDES + i + 1;
 
 	  longs[2+j+i*4] = longs[j+i*4] + SIDES;
 	  longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
@@ -1290,8 +1283,8 @@ void PieceInfo::LoadInformation()
       }
       else
       {
-	pGroup->drawinfo = malloc(sizeof(unsigned short)*size);
-	ushorts = (unsigned short*)pGroup->drawinfo;
+	pGroup->drawinfo = malloc(sizeof(lcuint16)*size);
+	ushorts = (lcuint16*)pGroup->drawinfo;
 
 	ushorts[0] = 2; // colors
 	ushorts[1] = color;
@@ -1301,54 +1294,54 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)(verts + i);
+	  ushorts[j+i*4] = (lcuint16)(verts + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts;
-	    ushorts[j+2+i*4] = (unsigned short)verts + SIDES;
+	    ushorts[j+1+i*4] = (lcuint16)verts;
+	    ushorts[j+2+i*4] = (lcuint16)verts + SIDES;
 	  }
 	  else
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + i + 1;
-	    ushorts[j+2+i*4] = (unsigned short)verts + SIDES + i + 1;
+	    ushorts[j+1+i*4] = (lcuint16)verts + i + 1;
+	    ushorts[j+2+i*4] = (lcuint16)verts + SIDES + i + 1;
 	  }
-	  ushorts[j+3+i*4] = (unsigned short)verts + SIDES + i;
+	  ushorts[j+3+i*4] = (lcuint16)verts + SIDES + i;
 	}
 	j += 4*SIDES;
 
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)(verts + 2*SIDES + i);
+	  ushorts[j+i*4] = (lcuint16)(verts + 2*SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + 2*SIDES;
-	    ushorts[j+2+i*4] = (unsigned short)verts + 3*SIDES;
+	    ushorts[j+1+i*4] = (lcuint16)verts + 2*SIDES;
+	    ushorts[j+2+i*4] = (lcuint16)verts + 3*SIDES;
 	  }
 	  else
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + 2*SIDES + i + 1;
-	    ushorts[j+2+i*4] = (unsigned short)verts + 3*SIDES + i + 1;
+	    ushorts[j+1+i*4] = (lcuint16)verts + 2*SIDES + i + 1;
+	    ushorts[j+2+i*4] = (lcuint16)verts + 3*SIDES + i + 1;
 	  }
-	  ushorts[j+3+i*4] = (unsigned short)verts + 3*SIDES + i;
+	  ushorts[j+3+i*4] = (lcuint16)verts + 3*SIDES + i;
 	}
 	j += 4*SIDES;
 
 	// ring
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)(verts + 3*SIDES + i);
+	  ushorts[j+i*4] = (lcuint16)(verts + 3*SIDES + i);
 	  if (i == SIDES-1)
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + 3*SIDES;
-	    ushorts[j+2+i*4] = (unsigned short)verts;
+	    ushorts[j+1+i*4] = (lcuint16)verts + 3*SIDES;
+	    ushorts[j+2+i*4] = (lcuint16)verts;
 	  }
 	  else
 	  {
-	    ushorts[j+1+i*4] = (unsigned short)verts + 3*SIDES + i + 1;
-	    ushorts[j+2+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[j+1+i*4] = (lcuint16)verts + 3*SIDES + i + 1;
+	    ushorts[j+2+i*4] = (lcuint16)verts + i + 1;
 	  }
-	  ushorts[j+3+i*4] = (unsigned short)verts + i;
+	  ushorts[j+3+i*4] = (lcuint16)verts + i;
 	}
 	j += 4*SIDES;
 
@@ -1362,11 +1355,11 @@ void PieceInfo::LoadInformation()
 	// outside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)verts + i;
+	  ushorts[j+i*4] = (lcuint16)verts + i;
 	  if (i == SIDES-1)
-	    ushorts[1+j+i*4] = (unsigned short)verts;
+	    ushorts[1+j+i*4] = (lcuint16)verts;
 	  else
-	    ushorts[1+j+i*4] = (unsigned short)verts + i + 1;
+	    ushorts[1+j+i*4] = (lcuint16)verts + i + 1;
 
 	  ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
 	  ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
@@ -1376,11 +1369,11 @@ void PieceInfo::LoadInformation()
 	// inside
 	for (i = 0; i < SIDES; i++)
 	{
-	  ushorts[j+i*4] = (unsigned short)verts + 2*SIDES + i;
+	  ushorts[j+i*4] = (lcuint16)verts + 2*SIDES + i;
 	  if (i == SIDES-1)
-	    ushorts[1+j+i*4] = (unsigned short)verts + 2*SIDES;
+	    ushorts[1+j+i*4] = (lcuint16)verts + 2*SIDES;
 	  else
-	    ushorts[1+j+i*4] = (unsigned short)verts + 2*SIDES + i + 1;
+	    ushorts[1+j+i*4] = (lcuint16)verts + 2*SIDES + i + 1;
 
 	  ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
 	  ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;

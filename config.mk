@@ -216,10 +216,31 @@ config:
 	  (test -s endiantest && (./endiantest; exit) 2> /dev/null); then \
 	  echo "little endian"; \
 	  echo "#define LC_LITTLE_ENDIAN" >> $(OSDIR)/config.h; \
+	  echo "#define LCUINT16(val) val" >> $(OSDIR)/config.h; \
+	  echo "#define LCUINT32(val) val" >> $(OSDIR)/config.h; \
+	  echo "#define LCINT16(val) val" >> $(OSDIR)/config.h; \
+	  echo "#define LCINT32(val) val" >> $(OSDIR)/config.h; \
+	  echo "#define LCFLOAT(val) val" >> $(OSDIR)/config.h; \
 	else \
 	  echo "big endian"; \
 	  echo "#define LC_BIG_ENDIAN" >> $(OSDIR)/config.h; \
-	fi
+	  echo "#define LCUINT16(val) ((lcuint16) ( \\" >> $(OSDIR)/config.h; \
+	  echo "    (((lcuint16) (val) & (lcuint16) 0x00ffU) << 8) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((lcuint16) (val) & (lcuint16) 0xff00U) >> 8)))" >> $(OSDIR)/config.h; \
+	  echo "#define LCUINT32(val) ((lcuint32) ( \\" >> $(OSDIR)/config.h; \
+	  echo "    (((lcuint32) (val) & (lcuint32) 0x000000ffU) << 24) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((lcuint32) (val) & (lcuint32) 0x0000ff00U) <<  8) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((lcuint32) (val) & (lcuint32) 0x00ff0000U) >>  8) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((lcuint32) (val) & (lcuint32) 0xff000000U) >> 24)))" >> $(OSDIR)/config.h; \
+	  echo "#define LCINT16(val) ((lcint16)LCUINT16(val))" >> $(OSDIR)/config.h; \
+	  echo "#define LCINT32(val) ((lcint32)LCUINT32(val))" >> $(OSDIR)/config.h; \
+	  echo -e "inline float LCFLOAT (float l)\n{" >> $(OSDIR)/config.h; \
+	  echo -e "  union { unsigned char b[4]; float f; } in, out;\n" >> $(OSDIR)/config.h; \
+	  echo -e "  in.f = l;\n  out.b[0] = in.b[3];\n  out.b[1] = in.b[2];" >> $(OSDIR)/config.h; \
+	  echo -e "  out.b[2] = in.b[1];\n  out.b[3] = in.b[0];\n" >> $(OSDIR)/config.h; \
+	  echo -e "  return out.f;\n}" >> $(OSDIR)/config.h; \
+	fi; \
+	echo "" >> $(OSDIR)/config.h
 	@rm -f endiantest.c endiantest
 
 ### Check if the user has libjpeg installed

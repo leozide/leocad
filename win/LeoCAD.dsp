@@ -211,13 +211,6 @@ USERDEP__LEOCA="$(ProjDir)\hlp\AfxCore.rtf"	"$(ProjDir)\hlp\AfxPrint.rtf"
 # Begin Source File
 
 SOURCE=.\Leocad.rc
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1087,15 +1080,7 @@ SOURCE=..\Common\light.h
 # Begin Source File
 
 SOURCE=..\common\mainwnd.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1195,15 +1180,7 @@ SOURCE=..\Common\quant.h
 # Begin Source File
 
 SOURCE=..\common\str.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1256,15 +1233,7 @@ SOURCE=..\Common\vector.h
 # Begin Source File
 
 SOURCE=..\common\view.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

@@ -41,7 +41,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	CString info, tmp;
 	PIXELFORMATDESCRIPTOR pfd;
-	DescribePixelFormat(m_hViewDC, GetPixelFormat(m_hViewDC), sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	pfnwglDescribePixelFormat(m_hViewDC, pfnwglGetPixelFormat(m_hViewDC), sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
 	info = ("Pixel Format: ");
 	if (pfd.iPixelType == PFD_TYPE_RGBA)

@@ -211,6 +211,9 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
   if (!project->SaveModified())
     return TRUE;
 
+  delete project;
+  project = NULL;
+
   gtk_main_quit ();
   return FALSE;
 }
@@ -335,7 +338,7 @@ int main(int argc, char* argv[])
 
   gtk_main();
 
-  delete project;
+  //  delete project;
   return 0;
 }
 

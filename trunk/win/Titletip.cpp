@@ -232,4 +232,3 @@ BOOL CTitleTip::PreTranslateMessage(MSG* pMsg)
 	
 	return CWnd::PreTranslateMessage(pMsg);
 }
-

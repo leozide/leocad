@@ -542,6 +542,7 @@ static void update_window_layout ()
     if (pieces_visible)
     {
       pieces_parent = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+      gtk_window_set_transient_for (GTK_WINDOW (pieces_parent), GTK_WINDOW (main_window));
       gtk_signal_connect (GTK_OBJECT (pieces_parent), "delete_event",
 			  GTK_SIGNAL_FUNC (pieces_close), NULL);
       gtk_signal_connect (GTK_OBJECT (pieces_parent), "destroy",

@@ -33,20 +33,20 @@ typedef struct
 } VIEWPORT;
 
 static VIEWPORT viewports[14] = {
-	{ 1,  0, 0,    1,    1,     0,    0,    0,    0,     0,    0,    0,    0,     0,    0,    0,    0 }, // 1
-	{ 2,  0, 0, 0.5f,    1,  0.5f,    0, 0.5f,    1,     0,    0,    0,    0,     0,    0,    0,    0 }, // 2V
-	{ 2,  0, 0,    1, 0.5f,     0, 0.5f,    1, 0.5f,     0,    0,    0,    0,     0,    0,    0,    0 }, // 2H
-	{ 2,  0, 0,    1, 0.7f,     0, 0.7f,    1, 0.3f,     0,    0,    0,    0,     0,    0,    0,    0 }, // 2HT
-	{ 2,  0, 0,    1, 0.3f,     0, 0.3f,    1, 0.7f,     0,    0,    0,    0,     0,    0,    0,    0 }, // 2HB
-	{ 3,  0, 0, 0.5f, 0.5f,     0, 0.5f, 0.5f, 0.5f,  0.5f,    0, 0.5f,    1,     0,    0,    0,    0 }, // 3VL
-	{ 3,  0, 0, 0.5f,    1,  0.5f,    0, 0.5f, 0.5f,  0.5f, 0.5f, 0.5f, 0.5f,     0,    0,    0,    0 }, // 3VR
-	{ 3,  0, 0,    1, 0.5f,     0, 0.5f, 0.5f, 0.5f,  0.5f, 0.5f, 0.5f, 0.5f,     0,    0,    0,    0 }, // 3HB
-	{ 3,  0, 0, 0.5f, 0.5f,  0.5f,    0, 0.5f, 0.5f,     0, 0.5f,    1, 0.5f,     0,    0,    0,    0 }, // 3HT
-	{ 4,  0, 0, 0.3f, 0.3f,     0, 0.3f, 0.3f, 0.4f,     0, 0.7f, 0.3f, 0.3f,  0.3f,    0, 0.7f,    1 }, // 4VL
-	{ 4,  0, 0, 0.7f,    1,  0.7f,    0, 0.3f, 0.3f,  0.7f, 0.3f, 0.3f, 0.4f,  0.7f, 0.7f, 0.3f, 0.3f }, // 4VR
-	{ 4,  0, 0,    1, 0.7f,     0, 0.7f, 0.3f, 0.3f,  0.3f, 0.7f, 0.4f, 0.3f,  0.7f, 0.7f, 0.3f, 0.3f }, // 4HT
-	{ 4,  0, 0, 0.3f, 0.3f,  0.3f,    0, 0.4f, 0.3f,  0.7f,    0, 0.3f, 0.3f,     0, 0.3f,    1, 0.7f }, // 4HB
-	{ 4,  0, 0, 0.5f, 0.5f,  0.5f,    0, 0.5f, 0.5f,     0, 0.5f, 0.5f, 0.5f,  0.5f, 0.5f, 0.5f, 0.5f }};// 4
+  { 1,  {{0, 0,    1,    1}, {    0,    0,    0,    0}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 1
+  { 2,  {{0, 0, 0.5f,    1}, { 0.5f,    0, 0.5f,    1}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2V
+  { 2,  {{0, 0,    1, 0.5f}, {    0, 0.5f,    1, 0.5f}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2H
+  { 2,  {{0, 0,    1, 0.7f}, {    0, 0.7f,    1, 0.3f}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2HT
+  { 2,  {{0, 0,    1, 0.3f}, {    0, 0.3f,    1, 0.7f}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2HB
+  { 3,  {{0, 0, 0.5f, 0.5f}, {    0, 0.5f, 0.5f, 0.5f}, { 0.5f,    0, 0.5f,    1}, {    0,    0,    0,    0} }}, // 3VL
+  { 3,  {{0, 0, 0.5f,    1}, { 0.5f,    0, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f, 0.5f}, {    0,    0,    0,    0} }}, // 3VR
+  { 3,  {{0, 0,    1, 0.5f}, {    0, 0.5f, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f, 0.5f}, {    0,    0,    0,    0} }}, // 3HB
+  { 3,  {{0, 0, 0.5f, 0.5f}, { 0.5f,    0, 0.5f, 0.5f}, {    0, 0.5f,    1, 0.5f}, {    0,    0,    0,    0} }}, // 3HT
+  { 4,  {{0, 0, 0.3f, 0.3f}, {    0, 0.3f, 0.3f, 0.4f}, {    0, 0.7f, 0.3f, 0.3f}, { 0.3f,    0, 0.7f,    1} }}, // 4VL
+  { 4,  {{0, 0, 0.7f,    1}, { 0.7f,    0, 0.3f, 0.3f}, { 0.7f, 0.3f, 0.3f, 0.4f}, { 0.7f, 0.7f, 0.3f, 0.3f} }}, // 4VR
+  { 4,  {{0, 0,    1, 0.7f}, {    0, 0.7f, 0.3f, 0.3f}, { 0.3f, 0.7f, 0.4f, 0.3f}, { 0.7f, 0.7f, 0.3f, 0.3f} }}, // 4HT
+  { 4,  {{0, 0, 0.3f, 0.3f}, { 0.3f,    0, 0.4f, 0.3f}, { 0.7f,    0, 0.3f, 0.3f}, {    0, 0.3f,    1, 0.7f} }}, // 4HB
+  { 4,  {{0, 0, 0.5f, 0.5f}, { 0.5f,    0, 0.5f, 0.5f}, {    0, 0.5f, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f, 0.5f} }}};// 4
 
 typedef struct 
 {
@@ -653,7 +653,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	char id[32];
 	unsigned long rgb;
 	float fv = 0.4f;
-	unsigned char ch, action;
+	unsigned char ch, action = m_nCurAction;
 	unsigned short sh;
 
 	file->Seek(0, SEEK_SET);
@@ -2639,7 +2639,7 @@ bool Project::RemoveSelectedObjects()
 	}
 
 	// Cameras can't be removed while being used or default
-	for (pCamera = m_pCameras; pCamera; pPrev = pCamera, pCamera = pCamera->m_pNext)
+	for (pPrev = NULL, pCamera = m_pCameras; pCamera; pPrev = pCamera, pCamera = pCamera->m_pNext)
 	{
 		if (pCamera->IsSelected() && pCamera->IsUser())
 		{
@@ -2653,7 +2653,10 @@ bool Project::RemoveSelectedObjects()
 
 			if (bCanDelete)
 			{
-				((Camera*)pPrev)->m_pNext = pCamera->m_pNext;
+			  if (pPrev)
+			    ((Camera*)pPrev)->m_pNext = pCamera->m_pNext;
+			  else
+			    m_pCameras = pCamera->m_pNext;
 				delete pCamera;
 				pCamera = (Camera*)pPrev;
 				removed = true;
@@ -2752,7 +2755,8 @@ void Project::CheckAutoSave()
 	m_nSaveTimer += 5;
 	if (m_nAutosave & LC_AUTOSAVE_FLAG)
 	{
-		int nInterval = m_nAutosave & ~LC_AUTOSAVE_FLAG;
+		int nInterval;
+		nInterval = m_nAutosave & ~LC_AUTOSAVE_FLAG;
 
 		if (m_nSaveTimer >= (m_nAutosave*60))
 		{
@@ -3221,7 +3225,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
 				FILE* f;
-				char* ext, fn[LC_MAXPATH];
+				char* ext = ".bmp", fn[LC_MAXPATH];
 				int i;
 				unsigned short last = GetLastStep();
 
@@ -3458,7 +3462,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				while (fread(&bt, 4, 1, f))
 				{
 					u = (((unsigned char)(bt[3])|((unsigned short)(bt[2]) << 8))|(((unsigned long)(bt[1])) << 16)) + bt[0] * 16581375;
-					sprintf(tmp, "%d", u);
+					sprintf(tmp, "%d", (int)u);
 					pInfo = FindPieceInfo(tmp);
 
 					fread(&tmp, 9, 1, f);
@@ -3507,7 +3511,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			strcpy(fn, opts.outpath);
-			if (ptr = strrchr (fn, '.'))
+			if ((ptr = strrchr (fn, '.')))
 				*ptr = 0;
 			strcat (fn, ".inc");
 			f = fopen(fn, "wt");
@@ -3568,7 +3572,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					{
 						char name[20];
 						strcpy(name, pInfo->m_strName);
-						while (ptr = strchr(name, '-'))
+						while ((ptr = strchr(name, '-')))
 							*ptr = '_';
 						fprintf(f, "#declare lc_%s = union {\n", name);
 
@@ -3683,12 +3687,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			fclose(f);
-			if (ptr = strrchr (fn, '.'))
+			if ((ptr = strrchr (fn, '.')))
 				*ptr = 0;
 			strcat (fn, ".pov");
 			f = fopen(fn, "wt");
 
-			if (ptr = strrchr (fn, '.'))
+			if ((ptr = strrchr (fn, '.')))
 				*ptr = 0;
 			ptr = strrchr (fn, '\\');
 			if (!ptr)
@@ -3719,7 +3723,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				{
 					char* ptr;
 					sprintf(name, "lc_%s", pPiece->GetPieceInfo()->m_strName);
-					while (ptr = strchr(name, '-'))
+					while ((ptr = strchr(name, '-')))
 						*ptr = '_';
 				}
 				else
@@ -4164,7 +4168,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								if (a > max) 
 									max = a;
 
-					sprintf(groups[j]->m_strName, "Pasted Group #%0.2d", max+1);
+					sprintf(groups[j]->m_strName, "Pasted Group #%.2d", max+1);
 					groups[j]->m_pNext = m_pGroups;
 					m_pGroups = groups[j];
 				}
@@ -4497,7 +4501,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							if (i > max)
 								max = i;
 				pGroup = new Group;
-				sprintf(pGroup->m_strName, "Minifig #%0.2d", max+1);
+				sprintf(pGroup->m_strName, "Minifig #%.2d", max+1);
 
 				pGroup->m_pNext = m_pGroups;
 				m_pGroups = pGroup;
@@ -4519,6 +4523,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SetModifiedFlag(true);
 				CheckPoint("Minifig");
 			}
+
+			for (i = 0; i < 15; i++)
+			  if (opts.info[i])
+			    opts.info[i]->DeRef();
 		} break;
 
 		case LC_PIECE_ARRAY:
@@ -4554,7 +4562,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					opts.fMove[2] *= 0.96f;
 				}
 
-				Piece *pPiece, *pFirst, *pLast = NULL;
+				Piece *pPiece, *pFirst = NULL, *pLast = NULL;
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 				int sel = 0;
 				unsigned long i, j, k;
@@ -4703,7 +4711,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
 						if (i > max)
 							max = i;
-			sprintf(name, "Group #%0.2d", max+1);
+			sprintf(name, "Group #%.2d", max+1);
 
 			if (SystemDoDialog(LC_DLG_GROUP, name))
 			{
@@ -6240,8 +6248,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				if (bShift)
 				{
 					// Focus the previous visible piece.
-					Piece* pBest;
-					pPiece = pFocus;
+					Piece* pBest = pPiece = pFocus;
 					for (;;)
 					{
 						if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))

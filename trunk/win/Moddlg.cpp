@@ -131,7 +131,7 @@ void CModifyDialog::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 } 
 
-void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler)
+void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler*/)
 {
 	UpdateDialogControls(pTarget, FALSE);
 }

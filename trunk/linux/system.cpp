@@ -23,6 +23,8 @@ char* strupr(char* string)
     if ('a' <= *cp && *cp <= 'z')
       *cp += 'A' - 'a';
   }
+
+  return string;
 }
 
 char* strlwr(char* string)
@@ -33,6 +35,8 @@ char* strlwr(char* string)
     if ('A' <= *cp && *cp <= 'Z')
       *cp += 'a' - 'A';
   }
+
+  return string;
 }
 
 
@@ -163,6 +167,8 @@ void SystemUpdateAction(int new_action, int old_action)
     button = tool_toolbar.rotview; xpm = cr_rotv; x = 15; y = 15; break;
   case LC_ACTION_ROLL:
     button = tool_toolbar.roll; xpm = cr_roll; x = 15; y = 15; break;
+  default:
+    return;
   }
 
   GdkBitmap *bitmap;

@@ -33,7 +33,7 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
-	void OnUpdateRecentFileMenu(CCmdUI* pCmdUI) {};
+	void OnUpdateRecentFileMenu(CCmdUI* /*pCmdUI*/) {};
 
 	//{{AFX_MSG(CCADApp)
 	afx_msg void OnHelpUpdates();

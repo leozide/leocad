@@ -176,7 +176,6 @@ LC_IMAGE* OpenBMP (char* filename)
 	// set the output params
 	image = (LC_IMAGE*)malloc(w*h*3 + sizeof(LC_IMAGE));
 	long row_size = w * 3;
-	long bufsize = (long)w * 3 * (long)h;
 
 	if (image != NULL) 
 	{
@@ -281,7 +280,7 @@ LC_IMAGE* OpenBMP (char* filename)
 		else
 		{
 			int i, x = 0;
-			unsigned char c, c1, *pp;
+			unsigned char c, c1 = 0, *pp;
 			row = 0;
 			pp = outbuf + (bmHeight-1)*bmWidth*3;
 
@@ -416,7 +415,7 @@ bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize)
 
 	unsigned short bits;
 	unsigned long cmap, bfSize;
-	unsigned char pal[3][256], *colormappedbuffer;
+	unsigned char pal[3][256], *colormappedbuffer = NULL;
 
 	if (quantize)
 	{
@@ -471,7 +470,7 @@ bool SaveBMP(char* filename, LC_IMAGE* image, bool quantize)
 
 		for (int row = 0; row < image->height; row++) 
 		{
-			int pixbuf;
+			int pixbuf = 0;
 
 			for (int col = 0; col < image->width; col++) 
 			{

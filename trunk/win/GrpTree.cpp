@@ -239,7 +239,7 @@ BOOL CGroupEditTree::PreTranslateMessage(MSG* pMsg)
 	return CTreeCtrl::PreTranslateMessage(pMsg);
 }
 
-BOOL CGroupEditTree::IsDropSource(HTREEITEM hItem)
+BOOL CGroupEditTree::IsDropSource(HTREEITEM /*hItem*/)
 {
 	return TRUE;
 }

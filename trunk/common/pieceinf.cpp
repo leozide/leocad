@@ -1746,14 +1746,14 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 				for (count = *info, info++; count; count -= 4)
 				{
-					fprintf(file, "f %d %d %d %d\n", 
+					fprintf(file, "f %ld %ld %ld %ld\n", 
 						*info+*start, info[1]+*start, info[2]+*start, info[3]+*start);
 					info += 4;
 				}
 
 				for (count = *info, info++; count; count -= 3)
 				{
-					fprintf(file, "f %d %d %d\n", 
+					fprintf(file, "f %ld %ld %ld\n", 
 						*info+*start, info[1]+*start, info[2]+*start);
 					info += 3;
 				}
@@ -1796,14 +1796,14 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 				for (count = *info, info++; count; count -= 4)
 				{
-					fprintf(file, "f %d %d %d %d\n", 
+					fprintf(file, "f %ld %ld %ld %ld\n", 
 						*info+*start, info[1]+*start, info[2]+*start, info[3]+*start);
 					info += 4;
 				}
 
 				for (count = *info, info++; count; count -= 3)
 				{
-					fprintf(file, "f %d %d %d\n", 
+					fprintf(file, "f %ld %ld %ld\n", 
 						*info+*start, info[1]+*start, info[2]+*start);
 					info += 3;
 				}

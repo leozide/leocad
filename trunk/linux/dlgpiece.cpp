@@ -14,6 +14,7 @@
 #include <GL/glx.h>
 #include <stdio.h>
 #include "gtkglarea.h"
+#include "gtktools.h"
 #include "system.h"
 #include "typedefs.h"
 #include "globals.h"
@@ -95,7 +96,7 @@ static gint minifigdlg_redraw (GtkWidget *widget, GdkEventExpose *event)
   return TRUE;
 }
 
-// Save the new size of the window.
+// Setup the OpenGL projection
 static gint minifigdlg_resize (GtkWidget *widget, GdkEventConfigure *event)
 {
   if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
@@ -124,34 +125,42 @@ static gint minifigdlg_resize (GtkWidget *widget, GdkEventConfigure *event)
   return TRUE;
 }
 
+// User wants to add the minifig to the project
 static void minifigdlg_ok(GtkWidget *widget, gpointer data)
 {
-  //  LC_GROUPDLG_STRUCT* s = (LC_GROUPDLG_STRUCT*)data;
+  //  LC_MINIFIGDLG_STRUCT* s = (LC_MINIFIGDLG_STRUCT*)data;
   //  LC_MINIFIGDLG_OPTS* opts = (LC_MINIFIGDLG_OPTS*)s->data;
 
   dlg_end (LC_OK);
 }
 
-// Create a combo box with a color selection control
-static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidget* vbox)
+// A new color was selected from the menu
+static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
 {
-  GtkWidget *hbox, *combo, *color, *menu, *menuitem;
+  LC_MINIFIGDLG_STRUCT* info;
+  GtkWidget* button;
   int i;
 
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+  button = (GtkWidget*)gtk_object_get_data (GTK_OBJECT (widget), "button");
+  info = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (button), "info");
 
-  combo = info->pieces[num] = gtk_combo_new ();
-  gtk_widget_show (combo);
-  gtk_box_pack_start (GTK_BOX (hbox), combo, FALSE, TRUE, 0);
-  gtk_widget_set_usize (combo, 75, 25);
-  gtk_entry_set_editable (GTK_ENTRY (GTK_COMBO (combo)->entry), FALSE);
+  if (!info)
+    return;
 
-  color = info->colors[num] = gtk_option_menu_new ();
+  for (i = 0; i < 15; i++)
+    if (info->colors[i] == button)
+      break;
 
-  gtk_widget_show (color);
-  gtk_box_pack_start (GTK_BOX (hbox), color, FALSE, FALSE, 0);
+  info->opts->colors[i] = (int)data;
+  gtk_widget_draw (info->preview, NULL);
+  set_button_pixmap2 (button, FlatColorArray[(int)data]);
+}
+
+// A color button was clicked
+static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
+{
+  int i;
+  GtkWidget *menu, *menuitem;
 
   menu = gtk_menu_new ();
 
@@ -160,13 +169,54 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidge
     menuitem = gtk_menu_item_new_with_label (colornames[i]);
     gtk_widget_show (menuitem);
     gtk_menu_append (GTK_MENU (menu), menuitem);
+
+    gtk_object_set_data (GTK_OBJECT (menuitem), "button", widget);
+    gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
+			GTK_SIGNAL_FUNC (minifigdlg_color_response), (void*)i);
   }
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (color), menu);
-  gtk_option_menu_set_history (GTK_OPTION_MENU (color), info->opts->colors[num]);
+
+  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 0, 0);
+}
+
+// A color button was exposed, draw the pixmap
+static gint minifigdlg_color_expose (GtkWidget *widget)
+{
+  int* data = (int*)gtk_object_get_data (GTK_OBJECT (widget), "color");
+  set_button_pixmap2 (widget, FlatColorArray[*data]);
+  return TRUE;
+}
+
+// Create a combo box with a color selection control
+static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidget* vbox)
+{
+  GtkWidget *hbox, *combo, *color;
+
+  hbox = gtk_hbox_new (FALSE, 5);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, FALSE, 0);
+
+  combo = info->pieces[num] = gtk_combo_new ();
+  gtk_widget_show (combo);
+  gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
+  gtk_widget_set_usize (combo, 60, 25);
+  gtk_entry_set_editable (GTK_ENTRY (GTK_COMBO (combo)->entry), FALSE);
+
+  color = info->colors[num] = gtk_button_new_with_label ("");
+  gtk_widget_set_events (color, GDK_EXPOSURE_MASK);
+  gtk_widget_show (color);
+  gtk_object_set_data (GTK_OBJECT (color), "color", &info->opts->colors[num]);
+  gtk_object_set_data (GTK_OBJECT (color), "info", info);
+  gtk_widget_set_usize (color, 40, 25);
+  gtk_signal_connect (GTK_OBJECT (color), "expose_event",
+		      GTK_SIGNAL_FUNC (minifigdlg_color_expose), NULL);
+  gtk_signal_connect (GTK_OBJECT (color), "clicked",
+		      GTK_SIGNAL_FUNC (minifigdlg_color_clicked), info);
+  gtk_box_pack_start (GTK_BOX (hbox), color, FALSE, TRUE, 0);
 }
 
 int minifigdlg_execute(void* param)
 {
+  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   LC_MINIFIGDLG_STRUCT s;
   GtkWidget *dlg;
   GtkWidget *vbox1, *vbox2, *hbox;
@@ -180,12 +230,12 @@ int minifigdlg_execute(void* param)
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
 		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 600, 400);
+  gtk_widget_set_usize (dlg, 600, 360);
   gtk_window_set_title (GTK_WINDOW (dlg), "Minifig Wizard");
   gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
   gtk_widget_realize (dlg);
 
-  vbox1 = gtk_vbox_new (FALSE, 0);
+  vbox1 = gtk_vbox_new (FALSE, 10);
   gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (dlg), vbox1);
   gtk_container_border_width (GTK_CONTAINER (vbox1), 5);
@@ -194,9 +244,9 @@ int minifigdlg_execute(void* param)
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
+  vbox2 = gtk_vbox_new (FALSE, 5);
   gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
 
   minifigdlg_createpair (&s, MFW_HAT, vbox2);
   minifigdlg_createpair (&s, MFW_NECK, vbox2);
@@ -206,8 +256,6 @@ int minifigdlg_execute(void* param)
   minifigdlg_createpair (&s, MFW_HIPS, vbox2);
   minifigdlg_createpair (&s, MFW_RIGHT_LEG, vbox2);
   minifigdlg_createpair (&s, MFW_RIGHT_SHOE, vbox2);
-
-  int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
 
   // Create new OpenGL widget.
   s.preview = gtk_gl_area_share_new (attrlist, GTK_GL_AREA (drawing_area));
@@ -223,9 +271,9 @@ int minifigdlg_execute(void* param)
   gtk_widget_show (GTK_WIDGET (s.preview));
   gtk_object_set_data (GTK_OBJECT (s.preview), "minifig", &s);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
+  vbox2 = gtk_vbox_new (FALSE, 5);
   gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
 
   minifigdlg_createpair (&s, MFW_HEAD, vbox2);
   minifigdlg_createpair (&s, MFW_TORSO, vbox2);
@@ -284,6 +332,8 @@ int minifigdlg_execute(void* param)
       case MF_LEGL:  id = MFW_LEFT_LEG; break;
       case MF_LEGR:  id = MFW_RIGHT_LEG; break;
       case MF_SHOE:  id = MFW_LEFT_SHOE; break;
+      default:
+	continue;
       }
 
       if (i != 29)
@@ -308,15 +358,7 @@ int minifigdlg_execute(void* param)
     }
   }
 
-
-
-
   return dlg_domodal(dlg, LC_CANCEL);
-  /*
-	for (int i = 0; i < 15; i++)
-		if (m_pMFWnd->m_pFig->info[i])
-			m_pMFWnd->m_pFig->info[i]->DeRef();
-*/
 }
 
 

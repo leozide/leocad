@@ -76,4 +76,36 @@ void set_button_pixmap (GtkWidget* widget, float* color)
   gdk_gc_destroy(gc);
 }
 
+void set_button_pixmap2 (GtkWidget* widget, unsigned char* color)
+{
+  GdkColor c;
+  GdkGC* gc;
+  GdkPixmap* pixmap;
+
+  if (widget->window == NULL)
+    return;
+
+  if ((widget->allocation.width < 10) || (widget->allocation.height < 10))
+    return;
+
+  gc = gdk_gc_new (widget->window);
+  pixmap = gdk_pixmap_new (widget->window, widget->allocation.width - 10,
+			   widget->allocation.height - 10, -1);
+
+  c.red = color[0]*256;
+  c.green = color[1]*256;
+  c.blue = color[2]*256;
+  gdk_color_alloc (gtk_widget_get_colormap(widget), &c);
+  gdk_gc_set_foreground(gc, &c);
+
+  gdk_draw_rectangle (pixmap, gc, TRUE, 0, 0,
+		      widget->allocation.width - 5, widget->allocation.height - 5);
+
+  GtkWidget* pixmapwid = gtk_pixmap_new (pixmap, (GdkBitmap*)NULL);
+  gtk_widget_show (pixmapwid);
+
+  gtk_container_remove (GTK_CONTAINER(widget), GTK_BIN(widget)->child);
+  gtk_container_add (GTK_CONTAINER(widget), pixmapwid);
+  gdk_gc_destroy(gc);
+}
 

@@ -4,9 +4,9 @@
 #include "typedefs.h"
 
 #define alpha_composite(composite, fg, alpha, bg) {			\
-    unsigned short temp = ((unsigned short)(fg)*(unsigned short)(alpha) +				\
-                (unsigned short)(bg)*(unsigned short)(255 - (unsigned short)(alpha)) + (unsigned short)128);	\
-    (composite) = (unsigned char)((temp + (temp >> 8)) >> 8);			\
+  unsigned short temp = ((unsigned short)(fg)*(unsigned short)(alpha) +	\
+  (unsigned short)(bg)*(unsigned short)(255 - (unsigned short)(alpha)) + (unsigned short)128);	\
+  (composite) = (unsigned char)((temp + (temp >> 8)) >> 8);			\
 }
 
 // ========================================================
@@ -104,6 +104,8 @@ LC_IMAGE* OpenPNG(char* filename)
 			blue  = (unsigned char)pBackground->blue;
 		}
 	}
+	else
+	  red = green = blue = 0;
 
 	// decode the image, all at once
 	if (setjmp(png_ptr->jmpbuf))

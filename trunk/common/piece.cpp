@@ -450,7 +450,7 @@ void Piece::CreateName(Piece* pPiece)
 				if (i > max) 
 					max = i;
 
-	sprintf (m_strName, "%s #%0.2d", m_pPieceInfo->m_strDescription, max+1);
+	sprintf (m_strName, "%s #%.2d", m_pPieceInfo->m_strDescription, max+1);
 }
 
 void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, CLICKLINE* pLine)

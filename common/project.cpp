@@ -6318,6 +6318,76 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			m_nAngleSnap = 180;
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
+
+		case LC_EDIT_ACTION_SELECT:
+		{
+			SetAction(LC_ACTION_SELECT);
+		} break;
+
+		case LC_EDIT_ACTION_INSERT:
+		{
+			SetAction(LC_ACTION_INSERT);
+		} break;
+
+		case LC_EDIT_ACTION_LIGHT:
+		{
+			SetAction(LC_ACTION_LIGHT);
+		} break;
+
+		case LC_EDIT_ACTION_SPOTLIGHT:
+		{
+			SetAction(LC_ACTION_SPOTLIGHT);
+		} break;
+
+		case LC_EDIT_ACTION_CAMERA:
+		{
+			SetAction(LC_ACTION_CAMERA);
+		} break;
+
+		case LC_EDIT_ACTION_MOVE:
+		{
+			SetAction(LC_ACTION_MOVE);
+		} break;
+
+		case LC_EDIT_ACTION_ROTATE:
+		{
+			SetAction(LC_ACTION_ROTATE);
+		} break;
+
+		case LC_EDIT_ACTION_ERASER:
+		{
+			SetAction(LC_ACTION_ERASER);
+		} break;
+
+		case LC_EDIT_ACTION_PAINT:
+		{
+			SetAction(LC_ACTION_PAINT);
+		} break;
+
+		case LC_EDIT_ACTION_ZOOM:
+		{
+			SetAction(LC_ACTION_ZOOM);
+		} break;
+
+		case LC_EDIT_ACTION_ZOOM_REGION:
+		{
+			SetAction(LC_ACTION_ZOOM_REGION);
+		} break;
+
+		case LC_EDIT_ACTION_PAN:
+		{
+			SetAction(LC_ACTION_PAN);
+		} break;
+
+		case LC_EDIT_ACTION_ROTATE_VIEW:
+		{
+			SetAction(LC_ACTION_ROTATE_VIEW);
+		} break;
+
+		case LC_EDIT_ACTION_ROLL:
+		{
+			SetAction(LC_ACTION_ROLL);
+		} break;
 	}
 }
 

@@ -1125,19 +1125,19 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			{
 				LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
 
-				if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
-				{
-					if (GetFocus() != GetActiveView())
-					{
-						break;
-					}
-				}
-
 				if (pMsg->wParam == Cmd.Key1)
 				{
 					if ((Shift == ((Cmd.Flags & LC_KEYMOD1_SHIFT) != 0)) &&
 					    (Control == ((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0)))
 					{
+						if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
+						{
+							if (GetFocus() != GetActiveView())
+							{
+								break;
+							}
+						}
+
 						project->HandleCommand(Cmd.ID, 0);
 						return true;
 					}
@@ -1148,6 +1148,14 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 					if ((Shift == ((Cmd.Flags & LC_KEYMOD2_SHIFT) != 0)) &&
 					    (Control == ((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0)))
 					{
+						if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
+						{
+							if (GetFocus() != GetActiveView())
+							{
+								break;
+							}
+						}
+
 						project->HandleCommand(Cmd.ID, 0);
 						return true;
 					}
@@ -1235,25 +1243,39 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_SNAPMOVEMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
 		0,                         // LC_TOOLBAR_BACKGROUND
-		0,                         // LC_EDIT_MOVE_SNAP_0,
-		0,                         // LC_EDIT_MOVE_SNAP_1,
-		0,                         // LC_EDIT_MOVE_SNAP_2,
-		0,                         // LC_EDIT_MOVE_SNAP_3,
-		0,                         // LC_EDIT_MOVE_SNAP_4,
-		0,                         // LC_EDIT_MOVE_SNAP_5,
-		0,                         // LC_EDIT_MOVE_SNAP_6,
-		0,                         // LC_EDIT_MOVE_SNAP_7,
-		0,                         // LC_EDIT_MOVE_SNAP_8,
-		0,                         // LC_EDIT_MOVE_SNAP_9,
-		0,                         // LC_EDIT_ANGLE_SNAP_0,
-		0,                         // LC_EDIT_ANGLE_SNAP_1,
-		0,                         // LC_EDIT_ANGLE_SNAP_2,
-		0,                         // LC_EDIT_ANGLE_SNAP_3,
-		0,                         // LC_EDIT_ANGLE_SNAP_4,
-		0,                         // LC_EDIT_ANGLE_SNAP_5,
-		0,                         // LC_EDIT_ANGLE_SNAP_6,
-		0,                         // LC_EDIT_ANGLE_SNAP_7,
-		0,                         // LC_EDIT_ANGLE_SNAP_8,
+		0,                         // LC_EDIT_MOVE_SNAP_0
+		0,                         // LC_EDIT_MOVE_SNAP_1
+		0,                         // LC_EDIT_MOVE_SNAP_2
+		0,                         // LC_EDIT_MOVE_SNAP_3
+		0,                         // LC_EDIT_MOVE_SNAP_4
+		0,                         // LC_EDIT_MOVE_SNAP_5
+		0,                         // LC_EDIT_MOVE_SNAP_6
+		0,                         // LC_EDIT_MOVE_SNAP_7
+		0,                         // LC_EDIT_MOVE_SNAP_8
+		0,                         // LC_EDIT_MOVE_SNAP_9
+		0,                         // LC_EDIT_ANGLE_SNAP_0
+		0,                         // LC_EDIT_ANGLE_SNAP_1
+		0,                         // LC_EDIT_ANGLE_SNAP_2
+		0,                         // LC_EDIT_ANGLE_SNAP_3
+		0,                         // LC_EDIT_ANGLE_SNAP_4
+		0,                         // LC_EDIT_ANGLE_SNAP_5
+		0,                         // LC_EDIT_ANGLE_SNAP_6
+		0,                         // LC_EDIT_ANGLE_SNAP_7
+		0,                         // LC_EDIT_ANGLE_SNAP_8
+		0,                         // LC_EDIT_ACTION_SELECT
+		0,                         // LC_EDIT_ACTION_INSERT
+		0,                         // LC_EDIT_ACTION_LIGHT
+		0,                         // LC_EDIT_ACTION_SPOTLIGHT
+		0,                         // LC_EDIT_ACTION_CAMERA
+		0,                         // LC_EDIT_ACTION_MOVE
+		0,                         // LC_EDIT_ACTION_ROTATE
+		0,                         // LC_EDIT_ACTION_ERASER
+		0,                         // LC_EDIT_ACTION_PAINT
+		0,                         // LC_EDIT_ACTION_ZOOM
+		0,                         // LC_EDIT_ACTION_ZOOM_REGION
+		0,                         // LC_EDIT_ACTION_PAN
+		0,                         // LC_EDIT_ACTION_ROTATE_VIEW
+		0,                         // LC_EDIT_ACTION_ROLL
 	};
 
 	m_bmpMenu.Attach(m_hMenuDefault);

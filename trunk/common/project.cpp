@@ -36,6 +36,11 @@ void SystemUpdateFocus (void* p)
   messenger->Dispatch (LC_MSG_FOCUS_CHANGED, p);
 }
 
+static void ProjectListener(int Message, void* Data, void* User)
+{
+	((Project*)User)->HandleMessage(Message, Data);
+}
+
 typedef struct
 {
   unsigned char n;
@@ -97,9 +102,10 @@ Project::Project()
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
-  if (messenger == NULL)
-    messenger = new Messenger ();
-  messenger->AddRef ();
+	if (messenger == NULL)
+		messenger = new Messenger ();
+	messenger->AddRef();
+	messenger->Listen(&ProjectListener, this);
 
   for (i = 0; i < LC_CONNECTIONS; i++)
 	{
@@ -588,6 +594,7 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strFooter, Sys_ProfileLoadString ("Default", "Footer", "Page &P"));
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
 	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
+	m_OverlayActive = false;
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
@@ -1803,13 +1810,13 @@ void Project::Render(bool bToMemory)
 	m_bStopRender = false;
 	m_bRendering = true;
 	RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
-        //	SystemSwapBuffers();
+	//	SystemSwapBuffers();
 
 	if ((m_nDetail & LC_DET_FAST) && (m_nDetail & LC_DET_BACKGROUND))
 	{
 		RenderScene(true, true);
-                //		if (!m_bStopRender)
-                //			SystemSwapBuffers();
+//		if (!m_bStopRender)
+//			SystemSwapBuffers();
 	}
 	m_bRendering = false;
 
@@ -1989,125 +1996,125 @@ static void BuildBSP(LC_BSPNODE* node, Piece* pList)
 
 void Project::RenderScene(bool bShaded, bool bDrawViewports)
 {
-  glViewport (0, 0, m_nViewX, m_nViewY);
-  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport (0, 0, m_nViewX, m_nViewY);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  if (bDrawViewports)
-  {
-    if (bShaded)
-    {
-      if (m_nDetail & LC_DET_LIGHTING)
-	glDisable (GL_LIGHTING);
-      if (m_nScene & LC_SCENE_FOG)
-	glDisable (GL_FOG);
-      RenderViewports(true, true);
-      if (m_nDetail & LC_DET_LIGHTING)
-	glEnable(GL_LIGHTING);
-      if (m_nScene & LC_SCENE_FOG)
-	glEnable (GL_FOG);
-    }
-    else
-      RenderViewports(true, true);
-  }
-  else
-    RenderViewports(true, false);
+	if (bDrawViewports)
+	{
+		if (bShaded)
+		{
+			if (m_nDetail & LC_DET_LIGHTING)
+				glDisable (GL_LIGHTING);
+			if (m_nScene & LC_SCENE_FOG)
+				glDisable (GL_FOG);
+			RenderViewports(true, true);
+			if (m_nDetail & LC_DET_LIGHTING)
+				glEnable(GL_LIGHTING);
+			if (m_nScene & LC_SCENE_FOG)
+				glEnable (GL_FOG);
+		}
+		else
+			RenderViewports(true, true);
+	}
+	else
+		RenderViewports(true, false);
 
-  for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-  {
-    int x = (int)(viewports[m_nViewportMode].dim[vp][0] * ((float)m_nViewX));
-    int y = (int)(viewports[m_nViewportMode].dim[vp][1] * ((float)m_nViewY));
-    int w = (int)(viewports[m_nViewportMode].dim[vp][2] * ((float)m_nViewX));
-    int h = (int)(viewports[m_nViewportMode].dim[vp][3] * ((float)m_nViewY));
+	for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
+	{
+		int x = (int)(viewports[m_nViewportMode].dim[vp][0] * ((float)m_nViewX));
+		int y = (int)(viewports[m_nViewportMode].dim[vp][1] * ((float)m_nViewY));
+		int w = (int)(viewports[m_nViewportMode].dim[vp][2] * ((float)m_nViewX));
+		int h = (int)(viewports[m_nViewportMode].dim[vp][3] * ((float)m_nViewY));
 
-    float ratio = (float)w/h;
-    glViewport(x, y, w, h);
-    m_pViewCameras[vp]->LoadProjection(ratio);
+		float ratio = (float)w/h;
+		glViewport(x, y, w, h);
+		m_pViewCameras[vp]->LoadProjection(ratio);
 
-    if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
-    {
-      if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-	glDisable(GL_LIGHTING);
+		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
+		{
+			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
+				glDisable(GL_LIGHTING);
 
-      glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
+			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
 
-      // There's got to be an easier way...
-      if (m_nSnap & LC_DRAW_AXIS)
-      {
-	GLdouble model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
-	GLint viewport[4];
+			// There's got to be an easier way...
+			if (m_nSnap & LC_DRAW_AXIS)
+			{
+				GLdouble model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
+				GLint viewport[4];
+				
+				glGetDoublev(GL_MODELVIEW_MATRIX, model);
+				glGetDoublev(GL_PROJECTION_MATRIX, proj);
+				glGetIntegerv(GL_VIEWPORT, viewport);
+				gluUnProject(25, 25, 0.1, model, proj, viewport, &obj1x, &obj1y, &obj1z);
+				gluUnProject(45, 25, 0.1, model, proj, viewport, &obj2x, &obj2y, &obj2z); 
 
-	glGetDoublev(GL_MODELVIEW_MATRIX, model);
-	glGetDoublev(GL_PROJECTION_MATRIX, proj);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	gluUnProject(25, 25, 0.1, model, proj, viewport, &obj1x, &obj1y, &obj1z);
-	gluUnProject(45, 25, 0.1, model, proj, viewport, &obj2x, &obj2y, &obj2z); 
+				float ds = (float)sqrt((obj1x-obj2x)*(obj1x-obj2x)+(obj1y-obj2y)*(obj1y-obj2y)+(obj1z-obj2z)*(obj1z-obj2z));
+				float verts[30][3] = { {0,0,0}, {0.8f*ds,0,0}, {0.8f*ds,0.2f*ds,0}, {ds,0,0}, {0.8f*ds,-0.2f*ds,0}, 
+				                       {0.8f*ds,0,0}, {0.8f*ds,0,0.2f*ds}, {ds,0,0}, {0.8f*ds,0,-0.2f*ds}, {0.8f*ds,0,0},
+				                       {0,0,0},{0,0.8f*ds,0}, {0,0.8f*ds,0.2f*ds}, {0,ds,0}, {0,0.8f*ds,-0.2f*ds},
+				                       {0,0.8f*ds,0}, {0.2f*ds,0.8f*ds,0}, {0,ds,0}, {-0.2f*ds,0.8f*ds,0}, {0,0.8f*ds,0},
+				                       {0,0,0}, {0,0,0.8f*ds}, {0.2f*ds,0,0.8f*ds}, {0,0,ds}, {-0.2f*ds,0,0.8f*ds},
+				                       {0,0,0.8f*ds}, {0,0.2f*ds,0.8f*ds}, {0,0,ds}, {0,-0.2f*ds,0.8f*ds}, {0,0,0.8f*ds} };
 
-	float ds = (float)sqrt((obj1x-obj2x)*(obj1x-obj2x)+(obj1y-obj2y)*(obj1y-obj2y)+(obj1z-obj2z)*(obj1z-obj2z));
-	float verts[30][3] = { {0,0,0}, {0.8f*ds,0,0}, {0.8f*ds,0.2f*ds,0}, {ds,0,0}, {0.8f*ds,-0.2f*ds,0}, 
-			       {0.8f*ds,0,0}, {0.8f*ds,0,0.2f*ds}, {ds,0,0}, {0.8f*ds,0,-0.2f*ds}, {0.8f*ds,0,0},
-			       {0,0,0},{0,0.8f*ds,0}, {0,0.8f*ds,0.2f*ds}, {0,ds,0}, {0,0.8f*ds,-0.2f*ds},
-			       {0,0.8f*ds,0}, {0.2f*ds,0.8f*ds,0}, {0,ds,0}, {-0.2f*ds,0.8f*ds,0}, {0,0.8f*ds,0},
-			       {0,0,0}, {0,0,0.8f*ds}, {0.2f*ds,0,0.8f*ds}, {0,0,ds}, {-0.2f*ds,0,0.8f*ds},
-			       {0,0,0.8f*ds}, {0,0.2f*ds,0.8f*ds}, {0,0,ds}, {0,-0.2f*ds,0.8f*ds}, {0,0,0.8f*ds} };
+				glPushMatrix();
+				glTranslated(obj1x, obj1y, obj1z);
+				glVertexPointer (3, GL_FLOAT, 0, verts);
+				glDrawArrays(GL_LINE_STRIP, 0, 30);
 
-	glPushMatrix();
-	glTranslated(obj1x, obj1y, obj1z);
-	glVertexPointer (3, GL_FLOAT, 0, verts);
-	glDrawArrays(GL_LINE_STRIP, 0, 30);
+				Matrix m;
+				m.FromInverse(model);
+				m.SetTranslation(0,0,0);
 
-	Matrix m;
-	m.FromInverse(model);
-	m.SetTranslation(0,0,0);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				m_pScreenFont->MakeCurrent();
+				glEnable(GL_TEXTURE_2D);
+				glEnable(GL_ALPHA_TEST);
 
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_pScreenFont->MakeCurrent();
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_ALPHA_TEST);
+				glPushMatrix();
+				glTranslatef(1.4f*ds, 0, 0);
+				glMultMatrixf(m.m);
+				glBegin(GL_QUADS);
+				m_pScreenFont->PrintCharScaled (0.025f * ds, 'X');
+				glEnd();
+				glPopMatrix();
 
-  glPushMatrix();
-	glTranslatef(1.4f*ds, 0, 0);
-	glMultMatrixf(m.m);
-	glBegin(GL_QUADS);
-  m_pScreenFont->PrintCharScaled (0.025f * ds, 'X');
-	glEnd();
-	glPopMatrix();
+				glPushMatrix();
+				glTranslatef(0, 1.4f*ds, 0);
+				glMultMatrixf(m.m);
+				glBegin(GL_QUADS);
+				m_pScreenFont->PrintCharScaled (0.025f * ds, 'Y');
+				glEnd();
+				glPopMatrix();
 
-	glPushMatrix();
-	glTranslatef(0, 1.4f*ds, 0);
-	glMultMatrixf(m.m);
-	glBegin(GL_QUADS);
-  m_pScreenFont->PrintCharScaled (0.025f * ds, 'Y');
-	glEnd();
-	glPopMatrix();
+				glPushMatrix();
+				glTranslatef(0, 0, 1.4f*ds);
+				glMultMatrixf(m.m);
+				glBegin(GL_QUADS);
+				m_pScreenFont->PrintCharScaled (0.025f * ds, 'Z');
+				glEnd();
+				glPopMatrix();
+				
+				glPopMatrix();
+				glDisable(GL_TEXTURE_2D);
+				glDisable(GL_ALPHA_TEST);
+			}
 
-	glPushMatrix();
-	glTranslatef(0, 0, 1.4f*ds);
-	glMultMatrixf(m.m);
-	glBegin(GL_QUADS);
-  m_pScreenFont->PrintCharScaled (0.025f * ds, 'Z');
-	glEnd();
-	glPopMatrix();
+			if (m_nSnap & LC_DRAW_GRID)
+				glCallList (m_nGridList);
 
-	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_ALPHA_TEST);
-      }
+			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
+				glEnable(GL_LIGHTING);
+		}
 
-      if (m_nSnap & LC_DRAW_GRID)
-	glCallList (m_nGridList);
+		if ((m_nDetail & LC_DET_LIGHTING) != 0)
+		{
+			int index = 0;
+			Light *pLight;
 
-      if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-	glEnable(GL_LIGHTING);
-    }
-
-    if ((m_nDetail & LC_DET_LIGHTING) != 0)
-    {
-      int index = 0;
-      Light *pLight;
-
-      for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-	pLight->Setup (index);
-    }
+			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
+				pLight->Setup (index);
+		}
 
     //    glDisable (GL_COLOR_MATERIAL);
     /*
@@ -2353,6 +2360,59 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 		  if (m_nDetail & LC_DET_LIGHTING)
 		    glEnable (GL_LIGHTING);
 		}
+	}
+
+	if (bDrawViewports && m_OverlayActive)
+		RenderOverlays();
+}
+
+void Project::RenderOverlays()
+{
+	if (m_nCurAction == LC_ACTION_MOVE)
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		float Arrows[6][3] = {
+			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] },
+			{ m_OverlayCenter[0] + m_OverlayScale, m_OverlayCenter[1], m_OverlayCenter[2] },
+			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] },
+			{ m_OverlayCenter[0], m_OverlayCenter[1] + m_OverlayScale, m_OverlayCenter[2] },
+			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] },
+			{ m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] + m_OverlayScale }
+		};
+
+		for (int i = 0; i < 3; i++)
+		{
+			if (m_OverlayMode == LC_OVERLAY_X + i)
+				glColor3f(1,0,0);
+			else
+				glColor3f(0,0,0);
+
+			glPushMatrix();
+			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+			if (i == 1)
+				glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+			else if (i == 2)
+				glRotatef(90.0f, 0.0f, -1.0f, 0.0f);
+
+			glBegin(GL_LINES);
+			glVertex3f(0.0f, 0.0f, 0.0f);
+			glVertex3f(m_OverlayScale, 0.0f, 0.0f);
+			glEnd();
+
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex3f(m_OverlayScale, 0.0f, 0.0f);
+			for (int j = 0; j < 9; j++)
+				glVertex3f(0.6f * m_OverlayScale, (float)cos(2.0 * M_PI * j / 8) * 0.1f * m_OverlayScale, (float)sin(2.0 * M_PI * j / 8) * 0.1f * m_OverlayScale);
+			glEnd();
+
+			glPopMatrix();
+		}
+
+		glEnable(GL_DEPTH_TEST);
+	}
+	else if (m_nCurAction == LC_ACTION_ROTATE)
+	{
 	}
 }
 
@@ -2906,6 +2966,13 @@ void Project::UpdateSelection()
 		if (pLight->IsSelected())
 			flags |= LC_SEL_LIGHT;
 
+	if (m_nTracking == LC_TRACK_NONE)
+	{
+		m_OverlayMode = LC_OVERLAY_XYZ;
+		m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
+		m_OverlayScale = 1.0f;
+	}
+
 	SystemUpdateSelected(flags);
 }
 
@@ -3200,6 +3267,13 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 		case LC_LIGHT_MODIFIED:
 		{
 		} break;
+	}
+}
+
+void Project::HandleMessage(int Message, void* Data)
+{
+	if (Message == LC_MSG_FOCUS_CHANGED)
+	{
 	}
 }
 
@@ -5811,6 +5885,24 @@ void Project::SetAction(int nAction)
 {
 	SystemUpdateAction(nAction, m_nCurAction);
 	m_nCurAction = nAction;
+
+	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE))
+	{
+		m_OverlayMode = LC_OVERLAY_XYZ;
+		m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
+		m_OverlayScale = 1.0f;
+
+		if (m_OverlayActive)
+			UpdateAllViews();
+	}
+	else
+	{
+		if (m_OverlayActive)
+		{
+			m_OverlayActive = false;
+			UpdateAllViews();
+		}
+	}
 }
 
 // Remove unused groups
@@ -5929,6 +6021,27 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
       pLight->GetTarget ()->Select (false, bFocusOnly, false);
   }
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
+}
+
+bool Project::GetSelectionCenter(float Center[3]) const
+{
+	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+	bool Selected = false;
+
+	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
+		if (pPiece->IsSelected())
+		{
+			pPiece->CompareBoundingBox(bs);
+			Selected = true;
+		}
+	}
+
+	Center[0] = (bs[0] + bs[3]) * 0.5f;
+	Center[1] = (bs[1] + bs[4]) * 0.5f;
+	Center[2] = (bs[2] + bs[5]) * 0.5f;
+
+	return Selected;
 }
 
 Camera* Project::GetCamera(int i)
@@ -6352,6 +6465,11 @@ void Project::MoveSelectedObjects(float x, float y, float z)
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
 	// TODO: move group centers
+
+	if (m_OverlayActive)
+	{
+		GetSelectionCenter(m_OverlayCenter);
+	}
 }
 
 void Project::RotateSelectedObjects(float x, float y, float z)
@@ -7152,7 +7270,6 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			if (sel)
       {
 				StartTracking(LC_TRACK_START_LEFT);
-        m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
       }
 		} break;
 
@@ -7164,7 +7281,6 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				if (pPiece->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_LEFT);
-          m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
 					break;
 				}
 		} break;
@@ -7337,7 +7453,14 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
 	// && m_nAction != ACTION_INSERT
 	if (m_nTracking == LC_TRACK_NONE)
+	{
+		if (m_OverlayActive)
+		{
+			MouseUpdateOverlays(x, y);
+		}
+
 		return;
+	}
 
 	if (m_nTracking == LC_TRACK_START_RIGHT)
 		m_nTracking = LC_TRACK_RIGHT;
@@ -7441,6 +7564,33 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
         SnapPoint (delta, m_fTrack);
 
+				if (m_OverlayActive)
+				{
+					switch (m_OverlayMode)
+					{
+					case LC_OVERLAY_XYZ:
+						break;
+					case LC_OVERLAY_X:
+						delta[1] = delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_Y:
+						delta[0] = delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_Z:
+						delta[0] = delta[1] = 0.0f;
+						break;
+					case LC_OVERLAY_XY:
+						delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_XZ:
+						delta[1] = 0.0f;
+						break;
+					case LC_OVERLAY_YZ:
+						delta[0] = 0.0f;
+						break;
+					}
+				}
+
 				MoveSelectedObjects(delta[0], delta[1], delta[2]);
 
         m_nDownX = x;
@@ -7457,18 +7607,45 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
           (ptz - m_fTrack[2])*mouse };
         float d[3] = { delta[0], delta[1], delta[2] };
 
-  			SnapPoint (delta, NULL);
+				if (m_OverlayActive)
+				{
+					switch (m_OverlayMode)
+					{
+					case LC_OVERLAY_XYZ:
+						break;
+					case LC_OVERLAY_X:
+						delta[1] = delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_Y:
+						delta[0] = delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_Z:
+						delta[0] = delta[1] = 0.0f;
+						break;
+					case LC_OVERLAY_XY:
+						delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_XZ:
+						delta[1] = 0.0f;
+						break;
+					case LC_OVERLAY_YZ:
+						delta[0] = 0.0f;
+						break;
+					}
+				}
+
+				SnapPoint (delta, NULL);
 
   			m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
 	  		m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
 		  	m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
 
-  			if (m_nSnap & LC_DRAW_3DMOUSE)
+  			if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
 	  			MoveSelectedObjects(delta[0], delta[1], delta[2]);
 		  	else
-			  {
-				  if (m_nTracking == LC_TRACK_LEFT)
-					  MoveSelectedObjects(delta[0], delta[1], 0);
+				{
+					if (m_nTracking == LC_TRACK_LEFT)
+						MoveSelectedObjects(delta[0], delta[1], 0);
   				else
 	  				MoveSelectedObjects(0, 0, delta[2]);
 		  	}
@@ -7707,5 +7884,65 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
       UpdateAllViews();
     } break;
                 */
+	}
+}
+
+// Check if the mouse is over a different area of the overlay and redraw it.
+void Project::MouseUpdateOverlays(int x, int y)
+{
+	if (m_nCurAction == LC_ACTION_MOVE)
+	{
+		GLdouble modelMatrix[16], projMatrix[16];
+		GLint viewport[4];
+
+		LoadViewportProjection();
+		glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+		glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+		glGetIntegerv(GL_VIEWPORT, viewport);
+
+		double pts[4][3];
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], modelMatrix, projMatrix, viewport, &pts[0][0], &pts[0][1], &pts[0][2]);
+		gluProject(m_OverlayCenter[0] + m_OverlayScale, m_OverlayCenter[1], m_OverlayCenter[2], modelMatrix, projMatrix, viewport, &pts[1][0], &pts[1][1], &pts[1][2]);
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1] + m_OverlayScale, m_OverlayCenter[2], modelMatrix, projMatrix, viewport, &pts[2][0], &pts[2][1], &pts[2][2]);
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] + m_OverlayScale, modelMatrix, projMatrix, viewport, &pts[3][0], &pts[3][1], &pts[3][2]);
+
+		int Mode = -1;
+
+		// Check if the mouse is over an arrow.
+		for (int i = 1; i < 4; i++)
+		{
+			float LineMag, U;
+
+			LineMag = sqrtf((float)((pts[i][0]-pts[0][0])*(pts[i][0]-pts[0][0]) + (pts[i][1]-pts[0][1])*(pts[i][1]-pts[0][1])));
+
+			U = (float)(((((float)x - pts[0][0]) * (pts[i][0] - pts[0][0])) + (((float)y - pts[0][1]) * (pts[i][1] - pts[0][1]))) / (LineMag * LineMag));
+
+			// Point is outside the line segment.
+			if (U < 0.0f || U > 1.0f)
+				continue;
+
+			// Point in the arrow closest to the mouse.
+			float ix = (float)(pts[0][0] + U * (pts[i][0] - pts[0][0]));
+			float iy = (float)(pts[0][1] + U * (pts[i][1] - pts[0][1]));
+
+			if (((ix-x)*(ix-x) + (iy-y)*(iy-y)) < 100.0f)
+			{
+				Mode = LC_OVERLAY_X + i - 1;
+				break;
+			}
+		}
+
+		// TODO: Check if the mouse is near the center and select a plane.
+
+		if (Mode == -1)
+		{
+			Mode = LC_OVERLAY_XYZ;
+		}
+
+		if (Mode != m_OverlayMode)
+		{
+			m_OverlayMode = Mode;
+			UpdateAllViews();
+		}
 	}
 }

@@ -14,15 +14,14 @@
 class Light;
 class LightTarget;
 
-typedef enum { LK_POSITION, LK_TARGET, LK_COLOR } LK_TYPES;
-
-typedef struct LC_LIGHT_KEY
+typedef enum
 {
-  unsigned short  time;
-  float	          param[3];
-  unsigned char   type;
-  LC_LIGHT_KEY*  next;
-} LC_LIGHT_KEY;
+  LC_LK_POSITION, LC_LK_TARGET, // position
+  LC_LK_AMBIENT, LC_LK_DIFFUSE, LC_LK_SPECULAR, // color
+  LC_LK_CONSTANT, LC_LK_LINEAR, LC_LK_QUADRATIC, // attenuation
+  LC_LK_CUTOFF, LC_LK_EXPONENT, // spot
+  LC_LK_COUNT
+} LC_LK_TYPES;
 
 class LightTarget : public Object
 {
@@ -83,21 +82,14 @@ class Light : public Object
   void Render (float fLineWidth);
   void MinIntersectDist (LC_CLICKLINE* Line);
   void UpdatePosition (unsigned short nTime, bool bAnimation);
-  void CalculatePosition (unsigned short nTime, bool bAnimation, float pos[3], float target[3], float color[3]);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, float param[3], unsigned char nKeyType);
   void Setup (int index);
 
 protected:
-  void RemoveKeys ();
   void Initialize ();
 
   // Camera target
   LightTarget* m_pTarget;
-
-  // Position
-  LC_LIGHT_KEY* m_pAnimationKeys;
-  LC_LIGHT_KEY* m_pInstructionKeys;
 
   // Attributes
   float m_fCone;
@@ -109,10 +101,17 @@ protected:
   static GLuint m_nSphereList;
   static GLuint m_nTargetList;
 
-  // Temporary position
+  // Temporary parameters
   float m_fPos[4];
-  float m_fTarget[4];
-  float m_fColor[4];
+  float m_fTarget[3];
+  float m_fAmbient[4];
+  float m_fDiffuse[4];
+  float m_fSpecular[4];
+  float m_fConstant;
+  float m_fLinear;
+  float m_fQuadratic;
+  float m_fCutoff;
+  float m_fExponent;
 };
 
 #endif // _LIGHT_H_

@@ -23,15 +23,13 @@ typedef enum
   LC_CAMERA_MAIN, LC_CAMERA_USER
 } LC_CAMERA_TYPES;
 
-typedef enum { CK_EYE, CK_TARGET, CK_UP } CK_TYPES;
-
-typedef struct LC_CAMERA_KEY
+typedef enum
 {
-  unsigned short  time;
-  float	          param[3];
-  unsigned char   type;
-  LC_CAMERA_KEY*  next;
-} LC_CAMERA_KEY;
+  LC_CK_EYE,
+  LC_CK_TARGET,
+  LC_CK_UP,
+  LC_CK_COUNT
+} LC_CK_TYPES;
 
 class CameraTarget : public Object
 {
@@ -115,14 +113,14 @@ public:
 	void FocusTarget()
 		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
 
-public:
+ public:
+  bool FileLoad (File& file);
+  void FileSave (File& file);
+
 	void MinIntersectDist (LC_CLICKLINE* pLine);
-	void ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, float param[3], unsigned char nKeyType);
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
-	void FileLoad(File* file);
-	void FileSave(File* file);
 
 	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
@@ -139,27 +137,23 @@ public:
 	float m_zFar;
 
  protected:
-  void CalculatePosition(unsigned short nTime, bool bAnimation, float eye[3], float target[3], float up[3]);
-  void RemoveKeys();
   void Initialize();
 
   // Camera target
   CameraTarget* m_pTarget;
-
-  // Position
-  LC_CAMERA_KEY* m_pAnimationKeys;
-  LC_CAMERA_KEY* m_pInstructionKeys;
 
   // Attributes
   char m_strName[81];
   unsigned char m_nState;
   unsigned char m_nType;
   GLuint m_nList;
+  static GLuint m_nTargetList;
 
   // Temporary position
   float m_fEye[3];
   float m_fTarget[3];
   float m_fUp[3];
+
   TiledRender* m_pTR;
 };
 

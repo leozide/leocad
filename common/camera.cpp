@@ -12,29 +12,16 @@
 #include "camera.h"
 #include "tr.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// Static functions
+#define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
 
-static GLuint _nTargetList = 0;
+GLuint Camera::m_nTargetList = 0;
 
-static LC_CAMERA_KEY* AddNode (LC_CAMERA_KEY *node, unsigned short nTime, unsigned char nType)
+static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 {
-  LC_CAMERA_KEY* newnode = (LC_CAMERA_KEY*)malloc (sizeof (LC_CAMERA_KEY));
-
-  if (node)
-  {
-    newnode->next = node->next;
-    node->next = newnode;
-  }
-  else
-    newnode->next = NULL;
-
-  newnode->type = nType;
-  newnode->time = nTime;
-  newnode->param[0] = newnode->param[1] = newnode->param[2] = 0;
-
-  return newnode;
-}
+  { "Camera Position", 3, LC_CK_EYE },
+  { "Camera Target", 3, LC_CK_TARGET },
+  { "Camera Up Vector", 3, LC_CK_UP }
+};
 
 // =============================================================================
 // CameraTarget class
@@ -86,28 +73,13 @@ Camera::Camera (unsigned char nType, Camera* pPrev)
 		       { 0,50,0 }, { 0,-50,0 }, { 10,10,5}, { 0,5,0 } };
   float ups [8][3] = {  { 0,0,1 }, { 0,0,1 }, { 1,0,0 }, { -1,0,0 }, { 0,0,1 },
 			{ 0,0,1 }, {-0.2357f, -0.2357f, 0.94281f }, { 0,0,1 } };
-  LC_CAMERA_KEY* node;
 
   Initialize();
-  m_pAnimationKeys = AddNode (NULL, 1, CK_EYE);
-  m_pAnimationKeys->param[0] = eyes[nType][0];
-  m_pAnimationKeys->param[1] = eyes[nType][1];
-  m_pAnimationKeys->param[2] = eyes[nType][2];
-  node = AddNode (m_pAnimationKeys, 1, CK_TARGET);
-  node = AddNode (node, 1, CK_UP);
-  node->param[0] = ups[nType][0];
-  node->param[1] = ups[nType][1];
-  node->param[2] = ups[nType][2];
 
-  m_pInstructionKeys = AddNode (NULL, 1, CK_EYE);
-  m_pInstructionKeys->param[0] = eyes[nType][0];
-  m_pInstructionKeys->param[1] = eyes[nType][1];
-  m_pInstructionKeys->param[2] = eyes[nType][2];
-  node = AddNode (m_pInstructionKeys, 1, CK_TARGET);
-  node = AddNode (node, 1, CK_UP);
-  node->param[0] = ups[nType][0];
-  node->param[1] = ups[nType][1];
-  node->param[2] = ups[nType][2];
+  ChangeKey (1, false, true, eyes[nType], LC_CK_EYE);
+  ChangeKey (1, false, true, ups[nType], LC_CK_UP);
+  ChangeKey (1, true, true, eyes[nType], LC_CK_EYE);
+  ChangeKey (1, true, true, ups[nType], LC_CK_UP);
 
   strcpy (m_strName, names[nType]);
   if (nType != 8)
@@ -124,8 +96,6 @@ Camera::Camera (unsigned char nType, Camera* pPrev)
 Camera::Camera (const float *eye, const float *target, const float *up, Camera* pCamera)
   : Object (LC_OBJECT_CAMERA)
 {
-  LC_CAMERA_KEY* node;
-
   // Fix the up vector
   Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
   frontvec.Normalize();
@@ -134,31 +104,13 @@ Camera::Camera (const float *eye, const float *target, const float *up, Camera* 
   upvec.Normalize();
 
   Initialize();
-  m_pAnimationKeys = AddNode (NULL, 1, CK_EYE);
-  m_pAnimationKeys->param[0] = eye[0];
-  m_pAnimationKeys->param[1] = eye[1];
-  m_pAnimationKeys->param[2] = eye[2];
-  node = AddNode (m_pAnimationKeys, 1, CK_TARGET);
-  node->param[0] = target[0];
-  node->param[1] = target[1];
-  node->param[2] = target[2];
-  node = AddNode (node, 1, CK_UP);
-  node->param[0] = upvec.X();
-  node->param[1] = upvec.Y();
-  node->param[2] = upvec.Z();
 
-  m_pInstructionKeys = AddNode (NULL, 1, CK_EYE);
-  m_pInstructionKeys->param[0] = eye[0];
-  m_pInstructionKeys->param[1] = eye[1];
-  m_pInstructionKeys->param[2] = eye[2];
-  node = AddNode (m_pInstructionKeys, 1, CK_TARGET);
-  node->param[0] = target[0];
-  node->param[1] = target[1];
-  node->param[2] = target[2];
-  node = AddNode (node, 1, CK_UP);
-  node->param[0] = upvec.X();
-  node->param[1] = upvec.Y();
-  node->param[2] = upvec.Z();
+  ChangeKey (1, false, true, eye, LC_CK_EYE);
+  ChangeKey (1, false, true, target, LC_CK_TARGET);
+  ChangeKey (1, false, true, upvec, LC_CK_UP);
+  ChangeKey (1, true, true, eye, LC_CK_EYE);
+  ChangeKey (1, true, true, target, LC_CK_TARGET);
+  ChangeKey (1, true, true, upvec, LC_CK_UP);
 
   int i, max = 0;
 
@@ -186,8 +138,6 @@ Camera::Camera (const float *eye, const float *target, const float *up, Camera* 
 Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera)
   : Object (LC_OBJECT_CAMERA)
 {
-  LC_CAMERA_KEY* node;
-
   // Fix the up vector
   Vector upvec(0,0,1), frontvec(ex-tx, ey-ty, ez-tz), sidevec;
   frontvec.Normalize();
@@ -199,31 +149,15 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
   upvec.Normalize();
 
   Initialize();
-  m_pAnimationKeys = AddNode (NULL, 1, CK_EYE);
-  m_pAnimationKeys->param[0] = ex;
-  m_pAnimationKeys->param[1] = ey;
-  m_pAnimationKeys->param[2] = ez;
-  node = AddNode (m_pAnimationKeys, 1, CK_TARGET);
-  node->param[0] = tx;
-  node->param[1] = ty;
-  node->param[2] = tz;
-  node = AddNode (node, 1, CK_UP);
-  node->param[0] = upvec.X();
-  node->param[1] = upvec.Y();
-  node->param[2] = upvec.Z();
 
-  m_pInstructionKeys = AddNode (NULL, 1, CK_EYE);
-  m_pInstructionKeys->param[0] = ex;
-  m_pInstructionKeys->param[1] = ey;
-  m_pInstructionKeys->param[2] = ez;
-  node = AddNode (m_pInstructionKeys, 1, CK_TARGET);
-  node->param[0] = tx;
-  node->param[1] = ty;
-  node->param[2] = tz;
-  node = AddNode (node, 1, CK_UP);
-  node->param[0] = upvec.X();
-  node->param[1] = upvec.Y();
-  node->param[2] = upvec.Z();
+  float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
+
+  ChangeKey (1, false, true, eye, LC_CK_EYE);
+  ChangeKey (1, false, true, target, LC_CK_TARGET);
+  ChangeKey (1, false, true, upvec, LC_CK_UP);
+  ChangeKey (1, true, true, eye, LC_CK_EYE);
+  ChangeKey (1, true, true, target, LC_CK_TARGET);
+  ChangeKey (1, true, true, upvec, LC_CK_UP);
 
   int i, max = 0;
 
@@ -252,7 +186,7 @@ Camera::~Camera()
 {
   if (m_nList != 0)
     glDeleteLists (m_nList, 1);
-  RemoveKeys ();
+
   delete m_pTarget;
 }
 
@@ -264,8 +198,6 @@ void Camera::Initialize()
 
   m_pNext = NULL;
   m_nState = 0;
-  m_pAnimationKeys = NULL;
-  m_pInstructionKeys = NULL;
   m_nList = 0;
   m_nType = LC_CAMERA_USER;
 
@@ -273,97 +205,109 @@ void Camera::Initialize()
   for (unsigned char i = 0 ; i < sizeof(m_strName) ; i++ )
     m_strName[i] = 0;
 
+  float *values[] = { m_fEye, m_fTarget, m_fUp };
+  RegisterKeys (values, camera_key_info, LC_CK_COUNT);
+
   m_pTarget = new CameraTarget (this);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 
-void Camera::FileLoad(File* file)
+bool Camera::FileLoad(File& file)
 {
-  RemoveKeys();
   unsigned char version, ch;
-  LC_CAMERA_KEY *node;
 
-  file->Read(&version, 1);
+  file.ReadByte (&version, 1);
+
+  if (version > LC_CAMERA_SAVE_VERSION)
+    return false;
+
+  if (version > 5)
+    if (!Object::FileLoad (file))
+      return false;
 
   if (version == 4)
   {
-    file->Read(m_strName, 80);
+    file.Read(m_strName, 80);
     m_strName[80] = 0;
   }
   else
   {
-    file->Read(&ch, 1);
+    file.Read(&ch, 1);
     if (ch == 0xFF)
-      return; // don't read CString
-    file->Read(m_strName, ch);
+      return false; // don't read CString
+    file.Read(m_strName, ch);
     m_strName[ch] = 0;
   }
 
   if (version < 3)
   {
     double d[3];
-    file->Read(d, sizeof(d));
-    m_pInstructionKeys = AddNode(NULL, 1, CK_EYE);
-    m_pInstructionKeys->param[0] = (float)d[0];
-    m_pInstructionKeys->param[1] = (float)d[1];
-    m_pInstructionKeys->param[2] = (float)d[2];
-    file->Read(d, sizeof(d));
-    node = AddNode(m_pInstructionKeys, 1, CK_TARGET);
-    node->param[0] = (float)d[0];
-    node->param[1] = (float)d[1];
-    node->param[2] = (float)d[2];
-    file->Read (d, sizeof(d));
-    node = AddNode(node, 1, CK_UP);
-    node->param[0] = (float)d[0];
-    node->param[1] = (float)d[1];
-    node->param[2] = (float)d[2];
-//		m_Start.snapshot = FALSE;
+    float f[3];
+
+    file.Read(d, sizeof(d));
+    f[0] = (float)d[0];
+    f[1] = (float)d[1];
+    f[2] = (float)d[2];
+    ChangeKey (1, false, true, f, LC_CK_EYE);
+    ChangeKey (1, true, true, f, LC_CK_EYE);
+
+    file.Read(d, sizeof(d));
+    f[0] = (float)d[0];
+    f[1] = (float)d[1];
+    f[2] = (float)d[2];
+    ChangeKey (1, false, true, f, LC_CK_TARGET);
+    ChangeKey (1, true, true, f, LC_CK_TARGET);
+
+    file.Read(d, sizeof(d));
+    f[0] = (float)d[0];
+    f[1] = (float)d[1];
+    f[2] = (float)d[2];
+    ChangeKey (1, false, true, f, LC_CK_UP);
+    ChangeKey (1, true, true, f, LC_CK_UP);
   }
 
   if (version == 3)
   {
-    file->Read(&ch, 1);
+    file.Read(&ch, 1);
 
-    node = NULL;
     while (ch--)
     {
-      if (node == NULL)
-      {
-	m_pInstructionKeys = AddNode(NULL, 1, CK_EYE);
-	node = m_pInstructionKeys;
-      }
-      else
-	node = AddNode(node, 1, CK_EYE);
-
       unsigned char step;
       double eye[3], target[3], up[3];
-      file->Read(eye, sizeof(double[3]));
-      file->Read(target, sizeof(double[3]));
-      file->Read(up, sizeof(double[3]));
-      file->Read(&step, 1);
+      float f[3];
+
+      file.Read(eye, sizeof(double[3]));
+      file.Read(target, sizeof(double[3]));
+      file.Read(up, sizeof(double[3]));
+      file.Read(&step, 1);
 
       if (up[0] == 0 && up[1] == 0 && up[2] == 0)
 	up[2] = 1;
 
-      node->time = step;
-      node->param[0] = (float)eye[0];
-      node->param[1] = (float)eye[1];
-      node->param[2] = (float)eye[2];
-      node = AddNode(node, step, CK_TARGET);
-      node->param[0] = (float)target[0];
-      node->param[1] = (float)target[1];
-      node->param[2] = (float)target[2];
-      node = AddNode(node, step, CK_UP);
-      node->param[0] = (float)up[0];
-      node->param[1] = (float)up[1];
-      node->param[2] = (float)up[2];
+      f[0] = (float)eye[0];
+      f[1] = (float)eye[1];
+      f[2] = (float)eye[2];
+      ChangeKey (step, false, true, f, LC_CK_EYE);
+      ChangeKey (step, true, true, f, LC_CK_EYE);
+
+      f[0] = (float)target[0];
+      f[1] = (float)target[1];
+      f[2] = (float)target[2];
+      ChangeKey (step, false, true, f, LC_CK_TARGET);
+      ChangeKey (step, true, true, f, LC_CK_TARGET);
+
+      f[0] = (float)up[0];
+      f[1] = (float)up[1];
+      f[2] = (float)up[2];
+      ChangeKey (step, false, true, f, LC_CK_UP);
+      ChangeKey (step, true, true, f, LC_CK_UP);
 
       int snapshot; // BOOL under Windows
       int cam;
-      file->Read(&snapshot, 4);
-      file->Read(&cam, 4);
+      file.Read(&snapshot, 4);
+      file.Read(&cam, 4);
 //			if (cam == -1)
 //				node->pCam = NULL;
 //			else
@@ -373,66 +317,56 @@ void Camera::FileLoad(File* file)
 
   if (version < 4)
   {
-    m_pAnimationKeys = AddNode (NULL, 1, CK_EYE);
-    LC_CAMERA_KEY* node = AddNode (m_pAnimationKeys, 1, CK_TARGET);
-    node = AddNode (node, 1, CK_UP);
-    memcpy(m_pAnimationKeys->param, m_pInstructionKeys->param, sizeof(float[3]));
-    memcpy(m_pAnimationKeys->next->param, m_pInstructionKeys->next->param, sizeof(float[3]));
-    memcpy(node->param, m_pInstructionKeys->next->next->param, sizeof(float[3]));
-
     double d;
-    file->Read(&d, sizeof(d)); m_fovy = (float)d;
-    file->Read(&d, sizeof(d)); m_zFar = (float)d;
-    file->Read(&d, sizeof(d)); m_zNear= (float)d;
+    file.Read(&d, sizeof(d)); m_fovy = (float)d;
+    file.Read(&d, sizeof(d)); m_zFar = (float)d;
+    file.Read(&d, sizeof(d)); m_zNear= (float)d;
   }
   else
   {
     int n;
 
-    file->Read(&n, 4);
-    for (node = NULL; n--;)
+    if (version < 6)
     {
-      if (node == NULL)
+      unsigned short time;
+      float param[4];
+      unsigned char type;
+
+      file.Read(&n, 4);
+      while (n--)
       {
-	m_pInstructionKeys = AddNode(NULL, 1, CK_EYE);
-	node = m_pInstructionKeys;
+        file.Read(&time, 2);
+        file.Read(param, 12);
+        file.Read(&type, 1);
+
+        ChangeKey (time, false, true, param, type);
       }
-      else
-	node = AddNode(node, 1, CK_EYE);
-      file->Read(&node->time, 2);
-      file->Read(node->param, 12);
-      file->Read(&node->type, 1);
+
+      file.Read(&n, 4);
+      while (n--)
+      {
+        file.Read(&time, 2);
+        file.Read(param, 12);
+        file.Read(&type, 1);
+
+        ChangeKey (time, true, true, param, type);
+      }
     }
 
-    file->Read(&n, 4);
-    for (node = NULL; n--;)
-    {
-      if (node == NULL)
-      {
-	m_pAnimationKeys = AddNode(NULL, 1, CK_EYE);
-	node = m_pAnimationKeys;
-      }
-      else
-	node = AddNode(node, 1, CK_EYE);
-      file->Read(&node->time, 2);
-      file->Read(node->param, 12);
-      file->Read(&node->type, 1);
-    }
-
-    file->Read(&m_fovy, 4);
-    file->Read(&m_zFar, 4);
-    file->Read(&m_zNear, 4);
+    file.Read(&m_fovy, 4);
+    file.Read(&m_zFar, 4);
+    file.Read(&m_zNear, 4);
 
     if (version < 5)
     {
-      file->Read(&n, 4);
+      file.Read(&n, 4);
       if (n != 0)
 	m_nState |= LC_CAMERA_HIDDEN;
     }
     else
     {
-      file->Read(&m_nState, 1);
-      file->Read(&m_nType, 1);
+      file.Read(&m_nState, 1);
+      file.Read(&m_nType, 1);
     }
   }
 
@@ -441,93 +375,38 @@ void Camera::FileLoad(File* file)
     unsigned long show;
     int user;
 
-    file->Read(&show, 4);
+    file.Read(&show, 4);
 //			if (version > 2)
-    file->Read(&user, 4);
+    file.Read(&user, 4);
     if (show == 0)
       m_nState |= LC_CAMERA_HIDDEN;
   }
+
+  return true;
 }
 
-void Camera::FileSave(File* file)
+void Camera::FileSave(File& file)
 {
-  int n;
-  LC_CAMERA_KEY *node;
-  unsigned char ch = 5; // LeoCAD 0.70
+  unsigned char ch = LC_CAMERA_SAVE_VERSION;
 
-  file->Write(&ch, 1);
+  file.WriteByte (&ch, 1);
+
+  Object::FileSave (file);
+
   ch = (unsigned char)strlen(m_strName);
-  file->Write(&ch, 1);
-  file->Write(m_strName, ch);
+  file.Write(&ch, 1);
+  file.Write(m_strName, ch);
 
-  for (n = 0, node = m_pInstructionKeys; node; node = node->next)
-    n++;
-  file->Write(&n, 4);
-
-  for (node = m_pInstructionKeys; node; node = node->next)
-  {
-    file->Write(&node->time, 2);
-    file->Write(node->param, 12);
-    file->Write(&node->type, 1);
-  }
-
-  for (n = 0, node = m_pAnimationKeys; node; node = node->next)
-    n++;
-  file->Write(&n, 4);
-
-  for (node = m_pAnimationKeys; node; node = node->next)
-  {
-    file->Write(&node->time, 2);
-    file->Write(node->param, 12);
-    file->Write(&node->type, 1);
-  }
-
-  file->Write(&m_fovy, 4);
-  file->Write(&m_zFar, 4);
-  file->Write(&m_zNear, 4);
+  file.Write(&m_fovy, 4);
+  file.Write(&m_zFar, 4);
+  file.Write(&m_zNear, 4);
   // version 5
-  file->Write(&m_nState, 1);
-  file->Write(&m_nType, 1);
+  file.Write(&m_nState, 1);
+  file.Write(&m_nType, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
-
-void Camera::ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, float param[3], unsigned char nKeyType)
-{
-  LC_CAMERA_KEY *node, *poskey = NULL, *newpos = NULL;
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
-
-  while (node)
-  {
-    if ((node->time <= nTime) &&
-	(node->type == nKeyType))
-      poskey = node;
-
-    node = node->next;
-  }
-
-  if (bAddKey)
-  {
-    if (poskey)
-    {
-      if (poskey->time != nTime)
-	newpos = AddNode(poskey, nTime, nKeyType);
-    }
-    else
-      newpos = AddNode(poskey, nTime, nKeyType);
-  }
-
-  if (newpos == NULL)
-    newpos = poskey;
-
-  newpos->param[0] = param[0];
-  newpos->param[1] = param[1];
-  newpos->param[2] = param[2];
-}
 
 void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
@@ -540,8 +419,8 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
     m_fTarget[1] += dy;
     m_fTarget[2] += dz;
 
-    ChangeKey(nTime, bAnimation, bAddKey, m_fEye, CK_EYE);
-    ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, CK_TARGET);
+    ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
+    ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
   }
   else
   {
@@ -551,7 +430,7 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
       m_fEye[1] += dy;
       m_fEye[2] += dz;
 
-      ChangeKey(nTime, bAnimation, bAddKey, m_fEye, CK_EYE);
+      ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
     }
 
     if (IsTargetSelected())
@@ -560,7 +439,7 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
       m_fTarget[1] += dy;
       m_fTarget[2] += dz;
 
-      ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, CK_TARGET);
+      ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
     }
 
     // Fix the up vector
@@ -571,105 +450,23 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
     upvec.Normalize();
     upvec.ToFloat(m_fUp);
 
-    ChangeKey(nTime, bAnimation, bAddKey, m_fUp, CK_UP);
+    ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
   }
-}
-
-void Camera::RemoveKeys()
-{
-  LC_CAMERA_KEY *node, *prev;
-
-  for (node = m_pInstructionKeys; node;)
-  {
-    prev = node;
-    node = node->next;
-    free (prev);
-  }
-
-  for (node = m_pAnimationKeys; node;)
-  {
-    prev = node;
-    node = node->next;
-    free (prev);
-  }
-}
-
-void Camera::CalculatePosition (unsigned short nTime, bool bAnimation, float eye[3], float target[3], float up[3])
-{
-  LC_CAMERA_KEY *node, *pe = NULL, *ne = NULL, *pt = NULL, *nt = NULL, *pu = NULL, *nu = NULL;
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
-
-  while (node && (!ne || !nt || !nu))
-  {
-    if (node->time <= nTime)
-    {
-      switch (node->type)
-      {
-      case CK_EYE: pe = node; break;
-      case CK_TARGET: pt = node; break;
-      case CK_UP: pu = node; break;
-      }
-    }
-    else
-    {
-      switch (node->type)
-      {
-      case CK_EYE: if (ne == NULL) ne = node; break;
-      case CK_TARGET: if (nt == NULL) nt = node; break;
-      case CK_UP: if (nu == NULL) nu = node; break;
-      }
-    }
-
-    node = node->next;
-  }
-
-  // TODO: USE KEY IN/OUT WEIGHTS
-  if (bAnimation && (ne != NULL) && (pe->time != nTime))
-  {
-    float t = (float)(nTime - pe->time)/(ne->time - pe->time);
-    eye[0] = pe->param[0] + (ne->param[0] - pe->param[0])*t;
-    eye[1] = pe->param[1] + (ne->param[1] - pe->param[1])*t;
-    eye[2] = pe->param[2] + (ne->param[2] - pe->param[2])*t;
-  }
-  else
-    memcpy (eye, pe->param, sizeof(float[3]));
-
-  if (bAnimation && (nt != NULL) && (pt->time != nTime))
-  {
-    float t = (float)(nTime - pt->time)/(nt->time - pt->time);
-    target[0] = pt->param[0] + (nt->param[0] - pt->param[0])*t;
-    target[1] = pt->param[1] + (nt->param[1] - pt->param[1])*t;
-    target[2] = pt->param[2] + (nt->param[2] - pt->param[2])*t;
-  }
-  else
-    memcpy (target, pt->param, sizeof(float[3]));
-
-  if (bAnimation && (nu != NULL) && (pu->time != nTime))
-  {
-    float t = (float)(nTime - pu->time)/(nu->time - pu->time);
-    up[0] = pu->param[0] + (nu->param[0] - pu->param[0])*t;
-    up[1] = pu->param[1] + (nu->param[1] - pu->param[1])*t;
-    up[2] = pu->param[2] + (nu->param[2] - pu->param[2])*t;
-  }
-  else
-    memcpy (up, pu->param, sizeof(float[3]));
-
-  // Fix the up vector
-  Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
-  sidevec.Cross(frontvec, upvec);
-  upvec.Cross(sidevec, frontvec);
-  upvec.Normalize();
-  upvec.ToFloat(up);
 }
 
 void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)
 {
-  CalculatePosition(nTime, bAnimation, m_fEye, m_fTarget, m_fUp);
+  CalculateKeys (nTime, bAnimation);
 
-  Vector frontvec (m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
+  // Fix the up vector
+  Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
+  Vector upvec(m_fUp), sidevec;
+
+  sidevec.Cross(frontvec, upvec);
+  upvec.Cross(sidevec, frontvec);
+  upvec.Normalize();
+  upvec.ToFloat(m_fUp);
+
   float len = frontvec.Length();
 
   Matrix mat;
@@ -723,10 +520,10 @@ void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)
 
   glEndList();
 
-  if (_nTargetList == 0)
+  if (m_nTargetList == 0)
   {
-    _nTargetList = glGenLists(1);
-    glNewList(_nTargetList, GL_COMPILE);
+    m_nTargetList = glGenLists(1);
+    glNewList (m_nTargetList, GL_COMPILE);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     float box[24][3] = { 
@@ -768,13 +565,13 @@ void Camera::Render(float fLineWidth)
   {
     glLineWidth(fLineWidth*2);
     glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
-    glCallList(_nTargetList);
+    glCallList(m_nTargetList);
     glLineWidth(fLineWidth);
   }
   else
   {
     glColor3f(0.5f, 0.8f, 0.5f);
-    glCallList(_nTargetList);
+    glCallList(m_nTargetList);
   }
 
   glColor3f(0.5f, 0.8f, 0.5f);
@@ -878,8 +675,8 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
   m_fTarget[1] += frontvec.Y();
   m_fTarget[2] += frontvec.Z();
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, CK_EYE);
-  ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, CK_TARGET);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
   UpdatePosition(nTime, bAnimation);
 }
 
@@ -899,8 +696,8 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
   m_fTarget[1] += upvec.Y() + sidevec.Y();
   m_fTarget[2] += upvec.Z() + sidevec.Z();
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, CK_EYE);
-  ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, CK_TARGET);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
   UpdatePosition(nTime, bAnimation);
 }
 
@@ -929,8 +726,8 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
   upvec.Normalize();
   upvec.ToFloat(m_fUp);
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, CK_EYE);
-  ChangeKey(nTime, bAnimation, bAddKey, m_fUp, CK_UP);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
   UpdatePosition(nTime, bAnimation);
 }
 
@@ -942,7 +739,7 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
   mat.FromAxisAngle(front, 2.0f*dx/(21-mouse));
   mat.TransformPoints(m_fUp, 1);
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fUp, CK_UP);
+  ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
   UpdatePosition(nTime, bAnimation);
 }
 

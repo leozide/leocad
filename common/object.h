@@ -10,6 +10,7 @@ class Object;
 #define LC_OBJECT_SELECTED       0x02
 #define LC_OBJECT_FOCUSED        0x04
 */
+
 typedef enum
 {
   LC_OBJECT_PIECE,
@@ -21,6 +22,22 @@ typedef enum
   //  LC_OBJECT_GROUP_PIVOT,
   //  LC_OBJECT_CURVE
 } LC_OBJECT_TYPE;
+
+// key handling
+typedef struct LC_OBJECT_KEY
+{
+  unsigned short  time;
+  float	          param[4];
+  unsigned char   type;
+  LC_OBJECT_KEY*  next;
+} LC_OBJECT_KEY;
+
+typedef struct
+{
+  const char *description;
+  unsigned char size; // number of floats
+  unsigned char type;
+} LC_OBJECT_KEY_INFO;
 
 // rendering parameters
 typedef struct
@@ -132,11 +149,35 @@ class Object
   Object* GetTopAncestor ()
     { return m_pParent ? m_pParent->GetTopAncestor () : this; }
   */
+
  protected:
-  //  char m_strName[LC_OBJECT_NAME_LEN+1];
+  //  Str m_strName;
   //  unsigned char m_nState;
 
+  virtual bool FileLoad (File& file);
+  virtual void FileSave (File& file);
+
+  // Key handling stuff
+ public:
+  void CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value);
+  void ChangeKey (unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
+
+ protected:
+  void RegisterKeys (float *values[], LC_OBJECT_KEY_INFO* info, int count);
+  void CalculateKeys (unsigned short nTime, bool bAnimation);
+
+ private:
+  void RemoveKeys ();
+
+  LC_OBJECT_KEY* m_pAnimationKeys;
+  LC_OBJECT_KEY* m_pInstructionKeys;
+  float **m_pKeyValues;
+
+  LC_OBJECT_KEY_INFO *m_pKeyInfo;
+  int m_nKeyInfoCount;
+
   // Bounding box stuff
+ protected:
   double BoundingBoxIntersectDist (LC_CLICKLINE* pLine) const;
   void BoundingBoxCalculate (float pos[3]);
   void BoundingBoxCalculate (Matrix *mat);
@@ -148,6 +189,8 @@ class Object
   bool BoundingBoxPointInside (double x, double y, double z) const;
   float m_fBoxPlanes[4][6];
 
+  // Object type
+ private:
   LC_OBJECT_TYPE m_nObjectType;
 };
 

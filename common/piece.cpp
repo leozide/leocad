@@ -13,30 +13,16 @@
 #include "group.h"
 #include "project.h"
 
+#define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
+
+static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
+{
+  { "Position", 3, LC_PK_POSITION },
+  { "Rotation", 4, LC_PK_ROTATION }
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // Static functions
-
-static LC_PIECE_KEY* AddNode (LC_PIECE_KEY *node, unsigned short nTime, unsigned char nType)
-{
-  LC_PIECE_KEY* newnode = (LC_PIECE_KEY*)malloc(sizeof(LC_PIECE_KEY));
-
-  if (node)
-  {
-    newnode->next = node->next;
-    node->next = newnode;
-  }
-  else
-    newnode->next = NULL;
-
-  newnode->type = nType;
-  newnode->time = nTime;
-  newnode->param[0] = newnode->param[1] = newnode->param[2] = newnode->param[3] = 0;
-
-  if (nType == PK_ROTATION)
-    newnode->param[2] = 1;
-
-  return newnode;
-}
 
 inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting, bool bNoAlpha)
 {
@@ -111,8 +97,6 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	m_pPieceInfo = pPieceInfo;
 	m_nState = 0;
 	m_nColor = 0;
-	m_pInstructionKeys = NULL;
-	m_pAnimationKeys = NULL;
 	m_nStepShow = 1;
 	m_nStepHide = 255;
 	m_nFrameHide = 65535;
@@ -127,7 +111,7 @@ Piece::Piece(PieceInfo* pPieceInfo)
 		if (m_pPieceInfo->m_nConnectionCount > 0)
 		{
 			m_pConnections = (CONNECTION*)malloc(sizeof(CONNECTION)*(m_pPieceInfo->m_nConnectionCount));
-			
+
 			for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
 			{
 				m_pConnections[i].type = m_pPieceInfo->m_pConnections[i].type;
@@ -136,17 +120,27 @@ Piece::Piece(PieceInfo* pPieceInfo)
 			}
 		}
 	}
+
+  float *values[] = { m_fPosition, m_fRotation };
+  RegisterKeys (values, piece_key_info, LC_PK_COUNT);
+
+  float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
+  ChangeKey (1, false, true, pos, LC_PK_POSITION);
+  ChangeKey (1, false, true, rot, LC_PK_ROTATION);
+  ChangeKey (1, true, true, pos, LC_PK_POSITION);
+  ChangeKey (1, true, true, rot, LC_PK_ROTATION);
 }
 
 Piece::~Piece()
 {
-	RemoveKeys();
-	if (m_pPieceInfo != NULL)
-		m_pPieceInfo->DeRef();
-	if (m_pDrawInfo != NULL)
-		free(m_pDrawInfo);
-	if (m_pConnections != NULL)
-		free(m_pConnections);
+  if (m_pPieceInfo != NULL)
+    m_pPieceInfo->DeRef ();
+
+  if (m_pDrawInfo != NULL)
+    free (m_pDrawInfo);
+
+  if (m_pConnections != NULL)
+    free (m_pConnections);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -171,251 +165,222 @@ void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 	}
 }
 
-void Piece::FileLoad(File* file, char* name)
+bool Piece::FileLoad (File& file, char* name)
 {
-	LC_PIECE_KEY *node;
-	unsigned char version, ch;
+  unsigned char version, ch;
 
-	file->ReadByte(&version, 1);
+  file.ReadByte (&version, 1);
 
-	if (version > 5)
-	{
-		unsigned long keys;
+  if (version > LC_PIECE_SAVE_VERSION)
+    return false;
 
-		file->ReadLong(&keys, 1);
-		for (node = NULL; keys--;)
-		{
-			if (node == NULL)
-			{
-				m_pInstructionKeys = AddNode(NULL, 1, PK_POSITION);
-				node = m_pInstructionKeys;
-			}
-			else
-				node = AddNode(node, 1, PK_POSITION);
+  if (version > 8)
+    if (!Object::FileLoad (file))
+      return false;
 
-			file->Read(node->param, 16);
-			file->ReadShort(&node->time, 1);
-			file->ReadByte(&node->type, 1);
-		}
+  if (version < 9)
+  {
+    unsigned short time;
+    float param[4];
+    unsigned char type;
 
-		file->ReadLong(&keys, 1);
-		for (node = NULL; keys--;)
-		{
-			if (node == NULL)
-			{
-				m_pAnimationKeys = AddNode(NULL, 1, PK_POSITION);
-				node = m_pAnimationKeys;
-			}
-			else
-				node = AddNode(node, 1, PK_POSITION);
+    if (version > 5)
+    {
+      unsigned long keys;
 
-			file->Read(node->param, 16);
-			file->ReadShort(&node->time, 1);
-			file->ReadByte(&node->type, 1);
-		}
-	}
-	else
-	{
-		if (version > 2)
-		{
-			file->Read(&ch, 1);
+      file.ReadLong (&keys, 1);
+      while (keys--)
+      {
+        file.Read (param, 16);
+        file.ReadShort (&time, 1);
+        file.ReadByte (&type, 1);
 
-			for (node = NULL; ch--;)
-			{
-				if (node == NULL)
-				{
-					m_pInstructionKeys = AddNode(NULL, 1, PK_POSITION);
-					node = m_pInstructionKeys;
-				}
-				else
-					node = AddNode(node, 1, PK_POSITION);
+        ChangeKey (time, false, true, param, type);
+      }
 
-				Matrix mat;
-				if (version > 3)
-				{
-					float m[16];
-					file->Read(m, sizeof(m));
-					mat.FromFloat(m);
-				}
-				else
-				{
-					float move[3], rotate[3];
-					file->Read(move, sizeof(float[3]));
-					file->Read(rotate, sizeof(float[3]));
-					mat.CreateOld(move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
-				}
+      file.ReadLong (&keys, 1);
+      while (keys--)
+      {
+        file.Read (param, 16);
+        file.ReadShort (&time, 1);
+        file.ReadByte (&type, 1);
 
-				unsigned char b;
-				file->ReadByte(&b, 1);
-				node->time = b;
-				mat.GetTranslation(&node->param[0], &node->param[1], &node->param[2]);
-				node = AddNode(node, b, PK_ROTATION);
-				mat.ToAxisAngle(node->param);
-				
-				int bl;
-				file->ReadLong(&bl, 1);
-			}
-		}
-		else
-		{
-			Matrix mat;
-			float move[3], rotate[3];
-			file->Read(move, sizeof(float[3]));
-			file->Read(rotate, sizeof(float[3]));
-			mat.CreateOld(move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+        ChangeKey (time, true, true, param, type);
+      }
+    }
+    else
+    {
+      if (version > 2)
+      {
+        file.Read (&ch, 1);
 
-			m_pInstructionKeys = AddNode (NULL, 1, PK_POSITION);
-			mat.GetTranslation(&m_pInstructionKeys->param[0], &m_pInstructionKeys->param[1], &m_pInstructionKeys->param[2]);
-			AddNode(m_pInstructionKeys, 1, PK_ROTATION);
-			mat.ToAxisAngle(m_pInstructionKeys->next->param);
-		}
+        while (ch--)
+        {
+          Matrix mat;
+          if (version > 3)
+          {
+            float m[16];
+            file.Read (m, sizeof(m));
+            mat.FromFloat (m);
+          }
+          else
+          {
+            float move[3], rotate[3];
+            file.Read (move, sizeof(float[3]));
+            file.Read (rotate, sizeof(float[3]));
+            mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+          }
 
-		m_pAnimationKeys = AddNode (NULL, 1, PK_POSITION);
-		AddNode(m_pAnimationKeys, 1, PK_ROTATION);
-		memcpy(m_pAnimationKeys->param, m_pInstructionKeys->param, sizeof(float[4]));
-		memcpy(m_pAnimationKeys->next->param, m_pInstructionKeys->next->param, sizeof(float[4]));
-	}
+          unsigned char b;
+          file.ReadByte(&b, 1);
+          time = b;
 
-	// Common to all versions.
-	file->Read(name, 9);
-	file->ReadByte(&m_nColor, 1);
+          mat.GetTranslation(&param[0], &param[1], &param[2]);
+          param[3] = 0;
+          ChangeKey (time, false, true, param, LC_PK_POSITION);
+          ChangeKey (time, true, true, param, LC_PK_POSITION);
 
-	if (version < 5)
-	{
-		const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
-		m_nColor = conv[m_nColor];
-	}
+          mat.ToAxisAngle (param);
+          ChangeKey (time, false, true, param, LC_PK_ROTATION);
+          ChangeKey (time, true, true, param, LC_PK_ROTATION);
 
-	file->ReadByte(&m_nStepShow, 1);
-	if (version > 1)
-		file->ReadByte(&m_nStepHide, 1);
-	else
-		m_nStepHide = 255;
+          int bl;
+          file.ReadLong (&bl, 1);
+        }
+      }
+      else
+      {
+        Matrix mat;
+        float move[3], rotate[3];
+        file.Read (move, sizeof(float[3]));
+        file.Read (rotate, sizeof(float[3]));
+        mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
 
-	if (version > 5)
-	{
-		file->ReadShort(&m_nFrameShow, 1);
-		file->ReadShort(&m_nFrameHide, 1);
+        mat.GetTranslation(&param[0], &param[1], &param[2]);
+        param[3] = 0;
+        ChangeKey (1, false, true, param, LC_PK_POSITION);
+        ChangeKey (1, true, true, param, LC_PK_POSITION);
 
-		if (version > 7)
-		{
-			file->ReadByte(&m_nState, 1);
-			UnSelect();
-			file->ReadByte(&ch, 1);
-			file->Read(m_strName, ch);
-		}
-		else
-		{
-			int hide;
-			file->ReadLong(&hide, 1);
-			if (hide != 0)
-				m_nState |= LC_PIECE_HIDDEN;
-			file->Read(m_strName, 81);
-		}
+        mat.ToAxisAngle (param);
+        ChangeKey (1, false, true, param, LC_PK_ROTATION);
+        ChangeKey (1, true, true, param, LC_PK_ROTATION);
+      }
+    }
+  }
 
-		// 7 (0.64)
-		int i = -1;
-		if (version > 6)
-			file->ReadLong(&i, 1);
-		m_pGroup = (Group*)i;
-	}
-	else
-	{
-		m_nFrameShow = 1;
-		m_nFrameHide = 65535;
+  // Common to all versions.
+  file.Read (name, 9);
+  file.ReadByte (&m_nColor, 1);
 
-		file->ReadByte(&ch, 1);
-		if (ch == 0)
-			m_pGroup = (Group*)-1;
-		else
-			m_pGroup = (Group*)ch;
+  if (version < 5)
+  {
+    const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
+    m_nColor = conv[m_nColor];
+  }
 
-		file->ReadByte(&ch, 1);
-		if (ch & 0x01)
-			m_nState |= LC_PIECE_HIDDEN;
-	}
+  file.ReadByte(&m_nStepShow, 1);
+  if (version > 1)
+    file.ReadByte(&m_nStepHide, 1);
+  else
+    m_nStepHide = 255;
+
+  if (version > 5)
+  {
+    file.ReadShort(&m_nFrameShow, 1);
+    file.ReadShort(&m_nFrameHide, 1);
+
+    if (version > 7)
+    {
+      file.ReadByte(&m_nState, 1);
+      UnSelect();
+      file.ReadByte(&ch, 1);
+      file.Read(m_strName, ch);
+    }
+    else
+    {
+      int hide;
+      file.ReadLong(&hide, 1);
+      if (hide != 0)
+        m_nState |= LC_PIECE_HIDDEN;
+      file.Read(m_strName, 81);
+    }
+
+    // 7 (0.64)
+    int i = -1;
+    if (version > 6)
+      file.ReadLong(&i, 1);
+    m_pGroup = (Group*)i;
+  }
+  else
+  {
+    m_nFrameShow = 1;
+    m_nFrameHide = 65535;
+
+    file.ReadByte(&ch, 1);
+    if (ch == 0)
+      m_pGroup = (Group*)-1;
+    else
+      m_pGroup = (Group*)ch;
+
+    file.ReadByte(&ch, 1);
+    if (ch & 0x01)
+      m_nState |= LC_PIECE_HIDDEN;
+  }
+
+  return true;
 }
 
-void Piece::FileSave(File* file, Group* pGroups)
+void Piece::FileSave (File& file, Group* pGroups)
 {
-	LC_PIECE_KEY *node;
-	unsigned char ch = 8; // LeoCAD 0.70
-	unsigned long n;
+  unsigned char ch = LC_PIECE_SAVE_VERSION;
 
-	file->WriteByte(&ch, 1);
+  file.WriteByte (&ch, 1);
 
-	for (n = 0, node = m_pInstructionKeys; node; node = node->next)
-		n++;
-	file->WriteLong(&n, 1);
+  Object::FileSave (file);
 
-	for (node = m_pInstructionKeys; node; node = node->next)
-	{
-		file->Write(node->param, 16);
-		file->WriteShort(&node->time, 1);
-		file->WriteByte(&node->type, 1);
-	}
+  file.Write(m_pPieceInfo->m_strName, 9);
+  file.WriteByte(&m_nColor, 1);
+  file.WriteByte(&m_nStepShow, 1);
+  file.WriteByte(&m_nStepHide, 1);
+  file.WriteShort(&m_nFrameShow, 1);
+  file.WriteShort(&m_nFrameHide, 1);
 
-	for (n = 0, node = m_pAnimationKeys; node; node = node->next)
-		n++;
-	file->WriteLong(&n, 1);
+  // version 8
+  file.WriteByte(&m_nState, 1);
+  ch = strlen(m_strName);
+  file.WriteByte(&ch, 1);
+  file.Write(m_strName, ch);
 
-	for (node = m_pAnimationKeys; node; node = node->next)
-	{
-		file->Write(node->param, 16);
-		file->WriteShort(&node->time, 1);
-		file->WriteByte(&node->type, 1);
-	}
-
-	file->Write(m_pPieceInfo->m_strName, 9);
-
-	file->WriteByte(&m_nColor, 1);
-	file->WriteByte(&m_nStepShow, 1);
-	file->WriteByte(&m_nStepHide, 1);
-	file->WriteShort(&m_nFrameShow, 1);
-	file->WriteShort(&m_nFrameHide, 1);
-
-	// version 8
-	file->WriteByte(&m_nState, 1);
-	ch = strlen(m_strName);
-	file->WriteByte(&ch, 1);
-	file->Write(m_strName, ch);
-
-	// version 7
-	int i;
-	if (m_pGroup != NULL)
-	{
-		for (i = 0; pGroups; pGroups = pGroups->m_pNext)
-		{
-			if (m_pGroup == pGroups)
-				break;
-			i++;
-		}
-	}
-	else
-		i = -1;
-	file->WriteLong(&i, 1);
+  // version 7
+  int i;
+  if (m_pGroup != NULL)
+  {
+    for (i = 0; pGroups; pGroups = pGroups->m_pNext)
+    {
+      if (m_pGroup == pGroups)
+        break;
+      i++;
+    }
+  }
+  else
+    i = -1;
+  file.WriteLong(&i, 1);
 }
 
 void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)
 {
-	m_nFrameShow = nFrame;
-	m_nStepShow = nStep;
+  m_nFrameShow = nFrame;
+  m_nStepShow = nStep;
 
-	m_pAnimationKeys = AddNode (NULL, 1, PK_POSITION);
-	AddNode(m_pAnimationKeys, 1, PK_ROTATION);
-	m_pAnimationKeys->param[0] = x;
-	m_pAnimationKeys->param[1] = y;
-	m_pAnimationKeys->param[2] = z;
+  float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
+  ChangeKey (1, false, true, pos, LC_PK_POSITION);
+  ChangeKey (1, false, true, rot, LC_PK_ROTATION);
+  ChangeKey (1, true, true, pos, LC_PK_POSITION);
+  ChangeKey (1, true, true, rot, LC_PK_ROTATION);
 
-	m_pInstructionKeys = AddNode (NULL, 1, PK_POSITION);
-	AddNode(m_pInstructionKeys, 1, PK_ROTATION);
-	m_pInstructionKeys->param[0] = x;
-	m_pInstructionKeys->param[1] = y;
-	m_pInstructionKeys->param[2] = z;
+  UpdatePosition (1, false);
 
-	UpdatePosition(1, false);
-
-	m_nColor = nColor;
+  m_nColor = nColor;
 }
 
 void Piece::CreateName(Piece* pPiece)
@@ -571,71 +536,13 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	free(verts);
 }
 
-void Piece::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+void Piece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-	m_fPosition[0] += x;
-	m_fPosition[1] += y;
-	m_fPosition[2] += z;
+  m_fPosition[0] += dx;
+  m_fPosition[1] += dy;
+  m_fPosition[2] += dz;
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_fPosition, PK_POSITION);
-}
-
-void Piece::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, float* param, unsigned char nKeyType)
-{
-	LC_PIECE_KEY *node, *poskey = NULL, *newpos = NULL;
-	if (bAnimation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
-
-	while (node)
-	{
-		if ((node->time <= nTime) &&
-			(node->type == nKeyType))
-				poskey = node;
-
-		node = node->next;
-	}
-
-	if (bAddKey)
-	{
-		if (poskey)
-		{
-			if (poskey->time != nTime)
-				newpos = AddNode(poskey, nTime, nKeyType);
-		}
-		else
-			newpos = AddNode(poskey, nTime, nKeyType);
-	}
-
-	if (newpos == NULL)
-		newpos = poskey;
-
-	newpos->param[0] = param[0];
-	newpos->param[1] = param[1];
-	newpos->param[2] = param[2];
-
-	if (nKeyType == PK_ROTATION)
-		newpos->param[3] = param[3];
-}
-
-void Piece::RemoveKeys()
-{
-	LC_PIECE_KEY *node, *prev;
-
-	for (node = m_pInstructionKeys; node;)
-	{
-		prev = node;
-		node = node->next;
-		free (prev);
-	}
-
-	for (node = m_pAnimationKeys; node;)
-	{
-		prev = node;
-		node = node->next;
-		free (prev);
-	}
+  ChangeKey (nTime, bAnimation, bAddKey, m_fPosition, LC_PK_POSITION);
 }
 
 bool Piece::IsVisible(unsigned short nTime, bool bAnimation)
@@ -684,80 +591,6 @@ void Piece::CompareBoundingBox(float box[6])
 	}
 }
 
-bool Piece::CalculatePositionRotation(unsigned short nTime, bool bAnimation, float pos[3], float rot[4])
-{
-	LC_PIECE_KEY *node, *prevpos = NULL, *nextpos = NULL, *prevrot = NULL, *nextrot = NULL;
-	if (bAnimation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
-
-	while (node && (!nextpos || !nextrot))
-	{
-		if (node->time <= nTime)
-		{
-			if (node->type == PK_POSITION)
-				prevpos = node;
-			else
-				prevrot = node;
-		}
-		else
-		{
-			if (node->type == PK_POSITION)
-			{
-				if (nextpos == NULL)
-					nextpos = node;
-			}
-			else
-			{
-				if (nextrot == NULL)
-					nextrot = node;
-			}
-		}
-
-		node = node->next;
-	}
-
-	if (bAnimation)
-	{
-		if ((nextpos != NULL) && (prevpos->time != nTime))
-		{
-			// TODO: USE KEY IN/OUT WEIGHTS
-			float t = (float)(nTime - prevpos->time)/(nextpos->time - prevpos->time);
-			pos[0] = prevpos->param[0] + (nextpos->param[0] - prevpos->param[0])*t;
-			pos[1] = prevpos->param[1] + (nextpos->param[1] - prevpos->param[1])*t;
-			pos[2] = prevpos->param[2] + (nextpos->param[2] - prevpos->param[2])*t;
-		}
-		else
-			memcpy (pos, prevpos->param, sizeof(float[3]));
-
-		if ((nextrot != NULL) && (prevrot->time != nTime))
-		{
-			// TODO: USE KEY IN/OUT WEIGHTS
-			float t = (float)(nTime - prevrot->time)/(nextrot->time - prevrot->time);
-			rot[0] = prevrot->param[0] + (nextrot->param[0] - prevrot->param[0])*t;
-			rot[1] = prevrot->param[1] + (nextrot->param[1] - prevrot->param[1])*t;
-			rot[2] = prevrot->param[2] + (nextrot->param[2] - prevrot->param[2])*t;
-			rot[3] = prevrot->param[3] + (nextrot->param[3] - prevrot->param[3])*t;
-		}
-		else
-			memcpy (rot, prevrot->param, sizeof(float[4]));
-	}
-	else
-	{
-		if (memcmp(pos, prevpos->param, sizeof(float[3])) ||
-			memcmp(rot, prevrot->param, sizeof(float[4])))
-		{
-			memcpy (pos, prevpos->param, sizeof(float[3]));
-			memcpy (rot, prevrot->param, sizeof(float[4]));
-		}
-		else
-			return false;
-	}
-
-	return true;
-}
-
 Group* Piece::GetTopGroup()
 {
 	return m_pGroup ? m_pGroup->GetTopGroup() : NULL;
@@ -786,7 +619,7 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 	if (!IsVisible(nTime, bAnimation))
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
-	CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation);
+	CalculateKeys (nTime, bAnimation);
 //	if (CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation))
 	{
 		Matrix mat(m_fRotation, m_fPosition);

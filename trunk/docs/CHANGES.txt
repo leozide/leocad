@@ -1,13 +1,20 @@
 This is a changelog for developers only, not for ordinary users.
 
-07/01/2000
+02/02/2001
+	- HTML dialog now correctly remembers the last settings
+	- Added step add/remove commands
+
+01/02/2001
+	- Fixed a crash deselecting point lights
+
+07/01/2001
         - Added a new command to create floating views of the project
 
-05/01/2000
+05/01/2001
         - Added a new cross platform class for handling OpenGL windows
         - Added a new base window class for handling top level windows
 
-02/01/2000
+02/01/2001
         - Linux PPC fixes - LeoCAD now works on big endian computers !
           Thanks to Lon Shapiro for allowing me to use his Mac for debugging.
 

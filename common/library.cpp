@@ -2,6 +2,7 @@
 // Piece library management
 //
 
+#include <stdlib.h>
 #include "library.h"
 #include "file.h"
 #include "pieceinf.h"

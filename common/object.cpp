@@ -242,7 +242,8 @@ void Object::ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, con
 
 void Object::CalculateKeys (unsigned short nTime, bool bAnimation)
 {
-  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
+//  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
+  LC_OBJECT_KEY *next[32], *prev[32], *node;
   int i, empty = m_nKeyInfoCount;
 
   for (i = 0; i < m_nKeyInfoCount; i++)

@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "light.h"
 #include "defines.h"
 #include "globals.h"
@@ -226,8 +227,8 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
     float verts[16*3];
     for (int i = 0; i < 8; i++)
     {
-      verts[i*6] = verts[i*6+3] = cos ((float)i/4 * PI) * 0.3f;
-      verts[i*6+1] = verts[i*6+4] = sin ((float)i/4 * PI) * 0.3f;
+      verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * PI) * 0.3f;
+      verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * PI) * 0.3f;
       verts[i*6+2] = 0.3f;
       verts[i*6+5] = -0.3f;
     }
@@ -384,17 +385,17 @@ void Light::Render (float fLineWidth)
 
       if (fabs (frontvec.X ()) < fabs (frontvec.Y ()))
       {
-	if (fabs (frontvec.X ()) < fabs (frontvec.Z ()))
-	  up[0] = -(up[1]*frontvec.Y () + up[2]*frontvec.Z ());
-	else
-	  up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
+        if (fabs (frontvec.X ()) < fabs (frontvec.Z ()))
+          up[0] = -(up[1]*frontvec.Y () + up[2]*frontvec.Z ());
+        else
+          up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
       }
       else
       {
-	if (fabs (frontvec.Y ()) < fabs (frontvec.Z ()))
-	  up[1] = -(up[0]*frontvec.X () + up[2]*frontvec.Z ());
-	else
-	  up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
+        if (fabs (frontvec.Y ()) < fabs (frontvec.Z ()))
+          up[1] = -(up[0]*frontvec.X () + up[2]*frontvec.Z ());
+        else
+          up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
       }
 
       glPushMatrix ();
@@ -403,7 +404,7 @@ void Light::Render (float fLineWidth)
       modelview.Invert ();
       glMultMatrixf (modelview.m);
 
-      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01, len);
+      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01f, len);
       projection.Invert ();
       glMultMatrixf (projection.m);
 

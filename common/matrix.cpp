@@ -720,7 +720,7 @@ void Matrix::CreatePerspective (float fovy, float aspect, float nearval, float f
 
   LoadIdentity ();
 
-  top = nearval * tan (fovy * M_PI / 360.0);
+  top = nearval * (float)tan (fovy * M_PI / 360.0);
   bottom = -top;
 
   left = bottom * aspect;
@@ -729,12 +729,12 @@ void Matrix::CreatePerspective (float fovy, float aspect, float nearval, float f
   if ((nearval<=0.0 || farval<=0.0) || (nearval == farval) || (left == right) || (top == bottom))
     return;
 
-  x = (2.0*nearval) / (right-left);
-  y = (2.0*nearval) / (top-bottom);
+  x = (2.0f*nearval) / (right-left);
+  y = (2.0f*nearval) / (top-bottom);
   a = (right+left) / (right-left);
   b = (top+bottom) / (top-bottom);
   c = -(farval+nearval) / ( farval-nearval);
-  d = -(2.0*farval*nearval) / (farval-nearval);
+  d = -(2.0f*farval*nearval) / (farval-nearval);
 
 #define M(row,col)  m[col*4+row]
   M(0,0) = x;     M(0,1) = 0.0F;  M(0,2) = a;      M(0,3) = 0.0F;
@@ -752,7 +752,7 @@ void Matrix::CreateLookat (float eye[3], float target[3], float up[3])
   z[0] = eye[0] - target[0];
   z[1] = eye[1] - target[1];
   z[2] = eye[2] - target[2];
-  mag = sqrt (z[0]*z[0] + z[1]*z[1] + z[2]*z[2]);
+  mag = (float)sqrt (z[0]*z[0] + z[1]*z[1] + z[2]*z[2]);
   if (mag)
   {
     z[0] /= mag;
@@ -774,7 +774,7 @@ void Matrix::CreateLookat (float eye[3], float target[3], float up[3])
   y[1] = -z[0]*x[2] + z[2]*x[0];
   y[2] =  z[0]*x[1] - z[1]*x[0];
 
-  mag = sqrt (x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+  mag = (float)sqrt (x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
   if (mag)
   {
     x[0] /= mag;
@@ -782,7 +782,7 @@ void Matrix::CreateLookat (float eye[3], float target[3], float up[3])
     x[2] /= mag;
   }
 
-  mag = sqrt (y[0]*y[0] + y[1]*y[1] + y[2]*y[2]);
+  mag = (float)sqrt (y[0]*y[0] + y[1]*y[1] + y[2]*y[2]);
   if (mag)
   {
     y[0] /= mag;

@@ -11,6 +11,8 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "globals.h"
+#include "system.h"
+#include "library.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -539,6 +541,40 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 
+		case ID_FILE_IMPORTPIECE:
+		{
+			CString filename;
+			LC_LDRAW_PIECE piece;
+
+			CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",this);
+			dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH);
+
+			if (dlg.DoModal() != IDOK)
+				return TRUE;
+			filename.ReleaseBuffer();
+
+			SystemDoWaitCursor(1);
+
+			if (ReadLDrawPiece(filename, &piece))
+			{
+				if (project->FindPieceInfo(piece.name) != NULL)
+					AfxMessageBox("Piece already exists in the library !", MB_OK|MB_ICONINFORMATION);
+
+				if (SaveLDrawPiece(&piece))
+					AfxMessageBox("Piece successfully imported.", MB_OK|MB_ICONINFORMATION);
+				else
+					AfxMessageBox("Error saving library.", MB_OK|MB_ICONINFORMATION);
+			}
+			else
+				AfxMessageBox("Error reading file", MB_OK|MB_ICONINFORMATION);
+
+			SystemDoWaitCursor(-1);
+			FreeLDrawPiece(&piece);
+
+			return TRUE;
+		}
+
 		case ID_LIBDLG_GROUP_INSERT:
 		{
 			HTREEITEM hti = m_Tree.GetSelectedItem();
@@ -798,106 +834,45 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (AfxMessageBox("Are you sure you want to delete ?", MB_ICONQUESTION | MB_YESNO) != IDYES)
 				return TRUE;
 
-			CString str = project->GetLibraryPath();
-			DeleteFile(str + "pieces-i.old");
-			DeleteFile(str + "pieces-b.old");
-			rename(str + "pieces.idx", str + "pieces-i.old");
-			rename(str + "pieces.bin", str + "pieces-b.old");
+			int i, sel = 0;
 
-			FileDisk oldbin, oldidx, newbin, newidx;
-			if ((!oldbin.Open(str + "pieces-b.old", "rb")) ||
-				(!oldidx.Open(str + "pieces-i.old", "rb")) ||
-				(!newbin.Open(str + "pieces.bin", "wb")) ||
-				(!newidx.Open(str + "pieces.idx", "wb")))
+			for (i = 0; i < m_List.GetItemCount(); i++)
+				if (m_List.GetItemState(i, LVIS_SELECTED))
+					sel++;
+
+			// Nothing to be done
+			if (sel == 0)
+				return TRUE;
+
+			char** names = (char**)malloc(sel*sizeof(char**));
+
+			for (sel = 0, i = 0; i < m_List.GetItemCount(); i++)
+				if (m_List.GetItemState(i, LVIS_SELECTED))
+				{
+					names[sel] = m_Parts[m_List.GetItemData(i)].info->m_strName;
+					sel++;
+				}
+			
+			DeletePiece(names, sel);
+			free(names);
+
+			CString str = project->GetLibraryPath();
+			FileDisk newidx;
+			if (!newidx.Open(str + "pieces.idx", "rb"))
 			{
 				AfxMessageBox("Cannot open file.", MB_OK|MB_ICONERROR);
 				return TRUE;
 			}
 
-			char tmp[200];
-			unsigned short count, deleted = 0, j;
-
-			oldidx.Seek(-(LONG)(sizeof(count)), SEEK_END);
-			oldidx.Read(&count, sizeof(count));
-			oldidx.Seek(0, SEEK_SET);
-			oldidx.Read(tmp, 34);
-			newidx.Write(tmp, 34);
-			oldbin.Read(tmp, 32);
-			newbin.Write(tmp, 32);
-
-			CProgressDlg dlg("Deleting");
-			dlg.Create(this);
-			dlg.SetRange (0, count);
-
-			for (j = 0; j < count; j++)
-			{
-				dlg.StepIt();
-				dlg.SetStatus(m_Parts[j].info->m_strDescription);
-
-				if (dlg.CheckCancelButton())
-				if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
-					break;
-
-				BOOL bDelete = FALSE;
-				char name[9];
-				name[8] = 0;
-				oldidx.Read (&name, 8);
-
-				for (int i = 0; i < m_List.GetItemCount(); i++)
-					if (strcmp(name, m_Parts[m_List.GetItemData(i)].info->m_strName) == 0)
-					{
-						if (m_List.GetItemState(i, LVIS_SELECTED))
-							bDelete = TRUE;
-						break;
-					}
-
-				if (bDelete)
-				{
-					oldidx.Seek(64+12+13, SEEK_CUR);
-					deleted++;
-					continue;
-				}
-
-				newidx.Write(name, 8);
-				oldidx.Read(tmp, 64+12+5);
-				newidx.Write(tmp, 64+12+5);
-				unsigned long binoff = newbin.GetLength(), size;
-				newidx.Write(&binoff, sizeof(binoff));
-				oldidx.Read(&binoff, sizeof(binoff));
-				oldidx.Read(&size, sizeof(size));
-				newidx.Write(&size, sizeof(size));
-
-				void* membuf = malloc (size);
-				oldbin.Seek(binoff, SEEK_SET);
-				oldbin.Read(membuf, size);
-				newbin.Write(membuf, size);
-				free(membuf);
-			}
-
-			// list of moved pieces
-			unsigned short moved;
-			long seek;
-
-			oldidx.Seek(-8, SEEK_END);
-			oldidx.Read(&moved, 2);
-			seek = 16*moved+2;
-			oldidx.Seek(-seek, SEEK_SET);
-			void* membuf = malloc(seek);
-			oldidx.Read(membuf, seek);
-			newidx.Write(membuf, seek);
-			free(membuf);
-
-			// info at the end
-			unsigned long binoff = newbin.GetPosition();
-			newidx.Write(&binoff, sizeof(binoff));
-			count -= deleted;
-			newidx.Write(&count, sizeof(count));
+			unsigned short count;
 
 			// Reload the piece library index.
+			newidx.Seek(-2, SEEK_END);
+			newidx.Read(&count, 2);
 			newidx.Seek(34, SEEK_SET);
 
 			m_Parts.SetSize(count);
-			for (int i = 0; i < count; i++)
+			for (i = 0; i < count; i++)
 			{
 				PARTGROUPINFO* inf = &m_Parts[i];
 				inf->info = project->GetPieceInfo(i);
@@ -908,10 +883,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				newidx.Seek(8, SEEK_CUR);
 			}
 
-			oldidx.Close();
-			oldbin.Close();
 			newidx.Close();
-			newbin.Close();
 
 			UpdateList();
 			m_bReload = TRUE;

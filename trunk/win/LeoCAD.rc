@@ -516,6 +516,7 @@ BEGIN
         , GRAYED
         MENUITEM "&Print Catalog...",           ID_LIBDLG_FILE_PRINTCATALOG
         MENUITEM "Load &Update...",             ID_LIBDLG_FILE_MERGEUPDATE
+        MENUITEM "&Import Piece...",            ID_FILE_IMPORTPIECE
         MENUITEM SEPARATOR
         MENUITEM "Re&turn",                     IDOK
         MENUITEM "&Cancel",                     IDCANCEL
@@ -1952,6 +1953,11 @@ BEGIN
     ID_LOCK_UNLOCKALL       "Allows movement in all directions"
     ID_LOCK_ON              "Axis lock toggle\nAxis Lock Toggle"
     ID_PIECE_MIRROR         "Mirror pieces\nMirror"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
 END
 
 #endif    // English (U.S.) resources

@@ -15,6 +15,7 @@ class CAboutDlg : public CDialog
 public:
 	HDC m_hViewDC;
 	CAboutDlg();
+	virtual ~CAboutDlg();
 
 // Dialog Data
 	//{{AFX_DATA(CAboutDlg)
@@ -31,8 +32,16 @@ public:
 protected:
 	//{{AFX_MSG(CAboutDlg)
 	virtual BOOL OnInitDialog();
+	afx_msg void OnHomepage();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	void AdjustHomepageWindow();
+
+	CFont m_Font;          // Underlined font.
+	HCURSOR m_hLinkCursor; // Hand cursor.
 };
 
 //{{AFX_INSERT_LOCATION}}

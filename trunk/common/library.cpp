@@ -76,7 +76,7 @@ static unsigned long GetDefaultPieceGroup(char* name)
 		strstr(tmp,"Roadsign")	|| strstr(tmp,"Town")	|| 
 		strstr(tmp,"Leaves")	|| strstr(tmp,"Horse")	||
 		strstr(tmp,"Tree")		|| strstr(tmp,"Flower")	||
-		strstr(tmp,"Plant")		|| 
+		strstr(tmp,"Plant")		|| strstr(tmp,"Pannier")||
 		strstr(tmp,"Conveyor")	|| strstr(tmp,"Tractor")|| 
 		strstr(tmp,"Grab")		|| strstr(tmp,"Roller")	|| 
 		strstr(tmp,"Stretch")	|| strstr(tmp,"Tap ")	|| 
@@ -1457,4 +1457,246 @@ bool DeletePiece(char** names, int numpieces)
 // ========================================================
 
 // Load update
+bool LoadUpdate(const char* update)
+{
+	FileDisk newbin, newidx, oldbin, oldidx, up;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
+	unsigned short changes, moved, count, i, j, newcount = 0;
+	unsigned long cs, group, binoff;
+	unsigned char bt;
+	void* membuf;
 
+	typedef struct
+	{
+		char name[9];
+		BYTE type;
+		DWORD offset;
+	} LC_UPDATE_INFO;
+	LC_UPDATE_INFO* upinfo;
+
+	strcpy(file1, project->GetLibraryPath());
+	strcat(file1, "pieces-b.old");
+	remove(file1);
+	strcpy(file2, project->GetLibraryPath());
+	strcat(file2, "pieces.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) ||
+		(!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, project->GetLibraryPath());
+	strcat(file1, "pieces-i.old");
+	remove(file1);
+	strcpy(file2, project->GetLibraryPath());
+	strcat(file2, "pieces.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) ||
+		(!newidx.Open(file2, "wb")))
+		return false;
+
+	if (!up.Open(update, "rb"))
+		return false;
+
+	up.Seek(32, SEEK_SET);
+	up.ReadByte(&bt, 1);
+	if (bt != 2)
+		return false;	// wrong version
+
+	up.ReadByte(&bt, 1); // update number
+
+	up.Seek(-2, SEEK_END);
+	up.ReadShort(&changes, 1);
+	up.Seek(34, SEEK_SET);
+
+	oldidx.Seek(-2, SEEK_END);
+	oldidx.ReadShort(&count, 1);
+	oldidx.Seek(0, SEEK_SET);
+	oldidx.Read(tmp, 34);
+	newidx.Write(tmp, 33); // skip update byte
+	newidx.WriteByte(&bt, 1);
+	oldbin.Read(tmp, 32);
+	newbin.Write(tmp, 32);
+
+	upinfo = (LC_UPDATE_INFO*)malloc(sizeof(LC_UPDATE_INFO)*changes);
+	memset(upinfo, 0, sizeof(LC_UPDATE_INFO)*changes);
+
+	for (i = 0; i < changes; i++)
+	{
+		up.Read(&upinfo[i].name, 8);
+		up.Read(&upinfo[i].type, 1);
+		upinfo[i].offset = up.GetPosition();
+
+		if ((upinfo[i].type & LC_UPDATE_DESCRIPTION) ||
+			(upinfo[i].type & LC_UPDATE_NEWPIECE))
+			up.Seek(64+4, SEEK_CUR);
+
+		if ((upinfo[i].type & LC_UPDATE_DRAWINFO) ||
+			(upinfo[i].type & LC_UPDATE_NEWPIECE))
+		{
+			up.Seek(12+1, SEEK_CUR);
+			up.ReadLong(&cs, 1);
+			up.Seek(cs, SEEK_CUR);
+		}
+	}
+
+//	CProgressDlg dlg(_T("Updating Library"));
+//	dlg.Create(this);
+//	dlg.SetRange (0, count);
+
+	for (i = 0; i < count; i++)
+	{
+		char name[9];
+		name[8] = 0;
+		oldidx.Read (&name, 8);
+
+//		dlg.StepIt();
+//		if(dlg.CheckCancelButton())
+//			if(AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
+//			{
+//				free(upinfo);
+//				return TRUE;
+//			}
+
+		for (j = 0; j < changes; j++)
+		if (strcmp(name, upinfo[j].name) == 0)
+		{
+			if (upinfo[j].type == LC_UPDATE_DELETE)
+			{
+				oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
+				break;
+			}
+
+			newcount++;
+			up.Seek(upinfo[j].offset, SEEK_SET);
+			newidx.Write(name, 8);
+
+			// description
+			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
+			{
+				up.Read(&tmp, 64);
+				up.Read(&group, 4);
+				oldidx.Seek(64, SEEK_CUR);
+			}
+			else
+				oldidx.Read(&tmp, 64);
+			newidx.Write(tmp, 64);
+//			dlg.SetStatus(tmp);
+
+			// bounding box & flags
+			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
+			{
+				up.Read(&tmp, 12+1);
+				oldidx.Seek(12+1, SEEK_CUR);
+			}
+			else
+				oldidx.Read(&tmp, 12+1);
+			newidx.Write(tmp, 12+1);
+
+			// group
+			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
+				oldidx.Seek(4, SEEK_CUR);
+			else
+				oldidx.Read(&group, 4);
+			newidx.Write(&group, 4);
+
+			binoff = newbin.GetLength();
+			newidx.WriteLong(&binoff, 1);
+
+			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
+			{
+				up.ReadLong(&cs, 1);
+				oldidx.Seek(4+4, SEEK_CUR);
+
+				membuf = malloc(cs);
+				up.Read(membuf, cs);
+				newbin.Write(membuf, cs);
+				free(membuf);
+			}
+			else
+			{
+				oldidx.ReadLong(&binoff, 1);
+				oldidx.ReadLong(&cs, 1);
+
+				membuf = malloc(cs);
+				oldbin.Seek(binoff, SEEK_SET);
+				oldbin.Read(membuf, cs);
+				newbin.Write(membuf, cs);
+				free(membuf);
+			}
+			newidx.WriteLong(&cs, 1);
+			break;
+		}
+
+		// not changed, just copy
+		if (j == changes)
+		{
+			newcount++;
+			newidx.Write(name, 8);
+			oldidx.Read(tmp, 64+12+1+4);
+			newidx.Write(tmp, 64+12+1+4);
+			binoff = newbin.GetLength();
+			newidx.WriteLong(&binoff, 1);
+			oldidx.ReadLong(&binoff, 1);
+			oldidx.ReadLong(&cs, 1);
+			newidx.WriteLong(&cs, 1);
+
+//			tmp[64] = 0;
+//			dlg.SetStatus(tmp);
+
+			membuf = malloc(cs);
+			oldbin.Seek(binoff, SEEK_SET);
+			oldbin.Read(membuf, cs);
+			newbin.Write(membuf, cs);
+			free(membuf);
+		}
+	}
+
+	// now add new pieces
+	for (j = 0; j < changes; j++)
+		if (upinfo[j].type == LC_UPDATE_NEWPIECE)
+		{
+			newcount++;
+			newidx.Write(upinfo[j].name, 8);
+			up.Seek(upinfo[j].offset, SEEK_SET);
+			up.Read(&tmp, 64+12);
+			newidx.Write(tmp, 64+12);
+			up.Read(&group, 4);
+			up.Read(&bt, 1);
+			newidx.Write(&bt, 1);
+			newidx.Write(&group, 4);
+			binoff = newbin.GetLength();
+			newidx.WriteLong(&binoff, 1);
+
+			up.ReadLong(&cs, 1);
+			membuf = malloc(cs);
+			up.Read(membuf, cs);
+			newbin.Write(membuf, cs);
+			up.WriteLong(&cs, 1);
+			newidx.WriteLong(&cs, 1);
+			free (membuf);
+		}
+
+	up.Seek(-(2+2), SEEK_END);
+	up.ReadShort(&moved, 1);
+	cs = 2+moved*16;
+	up.Seek(-(LONG)(cs), SEEK_CUR);
+	membuf = malloc(cs);
+	up.Read(membuf, cs);
+	newidx.Write(membuf, cs);
+	free (membuf);
+
+	binoff = newbin.GetLength();
+	newidx.WriteLong(&binoff, 1);
+	newidx.WriteShort(&newcount, 1);
+
+	free(upinfo);
+	oldidx.Close();
+	oldbin.Close();
+	newidx.Close();
+	newbin.Close();
+	up.Close();
+
+	return true;
+}

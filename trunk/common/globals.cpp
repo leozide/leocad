@@ -167,14 +167,17 @@ MFW_PIECEINFO mfwpieceinfo[] = {
   { "973P49", "Forestman Blue Collar", MF_TORSO },
   { "973P48", "Forestman Maroon Collar", MF_TORSO },
   { "973P50", "Forestman Black Collar", MF_TORSO },
-  { "3841", "Pickaxe", MF_TOOL }
+  { "3841", "Pickaxe", MF_TOOL },
+  { "973P21", "Five Button Fire Fighter", MF_TORSO },
+  { "973P22", "Red Shirt and Suit", MF_TORSO },
+  { "973P34", "Open Jacket over Striped Vest", MF_TORSO },
+  { "973P46", "Forestman and Purse", MF_TORSO },
+  { "973P101", "SW Rebel Pilot", MF_TORSO },
+  { "4498", "Arrow Quiver", MF_NECK },
+  { "4499", "Bow with Arrow", MF_TOOL },
+  { "3852", "Hairbrush", MF_TOOL },
+  { "30152", "Magnifying Glass", MF_TOOL }
 };
 
 //	{ "770", "Shield Ovoid", MF_TOOL }, 
-//	2447.DAT      Minifig Helmet Visor
-
-
-
-
-
-
+//	2447      Minifig Helmet Visor

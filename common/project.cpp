@@ -29,6 +29,7 @@
 #include "view.h"
 #include "library.h"
 #include "texfont.h"
+#include "algebra.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p)
@@ -2333,40 +2334,40 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 		// Draw cameras & lights
 		if (bDrawViewports)
 		{
-		  if (m_nDetail & LC_DET_LIGHTING)
-		  {
-		    glDisable (GL_LIGHTING);
-		    int index = 0;
-		    Light *pLight;
+			if (m_nDetail & LC_DET_LIGHTING)
+			{
+				glDisable (GL_LIGHTING);
+				int index = 0;
+				Light *pLight;
+				
+				for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
+					glDisable ((GLenum)(GL_LIGHT0+index));
+			}
+			
+			Camera* pCamera;
+			Light* pLight;
+			
+			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+			{
+				if ((pCamera == m_pViewCameras[vp]) || !pCamera->IsVisible())
+					continue;
+				pCamera->Render(m_fLineWidth);
+			}
 
-		    for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-		      glDisable ((GLenum)(GL_LIGHT0+index));
-		  }
-
-		  Camera* pCamera;
-		  Light* pLight;
-
-		  for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-		  {
-		    if ((pCamera == m_pViewCameras[vp]) || !pCamera->IsVisible())
-		      continue;
-		    pCamera->Render(m_fLineWidth);
-		  }
-
-		  for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		    if (pLight->IsVisible ())
-		      pLight->Render(m_fLineWidth);
-
-		  if (m_nDetail & LC_DET_LIGHTING)
-		    glEnable (GL_LIGHTING);
+			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+				if (pLight->IsVisible ())
+					pLight->Render(m_fLineWidth);
+				
+				if (m_nDetail & LC_DET_LIGHTING)
+					glEnable (GL_LIGHTING);
 		}
-	}
 
-	if (bDrawViewports && m_OverlayActive)
-		RenderOverlays();
+		if (bDrawViewports && m_OverlayActive)
+			RenderOverlays(vp);
+	}
 }
 
-void Project::RenderOverlays()
+void Project::RenderOverlays(int Viewport)
 {
 	if (m_nCurAction == LC_ACTION_MOVE)
 	{
@@ -2384,9 +2385,24 @@ void Project::RenderOverlays()
 		for (int i = 0; i < 3; i++)
 		{
 			if (m_OverlayMode == LC_OVERLAY_X + i)
-				glColor3f(1,0,0);
+			{
+				glColor3f(0.8f, 0.8f, 0.0f);
+			}
 			else
-				glColor3f(0,0,0);
+			{
+				switch (i)
+				{
+				case 0:
+					glColor3f(0.8f, 0.0f, 0.0f);
+					break;
+				case 1:
+					glColor3f(0.0f, 0.8f, 0.0f);
+					break;
+				case 2:
+					glColor3f(0.0f, 0.0f, 0.8f);
+					break;
+				}
+			}
 
 			glPushMatrix();
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
@@ -2413,6 +2429,126 @@ void Project::RenderOverlays()
 	}
 	else if (m_nCurAction == LC_ACTION_ROTATE)
 	{
+		glDisable(GL_DEPTH_TEST);
+
+		Camera* Cam = m_pViewCameras[Viewport];
+		Matrix Mat;
+		int j;
+
+		Mat.CreateLookat(Cam->GetEyePos(), Cam->GetTargetPos(), Cam->GetUpVec());
+		Mat.Transpose3();
+		Mat.SetTranslation(m_OverlayCenter);
+
+		glBegin(GL_LINE_LOOP);
+		glColor3f(0.1f, 0.1f, 0.1f);
+
+		for (j = 0; j < 32; j++)
+		{
+			float Point[3];
+
+			Point[0] = (float)cos(2.0 * M_PI * j / 32) * 2.0f * m_OverlayScale;
+			Point[1] = (float)sin(2.0 * M_PI * j / 32) * 2.0f * m_OverlayScale;
+			Point[2] = 0.0f;
+
+			Mat.TransformPoints(Point, 1);
+
+			glVertex3fv(Point);
+		}
+
+		glEnd();
+
+		glBegin(GL_LINE_LOOP);
+		glColor3f(0.1f, 0.1f, 0.1f);
+
+		for (j = 0; j < 32; j++)
+		{
+			float Point[3];
+
+			Point[0] = (float)cos(2.0 * M_PI * j / 32) * 2.5f * m_OverlayScale;
+			Point[1] = (float)sin(2.0 * M_PI * j / 32) * 2.5f * m_OverlayScale;
+			Point[2] = 0.0f;
+
+			Mat.TransformPoints(Point, 1);
+
+			glVertex3fv(Point);
+		}
+
+		glEnd();
+
+		Vector ViewDir(Cam->GetTargetPos(), Cam->GetEyePos());
+		ViewDir.Normalize();
+
+		for (int i = 0; i < 3; i++)
+		{
+			if (m_OverlayMode == LC_OVERLAY_X + i)
+			{
+				glColor3f(0.8f, 0.8f, 0.0f);
+			}
+			else
+			{
+				switch (i)
+				{
+				case 0:
+					glColor3f(0.8f, 0.0f, 0.0f);
+					break;
+				case 1:
+					glColor3f(0.0f, 0.8f, 0.0f);
+					break;
+				case 2:
+					glColor3f(0.0f, 0.0f, 0.8f);
+					break;
+				}
+			}
+
+			glBegin(GL_LINES);
+
+			for (int j = 0; j < 32; j++)
+			{
+				float x1, x2, y1, y2, z1, z2;
+
+				switch (i)
+				{
+				case 0:
+					x1 = 0.0f;
+					x2 = 0.0f;
+					y1 = (float)cos(2.0 * M_PI * j / 32);
+					y2 = (float)cos(2.0 * M_PI * (j + 1) / 32);
+					z1 = (float)sin(2.0 * M_PI * j / 32);
+					z2 = (float)sin(2.0 * M_PI * (j + 1) / 32);
+					break;
+
+				case 1:
+					x1 = (float)cos(2.0 * M_PI * j / 32);
+					x2 = (float)cos(2.0 * M_PI * (j + 1) / 32);
+					y1 = 0.0f;
+					y2 = 0.0f;
+					z1 = (float)sin(2.0 * M_PI * j / 32);
+					z2 = (float)sin(2.0 * M_PI * (j + 1) / 32);
+					break;
+
+				case 2:
+					x1 = (float)cos(2.0 * M_PI * j / 32);
+					x2 = (float)cos(2.0 * M_PI * (j + 1) / 32);
+					y1 = (float)sin(2.0 * M_PI * j / 32);
+					y2 = (float)sin(2.0 * M_PI * (j + 1) / 32);
+					z1 = 0.0f;
+					z2 = 0.0f;
+					break;
+				}
+
+				if ((ViewDir[0]*(x1+x2) + ViewDir[1]*(y1+y2) + ViewDir[2]*(z1+z2)) >= 0.0f)
+				{
+					glVertex3f(m_OverlayCenter[0] + x1 * 2.0f * m_OverlayScale, m_OverlayCenter[1] + y1 * 2.0f * m_OverlayScale, m_OverlayCenter[2] + z1 * 2.0f * m_OverlayScale);
+					glVertex3f(m_OverlayCenter[0] + x2 * 2.0f * m_OverlayScale, m_OverlayCenter[1] + y2 * 2.0f * m_OverlayScale, m_OverlayCenter[2] + z2 * 2.0f * m_OverlayScale);
+				}
+			}
+
+			glEnd();
+		}
+
+		glEnable(GL_DEPTH_TEST);
+
+		glPopMatrix();
 	}
 }
 
@@ -7719,6 +7855,28 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				(ptz - m_fTrack[2])*mouse };
 			float d[3] = { delta[0], delta[1], delta[2] };
 
+				if (m_OverlayActive)
+				{
+					switch (m_OverlayMode)
+					{
+					case LC_OVERLAY_XYZ:
+						break;
+					case LC_OVERLAY_X:
+						delta[1] = delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_Y:
+						delta[0] = delta[2] = 0.0f;
+						break;
+					case LC_OVERLAY_Z:
+						delta[0] = delta[1] = 0.0f;
+						break;
+					case LC_OVERLAY_XY:
+					case LC_OVERLAY_XZ:
+					case LC_OVERLAY_YZ:
+						break;
+					}
+				}
+
 			ldiv_t result;
 			for (int i = 0; i < 3; i++)
 			if (m_nSnap & LC_DRAW_SNAP_A)
@@ -7736,7 +7894,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
 			m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
 
-			if (m_nSnap & LC_DRAW_3DMOUSE)
+			if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
 				RotateSelectedObjects (delta[0], delta[1], delta[2]);
 			else
 			{
@@ -7892,40 +8050,42 @@ void Project::MouseUpdateOverlays(int x, int y)
 {
 	if (m_nCurAction == LC_ACTION_MOVE)
 	{
-		GLdouble modelMatrix[16], projMatrix[16];
-		GLint viewport[4];
+		GLdouble ModelMatrix[16], ProjMatrix[16];
+		GLint Viewport[4];
 
 		LoadViewportProjection();
-		glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-		glGetIntegerv(GL_VIEWPORT, viewport);
+		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
+		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+		glGetIntegerv(GL_VIEWPORT, Viewport);
 
 		double pts[4][3];
-		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], modelMatrix, projMatrix, viewport, &pts[0][0], &pts[0][1], &pts[0][2]);
-		gluProject(m_OverlayCenter[0] + m_OverlayScale, m_OverlayCenter[1], m_OverlayCenter[2], modelMatrix, projMatrix, viewport, &pts[1][0], &pts[1][1], &pts[1][2]);
-		gluProject(m_OverlayCenter[0], m_OverlayCenter[1] + m_OverlayScale, m_OverlayCenter[2], modelMatrix, projMatrix, viewport, &pts[2][0], &pts[2][1], &pts[2][2]);
-		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] + m_OverlayScale, modelMatrix, projMatrix, viewport, &pts[3][0], &pts[3][1], &pts[3][2]);
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &pts[0][0], &pts[0][1], &pts[0][2]);
+		gluProject(m_OverlayCenter[0] + m_OverlayScale, m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &pts[1][0], &pts[1][1], &pts[1][2]);
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1] + m_OverlayScale, m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &pts[2][0], &pts[2][1], &pts[2][2]);
+		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] + m_OverlayScale, ModelMatrix, ProjMatrix, Viewport, &pts[3][0], &pts[3][1], &pts[3][2]);
 
 		int Mode = -1;
+
+		Point3 SegStart((float)pts[0][0], (float)pts[0][1], (float)pts[0][2]);
+		Point3 Pt((float)x, (float)y, 0);
 
 		// Check if the mouse is over an arrow.
 		for (int i = 1; i < 4; i++)
 		{
-			float LineMag, U;
+			Point3 SegEnd((float)pts[i][0], (float)pts[i][1], (float)pts[i][2]);
+			Vector3 Line = SegEnd - SegStart;
+			Vector3 Vec = Pt - SegStart;
 
-			LineMag = sqrtf((float)((pts[i][0]-pts[0][0])*(pts[i][0]-pts[0][0]) + (pts[i][1]-pts[0][1])*(pts[i][1]-pts[0][1])));
-
-			U = (float)(((((float)x - pts[0][0]) * (pts[i][0] - pts[0][0])) + (((float)y - pts[0][1]) * (pts[i][1] - pts[0][1]))) / (LineMag * LineMag));
+			float u = Dot3(Vec, Line) / Line.LengthSquared();
 
 			// Point is outside the line segment.
-			if (U < 0.0f || U > 1.0f)
+			if (u < 0.0f || u > 1.0f)
 				continue;
 
-			// Point in the arrow closest to the mouse.
-			float ix = (float)(pts[0][0] + U * (pts[i][0] - pts[0][0]));
-			float iy = (float)(pts[0][1] + U * (pts[i][1] - pts[0][1]));
+			// Closest point in the line segment to the mouse.
+			Point3 Closest = SegStart + u * Line;
 
-			if (((ix-x)*(ix-x) + (iy-y)*(iy-y)) < 100.0f)
+			if ((Closest - Pt).LengthSquared() < 100.0f)
 			{
 				Mode = LC_OVERLAY_X + i - 1;
 				break;
@@ -7937,6 +8097,132 @@ void Project::MouseUpdateOverlays(int x, int y)
 		if (Mode == -1)
 		{
 			Mode = LC_OVERLAY_XYZ;
+		}
+
+		if (Mode != m_OverlayMode)
+		{
+			m_OverlayMode = Mode;
+			UpdateAllViews();
+		}
+	}
+	else if (m_nCurAction == LC_ACTION_ROTATE)
+	{
+		// Calculate the distance from the mouse pointer to the center of the sphere.
+		GLdouble px, py, pz, rx, ry, rz;
+		GLdouble ModelMatrix[16], ProjMatrix[16];
+		GLint Viewport[4];
+
+		LoadViewportProjection();
+		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
+		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+		glGetIntegerv(GL_VIEWPORT, Viewport);
+
+		// Unproject the mouse point against both the front and the back clipping planes.
+		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, Viewport, &px, &py, &pz);
+		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, Viewport, &rx, &ry, &rz);
+
+		Point3 SegStart((float)rx, (float)ry, (float)rz);
+		Point3 SegEnd((float)px, (float)py, (float)pz);
+		Point3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+
+		Vector3 Line = SegEnd - SegStart;
+		Vector3 Vec = Center - SegStart;
+
+		float u = Dot3(Vec, Line) / Line.LengthSquared();
+
+		// Closest point in the line to the mouse.
+		Point3 Closest = SegStart + u * Line;
+
+		int Mode = -1;
+		float Distance = (Closest - Center).LengthSquared();
+		const float Epsilon = 0.25f * m_OverlayScale;
+
+		if (Distance > (2.5f * m_OverlayScale + Epsilon))
+		{
+			Mode = LC_OVERLAY_XYZ;
+		}
+		else if (Distance > (2.5f * m_OverlayScale - Epsilon))
+		{
+			// TODO: Mode = LC_OVERLAY_VIEW;
+		}
+		else if (Distance < (2.0f * m_OverlayScale + Epsilon))
+		{
+			// 3D rotation unless we're over one of the axis circles.
+			Mode = LC_OVERLAY_XYZ; // TODO: remember if you are inside the sphere and draw a translucent sphere.
+
+			// Point P on a line defined by two points P1 and P2 is described by P = P1 + u (P2 - P1)
+			// A sphere centered at P3 with radius r is described by (x - x3)2 + (y - y3)2 + (z - z3)2 = r2 
+			// Substituting the equation of the line into the sphere gives a quadratic equation where:
+			// a = (x2 - x1)2 + (y2 - y1)2 + (z2 - z1)2 
+			// b = 2[ (x2 - x1) (x1 - x3) + (y2 - y1) (y1 - y3) + (z2 - z1) (z1 - z3) ] 
+			// c = x32 + y32 + z32 + x12 + y12 + z12 - 2[x3 x1 + y3 y1 + z3 z1] - r2 
+			// The solutions to this quadratic are described by: (-b +- sqrt(b2 - 4 a c) / 2 a
+			// The exact behavior is determined by b * b - 4 * a * c 
+			// If this is less than 0 then the line does not intersect the sphere. 
+			// If it equals 0 then the line is a tangent to the sphere intersecting it at one point
+			// If it is greater then 0 the line intersects the sphere at two points. 
+
+			float x1 = (float)px, y1 = (float)py, z1 = (float)pz;
+			float x2 = (float)rx, y2 = (float)ry, z2 = (float)rz;
+			float x3 = m_OverlayCenter[0], y3 = m_OverlayCenter[1], z3 = m_OverlayCenter[2];
+			float r = 2.0f * m_OverlayScale;
+
+			float a = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1) + (z2 - z1)*(z2 - z1);
+			float b = 2 * ((x2 - x1)*(x1 - x3) + (y2 - y1)*(y1 - y3) + (z2 - z1)*(z1 - z3));
+			float c = x3*x3 + y3*y3 + z3*z3 + x1*x1 + y1*y1 + z1*z1 - 2*(x3*x1 + y3*y1 + z3*z1) - r*r;
+			float f = b * b - 4 * a * c;
+
+			if (f >= 0.0f)
+			{
+				Camera* Cam = m_pViewCameras[m_nActiveViewport];
+				Vector3 ViewDir = Cam->GetTargetPosition() - Cam->GetEyePosition();
+
+				float u1 = (-b + sqrtf(f)) / (2*a);
+				float u2 = (-b - sqrtf(f)) / (2*a);
+
+				Point3 Intersections[2] =
+				{
+					Point3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
+					Point3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
+				};
+
+				for (int i = 0; i < 2; i++)
+				{
+					Vector3 Dist = Intersections[i] - Center;
+
+					if (Dot3(ViewDir, Dist) > 0.0f)
+						continue;
+
+					float dx = fabsf(Dist.GetX()), dy = fabsf(Dist.GetY()), dz = fabsf(Dist.GetZ());
+
+					if (dx < dy)
+					{
+						if (dx < dz)
+						{
+							if (dx < Epsilon)
+								Mode = LC_OVERLAY_X;
+						}
+						else
+						{
+							if (dz < Epsilon)
+								Mode = LC_OVERLAY_Z;
+						}
+					}
+					else
+					{
+						if (dy < dz)
+						{
+							if (dy < Epsilon)
+								Mode = LC_OVERLAY_Y;
+						}
+						else
+						{
+							if (dz < Epsilon)
+								Mode = LC_OVERLAY_Z;
+						}
+					}
+				}
+			}
 		}
 
 		if (Mode != m_OverlayMode)

@@ -155,7 +155,7 @@ protected:
 	// Rendering
 	void RenderScene(bool bShaded, bool bDrawViewports);
 	void RenderViewports(bool bBackground, bool bLines);
-	void RenderOverlays();
+	void RenderOverlays(int Viewport);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);

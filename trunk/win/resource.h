@@ -432,6 +432,7 @@
 #define IDC_MF_LEGLSPIN                 1242
 #define IDC_KEYDLG_FILENAME             1242
 #define IDC_MF_LEGRSPIN                 1243
+#define IDC_ABTDLG_VERSION              1243
 #define IDC_MF_SHOELSPIN                1244
 #define IDC_MF_SHOERSPIN                1245
 #define ID_EDIT_SELECTALL               32772
@@ -669,7 +670,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        235
 #define _APS_NEXT_COMMAND_VALUE         33158
-#define _APS_NEXT_CONTROL_VALUE         1243
+#define _APS_NEXT_CONTROL_VALUE         1244
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

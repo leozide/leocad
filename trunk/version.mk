@@ -1,14 +1,5 @@
-# $Id$
-#
 MAJOR		:= 0
-MINOR		:= 73
+MINOR		:= 74
 PATCHLVL	:= 0
+VERSIONTAG  := beta
 VERSION		:= $(MAJOR).$(MINOR).$(PATCHLVL)
-
-
-
-
-
-
-
-

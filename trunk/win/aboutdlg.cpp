@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "leocad.h"
 #include "AboutDlg.h"
+#include "config.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -114,6 +115,9 @@ BOOL CAboutDlg::OnInitDialog()
 	}
 
 	AdjustHomepageWindow();
+
+	// Fix the version number.
+	SetDlgItemText(IDC_ABTDLG_VERSION, "LeoCAD Version " LC_VERSION_TEXT LC_VERSION_TAG);
 
 	return TRUE;
 }

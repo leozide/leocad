@@ -600,8 +600,9 @@ CAPTION "About LeoCAD"
 FONT 8, "MS Sans Serif"
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "LeoCAD Version 0.73",IDC_STATIC,40,10,119,8,SS_NOPREFIX
-    LTEXT           "Copyright © 1996-2002, BT Software",IDC_STATIC,40,25,
+    LTEXT           "LeoCAD Version x.xx",IDC_ABTDLG_VERSION,40,10,119,8,
+                    SS_NOPREFIX
+    LTEXT           "Copyright © 1996-2005, BT Software",IDC_STATIC,40,25,
                     119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,32,14,WS_GROUP
     GROUPBOX        "System Information",IDC_STATIC,7,85,203,50

@@ -1124,6 +1124,11 @@ SOURCE=..\common\view.h
 # PROP Default_Filter "c;cpp"
 # Begin Source File
 
+SOURCE=..\common\algebra.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
 SOURCE=..\Common\camera.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File

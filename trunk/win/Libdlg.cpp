@@ -508,7 +508,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					DWORD grp = m_Parts[j].group;
 					BOOL g1 = (grp & (1 << i)) != 0;
-					BOOL g2 = (grp & (1 << i-1)) != 0;
+					BOOL g2 = (grp & (1 << (i-1))) != 0;
 
 					if (g1)
 						grp |= (1 << (i-1));
@@ -561,7 +561,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					DWORD grp = m_Parts[j].group;
 					BOOL g1 = (grp & (1 << i)) != 0;
-					BOOL g2 = (grp & (1 << i+1)) != 0;
+					BOOL g2 = (grp & (1 << (i+1))) != 0;
 
 					if (g1)
 						grp |= (1 << (i+1));
@@ -949,7 +949,7 @@ BOOL CLibraryDlg::ContinueModal()
 	EnableControl(ID_LIBDLG_GROUP_RENAME, bValid);
 	EnableControl(ID_LIBDLG_GROUP_DELETE, bValid && m_nMaxGroups != 1);
 	EnableControl(ID_LIBDLG_GROUP_MOVEUP, dw > 1);
-	EnableControl(ID_LIBDLG_GROUP_MOVEDOWN, (dw != 0) && (dw != (DWORD)(1 << m_nMaxGroups-1)));
+	EnableControl(ID_LIBDLG_GROUP_MOVEDOWN, (dw != 0) && (dw != (DWORD)(1 << (m_nMaxGroups-1))));
 
 	return CDialog::ContinueModal();
 }

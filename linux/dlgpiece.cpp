@@ -184,18 +184,15 @@ static void adj_changed (GtkAdjustment *adj, gpointer data)
 }
 
 // Create a combo box with a color selection control
-static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidget* vbox)
+static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int idx, int num, GtkWidget* table)
 {
-  GtkWidget *hbox, *combo, *color, *spin;
+  GtkWidget *combo, *color, *spin;
   GtkObject *adj;
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, FALSE, 0);
 
   combo = info->pieces[num] = gtk_combo_new ();
   gtk_widget_show (combo);
-  gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
+  gtk_table_attach (GTK_TABLE (table), combo, 0, 1, idx, idx+1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) GTK_EXPAND, 0, 0);
   gtk_widget_set_usize (combo, 60, 25);
   gtk_entry_set_editable (GTK_ENTRY (GTK_COMBO (combo)->entry), FALSE);
   gtk_signal_connect (GTK_OBJECT (GTK_COMBO (combo)->entry), "changed",
@@ -212,7 +209,8 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidge
 		      GTK_SIGNAL_FUNC (minifigdlg_color_expose), NULL);
   gtk_signal_connect (GTK_OBJECT (color), "clicked",
 		      GTK_SIGNAL_FUNC (minifigdlg_color_clicked), info);
-  gtk_box_pack_start (GTK_BOX (hbox), color, FALSE, TRUE, 0);
+  gtk_table_attach (GTK_TABLE (table), color, 1, 2, idx, idx+1,
+                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions) GTK_EXPAND, 0, 0);
 
   if ((num == LC_MFW_TORSO) || (num == LC_MFW_HIPS))
     return;
@@ -224,7 +222,8 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int num, GtkWidge
   gtk_widget_show (spin);
   gtk_object_set_data (GTK_OBJECT (color), "info", info);
   //  gtk_widget_set_usize (spin, 40, -1);
-  gtk_box_pack_start (GTK_BOX (hbox), spin, FALSE, TRUE, 0);
+  gtk_table_attach (GTK_TABLE (table), spin, 2, 3, idx, idx+1,
+                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions) GTK_EXPAND, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spin), TRUE);
 }
 
@@ -233,7 +232,7 @@ int minifigdlg_execute(void* param)
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   LC_MINIFIGDLG_STRUCT s;
   GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2, *hbox, *frame;
+  GtkWidget *vbox, *hbox, *frame, *table;
   GtkWidget *button;
   int i;
 
@@ -251,27 +250,29 @@ int minifigdlg_execute(void* param)
   //  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
   gtk_widget_realize (dlg);
 
-  vbox1 = gtk_vbox_new (FALSE, 10);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox1);
-  gtk_container_border_width (GTK_CONTAINER (vbox1), 5);
+  vbox = gtk_vbox_new (FALSE, 10);
+  gtk_widget_show (vbox);
+  gtk_container_add (GTK_CONTAINER (dlg), vbox);
+  gtk_container_border_width (GTK_CONTAINER (vbox), 5);
 
   hbox = gtk_hbox_new (FALSE, 5);
   gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 0);
 
-  vbox2 = gtk_vbox_new (FALSE, 5);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
+  table = gtk_table_new (8, 3, FALSE);
+  gtk_widget_show (table);
+  gtk_box_pack_start (GTK_BOX (hbox), table, TRUE, TRUE, 0);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 5);
 
-  minifigdlg_createpair (&s, LC_MFW_HAT, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_NECK, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_RIGHT_ARM, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_RIGHT_HAND, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_RIGHT_TOOL, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_HIPS, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_RIGHT_LEG, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_RIGHT_SHOE, vbox2);
+  minifigdlg_createpair (&s, 0, LC_MFW_HAT, table);
+  minifigdlg_createpair (&s, 1, LC_MFW_NECK, table);
+  minifigdlg_createpair (&s, 2, LC_MFW_RIGHT_ARM, table);
+  minifigdlg_createpair (&s, 3, LC_MFW_RIGHT_HAND, table);
+  minifigdlg_createpair (&s, 4, LC_MFW_RIGHT_TOOL, table);
+  minifigdlg_createpair (&s, 5, LC_MFW_HIPS, table);
+  minifigdlg_createpair (&s, 6, LC_MFW_RIGHT_LEG, table);
+  minifigdlg_createpair (&s, 7, LC_MFW_RIGHT_SHOE, table);
 
   // Create new OpenGL widget.
   s.preview = gtk_gl_area_share_new (attrlist, GTK_GL_AREA (drawing_area));
@@ -292,21 +293,23 @@ int minifigdlg_execute(void* param)
   gtk_widget_show (GTK_WIDGET (s.preview));
   gtk_object_set_data (GTK_OBJECT (s.preview), "minifig", &s);
 
-  vbox2 = gtk_vbox_new (FALSE, 5);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
+  table = gtk_table_new (7, 3, FALSE);
+  gtk_widget_show (table);
+  gtk_box_pack_start (GTK_BOX (hbox), table, TRUE, TRUE, 0);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 5);
 
-  minifigdlg_createpair (&s, LC_MFW_HEAD, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_TORSO, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_LEFT_ARM, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_LEFT_HAND, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_LEFT_TOOL, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_LEFT_LEG, vbox2);
-  minifigdlg_createpair (&s, LC_MFW_LEFT_SHOE, vbox2);
+  minifigdlg_createpair (&s, 0, LC_MFW_HEAD, table);
+  minifigdlg_createpair (&s, 1, LC_MFW_TORSO, table);
+  minifigdlg_createpair (&s, 2, LC_MFW_LEFT_ARM, table);
+  minifigdlg_createpair (&s, 3, LC_MFW_LEFT_HAND, table);
+  minifigdlg_createpair (&s, 4, LC_MFW_LEFT_TOOL, table);
+  minifigdlg_createpair (&s, 5, LC_MFW_LEFT_LEG, table);
+  minifigdlg_createpair (&s, 6, LC_MFW_LEFT_SHOE, table);
 
   hbox = gtk_hbox_new (FALSE, 10);
   gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 
   button = gtk_button_new_with_label ("OK");

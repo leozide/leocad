@@ -5,26 +5,26 @@ template <class T>
 class PtrArray
 {
  public:
-  PtrArray (unsigned long nSize = 0);
+  PtrArray (int nSize = 0);
   ~PtrArray ();
 
-  void SetSize (unsigned long nSize);
-  unsigned long GetSize () const
+  void SetSize (int nSize);
+  int GetSize () const
     { return m_nLength; }
 
-  T* RemoveIndex (unsigned long nIndex);
+  T* RemoveIndex (int nIndex);
   T* RemovePointer (T* pObj);
   void Add (T* pObj);
 
-  T* operator [](unsigned long nIndex) const
+  T* operator [](int nIndex) const
     { return m_pData[nIndex]; }
 
  protected:
-  void Expand (unsigned long nGrow);
+  void Expand (int nGrow);
 
   T** m_pData;
-  unsigned long m_nLength;
-  unsigned long m_nAlloc;
+  int m_nLength;
+  int m_nAlloc;
 };
 
 #include "array.cpp"

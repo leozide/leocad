@@ -114,7 +114,7 @@ BOOL CLibraryDlg::OnInitDialog()
 	m_TreeImages.Create(IDB_PARTICONS, 16, 0, RGB (0,128,128));
 	m_Tree.SetImageList(&m_TreeImages, TVSIL_NORMAL);
 
-	File idx(false);
+	FileDisk idx;
 	char filename[LC_MAXPATH];
 
 	// Read the piece library index.
@@ -804,7 +804,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			rename(str + "pieces.idx", str + "pieces-i.old");
 			rename(str + "pieces.bin", str + "pieces-b.old");
 
-			File oldbin(false), oldidx(false), newbin(false), newidx(false);
+			FileDisk oldbin, oldidx, newbin, newidx;
 			if ((!oldbin.Open(str + "pieces-b.old", "rb")) ||
 				(!oldidx.Open(str + "pieces-i.old", "rb")) ||
 				(!newbin.Open(str + "pieces.bin", "wb")) ||

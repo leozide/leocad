@@ -147,5 +147,5 @@ arch/leocad-$(VERSION)-src.tgz: arch veryclean
 
 arch/leocad-$(VERSION)-src.zip: arch veryclean
 	rm -f $@
-	( cd .. ; zip -r leocad/$@ leocad -x '*/arch/*' -x '*/CVS/*' )
+	( cd .. ; zip -r leocad/$@ leocad -x '*/arch/*' -x '*/CVS/*' -x '*~' -x '*/core' -x '*/.#*')
 

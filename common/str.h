@@ -8,9 +8,9 @@ class String
  public:
   String ();
   String (const String& src)
-    { *this = src; }
+    { m_pData = NULL; *this = src; }
   String (const char* str)
-    { *this = str; }
+    { m_pData = NULL; *this = str; }
   ~String ();
 
   int GetLength () const

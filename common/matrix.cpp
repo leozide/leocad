@@ -427,6 +427,12 @@ void Matrix::ToAxisAngle (float *rot) const
 {
   float fTrace = m[0] + m[5] + m[10];
   float inv, fCos = 0.5f * (fTrace - 1.0f);
+
+	while (fCos < -1.0f)
+		fCos += 2.0f;
+	while (fCos > 1.0f)
+		fCos -= 2.0f;
+
   rot[3] = (float)acos (fCos);  // in [0,PI]
 
   if (rot[3] > 0.01f)

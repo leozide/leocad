@@ -169,7 +169,7 @@ void CModifyDialog::UpdateInfo(void* pObject, BYTE nType)
 			pPiece->GetPosition(pos);
 			pPiece->GetRotation(rot);
 			Matrix mat(rot, pos);
-			mat.GetEulerAngles(rot);
+			mat.ToEulerAngles(rot);
 
 			m_fPosX = pos[0];
 			m_fPosY = pos[1];

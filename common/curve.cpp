@@ -2,6 +2,7 @@
 //
 
 #include <stdlib.h>
+#include <math.h>
 #include "globals.h"
 #include "curve.h"
 #include "opengl.h"
@@ -572,8 +573,8 @@ void Curve::TesselateHose ()
       for (int k = 0; k < steps2; k++)
       {
 	float *o = &verts[(j*steps2+k)*3];
-	v[0] = cos (2.0 * M_PI * k / steps2) * 0.15f;
-	v[1] = sin (2.0 * M_PI * k / steps2) * 0.15f;
+	v[0] = (float)(cos (2.0 * M_PI * k / steps2) * 0.15);
+	v[1] = (float)(sin (2.0 * M_PI * k / steps2) * 0.15);
 	v[2] = 0;
 	m.TransformPoint (o, v);
       }

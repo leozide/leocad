@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W4 /GX /O2 /I "../common" /I "../win" /D "NDEBUG" /D "WIN32" /D "LC_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /D "NDEBUG" /D "WIN32" /D "LC_WINDOWS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -52,7 +52,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libc.lib" /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
 
 !ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
@@ -78,8 +78,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /debug /machine:I386 /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
-# SUBTRACT LINK32 /profile
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
+# SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
 
@@ -178,13 +178,6 @@ USERDEP__LEOCA="$(ProjDir)\hlp\AfxCore.rtf"	"$(ProjDir)\hlp\AfxPrint.rtf"
 # Begin Source File
 
 SOURCE=.\Leocad.rc
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -821,11 +814,19 @@ SOURCE=.\res\Zoomrect.cur
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=".\$(ProjDir)\hlp\AfxCore.rtf"
+# End Source File
+# Begin Source File
+
 SOURCE=.\hlp\AfxCore.rtf
 # End Source File
 # Begin Source File
 
 SOURCE=.\hlp\AfxOleSv.rtf
+# End Source File
+# Begin Source File
+
+SOURCE=".\$(ProjDir)\hlp\AfxPrint.rtf"
 # End Source File
 # Begin Source File
 
@@ -933,12 +934,25 @@ SOURCE=.\hlp\Scmin.bmp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\common\array.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\Common\camera.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\camera.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\curve.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\curve.h
 # End Source File
 # Begin Source File
 
@@ -1034,15 +1048,7 @@ SOURCE=..\Common\matrix.h
 # Begin Source File
 
 SOURCE=..\common\message.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1051,15 +1057,7 @@ SOURCE=..\common\message.h
 # Begin Source File
 
 SOURCE=..\common\minifig.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1068,15 +1066,7 @@ SOURCE=..\common\minifig.h
 # Begin Source File
 
 SOURCE=..\common\object.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1087,6 +1077,8 @@ SOURCE=..\common\object.h
 SOURCE=..\common\opengl.cpp
 
 !IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# ADD CPP /YX
 
 !ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 

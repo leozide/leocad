@@ -395,7 +395,7 @@ bool PiecesLibrary::DeletePiece (char** names, int numpieces)
 		oldidx.Read(tmp, 64+12+1+4);
 		newidx.Write(tmp, 64+12+1+4);
 
-		unsigned long binoff = newbin.GetLength(), size;
+		lcuint32 binoff = newbin.GetLength(), size;
 		newidx.WriteLong(&binoff, 1);
 		oldidx.ReadLong(&binoff, 1);
 		oldidx.ReadLong(&size, 1);
@@ -409,7 +409,7 @@ bool PiecesLibrary::DeletePiece (char** names, int numpieces)
 	}
 
 	// list of moved pieces
-	unsigned short moved, cs;
+	lcuint16 moved, cs;
 
 	oldidx.Seek(-(2+4+2), SEEK_END);
 	oldidx.ReadShort(&moved, 1);
@@ -421,7 +421,7 @@ bool PiecesLibrary::DeletePiece (char** names, int numpieces)
 	free(membuf);
 
 	// info at the end
-	unsigned long binoff = newbin.GetPosition();
+	lcuint32 binoff = newbin.GetPosition();
 	newidx.WriteLong(&binoff, 1);
 	count -= deleted;
 	newidx.WriteShort(&count, 1);
@@ -439,16 +439,16 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 {
 	FileDisk newbin, newidx, oldbin, oldidx, up;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
-	unsigned short changes, moved, count, i, j, newcount = 0;
-	unsigned long cs, group, binoff;
-	unsigned char bt;
+	lcuint16 changes, moved, count, i, j, newcount = 0;
+	lcuint32 cs, group, binoff;
+	lcuint8 bt;
 	void* membuf;
 
 	typedef struct
 	{
 		char name[9];
-		unsigned char type;
-		unsigned long offset;
+		lcuint8 type;
+		lcuint32 offset;
 	} LC_UPDATE_INFO;
 	LC_UPDATE_INFO* upinfo;
 
@@ -926,7 +926,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 	Height = img.Height ();
 	count++;
 
-	// FIXME: This should be an option when you choose the file but I'll leave it hardcoded for now.
+	// TODO: The texture type should be an option when you choose the file but I'll leave it hardcoded for now.
 	if (!strcmp (NewTexName, "SYSFONT"))
 	{
 		lcuint8* buf = img.GetData();

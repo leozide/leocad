@@ -239,7 +239,7 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
     glTexImage2D (GL_TEXTURE_2D, 0, components, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
 
   if (bFilter)
-    for (level = 1; ((w != 1) && (h != 1)); level++)
+    for (level = 1; ((w != 1) || (h != 1)); level++)
     {
       GLubyte *out, *in;
       int row;

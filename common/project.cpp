@@ -28,6 +28,7 @@
 #include "mainwnd.h"
 #include "view.h"
 #include "library.h"
+#include "texfont.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p)
@@ -110,6 +111,7 @@ Project::Project()
 		m_pClipboard[i] = NULL;
 
   m_pLibrary = new PiecesLibrary ();
+	m_pScreenFont = new TexFont();
 }
 
 Project::~Project()
@@ -131,6 +133,7 @@ Project::~Project()
 
 	delete m_pTerrain;
 	delete m_pBackground;
+	delete m_pScreenFont;
   delete m_pLibrary;
 }
 
@@ -2055,7 +2058,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	m.SetTranslation(0,0,0);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_ScreenFont.MakeCurrent();
+	m_pScreenFont->MakeCurrent();
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_ALPHA_TEST);
 
@@ -2063,7 +2066,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	glTranslatef(1.4f*ds, 0, 0);
 	glMultMatrixf(m.m);
 	glBegin(GL_QUADS);
-  m_ScreenFont.PrintCharScaled (0.025f * ds, 'X');
+  m_pScreenFont->PrintCharScaled (0.025f * ds, 'X');
 	glEnd();
 	glPopMatrix();
 
@@ -2071,7 +2074,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	glTranslatef(0, 1.4f*ds, 0);
 	glMultMatrixf(m.m);
 	glBegin(GL_QUADS);
-  m_ScreenFont.PrintCharScaled (0.025f * ds, 'Y');
+  m_pScreenFont->PrintCharScaled (0.025f * ds, 'Y');
 	glEnd();
 	glPopMatrix();
 
@@ -2079,7 +2082,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 	glTranslatef(0, 0, 1.4f*ds);
 	glMultMatrixf(m.m);
 	glBegin(GL_QUADS);
-  m_ScreenFont.PrintCharScaled (0.025f * ds, 'Z');
+  m_pScreenFont->PrintCharScaled (0.025f * ds, 'Z');
 	glEnd();
 	glPopMatrix();
 
@@ -2442,7 +2445,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 		if (!bBackground)
 			glEnable(GL_TEXTURE_2D);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_ScreenFont.MakeCurrent();
+		m_pScreenFont->MakeCurrent();
 		glEnable(GL_ALPHA_TEST);
 		glBegin(GL_QUADS);
 
@@ -2453,7 +2456,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
 			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
 
-      m_ScreenFont.PrintText (x + 3, y + h - 6, m_pViewCameras[vp]->GetName ());
+      m_pScreenFont->PrintText (x + 3, y + h - 6, m_pViewCameras[vp]->GetName ());
 		}
 		glEnd();
 	
@@ -2592,7 +2595,7 @@ void Project::RenderInitialize()
 		glDisable (GL_FOG);
 
 	// Load font
-  if (!m_ScreenFont.IsLoaded ())
+  if (!m_pScreenFont->IsLoaded ())
   {
     char filename[LC_MAXPATH];
     FileDisk file;
@@ -2601,7 +2604,7 @@ void Project::RenderInitialize()
     strcat (filename, "sysfont.txf");
 
     if (file.Open (filename, "rb"))
-      m_ScreenFont.FileLoad (file);
+      m_pScreenFont->FileLoad (file);
   }
 
 	glAlphaFunc(GL_GREATER, 0.0625);

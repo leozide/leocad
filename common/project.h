@@ -5,13 +5,12 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
-#include "texfont.h"
 #include "array.h"
 
 typedef enum 
 {
-  LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
-  LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
+	LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
+	LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
 } LC_MOUSE_TRACK;
 
 class Piece;
@@ -25,6 +24,7 @@ class Matrix;
 class View;
 class Image;
 class PiecesLibrary;
+class TexFont;
 
 // Undo support
 
@@ -32,10 +32,10 @@ class PiecesLibrary;
 
 typedef struct LC_UNDOINFO
 {
-  FileMem file;
-  char strText[21];
-  LC_UNDOINFO* pNext;
-  LC_UNDOINFO() { pNext = NULL; };
+	FileMem file;
+	char strText[21];
+	LC_UNDOINFO* pNext;
+	LC_UNDOINFO() { pNext = NULL; };
 } LC_UNDOINFO;
 
 class Project
@@ -52,19 +52,19 @@ public:
 		{ return m_bModified; }
 	void SetModifiedFlag(bool bModified)
 		{ m_bModified = bModified; }
-	
+
 	// Access to protected members
 	unsigned char GetLastStep();
 	bool IsAnimation()
 		{ return m_bAnimation; }
 	unsigned short GetCurrentTime ()
-	  { return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
 		{ return m_nCurColor; }
-  int GetCurrentGroup () const
-    { return m_nCurGroup; }
+	int GetCurrentGroup () const
+		{ return m_nCurGroup; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	Camera* GetCamera(int i);
@@ -73,8 +73,8 @@ public:
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
 		*to = m_bAnimation ? m_nTotalFrames : 255;
 	}
-  unsigned short GetTotalFrames () const
-    { return m_nTotalFrames; }
+	unsigned short GetTotalFrames () const
+		{ return m_nTotalFrames; }
 
 	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
 	{
@@ -83,8 +83,8 @@ public:
 		*ppLight = m_pLights;
 	}
 
-  PiecesLibrary* GetPiecesLibrary () const
-    { return m_pLibrary; }
+	PiecesLibrary* GetPiecesLibrary () const
+		{ return m_pLibrary; }
 
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
 	void SetTitle (const char* lpszTitle);
@@ -99,11 +99,11 @@ public:
 	void CheckAutoSave();
 	void GetFocusPosition(float* pos);
 	Object* GetFocusObject() const;
-  Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
+	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
-  void AddView (View* pView);
-  void RemoveView (View* pView);
-  void UpdateAllViews (View* pSender = NULL);
+	void AddView (View* pView);
+	void RemoveView (View* pView);
+	void UpdateAllViews (View* pSender = NULL);
 
 // Implementation
 protected:
@@ -112,7 +112,7 @@ protected:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;    // changed since last saved
 
-        PtrArray<View> m_ViewList;
+	PtrArray<View> m_ViewList;
 
 	char m_strAuthor[101];
 	char m_strDescription[101];
@@ -120,8 +120,8 @@ protected:
 
 	// Piece library
 	char m_AppPath[LC_MAXPATH];	// path to the LeoCAD executable
-  TexFont m_ScreenFont;
-  PiecesLibrary* m_pLibrary;
+	TexFont* m_pScreenFont;
+	PiecesLibrary* m_pLibrary;
 
 	// Undo support
 	LC_UNDOINFO* m_pUndoList;

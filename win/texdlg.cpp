@@ -7,6 +7,7 @@
 #include "library.h"
 #include "project.h"
 #include "globals.h"
+#include "texture.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

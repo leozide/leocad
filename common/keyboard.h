@@ -117,14 +117,22 @@
 
 #define LC_KEYMOD1_SHIFT    0x01
 #define LC_KEYMOD1_CONTROL  0x02
-#define LC_KEYMOD2_SHIFT    0x10
-#define LC_KEYMOD2_CONTROL  0x20
+#define LC_KEYMOD2_SHIFT    0x04
+#define LC_KEYMOD2_CONTROL  0x08
+#define LC_KEYMOD_VIEWONLY  0x10
+
+#define LC_KEYMOD1_MASK     (LC_KEYMOD1_SHIFT | LC_KEYMOD1_CONTROL)
+#define LC_KEYMOD2_MASK     (LC_KEYMOD2_SHIFT | LC_KEYMOD2_CONTROL)
+#define LC_KEYMOD_MASK      (LC_KEYMOD1_MASK | LC_KEYMOD2_MASK)
+
+#define LC_KEYMOD_1TO2(a)   ((a & ~LC_KEYMOD_MASK) | ((a & LC_KEYMOD1_MASK) << 2))
+#define LC_KEYMOD_2TO1(a)   ((a & ~LC_KEYMOD_MASK) | ((a & LC_KEYMOD2_MASK) >> 2))
 
 typedef struct
 {
 	LC_COMMANDS ID;
 	const char* Description;
-	unsigned char Modifiers;
+	unsigned char Flags;
 	unsigned char Key1;
 	unsigned char Key2;
 } LC_KEYBOARD_COMMAND;

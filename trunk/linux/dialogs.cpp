@@ -16,6 +16,8 @@
 #include "dialogs.h"
 #include "typedefs.h"
 #include "globals.h"
+#include "piece.h"
+#include "group.h"
 
 static int def_ret = 0;
 static int* cur_ret = NULL;
@@ -2210,6 +2212,214 @@ int propertiesdlg_execute(void* param)
 
   return dlg_domodal(dlg, LC_CANCEL);
 }
+
+// =========================================================
+
+// 'Edit Groups' dialog
+
+typedef struct
+{
+  void* data;
+
+} LC_GROUPEDITDLG_STRUCT;
+
+static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
+{
+  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
+  LC_GROUPEDITDLG_OPTS* opts = (LC_GROUPEDITDLG_OPTS*)s->data;
+
+  *cur_ret = LC_OK;
+}
+
+void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
+{
+  int i;
+  GtkWidget *item, *subtree;
+
+  // Add the groups
+  for (i = 0; i < opts->groupcount; i++)
+    if (opts->groupsgroups[i] == pGroup)
+    {
+      item = gtk_tree_item_new_with_label (opts->groups[i]->m_strName);
+      /*
+      tvstruct.item.lParam = i + 0xFFFF;
+      tvstruct.item.iImage = 0;
+      tvstruct.item.iSelectedImage = 1;
+      tvstruct.item.pszText = opts->groups[i]->m_strName;
+      tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+      */
+
+      gtk_tree_append (GTK_TREE(tree), item);
+      gtk_widget_show (item);
+
+      subtree = gtk_tree_new();
+      gtk_tree_set_selection_mode (GTK_TREE(subtree), GTK_SELECTION_SINGLE);
+      gtk_tree_set_view_mode (GTK_TREE(subtree), GTK_TREE_VIEW_ITEM);
+      gtk_tree_item_set_subtree (GTK_TREE_ITEM(item), subtree);
+
+      groupeditdlg_addchildren(subtree, opts->groups[i], opts);
+    }
+
+  // Add the pieces
+  for (i = 0; i < opts->piececount; i++)
+    if (opts->piecesgroups[i] == pGroup)
+    {
+      /*
+      tvstruct.item.lParam = i;
+      tvstruct.item.iImage = 2;
+      tvstruct.item.iSelectedImage = 2;
+      tvstruct.item.pszText = (char*)opts->pieces[i]->GetName();
+      tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+      */
+      item = gtk_tree_item_new_with_label ((char*)opts->pieces[i]->GetName());
+      gtk_tree_append (GTK_TREE(tree), item);
+      gtk_widget_show (item);
+    }
+}
+
+int groupeditdlg_execute(void* param)
+{
+  GtkWidget *dlg;
+  GtkWidget *vbox, *hbox;
+  GtkWidget *button, *tree, *scrolled_win;
+  LC_GROUPEDITDLG_STRUCT s;
+  s.data = param;
+
+  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
+		      GTK_SIGNAL_FUNC (delete_callback), NULL);
+  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
+		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+  gtk_widget_set_usize (dlg, 450, 280);
+  gtk_window_set_title (GTK_WINDOW (dlg), "Edit Groups");
+  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
+  gtk_widget_realize (dlg);
+
+  vbox = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox);
+  gtk_container_add (GTK_CONTAINER (dlg), vbox);
+  gtk_container_border_width (GTK_CONTAINER (vbox), 5);
+
+  scrolled_win = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_win),
+                                  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_widget_set_usize (scrolled_win, 150, 200);
+  gtk_container_add (GTK_CONTAINER(vbox), scrolled_win);
+  gtk_widget_show (scrolled_win);
+
+  tree = gtk_tree_new ();
+  gtk_widget_show (tree);
+  gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW(scrolled_win), tree);
+  gtk_container_set_border_width (GTK_CONTAINER (tree), 5);
+
+  hbox = gtk_hbox_new (FALSE, 10);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+  button = gtk_button_new_with_label ("OK");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+		      GTK_SIGNAL_FUNC (groupeditdlg_ok), &s);
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 70, 25);
+  GtkAccelGroup *accel_group = gtk_accel_group_new ();
+  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
+  gtk_widget_add_accelerator (button, "clicked", accel_group,
+                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+
+  button = gtk_button_new_with_label ("Cancel");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+		      GTK_SIGNAL_FUNC (default_callback), GINT_TO_POINTER (LC_CANCEL));
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 70, 25);
+  gtk_widget_add_accelerator (button, "clicked", accel_group,
+                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+
+  groupeditdlg_addchildren(tree, NULL, (LC_GROUPEDITDLG_OPTS*)param);
+
+  return dlg_domodal(dlg, LC_CANCEL);
+}
+
+// =========================================================
+
+// Group Dialog
+
+typedef struct
+{
+  void* data;
+  GtkWidget* entry;
+} LC_GROUPDLG_STRUCT;
+
+static void groupdlg_ok(GtkWidget *widget, gpointer data)
+{
+  LC_GROUPDLG_STRUCT* s = (LC_GROUPDLG_STRUCT*)data;
+  char* name = (char*)s->data;
+
+  strcpy (name, gtk_entry_get_text (GTK_ENTRY (s->entry)));
+
+  *cur_ret = LC_OK;
+}
+
+int groupdlg_execute(void* param)
+{
+  GtkWidget *dlg;
+  GtkWidget *vbox, *hbox;
+  GtkWidget *button;
+  LC_GROUPDLG_STRUCT s;
+  s.data = param;
+
+  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
+		      GTK_SIGNAL_FUNC (delete_callback), NULL);
+  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
+		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+  gtk_widget_set_usize (dlg, 250, 100);
+  gtk_window_set_title (GTK_WINDOW (dlg), "Group Name");
+  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
+  gtk_widget_realize (dlg);
+
+  vbox = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox);
+  gtk_container_add (GTK_CONTAINER (dlg), vbox);
+  gtk_container_border_width (GTK_CONTAINER (vbox), 5);
+
+  s.entry =  gtk_entry_new_with_max_length (64);
+  gtk_widget_show (s.entry);
+  gtk_box_pack_start (GTK_BOX (vbox), s.entry, TRUE, FALSE, 0);
+  gtk_widget_set_usize (s.entry, 50, -2);
+  gtk_entry_set_text (GTK_ENTRY (s.entry), (char*)param);
+
+  hbox = gtk_hbox_new (FALSE, 10);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+  button = gtk_button_new_with_label ("OK");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+		      GTK_SIGNAL_FUNC (groupdlg_ok), &s);
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 70, 25);
+  GtkAccelGroup *accel_group = gtk_accel_group_new ();
+  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
+  gtk_widget_add_accelerator (button, "clicked", accel_group,
+                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+
+  button = gtk_button_new_with_label ("Cancel");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+		      GTK_SIGNAL_FUNC (default_callback), GINT_TO_POINTER (LC_CANCEL));
+  gtk_widget_show (button);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_widget_set_usize (button, 70, 25);
+  gtk_widget_add_accelerator (button, "clicked", accel_group,
+                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+
+  return dlg_domodal(dlg, LC_CANCEL);
+}
+
+
 
 
 

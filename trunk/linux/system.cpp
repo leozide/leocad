@@ -560,7 +560,12 @@ bool SystemDoDialog(int mode, void* param)
     case LC_DLG_STEPCHOOSE: {
     } break;
 
+    case LC_DLG_EDITGROUPS: {
+      return groupeditdlg_execute(param) == LC_OK;
+    } break;
+
     case LC_DLG_GROUP: {
+      return groupdlg_execute(param) == LC_OK;
     } break;
   }
 

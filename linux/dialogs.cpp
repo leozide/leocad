@@ -672,7 +672,7 @@ int aboutdlg_execute(void* param)
   gtk_widget_show (vbox2);
   gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
 
-  w = gtk_label_new ("LeoCAD for "LC_VERSION_OSNAME" Version 0.72");
+  w = gtk_label_new ("LeoCAD for "LC_VERSION_OSNAME" Version "LC_VERSION);
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 

@@ -9,11 +9,9 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
 #include <stdio.h>
 #include <string.h>
+#include "opengl.h"
 #include "gtkglarea.h"
 #include "gtktools.h"
 #include "system.h"
@@ -301,7 +299,7 @@ static void minifigdlg_piece_changed (GtkWidget *widget)
       if (strcmp (piece_info->m_strName,"4006") == 0)
 	{ rz = 180; y = -1.24f; z = 2.18f; }
       if (strcmp (piece_info->m_strName,"6246C") == 0)
-	{ rx = 35; rz = 0; y = -2.36f; z = 1.08f; }
+	{ rx = 45; rz = 0; y = -0.86f; z = 1.78f; }
       if (strcmp (piece_info->m_strName,"4497") == 0)
 	{ y = -2.16f; z = 3.08f; rz = 90; }
       if (strcmp (piece_info->m_strName,"30092") == 0)
@@ -318,6 +316,10 @@ static void minifigdlg_piece_changed (GtkWidget *widget)
 	{ rz = -90; x = 0.90f; y = -0.8f; z = 1.84f; }
       if (strcmp (piece_info->m_strName,"30152") == 0)
 	{ z = 3.06f; y = -2.16f; }                                      
+      if (strcmp (piece_info->m_strName,"2570") == 0)
+	{ z = 1.68f; y = -0.8f; }
+      if (strcmp (piece_info->m_strName,"2614") == 0)
+	{ z = 1.74f; y = -0.86f; }
 
       if (i == MFW_RIGHT_TOOL)
 	x = -x;
@@ -376,7 +378,7 @@ int minifigdlg_execute(void* param)
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   LC_MINIFIGDLG_STRUCT s;
   GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2, *hbox;
+  GtkWidget *vbox1, *vbox2, *hbox, *frame;
   GtkWidget *button;
   int i;
 
@@ -423,8 +425,13 @@ int minifigdlg_execute(void* param)
   gtk_signal_connect (GTK_OBJECT (s.preview), "configure_event",
       GTK_SIGNAL_FUNC (minifigdlg_resize), NULL);
 
+  frame = gtk_frame_new (NULL);
+  gtk_widget_show (frame);
+  gtk_container_add (GTK_CONTAINER (hbox), frame);
+  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
+
   gtk_widget_set_usize (GTK_WIDGET (s.preview), 100, 300);
-  gtk_container_add (GTK_CONTAINER (hbox), GTK_WIDGET (s.preview));
+  gtk_container_add (GTK_CONTAINER (frame), GTK_WIDGET (s.preview));
   gtk_widget_show (GTK_WIDGET (s.preview));
   gtk_object_set_data (GTK_OBJECT (s.preview), "minifig", &s);
 
@@ -506,19 +513,19 @@ int minifigdlg_execute(void* param)
     if (i == 6) i++;
   }
 
-  names[MFW_HAT] = g_list_prepend (names[MFW_HAT], "None");
-  names[MFW_NECK] = g_list_prepend (names[MFW_NECK], "None");
-  names[MFW_LEFT_TOOL] = g_list_prepend (names[MFW_LEFT_TOOL], "None");
-  names[MFW_RIGHT_TOOL] = g_list_prepend (names[MFW_RIGHT_TOOL], "None");
-  names[MFW_LEFT_SHOE] = g_list_prepend (names[MFW_LEFT_SHOE], "None");
-  names[MFW_RIGHT_SHOE] = g_list_prepend (names[MFW_RIGHT_SHOE], "None");
+  names[MFW_HAT] = g_list_prepend (names[MFW_HAT], (void*)"None");
+  names[MFW_NECK] = g_list_prepend (names[MFW_NECK], (void*)"None");
+  names[MFW_LEFT_TOOL] = g_list_prepend (names[MFW_LEFT_TOOL], (void*)"None");
+  names[MFW_RIGHT_TOOL] = g_list_prepend (names[MFW_RIGHT_TOOL], (void*)"None");
+  names[MFW_LEFT_SHOE] = g_list_prepend (names[MFW_LEFT_SHOE], (void*)"None");
+  names[MFW_RIGHT_SHOE] = g_list_prepend (names[MFW_RIGHT_SHOE], (void*)"None");
 
   for (i = 0; i < 15; i++)
     gtk_combo_set_popdown_strings ( GTK_COMBO (s.pieces[i]), names[i]);
 
-  gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_HAT])->list), 6);
+  gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_HAT])->list), 7);
   gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_HEAD])->list), 4);
-  gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_TORSO])->list), 19);
+  gtk_list_select_item ( GTK_LIST (GTK_COMBO (s.pieces[MFW_TORSO])->list), 22);
 
   return dlg_domodal(dlg, LC_CANCEL);
 }

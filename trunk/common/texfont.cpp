@@ -92,6 +92,39 @@ bool TexFont::FileLoad (File& file)
   return true;
 }
 
+void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
+{
+	*cx = 0;
+	*cy = m_nFontHeight;
+
+  while (*Text != 0)
+  {
+		*cx += m_Glyphs[*Text].width;
+    Text++;
+  }
+}
+
+void TexFont::PrintText(float Left, float Top, float ScaleX, float ScaleY, const char* Text) const
+{
+	float Height = m_nFontHeight * ScaleY;
+
+  while (*Text != 0)
+  {
+    glTexCoord2f(m_Glyphs[*Text].left, m_Glyphs[*Text].top);
+    glVertex2f(Left, Top);
+    glTexCoord2f(m_Glyphs[*Text].left, m_Glyphs[*Text].bottom);
+    glVertex2f(Left, Top - Height);
+    glTexCoord2f(m_Glyphs[*Text].right, m_Glyphs[*Text].bottom);
+    glVertex2f(Left + m_Glyphs[*Text].width * ScaleX, Top - Height);
+    glTexCoord2f(m_Glyphs[*Text].right, m_Glyphs[*Text].top);
+    glVertex2f(Left + m_Glyphs[*Text].width * ScaleX, Top);
+
+    Left += m_Glyphs[*Text].width * ScaleX;
+    Text++;
+  }
+}
+
+// Old function, should probably be removed.
 void TexFont::PrintText (float left, float top, const char* text) const
 {
   while (*text != 0)

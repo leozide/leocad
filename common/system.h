@@ -46,8 +46,8 @@ void Sys_SetCursorPos (int x, int y);
 
 int Sys_MessageBox (const char* text, const char* caption="LeoCAD", int type=LC_MB_OK|LC_MB_ICONINFORMATION);
 
-
-
+// Misc stuff
+bool Sys_KeyDown (int key);
 
 
 

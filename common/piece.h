@@ -21,12 +21,12 @@ class PieceInfo;
 
 typedef enum {	PK_POSITION, PK_ROTATION } PK_TYPES;
 
-typedef struct PIECE_KEY {
+typedef struct LC_PIECE_KEY {
 	unsigned short	time;
 	float			param[4];
 	unsigned char	type;
-	PIECE_KEY*		next;
-} PIECE_KEY;
+	LC_PIECE_KEY*		next;
+} LC_PIECE_KEY;
 
 class Piece : public Object
 {
@@ -159,8 +159,8 @@ protected:
 	void BuildDrawInfo();
 
 	// Position
-	PIECE_KEY* m_pAnimationKeys;
-	PIECE_KEY* m_pInstructionKeys;
+	LC_PIECE_KEY* m_pAnimationKeys;
+	LC_PIECE_KEY* m_pInstructionKeys;
 
 	// Atributes
 	PieceInfo* m_pPieceInfo;

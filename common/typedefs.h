@@ -90,6 +90,7 @@ typedef enum {
 	LC_ACTION_LIGHT,
 	LC_ACTION_SPOTLIGHT,
 	LC_ACTION_CAMERA,
+	LC_ACTION_CURVE,
 	LC_ACTION_MOVE,
 	LC_ACTION_ROTATE,
 	LC_ACTION_ERASER,
@@ -124,20 +125,6 @@ typedef struct
 	CONNECTION_ENTRY* entries;
 	unsigned short numentries;
 } CONNECTION_TYPE;
-
-// Minifig Wizard information
-
-typedef	enum {
-  MF_HAT, MF_HEAD, MF_TORSO, MF_NECK, MF_ARML, MF_ARMR, 
-  MF_HAND, MF_TOOL, MF_HIPS, MF_LEGL, MF_LEGR, MF_SHOE
-} MFW_TYPES;
-
-typedef struct {
-  char name[9];
-  char description[32];
-  int type;
-} MFW_PIECEINFO;
-
 
 // Select by Name dialog data
 
@@ -262,16 +249,6 @@ typedef struct
 	bool hilite;
 	LC_IMAGEDLG_OPTS imdlg;
 } LC_HTMLDLG_OPTS;
-
-// hat, head, torso, neck, arml, armr, handl, handr, tooll,
-// toolr, hips, legl, legr, shoel, shoer
-typedef struct
-{
-	PieceInfo*	info[15];
-	int			colors[15];
-	float		pos[15][3];
-	float		rot[15][3];
-} LC_MINIFIGDLG_OPTS;
 
 typedef struct
 {

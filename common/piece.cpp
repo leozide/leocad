@@ -16,26 +16,26 @@
 /////////////////////////////////////////////////////////////////////////////
 // Static functions
 
-static PIECE_KEY* AddNode (PIECE_KEY *node, unsigned short nTime, unsigned char nType)
+static LC_PIECE_KEY* AddNode (LC_PIECE_KEY *node, unsigned short nTime, unsigned char nType)
 {
-	PIECE_KEY* newnode = (PIECE_KEY*)malloc(sizeof(PIECE_KEY));
+  LC_PIECE_KEY* newnode = (LC_PIECE_KEY*)malloc(sizeof(LC_PIECE_KEY));
 
-	if (node)
-	{
-		newnode->next = node->next;
-		node->next = newnode;
-	}
-	else
-		newnode->next = NULL;
+  if (node)
+  {
+    newnode->next = node->next;
+    node->next = newnode;
+  }
+  else
+    newnode->next = NULL;
 
-	newnode->type = nType;
-	newnode->time = nTime;
-	newnode->param[0] = newnode->param[1] = newnode->param[2] = newnode->param[3] = 0;
+  newnode->type = nType;
+  newnode->time = nTime;
+  newnode->param[0] = newnode->param[1] = newnode->param[2] = newnode->param[3] = 0;
 
-	if (nType == PK_ROTATION)
-		newnode->param[2] = 1;
+  if (nType == PK_ROTATION)
+    newnode->param[2] = 1;
 
-	return newnode;
+  return newnode;
 }
 
 inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting, bool bNoAlpha)
@@ -94,50 +94,18 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 /////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
 
-#if ! (defined (GL_EXT_compiled_vertex_array))
-
-#ifdef LC_LINUX
-#include <GL/glx.h>
-#define wglGetProcAddress(func) glXGetProcAddressARB((const GLubyte *) func)
-#endif
-
-#ifdef LC_WINDOWS
-typedef void (APIENTRY * GLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
-typedef void (APIENTRY * GLUNLOCKARRAYSEXTPROC) ();
-#else
-// TODO: get the entry point under different OS's
-#define glLockArraysEXT(a,b) {}
-#define glUnlockArraysEXT() {}
-#endif
-
-static GLLOCKARRAYSEXTPROC glLockArraysEXT;
-static GLUNLOCKARRAYSEXTPROC glUnlockArraysEXT;
-
 static bool lockarrays = false;
-#else
-static bool lockarrays = true;
-#endif
 
 Piece::Piece(PieceInfo* pPieceInfo)
   : Object (LC_OBJECT_PIECE)
 {
-#if ! (defined (GL_EXT_compiled_vertex_array))
+  static bool first_time = true;
 
-	static bool first_time = true;
-
-	if (first_time)
-	{
-		first_time = false;
-		char* extensions = (char*)glGetString(GL_EXTENSIONS);
-
-		if (strstr(extensions, "GL_EXT_compiled_vertex_array "))
-		{
-			glLockArraysEXT = (GLLOCKARRAYSEXTPROC)wglGetProcAddress("glLockArraysEXT");
-			glUnlockArraysEXT = (GLUNLOCKARRAYSEXTPROC)wglGetProcAddress("glUnlockArraysEXT");
-			lockarrays = true;
-		}
-	}
-#endif
+  if (first_time)
+  {
+    first_time = false;
+    lockarrays = GL_HasCompiledVertexArrays ();
+  }
 
 	m_pNext = NULL;
 	m_pPieceInfo = pPieceInfo;
@@ -205,7 +173,7 @@ void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 
 void Piece::FileLoad(File* file, char* name)
 {
-	PIECE_KEY *node;
+	LC_PIECE_KEY *node;
 	unsigned char version, ch;
 
 	file->ReadByte(&version, 1);
@@ -370,7 +338,7 @@ void Piece::FileLoad(File* file, char* name)
 
 void Piece::FileSave(File* file, Group* pGroups)
 {
-	PIECE_KEY *node;
+	LC_PIECE_KEY *node;
 	unsigned char ch = 8; // LeoCAD 0.70
 	unsigned long n;
 
@@ -614,7 +582,7 @@ void Piece::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, f
 
 void Piece::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, float* param, unsigned char nKeyType)
 {
-	PIECE_KEY *node, *poskey = NULL, *newpos = NULL;
+	LC_PIECE_KEY *node, *poskey = NULL, *newpos = NULL;
 	if (bAnimation)
 		node = m_pAnimationKeys;
 	else
@@ -653,7 +621,7 @@ void Piece::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, float
 
 void Piece::RemoveKeys()
 {
-	PIECE_KEY *node, *prev;
+	LC_PIECE_KEY *node, *prev;
 
 	for (node = m_pInstructionKeys; node;)
 	{
@@ -718,7 +686,7 @@ void Piece::CompareBoundingBox(float box[6])
 
 bool Piece::CalculatePositionRotation(unsigned short nTime, bool bAnimation, float pos[3], float rot[4])
 {
-	PIECE_KEY *node, *prevpos = NULL, *nextpos = NULL, *prevrot = NULL, *nextrot = NULL;
+	LC_PIECE_KEY *node, *prevpos = NULL, *nextpos = NULL, *prevrot = NULL, *nextrot = NULL;
 	if (bAnimation)
 		node = m_pAnimationKeys;
 	else

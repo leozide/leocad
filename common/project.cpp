@@ -20,36 +20,51 @@
 #include "image.h"
 #include "system.h"
 #include "globals.h"
+#include "minifig.h"
 
 typedef struct
 {
-	unsigned char n;
-	float dim [4][4];
-} VIEWPORT;
+  unsigned char n;
+  float dim [4][4];
+} LC_VIEWPORT;
 
-static VIEWPORT viewports[14] = {
-  { 1,  {{0, 0,    1,    1}, {    0,    0,    0,    0}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 1
-  { 2,  {{0, 0, 0.5f,    1}, { 0.5f,    0, 0.5f,    1}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2V
-  { 2,  {{0, 0,    1, 0.5f}, {    0, 0.5f,    1, 0.5f}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2H
-  { 2,  {{0, 0,    1, 0.7f}, {    0, 0.7f,    1, 0.3f}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2HT
-  { 2,  {{0, 0,    1, 0.3f}, {    0, 0.3f,    1, 0.7f}, {    0,    0,    0,    0}, {    0,    0,    0,    0} }}, // 2HB
-  { 3,  {{0, 0, 0.5f, 0.5f}, {    0, 0.5f, 0.5f, 0.5f}, { 0.5f,    0, 0.5f,    1}, {    0,    0,    0,    0} }}, // 3VL
-  { 3,  {{0, 0, 0.5f,    1}, { 0.5f,    0, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f, 0.5f}, {    0,    0,    0,    0} }}, // 3VR
-  { 3,  {{0, 0,    1, 0.5f}, {    0, 0.5f, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f, 0.5f}, {    0,    0,    0,    0} }}, // 3HB
-  { 3,  {{0, 0, 0.5f, 0.5f}, { 0.5f,    0, 0.5f, 0.5f}, {    0, 0.5f,    1, 0.5f}, {    0,    0,    0,    0} }}, // 3HT
-  { 4,  {{0, 0, 0.3f, 0.3f}, {    0, 0.3f, 0.3f, 0.4f}, {    0, 0.7f, 0.3f, 0.3f}, { 0.3f,    0, 0.7f,    1} }}, // 4VL
-  { 4,  {{0, 0, 0.7f,    1}, { 0.7f,    0, 0.3f, 0.3f}, { 0.7f, 0.3f, 0.3f, 0.4f}, { 0.7f, 0.7f, 0.3f, 0.3f} }}, // 4VR
-  { 4,  {{0, 0,    1, 0.7f}, {    0, 0.7f, 0.3f, 0.3f}, { 0.3f, 0.7f, 0.4f, 0.3f}, { 0.7f, 0.7f, 0.3f, 0.3f} }}, // 4HT
-  { 4,  {{0, 0, 0.3f, 0.3f}, { 0.3f,    0, 0.4f, 0.3f}, { 0.7f,    0, 0.3f, 0.3f}, {    0, 0.3f,    1, 0.7f} }}, // 4HB
-  { 4,  {{0, 0, 0.5f, 0.5f}, { 0.5f,    0, 0.5f, 0.5f}, {    0, 0.5f, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f, 0.5f} }}};// 4
+static LC_VIEWPORT viewports[14] = {
+  { 1,  {{ 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f, 0.0f },
+	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 1
+  { 2,  {{ 0.0f, 0.0f, 0.5f, 1.0f }, { 0.5f, 0.0f, 0.5f, 1.0f },
+	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2V
+  { 2,  {{ 0.0f, 0.0f, 1.0f, 0.5f }, { 0.0f, 0.5f, 1.0f, 0.5f },
+	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2H
+  { 2,  {{ 0.0f, 0.0f, 1.0f, 0.7f }, { 0.0f, 0.7f, 1.0f, 0.3f },
+	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2HT
+  { 2,  {{ 0.0f, 0.0f, 1.0f, 0.3f }, { 0.0f, 0.3f, 1.0f, 0.7f },
+	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2HB
+  { 3,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.0f, 0.5f, 0.5f, 0.5f },
+	 { 0.5f, 0.0f, 0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3VL
+  { 3,  {{ 0.0f, 0.0f, 0.5f, 1.0f }, { 0.5f, 0.0f, 0.5f, 0.5f },
+	 { 0.5f, 0.5f, 0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3VR
+  { 3,  {{ 0.0f, 0.0f, 1.0f, 0.5f }, { 0.0f, 0.5f, 0.5f, 0.5f },
+	 { 0.5f, 0.5f, 0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3HB
+  { 3,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.5f, 0.0f, 0.5f, 0.5f },
+	 { 0.0f, 0.5f, 1.0f, 0.5f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3HT
+  { 4,  {{ 0.0f, 0.0f, 0.3f, 0.3f }, { 0.0f, 0.3f, 0.3f, 0.4f },
+	 { 0.0f, 0.7f, 0.3f, 0.3f }, { 0.3f, 0.0f, 0.7f, 1.0f } }}, // 4VL
+  { 4,  {{ 0.0f, 0.0f, 0.7f, 1.0f }, { 0.7f, 0.0f, 0.3f, 0.3f },
+	 { 0.7f, 0.3f, 0.3f, 0.4f }, { 0.7f, 0.7f, 0.3f, 0.3f } }}, // 4VR
+  { 4,  {{ 0.0f, 0.0f, 1.0f, 0.7f }, { 0.0f, 0.7f, 0.3f, 0.3f },
+	 { 0.3f, 0.7f, 0.4f, 0.3f }, { 0.7f, 0.7f, 0.3f, 0.3f } }}, // 4HT
+  { 4,  {{ 0.0f, 0.0f, 0.3f, 0.3f }, { 0.3f, 0.0f, 0.4f, 0.3f },
+	 { 0.7f, 0.0f, 0.3f, 0.3f }, { 0.0f, 0.3f, 1.0f, 0.7f } }}, // 4HB
+  { 4,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.5f, 0.0f, 0.5f, 0.5f },
+	 { 0.0f, 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f, 0.5f } }}};// 4
 
 typedef struct 
 {
-	unsigned char width;
-	float left, right, top, bottom;
-} TXFVERT;
+  unsigned char width;
+  float left, right, top, bottom;
+} LC_TXFVERT;
 
-static TXFVERT glyphs[93];
+static LC_TXFVERT glyphs[93];
 
 /////////////////////////////////////////////////////////////////////////////
 // Project construction/destruction
@@ -177,9 +192,18 @@ Project::~Project()
 // Project attributes, general services
 
 // The main window should be created before calling this
-bool Project::Initialize(int argc, char *argv[], char* libpath)
+bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 {
-	m_LibraryPath = libpath;
+  char *env_path;
+  bool loaded = false;
+
+  strcpy (m_AppPath, binpath);
+
+  // check if there's an environment variable for the piece library
+  env_path = getenv ("LEOCAD_LIB");
+  if (env_path != NULL)
+    libpath = env_path;
+
 	m_strPathName[0] = 0;
 
 	LC_IMAGE_OPTS imopts;
@@ -208,7 +232,7 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 			if ((strcmp (param, "l") == 0) && ((i+1) < argc))
 			{
 				i++;
-				m_LibraryPath = argv[i];
+				libpath = argv[i];
 			}
 
 			if (strcmp (param, "i") == 0)
@@ -254,7 +278,15 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 		}
 	}
 
-	if (LoadPieceLibrary() == false)
+	// if the user specified a library, try to load it first
+	if (libpath != NULL)
+	  loaded = LoadPieceLibrary (libpath);
+
+	// if we couldn't find a library, try the executable path
+	if (!loaded)
+	  loaded = LoadPieceLibrary (binpath);
+
+	if (!loaded)
 	{
 #ifdef LC_WINDOWS
 		SystemDoMessageBox("Cannot load piece library.", LC_MB_OK|LC_MB_ICONERROR);
@@ -324,7 +356,7 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 }
 
 // Load the piece library
-bool Project::LoadPieceLibrary()
+bool Project::LoadPieceLibrary (char *libpath)
 {
 	FileDisk idx;
 	char filename[LC_MAXPATH];
@@ -334,6 +366,8 @@ bool Project::LoadPieceLibrary()
 	PieceInfo* pElements;
 	Texture* pTexture;
 	int i;
+
+	strcpy (m_LibraryPath, libpath);
 
 	// Make sure that the path ends with a '/'
 	i = strlen(m_LibraryPath)-1;
@@ -477,7 +511,7 @@ void Project::DeleteContents(bool bUndo)
 
 	if (!bUndo)
 	{
-		UNDOINFO* pUndo;
+		LC_UNDOINFO* pUndo;
 
 		while (m_pUndoList)
 		{
@@ -1620,10 +1654,10 @@ void Project::SetPathName(char* lpszPathName, bool bAddToMRU)
 // Undo/Redo support
 
 // Save current state.
-void Project::CheckPoint(char* text)
+void Project::CheckPoint (const char* text)
 {
-	UNDOINFO* pTmp;
-	UNDOINFO* pUndo = new UNDOINFO;
+	LC_UNDOINFO* pTmp;
+	LC_UNDOINFO* pUndo = new LC_UNDOINFO;
 	int i;
 
 	strcpy(pUndo->strText, text);
@@ -1957,7 +1991,7 @@ glLightfv(GL_LIGHT0, GL_SPECULAR, one);
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_ALPHA_TEST);
 
-				TXFVERT* glyph;
+				LC_TXFVERT* glyph;
 
 				glPushMatrix();
 				glTranslatef(1.4f*ds, 0, 0);
@@ -2562,6 +2596,7 @@ void CCADDoc::AddPiece(CPiece* pNewPiece)
 	else
 	{
 		m_pPieces = pPiece;
+		pPiece->m_pNext = NULL;
 	}
 
 	pPiece->AddConnections(m_pConnections);
@@ -3976,7 +4011,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_UNDO:
 		case LC_EDIT_REDO:
 		{
-			UNDOINFO *pUndo, *pTmp;
+			LC_UNDOINFO *pUndo, *pTmp;
 			int i;
 
 			if (id == LC_EDIT_UNDO)
@@ -4401,6 +4436,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->Initialize(pos[0], pos[1], pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
 				pPiece->ChangeKey(1, false, false, rot, PK_ROTATION);
 				pPiece->ChangeKey(1, true, false, rot, PK_ROTATION);
+				pPiece->UpdatePosition(1, false);
 			}
 			else
 				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame, m_nCurColor);
@@ -4437,78 +4473,35 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_MINIFIG:
 		{
-			LC_MINIFIGDLG_OPTS opts;
-	 		const unsigned char colors[15] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
-			const float pos[15][3] = { {0,0,3.84f},{0,0,3.84f},{0,0,2.88f},{0,0,2.96f},{0,0,2.56f},{0,0,2.56f},{0.9f,-0.62f,1.76f},
-		{-0.9f,-0.62f,1.76f},{0.92f,-0.62f,1.76f},{-0.92f,-0.62f,1.76f},{0,0,1.6f},{0,0,1.12f},{0,0,1.12f},{0.42f,0,0},{-0.42f,0,0} };
-			int i;
+		  MinifigWizard wiz;
+		  int i;
 
-			for (i = 0; i < 15; i++)
-			{
-			    opts.info[i] = NULL;
-			    opts.colors[i] = colors[i];
-			    opts.pos[i][0] = pos[i][0];
-			    opts.pos[i][1] = pos[i][1];
-			    opts.pos[i][2] = pos[i][2];
-			    opts.rot[i][0] = 0;
-			    opts.rot[i][1] = 0;
-			    opts.rot[i][2] = 0;
-			}
+		  if (SystemDoDialog (LC_DLG_MINIFIG, &wiz))
+		  {
+		    SelectAndFocusNone(false);
 
-			for (i = 0; i < 13; i++)
-			{
-			    if (i == 3 || i == 7 || i == 8 || i == 9)
-			      continue;
+		    for (i = 0; i < LC_MFW_NUMITEMS; i++)
+		    {
+		      if (wiz.m_Info[i] == NULL)
+			continue;
 
-			    PieceInfo* pInfo = FindPieceInfo(mfwpieceinfo[i].name);
-			    if (pInfo == NULL)
-			      continue;
+		      Matrix mat;
+		      Piece* pPiece = new Piece(wiz.m_Info[i]);
 
-			    if (i == 6)
-			    {
-				opts.info[6] = pInfo;
-				opts.info[7] = pInfo;
-				pInfo->AddRef();
-				pInfo->AddRef();
-				opts.rot[6][0] = 45;
-				opts.rot[6][2] = 90;
-				opts.rot[7][0] = 45;
-				opts.rot[7][2] = 90;
-			    }
-			    else
-			    {
-				opts.info[i] = pInfo;
-				pInfo->AddRef();
-			    }
-			}
+		      pPiece->Initialize(wiz.m_Position[i][0], wiz.m_Position[i][1], wiz.m_Position[i][2],
+					 m_nCurStep, m_nCurFrame, wiz.m_Colors[i]);
+		      pPiece->CreateName(m_pPieces);
+		      AddPiece(pPiece);
+		      pPiece->Select();
 
-			if (SystemDoDialog(LC_DLG_MINIFIG, &opts))
-			{
-				SelectAndFocusNone(false);
+		      pPiece->ChangeKey(1, false, false, wiz.m_Rotation[i], PK_ROTATION);
+		      pPiece->ChangeKey(1, true, false, wiz.m_Rotation[i], PK_ROTATION);
+		      pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+		      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep,
+						   m_bAnimation, false, true);
 
-				for (i = 0; i < 15; i++)
-				{
-					if (opts.info[i] == NULL)
-						continue;
-
-					Matrix mat;
-					float rot[4];
-					Piece* pPiece = new Piece(opts.info[i]);
-
-					pPiece->Initialize(opts.pos[i][0], opts.pos[i][1], opts.pos[i][2], m_nCurStep, m_nCurFrame, opts.colors[i]);
-					pPiece->CreateName(m_pPieces);
-					AddPiece(pPiece);
-					pPiece->Select();
-
-					mat.CreateOld(0,0,0,opts.rot[i][0],opts.rot[i][1],opts.rot[i][2]);
-					mat.ToAxisAngle(rot);
-					pPiece->ChangeKey(1, false, false, rot, PK_ROTATION);
-					pPiece->ChangeKey(1, true, false, rot, PK_ROTATION);
-					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-					pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
-
-					SystemPieceComboAdd(opts.info[i]->m_strDescription);
-				}
+		      SystemPieceComboAdd(wiz.m_Info[i]->m_strDescription);
+		    }
 
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 				int max = 0;
@@ -4543,9 +4536,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				CheckPoint("Minifig");
 			}
 
-			for (i = 0; i < 15; i++)
-			  if (opts.info[i])
-			    opts.info[i]->DeRef();
+			for (i = 0; i < LC_MFW_NUMITEMS; i++)
+			  if (wiz.m_Info[i])
+			    wiz.m_Info[i]->DeRef();
 		} break;
 
 		case LC_PIECE_ARRAY:
@@ -5072,14 +5065,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
+		  // FIXME: rewrite using the FustrumCull function
 			if (m_pPieces == 0) break;
+			bool bControl = Sys_KeyDown (KEY_CONTROL);
 
-			// HACK !!! HACK !!! HACK
-#ifdef LC_WINDOWS
-			bool bControl = (GetKeyState(KEY_CONTROL) < 0);
-#else
-			bool bControl = false;
-#endif
 			GLdouble modelMatrix[16], projMatrix[16];
 			float up[3], eye[3], target[3];
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
@@ -5881,6 +5870,11 @@ bool Project::StopTracking(bool bAccept)
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
 		}
+		else if (m_nCurAction == LC_ACTION_CURVE)
+		{
+			SetModifiedFlag(true);
+			CheckPoint("Inserting");
+		}
 	}
 	else if (m_pTrackFile != NULL)
 	{
@@ -6483,7 +6477,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				MoveSelectedObjects(axis[0], axis[1], axis[2]);
 			SystemRedrawView();
 			SetModifiedFlag(true);
-			CheckPoint((bShift) ? (char*) "Rotating" : (char*) "Moving");
+			CheckPoint((bShift) ? "Rotating" : "Moving");
 			SystemUpdateFocus(NULL, 0);
 			ret = true;
 		} break;
@@ -6783,11 +6777,12 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
   if (SetActiveViewport(x, y))
     return;
 
-  LoadViewportProjection();
-  glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-  glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-  glGetIntegerv(GL_VIEWPORT, viewport);
+  LoadViewportProjection ();
+  glGetDoublev (GL_MODELVIEW_MATRIX, modelMatrix);
+  glGetDoublev (GL_PROJECTION_MATRIX, projMatrix);
+  glGetIntegerv (GL_VIEWPORT, viewport);
 
+  // why this is here ?
   gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
   m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
@@ -7154,5 +7149,34 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			SystemUpdateFocus(NULL, 0);
 			SystemRedrawView();
 		} break;
+		/*
+    case LC_ACTION_CURVE:
+    {
+      float mouse = 10.0f/(21 - m_nMouse);
+      float dx = (ptx - m_fTrack[0])*mouse;
+      float dy = (pty - m_fTrack[1])*mouse;
+      float dz = (ptz - m_fTrack[2])*mouse;
+      Object *pObj = NULL;
+      Curve *pCurve;
+
+      m_fTrack[0] = ptx;
+      m_fTrack[1] = pty;
+      m_fTrack[2] = ptz;
+
+      for (pObj = m_pObjects; pObj != NULL; pObj = pObj->m_pNext)
+	if (pObj->IsSelected ())
+	  break;
+
+      if (pObj == NULL)
+	break;
+      pCurve = (Curve*)pObj;
+
+      pCurve->Move (1, m_bAnimation, false, dx, dy, dz);
+      pCurve->UpdatePosition(1, m_bAnimation);
+
+      SystemUpdateFocus(NULL, 0);
+      SystemRedrawView();
+    } break;
+		*/
 	}
 }

@@ -25,13 +25,13 @@ class Matrix;
 
 #include "file.h"
 
-typedef struct UNDOINFO
+typedef struct LC_UNDOINFO
 {
-	FileMem file;
-	char strText[21];
-	UNDOINFO* pNext;
-	UNDOINFO() { pNext = NULL; };
-} UNDOINFO;
+  FileMem file;
+  char strText[21];
+  LC_UNDOINFO* pNext;
+  LC_UNDOINFO() { pNext = NULL; };
+} LC_UNDOINFO;
 
 class Project
 {
@@ -39,7 +39,7 @@ public:
 // Constructors
 	Project();
 	~Project();
-	bool Initialize(int argc, char *argv[], char* libpath);
+	bool Initialize(int argc, char *argv[], char* binpath, char* libpath);
 
 // Attributes
 public:
@@ -107,8 +107,9 @@ protected:
 	char m_strComments[256];
 
 	// Piece library
-	bool LoadPieceLibrary();
-	char* m_LibraryPath;	// path to the library files
+	bool LoadPieceLibrary (char* libpath);
+	char m_LibraryPath[LC_MAXPATH];	// path to the library files
+	char m_AppPath[LC_MAXPATH];	// path to the LeoCAD executable
 	int m_nPieceCount;		// number of pieces
 	PieceInfo* m_pPieceIdx;	// index
 	int m_nTextureCount;
@@ -117,10 +118,10 @@ protected:
 	int m_nMovedCount;
 
 	// Undo support
-	UNDOINFO* m_pUndoList;
-	UNDOINFO* m_pRedoList;
+	LC_UNDOINFO* m_pUndoList;
+	LC_UNDOINFO* m_pRedoList;
 	bool m_bUndoOriginal;
-	void CheckPoint(char* text);
+	void CheckPoint (const char* text);
 
 	// Objects
 	Piece* m_pPieces;

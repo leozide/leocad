@@ -15,6 +15,7 @@
 
 File::File ()
 {
+  strcpy(FileName, "");
 }
 
 File::~File ()
@@ -399,6 +400,8 @@ int FileDisk::PutChar(int c)
 
 bool FileDisk::Open(const char *filename, const char *mode)
 {
+  strcpy(FileName, filename);
+
   m_hFile = fopen(filename, mode);
   m_bCloseOnDelete = true;
 
@@ -414,6 +417,7 @@ void FileMem::Close()
   if (m_pBuffer && m_bAutoDelete)
     free(m_pBuffer);
   m_pBuffer = NULL;
+  strcpy(FileName, "");
 }
 
 void FileDisk::Close()
@@ -423,6 +427,7 @@ void FileDisk::Close()
 
   m_hFile = NULL;
   m_bCloseOnDelete = false;
+  strcpy(FileName, "");
 }
 
 unsigned long FileMem::Seek(long lOff, int nFrom)

@@ -361,7 +361,7 @@ void PieceInfo::LoadInformation()
     pConnection->type = *bytes;
     bytes++;
 
-    shorts = GINT16((short*)bytes);
+    shorts = (short*)bytes;
     pConnection->center[0] = (float)(GINT16(*shorts))*scale;
     shorts++;
     pConnection->center[1] = (float)(GINT16(*shorts))*scale;
@@ -394,7 +394,7 @@ void PieceInfo::LoadInformation()
     strcpy(name, (char*)bytes);
     tex->texture = project->FindTexture(name);
 
-    shorts = GINT16((short*)(bytes + 8));
+    shorts = (short*)(bytes + 8);
     for (i = 0; i < 4; i++)
     {
       tex->vertex[i][0] = (float)GINT16(shorts[0])*scale;
@@ -510,7 +510,7 @@ void PieceInfo::LoadInformation()
     m_nFlags &= ~LC_PIECE_LONGDATA;
 
   // Copy the 'fixed' vertexes
-  shorts = GINT16((short*)(longs + 1));
+  shorts = (short*)(longs + 1);
   for (verts = 0; verts < GUINT32(*longs); verts++)
   {
     m_fVertexArray[verts*3] = (float)GINT16(*shorts)*scale;

@@ -7406,7 +7406,16 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
 			m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
 
-			RotateSelectedObjects(delta[0], delta[1], delta[2]);
+			if (m_nSnap & LC_DRAW_3DMOUSE)
+				RotateSelectedObjects (delta[0], delta[1], delta[2]);
+			else
+			{
+				if (m_nTracking == LC_TRACK_LEFT)
+					RotateSelectedObjects (delta[0], delta[1], 0);
+				else
+					RotateSelectedObjects (0, 0, delta[2]);
+			}
+
 			SystemUpdateFocus(NULL, 0);
 			UpdateAllViews();
 		} break;

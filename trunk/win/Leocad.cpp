@@ -246,7 +246,9 @@ BOOL CCADApp::InitInstance()
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
-	return TRUE;
+  project->UpdateAllViews (NULL);
+
+  return TRUE;
 }
 
 int CCADApp::ExitInstance() 

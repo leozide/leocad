@@ -945,9 +945,9 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_DISABLED | WS_GROUP | WS_TABSTOP,27,
                     104,60,8
     CONTROL         "Highlight new pieces",IDC_HTMDLG_HIGHLIGHT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,128,84,8
-    CONTROL         "Use .html extension",IDC_HTMLDLG_HTMLEXT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,140,100,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,128,154,8
+    CONTROL         "Save files with .html extension",IDC_HTMLDLG_HTMLEXT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,140,154,8
     LTEXT           "Output folder",IDC_STATIC,7,156,46,8
     EDITTEXT        IDC_HTMDLG_OUTPUT,55,155,112,10,ES_AUTOHSCROLL
     PUSHBUTTON      "...",IDC_HTMDLG_BROWSEFOLDER,172,155,8,10

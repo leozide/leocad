@@ -440,7 +440,7 @@ unsigned long FileMem::Seek(long lOff, int nFrom)
 
   m_nPosition = lNewPos;
 
-  return m_nPosition;
+  return 0;
 }
 
 unsigned long FileDisk::Seek(long lOff, int nFrom)

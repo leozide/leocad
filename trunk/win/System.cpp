@@ -1331,11 +1331,7 @@ bool SystemDoDialog(int nMode, void* param)
 			CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
 
 			for (int i = 0; i < pBar->m_wndGroupsBar.m_ToolbarData.iButtons; i++)
-			{
-				strcpy (dlg.m_strGroups[i], pBar->m_GroupNames[i]);
 				dlg.m_nBitmaps[i] = pBar->m_wndGroupsBar.m_ToolbarData.ButtonData[i].iBitmap;
-			}
-			dlg.m_nMaxGroups = pBar->m_wndGroupsBar.m_ToolbarData.iButtons;
 			dlg.m_ImageList.Create(IDB_PIECEBAR, 16, 0, 0x00ff00ff);
 
 			if (dlg.DoModal() == IDOK)
@@ -1347,7 +1343,7 @@ bool SystemDoDialog(int nMode, void* param)
 				pBar->PostMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right, rc.bottom));
 			}
 
-			return (dlg.m_bReload != FALSE);
+			return true;
 		} break;
 
 		case LC_DLG_SELECTBYNAME:

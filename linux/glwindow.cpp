@@ -144,7 +144,7 @@ GLWindow::~GLWindow ()
   g_free (m_pData);
 }
 
-void GLWindow::Create (void *data)
+bool GLWindow::Create (void *data)
 {
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
@@ -158,16 +158,25 @@ void GLWindow::Create (void *data)
     printf ("OpenGL fatal error: GtkRadiant needs a display with at least 16 bit colors.\n");
 
   if (dpy == NULL)
+  {
     printf ("OpenGL fatal error: Cannot get display.\n");
+    return false;
+  }
   prv->xdisplay = dpy;
 
   vi = pfnglXChooseVisual (dpy, DefaultScreen (dpy), attrlist);
   if (vi == NULL)
+  {
     printf ("OpenGL fatal error: glXChooseVisual failed.\n");
+    return false;
+  }
 
   visual = gdkx_visual_get (vi->visualid);
   if (visual == NULL)
+  {
     printf ("OpenGL fatal error: Cannot get visual.\n");
+    return false;
+  }
 
   gtk_widget_push_colormap (gdk_colormap_new (visual, TRUE));
   gtk_widget_push_visual (visual);
@@ -210,6 +219,8 @@ void GLWindow::Create (void *data)
                       GTK_SIGNAL_FUNC (realize_event), this);
 
   *((GtkWidget**)data) = prv->widget;
+
+  return true;
 }
 
 void GLWindow::DestroyContext ()

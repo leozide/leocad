@@ -332,8 +332,8 @@ void PieceInfo::LoadInformation()
     (((unsigned long) (val) & (unsigned long) 0x0000ff00U) <<  8) | \
     (((unsigned long) (val) & (unsigned long) 0x00ff0000U) >>  8) | \
     (((unsigned long) (val) & (unsigned long) 0xff000000U) >> 24)))
-#define GINT16(val) ((gint16)GUINT16(val))
-#define GINT32(val) ((gint32)GUINT32(val))
+#define GINT16(val) ((short)GUINT16(val))
+#define GINT32(val) ((long)GUINT32(val))
 #else
 #define GUINT16(val) val
 #define GUINT32(val) val

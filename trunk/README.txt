@@ -6,6 +6,9 @@ However, there are several resources:
 - New website:
   http://www.leocad.org/
 
+- Manual:
+  http://www.leocad.org/manual/
+
 - Mailing lists:
   http://gerf.org/mailman/listinfo
 

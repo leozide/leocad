@@ -1469,8 +1469,8 @@ bool LoadUpdate(const char* update)
 	typedef struct
 	{
 		char name[9];
-		BYTE type;
-		DWORD offset;
+		unsigned char type;
+		unsigned long offset;
 	} LC_UPDATE_INFO;
 	LC_UPDATE_INFO* upinfo;
 
@@ -1681,11 +1681,11 @@ bool LoadUpdate(const char* update)
 	up.Seek(-(2+2), SEEK_END);
 	up.ReadShort(&moved, 1);
 	cs = 2+moved*16;
-	up.Seek(-(LONG)(cs), SEEK_CUR);
+	up.Seek(-(long)(cs), SEEK_CUR);
 	membuf = malloc(cs);
 	up.Read(membuf, cs);
 	newidx.Write(membuf, cs);
-	free (membuf);
+	free(membuf);
 
 	binoff = newbin.GetLength();
 	newidx.WriteLong(&binoff, 1);

@@ -1066,16 +1066,16 @@ bool SystemDoDialog(int nMode, void* param)
 	{
 		case LC_DLG_FILE_OPEN_PROJECT:
 		{
-			char *defdir = (char*)param;
-			if (strlen(defdir))
-				_chdir(defdir);
-
 			CFileDialog dlg(TRUE, "*.lcd", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||", AfxGetMainWnd());
 			dlg.m_ofn.Flags |= (OFN_ENABLETEMPLATE|OFN_HIDEREADONLY|OFN_FILEMUSTEXIST|OFN_ENABLEHOOK|OFN_EXPLORER);
 			dlg.m_ofn.hInstance = AfxGetInstanceHandle();
 			dlg.m_ofn.lpfnHook = OFNOpenHookProc;
 			dlg.m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_OPENDLG_TEMPLATE);
+
+			char *defdir = (char*)param;
+			if (strlen(defdir))
+				dlg.m_ofn.lpstrInitialDir = defdir;
 
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1106,10 +1106,6 @@ bool SystemDoDialog(int nMode, void* param)
 
 		case LC_DLG_FILE_MERGE_PROJECT:
 		{
-			char *defdir = (char*)param;
-			if (strlen(defdir))
-				_chdir(defdir);
-
 			CFileDialog dlg(TRUE, "*.lcd", NULL, OFN_HIDEREADONLY|OFN_ENABLETEMPLATE|OFN_FILEMUSTEXIST|OFN_ENABLEHOOK|OFN_EXPLORER,
 				"LeoCAD Projects (*.lcd)|*.lcd|All Files (*.*)|*.*||", AfxGetMainWnd());
 	
@@ -1117,6 +1113,10 @@ bool SystemDoDialog(int nMode, void* param)
 			dlg.m_ofn.lpfnHook = OFNOpenHookProc;
 			dlg.m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_OPENDLG_TEMPLATE);
 			dlg.m_ofn.lpstrTitle = "Merge";
+
+			char *defdir = (char*)param;
+			if (strlen(defdir))
+				dlg.m_ofn.lpstrInitialDir = defdir;
 
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1129,9 +1129,6 @@ bool SystemDoDialog(int nMode, void* param)
 		{
 			LC_FILEOPENDLG_OPTS* opts = (LC_FILEOPENDLG_OPTS*)param;
 
-			if (strlen(opts->path))
-				_chdir(opts->path);
-
 			if (opts->type == LC_FILEOPENDLG_DAT)
 			{
 				CString filename;
@@ -1140,6 +1137,7 @@ bool SystemDoDialog(int nMode, void* param)
 					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
 				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 32);
 		    dlg.m_ofn.nMaxFile = _MAX_PATH;
+				dlg.m_ofn.lpstrInitialDir = opts->path;
 
 	      if (dlg.DoModal() == IDOK)
 				{

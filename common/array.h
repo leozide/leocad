@@ -10,7 +10,6 @@ class PtrArray
 
   typedef int (*LC_PTRARRAY_COMPARE_FUNC) (T* a, T* b, void* data);
 
-  void SetSize (int nSize);
   int GetSize () const
     { return m_nLength; }
 
@@ -29,6 +28,35 @@ class PtrArray
   T** m_pData;
   int m_nLength;
   int m_nAlloc;
+};
+
+template <class T>
+class ObjArray
+{
+public:
+	ObjArray(int Size = 0, int Grow = 16);
+	~ObjArray();
+
+	typedef int (*LC_OBJARRAY_COMPARE_FUNC)(const T& A, const T& B, void* SortData);
+
+	int GetSize() const
+		{ return m_Length; }
+
+	void RemoveIndex(int Index);
+	void Add(const T& Obj);
+	void AddSorted(const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData);
+	void InsertAt(int Index, const T& Obj);
+
+	T& operator [](int Index) const
+		{ return m_Data[Index]; }
+
+protected:
+	void Expand(int Grow);
+
+	T* m_Data;
+	int m_Length;
+	int m_Alloc;
+	int m_Grow;
 };
 
 #include "array.cpp"

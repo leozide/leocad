@@ -1076,7 +1076,21 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
   m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
   m_wndSplitter.CreateView (1, 0, RUNTIME_CLASS (CRichEditView), CSize (0, 0), pContext);
   m_wndSplitter.SetRowInfo (1, 50, 0);
-  ((CRichEditView *) m_wndSplitter.GetPane (1, 0))->GetRichEditCtrl ().SetReadOnly (TRUE);
+
+	// Setup the console.
+	CRichEditCtrl& Edit = ((CRichEditView*) m_wndSplitter.GetPane(1, 0))->GetRichEditCtrl();
+	Edit.SetReadOnly (TRUE);
+
+	CHARFORMAT cf;
+	memset(&cf, 0, sizeof(cf));
+	cf.dwMask = CFM_BOLD | CFM_FACE;
+
+	NONCLIENTMETRICS nm;
+	nm.cbSize = sizeof (NONCLIENTMETRICS);
+	VERIFY (SystemParametersInfo(SPI_GETNONCLIENTMETRICS,nm.cbSize,&nm,0)); 
+	strcpy(cf.szFaceName, nm.lfStatusFont.lfFaceName);
+
+	Edit.SetDefaultCharFormat(cf);
 
   return TRUE;
 }

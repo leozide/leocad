@@ -160,8 +160,6 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		UpdateControls(m_pObject->GetType());
 	}
 
-	// TODO: CM UNITS
-
 	switch (m_nType)
 	{
 		case LC_OBJECT_PIECE:
@@ -173,12 +171,20 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			Matrix mat(rot, pos);
 			mat.ToEulerAngles(rot);
 
+			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			{
+				pos[0] /= 0.08f;
+				pos[1] /= 0.08f;
+				pos[2] /= 0.08f;
+			}
+
 			m_fPosX = pos[0];
 			m_fPosY = pos[1];
 			m_fPosZ = pos[2];
 			m_fRotX = rot[0];
 			m_fRotY = rot[1];
 			m_fRotZ = rot[2];
+
 			if (project->IsAnimation())
 			{
 				m_nFrom = pPiece->GetFrameShow();
@@ -207,17 +213,38 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 				pCamera = ((CameraTarget*)m_pObject)->GetParent();
 
 			pCamera->GetEyePos(tmp);
+			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			{
+				tmp[0] /= 0.08f;
+				tmp[1] /= 0.08f;
+				tmp[2] /= 0.08f;
+			}
 			m_fPosX = tmp[0];
 			m_fPosY = tmp[1];
 			m_fPosZ = tmp[2];
+
 			pCamera->GetTargetPos(tmp);
+			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			{
+				tmp[0] /= 0.08f;
+				tmp[1] /= 0.08f;
+				tmp[2] /= 0.08f;
+			}
 			m_fRotX = tmp[0];
 			m_fRotY = tmp[1];
 			m_fRotZ = tmp[2];
+
 			pCamera->GetUpVec(tmp);
+			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			{
+				tmp[0] /= 0.08f;
+				tmp[1] /= 0.08f;
+				tmp[2] /= 0.08f;
+			}
 			m_fUpX = tmp[0];
 			m_fUpY = tmp[1];
 			m_fUpZ = tmp[2];
+
 			m_fFOV = pCamera->m_fovy;
 			m_fNear = pCamera->m_zNear;
 			m_fFar = pCamera->m_zFar;
@@ -345,6 +372,12 @@ void CModifyDialog::OnModdlgApply()
 			mod.pos[0] = m_fPosX;
 			mod.pos[1] = m_fPosY;
 			mod.pos[2] = m_fPosZ;
+			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			{
+				mod.pos[0] *= 0.08f;
+				mod.pos[1] *= 0.08f;
+				mod.pos[2] *= 0.08f;
+			}
 			mod.rot[0] = m_fRotX;
 			mod.rot[1] = m_fRotY;
 			mod.rot[2] = m_fRotZ;
@@ -372,6 +405,18 @@ void CModifyDialog::OnModdlgApply()
 			mod.up[0] = m_fUpX;
 			mod.up[1] = m_fUpY;
 			mod.up[2] = m_fUpZ;
+			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			{
+				mod.eye[0] *= 0.08f;
+				mod.eye[1] *= 0.08f;
+				mod.eye[2] *= 0.08f;
+				mod.target[0] *= 0.08f;
+				mod.target[1] *= 0.08f;
+				mod.target[2] *= 0.08f;
+				mod.up[0] *= 0.08f;
+				mod.up[1] *= 0.08f;
+				mod.up[2] *= 0.08f;
+			}
 			mod.fovy = m_fFOV;
 			mod.znear = m_fNear;
 			mod.zfar = m_fFar;

@@ -1113,6 +1113,22 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			bool Shift = GetKeyState(VK_SHIFT) < 0;
 
 			// Don't process key presses if the user is typing text.
+			if (!Control)
+			{
+				if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()) ||
+					  m_wndPiecesBar.m_wndPiecesList.IsChild(GetFocus()))
+				{
+					return CFrameWnd::PreTranslateMessage(pMsg);
+				}
+
+				char Name[256];
+				GetClassName(GetFocus()->m_hWnd, Name, sizeof(Name));
+				if (!strcmp(Name, "Edit"))
+				{
+					return CFrameWnd::PreTranslateMessage(pMsg);
+				}
+			}
+
 			if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()) ||
 				  m_wndPiecesBar.m_wndPiecesList.IsChild(GetFocus()))
 			{

@@ -1323,7 +1323,8 @@ void CBMPMenu::DitherBlt2(CDC *drawdc, int nXDest, int nYDest, int nWidth, int n
 	
 	// Copy the image from the toolbar into the memory DC
 	// and draw it (grayed) back into the toolbar.
-	dc.FillSolidRect(0,0, nWidth, nHeight, GetSysColor((IsNewShell())?COLOR_3DFACE:COLOR_MENU));
+//	dc.FillSolidRect(0,0, nWidth, nHeight, GetSysColor((IsNewShell())?COLOR_3DFACE:COLOR_MENU));
+	dc.FillSolidRect(0,0, nWidth, nHeight, GetSysColor(COLOR_MENU)); // Looks better on XP.
 	//SK: Looks better on the old shell
 	dc.SetBkColor(RGB(0, 0, 0));
 	dc.SetTextColor(RGB(255, 255, 255));
@@ -1344,6 +1345,8 @@ void CBMPMenu::DitherBlt2(CDC *drawdc, int nXDest, int nYDest, int nWidth, int n
 	dc.SelectObject(pdcOldBmp);
 	dc.DeleteDC();
 	
+	brShadow.DeleteObject();
+	brHilight.DeleteObject();
 	bwbmp.DeleteObject();
 }
 

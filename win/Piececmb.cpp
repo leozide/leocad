@@ -8,6 +8,7 @@
 #include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
+#include "library.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -44,6 +45,7 @@ void CPiecesCombo::OnEditupdate()
 		return;
 
 	char str[66];
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
 	PieceInfo* pInfo;
 
@@ -52,9 +54,9 @@ void CPiecesCombo::OnEditupdate()
 		char newstr[66];
 		int sel = -1;
 		strcpy (newstr, "Z");
-		for (int i = 0; i < project->GetPieceLibraryCount(); i++)
+		for (int i = 0; i < pLib->GetPieceCount(); i++)
 		{
-			pInfo = project->GetPieceInfo(i);
+			pInfo = pLib->GetPieceInfo(i);
 
 			if (_strnicmp (str, pInfo->m_strDescription, n) == 0)
 			{
@@ -77,7 +79,7 @@ void CPiecesCombo::OnEditupdate()
 
 		if (sel >= 0)
 		{
-			pInfo = project->GetPieceInfo(sel);
+			pInfo = pLib->GetPieceInfo(sel);
 
 			if ((pBar->m_bGroups) && (pInfo->m_nGroups != 0))
 				if ((pInfo->m_nGroups & (1 << pBar->m_nCurGroup)) == 0)
@@ -132,13 +134,14 @@ void CPiecesCombo::OnSelchange()
 {
 	char str[66];
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
+  PiecesLibrary *pLib = project->GetPiecesLibrary ();
 
 	if (!GetLBText (GetCurSel(), str))
 		return;
 
-	for (int i = 0; i < project->GetPieceLibraryCount(); i++)
+	for (int i = 0; i < pLib->GetPieceCount(); i++)
 	{
-		PieceInfo* pInfo = project->GetPieceInfo(i);
+		PieceInfo* pInfo = pLib->GetPieceInfo(i);
 
 		if (strcmp (str, pInfo->m_strDescription) == 0)
 		{

@@ -1,0 +1,13 @@
+This is a changelog for developers only, not for ordinary users.
+
+21/08/2000
+	- New options for the Minifig Wizard, now each piece can be rotated.
+
+19/08/2000
+	- Fixed a bug when you insert a piece after a rotated piece wouldn't
+	  show the new piece correctly.
+	- Added a new parameter to Project::Initialize to search the program
+	  directory for the piece library. Useful if a Linux user wants to
+	  install everything in the same directory and keeps compatibility
+	  with installations in /usr/local/share/leocad.
+	- Initial attempt of a BeOS port. 

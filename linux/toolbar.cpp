@@ -12,10 +12,11 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "toolbar.h"
+#include "message.h"
 
-// =========================================================
-
+// =============================================================================
 // Variables
+
 GtkWidget *piecepreview;
 GtkWidget *piecelist;
 GtkWidget *piececombo;
@@ -278,7 +279,7 @@ static gint draw_preview(GtkWidget *widget, GdkEventExpose *event)
   glEnable(GL_COLOR_MATERIAL);
   glDisable (GL_DITHER);
   glShadeModel (GL_FLAT);
-  
+
   double aspect = (float)widget->allocation.width/(float)widget->allocation.height;
   glViewport(0,0, widget->allocation.width, widget->allocation.height);
   glMatrixMode(GL_PROJECTION);
@@ -293,7 +294,7 @@ static gint draw_preview(GtkWidget *widget, GdkEventExpose *event)
   glClearColor(bg[0], bg[1], bg[2], bg[3]);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   piece_info->RenderPiece(project->GetCurrentColor());
-  
+
   glFinish();
   gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
   gtk_gl_area_make_current(GTK_GL_AREA(drawing_area));
@@ -367,10 +368,15 @@ static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButt
 {
   if (piece_info != NULL)
     piece_info->DeRef();
+
   piece_info = (PieceInfo*)gtk_clist_get_row_data(GTK_CLIST(piecelist), row);
-  piece_info->AddRef();
-  project->SetCurrentPiece(piece_info);
-  gtk_widget_draw(piecepreview, NULL);
+
+  if (piece_info != NULL)
+  {
+    piece_info->AddRef();
+    project->SetCurrentPiece(piece_info);
+    gtk_widget_draw(piecepreview, NULL);
+  }
 }
 
 // Add a new piece to the combobox
@@ -671,6 +677,7 @@ GtkWidget* create_piecebar (GtkWidget *window)
   gtk_signal_connect (GTK_OBJECT (piecelist), "click_column",
 		      GTK_SIGNAL_FUNC (piecelist_setsort), NULL);
   gtk_container_add (GTK_CONTAINER (scroll_win), piecelist);
+  gtk_clist_set_selection_mode (GTK_CLIST (piecelist), GTK_SELECTION_BROWSE);
   gtk_clist_set_column_width (GTK_CLIST(piecelist), 0, 90);
   gtk_clist_set_column_width (GTK_CLIST(piecelist), 1, 10);
   gtk_clist_set_column_auto_resize (GTK_CLIST(piecelist), 1, TRUE);
@@ -764,17 +771,27 @@ GtkWidget* create_piecebar (GtkWidget *window)
   return frame;
 }
 
-// =========================================================
-
+// =============================================================================
 // Status bar
 
 GtkWidget *label_message, *label_position, *label_snap, *label_step;
 
+static void statusbar_listener (int message, void *data, void *user)
+{
+  if (message == LC_MSG_FOCUS_CHANGED)
+  {
+    char text[32];
+    float pos[3];
+    project->GetFocusPosition (pos);
+    sprintf (text, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
+ 
+    gtk_label_set (GTK_LABEL (label_position), text);
+  }
+}
+
 void create_statusbar(GtkWidget *window, GtkWidget *vbox)
 {
-  GtkWidget *hbox, *hbox1;
-  GtkWidget *frame;
-  //GtkStyle *style;
+  GtkWidget *hbox, *hbox1, *frame;
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -842,8 +859,6 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   label_step = gtk_label_new (" ");
   gtk_widget_show (label_step);
   gtk_box_pack_start (GTK_BOX (hbox1), label_step, TRUE, TRUE, 0);
+
+  messenger->Listen (&statusbar_listener, NULL);
 }
-
-
-
-

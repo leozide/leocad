@@ -140,10 +140,6 @@ void CPiecesList::OnItemchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	else if (pNMListView->uOldState & LVIS_SELECTED)
 	{
-		CWnd* CaptureWnd = GetCapture();
-		if ((CaptureWnd != NULL) && (CaptureWnd ->m_hWnd == m_TitleTip.m_hWnd))
-			ReleaseCapture();
-
 		CRect Rect;
 		POINT MousePos;
 
@@ -152,7 +148,13 @@ void CPiecesList::OnItemchanged(NMHDR* pNMHDR, LRESULT* pResult)
 		ScreenToClient(&MousePos);
 
 		if (Rect.PtInRect(MousePos))
+		{
+			CWnd* CaptureWnd = GetCapture();
+			if ((CaptureWnd != NULL) && (CaptureWnd ->m_hWnd == m_TitleTip.m_hWnd))
+				ReleaseCapture();
+
 			m_TitleTip.ShowWindow(SW_HIDE);
+		}
 	}
 
 	*pResult = 0;

@@ -38,10 +38,10 @@ all: $(BIN)
 static: bin/leocad.static
 
 bin/leocad: $(OBJ) bin
-	$(CC) -o $@ $(OBJ) $(LIBS)
+	$(CXX) -o $@ $(OBJ) $(LIBS)
 
 bin/leocad.static: $(OBJ) bin
-	$(CC) -static -o $@ $(OBJ) $(LIBS)
+	$(CXX) -static -o $@ $(OBJ) $(LIBS)
 
 bin:
 	mkdir bin

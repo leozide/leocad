@@ -429,6 +429,8 @@ void Project::SetTitle(const char* lpszTitle)
 			*ptr = 0;
 		if (strcmp(ext, "dat") == 0)
 			*ptr = 0;
+		if (strcmp(ext, "ldr") == 0)
+			*ptr = 0;
 	}
 
 	SystemSetWindowCaption(title);
@@ -1307,7 +1309,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		strncpy(ext, ptr, 3);
 		strlwr(ext);
 
-		if (strcmp(ext, "dat") == 0)
+		if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 		{
 			*ptr = 0;
 			strcat(newName, "lcd");
@@ -1354,7 +1356,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		strlwr(ext);
 	}
 
-	if (strcmp(ext, "dat") == 0)
+	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
 		const int col[28] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
 		Piece* pPiece;
@@ -1512,7 +1514,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
 		strlwr(ext);
 	}
 
-	if (strcmp(ext, "dat") == 0)
+	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 		datfile = true;
 
 	DeleteContents(false);

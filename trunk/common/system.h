@@ -98,5 +98,8 @@ File* SystemImportClipboard();
 void SystemPumpMessages();
 long SystemGetTicks();
 
+void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text);
+void SytemEndProgressBar();
+void SytemStepProgressBar();
 
 #endif // _SYSTEM_H_

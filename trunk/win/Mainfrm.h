@@ -56,6 +56,9 @@ public:
 	CPiecesBar    m_wndPiecesBar;
   CSplitterWnd  m_wndSplitter;
 
+	void SetStatusBarMessage(const char* Message)
+		{ m_strStatusBar = Message; }
+
 protected:
 	CModifyDialog	m_wndModifyDlg;
 
@@ -63,6 +66,7 @@ protected:
 	WINDOWPLACEMENT m_wpPrev;
 	CToolBar* m_pwndFullScrnBar;
 	CRect m_FullScreenWindowRect;
+	CString m_strStatusBar;
 
 // Generated message map functions
 protected:
@@ -78,6 +82,7 @@ protected:
 	afx_msg void OnFilePrintPieceList();
 	afx_msg void OnActivateApp(BOOL bActive, HTASK hTask);
 	afx_msg void OnViewNewView();
+	afx_msg LRESULT OnSetMessageString(WPARAM wParam, LPARAM lParam);
 	//}}AFX_MSG
 
 	// Status bar

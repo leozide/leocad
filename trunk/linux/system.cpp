@@ -739,3 +739,15 @@ void SystemSwapBuffers()
   //  if (drawing_area)
   //    gtk_gl_area_swapbuffers (GTK_GL_AREA(drawing_area));
 }
+
+void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
+{
+}
+
+void SytemEndProgressBar()
+{
+}
+
+void SytemStepProgressBar()
+{
+}

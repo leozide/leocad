@@ -133,6 +133,7 @@
 #define IDD_TERRAIN_OPTIONS             218
 #define IDR_PREVIEW                     221
 #define IDD_EDIT_GROUPS                 231
+#define IDD_LIBRARY_TEXTURES            234
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -398,9 +399,12 @@
 #define IDC_HTMLDLG_HTMLEXT             1223
 #define IDC_MF_ARMRANGLE                1224
 #define IDC_MF_HANDLANGLE               1225
+#define ID_LIBTEX_ADD                   1225
 #define IDC_MF_HANDRANGLE               1226
+#define ID_LIBTEX_REMOVE                1226
 #define IDC_MF_TOOLLANGLE               1227
 #define IDC_MF_TOOLRANGLE               1228
+#define ID_LIBTEX_LIST                  1228
 #define IDC_MF_LEGLANGLE                1229
 #define IDC_MF_LEGRANGLE                1230
 #define IDC_MF_SHOELANGLE               1231
@@ -611,6 +615,7 @@
 #define ID_TERDLG_FILE_OPEN             33114
 #define ID_TERDLG_FILE_SAVE             33115
 #define ID_TERDLG_EDIT_PREFERENCES      33116
+#define ID_TERDLG_EDIT_SELECT           33119
 #define ID_TERDLG_EDIT_ZOOM             33120
 #define ID_TERDLG_EDIT_PAN              33121
 #define ID_TERDLG_EDIT_ROTATE           33122
@@ -638,6 +643,7 @@
 #define ID_FILE_IMPORTPIECE             33152
 #define ID_VIEW_NEWVIEW                 33153
 #define ID_VIEW_STEP_DELETE             33154
+#define ID_LIBDLG_FILE_TEXTURES         33157
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -648,9 +654,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        234
-#define _APS_NEXT_COMMAND_VALUE         33155
-#define _APS_NEXT_CONTROL_VALUE         1225
+#define _APS_NEXT_RESOURCE_VALUE        235
+#define _APS_NEXT_COMMAND_VALUE         33158
+#define _APS_NEXT_CONTROL_VALUE         1229
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

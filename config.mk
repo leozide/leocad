@@ -5,9 +5,11 @@ include version.mk
 CC		:= gcc
 CXX		:= g++
 
-DEBUG 		:= -g
 OS 		:= -D_LINUX
 OSDIR 		:= linux
+
+# (Add a -g for debugging)
+CPPFLAGS += -O2
 
 # Add compile options, such as -I option to include jpeglib's headers
 # CPPFLAGS += -I/home/fred/jpeglib

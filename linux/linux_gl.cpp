@@ -31,12 +31,12 @@ PFNGLXUSEXFONT pfnglXUseXFont;
 PFNGLXQUERYEXTENSIONSSTRING pfnglXQueryExtensionsString;
 PFNGLXQUERYSERVERSTRING pfnglXQueryServerString;
 PFNGLXGETCLIENTSTRING pfnglXGetClientString;
-PFNGLXCREATEGLXPIXMAPMESA pfnglXCreateGLXPixmapMESA;
-PFNGLXRELEASEBUFFERSMESA pfnglXReleaseBuffersMESA;
-PFNGLXCOPYSUBBUFFERMESA pfnglXCopySubBufferMESA;
-PFNGLXSET3DFXMODEMESA pfnglXSet3DfxModeMESA;
-PFNGLXGETVIDEOSYNCSGI pfnglXGetVideoSyncSGI;
-PFNGLXWAITVIDEOSYNCSGI pfnglXWaitVideoSyncSGI;
+//PFNGLXCREATEGLXPIXMAPMESA pfnglXCreateGLXPixmapMESA;
+//PFNGLXRELEASEBUFFERSMESA pfnglXReleaseBuffersMESA;
+//PFNGLXCOPYSUBBUFFERMESA pfnglXCopySubBufferMESA;
+//PFNGLXSET3DFXMODEMESA pfnglXSet3DfxModeMESA;
+//PFNGLXGETVIDEOSYNCSGI pfnglXGetVideoSyncSGI;
+//PFNGLXWAITVIDEOSYNCSGI pfnglXWaitVideoSyncSGI;
 PFNGLXGETPROCADDRESSARB pfnglXGetProcAddressARB;
 
 // =============================================================================
@@ -110,12 +110,12 @@ bool Sys_GLOpenLibrary (const char* libname)
   pfnglXQueryExtensionsString = (PFNGLXQUERYEXTENSIONSSTRING) Sys_GLGetProc ("glXQueryExtensionsString");
   pfnglXQueryServerString = (PFNGLXQUERYSERVERSTRING) Sys_GLGetProc ("glXQueryServerString");
   pfnglXGetClientString = (PFNGLXGETCLIENTSTRING) Sys_GLGetProc ("glXGetClientString");
-  pfnglXCreateGLXPixmapMESA = (PFNGLXCREATEGLXPIXMAPMESA) Sys_GLGetProc ("glXCreateGLXPixmapMESA");
-  pfnglXReleaseBuffersMESA = (PFNGLXRELEASEBUFFERSMESA) Sys_GLGetProc ("glXReleaseBuffersMESA");
-  pfnglXCopySubBufferMESA = (PFNGLXCOPYSUBBUFFERMESA) Sys_GLGetProc ("glXCopySubBufferMESA");
-  pfnglXSet3DfxModeMESA = (PFNGLXSET3DFXMODEMESA) Sys_GLGetProc ("glXSet3DfxModeMESA");
-  pfnglXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGI) Sys_GLGetProc ("glXGetVideoSyncSGI");
-  pfnglXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGI) Sys_GLGetProc ("glXWaitVideoSyncSGI");
+  //  pfnglXCreateGLXPixmapMESA = (PFNGLXCREATEGLXPIXMAPMESA) Sys_GLGetProc ("glXCreateGLXPixmapMESA");
+  //  pfnglXReleaseBuffersMESA = (PFNGLXRELEASEBUFFERSMESA) Sys_GLGetProc ("glXReleaseBuffersMESA");
+  //  pfnglXCopySubBufferMESA = (PFNGLXCOPYSUBBUFFERMESA) Sys_GLGetProc ("glXCopySubBufferMESA");
+  //  pfnglXSet3DfxModeMESA = (PFNGLXSET3DFXMODEMESA) Sys_GLGetProc ("glXSet3DfxModeMESA");
+  //  pfnglXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGI) Sys_GLGetProc ("glXGetVideoSyncSGI");
+  //  pfnglXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGI) Sys_GLGetProc ("glXWaitVideoSyncSGI");
   pfnglXGetProcAddressARB = (PFNGLXGETPROCADDRESSARB) Sys_GLGetProc ("glXGetProcAddressARB");
 
   return true;
@@ -149,11 +149,11 @@ void Sys_GLCloseLibrary ()
   pfnglXQueryExtensionsString = NULL;
   pfnglXQueryServerString = NULL;
   pfnglXGetClientString = NULL;
-  pfnglXCreateGLXPixmapMESA = NULL;
-  pfnglXReleaseBuffersMESA = NULL;
-  pfnglXCopySubBufferMESA = NULL;
-  pfnglXSet3DfxModeMESA = NULL;
-  pfnglXGetVideoSyncSGI = NULL;
-  pfnglXWaitVideoSyncSGI = NULL;
+  //  pfnglXCreateGLXPixmapMESA = NULL;
+  //  pfnglXReleaseBuffersMESA = NULL;
+  //  pfnglXCopySubBufferMESA = NULL;
+  //  pfnglXSet3DfxModeMESA = NULL;
+  //  pfnglXGetVideoSyncSGI = NULL;
+  //  pfnglXWaitVideoSyncSGI = NULL;
   pfnglXGetProcAddressARB = NULL;
 }

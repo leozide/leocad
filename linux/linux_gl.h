@@ -70,12 +70,12 @@ extern PFNGLXUSEXFONT pfnglXUseXFont;
 extern PFNGLXQUERYEXTENSIONSSTRING pfnglXQueryExtensionsString;
 extern PFNGLXQUERYSERVERSTRING pfnglXQueryServerString;
 extern PFNGLXGETCLIENTSTRING pfnglXGetClientString;
-extern PFNGLXCREATEGLXPIXMAPMESA pfnglXCreateGLXPixmapMESA;
-extern PFNGLXRELEASEBUFFERSMESA pfnglXReleaseBuffersMESA;
-extern PFNGLXCOPYSUBBUFFERMESA pfnglXCopySubBufferMESA;
-extern PFNGLXSET3DFXMODEMESA pfnglXSet3DfxModeMESA;
-extern PFNGLXGETVIDEOSYNCSGI pfnglXGetVideoSyncSGI;
-extern PFNGLXWAITVIDEOSYNCSGI pfnglXWaitVideoSyncSGI;
+//extern PFNGLXCREATEGLXPIXMAPMESA pfnglXCreateGLXPixmapMESA;
+//extern PFNGLXRELEASEBUFFERSMESA pfnglXReleaseBuffersMESA;
+//extern PFNGLXCOPYSUBBUFFERMESA pfnglXCopySubBufferMESA;
+//extern PFNGLXSET3DFXMODEMESA pfnglXSet3DfxModeMESA;
+//extern PFNGLXGETVIDEOSYNCSGI pfnglXGetVideoSyncSGI;
+//extern PFNGLXWAITVIDEOSYNCSGI pfnglXWaitVideoSyncSGI;
 extern PFNGLXGETPROCADDRESSARB pfnglXGetProcAddressARB;
 
 
@@ -102,12 +102,12 @@ extern PFNGLXGETPROCADDRESSARB pfnglXGetProcAddressARB;
 #define glXQueryExtensionsString pfnglXQueryExtensionsString;
 #define glXQueryServerString pfnglXQueryServerString;
 #define glXGetClientString pfnglXGetClientString;
-#define glXCreateGLXPixmapMESA pfnglXCreateGLXPixmapMESA;
-#define glXReleaseBuffersMESA pfnglXReleaseBuffersMESA;
-#define glXCopySubBufferMESA pfnglXCopySubBufferMESA;
-#define glXSet3DfxModeMESA pfnglXSet3DfxModeMESA;
-#define glXGetVideoSyncSGI pfnglXGetVideoSyncSGI;
-#define glXWaitVideoSyncSGI pfnglXWaitVideoSyncSGI;
+//#define glXCreateGLXPixmapMESA pfnglXCreateGLXPixmapMESA;
+//#define glXReleaseBuffersMESA pfnglXReleaseBuffersMESA;
+//#define glXCopySubBufferMESA pfnglXCopySubBufferMESA;
+//#define glXSet3DfxModeMESA pfnglXSet3DfxModeMESA;
+//#define glXGetVideoSyncSGI pfnglXGetVideoSyncSGI;
+//#define glXWaitVideoSyncSGI pfnglXWaitVideoSyncSGI;
 #define glXGetProcAddressARB pfnglXGetProcAddressARB;
 
 

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <memory.h>
 #include <stdlib.h>
+#include <string.h>
 #include "file.h"
 #include "defines.h"
 

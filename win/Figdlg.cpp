@@ -70,9 +70,33 @@ BOOL CMinifigDlg::OnInitDialog()
 	::GetWindowRect (::GetDlgItem(m_hWnd, IDC_PREVIEWSTATIC), &r);
 	ScreenToClient (&r);
 
+	HINSTANCE hInst = AfxGetInstanceHandle();
+	WNDCLASS wndcls;
+LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+#define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
+#define MINIFIG_CLASSNAME _T("LeoCADMinifigOpenGLClass")
+
+  // check if our class is registered
+	if(!(GetClassInfo (hInst, MINIFIG_CLASSNAME, &wndcls)))
+	{
+  	if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
+	  {
+      // set our class name
+	  	wndcls.lpszClassName = MINIFIG_CLASSNAME;
+      wndcls.lpfnWndProc = GLWindowProc;
+
+  		// register class
+	  	if (!AfxRegisterClass (&wndcls))
+		  	AfxThrowResourceException();
+  	}
+		else
+			AfxThrowResourceException();
+  }
+
 	m_pMinifigWnd = new CWnd;
-	m_pMinifigWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 501);
-	m_pMinifig->Create (m_pMinifigWnd);
+  m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
+    WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);

@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CMainFrame
+LastClass=CCADView
 LastTemplate=CHeaderCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "leocad.h"
@@ -130,7 +130,7 @@ HeaderFile=Cadview.h
 ImplementationFile=Cadview.cpp
 Filter=C
 VirtualFilter=VWC
-LastObject=CCADView
+LastObject=ID_FILE_PRINT_PREVIEW
 
 [CLS:CColorPicker]
 Type=0

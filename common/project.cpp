@@ -4674,34 +4674,36 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_MINIFIG:
 		{
-		  MinifigWizard wiz (m_ViewList[0]);
+		  MinifigWizard *wiz = new MinifigWizard (m_ViewList[0]);
 		  int i;
 
-		  if (SystemDoDialog (LC_DLG_MINIFIG, &wiz))
+      wiz->IncRef ();
+
+      if (SystemDoDialog (LC_DLG_MINIFIG, wiz))
 		  {
 		    SelectAndFocusNone(false);
 
 		    for (i = 0; i < LC_MFW_NUMITEMS; i++)
 		    {
-		      if (wiz.m_Info[i] == NULL)
-			continue;
+		      if (wiz->m_Info[i] == NULL)
+            continue;
 
 		      Matrix mat;
-		      Piece* pPiece = new Piece(wiz.m_Info[i]);
+		      Piece* pPiece = new Piece(wiz->m_Info[i]);
 
-		      pPiece->Initialize(wiz.m_Position[i][0], wiz.m_Position[i][1], wiz.m_Position[i][2],
-					 m_nCurStep, m_nCurFrame, wiz.m_Colors[i]);
+		      pPiece->Initialize(wiz->m_Position[i][0], wiz->m_Position[i][1], wiz->m_Position[i][2],
+					 m_nCurStep, m_nCurFrame, wiz->m_Colors[i]);
 		      pPiece->CreateName(m_pPieces);
 		      AddPiece(pPiece);
 		      pPiece->Select(true, false, false);
 
-		      pPiece->ChangeKey(1, false, false, wiz.m_Rotation[i], LC_PK_ROTATION);
-		      pPiece->ChangeKey(1, true, false, wiz.m_Rotation[i], LC_PK_ROTATION);
+		      pPiece->ChangeKey(1, false, false, wiz->m_Rotation[i], LC_PK_ROTATION);
+		      pPiece->ChangeKey(1, true, false, wiz->m_Rotation[i], LC_PK_ROTATION);
 		      pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep,
 						   m_bAnimation, false, true);
 
-		      SystemPieceComboAdd(wiz.m_Info[i]->m_strDescription);
+		      SystemPieceComboAdd(wiz->m_Info[i]->m_strDescription);
 		    }
 
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
@@ -4730,7 +4732,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 
-                                messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 				UpdateSelection();
 				UpdateAllViews();
 				SetModifiedFlag(true);
@@ -4738,8 +4740,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			for (i = 0; i < LC_MFW_NUMITEMS; i++)
-			  if (wiz.m_Info[i])
-			    wiz.m_Info[i]->DeRef();
+			  if (wiz->m_Info[i])
+			    wiz->m_Info[i]->DeRef();
+
+      wiz->DecRef ();
 		} break;
 
 		case LC_PIECE_ARRAY:

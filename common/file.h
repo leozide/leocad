@@ -31,10 +31,12 @@ class File
   unsigned long ReadShort (void* pBuf, unsigned long nCount);
   unsigned long ReadLong (void* pBuf, unsigned long nCount);
   unsigned long ReadFloat (void* pBuf, unsigned long nCount);
+  unsigned long ReadDouble (void* pBuf, unsigned long nCount);
   unsigned long WriteByte (const void* pBuf, unsigned long nCount);
   unsigned long WriteShort (const void* pBuf, unsigned long nCount);
   unsigned long WriteLong (const void* pBuf, unsigned long nCount);
   unsigned long WriteFloat (const void* pBuf, unsigned long nCount);
+  unsigned long WriteDouble (const void* pBuf, unsigned long nCount);
 
   virtual void Abort()=0;
   virtual void Flush()=0;

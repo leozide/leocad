@@ -74,7 +74,7 @@ unsigned long File::ReadLong (void* pBuf, unsigned long nCount)
   return read;
 }
 
-// reads 4-byte integers
+// reads 4-byte floats
 unsigned long File::ReadFloat (void* pBuf, unsigned long nCount)
 {
   unsigned long read;
@@ -96,6 +96,39 @@ unsigned long File::ReadFloat (void* pBuf, unsigned long nCount)
     out.b[3] = in.b[0];
 
     *val = out.f;
+    val++;
+  }
+#endif
+
+  return read;
+}
+
+// reads 8-byte floats
+unsigned long File::ReadDouble (void* pBuf, unsigned long nCount)
+{
+  unsigned long read;
+
+  read = Read (pBuf, nCount*8)/8;
+
+#ifdef LC_BIG_ENDIAN
+  unsigned long i;
+  double* val = (double*)pBuf;
+  union { unsigned char b[8]; double d; } in, out;
+
+  for (i = 0; i < read; i++)
+  {
+    in.d = *val;
+
+    out.b[0] = in.b[7];
+    out.b[1] = in.b[6];
+    out.b[2] = in.b[5];
+    out.b[3] = in.b[4];
+    out.b[4] = in.b[3];
+    out.b[5] = in.b[2];
+    out.b[6] = in.b[1];
+    out.b[7] = in.b[0];
+
+    *val = out.d;
     val++;
   }
 #endif
@@ -174,6 +207,38 @@ unsigned long File::WriteFloat (const void* pBuf, unsigned long nCount)
   return wrote;
 #else
   return Write (pBuf, nCount*4)/4;
+#endif
+}
+
+// writes 8-byte floats
+unsigned long File::WriteDouble (const void* pBuf, unsigned long nCount)
+{
+#ifdef LC_BIG_ENDIAN
+  unsigned long wrote = 0, i;
+  double* val = (double*)pBuf, x;
+  union { unsigned char b[8]; double d; } in, out;
+
+  for (i = 0; i < nCount; i++)
+  {
+    in.d = *val;
+    val++;
+
+    out.b[0] = in.b[7];
+    out.b[1] = in.b[6];
+    out.b[2] = in.b[5];
+    out.b[3] = in.b[4];
+    out.b[4] = in.b[3];
+    out.b[5] = in.b[2];
+    out.b[6] = in.b[1];
+    out.b[7] = in.b[0];
+    x = out.d;
+
+    wrote += Write (&x, 8)/8;
+  }
+
+  return wrote;
+#else
+  return Write (pBuf, nCount*8)/8;
 #endif
 }
 

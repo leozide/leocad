@@ -990,7 +990,9 @@ void CMainFrame::OnActivateApp(BOOL bActive, HTASK hTask)
 {
 	CFrameWnd::OnActivateApp(bActive, hTask);
 	
-	project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
+	// Don't notify if we loose focus while on print preview
+	if (m_lpfnCloseProc == NULL)
+		project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
 }
 
 #include "view.h"

@@ -315,14 +315,14 @@ void CCADApp::OnHelpUpdates()
 					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100 + (float)LC_VERSION_PATCH/1000)
 						str.Format("There's a newer version of LeoCAD available for download (%0.3f).\n\n", ver);
 					else
-						str = "You are using the latest version of LeoCAD (" LC_VERSION ").\n";
+						str = "You are using the latest version of LeoCAD.\n\n";
 
 					if (lib > project->GetPiecesLibrary ()->GetPieceCount ())
 						str += "There are new pieces available.\n";
 					else
 						str += "There are no new pieces available at this time.\n";
 
-					AfxMessageBox(str);
+					AfxMessageBox(str, MB_OK | MB_ICONINFORMATION);
 				}
 				else
 					AfxMessageBox("Unknown file information.");

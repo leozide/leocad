@@ -92,7 +92,7 @@ bool Object::FileLoad (File& file)
   while (n--)
   {
     file.ReadShort (&time, 1);
-    file.Read (param, sizeof (float[4]));
+    file.ReadFloat (param, 4);
     file.ReadByte (&type, 1);
 
     ChangeKey (time, false, true, param, type);
@@ -102,7 +102,7 @@ bool Object::FileLoad (File& file)
   while (n--)
   {
     file.ReadShort (&time, 1);
-    file.Read (param, sizeof (float[4]));
+    file.ReadFloat (param, 4);
     file.ReadByte (&type, 1);
 
     ChangeKey (time, true, true, param, type);
@@ -126,7 +126,7 @@ void Object::FileSave (File& file) const
   for (node = m_pInstructionKeys; node; node = node->next)
   {
     file.WriteShort (&node->time, 1);
-    file.Write (node->param, sizeof (float[4]));
+    file.WriteFloat (node->param, 4);
     file.WriteByte (&node->type, 1);
   }
 
@@ -137,7 +137,7 @@ void Object::FileSave (File& file) const
   for (node = m_pAnimationKeys; node; node = node->next)
   {
     file.WriteShort (&node->time, 1);
-    file.Write (node->param, sizeof (float[4]));
+    file.WriteFloat (node->param, 4);
     file.WriteByte (&node->type, 1);
   }
 }

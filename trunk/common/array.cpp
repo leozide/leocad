@@ -6,7 +6,7 @@
 #include <string.h>
 
 template <class T>
-PtrArray<T>::PtrArray (unsigned long nSize)
+PtrArray<T>::PtrArray (int nSize)
 {
   m_pData = NULL;
   m_nLength = 0;
@@ -23,7 +23,7 @@ PtrArray<T>::~PtrArray ()
 }
 
 template <class T>
-void PtrArray<T>::Expand (unsigned long nGrow)
+void PtrArray<T>::Expand (int nGrow)
 {
   if ((m_nLength + nGrow) > m_nAlloc)
   {
@@ -34,7 +34,7 @@ void PtrArray<T>::Expand (unsigned long nGrow)
 }
 
 template <class T>
-void PtrArray<T>::SetSize (unsigned long nSize)
+void PtrArray<T>::SetSize (int nSize)
 {
   if (nSize > m_nLength)
     Expand (nSize - m_nLength);
@@ -43,7 +43,7 @@ void PtrArray<T>::SetSize (unsigned long nSize)
 }
 
 template <class T>
-T* PtrArray<T>::RemoveIndex (unsigned long nIndex)
+T* PtrArray<T>::RemoveIndex (int nIndex)
 {
   T* ret = NULL;
 
@@ -65,7 +65,7 @@ T* PtrArray<T>::RemoveIndex (unsigned long nIndex)
 template <class T>
 T* PtrArray<T>::RemovePointer (T* pObj)
 {
-  unsigned long i;
+  int i;
 
   for (i = 0; i < m_nLength; i++)
     if (m_pData[i] == pObj)

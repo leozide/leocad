@@ -21,6 +21,14 @@
 #include "system.h"
 #include "globals.h"
 #include "minifig.h"
+#include "config.h"
+#include "message.h"
+
+// FIXME: temporary function, replace the code !!!
+void SystemUpdateFocus (void* p, int i)
+{
+  messenger->Dispatch (LC_MSG_FOCUS_CHANGED, p);
+}
 
 typedef struct
 {
@@ -93,6 +101,10 @@ Project::Project()
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
+
+        if (messenger == NULL)
+          messenger = new Messenger ();
+        messenger->AddRef ();
 
 	int i;
 	for (i = 0; i < LC_CONNECTIONS; i++)
@@ -183,6 +195,8 @@ Project::~Project()
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
 
+        messenger->DecRef ();
+
 	delete m_pTerrain;
 	delete m_pBackground;
 }
@@ -229,16 +243,14 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
   {
     char* param = argv[i];
 
-    if (argv[i][0] == '-')
+    if (param[0] == '-')
     {
-      param++;
-
-      if (((strcmp (param, "l") == 0) || (strcmp (param, "-libpath") == 0)) && ((i+1) < argc))
+      if (((strcmp (param, "-l") == 0) || (strcmp (param, "--libpath") == 0)) && ((i+1) < argc))
       {
 	i++;
 	libpath = argv[i];
       }
-      else if ((strcmp (param, "i") == 0) || (strcmp (param, "-image") == 0))
+      else if ((strcmp (param, "-i") == 0) || (strcmp (param, "--image") == 0))
       {
 	save_image = true;
 
@@ -248,40 +260,51 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
 	  strcpy (picture, argv[i]);
 	}
       }
-      else if (((strcmp (param, "w") == 0) || (strcmp (param, "-width") == 0)) && ((i+1) < argc))
+      else if (((strcmp (param, "-w") == 0) || (strcmp (param, "--width") == 0)) && ((i+1) < argc))
       {
 	int w;
 	i++;
 	if (sscanf(argv[i], "%d", &w) == 1)
 	  width = w;
       }
-      else if (((strcmp (param, "h") == 0) || (strcmp (param, "-height") == 0)) && ((i+1) < argc))
+      else if (((strcmp (param, "-h") == 0) || (strcmp (param, "--height") == 0)) && ((i+1) < argc))
       {
 	int h;
 	i++;
 	if (sscanf(argv[i], "%d", &h) == 1)
 	  height = h;
       }
-      else if (((strcmp (param, "f") == 0) || (strcmp (param, "-from") == 0)) && ((i+1) < argc))
+      else if (((strcmp (param, "-f") == 0) || (strcmp (param, "--from") == 0)) && ((i+1) < argc))
       {
 	int f;
 	i++;
 	if (sscanf(argv[i], "%d", &f) == 1)
 	  from = f;
       }
-      else if (((strcmp (param, "t") == 0) || (strcmp (param, "-to") == 0)) && ((i+1) < argc))
+      else if (((strcmp (param, "-t") == 0) || (strcmp (param, "--to") == 0)) && ((i+1) < argc))
       {
 	int t;
 	i++;
 	if (sscanf(argv[i], "%d", &t) == 1)
 	  to = t;
       }
-      else if (strcmp (param, "-animation") == 0)
+      else if (strcmp (param, "--animation") == 0)
 	animation = 1;
-      else if (strcmp (param, "-instructions") == 0)
+      else if (strcmp (param, "--instructions") == 0)
 	animation = 0;
-      else if (strcmp (param, "-highlight") == 0)
+      else if (strcmp (param, "--highlight") == 0)
 	highlight = true;
+      else if ((strcmp (param, "-V") == 0) || (strcmp (param, "--version") == 0))
+      {
+	printf ("LeoCAD version "LC_VERSION" for "LC_VERSION_OSNAME"\n");
+	printf ("Copyright (c) 1996-2000, BT Software\n");
+	return false;
+      }
+      else if ((strcmp (param, "-H") == 0) || (strcmp (param, "--help") == 0))
+      {
+      }
+      else
+	printf ("Unknown parameter: %s\n", param);
     }
     else
     {
@@ -809,11 +832,11 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		file->Read(&eye, sizeof(eye));
 		file->Read(&target, sizeof(target));
 		float tmp[3] = { (float)eye[0], (float)eye[1], (float)eye[2] };
-		pCam->ChangeKey(1, false, false, tmp, CK_EYE);
-		pCam->ChangeKey(1, true, false, tmp, CK_EYE);
+		pCam->ChangeKey(1, false, false, tmp, LC_CK_EYE);
+		pCam->ChangeKey(1, true, false, tmp, LC_CK_EYE);
 		tmp[0] = (float)target[0]; tmp[1] = (float)target[1]; tmp[2] = (float)target[2];
-		pCam->ChangeKey(1, false, false, tmp, CK_TARGET);
-		pCam->ChangeKey(1, true, false, tmp, CK_TARGET);
+		pCam->ChangeKey(1, false, false, tmp, LC_CK_TARGET);
+		pCam->ChangeKey(1, true, false, tmp, LC_CK_TARGET);
 
 		// Create up vector
 		Vector upvec(0,0,1), frontvec((float)(eye[0]-target[0]), (float)(eye[1]-target[1]), (float)(eye[2]-target[2])), sidevec;
@@ -825,8 +848,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		upvec.Cross(sidevec, frontvec);
 		upvec.Normalize();
 		upvec.ToFloat(tmp);
-		pCam->ChangeKey(1, false, false, tmp, CK_UP);
-		pCam->ChangeKey(1, true, false, tmp, CK_UP);
+		pCam->ChangeKey(1, false, false, tmp, LC_CK_UP);
+		pCam->ChangeKey(1, true, false, tmp, LC_CK_UP);
 	}
 
 	if (bMerge)
@@ -853,7 +876,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			char name[9];
 			Piece* pPiece = new Piece(NULL);
-			pPiece->FileLoad(file, name);
+			pPiece->FileLoad(*file, name);
 			PieceInfo* pInfo = FindPieceInfo(name);
 			if (pInfo)
 			{
@@ -904,8 +927,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				AddPiece(pPiece);
 				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
 				mat.ToAxisAngle(param);
-				pPiece->ChangeKey(1, false, false, param, PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, param, PK_ROTATION);
+				pPiece->ChangeKey(1, false, false, param, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 //				pPiece->SetGroup((Group*)group);
 				SystemPieceComboAdd(pInfo->m_strDescription);
 			}
@@ -1069,12 +1092,12 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			{
 				pCam = new Camera(0, NULL);
 				for (i = 0; i < count; i++)
-					pCam->FileLoad(file);
+					pCam->FileLoad(*file);
 				delete pCam;
 			}
 			else
 				for (pCam = m_pCameras; pCam; pCam = pCam->m_pNext)
-					pCam->FileLoad(file);
+					pCam->FileLoad(*file);
 		}
 
 		if (fv >= 0.7f)
@@ -1234,7 +1257,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->Write(&i, 4);
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		pPiece->FileSave(file, m_pGroups);
+		pPiece->FileSave(*file, m_pGroups);
 
 	ch = strlen(m_strAuthor);
 	file->Write(&ch, 1);
@@ -1263,7 +1286,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->Write(&i, 4);
 
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-		pCamera->FileSave(file);
+		pCamera->FileSave(*file);
 
 	for (j = 0; j < 4; j++)
 	{
@@ -1392,8 +1415,8 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 					pPiece->CreateName(m_pPieces);
 					AddPiece(pPiece);
 					tmpmat.ToAxisAngle(rot);
-					pPiece->ChangeKey(1, false, false, rot, PK_ROTATION);
-					pPiece->ChangeKey(1, true, false, rot, PK_ROTATION);
+					pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
+					pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
 					SystemPieceComboAdd(pInfo->m_strDescription);
 					(*nOk)++;
 				}
@@ -1989,159 +2012,168 @@ static void BuildBSP(LC_BSPNODE* node, Piece* pList)
 
 void Project::RenderScene(bool bShaded, bool bDrawViewports)
 {
-	glViewport(0, 0, m_nViewX, m_nViewY);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glViewport (0, 0, m_nViewX, m_nViewY);
+  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (bDrawViewports)
+  if (bDrawViewports)
+  {
+    if (bShaded)
+    {
+      if (m_nDetail & LC_DET_LIGHTING)
+	glDisable (GL_LIGHTING);
+      if (m_nScene & LC_SCENE_FOG)
+	glDisable (GL_FOG);
+      RenderViewports(true, true);
+      if (m_nDetail & LC_DET_LIGHTING)
+	glEnable(GL_LIGHTING);
+      if (m_nScene & LC_SCENE_FOG)
+	glEnable (GL_FOG);
+    }
+    else
+      RenderViewports(true, true);
+  }
+  else
+    RenderViewports(true, false);
+
+  for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
+  {
+    int x = (int)(viewports[m_nViewportMode].dim[vp][0] * ((float)m_nViewX));
+    int y = (int)(viewports[m_nViewportMode].dim[vp][1] * ((float)m_nViewY));
+    int w = (int)(viewports[m_nViewportMode].dim[vp][2] * ((float)m_nViewX));
+    int h = (int)(viewports[m_nViewportMode].dim[vp][3] * ((float)m_nViewY));
+
+    float ratio = (float)w/h;
+    glViewport(x, y, w, h);
+    m_pViewCameras[vp]->LoadProjection(ratio);
+
+    if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
+    {
+      if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
+	glDisable(GL_LIGHTING);
+
+      glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
+
+      // There's got to be an easier way...
+      if (m_nSnap & LC_DRAW_AXIS)
+      {
+	GLdouble model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
+	GLint viewport[4];
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, model);
+	glGetDoublev(GL_PROJECTION_MATRIX, proj);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	gluUnProject(25, 25, 0.1, model, proj, viewport, &obj1x, &obj1y, &obj1z);
+	gluUnProject(45, 25, 0.1, model, proj, viewport, &obj2x, &obj2y, &obj2z); 
+
+	float ds = (float)sqrt((obj1x-obj2x)*(obj1x-obj2x)+(obj1y-obj2y)*(obj1y-obj2y)+(obj1z-obj2z)*(obj1z-obj2z));
+	float verts[30][3] = { {0,0,0}, {0.8f*ds,0,0}, {0.8f*ds,0.2f*ds,0}, {ds,0,0}, {0.8f*ds,-0.2f*ds,0}, 
+			       {0.8f*ds,0,0}, {0.8f*ds,0,0.2f*ds}, {ds,0,0}, {0.8f*ds,0,-0.2f*ds}, {0.8f*ds,0,0},
+			       {0,0,0},{0,0.8f*ds,0}, {0,0.8f*ds,0.2f*ds}, {0,ds,0}, {0,0.8f*ds,-0.2f*ds},
+			       {0,0.8f*ds,0}, {0.2f*ds,0.8f*ds,0}, {0,ds,0}, {-0.2f*ds,0.8f*ds,0}, {0,0.8f*ds,0},
+			       {0,0,0}, {0,0,0.8f*ds}, {0.2f*ds,0,0.8f*ds}, {0,0,ds}, {-0.2f*ds,0,0.8f*ds},
+			       {0,0,0.8f*ds}, {0,0.2f*ds,0.8f*ds}, {0,0,ds}, {0,-0.2f*ds,0.8f*ds}, {0,0,0.8f*ds} };
+
+	glPushMatrix();
+	glTranslated(obj1x, obj1y, obj1z);
+	glVertexPointer (3, GL_FLOAT, 0, verts);
+	glDrawArrays(GL_LINE_STRIP, 0, 30);
+
+	Matrix m;
+	m.FromInverse(model);
+	m.SetTranslation(0,0,0);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	m_pTextures[0].MakeCurrent();
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_ALPHA_TEST);
+
+	LC_TXFVERT* glyph;
+
+	glPushMatrix();
+	glTranslatef(1.4f*ds, 0, 0);
+	glMultMatrixf(m.m);
+	glyph = &glyphs['X'-32];
+	glBegin(GL_QUADS);
+	glTexCoord2f(glyph->left, glyph->top);
+	glVertex2f(0, 0.4f*ds);
+	glTexCoord2f(glyph->left, glyph->bottom);
+	glVertex2f(0, -0.4f*ds);
+	glTexCoord2f(glyph->right, glyph->bottom);
+	glVertex2f(glyph->width*ds/20, -0.4f*ds);
+	glTexCoord2f(glyph->right, glyph->top);
+	glVertex2f(glyph->width*ds/20, 0.4f*ds);
+	glEnd();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0, 1.4f*ds, 0);
+	glMultMatrixf(m.m);
+	glyph = &glyphs['Y'-32];
+	glBegin(GL_QUADS);
+	glTexCoord2f(glyph->left, glyph->top);
+	glVertex2f(0, 0.4f*ds);
+	glTexCoord2f(glyph->left, glyph->bottom);
+	glVertex2f(0, -0.4f*ds);
+	glTexCoord2f(glyph->right, glyph->bottom);
+	glVertex2f(glyph->width*ds/20, -0.4f*ds);
+	glTexCoord2f(glyph->right, glyph->top);
+	glVertex2f(glyph->width*ds/20, 0.4f*ds);
+	glEnd();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0, 0, 1.4f*ds);
+	glMultMatrixf(m.m);
+	glyph = &glyphs['Z'-32];
+	glBegin(GL_QUADS);
+	glTexCoord2f(glyph->left, glyph->top);
+	glVertex2f(0, 0.4f*ds);
+	glTexCoord2f(glyph->left, glyph->bottom);
+	glVertex2f(0, -0.4f*ds);
+	glTexCoord2f(glyph->right, glyph->bottom);
+	glVertex2f(glyph->width*ds/20, -0.4f*ds);
+	glTexCoord2f(glyph->right, glyph->top);
+	glVertex2f(glyph->width*ds/20, 0.4f*ds);
+	glEnd();
+	glPopMatrix();
+
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_ALPHA_TEST);
+      }
+
+      if (m_nSnap & LC_DRAW_GRID)
+	glCallList (m_nGridList);
+
+      if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
+	glEnable(GL_LIGHTING);
+    }
+
+    if ((m_nDetail & LC_DET_LIGHTING) != 0)
+    {
+      int index = 0;
+      Light *pLight;
+
+      for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
+	pLight->Setup (index);
+    }
+
+    //    glDisable (GL_COLOR_MATERIAL);
+    /*
+      {
+	for (int i = -100; i < 100; i+=5)
 	{
-		if (bShaded)
-		{
-			if (m_nDetail & LC_DET_LIGHTING)
-				glDisable (GL_LIGHTING);
-			if (m_nScene & LC_SCENE_FOG)
-				glDisable (GL_FOG);
-			RenderViewports(true, true);
-			if (m_nDetail & LC_DET_LIGHTING)
-				glEnable(GL_LIGHTING);
-			if (m_nScene & LC_SCENE_FOG)
-				glEnable (GL_FOG);
-		}
-		else
-			RenderViewports(true, true);
+	  glBegin (GL_QUAD_STRIP);
+	  glNormal3f (0,0,1);
+	  for (int j = -100; j < 100; j+=5)
+	  {
+	    glVertex3f ((float)i/10, (float)j/10,0);
+	    glVertex3f ((float)(i+5)/10, (float)j/10,0);
+	  }
+	  glEnd();
 	}
-	else
-		RenderViewports(true, false);
-
-/*
-//		if ((m_dwDetail & DET_LIGHTING) != 0)
-	for (POSITION pos = m_Lights.GetHeadPosition(); pos != NULL;)
-	{
-		CLight* pLight = m_Lights.GetNext(pos);
-
-//			pLight->LoadPosition();
-		glLightfv(GL_LIGHT0, GL_POSITION, pLight->m_fPosition);
-
-float one[] = {1.f, 1.f, 1.f, 1.f};
-glEnable(GL_LIGHT0);
-//	glLightfv(GL_LIGHT0, GL_AMBIENT, one);
-glLightfv(GL_LIGHT0, GL_SPECULAR, one);
-
-	}
-*/
-	for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-	{
-		int x = (int)(viewports[m_nViewportMode].dim[vp][0] * ((float)m_nViewX));
-		int y = (int)(viewports[m_nViewportMode].dim[vp][1] * ((float)m_nViewY));
-		int w = (int)(viewports[m_nViewportMode].dim[vp][2] * ((float)m_nViewX));
-		int h = (int)(viewports[m_nViewportMode].dim[vp][3] * ((float)m_nViewY));
-
-		float ratio = (float)w/h;
-		glViewport(x, y, w, h);
-		m_pViewCameras[vp]->LoadProjection(ratio);
-
-		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
-		{
-			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-				glDisable(GL_LIGHTING);
-
-			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
-
-			// There's got to be an easier way...
-			if (m_nSnap & LC_DRAW_AXIS)
-			{
-				GLdouble model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
-				GLint viewport[4];
-				
-				glGetDoublev(GL_MODELVIEW_MATRIX, model);
-				glGetDoublev(GL_PROJECTION_MATRIX, proj);
-				glGetIntegerv(GL_VIEWPORT, viewport);
-				gluUnProject(25, 25, 0.1, model, proj, viewport, &obj1x, &obj1y, &obj1z);
-				gluUnProject(45, 25, 0.1, model, proj, viewport, &obj2x, &obj2y, &obj2z); 
-
-				float ds = (float)sqrt((obj1x-obj2x)*(obj1x-obj2x)+(obj1y-obj2y)*(obj1y-obj2y)+(obj1z-obj2z)*(obj1z-obj2z));
-				float verts[30][3] = { {0,0,0}, {0.8f*ds,0,0}, {0.8f*ds,0.2f*ds,0}, {ds,0,0}, {0.8f*ds,-0.2f*ds,0}, 
-					{0.8f*ds,0,0}, {0.8f*ds,0,0.2f*ds}, {ds,0,0}, {0.8f*ds,0,-0.2f*ds}, {0.8f*ds,0,0},
-					{0,0,0},{0,0.8f*ds,0}, {0,0.8f*ds,0.2f*ds}, {0,ds,0}, {0,0.8f*ds,-0.2f*ds},
-					{0,0.8f*ds,0}, {0.2f*ds,0.8f*ds,0}, {0,ds,0}, {-0.2f*ds,0.8f*ds,0}, {0,0.8f*ds,0},
-					{0,0,0}, {0,0,0.8f*ds}, {0.2f*ds,0,0.8f*ds}, {0,0,ds}, {-0.2f*ds,0,0.8f*ds},
-					{0,0,0.8f*ds}, {0,0.2f*ds,0.8f*ds}, {0,0,ds}, {0,-0.2f*ds,0.8f*ds}, {0,0,0.8f*ds} };
-
-				glPushMatrix();
-				glTranslated(obj1x, obj1y, obj1z);
-				glVertexPointer (3, GL_FLOAT, 0, verts);
-				glDrawArrays(GL_LINE_STRIP, 0, 30);
-
-				Matrix m;
-				m.FromInverse(model);
-				m.SetTranslation(0,0,0);
-
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-				m_pTextures[0].MakeCurrent();
-				glEnable(GL_TEXTURE_2D);
-				glEnable(GL_ALPHA_TEST);
-
-				LC_TXFVERT* glyph;
-
-				glPushMatrix();
-				glTranslatef(1.4f*ds, 0, 0);
-				glMultMatrixf(m.m);
-				glyph = &glyphs['X'-32];
-				glBegin(GL_QUADS);
-				glTexCoord2f(glyph->left, glyph->top);
-				glVertex2f(0, 0.4f*ds);
-				glTexCoord2f(glyph->left, glyph->bottom);
-				glVertex2f(0, -0.4f*ds);
-				glTexCoord2f(glyph->right, glyph->bottom);
-				glVertex2f(glyph->width*ds/20, -0.4f*ds);
-				glTexCoord2f(glyph->right, glyph->top);
-				glVertex2f(glyph->width*ds/20, 0.4f*ds);
-				glEnd();
-				glPopMatrix();
-
-				glPushMatrix();
-				glTranslatef(0, 1.4f*ds, 0);
-				glMultMatrixf(m.m);
-				glyph = &glyphs['Y'-32];
-				glBegin(GL_QUADS);
-				glTexCoord2f(glyph->left, glyph->top);
-				glVertex2f(0, 0.4f*ds);
-				glTexCoord2f(glyph->left, glyph->bottom);
-				glVertex2f(0, -0.4f*ds);
-				glTexCoord2f(glyph->right, glyph->bottom);
-				glVertex2f(glyph->width*ds/20, -0.4f*ds);
-				glTexCoord2f(glyph->right, glyph->top);
-				glVertex2f(glyph->width*ds/20, 0.4f*ds);
-				glEnd();
-				glPopMatrix();
-
-				glPushMatrix();
-				glTranslatef(0, 0, 1.4f*ds);
-				glMultMatrixf(m.m);
-				glyph = &glyphs['Z'-32];
-				glBegin(GL_QUADS);
-				glTexCoord2f(glyph->left, glyph->top);
-				glVertex2f(0, 0.4f*ds);
-				glTexCoord2f(glyph->left, glyph->bottom);
-				glVertex2f(0, -0.4f*ds);
-				glTexCoord2f(glyph->right, glyph->bottom);
-				glVertex2f(glyph->width*ds/20, -0.4f*ds);
-				glTexCoord2f(glyph->right, glyph->top);
-				glVertex2f(glyph->width*ds/20, 0.4f*ds);
-				glEnd();
-				glPopMatrix();
-
-				glPopMatrix();
-				glDisable(GL_TEXTURE_2D);
-				glDisable(GL_ALPHA_TEST);
-			}
-
-			if (m_nSnap & LC_DRAW_GRID)
-				glCallList (m_nGridList);
-
-			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-				glEnable(GL_LIGHTING);
-		}
-
+      }
+    */
 		if (bShaded)
 		{
 			if (m_nScene & LC_SCENE_FLOOR)
@@ -2326,27 +2358,32 @@ glLightfv(GL_LIGHT0, GL_SPECULAR, one);
 		// Draw cameras & lights
 		if (bDrawViewports)
 		{
-			Camera* pCamera;
+		  if (m_nDetail & LC_DET_LIGHTING)
+		  {
+		    glDisable (GL_LIGHTING);
+		    int index = 0;
+		    Light *pLight;
 
-			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-			{
-				if ((pCamera == m_pViewCameras[vp]) || !pCamera->IsVisible())
-					continue;
-				pCamera->Render(m_fLineWidth);
-			}
+		    for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
+		      glDisable ((GLenum)(GL_LIGHT0+index));
+		  }
 
-			if ((m_nDetail & LC_DET_LIGHTING) && (m_pLights != NULL))
-			{
-//				Light* pLight;
+		  Camera* pCamera;
+		  Light* pLight;
 
-				glDisable (GL_LIGHTING);
-				glColor3f(1, 1, 0);
+		  for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+		  {
+		    if ((pCamera == m_pViewCameras[vp]) || !pCamera->IsVisible())
+		      continue;
+		    pCamera->Render(m_fLineWidth);
+		  }
 
-//				for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-//					pLight->Render();
+		  for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+		    if (pLight->IsVisible ())
+		      pLight->Render(m_fLineWidth);
 
-				glEnable (GL_LIGHTING);
-			}
+		  if (m_nDetail & LC_DET_LIGHTING)
+		    glEnable (GL_LIGHTING);
 		}
 	}
 }
@@ -2578,12 +2615,16 @@ void Project::RenderInitialize()
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
 	    glEnable(GL_LIGHTING);
-		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-		glEnable(GL_COLOR_MATERIAL);
-float spec[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
-glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
-glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10);
-// call initlights()
+            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+            glEnable(GL_COLOR_MATERIAL);
+
+            GLfloat mat_translucent[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
+            GLfloat mat_opaque[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
+            GLfloat medium_shininess[] = { (GLfloat)64.0 };
+
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, medium_shininess);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_opaque);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_translucent);
 	}
 	else
 	{
@@ -3092,6 +3133,9 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			}
 		} break;
 
+                // FIXME: don't change the keys with ChangeKey()
+                // FIXME: even if pos == prevpos, the user might want to add a key
+
 		case LC_PIECE_MODIFIED:
 		{
 			LC_PIECE_MODIFY* mod = (LC_PIECE_MODIFY*)param;
@@ -3102,15 +3146,15 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			pPiece->GetRotation(rot);
 			Matrix mat(rot, pos);
 			mat.GetEulerAngles(rot);
-			
+
 			if (mod->pos[0] != pos[0] || mod->pos[1] != pos[1] || mod->pos[2] != pos[2])
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->pos, PK_POSITION);
+				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->pos, LC_PK_POSITION);
 
 			if (mod->rot[0] != rot[0] || mod->rot[1] != rot[1] || mod->rot[2] != rot[2])
 			{
 				mat.FromEuler(mod->rot[0], mod->rot[1], mod->rot[2]);
 				mat.ToAxisAngle(rot);
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, PK_ROTATION);
+				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 			}
 
 			if (m_bAnimation)
@@ -3153,11 +3197,11 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			pCamera->GetUpVec(tmp);
 
 			if (tmp[0] != mod->eye[0] || tmp[1] != mod->eye[1] || tmp[2] != mod->eye[2])
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->eye, CK_EYE);
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->eye, LC_CK_EYE);
 			if (tmp[0] != mod->target[0] || tmp[1] != mod->target[1] || tmp[2] != mod->target[2])
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->target, CK_TARGET);
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->target, LC_CK_TARGET);
 			if (tmp[0] != mod->up[0] || tmp[1] != mod->up[1] || tmp[2] != mod->up[2])
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->up, CK_UP);
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->up, LC_CK_UP);
 
 			pCamera->m_fovy = mod->fovy;
 			pCamera->m_zNear = mod->znear;
@@ -4211,7 +4255,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
-					pPiece->FileSave(m_pClipboard[m_nCurClipboard], m_pGroups);
+					pPiece->FileSave(*m_pClipboard[m_nCurClipboard], m_pGroups);
 
 			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				i++;
@@ -4227,7 +4271,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 				if (pCamera->IsSelected())
-					pCamera->FileSave(m_pClipboard[m_nCurClipboard]);
+					pCamera->FileSave(*m_pClipboard[m_nCurClipboard]);
 /*
 			for (i = 0, pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 				if (pLight->IsSelected())
@@ -4269,7 +4313,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				char name[9];
 				Piece* pPiece = new Piece(NULL);
-				pPiece->FileLoad(file, name);
+				pPiece->FileLoad(*file, name);
 				PieceInfo* pInfo = FindPieceInfo(name);
 				if (pInfo)
 				{
@@ -4358,7 +4402,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			while (i--)
 			{
 				pCamera = new Camera(8, pCamera);
-				pCamera->FileLoad(file);
+				pCamera->FileLoad(*file);
 				pCamera->Select();
 			}
 
@@ -4552,8 +4596,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				mat.GetTranslation(pos);
 				SnapPoint(&pos[0], &pos[1], &pos[2]);
 				pPiece->Initialize(pos[0], pos[1], pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
-				pPiece->ChangeKey(1, false, false, rot, PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, rot, PK_ROTATION);
+				pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
 				pPiece->UpdatePosition(1, false);
 			}
 			else
@@ -4612,8 +4656,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		      AddPiece(pPiece);
 		      pPiece->Select();
 
-		      pPiece->ChangeKey(1, false, false, wiz.m_Rotation[i], PK_ROTATION);
-		      pPiece->ChangeKey(1, true, false, wiz.m_Rotation[i], PK_ROTATION);
+		      pPiece->ChangeKey(1, false, false, wiz.m_Rotation[i], LC_PK_ROTATION);
+		      pPiece->ChangeKey(1, true, false, wiz.m_Rotation[i], LC_PK_ROTATION);
 		      pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep,
 						   m_bAnimation, false, true);
@@ -4745,8 +4789,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], 
 								m_nCurStep, m_nCurFrame, pPiece->GetColor());
-							pLast->ChangeKey(1, false, false, param, PK_ROTATION);
-							pLast->ChangeKey(1, true, false, param, PK_ROTATION);
+							pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
+							pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 						}
 
 						if (opts.nArrayDimension == 0)
@@ -4766,8 +4810,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2],
 									m_nCurStep, m_nCurFrame, pPiece->GetColor());
-								pLast->ChangeKey(1, false, false, param, PK_ROTATION);
-								pLast->ChangeKey(1, true, false, param, PK_ROTATION);
+								pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
+								pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 							}
 
 							if (opts.nArrayDimension == 1)
@@ -4785,8 +4829,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2],
 									m_nCurStep, m_nCurFrame, pPiece->GetColor());
-								pLast->ChangeKey(1, false, false, param, PK_ROTATION);
-								pLast->ChangeKey(1, true, false, param, PK_ROTATION);
+								pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
+								pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 							}
 						}
 					}
@@ -4819,9 +4863,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
 				{
-					pPiece->CalculatePositionRotation(m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, move, rot);
-					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, move, PK_POSITION);
-					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, PK_ROTATION);
+					pPiece->CalculateSingleKey (m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, LC_PK_POSITION, move);
+					pPiece->CalculateSingleKey (m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, LC_PK_ROTATION, rot);
+					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, move, LC_PK_POSITION);
+					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 				}
 
 			// TODO: cameras and lights
@@ -5305,8 +5350,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					}
 				}
 
-				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, eye, CK_EYE);
-				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, target, CK_TARGET);
+				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, eye, LC_CK_EYE);
+				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, target, LC_CK_TARGET);
 				pCam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 
@@ -5993,6 +6038,11 @@ bool Project::StopTracking(bool bAccept)
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
 		}
+		else if (m_nCurAction == LC_ACTION_SPOTLIGHT)
+		{
+			SetModifiedFlag(true);
+			CheckPoint("Inserting");
+		}
 	}
 	else if (m_pTrackFile != NULL)
 	{
@@ -6162,10 +6212,11 @@ void Project::MoveSelectedObjects(float x, float y, float z)
 		}
 
 	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		if (pLight->IsSelected())
-		{
-//		pLight->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-		}
+	  if (pLight->IsSelected())
+	  {
+	    pLight->Move (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, x, y, z);
+	    pLight->UpdatePosition (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+	  }
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsSelected())
@@ -6234,11 +6285,11 @@ void Project::RotateSelectedObjects(float x, float y, float z)
 			m.GetTranslation(pos);
 
 			// TODO: check if moved
-			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, PK_POSITION);
+			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
 		m.ToAxisAngle(rot);
-		pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, PK_ROTATION);
+		pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 /*
 		for (POSITION pos2 = m_Pieces.GetHeadPosition(); pos2 != NULL;)
@@ -6774,59 +6825,97 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
     } break;
 
     case LC_ACTION_INSERT:
-//		case LC_ACTION_LIGHT:
-		{
-			if (m_nCurAction == LC_ACTION_INSERT)
-			{
-				Piece* pPiece = new Piece(m_pCurPiece);
-				SnapPoint(&m_fTrack[0], &m_fTrack[1], &m_fTrack[2]);
-				pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+    case LC_ACTION_LIGHT:
+    {
+      if (m_nCurAction == LC_ACTION_INSERT)
+      {
+	Piece* pPiece = new Piece(m_pCurPiece);
+	SnapPoint(&m_fTrack[0], &m_fTrack[1], &m_fTrack[2]);
+	pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
 
-				SelectAndFocusNone(false);
-				pPiece->CreateName(m_pPieces);
-				AddPiece(pPiece);
-				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
-				SystemUpdateFocus(pPiece, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
-				pPiece->Focus();
-				UpdateSelection();
-				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+	SelectAndFocusNone(false);
+	pPiece->CreateName(m_pPieces);
+	AddPiece(pPiece);
+	pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+	pPiece->Focus();
+	UpdateSelection();
+	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+	SystemUpdateFocus(pPiece, LC_PIECE|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
 
-				if (m_nSnap & LC_DRAW_MOVE)
-					SetAction(LC_ACTION_MOVE);
-			}
-/*
-			if (m_nCurAction == ACTION_LIGHT)
-			{
-				SelectAndFocusNone(FALSE);
+	if (m_nSnap & LC_DRAW_MOVE)
+	  SetAction(LC_ACTION_MOVE);
+      }
+      else if (m_nCurAction == LC_ACTION_LIGHT)
+      {
+	GLint max;
+	int count = 0;
+	Light *pLight;
 
-				CLight* pLight = new CLight(m_fTrackPos[0], m_fTrackPos[1], m_fTrackPos[2]);
-				m_Lights.AddTail(pLight);
+	glGetIntegerv (GL_MAX_LIGHTS, &max);
+	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	  count++;
 
-//					if (m_Lights.GetCount() == 8)
-//						m_nCurAction = ACTION_SELECT;
-//	strcpy (m_Name
-//			pFrame->UpdateInfo();
-			}
-*/
+	if (count == max)
+	  break;
+
+	SnapPoint(&m_fTrack[0], &m_fTrack[1], &m_fTrack[2]);
+	pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
+
+	SelectAndFocusNone (false);
+
+	//	pLight->CreateName (m_pPieces);
+	pLight->m_pNext = m_pLights;
+	m_pLights = pLight;
+	SystemUpdateFocus (pLight, LC_LIGHT|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+	pLight->FocusEye ();
+	UpdateSelection ();
+      }
+
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
 			UpdateSelection();
 			SystemRedrawView();
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
-		} break;
+    } break;
 
-		case LC_ACTION_CAMERA:
-		{
-			double tmp[3];
-			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
-			SelectAndFocusNone(false);
-			StartTracking(LC_TRACK_START_LEFT);
-			Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
-			pCamera->FocusTarget();
-			UpdateSelection();
-			SystemRedrawView();
-			SystemUpdateFocus(pCamera, LC_CAMERA|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
-		} break;
+    case LC_ACTION_SPOTLIGHT:
+    {
+      GLint max;
+      int count = 0;
+      Light *pLight;
+
+      glGetIntegerv (GL_MAX_LIGHTS, &max);
+      for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+        count++;
+
+      if (count == max)
+        break;
+
+      double tmp[3];
+      gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+      SelectAndFocusNone(false);
+      StartTracking(LC_TRACK_START_LEFT);
+      pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
+      pLight->FocusTarget();
+      pLight->m_pNext = m_pLights;
+      m_pLights = pLight;
+      UpdateSelection();
+      SystemRedrawView();
+      SystemUpdateFocus(pLight, LC_LIGHT|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+    } break;
+
+    case LC_ACTION_CAMERA:
+    {
+      double tmp[3];
+      gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+      SelectAndFocusNone(false);
+      StartTracking(LC_TRACK_START_LEFT);
+      Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
+      pCamera->FocusTarget();
+      UpdateSelection();
+      SystemRedrawView();
+      SystemUpdateFocus(pCamera, LC_CAMERA|LC_UPDATE_OBJECT|LC_UPDATE_TYPE);
+    } break;
 
 		case LC_ACTION_MOVE:
 		{
@@ -6885,9 +6974,6 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			m_nTracking = LC_TRACK_START_LEFT;
 			m_pTrackFile = NULL;
 		} break;
-
-		case LC_ACTION_SPOTLIGHT:
-			break;
 	}
 }
 
@@ -6965,7 +7051,7 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 
 void Project::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	StopTracking(true);
+  StopTracking(true);
 }
 
 void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
@@ -7078,7 +7164,23 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			break;
 
 		case LC_ACTION_SPOTLIGHT:
-			break;
+		{
+			float mouse = 10.0f/(21 - m_nMouse);
+			float delta[3] = { (ptx - m_fTrack[0])*mouse,
+				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
+
+			m_fTrack[0] = ptx;
+			m_fTrack[1] = pty;
+			m_fTrack[2] = ptz;
+			
+			Light* pLight = m_pLights;
+
+			pLight->Move (1, m_bAnimation, false, delta[0], delta[1], delta[2]);
+			pLight->UpdatePosition (1, m_bAnimation);
+
+			SystemUpdateFocus(NULL, 0);
+			SystemRedrawView();
+		} break;
 
 		case LC_ACTION_CAMERA:
 		{
@@ -7094,12 +7196,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			while (pCamera->m_pNext != NULL)
 				pCamera = pCamera->m_pNext;
 
-			float target[3];
-			pCamera->GetTargetPos (target);
-			target[0] += delta[0];
-			target[1] += delta[1];
-			target[2] += delta[2];
-			pCamera->ChangeKey(1, m_bAnimation, false, target, CK_TARGET);
+			pCamera->Move (1, m_bAnimation, false, delta[0], delta[1], delta[2]);
 			pCamera->UpdatePosition(1, m_bAnimation);
 
 			SystemUpdateFocus(NULL, 0);

@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <X11/keysym.h>
+#include <sys/time.h>
 #include "opengl.h"
 #include "gdkgl.h"
 #include "gtkglarea.h"
@@ -45,146 +47,9 @@ void Sys_SetCursorPos (int x, int y)
 }
 */
 
-// =============================================================================
-// Message Boxes
-
-static void dialog_button_callback (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *parent;
-  int *loop, *ret;
-
-  parent = gtk_widget_get_toplevel (widget);
-  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
-  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
-
-  *loop = 0;
-  *ret = (int)data;
-}
-
-static gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
-{
-  int *loop;
-
-  gtk_widget_hide (widget);
-  loop = (int*)gtk_object_get_data (GTK_OBJECT (widget), "loop");
-  *loop = 0;
-
-  return TRUE;
-}
-
 int Sys_MessageBox (const char* text, const char* caption, int type)
 {
-  GtkWidget *window, *w, *vbox, *hbox;
-  int mode = (type & LC_MB_TYPEMASK), ret, loop = 1;
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_window_set_title (GTK_WINDOW (window), caption);
-  gtk_container_border_width (GTK_CONTAINER (window), 10);
-  gtk_object_set_data (GTK_OBJECT (window), "loop", &loop);
-  gtk_object_set_data (GTK_OBJECT (window), "ret", &ret);
-  gtk_widget_realize (window);
- 
-  vbox = gtk_vbox_new (FALSE, 10);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
- 
-  w = gtk_label_new (text);
-  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
-  gtk_label_set_justify (GTK_LABEL (w), GTK_JUSTIFY_LEFT);
-  gtk_widget_show (w);
- 
-  w = gtk_hseparator_new ();
-  gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
-  gtk_widget_show (w);
- 
-  hbox = gtk_hbox_new (FALSE, 10);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
-  gtk_widget_show (hbox);
- 
-  if (mode == LC_MB_OK)
-  {
-    w = gtk_button_new_with_label ("Ok");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
-    ret = LC_OK;
-  }
-  else if (mode == LC_MB_OKCANCEL)
-  {
-    w = gtk_button_new_with_label ("Ok");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
-
-    w = gtk_button_new_with_label ("Cancel");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-    gtk_widget_show (w);
-    ret = LC_CANCEL;
-  }
-  else if (mode == LC_MB_YESNOCANCEL)
-  {
-    w = gtk_button_new_with_label ("Yes");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
- 
-    w = gtk_button_new_with_label ("No");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
-    gtk_widget_show (w);
- 
-    w = gtk_button_new_with_label ("Cancel");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-    gtk_widget_show (w);
-    ret = LC_CANCEL;
-  }
-  else /* if (mode == LC_MB_YESNO) */
-  {
-    w = gtk_button_new_with_label ("Yes");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
-    GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
-    gtk_widget_grab_default (w);
-    gtk_widget_show (w);
- 
-    w = gtk_button_new_with_label ("No");
-    gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
-    gtk_signal_connect (GTK_OBJECT (w), "clicked",
-                        GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
-    gtk_widget_show (w);
-    ret = LC_NO;
-  }
-
-  gtk_widget_show (window);
-  gtk_grab_add (window);
-
-  while (loop)
-    gtk_main_iteration ();
-
-  gtk_grab_remove (window);
-  gtk_widget_destroy (window);
-
-  return ret;
+  return msgbox_execute (text, caption, type);
 }
 
 // =============================================================================
@@ -301,11 +166,22 @@ char* strlwr(char* string)
 
 void SystemPumpMessages()
 {
+  while (gtk_events_pending ())
+    gtk_main_iteration ();
 }
 
 long SystemGetTicks()
 {
-  return 0;//GetTickCount();
+  static int basetime = 0;
+  struct timezone tzp;
+  struct timeval tp;
+
+  gettimeofday (&tp, &tzp);
+
+  if (!basetime)
+    basetime = tp.tv_sec;
+
+  return (tp.tv_sec-basetime)*1000 + tp.tv_usec/1000;
 }
 
 // User Interface
@@ -387,8 +263,7 @@ void SystemUpdateAction(int new_action, int old_action)
   {
     x = 0; y = 2;
     // TODO: FIX ME !!!
-    if (0)
-    //    if (IsKeyDown(KEY_CONTROL))
+    if (Sys_KeyDown (KEY_CONTROL))
       xpm = cr_selm;
     else
       xpm = cr_sel;
@@ -734,17 +609,6 @@ void SystemUpdatePlay(bool play, bool stop)
   gtk_widget_set_sensitive (anim_toolbar.stop, stop);
 }
 
-void SystemUpdateFocus(void* object, unsigned char type)
-{
-  // TODO: modify dialog
-  char text[32];
-  float pos[3];
-  project->GetFocusPosition(pos);
-  sprintf (text, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
- 
-  gtk_label_set (GTK_LABEL (label_position), text);
-}
-
 void SystemInit()
 {
 }
@@ -753,9 +617,10 @@ void SystemFinish()
 {
 }
 
+// FIXME: remove 
 int SystemDoMessageBox(char* prompt, int mode)
 {
-  return msgbox_execute(prompt, mode);
+  return msgbox_execute (prompt, "LeoCAD", mode);
 }
 
 bool SystemDoDialog(int mode, void* param)
@@ -763,15 +628,15 @@ bool SystemDoDialog(int mode, void* param)
   switch (mode)
   {
     case LC_DLG_FILE_OPEN: {
-      return filedlg_execute("Open File", (char*)param) == LC_OK;
+      return openprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
     case LC_DLG_FILE_SAVE: {
-      return filedlg_execute("Save File", (char*)param) == LC_OK;
+      return saveprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
     case LC_DLG_FILE_MERGE: {
-      return filedlg_execute("Merge File", (char*)param) == LC_OK;
+      return openprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
     case LC_DLG_ABOUT: {
@@ -799,6 +664,7 @@ bool SystemDoDialog(int mode, void* param)
     } break;
 
     case LC_DLG_PICTURE_SAVE: {
+      return savepicturedlg_execute (param) == LC_OK;
     } break;
 
     case LC_DLG_MINIFIG: {

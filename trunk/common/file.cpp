@@ -1,5 +1,6 @@
 // File class, can be a memory file or in the disk.
 // Needed to work with the clipboard and undo/redo easily.
+// NOTE: Because of endianess issues, all I/O must be done from a File class.
 
 #include <stdio.h>
 #include <memory.h>
@@ -9,112 +10,174 @@
 #include "defines.h"
 #include "config.h"
 
-/////////////////////////////////////////////////////////////////////////////
+// =============================================================================
 // File construction/destruction
 
-File::File()
+File::File ()
 {
 }
 
-File::~File()
+File::~File ()
 {
 }
 
-// ========================================================
+// =============================================================================
+// Endian-safe functions
 
-unsigned long File::ReadByte(void* pBuf, unsigned long nCount)
+// reads 1-byte integers
+unsigned long File::ReadByte (void* pBuf, unsigned long nCount)
 {
-	return Read(pBuf, nCount);
+  return Read (pBuf, nCount);
 }
 
-// Reads a 2-byte value
-unsigned long File::ReadShort(void* pBuf, unsigned long nCount)
+// reads 2-byte integers
+unsigned long File::ReadShort (void* pBuf, unsigned long nCount)
 {
-	unsigned long read;
+  unsigned long read;
 
-	read = Read(pBuf, nCount*2)/2;
+  read = Read (pBuf, nCount*2)/2;
 
 #ifdef LC_BIG_ENDIAN
-	unsigned long i;
-	unsigned short* val = (unsigned short*)pBuf, x;
+  unsigned long i;
+  unsigned short* val = (unsigned short*)pBuf, x;
 
-	for (i = 0; i < read; i++)
-	{
-		x = *val;
-		*val = ((x>>8) | (x<<8));
-		val++;
-	}
+  for (i = 0; i < read; i++)
+  {
+    x = *val;
+    *val = ((x>>8) | (x<<8));
+    val++;
+  }
 #endif
 
-	return read;
+  return read;
 }
 
-// Read a 4-byte value
-unsigned long File::ReadLong(void* pBuf, unsigned long nCount)
+// reads 4-byte integers
+unsigned long File::ReadLong (void* pBuf, unsigned long nCount)
 {
-	unsigned long read;
+  unsigned long read;
 
-	read = Read(pBuf, nCount*4)/4;
+  read = Read (pBuf, nCount*4)/4;
 
 #ifdef LC_BIG_ENDIAN
-	unsigned long i;
-	unsigned long* val = (unsigned long*)pBuf, x;
+  unsigned long i;
+  unsigned long* val = (unsigned long*)pBuf, x;
 
-	for (i = 0; i < read; i++)
-	{
-		x = *val;
-		*val = ((x>>24) | ((x>>8) & 0xff00) | ((x<<8) & 0xff0000) | (x<<24));
-		val++;
-	}
+  for (i = 0; i < read; i++)
+  {
+    x = *val;
+    *val = ((x>>24) | ((x>>8) & 0xff00) | ((x<<8) & 0xff0000) | (x<<24));
+    val++;
+  }
 #endif
 
-	return read;
+  return read;
 }
 
-unsigned long File::WriteByte(const void* pBuf, unsigned long nCount)
+// reads 4-byte integers
+unsigned long File::ReadFloat (void* pBuf, unsigned long nCount)
 {
-	return Write(pBuf, nCount);
+  unsigned long read;
+
+  read = Read (pBuf, nCount*4)/4;
+
+#ifdef LC_BIG_ENDIAN
+  unsigned long i;
+  float* val = (float*)pBuf;
+  union { unsigned char b[4]; float f; } in, out;
+
+  for (i = 0; i < read; i++)
+  {
+    in.f = *val;
+
+    out.b[0] = in.b[3];
+    out.b[1] = in.b[2];
+    out.b[2] = in.b[1];
+    out.b[3] = in.b[0];
+
+    *val = out.f;
+    val++;
+  }
+#endif
+
+  return read;
 }
 
-unsigned long File::WriteShort(const void* pBuf, unsigned long nCount)
+// writes 1-byte integers
+unsigned long File::WriteByte (const void* pBuf, unsigned long nCount)
+{
+  return Write (pBuf, nCount);
+}
+
+// writes 2-byte integers
+unsigned long File::WriteShort (const void* pBuf, unsigned long nCount)
 {
 #ifdef LC_BIG_ENDIAN
-	unsigned long wrote = 0, i;
-	unsigned short* val = (unsigned short*)pBuf, x;
+  unsigned long wrote = 0, i;
+  unsigned short* val = (unsigned short*)pBuf, x;
 
-	for (i = 0; i < nCount; i++)
-	{
-		x = (((*val)>>8) | ((*val)<<8));
-		val++;
-		wrote += Write(&x, 2)/2;
-	}
+  for (i = 0; i < nCount; i++)
+  {
+    x = (((*val)>>8) | ((*val)<<8));
+    val++;
+    wrote += Write (&x, 2)/2;
+  }
 
-	return wrote;
+  return wrote;
 #else
-	return Write(pBuf, nCount*2);
+  return Write(pBuf, nCount*2)/2;
 #endif
 }
 
-unsigned long File::WriteLong(const void* pBuf, unsigned long nCount)
+// writes 4-byte integers
+unsigned long File::WriteLong (const void* pBuf, unsigned long nCount)
 {
 #ifdef LC_BIG_ENDIAN
-	unsigned long wrote = 0, i;
-	unsigned long* val = (unsigned long*)pBuf, x;
+  unsigned long wrote = 0, i;
+  unsigned long* val = (unsigned long*)pBuf, x;
 
-	for (i = 0; i < nCount; i++)
-	{
-		x = (((*val)>>24) | (((*val)>>8) & 0xff00) | (((*val)<<8) & 0xff0000) | ((*val)<<24));
-		val++;
-		wrote += Write(&x, 4)/4;
-	}
+  for (i = 0; i < nCount; i++)
+  {
+    x = (((*val)>>24) | (((*val)>>8) & 0xff00) | (((*val)<<8) & 0xff0000) | ((*val)<<24));
+    val++;
+    wrote += Write (&x, 4)/4;
+  }
 
-	return wrote;
+  return wrote;
 #else
-	return Write(pBuf, nCount*4);
+  return Write (pBuf, nCount*4)/4;
 #endif
 }
 
-// =========================================================
+// writes 4-byte floats
+unsigned long File::WriteFloat (const void* pBuf, unsigned long nCount)
+{
+#ifdef LC_BIG_ENDIAN
+  unsigned long wrote = 0, i;
+  float* val = (float*)pBuf, x;
+  union { unsigned char b[4]; float f; } in, out;
+
+  for (i = 0; i < nCount; i++)
+  {
+    in.f = *val;
+    val++;
+
+    out.b[0] = in.b[3];
+    out.b[1] = in.b[2];
+    out.b[2] = in.b[1];
+    out.b[3] = in.b[0];
+    x = out.f;
+
+    wrote += Write (&x, 4)/4;
+  }
+
+  return wrote;
+#else
+  return Write (pBuf, nCount*4)/4;
+#endif
+}
+
+// =============================================================================
 
 FileMem::FileMem()
 {

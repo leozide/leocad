@@ -9,34 +9,36 @@
 
 class File
 {
-public:
-// Constructors
-	File();
-	virtual ~File();
+ public:
+  // Constructors
+  File();
+  virtual ~File();
 
-// Implementation
-public:
-	virtual unsigned long GetPosition() const = 0;
-	virtual unsigned long Seek(long lOff, int nFrom) = 0;
-	virtual void SetLength(unsigned long nNewLen) = 0;
-	virtual unsigned long GetLength() const = 0;
+  // Implementation
+ public:
+  virtual unsigned long GetPosition() const = 0;
+  virtual unsigned long Seek(long lOff, int nFrom) = 0;
+  virtual void SetLength(unsigned long nNewLen) = 0;
+  virtual unsigned long GetLength() const = 0;
 
-	virtual char* ReadString(char* pBuf, unsigned long nMax)=0;
-	virtual unsigned long Read(void* pBuf, unsigned long nCount)=0;
-	virtual unsigned long Write(const void* pBuf, unsigned long nCount)=0;
-	virtual int GetChar()=0;
-	virtual int PutChar(int c)=0;
+  virtual char* ReadString(char* pBuf, unsigned long nMax)=0;
+  virtual unsigned long Read(void* pBuf, unsigned long nCount)=0;
+  virtual unsigned long Write(const void* pBuf, unsigned long nCount)=0;
+  virtual int GetChar()=0;
+  virtual int PutChar(int c)=0;
 
-	unsigned long ReadByte(void* pBuf, unsigned long nCount);
-	unsigned long ReadShort(void* pBuf, unsigned long nCount);
-	unsigned long ReadLong(void* pBuf, unsigned long nCount);
-	unsigned long WriteByte(const void* pBuf, unsigned long nCount);
-	unsigned long WriteShort(const void* pBuf, unsigned long nCount);
-	unsigned long WriteLong(const void* pBuf, unsigned long nCount);
+  unsigned long ReadByte (void* pBuf, unsigned long nCount);
+  unsigned long ReadShort (void* pBuf, unsigned long nCount);
+  unsigned long ReadLong (void* pBuf, unsigned long nCount);
+  unsigned long ReadFloat (void* pBuf, unsigned long nCount);
+  unsigned long WriteByte (const void* pBuf, unsigned long nCount);
+  unsigned long WriteShort (const void* pBuf, unsigned long nCount);
+  unsigned long WriteLong (const void* pBuf, unsigned long nCount);
+  unsigned long WriteFloat (const void* pBuf, unsigned long nCount);
 
-	virtual void Abort()=0;
-	virtual void Flush()=0;
-	virtual void Close()=0;
+  virtual void Abort()=0;
+  virtual void Flush()=0;
+  virtual void Close()=0;
 };
 
 class FileMem : public File

@@ -7,6 +7,7 @@
 #include "matrix.h"
 #include "file.h"
 #include "defines.h"
+#include "config.h"
 
 static float Identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
@@ -177,9 +178,30 @@ Matrix::~Matrix()
 {
 }
 
+#ifdef LC_BIG_ENDIAN
+
+float __LittleFloat (float l)
+{
+  union { unsigned char b[4]; float f; } in, out;
+
+  in.f = l;
+  out.b[0] = in.b[3];
+  out.b[1] = in.b[2];
+  out.b[2] = in.b[1];
+  out.b[3] = in.b[0];
+
+  return out.f;
+}
+#endif
+
 // Expand from the .bin file
 void Matrix::FromPacked (const float *mat)
 {
+#ifdef LC_BIG_ENDIAN
+  for (int j = 0; j < 12; j++)
+    mat[i] = __LittleFloat (mat[i]);
+#endif
+
   m[0] = mat[0];
   m[1] = mat[1];
   m[2] = mat[2];

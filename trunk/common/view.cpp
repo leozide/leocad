@@ -32,6 +32,7 @@ void View::OnInitialUpdate ()
 {
   GLWindow::OnInitialUpdate ();
   m_pProject->AddView (this);
+  OnDraw ();
 }
 
 void View::OnLeftButtonDown (int x, int y, bool bControl, bool bShift)

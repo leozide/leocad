@@ -276,7 +276,11 @@ static gint button_press_event (GtkWidget *widget, GdkEventButton *event)
 				     (event->state & GDK_SHIFT_MASK) != 0);
   }
 
-  gtk_window_set_focus(GTK_WINDOW(main_window), drawing_area);
+  gtk_window_set_focus (GTK_WINDOW (main_window), drawing_area);
+  gdk_pointer_grab (widget->window, FALSE,
+                    (GdkEventMask)(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK),
+                    NULL, NULL, GDK_CURRENT_TIME);
+
   
   return TRUE;
 }
@@ -286,6 +290,8 @@ static gint button_release_event (GtkWidget *widget, GdkEventButton *event)
   int x, y;
   x = (int)event->x;
   y = widget->allocation.height - (int)event->y - 1;
+
+  gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
   if (event->button == 1)
     project->OnLeftButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, 

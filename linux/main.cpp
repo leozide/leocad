@@ -39,6 +39,7 @@ static char lib_path[] = "/usr/local/share/leocad/";
 bool ignore_commands = false;
 
 static void update_window_layout ();
+static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data);
 
 // =============================================================================
 // Static functions
@@ -157,10 +158,7 @@ void OnCommand(GtkWidget* widget, gpointer data)
   {
     case ID_FILE_EXIT:
     {
-      if (!project->SaveModified())
-	break;
-
-      gtk_widget_destroy (main_window);
+      main_quit (NULL, NULL, NULL);
     } break;
 
     case ID_SNAP_A:
@@ -386,6 +384,10 @@ static void main_destroy ()
   gpointer item;
   int i = 0;
 
+  // Save window position/size
+  Sys_ProfileSaveInt ("Window", "Width", main_window->allocation.width);
+  Sys_ProfileSaveInt ("Window", "Height", main_window->allocation.height);
+
   // Save toolbar state
   Sys_ProfileSaveInt ("Toolbars", "Standard", ((GTK_WIDGET_VISIBLE (main_toolbar.handle_box)) ? 1 : 0));
   Sys_ProfileSaveInt ("Toolbars", "Drawing", ((GTK_WIDGET_VISIBLE (tool_toolbar.handle_box)) ? 1 : 0));
@@ -424,7 +426,14 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
   delete project;
   project = NULL;
 
+  // save window position
+  gint x, y;
+  gdk_window_get_root_origin (main_window->window, &x, &y);
+  Sys_ProfileSaveInt ("Window", "PositionX", x);
+  Sys_ProfileSaveInt ("Window", "PositionY", y);
+
   gtk_widget_destroy (main_window);
+
   return FALSE;
 }
 
@@ -558,7 +567,7 @@ int main (int argc, char* argv[])
 {
   char* libgl = NULL;
   GtkWidget *vbox;
-  int i, j, k;
+  int i, j, k, x, y;
 
   // Parse and remove Linux arguments
   for (i = 1; i < argc; i++)
@@ -615,11 +624,18 @@ int main (int argc, char* argv[])
   main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (main_window), "LeoCAD");
   gtk_container_border_width (GTK_CONTAINER (main_window), 0);
-//  gtk_window_set_policy (GTK_WINDOW (window), TRUE, TRUE, FALSE);
   gtk_widget_realize (main_window);
-// read preferences
-  gtk_window_set_default_size (GTK_WINDOW (main_window), 600, 400);
- 
+
+  // Read window position and size
+  x = Sys_ProfileLoadInt ("Window", "Width", 600);
+  y = Sys_ProfileLoadInt ("Window", "Height", 400);
+  gtk_window_set_default_size (GTK_WINDOW (main_window), x, y);
+
+  x = Sys_ProfileLoadInt ("Window", "PositionX", -1);
+  y = Sys_ProfileLoadInt ("Window", "PositionY", -1);
+  if (x != -1 && y != -1)
+    gtk_widget_set_uposition (main_window, x, y);
+
   gtk_signal_connect (GTK_OBJECT (main_window), "delete_event", (GtkSignalFunc) main_quit, NULL);
   gtk_signal_connect (GTK_OBJECT (main_window), "destroy", (GtkSignalFunc) main_destroy, NULL);
 

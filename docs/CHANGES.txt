@@ -1,5 +1,8 @@
 This is a changelog for developers only, not for ordinary users.
 
+27/08/2000
+	- Save window position and size under Linux.
+
 25/08/2000
 	- Changes to the Linux version:
 	- The Pieces toolbar can now be resized when docked or detached from

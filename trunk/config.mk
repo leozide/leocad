@@ -37,15 +37,6 @@ CPPFLAGS   += -L/usr/local/lib
 
 endif
 
-### BeOS configuration
-
-ifeq ($(shell uname), BeOS)
-
-OS 	:= -DLC_BEOS
-OSDIR 	:= beos
-
-endif
-
 ### Default directory
 
 ifeq ($(PREFIX), )
@@ -253,7 +244,7 @@ config:
 	  echo "HAVE_JPEGLIB = yes" >> $(OSDIR)/config.mk; \
 	  echo "#define LC_HAVE_JPEGLIB" >> $(OSDIR)/config.h; \
 	else \
-	  echo "no (libjpeg required)"; \
+	  echo "no (libjpeg optional)"; \
 	  echo "HAVE_JPEGLIB = no" >> $(OSDIR)/config.mk; \
 	  echo "#undef LC_HAVE_JPEGLIB" >> $(OSDIR)/config.h; \
 	fi
@@ -269,7 +260,7 @@ config:
 	  echo "HAVE_ZLIB = yes" >> $(OSDIR)/config.mk; \
 	  echo "#define LC_HAVE_ZLIB" >> $(OSDIR)/config.h; \
 	else \
-	  echo "no (zlib required)"; \
+	  echo "no (zlib optional)"; \
 	  echo "HAVE_ZLIB = no" >> $(OSDIR)/config.mk; \
 	  echo "#undef LC_HAVE_ZLIB" >> $(OSDIR)/config.h; \
 	fi
@@ -285,7 +276,7 @@ config:
 	  echo "HAVE_PNGLIB = yes" >> $(OSDIR)/config.mk; \
 	  echo "#define LC_HAVE_PNGLIB" >> $(OSDIR)/config.h; \
 	else \
-	  echo "no (libpng required)"; \
+	  echo "no (libpng optional)"; \
 	  echo "HAVE_PNGLIB = no" >> $(OSDIR)/config.mk; \
 	  echo "#undef LC_HAVE_PNGLIB" >> $(OSDIR)/config.h; \
 	fi

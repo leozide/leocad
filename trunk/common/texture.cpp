@@ -100,7 +100,7 @@ void Texture::LoadIndex(File* idx)
   switch (bt)
   {
   case LC_INTENSITY:
-    m_nFormat = GL_LUMINANCE;
+    m_nFormat = GL_LUMINANCE_ALPHA;
     m_nFileSize = m_nWidth*m_nHeight;
     break;
   case LC_RGB:
@@ -135,11 +135,14 @@ void Texture::Load(bool bFilter)
   if (!bin.Open(filename, "rb"))
     return;
 
-  bits = malloc(m_nFileSize);
+  if (m_nFormat == GL_LUMINANCE_ALPHA)
+    bits = malloc (m_nFileSize*2);
+  else
+    bits = malloc (m_nFileSize);
 
-  bin.Seek(m_nOffset, SEEK_SET);
-  bin.Read(bits, m_nFileSize);
-  bin.Close();
+  bin.Seek (m_nOffset, SEEK_SET);
+  bin.Read (bits, m_nFileSize);
+  bin.Close ();
 
   FinishLoadImage (bFilter, bits);
 
@@ -201,11 +204,16 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
 
   switch (m_nFormat)
   {
-  case GL_LUMINANCE: components = 1; break;
+  case GL_LUMINANCE_ALPHA: components = 2; break;
   case GL_RGB: components = 3; break;
   case GL_RGBA: components = 4; break;
   default: return false;
   }
+
+  // create an alpha channel for the texture 
+  if (m_nFormat == GL_LUMINANCE_ALPHA)
+    for (i = m_nWidth*m_nHeight-1; i >= 0; i--)
+      ((GLubyte*)data)[i*2+1] = ((GLubyte*)data)[i*2] = ((GLubyte*)data)[i];
 
   glGetIntegerv (GL_MAX_TEXTURE_SIZE, &maxsize);
 
@@ -233,10 +241,7 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
     data = tmp;
   }
 
-  if (m_nFormat == GL_LUMINANCE)
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_INTENSITY4, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
-  else
-    glTexImage2D (GL_TEXTURE_2D, 0, components, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
+  glTexImage2D (GL_TEXTURE_2D, 0, components, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
 
   if (bFilter)
     for (level = 1; ((w != 1) || (h != 1)); level++)

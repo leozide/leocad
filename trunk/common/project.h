@@ -153,7 +153,7 @@ protected:
 	void CalculateStep();
 	void MoveSelectedObjects(float x, float y, float z);
 	void RotateSelectedObjects(float x, float y, float z);
-	void SnapPoint(float *x, float *y, float *z);
+	void SnapPoint (float *point, float *reminder) const;
 
 	// Rendering
 	void RenderScene(bool bShaded, bool bDrawViewports);

@@ -36,6 +36,7 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -53,6 +54,7 @@ public:
 	CFlatToolBar  m_wndToolsBar;
 	CFlatToolBar  m_wndAnimationBar;
 	CPiecesBar    m_wndPiecesBar;
+  CSplitterWnd  m_wndSplitter;
 
 protected:
 	CModifyDialog	m_wndModifyDlg;

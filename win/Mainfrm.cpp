@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <afxrich.h>
 #include "LeoCAD.h"
 #include "MainFrm.h"
 #include "Camera.h"
@@ -9,6 +10,8 @@
 #include "message.h"
 #include "globals.h"
 #include "mainwnd.h"
+#include "cadview.h"
+#include "console.h"
 
 #include "Print.h"
 
@@ -38,6 +41,55 @@ void mainframe_listener (int message, void *data, void *user)
     if (pFrame != NULL)
       pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)data, 0);
   }
+}
+
+static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, void* user_data)
+{
+  CRichEditCtrl& ctrl = ((CRichEditView *) user_data)->GetRichEditCtrl ();
+  CHARFORMAT cf;
+  int line, index, length;
+
+  cf.cbSize = sizeof (cf);
+  cf.dwMask = CFM_COLOR;
+  cf.dwEffects = 0;
+
+  switch (level)
+  {
+  case LC_CONSOLE_ERROR:
+    cf.crTextColor = RGB (255, 0, 0);
+    break;
+
+  case LC_CONSOLE_WARNING:
+    cf.crTextColor = RGB (0, 0, 255);
+    break;
+
+  case LC_CONSOLE_DEBUG:
+    cf.crTextColor = RGB (0, 255, 0);
+    break;
+
+  case LC_CONSOLE_MISC:
+  default:
+    cf.crTextColor = RGB (0, 0, 0);
+    break;
+  }
+
+  // select the last line
+  line = ctrl.GetLineCount ();
+  index = ctrl.LineIndex (line - 1);
+  ctrl.SetSel (index, index);
+
+  // print text
+  ctrl.ReplaceSel (text);
+  line = ctrl.GetLineCount ();
+  index = ctrl.LineIndex (line - 2);
+  length = ctrl.LineLength (line - 2);
+  ctrl.SetSel (index, index + length);
+  ctrl.SetSelectionCharFormat (cf);
+
+  // select the last line
+  line = ctrl.GetLineCount ();
+  index = ctrl.LineIndex (line - 1);
+  ctrl.SetSel (index, index);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -204,6 +256,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
   messenger->Listen (&mainframe_listener, this);
 
   main_window->SetXID (this);
+
+  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
 
 	return 0;
 }
@@ -974,4 +1028,16 @@ void CMainFrame::OnViewNewView()
     WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
     CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
     m_hWnd, (HMENU)0, hInst, view);
+}
+
+BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
+{
+  m_wndSplitter.CreateStatic (this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
+
+  m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
+  m_wndSplitter.CreateView (1, 0, RUNTIME_CLASS (CRichEditView), CSize (0, 0), pContext);
+  m_wndSplitter.SetRowInfo (1, 50, 0);
+  ((CRichEditView *) m_wndSplitter.GetPane (1, 0))->GetRichEditCtrl ().SetReadOnly (TRUE);
+
+  return TRUE;
 }

@@ -636,4 +636,8 @@ void SystemReleaseMouse()
 {
 }
 
-
+void SystemSwapBuffers()
+{
+  if (drawing_area)
+    gtk_gl_area_swapbuffers (GTK_GL_AREA(drawing_area));
+}

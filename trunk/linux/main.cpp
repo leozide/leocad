@@ -69,7 +69,11 @@ void OnCommand(GtkWidget* widget, gpointer data)
 
   switch (id)
   {
-    case ID_FILE_EXIT: {
+    case ID_FILE_EXIT:
+    {
+      if (!project->SaveModified())
+	break;
+
       gtk_main_quit();
     } break;
 
@@ -190,8 +194,6 @@ static gint draw_view(GtkWidget *widget, GdkEventExpose *event)
     return TRUE;
 
   project->Render(false);
-  // TODO: call SystemSwap from Render()
-  gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
 
   return TRUE;
 }

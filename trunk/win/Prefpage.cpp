@@ -791,7 +791,7 @@ void CPreferencesKeyboard::OnKeydlgRemove()
 	else
 	{
 		Cmd.Key2 = 0;
-		Cmd.Modifiers |= 0x0f;
+		Cmd.Modifiers &= 0x0f;
 	}
 
 	OnSelchangeKeydlgCmdlist();

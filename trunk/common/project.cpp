@@ -2425,7 +2425,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 	glOrtho(0, m_nViewX, 0, m_nViewY, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-//	glTranslatef(0.375, 0.375, 0.0);
+	glTranslatef(0.375, 0.375, 0.0);
 
 	if (bBackground)
 	{
@@ -2513,8 +2513,8 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 		{
 			x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
 			y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-			w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
-			h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
+			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
+			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
 
 			float l = x+3, t = y+h-6;
 			for (const char* p = m_pViewCameras[vp]->GetName(); *p; p++)
@@ -2551,8 +2551,8 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 
 			x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
 			y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-			w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
-			h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
+			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
+			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
 
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(x, y);
@@ -2564,8 +2564,8 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 
 		x = viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX;
 		y = viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY;
-		w = viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX;
-		h = viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY;
+		w = viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)(m_nViewX - 1);
+		h = viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)(m_nViewY - 1);
 
 		glColor3f(1.0f, 0, 0);
 		glBegin(GL_LINE_LOOP);

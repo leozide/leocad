@@ -328,7 +328,7 @@ bool Project::Initialize(int argc, char *argv[], char* libpath)
 // Load the piece library
 bool Project::LoadPieceLibrary()
 {
-	File idx(false);
+	FileDisk idx;
 	char filename[LC_MAXPATH];
 	unsigned char version;
 	unsigned short count, movedcount;
@@ -1281,7 +1281,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 
 			if (read)
 			{
-				File tf(false);
+				FileDisk tf;
 				if (tf.Open(pn, "rt"))
 					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep);
 			}
@@ -1315,7 +1315,7 @@ bool Project::DoFileSave()
 // if 'bReplace' is FALSE will not change path name (SaveCopyAs)
 bool Project::DoSave(char* lpszPathName, bool bReplace)
 {
-	File file(false);
+	FileDisk file;
 	char newName[LC_MAXPATH];
 	memset(newName, 0, sizeof(newName));
 	if (lpszPathName)
@@ -1516,7 +1516,7 @@ bool Project::OnNewDocument()
 
 bool Project::OnOpenDocument(char* lpszPathName)
 {
-	File file(false);
+	FileDisk file;
 	bool bSuccess = false;
 
 	if (!file.Open(lpszPathName, "rb"))
@@ -3082,7 +3082,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_MERGE, filename))
 			{
-				File file(false);
+				FileDisk file;
 				if (file.Open(filename, "rb"))
 				{
 //				CWaitCursor wait;
@@ -3895,7 +3895,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_LIBRARY:
 		{
-			File file(true);
+			FileMem file;
 			FileSave(&file, true);
 
 			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
@@ -4016,7 +4016,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (m_pClipboard[m_nCurClipboard] != NULL)
 				delete m_pClipboard[m_nCurClipboard];
-			m_pClipboard[m_nCurClipboard] = new File(true);
+			m_pClipboard[m_nCurClipboard] = new FileMem;
 
 			int i = 0;
 			Piece* pPiece;
@@ -5919,7 +5919,7 @@ void Project::StartTracking(int mode)
 {
 	SystemCaptureMouse();
 	m_nTracking = mode;
-	m_pTrackFile = new File(true);
+	m_pTrackFile = new FileMem;
 	FileSave(m_pTrackFile, true);
 }
 

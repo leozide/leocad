@@ -157,7 +157,7 @@ LC_IMAGE* OpenImage(char* filename)
 		return ResizeImage(OpenBMP(filename));
 	if ((strcmp (ext, "gif") == 0) || (strcmp (ext, "tmp") == 0))
 	{
-		File file(false);
+		FileDisk file;
 		if (!file.Open(filename, "rb"))
 			return NULL;
 		LC_IMAGE* image = ResizeImage(OpenGIF(&file));
@@ -193,7 +193,7 @@ bool SaveImage(char* filename, LC_IMAGE* image, LC_IMAGE_OPTS* opts)
 
 	if (strcmp (ext, "gif") == 0)
 	{
-		File file(false);
+		FileDisk file;
 		if (!file.Open(filename, "wb"))
 			return false;
 

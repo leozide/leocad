@@ -16,13 +16,26 @@ CPPFLAGS += -O2 -Wall
 # Add linker options, such as -L option to include jpeglib's libraries
 # LDFLAGS += -L/home/fred/jpeglib
 
-### Linux and FreeBSD configuration
+### Linux configuration
 
-ifneq ($(findstring $(shell uname), Linux, FreeBSD), )
+ifeq ($(shell uname), Linux)
 
-OS 	:= -DLC_LINUX
-OSDIR 	:= linux
-PREFIX  := /usr/local
+OS 	   := -DLC_LINUX
+OSDIR 	   := linux
+PREFIX     := /usr/local
+GTK_CONFIG := gtk-config
+
+endif
+
+### FreeBSD configuration
+
+ifeq ($(shell uname), FreeBSD)
+
+OS 	   := -DLC_LINUX
+OSDIR 	   := linux
+PREFIX     := /usr/local
+GTK_CONFIG := gtk12-config
+CPPFLAGS   += -L/usr/local/lib
 
 endif
 
@@ -62,7 +75,22 @@ config:
 	@echo "#define LC_VERSION_PATCH $(PATCHLVL)" >> $(OSDIR)/config.h
 	@echo "#define LC_VERSION_OSNAME \"$(shell uname)\"" >> $(OSDIR)/config.h
 	@echo "#define LC_VERSION \"$(MAJOR).$(MINOR).$(PATCHLVL)\"" >> $(OSDIR)/config.h
+	@echo "#define LC_INSTALL_PREFIX \"$(PREFIX)\"" >> $(OSDIR)/config.h
 	@echo "" >> $(OSDIR)/config.h
+
+### Determine if machine is little or big endian
+	@echo -n "Determining endianess... "
+	@echo "main () { union { long l; char c[sizeof (long)]; } u;" > endiantest.c
+	@echo "u.l = 1; exit (u.c[sizeof (long) - 1] == 1); }" >> endiantest.c
+	@if { (eval $(CC) endiantest.c -o endiantest) 2> /dev/null; } && \
+	  (test -s endiantest && (./endiantest; exit) 2> /dev/null); then \
+	  echo "little endian"; \
+	  echo "#define LC_LITTLE_ENDIAN" >> $(OSDIR)/config.h; \
+	else \
+	  echo "big endian"; \
+	  echo "#define LC_BIG_ENDIAN" >> $(OSDIR)/config.h; \
+	fi
+	@rm -f endiantest.c endiantest
 
 ### Check if the user has libjpeg installed
 	@echo -n "Checking for jpeg support... "
@@ -78,7 +106,7 @@ config:
 	  echo "HAVE_JPEGLIB = no" >> $(OSDIR)/config.mk; \
 	  echo "#undef LC_HAVE_JPEGLIB" >> $(OSDIR)/config.h; \
 	fi
-	@rm -rf jpegtest.c jpegtest
+	@rm -f jpegtest.c jpegtest
 
 ### Check if the user has zlib installed
 	@echo -n "Checking for zlib support... "
@@ -94,9 +122,9 @@ config:
 	  echo "HAVE_ZLIB = no" >> $(OSDIR)/config.mk; \
 	  echo "#undef LC_HAVE_ZLIB" >> $(OSDIR)/config.h; \
 	fi
-	@rm -rf ztest.c ztest
+	@rm -f ztest.c ztest
 
-### Check if the user has libjpeg installed
+### Check if the user has libpng installed
 	@echo -n "Checking for png support... "
 	@echo "char png_read_info();" > pngtest.c
 	@echo "int main() { png_read_info(); return 0; }" >> pngtest.c
@@ -110,7 +138,7 @@ config:
 	  echo "HAVE_PNGLIB = no" >> $(OSDIR)/config.mk; \
 	  echo "#undef LC_HAVE_PNGLIB" >> $(OSDIR)/config.h; \
 	fi
-	@rm -rf pngtest.c pngtest
+	@rm -f pngtest.c pngtest
 
 	@echo "" >> $(OSDIR)/config.h
 	@echo "#endif // _CONFIG_H_" >> $(OSDIR)/config.h

@@ -29,12 +29,17 @@ OBJ := \
 
 
 ### link the program
-.PHONY: all
+.PHONY: all static
 
 all: $(BIN)
 
+static: bin/leocad.static
+
 bin/leocad: $(OBJ) bin
 	$(CC) -o $@ $(OBJ) $(LIBS)
+
+bin/leocad.static: $(OBJ) bin
+	$(CC) -static -o $@ $(OBJ) $(LIBS)
 
 bin:
 	mkdir bin

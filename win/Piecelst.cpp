@@ -109,6 +109,50 @@ void CPiecesList::OnItemchanged(NMHDR* pNMHDR, LRESULT* pResult)
 
 		if (pBar->m_bGroups)
 			m_nLastPieces[pBar->m_nCurGroup] = pNMListView->iItem;
+
+		CRect Rect;
+		POINT MousePos;
+
+		GetCursorPos(&MousePos);
+		GetItemRect(pNMListView->iItem, &Rect, LVIR_BOUNDS);
+		ScreenToClient(&MousePos);
+
+		if (Rect.PtInRect(MousePos))
+		{
+			int row, col;
+			RECT cellrect;
+			row = CellRectFromPoint (CPoint(MousePos), &cellrect, &col);
+			if (row != -1)
+			{
+				int offset = 7;
+				if( col == 0 ) 
+				{
+					CRect rcLabel;
+					GetItemRect(row, &rcLabel, LVIR_LABEL);
+					offset = rcLabel.left - cellrect.left + offset / 2;
+				}
+				cellrect.top--;
+
+				m_TitleTip.ShowWindow(SW_HIDE);
+				m_TitleTip.Show (cellrect, GetItemText(row, col), offset-1, GetItemState (row, LVIS_FOCUSED));
+			}
+		}
+	}
+	else if (pNMListView->uOldState & LVIS_SELECTED)
+	{
+		CWnd* CaptureWnd = GetCapture();
+		if ((CaptureWnd != NULL) && (CaptureWnd ->m_hWnd == m_TitleTip.m_hWnd))
+			ReleaseCapture();
+
+		CRect Rect;
+		POINT MousePos;
+
+		GetCursorPos(&MousePos);
+		GetItemRect(pNMListView->iItem, &Rect, LVIR_BOUNDS);
+		ScreenToClient(&MousePos);
+
+		if (Rect.PtInRect(MousePos))
+			m_TitleTip.ShowWindow(SW_HIDE);
 	}
 
 	*pResult = 0;

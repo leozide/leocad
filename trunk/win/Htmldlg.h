@@ -46,7 +46,6 @@ protected:
 	afx_msg void OnListClick();
 	afx_msg void OnLayoutClick();
 	afx_msg void OnHtmdlgBrowsefolder();
-	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

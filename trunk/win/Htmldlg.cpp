@@ -91,15 +91,3 @@ void CHTMLDlg::OnHtmdlgBrowsefolder()
 		UpdateData (FALSE);
 	}
 }
-
-void CHTMLDlg::OnOK() 
-{
-	UpdateData();
-
-	if (m_strFolder[m_strFolder.GetLength()-1] != '\\') 
-		m_strFolder += "\\";
-
-	UpdateData(FALSE);
-	
-	CDialog::OnOK();
-}

@@ -14,7 +14,20 @@
 #define LC_VERSION "0.73.0"
 #define LC_INSTALL_PREFIX "C:\\leocad"
 
+typedef signed char lcint8;
+typedef unsigned char lcuint8;
+typedef signed short lcint16;
+typedef unsigned short lcuint16;
+typedef signed int lcint32;
+typedef unsigned int lcuint32;
+
 #define LC_LITTLE_ENDIAN
+#define LCUINT16(val) val
+#define LCUINT32(val) val
+#define LCINT16(val) val
+#define LCINT32(val) val
+#define LCFLOAT(val) val
+
 #define LC_HAVE_JPEGLIB
 #define LC_HAVE_ZLIB
 #define LC_HAVE_PNGLIB

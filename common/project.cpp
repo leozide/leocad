@@ -5913,7 +5913,8 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
   for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
   {
     pLight->Select (false, bFocusOnly, false);
-    pLight->GetTarget ()->Select (false, bFocusOnly, false);
+    if (pLight->GetTarget ())
+      pLight->GetTarget ()->Select (false, bFocusOnly, false);
   }
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 }

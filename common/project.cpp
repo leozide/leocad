@@ -3366,6 +3366,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							char* ext = strrchr(opts.filename, '.');
 							*ext = 0;
 							sprintf(filename, "%s%02d.%s", opts.filename, i+1, ext+1);
+                                                        *ext = '.';
 						}
 						else
 							strcpy(filename, opts.filename);
@@ -6267,8 +6268,17 @@ void Project::RotateSelectedObjects(float x, float y, float z)
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsSelected())
 		{
-			pPiece->CompareBoundingBox (bs);
-			nSel++;
+                  /*
+                  pPiece->GetPosition (pos);
+                  if (pos[0] < bs[0]) bs[0] = pos[0];
+                  if (pos[1] < bs[1]) bs[1] = pos[1];
+                  if (pos[2] < bs[2]) bs[2] = pos[2];
+                  if (pos[0] > bs[3]) bs[3] = pos[0];
+                  if (pos[1] > bs[4]) bs[4] = pos[1];
+                  if (pos[2] > bs[5]) bs[5] = pos[2];
+                  */
+                  pPiece->CompareBoundingBox (bs);
+                  nSel++;
 		}
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)

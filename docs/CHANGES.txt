@@ -1,5 +1,12 @@
 This is a changelog for developers only, not for ordinary users.
 
+20/12/2000
+        - Fixed crash when saving pictures of multiple steps.
+
+================================================================================
+                                  Version 0.73
+================================================================================
+
 18/12/2000
 	- Fixed win32 help file.
 

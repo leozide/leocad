@@ -1089,7 +1089,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_FILE_SAVE_PROJECT:
 		{
 			CFileDialog dlg(FALSE, "*.lcd", (char*)param, OFN_HIDEREADONLY|OFN_PATHMUSTEXIST|OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE,
-				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||");
+				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat;*.ldr)|*.dat;*.ldr|All Files (*.*)|*.*||");
 
 			dlg.m_ofn.lpfnHook = OFNSaveHookProc;
 			dlg.m_ofn.hInstance = AfxGetInstanceHandle();

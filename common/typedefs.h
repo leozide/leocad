@@ -249,6 +249,7 @@ typedef struct
 	bool listend;
 	bool liststep;
 	bool highlight;
+  bool htmlext;
 	LC_IMAGEDLG_OPTS imdlg;
 } LC_HTMLDLG_OPTS;
 

@@ -395,6 +395,7 @@
 #define IDC_MF_HEADANGLE                1221
 #define IDC_MF_NECKANGLE                1222
 #define IDC_MF_ARMLANGLE                1223
+#define IDC_HTMLDLG_HTMLEXT             1223
 #define IDC_MF_ARMRANGLE                1224
 #define IDC_MF_HANDLANGLE               1225
 #define IDC_MF_HANDRANGLE               1226
@@ -649,7 +650,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        234
 #define _APS_NEXT_COMMAND_VALUE         33155
-#define _APS_NEXT_CONTROL_VALUE         1223
+#define _APS_NEXT_CONTROL_VALUE         1224
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

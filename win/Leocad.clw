@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CCADView
+LastClass=CHTMLDlg
 LastTemplate=CHeaderCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "leocad.h"
@@ -80,7 +80,7 @@ Resource17=IDD_SELECT_OBJECTS
 Resource18=IDD_ARRAY
 Resource19=IDD_STEP
 Resource20=IDD_MINIFIG
-Resource21=IDD_HTML
+Resource21=IDR_MAINFRAME
 Resource22=IDD_PROGRESS
 Resource23=IDR_PIECEEDITOR
 Resource24=IDD_PREFGENERAL
@@ -97,7 +97,7 @@ Resource34=IDD_SAVEPICTUREDLG_TEMPLATE
 Resource35=IDD_PIECEEDITOR
 Class50=CGroupEditTree
 Class51=CSortHeaderCtrl
-Resource36=IDR_MAINFRAME
+Resource36=IDD_HTML
 
 [CLS:CAboutDlg]
 Type=0
@@ -191,6 +191,9 @@ Type=0
 BaseClass=CDialog
 HeaderFile=Htmldlg.h
 ImplementationFile=Htmldlg.cpp
+Filter=D
+VirtualFilter=dWC
+LastObject=CHTMLDlg
 
 [CLS:CImageDlg]
 Type=0
@@ -569,7 +572,7 @@ Control3=IDCANCEL,button,1342242816
 [DLG:IDD_HTML]
 Type=1
 Class=CHTMLDlg
-ControlCount=15
+ControlCount=16
 Control1=IDC_STATIC,button,1342177287
 Control2=IDC_HTMDLG_SINGLEPAGE,button,1342308361
 Control3=IDC_HTMDLG_ONESTEP,button,1342177289
@@ -579,12 +582,13 @@ Control6=IDC_HTMDLG_LIST_STEP,button,1342242819
 Control7=IDC_HTMDLG_LIST_END,button,1342242819
 Control8=IDC_HTMDLG_LISTIMAGES,button,1476591619
 Control9=IDC_HTMDLG_HIGHLIGHT,button,1342242819
-Control10=IDC_STATIC,static,1342308352
-Control11=IDC_HTMDLG_OUTPUT,edit,1350631552
-Control12=IDC_HTMDLG_BROWSEFOLDER,button,1342242816
-Control13=IDOK,button,1342242817
-Control14=IDCANCEL,button,1342242816
-Control15=IDC_HTMDLG_IMAGEOPTIONS,button,1342242816
+Control10=IDC_HTMLDLG_HTMLEXT,button,1342242819
+Control11=IDC_STATIC,static,1342308352
+Control12=IDC_HTMDLG_OUTPUT,edit,1350631552
+Control13=IDC_HTMDLG_BROWSEFOLDER,button,1342242816
+Control14=IDOK,button,1342242817
+Control15=IDCANCEL,button,1342242816
+Control16=IDC_HTMDLG_IMAGEOPTIONS,button,1342242816
 
 [DLG:IDD_IMAGE]
 Type=1

@@ -1,0 +1,109 @@
+This is a changelog for developers only, not for ordinary users.
+
+18/12/2000
+	- Fixed win32 help file.
+
+17/12/2000
+	- Fixed win2k startup crash.
+
+16/12/2000
+        - Fixed AVI saving.
+        - Fixed rotation bug.
+
+15/12/2000
+        - Fixed small bug in the texture font.
+
+03/12/2000
+        - Added Save Picture dialog to the linux version.
+        - Added an overwrite prompt when saving a project under linux.
+
+02/12/2000
+        - Added project loading preview to the linux version.
+
+24/11/2000
+        - Renamed several functions from the Matrix class.
+        - Added const to several functions.
+
+23/11/2000
+        - Now all object classes have a Select () function.
+
+18/11/2000
+        - Fixed animation playback under linux.
+        - Fixed Z buffer bug in the piece preview.
+        - Fixed blending in piece preview.
+
+12/11/2000
+        - Added the PtrArray class.
+        - Started adding the internal messaging system.
+        - Link with g++ instead of gcc.
+        - Moved all keyframer functions to the Object class.
+
+09/11/2000
+        - First implementation of the light classes.
+        - Added a const float* operator to the Vector class.
+        - Added functions to create transformation matrixes.
+        - Faster rendering of the camera objects.
+        - Added new minifig pieces.
+
+01/10/2000
+	- Added an option to save custom minifigs to the Minifig Wizard.
+
+30/09/2000
+	- Enabled the "Make Default" button of the preferences dialog (Linux).
+
+24/09/2000
+	- Finished adding the new minifig rotation options.
+
+20/09/2000
+	- Fixed the numeric keypad under Linux, thanks to Renaud Breard.
+	- Updated the Array dialog.
+
+18/09/2000
+	- Added new menu shortcuts.
+	- Fixed endianess bugs when loading piece information.
+	- Fixed piece preview mirrored image.
+	- Fixed some warning messages in FreeBSD.
+	- Added endian test to auto-configuration.
+	- Fixed gtk-config problem under FreeBSD.
+
+16/09/2000
+	- Added man page, thanks to Patrick Mahoney.
+	- Moved gif and jpg functions from image.cpp to separate files.
+	- Modified the Makefile to automatically check for libjpeg, zlib and
+          libpng. It also creates a config.h file with the options.
+
+15/09/2000
+	- Fixed problem with "focus follow mouse" in X, thanks to Renaud Breard.
+
+13/09/2000
+	- Fixed bug that caused image files to be saved upside down.
+
+12/09/2000
+	- Fixed bug when exporting POV-Ray files using LGEO.
+	- Changed GL library name under Linux from 'libGL.so.1' to 'libGL.so'.
+
+27/08/2000
+	- Save window position and size under Linux.
+
+25/08/2000
+	- Changes to the Linux version:
+	- The Pieces toolbar can now be resized when docked or detached from
+	  the main window.
+	- The toolbar menu now has the checkboxes correct.
+	- Remember toolbar state between sessions.
+
+24/08/2000
+	- Updated the Windows version with the new Minifig Wizard.
+	- Fixed OpenGL problems on the Windows version.
+
+21/08/2000
+	- New options for the Minifig Wizard, now each piece can be rotated.
+
+19/08/2000
+	- Fixed a bug when you insert a piece after a rotated piece wouldn't
+	  show the new piece correctly.
+	- Added a new parameter to Project::Initialize to search the program
+	  directory for the piece library. Useful if a Linux user wants to
+	  install everything in the same directory and keeps compatibility
+	  with installations in /usr/local/share/leocad.
+	- Initial attempt of a BeOS port. 

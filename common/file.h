@@ -6,16 +6,18 @@
 #define _FILE_H_
 
 #include <stdio.h>
+#include <string.h>
+#include "defines.h"
 
 class File
 {
- public:
+public:
   // Constructors
   File();
   virtual ~File();
 
   // Implementation
- public:
+public:
   virtual unsigned long GetPosition() const = 0;
   virtual unsigned long Seek(long lOff, int nFrom) = 0;
   virtual void SetLength(unsigned long nNewLen) = 0;
@@ -41,6 +43,15 @@ class File
   virtual void Abort()=0;
   virtual void Flush()=0;
   virtual void Close()=0;
+
+  const char* GetFileName() const
+    { return FileName; }
+
+  void SetFileName(const char* Name)
+    { strncpy(FileName, Name, LC_MAXPATH); }
+
+protected:
+  char FileName[LC_MAXPATH];
 };
 
 class FileMem : public File

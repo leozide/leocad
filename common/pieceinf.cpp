@@ -1636,18 +1636,20 @@ void PieceInfo::RenderPiece(int nColor)
 					curcolor = (unsigned short)*info;
 				info++;
 
-				glColor3ubv(FlatColorArray[curcolor]);
 				if (curcolor > 13 && curcolor < 22)
 				{
 //					glEnable (GL_POLYGON_STIPPLE);
-					glEnable (GL_BLEND);
-					glDepthMask (GL_FALSE);
+                                  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                                  glEnable (GL_BLEND);
+                                  glDepthMask (GL_FALSE);
+                                  glColor4ubv (ColorArray[curcolor]);
 				}
 				else
 				{
 //					glDisable (GL_POLYGON_STIPPLE);
-					glDepthMask (GL_TRUE);
-					glDisable (GL_BLEND);
+                                  glDepthMask (GL_TRUE);
+                                  glDisable (GL_BLEND);
+                                  glColor3ubv (FlatColorArray[curcolor]);
 				}
 
 				if (*info)
@@ -1677,18 +1679,20 @@ void PieceInfo::RenderPiece(int nColor)
 					curcolor = *info;
 				info++;
 
-				glColor3ubv(FlatColorArray[curcolor]);
 				if (curcolor > 13 && curcolor < 22)
 				{
 //					glEnable (GL_POLYGON_STIPPLE);
-					glEnable (GL_BLEND);
-					glDepthMask (GL_FALSE);
+                                  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                                  glEnable (GL_BLEND);
+                                  glDepthMask (GL_FALSE);
+                                  glColor4ubv (ColorArray[curcolor]);
 				}
 				else
 				{
 //					glDisable (GL_POLYGON_STIPPLE);
-					glDepthMask (GL_TRUE);
-					glDisable (GL_BLEND);
+                                  glDepthMask (GL_TRUE);
+                                  glDisable (GL_BLEND);
+                                  glColor3ubv(FlatColorArray[curcolor]);
 				}
 
 				if (*info)
@@ -1703,6 +1707,8 @@ void PieceInfo::RenderPiece(int nColor)
 			}
 		}
 	}
+        // if glDepthMask is GL_FALSE then glClearBuffer (GL_DEPTH_BUFFER_BIT) doesn't work
+        glDepthMask (GL_TRUE);
 }
 
 void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* start)

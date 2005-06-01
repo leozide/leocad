@@ -739,14 +739,16 @@ void CPreferencesKeyboard::SetOptions()
 
 void CPreferencesKeyboard::GetOptions()
 {
-	if (SaveKeyboardShortcuts(m_strFileName))
+	if (m_strFileName.GetLength())
 	{
-		AfxGetApp()->WriteProfileString("Settings", "Keyboard", m_strFileName);
+		if (!SaveKeyboardShortcuts(m_strFileName))
+		{
+			m_strFileName = "";
+			AfxMessageBox("Error saving Keyboard Shortcuts file.", MB_OK | MB_ICONEXCLAMATION);
+		}
 	}
-	else
-	{
-		AfxMessageBox("Error saving Keyboard Shortcuts file.", MB_OK | MB_ICONEXCLAMATION);
-	}
+
+	AfxGetApp()->WriteProfileString("Settings", "Keyboard", m_strFileName);
 
   ((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators();
 }
@@ -964,6 +966,8 @@ void CPreferencesKeyboard::OnKeydlgReset()
 	{
 		ResetKeyboardShortcuts();
 		OnSelchangeKeydlgCmdlist();
+		m_strFileName = "";
+		UpdateData(FALSE);
 	}
 }
 

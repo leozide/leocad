@@ -58,6 +58,7 @@ public:
   CSplitterWnd  m_wndSplitter;
 
 	void UpdateMenuAccelerators();
+	void SetStatusBarPane(UINT ID, const char* Text);
 	void SetStatusBarMessage(const char* Message)
 		{ m_strStatusBar = Message; }
 

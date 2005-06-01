@@ -431,11 +431,37 @@ LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 
 	char str[128];
 	float pos[3];
+
 	project->GetFocusPosition(pos);
 	sprintf (str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_POSITION), str);
+
+	SetStatusBarPane(ID_INDICATOR_POSITION, str);
 
 	return TRUE;
+}
+
+// Helper function change the text of a status bar pane and resize it.
+void CMainFrame::SetStatusBarPane(UINT ID, const char* Text)
+{
+	// Set the pane text.
+	int Index = m_wndStatusBar.CommandToIndex(ID);
+	m_wndStatusBar.SetPaneText(Index, Text);
+
+	// Resize the pane to fit the text.
+	UINT nID, nStyle; int cxWidth;
+	HFONT hFont = (HFONT)m_wndStatusBar.SendMessage(WM_GETFONT);
+	CClientDC dcScreen(NULL);
+	HGDIOBJ hOldFont = NULL;
+
+	if (hFont != NULL)
+		hOldFont = dcScreen.SelectObject(hFont);
+
+	m_wndStatusBar.GetPaneInfo(Index, nID, nStyle, cxWidth);
+	cxWidth = dcScreen.GetTextExtent(Text).cx;
+	m_wndStatusBar.SetPaneInfo(Index, nID, nStyle, cxWidth);
+
+	if (hOldFont != NULL)
+		dcScreen.SelectObject(hOldFont);
 }
 
 LONG CMainFrame::OnPopupClose(UINT /*lParam*/, LONG /*wParam*/)

@@ -295,40 +295,43 @@ void Object::CalculateKeys (unsigned short nTime, bool bAnimation)
 
 void Object::CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value) const
 {
-  LC_OBJECT_KEY *next = NULL, *prev = NULL, *node;
+	LC_OBJECT_KEY *next = NULL, *prev = NULL, *node;
 
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
+	if (bAnimation)
+		node = m_pAnimationKeys;
+	else
+		node = m_pInstructionKeys;
 
-  while (node)
-  {
-    if (node->time <= nTime)
-      prev = node;
-    else
-    {
-      if (next == NULL)
-      {
-        next = node;
-        break;
-      }
-    }
+	while (node)
+	{
+		if (node->type == keytype)
+		{
+			if (node->time <= nTime)
+				prev = node;
+			else
+			{
+				if (next == NULL)
+				{
+					next = node;
+					break;
+				}
+			}
+		}
 
-    node = node->next;
-  }
+		node = node->next;
+	}
 
-  // TODO: USE KEY IN/OUT WEIGHTS
-  if (bAnimation && (next != NULL) && (prev->time != nTime))
-  {
-    float t = (float)(nTime - prev->time)/(next->time - prev->time);
+	// TODO: USE KEY IN/OUT WEIGHTS
+	if (bAnimation && (next != NULL) && (prev->time != nTime))
+	{
+		float t = (float)(nTime - prev->time)/(next->time - prev->time);
 
-    for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
-      value[j] = prev->param[j] + (next->param[j] - prev->param[j])*t;
-  }
-  else
-    for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
-      value[j] = prev->param[j];
+		for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
+			value[j] = prev->param[j] + (next->param[j] - prev->param[j])*t;
+	}
+	else
+		for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
+			value[j] = prev->param[j];
 }
 
 void Object::InsertTime (unsigned short start, bool animation, unsigned short time)

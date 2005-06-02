@@ -71,24 +71,27 @@ void MainWnd::UpdateMRU ()
 #endif
 }
 
-void MainWnd::AddToMRU (const char *filename)
+void MainWnd::AddToMRU(const char* Filename)
 {
-  // update the MRU list, if an existing MRU string matches file name
-  int i;
+	// Make a copy of the string in case we're loading a file from the MRU menu.
+	String str = Filename;
+	int i;
 
-  for (i = 0; i < (LC_MRU_MAX - 1); i++)
-    if (m_strMRU[i] == filename)
-      break;
+	// Search for Filename in the MRU list.
+	for (i = 0; i < (LC_MRU_MAX - 1); i++)
+		if (m_strMRU[i] == Filename)
+			break;
 
-  // move MRU strings before this one down
-  for (; i > 0; i--)
-    m_strMRU[i] = m_strMRU[i-1];
-  m_strMRU[0] = filename;
+	// Move MRU strings before this one down.
+	for (; i > 0; i--)
+		m_strMRU[i] = m_strMRU[i-1];
 
-  UpdateMRU ();
+	m_strMRU[0] = str;
+
+	UpdateMRU();
 }
 
-void MainWnd::RemoveFromMRU (int index)
+void MainWnd::RemoveFromMRU(int index)
 {
   for (int i = index; i < (LC_MRU_MAX - 1); i++)
     m_strMRU[i] = m_strMRU[i+1];

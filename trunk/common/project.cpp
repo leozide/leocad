@@ -1835,17 +1835,13 @@ void Project::Render(bool bToMemory)
 
 	m_bStopRender = false;
 	m_bRendering = true;
-	RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
-	//	SystemSwapBuffers();
 
-	if ((m_nDetail & LC_DET_FAST) && (m_nDetail & LC_DET_BACKGROUND))
-	{
+	if ((m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
+		RenderScene(false, true);
+	else
 		RenderScene(true, true);
-//		if (!m_bStopRender)
-//			SystemSwapBuffers();
-	}
-	m_bRendering = false;
 
+	m_bRendering = false;
 
 #ifdef BENCHMARK
 	dwMillis = GetTickCount() - dwMillis;
@@ -2193,12 +2189,12 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 			// Draw opaque pieces first
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				if (m_nDetail & LC_DET_BACKGROUND)
-				{
-					SystemPumpMessages();
-					if (m_bStopRender)
-						return;
-				}
+//				if (m_nDetail & LC_DET_BACKGROUND)
+//				{
+//					SystemPumpMessages();
+//					if (m_bStopRender)
+//						return;
+//				}
 
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 				{
@@ -6778,6 +6774,25 @@ bool Project::StopTracking(bool bAccept)
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
+
+			case LC_ACTION_ZOOM:
+			case LC_ACTION_PAN:
+			case LC_ACTION_ROTATE_VIEW:
+			case LC_ACTION_ROLL:
+			{
+				// For some reason the scene doesn't get redrawn when changing a camera but it does
+				// when moving things around, so manually get the full scene rendered again.
+				if (m_nDetail & LC_DET_FAST)
+					UpdateAllViews();
+			} break;
+
+			case LC_ACTION_SELECT:
+			case LC_ACTION_INSERT:
+			case LC_ACTION_LIGHT:
+			case LC_ACTION_ERASER:
+			case LC_ACTION_PAINT:
+			case LC_ACTION_ZOOM_REGION:
+				break;
 		}
 	}
 	else if (m_pTrackFile != NULL)

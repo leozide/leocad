@@ -465,12 +465,12 @@ void SystemUpdateRenderingMode(bool bBackground, bool bFast)
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
-	if (bFast)
-	{
-		pCtrl->EnableButton(ID_RENDER_BACKGROUND, TRUE);
-		pCtrl->CheckButton(ID_RENDER_BACKGROUND, bBackground);
-	}
-	else
+//	if (bFast)
+//	{
+//		pCtrl->EnableButton(ID_RENDER_BACKGROUND, TRUE);
+//		pCtrl->CheckButton(ID_RENDER_BACKGROUND, bBackground);
+//	}
+//	else
 	{
 		pCtrl->CheckButton(ID_RENDER_BACKGROUND, FALSE);
 		pCtrl->EnableButton(ID_RENDER_BACKGROUND, FALSE);

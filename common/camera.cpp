@@ -199,7 +199,7 @@ void Camera::Initialize()
 {
   m_fovy = 30;
   m_zNear = 1;
-  m_zFar = 100;
+  m_zFar = 500;
 
   m_pNext = NULL;
   m_nState = 0;

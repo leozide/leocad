@@ -93,3 +93,13 @@ void CHTMLDlg::OnHtmdlgBrowsefolder()
 		UpdateData (FALSE);
 	}
 }
+
+BOOL CHTMLDlg::OnInitDialog() 
+{
+	CDialog::OnInitDialog();
+	
+	GetDlgItem(IDC_HTMDLG_LISTIMAGES)->EnableWindow(m_bListStep || m_bListEnd);
+	GetDlgItem(IDC_HTMDLG_INDEX)->EnableWindow(m_nLayout != 0);
+
+	return TRUE;
+}

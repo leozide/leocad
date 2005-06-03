@@ -18,67 +18,67 @@ typedef struct
 
 BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 {
-  switch (pMsg->message)
-  {
-  case WM_PAINT:
-    wnd->OnDraw ();
-    break;
-  case WM_SIZE:
-    wnd->OnSize (LOWORD (pMsg->lParam), HIWORD (pMsg->lParam));
-    break;
-  case WM_LBUTTONDOWN:
-    wnd->OnLeftButtonDown (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
-      (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
-    break;
-  case WM_LBUTTONUP:
-    wnd->OnLeftButtonUp (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
-      (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
-    break;
-  case WM_LBUTTONDBLCLK:
-    wnd->OnLeftButtonDoubleClick (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
-      (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
-    break;
-  case WM_RBUTTONDOWN:
-    wnd->OnRightButtonDown (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
-      (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
-    break;
-  case WM_RBUTTONUP:
-    wnd->OnRightButtonUp (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
-      (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
-    break;
-  case WM_MOUSEMOVE:
-    wnd->OnMouseMove (LOWORD (pMsg->lParam), wnd->GetHeight () - HIWORD (pMsg->lParam) - 1,
-      (pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
-    break;
-  case WM_ERASEBKGND:
-    return TRUE;
-  case WM_CREATE:
-    wnd->OnInitialUpdate ();
-    break;
-  case WM_DESTROY:
-    wnd->DestroyContext ();
-    break;
-  case WM_PALETTECHANGED:
-    if ((HWND)pMsg->wParam == pMsg->hwnd)  // Responding to own message.
-      break;
-  case WM_QUERYNEWPALETTE:
-    {
-      GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData ();
+	switch (pMsg->message)
+	{
+		case WM_PAINT:
+			wnd->OnDraw ();
+			break;
+		case WM_SIZE:
+			wnd->OnSize (LOWORD (pMsg->lParam), HIWORD (pMsg->lParam));
+			break;
+		case WM_LBUTTONDOWN:
+			wnd->OnLeftButtonDown((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_LBUTTONUP:
+			wnd->OnLeftButtonUp((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_LBUTTONDBLCLK:
+			wnd->OnLeftButtonDoubleClick((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_RBUTTONDOWN:
+			wnd->OnRightButtonDown((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_RBUTTONUP:
+			wnd->OnRightButtonUp((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_MOUSEMOVE:
+			wnd->OnMouseMove((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_ERASEBKGND:
+			return TRUE;
+		case WM_CREATE:
+			wnd->OnInitialUpdate ();
+			break;
+		case WM_DESTROY:
+			wnd->DestroyContext ();
+			break;
+		case WM_PALETTECHANGED:
+			if ((HWND)pMsg->wParam == pMsg->hwnd)  // Responding to own message.
+				break;
+		case WM_QUERYNEWPALETTE:
+		{
+			GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData ();
 
-    	if (prv->m_pPal)
-    	{
-    		prv->m_pDC->SelectPalette (prv->m_pPal, FALSE);
-    		if (prv->m_pDC->RealizePalette () != 0)
-		    {
-    			// Some colors changed, so we need to do a repaint.
-		    	InvalidateRect (prv->m_hWnd, NULL, TRUE);
-    		}
-    	}
-    	return TRUE;
-    } break;
-  }
+			if (prv->m_pPal)
+			{
+				prv->m_pDC->SelectPalette (prv->m_pPal, FALSE);
+					if (prv->m_pDC->RealizePalette () != 0)
+					{
+						// Some colors changed, so we need to do a repaint.
+						InvalidateRect (prv->m_hWnd, NULL, TRUE);
+					}
+			}
+			return TRUE;
+		} break;
+	}
 
-  return FALSE;
+	return FALSE;
 }
 
 LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

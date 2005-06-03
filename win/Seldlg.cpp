@@ -21,11 +21,27 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CSelectDlg dialog
 
+int SelectDlgCompare(const void* elem1, const void* elem2)
+{
+	LC_SEL_DATA* a = (LC_SEL_DATA*)elem1;
+	LC_SEL_DATA* b = (LC_SEL_DATA*)elem2;
+
+	if (a->type == b->type)
+		return strcmp(a->name, b->name);
+	else
+		return a->type - b->type;
+}
 
 CSelectDlg::CSelectDlg(void* pData, CWnd* pParent /*=NULL*/)
 	: CDialog(CSelectDlg::IDD, pParent)
 {
 	m_pData = (LC_SEL_DATA*)pData;
+
+	int count = 0;
+	for (LC_SEL_DATA* p = m_pData; p->pointer != NULL; p++)
+		count++;
+
+	qsort(m_pData, count, sizeof(LC_SEL_DATA), SelectDlgCompare);
 
 	//{{AFX_DATA_INIT(CSelectDlg)
 	m_bCameras = TRUE;
@@ -68,7 +84,7 @@ END_MESSAGE_MAP()
 BOOL CSelectDlg::OnInitDialog() 
 {
 	UINT u = theApp.GetProfileInt(LC_SELDLG_KEY, LC_SELDLG_KEY_NAME, 
-			LC_SELDLG_CAMERAS|LC_SELDLG_GROUPS|LC_SELDLG_LIGHTS|LC_SELDLG_PIECES);
+	                              LC_SELDLG_CAMERAS|LC_SELDLG_GROUPS|LC_SELDLG_LIGHTS|LC_SELDLG_PIECES);
 
 	m_bCameras = (u & LC_SELDLG_CAMERAS) != 0;
 	m_bGroups = (u & LC_SELDLG_GROUPS) != 0;
@@ -79,35 +95,46 @@ BOOL CSelectDlg::OnInitDialog()
 
 	UpdateList(TRUE);
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CSelectDlg::OnSeldlgAll() 
 {
+	m_List.SetRedraw(FALSE);
+
 	for (int i = 0; i < m_List.GetCount(); i++)
 	{
 		m_List.SetSel(i);
 		((LC_SEL_DATA*)m_List.GetItemDataPtr(i))->selected = true;
 	}
+
+	m_List.SetRedraw(TRUE);
 }
 
 void CSelectDlg::OnSeldlgNone() 
 {
+	m_List.SetRedraw(FALSE);
+
 	for (int i = 0; i < m_List.GetCount(); i++)
 	{
 		m_List.SetSel(i, FALSE);
 		((LC_SEL_DATA*)m_List.GetItemDataPtr(i))->selected = false;
 	}
+
+	m_List.SetRedraw(TRUE);
 }
 
 void CSelectDlg::OnSeldlgInvert() 
 {
+	m_List.SetRedraw(FALSE);
+
 	for (int i = 0; i < m_List.GetCount(); i++)
 	{
 		m_List.SetSel(i, !m_List.GetSel(i));
 		((LC_SEL_DATA*)m_List.GetItemDataPtr(i))->selected = (m_List.GetSel(i) != 0);
 	}
+
+	m_List.SetRedraw(TRUE);
 }
 
 void CSelectDlg::OnOK() 
@@ -136,6 +163,8 @@ void CSelectDlg::UpdateList(BOOL bFirst)
 	BOOL bGroups = m_bGroups;
 	UpdateData(TRUE);
 	int i, idx;
+
+	m_List.SetRedraw(FALSE);
 
 	if ((m_bPieces != bPieces) || bFirst)
 	{
@@ -227,6 +256,8 @@ void CSelectDlg::UpdateList(BOOL bFirst)
 
 	for (idx = 0; idx < m_List.GetCount(); idx++)
 		m_List.SetSel(idx, ((LC_SEL_DATA*)m_List.GetItemData(idx))->selected);
+
+	m_List.SetRedraw(TRUE);
 }
 
 void CSelectDlg::OnSelChange() 

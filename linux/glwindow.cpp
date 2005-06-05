@@ -33,7 +33,7 @@ static gint expose_event (GtkWidget *widget, GdkEventExpose *event, gpointer dat
 
   if (event->count > 0)
     return TRUE;
-  printf("draw\n");
+
   wnd->OnDraw ();
 
   return TRUE;
@@ -184,6 +184,7 @@ bool GLWindow::Create (void *data)
   gtk_widget_push_visual (visual);
 
   prv->widget = gtk_drawing_area_new ();
+  gtk_widget_set_double_buffered(GTK_WIDGET(prv->widget), FALSE);
 
   if (m_pShare == NULL)
     prv->context = pfnglXCreateContext (dpy, vi, NULL, True);

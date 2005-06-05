@@ -66,7 +66,7 @@ void* Sys_StartMemoryRender(int width, int height)
   render->glxcontext = pfnglXCreateContext (render->xdisplay, vi, NULL, True);
   render->pixmap = gdk_pixmap_new (NULL, width, height, render->visual->depth);
 
-  xpixmap = ((GdkPixmapPrivate*)render->pixmap)->xwindow;
+  xpixmap = (Pixmap)GDK_DRAWABLE_XID(render->pixmap);
   render->glxpixmap = pfnglXCreateGLXPixmap (render->xdisplay, vi, xpixmap);
 
   XFree(vi);
@@ -144,6 +144,10 @@ char* strlwr(char* string)
   return string;
 }
 
+int stricmp(const char* str1, const char* str2)
+{
+  return g_ascii_strcasecmp(str1, str2);
+}
 
 
 
@@ -575,7 +579,7 @@ void SystemUpdateRecentMenu (String names[4])
  
       gtk_widget_show (item);
       gtk_widget_set_sensitive (item, TRUE);
-      gtk_widget_add_accelerator (item, "activate_item", accel, text[0], 0, (GtkAccelFlags)0);
+      gtk_widget_add_accelerator (item, "activate_item", accel, text[0], (GdkModifierType)0, (GtkAccelFlags)0);
     }
   }
 }

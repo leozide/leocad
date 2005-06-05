@@ -37,6 +37,8 @@ GtkWidget* clist_title_with_arrow (GtkWidget* clist, char col, char* label_text)
 
 void set_notebook_tab (GtkWidget *notebook, gint page_num, GtkWidget *widget)
 {
+  gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook), gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_num), widget);
+  /*
   GtkNotebookPage *page;
   GtkWidget *notebook_page;
 
@@ -47,6 +49,7 @@ void set_notebook_tab (GtkWidget *notebook, gint page_num, GtkWidget *widget)
   gtk_notebook_insert_page (GTK_NOTEBOOK (notebook), notebook_page,
                             widget, page_num);
   gtk_widget_unref (notebook_page);
+  */
 }
 
 void set_button_pixmap (GtkWidget* widget, float* color)

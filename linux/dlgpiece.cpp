@@ -102,7 +102,7 @@ static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* info;
   int i, piece_type;
-  char* desc;
+  const gchar* desc;
 
   info = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "info");
   if (info == NULL)
@@ -379,7 +379,7 @@ int minifigdlg_execute (void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -388,7 +388,7 @@ int minifigdlg_execute (void* param)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
   gtk_widget_set_usize (button, 70, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-			      GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+			      GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   // Fill the combo boxes with the available pieces
   for (i = 0; i < LC_MFW_NUMITEMS; i++)

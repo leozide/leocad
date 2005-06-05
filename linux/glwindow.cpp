@@ -33,7 +33,7 @@ static gint expose_event (GtkWidget *widget, GdkEventExpose *event, gpointer dat
 
   if (event->count > 0)
     return TRUE;
-
+  printf("draw\n");
   wnd->OnDraw ();
 
   return TRUE;

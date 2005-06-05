@@ -128,7 +128,7 @@ int msgbox_execute (const char* text, const char *caption, int flags)
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
     gtk_signal_connect (GTK_OBJECT (w), "clicked",
                         GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
-    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
     GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
     gtk_widget_grab_default (w);
     gtk_widget_show (w);
@@ -139,7 +139,7 @@ int msgbox_execute (const char* text, const char *caption, int flags)
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
     gtk_signal_connect (GTK_OBJECT (w), "clicked",
                         GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
-    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
     gtk_widget_show (w);
 
     w = gtk_button_new_with_label ("");
@@ -147,8 +147,8 @@ int msgbox_execute (const char* text, const char *caption, int flags)
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
     gtk_signal_connect (GTK_OBJECT (w), "clicked",
                         GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
-    gtk_widget_add_accelerator (w, "clicked", group, GDK_Escape, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0);
     gtk_widget_show (w);
     ret = LC_CANCEL;
   }
@@ -586,7 +586,7 @@ int arraydlg_execute(void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_widget_show (button);
@@ -595,7 +595,7 @@ int arraydlg_execute(void* param)
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 0);
   gtk_container_border_width (GTK_CONTAINER (button), 12);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   hbox2 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox2);
@@ -753,6 +753,7 @@ int aboutdlg_execute (void* param)
 {
 #include "pixmaps/icon32.xpm"
   GtkWidget *dlg, *vbox1, *vbox2, *hbox, *frame, *scr, *w;
+  GtkTextBuffer *buffer;
   char info[512], buf[64];
   GLboolean valueb;
   GLint value;
@@ -785,11 +786,11 @@ int aboutdlg_execute (void* param)
   gtk_widget_show (vbox2);
   gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 10);
 
-  w = gtk_label_new ("LeoCAD for "LC_VERSION_OSNAME" Version "LC_VERSION);
+  w = gtk_label_new ("LeoCAD for "LC_VERSION_OSNAME" Version "LC_VERSION_TEXT);
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 
-  w = gtk_label_new ("Copyright (c) 1996-2001, BT Software");
+  w = gtk_label_new ("Copyright (c) 1996-2005, BT Software");
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 
@@ -808,7 +809,7 @@ int aboutdlg_execute (void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (w, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   frame = gtk_frame_new ("System Information");
   gtk_widget_show (frame);
@@ -882,13 +883,15 @@ int aboutdlg_execute (void* param)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   gtk_box_pack_start (GTK_BOX (vbox2), scr, TRUE, TRUE, 0);
 
-  w = gtk_text_new (NULL, NULL);
+  w = gtk_text_view_new();
   gtk_widget_show (w);
   gtk_container_add (GTK_CONTAINER (scr), w);
-  gtk_text_insert (GTK_TEXT (w), NULL, NULL, NULL, info, strlen(info));
 
-  if (GTK_TEXT (w)->vadj != NULL)
-    gtk_adjustment_set_value (GTK_ADJUSTMENT (GTK_TEXT (w)->vadj), 0);
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(w));
+  gtk_text_buffer_set_text (buffer, info, -1);
+
+  //  if (GTK_TEXT (w)->vadj != NULL)
+  //    gtk_adjustment_set_value (GTK_ADJUSTMENT (GTK_TEXT (w)->vadj), 0);
 
   return dlg_domodal(dlg, LC_OK);
 }
@@ -1015,7 +1018,7 @@ int htmldlg_execute (void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -1024,7 +1027,7 @@ int htmldlg_execute (void* param)
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
   gtk_widget_set_usize (button, 60, -2);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Images...");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -1292,7 +1295,7 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -1301,7 +1304,7 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
   gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, TRUE, 0);
   gtk_widget_set_usize (button, 70, -2);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   frame = gtk_frame_new ("Format");
   gtk_widget_show (frame);
@@ -1500,7 +1503,7 @@ int povraydlg_execute(void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -1509,7 +1512,7 @@ int povraydlg_execute(void* param)
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, TRUE, 5);
   gtk_widget_set_usize (button, -2, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   s.render = gtk_check_button_new_with_label ("Render Scene");
   gtk_widget_show (s.render);
@@ -2074,7 +2077,7 @@ int preferencesdlg_execute(void* param)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_usize (button, 80, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("OK");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -2083,7 +2086,7 @@ int preferencesdlg_execute(void* param)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_usize (button, 80, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Make Default");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -2408,13 +2411,15 @@ int propertiesdlg_execute(void* param)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
   gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
 
-  s.sum_comments = gtk_text_new (NULL, NULL);
+  s.sum_comments = gtk_text_view_new();
   gtk_widget_show (s.sum_comments);
   gtk_box_pack_start (GTK_BOX (vbox2), s.sum_comments, TRUE, TRUE, 0);
-  gtk_text_set_editable (GTK_TEXT (s.sum_comments), TRUE);
+  //  gtk_text_set_editable (GTK_TEXT (s.sum_comments), TRUE);
   gtk_widget_realize (s.sum_comments);
-  gtk_text_insert (GTK_TEXT (s.sum_comments), NULL, NULL, NULL,
-                   opts->strComments, strlen(opts->strComments));
+
+  GtkTextBuffer *buffer;
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
+  gtk_text_buffer_set_text(buffer, opts->strComments, -1);
 
   int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
   memset (&totalcount, 0, sizeof (totalcount));
@@ -2527,7 +2532,7 @@ int propertiesdlg_execute(void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("OK");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -2536,7 +2541,7 @@ int propertiesdlg_execute(void* param)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_usize (button, 70, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   return dlg_domodal(dlg, LC_CANCEL);
 }
@@ -2561,6 +2566,7 @@ static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 
 void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
 {
+#if 0
   int i;
   GtkWidget *item, *subtree;
 
@@ -2603,10 +2609,12 @@ void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OP
       gtk_tree_append (GTK_TREE(tree), item);
       gtk_widget_show (item);
     }
+#endif
 }
 
 int groupeditdlg_execute(void* param)
 {
+#if 0
   GtkWidget *dlg;
   GtkWidget *vbox, *hbox;
   GtkWidget *button, *tree, *scrolled_win;
@@ -2656,7 +2664,7 @@ int groupeditdlg_execute(void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -2665,11 +2673,13 @@ int groupeditdlg_execute(void* param)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
   gtk_widget_set_usize (button, 70, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   groupeditdlg_addchildren(tree, NULL, (LC_GROUPEDITDLG_OPTS*)param);
 
   return dlg_domodal(dlg, LC_CANCEL);
+#endif
+  return 0;
 }
 
 // =========================================================
@@ -2735,7 +2745,7 @@ int groupdlg_execute(void* param)
   GtkAccelGroup *accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   button = gtk_button_new_with_label ("Cancel");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -2744,7 +2754,7 @@ int groupdlg_execute(void* param)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
   gtk_widget_set_usize (button, 70, 25);
   gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   return dlg_domodal(dlg, LC_CANCEL);
 }
@@ -2825,6 +2835,7 @@ static void librarydlg_command (GtkWidget *widget, gpointer data)
 
 int librarydlg_execute (void *param)
 {
+#if 0
   GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *item, *menu, *menubar, *handle;
   GtkAccelGroup *accel, *menu_accel;
   int loop = 1, ret = LC_CANCEL;
@@ -2960,6 +2971,8 @@ int librarydlg_execute (void *param)
   gtk_widget_destroy (dlg);
 
   return ret;
+#endif
+  return LC_OK;
 }
 
 #else

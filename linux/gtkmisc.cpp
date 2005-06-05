@@ -8,7 +8,7 @@
 #include "gtkmisc.h"
 #include "globals.h"
 #include "project.h"
-#include "pixmenu.h"
+//#include "pixmenu.h"
 #include "gtktools.h"
 
 // =============================================================================
@@ -116,7 +116,8 @@ GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel, G
 
   menu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
-  *menu_accel = gtk_menu_ensure_uline_accel_group (GTK_MENU (menu));
+  //  *menu_accel = gtk_menu_ensure_uline_accel_group (GTK_MENU (menu));
+  *menu_accel = gtk_menu_get_accel_group(GTK_MENU(menu));
 
   return menu;
 }
@@ -129,13 +130,14 @@ GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *me
 
   item = gtk_menu_item_new_with_label ("");
   tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
+  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
 
   submenu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
-  *submenu_accel = gtk_menu_ensure_uline_accel_group (GTK_MENU (submenu));
+  //  *submenu_accel = gtk_menu_ensure_uline_accel_group (GTK_MENU (submenu));
+  *submenu_accel = gtk_menu_get_accel_group(GTK_MENU(submenu));
 
   return submenu;
 }
@@ -148,7 +150,7 @@ GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_
 
   item = gtk_menu_item_new_with_label ("");
   tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
+  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
 
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
@@ -166,7 +168,7 @@ GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixma
   GtkWidget *item, *accel_label, *pixmap_widget;
   guint tmp_key;
 
-  item = gtk_pixmap_menu_item_new ();
+  item = gtk_image_menu_item_new ();
 
   accel_label = gtk_accel_label_new (label);
   gtk_misc_set_alignment (GTK_MISC (accel_label), 0.0, 0.5);
@@ -177,10 +179,10 @@ GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixma
 
   pixmap_widget = new_pixmap (GTK_WIDGET (window), pixmap);
   gtk_widget_show (pixmap_widget);
-  gtk_pixmap_menu_item_set_pixmap (GTK_PIXMAP_MENU_ITEM (item), pixmap_widget);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), pixmap_widget);
 
   tmp_key = gtk_label_parse_uline (GTK_LABEL (accel_label), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
+  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
 
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
@@ -200,7 +202,7 @@ GtkWidget* create_check_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup 
 
   item = gtk_check_menu_item_new_with_label ("");
   tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
+  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
   gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (func), GINT_TO_POINTER (id));
@@ -223,7 +225,7 @@ GtkWidget* create_radio_menu_item (GtkWidget *menu, GtkWidget *last, gchar *labe
     group = gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (last));
   item = gtk_radio_menu_item_new_with_label (group, "");
   tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, 0, (GtkAccelFlags)0);
+  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
   gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (func), GINT_TO_POINTER (id));

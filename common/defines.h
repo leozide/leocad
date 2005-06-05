@@ -51,6 +51,7 @@
 
 char* strupr(char* string);
 char* strlwr(char* string);
+int stricmp(const char* str1, const char* str2);
 
 #endif
 

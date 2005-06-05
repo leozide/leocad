@@ -25,7 +25,7 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   GtkWidget *handle_box, *menu_bar, *menu, *menu_in_menu, *item;
   GtkAccelGroup *accel, *menu_accel, *menu_in_menu_accel;
 
-  accel = gtk_accel_group_get_default ();
+  accel = NULL;//gtk_accel_group_get_default ();
   handle_box = gtk_handle_box_new ();
   gtk_box_pack_start (GTK_BOX (vbox), handle_box, FALSE, FALSE, 0);
   gtk_widget_show (handle_box);

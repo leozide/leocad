@@ -494,7 +494,7 @@ static void update_window_layout ()
 
       if (pieces_floating == FALSE)
 	gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
-				pieces_width - GTK_PANED (pieces_parent)->gutter_size);
+				pieces_width);
     }
     else
     {
@@ -702,7 +702,7 @@ int main (int argc, char* argv[])
   // get the splitter in the correct size, must be done after the widget has been realized
   if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
     gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
-			    pieces_width - GTK_PANED (pieces_parent)->gutter_size);
+			    pieces_width);
 
   if (project->Initialize (argc, argv, app_path, lib_path) == false)
   {

@@ -44,7 +44,7 @@ void PiecePreview::OnDraw ()
   gluPerspective (30.0f, aspect, 1.0f, 100.0f);
   glMatrixMode (GL_MODELVIEW);
   glLoadIdentity ();
-  m_pPieceInfo->ZoomExtents ();
+  m_pPieceInfo->ZoomExtents (30.0f, aspect);
 
   float pos[4] = { 0, 0, 10, 0 }, *bg = project->GetBackgroundColor ();
   glLightfv (GL_LIGHT0, GL_POSITION, pos);

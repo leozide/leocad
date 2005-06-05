@@ -22,7 +22,6 @@ ifeq ($(shell uname), Linux)
 
 OS 	   := -DLC_LINUX
 OSDIR 	   := linux
-GTK_CONFIG := gtk-config
 
 endif
 
@@ -32,7 +31,6 @@ ifeq ($(shell uname), FreeBSD)
 
 OS 	   := -DLC_LINUX
 OSDIR 	   := linux
-GTK_CONFIG := gtk12-config
 CPPFLAGS   += -L/usr/local/lib
 
 endif
@@ -235,7 +233,19 @@ config:
 	echo "" >> $(OSDIR)/config.h
 	@rm -f endiantest.c endiantest
 
-### Check if the user has libjpeg installed
+#### Check if the user has GTK+ and GLIB installed.
+	@echo -n "Checking if GLIB and GTK+ are installed... "
+	@if (pkg-config --atleast-version=2.0.0 glib-2.0) && (pkg-config --atleast-version=2.0.0 gtk+-2.0); then \
+	  echo "ok"; \
+	  echo "CFLAGS += \$$(shell pkg-config gtk+-2.0 --cflags)" >> $(OSDIR)/config.mk; \
+	  echo "CXXFLAGS += \$$(shell pkg-config gtk+-2.0 --cflags)" >> $(OSDIR)/config.mk; \
+	  echo "LIBS += \$$(shell pkg-config gtk+-2.0 --libs)" >> $(OSDIR)/config.mk; \
+	else \
+	  echo "failed"; \
+	  echo "\$$(error GLIB and GTK+ not found, install the libraries and run make config again.)" >> $(OSDIR)/config.mk; \
+	fi
+
+## Check if the user has libjpeg installed
 	@echo -n "Checking for jpeg support... "
 	@echo "char jpeg_read_header();" > jpegtest.c
 	@echo "int main() { jpeg_read_header(); return 0; }" >> jpegtest.c

@@ -181,7 +181,7 @@ void ObjArray<T>::InsertAt(int Index, const T& Obj)
 	else
 		Expand(1);
 
-	m_nLength++;
+	m_Length++;
 	for (int i = m_Length - 1; i > Index; i--)
 		m_Data[i] = m_Data[i-1];
 

@@ -1,6 +1,5 @@
 ### ALL CONFIGURATION SHOULD BE IN CONFIG.MK, NOT HERE
 include config.mk
--include $(OSDIR)/config.mk
 
 ### Module directories
 MODULES := $(OSDIR) common
@@ -17,6 +16,8 @@ LIBS :=
 SRC :=
 
 BIN := bin/leocad
+
+-include $(OSDIR)/config.mk
 
 ### include the description for
 ###   each module
@@ -53,12 +54,12 @@ endif
 ###   dependencies
 %.d: %.c
 	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
-	@./depend.sh $@ $(@D) $(CC) $(CFLAGS) $(CPPFLAGS) -w $<
+	@$(CC) -MM -MT '$(patsubst %.d,%.o, $@)' $(CFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
 %.d: %.cpp
 	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
-	@./depend.sh $@ $(@D) $(CXX) $(CXXFLAGS) $(CPPFLAGS) -w $<
+	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
 ### Various cleaning functions

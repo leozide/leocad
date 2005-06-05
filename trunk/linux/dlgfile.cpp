@@ -24,7 +24,7 @@
 static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent *event, GtkPreview *preview)
 {
   GtkWidget *parent = gtk_widget_get_toplevel (GTK_WIDGET (clist));
-  char *filename, *p;
+  const char *filename, *p;
   bool loaded = false;
   Image image;
 

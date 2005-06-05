@@ -82,13 +82,15 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   gtk_box_pack_start (GTK_BOX (vbox), main_toolbar.handle_box, FALSE, FALSE, 0);
   //  if (user_rc.view_main_toolbar)
     gtk_widget_show (main_toolbar.handle_box);
-  main_toolbar.toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  main_toolbar.toolbar = gtk_toolbar_new ();
+  gtk_toolbar_set_orientation(GTK_TOOLBAR(main_toolbar.toolbar), GTK_ORIENTATION_HORIZONTAL);
+  gtk_toolbar_set_style(GTK_TOOLBAR(main_toolbar.toolbar), GTK_TOOLBAR_ICONS);
   //  gtk_toolbar_set_style (GTK_TOOLBAR (main_toolbar.toolbar), user_rc.toolbar_style);
   gtk_container_add (GTK_CONTAINER (main_toolbar.handle_box), main_toolbar.toolbar);
   gtk_widget_show (main_toolbar.toolbar);
 
   gtk_container_border_width (GTK_CONTAINER (main_toolbar.toolbar), 2);
-  gtk_toolbar_set_button_relief (GTK_TOOLBAR (main_toolbar.toolbar), GTK_RELIEF_NONE);
+  //  gtk_toolbar_set_button_relief (GTK_TOOLBAR (main_toolbar.toolbar), GTK_RELIEF_NONE);
   //  gtk_toolbar_set_space_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_SPACE_LINE);
   //  gtk_toolbar_set_space_size (GTK_TOOLBAR (main_toolbar.toolbar), 10);
 
@@ -145,13 +147,15 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   //  if (user_rc.view_tool_toolbar)
     gtk_widget_show (tool_toolbar.handle_box);
 
-  tool_toolbar.toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  tool_toolbar.toolbar = gtk_toolbar_new();
+  gtk_toolbar_set_orientation(GTK_TOOLBAR(tool_toolbar.toolbar), GTK_ORIENTATION_HORIZONTAL);
+  gtk_toolbar_set_style(GTK_TOOLBAR(tool_toolbar.toolbar), GTK_TOOLBAR_ICONS);
   //  gtk_toolbar_set_style (GTK_TOOLBAR (tool_toolbar.toolbar), user_rc.toolbar_style);
   gtk_container_add (GTK_CONTAINER (tool_toolbar.handle_box), tool_toolbar.toolbar);
   gtk_widget_show (tool_toolbar.toolbar);
 
   gtk_container_border_width (GTK_CONTAINER (tool_toolbar.toolbar), 2);
-  gtk_toolbar_set_button_relief (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_RELIEF_NONE);
+  //  gtk_toolbar_set_button_relief (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_RELIEF_NONE);
 
   tool_toolbar.brick = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
      GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, "Piece", "Insert Piece", "",
@@ -208,13 +212,15 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   //  if (user_rc.view_anim_toolbar)
     gtk_widget_show (anim_toolbar.handle_box);
 
-  anim_toolbar.toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  anim_toolbar.toolbar = gtk_toolbar_new();
+  gtk_toolbar_set_orientation(GTK_TOOLBAR(anim_toolbar.toolbar), GTK_ORIENTATION_HORIZONTAL);
+  gtk_toolbar_set_style(GTK_TOOLBAR(anim_toolbar.toolbar), GTK_TOOLBAR_ICONS);
 //  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), user_rc.toolbar_style);
   gtk_container_add (GTK_CONTAINER (anim_toolbar.handle_box), anim_toolbar.toolbar);
   gtk_widget_show (anim_toolbar.toolbar);
 
   gtk_container_border_width (GTK_CONTAINER (anim_toolbar.toolbar), 2);
-  gtk_toolbar_set_button_relief (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_RELIEF_NONE);
+  //  gtk_toolbar_set_button_relief (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_RELIEF_NONE);
 
   anim_toolbar.first = gtk_toolbar_append_item (GTK_TOOLBAR (anim_toolbar.toolbar),
      "First", "Go to the Start", "", new_pixmap (window, an_first), 
@@ -326,10 +332,11 @@ static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButt
   preview->SetCurrentPiece ((PieceInfo*)gtk_clist_get_row_data (GTK_CLIST (piecelist), row));
 }
 
-static void piececombo_popup_position (GtkMenu *menu, gint *x, gint *y, gpointer data)
+static void piececombo_popup_position (GtkMenu *menu, gint *x, gint *y, gboolean* push, gpointer data)
 {
   gdk_window_get_origin (pieceentry->window, x, y);
   *y += pieceentry->allocation.height;
+  *push = true;
 }
 
 static void piececombo_popup (GtkWidget *widget, gpointer data)
@@ -397,7 +404,7 @@ void piececombo_add (const char* str)
 static void piececombo_changed (GtkWidget *widget, gpointer data)
 {
   PiecesLibrary *pLib = project->GetPiecesLibrary ();
-  char* str;
+  const gchar* str;
   int i;
 
   str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
@@ -673,7 +680,9 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 #include "pixmaps/pi-misc.xpm"
 #include "pixmaps/pi-tech.xpm"
 
-  grouptoolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  grouptoolbar = gtk_toolbar_new();
+  gtk_toolbar_set_orientation(GTK_TOOLBAR(grouptoolbar), GTK_ORIENTATION_HORIZONTAL);
+  gtk_toolbar_set_style(GTK_TOOLBAR(grouptoolbar), GTK_TOOLBAR_ICONS);
   gtk_container_set_border_width (GTK_CONTAINER(grouptoolbar), 2);
   //gtk_toolbar_set_space_size (GTK_TOOLBAR(toolbar), 5);
 

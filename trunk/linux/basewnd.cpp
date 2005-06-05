@@ -112,7 +112,7 @@ int BaseWnd::MessageBox (const char* text, const char* caption, int flags)
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
     gtk_signal_connect (GTK_OBJECT (w), "clicked",
                         GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_YES));
-    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
     GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
     gtk_widget_grab_default (w);
     gtk_widget_show (w);
@@ -123,7 +123,7 @@ int BaseWnd::MessageBox (const char* text, const char* caption, int flags)
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
     gtk_signal_connect (GTK_OBJECT (w), "clicked",
                         GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_NO));
-    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
     gtk_widget_show (w);
 
     w = gtk_button_new_with_label ("");
@@ -131,8 +131,8 @@ int BaseWnd::MessageBox (const char* text, const char* caption, int flags)
     gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, TRUE, 0);
     gtk_signal_connect (GTK_OBJECT (w), "clicked",
                         GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, 0, (GtkAccelFlags)0);
-    gtk_widget_add_accelerator (w, "clicked", group, GDK_Escape, 0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
+    gtk_widget_add_accelerator (w, "clicked", group, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0);
     gtk_widget_show (w);
     ret = LC_CANCEL;
   }
@@ -239,7 +239,7 @@ void BaseWnd::SetMenuItemText (int id, const char *text)
   {
     gtk_label_set_pattern (GTK_LABEL (GTK_BIN (m_pMenuItems[id].widget)->child), pattern);
     gtk_widget_add_accelerator (m_pMenuItems[id].widget, "activate_item",
-                                m_pMenuItems[id].accel, accel_key, 0, (GtkAccelFlags)0);
+                                m_pMenuItems[id].accel, accel_key, (GdkModifierType)0, (GtkAccelFlags)0);
   }
 
   g_free (pattern);

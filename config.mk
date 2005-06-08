@@ -242,7 +242,8 @@ config:
 	  echo "LIBS += \$$(shell pkg-config gtk+-2.0 --libs)" >> $(OSDIR)/config.mk; \
 	else \
 	  echo "failed"; \
-	  echo "\$$(error GLIB and GTK+ not found, install the libraries and run make config again.)" >> $(OSDIR)/config.mk; \
+	  rm -rf $(OSDIR)/config.mk; \
+	  exit 1; \
 	fi
 
 ## Check if the user has libjpeg installed

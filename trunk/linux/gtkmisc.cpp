@@ -103,41 +103,30 @@ GtkWidget* menu_tearoff (GtkWidget *menu)
   return menu_item;
 }
  
-GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel, GtkAccelGroup **menu_accel)
+GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel)
 {
   GtkWidget *item, *menu;
-  guint tmp_key;
 
-  item = gtk_menu_item_new_with_label ("");
-  tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", accel, tmp_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
+  item = gtk_menu_item_new_with_mnemonic(label);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (bar), item);
 
   menu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
-  //  *menu_accel = gtk_menu_ensure_uline_accel_group (GTK_MENU (menu));
-  *menu_accel = gtk_menu_get_accel_group(GTK_MENU(menu));
 
   return menu;
 }
 
-GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_accel,
-				GtkAccelGroup **submenu_accel)
+GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *accel)
 {
   GtkWidget *item, *submenu;
-  guint tmp_key;
 
-  item = gtk_menu_item_new_with_label ("");
-  tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
+  item = gtk_menu_item_new_with_mnemonic(label);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
 
   submenu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
-  //  *submenu_accel = gtk_menu_ensure_uline_accel_group (GTK_MENU (submenu));
-  *submenu_accel = gtk_menu_get_accel_group(GTK_MENU(submenu));
 
   return submenu;
 }
@@ -146,12 +135,8 @@ GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_
 			     GtkSignalFunc func, GtkObject *window, int id, const char* data)
 {
   GtkWidget *item;
-  guint tmp_key;
 
-  item = gtk_menu_item_new_with_label ("");
-  tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
-
+  item = gtk_menu_item_new_with_mnemonic (label);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
   gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (func), GINT_TO_POINTER (id));
@@ -165,24 +150,13 @@ GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_
 GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixmap, GtkAccelGroup *menu_accel,
                                     GtkSignalFunc func, GtkObject *window, int id, const char* data)
 {
-  GtkWidget *item, *accel_label, *pixmap_widget;
-  guint tmp_key;
+  GtkWidget *item, *pixmap_widget;
 
-  item = gtk_image_menu_item_new ();
-
-  accel_label = gtk_accel_label_new (label);
-  gtk_misc_set_alignment (GTK_MISC (accel_label), 0.0, 0.5);
-
-  gtk_container_add (GTK_CONTAINER (item), accel_label);
-  gtk_accel_label_set_accel_widget (GTK_ACCEL_LABEL (accel_label), item);
-  gtk_widget_show (accel_label);
+  item = gtk_image_menu_item_new_with_mnemonic(label);
 
   pixmap_widget = new_pixmap (GTK_WIDGET (window), pixmap);
   gtk_widget_show (pixmap_widget);
   gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), pixmap_widget);
-
-  tmp_key = gtk_label_parse_uline (GTK_LABEL (accel_label), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
 
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
@@ -198,11 +172,8 @@ GtkWidget* create_check_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup 
 				   GtkSignalFunc func, GtkObject *window, int id, const char* data)
 {
   GtkWidget *item;
-  guint tmp_key;
 
-  item = gtk_check_menu_item_new_with_label ("");
-  tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
+  item = gtk_check_menu_item_new_with_mnemonic(label);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
   gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (func), GINT_TO_POINTER (id));
@@ -218,14 +189,11 @@ GtkWidget* create_radio_menu_item (GtkWidget *menu, GtkWidget *last, gchar *labe
 				   GtkObject *window, int id, const char* data)
 {
   GtkWidget *item;
-  guint tmp_key;
   GSList *group = NULL;
 
   if (last != NULL)
     group = gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (last));
-  item = gtk_radio_menu_item_new_with_label (group, "");
-  tmp_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (item)->child), label);
-  gtk_widget_add_accelerator (item, "activate_item", menu_accel, tmp_key, (GdkModifierType)0, (GtkAccelFlags)0);
+  item = gtk_radio_menu_item_new_with_mnemonic(group, label);
   gtk_widget_show (item);
   gtk_container_add (GTK_CONTAINER (menu), item);
   gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (func), GINT_TO_POINTER (id));

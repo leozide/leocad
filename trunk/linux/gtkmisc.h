@@ -6,12 +6,11 @@ void load_pixmap (const char* filename, GdkPixmap **gdkpixmap, GdkBitmap **mask)
 
 GtkWidget* menu_separator (GtkWidget *menu);
 GtkWidget* menu_tearoff (GtkWidget *menu);
-GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel, GtkAccelGroup **menu_accel);
-GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_accel,
-				GtkAccelGroup **submenu_accel);
-GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_accel,
+GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel);
+GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *accel);
+GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *accel,
 			     GtkSignalFunc func, GtkObject *window, int id, const char* data);
-GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixmap, GtkAccelGroup *menu_accel,
+GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixmap, GtkAccelGroup *accel,
                                     GtkSignalFunc func, GtkObject *window, int id, const char* data);
 GtkWidget* create_check_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_accel,
 				   GtkSignalFunc func, GtkObject *window, int id, const char* data);

@@ -544,7 +544,6 @@ void SystemUpdateSelected(unsigned long flags)
 
 void SystemUpdateRecentMenu (String names[4])
 {
-  GtkAccelGroup *accel = (GtkAccelGroup*)gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "file_menu_accel");
   GtkWidget *item;
   char buf[32];
 
@@ -565,21 +564,12 @@ void SystemUpdateRecentMenu (String names[4])
     }
     else
     {
-      char pattern[LC_MAXPATH+4], text[LC_MAXPATH+4];
-      gint length;
+      char text[LC_MAXPATH+4];
 
-      sprintf (text, "%d- %s", i+1, (char*)names[i]);
-      gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
- 
-      length = strlen (text);
-      memset (pattern, ' ', length);
-      pattern[length] = '\0';
-      pattern[0] = '_';
-      gtk_label_set_pattern (GTK_LABEL (GTK_BIN (item)->child), pattern);
- 
-      gtk_widget_show (item);
-      gtk_widget_set_sensitive (item, TRUE);
-      gtk_widget_add_accelerator (item, "activate_item", accel, text[0], (GdkModifierType)0, (GtkAccelFlags)0);
+      sprintf (text, "_%d- %s", i+1, (char*)names[i]);
+      gtk_label_set_text_with_mnemonic(GTK_LABEL(GTK_BIN(item)->child), text);
+      gtk_widget_show(item);
+      gtk_widget_set_sensitive(item, TRUE);
     }
   }
 }

@@ -185,22 +185,22 @@ void BaseWnd::CheckMenuItem (int id, bool check)
   gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (m_pMenuItems[id].widget), check);  
   ignore_commands = false;
 }
+#include <stdio.h>
 
 void BaseWnd::SetMenuItemText (int id, const char *text)
 {
-  guint accel_key = GDK_VoidSymbol;
   gboolean underscore;
-  gchar *r, *p, *q, *str;
+  gchar *r;
+  const char *p;
   gchar *pattern;
   gint length;
 
   length = strlen (text);
   pattern = g_new (gchar, length+1);
-  str = g_strdup (text);
   
   underscore = FALSE;
   
-  p = q = str;
+  p = text;
   r = pattern;
 
   while (*p)
@@ -208,15 +208,13 @@ void BaseWnd::SetMenuItemText (int id, const char *text)
     if (underscore)
     {
       if (*p == '&')
-        *r++ = ' ';
+        *r++ = *p;
       else
       {
         *r++ = '_';
-        if (accel_key == GDK_VoidSymbol)
-          accel_key = gdk_keyval_to_lower (*p);
+	*r++ = *p;
       }
 
-      *q++ = *p;
       underscore = FALSE;
     }
     else
@@ -224,25 +222,13 @@ void BaseWnd::SetMenuItemText (int id, const char *text)
       if (*p == '&')
         underscore = TRUE;
       else
-      {
-        *q++ = *p;
-        *r++ = ' ';
-      }
+	*r++ = *p;
     }
     p++;
   }
-  *q = 0;
   *r = 0;
 
-  gtk_label_set_text (GTK_LABEL (GTK_BIN (m_pMenuItems[id].widget)->child), str);
-  if (accel_key != GDK_VoidSymbol)
-  {
-    gtk_label_set_pattern (GTK_LABEL (GTK_BIN (m_pMenuItems[id].widget)->child), pattern);
-    gtk_widget_add_accelerator (m_pMenuItems[id].widget, "activate_item",
-                                m_pMenuItems[id].accel, accel_key, (GdkModifierType)0, (GtkAccelFlags)0);
-  }
-
+  gtk_label_set_text_with_mnemonic(GTK_LABEL(GTK_BIN(m_pMenuItems[id].widget)->child), pattern);
   g_free (pattern);
-  g_free (str);
 }
 

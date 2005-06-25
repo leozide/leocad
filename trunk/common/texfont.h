@@ -18,7 +18,7 @@ public:
 	{ if (m_bLoaded) m_pTexture->MakeCurrent (); }
 
 	bool FileLoad(File& file);
-	void PrintText(float left, float top, const char* text) const;
+	void PrintText(float left, float top, float z, const char* text) const;
 	void PrintText(float Left, float Top, float ScaleX, float ScaleY, const char* Text) const;
 	void PrintCharScaled(float scale, char ch) const;
 	void GetStringDimensions(int* cx, int* cy, const char* Text) const;

@@ -2050,77 +2050,89 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 
 		float ratio = (float)w/h;
 		glViewport(x, y, w, h);
-		m_pViewCameras[vp]->LoadProjection(ratio);
 
+		// Disable lighting.
 		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
 		{
 			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
 				glDisable(GL_LIGHTING);
+		}
+		
+		if (m_nSnap & LC_DRAW_AXIS)
+		{
+	    Matrix Mats[3];
+		  Mats[0].CreateLookat(m_pViewCameras[vp]->GetEyePos(), m_pViewCameras[vp]->GetTargetPos(), m_pViewCameras[vp]->GetUpVec());
+			Mats[0].SetTranslation(0, 0, 0);
 
-			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
+			float m1[] = { 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
+			float m2[] = { 0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 1 };
+			Mats[1].Multiply(Mats[0], Matrix(m1));
+			Mats[2].Multiply(Mats[0], Matrix(m2));
 
-			// There's got to be an easier way...
-			if (m_nSnap & LC_DRAW_AXIS)
+			float pts[3][3] = { { 20, 0, 0 }, { 0, 20, 0 }, { 0, 0, 20 } };
+			Mats[0].TransformPoints(&pts[0][0], 3);
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(0, w, 0, h, -50, 50);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			glTranslatef(25.375f, 25.375f, 0.0f);
+
+			// Draw the arrows.
+			for (int i = 0; i < 3; i++)
 			{
-				GLdouble model[16], proj[16], obj1x, obj1y, obj1z, obj2x, obj2y, obj2z;
-				GLint viewport[4];
-				
-				glGetDoublev(GL_MODELVIEW_MATRIX, model);
-				glGetDoublev(GL_PROJECTION_MATRIX, proj);
-				glGetIntegerv(GL_VIEWPORT, viewport);
-				gluUnProject(25, 25, 0.1, model, proj, viewport, &obj1x, &obj1y, &obj1z);
-				gluUnProject(45, 25, 0.1, model, proj, viewport, &obj2x, &obj2y, &obj2z); 
+				switch (i)
+				{
+				case 0:
+					glColor3f(0.8f, 0.0f, 0.0f);
+					break;
+				case 1:
+					glColor3f(0.0f, 0.8f, 0.0f);
+					break;
+				case 2:
+					glColor3f(0.0f, 0.0f, 0.8f);
+					break;
+				}
 
-				float ds = (float)sqrt((obj1x-obj2x)*(obj1x-obj2x)+(obj1y-obj2y)*(obj1y-obj2y)+(obj1z-obj2z)*(obj1z-obj2z));
-				float verts[30][3] = { {0,0,0}, {0.8f*ds,0,0}, {0.8f*ds,0.2f*ds,0}, {ds,0,0}, {0.8f*ds,-0.2f*ds,0}, 
-				                       {0.8f*ds,0,0}, {0.8f*ds,0,0.2f*ds}, {ds,0,0}, {0.8f*ds,0,-0.2f*ds}, {0.8f*ds,0,0},
-				                       {0,0,0},{0,0.8f*ds,0}, {0,0.8f*ds,0.2f*ds}, {0,ds,0}, {0,0.8f*ds,-0.2f*ds},
-				                       {0,0.8f*ds,0}, {0.2f*ds,0.8f*ds,0}, {0,ds,0}, {-0.2f*ds,0.8f*ds,0}, {0,0.8f*ds,0},
-				                       {0,0,0}, {0,0,0.8f*ds}, {0.2f*ds,0,0.8f*ds}, {0,0,ds}, {-0.2f*ds,0,0.8f*ds},
-				                       {0,0,0.8f*ds}, {0,0.2f*ds,0.8f*ds}, {0,0,ds}, {0,-0.2f*ds,0.8f*ds}, {0,0,0.8f*ds} };
-
-				glPushMatrix();
-				glTranslated(obj1x, obj1y, obj1z);
-				glVertexPointer (3, GL_FLOAT, 0, verts);
-				glDrawArrays(GL_LINE_STRIP, 0, 30);
-
-				Matrix m;
-				m.FromInverse(model);
-				m.SetTranslation(0,0,0);
-
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-				m_pScreenFont->MakeCurrent();
-				glEnable(GL_TEXTURE_2D);
-				glEnable(GL_ALPHA_TEST);
-
-				glPushMatrix();
-				glTranslatef(1.4f*ds, 0, 0);
-				glMultMatrixf(m.m);
-				glBegin(GL_QUADS);
-				m_pScreenFont->PrintCharScaled (0.025f * ds, 'X');
+				glBegin(GL_LINES);
+				glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
+				glVertex3f(0, 0, 0);
 				glEnd();
-				glPopMatrix();
 
-				glPushMatrix();
-				glTranslatef(0, 1.4f*ds, 0);
-				glMultMatrixf(m.m);
-				glBegin(GL_QUADS);
-				m_pScreenFont->PrintCharScaled (0.025f * ds, 'Y');
+				glBegin(GL_TRIANGLE_FAN);
+				glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
+				for (int j = 0; j < 9; j++)
+				{
+					float pt[3] = { 12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f };
+					Mats[i].TransformPoints(pt, 1);
+					glVertex3f(pt[0], pt[1], pt[2]);
+				}
 				glEnd();
-				glPopMatrix();
-
-				glPushMatrix();
-				glTranslatef(0, 0, 1.4f*ds);
-				glMultMatrixf(m.m);
-				glBegin(GL_QUADS);
-				m_pScreenFont->PrintCharScaled (0.025f * ds, 'Z');
-				glEnd();
-				glPopMatrix();
-				
-				glPopMatrix();
-				glDisable(GL_TEXTURE_2D);
-				glDisable(GL_ALPHA_TEST);
 			}
+
+			// Draw the text.
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			m_pScreenFont->MakeCurrent();
+			glEnable(GL_TEXTURE_2D);
+			glEnable(GL_ALPHA_TEST);
+
+			glBegin(GL_QUADS);
+			glColor3f(0, 0, 0);
+			m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
+			m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
+			m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
+			glEnd();
+
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_ALPHA_TEST);
+		}
+					
+		m_pViewCameras[vp]->LoadProjection(ratio);
+
+		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
+		{
+			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
 
 			if (m_nSnap & LC_DRAW_GRID)
 				glCallList (m_nGridList);
@@ -2749,7 +2761,7 @@ void Project::RenderOverlays(int Viewport)
 
 					glBegin(GL_QUADS);
 					glColor3f(0.4f, 0.4f, 0.4f);
-					m_pScreenFont->PrintText((float)ScreenX - Vp[0] - (cx / 2), (float)ScreenY - Vp[1] + (cy / 2), buf);
+					m_pScreenFont->PrintText((float)ScreenX - Vp[0] - (cx / 2), (float)ScreenY - Vp[1] + (cy / 2), 0.0f, buf);
 					glEnd();
 
 					glDisable(GL_TEXTURE_2D);
@@ -2869,7 +2881,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
 			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
 
-      m_pScreenFont->PrintText (x + 3, y + h - 6, m_pViewCameras[vp]->GetName ());
+      m_pScreenFont->PrintText(x + 3, y + h - 6, 0.0f, m_pViewCameras[vp]->GetName());
 		}
 		glEnd();
 	

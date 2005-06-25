@@ -963,39 +963,41 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,122,24,41,14
 END
 
-IDD_PREFGENERAL DIALOG DISCARDABLE  0, 0, 240, 114
+IDD_PREFGENERAL DIALOG DISCARDABLE  0, 0, 245, 132
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Saving",IDC_STATIC,7,7,126,66
+    GROUPBOX        "Saving",IDC_STATIC,7,7,130,70
     CONTROL         "Autosave every",IDC_GENDLG_AUTOSAVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,12,17,63,8
-    EDITTEXT        IDC_GENDLG_SAVETIME,77,16,20,12,ES_AUTOHSCROLL
-    LTEXT           "minutes",IDC_STATIC,101,17,24,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,19,63,8
+    EDITTEXT        IDC_GENDLG_SAVETIME,77,18,20,12,ES_AUTOHSCROLL
+    LTEXT           "minutes",IDC_STATIC,101,19,24,8
     CONTROL         "Create backups",IDC_GENDLG_BACKUP,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,12,32,65,8
-    LTEXT           "Default projects folder:",IDC_STATIC,12,45,72,8
-    EDITTEXT        IDC_GENDLG_FOLDER,12,57,100,10,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_GENDLG_FOLDERBTN,118,57,8,10
-    LTEXT           "Default user:",IDC_STATIC,11,77,44,8
-    EDITTEXT        IDC_GENDLG_USER,57,76,75,10,ES_AUTOHSCROLL
-    LTEXT           "Mouse sensitivity",IDC_STATIC,11,92,59,8
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,12,35,65,8
+    LTEXT           "Default projects folder:",IDC_STATIC,12,47,72,8
+    EDITTEXT        IDC_GENDLG_FOLDER,12,59,105,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_GENDLG_FOLDERBTN,121,59,8,10
+    LTEXT           "Default user:",IDC_STATIC,11,85,44,8
+    EDITTEXT        IDC_GENDLG_USER,57,83,75,12,ES_AUTOHSCROLL
+    LTEXT           "Mouse sensitivity",IDC_STATIC,11,100,59,8
     CONTROL         "Slider1",IDC_GENDLG_MOUSE,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,76,91,31,10
-    GROUPBOX        "Pieces Toolbar",IDC_STATIC,141,7,92,93
+                    TBS_NOTICKS | WS_TABSTOP,76,99,31,10
+    GROUPBOX        "Pieces Toolbar",IDC_STATIC,146,7,92,93
     CONTROL         "Show subparts",IDC_GENDLG_SUBPARTS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,146,19,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,19,81,8
     CONTROL         "Show piece numbers",IDC_GENDLG_NUMBERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,146,32,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,32,81,8
     CONTROL         "Enable preview",IDC_GENDLG_PREVIEW,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,146,45,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,45,81,8
     CONTROL         "Auto zoom preview",IDC_GENDLG_ZOOM,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,146,58,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,58,81,8
     CONTROL         "Sort pieces by group",IDC_GENDLG_GROUP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,146,71,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,71,81,8
     CONTROL         "Show combobox",IDC_GENDLG_COMBO,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,146,84,81,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,84,81,8
+    CONTROL         "Check for updates on startup",IDC_GENDLG_UPDATES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,113,119,8
 END
 
 IDD_PREFDRAWING DIALOG DISCARDABLE  0, 0, 240, 114
@@ -1545,9 +1547,9 @@ BEGIN
     IDD_PREFGENERAL, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 233
+        RIGHTMARGIN, 238
         TOPMARGIN, 7
-        BOTTOMMARGIN, 106
+        BOTTOMMARGIN, 124
     END
 
     IDD_PREFDRAWING, DIALOG

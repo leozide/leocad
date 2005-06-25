@@ -35,6 +35,7 @@ public:
 	BOOL	m_bCombo;
 	CString	m_bUser;
 	CString	m_strUser;
+	BOOL	m_Updates;
 	//}}AFX_DATA
 
 

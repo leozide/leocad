@@ -37,6 +37,7 @@ CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::
 	m_bAutoSave = FALSE;
 	m_bCombo = FALSE;
 	m_strUser = _T("");
+	m_Updates = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -61,6 +62,7 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_GENDLG_COMBO, m_bCombo);
 	DDX_Text(pDX, IDC_GENDLG_USER, m_strUser);
 	DDV_MaxChars(pDX, m_strUser, 100);
+	DDX_Check(pDX, IDC_GENDLG_UPDATES, m_Updates);
 	//}}AFX_DATA_MAP
 }
 
@@ -90,8 +92,9 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_strFolder = strFolder;
 	m_strUser = strUser;
 
+	m_Updates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
 	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 
-		PIECEBAR_PREVIEW|PIECEBAR_GROUP|PIECEBAR_COMBO|PIECEBAR_ZOOMPREVIEW);
+	                                   PIECEBAR_PREVIEW|PIECEBAR_GROUP|PIECEBAR_COMBO|PIECEBAR_ZOOMPREVIEW);
 	m_bPreview = (i & PIECEBAR_PREVIEW) != 0;
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bGroup = (i & PIECEBAR_GROUP) != 0;
@@ -117,6 +120,7 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 	if (m_bZoom) i |= PIECEBAR_ZOOMPREVIEW;
 		
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
+	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);
 }
 
 BOOL CPreferencesGeneral::OnInitDialog() 

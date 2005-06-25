@@ -8,6 +8,7 @@
 #include "CADDoc.h"
 #include "CADView.h"
 #include <wininet.h>
+#include <process.h>
 #include "project.h"
 #include "globals.h"
 #include "system.h"
@@ -48,6 +49,81 @@ void wprintf(char *fmt, ...)
 	WriteConsole(__hStdOut, s, strlen(s), &cCharsWritten, NULL);
 }
 #endif
+
+// If Data is NULL this function won't display a message if there are no updates.
+static void CheckForUpdates(void* Data)
+{
+	HINTERNET session = InternetOpen("LeoCAD", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0) ;
+	
+	char szSizeBuffer[32];
+	DWORD dwLengthSizeBuffer = sizeof(szSizeBuffer); 
+	DWORD dwFileSize;
+	DWORD dwBytesRead;
+	CString Contents;
+
+	HINTERNET hHttpFile = InternetOpenUrl(session, "http://www.leocad.org/updates.txt", NULL, 0, 0, 0);
+
+	if (hHttpFile)
+	{
+		if(HttpQueryInfo(hHttpFile,HTTP_QUERY_CONTENT_LENGTH, szSizeBuffer, &dwLengthSizeBuffer, NULL))
+		{	 
+			dwFileSize = atol(szSizeBuffer);
+			LPSTR szContents = Contents.GetBuffer(dwFileSize);
+			
+			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
+			{
+				float ver;
+				int lib;
+
+				if (sscanf (szContents, "%f %d", &ver, &lib) == 2)
+				{
+					CString str;
+					bool Update = false;
+
+					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100 + (float)LC_VERSION_PATCH/1000)
+					{
+						str.Format("There's a newer version of LeoCAD available for download (%0.3f).\n", ver);
+						Update = true;
+					}
+					else
+						str = "You are using the latest version of LeoCAD.\n";
+
+					if (lib > project->GetPiecesLibrary ()->GetPieceCount ())
+					{
+						str += "There are new pieces available.\n\n";
+						Update = true;
+					}
+					else
+						str += "There are no new pieces available at this time.\n";
+
+					if (Data || Update)
+					{
+						if (Update)
+						{
+							str += "Would you like to visit the LeoCAD website now?\n";
+
+							if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
+							{
+								ShellExecute(::GetDesktopWindow(), _T("open"), _T("http://www.leocad.org"), NULL, NULL, SW_NORMAL); 
+							}
+						}
+						else
+							AfxMessageBox(str, MB_OK | MB_ICONINFORMATION);
+					}
+				}
+				else
+					AfxMessageBox("Unknown file information.");
+			}
+			InternetCloseHandle(hHttpFile);
+		}
+		else
+			AfxMessageBox("Could not connect.");
+	}
+	else
+		AfxMessageBox("Could not connect.");
+
+	InternetCloseHandle(session);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CCADApp
@@ -253,6 +329,9 @@ BOOL CCADApp::InitInstance()
 
   project->UpdateAllViews (NULL);
 
+	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
+		_beginthread(CheckForUpdates, 0, NULL);
+
   return TRUE;
 }
 
@@ -286,56 +365,7 @@ int CCADApp::ExitInstance()
 
 void CCADApp::OnHelpUpdates() 
 {
-	HINTERNET session = InternetOpen("LeoCAD", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0) ;
-	
-	char szSizeBuffer[32];
-	DWORD dwLengthSizeBuffer = sizeof(szSizeBuffer); 
-	DWORD dwFileSize;
-	DWORD dwBytesRead;
-	CString Contents;
-
-	HINTERNET hHttpFile = InternetOpenUrl(session, "http://www.leocad.org/updates.txt", NULL, 0, 0, 0);
-
-	if (hHttpFile)
-	{
-		if(HttpQueryInfo(hHttpFile,HTTP_QUERY_CONTENT_LENGTH, szSizeBuffer, &dwLengthSizeBuffer, NULL))
-		{	 
-			dwFileSize = atol(szSizeBuffer);
-			LPSTR szContents = Contents.GetBuffer(dwFileSize);
-			
-			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
-			{
-				float ver;
-				int lib;
-
-				if (sscanf (szContents, "%f %d", &ver, &lib) == 2)
-				{
-					CString str;
-
-					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100 + (float)LC_VERSION_PATCH/1000)
-						str.Format("There's a newer version of LeoCAD available for download (%0.3f).\n\n", ver);
-					else
-						str = "You are using the latest version of LeoCAD.\n\n";
-
-					if (lib > project->GetPiecesLibrary ()->GetPieceCount ())
-						str += "There are new pieces available.\n";
-					else
-						str += "There are no new pieces available at this time.\n";
-
-					AfxMessageBox(str, MB_OK | MB_ICONINFORMATION);
-				}
-				else
-					AfxMessageBox("Unknown file information.");
-			}
-			InternetCloseHandle(hHttpFile);
-		}
-		else
-			AfxMessageBox("Could not connect.");
-	}
-	else
-		AfxMessageBox("Could not connect.");
-
-	InternetCloseHandle(session);
+	CheckForUpdates(this);
 }
 
 void CCADApp::OnHelpHomePage() 

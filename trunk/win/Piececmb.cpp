@@ -125,7 +125,9 @@ BOOL CPiecesCombo::PreTranslateMessage(MSG* pMsg)
 		int nVirtKey = (int) pMsg->wParam;
 		if (nVirtKey == VK_DELETE || nVirtKey == VK_BACK)
 		{
+			CEdit* Edit = (CEdit*)GetWindow(GW_CHILD);
 			m_bAutoComplete = FALSE;
+			Edit->ReplaceSel("");
 		}
 		else if (nVirtKey == VK_RETURN)
 		{

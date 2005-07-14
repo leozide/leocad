@@ -798,6 +798,13 @@ void SystemUpdateCameraMenu(Camera* pCamera)
   ((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators(); 
 }
 
+void SystemUpdateCategories(bool SearchOnly)
+{
+	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
+	pBar->UpdatePiecesTree(SearchOnly);
+}
+
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
 extern UINT AFXAPI AfxGetFileName(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
 

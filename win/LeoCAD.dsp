@@ -344,6 +344,10 @@ SOURCE=.\Transbar.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\transdlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Wheelwnd.cpp
 # End Source File
 # Begin Source File
@@ -573,6 +577,10 @@ SOURCE=.\Tools.h
 # Begin Source File
 
 SOURCE=.\Transbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\transdlg.h
 # End Source File
 # Begin Source File
 

@@ -4,30 +4,33 @@
 template <class T>
 class PtrArray
 {
- public:
-  PtrArray (int nSize = 0);
-  ~PtrArray ();
+public:
+	PtrArray(int nSize = 0);
+	~PtrArray();
 
-  typedef int (*LC_PTRARRAY_COMPARE_FUNC) (T* a, T* b, void* data);
+	typedef int (*LC_PTRARRAY_COMPARE_FUNC)(T* a, T* b, void* data);
 
-  int GetSize () const
-    { return m_nLength; }
+	int GetSize() const
+		{ return m_nLength; }
 
-  T* RemoveIndex (int nIndex);
-  T* RemovePointer (T* pObj);
-  void Add (T* pObj);
-  void AddSorted (T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData);
-  void InsertAt (int nIndex, T* pObj);
+	T* RemoveIndex(int nIndex);
+	T* RemovePointer(T* pObj);
+	void RemoveAll();
+	void Add(T* pObj);
+	void AddSorted(T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData);
+	void InsertAt(int nIndex, T* pObj);
+	int FindIndex(T* Obj) const;
 
-  T* operator [](int nIndex) const
-    { return m_pData[nIndex]; }
+	PtrArray<T>& operator=(const PtrArray<T>& Array);
+	T* operator [](int nIndex) const
+		{ return m_pData[nIndex]; }
 
- protected:
-  void Expand (int nGrow);
+protected:
+	void Expand(int nGrow);
 
-  T** m_pData;
-  int m_nLength;
-  int m_nAlloc;
+	T** m_pData;
+	int m_nLength;
+	int m_nAlloc;
 };
 
 template <class T>
@@ -43,6 +46,7 @@ public:
 		{ return m_Length; }
 
 	void RemoveIndex(int Index);
+	void RemoveAll();
 	void Add(const T& Obj);
 	void AddSorted(const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData);
 	void InsertAt(int Index, const T& Obj);

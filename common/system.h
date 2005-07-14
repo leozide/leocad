@@ -75,6 +75,7 @@ void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);
 void SystemUpdateSelected(unsigned long flags);
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
+void SystemUpdateCategories(bool SearchOnly);
 
 void SystemInit();
 void SystemFinish();

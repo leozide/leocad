@@ -3,12 +3,19 @@
 
 #include "defines.h"
 #include "str.h"
+#include "array.h"
 
 class File;
 class Texture;
 class PieceInfo;
 
 #define LC_PIECESLIB_MAXGROUPS    32
+
+typedef struct
+{
+	String Name;
+	String Keywords;
+} PiecesLibraryCategory;
 
 class PiecesLibrary
 {
@@ -29,19 +36,40 @@ public:
 	bool NeedsReload () const
 		{ return m_bNeedsReload; }
 
+	// Categories.
+	void GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
+	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces);
+	void SetCategory(int Index, const String& Name, const String& Keywords);
+	void AddCategory(const String& Name, const String& Keywords);
+
+	const char* GetCategoryName(int Index) const
+		{ return m_Categories[Index].Name; }
+
+	int GetNumCategories() const
+		{ return m_Categories.GetSize(); }
+
+	int FindCategoryIndex(const String& CategoryName) const
+	{
+		for (int i = 0; i < m_Categories.GetSize(); i++)
+			if (m_Categories[i].Name == CategoryName)
+				return i;
+
+		return -1;
+	}
+
 	void CheckReload ();
   bool Load (const char* libpath);
   void Unload ();
 	bool LoadGroupConfig (const char* Filename);
 
-	// Search for stuff
+	// Search for pieces.
   PieceInfo* FindPieceInfo (const char* name) const;
   PieceInfo* GetPieceInfo (int index) const;
   int GetPieceIndex (PieceInfo *pInfo) const;
   Texture* FindTexture (const char* name) const;
   Texture* GetTexture (int index) const;
 
-	// File operations
+	// File operations.
   bool DeletePieces (char** names, int numpieces);
   bool LoadUpdate (const char* update);
 	bool DeleteTextures (char** Names, int NumTextures);
@@ -59,6 +87,9 @@ protected:
 	PieceInfo* m_pPieceIdx;	 // pieces array
 	int m_nTextureCount;     // number of textures
 	Texture* m_pTextures;    // textures array
+
+	// Categories.
+	ObjArray<PiecesLibraryCategory> m_Categories;
 
 	// Groups stuff
 	int m_nGroupCount;

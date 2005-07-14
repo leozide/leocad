@@ -9,9 +9,12 @@
 
 #include "TitleTip.h"
 #include "SortHead.h"
+#include "array.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPiecesList window
+
+class PieceInfo;
 
 class CPiecesList : public CListCtrl
 {
@@ -33,8 +36,10 @@ public:
 
 // Implementation
 public:
-	void UpdateList();
 	virtual ~CPiecesList();
+
+	void ChangeGroup();
+	void UpdateList(bool Repopulate = true);
 
 	// Generated message map functions
 protected:
@@ -46,6 +51,24 @@ protected:
 
 	CTitleTip m_TitleTip;
 	CSortHeaderCtrl m_HeaderCtrl;
+
+	void AddPiece(PieceInfo* Info, int ImageIndex);
+
+	// Variables for grouping patterned pieces together.
+	typedef struct
+	{
+		PieceInfo* Parent;
+		PtrArray<PieceInfo> Children;
+		bool Collapsed;
+	} PieceListGroup;
+
+	CImageList m_Images;
+	bool m_GroupPatterns;
+	PtrArray<PieceListGroup> m_Groups;
+	PtrArray<PieceInfo> m_Pieces;
+
+	void UpdateGroups();
+	void ClearGroups();
 
 	//{{AFX_MSG(CPiecesList)
 	afx_msg void OnColumnclick(NMHDR* pNMHDR, LRESULT* pResult);

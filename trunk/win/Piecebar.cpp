@@ -5,6 +5,8 @@
 #include "afxpriv.h"    // for CDockContext
 #include "resource.h"
 #include "piecebar.h"
+#include "library.h"
+#include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
 
@@ -30,13 +32,13 @@ CPiecesBar::CPiecesBar()
 	m_wndPiecePreview.m_bZoomPreview = (i & PIECEBAR_ZOOMPREVIEW) != 0;
 	m_nCurGroup = 1;
 
-    m_sizeMin = CSize(222, 200);
-    m_sizeHorz = CSize(200, 200);
-    m_sizeVert = CSize(200, 200);
-    m_sizeFloat = CSize(200, 200);
-    m_bTracking = FALSE;
-    m_bInRecalcNC = FALSE;
-    m_cxEdge = 5;
+	m_sizeMin = CSize(222, 200);
+	m_sizeHorz = CSize(200, 200);
+	m_sizeVert = CSize(200, 200);
+	m_sizeFloat = CSize(200, 200);
+	m_bTracking = FALSE;
+	m_bInRecalcNC = FALSE;
+	m_cxEdge = 5;
 	m_bDragShowContent = FALSE;
 	m_nPreviewHeight = AfxGetApp()->GetProfileInt("Settings", "Preview Height", 93);
 	m_bNoContext = FALSE;
@@ -48,20 +50,20 @@ CPiecesBar::~CPiecesBar()
 }
 
 BEGIN_MESSAGE_MAP(CPiecesBar, CControlBar)
-    //{{AFX_MSG_MAP(CPiecesBar)
-    ON_WM_PAINT()
-    ON_WM_NCPAINT()
-    ON_WM_WINDOWPOSCHANGED()
-    ON_WM_NCCALCSIZE()
-    ON_WM_LBUTTONUP()
-    ON_WM_MOUSEMOVE()
-    ON_WM_NCLBUTTONDOWN()
-    ON_WM_LBUTTONDOWN()
-    ON_WM_LBUTTONDBLCLK()
+	//{{AFX_MSG_MAP(CPiecesBar)
+	ON_WM_PAINT()
+	ON_WM_NCPAINT()
+	ON_WM_WINDOWPOSCHANGED()
+	ON_WM_NCCALCSIZE()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_NCLBUTTONDOWN()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
-    ON_WM_CAPTURECHANGED()
-    ON_WM_NCHITTEST()
-    ON_WM_SETCURSOR()
+	ON_WM_CAPTURECHANGED()
+	ON_WM_NCHITTEST()
+	ON_WM_SETCURSOR()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_CONTEXTMENU()
@@ -77,120 +79,113 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////
 // CPiecesBar message handlers
 
-BOOL CPiecesBar::Create(LPCTSTR lpszWindowName, CWnd* pParentWnd,
-                               CSize sizeDefault, BOOL bHasGripper,
-                               UINT nID, DWORD dwStyle)
+BOOL CPiecesBar::Create(LPCTSTR lpszWindowName, CWnd* pParentWnd, CSize sizeDefault, 
+                        BOOL bHasGripper, UINT nID, DWORD dwStyle)
 {
-    ASSERT_VALID(pParentWnd);   // must have a parent
-    ASSERT (!((dwStyle & CBRS_SIZE_FIXED)
-        && (dwStyle & CBRS_SIZE_DYNAMIC)));
+	ASSERT_VALID(pParentWnd);   // must have a parent
+	ASSERT (!((dwStyle & CBRS_SIZE_FIXED) && (dwStyle & CBRS_SIZE_DYNAMIC)));
 
-    // save the style
-    SetBarStyle(dwStyle & CBRS_ALL);
+	// save the style
+	SetBarStyle(dwStyle & CBRS_ALL);
 
-    CString wndclass = ::AfxRegisterWndClass(CS_DBLCLKS,
-        ::LoadCursor(NULL, IDC_ARROW),
-        ::GetSysColorBrush(COLOR_BTNFACE), 0);
+	CString wndclass = ::AfxRegisterWndClass(CS_DBLCLKS, ::LoadCursor(NULL, IDC_ARROW),
+	                                         ::GetSysColorBrush(COLOR_BTNFACE), 0);
 
-    dwStyle &= ~CBRS_ALL;
-    dwStyle &= WS_VISIBLE | WS_CHILD;
-    if (!CWnd::Create(wndclass, lpszWindowName, dwStyle, CRect(0,0,0,0),
-        pParentWnd, nID))
-        return FALSE;
+	dwStyle &= ~CBRS_ALL;
+	dwStyle &= WS_VISIBLE | WS_CHILD;
+	if (!CWnd::Create(wndclass, lpszWindowName, dwStyle, CRect(0,0,0,0),
+			pParentWnd, nID))
+			return FALSE;
 
-    m_sizeHorz = sizeDefault;
-    m_sizeVert = sizeDefault;
-    m_sizeFloat = sizeDefault;
+	m_sizeHorz = sizeDefault;
+	m_sizeVert = sizeDefault;
+	m_sizeFloat = sizeDefault;
 
-    m_bHasGripper = bHasGripper;
-    m_cyGripper = m_bHasGripper ? 12 : 0;
+	m_bHasGripper = bHasGripper;
+	m_cyGripper = m_bHasGripper ? 12 : 0;
 
-    return TRUE;
+	return TRUE;
 }
 
 BOOL CPiecesBar::IsHorzDocked() const
 {
-    return (m_nDockBarID == AFX_IDW_DOCKBAR_TOP ||
-        m_nDockBarID == AFX_IDW_DOCKBAR_BOTTOM);
+	return (m_nDockBarID == AFX_IDW_DOCKBAR_TOP || m_nDockBarID == AFX_IDW_DOCKBAR_BOTTOM);
 }
 
 BOOL CPiecesBar::IsVertDocked() const
 {
-    return (m_nDockBarID == AFX_IDW_DOCKBAR_LEFT ||
-        m_nDockBarID == AFX_IDW_DOCKBAR_RIGHT);
+	return (m_nDockBarID == AFX_IDW_DOCKBAR_LEFT || m_nDockBarID == AFX_IDW_DOCKBAR_RIGHT);
 }
 
 CSize CPiecesBar::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
 {
-    CRect rc;
+	CRect rc;
 
-    m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_TOP)->GetWindowRect(rc);
-    int nHorzDockBarWidth = bStretch ? 32767 : rc.Width() + 4;
-    m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_LEFT)->GetWindowRect(rc);
-    int nVertDockBarHeight = bStretch ? 32767 : rc.Height() + 4;
+	m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_TOP)->GetWindowRect(rc);
+	int nHorzDockBarWidth = bStretch ? 32767 : rc.Width() + 4;
+	m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_LEFT)->GetWindowRect(rc);
+	int nVertDockBarHeight = bStretch ? 32767 : rc.Height() + 4;
 
-    if (bHorz)
-        return CSize(nHorzDockBarWidth, m_sizeHorz.cy);
-    else
-        return CSize(m_sizeVert.cx, nVertDockBarHeight);
+	if (bHorz)
+		return CSize(nHorzDockBarWidth, m_sizeHorz.cy);
+	else
+		return CSize(m_sizeVert.cx, nVertDockBarHeight);
 }
 
 CSize CPiecesBar::CalcDynamicLayout(int nLength, DWORD dwMode)
 {
-    if (dwMode & (LM_HORZDOCK | LM_VERTDOCK))
-    {
-        if (nLength == -1)
-            GetDockingFrame()->DelayRecalcLayout();
-        return CControlBar::CalcDynamicLayout(nLength,dwMode);
-    }
+	if (dwMode & (LM_HORZDOCK | LM_VERTDOCK))
+	{
+		if (nLength == -1)
+			GetDockingFrame()->DelayRecalcLayout();
+		return CControlBar::CalcDynamicLayout(nLength,dwMode);
+	}
 
-    if (dwMode & LM_MRUWIDTH)
-        return m_sizeFloat;
+	if (dwMode & LM_MRUWIDTH)
+		return m_sizeFloat;
 
-    if (dwMode & LM_COMMIT)
-    {
-        m_sizeFloat.cx = nLength;
-        return m_sizeFloat;
-    }
+	if (dwMode & LM_COMMIT)
+	{
+		m_sizeFloat.cx = nLength;
+		return m_sizeFloat;
+	}
 
-    if (dwMode & LM_LENGTHY)
-        return CSize(m_sizeFloat.cx,
-            m_sizeFloat.cy = max(m_sizeMin.cy, nLength));
-    else
-        return CSize(max(m_sizeMin.cx, nLength), m_sizeFloat.cy);
+	if (dwMode & LM_LENGTHY)
+		return CSize(m_sizeFloat.cx,
+		m_sizeFloat.cy = max(m_sizeMin.cy, nLength));
+	else
+		return CSize(max(m_sizeMin.cx, nLength), m_sizeFloat.cy);
 }
 
 void CPiecesBar::OnWindowPosChanged(WINDOWPOS FAR* lpwndpos) 
 {
-    CControlBar::OnWindowPosChanged(lpwndpos);
+	CControlBar::OnWindowPosChanged(lpwndpos);
 
-    // Find on which side are we docked
-    m_nDockBarID = GetParent()->GetDlgCtrlID();
+	// Find on which side are we docked
+	m_nDockBarID = GetParent()->GetDlgCtrlID();
 
-    if (!m_bInRecalcNC)
-    {
-        m_bInRecalcNC = TRUE;
+	if (!m_bInRecalcNC)
+	{
+		m_bInRecalcNC = TRUE;
 
-        // Force recalc the non-client area
-        SetWindowPos(NULL, 0, 0, 0, 0,
-            SWP_NOMOVE | SWP_NOSIZE |
-            SWP_NOACTIVATE | SWP_NOZORDER |
-            SWP_FRAMECHANGED);
+		// Force recalc the non-client area
+		SetWindowPos(NULL, 0, 0, 0, 0,
+		             SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
-        m_bInRecalcNC = FALSE;
-    }
+		m_bInRecalcNC = FALSE;
+	}
 }
 
 BOOL CPiecesBar::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
-    if ((nHitTest != HTSIZE) || m_bTracking)
-        return CControlBar::OnSetCursor(pWnd, nHitTest, message);
+	if ((nHitTest != HTSIZE) || m_bTracking)
+		return CControlBar::OnSetCursor(pWnd, nHitTest, message);
 
-    if (IsHorzDocked())
-        ::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
-    else
-        ::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
-    return TRUE;
+	if (IsHorzDocked())
+		::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+	else
+		::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -198,45 +193,45 @@ BOOL CPiecesBar::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 //
 void CPiecesBar::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-    if (m_pDockBar != NULL)
-    {
-        // start the drag
-        ASSERT(m_pDockContext != NULL);
-        ClientToScreen(&point);
-        m_pDockContext->StartDrag(point);
-    }
-    else
-        CWnd::OnLButtonDown(nFlags, point);
+	if (m_pDockBar != NULL)
+	{
+		// start the drag
+		ASSERT(m_pDockContext != NULL);
+		ClientToScreen(&point);
+		m_pDockContext->StartDrag(point);
+	}
+	else
+		CWnd::OnLButtonDown(nFlags, point);
 }
 
 void CPiecesBar::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
-    if (m_pDockBar != NULL)
-    {
-        // toggle docking
-        ASSERT(m_pDockContext != NULL);
-        m_pDockContext->ToggleDocking();
-    }
-    else
-        CWnd::OnLButtonDblClk(nFlags, point);
+	if (m_pDockBar != NULL)
+	{
+		// toggle docking
+		ASSERT(m_pDockContext != NULL);
+		m_pDockContext->ToggleDocking();
+	}
+	else
+		CWnd::OnLButtonDblClk(nFlags, point);
 }
 
 void CPiecesBar::OnNcLButtonDown(UINT nHitTest, CPoint point) 
 {
-    if (m_bTracking) return;
+	if (m_bTracking) return;
 
-    if ((nHitTest == HTSIZE) && !IsFloating())
-        StartTracking();
-    else    
-        CControlBar::OnNcLButtonDown(nHitTest, point);
+	if ((nHitTest == HTSIZE) && !IsFloating())
+		StartTracking();
+	else    
+		CControlBar::OnNcLButtonDown(nHitTest, point);
 }
 
 void CPiecesBar::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-    if (m_bTracking)
+	if (m_bTracking)
 		StopTracking(TRUE);
 
-    CControlBar::OnLButtonUp(nFlags, point);
+	CControlBar::OnLButtonUp(nFlags, point);
 }
 
 void CPiecesBar::OnRButtonDown(UINT nFlags, CPoint point) 
@@ -249,152 +244,151 @@ void CPiecesBar::OnRButtonDown(UINT nFlags, CPoint point)
 
 void CPiecesBar::OnMouseMove(UINT nFlags, CPoint point) 
 {
-    if (m_bTracking)
-    {
+	if (m_bTracking)
+	{
 		ASSERT (!IsFloating());
 		CPoint pt = point;
 		ClientToScreen(&pt);
 
 		OnTrackUpdateSize(pt);
-    }
+	}
 
-    CControlBar::OnMouseMove(nFlags, point);
+	CControlBar::OnMouseMove(nFlags, point);
 }
 
 void CPiecesBar::OnCaptureChanged(CWnd *pWnd) 
 {
-    if (m_bTracking && pWnd != this)
-        StopTracking(FALSE); // cancel tracking
+	if (m_bTracking && pWnd != this)
+		StopTracking(FALSE); // cancel tracking
 
-    CControlBar::OnCaptureChanged(pWnd);
+	CControlBar::OnCaptureChanged(pWnd);
 }
 
 void CPiecesBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp) 
 {
 	UNREFERENCED_PARAMETER(bCalcValidRects);
 
-    // Compute the rectangle of the mobile edge
-    GetWindowRect(m_rectBorder);
-    m_rectBorder.OffsetRect(-m_rectBorder.left, -m_rectBorder.top);
-    m_rectBorder.DeflateRect(1, 1);
-    
-    m_rectGripper = m_rectBorder;
-    m_rectGripper.DeflateRect(5, 5);
-    m_rectGripper.right -= m_cxEdge;
-    m_rectGripper.bottom -= m_cxEdge;
-    CRect rc = lpncsp->rgrc[0];
+	// Compute the rectangle of the mobile edge
+	GetWindowRect(m_rectBorder);
+	m_rectBorder.OffsetRect(-m_rectBorder.left, -m_rectBorder.top);
+	m_rectBorder.DeflateRect(1, 1);
 
-    DWORD dwBorderStyle = m_dwStyle | CBRS_BORDER_ANY;
+	m_rectGripper = m_rectBorder;
+	m_rectGripper.DeflateRect(5, 5);
+	m_rectGripper.right -= m_cxEdge;
+	m_rectGripper.bottom -= m_cxEdge;
+	CRect rc = lpncsp->rgrc[0];
 
-    switch(m_nDockBarID)
-    {
-    case AFX_IDW_DOCKBAR_TOP:
-        dwBorderStyle &= ~CBRS_BORDER_BOTTOM;
-        rc.DeflateRect(m_cyGripper + 2, 2, 2, m_cxEdge + 2);
-        m_rectBorder.top = m_rectBorder.bottom - m_cxEdge;
-        break;
-    case AFX_IDW_DOCKBAR_BOTTOM:
-        dwBorderStyle &= ~CBRS_BORDER_TOP;
-        rc.DeflateRect(m_cyGripper + 2, m_cxEdge + 2, 2, 2);
-        m_rectBorder.bottom = m_rectBorder.top + m_cxEdge;
-        m_rectGripper.OffsetRect(0, m_cxEdge);
-        break;
-    case AFX_IDW_DOCKBAR_LEFT:
-        dwBorderStyle &= ~CBRS_BORDER_RIGHT;
-        rc.DeflateRect(2, m_cyGripper + 2, m_cxEdge + 2, 6);
-        m_rectBorder.left = m_rectBorder.right - m_cxEdge;
-        break;
-    case AFX_IDW_DOCKBAR_RIGHT:
-        dwBorderStyle &= ~CBRS_BORDER_LEFT;
-        rc.DeflateRect(m_cxEdge + 2, m_cyGripper + 2, 2, 6);
-        m_rectBorder.right = m_rectBorder.left + m_cxEdge;
-        m_rectGripper.OffsetRect(m_cxEdge, 0);
-        break;
-    default:
-        m_rectBorder.SetRectEmpty();
-        break;
-    }
+	DWORD dwBorderStyle = m_dwStyle | CBRS_BORDER_ANY;
 
-    lpncsp->rgrc[0] = rc;
+	switch(m_nDockBarID)
+	{
+	case AFX_IDW_DOCKBAR_TOP:
+		dwBorderStyle &= ~CBRS_BORDER_BOTTOM;
+		rc.DeflateRect(m_cyGripper + 2, 2, 2, m_cxEdge + 2);
+		m_rectBorder.top = m_rectBorder.bottom - m_cxEdge;
+		break;
+	case AFX_IDW_DOCKBAR_BOTTOM:
+		dwBorderStyle &= ~CBRS_BORDER_TOP;
+		rc.DeflateRect(m_cyGripper + 2, m_cxEdge + 2, 2, 2);
+		m_rectBorder.bottom = m_rectBorder.top + m_cxEdge;
+		m_rectGripper.OffsetRect(0, m_cxEdge);
+		break;
+	case AFX_IDW_DOCKBAR_LEFT:
+		dwBorderStyle &= ~CBRS_BORDER_RIGHT;
+		rc.DeflateRect(2, m_cyGripper + 2, m_cxEdge + 2, 6);
+		m_rectBorder.left = m_rectBorder.right - m_cxEdge;
+		break;
+	case AFX_IDW_DOCKBAR_RIGHT:
+		dwBorderStyle &= ~CBRS_BORDER_LEFT;
+		rc.DeflateRect(m_cxEdge + 2, m_cyGripper + 2, 2, 6);
+		m_rectBorder.right = m_rectBorder.left + m_cxEdge;
+		m_rectGripper.OffsetRect(m_cxEdge, 0);
+		break;
+	default:
+		m_rectBorder.SetRectEmpty();
+		break;
+	}
 
-    SetBarStyle(dwBorderStyle);
+	lpncsp->rgrc[0] = rc;
+
+	SetBarStyle(dwBorderStyle);
 }
 
 void CPiecesBar::OnNcPaint() 
 {
-    // get window DC that is clipped to the non-client area
-    CWindowDC dc(this);
-    CRect rectClient;
-    GetClientRect(rectClient);
-    CRect rectWindow;
-    GetWindowRect(rectWindow);
-    ScreenToClient(rectWindow);
-    rectClient.OffsetRect(-rectWindow.left, -rectWindow.top);
-    dc.ExcludeClipRect(rectClient);
+	// get window DC that is clipped to the non-client area
+	CWindowDC dc(this);
+	CRect rectClient;
+	GetClientRect(rectClient);
+	CRect rectWindow;
+	GetWindowRect(rectWindow);
+	ScreenToClient(rectWindow);
+	rectClient.OffsetRect(-rectWindow.left, -rectWindow.top);
+	dc.ExcludeClipRect(rectClient);
 
-    // draw borders in non-client area
-    rectWindow.OffsetRect(-rectWindow.left, -rectWindow.top);
-    DrawBorders(&dc, rectWindow);
+	// draw borders in non-client area
+	rectWindow.OffsetRect(-rectWindow.left, -rectWindow.top);
+	DrawBorders(&dc, rectWindow);
 
-    // erase parts not drawn
-    dc.IntersectClipRect(rectWindow);
+	// erase parts not drawn
+	dc.IntersectClipRect(rectWindow);
 
-    // erase NC background the hard way
-    HBRUSH hbr = (HBRUSH)GetClassLong(m_hWnd, GCL_HBRBACKGROUND);
-    ::FillRect(dc.m_hDC, rectWindow, hbr);
+	// erase NC background the hard way
+	HBRUSH hbr = (HBRUSH)GetClassLong(m_hWnd, GCL_HBRBACKGROUND);
+	::FillRect(dc.m_hDC, rectWindow, hbr);
 
-    // paint the mobile edge
-    dc.Draw3dRect(m_rectBorder, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-        ::GetSysColor(COLOR_BTNSHADOW));
+	// paint the mobile edge
+	dc.Draw3dRect(m_rectBorder, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
 
-    if (m_bHasGripper)
-    {
-        // paint the gripper
-        CRect gripper = m_rectGripper;
-        
-        if (IsHorzDocked())
-        {
-            // gripper at left
-            gripper.right = gripper.left + 3;
-            dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-                ::GetSysColor(COLOR_BTNSHADOW));
-            gripper.OffsetRect(3, 0);
-            dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-                ::GetSysColor(COLOR_BTNSHADOW));
-        }
-        else if (IsVertDocked())
-        {
-            // gripper at top
-            gripper.bottom = gripper.top + 3;
-            dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-                ::GetSysColor(COLOR_BTNSHADOW));
-            gripper.OffsetRect(0, 3);
-            dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-                ::GetSysColor(COLOR_BTNSHADOW));
-        }
-    }
+	if (m_bHasGripper)
+	{
+		// paint the gripper
+		CRect gripper = m_rectGripper;
+		
+		if (IsHorzDocked())
+		{
+			// gripper at left
+			gripper.right = gripper.left + 3;
+			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
+				::GetSysColor(COLOR_BTNSHADOW));
+			gripper.OffsetRect(3, 0);
+			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
+				::GetSysColor(COLOR_BTNSHADOW));
+		}
+		else if (IsVertDocked())
+		{
+			// gripper at top
+			gripper.bottom = gripper.top + 3;
+			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
+				::GetSysColor(COLOR_BTNSHADOW));
+			gripper.OffsetRect(0, 3);
+			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
+				::GetSysColor(COLOR_BTNSHADOW));
+		}
+	}
 
-    ReleaseDC(&dc);
+	ReleaseDC(&dc);
 }
 
 void CPiecesBar::OnPaint() 
 {
-    // overridden to skip border painting based on clientrect
-    CPaintDC dc(this);
+	// overridden to skip border painting based on clientrect
+	CPaintDC dc(this);
 }
 
 UINT CPiecesBar::OnNcHitTest(CPoint point) 
 {
-    if (IsFloating())
-        return CControlBar::OnNcHitTest(point);
+	if (IsFloating())
+		return CControlBar::OnNcHitTest(point);
 
-    CRect rc;
-    GetWindowRect(rc);
-    point.Offset(-rc.left, -rc.top);
-    if (m_rectBorder.PtInRect(point))
-        return HTSIZE;
-    else
-        return HTCLIENT;
+	CRect rc;
+	GetWindowRect(rc);
+	point.Offset(-rc.left, -rc.top);
+	if (m_rectBorder.PtInRect(point))
+		return HTSIZE;
+	else
+		return HTCLIENT;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -402,27 +396,27 @@ UINT CPiecesBar::OnNcHitTest(CPoint point)
 
 void CPiecesBar::StartTracking()
 {
-    SetCapture();
+	SetCapture();
 
-    // make sure no updates are pending
-    RedrawWindow(NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
-	
+	// make sure no updates are pending
+	RedrawWindow(NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
+
 	m_bDragShowContent = QueryDragFullWindows();
-	
+
 	if (!m_bDragShowContent)
-	    m_pDockSite->LockWindowUpdate();
+		m_pDockSite->LockWindowUpdate();
 
 	m_sizeOld = IsHorzDocked() ? m_sizeHorz : m_sizeVert;
 
 	CRect rect;
 	GetWindowRect(&rect);
-    m_ptOld = m_rectBorder.CenterPoint() + rect.TopLeft();
+	m_ptOld = m_rectBorder.CenterPoint() + rect.TopLeft();
 
 	m_sizeMax = CalcMaxSize();
-    m_bTracking = TRUE;
-    
+	m_bTracking = TRUE;
+
 	if (!m_bDragShowContent)
-	    OnTrackInvertTracker();
+		OnTrackInvertTracker();
 }
 
 void CPiecesBar::StopTracking(BOOL bAccept)
@@ -430,50 +424,49 @@ void CPiecesBar::StopTracking(BOOL bAccept)
 	if (!m_bDragShowContent)
 	{
 		OnTrackInvertTracker();
-	    m_pDockSite->UnlockWindowUpdate();
+		m_pDockSite->UnlockWindowUpdate();
 	}
 
-    m_bTracking = FALSE;
-    ReleaseCapture();
-    
-    if (!bAccept) // resize canceled?
+	m_bTracking = FALSE;
+	ReleaseCapture();
+
+	if (!bAccept) // resize canceled?
 	{
 		// restore old size
 		if (IsHorzDocked())
-	        m_sizeHorz = m_sizeOld;
+			m_sizeHorz = m_sizeOld;
 		else
 			m_sizeVert = m_sizeOld;
 	}
 
-    m_pDockSite->DelayRecalcLayout();
+	m_pDockSite->DelayRecalcLayout();
 }
 
 void CPiecesBar::OnTrackUpdateSize(CPoint& point)
 {
 	BOOL bHorz = IsHorzDocked();
 
-    CSize sizeNew = m_sizeOld;
-	
-    if ((m_nDockBarID == AFX_IDW_DOCKBAR_TOP) ||
+	CSize sizeNew = m_sizeOld;
+
+	if ((m_nDockBarID == AFX_IDW_DOCKBAR_TOP) ||
 		(m_nDockBarID == AFX_IDW_DOCKBAR_LEFT))
-        sizeNew += point - m_ptOld;
+		sizeNew += point - m_ptOld;
 	else
-        sizeNew -= point - m_ptOld;
+		sizeNew -= point - m_ptOld;
 
 	// check limits
-  	sizeNew.cx = max(m_sizeMin.cx, sizeNew.cx);
-  	sizeNew.cy = max(m_sizeMin.cy, sizeNew.cy);
-  	sizeNew.cx = min(m_sizeMax.cx, sizeNew.cx);
-  	sizeNew.cy = min(m_sizeMax.cy, sizeNew.cy);
+	sizeNew.cx = max(m_sizeMin.cx, sizeNew.cx);
+	sizeNew.cy = max(m_sizeMin.cy, sizeNew.cy);
+	sizeNew.cx = min(m_sizeMax.cx, sizeNew.cx);
+	sizeNew.cy = min(m_sizeMax.cy, sizeNew.cy);
 
-    if ((sizeNew.cy == m_sizeHorz.cy) && bHorz ||
-		(sizeNew.cx == m_sizeVert.cx) && !bHorz)
+	if ((sizeNew.cy == m_sizeHorz.cy) && bHorz || (sizeNew.cx == m_sizeVert.cx) && !bHorz)
 		return; // no size change
 
 	if (!m_bDragShowContent)
 		OnTrackInvertTracker();
 
-    if (bHorz)
+	if (bHorz)
 		m_sizeHorz = sizeNew;
 	else
 		m_sizeVert = sizeNew;
@@ -481,7 +474,7 @@ void CPiecesBar::OnTrackUpdateSize(CPoint& point)
 	if (!m_bDragShowContent)
 		OnTrackInvertTracker();
 	else
-	    m_pDockSite->DelayRecalcLayout();
+		m_pDockSite->DelayRecalcLayout();
 }
 
 CSize CPiecesBar::CalcMaxSize()
@@ -525,22 +518,22 @@ CSize CPiecesBar::CalcMaxSize()
 	}
 	
 	size -= CSize(4, 4);
-    size += IsHorzDocked() ? m_sizeHorz : m_sizeVert;
+	size += IsHorzDocked() ? m_sizeHorz : m_sizeVert;
 
 	return size;
 }
 
 void CPiecesBar::OnTrackInvertTracker()
 {
-    ASSERT_VALID(this);
-    ASSERT(m_bTracking);
+	ASSERT_VALID(this);
+	ASSERT(m_bTracking);
 
 	CRect rect = m_rectBorder;
-    CRect rectBar, rectFrame;
-    GetWindowRect(rectBar);
-    rect.OffsetRect(rectBar.TopLeft());
-    m_pDockSite->GetWindowRect(rectFrame);
-    rect.OffsetRect(-rectFrame.left, -rectFrame.top);
+	CRect rectBar, rectFrame;
+	GetWindowRect(rectBar);
+	rect.OffsetRect(rectBar.TopLeft());
+	m_pDockSite->GetWindowRect(rectFrame);
+	rect.OffsetRect(-rectFrame.left, -rectFrame.top);
 
 	switch (m_nDockBarID)
 	{
@@ -554,24 +547,22 @@ void CPiecesBar::OnTrackInvertTracker()
 		rect.OffsetRect(m_sizeOld.cx - m_sizeVert.cx, 0); break;
 	}
 	if (IsVertDocked())
-	    rect.bottom -= 4;
-    rect.DeflateRect(1, 1);
+		rect.bottom -= 4;
+	rect.DeflateRect(1, 1);
 
-    CDC *pDC = m_pDockSite->GetDCEx(NULL,
-        DCX_WINDOW|DCX_CACHE|DCX_LOCKWINDOWUPDATE);
+	CDC *pDC = m_pDockSite->GetDCEx(NULL, DCX_WINDOW|DCX_CACHE|DCX_LOCKWINDOWUPDATE);
 
-    CBrush* pBrush = CDC::GetHalftoneBrush();
-    HBRUSH hOldBrush = NULL;
-    if (pBrush != NULL)
-        hOldBrush = (HBRUSH)::SelectObject(pDC->m_hDC, pBrush->m_hObject);
+	CBrush* pBrush = CDC::GetHalftoneBrush();
+	HBRUSH hOldBrush = NULL;
+	if (pBrush != NULL)
+		hOldBrush = (HBRUSH)::SelectObject(pDC->m_hDC, pBrush->m_hObject);
 
-    pDC->PatBlt(rect.left, rect.top,
-		rect.Width(), rect.Height(), PATINVERT);
+	pDC->PatBlt(rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
 
-    if (hOldBrush != NULL)
-        ::SelectObject(pDC->m_hDC, hOldBrush);
+	if (hOldBrush != NULL)
+		::SelectObject(pDC->m_hDC, hOldBrush);
 
-    m_pDockSite->ReleaseDC(pDC);
+	m_pDockSite->ReleaseDC(pDC);
 }
 
 BOOL CPiecesBar::QueryDragFullWindows() const
@@ -624,6 +615,7 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	{
 		m_wndSplitter.SetWindowPos (NULL, 5, m_nPreviewHeight+6, cx-10, 4, SWP_NOZORDER);
 		m_wndPiecesList.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
+		m_PiecesTree.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
 		m_wndPiecePreview.SetWindowPos (NULL, 5, 5, cx-10, m_nPreviewHeight, 0);
 		m_wndPiecePreview.EnableWindow (TRUE);
 		m_wndPiecePreview.ShowWindow (SW_SHOW);
@@ -657,6 +649,9 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 
 	m_wndPiecesList.SetColumnWidth (0, rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL) -2);
 	m_wndPiecesCombo.ShowWindow ((m_bCombo) ? SW_SHOW : SW_HIDE);
+
+
+m_wndPiecesList.ShowWindow(FALSE);
 }
 
 void CPiecesBar::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler)
@@ -677,25 +672,28 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CControlBar::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
-	m_wndPiecesList.Create (LVS_SINGLESEL|LVS_SHOWSELALWAYS|LVS_AUTOARRANGE|
-		LVS_SORTASCENDING|WS_VISIBLE|WS_TABSTOP|LVS_REPORT|WS_BORDER,
-		CRect(0,0,0,0), this, IDW_PIECESLIST);
+
+	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_HASBUTTONS|TVS_DISABLEDRAGDROP|TVS_HASLINES|TVS_LINESATROOT, 
+	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
+
+	m_wndPiecesList.Create(LVS_SINGLESEL|LVS_SHOWSELALWAYS|LVS_AUTOARRANGE|
+	                       LVS_SORTASCENDING|WS_VISIBLE|WS_TABSTOP|LVS_REPORT|WS_BORDER,
+	                       CRect(0,0,0,0), this, IDW_PIECESLIST);
 
 	m_wndPiecesList.InsertColumn(0, "Description", LVCFMT_LEFT, 129, 0);
 	m_wndPiecesList.SubclassHeader();
 	if (m_bNumbers)
 		m_wndPiecesList.InsertColumn(1, "Number", LVCFMT_LEFT, 60, 1);
 
-	m_wndColorsList.Create (LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
-		LBS_OWNERDRAWFIXED|WS_VISIBLE|WS_TABSTOP|WS_CHILD|WS_BORDER,
-		CRect (0,0,0,0), this, IDW_COLORSLIST);
+	m_wndColorsList.Create(LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
+	                       LBS_OWNERDRAWFIXED|WS_VISIBLE|WS_TABSTOP|WS_CHILD|WS_BORDER,
+	                       CRect (0,0,0,0), this, IDW_COLORSLIST);
 
 	for (int i = 0; i < LC_MAXCOLORS; i++)
 		m_wndColorsList.AddString("");
 
-	m_wndPiecesCombo.Create (CBS_DROPDOWN|CBS_SORT|CBS_HASSTRINGS|WS_VISIBLE|WS_CHILD|
-		WS_VSCROLL|WS_TABSTOP, CRect (0,0,0,0), this, IDW_PIECESCOMBO);
+	m_wndPiecesCombo.Create(CBS_DROPDOWN|CBS_SORT|CBS_HASSTRINGS|WS_VISIBLE|WS_CHILD|
+	                        WS_VSCROLL|WS_TABSTOP, CRect (0,0,0,0), this, IDW_PIECESCOMBO);
 
 	//  Create a font for the combobox
 	LOGFONT logFont;
@@ -721,8 +719,8 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CreateGroupsBar();
 
-	CreateWindow("STATIC", "", WS_VISIBLE|WS_CHILD|SS_ETCHEDFRAME, 
-		0,0,0,0, m_hWnd, (HMENU)IDW_PIECEBAR_SPLITTER, AfxGetInstanceHandle(), NULL); 
+	CreateWindow("STATIC", "", WS_VISIBLE|WS_CHILD|SS_ETCHEDFRAME, 0, 0, 0, 0,
+	             m_hWnd, (HMENU)IDW_PIECEBAR_SPLITTER, AfxGetInstanceHandle(), NULL);
 
 	// y-splitter
 	m_wndSplitter.BindWithControl(this, IDW_PIECEBAR_SPLITTER);
@@ -750,7 +748,7 @@ BOOL CPiecesBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (GetRoutingFrame() != NULL)
 		return FALSE;
-	
+
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
 
@@ -796,7 +794,7 @@ BOOL CPiecesBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 	}
 */
 	*pResult = 0;
-	
+
 	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE);
 
 	return TRUE; // message was handled
@@ -886,7 +884,7 @@ void CPiecesBar::CreateGroupsBar()
 			strcpy (m_GroupNames[i], str);
 		}
 	}
-	
+
 	m_wndGroupsBar.m_ToolbarData.dwStyle = TBSTYLE_FLAT;
 	m_wndGroupsBar.m_ToolbarData.idControl = IDW_GROUPSBAR;
 	m_wndGroupsBar.m_ToolbarData.idbDefault = IDB_PIECEBAR;
@@ -921,4 +919,134 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 		if (pMenu)
 			pMenu->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 	}
+}
+
+void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
+{
+	PiecesLibrary *Lib = project->GetPiecesLibrary();
+
+	if (SearchOnly)
+	{
+		HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+
+	  while (Item != NULL)
+	  {
+			CString Name = m_PiecesTree.GetItemText(Item);
+
+			if (Name == "Search Results")
+				break;
+
+			Item = m_PiecesTree.GetNextSiblingItem(Item);
+	  }
+
+		if (Item == NULL)
+		{
+			Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+		}
+
+		m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
+		m_PiecesTree.EnsureVisible(Item);
+		m_PiecesTree.Expand(Item, TVE_EXPAND);
+	}
+	else
+	{
+		m_PiecesTree.SetRedraw(FALSE);
+		m_PiecesTree.DeleteAllItems();
+
+		for (int i = 0; i < Lib->GetNumCategories(); i++)
+		{
+			m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
+		}
+
+		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+
+		m_PiecesTree.SetRedraw(TRUE);
+		m_PiecesTree.Invalidate();
+	}
+}
+
+BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult) 
+{
+	if (wParam == IDW_PIECESTREE)
+	{
+		LPNMTREEVIEW Notify = (LPNMTREEVIEW)lParam;
+
+		if (Notify->hdr.code == TVN_SELCHANGED)
+		{
+			PieceInfo* Info = (PieceInfo*)Notify->itemNew.lParam;
+
+			if (Info != NULL)
+			{
+				project->SetCurrentPiece(Info);
+				m_wndPiecePreview.SetPieceInfo(Info);
+				m_wndPiecePreview.PostMessage(WM_PAINT);
+			}
+		}
+		else if (Notify->hdr.code == TVN_ITEMEXPANDING)
+		{
+			if (Notify->action == TVE_EXPAND)
+			{
+				PiecesLibrary *Lib = project->GetPiecesLibrary();
+
+				// Check if we're expanding a category item.
+				if (Notify->itemNew.lParam == NULL)
+				{
+					HTREEITEM CategoryItem = Notify->itemNew.hItem;
+					CString CategoryName = m_PiecesTree.GetItemText(CategoryItem);
+					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
+
+					if (CategoryIndex != -1)
+					{
+						PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+						int i;
+
+						Lib->GetCategoryEntries(CategoryIndex, SinglePieces, GroupedPieces);
+
+						for (i = 0; i < SinglePieces.GetSize(); i++)
+						{
+							PieceInfo* Info = SinglePieces[i];
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_SORT);
+						}
+
+						for (i = 0; i < GroupedPieces.GetSize(); i++)
+						{
+							PieceInfo* Info = GroupedPieces[i];
+							m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_SORT);
+						}
+
+						if (CategoryName == "Search Results")
+						{
+							// Let the user know if the search is empty.
+							if ((SinglePieces.GetSize() == 0) && (GroupedPieces.GetSize() == 0))
+							{
+								m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No pieces found", 0, 0, 0, 0, 0, CategoryItem, TVI_SORT);
+							}
+						}
+					}
+				}
+				else
+				{
+					PieceInfo* Parent = (PieceInfo*)Notify->itemNew.lParam;
+
+					PtrArray<PieceInfo> Pieces;
+					Lib->GetPatternedPieces(Parent, Pieces);
+
+					HTREEITEM ParentItem = Notify->itemNew.hItem;
+
+					for (int i = 0; i < Pieces.GetSize(); i++)
+					{
+						PieceInfo* Info = Pieces[i];
+						m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription + strlen(Parent->m_strDescription) + 1, 0, 0, 0, 0, (LPARAM)Info, ParentItem, TVI_SORT);
+					}
+				}
+			}
+			else if (Notify->action == TVE_COLLAPSE)
+			{
+				// Remove all children.
+				m_PiecesTree.Expand(Notify->itemNew.hItem, TVE_COLLAPSE | TVE_COLLAPSERESET);
+			}
+		}
+	}
+
+	return CControlBar::OnNotify(wParam, lParam, pResult);
 }

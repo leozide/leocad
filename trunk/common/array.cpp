@@ -1,105 +1,132 @@
 //
-// Simple array class
+// Simple array classes
 //
 
 #include <stdlib.h>
 #include <string.h>
 
 template <class T>
-PtrArray<T>::PtrArray (int nSize)
+PtrArray<T>::PtrArray(int nSize)
 {
-  m_pData = NULL;
-  m_nLength = 0;
-  m_nAlloc = 0;
+	m_pData = NULL;
+	m_nLength = 0;
+	m_nAlloc = 0;
 
-  if (nSize != 0)
-    Expand (nSize);
+	if(nSize != 0)
+		Expand(nSize);
 }
 
 template <class T>
-PtrArray<T>::~PtrArray ()
+PtrArray<T>::~PtrArray()
 {
-  free (m_pData);
+	free(m_pData);
 }
 
 template <class T>
-void PtrArray<T>::Expand (int nGrow)
+void PtrArray<T>::Expand(int nGrow)
 {
-  if ((m_nLength + nGrow) > m_nAlloc)
-  {
-    m_pData = (T**)realloc (m_pData, (m_nLength + nGrow) * sizeof (T*));
-    memset (m_pData + m_nLength, 0, nGrow * sizeof (T*));
-    m_nAlloc = m_nLength + nGrow;
-  }
+	if((m_nLength + nGrow) > m_nAlloc)
+	{
+		m_pData =(T**)realloc(m_pData,(m_nLength + nGrow) * sizeof(T*));
+		memset(m_pData + m_nLength, 0, nGrow * sizeof(T*));
+		m_nAlloc = m_nLength + nGrow;
+	}
 }
 
 template <class T>
-T* PtrArray<T>::RemoveIndex (int nIndex)
+void PtrArray<T>::RemoveAll()
 {
-  T* ret = NULL;
-
-  if (nIndex < m_nLength)
-  {
-    ret = m_pData[nIndex];
-
-    if (nIndex != m_nLength - 1)
-      memmove (m_pData + nIndex, m_pData + nIndex + 1,
-               sizeof (T*) * (m_nLength - nIndex - 1));
- 
-    m_nLength--;
-    m_pData[m_nLength] = NULL;
-  }
-
-  return ret;
+	m_nLength = 0;
 }
 
 template <class T>
-T* PtrArray<T>::RemovePointer (T* pObj)
+T* PtrArray<T>::RemoveIndex(int nIndex)
 {
-  int i;
+	T* ret = NULL;
 
-  for (i = 0; i < m_nLength; i++)
-    if (m_pData[i] == pObj)
-      return RemoveIndex (i);
+	if(nIndex < m_nLength)
+	{
+		ret = m_pData[nIndex];
 
-  return NULL;
+		if(nIndex != m_nLength - 1)
+			memmove(m_pData + nIndex, m_pData + nIndex + 1, sizeof(T*) *(m_nLength - nIndex - 1));
+
+		m_nLength--;
+		m_pData[m_nLength] = NULL;
+	}
+
+	return ret;
 }
 
 template <class T>
-void PtrArray<T>::Add (T* pObj)
+T* PtrArray<T>::RemovePointer(T* pObj)
 {
-  Expand (1);
-  m_pData[m_nLength++] = pObj;
+	int i;
+
+	for(i = 0; i < m_nLength; i++)
+		if(m_pData[i] == pObj)
+			return RemoveIndex(i);
+
+	return NULL;
 }
 
 template <class T>
-void PtrArray<T>::AddSorted (T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData)
+void PtrArray<T>::Add(T* pObj)
 {
-  int i;
-
-  for (i = 0; i < GetSize (); i++)
-    if (pFunc (pObj, m_pData[i], pData) < 0)
-    {
-      InsertAt (i, pObj);
-      return;
-    }
-
-  Add (pObj);
+	Expand(1);
+	m_pData[m_nLength] = pObj;
+	m_nLength++;
 }
 
 template <class T>
-void PtrArray<T>::InsertAt (int nIndex, T* pObj)
+void PtrArray<T>::AddSorted(T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData)
 {
-  if (nIndex >= m_nLength)
-    Expand (nIndex - m_nLength + 1);
-  else
-    Expand (1);
+	int i;
+
+	for(i = 0; i < GetSize(); i++)
+	{
+		if(pFunc(pObj, m_pData[i], pData) < 0)
+		{
+			InsertAt(i, pObj);
+			return;
+		}
+	}
+
+		Add(pObj);
+}
+
+template <class T>
+void PtrArray<T>::InsertAt(int nIndex, T* pObj)
+{
+	if(nIndex >= m_nLength)
+		Expand(nIndex - m_nLength + 1);
+	else
+		Expand(1);
 
 	m_nLength++;
-  for (int i = m_nLength - 1; i > nIndex; i--)
-    m_pData[i] = m_pData[i-1];
+	for(int i = m_nLength - 1; i > nIndex; i--)
+		m_pData[i] = m_pData[i-1];
 
-  m_pData[nIndex] = pObj;
+	m_pData[nIndex] = pObj;
+}
+
+template <class T>
+int PtrArray<T>::FindIndex(T* Obj) const
+{
+	for (int i = 0; i < m_nLength; i++)
+		if (m_pData[i] == Obj)
+			return i;
+
+	return -1;
+}
+
+template <class T>
+PtrArray<T>& PtrArray<T>::operator=(const PtrArray<T>& Array)
+{
+	m_nLength = Array.m_nLength;
+	m_nAlloc = Array.m_nAlloc;
+	m_pData =(T**)realloc(m_pData, (m_nAlloc) * sizeof(T*));
+	memcpy(m_pData, Array.m_pData, (m_nAlloc) * sizeof(T*));
 }
 
 // ============================================================================
@@ -138,6 +165,12 @@ void ObjArray<T>::Expand(int Grow)
 		m_Data = NewData;
 		m_Alloc = NewSize;
 	}
+}
+
+template <class T>
+void ObjArray<T>::RemoveAll()
+{
+	m_Length = 0;
 }
 
 template <class T>

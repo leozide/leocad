@@ -48,6 +48,7 @@ CPiecesList::CPiecesList()
 
 CPiecesList::~CPiecesList()
 {
+	ClearGroups();
 	// TODO: save m_nLastPieces to registry
 }
 
@@ -160,39 +161,216 @@ void CPiecesList::OnItemchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CPiecesList::UpdateList()
+void CPiecesList::ClearGroups()
+{
+	for (int i = 0; i < m_Groups.GetSize(); i++)
+		delete m_Groups[i];
+
+	m_Groups.RemoveAll();
+	m_Pieces.RemoveAll();
+}
+
+void CPiecesList::UpdateGroups()
+{
+	CPiecesBar* Bar = (CPiecesBar*)GetParent();
+	PiecesLibrary *Lib = project->GetPiecesLibrary();
+	int i, j;
+
+	ClearGroups();
+
+	for (i = 0; i < Lib->GetPieceCount(); i++)
+	{
+		PieceInfo* Info = Lib->GetPieceInfo(i);
+
+		// Skip subparts if the user doesn't want to see them.
+		if ((Info->m_strDescription[0] == '~') && !Bar->m_bSubParts)
+			continue;
+
+		// Skip pieces not in the current category.
+		if (Bar->m_bGroups && ((Info->m_nGroups & (DWORD)(1 << Bar->m_nCurGroup)) == 0))
+			continue;
+
+		// There's nothing else to check if we're not grouping patterned pieces together.
+		if (!m_GroupPatterns)
+		{
+			m_Pieces.Add(Info);
+			continue;
+		}
+
+		// Check if it's a patterned piece.
+		const char* Name = Info->m_strName;
+		while (*Name)
+		{
+			if (!*Name || *Name < '0' || *Name > '9')
+				break;
+
+			if (*Name == 'P')
+				break;
+
+			Name++;
+		}
+
+		if (*Name == 'P')
+		{
+			PieceListGroup* Group = NULL;
+			PieceInfo* Parent;
+
+			char ParentName[9];
+			strcpy(ParentName, Info->m_strName);
+			ParentName[Name - Info->m_strName] = '\0';
+
+			Parent = Lib->FindPieceInfo(ParentName);
+
+			if (Parent)
+			{
+				// Search for the parent's group.
+				for (j = 0; j < m_Groups.GetSize(); j++)
+				{
+					if (m_Groups[j]->Parent == Parent)
+					{
+						Group = m_Groups[j];
+						break;
+					}
+				}
+
+				// Check if the parent wasn't added as a single piece.
+				if (!Group)
+				{
+					for (j = 0; j < m_Pieces.GetSize(); j++)
+					{
+						if (m_Pieces[j] == Parent)
+						{
+							m_Pieces.RemoveIndex(j);
+
+							Group = new PieceListGroup();
+							Group->Parent = Parent;
+							Group->Collapsed = true;
+							m_Groups.Add(Group);
+
+							break;
+						}
+					}
+				}
+
+				// Create a new group for the parent.
+				if (!Group)
+				{
+					Group = new PieceListGroup();
+					Group->Parent = Parent;
+					Group->Collapsed = true;
+					m_Groups.Add(Group);
+				}
+
+				Group->Children.Add(Info);
+			}
+			else
+			{
+				m_Pieces.Add(Info);
+			}
+		}
+		else
+		{
+			bool Found = false;
+
+			// Add piece to the list if it's not there already,
+			// this could be the parent whose child was added earlier.
+			for (j = 0; j < m_Groups.GetSize(); j++)
+			{
+				if (m_Groups[j]->Parent == Info)
+				{
+					Found = true;
+					break;
+				}
+			}
+
+			if (!Found)
+			{
+				m_Pieces.Add(Info);
+			}
+		}
+	}
+}
+
+void CPiecesList::AddPiece(PieceInfo* Info, int ImageIndex)
+{
+	LV_ITEM lvi;
+
+	if (ImageIndex == -1)
+		lvi.mask = LVIF_TEXT | LVIF_PARAM;
+	else
+		lvi.mask = LVIF_TEXT | LVIF_PARAM | LVIF_IMAGE;
+
+	TCHAR tmp[65], tmp2[10];
+	strcpy(tmp, Info->m_strDescription);
+	lvi.iImage = ImageIndex;
+	lvi.iItem = 0;
+	lvi.iSubItem = 0;
+	lvi.pszText = tmp;
+	lvi.lParam = (LPARAM)Info;
+	int idx = InsertItem(&lvi);
+
+	strcpy(tmp2, Info->m_strName);
+	SetItemText(idx, 1, tmp2);
+}
+
+void CPiecesList::UpdateList(bool Repopulate)
 {
 	CWaitCursor wc;
-	CPiecesBar* pBar = (CPiecesBar*)GetParent();
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
+	int i;
 
-	SetRedraw (FALSE);
+	if (Repopulate)
+		UpdateGroups();
+
+	SetRedraw(FALSE);
 	DeleteAllItems();
 
-	LV_ITEM lvi;
-	lvi.mask = LVIF_TEXT | LVIF_PARAM;
+/*
+	PiecesLibrary *pLib = project->GetPiecesLibrary();
 
 	for (int i = 0; i < pLib->GetPieceCount(); i++)
 	{
 		PieceInfo* pInfo = pLib->GetPieceInfo(i);
 
+		// Skip subparts if the user doesn't want to see them.
 		if ((pInfo->m_strDescription[0] == '~') && !pBar->m_bSubParts)
 			continue;
 
-		if ((!pBar->m_bGroups) ||
-			((pInfo->m_nGroups & (DWORD)(1 << pBar->m_nCurGroup)) != 0))
-		{
-			TCHAR tmp[65], tmp2[10];
-			strcpy (tmp, pInfo->m_strDescription);
-			lvi.iItem = 0;
-			lvi.iSubItem = 0;
-			lvi.pszText = tmp;
-			lvi.lParam = (LPARAM)pInfo;
-			int idx = InsertItem(&lvi);
+		// Skip pieces not in the current category.
+		if (pBar->m_bGroups && ((pInfo->m_nGroups & (DWORD)(1 << pBar->m_nCurGroup)) == 0))
+			continue;
 
-			strcpy (tmp2, pInfo->m_strName);
-			SetItemText(idx, 1, tmp2);
+		TCHAR tmp[65], tmp2[10];
+		strcpy(tmp, pInfo->m_strDescription);
+		lvi.iItem = 0;
+		lvi.iSubItem = 0;
+		lvi.pszText = tmp;
+		lvi.lParam = (LPARAM)pInfo;
+		lvi.iImage = 1;
+		int idx = InsertItem(&lvi);
+
+		strcpy(tmp2, pInfo->m_strName);
+		SetItemText(idx, 1, tmp2);
+	}
+*/
+
+	for (i = 0; i < m_Groups.GetSize(); i++)
+	{
+		PieceListGroup* Group = m_Groups[i];
+
+		AddPiece(Group->Parent, (Group->Collapsed) ? 0 : 1);
+
+		if (!Group->Collapsed)
+		{
+			for (int j = 0; j < Group->Children.GetSize(); j++)
+			{
+				AddPiece(Group->Children[j], 3);
+			}
 		}
+	}
+
+	for (i = 0; i < m_Pieces.GetSize(); i++)
+	{
+		AddPiece(m_Pieces[i], 3);
 	}
 
 	if (m_bAscending)
@@ -200,9 +378,10 @@ void CPiecesList::UpdateList()
 	else
 		SortItems((PFNLVCOMPARE)ListViewCompareProc, m_nSortedCol|0xF0);
 
+	CPiecesBar* pBar = (CPiecesBar*)GetParent();
 	EnsureVisible(m_nLastPieces[pBar->m_nCurGroup], FALSE);
-	SetItemState (m_nLastPieces[pBar->m_nCurGroup], LVIS_SELECTED | LVIS_FOCUSED , LVIS_SELECTED | LVIS_FOCUSED);
-	SetRedraw (TRUE);
+	SetItemState(m_nLastPieces[pBar->m_nCurGroup], LVIS_SELECTED | LVIS_FOCUSED , LVIS_SELECTED | LVIS_FOCUSED);
+	SetRedraw(TRUE);
 	Invalidate();
 }
 
@@ -289,6 +468,9 @@ int CPiecesList::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+	m_Images.Create(IDB_PARTICONS, 16, 0, RGB (0,128,128));
+	SetImageList(&m_Images, LVSIL_SMALL);
+
 	m_TitleTip.Create(this);
 
 	return 0;
@@ -303,6 +485,36 @@ void CPiecesList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 		CView* pView = pFrame->GetActiveView();
 		pView->SetFocus();
+	}
+	else if (nChar == VK_RIGHT)
+	{
+		int Index = GetNextItem(-1, LVNI_ALL | LVNI_SELECTED);
+		PieceInfo* Info = (PieceInfo*)GetItemData(Index);
+
+		for (int i = 0; i < m_Groups.GetSize(); i++)
+		{
+			PieceListGroup* Group = m_Groups[i];
+
+			if (Group->Parent == Info)
+				Group->Collapsed = false;
+		}
+
+		UpdateList(false);
+	}
+	else if (nChar == VK_LEFT)
+	{
+		int Index = GetNextItem(-1, LVNI_ALL | LVNI_SELECTED);
+		PieceInfo* Info = (PieceInfo*)GetItemData(Index);
+
+		for (int i = 0; i < m_Groups.GetSize(); i++)
+		{
+			PieceListGroup* Group = m_Groups[i];
+
+			if (Group->Parent == Info)
+				Group->Collapsed = true;
+		}
+
+		UpdateList(false);
 	}
 	else
 		CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);

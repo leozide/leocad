@@ -198,6 +198,30 @@ bool PiecesLibrary::Load (const char *libpath)
 	idx.Close();
 	bin.Close();
 
+	// TODO: Load categories.
+
+	const int NumCategories = 34;
+	const char* DefaultCategories[] =
+	{
+	  "Animal", "Antenna", "Arm", "Bar", "Baseplate", "Belville", "Boat", "Bracket", "Brick", "Car",
+	  "Cone", "Container", "Crane", "Cylinder", "Door", "Flag", "Hinge", "Hose", "Magnet", "Minifig",
+	  "Minifig Accessory", "Plane", "Plant", "Plate", "Propellor", "Rock", "Round", "Scala",
+		"Slope", "Space", "Support", "Technic", "Wheel", "Windscreen"
+	};
+
+
+	for (i = 0; i < NumCategories; i++)
+	{
+		PiecesLibraryCategory Cat;
+
+		Cat.Name = DefaultCategories[i];
+		Cat.Keywords = DefaultCategories[i];
+
+		m_Categories.Add(Cat);
+	}
+
+	SystemUpdateCategories(false);
+
 	m_bNeedsReload = false;
 
 	return true;
@@ -365,6 +389,118 @@ Texture* PiecesLibrary::GetTexture (int index) const
 }
 
 // =============================================================================
+
+void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+{
+	bool m_bSubParts = false;
+
+	String& SearchString = m_Categories[CategoryIndex].Keywords;
+
+	SinglePieces.RemoveAll();
+	GroupedPieces.RemoveAll();
+
+	for (int i = 0; i < m_nPieceCount; i++)
+	{
+		PieceInfo* Info = &m_pPieceIdx[i];
+
+		// Skip subparts if the user doesn't want to see them.
+		if ((Info->m_strDescription[0] == '~') && !m_bSubParts)
+			continue;
+
+		// Check if the piece belongs to this category.
+		if (strncmp(Info->m_strDescription, (const char*)SearchString, strlen(SearchString)) != 0)
+			continue;
+
+		// Check if it's a patterned piece.
+		const char* Name = Info->m_strName;
+		while (*Name)
+		{
+			if (!*Name || *Name < '0' || *Name > '9')
+				break;
+
+			if (*Name == 'P')
+				break;
+
+			Name++;
+		}
+
+		if (*Name == 'P')
+		{
+			PieceInfo* Parent;
+
+			// Find the parent of this patterned piece.
+			char ParentName[9];
+			strcpy(ParentName, Info->m_strName);
+			ParentName[Name - Info->m_strName] = '\0';
+
+			Parent = FindPieceInfo(ParentName);
+
+			if (Parent)
+			{
+				// Check if the parent was added as a single piece.
+				int Index = SinglePieces.FindIndex(Parent);
+
+				if (Index != -1)
+					SinglePieces.RemoveIndex(Index);
+
+				Index = GroupedPieces.FindIndex(Parent);
+
+				if (Index == -1)
+					GroupedPieces.Add(Parent);
+			}
+			else
+			{
+				// Patterned pieces should have a parent but in case they don't just add them anyway.
+				SinglePieces.Add(Info);
+			}
+		}
+		else
+		{
+			// Check if this piece has already been added to this category by one of its children.
+			int Index = GroupedPieces.FindIndex(Info);
+
+			if (Index == -1)
+				SinglePieces.Add(Info);
+		}
+	}
+}
+
+void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces)
+{
+	char Name[9];
+	strcpy(Name, Parent->m_strName);
+	strcat(Name, "P");
+
+	Pieces.RemoveAll();
+
+	for (int i = 0; i < m_nPieceCount; i++)
+	{
+		PieceInfo* Info = &m_pPieceIdx[i];
+
+		if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
+			Pieces.Add(Info);
+	}
+}
+
+void PiecesLibrary::SetCategory(int Index, const String& Name, const String& Keywords)
+{
+	m_Categories[Index].Name = Name;
+	m_Categories[Index].Keywords = Keywords;
+
+	SystemUpdateCategories(true);
+}
+
+void PiecesLibrary::AddCategory(const String& Name, const String& Keywords)
+{
+	PiecesLibraryCategory Cat;
+
+	Cat.Name = Name;
+	Cat.Keywords = Keywords;
+
+	m_Categories.Add(Cat);
+
+	SystemUpdateCategories(true);
+}
 
 unsigned long PiecesLibrary::GetDefaultPieceGroup (const char* name)
 {

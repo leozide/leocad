@@ -125,8 +125,25 @@ BOOL CPiecesCombo::PreTranslateMessage(MSG* pMsg)
 		int nVirtKey = (int) pMsg->wParam;
 		if (nVirtKey == VK_DELETE || nVirtKey == VK_BACK)
 		{
-// if enter pressed, add piece (postmessage to mainwnd)
 			m_bAutoComplete = FALSE;
+		}
+		else if (nVirtKey == VK_RETURN)
+		{
+		  PiecesLibrary* Lib = project->GetPiecesLibrary();
+			CString str;
+
+			GetWindowText(str);
+
+			int Index = Lib->FindCategoryIndex("Search Results");
+
+			if (Index == -1)
+			{
+				Lib->AddCategory("Search Results", (const char*)str);
+			}
+			else
+			{
+				Lib->SetCategory(Index, "Search Results", (const char*)str);
+			}
 		}
 	}
 

@@ -21,6 +21,7 @@
 #define IDW_PIECESCOMBO                 108
 #define IDW_COLORSLIST                  109
 #define IDW_PIECEBAR_SPLITTER           110
+#define IDW_PIECESTREE                  111
 #define IDS_CANNOT_OPEN_CLIPBOARD       111
 #define IDS_CANNOT_GET_CLIPBOARD_DATA   112
 #define IDS_CANCEL_PROMPT               113
@@ -135,6 +136,7 @@
 #define IDD_EDIT_GROUPS                 231
 #define IDD_LIBRARY_TEXTURES            234
 #define IDD_PREFKEYBOARD                235
+#define IDD_TRANSFORM                   236
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -380,14 +382,18 @@
 #define IDC_EDIT1                       1210
 #define IDC_MF_HANDR                    1211
 #define IDC_TEROPT_FLAT                 1211
+#define IDC_TRANSDLG_GY                 1211
 #define IDC_MF_TOOLL                    1212
 #define IDC_EDIT2                       1212
 #define IDC_SCNDLG_SOLID                1212
+#define IDC_TRANSDLG_GZ                 1212
 #define IDC_MF_TOOLR                    1213
 #define IDC_SCNDLG_GRADIENT             1213
+#define IDC_TRANSDLG_OY                 1213
 #define IDC_MF_HIPS                     1214
 #define IDC_SCNDLG_IMAGE                1214
 #define IDC_TREE                        1214
+#define IDC_TRANSDLG_OZ                 1214
 #define IDC_MF_LEGL                     1215
 #define IDC_MODDLG_PLANESSTATIC         1215
 #define IDC_MF_LEGR                     1216
@@ -436,6 +442,8 @@
 #define IDC_MF_SHOELSPIN                1244
 #define IDC_GENDLG_UPDATES              1244
 #define IDC_MF_SHOERSPIN                1245
+#define IDC_TRANSDLG_GX                 1245
+#define IDC_TRANSDLG_OX                 1246
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -669,9 +677,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        235
+#define _APS_NEXT_RESOURCE_VALUE        237
 #define _APS_NEXT_COMMAND_VALUE         33158
-#define _APS_NEXT_CONTROL_VALUE         1245
+#define _APS_NEXT_CONTROL_VALUE         1246
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

@@ -40,6 +40,8 @@ public:
 
  public:
   void MinIntersectDist (LC_CLICKLINE* pLine);
+	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
+	{ return false; }
   void Select (bool bSelecting, bool bFocus, bool bMultiple);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
     {
@@ -141,6 +143,8 @@ public:
 	void FileSave (File& file) const;
 	void MinIntersectDist (LC_CLICKLINE* pLine);
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
+	{ return false; }
 
 
 	void UpdatePosition(unsigned short nTime, bool bAnimation);

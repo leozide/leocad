@@ -6,38 +6,50 @@
 //
 // Simple math library and linear algebra functions.
 //
-// Everything is based on the Float4 class, so changing that class should be enough
+// Everything is based on the Vector4 class, so changing that class should be enough
 // to add support for compiler specific math intrinsics.
 //
 // Functions that end with 34 mean that they don't care what happens to the 4th
 // component, it can either be affected or not.
 //
+// Matrices are represented as row-major, so we pre-multiply instead of post-multiplying
+// like you would in a column major notation.
+//
+// OpenGL only expects a matrix to be an array of 16 floats so it doesn't matter what
+// notation we use.
+//
+// v[0]  v[1]  v[2]  v[3]   <- x, y, z, w
+//
+// m[0]  m[1]  m[2]  m[3]   <- x axis
+// m[4]  m[5]  m[6]  m[7]   <- y axis
+// m[8]  m[9]  m[10] m[11]  <- z axis
+// m[12] m[13] m[14] m[15]  <- translation
+// 
 
 // TODO: Move this define to config.h
 #define LC_MATH_FLOAT
 //#define LC_MATH_SSE
 
 // Classes defined in this file:
-class Float4;
 class Point3;
 class Vector3;
+class Vector4;
 class Quaternion;
-class Matrix33;
 class Matrix44;
 
 // ============================================================================
-// Float4 class (float version).
+// Vector4 class (float version).
 
 #ifdef LC_MATH_FLOAT
 
-class Float4
+class Vector4
 {
 public:
 	// Constructors.
-	inline Float4() { }
-	inline explicit Float4(const float _x, const float _y, const float _z)
+	inline Vector4() { }
+	inline explicit Vector4(const float _x, const float _y, const float _z)
 		: x(_x), y(_y), z(_z) { }
-	inline explicit Float4(const float _x, const float _y, const float _z, const float _w)
+	inline explicit Vector4(const float _x, const float _y, const float _z, const float _w)
 		: x(_x), y(_y), z(_z), w(_w) { }
 
 	// Get/Set functions.
@@ -50,68 +62,80 @@ public:
 	inline void SetZ(const float _z) { z = _z; }
 	inline void SetW(const float _w) { w = _w; }
 
-	template<typename T>
-	inline const float operator[](T i) const { return ((const float*)this)[i]; }
+	inline float& operator[](int i) const { return ((float*)this)[i]; }
 
 	// Comparison.
-	friend inline bool operator==(const Float4& a, const Float4& b)
+	friend inline bool operator==(const Vector4& a, const Vector4& b)
 	{ return (a.x == b.x) && (a.y == b.y) && (a.z == b.z) && (a.w == b.w); }
 
-	friend inline bool Compare3(const Float4& a, const Float4& b)
+	friend inline bool Compare3(const Vector4& a, const Vector4& b)
 	{ return (a.x == b.x) && (a.y == b.y) && (a.z == b.z); }
 
 	// Math operations for 4 components.
-	friend inline Float4 operator+(const Float4& a, const Float4& b)
-	{ return Float4(a.x+b.x, a.y+b.y, a.z+b.z, a.w+b.w); }
+	friend inline Vector4 operator+(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.x+b.x, a.y+b.y, a.z+b.z, a.w+b.w); }
 
-	friend inline Float4 operator-(const Float4& a, const Float4& b)
-	{ return Float4(a.x-b.x, a.y-b.y, a.z-b.z, a.w-b.w); }
+	friend inline Vector4 operator-(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.x-b.x, a.y-b.y, a.z-b.z, a.w-b.w); }
 
-	friend inline Float4 operator*(const Float4& a, float f)
-	{ return Float4(a.x*f, a.y*f, a.z*f, a.w*f); }
+	friend inline Vector4 operator*(const Vector4& a, float f)
+	{ return Vector4(a.x*f, a.y*f, a.z*f, a.w*f); }
 
-	friend inline Float4 operator*(const Float4& a, const Float4& b)
-	{ return Float4(a.x*b.x, a.y*b.y, a.z*b.z, a.w*b.w); }
+	friend inline Vector4 operator*(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.x*b.x, a.y*b.y, a.z*b.z, a.w*b.w); }
 
-	friend inline Float4 operator/(const Float4& a, float f)
-	{ return Float4(a.x/f, a.y/f, a.z/f, a.w/f); }
+	friend inline Vector4 operator/(const Vector4& a, float f)
+	{ return Vector4(a.x/f, a.y/f, a.z/f, a.w/f); }
 
-	friend inline Float4 operator-(const Float4& a)
-	{ return Float4(-a.x, -a.y, -a.z, -a.w); }
+	friend inline Vector4 operator/=(Vector4& a, float f)
+	{ a = Vector4(a.x/f, a.y/f, a.z/f, a.w/f); return a; }
+
+	friend inline Vector4 operator-(const Vector4& a)
+	{ return Vector4(-a.x, -a.y, -a.z, -a.w); }
 
 	// Math operations ignoring the 4th component.
-	friend inline Float4 Add34(const Float4& a, const Float4& b)
-	{ return Float4(a.x+b.x, a.y+b.y, a.z+b.z); }
+	friend inline Vector4 Add34(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.x+b.x, a.y+b.y, a.z+b.z); }
 
-	friend inline Float4 Subtract34(const Float4& a, const Float4& b)
-	{ return Float4(a.x-b.x, a.y-b.y, a.z-b.z); }
+	friend inline Vector4 Subtract34(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.x-b.x, a.y-b.y, a.z-b.z); }
 
-	friend inline Float4 Multiply34(const Float4& a, float f)
-	{ return Float4(a.x*f, a.y*f, a.z*f); }
+	friend inline Vector4 Multiply34(const Vector4& a, float f)
+	{ return Vector4(a.x*f, a.y*f, a.z*f); }
 
-	friend inline Float4 Multiply34(const Float4& a, const Float4& b)
-	{ return Float4(a.x*b.x, a.y*b.y, a.z*b.z); }
+	friend inline Vector4 Multiply34(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.x*b.x, a.y*b.y, a.z*b.z); }
 
-	friend inline Float4 Divide34(const Float4& a, float f)
-	{ return Float4(a.x/f, a.y/f, a.z/f); }
+	friend inline Vector4 Divide34(const Vector4& a, float f)
+	{ return Vector4(a.x/f, a.y/f, a.z/f); }
 
-	friend inline Float4 Negate34(const Float4& a)
-	{ return Float4(-a.x, -a.y, -a.z, -a.w); }
+	friend inline Vector4 Negate34(const Vector4& a)
+	{ return Vector4(-a.x, -a.y, -a.z, -a.w); }
 
 	// Dot product.
-	friend inline float Dot3(const Float4& a, const Float4& b)
+	friend inline float Dot3(const Vector4& a, const Vector4& b)
 	{ return a.x*b.x + a.y*b.y + a.z*b.z; }
 
+	friend inline float Dot4(const Vector4& a, const Vector4& b)
+	{ return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
+
 	// Cross product.
-	friend inline Float4 Cross3(const Float4& a, const Float4& b)
-	{ return Float4(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); }
+	friend inline Vector4 Cross3(const Vector4& a, const Vector4& b)
+	{ return Vector4(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); }
 
 	// Other functions.
 	inline float Length3() const
 	{ return sqrtf(Dot3(*this, *this)); }
 
-	inline void Normalize3()
+	inline void Normalize34()
 	{ *this = *this / Length3(); }
+
+	inline void Abs34()
+	{
+		if (x < 0.0f) x = -x;
+		if (y < 0.0f) y = -y;
+		if (z < 0.0f) z = -z;
+	}
 
 	inline void Abs()
 	{
@@ -128,23 +152,23 @@ protected:
 #endif
 
 // ============================================================================
-// Float4 class (SSE version).
+// Vector4 class (SSE version).
 
 #ifdef LC_MATH_SSE
 
 // If you can't find this file you need to install the VS6 Processor Pack.
 #include <xmmintrin.h>
 
-class __declspec(align(16)) Float4
+class __declspec(align(16)) Vector4
 {
 public:
 	// Constructors.
-	inline Float4() { }
-	inline explicit Float4(const __m128& _xyzw)
+	inline Vector4() { }
+	inline explicit Vector4(const __m128& _xyzw)
 		: xyzw(_xyzw) { }
-	inline explicit Float4(const float _x, const float _y, const float _z)
+	inline explicit Vector4(const float _x, const float _y, const float _z)
 		: xyzw(_mm_setr_ps(_x, _y, _z, _z)) { }
-	inline explicit Float4(const float _x, const float _y, const float _z, const float _w)
+	inline explicit Vector4(const float _x, const float _y, const float _z, const float _w)
 		: xyzw(_mm_setr_ps(_x, _y, _z, _w)) { }
 
 	// Get/Set functions.
@@ -173,59 +197,58 @@ public:
 		xyzw = _mm_shuffle_ps(xyzw, zzww, _MM_SHUFFLE(2, 0, 1, 0));
 	}
 
-	template<typename T>
-	inline const float operator[](T i) const { return ((const float*)this)[i]; }
+	inline float& operator[](int i) const { return ((const float*)this)[i]; }
 
 	// Comparison.
-	friend inline bool operator==(const Float4& a, const Float4& b)
+	friend inline bool operator==(const Vector4& a, const Vector4& b)
 	{ return !_mm_movemask_ps(_mm_cmpneq_ps(a.xyzw, b.xyzw)); }
 
-	friend inline bool Compare3(const Float4& a, const Float4& b)
+	friend inline bool Compare3(const Vector4& a, const Vector4& b)
 	{ return (_mm_movemask_ps(_mm_cmpeq_ps(a.xyzw, b.xyzw)) & 0x7) == 0x7; }
 
 	// Math operations for 4 components.
-	friend inline Float4 operator+(const Float4& a, const Float4& b)
-	{ return Float4(_mm_add_ps(a.xyzw, b.xyzw)); }
+	friend inline Vector4 operator+(const Vector4& a, const Vector4& b)
+	{ return Vector4(_mm_add_ps(a.xyzw, b.xyzw)); }
 
-	friend inline Float4 operator-(const Float4& a, const Float4& b)
-	{ return Float4(_mm_sub_ps(a.xyzw, b.xyzw)); }
+	friend inline Vector4 operator-(const Vector4& a, const Vector4& b)
+	{ return Vector4(_mm_sub_ps(a.xyzw, b.xyzw)); }
 
-	friend inline Float4 operator*(const Float4& a, float f)
-	{ return Float4(_mm_mul_ps(a.xyzw, _mm_load_ps1(&f))); }
+	friend inline Vector4 operator*(const Vector4& a, float f)
+	{ return Vector4(_mm_mul_ps(a.xyzw, _mm_load_ps1(&f))); }
 
-	friend inline Float4 operator*(const Float4& a, const Float4& b)
-	{ return Float4(_mm_mul_ps(a.xyzw, b.xyzw)); }
+	friend inline Vector4 operator*(const Vector4& a, const Vector4& b)
+	{ return Vector4(_mm_mul_ps(a.xyzw, b.xyzw)); }
 
-	friend inline Float4 operator/(const Float4& a, float f)
-	{ return Float4(_mm_div_ps(a.xyzw, _mm_load_ps1(&f))); }
+	friend inline Vector4 operator/(const Vector4& a, float f)
+	{ return Vector4(_mm_div_ps(a.xyzw, _mm_load_ps1(&f))); }
 
-	friend inline Float4 operator-(const Float4& a)
+	friend inline Vector4 operator-(const Vector4& a)
 	{
 		static const __declspec(align(16)) unsigned int Mask[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 }
-		return Float4(_mm_xor_ps(xyzw, *(__m128*)&Mask));
+		return Vector4(_mm_xor_ps(xyzw, *(__m128*)&Mask));
 	}
 
 	// Math operations ignoring the 4th component.
-	friend inline Float4 Add34(const Float4& a, const Float4& b)
+	friend inline Vector4 Add34(const Vector4& a, const Vector4& b)
 	{ return a*b }
 
-	friend inline Float4 Subtract34(const Float4& a, const Float4& b)
+	friend inline Vector4 Subtract34(const Vector4& a, const Vector4& b)
 	{ return a-b; }
 
-	friend inline Float4 Multiply34(const Float4& a, float f)
+	friend inline Vector4 Multiply34(const Vector4& a, float f)
 	{ return a*f; }
 
-	friend inline Float4 Multiply34(const Float4& a, const Float4& b)
+	friend inline Vector4 Multiply34(const Vector4& a, const Vector4& b)
 	{ return a*b; }
 
-	friend inline Float4 Divide34(const Float4& a, float f)
+	friend inline Vector4 Divide34(const Vector4& a, float f)
 	{ return a/f; }
 
-	friend inline Float4 Negate34(const Float4& a)
+	friend inline Vector4 Negate34(const Vector4& a)
 	{ return -a; }
 
 	// Dot product.
-	friend inline float Dot3(const Float4& a, const Float4& b)
+	friend inline float Dot3(const Vector4& a, const Vector4& b)
 	{
 		__m128 tmp = _mm_mul_ps(a.xyzw, b.xyzw);
 		__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)));
@@ -235,13 +258,13 @@ public:
 	}
 
 	// Cross product.
-	friend inline Float4 Cross3(const Float4& a, const Float4& b)
+	friend inline Vector4 Cross3(const Vector4& a, const Vector4& b)
 	{
 		// a(yzx)*b(zxy)-a(zxy)*b(yzx)
 		__m128 r1 = _mm_mul_ps(_mm_shuffle_ps(a.xyzw, a.xyzw, _MM_SHUFFLE(0, 0, 2, 1)), _mm_shuffle_ps(b.xyzw, b.xyzw, _MM_SHUFFLE(0, 1, 0, 2)));
 		__m128 r2 = _mm_mul_ps(_mm_shuffle_ps(a.xyzw, a.xyzw, _MM_SHUFFLE(0, 1, 0, 2)), _mm_shuffle_ps(b.xyzw, b.xyzw, _MM_SHUFFLE(0, 0, 2, 1)));
 
-		return Float4(_mm_sub_ps(r1, r2));
+		return Vector4(_mm_sub_ps(r1, r2));
 	}
 
 	// Other functions.
@@ -255,7 +278,7 @@ public:
 		return *(const float*)&tmp;
 	}
 
-	inline void Normalize3()
+	inline void Normalize34()
 	{
 		__m128 tmp = _mm_mul_ps(xyzw, xyzw);
 		__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)));
@@ -285,13 +308,13 @@ class Point3
 public:
 	// Constructors.
 	inline Point3() { }
-	inline explicit Point3(const Float4& _v)
+	inline explicit Point3(const Vector4& _v)
 		: m_Value(_v) { }
 	inline explicit Point3(const float _x, const float _y, const float _z)
 		: m_Value(_x, _y, _z) { }
 
 	// Get/Set functions.
-	inline const Float4& GetValue() const { return m_Value; }
+	inline const Vector4& GetValue() const { return m_Value; }
 	inline float GetX() const { return m_Value.GetX(); }
 	inline float GetY() const { return m_Value.GetY(); }
 	inline float GetZ() const { return m_Value.GetZ(); }
@@ -299,17 +322,15 @@ public:
 	inline void SetY(const float _y) { m_Value.SetY(_y); }
 	inline void SetZ(const float _z) { m_Value.SetZ(_z); }
 
-	template<typename T>
-	inline const float operator[](T i) const { return m_Value[i]; }
+	inline operator const Vector4() const
+	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 1.0f); }
+
+	inline float& operator[](int i) const { return m_Value[i]; }
 
 	// Math operations.
-	template<typename T> inline Point3& operator+=(const T& a) { return *this = *this + a; }
-	template<typename T> inline Point3& operator-=(const T& a) { return *this = *this - a; }
-	template<typename T> inline Point3& operator/=(const T& a) { return *this = *this / a; }
-	template<typename T> inline Point3& operator*=(const T& a) { return *this = *this * a; }
 
 protected:
-	Float4 m_Value;
+	Vector4 m_Value;
 };
 
 
@@ -322,13 +343,13 @@ public:
 	// Constructors.
 	inline Vector3()
 		{ }
-	inline explicit Vector3(const Float4& _v)
+	inline explicit Vector3(const Vector4& _v)
 		: m_Value(_v) { }
 	inline explicit Vector3(const float _x, const float _y, const float _z)
 		: m_Value(_x, _y, _z) { }
 
 	// Get/Set functions.
-	inline const Float4& GetValue() const { return m_Value; }
+	inline const Vector4& GetValue() const { return m_Value; }
 	inline float GetX() const { return m_Value.GetX(); }
 	inline float GetY() const { return m_Value.GetY(); }
 	inline float GetZ() const { return m_Value.GetZ(); }
@@ -336,14 +357,17 @@ public:
 	inline void SetY(const float _y) { m_Value.SetY(_y); }
 	inline void SetZ(const float _z) { m_Value.SetZ(_z); }
 
-	template<typename T>
-	inline const float operator[](T i) const { return m_Value[i]; }
+	inline operator const Vector4() const
+	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 0.0f); }
+
+	inline float& operator[](int i) const { return m_Value[i]; }
 
 	// Math operations.
-	template<typename T> inline Vector3& operator+=(const T& a) { return *this = *this + a; }
-	template<typename T> inline Vector3& operator-=(const T& a) { return *this = *this - a; }
-	template<typename T> inline Vector3& operator/=(const T& a) { return *this = *this / a; }
-	template<typename T> inline Vector3& operator*=(const T& a) { return *this = *this * a; }
+	friend inline Vector3 operator+=(Vector3& a, const Vector3& b)
+	{ a.m_Value = a.m_Value + b.m_Value; return a; }
+
+	friend inline Vector3 operator*=(Vector3& a, float b)
+	{ a.m_Value = a.m_Value * b; return a; }
 
 	// Other functions.
 	inline float Length() const
@@ -352,14 +376,14 @@ public:
 	inline float LengthSquared() const
 	{ return Dot3(m_Value, m_Value); }
 
-	inline void Normalize()
-	{ m_Value.Normalize3(); }
+	inline const Vector3& Normalize()
+	{ m_Value.Normalize34(); return *this; }
 
 	inline void Abs()
-	{ m_Value.Abs(); }
+	{ m_Value.Abs34(); }
 
 protected:
-	Float4 m_Value;
+	Vector4 m_Value;
 };
 
 
@@ -450,7 +474,7 @@ public:
 	// Constructors.
 	inline Quaternion()
 		{ }
-	inline explicit Quaternion(const Float4& _v)
+	inline explicit Quaternion(const Vector4& _v)
 		: m_Value(_v) { }
 	inline explicit Quaternion(const float _x, const float _y, const float _z, const float _w)
 		: m_Value(_x, _y, _z, _w) { }
@@ -469,24 +493,24 @@ public:
 	inline const float operator[](T i) const { return m_Value[i]; }
 
 	// Conversions.
-	inline void FromAxisAngle(const Float4& AxisAngle)
+	inline void FromAxisAngle(const Vector4& AxisAngle)
 	{
 		float s = sinf(AxisAngle[3] / 2.0f);
-		m_Value = Float4(AxisAngle[0] * s, AxisAngle[1] * s, AxisAngle[2] * s, cosf(AxisAngle[3] / 2.0f));
+		m_Value = Vector4(AxisAngle[0] * s, AxisAngle[1] * s, AxisAngle[2] * s, cosf(AxisAngle[3] / 2.0f));
 	}
 
-	inline void ToAxisAngle(Float4& AxisAngle) const
+	inline void ToAxisAngle(Vector4& AxisAngle) const
 	{
 		float Len = m_Value[0]*m_Value[0] + m_Value[1]*m_Value[1] + m_Value[2]*m_Value[2];
 
 		if (Len > 0.001f)
 		{
 			float f = 1.0f / sqrtf(Len);
-			AxisAngle = Float4(m_Value[0] * f, m_Value[1] * f, m_Value[2] * f, acosf(m_Value[3]) * 2.0f);
+			AxisAngle = Vector4(m_Value[0] * f, m_Value[1] * f, m_Value[2] * f, acosf(m_Value[3]) * 2.0f);
 		}
 		else
 		{
-			AxisAngle = Float4(0, 0, 1, 0);
+			AxisAngle = Vector4(0, 0, 1, 0);
 		}
 	}
 
@@ -526,7 +550,7 @@ public:
 	}
 
 protected:
-	Float4 m_Value;
+	Vector4 m_Value;
 };
 
 
@@ -588,43 +612,96 @@ protected:
 	Vector3 m_Rows[3];
 };
 
-
 // ============================================================================
-// 4x4 Matrix class (actually 4x3).
+// 4x3 Matrix class.
+/*
+class Matrix43
+{
+public:
+	inline Matrix43()
+		{ }
+	inline Matrix43(const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4& Row3)
+		{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
+
+	inline void SetTranslation(const Point3& a)
+	{ m_Rows[3] = Vector4(a.GetX(), a.GetY(), a.GetZ(), 0.0f); }
+
+	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
+	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
+
+	friend inline Point3 operator*(const Point3& a, const Matrix43& b)
+	{ return Point3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]); }
+
+	friend inline Vector4 operator*(const Vector4& a, const Matrix43& b)
+	{ return Point3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]*a.GetW()); }
+
+protected:
+	Vector4 m_Rows[4];
+};
+*/
+// ============================================================================
+// 4x4 Matrix class.
 
 class Matrix44
 {
 public:
 	inline Matrix44()
-		{ }
-	inline Matrix44(const Float4& Row0, const Float4& Row1, const Float4& Row2, const Float4& Row3)
-		{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
+	{ }
+	inline Matrix44(const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4& Row3)
+	{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
 
-	inline void Transpose3()
-	{
-		Float4 a = m_Rows[0], b = m_Rows[1], c = m_Rows[2];
-		m_Rows[0] = Float4(a.GetX(), b.GetX(), c.GetX(), a.GetW());
-		m_Rows[1] = Float4(a.GetY(), b.GetY(), c.GetY(), b.GetW());
-		m_Rows[2] = Float4(a.GetZ(), b.GetZ(), c.GetZ(), c.GetW());
-	}
-
-	inline void SetTranslation(const Point3& a)
-	{ m_Rows[3] = Float4(a.GetX(), a.GetY(), a.GetZ(), 0.0f); }
-
-	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
-	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
-
+	// Math operations.
 	friend inline Point3 operator*(const Point3& a, const Matrix44& b)
 	{ return Point3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]); }
 
-protected:
-	Float4 m_Rows[4];
-};
+	friend inline Vector3 operator*(const Vector3& a, const Matrix44& b)
+	{ return Vector3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ()); }
 
+	friend inline Vector4 operator*(const Vector4& a, const Matrix44& b)
+	{ return Vector4(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]*a.GetW()); }
+
+	friend inline Matrix44 operator*(const Matrix44& a, const Matrix44& b)
+	{
+		Vector4 Col0(b.m_Rows[0][0], b.m_Rows[1][0], b.m_Rows[2][0], b.m_Rows[3][0]);
+		Vector4 Col1(b.m_Rows[0][1], b.m_Rows[1][1], b.m_Rows[2][1], b.m_Rows[3][1]);
+		Vector4 Col2(b.m_Rows[0][2], b.m_Rows[1][2], b.m_Rows[2][2], b.m_Rows[3][2]);
+		Vector4 Col3(b.m_Rows[0][3], b.m_Rows[1][3], b.m_Rows[2][3], b.m_Rows[3][3]);
+
+		Vector4 Ret0(Dot4(a.m_Rows[0], Col0), Dot4(a.m_Rows[0], Col1), Dot4(a.m_Rows[0], Col2), Dot4(a.m_Rows[0], Col3));
+		Vector4 Ret1(Dot4(a.m_Rows[1], Col0), Dot4(a.m_Rows[1], Col1), Dot4(a.m_Rows[1], Col2), Dot4(a.m_Rows[1], Col3));
+		Vector4 Ret2(Dot4(a.m_Rows[2], Col0), Dot4(a.m_Rows[2], Col1), Dot4(a.m_Rows[2], Col2), Dot4(a.m_Rows[2], Col3));
+		Vector4 Ret3(Dot4(a.m_Rows[3], Col0), Dot4(a.m_Rows[3], Col1), Dot4(a.m_Rows[3], Col2), Dot4(a.m_Rows[3], Col3));
+
+		return Matrix44(Ret0, Ret1, Ret2, Ret3);
+	}
+
+	inline void Transpose3()
+	{
+		Vector4 a = m_Rows[0], b = m_Rows[1], c = m_Rows[2];
+		m_Rows[0] = Vector4(a.GetX(), b.GetX(), c.GetX(), a.GetW());
+		m_Rows[1] = Vector4(a.GetY(), b.GetY(), c.GetY(), b.GetW());
+		m_Rows[2] = Vector4(a.GetZ(), b.GetZ(), c.GetZ(), c.GetW());
+	}
+
+	inline void SetTranslation(const Point3& a)
+	{ m_Rows[3] = Vector4(a.GetX(), a.GetY(), a.GetZ(), 1.0f); }
+
+	friend Matrix44 Inverse(const Matrix44& m);
+	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
+	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
+
+protected:
+	Vector4 m_Rows[4];
+};
 
 // ============================================================================
 // Other Functions.
 
-Point3 ProjectPoint(const Point3& Pt, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+Point3 ProjectPoint(const Point3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+Point3 UnprojectPoint(const Point3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+void UnprojectPoints(Point3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+
+void PolygonPlaneClip(Point3* InPoints, int NumInPoints, Point3* OutPoints, int* NumOutPoints, const Vector4& Plane);
+bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Point3& End, const Vector4& Plane);
 
 #endif

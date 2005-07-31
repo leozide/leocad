@@ -143,6 +143,7 @@ BEGIN
     BUTTON      ID_ACTION_CAMERA
     SEPARATOR
     BUTTON      ID_ACTION_SELECT
+    BUTTON      ID_ACTION_SELECT_REGION
     BUTTON      ID_ACTION_MOVE
     BUTTON      ID_ACTION_ROTATE
     BUTTON      ID_ACTION_REMOVE
@@ -1424,6 +1425,20 @@ BEGIN
     GROUPBOX        "Offset",IDC_STATIC,105,7,80,68
 END
 
+IDD_CATEGORY DIALOG DISCARDABLE  0, 0, 205, 67
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Category"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Name",IDC_STATIC,7,9,26,8
+    EDITTEXT        IDC_CATDLG_NAME,45,7,100,12,ES_AUTOHSCROLL
+    LTEXT           "Keywords",IDC_STATIC,7,26,33,8
+    EDITTEXT        IDC_CATDLG_KEYWORDS,45,24,100,36,ES_MULTILINE | 
+                    ES_AUTOVSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,157,7,41,14
+    PUSHBUTTON      "Cancel",IDCANCEL,157,26,41,14
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -1693,6 +1708,14 @@ BEGIN
         RIGHTMARGIN, 242
         TOPMARGIN, 7
         BOTTOMMARGIN, 75
+    END
+
+    IDD_CATEGORY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 198
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 60
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2096,6 +2119,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
+    ID_ACTION_SELECT_REGION "Select objects with the mouse\nSelect Region"
 END
 
 #endif    // English (U.S.) resources

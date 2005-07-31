@@ -9,7 +9,8 @@ class Piece;
 class PieceInfo;
 #include "defines.h"
 
-typedef enum {
+typedef enum
+{
 	LC_COLOR_CHANGED,
 	LC_GROUP_CHANGED,
 	LC_CAPTURE_LOST,
@@ -19,7 +20,8 @@ typedef enum {
 	LC_LIGHT_MODIFIED
 } LC_NOTIFY;
 
-typedef enum {
+typedef enum
+{
 	LC_FILE_NEW,
 	LC_FILE_OPEN,
 	LC_FILE_MERGE,
@@ -127,8 +129,10 @@ typedef enum {
 	LC_EDIT_ACTION_ROLL,
 } LC_COMMANDS;
 
-typedef enum { 
-	LC_ACTION_SELECT = 0, 
+typedef enum
+{
+	LC_ACTION_SELECT, 
+	LC_ACTION_SELECT_REGION, 
 	LC_ACTION_INSERT,
 	LC_ACTION_LIGHT,
 	LC_ACTION_SPOTLIGHT,

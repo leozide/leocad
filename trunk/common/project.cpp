@@ -30,6 +30,7 @@
 #include "library.h"
 #include "texfont.h"
 #include "algebra.h"
+#include "debug.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p)
@@ -2364,6 +2365,10 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 				RenderBoxes(true);
 		}
 
+#ifdef LC_DEBUG
+		RenderDebugPrimitives();
+#endif
+
 		// Draw cameras & lights
 		if (bDrawViewports)
 		{
@@ -2393,6 +2398,50 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 				
 				if (m_nDetail & LC_DET_LIGHTING)
 					glEnable (GL_LIGHTING);
+		}
+
+		// Draw the selection rectangle.
+		if ((m_nCurAction == LC_ACTION_SELECT_REGION) && (m_nTracking == LC_TRACK_LEFT))
+		{
+			int x, y, w, h;
+
+			x = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
+			y = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
+			w = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
+			h = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+
+			glViewport(x, y, w, h);
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(0, w, 0, h, -1, 1);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			glTranslatef(0.375, 0.375, 0.0);
+
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_LINE_STIPPLE);
+			glLineStipple(5, 0x5555);
+			glColor3f(0, 0, 0);
+
+			float pt1x = (float)(m_nDownX - x);
+			float pt1y = (float)(m_nDownY - y);
+			float pt2x = m_fTrack[0] - x;
+			float pt2y = m_fTrack[1] - y;
+
+			glBegin(GL_LINES);
+			glVertex2f(pt1x, pt1y);
+			glVertex2f(pt2x, pt1y);
+			glVertex2f(pt2x, pt1y);
+			glVertex2f(pt2x, pt2y);
+			glVertex2f(pt2x, pt2y);
+			glVertex2f(pt1x, pt2y);
+			glVertex2f(pt1x, pt2y);
+			glVertex2f(pt1x, pt1y);
+			glEnd();
+
+			glDisable(GL_LINE_STIPPLE);
+			glEnable(GL_DEPTH_TEST);
 		}
 
 		if (bDrawViewports && m_OverlayActive)
@@ -2504,7 +2553,7 @@ void Project::RenderOverlays(int Viewport)
 		// Draw a disc showing the rotation amount.
 		if (m_MouseTotalDelta.LengthSquared() != 0.0f && (m_nTracking != LC_TRACK_NONE))
 		{
-			Float4 Rotation;
+			Vector4 Rotation;
 			float Angle, Step;
 
 			switch (m_OverlayMode)
@@ -2512,17 +2561,17 @@ void Project::RenderOverlays(int Viewport)
 			case LC_OVERLAY_X:
 				glColor4f(0.8f, 0.0f, 0.0f, 0.3f);
 				Angle = m_MouseTotalDelta[0];
-				Rotation = Float4(0.0f, 0.0f, 0.0f, 0.0f);
+				Rotation = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
 				break;
 			case LC_OVERLAY_Y:
 				glColor4f(0.0f, 0.8f, 0.0f, 0.3f);
 				Angle = m_MouseTotalDelta[1];
-				Rotation = Float4(90.0f, 0.0f, 0.0f, 1.0f);
+				Rotation = Vector4(90.0f, 0.0f, 0.0f, 1.0f);
 				break;
 			case LC_OVERLAY_Z:
 				glColor4f(0.0f, 0.0f, 0.8f, 0.3f);
 				Angle = m_MouseTotalDelta[2];
-				Rotation = Float4(90.0f, 0.0f, -1.0f, 0.0f);
+				Rotation = Vector4(90.0f, 0.0f, -1.0f, 0.0f);
 				break;
 			default:
 				Angle = 0.0f;
@@ -6666,6 +6715,88 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine)
 		pLight->MinIntersectDist(pLine);
 }
 
+void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
+{
+	int Viewport[4] =
+	{
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX),
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY),
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX),
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY)
+	};
+
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
+
+	// Build the matrices.
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+	// Find out the top-left and bottom-right corners in screen coordinates.
+	float Left, Top, Bottom, Right;
+
+	if (x1 < x2)
+	{
+		Left = x1;
+		Right = x2;
+	}
+	else
+	{
+		Left = x2;
+		Right = x1;
+	}
+
+	if (y1 > y2)
+	{
+		Top = y1;
+		Bottom = y2;
+	}
+	else
+	{
+		Top = y2;
+		Bottom = y1;
+	}
+
+	// Unproject 6 points to world space.
+	Point3 Corners[6] =
+	{
+		Point3(Left, Top, 0), Point3(Left, Bottom, 0), Point3(Right, Bottom, 0),
+		Point3(Right, Top, 0), Point3(Left, Top, 1), Point3(Right, Bottom, 1)
+	};
+
+	UnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
+
+	// Build the box planes.
+	Vector4 Planes[6];
+
+	Planes[0] = Cross3(Corners[4] - Corners[0], Corners[1] - Corners[0]).Normalize(); // Left
+	Planes[1] = Cross3(Corners[5] - Corners[2], Corners[3] - Corners[2]).Normalize(); // Right
+	Planes[2] = Cross3(Corners[3] - Corners[0], Corners[4] - Corners[0]).Normalize(); // Top
+	Planes[3] = Cross3(Corners[1] - Corners[2], Corners[5] - Corners[2]).Normalize(); // Bottom
+	Planes[4] = Cross3(Corners[1] - Corners[0], Corners[3] - Corners[0]).Normalize(); // Front
+	Planes[5] = Cross3(Corners[1] - Corners[2], Corners[3] - Corners[2]).Normalize(); // Back
+
+	Planes[0][3] = -Dot3(Planes[0], Corners[0]);
+	Planes[1][3] = -Dot3(Planes[1], Corners[5]);
+	Planes[2][3] = -Dot3(Planes[2], Corners[0]);
+	Planes[3][3] = -Dot3(Planes[3], Corners[5]);
+	Planes[4][3] = -Dot3(Planes[4], Corners[0]);
+	Planes[5][3] = -Dot3(Planes[5], Corners[5]);
+
+	// Check if any objects are inside the volume.
+	for (Piece* piece = m_pPieces; piece != NULL; piece = piece->m_pNext)
+	{
+		if (piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+		{
+			if (piece->IntersectsVolume(Planes, 6))
+				Objects.Add(piece);
+		}
+	}
+
+	// TODO: lights and cameras.
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Mouse handling
 
@@ -6755,6 +6886,42 @@ bool Project::StopTracking(bool bAccept)
 	{
 		switch (m_nCurAction)
 		{
+			case LC_ACTION_SELECT_REGION:
+			{
+				// Find objects inside the rectangle.
+				PtrArray<Object> Objects;
+				FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
+
+				// Deselect old pieces.
+				bool Control = Sys_KeyDown(KEY_CONTROL);
+				SelectAndFocusNone(Control);
+
+				// Select new pieces.
+				for (int i = 0; i < Objects.GetSize(); i++)
+				{
+					if (Objects[i]->GetType() == LC_OBJECT_PIECE)
+					{
+						Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
+						if (pGroup != NULL)
+						{
+							for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+								if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+										(pPiece->GetTopGroup() == pGroup))
+									pPiece->Select (true, false, false);
+						}
+						else
+							Objects[i]->Select(true, false, Control);
+					}
+					else
+						Objects[i]->Select(true, false, Control);
+				}
+
+				// Update screen and UI.
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(NULL);
+			} break;
+
 			case LC_ACTION_MOVE:
 			{
 				SetModifiedFlag(true);
@@ -6809,10 +6976,13 @@ bool Project::StopTracking(bool bAccept)
 	}
 	else if (m_pTrackFile != NULL)
 	{
-		DeleteContents (true);
-		FileLoad (m_pTrackFile, true, false);
-		delete m_pTrackFile;
-		m_pTrackFile = NULL;
+		if (m_nCurAction != LC_ACTION_SELECT_REGION)
+		{
+			DeleteContents (true);
+			FileLoad (m_pTrackFile, true, false);
+			delete m_pTrackFile;
+			m_pTrackFile = NULL;
+		}
 	}
 
 	return true;
@@ -7099,7 +7269,7 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 		pPiece->GetRotation(rot);
 
 		Quaternion q;
-		q.FromAxisAngle(Float4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+		q.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
 		if (nSel == 1)
 		{
@@ -7145,7 +7315,7 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
-		Float4 tmp;
+		Vector4 tmp;
 		q.ToAxisAngle(tmp);
 		rot[0] = tmp[0];
 		rot[1] = tmp[1];
@@ -7533,32 +7703,32 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-  GLdouble modelMatrix[16], projMatrix[16], point[3];
-  GLint viewport[4];
+	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLint viewport[4];
 
-  if (IsDrawing())
-    return;
+	if (IsDrawing())
+		return;
 
-  if (m_nTracking != LC_TRACK_NONE)
-    if (StopTracking(false))
-      return;
+	if (m_nTracking != LC_TRACK_NONE)
+		if (StopTracking(false))
+			return;
 
-  if (SetActiveViewport(x, y))
-    return;
+	if (SetActiveViewport(x, y))
+		return;
 
-  m_bTrackCancel = false;
-  m_nDownX = x;
-  m_nDownY = y;
+	m_bTrackCancel = false;
+	m_nDownX = x;
+	m_nDownY = y;
 	m_MouseTotalDelta = Vector3(0, 0, 0);
 	m_MouseSnapLeftover = Vector3(0, 0, 0);
 
-  LoadViewportProjection(m_nActiveViewport);
-  glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-  glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-  glGetIntegerv(GL_VIEWPORT, viewport);
+	LoadViewportProjection(m_nActiveViewport);
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+	glGetIntegerv(GL_VIEWPORT, viewport);
 
-  gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-  m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
 	{
@@ -7575,7 +7745,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				{
 					switch (ClickLine.pClosest->GetType ())
 					{
-					case LC_OBJECT_PIECE:
+						case LC_OBJECT_PIECE:
 						{
 							Piece* pPiece = (Piece*)ClickLine.pClosest;
 							Group* pGroup = pPiece->GetTopGroup();
@@ -7592,10 +7762,10 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 										pPiece->Select (!bFocus, false, false);
 						} break;
 
-					case LC_OBJECT_CAMERA:
-					case LC_OBJECT_CAMERA_TARGET:
-					case LC_OBJECT_LIGHT:
-					case LC_OBJECT_LIGHT_TARGET:
+						case LC_OBJECT_CAMERA:
+						case LC_OBJECT_CAMERA_TARGET:
+						case LC_OBJECT_LIGHT:
+						case LC_OBJECT_LIGHT_TARGET:
 						{
 							SelectAndFocusNone (bControl);
 							ClickLine.pClosest->Select (true, true, bControl);
@@ -7610,83 +7780,83 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				SystemUpdateFocus(ClickLine.pClosest);
 			}
 
-      if ((m_nCurAction == LC_ACTION_ERASER) && (ClickLine.pClosest != NULL))
-      {
-	switch (ClickLine.pClosest->GetType ())
-	{
-	  case LC_OBJECT_PIECE:
-	  {
-	    Piece* pPiece = (Piece*)ClickLine.pClosest;
-	    RemovePiece(pPiece);
-	    delete pPiece;
+			if ((m_nCurAction == LC_ACTION_ERASER) && (ClickLine.pClosest != NULL))
+			{
+				switch (ClickLine.pClosest->GetType ())
+				{
+					case LC_OBJECT_PIECE:
+					{
+						Piece* pPiece = (Piece*)ClickLine.pClosest;
+						RemovePiece(pPiece);
+						delete pPiece;
 //						CalculateStep();
-	    RemoveEmptyGroups();
-	  } break;
+						RemoveEmptyGroups();
+					} break;
 
-	  case LC_OBJECT_CAMERA:
-	  case LC_OBJECT_CAMERA_TARGET:
-	  {
-	    Camera* pCamera;
-	    if (ClickLine.pClosest->GetType () == LC_OBJECT_CAMERA)
-	      pCamera = (Camera*)ClickLine.pClosest;
-	    else
-	      pCamera = ((CameraTarget*)ClickLine.pClosest)->GetParent();
-	    bool bCanDelete = pCamera->IsUser();
+					case LC_OBJECT_CAMERA:
+					case LC_OBJECT_CAMERA_TARGET:
+					{
+						Camera* pCamera;
+						if (ClickLine.pClosest->GetType () == LC_OBJECT_CAMERA)
+							pCamera = (Camera*)ClickLine.pClosest;
+						else
+							pCamera = ((CameraTarget*)ClickLine.pClosest)->GetParent();
+						bool bCanDelete = pCamera->IsUser();
 
-	    for (int i = 0; i < 4; i++)
-	      if (pCamera == m_pViewCameras[i])
-		bCanDelete = false;
+						for (int i = 0; i < 4; i++)
+							if (pCamera == m_pViewCameras[i])
+								bCanDelete = false;
 
-	    if (bCanDelete)
-	    {
-	      Camera* pPrev;
-	      for (pPrev = m_pCameras; pPrev; pPrev = pPrev->m_pNext)
-		if (pPrev->m_pNext == pCamera)
-		{
-		  pPrev->m_pNext = pCamera->m_pNext;
-		  delete pCamera;
-		  SystemUpdateCameraMenu(m_pCameras);
-		  SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
-		  break;
-		}
-	    }
-	  } break;
+						if (bCanDelete)
+						{
+							Camera* pPrev;
+							for (pPrev = m_pCameras; pPrev; pPrev = pPrev->m_pNext)
+								if (pPrev->m_pNext == pCamera)
+								{
+									pPrev->m_pNext = pCamera->m_pNext;
+									delete pCamera;
+									SystemUpdateCameraMenu(m_pCameras);
+									SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
+									break;
+								}
+						}
+					} break;
 
-	  case LC_OBJECT_LIGHT:
-	  case LC_OBJECT_LIGHT_TARGET:
-	  { 
-/*						pos = m_Lights.Find(pObject->m_pParent);
-						m_Lights.RemoveAt(pos);
-						delete pObject->m_pParent;
-*/	  } break;
-	}
+					case LC_OBJECT_LIGHT:
+					case LC_OBJECT_LIGHT_TARGET:
+					{
+//						pos = m_Lights.Find(pObject->m_pParent);
+//						m_Lights.RemoveAt(pos);
+//						delete pObject->m_pParent;
+					} break;
+				}
 
-	UpdateSelection();
-	UpdateAllViews();
-	SetModifiedFlag(true);
-	CheckPoint("Deleting");
+				UpdateSelection();
+				UpdateAllViews();
+				SetModifiedFlag(true);
+				CheckPoint("Deleting");
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
-      }
+			}
 
-      if ((m_nCurAction == LC_ACTION_PAINT) && (ClickLine.pClosest != NULL) && 
-	  (ClickLine.pClosest->GetType() == LC_OBJECT_PIECE))
-      {
-	Piece* pPiece = (Piece*)ClickLine.pClosest;
+			if ((m_nCurAction == LC_ACTION_PAINT) && (ClickLine.pClosest != NULL) && 
+				(ClickLine.pClosest->GetType() == LC_OBJECT_PIECE))
+			{
+				Piece* pPiece = (Piece*)ClickLine.pClosest;
 
-	if (pPiece->GetColor() != m_nCurColor)
-	{
-	  bool bTrans = pPiece->IsTransparent();
-	  pPiece->SetColor(m_nCurColor);
-	  if (bTrans != pPiece->IsTransparent())
-	    pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
+				if (pPiece->GetColor() != m_nCurColor)
+				{
+					bool bTrans = pPiece->IsTransparent();
+					pPiece->SetColor(m_nCurColor);
+					if (bTrans != pPiece->IsTransparent())
+						pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 
-	  SetModifiedFlag(true);
-	  CheckPoint("Painting");
-	  SystemUpdateFocus(NULL);
-	  UpdateAllViews();
-	}
-      }
-    } break;
+					SetModifiedFlag(true);
+					CheckPoint("Painting");
+					SystemUpdateFocus(NULL);
+					UpdateAllViews();
+				}
+			}
+		} break;
 
 		case LC_ACTION_INSERT:
 		case LC_ACTION_LIGHT:
@@ -7840,6 +8010,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			}
 		} break;
 
+		case LC_ACTION_SELECT_REGION:
 		case LC_ACTION_ZOOM:
 		case LC_ACTION_ROLL:
 		case LC_ACTION_PAN:
@@ -8040,6 +8211,26 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 	switch (m_nCurAction)
 	{
+		case LC_ACTION_SELECT_REGION:
+		{
+			int ptx = x, pty = y;
+
+			if (ptx >= viewport[0] + viewport[2])
+				ptx = viewport[0] + viewport[2] - 1;
+			else if (ptx <= viewport[0])
+				ptx = viewport[0] + 1;
+
+			if (pty >= viewport[1] + viewport[3])
+				pty = viewport[1] + viewport[3] - 1;
+			else if (pty <= viewport[1])
+				pty = viewport[1] + 1;
+
+			m_fTrack[0] = (float)ptx;
+			m_fTrack[1] = (float)pty;
+
+			UpdateAllViews();
+		} break;
+
 		case LC_ACTION_INSERT:
 			// TODO: handle action_insert (draw preview)
 			break;
@@ -8518,9 +8709,9 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			glVertex2i(rx, m_nDownY);
 			glEnd();
 
-                        //			SystemSwapBuffers();
+			//			SystemSwapBuffers();
 		} break;
-		
+
 		case LC_ACTION_PAN:
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))

@@ -68,19 +68,23 @@ typedef struct LC_CLICKLINE
 
 class Object
 {
- public:
-  Object (LC_OBJECT_TYPE nType);
-  virtual ~Object ();
+public:
+	Object (LC_OBJECT_TYPE nType);
+	virtual ~Object ();
 
- public:
-  // move the object
-  virtual void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
-  // check if the object intersects the ray
-  virtual void MinIntersectDist (LC_CLICKLINE* pLine) = 0;
-  // bSelecting is the action (add/remove), bFocus means "add focus if selecting"
-  // or "remove focus only if deselecting", bMultiple = Ctrl key is down
-  virtual void Select (bool bSelecting, bool bFocus, bool bMultiple) = 0;
+public:
+	// Move the object.
+	virtual void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
 
+	// Check if the object intersects the ray.
+	virtual void MinIntersectDist(LC_CLICKLINE* pLine) = 0;
+
+	// bSelecting is the action (add/remove), bFocus means "add focus if selecting"
+	// or "remove focus only if deselecting", bMultiple = Ctrl key is down
+	virtual void Select(bool bSelecting, bool bFocus, bool bMultiple) = 0;
+
+	// Check if the object intersects the volume specified by a given set of planes.
+	virtual bool IntersectsVolume(const class Vector4* Planes, int NumPlanes) = 0;
 
 
   /*

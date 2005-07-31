@@ -37,6 +37,8 @@ class CurvePoint : public Object
   bool FileLoad (File& file);
   void FileSave (File& file) const;
   void MinIntersectDist (LC_CLICKLINE* pLine);
+	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
+	{ return false; }
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
   void Render (LC_RENDER_INFO* pInfo);

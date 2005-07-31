@@ -12,6 +12,7 @@
 #include "piece.h"
 #include "group.h"
 #include "project.h"
+#include "algebra.h"
 
 #define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
 
@@ -610,6 +611,208 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 
 	free(verts);
+}
+
+// Return true if a polygon intersects a set of planes.
+bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes)
+{
+	float* Points[4] = { p1, p2, p3, p4 };
+	int Outcodes[4] = { 0, 0, 0, 0 };
+	int NumPoints = (p4 != NULL) ? 4 : 3;
+
+	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
+	for (int i = 0; i < NumPoints; i++)
+	{
+		Point3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+
+		for (int j = 0; j < NumPlanes; j++)
+		{
+			if (Dot3(Pt, Planes[j]) + Planes[j][3] > 0)
+				Outcodes[i] |= 1 << j;
+		}
+	}
+
+	if (p4 != NULL)
+	{
+		// Polygon completely outside a plane.
+		if ((Outcodes[0] & Outcodes[1] & Outcodes[2] & Outcodes[3]) != 0)
+			return false;
+
+		// If any vertex has an out code of all zeros then we intersect the volume.
+		if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2] || !Outcodes[3])
+			return true;
+	}
+	else
+	{
+		// Polygon completely outside a plane.
+		if ((Outcodes[0] & Outcodes[1] & Outcodes[2]) != 0)
+			return false;
+
+		// If any vertex has an out code of all zeros then we intersect the volume.
+		if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2])
+			return true;
+	}
+
+	// Buffers for clipping the polygon.
+	Point3 ClipPoints[2][8];
+	int NumClipPoints[2];
+	int ClipBuffer = 0;
+
+	NumClipPoints[0] = NumPoints;
+	ClipPoints[0][0] = Point3(p1[0], p1[1], p1[2]);
+	ClipPoints[0][1] = Point3(p2[0], p2[1], p2[2]);
+	ClipPoints[0][2] = Point3(p3[0], p3[1], p3[2]);
+
+	if (NumPoints == 4)
+		ClipPoints[0][3] = Point3(p4[0], p4[1], p4[2]);
+
+	// Now clip the polygon against the planes.
+	for (i = 0; i < NumPlanes; i++)
+	{
+		PolygonPlaneClip(ClipPoints[ClipBuffer], NumClipPoints[ClipBuffer], ClipPoints[ClipBuffer^1], &NumClipPoints[ClipBuffer^1], Planes[i]);
+		ClipBuffer ^= 1;
+
+		if (!NumClipPoints[ClipBuffer])
+			return false;
+	}
+
+	return true;
+}
+
+bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
+{
+	// First check the bounding box for quick rejection.
+	Point3 Box[8] =
+	{
+		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
+		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
+		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]),
+		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
+		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
+		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
+	};
+
+	// TODO: transform the planes to local space instead.
+	Matrix m(m_fRotation, m_fPosition);
+
+	// Start by testing trivial reject/accept cases.
+	int Outcodes[8];
+
+	for (int i = 0; i < 8; i++)
+	{
+		Point3 Point;
+		m.TransformPoint(&Point[0], &Box[i][0]);
+		Outcodes[i] = 0;
+
+		for (int j = 0; j < NumPlanes; j++)
+		{
+			if (Dot3(Point, Planes[j]) + Planes[j][3] > 0)
+				Outcodes[i] |= 1 << j;
+		}
+	}
+
+	int OutcodesOR = 0, OutcodesAND = 0x3f;
+
+	for (i = 0; i < 8; i++)
+	{
+		OutcodesAND &= Outcodes[i];
+		OutcodesOR |= Outcodes[i];
+	}
+
+	// All corners outside the same plane.
+	if (OutcodesAND != 0)
+		return false;
+
+	// All corners inside the volume.
+	if (OutcodesOR == 0)
+		return true;
+
+	// Partial intersection, so check if any triangles are inside.
+	Matrix mat(m_fRotation, m_fPosition);
+	float* verts = (float*)malloc(sizeof(float)*3*m_pPieceInfo->m_nVertexCount);
+	memcpy(verts, m_pPieceInfo->m_fVertexArray, sizeof(float)*3*m_pPieceInfo->m_nVertexCount);
+	mat.TransformPoints(verts, m_pPieceInfo->m_nVertexCount);
+
+	bool ret = false;
+
+	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	{
+		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
+		colors = *info;
+		info++;
+
+		while (colors--)
+		{
+			info++;
+
+			for (i = 0; i < *info; i += 4)
+			{
+				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
+				    &verts[info[i+3]*3], &verts[info[i+4]*3], Planes, NumPlanes))
+				{
+					ret = true;
+					break;
+				}
+			}
+
+			info += *info + 1;
+
+			for (i = 0; i < *info; i += 3)
+			{
+				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
+				    &verts[info[i+3]*3], NULL, Planes, NumPlanes))
+				{
+					ret = true;
+					break;
+				}
+			}
+
+			info += *info + 1;
+			info += *info + 1;
+		}
+	}
+	else
+	{
+		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
+		colors = *info;
+		info++;
+
+		while (colors--)
+		{
+			info++;
+
+			for (i = 0; i < *info; i += 4)
+			{
+				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
+				    &verts[info[i+3]*3], &verts[info[i+4]*3], Planes, NumPlanes))
+				{
+					ret = true;
+					break;
+				}
+			}
+
+			info += *info + 1;
+
+			for (i = 0; i < *info; i += 3)
+			{
+				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
+				    &verts[info[i+3]*3], NULL, Planes, NumPlanes))
+				{
+					ret = true;
+					break;
+				}
+			}
+
+			info += *info + 1;
+			info += *info + 1;
+		}
+	}
+
+	free(verts);
+
+	return ret;
 }
 
 void Piece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)

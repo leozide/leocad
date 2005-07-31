@@ -137,6 +137,7 @@
 #define IDD_LIBRARY_TEXTURES            234
 #define IDD_PREFKEYBOARD                235
 #define IDD_TRANSFORM                   236
+#define IDD_CATEGORY                    237
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -383,6 +384,7 @@
 #define IDC_MF_HANDR                    1211
 #define IDC_TEROPT_FLAT                 1211
 #define IDC_TRANSDLG_GY                 1211
+#define IDC_CATDLG_KEYWORDS             1211
 #define IDC_MF_TOOLL                    1212
 #define IDC_EDIT2                       1212
 #define IDC_SCNDLG_SOLID                1212
@@ -444,6 +446,7 @@
 #define IDC_MF_SHOERSPIN                1245
 #define IDC_TRANSDLG_GX                 1245
 #define IDC_TRANSDLG_OX                 1246
+#define IDC_CATDLG_NAME                 1246
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -456,21 +459,22 @@
 #define ID_VIEW_STEP_CHOOSE             32784
 #define ID_VIEW_STEP_INSERT             32785
 #define ID_ACTION_SELECT                32788
-#define ID_ACTION_INSERT                32789
-#define ID_ACTION_LIGHT                 32790
-#define ID_ACTION_SPOTLIGHT             32791
-#define ID_ACTION_CAMERA                32792
-#define ID_ACTION_MOVE                  32793
-#define ID_ACTION_ROTATE                32794
-#define ID_ACTION_REMOVE                32795
-#define ID_ACTION_PAINT                 32796
-#define ID_ACTION_ZOOM                  32797
-#define ID_ACTION_ZOOM_REGION           32798
-#define ID_ACTION_PAN                   32799
-#define ID_ACTION_ROTATE_VIEW           32800
-#define ID_ACTION_ROLL                  32801
-#define ID_ACTION_ZOOM_EXTENTS          32802
-#define ID_ZOOM_EXTENTS                 32802
+#define ID_ACTION_SELECT_REGION         32789
+#define ID_ACTION_INSERT                32790
+#define ID_ACTION_LIGHT                 32791
+#define ID_ACTION_SPOTLIGHT             32792
+#define ID_ACTION_CAMERA                32793
+#define ID_ACTION_MOVE                  32794
+#define ID_ACTION_ROTATE                32795
+#define ID_ACTION_REMOVE                32796
+#define ID_ACTION_PAINT                 32797
+#define ID_ACTION_ZOOM                  32798
+#define ID_ACTION_ZOOM_REGION           32799
+#define ID_ACTION_PAN                   32800
+#define ID_ACTION_ROTATE_VIEW           32801
+#define ID_ACTION_ROLL                  32802
+#define ID_ACTION_ZOOM_EXTENTS          32803
+#define ID_ZOOM_EXTENTS                 32807
 #define ID_PIECE_GROUP                  32808
 #define ID_PIECE_UNGROUP                32809
 #define ID_VIEW_PREFERENCES             32810
@@ -677,9 +681,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        237
-#define _APS_NEXT_COMMAND_VALUE         33158
-#define _APS_NEXT_CONTROL_VALUE         1246
+#define _APS_NEXT_RESOURCE_VALUE        238
+#define _APS_NEXT_COMMAND_VALUE         33159
+#define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

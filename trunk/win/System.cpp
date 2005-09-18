@@ -667,15 +667,31 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap)
 {
-	// Status bar
-	char snap[256];
+	char Text[256], Buffer[256];
 
-	if (MoveSnap)
-		wsprintf(snap, " M: %d R: %d ", MoveSnap, RotateSnap);
+	int SnapXY = MoveSnap & 0xff;
+	int SnapZ = (MoveSnap >> 8) & 0xff;
+
+	strcpy(Text, " M: ");
+
+	if (SnapXY)
+		sprintf(Buffer, "%d", SnapXY);
 	else
-		wsprintf(snap, " M: /2 R: %d ", RotateSnap);
+		strcpy(Buffer, "/2");
 
-	((CMainFrame*)AfxGetMainWnd())->SetStatusBarPane(ID_INDICATOR_SNAP, snap);
+	strcat(Text, Buffer);
+
+	if (SnapZ)
+		sprintf(Buffer, " %d", SnapZ);
+	else
+		strcpy(Buffer, " /3");
+
+	strcat(Text, Buffer);
+
+	sprintf(Buffer, " R: %d ", RotateSnap);
+	strcat(Text, Buffer);
+
+	((CMainFrame*)AfxGetMainWnd())->SetStatusBarPane(ID_INDICATOR_SNAP, Text);
 }
 
 void SystemUpdatePaste(bool enable)

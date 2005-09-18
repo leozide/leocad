@@ -559,7 +559,7 @@ void Project::LoadDefaults(bool cameras)
 	SystemUpdateSnap(m_nSnap);
 	m_nMoveSnap = 0;
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-    m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
+	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
 	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
 	rgb = Sys_ProfileLoadInt ("Default", "Fog", 0xFFFFFF);
 	m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
@@ -6270,7 +6270,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (nParam == 19)
 					m_nMoveSnap = 100;
 				else
-					m_nMoveSnap = (unsigned short)(nParam - 10)*5 + 10;
+					m_nMoveSnap = ((unsigned short)(nParam - 10)*5 + 10) | (m_nMoveSnap & ~0xff);
 			}
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
@@ -6297,18 +6297,33 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 		} break;
 
-		case LC_EDIT_MOVE_SNAP_0:
-		case LC_EDIT_MOVE_SNAP_1:
-		case LC_EDIT_MOVE_SNAP_2:
-		case LC_EDIT_MOVE_SNAP_3:
-		case LC_EDIT_MOVE_SNAP_4:
-		case LC_EDIT_MOVE_SNAP_5:
-		case LC_EDIT_MOVE_SNAP_6:
-		case LC_EDIT_MOVE_SNAP_7:
-		case LC_EDIT_MOVE_SNAP_8:
-		case LC_EDIT_MOVE_SNAP_9:
+		case LC_EDIT_MOVEXY_SNAP_0:
+		case LC_EDIT_MOVEXY_SNAP_1:
+		case LC_EDIT_MOVEXY_SNAP_2:
+		case LC_EDIT_MOVEXY_SNAP_3:
+		case LC_EDIT_MOVEXY_SNAP_4:
+		case LC_EDIT_MOVEXY_SNAP_5:
+		case LC_EDIT_MOVEXY_SNAP_6:
+		case LC_EDIT_MOVEXY_SNAP_7:
+		case LC_EDIT_MOVEXY_SNAP_8:
+		case LC_EDIT_MOVEXY_SNAP_9:
 		{
-			m_nMoveSnap = id - LC_EDIT_MOVE_SNAP_0;
+			m_nMoveSnap = (id - LC_EDIT_MOVEXY_SNAP_0) | (m_nMoveSnap & ~0xff);
+			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+		} break;
+
+		case LC_EDIT_MOVEZ_SNAP_0:
+		case LC_EDIT_MOVEZ_SNAP_1:
+		case LC_EDIT_MOVEZ_SNAP_2:
+		case LC_EDIT_MOVEZ_SNAP_3:
+		case LC_EDIT_MOVEZ_SNAP_4:
+		case LC_EDIT_MOVEZ_SNAP_5:
+		case LC_EDIT_MOVEZ_SNAP_6:
+		case LC_EDIT_MOVEZ_SNAP_7:
+		case LC_EDIT_MOVEZ_SNAP_8:
+		case LC_EDIT_MOVEZ_SNAP_9:
+		{
+			m_nMoveSnap = (((id - LC_EDIT_MOVEZ_SNAP_0) << 8) | (m_nMoveSnap & ~0xff00));
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
@@ -7110,18 +7125,19 @@ void Project::StartTracking(int mode)
 
 void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 {
+	lcuint32 SXY = (m_nMoveSnap & 0xff);
+	lcuint32 SZ = ((m_nMoveSnap >> 8) & 0xff);
 	float SnapXY, SnapZ;
 
-	if (m_nMoveSnap > 0)
-	{
-		SnapXY = 0.8f * m_nMoveSnap;
-		SnapZ = 0.32f * m_nMoveSnap;
-	}
+	if (SXY > 0)
+		SnapXY = 0.8f * SXY;
 	else
-	{
 		SnapXY = 0.4f;
+
+	if (SZ > 0)
+		SnapZ = 0.96f * SZ;
+	else
 		SnapZ = 0.32f;
-	}
 
 	if (m_nSnap & LC_DRAW_SNAP_X)
 	{
@@ -7530,16 +7546,18 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-				if (m_nMoveSnap > 0)
-				{
-					axis[0] = axis[1] = 0.8f * m_nMoveSnap;
-					axis[2] = 0.32f * m_nMoveSnap;
-				}
+				lcuint32 SnapXY = (m_nMoveSnap & 0xff);
+				lcuint32 SnapZ = ((m_nMoveSnap >> 8) & 0xff);
+
+				if (SnapXY > 0)
+					axis[0] = axis[1] = 0.8f * SnapXY;
 				else
-				{
 					axis[0] = axis[1] = 0.4f;
+
+				if (SnapZ > 0)
+					axis[2] = 0.96f * SnapZ;
+				else
 					axis[2] = 0.32f;
-				}
 
 				if ((m_nSnap & LC_DRAW_SNAP_X == 0) || bControl)
 					axis[0] = 0.01f;

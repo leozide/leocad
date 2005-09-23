@@ -83,10 +83,8 @@ void CPiecePreview::OnPaint()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	if (m_bZoomPreview)
-		m_pPieceInfo->ZoomExtents(30.0f, (float)aspect);
-	else
-		gluLookAt (-5, -5, 4, 0, 0, 0, 0, 0, 1);
+	gluLookAt (-5, -5, 4, 0, 0, 0, 0, 0, 1);
+	m_pPieceInfo->ZoomExtents(30.0f, (float)aspect);
 
 	float pos[4] = { 0, 0, 10, 0 }, *bg = project->GetBackgroundColor();
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);

@@ -363,8 +363,11 @@ IDR_POPUPS MENU DISCARDABLE
 BEGIN
     POPUP "0"
     BEGIN
+        MENUITEM "New Category...",             ID_PIECEBAR_NEWCATEGORY
+        MENUITEM "Remove Category",             ID_PIECEBAR_REMOVECATEGORY
+        MENUITEM "Edit Category...",            ID_PIECEBAR_EDITCATEGORY
+        MENUITEM SEPARATOR
         MENUITEM "Preview Pieces",              ID_PIECEBAR_PREVIEW
-        MENUITEM "Zoom Preview",                ID_PIECEBAR_ZOOMPREVIEW
         MENUITEM "Group Pieces",                ID_PIECEBAR_GROUP
         MENUITEM "Show ComboBox",               ID_PIECEBAR_COMBOBOX
         MENUITEM "Show Numbers",                ID_PIECEBAR_NUMBERS
@@ -2044,6 +2047,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    ID_ACTION_PAN           "Pan\nPan"
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
     ID_ACTION_ROLL          "Roll view\nRoll"
     ID_ZOOM_EXTENTS         "Zoom extents (hold CTRL to zoom all views)\nZoom Extents"
@@ -2054,6 +2058,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_ACTION_SELECT        "Select objects with the mouse\nSelect"
+    ID_ACTION_SELECT_REGION "Select objects with the mouse\nSelect Region"
     ID_ACTION_INSERT        "Add pieces to the project\nInsert"
     ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
     ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"
@@ -2064,7 +2069,6 @@ BEGIN
     ID_ACTION_PAINT         "Change piece color\nPaint"
     ID_ACTION_ZOOM          "Zoom in or out\nZoom"
     ID_ACTION_ZOOM_REGION   "Zoom region\nZoom Region"
-    ID_ACTION_PAN           "Pan\nPan"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -2119,7 +2123,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
-    ID_ACTION_SELECT_REGION "Select objects with the mouse\nSelect Region"
 END
 
 #endif    // English (U.S.) resources

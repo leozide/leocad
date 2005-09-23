@@ -495,7 +495,6 @@
 #define ID_FILE_EXPORT_WAVEFRONT        32833
 #define ID_FILE_EXPORT_LDRAW            32834
 #define ID_FILE_EXPORT_POVRAY           32835
-#define ID_PIECEBAR_ZOOMPREVIEW         32836
 #define ID_PIECEBAR_GROUP               32837
 #define ID_PIECEBAR_PREVIEW             32838
 #define ID_PIECEBAR_NUMBERS             32839
@@ -671,6 +670,9 @@
 #define ID_VIEW_NEWVIEW                 33153
 #define ID_VIEW_STEP_DELETE             33154
 #define ID_LIBDLG_FILE_TEXTURES         33157
+#define ID_PIECEBAR_NEWCATEGORY         33159
+#define ID_PIECEBAR_EDITCATEGORY        33160
+#define ID_PIECEBAR_REMOVECATEGORY      33161
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -682,7 +684,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        238
-#define _APS_NEXT_COMMAND_VALUE         33159
+#define _APS_NEXT_COMMAND_VALUE         33162
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

@@ -110,8 +110,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
 	ON_WM_DROPFILES()
 	//}}AFX_MSG_MAP
-	ON_COMMAND_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnPieceBar)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_ZOOMPREVIEW, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
+	ON_COMMAND_RANGE(ID_PIECEBAR_GROUP, ID_PIECEBAR_SUBPARTS, OnPieceBar)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_GROUP, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
 	// Global help commands
 	ON_COMMAND(ID_HELP_FINDER, CFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_HELP, CFrameWnd::OnHelp)
@@ -479,7 +479,6 @@ LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
 	m_wndPiecesBar.m_bGroups = (i & PIECEBAR_GROUP) != 0;
 	m_wndPiecesBar.m_bCombo = (i & PIECEBAR_COMBO) != 0;
 	m_wndPiecesBar.m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
-	m_wndPiecesBar.m_wndPiecePreview.m_bZoomPreview = (i & PIECEBAR_ZOOMPREVIEW) != 0;
 
 	RECT rc;
 	m_wndPiecesBar.GetClientRect(&rc);
@@ -542,11 +541,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 {
 	switch (nID)
 	{
-		case ID_PIECEBAR_ZOOMPREVIEW:
-		{
-			m_wndPiecesBar.m_wndPiecePreview.m_bZoomPreview = !m_wndPiecesBar.m_wndPiecePreview.m_bZoomPreview;	
-			m_wndPiecesBar.m_wndPiecePreview.PostMessage(WM_PAINT);
-		} break;
 		case ID_PIECEBAR_GROUP:
 		{
 			m_wndPiecesBar.m_bGroups = !m_wndPiecesBar.m_bGroups;
@@ -571,7 +565,7 @@ void CMainFrame::OnPieceBar(UINT nID)
 		} break;
 	}
 
-	if ((nID != ID_PIECEBAR_ZOOMPREVIEW) && (nID != ID_PIECEBAR_SUBPARTS))
+	if (nID != ID_PIECEBAR_SUBPARTS)
 	{
 		RECT rc;
 		m_wndPiecesBar.GetClientRect(&rc);
@@ -587,7 +581,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 	if (m_wndPiecesBar.m_bGroups) u |= PIECEBAR_GROUP;
 	if (m_wndPiecesBar.m_bCombo) u |= PIECEBAR_COMBO;
 	if (m_wndPiecesBar.m_bNumbers) u |= PIECEBAR_PARTNUMBERS;
-	if (m_wndPiecesBar.m_wndPiecePreview.m_bZoomPreview) u |= PIECEBAR_ZOOMPREVIEW;
 	theApp.WriteProfileInt("Settings", "Piecebar Options", u);
 }
 
@@ -595,13 +588,6 @@ void CMainFrame::OnUpdatePieceBar(CCmdUI* pCmdUI)
 {
 	switch (pCmdUI->m_nID)
 	{
-		case ID_PIECEBAR_ZOOMPREVIEW:
-		{
-			if (m_wndPiecesBar.m_bPreview)
-				pCmdUI->SetCheck(m_wndPiecesBar.m_wndPiecePreview.m_bZoomPreview);
-			else
-				pCmdUI->Enable(FALSE);
-		} break;
 		case ID_PIECEBAR_GROUP:
 			pCmdUI->SetCheck(m_wndPiecesBar.m_bGroups); break;
 		case ID_PIECEBAR_PREVIEW:

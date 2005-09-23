@@ -20,7 +20,6 @@ public:
 
 // Attributes
 public:
-	BOOL m_bZoomPreview;
 	void SetPieceInfo (PieceInfo* pInfo);
 	PieceInfo* GetPieceInfo () const
     { return m_pPieceInfo; }

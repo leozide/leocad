@@ -29,7 +29,6 @@ CPiecesBar::CPiecesBar()
 	m_bGroups = (i & PIECEBAR_GROUP) != 0;
 	m_bCombo = (i & PIECEBAR_COMBO) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
-	m_wndPiecePreview.m_bZoomPreview = (i & PIECEBAR_ZOOMPREVIEW) != 0;
 	m_nCurGroup = 1;
 
 	m_sizeMin = CSize(222, 200);
@@ -916,8 +915,27 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 		CMenu menuPopups;
 		menuPopups.LoadMenu(IDR_POPUPS);
 		CMenu* pMenu = menuPopups.GetSubMenu(0);
+
 		if (pMenu)
+		{
+			HTREEITEM Item = m_PiecesTree.GetSelectedItem();
+			bool CategorySelected = false;
+
+			if (Item != NULL)
+			{
+				PiecesLibrary *Lib = project->GetPiecesLibrary();
+				CString CategoryName = m_PiecesTree.GetItemText(Item);
+				int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
+
+				if (CategoryIndex != -1)
+					CategorySelected = true;
+			}
+
+			pMenu->EnableMenuItem(ID_PIECEBAR_REMOVECATEGORY, MF_BYCOMMAND | (CategorySelected ? MF_ENABLED : MF_GRAYED));
+			pMenu->EnableMenuItem(ID_PIECEBAR_EDITCATEGORY, MF_BYCOMMAND | (CategorySelected ? MF_ENABLED : MF_GRAYED));
+
 			pMenu->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+		}
 	}
 }
 

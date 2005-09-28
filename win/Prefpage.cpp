@@ -27,9 +27,7 @@ IMPLEMENT_DYNCREATE(CPreferencesKeyboard, CPropertyPage)
 CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::IDD)
 {
 	//{{AFX_DATA_INIT(CPreferencesGeneral)
-	m_bZoom = FALSE;
 	m_bSubparts = FALSE;
-	m_bPreview = FALSE;
 	m_nSaveTime = 0;
 	m_bNumbers = FALSE;
 	m_bGroup = FALSE;
@@ -50,9 +48,7 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPreferencesGeneral)
 	DDX_Control(pDX, IDC_GENDLG_MOUSE, m_ctlMouse);
-	DDX_Check(pDX, IDC_GENDLG_ZOOM, m_bZoom);
 	DDX_Check(pDX, IDC_GENDLG_SUBPARTS, m_bSubparts);
-	DDX_Check(pDX, IDC_GENDLG_PREVIEW, m_bPreview);
 	DDX_Text(pDX, IDC_GENDLG_SAVETIME, m_nSaveTime);
 	DDV_MinMaxInt(pDX, m_nSaveTime, 1, 60);
 	DDX_Check(pDX, IDC_GENDLG_NUMBERS, m_bNumbers);
@@ -93,14 +89,11 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_strUser = strUser;
 
 	m_Updates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
-	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 
-	                                   PIECEBAR_PREVIEW|PIECEBAR_GROUP|PIECEBAR_COMBO|PIECEBAR_ZOOMPREVIEW);
-	m_bPreview = (i & PIECEBAR_PREVIEW) != 0;
+	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP|PIECEBAR_COMBO);
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bGroup = (i & PIECEBAR_GROUP) != 0;
 	m_bCombo = (i & PIECEBAR_COMBO) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
-	m_bZoom = (i & PIECEBAR_ZOOMPREVIEW) != 0;
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
@@ -112,12 +105,10 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 	strcpy(strUser, m_strUser);
 
 	int i = 0;
-	if (m_bPreview) i |= PIECEBAR_PREVIEW;
 	if (m_bSubparts) i |= PIECEBAR_SUBPARTS;
 	if (m_bGroup) i |= PIECEBAR_GROUP;
 	if (m_bCombo) i |= PIECEBAR_COMBO;
 	if (m_bNumbers) i |= PIECEBAR_PARTNUMBERS;
-	if (m_bZoom) i |= PIECEBAR_ZOOMPREVIEW;
 		
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
 	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);

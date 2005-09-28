@@ -472,9 +472,7 @@ LONG CMainFrame::OnPopupClose(UINT /*lParam*/, LONG /*wParam*/)
 
 LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
 {
-	int i = theApp.GetProfileInt("Settings", "Piecebar Options", 
-		PIECEBAR_PREVIEW|PIECEBAR_GROUP|PIECEBAR_COMBO|PIECEBAR_ZOOMPREVIEW);
-	m_wndPiecesBar.m_bPreview = (i & PIECEBAR_PREVIEW) != 0;
+	int i = theApp.GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP|PIECEBAR_COMBO);
 	m_wndPiecesBar.m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_wndPiecesBar.m_bGroups = (i & PIECEBAR_GROUP) != 0;
 	m_wndPiecesBar.m_bCombo = (i & PIECEBAR_COMBO) != 0;
@@ -546,10 +544,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 			m_wndPiecesBar.m_bGroups = !m_wndPiecesBar.m_bGroups;
 			m_wndPiecesBar.m_wndPiecesList.UpdateList();
 		} break;
-		case ID_PIECEBAR_PREVIEW:
-		{
-			m_wndPiecesBar.m_bPreview = !m_wndPiecesBar.m_bPreview;
-		} break;
 		case ID_PIECEBAR_NUMBERS:
 		{
 			m_wndPiecesBar.m_bNumbers = !m_wndPiecesBar.m_bNumbers;
@@ -576,7 +570,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 	}
 
 	UINT u = 0;
-	if (m_wndPiecesBar.m_bPreview) u |= PIECEBAR_PREVIEW;
 	if (m_wndPiecesBar.m_bSubParts) u |= PIECEBAR_SUBPARTS;
 	if (m_wndPiecesBar.m_bGroups) u |= PIECEBAR_GROUP;
 	if (m_wndPiecesBar.m_bCombo) u |= PIECEBAR_COMBO;
@@ -590,8 +583,6 @@ void CMainFrame::OnUpdatePieceBar(CCmdUI* pCmdUI)
 	{
 		case ID_PIECEBAR_GROUP:
 			pCmdUI->SetCheck(m_wndPiecesBar.m_bGroups); break;
-		case ID_PIECEBAR_PREVIEW:
-			pCmdUI->SetCheck(m_wndPiecesBar.m_bPreview); break;
 		case ID_PIECEBAR_NUMBERS:
 			pCmdUI->SetCheck(m_wndPiecesBar.m_bNumbers); break;
 		case ID_PIECEBAR_COMBOBOX:

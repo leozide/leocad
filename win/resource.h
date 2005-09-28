@@ -496,7 +496,6 @@
 #define ID_FILE_EXPORT_LDRAW            32834
 #define ID_FILE_EXPORT_POVRAY           32835
 #define ID_PIECEBAR_GROUP               32837
-#define ID_PIECEBAR_PREVIEW             32838
 #define ID_PIECEBAR_NUMBERS             32839
 #define ID_PIECEBAR_COMBOBOX            32840
 #define ID_PIECEBAR_SUBPARTS            32841

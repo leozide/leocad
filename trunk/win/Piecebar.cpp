@@ -22,9 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CPiecesBar::CPiecesBar()
 {
-	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 
-		PIECEBAR_PREVIEW|PIECEBAR_GROUP|PIECEBAR_COMBO|PIECEBAR_ZOOMPREVIEW);
-	m_bPreview = (i & PIECEBAR_PREVIEW) != 0;
+	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP|PIECEBAR_COMBO);
 	m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bGroups = (i & PIECEBAR_GROUP) != 0;
 	m_bCombo = (i & PIECEBAR_COMBO) != 0;
@@ -610,23 +608,13 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	else
 		m_wndGroupsBar.ShowWindow (SW_HIDE);
 
-	if (m_bPreview)
-	{
-		m_wndSplitter.SetWindowPos (NULL, 5, m_nPreviewHeight+6, cx-10, 4, SWP_NOZORDER);
-		m_wndPiecesList.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
-		m_PiecesTree.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
-		m_wndPiecePreview.SetWindowPos (NULL, 5, 5, cx-10, m_nPreviewHeight, 0);
-		m_wndPiecePreview.EnableWindow (TRUE);
-		m_wndPiecePreview.ShowWindow (SW_SHOW);
-		m_wndSplitter.ShowWindow (SW_SHOW);
-	}
-	else
-	{
-		m_wndSplitter.ShowWindow (SW_HIDE);
-		m_wndPiecesList.SetWindowPos (NULL, 5, 5, cx-10, cy-off-10, SWP_NOZORDER);
-		m_wndPiecePreview.ShowWindow (SW_HIDE);
-		m_wndPiecePreview.EnableWindow (FALSE);
-	}
+	m_wndSplitter.SetWindowPos (NULL, 5, m_nPreviewHeight+6, cx-10, 4, SWP_NOZORDER);
+	m_wndPiecesList.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
+	m_PiecesTree.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
+	m_wndPiecePreview.SetWindowPos (NULL, 5, 5, cx-10, m_nPreviewHeight, 0);
+	m_wndPiecePreview.EnableWindow (TRUE);
+	m_wndPiecePreview.ShowWindow (SW_SHOW);
+	m_wndSplitter.ShowWindow (SW_SHOW);
 
 	RECT rect;
 	m_wndPiecesList.GetWindowRect (&rect);

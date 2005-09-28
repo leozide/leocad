@@ -79,7 +79,6 @@ protected:
 public:
 	void CreateGroupsBar();
 	BOOL m_bSubParts;
-	BOOL m_bPreview;
 	BOOL m_bGroups;
 	BOOL m_bCombo;
 	BOOL m_bNumbers;

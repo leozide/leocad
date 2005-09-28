@@ -24,9 +24,7 @@ public:
 	//{{AFX_DATA(CPreferencesGeneral)
 	enum { IDD = IDD_PREFGENERAL };
 	CSliderCtrl	m_ctlMouse;
-	BOOL	m_bZoom;
 	BOOL	m_bSubparts;
-	BOOL	m_bPreview;
 	int		m_nSaveTime;
 	BOOL	m_bNumbers;
 	BOOL	m_bGroup;

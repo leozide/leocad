@@ -47,12 +47,12 @@
 #define PRINT_BORDER	0x008
 
 // Piecebar settings
-#define PIECEBAR_PREVIEW		0x01	// Show piece preview
-#define PIECEBAR_SUBPARTS		0x02	// Show subparts
-#define PIECEBAR_GROUP			0x04	// Group pieces
-#define PIECEBAR_ZOOMPREVIEW	0x08	// Zoom piece preview
-#define PIECEBAR_COMBO			0x10	// Show combobox
-#define PIECEBAR_PARTNUMBERS	0x20	// Show part numbers
+//#define PIECEBAR_PREVIEW      0x01 // Show piece preview
+#define PIECEBAR_SUBPARTS     0x02 // Show subparts
+#define PIECEBAR_GROUP        0x04 // Group pieces
+//#define PIECEBAR_ZOOMPREVIEW  0x08 // Zoom piece preview
+#define PIECEBAR_COMBO        0x10 // Show combobox
+#define PIECEBAR_PARTNUMBERS  0x20 // Show part numbers
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.

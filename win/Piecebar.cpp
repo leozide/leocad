@@ -711,9 +711,9 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// y-splitter
 	m_wndSplitter.BindWithControl(this, IDW_PIECEBAR_SPLITTER);
-	m_wndSplitter.SetMinHeight(40, 40);
+	m_wndSplitter.SetMinHeight(0, 0);
 	m_wndSplitter.AttachAsAbovePane(IDW_PIECEPREVIEW);
-	m_wndSplitter.AttachAsBelowPane(IDW_PIECESLIST);
+	m_wndSplitter.AttachAsBelowPane(IDW_PIECESTREE);
 	m_wndSplitter.RecalcLayout();
 
 	return 0;

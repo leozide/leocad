@@ -27,6 +27,7 @@
 #include "LibDlg.h"
 #include "EdGrpDlg.h"
 #include "AboutDlg.h"
+#include "categdlg.h"
 #include "cadbar.h"
 #include "mainfrm.h"
 
@@ -1525,6 +1526,21 @@ bool SystemDoDialog(int nMode, void* param)
 				strcpy((char*)param, dlg.m_strName);
 
 				return true;
+			}
+		} break;
+
+		case LC_DLG_EDITCATEGORY:
+		{
+			CCategoryDlg Dlg;
+			LC_CATEGORYDLG_OPTS* Opts = (LC_CATEGORYDLG_OPTS*)param;
+
+			Dlg.m_Keywords = Opts->Keywords;
+			Dlg.m_Name = Opts->Name;
+
+			if (Dlg.DoModal() == IDOK)
+			{
+				Opts->Keywords = Dlg.m_Keywords;
+				Opts->Name = Dlg.m_Name;
 			}
 		} break;
 

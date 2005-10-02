@@ -458,8 +458,7 @@
 #define ID_VIEW_STEP_PREVIOUS           32783
 #define ID_VIEW_STEP_CHOOSE             32784
 #define ID_VIEW_STEP_INSERT             32785
-#define ID_ACTION_SELECT                32788
-#define ID_ACTION_SELECT_REGION         32789
+#define ID_ACTION_SELECT                32789
 #define ID_ACTION_INSERT                32790
 #define ID_ACTION_LIGHT                 32791
 #define ID_ACTION_SPOTLIGHT             32792

@@ -2401,7 +2401,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 		}
 
 		// Draw the selection rectangle.
-		if ((m_nCurAction == LC_ACTION_SELECT_REGION) && (m_nTracking == LC_TRACK_LEFT))
+		if ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT))
 		{
 			int x, y, w, h;
 
@@ -6901,40 +6901,44 @@ bool Project::StopTracking(bool bAccept)
 	{
 		switch (m_nCurAction)
 		{
-			case LC_ACTION_SELECT_REGION:
+			case LC_ACTION_SELECT:
 			{
-				// Find objects inside the rectangle.
-				PtrArray<Object> Objects;
-				FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
-
-				// Deselect old pieces.
-				bool Control = Sys_KeyDown(KEY_CONTROL);
-				SelectAndFocusNone(Control);
-
-				// Select new pieces.
-				for (int i = 0; i < Objects.GetSize(); i++)
+				if (((float)m_nDownX != m_fTrack[0]) || ((float)m_nDownY != m_fTrack[1]))
 				{
-					if (Objects[i]->GetType() == LC_OBJECT_PIECE)
+					// Find objects inside the rectangle.
+					PtrArray<Object> Objects;
+					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
+
+					// Deselect old pieces.
+					bool Control = Sys_KeyDown(KEY_CONTROL);
+					SelectAndFocusNone(Control);
+
+					// Select new pieces.
+					for (int i = 0; i < Objects.GetSize(); i++)
 					{
-						Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
-						if (pGroup != NULL)
+						if (Objects[i]->GetType() == LC_OBJECT_PIECE)
 						{
-							for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-								if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-										(pPiece->GetTopGroup() == pGroup))
-									pPiece->Select (true, false, false);
+							Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
+							if (pGroup != NULL)
+							{
+								for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+									if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+											(pPiece->GetTopGroup() == pGroup))
+										pPiece->Select (true, false, false);
+							}
+							else
+								Objects[i]->Select(true, false, Control);
 						}
 						else
 							Objects[i]->Select(true, false, Control);
 					}
-					else
-						Objects[i]->Select(true, false, Control);
+
+					// Update screen and UI.
+					UpdateSelection();
+					UpdateAllViews();
+					SystemUpdateFocus(NULL);
 				}
 
-				// Update screen and UI.
-				UpdateSelection();
-				UpdateAllViews();
-				SystemUpdateFocus(NULL);
 			} break;
 
 			case LC_ACTION_MOVE:
@@ -6980,7 +6984,6 @@ bool Project::StopTracking(bool bAccept)
 					UpdateAllViews();
 			} break;
 
-			case LC_ACTION_SELECT:
 			case LC_ACTION_INSERT:
 			case LC_ACTION_LIGHT:
 			case LC_ACTION_ERASER:
@@ -6991,7 +6994,11 @@ bool Project::StopTracking(bool bAccept)
 	}
 	else if (m_pTrackFile != NULL)
 	{
-		if (m_nCurAction != LC_ACTION_SELECT_REGION)
+		if (m_nCurAction == LC_ACTION_SELECT)
+		{
+			UpdateAllViews();
+		}
+		else
 		{
 			DeleteContents (true);
 			FileLoad (m_pTrackFile, true, false);
@@ -7796,6 +7803,8 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				UpdateSelection();
 				UpdateAllViews();
 				SystemUpdateFocus(ClickLine.pClosest);
+
+				StartTracking(LC_TRACK_START_LEFT);
 			}
 
 			if ((m_nCurAction == LC_ACTION_ERASER) && (ClickLine.pClosest != NULL))
@@ -8028,7 +8037,6 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			}
 		} break;
 
-		case LC_ACTION_SELECT_REGION:
 		case LC_ACTION_ZOOM:
 		case LC_ACTION_ROLL:
 		case LC_ACTION_PAN:
@@ -8229,7 +8237,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 	switch (m_nCurAction)
 	{
-		case LC_ACTION_SELECT_REGION:
+		case LC_ACTION_SELECT:
 		{
 			int ptx = x, pty = y;
 

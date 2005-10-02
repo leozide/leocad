@@ -143,7 +143,6 @@ BEGIN
     BUTTON      ID_ACTION_CAMERA
     SEPARATOR
     BUTTON      ID_ACTION_SELECT
-    BUTTON      ID_ACTION_SELECT_REGION
     BUTTON      ID_ACTION_MOVE
     BUTTON      ID_ACTION_ROTATE
     BUTTON      ID_ACTION_REMOVE
@@ -2053,7 +2052,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_ACTION_SELECT        "Select objects with the mouse\nSelect"
-    ID_ACTION_SELECT_REGION "Select objects with the mouse\nSelect Region"
     ID_ACTION_INSERT        "Add pieces to the project\nInsert"
     ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
     ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"

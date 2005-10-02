@@ -7,7 +7,9 @@
 class Group;
 class Piece;
 class PieceInfo;
+
 #include "defines.h"
+#include "str.h"
 
 typedef enum
 {
@@ -142,7 +144,6 @@ typedef enum
 typedef enum
 {
 	LC_ACTION_SELECT, 
-	LC_ACTION_SELECT_REGION, 
 	LC_ACTION_INSERT,
 	LC_ACTION_LIGHT,
 	LC_ACTION_SPOTLIGHT,
@@ -278,6 +279,7 @@ typedef enum {
 	LC_DLG_STEPCHOOSE,
 	LC_DLG_EDITGROUPS,
 	LC_DLG_GROUP,
+	LC_DLG_EDITCATEGORY,
 	LC_DLG_ABOUT
 } LC_DIALOGS;
 
@@ -373,5 +375,11 @@ typedef struct
 	char strFooter[256];
 	char strHeader[256];
 } LC_PREFERENCESDLG_OPTS;
+
+typedef struct
+{
+	String Name;
+	String Keywords;
+} LC_CATEGORYDLG_OPTS;
 
 #endif

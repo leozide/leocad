@@ -617,11 +617,11 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes)
 {
 	float* Points[4] = { p1, p2, p3, p4 };
-	int Outcodes[4] = { 0, 0, 0, 0 };
+	int Outcodes[4] = { 0, 0, 0, 0 }, i;
 	int NumPoints = (p4 != NULL) ? 4 : 3;
 
 	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
-	for (int i = 0; i < NumPoints; i++)
+	for (i = 0; i < NumPoints; i++)
 	{
 		Point3 Pt(Points[i][0], Points[i][1], Points[i][2]);
 
@@ -698,9 +698,9 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	Matrix m(m_fRotation, m_fPosition);
 
 	// Start by testing trivial reject/accept cases.
-	int Outcodes[8];
+	int Outcodes[8], i;
 
-	for (int i = 0; i < 8; i++)
+	for (i = 0; i < 8; i++)
 	{
 		Point3 Point;
 		m.TransformPoint(&Point[0], &Box[i][0]);

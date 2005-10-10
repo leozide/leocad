@@ -184,6 +184,10 @@ void SystemUpdateViewport(int new_vp, int old_vp)
   ignore_commands = false;
 }
 
+void SystemUpdateCategories(bool SearchOnly)
+{
+}
+
 static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, gchar **xpm)
 {
   int height, width, colors;

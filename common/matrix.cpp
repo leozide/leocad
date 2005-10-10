@@ -205,9 +205,9 @@ void Matrix::LoadIdentity ()
   memcpy (&m[0], &Identity, sizeof(float[16]));
 }
 
-void Matrix::Multiply (Matrix& m1, Matrix& m2)
+void Matrix::Multiply(const Matrix& m1, const Matrix& m2)
 {
-  matmul (m, m1.m, m2.m);
+	matmul(m, m1.m, m2.m);
 }
 
 void Matrix::Rotate (float angle, float x, float y, float z)

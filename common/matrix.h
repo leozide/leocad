@@ -30,7 +30,7 @@ class Matrix
 
   void LoadIdentity();
   void Translate(float x, float y, float z);
-  void Multiply(Matrix& m1, Matrix& m2);
+  void Multiply(const Matrix& m1, const Matrix& m2);
   bool Invert();
 	void Transpose3();
 

@@ -502,6 +502,11 @@ void PiecesLibrary::AddCategory(const String& Name, const String& Keywords)
 	SystemUpdateCategories(true);
 }
 
+void PiecesLibrary::RemoveCategory(int Index)
+{
+	m_Categories.RemoveIndex(Index);
+}
+
 unsigned long PiecesLibrary::GetDefaultPieceGroup (const char* name)
 {
 	char tmp[9];

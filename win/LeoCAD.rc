@@ -363,7 +363,7 @@ BEGIN
     POPUP "0"
     BEGIN
         MENUITEM "New Category...",             ID_PIECEBAR_NEWCATEGORY
-        MENUITEM "Remove Category",             ID_PIECEBAR_REMOVECATEGORY
+        MENUITEM "Remove Category...",          ID_PIECEBAR_REMOVECATEGORY
         MENUITEM "Edit Category...",            ID_PIECEBAR_EDITCATEGORY
         MENUITEM SEPARATOR
         MENUITEM "Group Pieces",                ID_PIECEBAR_GROUP
@@ -2051,7 +2051,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_ACTION_SELECT        "Select objects with the mouse\nSelect"
+    ID_ACTION_SELECT        "Select objects (hold control down to select multiple objects)\nSelect"
     ID_ACTION_INSERT        "Add pieces to the project\nInsert"
     ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
     ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"

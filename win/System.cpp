@@ -1541,6 +1541,8 @@ bool SystemDoDialog(int nMode, void* param)
 			{
 				Opts->Keywords = Dlg.m_Keywords;
 				Opts->Name = Dlg.m_Name;
+
+				return true;
 			}
 		} break;
 

@@ -41,9 +41,13 @@ public:
 	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces);
 	void SetCategory(int Index, const String& Name, const String& Keywords);
 	void AddCategory(const String& Name, const String& Keywords);
+	void RemoveCategory(int Index);
 
 	const char* GetCategoryName(int Index) const
 		{ return m_Categories[Index].Name; }
+
+	const char* GetCategoryKeywords(int Index) const
+		{ return m_Categories[Index].Keywords; }
 
 	int GetNumCategories() const
 		{ return m_Categories.GetSize(); }

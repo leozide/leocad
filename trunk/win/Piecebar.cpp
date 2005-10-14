@@ -906,17 +906,30 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 
 		if (pMenu)
 		{
-			HTREEITEM Item = m_PiecesTree.GetSelectedItem();
 			bool CategorySelected = false;
 
-			if (Item != NULL)
-			{
-				PiecesLibrary *Lib = project->GetPiecesLibrary();
-				CString CategoryName = m_PiecesTree.GetItemText(Item);
-				int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
+			CRect r;
+			m_PiecesTree.GetWindowRect(&r);
 
-				if (CategoryIndex != -1)
-					CategorySelected = true;
+			if (r.PtInRect(point))
+			{
+				HTREEITEM Item = m_PiecesTree.GetSelectedItem();
+
+				if (Item != NULL)
+				{
+					PiecesLibrary *Lib = project->GetPiecesLibrary();
+					CString CategoryName = m_PiecesTree.GetItemText(Item);
+					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
+
+					if (CategoryIndex != -1)
+						CategorySelected = true;
+				}
+
+				pMenu->EnableMenuItem(ID_PIECEBAR_NEWCATEGORY, MF_BYCOMMAND | MF_ENABLED);
+			}
+			else
+			{
+				pMenu->EnableMenuItem(ID_PIECEBAR_NEWCATEGORY, MF_BYCOMMAND | MF_GRAYED);
 			}
 
 			pMenu->EnableMenuItem(ID_PIECEBAR_REMOVECATEGORY, MF_BYCOMMAND | (CategorySelected ? MF_ENABLED : MF_GRAYED));
@@ -924,6 +937,61 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			pMenu->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 		}
+	}
+}
+
+void CPiecesBar::UpdatePiecesTree(const char* OldCategory, const char* NewCategory)
+{
+	if (OldCategory && NewCategory)
+	{
+		HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+
+		while (Item != NULL)
+		{
+			CString Name = m_PiecesTree.GetItemText(Item);
+
+			if (Name == OldCategory)
+				break;
+
+			Item = m_PiecesTree.GetNextSiblingItem(Item);
+		}
+
+		if (Item == NULL)
+			return;
+
+		m_PiecesTree.SetItemText(Item, NewCategory);
+
+		m_PiecesTree.EnsureVisible(Item);
+		if (m_PiecesTree.GetItemState(Item, TVIS_EXPANDED) & TVIS_EXPANDED)
+		{
+			m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
+			m_PiecesTree.Expand(Item, TVE_EXPAND);
+		}
+	}
+	else if (NewCategory)
+	{
+		HTREEITEM Item;
+		Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, NewCategory, 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
+		m_PiecesTree.EnsureVisible(Item);
+	}
+	else if (OldCategory)
+	{
+		HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+
+		while (Item != NULL)
+		{
+			CString Name = m_PiecesTree.GetItemText(Item);
+
+			if (Name == OldCategory)
+				break;
+
+			Item = m_PiecesTree.GetNextSiblingItem(Item);
+		}
+
+		if (Item == NULL)
+			return;
+
+		m_PiecesTree.DeleteItem(Item);
 	}
 }
 

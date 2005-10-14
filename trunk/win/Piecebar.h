@@ -39,7 +39,7 @@ public:
 public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CPiecesBar)
-public:
+	public:
 	virtual BOOL Create(LPCTSTR lpszWindowName, CWnd* pParentWnd, CSize sizeDefault, BOOL bHasGripper, UINT nID, DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP);
 	virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
 	virtual CSize CalcDynamicLayout(int nLength, DWORD dwMode);
@@ -95,6 +95,7 @@ public:
 	int m_nCurGroup;
 
 	void UpdatePiecesTree(bool SearchOnly);
+	void UpdatePiecesTree(const char* OldCategory, const char* NewCategory);
 
 // Generated message map functions
 protected:

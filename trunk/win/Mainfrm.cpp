@@ -14,6 +14,8 @@
 #include "cadview.h"
 #include "console.h"
 #include "keyboard.h"
+#include "system.h"
+#include "library.h"
 
 #include "Print.h"
 
@@ -984,7 +986,76 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_HELP_ABOUT, 0);
 		} break;
 
-		default: return CFrameWnd::OnCommand(wParam, lParam);
+		case ID_PIECEBAR_EDITCATEGORY:
+		{
+			HTREEITEM Item = m_wndPiecesBar.m_PiecesTree.GetSelectedItem();
+
+			if (Item == NULL)
+				break;
+
+			PiecesLibrary* Lib = project->GetPiecesLibrary();
+			CString CategoryName = m_wndPiecesBar.m_PiecesTree.GetItemText(Item);
+			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
+
+			if (Index == -1)
+				break;
+
+			LC_CATEGORYDLG_OPTS Opts;
+			Opts.Name = Lib->GetCategoryName(Index);
+			Opts.Keywords = Lib->GetCategoryKeywords(Index);
+
+			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
+			{
+				String OldName = Lib->GetCategoryName(Index);
+				Lib->SetCategory(Index, Opts.Name, Opts.Keywords);
+				m_wndPiecesBar.UpdatePiecesTree(OldName, Opts.Name);
+			}
+
+		} break;
+
+		case ID_PIECEBAR_NEWCATEGORY:
+		{
+			LC_CATEGORYDLG_OPTS Opts;
+			Opts.Name = "New Category";
+			Opts.Keywords = "";
+
+			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
+			{
+				PiecesLibrary* Lib = project->GetPiecesLibrary();
+				Lib->AddCategory(Opts.Name, Opts.Keywords);
+				m_wndPiecesBar.UpdatePiecesTree(NULL, Opts.Name);
+			}
+
+		} break;
+
+		case ID_PIECEBAR_REMOVECATEGORY:
+		{
+			HTREEITEM Item = m_wndPiecesBar.m_PiecesTree.GetSelectedItem();
+
+			if (Item == NULL)
+				break;
+
+			PiecesLibrary* Lib = project->GetPiecesLibrary();
+			CString CategoryName = m_wndPiecesBar.m_PiecesTree.GetItemText(Item);
+			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
+
+			if (Index == -1)
+				break;
+
+			char Msg[1024];
+			String Name = Lib->GetCategoryName(Index);
+			sprintf(Msg, "Are you sure you want to remove the %s category?", Name);
+
+			if (SystemDoMessageBox(Msg, LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES)
+			{
+				Lib->RemoveCategory(Index);
+				m_wndPiecesBar.UpdatePiecesTree(Name, NULL);
+			}
+
+		} break;
+
+		default:
+			return CFrameWnd::OnCommand(wParam, lParam);
 	}
 
 	return TRUE;

@@ -331,9 +331,10 @@ BEGIN
     BEGIN
         MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
         MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
-        MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
+        MENUITEM "Transform...",                ID_PIECE_TRANSFORM
         MENUITEM "Array...",                    ID_PIECE_ARRAY
         MENUITEM "Mirror...",                   ID_PIECE_MIRROR
+        MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
         MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
         MENUITEM SEPARATOR
         MENUITEM "Group...",                    ID_PIECE_GROUP
@@ -1748,6 +1749,8 @@ IDC_PAN_NE              CURSOR  DISCARDABLE     "res\\pan_ne.cur"
 IDC_PAN_NW              CURSOR  DISCARDABLE     "res\\pan_nw.cur"
 IDC_PAN_SE              CURSOR  DISCARDABLE     "res\\pan_se.cur"
 IDC_PAN_SW              CURSOR  DISCARDABLE     "res\\pan_sw.cur"
+IDC_ROTX                CURSOR  DISCARDABLE     "res\\rotx.cur"
+IDC_ROTY                CURSOR  DISCARDABLE     "res\\roty.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2116,6 +2119,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
+    ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
 END
 
 #endif    // English (U.S.) resources

@@ -98,6 +98,7 @@ Project::Project()
 	m_nGridList = 0;
   m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
+	m_nCurAction = 0;
 	m_pTerrain = new Terrain();
 	m_pBackground = new Texture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
@@ -2823,6 +2824,76 @@ void Project::RenderOverlays(int Viewport)
 				}
 			}
 		}
+
+		glEnable(GL_DEPTH_TEST);
+	}
+	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	{
+		int x, y, w, h;
+
+		x = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
+		y = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
+		w = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
+		h = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+
+		glViewport(0, 0, m_nViewX, m_nViewY);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, m_nViewX, 0, m_nViewY, -1, 1);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(0.375f, 0.375f, 0.0f);
+
+		glDisable(GL_DEPTH_TEST);
+		glColor3f(0, 0, 0);
+
+		// Draw circle.
+		glBegin(GL_LINE_LOOP);
+
+		float r = min(w, h) * 0.35f;
+		float cx = x + w / 2.0f;
+		float cy = y + h / 2.0f;
+
+		for (int i = 0; i < 32; i++)
+		{
+			float x = cosf((float)i / 32.0f * (2.0f * LC_PI)) * r + cx;
+			float y = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
+
+			glVertex2f(x, y);
+		}
+
+		glEnd();
+
+		const float OverlayCameraSquareSize = 8.0f;
+
+		// Draw squares.
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(cx + OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize);
+		glVertex2f(cx - OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize);
+		glVertex2f(cx - OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize);
+		glVertex2f(cx + OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize);
+		glEnd();
+
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(cx + OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize);
+		glVertex2f(cx - OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize);
+		glVertex2f(cx - OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize);
+		glVertex2f(cx + OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize);
+		glEnd();
+
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(cx + r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
+		glVertex2f(cx + r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
+		glVertex2f(cx + r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
+		glVertex2f(cx + r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
+		glEnd();
+
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(cx - r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
+		glVertex2f(cx - r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
+		glVertex2f(cx - r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
+		glVertex2f(cx - r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
+		glEnd();
 
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -6458,7 +6529,8 @@ void Project::SetAction(int nAction)
 	SystemUpdateAction(nAction, m_nCurAction);
 	m_nCurAction = nAction;
 
-	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE))
+	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE) ||
+	    (m_nCurAction == LC_ACTION_ROTATE_VIEW))
 	{
 		ActivateOverlay();
 
@@ -8769,7 +8841,6 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				SystemUpdateCurrentCamera(NULL, pCamera, m_pCameras);
 			}
 
-
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
@@ -8778,7 +8849,25 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			bs[1] = (bs[1]+bs[4])/2;
 			bs[2] = (bs[2]+bs[5])/2;
 
-			m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+			switch (m_OverlayMode)
+			{
+				case LC_OVERLAY_XYZ:
+					m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					break;
+
+				case LC_OVERLAY_X:
+					m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, 0, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					break;
+
+				case LC_OVERLAY_Y:
+					m_pViewCameras[m_nActiveViewport]->DoRotate(0, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					break;
+
+				case LC_OVERLAY_Z:
+					m_pViewCameras[m_nActiveViewport]->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+					break;
+			}
+
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -9066,11 +9155,44 @@ void Project::MouseUpdateOverlays(int x, int y)
 			UpdateAllViews();
 		}
 	}
+	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	{
+		int vx, vy, vw, vh;
+		vx = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
+		vy = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
+		vw = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
+		vh = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+
+		int cx = vx + vw / 2;
+		int cy = vy + vh / 2;
+
+		float d = sqrtf((float)((cx - x) * (cx - x) + (cy - y) * (cy - y)));
+		float r = min(vw, vh) * 0.35f;
+
+		if ((d < r + 4.0f) && (d > r - 4.0f))
+		{
+			if ((cx - x < 4) && (cx - x > -4))
+				m_OverlayMode = LC_OVERLAY_Y;
+
+			if ((cy - y < 4) && (cy - y > -4))
+				m_OverlayMode = LC_OVERLAY_X;
+		}
+		else
+		{
+			if (d < r)
+				m_OverlayMode = LC_OVERLAY_XYZ;
+			else
+				m_OverlayMode = LC_OVERLAY_Z;
+		}
+	}
 }
 
 void Project::ActivateOverlay()
 {
-	m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
+	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE))
+		m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
+	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+		m_OverlayActive = true;
 
 	if (m_OverlayActive)
 	{

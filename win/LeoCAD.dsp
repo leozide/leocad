@@ -820,6 +820,14 @@ SOURCE=.\res\Rotate.cur
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\rotx.cur
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\roty.cur
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\SelctGrp.cur
 # End Source File
 # Begin Source File

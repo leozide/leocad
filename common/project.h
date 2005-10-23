@@ -14,6 +14,18 @@ typedef enum
 	LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
 } LC_MOUSE_TRACK;
 
+// Mouse control overlays.
+typedef enum
+{
+	LC_OVERLAY_XYZ,
+	LC_OVERLAY_X,
+	LC_OVERLAY_Y,
+	LC_OVERLAY_Z,
+	LC_OVERLAY_XY,
+	LC_OVERLAY_XZ,
+	LC_OVERLAY_YZ
+} LC_OVERLAY_MODES;
+
 class Piece;
 class Camera;
 class Light;
@@ -70,6 +82,10 @@ public:
 		{ return m_nCurGroup; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
+	unsigned char GetAction() const
+		{ return m_nCurAction; }
+	int GetOverlayMode() const
+		{ return m_OverlayMode; }
 	Camera* GetCamera(int i);
 	void GetTimeRange(int* from, int* to)
 	{
@@ -200,18 +216,6 @@ protected:
 	int m_nMouse;
 	Vector3 m_MouseSnapLeftover;
 	Vector3 m_MouseTotalDelta;
-
-	// Mouse control overlays.
-	typedef enum
-	{
-		LC_OVERLAY_XYZ,
-		LC_OVERLAY_X,
-		LC_OVERLAY_Y,
-		LC_OVERLAY_Z,
-		LC_OVERLAY_XY,
-		LC_OVERLAY_XZ,
-		LC_OVERLAY_YZ
-	} LC_OVERLAY_MODES;
 
 	int m_OverlayMode;
 	bool m_OverlayActive;

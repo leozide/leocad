@@ -138,6 +138,8 @@
 #define IDD_PREFKEYBOARD                235
 #define IDD_TRANSFORM                   236
 #define IDD_CATEGORY                    237
+#define IDC_ROTX                        238
+#define IDC_ROTY                        239
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -671,6 +673,7 @@
 #define ID_PIECEBAR_NEWCATEGORY         33159
 #define ID_PIECEBAR_EDITCATEGORY        33160
 #define ID_PIECEBAR_REMOVECATEGORY      33161
+#define ID_PIECE_TRANSFORM              33162
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -681,8 +684,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        238
-#define _APS_NEXT_COMMAND_VALUE         33162
+#define _APS_NEXT_RESOURCE_VALUE        240
+#define _APS_NEXT_COMMAND_VALUE         33163
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

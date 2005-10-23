@@ -7,26 +7,27 @@ class Project;
 
 class View : public GLWindow
 {
- public:
-  View (Project *pProject, GLWindow *share);
-  virtual ~View ();
+public:
+	View (Project *pProject, GLWindow *share);
+	virtual ~View ();
 
-  void OnDraw ();
-  void OnInitialUpdate ();
-  void OnLeftButtonDown (int x, int y, bool bControl, bool bShift);
-  void OnLeftButtonUp (int x, int y, bool bControl, bool bShift);
-  void OnLeftButtonDoubleClick (int x, int y, bool bControl, bool bShift);
-  void OnRightButtonDown (int x, int y, bool bControl, bool bShift);
-  void OnRightButtonUp (int x, int y, bool bControl, bool bShift);
-  void OnMouseMove (int x, int y, bool bControl, bool bShift);
+	void OnDraw ();
+	void OnInitialUpdate ();
+	void OnLeftButtonDown (int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonUp (int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonDoubleClick (int x, int y, bool bControl, bool bShift);
+	void OnRightButtonDown (int x, int y, bool bControl, bool bShift);
+	void OnRightButtonUp (int x, int y, bool bControl, bool bShift);
+	void OnMouseMove (int x, int y, bool bControl, bool bShift);
 
-  Project* GetProject () const
-    { return m_pProject; }
+	LC_CURSOR_TYPE GetCursor(int x, int y) const;
+	Project* GetProject () const
+		{ return m_Project; }
 
- protected:
-  Project* m_pProject;
+protected:
+	Project* m_Project;
 
-  //  virtual void OnInitialUpdate (); // called first time after construct    
+	//  virtual void OnInitialUpdate (); // called first time after construct
 };
 
 #endif // _VIEW_H_

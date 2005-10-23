@@ -31,6 +31,21 @@
 #include "cadbar.h"
 #include "mainfrm.h"
 
+bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description)
+{
+	char buf[1024];
+	sprintf(buf, "Assertion failed on line %d of file %s: %s", Line, FileName, Description);
+	AfxMessageBox(buf, MB_OK|MB_ICONSTOP);
+
+	// TODO: Add a real assert dialog instead of the message box.
+	// TODO: Add an option to disable all asserts.
+	// TODO: Add an option to disable only this assert.
+	// TODO: Add an option to break into the debugger.
+
+	return false;
+}
+
+
 static CMenu menuPopups;
 static CStepDlg* StepModeless = NULL;
 static UINT ClipboardFormat = 0;

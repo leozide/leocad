@@ -394,10 +394,11 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& S
 {
 	bool m_bSubParts = false;
 
-	String& SearchString = m_Categories[CategoryIndex].Keywords;
-
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
+
+	String Keywords = m_Categories[CategoryIndex].Keywords;
+	Keywords.MakeLower();
 
 	for (int i = 0; i < m_nPieceCount; i++)
 	{
@@ -408,7 +409,34 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& S
 			continue;
 
 		// Check if the piece belongs to this category.
-		if (strncmp(Info->m_strDescription, (const char*)SearchString, strlen(SearchString)) != 0)
+		String PieceName = Info->m_strDescription;
+		PieceName.MakeLower();
+
+		const char* p = Keywords;
+		bool Match = false;
+
+		while (*p)
+		{
+			const char* k = p;
+
+			while (*k && (*k != ',') && (*k != ';'))
+				k++;
+
+			String Search = Keywords.Mid(p - (const char*)Keywords, k - p);
+
+			if (PieceName.Find(Search) != -1)
+			{
+				Match = true;
+				break;
+			}
+
+			if (*k)
+				p = k + 1;
+			else
+				break;
+		}
+
+		if (!Match)
 			continue;
 
 		// Check if it's a patterned piece.

@@ -814,36 +814,40 @@ void CCADView::OnDropDown (NMHDR* pNotifyStruct, LRESULT* pResult)
 
 LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 {
-	UINT c;
+	UINT Cursor;
 
-	switch (lParam)
+	POINT pt;
+	GetCursorPos(&pt);
+	ScreenToClient(&pt);
+
+	switch (m_pView->GetCursor(pt.x, pt.y))
 	{
-		case LC_ACTION_SELECT:
-			if (GetKeyState (VK_CONTROL) < 0)
-				c = IDC_SELECT_GROUP;
-			else
-				c = IDC_SELECT;
-			break;
-		case LC_ACTION_INSERT: c = IDC_BRICK; break;
-		case LC_ACTION_LIGHT: c = IDC_LIGHT; break;
-		case LC_ACTION_SPOTLIGHT: c = IDC_SPOTLIGHT; break;
-		case LC_ACTION_CAMERA: c = IDC_CAMERA; break;
-		case LC_ACTION_MOVE: c = IDC_MOVE; break;
-		case LC_ACTION_ROTATE: c = IDC_ROTATE; break;
-		case LC_ACTION_ERASER: c = IDC_ERASER; break;
-		case LC_ACTION_PAINT: c = IDC_PAINT; break;
-		case LC_ACTION_ZOOM: c = IDC_ZOOM; break;
-		case LC_ACTION_ZOOM_REGION: c = IDC_ZOOM_REGION; break;
-		case LC_ACTION_PAN: c = IDC_PAN; break;
-		case LC_ACTION_ROTATE_VIEW: c = IDC_ANGLE; break;
-		case LC_ACTION_ROLL: c = IDC_ROLL; break;
+		case LC_CURSOR_NONE: Cursor = NULL; break;
+		case LC_CURSOR_BRICK: Cursor = IDC_BRICK; break;
+		case LC_CURSOR_LIGHT: Cursor = IDC_LIGHT; break;
+		case LC_CURSOR_SPOTLIGHT: Cursor = IDC_SPOTLIGHT; break;
+		case LC_CURSOR_CAMERA: Cursor = IDC_CAMERA; break;
+		case LC_CURSOR_SELECT: Cursor = IDC_SELECT; break;
+		case LC_CURSOR_SELECT_GROUP: Cursor = IDC_SELECT_GROUP; break;
+		case LC_CURSOR_MOVE: Cursor = IDC_MOVE; break;
+		case LC_CURSOR_ROTATE: Cursor = IDC_ROTATE; break;
+		case LC_CURSOR_ROTATEX: Cursor = IDC_ROTX; break;
+		case LC_CURSOR_ROTATEY: Cursor = IDC_ROTY; break;
+		case LC_CURSOR_DELETE: Cursor = IDC_ERASER; break;
+		case LC_CURSOR_PAINT: Cursor = IDC_PAINT; break;
+		case LC_CURSOR_ZOOM: Cursor = IDC_ZOOM; break;
+		case LC_CURSOR_ZOOM_REGION: Cursor = IDC_ZOOM_REGION; break;
+		case LC_CURSOR_PAN: Cursor = IDC_PAN; break;
+		case LC_CURSOR_ROLL: Cursor = IDC_ROLL; break;
+		case LC_CURSOR_ROTATE_VIEW: Cursor = IDC_ANGLE; break;
+
 		default:
-			c = NULL;
+			LC_ASSERT_FALSE("Unknown cursor type.");
 	}
 
-	if (c)
+	if (Cursor)
 	{
-		m_hCursor = theApp.LoadCursor(c);
+		m_hCursor = theApp.LoadCursor(Cursor);
 		SetCursor(m_hCursor);
 	}
 	else
@@ -854,13 +858,18 @@ LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 
 BOOL CCADView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
+	if (CView::OnSetCursor(pWnd, nHitTest, message))
+		return TRUE;
+
+	OnChangeCursor(0, 0);
+
 	if (m_hCursor)
 	{
 		SetCursor(m_hCursor);
 		return TRUE;
 	}
 
-	return CView::OnSetCursor(pWnd, nHitTest, message);
+	return FALSE;
 }
 
 BOOL CCADView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 

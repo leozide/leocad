@@ -4,6 +4,27 @@
 #include "defines.h"
 #include "typedefs.h"
 
+// Assert macros.
+#ifdef LC_DEBUG
+
+extern bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description);
+
+#define LC_ASSERT(Expr, Desc) \
+do \
+{ \
+	static bool Ignore = false; \
+	if (!Expr && !Ignore) \
+		Ignore = lcAssert(__FILE__, __LINE__, #Expr, Desc); \
+} while (0)
+
+#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
+
+#else
+
+#define LC_ASSERT(expr, desc) do { } while(0)
+
+#endif
+
 // Profile functions
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
 bool Sys_ProfileSaveString (const char *section, const char *key, const char *value);

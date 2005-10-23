@@ -50,7 +50,7 @@ void wprintf(char *fmt, ...)
 }
 #endif
 
-// If Data is NULL this function won't display a message if there are no updates.
+// If Data is NULL this function will only display a message if there are updates.
 static void CheckForUpdates(void* Data)
 {
 	HINTERNET session = InternetOpen("LeoCAD", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0) ;
@@ -111,15 +111,15 @@ static void CheckForUpdates(void* Data)
 							AfxMessageBox(str, MB_OK | MB_ICONINFORMATION);
 					}
 				}
-				else
+				else if (Data != NULL)
 					AfxMessageBox("Unknown file information.");
 			}
 			InternetCloseHandle(hHttpFile);
 		}
-		else
+		else if (Data != NULL)
 			AfxMessageBox("Could not connect.");
 	}
-	else
+	else if (Data != NULL)
 		AfxMessageBox("Could not connect.");
 
 	InternetCloseHandle(session);

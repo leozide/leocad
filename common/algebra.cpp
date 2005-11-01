@@ -163,11 +163,13 @@ Matrix44 Inverse(const Matrix44& m)
 	r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
 	r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-	Matrix44 out(Vector4(r0[4], r1[4], r2[4], r3[4]), 
-	             Vector4(r0[5], r1[5], r2[5], r3[5]), 
-	             Vector4(r0[6], r1[6], r2[6], r3[6]), 
-	             Vector4(r0[7], r1[7], r2[7], r3[7]));
-
+	Vector4 Row0(r0[4], r1[4], r2[4], r3[4]);
+	Vector4 Row1(r0[5], r1[5], r2[5], r3[5]);
+	Vector4 Row2(r0[6], r1[6], r2[6], r3[6]);
+	Vector4 Row3(r0[7], r1[7], r2[7], r3[7]);
+	
+	Matrix44 out(Row0, Row1, Row2, Row3);
+	
 	return out;
 
 #undef MAT

@@ -30,6 +30,8 @@
 #include "categdlg.h"
 #include "cadbar.h"
 #include "mainfrm.h"
+#include "project.h"
+#include "globals.h"
 
 bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description)
 {
@@ -683,29 +685,11 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap)
 {
-	char Text[256], Buffer[256];
+	char Text[256], xy[32], z[32];
 
-	int SnapXY = MoveSnap & 0xff;
-	int SnapZ = (MoveSnap >> 8) & 0xff;
+	project->GetSnapDistanceText(xy, z);
 
-	strcpy(Text, " M: ");
-
-	if (SnapXY)
-		sprintf(Buffer, "%d", SnapXY);
-	else
-		strcpy(Buffer, "/2");
-
-	strcat(Text, Buffer);
-
-	if (SnapZ)
-		sprintf(Buffer, " %d", SnapZ);
-	else
-		strcpy(Buffer, " /3");
-
-	strcat(Text, Buffer);
-
-	sprintf(Buffer, " R: %d ", RotateSnap);
-	strcat(Text, Buffer);
+	sprintf(Text, " M: %s %s R: %d ", xy, z, RotateSnap);
 
 	((CMainFrame*)AfxGetMainWnd())->SetStatusBarPane(ID_INDICATOR_SNAP, Text);
 }

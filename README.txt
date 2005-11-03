@@ -24,7 +24,7 @@ using OpenGL.
 
 - LeoCAD for Linux:
 
-  You can either download the source from CVS or use the precompiled i386
+  You can either download the source from SVN or use the precompiled i386
   binaries. You will also need to download the Pieces Library separately,
   extract it to a directory of your choice and point the LEOCAD_LIB
   environment variable to it. More information is available at
@@ -43,6 +43,9 @@ Online Resources
 - Manual:
   http://www.leocad.org/manual/
 
+- Wiki:
+  http://trac.gerf.org/leocad/wiki
+
 - Mailing lists:
   http://gerf.org/mailman/listinfo
 
@@ -50,11 +53,11 @@ Online Resources
   http://news.lugnet.com/cad/leocad/
   news://lugnet.com/lugnet.cad.leocad
 
-- CVS access:
-  :pserver:guest@gerf.org:/usr/cvsroot, password:guest, module:leocad
+- Subversion access:
+  http://svn.gerf.org/svn/leocad
 
-- CVS-Web pages:
-  http://gerf.org/cgi-bin/cvsweb
+- Bug database:
+  http://trac.gerf.org/leocad/newticket
 
 
 Legal Disclaimer

@@ -681,9 +681,15 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	int nID = LOWORD(wParam);
 
-	if (nID >= ID_SNAP_12 && nID <= ID_SNAP_100)
+	if (nID >= ID_SNAP_0 && nID <= ID_SNAP_9)
 	{
-		project->HandleCommand(LC_TOOLBAR_SNAPMOVEMENU, nID - ID_SNAP_12);
+		project->HandleCommand((LC_COMMANDS)(LC_EDIT_MOVEXY_SNAP_0 + nID - ID_SNAP_0), 0);
+		return TRUE;
+	}
+
+	if (nID >= ID_SNAP_10 && nID <= ID_SNAP_19)
+	{
+		project->HandleCommand((LC_COMMANDS)(LC_EDIT_MOVEZ_SNAP_0 + nID - ID_SNAP_10), 0);
 		return TRUE;
 	}
 
@@ -1336,7 +1342,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_ADDKEYS
 		0,                         // LC_TOOLBAR_SNAPMENU
 		0,                         // LC_TOOLBAR_LOCKMENU
-		0,                         // LC_TOOLBAR_SNAPMOVEMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
 		0,                         // LC_TOOLBAR_BACKGROUND
 		0,                         // LC_EDIT_MOVE_SNAP_0

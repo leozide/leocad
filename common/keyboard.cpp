@@ -80,7 +80,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 //	{ LC_TOOLBAR_ADDKEYS, "", 0, 0, 0 },
 //	{ LC_TOOLBAR_SNAPMENU, "", 0, 0, 0 },
 //	{ LC_TOOLBAR_LOCKMENU, "", 0, 0, 0 },
-//	{ LC_TOOLBAR_SNAPMOVEMENU, "", 0, 0, 0 },
 //	{ LC_TOOLBAR_FASTRENDER, "", 0, 0, 0 },
 //	{ LC_TOOLBAR_BACKGROUND, "", 0, 0, 0 },
 	{ LC_VIEW_STEP_INSERT, "Step Insert", 0, 0, 0 },

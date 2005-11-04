@@ -6332,20 +6332,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateSnap(m_nSnap);
 		} break;
 
-		case LC_TOOLBAR_SNAPMOVEMENU:
-		{
-			if (nParam < 11)
-				m_nMoveSnap = (unsigned short)nParam;
-			else
-			{
-				if (nParam == 19)
-					m_nMoveSnap = 100;
-				else
-					m_nMoveSnap = ((unsigned short)(nParam - 10)*5 + 10) | (m_nMoveSnap & ~0xff);
-			}
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_TOOLBAR_BACKGROUND:
 		case LC_TOOLBAR_FASTRENDER:
 		{

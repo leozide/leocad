@@ -52,16 +52,7 @@ public:
 	inline explicit Vector4(const float _x, const float _y, const float _z, const float _w)
 		: x(_x), y(_y), z(_z), w(_w) { }
 
-	// Get/Set functions.
-	inline float GetX() const { return x; }
-	inline float GetY() const { return y; }
-	inline float GetZ() const { return z; }
-	inline float GetW() const { return w; }
-	inline void SetX(const float _x) { x = _x; }
-	inline void SetY(const float _y) { y = _y; }
-	inline void SetZ(const float _z) { z = _z; }
-	inline void SetW(const float _w) { w = _w; }
-
+	inline operator const float*() const { return (const float*)this; }
 	inline float& operator[](int i) const { return ((float*)this)[i]; }
 
 	// Comparison.
@@ -313,15 +304,8 @@ public:
 	inline explicit Point3(const float _x, const float _y, const float _z)
 		: m_Value(_x, _y, _z) { }
 
-	// Get/Set functions.
+	inline operator const float*() const { return (const float*)this; }
 	inline const Vector4& GetValue() const { return m_Value; }
-	inline float GetX() const { return m_Value.GetX(); }
-	inline float GetY() const { return m_Value.GetY(); }
-	inline float GetZ() const { return m_Value.GetZ(); }
-	inline void SetX(const float _x) { m_Value.SetX(_x); }
-	inline void SetY(const float _y) { m_Value.SetY(_y); }
-	inline void SetZ(const float _z) { m_Value.SetZ(_z); }
-
 	inline operator const Vector4() const
 	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 1.0f); }
 
@@ -348,15 +332,8 @@ public:
 	inline explicit Vector3(const float _x, const float _y, const float _z)
 		: m_Value(_x, _y, _z) { }
 
-	// Get/Set functions.
+	inline operator const float*() const { return (const float*)this; }
 	inline const Vector4& GetValue() const { return m_Value; }
-	inline float GetX() const { return m_Value.GetX(); }
-	inline float GetY() const { return m_Value.GetY(); }
-	inline float GetZ() const { return m_Value.GetZ(); }
-	inline void SetX(const float _x) { m_Value.SetX(_x); }
-	inline void SetY(const float _y) { m_Value.SetY(_y); }
-	inline void SetZ(const float _z) { m_Value.SetZ(_z); }
-
 	inline operator const Vector4() const
 	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 0.0f); }
 
@@ -480,17 +457,7 @@ public:
 		: m_Value(_x, _y, _z, _w) { }
 
 	// Get/Set functions.
-	inline float GetX() const { return m_Value.GetX(); }
-	inline float GetY() const { return m_Value.GetY(); }
-	inline float GetZ() const { return m_Value.GetZ(); }
-	inline float GetW() const { return m_Value.GetW(); }
-	inline void SetX(const float _x) { m_Value.SetX(_x); }
-	inline void SetY(const float _y) { m_Value.SetY(_y); }
-	inline void SetZ(const float _z) { m_Value.SetZ(_z); }
-	inline void SetW(const float _w) { m_Value.SetW(_w); }
-
-	template<typename T>
-	inline const float operator[](T i) const { return m_Value[i]; }
+	inline const float operator[](int i) const { return m_Value[i]; }
 
 	// Conversions.
 	inline void FromAxisAngle(const Vector4& AxisAngle)
@@ -546,7 +513,7 @@ public:
 		Rows[1] = Vector3(Txy-Twz, 1.0f-(Txx+Tzz), Tyz+Twx);
 		Rows[2] = Vector3(Txz+Twy, Tyz-Twx, 1.0f-(Txx+Tyy));
 
-		return Vector3(Rows[0].GetValue()*a.GetX() + Rows[1].GetValue()*a.GetY() + Rows[2].GetValue()*a.GetZ());
+		return Vector3(Rows[0].GetValue()*a[0] + Rows[1].GetValue()*a[1] + Rows[2].GetValue()*a[2]);
 	}
 
 protected:
@@ -606,7 +573,7 @@ public:
 	}
 
 	friend inline Vector3 operator*(const Vector3& a, const Matrix33& b)
-	{ return Vector3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ()); }
+	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
 protected:
 	Vector3 m_Rows[3];
@@ -624,16 +591,16 @@ public:
 		{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
 
 	inline void SetTranslation(const Point3& a)
-	{ m_Rows[3] = Vector4(a.GetX(), a.GetY(), a.GetZ(), 0.0f); }
+	{ m_Rows[3] = Vector4(a[0], a[1], a[2], 0.0f); }
 
 	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
 	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
 
 	friend inline Point3 operator*(const Point3& a, const Matrix43& b)
-	{ return Point3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]); }
+	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]); }
 
 	friend inline Vector4 operator*(const Vector4& a, const Matrix43& b)
-	{ return Point3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]*a.GetW()); }
+	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]*a[3]); }
 
 protected:
 	Vector4 m_Rows[4];
@@ -652,13 +619,13 @@ public:
 
 	// Math operations.
 	friend inline Point3 operator*(const Point3& a, const Matrix44& b)
-	{ return Point3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]); }
+	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]); }
 
 	friend inline Vector3 operator*(const Vector3& a, const Matrix44& b)
-	{ return Vector3(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ()); }
+	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
 	friend inline Vector4 operator*(const Vector4& a, const Matrix44& b)
-	{ return Vector4(b.m_Rows[0]*a.GetX() + b.m_Rows[1]*a.GetY() + b.m_Rows[2]*a.GetZ() + b.m_Rows[3]*a.GetW()); }
+	{ return Vector4(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]*a[3]); }
 
 	friend inline Matrix44 operator*(const Matrix44& a, const Matrix44& b)
 	{
@@ -678,13 +645,13 @@ public:
 	inline void Transpose3()
 	{
 		Vector4 a = m_Rows[0], b = m_Rows[1], c = m_Rows[2];
-		m_Rows[0] = Vector4(a.GetX(), b.GetX(), c.GetX(), a.GetW());
-		m_Rows[1] = Vector4(a.GetY(), b.GetY(), c.GetY(), b.GetW());
-		m_Rows[2] = Vector4(a.GetZ(), b.GetZ(), c.GetZ(), c.GetW());
+		m_Rows[0] = Vector4(a[0], b[0], c[0], a[3]);
+		m_Rows[1] = Vector4(a[1], b[1], c[1], b[3]);
+		m_Rows[2] = Vector4(a[2], b[2], c[2], c[3]);
 	}
 
 	inline void SetTranslation(const Point3& a)
-	{ m_Rows[3] = Vector4(a.GetX(), a.GetY(), a.GetZ(), 1.0f); }
+	{ m_Rows[3] = Vector4(a[0], a[1], a[2], 1.0f); }
 
 	friend Matrix44 Inverse(const Matrix44& m);
 	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);

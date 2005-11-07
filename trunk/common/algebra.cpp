@@ -26,10 +26,10 @@ void Matrix44::CreateLookAt(const Point3& Eye, const Point3& Target, const Vecto
 	y.Normalize();
 	z.Normalize();
 
-	m_Rows[0] = Vector4(x.GetX(), y.GetX(), z.GetX(), 0.0f);
-	m_Rows[1] = Vector4(x.GetY(), y.GetY(), z.GetY(), 0.0f);
-	m_Rows[2] = Vector4(x.GetZ(), y.GetZ(), z.GetZ(), 0.0f);
-	m_Rows[3] = m_Rows[0]*-Eye.GetX() + m_Rows[1]*-Eye.GetY() + m_Rows[2]*-Eye.GetZ();
+	m_Rows[0] = Vector4(x[0], y[0], z[0], 0.0f);
+	m_Rows[1] = Vector4(x[1], y[1], z[1], 0.0f);
+	m_Rows[2] = Vector4(x[2], y[2], z[2], 0.0f);
+	m_Rows[3] = m_Rows[0]*-Eye[0] + m_Rows[1]*-Eye[1] + m_Rows[2]*-Eye[2];
 	m_Rows[3][3] = 1.0f;
 }
 

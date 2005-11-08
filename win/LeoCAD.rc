@@ -459,12 +459,12 @@ BEGIN
         MENUITEM "1/20 Stud",                   ID_SNAP_1
         MENUITEM "1/4 Stud",                    ID_SNAP_2
         MENUITEM "1/2 Stud",                    ID_SNAP_3
-        MENUITEM "1 Stud",                      ID_SNAP_4
-        MENUITEM "2 Studs",                     ID_SNAP_5
-        MENUITEM "3 Studs",                     ID_SNAP_6
-        MENUITEM "4 Studs",                     ID_SNAP_7
-        MENUITEM "8 Studs",                     ID_SNAP_8
-        MENUITEM "16 Studs",                    ID_SNAP_9
+        MENUITEM "1 Flat",                      ID_SNAP_4
+        MENUITEM "1 Stud",                      ID_SNAP_5
+        MENUITEM "2 Studs",                     ID_SNAP_6
+        MENUITEM "3 Studs",                     ID_SNAP_7
+        MENUITEM "4 Studs",                     ID_SNAP_8
+        MENUITEM "8 Studs",                     ID_SNAP_9
         MENUITEM "None",                        ID_SNAP_10, MENUBREAK
         MENUITEM "1/20 Stud",                   ID_SNAP_11
         MENUITEM "1/4 Stud",                    ID_SNAP_12

@@ -2864,7 +2864,7 @@ void Project::RenderOverlays(int Viewport)
 
 		glEnd();
 
-		const float OverlayCameraSquareSize = 8.0f;
+		const float OverlayCameraSquareSize = max(8.0f, (w+h)/200);
 
 		// Draw squares.
 		glBegin(GL_LINE_LOOP);

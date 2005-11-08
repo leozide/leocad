@@ -558,7 +558,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE | LC_DRAW_PREVIEW);
 	SystemUpdateSnap(m_nSnap);
-	m_nMoveSnap = 0x0604;
+	m_nMoveSnap = 0x0605;
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
 	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
@@ -7204,7 +7204,7 @@ void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 	int SXY = (m_nMoveSnap & 0xff);
 	int SZ = ((m_nMoveSnap >> 8) & 0xff);
 
-	const float SnapXYTable[] = { 0.01f, 0.04f, 0.2f, 0.4f, 0.8f, 1.6f, 2.4f, 3.2f, 6.4f, 12.8f };
+	const float SnapXYTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 1.6f, 2.4f, 3.2f, 6.4f };
 	const float SnapZTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 0.96f, 1.92f, 3.84f, 7.68f };
 
 	SXY = min(SXY, 9);
@@ -7230,7 +7230,7 @@ void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
 		int SXY = (m_nMoveSnap & 0xff);
 		int SZ = ((m_nMoveSnap >> 8) & 0xff);
 
-		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1/2S", "1S", "2S", "3S", "4S", "8S", "16S" };
+		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
 		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
 
 		SXY = min(SXY, 9);

@@ -9160,12 +9160,14 @@ void Project::MouseUpdateOverlays(int x, int y)
 		float d = sqrtf((float)((cx - x) * (cx - x) + (cy - y) * (cy - y)));
 		float r = min(vw, vh) * 0.35f;
 
-		if ((d < r + 4.0f) && (d > r - 4.0f))
+		const float SquareSize = max(8.0f, (vw+vh)/200);
+
+		if ((d < r + SquareSize) && (d > r - SquareSize))
 		{
-			if ((cx - x < 4) && (cx - x > -4))
+			if ((cx - x < SquareSize) && (cx - x > -SquareSize))
 				m_OverlayMode = LC_OVERLAY_Y;
 
-			if ((cy - y < 4) && (cy - y > -4))
+			if ((cy - y < SquareSize) && (cy - y > -SquareSize))
 				m_OverlayMode = LC_OVERLAY_X;
 		}
 		else

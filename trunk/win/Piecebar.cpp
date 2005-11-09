@@ -31,8 +31,8 @@ CPiecesBar::CPiecesBar()
 
 	m_sizeMin = CSize(222, 200);
 	m_sizeHorz = CSize(200, 200);
-	m_sizeVert = CSize(200, 200);
-	m_sizeFloat = CSize(200, 200);
+	m_sizeVert = CSize(226, -1);
+	m_sizeFloat = CSize(226, 270);
 	m_bTracking = FALSE;
 	m_bInRecalcNC = FALSE;
 	m_cxEdge = 5;
@@ -44,6 +44,7 @@ CPiecesBar::CPiecesBar()
 CPiecesBar::~CPiecesBar()
 {
 	AfxGetApp()->WriteProfileInt("Settings", "Preview Height", m_nPreviewHeight);
+	SaveState();
 }
 
 BEGIN_MESSAGE_MAP(CPiecesBar, CControlBar)
@@ -90,18 +91,49 @@ BOOL CPiecesBar::Create(LPCTSTR lpszWindowName, CWnd* pParentWnd, CSize sizeDefa
 
 	dwStyle &= ~CBRS_ALL;
 	dwStyle &= WS_VISIBLE | WS_CHILD;
-	if (!CWnd::Create(wndclass, lpszWindowName, dwStyle, CRect(0,0,0,0),
-			pParentWnd, nID))
-			return FALSE;
+	if (!CWnd::Create(wndclass, lpszWindowName, dwStyle, CRect(0,0,0,0), pParentWnd, nID))
+		return FALSE;
 
 	m_sizeHorz = sizeDefault;
 	m_sizeVert = sizeDefault;
 	m_sizeFloat = sizeDefault;
 
+	LoadState();
+	
 	m_bHasGripper = bHasGripper;
 	m_cyGripper = m_bHasGripper ? 12 : 0;
 
 	return TRUE;
+}
+
+void CPiecesBar::SaveState()
+{
+	CWinApp* pApp = AfxGetApp();
+	TCHAR* szSection = _T("PiecesBar");
+
+	pApp->WriteProfileInt(szSection, _T("HorzCX"), m_sizeHorz.cx);
+	pApp->WriteProfileInt(szSection, _T("HorzCY"), m_sizeHorz.cy);
+
+	pApp->WriteProfileInt(szSection, _T("VertCX"), m_sizeVert.cx);
+	pApp->WriteProfileInt(szSection, _T("VertCY"), m_sizeVert.cy);
+
+	pApp->WriteProfileInt(szSection, _T("FloatCX"), m_sizeFloat.cx);
+	pApp->WriteProfileInt(szSection, _T("FloatCY"), m_sizeFloat.cy);
+}
+
+void CPiecesBar::LoadState()
+{
+	CWinApp* pApp = AfxGetApp();
+	TCHAR* szSection = _T("PiecesBar");
+
+	m_sizeHorz.cx = (int)pApp->GetProfileInt(szSection, _T("HorzCX"), m_sizeHorz.cx);
+	m_sizeHorz.cy = (int)pApp->GetProfileInt(szSection, _T("HorzCY"), m_sizeHorz.cy);
+
+	m_sizeVert.cx = (int)pApp->GetProfileInt(szSection, _T("VertCX"), m_sizeVert.cx);
+	m_sizeVert.cy = (int)pApp->GetProfileInt(szSection, _T("VertCY"), m_sizeVert.cy);
+
+	m_sizeFloat.cx = (int)pApp->GetProfileInt(szSection, _T("FloatCX"), m_sizeFloat.cx);
+	m_sizeFloat.cy = (int)pApp->GetProfileInt(szSection, _T("FloatCY"), m_sizeFloat.cy);
 }
 
 BOOL CPiecesBar::IsHorzDocked() const

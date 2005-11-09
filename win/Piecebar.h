@@ -76,6 +76,9 @@ protected:
 	int     m_cyGripper;
 	CRect   m_rectGripper;
 
+	void LoadState();
+	void SaveState();
+
 public:
 	void CreateGroupsBar();
 	BOOL m_bSubParts;

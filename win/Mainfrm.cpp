@@ -227,8 +227,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// members. If you need to change them later, don't forget to call
 	// RecalcLayout() or DelayRecalcLayout() after you set the size.
 	// You can use this technique to load/save the size of the control bar.
-	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
-	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
+//	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
+//	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
 	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT);
 

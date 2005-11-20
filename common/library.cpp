@@ -400,6 +400,8 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& S
 	String Keywords = m_Categories[CategoryIndex].Keywords;
 	Keywords.MakeLower();
 
+	bool SearchResults = (m_Categories[CategoryIndex].Name == "Search Results");
+
 	for (int i = 0; i < m_nPieceCount; i++)
 	{
 		PieceInfo* Info = &m_pPieceIdx[i];
@@ -441,18 +443,22 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& S
 
 		// Check if it's a patterned piece.
 		const char* Name = Info->m_strName;
-		while (*Name)
+
+		if (!SearchResults)
 		{
-			if (!*Name || *Name < '0' || *Name > '9')
-				break;
+			while (*Name)
+			{
+				if (!*Name || *Name < '0' || *Name > '9')
+					break;
 
-			if (*Name == 'P')
-				break;
+				if (*Name == 'P')
+					break;
 
-			Name++;
+				Name++;
+			}
 		}
 
-		if (*Name == 'P')
+		if (*Name == 'P' && !SearchResults)
 		{
 			PieceInfo* Parent;
 

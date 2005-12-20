@@ -22,10 +22,9 @@ static char THIS_FILE[] = __FILE__;
 
 CPiecesBar::CPiecesBar()
 {
-	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP|PIECEBAR_COMBO);
+	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP);
 	m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bGroups = (i & PIECEBAR_GROUP) != 0;
-	m_bCombo = (i & PIECEBAR_COMBO) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 	m_nCurGroup = 1;
 
@@ -625,11 +624,8 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	int off = 31;
 	m_wndColorsList.SetWindowPos (NULL, (cx-210)/2, cy-off, 212, 26, SWP_NOZORDER);
 
-	if (m_bCombo)
-	{
-		off += 30;
-		m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
-	}
+	off += 30;
+	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
 
 	if (m_bGroups)
 	{
@@ -666,8 +662,8 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	else
 		m_wndPiecesList.DeleteColumn (1);
 
-	m_wndPiecesList.SetColumnWidth (0, rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL) -2);
-	m_wndPiecesCombo.ShowWindow ((m_bCombo) ? SW_SHOW : SW_HIDE);
+	m_wndPiecesList.SetColumnWidth(0, rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL) -2);
+	m_wndPiecesCombo.ShowWindow(SW_SHOW);
 
 
 m_wndPiecesList.ShowWindow(FALSE);

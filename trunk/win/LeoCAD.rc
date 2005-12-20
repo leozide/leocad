@@ -365,7 +365,6 @@ BEGIN
         MENUITEM "Edit Category...",            ID_PIECEBAR_EDITCATEGORY
         MENUITEM SEPARATOR
         MENUITEM "Group Pieces",                ID_PIECEBAR_GROUP
-        MENUITEM "Show ComboBox",               ID_PIECEBAR_COMBOBOX
         MENUITEM "Show Numbers",                ID_PIECEBAR_NUMBERS
         MENUITEM "Show Subparts",               ID_PIECEBAR_SUBPARTS
         MENUITEM SEPARATOR
@@ -979,14 +978,12 @@ BEGIN
     CONTROL         "Slider1",IDC_GENDLG_MOUSE,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,76,99,31,10
     GROUPBOX        "Pieces Toolbar",IDC_STATIC,146,7,92,70
-    CONTROL         "Show subparts",IDC_GENDLG_SUBPARTS,"Button",
+    CONTROL         "Show sub-pieces",IDC_GENDLG_SUBPARTS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,152,19,81,8
     CONTROL         "Show piece numbers",IDC_GENDLG_NUMBERS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,152,32,81,8
     CONTROL         "Sort pieces by group",IDC_GENDLG_GROUP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,152,45,81,8
-    CONTROL         "Show combobox",IDC_GENDLG_COMBO,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,152,58,81,8
     CONTROL         "Check for updates on startup",IDC_GENDLG_UPDATES,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,11,113,119,8
 END

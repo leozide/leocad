@@ -83,7 +83,6 @@ public:
 	void CreateGroupsBar();
 	BOOL m_bSubParts;
 	BOOL m_bGroups;
-	BOOL m_bCombo;
 	BOOL m_bNumbers;
 	CPiecesList		m_wndPiecesList;
 	CColorsList		m_wndColorsList;

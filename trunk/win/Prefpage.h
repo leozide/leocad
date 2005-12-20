@@ -30,7 +30,6 @@ public:
 	BOOL	m_bGroup;
 	CString	m_strFolder;
 	BOOL	m_bAutoSave;
-	BOOL	m_bCombo;
 	CString	m_bUser;
 	CString	m_strUser;
 	BOOL	m_Updates;

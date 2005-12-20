@@ -1208,10 +1208,10 @@ bool SystemDoDialog(int nMode, void* param)
 			{
 				const char *ext, *filter;
 
-				if (opts->type == LC_FILEOPENDLG_LGF)
+				if (opts->type == LC_FILEOPENDLG_LCF)
 				{
-					ext = ".lgf\0";
-					filter = "LeoCAD Group Files (*.lgf)|*.lgf|All Files (*.*)|*.*||";
+					ext = ".lcf\0";
+					filter = "LeoCAD Category Files (*.lcf)|*.lcf|All Files (*.*)|*.*||";
 				}
 				else
 				{
@@ -1224,12 +1224,11 @@ bool SystemDoDialog(int nMode, void* param)
 				if (dlg.DoModal() == IDOK)
 				{
 					opts->numfiles = 1;
-					opts->filenames = (char**)malloc(sizeof(char*));
-					opts->filenames[0] = (char*)malloc(LC_MAXPATH);
-					strcpy (opts->filenames[0], dlg.GetPathName ());
+					opts->filenames = (char**)malloc(LC_MAXPATH);
+					strcpy((char*)opts->filenames, dlg.GetPathName ());
 
 					// Get the file path.
-					strcpy (opts->path, opts->filenames[0]);
+					strcpy(opts->path, (char*)opts->filenames);
 					if (strlen (opts->path) > 0)
 					{
 						char* ptr = strrchr(opts->path, '/');
@@ -1248,6 +1247,25 @@ bool SystemDoDialog(int nMode, void* param)
 				return false;
 			}
 
+		} break;
+
+		case LC_DLG_FILE_SAVE:
+		{
+			LC_FILESAVEDLG_OPTS* opts = (LC_FILESAVEDLG_OPTS*)param;
+
+			if (opts->type == LC_FILESAVEDLG_LCF)
+			{
+				CFileDialog dlg(FALSE, ".lcf", NULL, OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				                "LeoCAD Category Files (*.lcf)|*.lcf|All Files (*.*)|*.*||", NULL);
+
+				if (dlg.DoModal() == IDOK)
+				{
+					strcpy(opts->path, dlg.GetPathName ());
+					return true;
+				}
+			}
+
+			return false;
 		} break;
 
 		case LC_DLG_PICTURE_SAVE:
@@ -1454,21 +1472,10 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_LIBRARY:
 		{
 			CLibraryDlg dlg;
-			CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
-			CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
+			dlg.DoModal();
 
-			for (int i = 0; i < pBar->m_wndGroupsBar.m_ToolbarData.iButtons; i++)
-				dlg.m_nBitmaps[i] = pBar->m_wndGroupsBar.m_ToolbarData.ButtonData[i].iBitmap;
-			dlg.m_ImageList.Create(IDB_PIECEBAR, 16, 0, 0x00ff00ff);
-
-			if (dlg.DoModal() == IDOK)
-			{
-				pBar->CreateGroupsBar();
-				pBar->m_wndPiecesList.UpdateList();
-				RECT rc;
-				pBar->GetClientRect(&rc);
-				pBar->PostMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right, rc.bottom));
-			}
+			CPiecesBar* pBar = (CPiecesBar*)((CFrameWnd*)AfxGetMainWnd())->GetControlBar(ID_VIEW_PIECES_BAR);
+			pBar->UpdatePiecesTree(false);
 
 			return true;
 		} break;

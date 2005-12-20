@@ -92,6 +92,11 @@ int stricmp(const char* str1, const char* str2);
 #define M_PI  3.14159265
 #endif
 
+#define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
+                                                ((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))
+
+#define LC_FILE_ID LC_FOURCC('L','C','D', 0)
+
 #define LC_CONNECTIONS	2		// Different piece connections
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
 

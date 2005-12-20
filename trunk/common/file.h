@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "defines.h"
+#include "config.h"
+
+class String;
 
 class File
 {
@@ -19,7 +22,7 @@ public:
 	virtual void SetLength(unsigned long nNewLen) = 0;
 	virtual unsigned long GetLength() const = 0;
 
-	virtual char* ReadString(char* pBuf, unsigned long nMax)=0;
+	virtual char* ReadLine(char* pBuf, unsigned long nMax)=0;
 	virtual unsigned long Read(void* pBuf, unsigned long nCount)=0;
 	virtual unsigned long Write(const void* pBuf, unsigned long nCount)=0;
 	virtual int GetChar()=0;
@@ -36,15 +39,27 @@ public:
 	unsigned long WriteFloat(const void* pBuf, unsigned long nCount);
 	unsigned long WriteDouble(const void* pBuf, unsigned long nCount);
 
+	void ReadString(String& Value);
+	void ReadInt(lcint32* Value)
+	{ ReadLong(Value, 1); }
+	void ReadInt(lcuint32* Value)
+	{ ReadLong(Value, 1); }
+
+	void WriteString(const String& Value);
+	void WriteInt(lcint32 Value)
+	{ WriteLong(&Value, 1); }
+	void WriteInt(lcuint32 Value)
+	{ WriteLong(&Value, 1); }
+
 	virtual void Abort()=0;
 	virtual void Flush()=0;
 	virtual void Close()=0;
 
 	const char* GetFileName() const
-		{ return FileName; }
+	{ return FileName; }
 	
 	void SetFileName(const char* Name)
-		{ strncpy(FileName, Name, LC_MAXPATH); }
+	{ strncpy(FileName, Name, LC_MAXPATH); }
 
 protected:
 	char FileName[LC_MAXPATH];
@@ -64,7 +79,7 @@ public:
 	void SetLength(unsigned long nNewLen);
 	unsigned long GetLength() const;
 
-	char* ReadString(char* pBuf, unsigned long nMax);
+	char* ReadLine(char* pBuf, unsigned long nMax);
 	unsigned long Read(void* pBuf, unsigned long nCount);
 	unsigned long Write(const void* pBuf, unsigned long nCount);
 	int GetChar();
@@ -100,7 +115,7 @@ public:
 	void SetLength(unsigned long nNewLen);
 	unsigned long GetLength() const;
 
-	char* ReadString(char* pBuf, unsigned long nMax);
+	char* ReadLine(char* pBuf, unsigned long nMax);
 	unsigned long Read(void* pBuf, unsigned long nCount);
 	unsigned long Write(const void* pBuf, unsigned long nCount);
 	int GetChar();

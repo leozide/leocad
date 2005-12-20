@@ -22,137 +22,114 @@ const char PiecesLibrary::TexturesBinHeader[32] = "LeoCAD texture data file\0\0\
 const char PiecesLibrary::TexturesIdxHeader[32] = "LeoCAD texture index file\0\0\0\0\0\0";
 const int PiecesLibrary::TexturesFileVersion = 1;
 
-PiecesLibrary::PiecesLibrary ()
+PiecesLibrary::PiecesLibrary()
 {
-  strcpy (m_LibraryPath, "");
-  m_pMovedReference = NULL;
-  m_nMovedCount = 0;
-  m_pPieceIdx = NULL;
-  m_nPieceCount = 0;
-  m_pTextures = NULL;
-  m_nTextureCount = 0;
-	m_bNeedsReload = false;
+	strcpy(m_LibraryPath, "");
+	strcpy(m_CategoriesFile, "");
+	m_pMovedReference = NULL;
+	m_nMovedCount = 0;
+	m_pPieceIdx = NULL;
+	m_nPieceCount = 0;
+	m_pTextures = NULL;
+	m_nTextureCount = 0;
+	m_Modified = false;
+	m_CategoriesModified = false;
 }
 
-PiecesLibrary::~PiecesLibrary ()
+PiecesLibrary::~PiecesLibrary()
 {
-  Unload ();
-}
-
-void PiecesLibrary::CheckReload ()
-{
-  char LibraryPath[LC_MAXPATH];
-
-	strcpy (LibraryPath, m_LibraryPath);
-
-	if (m_bNeedsReload)
-	{
-		// FIXME: project will crash if we don't update the pieceinfos
-
-		Unload ();
-		Load (LibraryPath);
-	}
+	Unload();
 }
 
 void PiecesLibrary::Unload ()
 {
-  strcpy (m_LibraryPath, "");
+	strcpy(m_LibraryPath, "");
 
-  free (m_pMovedReference);
-  m_pMovedReference = NULL;
-  m_nMovedCount = 0;
+	free(m_pMovedReference);
+	m_pMovedReference = NULL;
+	m_nMovedCount = 0;
 
-  delete [] m_pPieceIdx;
-  m_pPieceIdx = NULL;
-  m_nPieceCount = 0;
+	delete [] m_pPieceIdx;
+	m_pPieceIdx = NULL;
+	m_nPieceCount = 0;
 
-  delete [] m_pTextures;
-  m_pTextures = NULL;
-  m_nTextureCount = 0;
+	delete [] m_pTextures;
+	m_pTextures = NULL;
+	m_nTextureCount = 0;
 }
 
 bool PiecesLibrary::Load (const char *libpath)
 {
-  FileDisk idx, bin;
-  char filename[LC_MAXPATH];
-  lcuint16 count, movedcount;
-  lcuint32 binsize;
-  Texture* pTexture;
-  int i;
+	FileDisk idx, bin;
+	char filename[LC_MAXPATH];
+	lcuint16 count, movedcount;
+	lcuint32 binsize;
+	Texture* pTexture;
+	int i;
 
-  strcpy (m_LibraryPath, libpath);
+	strcpy (m_LibraryPath, libpath);
 
-  // Make sure that the path ends with a '/'
-  i = strlen(m_LibraryPath)-1;
-  if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
-    strcat(m_LibraryPath, "/");
+	// Make sure that the path ends with a '/'
+	i = strlen(m_LibraryPath)-1;
+	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
+		strcat(m_LibraryPath, "/");
 
-  // Read the piece library index.
-  strcpy (filename, m_LibraryPath);
-  strcat (filename, "pieces.idx");
+	// Read the piece library index.
+	strcpy (filename, m_LibraryPath);
+	strcat (filename, "pieces.idx");
 
-  if (!idx.Open (filename, "rb"))
+	if (!idx.Open (filename, "rb"))
 	{
 		console.PrintError ("Cannot open Pieces Library file: %s.\n", filename);
-    return false;
+		return false;
 	}
 
-  strcpy (filename, m_LibraryPath);
-  strcat (filename, "pieces.bin");
+	strcpy (filename, m_LibraryPath);
+	strcat (filename, "pieces.bin");
 
-  if (!bin.Open (filename, "rb"))
+	if (!bin.Open (filename, "rb"))
 	{
 		console.PrintError ("Cannot open Pieces Library file: %s.\n", filename);
-    return false;
+		return false;
 	}
 
 	if (!ValidatePiecesFile (idx, bin))
 		return false;
 
-  idx.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
-  idx.ReadShort (&movedcount, 1);
-  idx.ReadLong (&binsize, 1);
-  idx.ReadShort (&count, 1);
-  idx.Seek (34, SEEK_SET);
+	idx.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
+	idx.ReadShort (&movedcount, 1);
+	idx.ReadLong (&binsize, 1);
+	idx.ReadShort (&count, 1);
+	idx.Seek (34, SEEK_SET);
 
-  // Load piece indexes
-  delete [] m_pPieceIdx;
-  m_pPieceIdx = new PieceInfo[count];
-  m_nPieceCount = count;
+	// Load piece indexes
+	delete [] m_pPieceIdx;
+	m_pPieceIdx = new PieceInfo[count];
+	m_nPieceCount = count;
 
-  for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
-    pElements->LoadIndex (idx);
+	for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
+		pElements->LoadIndex (idx);
 
-  // Load moved files reference.
-  if (m_pMovedReference != NULL)
-    free(m_pMovedReference);
-  m_pMovedReference = (char*)malloc(18*movedcount);
-  memset (m_pMovedReference, 0, 18*movedcount);
-  m_nMovedCount = movedcount;
+	// Load moved files reference.
+	if (m_pMovedReference != NULL)
+		free(m_pMovedReference);
+	m_pMovedReference = (char*)malloc(18*movedcount);
+	memset (m_pMovedReference, 0, 18*movedcount);
+	m_nMovedCount = movedcount;
 
-  for (i = 0; i < movedcount; i++)
-  {
-    idx.Read (&m_pMovedReference[i*18], 8);
-    idx.Read (&m_pMovedReference[i*18+9], 8);
-  }
+	for (i = 0; i < movedcount; i++)
+	{
+		idx.Read (&m_pMovedReference[i*18], 8);
+		idx.Read (&m_pMovedReference[i*18+9], 8);
+	}
 
-  idx.Close();
+	idx.Close();
 	bin.Close();
 
 	// Load groups configuration
-	if (!LoadGroupConfig (Sys_ProfileLoadString ("Settings", "Groups", "")))
-	{
-		m_strGroups[0] = "Plates";
-		m_strGroups[1] = "Bricks";
-		m_strGroups[2] = "Tiles";
-		m_strGroups[3] = "Slope Bricks";
-		m_strGroups[4] = "Technic";
-		m_strGroups[5] = "Space";
-		m_strGroups[6] = "Train";
-		m_strGroups[7] = "Other Bricks";
-		m_strGroups[8] = "Accessories";
-		m_nGroupCount = 9;
-	}
+	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
+	if (!strlen(FileName) || !LoadCategories(FileName))
+		ResetCategories();
 
 	// Read the texture index.
 	strcpy(filename, m_LibraryPath);
@@ -171,13 +148,13 @@ bool PiecesLibrary::Load (const char *libpath)
 		return false;
 	}
 
-  strcpy (filename, m_LibraryPath);
-  strcat (filename, "textures.bin");
+	strcpy (filename, m_LibraryPath);
+	strcat (filename, "textures.bin");
 
-  if (!bin.Open (filename, "rb"))
+	if (!bin.Open (filename, "rb"))
 	{
 		console.PrintError ("Cannot open Textures Library file: %s.\n", filename);
-    return false;
+		return false;
 	}
 
 	if (!ValidateTexturesFile (idx, bin))
@@ -198,43 +175,10 @@ bool PiecesLibrary::Load (const char *libpath)
 	idx.Close();
 	bin.Close();
 
-	// TODO: Load categories.
-
-	const int NumCategories = 34;
-	const char* DefaultCategories[] =
-	{
-	  "Animal", "Antenna", "Arm", "Bar", "Baseplate", "Belville", "Boat", "Bracket", "Brick", "Car",
-	  "Cone", "Container", "Crane", "Cylinder", "Door", "Flag", "Hinge", "Hose", "Magnet", "Minifig",
-	  "Minifig Accessory", "Plane", "Plant", "Plate", "Propellor", "Rock", "Round", "Scala",
-		"Slope", "Space", "Support", "Technic", "Wheel", "Windscreen"
-	};
-
-
-	for (i = 0; i < NumCategories; i++)
-	{
-		PiecesLibraryCategory Cat;
-
-		Cat.Name = DefaultCategories[i];
-		Cat.Keywords = DefaultCategories[i];
-
-		m_Categories.Add(Cat);
-	}
-
 	SystemUpdateCategories(false);
 
-	m_bNeedsReload = false;
-
-	return true;
-}
-
-bool PiecesLibrary::LoadGroupConfig (const char* Filename)
-{
-	// FIXME:
-	return false;
-
-	
-	strcpy (m_GroupsFile, Filename);
-
+	m_CategoriesModified = false;
+	m_Modified = false;
 
 	return true;
 }
@@ -243,12 +187,12 @@ bool PiecesLibrary::LoadGroupConfig (const char* Filename)
 bool PiecesLibrary::ValidatePiecesFile (File& IdxFile, File& BinFile) const
 {
 	lcuint32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
-  lcuint16 count, movedcount;
+	lcuint16 count, movedcount;
 	lcuint8 version;
 	char header[32];
 
-  IdxFile.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
-  IdxFile.ReadShort (&movedcount, 1);
+	IdxFile.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
+	IdxFile.ReadShort (&movedcount, 1);
 	IdxFile.ReadLong (&binsize, 1);
 	IdxFile.ReadShort (&count, 1);
 	IdxFile.Seek (0, SEEK_SET);
@@ -291,7 +235,7 @@ bool PiecesLibrary::ValidatePiecesFile (File& IdxFile, File& BinFile) const
 bool PiecesLibrary::ValidateTexturesFile (File& IdxFile, File& BinFile) const
 {
 	lcuint32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
-  lcuint16 count;
+	lcuint16 count;
 	lcuint8 version;
 	char header[32];
 
@@ -340,57 +284,211 @@ bool PiecesLibrary::ValidateTexturesFile (File& IdxFile, File& BinFile) const
 // Remember to make 'name' uppercase.
 PieceInfo* PiecesLibrary::FindPieceInfo (const char* name) const
 {
-  PieceInfo* pInfo;
-  int i;
+	PieceInfo* pInfo;
+	int i;
 
-  for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
-    if (!strcmp (name, pInfo->m_strName))
-      return pInfo;
+	for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
+		if (!strcmp (name, pInfo->m_strName))
+			return pInfo;
 
-  for (i = 0; i < m_nMovedCount; i++)
-  {
-    if (!strcmp (&m_pMovedReference[i*18], name))
-    {
-      char* tmp = &m_pMovedReference[i*18+9];
+	for (i = 0; i < m_nMovedCount; i++)
+	{
+		if (!strcmp (&m_pMovedReference[i*18], name))
+		{
+			char* tmp = &m_pMovedReference[i*18+9];
 
-      for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
-        if (!strcmp (tmp, pInfo->m_strName))
-          return pInfo;
+			for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
+				if (!strcmp (tmp, pInfo->m_strName))
+					return pInfo;
 
-      break; // something went wrong.
-    }
-  }
+			break; // something went wrong.
+		}
+	}
 
-  return NULL;
+	return NULL;
 }
 
-PieceInfo* PiecesLibrary::GetPieceInfo (int index) const
+PieceInfo* PiecesLibrary::GetPieceInfo(int index) const
 {
-  return &m_pPieceIdx[index];
+	return &m_pPieceIdx[index];
 }
 
-int PiecesLibrary::GetPieceIndex (PieceInfo *pInfo) const
+int PiecesLibrary::GetPieceIndex(PieceInfo *pInfo) const
 {
-  return (((char*)pInfo - (char*)m_pPieceIdx) / sizeof (PieceInfo));
+	return (((char*)pInfo - (char*)m_pPieceIdx) / sizeof (PieceInfo));
 }
 
-Texture* PiecesLibrary::FindTexture (const char* name) const
+Texture* PiecesLibrary::FindTexture(const char* name) const
 {
-  for (int i = 0; i < m_nTextureCount; i++)
-    if (!strcmp (name, m_pTextures[i].m_strName))
-      return &m_pTextures[i];
+	for (int i = 0; i < m_nTextureCount; i++)
+		if (!strcmp (name, m_pTextures[i].m_strName))
+			return &m_pTextures[i];
 
-  return NULL;
+		return NULL;
 }
 
 Texture* PiecesLibrary::GetTexture (int index) const
 {
-  return &m_pTextures[index];
+	return &m_pTextures[index];
+}
+
+// =============================================================================
+// Category functions.
+
+void PiecesLibrary::ResetCategories()
+{
+	const int NumCategories = 34;
+	const char* DefaultCategories[] =
+	{
+	  "Animal", "Antenna", "Arm", "Bar", "Baseplate", "Belville", "Boat", "Bracket", "Brick", "Car",
+	  "Cone", "Container", "Crane", "Cylinder", "Door", "Flag", "Hinge", "Hose", "Magnet", "Minifig",
+	  "Minifig Accessory", "Plane", "Plant", "Plate", "Propellor", "Rock", "Round", "Scala",
+	  "Slope", "Space", "Support", "Technic", "Wheel", "Windscreen"
+	};
+
+	m_Categories.RemoveAll();
+	for (int i = 0; i < NumCategories; i++)
+	{
+		PiecesLibraryCategory Cat;
+
+		Cat.Name = DefaultCategories[i];
+		Cat.Keywords = DefaultCategories[i];
+
+		m_Categories.Add(Cat);
+	}
+
+	strcpy(m_CategoriesFile, "");
+	Sys_ProfileSaveString("Settings", "Categories", m_CategoriesFile);
+	m_CategoriesModified = false;
+}
+
+bool PiecesLibrary::LoadCategories(const char* FileName)
+{
+	char Path[LC_MAXPATH];
+
+	if (FileName)
+	{
+		strcpy(Path, FileName);
+	}
+	else
+	{
+		LC_FILEOPENDLG_OPTS opts;
+
+		opts.type = LC_FILEOPENDLG_LCF;
+		strcpy(opts.path, m_CategoriesFile);
+
+		if (!SystemDoDialog(LC_DLG_FILE_OPEN, &opts)) 
+			return false;
+
+		strcpy(Path, (char*)opts.filenames);
+
+		free(opts.filenames);
+	}
+
+	// Load the file.
+	FileDisk File;
+
+	if (!File.Open(Path, "rb"))
+		return false;
+
+	lcuint32 i;
+
+	File.ReadInt(&i);
+	if (i != LC_FILE_ID)
+		return false;
+
+	File.ReadInt(&i);
+	if (i != LC_CATEGORY_FILE_ID)
+		return false;
+
+	File.ReadInt(&i);
+	if (i != LC_CATEGORY_FILE_VERSION)
+		return false;
+
+	File.ReadInt(&i);
+	while (i--)
+	{
+		PiecesLibraryCategory Cat;
+
+		File.ReadString(Cat.Name);
+		File.ReadString(Cat.Keywords);
+
+		m_Categories.Add(Cat);
+	}
+
+	strcpy(m_CategoriesFile, Path);
+	Sys_ProfileSaveString("Settings", "Categories", m_CategoriesFile);
+	m_CategoriesModified = false;
+
+	return true;
+}
+
+// Returns true if it's ok to continue.
+bool PiecesLibrary::SaveCategories()
+{
+	if (m_CategoriesModified)
+	{
+		switch (SystemDoMessageBox("Save category changes ?", LC_MB_YESNOCANCEL|LC_MB_ICONQUESTION))
+		{
+			case LC_CANCEL:
+				return false;
+
+			case LC_YES:
+				if (!DoSaveCategories(false))
+					return false;
+				break;
+
+			case LC_NO:
+				return true;
+				break;
+		}
+	}
+
+	return true;
+}
+
+bool PiecesLibrary::DoSaveCategories(bool AskName)
+{
+	// Get the file name.
+	if (AskName || (strlen(m_CategoriesFile) == 0))
+	{
+		LC_FILESAVEDLG_OPTS opts;
+
+		opts.type = LC_FILESAVEDLG_LCF;
+		strcpy(opts.path, m_CategoriesFile);
+
+		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &opts)) 
+			return false; 
+
+		strcpy(m_CategoriesFile, opts.path);
+	}
+
+	// Save the file.
+	FileDisk File;
+
+	if (!File.Open(m_CategoriesFile, "wb"))
+		return false;
+
+	File.WriteInt(LC_FILE_ID);
+	File.WriteInt(LC_CATEGORY_FILE_ID);
+	File.WriteInt(LC_CATEGORY_FILE_VERSION);
+
+	File.WriteInt(m_Categories.GetSize());
+	for (int i = 0; i < m_Categories.GetSize(); i++)
+	{
+		File.WriteString(m_Categories[i].Name);
+		File.WriteString(m_Categories[i].Keywords);
+	}
+
+	Sys_ProfileSaveString("Settings", "Categories", m_CategoriesFile);
+	m_CategoriesModified = false;
+
+	return true;
 }
 
 // =============================================================================
 
-void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
 {
 	bool m_bSubParts = false;
 
@@ -400,7 +498,9 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& S
 	String Keywords = m_Categories[CategoryIndex].Keywords;
 	Keywords.MakeLower();
 
-	bool SearchResults = (m_Categories[CategoryIndex].Name == "Search Results");
+	// Don't group entries in the search results category.
+	if (m_Categories[CategoryIndex].Name == "Search Results")
+		GroupPieces = false;
 
 	for (int i = 0; i < m_nPieceCount; i++)
 	{
@@ -441,24 +541,27 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& S
 		if (!Match)
 			continue;
 
+		if (!GroupPieces)
+		{
+			SinglePieces.Add(Info);
+			continue;
+		}
+
 		// Check if it's a patterned piece.
 		const char* Name = Info->m_strName;
 
-		if (!SearchResults)
+		while (*Name)
 		{
-			while (*Name)
-			{
-				if (!*Name || *Name < '0' || *Name > '9')
-					break;
+			if (!*Name || *Name < '0' || *Name > '9')
+				break;
 
-				if (*Name == 'P')
-					break;
+			if (*Name == 'P')
+				break;
 
-				Name++;
-			}
+			Name++;
 		}
 
-		if (*Name == 'P' && !SearchResults)
+		if (*Name == 'P')
 		{
 			PieceInfo* Parent;
 
@@ -522,6 +625,8 @@ void PiecesLibrary::SetCategory(int Index, const String& Name, const String& Key
 	m_Categories[Index].Keywords = Keywords;
 
 	SystemUpdateCategories(true);
+
+	m_CategoriesModified = true;
 }
 
 void PiecesLibrary::AddCategory(const String& Name, const String& Keywords)
@@ -534,94 +639,22 @@ void PiecesLibrary::AddCategory(const String& Name, const String& Keywords)
 	m_Categories.Add(Cat);
 
 	SystemUpdateCategories(true);
+
+	m_CategoriesModified = true;
 }
 
 void PiecesLibrary::RemoveCategory(int Index)
 {
 	m_Categories.RemoveIndex(Index);
-}
 
-unsigned long PiecesLibrary::GetDefaultPieceGroup (const char* name)
-{
-	char tmp[9];
-	strncpy(tmp, name, 9);
-//	tmp[8] = 0;
-
-	if (strstr(tmp,"Baseplate")	|| strstr(tmp,"Plate")	|| 
-		strstr(tmp,"Platform")) 
-		return 0x001;
-
-	if (strstr(tmp,"Brick")	|| strstr(tmp,"Cylin") ||
-		strstr(tmp,"Cone"))
-		return 0x002;
-	
-	if (strstr(tmp,"Tile"))
-		return 0x004;
-
-	if (strstr(tmp,"Slope"))
-		return 0x008;
-
-	if (strstr(tmp,"Technic")	|| strstr(tmp,"Crane")	||
-		strstr(tmp,"Wheel")		|| strstr(tmp,"Tyre")	||
-		strstr(tmp,"Electric"))
-		return 0x010;
-
-	// space & plane
-	if (strstr(tmp,"Space")		|| strstr(tmp,"Plane")	||
-		strstr(tmp,"Windscr")	|| strstr(tmp,"~2421")	||
-		strstr(tmp,"Wing")		|| strstr(tmp,"Wedge")	||
-		strstr(tmp,"Propellor")	|| strstr(tmp,"Rotor")	||
-		strstr(tmp,"Rack")		|| strstr(tmp,"Tail") ||
-    strstr(tmp,"Cockpit"))
-		return 0x020;
-
-	if (strstr(tmp,"Train"))
-		return 0x040;
-
-	// other parts
-	if (strstr(tmp,"Arch")		|| strstr(tmp,"Panel")	||
-		strstr(tmp,"Car")		|| strstr(tmp,"Window")	||
-		strstr(tmp,"Freestyle")	|| strstr(tmp,"Support")||
-		strstr(tmp,"Fence")		|| strstr(tmp,"Gate")	|| 
-		strstr(tmp,"Garage")	|| strstr(tmp,"Stairs")	||
-		strstr(tmp,"Bracket")	|| strstr(tmp,"Hinge")	||
-		strstr(tmp,"Homemaker")	|| strstr(tmp,"Rock")	|| 
-		strstr(tmp,"Cupboard")	|| strstr(tmp,"Storage")||
-		strstr(tmp,"Scala")		|| strstr(tmp,"Boat")	||
-		strstr(tmp,"Trailer")	|| strstr(tmp,"Box")	|| 
-		strstr(tmp,"Turntab")	|| strstr(tmp,"Winch")	|| 
-		strstr(tmp,"Door")		|| strstr(tmp,"Magnet") ||
-    strstr(tmp,"Staircase") || strstr(tmp,"Glass") ||
-    strstr(tmp,"Container"))
-		return 0x080;
-
-	// accessories
-	if (strstr(tmp,"Minifig")	|| strstr(tmp,"Antenna")||
-		strstr(tmp,"Ladder")	|| strstr(tmp,"Jack")	||
-		strstr(tmp,"Exhaust")	|| strstr(tmp,"Lever")	||
-		strstr(tmp,"Roadsign")	|| strstr(tmp,"Town")	|| 
-		strstr(tmp,"Leaves")	|| strstr(tmp,"Horse")	||
-		strstr(tmp,"Tree")		|| strstr(tmp,"Flower")	||
-		strstr(tmp,"Plant")		|| strstr(tmp,"Pannier")||
-		strstr(tmp,"Conveyor")	|| strstr(tmp,"Tractor")|| 
-		strstr(tmp,"Grab")		|| strstr(tmp,"Roller")	|| 
-		strstr(tmp,"Stretch")	|| strstr(tmp,"Tap ")	|| 
-		strstr(tmp,"Forklift")	|| strstr(tmp,"Flag")	|| 
-		strstr(tmp,"Belville")	|| strstr(tmp,"Light &")|| 
-		strstr(tmp,"Hose")		|| strstr(tmp,"Arm P")	|| 
-		strstr(tmp,"Brush")		|| strstr(tmp,"Castle")	||
-		strstr(tmp,"Tipper")	|| strstr(tmp,"Bar") ||
-		strstr(tmp,"Animal"))
-		return 0x100;
-
-	return 1;
+	m_CategoriesModified = true;
 }
 
 // =============================================================================
 // Pieces handling stuff
 
 // Remove pieces from the library
-bool PiecesLibrary::DeletePieces (char** names, int numpieces)
+bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
 {
 	FileDisk newbin, newidx, oldbin, oldidx;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
@@ -676,11 +709,11 @@ bool PiecesLibrary::DeletePieces (char** names, int numpieces)
 		name[8] = 0;
 		oldidx.Read(&name, 8);
 
-		for (i = 0; i < numpieces; i++)
-			if (strcmp(name, names[i]) == 0)
+		for (i = 0; i < Pieces.GetSize(); i++)
+			if (strcmp(name, Pieces[i]->m_strName) == 0)
 				break;
 
-		if (i != numpieces)
+		if (i != Pieces.GetSize())
 		{
 			oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
 			deleted++;
@@ -727,7 +760,7 @@ bool PiecesLibrary::DeletePieces (char** names, int numpieces)
 	newidx.Close();
 	newbin.Close();
 
-	m_bNeedsReload = true;
+	m_Modified = true;
 
 	return true;
 }
@@ -974,7 +1007,7 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 	newbin.Close();
 	up.Close();
 
-	m_bNeedsReload = true;
+	m_Modified = true;
 
 	return true;
 }
@@ -1092,7 +1125,7 @@ bool PiecesLibrary::DeleteTextures (char** Names, int NumTextures)
 	count -= deleted;
 	newidx.WriteShort (&count, 1);
 
-	m_bNeedsReload = true;
+	m_Modified = true;
 
 	return true;
 }
@@ -1275,7 +1308,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 	count -= deleted;
 	newidx.WriteShort (&count, 1);
 
-	m_bNeedsReload = true;
+	m_Modified = true;
 
 	return true;
 }
@@ -2538,7 +2571,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 
 	newidx.WriteByte(&bt, 1);
 
-	i = PiecesLibrary::GetDefaultPieceGroup(piece->description);
+	i = 0;//PiecesLibrary::GetDefaultPieceGroup(piece->description);
 	newidx.WriteLong(&i, 1);
 	newidx.WriteLong(&binoff, 1);
 

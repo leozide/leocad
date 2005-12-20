@@ -1228,7 +1228,7 @@ void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
   FileMem* CurFile = NULL;
 	char Buf[1024];
 
-	while (MPD.ReadString(Buf, 1024))
+	while (MPD.ReadLine(Buf, 1024))
   {
     String Line(Buf);
 
@@ -1279,7 +1279,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
   lcuint32 Offset = file->GetPosition();
   file->Seek(0, SEEK_SET);
 
-  while (file->ReadString(buf, 1024))
+  while (file->ReadLine(buf, 1024))
 	{
 		strupr(buf);
 		if (strstr(buf, "STEP"))
@@ -4727,6 +4727,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			FileMem file;
 			FileSave(&file, true);
+
+			// TODO: save piece IDs and reload.
 
 			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
 			{

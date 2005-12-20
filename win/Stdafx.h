@@ -51,7 +51,7 @@
 #define PIECEBAR_SUBPARTS     0x02 // Show subparts
 #define PIECEBAR_GROUP        0x04 // Group pieces
 //#define PIECEBAR_ZOOMPREVIEW  0x08 // Zoom piece preview
-#define PIECEBAR_COMBO        0x10 // Show combobox
+//#define PIECEBAR_COMBO        0x10 // Show combobox
 #define PIECEBAR_PARTNUMBERS  0x20 // Show part numbers
 
 //{{AFX_INSERT_LOCATION}}

@@ -1106,7 +1106,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 						PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 						int i;
 
-						Lib->GetCategoryEntries(CategoryIndex, SinglePieces, GroupedPieces);
+						Lib->GetCategoryEntries(CategoryIndex, true, SinglePieces, GroupedPieces);
 
 						for (i = 0; i < SinglePieces.GetSize(); i++)
 						{

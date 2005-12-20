@@ -9,7 +9,8 @@ class File;
 class Texture;
 class PieceInfo;
 
-#define LC_PIECESLIB_MAXGROUPS    32
+#define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
+#define LC_CATEGORY_FILE_VERSION  0x0100
 
 typedef struct
 {
@@ -20,28 +21,26 @@ typedef struct
 class PiecesLibrary
 {
 public:
-  PiecesLibrary ();
-  ~PiecesLibrary ();
+	PiecesLibrary();
+	~PiecesLibrary();
 
-  const char* GetLibraryPath() const
-    { return m_LibraryPath; }
-  int GetPieceCount () const
-    { return m_nPieceCount; }
-  int GetTextureCount () const
-    { return m_nTextureCount; }
-  int GetGroupCount () const
-    { return m_nGroupCount; }
-  String& GetGroup (int i)
-    { return m_strGroups[i]; }
-	bool NeedsReload () const
-		{ return m_bNeedsReload; }
+	const char* GetLibraryPath() const
+		{ return m_LibraryPath; }
+	int GetPieceCount () const
+		{ return m_nPieceCount; }
+	int GetTextureCount () const
+		{ return m_nTextureCount; }
 
 	// Categories.
-	void GetCategoryEntries(int CategoryIndex, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces);
 	void SetCategory(int Index, const String& Name, const String& Keywords);
 	void AddCategory(const String& Name, const String& Keywords);
 	void RemoveCategory(int Index);
+	void ResetCategories();
+	bool SaveCategories();
+	bool DoSaveCategories(bool AskName);
+	bool LoadCategories(const char* FileName);
 
 	const char* GetCategoryName(int Index) const
 		{ return m_Categories[Index].Name; }
@@ -61,32 +60,28 @@ public:
 		return -1;
 	}
 
-	void CheckReload ();
-  bool Load (const char* libpath);
-  void Unload ();
-	bool LoadGroupConfig (const char* Filename);
+	bool Load(const char* libpath);
+	void Unload();
 
 	// Search for pieces.
-  PieceInfo* FindPieceInfo (const char* name) const;
-  PieceInfo* GetPieceInfo (int index) const;
-  int GetPieceIndex (PieceInfo *pInfo) const;
-  Texture* FindTexture (const char* name) const;
-  Texture* GetTexture (int index) const;
+	PieceInfo* FindPieceInfo(const char* name) const;
+	PieceInfo* GetPieceInfo(int index) const;
+	int GetPieceIndex(PieceInfo *pInfo) const;
+	Texture* FindTexture(const char* name) const;
+	Texture* GetTexture(int index) const;
 
 	// File operations.
-  bool DeletePieces (char** names, int numpieces);
-  bool LoadUpdate (const char* update);
-	bool DeleteTextures (char** Names, int NumTextures);
-	bool ImportTexture (const char* Name);
-	bool ImportLDrawPiece (const char* Filename);
-
-	static unsigned long GetDefaultPieceGroup (const char* name);
+	bool DeletePieces(PtrArray<PieceInfo>& Pieces);
+	bool LoadUpdate(const char* update);
+	bool DeleteTextures(char** Names, int NumTextures);
+	bool ImportTexture(const char* Name);
+	bool ImportLDrawPiece(const char* Filename);
 
 protected:
-  char m_LibraryPath[LC_MAXPATH];	// path to the library files
+	char m_LibraryPath[LC_MAXPATH];	// path to the library files
 
 	int m_nMovedCount;       // number of moved pieces
-  char* m_pMovedReference; // moved pieces list
+	char* m_pMovedReference; // moved pieces list
 	int m_nPieceCount;       // number of pieces
 	PieceInfo* m_pPieceIdx;	 // pieces array
 	int m_nTextureCount;     // number of textures
@@ -95,12 +90,9 @@ protected:
 	// Categories.
 	ObjArray<PiecesLibraryCategory> m_Categories;
 
-	// Groups stuff
-	int m_nGroupCount;
-	String m_strGroups[LC_PIECESLIB_MAXGROUPS];
-	char m_GroupsFile[LC_MAXPATH];
-
-	bool m_bNeedsReload;  // if the library files were changed and they need to be reloaded
+	bool m_Modified;
+	bool m_CategoriesModified;
+	char m_CategoriesFile[LC_MAXPATH];
 
 	bool ValidatePiecesFile (File& IdxFile, File& BinFile) const;
 	bool ValidateTexturesFile (File& IdxFile, File& BinFile) const;

@@ -287,6 +287,7 @@ typedef enum {
 	LC_DLG_FILE_SAVE_PROJECT,
 	LC_DLG_FILE_MERGE_PROJECT,
 	LC_DLG_FILE_OPEN,
+	LC_DLG_FILE_SAVE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
 	LC_DLG_POVRAY,
@@ -308,7 +309,7 @@ typedef enum {
 typedef enum
 {
 	LC_FILEOPENDLG_DAT,
-	LC_FILEOPENDLG_LGF,
+	LC_FILEOPENDLG_LCF,
 	LC_FILEOPENDLG_LUP
 } LC_FILEOPENDLG_TYPES;
 
@@ -319,6 +320,17 @@ typedef struct
 	int numfiles;
 	char** filenames;
 } LC_FILEOPENDLG_OPTS;
+
+typedef enum
+{
+	LC_FILESAVEDLG_LCF,
+} LC_FILESAVEDLG_TYPES;
+
+typedef struct
+{
+	int type;
+	char path[LC_MAXPATH];
+} LC_FILESAVEDLG_OPTS;
 
 typedef struct
 {

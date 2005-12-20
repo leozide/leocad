@@ -206,7 +206,7 @@ bool LoadKeyboardShortcuts(const char* FileName)
 	}
 
 	char Line[1024];
-	while (f.ReadString(Line, 1024))
+	while (f.ReadLine(Line, 1024))
 	{
 		char* ptr = strchr(Line, '=');
 

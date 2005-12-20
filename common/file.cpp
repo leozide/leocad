@@ -9,6 +9,7 @@
 #include "file.h"
 #include "defines.h"
 #include "config.h"
+#include "str.h"
 
 // =============================================================================
 // File construction/destruction
@@ -243,6 +244,20 @@ unsigned long File::WriteDouble (const void* pBuf, unsigned long nCount)
 #endif
 }
 
+void File::ReadString(String& Value)
+{
+	lcuint32 l;
+	ReadInt(&l);
+	Read(Value.GetBuffer(l+1), l);
+	((char*)Value)[l] = 0;
+}
+
+void File::WriteString(const String& Value)
+{
+	WriteInt(Value.GetLength());
+	Write((const char*)Value, Value.GetLength());
+}
+
 // =============================================================================
 
 FileMem::FileMem()
@@ -281,7 +296,7 @@ FileDisk::~FileDisk()
 /////////////////////////////////////////////////////////////////////////////
 // File operations
 
-char* FileMem::ReadString(char* pBuf, unsigned long nMax)
+char* FileMem::ReadLine(char* pBuf, unsigned long nMax)
 {
   int nRead = 0;
   unsigned char ch;
@@ -308,7 +323,7 @@ char* FileMem::ReadString(char* pBuf, unsigned long nMax)
   return pBuf;
 }
 
-char* FileDisk::ReadString(char* pBuf, unsigned long nMax)
+char* FileDisk::ReadLine(char* pBuf, unsigned long nMax)
 {
   return fgets(pBuf, nMax, m_hFile);
 }

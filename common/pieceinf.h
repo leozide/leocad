@@ -49,6 +49,24 @@ class PieceInfo
   PieceInfo ();
   ~PieceInfo ();
 
+	bool IsPatterned() const
+	{
+		const char* Name = m_strName;
+
+		while (*Name)
+		{
+			if (*Name < '0' || *Name > '9')
+				break;
+
+			Name++;
+		}
+
+		if (*Name == 'P')
+			return true;
+
+		return false;
+	}
+
 	// Operations
 	void ZoomExtents(float Fov, float Aspect);
 	void RenderOnce(int nColor);

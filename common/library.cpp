@@ -490,15 +490,53 @@ bool PiecesLibrary::DoSaveCategories(bool AskName)
 
 // =============================================================================
 
-void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+// Check if the piece belongs to a category.
+bool PiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const
+{
+	String PieceName = Info->m_strDescription;
+	PieceName.MakeLower();
+
+	String Keywords = CategoryKeywords;
+	Keywords.MakeLower();
+
+	const char* p = Keywords;
+
+	while (*p)
+	{
+		const char* k = p;
+
+		while (*k && (*k != ',') && (*k != ';'))
+			k++;
+
+		String Search = Keywords.Mid(p - (const char*)Keywords, k - p);
+
+		if (PieceName.Find(Search) != -1)
+			return true;
+
+		if (*k)
+			p = k + 1;
+		else
+			break;
+	}
+
+	return false;
+}
+
+int PiecesLibrary::GetFirstCategory(PieceInfo* Info) const
+{
+	for (int i = 0; i < m_Categories.GetSize(); i++)
+		if (PieceInCategory(Info, m_Categories[i].Keywords))
+			return i;
+
+	return -1;
+}
+
+void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces) const
 {
 	bool m_bSubParts = false;
 
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
-
-	String Keywords = m_Categories[CategoryIndex].Keywords;
-	Keywords.MakeLower();
 
 	// Don't group entries in the search results category.
 	if (m_Categories[CategoryIndex].Name == "Search Results")
@@ -512,35 +550,7 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrA
 		if ((Info->m_strDescription[0] == '~') && !m_bSubParts)
 			continue;
 
-		// Check if the piece belongs to this category.
-		String PieceName = Info->m_strDescription;
-		PieceName.MakeLower();
-
-		const char* p = Keywords;
-		bool Match = false;
-
-		while (*p)
-		{
-			const char* k = p;
-
-			while (*k && (*k != ',') && (*k != ';'))
-				k++;
-
-			String Search = Keywords.Mid(p - (const char*)Keywords, k - p);
-
-			if (PieceName.Find(Search) != -1)
-			{
-				Match = true;
-				break;
-			}
-
-			if (*k)
-				p = k + 1;
-			else
-				break;
-		}
-
-		if (!Match)
+		if (!PieceInCategory(Info, m_Categories[CategoryIndex].Keywords))
 			continue;
 
 		if (!GroupPieces)
@@ -550,27 +560,14 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrA
 		}
 
 		// Check if it's a patterned piece.
-		const char* Name = Info->m_strName;
-
-		while (*Name)
-		{
-			if (!*Name || *Name < '0' || *Name > '9')
-				break;
-
-			if (*Name == 'P')
-				break;
-
-			Name++;
-		}
-
-		if (*Name == 'P')
+		if (Info->IsPatterned())
 		{
 			PieceInfo* Parent;
 
 			// Find the parent of this patterned piece.
 			char ParentName[9];
 			strcpy(ParentName, Info->m_strName);
-			ParentName[Name - Info->m_strName] = '\0';
+			*strchr(ParentName, 'P') = '\0';
 
 			Parent = FindPieceInfo(ParentName);
 
@@ -604,7 +601,7 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrA
 	}
 }
 
-void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces)
+void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const
 {
 	char Name[9];
 	strcpy(Name, Parent->m_strName);

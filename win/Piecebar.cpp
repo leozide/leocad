@@ -688,7 +688,7 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CControlBar::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_HASBUTTONS|TVS_DISABLEDRAGDROP|TVS_HASLINES|TVS_LINESATROOT, 
+	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_DISABLEDRAGDROP|TVS_HASLINES|TVS_LINESATROOT, 
 	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
 
 	m_wndPiecesList.Create(LVS_SINGLESEL|LVS_SHOWSELALWAYS|LVS_AUTOARRANGE|
@@ -965,6 +965,81 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			pMenu->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 		}
+	}
+}
+
+void CPiecesBar::SelectPiece(const char* Category, PieceInfo* Info)
+{
+	HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+	const char* PieceName = Info->m_strDescription;
+
+	// Find the category and make sure it's expanded.
+	while (Item != NULL)
+	{
+		CString Name = m_PiecesTree.GetItemText(Item);
+
+		if (Name == Category)
+		{
+			m_PiecesTree.Expand(Item, TVE_EXPAND);
+			break;
+		}
+
+		Item = m_PiecesTree.GetNextSiblingItem(Item);
+	}
+
+	if (Item == NULL)
+		return;
+
+	// Expand the piece group if it's patterned.
+	if (Info->IsPatterned())
+	{
+		PieceInfo* Parent;
+
+		// Find the parent of this patterned piece and expand it.
+		char ParentName[9];
+		strcpy(ParentName, Info->m_strName);
+		*strchr(ParentName, 'P') = '\0';
+
+		Parent = project->GetPiecesLibrary()->FindPieceInfo(ParentName);
+
+		if (Parent)
+		{
+			Item = m_PiecesTree.GetChildItem(Item);
+
+			while (Item != NULL)
+			{
+				CString Name = m_PiecesTree.GetItemText(Item);
+
+				if (Name == Parent->m_strDescription)
+				{
+					m_PiecesTree.Expand(Item, TVE_EXPAND);
+
+					// If both descriptions begin with the same text, only show the difference.
+					if (!strncmp(Info->m_strDescription, Parent->m_strDescription, strlen(Parent->m_strDescription)))
+						PieceName = Info->m_strDescription + strlen(Parent->m_strDescription) + 1;
+
+					break;
+				}
+
+				Item = m_PiecesTree.GetNextSiblingItem(Item);
+			}
+		}
+	}
+
+	// Find the piece.
+	Item = m_PiecesTree.GetChildItem(Item);
+
+	while (Item != NULL)
+	{
+		CString Name = m_PiecesTree.GetItemText(Item);
+
+		if (Name == PieceName)
+		{
+			m_PiecesTree.SelectItem(Item);
+			return;
+		}
+
+		Item = m_PiecesTree.GetNextSiblingItem(Item);
 	}
 }
 

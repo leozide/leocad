@@ -120,6 +120,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		case ID_LIBDLG_FILE_OPEN:
 		{
 			project->GetPiecesLibrary()->LoadCategories(NULL);
+			UpdateTree();
 			return TRUE;
 		}
 
@@ -158,7 +159,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 				free(opts.filenames);
 
-				UpdateList();
+				UpdateTree();
 			}
 
 			return TRUE;

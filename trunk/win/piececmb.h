@@ -7,6 +7,8 @@
 // PieceCmb.h : header file
 //
 
+class PieceInfo;
+
 /////////////////////////////////////////////////////////////////////////////
 // CPiecesCombo window
 
@@ -36,6 +38,8 @@ public:
 	// Generated message map functions
 protected:
 	BOOL m_bAutoComplete;
+	void SelectPiece(PieceInfo* Info);
+
 	//{{AFX_MSG(CPiecesCombo)
 	afx_msg void OnEditupdate();
 	afx_msg void OnSelchange();

@@ -98,6 +98,7 @@ public:
 
 	void UpdatePiecesTree(bool SearchOnly);
 	void UpdatePiecesTree(const char* OldCategory, const char* NewCategory);
+	void SelectPiece(const char* Category, PieceInfo* Info);
 
 // Generated message map functions
 protected:

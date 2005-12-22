@@ -32,8 +32,10 @@ public:
 		{ return m_nTextureCount; }
 
 	// Categories.
-	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
-	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces);
+	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
+	int GetFirstCategory(PieceInfo* Info) const;
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces) const;
+	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
 	void SetCategory(int Index, const String& Name, const String& Keywords);
 	void AddCategory(const String& Name, const String& Keywords);
 	void RemoveCategory(int Index);

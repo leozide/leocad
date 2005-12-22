@@ -405,6 +405,8 @@ bool PiecesLibrary::LoadCategories(const char* FileName)
 	if (i != LC_CATEGORY_FILE_VERSION)
 		return false;
 
+	m_Categories.RemoveAll();
+
 	File.ReadInt(&i);
 	while (i--)
 	{

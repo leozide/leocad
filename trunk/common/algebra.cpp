@@ -292,3 +292,119 @@ bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Poin
 	return true;
 }
 
+bool LineTriangleMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection)
+{
+	// Calculate the polygon plane.
+	Vector4 Plane;
+	Plane = Cross3(p1 - p2, p3 - p2);
+	Plane[3] = -Dot3(Plane, p1);
+
+	// Check if the line is parallel to the plane.
+	Vector3 Dir = End - Start;
+
+	float t1 = Dot3(Plane, Start) + Plane[3];
+	float t2 = Dot3(Plane, Dir);
+
+	if (t2 == 0)
+		return false;
+
+	float t = -(t1 / t2);
+
+	if (t < 0)
+		return false;
+
+	// Intersection of the plane and line segment.
+	Intersection = Start - (t1 / t2) * Dir;
+
+	float Dist = (Start - Intersection).Length();
+
+	if (Dist > MinDist)
+		return false;
+
+	// Check if we're inside the triangle.
+	Vector3 pa1, pa2, pa3;
+	pa1 = (p1 - Intersection).Normalize();
+	pa2 = (p2 - Intersection).Normalize();
+	pa3 = (p3 - Intersection).Normalize();
+
+	float a1, a2, a3;
+	a1 = Dot3(pa1, pa2);
+	a2 = Dot3(pa2, pa3);
+	a3 = Dot3(pa3, pa1);
+
+	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+
+	if (fabs(total - 360) <= 0.001f)
+	{
+		MinDist = Dist;
+		return true;
+	}
+
+	return false;
+}
+
+bool LineQuadMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& p4, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection)
+{
+	// Calculate the polygon plane.
+	Vector4 Plane;
+	Plane = Cross3(p1 - p2, p3 - p2);
+	Plane[3] = -Dot3(Plane, p1);
+
+	// Check if the line is parallel to the plane.
+	Vector3 Dir = End - Start;
+
+	float t1 = Dot3(Plane, Start) + Plane[3];
+	float t2 = Dot3(Plane, Dir);
+
+	if (t2 == 0)
+		return false;
+
+	float t = -(t1 / t2);
+
+	if (t < 0)
+		return false;
+
+	// Intersection of the plane and line segment.
+	Intersection = Start - (t1 / t2) * Dir;
+
+	float Dist = (Start - Intersection).Length();
+
+	if (Dist > MinDist)
+		return false;
+
+	// Check if we're inside the triangle.
+	Vector3 pa1, pa2, pa3;
+	pa1 = (p1 - Intersection).Normalize();
+	pa2 = (p2 - Intersection).Normalize();
+	pa3 = (p3 - Intersection).Normalize();
+
+	float a1, a2, a3;
+	a1 = Dot3(pa1, pa2);
+	a2 = Dot3(pa2, pa3);
+	a3 = Dot3(pa3, pa1);
+
+	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+
+	if (fabs(total - 360) <= 0.001f)
+	{
+		MinDist = Dist;
+		return true;
+	}
+
+	// Check if we're inside the second triangle.
+	pa2 = (p4 - Intersection).Normalize();
+
+	a1 = Dot3(pa1, pa2);
+	a2 = Dot3(pa2, pa3);
+	a3 = Dot3(pa3, pa1);
+
+	total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+			
+	if (fabs(total - 360) <= 0.001f)
+	{
+		MinDist = Dist;
+		return true;
+	}
+
+	return false;
+}

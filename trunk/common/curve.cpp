@@ -147,7 +147,7 @@ CurvePoint::~CurvePoint ()
 
 void CurvePoint::MinIntersectDist (LC_CLICKLINE* pLine)
 {
-  double dist = BoundingBoxIntersectDist (pLine);
+  float dist = (float)BoundingBoxIntersectDist (pLine);
 
   if (dist < pLine->mindist)
   {

@@ -56,11 +56,10 @@ typedef struct
 // the callback function.
 typedef struct LC_CLICKLINE
 {
-  double a1, b1, c1;
-  double a2, b2, c2;
-  double mindist;
+  float a1, b1, c1;
+  float a2, b2, c2;
+  float mindist;
   Object *pClosest;
-  //  void *pParam;
 
   double PointDistance (float *point);
 

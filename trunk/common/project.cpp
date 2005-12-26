@@ -2761,13 +2761,13 @@ void Project::RenderOverlays(int Viewport)
 					glVertex3f(Pt[0], Pt[1], Pt[2]);
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 
-					Rot.FromAxisAngle(Normal, LC_PI * 0.15f);
+					Rot.CreateFromAxisAngle(Normal, LC_PI * 0.15f);
 					Arrow = Tangent * Rot * OverlayRotateArrowCapSize;
 
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
 
-					Rot.FromAxisAngle(Normal, -LC_PI * 0.15f);
+					Rot.CreateFromAxisAngle(Normal, -LC_PI * 0.15f);
 					Arrow = Tangent * Rot * OverlayRotateArrowCapSize;
 
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
@@ -6810,13 +6810,13 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine)
 	gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &px, &py, &pz);
 	gluUnProject(x, y, 1, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
 
-	pLine->a1 = px;
-	pLine->b1 = py;
-	pLine->c1 = pz;
-	pLine->a2 = rx-px;
-	pLine->b2 = ry-py;
-	pLine->c2 = rz-pz;
-	pLine->mindist = DBL_MAX;
+	pLine->a1 = (float)px;
+	pLine->b1 = (float)py;
+	pLine->c1 = (float)pz;
+	pLine->a2 = (float)(rx-px);
+	pLine->b2 = (float)(ry-py);
+	pLine->c2 = (float)(rz-pz);
+	pLine->mindist = FLT_MAX;
 	pLine->pClosest = NULL;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)

@@ -1165,15 +1165,7 @@ SOURCE=..\common\curve.cpp
 # Begin Source File
 
 SOURCE=..\common\debug.cpp
-
-!IF  "$(CFG)" == "LeoCAD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
-
 # SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

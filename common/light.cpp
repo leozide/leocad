@@ -47,7 +47,7 @@ LightTarget::~LightTarget ()
 
 void LightTarget::MinIntersectDist (LC_CLICKLINE* pLine)
 {
-  double dist = BoundingBoxIntersectDist (pLine);
+  float dist = (float)BoundingBoxIntersectDist (pLine);
 
   if (dist < pLine->mindist)
   {
@@ -223,12 +223,12 @@ void Light::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
 
 void Light::MinIntersectDist (LC_CLICKLINE* pLine)
 {
-  double dist;
+  float dist;
 
   if (m_nState & LC_LIGHT_HIDDEN)
     return;
 
-  dist = BoundingBoxIntersectDist (pLine);
+  dist = (float)BoundingBoxIntersectDist (pLine);
   if (dist < pLine->mindist)
   {
     pLine->mindist = dist;

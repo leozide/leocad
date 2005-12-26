@@ -43,7 +43,7 @@ CameraTarget::~CameraTarget ()
 
 void CameraTarget::MinIntersectDist (LC_CLICKLINE* pLine)
 {
-  double dist = BoundingBoxIntersectDist (pLine);
+  float dist = (float)BoundingBoxIntersectDist (pLine);
 
   if (dist < pLine->mindist)
   {
@@ -678,12 +678,12 @@ void Camera::Render(float fLineWidth)
 
 void Camera::MinIntersectDist(LC_CLICKLINE* pLine)
 {
-  double dist;
+  float dist;
 
   if (m_nState & LC_CAMERA_HIDDEN)
     return;
 
-  dist = BoundingBoxIntersectDist (pLine);
+  dist = (float)BoundingBoxIntersectDist (pLine);
   if (dist < pLine->mindist)
   {
     pLine->mindist = dist;

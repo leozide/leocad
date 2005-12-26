@@ -1,7 +1,3 @@
-//
-//	piece.h
-////////////////////////////////////////////////////
-
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
@@ -149,7 +145,6 @@ public:
 	}
 */
 protected:
-	void LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine);
 	void BuildDrawInfo();
 
 	// Atributes

@@ -116,10 +116,16 @@ public:
 
 	// Other functions.
 	inline float Length3() const
-	{ return sqrtf(Dot3(*this, *this)); }
+	{ return sqrtf(x*x + y*y + z*z); }
 
 	inline void Normalize34()
-	{ *this = *this / Length3(); }
+	{
+		float len = 1.0f / sqrtf(x*x + y*y + z*z);
+
+		x *= len;
+		y *= len;
+		z *= len;
+	}
 
 	inline void Abs34()
 	{
@@ -161,32 +167,6 @@ public:
 		: xyzw(_mm_setr_ps(_x, _y, _z, _z)) { }
 	inline explicit Vector4(const float _x, const float _y, const float _z, const float _w)
 		: xyzw(_mm_setr_ps(_x, _y, _z, _w)) { }
-
-	// Get/Set functions.
-	inline float GetX() const { return ((const float*)this)[0]; }
-	inline float GetY() const { return ((const float*)this)[1]; }
-	inline float GetZ() const { return ((const float*)this)[2]; }
-	inline float GetW() const { return ((const float*)this)[3]; }
-	inline void SetX(const float _x)
-	{
-		__m128 xxyy = _mm_shuffle_ps(_mm_load_ps1(&_x), xyzw, _MM_SHUFFLE(1, 1, 0, 0));
-		xyzw = _mm_shuffle_ps(xxyy, xyzw, _MM_SHUFFLE(3, 2, 2, 0));
-	}
-	inline void SetY(const float _y)
-	{
-		__m128 xxyy = _mm_shuffle_ps(xyzw, _mm_load_ps1(&_y), _MM_SHUFFLE(1, 1, 0, 0));
-		xyzw = _mm_shuffle_ps(xxyy, xyzw, _MM_SHUFFLE(3, 2, 2, 0));
-	}
-	inline void SetZ(const float _z)
-	{
-		__m128 zzww = _mm_shuffle_ps(_mm_load_ps1(&_z), xyzw, _MM_SHUFFLE(3, 3, 2, 2));
-		xyzw = _mm_shuffle_ps(xyzw, zzww, _MM_SHUFFLE(2, 0, 1, 0));
-	}
-	inline void SetW(const float _w)
-	{
-		__m128 zzww = _mm_shuffle_ps(xyzw, _mm_load_ps1(&_w), _MM_SHUFFLE(3, 3, 2, 2));
-		xyzw = _mm_shuffle_ps(xyzw, zzww, _MM_SHUFFLE(2, 0, 1, 0));
-	}
 
 	inline float& operator[](int i) const { return ((const float*)this)[i]; }
 
@@ -535,12 +515,12 @@ public:
 
 	inline void LoadIdentity()
 	{
-		m_Rows[0] = Vector3(1, 0, 0);
-		m_Rows[1] = Vector3(0, 1, 0);
-		m_Rows[2] = Vector3(0, 0, 1);
+		m_Rows[0] = Vector3(1.0f, 0.0f, 0.0f);
+		m_Rows[1] = Vector3(0.0f, 1.0f, 0.0f);
+		m_Rows[2] = Vector3(0.0f, 0.0f, 1.0f);
 	}
 
-	inline void FromAxisAngle(const Vector3& Axis, const float Radians)
+	inline void CreateFromAxisAngle(const Vector3& Axis, const float Radians)
 	{
 		float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
 
@@ -567,9 +547,9 @@ public:
 		zs = Normal[2] * s;
 		one_c = 1.0f - c;
 
-		m_Rows[0] = Vector3((one_c * xx) + c, (one_c * xy) - zs, (one_c * zx) + ys);
-		m_Rows[1] = Vector3((one_c * xy) + zs, (one_c * yy) + c, (one_c * yz) - xs);
-		m_Rows[2] = Vector3((one_c * zx) - ys, (one_c * yz) + xs, (one_c * zz) + c);
+		m_Rows[0] = Vector3((one_c * xx) + c, (one_c * xy) + zs, (one_c * zx) - ys);
+		m_Rows[1] = Vector3((one_c * xy) - zs, (one_c * yy) + c, (one_c * yz) + xs);
+		m_Rows[2] = Vector3((one_c * zx) + ys, (one_c * yz) - xs, (one_c * zz) + c);
 	}
 
 	friend inline Vector3 operator*(const Vector3& a, const Matrix33& b)
@@ -577,35 +557,10 @@ public:
 
 protected:
 	Vector3 m_Rows[3];
+
+	friend class Matrix44;
 };
 
-// ============================================================================
-// 4x3 Matrix class.
-/*
-class Matrix43
-{
-public:
-	inline Matrix43()
-		{ }
-	inline Matrix43(const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4& Row3)
-		{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
-
-	inline void SetTranslation(const Point3& a)
-	{ m_Rows[3] = Vector4(a[0], a[1], a[2], 0.0f); }
-
-	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
-	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
-
-	friend inline Point3 operator*(const Point3& a, const Matrix43& b)
-	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]); }
-
-	friend inline Vector4 operator*(const Vector4& a, const Matrix43& b)
-	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]*a[3]); }
-
-protected:
-	Vector4 m_Rows[4];
-};
-*/
 // ============================================================================
 // 4x4 Matrix class.
 
@@ -616,6 +571,8 @@ public:
 	{ }
 	inline Matrix44(const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4& Row3)
 	{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
+
+	inline Vector4& operator[](int i) { return m_Rows[i]; }
 
 	// Math operations.
 	friend inline Point3 operator*(const Point3& a, const Matrix44& b)
@@ -642,6 +599,15 @@ public:
 		return Matrix44(Ret0, Ret1, Ret2, Ret3);
 	}
 
+	inline Matrix44& operator=(const Matrix33& a)
+	{
+		m_Rows[0] = Vector4(a.m_Rows[0][0], a.m_Rows[0][1], a.m_Rows[0][2], 0.0f);
+		m_Rows[1] = Vector4(a.m_Rows[1][0], a.m_Rows[1][1], a.m_Rows[1][2], 0.0f);
+		m_Rows[2] = Vector4(a.m_Rows[2][0], a.m_Rows[2][1], a.m_Rows[2][2], 0.0f);
+		m_Rows[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+		return *this;
+	}
+
 	inline void Transpose3()
 	{
 		Vector4 a = m_Rows[0], b = m_Rows[1], c = m_Rows[2];
@@ -657,6 +623,13 @@ public:
 	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
 	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
 
+	void CreateFromAxisAngle(const Vector3& Axis, float Radians)
+	{
+		Matrix33 Mat;
+		Mat.CreateFromAxisAngle(Axis, Radians);
+		*this = Mat;
+	}
+
 protected:
 	Vector4 m_Rows[4];
 };
@@ -670,5 +643,7 @@ void UnprojectPoints(Point3* Points, int NumPoints, const Matrix44& ModelView, c
 
 void PolygonPlaneClip(Point3* InPoints, int NumInPoints, Point3* OutPoints, int* NumOutPoints, const Vector4& Plane);
 bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Point3& End, const Vector4& Plane);
+bool LineTriangleMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection);
+bool LineQuadMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& p4, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection);
 
 #endif

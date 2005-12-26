@@ -23,6 +23,8 @@ do \
 
 #define LC_ASSERT(expr, desc) do { } while(0)
 
+#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
+
 #endif
 
 // Profile functions

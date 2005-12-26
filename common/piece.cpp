@@ -473,89 +473,6 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
   Object::RemoveTime (start, animation, time);
 }
 
-void Piece::LineFacet(float* p1, float* p2, float* p3, float* p4, LC_CLICKLINE* pLine)
-{
-	double t, t1, t2, x, y, z, plane[4];
-	plane[0] = ((p1[1]-p2[1])*(p3[2]-p2[2])) - ((p1[2]-p2[2])*(p3[1]-p2[1]));
-	plane[1] = ((p1[2]-p2[2])*(p3[0]-p2[0])) - ((p1[0]-p2[0])*(p3[2]-p2[2])); 
-	plane[2] = ((p1[0]-p2[0])*(p3[1]-p2[1])) - ((p1[1]-p2[1])*(p3[0]-p2[0]));
-	plane[3] = -(plane[0]*p1[0]) -(plane[1]*p1[1]) -(plane[2]*p1[2]);
-	t1 = (plane[0]*pLine->a1 + plane[1]*pLine->b1 + plane[2]*pLine->c1 + plane[3]);
-	t2 = (plane[0]*pLine->a2 + plane[1]*pLine->b2 + plane[2]*pLine->c2);
-
-	if (t1 != 0 && t2 != 0)
-	{
-		t = -(t1 / t2);
-		if (t >= 0)
-		{
-			x = pLine->a1+pLine->a2*t;
-			y = pLine->b1+pLine->b2*t;
-			z = pLine->c1+pLine->c2*t;
-
-			if (fabs(plane[0]*x + plane[1]*y + plane[2]*z + plane[3]) <= 0.001)
-			{
-				double dist = sqrt((pLine->a1-x)*(pLine->a1-x)+(pLine->b1-y)*(pLine->b1-y)+(pLine->c1-z)*(pLine->c1-z));
-
-				if (dist < pLine->mindist)
-				{
-					double pa1[3], pa2[3], pa3[3], a1, a2, a3, inv;
-					pa1[0] = p1[0] - x;
-					pa1[1] = p1[1] - y;
-					pa1[2] = p1[2] - z;
-					inv = 1.0/sqrt(pa1[0]*pa1[0] + pa1[1]*pa1[1] + pa1[2]*pa1[2]);
-					pa1[0] *= inv;
-					pa1[1] *= inv;
-					pa1[2] *= inv;
-					pa2[0] = p2[0] - x;
-					pa2[1] = p2[1] - y;
-					pa2[2] = p2[2] - z;
-					inv = 1.0/sqrt(pa2[0]*pa2[0] + pa2[1]*pa2[1] + pa2[2]*pa2[2]);
-					pa2[0] *= inv;
-					pa2[1] *= inv;
-					pa2[2] *= inv;
-					pa3[0] = p3[0] - x;
-					pa3[1] = p3[1] - y;
-					pa3[2] = p3[2] - z;
-					inv = 1.0/sqrt(pa3[0]*pa3[0] + pa3[1]*pa3[1] + pa3[2]*pa3[2]);
-					pa3[0] *= inv;
-					pa3[1] *= inv;
-					pa3[2] *= inv;
-					a1 = pa1[0]*pa2[0] + pa1[1]*pa2[1] + pa1[2]*pa2[2];
-					a2 = pa2[0]*pa3[0] + pa2[1]*pa3[1] + pa2[2]*pa3[2];
-					a3 = pa3[0]*pa1[0] + pa3[1]*pa1[1] + pa3[2]*pa1[2];
-					double total = (acos(a1) + acos(a2) + acos(a3)) * RTOD;
-
-					if (fabs(total - 360) > 0.001) // Outside triangle
-					{
-						if (p4 != NULL)
-						{
-							pa2[0] = p4[0] - x;
-							pa2[1] = p4[1] - y;
-							pa2[2] = p4[2] - z;
-							inv = 1.0/sqrt(pa2[0]*pa2[0] + pa2[1]*pa2[1] + pa2[2]*pa2[2]);
-							pa2[0] *= inv;
-							pa2[1] *= inv;
-							pa2[2] *= inv;
-							a1 = pa1[0]*pa2[0] + pa1[1]*pa2[1] + pa1[2]*pa2[2];
-							a2 = pa2[0]*pa3[0] + pa2[1]*pa3[1] + pa2[2]*pa3[2];
-							a3 = pa3[0]*pa1[0] + pa3[1]*pa1[1] + pa3[2]*pa1[2];
-							total = (acos(a1) + acos(a2) + acos(a3)) * RTOD;
-							
-							if (fabs(total - 360) > 0.001)
-								return; // Outside other triangle
-						}
-						else
-							return;
-					}
-
-					pLine->mindist = dist;
-					pLine->pClosest = this;
-				}
-			}
-		}
-	}
-}
-
 void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 {
 	double dist;
@@ -564,10 +481,15 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	if (dist >= pLine->mindist)
 		return;
 
-	Matrix mat(m_fRotation, m_fPosition);
-	float* verts = (float*)malloc(sizeof(float)*3*m_pPieceInfo->m_nVertexCount);
-	memcpy(verts, m_pPieceInfo->m_fVertexArray, sizeof(float)*3*m_pPieceInfo->m_nVertexCount);
-	mat.TransformPoints(verts, m_pPieceInfo->m_nVertexCount);
+	Matrix44 WorldToLocal;
+	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldToLocal.SetTranslation(Point3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]) * WorldToLocal);
+
+	Point3 Start = Point3(pLine->a1, pLine->b1, pLine->c1) * WorldToLocal;
+	Point3 End = Point3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2) * WorldToLocal;
+	Point3 Intersection;
+
+	float* verts = m_pPieceInfo->m_fVertexArray;
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
@@ -578,13 +500,28 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		while (colors--)
 		{
 			info++;
+
 			for (i = 0; i < *info; i += 4)
-				LineFacet(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-					&verts[info[i+3]*3], &verts[info[i+4]*3], pLine);
+			{
+				if (LineQuadMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
+				                            (Point3&)verts[info[i+3]*3], (Point3&)verts[info[i+4]*3],
+				                            Start, End, pLine->mindist, Intersection))
+				{
+					pLine->pClosest = this;
+				}
+			}
+
 			info += *info + 1;
+
 			for (i = 0; i < *info; i += 3)
-				LineFacet(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-					&verts[info[i+3]*3], NULL, pLine);
+			{
+				if (LineTriangleMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
+				                                (Point3&)verts[info[i+3]*3], Start, End, pLine->mindist, Intersection))
+				{
+					pLine->pClosest = this;
+				}
+			}
+
 			info += *info + 1;
 			info += *info + 1;
 		}
@@ -598,19 +535,32 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		while (colors--)
 		{
 			info++;
+
 			for (i = 0; i < *info; i += 4)
-				LineFacet(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-					&verts[info[i+3]*3], &verts[info[i+4]*3], pLine);
+			{
+				if (LineQuadMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
+				                            (Point3&)verts[info[i+3]*3], (Point3&)verts[info[i+4]*3],
+				                            Start, End, pLine->mindist, Intersection))
+				{
+					pLine->pClosest = this;
+				}
+			}
+
 			info += *info + 1;
+
 			for (i = 0; i < *info; i += 3)
-				LineFacet(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-					&verts[info[i+3]*3], NULL, pLine);
+			{
+				if (LineTriangleMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
+				                                (Point3&)verts[info[i+3]*3], Start, End, pLine->mindist, Intersection))
+				{
+					pLine->pClosest = this;
+				}
+			}
+
 			info += *info + 1;
 			info += *info + 1;
 		}
 	}
-
-	free(verts);
 }
 
 // Return true if a polygon intersects a set of planes.
@@ -694,21 +644,30 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
 	};
 
-	// TODO: transform the planes to local space instead.
-	Matrix m(m_fRotation, m_fPosition);
+	// Transform the planes to local space.
+	Matrix44 WorldToLocal;
+	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldToLocal.SetTranslation(Point3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]) * WorldToLocal);
+
+	Vector4* LocalPlanes = new Vector4[NumPlanes];
+	int i;
+
+	for (i = 0; i < NumPlanes; i++)
+	{
+		LocalPlanes[i] = Vector3(Planes[i]) * WorldToLocal;
+		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
+	}
 
 	// Start by testing trivial reject/accept cases.
-	int Outcodes[8], i;
+	int Outcodes[8];
 
 	for (i = 0; i < 8; i++)
 	{
-		Point3 Point;
-		m.TransformPoint(&Point[0], &Box[i][0]);
 		Outcodes[i] = 0;
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
-			if (Dot3(Point, Planes[j]) + Planes[j][3] > 0)
+			if (Dot3(Box[i], LocalPlanes[j]) + LocalPlanes[j][3] > 0)
 				Outcodes[i] |= 1 << j;
 		}
 	}
@@ -723,18 +682,20 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	// All corners outside the same plane.
 	if (OutcodesAND != 0)
+	{
+		delete[] LocalPlanes;
 		return false;
+	}
 
 	// All corners inside the volume.
 	if (OutcodesOR == 0)
+	{
+		delete[] LocalPlanes;
 		return true;
+	}
 
 	// Partial intersection, so check if any triangles are inside.
-	Matrix mat(m_fRotation, m_fPosition);
-	float* verts = (float*)malloc(sizeof(float)*3*m_pPieceInfo->m_nVertexCount);
-	memcpy(verts, m_pPieceInfo->m_fVertexArray, sizeof(float)*3*m_pPieceInfo->m_nVertexCount);
-	mat.TransformPoints(verts, m_pPieceInfo->m_nVertexCount);
-
+	float* verts = m_pPieceInfo->m_fVertexArray;
 	bool ret = false;
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
@@ -749,8 +710,8 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 			for (i = 0; i < *info; i += 4)
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				    &verts[info[i+3]*3], &verts[info[i+4]*3], Planes, NumPlanes))
+				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
+				                            &verts[info[i+3]*3], &verts[info[i+4]*3], LocalPlanes, NumPlanes))
 				{
 					ret = true;
 					break;
@@ -761,8 +722,8 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 			for (i = 0; i < *info; i += 3)
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				    &verts[info[i+3]*3], NULL, Planes, NumPlanes))
+				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
+				                            &verts[info[i+3]*3], NULL, LocalPlanes, NumPlanes))
 				{
 					ret = true;
 					break;
@@ -786,7 +747,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 			for (i = 0; i < *info; i += 4)
 			{
 				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				    &verts[info[i+3]*3], &verts[info[i+4]*3], Planes, NumPlanes))
+				                            &verts[info[i+3]*3], &verts[info[i+4]*3], LocalPlanes, NumPlanes))
 				{
 					ret = true;
 					break;
@@ -798,7 +759,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 			for (i = 0; i < *info; i += 3)
 			{
 				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				    &verts[info[i+3]*3], NULL, Planes, NumPlanes))
+				                            &verts[info[i+3]*3], NULL, LocalPlanes, NumPlanes))
 				{
 					ret = true;
 					break;
@@ -810,7 +771,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		}
 	}
 
-	free(verts);
+	delete[] LocalPlanes;
 
 	return ret;
 }

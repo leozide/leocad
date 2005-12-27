@@ -243,10 +243,6 @@ SOURCE=.\Piececmb.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Piecelst.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Pieceprv.cpp
 # End Source File
 # Begin Source File
@@ -291,10 +287,6 @@ SOURCE=.\Seldlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SortHead.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Splitter.cpp
 # End Source File
 # Begin Source File
@@ -336,15 +328,7 @@ SOURCE=.\texdlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Titletip.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Tools.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Transbar.cpp
 # End Source File
 # Begin Source File
 
@@ -484,10 +468,6 @@ SOURCE=.\PieceInf.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PieceLst.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\PiecePrv.h
 # End Source File
 # Begin Source File
@@ -536,10 +516,6 @@ SOURCE=.\SelDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SortHead.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Splitter.h
 # End Source File
 # Begin Source File
@@ -581,10 +557,6 @@ SOURCE=.\Titletip.h
 # Begin Source File
 
 SOURCE=.\Tools.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Transbar.h
 # End Source File
 # Begin Source File
 

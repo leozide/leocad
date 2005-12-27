@@ -27,7 +27,6 @@ public:
 	BOOL	m_bSubparts;
 	int		m_nSaveTime;
 	BOOL	m_bNumbers;
-	BOOL	m_bGroup;
 	CString	m_strFolder;
 	BOOL	m_bAutoSave;
 	CString	m_bUser;

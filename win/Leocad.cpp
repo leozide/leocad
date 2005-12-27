@@ -205,6 +205,17 @@ BOOL CCADApp::InitInstance()
 	if (!project->Initialize(__argc, __targv, app, NULL))
 		return false;
 
+	// Show something in the piece preview window.
+	PieceInfo* Info = project->GetPiecesLibrary()->FindPieceInfo("3005");
+	if (!Info)
+		Info = project->GetPiecesLibrary()->GetPieceInfo(0);
+	if (Info)
+	{
+		project->SetCurrentPiece(Info);
+		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.SetPieceInfo(Info);
+		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.PostMessage(WM_PAINT);
+	}
+
 	// TODO: move this to the project.
 	CString cfg = GetProfileString("Settings","Groups","");
 	if (!cfg.IsEmpty())

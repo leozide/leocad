@@ -30,7 +30,6 @@ CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::
 	m_bSubparts = FALSE;
 	m_nSaveTime = 0;
 	m_bNumbers = FALSE;
-	m_bGroup = FALSE;
 	m_strFolder = _T("");
 	m_bAutoSave = FALSE;
 	m_strUser = _T("");
@@ -51,7 +50,6 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_GENDLG_SAVETIME, m_nSaveTime);
 	DDV_MinMaxInt(pDX, m_nSaveTime, 1, 60);
 	DDX_Check(pDX, IDC_GENDLG_NUMBERS, m_bNumbers);
-	DDX_Check(pDX, IDC_GENDLG_GROUP, m_bGroup);
 	DDX_Text(pDX, IDC_GENDLG_FOLDER, m_strFolder);
 	DDX_Check(pDX, IDC_GENDLG_AUTOSAVE, m_bAutoSave);
 	DDX_Text(pDX, IDC_GENDLG_USER, m_strUser);
@@ -87,9 +85,8 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_strUser = strUser;
 
 	m_Updates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
-	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP);
+	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 0);
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
-	m_bGroup = (i & PIECEBAR_GROUP) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 }
 
@@ -103,7 +100,6 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 
 	int i = 0;
 	if (m_bSubparts) i |= PIECEBAR_SUBPARTS;
-	if (m_bGroup) i |= PIECEBAR_GROUP;
 	if (m_bNumbers) i |= PIECEBAR_PARTNUMBERS;
 		
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);

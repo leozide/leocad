@@ -1733,11 +1733,6 @@ void SystemSwapBuffers()
 	OpenGLSwapBuffers (pfnwglGetCurrentDC());
 }
 
-void SystemSetGroup(int group)
-{
-	AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, group+2, 0);
-}
-
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();

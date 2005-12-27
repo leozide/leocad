@@ -112,8 +112,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
 	ON_WM_DROPFILES()
 	//}}AFX_MSG_MAP
-	ON_COMMAND_RANGE(ID_PIECEBAR_GROUP, ID_PIECEBAR_SUBPARTS, OnPieceBar)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_GROUP, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
+	ON_COMMAND_RANGE(ID_PIECEBAR_NUMBERS, ID_PIECEBAR_SUBPARTS, OnPieceBar)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_NUMBERS, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
 	// Global help commands
 	ON_COMMAND(ID_HELP_FINDER, CFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_HELP, CFrameWnd::OnHelp)
@@ -314,13 +314,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 // lParam = update pieces, wParam = update colors
 LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 {
-	if (lParam)
-	{
-		if (lParam > 2)
-			m_wndPiecesBar.m_nCurGroup = lParam - 2;
-		m_wndPiecesBar.m_wndPiecesList.UpdateList();
-	}
-
 	if (wParam != 0)
 	{
 		int x = wParam-1;
@@ -474,9 +467,8 @@ LONG CMainFrame::OnPopupClose(UINT /*lParam*/, LONG /*wParam*/)
 
 LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
 {
-	int i = theApp.GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP);
+	int i = theApp.GetProfileInt("Settings", "Piecebar Options", 0);
 	m_wndPiecesBar.m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
-	m_wndPiecesBar.m_bGroups = (i & PIECEBAR_GROUP) != 0;
 	m_wndPiecesBar.m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 
 	RECT rc;
@@ -540,11 +532,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 {
 	switch (nID)
 	{
-		case ID_PIECEBAR_GROUP:
-		{
-			m_wndPiecesBar.m_bGroups = !m_wndPiecesBar.m_bGroups;
-			m_wndPiecesBar.m_wndPiecesList.UpdateList();
-		} break;
 		case ID_PIECEBAR_NUMBERS:
 		{
 			m_wndPiecesBar.m_bNumbers = !m_wndPiecesBar.m_bNumbers;
@@ -552,7 +539,7 @@ void CMainFrame::OnPieceBar(UINT nID)
 		case ID_PIECEBAR_SUBPARTS:
 		{
 			m_wndPiecesBar.m_bSubParts = !m_wndPiecesBar.m_bSubParts;
-			m_wndPiecesBar.m_wndPiecesList.UpdateList();
+//			m_wndPiecesBar.UpdatePiecesTree(false);
 		} break;
 	}
 
@@ -568,7 +555,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 
 	UINT u = 0;
 	if (m_wndPiecesBar.m_bSubParts) u |= PIECEBAR_SUBPARTS;
-	if (m_wndPiecesBar.m_bGroups) u |= PIECEBAR_GROUP;
 	if (m_wndPiecesBar.m_bNumbers) u |= PIECEBAR_PARTNUMBERS;
 	theApp.WriteProfileInt("Settings", "Piecebar Options", u);
 }
@@ -577,8 +563,6 @@ void CMainFrame::OnUpdatePieceBar(CCmdUI* pCmdUI)
 {
 	switch (pCmdUI->m_nID)
 	{
-		case ID_PIECEBAR_GROUP:
-			pCmdUI->SetCheck(m_wndPiecesBar.m_bGroups); break;
 		case ID_PIECEBAR_NUMBERS:
 			pCmdUI->SetCheck(m_wndPiecesBar.m_bNumbers); break;
 		case ID_PIECEBAR_SUBPARTS:
@@ -1191,8 +1175,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 				if (Focus != NULL)
 				{
-					if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(Focus) ||
-							m_wndPiecesBar.m_wndPiecesList.IsChild(Focus))
+					if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(Focus))
 					{
 						return CFrameWnd::PreTranslateMessage(pMsg);
 					}
@@ -1206,8 +1189,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 				}
 			}
 
-			if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()) ||
-				  m_wndPiecesBar.m_wndPiecesList.IsChild(GetFocus()))
+			if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()))
 			{
 				if (!Control && (((pMsg->wParam >= 'A') && (pMsg->wParam <= 'Z')) || ((pMsg->wParam >= '0') && (pMsg->wParam <= '9'))))
 				{

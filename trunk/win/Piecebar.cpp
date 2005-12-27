@@ -22,11 +22,9 @@ static char THIS_FILE[] = __FILE__;
 
 CPiecesBar::CPiecesBar()
 {
-	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", PIECEBAR_GROUP);
+	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 0);
 	m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
-	m_bGroups = (i & PIECEBAR_GROUP) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
-	m_nCurGroup = 1;
 
 	m_sizeMin = CSize(222, 200);
 	m_sizeHorz = CSize(200, 200);
@@ -66,10 +64,7 @@ BEGIN_MESSAGE_MAP(CPiecesBar, CControlBar)
 	ON_WM_CONTEXTMENU()
 	//}}AFX_MSG_MAP
 	ON_LBN_SELCHANGE(IDW_COLORSLIST, OnSelChangeColor)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 	ON_MESSAGE(WM_LC_SPLITTER_MOVED, OnSplitterMoved)
-	ON_COMMAND_RANGE(ID_PIECE_GROUP01, ID_PIECE_GROUP32, OnPieceGroupClicked)
 END_MESSAGE_MAP()
 
 
@@ -627,46 +622,14 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	off += 30;
 	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
 
-	if (m_bGroups)
-	{
-		off += 28;
-		m_wndGroupsBar.SetWindowPos (NULL, 5, cy-off, cx-10, 24, SWP_NOZORDER);
-		m_wndGroupsBar.ShowWindow (SW_SHOW);
-	}
-	else
-		m_wndGroupsBar.ShowWindow (SW_HIDE);
-
 	m_wndSplitter.SetWindowPos (NULL, 5, m_nPreviewHeight+6, cx-10, 4, SWP_NOZORDER);
-	m_wndPiecesList.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
 	m_PiecesTree.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
 	m_wndPiecePreview.SetWindowPos (NULL, 5, 5, cx-10, m_nPreviewHeight, 0);
 	m_wndPiecePreview.EnableWindow (TRUE);
 	m_wndPiecePreview.ShowWindow (SW_SHOW);
 	m_wndSplitter.ShowWindow (SW_SHOW);
 
-	RECT rect;
-	m_wndPiecesList.GetWindowRect (&rect);
-
-	if (m_bNumbers)
-	{
-		LV_COLUMN lvc;
-		lvc.mask = LVCF_WIDTH;
-		if (!m_wndPiecesList.GetColumn(1,&lvc))
-		{
-			m_wndPiecesList.InsertColumn(1, "Number", LVCFMT_LEFT, 60, 1);
-			rect.right -= 60;
-		}
-		else
-			rect.right -= lvc.cx;
-	}
-	else
-		m_wndPiecesList.DeleteColumn (1);
-
-	m_wndPiecesList.SetColumnWidth(0, rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL) -2);
 	m_wndPiecesCombo.ShowWindow(SW_SHOW);
-
-
-m_wndPiecesList.ShowWindow(FALSE);
 }
 
 void CPiecesBar::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler)
@@ -679,7 +642,6 @@ void CPiecesBar::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler)
 //		sta |= TBSTATE_ENABLED|TBSTATE_CHECKED;
 //	m_wndGroupsBar.GetToolBarCtrl().SetState(nID, sta);
 
-	m_wndGroupsBar.OnUpdateCmdUI(pTarget, FALSE);
 	UpdateDialogControls(pTarget, FALSE);
 }
 
@@ -690,15 +652,6 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_DISABLEDRAGDROP|TVS_HASLINES|TVS_LINESATROOT, 
 	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
-
-	m_wndPiecesList.Create(LVS_SINGLESEL|LVS_SHOWSELALWAYS|LVS_AUTOARRANGE|
-	                       LVS_SORTASCENDING|WS_VISIBLE|WS_TABSTOP|LVS_REPORT|WS_BORDER,
-	                       CRect(0,0,0,0), this, IDW_PIECESLIST);
-
-	m_wndPiecesList.InsertColumn(0, "Description", LVCFMT_LEFT, 129, 0);
-	m_wndPiecesList.SubclassHeader();
-	if (m_bNumbers)
-		m_wndPiecesList.InsertColumn(1, "Number", LVCFMT_LEFT, 60, 1);
 
 	m_wndColorsList.Create(LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
 	                       LBS_OWNERDRAWFIXED|WS_VISIBLE|WS_TABSTOP|WS_CHILD|WS_BORDER,
@@ -732,8 +685,6 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndPiecePreview.Create (NULL, NULL, WS_BORDER|WS_CHILD|WS_VISIBLE,
 		CRect(0, 0, 0, 0), this, IDW_PIECEPREVIEW);
 
-	CreateGroupsBar();
-
 	CreateWindow("STATIC", "", WS_VISIBLE|WS_CHILD|SS_ETCHEDFRAME, 0, 0, 0, 0,
 	             m_hWnd, (HMENU)IDW_PIECEBAR_SPLITTER, AfxGetInstanceHandle(), NULL);
 
@@ -757,64 +708,6 @@ void CPiecesBar::OnSelChangeColor()
 	m_wndPiecePreview.PostMessage (WM_PAINT);
 }
 
-BOOL CPiecesBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
-{
-	ASSERT(pNMHDR->code == TTN_NEEDTEXTA || pNMHDR->code == TTN_NEEDTEXTW);
-
-	if (GetRoutingFrame() != NULL)
-		return FALSE;
-
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-
-	UINT nID = pNMHDR->idFrom;
-	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
-		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
-	{
-		nID = ((UINT)(WORD)::GetDlgCtrlID((HWND)nID));
-	}
-	if (nID >= ID_PIECE_GROUP01 && nID <= ID_PIECE_GROUP32) // will be zero on a separator
-	{
-		if (pNMHDR->code == TTN_NEEDTEXTA)
-			lstrcpyn(pTTTA->szText, m_GroupNames[nID-ID_PIECE_GROUP01],(sizeof(pTTTA->szText)/sizeof(pTTTA->szText[0])));
-		else
-			_mbstowcsz(pTTTW->szText, m_GroupNames[nID-ID_PIECE_GROUP01],(sizeof(pTTTW->szText)/sizeof(pTTTW->szText[0])));
-	}
-/*	else if (nID == IDW_COLORSLIST)
-	{
-		POINT pt;
-		GetCursorPos(&pt);
-		m_wndColorsList.ScreenToClient(&pt);
-		CString str;
-
-		for (int i = 0; i < 14; i++)
-		{
-			CRect rect (i*15,0,(i+1)*15,12);
-			if (rect.PtInRect(pt))
-			{
-				str.LoadString(IDS_COLOR01+i);
-				break;
-			}
-			rect.OffsetRect (0,12);
-			if (rect.PtInRect(pt))
-			{
-				str.LoadString(IDS_COLOR15+i);
-				break;
-			}
-		}
-		if (pNMHDR->code == TTN_NEEDTEXTA)
-			lstrcpyn(pTTTA->szText, str,(sizeof(pTTTA->szText)/sizeof(pTTTA->szText[0])));
-		else
-			_mbstowcsz(pTTTW->szText, str,(sizeof(pTTTW->szText)/sizeof(pTTTW->szText[0])));
-	}
-*/
-	*pResult = 0;
-
-	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE);
-
-	return TRUE; // message was handled
-}
-
 LONG CPiecesBar::OnSplitterMoved(UINT lParam, LONG wParam)
 {
 	UNREFERENCED_PARAMETER(wParam);
@@ -825,99 +718,6 @@ LONG CPiecesBar::OnSplitterMoved(UINT lParam, LONG wParam)
 		m_nPreviewHeight += lParam;
 
 	return TRUE;
-}
-
-void CPiecesBar::OnPieceGroupClicked(UINT nID)
-{
-	m_nCurGroup = nID - ID_PIECE_GROUP01;
-	project->HandleNotify(LC_GROUP_CHANGED, m_nCurGroup);
-	AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, 1, 0);
-}
-
-void CPiecesBar::CreateGroupsBar()
-{
-	BYTE nGroups = 0;
-	memset (m_GroupNames, 0, sizeof(m_GroupNames));
-	CString str, cfg = AfxGetApp()->GetProfileString("Settings", "Groups", "");
-
-	for (int i = 0; i < 32; i++)
-		m_wndGroupsBar.m_ToolbarData.ButtonData[i].iBitmap = min (i,9);
-	m_wndGroupsBar.m_ToolbarData.himl = NULL;
-
-	if (!cfg.IsEmpty())
-	{
-		CFile f;
-		if (f.Open(cfg, CFile::modeRead|CFile::shareDenyWrite) != 0)
-		if (f.GetLength() != 0)
-		{
-			CArchive ar(&f, CArchive::load | CArchive::bNoFlushOnDelete);
-			char tmp[33];
-			float ver;
-			CString str;
-			ar.Read (tmp, 32);
-			ar >> ver;
-			if (ver == 0.1f)
-				ar >> i;
-			else
-			{
-				ar >> nGroups;
-				for (i = 0; i < nGroups; i++)
-				{
-					ar.Read (m_GroupNames[i], 33);
-
-					if (ver > 0.2f)
-						ar >> m_wndGroupsBar.m_ToolbarData.ButtonData[i].iBitmap;
-				}
-			}
-
-			if (ver > 0.2f)
-			{
-				CImageList iml;
-				iml.Read(&ar);
-				m_wndGroupsBar.m_ToolbarData.himl = iml.Detach();
-			}
-
-			ar.Close();
-			f.Close();
-		}
-	}
-
-	if (nGroups == 0)
-		nGroups = 9;
-
-	for (i = 0; i < nGroups; i++)
-	{
-		m_wndGroupsBar.m_ToolbarData.ButtonData[i].idCommand = ID_PIECE_GROUP01 + i;
-		m_wndGroupsBar.m_ToolbarData.ButtonData[i].fsState = TBSTATE_ENABLED;
-		m_wndGroupsBar.m_ToolbarData.ButtonData[i].fsStyle = TBSTYLE_BUTTON;
-		m_wndGroupsBar.m_ToolbarData.ButtonData[i].lpszButtonText = "";
-		m_wndGroupsBar.m_ToolbarData.ButtonData[i].lpszTooltip = "";
-
-		if (m_GroupNames[i][0] == 0)
-		{
-			str.LoadString (ID_PIECE_GROUP01 + i);
-			strcpy (m_GroupNames[i], str);
-		}
-	}
-
-	m_wndGroupsBar.m_ToolbarData.dwStyle = TBSTYLE_FLAT;
-	m_wndGroupsBar.m_ToolbarData.idControl = IDW_GROUPSBAR;
-	m_wndGroupsBar.m_ToolbarData.idbDefault = IDB_PIECEBAR;
-	m_wndGroupsBar.m_ToolbarData.idbHot = NULL;
-	m_wndGroupsBar.m_ToolbarData.iButtons = nGroups;
-	m_wndGroupsBar.m_ToolbarData.iButtonCX = 16;
-	m_wndGroupsBar.m_ToolbarData.iButtonCY = 15;
-
-	if (m_wndGroupsBar.m_ToolbarData.himl == NULL)
-	m_wndGroupsBar.m_ToolbarData.himl = ImageList_LoadImage
-		(AfxGetInstanceHandle(), MAKEINTRESOURCE(m_wndGroupsBar.m_ToolbarData.idbDefault), m_wndGroupsBar.m_ToolbarData.iButtonCX, 0, 0x00ff00ff, IMAGE_BITMAP, 0);
-
-	if (m_wndGroupsBar.m_hWnd)
-		m_wndGroupsBar.DestroyWindow();
-	m_wndGroupsBar.Create(m_hWnd);
-	m_wndGroupsBar.SetBarStyle(m_wndGroupsBar.GetBarStyle() | CBRS_FLYBY | CBRS_ALIGN_ANY);
-	m_wndGroupsBar.SetWindowPos (NULL,5,210,216,24,SWP_NOZORDER);
-	m_wndGroupsBar.EnableToolTips();
 }
 
 void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point) 

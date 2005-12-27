@@ -496,7 +496,6 @@
 #define ID_FILE_EXPORT_WAVEFRONT        32833
 #define ID_FILE_EXPORT_LDRAW            32834
 #define ID_FILE_EXPORT_POVRAY           32835
-#define ID_PIECEBAR_GROUP               32837
 #define ID_PIECEBAR_NUMBERS             32839
 #define ID_PIECEBAR_SUBPARTS            32841
 #define ID_PIECE_ARRAY                  32842

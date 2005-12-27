@@ -9,11 +9,9 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
-#include "PieceLst.h"
 #include "ColorLst.h"
 #include "PieceCmb.h"
 #include "PiecePrv.h"
-#include "TransBar.h"
 #include "Splitter.h"
 
 /////////////////////////////////////////////////////////////////////////
@@ -61,13 +59,13 @@ protected:
 
 protected:
 	// used for resizing
-	CSize	m_sizeMin;
+	CSize   m_sizeMin;
 	CSize   m_sizeMax;
-	CPoint	m_ptOld;
+	CPoint  m_ptOld;
 	CRect   m_rectBorder;
 	BOOL    m_bTracking;
-	BOOL	m_bDragShowContent;
-	CSize	m_sizeOld;
+	BOOL    m_bDragShowContent;
+	CSize   m_sizeOld;
 
 	BOOL    m_bInRecalcNC;
 	UINT    m_nDockBarID;
@@ -80,21 +78,14 @@ protected:
 	void SaveState();
 
 public:
-	void CreateGroupsBar();
 	BOOL m_bSubParts;
-	BOOL m_bGroups;
 	BOOL m_bNumbers;
-	CPiecesList		m_wndPiecesList;
-	CColorsList		m_wndColorsList;
-	CPiecesCombo	m_wndPiecesCombo;
-	CPiecePreview	m_wndPiecePreview;
-	CTransToolBar	m_wndGroupsBar;
-	CySplitterWnd	m_wndSplitter;
+	CColorsList   m_wndColorsList;
+	CPiecesCombo  m_wndPiecesCombo;
+	CPiecePreview m_wndPiecePreview;
+	CySplitterWnd m_wndSplitter;
 
 	CTreeCtrl m_PiecesTree;
-
-	char m_GroupNames[32][33];
-	int m_nCurGroup;
 
 	void UpdatePiecesTree(bool SearchOnly);
 	void UpdatePiecesTree(const char* OldCategory, const char* NewCategory);
@@ -126,9 +117,7 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	//}}AFX_MSG
 
-	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LONG OnSplitterMoved(UINT lParam, LONG wParam);
-	void OnPieceGroupClicked(UINT nID);
 
 	DECLARE_MESSAGE_MAP()
 };

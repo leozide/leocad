@@ -314,11 +314,6 @@ void SystemUpdateAction(int new_action, int old_action)
   ignore_commands = false;
 }
 
-void SystemSetGroup(int new_group)
-{
-  groupsbar_set(new_group);
-}
-
 void SystemUpdateColorList(int new_color)
 {
   colorlist_set(new_color);

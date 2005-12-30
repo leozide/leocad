@@ -546,8 +546,6 @@ void Project::LoadDefaults(bool cameras)
 	SetAction(0);
 	m_nCurColor = 0;
 	SystemUpdateColorList(m_nCurColor);
-	m_nCurGroup = 1;
-	SystemSetGroup(m_nCurGroup);
 	m_bAnimation = false;
 	m_bAddKeys = false;
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
@@ -718,7 +716,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		file->ReadLong (&m_nSnap, 1);
 		file->ReadFloat (&m_fLineWidth, 1);
 		file->ReadLong (&m_nDetail, 1);
-		file->ReadLong (&i, 1); m_nCurGroup = i;
+		file->ReadLong (&i, 1); //m_nCurGroup = i;
 		file->ReadLong (&i, 1); m_nCurColor = i;
 		file->ReadLong (&i, 1); action = i;
 		file->ReadLong (&i, 1); m_nCurStep = i;
@@ -1075,7 +1073,6 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	SetAction(action);
 	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
-	SystemSetGroup(m_nCurGroup);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
@@ -1111,7 +1108,8 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteLong (&m_nSnap, 1);
 	file->WriteFloat (&m_fLineWidth, 1);
 	file->WriteLong (&m_nDetail, 1);
-	i = m_nCurGroup; file->WriteLong (&i, 1);
+	//i = m_nCurGroup;
+	file->WriteLong (&i, 1);
 	i = m_nCurColor; file->WriteLong (&i, 1);
 	i = m_nCurAction; file->WriteLong (&i, 1);
 	i = m_nCurStep; file->WriteLong (&i, 1);
@@ -3685,11 +3683,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			m_nCurColor = (unsigned char)param;
 		} break;
 
-		case LC_GROUP_CHANGED:
-		{
-			m_nCurGroup = (unsigned char)param;
-		} break;
-
 		case LC_CAPTURE_LOST:
 		{
 			if (m_nTracking != LC_TRACK_NONE)
@@ -4728,26 +4721,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			FileMem file;
 			FileSave(&file, true);
 
-			// TODO: save piece IDs and reload.
-
 			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
 			{
-/*
-		for (i = 0; i < pDoc->m_PartsIdx.GetSize(); i++)
-			pDoc->m_PartsIdx[i].DeleteInformation();
-
-		pDoc->LoadPieceLibrary();
-		pDoc->m_bUndo = TRUE;
-		PartFile.SeekToBegin();
-		CArchive ar(&PartFile, CArchive::load);
-		pDoc->Serialize(ar); 
-		ar.Close();
-		pDoc->m_bUndo = FALSE;
-		pDoc->RebuildDisplayLists(FALSE);
-		pDoc->UpdateAllViews(NULL);
-		m_wndPiecesBar.m_wndPiecesList.UpdateList();
-	}
-*/
+				if (m_pLibrary->m_Modified)
+				{
+					DeleteContents(true);
+					FileLoad(&file, true, false);
+				}
 			}
 		} break;
 

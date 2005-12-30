@@ -21,13 +21,30 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// Function to sort the list control.
+static int CALLBACK ListCompare(LPARAM lP1, LPARAM lP2, LPARAM lParamSort)
+{
+	int ret;
+
+	if ((lP1 < 0) || (lP2 < 0))
+		return 0;
+
+	if ((lParamSort & ~0xF0) == 0)
+		ret = strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
+	else
+		ret = strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
+
+	return ret;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CLibraryDlg dialog
-
 
 CLibraryDlg::CLibraryDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CLibraryDlg::IDD, pParent)
 {
+	m_SortColumn = 0;
+
 	//{{AFX_DATA_INIT(CLibraryDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
@@ -50,6 +67,7 @@ void CLibraryDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CLibraryDlg, CDialog)
 	//{{AFX_MSG_MAP(CLibraryDlg)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_LIBDLG_TREE, OnSelChangedTree)
+	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIBDLG_LIST, OnListColumnClick)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
@@ -106,6 +124,11 @@ BOOL CLibraryDlg::OnInitDialog()
 
 	m_TreeImages.Create(IDB_PARTICONS, 16, 0, RGB (0,128,128));
 	m_Tree.SetImageList(&m_TreeImages, TVSIL_NORMAL);
+
+	RECT rect;
+	m_List.GetWindowRect(&rect);
+	m_List.InsertColumn(0, "Name", LVCFMT_LEFT, rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL) - 4 - 60, 0);
+	m_List.InsertColumn(1, "Number", LVCFMT_LEFT, 60, 1);
 
 	UpdateList();
 	UpdateTree();
@@ -346,10 +369,31 @@ void CLibraryDlg::UpdateList()
 			lvi.iSubItem = 0;
 			lvi.lParam = (LPARAM)Info;
 			lvi.pszText = Info->m_strDescription;
-			m_List.InsertItem(&lvi);
+			int idx = m_List.InsertItem(&lvi);
+
+			m_List.SetItemText(idx, 1, Info->m_strName);
 		}
 	}
+	else
+	{
+		for (int i = 0; i < Lib->GetPieceCount(); i++)
+		{
+			PieceInfo* Info = Lib->GetPieceInfo(i);
 
+			LVITEM lvi;
+			lvi.mask = LVIF_TEXT | LVIF_PARAM;
+			lvi.iItem = 0;
+			lvi.iSubItem = 0;
+			lvi.lParam = (LPARAM)Info;
+			lvi.pszText = Info->m_strDescription;
+			int idx = m_List.InsertItem(&lvi);
+
+			m_List.SetItemText(idx, 1, Info->m_strName);
+		}
+
+	}
+
+	m_List.SortItems((PFNLVCOMPARE)ListCompare, m_SortColumn);
 	m_List.SetRedraw(TRUE);
 }
 
@@ -358,10 +402,13 @@ void CLibraryDlg::UpdateTree()
 	m_Tree.SetRedraw(FALSE);
 	m_Tree.DeleteAllItems();
 
+	HTREEITEM Root = m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_TEXT, "Pieces", 0, 1, 0, 0, 0, TVI_ROOT, TVI_SORT);
+
 	PiecesLibrary *Lib = project->GetPiecesLibrary();
 	for (int i = 0; i < Lib->GetNumCategories(); i++)
-		m_Tree.InsertItem(TVIF_IMAGE|TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 1, 0, 0, 0, TVI_ROOT, TVI_SORT);
+		m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 1, 0, 0, 0, Root, TVI_SORT);
 
+	m_Tree.Expand(Root, TVE_EXPAND);
 	m_Tree.SetRedraw(TRUE);
 	m_Tree.Invalidate();
 }
@@ -450,4 +497,16 @@ BOOL CLibraryDlg::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 		SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE);
 	
 	return TRUE;    // message was handled
+}
+
+void CLibraryDlg::OnListColumnClick(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+
+	// Save the column index.
+	m_SortColumn = pNMListView->iSubItem;
+
+	m_List.SortItems((PFNLVCOMPARE)ListCompare, m_SortColumn);
+
+	*pResult = 0;
 }

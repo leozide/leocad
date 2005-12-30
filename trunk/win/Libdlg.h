@@ -35,6 +35,7 @@ public:
 
 	CToolBar m_wndToolBar;
 	CImageList m_TreeImages;
+	int m_SortColumn;
 
 protected:
 	// Generated message map functions
@@ -43,6 +44,7 @@ protected:
 	afx_msg void OnSelChangedTree(NMHDR* pNMHDR, LRESULT* pResult);
 	virtual void OnCancel();
 	virtual void OnOK();
+	afx_msg void OnListColumnClick(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);

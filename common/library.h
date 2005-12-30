@@ -79,6 +79,9 @@ public:
 	bool ImportTexture(const char* Name);
 	bool ImportLDrawPiece(const char* Filename);
 
+	// Set when pieces are added/removed from the library.
+	bool m_Modified;
+
 protected:
 	char m_LibraryPath[LC_MAXPATH];	// path to the library files
 
@@ -92,7 +95,6 @@ protected:
 	// Categories.
 	ObjArray<PiecesLibraryCategory> m_Categories;
 
-	bool m_Modified;
 	bool m_CategoriesModified;
 	char m_CategoriesFile[LC_MAXPATH];
 

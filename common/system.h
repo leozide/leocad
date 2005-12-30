@@ -107,7 +107,6 @@ bool SystemDoDialog(int nMode, void* param);
 void SystemDoPopupMenu(int nMenu, int x, int y);
 void SystemDoWaitCursor(int nCode);
 
-void SystemSetGroup(int nNew);
 void SystemSetWindowCaption(char* caption);
 //void SystemRedrawView();
 void SystemPieceComboAdd(char* name);

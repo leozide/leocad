@@ -78,8 +78,6 @@ public:
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
 		{ return m_nCurColor; }
-	int GetCurrentGroup () const
-		{ return m_nCurGroup; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	unsigned char GetAction() const
@@ -260,7 +258,6 @@ protected:
 	PieceInfo* m_pCurPiece;
 	unsigned char m_nCurColor;
 	unsigned char m_nCurAction;
-	unsigned char m_nCurGroup;
 	bool m_bAnimation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;

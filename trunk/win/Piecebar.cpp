@@ -16,9 +16,36 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
 /////////////////////////////////////////////////////////////////////////
 // CPiecesBar
+
+int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
+{
+	if (a->IsSubPiece())
+	{
+		if (b->IsSubPiece())
+		{
+			return strcmp(a->m_strDescription, b->m_strDescription);
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	else
+	{
+		if (b->IsSubPiece())
+		{
+			return -1;
+		}
+		else
+		{
+			return strcmp(a->m_strDescription, b->m_strDescription);
+		}
+	}
+
+	return 0;
+}
 
 CPiecesBar::CPiecesBar()
 {
@@ -942,6 +969,22 @@ void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 	}
 }
 
+void CPiecesBar::RefreshPiecesTree()
+{
+	HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+
+  while (Item != NULL)
+  {
+		if ((m_PiecesTree.GetItemState(Item, TVIF_STATE) & TVIS_EXPANDED) != 0)
+		{
+			m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
+			m_PiecesTree.Expand(Item, TVE_EXPAND);
+		}
+
+		Item = m_PiecesTree.GetNextSiblingItem(Item);
+  }
+}
+
 BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult) 
 {
 	if (wParam == IDW_PIECESTREE)
@@ -979,16 +1022,26 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 						Lib->GetCategoryEntries(CategoryIndex, true, SinglePieces, GroupedPieces);
 
+						SinglePieces.Sort(PiecesSortFunc, NULL);
 						for (i = 0; i < SinglePieces.GetSize(); i++)
 						{
 							PieceInfo* Info = SinglePieces[i];
-							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_SORT);
+
+							if (!m_bSubParts && Info->IsSubPiece())
+								continue;
+
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
 						}
 
+						GroupedPieces.Sort(PiecesSortFunc, NULL);
 						for (i = 0; i < GroupedPieces.GetSize(); i++)
 						{
 							PieceInfo* Info = GroupedPieces[i];
-							m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_SORT);
+
+							if (!m_bSubParts && Info->IsSubPiece())
+								continue;
+
+							m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
 						}
 
 						if (CategoryName == "Search Results")
@@ -1008,17 +1061,21 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					PtrArray<PieceInfo> Pieces;
 					Lib->GetPatternedPieces(Parent, Pieces);
 
+					Pieces.Sort(PiecesSortFunc, NULL);
 					HTREEITEM ParentItem = Notify->itemNew.hItem;
 
 					for (int i = 0; i < Pieces.GetSize(); i++)
 					{
 						PieceInfo* Info = Pieces[i];
 
+						if (!m_bSubParts && Info->IsSubPiece())
+							continue;
+
 						// If both descriptions begin with the same text, only show the difference.
 						if (!strncmp(Info->m_strDescription, Parent->m_strDescription, strlen(Parent->m_strDescription)))
-							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription + strlen(Parent->m_strDescription) + 1, 0, 0, 0, 0, (LPARAM)Info, ParentItem, TVI_SORT);
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription + strlen(Parent->m_strDescription) + 1, 0, 0, 0, 0, (LPARAM)Info, ParentItem, TVI_LAST);
 						else
-							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, ParentItem, TVI_SORT);
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, ParentItem, TVI_LAST);
 					}
 				}
 			}

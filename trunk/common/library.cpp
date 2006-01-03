@@ -533,8 +533,6 @@ int PiecesLibrary::GetFirstCategory(PieceInfo* Info) const
 
 void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces) const
 {
-	bool m_bSubParts = false;
-
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
 
@@ -545,10 +543,6 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrA
 	for (int i = 0; i < m_nPieceCount; i++)
 	{
 		PieceInfo* Info = &m_pPieceIdx[i];
-
-		// Skip subparts if the user doesn't want to see them.
-		if ((Info->m_strDescription[0] == '~') && !m_bSubParts)
-			continue;
 
 		if (!PieceInCategory(Info, m_Categories[CategoryIndex].Keywords))
 			continue;

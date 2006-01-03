@@ -67,6 +67,11 @@ class PieceInfo
 		return false;
 	}
 
+	bool IsSubPiece() const
+	{
+		return (m_strDescription[0] == '~');
+	}
+
 	// Operations
 	void ZoomExtents(float Fov, float Aspect);
 	void RenderOnce(int nColor);

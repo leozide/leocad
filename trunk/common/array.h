@@ -8,7 +8,7 @@ public:
 	PtrArray(int nSize = 0);
 	~PtrArray();
 
-	typedef int (*LC_PTRARRAY_COMPARE_FUNC)(T* a, T* b, void* data);
+	typedef int (*LC_PTRARRAY_COMPARE_FUNC)(const T* a, const T* b, void* data);
 
 	int GetSize() const
 		{ return m_nLength; }
@@ -20,6 +20,7 @@ public:
 	void AddSorted(T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData);
 	void InsertAt(int nIndex, T* pObj);
 	int FindIndex(T* Obj) const;
+	void Sort(LC_PTRARRAY_COMPARE_FUNC SortFunc, void* SortData);
 
 	PtrArray<T>& operator=(const PtrArray<T>& Array);
 	T* operator [](int nIndex) const

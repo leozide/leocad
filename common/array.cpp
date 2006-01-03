@@ -121,6 +121,36 @@ int PtrArray<T>::FindIndex(T* Obj) const
 }
 
 template <class T>
+void PtrArray<T>::Sort(LC_PTRARRAY_COMPARE_FUNC SortFunc, void* SortData)
+{
+	int Count = GetSize();
+
+	if (Count <= 1)
+		return;
+
+	int i = 1;
+	bool Flipped;
+
+	do
+	{
+		Flipped = false;
+
+		for (int j = Count - 1; j >= i; --j)
+		{
+			T* a = m_pData[j];
+			T* b = m_pData[j-1];
+
+			if (SortFunc(b, a, SortData) > 0)
+			{
+				m_pData[j - 1] = a;
+				m_pData[j] = b;
+				Flipped = true;
+			}
+		}
+	} while ((++i < Count) && Flipped);
+}
+
+template <class T>
 PtrArray<T>& PtrArray<T>::operator=(const PtrArray<T>& Array)
 {
 	m_nLength = Array.m_nLength;

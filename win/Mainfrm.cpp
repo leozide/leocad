@@ -539,7 +539,7 @@ void CMainFrame::OnPieceBar(UINT nID)
 		case ID_PIECEBAR_SUBPARTS:
 		{
 			m_wndPiecesBar.m_bSubParts = !m_wndPiecesBar.m_bSubParts;
-//			m_wndPiecesBar.UpdatePiecesTree(false);
+			m_wndPiecesBar.RefreshPiecesTree();
 		} break;
 	}
 

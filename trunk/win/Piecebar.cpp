@@ -959,6 +959,9 @@ void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 
 		for (int i = 0; i < Lib->GetNumCategories(); i++)
 		{
+			if (Lib->GetCategoryName(i) == "Search Results")
+				continue;
+
 			m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
 		}
 

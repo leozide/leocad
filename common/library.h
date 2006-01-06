@@ -44,10 +44,10 @@ public:
 	bool DoSaveCategories(bool AskName);
 	bool LoadCategories(const char* FileName);
 
-	const char* GetCategoryName(int Index) const
+	const String& GetCategoryName(int Index) const
 		{ return m_Categories[Index].Name; }
 
-	const char* GetCategoryKeywords(int Index) const
+	const String& GetCategoryKeywords(int Index) const
 		{ return m_Categories[Index].Keywords; }
 
 	int GetNumCategories() const

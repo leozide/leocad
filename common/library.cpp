@@ -475,9 +475,25 @@ bool PiecesLibrary::DoSaveCategories(bool AskName)
 	File.WriteInt(LC_CATEGORY_FILE_ID);
 	File.WriteInt(LC_CATEGORY_FILE_VERSION);
 
-	File.WriteInt(m_Categories.GetSize());
-	for (int i = 0; i < m_Categories.GetSize(); i++)
+	int NumCategories = m_Categories.GetSize();
+	int i;
+
+	for (i = 0; i < m_Categories.GetSize(); i++)
 	{
+		if (m_Categories[i].Name == "Search Results")
+		{
+			NumCategories--;
+			break;
+		}
+	}
+
+
+	File.WriteInt(NumCategories);
+	for (i = 0; i < m_Categories.GetSize(); i++)
+	{
+		if (m_Categories[i].Name == "Search Results")
+			continue;
+
 		File.WriteString(m_Categories[i].Name);
 		File.WriteString(m_Categories[i].Keywords);
 	}

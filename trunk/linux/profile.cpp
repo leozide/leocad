@@ -98,7 +98,7 @@ static bool save_var (const char *section, const char *key, const char *value)
 
   // First we need to find the section
   found = false;
-  while (old_rc.ReadString (line, 1024) != NULL)
+  while (old_rc.ReadLine(line, 1024) != NULL)
   {
     fputs (line, rc);
 
@@ -122,7 +122,7 @@ static bool save_var (const char *section, const char *key, const char *value)
   }
 
   found = false;
-  while (old_rc.ReadString (line, 1024) != NULL)
+  while (old_rc.ReadLine(line, 1024) != NULL)
   {
     ptr = strchr (line, '=');
 
@@ -152,7 +152,7 @@ static bool save_var (const char *section, const char *key, const char *value)
     fputs ("\n", rc);
   }
 
-  while (old_rc.ReadString (line, 1024) != NULL)
+  while (old_rc.ReadLine(line, 1024) != NULL)
     fputs (line, rc);
 
   fclose (rc);

@@ -22,7 +22,7 @@
 #include "main.h"
 #include "config.h"
 #include "message.h"
-#include "libman.h"
+#include "project.h"
 
 // =============================================================================
 // Modal dialog helper functions
@@ -2768,7 +2768,7 @@ int groupdlg_execute(void* param)
 
 static void librarydlg_update_list (GtkWidget *dlg)
 {
-  LibraryManager *lib = (LibraryManager*) gtk_object_get_data (GTK_OBJECT (dlg), "lib");
+  PiecesLibrary *lib = project->GetPiecesLibrary();
   GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (dlg), "list"));
   int row, sel = GTK_CLIST (ctree)->focus_row;
@@ -2776,19 +2776,16 @@ static void librarydlg_update_list (GtkWidget *dlg)
   gtk_clist_freeze (clist);
   gtk_clist_clear (clist);
 
-  for (int i = 0; i < lib->GetPieceCount(); i++)
+  PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+  lib->GetCategoryEntries(sel, false, SinglePieces, GroupedPieces);
+
+  for (int i = 0; i < SinglePieces.GetSize(); i++)
   {
-    PieceInfo* info;
-    lcuint32 groups;
+    PieceInfo* info = SinglePieces[i];
 
-    lib->GetPieceInfo (i, &info, &groups);
-
-    if ((sel == 0) || (((1 << (sel-1)) & groups) != 0))
-    {
-      char *text = info->m_strDescription;
-      row = gtk_clist_append (clist, &text);
-      gtk_clist_set_row_data (clist, row, GINT_TO_POINTER (i));
-    }
+    char *text = info->m_strDescription;
+    row = gtk_clist_append (clist, &text);
+    gtk_clist_set_row_data (clist, row, info);
   }
 
   gtk_clist_thaw (clist);
@@ -2798,7 +2795,7 @@ static void librarydlg_update_list (GtkWidget *dlg)
 
 static void librarydlg_update_tree (GtkWidget *dlg)
 {
-  LibraryManager *lib = (LibraryManager*) gtk_object_get_data (GTK_OBJECT (dlg), "lib");
+  PiecesLibrary *lib = project->GetPiecesLibrary();
   GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCTreeNode *parent;
   char *text = "Groups";
@@ -2808,9 +2805,9 @@ static void librarydlg_update_tree (GtkWidget *dlg)
 
   parent = gtk_ctree_insert_node (ctree, NULL, NULL, &text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
 
-  for (int i = 0; i < lib->GetGroupCount(); i++)
+  for (int i = 0; i < lib->GetNumCategories(); i++)
   {
-    text = lib->GetGroupName(i);
+    text = lib->GetCategoryName(i);
     gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
   }
 

@@ -314,8 +314,6 @@ static void fill_piecelist(int group)
 static void group_event(GtkWidget *widget, gpointer data)
 {
   fill_piecelist((int)data);
-  if (!ignore_commands)
-    project->HandleNotify(LC_GROUP_CHANGED, (int)data);
 }
 
 void groupsbar_set(int new_group)

@@ -115,6 +115,12 @@ BOOL CPiecesBar::Create(LPCTSTR lpszWindowName, CWnd* pParentWnd, CSize sizeDefa
 	if (!CWnd::Create(wndclass, lpszWindowName, dwStyle, CRect(0,0,0,0), pParentWnd, nID))
 		return FALSE;
 
+	if (sizeDefault.cx < m_sizeMin.cx)
+		sizeDefault.cx = m_sizeMin.cx;
+
+	if (sizeDefault.cy < m_sizeMin.cy)
+		sizeDefault.cy = m_sizeMin.cy;
+
 	m_sizeHorz = sizeDefault;
 	m_sizeVert = sizeDefault;
 	m_sizeFloat = sizeDefault;

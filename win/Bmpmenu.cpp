@@ -709,7 +709,9 @@ BOOL CBMPMenu::LoadFromToolBar(UINT nID,UINT nToolBar,int& xoffset)
 	BOOL returnflag=FALSE;
 	CToolBar bar;
 	
-	bar.Create(AfxGetMainWnd());
+	CWnd* pWnd = AfxGetMainWnd();
+	if (pWnd == NULL)pWnd = CWnd::GetDesktopWindow();
+	bar.Create(pWnd);
 	if(bar.LoadToolBar(nToolBar)){
 		offset=bar.CommandToIndex(nID);
 		if(offset>=0){
@@ -916,6 +918,7 @@ void CBMPMenu::InsertSpaces(void)
 	m_fontMenu.CreateFontIndirect (&m_lf);
 	
 	CWnd *pWnd = AfxGetMainWnd();  
+	if (pWnd == NULL)pWnd = CWnd::GetDesktopWindow();
 	CDC *pDC = pWnd->GetDC();
 	CFont* pFont = pDC->SelectObject (&m_fontMenu);
 	
@@ -955,7 +958,7 @@ void CBMPMenu::InsertSpaces(void)
 		}
 	}
 	pDC->SelectObject (pFont);              // Select old font in
-	AfxGetMainWnd()->ReleaseDC(pDC);       // Release the DC
+	pWnd->ReleaseDC(pDC);       // Release the DC
 	m_fontMenu.DeleteObject();
 }
 

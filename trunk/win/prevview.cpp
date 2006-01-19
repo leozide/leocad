@@ -7,7 +7,12 @@
 #include "PrevView.h"
 
 #include "CADView.h"
+
+#if _MFC_VER < 0x0710
 #include <../src/afximpl.h>
+#else
+#include <../src/mfc/afximpl.h>
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE

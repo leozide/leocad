@@ -21,6 +21,12 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
+#if _MFC_VER >= 0x0710
+typedef DWORD ACTIVATEAPPPARAM;
+#else
+typedef HTASK ACTIVATEAPPPARAM;
+#endif
+
 //#include <afxadv.h>			// CSharedFile
 
 #include "opengl.h"

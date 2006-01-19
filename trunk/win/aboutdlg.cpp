@@ -75,11 +75,11 @@ BOOL CAboutDlg::OnInitDialog()
 
 	tmp.Format("Color bits: %d, Depth Buffer: %d bits\r\nOpenGL Version ", pfd.cColorBits, pfd.cDepthBits);
 	info += tmp;
-	info += glGetString(GL_VERSION);
+	info += (const char*)glGetString(GL_VERSION);
 	info += " (";
-	info += glGetString(GL_RENDERER);
+	info += (const char*)glGetString(GL_RENDERER);
 	info += " - ";
-	info += glGetString(GL_VENDOR);
+	info += (const char*)glGetString(GL_VENDOR);
 	info += ")";
 
 	SetDlgItemText(IDC_ABTDLG_INFO, info);

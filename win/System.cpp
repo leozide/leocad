@@ -859,7 +859,7 @@ static void AbbreviateName(LPTSTR lpszCanon, int cchMax, BOOL bAtLeastName)
 	// If cchMax isn't enough to hold at least the basename, we're done
 	if (cchMax < cchFileName)
 	{
-		lstrcpy(lpszCanon, (bAtLeastName) ? lpszFileName : &afxChNil);
+		lstrcpy(lpszCanon, (bAtLeastName) ? lpszFileName : _T(""));
 		return;
 	}
 

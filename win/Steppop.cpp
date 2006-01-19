@@ -70,7 +70,7 @@ void CStepPopup::OnKillFocus(CWnd* pNewWnd)
 		DestroyWindow();
 }
 
-void CStepPopup::OnActivateApp(BOOL bActive, HTASK hTask) 
+void CStepPopup::OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask) 
 {
 	CWnd::OnActivateApp(bActive, hTask);
 	

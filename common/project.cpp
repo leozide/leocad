@@ -7641,11 +7641,11 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				axis[0] = axis[1] = xy;
 				axis[2] = z;
 
-				if ((m_nSnap & LC_DRAW_SNAP_X == 0) || bControl)
+				if (((m_nSnap & LC_DRAW_SNAP_X) == 0) || bControl)
 					axis[0] = 0.01f;
-				if ((m_nSnap & LC_DRAW_SNAP_Y == 0) || bControl)
+				if (((m_nSnap & LC_DRAW_SNAP_Y) == 0) || bControl)
 					axis[1] = 0.01f;
-				if ((m_nSnap & LC_DRAW_SNAP_Z == 0) || bControl)
+				if (((m_nSnap & LC_DRAW_SNAP_Z) == 0) || bControl)
 					axis[2] = 0.01f;
 			}
 

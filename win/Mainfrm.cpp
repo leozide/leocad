@@ -1043,7 +1043,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CMainFrame::OnActivateApp(BOOL bActive, HTASK hTask) 
+void CMainFrame::OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask) 
 {
 	CFrameWnd::OnActivateApp(bActive, hTask);
 	

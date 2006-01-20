@@ -8,6 +8,7 @@
 //
 
 class PieceInfo;
+class PiecePreview;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPiecePreview window
@@ -20,9 +21,8 @@ public:
 
 // Attributes
 public:
-	void SetPieceInfo (PieceInfo* pInfo);
-	PieceInfo* GetPieceInfo () const
-    { return m_pPieceInfo; }
+	void SetPieceInfo(PieceInfo* pInfo);
+	PieceInfo* GetPieceInfo () const;
 
 // Operations
 public:
@@ -38,12 +38,7 @@ public:
 
 	// Generated message map functions
 protected:
-	SIZE m_szView;
-	HGLRC m_hglRC;
-	PieceInfo* m_pPieceInfo;
-
-	CPalette* m_pPalette;
-	CClientDC* m_pDC;
+	PiecePreview* m_Preview;
 
 	//{{AFX_MSG(CPiecePreview)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

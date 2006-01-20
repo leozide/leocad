@@ -7,16 +7,18 @@ class PieceInfo;
 
 class PiecePreview : public GLWindow
 {
- public:
-  PiecePreview (GLWindow *share);
-  virtual ~PiecePreview ();
+public:
+	PiecePreview(GLWindow *share);
+	virtual ~PiecePreview();
 
-  void OnDraw ();
+	void OnDraw();
 
-  void SetCurrentPiece (PieceInfo *pInfo);
+	PieceInfo* GetCurrentPiece() const
+	{ return m_PieceInfo; }
+	void SetCurrentPiece(PieceInfo* Info);
 
- private:
-  PieceInfo* m_pPieceInfo;
+protected:
+	PieceInfo* m_PieceInfo;
 };
 
 #endif // _PREVIEW_H_

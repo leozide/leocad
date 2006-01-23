@@ -1068,6 +1068,10 @@ SOURCE=..\Common\pieceinf.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\preview.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\Common\project.h
 # End Source File
 # Begin Source File
@@ -1246,6 +1250,11 @@ SOURCE=..\Common\piece.cpp
 # Begin Source File
 
 SOURCE=..\Common\pieceinf.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\preview.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File

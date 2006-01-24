@@ -271,3 +271,10 @@ void GLWindow::Redraw ()
   gtk_widget_draw (prv->widget, (GdkRectangle*)NULL);
 }
 
+void GLWindow::CaptureMouse()
+{
+}
+
+void GLWindow::ReleaseMouse()
+{
+}

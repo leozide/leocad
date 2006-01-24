@@ -114,36 +114,6 @@ BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CCADView::OnDraw(CDC* /*pDC*/)
 {
-  static int added = 0;
-
-  if (!added)
-  {
-    m_pView->OnInitialUpdate ();
-    added = 1;
-  }
-
-//  m_pView->OnDraw ();
-//	project->Render(false);
-/*
-	CCADDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	
-	if (m_pPixels)
-	{
-		glViewport(0, 0, pDoc->m_szView.cx, pDoc->m_szView.cy);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluOrtho2D(0, pDoc->m_szView.cx, 0, pDoc->m_szView.cy);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glRasterPos2i(0, 0);
-		glDrawPixels(pDoc->m_szView.cx, pDoc->m_szView.cy, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
-	}
-	else
-		pDoc->Render(FALSE);
-
-	pfnwglSwapBuffers (pfnwglGetCurrentDC());
-*/
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -769,7 +739,7 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
   m_pView = new View (project, NULL);
   m_pView->Create (m_hWnd);
-//  m_pView->OnInitialUpdate ();
+  m_pView->OnInitialUpdate ();
 
   SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
@@ -1052,10 +1022,13 @@ LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
   if (m_pView)
   {
     MSG msg;
-    msg.message = message;
+
+		msg.message = message;
     msg.wParam = wParam;
     msg.lParam = lParam;
-    GLWindowPreTranslateMessage (m_pView, &msg);
+
+		if (GLWindowPreTranslateMessage(m_pView, &msg))
+			return TRUE;
   }
 	
 	return CView::WindowProc(message, wParam, lParam);

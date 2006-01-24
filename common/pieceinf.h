@@ -9,6 +9,7 @@
 #ifndef GLuint
 #include "opengl.h"
 #endif
+#include "algebra.h"
 
 #define LC_PIECE_COUNT						0x01 // Count this piece in the totals ?
 #define LC_PIECE_LONGDATA					0x02 // unsigned long/short index
@@ -72,8 +73,15 @@ class PieceInfo
 		return (m_strDescription[0] == '~');
 	}
 
+	Point3 GetCenter() const
+	{
+		return Point3((m_fDimensions[0] + m_fDimensions[3]) * 0.5f,
+		              (m_fDimensions[1] + m_fDimensions[4]) * 0.5f,
+		              (m_fDimensions[2] + m_fDimensions[5]) * 0.5f);
+	}
+
 	// Operations
-	void ZoomExtents(float Fov, float Aspect);
+	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);

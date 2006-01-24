@@ -53,7 +53,7 @@ void CPiecePreview::OnPaint()
 	if (!IsWindowEnabled() || (m_Preview == NULL))
 		return;
 
-	m_Preview->OnDraw();
+//	m_Preview->OnDraw();
 }
 
 void CPiecePreview::OnSize(UINT nType, int cx, int cy) 
@@ -94,4 +94,21 @@ void CPiecePreview::SetPieceInfo(PieceInfo* pInfo)
 PieceInfo* CPiecePreview::GetPieceInfo() const
 {
 	return m_Preview->GetCurrentPiece();
+}
+
+BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);
+LRESULT CPiecePreview::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if (m_Preview)
+	{
+		MSG msg;
+		msg.message = message;
+		msg.wParam = wParam;
+		msg.lParam = lParam;
+
+		if (GLWindowPreTranslateMessage(m_Preview, &msg))
+			return TRUE;
+	}
+
+	return CWnd::WindowProc(message, wParam, lParam);
 }

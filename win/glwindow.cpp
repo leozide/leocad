@@ -21,8 +21,13 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 	switch (pMsg->message)
 	{
 		case WM_PAINT:
+		{
+			GLWindowPrivate* prv = (GLWindowPrivate*)wnd->GetData();
+			PAINTSTRUCT ps;
+			BeginPaint(prv->m_hWnd, &ps);
 			wnd->OnDraw ();
-			break;
+			EndPaint(prv->m_hWnd, &ps);
+		} break;
 		case WM_SIZE:
 			wnd->OnSize (LOWORD (pMsg->lParam), HIWORD (pMsg->lParam));
 			break;
@@ -74,11 +79,13 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 						InvalidateRect (prv->m_hWnd, NULL, TRUE);
 					}
 			}
-			return TRUE;
 		} break;
+
+		default:
+			return FALSE;
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -247,3 +254,13 @@ void GLWindow::Redraw ()
   InvalidateRect (prv->m_hWnd, NULL, FALSE);
 }
 
+void GLWindow::CaptureMouse()
+{
+  GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
+	SetCapture(prv->m_hWnd);
+}
+
+void GLWindow::ReleaseMouse()
+{
+	ReleaseCapture();
+}

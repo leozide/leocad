@@ -285,6 +285,7 @@ public:
 		: m_Value(_x, _y, _z) { }
 
 	inline operator const float*() const { return (const float*)this; }
+	inline operator float*() { return (float*)this; }
 	inline const Vector4& GetValue() const { return m_Value; }
 	inline operator const Vector4() const
 	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 1.0f); }
@@ -313,6 +314,7 @@ public:
 		: m_Value(_x, _y, _z) { }
 
 	inline operator const float*() const { return (const float*)this; }
+	inline operator float*() { return (float*)this; }
 	inline const Vector4& GetValue() const { return m_Value; }
 	inline operator const Vector4() const
 	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 0.0f); }
@@ -555,6 +557,9 @@ public:
 	friend inline Vector3 operator*(const Vector3& a, const Matrix33& b)
 	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
+	friend inline Point3 operator*(const Point3& a, const Matrix33& b)
+	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
+
 protected:
 	Vector3 m_Rows[3];
 
@@ -572,7 +577,16 @@ public:
 	inline Matrix44(const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4& Row3)
 	{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
 
+	inline operator const float*() const { return (const float*)this; }
 	inline Vector4& operator[](int i) { return m_Rows[i]; }
+
+	inline void LoadIdentity()
+	{
+		m_Rows[0] = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+		m_Rows[1] = Vector4(0.0f, 1.0f, 0.0f, 0.0f);
+		m_Rows[2] = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+		m_Rows[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+	}
 
 	// Math operations.
 	friend inline Point3 operator*(const Point3& a, const Matrix44& b)

@@ -1540,9 +1540,16 @@ void PieceInfo::FreeInformation()
 }
 
 // Zoom extents for the preview window and print catalog
-void PieceInfo::ZoomExtents(float Fov, float Aspect)
+void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 {
 	float Eye[3] = { -100.0f, -100.0f, 50.0f };
+
+	if (EyePos)
+	{
+		Eye[0] = EyePos[0];
+		Eye[1] = EyePos[1];
+		Eye[2] = EyePos[2];
+	}
 
 	// Get perspective information.
 	float Alpha = Fov / 2.0f;
@@ -1644,6 +1651,13 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect)
 	NewEye[0] = Eye[0] + Front[0] * SmallestU;
 	NewEye[1] = Eye[1] + Front[1] * SmallestU;
 	NewEye[2] = Eye[2] + Front[2] * SmallestU;
+
+	if (EyePos)
+	{
+		EyePos[0] = NewEye[0];
+		EyePos[1] = NewEye[1];
+		EyePos[2] = NewEye[2];
+	}
 
 	Vector FrontVec, RightVec, UpVec;
 

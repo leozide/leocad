@@ -31,9 +31,6 @@ CPiecePreview::~CPiecePreview()
 
 BEGIN_MESSAGE_MAP(CPiecePreview, CWnd)
 	//{{AFX_MSG_MAP(CPiecePreview)
-	ON_WM_ERASEBKGND()
-	ON_WM_PAINT()
-	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
@@ -42,25 +39,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CPiecePreview message handlers
-
-BOOL CPiecePreview::OnEraseBkgnd(CDC* pDC) 
-{
-	return TRUE;
-}
-
-void CPiecePreview::OnPaint() 
-{
-	if (!IsWindowEnabled() || (m_Preview == NULL))
-		return;
-
-//	m_Preview->OnDraw();
-}
-
-void CPiecePreview::OnSize(UINT nType, int cx, int cy) 
-{
-	m_Preview->OnSize(cx, cy);
-	CWnd::OnSize(nType, cx, cy);
-}
 
 int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {

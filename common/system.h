@@ -37,10 +37,6 @@ char* Sys_ProfileLoadString (const char *section, const char *key, const char *d
 void* Sys_StartMemoryRender (int width, int height);
 void Sys_FinishMemoryRender (void* param);
 
-// Cursor functions
-//void Sys_GetCursorPos (int *x, int *y);
-//void Sys_SetCursorPos (int x, int y);
-
 // FIXME: moved to basewnd, remove
 
 // Message Box
@@ -108,7 +104,6 @@ void SystemDoPopupMenu(int nMenu, int x, int y);
 void SystemDoWaitCursor(int nCode);
 
 void SystemSetWindowCaption(char* caption);
-//void SystemRedrawView();
 void SystemPieceComboAdd(char* name);
 
 void SystemCaptureMouse();
@@ -117,7 +112,6 @@ void SystemReleaseMouse();
 void SystemExportClipboard(File* clip);
 File* SystemImportClipboard();
 
-//void SystemSwapBuffers();
 void SystemPumpMessages();
 long SystemGetTicks();
 

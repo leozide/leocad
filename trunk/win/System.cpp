@@ -1633,13 +1633,6 @@ void Sys_FinishMemoryRender(void* param)
 /////////////////////////////////////////////////////////////////////////////
 // Main window functions
 
-void SystemRedrawView()
-{
-	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
-	CView* pView = pFrame->GetActiveView();
-	pView->Invalidate(FALSE);
-}
-
 void SystemPieceComboAdd(char* name)
 {
 	CWnd* pWnd = AfxGetMainWnd();
@@ -1726,11 +1719,6 @@ void SystemPumpMessages()
 long SystemGetTicks()
 {
 	return GetTickCount();
-}
-
-void SystemSwapBuffers()
-{
-	OpenGLSwapBuffers (pfnwglGetCurrentDC());
 }
 
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)

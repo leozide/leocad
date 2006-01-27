@@ -19,18 +19,6 @@
 // =============================================================================
 // Cursor functions
 
-/*
-void Sys_GetCursorPos (int *x, int *y)
-{
-  gdk_window_get_pointer (NULL, x, y, NULL);
-}
-
-void Sys_SetCursorPos (int x, int y)
-{
-  XWarpPointer (GDK_DISPLAY(), None, GDK_ROOT_WINDOW(), 0, 0, 0, 0, x, y);
-}
-*/
-
 int Sys_MessageBox (const char* text, const char* caption, int type)
 {
   return msgbox_execute (text, caption, type);
@@ -708,11 +696,6 @@ void SystemSetWindowCaption(char* caption)
   gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), caption);
 }
 
-void SystemRedrawView()
-{
-  gtk_widget_draw(drawing_area, NULL);
-}
-
 void SystemPieceComboAdd(char* name)
 {
   piececombo_add(name);
@@ -725,12 +708,6 @@ void SystemCaptureMouse()
 
 void SystemReleaseMouse()
 {
-}
-
-void SystemSwapBuffers()
-{
-  //  if (drawing_area)
-  //    gtk_gl_area_swapbuffers (GTK_GL_AREA(drawing_area));
 }
 
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)

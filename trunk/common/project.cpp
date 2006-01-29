@@ -156,8 +156,6 @@ bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
   char *env_path;
   bool loaded = false;
 
-  strcpy (m_AppPath, binpath);
-
   // check if there's an environment variable for the piece library
   env_path = getenv ("LEOCAD_LIB");
   if (env_path != NULL)

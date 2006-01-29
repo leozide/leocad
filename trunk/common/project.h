@@ -138,7 +138,6 @@ protected:
 	char m_strComments[256];
 
 	// Piece library
-	char m_AppPath[LC_MAXPATH];	// path to the LeoCAD executable
 	TexFont* m_pScreenFont;
 	PiecesLibrary* m_pLibrary;
 

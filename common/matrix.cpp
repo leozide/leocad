@@ -323,14 +323,23 @@ void Matrix::FromLDraw (const float *f)
   float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
   float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
 
-  m[0] = f[3];    m[1] = f[6];    m[2] = f[9];
-  m[4] = f[4];    m[5] = f[7];    m[6] = f[10];
-  m[8] = f[5];    m[9] = f[8];    m[10]= f[11];
-  m[12]= f[0]/25; m[13]= f[1]/25; m[14]= f[2]/25;
+  m[0] = f[3];    m[1] = f[6];    m[2] = f[9];    m[3]  = 0.0f;
+  m[4] = f[4];    m[5] = f[7];    m[6] = f[10];   m[7]  = 0.0f;
+  m[8] = f[5];    m[9] = f[8];    m[10]= f[11];   m[11] = 0.0f;
+  m[12]= f[0]/25; m[13]= f[1]/25; m[14]= f[2]/25; m[15] = 1.0f;
+
+	// Normalize.
+	float inv;
+	inv = 1.0f / sqrtf(m[0]*m[0] + m[4]*m[4] + m[8]*m[8]);
+	m[0] *= inv; m[4] *= inv; m[8] *= inv;
+	inv = 1.0f / sqrtf(m[1]*m[1] + m[5]*m[5] + m[9]*m[9]);
+	m[1] *= inv; m[5] *= inv; m[9] *= inv;
+	inv = 1.0f / sqrtf(m[2]*m[2] + m[6]*m[6] + m[10]*m[10]);
+	m[2] *= inv; m[6] *= inv; m[10] *= inv;
 
   matmul (m, m, t);
   matmul (trans, trans, m);
-  memcpy (&m[0], &trans[0], sizeof(m));
+	memcpy (&m[0], &trans[0], sizeof(m));
 }
 
 void Matrix::ToLDraw (float *f) const

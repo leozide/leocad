@@ -515,27 +515,7 @@ bool PiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKeywo
 	String Keywords = CategoryKeywords;
 	Keywords.MakeLower();
 
-	const char* p = Keywords;
-
-	while (*p)
-	{
-		const char* k = p;
-
-		while (*k && (*k != ',') && (*k != ';'))
-			k++;
-
-		String Search = Keywords.Mid(p - (const char*)Keywords, k - p);
-
-		if (PieceName.Find(Search) != -1)
-			return true;
-
-		if (*k)
-			p = k + 1;
-		else
-			break;
-	}
-
-	return false;
+	return PieceName.Match(Keywords);
 }
 
 int PiecesLibrary::GetFirstCategory(PieceInfo* Info) const

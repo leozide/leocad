@@ -180,6 +180,136 @@ String& String::Right (int count) const
 // =============================================================================
 // Other functions
 
+// Evaluates the contents of the string against a boolean expression.
+// For example: (^Car | %Animal) & !Parrot
+// Will return true for any strings that have the Car word or
+// begin with Animal and do not have the word Parrot.
+bool String::Match(const String& Expression) const
+{
+	// Check if we need to split the test expression.
+	const char* p = Expression;
+
+	while (*p)
+	{
+		if (*p == '!')
+		{
+			return !Match(String(p + 1));
+		}
+		else if (*p == '(')
+		{
+			const char* Start = p;
+			int c = 0;
+
+			// Skip what's inside the parenthesis.
+			do
+			{
+				if (*p == '(')
+						c++;
+				else if (*p == ')')
+						c--;
+				else if (*p == 0)
+					return false; // Mismatched parenthesis.
+
+				p++;
+			}
+			while (c);
+
+			if (*p == 0)
+				break;
+		}
+		else if ((*p == '|') || (*p == '&'))
+		{
+			String Left, Right;
+
+			Left = Expression.Left((p - Expression) - 1);
+			Right = Expression.Right(Expression.GetLength() - (p - Expression) - 1);
+
+			if (*p == '|')
+				return Match(Left) || Match(Right);
+			else
+				return Match(Left) && Match(Right);
+		}
+
+		p++;
+	}
+
+	if (Expression.Find('(') != -1)
+	{
+		p = Expression;
+		while (*p)
+		{
+			if (*p == '(')
+			{
+				const char* Start = p;
+				int c = 0;
+
+				// Extract what's inside the parenthesis.
+				do
+				{
+					if (*p == '(')
+							c++;
+					else if (*p == ')')
+							c--;
+					else if (*p == 0)
+						return false; // Mismatched parenthesis.
+
+					p++;
+				}
+				while (c);
+
+				String Expr = Expression.Mid(Start - Expression + 1, p - Start - 2);
+				return Match(Expr);
+			}
+
+			p++;
+		}
+	}
+
+	// Testing a simple case.
+	String Search = Expression;
+	Search.TrimRight();
+	Search.TrimLeft();
+
+	const char* Word = Search;
+
+	// Check for modifiers.
+	bool WholeWord = 0;
+	bool Begin = 0;
+
+	for (;;)
+	{
+		if (Word[0] == '^')
+			WholeWord = true;
+		else if (Word[0] == '%')
+			Begin = true;
+		else
+			break;
+
+		Word++;
+	}
+
+	int Result = Find(Word);
+
+	if (Result == -1)
+		return false;
+
+	if (Begin && (Result != 0))
+		return false;
+
+	if (WholeWord)
+	{
+		char End = GetAt(Result + strlen(Word));
+
+		if ((End != 0) && (End != ' '))
+			return false;
+
+		if ((Result != 0) && (GetAt(Result-1) != ' '))
+			return false;
+	}
+
+	return true;
+}
+
 int String::CompareNoCase (const char *string) const
 {
   char c1, c2, *ch = m_pData;

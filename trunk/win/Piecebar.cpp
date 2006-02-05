@@ -1067,11 +1067,29 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				{
 					PieceInfo* Parent = (PieceInfo*)Notify->itemNew.lParam;
 
+					HTREEITEM CategoryItem = m_PiecesTree.GetParentItem(Notify->itemNew.hItem);
+					CString CategoryName = m_PiecesTree.GetItemText(CategoryItem);
+					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
+
 					PtrArray<PieceInfo> Pieces;
 					Lib->GetPatternedPieces(Parent, Pieces);
 
 					Pieces.Sort(PiecesSortFunc, NULL);
 					HTREEITEM ParentItem = Notify->itemNew.hItem;
+
+					// Remove all children (for some reason TVE_COLLAPSERESET isn't always working).
+					if (m_PiecesTree.ItemHasChildren(ParentItem))
+					{
+						HTREEITEM NextItem;
+						HTREEITEM ChildItem = m_PiecesTree.GetChildItem(ParentItem);
+
+						while (ChildItem != NULL)
+						{
+							NextItem = m_PiecesTree.GetNextItem(ChildItem, TVGN_NEXT);
+							m_PiecesTree.DeleteItem(ChildItem);
+							ChildItem = NextItem;
+						}
+					}
 
 					for (int i = 0; i < Pieces.GetSize(); i++)
 					{
@@ -1079,6 +1097,12 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 						if (!m_bSubParts && Info->IsSubPiece())
 							continue;
+
+						if (CategoryIndex != -1)
+						{
+							if (!Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(CategoryIndex)))
+								continue;
+						}
 
 						// If both descriptions begin with the same text, only show the difference.
 						if (!strncmp(Info->m_strDescription, Parent->m_strDescription, strlen(Parent->m_strDescription)))
@@ -1090,7 +1114,6 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 			}
 			else if (Notify->action == TVE_COLLAPSE)
 			{
-				// Remove all children.
 				m_PiecesTree.Expand(Notify->itemNew.hItem, TVE_COLLAPSE | TVE_COLLAPSERESET);
 			}
 		}

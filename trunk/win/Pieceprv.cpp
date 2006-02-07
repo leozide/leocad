@@ -26,6 +26,7 @@ CPiecePreview::CPiecePreview()
 
 CPiecePreview::~CPiecePreview()
 {
+	delete m_Preview;
 }
 
 

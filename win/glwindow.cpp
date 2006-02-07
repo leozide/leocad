@@ -62,6 +62,7 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 			break;
 		case WM_DESTROY:
 			wnd->DestroyContext ();
+			return FALSE;
 			break;
 		case WM_PALETTECHANGED:
 			if ((HWND)pMsg->wParam == pMsg->hwnd)  // Responding to own message.

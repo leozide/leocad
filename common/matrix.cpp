@@ -205,6 +205,11 @@ void Matrix::LoadIdentity ()
   memcpy (&m[0], &Identity, sizeof(float[16]));
 }
 
+float Matrix::Determinant() const
+{
+	return m[0]*m[5]*m[10] + m[1]*m[6]*m[8] + m[2]*m[4]*m[9] - m[0]*m[6]*m[9] - m[1]*m[4]*m[10] - m[2]*m[5]*m[8];
+}
+
 void Matrix::Multiply(const Matrix& m1, const Matrix& m2)
 {
 	matmul(m, m1.m, m2.m);
@@ -320,40 +325,31 @@ void Matrix::TransformPoints (float p[], int n)
 
 void Matrix::FromLDraw (const float *f)
 {
-  float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
-  float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
+	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
+	float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
 
-  m[0] = f[3];    m[1] = f[6];    m[2] = f[9];    m[3]  = 0.0f;
-  m[4] = f[4];    m[5] = f[7];    m[6] = f[10];   m[7]  = 0.0f;
-  m[8] = f[5];    m[9] = f[8];    m[10]= f[11];   m[11] = 0.0f;
-  m[12]= f[0]/25; m[13]= f[1]/25; m[14]= f[2]/25; m[15] = 1.0f;
+	m[0] = f[3];    m[1] = f[6];    m[2] = f[9];    m[3]  = 0.0f;
+	m[4] = f[4];    m[5] = f[7];    m[6] = f[10];   m[7]  = 0.0f;
+	m[8] = f[5];    m[9] = f[8];    m[10]= f[11];   m[11] = 0.0f;
+	m[12]= f[0]/25; m[13]= f[1]/25; m[14]= f[2]/25; m[15] = 1.0f;
 
-	// Normalize.
-	float inv;
-	inv = 1.0f / sqrtf(m[0]*m[0] + m[4]*m[4] + m[8]*m[8]);
-	m[0] *= inv; m[4] *= inv; m[8] *= inv;
-	inv = 1.0f / sqrtf(m[1]*m[1] + m[5]*m[5] + m[9]*m[9]);
-	m[1] *= inv; m[5] *= inv; m[9] *= inv;
-	inv = 1.0f / sqrtf(m[2]*m[2] + m[6]*m[6] + m[10]*m[10]);
-	m[2] *= inv; m[6] *= inv; m[10] *= inv;
-
-  matmul (m, m, t);
-  matmul (trans, trans, m);
+	matmul (m, m, t);
+	matmul (trans, trans, m);
 	memcpy (&m[0], &trans[0], sizeof(m));
 }
 
 void Matrix::ToLDraw (float *f) const
 {
-  float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
-  float tmp[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
+	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
+	float tmp[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
 
-  matmul(tmp, tmp, m);
-  matmul (tmp, tmp, trans);
+	matmul(tmp, tmp, m);
+	matmul (tmp, tmp, trans);
 
-  f[0] = m[12]*25; f[1] = -m[14]*25; f[2] = m[13]*25;
-  f[3] = tmp[0];   f[4] = tmp[4];    f[5] = tmp[8];
-  f[6] = tmp[1];   f[7] = tmp[5];    f[8] = tmp[9];
-  f[9] = tmp[2];   f[10]= tmp[6];    f[11]= tmp[10];
+	f[0] = m[12]*25; f[1] = -m[14]*25; f[2] = m[13]*25;
+	f[3] = tmp[0];   f[4] = tmp[4];    f[5] = tmp[8];
+	f[6] = tmp[1];   f[7] = tmp[5];    f[8] = tmp[9];
+	f[9] = tmp[2];   f[10]= tmp[6];    f[11]= tmp[10];
 }
 
 void Matrix::FileLoad (File& file)
@@ -432,88 +428,102 @@ void Matrix::ToEulerAngles (float *rot) const
   if (rot[0] < 0) rot[0] += 360;
 }
 
-void Matrix::ToAxisAngle (float *rot) const
+void Matrix::ToAxisAngle(float *rot) const
 {
-  float fTrace = m[0] + m[5] + m[10];
-  float inv, fCos = 0.5f * (fTrace - 1.0f);
+	Matrix tmp(*this);
 
-	while (fCos < -1.0f)
-		fCos += 2.0f;
-	while (fCos > 1.0f)
-		fCos -= 2.0f;
+	// Normalize.
+	float inv;
+	inv = 1.0f / sqrtf(tmp.m[0]*tmp.m[0] + tmp.m[1]*tmp.m[1] + tmp.m[2]*tmp.m[2]);
+	tmp.m[0] *= inv; tmp.m[1] *= inv; tmp.m[2] *= inv;
+	inv = 1.0f / sqrtf(tmp.m[4]*tmp.m[4] + tmp.m[5]*tmp.m[5] + tmp.m[6]*tmp.m[6]);
+	tmp.m[4] *= inv; tmp.m[5] *= inv; tmp.m[6] *= inv;
+	inv = 1.0f / sqrtf(tmp.m[8]*tmp.m[8] + tmp.m[9]*tmp.m[9] + tmp.m[10]*tmp.m[10]);
+	tmp.m[8] *= inv; tmp.m[9] *= inv; tmp.m[10] *= inv;
 
-  rot[3] = (float)acos (fCos);  // in [0,PI]
+	// Determinant should be 1 for rotation matrices.
+	if (tmp.Determinant() < 0.0f)
+	{
+		tmp.m[0] *= -1.0f;
+		tmp.m[1] *= -1.0f;
+		tmp.m[2] *= -1.0f;
+	}
 
-  if (rot[3] > 0.01f)
-  {
-    if (fabs (M_PI - rot[3]) > 0.01f)
-    {
-      rot[0] = m[6] - m[9];
-      rot[1] = m[8] - m[2];
-      rot[2] = m[1] - m[4];
+	float fTrace = tmp.m[0] + tmp.m[5] + tmp.m[10];
+	float fCos = 0.5f * (fTrace - 1.0f);
 
-      inv = 1.0f / (float)sqrt (rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+	rot[3] = acosf(fCos);  // in [0,PI]
 
-      rot[0] *= inv;
-      rot[1] *= inv;
-      rot[2] *= inv;
-    }
-    else
-    {
-      // angle is PI
-      float fHalfInverse;
-      if (m[0] >= m[5])
-      {
-        // r00 >= r11
-        if (m[0] >= m[10])
-        {
-          // r00 is maximum diagonal term
-          rot[0] = (float)(0.5 * sqrt (m[0] - m[5] - m[10] + 1.0));
-          fHalfInverse = 0.5f / rot[0];
-          rot[1] = fHalfInverse * m[4];
-          rot[2] = fHalfInverse * m[8];
-        }
-        else
-        {
-          // r22 is maximum diagonal term
-          rot[2] = (float)(0.5 * sqrt (m[10] - m[0] - m[5] + 1.0));
-          fHalfInverse = 0.5f / rot[2];
-          rot[0] = fHalfInverse * m[8];
-          rot[1] = fHalfInverse * m[9];
-        }
-      }
-      else
-      {
-        // r11 > r00
-        if (m[5] >= m[10])
-        {
-          // r11 is maximum diagonal term
-          rot[1] = (float)(0.5 * sqrt (m[5] - m[0] - m[10] + 1.0));
-          fHalfInverse  = 0.5f / rot[1];
-          rot[0] = fHalfInverse * m[4];
-          rot[2] = fHalfInverse * m[9];
-        }
-        else
-        {
-          // r22 is maximum diagonal term
-          rot[2] = (float)(0.5 * sqrt (m[10] - m[0] - m[5] + 1.0));
-          fHalfInverse = 0.5f / rot[2];
-          rot[0] = fHalfInverse * m[8];
-          rot[1] = fHalfInverse * m[9];
-        }
-      }
-    }
-  }
-  else
-  {
-    // The angle is 0 and the matrix is the identity.  Any axis will
-    // work, so just use the x-axis.
-    rot[0] = 0.0;
-    rot[1] = 0.0;
-    rot[2] = 1.0;
-  }
+	if (rot[3] > 0.01f)
+	{
+		if (fabs (M_PI - rot[3]) > 0.01f)
+		{
+			rot[0] = tmp.m[6] - tmp.m[9];
+			rot[1] = tmp.m[8] - tmp.m[2];
+			rot[2] = tmp.m[1] - tmp.m[4];
 
-  rot[3] *= RTOD;
+			inv = 1.0f / sqrtf(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+
+			rot[0] *= inv;
+			rot[1] *= inv;
+			rot[2] *= inv;
+		}
+		else
+		{
+			// angle is PI
+			float fHalfInverse;
+			if (tmp.m[0] >= tmp.m[5])
+			{
+				// r00 >= r11
+				if (tmp.m[0] >= tmp.m[10])
+				{
+					// r00 is maximum diagonal term
+					rot[0] = 0.5f * sqrtf(tmp.m[0] - tmp.m[5] - tmp.m[10] + 1.0f);
+					fHalfInverse = 0.5f / rot[0];
+					rot[1] = fHalfInverse * tmp.m[4];
+					rot[2] = fHalfInverse * tmp.m[8];
+				}
+				else
+				{
+					// r22 is maximum diagonal term
+					rot[2] = 0.5f * sqrtf(tmp.m[10] - tmp.m[0] - tmp.m[5] + 1.0f);
+					fHalfInverse = 0.5f / rot[2];
+					rot[0] = fHalfInverse * tmp.m[8];
+					rot[1] = fHalfInverse * tmp.m[9];
+				}
+			}
+			else
+			{
+				// r11 > r00
+				if (tmp.m[5] >= tmp.m[10])
+				{
+					// r11 is maximum diagonal term
+					rot[1] = 0.5f * sqrtf(tmp.m[5] - tmp.m[0] - tmp.m[10] + 1.0f);
+					fHalfInverse  = 0.5f / rot[1];
+					rot[0] = fHalfInverse * tmp.m[4];
+					rot[2] = fHalfInverse * tmp.m[9];
+				}
+				else
+				{
+					// r22 is maximum diagonal term
+					rot[2] = 0.5f * sqrtf(tmp.m[10] - tmp.m[0] - tmp.m[5] + 1.0f);
+					fHalfInverse = 0.5f / rot[2];
+					rot[0] = fHalfInverse * tmp.m[8];
+					rot[1] = fHalfInverse * tmp.m[9];
+				}
+			}
+		}
+	}
+	else
+	{
+		// The angle is 0 and the matrix is the identity.  Any axis will
+		// work, so just use the z-axis.
+		rot[0] = 0.0f;
+		rot[1] = 0.0f;
+		rot[2] = 1.0f;
+	}
+
+	rot[3] *= RTOD;
 }
 
 void Matrix::FromEulerAngles (float roll, float pitch, float yaw)

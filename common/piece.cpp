@@ -1762,29 +1762,55 @@ void Piece::AddConnections(CONNECTION_TYPE* pConnections)
 
 void Piece::RemoveConnections(CONNECTION_TYPE* pConnections)
 {
+	PtrArray<Piece> RebuildList;
 	int i, j;
 
 	for (i = 0; i < LC_CONNECTIONS; i++)
-		for (j = 0; j < pConnections[i].numentries; j++)
-			if (pConnections[i].entries[j].owner == this)
+	{
+		CONNECTION_TYPE* Type = &pConnections[i];
+
+		for (j = 0; j < Type->numentries; j++)
+		{
+			CONNECTION_ENTRY* Entry = &Type->entries[j];
+
+			if (Entry->owner == this)
 			{
-				free(pConnections[i].entries[j].cons);
-				pConnections[i].numentries--;
-
-				for (; j < pConnections[i].numentries; j++)
-					pConnections[i].entries[j] = pConnections[i].entries[j+1];
-
-				if (pConnections[i].numentries % 5 == 0)
+				// Save a list of pieces that their lost connection to this one.
+				for (int k = 0; k < Entry->numcons; k++)
 				{
-					if (pConnections[i].numentries > 0)
-						pConnections[i].entries = (CONNECTION_ENTRY*)realloc(pConnections[i].entries, sizeof(CONNECTION_ENTRY)*pConnections[i].numentries);
+					if (Entry->cons[k]->link != NULL)
+					{
+						if (RebuildList.FindIndex(Entry->cons[k]->link->owner) == -1)
+							RebuildList.Add(Entry->cons[k]->link->owner);
+						Entry->cons[k]->link->link = NULL;
+					}
+				}
+
+				free(Entry->cons);
+				Type->numentries--;
+
+				// Shrink array.
+				for (; j < Type->numentries; j++)
+					Type->entries[j] = Type->entries[j+1];
+
+				// Realloc to save memory.
+				if (Type->numentries % 5 == 0)
+				{
+					if (Type->numentries > 0)
+						Type->entries = (CONNECTION_ENTRY*)realloc(Type->entries, sizeof(CONNECTION_ENTRY)*Type->numentries);
 					else
 					{
-						free (pConnections[i].entries);
-						pConnections[i].entries = NULL;
+						free(Type->entries);
+						Type->entries = NULL;
 					}
 				}
 			}
+		}
+	}
+
+	// Fix pieces that lost their connection to this one.
+	for (i = 0; i < RebuildList.GetSize(); i++)
+		RebuildList[i]->BuildDrawInfo();
 }
 
 /*

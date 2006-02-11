@@ -83,7 +83,7 @@ void Console::PrintError (const char* format, ...)
 
 void Console::InternalPrint (LC_CONSOLE_LEVEL level, const char* text)
 {
-#ifdef LC_DEBUG
+#ifndef LC_DEBUG
   if (level == LC_CONSOLE_DEBUG)
     return;
 #endif

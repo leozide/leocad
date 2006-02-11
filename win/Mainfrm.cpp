@@ -39,53 +39,44 @@ void mainframe_listener (int message, void *data, void *user)
 
 static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, void* user_data)
 {
-  CRichEditCtrl& ctrl = ((CRichEditView *) user_data)->GetRichEditCtrl ();
-  CHARFORMAT cf;
-  int line, index, length;
+	CRichEditCtrl& ctrl = ((CRichEditView *) user_data)->GetRichEditCtrl ();
+	CHARFORMAT cf;
 
-  cf.cbSize = sizeof (cf);
-  cf.dwMask = CFM_COLOR;
-  cf.dwEffects = 0;
+	cf.cbSize = sizeof (cf);
+	cf.dwMask = CFM_COLOR;
+	cf.dwEffects = 0;
 
-  switch (level)
-  {
-  case LC_CONSOLE_ERROR:
-    cf.crTextColor = RGB (255, 0, 0);
-    break;
+	switch (level)
+	{
+	case LC_CONSOLE_ERROR:
+		cf.crTextColor = RGB (255, 0, 0);
+		break;
 
-  case LC_CONSOLE_WARNING:
-    cf.crTextColor = RGB (0, 0, 255);
-    break;
+	case LC_CONSOLE_WARNING:
+		cf.crTextColor = RGB (0, 0, 255);
+		break;
 
-  case LC_CONSOLE_DEBUG:
-    cf.crTextColor = RGB (0, 255, 0);
-    break;
+	case LC_CONSOLE_DEBUG:
+		cf.crTextColor = RGB (0, 128, 0);
+		break;
 
-  case LC_CONSOLE_MISC:
-  default:
-    cf.crTextColor = RGB (0, 0, 0);
-    break;
-  }
+	case LC_CONSOLE_MISC:
+	default:
+		cf.crTextColor = RGB (0, 0, 0);
+		break;
+	}
 
 	ctrl.SetRedraw(FALSE);
 
-  // select the last line
-  line = ctrl.GetLineCount ();
-  index = ctrl.LineIndex (line - 1);
-  ctrl.SetSel (index, index);
+	// Go to the end of the window text.
+	int TextStart = ctrl.GetWindowTextLength();
+	ctrl.SetSel(TextStart, -1);
 
-  // print text
-  ctrl.ReplaceSel (text);
-  line = ctrl.GetLineCount ();
-  index = ctrl.LineIndex (line - 2);
-  length = ctrl.LineLength (line - 2);
-  ctrl.SetSel (index, index + length);
-  ctrl.SetSelectionCharFormat (cf);
+	// Change color.
+	ctrl.SetSelectionCharFormat(cf);
 
-  // select the last line
-  line = ctrl.GetLineCount ();
-  index = ctrl.LineIndex (line - 1);
-  ctrl.SetSel (index, index);
+	// Append new text.
+	ctrl.ReplaceSel(text);
 
 	ctrl.SetRedraw(TRUE);
 	ctrl.InvalidateRect(NULL, FALSE);

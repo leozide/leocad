@@ -98,7 +98,6 @@ public:
 	float m_fDimensions[6];
 	unsigned long m_nOffset;
 	unsigned long m_nSize;
-	unsigned long m_nGroups;
 
 	// Nobody should change these
 	unsigned char	m_nFlags;

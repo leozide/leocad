@@ -223,7 +223,7 @@ void PieceInfo::LoadIndex (File& file)
   m_strDescription[64] = '\0';
   file.ReadShort (sh, 6);
   file.ReadByte (&m_nFlags, 1);
-  file.ReadLong (&m_nGroups, 1);
+  lcuint32 Groups; file.ReadLong (&Groups, 1);
   file.ReadLong (&m_nOffset, 1);
   file.ReadLong (&m_nSize, 1);
 

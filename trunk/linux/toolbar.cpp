@@ -252,8 +252,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 // Pieces toolbar
 
 static bool list_subparts = false;
-static bool list_groups = true;
-static int  list_curgroup;
 static int  piecelist_col_sort = 0;
 static bool piecelist_ascending = true; 
 static int cur_color = 0;
@@ -290,7 +288,7 @@ static void fill_piecelist(int group)
   gtk_clist_freeze(GTK_CLIST(piecelist));
   gtk_clist_clear(GTK_CLIST(piecelist));
 
-  list_curgroup = group;
+//  list_curgroup = group;
 
   for (int i = 0; i < pLib->GetPieceCount (); i++)
   {
@@ -299,7 +297,7 @@ static void fill_piecelist(int group)
     if ((pInfo->m_strDescription[0] == '~') && !list_subparts)
       continue;
 
-    if ((!list_groups) || ((pInfo->m_nGroups & (long)(1 << group)) != 0))
+//    if ((!list_groups) || ((pInfo->m_nGroups & (long)(1 << group)) != 0))
     {
       char* dummy[] = { pInfo->m_strDescription, pInfo->m_strName };
 
@@ -401,44 +399,47 @@ void piececombo_add (const char* str)
 
 static void piececombo_changed (GtkWidget *widget, gpointer data)
 {
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
-  const gchar* str;
-  int i;
+	PiecesLibrary *pLib = project->GetPiecesLibrary ();
+	const gchar* str;
+	int i;
 
-  str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
+	str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
 
-  for (i = 0; i < pLib->GetPieceCount (); i++)
-  {
-    PieceInfo* pInfo = pLib->GetPieceInfo (i);
- 
-    if (strcmp (str, pInfo->m_strDescription) == 0)
-    {
-      // Check if we need to change the current group
-      if ((list_groups) && (pInfo->m_nGroups != 0))
-	if ((pInfo->m_nGroups & (1 << list_curgroup)) == 0)
+	for (i = 0; i < pLib->GetPieceCount (); i++)
 	{
-	  unsigned long d = 1;
-	  for (int k = 1; k < 32; k++)
-	  {
-	    if ((pInfo->m_nGroups & d) != 0)
-	    {
-	      groupsbar_set (k-1);
-              break;
-	    }
-	    else
-	      d <<= 1;
-	  }
+		PieceInfo* pInfo = pLib->GetPieceInfo (i);
+
+		if (strcmp (str, pInfo->m_strDescription) == 0)
+		{
+/*
+			// Check if we need to change the current group
+			if ((list_groups) && (pInfo->m_nGroups != 0))
+			{
+				if ((pInfo->m_nGroups & (1 << list_curgroup)) == 0)
+				{
+					unsigned long d = 1;
+					for (int k = 1; k < 32; k++)
+					{
+						if ((pInfo->m_nGroups & d) != 0)
+						{
+							groupsbar_set (k-1);
+							break;
+						}
+						else
+							d <<= 1;
+					}
+				}
+			}
+*/
+			// Select the piece
+			i = gtk_clist_find_row_from_data (GTK_CLIST (piecelist), pInfo);
+			gtk_clist_select_row (GTK_CLIST (piecelist), i, 0);
+			if (gtk_clist_row_is_visible (GTK_CLIST (piecelist), i) != GTK_VISIBILITY_FULL)
+				gtk_clist_moveto (GTK_CLIST (piecelist), i, 0, 0.5f, 0);
+
+			return;
+		}
 	}
-
-      // Select the piece
-      i = gtk_clist_find_row_from_data (GTK_CLIST (piecelist), pInfo);
-      gtk_clist_select_row (GTK_CLIST (piecelist), i, 0);
-      if (gtk_clist_row_is_visible (GTK_CLIST (piecelist), i) != GTK_VISIBILITY_FULL)
-        gtk_clist_moveto (GTK_CLIST (piecelist), i, 0, 0.5f, 0);
-
-      return;
-    }
-  }
 }
 
 // Draw a pixmap for the colorlist control

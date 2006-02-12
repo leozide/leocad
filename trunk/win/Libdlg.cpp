@@ -376,21 +376,50 @@ void CLibraryDlg::UpdateList()
 	}
 	else
 	{
-		for (int i = 0; i < Lib->GetPieceCount(); i++)
+		if (CategoryName == "Unassigned")
 		{
-			PieceInfo* Info = Lib->GetPieceInfo(i);
+			// Test each piece against all categories.
+			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			{
+				PieceInfo* Info = Lib->GetPieceInfo(i);
 
-			LVITEM lvi;
-			lvi.mask = LVIF_TEXT | LVIF_PARAM;
-			lvi.iItem = 0;
-			lvi.iSubItem = 0;
-			lvi.lParam = (LPARAM)Info;
-			lvi.pszText = Info->m_strDescription;
-			int idx = m_List.InsertItem(&lvi);
+				for (int j = 0; j < Lib->GetNumCategories(); j++)
+				{
+					if (Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(j)))
+						break;
+				}
 
-			m_List.SetItemText(idx, 1, Info->m_strName);
+				if (j == Lib->GetNumCategories())
+				{
+					LVITEM lvi;
+					lvi.mask = LVIF_TEXT | LVIF_PARAM;
+					lvi.iItem = 0;
+					lvi.iSubItem = 0;
+					lvi.lParam = (LPARAM)Info;
+					lvi.pszText = Info->m_strDescription;
+					int idx = m_List.InsertItem(&lvi);
+
+					m_List.SetItemText(idx, 1, Info->m_strName);
+				}
+			}
 		}
+		else if (CategoryName == "Pieces")
+		{
+			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			{
+				PieceInfo* Info = Lib->GetPieceInfo(i);
 
+				LVITEM lvi;
+				lvi.mask = LVIF_TEXT | LVIF_PARAM;
+				lvi.iItem = 0;
+				lvi.iSubItem = 0;
+				lvi.lParam = (LPARAM)Info;
+				lvi.pszText = Info->m_strDescription;
+				int idx = m_List.InsertItem(&lvi);
+
+				m_List.SetItemText(idx, 1, Info->m_strName);
+			}
+		}
 	}
 
 	m_List.SortItems((PFNLVCOMPARE)ListCompare, m_SortColumn);
@@ -407,6 +436,8 @@ void CLibraryDlg::UpdateTree()
 	PiecesLibrary *Lib = project->GetPiecesLibrary();
 	for (int i = 0; i < Lib->GetNumCategories(); i++)
 		m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 1, 0, 0, 0, Root, TVI_SORT);
+
+	m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, "Unassigned", 0, 1, 0, 0, 0, Root, TVI_LAST);
 
 	m_Tree.Expand(Root, TVE_EXPAND);
 	m_Tree.SetRedraw(TRUE);

@@ -17,6 +17,7 @@
 #include "mainwnd.h"
 #include "library.h"
 #include "keyboard.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -88,7 +89,7 @@ static void CheckForUpdates(void* Data)
 					else
 						str = "You are using the latest version of LeoCAD.\n";
 
-					if (lib > project->GetPiecesLibrary ()->GetPieceCount ())
+					if (lib > lcGetPiecesLibrary()->GetPieceCount ())
 					{
 						str += "There are new pieces available.\n\n";
 						Update = true;
@@ -175,8 +176,17 @@ BOOL CCADApp::InitInstance()
 
 	InitKeyboardShortcuts();
 
-  if (!GL_Initialize (NULL))
-    return FALSE;
+	char app[LC_MAXPATH], *ptr;
+	GetModuleFileName (NULL, app, LC_MAXPATH);
+	ptr = strrchr(app,'\\');
+	if (ptr)
+		*(++ptr) = 0;
+
+	g_App = new lcApplication();
+	main_window = new MainWnd();
+
+	if (!g_App->Initialize(__argc, __targv, app))
+		return false;
 
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views.
@@ -191,29 +201,18 @@ BOOL CCADApp::InitInstance()
   EnableShellOpen();
 	RegisterShellFileTypes(TRUE);
 
-  main_window = new MainWnd ();
-	project = new Project;
-
 	UINT cmdshow = m_nCmdShow;
 	m_nCmdShow = SW_HIDE;
 	pDocTemplate->OpenDocumentFile(NULL);
 
-	char app[LC_MAXPATH], *ptr;
-	GetModuleFileName (NULL, app, LC_MAXPATH);
-	ptr = strrchr(app,'\\');
-	if (ptr)
-		*(++ptr) = 0;
-
-	if (!project->Initialize(__argc, __targv, app, NULL))
-		return false;
-
 	// Show something in the piece preview window.
-	PieceInfo* Info = project->GetPiecesLibrary()->FindPieceInfo("3005");
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
 	if (!Info)
-		Info = project->GetPiecesLibrary()->GetPieceInfo(0);
+		Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+
 	if (Info)
 	{
-		project->SetCurrentPiece(Info);
+		lcGetActiveProject()->SetCurrentPiece(Info);
 		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.SetPieceInfo(Info);
 		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.PostMessage(WM_PAINT);
 	}
@@ -260,14 +259,15 @@ BOOL CCADApp::InitInstance()
 	else
 		m_pMainWnd->ShowWindow(cmdshow);
 	m_pMainWnd->UpdateWindow();
-	project->HandleNotify(LC_ACTIVATE, 1);
+	lcGetActiveProject()->HandleNotify(LC_ACTIVATE, 1);
+	lcGetActiveProject()->UpdateInterface();
 
   main_window->UpdateMRU ();
 
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
-  project->UpdateAllViews (NULL);
+  lcGetActiveProject()->UpdateAllViews (NULL);
 
 	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
 		_beginthread(CheckForUpdates, 0, NULL);
@@ -280,17 +280,13 @@ int CCADApp::ExitInstance()
 	if (m_hMutex != NULL)
 		ReleaseMutex(m_hMutex);
 
-	if (project)
-	{
-		project->HandleNotify(LC_ACTIVATE, 0);
-		delete project;
-    project = NULL;
-	}
+	delete main_window;
+	main_window = NULL;
 
-  delete main_window;
-  main_window = NULL;
+	g_App->Shutdown();
 
-	GL_Shutdown ();
+	delete g_App;
+	g_App = NULL;
 
 #ifdef _DEBUG
 	if (__hStdOut != NULL)

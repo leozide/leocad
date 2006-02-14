@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "light.h"
 #include "matrix.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG 
 #undef THIS_FILE 
@@ -143,7 +144,7 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		return;
 
 	if (pObject == NULL)
-		pObject = project->GetFocusObject();
+		pObject = lcGetActiveProject()->GetFocusObject();
 
 	m_pObject = pObject;
 
@@ -171,7 +172,7 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			Matrix mat(rot, pos);
 			mat.ToEulerAngles(rot);
 
-			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
 			{
 				pos[0] /= 0.08f;
 				pos[1] /= 0.08f;
@@ -185,7 +186,7 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			m_fRotY = rot[1];
 			m_fRotZ = rot[2];
 
-			if (project->IsAnimation())
+			if (lcGetActiveProject()->IsAnimation())
 			{
 				m_nFrom = pPiece->GetFrameShow();
 				m_nTo = pPiece->GetFrameHide();
@@ -213,7 +214,7 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 				pCamera = ((CameraTarget*)m_pObject)->GetParent();
 
 			pCamera->GetEyePos(tmp);
-			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
 			{
 				tmp[0] /= 0.08f;
 				tmp[1] /= 0.08f;
@@ -224,7 +225,7 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			m_fPosZ = tmp[2];
 
 			pCamera->GetTargetPos(tmp);
-			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
 			{
 				tmp[0] /= 0.08f;
 				tmp[1] /= 0.08f;
@@ -235,7 +236,7 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 			m_fRotZ = tmp[2];
 
 			pCamera->GetUpVec(tmp);
-			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
 			{
 				tmp[0] /= 0.08f;
 				tmp[1] /= 0.08f;
@@ -372,7 +373,7 @@ void CModifyDialog::OnModdlgApply()
 			mod.pos[0] = m_fPosX;
 			mod.pos[1] = m_fPosY;
 			mod.pos[2] = m_fPosZ;
-			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
 			{
 				mod.pos[0] *= 0.08f;
 				mod.pos[1] *= 0.08f;
@@ -387,7 +388,7 @@ void CModifyDialog::OnModdlgApply()
 			mod.color = m_ctlColor.GetColorIndex();
 			strcpy(mod.name, m_strName);
 
-			project->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&mod);
+			lcGetActiveProject()->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&mod);
 		} break;
 
 		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
@@ -405,7 +406,7 @@ void CModifyDialog::OnModdlgApply()
 			mod.up[0] = m_fUpX;
 			mod.up[1] = m_fUpY;
 			mod.up[2] = m_fUpZ;
-			if ((project->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
+			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
 			{
 				mod.eye[0] *= 0.08f;
 				mod.eye[1] *= 0.08f;
@@ -421,7 +422,7 @@ void CModifyDialog::OnModdlgApply()
 			mod.znear = m_fNear;
 			mod.zfar = m_fFar;
 
-			project->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&mod);
+			lcGetActiveProject()->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&mod);
 		} break;
 
 		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
@@ -446,7 +447,7 @@ void CModifyDialog::OnDropdownModdlgList()
 	Light* pLight;
 	int i;
 
-	project->GetArrays(&pPiece, &pCamera, &pLight);
+	lcGetActiveProject()->GetArrays(&pPiece, &pCamera, &pLight);
 
 	m_ctlCombo.ResetContent();
 

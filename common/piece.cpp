@@ -13,6 +13,7 @@
 #include "group.h"
 #include "project.h"
 #include "algebra.h"
+#include "lc_application.h"
 
 #define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
 
@@ -420,23 +421,23 @@ void Piece::InsertTime (unsigned short start, bool animation, unsigned short tim
   if (animation)
   {
     if (m_nFrameShow >= start)
-      m_nFrameShow = min (m_nFrameShow + time, project->GetTotalFrames ());
+      m_nFrameShow = min(m_nFrameShow + time, lcGetActiveProject()->GetTotalFrames());
 
     if (m_nFrameHide >= start)
-      m_nFrameHide = min (m_nFrameHide + time, project->GetTotalFrames ());
+      m_nFrameHide = min(m_nFrameHide + time, lcGetActiveProject()->GetTotalFrames());
 
-    if (m_nFrameShow > project->GetCurrentTime ())
+    if (m_nFrameShow > lcGetActiveProject()->GetCurrentTime())
       Select (false, false, false);
   }
   else
   {
     if (m_nStepShow >= start)
-      m_nStepShow = min (m_nStepShow + time, 255);
+      m_nStepShow = min(m_nStepShow + time, 255);
 
     if (m_nStepHide >= start)
-      m_nStepHide = min (m_nStepHide + time, 255);
+      m_nStepHide = min(m_nStepHide + time, 255);
 
-    if (m_nStepShow > project->GetCurrentTime ())
+    if (m_nStepShow > lcGetActiveProject()->GetCurrentTime ())
       Select (false, false, false);
   }
 
@@ -448,14 +449,14 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
   if (animation)
   {
     if (m_nFrameShow >= start)
-      m_nFrameShow = max (m_nFrameShow - time, 1);
+      m_nFrameShow = max(m_nFrameShow - time, 1);
 
-    if (m_nFrameHide == project->GetTotalFrames ())
-      m_nFrameHide = project->GetTotalFrames ();
+    if (m_nFrameHide == lcGetActiveProject()->GetTotalFrames())
+      m_nFrameHide = lcGetActiveProject()->GetTotalFrames();
     else
-      m_nFrameHide = max (m_nFrameHide - time, 1);
+      m_nFrameHide = max(m_nFrameHide - time, 1);
 
-    if (m_nFrameHide < project->GetCurrentTime ())
+    if (m_nFrameHide < lcGetActiveProject()->GetCurrentTime())
       Select (false, false, false);
   }
   else
@@ -466,7 +467,7 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
     if (m_nStepHide != 255)
       m_nStepHide = max (m_nStepHide - time, 1);
 
-    if (m_nStepHide < project->GetCurrentTime ())
+    if (m_nStepHide < lcGetActiveProject()->GetCurrentTime())
       Select (false, false, false);
   }
 

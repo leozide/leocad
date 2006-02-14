@@ -11,6 +11,7 @@
 #include "image.h"
 #include "system.h"
 #include "console.h"
+#include "lc_application.h"
 
 // =============================================================================
 // PiecesLibrary class
@@ -2266,7 +2267,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 	unsigned long i, j, cs, binoff = 0, delta;
 	void* membuf;
 	short scale, sb[6];
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-b.old");

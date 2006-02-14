@@ -5,6 +5,7 @@
 #include "Tools.h"
 #include "resource.h"
 #include "PrefSht.h"
+#include "lc_application.h"
 #include <math.h>
 #include <shlobj.h>
 
@@ -254,6 +255,8 @@ void Export3DStudio()
 		"3D Studio Files (*.3ds)|*.3ds|All Files (*.*)|*.*||", AfxGetMainWnd());
 	if (dlg.DoModal() != IDOK)
 		return;
+
+	Project* project = lcGetActiveProject();
 
 	ClearErrList3ds();
 	file3ds *file = OpenFile3ds(dlg.GetPathName(), "w");

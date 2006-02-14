@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "image.h"
 #include "library.h"
+#include "lc_application.h"
 
 // =============================================================================
 // Static functions
@@ -131,7 +132,7 @@ void Texture::Load(bool bFilter)
   FileDisk bin;
   void* bits;
 
-  strcpy(filename, project->GetPiecesLibrary ()->GetLibraryPath());
+  strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
   strcat(filename, "textures.bin");
   if (!bin.Open(filename, "rb"))
     return;

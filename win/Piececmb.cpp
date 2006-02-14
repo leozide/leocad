@@ -9,6 +9,7 @@
 #include "project.h"
 #include "globals.h"
 #include "library.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -45,7 +46,7 @@ void CPiecesCombo::OnEditupdate()
 		return;
 
 	char str[66];
-	PiecesLibrary *pLib = project->GetPiecesLibrary ();
+	PiecesLibrary *pLib = lcGetPiecesLibrary();
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
 	PieceInfo* pInfo;
 
@@ -105,7 +106,7 @@ BOOL CPiecesCombo::PreTranslateMessage(MSG* pMsg)
 		}
 		else if (nVirtKey == VK_RETURN)
 		{
-		  PiecesLibrary* Lib = project->GetPiecesLibrary();
+		  PiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString str;
 
 			GetWindowText(str);
@@ -126,7 +127,7 @@ void CPiecesCombo::OnSelchange()
 {
 	char str[66];
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
-  PiecesLibrary *pLib = project->GetPiecesLibrary();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	if (!GetLBText (GetCurSel(), str))
 		return;
@@ -142,7 +143,7 @@ void CPiecesCombo::OnSelchange()
 
 void CPiecesCombo::SelectPiece(PieceInfo* Info)
 {
-  PiecesLibrary *Lib = project->GetPiecesLibrary();
+  PiecesLibrary *Lib = lcGetPiecesLibrary();
 	CPiecesBar* Bar = (CPiecesBar*)GetParent();
 
 	int Index = Lib->GetFirstCategory(Info);

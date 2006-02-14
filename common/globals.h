@@ -5,9 +5,6 @@
 #include "typedefs.h"
 #include "console.h"
 
-class Project;
-extern Project* project;
-
 class Messenger;
 extern Messenger* messenger;
 

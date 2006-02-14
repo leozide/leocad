@@ -16,6 +16,7 @@
 #include "view.h"
 #include "MainFrm.h"
 #include "PiecePrv.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -160,8 +161,8 @@ BOOL CCADView::OnPreparePrinting(CPrintInfo* pInfo)
 
 	int cols = theApp.GetProfileInt("Default", "Print Columns", 1);
 	int rows = theApp.GetProfileInt("Default", "Print Rows", 1);
-	int Max = (project->GetLastStep()/(rows*cols));
-	if (project->GetLastStep()%(rows*cols) != 0) 
+	int Max = (lcGetActiveProject()->GetLastStep()/(rows*cols));
+	if (lcGetActiveProject()->GetLastStep()%(rows*cols) != 0) 
 		Max++;
 	pInfo->SetMaxPage(Max);
 
@@ -190,8 +191,8 @@ void CCADView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* pInfo)
 {
 	int cols = theApp.GetProfileInt("Default", "Print Columns", 1);
 	int rows = theApp.GetProfileInt("Default", "Print Rows", 1);
-	int Max = (project->GetLastStep()/(rows*cols));
-	if (project->GetLastStep()%(rows*cols) != 0)
+	int Max = (lcGetActiveProject()->GetLastStep()/(rows*cols));
+	if (lcGetActiveProject()->GetLastStep()%(rows*cols) != 0)
 		Max++;
 	pInfo->SetMaxPage(Max);
 }
@@ -200,6 +201,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 {
 	int cols = theApp.GetProfileInt("Default","Print Columns", 1);
 	int rows = theApp.GetProfileInt("Default","Print Rows", 1);
+	Project* project = lcGetActiveProject();
+
 	if (rows < 1) rows = 1;
 	if (cols < 1) cols = 1;
 	CRect rc(0, 0, pDC->GetDeviceCaps(HORZRES), pDC->GetDeviceCaps(VERTRES));
@@ -426,6 +429,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT nMaxPage, BOOL bCatalog)
 {
+	Project* project = lcGetActiveProject();
 	CString str,tmp;
 	UINT nFormat = DT_CENTER;
 	int r;
@@ -734,25 +738,25 @@ CCADDoc* CCADView::GetDocument() // non-debug version is inline
 
 int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-  if (CView::OnCreate(lpCreateStruct) == -1)
+	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-  m_pView = new View (project, NULL);
-  m_pView->Create (m_hWnd);
-  m_pView->OnInitialUpdate ();
+	m_pView = new View (lcGetActiveProject(), NULL);
+	m_pView->Create (m_hWnd);
+	m_pView->OnInitialUpdate ();
 
-  SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
+	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
-  return 0;
+	return 0;
 }
 
 void CCADView::OnDestroy() 
 {
-  delete m_pView;
-  m_pView = NULL;
+	delete m_pView;
+	m_pView = NULL;
 
-  KillTimer (IDT_LC_SAVETIMER);
-	
+	KillTimer (IDT_LC_SAVETIMER);
+
 	CView::OnDestroy();
 }
 
@@ -845,9 +849,9 @@ BOOL CCADView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 BOOL CCADView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 {
 	if (zDelta > 0)
-		project->HandleCommand(LC_VIEW_ZOOMOUT, 0);
+		lcGetActiveProject()->HandleCommand(LC_VIEW_ZOOMOUT, 0);
 	else
-		project->HandleCommand(LC_VIEW_ZOOMIN, 0);
+		lcGetActiveProject()->HandleCommand(LC_VIEW_ZOOMIN, 0);
 
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
@@ -873,7 +877,7 @@ LONG CCADView::OnAutoPan(UINT lParam, LONG wParam)
 	pt2.y = -pt2.y;
 
 	unsigned long pt = ((short)pt2.x) | ((unsigned long)(((short)pt2.y) << 16));
-	project->HandleCommand(LC_VIEW_AUTOPAN, pt);	
+	lcGetActiveProject()->HandleCommand(LC_VIEW_AUTOPAN, pt);	
 
 	return TRUE;
 }
@@ -881,7 +885,7 @@ LONG CCADView::OnAutoPan(UINT lParam, LONG wParam)
 void CCADView::OnTimer(UINT nIDEvent) 
 {
 	if (nIDEvent == IDT_LC_SAVETIMER)
-		project->CheckAutoSave();
+		lcGetActiveProject()->CheckAutoSave();
 	
 	CView::OnTimer(nIDEvent);
 }
@@ -890,7 +894,7 @@ void CCADView::OnTimer(UINT nIDEvent)
 LONG CCADView::OnSetStep(UINT lParam, LONG /*wParam*/)
 {
 	if (lParam > 0)
-		project->HandleCommand(LC_VIEW_STEP_SET, lParam);
+		lcGetActiveProject()->HandleCommand(LC_VIEW_STEP_SET, lParam);
 
 	return TRUE;
 }
@@ -898,7 +902,7 @@ LONG CCADView::OnSetStep(UINT lParam, LONG /*wParam*/)
 void CCADView::OnCaptureChanged(CWnd *pWnd) 
 {
 	if (pWnd != this)
-		project->HandleNotify(LC_CAPTURE_LOST, 0);
+		lcGetActiveProject()->HandleNotify(LC_CAPTURE_LOST, 0);
 	
 	CView::OnCaptureChanged(pWnd);
 }
@@ -951,7 +955,7 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
     } break;
 	}
 
-	project->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);
+	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);
 /*
 	switch (nChar)
 	{

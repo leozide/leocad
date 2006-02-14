@@ -31,6 +31,7 @@
 #include "texfont.h"
 #include "algebra.h"
 #include "debug.h"
+#include "lc_application.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p)
@@ -119,7 +120,6 @@ Project::Project()
 	for (i = 0; i < 10; i++)
 		m_pClipboard[i] = NULL;
 
-  m_pLibrary = new PiecesLibrary ();
 	m_pScreenFont = new TexFont();
 }
 
@@ -143,291 +143,53 @@ Project::~Project()
 	delete m_pTerrain;
 	delete m_pBackground;
 	delete m_pScreenFont;
-  delete m_pLibrary;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
 // Project attributes, general services
 
-// The main window should be created before calling this
-bool Project::Initialize(int argc, char *argv[], char* binpath, char* libpath)
+void Project::UpdateInterface()
 {
-  char *env_path;
-  bool loaded = false;
+	// Update all user interface elements.
+	SystemUpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
+	SystemUpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
+	SystemUpdatePlay(true, false);
+	SystemUpdateCategories(false);
+	SetTitle(m_strTitle);
 
-  // check if there's an environment variable for the piece library
-  env_path = getenv ("LEOCAD_LIB");
-  if (env_path != NULL)
-    libpath = env_path;
-
-  m_strPathName[0] = 0;
-
-  LC_IMAGE_OPTS imopts;
-  char picture[LC_MAXPATH];
-  bool save_image = false;
-  picture[0] = 0;
-
-  unsigned long image = Sys_ProfileLoadInt  ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
-  int width = Sys_ProfileLoadInt ("Default", "Image Width", 640);
-  int height = Sys_ProfileLoadInt ("Default", "Image Height", 480);
-//	int width = Sys_ProfileLoadInt ("Default", "Image Width", GetSystemMetrics(SM_CXSCREEN));
-//	int height = Sys_ProfileLoadInt ("Default", "Image Height", GetSystemMetrics(SM_CYSCREEN));
-  unsigned short from = 0, to = 0;
-  int i, animation = -1;
-  bool highlight = false;
-  imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-  imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-  imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-  imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
-  imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
-
-	for (i = 1; i < argc; i++)
-	{
-		char* param = argv[i];
-
-    if (param[0] == '-')
-		{
-			if (((strcmp (param, "-l") == 0) || (strcmp (param, "--libpath") == 0)) && ((i+1) < argc))
-			{
-				i++;
-				libpath = argv[i];
-			}
-			else if ((strcmp (param, "-i") == 0) || (strcmp (param, "--image") == 0))
-			{
-				save_image = true;
-
-				if (((i+1) != argc) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					strcpy (picture, argv[i]);
-				}
-			}
-			else if (((strcmp (param, "-w") == 0) || (strcmp (param, "--width") == 0)) && ((i+1) < argc))
-			{
-				int w;
-				i++;
-				if (sscanf(argv[i], "%d", &w) == 1)
-					width = w;
-			}
-			else if (((strcmp (param, "-h") == 0) || (strcmp (param, "--height") == 0)) && ((i+1) < argc))
-			{
-				int h;
-				i++;
-				if (sscanf(argv[i], "%d", &h) == 1)
-					height = h;
-			}
-			else if (((strcmp (param, "-f") == 0) || (strcmp (param, "--from") == 0)) && ((i+1) < argc))
-			{
-				int f;
-				i++;
-				if (sscanf(argv[i], "%d", &f) == 1)
-					from = f;
-			}
-			else if (((strcmp (param, "-t") == 0) || (strcmp (param, "--to") == 0)) && ((i+1) < argc))
-			{
-				int t;
-				i++;
-				if (sscanf(argv[i], "%d", &t) == 1)
-					to = t;
-			}
-			else if (strcmp (param, "--animation") == 0)
-				animation = 1;
-			else if (strcmp (param, "--instructions") == 0)
-				animation = 0;
-			else if (strcmp (param, "--highlight") == 0)
-				highlight = true;
-			else if ((strcmp (param, "-v") == 0) || (strcmp (param, "--version") == 0))
-			{
-				printf ("LeoCAD version " LC_VERSION_TEXT LC_VERSION_TAG " for "LC_VERSION_OSNAME"\n");
-				printf ("Copyright (c) 1996-2003, BT Software\n");
-				printf ("Compiled "__DATE__"\n");
-
-#ifdef LC_HAVE_JPEGLIB
-				printf ("With JPEG support\n");
-#else
-				printf ("Without JPEG support\n");
-#endif
-
-#ifdef LC_HAVE_PNGLIB
-				printf ("With PNG support\n");
-#else
-				printf ("Without PNG support\n");
-#endif
-
-	return false;
-			}
-			else if ((strcmp (param, "-h") == 0) || (strcmp (param, "--help") == 0))
-			{
-			}
-			else
-				printf ("Unknown parameter: %s\n", param);
-		}
-		else
-		{
-			strcpy (m_strPathName, param);
-/*
-			if (m_strFileName.IsEmpty())
-				m_strFileName = pszParam;
-			else if (m_nShellCommand == FilePrintTo && m_strPrinterName.IsEmpty())
-				m_strPrinterName = pszParam;
-			else if (m_nShellCommand == FilePrintTo && m_strDriverName.IsEmpty())
-				m_strDriverName = pszParam;
-			else if (m_nShellCommand == FilePrintTo && m_strPortName.IsEmpty())
-				m_strPortName = pszParam;
-*/
-		}
-	}
-
-  // if the user specified a library, try to load it first
-  if (libpath != NULL)
-    loaded = m_pLibrary->Load (libpath);
-
-  // if we couldn't find a library, try the executable path
-  if (!loaded)
-    loaded = m_pLibrary->Load (binpath);
-
-  if (!loaded)
-  {
-#ifdef LC_WINDOWS
-    // let's hope this message helps the users
-    SystemDoMessageBox("Cannot load piece library.\n"
-      "Make sure that you have the PIECES.IDX file in the same "
-      "folder where you installed the program.", LC_MB_OK|LC_MB_ICONERROR);
-#else
-    printf("Cannot load piece library !\n");
-#endif
-    return false;
-  }
-
-  SystemInit();
-
-  if (strlen(m_strPathName) && OnOpenDocument(m_strPathName))
-  {
-    SetPathName(m_strPathName, true);
-
-    if (save_image == true)
-    {
-      bool need_ext = false;
-
-      if (picture[0] == 0)
-      {
-	strcpy (picture, m_strPathName);
-	char *p = strrchr (picture, '.');
-	if (p != NULL)
-	  *p = 0;
-	need_ext = true;
-      }
-      else
-      {
-	char ext[5];
-	char *p = strrchr(picture, '.');
-	if (p != NULL)
-	  strcpy(ext, p+1);
-	strlwr(ext);
-
-	if ((strcmp(ext, "bmp") != 0) && (strcmp(ext, "gif") != 0) && 
-	    (strcmp(ext, "jpg") != 0) && (strcmp(ext, "jpeg") != 0) &&
-	    (strcmp(ext, "png") != 0))
-	  need_ext = true;
-      }
-
-      if (need_ext)
-	switch (imopts.format)
-	{
-	case LC_IMAGE_BMP: strcat(picture, ".bmp"); break;
-	case LC_IMAGE_GIF: strcat(picture, ".gif"); break;
-	case LC_IMAGE_JPG: strcat(picture, ".jpg"); break;
-	case LC_IMAGE_PNG: strcat(picture, ".png"); break;
-	}
-
-      imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
-      imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
-      imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
-
-      if (animation == 0)
-	m_bAnimation = false;
-      else if (animation == 1)
-	m_bAnimation = true;
-
-      if (to < from)
-      {
-	unsigned short tmp;
-	tmp = from;
-	from = to;
-	to = tmp;
-      }
-
-      if ((from == 0) && (to == 0))
-      {
+	SystemUpdateFocus(NULL);
+	SetAction(m_nCurAction);
+	SystemUpdateViewport(m_nViewportMode, 0);
+	SystemUpdateColorList(m_nCurColor);
+	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
+	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
+	SystemUpdateSnap(m_nSnap);
+	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	SystemUpdateCameraMenu(m_pCameras);
+	SystemUpdateCurrentCamera(NULL, m_pViewCameras[m_nActiveViewport], m_pCameras);
+	UpdateSelection();
 	if (m_bAnimation)
-	  from = to = m_nCurFrame;
+		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 	else
-	  from = to = m_nCurStep;
-      }
-      else if ((from == 0) && (to != 0))
-      {
-	from = to;
-      }
-      else if ((from != 0) && (to == 0))
-      {
-	to = from;
-      }
+		SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 
-      if (m_bAnimation)
-      {
-	if (from > m_nTotalFrames)
-	  from = m_nTotalFrames;
+	for (int i = 0; i < m_ViewList.GetSize(); i++)
+	{
+		m_ViewList[i]->MakeCurrent();
+		RenderInitialize();
+	}
 
-	if (to > m_nTotalFrames)
-	  to = m_nTotalFrames;
-      }
-      else
-      {
-	if (from > 255)
-	  from = 255;
-
-	if (to > 255)
-	  to = 255;
-      }
-
-      Image* images = new Image[to - from + 1];
-      CreateImages (images, width, height, from, to, highlight);
-
-      for (i = 0; i <= to - from; i++)
-      {
-        char filename[LC_MAXPATH];
-
-        if (from != to)
-        {
-          char* ext = strrchr (picture, '.');
-          *ext = 0;
-          sprintf (filename, "%s%02d.%s", picture, i+1, ext+1);
-          *ext = '.';
-        }
-        else
-          strcpy (filename, picture);
-
-        images[i].FileSave (filename, &imopts);
-      }
-      delete []images;
-
-      return false;
-    }
-  }
-  else
-    OnNewDocument();
-
-  return true;
+	UpdateSelection();
 }
 
 void Project::SetTitle(const char* lpszTitle)
 {
-	strcpy(m_strTitle, lpszTitle);
+	if (lpszTitle != m_strTitle)
+		strcpy(m_strTitle, lpszTitle);
 
 	char title[LC_MAXPATH], *ptr, ext[4];
-	strcpy(title, "LeoCAD - ");
-	strcat(title, m_strTitle);
+	strcpy(title, m_strTitle);
 
 	ptr = strrchr(title, '.');
 	if (ptr != NULL)
@@ -443,6 +205,8 @@ void Project::SetTitle(const char* lpszTitle)
 		if (strcmp(ext, "ldr") == 0)
 			*ptr = 0;
 	}
+
+	strcat(title, " - LeoCAD");
 
 	SystemSetWindowCaption(title);
 }
@@ -733,7 +497,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			char name[9];
 			Piece* pPiece = new Piece(NULL);
 			pPiece->FileLoad(*file, name);
-			PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
+			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 			if (pInfo)
 			{
 				pPiece->SetPieceInfo(pInfo);
@@ -772,7 +536,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
 
-			PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
+			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 			if (pInfo != NULL)
 			{
 				Piece* pPiece = new Piece(pInfo);
@@ -1318,7 +1082,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				char name[9];
 				strcpy(name, tmp);
 
-				PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
+				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 				if (pInfo != NULL)
 				{
 					float x, y, z, rot[4];
@@ -1744,7 +1508,7 @@ void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
 
 	// add it to the file MRU list
 	if (bAddToMRU)
-          main_window->AddToMRU (lpszPathName);
+		main_window->AddToMRU (lpszPathName);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1823,7 +1587,7 @@ void Project::Render(bool bToMemory)
 
 #ifdef _DEBUG
 #ifdef LC_WINDOWS
-#define BENCHMARK
+//#define BENCHMARK
 #endif
 #endif
 
@@ -3182,7 +2946,7 @@ void Project::RenderInitialize()
     char filename[LC_MAXPATH];
     FileDisk file;
 
-    strcpy (filename, m_pLibrary->GetLibraryPath ());
+    strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath ());
     strcat (filename, "sysfont.txf");
 
     if (file.Open (filename, "rb"))
@@ -3621,12 +3385,12 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext)
 	fputs("</tr>\n",f);
 
 	PieceInfo* pInfo;
-	for (int j = 0; j < m_pLibrary->GetPieceCount (); j++)
+	for (int j = 0; j < lcGetPiecesLibrary()->GetPieceCount (); j++)
 	{
 		bool Add = false;
 		int count[LC_MAXCOLORS];
 		memset (&count, 0, sizeof (count));
-		pInfo = m_pLibrary->GetPieceInfo (j);
+		pInfo = lcGetPiecesLibrary()->GetPieceInfo (j);
 
 		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		{
@@ -4226,10 +3990,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		  PieceInfo* pInfo;
 		  Piece* pPiece;
 		  FILE* f;
-		  char *conv = (char*)malloc (9*m_pLibrary->GetPieceCount ());
-		  char *flags = (char*)malloc (m_pLibrary->GetPieceCount ());
-		  memset (conv, 0, 9*m_pLibrary->GetPieceCount());
-		  memset (flags, 0, m_pLibrary->GetPieceCount());
+		  char *conv = (char*)malloc (9*lcGetPiecesLibrary()->GetPieceCount ());
+		  char *flags = (char*)malloc (lcGetPiecesLibrary()->GetPieceCount ());
+		  memset (conv, 0, 9*lcGetPiecesLibrary()->GetPieceCount());
+		  memset (flags, 0, lcGetPiecesLibrary()->GetPieceCount());
 
 		  // read LGEO conversion table
 		  if (strlen (opts.libpath))
@@ -4252,7 +4016,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		      u = (((unsigned char)(bt[3])|((unsigned short)(bt[2]) << 8))|
 			   (((unsigned long)(bt[1])) << 16)) + bt[0] * 16581375;
 		      sprintf(tmp, "%d", (int)u);
-		      pInfo = m_pLibrary->FindPieceInfo(tmp);
+		      pInfo = lcGetPiecesLibrary()->FindPieceInfo(tmp);
 
 		      fread(&tmp, 9, 1, f);
 		      if (tmp[8] != 0)
@@ -4260,7 +4024,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		      if (pInfo != NULL)
 		      {
-            int idx = m_pLibrary->GetPieceIndex (pInfo);
+            int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
             memcpy (&conv[idx*9], &tmp[1], 9);
             flags[idx] = tmp[0];
 		      }
@@ -4285,12 +4049,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		      if ((tmp[u] == 0) && (u != 0))
 		      {
 			u = 0;
-			pInfo = m_pLibrary->FindPieceInfo(tmp);
+			pInfo = lcGetPiecesLibrary()->FindPieceInfo(tmp);
 			fread(&tmp, 8, 1, f);
 
 			if (pInfo != NULL)
 			{
-			  int idx = m_pLibrary->GetPieceIndex (pInfo);
+			  int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
 			  memcpy(&conv[idx*9], tmp, 9);
 			}
 		      }
@@ -4322,7 +4086,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		      if (pNext == pPiece)
 		      {
-			int idx = m_pLibrary->GetPieceIndex (pInfo);
+			int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
 			char pat[] = "patterns/";
 			if (conv[idx*9+1] != 'p')
 			  strcpy(pat, "");
@@ -4365,7 +4129,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
 				pInfo = pPiece->GetPieceInfo();
-				int idx = m_pLibrary->GetPieceIndex (pInfo);
+				int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
 				if (conv[idx*9] != 0)
 					continue;
 
@@ -4520,7 +4284,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 			  float fl[12], pos[3], rot[4];
 			  char name[20];
-			  int idx = m_pLibrary->GetPieceIndex (pPiece->GetPieceInfo ());
+			  int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
 
 			  if (conv[idx*9] == 0)
 			  {
@@ -4671,16 +4435,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			strcpy(opts.strComments, m_strComments);
 			opts.strFilename = m_strPathName;
 
-			opts.lines = m_pLibrary->GetPieceCount();
-			opts.count = (unsigned short*)malloc(m_pLibrary->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			memset (opts.count, 0, m_pLibrary->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			opts.names = (char**)malloc(m_pLibrary->GetPieceCount()*sizeof(char*));
-			for (int i = 0; i < m_pLibrary->GetPieceCount(); i++)
-				opts.names[i] = m_pLibrary->GetPieceInfo (i)->m_strDescription;
+			opts.lines = lcGetPiecesLibrary()->GetPieceCount();
+			opts.count = (unsigned short*)malloc(lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
+			memset (opts.count, 0, lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
+			opts.names = (char**)malloc(lcGetPiecesLibrary()->GetPieceCount()*sizeof(char*));
+			for (int i = 0; i < lcGetPiecesLibrary()->GetPieceCount(); i++)
+				opts.names[i] = lcGetPiecesLibrary()->GetPieceInfo (i)->m_strDescription;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				int idx = m_pLibrary->GetPieceIndex (pPiece->GetPieceInfo ());
+				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
 				opts.count[idx*LC_MAXCOLORS+pPiece->GetColor()]++;
 			}
 
@@ -4721,7 +4485,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
 			{
-				if (m_pLibrary->m_Modified)
+				if (lcGetPiecesLibrary()->m_Modified)
 				{
 					DeleteContents(true);
 					FileLoad(&file, true, false);
@@ -4878,7 +4642,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				char name[9];
 				Piece* pPiece = new Piece(NULL);
 				pPiece->FileLoad(*file, name);
-				PieceInfo* pInfo = m_pLibrary->FindPieceInfo(name);
+				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 				if (pInfo)
 				{
 					pPiece->SetPieceInfo(pInfo);

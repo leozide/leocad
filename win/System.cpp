@@ -32,6 +32,7 @@
 #include "mainfrm.h"
 #include "project.h"
 #include "globals.h"
+#include "lc_application.h"
 
 bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description)
 {
@@ -447,7 +448,10 @@ void SystemInit()
 // Viewport menu.
 void SystemUpdateViewport(int nNew, int nOld)
 {
-	CMenu* pMenu = GetMainMenu(2)->GetSubMenu(12);
+	CMenu* pMenu = GetMainMenu(2);
+	if (!pMenu)
+		return;
+	pMenu = pMenu->GetSubMenu(12);
 	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
 	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
 }
@@ -456,6 +460,8 @@ void SystemUpdateViewport(int nNew, int nOld)
 void SystemUpdateAction(int nNew, int nOld)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(ID_VIEW_TOOLS_BAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 	CView* pView = pFrame->GetActiveView();
@@ -474,12 +480,15 @@ void SystemUpdateAction(int nNew, int nOld)
 // Current color in the listbox;
 void SystemUpdateColorList(int nNew)
 {
-	AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, 0, nNew+1);
+	if (AfxGetMainWnd())
+		AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, 0, nNew+1);
 }
 
 void SystemUpdateRenderingMode(bool bBackground, bool bFast)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
@@ -500,6 +509,8 @@ void SystemUpdateRenderingMode(bool bBackground, bool bFast)
 void SystemUpdateUndoRedo(char* undo, char* redo)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 	CMenu* pMenu = GetMainMenu(1);
@@ -542,6 +553,8 @@ void SystemUpdateUndoRedo(char* undo, char* redo)
 void SystemUpdateSnap(const unsigned long nSnap)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 	pCtrl->CheckButton(ID_SNAP_ANGLE, (nSnap & LC_DRAW_SNAP_A) != 0);
@@ -577,6 +590,8 @@ void SystemUpdateSelected(unsigned long flags)
 {
 	CMenu* pMenu;
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
@@ -647,6 +662,8 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 {
 	// Toolbar
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(ID_VIEW_ANIMATION_BAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
@@ -687,11 +704,12 @@ void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap)
 {
 	char Text[256], xy[32], z[32];
 
-	project->GetSnapDistanceText(xy, z);
+	lcGetActiveProject()->GetSnapDistanceText(xy, z);
 
 	sprintf(Text, " M: %s %s R: %d ", xy, z, RotateSnap);
 
-	((CMainFrame*)AfxGetMainWnd())->SetStatusBarPane(ID_INDICATOR_SNAP, Text);
+	if (AfxGetMainWnd())
+		((CMainFrame*)AfxGetMainWnd())->SetStatusBarPane(ID_INDICATOR_SNAP, Text);
 }
 
 void SystemUpdatePaste(bool enable)
@@ -722,6 +740,8 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 {
 	// Toolbar
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(ID_VIEW_ANIMATION_BAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
@@ -747,7 +767,10 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
+	CMenu* Menu = GetMainMenu(2);
+	if (!Menu)
+		return;
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i;
 
@@ -772,7 +795,10 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 // Update the list of cameras
 void SystemUpdateCameraMenu(Camera* pCamera)
 {
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
+	CMenu* Menu = GetMainMenu(2);
+	if (!Menu)
+		return;
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	Camera* pFirst = pCamera;
 	int i;
@@ -817,6 +843,10 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 void SystemUpdateCategories(bool SearchOnly)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+
+	if (!pFrame)
+		return;
+
 	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
 	pBar->UpdatePiecesTree(SearchOnly);
 }
@@ -970,6 +1000,8 @@ static BOOL GetDisplayName(char* filename, CString& strName, LPCTSTR lpszCurDir,
 void SystemUpdateRecentMenu(char names[4][LC_MAXPATH])
 {
 	CBMPMenu* pMenu = (CBMPMenu*)GetMainMenu(0);
+	if (!pMenu)
+		return;
 	UINT nState;
 
 	pMenu->DeleteMenu(ID_FILE_MRU_FILE2, MF_BYCOMMAND);
@@ -1061,6 +1093,9 @@ extern void AFXAPI AfxSetWindowText(HWND, LPCTSTR);
 
 void SystemSetWindowCaption(char* caption)
 {
+	if (!AfxGetMainWnd())
+		return;
+
 	AfxSetWindowText(AfxGetMainWnd()->m_hWnd, caption);
 }
 
@@ -1724,6 +1759,8 @@ long SystemGetTicks()
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
 
 	pStatusBar->ShowProgressBar(TRUE);
@@ -1738,6 +1775,8 @@ void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 void SytemEndProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
 
 	pStatusBar->ShowProgressBar(FALSE);
@@ -1749,6 +1788,8 @@ void SytemEndProgressBar()
 void SytemStepProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
 	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
 
 	pStatusBar->StepProgressBar();

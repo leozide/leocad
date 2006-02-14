@@ -13,12 +13,13 @@
 #include "Tools.h"
 #include "Piece.h"
 #include "library.h"
+#include "lc_application.h"
 
 static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 {
 	CCADView* pView = (CCADView*)pMainFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOSELECTION|PD_ENABLEPRINTHOOK, pParent);
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	int bricks = 0;
 	for (int j = 0; j < pLib->GetPieceCount (); j++)
@@ -288,7 +289,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3ubv(FlatColorArray[project->GetCurrentColor()]);
+			glColor3ubv(FlatColorArray[lcGetActiveProject()->GetCurrentColor()]);
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
@@ -305,7 +306,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			FillRect(pMemDC->m_hDC, CRect(0,h,w,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pInfo->RenderPiece(project->GetCurrentColor());
+			pInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
 			glFlush();
 
 			TextOut (pMemDC->m_hDC, 5, 5, pInfo->m_strDescription, strlen(pInfo->m_strDescription));
@@ -411,7 +412,8 @@ static void PrintPiecesThread(void* pv)
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
+	Project* project = lcGetActiveProject();
 
 	UINT *pieces = (UINT*)malloc(pLib->GetPieceCount ()*28*sizeof(UINT));
 	int col[28];

@@ -6,6 +6,7 @@
 #include "EdGrpDlg.h"
 #include "globals.h"
 #include "project.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,7 +91,7 @@ void CEditGroupsDlg::OnEditgrpNewgroup()
       pParent = m_Tree.opts->groups[item.lParam - 0xFFFF];
   }
 
-  pGroup = project->AddGroup (NULL, pParent, 0, 0, 0);
+  pGroup = lcGetActiveProject()->AddGroup (NULL, pParent, 0, 0, 0);
 
   m_Tree.opts->groupcount++;
   m_Tree.opts->groups = (Group**)realloc(m_Tree.opts->groups, m_Tree.opts->groupcount*sizeof(Group*));

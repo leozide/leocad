@@ -1025,9 +1025,10 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					CString CategoryName = m_PiecesTree.GetItemText(CategoryItem);
 					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
+					PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+
 					if (CategoryIndex != -1)
 					{
-						PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 						int i;
 
 						Lib->GetCategoryEntries(CategoryIndex, true, SinglePieces, GroupedPieces);
@@ -1053,14 +1054,14 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 							m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
 						}
+					}
 
-						if (CategoryName == "Search Results")
+					if (CategoryName == "Search Results")
+					{
+						// Let the user know if the search is empty.
+						if ((SinglePieces.GetSize() == 0) && (GroupedPieces.GetSize() == 0))
 						{
-							// Let the user know if the search is empty.
-							if ((SinglePieces.GetSize() == 0) && (GroupedPieces.GetSize() == 0))
-							{
-								m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No pieces found", 0, 0, 0, 0, 0, CategoryItem, TVI_SORT);
-							}
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No pieces found", 0, 0, 0, 0, 0, CategoryItem, TVI_SORT);
 						}
 					}
 				}

@@ -1016,7 +1016,25 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		{
 			if (Notify->action == TVE_EXPAND)
 			{
+				m_PiecesTree.SetRedraw(FALSE);
+
 				PiecesLibrary *Lib = lcGetPiecesLibrary();
+
+				// Remove all children.
+				HTREEITEM Item = Notify->itemNew.hItem;
+
+				if (m_PiecesTree.ItemHasChildren(Item))
+				{
+					HTREEITEM NextItem;
+					HTREEITEM ChildItem = m_PiecesTree.GetChildItem(Item);
+
+					while (ChildItem != NULL)
+					{
+						NextItem = m_PiecesTree.GetNextItem(ChildItem, TVGN_NEXT);
+						m_PiecesTree.DeleteItem(ChildItem);
+						ChildItem = NextItem;
+					}
+				}
 
 				// Check if we're expanding a category item.
 				if (Notify->itemNew.lParam == NULL)
@@ -1079,20 +1097,6 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					Pieces.Sort(PiecesSortFunc, NULL);
 					HTREEITEM ParentItem = Notify->itemNew.hItem;
 
-					// Remove all children (for some reason TVE_COLLAPSERESET isn't always working).
-					if (m_PiecesTree.ItemHasChildren(ParentItem))
-					{
-						HTREEITEM NextItem;
-						HTREEITEM ChildItem = m_PiecesTree.GetChildItem(ParentItem);
-
-						while (ChildItem != NULL)
-						{
-							NextItem = m_PiecesTree.GetNextItem(ChildItem, TVGN_NEXT);
-							m_PiecesTree.DeleteItem(ChildItem);
-							ChildItem = NextItem;
-						}
-					}
-
 					for (int i = 0; i < Pieces.GetSize(); i++)
 					{
 						PieceInfo* Info = Pieces[i];
@@ -1113,6 +1117,9 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, ParentItem, TVI_LAST);
 					}
 				}
+
+				m_PiecesTree.SetRedraw(TRUE);
+				m_PiecesTree.Invalidate();
 			}
 			else if (Notify->action == TVE_COLLAPSE)
 			{

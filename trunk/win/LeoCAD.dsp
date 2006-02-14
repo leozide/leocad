@@ -1028,6 +1028,10 @@ SOURCE=..\common\keyboard.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\lc_application.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\library.h
 # End Source File
 # Begin Source File
@@ -1190,6 +1194,11 @@ SOURCE=..\Common\image.cpp
 # Begin Source File
 
 SOURCE=..\common\keyboard.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_application.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File

@@ -267,7 +267,7 @@ typedef struct
 	bool truecolor;
 	unsigned char background[3];
 	float pause;
-	unsigned char format;
+	unsigned int format;
 } LC_IMAGE_OPTS;
 
 typedef struct

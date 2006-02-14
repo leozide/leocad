@@ -7,6 +7,7 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "system.h"
+#include "lc_application.h"
 
 PiecePreview::PiecePreview(GLWindow *share)
 	: GLWindow(share)
@@ -76,11 +77,11 @@ void PiecePreview::OnDraw()
 		glLoadMatrixf(WorldToView);
 	}
 
-	float pos[4] = { 0, 0, 10, 0 }, *bg = project->GetBackgroundColor ();
+	float pos[4] = { 0, 0, 10, 0 }, *bg = lcGetActiveProject()->GetBackgroundColor ();
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_PieceInfo->RenderPiece(project->GetCurrentColor ());
+	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
 
 	glFinish();
 	SwapBuffers();
@@ -98,7 +99,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	if (m_PieceInfo != NULL)
 	{
 		m_PieceInfo->AddRef();
-		project->SetCurrentPiece(m_PieceInfo);
+		lcGetActiveProject()->SetCurrentPiece(m_PieceInfo);
 		Redraw();
 	}
 }

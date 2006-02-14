@@ -14,6 +14,7 @@
 #include "globals.h"
 #include "system.h"
 #include "library.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -142,20 +143,20 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	{
 		case ID_LIBDLG_FILE_OPEN:
 		{
-			project->GetPiecesLibrary()->LoadCategories(NULL);
+			lcGetPiecesLibrary()->LoadCategories(NULL);
 			UpdateTree();
 			return TRUE;
 		}
 
 		case ID_LIBDLG_FILE_SAVE:
 		{
-			project->GetPiecesLibrary()->DoSaveCategories(false);
+			lcGetPiecesLibrary()->DoSaveCategories(false);
 			return TRUE;
 		}
 
 		case ID_LIBDLG_FILE_SAVEAS:
 		{
-			project->GetPiecesLibrary()->DoSaveCategories(true);
+			lcGetPiecesLibrary()->DoSaveCategories(true);
 			return TRUE;
 		}
 
@@ -178,7 +179,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
 			{
-				project->GetPiecesLibrary()->LoadUpdate((char*)opts.filenames);
+				lcGetPiecesLibrary()->LoadUpdate((char*)opts.filenames);
 
 				free(opts.filenames);
 
@@ -199,7 +200,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			{
 				for (int i = 0; i < opts.numfiles; i++)
 				{
-					project->GetPiecesLibrary ()->ImportLDrawPiece (opts.filenames[i]);
+					lcGetPiecesLibrary ()->ImportLDrawPiece (opts.filenames[i]);
 					free (opts.filenames[i]);
 				}
 
@@ -222,7 +223,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			if (SystemDoMessageBox("Are you sure you want to reset the categories?", LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES)
 			{
-				project->GetPiecesLibrary()->ResetCategories();
+				lcGetPiecesLibrary()->ResetCategories();
 
 				UpdateList();
 				UpdateTree();
@@ -239,8 +240,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
 			{
-				PiecesLibrary* Lib = project->GetPiecesLibrary();
-				Lib->AddCategory(Opts.Name, Opts.Keywords);
+				lcGetPiecesLibrary()->AddCategory(Opts.Name, Opts.Keywords);
 			}
 
 			UpdateTree();
@@ -255,7 +255,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = project->GetPiecesLibrary();
+			PiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_Tree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -283,7 +283,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = project->GetPiecesLibrary();
+			PiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_Tree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -331,7 +331,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (SystemDoMessageBox ("Are you sure you want to permanently delete the selected pieces?", LC_MB_YESNO|LC_MB_ICONQUESTION) != LC_YES)
 				return TRUE;
 
-			project->GetPiecesLibrary()->DeletePieces(Pieces);
+			lcGetPiecesLibrary()->DeletePieces(Pieces);
 
 			UpdateList();
 
@@ -347,7 +347,7 @@ void CLibraryDlg::UpdateList()
 	m_List.DeleteAllItems();
 	m_List.SetRedraw(FALSE);
 
-	PiecesLibrary *Lib = project->GetPiecesLibrary();
+	PiecesLibrary *Lib = lcGetPiecesLibrary();
 
 	HTREEITEM CategoryItem = m_Tree.GetSelectedItem();
 	CString CategoryName = m_Tree.GetItemText(CategoryItem);
@@ -433,7 +433,7 @@ void CLibraryDlg::UpdateTree()
 
 	HTREEITEM Root = m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_TEXT, "Pieces", 0, 1, 0, 0, 0, TVI_ROOT, TVI_SORT);
 
-	PiecesLibrary *Lib = project->GetPiecesLibrary();
+	PiecesLibrary *Lib = lcGetPiecesLibrary();
 	for (int i = 0; i < Lib->GetNumCategories(); i++)
 		m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 1, 0, 0, 0, Root, TVI_SORT);
 
@@ -454,7 +454,7 @@ void CLibraryDlg::OnSelChangedTree(NMHDR* pNMHDR, LRESULT* pResult)
 void CLibraryDlg::OnCancel() 
 {
 	// Check if it's ok to close the dialog
-	if (!project->GetPiecesLibrary()->SaveCategories())
+	if (!lcGetPiecesLibrary()->SaveCategories())
 		return;
 
 	CDialog::OnCancel();
@@ -463,7 +463,7 @@ void CLibraryDlg::OnCancel()
 void CLibraryDlg::OnOK() 
 {
 	// Check if it's ok to close the dialog
-	if (!project->GetPiecesLibrary()->SaveCategories())
+	if (!lcGetPiecesLibrary()->SaveCategories())
 		return;
 
 	CDialog::OnOK();

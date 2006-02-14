@@ -13,6 +13,7 @@
 #include "system.h"
 #include "matrix.h"
 #include "library.h"
+#include "lc_application.h"
 
 // =============================================================================
 // Static variables
@@ -442,7 +443,7 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 		m_Colors[i] = colors[i];
 		m_Angles[i] = 0;
 
-		m_Info[i] = project->GetPiecesLibrary ()->FindPieceInfo (pieces[i]);
+		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
 		if (m_Info[i] != NULL)
 			m_Info[i]->AddRef();
 	}
@@ -451,7 +452,7 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
 
-	i = Sys_ProfileLoadInt ("MinifigWizard", "Version", 1);
+	i = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
 	if (i == 1)
 	{
 		char *ptr, buf[32];
@@ -552,7 +553,7 @@ void MinifigWizard::OnDraw ()
 	glEnable (GL_DEPTH_TEST);
 	glDepthFunc (GL_LEQUAL);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	float *bg = project->GetBackgroundColor();
+	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor (bg[0], bg[1], bg[2], bg[3]);
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable (GL_DITHER);
@@ -888,7 +889,7 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
 	{
 		PieceInfo* piece_info;
 
-		piece_info = project->GetPiecesLibrary ()->FindPieceInfo (mfw_pieceinfo[i].name);
+		piece_info = lcGetPiecesLibrary()->FindPieceInfo(mfw_pieceinfo[i].name);
 		if (piece_info == NULL)
 			continue;
 
@@ -971,7 +972,7 @@ void MinifigWizard::ChangePiece (int type, const char *desc)
 	{
 		if (strcmp(desc, mfw_pieceinfo[j].description) == 0)
 		{
-			piece_info = project->GetPiecesLibrary()->FindPieceInfo(mfw_pieceinfo[j].name);
+			piece_info = lcGetPiecesLibrary()->FindPieceInfo(mfw_pieceinfo[j].name);
 			if (piece_info == NULL)
 				continue;
 
@@ -1083,7 +1084,7 @@ bool MinifigWizard::LoadMinifig (const char* name)
 
     endptr = strchr (ptr, ' ');
     *endptr = '\0';
-    m_Info[j] = project->GetPiecesLibrary ()->FindPieceInfo (ptr);
+    m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo (ptr);
     *endptr = ' ';
     ptr = endptr;
 

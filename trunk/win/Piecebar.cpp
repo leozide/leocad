@@ -9,6 +9,7 @@
 #include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -737,7 +738,7 @@ void CPiecesBar::OnSelChangeColor()
 	if (i == LB_ERR)
 		return;
 
-	project->HandleNotify(LC_COLOR_CHANGED, (i % 2 == 0) ? (i/2) : (((i-1)/2)+14));
+	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, (i % 2 == 0) ? (i/2) : (((i-1)/2)+14));
 	m_wndPiecePreview.PostMessage (WM_PAINT);
 }
 
@@ -778,7 +779,7 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 
 				if (Item != NULL)
 				{
-					PiecesLibrary *Lib = project->GetPiecesLibrary();
+					PiecesLibrary *Lib = lcGetPiecesLibrary();
 					CString CategoryName = m_PiecesTree.GetItemText(Item);
 					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -833,7 +834,7 @@ void CPiecesBar::SelectPiece(const char* Category, PieceInfo* Info)
 		strcpy(ParentName, Info->m_strName);
 		*strchr(ParentName, 'P') = '\0';
 
-		Parent = project->GetPiecesLibrary()->FindPieceInfo(ParentName);
+		Parent = lcGetPiecesLibrary()->FindPieceInfo(ParentName);
 
 		if (Parent)
 		{
@@ -933,7 +934,7 @@ void CPiecesBar::UpdatePiecesTree(const char* OldCategory, const char* NewCatego
 
 void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 {
-	PiecesLibrary *Lib = project->GetPiecesLibrary();
+	PiecesLibrary *Lib = lcGetPiecesLibrary();
 
 	if (SearchOnly)
 	{
@@ -1006,7 +1007,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 			if (Info != NULL)
 			{
-				project->SetCurrentPiece(Info);
+				lcGetActiveProject()->SetCurrentPiece(Info);
 				m_wndPiecePreview.SetPieceInfo(Info);
 				m_wndPiecePreview.PostMessage(WM_PAINT);
 			}
@@ -1015,7 +1016,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		{
 			if (Notify->action == TVE_EXPAND)
 			{
-				PiecesLibrary *Lib = project->GetPiecesLibrary();
+				PiecesLibrary *Lib = lcGetPiecesLibrary();
 
 				// Check if we're expanding a category item.
 				if (Notify->itemNew.lParam == NULL)

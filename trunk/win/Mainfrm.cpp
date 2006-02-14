@@ -16,7 +16,7 @@
 #include "keyboard.h"
 #include "system.h"
 #include "library.h"
-
+#include "lc_application.h"
 #include "Print.h"
 
 #ifdef _DEBUG
@@ -418,7 +418,7 @@ LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 	char str[128];
 	float pos[3];
 
-	project->GetFocusPosition(pos);
+	lcGetActiveProject()->GetFocusPosition(pos);
 	sprintf (str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
 
 	SetStatusBarPane(ID_INDICATOR_POSITION, str);
@@ -475,7 +475,7 @@ void CMainFrame::OnClose()
 	if (m_lpfnCloseProc != NULL && !(*m_lpfnCloseProc)(this))
 		return;
 
-	if (!project->SaveModified())
+	if (!lcGetActiveProject()->SaveModified())
 		return;
 
 	if (GetStyle() & WS_VISIBLE)
@@ -629,7 +629,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		Camera* pCamera = project->GetCamera(nID-ID_CAMERA_FIRST);
+		Camera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
 		rMessage += pCamera->GetName();
 		rMessage += "\"";
@@ -646,6 +646,7 @@ void CMainFrame::OnFilePrintPieceList()
 // Pass all commands to the project.
 BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam) 
 {
+	Project* project = lcGetActiveProject();
 	int nID = LOWORD(wParam);
 
 	if (nID >= ID_SNAP_0 && nID <= ID_SNAP_9)
@@ -966,7 +967,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = project->GetPiecesLibrary();
+			PiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_wndPiecesBar.m_PiecesTree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -994,7 +995,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
 			{
-				PiecesLibrary* Lib = project->GetPiecesLibrary();
+				PiecesLibrary* Lib = lcGetPiecesLibrary();
 				Lib->AddCategory(Opts.Name, Opts.Keywords);
 				m_wndPiecesBar.UpdatePiecesTree(NULL, Opts.Name);
 			}
@@ -1008,7 +1009,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = project->GetPiecesLibrary();
+			PiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_wndPiecesBar.m_PiecesTree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -1040,7 +1041,12 @@ void CMainFrame::OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask)
 	
 	// Don't notify if we loose focus while on print preview
 	if (m_lpfnCloseProc == NULL)
-		project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
+	{
+		Project* project = lcGetActiveProject();
+
+		if (project)
+			project->HandleNotify(LC_ACTIVATE, bActive ? 1 : 0);
+	}
 }
 
 LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
@@ -1115,7 +1121,7 @@ void CMainFrame::OnViewNewView()
 			AfxThrowResourceException();
   }
 
-  View *view = new View (project, NULL);
+  View *view = new View (lcGetActiveProject(), NULL);
 
   CreateWindowEx (0, FLOATING_CLASSNAME, "LeoCAD",
     WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
@@ -1205,7 +1211,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 							}
 						}
 
-						project->HandleCommand(Cmd.ID, 0);
+						lcGetActiveProject()->HandleCommand(Cmd.ID, 0);
 						return true;
 					}
 				}
@@ -1223,7 +1229,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 							}
 						}
 
-						project->HandleCommand(Cmd.ID, 0);
+						lcGetActiveProject()->HandleCommand(Cmd.ID, 0);
 						return true;
 					}
 				}
@@ -1394,7 +1400,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		TCHAR szFileName[_MAX_PATH];
 		::DragQueryFile(hDropInfo, 0, szFileName, _MAX_PATH);
 
-		project->OpenProject(szFileName);
+		lcGetActiveProject()->OpenProject(szFileName);
 	}
 	::DragFinish(hDropInfo);
 }

@@ -57,7 +57,6 @@ public:
 // Constructors
 	Project();
 	~Project();
-	bool Initialize(int argc, char *argv[], char* binpath, char* libpath);
 
 // Attributes
 public:
@@ -70,6 +69,8 @@ public:
 	unsigned char GetLastStep();
 	bool IsAnimation()
 		{ return m_bAnimation; }
+	void SetAnimation(bool Anim)
+	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
 	unsigned short GetCurrentTime ()
 		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
 	unsigned long GetSnapFlags() const
@@ -102,9 +103,7 @@ public:
 		*ppLight = m_pLights;
 	}
 
-	PiecesLibrary* GetPiecesLibrary () const
-		{ return m_pLibrary; }
-
+	void UpdateInterface();
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
 	void SetTitle (const char* lpszTitle);
 
@@ -113,6 +112,7 @@ public:
 	void DeleteContents(bool bUndo); // delete doc items etc
 	void LoadDefaults(bool cameras);
 
+	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(bool bToMemory);
 	void SetViewSize(int cx, int cy);
 	void CheckAutoSave();
@@ -139,7 +139,6 @@ protected:
 
 	// Piece library
 	TexFont* m_pScreenFont;
-	PiecesLibrary* m_pLibrary;
 
 	// Undo support
 	LC_UNDOINFO* m_pUndoList;
@@ -194,7 +193,6 @@ protected:
 	void RenderOverlays(int Viewport);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
-	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
 
 	inline bool IsDrawing()

@@ -8,6 +8,7 @@
 #include "project.h"
 #include "globals.h"
 #include "texture.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,7 +69,7 @@ void CTexturesDlg::OnLibtexAdd()
 
 	if (dlg.DoModal() == IDOK)
 	{
-		project->GetPiecesLibrary ()->ImportTexture (dlg.GetPathName());
+		lcGetPiecesLibrary()->ImportTexture(dlg.GetPathName());
 		UpdateList();
 	}
 }
@@ -96,7 +97,7 @@ void CTexturesDlg::OnLibtexRemove()
 		}
 	}
 
-	project->GetPiecesLibrary ()->DeleteTextures (names, selected);
+	lcGetPiecesLibrary()->DeleteTextures(names, selected);
 
 	free (names);
 
@@ -105,13 +106,13 @@ void CTexturesDlg::OnLibtexRemove()
 
 void CTexturesDlg::UpdateList()
 {
-	PiecesLibrary *pLib = project->GetPiecesLibrary ();
+	PiecesLibrary *pLib = lcGetPiecesLibrary();
 
-	m_List.ResetContent ();
+	m_List.ResetContent();
 
-	for (int i = 0; i < pLib->GetTextureCount (); i++)
+	for (int i = 0; i < pLib->GetTextureCount(); i++)
 	{
 		int index = m_List.AddString (pLib->GetTexture(i)->m_strName);
-		m_List.SetItemDataPtr (index, pLib->GetTexture(i)->m_strName);
+		m_List.SetItemDataPtr(index, pLib->GetTexture(i)->m_strName);
 	}
 }

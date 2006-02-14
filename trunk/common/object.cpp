@@ -10,6 +10,7 @@
 #include "matrix.h"
 #include "vector.h"
 #include "file.h"
+#include "lc_application.h"
 
 #define LC_KEY_SAVE_VERSION 1 // LeoCAD 0.73
 
@@ -347,7 +348,7 @@ void Object::InsertTime (unsigned short start, bool animation, unsigned short ti
   if (animation)
   {
     node = m_pAnimationKeys;
-    last = project->GetTotalFrames ();
+    last = lcGetActiveProject()->GetTotalFrames ();
   }
   else
   {

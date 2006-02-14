@@ -8,6 +8,7 @@
 #include "texture.h"
 #include "library.h"
 #include "file.h"
+#include "lc_application.h"
 
 #define LC_TEXFONT_FILE_VERSION 1 // LeoCAD 0.74
 #define LC_TEXFONT_FILE_HEADER "LeoCAD Texture Font\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -56,7 +57,7 @@ bool TexFont::FileLoad (File& file)
   memset (buf, 0, 32);
   file.Read (buf, 8);
 
-  m_pTexture = project->GetPiecesLibrary()->FindTexture (buf);
+  m_pTexture = lcGetPiecesLibrary()->FindTexture (buf);
   if (m_pTexture == NULL)
   {
     console.PrintError ("Cannot find texture for font %s.\n", buf);

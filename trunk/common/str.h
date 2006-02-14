@@ -22,7 +22,7 @@ public:
 
 	char GetAt(int index) const
 	{ return m_pData[index]; }
-	char operator[](int index) const
+	char& operator[](int index) const
 	{ return m_pData[index]; }
 	void SetAt(int index, char ch)
 	{ m_pData[index] = ch; }

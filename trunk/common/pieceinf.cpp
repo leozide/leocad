@@ -15,6 +15,7 @@
 #include "defines.h"
 #include "config.h"
 #include "library.h"
+#include "lc_application.h"
 
 #define SIDES 16
 static float sintbl[SIDES];
@@ -320,7 +321,7 @@ void PieceInfo::LoadInformation()
   glEndList ();
 
   // Open pieces.bin and buffer the information we need.
-  strcpy (filename, project->GetPiecesLibrary ()->GetLibraryPath());
+  strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath());
   strcat (filename, "pieces.bin");
   if (!bin.Open (filename, "rb"))
     return;
@@ -381,7 +382,7 @@ void PieceInfo::LoadInformation()
     bytes++;
 
     strcpy(name, (char*)bytes);
-    tex->texture = project->GetPiecesLibrary()->FindTexture(name);
+    tex->texture = lcGetPiecesLibrary()->FindTexture(name);
 
     shorts = (lcint16*)(bytes + 8);
     for (i = 0; i < 4; i++)

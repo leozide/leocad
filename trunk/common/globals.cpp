@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include "globals.h"
 
-Project* project;
 Messenger* messenger;
 MainWnd* main_window;
 

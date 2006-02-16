@@ -13,15 +13,23 @@ typedef struct
   int index;
   UINT command;
 } BaseMenuItem;
+#endif
 
-#else
-
+#ifdef LC_LINUX
 #include <gtk/gtk.h>
 typedef GtkWidget* BaseWndXID;
 typedef struct
 {
   GtkWidget* widget;
   GtkAccelGroup* accel;
+} BaseMenuItem;
+#endif
+
+#ifdef LC_MACOSX
+typedef void* BaseWndXID;
+typedef struct
+{
+	void* Dummy;
 } BaseMenuItem;
 #endif
 
@@ -74,7 +82,7 @@ class BaseWnd
   void SetXID (BaseWndXID id)
     { m_pXID = id; }
 
-#ifndef WIN32
+#ifdef LC_LINUX 
   // FIXME: remove
   operator GtkWidget* () const
     { return m_pXID; }

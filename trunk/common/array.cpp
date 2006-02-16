@@ -159,6 +159,15 @@ PtrArray<T>& PtrArray<T>::operator=(const PtrArray<T>& Array)
 	memcpy(m_pData, Array.m_pData, (m_nAlloc) * sizeof(T*));
 }
 
+template <class T>
+PtrArray<T>& PtrArray<T>::operator+=(const PtrArray<T>& Array)
+{
+	Expand(Array.m_nLength);
+	memcpy(m_pData + m_nLength, Array.m_pData, Array.m_nLength * sizeof(T*));
+	m_nLength += Array.m_nLength;
+	return *this;
+}
+
 // ============================================================================
 
 template <class T>

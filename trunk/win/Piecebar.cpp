@@ -1051,7 +1051,10 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 						Lib->GetCategoryEntries(CategoryIndex, true, SinglePieces, GroupedPieces);
 
+						// Merge and sort the arrays.
+						SinglePieces += GroupedPieces;
 						SinglePieces.Sort(PiecesSortFunc, NULL);
+
 						for (i = 0; i < SinglePieces.GetSize(); i++)
 						{
 							PieceInfo* Info = SinglePieces[i];
@@ -1059,18 +1062,10 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							if (!m_bSubParts && Info->IsSubPiece())
 								continue;
 
-							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
-						}
-
-						GroupedPieces.Sort(PiecesSortFunc, NULL);
-						for (i = 0; i < GroupedPieces.GetSize(); i++)
-						{
-							PieceInfo* Info = GroupedPieces[i];
-
-							if (!m_bSubParts && Info->IsSubPiece())
-								continue;
-
-							m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
+							if (GroupedPieces.FindIndex(Info) == -1)
+								m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
+							else
+								m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
 						}
 					}
 

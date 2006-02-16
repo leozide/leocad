@@ -23,6 +23,7 @@ public:
 	void Sort(LC_PTRARRAY_COMPARE_FUNC SortFunc, void* SortData);
 
 	PtrArray<T>& operator=(const PtrArray<T>& Array);
+	PtrArray<T>& operator+=(const PtrArray<T>& Array);
 	T* operator [](int nIndex) const
 		{ return m_pData[nIndex]; }
 

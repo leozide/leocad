@@ -357,7 +357,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 		Image* images = new Image[ImageEnd - ImageStart + 1];
 		project->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
 
-		for (i = 0; i <= ImageEnd - ImageStart; i++)
+		for (int i = 0; i <= ImageEnd - ImageStart; i++)
 		{
 			char idx[256];
 			String Frame;

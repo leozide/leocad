@@ -22,6 +22,7 @@ ifeq ($(shell uname), Linux)
 
 OS 	   := -DLC_LINUX
 OSDIR 	   := linux
+TEST_GTK   := 1
 
 endif
 
@@ -31,7 +32,82 @@ ifeq ($(shell uname), FreeBSD)
 
 OS 	   := -DLC_LINUX
 OSDIR 	   := linux
+TEST_GTK   := 1
 CPPFLAGS   += -L/usr/local/lib
+
+endif
+
+### Macintosh configuration
+
+ifeq ($(shell uname), Darwin)
+
+OS         := -DLC_MACOSX
+OSDIR      := macosx
+TEST_GTK   := 0
+CPPFLAGS   += -funsigned-char -I/Developer/Headers/FlatCarbon/
+LDFLAGS    += -framework AGL
+
+# The directory tree for the generated bundle
+BUNDLEDIR  = bin/LeoCAD.app
+CONTDIR    = $(BUNDLEDIR)/Contents
+BINDIR     = $(CONTDIR)/MacOS
+RSRCDIR    = $(CONTDIR)/Resources
+EN_RSRCDIR = $(RSRCDIR)/English.lproj
+
+NIBS = main.nib
+
+all: bundletree exec bnibs pkginfo infoplist infopliststr
+
+bundletree: $(BUNDLEDIR) $(CONTDIR) $(BINDIR) $(RSRCDIR) $(EN_RSRCDIR)
+
+$(BUNDLEDIR):
+	mkdir $(BUNDLEDIR)
+
+$(CONTDIR):
+	mkdir $(CONTDIR)
+
+$(BINDIR):
+	mkdir $(BINDIR)
+
+$(RSRCDIR):
+	mkdir $(RSRCDIR)
+
+$(EN_RSRCDIR):
+	mkdir $(EN_RSRCDIR)
+
+# The binary executable
+exec: $(BINDIR)/leocad
+
+$(BINDIR)/leocad: bin/leocad
+	cp bin/leocad $(BINDIR)
+
+# The nib's
+BNIBS = $(NIBS:%=$(EN_RSRCDIR)/%)
+
+bnibs: $(BNIBS)
+
+$(BNIBS) : $(EN_RSRCDIR)/%: macosx/English.lproj/%
+	rm -rf $@
+	cp -R $< $@
+	touch $@
+
+# Info.plist
+infoplist : $(CONTDIR)/Info.plist
+
+$(CONTDIR)/Info.plist : macosx/Info.plist
+	cp macosx/Info.plist $@
+
+# PkgInfo
+pkginfo : $(CONTDIR)/PkgInfo
+
+$(CONTDIR)/PkgInfo : macosx/PkgInfo
+	cp macosx/PkgInfo $@
+
+# InfoPlist.strings - this goes inside English.lproj
+infopliststr : $(EN_RSRCDIR)/InfoPlist.strings
+
+$(EN_RSRCDIR)/InfoPlist.strings: macosx/English.lproj/InfoPlist.strings
+	cp $< $@
 
 endif
 
@@ -234,6 +310,7 @@ config:
 	@rm -f endiantest.c endiantest
 
 #### Check if the user has GTK+ and GLIB installed.
+ifeq ($(TEST_GTK), 1)
 	@echo -n "Checking if GLIB and GTK+ are installed... "
 	@if (pkg-config --atleast-version=2.0.0 glib-2.0) && (pkg-config --atleast-version=2.0.0 gtk+-2.0); then \
 	  echo "ok"; \
@@ -245,6 +322,7 @@ config:
 	  rm -rf $(OSDIR)/config.mk; \
 	  exit 1; \
 	fi
+endif
 
 ## Check if the user has libjpeg installed
 	@echo -n "Checking for jpeg support... "

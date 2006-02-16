@@ -15,6 +15,11 @@
 #include "linux_gl.h"
 #endif 
 
+#ifdef LC_MACOSX
+#include <OpenGL/gl.h>
+#include <AGL/agl.h>
+#endif
+
 //#include <GL/glu.h> // TODO: remove all glu calls
 void gluLookAt (GLdouble eyex, GLdouble eyey, GLdouble eyez,
 		GLdouble centerx, GLdouble centery, GLdouble centerz,

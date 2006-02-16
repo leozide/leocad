@@ -4,10 +4,8 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
-/////////////////////////////////////////////////////////////////////////////
-// System specific
-
-#if !(defined(LC_WINDOWS) || defined(LC_LINUX))
+// Check for supported platforms.
+#if !(defined(LC_WINDOWS) || defined(LC_LINUX) || defined(LC_MACOSX))
 #error  YOU NEED TO DEFINE YOUR OS
 #endif
 
@@ -54,6 +52,31 @@ char* strlwr(char* string);
 int stricmp(const char* str1, const char* str2);
 
 #endif
+
+#ifdef LC_MACOSX
+#define LC_MAXPATH 1024 //FILENAME_MAX
+
+#define KEY_SHIFT       0x01
+#define KEY_CONTROL     0x02
+#define KEY_ESCAPE      0x03
+#define KEY_TAB         0x04
+#define KEY_INSERT      0x05
+#define KEY_DELETE      0x06
+#define KEY_UP          0x07
+#define KEY_DOWN        0x08
+#define KEY_LEFT        0x09
+#define KEY_RIGHT       0x0A
+#define KEY_PRIOR       0x0B
+#define KEY_NEXT        0x0C
+#define KEY_PLUS        '+'
+#define KEY_MINUS       '-'
+
+char* strupr(char* string);
+char* strlwr(char* string);
+int stricmp(const char* str1, const char* str2);
+
+#endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 // LeoCAD constants

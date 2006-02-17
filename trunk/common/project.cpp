@@ -1635,7 +1635,7 @@ typedef struct LC_BSPNODE
 } LC_BSPNODE;
 
 static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel,
-	bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+	bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
 {
 	if (node->piece)
 	{
@@ -1656,20 +1656,20 @@ static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel,
 			}
 		}
 
-		node->piece->Render(bLighting, bNoAlpha, bEdges, nLastColor, bTrans);
+		node->piece->Render(bLighting, bEdges, nLastColor, bTrans);
 		return;
 	}
 
 	if (eye[0]*node->plane[0] + eye[1]*node->plane[1] +
 		eye[2]*node->plane[2] + node->plane[3] > 0.0f)
 	{
-		RenderBSP(node->back, eye, bSel, bLighting, bNoAlpha, bEdges, nLastColor, bTrans);
-		RenderBSP(node->front, eye, bSel, bLighting, bNoAlpha, bEdges, nLastColor, bTrans);
+		RenderBSP(node->back, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
+		RenderBSP(node->front, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
 	}
 	else
 	{
-		RenderBSP(node->front, eye, bSel, bLighting, bNoAlpha, bEdges, nLastColor, bTrans);
-		RenderBSP(node->back, eye, bSel, bLighting, bNoAlpha, bEdges, nLastColor, bTrans);
+		RenderBSP(node->front, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
+		RenderBSP(node->back, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
 	}
 }
 
@@ -1932,7 +1932,6 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
     {
       LC_RENDER_INFO info;
       info.lighting = (m_nDetail & LC_DET_LIGHTING) != 0;
-      info.stipple = (m_nDetail & LC_DET_SCREENDOOR) != 0;
       info.edges = (m_nDetail & LC_DET_BRICKEDGES) != 0;
       info.fLineWidth = m_fLineWidth;
 
@@ -2008,7 +2007,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 							}
 						}
 */
-						pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_SCREENDOOR) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+						pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
 					}
 					else
 					{
@@ -2024,7 +2023,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 				m_pViewCameras[vp]->GetEyePos (eye);
 				BuildBSP(&tree, pList);
 				RenderBSP(&tree, eye, &bSel,
-					(m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_SCREENDOOR) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+					(m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
 			}
 
 
@@ -2078,19 +2077,14 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 						}
 					}
 */
-					pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_SCREENDOOR) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+					pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
 				}
 			}
 #endif
 			if (bTrans)
 			{
-				if (m_nDetail & LC_DET_SCREENDOOR)
-					glDisable(GL_POLYGON_STIPPLE);
-				else
-				{
-					glDepthMask(GL_TRUE);
-					glDisable(GL_BLEND);
-				}
+				glDepthMask(GL_TRUE);
+				glDisable(GL_BLEND);
 			}
 			if (bSel)
 				glLineWidth(m_fLineWidth);
@@ -2863,15 +2857,8 @@ void Project::RenderBoxes(bool bHilite)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
-	unsigned long stipple_pattern[32];
 	int i;
-	for (i = 0; i < 32; i += 2)
-	{
-		stipple_pattern[i]   = 0xAAAAAAAA;
-		stipple_pattern[i+1] = 0x55555555;
-	}
 	glLineStipple (1, 65280);
-	glPolygonStipple ((GLubyte*)&stipple_pattern[0]);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_POLYGON_OFFSET_FILL);

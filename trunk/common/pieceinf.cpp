@@ -1709,13 +1709,11 @@ void PieceInfo::RenderPiece(int nColor)
 			glColor3ubv(FlatColorArray[nColor]);
 		if (nColor > 13 && nColor < 22)
 		{
-//			glEnable (GL_POLYGON_STIPPLE);
 			glEnable (GL_BLEND);
 			glDepthMask (GL_FALSE);
 		}
 		else
 		{
-//			glDisable (GL_POLYGON_STIPPLE);
 			glDepthMask (GL_TRUE);
 			glDisable (GL_BLEND);
 		}
@@ -1758,7 +1756,6 @@ void PieceInfo::RenderPiece(int nColor)
 
 				if (curcolor > 13 && curcolor < 22)
 				{
-//					glEnable (GL_POLYGON_STIPPLE);
 					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glEnable (GL_BLEND);
 					glDepthMask (GL_FALSE);
@@ -1766,7 +1763,6 @@ void PieceInfo::RenderPiece(int nColor)
 				}
 				else
 				{
-//					glDisable (GL_POLYGON_STIPPLE);
 					glDepthMask (GL_TRUE);
 					glDisable (GL_BLEND);
 					glColor3ubv (FlatColorArray[curcolor]);
@@ -1801,7 +1797,6 @@ void PieceInfo::RenderPiece(int nColor)
 
 				if (curcolor > 13 && curcolor < 22)
 				{
-//					glEnable (GL_POLYGON_STIPPLE);
 					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glEnable (GL_BLEND);
 					glDepthMask (GL_FALSE);
@@ -1809,7 +1804,6 @@ void PieceInfo::RenderPiece(int nColor)
 				}
 				else
 				{
-//					glDisable (GL_POLYGON_STIPPLE);
 					glDepthMask (GL_TRUE);
 					glDisable (GL_BLEND);
 					glColor3ubv(FlatColorArray[curcolor]);

@@ -1528,7 +1528,7 @@ typedef struct
 {
   void* data;
   GtkWidget *det_edges, *det_dither, *det_lighting, *det_smooth;
-  GtkWidget *det_antialias, *det_linear, *det_screen, *det_fast;
+  GtkWidget *det_antialias, *det_linear, *det_fast;
   GtkWidget *det_solid, *det_hidden, *det_background, *det_width;
   GtkWidget *draw_grid, *draw_gridunits, *draw_axis, *draw_preview;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
@@ -1553,7 +1553,6 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
   if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
   if (GTK_TOGGLE_BUTTON (s->det_linear)->active) detail |= LC_DET_LINEAR;
-  if (GTK_TOGGLE_BUTTON (s->det_screen)->active) detail |= LC_DET_SCREENDOOR;
   if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
   if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
   if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
@@ -1617,7 +1616,6 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
   if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
   if (GTK_TOGGLE_BUTTON (s->det_linear)->active) detail |= LC_DET_LINEAR;
-  if (GTK_TOGGLE_BUTTON (s->det_screen)->active) detail |= LC_DET_SCREENDOOR;
   if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
   if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
   if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
@@ -1755,11 +1753,6 @@ int preferencesdlg_execute(void* param)
   s.det_linear = gtk_check_button_new_with_label ("Linear filtering");
   gtk_widget_show (s.det_linear);
   gtk_table_attach (GTK_TABLE (table), s.det_linear, 0, 1, 5, 6,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_screen = gtk_check_button_new_with_label ("Screen door transparency");
-  gtk_widget_show (s.det_screen);
-  gtk_table_attach (GTK_TABLE (table), s.det_screen, 0, 1, 6, 7,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   s.det_fast = gtk_check_button_new_with_label ("Fast rendering");
@@ -2108,8 +2101,6 @@ int preferencesdlg_execute(void* param)
 			       (opts->nDetail & LC_DET_ANTIALIAS) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_linear),
 			       (opts->nDetail & LC_DET_LINEAR) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_screen),
-			       (opts->nDetail & LC_DET_SCREENDOOR) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_fast),
 			       (opts->nDetail & LC_DET_FAST) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_solid),

@@ -26,9 +26,11 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 /////////////////////////////////////////////////////////////////////////////
 // Static functions
 
-inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting, bool bNoAlpha)
+inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting)
 {
-	if (bLighting || !bNoAlpha)
+	bool Transparent = (nColor > 13 && nColor < 22);
+
+	if (bLighting || Transparent)
 		glColor4ubv(ColorArray[nColor]);
 	else
 		glColor3ubv(FlatColorArray[nColor]);
@@ -36,45 +38,23 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 	if (nColor > 27)
 		return;
 
-	if (bNoAlpha)
+	if (Transparent)
 	{
-		if (nColor > 13 && nColor < 22)
+		if (!*bTrans)
 		{
-			if (!*bTrans)
-			{
-				*bTrans = true;
-				glEnable(GL_POLYGON_STIPPLE);
-			}
-		}
-		else
-		{
-			if (*bTrans)
-			{
-				*bTrans = false;
-				glDisable(GL_POLYGON_STIPPLE);
-			}
+			*bTrans = true;
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 	}
 	else
 	{
-		if (nColor > 13 && nColor < 22)
+		if (*bTrans)
 		{
-			if (!*bTrans)
-			{
-				*bTrans = true;
-				glEnable(GL_BLEND);
-				glDepthMask(GL_FALSE);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			}
-		}
-		else
-		{
-			if (*bTrans)
-			{
-				*bTrans = false;
-				glDepthMask(GL_TRUE);
-				glDisable(GL_BLEND);
-			}
+			*bTrans = false;
+			glDepthMask(GL_TRUE);
+			glDisable(GL_BLEND);
 		}
 	}
 }
@@ -1138,14 +1118,12 @@ void Piece::BuildDrawInfo()
 	}
 }
 
-void Piece::Render(bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
 {
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
 	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
 	glVertexPointer (3, GL_FLOAT, 0, m_pPieceInfo->m_fVertexArray);
-
-//	glEnable(GL_POLYGON_STIPPLE);
 
 	for (int sh = 0; sh < m_pPieceInfo->m_nTextureCount; sh++)
 	{
@@ -1154,7 +1132,7 @@ void Piece::Render(bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nL
 
 		if (m_pPieceInfo->m_pTextures[sh].color == LC_COL_DEFAULT)
 		{
-			SetCurrentColor(m_nColor, bTrans, bLighting, bNoAlpha);
+			SetCurrentColor(m_nColor, bTrans, bLighting);
 			*nLastColor = m_nColor;
 		}
 
@@ -1186,12 +1164,12 @@ void Piece::Render(bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nL
 			{
 				if (*info == LC_COL_DEFAULT)
 				{
-					SetCurrentColor(m_nColor, bTrans, bLighting, bNoAlpha);
+					SetCurrentColor(m_nColor, bTrans, bLighting);
 					*nLastColor = m_nColor;
 				}
 				else
 				{
-					SetCurrentColor((unsigned char)*info, bTrans, bLighting, bNoAlpha);
+					SetCurrentColor((unsigned char)*info, bTrans, bLighting);
 					*nLastColor = (unsigned char)*info;
 				}
 			}
@@ -1223,7 +1201,7 @@ void Piece::Render(bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nL
 			    if (lock)
 			      glUnlockArraysEXT();
 
-			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting, bNoAlpha);
+			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting);
 			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
 
 			    if (lock)
@@ -1258,12 +1236,12 @@ void Piece::Render(bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nL
 			{
 				if (*info == LC_COL_DEFAULT)
 				{
-					SetCurrentColor(m_nColor, bTrans, bLighting, bNoAlpha);
+					SetCurrentColor(m_nColor, bTrans, bLighting);
 					*nLastColor = m_nColor;
 				}
 				else
 				{
-					SetCurrentColor((unsigned char)*info, bTrans, bLighting, bNoAlpha);
+					SetCurrentColor((unsigned char)*info, bTrans, bLighting);
 					*nLastColor = (unsigned char)*info;
 				}
 			}
@@ -1294,7 +1272,7 @@ void Piece::Render(bool bLighting, bool bNoAlpha, bool bEdges, unsigned char* nL
 			  {
 			    if (lock)
 			      glUnlockArraysEXT();
-			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting, bNoAlpha);
+			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting);
 			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
 			    
 			    if (lock)

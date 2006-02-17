@@ -276,7 +276,8 @@ void PolygonPlaneClip(Point3* InPoints, int NumInPoints, Point3* OutPoints, int*
 	}
 }
 
-// Return the intersction point of a line and a plane, or false if they are parallel.
+// Calculate the intersection of a line segment and a plane and returns false
+// if they are parallel or the intersection is outside the line segment.
 bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Point3& End, const Vector4& Plane)
 {
 	Vector3 Dir = End - Start;
@@ -287,7 +288,12 @@ bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Poin
 	if (t2 == 0.0f)
 		return false;
 
-	Intersection = Start - (t1 / t2) * Dir;
+	float t = -t1 / t2;
+
+	Intersection = Start + t * Dir;
+
+	if ((t < 0.0f) || (t > 1.0f))
+		return false;
 
 	return true;
 }

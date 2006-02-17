@@ -146,7 +146,7 @@ int stricmp(const char* str1, const char* str2);
 #define LC_DET_LINEAR		0x02000	// Linear filtering
 #define LC_DET_FAST			0x04000	// Fast rendering (boxes)
 #define LC_DET_BACKGROUND	0x08000	// Background rendering
-#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
+//#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
 
 #define LC_DRAW_AXIS		0x0001	// Orientation icon
 #define LC_DRAW_GRID		0x0002	// Grid

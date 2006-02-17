@@ -600,131 +600,104 @@ void Curve::TesselateHose ()
 
 void Curve::Render (LC_RENDER_INFO* pInfo)
 {
-  if ((m_nState & LC_CURVE_HIDDEN) != 0)
-    return;
+	if ((m_nState & LC_CURVE_HIDDEN) != 0)
+		return;
 
-  // FIXME: create a "set color" function in LC_RENDER_INFO
-  if (pInfo->lighting || !pInfo->stipple)
-    glColor4ubv (ColorArray[m_nColor]);
-  else
-    glColor3ubv (FlatColorArray[m_nColor]);
+	// FIXME: create a "set color" function in LC_RENDER_INFO
+	if (pInfo->lighting)
+		glColor4ubv (ColorArray[m_nColor]);
+	else
+		glColor3ubv (FlatColorArray[m_nColor]);
 
-  if (pInfo->stipple)
-  {
-    if (m_nColor > 13 && m_nColor < 22)
-    {
-      if (!pInfo->transparent)
-      {
-	pInfo->transparent = true;
-	glEnable (GL_POLYGON_STIPPLE);
-      }
-    }
-    else
-    {
-      if (pInfo->transparent)
-      {
-	pInfo->transparent = false;
-	glDisable (GL_POLYGON_STIPPLE);
-      }
-    }
-  }
-  else
-  {
-    if (m_nColor > 13 && m_nColor < 22) // FIXME: use a #define
-    {
-      if (!pInfo->transparent)
-      {
-	pInfo->transparent = true;
-	glEnable (GL_BLEND);
-	glDepthMask (GL_FALSE);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      }
-    }
-    else
-    {
-      if (pInfo->transparent)
-      {
-	pInfo->transparent = false;
-	glDepthMask (GL_TRUE);
-	glDisable (GL_BLEND);
-      }
-    }
-  }
-
-  //  glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-  glCallList (m_nDisplayList);
-
-  //  if (m_nState & LC_CURVE_SELECTED)
-  {
-    // turn off transparency to draw the control points
-    if (pInfo->transparent)
-    {
-      pInfo->transparent = false;
-      if (pInfo->stipple)
-	glDisable (GL_POLYGON_STIPPLE);
-      else
-      {
-	if (pInfo->transparent)
+	if (m_nColor > 13 && m_nColor < 22) // FIXME: use a #define
 	{
-	  glDepthMask (GL_TRUE);
-	  glDisable (GL_BLEND);
+		if (!pInfo->transparent)
+		{
+			pInfo->transparent = true;
+			glEnable (GL_BLEND);
+			glDepthMask (GL_FALSE);
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
 	}
-      }
-    }
+	else
+	{
+		if (pInfo->transparent)
+		{
+			pInfo->transparent = false;
+			glDepthMask (GL_TRUE);
+			glDisable (GL_BLEND);
+		}
+	}
 
-    for (int i = 0; i < m_Points.GetSize (); i++)
-      m_Points[i]->Render (pInfo);
-  }
+	//  glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+	glCallList (m_nDisplayList);
 
-    /*
-  if (IsSelected ())
-  {
+	//  if (m_nState & LC_CURVE_SELECTED)
+	{
+		// turn off transparency to draw the control points
+		if (pInfo->transparent)
+		{
+			pInfo->transparent = false;
+			if (pInfo->transparent)
+			{
+				glDepthMask (GL_TRUE);
+				glDisable (GL_BLEND);
+			}
+		}
 
-    for (int i = 0; i < m_nNumPoints; i++)
-    {
-      if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_FOCUSED)
+		for (int i = 0; i < m_Points.GetSize (); i++)
+			m_Points[i]->Render (pInfo);
+	}
+
+	/*
+	if (IsSelected ())
+	{
+
+	for (int i = 0; i < m_nNumPoints; i++)
+	{
+	if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_FOCUSED)
 	glColor3ubv (FlatColorArray[LC_COL_FOCUSED]);
-      else if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_SELECTED)
+	else if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_SELECTED)
 	glColor3ubv (FlatColorArray[LC_COL_SELECTED]);
-      else
+	else
 	glColor3f(0.5f, 0.8f, 0.5f); // FIXME: same as camera color, add to FlatColorArray
-      //      glColor3ub (0, 0, 0); // FIXME: inverse of background
-      // FIXME: add a new color to the array and change the names from LC_COL to LC_COLOR ?
+	//      glColor3ub (0, 0, 0); // FIXME: inverse of background
+	// FIXME: add a new color to the array and change the names from LC_COL to LC_COLOR ?
 
-      glPushMatrix ();
-    //    RenderSegment (m_pPoints[i].m_fPos, m_pPoints[i+1].m_fPos, m_pSegments[i].m_fR1, m_pSegments[i].m_fR2);
-      glTranslatef (m_pPoints[i].m_fPos[0], m_pPoints[i].m_fPos[1], m_pPoints[i].m_fPos[2]);
-      glCallList (m_nSphereList);
+	glPushMatrix ();
+	//    RenderSegment (m_pPoints[i].m_fPos, m_pPoints[i+1].m_fPos, m_pSegments[i].m_fR1, m_pSegments[i].m_fR2);
+	glTranslatef (m_pPoints[i].m_fPos[0], m_pPoints[i].m_fPos[1], m_pPoints[i].m_fPos[2]);
+	glCallList (m_nSphereList);
 
-      if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_FOCUSED)
-      {
+	if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_FOCUSED)
+	{
 	glBegin (GL_LINES);
 	if (i < m_nNumSegments)
 	{
-	  glVertex3fv (m_pSegments[i].m_fR1);
-	  glVertex3f (0, 0, 0);
+	glVertex3fv (m_pSegments[i].m_fR1);
+	glVertex3f (0, 0, 0);
 	}
 	else if (i > 0)
 	{
-	  glVertex3f (-m_pSegments[i-1].m_fR2[0], -m_pSegments[i-1].m_fR2[1], -m_pSegments[i-1].m_fR2[2]);
-	  glVertex3f (0, 0, 0);
+	glVertex3f (-m_pSegments[i-1].m_fR2[0], -m_pSegments[i-1].m_fR2[1], -m_pSegments[i-1].m_fR2[2]);
+	glVertex3f (0, 0, 0);
 	}
 	glEnd ();
-      }
+	}
 
-      glPopMatrix ();
-    }
-  }
-    */
+	glPopMatrix ();
+	}
+	}
+	*/
 
 
-  /*
-  if (m_nFlags & LC_CURVE_LOOP)
-  {
-    i = m_nNumPoints - 1;
-    RenderSegment (m_pPoints[0].pos, m_pPoints[i].pos, m_pPoints[0].normal, m_pPoints[i].normal);
-  }
-  */
+	/*
+	if (m_nFlags & LC_CURVE_LOOP)
+	{
+	i = m_nNumPoints - 1;
+	RenderSegment (m_pPoints[0].pos, m_pPoints[i].pos, m_pPoints[0].normal, m_pPoints[i].normal);
+	}
+	*/
 }
 
 

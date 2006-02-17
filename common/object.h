@@ -44,7 +44,6 @@ typedef struct
 typedef struct
 {
   bool lighting;
-  bool stipple;
   bool edges;
   float fLineWidth;
 

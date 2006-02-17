@@ -197,7 +197,6 @@ void CPreferencesDetail::SetOptions(DWORD dwDetail, float fLine)
 	m_bFast = (dwDetail & LC_DET_FAST) != 0;
 	m_bHidden = (dwDetail & LC_DET_HIDDEN_LINE) != 0;
 	m_bSolid = (dwDetail & LC_DET_BOX_FILL) != 0;
-	m_bNoAlpha = (dwDetail & LC_DET_SCREENDOOR) != 0;
 	m_fLineWidth = fLine;
 }
 
@@ -214,7 +213,6 @@ void CPreferencesDetail::GetOptions(DWORD* dwDetail, float* fLine)
 	if (m_bFast) *dwDetail |= LC_DET_FAST;
 	if (m_bHidden) *dwDetail |= LC_DET_HIDDEN_LINE;
 	if (m_bSolid) *dwDetail |= LC_DET_BOX_FILL;
-	if (m_bNoAlpha) *dwDetail |= LC_DET_SCREENDOOR;
 	*fLine = m_fLineWidth;
 }
 

@@ -1587,7 +1587,7 @@ void Project::Render(bool bToMemory)
 
 #ifdef _DEBUG
 #ifdef LC_WINDOWS
-//#define BENCHMARK
+#define BENCHMARK
 #endif
 #endif
 
@@ -2127,6 +2127,18 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 		// Draw cameras & lights
 		if (bDrawViewports)
 		{
+			if (m_nCurAction == LC_ACTION_INSERT)
+			{
+				Point3 pos = GetPieceInsertPosition(m_nDownX, m_nDownY);
+
+				glPushMatrix();
+				glTranslatef(pos[0], pos[1], pos[2]);
+				glLineWidth(2*m_fLineWidth);
+				m_pCurPiece->RenderPiece(m_nCurColor);
+				glLineWidth(m_fLineWidth);
+				glPopMatrix();
+			}
+
 			if (m_nDetail & LC_DET_LIGHTING)
 			{
 				glDisable (GL_LIGHTING);
@@ -6521,7 +6533,60 @@ Object* Project::GetFocusObject() const
 	return NULL;
 }
 
-void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine)
+// Try to find a good place for the user to add a new piece.
+Point3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
+{
+	// See if the mouse is over any pieces.
+	LC_CLICKLINE ClickLine;
+	FindObjectFromPoint(MouseX, MouseY, &ClickLine, true);
+
+	Piece* HitPiece = (Piece*)ClickLine.pClosest;
+	if (HitPiece)
+	{
+		float pos[3], rot[4];
+		HitPiece->GetPosition(pos);
+		HitPiece->GetRotation(rot);
+
+		Matrix mat(rot, pos);
+		mat.Translate(0, 0, HitPiece->GetPieceInfo()->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
+		mat.GetTranslation(pos);
+		SnapPoint(pos, NULL);
+
+		return Point3(pos[0], pos[1], pos[2]);
+	}
+
+	// Try to hit the base grid.
+	int Viewport[4] =
+	{
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX),
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY),
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX),
+		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY)
+	};
+
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
+
+	// Build the matrices.
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+	Point3 ClickPoints[2] = { Point3((float)m_nDownX, (float)m_nDownY, 0.0f), Point3((float)m_nDownX, (float)m_nDownY, 1.0f) };
+	UnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
+
+	Point3 Intersection;
+	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
+	{
+		SnapVector((Vector3&)Intersection, Vector3(0, 0, 0));
+		return Intersection;
+	}
+
+	// Couldn't find a good position, so just place the piece somewhere near the camera.
+	return UnprojectPoint(Point3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+}
+
+void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly)
 {
 	GLdouble px, py, pz, rx, ry, rz;
 	GLdouble modelMatrix[16], projMatrix[16];
@@ -6552,12 +6617,15 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine)
 		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 			pPiece->MinIntersectDist(pLine);
 
-	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-		if (pCamera != m_pViewCameras[m_nActiveViewport])
-			pCamera->MinIntersectDist(pLine);
+	if (!PiecesOnly)
+	{
+		for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+			if (pCamera != m_pViewCameras[m_nActiveViewport])
+				pCamera->MinIntersectDist(pLine);
 
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		pLight->MinIntersectDist(pLine);
+		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			pLight->MinIntersectDist(pLine);
+	}
 }
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
@@ -6981,6 +7049,13 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 	{
 		int i = (int)(Delta[0] / SnapXY);
 		Leftover[0] = Delta[0] - (SnapXY * i);
+
+		if (Leftover[0] > SnapXY / 2)
+		{
+			Leftover[0] -= SnapXY;
+			i++;
+		}
+
 		Delta[0] = SnapXY * i;
 	}
 
@@ -6988,6 +7063,13 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 	{
 		int i = (int)(Delta[1] / SnapXY);
 		Leftover[1] = Delta[1] - (SnapXY * i);
+
+		if (Leftover[1] > SnapXY / 2)
+		{
+			Leftover[1] -= SnapXY;
+			i++;
+		}
+
 		Delta[1] = SnapXY * i;
 	}
 
@@ -6995,6 +7077,13 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 	{
 		int i = (int)(Delta[2] / SnapZ);
 		Leftover[2] = Delta[2] - (SnapZ * i);
+
+		if (Leftover[2] > SnapZ / 2)
+		{
+			Leftover[2] -= SnapZ;
+			i++;
+		}
+
 		Delta[2] = SnapZ * i;
 	}
 }
@@ -7714,9 +7803,10 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
 			{
+				Point3 Pos = GetPieceInsertPosition(x, y);
 				Piece* pPiece = new Piece(m_pCurPiece);
-				SnapPoint (m_fTrack, NULL);
-				pPiece->Initialize(m_fTrack[0], m_fTrack[1], m_fTrack[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				SnapVector((Vector3&)Pos, Vector3(0, 0, 0));
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_pPieces);
@@ -8023,8 +8113,7 @@ void Project::OnRightButtonUp(int x, int y, bool bControl, bool bShift)
 
 void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
-	// && m_nAction != ACTION_INSERT
-	if (m_nTracking == LC_TRACK_NONE)
+	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_ACTION_INSERT))
 	{
 		if (m_OverlayActive)
 		{
@@ -8078,8 +8167,15 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 		} break;
 
 		case LC_ACTION_INSERT:
-			// TODO: handle action_insert (draw preview)
-			break;
+		{
+			if (m_nDownX != x || m_nDownY != y)
+			{
+				m_nDownX = x;
+				m_nDownY = y;
+
+				UpdateAllViews();
+			}
+		}	break;
 
 		case LC_ACTION_SPOTLIGHT:
 		{

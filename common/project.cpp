@@ -2129,10 +2129,13 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
 			{
-				Vector3 pos = GetPieceInsertPosition(m_nDownX, m_nDownY);
+				Vector3 Pos;
+				Vector4 Rot;
+				GetPieceInsertPosition(m_nDownX, m_nDownY, Pos, Rot);
 
 				glPushMatrix();
-				glTranslatef(pos[0], pos[1], pos[2]);
+				glTranslatef(Pos[0], Pos[1], Pos[2]);
+				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
 				glLineWidth(2*m_fLineWidth);
 				m_pCurPiece->RenderPiece(m_nCurColor);
 				glLineWidth(m_fLineWidth);
@@ -4915,18 +4918,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (pLast != NULL)
 			{
-				float pos[3], rot[4];
-				pLast->GetPosition(pos);
-				pLast->GetRotation(rot);
+				Vector3 Pos;
+				Vector4 Rot;
 
-				Matrix mat(rot, pos);
-				mat.Translate(0, 0, pLast->GetPieceInfo()->m_fDimensions[2] - pLast->GetPieceInfo()->m_fDimensions[5]);
-				mat.GetTranslation(pos);
-				SnapPoint (pos, NULL);
-				pPiece->Initialize(pos[0], pos[1], pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
-				pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(1, false);
+				GetPieceInsertPosition(pLast, Pos, Rot);
+
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+
+				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 			else
 				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame, m_nCurColor);
@@ -4936,7 +4937,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			AddPiece(pPiece);
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 			pPiece->Select (true, true, false);
-                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
+			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
 			UpdateSelection();
 			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
@@ -6300,6 +6301,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 void Project::SetAction(int nAction)
 {
+	bool Redraw = false;
+
+	if (m_nCurAction == LC_ACTION_INSERT)
+		Redraw = true;
+
 	SystemUpdateAction(nAction, m_nCurAction);
 	m_nCurAction = nAction;
 
@@ -6309,16 +6315,19 @@ void Project::SetAction(int nAction)
 		ActivateOverlay();
 
 		if (m_OverlayActive)
-			UpdateAllViews();
+			Redraw = true;
 	}
 	else
 	{
 		if (m_OverlayActive)
 		{
 			m_OverlayActive = false;
-			UpdateAllViews();
+			Redraw = true;
 		}
 	}
+
+	if (Redraw)
+		UpdateAllViews();
 }
 
 // Remove unused groups
@@ -6537,26 +6546,36 @@ Object* Project::GetFocusObject() const
 	return NULL;
 }
 
-// Try to find a good place for the user to add a new piece.
-Vector3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
+// Find a good starting position/orientation relative to an existing piece.
+void Project::GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation)
 {
-	// See if the mouse is over any pieces.
+	Vector3 Dist(0, 0, OffsetPiece->GetPieceInfo()->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
+	SnapVector(Dist, Vector3());
+
+	float pos[3], rot[4];
+	OffsetPiece->GetPosition(pos);
+	OffsetPiece->GetRotation(rot);
+
+	Matrix mat(rot, pos);
+	mat.Translate(Dist[0], Dist[1], Dist[2]);
+	mat.GetTranslation(pos);
+
+	Position = Vector3(pos[0], pos[1], pos[2]);
+	Rotation = Vector4(rot[0], rot[1], rot[2], rot[3]);
+}
+
+// Try to find a good starting position/orientation for a new piece.
+void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Rotation)
+{
+	// See if the mouse is over a piece.
 	LC_CLICKLINE ClickLine;
 	FindObjectFromPoint(MouseX, MouseY, &ClickLine, true);
 
 	Piece* HitPiece = (Piece*)ClickLine.pClosest;
 	if (HitPiece)
 	{
-		float pos[3], rot[4];
-		HitPiece->GetPosition(pos);
-		HitPiece->GetRotation(rot);
-
-		Matrix mat(rot, pos);
-		mat.Translate(0, 0, HitPiece->GetPieceInfo()->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
-		mat.GetTranslation(pos);
-		SnapPoint(pos, NULL);
-
-		return Vector3(pos[0], pos[1], pos[2]);
+		GetPieceInsertPosition(HitPiece, Position, Rotation);
+		return;
 	}
 
 	// Try to hit the base grid.
@@ -6583,11 +6602,14 @@ Vector3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
 	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
 	{
 		SnapVector((Vector3&)Intersection, Vector3(0, 0, 0));
-		return Intersection;
+		Position = Intersection;
+		Rotation = Vector4(0, 0, 1, 0);
+		return;
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	return UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+	Position = UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+	Rotation = Vector4(0, 0, 1, 0);
 }
 
 void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly)
@@ -7807,10 +7829,17 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
 			{
-				Vector3 Pos = GetPieceInsertPosition(x, y);
+				Vector3 Pos;
+				Vector4 Rot;
+
+				GetPieceInsertPosition(x, y, Pos, Rot);
+
 				Piece* pPiece = new Piece(m_pCurPiece);
-				SnapVector((Vector3&)Pos, Vector3(0, 0, 0));
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+
+				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_pPieces);

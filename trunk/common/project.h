@@ -161,7 +161,8 @@ protected:
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();
-	Vector3 GetPieceInsertPosition(int MouseX, int MouseY);
+	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
+	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);

@@ -318,7 +318,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE | LC_DRAW_PREVIEW);
 	SystemUpdateSnap(m_nSnap);
-	m_nMoveSnap = 0x0605;
+	m_nMoveSnap = 0x0604;
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
 	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
@@ -5402,7 +5402,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (pPiece->IsSelected())
 					pPiece->Hide();
 			UpdateSelection();
-                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 			UpdateAllViews();
 		} break;
 
@@ -5475,8 +5475,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							redraw = true;
 							pPiece->SetFrameShow(t+1);
 
-                                                        if (pPiece->IsSelected () && t == m_nCurFrame)
-                                                          pPiece->Select (false, false, false);
+							if (pPiece->IsSelected () && t == m_nCurFrame)
+								pPiece->Select (false, false, false);
 						}
 					}
 					else
@@ -5484,11 +5484,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						unsigned char t = pPiece->GetStepShow();
 						if (t < 255)
 						{
-                                                  redraw = true;
-                                                  pPiece->SetStepShow(t+1);
+							redraw = true;
+							pPiece->SetStepShow(t+1);
 
-                                                  if (pPiece->IsSelected () && t == m_nCurStep)
-                                                    pPiece->Select (false, false, false);
+							if (pPiece->IsSelected () && t == m_nCurStep)
+								pPiece->Select (false, false, false);
 						}
 					}
 				}
@@ -5498,7 +5498,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
 				UpdateAllViews();
-                                UpdateSelection ();
+				UpdateSelection ();
 			}
 		} break;
 
@@ -5547,6 +5547,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				strcpy(m_strFooter, opts.strFooter);
 				strcpy(m_strHeader, opts.strHeader);
 				SystemUpdateSnap(m_nSnap);
+				SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 
 				for (int i = 0; i < m_ViewList.GetSize (); i++)
 				{
@@ -5584,7 +5585,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
-		  // FIXME: rewrite using the FustrumCull function
+			// FIXME: rewrite using the FustrumCull function
 			if (m_pPieces == 0) break;
 			bool bControl = Sys_KeyDown (KEY_CONTROL);
 
@@ -6066,10 +6067,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nSnap |= LC_DRAW_SNAP_Z;
 				break;
 			case 3:
-				m_nSnap |= LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z;
+				if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
+					m_nSnap &= ~LC_DRAW_SNAP_XYZ;
+				else
+					m_nSnap |= LC_DRAW_SNAP_XYZ;
 				break;
 			case 4:
-				m_nSnap &= ~(LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z);
+				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
 				break;
 			case 5:
 				if (m_nSnap & LC_DRAW_SNAP_A)
@@ -6104,7 +6108,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nSnap |= LC_DRAW_LOCK_Z;
 				break;
 			case 3:
-				m_nSnap &= ~(LC_DRAW_LOCK_X|LC_DRAW_LOCK_Y|LC_DRAW_LOCK_Z);
+				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
 				break;
 			case 4:
 				m_nSnap &= ~LC_DRAW_3DMOUSE;

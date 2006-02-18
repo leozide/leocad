@@ -52,14 +52,14 @@ void PiecePreview::OnDraw()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	Point3 Eye(0, 0, 1.0f);
+	Vector3 Eye(0, 0, 1.0f);
 	Matrix33 Rot;
 
 	Rot.CreateFromAxisAngle(Vector3(1, 0, 0), -m_RotateX * LC_DTOR);
-	Eye = Eye * Rot;
+	Eye = Mul(Eye, Rot);
 
 	Rot.CreateFromAxisAngle(Vector3(0, 0, 1), -m_RotateZ * LC_DTOR);
-	Eye = Eye * Rot;
+	Eye = Mul(Eye, Rot);
 
 	if (m_AutoZoom)
 	{

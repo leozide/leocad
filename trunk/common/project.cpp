@@ -2129,7 +2129,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
 			{
-				Point3 pos = GetPieceInsertPosition(m_nDownX, m_nDownY);
+				Vector3 pos = GetPieceInsertPosition(m_nDownX, m_nDownY);
 
 				glPushMatrix();
 				glTranslatef(pos[0], pos[1], pos[2]);
@@ -2403,13 +2403,13 @@ void Project::RenderOverlays(int Viewport)
 
 		for (j = 0; j < 32; j++)
 		{
-			Point3 Pt;
+			Vector3 Pt;
 
 			Pt[0] = cosf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
 			Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
 			Pt[2] = 0.0f;
 
-			Pt = Pt * Mat;
+			Pt = Mul31(Pt, Mat);
 
 			glVertex3f(Pt[0], Pt[1], Pt[2]);
 		}
@@ -2468,8 +2468,8 @@ void Project::RenderOverlays(int Viewport)
 
 				if (Dot3(ViewDir, v1+v2) <= 0.0f)
 				{
-					Point3 Pt1 = m_OverlayCenter + v1 * OverlayRotateRadius * OverlayScale;
-					Point3 Pt2 = m_OverlayCenter + v2 * OverlayRotateRadius * OverlayScale;
+					Vector3 Pt1 = m_OverlayCenter + v1 * OverlayRotateRadius * OverlayScale;
+					Vector3 Pt2 = m_OverlayCenter + v2 * OverlayRotateRadius * OverlayScale;
 
 					glVertex3f(Pt1[0], Pt1[1], Pt1[2]);
 					glVertex3f(Pt2[0], Pt2[1], Pt2[2]);
@@ -2516,8 +2516,8 @@ void Project::RenderOverlays(int Viewport)
 					const float OverlayRotateArrowSize = 1.5f;
 					const float OverlayRotateArrowCapSize = 0.25f;
 
-					Point3 Pt = m_OverlayCenter + Normal * OverlayScale * OverlayRotateRadius;
-					Point3 Tip = Pt + Tangent * OverlayScale * OverlayRotateArrowSize;
+					Vector3 Pt = m_OverlayCenter + Normal * OverlayScale * OverlayRotateRadius;
+					Vector3 Tip = Pt + Tangent * OverlayScale * OverlayRotateArrowSize;
 					Vector3 Arrow;
 					Matrix33 Rot;
 
@@ -2528,13 +2528,13 @@ void Project::RenderOverlays(int Viewport)
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 
 					Rot.CreateFromAxisAngle(Normal, LC_PI * 0.15f);
-					Arrow = Tangent * Rot * OverlayRotateArrowCapSize;
+					Arrow = Mul(Tangent, Rot) * OverlayRotateArrowCapSize;
 
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
 
 					Rot.CreateFromAxisAngle(Normal, -LC_PI * 0.15f);
-					Arrow = Tangent * Rot * OverlayRotateArrowCapSize;
+					Arrow = Mul(Tangent, Rot) * OverlayRotateArrowCapSize;
 
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
@@ -6439,7 +6439,7 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 }
 
-bool Project::GetSelectionCenter(Point3& Center) const
+bool Project::GetSelectionCenter(Vector3& Center) const
 {
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	bool Selected = false;
@@ -6453,7 +6453,7 @@ bool Project::GetSelectionCenter(Point3& Center) const
 		}
 	}
 
-	Center = Point3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
+	Center = Vector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 
 	return Selected;
 }
@@ -6538,7 +6538,7 @@ Object* Project::GetFocusObject() const
 }
 
 // Try to find a good place for the user to add a new piece.
-Point3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
+Vector3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
 {
 	// See if the mouse is over any pieces.
 	LC_CLICKLINE ClickLine;
@@ -6556,7 +6556,7 @@ Point3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
 		mat.GetTranslation(pos);
 		SnapPoint(pos, NULL);
 
-		return Point3(pos[0], pos[1], pos[2]);
+		return Vector3(pos[0], pos[1], pos[2]);
 	}
 
 	// Try to hit the base grid.
@@ -6576,10 +6576,10 @@ Point3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
 	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
 	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Point3 ClickPoints[2] = { Point3((float)m_nDownX, (float)m_nDownY, 0.0f), Point3((float)m_nDownX, (float)m_nDownY, 1.0f) };
+	Vector3 ClickPoints[2] = { Vector3((float)m_nDownX, (float)m_nDownY, 0.0f), Vector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
 	UnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
-	Point3 Intersection;
+	Vector3 Intersection;
 	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
 	{
 		SnapVector((Vector3&)Intersection, Vector3(0, 0, 0));
@@ -6587,7 +6587,7 @@ Point3 Project::GetPieceInsertPosition(int MouseX, int MouseY)
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	return UnprojectPoint(Point3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+	return UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
 }
 
 void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly)
@@ -6676,10 +6676,10 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 	}
 
 	// Unproject 6 points to world space.
-	Point3 Corners[6] =
+	Vector3 Corners[6] =
 	{
-		Point3(Left, Top, 0), Point3(Left, Bottom, 0), Point3(Right, Bottom, 0),
-		Point3(Right, Top, 0), Point3(Left, Top, 1), Point3(Right, Bottom, 1)
+		Vector3(Left, Top, 0), Vector3(Left, Bottom, 0), Vector3(Right, Bottom, 0),
+		Vector3(Right, Top, 0), Vector3(Left, Top, 1), Vector3(Right, Bottom, 1)
 	};
 
 	UnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
@@ -6930,20 +6930,20 @@ bool Project::StopTracking(bool bAccept)
 				}
 
 				// Unproject screen points to world space.
-				Point3 Points[3] =
+				Vector3 Points[3] =
 				{
-					Point3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-					Point3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
-					Point3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
+					Vector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
+					Vector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
+					Vector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
 				};
 
 				UnprojectPoints(Points, 3, ModelView, Projection, Viewport);
 
 				// Center camera.
-				Point3 Eye = Cam->GetEyePosition();
+				Vector3 Eye = Cam->GetEyePosition();
 				Eye = Eye + (Points[0] - Points[1]);
 
-				Point3 Target = Cam->GetTargetPosition();
+				Vector3 Target = Cam->GetTargetPosition();
 				Target = Target + (Points[0] - Points[1]);
 
 				// Zoom in/out.
@@ -7205,7 +7205,7 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 		bs[2] = bs[5] = pos[2];
 	}
 
-	Point3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
+	Vector3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
@@ -7221,37 +7221,37 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 		if (nSel == 1)
 		{
 			if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
-				q = Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR)) * q;
+				q = Mul(Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR)), q);
 
 			if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
-				q = Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR)) * q;
+				q = Mul(Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR)), q);
 
 			if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
-				q = Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR)) * q;
+				q = Mul(Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR)), q);
 		}
 		else
 		{
-			Vector3 Distance = Point3(pos[0], pos[1], pos[2]) - Center;
+			Vector3 Distance = Vector3(pos[0], pos[1], pos[2]) - Center;
 
 			if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
 			{
 				Quaternion RotX(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR));
-				q = RotX * q;
-				Distance = Distance * RotX;
+				q = Mul(RotX, q);
+				Distance = Mul(Distance, RotX);
 			}
 
 			if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
 			{
 				Quaternion RotY(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR));
-				q = RotY * q;
-				Distance = Distance * RotY;
+				q = Mul(RotY, q);
+				Distance = Mul(Distance, RotY);
 			}
 
 			if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
 			{
 				Quaternion RotZ(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR));
-				q = RotZ * q;
-				Distance = Distance * RotZ;
+				q = Mul(RotZ, q);
+				Distance = Mul(Distance, RotZ);
 			}
 
 			pos[0] = Center[0] + Distance[0];
@@ -7807,7 +7807,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
 			{
-				Point3 Pos = GetPieceInsertPosition(x, y);
+				Vector3 Pos = GetPieceInsertPosition(x, y);
 				Piece* pPiece = new Piece(m_pCurPiece);
 				SnapVector((Vector3&)Pos, Vector3(0, 0, 0));
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
@@ -8763,13 +8763,13 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 		int Mode = -1;
 
-		Point3 SegStart((float)pts[0][0], (float)pts[0][1], (float)pts[0][2]);
-		Point3 Pt((float)x, (float)y, 0);
+		Vector3 SegStart((float)pts[0][0], (float)pts[0][1], (float)pts[0][2]);
+		Vector3 Pt((float)x, (float)y, 0);
 
 		// Check if the mouse is over an arrow.
 		for (int i = 1; i < 4; i++)
 		{
-			Point3 SegEnd((float)pts[i][0], (float)pts[i][1], (float)pts[i][2]);
+			Vector3 SegEnd((float)pts[i][0], (float)pts[i][1], (float)pts[i][2]);
 			Vector3 Line = SegEnd - SegStart;
 			Vector3 Vec = Pt - SegStart;
 
@@ -8780,7 +8780,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 				continue;
 
 			// Closest point in the line segment to the mouse.
-			Point3 Closest = SegStart + u * Line;
+			Vector3 Closest = SegStart + u * Line;
 
 			if ((Closest - Pt).LengthSquared() < 100.0f)
 			{
@@ -8841,9 +8841,9 @@ void Project::MouseUpdateOverlays(int x, int y)
 		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, Viewport, &px, &py, &pz);
 		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, Viewport, &rx, &ry, &rz);
 
-		Point3 SegStart((float)rx, (float)ry, (float)rz);
-		Point3 SegEnd((float)px, (float)py, (float)pz);
-		Point3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+		Vector3 SegStart((float)rx, (float)ry, (float)rz);
+		Vector3 SegEnd((float)px, (float)py, (float)pz);
+		Vector3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 		Vector3 Line = SegEnd - SegStart;
 		Vector3 Vec = Center - SegStart;
@@ -8851,7 +8851,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 		float u = Dot3(Vec, Line) / Line.LengthSquared();
 
 		// Closest point in the line to the mouse.
-		Point3 Closest = SegStart + u * Line;
+		Vector3 Closest = SegStart + u * Line;
 
 		int Mode = -1;
 		float Distance = (Closest - Center).Length();
@@ -8897,10 +8897,10 @@ void Project::MouseUpdateOverlays(int x, int y)
 				float u1 = (-b + sqrtf(f)) / (2*a);
 				float u2 = (-b - sqrtf(f)) / (2*a);
 
-				Point3 Intersections[2] =
+				Vector3 Intersections[2] =
 				{
-					Point3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
-					Point3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
+					Vector3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
+					Vector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
 				};
 
 				for (int i = 0; i < 2; i++)

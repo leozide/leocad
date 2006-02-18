@@ -161,11 +161,11 @@ protected:
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();
-	Point3 GetPieceInsertPosition(int MouseX, int MouseY);
+	Vector3 GetPieceInsertPosition(int MouseX, int MouseY);
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
-	bool GetSelectionCenter(Point3& Center) const;
+	bool GetSelectionCenter(Vector3& Center) const;
 	void CalculateStep();
 	void MoveSelectedObjects(const Vector3& Delta);
 	void RotateSelectedObjects(const Vector3& Delta);
@@ -218,8 +218,8 @@ protected:
 	int m_OverlayMode;
 	bool m_OverlayActive;
 	float m_OverlayScale[4];
-	Point3 m_OverlayCenter;
-	Point3 m_OverlayTrackStart;
+	Vector3 m_OverlayCenter;
+	Vector3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
 	void MouseUpdateOverlays(int x, int y);
 	void ActivateOverlay();

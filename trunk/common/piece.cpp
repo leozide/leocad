@@ -464,11 +464,11 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 	Matrix44 WorldToLocal;
 	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(Point3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]) * WorldToLocal);
+	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
 
-	Point3 Start = Point3(pLine->a1, pLine->b1, pLine->c1) * WorldToLocal;
-	Point3 End = Point3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2) * WorldToLocal;
-	Point3 Intersection;
+	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
+	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
+	Vector3 Intersection;
 
 	float* verts = m_pPieceInfo->m_fVertexArray;
 
@@ -484,9 +484,12 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 			for (i = 0; i < *info; i += 4)
 			{
-				if (LineQuadMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
-				                            (Point3&)verts[info[i+3]*3], (Point3&)verts[info[i+4]*3],
-				                            Start, End, pLine->mindist, Intersection))
+				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
+				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
+				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
+				Vector3 v4(verts[info[i+4]*3], verts[info[i+4]*3+1], verts[info[i+4]*3+2]);
+
+				if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
 				{
 					pLine->pClosest = this;
 				}
@@ -496,8 +499,11 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 			for (i = 0; i < *info; i += 3)
 			{
-				if (LineTriangleMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
-				                                (Point3&)verts[info[i+3]*3], Start, End, pLine->mindist, Intersection))
+				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
+				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
+				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
+
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
 				{
 					pLine->pClosest = this;
 				}
@@ -519,9 +525,12 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 			for (i = 0; i < *info; i += 4)
 			{
-				if (LineQuadMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
-				                            (Point3&)verts[info[i+3]*3], (Point3&)verts[info[i+4]*3],
-				                            Start, End, pLine->mindist, Intersection))
+				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
+				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
+				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
+				Vector3 v4(verts[info[i+4]*3], verts[info[i+4]*3+1], verts[info[i+4]*3+2]);
+
+				if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
 				{
 					pLine->pClosest = this;
 				}
@@ -531,8 +540,11 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 			for (i = 0; i < *info; i += 3)
 			{
-				if (LineTriangleMinIntersection((Point3&)verts[info[i+1]*3], (Point3&)verts[info[i+2]*3],
-				                                (Point3&)verts[info[i+3]*3], Start, End, pLine->mindist, Intersection))
+				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
+				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
+				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
+
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
 				{
 					pLine->pClosest = this;
 				}
@@ -554,7 +566,7 @@ bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const V
 	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
 	for (i = 0; i < NumPoints; i++)
 	{
-		Point3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+		Vector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
@@ -585,17 +597,17 @@ bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const V
 	}
 
 	// Buffers for clipping the polygon.
-	Point3 ClipPoints[2][8];
+	Vector3 ClipPoints[2][8];
 	int NumClipPoints[2];
 	int ClipBuffer = 0;
 
 	NumClipPoints[0] = NumPoints;
-	ClipPoints[0][0] = Point3(p1[0], p1[1], p1[2]);
-	ClipPoints[0][1] = Point3(p2[0], p2[1], p2[2]);
-	ClipPoints[0][2] = Point3(p3[0], p3[1], p3[2]);
+	ClipPoints[0][0] = Vector3(p1[0], p1[1], p1[2]);
+	ClipPoints[0][1] = Vector3(p2[0], p2[1], p2[2]);
+	ClipPoints[0][2] = Vector3(p3[0], p3[1], p3[2]);
 
 	if (NumPoints == 4)
-		ClipPoints[0][3] = Point3(p4[0], p4[1], p4[2]);
+		ClipPoints[0][3] = Vector3(p4[0], p4[1], p4[2]);
 
 	// Now clip the polygon against the planes.
 	for (i = 0; i < NumPlanes; i++)
@@ -613,29 +625,29 @@ bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const V
 bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 {
 	// First check the bounding box for quick rejection.
-	Point3 Box[8] =
+	Vector3 Box[8] =
 	{
-		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
-		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
-		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]),
-		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
-		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
-		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
-		Point3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
-		Point3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
 	};
 
 	// Transform the planes to local space.
 	Matrix44 WorldToLocal;
 	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(Point3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]) * WorldToLocal);
+	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
 
 	Vector4* LocalPlanes = new Vector4[NumPlanes];
 	int i;
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		LocalPlanes[i] = Vector3(Planes[i]) * WorldToLocal;
+		LocalPlanes[i] = Mul30(Vector3(Planes[i]), WorldToLocal);
 		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
 	}
 

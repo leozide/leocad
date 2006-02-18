@@ -7,8 +7,8 @@
 
 typedef struct
 {
-	Point3 pt1;
-	Point3 pt2;
+	Vector3 pt1;
+	Vector3 pt2;
 	Vector3 color;
 } LC_DEBUG_LINE;
 
@@ -20,7 +20,7 @@ void ClearDebugLines()
 	NumDebugLines = 0;
 }
 
-void AddDebugLine(const Point3& pt1, const Point3& pt2, const Vector3& Color)
+void AddDebugLine(const Vector3& pt1, const Vector3& pt2, const Vector3& Color)
 {
 	if (NumDebugLines == LC_MAX_DEBUG_LINES-1)
 		return;
@@ -35,10 +35,10 @@ void AddDebugLine(const Point3& pt1, const Point3& pt2, const Vector3& Color)
 
 typedef struct
 {
-	Point3 pt1;
-	Point3 pt2;
-	Point3 pt3;
-	Point3 pt4;
+	Vector3 pt1;
+	Vector3 pt2;
+	Vector3 pt3;
+	Vector3 pt4;
 	Vector4 color;
 } LC_DEBUG_QUAD;
 
@@ -50,7 +50,7 @@ void ClearDebugQuads()
 	NumDebugQuads = 0;
 }
 
-void AddDebugQuad(const Point3& pt1, const Point3& pt2, const Point3& pt3, const Point3& pt4, const Vector4& Color)
+void AddDebugQuad(const Vector3& pt1, const Vector3& pt2, const Vector3& pt3, const Vector3& pt4, const Vector4& Color)
 {
 	if (NumDebugQuads == LC_MAX_DEBUG_QUADS-1)
 		return;

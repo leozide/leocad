@@ -8,7 +8,7 @@
 // ============================================================================
 // 4x4 Matrix class.
 
-void Matrix44::CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up)
+void Matrix44::CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up)
 {
 	Vector3 x, y, z;
 
@@ -180,32 +180,32 @@ Matrix44 Inverse(const Matrix44& m)
 // Project/Unproject a point.
 
 // Convert world coordinates to screen coordinates.
-Point3 ProjectPoint(const Point3& Pt, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
+Vector3 ProjectPoint(const Vector3& Pt, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
 {
 	Vector4 Tmp;
 
-	Tmp = Vector4(Pt) * ModelView;
-	Tmp = Tmp * Projection;
+	Tmp = Mul4(Vector4(Pt), ModelView);
+	Tmp = Mul4(Tmp, Projection);
 
 	// Normalize.
 	Tmp /= Tmp[3];
 
 	// Screen coordinates.
-	return Point3(Viewport[0]+(1+Tmp[0])*Viewport[2]/2, Viewport[1]+(1+Tmp[1])*Viewport[3]/2, (1+Tmp[2])/2);
+	return Vector3(Viewport[0]+(1+Tmp[0])*Viewport[2]/2, Viewport[1]+(1+Tmp[1])*Viewport[3]/2, (1+Tmp[2])/2);
 }
 
 // Convert screen coordinates to world coordinates.
-Point3 UnprojectPoint(const Point3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
+Vector3 UnprojectPoint(const Vector3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
 {
-	Point3 Tmp = Point;
+	Vector3 Tmp = Point;
 	UnprojectPoints(&Tmp, 1, ModelView, Projection, Viewport);
 	return Tmp;
 }
 
-void UnprojectPoints(Point3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
+void UnprojectPoints(Vector3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
 {
 	// Calculate the screen to model transform.
-	Matrix44 Transform = Inverse(ModelView * Projection);
+	Matrix44 Transform = Inverse(Mul(ModelView, Projection));
 
 	for (int i = 0; i < NumPoints; i++)
 	{
@@ -217,12 +217,12 @@ void UnprojectPoints(Point3* Points, int NumPoints, const Matrix44& ModelView, c
 		Tmp[2] = Points[i][2] * 2.0f - 1.0f;
 		Tmp[3] = 1.0f;
 
-		Tmp = Tmp * Transform;
+		Tmp = Mul4(Tmp, Transform);
 
 		if (Tmp[3] != 0.0f)
 			Tmp /= Tmp[3];
 
-		Points[i] = Point3(Tmp[0], Tmp[1], Tmp[2]);
+		Points[i] = Vector3(Tmp[0], Tmp[1], Tmp[2]);
 	}
 }
 
@@ -230,9 +230,9 @@ void UnprojectPoints(Point3* Points, int NumPoints, const Matrix44& ModelView, c
 // Geometry functions.
 
 // Sutherland-Hodgman method of clipping a polygon to a plane.
-void PolygonPlaneClip(Point3* InPoints, int NumInPoints, Point3* OutPoints, int* NumOutPoints, const Vector4& Plane)
+void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, int* NumOutPoints, const Vector4& Plane)
 {
-	Point3 *s, *p, i;
+	Vector3 *s, *p, i;
 
 	*NumOutPoints = 0;
 	s = &InPoints[NumInPoints-1];
@@ -278,7 +278,7 @@ void PolygonPlaneClip(Point3* InPoints, int NumInPoints, Point3* OutPoints, int*
 
 // Calculate the intersection of a line segment and a plane and returns false
 // if they are parallel or the intersection is outside the line segment.
-bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Point3& End, const Vector4& Plane)
+bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane)
 {
 	Vector3 Dir = End - Start;
 
@@ -298,7 +298,7 @@ bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Poin
 	return true;
 }
 
-bool LineTriangleMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection)
+bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
 {
 	// Calculate the polygon plane.
 	Vector4 Plane;
@@ -349,7 +349,7 @@ bool LineTriangleMinIntersection(const Point3& p1, const Point3& p2, const Point
 	return false;
 }
 
-bool LineQuadMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& p4, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection)
+bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
 {
 	// Calculate the polygon plane.
 	Vector4 Plane;

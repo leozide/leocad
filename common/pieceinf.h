@@ -73,11 +73,11 @@ class PieceInfo
 		return (m_strDescription[0] == '~');
 	}
 
-	Point3 GetCenter() const
+	Vector3 GetCenter() const
 	{
-		return Point3((m_fDimensions[0] + m_fDimensions[3]) * 0.5f,
-		              (m_fDimensions[1] + m_fDimensions[4]) * 0.5f,
-		              (m_fDimensions[2] + m_fDimensions[5]) * 0.5f);
+		return Vector3((m_fDimensions[0] + m_fDimensions[3]) * 0.5f,
+		               (m_fDimensions[1] + m_fDimensions[4]) * 0.5f,
+		               (m_fDimensions[2] + m_fDimensions[5]) * 0.5f);
 	}
 
 	// Operations

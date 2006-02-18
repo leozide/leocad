@@ -31,7 +31,6 @@
 //#define LC_MATH_SSE
 
 // Classes defined in this file:
-class Point3;
 class Vector3;
 class Vector4;
 class Quaternion;
@@ -272,34 +271,6 @@ protected:
 #endif
 
 // ============================================================================
-// 3D Point class.
-
-class Point3
-{
-public:
-	// Constructors.
-	inline Point3() { }
-	inline explicit Point3(const Vector4& _v)
-		: m_Value(_v) { }
-	inline explicit Point3(const float _x, const float _y, const float _z)
-		: m_Value(_x, _y, _z) { }
-
-	inline operator const float*() const { return (const float*)this; }
-	inline operator float*() { return (float*)this; }
-	inline const Vector4& GetValue() const { return m_Value; }
-	inline operator const Vector4() const
-	{ return Vector4(m_Value[0], m_Value[1], m_Value[2], 1.0f); }
-
-	inline float& operator[](int i) const { return m_Value[i]; }
-
-	// Math operations.
-
-protected:
-	Vector4 m_Value;
-};
-
-
-// ============================================================================
 // 3D Vector class.
 
 class Vector3
@@ -347,12 +318,9 @@ protected:
 
 
 // ============================================================================
-// Point3 and Vector3 Operators.
+// Operators.
 
 // Comparison.
-inline bool operator==(const Point3& a, const Point3& b)
-{ return Compare3(a.GetValue(), b.GetValue()); }
-
 inline bool operator==(const Vector3& a, const Vector3& b)
 { return Compare3(a.GetValue(), b.GetValue()); }
 
@@ -363,12 +331,6 @@ inline Vector3 operator*(const Vector3& a, float f)
 inline Vector3 operator*(float f, const Vector3& a)
 { return Vector3(Multiply34(a.GetValue(), f)); }
 
-inline Point3 operator*(const Point3& a, float f)
-{ return Point3(Multiply34(a.GetValue(), f)); }
-
-inline Point3 operator*(float f, const Point3& a)
-{ return Point3(Multiply34(a.GetValue(), f)); }
-
 // Divide by a scalar.
 inline Vector3 operator/(const Vector3& a, float f)
 { return Vector3(Divide34(a.GetValue(), f)); }
@@ -376,44 +338,17 @@ inline Vector3 operator/(const Vector3& a, float f)
 inline Vector3 operator/(float f, const Vector3& a)
 { return Vector3(Divide34(a.GetValue(), f)); }
 
-inline Point3 operator/(const Point3& a, float f)
-{ return Point3(Divide34(a.GetValue(), f)); }
-
-inline Point3 operator/(float f, const Point3& a)
-{ return Point3(Divide34(a.GetValue(), f)); }
-
-// Add vectors/points (return a point if either is a point).
-inline Point3 operator+(const Point3& a, const Point3& b)
-{ return Point3(Add34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator+(const Point3& a, const Vector3& b)
-{ return Point3(Add34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator+(const Vector3& a, const Point3& b)
-{ return Point3(Add34(a.GetValue(), b.GetValue())); }
-
+// Add vectors.
 inline Vector3 operator+(const Vector3& a, const Vector3& b)
 { return Vector3(Add34(a.GetValue(), b.GetValue())); }
 
-// Subtract vectors/points (return a vector if both arguments are the same type).
-inline Vector3 operator-(const Point3& a, const Point3& b)
-{ return Vector3(Subtract34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator-(const Point3& a, const Vector3& b)
-{ return Point3(Subtract34(a.GetValue(), b.GetValue())); }
-
-inline Point3 operator-(const Vector3& a, const Point3& b)
-{ return Point3(Subtract34(a.GetValue(), b.GetValue())); }
-
+// Subtract vectors.
 inline Vector3 operator-(const Vector3& a, const Vector3& b)
 { return Vector3(Subtract34(a.GetValue(), b.GetValue())); }
 
 // Negate.
 inline Vector3 operator-(const Vector3& a)
 { return Vector3(Negate34(a.GetValue())); }
-
-inline Point3 operator-(const Point3& a)
-{ return Point3(Negate34(a.GetValue())); }
 
 // Dot product.
 inline float Dot3(const Vector3& a, const Vector3& b)
@@ -464,7 +399,7 @@ public:
 	}
 
 	// Operators.
-	friend inline Quaternion operator*(const Quaternion& a, const Quaternion& b)
+	friend inline Quaternion Mul(const Quaternion& a, const Quaternion& b)
 	{
     float x =  a.m_Value[0] * b.m_Value[3] + a.m_Value[1] * b.m_Value[2] - a.m_Value[2] * b.m_Value[1] + a.m_Value[3] * b.m_Value[0];
     float y = -a.m_Value[0] * b.m_Value[2] + a.m_Value[1] * b.m_Value[3] + a.m_Value[2] * b.m_Value[0] + a.m_Value[3] * b.m_Value[1];
@@ -474,7 +409,7 @@ public:
 		return Quaternion(x, y, z, w);
 	}
 
-	friend inline Vector3 operator*(const Vector3& a, const Quaternion& b)
+	friend inline Vector3 Mul(const Vector3& a, const Quaternion& b)
 	{
 		// Faster to transform to a matrix and multiply.
 		float Tx  = 2.0f*b[0];
@@ -554,11 +489,8 @@ public:
 		m_Rows[2] = Vector3((one_c * zx) + ys, (one_c * yz) - xs, (one_c * zz) + c);
 	}
 
-	friend inline Vector3 operator*(const Vector3& a, const Matrix33& b)
+	friend inline Vector3 Mul(const Vector3& a, const Matrix33& b)
 	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
-
-	friend inline Point3 operator*(const Point3& a, const Matrix33& b)
-	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
 protected:
 	Vector3 m_Rows[3];
@@ -589,16 +521,16 @@ public:
 	}
 
 	// Math operations.
-	friend inline Point3 operator*(const Point3& a, const Matrix44& b)
-	{ return Point3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]); }
+	friend inline Vector3 Mul31(const Vector3& a, const Matrix44& b)
+	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]); }
 
-	friend inline Vector3 operator*(const Vector3& a, const Matrix44& b)
+	friend inline Vector3 Mul30(const Vector3& a, const Matrix44& b)
 	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
-	friend inline Vector4 operator*(const Vector4& a, const Matrix44& b)
+	friend inline Vector4 Mul4(const Vector4& a, const Matrix44& b)
 	{ return Vector4(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]*a[3]); }
 
-	friend inline Matrix44 operator*(const Matrix44& a, const Matrix44& b)
+	friend inline Matrix44 Mul(const Matrix44& a, const Matrix44& b)
 	{
 		Vector4 Col0(b.m_Rows[0][0], b.m_Rows[1][0], b.m_Rows[2][0], b.m_Rows[3][0]);
 		Vector4 Col1(b.m_Rows[0][1], b.m_Rows[1][1], b.m_Rows[2][1], b.m_Rows[3][1]);
@@ -630,11 +562,11 @@ public:
 		m_Rows[2] = Vector4(a[2], b[2], c[2], c[3]);
 	}
 
-	inline void SetTranslation(const Point3& a)
+	inline void SetTranslation(const Vector3& a)
 	{ m_Rows[3] = Vector4(a[0], a[1], a[2], 1.0f); }
 
 	friend Matrix44 Inverse(const Matrix44& m);
-	void CreateLookAt(const Point3& Eye, const Point3& Target, const Vector3& Up);
+	void CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
 	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
 
 	void CreateFromAxisAngle(const Vector3& Axis, float Radians)
@@ -651,13 +583,13 @@ protected:
 // ============================================================================
 // Other Functions.
 
-Point3 ProjectPoint(const Point3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
-Point3 UnprojectPoint(const Point3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
-void UnprojectPoints(Point3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+Vector3 ProjectPoint(const Vector3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+Vector3 UnprojectPoint(const Vector3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
+void UnprojectPoints(Vector3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
 
-void PolygonPlaneClip(Point3* InPoints, int NumInPoints, Point3* OutPoints, int* NumOutPoints, const Vector4& Plane);
-bool LinePlaneIntersection(Point3& Intersection, const Point3& Start, const Point3& End, const Vector4& Plane);
-bool LineTriangleMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection);
-bool LineQuadMinIntersection(const Point3& p1, const Point3& p2, const Point3& p3, const Point3& p4, const Point3& Start, const Point3& End, float& MinDist, Point3& Intersection);
+void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, int* NumOutPoints, const Vector4& Plane);
+bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane);
+bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
+bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
 
 #endif

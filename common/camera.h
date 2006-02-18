@@ -68,10 +68,10 @@ public:
 	virtual ~Camera ();
 
 	// Query functions.
-	inline Point3 GetEyePosition() const
-	{ return Point3(m_fEye[0], m_fEye[1], m_fEye[2]); };
-	inline Point3 GetTargetPosition() const
-	{ return Point3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
+	inline Vector3 GetEyePosition() const
+	{ return Vector3(m_fEye[0], m_fEye[1], m_fEye[2]); };
+	inline Vector3 GetTargetPosition() const
+	{ return Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
 	inline Vector3 GetUpVector() const
 	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
 

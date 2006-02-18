@@ -6,10 +6,10 @@
 
 void RenderDebugPrimitives();
 
-void AddDebugLine(const Point3& pt1, const Point3& pt2, const Vector3& Color);
+void AddDebugLine(const Vector3& pt1, const Vector3& pt2, const Vector3& Color);
 void ClearDebugLines();
 
-void AddDebugQuad(const Point3& pt1, const Point3& pt2, const Point3& pt3, const Point3& pt4, const Vector4& Color);
+void AddDebugQuad(const Vector3& pt1, const Vector3& pt2, const Vector3& pt3, const Vector3& pt4, const Vector4& Color);
 void ClearDebugQuads();
 
 

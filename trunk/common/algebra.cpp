@@ -184,7 +184,7 @@ Vector3 ProjectPoint(const Vector3& Pt, const Matrix44& ModelView, const Matrix4
 {
 	Vector4 Tmp;
 
-	Tmp = Mul4(Vector4(Pt), ModelView);
+	Tmp = Mul4(Vector4(Pt[0], Pt[1], Pt[2], 1.0f), ModelView);
 	Tmp = Mul4(Tmp, Projection);
 
 	// Normalize.
@@ -192,6 +192,23 @@ Vector3 ProjectPoint(const Vector3& Pt, const Matrix44& ModelView, const Matrix4
 
 	// Screen coordinates.
 	return Vector3(Viewport[0]+(1+Tmp[0])*Viewport[2]/2, Viewport[1]+(1+Tmp[1])*Viewport[3]/2, (1+Tmp[2])/2);
+}
+
+void ProjectPoints(Vector3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4])
+{
+	for (int i = 0; i < NumPoints; i++)
+	{
+		Vector4 Tmp;
+
+		Tmp = Mul4(Vector4(Points[i][0], Points[i][1], Points[i][2], 1.0f), ModelView);
+		Tmp = Mul4(Tmp, Projection);
+
+		// Normalize.
+		Tmp /= Tmp[3];
+
+		// Screen coordinates.
+		Points[i] = Vector3(Viewport[0]+(1+Tmp[0])*Viewport[2]/2, Viewport[1]+(1+Tmp[1])*Viewport[3]/2, (1+Tmp[2])/2);
+	}
 }
 
 // Convert screen coordinates to world coordinates.

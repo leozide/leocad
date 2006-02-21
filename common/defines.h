@@ -148,23 +148,23 @@ int stricmp(const char* str1, const char* str2);
 #define LC_DET_BACKGROUND	0x08000	// Background rendering
 //#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
 
-#define LC_DRAW_AXIS      0x0001 // Orientation icon
-#define LC_DRAW_GRID      0x0002 // Grid
-#define LC_DRAW_SNAP_A    0x0004 // Snap Angle
-#define LC_DRAW_SNAP_X    0x0008 // Snap X
-#define LC_DRAW_SNAP_Y    0x0010 // Snap Y
-#define LC_DRAW_SNAP_Z    0x0020 // Snap Z
-#define LC_DRAW_SNAP_XYZ (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
-//#define DRAW_COLLISION  0x0040
-#define LC_DRAW_MOVE      0x0080 // Switch to move after insert
-#define LC_DRAW_LOCK_X    0x0100 // Lock X
-#define LC_DRAW_LOCK_Y    0x0200 // Lock Y
-#define LC_DRAW_LOCK_Z    0x0400 // Lock Z
-#define LC_DRAW_LOCK_XYZ  (LC_DRAW_LOCK_X | LC_DRAW_LOCK_Y | LC_DRAW_LOCK_Z)
-#define LC_DRAW_MOVEAXIS  0x0800 // Move on fixed axis
-#define LC_DRAW_PREVIEW   0x1000 // Show piece position
-#define LC_DRAW_CM_UNITS  0x2000 // Use centimeters
-#define LC_DRAW_3DMOUSE   0x4000 // Mouse moves in all directions
+#define LC_DRAW_AXIS           0x0001 // Orientation icon
+#define LC_DRAW_GRID           0x0002 // Grid
+#define LC_DRAW_SNAP_A         0x0004 // Snap Angle
+#define LC_DRAW_SNAP_X         0x0008 // Snap X
+#define LC_DRAW_SNAP_Y         0x0010 // Snap Y
+#define LC_DRAW_SNAP_Z         0x0020 // Snap Z
+#define LC_DRAW_SNAP_XYZ       (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
+#define LC_DRAW_SNAP_GRID      0x0040 // Snap to grid (world coordinates)
+#define LC_DRAW_MOVE           0x0080 // Switch to move after insert
+#define LC_DRAW_LOCK_X         0x0100 // Lock X
+#define LC_DRAW_LOCK_Y         0x0200 // Lock Y
+#define LC_DRAW_LOCK_Z         0x0400 // Lock Z
+#define LC_DRAW_LOCK_XYZ       (LC_DRAW_LOCK_X | LC_DRAW_LOCK_Y | LC_DRAW_LOCK_Z)
+#define LC_DRAW_MOVEAXIS       0x0800 // Move on fixed axis
+#define LC_DRAW_PREVIEW        0x1000 // Show piece position
+#define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
+#define LC_DRAW_3DMOUSE        0x4000 // Mouse moves in all directions
 
 //	#define RENDER_FAST			0x001
 //	#define RENDER_BACKGROUND	0x002

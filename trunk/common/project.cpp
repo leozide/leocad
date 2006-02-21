@@ -2232,11 +2232,29 @@ void Project::RenderOverlays(int Viewport)
 
 		glDisable(GL_DEPTH_TEST);
 
+		// Find the rotation from the focused piece if relative snap is enabled.
+		Object* Focus = NULL;
+		float Rot[4];
+
+		if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+		{
+			Focus = GetFocusObject();
+
+			if ((Focus != NULL) && Focus->IsPiece())
+				((Piece*)Focus)->GetRotation(Rot);
+			else
+				Focus = NULL;
+		}
+
 		// Draw a quad if we're moving on a plane.
 		if ((m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_XZ) || (m_OverlayMode == LC_OVERLAY_YZ))
 		{
 			glPushMatrix();
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+
+			if (Focus)
+				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+
 			if (m_OverlayMode == LC_OVERLAY_XZ)
 				glRotatef(90.0f, 0.0f, 0.0f, -1.0f);
 			else if (m_OverlayMode == LC_OVERLAY_XY)
@@ -2285,6 +2303,10 @@ void Project::RenderOverlays(int Viewport)
 
 			glPushMatrix();
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+
+			if (Focus)
+				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+
 			if (i == 1)
 				glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
 			else if (i == 2)
@@ -6476,6 +6498,21 @@ Camera* Project::GetCamera(int i)
 	return pCamera;
 }
 
+void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4])
+{
+	Viewport[0] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
+	Viewport[1] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
+	Viewport[2] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
+	Viewport[3] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
+
+	// Build the matrices.
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+}
+
 void Project::GetFocusPosition(float* pos)
 {
 	Piece* pPiece;
@@ -7081,6 +7118,11 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 			Leftover[0] -= SnapXY;
 			i++;
 		}
+		else if (Leftover[0] < -SnapXY / 2)
+		{
+			Leftover[0] += SnapXY;
+			i--;
+		}
 
 		Delta[0] = SnapXY * i;
 	}
@@ -7095,6 +7137,11 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 			Leftover[1] -= SnapXY;
 			i++;
 		}
+		else if (Leftover[1] < -SnapXY / 2)
+		{
+			Leftover[1] += SnapXY;
+			i--;
+		}
 
 		Delta[1] = SnapXY * i;
 	}
@@ -7108,6 +7155,11 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 		{
 			Leftover[2] -= SnapZ;
 			i++;
+		}
+		else if (Leftover[2] < -SnapZ / 2)
+		{
+			Leftover[2] += SnapZ;
+			i--;
 		}
 
 		Delta[2] = SnapZ * i;
@@ -7131,27 +7183,45 @@ void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
 	}
 }
 
-void Project::MoveSelectedObjects(const Vector3& Delta)
+void Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 {
-	float x, y, z;
+	// Don't move along locked directions.
+	if (m_nSnap & LC_DRAW_LOCK_X)
+		Move[0] = 0;
+
+	if (m_nSnap & LC_DRAW_LOCK_Y)
+		Move[1] = 0;
+
+	if (m_nSnap & LC_DRAW_LOCK_Z)
+		Move[2] = 0;
+
+	// Snap.
+	SnapVector(Move, Remainder);
+
+	// Transform the translation if we're in relative mode.
+	if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+	{
+		Object* Focus = GetFocusObject();
+
+		if ((Focus != NULL) && Focus->IsPiece())
+		{
+			float Rot[4];
+			((Piece*)Focus)->GetRotation(Rot);
+
+			Matrix33 RotMat;
+			RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+
+			Move = Mul(Move, RotMat);
+		}
+	}
+
+	if (Move.LengthSquared() < 0.001f)
+		return;
+
 	Piece* pPiece;
 	Camera* pCamera;
 	Light* pLight;
-
-	if (m_nSnap & LC_DRAW_LOCK_X)
-		x = 0;
-	else
-		x = Delta[0];
-
-	if (m_nSnap & LC_DRAW_LOCK_Y)
-		y = 0;
-	else
-		y = Delta[1];
-
-	if (m_nSnap & LC_DRAW_LOCK_Z)
-		z = 0;
-	else
-		z = Delta[2];
+	float x = Move[0], y = Move[1], z = Move[2];
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		if (pCamera->IsSelected())
@@ -7652,7 +7722,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (bShift)
 				RotateSelectedObjects(axis[0], axis[1], axis[2]);
 			else
-				MoveSelectedObjects(axis[0], axis[1], axis[2]);
+				MoveSelectedObjects(Vector3(axis[0], axis[1], axis[2]), Vector3());
 			UpdateOverlayScale();
 			UpdateAllViews();
 			SetModifiedFlag(true);
@@ -8290,13 +8360,33 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 					break;
 				}
 
+				// Transform the translation axis.
+				Vector3 Axis1 = Dir1;
+				Vector3 Axis2 = Dir2;
+
+				if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+				{
+					Object* Focus = GetFocusObject();
+
+					if ((Focus != NULL) && Focus->IsPiece())
+					{
+						float Rot[4];
+						((Piece*)Focus)->GetRotation(Rot);
+
+						Matrix33 RotMat;
+						RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+
+						Axis1 = Mul(Dir1, RotMat);
+						Axis2 = Mul(Dir2, RotMat);
+					}
+				}
 				// Find out what direction the mouse is going to move stuff.
 				Vector3 MoveX, MoveY;
 
 				if (SingleDir)
 				{
-					float dx1 = Dot3(ScreenX, Dir1);
-					float dy1 = Dot3(ScreenY, Dir1);
+					float dx1 = Dot3(ScreenX, Axis1);
+					float dy1 = Dot3(ScreenY, Axis1);
 
 					if (fabsf(dx1) > fabsf(dy1))
 					{
@@ -8319,10 +8409,10 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				}
 				else
 				{
-					float dx1 = Dot3(ScreenX, Dir1);
-					float dy1 = Dot3(ScreenY, Dir1);
-					float dx2 = Dot3(ScreenX, Dir2);
-					float dy2 = Dot3(ScreenY, Dir2);
+					float dx1 = Dot3(ScreenX, Axis1);
+					float dy1 = Dot3(ScreenY, Axis1);
+					float dx2 = Dot3(ScreenX, Axis2);
+					float dy2 = Dot3(ScreenY, Axis2);
 
 					if (fabsf(dx1) > fabsf(dx2))
 					{
@@ -8357,9 +8447,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				SnapVector(Delta, m_MouseSnapLeftover);
+				MoveSelectedObjects(Delta, m_MouseSnapLeftover);
 				m_MouseTotalDelta += Delta;
-				MoveSelectedObjects(Delta);
 			}
 			else
 			{
@@ -8395,8 +8484,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 					delta[1] = delta[1] * mouse + m_fTrack[1];
 					delta[2] = delta[2] * mouse + m_fTrack[2];
 
-					SnapPoint (delta, m_fTrack);
-					MoveSelectedObjects(delta[0], delta[1], delta[2]);
+					SnapPoint(delta, m_fTrack);
+					MoveSelectedObjects(Vector3(delta[0], delta[1], delta[2]), Vector3());
 
 					m_nDownX = x;
 					m_nDownY = y;
@@ -8416,13 +8505,13 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 					m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
 
 					if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
-						MoveSelectedObjects(delta[0], delta[1], delta[2]);
+						MoveSelectedObjects(Vector3(delta[0], delta[1], delta[2]), Vector3());
 					else
 					{
 						if (m_nTracking == LC_TRACK_LEFT)
-							MoveSelectedObjects(delta[0], delta[1], 0);
+							MoveSelectedObjects(Vector3(delta[0], delta[1], 0), Vector3());
 						else
-							MoveSelectedObjects(0, 0, delta[2]);
+							MoveSelectedObjects(Vector3(0, 0, delta[2]), Vector3());
 					}
 				}
 			}
@@ -8776,31 +8865,51 @@ void Project::MouseUpdateOverlays(int x, int y)
 	{
 		const float OverlayMoveArrowSize = 1.5f;
 
-		GLdouble ModelMatrix[16], ProjMatrix[16];
-		GLint Viewport[4];
+		Matrix44 ModelView, Projection;
+		int Viewport[4];
 
-		LoadViewportProjection(m_nActiveViewport);
-		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-		glGetIntegerv(GL_VIEWPORT, Viewport);
+		GetActiveViewportMatrices(ModelView, Projection, Viewport);
 
-		double pts[4][3];
-		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &pts[0][0], &pts[0][1], &pts[0][2]);
-		gluProject(m_OverlayCenter[0] + OverlayMoveArrowSize * OverlayScale, m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &pts[1][0], &pts[1][1], &pts[1][2]);
-		gluProject(m_OverlayCenter[0], m_OverlayCenter[1] + OverlayMoveArrowSize * OverlayScale, m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &pts[2][0], &pts[2][1], &pts[2][2]);
-		gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2] + OverlayMoveArrowSize * OverlayScale, ModelMatrix, ProjMatrix, Viewport, &pts[3][0], &pts[3][1], &pts[3][2]);
+		// Array of points for the arrow edges.
+		Vector3 Points[4] =
+		{
+			Vector3(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]),
+			Vector3(OverlayMoveArrowSize * OverlayScale, 0, 0),
+			Vector3(0, OverlayMoveArrowSize * OverlayScale, 0),
+			Vector3(0, 0, OverlayMoveArrowSize * OverlayScale),
+		};
+
+		// Find the rotation from the focused piece if relative snap is enabled.
+		if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+		{
+			Object* Focus = GetFocusObject();
+
+			if ((Focus != NULL) && Focus->IsPiece())
+			{
+				float Rot[4];
+				((Piece*)Focus)->GetRotation(Rot);
+
+				Matrix33 RotMat;
+				RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+
+				for (int i = 1; i < 4; i++)
+					Points[i] = Mul(Points[i], RotMat);
+			}
+		}
+
+		for (int i = 1; i < 4; i++)
+			Points[i] += Points[0];
+
+		ProjectPoints(Points, 4, ModelView, Projection, Viewport);
 
 		int Mode = -1;
-
-		Vector3 SegStart((float)pts[0][0], (float)pts[0][1], (float)pts[0][2]);
 		Vector3 Pt((float)x, (float)y, 0);
 
 		// Check if the mouse is over an arrow.
 		for (int i = 1; i < 4; i++)
 		{
-			Vector3 SegEnd((float)pts[i][0], (float)pts[i][1], (float)pts[i][2]);
-			Vector3 Line = SegEnd - SegStart;
-			Vector3 Vec = Pt - SegStart;
+			Vector3 Line = Points[i] - Points[0];
+			Vector3 Vec = Pt - Points[0];
 
 			float u = Dot3(Vec, Line) / Line.LengthSquared();
 
@@ -8809,7 +8918,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 				continue;
 
 			// Closest point in the line segment to the mouse.
-			Vector3 Closest = SegStart + u * Line;
+			Vector3 Closest = Points[0] + u * Line;
 
 			if ((Closest - Pt).LengthSquared() < 100.0f)
 			{

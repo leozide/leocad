@@ -167,8 +167,10 @@ protected:
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	bool GetSelectionCenter(Vector3& Center) const;
+	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
-	void MoveSelectedObjects(const Vector3& Delta);
+
+	void MoveSelectedObjects(Vector3& Move, Vector3& Remainder);
 	void RotateSelectedObjects(const Vector3& Delta);
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
@@ -177,8 +179,6 @@ protected:
 	// TODO: Update function calls to use the math library.
 	void RotateSelectedObjects(float x, float y, float z)
 	{ RotateSelectedObjects(Vector3(x, y, z)); };
-	inline void MoveSelectedObjects(float x, float y, float z)
-	{ MoveSelectedObjects(Vector3(x, y, z)); };
 	void SnapPoint(float *point, float *reminder) const
 	{
 		Vector3 Pt(point[0], point[1], point[2]);

@@ -303,6 +303,9 @@ bool String::Match(const String& Expression) const
 		if ((End != 0) && (End != ' '))
 			return false;
 
+		if ((Result != 0) && ((GetAt(Result-1) == '_') || (GetAt(Result-1) == '~')))
+			Result--;
+
 		if ((Result != 0) && (GetAt(Result-1) != ' '))
 			return false;
 	}

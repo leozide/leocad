@@ -294,7 +294,10 @@ bool String::Match(const String& Expression) const
 		return false;
 
 	if (Begin && (Result != 0))
-		return false;
+	{
+		if ((Result != 1) || ((GetAt(Result-1) != '_') && (GetAt(Result-1) != '~')))
+			return false;
+	}
 
 	if (WholeWord)
 	{

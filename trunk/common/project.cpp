@@ -786,7 +786,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadLong (&i, 1); m_nCurFrame = i;
 				file->ReadShort (&m_nTotalFrames, 1);
 				file->ReadLong (&i, 1); m_nGridSize = i;
-				file->ReadLong (&i, 1); m_nMoveSnap = i;
+				file->ReadLong (&i, 1); //m_nMoveSnap = i;
 			}
 			else
 			{
@@ -796,9 +796,9 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadShort (&m_nCurFrame, 1);
 				file->ReadShort (&m_nTotalFrames, 1);
 				file->ReadShort (&m_nGridSize, 1);
-				file->ReadShort (&m_nMoveSnap, 1);
-				if (fv < 1.4f)
-					m_nMoveSnap = 0x0304;
+				file->ReadShort (&sh, 1);
+				if (fv >= 1.4f)
+					m_nMoveSnap = sh;
 			}
 		}
 			

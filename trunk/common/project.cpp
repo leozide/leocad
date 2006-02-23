@@ -318,7 +318,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE | LC_DRAW_PREVIEW);
 	SystemUpdateSnap(m_nSnap);
-	m_nMoveSnap = 0x0604;
+	m_nMoveSnap = 0x0304;
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
 	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
@@ -797,6 +797,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadShort (&m_nTotalFrames, 1);
 				file->ReadShort (&m_nGridSize, 1);
 				file->ReadShort (&m_nMoveSnap, 1);
+				if (fv < 1.4f)
+					m_nMoveSnap = 0x0304;
 			}
 		}
 			
@@ -853,7 +855,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 void Project::FileSave(File* file, bool bUndo)
 {
-	float ver_flt = 1.3f; // LeoCAD 0.70
+	float ver_flt = 1.4f; // LeoCAD 0.75 - (and this should have been an integer).
 	unsigned long rgb;
 	unsigned char ch;
 	unsigned short sh;

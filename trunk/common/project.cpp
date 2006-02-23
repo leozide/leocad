@@ -7059,13 +7059,19 @@ void Project::StartTracking(int mode)
 	FileSave(m_pTrackFile, true);
 }
 
+void Project::GetSnapIndex(int* SnapXY, int* SnapZ) const
+{
+	*SnapXY = (m_nMoveSnap & 0xff);
+	*SnapZ = ((m_nMoveSnap >> 8) & 0xff);
+}
+
 void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 {
-	int SXY = (m_nMoveSnap & 0xff);
-	int SZ = ((m_nMoveSnap >> 8) & 0xff);
-
 	const float SnapXYTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 1.6f, 2.4f, 3.2f, 6.4f };
 	const float SnapZTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 0.96f, 1.92f, 3.84f, 7.68f };
+
+	int SXY, SZ;
+	GetSnapIndex(&SXY, &SZ);
 
 	SXY = min(SXY, 9);
 	SZ = min(SZ, 9);
@@ -7087,11 +7093,11 @@ void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
 	}
 	else
 	{
-		int SXY = (m_nMoveSnap & 0xff);
-		int SZ = ((m_nMoveSnap >> 8) & 0xff);
-
 		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
 		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
+
+		int SXY, SZ;
+		GetSnapIndex(&SXY, &SZ);
 
 		SXY = min(SXY, 9);
 		SZ = min(SZ, 9);

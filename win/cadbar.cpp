@@ -6,6 +6,8 @@
 #include "leocad.h"
 #include "CADBar.h"
 #include "StepPop.h"
+#include "project.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -70,6 +72,13 @@ void CCADStatusBar::OnLButtonDown(UINT nFlags, CPoint point)
 		CMenu menuPopups;
 		menuPopups.LoadMenu(IDR_POPUPS);
 		CMenu* pMenu = menuPopups.GetSubMenu(7);
+
+		int SXY, SZ;
+		lcGetActiveProject()->GetSnapIndex(&SXY, &SZ);
+
+		pMenu->CheckMenuRadioItem(0, 9, SXY, MF_BYPOSITION);
+		pMenu->CheckMenuRadioItem(10, 19, 10 + SZ, MF_BYPOSITION);
+
 		pMenu->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 	}
 

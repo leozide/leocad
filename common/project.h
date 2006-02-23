@@ -83,6 +83,7 @@ public:
 		{ return m_nCurAction; }
 	int GetOverlayMode() const
 		{ return m_OverlayMode; }
+	void GetSnapIndex(int* SnapXY, int* SnapZ) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
 	Camera* GetCamera(int i);

@@ -7,9 +7,11 @@
 class Group;
 class Piece;
 class PieceInfo;
+class Camera;
 
 #include "defines.h"
 #include "str.h"
+#include "algebra.h"
 
 typedef enum
 {
@@ -225,10 +227,10 @@ typedef struct
 
 typedef struct
 {
-	void* piece;
+	Piece* piece;
+	Vector3 Position;
+	Vector3 Rotation;
 	char name[81];
-	float pos[3];
-	float rot[3];
 	int from;
 	int to;
 	bool hidden;
@@ -237,11 +239,11 @@ typedef struct
 
 typedef struct
 {
-	void* camera;
+	Camera* camera;
+	Vector3 Eye;
+	Vector3 Target;
+	Vector3 Up;
 	char name[81];
-	float eye[3];
-	float target[3];
-	float up[3];
 	float fovy;
 	float znear;
 	float zfar;

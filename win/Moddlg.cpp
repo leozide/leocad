@@ -165,23 +165,18 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 	{
 		case LC_OBJECT_PIECE:
 		{
-			float pos[3], rot[4];
+			float rot[4];
 			Piece* pPiece = (Piece*)m_pObject;
-			pPiece->GetPosition(pos);
+			Vector3 Pos = pPiece->GetPosition();
 			pPiece->GetRotation(rot);
-			Matrix mat(rot, pos);
+			Matrix mat(rot, Pos);
 			mat.ToEulerAngles(rot);
 
-			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
-			{
-				pos[0] /= 0.08f;
-				pos[1] /= 0.08f;
-				pos[2] /= 0.08f;
-			}
+			lcGetActiveProject()->ConvertToUserUnits(Pos);
 
-			m_fPosX = pos[0];
-			m_fPosY = pos[1];
-			m_fPosZ = pos[2];
+			m_fPosX = Pos[0];
+			m_fPosY = Pos[1];
+			m_fPosZ = Pos[2];
 			m_fRotX = rot[0];
 			m_fRotY = rot[1];
 			m_fRotZ = rot[2];
@@ -206,42 +201,27 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			float tmp[3];
+			Vector3 tmp;
 			Camera* pCamera;
 			if (m_nType == LC_OBJECT_CAMERA)
 				pCamera = (Camera*)m_pObject;
 			else
 				pCamera = ((CameraTarget*)m_pObject)->GetParent();
 
-			pCamera->GetEyePos(tmp);
-			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
-			{
-				tmp[0] /= 0.08f;
-				tmp[1] /= 0.08f;
-				tmp[2] /= 0.08f;
-			}
+			tmp = pCamera->GetEyePosition();
+			lcGetActiveProject()->ConvertToUserUnits(tmp);
 			m_fPosX = tmp[0];
 			m_fPosY = tmp[1];
 			m_fPosZ = tmp[2];
 
-			pCamera->GetTargetPos(tmp);
-			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
-			{
-				tmp[0] /= 0.08f;
-				tmp[1] /= 0.08f;
-				tmp[2] /= 0.08f;
-			}
+			tmp = pCamera->GetTargetPosition();
+			lcGetActiveProject()->ConvertToUserUnits(tmp);
 			m_fRotX = tmp[0];
 			m_fRotY = tmp[1];
 			m_fRotZ = tmp[2];
 
-			pCamera->GetUpVec(tmp);
-			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
-			{
-				tmp[0] /= 0.08f;
-				tmp[1] /= 0.08f;
-				tmp[2] /= 0.08f;
-			}
+			tmp = pCamera->GetUpVector();
+			lcGetActiveProject()->ConvertToUserUnits(tmp);
 			m_fUpX = tmp[0];
 			m_fUpY = tmp[1];
 			m_fUpZ = tmp[2];
@@ -369,19 +349,10 @@ void CModifyDialog::OnModdlgApply()
 		{
 			LC_PIECE_MODIFY mod;
 
-			mod.piece = m_pObject;
-			mod.pos[0] = m_fPosX;
-			mod.pos[1] = m_fPosY;
-			mod.pos[2] = m_fPosZ;
-			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
-			{
-				mod.pos[0] *= 0.08f;
-				mod.pos[1] *= 0.08f;
-				mod.pos[2] *= 0.08f;
-			}
-			mod.rot[0] = m_fRotX;
-			mod.rot[1] = m_fRotY;
-			mod.rot[2] = m_fRotZ;
+			mod.piece = (Piece*)m_pObject;
+			mod.Position = Vector3(m_fPosX, m_fPosY, m_fPosZ);
+			lcGetActiveProject()->ConvertFromUserUnits(mod.Position);
+			mod.Rotation = Vector3(m_fRotX, m_fRotY, m_fRotZ);
 			mod.from = m_nFrom;
 			mod.to = m_nTo;
 			mod.hidden = (m_bHidden != FALSE);
@@ -395,29 +366,14 @@ void CModifyDialog::OnModdlgApply()
 		{
 			LC_CAMERA_MODIFY mod;
 
-			mod.camera = m_pObject;
+			mod.camera = (Camera*)m_pObject;
 			mod.hidden = (m_bHidden != FALSE);
-			mod.eye[0] = m_fPosX;
-			mod.eye[1] = m_fPosY;
-			mod.eye[2] = m_fPosZ;
-			mod.target[0] = m_fRotX;
-			mod.target[1] = m_fRotY;
-			mod.target[2] = m_fRotZ;
-			mod.up[0] = m_fUpX;
-			mod.up[1] = m_fUpY;
-			mod.up[2] = m_fUpZ;
-			if ((lcGetActiveProject()->GetSnapFlags() & LC_DRAW_CM_UNITS) == 0)
-			{
-				mod.eye[0] *= 0.08f;
-				mod.eye[1] *= 0.08f;
-				mod.eye[2] *= 0.08f;
-				mod.target[0] *= 0.08f;
-				mod.target[1] *= 0.08f;
-				mod.target[2] *= 0.08f;
-				mod.up[0] *= 0.08f;
-				mod.up[1] *= 0.08f;
-				mod.up[2] *= 0.08f;
-			}
+			mod.Eye = Vector3(m_fPosX, m_fPosY, m_fPosZ);
+			mod.Target = Vector3(m_fRotX, m_fRotY, m_fRotZ);
+			mod.Up = Vector3(m_fUpX, m_fUpY, m_fUpZ);
+			lcGetActiveProject()->ConvertFromUserUnits(mod.Eye);
+			lcGetActiveProject()->ConvertFromUserUnits(mod.Target);
+			lcGetActiveProject()->ConvertFromUserUnits(mod.Up);
 			mod.fovy = m_fFOV;
 			mod.znear = m_fNear;
 			mod.zfar = m_fFar;

@@ -100,6 +100,8 @@ public:
 		{ return m_nFrameHide; }
 	const float* GetConstPosition()
 		{ return m_fPosition; }
+	inline Vector3 GetPosition() const
+		{ return Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]); }
 	void GetPosition (float* position)
 		{ memcpy(position, m_fPosition, sizeof(m_fPosition)); }
 	void GetRotation (float* rotation)

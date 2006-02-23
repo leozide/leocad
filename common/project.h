@@ -73,8 +73,6 @@ public:
 	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
 	unsigned short GetCurrentTime ()
 		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
-	unsigned long GetSnapFlags() const
-		{ return m_nSnap; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
@@ -96,6 +94,8 @@ public:
 	unsigned short GetTotalFrames () const
 		{ return m_nTotalFrames; }
 
+	void ConvertToUserUnits(Vector3& Value) const;
+	void ConvertFromUserUnits(Vector3& Value) const;
 	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
 	{
 		*ppPiece = m_pPieces;
@@ -116,7 +116,8 @@ public:
 	void Render(bool bToMemory);
 	void SetViewSize(int cx, int cy);
 	void CheckAutoSave();
-	void GetFocusPosition(float* pos);
+	bool GetSelectionCenter(Vector3& Center) const;
+	bool GetFocusPosition(Vector3& Position) const;
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
@@ -166,7 +167,6 @@ protected:
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
-	bool GetSelectionCenter(Vector3& Center) const;
 	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
 

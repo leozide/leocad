@@ -768,10 +768,12 @@ static void statusbar_listener (int message, void *data, void *user)
   if (message == LC_MSG_FOCUS_CHANGED)
   {
     char text[32];
-    float pos[3];
-    project->GetFocusPosition (pos);
+    Point3 pos;
+
+    project->GetFocusPosition(pos);
+		project->ConvertToUserUnits(pos);
+
     sprintf (text, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
- 
     gtk_label_set (GTK_LABEL (label_position), text);
   }
 }

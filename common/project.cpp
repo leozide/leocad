@@ -3496,18 +3496,18 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			LC_PIECE_MODIFY* mod = (LC_PIECE_MODIFY*)param;
 			Piece* pPiece = (Piece*)mod->piece;
 
-			float pos[3], rot[4];
-			pPiece->GetPosition(pos);
+			float rot[4];
+			Vector3 Pos = pPiece->GetPosition();
 			pPiece->GetRotation(rot);
-			Matrix mat(rot, pos);
+			Matrix mat(rot, Pos);
 			mat.ToEulerAngles(rot);
 
-			if (mod->pos[0] != pos[0] || mod->pos[1] != pos[1] || mod->pos[2] != pos[2])
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->pos, LC_PK_POSITION);
+			if (Pos != mod->Position)
+				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Position, LC_PK_POSITION);
 
-			if (mod->rot[0] != rot[0] || mod->rot[1] != rot[1] || mod->rot[2] != rot[2])
+			if (mod->Rotation[0] != rot[0] || mod->Rotation[1] != rot[1] || mod->Rotation[2] != rot[2])
 			{
-				mat.FromEulerAngles (mod->rot[0], mod->rot[1], mod->rot[2]);
+				mat.FromEulerAngles(mod->Rotation[0], mod->Rotation[1], mod->Rotation[2]);
 				mat.ToAxisAngle(rot);
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 			}
@@ -3543,21 +3543,20 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 		{
 			LC_CAMERA_MODIFY* mod = (LC_CAMERA_MODIFY*)param;
 			Camera* pCamera = (Camera*)mod->camera;
-			float tmp[3];
 
 			if (mod->hidden)
 				pCamera->Hide();
 			else
 				pCamera->UnHide();
 
-			pCamera->GetUpVec(tmp);
+			if (pCamera->GetEyePosition() != mod->Eye)
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Eye, LC_CK_EYE);
 
-			if (tmp[0] != mod->eye[0] || tmp[1] != mod->eye[1] || tmp[2] != mod->eye[2])
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->eye, LC_CK_EYE);
-			if (tmp[0] != mod->target[0] || tmp[1] != mod->target[1] || tmp[2] != mod->target[2])
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->target, LC_CK_TARGET);
-			if (tmp[0] != mod->up[0] || tmp[1] != mod->up[1] || tmp[2] != mod->up[2])
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->up, LC_CK_UP);
+			if (pCamera->GetTargetPosition() != mod->Target)
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Target, LC_CK_TARGET);
+
+			if (pCamera->GetUpVector() != mod->Up)
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Up, LC_CK_UP);
 
 			pCamera->m_fovy = mod->fovy;
 			pCamera->m_zNear = mod->znear;
@@ -6513,54 +6512,51 @@ void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projectio
 	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 }
 
-void Project::GetFocusPosition(float* pos)
+void Project::ConvertToUserUnits(Vector3& Value) const
+{
+	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
+		Value /= 0.08f;
+}
+
+void Project::ConvertFromUserUnits(Vector3& Value) const
+{
+	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
+		Value *= 0.08f;
+}
+
+bool Project::GetFocusPosition(Vector3& Position) const
 {
 	Piece* pPiece;
 	Camera* pCamera;
+	float* pos = &Position[0];
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsFocused())
 		{
 			pPiece->GetPosition(pos);
-			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-			{
-				pos[0] /= 0.08f;
-				pos[1] /= 0.08f;
-				pos[2] /= 0.08f;
-			}
-			return;
+			return true;
 		}
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 	{
 		if (pCamera->IsEyeFocused())
 		{
-			pCamera->GetEyePos (pos);
-			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-			{
-				pos[0] /= 0.08f;
-				pos[1] /= 0.08f;
-				pos[2] /= 0.08f;
-			}
-			return;
+			pCamera->GetEyePos(pos);
+			return true;
 		}
 
 		if (pCamera->IsTargetFocused())
 		{
-			pCamera->GetTargetPos (pos);
-			if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-			{
-				pos[0] /= 0.08f;
-				pos[1] /= 0.08f;
-				pos[2] /= 0.08f;
-			}
-			return;
+			pCamera->GetTargetPos(pos);
+			return true;
 		}
 	}
 
 	// TODO: light
 
 	pos[0] = pos[1] = pos[2] = 0.0f;
+
+	return false;
 }
 
 // Returns the object that currently has focus.
@@ -8897,16 +8893,16 @@ void Project::MouseUpdateOverlays(int x, int y)
 			}
 		}
 
-		for (int i = 1; i < 4; i++)
+		int i, Mode = -1;
+		Vector3 Pt((float)x, (float)y, 0);
+
+		for (i = 1; i < 4; i++)
 			Points[i] += Points[0];
 
 		ProjectPoints(Points, 4, ModelView, Projection, Viewport);
 
-		int Mode = -1;
-		Vector3 Pt((float)x, (float)y, 0);
-
 		// Check if the mouse is over an arrow.
-		for (int i = 1; i < 4; i++)
+		for (i = 1; i < 4; i++)
 		{
 			Vector3 Line = Points[i] - Points[0];
 			Vector3 Vec = Pt - Points[0];

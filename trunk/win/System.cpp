@@ -451,7 +451,7 @@ void SystemUpdateViewport(int nNew, int nOld)
 	CMenu* pMenu = GetMainMenu(2);
 	if (!pMenu)
 		return;
-	pMenu = pMenu->GetSubMenu(12);
+	pMenu = pMenu->GetSubMenu(13);
 	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
 	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
 }
@@ -770,7 +770,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(14);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i;
 
@@ -798,7 +798,7 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(14);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	Camera* pFirst = pCamera;
 	int i;

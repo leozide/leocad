@@ -4,19 +4,13 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
-class File;
-
 class Matrix
 {
 public:
 	Matrix();
 	Matrix(const float *mat);
-	Matrix(const double *matrix);
 	Matrix(const float *rot, const float *pos);
-	~Matrix();
-
-	void FileSave(File& file) const;
-	void FileLoad(File& file);
+	~Matrix() { };
 
 	void FromPacked(const float *mat);
 	void FromFloat(const float* mat);
@@ -35,7 +29,6 @@ public:
 	void Transpose3();
 	float Determinant() const;
 
-
 	void GetTranslation(float *x, float *y, float *z);
 	void SetTranslation(float x, float y, float z);
 	void GetTranslation(float pos[3]);
@@ -43,11 +36,9 @@ public:
 
 	void TransformPoint(float out[], const float in[3]);
 	void TransformPoints(float p[], int n);
-	void Create(float mx, float my, float mz, float rx, float ry, float rz);
 	void CreateOld(float mx, float my, float mz, float rx, float ry, float rz);
 	void Rotate(float angle, float x, float y, float z);
 	void RotateCenter(float angle, float x, float y, float z, float px, float py, float pz);
-	bool FromInverse(double* src);
 	void CreatePerspective(float fovy, float aspect, float nearval, float farval);
 	void CreateLookat(const float *eye, const float *target, const float *up);
 

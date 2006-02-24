@@ -1530,9 +1530,9 @@ typedef struct
   GtkWidget *det_edges, *det_dither, *det_lighting, *det_smooth;
   GtkWidget *det_antialias, *det_linear, *det_fast;
   GtkWidget *det_solid, *det_hidden, *det_background, *det_width;
-  GtkWidget *draw_grid, *draw_gridunits, *draw_axis, *draw_preview;
+  GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
-  GtkWidget *draw_anglesnap, *draw_centimeter, *draw_collision;
+  GtkWidget *draw_anglesnap, *draw_centimeter;
   GtkWidget *draw_move, *draw_fixed;
   GtkWidget *draw_lockx, *draw_locky, *draw_lockz;
   GtkWidget *scn_solid, *scn_gradient, *scn_image, *scn_imagename;
@@ -1563,7 +1563,7 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   int grid_size, angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
-  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
+//  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
   if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
@@ -1626,7 +1626,7 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   int grid_size, angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
-  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
+//  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
   if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
@@ -1819,11 +1819,6 @@ int preferencesdlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), s.draw_axis, 0, 1, 1, 2,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
-  s.draw_preview = gtk_check_button_new_with_label ("Preview position");
-  gtk_widget_show (s.draw_preview);
-  gtk_table_attach (GTK_TABLE (table), s.draw_preview, 0, 1, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
   s.draw_snapx = gtk_check_button_new_with_label ("Snap X");
   gtk_widget_show (s.draw_snapx);
   gtk_table_attach (GTK_TABLE (table), s.draw_snapx, 0, 1, 3, 4,
@@ -1862,12 +1857,6 @@ int preferencesdlg_execute(void* param)
   gtk_widget_show (s.draw_centimeter);
   gtk_table_attach (GTK_TABLE (table), s.draw_centimeter, 0, 1, 7, 8,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_collision = gtk_check_button_new_with_label ("Collision detection");
-  gtk_widget_show (s.draw_collision);
-  gtk_table_attach (GTK_TABLE (table), s.draw_collision, 1, 2, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-  gtk_widget_set_sensitive (s.draw_collision, FALSE);
 
   s.draw_move = gtk_check_button_new_with_label ("Switch to move after insert");
   gtk_widget_show (s.draw_move);
@@ -2115,8 +2104,8 @@ int preferencesdlg_execute(void* param)
 			       (opts->nSnap & LC_DRAW_GRID) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_axis),
 			       (opts->nSnap & LC_DRAW_AXIS) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_preview),
-			       (opts->nSnap & LC_DRAW_PREVIEW) ? TRUE : FALSE);
+//  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_preview),
+//			       (opts->nSnap & LC_DRAW_PREVIEW) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapx),
 			       (opts->nSnap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapy),

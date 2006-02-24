@@ -993,8 +993,8 @@ BEGIN
     LTEXT           "units",IDC_STATIC,76,7,16,8
     CONTROL         "Axis icon",IDC_AIDDLG_AXIS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,20,42,8
-    CONTROL         "Preview position",IDC_AIDDLG_PREVIEW,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,33,64,8
+    CONTROL         "Centimeter units",IDC_AIDDLG_CENTIMETERS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,33,70,8
     CONTROL         "Snap X",IDC_AIDDLG_SNAPX,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,46,42,8
     CONTROL         "Snap Y",IDC_AIDDLG_SNAPY,"Button",BS_AUTOCHECKBOX | 
@@ -1005,10 +1005,8 @@ BEGIN
                     WS_TABSTOP,7,85,49,8
     EDITTEXT        IDC_AIDDLG_ANGLE,57,84,20,10,ES_AUTOHSCROLL
     LTEXT           "degrees",IDC_STATIC,79,85,27,8
-    CONTROL         "Centimeter units",IDC_AIDDLG_CENTIMETERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,98,70,8
-    CONTROL         "Collision detection",IDC_AIDDLG_COLLISION,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,122,7,111,8
+    CONTROL         "Mouse always moves in 3D",IDC_AIDDLG_3DMOUSE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,122,7,111,8
     CONTROL         "Switch to move after inserting",IDC_AIDDLG_MOVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,122,20,111,8
     CONTROL         "Fixed direction keys",IDC_AIDDLG_FIXEDKEYS,"Button",
@@ -1019,8 +1017,6 @@ BEGIN
                     WS_TABSTOP,122,59,111,8
     CONTROL         "Lock Z",IDC_AIDDLG_LOCKZ,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,122,72,111,8
-    CONTROL         "Mouse always moves in 3D",IDC_AIDDLG_3DMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,122,85,111,8
 END
 
 IDD_PREFDETAIL DIALOG DISCARDABLE  0, 0, 240, 114
@@ -1040,8 +1036,6 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,59,97,8
     CONTROL         "Linear filtering",IDC_DETDLG_LINEAR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,72,97,8
-    CONTROL         "Screen door transparency",IDC_DETDLG_NOALPHA,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,85,97,8
     CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,120,7,96,8
     CONTROL         "Draw solid boxes",IDC_DETDLG_SOLID,"Button",

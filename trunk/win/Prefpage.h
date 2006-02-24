@@ -86,7 +86,6 @@ public:
 	BOOL	m_bFast;
 	BOOL	m_bHidden;
 	BOOL	m_bSolid;
-	BOOL	m_bNoAlpha;
 	//}}AFX_DATA
 
 
@@ -130,7 +129,6 @@ public:
 	int		m_nAngle;
 	BOOL	m_bAxis;
 	BOOL	m_bCentimeters;
-	BOOL	m_bCollision;
 	BOOL	m_bFixed;
 	BOOL	m_bGrid;
 	int		m_nGridSize;
@@ -138,7 +136,6 @@ public:
 	BOOL	m_bLockY;
 	BOOL	m_bLockZ;
 	BOOL	m_bMove;
-	BOOL	m_bPreview;
 	BOOL	m_bSnapA;
 	BOOL	m_bSnapX;
 	BOOL	m_bSnapY;

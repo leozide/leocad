@@ -6,7 +6,6 @@
 #include <math.h>
 #include <string.h>
 #include "matrix.h"
-#include "file.h"
 #include "defines.h"
 
 // =============================================================================
@@ -103,12 +102,6 @@ Matrix::Matrix (const float* mat)
   memcpy (&m[0], mat, sizeof(float[16]));
 }
 
-Matrix::Matrix (const double *mat)
-{
-  for (int i = 0; i < 16; i++)
-    m[i] = (float)mat[i];
-}
-
 // Create a matrix from axis-angle and a point
 Matrix::Matrix (const float *rot, const float *pos)
 {
@@ -170,10 +163,6 @@ Matrix::Matrix (const float *rot, const float *pos)
 	m[15] = 1.0f;
 }
 
-Matrix::~Matrix()
-{
-}
-
 // Expand from the .bin file
 void Matrix::FromPacked (const float *mat)
 {
@@ -225,11 +214,6 @@ void Matrix::Rotate (float angle, float x, float y, float z)
   rotation_matrix(angle, x, y, z, rm);
   matmul(rm, rm, m);
   memcpy (&m[0], &rm[0], sizeof(rm));
-/*
-  for (int i = 0; i < 12; i++)
-    if (fabs (m[i]) < .001f)
-      m[i] = 0;
-*/
 }
 
 void Matrix::RotateCenter (float angle, float x, float y, float z, float px, float py, float pz)
@@ -281,15 +265,6 @@ void Matrix::SetTranslation (float pos[3])
   m[13] = pos[1];
   m[14] = pos[2];
   m[15] = 1;
-}
-
-void Matrix::Create(float mx, float my, float mz, float rx, float ry, float rz)
-{
-	LoadIdentity();
-	Translate(mx, my, mz);
-	Rotate(rx, 1, 0, 0);
-	Rotate(ry, 0, 1, 0);
-	Rotate(rz, 0, 0, 1);
 }
 
 void Matrix::CreateOld(float mx, float my, float mz, float rx, float ry, float rz)
@@ -350,30 +325,6 @@ void Matrix::ToLDraw (float *f) const
 	f[3] = tmp[0];   f[4] = tmp[4];    f[5] = tmp[8];
 	f[6] = tmp[1];   f[7] = tmp[5];    f[8] = tmp[9];
 	f[9] = tmp[2];   f[10]= tmp[6];    f[11]= tmp[10];
-}
-
-void Matrix::FileLoad (File& file)
-{
-  float tmp[12];
-
-  file.ReadLong (&tmp, 12);
-
-  m[0] = tmp[0]; m[1] = tmp[1];  m[2] = tmp[2];  m[3] = 0.0f;
-  m[4] = tmp[3]; m[5] = tmp[4];  m[6] = tmp[5];  m[7] = 0.0f;
-  m[8] = tmp[6]; m[9] = tmp[7];  m[10]= tmp[8];  m[11]= 0.0f;
-  m[12]= tmp[9]; m[13]= tmp[10]; m[14]= tmp[11]; m[15]= 1.0f;
-}
-
-void Matrix::FileSave (File& file) const
-{
-  float tmp[12];
-
-  tmp[0] = m[0];  tmp[1] = m[1];  tmp[2] = m[2];
-  tmp[3] = m[4];  tmp[4] = m[5];  tmp[5] = m[6];
-  tmp[6] = m[8];  tmp[7] = m[9];  tmp[8] = m[10];
-  tmp[9] = m[12]; tmp[10]= m[13]; tmp[11]= m[14];
-
-  file.WriteLong (&tmp, 12);
 }
 
 void Matrix::ToEulerAngles (float *rot) const
@@ -564,129 +515,6 @@ void Matrix::FromAxisAngle (const float *axis, float angle)
   if (angle == 0.0f)
     return;
   rotation_matrix (angle, axis[0], axis[1], axis[2], m);
-}
-
-bool Matrix::FromInverse(double* src)
-{
-/*
-// This code is better !
-	float det_1, pos, neg, temp;
-
-#define ACCUMULATE	  \
-	if (temp >= 0.0)  \
-		pos += temp;  \
-	else			  \
-		neg += temp;
-
-#define PRECISION_LIMIT (1.0e-15)
-
-	// Calculate the determinant of submatrix A and determine if the
-	// the matrix is singular as limited by the double precision
-	// floating-point data representation.
-	pos = neg = 0.0f;
-	temp =	src[0] * src[5] * src[10];
-	ACCUMULATE
-	temp =	src[1] * src[6] * src[8];
-	ACCUMULATE
-	temp =	src[2] * src[4] * src[9];
-	ACCUMULATE
-	temp = -src[2] * src[5] * src[8];
-	ACCUMULATE
-	temp = -src[1] * src[4] * src[10];
-	ACCUMULATE
-	temp = -src[0] * src[6] * src[9];
-	ACCUMULATE
-	det_1 = pos + neg;
-#define ABS(a) (a < 0) ? -a : a
-	// Is the submatrix A singular ?
-	if ((det_1 == 0.0) || (ABS(det_1 / (pos - neg)) < PRECISION_LIMIT))
-		return false;
-
-	// Calculate inverse(A) = adj(A) / det(A)
-	det_1 = 1.0f / det_1;
-	inverse[0] =  (src[5]*src[10] - src[6]*src[9])*det_1;
-	inverse[4] = -(src[4]*src[10] - src[6]*src[8])*det_1;
-	inverse[8] =  (src[4]*src[9]  - src[5]*src[8])*det_1;
-	inverse[1] = -(src[1]*src[10] - src[2]*src[9])*det_1;
-	inverse[5] =  (src[0]*src[10] - src[2]*src[8])*det_1;
-	inverse[9] = -(src[0]*src[9]  - src[1]*src[8])*det_1;
-	inverse[2] =  (src[1]*src[6]  - src[2]*src[5])*det_1;
-	inverse[6] = -(src[0]*src[6]  - src[2]*src[4])*det_1;
-	inverse[10] = (src[0]*src[5]  - src[1]*src[4])*det_1;
-
-	// Calculate -C * inverse(A)
-	inverse[12] = -(src[12]*inverse[0] + src[13]*inverse[4] + src[14]*inverse[8]);
-	inverse[13] = -(src[12]*inverse[1] + src[13]*inverse[5] + src[14]*inverse[9]);
-	inverse[14] = -(src[12]*inverse[2] + src[13]*inverse[6] + src[14]*inverse[10]);
-
-	// Fill in last column
-	inverse[3] = inverse[7] = inverse[11] = 0.0f;
-	inverse[15] = 1.0f;
-
-	return true;
-*/
-	float t;
-	int i, j, k, swap;
-	float tmp[4][4];
-
-	for (i = 0; i < 16; i++)
-		m[i] = 0.0;
-	m[0] = m[5] = m[10] = m[15] = 1.0;
-
-	for (i = 0; i < 4; i++)
-	for (j = 0; j < 4; j++)
-		tmp[i][j] = (float)src[i*4+j];
-
-	for (i = 0; i < 4; i++) 
-	{
-		// look for largest element in column.
-		swap = i;
-		for (j = i + 1; j < 4; j++) 
-			if (fabs(tmp[j][i]) > fabs(tmp[i][i])) 
-				swap = j;
-
-		if (swap != i) 
-		{
-			// swap rows.
-			for (k = 0; k < 4; k++)
-			{
-				t = tmp[i][k];
-				tmp[i][k] = tmp[swap][k];
-				tmp[swap][k] = t;
-
-				t = m[i*4+k];
-				m[i*4+k] = m[swap*4+k];
-				m[swap*4+k] = t;
-			}
-		}
-
-		if (tmp[i][i] == 0) 
-		{
-			// The matrix is singular, which shouldn't happen.
-			return false;
-		}
-
-		t = tmp[i][i];
-		for (k = 0; k < 4; k++) 
-		{
-			tmp[i][k] /= t;
-			m[i*4+k] /= t;
-		}
-		for (j = 0; j < 4; j++) 
-		{
-			if (j != i) 
-			{
-				t = tmp[j][i];
-				for (k = 0; k < 4; k++) 
-				{
-					tmp[j][k] -= tmp[i][k]*t;
-					m[j*4+k] -= m[i*4+k]*t;
-				}
-			}
-		}
-	}
-
-	return true;
 }
 
 void Matrix::Transpose3()

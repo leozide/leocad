@@ -145,4 +145,26 @@ protected:
 	BOOL disable_old_style;
 }; 
 
+// ============================================================================
+
+class CTitleMenu : public CMenu
+{
+public:
+	CTitleMenu();
+	virtual ~CTitleMenu();
+
+// Operations
+public:
+	void SetMenuTitle(UINT ID, const char* Title);
+
+// Implementation
+public:
+	static void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
+	static void DrawItem(LPDRAWITEMSTRUCT lpDIS);
+
+protected:
+	static CFont m_Font;
+	HFONT CreateTitleFont();
+};
+
 #endif

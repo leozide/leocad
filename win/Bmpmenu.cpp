@@ -1447,3 +1447,89 @@ BOOL CBMPMenu::DeleteMenu(UINT nPosition, UINT nFlags)
 
 	return (CMenu::DeleteMenu(nPosition, nFlags));
 }
+
+// ============================================================================
+
+CFont CTitleMenu::m_Font;
+
+CTitleMenu::CTitleMenu()
+{
+	HFONT hfont = CreateTitleFont();
+	ASSERT(hfont);
+	m_Font.Attach(hfont);
+}
+
+CTitleMenu::~CTitleMenu()
+{
+	m_Font.DeleteObject();
+}
+
+HFONT CTitleMenu::CreateTitleFont()
+{
+	// start by getting the stock menu font
+	HFONT hfont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+	if (hfont)
+	{
+		LOGFONT lf; //get the complete LOGFONT describing this font
+		if (GetObject(hfont, sizeof(LOGFONT), &lf)) 
+		{
+			lf.lfWeight = FW_BOLD;	// set the weight to bold
+			// recreate this font with just the weight changed
+			return ::CreateFontIndirect(&lf);
+		}
+	}
+	return NULL;
+}
+
+void CTitleMenu::SetMenuTitle(UINT ID, const char* Title)
+{
+	UINT State = GetMenuState(ID, MF_BYCOMMAND);
+	CMenu::ModifyMenu(ID, MF_BYCOMMAND | MF_OWNERDRAW | State, ID, Title);
+}
+
+void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
+{
+	// Get the screen dc to use for retrieving size information.
+	CDC dc;
+	dc.Attach(::GetDC(NULL));
+
+	// Select the title font.
+	HFONT hfontOld = (HFONT)SelectObject(dc.m_hDC, (HFONT)m_Font);
+
+	// Compute the size of the title.
+	CSize size = dc.GetTextExtent((char*)mi->itemData);
+
+	// Deselect the title font.
+	dc.SelectObject(hfontOld);
+
+	// Add in the left margin for the menu item.
+	size.cx += GetSystemMetrics(SM_CXMENUCHECK)+8;
+
+	// Return the width and height.
+	mi->itemWidth = size.cx;
+	mi->itemHeight = size.cy;
+}
+
+void CTitleMenu::DrawItem(LPDRAWITEMSTRUCT di)
+{
+	// Fill the background.
+	HBRUSH bgb = CreateSolidBrush(GetSysColor(COLOR_MENU));
+	FillRect(di->hDC, &di->rcItem, bgb);
+	DeleteObject(bgb);
+
+	// Setup font.
+	int mode = SetBkMode(di->hDC, TRANSPARENT);
+	COLORREF color = SetTextColor(di->hDC, GetSysColor(COLOR_MENUTEXT));
+	HFONT old = (HFONT)SelectObject(di->hDC, (HFONT)m_Font);
+
+	// Add the menu margin offset.
+	di->rcItem.left += GetSystemMetrics(SM_CXMENUCHECK)+8;
+
+	// Draw the text left aligned and vertically centered.
+	DrawText(di->hDC, (char*)di->itemData, -1, &di->rcItem, DT_SINGLELINE|DT_VCENTER|DT_LEFT);
+
+	// Restore everything.
+	SelectObject(di->hDC, old);
+	SetBkMode(di->hDC, mode);
+	SetTextColor(di->hDC, color);
+}

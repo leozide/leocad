@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
 	ON_WM_SETFOCUS()
+	ON_WM_DRAWITEM()
 	ON_WM_MEASUREITEM()
 	ON_WM_MENUCHAR()
 	ON_WM_INITMENUPOPUP()
@@ -378,7 +379,12 @@ void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStru
 {
 	if(lpMeasureItemStruct->CtlType == ODT_MENU)
 	{
-		if(IsMenu((HMENU)lpMeasureItemStruct->itemID))
+		if ((lpMeasureItemStruct->itemID == ID_SNAP_XY) || (lpMeasureItemStruct->itemID == ID_SNAP_Z))
+		{
+			CTitleMenu::MeasureItem(lpMeasureItemStruct);
+			return;
+		}
+		else if(IsMenu((HMENU)lpMeasureItemStruct->itemID))
 		{
 			CMenu* cmenu = CMenu::FromHandle((HMENU)lpMeasureItemStruct->itemID);
 			if(m_bmpMenu.IsMenu(cmenu))
@@ -390,6 +396,18 @@ void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStru
 	}
 
 	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
+}
+
+void CMainFrame::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	if ((lpDrawItemStruct->itemID == ID_SNAP_XY) || (lpDrawItemStruct->itemID == ID_SNAP_Z))
+	{
+		CTitleMenu::DrawItem(lpDrawItemStruct);
+	}
+	else
+	{
+		CFrameWnd::OnDrawItem(nIDCtl, lpDrawItemStruct);
+	}
 }
 
 LRESULT CMainFrame::OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu) 

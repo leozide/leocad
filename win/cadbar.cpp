@@ -8,6 +8,7 @@
 #include "StepPop.h"
 #include "project.h"
 #include "lc_application.h"
+#include "bmpmenu.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -69,15 +70,18 @@ void CCADStatusBar::OnLButtonDown(UINT nFlags, CPoint point)
 	if (rect.PtInRect(point))
 	{
 		ClientToScreen(&point);
-		CMenu menuPopups;
+		CTitleMenu menuPopups;
 		menuPopups.LoadMenu(IDR_POPUPS);
-		CMenu* pMenu = menuPopups.GetSubMenu(7);
+		CTitleMenu* pMenu = (CTitleMenu*)menuPopups.GetSubMenu(7);
 
 		int SXY, SZ;
 		lcGetActiveProject()->GetSnapIndex(&SXY, &SZ);
 
-		pMenu->CheckMenuRadioItem(0, 9, SXY, MF_BYPOSITION);
-		pMenu->CheckMenuRadioItem(10, 19, 10 + SZ, MF_BYPOSITION);
+		pMenu->SetMenuTitle(ID_SNAP_XY, "XY Snap");
+		pMenu->SetMenuTitle(ID_SNAP_Z, "Z Snap");
+
+		pMenu->CheckMenuRadioItem(2, 11, SXY + 2, MF_BYPOSITION);
+		pMenu->CheckMenuRadioItem(14, 23, SZ + 14, MF_BYPOSITION);
 
 		pMenu->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 	}
@@ -136,4 +140,3 @@ void CCADStatusBar::AdjustProgressBarPosition()
 	m_Progress.SetWindowPos(NULL, Rect.right - m_nProgressWidth, Rect.top,
 		m_nProgressWidth, Rect.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
 }
-

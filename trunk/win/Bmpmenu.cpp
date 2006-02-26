@@ -1450,13 +1450,12 @@ BOOL CBMPMenu::DeleteMenu(UINT nPosition, UINT nFlags)
 
 // ============================================================================
 
-CFont CTitleMenu::m_Font;
-
 CTitleMenu::CTitleMenu()
 {
 	HFONT hfont = CreateTitleFont();
 	ASSERT(hfont);
 	m_Font.Attach(hfont);
+	m_TitleStrings.InitHashTable(7);
 }
 
 CTitleMenu::~CTitleMenu()
@@ -1483,12 +1482,17 @@ HFONT CTitleMenu::CreateTitleFont()
 
 void CTitleMenu::SetMenuTitle(UINT ID, const char* Title)
 {
+	m_TitleStrings[ID] = Title;
 	UINT State = GetMenuState(ID, MF_BYCOMMAND);
-	CMenu::ModifyMenu(ID, MF_BYCOMMAND | MF_OWNERDRAW | State, ID, Title);
+	ModifyMenu(ID, MF_BYCOMMAND | MF_OWNERDRAW | State, ID, (LPCTSTR)this);
 }
 
 void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
 {
+	const char* Text;
+	if (!m_TitleStrings.Lookup(mi->itemID, Text))
+		return;
+
 	// Get the screen dc to use for retrieving size information.
 	CDC dc;
 	dc.Attach(::GetDC(NULL));
@@ -1497,7 +1501,7 @@ void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
 	HFONT hfontOld = (HFONT)SelectObject(dc.m_hDC, (HFONT)m_Font);
 
 	// Compute the size of the title.
-	CSize size = dc.GetTextExtent((char*)mi->itemData);
+	CSize size = dc.GetTextExtent(Text);
 
 	// Deselect the title font.
 	dc.SelectObject(hfontOld);
@@ -1512,6 +1516,10 @@ void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
 
 void CTitleMenu::DrawItem(LPDRAWITEMSTRUCT di)
 {
+	const char* Text;
+	if (!m_TitleStrings.Lookup(di->itemID, Text))
+		return;
+
 	// Fill the background.
 	HBRUSH bgb = CreateSolidBrush(GetSysColor(COLOR_MENU));
 	FillRect(di->hDC, &di->rcItem, bgb);
@@ -1526,7 +1534,7 @@ void CTitleMenu::DrawItem(LPDRAWITEMSTRUCT di)
 	di->rcItem.left += GetSystemMetrics(SM_CXMENUCHECK)+8;
 
 	// Draw the text left aligned and vertically centered.
-	DrawText(di->hDC, (char*)di->itemData, -1, &di->rcItem, DT_SINGLELINE|DT_VCENTER|DT_LEFT);
+	DrawText(di->hDC, Text, -1, &di->rcItem, DT_SINGLELINE|DT_VCENTER|DT_LEFT);
 
 	// Restore everything.
 	SelectObject(di->hDC, old);

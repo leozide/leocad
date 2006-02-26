@@ -477,7 +477,7 @@ void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
   gtk_label_set (GTK_LABEL (label_snap), text);
 }
 
-void SystemUpdateSelected(unsigned long flags)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 {
   GtkWidget *item;
 

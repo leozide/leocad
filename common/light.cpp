@@ -61,6 +61,11 @@ void LightTarget::Select (bool bSelecting, bool bFocus, bool bMultiple)
   m_pParent->SelectTarget (bSelecting, bFocus, bMultiple);
 }
 
+const char* LightTarget::GetName() const
+{
+	return m_pParent->GetName();
+}
+
 // =============================================================================
 // Light class
 

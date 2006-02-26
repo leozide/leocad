@@ -250,6 +250,7 @@ Curve::Curve ()
 Curve::Curve (PieceInfo *pInfo, const float *pos, unsigned char color)
   : Object (LC_OBJECT_CURVE)
 {
+	/*
   Initialize ();
 
   // FIXME: set the curve type and length based on the PieceInfo
@@ -281,13 +282,16 @@ Curve::Curve (PieceInfo *pInfo, const float *pos, unsigned char color)
   m_Points.Add (pt);
 
   UpdatePosition (1, false);
+*/
 }
 
 Curve::~Curve ()
 {
+	/*
   for (int i = 0; i < m_Points.GetSize (); i++)
     delete m_Points[i];
   glDeleteLists (m_nDisplayList, 1);
+	*/
 }
 
 void Curve::Initialize ()

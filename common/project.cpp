@@ -3219,6 +3219,8 @@ bool Project::RemoveSelectedObjects()
 void Project::UpdateSelection()
 {
 	unsigned long flags = 0;
+	int SelectedCount = 0;
+	Object* Focus = NULL;
 
 	if (m_pPieces == NULL)
 		flags |= LC_SEL_NO_PIECES;
@@ -3232,6 +3234,11 @@ void Project::UpdateSelection()
 		{
 			if (pPiece->IsSelected())
 			{
+				SelectedCount++;
+
+				if (pPiece->IsFocused())
+					Focus = pPiece;
+
 				if (flags & LC_SEL_PIECE)
 					flags |= LC_SEL_MULTIPLE;
 				else
@@ -3270,18 +3277,30 @@ void Project::UpdateSelection()
 
 	for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		if (pCamera->IsSelected())
+		{
 			flags |= LC_SEL_CAMERA;
+			SelectedCount++;
+
+			if (pCamera->IsEyeFocused() || pCamera->IsTargetFocused())
+				Focus = pCamera;
+		}
 
 	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 		if (pLight->IsSelected())
+		{
 			flags |= LC_SEL_LIGHT;
+			SelectedCount++;
+
+			if (pLight->IsEyeFocused() || pLight->IsTargetFocused())
+				Focus = pLight;
+		}
 
 	if (m_nTracking == LC_TRACK_NONE)
 	{
 		ActivateOverlay();
 	}
 
-	SystemUpdateSelected(flags);
+	SystemUpdateSelected(flags, SelectedCount, Focus);
 }
 
 void Project::CheckAutoSave()
@@ -7256,7 +7275,8 @@ void Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 
 	if (m_OverlayActive)
 	{
-		GetSelectionCenter(m_OverlayCenter);
+		if (!GetFocusPosition(m_OverlayCenter))
+			GetSelectionCenter(m_OverlayCenter);
 	}
 }
 
@@ -7385,6 +7405,12 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsSelected())
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+
+	if (m_OverlayActive)
+	{
+		if (!GetFocusPosition(m_OverlayCenter))
+			GetSelectionCenter(m_OverlayCenter);
+	}
 }
 
 bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
@@ -9156,7 +9182,14 @@ void Project::MouseUpdateOverlays(int x, int y)
 void Project::ActivateOverlay()
 {
 	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE))
-		m_OverlayActive = GetSelectionCenter(m_OverlayCenter);
+	{
+		if (GetFocusPosition(m_OverlayCenter))
+			m_OverlayActive = true;
+		else if (GetSelectionCenter(m_OverlayCenter))
+			m_OverlayActive = true;
+		else
+			m_OverlayActive = false;
+	}
 	else if ((m_nCurAction == LC_ACTION_ZOOM_REGION) && (m_nTracking == LC_TRACK_START_LEFT))
 		m_OverlayActive = true;
 	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)

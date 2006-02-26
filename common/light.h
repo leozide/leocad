@@ -25,70 +25,77 @@ typedef enum
 
 class LightTarget : public Object
 {
- public:
-  LightTarget (Light *pParent);
-  ~LightTarget ();
+public:
+	LightTarget (Light *pParent);
+	~LightTarget ();
 
- public:
-  void MinIntersectDist (LC_CLICKLINE* pLine);
+public:
+	void MinIntersectDist (LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-  void Select (bool bSelecting, bool bFocus, bool bMultiple);
-  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
-    {
-      // FIXME: move the position handling to the light target
-    }
+	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	{
+		// FIXME: move the position handling to the light target
+	}
 
-  Light* GetParent () const
-    { return m_pParent; }
+	const char* GetName() const;
 
- protected:
-  Light* m_pParent;
+	Light* GetParent () const
+	{ return m_pParent; }
 
-  friend class Light; // FIXME: needed for BoundingBoxCalculate ()
-  // remove and use UpdatePosition instead
+protected:
+	Light* m_pParent;
+
+	friend class Light; // FIXME: needed for BoundingBoxCalculate ()
+	// remove and use UpdatePosition instead
 };
 
 class Light : public Object
 {
- public:
-  Light (float px, float py, float pz);
-  Light (float px, float py, float pz, float tx, float ty, float tz);
-  virtual ~Light ();
+public:
+	Light (float px, float py, float pz);
+	Light (float px, float py, float pz, float tx, float ty, float tz);
+	virtual ~Light ();
 
-  void Select (bool bSelecting, bool bFocus, bool bMultiple);
-
-
-        void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
+	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-  Light* m_pNext;
+	Light* m_pNext;
 
-  bool IsVisible()
-    { return (m_nState & LC_LIGHT_HIDDEN) == 0; } 
-  bool IsSelected()
-    { return (m_nState & (LC_LIGHT_SELECTED|LC_LIGHT_TARGET_SELECTED)) != 0; } 
-  bool IsEyeSelected()
-    { return (m_nState & LC_LIGHT_SELECTED) != 0; } 
-  bool IsTargetSelected()
-    { return (m_nState & LC_LIGHT_TARGET_SELECTED) != 0; } 
-  void Select()
-    { m_nState |= (LC_LIGHT_SELECTED|LC_LIGHT_TARGET_SELECTED); } 
-  void UnSelect()
-    { m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED|LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED); } 
-  void UnFocus()
-    { m_nState &= ~(LC_LIGHT_FOCUSED|LC_LIGHT_TARGET_FOCUSED); } 
-  void FocusEye()
-    { m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED); } 
-  void FocusTarget()
-    { m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED); } 
-  const char* GetName()
-    { return m_strName; }
-  void GetTargetPos (float *pos) const
-    { memcpy (pos, m_fTarget, sizeof (float[3])); }
-  LightTarget* GetTarget () const
-    { return m_pTarget; }
+	bool IsVisible()
+	{ return (m_nState & LC_LIGHT_HIDDEN) == 0; }
+	bool IsSelected()
+	{ return (m_nState & (LC_LIGHT_SELECTED|LC_LIGHT_TARGET_SELECTED)) != 0; }
+	bool IsEyeSelected()
+	{ return (m_nState & LC_LIGHT_SELECTED) != 0; }
+	bool IsTargetSelected()
+	{ return (m_nState & LC_LIGHT_TARGET_SELECTED) != 0; }
+	bool IsEyeFocused()
+	{ return (m_nState & LC_LIGHT_FOCUSED) != 0; }
+	bool IsTargetFocused()
+	{ return (m_nState & LC_LIGHT_TARGET_FOCUSED) != 0; }
 
+	void Select()
+	{ m_nState |= (LC_LIGHT_SELECTED|LC_LIGHT_TARGET_SELECTED); }
+	void UnSelect()
+	{ m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED|LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED); }
+	void UnFocus()
+	{ m_nState &= ~(LC_LIGHT_FOCUSED|LC_LIGHT_TARGET_FOCUSED); }
+	void FocusEye()
+	{ m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED); }
+	void FocusTarget()
+	{ m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED); }
+	const char* GetName()
+	{ return m_strName; }
+	void GetTargetPos (float *pos) const
+	{ memcpy (pos, m_fTarget, sizeof (float[3])); }
+	LightTarget* GetTarget () const
+	{ return m_pTarget; }
+
+	const char* GetName() const
+	{ return m_strName; };
 
   void Render (float fLineWidth);
   void MinIntersectDist (LC_CLICKLINE* Line);

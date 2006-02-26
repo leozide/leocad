@@ -143,6 +143,7 @@ public:
   LC_OBJECT_TYPE GetType () const
     { return m_nObjectType; }
 
+  virtual const char* GetName() const = 0;
   /*
   // For linked lists
   Object* m_pNext;

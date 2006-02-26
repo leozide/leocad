@@ -91,7 +91,7 @@ void SystemUpdateCameraMenu(Camera* pCamera);
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);
-void SystemUpdateSelected(unsigned long flags);
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemUpdateCategories(bool SearchOnly);

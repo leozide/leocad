@@ -586,10 +586,10 @@ void SystemUpdateSnap(const unsigned long nSnap)
 	// TODO: change Snap None & All (or maybe not ?)
 }
 
-void SystemUpdateSelected(unsigned long flags)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 {
 	CMenu* pMenu;
-	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
 	if (!pFrame)
 		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
@@ -655,6 +655,29 @@ void SystemUpdateSelected(unsigned long flags)
 
 	pCtrl->EnableButton(ID_PIECE_PREVIOUS, flags & LC_SEL_PIECE ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_PIECE_NEXT, flags & LC_SEL_PIECE ? TRUE : FALSE);
+
+	// Status bar text.
+	if (SelectedCount == 0)
+	{
+		pFrame->SetStatusBarMessage("");
+		pFrame->SetMessageText(AFX_IDS_IDLEMESSAGE);
+	}
+	else if ((SelectedCount == 1) && (Focus != NULL))
+	{
+		pFrame->SetStatusBarMessage(Focus->GetName());
+		pFrame->SetMessageText(Focus->GetName());
+	}
+	else
+	{
+		char Message[256];
+		if (SelectedCount == 1)
+			strcpy(Message, "1 Object selected.");
+		else
+			sprintf(Message, "%d Objects selected.", SelectedCount);
+
+		pFrame->SetStatusBarMessage(Message);
+		pFrame->SetMessageText(Message);
+	}
 }
 
 // Changed current step/frame

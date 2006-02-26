@@ -57,6 +57,11 @@ void CameraTarget::Select (bool bSelecting, bool bFocus, bool bMultiple)
   m_pParent->SelectTarget (bSelecting, bFocus, bMultiple);
 }
 
+const char* CameraTarget::GetName() const
+{
+	return m_pParent->GetName();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Camera construction/destruction
 

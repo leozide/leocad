@@ -38,24 +38,26 @@ public:
 	CameraTarget (Camera *pParent);
 	virtual ~CameraTarget ();
 
- public:
-  void MinIntersectDist (LC_CLICKLINE* pLine);
+public:
+	void MinIntersectDist (LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-  void Select (bool bSelecting, bool bFocus, bool bMultiple);
-  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
-    {
-      // FIXME: move the position handling to the camera target
-    }
+	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	{
+		// FIXME: move the position handling to the camera target
+	}
 
-  Camera* GetParent () const
-    { return m_pParent; }
+	const char* GetName() const;
 
- protected:
-  Camera* m_pParent;
+	Camera* GetParent () const
+	{ return m_pParent; }
 
-  friend class Camera; // FIXME: needed for BoundingBoxCalculate ()
-  // remove and use UpdatePosition instead
+protected:
+	Camera* m_pParent;
+
+	friend class Camera; // FIXME: needed for BoundingBoxCalculate ()
+	// remove and use UpdatePosition instead
 };
 
 class Camera : public Object
@@ -74,6 +76,9 @@ public:
 	{ return Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
 	inline Vector3 GetUpVector() const
 	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
+
+	const char* GetName() const
+	{ return m_strName; };
 
 	CameraTarget* GetTarget () const
 		{ return m_pTarget; }

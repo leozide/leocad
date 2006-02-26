@@ -15,21 +15,22 @@ class PieceInfo;
 #define LC_PIECE_SELECTED	0x02
 #define LC_PIECE_FOCUSED	0x04
 
-typedef enum {
-  LC_PK_POSITION,
-  LC_PK_ROTATION,
-  LC_PK_COUNT
+typedef enum
+{
+	LC_PK_POSITION,
+	LC_PK_ROTATION,
+	LC_PK_COUNT
 } LC_PK_TYPES;
 
 class Piece : public Object
 {
 public:
-  Piece (PieceInfo* pPieceInfo);
-  ~Piece ();
+	Piece (PieceInfo* pPieceInfo);
+	~Piece ();
 
-  void Select (bool bSelecting, bool bFocus, bool bMultiple);
-  virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
-  virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
+	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
+	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes);
 
 
@@ -49,6 +50,9 @@ public:
 		{ return (m_nState & LC_PIECE_SELECTED) != 0; }
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
+
+	const char* GetName() const
+	{ return m_strName; };
 
 	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);

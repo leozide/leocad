@@ -1082,16 +1082,12 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 		CString strMessage;
 
 		// set the message bar text
-		if (!m_strStatusBar.IsEmpty())
-		{
-			lpsz = m_strStatusBar;
-		}
-		else if (lParam != 0)
+		if (lParam != 0)
 		{
 			ASSERT(wParam == 0);    // can't have both an ID and a string
 			lpsz = (LPCTSTR)lParam; // set an explicit string
 		}
-		else if (wParam != 0)
+		else if ((wParam != 0) && !(wParam == AFX_IDS_IDLEMESSAGE && !m_strStatusBar.IsEmpty()))
 		{
 			// map SC_CLOSE to PREVIEW_CLOSE when in print preview mode
 			if (wParam == AFX_IDS_SCCLOSE && m_lpfnCloseProc != NULL)
@@ -1101,6 +1097,11 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 			GetMessageString(wParam, strMessage);
 			lpsz = strMessage;
 		}
+		else if (!m_strStatusBar.IsEmpty())
+		{
+			lpsz = m_strStatusBar;
+		}
+
 		pMessageBar->SetWindowText(lpsz);
 
 		// update owner of the bar in terms of last message selected

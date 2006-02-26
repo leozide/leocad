@@ -381,7 +381,8 @@ void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStru
 	{
 		if ((lpMeasureItemStruct->itemID == ID_SNAP_XY) || (lpMeasureItemStruct->itemID == ID_SNAP_Z))
 		{
-			CTitleMenu::MeasureItem(lpMeasureItemStruct);
+			CTitleMenu* Menu = (CTitleMenu*)lpMeasureItemStruct->itemData;
+			Menu->MeasureItem(lpMeasureItemStruct);
 			return;
 		}
 		else if(IsMenu((HMENU)lpMeasureItemStruct->itemID))
@@ -402,7 +403,8 @@ void CMainFrame::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	if ((lpDrawItemStruct->itemID == ID_SNAP_XY) || (lpDrawItemStruct->itemID == ID_SNAP_Z))
 	{
-		CTitleMenu::DrawItem(lpDrawItemStruct);
+		CTitleMenu* Menu = (CTitleMenu*)lpDrawItemStruct->itemData;
+		Menu->DrawItem(lpDrawItemStruct);
 	}
 	else
 	{

@@ -159,12 +159,13 @@ public:
 
 // Implementation
 public:
-	static void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
-	static void DrawItem(LPDRAWITEMSTRUCT lpDIS);
+	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
 
 protected:
-	static CFont m_Font;
+	CFont m_Font;
 	HFONT CreateTitleFont();
+	CMap<int, int, const char*, const char*> m_TitleStrings;
 };
 
 #endif

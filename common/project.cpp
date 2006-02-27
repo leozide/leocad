@@ -8066,6 +8066,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 			{
 				StartTracking(LC_TRACK_START_LEFT);
 				m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
+				m_MouseSnapLeftover = Vector3(0.0f, 0.0f, 0.0f);
 			}
 		} break;
 
@@ -8352,7 +8353,11 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 		case LC_ACTION_MOVE:
 		{
-			if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
+			// Check if the mouse moved since the last update.
+			if ((x == m_nDownX) && (y == m_nDownY))
+				break;
+
+			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || ((m_nSnap & LC_DRAW_3DMOUSE) == 0))
 			{
 				Camera* Camera = m_pViewCameras[m_nActiveViewport];
 
@@ -8362,7 +8367,16 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
 
-				switch (m_OverlayMode)
+				int OverlayMode;
+
+				if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
+					OverlayMode = m_OverlayMode;
+				else if (m_nTracking == LC_TRACK_LEFT)
+					OverlayMode = LC_OVERLAY_XY;
+				else
+					OverlayMode = LC_OVERLAY_Z;
+
+				switch (OverlayMode)
 				{
 				case LC_OVERLAY_X:
 					Dir1 = Vector3(1, 0, 0);
@@ -8482,68 +8496,22 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			}
 			else
 			{
-				Camera *camera = m_pViewCameras[m_nActiveViewport];
+				// 3D movement.
+				Camera* Camera = m_pViewCameras[m_nActiveViewport];
 
-				// TODO: old 3D mouse movement code needs to be improved.
-				if (camera->IsSide ())
-				{
-					Matrix mat;
-					float delta[3];
+				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
+				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
+				Vector3 ScreenY = Camera->GetUpVector();
 
-					mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
-					mat.SetTranslation (0, 0, 0);
-					mat.Invert ();
+				Vector3 MoveX, MoveY;
 
-					if (m_nTracking == LC_TRACK_LEFT)
-					{
-						delta[0] = (float)(x - m_nDownX);
-						delta[1] = (float)(y - m_nDownY);
-						delta[2] = 0;
-					}
-					else
-					{
-						delta[0] = 0;
-						delta[1] = 0;
-						delta[2] = (float)(y - m_nDownY);
-					}
+				MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
+				MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
 
-					mat.TransformPoints (delta, 1);
+				m_nDownX = x;
+				m_nDownY = y;
 
-					float mouse = 0.25f/(21-m_nMouse);
-					delta[0] = delta[0] * mouse + m_fTrack[0];
-					delta[1] = delta[1] * mouse + m_fTrack[1];
-					delta[2] = delta[2] * mouse + m_fTrack[2];
-
-					SnapPoint(delta, m_fTrack);
-					MoveSelectedObjects(Vector3(delta[0], delta[1], delta[2]), Vector3());
-
-					m_nDownX = x;
-					m_nDownY = y;
-				}
-				else
-				{
-					// TODO: rewrite
-
-					float mouse = 5.0f/(21-m_nMouse);
-					float delta[3] = { (ptx - m_fTrack[0])*mouse, (pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
-					float d[3] = { delta[0], delta[1], delta[2] };
-
-					SnapPoint (delta, NULL);
-
-					m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
-					m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
-					m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
-
-					if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
-						MoveSelectedObjects(Vector3(delta[0], delta[1], delta[2]), Vector3());
-					else
-					{
-						if (m_nTracking == LC_TRACK_LEFT)
-							MoveSelectedObjects(Vector3(delta[0], delta[1], 0), Vector3());
-						else
-							MoveSelectedObjects(Vector3(0, 0, delta[2]), Vector3());
-					}
-				}
+				MoveSelectedObjects(MoveX + MoveY + m_MouseSnapLeftover, m_MouseSnapLeftover);
 			}
 
 			SystemUpdateFocus(NULL);

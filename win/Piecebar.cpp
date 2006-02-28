@@ -684,7 +684,7 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CControlBar::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_DISABLEDRAGDROP|TVS_HASLINES|TVS_LINESATROOT, 
+	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT, 
 	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
 
 	m_wndColorsList.Create(LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
@@ -1010,6 +1010,20 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				lcGetActiveProject()->SetCurrentPiece(Info);
 				m_wndPiecePreview.SetPieceInfo(Info);
 				m_wndPiecePreview.PostMessage(WM_PAINT);
+			}
+		}
+		else if (Notify->hdr.code == TVN_BEGINDRAG)
+		{
+			PieceInfo* Info = (PieceInfo*)Notify->itemNew.lParam;
+
+			if (Info != NULL)
+			{
+				lcGetActiveProject()->BeginPieceDrop(Info);
+
+				// Force a cursor update.
+				CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+				CView* pView = pFrame->GetActiveView();
+				pView->PostMessage(WM_LC_SET_CURSOR, 0, 0);
 			}
 		}
 		else if (Notify->hdr.code == TVN_ITEMEXPANDING)

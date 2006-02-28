@@ -7765,6 +7765,18 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 	return ret;
 }
 
+void Project::BeginPieceDrop(PieceInfo* Info)
+{
+	StartTracking(LC_TRACK_LEFT);
+
+	m_PreviousAction = m_nCurAction;
+	m_PreviousPiece = m_pCurPiece;
+
+	m_pCurPiece = Info;
+	m_pCurPiece->AddRef();
+	SetAction(LC_ACTION_INSERT);
+}
+
 void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
@@ -8162,6 +8174,54 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 
 void Project::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
+	if (m_nTracking == LC_TRACK_LEFT)
+	{
+		// Dragging a new piece from the tree.
+		if (m_nCurAction == LC_ACTION_INSERT)
+		{
+			int Viewport[4];
+			Viewport[0] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
+			Viewport[1] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
+			Viewport[2] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
+			Viewport[3] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+
+			if ((x > Viewport[0]) && (x < Viewport[2]) && (y > Viewport[1]) && (y < Viewport[3]))
+			{
+				Vector3 Pos;
+				Vector4 Rot;
+
+				GetPieceInsertPosition(x, y, Pos, Rot);
+
+				Piece* pPiece = new Piece(m_pCurPiece);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+
+				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				SelectAndFocusNone(false);
+				pPiece->CreateName(m_pPieces);
+				AddPiece(pPiece);
+				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+				pPiece->Select (true, true, false);
+				UpdateSelection();
+				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+				SystemUpdateFocus(pPiece);
+
+				if (m_nSnap & LC_DRAW_MOVE)
+					SetAction(LC_ACTION_MOVE);
+				else
+					SetAction(m_PreviousAction);
+			}
+			else
+				SetAction(m_PreviousAction);
+
+			m_pCurPiece->DeRef();
+			m_pCurPiece = m_PreviousPiece;
+			m_PreviousPiece = NULL;
+		}
+	}
+
   StopTracking(true);
 }
 

@@ -33,6 +33,8 @@
 #include "project.h"
 #include "globals.h"
 #include "lc_application.h"
+#include "piece.h"
+#include "pieceinf.h"
 
 bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description)
 {
@@ -664,8 +666,15 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 	}
 	else if ((SelectedCount == 1) && (Focus != NULL))
 	{
-		pFrame->SetStatusBarMessage(Focus->GetName());
-		pFrame->SetMessageText(Focus->GetName());
+		char Message[256];
+
+		if (Focus->IsPiece())
+			sprintf(Message, "%s (ID: %s)", Focus->GetName(), ((Piece*)Focus)->GetPieceInfo()->m_strName);
+		else
+			strcpy(Message, Focus->GetName());
+
+		pFrame->SetStatusBarMessage(Message);
+		pFrame->SetMessageText(Message);
 	}
 	else
 	{

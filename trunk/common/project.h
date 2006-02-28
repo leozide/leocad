@@ -112,6 +112,7 @@ public:
 	// Special notifications
 	void DeleteContents(bool bUndo); // delete doc items etc
 	void LoadDefaults(bool cameras);
+	void BeginPieceDrop(PieceInfo* Info);
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(bool bToMemory);
@@ -256,8 +257,10 @@ protected:
 	int m_nViewX;
 	int m_nViewY;
 	PieceInfo* m_pCurPiece;
+	PieceInfo* m_PreviousPiece;
 	unsigned char m_nCurColor;
 	unsigned char m_nCurAction;
+	unsigned char m_PreviousAction;
 	bool m_bAnimation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;

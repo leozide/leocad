@@ -152,7 +152,7 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
   Vector upvec(0,0,1), frontvec(ex-tx, ey-ty, ez-tz), sidevec;
   frontvec.Normalize();
   if (frontvec == upvec)
-    sidevec.FromFloat(1,0,0);
+    sidevec = Vector(1,0,0);
   else
     sidevec.Cross(frontvec, upvec);
   upvec.Cross(sidevec, frontvec);
@@ -730,12 +730,12 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
   frontvec *= 2.0f*dy/(21-mouse);
 
   // TODO: option to move eye, target or both
-  m_fEye[0] += frontvec.X();
-  m_fEye[1] += frontvec.Y();
-  m_fEye[2] += frontvec.Z();
-  m_fTarget[0] += frontvec.X();
-  m_fTarget[1] += frontvec.Y();
-  m_fTarget[2] += frontvec.Z();
+  m_fEye[0] += frontvec[0];
+  m_fEye[1] += frontvec[1];
+  m_fEye[2] += frontvec[2];
+  m_fTarget[0] += frontvec[0];
+  m_fTarget[1] += frontvec[1];
+  m_fTarget[2] += frontvec[2];
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
@@ -751,12 +751,12 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
   upvec.Normalize();
   upvec *= -2.0f*dy/(21-mouse);
 
-  m_fEye[0] += upvec.X() + sidevec.X();
-  m_fEye[1] += upvec.Y() + sidevec.Y();
-  m_fEye[2] += upvec.Z() + sidevec.Z();
-  m_fTarget[0] += upvec.X() + sidevec.X();
-  m_fTarget[1] += upvec.Y() + sidevec.Y();
-  m_fTarget[2] += upvec.Z() + sidevec.Z();
+  m_fEye[0] += upvec[0] + sidevec[0];
+  m_fEye[1] += upvec[1] + sidevec[1];
+  m_fEye[2] += upvec[2] + sidevec[2];
+  m_fTarget[0] += upvec[0] + sidevec[0];
+  m_fTarget[1] += upvec[1] + sidevec[1];
+  m_fTarget[2] += upvec[2] + sidevec[2];
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
@@ -774,15 +774,15 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 
   // TODO: option to move eye or target
   float len = frontvec.Length();
-  frontvec.Add(upvec.X() + sidevec.X(), upvec.Y() + sidevec.Y(), upvec.Z() + sidevec.Z());
+  frontvec += Vector(upvec[0] + sidevec[0], upvec[1] + sidevec[1], upvec[2] + sidevec[2]);
   frontvec.Normalize();
   frontvec *= len;
-  frontvec.Add(m_fTarget);
+  frontvec += Vector(m_fTarget);
   frontvec.ToFloat(m_fEye);
 
   // Calculate new up
-  upvec.FromFloat(m_fUp);
-  frontvec.FromFloat(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
+  upvec = Vector(m_fUp[0], m_fUp[1], m_fUp[2]);
+  frontvec = Vector(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
   sidevec.Cross(frontvec, upvec);
   upvec.Cross(sidevec, frontvec);
   upvec.Normalize();

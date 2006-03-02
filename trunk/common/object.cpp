@@ -46,7 +46,7 @@ double LC_CLICKLINE::PointDistance (float *point)
     else
       t /= len;
 
-    d.Scale (t*len);
+    d *= (t*len);
     op -= d;
   }
 

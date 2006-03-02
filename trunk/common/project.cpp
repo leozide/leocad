@@ -460,7 +460,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		Vector upvec(0,0,1), frontvec((float)(eye[0]-target[0]), (float)(eye[1]-target[1]), (float)(eye[2]-target[2])), sidevec;
 		frontvec.Normalize();
 		if (frontvec == upvec)
-			sidevec.FromFloat(1,0,0);
+			sidevec = Vector(1,0,0);
 		else
 			sidevec.Cross(frontvec, upvec);
 		upvec.Cross(sidevec, frontvec);
@@ -5743,7 +5743,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				upvec.Cross(sidevec, frontvec);
 				upvec.Normalize();
 				upvec.ToFloat(up);
-				frontvec.Scale(0.25f);
+				frontvec *= 0.25f;
 
 				glMatrixMode(GL_MODELVIEW);
 				glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
@@ -5751,9 +5751,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				for (out = 0; out < 10000; out++) // Zoom in
 				{
-					eye[0] -= frontvec.X();
-					eye[1] -= frontvec.Y();
-					eye[2] -= frontvec.Z();
+					eye[0] -= frontvec[0];
+					eye[1] -= frontvec[1];
+					eye[2] -= frontvec[2];
 					glLoadIdentity();
 					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
 					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
@@ -5775,9 +5775,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				for (out = 0; out < 10000 && !stp; out++) // zoom out
 				{
 					stp = true;
-					eye[0] += frontvec.X();
-					eye[1] += frontvec.Y();
-					eye[2] += frontvec.Z();
+					eye[0] += frontvec[0];
+					eye[1] += frontvec[1];
+					eye[2] += frontvec[2];
 					glLoadIdentity();
 					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
 					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);

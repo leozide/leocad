@@ -802,7 +802,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(14);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i;
 
@@ -830,7 +830,7 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(14);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	Camera* pFirst = pCamera;
 	int i;

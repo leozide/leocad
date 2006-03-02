@@ -1663,18 +1663,18 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 	Vector FrontVec, RightVec, UpVec;
 
 	// Calculate view matrix.
-	UpVec.FromFloat(Top);
+	UpVec = Vector(Top[0], Top[1], Top[2]);
 	UpVec.Normalize();
-	FrontVec.FromFloat(Front);
+	FrontVec = Vector(Front[0], Front[1], Front[2]);
 	FrontVec.Normalize();
-	RightVec.FromFloat(Side);
+	RightVec = Vector(Side[0], Side[1], Side[2]);
 	RightVec.Normalize();
 
   float ViewMat[16];
-  ViewMat[0] = -RightVec.X(); ViewMat[4] = -RightVec.Y(); ViewMat[8]  = -RightVec.Z(); ViewMat[12] = 0.0;
-  ViewMat[1] = UpVec.X();     ViewMat[5] = UpVec.Y();     ViewMat[9]  = UpVec.Z();     ViewMat[13] = 0.0;
-  ViewMat[2] = -FrontVec.X(); ViewMat[6] = -FrontVec.Y(); ViewMat[10] = -FrontVec.Z(); ViewMat[14] = 0.0;
-  ViewMat[3] = 0.0;           ViewMat[7] = 0.0;           ViewMat[11] = 0.0;           ViewMat[15] = 1.0;
+  ViewMat[0] = -RightVec[0]; ViewMat[4] = -RightVec[1]; ViewMat[8]  = -RightVec[2]; ViewMat[12] = 0.0;
+  ViewMat[1] = UpVec[0];     ViewMat[5] = UpVec[1];     ViewMat[9]  = UpVec[2];     ViewMat[13] = 0.0;
+  ViewMat[2] = -FrontVec[0]; ViewMat[6] = -FrontVec[1]; ViewMat[10] = -FrontVec[2]; ViewMat[14] = 0.0;
+  ViewMat[3] = 0.0;          ViewMat[7] = 0.0;          ViewMat[11] = 0.0;          ViewMat[15] = 1.0;
 
   // Load ViewMatrix
   glMatrixMode(GL_MODELVIEW);

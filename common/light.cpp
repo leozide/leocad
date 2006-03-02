@@ -285,19 +285,19 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
     Vector frontvec (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
     float len = frontvec.Length (), up[3] = { 1, 1, 1 };
 
-    if (fabs (frontvec.X ()) < fabs (frontvec.Y ()))
+    if (fabs (frontvec[0]) < fabs (frontvec[1]))
     {
-      if (fabs (frontvec.X ()) < fabs (frontvec.Z ()))
-	up[0] = -(up[1]*frontvec.Y () + up[2]*frontvec.Z ());
+      if (fabs (frontvec[0]) < fabs (frontvec[2]))
+	up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
       else
-	up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
+	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
     }
     else
     {
-      if (fabs (frontvec.Y ()) < fabs (frontvec.Z ()))
-	up[1] = -(up[0]*frontvec.X () + up[2]*frontvec.Z ());
+      if (fabs (frontvec[1]) < fabs (frontvec[2]))
+	up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
       else
-	up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
+	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
     }
 
     Matrix mat;
@@ -467,19 +467,19 @@ void Light::Render (float fLineWidth)
       Vector frontvec(m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
       float len = frontvec.Length (), up[3] = { 1, 1, 1 };
 
-      if (fabs (frontvec.X ()) < fabs (frontvec.Y ()))
+      if (fabs (frontvec[0]) < fabs (frontvec[1]))
       {
-        if (fabs (frontvec.X ()) < fabs (frontvec.Z ()))
-          up[0] = -(up[1]*frontvec.Y () + up[2]*frontvec.Z ());
+        if (fabs (frontvec[0]) < fabs (frontvec[2]))
+          up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
         else
-          up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
+          up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
       }
       else
       {
-        if (fabs (frontvec.Y ()) < fabs (frontvec.Z ()))
-          up[1] = -(up[0]*frontvec.X () + up[2]*frontvec.Z ());
+        if (fabs (frontvec[1]) < fabs (frontvec[2]))
+          up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
         else
-          up[2] = -(up[0]*frontvec.X () + up[1]*frontvec.Y ());
+          up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
       }
 
       glPushMatrix ();

@@ -7434,7 +7434,7 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 			if (pFocus != NULL)
 			{
 				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
-				NewLocalToWorld = Mul(LocalToFocus, Rotation);
+				NewLocalToWorld = Mul(Rotation, LocalToFocus);
 
 				Quaternion WorldToLocal;
 				WorldToLocal.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
@@ -7455,8 +7455,7 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			if (Distance.LengthSquared() > 0.00001f)
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
+			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];

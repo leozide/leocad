@@ -2344,6 +2344,20 @@ void Project::RenderOverlays(int Viewport)
 		Matrix44 Mat;
 		int j;
 
+		// Find the rotation from the focused piece if relative snap is enabled.
+		Object* Focus = NULL;
+		float Rot[4];
+
+		if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+		{
+			Focus = GetFocusObject();
+
+			if ((Focus != NULL) && Focus->IsPiece())
+				((Piece*)Focus)->GetRotation(Rot);
+			else
+				Focus = NULL;
+		}
+
 		// Draw a disc showing the rotation amount.
 		if (m_MouseTotalDelta.LengthSquared() != 0.0f && (m_nTracking != LC_TRACK_NONE))
 		{
@@ -2386,6 +2400,10 @@ void Project::RenderOverlays(int Viewport)
 			{
 				glPushMatrix();
 				glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+
+				if (Focus)
+					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+
 				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
 
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -2446,6 +2464,20 @@ void Project::RenderOverlays(int Viewport)
 		Vector3 ViewDir = Cam->GetTargetPosition() - Cam->GetEyePosition();
 		ViewDir.Normalize();
 
+		// Transform ViewDir to local space.
+		if (Focus)
+		{
+			Matrix33 RotMat;
+			RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
+
+			ViewDir = Mul(ViewDir, RotMat);
+		}
+
+		glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+
+		if (Focus)
+			glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+
 		// Draw each axis circle.
 		for (int i = 0; i < 3; i++)
 		{
@@ -2495,8 +2527,8 @@ void Project::RenderOverlays(int Viewport)
 
 				if (Dot3(ViewDir, v1+v2) <= 0.0f)
 				{
-					Vector3 Pt1 = m_OverlayCenter + v1 * OverlayRotateRadius * OverlayScale;
-					Vector3 Pt2 = m_OverlayCenter + v2 * OverlayRotateRadius * OverlayScale;
+					Vector3 Pt1 = v1 * OverlayRotateRadius * OverlayScale;
+					Vector3 Pt2 = v2 * OverlayRotateRadius * OverlayScale;
 
 					glVertex3f(Pt1[0], Pt1[1], Pt1[2]);
 					glVertex3f(Pt2[0], Pt2[1], Pt2[2]);
@@ -2543,7 +2575,7 @@ void Project::RenderOverlays(int Viewport)
 					const float OverlayRotateArrowSize = 1.5f;
 					const float OverlayRotateArrowCapSize = 0.25f;
 
-					Vector3 Pt = m_OverlayCenter + Normal * OverlayScale * OverlayRotateRadius;
+					Vector3 Pt = Normal * OverlayScale * OverlayRotateRadius;
 					Vector3 Tip = Pt + Tangent * OverlayScale * OverlayRotateArrowSize;
 					Vector3 Arrow;
 					Matrix33 Rot;
@@ -2603,7 +2635,7 @@ void Project::RenderOverlays(int Viewport)
 					m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
 					glBegin(GL_QUADS);
-					glColor3f(0.4f, 0.4f, 0.4f);
+					glColor3f(0.8f, 0.8f, 0.0f);
 					m_pScreenFont->PrintText((float)ScreenX - Vp[0] - (cx / 2), (float)ScreenY - Vp[1] + (cy / 2), 0.0f, buf);
 					glEnd();
 
@@ -7336,6 +7368,31 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 
 	Vector3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
 
+	// Create the rotation matrix.
+	Quaternion Rotation(0, 0, 0, 1);
+	Quaternion WorldToFocus, FocusToWorld;
+
+	if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
+		Rotation = Mul(Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR)), Rotation);
+
+	if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
+		Rotation = Mul(Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR)), Rotation);
+
+	if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
+		Rotation = Mul(Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR)), Rotation);
+
+	// Transform the rotation relative to the focused piece.
+	if (pFocus != NULL)
+	{
+		float Rot[4];
+		((Piece*)pFocus)->GetRotation(Rot);
+
+		WorldToFocus.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
+		FocusToWorld.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
+
+		Rotation = Mul(FocusToWorld, Rotation);
+	}
+
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
 		if (!pPiece->IsSelected())
@@ -7344,75 +7401,71 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 		pPiece->GetPosition(pos);
 		pPiece->GetRotation(rot);
 
-		Quaternion q;
-		q.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+		Vector4 NewRotation;
 
-		if (nSel == 1)
+		if ((nSel == 1) && (pFocus == pPiece))
 		{
-			if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
-				q = Mul(Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR)), q);
+			Quaternion LocalToWorld;
+			LocalToWorld.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
-			if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
-				q = Mul(Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR)), q);
+			Quaternion NewLocalToWorld;
 
-			if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
-				q = Mul(Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR)), q);
+			if (pFocus != NULL)
+			{
+				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
+				NewLocalToWorld = Mul(LocalToFocus, Rotation);
+			}
+			else
+			{
+				NewLocalToWorld = Mul(Rotation, LocalToWorld);
+			}
+
+			NewLocalToWorld.ToAxisAngle(NewRotation);
 		}
 		else
 		{
 			Vector3 Distance = Vector3(pos[0], pos[1], pos[2]) - Center;
 
-			if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
+			Quaternion LocalToWorld;
+			LocalToWorld.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+
+			Quaternion NewLocalToWorld;
+
+			if (pFocus != NULL)
 			{
-				Quaternion RotX(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR));
-				q = Mul(RotX, q);
-				Distance = Mul(Distance, RotX);
+				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
+				NewLocalToWorld = Mul(LocalToFocus, Rotation);
+
+				Quaternion WorldToLocal;
+				WorldToLocal.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
+
+				Distance = Mul(Distance, WorldToLocal);
+				Distance = Mul(Distance, NewLocalToWorld);
+			}
+			else
+			{
+				NewLocalToWorld = Mul(Rotation, LocalToWorld);
+
+				Distance = Mul(Distance, Rotation);
 			}
 
-			if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
-			{
-				Quaternion RotY(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR));
-				q = Mul(RotY, q);
-				Distance = Mul(Distance, RotY);
-			}
-
-			if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
-			{
-				Quaternion RotZ(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR));
-				q = Mul(RotZ, q);
-				Distance = Mul(Distance, RotZ);
-			}
+			NewLocalToWorld.ToAxisAngle(NewRotation);
 
 			pos[0] = Center[0] + Distance[0];
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			// TODO: check if moved
-			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
+			if (Distance.LengthSquared() > 0.00001f)
+				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
-		Vector4 tmp;
-		q.ToAxisAngle(tmp);
-		rot[0] = tmp[0];
-		rot[1] = tmp[1];
-		rot[2] = tmp[2];
-		rot[3] = tmp[3] * LC_RTOD;
+		rot[0] = NewRotation[0];
+		rot[1] = NewRotation[1];
+		rot[2] = NewRotation[2];
+		rot[3] = NewRotation[3] * LC_RTOD;
 
 		pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-/*
-		for (POSITION pos2 = m_Pieces.GetHeadPosition(); pos2 != NULL;)
-		{
-			CPiece* tmp = m_Pieces.GetNext(pos2);
-			if (tmp == pPiece)
-				continue;
-
-			if (pPiece->Collide(tmp))
-				wprintf("Collision");
-			else
-				wprintf("No Collision");
-		}
-*/
 	}
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -9123,9 +9176,26 @@ void Project::MouseUpdateOverlays(int x, int y)
 					Dist.Normalize();
 					Dist.Abs();
 
-					float dx = Dist[0];
-					float dy = Dist[1];
-					float dz = Dist[2];
+					// Find the rotation from the focused piece if relative snap is enabled.
+					if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+					{
+						Object* Focus = GetFocusObject();
+
+						if ((Focus != NULL) && Focus->IsPiece())
+						{
+							float Rot[4];
+							((Piece*)Focus)->GetRotation(Rot);
+
+							Matrix33 RotMat;
+							RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
+
+							Dist = Mul(Dist, RotMat);
+						}
+					}
+
+					float dx = fabsf(Dist[0]);
+					float dy = fabsf(Dist[1]);
+					float dz = fabsf(Dist[2]);
 
 					if (dx < dy)
 					{

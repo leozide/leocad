@@ -7815,7 +7815,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
       }
 
 			if (bShift)
-				RotateSelectedObjects(axis[0], axis[1], axis[2]);
+				RotateSelectedObjects(Vector3(axis[0], axis[1], axis[2]));
 			else
 				MoveSelectedObjects(Vector3(axis[0], axis[1], axis[2]), Vector3());
 			UpdateOverlayScale();
@@ -8043,7 +8043,6 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 				if (count == max)
 					break;
 
-				SnapPoint (m_fTrack, NULL);
 				pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 
 				SelectAndFocusNone (false);
@@ -8802,7 +8801,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 							m_fTrack[i] = (float)(result.rem);
 						}
 
-						RotateSelectedObjects (delta[0], delta[1], delta[2]);
+						RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]));
 
 						m_nDownX = x;
 						m_nDownY = y;
@@ -8837,13 +8836,13 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 							m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
 
 							if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
-								RotateSelectedObjects (delta[0], delta[1], delta[2]);
+								RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]));
 							else
 							{
 								if (m_nTracking == LC_TRACK_LEFT)
-									RotateSelectedObjects (delta[0], delta[1], 0);
+									RotateSelectedObjects(Vector3(delta[0], delta[1], 0));
 								else
-									RotateSelectedObjects (0, 0, delta[2]);
+									RotateSelectedObjects(Vector3(0, 0, delta[2]));
 							}
 				}
 			}

@@ -112,29 +112,7 @@ public:
 		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
 
 	void Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans);
-	inline void RenderBox(bool bHilite, float fLineWidth)
-	{
-		glPushMatrix();
-		glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
-		glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
-
-		if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
-		{
-			glColor3ubv(FlatColorArray[m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED]);
-			glLineWidth(2*fLineWidth);
-			glPushAttrib(GL_POLYGON_BIT);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glCallList(m_nBoxList);
-			glPopAttrib();
-			glLineWidth(fLineWidth);
-		}
-		else
-		{
-			glColor3ubv(FlatColorArray[m_nColor]);
-			glCallList(m_nBoxList);
-		}
-		glPopMatrix();
-	}
+	void RenderBox(bool bHilite, float fLineWidth);
 
 	inline bool IsTransparent()
 	{
@@ -169,7 +147,6 @@ protected:
 	// Temporary variables
 	float m_fPosition[3];
 	float m_fRotation[4];
-	GLuint m_nBoxList;
 	CONNECTION* m_pConnections;
 	void* m_pDrawInfo;
 };

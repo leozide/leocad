@@ -210,6 +210,7 @@ void Camera::Initialize()
   m_nState = 0;
   m_nList = 0;
   m_nType = LC_CAMERA_USER;
+  m_nList = 0;
 
   m_pTR = NULL;
   for (unsigned char i = 0 ; i < sizeof(m_strName) ; i++ )
@@ -516,10 +517,15 @@ void Camera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
   } 
 }
 
-void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)
+void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
-  CalculateKeys (nTime, bAnimation);
+  CalculateKeys(nTime, bAnimation);
 
+	UpdateBoundingBox();
+}
+
+void Camera::UpdateBoundingBox()
+{
   // Fix the up vector
   Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
   Vector upvec(m_fUp), sidevec;
@@ -541,8 +547,8 @@ void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)
   m_pTarget->BoundingBoxCalculate (&mat);
   mat.SetTranslation (0, 0, 0);
 
-  if (m_nList == 0)
-    m_nList = glGenLists(1);
+	if (!m_nList)
+		return;
 
   glNewList(m_nList, GL_COMPILE);
 
@@ -610,6 +616,13 @@ void Camera::UpdatePosition (unsigned short nTime, bool bAnimation)
 
 void Camera::Render(float fLineWidth)
 {
+	// Create the display lists if this is the first time we're rendered.
+	if (!m_nList)
+	{
+    m_nList = glGenLists(1);
+		UpdateBoundingBox();
+	}
+
   if (IsEyeSelected())
   {
     glLineWidth(fLineWidth*2);

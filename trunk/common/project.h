@@ -177,20 +177,6 @@ protected:
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
-	// Deprecated compatibility functions.
-	// TODO: Update function calls to use the math library.
-	void RotateSelectedObjects(float x, float y, float z)
-	{ RotateSelectedObjects(Vector3(x, y, z)); };
-	void SnapPoint(float *point, float *reminder) const
-	{
-		Vector3 Pt(point[0], point[1], point[2]);
-		Vector3 Rem;
-		if (reminder) Rem = Vector3(reminder[0], reminder[1], reminder[2]);
-		SnapVector(Pt, Rem);
-		point[0] = Pt[0]; point[1] = Pt[1]; point[2] = Pt[2];
-		if (reminder) { reminder[0] = Rem[0]; reminder[1] = Rem[1]; reminder[2] = Rem[2]; }
-	};
-
 	// Rendering
 	void RenderScene(bool bShaded, bool bDrawViewports);
 	void RenderViewports(bool bBackground, bool bLines);

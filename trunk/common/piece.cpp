@@ -89,6 +89,8 @@ Piece::Piece(PieceInfo* pPieceInfo)
 
 	if (m_pPieceInfo != NULL)
 	{
+		m_pPieceInfo->AddRef();
+
 		if (m_pPieceInfo->m_nConnectionCount > 0)
 		{
 			m_pConnections = (CONNECTION*)malloc(sizeof(CONNECTION)*(m_pPieceInfo->m_nConnectionCount));
@@ -131,6 +133,7 @@ Piece::~Piece()
 void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 {
 	m_pPieceInfo = pPieceInfo;
+	m_pPieceInfo->AddRef();
 
 	if (m_pPieceInfo->m_nConnectionCount > 0)
 	{

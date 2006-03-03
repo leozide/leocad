@@ -217,6 +217,7 @@ void PieceInfo::LoadIndex (File& file)
   m_pGroups = NULL;
   m_nTextureCount = 0;
   m_pTextures = NULL;
+	m_nBoxList = 0;
 
   file.Read (m_strName, 8);
   m_strName[8] = '\0';
@@ -243,7 +244,7 @@ void PieceInfo::LoadIndex (File& file)
   m_fDimensions[5] = (float)sh[5]/scale;
 }
 
-GLuint PieceInfo::AddRef()
+void PieceInfo::AddRef()
 {
 	if (m_nRef == 0)
 		LoadInformation();
@@ -253,8 +254,6 @@ GLuint PieceInfo::AddRef()
 		if (m_pTextures[i].texture != NULL)
 			m_pTextures[i].texture->AddRef(false);
 // TODO: get correct filter paramenter
-
-	return m_nBoxList;
 }
 
 void PieceInfo::DeRef()
@@ -266,6 +265,49 @@ void PieceInfo::DeRef()
 
 	if (m_nRef == 0)
 		FreeInformation();
+}
+
+void PieceInfo::CreateBoxDisplayList()
+{
+	if (m_nBoxList)
+		return;
+
+	// Create a display for the bounding box.
+	m_nBoxList = glGenLists(1);
+	glNewList(m_nBoxList, GL_COMPILE);
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	float box[24][3] =
+	{
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] }, 
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] }, 
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] }, 
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
+		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
+		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
+		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] }
+	};
+
+	glVertexPointer(3, GL_FLOAT, 0, box);
+	glDrawArrays(GL_QUADS, 0, 24);
+	glEndList();
 }
 
 void PieceInfo::LoadInformation()
@@ -284,41 +326,6 @@ void PieceInfo::LoadInformation()
 
   // We don't want memory leaks.
   FreeInformation ();
-
-  // Create a display for the bounding box.
-  m_nBoxList = glGenLists(1);
-  glNewList(m_nBoxList, GL_COMPILE);
-  glEnableClientState(GL_VERTEX_ARRAY);
-
-  float box[24][3] = {
-    { m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] }, 
-    { m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-    { m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
-    { m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
-    { m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-    { m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
-    { m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-    { m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-    { m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] }, 
-    { m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-    { m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-    { m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-    { m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
-    { m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-    { m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
-    { m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] }, 
-    { m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-    { m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-    { m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-    { m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
-    { m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
-    { m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
-    { m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-    { m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] }
-  };
-  glVertexPointer (3, GL_FLOAT, 0, box);
-  glDrawArrays (GL_QUADS, 0, 24);
-  glEndList ();
 
   // Open pieces.bin and buffer the information we need.
   strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath());

@@ -172,6 +172,7 @@ public:
 
 protected:
 	void Initialize();
+	void UpdateBoundingBox();
 
 	// Camera target
 	CameraTarget* m_pTarget;

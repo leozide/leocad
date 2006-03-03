@@ -89,7 +89,6 @@ Piece::Piece(PieceInfo* pPieceInfo)
 
 	if (m_pPieceInfo != NULL)
 	{
-		m_nBoxList = m_pPieceInfo->AddRef();
 		if (m_pPieceInfo->m_nConnectionCount > 0)
 		{
 			m_pConnections = (CONNECTION*)malloc(sizeof(CONNECTION)*(m_pPieceInfo->m_nConnectionCount));
@@ -132,7 +131,6 @@ Piece::~Piece()
 void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 {
 	m_pPieceInfo = pPieceInfo;
-	m_nBoxList = m_pPieceInfo->AddRef();
 
 	if (m_pPieceInfo->m_nConnectionCount > 0)
 	{
@@ -1128,6 +1126,30 @@ void Piece::BuildDrawInfo()
 				i++;
 		}
 	}
+}
+
+void Piece::RenderBox(bool bHilite, float fLineWidth)
+{
+	glPushMatrix();
+	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
+	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
+
+	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
+	{
+		glColor3ubv(FlatColorArray[m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+		glLineWidth(2*fLineWidth);
+		glPushAttrib(GL_POLYGON_BIT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glCallList(m_pPieceInfo->GetBoxDisplayList());
+		glPopAttrib();
+		glLineWidth(fLineWidth);
+	}
+	else
+	{
+		glColor3ubv(FlatColorArray[m_nColor]);
+		glCallList(m_pPieceInfo->GetBoxDisplayList());
+	}
+	glPopMatrix();
 }
 
 void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)

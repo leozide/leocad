@@ -87,8 +87,14 @@ class PieceInfo
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
 
 	// Implementation
-	void LoadIndex (File& file);
-	GLuint AddRef();
+	GLuint GetBoxDisplayList()
+	{
+		if (!m_nBoxList)
+			CreateBoxDisplayList();
+		return m_nBoxList;
+	};
+	void LoadIndex(File& file);
+	void AddRef();
 	void DeRef();
 
 public:
@@ -116,9 +122,7 @@ protected:
 
 	void LoadInformation();
 	void FreeInformation();
-/*
-	CRModel*	m_pRModel;
-*/
+	void CreateBoxDisplayList();
 };
 
 #endif // _PIECEINF_H_

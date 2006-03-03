@@ -13,7 +13,7 @@ PiecePreview::PiecePreview(GLWindow *share)
 	: GLWindow(share)
 {
 	m_PieceInfo = NULL;
-	m_RotateX = 45.0f;
+	m_RotateX = 60.0f;
 	m_RotateZ = 45.0f;
 	m_Distance = 10.0f;
 	m_AutoZoom = true;

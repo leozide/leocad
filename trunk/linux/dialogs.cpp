@@ -2742,7 +2742,7 @@ int groupdlg_execute(void* param)
 // =============================================================================
 // Piece Library Dialog
 
-#if 1
+#if 0
 #include "library.h"
 #include "pieceinf.h"
 

@@ -6649,7 +6649,7 @@ Object* Project::GetFocusObject() const
 void Project::GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation)
 {
 	Vector3 Dist(0, 0, OffsetPiece->GetPieceInfo()->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
-	SnapVector(Dist, Vector3());
+	SnapVector(Dist);
 
 	float pos[3], rot[4];
 	OffsetPiece->GetPosition(pos);
@@ -6700,7 +6700,7 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	Vector3 Intersection;
 	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
 	{
-		SnapVector((Vector3&)Intersection, Vector3(0, 0, 0));
+		SnapVector(Intersection);
 		Position = Intersection;
 		Rotation = Vector4(0, 0, 1, 0);
 		return;
@@ -7654,7 +7654,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		case KEY_RIGHT: case KEY_NEXT: case KEY_PRIOR:
 //		if (AnyObjectSelected(FALSE))
 		{
-			float axis[3];
+			Vector3 axis;
 			if (bShift)
 			{
 				if (m_nSnap & LC_DRAW_SNAP_A)
@@ -7815,9 +7815,13 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
       }
 
 			if (bShift)
-				RotateSelectedObjects(Vector3(axis[0], axis[1], axis[2]));
+				RotateSelectedObjects(axis);
 			else
-				MoveSelectedObjects(Vector3(axis[0], axis[1], axis[2]), Vector3());
+			{
+				Vector3 tmp;
+				MoveSelectedObjects(axis, tmp);
+			}
+
 			UpdateOverlayScale();
 			UpdateAllViews();
 			SetModifiedFlag(true);
@@ -8635,7 +8639,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				MoveSelectedObjects(MoveX + MoveY + m_MouseSnapLeftover, m_MouseSnapLeftover);
+				Vector3 TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
+				MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
 			}
 
 			SystemUpdateFocus(NULL);

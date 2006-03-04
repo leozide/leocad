@@ -10,11 +10,11 @@ public:
 	Vector(const float *p1, const float *p2);
 	~Vector() { };
 
-	float Dot(Vector& vec);
-	float Angle(Vector& vec);
-	Vector& Cross(Vector& v1, Vector& v2);
-	Vector& operator+=(Vector& add);
-	Vector& operator-=(Vector& sub);
+	float Dot(const Vector& vec);
+	float Angle(const Vector& vec);
+	Vector& Cross(const Vector& v1, const Vector& v2);
+	Vector& operator+=(const Vector& add);
+	Vector& operator-=(const Vector& sub);
 	Vector& operator*=(float scalar);
 
 	operator const float*() const

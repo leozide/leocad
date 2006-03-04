@@ -174,6 +174,11 @@ protected:
 
 	void MoveSelectedObjects(Vector3& Move, Vector3& Remainder);
 	void RotateSelectedObjects(const Vector3& Delta);
+	void SnapVector(Vector3& Delta) const
+	{
+		Vector3 Dummy;
+		SnapVector(Delta, Dummy);
+	}
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 

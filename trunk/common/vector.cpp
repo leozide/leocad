@@ -44,7 +44,7 @@ Vector& Vector::operator*=(float scalar)
   return *this;
 }
 
-Vector& Vector::operator+=(Vector& add)
+Vector& Vector::operator+=(const Vector& add)
 {
   m_fPoint[0] += add.m_fPoint[0];
   m_fPoint[1] += add.m_fPoint[1];
@@ -52,7 +52,7 @@ Vector& Vector::operator+=(Vector& add)
   return *this;
 }
 
-Vector& Vector::operator-=(Vector& sub)
+Vector& Vector::operator-=(const Vector& sub)
 {
   m_fPoint[0] -= sub.m_fPoint[0];
   m_fPoint[1] -= sub.m_fPoint[1];
@@ -73,7 +73,7 @@ void Vector::Normalize()
   m_fPoint[2] *= inv;
 }
 
-Vector& Vector::Cross(Vector& v1, Vector& v2)
+Vector& Vector::Cross(const Vector& v1, const Vector& v2)
 {
   m_fPoint[0] = v1.m_fPoint[1]*v2.m_fPoint[2] - v1.m_fPoint[2]*v2.m_fPoint[1];
   m_fPoint[1] = v1.m_fPoint[2]*v2.m_fPoint[0] - v1.m_fPoint[0]*v2.m_fPoint[2];
@@ -81,7 +81,7 @@ Vector& Vector::Cross(Vector& v1, Vector& v2)
   return *this;
 }
 
-float Vector::Angle(Vector& vec)
+float Vector::Angle(const Vector& vec)
 {
   double d, m1, m2;
 
@@ -92,7 +92,7 @@ float Vector::Angle(Vector& vec)
   return (float)(RTOD * acos(d / (m1*m2)));
 }
 
-float Vector::Dot(Vector& vec)
+float Vector::Dot(const Vector& vec)
 {
   return m_fPoint[0]*vec.m_fPoint[0]+m_fPoint[1]*vec.m_fPoint[1]+m_fPoint[2]*vec.m_fPoint[2];
 }

@@ -9212,10 +9212,6 @@ void Project::MouseUpdateOverlays(int x, int y)
 					if (Dot3(ViewDir, Dist) > 0.0f)
 						continue;
 
-					// Check if we're close enough to one of the axis.
-					Dist.Normalize();
-					Dist.Abs();
-
 					// Find the rotation from the focused piece if relative snap is enabled.
 					if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
 					{
@@ -9232,6 +9228,9 @@ void Project::MouseUpdateOverlays(int x, int y)
 							Dist = Mul(Dist, RotMat);
 						}
 					}
+
+					// Check if we're close enough to one of the axis.
+					Dist.Normalize();
 
 					float dx = fabsf(Dist[0]);
 					float dy = fabsf(Dist[1]);
@@ -9279,7 +9278,6 @@ void Project::MouseUpdateOverlays(int x, int y)
 							break;
 						}
 
-						Dist.Normalize();
 						Dist *= r;
 
 						m_OverlayTrackStart = Center + Dist;

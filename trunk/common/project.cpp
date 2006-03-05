@@ -2413,12 +2413,18 @@ void Project::RenderOverlays(int Viewport)
 
 				glVertex3f(0.0f, 0.0f, 0.0f);
 
+				float StartAngle;
 				int i = 0;
+
+				if (Step < 0)
+					StartAngle = -Angle;
+				else
+					StartAngle = Angle;
 
 				do
 				{
-					float x = cosf(Step * i * DTOR) * OverlayRotateRadius * OverlayScale;
-					float y = sinf(Step * i * DTOR) * OverlayRotateRadius * OverlayScale;
+					float x = cosf((Step * i - StartAngle) * DTOR) * OverlayRotateRadius * OverlayScale;
+					float y = sinf((Step * i - StartAngle) * DTOR) * OverlayRotateRadius * OverlayScale;
 
 					glVertex3f(0.0f, x, y);
 
@@ -7251,7 +7257,7 @@ void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
 	}
 }
 
-void Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
+bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -7265,6 +7271,9 @@ void Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 
 	// Snap.
 	SnapVector(Move, Remainder);
+
+	if (Move.LengthSquared() < 0.001f)
+		return false;
 
 	// Transform the translation if we're in relative mode.
 	if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
@@ -7284,7 +7293,7 @@ void Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 	}
 
 	if (Move.LengthSquared() < 0.001f)
-		return;
+		return false;
 
 	Piece* pPiece;
 	Camera* pCamera;
@@ -7323,23 +7332,27 @@ void Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		if (!GetFocusPosition(m_OverlayCenter))
 			GetSelectionCenter(m_OverlayCenter);
 	}
+
+	return true;
 }
 
-void Project::RotateSelectedObjects(const Vector3& Delta)
+bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 {
-	float x = Delta[0];
-	float y = Delta[1];
-	float z = Delta[2];
-
+	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
-		x = 0;
-	if (m_nSnap & LC_DRAW_LOCK_Y)
-		y = 0;
-	if (m_nSnap & LC_DRAW_LOCK_Z)
-		z = 0;
+		Delta[0] = 0;
 
-	if (x == 0 && y == 0 && z == 0)
-		return;
+	if (m_nSnap & LC_DRAW_LOCK_Y)
+		Delta[1] = 0;
+
+	if (m_nSnap & LC_DRAW_LOCK_Z)
+		Delta[2] = 0;
+
+	// Snap.
+	SnapRotationVector(Delta, Remainder);
+
+	if (Delta.LengthSquared() < 0.001f)
+		return false;
 
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	float pos[3], rot[4];
@@ -7372,14 +7385,26 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 	Quaternion Rotation(0, 0, 0, 1);
 	Quaternion WorldToFocus, FocusToWorld;
 
-	if (!(m_nSnap & LC_DRAW_LOCK_X) && (x != 0.0f))
-		Rotation = Mul(Quaternion(sinf(x / 2.0f * LC_DTOR), 0, 0, cosf(x / 2.0f * LC_DTOR)), Rotation);
+	if (!(m_nSnap & LC_DRAW_LOCK_X) && (Delta[0] != 0.0f))
+	{
+		Quaternion q;
+		q.CreateRotationX(Delta[0] * LC_DTOR);
+		Rotation = Mul(q, Rotation);
+	}
 
-	if (!(m_nSnap & LC_DRAW_LOCK_Y) && (y != 0.0f))
-		Rotation = Mul(Quaternion(0, sinf(y / 2.0f * LC_DTOR), 0, cosf(y / 2.0f * LC_DTOR)), Rotation);
+	if (!(m_nSnap & LC_DRAW_LOCK_Y) && (Delta[1] != 0.0f))
+	{
+		Quaternion q;
+		q.CreateRotationY(Delta[1] * LC_DTOR);
+		Rotation = Mul(q, Rotation);
+	}
 
-	if (!(m_nSnap & LC_DRAW_LOCK_Z) && (z != 0.0f))
-		Rotation = Mul(Quaternion(0, 0, sinf(z / 2.0f * LC_DTOR), cosf(z / 2.0f * LC_DTOR)), Rotation);
+	if (!(m_nSnap & LC_DRAW_LOCK_Z) && (Delta[2] != 0.0f))
+	{
+		Quaternion q;
+		q.CreateRotationZ(Delta[2] * LC_DTOR);
+		Rotation = Mul(q, Rotation);
+	}
 
 	// Transform the rotation relative to the focused piece.
 	if (pFocus != NULL)
@@ -7476,6 +7501,8 @@ void Project::RotateSelectedObjects(const Vector3& Delta)
 		if (!GetFocusPosition(m_OverlayCenter))
 			GetSelectionCenter(m_OverlayCenter);
 	}
+
+	return true;
 }
 
 bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
@@ -7815,7 +7842,10 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
       }
 
 			if (bShift)
-				RotateSelectedObjects(axis);
+			{
+				Vector3 tmp;
+				RotateSelectedObjects(axis, tmp);
+			}
 			else
 			{
 				Vector3 tmp;
@@ -8485,6 +8515,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			if ((x == m_nDownX) && (y == m_nDownY))
 				break;
 
+			bool Redraw;
+
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || ((m_nSnap & LC_DRAW_3DMOUSE) == 0))
 			{
 				Camera* Camera = m_pViewCameras[m_nActiveViewport];
@@ -8619,7 +8651,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				MoveSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8640,15 +8672,18 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
-				MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
 			}
 
 			SystemUpdateFocus(NULL);
-			UpdateAllViews();
+			if (Redraw)
+				UpdateAllViews();
 		} break;
 		
 		case LC_ACTION_ROTATE:
 		{
+			bool Redraw;
+
 			if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
 			{
 				Camera* Camera = m_pViewCameras[m_nActiveViewport];
@@ -8754,9 +8789,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				SnapRotationVector(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
 				m_MouseTotalDelta += Delta;
-				RotateSelectedObjects(Delta);
 			}
 			else
 			{
@@ -8806,7 +8840,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 							m_fTrack[i] = (float)(result.rem);
 						}
 
-						RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]));
+						Vector3 tmp;
+						Redraw = RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]), tmp);
 
 						m_nDownX = x;
 						m_nDownY = y;
@@ -8840,20 +8875,22 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 							m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
 							m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
 
+							Vector3 tmp;
 							if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
-								RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]));
+								Redraw = RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]), tmp);
 							else
 							{
 								if (m_nTracking == LC_TRACK_LEFT)
-									RotateSelectedObjects(Vector3(delta[0], delta[1], 0));
+									Redraw = RotateSelectedObjects(Vector3(delta[0], delta[1], 0), tmp);
 								else
-									RotateSelectedObjects(Vector3(0, 0, delta[2]));
+									Redraw = RotateSelectedObjects(Vector3(0, 0, delta[2]), tmp);
 							}
 				}
 			}
 
 			SystemUpdateFocus(NULL);
-			UpdateAllViews();
+			if (Redraw)
+				UpdateAllViews();
 			} break;
 
 		case LC_ACTION_ZOOM:

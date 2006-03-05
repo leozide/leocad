@@ -386,6 +386,21 @@ public:
 		m_Value = Vector4(AxisAngle[0] * s, AxisAngle[1] * s, AxisAngle[2] * s, cosf(AxisAngle[3] / 2.0f));
 	}
 
+	inline void CreateRotationX(float Radians)
+	{
+		m_Value = Vector4(sinf(Radians / 2.0f), 0, 0, cosf(Radians / 2.0f));
+	}
+
+	inline void CreateRotationY(float Radians)
+	{
+		m_Value = Vector4(0, sinf(Radians / 2.0f), 0, cosf(Radians / 2.0f));
+	}
+
+	inline void CreateRotationZ(float Radians)
+	{
+		m_Value = Vector4(0, 0, sinf(Radians / 2.0f), cosf(Radians / 2.0f));
+	}
+
 	inline void ToAxisAngle(Vector4& AxisAngle) const
 	{
 		float Len = m_Value[0]*m_Value[0] + m_Value[1]*m_Value[1] + m_Value[2]*m_Value[2];

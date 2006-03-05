@@ -579,11 +579,6 @@ void SystemUpdateSnap(const unsigned long nSnap)
 
 	SetMenuItemBitmaps(pMenu->m_hMenu, ID_LOCK_2BUTTONS, MF_BYCOMMAND, NULL, hbmMenuDot);
 	SetMenuItemBitmaps(pMenu->m_hMenu, ID_LOCK_3DMOVEMENT, MF_BYCOMMAND, NULL, hbmMenuDot);
-	pMenu->CheckMenuItem(ID_LOCK_2BUTTONS, MF_BYCOMMAND | 
-		((nSnap & LC_DRAW_3DMOUSE) == 0 ? MF_CHECKED : MF_UNCHECKED));
-	pMenu->CheckMenuItem(ID_LOCK_3DMOVEMENT, MF_BYCOMMAND | 
-		(nSnap & LC_DRAW_3DMOUSE ? MF_CHECKED : MF_UNCHECKED));
-
 
 	// TODO: change Snap None & All (or maybe not ?)
 }

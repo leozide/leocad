@@ -253,7 +253,6 @@ CPreferencesDrawing::CPreferencesDrawing() : CPropertyPage(CPreferencesDrawing::
 	m_bSnapX = FALSE;
 	m_bSnapY = FALSE;
 	m_bSnapZ = FALSE;
-	m_b3DMouse = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -280,7 +279,6 @@ void CPreferencesDrawing::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AIDDLG_SNAPX, m_bSnapX);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPY, m_bSnapY);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPZ, m_bSnapZ);
-	DDX_Check(pDX, IDC_AIDDLG_3DMOUSE, m_b3DMouse);
 	//}}AFX_DATA_MAP
 }
 
@@ -298,7 +296,6 @@ void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle
 
 	m_bAxis = (dwSnap & LC_DRAW_AXIS) != 0;
 	m_bCentimeters = (dwSnap & LC_DRAW_CM_UNITS) != 0;
-//		m_bCollision = (dwSnap & LC_DRAW_COLLISION) != 0;
 	m_bFixed = (dwSnap & LC_DRAW_MOVEAXIS) != 0;
 	m_bGrid = (dwSnap & LC_DRAW_GRID) != 0;
 	m_bLockX = (dwSnap & LC_DRAW_LOCK_X) != 0;
@@ -309,7 +306,6 @@ void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle
 	m_bSnapX = (dwSnap & LC_DRAW_SNAP_X) != 0;
 	m_bSnapY = (dwSnap & LC_DRAW_SNAP_Y) != 0;
 	m_bSnapZ = (dwSnap & LC_DRAW_SNAP_Z) != 0;
-	m_b3DMouse = (dwSnap & LC_DRAW_3DMOUSE) != 0;
 }
 
 void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAngle, unsigned short* nGrid)
@@ -320,7 +316,6 @@ void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAng
 	*dwSnap = 0;
 	if (m_bAxis) *dwSnap |= LC_DRAW_AXIS;
 	if (m_bCentimeters) *dwSnap |= LC_DRAW_CM_UNITS;
-//		if (m_bCollision) *dwSnap |= LC_DRAW_COLLISION;
 	if (m_bFixed) *dwSnap |= LC_DRAW_MOVEAXIS;
 	if (m_bGrid) *dwSnap |= LC_DRAW_GRID;
 	if (m_bLockX) *dwSnap |= LC_DRAW_LOCK_X;
@@ -331,7 +326,6 @@ void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAng
 	if (m_bSnapX) *dwSnap |= LC_DRAW_SNAP_X;
 	if (m_bSnapY) *dwSnap |= LC_DRAW_SNAP_Y;
 	if (m_bSnapZ) *dwSnap |= LC_DRAW_SNAP_Z;
-	if (m_b3DMouse) *dwSnap |= LC_DRAW_3DMOUSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////

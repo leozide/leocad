@@ -140,7 +140,6 @@ public:
 	BOOL	m_bSnapX;
 	BOOL	m_bSnapY;
 	BOOL	m_bSnapZ;
-	BOOL	m_b3DMouse;
 	//}}AFX_DATA
 
 

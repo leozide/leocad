@@ -6204,12 +6204,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			case 3:
 				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
 				break;
-			case 4:
-				m_nSnap &= ~LC_DRAW_3DMOUSE;
-				break;
-			case 5:
-				m_nSnap |= LC_DRAW_3DMOUSE;
-				break;
 			}
 			SystemUpdateSnap(m_nSnap);
 		} break;
@@ -8515,12 +8509,11 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			if ((x == m_nDownX) && (y == m_nDownY))
 				break;
 
+			Camera* Camera = m_pViewCameras[m_nActiveViewport];
 			bool Redraw;
 
-			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || ((m_nSnap & LC_DRAW_3DMOUSE) == 0))
+			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Camera* Camera = m_pViewCameras[m_nActiveViewport];
-
 				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
 				Vector3 ScreenY = Camera->GetUpVector();
 				ScreenX.Normalize();
@@ -8584,6 +8577,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 						Axis2 = Mul(Dir2, RotMat);
 					}
 				}
+
 				// Find out what direction the mouse is going to move stuff.
 				Vector3 MoveX, MoveY;
 
@@ -8657,21 +8651,33 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Camera* Camera = m_pViewCameras[m_nActiveViewport];
-
 				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
 				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
 				Vector3 ScreenY = Camera->GetUpVector();
 
-				Vector3 MoveX, MoveY;
+				Vector3 TotalMove;
 
-				MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
-				MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+				if (m_nTracking == LC_TRACK_LEFT)
+				{
+					Vector3 MoveX, MoveY;
+
+					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
+					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+
+					TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
+				}
+				else
+				{
+					Vector3 MoveZ;
+
+					MoveZ = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+
+					TotalMove = MoveZ + m_MouseSnapLeftover;
+				}
 
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Vector3 TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
 				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
 			}
 
@@ -8682,19 +8688,27 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 		
 		case LC_ACTION_ROTATE:
 		{
+			Camera* Camera = m_pViewCameras[m_nActiveViewport];
 			bool Redraw;
 
-			if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
+			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Camera* Camera = m_pViewCameras[m_nActiveViewport];
-
 				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
 				Vector3 ScreenY = Camera->GetUpVector();
 				ScreenX.Normalize();
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
 
-				switch (m_OverlayMode)
+				int OverlayMode;
+
+				if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
+					OverlayMode = m_OverlayMode;
+				else if (m_nTracking == LC_TRACK_LEFT)
+					OverlayMode = LC_OVERLAY_XY;
+				else
+					OverlayMode = LC_OVERLAY_Z;
+
+				switch (OverlayMode)
 				{
 				case LC_OVERLAY_X:
 					Dir1 = Vector3(1, 0, 0);
@@ -8794,104 +8808,42 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			}
 			else
 			{
-				// TODO: old mouse rotation code needs to be fixed/removed.
-				Camera *camera = m_pViewCameras[m_nActiveViewport];
+				// 3D movement.
+				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
+				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
+				Vector3 ScreenY = Camera->GetUpVector();
 
-				if (camera->IsSide ())
+				Vector3 Delta;
+
+				if (m_nTracking == LC_TRACK_LEFT)
 				{
-					Matrix mat;
-					float delta[3];
+					Vector3 MoveX, MoveY;
 
-					mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
-					mat.SetTranslation (0, 0, 0);
-					mat.Invert ();
+					MoveX = ScreenX * (float)(x - m_nDownX) * 36.0f / (float)(21 - m_nMouse);
+					MoveY = ScreenY * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
 
-					if (m_nTracking == LC_TRACK_LEFT)
-					{
-						delta[0] = (float)(x - m_nDownX);
-						delta[1] = (float)(y - m_nDownY);
-						delta[2] = 0;
-					}
-					else
-					{
-						delta[0] = 0;
-						delta[1] = 0;
-						delta[2] = (float)(y - m_nDownY);
-					}
-
-					mat.TransformPoints (delta, 1);
-
-					float mouse = 36.0f/(21-m_nMouse);
-					ldiv_t result;
-
-					for (int i = 0; i < 3; i++)
-						if (m_nSnap & LC_DRAW_SNAP_A)
-						{
-							delta[i] = delta[i] * mouse + m_fTrack[i];
-							result = ldiv ((long)delta[i], m_nAngleSnap);
-							delta[i] = (float)(result.quot * m_nAngleSnap);
-							m_fTrack[i] = (float)(result.rem);
-						}
-						else
-						{
-							delta[i] = delta[i] * mouse + m_fTrack[i];
-							result = ldiv ((long)delta[i], 1);
-							delta[i] = (float)(result.quot);
-							m_fTrack[i] = (float)(result.rem);
-						}
-
-						Vector3 tmp;
-						Redraw = RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]), tmp);
-
-						m_nDownX = x;
-						m_nDownY = y;
+					Delta = MoveX + MoveY + m_MouseSnapLeftover;
 				}
 				else
 				{
+					Vector3 MoveZ;
 
-					// TODO: rewrite
+					MoveZ = ScreenZ * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
 
-					float mouse = 360.0f/(21-m_nMouse);
-					float delta[3] = {
-						(ptx - m_fTrack[0])*mouse,
-							(pty - m_fTrack[1])*mouse,
-							(ptz - m_fTrack[2])*mouse };
-						float d[3] = { delta[0], delta[1], delta[2] };
-
-						ldiv_t result;
-						for (int i = 0; i < 3; i++)
-							if (m_nSnap & LC_DRAW_SNAP_A)
-							{
-								result = ldiv ((long)delta[i], m_nAngleSnap);
-								delta[i] = (float)(result.quot * m_nAngleSnap);
-							}
-							else
-							{
-								result = ldiv ((long)delta[i], 1);
-								delta[i] = (float)result.quot;
-							}
-
-							m_fTrack[0] = ptx + (delta[0]-d[0])/mouse;
-							m_fTrack[1] = pty + (delta[1]-d[1])/mouse;
-							m_fTrack[2] = ptz + (delta[2]-d[2])/mouse;
-
-							Vector3 tmp;
-							if ((m_nSnap & LC_DRAW_3DMOUSE) || (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)))
-								Redraw = RotateSelectedObjects(Vector3(delta[0], delta[1], delta[2]), tmp);
-							else
-							{
-								if (m_nTracking == LC_TRACK_LEFT)
-									Redraw = RotateSelectedObjects(Vector3(delta[0], delta[1], 0), tmp);
-								else
-									Redraw = RotateSelectedObjects(Vector3(0, 0, delta[2]), tmp);
-							}
+					Delta = MoveZ + m_MouseSnapLeftover;
 				}
+
+				m_nDownX = x;
+				m_nDownY = y;
+
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				m_MouseTotalDelta += Delta;
 			}
 
 			SystemUpdateFocus(NULL);
 			if (Redraw)
 				UpdateAllViews();
-			} break;
+		} break;
 
 		case LC_ACTION_ZOOM:
 		{

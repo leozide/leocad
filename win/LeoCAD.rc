@@ -327,9 +327,8 @@ BEGIN
     BEGIN
         MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
         MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
-        MENUITEM "Transform...",                ID_PIECE_TRANSFORM
         MENUITEM "Array...",                    ID_PIECE_ARRAY
-        MENUITEM "Mirror...",                   ID_PIECE_MIRROR
+        MENUITEM "Mirror...",                   ID_PIECE_MIRROR, GRAYED
         MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
         MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
         MENUITEM SEPARATOR
@@ -477,9 +476,6 @@ BEGIN
     END
     POPUP "8"
     BEGIN
-        MENUITEM "2 Buttons",                   ID_LOCK_2BUTTONS
-        MENUITEM "3D Movement",                 ID_LOCK_3DMOVEMENT
-        MENUITEM SEPARATOR
         MENUITEM "Lock X",                      ID_LOCK_LOCKX
         MENUITEM "Lock Y",                      ID_LOCK_LOCKY
         MENUITEM "Lock Z",                      ID_LOCK_LOCKZ
@@ -1010,7 +1006,7 @@ BEGIN
                     WS_TABSTOP,7,85,49,8
     EDITTEXT        IDC_AIDDLG_ANGLE,57,84,20,10,ES_AUTOHSCROLL
     LTEXT           "degrees",IDC_STATIC,79,85,27,8
-    CONTROL         "Mouse always moves in 3D",IDC_AIDDLG_3DMOUSE,"Button",
+    CONTROL         "Don't allow relative snap",IDC_AIDDLG_GLOBAL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,122,7,111,8
     CONTROL         "Switch to move after inserting",IDC_AIDDLG_MOVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,122,20,111,8

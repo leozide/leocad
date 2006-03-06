@@ -253,6 +253,7 @@ CPreferencesDrawing::CPreferencesDrawing() : CPropertyPage(CPreferencesDrawing::
 	m_bSnapX = FALSE;
 	m_bSnapY = FALSE;
 	m_bSnapZ = FALSE;
+	m_bGlobal = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -279,6 +280,7 @@ void CPreferencesDrawing::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AIDDLG_SNAPX, m_bSnapX);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPY, m_bSnapY);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPZ, m_bSnapZ);
+	DDX_Check(pDX, IDC_AIDDLG_GLOBAL, m_bGlobal);
 	//}}AFX_DATA_MAP
 }
 
@@ -306,6 +308,7 @@ void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle
 	m_bSnapX = (dwSnap & LC_DRAW_SNAP_X) != 0;
 	m_bSnapY = (dwSnap & LC_DRAW_SNAP_Y) != 0;
 	m_bSnapZ = (dwSnap & LC_DRAW_SNAP_Z) != 0;
+	m_bGlobal = (dwSnap & LC_DRAW_GLOBAL_SNAP) != 0;
 }
 
 void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAngle, unsigned short* nGrid)
@@ -326,6 +329,7 @@ void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAng
 	if (m_bSnapX) *dwSnap |= LC_DRAW_SNAP_X;
 	if (m_bSnapY) *dwSnap |= LC_DRAW_SNAP_Y;
 	if (m_bSnapZ) *dwSnap |= LC_DRAW_SNAP_Z;
+	if (m_bGlobal) *dwSnap |= LC_DRAW_GLOBAL_SNAP;
 }
 
 /////////////////////////////////////////////////////////////////////////////

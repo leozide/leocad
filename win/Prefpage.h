@@ -140,6 +140,7 @@ public:
 	BOOL	m_bSnapX;
 	BOOL	m_bSnapY;
 	BOOL	m_bSnapZ;
+	BOOL	m_bGlobal;
 	//}}AFX_DATA
 
 

@@ -217,6 +217,7 @@
 #define IDC_GENDLG_GROUP                1077
 #define IDC_SCNDLG_FLOORSKY             1077
 #define IDC_SCNDLG_TERRAIN              1077
+#define IDC_AIDDLG_SNAPX2               1077
 #define IDC_GENDLG_SUBPARTS             1078
 #define IDC_SCNDLG_SKYGRADIENT          1078
 #define IDC_GENDLG_AUTOSAVE             1079
@@ -245,6 +246,7 @@
 #define IDC_PROP_SUM_COMMENTS           1091
 #define IDC_DETDLG_DITHER               1091
 #define IDC_AIDDLG_3DMOUSE              1091
+#define IDC_AIDDLG_GLOBAL               1091
 #define IDC_PROP_GEN_CREATED            1092
 #define IDC_DETDLG_LIGHTING             1092
 #define IDC_PROP_GEN_MODIFIED           1093

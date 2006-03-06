@@ -2238,7 +2238,7 @@ void Project::RenderOverlays(int Viewport)
 		Object* Focus = NULL;
 		float Rot[4];
 
-		if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
@@ -2348,7 +2348,7 @@ void Project::RenderOverlays(int Viewport)
 		Object* Focus = NULL;
 		float Rot[4];
 
-		if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
@@ -7270,7 +7270,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		return false;
 
 	// Transform the translation if we're in relative mode.
-	if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 	{
 		Object* Focus = GetFocusObject();
 
@@ -7401,6 +7401,9 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 	}
 
 	// Transform the rotation relative to the focused piece.
+	if (m_nSnap & LC_DRAW_GLOBAL_SNAP)
+		pFocus = NULL;
+
 	if (pFocus != NULL)
 	{
 		float Rot[4];
@@ -8561,7 +8564,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				Vector3 Axis1 = Dir1;
 				Vector3 Axis2 = Dir2;
 
-				if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+				if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 				{
 					Object* Focus = GetFocusObject();
 
@@ -8996,7 +8999,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 		};
 
 		// Find the rotation from the focused piece if relative snap is enabled.
-		if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Object* Focus = GetFocusObject();
 
@@ -9165,7 +9168,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 						continue;
 
 					// Find the rotation from the focused piece if relative snap is enabled.
-					if ((m_nSnap & LC_DRAW_SNAP_GRID) == 0)
+					if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 					{
 						Object* Focus = GetFocusObject();
 

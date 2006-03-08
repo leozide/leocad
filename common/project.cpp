@@ -6926,7 +6926,7 @@ bool Project::StopTracking(bool bAccept)
 		{
 			case LC_ACTION_SELECT:
 			{
-				if (((float)m_nDownX != m_fTrack[0]) || ((float)m_nDownY != m_fTrack[1]))
+				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
 					// Find objects inside the rectangle.
 					PtrArray<Object> Objects;
@@ -6955,12 +6955,12 @@ bool Project::StopTracking(bool bAccept)
 						else
 							Objects[i]->Select(true, false, Control);
 					}
-
-					// Update screen and UI.
-					UpdateSelection();
-					UpdateAllViews();
-					SystemUpdateFocus(NULL);
 				}
+
+				// Update screen and UI.
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(NULL);
 
 			} break;
 

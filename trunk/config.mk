@@ -45,7 +45,7 @@ OS         := -DLC_MACOSX
 OSDIR      := macosx
 TEST_GTK   := 0
 CPPFLAGS   += -funsigned-char -I/Developer/Headers/FlatCarbon/
-LDFLAGS    += -framework AGL
+LDFLAGS    += -framework AGL -framework Carbon
 
 # The directory tree for the generated bundle
 BUNDLEDIR  = bin/LeoCAD.app

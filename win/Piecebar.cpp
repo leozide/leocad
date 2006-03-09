@@ -684,7 +684,7 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CControlBar::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT, 
+	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT|TVS_INFOTIP, 
 	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
 
 	m_wndColorsList.Create(LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
@@ -1024,6 +1024,17 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 				CView* pView = pFrame->GetActiveView();
 				pView->PostMessage(WM_LC_SET_CURSOR, 0, 0);
+			}
+		}
+		else if (Notify->hdr.code == TVN_GETINFOTIP)
+		{
+			LPNMTVGETINFOTIP Tip = (LPNMTVGETINFOTIP)lParam;
+			HTREEITEM Item = Tip->hItem;
+			PieceInfo* Info = (PieceInfo*)m_PiecesTree.GetItemData(Item);
+
+			if (Info != NULL)
+			{
+				_snprintf(Tip->pszText, Tip->cchTextMax, "%s (%s)", Info->m_strDescription, Info->m_strName);
 			}
 		}
 		else if (Notify->hdr.code == TVN_ITEMEXPANDING)

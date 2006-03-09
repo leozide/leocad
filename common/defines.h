@@ -54,7 +54,8 @@ int stricmp(const char* str1, const char* str2);
 #endif
 
 #ifdef LC_MACOSX
-#define LC_MAXPATH 1024 //FILENAME_MAX
+#include <sys/param.h>
+#define LC_MAXPATH MAXPATHLEN //FILENAME_MAX
 
 #define KEY_SHIFT       0x01
 #define KEY_CONTROL     0x02

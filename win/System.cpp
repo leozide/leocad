@@ -36,16 +36,18 @@
 #include "piece.h"
 #include "pieceinf.h"
 
+// Display a message box when an assert happens.
 bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description)
 {
 	char buf[1024];
-	sprintf(buf, "Assertion failed on line %d of file %s: %s", Line, FileName, Description);
-	AfxMessageBox(buf, MB_OK|MB_ICONSTOP);
+	sprintf(buf, "Assertion failed on line %d of file %s.\n%s\nDo you want to debug this?", Line, FileName, Description);
 
-	// TODO: Add a real assert dialog instead of the message box.
-	// TODO: Add an option to disable all asserts.
-	// TODO: Add an option to disable only this assert.
-	// TODO: Add an option to break into the debugger.
+	int ret = AfxMessageBox(buf, MB_YESNOCANCEL|MB_ICONERROR);
+
+	if (ret == IDYES)
+		DebugBreak();
+	else if (ret == IDCANCEL)
+		return true; // Disable this assert.
 
 	return false;
 }

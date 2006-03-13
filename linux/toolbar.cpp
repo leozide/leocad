@@ -14,6 +14,7 @@
 #include "message.h"
 #include "preview.h"
 #include "library.h"
+#include "lc_application.h"
 
 // =============================================================================
 // Variables
@@ -62,7 +63,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 #include "pixmaps/st-fast.xpm"
 #include "pixmaps/st-paste.xpm"
 #include "pixmaps/st-save.xpm"
-#include "pixmaps/st-bg.xpm"
 #include "pixmaps/st-help.xpm"
 #include "pixmaps/st-prev.xpm"
 #include "pixmaps/st-snap.xpm"
@@ -132,9 +132,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   main_toolbar.fast = gtk_toolbar_append_element (GTK_TOOLBAR (main_toolbar.toolbar), 
      GTK_TOOLBAR_CHILD_TOGGLEBUTTON, NULL, "Fast", "Fast rendering", "", 
      new_pixmap (window, st_fast), GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_TOOLBAR_FASTRENDER);
-  main_toolbar.bg = gtk_toolbar_append_element (GTK_TOOLBAR (main_toolbar.toolbar),
-     GTK_TOOLBAR_CHILD_TOGGLEBUTTON, NULL, "Backgnd", "Backgroung rendering", "", 
-     new_pixmap (window, st_bg), GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_TOOLBAR_BACKGROUND);
   gtk_toolbar_append_item (GTK_TOOLBAR (main_toolbar.toolbar), "About", "About LeoCAD", "", 
      new_pixmap (window, st_about), GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_HELP_ABOUT);
   gtk_toolbar_append_item (GTK_TOOLBAR (main_toolbar.toolbar), "Help", "Help", "",
@@ -283,7 +280,7 @@ static void piecelist_setsort (GtkCList* clist, gint column)
 
 static void fill_piecelist(int group)
 {
-  PiecesLibrary *pLib = project->GetPiecesLibrary ();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
 
   gtk_clist_freeze(GTK_CLIST(piecelist));
   gtk_clist_clear(GTK_CLIST(piecelist));
@@ -399,7 +396,7 @@ void piececombo_add (const char* str)
 
 static void piececombo_changed (GtkWidget *widget, gpointer data)
 {
-	PiecesLibrary *pLib = project->GetPiecesLibrary ();
+	PiecesLibrary *pLib = lcGetPiecesLibrary();
 	const gchar* str;
 	int i;
 
@@ -571,7 +568,7 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
   {
     cur_color = x;
     colorlist_draw_pixmap(widget);
-    project->HandleNotify(LC_COLOR_CHANGED, x);
+    lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
     gtk_widget_draw(widget, NULL);
     preview->Redraw ();
   }
@@ -592,7 +589,7 @@ static gint colorlist_button_press(GtkWidget *widget, GdkEventButton *event)
     {
       cur_color = x;
       colorlist_draw_pixmap(widget);
-      project->HandleNotify(LC_COLOR_CHANGED, x);
+      lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
       gtk_widget_draw(widget, NULL);
       preview->Redraw ();
     }
@@ -768,10 +765,10 @@ static void statusbar_listener (int message, void *data, void *user)
   if (message == LC_MSG_FOCUS_CHANGED)
   {
     char text[32];
-    Point3 pos;
+    Vector3 pos;
 
-    project->GetFocusPosition(pos);
-		project->ConvertToUserUnits(pos);
+    lcGetActiveProject()->GetFocusPosition(pos);
+    lcGetActiveProject()->ConvertToUserUnits(pos);
 
     sprintf (text, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
     gtk_label_set (GTK_LABEL (label_position), text);

@@ -20,6 +20,7 @@
 #include "config.h"
 #include "dialogs.h"
 #include "view.h"
+#include "lc_application.h"
 
 View* view;
 
@@ -125,7 +126,7 @@ void OnCommandDirect(GtkWidget *w, gpointer data)
   if (ignore_commands)
     return;
 
-  project->HandleCommand((LC_COMMANDS)(int)data, 0);
+  lcGetActiveProject()->HandleCommand((LC_COMMANDS)(int)data, 0);
 }
 
 static void view_destroy (GtkWidget *widget, gpointer data)
@@ -135,6 +136,7 @@ static void view_destroy (GtkWidget *widget, gpointer data)
 
 void OnCommand(GtkWidget* widget, gpointer data)
 {
+  Project* project = lcGetActiveProject();
   int id = (int)data;
 
   if (ignore_commands)
@@ -326,7 +328,7 @@ static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data
 
   if (code != 0)
   {
-    if (project->OnKeyDown(code, (event->state & GDK_CONTROL_MASK) != 0, 
+    if (lcGetActiveProject()->OnKeyDown(code, (event->state & GDK_CONTROL_MASK) != 0, 
 			   (event->state & GDK_SHIFT_MASK) != 0))
 	gtk_signal_emit_stop_by_name (GTK_OBJECT(widget), "key_press_event");
   }
@@ -375,11 +377,11 @@ static void main_destroy ()
 
 static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data)
 {
-  if (!project->SaveModified())
+  if (!lcGetActiveProject()->SaveModified())
     return TRUE;
 
-  delete project;
-  project = NULL;
+  g_App->Shutdown();
+  delete g_App;
 
   // save window position
   gint x, y;
@@ -506,42 +508,8 @@ static void update_window_layout ()
 
 int main (int argc, char* argv[])
 {
-  char* libgl = NULL;
   GtkWidget *vbox;
-  int i, j, k, x, y;
-
-  // Parse and remove Linux arguments
-  for (i = 1; i < argc; i++)
-  {
-    char* param = argv[i];
-
-    if (param[0] == '-' && param[1] == '-')
-    {
-      param += 2;
-
-      if ((strcmp (param, "libgl") == 0) && (i != argc))
-      {
-	libgl = argv[i+1];
-	argv[i] = argv[i+1] = NULL;
-	i++;
-      }
-    }
-  }
-
-  for (i = 1; i < argc; i++)
-  {
-    for (k = i; k < argc; k++)
-      if (argv[k] != NULL)
-	break;
-
-    if (k > i)
-    {
-      k -= i;
-      for (j = i + k; j < argc; j++)
-	argv[j-k] = argv[j];
-      argc -= k;
-    }
-  }
+  int x, y;
 
   init_paths (argv[0]);
 
@@ -549,8 +517,12 @@ int main (int argc, char* argv[])
   gtk_init (&argc, &argv);
 
   atexit (GL_Shutdown);
-  // Check if OpenGL is supported.
-  if (!GL_Initialize (libgl))
+
+  // Initialize the application.
+  g_App = new lcApplication();
+  main_window = new MainWnd();
+
+  if (!g_App->Initialize(argc, argv, lib_path))
     return 1;
 
   if (pfnglXQueryExtension (GDK_DISPLAY (), NULL, NULL) != True)
@@ -559,10 +531,7 @@ int main (int argc, char* argv[])
     return 1;
   }
 
-//  startup_message ("Loading user preferences ...");
-  main_window = new MainWnd ();
-  project = new Project ();
-  view = new View (project, NULL);
+  view = new View (lcGetActiveProject(), NULL);
 
   //  main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), "LeoCAD");
@@ -703,14 +672,6 @@ int main (int argc, char* argv[])
   if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
     gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
 			    pieces_width);
-
-  if (project->Initialize (argc, argv, app_path, lib_path) == false)
-  {
-    delete project;
-    delete main_window;
-    //    return 1;
-    _exit (1);
-  }
 
   gtk_main();
 

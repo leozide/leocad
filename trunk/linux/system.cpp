@@ -167,6 +167,9 @@ void SystemUpdateViewport(int new_vp, int old_vp)
   sprintf (buf, "menu_view_viewports_%02d", new_vp+1);
   gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), buf);
 
+  if (!item)
+    return;
+
   ignore_commands = true;
   gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
   ignore_commands = false;
@@ -232,6 +235,9 @@ void SystemUpdateAction(int new_action, int old_action)
 #include "pixmaps/cr_roll.xpm"
 #include "pixmaps/cr_zoom.xpm"
 #include "pixmaps/cr_zoomr.xpm"
+
+  if (!drawing_area)
+    return;
 
   GtkWidget* button;
   char** xpm = NULL;
@@ -309,18 +315,10 @@ void SystemUpdateColorList(int new_color)
 
 void SystemUpdateRenderingMode(bool bBackground, bool bFast)
 {
-  ignore_commands = true;
-  if (bFast)
-  {
-    gtk_widget_set_sensitive (main_toolbar.bg, TRUE);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.bg), bBackground);
-  }
-  else
-  {
-    gtk_widget_set_sensitive (main_toolbar.bg, FALSE);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.bg), FALSE);
-  }
+  if (!main_toolbar.fast)
+    return;
 
+  ignore_commands = true;
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.fast), bFast);
   ignore_commands = false;
 }
@@ -334,6 +332,10 @@ void SystemUpdateUndoRedo(char* undo, char* redo)
   if (undo)
     strcat(text, undo);
   item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_undo");
+
+  if (!item)
+    return;
+
   gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), text);
   gtk_widget_set_sensitive (GTK_WIDGET (item), undo != NULL);
 
@@ -350,6 +352,9 @@ void SystemUpdateUndoRedo(char* undo, char* redo)
 
 void SystemUpdateSnap(const unsigned long snap)
 {
+  if (!main_toolbar.angle)
+    return;
+
   ignore_commands = true;
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.angle), (snap & LC_DRAW_SNAP_A) != 0);
   ignore_commands = false;
@@ -359,7 +364,12 @@ void SystemUpdateSnap(const unsigned long snap)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
-  gpointer item = NULL, menu = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu");
+  gpointer item = NULL;
+  gpointer menu = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu");
+
+  if (!menu)
+    return;
+
   GList *lst = gtk_container_children (GTK_CONTAINER (menu));
 
   for (int i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
@@ -394,6 +404,9 @@ void SystemUpdateCameraMenu(Camera* pCamera)
   Camera* pFirst = pCamera;
   GList *lst;
   int i;
+
+  if (!menu)
+    return;
 
   // empty the menu
   while ((lst = gtk_container_children (GTK_CONTAINER (menu))) != NULL)
@@ -430,6 +443,9 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 {
   GtkWidget *item;
 
+  if (!anim_toolbar.first)
+    return;
+
   gtk_widget_set_sensitive (anim_toolbar.first, nTime != 1);
   gtk_widget_set_sensitive (anim_toolbar.prev, nTime > 1);
   gtk_widget_set_sensitive (anim_toolbar.next, nTime < nTotal);
@@ -455,6 +471,9 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 {
+  if (!anim_toolbar.play)
+    return;
+
   ignore_commands = true;
   gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
   gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
@@ -468,6 +487,9 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
 {
+  if (!label_snap)
+    return;
+
   char text[11];
   if (move_snap)
     sprintf (text, "Move x%i", move_snap);
@@ -483,6 +505,10 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 
   // select all/none/invert/by name (menu)
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_all"));
+
+  if (!item)
+    return;
+
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_none"));
   gtk_widget_set_sensitive (item, flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) != 0);

@@ -25,7 +25,6 @@ typedef struct
   GtkWidget* snap;
   GtkWidget* angle;
   GtkWidget* fast;
-  GtkWidget* bg;
 
 } MAIN_TOOLBAR;
 

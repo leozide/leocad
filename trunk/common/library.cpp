@@ -338,22 +338,63 @@ Texture* PiecesLibrary::GetTexture (int index) const
 
 void PiecesLibrary::ResetCategories()
 {
-	const int NumCategories = 34;
-	const char* DefaultCategories[] =
+	struct CategoryEntry
 	{
-	  "Animal", "Antenna", "Arm", "Bar", "Baseplate", "Belville", "Boat", "Bracket", "Brick", "Car",
-	  "Cone", "Container", "Crane", "Cylinder", "Door", "Flag", "Hinge", "Hose", "Magnet", "Minifig",
-	  "Minifig Accessory", "Plane", "Plant", "Plate", "Propellor", "Rock", "Round", "Scala",
-	  "Slope", "Space", "Support", "Technic", "Wheel", "Windscreen"
+		const char* Name;
+		const char* Keywords;
 	};
+
+	// Animal, Antenna, Arch, Arm, Bar, Baseplate, Belville, Boat, Bracket, Brick,
+	// Car, Cone, Container, Conveyor, Crane, Cylinder, Door, Electric, Exhaust,
+	// Fence, Flag, Forklift, Freestyle, Garage, Gate, Glass, Grab, Hinge, Homemaker,
+	// Hose, Jack, Ladder, Lever, Magnet, Minifig, Minifig Accessory, Panel, Plane,
+	// Plant, Plate, Platform, Propellor, Rack, Roadsign, Rock, Scala, Slope, Staircase,
+	// Support, Tail, Tap, Technic, Tile, Tipper, Tractor, Trailer, Train, Turntable,
+	// Tyre, Wedge, Wheel, Winch, Window, Windscreen, Wing
+	CategoryEntry DefaultCategories[] =
+	{
+		{ "Animal", "^%Animal" },
+		{ "Antenna", "^%Antenna" },
+		{ "Arch", "^%Arch" },
+		{ "Bar", "^%Bar" },
+		{ "Baseplate", "^%Baseplate | ^%Platform" },
+		{ "Boat", "^%Boat" },
+		{ "Brick", "^%Brick" },
+		{ "Container", "^%Container | ^%Box | ^Chest | ^%Storage | ^Mailbox" },
+		{ "Door and Window", "^%Door | ^%Window | ^%Glass | ^%Freestyle | ^%Gate | ^%Garage | ^%Roller" },
+		{ "Duplo", "^%Duplo | ^%Scala | ^%Belville" },
+		{ "Electric", "^%Electric | ^%Light | ^%Excavator | ^%Exhaust" },
+		{ "Hinge and Bracket", "^%Hinge | ^%Bracket | ^%Turntable" },
+		{ "Hose", "^%Hose" },
+		{ "Minifig", "^%Minifig" },
+		{ "Miscellaneous", "^%Arm | ^%Barrel | ^%Brush | ^%Cockpit | ^%Conveyor | ^%Crane | ^%Cupboard | ^%Fabuland | ^%Fence | ^%Homemaker | ^%Jack | ^%Ladder | ^%Rock | ^%Staircase | ^%Stretcher | ^%Tap | ^%Tipper | ^%Trailer | ^%Winch" },
+		{ "Panel", "^%Panel | ^%Castle Wall | ^%Castle Turret" },
+		{ "Plant", "^%Plant" },
+		{ "Plate", "^%Plate" },
+		{ "Round", "^%Cylinder | ^%Cone | ^%Dish | ^%Round" },
+		{ "Sign and Flag", "^%Flag | ^%Roadsign | ^%Streetlight | ^%Flagpost | ^%Lamppost | ^%Signpost" },
+		{ "Slope", "^%Slope" },
+		{ "Space", "^%Space" },
+		{ "Sticker", "^%Sticker" },
+		{ "Support", "^%Support" },
+		{ "Technic", "^%Technic | ^%Rack" },
+		{ "Tile", "^%Tile" },
+		{ "Train", "^%Train | ^%Monorail | ^%Magnet" },
+		{ "Tyre and Wheel", "^%Tyre | %^Wheel | ^%Castle Wagon" },
+		{ "Vehicle", "^%Car | ^%Tractor | ^%Bike | ^%Plane | ^%Propellor | ^%Tail | ^%Landing | ^%Forklift | ^%Grab Jaw" },
+		{ "Windscreen", "^%Windscreen" },
+		{ "Wedge", "^%Wedge" },
+		{ "Wing", "^%Wing" },
+	};
+	const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
 
 	m_Categories.RemoveAll();
 	for (int i = 0; i < NumCategories; i++)
 	{
 		PiecesLibraryCategory Cat;
 
-		Cat.Name = DefaultCategories[i];
-		Cat.Keywords = DefaultCategories[i];
+		Cat.Name = DefaultCategories[i].Name;
+		Cat.Keywords = DefaultCategories[i].Keywords;
 
 		m_Categories.Add(Cat);
 	}

@@ -19,7 +19,7 @@
 // =============================================================================
 // Variables
 
-GtkWidget *piecelist;
+GtkWidget *piecetree;
 GtkWidget *pieceentry;
 GtkWidget *piecemenu;
 GtkWidget *colorlist;
@@ -248,81 +248,107 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 // =========================================================
 // Pieces toolbar
 
-static bool list_subparts = false;
-static int  piecelist_col_sort = 0;
-static bool piecelist_ascending = true; 
+//static bool list_subparts = false;
 static int cur_color = 0;
 static GdkPixmap* colorlist_pixmap = NULL;
-static GtkWidget* list_arrows[2];
-static GtkWidget* groups[9];
 
-// Called when the user clicked on the header of the piecelist
-static void piecelist_setsort (GtkCList* clist, gint column)
+int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
 {
-  if (piecelist_col_sort == column)
-    piecelist_ascending = !piecelist_ascending;
-  else
-  {
-    gtk_widget_hide (list_arrows[piecelist_col_sort]);
-    gtk_widget_show (list_arrows[column]);
-    piecelist_ascending = true;
-  }
-  piecelist_col_sort = column;
+	if (a->IsSubPiece())
+	{
+		if (b->IsSubPiece())
+		{
+			return strcmp(a->m_strDescription, b->m_strDescription);
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	else
+	{
+		if (b->IsSubPiece())
+		{
+			return -1;
+		}
+		else
+		{
+			return strcmp(a->m_strDescription, b->m_strDescription);
+		}
+	}
 
-  gtk_arrow_set (GTK_ARROW (list_arrows[column]), piecelist_ascending
-		 ? GTK_ARROW_DOWN : GTK_ARROW_UP, GTK_SHADOW_IN);
-
-  gtk_clist_set_sort_column (GTK_CLIST(piecelist), column);
-  gtk_clist_set_sort_type (GTK_CLIST(piecelist), piecelist_ascending
-			   ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
-  gtk_clist_sort (GTK_CLIST(piecelist));
+	return 0;
 }
 
-static void fill_piecelist(int group)
+void fill_piecetree()
 {
-  PiecesLibrary *pLib = lcGetPiecesLibrary();
+  PiecesLibrary* Lib = lcGetPiecesLibrary();
+  GtkTreeStore* model = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(piecetree)));
 
-  gtk_clist_freeze(GTK_CLIST(piecelist));
-  gtk_clist_clear(GTK_CLIST(piecelist));
-
-//  list_curgroup = group;
-
-  for (int i = 0; i < pLib->GetPieceCount (); i++)
+  for (int i = 0; i < Lib->GetNumCategories(); i++)
   {
-    PieceInfo* pInfo = pLib->GetPieceInfo (i);
+    GtkTreeIter iter;
+    gtk_tree_store_append(model, &iter, NULL);
+    gtk_tree_store_set(model, &iter, 0, (const char*)Lib->GetCategoryName(i), 1, NULL, -1);
 
-    if ((pInfo->m_strDescription[0] == '~') && !list_subparts)
-      continue;
+    PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
-//    if ((!list_groups) || ((pInfo->m_nGroups & (long)(1 << group)) != 0))
+    Lib->GetCategoryEntries(i, true, SinglePieces, GroupedPieces);
+
+    SinglePieces += GroupedPieces;
+    SinglePieces.Sort(PiecesSortFunc, NULL);
+
+    for (int j = 0; j < SinglePieces.GetSize(); j++)
     {
-      char* dummy[] = { pInfo->m_strDescription, pInfo->m_strName };
+      PieceInfo* Info = SinglePieces[j];
 
-      int idx = gtk_clist_append(GTK_CLIST(piecelist), dummy);
-      gtk_clist_set_row_data(GTK_CLIST(piecelist), idx, pInfo);
+      GtkTreeIter entry;
+
+      gtk_tree_store_append(model, &entry, &iter);
+      gtk_tree_store_set(model, &entry, 0, Info->m_strDescription, 1, Info, -1);
+
+      if (GroupedPieces.FindIndex(Info) != -1)
+      {
+	PtrArray<PieceInfo> Patterns;
+	Lib->GetPatternedPieces(Info, Patterns);
+
+	for (int k = 0; k < Patterns.GetSize(); k++)
+	{
+	  GtkTreeIter pat;
+	  PieceInfo* child = Patterns[k];
+
+	  if (!Lib->PieceInCategory(child, Lib->GetCategoryKeywords(i)))
+	    continue;
+
+	  const char* desc = child->m_strDescription;
+	  int len = strlen(Info->m_strDescription);
+
+	  if (!strncmp(child->m_strDescription, Info->m_strDescription, len))
+	    desc += len;
+
+	  gtk_tree_store_append(model, &pat, &entry);
+	  gtk_tree_store_set(model, &pat, 0, desc, 1, child, -1);
+	}	
+      }
     }
   }
-  gtk_clist_thaw(GTK_CLIST(piecelist));
-}
-
-// Callback for the groups toolbar.
-static void group_event(GtkWidget *widget, gpointer data)
-{
-  fill_piecelist((int)data);
-}
-
-void groupsbar_set(int new_group)
-{
-  ignore_commands = true;
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(groups[new_group]), TRUE);
-  ignore_commands = false;
-  gtk_clist_select_row (GTK_CLIST(piecelist), 0, 0);
 }
 
 // Callback for the pieces list.
-static void selection_made(GtkWidget *clist, gint row, gint column, GdkEventButton *event, gpointer data)
+static void piecetree_changed(GtkTreeSelection* selection, gpointer data)
 {
-  preview->SetCurrentPiece ((PieceInfo*)gtk_clist_get_row_data (GTK_CLIST (piecelist), row));
+  GtkTreeIter iter;
+  GtkTreeModel* model;
+
+  if (gtk_tree_selection_get_selected(selection, &model, &iter))
+  {
+    gpointer sel;
+
+    gtk_tree_model_get(model, &iter, 1, &sel, -1);
+
+    if (sel)
+      preview->SetCurrentPiece((PieceInfo*)sel);
+  }
 }
 
 static void piececombo_popup_position (GtkMenu *menu, gint *x, gint *y, gboolean* push, gpointer data)
@@ -396,47 +422,27 @@ void piececombo_add (const char* str)
 
 static void piececombo_changed (GtkWidget *widget, gpointer data)
 {
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
-	const gchar* str;
-	int i;
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
+  const gchar* str;
+  int i;
 
-	str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
+  str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
 
-	for (i = 0; i < pLib->GetPieceCount (); i++)
-	{
-		PieceInfo* pInfo = pLib->GetPieceInfo (i);
+  for (i = 0; i < pLib->GetPieceCount (); i++)
+  {
+    PieceInfo* pInfo = pLib->GetPieceInfo (i);
 
-		if (strcmp (str, pInfo->m_strDescription) == 0)
-		{
-/*
-			// Check if we need to change the current group
-			if ((list_groups) && (pInfo->m_nGroups != 0))
-			{
-				if ((pInfo->m_nGroups & (1 << list_curgroup)) == 0)
-				{
-					unsigned long d = 1;
-					for (int k = 1; k < 32; k++)
-					{
-						if ((pInfo->m_nGroups & d) != 0)
-						{
-							groupsbar_set (k-1);
-							break;
-						}
-						else
-							d <<= 1;
-					}
-				}
-			}
-*/
-			// Select the piece
-			i = gtk_clist_find_row_from_data (GTK_CLIST (piecelist), pInfo);
-			gtk_clist_select_row (GTK_CLIST (piecelist), i, 0);
-			if (gtk_clist_row_is_visible (GTK_CLIST (piecelist), i) != GTK_VISIBILITY_FULL)
-				gtk_clist_moveto (GTK_CLIST (piecelist), i, 0, 0.5f, 0);
+    if (strcmp (str, pInfo->m_strDescription) == 0)
+    {
+      // Select the piece
+      //      i = gtk_clist_find_row_from_data (GTK_CLIST (piecelist), pInfo);
+      //      gtk_clist_select_row (GTK_CLIST (piecelist), i, 0);
+      //      if (gtk_clist_row_is_visible (GTK_CLIST (piecelist), i) != GTK_VISIBILITY_FULL)
+      //	gtk_clist_moveto (GTK_CLIST (piecelist), i, 0, 0.5f, 0);
 
-			return;
-		}
-	}
+      return;
+    }
+  }
 }
 
 // Draw a pixmap for the colorlist control
@@ -613,8 +619,6 @@ void colorlist_set(int new_color)
 // Create the pieces toolbar
 GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 {
-  gchar *titles[2] = { "Description", "Number" };
-
   GtkWidget *vbox1, *hbox, *vpan, *scroll_win, *frame, *button, *arrow;
 
   frame = gtk_frame_new (NULL);
@@ -639,80 +643,26 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 
   scroll_win = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scroll_win), 
-				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_widget_show (scroll_win);
   gtk_container_add (GTK_CONTAINER (vpan), scroll_win);
 
-  piecelist = gtk_clist_new_with_titles(2, titles);
-  gtk_signal_connect(GTK_OBJECT(piecelist), "select_row",
-		     GTK_SIGNAL_FUNC(selection_made), NULL);
-  gtk_signal_connect (GTK_OBJECT (piecelist), "click_column",
-		      GTK_SIGNAL_FUNC (piecelist_setsort), NULL);
-  gtk_container_add (GTK_CONTAINER (scroll_win), piecelist);
-  gtk_clist_set_selection_mode (GTK_CLIST (piecelist), GTK_SELECTION_BROWSE);
-  gtk_clist_set_column_width (GTK_CLIST(piecelist), 0, 90);
-  gtk_clist_set_column_width (GTK_CLIST(piecelist), 1, 10);
-  gtk_clist_set_column_auto_resize (GTK_CLIST(piecelist), 1, TRUE);
-  list_arrows[0] = clist_title_with_arrow (piecelist, 0, titles[0]);
-  list_arrows[1] = clist_title_with_arrow (piecelist, 1, titles[1]);
-   //gtk_clist_set_shadow_type (GTK_CLIST(piecelist), GTK_SHADOW_IN);
-  //  gtk_clist_column_titles_show (GTK_CLIST (piecelist));
-  gtk_clist_set_auto_sort (GTK_CLIST(piecelist), TRUE);
-  gtk_widget_show (list_arrows[0]);
-  gtk_widget_show (piecelist);
+  GtkTreeStore* store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+  piecetree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+  gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(piecetree), false);
 
-  /*
-  gtk_clist_set_hadjustment (GTK_CLIST (piecelist), NULL);
-  gtk_clist_set_vadjustment (GTK_CLIST (piecelist), NULL);
-  */
+  GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+  GtkTreeViewColumn* column;
+  column = gtk_tree_view_column_new_with_attributes("Piece", renderer, "text", 0, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(piecetree), column);
 
-#include "pixmaps/pi-acces.xpm"
-#include "pixmaps/pi-plate.xpm"
-#include "pixmaps/pi-tile.xpm"
-#include "pixmaps/pi-brick.xpm"
-#include "pixmaps/pi-slope.xpm"
-#include "pixmaps/pi-train.xpm"
-#include "pixmaps/pi-space.xpm"
-#include "pixmaps/pi-misc.xpm"
-#include "pixmaps/pi-tech.xpm"
+  GtkTreeSelection* select;
+  select = gtk_tree_view_get_selection(GTK_TREE_VIEW(piecetree));
+  gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
+  g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(piecetree_changed), NULL);
 
-  grouptoolbar = gtk_toolbar_new();
-  gtk_toolbar_set_orientation(GTK_TOOLBAR(grouptoolbar), GTK_ORIENTATION_HORIZONTAL);
-  gtk_toolbar_set_style(GTK_TOOLBAR(grouptoolbar), GTK_TOOLBAR_ICONS);
-  gtk_container_set_border_width (GTK_CONTAINER(grouptoolbar), 2);
-  //gtk_toolbar_set_space_size (GTK_TOOLBAR(toolbar), 5);
-
-  groups[0] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, "", "Plates", "", new_pixmap(window, pi_plate),
-     GTK_SIGNAL_FUNC(group_event), (void*)0);
-  groups[1] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[0], "", "Bricks", "", new_pixmap(window, pi_brick),
-     GTK_SIGNAL_FUNC(group_event), (void*)1);
-  groups[2] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[1], "", "Tiles", "", new_pixmap(window, pi_tile),
-     GTK_SIGNAL_FUNC(group_event), (void*)2);
-  groups[3] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[2], "", "Slopes", "", new_pixmap(window, pi_slope),
-     GTK_SIGNAL_FUNC(group_event), (void*)3);
-  groups[4] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[3], "", "Technic", "", new_pixmap(window, pi_tech),
-     GTK_SIGNAL_FUNC(group_event), (void*)4);
-  groups[5] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[4], "", "Space", "", new_pixmap(window, pi_space),
-     GTK_SIGNAL_FUNC(group_event), (void*)5);
-  groups[6] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[5], "", "Train", "", new_pixmap(window, pi_train),
-     GTK_SIGNAL_FUNC(group_event), (void*)6);
-  groups[7] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[6], "", "Other", "", new_pixmap(window, pi_misc),
-     GTK_SIGNAL_FUNC(group_event), (void*)7);
-  groups[8] = gtk_toolbar_append_element(GTK_TOOLBAR(grouptoolbar),
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, groups[7], "", "Accessories", "", new_pixmap(window, pi_acces),
-     GTK_SIGNAL_FUNC(group_event), (void*)8);
-
-  // gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(both_button),TRUE);
-  gtk_box_pack_start(GTK_BOX(vbox1), grouptoolbar, FALSE, TRUE, 0);
-  gtk_widget_show(grouptoolbar);
+  gtk_container_add(GTK_CONTAINER(scroll_win), piecetree);
+  gtk_widget_show(piecetree);
 
   // Piece combo
   hbox = gtk_hbox_new (FALSE, 1);
@@ -721,10 +671,10 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 
   pieceentry = gtk_entry_new ();
   gtk_widget_show (pieceentry);
-  gtk_box_pack_start (GTK_BOX (hbox), pieceentry, TRUE, TRUE, 0);
-  gtk_signal_connect (GTK_OBJECT (pieceentry), "changed", GTK_SIGNAL_FUNC (piececombo_changed), NULL);
+  gtk_box_pack_start(GTK_BOX(hbox), pieceentry, TRUE, TRUE, 0);
+  gtk_signal_connect(GTK_OBJECT(pieceentry), "changed", GTK_SIGNAL_FUNC(piececombo_changed), NULL);
 
-  button = gtk_button_new ();
+  button = gtk_button_new();
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
   gtk_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (piececombo_popup), NULL);
@@ -751,6 +701,17 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 		      GTK_SIGNAL_FUNC(colorlist_key_press), NULL);
 
   gtk_widget_show(colorlist);
+
+  fill_piecetree();
+
+  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
+  if (!Info)
+    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+  if (Info)
+  {
+    lcGetActiveProject()->SetCurrentPiece(Info);
+    //    preview->SetCurrentPiece(Info);
+  }
 
   return frame;
 }

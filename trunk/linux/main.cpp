@@ -21,6 +21,8 @@
 #include "dialogs.h"
 #include "view.h"
 #include "lc_application.h"
+#include "library.h"
+#include "preview.h"
 
 View* view;
 
@@ -672,6 +674,17 @@ int main (int argc, char* argv[])
   if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
     gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
 			    pieces_width);
+
+
+  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
+  if (!Info)
+    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+  if (Info)
+  {
+    lcGetActiveProject()->SetCurrentPiece(Info);
+    extern PiecePreview* preview;
+    preview->SetCurrentPiece(Info);
+  }
 
   gtk_main();
 

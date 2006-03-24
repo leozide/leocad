@@ -332,6 +332,14 @@ void fill_piecetree()
       }
     }
   }
+
+  GtkTreeIter iter;
+  gtk_tree_store_append(model, &iter, NULL);
+  gtk_tree_store_set(model, &iter, 0, "Search Results", 1, NULL, -1);
+
+  GtkTreeIter entry;
+  gtk_tree_store_append(GTK_TREE_STORE(model), &entry, &iter);
+  gtk_tree_store_set(GTK_TREE_STORE(model), &entry, 0, "No pieces found", 1, NULL, -1);
 }
 
 // Callback for the pieces list.
@@ -418,6 +426,82 @@ void piececombo_add (const char* str)
     gtk_widget_show (item);
     gtk_menu_insert (GTK_MENU (piecemenu), item, pos);
   }
+}
+
+static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
+{
+  if (event->keyval == GDK_Return)
+  {
+    const gchar* str = gtk_entry_get_text(GTK_ENTRY(pieceentry));
+    PiecesLibrary* Lib = lcGetPiecesLibrary();
+
+    // Save search.
+    int Index = Lib->FindCategoryIndex("Search Results");
+
+    if (Index == -1)
+    {
+      Lib->AddCategory("Search Results", (const char*)str);
+      Index = Lib->GetNumCategories() - 1;
+    }
+    else
+      Lib->SetCategory(Index, "Search Results", (const char*)str);
+
+    // Find search category row.
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(piecetree));
+    GtkTreeIter iter;
+
+    if (!gtk_tree_model_get_iter_first(model, &iter))
+      return FALSE;
+
+    do
+    {
+      gchar* name;
+      gtk_tree_model_get(model, &iter, 0, &name, -1);
+
+      if (strcmp(name, "Search Results"))
+	continue;
+
+      GtkTreeIter child;
+
+      // Remove all children.
+      while (gtk_tree_model_iter_children(model, &child, &iter))
+	gtk_tree_store_remove(GTK_TREE_STORE(model), &child);	
+
+      // Perform search.
+      PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+      Lib->GetCategoryEntries(Index, true, SinglePieces, GroupedPieces);
+
+      // Merge and sort the arrays.
+      SinglePieces += GroupedPieces;
+      SinglePieces.Sort(PiecesSortFunc, NULL);
+
+      // Add results.
+      for (int i = 0; i < SinglePieces.GetSize(); i++)
+      {
+	PieceInfo* Info = SinglePieces[i];
+
+	GtkTreeIter entry;
+	gtk_tree_store_append(GTK_TREE_STORE(model), &entry, &iter);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &entry, 0, Info->m_strDescription, 1, Info, -1);
+      }
+
+      if (SinglePieces.GetSize() == 0)
+      {
+ 	GtkTreeIter entry;
+	gtk_tree_store_append(GTK_TREE_STORE(model), &entry, &iter);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &entry, 0, "No pieces found", 1, NULL, -1);
+     }
+
+      // Expand results.
+      GtkTreePath* path = gtk_tree_model_get_path(model, &iter);
+      gtk_tree_view_expand_row(GTK_TREE_VIEW(piecetree), path, FALSE);
+      gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(piecetree), path, NULL, TRUE, 0.5f, 0.0f);
+      gtk_tree_path_free(path);
+
+    } while (gtk_tree_model_iter_next(model, &iter));
+  }
+
+  return FALSE;
 }
 
 static void piececombo_changed (GtkWidget *widget, gpointer data)
@@ -673,6 +757,7 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
   gtk_widget_show (pieceentry);
   gtk_box_pack_start(GTK_BOX(hbox), pieceentry, TRUE, TRUE, 0);
   gtk_signal_connect(GTK_OBJECT(pieceentry), "changed", GTK_SIGNAL_FUNC(piececombo_changed), NULL);
+  gtk_signal_connect(GTK_OBJECT(pieceentry), "key_press_event", GTK_SIGNAL_FUNC(piececombo_key), NULL);
 
   button = gtk_button_new();
   gtk_widget_show (button);

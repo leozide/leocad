@@ -403,8 +403,12 @@ int minifigdlg_execute (void* param)
 
     if (names != NULL)
     {
+      gtk_signal_handler_block_by_func(GTK_OBJECT(GTK_COMBO(s.pieces[i])->entry),
+				       GTK_SIGNAL_FUNC(minifigdlg_piece_changed), NULL);
       gtk_combo_set_popdown_strings (GTK_COMBO (s.pieces[i]), names);
       g_list_free (names);
+      gtk_signal_handler_unblock_by_func(GTK_OBJECT(GTK_COMBO(s.pieces[i])->entry),
+					 GTK_SIGNAL_FUNC(minifigdlg_piece_changed), NULL);
     }
     free (list);
   }

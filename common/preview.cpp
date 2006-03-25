@@ -14,7 +14,7 @@ PiecePreview::PiecePreview(GLWindow *share)
 {
 	m_PieceInfo = NULL;
 	m_RotateX = 60.0f;
-	m_RotateZ = 45.0f;
+	m_RotateZ = 225.0f;
 	m_Distance = 10.0f;
 	m_AutoZoom = true;
 	m_Tracking = LC_TRACK_NONE;

@@ -89,14 +89,6 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
   gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 0, 0);
 }
 
-// A color button was exposed, draw the pixmap
-static gint minifigdlg_color_expose (GtkWidget *widget)
-{
-  int* data = (int*)gtk_object_get_data (GTK_OBJECT (widget), "color");
-  set_button_pixmap2 (widget, FlatColorArray[*data]);
-  return TRUE;
-}
-
 // New piece was selected
 static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
 {
@@ -249,8 +241,6 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int idx, int num,
   gtk_object_set_data (GTK_OBJECT (color), "color", &info->wizard->m_Colors[num]);
   gtk_object_set_data (GTK_OBJECT (color), "info", info);
   gtk_widget_set_usize (color, 40, 25);
-  gtk_signal_connect (GTK_OBJECT (color), "expose_event",
-		      GTK_SIGNAL_FUNC (minifigdlg_color_expose), NULL);
   gtk_signal_connect (GTK_OBJECT (color), "clicked",
 		      GTK_SIGNAL_FUNC (minifigdlg_color_clicked), info);
   gtk_table_attach (GTK_TABLE (table), color, 1, 2, idx, idx+1,
@@ -415,6 +405,13 @@ int minifigdlg_execute (void* param)
 
   minifigdlg_updatecombo (&s);
   minifigdlg_updateselection (&s);
+
+  gtk_widget_show(dlg);
+
+  for (i = 0; i < LC_MFW_NUMITEMS; i++)
+  {
+    set_button_pixmap2(s.colors[i], FlatColorArray[s.wizard->m_Colors[i]]);
+  }
 
   return dlg_domodal(dlg, LC_CANCEL);
 }

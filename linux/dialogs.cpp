@@ -1532,7 +1532,7 @@ typedef struct
   GtkWidget *det_solid, *det_hidden, *det_background, *det_width;
   GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
-  GtkWidget *draw_anglesnap, *draw_centimeter;
+  GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
   GtkWidget *draw_move, *draw_fixed;
   GtkWidget *draw_lockx, *draw_locky, *draw_lockz;
   GtkWidget *scn_solid, *scn_gradient, *scn_image, *scn_imagename;
@@ -1563,18 +1563,17 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   int grid_size, angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
-//  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
   if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
   if (GTK_TOGGLE_BUTTON (s->draw_angle)->active) snap |= LC_DRAW_SNAP_A;
   if (GTK_TOGGLE_BUTTON (s->draw_centimeter)->active) snap |= LC_DRAW_CM_UNITS;
-  //  if (GTK_TOGGLE_BUTTON (s->draw_collision)->active) snap |= LC_DRAW_COLLISION;
   if (GTK_TOGGLE_BUTTON (s->draw_move)->active) snap |= LC_DRAW_MOVE;
   if (GTK_TOGGLE_BUTTON (s->draw_fixed)->active) snap |= LC_DRAW_MOVEAXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_lockx)->active) snap |= LC_DRAW_LOCK_X;
   if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
+  if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
   if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
   if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
 
@@ -1626,18 +1625,17 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   int grid_size, angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
-//  if (GTK_TOGGLE_BUTTON (s->draw_preview)->active) snap |= LC_DRAW_PREVIEW;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
   if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
   if (GTK_TOGGLE_BUTTON (s->draw_angle)->active) snap |= LC_DRAW_SNAP_A;
   if (GTK_TOGGLE_BUTTON (s->draw_centimeter)->active) snap |= LC_DRAW_CM_UNITS;
-  //  if (GTK_TOGGLE_BUTTON (s->draw_collision)->active) snap |= LC_DRAW_COLLISION;
   if (GTK_TOGGLE_BUTTON (s->draw_move)->active) snap |= LC_DRAW_MOVE;
   if (GTK_TOGGLE_BUTTON (s->draw_fixed)->active) snap |= LC_DRAW_MOVEAXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_lockx)->active) snap |= LC_DRAW_LOCK_X;
   if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
+  if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
   if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
   if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
 
@@ -1790,7 +1788,7 @@ int preferencesdlg_execute(void* param)
   gtk_box_pack_start (GTK_BOX (hbox), s.det_width, FALSE, FALSE, 0);
   gtk_widget_set_usize (s.det_width, 50, -2);
 
-  table = gtk_table_new (8, 2, TRUE);
+  table = gtk_table_new (7, 2, TRUE);
   gtk_widget_show (table);
   gtk_container_add (GTK_CONTAINER (notebook), table);
   gtk_container_border_width (GTK_CONTAINER (table), 5);
@@ -1817,6 +1815,11 @@ int preferencesdlg_execute(void* param)
   s.draw_axis = gtk_check_button_new_with_label ("Axis icon");
   gtk_widget_show (s.draw_axis);
   gtk_table_attach (GTK_TABLE (table), s.draw_axis, 0, 1, 1, 2,
+                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+  s.draw_centimeter = gtk_check_button_new_with_label ("Centimeter units");
+  gtk_widget_show (s.draw_centimeter);
+  gtk_table_attach (GTK_TABLE (table), s.draw_centimeter, 0, 1, 2, 3,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   s.draw_snapx = gtk_check_button_new_with_label ("Snap X");
@@ -1853,9 +1856,9 @@ int preferencesdlg_execute(void* param)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
   gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
 
-  s.draw_centimeter = gtk_check_button_new_with_label ("Centimeter units");
-  gtk_widget_show (s.draw_centimeter);
-  gtk_table_attach (GTK_TABLE (table), s.draw_centimeter, 0, 1, 7, 8,
+  s.draw_relative = gtk_check_button_new_with_label ("Don't allow relative snap");
+  gtk_widget_show (s.draw_relative);
+  gtk_table_attach (GTK_TABLE (table), s.draw_relative, 1, 2, 0, 1,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   s.draw_move = gtk_check_button_new_with_label ("Switch to move after insert");
@@ -2104,8 +2107,6 @@ int preferencesdlg_execute(void* param)
 			       (opts->nSnap & LC_DRAW_GRID) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_axis),
 			       (opts->nSnap & LC_DRAW_AXIS) ? TRUE : FALSE);
-//  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_preview),
-//			       (opts->nSnap & LC_DRAW_PREVIEW) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapx),
 			       (opts->nSnap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapy),
@@ -2116,8 +2117,6 @@ int preferencesdlg_execute(void* param)
 			       (opts->nSnap & LC_DRAW_SNAP_A) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_centimeter),
 			       (opts->nSnap & LC_DRAW_CM_UNITS) ? TRUE : FALSE);
-  //  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_collision),
-  //			       (opts->nSnap & LC_DRAW_COLLISION) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_move),
 			       (opts->nSnap & LC_DRAW_MOVE) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_fixed),
@@ -2128,6 +2127,8 @@ int preferencesdlg_execute(void* param)
 			       (opts->nSnap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_lockz),
 			       (opts->nSnap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
+  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_relative),
+			       (opts->nSnap & LC_DRAW_GLOBAL_SNAP) ? TRUE : FALSE);
   write_int(s.draw_gridunits, opts->nGridSize);
   write_int(s.draw_anglesnap, opts->nAngleSnap);
 

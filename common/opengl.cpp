@@ -1133,34 +1133,37 @@ static bool  GL_PointParameters = false;
 
 static bool GL_ExtensionSupported (const char *extension)
 {
-  const GLubyte *extensions = NULL;
-  const GLubyte *start;
-  GLubyte *where, *terminator;
+	const GLubyte *extensions = NULL;
+	const GLubyte *start;
+	GLubyte *where, *terminator;
 
-  // Extension names should not have spaces.
-  where = (GLubyte *) strchr (extension, ' ');
-  if (where || *extension == '\0')
-    return false;
+	// Extension names should not have spaces.
+	where = (GLubyte*) strchr(extension, ' ');
+	if (where || *extension == '\0')
+		return false;
 
-  extensions = glGetString (GL_EXTENSIONS);
+	extensions = glGetString(GL_EXTENSIONS);
 
-  // It takes a bit of care to be fool-proof about parsing the
-  // OpenGL extensions string. Don't be fooled by sub-strings, etc.
-  for (start = extensions; ;)
-  {
-    where = (GLubyte *) strstr ((const char *) start, extension);
-    if (!where)
-      break;
+	if (!extensions)
+		return false;
 
-    terminator = where + strlen (extension);
-    if (where == start || *(where - 1) == ' ')
-      if (*terminator == ' ' || *terminator == '\0')
-	return true;
+	// It takes a bit of care to be fool-proof about parsing the
+	// OpenGL extensions string. Don't be fooled by sub-strings, etc.
+	for (start = extensions; ;)
+	{
+		where = (GLubyte*)strstr((const char*)start, extension);
+		if (!where)
+			break;
 
-    start = terminator;
-  }
+		terminator = where + strlen(extension);
+		if (where == start || *(where - 1) == ' ')
+			if (*terminator == ' ' || *terminator == '\0')
+				return true;
 
-  return false;
+		start = terminator;
+	}
+
+	return false;
 }
 
 int GL_GetMultiTextures ()

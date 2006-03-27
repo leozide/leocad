@@ -1276,7 +1276,7 @@ END
 
 IDD_LIBRARY DIALOG DISCARDABLE  0, 0, 300, 200
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Piece Library Manager"
+CAPTION "Pieces Library Manager"
 MENU IDR_LIBRARY
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1740,7 +1740,7 @@ BEGIN
     ID_INDICATOR_POSITION   " X: 0.00 Y: 0.00 Z:0.00 "
     ID_INDICATOR_STEP       " Step 100 "
     ID_INDICATOR_SNAP       " Snap x10 "
-    IDW_PIECEPREVIEW        "Preview of how a piece looks"
+    IDW_PIECEPREVIEW        "Preview a piece (hold the left mouse button down to rotate and right button to zoom)"
     IDW_PIECESLIST          "Select the piece you want from this list"
     IDW_GROUPSBAR           "Select the group of pieces that you want to see"
     IDW_PIECESCOMBO         "Type the name or number of a piece"
@@ -2032,7 +2032,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_ACTION_SELECT        "Select objects (hold control down to select multiple objects)\nSelect"
+    ID_ACTION_SELECT        "Select objects (hold CTRL down or drag the mouse to select multiple objects)\nSelect"
     ID_ACTION_INSERT        "Add pieces to the project\nInsert"
     ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
     ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"

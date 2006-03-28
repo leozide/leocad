@@ -2618,7 +2618,7 @@ void Project::RenderOverlays(int Viewport)
 					glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
 					glGetIntegerv(GL_VIEWPORT, Vp);
 
-					gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Vp, &ScreenX, &ScreenY, &ScreenZ);
+					gluProject(0, 0, 0, ModelMatrix, ProjMatrix, Vp, &ScreenX, &ScreenY, &ScreenZ);
 
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();

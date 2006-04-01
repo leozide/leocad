@@ -19,18 +19,18 @@ using OpenGL.
 
 - LeoCAD for Windows:
 
-  Download LeoCAD-0.74-Windows.exe to your computer, double click on the 
-  icon to launch the installer and follow the dialog intructions.
+  Download LeoCAD-0.75-Windows.exe to your computer, double click on the 
+  icon to launch the installer and follow the intructions.
 
 - LeoCAD for Linux:
 
-  You can either download the source from SVN or use the precompiled i386
-  binaries. You will also need to download the Pieces Library separately,
-  extract it to a directory of your choice and point the LEOCAD_LIB
-  environment variable to it. More information is available at
-  http://www.leocad.org/linux.htm
+  You can either download the source from Subversion or use the i386 rpm
+  binaries. If you decide to compile it yourself you will also need to 
+  download the Pieces Library separately, extract it to any directory of 
+  your choice and point the LEOCAD_LIB environment variable to it. More 
+  information is available at http://www.leocad.org/linux.htm
 
-New users can follow the tutorials at http://www.leocad.org/tutorial/
+New users can follow the tutorial at http://www.leocad.org/tutorial/
 to learn how to use LeoCAD.
 
 

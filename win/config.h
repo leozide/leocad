@@ -11,7 +11,7 @@
 #define LC_VERSION_MINOR 74
 #define LC_VERSION_PATCH 0
 #define LC_VERSION_OSNAME "Windows"
-#define LC_VERSION_TEXT "0.74"
+#define LC_VERSION_TEXT "0.75"
 #define LC_VERSION_TAG ""
 #define LC_INSTALL_PREFIX "C:\\leocad"
 

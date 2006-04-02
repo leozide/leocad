@@ -8,7 +8,7 @@
 #define _CONFIG_H_
 
 #define LC_VERSION_MAJOR 0
-#define LC_VERSION_MINOR 74
+#define LC_VERSION_MINOR 75
 #define LC_VERSION_PATCH 0
 #define LC_VERSION_OSNAME "Windows"
 #define LC_VERSION_TEXT "0.75"

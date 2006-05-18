@@ -105,14 +105,26 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-    char **names;
+    LC_MFW_PIECEINFO** items;
     int j, count;
 
-    m_pMinifig->GetDescriptions (i, &names, &count);
+    m_pMinifig->GetItems(i, &items, &count);
 
     for (j = 0; j < count; j++)
-			pCombo->AddString (names[j]);
-    free (names);
+		{
+			if (items[j])
+			{
+				int idx = pCombo->AddString(items[j]->description);
+				pCombo->SetItemDataPtr(idx, items[j]);
+			}
+			else
+			{
+				int idx = pCombo->AddString("None");
+				pCombo->SetItemDataPtr(idx, NULL);
+			}
+		}
+
+		free(items);
 	}
 
   char *names[LC_MFW_NUMITEMS];
@@ -153,10 +165,11 @@ LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 
 void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
-  char tmp[65];
-  GetDlgItem(nID)->GetWindowText (tmp, 65);
-	m_pMinifig->ChangePiece (nID-IDC_MF_HAT, tmp);
-	m_pMinifig->Redraw ();
+	CComboBox* combo = (CComboBox*)GetDlgItem(nID);
+	LC_MFW_PIECEINFO* info = (LC_MFW_PIECEINFO*)combo->GetItemDataPtr(combo->GetCurSel());
+
+	m_pMinifig->ChangePiece(nID-IDC_MF_HAT, info);
+	m_pMinifig->Redraw();
 }
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 

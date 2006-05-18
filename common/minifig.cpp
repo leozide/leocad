@@ -336,7 +336,7 @@ static LC_MFW_PIECEINFO mfw_pieceinfo[] =
 	{ "970",    "Hips",                               LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
 	{ "970P4F", "Hips with Leather Belt (Red Studs)", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
 	{ "970P63", "Hips with Robot Pattern",            LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
-	{ "970PHB", "Purple Greatcoat Pattern",           LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
+	{ "970PHB", "Hips with Purple Greatcoat Pattern", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
 	{ "970PS5", "Hips with SW Gun Belt",              LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
 
 	// Left Legs
@@ -878,10 +878,10 @@ void MinifigWizard::GetSelections (char **names)
 	}
 }
 
-void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
+void MinifigWizard::GetItems(int type, LC_MFW_PIECEINFO*** items, int *count)
 {
-	char **list = (char**)malloc (sizeof (char*)*mfw_pieces);
-	*names = list;
+	LC_MFW_PIECEINFO** list = (LC_MFW_PIECEINFO**)malloc(sizeof(LC_MFW_PIECEINFO*)*mfw_pieces);
+	*items = list;
 	*count = 0;
 	int i, j;
 
@@ -938,18 +938,18 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
 			continue;
 		}
 
-		list[(*count)++] = mfw_pieceinfo[i].description;
+		list[(*count)++] = &mfw_pieceinfo[i];
 	}
 
 	// ugly sort
 	for (i = 0; i < (*count) - 1; i++)
 		for (j = 0; j < (*count) - 1; j++)
 		{
-			if (strcmp (list[j], list[j+1]) > 0)
+			if (strcmp (list[j]->description, list[j+1]->description) > 0)
 			{
-	char *tmp = list[j];
-	list[j] = list[j+1];
-	list[j+1] = tmp;
+				LC_MFW_PIECEINFO* tmp = list[j];
+				list[j] = list[j+1];
+				list[j+1] = tmp;
 			}
 		}
 
@@ -957,35 +957,26 @@ void MinifigWizard::GetDescriptions (int type, char ***names, int *count)
 	    (type == LC_MFW_LEFT_TOOL) || (type == LC_MFW_RIGHT_TOOL) ||
 	    (type == LC_MFW_LEFT_SHOE) || (type == LC_MFW_RIGHT_SHOE))
 	{
-		memmove (list+1, list, *count*sizeof (char*));
-		list[0] = "None";
+		memmove(list+1, list, (*count) * sizeof(LC_MFW_PIECEINFO*));
+		list[0] = NULL;
 		(*count)++;
 	}
 }
 
-void MinifigWizard::ChangePiece (int type, const char *desc)
+void MinifigWizard::ChangePiece(int type, LC_MFW_PIECEINFO* info)
 {
 	PieceInfo* piece_info = NULL;
-	int j;
 
-	for (j = 0; j < mfw_pieces; j++)
+	if (info)
 	{
-		if (strcmp(desc, mfw_pieceinfo[j].description) == 0)
-		{
-			piece_info = lcGetPiecesLibrary()->FindPieceInfo(mfw_pieceinfo[j].name);
-			if (piece_info == NULL)
-				continue;
+		piece_info = lcGetPiecesLibrary()->FindPieceInfo(info->name);
 
-			if (m_Info[type])
-				m_Info[type]->DeRef();
-			m_Info[type] = piece_info;
-			piece_info->AddRef();
-			break;
-		}
+		if (m_Info[type])
+			m_Info[type]->DeRef();
+		m_Info[type] = piece_info;
+		piece_info->AddRef();
 	}
-
-	// Piece not found ("None")
-	if (j == mfw_pieces)
+	else
 	{
 		if (m_Info[type])
 			m_Info[type]->DeRef();

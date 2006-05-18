@@ -42,12 +42,12 @@ class MinifigWizard : public GLWindow
 
   void OnDraw ();
 
-  void Calculate ();
-  void GetDescriptions (int type, char ***names, int *count);
-  void GetSelections (char **names);
-  void ChangePiece (int type, const char *description);
-  void ChangeColor (int type, int color);
-  void ChangeAngle (int type, float angle);
+  void Calculate();
+  void GetItems(int type, LC_MFW_PIECEINFO*** items, int *count);
+  void GetSelections(char **names);
+  void ChangePiece(int type, LC_MFW_PIECEINFO* info);
+  void ChangeColor(int type, int color);
+  void ChangeAngle(int type, float angle);
 
   void GetMinifigNames (char ***names, int *count);
   void SaveMinifig (const char* name);

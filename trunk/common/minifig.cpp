@@ -425,13 +425,13 @@ static LC_MFW_PIECEINFO mfw_pieceinfo[] =
 2488.DAT      Minifig Whip                                                    
 */
 
-static int mfw_pieces = sizeof (mfw_pieceinfo)/sizeof (LC_MFW_PIECEINFO);
+static int mfw_pieces = sizeof(mfw_pieceinfo)/sizeof(LC_MFW_PIECEINFO);
 
 // =============================================================================
 // MinifigWizard class
 
-MinifigWizard::MinifigWizard (GLWindow *share)
-	: GLWindow (share)
+MinifigWizard::MinifigWizard(GLWindow *share)
+	: GLWindow(share)
 {
 	const unsigned char colors[LC_MFW_NUMITEMS] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
 	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "976", "975", "977", "977",
@@ -457,129 +457,129 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 	{
 		char *ptr, buf[32];
 
-		m_MinifigCount = Sys_ProfileLoadInt ("MinifigWizard", "Count", 0);
-		m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
-		m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
+		m_MinifigCount = Sys_ProfileLoadInt("MinifigWizard", "Count", 0);
+		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**)*m_MinifigCount);
+		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**)*m_MinifigCount);
 
 		for (i = 0; i < m_MinifigCount; i++)
 		{
-			sprintf (buf, "Minifig%.2dName", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, buf);
-			m_MinifigNames[i] = (char*)malloc (strlen (ptr) + 1);
-			strcpy (m_MinifigNames[i], ptr);
+			sprintf(buf, "Minifig%.2dName", i);
+			ptr = Sys_ProfileLoadString("MinifigWizard", buf, buf);
+			m_MinifigNames[i] = (char*)malloc(strlen(ptr) + 1);
+			strcpy(m_MinifigNames[i], ptr);
 
-			m_MinifigTemplates[i] = (char*)malloc (768);
-			sprintf (buf, "Minifig%.2dColors", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
-			if (ptr[strlen (ptr) - 1] != ' ')
-				strcat (ptr, " ");
-			strcpy (m_MinifigTemplates[i], ptr);
+			m_MinifigTemplates[i] = (char*)malloc(768);
+			sprintf(buf, "Minifig%.2dColors", i);
+			ptr = Sys_ProfileLoadString("MinifigWizard", buf, "");
+			if (ptr[strlen(ptr) - 1] != ' ')
+				strcat(ptr, " ");
+			strcpy(m_MinifigTemplates[i], ptr);
 
-			sprintf (buf, "Minifig%.2dPieces", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
-			if (ptr[strlen (ptr) - 1] != ' ')
-				strcat (ptr, " ");
-			strcat (m_MinifigTemplates[i], ptr);
+			sprintf(buf, "Minifig%.2dPieces", i);
+			ptr = Sys_ProfileLoadString("MinifigWizard", buf, "");
+			if (ptr[strlen(ptr) - 1] != ' ')
+				strcat(ptr, " ");
+			strcat(m_MinifigTemplates[i], ptr);
 
-			sprintf (buf, "Minifig%.2dAngles", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
-			strcat (m_MinifigTemplates[i], ptr);
+			sprintf(buf, "Minifig%.2dAngles", i);
+			ptr = Sys_ProfileLoadString("MinifigWizard", buf, "");
+			strcat(m_MinifigTemplates[i], ptr);
 		}
 	}
 	else
-		Sys_MessageBox ("Unknown Minifig Preferences.");
+		Sys_MessageBox("Unknown Minifig Preferences.");
 }
 
-MinifigWizard::~MinifigWizard ()
+MinifigWizard::~MinifigWizard()
 {
 	char *ptr, buf[32];
 	int i, j;
 
-	Sys_ProfileSaveInt ("MinifigWizard", "Version", 1);
-	Sys_ProfileSaveInt ("MinifigWizard", "Count", m_MinifigCount);
+	Sys_ProfileSaveInt("MinifigWizard", "Version", 1);
+	Sys_ProfileSaveInt("MinifigWizard", "Count", m_MinifigCount);
 
 	for (i = 0; i < m_MinifigCount; i++)
 	{
 		char *value;
 		ptr = m_MinifigTemplates[i];
 
-		sprintf (buf, "Minifig%.2dName", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, m_MinifigNames[i]);
+		sprintf(buf, "Minifig%.2dName", i);
+		Sys_ProfileSaveString("MinifigWizard", buf, m_MinifigNames[i]);
 
 		value = ptr;
 		for (j = 0; j < LC_MFW_NUMITEMS; j++)
-			ptr = strchr (ptr, ' ') + 1;
+			ptr = strchr(ptr, ' ') + 1;
 		*(--ptr) = '\0';
 
-		sprintf (buf, "Minifig%.2dColors", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, value);
+		sprintf(buf, "Minifig%.2dColors", i);
+		Sys_ProfileSaveString("MinifigWizard", buf, value);
 		ptr++;
 
 		value = ptr;
 		for (j = 0; j < LC_MFW_NUMITEMS; j++)
-			ptr = strchr (ptr, ' ') + 1;
+			ptr = strchr(ptr, ' ') + 1;
 		*(--ptr) = '\0';
 
-		sprintf (buf, "Minifig%.2dPieces", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, value);
+		sprintf(buf, "Minifig%.2dPieces", i);
+		Sys_ProfileSaveString("MinifigWizard", buf, value);
 		ptr++;
 
-		sprintf (buf, "Minifig%.2dAngles", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, ptr);
+		sprintf(buf, "Minifig%.2dAngles", i);
+		Sys_ProfileSaveString("MinifigWizard", buf, ptr);
 
-		free (m_MinifigNames[i]);
-		free (m_MinifigTemplates[i]);
+		free(m_MinifigNames[i]);
+		free(m_MinifigTemplates[i]);
 	}
-	free (m_MinifigNames);
-	free (m_MinifigTemplates);
-	}
+	free(m_MinifigNames);
+	free(m_MinifigTemplates);
+}
 
-void MinifigWizard::OnDraw ()
+void MinifigWizard::OnDraw()
 {
 	int i;
 
-	if (!MakeCurrent ())
+	if (!MakeCurrent())
 		return;
 
 	float aspect = (float)m_nWidth/(float)m_nHeight;
-	glViewport (0, 0, m_nWidth, m_nHeight);
-	glMatrixMode (GL_PROJECTION);
-	glLoadIdentity ();
-	gluPerspective (30.0f, aspect, 1.0f, 20.0f);
-	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity ();
+	glViewport(0, 0, m_nWidth, m_nHeight);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(30.0f, aspect, 1.0f, 20.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
-	gluLookAt (0, -9, 4, 0, 5, 1, 0, 0, 1);
-	glEnable (GL_DEPTH_TEST);
-	glDepthFunc (GL_LEQUAL);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gluLookAt(0, -9, 4, 0, 5, 1, 0, 0, 1);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor (bg[0], bg[1], bg[2], bg[3]);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable (GL_DITHER);
-	glShadeModel (GL_FLAT);
+	glClearColor(bg[0], bg[1], bg[2], bg[3]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DITHER);
+	glShadeModel(GL_FLAT);
 
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Calculate ();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Calculate();
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		if (m_Info[i] == NULL)
 			continue;
 
-		glPushMatrix ();
-		glTranslatef (m_Position[i][0], m_Position[i][1], m_Position[i][2]);
-		glRotatef (m_Rotation[i][3], m_Rotation[i][0], m_Rotation[i][1], m_Rotation[i][2]);
+		glPushMatrix();
+		glTranslatef(m_Position[i][0], m_Position[i][1], m_Position[i][2]);
+		glRotatef(m_Rotation[i][3], m_Rotation[i][0], m_Rotation[i][1], m_Rotation[i][2]);
 		m_Info[i]->RenderPiece(m_Colors[i]);
-		glPopMatrix ();
+		glPopMatrix();
 	}
 
 	glFinish();
 
-	SwapBuffers ();
+	SwapBuffers();
 }
 
-void MinifigWizard::Calculate ()
+void MinifigWizard::Calculate()
 {
 	float pos[LC_MFW_NUMITEMS][3];
 	float rot[LC_MFW_NUMITEMS][3];
@@ -595,7 +595,7 @@ void MinifigWizard::Calculate ()
 			continue;
 
 		for (j = 0; j < mfw_pieces; j++)
-			if (strcmp (piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
+			if (strcmp(piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
 				break;
 
 		pos[type][0] = mfw_pieceinfo[j].x;
@@ -611,9 +611,9 @@ void MinifigWizard::Calculate ()
 		case LC_MFW_HEAD:
 			if (m_Info[LC_MFW_NECK] != NULL)
 			{
-				if (strcmp (m_Info[LC_MFW_NECK]->m_strName, "522") == 0) // Cape Cloth
+				if (strcmp(m_Info[LC_MFW_NECK]->m_strName, "522") == 0) // Cape Cloth
 					pos[type][2] += 0.02f;
-				else if (strcmp (m_Info[LC_MFW_NECK]->m_strName, "30174") == 0) // Armor Samurai
+				else if (strcmp(m_Info[LC_MFW_NECK]->m_strName, "30174") == 0) // Armor Samurai
 					pos[type][2] += 0.04f;
 				else
 					pos[type][2] += 0.08f;
@@ -626,13 +626,13 @@ void MinifigWizard::Calculate ()
 			break;
 
 		case LC_MFW_RIGHT_TOOL:
-			if ((strcmp (piece_info->m_strName, "4499") == 0) || // Bow with Arrow
-			    (strcmp (piece_info->m_strName, "30141") == 0))  // Rifle
+			if ((strcmp(piece_info->m_strName, "4499") == 0) || // Bow with Arrow
+			    (strcmp(piece_info->m_strName, "30141") == 0))  // Rifle
 				rot[type][2] = -rot[type][2];
 			break;
 
 		case LC_MFW_LEFT_LEG:
-			if (strcmp (piece_info->m_strName, "773") == 0) // Wooden Leg
+			if (strcmp(piece_info->m_strName, "773") == 0) // Wooden Leg
 			{
 				rot[type][2] += 180;//= -pos[type][0];
 //				pos[type][0] += 0.8f;
@@ -662,7 +662,7 @@ void MinifigWizard::Calculate ()
 	mat.LoadIdentity();
 	mat.CreateOld(0,0,0,rot[LC_MFW_NECK][0], rot[LC_MFW_NECK][1], rot[LC_MFW_NECK][2]);
 	mat.Rotate(m_Angles[LC_MFW_NECK], 0, 0, -1);
-	mat.SetTranslation (pos[LC_MFW_NECK][0], pos[LC_MFW_NECK][1], pos[LC_MFW_NECK][2]);
+	mat.SetTranslation(pos[LC_MFW_NECK][0], pos[LC_MFW_NECK][1], pos[LC_MFW_NECK][2]);
 	mat.ToAxisAngle(m_Rotation[LC_MFW_NECK]);
 	mat.GetTranslation(m_Position[LC_MFW_NECK]);
 
@@ -703,110 +703,110 @@ void MinifigWizard::Calculate ()
 		m3.CreateOld(0,0,0,rot[LC_MFW_LEFT_TOOL][0]-rot[LC_MFW_LEFT_HAND][0],
 		             rot[LC_MFW_LEFT_TOOL][1]-rot[LC_MFW_LEFT_HAND][1],
 		             rot[LC_MFW_LEFT_TOOL][2]-rot[LC_MFW_LEFT_HAND][2]);
-		mat.Multiply (m2, m3);
-		m2.LoadIdentity ();
+		mat.Multiply(m2, m3);
+		m2.LoadIdentity();
 
 		// Center the rotation points
-		if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			mat.Translate (0.11f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
-			mat.Translate (0, 0.8f, 0);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			mat.Translate (0.26f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
-			mat.Translate (0, 0, -0.16f);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			mat.Translate (0, 0, -0.24f);
+		if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+			mat.Translate(0.11f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
+			mat.Translate(0, 0.8f, 0);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+			mat.Translate(0.26f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
+			mat.Translate(0, 0, -0.16f);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
+			mat.Translate(0, 0, -0.24f);
 
 		// Saucepan and Frypan have a different rotation axis
-		if ((strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) ||
-	      (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0))
-			m2.Rotate (m_Angles[LC_MFW_LEFT_TOOL], 0, -1, 0);
+		if ((strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) ||
+		    (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0))
+			m2.Rotate(m_Angles[LC_MFW_LEFT_TOOL], 0, -1, 0);
 		else
-			m2.Rotate (m_Angles[LC_MFW_LEFT_TOOL], 0, 0, 1);
+			m2.Rotate(m_Angles[LC_MFW_LEFT_TOOL], 0, 0, 1);
 
-		m3.Multiply (mat, m2);
+		m3.Multiply(mat, m2);
 
-		if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			m3.Translate (-0.11f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
-			m3.Translate (0, -0.8f, 0);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			m3.Translate (-0.26f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
-			m3.Translate (0, 0, 0.16f);
-		else if (strcmp (m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			m3.Translate (0, 0, 0.24f);
+		if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+			m3.Translate(-0.11f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
+			m3.Translate(0, -0.8f, 0);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+			m3.Translate(-0.26f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
+			m3.Translate(0, 0, 0.16f);
+		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
+			m3.Translate(0, 0, 0.24f);
 
-		m3.ToAxisAngle (m_Rotation[LC_MFW_LEFT_TOOL]);
-		m3.GetTranslation (m_Position[LC_MFW_LEFT_TOOL]);
+		m3.ToAxisAngle(m_Rotation[LC_MFW_LEFT_TOOL]);
+		m3.GetTranslation(m_Position[LC_MFW_LEFT_TOOL]);
 	}
 
 	// right arm/hand/tool
-	mat.LoadIdentity (); m2.LoadIdentity (); m3.LoadIdentity ();
-	mat.Rotate (m_Angles[LC_MFW_RIGHT_ARM], -1, 0, 0);
-	mat.SetTranslation (pos[LC_MFW_RIGHT_ARM][0], pos[LC_MFW_RIGHT_ARM][1], pos[LC_MFW_RIGHT_ARM][2]);
-	mat.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_ARM]);
-	mat.GetTranslation (m_Position[LC_MFW_RIGHT_ARM]);
+	mat.LoadIdentity(); m2.LoadIdentity(); m3.LoadIdentity();
+	mat.Rotate(m_Angles[LC_MFW_RIGHT_ARM], -1, 0, 0);
+	mat.SetTranslation(pos[LC_MFW_RIGHT_ARM][0], pos[LC_MFW_RIGHT_ARM][1], pos[LC_MFW_RIGHT_ARM][2]);
+	mat.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_ARM]);
+	mat.GetTranslation(m_Position[LC_MFW_RIGHT_ARM]);
 
-	mat.Translate (pos[LC_MFW_RIGHT_HAND][0]-pos[LC_MFW_RIGHT_ARM][0],
-	               pos[LC_MFW_RIGHT_HAND][1]-pos[LC_MFW_RIGHT_ARM][1],
-	               pos[LC_MFW_RIGHT_HAND][2]-pos[LC_MFW_RIGHT_ARM][2]);
-	m2.CreateOld (0,0,0,rot[LC_MFW_RIGHT_HAND][0],rot[LC_MFW_RIGHT_HAND][1],rot[LC_MFW_RIGHT_HAND][2]);
-	m3.Multiply (mat, m2);
-	m3.Translate (0,0,-0.16f);
-	mat.LoadIdentity ();
-	mat.Translate (0,0,0.16f);
-	mat.Rotate (m_Angles[LC_MFW_RIGHT_HAND], 1, 0, 0);
-	m2.Multiply (m3, mat);
-	m2.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_HAND]);
-	m2.GetTranslation (m_Position[LC_MFW_RIGHT_HAND]);
+	mat.Translate(pos[LC_MFW_RIGHT_HAND][0]-pos[LC_MFW_RIGHT_ARM][0],
+	              pos[LC_MFW_RIGHT_HAND][1]-pos[LC_MFW_RIGHT_ARM][1],
+	              pos[LC_MFW_RIGHT_HAND][2]-pos[LC_MFW_RIGHT_ARM][2]);
+	m2.CreateOld(0,0,0,rot[LC_MFW_RIGHT_HAND][0],rot[LC_MFW_RIGHT_HAND][1],rot[LC_MFW_RIGHT_HAND][2]);
+	m3.Multiply(mat, m2);
+	m3.Translate(0,0,-0.16f);
+	mat.LoadIdentity();
+	mat.Translate(0,0,0.16f);
+	mat.Rotate(m_Angles[LC_MFW_RIGHT_HAND], 1, 0, 0);
+	m2.Multiply(m3, mat);
+	m2.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_HAND]);
+	m2.GetTranslation(m_Position[LC_MFW_RIGHT_HAND]);
 
 	if (m_Info[LC_MFW_RIGHT_TOOL] != NULL)
 	{
-		m2.Translate (pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
-		              pos[LC_MFW_RIGHT_TOOL][1]-pos[LC_MFW_RIGHT_HAND][1],
-		              pos[LC_MFW_RIGHT_TOOL][2]-pos[LC_MFW_RIGHT_HAND][2]);
-		m3.CreateOld (0,0,0,rot[LC_MFW_RIGHT_TOOL][0]-rot[LC_MFW_RIGHT_HAND][0],
-		              rot[LC_MFW_RIGHT_TOOL][1]-rot[LC_MFW_RIGHT_HAND][1],
-		              rot[LC_MFW_RIGHT_TOOL][2]-rot[LC_MFW_RIGHT_HAND][2]);
-		mat.Multiply (m2, m3);
-		m2.LoadIdentity ();
+		m2.Translate(pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
+		             pos[LC_MFW_RIGHT_TOOL][1]-pos[LC_MFW_RIGHT_HAND][1],
+		             pos[LC_MFW_RIGHT_TOOL][2]-pos[LC_MFW_RIGHT_HAND][2]);
+		m3.CreateOld(0,0,0,rot[LC_MFW_RIGHT_TOOL][0]-rot[LC_MFW_RIGHT_HAND][0],
+		             rot[LC_MFW_RIGHT_TOOL][1]-rot[LC_MFW_RIGHT_HAND][1],
+		             rot[LC_MFW_RIGHT_TOOL][2]-rot[LC_MFW_RIGHT_HAND][2]);
+		mat.Multiply(m2, m3);
+		m2.LoadIdentity();
 
 		// Center the rotation points
-		if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			mat.Translate (0.11f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
-			mat.Translate (0, 0.8f, 0);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			mat.Translate (0.26f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
-			mat.Translate (0, 0, -0.16f);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			mat.Translate (0, 0, -0.24f);
+		if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+			mat.Translate(0.11f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
+			mat.Translate(0, 0.8f, 0);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+			mat.Translate(0.26f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
+			mat.Translate(0, 0, -0.16f);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
+			mat.Translate(0, 0, -0.24f);
 
 		// Saucepan and Frypan have a different rotation axis
-		if ((strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) ||
-		    (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0))
-			m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, -1, 0);
+		if ((strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) ||
+		    (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0))
+			m2.Rotate(m_Angles[LC_MFW_RIGHT_TOOL], 0, -1, 0);
 		else
-			m2.Rotate (m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
+			m2.Rotate(m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
 
-		m3.Multiply (mat, m2);
+		m3.Multiply(mat, m2);
 
-		if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			m3.Translate (-0.11f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
-			m3.Translate (0, -0.8f, 0);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			m3.Translate (-0.26f, 0, 0);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
-			m3.Translate (0, 0, 0.16f);
-		else if (strcmp (m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			m3.Translate (0, 0, 0.24f);
+		if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
+			m3.Translate(-0.11f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
+			m3.Translate(0, -0.8f, 0);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
+			m3.Translate(-0.26f, 0, 0);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
+			m3.Translate(0, 0, 0.16f);
+		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
+			m3.Translate(0, 0, 0.24f);
 
-		m3.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_TOOL]);
-		m3.GetTranslation (m_Position[LC_MFW_RIGHT_TOOL]);
+		m3.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_TOOL]);
+		m3.GetTranslation(m_Position[LC_MFW_RIGHT_TOOL]);
 	}
 
 	// hips
@@ -819,47 +819,53 @@ void MinifigWizard::Calculate ()
 	m_Rotation[LC_MFW_HIPS][3] = 0.0f;
 
 	// left leg/shoe
-	mat.CreateOld (0,0,0,rot[LC_MFW_LEFT_LEG][0],rot[LC_MFW_LEFT_LEG][1],rot[LC_MFW_LEFT_LEG][2]);
-	m2.LoadIdentity ();
-	m2.Rotate (m_Angles[LC_MFW_LEFT_LEG], -1, 0, 0);
-	m2.SetTranslation (pos[LC_MFW_LEFT_LEG][0], pos[LC_MFW_LEFT_LEG][1], pos[LC_MFW_LEFT_LEG][2]);
-	m3.Multiply (m2, mat);
-	m3.ToAxisAngle (m_Rotation[LC_MFW_LEFT_LEG]);
-	m3.GetTranslation (m_Position[LC_MFW_LEFT_LEG]);
-	m3.Translate (pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
-	              pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
-	              pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
-	if (strcmp (m_Info[LC_MFW_LEFT_LEG]->m_strName, "773") == 0)
-		m3.Translate (-0.8f, 0, 0);
-	mat.CreateOld (0,0,0,rot[LC_MFW_LEFT_SHOE][0]-rot[LC_MFW_LEFT_LEG][0],
-	               rot[LC_MFW_LEFT_SHOE][1]-rot[LC_MFW_LEFT_LEG][1],
-	               rot[LC_MFW_LEFT_SHOE][2]-rot[LC_MFW_LEFT_LEG][2]);
-	m2.Multiply (m3, mat);
-	m3.LoadIdentity ();
-	m3.Rotate (m_Angles[LC_MFW_LEFT_SHOE], 0, 0, 1);
-	mat.Multiply (m2, m3);
-	mat.ToAxisAngle (m_Rotation[LC_MFW_LEFT_SHOE]);
-	mat.GetTranslation (m_Position[LC_MFW_LEFT_SHOE]);
+	if (m_Info[LC_MFW_LEFT_LEG])
+	{
+		mat.CreateOld(0,0,0,rot[LC_MFW_LEFT_LEG][0],rot[LC_MFW_LEFT_LEG][1],rot[LC_MFW_LEFT_LEG][2]);
+		m2.LoadIdentity();
+		m2.Rotate(m_Angles[LC_MFW_LEFT_LEG], -1, 0, 0);
+		m2.SetTranslation(pos[LC_MFW_LEFT_LEG][0], pos[LC_MFW_LEFT_LEG][1], pos[LC_MFW_LEFT_LEG][2]);
+		m3.Multiply(m2, mat);
+		m3.ToAxisAngle(m_Rotation[LC_MFW_LEFT_LEG]);
+		m3.GetTranslation(m_Position[LC_MFW_LEFT_LEG]);
+		m3.Translate(pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
+		             pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
+		             pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
+		if (strcmp(m_Info[LC_MFW_LEFT_LEG]->m_strName, "773") == 0)
+			m3.Translate(-0.8f, 0, 0);
+		mat.CreateOld(0,0,0,rot[LC_MFW_LEFT_SHOE][0]-rot[LC_MFW_LEFT_LEG][0],
+		              rot[LC_MFW_LEFT_SHOE][1]-rot[LC_MFW_LEFT_LEG][1],
+		              rot[LC_MFW_LEFT_SHOE][2]-rot[LC_MFW_LEFT_LEG][2]);
+		m2.Multiply(m3, mat);
+		m3.LoadIdentity();
+		m3.Rotate(m_Angles[LC_MFW_LEFT_SHOE], 0, 0, 1);
+		mat.Multiply(m2, m3);
+		mat.ToAxisAngle(m_Rotation[LC_MFW_LEFT_SHOE]);
+		mat.GetTranslation(m_Position[LC_MFW_LEFT_SHOE]);
+	}
 
 	// right leg/shoe
-	mat.LoadIdentity ();
-	mat.Rotate (m_Angles[LC_MFW_RIGHT_LEG], -1, 0, 0);
-	mat.SetTranslation (pos[LC_MFW_RIGHT_LEG][0], pos[LC_MFW_RIGHT_LEG][1], pos[LC_MFW_RIGHT_LEG][2]);
-	mat.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_LEG]);
-	mat.GetTranslation (m_Position[LC_MFW_RIGHT_LEG]);
-	mat.Translate (pos[LC_MFW_RIGHT_SHOE][0]-pos[LC_MFW_RIGHT_LEG][0],
-	               pos[LC_MFW_RIGHT_SHOE][1]-pos[LC_MFW_RIGHT_LEG][1],
-	               pos[LC_MFW_RIGHT_SHOE][2]-pos[LC_MFW_RIGHT_LEG][2]);
-	m2.CreateOld (0,0,0,rot[LC_MFW_RIGHT_SHOE][0],rot[LC_MFW_RIGHT_SHOE][1],rot[LC_MFW_RIGHT_SHOE][2]);
-	m3.Multiply (mat, m2);
-	mat.LoadIdentity ();
-	mat.Rotate (m_Angles[LC_MFW_RIGHT_SHOE], 0, 0, 1);
-	m2.Multiply (m3, mat);
-	m2.ToAxisAngle (m_Rotation[LC_MFW_RIGHT_SHOE]);
-	m2.GetTranslation (m_Position[LC_MFW_RIGHT_SHOE]);
+	if (m_Info[LC_MFW_RIGHT_LEG])
+	{
+		mat.LoadIdentity();
+		mat.Rotate(m_Angles[LC_MFW_RIGHT_LEG], -1, 0, 0);
+		mat.SetTranslation(pos[LC_MFW_RIGHT_LEG][0], pos[LC_MFW_RIGHT_LEG][1], pos[LC_MFW_RIGHT_LEG][2]);
+		mat.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_LEG]);
+		mat.GetTranslation(m_Position[LC_MFW_RIGHT_LEG]);
+		mat.Translate(pos[LC_MFW_RIGHT_SHOE][0]-pos[LC_MFW_RIGHT_LEG][0],
+		              pos[LC_MFW_RIGHT_SHOE][1]-pos[LC_MFW_RIGHT_LEG][1],
+		              pos[LC_MFW_RIGHT_SHOE][2]-pos[LC_MFW_RIGHT_LEG][2]);
+		m2.CreateOld(0,0,0,rot[LC_MFW_RIGHT_SHOE][0],rot[LC_MFW_RIGHT_SHOE][1],rot[LC_MFW_RIGHT_SHOE][2]);
+		m3.Multiply(mat, m2);
+		mat.LoadIdentity();
+		mat.Rotate(m_Angles[LC_MFW_RIGHT_SHOE], 0, 0, 1);
+		m2.Multiply(m3, mat);
+		m2.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_SHOE]);
+		m2.GetTranslation(m_Position[LC_MFW_RIGHT_SHOE]);
+	}
 }
 
-void MinifigWizard::GetSelections (char **names)
+void MinifigWizard::GetSelections(char **names)
 {
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
@@ -870,7 +876,7 @@ void MinifigWizard::GetSelections (char **names)
 			continue;
 
 		for (int j = 0; j < mfw_pieces; j++)
-			if (strcmp (piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
+			if (strcmp(piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
 			{
 				names[i] = mfw_pieceinfo[j].description;
 				break;
@@ -893,7 +899,7 @@ void MinifigWizard::GetItems(int type, LC_MFW_PIECEINFO*** items, int *count)
 		if (piece_info == NULL)
 			continue;
 
-		strcpy (mfw_pieceinfo[i].name, piece_info->m_strName);
+		strcpy(mfw_pieceinfo[i].name, piece_info->m_strName);
 
 		switch (type)
 		{
@@ -924,8 +930,8 @@ void MinifigWizard::GetItems(int type, LC_MFW_PIECEINFO*** items, int *count)
 
 		case LC_MFW_RIGHT_LEG:
 			if ((mfw_pieceinfo[i].type != LC_MFW_RIGHT_LEG) &&
-				((mfw_pieceinfo[i].type != LC_MFW_LEFT_LEG) ||
-				(strcmp (mfw_pieceinfo[i].name, "773") != 0))) // Wooden Leg
+			    ((mfw_pieceinfo[i].type != LC_MFW_LEFT_LEG) ||
+			    (strcmp(mfw_pieceinfo[i].name, "773") != 0))) // Wooden Leg
 				continue;
 			break;
 
@@ -945,7 +951,7 @@ void MinifigWizard::GetItems(int type, LC_MFW_PIECEINFO*** items, int *count)
 	for (i = 0; i < (*count) - 1; i++)
 		for (j = 0; j < (*count) - 1; j++)
 		{
-			if (strcmp (list[j]->description, list[j+1]->description) > 0)
+			if (strcmp(list[j]->description, list[j+1]->description) > 0)
 			{
 				LC_MFW_PIECEINFO* tmp = list[j];
 				list[j] = list[j+1];
@@ -984,133 +990,133 @@ void MinifigWizard::ChangePiece(int type, LC_MFW_PIECEINFO* info)
 	}
 }
 
-void MinifigWizard::ChangeColor (int type, int color)
+void MinifigWizard::ChangeColor(int type, int color)
 {
 	m_Colors[type] = color;
 }
 
-void MinifigWizard::ChangeAngle (int type, float angle)
+void MinifigWizard::ChangeAngle(int type, float angle)
 {
 	m_Angles[type] = angle;
 }
 
-void MinifigWizard::GetMinifigNames (char ***names, int *count)
+void MinifigWizard::GetMinifigNames(char ***names, int *count)
 {
 	*count = m_MinifigCount;
 	*names = m_MinifigNames;
 }
 
-void MinifigWizard::SaveMinifig (const char* name)
+void MinifigWizard::SaveMinifig(const char* name)
 {
-  char tmp[16];
-  int i, j;
+	char tmp[16];
+	int i, j;
 
-  // check if the name is already being used
-  for (i = 0; i < m_MinifigCount; i++)
-    if (strcmp (m_MinifigNames[i], name) == 0)
-      break;
+	// check if the name is already being used
+	for (i = 0; i < m_MinifigCount; i++)
+		if (strcmp(m_MinifigNames[i], name) == 0)
+			break;
 
-  if (i == m_MinifigCount)
-  {
-    m_MinifigCount++;
-    m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
-    m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
-    m_MinifigNames[i] = (char*)malloc (strlen (name) + 1);
-    strcpy (m_MinifigNames[i], name);
-    m_MinifigTemplates[i] = (char*)malloc (768);
-  }
-  strcpy (m_MinifigTemplates[i], "");
+	if (i == m_MinifigCount)
+	{
+		m_MinifigCount++;
+		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**)*m_MinifigCount);
+		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**)*m_MinifigCount);
+		m_MinifigNames[i] = (char*)malloc(strlen(name) + 1);
+		strcpy(m_MinifigNames[i], name);
+		m_MinifigTemplates[i] = (char*)malloc(768);
+	}
+	strcpy(m_MinifigTemplates[i], "");
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    sprintf (tmp, "%d ", m_Colors[j]);
-    strcat (m_MinifigTemplates[i], tmp);
-  }
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		sprintf(tmp, "%d ", m_Colors[j]);
+		strcat(m_MinifigTemplates[i], tmp);
+	}
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    if (m_Info[j] != NULL)
-      sprintf (tmp, "%s ", m_Info[j]->m_strName);
-    else
-      strcpy (tmp, "None ");
-    strcat (m_MinifigTemplates[i], tmp);
-  }
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		if (m_Info[j] != NULL)
+			sprintf(tmp, "%s ", m_Info[j]->m_strName);
+		else
+			strcpy(tmp, "None ");
+		strcat(m_MinifigTemplates[i], tmp);
+	}
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    sprintf (tmp, "%f ", m_Angles[j]);
-    strcat (m_MinifigTemplates[i], tmp);
-  }
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		sprintf(tmp, "%f ", m_Angles[j]);
+		strcat(m_MinifigTemplates[i], tmp);
+	}
 }
 
-bool MinifigWizard::LoadMinifig (const char* name)
+bool MinifigWizard::LoadMinifig(const char* name)
 {
-  char *ptr;
-  int i, j;
+	char *ptr;
+	int i, j;
 
-  // check if the name is valid
-  for (i = 0; i < m_MinifigCount; i++)
-    if (strcmp (m_MinifigNames[i], name) == 0)
-      break;
+	// check if the name is valid
+	for (i = 0; i < m_MinifigCount; i++)
+		if (strcmp(m_MinifigNames[i], name) == 0)
+			break;
 
-  if (i == m_MinifigCount)
-  {
-    //    Sys_MessageBox ("Unknown Minifig");
-    return false;
-  }
-  else
-    ptr = m_MinifigTemplates[i];
+	if (i == m_MinifigCount)
+	{
+		//    Sys_MessageBox("Unknown Minifig");
+		return false;
+	}
+	else
+		ptr = m_MinifigTemplates[i];
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    if (m_Info[j] != NULL)
-      m_Info[j]->DeRef ();
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+		if (m_Info[j] != NULL)
+			m_Info[j]->DeRef();
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    m_Colors[j] = strtol (ptr, &ptr, 10);
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+		m_Colors[j] = strtol(ptr, &ptr, 10);
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    char *endptr;
-    ptr++;
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		char *endptr;
+		ptr++;
 
-    endptr = strchr (ptr, ' ');
-    *endptr = '\0';
-    m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo (ptr);
-    *endptr = ' ';
-    ptr = endptr;
+		endptr = strchr(ptr, ' ');
+		*endptr = '\0';
+		m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo(ptr);
+		*endptr = ' ';
+		ptr = endptr;
 
-    if (m_Info[j] != NULL)
-      m_Info[j]->AddRef();
-  }
+		if (m_Info[j] != NULL)
+			m_Info[j]->AddRef();
+	}
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    m_Angles[j] = (float)strtod (ptr, &ptr);
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+		m_Angles[j] = (float)strtod(ptr, &ptr);
 
-  return true;
+	return true;
 }
 
-void MinifigWizard::DeleteMinifig (const char* name)
+void MinifigWizard::DeleteMinifig(const char* name)
 {
-  int i;
+	int i;
 
-  // check if the name is valid
-  for (i = 0; i < m_MinifigCount; i++)
-    if (strcmp (m_MinifigNames[i], name) == 0)
-      break;
+	// check if the name is valid
+	for (i = 0; i < m_MinifigCount; i++)
+		if (strcmp(m_MinifigNames[i], name) == 0)
+			break;
 
-  if (i == m_MinifigCount)
-  {
-    Sys_MessageBox ("Unknown Minifig");
-    return;
-  }
+	if (i == m_MinifigCount)
+	{
+		Sys_MessageBox("Unknown Minifig");
+		return;
+	}
 
-  free (m_MinifigNames[i]);
-  free (m_MinifigTemplates[i]);
-  m_MinifigCount--;
+	free(m_MinifigNames[i]);
+	free(m_MinifigTemplates[i]);
+	m_MinifigCount--;
 
-  for (; i < m_MinifigCount; i++)
-  {
-    m_MinifigNames[i] = m_MinifigNames[i+1];
-    m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
-  }
+	for (; i < m_MinifigCount; i++)
+	{
+		m_MinifigNames[i] = m_MinifigNames[i+1];
+		m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
+	}
 }

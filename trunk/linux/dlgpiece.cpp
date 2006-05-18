@@ -32,6 +32,7 @@ typedef struct
   GtkWidget *pieces[LC_MFW_NUMITEMS];
   GtkWidget *colors[LC_MFW_NUMITEMS];
   GtkWidget *angles[LC_MFW_NUMITEMS];
+  GList *infos[LC_MFW_NUMITEMS];
   GtkWidget *preview;
   GtkWidget *combo;
 } LC_MINIFIGDLG_STRUCT;
@@ -93,7 +94,7 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
 static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* info;
-  int i, piece_type;
+  int i, piece_type = 0;
   const gchar* desc;
 
   info = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "info");
@@ -107,9 +108,27 @@ static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
       break;
     }
 
-  desc = gtk_entry_get_text (GTK_ENTRY (widget));
+  desc = gtk_entry_get_text(GTK_ENTRY(widget));
 
-  info->wizard->ChangePiece (i, desc);
+  GList* list = info->infos[piece_type];
+  LC_MFW_PIECEINFO* pieceinfo = NULL;
+
+  if (!desc || !strlen(desc))
+    return;
+
+  while (list)
+  {
+    LC_MFW_PIECEINFO* l = (LC_MFW_PIECEINFO*)list->data;
+
+    if (l && !strcmp(l->description, desc))
+    {
+      pieceinfo = l;
+      break;
+    }
+    list = g_list_next(list);
+  }
+
+  info->wizard->ChangePiece (i, pieceinfo);
   info->wizard->Redraw ();
 }
 
@@ -385,11 +404,20 @@ int minifigdlg_execute (void* param)
   {
     GList* names = NULL;
     int count;
-    char **list;
-    s.wizard->GetDescriptions (i, &list, &count);
+    LC_MFW_PIECEINFO **list;
+    s.wizard->GetItems(i, &list, &count);
+    s.infos[i] = NULL;
 
     for (int j = 0; j < count; j++)
-      names = g_list_append (names, list[j]);
+    {
+      if (list[j])
+	s.infos[i] = g_list_append(s.infos[i], list[j]);
+
+      if (list[j])
+	names = g_list_append(names, list[j]->description);
+      else
+	names = g_list_append(names, (void*)"None");
+    }
 
     if (names != NULL)
     {
@@ -409,9 +437,12 @@ int minifigdlg_execute (void* param)
   gtk_widget_show(dlg);
 
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
-  {
     set_button_pixmap2(s.colors[i], FlatColorArray[s.wizard->m_Colors[i]]);
-  }
 
-  return dlg_domodal(dlg, LC_CANCEL);
+  int ret = dlg_domodal(dlg, LC_CANCEL);
+
+  for (i = 0; i < LC_MFW_NUMITEMS; i++)
+    g_list_free(s.infos[i]);
+
+  return ret;
 }

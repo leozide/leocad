@@ -173,8 +173,8 @@ protected:
 	void CalculateStep();
 
 	// Movement.
-	bool MoveSelectedObjects(Vector3& Move, Vector3& Remainder);
-	bool RotateSelectedObjects(Vector3& Delta, Vector3& Remainder);
+	bool MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap);
+	bool RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Snap);
 	void SnapVector(Vector3& Delta) const
 	{
 		Vector3 Dummy;

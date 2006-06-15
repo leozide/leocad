@@ -61,6 +61,14 @@ void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far
 	m_Rows[3] = Vector4(0, 0, d,  0);
 }
 
+void Matrix44::CreateOrtho(float Left, float Right, float Bottom, float Top, float Near, float Far)
+{
+	m_Rows[0] = Vector4(2.0f / (Right-Left), 0.0f, 0.0f, 0.0f);
+	m_Rows[1] = Vector4(0.0f, 2.0f / (Top-Bottom), 0.0f, 0.0f);
+	m_Rows[2] = Vector4(0.0f, 0.0f, -2.0f / (Far-Near), 0.0f);
+	m_Rows[3] = Vector4(-(Right+Left) / (Right-Left), -(Top+Bottom) / (Top-Bottom), -(Far+Near) / (Far-Near), 1.0f);
+}
+
 // Inverse code from the GLU library.
 Matrix44 Inverse(const Matrix44& m)
 {

@@ -405,7 +405,7 @@ public:
 	{
 		float Len = m_Value[0]*m_Value[0] + m_Value[1]*m_Value[1] + m_Value[2]*m_Value[2];
 
-		if (Len > 0.0001f)
+		if (Len > 0.00001f)
 		{
 			float f = 1.0f / sqrtf(Len);
 			AxisAngle = Vector4(m_Value[0] * f, m_Value[1] * f, m_Value[2] * f, acosf(m_Value[3]) * 2.0f);
@@ -586,6 +586,7 @@ public:
 	friend Matrix44 Inverse(const Matrix44& m);
 	void CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
 	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
+	void CreateOrtho(float Left, float Right, float Bottom, float Top, float Near, float Far);
 
 	void CreateFromAxisAngle(const Vector3& Axis, float Radians)
 	{

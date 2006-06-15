@@ -7251,7 +7251,7 @@ void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
 	}
 }
 
-bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
+bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -7264,9 +7264,10 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		Move[2] = 0;
 
 	// Snap.
-	SnapVector(Move, Remainder);
+	if (Snap)
+		SnapVector(Move, Remainder);
 
-	if (Move.LengthSquared() < 0.001f)
+	if (Move.LengthSquared() < 0.00001f)
 		return false;
 
 	// Transform the translation if we're in relative mode.
@@ -7285,9 +7286,6 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 			Move = Mul(Move, RotMat);
 		}
 	}
-
-	if (Move.LengthSquared() < 0.001f)
-		return false;
 
 	Piece* pPiece;
 	Camera* pCamera;
@@ -7330,7 +7328,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 	return true;
 }
 
-bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
+bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Snap)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -7343,7 +7341,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		Delta[2] = 0;
 
 	// Snap.
-	SnapRotationVector(Delta, Remainder);
+	if (Snap)
+		SnapRotationVector(Delta, Remainder);
 
 	if (Delta.LengthSquared() < 0.001f)
 		return false;
@@ -7681,7 +7680,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			Vector3 axis;
 			if (bShift)
 			{
-				if (m_nSnap & LC_DRAW_SNAP_A)
+				if ((m_nSnap & LC_DRAW_SNAP_A) && !bControl)
 					axis[0] = axis[1] = axis[2] = m_nAngleSnap;
 				else
 					axis[0] = axis[1] = axis[2] = 1;
@@ -7841,12 +7840,12 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (bShift)
 			{
 				Vector3 tmp;
-				RotateSelectedObjects(axis, tmp);
+				RotateSelectedObjects(axis, tmp, false);
 			}
 			else
 			{
 				Vector3 tmp;
-				MoveSelectedObjects(axis, tmp);
+				MoveSelectedObjects(axis, tmp, false);
 			}
 
 			UpdateOverlayScale();
@@ -8648,7 +8647,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8681,7 +8680,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true);
 			}
 
 			SystemUpdateFocus(NULL);
@@ -8806,7 +8805,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8839,7 +8838,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 

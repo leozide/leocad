@@ -9,6 +9,15 @@
 #include <math.h>
 #include <shlobj.h>
 
+#ifdef LC_HAVE_JPEGLIB
+#pragma comment(lib, "jpeglib")
+#endif
+
+#ifdef LC_HAVE_PNGLIB
+#pragma comment(lib, "libpng")
+#pragma comment(lib, "zlib")
+#endif
+
 // Create a bitmap of a given size and color
 HBITMAP CreateColorBitmap (UINT cx, UINT cy, COLORREF cr)
 {
@@ -242,12 +251,16 @@ BOOL FolderBrowse(CString *strFolder, LPCSTR lpszTitle, HWND hWndOwner)
 	return FALSE;
 } 
 
+#ifdef LC_HAVE_3DSFTK
+
 #include "3dsftk\inc\3dsftk.h"
 #include "globals.h"
 #include "project.h"
 #include "piece.h"
 #include "pieceinf.h"
 #include "matrix.h"
+
+#pragma comment(lib, "3dsftk")
 
 void Export3DStudio() 
 {
@@ -788,3 +801,11 @@ void Export3DStudio()
 	CloseFile3ds(file);
 	ReleaseDatabase3ds(&db);
 }
+
+#else
+
+void Export3DStudio() 
+{
+}
+
+#endif // LC_HAVE_3DSFTK

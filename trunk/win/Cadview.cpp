@@ -741,9 +741,11 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_pView = new View (lcGetActiveProject(), NULL);
-	m_pView->Create (m_hWnd);
-	m_pView->OnInitialUpdate ();
+	Project* project = lcGetActiveProject();
+
+	m_pView = new View(project, project->GetFirstView());
+	m_pView->Create(m_hWnd);
+	m_pView->OnInitialUpdate();
 
 	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 

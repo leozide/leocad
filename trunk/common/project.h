@@ -123,9 +123,11 @@ public:
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
-	void AddView (View* pView);
-	void RemoveView (View* pView);
-	void UpdateAllViews (View* pSender = NULL);
+	void AddView(View* pView);
+	void RemoveView(View* pView);
+	void UpdateAllViews(View* pSender = NULL);
+	View* GetFirstView() const
+		{ return m_ViewList.GetSize() ? m_ViewList[0] : NULL; }
 
 // Implementation
 protected:

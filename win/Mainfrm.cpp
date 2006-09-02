@@ -1147,7 +1147,8 @@ void CMainFrame::OnViewNewView()
 			AfxThrowResourceException();
   }
 
-  View *view = new View (lcGetActiveProject(), NULL);
+	Project* project = lcGetActiveProject();
+	View *view = new View(project, project->GetFirstView());
 
   CreateWindowEx (0, FLOATING_CLASSNAME, "LeoCAD",
     WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,

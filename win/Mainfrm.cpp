@@ -126,6 +126,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, OnUpdateControlBarMenu)
+	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitvertically)
+	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplithorizontally)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -142,6 +144,8 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
+		delete m_SplitterList[i];
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1153,11 +1157,12 @@ void CMainFrame::OnViewNewView()
 
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 {
-  m_wndSplitter.CreateStatic (this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
+	m_wndSplitter.CreateStatic (this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
 
-  m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
-  m_wndSplitter.CreateView (1, 0, RUNTIME_CLASS (CRichEditView), CSize (0, 0), pContext);
-  m_wndSplitter.SetRowInfo (1, 50, 0);
+	m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
+	m_wndSplitter.CreateView (1, 0, RUNTIME_CLASS (CRichEditView), CSize (0, 0), pContext);
+
+	m_wndSplitter.SetRowInfo (1, 50, 0);
 
 	// Setup the console.
 	CRichEditCtrl& Edit = ((CRichEditView*) m_wndSplitter.GetPane(1, 0))->GetRichEditCtrl();
@@ -1174,7 +1179,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 
 	Edit.SetDefaultCharFormat(cf);
 
-  return TRUE;
+	return TRUE;
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 
@@ -1425,4 +1430,71 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		lcGetActiveProject()->OpenProject(szFileName);
 	}
 	::DragFinish(hDropInfo);
+}
+
+
+void CMainFrame::OnViewSplitvertically()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Calculate the new view size.
+	RECT rect;
+	view->GetClientRect(&rect);
+	int Width = (rect.right - rect.left) / 2;
+	int Height = rect.bottom - rect.top;
+
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+
+	// Remove current view from the parent.
+	parent->DetachWindow(Row, Col);
+
+	// Create the new splitter and attach it to the parent.
+	CDynamicSplitterWnd* splitter = new CDynamicSplitterWnd();
+	m_SplitterList.Add(splitter);
+
+	splitter->CreateStatic(parent, 1, 2, WS_CHILD | WS_VISIBLE,  parent->IdFromRowCol(Row, Col));
+	parent->AttachWindow(splitter, Row, Col);
+
+	// Attach views to the new splitter.
+	splitter->AttachWindow(view, 0, 0);
+	splitter->SetColumnInfo(0, Width, 0);
+	splitter->CreateView(0, 1, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
+
+	// Update layout.
+	parent->RecalcLayout();
+}
+
+void CMainFrame::OnViewSplithorizontally()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Calculate the new view size.
+	RECT rect;
+	view->GetClientRect(&rect);
+	int Width = rect.right - rect.left;
+	int Height = (rect.bottom - rect.top) / 2;
+
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+
+	// Remove current view from the parent.
+	parent->DetachWindow(Row, Col);
+
+	// Create the new splitter and attach it to the parent.
+	CDynamicSplitterWnd* splitter = new CDynamicSplitterWnd();
+	m_SplitterList.Add(splitter);
+
+	splitter->CreateStatic(parent, 2, 1, WS_CHILD | WS_VISIBLE,  parent->IdFromRowCol(Row, Col));
+	parent->AttachWindow(splitter, Row, Col);
+
+	// Attach views to the new splitter.
+	splitter->AttachWindow(view, 0, 0);
+	splitter->SetRowInfo(0, Height, 0);
+	splitter->CreateView(1, 0, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
+
+	// Update layout.
+	parent->RecalcLayout();
 }

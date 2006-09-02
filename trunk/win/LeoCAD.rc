@@ -322,6 +322,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
         MENUITEM "New View",                    ID_VIEW_NEWVIEW
+        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
+        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
     END
     POPUP "&Piece"
     BEGIN
@@ -2082,6 +2084,12 @@ BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_SPLITHORIZONTALLY "Split the current view in 2 horizontally."
+    ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."
 END
 
 #endif    // English (U.S.) resources

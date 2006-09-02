@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libc.lib" /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
+# ADD LINK32 vfw32.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libc.lib" /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
 
 !ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib gdi32.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
+# ADD LINK32 vfw32.lib gdi32.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -147,6 +147,10 @@ SOURCE=.\Colorlst.cpp
 # Begin Source File
 
 SOURCE=.\Disabtab.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\dynsplit.cpp
 # End Source File
 # Begin Source File
 
@@ -397,6 +401,10 @@ SOURCE=.\Config.h
 # Begin Source File
 
 SOURCE=.\Disabtab.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dynsplit.h
 # End Source File
 # Begin Source File
 

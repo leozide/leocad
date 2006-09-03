@@ -54,7 +54,7 @@ Online Resources
   news://lugnet.com/lugnet.cad.leocad
 
 - Subversion access:
-  http://svn.gerf.org/svn/leocad
+  http://svn.gerf.org/leocad
 
 - Bug database:
   http://trac.gerf.org/leocad/newticket

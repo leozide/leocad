@@ -107,8 +107,10 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnViewSplitvertically();
-	afx_msg void OnViewSplithorizontally();
+	afx_msg void OnViewSplitVertically();
+	afx_msg void OnViewSplitHorizontally();
+	afx_msg void OnViewDeleteView();
+	afx_msg void OnViewResetViews();
 };
 
 /////////////////////////////////////////////////////////////////////////////

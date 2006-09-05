@@ -126,8 +126,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, OnUpdateControlBarMenu)
-	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitvertically)
-	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplithorizontally)
+	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
+	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
+	ON_COMMAND(ID_VIEW_DELETEVIEW, OnViewDeleteView)
+	ON_COMMAND(ID_VIEW_RESETVIEWS, OnViewResetViews)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -1119,6 +1121,7 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 }
 
 #include "view.h"
+#include ".\mainfrm.h"
 LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 void CMainFrame::OnViewNewView() 
@@ -1434,7 +1437,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 }
 
 
-void CMainFrame::OnViewSplitvertically()
+void CMainFrame::OnViewSplitVertically()
 {
 	CView* view = GetActiveView();
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
@@ -1467,7 +1470,7 @@ void CMainFrame::OnViewSplitvertically()
 	parent->RecalcLayout();
 }
 
-void CMainFrame::OnViewSplithorizontally()
+void CMainFrame::OnViewSplitHorizontally()
 {
 	CView* view = GetActiveView();
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
@@ -1498,4 +1501,75 @@ void CMainFrame::OnViewSplithorizontally()
 
 	// Update layout.
 	parent->RecalcLayout();
+}
+
+void CMainFrame::OnViewDeleteView()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Don't do anything if there's only one view.
+	if (parent == &m_wndSplitter)
+		return;
+
+	// Calculate the sibling position.
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+
+	if (parent->GetRowCount() == 2)
+	{
+		ASSERT(parent->GetColumnCount() == 1);
+
+		if (Row == 0)
+			Row = 1;
+		else
+			Row = 0;
+	}
+	else
+	{
+		ASSERT(parent->GetColumnCount() == 2);
+		ASSERT(parent->GetRowCount() == 1);
+
+		if (Col == 0)
+			Col = 1;
+		else
+			Col = 0;
+	}
+
+	// Detach sibling.
+	CWnd* sibling = parent->GetPane(Row, Col);
+	parent->DetachWindow(Row, Col);
+
+	// Find the parent's parent splitter.
+	CDynamicSplitterWnd* parent2 = (CDynamicSplitterWnd*)parent->GetParent();
+	parent2->GetViewRowCol(parent, &Row, &Col);
+
+	// Detach the splitter from its parent and replace it with the sibling view.
+	parent2->DetachWindow(Row, Col);
+	parent2->AttachWindow(sibling, Row, Col);
+
+	// Find first view.
+	while (!sibling->IsKindOf(RUNTIME_CLASS(CCADView)))
+		sibling = ((CDynamicSplitterWnd*)sibling)->GetPane(0, 0);
+	SetActiveView((CView*)sibling);
+
+	// Destroy parent splitter and view.
+	parent->DestroyWindow();
+
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
+	{
+		if (m_SplitterList[i] == parent)
+		{
+			delete m_SplitterList[i];
+			m_SplitterList.RemoveAt(i);
+			break;
+		}
+	}
+
+	// Update layout.
+	parent2->RecalcLayout();
+}
+
+void CMainFrame::OnViewResetViews()
+{
 }

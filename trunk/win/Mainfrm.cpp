@@ -1572,4 +1572,27 @@ void CMainFrame::OnViewDeleteView()
 
 void CMainFrame::OnViewResetViews()
 {
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Don't do anything if there's only one view.
+	if (parent == &m_wndSplitter)
+		return;
+
+	// Save the active view.
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+	parent->DetachWindow(Row, Col);
+
+	// Delete all other views.
+	m_wndSplitter.GetPane(0, 0)->DestroyWindow();
+
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
+		delete m_SplitterList[i];
+	m_SplitterList.RemoveAll();
+
+	// Add the active view back.
+	m_wndSplitter.AttachWindow(view, 0, 0);
+	m_wndSplitter.RecalcLayout();
+	SetActiveView(view);
 }

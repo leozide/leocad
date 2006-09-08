@@ -41,7 +41,7 @@ unsigned long File::ReadShort (void* pBuf, unsigned long nCount)
 
 #ifdef LC_BIG_ENDIAN
   unsigned long i;
-  lcuint16* val = (lcuint16*)pBuf, x;
+  u16* val = (u16*)pBuf, x;
 
   for (i = 0; i < read; i++)
   {
@@ -63,7 +63,7 @@ unsigned long File::ReadLong (void* pBuf, unsigned long nCount)
 
 #ifdef LC_BIG_ENDIAN
   unsigned long i;
-  lcuint32* val = (lcuint32*)pBuf, x;
+  u32* val = (u32*)pBuf, x;
 
   for (i = 0; i < read; i++)
   {
@@ -149,7 +149,7 @@ unsigned long File::WriteShort (const void* pBuf, unsigned long nCount)
 {
 #ifdef LC_BIG_ENDIAN
   unsigned long wrote = 0, i;
-  lcuint16* val = (lcuint16*)pBuf, x;
+  u16* val = (u16*)pBuf, x;
 
   for (i = 0; i < nCount; i++)
   {
@@ -169,7 +169,7 @@ unsigned long File::WriteLong (const void* pBuf, unsigned long nCount)
 {
 #ifdef LC_BIG_ENDIAN
   unsigned long wrote = 0, i;
-  lcuint32* val = (lcuint32*)pBuf, x;
+  u32* val = (u32*)pBuf, x;
 
   for (i = 0; i < nCount; i++)
   {
@@ -246,7 +246,7 @@ unsigned long File::WriteDouble (const void* pBuf, unsigned long nCount)
 
 void File::ReadString(String& Value)
 {
-	lcuint32 l;
+	u32 l;
 	ReadInt(&l);
 	Read(Value.GetBuffer(l+1), l);
 	((char*)Value)[l] = 0;

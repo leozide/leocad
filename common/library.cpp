@@ -63,8 +63,8 @@ bool PiecesLibrary::Load (const char *libpath)
 {
 	FileDisk idx, bin;
 	char filename[LC_MAXPATH];
-	lcuint16 count, movedcount;
-	lcuint32 binsize;
+	u16 count, movedcount;
+	u32 binsize;
 	Texture* pTexture;
 	int i;
 
@@ -187,9 +187,9 @@ bool PiecesLibrary::Load (const char *libpath)
 // Make sure the pieces library files are valid
 bool PiecesLibrary::ValidatePiecesFile (File& IdxFile, File& BinFile) const
 {
-	lcuint32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
-	lcuint16 count, movedcount;
-	lcuint8 version;
+	u32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
+	u16 count, movedcount;
+	u8 version;
 	char header[32];
 
 	IdxFile.Seek (-(long)(2*sizeof(count)+sizeof(binsize)), SEEK_END);
@@ -235,9 +235,9 @@ bool PiecesLibrary::ValidatePiecesFile (File& IdxFile, File& BinFile) const
 // Make sure the textures library files are valid
 bool PiecesLibrary::ValidateTexturesFile (File& IdxFile, File& BinFile) const
 {
-	lcuint32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
-	lcuint16 count;
-	lcuint8 version;
+	u32 binsize, IdxPos = IdxFile.GetPosition(), BinPos = BinFile.GetPosition();
+	u16 count;
+	u8 version;
 	char header[32];
 
 	IdxFile.Seek (-(long)(sizeof(count)+sizeof(binsize)), SEEK_END);
@@ -433,7 +433,7 @@ bool PiecesLibrary::LoadCategories(const char* FileName)
 	if (!File.Open(Path, "rb"))
 		return false;
 
-	lcuint32 i;
+	u32 i;
 
 	File.ReadInt(&i);
 	if (i != LC_FILE_ID)
@@ -689,7 +689,7 @@ bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
 {
 	FileDisk newbin, newidx, oldbin, oldidx;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
-	lcuint16 count, deleted = 0, j;
+	u16 count, deleted = 0, j;
 	void* membuf;
 
 	strcpy(file1, m_LibraryPath);
@@ -755,7 +755,7 @@ bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
 		oldidx.Read(tmp, 64+12+1+4);
 		newidx.Write(tmp, 64+12+1+4);
 
-		lcuint32 binoff = newbin.GetLength(), size;
+		u32 binoff = newbin.GetLength(), size;
 		newidx.WriteLong(&binoff, 1);
 		oldidx.ReadLong(&binoff, 1);
 		oldidx.ReadLong(&size, 1);
@@ -769,7 +769,7 @@ bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
 	}
 
 	// list of moved pieces
-	lcuint16 moved, cs;
+	u16 moved, cs;
 
 	oldidx.Seek(-(2+4+2), SEEK_END);
 	oldidx.ReadShort(&moved, 1);
@@ -781,7 +781,7 @@ bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
 	free(membuf);
 
 	// info at the end
-	lcuint32 binoff = newbin.GetPosition();
+	u32 binoff = newbin.GetPosition();
 	newidx.WriteLong(&binoff, 1);
 	count -= deleted;
 	newidx.WriteShort(&count, 1);
@@ -801,16 +801,16 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 {
 	FileDisk newbin, newidx, oldbin, oldidx, up;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
-	lcuint16 changes, moved, count, i, j, newcount = 0;
-	lcuint32 cs, group, binoff;
-	lcuint8 bt;
+	u16 changes, moved, count, i, j, newcount = 0;
+	u32 cs, group, binoff;
+	u8 bt;
 	void* membuf;
 
 	typedef struct
 	{
 		char name[9];
-		lcuint8 type;
-		lcuint32 offset;
+		u8 type;
+		u32 offset;
 	} LC_UPDATE_INFO;
 	LC_UPDATE_INFO* upinfo;
 
@@ -1050,9 +1050,9 @@ bool PiecesLibrary::DeleteTextures (char** Names, int NumTextures)
 {
 	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 	FileDisk newbin, newidx, oldbin, oldidx;
-	lcuint32 binsize, offset = 0;
-  lcuint16 count, deleted = 0, i, j;
-	lcuint8 version, bt;
+	u32 binsize, offset = 0;
+	u16 count, deleted = 0, i, j;
+	u8 version, bt;
 
 	// Backup files
 	strcpy(file1, m_LibraryPath);
@@ -1098,8 +1098,8 @@ bool PiecesLibrary::DeleteTextures (char** Names, int NumTextures)
 
 	for (i = 0; i < count; i++)
 	{
-		lcuint32 OldOffset, FileSize = 0;
-		lcuint16 Width, Height;
+		u32 OldOffset, FileSize = 0;
+		u16 Width, Height;
 		char TexName[9];
 		TexName[8] = 0;
 
@@ -1165,9 +1165,9 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 {
 	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 	FileDisk newbin, newidx, oldbin, oldidx;
-	lcuint32 FileSize = 0, binsize, offset = 0;
-	lcuint16 Width, Height, count, deleted = 0, i;
-	lcuint8 version, bt;
+	u32 FileSize = 0, binsize, offset = 0;
+	u16 Width, Height, count, deleted = 0, i;
+	u8 version, bt;
 	Image img;
 
 	if (!img.FileLoad (Name))
@@ -1212,7 +1212,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 	strcpy(NewTexName, p);
 
 	if (FindTexture (NewTexName) != NULL)
-	  Sys_MessageBox ("Texture already exists in the library !");
+		Sys_MessageBox ("Texture already exists in the library !");
 
 	// Write the headers
 	newidx.Write (TexturesIdxHeader, sizeof (TexturesIdxHeader));
@@ -1237,8 +1237,8 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 
 	for (i = 0; i < count; i++)
 	{
-		lcuint32 OldOffset;
-		lcuint16 Width, Height;
+		u32 OldOffset;
+		u16 Width, Height;
 		char TexName[9];
 		TexName[8] = 0;
 
@@ -1295,7 +1295,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 	// TODO: The texture type should be an option when you choose the file but I'll leave it hardcoded for now.
 	if (!strcmp (NewTexName, "SYSFONT"))
 	{
-		lcuint8* buf = img.GetData();
+		u8* buf = img.GetData();
 		int w = img.Alpha () ? 4 : 3;
 
 		for (i = 0; i < Width*Height; i++)
@@ -2258,7 +2258,7 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 	{
 		for (j = 0; j < lf->type; j++)
 		{
-		  int i;
+			int i;
 			for (i = unique-1; i != -1; i--)
 				if (FloatPointsClose(&verts[i*3], &lf->points[j*3]))
 					break;
@@ -2308,7 +2308,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 	unsigned long i, j, cs, binoff = 0, delta;
 	void* membuf;
 	short scale, sb[6];
-  PiecesLibrary *pLib = lcGetPiecesLibrary();
+	PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	strcpy(file1, pLib->GetLibraryPath());
 	strcat(file1, "pieces-b.old");

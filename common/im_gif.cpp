@@ -31,19 +31,19 @@ typedef struct
   int firstcode;	// first byte of oldcode's expansion
 
   // LZW symbol table and expansion stack
-  lcuint16 *symbol_head;	// => table of prefix symbols
-  lcuint8  *symbol_tail;	// => table of suffix bytes
-  lcuint8  *symbol_stack;	// => stack for symbol expansions
-  lcuint8  *sp;				// stack pointer
+  u16 *symbol_head;	// => table of prefix symbols
+  u8  *symbol_tail;	// => table of suffix bytes
+  u8  *symbol_stack;	// => stack for symbol expansions
+  u8  *sp;				// stack pointer
 
   // State for interlaced image processing
   bool is_interlaced;		// true if have interlaced image
 //	jvirt_sarray_ptr interlaced_image; // full image in interlaced order
   unsigned char* interlaced_image;
-  lcuint32 cur_row_number;	// need to know actual row number
-  lcuint32 pass2_offset;	// # of pixel rows in pass 1
-  lcuint32 pass3_offset;	// # of pixel rows in passes 1&2
-  lcuint32 pass4_offset;	// # of pixel rows in passes 1,2,3
+  u32 cur_row_number;	// need to know actual row number
+  u32 pass2_offset;	// # of pixel rows in pass 1
+  u32 pass3_offset;	// # of pixel rows in passes 1&2
+  u32 pass4_offset;	// # of pixel rows in passes 1,2,3
 
   File* input_file;
   bool first_interlace;
@@ -73,7 +73,7 @@ static int GetDataBlock (gif_source_ptr sinfo, char *buf)
 
 static int GetCode (gif_source_ptr sinfo)
 {
-  register lcint32 accum;
+  register i32 accum;
   int offs, ret, count;
 
   while ((sinfo->cur_bit + sinfo->code_size) > sinfo->last_bit)
@@ -165,7 +165,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
     if (code > sinfo->max_code)
       incode = 0;		// prevent creation of loops in symbol table
     // this symbol will be defined as oldcode/firstcode
-    *(sinfo->sp++) = (lcuint8) sinfo->firstcode;
+    *(sinfo->sp++) = (u8) sinfo->firstcode;
     code = sinfo->oldcode;
   }
 
@@ -179,7 +179,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
   if ((code = sinfo->max_code) < LZW_TABLE_SIZE)
   {
     sinfo->symbol_head[code] = sinfo->oldcode;
-    sinfo->symbol_tail[code] = (lcuint8) sinfo->firstcode;
+    sinfo->symbol_tail[code] = (u8) sinfo->firstcode;
     sinfo->max_code++;
     if ((sinfo->max_code >= sinfo->limit_code) &&
 	(sinfo->code_size < MAX_LZW_BITS))
@@ -272,9 +272,9 @@ bool Image::LoadGIF (File& file)
     break;
   }
 
-  source->symbol_head = (lcuint16*) malloc(LZW_TABLE_SIZE * sizeof(lcuint16));
-  source->symbol_tail = (lcuint8*) malloc (LZW_TABLE_SIZE * sizeof(lcuint8));
-  source->symbol_stack = (lcuint8*) malloc (LZW_TABLE_SIZE * sizeof(lcuint8));
+  source->symbol_head = (u16*) malloc(LZW_TABLE_SIZE * sizeof(u16));
+  source->symbol_tail = (u8*) malloc (LZW_TABLE_SIZE * sizeof(u8));
+  source->symbol_stack = (u8*) malloc (LZW_TABLE_SIZE * sizeof(u8));
   source->last_byte = 2; // make safe to "recopy last two bytes"
   source->last_bit = 0;	 // nothing in the buffer
   source->cur_bit = 0;	 // force buffer load on first call
@@ -308,15 +308,15 @@ bool Image::LoadGIF (File& file)
     {
       if (source->first_interlace)
       {
-        register lcuint8 *sptr;
-        register lcuint32 col;
-        lcuint32 row;
+        register u8 *sptr;
+        register u32 col;
+        u32 row;
 
         for (row = 0; row < source->height; row++) 
         {
           sptr = &source->interlaced_image[row*source->width];
           for (col = source->width; col > 0; col--) 
-            *sptr++ = (lcuint8) LZWReadByte(source);
+            *sptr++ = (u8) LZWReadByte(source);
         }
 
         source->first_interlace = false;
@@ -327,9 +327,9 @@ bool Image::LoadGIF (File& file)
       }
 
       register int c;
-      register lcuint8 *sptr, *ptr;
-      register lcuint32 col;
-      lcuint32 irow;
+      register u8 *sptr, *ptr;
+      register u32 col;
+      u32 irow;
 
       // Figure out which row of interlaced image is needed, and access it.
       switch ((int) (source->cur_row_number & 7))
@@ -362,8 +362,8 @@ bool Image::LoadGIF (File& file)
     else
     {
       register int c;
-      register lcuint8 *ptr;
-      register lcuint32 col;
+      register u8 *ptr;
+      register u32 col;
 
       ptr = source->buffer;
       for (col = source->width; col > 0; col--)
@@ -393,12 +393,12 @@ bool Image::LoadGIF (File& file)
 
 #undef LZW_TABLE_SIZE
 #define	MAX_LZW_BITS 12
-typedef lcint16 code_int;
+typedef i16 code_int;
 #define LZW_TABLE_SIZE	((code_int) 1 << MAX_LZW_BITS)
 #define HSIZE 5003
 typedef int hash_int;
 #define MAXCODE(n_bits)	(((code_int) 1 << (n_bits)) - 1)
-typedef lcint32 hash_entry;
+typedef i32 hash_entry;
 #define HASH_ENTRY(prefix,suffix)  ((((hash_entry) (prefix)) << 8) | (suffix))
 
 typedef struct
@@ -406,7 +406,7 @@ typedef struct
   int n_bits;
   code_int maxcode;
   int init_bits;
-  lcint32 cur_accum;
+  i32 cur_accum;
   int cur_bits;
   code_int waiting_code;
   bool first_byte;
@@ -442,7 +442,7 @@ static void flush_packet(gif_dest_ptr dinfo)
 
 static void output(gif_dest_ptr dinfo, code_int code)
 {
-  dinfo->cur_accum |= ((lcint32) code) << dinfo->cur_bits;
+  dinfo->cur_accum |= ((i32) code) << dinfo->cur_bits;
   dinfo->cur_bits += dinfo->n_bits;
 
   while (dinfo->cur_bits >= 8)
@@ -538,7 +538,7 @@ bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned cha
   gif_dest_ptr dinfo;
   dinfo = (gif_dest_ptr) malloc (sizeof(gif_dest_struct));
   dinfo->output_file = &file;
-  dinfo->buffer = malloc(m_nWidth*sizeof(lcuint32));
+  dinfo->buffer = malloc(m_nWidth*sizeof(u32));
   dinfo->hash_code = (code_int*) malloc(HSIZE * sizeof(code_int));
   dinfo->hash_value = (hash_entry*)malloc(HSIZE*sizeof(hash_entry));
 
@@ -623,8 +623,8 @@ bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned cha
   {
     memcpy(dinfo->buffer, colormappedbuffer+(scanline*m_nWidth), m_nWidth);
 
-    register lcuint8 *ptr;
-    register lcuint32 col;
+    register u8 *ptr;
+    register u32 col;
 
     ptr = (unsigned char*)dinfo->buffer;
     for (col = m_nWidth; col > 0; col--) 

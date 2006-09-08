@@ -36,8 +36,8 @@ class Texture
 
   // Read-only
   char m_strName[9];
-  lcuint16 m_nWidth;
-  lcuint16 m_nHeight;
+  u16 m_nWidth;
+  u16 m_nHeight;
 
 protected:
   bool FinishLoadImage (bool bFilter, void *data);
@@ -45,8 +45,8 @@ protected:
   int m_nRef;
   GLuint m_nID;
   GLenum m_nFormat;
-  lcuint32 m_nOffset;
-  lcuint32 m_nFileSize;
+  u32 m_nOffset;
+  u32 m_nFileSize;
 };
 
 

@@ -15,12 +15,14 @@
 #define LC_VERSION_TAG ""
 #define LC_INSTALL_PREFIX "C:\\leocad"
 
-typedef signed char lcint8;
-typedef unsigned char lcuint8;
-typedef signed short lcint16;
-typedef unsigned short lcuint16;
-typedef signed int lcint32;
-typedef unsigned int lcuint32;
+typedef signed char i8;
+typedef unsigned char u8;
+typedef signed short i16;
+typedef unsigned short u16;
+typedef signed int i32;
+typedef unsigned int u32;
+typedef long long i64;
+typedef unsigned long long u64;
 
 #define LC_LITTLE_ENDIAN
 #define LCUINT16(val) val

@@ -69,7 +69,7 @@ Project::Project()
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	m_nGridList = 0;
-  m_pTrackFile = NULL;
+	m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
 	m_pTerrain = new Terrain();
@@ -83,7 +83,7 @@ Project::Project()
 	messenger->AddRef();
 	messenger->Listen(&ProjectListener, this);
 
-  for (i = 0; i < LC_CONNECTIONS; i++)
+	for (i = 0; i < LC_CONNECTIONS; i++)
 	{
 		m_pConnections[i].entries = NULL;
 		m_pConnections[i].numentries = 0;
@@ -100,17 +100,17 @@ Project::~Project()
 	DeleteContents(false);
 	SystemFinish();
 
-  if (m_pTrackFile)
-  {
-    delete m_pTrackFile;
-    m_pTrackFile = NULL;
-  }
+	if (m_pTrackFile)
+	{
+		delete m_pTrackFile;
+		m_pTrackFile = NULL;
+	}
 
 	for (int i = 0; i < 10; i++)
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
 
-  messenger->DecRef ();
+	messenger->DecRef ();
 
 	delete m_pTerrain;
 	delete m_pBackground;
@@ -940,7 +940,7 @@ void Project::FileSave(File* file, bool bUndo)
 		{
 			pos = file->GetPosition();
 
-      Image* image = new Image[1];
+			Image* image = new Image[1];
 			LC_IMAGE_OPTS opts;
 			opts.interlaced = false;
 			opts.transparent = false;
@@ -959,61 +959,61 @@ void Project::FileSave(File* file, bool bUndo)
 
 void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
 {
-  FileMem* CurFile = NULL;
+	FileMem* CurFile = NULL;
 	char Buf[1024];
 
 	while (MPD.ReadLine(Buf, 1024))
-  {
-    String Line(Buf);
+	{
+		String Line(Buf);
 
-    Line.TrimLeft();
+		Line.TrimLeft();
 
-    if (Line[0] != '0')
-    {
-      // Copy current line.
-      if (CurFile != NULL)
-        CurFile->Write(Buf, strlen(Buf));
+		if (Line[0] != '0')
+		{
+			// Copy current line.
+			if (CurFile != NULL)
+				CurFile->Write(Buf, strlen(Buf));
 
-      continue;
-    }
+			continue;
+		}
 
-    Line.TrimRight();
-    Line = Line.Right(Line.GetLength() - 1);
-    Line.TrimLeft();
+		Line.TrimRight();
+		Line = Line.Right(Line.GetLength() - 1);
+		Line.TrimLeft();
 
-    // Find where a subfile starts.
-    if (Line.CompareNoCase("FILE", 4) == 0)
-    {
-      Line = Line.Right(Line.GetLength() - 4);
-      Line.TrimLeft();
+		// Find where a subfile starts.
+		if (Line.CompareNoCase("FILE", 4) == 0)
+		{
+			Line = Line.Right(Line.GetLength() - 4);
+			Line.TrimLeft();
 
-      // Create a new file.
-      CurFile = new FileMem();
-      CurFile->SetFileName(Line);
-      FileArray.Add(CurFile);
-    }
-    else if (Line.CompareNoCase("ENDFILE", 7) == 0)
-    {
-      // File ends here.
-      CurFile = NULL;
-    }
-    else if (CurFile != NULL)
-    {
-      // Copy current line.
-      CurFile->Write(Buf, strlen(Buf));
-    }
-  }
+			// Create a new file.
+			CurFile = new FileMem();
+			CurFile->SetFileName(Line);
+			FileArray.Add(CurFile);
+		}
+		else if (Line.CompareNoCase("ENDFILE", 7) == 0)
+		{
+			// File ends here.
+			CurFile = NULL;
+		}
+		else if (CurFile != NULL)
+		{
+			// Copy current line.
+			CurFile->Write(Buf, strlen(Buf));
+		}
+	}
 }
 
 void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray)
 {
 	char buf[1024];
 
-  // Save file offset.
-  lcuint32 Offset = file->GetPosition();
-  file->Seek(0, SEEK_SET);
+	// Save file offset.
+	u32 Offset = file->GetPosition();
+	file->Seek(0, SEEK_SET);
 
-  while (file->ReadLine(buf, 1024))
+	while (file->ReadLine(buf, 1024))
 	{
 		strupr(buf);
 		if (strstr(buf, "STEP"))
@@ -1050,7 +1050,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			if (ptr != NULL)
 				*ptr = 0;
 
-      // See if it's a piece in the library
+			// See if it's a piece in the library
 			if (strlen(tmp) < 9)
 			{
 				char name[9];
@@ -1075,36 +1075,36 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				}
 			}
 
-      // Check for MPD files first.
-      if (read)
-      {
-        for (int i = 0; i < FileArray.GetSize(); i++)
-        {
-          if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
-          {
-  					FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
-  					read = false;
-            break;
-          }
-        }
-      }
+			// Check for MPD files first.
+			if (read)
+			{
+				for (int i = 0; i < FileArray.GetSize(); i++)
+				{
+					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					{
+						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+						read = false;
+						break;
+					}
+				}
+			}
 
-      // Try to read the file from disk.
+			// Try to read the file from disk.
 			if (read)
 			{
 				FileDisk tf;
 
-        if (tf.Open(pn, "rt"))
-        {
+				if (tf.Open(pn, "rt"))
+				{
 					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
 					read = false;
-        }
+				}
 			}
 		}
 	}
 
-  // Restore file offset.
-  file->Seek(Offset, SEEK_SET);
+	// Restore file offset.
+	file->Seek(Offset, SEEK_SET);
 }
 
 bool Project::DoFileSave()

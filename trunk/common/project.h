@@ -206,6 +206,10 @@ protected:
 	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
 
+	// Animation playback.
+	bool m_PlayingAnimation;
+	u64 m_LastFrameTime;
+
 	File* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;

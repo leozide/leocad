@@ -121,14 +121,16 @@ public:
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool AllowFast, bool RenderInterface);
 	void CheckAutoSave();
+	void CheckAnimation();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
+	// Views.
 	void AddView(View* pView);
 	void RemoveView(View* pView);
-	void UpdateAllViews(View* pSender = NULL);
+	void UpdateAllViews();
 	View* GetFirstView() const
 		{ return m_ViewList.GetSize() ? m_ViewList[0] : NULL; }
 	View* GetActiveView() const

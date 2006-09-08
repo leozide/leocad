@@ -5,7 +5,6 @@
 todo: remove LC_VIEW_VIEWPORTS
 todo: remove SystemUpdateCurrentCamera (?)
 todo: save viewport config in project
-todo: fix animation playback
 */
 
 #include <stdlib.h>
@@ -329,6 +328,7 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
 	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
 	m_OverlayActive = false;
+	m_PlayingAnimation = false;
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
@@ -1535,11 +1535,10 @@ void Project::RemoveView (View* pView)
 	m_ViewList.RemovePointer(pView);
 }
 
-void Project::UpdateAllViews (View* pSender)
+void Project::UpdateAllViews()
 {
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
-		if (m_ViewList[i] != pSender)
-			m_ViewList[i]->Redraw();
+		m_ViewList[i]->Redraw(true);
 }
 
 // Returns true if the active view changed.
@@ -1591,6 +1590,14 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	if (Interface)
 	{
 		RenderInterface(view);
+	}
+
+	if (m_PlayingAnimation)
+	{
+		if (view == m_ActiveView)
+		{
+			m_LastFrameTime = SystemGetTicks();
+		}
 	}
 
 /*
@@ -3161,6 +3168,28 @@ void Project::CheckAutoSave()
 			ar.Close();
 			m_bUndo = FALSE;
 */		}
+	}
+}
+
+void Project::CheckAnimation()
+{
+	if (!m_PlayingAnimation)
+		return;
+
+	u64 Now = SystemGetTicks();
+	u64 Elapsed = Now - m_LastFrameTime;
+	int Frames = (int)((float)Elapsed / 1000 * m_nFPS);
+
+	if (Frames)
+	{
+		m_nCurFrame += Frames;
+		while (m_nCurFrame > m_nTotalFrames)
+			m_nCurFrame -= m_nTotalFrames;
+
+		CalculateStep();
+		SystemUpdateTime(true, m_nCurFrame, m_nTotalFrames);
+
+		UpdateAllViews();
 	}
 }
 
@@ -5746,41 +5775,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_STOP:
 		{
+			m_PlayingAnimation = false;
+			SystemUpdatePlay(true, false);
 		} break;
 
 		case LC_VIEW_PLAY:
 		{ 
-/*
 			SelectAndFocusNone(false);
 			UpdateSelection();
-			m_bStopRender = false;
-			m_bRendering = true;
 			SystemUpdatePlay(false, true);
-			long time = SystemGetTicks();
-			unsigned short tics;
-			float rate = 1000.0f/m_nFPS;
-
-			while (!m_bStopRender)
-			{
-				tics = (unsigned short)(SystemGetTicks() - time);
-				if (tics < rate)
-					continue; // nothing to do
-
-				time = SystemGetTicks();
-				m_nCurFrame += (unsigned short)((float)tics/rate);
-				while (m_nCurFrame > m_nTotalFrames)
-					m_nCurFrame -= m_nTotalFrames;
-				CalculateStep();
-				SystemUpdateTime(true, m_nCurFrame, m_nTotalFrames);
-	//				RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
-	//				SystemSwapBuffers();
-				UpdateAllViews ();
-				SystemPumpMessages();
-			}
-			m_bRendering = false;
-			SystemUpdatePlay(true, false);
-			SystemUpdateFocus(NULL);
-*/
+			m_LastFrameTime = GetTickCount();
+			m_PlayingAnimation = true;
 		} break;
 
 		case LC_VIEW_CAMERA_FRONT:

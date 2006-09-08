@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by LeoCAD.rc
 //
 #define IDAPPLY                         3
@@ -682,6 +682,8 @@
 #define ID_SNAP_Z                       33168
 #define ID_VIEW_SPLITHORIZONTALLY       33169
 #define ID_VIEW_SPLITVERTICALLY         33170
+#define ID_VIEW_DELETEVIEW              33172
+#define ID_VIEW_RESETVIEWS              33174
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -693,7 +695,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        240
-#define _APS_NEXT_COMMAND_VALUE         33172
+#define _APS_NEXT_COMMAND_VALUE         33175
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

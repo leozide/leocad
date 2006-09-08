@@ -26,7 +26,7 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 /////////////////////////////////////////////////////////////////////////////
 // Static functions
 
-inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting)
+inline static void SetCurrentColor(unsigned char nColor, bool bLighting)
 {
 	bool Transparent = (nColor > 13 && nColor < 22);
 
@@ -40,22 +40,14 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 
 	if (Transparent)
 	{
-		if (!*bTrans)
-		{
-			*bTrans = true;
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glDepthMask(GL_FALSE);
 	}
 	else
 	{
-		if (*bTrans)
-		{
-			*bTrans = false;
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
-		}
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
 	}
 }
 
@@ -1155,7 +1147,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 	glPopMatrix();
 }
 
-void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+void Piece::Render(bool bLighting, bool bEdges)
 {
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
@@ -1169,8 +1161,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 
 		if (m_pPieceInfo->m_pTextures[sh].color == LC_COL_DEFAULT)
 		{
-			SetCurrentColor(m_nColor, bTrans, bLighting);
-			*nLastColor = m_nColor;
+			SetCurrentColor(m_nColor, bLighting);
 		}
 
 		glEnable(GL_TEXTURE_2D);
@@ -1197,18 +1188,13 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 		{
 			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
 
-			if (*info != *nLastColor)
+			if (*info == LC_COL_DEFAULT)
 			{
-				if (*info == LC_COL_DEFAULT)
-				{
-					SetCurrentColor(m_nColor, bTrans, bLighting);
-					*nLastColor = m_nColor;
-				}
-				else
-				{
-					SetCurrentColor((unsigned char)*info, bTrans, bLighting);
-					*nLastColor = (unsigned char)*info;
-				}
+				SetCurrentColor(m_nColor, bLighting);
+			}
+			else
+			{
+				SetCurrentColor((unsigned char)*info, bLighting);
 			}
 			info++;
 
@@ -1238,8 +1224,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 			    if (lock)
 			      glUnlockArraysEXT();
 
-			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting);
-			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
+			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED, bLighting);
 
 			    if (lock)
 			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
@@ -1269,18 +1254,13 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 		{
 			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
 
-			if (*info != *nLastColor)
+			if (*info == LC_COL_DEFAULT)
 			{
-				if (*info == LC_COL_DEFAULT)
-				{
-					SetCurrentColor(m_nColor, bTrans, bLighting);
-					*nLastColor = m_nColor;
-				}
-				else
-				{
-					SetCurrentColor((unsigned char)*info, bTrans, bLighting);
-					*nLastColor = (unsigned char)*info;
-				}
+				SetCurrentColor(m_nColor, bLighting);
+			}
+			else
+			{
+				SetCurrentColor((unsigned char)*info, bLighting);
 			}
 			info++;
 
@@ -1309,8 +1289,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 			  {
 			    if (lock)
 			      glUnlockArraysEXT();
-			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting);
-			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
+			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COL_FOCUSED : LC_COL_SELECTED, bLighting);
 			    
 			    if (lock)
 			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);

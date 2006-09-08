@@ -10,8 +10,11 @@
 
 typedef enum 
 {
-	LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
-	LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
+	LC_TRACK_NONE,
+	LC_TRACK_START_LEFT,
+	LC_TRACK_LEFT,
+	LC_TRACK_START_RIGHT,
+	LC_TRACK_RIGHT
 } LC_MOUSE_TRACK;
 
 // Mouse control overlays.
@@ -87,6 +90,7 @@ public:
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
 	Camera* GetCamera(int i);
+	Camera* GetCamera(const char* Name) const;
 	void GetTimeRange(int* from, int* to)
 	{
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
@@ -115,8 +119,7 @@ public:
 	void BeginPieceDrop(PieceInfo* Info);
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
-	void Render(bool bToMemory);
-	void SetViewSize(int cx, int cy);
+	void Render(View* view, bool AllowFast, bool RenderInterface);
 	void CheckAutoSave();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
@@ -128,6 +131,9 @@ public:
 	void UpdateAllViews(View* pSender = NULL);
 	View* GetFirstView() const
 		{ return m_ViewList.GetSize() ? m_ViewList[0] : NULL; }
+	View* GetActiveView() const
+		{ return m_ActiveView; }
+	bool SetActiveView(View* view);
 
 // Implementation
 protected:
@@ -136,6 +142,7 @@ protected:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;    // changed since last saved
 
+	View* m_ActiveView;
 	PtrArray<View> m_ViewList;
 
 	char m_strAuthor[101];
@@ -156,7 +163,6 @@ protected:
 	Camera* m_pCameras;
 	Light* m_pLights;
 	Group* m_pGroups;
-	Camera* m_pViewCameras[4];
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
@@ -185,23 +191,21 @@ protected:
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
-	// Rendering
-	void RenderScene(bool bShaded, bool bDrawViewports);
-	void RenderViewports(bool bBackground, bool bLines);
-	void RenderOverlays(int Viewport);
+	// Rendering functions.
+	void RenderBackground(View* view);
+	void RenderScene(View* view);
+	void RenderSceneBoxes(View* view);
+	void RenderOverlays(View* view);
+	void RenderInterface(View* view);
+
+	// Rendering helper functions.
 	void RenderBoxes(bool bHilite);
+	void RenderBSP(struct LC_BSPNODE* node, float* eye, bool bLighting, bool bEdges);
+	void BuildBSP(struct LC_BSPNODE* node, Piece* pList);
+
 	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
 
-	inline bool IsDrawing()
-	{
-		if (m_bRendering)
-			m_bStopRender = true;
-		return m_bRendering;
-	}
-
-	bool m_bRendering;
-	bool m_bStopRender;
 	File* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;
@@ -214,7 +218,6 @@ protected:
 
 	int m_OverlayMode;
 	bool m_OverlayActive;
-	float m_OverlayScale[4];
 	Vector3 m_OverlayCenter;
 	Vector3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
@@ -222,21 +225,19 @@ protected:
 	void ActivateOverlay();
 	void UpdateOverlayScale();
 
-	void LoadViewportProjection(int Viewport);
-	bool SetActiveViewport(int x, int y);
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
 	void UpdateSelection();
 	void RemoveEmptyGroups();
 
 public:
-	// Call this functions from each OS
-	void OnLeftButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnMouseMove(int x, int y, bool bControl, bool bShift);
+	// Call these functions from each OS
+	void OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift);
+	void OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);
 	bool OnKeyDown(char nKey, bool bControl, bool bShift);
 
 	void SetAction(int nAction);
@@ -246,10 +247,6 @@ public:
 
 protected:
 	// State variables
-	unsigned char m_nViewportMode;
-	unsigned char m_nActiveViewport;
-	int m_nViewX;
-	int m_nViewY;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* m_PreviousPiece;
 	unsigned char m_nCurColor;

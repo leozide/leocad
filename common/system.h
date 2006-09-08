@@ -80,7 +80,6 @@ class Camera;
 class PieceInfo;
 
 // User Interface
-void SystemUpdateViewport(int nNew, int nOld);
 void SystemUpdateAction(int nNew, int nOld);
 void SystemUpdateColorList(int nNew);
 void SystemUpdateRenderingMode(bool bBackground, bool bFast);

@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -32,18 +32,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
@@ -69,48 +69,48 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\idr_main.ico"
-IDR_PARTFRAME           ICON    DISCARDABLE     "res\\idr_part.ico"
+IDR_MAINFRAME           ICON                    "res\\idr_main.ico"
+IDR_PARTFRAME           ICON                    "res\\idr_part.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
-IDB_VIEWPORTS           BITMAP  FIXED IMPURE    "res\\views.bmp"
-IDR_TOOLSBAR            BITMAP  DISCARDABLE     "res\\toolsbar.bmp"
-IDR_ANIMATORBAR         BITMAP  DISCARDABLE     "res\\animator.bmp"
-IDB_PARTICONS           BITMAP  DISCARDABLE     "res\\particon.bmp"
-IDB_AUTOPAN             BITMAP  DISCARDABLE     "res\\autopan.bmp"
-IDB_HELP                BITMAP  DISCARDABLE     "res\\help.bmp"
-IDB_HOME                BITMAP  DISCARDABLE     "res\\home.bmp"
-IDB_MAIL                BITMAP  DISCARDABLE     "res\\mail.bmp"
-IDB_INFO                BITMAP  DISCARDABLE     "res\\info.bmp"
-IDB_PIECE               BITMAP  DISCARDABLE     "res\\piece.bmp"
-IDB_CAMERA              BITMAP  DISCARDABLE     "res\\camera.bmp"
-IDB_LIGHT               BITMAP  DISCARDABLE     "res\\light.bmp"
-IDB_ZOOMIN              BITMAP  DISCARDABLE     "res\\zoomin.bmp"
-IDB_ZOOMOUT             BITMAP  DISCARDABLE     "res\\zoomout.bmp"
-IDB_GROUP               BITMAP  DISCARDABLE     "res\\group.bmp"
-IDB_UNGROUP             BITMAP  DISCARDABLE     "res\\ungroup.bmp"
-IDR_FULLSCREEN          BITMAP  DISCARDABLE     "res\\fullscr.bmp"
-IDB_FULLSCREEN          BITMAP  DISCARDABLE     "res\\fullscre.bmp"
-IDB_PHOTO               BITMAP  DISCARDABLE     "res\\photo.bmp"
-IDB_DELETE              BITMAP  DISCARDABLE     "res\\delete.bmp"
-IDB_PREFERENCES         BITMAP  DISCARDABLE     "res\\preferen.bmp"
-IDR_PIECEEDITOR         BITMAP  DISCARDABLE     "res\\pieceed.bmp"
-IDB_EDITOR_ICONS        BITMAP  DISCARDABLE     "res\\editor.bmp"
-IDR_LIBRARY             BITMAP  DISCARDABLE     "res\\library.bmp"
-IDR_TERRAIN             BITMAP  DISCARDABLE     "res\\terrain.bmp"
-IDR_PREVIEW             BITMAP  DISCARDABLE     "res\\preview.bmp"
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDB_VIEWPORTS           BITMAP                  "res\\views.bmp"
+IDR_TOOLSBAR            BITMAP                  "res\\toolsbar.bmp"
+IDR_ANIMATORBAR         BITMAP                  "res\\animator.bmp"
+IDB_PARTICONS           BITMAP                  "res\\particon.bmp"
+IDB_AUTOPAN             BITMAP                  "res\\autopan.bmp"
+IDB_HELP                BITMAP                  "res\\help.bmp"
+IDB_HOME                BITMAP                  "res\\home.bmp"
+IDB_MAIL                BITMAP                  "res\\mail.bmp"
+IDB_INFO                BITMAP                  "res\\info.bmp"
+IDB_PIECE               BITMAP                  "res\\piece.bmp"
+IDB_CAMERA              BITMAP                  "res\\camera.bmp"
+IDB_LIGHT               BITMAP                  "res\\light.bmp"
+IDB_ZOOMIN              BITMAP                  "res\\zoomin.bmp"
+IDB_ZOOMOUT             BITMAP                  "res\\zoomout.bmp"
+IDB_GROUP               BITMAP                  "res\\group.bmp"
+IDB_UNGROUP             BITMAP                  "res\\ungroup.bmp"
+IDR_FULLSCREEN          BITMAP                  "res\\fullscr.bmp"
+IDB_FULLSCREEN          BITMAP                  "res\\fullscre.bmp"
+IDB_PHOTO               BITMAP                  "res\\photo.bmp"
+IDB_DELETE              BITMAP                  "res\\delete.bmp"
+IDB_PREFERENCES         BITMAP                  "res\\preferen.bmp"
+IDR_PIECEEDITOR         BITMAP                  "res\\pieceed.bmp"
+IDB_EDITOR_ICONS        BITMAP                  "res\\editor.bmp"
+IDR_LIBRARY             BITMAP                  "res\\library.bmp"
+IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
+IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+IDR_MAINFRAME TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -134,7 +134,7 @@ BEGIN
     BUTTON      ID_CONTEXT_HELP
 END
 
-IDR_TOOLSBAR TOOLBAR DISCARDABLE  16, 15
+IDR_TOOLSBAR TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_ACTION_INSERT
     BUTTON      ID_ACTION_LIGHT
@@ -160,7 +160,7 @@ BEGIN
     BUTTON      ID_PIECE_ARRAY
 END
 
-IDR_ANIMATORBAR TOOLBAR DISCARDABLE  16, 15
+IDR_ANIMATORBAR TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_VIEW_STEP_FIRST
     BUTTON      ID_VIEW_STEP_PREVIOUS
@@ -172,19 +172,19 @@ BEGIN
     BUTTON      ID_ANIMATOR_KEY
 END
 
-IDR_FULLSCREEN TOOLBAR DISCARDABLE  16, 15
+IDR_FULLSCREEN TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_VIEW_FULLSCREEN
 END
 
-IDR_PIECEEDITOR TOOLBAR DISCARDABLE  16, 15
+IDR_PIECEEDITOR TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_EDITOR_FILE_NEW
     BUTTON      ID_EDITOR_FILE_OPEN
     BUTTON      ID_EDITOR_FILE_SAVE
 END
 
-IDR_LIBRARY TOOLBAR DISCARDABLE  16, 15
+IDR_LIBRARY TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_LIBDLG_FILE_OPEN
     BUTTON      ID_LIBDLG_FILE_SAVE
@@ -195,7 +195,7 @@ BEGIN
     BUTTON      ID_LIBDLG_CATEGORY_EDIT
 END
 
-IDR_TERRAIN TOOLBAR DISCARDABLE  16, 15
+IDR_TERRAIN TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_TERDLG_FILE_OPEN
     BUTTON      ID_TERDLG_FILE_SAVE
@@ -206,7 +206,7 @@ BEGIN
     BUTTON      ID_TERDLG_EDIT_ROTATE
 END
 
-IDR_PREVIEW TOOLBAR DISCARDABLE  16, 15
+IDR_PREVIEW TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_PREVIEW_PRINT
     BUTTON      ID_PREVIEW_PREV
@@ -224,7 +224,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -324,6 +324,8 @@ BEGIN
         MENUITEM "New View",                    ID_VIEW_NEWVIEW
         MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
         MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
+        MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
+        MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
     END
     POPUP "&Piece"
     BEGIN
@@ -356,7 +358,7 @@ BEGIN
     END
 END
 
-IDR_POPUPS MENU DISCARDABLE 
+IDR_POPUPS MENU 
 BEGIN
     POPUP "0"
     BEGIN
@@ -485,7 +487,7 @@ BEGIN
     END
 END
 
-IDR_PIECEEDITOR MENU DISCARDABLE 
+IDR_PIECEEDITOR MENU 
 BEGIN
     POPUP "File"
     BEGIN
@@ -507,7 +509,7 @@ BEGIN
     END
 END
 
-IDR_LIBRARY MENU DISCARDABLE 
+IDR_LIBRARY MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -538,7 +540,7 @@ BEGIN
     END
 END
 
-IDR_TERRAIN MENU DISCARDABLE 
+IDR_TERRAIN MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -573,7 +575,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS 
 BEGIN
     "F",            ID_VIEW_FULLSCREEN,     VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
@@ -587,8 +589,8 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 217, 142
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_ABOUTBOX DIALOG  0, 0, 217, 142
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About LeoCAD"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -607,8 +609,8 @@ BEGIN
                     SS_NOTIFY
 END
 
-IDD_PROPGENERAL DIALOG DISCARDABLE  0, 0, 220, 105
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PROPGENERAL DIALOG  0, 0, 220, 105
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -626,8 +628,8 @@ BEGIN
     LTEXT           "",IDC_PROP_GEN_ACCESSED,77,79,136,8,NOT WS_GROUP
 END
 
-IDD_PROPSUMMARY DIALOG DISCARDABLE  0, 0, 220, 105
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PROPSUMMARY DIALOG  0, 0, 220, 105
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Summary"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -640,8 +642,8 @@ BEGIN
                     ES_WANTRETURN | WS_VSCROLL
 END
 
-IDD_PROPPIECES DIALOG DISCARDABLE  0, 0, 220, 105
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PROPPIECES DIALOG  0, 0, 220, 105
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Pieces Used"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -649,8 +651,8 @@ BEGIN
                     LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,7,206,90
 END
 
-IDD_SELECT_OBJECTS DIALOG DISCARDABLE  0, 0, 246, 230
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_SELECT_OBJECTS DIALOG  0, 0, 246, 230
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Select Objects"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -672,8 +674,8 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,198,209,41,14
 END
 
-IDD_ARRAY DIALOG DISCARDABLE  0, 0, 224, 170
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_ARRAY DIALOG  0, 0, 224, 170
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Array"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -771,7 +773,7 @@ BEGIN
 END
 
 IDD_STEP DIALOGEX 0, 0, 108, 41
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Step"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -786,8 +788,8 @@ BEGIN
     PUSHBUTTON      "Apply",IDAPPLY,71,28,35,11
 END
 
-IDD_MINIFIG DIALOG DISCARDABLE  0, 0, 400, 186
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_MINIFIG DIALOG  0, 0, 400, 186
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Minifig Wizard"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -902,8 +904,8 @@ BEGIN
                     WS_GROUP
 END
 
-IDD_HTML DIALOG DISCARDABLE  0, 0, 187, 172
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_HTML DIALOG  0, 0, 187, 172
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "HTML Options"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -934,8 +936,8 @@ BEGIN
     PUSHBUTTON      "Images...",IDC_HTMDLG_IMAGEOPTIONS,139,45,41,14
 END
 
-IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 187, 57
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+IDD_PROGRESS DIALOG  0, 0, 187, 57
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "Progress"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -946,8 +948,8 @@ BEGIN
     LTEXT           "",IDC_PRGDLG_TEXT2,7,19,173,8
 END
 
-IDD_GROUP DIALOG DISCARDABLE  0, 0, 170, 45
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_GROUP DIALOG  0, 0, 170, 45
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Group Name"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -956,8 +958,8 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,122,24,41,14
 END
 
-IDD_PREFGENERAL DIALOG DISCARDABLE  0, 0, 245, 132
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PREFGENERAL DIALOG  0, 0, 245, 132
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -985,8 +987,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,11,113,119,8
 END
 
-IDD_PREFDRAWING DIALOG DISCARDABLE  0, 0, 240, 114
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PREFDRAWING DIALOG  0, 0, 240, 114
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Drawing Aids"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1022,8 +1024,8 @@ BEGIN
                     WS_TABSTOP,122,72,111,8
 END
 
-IDD_PREFDETAIL DIALOG DISCARDABLE  0, 0, 240, 114
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PREFDETAIL DIALOG  0, 0, 240, 114
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Details"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1051,8 +1053,8 @@ BEGIN
     EDITTEXT        IDC_DETDLG_LINE,157,62,20,10,ES_AUTOHSCROLL
 END
 
-IDD_PREFSCENE DIALOG DISCARDABLE  0, 0, 240, 114
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PREFSCENE DIALOG  0, 0, 240, 114
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Scene"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1082,8 +1084,8 @@ BEGIN
                     WS_TABSTOP,164,75,62,8
 END
 
-IDD_PREFPRINT DIALOG DISCARDABLE  0, 0, 240, 114
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PREFPRINT DIALOG  0, 0, 240, 114
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Print"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1119,7 +1121,7 @@ BEGIN
 END
 
 IDD_OPENDLG_TEMPLATE DIALOGEX 0, 0, 77, 99
-STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_OPENDLG_PREVIEW,"Static",SS_BITMAP,2,34,17,15,
@@ -1128,8 +1130,8 @@ BEGIN
     CTEXT           "Preview",IDC_OPENDLG_TEXT,2,20,60,8
 END
 
-IDD_MODIFY DIALOG DISCARDABLE  0, 0, 106, 92
-STYLE WS_CHILD
+IDD_MODIFY DIALOG  0, 0, 106, 92
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
     PUSHBUTTON      "",IDC_MODDLG_PIECE,4,4,12,12,BS_BITMAP
@@ -1162,8 +1164,8 @@ BEGIN
     LTEXT           "Clip",IDC_MODDLG_PLANESSTATIC,40,77,15,8
 END
 
-IDD_IMAGE DIALOG DISCARDABLE  0, 0, 212, 155
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_IMAGE DIALOG  0, 0, 212, 155
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Image Options"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1206,8 +1208,8 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,62,134,41,14
 END
 
-IDD_SAVEDLG_TEMPLATE DIALOG DISCARDABLE  0, 0, 280, 22
-STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+IDD_SAVEDLG_TEMPLATE DIALOG  0, 0, 280, 22
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "stc32",stc32,0,0,280,8,NOT WS_VISIBLE
@@ -1216,7 +1218,7 @@ BEGIN
 END
 
 IDD_EXPORTPOV DIALOGEX 0, 0, 195, 99
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "POV-Ray Export "
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -1240,16 +1242,16 @@ BEGIN
     LTEXT           "Output File",IDC_STATIC,13,65,66,8
 END
 
-IDD_SAVEPICTUREDLG_TEMPLATE DIALOG DISCARDABLE  0, 0, 280, 27
-STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+IDD_SAVEPICTUREDLG_TEMPLATE DIALOG  0, 0, 280, 27
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "stc32",stc32,0,0,280,8,NOT WS_VISIBLE
     PUSHBUTTON      "Options...",IDC_SAVEPICTURE_OPTIONS,222,8,50,14
 END
 
-IDD_PIECEEDITOR DIALOG DISCARDABLE  0, 0, 270, 186
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_PIECEEDITOR DIALOG  0, 0, 270, 186
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Piece Editor"
 MENU IDR_PIECEEDITOR
 FONT 8, "MS Sans Serif"
@@ -1276,8 +1278,8 @@ BEGIN
     PUSHBUTTON      "->",ID_EDITOR_NEXT,85,168,28,11
 END
 
-IDD_LIBRARY DIALOG DISCARDABLE  0, 0, 300, 200
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_LIBRARY DIALOG  0, 0, 300, 200
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Pieces Library Manager"
 MENU IDR_LIBRARY
 FONT 8, "MS Sans Serif"
@@ -1291,8 +1293,8 @@ BEGIN
                     WS_TABSTOP,102,7,191,186
 END
 
-IDD_TERRAIN DIALOG DISCARDABLE  0, 0, 320, 201
-STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+IDD_TERRAIN DIALOG  0, 0, 320, 201
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Terrain Editor"
 MENU IDR_TERRAIN
 FONT 8, "MS Sans Serif"
@@ -1301,8 +1303,8 @@ BEGIN
                     WS_TABSTOP,7,7,145,187
 END
 
-IDD_TERRAIN_OPTIONS DIALOG DISCARDABLE  0, 0, 234, 126
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_TERRAIN_OPTIONS DIALOG  0, 0, 234, 126
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Terrain Options"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1333,8 +1335,8 @@ BEGIN
     EDITTEXT        IDC_EDIT2,178,72,20,12,ES_AUTOHSCROLL | WS_DISABLED
 END
 
-IDD_EDIT_GROUPS DIALOG DISCARDABLE  0, 0, 193, 157
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_EDIT_GROUPS DIALOG  0, 0, 193, 157
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Edit Groups"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1346,8 +1348,8 @@ BEGIN
     PUSHBUTTON      "New",IDC_EDITGRP_NEWGROUP,7,136,41,14
 END
 
-IDD_LIBRARY_TEXTURES DIALOG DISCARDABLE  0, 0, 226, 201
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_LIBRARY_TEXTURES DIALOG  0, 0, 226, 201
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "LeoCAD Pieces Library Textures"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1359,8 +1361,8 @@ BEGIN
     PUSHBUTTON      "Remove",ID_LIBTEX_REMOVE,169,41,50,14
 END
 
-IDD_PREFKEYBOARD DIALOG DISCARDABLE  0, 0, 246, 132
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PREFKEYBOARD DIALOG  0, 0, 246, 132
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Keyboard"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1380,8 +1382,8 @@ BEGIN
     LTEXT           "Shortcuts File:",IDC_STATIC,100,76,139,8
 END
 
-IDD_TRANSFORM DIALOG DISCARDABLE  0, 0, 249, 84
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_TRANSFORM DIALOG  0, 0, 249, 84
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Transform"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1403,8 +1405,8 @@ BEGIN
     GROUPBOX        "Offset",IDC_STATIC,105,7,80,68
 END
 
-IDD_CATEGORY DIALOG DISCARDABLE  0, 0, 205, 67
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_CATEGORY DIALOG  0, 0, 205, 67
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Category"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1418,7 +1420,6 @@ BEGIN
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -1441,18 +1442,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "\0"
-            VALUE "CompanyName", "BT Software\0"
-            VALUE "FileDescription", "LeoCAD\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "LeoCAD\0"
-            VALUE "LegalCopyright", "Copyright © 1996-2002, BT Software\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "LEOCAD.EXE\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "LeoCAD Application\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "CompanyName", "BT Software"
+            VALUE "FileDescription", "LeoCAD"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "LeoCAD"
+            VALUE "LegalCopyright", "Copyright © 1996-2002, BT Software"
+            VALUE "OriginalFilename", "LEOCAD.EXE"
+            VALUE "ProductName", "LeoCAD Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -1461,8 +1458,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1470,7 +1465,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -1704,40 +1699,40 @@ END
 // Cursor
 //
 
-IDC_VSPLITBAR           CURSOR  DISCARDABLE     "res\\split.cur"
-IDC_ZOOM                CURSOR  DISCARDABLE     "res\\Zoom.cur"
-IDC_BRICK               CURSOR  DISCARDABLE     "res\\Brick.cur"
-IDC_CAMERA              CURSOR  DISCARDABLE     "res\\Camera.cur"
-IDC_ERASER              CURSOR  DISCARDABLE     "res\\Eraser.cur"
-IDC_SPOTLIGHT           CURSOR  DISCARDABLE     "res\\Light.cur"
-IDC_MOVE                CURSOR  DISCARDABLE     "res\\Move.cur"
-IDC_PAINT               CURSOR  DISCARDABLE     "res\\Paint.cur"
-IDC_PAN                 CURSOR  DISCARDABLE     "res\\Pan.cur"
-IDC_ANGLE               CURSOR  DISCARDABLE     "res\\Angle.cur"
-IDC_ROTATE              CURSOR  DISCARDABLE     "res\\Rotate.cur"
-IDC_LIGHT               CURSOR  DISCARDABLE     "res\\bulb.cur"
-IDC_ZOOM_REGION         CURSOR  DISCARDABLE     "res\\Zoomrect.cur"
-IDC_SELECT_GROUP        CURSOR  DISCARDABLE     "res\\SelctGrp.cur"
-IDC_SELECT              CURSOR  DISCARDABLE     "res\\select.cur"
-IDC_ROLL                CURSOR  DISCARDABLE     "res\\roll.cur"
-IDC_PAN_UP              CURSOR  DISCARDABLE     "res\\panup.cur"
-IDC_PAN_LEFT            CURSOR  DISCARDABLE     "res\\panleft.cur"
-IDC_PAN_DOWN            CURSOR  DISCARDABLE     "res\\pandown.cur"
-IDC_PAN_RIGHT           CURSOR  DISCARDABLE     "res\\panright.cur"
-IDC_PAN_ALL             CURSOR  DISCARDABLE     "res\\panall.cur"
-IDC_PAN_NE              CURSOR  DISCARDABLE     "res\\pan_ne.cur"
-IDC_PAN_NW              CURSOR  DISCARDABLE     "res\\pan_nw.cur"
-IDC_PAN_SE              CURSOR  DISCARDABLE     "res\\pan_se.cur"
-IDC_PAN_SW              CURSOR  DISCARDABLE     "res\\pan_sw.cur"
-IDC_ROTX                CURSOR  DISCARDABLE     "res\\rotx.cur"
-IDC_ROTY                CURSOR  DISCARDABLE     "res\\roty.cur"
+IDC_VSPLITBAR           CURSOR                  "res\\split.cur"
+IDC_ZOOM                CURSOR                  "res\\Zoom.cur"
+IDC_BRICK               CURSOR                  "res\\Brick.cur"
+IDC_CAMERA              CURSOR                  "res\\Camera.cur"
+IDC_ERASER              CURSOR                  "res\\Eraser.cur"
+IDC_SPOTLIGHT           CURSOR                  "res\\Light.cur"
+IDC_MOVE                CURSOR                  "res\\Move.cur"
+IDC_PAINT               CURSOR                  "res\\Paint.cur"
+IDC_PAN                 CURSOR                  "res\\Pan.cur"
+IDC_ANGLE               CURSOR                  "res\\Angle.cur"
+IDC_ROTATE              CURSOR                  "res\\Rotate.cur"
+IDC_LIGHT               CURSOR                  "res\\bulb.cur"
+IDC_ZOOM_REGION         CURSOR                  "res\\Zoomrect.cur"
+IDC_SELECT_GROUP        CURSOR                  "res\\SelctGrp.cur"
+IDC_SELECT              CURSOR                  "res\\select.cur"
+IDC_ROLL                CURSOR                  "res\\roll.cur"
+IDC_PAN_UP              CURSOR                  "res\\panup.cur"
+IDC_PAN_LEFT            CURSOR                  "res\\panleft.cur"
+IDC_PAN_DOWN            CURSOR                  "res\\pandown.cur"
+IDC_PAN_RIGHT           CURSOR                  "res\\panright.cur"
+IDC_PAN_ALL             CURSOR                  "res\\panall.cur"
+IDC_PAN_NE              CURSOR                  "res\\pan_ne.cur"
+IDC_PAN_NW              CURSOR                  "res\\pan_nw.cur"
+IDC_PAN_SE              CURSOR                  "res\\pan_se.cur"
+IDC_PAN_SW              CURSOR                  "res\\pan_sw.cur"
+IDC_ROTX                CURSOR                  "res\\rotx.cur"
+IDC_ROTY                CURSOR                  "res\\roty.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_INDICATOR_POSITION   " X: 0.00 Y: 0.00 Z:0.00 "
     ID_INDICATOR_STEP       " Step 100 "
@@ -1751,19 +1746,19 @@ BEGIN
     IDS_CANNOT_OPEN_CLIPBOARD "Failed to open Clipboard!"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDR_MAINFRAME           "LeoCAD\n\nLeoCAD\nLeoCAD Files (*.lcd)\n.lcd\nLeoCAD.Project\nLeoCAD Project"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "LeoCAD"
     AFX_IDS_IDLEMESSAGE     "For Help, press F1"
     AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_NEW             "Create a new project\nNew"
     ID_FILE_OPEN            "Open an existing project\nOpen"
@@ -1779,7 +1774,7 @@ BEGIN
     ID_FILE_SEND_MAIL       "Send the active project through electronic mail\nSend Mail"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
@@ -1790,7 +1785,7 @@ BEGIN
     ID_HELP                 "Display help for current task or command\nHelp"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -1798,12 +1793,12 @@ BEGIN
     ID_FILE_MRU_FILE4       "Open this document"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -1818,13 +1813,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the standard toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -1833,18 +1828,18 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_SNAP_ON              "3D snap toggle\n3D Snap Toggle"
     ID_SNAP_ANGLE           "Angle snap toggle\nAngle Snap Toggle"
@@ -1856,7 +1851,7 @@ BEGIN
     ID_VIEWPORT05           "View"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEWPORT06           "View"
     ID_VIEWPORT07           "View"
@@ -1870,7 +1865,7 @@ BEGIN
     ID_PIECE_GROUP01        "Plates"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_SNAP_SNAPX           "Snap X Toggle"
     ID_SNAP_SNAPY           "Snap Y Toggle"
@@ -1880,7 +1875,7 @@ BEGIN
     ID_FILE_SAVEPICTURE     "Save a picture"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDS_COLOR01             "Red"
     IDS_COLOR02             "Orange"
@@ -1900,7 +1895,7 @@ BEGIN
     IDS_COLOR16             "Clear Orange"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDS_COLOR17             "Clear Green"
     IDS_COLOR18             "Clear Light Green"
@@ -1916,7 +1911,7 @@ BEGIN
     IDS_COLOR28             "Silver"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_PIECE_GROUP02        "Bricks"
     ID_PIECE_GROUP03        "Tiles"
@@ -1936,7 +1931,7 @@ BEGIN
     ID_PIECE_GROUP17        "Group 17"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_PIECE_GROUP18        "Group 18"
     ID_PIECE_GROUP19        "Group 19"
@@ -1955,7 +1950,7 @@ BEGIN
     ID_PIECE_GROUP32        "Group 32"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_RENDER_BACKGROUND    "Fully renders the scene in the background\nBackground Render"
     ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
@@ -1968,7 +1963,7 @@ BEGIN
     ID_ANIMATOR_KEY         "Add new animation keys\nAdd Keys"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDS_CANNOT_GET_CLIPBOARD_DATA "Failed to get Clipboard data!"
     IDS_CANCEL_PROMPT       "Are you sure you want to stop ?"
@@ -1977,14 +1972,14 @@ BEGIN
     IDS_OPENFILE_ERROR      "Cannot open file !"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_PIECE_ARRAY          "Make copies of the selected pieces\nArray"
     ID_HELP_LEOCADHOMEPAGE  "Go to the LeoCAD Home page on the internet"
     ID_HELP_CHECKFORUPDATES "Check for a newer version of the program on the internet"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_EDIT_SELECTALL       "Select all objects"
     ID_EDIT_SELECTNONE      "De-select everything"
@@ -1996,17 +1991,17 @@ BEGIN
     ID_VIEW_STEP_PREVIOUS   "Go back one step or frame\nGo Back"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDR_PARTFRAME           "LeoCAD Piece Library Manager"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_HELP_SENDEMAIL       "Send an e-mail message to the author of the program"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEW_PIECES_BAR      "Show or hide the pieces toolbar\nToggle PiecesBar"
     ID_VIEW_TOOLS_BAR       "Show or hide the drawing toolbar\nToggle DrawingBar"
@@ -2014,7 +2009,7 @@ BEGIN
     ID_VIEW_MODIFY_BAR      "Show or hide the modify dialog\nToggle Modify Dialog"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_EDITPIECELIBRARY "Configure the LeoCAD Pieces Library"
     ID_VIEW_ZOOMIN          "Zoom In"
@@ -2022,7 +2017,7 @@ BEGIN
     ID_PIECE_EDITGROUPS     "Edit groups"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_ACTION_PAN           "Pan\nPan"
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
@@ -2032,7 +2027,7 @@ BEGIN
     ID_ANIMATOR_STOP        "Stop playing animation\nStop"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_ACTION_SELECT        "Select objects (hold CTRL down or drag the mouse to select multiple objects)\nSelect"
     ID_ACTION_INSERT        "Add pieces to the project\nInsert"
@@ -2047,12 +2042,12 @@ BEGIN
     ID_ACTION_ZOOM_REGION   "Zoom region\nZoom Region"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_PIECE_COPYKEYS       "Copy position and rotation"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEW_CAMERAS_RESET   "Reset cameras to their original positions"
     ID_PREVIEW_ONEPAGE      "Show only one page\nOne Page"
@@ -2061,7 +2056,7 @@ BEGIN
     ID_PREVIEW_PREV         "Preview the previous page\nPrevious Page"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_PREVIEW_NEXT         "Preview the next page\nNext Page"
     ID_PREVIEW_ZOOMIN       "Zoom In\nZoom In"
@@ -2079,14 +2074,14 @@ BEGIN
     ID_PIECE_MIRROR         "Mirror pieces\nMirror"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEW_SPLITHORIZONTALLY "Split the current view in 2 horizontally."
     ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."

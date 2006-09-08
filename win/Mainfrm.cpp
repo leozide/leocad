@@ -26,6 +26,12 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define TOOLBAR_VERSION 1
+#define LC_ANIM_TIMER 100
+
+void MainFrameTimer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	lcGetActiveProject()->CheckAnimation();
+}
 
 void mainframe_listener (int message, void *data, void *user)
 {
@@ -259,6 +265,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
   main_window->SetXID (this);
 
   console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
+
+	SetTimer(LC_ANIM_TIMER, 1000/60, (TIMERPROC)&MainFrameTimer);
 
 	return 0;
 }
@@ -532,6 +540,8 @@ void CMainFrame::OnClose()
 		SaveBarState("Toolbars");
 		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), TOOLBAR_VERSION);
 	}
+
+	KillTimer(LC_ANIM_TIMER);
 
 	AfxGetApp()->HideApplication();
 	GetActiveDocument()->OnCloseDocument();

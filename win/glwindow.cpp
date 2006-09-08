@@ -246,11 +246,14 @@ void GLWindow::SwapBuffers()
 	OpenGLSwapBuffers(prv->m_pDC->m_hDC);
 }
 
-void GLWindow::Redraw()
+void GLWindow::Redraw(bool ForceRedraw)
 {
 	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+
 	InvalidateRect(prv->m_hWnd, NULL, FALSE);
-	UpdateWindow(prv->m_hWnd);
+
+	if (ForceRedraw)
+		UpdateWindow(prv->m_hWnd);
 }
 
 void GLWindow::CaptureMouse()

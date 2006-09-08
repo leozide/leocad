@@ -100,7 +100,6 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 		wnd = (GLWindow*)cs->lpCreateParams;
 		wnd->Create(hwnd);
-		wnd->IncRef();
 
 		WindowMap.SetAt(hwnd, wnd);
 	}
@@ -120,7 +119,6 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 		if (uMsg == WM_DESTROY)
 		{
 			WindowMap.RemoveKey(hwnd);
-			wnd->DecRef();
 		}
 	}
 
@@ -132,7 +130,6 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 GLWindow::GLWindow(GLWindow *share)
 {
-	m_nRef = 0;
 	m_pShare = share;
 	m_pData = (GLWindowPrivate*)malloc(sizeof(GLWindowPrivate));
 	memset(m_pData, 0, sizeof(GLWindowPrivate));

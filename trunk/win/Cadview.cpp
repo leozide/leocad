@@ -295,10 +295,9 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	unsigned short nOldTime = project->m_bAnimation ? project->m_nCurFrame : project->m_nCurStep;
 	UINT nRenderTime = 1+((pInfo->m_nCurPage-1)*rows*cols);
 
-	int oldSizex = project->m_nViewX;
-	int oldSizey = project->m_nViewY;
-	project->m_nViewX = tw;
-	project->m_nViewY = th;
+	View view(project, NULL);
+	view.OnSize(tw, th);
+	view.SetCamera(project->GetCamera(LC_CAMERA_MAIN));
 
 	for (int r = 0; r < rows; r++)
 	for (int c = 0; c < cols; c++)
@@ -315,14 +314,11 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			Camera* pCam = project->m_pCameras;
-			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
-				if (i-- == 0)
-					break;
+			Camera* pCam = view.GetCamera();
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
 			do 
 			{
-				project->Render(true);
+				project->Render(&view, false, false);
 				glFinish();
 				int tr, tc, ctw, cth;
 				pCam->GetTileInfo(&tr, &tc, &ctw, &cth);
@@ -341,7 +337,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		}
 		else
 		{
-			project->Render(true);
+			project->Render(&view, false, false);
 			glFinish();
 			lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 			
@@ -398,8 +394,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		project->m_nCurFrame = nOldTime;
 	else
 		project->m_nCurStep = (unsigned char)nOldTime;
-	project->m_nViewX = oldSizex;
-	project->m_nViewY = oldSizey;
 
 	pfnwglMakeCurrent(NULL, NULL);
 	pfnwglDeleteContext(hmemrc);
@@ -998,6 +992,11 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
 {
+	if (pActivateView)
+		lcGetActiveProject()->SetActiveView(((CCADView*)pActivateView)->m_pView);
+	else
+		lcGetActiveProject()->SetActiveView(NULL);
+
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 /*
 	if (IsWindowEnabled())

@@ -29,8 +29,8 @@ typedef unsigned int lcuint32;
 #define LCINT32(val) val
 #define LCFLOAT(val) val
 
-#define LC_HAVE_JPEGLIB
-#define LC_HAVE_ZLIB
-#define LC_HAVE_PNGLIB
+#undef LC_HAVE_JPEGLIB
+#undef LC_HAVE_ZLIB
+#undef LC_HAVE_PNGLIB
 
 #endif // _CONFIG_H_

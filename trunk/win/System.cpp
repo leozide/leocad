@@ -449,17 +449,6 @@ void SystemInit()
 	}
 }
 
-// Viewport menu.
-void SystemUpdateViewport(int nNew, int nOld)
-{
-	CMenu* pMenu = GetMainMenu(2);
-	if (!pMenu)
-		return;
-	pMenu = pMenu->GetSubMenu(13);
-	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
-	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
-}
-
 // Action toolbar, popup menu and cursor.
 void SystemUpdateAction(int nNew, int nOld)
 {

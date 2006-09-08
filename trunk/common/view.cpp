@@ -5,12 +5,14 @@
 #include <stdlib.h>
 #include "project.h"
 #include "view.h"
+#include "camera.h"
 #include "system.h"
 
 View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
+	m_Camera = pProject->GetCamera(LC_CAMERA_MAIN);
 }
 
 View::~View()
@@ -90,8 +92,7 @@ void View::OnDraw()
 {
 	MakeCurrent();
 
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->Render(false);
+	m_Project->Render(this, true, true);
 
 	SwapBuffers();
 }
@@ -104,36 +105,56 @@ void View::OnInitialUpdate()
 
 void View::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->OnLeftButtonDown(x, y, bControl, bShift);
+	m_Project->OnLeftButtonDown(this, x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->OnLeftButtonUp(x, y, bControl, bShift);
+	m_Project->OnLeftButtonUp(this, x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->OnLeftButtonDoubleClick(x, y, bControl, bShift);
+	m_Project->OnLeftButtonDoubleClick(this, x, y, bControl, bShift);
 }
 
 void View::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->OnRightButtonDown(x, y, bControl, bShift);
+	m_Project->OnRightButtonDown(this, x, y, bControl, bShift);
 }
 
 void View::OnRightButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->OnRightButtonUp(x, y, bControl, bShift);
+	m_Project->OnRightButtonUp(this, x, y, bControl, bShift);
 }
 
 void View::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->OnMouseMove(x, y, bControl, bShift);
+	m_Project->OnMouseMove(this, x, y, bControl, bShift);
+}
+
+void View::LoadViewportProjection()
+{
+	float ratio = (float)m_nWidth/(float)m_nHeight;
+	glViewport(0, 0, m_nWidth, m_nHeight);
+	m_Camera->LoadProjection(ratio);
+}
+
+void View::SetCamera(Camera* cam)
+{
+	if (cam)
+		m_CameraName = cam->GetName();
+
+	m_Camera = cam;
+}
+
+void View::UpdateCamera()
+{
+	Camera* cam = m_Project->GetCamera(m_CameraName);
+
+	if (!cam)
+		cam = m_Project->GetCamera(LC_CAMERA_MAIN);
+
+	m_Camera = cam;
+	m_CameraName = m_Camera->GetName();
 }

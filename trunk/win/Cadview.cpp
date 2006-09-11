@@ -58,15 +58,12 @@ END_MESSAGE_MAP()
 
 CCADView::CCADView()
 {
-	m_pPixels = NULL;
 	m_hCursor = NULL;
   m_pView = NULL;
 }
 
 CCADView::~CCADView()
 {
-	if (m_pPixels)
-		free (m_pPixels);
 }
 
 BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
@@ -998,28 +995,6 @@ void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 		lcGetActiveProject()->SetActiveView(NULL);
 
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
-/*
-	if (IsWindowEnabled())
-	{
-		if (bActivate)
-		{
-			if (m_pPixels)
-				free (m_pPixels);
-			m_pPixels = NULL;
-		}
-		else
-		{
-			if (m_pPixels)
-				free (m_pPixels);
-
-			CCADDoc* pDoc = GetDocument();
-			m_pPixels = malloc(pDoc->m_szView.cx * pDoc->m_szView.cy * sizeof(GLubyte) * 4);
-			if (!m_pPixels)
-				return;
-			glReadPixels(0, 0, pDoc->m_szView.cx, pDoc->m_szView.cy, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
-		}
-	}
-*/
 }
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 

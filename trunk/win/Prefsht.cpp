@@ -5,6 +5,8 @@
 #include "resource.h"
 #include "PrefSht.h"
 #include "defines.h"
+#include "str.h"
+#include "mainfrm.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -122,4 +124,9 @@ void CPreferencesSheet::OnDefault()
 	m_PagePrint.GetOptions(st1, st2);
 	AfxGetApp()->WriteProfileString("Default", "Header", st1);
 	AfxGetApp()->WriteProfileString("Default", "Footer", st2);
+
+	String views;
+	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
+	Frame->GetViewLayout(NULL, views);
+	AfxGetApp()->WriteProfileString("Settings", "ViewLayout", views);
 }

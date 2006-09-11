@@ -47,13 +47,13 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+	View* m_pView;
+
 // Generated message map functions
 protected:
 	HCURSOR m_hCursor;
-  View* m_pView;
 
 	BOOL DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass* pPreviewViewClass, CPrintPreviewState* pState);
-	void* m_pPixels;
 	//{{AFX_MSG(CCADView)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();

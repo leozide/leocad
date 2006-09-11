@@ -1623,23 +1623,174 @@ void CMainFrame::OnViewResetViews()
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
 
 	// Don't do anything if there's only one view.
-	if (parent == &m_wndSplitter)
+	if (parent != &m_wndSplitter)
+	{
+		// Save the active view.
+		int Row, Col;
+		parent->GetViewRowCol(view, &Row, &Col);
+		parent->DetachWindow(Row, Col);
+
+		// Delete all other views.
+		m_wndSplitter.GetPane(0, 0)->DestroyWindow();
+
+		for (int i = 0; i < m_SplitterList.GetSize(); i++)
+			delete m_SplitterList[i];
+		m_SplitterList.RemoveAll();
+
+		// Add the active view back.
+		m_wndSplitter.AttachWindow(view, 0, 0);
+		m_wndSplitter.RecalcLayout();
+		SetActiveView(view);
+	}
+
+	// Load default view layout.
+	char* str = Sys_ProfileLoadString("Settings", "ViewLayout", "V");
+	SetViewLayout(NULL, str);
+}
+
+// Creates views based on a string describing the layout.
+void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
+{
+	if (!wnd)
+	{
+		wnd = m_wndSplitter.GetPane(0, 0);
+	}
+
+	if (!*str || *str == 'V')
+	{
+		str++;
+
+		// Read camera name.
+		int count = 0;
+		char buf[16];
+
+		while (*str && isdigit(*str) && count < 15)
+			buf[count++] = *str++;
+		buf[count] = 0;
+
+		int len = atoi(buf);
+		str++;
+
+		String name;
+		strncpy(name.GetBuffer(len), str, len);
+		name[len] = 0;
+		str += len;
+
+		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CCADView)));
+
+		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->GetCamera(name));
+
 		return;
+	}
+	else if (*str == 'S')
+	{
+		str++;
+		SetActiveView((CView*)wnd, false);
 
-	// Save the active view.
-	int Row, Col;
-	parent->GetViewRowCol(view, &Row, &Col);
-	parent->DetachWindow(Row, Col);
+		// Save splitter direction.
+		char dir = *str;
+		str++;
 
-	// Delete all other views.
-	m_wndSplitter.GetPane(0, 0)->DestroyWindow();
+		// Get view size.
+		int count = 0;
+		char buf[16];
 
-	for (int i = 0; i < m_SplitterList.GetSize(); i++)
-		delete m_SplitterList[i];
-	m_SplitterList.RemoveAll();
+		while (*str && isdigit(*str) && count < 15)
+			buf[count++] = *str++;
+		buf[count] = 0;
 
-	// Add the active view back.
-	m_wndSplitter.AttachWindow(view, 0, 0);
-	m_wndSplitter.RecalcLayout();
-	SetActiveView(view);
+		int pos = atoi(buf);
+
+		RECT rc;
+		wnd->GetClientRect(&rc);
+
+		// Split view.
+		if (dir == 'H')
+		{
+			OnViewSplitHorizontally();
+
+			CSplitterWnd* splitter = (CSplitterWnd*)wnd->GetParent();
+			splitter->SetRowInfo(0, pos * rc.bottom / 100, 0);
+			splitter->RecalcLayout();
+
+			SetViewLayout(splitter->GetPane(0, 0), str);
+			SetViewLayout(splitter->GetPane(1, 0), str);
+		}
+		else
+		{
+			OnViewSplitVertically();
+
+			CSplitterWnd* splitter = (CSplitterWnd*)wnd->GetParent();
+			splitter->SetColumnInfo(0, pos * rc.right / 100, 0);
+			splitter->RecalcLayout();
+
+			SetViewLayout(splitter->GetPane(0, 0), str);
+			SetViewLayout(splitter->GetPane(0, 1), str);
+		}
+	}
+	else
+	{
+		str++;
+		return;
+	}
+}
+
+// Creates a string describing the view layout.
+void CMainFrame::GetViewLayout(CWnd* wnd, String& str) const
+{
+	if (!wnd)
+	{
+		wnd = m_wndSplitter.GetPane(0, 0);
+	}
+
+	if (wnd->IsKindOf(RUNTIME_CLASS(CCADView)))
+	{
+		str += "V";
+
+		// Save camera name.
+		String name = ((CCADView*)wnd)->m_pView->GetCamera()->GetName();
+		int len = name.GetLength();
+		char buf[16];
+		sprintf(buf, "%d", len);
+		str += buf;
+		str += '|';
+		str += name;
+	}
+	else
+	{
+		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CSplitterWnd)));
+
+		CSplitterWnd* splitter = (CSplitterWnd*)wnd;
+		int pos, dummy;
+		RECT rc;
+
+		splitter->GetClientRect(&rc);
+
+		// Save splitter direction.
+		if (splitter->GetRowCount() > splitter->GetColumnCount())
+		{
+			str += "SH";
+			splitter->GetRowInfo(0, pos, dummy);
+			pos = 100 * pos / rc.bottom;
+		}
+		else
+		{
+			str += "SV";
+			splitter->GetColumnInfo(0, pos, dummy);
+			pos = 100 * pos / rc.right;
+		}
+
+		// Save splitter size.
+		char buf[16];
+		sprintf(buf, "%d", pos);
+		str += buf;
+
+		// Save children.
+		GetViewLayout(splitter->GetPane(0, 0), str);
+
+		if (splitter->GetRowCount() > splitter->GetColumnCount())
+			GetViewLayout(splitter->GetPane(1, 0), str);
+		else
+			GetViewLayout(splitter->GetPane(0, 1), str);
+	}
 }

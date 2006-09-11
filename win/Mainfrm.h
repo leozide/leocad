@@ -60,6 +60,9 @@ public:
 
 	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;
 
+	void SetViewLayout(CWnd* wnd, const char*& str);
+	void GetViewLayout(CWnd* wnd, class String& str) const;
+
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
 	void SetStatusBarMessage(const char* Message)

@@ -1322,14 +1322,8 @@ bool Project::OnNewDocument()
 	LoadDefaults(true);
 	CheckPoint("");
 
-        //	SystemUpdateRecentMenu(m_strRecentFiles);
-        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+	messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 
-//	CWnd* pFrame = AfxGetMainWnd();
-//	if (pFrame != NULL)
-//		pFrame->PostMessage (WM_LC_UPDATE_LIST, 1, m_nCurColor+1);
-// set cur group to 0
- 
 	return true;
 }
 
@@ -5784,7 +5778,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SelectAndFocusNone(false);
 			UpdateSelection();
 			SystemUpdatePlay(false, true);
-			m_LastFrameTime = GetTickCount();
+			m_LastFrameTime = SystemGetTicks();
 			m_PlayingAnimation = true;
 		} break;
 

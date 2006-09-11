@@ -402,7 +402,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 	glFinish();
-//		pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);
 	lf.lfWeight = FW_REGULAR;
@@ -525,7 +524,6 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 
 void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-//	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
 }
 
 void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView) 
@@ -560,44 +558,7 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 	pParent->RecalcLayout();
 	pParent->SendMessage(WM_SETMESSAGESTRING, (WPARAM)AFX_IDS_IDLEMESSAGE, 0L);
 	pParent->UpdateWindow();
-///
 
-
-	pfnwglMakeCurrent(NULL, NULL);
-/*
-	if (OpenGLGetPixelFormat(m_pDC->GetSafeHdc()) == 0)
-	{
-		delete m_pDC;
-		m_pDC = new CClientDC(this);
-
-		PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR), 1,
-			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
- 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	
-		int pixelformat = OpenGLChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
-		if (pixelformat == 0)
-		{
-			AfxMessageBox("ChoosePixelFormat failed");
-		}
-
-		if (OpenGLSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
-		{
-			AfxMessageBox("SetPixelFormat failed");
-		}
-	}
-
-	if (pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC) == FALSE)
-	{
-		LPTSTR lpMsgBuf;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		    NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf, 0, NULL);
-
-		::MessageBox(NULL, lpMsgBuf, "Error", MB_OK|MB_ICONINFORMATION);
-		LocalFree(lpMsgBuf);	
-	}
-*/
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -900,90 +861,54 @@ void CCADView::OnCaptureChanged(CWnd *pWnd)
 	CView::OnCaptureChanged(pWnd);
 }
 
-
-
-
-
-
-
-
-
 void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
 	char nKey = nChar;
 
-	switch (nChar)
+	if (nChar >= VK_NUMPAD0 && nChar <= VK_NUMPAD9)
 	{
-		case VK_NUMPAD0 : case VK_NUMPAD1 : case VK_NUMPAD2 : case VK_NUMPAD3 : case VK_NUMPAD4 : 
-		case VK_NUMPAD5 : case VK_NUMPAD6 : case VK_NUMPAD7 : case VK_NUMPAD8 : case VK_NUMPAD9 :
-		{
-			nKey = nChar - VK_NUMPAD0 + 0x30;
-		} break;
-
-    // select the next/previous piece on the pieces list
-    case VK_HOME:
-    case VK_END:
-    {
-      /*
-      CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd ();
-      CPiecesList& pList = pMain->m_wndPiecesBar.m_wndPiecesList;
-      LV_FINDINFO lvfi;
-      int sel;
-
-			lvfi.flags = LVFI_PARAM;
-			lvfi.lParam = (LPARAM)pMain->m_wndPiecesBar.m_wndPiecePreview.GetPieceInfo ();
-			sel = pList.FindItem (&lvfi);
-
-      if (sel != -1)
-      {
-        if (nChar == VK_HOME)
-          sel--;
-        else
-          sel++;
-
-  			pList.SetItemState (sel, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
-	  		pList.EnsureVisible (sel, FALSE);
-      }
-*/
-    } break;
+		nKey = nChar - VK_NUMPAD0 + '0';
 	}
 
-	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);
-/*
-	switch (nChar)
+	// Update cursor for multiple selection.
+	if (nChar == VK_CONTROL)
 	{
-// HANDLE CTRL if action == pan/zoom
-		case VK_CONTROL: 
-		if (m_nCurAction == ACTION_SELECT)
+		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
 		{
 			POINT pt;
+
 			GetCursorPos(&pt);
 			CRect rc;
 			GetWindowRect(rc);
+
 			if (rc.PtInRect(pt))
 				OnSetCursor(this, HTCLIENT, 0);
-		} break;
-*/
+		}
+	}
+
+	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_SHIFT) < 0);
+
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-/*	if (nChar == VK_CONTROL)
+	// Update cursor for multiple selection.
+	if (nChar == VK_CONTROL)
 	{
-// HANDLE CTRL if action == pan/zoom
-		CCADDoc* pDoc = GetDocument();
-		if (pDoc->m_nCurAction == ACTION_SELECT)
+		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
 		{
 			POINT pt;
+
 			GetCursorPos(&pt);
 			CRect rc;
 			GetWindowRect(rc);
+
 			if (rc.PtInRect(pt))
 				OnSetCursor(this, HTCLIENT, 0);
 		}
 	}
-*/	
+
 	CView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
@@ -999,17 +924,17 @@ void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
 {
-  if (m_pView)
-  {
-    MSG msg;
+	if (m_pView)
+	{
+		MSG msg;
 
 		msg.message = message;
-    msg.wParam = wParam;
-    msg.lParam = lParam;
+		msg.wParam = wParam;
+		msg.lParam = lParam;
 
 		if (GLWindowPreTranslateMessage(m_pView, &msg))
 			return TRUE;
-  }
-	
+	}
+
 	return CView::WindowProc(message, wParam, lParam);
 }

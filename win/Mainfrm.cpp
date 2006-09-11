@@ -260,11 +260,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	UpdateMenuAccelerators();
 
-  messenger->Listen (&mainframe_listener, this);
+	messenger->Listen (&mainframe_listener, this);
 
-  main_window->SetXID (this);
+	main_window->SetXID (this);
 
-  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
+	console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
+
+	// Load default view layout.
+	char* str = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
+	SetViewLayout(NULL, str);
 
 	SetTimer(LC_ANIM_TIMER, 1000/60, (TIMERPROC)&MainFrameTimer);
 
@@ -287,7 +291,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 		cs.cy = b - t;
 		
 		RECT workArea;
-        SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+		SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
 		l += workArea.left;
 		t += workArea.top;
 
@@ -1644,7 +1648,7 @@ void CMainFrame::OnViewResetViews()
 	}
 
 	// Load default view layout.
-	char* str = Sys_ProfileLoadString("Settings", "ViewLayout", "V");
+	char* str = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
 	SetViewLayout(NULL, str);
 }
 

@@ -3,6 +3,7 @@
 
 #include "defines.h"
 #include "typedefs.h"
+#include "str.h"
 
 // Assert macros.
 #ifdef LC_DEBUG
@@ -117,5 +118,8 @@ long SystemGetTicks();
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text);
 void SytemEndProgressBar();
 void SytemStepProgressBar();
+
+void SystemUpdateViewLayout();
+String SystemGetViewLayout();
 
 #endif // _SYSTEM_H_

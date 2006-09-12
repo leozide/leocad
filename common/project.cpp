@@ -1,12 +1,6 @@
 // Everything that is a part of a LeoCAD project goes here.
 //
 
-/*
-todo: remove LC_VIEW_VIEWPORTS
-todo: remove SystemUpdateCurrentCamera (?)
-todo: save viewport config in project
-*/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -691,12 +685,21 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 		if (fv >= 0.7f)
 		{
-			for (count = 0; count < 4; count++)
+			if (fv >= 1.5f)
 			{
-				file->ReadLong (&i, 1);
+				String Layout;
+				file->ReadString(Layout);
+				main_window->SetViewLayout(Layout);
+			}
+			else
+			{
+				for (count = 0; count < 4; count++)
+				{
+					file->ReadLong (&i, 1);
 
-				if (m_ViewList.GetSize() > count)
-					m_ViewList[count]->SetCamera(GetCamera(i));
+					if (m_ViewList.GetSize() > count)
+						m_ViewList[count]->SetCamera(GetCamera(i));
+				}
 			}
 
 			file->ReadLong (&rgb, 1);
@@ -819,11 +822,11 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 void Project::FileSave(File* file, bool bUndo)
 {
-	float ver_flt = 1.4f; // LeoCAD 0.75 - (and this should have been an integer).
+	float ver_flt = 1.5f; // LeoCAD 0.76 - (and this should have been an integer).
 	unsigned long rgb;
 	unsigned char ch;
 	unsigned short sh;
-	int i, j;
+	int i;
 
 	file->Seek (0, SEEK_SET);
 	file->Write (LC_STR_VERSION, 32);
@@ -881,23 +884,7 @@ void Project::FileSave(File* file, bool bUndo)
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		pCamera->FileSave(*file);
 
-	for (j = 0; j < 4; j++)
-	{
-		i = 0;
-
-		if (m_ViewList.GetSize() > j)
-		{
-			for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-			{
-				if (pCamera == m_ViewList[j]->GetCamera())
-					break;
-				else
-					i++;
-			}
-		}
-
-		file->WriteLong (&i, 1);
-	}
+	file->WriteString(main_window->GetViewLayout(true));
 
 	rgb = FLOATRGB(m_fFogColor);
 	file->WriteLong (&rgb, 1);

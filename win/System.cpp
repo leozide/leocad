@@ -1812,3 +1812,28 @@ void SytemStepProgressBar()
 
 	pStatusBar->StepProgressBar();
 }
+
+void SystemUpdateViewLayout()
+{
+	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
+
+	if (Frame)
+		Frame->OnViewResetViews();
+}
+
+String SystemGetViewLayout()
+{
+	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
+	String Layout;
+
+	if (Frame)
+	{
+		Frame->GetViewLayout(NULL, Layout);
+	}
+	else
+	{
+		Layout = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
+	}
+
+	return Layout;
+}

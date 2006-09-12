@@ -267,8 +267,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
 
 	// Load default view layout.
-	char* str = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
-	SetViewLayout(NULL, str);
+	const char* Layout = main_window->GetViewLayout(false);
+	SetViewLayout(NULL, Layout);
 
 	SetTimer(LC_ANIM_TIMER, 1000/60, (TIMERPROC)&MainFrameTimer);
 
@@ -1648,7 +1648,7 @@ void CMainFrame::OnViewResetViews()
 	}
 
 	// Load default view layout.
-	char* str = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
+	char* str = main_window->GetViewLayout(false);
 	SetViewLayout(NULL, str);
 }
 

@@ -699,6 +699,12 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_pView->Create(m_hWnd);
 	m_pView->OnInitialUpdate();
 
+	CCADView* ActiveView = (CCADView*)GetParentFrame()->GetActiveView();
+	if (ActiveView)
+	{
+		m_pView->SetCamera(ActiveView->m_pView->GetCamera());
+	}
+
 	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
 	return 0;

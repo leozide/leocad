@@ -33,7 +33,7 @@ BOOL CDynamicSplitterWnd::AttachWindow(CWnd* Wnd, int Row, int Col)
 	Wnd->SetDlgCtrlID(IdFromRowCol(Row, Col));
 	Wnd->SetParent(this);
 	Wnd->ShowWindow(SW_SHOW);
-	Wnd->UpdateWindow();
+	Wnd->InvalidateRect(NULL);
 
 	return TRUE;
 }

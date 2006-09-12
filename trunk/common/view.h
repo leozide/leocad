@@ -14,6 +14,7 @@ public:
 
 	void OnDraw();
 	void OnInitialUpdate();
+	void OnSize(int cx, int cy);
 	void OnLeftButtonDown(int x, int y, bool bControl, bool bShift);
 	void OnLeftButtonUp(int x, int y, bool bControl, bool bShift);
 	void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift);
@@ -24,6 +25,7 @@ public:
 	LC_CURSOR_TYPE GetCursor(int x, int y) const;
 
 	void LoadViewportProjection();
+	void UpdateOverlayScale();
 
 	Camera* GetCamera() const
 	{

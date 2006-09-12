@@ -133,11 +133,40 @@ void View::OnMouseMove(int x, int y, bool bControl, bool bShift)
 	m_Project->OnMouseMove(this, x, y, bControl, bShift);
 }
 
+void View::OnSize(int cx, int cy)
+{
+	GLWindow::OnSize(cx, cy);
+
+	UpdateOverlayScale();
+}
+
 void View::LoadViewportProjection()
 {
 	float ratio = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
 	m_Camera->LoadProjection(ratio);
+}
+
+void View::UpdateOverlayScale()
+{
+	GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
+	GLdouble ModelMatrix[16], ProjMatrix[16];
+	GLint Viewport[4];
+
+	LoadViewportProjection();
+	glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
+	glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+	glGetIntegerv(GL_VIEWPORT, Viewport);
+
+	const Vector3& Center = m_Project->GetOverlayCenter();
+
+	// Calculate the scaling factor by projecting the center to the front plane then
+	// projecting a point close to it back.
+	gluProject(Center[0], Center[1], Center[2], ModelMatrix, ProjMatrix, Viewport, &ScreenX, &ScreenY, &ScreenZ);
+	gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, Viewport, &PointX, &PointY, &PointZ);
+
+	Vector3 Dist((float)PointX - Center[0], (float)PointY - Center[1], (float)PointZ - Center[2]);
+	m_OverlayScale = Dist.Length() * 5.0f;
 }
 
 void View::SetCamera(Camera* cam)

@@ -8982,26 +8982,7 @@ void Project::UpdateOverlayScale()
 {
 	if (m_OverlayActive)
 	{
-		GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
-		GLdouble ModelMatrix[16], ProjMatrix[16];
-		GLint Viewport[4];
-
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
-		{
-			View* view = m_ViewList[i];
-
-			view->LoadViewportProjection();
-			glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-			glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-			glGetIntegerv(GL_VIEWPORT, Viewport);
-
-			// Calculate the scaling factor by projecting the center to the front plane then
-			// projecting a point close to it back.
-			gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &ScreenX, &ScreenY, &ScreenZ);
-			gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, Viewport, &PointX, &PointY, &PointZ);
-
-			Vector3 Dist((float)PointX - m_OverlayCenter[0], (float)PointY - m_OverlayCenter[1], (float)PointZ - m_OverlayCenter[2]);
-			view->m_OverlayScale = Dist.Length() * 5.0f;
-		}
+			m_ViewList[i]->UpdateOverlayScale();
 	}
 }

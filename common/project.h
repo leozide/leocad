@@ -98,6 +98,8 @@ public:
 	}
 	unsigned short GetTotalFrames () const
 		{ return m_nTotalFrames; }
+	const Vector3& GetOverlayCenter() const
+		{ return m_OverlayCenter; }
 
 	void ConvertToUserUnits(Vector3& Value) const;
 	void ConvertFromUserUnits(Vector3& Value) const;

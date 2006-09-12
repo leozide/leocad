@@ -104,6 +104,8 @@ IDB_EDITOR_ICONS        BITMAP                  "res\\editor.bmp"
 IDR_LIBRARY             BITMAP                  "res\\library.bmp"
 IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
 IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
+IDB_SPLITH              BITMAP                  "res\\splith.bmp"
+IDB_SPLITV              BITMAP                  "res\\splitv.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -320,12 +322,13 @@ BEGIN
             MENUITEM "&Delete",                     ID_VIEW_STEP_DELETE
         END
         MENUITEM SEPARATOR
-        MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
         MENUITEM "New View",                    ID_VIEW_NEWVIEW
-        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
-        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
         MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
         MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
+        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
+        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
+        MENUITEM SEPARATOR
+        MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
     END
     POPUP "&Piece"
     BEGIN
@@ -404,6 +407,11 @@ BEGIN
         BEGIN
             MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
         END
+        MENUITEM SEPARATOR
+        MENUITEM "Split Horizontally",          33169
+        MENUITEM "Split Vertically",            33170
+        MENUITEM "Delete View",                 33172
+        MENUITEM "Reset Views",                 33174
     END
     POPUP "2"
     BEGIN
@@ -2085,6 +2093,8 @@ STRINGTABLE
 BEGIN
     ID_VIEW_SPLITHORIZONTALLY "Split the current view in 2 horizontally."
     ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."
+    ID_VIEW_DELETEVIEW      "Delete the current view"
+    ID_VIEW_RESETVIEWS      "Reset all views to the default configuration"
 END
 
 #endif    // English (U.S.) resources

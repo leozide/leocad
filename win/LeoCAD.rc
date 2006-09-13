@@ -287,24 +287,6 @@ BEGIN
         MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
         MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
         MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
-        POPUP "&Viewports"
-        BEGIN
-            MENUITEM "01",                          ID_VIEWPORT01
-            MENUITEM "02",                          ID_VIEWPORT02
-            MENUITEM "03",                          ID_VIEWPORT03
-            MENUITEM "04",                          ID_VIEWPORT04
-            MENUITEM "05",                          ID_VIEWPORT05
-            MENUITEM "06",                          ID_VIEWPORT06
-            MENUITEM "07",                          ID_VIEWPORT07
-            MENUITEM "08",                          ID_VIEWPORT08
-            , MENUBARBREAK
-            MENUITEM "09",                          ID_VIEWPORT09
-            MENUITEM "10",                          ID_VIEWPORT10
-            MENUITEM "11",                          ID_VIEWPORT11
-            MENUITEM "12",                          ID_VIEWPORT12
-            MENUITEM "13",                          ID_VIEWPORT13
-            MENUITEM "14",                          ID_VIEWPORT14
-        END
         POPUP "C&ameras"
         BEGIN
             MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
@@ -327,6 +309,24 @@ BEGIN
         MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
         MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
         MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
+        POPUP "Default &Viewports"
+        BEGIN
+            MENUITEM "01",                          ID_VIEWPORT01
+            MENUITEM "02",                          ID_VIEWPORT02
+            MENUITEM "03",                          ID_VIEWPORT03
+            MENUITEM "04",                          ID_VIEWPORT04
+            MENUITEM "05",                          ID_VIEWPORT05
+            MENUITEM "06",                          ID_VIEWPORT06
+            MENUITEM "07",                          ID_VIEWPORT07
+            MENUITEM "08",                          ID_VIEWPORT08
+            , MENUBARBREAK
+            MENUITEM "09",                          ID_VIEWPORT09
+            MENUITEM "10",                          ID_VIEWPORT10
+            MENUITEM "11",                          ID_VIEWPORT11
+            MENUITEM "12",                          ID_VIEWPORT12
+            MENUITEM "13",                          ID_VIEWPORT13
+            MENUITEM "14",                          ID_VIEWPORT14
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
     END
@@ -2031,6 +2031,7 @@ BEGIN
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
     ID_ACTION_ROLL          "Roll view\nRoll"
     ID_ZOOM_EXTENTS         "Zoom extents (hold CTRL to zoom all views)\nZoom Extents"
+    ID_VIEW_PREFERENCES     "Change application settings"
     ID_ANIMATOR_PLAY        "Play animation sequence\nPlay"
     ID_ANIMATOR_STOP        "Stop playing animation\nStop"
 END

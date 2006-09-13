@@ -1528,16 +1528,20 @@ bool Project::SetActiveView(View* view)
 	if (view == m_ActiveView)
 		return false;
 
-	View* old = m_ActiveView;
+	Camera* OldCamera = NULL;
+	View* OldView = m_ActiveView;
 	m_ActiveView = view;
 
-	if (old)
-		old->Redraw();
+	if (OldView)
+	{
+		OldView->Redraw();
+		OldCamera = OldView->GetCamera();
+	}
 
 	if (view)
 	{
 		view->Redraw();
-		SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_pCameras);
 	}
 
 	return true;
@@ -5598,21 +5602,38 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
-/*
+
 		case LC_VIEW_VIEWPORTS:
 		{
-			// Safety check
-			if (m_nActiveViewport >= viewports[nParam].n)
+			// Predefined viewports (must match the menu).
+			const char* Viewports[14] =
 			{
-				SystemUpdateCurrentCamera(m_ActiveView->GetCamera(), m_pViewCameras[0], m_pCameras);
-				m_nActiveViewport = 0;
-			}
+				"V4|Main", // 1
+				"SV49V4|MainV4|Left", // 2V
+				"SH49V4|MainV4|Left", // 2H
+				"SH20V4|LeftV4|Main", // 2HT
+				"SH80V4|MainV4|Left", // 2HB
+				"SV49SH49V3|TopV4|LeftV4|Main", // 3VL
+				"SV49V4|MainSH49V3|TopV4|Left", // 3VR
+				"SH49SV49V3|TopV4|LeftV4|Main", // 3HB
+				"SH49V4|MainSV49V3|TopV4|Left", // 3HT
+				"SV32SH32V3|TopSH49V4|LeftV5|FrontV4|Main", // 4VL
+				"SV65V4|MainSH32V3|TopSH49V4|LeftV5|Front", // 4VR
+				"SH32SV32V3|TopSV49V4|LeftV5|FrontV4|Main", // 4HT
+				"SH65V4|MainSV32V3|TopSV49V4|LeftV5|Front", // 4HB
+				"SH49SV49V4|MainV3|TopSV49V4|LeftV5|Front"  // 4
+			};
 
-			m_nViewportMode = (unsigned char)nParam;
+			LC_ASSERT((nParam >= 0) && (nParam < 14), "Invalid view parameter.");
+
+			Camera* OldCamera = m_ActiveView->GetCamera();
+
+			main_window->SetViewLayout(Viewports[nParam]);
+
+			SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_pCameras);
 			UpdateOverlayScale();
-			UpdateAllViews();
 		} break;
-*/
+
 		case LC_VIEW_STEP_NEXT:
 		{
 			if (m_bAnimation)

@@ -252,8 +252,8 @@ void GLWindow::Redraw(bool ForceRedraw)
 
 	InvalidateRect(prv->m_hWnd, NULL, FALSE);
 
-//	if (ForceRedraw)
-//		UpdateWindow(prv->m_hWnd);
+	if (ForceRedraw)
+		UpdateWindow(prv->m_hWnd);
 }
 
 void GLWindow::CaptureMouse()

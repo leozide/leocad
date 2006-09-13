@@ -90,11 +90,14 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 
 void View::OnDraw()
 {
-	MakeCurrent();
+	if (m_Camera)
+	{
+		MakeCurrent();
 
-	m_Project->Render(this, true, true);
+		m_Project->Render(this, true, true);
 
-	SwapBuffers();
+		SwapBuffers();
+	}
 }
 
 void View::OnInitialUpdate()
@@ -142,9 +145,12 @@ void View::OnSize(int cx, int cy)
 
 void View::LoadViewportProjection()
 {
-	float ratio = (float)m_nWidth/(float)m_nHeight;
-	glViewport(0, 0, m_nWidth, m_nHeight);
-	m_Camera->LoadProjection(ratio);
+	if (m_Camera)
+	{
+		float ratio = (float)m_nWidth/(float)m_nHeight;
+		glViewport(0, 0, m_nWidth, m_nHeight);
+		m_Camera->LoadProjection(ratio);
+	}
 }
 
 void View::UpdateOverlayScale()

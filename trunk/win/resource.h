@@ -124,9 +124,7 @@
 #define IDS_COLOR28                     203
 #define IDC_PAN_SE                      203
 #define IDC_PAN_SW                      204
-#define IDR_PIECEEDITOR                 205
 #define IDD_PIECEEDITOR                 208
-#define IDB_EDITOR_ICONS                209
 #define IDD_LIBRARY                     211
 #define IDR_LIBRARY                     213
 #define IDD_TERRAIN                     216

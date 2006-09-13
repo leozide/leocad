@@ -99,8 +99,6 @@ IDB_FULLSCREEN          BITMAP                  "res\\fullscre.bmp"
 IDB_PHOTO               BITMAP                  "res\\photo.bmp"
 IDB_DELETE              BITMAP                  "res\\delete.bmp"
 IDB_PREFERENCES         BITMAP                  "res\\preferen.bmp"
-IDR_PIECEEDITOR         BITMAP                  "res\\pieceed.bmp"
-IDB_EDITOR_ICONS        BITMAP                  "res\\editor.bmp"
 IDR_LIBRARY             BITMAP                  "res\\library.bmp"
 IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
 IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
@@ -177,13 +175,6 @@ END
 IDR_FULLSCREEN TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_VIEW_FULLSCREEN
-END
-
-IDR_PIECEEDITOR TOOLBAR  16, 15
-BEGIN
-    BUTTON      ID_EDITOR_FILE_NEW
-    BUTTON      ID_EDITOR_FILE_OPEN
-    BUTTON      ID_EDITOR_FILE_SAVE
 END
 
 IDR_LIBRARY TOOLBAR  16, 15
@@ -492,28 +483,6 @@ BEGIN
         MENUITEM "Lock Y",                      ID_LOCK_LOCKY
         MENUITEM "Lock Z",                      ID_LOCK_LOCKZ
         MENUITEM "Unlock All",                  ID_LOCK_UNLOCKALL
-    END
-END
-
-IDR_PIECEEDITOR MENU 
-BEGIN
-    POPUP "File"
-    BEGIN
-        MENUITEM "New",                         ID_EDITOR_FILE_NEW
-        MENUITEM "Open...",                     ID_EDITOR_FILE_OPEN
-        MENUITEM "Save",                        ID_EDITOR_FILE_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "Return",                      ID_EDITOR_FILE_RETURN
-    END
-    POPUP "View"
-    BEGIN
-        MENUITEM "Fix Backfaces",               ID_EDITOR_VIEW_BACKFACES
-        MENUITEM "Background...",               ID_EDITOR_VIEW_BACKGROUND
-        MENUITEM "Connections",                 ID_EDITOR_VIEW_CONNECTIONS
-    END
-    POPUP "Help"
-    BEGIN
-        MENUITEM SEPARATOR
     END
 END
 
@@ -1261,7 +1230,7 @@ END
 IDD_PIECEEDITOR DIALOG  0, 0, 270, 186
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Piece Editor"
-MENU IDR_PIECEEDITOR
+MENU 205
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "",IDC_EDITORSTATIC,7,7,120,148,NOT WS_VISIBLE | 

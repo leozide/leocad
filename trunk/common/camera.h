@@ -10,6 +10,7 @@
 #define LC_CAMERA_FOCUSED           0x04
 #define LC_CAMERA_TARGET_SELECTED   0x08
 #define LC_CAMERA_TARGET_FOCUSED    0x10
+#define LC_CAMERA_ORTHOGRAPHIC      0x20
 
 class Camera;
 class CameraTarget;
@@ -18,10 +19,14 @@ class TiledRender;
 
 typedef enum
 {
-	LC_CAMERA_FRONT,LC_CAMERA_BACK,
-	LC_CAMERA_TOP,  LC_CAMERA_UNDER,
-	LC_CAMERA_LEFT, LC_CAMERA_RIGHT,
-	LC_CAMERA_MAIN, LC_CAMERA_USER
+	LC_CAMERA_FRONT,
+	LC_CAMERA_BACK,
+	LC_CAMERA_TOP,
+	LC_CAMERA_UNDER,
+	LC_CAMERA_LEFT,
+	LC_CAMERA_RIGHT,
+	LC_CAMERA_MAIN,
+	LC_CAMERA_USER
 } LC_CAMERA_TYPES;
 
 typedef enum
@@ -35,39 +40,39 @@ typedef enum
 class CameraTarget : public Object
 {
 public:
-	CameraTarget (Camera *pParent);
-	virtual ~CameraTarget ();
+	CameraTarget(Camera *pParent);
+	virtual ~CameraTarget();
 
 public:
-	void MinIntersectDist (LC_CLICKLINE* pLine);
+	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the camera target
 	}
 
 	const char* GetName() const;
 
-	Camera* GetParent () const
+	Camera* GetParent() const
 	{ return m_pParent; }
 
 protected:
 	Camera* m_pParent;
 
-	friend class Camera; // FIXME: needed for BoundingBoxCalculate ()
+	friend class Camera; // FIXME: needed for BoundingBoxCalculate()
 	// remove and use UpdatePosition instead
 };
 
 class Camera : public Object
 {
 public:
-	Camera ();
-	Camera (unsigned char nType, Camera* pPrev);
-	Camera (float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
-	Camera (const float *eye, const float *target, const float *up, Camera* pCamera);
-	virtual ~Camera ();
+	Camera();
+	Camera(unsigned char nType, Camera* pPrev);
+	Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
+	Camera(const float *eye, const float *target, const float *up, Camera* pCamera);
+	virtual ~Camera();
 
 	// Query functions.
 	inline Vector3 GetEyePosition() const
@@ -80,22 +85,22 @@ public:
 	const char* GetName() const
 	{ return m_strName; };
 
-	CameraTarget* GetTarget () const
+	CameraTarget* GetTarget() const
 		{ return m_pTarget; }
 
 
 	// Deprecated functions:
-	const float* GetEyePos () const
+	const float* GetEyePos() const
 		{ return m_fEye; };
-	void GetEyePos (float* eye) const
+	void GetEyePos(float* eye) const
 		{ memcpy(eye, m_fEye, sizeof(m_fEye)); };
-	const float* GetTargetPos () const
+	const float* GetTargetPos() const
 		{ return m_fTarget; };
-	void GetTargetPos (float* target) const
+	void GetTargetPos(float* target) const
 		{ memcpy(target, m_fTarget, sizeof(m_fTarget)); };
-	const float* GetUpVec () const
+	const float* GetUpVec() const
 		{ return m_fUp; };
-	void GetUpVec (float* up) const
+	void GetUpVec(float* up) const
 		{ memcpy(up, m_fUp, sizeof(m_fUp)); };
 
 
@@ -141,13 +146,13 @@ public:
 		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
 	*/
 
-	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
+	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	bool FileLoad (File& file);
-	void FileSave (File& file) const;
-	void MinIntersectDist (LC_CLICKLINE* pLine);
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	bool FileLoad(File& file);
+	void FileSave(File& file) const;
+	void MinIntersectDist(LC_CLICKLINE* pLine);
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
 

@@ -735,11 +735,12 @@ void Camera::LoadProjection(float fAspect)
 		if (m_nState & LC_CAMERA_ORTHOGRAPHIC)
 		{
 			float ymax, ymin, xmin, xmax, znear, zfar;
-			ymax = m_fovy;//(m_zFar-m_zNear)*tan(DTOR*m_fovy)/3;
+			Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
+			ymax = (frontvec.Length())*sinf(DTOR*m_fovy/2);
 			ymin = -ymax;
 			xmin = ymin * fAspect;
 			xmax = ymax * fAspect;
-			znear = m_zNear;//-600;
+			znear = m_zNear;
 			zfar = m_zFar;
 			glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
 		}
@@ -758,10 +759,13 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 {
 	if (m_nState & LC_CAMERA_ORTHOGRAPHIC)
 	{
+		// TODO: have a different option to change the fov.
 		m_fovy += (float)dy/(21-mouse);
 
 		if (m_fovy < 0.001f)
 			m_fovy = 0.001f;
+		else if (m_fovy > 179.999f)
+			m_fovy = 179.999f;
 	}
 	else
 	{

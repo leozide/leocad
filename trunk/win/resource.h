@@ -137,8 +137,11 @@
 #define IDD_TRANSFORM                   236
 #define IDD_CATEGORY                    237
 #define IDC_ROTX                        238
+#define IDD_MODIFY_PIECE                238
 #define IDC_ROTY                        239
+#define IDD_MODIFY_CAMERA               239
 #define IDB_SPLITH                      240
+#define IDD_MODIFY_LIGHT                240
 #define IDB_BITMAP2                     241
 #define IDB_SPLITV                      241
 #define IDC_SELDLG_LIST                 1000
@@ -211,6 +214,7 @@
 #define IDC_MODDLG_HIDDEN               1074
 #define IDC_SAVEDLG_PREVIEW             1074
 #define IDC_GENDLG_PREVIEW              1075
+#define IDC_MODDLG_HIDDEN2              1075
 #define IDC_AIDDLG_SNAPX                1076
 #define IDC_GENDLG_ZOOM                 1076
 #define IDC_IMGDLG_HIGHCOLOR            1076
@@ -270,8 +274,11 @@
 #define IDC_MODDLG_POSX                 1098
 #define IDC_MODDLG_POSY                 1099
 #define IDC_MODDLG_POSZ                 1100
+#define IDC_MODDLG_TARGETX              1101
 #define IDC_OPENDLG_PREVIEW             1102
+#define IDC_MODDLG_TARGETY              1102
 #define IDC_OPENDLG_TEXT                1103
+#define IDC_MODDLG_TARGETZ              1103
 #define IDC_SCNDLG_BGIMAGE_BROWSE       1104
 #define IDC_SCNDLG_FOGCOLOR             1105
 #define IDC_SCNDLG_BGCOLOR              1106
@@ -452,6 +459,8 @@
 #define IDC_TRANSDLG_GX                 1245
 #define IDC_TRANSDLG_OX                 1246
 #define IDC_CATDLG_NAME                 1246
+#define IDC_MODIFY_CHILD                1247
+#define IDC_MODDLG_ORTHO                1248
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -698,7 +707,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
 #define _APS_NEXT_COMMAND_VALUE         33176
-#define _APS_NEXT_CONTROL_VALUE         1247
+#define _APS_NEXT_CONTROL_VALUE         1249
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

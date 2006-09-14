@@ -3400,6 +3400,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			else
 				pCamera->UnHide();
 
+			pCamera->SetOrtho(mod->ortho);
+
 			if (pCamera->GetEyePosition() != mod->Eye)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Eye, LC_CK_EYE);
 

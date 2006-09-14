@@ -1,21 +1,116 @@
 // ModDlg.h: interface for the CModifyDialog class. 
-// 
-////////////////////////////////////////////////////////////////////// 
 
-#if !defined(AFX_INITDIALOGBAR_H__46B4D2B3_C982_11D1_8902_0060979C2EFD__INCLUDED_) 
-#define AFX_INITDIALOGBAR_H__46B4D2B3_C982_11D1_8902_0060979C2EFD__INCLUDED_ 
-
-#if _MSC_VER >= 1000 
-#pragma once 
-#endif // _MSC_VER >= 1000 
+#ifndef _MODDLG_H_
+#define _MODDLG_H_
 
 #include "ClrPick.h"
 
 class Object;
 
-///////////////////////////////////////////////////////////////////////////// 
-// CModifyDialog window 
+// CModifyPieceDlg dialog
+class CModifyPieceDlg : public CDialog
+{
+	DECLARE_DYNAMIC(CModifyPieceDlg)
 
+public:
+	CModifyPieceDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CModifyPieceDlg();
+
+// Dialog Data
+	//{{AFX_DATA(CModifyDialog)
+	enum { IDD = IDD_MODIFY_PIECE };
+	float	m_PosX;
+	float	m_PosY;
+	float	m_PosZ;
+	float	m_RotX;
+	float	m_RotY;
+	float	m_RotZ;
+	BOOL	m_Hidden;
+	int	m_From;
+	int	m_To;
+	CColorPicker	m_Color;
+	//}}AFX_DATA
+
+	void UpdateInfo(class Piece* piece);
+	void Apply(class Piece* piece);
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	// Generated message map functions
+	//{{AFX_MSG(CModifyPieceDlg)
+	virtual void OnOK();
+	virtual void OnCancel();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+// CModifyCameraDlg dialog
+class CModifyCameraDlg : public CDialog
+{
+	DECLARE_DYNAMIC(CModifyCameraDlg)
+
+public:
+	CModifyCameraDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CModifyCameraDlg();
+
+// Dialog Data
+	//{{AFX_DATA(CModifyDialog)
+	enum { IDD = IDD_MODIFY_CAMERA };
+	float	m_PosX;
+	float	m_PosY;
+	float	m_PosZ;
+	float	m_TargetX;
+	float	m_TargetY;
+	float	m_TargetZ;
+	float	m_UpX;
+	float	m_UpY;
+	float	m_UpZ;
+	float	m_FOV;
+	float	m_Near;
+	float	m_Far;
+	BOOL	m_Ortho;
+	BOOL	m_Hidden;
+	//}}AFX_DATA
+
+	void UpdateInfo(class Camera* camera);
+	void Apply(class Camera* camera);
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	// Generated message map functions
+	//{{AFX_MSG(CModifyCameraDlg)
+	virtual void OnOK();
+	virtual void OnCancel();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+// CModifyLightDlg dialog
+class CModifyLightDlg : public CDialog
+{
+	DECLARE_DYNAMIC(CModifyLightDlg)
+
+public:
+	CModifyLightDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CModifyLightDlg();
+
+// Dialog Data
+	enum { IDD = IDD_MODIFY_LIGHT };
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	// Generated message map functions
+	//{{AFX_MSG(CModifyLightDlg)
+	virtual void OnOK();
+	virtual void OnCancel();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+// CModifyDialog window 
 class CModifyDialog : public CDialogBar 
 { 
 	DECLARE_DYNAMIC(CModifyDialog) 
@@ -28,53 +123,42 @@ public:
 	//{{AFX_DATA(CModifyDialog)
 	enum { IDD = IDD_MODIFY };
 	CComboBox	m_ctlCombo;
-	CColorPicker	m_ctlColor;
-	float	m_fRotX;
-	float	m_fRotY;
-	float	m_fRotZ;
-	float	m_fPosX;
-	float	m_fPosY;
-	float	m_fPosZ;
-	BOOL	m_bHidden;
-	float	m_fFOV;
-	int		m_nFrom;
-	int		m_nTo;
 	CString	m_strName;
-	float	m_fUpX;
-	float	m_fUpY;
-	float	m_fUpZ;
-	float	m_fFar;
-	float	m_fNear;
 	//}}AFX_DATA
 
-// Attributes 
-public: 
+// Attributes
+public:
 
-// Operations 
-public: 
+// Operations
+public:
 
-// Overrides 
-	// ClassWizard generated virtual function overrides 
-	//{{AFX_VIRTUAL(CModifyDialog) 
-	protected: 
-	virtual void DoDataExchange(CDataExchange* pDX); 
-	//}}AFX_VIRTUAL 
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CModifyDialog)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	//}}AFX_VIRTUAL
 
-// Implementation 
-public: 
-
+// Implementation
+public:
 	void UpdateInfo(Object* pObject);
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
 	BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID); 
 	BOOL Create(CWnd* pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID); 
 
 protected: 
-	virtual BOOL OnInitDialogBar(); 
+	virtual BOOL OnInitDialogBar();
+	void PositionChildren();
+
 	Object* m_pObject;
-	BYTE m_nType;
+	int m_CurrentType;
+
+	CModifyPieceDlg m_PieceDlg;
+	CModifyCameraDlg m_CameraDlg;
+	CModifyLightDlg m_LightDlg;
 
 protected: 
-	void UpdateControls(BYTE nType);
+	void UpdateControls(int Type);
 	void OnMenuClick(UINT nID);
 
 	// Generated message map functions 
@@ -83,12 +167,12 @@ protected:
 	afx_msg void OnSelendokModdlgList();
 	afx_msg void OnModdlgApply();
 	afx_msg void OnDropdownModdlgList();
+	afx_msg void OnMove(int x, int y);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP() 
 }; 
 
-///////////////////////////////////////////////////////////////////////////// 
+#endif // _MODDLG_H_
 
-#endif //!defined(AFX_INITDIALOGBAR_H__46B4D2B3_C982_11D1_8902_0060979C2EFD__INCLUDED_) 
-///////////////////////////////////////////////////////////////////////////// 

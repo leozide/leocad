@@ -14,6 +14,7 @@
 #include "light.h"
 #include "matrix.h"
 #include "lc_application.h"
+#include ".\moddlg.h"
 
 #ifdef _DEBUG 
 #undef THIS_FILE 
@@ -33,6 +34,7 @@ BEGIN_MESSAGE_MAP(CModifyDialog, CDialogBar)
 	ON_CBN_SELENDOK(IDC_MODDLG_LIST, OnSelendokModdlgList)
 	ON_BN_CLICKED(IDC_MODDLG_APPLY, OnModdlgApply)
 	ON_CBN_DROPDOWN(IDC_MODDLG_LIST, OnDropdownModdlgList)
+	ON_WM_SHOWWINDOW()
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_MODDLG_PIECES, ID_MODDLG_LIGHTS, OnMenuClick)
 END_MESSAGE_MAP() 
@@ -40,98 +42,71 @@ END_MESSAGE_MAP()
 CModifyDialog::CModifyDialog() 
 {
 	m_pObject = NULL;
-	m_nType = 255;
+	m_CurrentType = -1;
 
 	//{{AFX_DATA_INIT(CModifyDialog)
-	m_fRotX = 0.0f;
-	m_fRotY = 0.0f;
-	m_fRotZ = 0.0f;
-	m_fPosX = 0.0f;
-	m_fPosY = 0.0f;
-	m_fPosZ = 0.0f;
-	m_bHidden = FALSE;
-	m_fFOV = 0.0f;
-	m_nFrom = 0;
-	m_nTo = 0;
 	m_strName = _T("");
-	m_fUpX = 0.0f;
-	m_fUpY = 0.0f;
-	m_fUpZ = 0.0f;
-	m_fFar = 0.0f;
-	m_fNear = 0.0f;
 	//}}AFX_DATA_INIT
 } 
 
 CModifyDialog::~CModifyDialog() 
-{ 
-} 
+{
+}
 
 BOOL CModifyDialog::Create(CWnd * pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID) 
-{ 
-	// Let MFC Create the control 
-	if(!CDialogBar::Create(pParentWnd, lpszTemplateName, nStyle, nID)) 
-		return FALSE; 
+{
+	// Let MFC Create the control.
+	if (!CDialogBar::Create(pParentWnd, lpszTemplateName, nStyle, nID))
+		return FALSE;
 
-	// Since there is no WM_INITDIALOG message we have to call 
-	// our own InitDialog function ourselves after m_hWnd is valid 
-	if(!OnInitDialogBar()) 
-		return FALSE; 
-	return TRUE; 
-} 
+	// Since there is no WM_INITDIALOG message we have to call
+	// our own InitDialog function ourselves after m_hWnd is valid
+	if (!OnInitDialogBar())
+		return FALSE;
 
-BOOL CModifyDialog::Create(CWnd * pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID) 
-{ 
-	//Let MFC Create the control 
-	if(!CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID)) 
-		return FALSE; 
-
-	// Since there is no WM_INITDIALOG message we have to call 
-	// our own InitDialog function ourselves after m_hWnd is valid 
-	if(!OnInitDialogBar()) 
-		return FALSE; 
-	return TRUE; 
+	return TRUE;
 }
 
-BOOL CModifyDialog::OnInitDialogBar() 
-{ 
-	// Support for the MFC DDX model 
-	UpdateData(FALSE); 
+BOOL CModifyDialog::Create(CWnd * pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID)
+{
+	// Let MFC Create the control.
+	if (!CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID))
+		return FALSE;
+
+	// MFC will call the other Create() function, so there's no
+	// need to call OnInitDialogBar() here.
+
+	return TRUE;
+}
+
+BOOL CModifyDialog::OnInitDialogBar()
+{
+	m_PieceDlg.Create(CModifyPieceDlg::IDD, this);
+	m_CameraDlg.Create(CModifyCameraDlg::IDD, this);
+	m_LightDlg.Create(CModifyLightDlg::IDD, this);
+
+	PositionChildren();
+
+	// Support for the MFC DDX model
+	UpdateData(FALSE);
+
 	m_ctlCombo.LimitText(80);
-	m_ctlColor.SetColorIndex(0);
 	UpdateControls(LC_OBJECT_PIECE);
+
 	return TRUE; 
 }
 
-void CModifyDialog::DoDataExchange(CDataExchange* pDX) 
-{ 
+void CModifyDialog::DoDataExchange(CDataExchange* pDX)
+{
 	//Derived Classes Overide this function 
-	ASSERT(pDX); 
-	
-	CDialogBar::DoDataExchange(pDX); 
-	//{{AFX_DATA_MAP(CModifyDialog) 
+	ASSERT(pDX);
+
+	CDialogBar::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CModifyDialog)
 	DDX_Control(pDX, IDC_MODDLG_LIST, m_ctlCombo);
-	DDX_Control(pDX, IDC_MODDLG_COLOR, m_ctlColor);
-	DDX_Text(pDX, IDC_MODDLG_ROTX, m_fRotX);
-	DDX_Text(pDX, IDC_MODDLG_ROTY, m_fRotY);
-	DDX_Text(pDX, IDC_MODDLG_ROTZ, m_fRotZ);
-	DDX_Text(pDX, IDC_MODDLG_POSX, m_fPosX);
-	DDX_Text(pDX, IDC_MODDLG_POSY, m_fPosY);
-	DDX_Text(pDX, IDC_MODDLG_POSZ, m_fPosZ);
-	DDX_Check(pDX, IDC_MODDLG_HIDDEN, m_bHidden);
-	DDX_Text(pDX, IDC_MODDLG_FOV, m_fFOV);
-	DDX_Text(pDX, IDC_MODDLG_FROM, m_nFrom);
-	DDX_Text(pDX, IDC_MODDLG_TO, m_nTo);
-	DDX_CBString(pDX, IDC_MODDLG_LIST, m_strName);
 	DDV_MaxChars(pDX, m_strName, 80);
-	DDX_Text(pDX, IDC_MODDLG_UPX, m_fUpX);
-	DDX_Text(pDX, IDC_MODDLG_UPY, m_fUpY);
-	DDX_Text(pDX, IDC_MODDLG_UPZ, m_fUpZ);
-	DDX_Text(pDX, IDC_MODDLG_FAR, m_fFar);
-//	DDV_MinMaxFloat(pDX, m_fFar, 5.f, 10000.f);
-	DDX_Text(pDX, IDC_MODDLG_NEAR, m_fNear);
-//	DDV_MinMaxFloat(pDX, m_fNear, 1.e-002f, 100.f);
 	//}}AFX_DATA_MAP
-} 
+}
 
 void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler*/)
 {
@@ -150,10 +125,12 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 
 	if (m_pObject == NULL)
 	{
+		/*
 		m_fPosX = m_fPosY = m_fPosZ = 0.0f;
 		m_fRotX = m_fRotY = m_fRotZ = 0.0f;
 		m_fUpX = m_fUpY = m_fUpZ = 0.0f;
 		UpdateData(FALSE);
+		*/
 		return;
 	}
 	else
@@ -161,77 +138,26 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		UpdateControls(m_pObject->GetType());
 	}
 
-	switch (m_nType)
+	switch (m_CurrentType)
 	{
 		case LC_OBJECT_PIECE:
 		{
-			float rot[4];
-			Piece* pPiece = (Piece*)m_pObject;
-			Vector3 Pos = pPiece->GetPosition();
-			pPiece->GetRotation(rot);
-			Matrix mat(rot, Pos);
-			mat.ToEulerAngles(rot);
-
-			lcGetActiveProject()->ConvertToUserUnits(Pos);
-
-			m_fPosX = Pos[0];
-			m_fPosY = Pos[1];
-			m_fPosZ = Pos[2];
-			m_fRotX = rot[0];
-			m_fRotY = rot[1];
-			m_fRotZ = rot[2];
-
-			if (lcGetActiveProject()->IsAnimation())
-			{
-				m_nFrom = pPiece->GetFrameShow();
-				m_nTo = pPiece->GetFrameHide();
-			}
-			else
-			{
-				m_nFrom = pPiece->GetStepShow();
-				m_nTo = pPiece->GetStepHide();
-			}
-
-			m_bHidden = pPiece->IsHidden();
-			m_ctlColor.SetColorIndex(pPiece->GetColor());
-			UpdateData(FALSE);
-			m_ctlCombo.SetWindowText(pPiece->GetName());
+			m_PieceDlg.UpdateInfo((Piece*)m_pObject);
+			m_ctlCombo.SetWindowText(((Piece*)m_pObject)->GetName());
 		} break;
 
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			Vector3 tmp;
-			Camera* pCamera;
-			if (m_nType == LC_OBJECT_CAMERA)
-				pCamera = (Camera*)m_pObject;
+			Camera* camera;
+
+			if (m_CurrentType == LC_OBJECT_CAMERA)
+				camera = (Camera*)m_pObject;
 			else
-				pCamera = ((CameraTarget*)m_pObject)->GetParent();
+				camera = ((CameraTarget*)m_pObject)->GetParent();
 
-			tmp = pCamera->GetEyePosition();
-			lcGetActiveProject()->ConvertToUserUnits(tmp);
-			m_fPosX = tmp[0];
-			m_fPosY = tmp[1];
-			m_fPosZ = tmp[2];
-
-			tmp = pCamera->GetTargetPosition();
-			lcGetActiveProject()->ConvertToUserUnits(tmp);
-			m_fRotX = tmp[0];
-			m_fRotY = tmp[1];
-			m_fRotZ = tmp[2];
-
-			tmp = pCamera->GetUpVector();
-			lcGetActiveProject()->ConvertToUserUnits(tmp);
-			m_fUpX = tmp[0];
-			m_fUpY = tmp[1];
-			m_fUpZ = tmp[2];
-
-			m_fFOV = pCamera->m_fovy;
-			m_fNear = pCamera->m_zNear;
-			m_fFar = pCamera->m_zFar;
-			m_bHidden = !pCamera->IsVisible();
-			UpdateData(FALSE);
-			m_ctlCombo.SetWindowText(pCamera->GetName());
+			m_CameraDlg.UpdateInfo(camera);
+			m_ctlCombo.SetWindowText(((Camera*)m_pObject)->GetName());
 		} break;
 
 		case LC_OBJECT_LIGHT:
@@ -254,69 +180,78 @@ void CModifyDialog::OnModdlgPiece()
 	pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, rc.right, rc.top, this);
 }
 
-void CModifyDialog::UpdateControls(BYTE nType)
+void CModifyDialog::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
-	if (m_nType == nType)
+	CDialogBar::OnShowWindow(bShow, nStatus);
+
+	if (bShow)
+		PositionChildren();
+}
+
+void CModifyDialog::OnMove(int x, int y)
+{
+	CDialogBar::OnMove(x, y);
+
+	// Avoid calling before window creation.
+	if (IsWindowVisible())
+		PositionChildren();
+}
+
+void CModifyDialog::PositionChildren()
+{
+	CRect Rect;
+
+	GetDlgItem(IDC_MODIFY_CHILD)->GetWindowRect(&Rect);
+
+	// Recompute coordinates relative to parent window.
+	ScreenToClient(&Rect);
+
+	// Now move the child windows.
+	m_PieceDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
+	m_CameraDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
+	m_LightDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
+}
+
+
+void CModifyDialog::UpdateControls(int Type)
+{
+	if (m_CurrentType == Type)
 		return;
 
 	DeleteObject((HBITMAP)SendDlgItemMessage(IDC_MODDLG_PIECE, BM_GETIMAGE, IMAGE_BITMAP, 0));
 
 	UINT id = IDB_PIECE;
-	if (nType == LC_OBJECT_CAMERA || nType == LC_OBJECT_CAMERA_TARGET)
+	if (Type == LC_OBJECT_CAMERA || Type == LC_OBJECT_CAMERA_TARGET)
 		id = IDB_CAMERA;
-	if (nType == LC_OBJECT_LIGHT || nType == LC_OBJECT_LIGHT_TARGET)
+	if (Type == LC_OBJECT_LIGHT || Type == LC_OBJECT_LIGHT_TARGET)
 		id = IDB_LIGHT;
 	SendDlgItemMessage(IDC_MODDLG_PIECE, BM_SETIMAGE, IMAGE_BITMAP, 
-		(LPARAM)LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(id)));
+	                   (LPARAM)LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(id)));
 
 	m_ctlCombo.SetWindowText("");
 
-	switch (nType)
+	m_PieceDlg.ShowWindow(SW_HIDE);
+	m_CameraDlg.ShowWindow(SW_HIDE);
+	m_LightDlg.ShowWindow(SW_HIDE);
+
+	switch (Type)
 	{
-		case LC_OBJECT_PIECE:
-		{
-			GetDlgItem(IDC_MODDLG_ROTATION)->SetWindowText(_T("Rotation")); 
-			GetDlgItem(IDC_MODDLG_STEPFROM)->SetWindowText(_T("Step"));
-			GetDlgItem(IDC_MODDLG_STEPTO)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_FROM)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_TO)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_COLOR)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_FOV)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_FOVSTATIC)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_UPX)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_UPY)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_UPZ)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_PLANESSTATIC)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_NEAR)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_FAR)->ShowWindow(SW_HIDE);
-		} break;
+	case LC_OBJECT_PIECE:
+		m_PieceDlg.ShowWindow(SW_SHOWNORMAL);
+		break;
 
-		case LC_OBJECT_CAMERA:
-		case LC_OBJECT_CAMERA_TARGET:
-		{
-			GetDlgItem(IDC_MODDLG_ROTATION)->SetWindowText(_T("Target"));
-			GetDlgItem(IDC_MODDLG_STEPFROM)->SetWindowText(_T("Up"));
-			GetDlgItem(IDC_MODDLG_STEPTO)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_FROM)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_TO)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_COLOR)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_MODDLG_FOV)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_FOVSTATIC)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_UPX)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_UPY)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_UPZ)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_PLANESSTATIC)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_NEAR)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_MODDLG_FAR)->ShowWindow(SW_SHOW);
-		} break;
+	case LC_OBJECT_CAMERA:
+	case LC_OBJECT_CAMERA_TARGET:
+		m_CameraDlg.ShowWindow(SW_SHOWNORMAL);
+		break;
 
-		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
-		{
-			// TODO: Lights.
-		} break;
+	case LC_OBJECT_LIGHT:
+	case LC_OBJECT_LIGHT_TARGET:
+		m_LightDlg.ShowWindow(SW_SHOWNORMAL);
+		break;
 	}
 
-	m_nType = nType;
+	m_CurrentType = Type;
 }
 
 void CModifyDialog::OnMenuClick(UINT nID)
@@ -341,60 +276,26 @@ void CModifyDialog::OnModdlgApply()
 {
 	if (m_pObject == NULL)
 		return;
+
 	UpdateData(TRUE);
 
-	switch (m_nType)
+	switch (m_CurrentType)
 	{
-		case LC_OBJECT_PIECE: 
-		{
-			LC_PIECE_MODIFY mod;
+		case LC_OBJECT_PIECE:
+			m_PieceDlg.Apply((Piece*)m_pObject);
+			break;
 
-			mod.piece = (Piece*)m_pObject;
-			mod.Position = Vector3(m_fPosX, m_fPosY, m_fPosZ);
-			lcGetActiveProject()->ConvertFromUserUnits(mod.Position);
-			mod.Rotation = Vector3(m_fRotX, m_fRotY, m_fRotZ);
-			mod.from = m_nFrom;
-			mod.to = m_nTo;
-			mod.hidden = (m_bHidden != FALSE);
-			mod.color = m_ctlColor.GetColorIndex();
-			strcpy(mod.name, m_strName);
+		case LC_OBJECT_CAMERA:
+		case LC_OBJECT_CAMERA_TARGET:
+			m_CameraDlg.Apply((Camera*)m_pObject);
+			break;
 
-			lcGetActiveProject()->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&mod);
-		} break;
-
-		case LC_OBJECT_CAMERA: case LC_OBJECT_CAMERA_TARGET:
-		{
-			LC_CAMERA_MODIFY mod;
-
-			mod.camera = (Camera*)m_pObject;
-			mod.hidden = (m_bHidden != FALSE);
-			mod.Eye = Vector3(m_fPosX, m_fPosY, m_fPosZ);
-			mod.Target = Vector3(m_fRotX, m_fRotY, m_fRotZ);
-			mod.Up = Vector3(m_fUpX, m_fUpY, m_fUpZ);
-			lcGetActiveProject()->ConvertFromUserUnits(mod.Eye);
-			lcGetActiveProject()->ConvertFromUserUnits(mod.Target);
-			lcGetActiveProject()->ConvertFromUserUnits(mod.Up);
-			mod.fovy = m_fFOV;
-			mod.znear = m_fNear;
-			mod.zfar = m_fFar;
-
-			lcGetActiveProject()->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&mod);
-		} break;
-
-		case LC_OBJECT_LIGHT: case LC_OBJECT_LIGHT_TARGET:
-		{
+		case LC_OBJECT_LIGHT:
+		case LC_OBJECT_LIGHT_TARGET:
 			// TODO: Lights.
-		} break;
+			break;
 	}
-//	pDoc->UpdateAllViews(NULL);
 }
-
-/*
-void CModifyDialog::OnModdlgClose() 
-{
-	AfxGetMainWnd()->PostMessage(WM_COMMAND, ID_VIEW_MODIFY_BAR);
-}
-*/
 
 void CModifyDialog::OnDropdownModdlgList() 
 {
@@ -407,7 +308,7 @@ void CModifyDialog::OnDropdownModdlgList()
 
 	m_ctlCombo.ResetContent();
 
-	switch (m_nType)
+	switch (m_CurrentType)
 	{
 		case LC_OBJECT_PIECE:
 		{
@@ -447,4 +348,291 @@ void CModifyDialog::OnDropdownModdlgList()
 				m_ctlCombo.SelectString(-1, ((Light*)m_pObject)->GetName());
 		} break;
 	}
+}
+
+// CModifyPieceDlg dialog
+IMPLEMENT_DYNAMIC(CModifyPieceDlg, CDialog)
+
+CModifyPieceDlg::CModifyPieceDlg(CWnd* pParent /*=NULL*/)
+	: CDialog(CModifyPieceDlg::IDD, pParent)
+{
+	m_PosX = 0.0f;
+	m_PosY = 0.0f;
+	m_PosZ = 0.0f;
+	m_RotX = 0.0f;
+	m_RotY = 0.0f;
+	m_RotZ = 0.0f;
+	m_Hidden = false;
+	m_From = 0;
+	m_To = 0;
+}
+
+CModifyPieceDlg::~CModifyPieceDlg()
+{
+}
+
+void CModifyPieceDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+
+	//{{AFX_DATA_MAP(CModifyDialog)
+	DDX_Text(pDX, IDC_MODDLG_POSX, m_PosX);
+	DDX_Text(pDX, IDC_MODDLG_POSY, m_PosY);
+	DDX_Text(pDX, IDC_MODDLG_POSZ, m_PosZ);
+	DDX_Text(pDX, IDC_MODDLG_ROTX, m_RotX);
+	DDX_Text(pDX, IDC_MODDLG_ROTY, m_RotY);
+	DDX_Text(pDX, IDC_MODDLG_ROTZ, m_RotZ);
+	DDX_Check(pDX, IDC_MODDLG_HIDDEN, m_Hidden);
+	DDX_Text(pDX, IDC_MODDLG_FROM, m_From);
+	DDX_Text(pDX, IDC_MODDLG_TO, m_To);
+	DDX_Control(pDX, IDC_MODDLG_COLOR, m_Color);
+	//}}AFX_DATA_MAP
+}
+
+
+BEGIN_MESSAGE_MAP(CModifyPieceDlg, CDialog)
+END_MESSAGE_MAP()
+
+
+// CModifyPieceDlg message handlers
+void CModifyPieceDlg::OnOK() 
+{
+}
+
+void CModifyPieceDlg::OnCancel() 
+{
+}
+
+void CModifyPieceDlg::UpdateInfo(Piece* piece)
+{
+	if (piece == NULL)
+	{
+		m_PosX = m_PosY = m_PosZ = 0.0f;
+		m_RotX = m_RotY = m_RotZ = 0.0f;
+		m_From = m_To = 0;
+		m_Hidden = false;
+		m_Color.SetColorIndex(0);
+	}
+	else
+	{
+		// Position.
+		Vector3 Pos = piece->GetPosition();
+		lcGetActiveProject()->ConvertToUserUnits(Pos);
+
+		m_PosX = Pos[0];
+		m_PosY = Pos[1];
+		m_PosZ = Pos[2];
+
+		// Rotation.
+		float rot[4];
+		piece->GetRotation(rot);
+		Matrix mat(rot, Pos);
+		mat.ToEulerAngles(rot);
+
+		m_RotX = rot[0];
+		m_RotY = rot[1];
+		m_RotZ = rot[2];
+
+		// Steps.
+		if (lcGetActiveProject()->IsAnimation())
+		{
+			m_From = piece->GetFrameShow();
+			m_To = piece->GetFrameHide();
+		}
+		else
+		{
+			m_From = piece->GetStepShow();
+			m_To = piece->GetStepHide();
+		}
+
+		m_Hidden = piece->IsHidden();
+		m_Color.SetColorIndex(piece->GetColor());
+	}
+
+	UpdateData(FALSE);
+}
+
+void CModifyPieceDlg::Apply(Piece* piece)
+{
+	UpdateData(TRUE);
+
+	LC_PIECE_MODIFY mod;
+
+	mod.piece = piece;
+	mod.Position = Vector3(m_PosX, m_PosY, m_PosZ);
+	lcGetActiveProject()->ConvertFromUserUnits(mod.Position);
+	mod.Rotation = Vector3(m_RotX, m_RotY, m_RotZ);
+	mod.from = m_From;
+	mod.to = m_To;
+	mod.hidden = (m_Hidden != FALSE);
+	mod.color = m_Color.GetColorIndex();
+	strcpy(mod.name, ((CModifyDialog*)GetParent())->m_strName);
+
+	lcGetActiveProject()->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&mod);
+}
+
+// CModifyCameraDlg dialog
+IMPLEMENT_DYNAMIC(CModifyCameraDlg, CDialog)
+
+CModifyCameraDlg::CModifyCameraDlg(CWnd* pParent /*=NULL*/)
+	: CDialog(CModifyCameraDlg::IDD, pParent)
+{
+	m_PosX = 0.0f;
+	m_PosY = 0.0f;
+	m_PosZ = 0.0f;
+	m_TargetX = 0.0f;
+	m_TargetY = 0.0f;
+	m_TargetZ = 0.0f;
+	m_UpX = 0.0f;
+	m_UpY = 0.0f;
+	m_UpZ = 0.0f;
+	m_FOV = 0.0f;
+	m_Near = 0.0f;
+	m_Far = 0.0f;
+	m_Ortho = false;
+	m_Hidden = false;
+}
+
+CModifyCameraDlg::~CModifyCameraDlg()
+{
+}
+
+void CModifyCameraDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+
+	//{{AFX_DATA_MAP(CModifyDialog)
+	DDX_Text(pDX, IDC_MODDLG_POSX, m_PosX);
+	DDX_Text(pDX, IDC_MODDLG_POSY, m_PosY);
+	DDX_Text(pDX, IDC_MODDLG_POSZ, m_PosZ);
+	DDX_Text(pDX, IDC_MODDLG_TARGETX, m_TargetX);
+	DDX_Text(pDX, IDC_MODDLG_TARGETY, m_TargetY);
+	DDX_Text(pDX, IDC_MODDLG_TARGETZ, m_TargetZ);
+	DDX_Text(pDX, IDC_MODDLG_UPX, m_UpX);
+	DDX_Text(pDX, IDC_MODDLG_UPY, m_UpY);
+	DDX_Text(pDX, IDC_MODDLG_UPZ, m_UpZ);
+	DDX_Text(pDX, IDC_MODDLG_FOV, m_FOV);
+	DDX_Text(pDX, IDC_MODDLG_NEAR, m_Near);
+	DDX_Text(pDX, IDC_MODDLG_FAR, m_Far);
+	DDX_Check(pDX, IDC_MODDLG_ORTHO, m_Ortho);
+	DDX_Check(pDX, IDC_MODDLG_HIDDEN, m_Hidden);
+	//}}AFX_DATA_MAP
+}
+
+
+BEGIN_MESSAGE_MAP(CModifyCameraDlg, CDialog)
+END_MESSAGE_MAP()
+
+
+// CModifyCameraDlg message handlers
+void CModifyCameraDlg::OnOK() 
+{
+}
+
+void CModifyCameraDlg::OnCancel() 
+{
+}
+
+void CModifyCameraDlg::UpdateInfo(Camera* camera)
+{
+	if (camera == NULL)
+	{
+		m_PosX = 0.0f;
+		m_PosY = 0.0f;
+		m_PosZ = 0.0f;
+		m_TargetX = 0.0f;
+		m_TargetY = 0.0f;
+		m_TargetZ = 0.0f;
+		m_UpX = 0.0f;
+		m_UpY = 0.0f;
+		m_UpZ = 0.0f;
+		m_FOV = 0.0f;
+		m_Near = 0.0f;
+		m_Far = 0.0f;
+		m_Ortho = false;
+		m_Hidden = false;
+	}
+	else
+	{
+		Vector3 tmp;
+
+		tmp = camera->GetEyePosition();
+		lcGetActiveProject()->ConvertToUserUnits(tmp);
+		m_PosX = tmp[0];
+		m_PosY = tmp[1];
+		m_PosZ = tmp[2];
+
+		tmp = camera->GetTargetPosition();
+		lcGetActiveProject()->ConvertToUserUnits(tmp);
+		m_TargetX = tmp[0];
+		m_TargetY = tmp[1];
+		m_TargetZ = tmp[2];
+
+		tmp = camera->GetUpVector();
+		lcGetActiveProject()->ConvertToUserUnits(tmp);
+		m_UpX = tmp[0];
+		m_UpY = tmp[1];
+		m_UpZ = tmp[2];
+
+		m_FOV = camera->m_fovy;
+		m_Near = camera->m_zNear;
+		m_Far = camera->m_zFar;
+		m_Ortho = camera->IsOrtho();
+		m_Hidden = !camera->IsVisible();
+	}
+
+	UpdateData(FALSE);
+}
+
+void CModifyCameraDlg::Apply(Camera* camera)
+{
+	UpdateData(TRUE);
+
+	LC_CAMERA_MODIFY mod;
+
+	mod.camera = camera;
+	mod.Eye = Vector3(m_PosX, m_PosY, m_PosZ);
+	lcGetActiveProject()->ConvertFromUserUnits(mod.Eye);
+	mod.Target = Vector3(m_TargetX, m_TargetY, m_TargetZ);
+	lcGetActiveProject()->ConvertFromUserUnits(mod.Target);
+	mod.Up = Vector3(m_UpX, m_UpY, m_UpZ);
+	mod.fovy = m_FOV;
+	mod.znear = m_Near;
+	mod.zfar = m_Far;
+	mod.hidden = (m_Hidden != FALSE);
+	mod.ortho = (m_Ortho != FALSE);
+	strcpy(mod.name, ((CModifyDialog*)GetParent())->m_strName);
+
+	lcGetActiveProject()->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&mod);
+}
+
+// CModifyLightDlg dialog
+IMPLEMENT_DYNAMIC(CModifyLightDlg, CDialog)
+
+CModifyLightDlg::CModifyLightDlg(CWnd* pParent /*=NULL*/)
+	: CDialog(CModifyLightDlg::IDD, pParent)
+{
+}
+
+CModifyLightDlg::~CModifyLightDlg()
+{
+}
+
+void CModifyLightDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+}
+
+
+BEGIN_MESSAGE_MAP(CModifyLightDlg, CDialog)
+END_MESSAGE_MAP()
+
+
+// CModifyLightDlg message handlers
+void CModifyLightDlg::OnOK() 
+{
+}
+
+void CModifyLightDlg::OnCancel() 
+{
 }

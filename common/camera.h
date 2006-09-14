@@ -132,6 +132,15 @@ public:
 		{ return (m_nState & LC_CAMERA_FOCUSED) != 0; } 
 	bool IsTargetFocused()
 		{ return (m_nState & LC_CAMERA_TARGET_FOCUSED) != 0; } 
+	bool IsOrtho() const
+		{ return (m_nState & LC_CAMERA_ORTHOGRAPHIC) != 0; }
+	void SetOrtho(bool ortho)
+	{
+		if (ortho)
+			m_nState |= LC_CAMERA_ORTHOGRAPHIC;
+		else
+			m_nState &= ~LC_CAMERA_ORTHOGRAPHIC;
+	}
 
 	/*
 	void Select()

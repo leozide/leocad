@@ -247,6 +247,7 @@ typedef struct
 	float fovy;
 	float znear;
 	float zfar;
+	bool ortho;
 	bool hidden;
 } LC_CAMERA_MODIFY;
 

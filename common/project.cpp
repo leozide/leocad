@@ -1849,12 +1849,11 @@ void Project::RenderScene(View* view)
 		glDisable(GL_FOG);
 		glShadeModel(GL_FLAT);
 
-		glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
 		Camera* camera = view->GetCamera();
 
 		if (camera->IsSide() && camera->IsOrtho())
 		{
-			Vector frontvec = camera->GetEyePosition() - camera->GetTargetPosition();
+			Vector3 frontvec = camera->GetEyePosition() - camera->GetTargetPosition();
 			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
 			float ymax, ymin, xmin, xmax;
 
@@ -1863,9 +1862,21 @@ void Project::RenderScene(View* view)
 			xmin = ymin * Aspect;
 			xmax = ymax * Aspect;
 
+			// Calculate camera offset.
+			Matrix44 ModelView;
+			ModelView.CreateLookAt(camera->GetEyePosition(), camera->GetTargetPosition(), camera->GetUpVector());
+			Vector3 offset = Mul30(camera->GetEyePosition(), ModelView);
+
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
+			glTranslatef(-offset[0], -offset[1], 0.0f);
+
+			xmin += offset[0];
+			xmax += offset[0];
+			ymin += offset[1];
+			ymax += offset[1];
+
 			float z = -camera->m_zFar;
 
 			Vector3 up = Abs(camera->GetUpVector());
@@ -1876,8 +1887,51 @@ void Project::RenderScene(View* view)
 			else
 				incy = 0.8f;
 
+			float scale = 1;
+
+			// Calculate minor line increment.
+			while ((ymax - ymin) / (incy * scale) > 100)
+				scale *= 2;
+
+			while ((xmax - xmin) / (incx * scale) > 100)
+				scale *= 2;
+
+			incx *= scale;
+			incy *= scale;
+
 			glBegin(GL_LINES);
 
+			// Draw minor lines.
+			glColor3f(0.75f, 0.75f, 0.75f);
+			for (float x = (int)(xmin / incx) * incx; x < xmax; x += incx)
+			{
+				glVertex3f(x, ymin, z);
+				glVertex3f(x, ymax, z);
+			}
+
+			for (float y = (int)(ymin / incy) * incy; y < ymax; y += incy)
+			{
+				glVertex3f(xmin, y, z);
+				glVertex3f(xmax, y, z);
+			}
+
+			// Reset increments and scale.
+			incx /= scale;
+			incy /= scale;
+			scale = 1;
+
+			// Calculate major line increment.
+			while ((ymax - ymin) / (incy * scale) > 10)
+				scale *= 2;
+
+			while ((xmax - xmin) / (incx * scale) > 10)
+				scale *= 2;
+
+			incx *= scale;
+			incy *= scale;
+
+			// Draw major lines.
+			glColor3f(0.0f, 0.0f, 0.0f);
 			for (float x = (int)(xmin / incx) * incx; x < xmax; x += incx)
 			{
 				glVertex3f(x, ymin, z);

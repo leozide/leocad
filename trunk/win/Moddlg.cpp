@@ -350,6 +350,59 @@ void CModifyDialog::OnDropdownModdlgList()
 	}
 }
 
+#include <locale.h>
+static void DDX_Text_Float(CDataExchange* pDX, int nIDC, float& value)
+{
+	pDX->PrepareEditCtrl(nIDC);
+	HWND hWndCtrl;
+	pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+	TCHAR szBuffer[400];
+	if (pDX->m_bSaveAndValidate)
+	{
+		::GetWindowText(hWndCtrl, szBuffer, sizeof(szBuffer)/sizeof(szBuffer[0]));
+		double d;
+		if (_stscanf(szBuffer, _T("%lf"), &d) != 1)
+		{
+			AfxMessageBox(AFX_IDP_PARSE_REAL);
+			pDX->Fail();            // throws exception
+		}
+		value = (float)d;
+	}
+	else
+	{
+		_stprintf(szBuffer, _T("%.2f"), value);
+		int nNewLen = lstrlen(szBuffer);
+
+		lconv* lc = localeconv();
+
+		// crop zeros
+		TCHAR* dot = strrchr(szBuffer, lc->decimal_point[0]);
+		if (dot)
+		{
+			TCHAR* ch = &szBuffer[nNewLen-1];
+
+			while (ch >= dot)
+			{
+				if (*ch != '0' && *ch != lc->decimal_point[0])
+					break;
+
+				*ch-- = 0;
+				nNewLen--;
+			}
+		}
+
+		TCHAR szOld[256];
+		// fast check to see if text really changes (reduces flash in controls)
+		if (nNewLen > sizeof(szOld)/sizeof(szOld[0]) ||
+			::GetWindowText(hWndCtrl, szOld, sizeof(szOld)/sizeof(szOld[0])) != nNewLen ||
+			lstrcmp(szOld, szBuffer) != 0)
+		{
+			// change it
+			::SetWindowText(hWndCtrl, szBuffer);
+		}
+	}
+}
+
 // CModifyPieceDlg dialog
 IMPLEMENT_DYNAMIC(CModifyPieceDlg, CDialog)
 
@@ -376,12 +429,12 @@ void CModifyPieceDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CModifyDialog)
-	DDX_Text(pDX, IDC_MODDLG_POSX, m_PosX);
-	DDX_Text(pDX, IDC_MODDLG_POSY, m_PosY);
-	DDX_Text(pDX, IDC_MODDLG_POSZ, m_PosZ);
-	DDX_Text(pDX, IDC_MODDLG_ROTX, m_RotX);
-	DDX_Text(pDX, IDC_MODDLG_ROTY, m_RotY);
-	DDX_Text(pDX, IDC_MODDLG_ROTZ, m_RotZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSX, m_PosX);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSY, m_PosY);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSZ, m_PosZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_ROTX, m_RotX);
+	DDX_Text_Float(pDX, IDC_MODDLG_ROTY, m_RotY);
+	DDX_Text_Float(pDX, IDC_MODDLG_ROTZ, m_RotZ);
 	DDX_Check(pDX, IDC_MODDLG_HIDDEN, m_Hidden);
 	DDX_Text(pDX, IDC_MODDLG_FROM, m_From);
 	DDX_Text(pDX, IDC_MODDLG_TO, m_To);
@@ -502,16 +555,16 @@ void CModifyCameraDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CModifyDialog)
-	DDX_Text(pDX, IDC_MODDLG_POSX, m_PosX);
-	DDX_Text(pDX, IDC_MODDLG_POSY, m_PosY);
-	DDX_Text(pDX, IDC_MODDLG_POSZ, m_PosZ);
-	DDX_Text(pDX, IDC_MODDLG_TARGETX, m_TargetX);
-	DDX_Text(pDX, IDC_MODDLG_TARGETY, m_TargetY);
-	DDX_Text(pDX, IDC_MODDLG_TARGETZ, m_TargetZ);
-	DDX_Text(pDX, IDC_MODDLG_UPX, m_UpX);
-	DDX_Text(pDX, IDC_MODDLG_UPY, m_UpY);
-	DDX_Text(pDX, IDC_MODDLG_UPZ, m_UpZ);
-	DDX_Text(pDX, IDC_MODDLG_FOV, m_FOV);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSX, m_PosX);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSY, m_PosY);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSZ, m_PosZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_TARGETX, m_TargetX);
+	DDX_Text_Float(pDX, IDC_MODDLG_TARGETY, m_TargetY);
+	DDX_Text_Float(pDX, IDC_MODDLG_TARGETZ, m_TargetZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_UPX, m_UpX);
+	DDX_Text_Float(pDX, IDC_MODDLG_UPY, m_UpY);
+	DDX_Text_Float(pDX, IDC_MODDLG_UPZ, m_UpZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_FOV, m_FOV);
 	DDX_Text(pDX, IDC_MODDLG_NEAR, m_Near);
 	DDX_Text(pDX, IDC_MODDLG_FAR, m_Far);
 	DDX_Check(pDX, IDC_MODDLG_ORTHO, m_Ortho);

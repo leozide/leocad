@@ -1850,7 +1850,52 @@ void Project::RenderScene(View* view)
 		glShadeModel(GL_FLAT);
 
 		glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
-		glCallList(m_nGridList);
+		Camera* camera = view->GetCamera();
+
+		if (camera->IsSide() && camera->IsOrtho())
+		{
+			Vector frontvec = camera->GetEyePosition() - camera->GetTargetPosition();
+			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
+			float ymax, ymin, xmin, xmax;
+
+			ymax = (frontvec.Length())*sinf(DTOR*camera->m_fovy/2);
+			ymin = -ymax;
+			xmin = ymin * Aspect;
+			xmax = ymax * Aspect;
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+			float z = -camera->m_zFar;
+
+			Vector3 up = Abs(camera->GetUpVector());
+			float incx = 0.8f, incy;
+
+			if ((up[2] > up[0]) && (up[2] > up[1]))
+				incy = 0.96f;
+			else
+				incy = 0.8f;
+
+			glBegin(GL_LINES);
+
+			for (float x = (int)(xmin / incx) * incx; x < xmax; x += incx)
+			{
+				glVertex3f(x, ymin, z);
+				glVertex3f(x, ymax, z);
+			}
+
+			for (float y = (int)(ymin / incy) * incy; y < ymax; y += incy)
+			{
+				glVertex3f(xmin, y, z);
+				glVertex3f(xmax, y, z);
+			}
+
+			glEnd();
+
+			glPopMatrix();
+		}
+		else
+			glCallList(m_nGridList);
 	}
 
 	// Setup lights.

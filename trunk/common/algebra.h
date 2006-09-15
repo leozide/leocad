@@ -302,6 +302,9 @@ public:
 	friend inline Vector3 operator/=(Vector3& a, float b)
 	{ a.m_Value = a.m_Value / b; return a; }
 
+	friend inline Vector3 Abs(const Vector3& a)
+	{ Vector3 tmp(a); tmp.Abs(); return tmp; }
+
 	// Other functions.
 	inline float Length() const
 	{ return m_Value.Length3(); }

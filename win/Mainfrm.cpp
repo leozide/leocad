@@ -1646,7 +1646,7 @@ void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
 	else if (*str == 'S')
 	{
 		str++;
-		SetActiveView((CView*)wnd, false);
+		SetActiveView((CView*)wnd);
 
 		// Save splitter direction.
 		char dir = *str;

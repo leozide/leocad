@@ -439,3 +439,22 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 
 	return false;
 }
+
+float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
+{
+	Vector3 Dir = End - Start;
+
+	float t1 = Dot3(Start - Point, Dir);
+	float t2 = Dir.LengthSquared();
+
+	float t = -t1 / t2;
+
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+
+	Vector3 Closest = Start + t * Dir;
+
+	return (Closest - Point).Length();
+}

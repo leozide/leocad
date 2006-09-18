@@ -272,7 +272,6 @@ protected:
 	unsigned long m_nSnap;
 	unsigned short m_nMoveSnap;
 	unsigned short m_nAngleSnap;
-	unsigned short m_nGridSize;
 	float m_fLineWidth;
 	float m_fFogDensity;
 	float m_fFogColor[4];
@@ -283,7 +282,6 @@ protected:
 	char m_strFooter[256];
 	char m_strHeader[256];
 
-	GLuint m_nGridList;
 	unsigned long m_nAutosave;
 	unsigned long m_nSaveTimer;
 	char m_strModelsPath[LC_MAXPATH];

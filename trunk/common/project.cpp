@@ -61,7 +61,6 @@ Project::Project()
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_nGridList = 0;
 	m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
@@ -291,7 +290,6 @@ void Project::LoadDefaults(bool cameras)
 	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fFogColor[3] = 1.0f;
-	m_nGridSize = (unsigned short)Sys_ProfileLoadInt ("Default", "Grid", 20);
 	rgb = Sys_ProfileLoadInt ("Default", "Ambient", 0x4B4B4B);
 	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
@@ -753,17 +751,18 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadLong (&i, 1); m_nCurFrame = i;
 				file->ReadShort (&m_nTotalFrames, 1);
-				file->ReadLong (&i, 1); m_nGridSize = i;
+				file->ReadLong (&i, 1); //m_nGridSize = i;
 				file->ReadLong (&i, 1); //m_nMoveSnap = i;
 			}
 			else
 			{
+				unsigned short sh;
 				file->ReadByte (&ch, 1); m_bAnimation = (ch != 0);
 				file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadShort (&m_nCurFrame, 1);
 				file->ReadShort (&m_nTotalFrames, 1);
-				file->ReadShort (&m_nGridSize, 1);
+				file->ReadShort (&sh, 1); // m_nGridSize
 				file->ReadShort (&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
@@ -908,7 +907,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteByte (&m_nFPS, 1);
 	file->WriteShort (&m_nCurFrame, 1);
 	file->WriteShort (&m_nTotalFrames, 1);
-	file->WriteShort (&m_nGridSize, 1);
+	sh = 10; file->WriteShort (&sh, 1); // m_nGridSize
 	file->WriteShort (&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = FLOATRGB(m_fGradient1);
@@ -1949,7 +1948,100 @@ void Project::RenderScene(View* view)
 			glPopMatrix();
 		}
 		else
-			glCallList(m_nGridList);
+		{
+			// Calculate view matrices.
+			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
+
+			Matrix44 ModelView, Projection;
+			ModelView.CreateLookAt(camera->GetEyePosition(), camera->GetTargetPosition(), camera->GetUpVector());
+			Projection.CreatePerspective(camera->m_fovy, Aspect, camera->m_zNear, camera->m_zFar);
+
+			// Unproject edge center points to world space.
+			int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+
+			Vector3 Points[10] =
+			{
+				Vector3(0, (float)Viewport[3] / 2, 0),
+				Vector3(0, (float)Viewport[3] / 2, 1),
+				Vector3((float)Viewport[2] / 2, 0, 0),
+				Vector3((float)Viewport[2] / 2, 0, 1),
+				Vector3((float)Viewport[2], (float)Viewport[3] / 2, 0),
+				Vector3((float)Viewport[2], (float)Viewport[3] / 2, 1),
+				Vector3((float)Viewport[2] / 2, (float)Viewport[3], 0),
+				Vector3((float)Viewport[2] / 2, (float)Viewport[3], 1),
+				Vector3((float)Viewport[2] / 2, (float)Viewport[3] / 2, 0),
+				Vector3((float)Viewport[2] / 2, (float)Viewport[3] / 2, 1),
+			};
+
+			UnprojectPoints(Points, 10, ModelView, Projection, Viewport);
+
+			// Intersect lines with base plane.
+			Vector3 Intersections[5];
+
+			for (int i = 0; i < 5; i++)
+				LinePlaneIntersection(Intersections[i], Points[i*2], Points[i*2+1], Vector4(0, 0, 1, 0));
+
+			// Find the smallest edge length.
+			float MinSize = FLT_MAX;
+			for (int i = 0; i < 4; i++)
+			{
+				float d1 = LinePointMinDistance(Intersections[4], Intersections[i], i == 0 ? Intersections[3] : Intersections[i-1]);
+				float d2 = (Intersections[4] - Intersections[i]).Length();
+
+				if (d1 < MinSize)
+					MinSize = d1;
+			}
+
+			// Draw grid.
+			float inc = 0.8f;
+			float z = 0.0f;
+			float xsteps = ceilf(MinSize / inc);
+
+			while (xsteps > 10)
+			{
+				xsteps = floorf(xsteps / 2);
+				inc *= 2;
+			}
+
+			float ysteps = xsteps;
+
+			float xmin = floorf((Intersections[4][0] + (10 * inc)) / (20 * inc)) * (20 * inc) - (xsteps * inc);
+			float ymin = floorf((Intersections[4][1] + (10 * inc)) / (20 * inc)) * (20 * inc) - (ysteps * inc);
+			xmin -= inc * 10;
+			ymin -= inc * 10;
+
+			xsteps *= 2;
+			ysteps *= 2;
+
+			if (fmodf(Intersections[4][0] + (10 * inc), (20 * inc)) > 0.5f)
+				xsteps += 20;
+			else
+				xsteps += 10;
+
+			if (fmodf(Intersections[4][1] + (10 * inc), (20 * inc)) > 0.5f)
+				ysteps += 20;
+			else
+				ysteps += 10;
+
+			float xmax = xmin + (xsteps + 1) * inc;
+			float ymax = ymin + (ysteps + 1) * inc;
+
+			glBegin(GL_LINES);
+
+			// Draw lines.
+			glColor3f(0.75f, 0.75f, 0.75f);
+			for (int x = 0; x < xsteps + 2; x++)
+			{
+				glVertex3f(xmin + x * inc, ymin, z);
+				glVertex3f(xmin + x * inc, ymax, z);
+			}
+
+			for (int y = 0; y < ysteps + 2; y++)
+			{
+				glVertex3f(xmin, ymin + y * inc, z);
+				glVertex3f(xmax, ymin + y * inc, z);
+			}
+		}
 	}
 
 	// Setup lights.
@@ -2826,7 +2918,6 @@ void Project::RenderBoxes(bool bHilite)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
-	int i;
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_POLYGON_OFFSET_FILL);
@@ -2885,17 +2976,17 @@ void Project::RenderInitialize()
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, m_fAmbient);
 
 	// Load font
-  if (!m_pScreenFont->IsLoaded ())
-  {
-    char filename[LC_MAXPATH];
-    FileDisk file;
+	if (!m_pScreenFont->IsLoaded())
+	{
+		char filename[LC_MAXPATH];
+		FileDisk file;
 
-    strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath ());
-    strcat (filename, "sysfont.txf");
+		strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
+		strcat(filename, "sysfont.txf");
 
-    if (file.Open (filename, "rb"))
-      m_pScreenFont->FileLoad (file);
-  }
+		if (file.Open(filename, "rb"))
+			m_pScreenFont->FileLoad(file);
+	}
 
 	glAlphaFunc(GL_GREATER, 0.0625);
 
@@ -2908,39 +2999,6 @@ void Project::RenderInitialize()
 			m_nScene &= ~LC_SCENE_BG;
 //			AfxMessageBox ("Could not load background");
 		}
-
-	// Set the perspective correction hint to fastest or nicest...
-//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-
-	// Grid display list
-	if (m_nGridList == 0)
-		m_nGridList = glGenLists(1);
-	glNewList (m_nGridList, GL_COMPILE);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	i = 2*(4*m_nGridSize+2); // verts needed (2*lines)
-	float *grid = (float*)malloc(i*sizeof(float[3]));
-	float x = m_nGridSize*0.8f;
-
-	for (int j = 0; j <= m_nGridSize*2; j++)
-	{
-		grid[j*12] = x;
-		grid[j*12+1] = m_nGridSize*0.8f;
-		grid[j*12+2] = 0;
-		grid[j*12+3] = x;
-		grid[j*12+4] = -m_nGridSize*0.8f;
-		grid[j*12+5] = 0;
-		grid[j*12+6] = m_nGridSize*0.8f;
-		grid[j*12+7] = x;
-		grid[j*12+8] = 0;
-		grid[j*12+9] = -m_nGridSize*0.8f;
-		grid[j*12+10] = x;
-		grid[j*12+11] = 0;
-		x -= 0.8f;
-	}
-	glVertexPointer(3, GL_FLOAT, 0, grid);
-	glDrawArrays(GL_LINES, 0, i);
-	glEndList();
-	free(grid);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -5495,7 +5553,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.fLineWidth = m_fLineWidth;
 			opts.nSnap = m_nSnap;
 			opts.nAngleSnap = m_nAngleSnap;
-			opts.nGridSize = m_nGridSize;
 			opts.nScene = m_nScene;
 			opts.fDensity = m_fFogDensity;
 			strcpy(opts.strBackground, m_strBackground);
@@ -5517,7 +5574,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				m_fLineWidth = opts.fLineWidth;
 				m_nSnap = opts.nSnap;
 				m_nAngleSnap = opts.nAngleSnap;
-				m_nGridSize = opts.nGridSize;
 				m_nScene = opts.nScene;
 				m_fFogDensity = opts.fDensity;
 				strcpy(m_strBackground, opts.strBackground);

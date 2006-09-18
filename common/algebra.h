@@ -614,5 +614,6 @@ void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, in
 bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane);
 bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
 bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
+float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End);
 
 #endif

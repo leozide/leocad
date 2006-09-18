@@ -755,6 +755,47 @@ void Camera::LoadProjection(float fAspect)
 	gluLookAt(m_fEye[0], m_fEye[1], m_fEye[2], m_fTarget[0], m_fTarget[1], m_fTarget[2], m_fUp[0], m_fUp[1], m_fUp[2]);
 }
 
+void Camera::GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const
+{
+	Matrix44 ModelView, Projection;
+
+	ModelView.CreateLookAt(GetEyePosition(), GetTargetPosition(), GetUpVector());
+	Projection.CreatePerspective(m_fovy, Aspect, m_zNear, m_zFar);
+
+	Matrix44 ModelProj = Mul(ModelView, Projection);
+
+	Planes[0][0] = (ModelProj[0][0] - ModelProj[0][3]) * -1;
+	Planes[0][1] = (ModelProj[1][0] - ModelProj[1][3]) * -1;
+	Planes[0][2] = (ModelProj[2][0] - ModelProj[2][3]) * -1;
+	Planes[0][3] = (ModelProj[3][0] - ModelProj[3][3]) * -1;
+	Planes[1][0] =  ModelProj[0][0] + ModelProj[0][3];
+	Planes[1][1] =  ModelProj[1][0] + ModelProj[1][3];
+	Planes[1][2] =  ModelProj[2][0] + ModelProj[2][3];
+	Planes[1][3] =  ModelProj[3][0] + ModelProj[3][3];
+	Planes[2][0] = (ModelProj[0][1] - ModelProj[0][3]) * -1;
+	Planes[2][1] = (ModelProj[1][1] - ModelProj[1][3]) * -1;
+	Planes[2][2] = (ModelProj[2][1] - ModelProj[2][3]) * -1;
+	Planes[2][3] = (ModelProj[3][1] - ModelProj[3][3]) * -1;
+	Planes[3][0] =  ModelProj[0][1] + ModelProj[0][3];
+	Planes[3][1] =  ModelProj[1][1] + ModelProj[1][3];
+	Planes[3][2] =  ModelProj[2][1] + ModelProj[2][3];
+	Planes[3][3] =  ModelProj[3][1] + ModelProj[3][3];
+	Planes[4][0] = (ModelProj[0][2] - ModelProj[0][3]) * -1;
+	Planes[4][1] = (ModelProj[1][2] - ModelProj[1][3]) * -1;
+	Planes[4][2] = (ModelProj[2][2] - ModelProj[2][3]) * -1;
+	Planes[4][3] = (ModelProj[3][2] - ModelProj[3][3]) * -1;
+	Planes[5][0] =  ModelProj[0][2] + ModelProj[0][3];
+	Planes[5][1] =  ModelProj[1][2] + ModelProj[1][3];
+	Planes[5][2] =  ModelProj[2][2] + ModelProj[2][3];
+	Planes[5][3] =  ModelProj[3][2] + ModelProj[3][3];
+
+	for (int i = 0; i < 6; i++)
+	{
+		float len = Planes[i].Length3();
+		Planes[i] /= -len;
+	}
+}
+
 void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
 	if (m_nState & LC_CAMERA_ORTHOGRAPHIC)

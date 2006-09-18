@@ -169,6 +169,7 @@ public:
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
+	void GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const;
 
 	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);

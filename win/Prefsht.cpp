@@ -108,10 +108,9 @@ void CPreferencesSheet::OnDefault()
 	m_PageDetail.GetOptions(&l, &f);
 	AfxGetApp()->WriteProfileInt("Default", "Detail", l);
 	AfxGetApp()->WriteProfileInt("Default", "Line", (int)(f*100));
-	m_PageDrawing.GetOptions(&l, &s1, &s2);
+	m_PageDrawing.GetOptions(&l, &s1);
 	AfxGetApp()->WriteProfileInt("Default", "Snap", l);
 	AfxGetApp()->WriteProfileInt("Default", "Angle", s1);
-	AfxGetApp()->WriteProfileInt("Default", "Grid", s2);
 	m_PageScene.GetOptions(&l, &f, str, cr1, cr2, cr3, cr4, cr5);
 	AfxGetApp()->WriteProfileInt("Default", "Scene", l);
 	AfxGetApp()->WriteProfileInt("Default", "Density", (int)(f*100));

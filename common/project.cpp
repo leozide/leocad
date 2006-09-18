@@ -2030,6 +2030,7 @@ void Project::RenderScene(View* view)
 
 			// Draw lines.
 			glColor3f(0.75f, 0.75f, 0.75f);
+
 			for (int x = 0; x < xsteps + 2; x++)
 			{
 				glVertex3f(xmin + x * inc, ymin, z);
@@ -2041,6 +2042,9 @@ void Project::RenderScene(View* view)
 				glVertex3f(xmin, ymin + y * inc, z);
 				glVertex3f(xmax, ymin + y * inc, z);
 			}
+
+			glEnd();
+
 		}
 	}
 
@@ -2918,6 +2922,7 @@ void Project::RenderBoxes(bool bHilite)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
+	glEnableClientState(GL_VERTEX_ARRAY);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_POLYGON_OFFSET_FILL);

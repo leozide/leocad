@@ -81,7 +81,7 @@ public:
 	{ return m_Target; };
 	inline const Vector3& GetUpVector() const
 	{ return m_Up; }
-	inline const Matrix44& GetWorldView() const
+	inline const Matrix44& GetWorldViewMatrix() const
 	{ return m_WorldView; }
 
 	const char* GetName() const

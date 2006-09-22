@@ -552,6 +552,9 @@ public:
 	friend inline Vector3 Mul30(const Vector3& a, const Matrix44& b)
 	{ return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
+	friend inline Vector4 Mul30(const Vector4& a, const Matrix44& b)
+	{ return Vector4(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
+
 	friend inline Vector4 Mul4(const Vector4& a, const Matrix44& b)
 	{ return Vector4(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2] + b.m_Rows[3]*a[3]); }
 
@@ -579,18 +582,19 @@ public:
 		return *this;
 	}
 
-	inline void Transpose3()
+	friend inline Matrix44 Transpose3(const Matrix44& m)
 	{
-		Vector4 a = m_Rows[0], b = m_Rows[1], c = m_Rows[2];
-		m_Rows[0] = Vector4(a[0], b[0], c[0], a[3]);
-		m_Rows[1] = Vector4(a[1], b[1], c[1], b[3]);
-		m_Rows[2] = Vector4(a[2], b[2], c[2], c[3]);
+		Vector4 a(m.m_Rows[0][0], m.m_Rows[1][0], m.m_Rows[2][0], m.m_Rows[0][3]);
+		Vector4 b(m.m_Rows[0][1], m.m_Rows[1][1], m.m_Rows[2][1], m.m_Rows[1][3]);
+		Vector4 c(m.m_Rows[0][2], m.m_Rows[1][2], m.m_Rows[2][2], m.m_Rows[2][3]);
+		return Matrix44(a, b, c, m.m_Rows[3]);
 	}
 
 	inline void SetTranslation(const Vector3& a)
 	{ m_Rows[3] = Vector4(a[0], a[1], a[2], 1.0f); }
 
 	friend Matrix44 Inverse(const Matrix44& m);
+	friend Matrix44 RotTranInverse(const Matrix44& m);
 	void CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
 	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
 	void CreateOrtho(float Left, float Right, float Bottom, float Top, float Near, float Far);

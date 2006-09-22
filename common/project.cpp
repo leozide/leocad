@@ -2222,7 +2222,7 @@ void Project::RenderInterface(View* view)
 	if (m_nSnap & LC_DRAW_AXIS)
 	{
 		Matrix44 Mats[3];
-		Mats[0] = view->GetCamera()->GetWorldView();
+		Mats[0] = view->GetCamera()->GetWorldViewMatrix();
 		Mats[1] = Matrix44(Mats[0][1], Mats[0][0], Mats[0][2], Mats[0][3]);
 		Mats[2] = Matrix44(Mats[0][2], Mats[0][1], Mats[0][0], Mats[0][3]);
 
@@ -2583,8 +2583,7 @@ void Project::RenderOverlays(View* view)
 			}
 		}
 
-		Mat.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-		Mat.Transpose3();
+		Mat = Transpose3(Cam->GetWorldViewMatrix());
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
@@ -7592,8 +7591,8 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
         if (camera->IsSide ())
         {
-					Matrix44 mat = camera->GetWorldView();
-          mat = Inverse(mat);
+					Matrix44 mat = camera->GetWorldViewMatrix();
+          mat = RotTranInverse(mat);
 
   				switch (nKey)
 	  			{

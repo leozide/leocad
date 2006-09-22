@@ -542,7 +542,7 @@ void Camera::UpdateBoundingBox()
 
 	m_WorldView.CreateLookAt(m_Eye, m_Target, m_Up);
 
-	Matrix44 mat = Inverse(m_WorldView);
+	Matrix44 mat = RotTranInverse(m_WorldView);
 
 	mat.SetTranslation(m_Eye);
 	BoundingBoxCalculate(mat);
@@ -671,7 +671,7 @@ void Camera::Render(float fLineWidth)
 
 		glPushMatrix();
 
-		modelview = Inverse(m_WorldView);
+		modelview = RotTranInverse(m_WorldView);
 		glMultMatrixf(modelview);
 
 		projection.CreatePerspective(m_fovy, 1.33f, 0.01f, len);

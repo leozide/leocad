@@ -26,7 +26,6 @@ public:
 	void Translate(float x, float y, float z);
 	void Multiply(const Matrix& m1, const Matrix& m2);
 	bool Invert();
-	void Transpose3();
 	float Determinant() const;
 
 	void GetTranslation(float *x, float *y, float *z);
@@ -39,8 +38,6 @@ public:
 	void CreateOld(float mx, float my, float mz, float rx, float ry, float rz);
 	void Rotate(float angle, float x, float y, float z);
 	void RotateCenter(float angle, float x, float y, float z, float px, float py, float pz);
-	void CreatePerspective(float fovy, float aspect, float nearval, float farval);
-	void CreateLookat(const float *eye, const float *target, const float *up);
 
 public:
 	float m[16];

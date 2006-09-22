@@ -575,8 +575,7 @@ void Terrain::Render(Camera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
-		float eye[3];
-		pCam->GetEyePos(eye);
+		Vector3 eye = pCam->GetEyePosition();
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
 		glScalef(pCam->m_zFar, pCam->m_zFar, 1);
@@ -669,8 +668,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 {
 	// Get camera position information.
-	float eye[3];
-	pCam->GetEyePos(eye);
+	Vector3 eye = pCam->GetEyePosition();
 	
 	// Get perspective information.
 	float alpha = pCam->m_fovy / 2.0f;
@@ -681,9 +679,8 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 	float beta = 2.0f * halfFovX;
 
 	// Get vector stuff from the position.
-	float nonOrthoTop[3], target[3];
-	pCam->GetUpVec(nonOrthoTop);
-	pCam->GetTargetPos(target);
+	Vector3 nonOrthoTop = pCam->GetUpVector();
+	Vector3 target = pCam->GetTargetPosition();
 	float front[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]};
 	float side[3];
 	side[0] = nonOrthoTop[1]*front[2] - nonOrthoTop[2]*front[1];

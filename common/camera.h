@@ -75,38 +75,20 @@ public:
 	virtual ~Camera();
 
 	// Query functions.
-	inline Vector3 GetEyePosition() const
-	{ return Vector3(m_fEye[0], m_fEye[1], m_fEye[2]); };
-	inline Vector3 GetTargetPosition() const
-	{ return Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
-	inline Vector3 GetUpVector() const
-	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
+	inline const Vector3& GetEyePosition() const
+	{ return m_Eye; };
+	inline const Vector3& GetTargetPosition() const
+	{ return m_Target; };
+	inline const Vector3& GetUpVector() const
+	{ return m_Up; }
+	inline const Matrix44& GetWorldView() const
+	{ return m_WorldView; }
 
 	const char* GetName() const
 	{ return m_strName; };
 
 	CameraTarget* GetTarget() const
 		{ return m_pTarget; }
-
-
-	// Deprecated functions:
-	const float* GetEyePos() const
-		{ return m_fEye; };
-	void GetEyePos(float* eye) const
-		{ memcpy(eye, m_fEye, sizeof(m_fEye)); };
-	const float* GetTargetPos() const
-		{ return m_fTarget; };
-	void GetTargetPos(float* target) const
-		{ memcpy(target, m_fTarget, sizeof(m_fTarget)); };
-	const float* GetUpVec() const
-		{ return m_fUp; };
-	void GetUpVec(float* up) const
-		{ memcpy(up, m_fUp, sizeof(m_fUp)); };
-
-
-
-
-
 
 public:
 	Camera* m_pNext;
@@ -200,9 +182,10 @@ protected:
 	static GLuint m_nTargetList;
 
 	// Current position and orientation.
-	float m_fEye[3];
-	float m_fTarget[3];
-	float m_fUp[3];
+	Vector3 m_Eye;
+	Vector3 m_Target;
+	Vector3 m_Up;
+	Matrix44 m_WorldView;
 
 	TiledRender* m_pTR;
 };

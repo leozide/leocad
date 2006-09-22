@@ -265,164 +265,165 @@ void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
   }
 }
 
-void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
+void Light::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
-  CalculateKeys (nTime, bAnimation);
-  BoundingBoxCalculate (m_fPos);
+	CalculateKeys (nTime, bAnimation);
+	BoundingBoxCalculate (m_fPos);
 
-  if (m_pTarget != NULL)
-  {
-    m_pTarget->BoundingBoxCalculate (m_fTarget);
+	if (m_pTarget != NULL)
+	{
+		m_pTarget->BoundingBoxCalculate (m_fTarget);
 
-    if (m_nList == 0)
-      m_nList = glGenLists(1);
+		if (m_nList == 0)
+			m_nList = glGenLists(1);
 
-    glNewList (m_nList, GL_COMPILE);
+		glNewList (m_nList, GL_COMPILE);
 
-    glPushMatrix ();
-    glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
+		glPushMatrix ();
+		glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
 
-    Vector frontvec (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
-    float len = frontvec.Length (), up[3] = { 1, 1, 1 };
+		Vector3 frontvec(m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+		Vector3 up(1, 1, 1);
+		float len = frontvec.Length ();
 
-    if (fabs (frontvec[0]) < fabs (frontvec[1]))
-    {
-      if (fabs (frontvec[0]) < fabs (frontvec[2]))
-	up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
-      else
-	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
-    }
-    else
-    {
-      if (fabs (frontvec[1]) < fabs (frontvec[2]))
-	up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
-      else
-	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
-    }
+		if (fabs (frontvec[0]) < fabs (frontvec[1]))
+		{
+			if (fabs (frontvec[0]) < fabs (frontvec[2]))
+				up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
+			else
+				up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
+		}
+		else
+		{
+			if (fabs (frontvec[1]) < fabs (frontvec[2]))
+				up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
+			else
+				up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
+		}
 
-    Matrix mat;
-    mat.CreateLookat (m_fPos, m_fTarget, up);
-    mat.Invert ();
-    mat.SetTranslation (0, 0, 0);
+		Matrix44 mat;
+		mat.CreateLookAt(Vector3(m_fPos[0], m_fPos[1], m_fPos[2]), Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]), up);
+		mat = Inverse(mat);
+		mat.SetTranslation(Vector3(0, 0, 0));
 
-    glMultMatrixf (mat.m);
+		glMultMatrixf(mat);
 
-    glEnableClientState (GL_VERTEX_ARRAY);
-    float verts[16*3];
-    for (int i = 0; i < 8; i++)
-    {
-      verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * PI) * 0.3f;
-      verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * PI) * 0.3f;
-      verts[i*6+2] = 0.3f;
-      verts[i*6+5] = -0.3f;
-    }
-    glVertexPointer (3, GL_FLOAT, 0, verts);
-    glDrawArrays (GL_LINES, 0, 16);
-    glVertexPointer (3, GL_FLOAT, 6*sizeof(float), verts);
-    glDrawArrays (GL_LINE_LOOP, 0, 8);
-    glVertexPointer (3, GL_FLOAT, 6*sizeof(float), &verts[3]);
-    glDrawArrays (GL_LINE_LOOP, 0, 8);
+		glEnableClientState (GL_VERTEX_ARRAY);
+		float verts[16*3];
+		for (int i = 0; i < 8; i++)
+		{
+			verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * PI) * 0.3f;
+			verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * PI) * 0.3f;
+			verts[i*6+2] = 0.3f;
+			verts[i*6+5] = -0.3f;
+		}
+		glVertexPointer (3, GL_FLOAT, 0, verts);
+		glDrawArrays (GL_LINES, 0, 16);
+		glVertexPointer (3, GL_FLOAT, 6*sizeof(float), verts);
+		glDrawArrays (GL_LINE_LOOP, 0, 8);
+		glVertexPointer (3, GL_FLOAT, 6*sizeof(float), &verts[3]);
+		glDrawArrays (GL_LINE_LOOP, 0, 8);
 
-    glBegin (GL_LINE_LOOP);
-    glVertex3f (-0.5f, -0.5f, -0.3f);
-    glVertex3f ( 0.5f, -0.5f, -0.3f);
-    glVertex3f ( 0.5f,  0.5f, -0.3f);
-    glVertex3f (-0.5f,  0.5f, -0.3f);
-    glEnd ();
+		glBegin (GL_LINE_LOOP);
+		glVertex3f (-0.5f, -0.5f, -0.3f);
+		glVertex3f ( 0.5f, -0.5f, -0.3f);
+		glVertex3f ( 0.5f,  0.5f, -0.3f);
+		glVertex3f (-0.5f,  0.5f, -0.3f);
+		glEnd ();
 
-    glTranslatef(0, 0, -len);
-    glEndList();
+		glTranslatef(0, 0, -len);
+		glEndList();
 
-    if (m_nTargetList == 0)
-    {
-      m_nTargetList = glGenLists (1);
-      glNewList (m_nTargetList, GL_COMPILE);
+		if (m_nTargetList == 0)
+		{
+			m_nTargetList = glGenLists (1);
+			glNewList (m_nTargetList, GL_COMPILE);
 
-      glEnableClientState (GL_VERTEX_ARRAY);
-      float box[24][3] = {
-	{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-	{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-	{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-	{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-	{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-	{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-	{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-	{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-	{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-	{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-	{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-	{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f } };
-      glVertexPointer (3, GL_FLOAT, 0, box);
-      glDrawArrays (GL_LINES, 0, 24);
-      glPopMatrix ();
-      glEndList ();
-    }
-  }
-  else
-  {
-    if (m_nSphereList == 0)
-      m_nSphereList = glGenLists (1);
-    glNewList (m_nSphereList, GL_COMPILE);
+			glEnableClientState (GL_VERTEX_ARRAY);
+			float box[24][3] = {
+				{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
+				{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
+				{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
+				{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
+				{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
+				{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
+				{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
+				{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
+				{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
+				{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
+				{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
+				{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f } };
+				glVertexPointer (3, GL_FLOAT, 0, box);
+				glDrawArrays (GL_LINES, 0, 24);
+				glPopMatrix ();
+				glEndList ();
+		}
+	}
+	else
+	{
+		if (m_nSphereList == 0)
+			m_nSphereList = glGenLists (1);
+		glNewList (m_nSphereList, GL_COMPILE);
 
-    const float radius = 0.2f;
-    const int slices = 6, stacks = 6;
-    float rho, drho, theta, dtheta;
-    float x, y, z;
-    int i, j, imin, imax;
-    drho = 3.1415926536f/(float)stacks;
-    dtheta = 2.0f*3.1415926536f/(float)slices;
+		const float radius = 0.2f;
+		const int slices = 6, stacks = 6;
+		float rho, drho, theta, dtheta;
+		float x, y, z;
+		int i, j, imin, imax;
+		drho = 3.1415926536f/(float)stacks;
+		dtheta = 2.0f*3.1415926536f/(float)slices;
 
-    // draw +Z end as a triangle fan
-    glBegin (GL_TRIANGLE_FAN);
-    glVertex3f (0.0, 0.0, radius);
-    for (j = 0; j <= slices; j++) 
-    {
-      theta = (j == slices) ? 0.0f : j * dtheta;
-      x = (float)(-sin(theta) * sin(drho));
-      y = (float)(cos(theta) * sin(drho));
-      z = (float)(cos(drho));
-      glVertex3f (x*radius, y*radius, z*radius);
-    }
-    glEnd ();
+		// draw +Z end as a triangle fan
+		glBegin (GL_TRIANGLE_FAN);
+		glVertex3f (0.0, 0.0, radius);
+		for (j = 0; j <= slices; j++) 
+		{
+			theta = (j == slices) ? 0.0f : j * dtheta;
+			x = (float)(-sin(theta) * sin(drho));
+			y = (float)(cos(theta) * sin(drho));
+			z = (float)(cos(drho));
+			glVertex3f (x*radius, y*radius, z*radius);
+		}
+		glEnd ();
 
-    imin = 1;
-    imax = stacks-1;
+		imin = 1;
+		imax = stacks-1;
 
-    for (i = imin; i < imax; i++)
-    {
-      rho = i * drho;
-      glBegin (GL_QUAD_STRIP);
-      for (j = 0; j <= slices; j++)
-      {
-	theta = (j == slices) ? 0.0f : j * dtheta;
-	x = (float)(-sin(theta) * sin(rho));
-	y = (float)(cos(theta) * sin(rho));
-	z = (float)(cos(rho));
-	glVertex3f (x*radius, y*radius, z*radius);
-	x = (float)(-sin(theta) * sin(rho+drho));
-	y = (float)(cos(theta) * sin(rho+drho));
-	z = (float)(cos(rho+drho));
-	glVertex3f (x*radius, y*radius, z*radius);
-      }
-      glEnd ();
-    }
+		for (i = imin; i < imax; i++)
+		{
+			rho = i * drho;
+			glBegin (GL_QUAD_STRIP);
+			for (j = 0; j <= slices; j++)
+			{
+				theta = (j == slices) ? 0.0f : j * dtheta;
+				x = (float)(-sin(theta) * sin(rho));
+				y = (float)(cos(theta) * sin(rho));
+				z = (float)(cos(rho));
+				glVertex3f (x*radius, y*radius, z*radius);
+				x = (float)(-sin(theta) * sin(rho+drho));
+				y = (float)(cos(theta) * sin(rho+drho));
+				z = (float)(cos(rho+drho));
+				glVertex3f (x*radius, y*radius, z*radius);
+			}
+			glEnd ();
+		}
 
-    // draw -Z end as a triangle fan
-    glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(0.0, 0.0, -radius);
-    rho = 3.1415926536f - drho;
-    for (j = slices; j >= 0; j--)
-    {
-      theta = (j==slices) ? 0.0f : j * dtheta;
-      x = (float)(-sin(theta) * sin(rho));
-      y = (float)(cos(theta) * sin(rho));
-      z = (float)(cos(rho));
-      glVertex3f (x*radius, y*radius, z*radius);
-    }
-    glEnd ();
+		// draw -Z end as a triangle fan
+		glBegin (GL_TRIANGLE_FAN);
+		glVertex3f(0.0, 0.0, -radius);
+		rho = 3.1415926536f - drho;
+		for (j = slices; j >= 0; j--)
+		{
+			theta = (j==slices) ? 0.0f : j * dtheta;
+			x = (float)(-sin(theta) * sin(rho));
+			y = (float)(cos(theta) * sin(rho));
+			z = (float)(cos(rho));
+			glVertex3f (x*radius, y*radius, z*radius);
+		}
+		glEnd ();
 
-    glEndList ();
-  }
+		glEndList ();
+	}
 }
 
 void Light::Render (float fLineWidth)
@@ -463,9 +464,10 @@ void Light::Render (float fLineWidth)
 
     if (IsSelected())
     {
-      Matrix projection, modelview;
-      Vector frontvec(m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
-      float len = frontvec.Length (), up[3] = { 1, 1, 1 };
+      Matrix44 projection, modelview;
+      Vector3 frontvec(m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+			Vector3 up(1, 1, 1);
+      float len = frontvec.Length ();
 
       if (fabs (frontvec[0]) < fabs (frontvec[1]))
       {
@@ -484,13 +486,13 @@ void Light::Render (float fLineWidth)
 
       glPushMatrix ();
 
-      modelview.CreateLookat (m_fPos, m_fTarget, up);
-      modelview.Invert ();
-      glMultMatrixf (modelview.m);
+      modelview.CreateLookAt(Vector3(m_fPos[0], m_fPos[1], m_fPos[2]), Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]), up);
+      modelview = Inverse(modelview);
+      glMultMatrixf(modelview);
 
-      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01f, len);
-      projection.Invert ();
-      glMultMatrixf (projection.m);
+      projection.CreatePerspective(2*m_fCutoff, 1.0f, 0.01f, len);
+      projection = Inverse(projection);
+      glMultMatrixf(projection);
 
       // draw the viewing frustum
       glBegin (GL_LINE_LOOP);

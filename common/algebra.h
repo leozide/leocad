@@ -470,6 +470,8 @@ public:
 		{ }
 	inline Matrix33(const Vector3& Row0, const Vector3& Row1, const Vector3& Row2)
 		{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; }
+	inline operator const float*() const { return (const float*)this; }
+	inline operator float*() { return (float*)this; }
 
 	inline void LoadIdentity()
 	{
@@ -531,6 +533,8 @@ public:
 	{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
 
 	inline operator const float*() const { return (const float*)this; }
+	inline operator float*() const { return (float*)this; }
+	inline const Vector4& operator[](int i) const { return m_Rows[i]; }
 	inline Vector4& operator[](int i) { return m_Rows[i]; }
 
 	inline void LoadIdentity()

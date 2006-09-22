@@ -2116,10 +2116,9 @@ void Project::RenderScene(View* view)
 	// Render translucent pieces sorted from back to front.
 	if (pList)
 	{
-		float eye[3];
-		view->GetCamera()->GetEyePos(eye);
+		Vector3 Eye = view->GetCamera()->GetEyePosition();
 		BuildBSP(&tree, pList);
-		RenderBSP(&tree, eye, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
+		RenderBSP(&tree, Eye, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
 	}
 
 	glDisable(GL_BLEND);
@@ -2222,17 +2221,12 @@ void Project::RenderInterface(View* view)
 	// Render axis icon.
 	if (m_nSnap & LC_DRAW_AXIS)
 	{
-		Matrix Mats[3];
-		Mats[0].CreateLookat(view->GetCamera()->GetEyePos(), view->GetCamera()->GetTargetPos(), view->GetCamera()->GetUpVec());
-		Mats[0].SetTranslation(0, 0, 0);
+		Matrix44 Mats[3];
+		Mats[0] = view->GetCamera()->GetWorldView();
+		Mats[1] = Matrix44(Mats[0][1], Mats[0][0], Mats[0][2], Mats[0][3]);
+		Mats[2] = Matrix44(Mats[0][2], Mats[0][1], Mats[0][0], Mats[0][3]);
 
-		float m1[] = { 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
-		float m2[] = { 0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 1 };
-		Mats[1].Multiply(Mats[0], Matrix(m1));
-		Mats[2].Multiply(Mats[0], Matrix(m2));
-
-		float pts[3][3] = { { 20, 0, 0 }, { 0, 20, 0 }, { 0, 0, 20 } };
-		Mats[0].TransformPoints(&pts[0][0], 3);
+		Vector3 pts[3] = { Vector3(Mats[0][0]) * 20, Vector3(Mats[0][1]) * 20, Vector3(Mats[0][2]) * 20 };
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -2266,9 +2260,9 @@ void Project::RenderInterface(View* view)
 			glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
 			for (int j = 0; j < 9; j++)
 			{
-				float pt[3] = { 12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f };
-				Mats[i].TransformPoints(pt, 1);
-				glVertex3f(pt[0], pt[1], pt[2]);
+				Vector3 pt(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f);
+				pt = Mul30(pt, Mats[i]);
+				glVertex3fv(pt);
 			}
 			glEnd();
 		}
@@ -4321,10 +4315,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				ptr = fn;
 
 			fprintf(f, "// File created by LeoCAD\n//\n\n#include \"%s.inc\"\n", ptr);
-			float eye[3], target[3], up[3];
-			m_ActiveView->GetCamera()->GetEyePos(eye);
-			m_ActiveView->GetCamera()->GetTargetPos(target);
-			m_ActiveView->GetCamera()->GetUpVec(up);
+			Vector3 eye = m_ActiveView->GetCamera()->GetEyePosition();
+			Vector3 target = m_ActiveView->GetCamera()->GetTargetPosition();
+			Vector3 up = m_ActiveView->GetCamera()->GetUpVector();
 
 			fprintf(f, "\ncamera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
 				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_ActiveView->GetCamera()->m_fovy);
@@ -5633,7 +5626,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			bool bControl = Sys_KeyDown (KEY_CONTROL);
 
 			GLdouble modelMatrix[16], projMatrix[16];
-			float up[3], eye[3], target[3];
+			Vector3 up, eye, target;
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			GLint viewport[4], out;
 
@@ -5679,8 +5672,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				glViewport(0, 0, view->GetWidth(), view->GetHeight());
 				pCam->LoadProjection(ratio);
 
-				pCam->GetTargetPos (target);
-				pCam->GetEyePos (eye);
+				target = pCam->GetTargetPosition();
+				eye = pCam->GetEyePosition();
 
 				up[0] = (bs[0] + bs[3])/2 - target[0];
 				up[1] = (bs[1] + bs[4])/2 - target[1];
@@ -5696,13 +5689,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				target[1] += up[1];
 				target[2] += up[2];
 
-				pCam->GetUpVec (up);
-				Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
+				up = pCam->GetUpVector();
+				Vector3 upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
 				frontvec.Normalize();
-				sidevec.Cross(frontvec, upvec);
-				upvec.Cross(sidevec, frontvec);
-				upvec.Normalize();
-				upvec.ToFloat(up);
+				sidevec = Cross3(frontvec, upvec);
+				upvec = Cross3(sidevec, frontvec);
+				up = upvec.Normalize();
 				frontvec *= 0.25f;
 
 				glMatrixMode(GL_MODELVIEW);
@@ -6539,12 +6531,12 @@ bool Project::GetFocusPosition(Vector3& Position) const
 {
 	Piece* pPiece;
 	Camera* pCamera;
-	float* pos = &Position[0];
+	Vector3 pos;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsFocused())
 		{
-			pPiece->GetPosition(pos);
+			pos = pPiece->GetPosition();
 			return true;
 		}
 
@@ -6552,13 +6544,13 @@ bool Project::GetFocusPosition(Vector3& Position) const
 	{
 		if (pCamera->IsEyeFocused())
 		{
-			pCamera->GetEyePos(pos);
+			pos = pCamera->GetEyePosition();
 			return true;
 		}
 
 		if (pCamera->IsTargetFocused())
 		{
-			pCamera->GetTargetPos(pos);
+			pos = pCamera->GetTargetPosition();
 			return true;
 		}
 	}
@@ -7600,11 +7592,8 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
         if (camera->IsSide ())
         {
-          Matrix mat;
-
-          mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
-          mat.SetTranslation (0, 0, 0);
-          mat.Invert ();
+					Matrix44 mat = camera->GetWorldView();
+          mat = Inverse(mat);
 
   				switch (nKey)
 	  			{
@@ -7633,7 +7622,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
               break;
           }
 
-          mat.TransformPoints (axis, 1);
+          axis = Mul30(axis, mat);
         }
         else
         {
@@ -8745,10 +8734,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			// We can't rotate the side cameras.
 			if (m_ActiveView->GetCamera()->IsSide())
 			{
-				float eye[3], target[3], up[3];
-				m_ActiveView->GetCamera()->GetEyePos(eye);
-				m_ActiveView->GetCamera()->GetTargetPos(target);
-				m_ActiveView->GetCamera()->GetUpVec(up);
+				Vector3 eye = m_ActiveView->GetCamera()->GetEyePosition();
+				Vector3 target = m_ActiveView->GetCamera()->GetTargetPosition();
+				Vector3 up = m_ActiveView->GetCamera()->GetUpVector();
 				Camera* pCamera = new Camera(eye, target, up, m_pCameras);
 
 				m_ActiveView->SetCamera(pCamera);

@@ -184,6 +184,14 @@ Matrix44 Inverse(const Matrix44& m)
 #undef SWAP_ROWS
 }
 
+Matrix44 RotTranInverse(const Matrix44& m)
+{
+	Matrix44 tmp = Transpose3(m);
+	tmp[3] = -Mul30(tmp[3], tmp);
+	tmp[3][3] = 1.0f;
+	return tmp;
+}
+
 // ============================================================================
 // Project/Unproject a point.
 

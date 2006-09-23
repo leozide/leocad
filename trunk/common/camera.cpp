@@ -540,7 +540,7 @@ void Camera::UpdateBoundingBox()
 
 	float len = frontvec.Length();
 
-	m_WorldView.CreateLookAt(m_Eye, m_Target, m_Up);
+	m_WorldView = CreateLookAtMatrix(m_Eye, m_Target, m_Up);
 
 	Matrix44 mat = RotTranInverse(m_WorldView);
 
@@ -674,7 +674,7 @@ void Camera::Render(float fLineWidth)
 		modelview = RotTranInverse(m_WorldView);
 		glMultMatrixf(modelview);
 
-		projection.CreatePerspective(m_fovy, 1.33f, 0.01f, len);
+		projection = CreatePerspectiveMatrix(m_fovy, 1.33f, 0.01f, len);
 		projection = Inverse(projection);
 		glMultMatrixf(projection);
 
@@ -753,8 +753,8 @@ void Camera::GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const
 {
 	Matrix44 ModelView, Projection;
 
-	ModelView.CreateLookAt(GetEyePosition(), GetTargetPosition(), GetUpVector());
-	Projection.CreatePerspective(m_fovy, Aspect, m_zNear, m_zFar);
+	ModelView = CreateLookAtMatrix(GetEyePosition(), GetTargetPosition(), GetUpVector());
+	Projection = CreatePerspectiveMatrix(m_fovy, Aspect, m_zNear, m_zFar);
 
 	Matrix44 ModelProj = Mul(ModelView, Projection);
 
@@ -785,7 +785,7 @@ void Camera::GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const
 
 	for (int i = 0; i < 6; i++)
 	{
-		float len = Planes[i].Length3();
+		float len = Length(Vector3(Planes[i]));
 		Planes[i] /= -len;
 	}
 }
@@ -869,7 +869,7 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
 	Matrix44 mat;
 	Vector3 front = m_Eye - m_Target;
 
-	mat.CreateFromAxisAngle(front, LC_DTOR * 2.0f*dx/(21-mouse));
+	mat = MatrixFromAxisAngle(front, LC_DTOR * 2.0f*dx/(21-mouse));
 	m_Up = Mul30(m_Up, mat);
 
 	ChangeKey(nTime, bAnimation, bAddKey, m_Up, LC_CK_UP);

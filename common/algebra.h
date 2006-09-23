@@ -46,10 +46,10 @@ class Matrix44;
 #define lcBaseVector_Copy3(res, a) { res.x = a.x; res.y = a.y; res.z = a.z; }
 #define lcBaseVector_Copy4(res, a) { res.x = a.x; res.y = a.y; res.z = a.z; res.w = a.w; }
 
-#define lcBaseVector_SetX(res, a) { res.x = a; }
-#define lcBaseVector_SetY(res, a) { res.y = a; }
-#define lcBaseVector_SetZ(res, a) { res.z = a; }
-#define lcBaseVector_SetW(res, a) { res.w = a; }
+#define lcBaseVector_SetX(res, a, b) { res.x = b; }
+#define lcBaseVector_SetY(res, a, b) { res.y = b; }
+#define lcBaseVector_SetZ(res, a, b) { res.z = b; }
+#define lcBaseVector_SetW(res, a, b) { res.w = b; }
 
 // Vector Comparisons.
 #define lcBaseVector_Equal3(res, a, b) { res = ((a.x == b.x) && (a.y == b.y) && (a.z == b.z)); }
@@ -90,6 +90,151 @@ struct lcBaseVector
 	float x, y, z, w;
 };
 
+#endif
+
+// ============================================================================
+// SSE version.
+
+#ifdef LC_MATH_SSE
+
+// If you can't find this file you need to install the VS6 Processor Pack.
+#include <xmmintrin.h>
+
+// Vector Initialization.
+#define lcBaseVector_Set3(res, a, b, c) { res.xyzw = _mm_setr_ps(a, b, c, 0.0f); }
+#define lcBaseVector_Set4(res, a, b, c, d) { res.xyzw = _mm_setr_ps(a, b, c, d); }
+#define lcBaseVector_Copy3(res, a) { res = a; }
+#define lcBaseVector_Copy4(res, a) { res = a; }
+
+#define lcBaseVector_SetX(res, a, b) \
+{ \
+	__m128 xxyy = _mm_shuffle_ps(_mm_load_ps1(&b), a.xyzw, _MM_SHUFFLE(1, 1, 0, 0)); \
+	res.xyzw = _mm_shuffle_ps(xxyy, a.xyzw, _MM_SHUFFLE(3, 2, 2, 0)); \
+}
+
+#define lcBaseVector_SetY(res, a, b) \
+{ \
+	__m128 xxyy = _mm_shuffle_ps(a.xyzw, _mm_load_ps1(&b), _MM_SHUFFLE(1, 1, 0, 0)); \
+	res.xyzw = _mm_shuffle_ps(xxyy, a.xyzw, _MM_SHUFFLE(3, 2, 2, 0)); \
+}
+
+#define lcBaseVector_SetZ(res, a, b) \
+{ \
+	__m128 zzww = _mm_shuffle_ps(_mm_load_ps1(&b), a.xyzw, _MM_SHUFFLE(3, 3, 2, 2)); \
+	res.xyzw = _mm_shuffle_ps(a.xyzw, zzww, _MM_SHUFFLE(3, 0, 1, 0)); \
+}
+
+#define lcBaseVector_SetW(res, a, b) \
+{ \
+	__m128 zzww = _mm_shuffle_ps(a.xyzw, _mm_load_ps1(&b), _MM_SHUFFLE(3, 3, 2, 2)); \
+	res.xyzw = _mm_shuffle_ps(a.xyzw, zzww, _MM_SHUFFLE(3, 0, 1, 0)); \
+}
+
+// Vector Comparisons.
+#define lcBaseVector_Equal3(res, a, b) { res = (_mm_movemask_ps(_mm_cmpeq_ps(a.xyzw, b.xyzw)) & 0x7) == 0x7; }
+#define lcBaseVector_Equal4(res, a, b) { res = !_mm_movemask_ps(_mm_cmpneq_ps(a.xyzw, b.xyzw)); }
+
+// Vector Arithmetic operations.
+#define lcBaseVector_Neg3(res, a) \
+{ \
+	const __declspec(align(16)) unsigned int Mask[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 }; \
+	res.xyzw = _mm_xor_ps(a.xyzw, *(__m128*)&Mask); \
+}
+
+#define lcBaseVector_Neg4(res, a) \
+{ \
+	const __declspec(align(16)) unsigned int Mask[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 }; \
+	res.xyzw = _mm_xor_ps(a.xyzw, *(__m128*)&Mask); \
+}
+
+#define lcBaseVector_Add3(res, a, b) { res.xyzw = _mm_add_ps(a.xyzw, b.xyzw); }
+#define lcBaseVector_Add4(res, a, b) { res.xyzw = _mm_add_ps(a.xyzw, b.xyzw); }
+#define lcBaseVector_Sub3(res, a, b) { res.xyzw = _mm_sub_ps(a.xyzw, b.xyzw); }
+#define lcBaseVector_Sub4(res, a, b) { res.xyzw = _mm_sub_ps(a.xyzw, b.xyzw); }
+
+#define lcBaseVector_Mul3(res, a, b) { res.xyzw = _mm_mul_ps(a.xyzw, b.xyzw); }
+#define lcBaseVector_Mul4(res, a, b) { res.xyzw = _mm_mul_ps(a.xyzw, b.xyzw); }
+#define lcBaseVector_Div3(res, a, b) { res.xyzw = _mm_div_ps(a.xyzw, b.xyzw); }
+#define lcBaseVector_Div4(res, a, b) { res.xyzw = _mm_div_ps(a.xyzw, b.xyzw); }
+
+#define lcBaseVector_Mul3f(res, a, b) { res.xyzw = _mm_mul_ps(a.xyzw, _mm_load_ps1(&b)); }
+#define lcBaseVector_Mul4f(res, a, b) { res.xyzw = _mm_mul_ps(a.xyzw, _mm_load_ps1(&b)); }
+#define lcBaseVector_Div3f(res, a, b) { res.xyzw = _mm_div_ps(a.xyzw, _mm_load_ps1(&b)); }
+#define lcBaseVector_Div4f(res, a, b) { res.xyzw = _mm_div_ps(a.xyzw, _mm_load_ps1(&b)); }
+
+#define lcBaseVector_Dot3(res, a, b) \
+{ \
+	__m128 tmp = _mm_mul_ps(a.xyzw, b.xyzw); \
+	__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2))); \
+	tmp = _mm_add_ss(tmp, yz); \
+	res = *(const float*)&tmp; \
+}
+
+#define lcBaseVector_Dot4(res, a, b) \
+{ \
+	__m128 tmp = _mm_mul_ps(a.xyzw, b.xyzw); \
+	__m128 xy = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 0)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1))); \
+	__m128 zw = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(3, 3, 3, 3))); \
+	tmp = _mm_add_ss(xy, zw); \
+	res = *(const float*)&tmp; \
+}
+
+// a(yzx)*b(zxy)-a(zxy)*b(yzx)
+#define lcBaseVector_Cross3(res, a, b) \
+{ \
+	__m128 r1 = _mm_mul_ps(_mm_shuffle_ps(a.xyzw, a.xyzw, _MM_SHUFFLE(0, 0, 2, 1)), _mm_shuffle_ps(b.xyzw, b.xyzw, _MM_SHUFFLE(0, 1, 0, 2))); \
+	__m128 r2 = _mm_mul_ps(_mm_shuffle_ps(a.xyzw, a.xyzw, _MM_SHUFFLE(0, 1, 0, 2)), _mm_shuffle_ps(b.xyzw, b.xyzw, _MM_SHUFFLE(0, 0, 2, 1))); \
+	res.xyzw = _mm_sub_ps(r1, r2); \
+}
+
+#define lcBaseVector_Abs3(res, a) \
+{ \
+	const __declspec(align(16)) unsigned int Mask[4] = { 0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff }; \
+	res.xyzw = _mm_and_ps(a.xyzw, *(__m128*)&Mask); \
+}
+
+#define lcBaseVector_Abs4(res, a) \
+{ \
+	const __declspec(align(16)) unsigned int Mask[4] = { 0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff }; \
+	res.xyzw = _mm_and_ps(a.xyzw, *(__m128*)&Mask); \
+}
+
+#define lcBaseVector_Length3(res, a) \
+{ \
+	__m128 tmp = _mm_mul_ps(a.xyzw, a.xyzw); \
+	__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2))); \
+	tmp = _mm_add_ss(tmp, yz); \
+	tmp = _mm_sqrt_ss(tmp); \
+	res = *(const float*)&tmp; \
+}
+
+#define lcBaseVector_Length4(res, a) \
+{ \
+	__m128 tmp = _mm_mul_ps(a.xyzw, a.xyzw); \
+	__m128 xy = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 0)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1))); \
+	__m128 zw = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(3, 3, 3, 3))); \
+	tmp = _mm_add_ss(xy, zw); \
+	tmp = _mm_sqrt_ss(tmp); \
+	res = *(const float*)&tmp; \
+}
+
+// Base class.
+struct __declspec(align(16)) lcBaseVector
+{
+	__m128 xyzw;
+};
+
+/*
+inline void Normalize34()
+{
+	__m128 tmp = _mm_mul_ps(xyzw, xyzw);
+	__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)));
+	tmp = _mm_add_ss(tmp, yz);
+	tmp = _mm_rsqrt_ss(tmp);
+	tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 0));
+	xyzw = _mm_mul_ps(xyzw, tmp);
+}
+*/
 #endif
 
 // ============================================================================
@@ -212,10 +357,10 @@ inline Vector4::Vector4(const Vector3& a)
 { lcBaseVector_Copy3(v, a.v); }
 
 inline Vector4::Vector4(const Vector3& a, const float w)
-{ lcBaseVector_Copy3(v, a.v); lcBaseVector_SetW(v, w); }
+{ lcBaseVector_Copy3(v, a.v); lcBaseVector_SetW(v, v, w); }
 
 inline Vector4::Vector4(const Vector4& a, const float w)
-{ lcBaseVector_Copy3(v, a.v); lcBaseVector_SetW(v, w); }
+{ lcBaseVector_Copy3(v, a.v); lcBaseVector_SetW(v, v, w); }
 
 inline Vector3::Vector3()
 { }
@@ -565,29 +710,6 @@ Matrix44 CreateLookAtMatrix(const Vector3& Eye, const Vector3& Target, const Vec
 Matrix44 CreatePerspectiveMatrix(float FoVy, float Aspect, float Near, float Far);
 Matrix44 CreateOrthoMatrix44(float Left, float Right, float Bottom, float Top, float Near, float Far);
 
-
-
-
-
-
-
-
-
-
-
-/*
-	// Other functions.
-	inline float LengthSquared() const
-	{ return Dot3(m_Value, m_Value); }
-
-	inline const Vector3& Normalize()
-	{ m_Value.Normalize34(); return *this; }
-
-	inline void Abs()
-	{ m_Value.Abs34(); }
-*/
-
-
 // ============================================================================
 // Linear Algebra Functions.
 
@@ -601,131 +723,5 @@ bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Ve
 bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
 bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
 float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End);
-
-
-/*
-// ============================================================================
-// SSE version.
-
-#ifdef LC_MATH_SSE
-
-// If you can't find this file you need to install the VS6 Processor Pack.
-#include <xmmintrin.h>
-
-class __declspec(align(16)) Vector4
-{
-public:
-	// Constructors.
-	inline Vector4() { }
-	inline explicit Vector4(const __m128& _xyzw)
-		: xyzw(_xyzw) { }
-	inline explicit Vector4(const float _x, const float _y, const float _z)
-		: xyzw(_mm_setr_ps(_x, _y, _z, _z)) { }
-	inline explicit Vector4(const float _x, const float _y, const float _z, const float _w)
-		: xyzw(_mm_setr_ps(_x, _y, _z, _w)) { }
-
-	inline float& operator[](int i) const { return ((const float*)this)[i]; }
-
-	// Comparison.
-	friend inline bool operator==(const Vector4& a, const Vector4& b)
-	{ return !_mm_movemask_ps(_mm_cmpneq_ps(a.xyzw, b.xyzw)); }
-
-	friend inline bool Compare3(const Vector4& a, const Vector4& b)
-	{ return (_mm_movemask_ps(_mm_cmpeq_ps(a.xyzw, b.xyzw)) & 0x7) == 0x7; }
-
-	// Math operations for 4 components.
-	friend inline Vector4 operator+(const Vector4& a, const Vector4& b)
-	{ return Vector4(_mm_add_ps(a.xyzw, b.xyzw)); }
-
-	friend inline Vector4 operator-(const Vector4& a, const Vector4& b)
-	{ return Vector4(_mm_sub_ps(a.xyzw, b.xyzw)); }
-
-	friend inline Vector4 operator*(const Vector4& a, float f)
-	{ return Vector4(_mm_mul_ps(a.xyzw, _mm_load_ps1(&f))); }
-
-	friend inline Vector4 operator*(const Vector4& a, const Vector4& b)
-	{ return Vector4(_mm_mul_ps(a.xyzw, b.xyzw)); }
-
-	friend inline Vector4 operator/(const Vector4& a, float f)
-	{ return Vector4(_mm_div_ps(a.xyzw, _mm_load_ps1(&f))); }
-
-	friend inline Vector4 operator-(const Vector4& a)
-	{
-		static const __declspec(align(16)) unsigned int Mask[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 }
-		return Vector4(_mm_xor_ps(xyzw, *(__m128*)&Mask));
-	}
-
-	// Math operations ignoring the 4th component.
-	friend inline Vector4 Add34(const Vector4& a, const Vector4& b)
-	{ return a*b }
-
-	friend inline Vector4 Subtract34(const Vector4& a, const Vector4& b)
-	{ return a-b; }
-
-	friend inline Vector4 Multiply34(const Vector4& a, float f)
-	{ return a*f; }
-
-	friend inline Vector4 Multiply34(const Vector4& a, const Vector4& b)
-	{ return a*b; }
-
-	friend inline Vector4 Divide34(const Vector4& a, float f)
-	{ return a/f; }
-
-	friend inline Vector4 Negate34(const Vector4& a)
-	{ return -a; }
-
-	// Dot product.
-	friend inline float Dot3(const Vector4& a, const Vector4& b)
-	{
-		__m128 tmp = _mm_mul_ps(a.xyzw, b.xyzw);
-		__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)));
-		tmp = _mm_add_ss(tmp, yz);
-
-		return *(const float*)&tmp;
-	}
-
-	// Cross product.
-	friend inline Vector4 Cross3(const Vector4& a, const Vector4& b)
-	{
-		// a(yzx)*b(zxy)-a(zxy)*b(yzx)
-		__m128 r1 = _mm_mul_ps(_mm_shuffle_ps(a.xyzw, a.xyzw, _MM_SHUFFLE(0, 0, 2, 1)), _mm_shuffle_ps(b.xyzw, b.xyzw, _MM_SHUFFLE(0, 1, 0, 2)));
-		__m128 r2 = _mm_mul_ps(_mm_shuffle_ps(a.xyzw, a.xyzw, _MM_SHUFFLE(0, 1, 0, 2)), _mm_shuffle_ps(b.xyzw, b.xyzw, _MM_SHUFFLE(0, 0, 2, 1)));
-
-		return Vector4(_mm_sub_ps(r1, r2));
-	}
-
-	// Other functions.
-	inline float Length3() const
-	{
-		__m128 tmp = _mm_mul_ps(xyzw, xyzw);
-		__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)));
-		tmp = _mm_add_ss(tmp, yz);
-		tmp = _mm_sqrt_ss(tmp);
-
-		return *(const float*)&tmp;
-	}
-
-	inline void Normalize34()
-	{
-		__m128 tmp = _mm_mul_ps(xyzw, xyzw);
-		__m128 yz = _mm_add_ss(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(1, 1, 1, 1)), _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(2, 2, 2, 2)));
-		tmp = _mm_add_ss(tmp, yz);
-		tmp = _mm_rsqrt_ss(tmp);
-		tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 0));
-		xyzw = _mm_mul_ps(xyzw, tmp);
-	}
-
-	inline void Abs()
-	{
-		static const __declspec(align(16)) unsigned int Mask[4] = { 0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff }
-		xyzw = _mm_and_ps(xyzw, *(__m128*)&Mask);
-	}
-
-protected:
-	__m128 xyzw;
-};
-
-#endif
-*/
 
 #endif

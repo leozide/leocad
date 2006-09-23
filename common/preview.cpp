@@ -55,10 +55,10 @@ void PiecePreview::OnDraw()
 	Vector3 Eye(0, 0, 1.0f);
 	Matrix33 Rot;
 
-	Rot.CreateFromAxisAngle(Vector3(1, 0, 0), -m_RotateX * LC_DTOR);
+	Rot = MatrixFromAxisAngle(Vector3(1, 0, 0), -m_RotateX * LC_DTOR);
 	Eye = Mul(Eye, Rot);
 
-	Rot.CreateFromAxisAngle(Vector3(0, 0, 1), -m_RotateZ * LC_DTOR);
+	Rot = MatrixFromAxisAngle(Vector3(0, 0, 1), -m_RotateZ * LC_DTOR);
 	Eye = Mul(Eye, Rot);
 
 	if (m_AutoZoom)
@@ -72,9 +72,8 @@ void PiecePreview::OnDraw()
 	}
 	else
 	{
-		Matrix44 WorldToView;
-		WorldToView.CreateLookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), Vector3(0, 0, 1));
-		glLoadMatrixf(WorldToView);
+		Matrix44 ModelView = CreateLookAtMatrix(Eye * m_Distance, m_PieceInfo->GetCenter(), Vector3(0, 0, 1));
+		glLoadMatrixf(ModelView);
 	}
 
 	float pos[4] = { 0, 0, 10, 0 }, *bg = lcGetActiveProject()->GetBackgroundColor ();

@@ -456,7 +456,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		return;
 
 	Matrix44 WorldToLocal;
-	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldToLocal = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
 	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
 
 	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
@@ -632,7 +632,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	// Transform the planes to local space.
 	Matrix44 WorldToLocal;
-	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldToLocal = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
 	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
 
 	Vector4* LocalPlanes = new Vector4[NumPlanes];
@@ -640,7 +640,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		LocalPlanes[i] = Mul30(Vector3(Planes[i]), WorldToLocal);
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldToLocal));
 		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
 	}
 

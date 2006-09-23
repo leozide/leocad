@@ -8,7 +8,7 @@
 // ============================================================================
 // 4x4 Matrix class.
 
-void Matrix44::CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up)
+Matrix44 CreateLookAtMatrix(const Vector3& Eye, const Vector3& Target, const Vector3& Up)
 {
 	Vector3 x, y, z;
 
@@ -26,14 +26,15 @@ void Matrix44::CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vec
 	y.Normalize();
 	z.Normalize();
 
-	m_Rows[0] = Vector4(x[0], y[0], z[0], 0.0f);
-	m_Rows[1] = Vector4(x[1], y[1], z[1], 0.0f);
-	m_Rows[2] = Vector4(x[2], y[2], z[2], 0.0f);
-	m_Rows[3] = m_Rows[0]*-Eye[0] + m_Rows[1]*-Eye[1] + m_Rows[2]*-Eye[2];
-	m_Rows[3][3] = 1.0f;
+	Vector4 Row0 = Vector4(x[0], y[0], z[0], 0.0f);
+	Vector4 Row1 = Vector4(x[1], y[1], z[1], 0.0f);
+	Vector4 Row2 = Vector4(x[2], y[2], z[2], 0.0f);
+	Vector4 Row3 = Vector4(Row0 * -Eye[0] + Row1 * -Eye[1] + Row2 * -Eye[2], 1.0f);
+
+	return Matrix44(Row0, Row1, Row2, Row3);
 }
 
-void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far)
+Matrix44 CreatePerspectiveMatrix(float FoVy, float Aspect, float Near, float Far)
 {
 	float Left, Right, Bottom, Top;
 
@@ -44,7 +45,7 @@ void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far
 	Right = Top * Aspect;
 
 	if ((Near <= 0.0f) || (Far <= 0.0f) || (Near == Far) || (Left == Right) || (Top == Bottom))
-		return;
+		return IdentityMatrix44();
 
 	float x, y, a, b, c, d;
 
@@ -55,18 +56,15 @@ void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far
 	c = -(Far + Near) / (Far - Near);
 	d = -(2.0f * Far * Near) / (Far - Near);
 
-	m_Rows[0] = Vector4(x, 0, 0,  0);
-	m_Rows[1] = Vector4(0, y, 0,  0);
-	m_Rows[2] = Vector4(a, b, c, -1);
-	m_Rows[3] = Vector4(0, 0, d,  0);
+	return Matrix44(Vector4(x, 0, 0,  0), Vector4(0, y, 0,  0), Vector4(a, b, c, -1), Vector4(0, 0, d,  0));
 }
 
-void Matrix44::CreateOrtho(float Left, float Right, float Bottom, float Top, float Near, float Far)
+Matrix44 CreateOrthoMatrix(float Left, float Right, float Bottom, float Top, float Near, float Far)
 {
-	m_Rows[0] = Vector4(2.0f / (Right-Left), 0.0f, 0.0f, 0.0f);
-	m_Rows[1] = Vector4(0.0f, 2.0f / (Top-Bottom), 0.0f, 0.0f);
-	m_Rows[2] = Vector4(0.0f, 0.0f, -2.0f / (Far-Near), 0.0f);
-	m_Rows[3] = Vector4(-(Right+Left) / (Right-Left), -(Top+Bottom) / (Top-Bottom), -(Far+Near) / (Far-Near), 1.0f);
+	return Matrix44(Vector4(2.0f / (Right-Left), 0.0f, 0.0f, 0.0f),
+	                Vector4(0.0f, 2.0f / (Top-Bottom), 0.0f, 0.0f),
+	                Vector4(0.0f, 0.0f, -2.0f / (Far-Near), 0.0f),
+	                Vector4(-(Right+Left) / (Right-Left), -(Top+Bottom) / (Top-Bottom), -(Far+Near) / (Far-Near), 1.0f));
 }
 
 // Inverse code from the GLU library.
@@ -335,7 +333,7 @@ bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vec
 {
 	// Calculate the polygon plane.
 	Vector4 Plane;
-	Plane = Cross3(p1 - p2, p3 - p2);
+	Plane = Vector4(Cross3(p1 - p2, p3 - p2));
 	Plane[3] = -Dot3(Plane, p1);
 
 	// Check if the line is parallel to the plane.
@@ -386,7 +384,7 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 {
 	// Calculate the polygon plane.
 	Vector4 Plane;
-	Plane = Cross3(p1 - p2, p3 - p2);
+	Plane = Vector4(Cross3(p1 - p2, p3 - p2));
 	Plane[3] = -Dot3(Plane, p1);
 
 	// Check if the line is parallel to the plane.

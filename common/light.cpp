@@ -302,7 +302,7 @@ void Light::UpdatePosition(unsigned short nTime, bool bAnimation)
 		}
 
 		Matrix44 mat;
-		mat.CreateLookAt(Vector3(m_fPos[0], m_fPos[1], m_fPos[2]), Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]), up);
+		mat = CreateLookAtMatrix(Vector3(m_fPos[0], m_fPos[1], m_fPos[2]), Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]), up);
 		mat = RotTranInverse(mat);
 		mat.SetTranslation(Vector3(0, 0, 0));
 
@@ -486,11 +486,11 @@ void Light::Render (float fLineWidth)
 
       glPushMatrix ();
 
-      modelview.CreateLookAt(Vector3(m_fPos[0], m_fPos[1], m_fPos[2]), Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]), up);
+      modelview = CreateLookAtMatrix(Vector3(m_fPos[0], m_fPos[1], m_fPos[2]), Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]), up);
       modelview = RotTranInverse(modelview);
       glMultMatrixf(modelview);
 
-      projection.CreatePerspective(2*m_fCutoff, 1.0f, 0.01f, len);
+      projection = CreatePerspectiveMatrix(2*m_fCutoff, 1.0f, 0.01f, len);
       projection = Inverse(projection);
       glMultMatrixf(projection);
 

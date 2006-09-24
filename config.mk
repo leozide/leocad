@@ -257,20 +257,29 @@ config:
 	  $$ac_cv_sizeof_int)		lcint32=int;; \
 	  $$ac_cv_sizeof_long)		lcint32=long;; \
 	esac; \
+	case 8 in \
+	  $$ac_cv_sizeof_long_long)	lcint64="long long";; \
+	esac; \
 	echo "" >> $(OSDIR)/config.h; \
-	echo "typedef signed char lcint8;" >> $(OSDIR)/config.h; \
-	echo "typedef unsigned char lcuint8;" >> $(OSDIR)/config.h; \
+	echo "typedef signed char i8;" >> $(OSDIR)/config.h; \
+	echo "typedef unsigned char u8;" >> $(OSDIR)/config.h; \
 	if test -n "$$lcint16"; then \
-	  echo "typedef signed $$lcint16 lcint16;" >> $(OSDIR)/config.h; \
-	  echo "typedef unsigned $$lcint16 lcuint16;" >> $(OSDIR)/config.h; \
+	  echo "typedef signed $$lcint16 i16;" >> $(OSDIR)/config.h; \
+	  echo "typedef unsigned $$lcint16 u16;" >> $(OSDIR)/config.h; \
 	else \
-	  echo "#error need to define lcint16 and lcuint16" >> $(OSDIR)/config.h; \
+	  echo "#error need to define i16 and u16" >> $(OSDIR)/config.h; \
 	fi; \
 	if test -n "$$lcint32"; then \
-	echo "typedef signed $$lcint32 lcint32;" >> $(OSDIR)/config.h; \
-	echo "typedef unsigned $$lcint32 lcuint32;" >> $(OSDIR)/config.h; \
+	echo "typedef signed $$lcint32 i32;" >> $(OSDIR)/config.h; \
+	echo "typedef unsigned $$lcint32 u32;" >> $(OSDIR)/config.h; \
 	else \
-	  echo "#error need to define lcint32 and lcuint32" >> $(OSDIR)/config.h; \
+	  echo "#error need to define i32 and u32" >> $(OSDIR)/config.h; \
+	fi; \
+	if test -n "$$lcint64"; then \
+	echo "typedef signed $$lcint64 i64;" >> $(OSDIR)/config.h; \
+	echo "typedef unsigned $$lcint64 u64;" >> $(OSDIR)/config.h; \
+	else \
+	  echo "#error need to define i64 and u64" >> $(OSDIR)/config.h; \
 	fi; \
 	echo "" >> $(OSDIR)/config.h
 
@@ -290,14 +299,14 @@ config:
 	else \
 	  echo "big endian"; \
 	  echo "#define LC_BIG_ENDIAN" >> $(OSDIR)/config.h; \
-	  echo "#define LCUINT16(val) ((lcuint16) ( \\" >> $(OSDIR)/config.h; \
-	  echo "    (((lcuint16) (val) & (lcuint16) 0x00ffU) << 8) | \\" >> $(OSDIR)/config.h; \
-	  echo "    (((lcuint16) (val) & (lcuint16) 0xff00U) >> 8)))" >> $(OSDIR)/config.h; \
-	  echo "#define LCUINT32(val) ((lcuint32) ( \\" >> $(OSDIR)/config.h; \
-	  echo "    (((lcuint32) (val) & (lcuint32) 0x000000ffU) << 24) | \\" >> $(OSDIR)/config.h; \
-	  echo "    (((lcuint32) (val) & (lcuint32) 0x0000ff00U) <<  8) | \\" >> $(OSDIR)/config.h; \
-	  echo "    (((lcuint32) (val) & (lcuint32) 0x00ff0000U) >>  8) | \\" >> $(OSDIR)/config.h; \
-	  echo "    (((lcuint32) (val) & (lcuint32) 0xff000000U) >> 24)))" >> $(OSDIR)/config.h; \
+	  echo "#define LCUINT16(val) ((u16) ( \\" >> $(OSDIR)/config.h; \
+	  echo "    (((u16) (val) & (u16) 0x00ffU) << 8) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((u16) (val) & (u16) 0xff00U) >> 8)))" >> $(OSDIR)/config.h; \
+	  echo "#define LCUINT32(val) ((u32) ( \\" >> $(OSDIR)/config.h; \
+	  echo "    (((u32) (val) & (u32) 0x000000ffU) << 24) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((u32) (val) & (u32) 0x0000ff00U) <<  8) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((u32) (val) & (u32) 0x00ff0000U) >>  8) | \\" >> $(OSDIR)/config.h; \
+	  echo "    (((u32) (val) & (u32) 0xff000000U) >> 24)))" >> $(OSDIR)/config.h; \
 	  echo "#define LCINT16(val) ((lcint16)LCUINT16(val))" >> $(OSDIR)/config.h; \
 	  echo "#define LCINT32(val) ((lcint32)LCUINT32(val))" >> $(OSDIR)/config.h; \
 	  echo -e "inline float LCFLOAT (float l)\n{" >> $(OSDIR)/config.h; \

@@ -686,6 +686,8 @@ int main (int argc, char* argv[])
     preview->SetCurrentPiece(Info);
   }
 
+  lcGetActiveProject()->SetActiveView(view);
+
   gtk_main();
 
   gtk_widget_unref (drawing_frame);

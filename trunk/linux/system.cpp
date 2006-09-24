@@ -733,3 +733,12 @@ void SytemEndProgressBar()
 void SytemStepProgressBar()
 {
 }
+
+void SystemUpdateViewLayout()
+{
+}
+
+String SystemGetViewLayout()
+{
+  return String("V4|Main");
+}

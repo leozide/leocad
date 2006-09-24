@@ -1530,7 +1530,7 @@ typedef struct
   GtkWidget *det_edges, *det_dither, *det_lighting, *det_smooth;
   GtkWidget *det_antialias, *det_linear, *det_fast;
   GtkWidget *det_solid, *det_hidden, *det_background, *det_width;
-  GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
+  GtkWidget *draw_grid, *draw_axis;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
   GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
   GtkWidget *draw_move, *draw_fixed;
@@ -1560,7 +1560,7 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
-  int grid_size, angle_snap;
+  int angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
@@ -1574,7 +1574,6 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
   if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
-  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
   if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
 
   int fog;
@@ -1591,7 +1590,6 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   opts->fLineWidth = line_width;
   opts->nSnap = snap;
   opts->nAngleSnap = angle_snap;
-  opts->nGridSize = grid_size;
   opts->nScene = scene;
   opts->fDensity = (float)fog/100;
 
@@ -1622,7 +1620,7 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
-  int grid_size, angle_snap;
+  int angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
@@ -1636,7 +1634,6 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
   if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
-  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
   if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
 
   int fog;
@@ -1652,7 +1649,6 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   Sys_ProfileSaveInt ("Default", "Line", (int)(line_width*100));
   Sys_ProfileSaveInt ("Default", "Snap", snap);
   Sys_ProfileSaveInt ("Default", "Angle", angle_snap);
-  Sys_ProfileSaveInt ("Default", "Grid", grid_size);
   Sys_ProfileSaveInt ("Default", "Scene", scene);
   Sys_ProfileSaveInt ("Default", "Density", fog);
   Sys_ProfileSaveString("Default", "BMP", gtk_entry_get_text (GTK_ENTRY (s->scn_imagename)));
@@ -1801,16 +1797,6 @@ int preferencesdlg_execute(void* param)
   s.draw_grid = gtk_check_button_new_with_label ("Base grid");
   gtk_widget_show (s.draw_grid);
   gtk_box_pack_start (GTK_BOX (hbox), s.draw_grid, FALSE, FALSE, 0);
-
-  s.draw_gridunits = gtk_entry_new ();
-  gtk_widget_show (s.draw_gridunits);
-  gtk_box_pack_start (GTK_BOX (hbox), s.draw_gridunits, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.draw_gridunits, 50, -2);
-
-  label = gtk_label_new ("units");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
 
   s.draw_axis = gtk_check_button_new_with_label ("Axis icon");
   gtk_widget_show (s.draw_axis);
@@ -2129,7 +2115,6 @@ int preferencesdlg_execute(void* param)
 			       (opts->nSnap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_relative),
 			       (opts->nSnap & LC_DRAW_GLOBAL_SNAP) ? TRUE : FALSE);
-  write_int(s.draw_gridunits, opts->nGridSize);
   write_int(s.draw_anglesnap, opts->nAngleSnap);
 
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_gradient),
@@ -2537,6 +2522,7 @@ typedef struct
 
 } LC_GROUPEDITDLG_STRUCT;
 
+/*
 static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 {
   //  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
@@ -2544,6 +2530,7 @@ static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 
   *cur_ret = LC_OK;
 }
+*/
 
 void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
 {

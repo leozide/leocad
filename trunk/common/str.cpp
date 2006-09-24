@@ -197,7 +197,6 @@ bool String::Match(const String& Expression) const
 		}
 		else if (*p == '(')
 		{
-			const char* Start = p;
 			int c = 0;
 
 			// Skip what's inside the parenthesis.

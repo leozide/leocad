@@ -6525,35 +6525,33 @@ void Project::ConvertFromUserUnits(Vector3& Value) const
 
 bool Project::GetFocusPosition(Vector3& Position) const
 {
-	Piece* pPiece;
-	Camera* pCamera;
-	Vector3 pos;
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
 		if (pPiece->IsFocused())
 		{
-			pos = pPiece->GetPosition();
+			Position = pPiece->GetPosition();
 			return true;
 		}
+	}
 
-	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+	for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 	{
 		if (pCamera->IsEyeFocused())
 		{
-			pos = pCamera->GetEyePosition();
+			Position = pCamera->GetEyePosition();
 			return true;
 		}
 
 		if (pCamera->IsTargetFocused())
 		{
-			pos = pCamera->GetTargetPosition();
+			Position = pCamera->GetTargetPosition();
 			return true;
 		}
 	}
 
 	// TODO: light
 
-	pos[0] = pos[1] = pos[2] = 0.0f;
+	Position = Vector3(0, 0, 0);
 
 	return false;
 }

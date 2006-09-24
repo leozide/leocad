@@ -21,8 +21,13 @@ typedef signed short i16;
 typedef unsigned short u16;
 typedef signed int i32;
 typedef unsigned int u32;
+#if _MSC_VER < 1300
+typedef __int64 i64;
+typedef __int64 u64;
+#else
 typedef __int64 i64;
 typedef unsigned __int64 u64;
+#endif
 
 #define LC_LITTLE_ENDIAN
 #define LCUINT16(val) val

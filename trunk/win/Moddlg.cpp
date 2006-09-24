@@ -14,7 +14,6 @@
 #include "light.h"
 #include "matrix.h"
 #include "lc_application.h"
-#include ".\moddlg.h"
 
 #ifdef _DEBUG 
 #undef THIS_FILE 
@@ -73,14 +72,19 @@ BOOL CModifyDialog::Create(CWnd * pParentWnd, UINT nIDTemplate, UINT nStyle, UIN
 	if (!CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID))
 		return FALSE;
 
-	// MFC will call the other Create() function, so there's no
-	// need to call OnInitDialogBar() here.
+	// Since there is no WM_INITDIALOG message we have to call
+	// our own InitDialog function ourselves after m_hWnd is valid
+	if (!OnInitDialogBar())
+		return FALSE;
 
 	return TRUE;
 }
 
 BOOL CModifyDialog::OnInitDialogBar()
 {
+	if (IsWindow(m_PieceDlg.m_hWnd))
+		return TRUE;
+
 	m_PieceDlg.Create(CModifyPieceDlg::IDD, this);
 	m_CameraDlg.Create(CModifyCameraDlg::IDD, this);
 	m_LightDlg.Create(CModifyLightDlg::IDD, this);

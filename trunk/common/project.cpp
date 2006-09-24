@@ -180,6 +180,7 @@ void Project::DeleteContents(bool bUndo)
 	Camera* pCamera;
 	Light* pLight;
 	Group* pGroup;
+	int i;
 
 	memset(m_strAuthor, 0, sizeof(m_strAuthor));
 	memset(m_strDescription, 0, sizeof(m_strDescription));
@@ -217,7 +218,7 @@ void Project::DeleteContents(bool bUndo)
 		delete pPiece;
 	}
 
-	for (int i = 0; i < LC_CONNECTIONS; i++)
+	for (i = 0; i < LC_CONNECTIONS; i++)
 	{
 		for (int j = 0; j < m_pConnections[i].numentries; j++)
 			delete (m_pConnections[i].entries[j].cons);
@@ -227,7 +228,7 @@ void Project::DeleteContents(bool bUndo)
 		m_pConnections[i].numentries = 0;
 	}
 
-	for (int i = 0; i < m_ViewList.GetSize(); i++)
+	for (i = 0; i < m_ViewList.GetSize(); i++)
 		m_ViewList[i]->SetCamera(NULL);
 
 	while (m_pCameras)
@@ -1854,7 +1855,7 @@ void Project::RenderScene(View* view)
 		{
 			Vector3 frontvec = camera->GetEyePosition() - camera->GetTargetPosition();
 			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
-			float ymax, ymin, xmin, xmax;
+			float ymax, ymin, xmin, xmax, x, y;
 
 			ymax = (frontvec.Length())*sinf(DTOR*camera->m_fovy/2);
 			ymin = -ymax;
@@ -1901,13 +1902,13 @@ void Project::RenderScene(View* view)
 
 			// Draw minor lines.
 			glColor3f(0.75f, 0.75f, 0.75f);
-			for (float x = (int)(xmin / incx) * incx; x < xmax; x += incx)
+			for (x = (int)(xmin / incx) * incx; x < xmax; x += incx)
 			{
 				glVertex3f(x, ymin, z);
 				glVertex3f(x, ymax, z);
 			}
 
-			for (float y = (int)(ymin / incy) * incy; y < ymax; y += incy)
+			for (y = (int)(ymin / incy) * incy; y < ymax; y += incy)
 			{
 				glVertex3f(xmin, y, z);
 				glVertex3f(xmax, y, z);
@@ -1930,13 +1931,13 @@ void Project::RenderScene(View* view)
 
 			// Draw major lines.
 			glColor3f(0.0f, 0.0f, 0.0f);
-			for (float x = (int)(xmin / incx) * incx; x < xmax; x += incx)
+			for (x = (int)(xmin / incx) * incx; x < xmax; x += incx)
 			{
 				glVertex3f(x, ymin, z);
 				glVertex3f(x, ymax, z);
 			}
 
-			for (float y = (int)(ymin / incy) * incy; y < ymax; y += incy)
+			for (y = (int)(ymin / incy) * incy; y < ymax; y += incy)
 			{
 				glVertex3f(xmin, y, z);
 				glVertex3f(xmax, y, z);
@@ -1955,7 +1956,7 @@ void Project::RenderScene(View* view)
 			Matrix44 Projection = CreatePerspectiveMatrix(camera->m_fovy, Aspect, camera->m_zNear, camera->m_zFar);
 
 			// Unproject edge center points to world space.
-			int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+			int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() }, i;
 
 			Vector3 Points[10] =
 			{
@@ -1976,12 +1977,12 @@ void Project::RenderScene(View* view)
 			// Intersect lines with base plane.
 			Vector3 Intersections[5];
 
-			for (int i = 0; i < 5; i++)
+			for (i = 0; i < 5; i++)
 				LinePlaneIntersection(Intersections[i], Points[i*2], Points[i*2+1], Vector4(0, 0, 1, 0));
 
 			// Find the smallest edge length.
 			float MinSize = FLT_MAX;
-			for (int i = 0; i < 4; i++)
+			for (i = 0; i < 4; i++)
 			{
 				float d1 = LinePointMinDistance(Intersections[4], Intersections[i], i == 0 ? Intersections[3] : Intersections[i-1]);
 				float d2 = (Intersections[4] - Intersections[i]).Length();
@@ -6006,7 +6007,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_pCameras = pCamera;
 			}
 
-			for (int i = 0; i < m_ViewList.GetSize(); i++)
+			for (i = 0; i < m_ViewList.GetSize(); i++)
 				m_ViewList[i]->UpdateCamera();
 
 			SystemUpdateCameraMenu(m_pCameras);

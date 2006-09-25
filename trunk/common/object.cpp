@@ -509,35 +509,28 @@ void Object::BoundingBoxCalculate (Matrix *mat, float Dimensions[6])
 }
 
 // Cameras
-void Object::BoundingBoxCalculate (Matrix *mat)
+void Object::BoundingBoxCalculate(const Matrix44& mat, float CubeEdge)
 {
-  float normals[6][3] = {
-    { 1,0,0 }, { 0,1,0 }, { 0,0,1 },
-    { -1,0,0 }, { 0,-1,0 }, { 0,0,-1 } };
-  float x,y,z,dist;
+	Vector3 Normals[6] =
+	{
+		Vector3( 1, 0, 0), Vector3(0,  1, 0), Vector3(0, 0,  1),
+		Vector3(-1, 0, 0), Vector3(0, -1, 0), Vector3(0, 0, -1)
+	};
 
-  if (IsCamera ())
-    dist = 0.3f;
-  else
-    dist = 0.2f;
+	int i;
 
-  mat->GetTranslation(&x,&y,&z);
-  mat->SetTranslation(0,0,0);
-  mat->TransformPoints(&normals[0][0], 6);
+	for (i = 0; i < 6; i++)
+		Normals[i] = Mul30(Normals[i], mat);
 
-  for (int i = 0; i < 6; i++)
-  {
-    m_fBoxPlanes[0][i] = normals[i][0];
-    m_fBoxPlanes[1][i] = normals[i][1];
-    m_fBoxPlanes[2][i] = normals[i][2];
+	for (i = 0; i < 6; i++)
+	{
+		m_fBoxPlanes[0][i] = Normals[i][0];
+		m_fBoxPlanes[1][i] = Normals[i][1];
+		m_fBoxPlanes[2][i] = Normals[i][2];
 
-    float pt[3];
-    pt[0] = dist*normals[i][0] + x;
-    pt[1] = dist*normals[i][1] + y;
-    pt[2] = dist*normals[i][2] + z;
-
-    m_fBoxPlanes[3][i] = -(pt[0]*normals[i][0]+pt[1]*normals[i][1]+pt[2]*normals[i][2]);
-  }
+		Vector3 pt = CubeEdge * Normals[i] + mat.GetTranslation();
+		m_fBoxPlanes[3][i] = -Dot3(pt, Normals[i]);
+	}
 }
 
 // Light

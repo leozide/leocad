@@ -184,11 +184,6 @@ void Matrix::FromPacked (const float *mat)
 	m[15] = 0.0f;
 }
 
-void Matrix::FromFloat (const float* mat)
-{
-  memcpy (&m[0], mat, sizeof(float[16]));
-}
-
 void Matrix::LoadIdentity ()
 {
   memcpy (&m[0], &Identity, sizeof(float[16]));

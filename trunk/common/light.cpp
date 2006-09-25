@@ -7,7 +7,6 @@
 #include "light.h"
 #include "defines.h"
 #include "globals.h"
-#include "matrix.h"
 
 GLuint Light::m_nSphereList = 0;
 GLuint Light::m_nTargetList = 0;

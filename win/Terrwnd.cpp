@@ -8,7 +8,6 @@
 
 #include "camera.h"
 #include "Tools.h"
-#include "Matrix.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

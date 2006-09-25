@@ -13,7 +13,6 @@ public:
 	~Matrix() { };
 
 	void FromPacked(const float *mat);
-	void FromFloat(const float* mat);
 	void FromLDraw(const float *f);
 	void FromEulerAngles(float yaw, float pitch, float roll);
 	void FromAxisAngle(const float *axis, float angle);

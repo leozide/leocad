@@ -194,9 +194,7 @@ bool Piece::FileLoad (File& file, char* name)
           Matrix mat;
           if (version > 3)
           {
-            float m[16];
-            file.ReadFloat (m, 16);
-            mat.FromFloat (m);
+            file.ReadFloat(mat.m, 16);
           }
           else
           {

@@ -488,121 +488,118 @@ void Curve::TesselateHose ()
 
 void Curve::TesselateHose ()
 {
-  float x, y, z, t, t2, t3, cx[4], cy[4], cz[4];
-  const float *p1, *p2, *r1, *r2;
+	float x, y, z, t, t2, t3, cx[4], cy[4], cz[4];
+	const float *p1, *p2, *r1, *r2;
 
-  float u[3] = { m_fUp0[0], m_fUp0[1], m_fUp0[2] };
-  int steps1 = 16, steps2 = 6, j, k;
-  float* verts = (float*)malloc ((steps1+1) * steps2 * 3 * sizeof (float));
-  float a, b, c;
+	float u[3] = { m_fUp0[0], m_fUp0[1], m_fUp0[2] };
+	int steps1 = 16, steps2 = 6, j, k;
+	float* verts = (float*)malloc ((steps1+1) * steps2 * 3 * sizeof (float));
+	float a, b, c;
 
-  glEnableClientState (GL_VERTEX_ARRAY);
-  glVertexPointer (3, GL_FLOAT, 0, verts);
+	glEnableClientState (GL_VERTEX_ARRAY);
+	glVertexPointer (3, GL_FLOAT, 0, verts);
 
-  for (int i = 0; i < m_Points.GetSize () - 1; i++)
-  {
-    float a1, a2, angle_step; // axial rotation
+	for (int i = 0; i < m_Points.GetSize () - 1; i++)
+	{
+		float a1, a2, angle_step; // axial rotation
 
-    p1 = m_Points[i]->GetPosition ();
-    p2 = m_Points[i+1]->GetPosition ();
-    r1 = m_Points[i]->GetDirection1 ();
-    r2 = m_Points[i+1]->GetDirection2 ();
-    a1 = m_Points[i]->GetAngle ();
-    a2 = m_Points[i+1]->GetAngle ();
+		p1 = m_Points[i]->GetPosition ();
+		p2 = m_Points[i+1]->GetPosition ();
+		r1 = m_Points[i]->GetDirection1 ();
+		r2 = m_Points[i+1]->GetDirection2 ();
+		a1 = m_Points[i]->GetAngle ();
+		a2 = m_Points[i+1]->GetAngle ();
 
-    angle_step = (a2 - a1) / steps1;
-    if (fabs (angle_step) < 0.01f)
-      angle_step = 0;
+		angle_step = (a2 - a1) / steps1;
+		if (fabs (angle_step) < 0.01f)
+			angle_step = 0;
 
-    cx[0] = 2*p1[0] - 2*p2[0] + r1[0] + r2[0];
-    cx[1] = -3*p1[0] + 3*p2[0] - 2*r1[0] - r2[0];
-    cx[2] = r1[0];
-    cx[3] = p1[0];
+		cx[0] = 2*p1[0] - 2*p2[0] + r1[0] + r2[0];
+		cx[1] = -3*p1[0] + 3*p2[0] - 2*r1[0] - r2[0];
+		cx[2] = r1[0];
+		cx[3] = p1[0];
 
-    cy[0] = 2*p1[1] - 2*p2[1] + r1[1] + r2[1];
-    cy[1] = -3*p1[1] + 3*p2[1] - 2*r1[1] - r2[1];
-    cy[2] = r1[1];
-    cy[3] = p1[1];
+		cy[0] = 2*p1[1] - 2*p2[1] + r1[1] + r2[1];
+		cy[1] = -3*p1[1] + 3*p2[1] - 2*r1[1] - r2[1];
+		cy[2] = r1[1];
+		cy[3] = p1[1];
 
-    cz[0] = 2*p1[2] - 2*p2[2] + r1[2] + r2[2];
-    cz[1] = -3*p1[2] + 3*p2[2] - 2*r1[2] - r2[2];
-    cz[2] = r1[2];
-    cz[3] = p1[2];
+		cz[0] = 2*p1[2] - 2*p2[2] + r1[2] + r2[2];
+		cz[1] = -3*p1[2] + 3*p2[2] - 2*r1[2] - r2[2];
+		cz[2] = r1[2];
+		cz[3] = p1[2];
 
-    for (t = 0, j = 0; j <= steps1; j++, t += 1.0f/steps1)
-    {
-      t2 = t*t;
-      t3 = t2*t;
+		for (t = 0, j = 0; j <= steps1; j++, t += 1.0f/steps1)
+		{
+			t2 = t*t;
+			t3 = t2*t;
 
-      // position
-      x = cx[0]*t3 + cx[1]*t2 + cx[2]*t + cx[3];
-      y = cy[0]*t3 + cy[1]*t2 + cy[2]*t + cy[3];
-      z = cz[0]*t3 + cz[1]*t2 + cz[2]*t + cz[3];
+			// position
+			x = cx[0]*t3 + cx[1]*t2 + cx[2]*t + cx[3];
+			y = cy[0]*t3 + cy[1]*t2 + cy[2]*t + cy[3];
+			z = cz[0]*t3 + cz[1]*t2 + cz[2]*t + cz[3];
 
-      // tangent
-      a = 3*cx[0]*t2 + 2*cx[1]*t + cx[2];
-      b = 3*cy[0]*t2 + 2*cy[1]*t + cy[2];
-      c = 3*cz[0]*t2 + 2*cz[1]*t + cz[2];
+			// tangent
+			a = 3*cx[0]*t2 + 2*cx[1]*t + cx[2];
+			b = 3*cy[0]*t2 + 2*cy[1]*t + cy[2];
+			c = 3*cz[0]*t2 + 2*cz[1]*t + cz[2];
 
-      Vector3 side, front(a, b, c);
-      Vector3 up(u[0], u[1], u[2]);
-      side = Cross3(front, up);
-      up = Cross3(side, front);
-      up.Normalize();
-      front.Normalize();
-      side.Normalize();
+			Vector3 side, front(a, b, c);
+			Vector3 up(u[0], u[1], u[2]);
+			side = Cross3(front, up);
+			up = Cross3(side, front);
+			up.Normalize();
+			front.Normalize();
+			side.Normalize();
 
-      if (angle_step != 0)
-      {
-        Matrix rot;
-        rot.FromAxisAngle (front, angle_step);
-        rot.TransformPoint (u, up);
-      }
-      else
+			if (angle_step != 0)
 			{
-        u[0] = up[0];
-        u[1] = up[1];
-        u[2] = up[2];
+				Matrix rot;
+				rot.FromAxisAngle (front, angle_step);
+				rot.TransformPoint (u, up);
+			}
+			else
+			{
+				u[0] = up[0];
+				u[1] = up[1];
+				u[2] = up[2];
 			}
 
-      float f[16];
-#define M(row,col)  f[col*4+row]
-      M(0,0) = side[0]; M(0,1) = up[0]; M(0,2) = front[0]; M(0,3) = x;
-      M(1,0) = side[1]; M(1,1) = up[1]; M(1,2) = front[1]; M(1,3) = y;
-      M(2,0) = side[2]; M(2,1) = up[2]; M(2,2) = front[2]; M(2,3) = z;
-      M(3,0) = 0.0;     M(3,1) = 0.0;   M(3,2) = 0.0;      M(3,3) = 1.0;
+			Matrix m;
+#define M(row,col)  m.m[col*4+row]
+			M(0,0) = side[0]; M(0,1) = up[0]; M(0,2) = front[0]; M(0,3) = x;
+			M(1,0) = side[1]; M(1,1) = up[1]; M(1,2) = front[1]; M(1,3) = y;
+			M(2,0) = side[2]; M(2,1) = up[2]; M(2,2) = front[2]; M(2,3) = z;
+			M(3,0) = 0.0;     M(3,1) = 0.0;   M(3,2) = 0.0;      M(3,3) = 1.0;
 #undef M
 
-      float v[3];
-      Matrix m;
-      m.FromFloat (f);
+			float v[3];
+			for (int k = 0; k < steps2; k++)
+			{
+				float *o = &verts[(j*steps2+k)*3];
+				v[0] = (float)(cos (2.0 * M_PI * k / steps2) * 0.15);
+				v[1] = (float)(sin (2.0 * M_PI * k / steps2) * 0.15);
+				v[2] = 0;
+				m.TransformPoint (o, v);
+			}
+		}
 
-      for (int k = 0; k < steps2; k++)
-      {
-	float *o = &verts[(j*steps2+k)*3];
-	v[0] = (float)(cos (2.0 * M_PI * k / steps2) * 0.15);
-	v[1] = (float)(sin (2.0 * M_PI * k / steps2) * 0.15);
-	v[2] = 0;
-	m.TransformPoint (o, v);
-      }
-    }
+		GLuint *index = (GLuint*)malloc (2 * (steps2+1) * sizeof (GLuint));
+		for (j = 0; j < steps1; j++)
+		{
+			for (k = 0; k < steps2; k++)
+			{
+				index[k*2] = j*steps2+k;
+				index[k*2+1] = (j+1)*steps2+k;
+			}
+			index[k*2] = index[0];
+			index[k*2+1] = index[1];
+			glDrawElements (GL_TRIANGLE_STRIP, 2*(steps2+1), GL_UNSIGNED_INT, index);
+		}
 
-    GLuint *index = (GLuint*)malloc (2 * (steps2+1) * sizeof (GLuint));
-    for (j = 0; j < steps1; j++)
-    {
-      for (k = 0; k < steps2; k++)
-      {
-	index[k*2] = j*steps2+k;
-	index[k*2+1] = (j+1)*steps2+k;
-      }
-      index[k*2] = index[0];
-      index[k*2+1] = index[1];
-      glDrawElements (GL_TRIANGLE_STRIP, 2*(steps2+1), GL_UNSIGNED_INT, index);
-    }
-
-    free (index);
-  }
-  free (verts);
+		free (index);
+	}
+	free (verts);
 }
 
 void Curve::Render (LC_RENDER_INFO* pInfo)

@@ -7,7 +7,6 @@
 #include "curve.h"
 #include "opengl.h"
 #include "matrix.h"
-#include "vector.h"
 
 #define LC_CURVE_SAVE_VERSION 1 // LeoCAD 0.73
 #define LC_CURVE_POINT_SAVE_VERSION 1 // LeoCAD 0.73
@@ -545,13 +544,13 @@ void Curve::TesselateHose ()
       b = 3*cy[0]*t2 + 2*cy[1]*t + cy[2];
       c = 3*cz[0]*t2 + 2*cz[1]*t + cz[2];
 
-      Vector side, front (a, b, c);
-      Vector up (u);
-      side.Cross (front, up);
-      up.Cross (side, front);
-      up.Normalize ();
-      front.Normalize ();
-      side.Normalize ();
+      Vector3 side, front(a, b, c);
+      Vector3 up(u[0], u[1], u[2]);
+      side = Cross3(front, up);
+      up = Cross3(side, front);
+      up.Normalize();
+      front.Normalize();
+      side.Normalize();
 
       if (angle_step != 0)
       {
@@ -560,7 +559,11 @@ void Curve::TesselateHose ()
         rot.TransformPoint (u, up);
       }
       else
-        up.ToFloat (u);
+			{
+        u[0] = up[0];
+        u[1] = up[1];
+        u[2] = up[2];
+			}
 
       float f[16];
 #define M(row,col)  f[col*4+row]

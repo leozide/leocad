@@ -382,10 +382,13 @@ inline bool operator==(const Vector3& a, const Vector3& b)
 inline Vector4 operator+(const Vector4& a, const Vector4& b)
 { Vector4 res; lcBaseVector_Add4(res.v, a.v, b.v); return res; }
 
+inline const Vector4& operator+=(Vector4& a, const Vector4& b)
+{ lcBaseVector_Add4(a.v, a.v, b.v); return a; }
+
 inline Vector4 operator-(const Vector4& a, const Vector4& b)
 { Vector4 res; lcBaseVector_Sub4(res.v, a.v, b.v); return res; }
 
-inline Vector4 operator-=(Vector4& a, const Vector4& b)
+inline const Vector4& operator-=(Vector4& a, const Vector4& b)
 { lcBaseVector_Sub4(a.v, a.v, b.v); return a; }
 
 inline Vector4 operator*(const Vector4& a, const Vector4& b)
@@ -400,11 +403,14 @@ inline Vector4 operator-(const Vector4& a)
 inline Vector3 operator+(const Vector3& a, const Vector3& b)
 { Vector3 res; lcBaseVector_Add3(res.v, a.v, b.v); return res; }
 
-inline Vector3 operator+=(Vector3& a, const Vector3& b)
+inline const Vector3& operator+=(Vector3& a, const Vector3& b)
 { lcBaseVector_Add3(a.v, a.v, b.v); return a; }
 
 inline Vector3 operator-(const Vector3& a, const Vector3& b)
 { Vector3 res; lcBaseVector_Sub3(res.v, a.v, b.v); return res; }
+
+inline const Vector3& operator-=(Vector3& a, const Vector3& b)
+{ lcBaseVector_Sub3(a.v, a.v, b.v); return a; }
 
 inline Vector3 operator*(const Vector3& a, const Vector3& b)
 { Vector3 res; lcBaseVector_Mul3(res.v, a.v, b.v); return res; }

@@ -11,7 +11,6 @@
 #include "project.h"
 #include "globals.h"
 #include "matrix.h"
-#include "vector.h"
 #include "defines.h"
 #include "config.h"
 #include "library.h"
@@ -1652,14 +1651,14 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 		EyePos[2] = NewEye[2];
 	}
 
-	Vector FrontVec, RightVec, UpVec;
+	Vector3 FrontVec, RightVec, UpVec;
 
 	// Calculate view matrix.
-	UpVec = Vector(Top[0], Top[1], Top[2]);
+	UpVec = Vector3(Top[0], Top[1], Top[2]);
 	UpVec.Normalize();
-	FrontVec = Vector(Front[0], Front[1], Front[2]);
+	FrontVec = Vector3(Front[0], Front[1], Front[2]);
 	FrontVec.Normalize();
-	RightVec = Vector(Side[0], Side[1], Side[2]);
+	RightVec = Vector3(Side[0], Side[1], Side[2]);
 	RightVec.Normalize();
 
   float ViewMat[16];

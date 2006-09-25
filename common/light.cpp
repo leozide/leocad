@@ -7,7 +7,6 @@
 #include "light.h"
 #include "defines.h"
 #include "globals.h"
-#include "vector.h"
 #include "matrix.h"
 
 GLuint Light::m_nSphereList = 0;
@@ -542,34 +541,34 @@ void Light::Render (float fLineWidth)
   }
 }
 
-void Light::Setup (int index)
+void Light::Setup(int index)
 {
-  GLenum light = (GLenum)(GL_LIGHT0+index);
+	GLenum light = (GLenum)(GL_LIGHT0+index);
 
-  if (!m_bEnabled)
-  {
-    glDisable (light);
-    return;
-  }
+	if (!m_bEnabled)
+	{
+		glDisable (light);
+		return;
+	}
 
-  glEnable (light);
-  glLightfv (light, GL_POSITION, m_fPos);
+	glEnable(light);
+	glLightfv(light, GL_POSITION, m_fPos);
 
-  glLightfv (light, GL_AMBIENT, m_fAmbient);
-  glLightfv (light, GL_DIFFUSE, m_fDiffuse);
-  glLightfv (light, GL_SPECULAR, m_fSpecular);
+	glLightfv(light, GL_AMBIENT, m_fAmbient);
+	glLightfv(light, GL_DIFFUSE, m_fDiffuse);
+	glLightfv(light, GL_SPECULAR, m_fSpecular);
 
-  glLightf (light, GL_CONSTANT_ATTENUATION, m_fConstant);
-  glLightf (light, GL_LINEAR_ATTENUATION, m_fLinear);
-  glLightf (light, GL_QUADRATIC_ATTENUATION, m_fQuadratic);
+	glLightf(light, GL_CONSTANT_ATTENUATION, m_fConstant);
+	glLightf(light, GL_LINEAR_ATTENUATION, m_fLinear);
+	glLightf(light, GL_QUADRATIC_ATTENUATION, m_fQuadratic);
 
-  if (m_pTarget != NULL)
-  {
-    Vector dir (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
-    dir.Normalize ();
+	if (m_pTarget != NULL)
+	{
+		Vector3 dir(m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+		dir.Normalize();
 
-    glLightf (light, GL_SPOT_CUTOFF, m_fCutoff);
-    glLightf (light, GL_SPOT_EXPONENT, m_fExponent);
-    glLightfv (light, GL_SPOT_DIRECTION, dir);
-  }
+		glLightf(light, GL_SPOT_CUTOFF, m_fCutoff);
+		glLightf(light, GL_SPOT_EXPONENT, m_fExponent);
+		glLightfv(light, GL_SPOT_DIRECTION, dir);
+	}
 }

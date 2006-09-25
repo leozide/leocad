@@ -8,7 +8,6 @@
 #include <math.h>
 #include <locale.h>
 #include "opengl.h"
-#include "vector.h"
 #include "matrix.h"
 #include "pieceinf.h"
 #include "texture.h"
@@ -413,17 +412,16 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		pCam->ChangeKey(1, true, false, tmp, LC_CK_TARGET);
 
 		// Create up vector
-		Vector upvec(0,0,1), frontvec((float)(eye[0]-target[0]), (float)(eye[1]-target[1]), (float)(eye[2]-target[2])), sidevec;
+		Vector3 upvec(0,0,1), frontvec((float)(eye[0]-target[0]), (float)(eye[1]-target[1]), (float)(eye[2]-target[2])), sidevec;
 		frontvec.Normalize();
 		if (frontvec == upvec)
-			sidevec = Vector(1,0,0);
+			sidevec = Vector3(1,0,0);
 		else
-			sidevec.Cross(frontvec, upvec);
-		upvec.Cross(sidevec, frontvec);
+			sidevec = Cross3(frontvec, upvec);
+		upvec = Cross3(sidevec, frontvec);
 		upvec.Normalize();
-		upvec.ToFloat(tmp);
-		pCam->ChangeKey(1, false, false, tmp, LC_CK_UP);
-		pCam->ChangeKey(1, true, false, tmp, LC_CK_UP);
+		pCam->ChangeKey(1, false, false, upvec, LC_CK_UP);
+		pCam->ChangeKey(1, true, false, upvec, LC_CK_UP);
 	}
 
 	if (bMerge)
@@ -7645,13 +7643,13 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
           gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
           gluUnProject( 5,10, 0.1, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
 				
-          Vector vx((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0);//p2[2] - p1[2] };
-          Vector x(1, 0, 0);
-          ax = vx.Angle(x);
+          Vector3 vx = Normalize(Vector3((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0));//p2[2] - p1[2] };
+          Vector3 x(1, 0, 0);
+          ax = acosf(Dot3(vx, x));
 				
-          Vector vy((float)(p3[0] - p1[0]), (float)(p3[1] - p1[1]), 0);//p2[2] - p1[2] };
-          Vector y(0, -1, 0);
-          ay = vy.Angle(y);
+          Vector3 vy = Normalize(Vector3((float)(p3[0] - p1[0]), (float)(p3[1] - p1[1]), 0));//p2[2] - p1[2] };
+          Vector3 y(0, -1, 0);
+          ay = acosf(Dot3(vy, y));
 				
           if (ax > 135)
             axis[0] = -axis[0];
@@ -7663,7 +7661,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
           {
             float tmp = axis[0];
             
-            ax = vx.Angle(y);
+            ax = acosf(Dot3(vx, y));
             if (ax > 90)
             {
               axis[0] = -axis[1];

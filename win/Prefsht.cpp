@@ -98,7 +98,7 @@ void CPreferencesSheet::OnDefault()
 	int i, j;
 	float f, cr1[4], cr2[4], cr3[4], cr4[4], cr5[4];
 	unsigned long l;
-	unsigned short s1, s2;
+	unsigned short s1;
 
 	m_PageGeneral.GetOptions(&i, &j, str, st1);
 	AfxGetApp()->WriteProfileInt("Settings", "Autosave", i);

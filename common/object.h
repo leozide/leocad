@@ -3,6 +3,7 @@
 
 class File;
 class Matrix;
+class Matrix44;
 class Object;
 /*
 #define LC_OBJECT_NAME_LEN         80
@@ -191,23 +192,23 @@ public:
   int m_nKeyInfoCount;
 
 
-  // Bounding box stuff
- protected:
-  double BoundingBoxIntersectDist (LC_CLICKLINE* pLine) const;
-  void BoundingBoxCalculate (float pos[3]);
-  void BoundingBoxCalculate (Matrix *mat);
-  void BoundingBoxCalculate (Matrix *mat, float Dimensions[6]);
+	// Bounding box stuff
+protected:
+	double BoundingBoxIntersectDist(LC_CLICKLINE* pLine) const;
+	void BoundingBoxCalculate(float pos[3]);
+	void BoundingBoxCalculate(const Matrix44& mat, float Size);
+	void BoundingBoxCalculate(Matrix *mat, float Dimensions[6]);
 
+private:
+	bool BoundingBoxIntersectionbyLine(double a1, double b1, double c1, double a2, double b2, double c2,
+	                                   double *x, double *y, double *z) const;
+	bool BoundingBoxPointInside (double x, double y, double z) const;
+	float m_fBoxPlanes[4][6];
+
+
+	 // Object type
  private:
-  bool BoundingBoxIntersectionbyLine (double a1, double b1, double c1, double a2, double b2, double c2,
-				      double *x, double *y, double *z) const;
-  bool BoundingBoxPointInside (double x, double y, double z) const;
-  float m_fBoxPlanes[4][6];
-
-
-  // Object type
- private:
-  LC_OBJECT_TYPE m_nObjectType;
+	 LC_OBJECT_TYPE m_nObjectType;
 };
 
 #endif

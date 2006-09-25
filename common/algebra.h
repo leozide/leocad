@@ -337,6 +337,9 @@ public:
 	inline void SetTranslation(const Vector3& a)
 	{ m_Rows[3] = Vector4(a[0], a[1], a[2], 1.0f); }
 
+	inline Vector3 GetTranslation() const
+	{ return Vector3(m_Rows[3]); }
+
 	Vector4 m_Rows[4];
 };
 

@@ -545,9 +545,9 @@ void Camera::UpdateBoundingBox()
 	Matrix44 mat = RotTranInverse(m_WorldView);
 
 	mat.SetTranslation(m_Eye);
-	BoundingBoxCalculate(mat);
+	BoundingBoxCalculate(mat, 0.3f);
 	mat.SetTranslation(m_Target);
-	m_pTarget->BoundingBoxCalculate(mat);
+	m_pTarget->BoundingBoxCalculate(mat, 0.2f);
 	mat.SetTranslation(Vector3(0, 0, 0));
 
 	if (!m_nList)

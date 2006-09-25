@@ -8,7 +8,6 @@
 #include "project.h"
 #include "object.h"
 #include "matrix.h"
-#include "vector.h"
 #include "file.h"
 #include "lc_application.h"
 
@@ -33,11 +32,11 @@ static void GetPolyCoeffs (float x1, float y1, float z1, float x2, float y2, flo
 
 double LC_CLICKLINE::PointDistance (float *point)
 {
-  Vector op ((float)(point[0] - a1), (float)(point[1] - b1), (float)(point[2] - c1));
-  Vector d ((float)a2, (float)b2, (float)c2);
+  Vector3 op ((float)(point[0] - a1), (float)(point[1] - b1), (float)(point[2] - c1));
+  Vector3 d ((float)a2, (float)b2, (float)c2);
   float len = d.Length ();
   d.Normalize ();
-  float t = op.Dot (d);
+  float t = Dot3(op, d);
 
   if (t > 0)
   {

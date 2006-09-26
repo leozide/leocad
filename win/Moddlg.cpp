@@ -12,7 +12,6 @@
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
-#include "matrix.h"
 #include "lc_application.h"
 
 #ifdef _DEBUG 
@@ -483,12 +482,12 @@ void CModifyPieceDlg::UpdateInfo(Piece* piece)
 		// Rotation.
 		float rot[4];
 		piece->GetRotation(rot);
-		Matrix mat(rot, Pos);
-		mat.ToEulerAngles(rot);
+		Matrix33 mat = MatrixFromAxisAngle(Vector3(rot[0], rot[1], rot[2]), rot[3] * LC_DTOR);
+		Vector3 Rot = MatrixToEulerAngles(mat) * LC_RTOD;
 
-		m_RotX = rot[0];
-		m_RotY = rot[1];
-		m_RotZ = rot[2];
+		m_RotX = Rot[0];
+		m_RotY = Rot[1];
+		m_RotZ = Rot[2];
 
 		// Steps.
 		if (lcGetActiveProject()->IsAnimation())

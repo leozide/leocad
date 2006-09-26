@@ -191,6 +191,42 @@ Matrix44 RotTranInverse(const Matrix44& m)
 }
 
 // ============================================================================
+// Matrix 3x3 class.
+
+Vector3 MatrixToEulerAngles(const Matrix33& RotMat)
+{
+	float SinPitch, CosPitch, SinRoll, CosRoll, SinYaw, CosYaw;
+
+	SinPitch = -RotMat.m_Rows[0][2];
+	CosPitch = sqrtf(1 - SinPitch*SinPitch);
+
+	if (fabsf(CosPitch) > 0.0005f)
+	{
+		SinRoll = RotMat.m_Rows[1][2] / CosPitch;
+		CosRoll = RotMat.m_Rows[2][2] / CosPitch;
+		SinYaw = RotMat.m_Rows[0][1] / CosPitch;
+		CosYaw = RotMat.m_Rows[0][0] / CosPitch;
+	} 
+	else
+	{
+		SinRoll = -RotMat.m_Rows[2][1];
+		CosRoll = RotMat.m_Rows[1][1];
+		SinYaw = 0.0f;
+		CosYaw = 1.0f;
+	}
+
+	Vector3 Rot(atan2f(SinRoll, CosRoll), atan2f(SinPitch, CosPitch), atan2f(SinYaw, CosYaw));
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (Rot[i] < 0)
+			Rot[i] += 2.0f * LC_PI;
+	}
+
+	return Rot;
+}
+
+// ============================================================================
 // Project/Unproject a point.
 
 // Convert world coordinates to screen coordinates.

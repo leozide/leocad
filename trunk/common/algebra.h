@@ -656,6 +656,8 @@ inline Matrix33 MatrixFromAxisAngle(const Vector3& Axis, const float Radians)
 	                Vector3((one_c * zx) + ys, (one_c * yz) - xs, (one_c * zz) + c));
 }
 
+Vector3 MatrixToEulerAngles(const Matrix33& a);
+
 // Math operations.
 inline Vector3 Mul(const Vector3& a, const Matrix33& b)
 { return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }

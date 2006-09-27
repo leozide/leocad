@@ -6,6 +6,7 @@
 #include "ClrPick.h"
 #include "sizecbar.h"
 #include "scbarg.h"
+#include "RollUpCtrl.h"
 
 class Object;
 
@@ -150,6 +151,7 @@ protected:
 	Object* m_pObject;
 	int m_CurrentType;
 
+	CRollupCtrl m_RollUp;
 	CModifyPieceDlg m_PieceDlg;
 	CModifyCameraDlg m_CameraDlg;
 	CModifyLightDlg m_LightDlg;
@@ -165,6 +167,7 @@ protected:
 	afx_msg void OnModdlgApply();
 	afx_msg void OnDropdownModdlgList();
 	afx_msg void OnMove(int x, int y);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 

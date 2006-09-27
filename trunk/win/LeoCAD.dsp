@@ -287,6 +287,10 @@ SOURCE=.\Rmodel.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\RollupCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\scbarg.cpp
 # End Source File
 # Begin Source File
@@ -521,6 +525,10 @@ SOURCE=.\PropsSht.h
 # Begin Source File
 
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RollupCtrl.h
 # End Source File
 # Begin Source File
 

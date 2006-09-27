@@ -87,7 +87,9 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 		return;
 
 	int off = 31;
-	m_wndColorsList.SetWindowPos (NULL, (cx-210)/2, cy-off, 212, 26, SWP_NOZORDER);
+	int ColorWidth = (cx / 14) * 14;
+	m_wndColorsList.SetWindowPos(NULL, (cx-ColorWidth)/2, cy-off, ColorWidth, 26, SWP_NOZORDER);
+	m_wndColorsList.SetColumnWidth(cx / 14);
 
 	off += 30;
 	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
@@ -139,8 +141,8 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		m_wndPiecesCombo.SetFont(&m_Font);
 	}
 
-	m_wndPiecePreview.Create (NULL, NULL, WS_BORDER|WS_CHILD|WS_VISIBLE,
-		CRect(0, 0, 0, 0), this, IDW_PIECEPREVIEW);
+	m_wndPiecePreview.Create(NULL, NULL, WS_BORDER|WS_CHILD|WS_VISIBLE,
+	                         CRect(0, 0, 0, 0), this, IDW_PIECEPREVIEW);
 
 	CreateWindow("STATIC", "", WS_VISIBLE|WS_CHILD|SS_ETCHEDFRAME, 0, 0, 0, 0,
 	             m_hWnd, (HMENU)IDW_PIECEBAR_SPLITTER, AfxGetInstanceHandle(), NULL);

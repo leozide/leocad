@@ -3500,17 +3500,19 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			float rot[4];
 			Vector3 Pos = pPiece->GetPosition();
 			pPiece->GetRotation(rot);
-			Matrix mat(rot, Pos);
-			mat.ToEulerAngles(rot);
+
+			Matrix33 mat = MatrixFromAxisAngle(Vector3(rot[0], rot[1], rot[2]), rot[3] * LC_DTOR);
+			Vector3 Angles = MatrixToEulerAngles(mat) * LC_RTOD;
 
 			if (Pos != mod->Position)
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Position, LC_PK_POSITION);
 
-			if (mod->Rotation[0] != rot[0] || mod->Rotation[1] != rot[1] || mod->Rotation[2] != rot[2])
+			if (mod->Rotation[0] != Angles[0] || mod->Rotation[1] != Angles[1] || mod->Rotation[2] != Angles[2])
 			{
-				mat.FromEulerAngles(mod->Rotation[0], mod->Rotation[1], mod->Rotation[2]);
-				mat.ToAxisAngle(rot);
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
+				mat = MatrixFromEulerAngles(Vector3(mod->Rotation[0], mod->Rotation[1], mod->Rotation[2]) * LC_DTOR);
+				Vector4 AxisAngle = MatrixToAxisAngle(mat);
+				AxisAngle[3] *= LC_RTOD;
+				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, AxisAngle, LC_PK_ROTATION);
 			}
 
 			if (m_bAnimation)

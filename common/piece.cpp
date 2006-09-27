@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "opengl.h"
-#include "matrix.h"
 #include "pieceinf.h"
 #include "texture.h"
 #include "piece.h"
@@ -14,6 +13,7 @@
 #include "project.h"
 #include "algebra.h"
 #include "lc_application.h"
+#include "matrix.h"
 
 #define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
 
@@ -199,8 +199,8 @@ bool Piece::FileLoad (File& file, char* name)
           else
           {
             float move[3], rotate[3];
-            file.ReadFloat (move, 3);
-            file.ReadFloat (rotate, 3);
+            file.ReadFloat(move, 3);
+            file.ReadFloat(rotate, 3);
             mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
           }
 
@@ -225,18 +225,18 @@ bool Piece::FileLoad (File& file, char* name)
       {
         Matrix mat;
         float move[3], rotate[3];
-        file.ReadFloat (move, 3);
-        file.ReadFloat (rotate, 3);
-        mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+        file.ReadFloat(move, 3);
+        file.ReadFloat(rotate, 3);
+        mat.CreateOld(move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
 
         mat.GetTranslation(&param[0], &param[1], &param[2]);
         param[3] = 0;
         ChangeKey (1, false, true, param, LC_PK_POSITION);
         ChangeKey (1, true, true, param, LC_PK_POSITION);
 
-        mat.ToAxisAngle (param);
-        ChangeKey (1, false, true, param, LC_PK_ROTATION);
-        ChangeKey (1, true, true, param, LC_PK_ROTATION);
+        mat.ToAxisAngle(param);
+        ChangeKey(1, false, true, param, LC_PK_ROTATION);
+        ChangeKey(1, true, true, param, LC_PK_ROTATION);
       }
     }
   }
@@ -791,27 +791,31 @@ bool Piece::IsVisible(unsigned short nTime, bool bAnimation)
 
 void Piece::CompareBoundingBox(float box[6])
 {
-	float v[24] = {
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2],
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2],
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2] };
-
-	Matrix m(m_fRotation, m_fPosition);
-	m.TransformPoints(v, 8);
-
-	for (int i = 0; i < 24; i += 3)
+	Vector3 v[8] =
 	{
-		if (v[i]   < box[0]) box[0] = v[i];
-		if (v[i+1] < box[1]) box[1] = v[i+1];
-		if (v[i+2] < box[2]) box[2] = v[i+2];
-		if (v[i]   > box[3]) box[3] = v[i];
-		if (v[i+1] > box[4]) box[4] = v[i+1];
-		if (v[i+2] > box[5]) box[5] = v[i+2];
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
+		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
+	};
+
+	Matrix44 m = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
+	m.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
+
+	for (int i = 0; i < 8; i++)
+	{
+		v[i] = Mul31(v[i], m);
+
+		if (v[i][0] < box[0]) box[0] = v[i][0];
+		if (v[i][1] < box[1]) box[1] = v[i][1];
+		if (v[i][2] < box[2]) box[2] = v[i][2];
+		if (v[i][0] > box[3]) box[3] = v[i][0];
+		if (v[i][1] > box[4]) box[4] = v[i][1];
+		if (v[i][2] > box[5]) box[5] = v[i][2];
 	}
 }
 
@@ -846,11 +850,21 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 	CalculateKeys (nTime, bAnimation);
 //	if (CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation))
 	{
-		Matrix mat(m_fRotation, m_fPosition);
-		BoundingBoxCalculate(&mat, m_pPieceInfo->m_fDimensions);
+		Matrix44 mat = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
+		mat.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
+
+		BoundingBoxCalculate(mat, m_pPieceInfo->m_fDimensions);
+
 		for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
 		{
-			mat.TransformPoint(m_pConnections[i].center, m_pPieceInfo->m_pConnections[i].center);
+			float* center = m_pPieceInfo->m_pConnections[i].center;
+			Vector3 tmp(center[0], center[1], center[2]);
+
+			tmp = Mul31(tmp, mat);
+
+			m_pConnections[i].center[0] = tmp[0];
+			m_pConnections[i].center[1] = tmp[1];
+			m_pConnections[i].center[2] = tmp[2];
 
 			// TODO: rotate normal
 		}

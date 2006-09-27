@@ -2,7 +2,6 @@
 #define _OBJECT_H_
 
 class File;
-class Matrix;
 class Matrix44;
 class Object;
 
@@ -172,8 +171,8 @@ private:
 protected:
 	float BoundingBoxIntersectDist(LC_CLICKLINE* pLine) const;
 	void BoundingBoxCalculate(float pos[3]);
-	void BoundingBoxCalculate(const Matrix44& mat, float Size);
-	void BoundingBoxCalculate(Matrix *mat, float Dimensions[6]);
+	void BoundingBoxCalculate(const Matrix44& Mat, float Size);
+	void BoundingBoxCalculate(const Matrix44& Mat, float Dimensions[6]);
 
 private:
 	bool BoundingBoxIntersectionbyLine(float a1, float b1, float c1, float a2, float b2, float c2,

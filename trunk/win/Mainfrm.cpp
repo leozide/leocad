@@ -211,15 +211,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	if (!m_wndModifyDlg.Create(this, IDD_MODIFY, CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE, ID_VIEW_MODIFY_BAR))
+	if (!m_wndModifyDlg.Create(_T("Modify"), this, ID_VIEW_MODIFY_BAR))
 	{
 		TRACE0("Failed to create modify dialog bar\n");
 		return -1;      // fail to create
 	}
 
 	EnableDocking(CBRS_ALIGN_ANY);
-	m_wndModifyDlg.SetWindowText(_T("Modify"));
-	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_LEFT | CBRS_ALIGN_RIGHT);
+	m_wndModifyDlg.SetBarStyle(m_wndModifyDlg.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
+	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_ANY);
 	ShowControlBar(&m_wndModifyDlg, FALSE, FALSE);
 	FloatControlBar(&m_wndModifyDlg, CPoint(10,10));
 
@@ -230,7 +230,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
 //	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
 	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT);
+	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	DockControlBar(&m_wndStandardBar);
 	DockControlBar(&m_wndToolsBar);
@@ -243,7 +243,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockControlBar(&m_wndAnimationBar, AFX_IDW_DOCKBAR_TOP, &rect);
 
 	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) == TOOLBAR_VERSION)
+	{
+		CSizingControlBar::GlobalLoadState(this, "SizingBars");
 		LoadBarState("Toolbars");
+	}
 
 	// Bitmap menus are cool !
 	CMenu* pMenu = GetMenu();
@@ -449,7 +452,7 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 
 LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
-	m_wndModifyDlg.UpdateInfo((Object*)lParam);
+	m_wndModifyDlg.m_ModifyDlg.UpdateInfo((Object*)lParam);
 
 	char str[128];
 	Vector3 pos;
@@ -540,6 +543,7 @@ void CMainFrame::OnClose()
 		theApp.WriteProfileInt("Settings", "Window Status", wp.showCmd);
 
 		SaveBarState("Toolbars");
+		CSizingControlBar::GlobalSaveState(this, "SizingBars");
 		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), TOOLBAR_VERSION);
 	}
 

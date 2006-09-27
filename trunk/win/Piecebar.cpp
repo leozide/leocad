@@ -54,39 +54,19 @@ CPiecesBar::CPiecesBar()
 	m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 
-	m_sizeMin = CSize(222, 200);
-	m_sizeHorz = CSize(200, 200);
-	m_sizeVert = CSize(226, -1);
-	m_sizeFloat = CSize(226, 270);
-	m_bTracking = FALSE;
-	m_bInRecalcNC = FALSE;
-	m_cxEdge = 5;
-	m_bDragShowContent = FALSE;
+	m_dwSCBStyle |= SCBS_SHOWEDGES;
 	m_nPreviewHeight = AfxGetApp()->GetProfileInt("Settings", "Preview Height", 93);
-	m_bNoContext = FALSE;
+
+	m_szMinHorz = m_szMinVert = m_szMinFloat = CSize(228, 200);
 }
 
 CPiecesBar::~CPiecesBar()
 {
 	AfxGetApp()->WriteProfileInt("Settings", "Preview Height", m_nPreviewHeight);
-	SaveState();
 }
 
-BEGIN_MESSAGE_MAP(CPiecesBar, CControlBar)
+BEGIN_MESSAGE_MAP(CPiecesBar, CSizingControlBarG)
 	//{{AFX_MSG_MAP(CPiecesBar)
-	ON_WM_PAINT()
-	ON_WM_NCPAINT()
-	ON_WM_WINDOWPOSCHANGED()
-	ON_WM_NCCALCSIZE()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_NCLBUTTONDOWN()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONDBLCLK()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_CAPTURECHANGED()
-	ON_WM_NCHITTEST()
-	ON_WM_SETCURSOR()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_CONTEXTMENU()
@@ -99,553 +79,9 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////
 // CPiecesBar message handlers
 
-BOOL CPiecesBar::Create(LPCTSTR lpszWindowName, CWnd* pParentWnd, CSize sizeDefault, 
-                        BOOL bHasGripper, UINT nID, DWORD dwStyle)
-{
-	ASSERT_VALID(pParentWnd);   // must have a parent
-	ASSERT (!((dwStyle & CBRS_SIZE_FIXED) && (dwStyle & CBRS_SIZE_DYNAMIC)));
-
-	// save the style
-	SetBarStyle(dwStyle & CBRS_ALL);
-
-	CString wndclass = ::AfxRegisterWndClass(CS_DBLCLKS, ::LoadCursor(NULL, IDC_ARROW),
-	                                         ::GetSysColorBrush(COLOR_BTNFACE), 0);
-
-	dwStyle &= ~CBRS_ALL;
-	dwStyle &= WS_VISIBLE | WS_CHILD;
-	if (!CWnd::Create(wndclass, lpszWindowName, dwStyle, CRect(0,0,0,0), pParentWnd, nID))
-		return FALSE;
-
-	if (sizeDefault.cx < m_sizeMin.cx)
-		sizeDefault.cx = m_sizeMin.cx;
-
-	if (sizeDefault.cy < m_sizeMin.cy)
-		sizeDefault.cy = m_sizeMin.cy;
-
-	m_sizeHorz = sizeDefault;
-	m_sizeVert = sizeDefault;
-	m_sizeFloat = sizeDefault;
-
-	LoadState();
-	
-	m_bHasGripper = bHasGripper;
-	m_cyGripper = m_bHasGripper ? 12 : 0;
-
-	return TRUE;
-}
-
-void CPiecesBar::SaveState()
-{
-	CWinApp* pApp = AfxGetApp();
-	TCHAR* szSection = _T("PiecesBar");
-
-	pApp->WriteProfileInt(szSection, _T("HorzCX"), m_sizeHorz.cx);
-	pApp->WriteProfileInt(szSection, _T("HorzCY"), m_sizeHorz.cy);
-
-	pApp->WriteProfileInt(szSection, _T("VertCX"), m_sizeVert.cx);
-	pApp->WriteProfileInt(szSection, _T("VertCY"), m_sizeVert.cy);
-
-	pApp->WriteProfileInt(szSection, _T("FloatCX"), m_sizeFloat.cx);
-	pApp->WriteProfileInt(szSection, _T("FloatCY"), m_sizeFloat.cy);
-}
-
-void CPiecesBar::LoadState()
-{
-	CWinApp* pApp = AfxGetApp();
-	TCHAR* szSection = _T("PiecesBar");
-
-	m_sizeHorz.cx = (int)pApp->GetProfileInt(szSection, _T("HorzCX"), m_sizeHorz.cx);
-	m_sizeHorz.cy = (int)pApp->GetProfileInt(szSection, _T("HorzCY"), m_sizeHorz.cy);
-
-	m_sizeVert.cx = (int)pApp->GetProfileInt(szSection, _T("VertCX"), m_sizeVert.cx);
-	m_sizeVert.cy = (int)pApp->GetProfileInt(szSection, _T("VertCY"), m_sizeVert.cy);
-
-	m_sizeFloat.cx = (int)pApp->GetProfileInt(szSection, _T("FloatCX"), m_sizeFloat.cx);
-	m_sizeFloat.cy = (int)pApp->GetProfileInt(szSection, _T("FloatCY"), m_sizeFloat.cy);
-}
-
-BOOL CPiecesBar::IsHorzDocked() const
-{
-	return (m_nDockBarID == AFX_IDW_DOCKBAR_TOP || m_nDockBarID == AFX_IDW_DOCKBAR_BOTTOM);
-}
-
-BOOL CPiecesBar::IsVertDocked() const
-{
-	return (m_nDockBarID == AFX_IDW_DOCKBAR_LEFT || m_nDockBarID == AFX_IDW_DOCKBAR_RIGHT);
-}
-
-CSize CPiecesBar::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
-{
-	CRect rc;
-
-	m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_TOP)->GetWindowRect(rc);
-	int nHorzDockBarWidth = bStretch ? 32767 : rc.Width() + 4;
-	m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_LEFT)->GetWindowRect(rc);
-	int nVertDockBarHeight = bStretch ? 32767 : rc.Height() + 4;
-
-	if (bHorz)
-		return CSize(nHorzDockBarWidth, m_sizeHorz.cy);
-	else
-		return CSize(m_sizeVert.cx, nVertDockBarHeight);
-}
-
-CSize CPiecesBar::CalcDynamicLayout(int nLength, DWORD dwMode)
-{
-	if (dwMode & (LM_HORZDOCK | LM_VERTDOCK))
-	{
-		if (nLength == -1)
-			GetDockingFrame()->DelayRecalcLayout();
-		return CControlBar::CalcDynamicLayout(nLength,dwMode);
-	}
-
-	if (dwMode & LM_MRUWIDTH)
-		return m_sizeFloat;
-
-	if (dwMode & LM_COMMIT)
-	{
-		m_sizeFloat.cx = nLength;
-		return m_sizeFloat;
-	}
-
-	if (dwMode & LM_LENGTHY)
-		return CSize(m_sizeFloat.cx,
-		m_sizeFloat.cy = max(m_sizeMin.cy, nLength));
-	else
-		return CSize(max(m_sizeMin.cx, nLength), m_sizeFloat.cy);
-}
-
-void CPiecesBar::OnWindowPosChanged(WINDOWPOS FAR* lpwndpos) 
-{
-	CControlBar::OnWindowPosChanged(lpwndpos);
-
-	// Find on which side are we docked
-	m_nDockBarID = GetParent()->GetDlgCtrlID();
-
-	if (!m_bInRecalcNC)
-	{
-		m_bInRecalcNC = TRUE;
-
-		// Force recalc the non-client area
-		SetWindowPos(NULL, 0, 0, 0, 0,
-		             SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
-
-		m_bInRecalcNC = FALSE;
-	}
-}
-
-BOOL CPiecesBar::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
-{
-	if ((nHitTest != HTSIZE) || m_bTracking)
-		return CControlBar::OnSetCursor(pWnd, nHitTest, message);
-
-	if (IsHorzDocked())
-		::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
-	else
-		::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
-	return TRUE;
-}
-
-/////////////////////////////////////////////////////////////////////////
-// Mouse Handling
-//
-void CPiecesBar::OnLButtonDown(UINT nFlags, CPoint point) 
-{
-	if (m_pDockBar != NULL)
-	{
-		// start the drag
-		ASSERT(m_pDockContext != NULL);
-		ClientToScreen(&point);
-		m_pDockContext->StartDrag(point);
-	}
-	else
-		CWnd::OnLButtonDown(nFlags, point);
-}
-
-void CPiecesBar::OnLButtonDblClk(UINT nFlags, CPoint point) 
-{
-	if (m_pDockBar != NULL)
-	{
-		// toggle docking
-		ASSERT(m_pDockContext != NULL);
-		m_pDockContext->ToggleDocking();
-	}
-	else
-		CWnd::OnLButtonDblClk(nFlags, point);
-}
-
-void CPiecesBar::OnNcLButtonDown(UINT nHitTest, CPoint point) 
-{
-	if (m_bTracking) return;
-
-	if ((nHitTest == HTSIZE) && !IsFloating())
-		StartTracking();
-	else    
-		CControlBar::OnNcLButtonDown(nHitTest, point);
-}
-
-void CPiecesBar::OnLButtonUp(UINT nFlags, CPoint point) 
-{
-	if (m_bTracking)
-		StopTracking(TRUE);
-
-	CControlBar::OnLButtonUp(nFlags, point);
-}
-
-void CPiecesBar::OnRButtonDown(UINT nFlags, CPoint point) 
-{
-	if (m_bTracking)
-		StopTracking(FALSE);
-
-	CControlBar::OnRButtonDown(nFlags, point);
-}
-
-void CPiecesBar::OnMouseMove(UINT nFlags, CPoint point) 
-{
-	if (m_bTracking)
-	{
-		ASSERT (!IsFloating());
-		CPoint pt = point;
-		ClientToScreen(&pt);
-
-		OnTrackUpdateSize(pt);
-	}
-
-	CControlBar::OnMouseMove(nFlags, point);
-}
-
-void CPiecesBar::OnCaptureChanged(CWnd *pWnd) 
-{
-	if (m_bTracking && pWnd != this)
-		StopTracking(FALSE); // cancel tracking
-
-	CControlBar::OnCaptureChanged(pWnd);
-}
-
-void CPiecesBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp) 
-{
-	UNREFERENCED_PARAMETER(bCalcValidRects);
-
-	// Compute the rectangle of the mobile edge
-	GetWindowRect(m_rectBorder);
-	m_rectBorder.OffsetRect(-m_rectBorder.left, -m_rectBorder.top);
-	m_rectBorder.DeflateRect(1, 1);
-
-	m_rectGripper = m_rectBorder;
-	m_rectGripper.DeflateRect(5, 5);
-	m_rectGripper.right -= m_cxEdge;
-	m_rectGripper.bottom -= m_cxEdge;
-	CRect rc = lpncsp->rgrc[0];
-
-	DWORD dwBorderStyle = m_dwStyle | CBRS_BORDER_ANY;
-
-	switch(m_nDockBarID)
-	{
-	case AFX_IDW_DOCKBAR_TOP:
-		dwBorderStyle &= ~CBRS_BORDER_BOTTOM;
-		rc.DeflateRect(m_cyGripper + 2, 2, 2, m_cxEdge + 2);
-		m_rectBorder.top = m_rectBorder.bottom - m_cxEdge;
-		break;
-	case AFX_IDW_DOCKBAR_BOTTOM:
-		dwBorderStyle &= ~CBRS_BORDER_TOP;
-		rc.DeflateRect(m_cyGripper + 2, m_cxEdge + 2, 2, 2);
-		m_rectBorder.bottom = m_rectBorder.top + m_cxEdge;
-		m_rectGripper.OffsetRect(0, m_cxEdge);
-		break;
-	case AFX_IDW_DOCKBAR_LEFT:
-		dwBorderStyle &= ~CBRS_BORDER_RIGHT;
-		rc.DeflateRect(2, m_cyGripper + 2, m_cxEdge + 2, 6);
-		m_rectBorder.left = m_rectBorder.right - m_cxEdge;
-		break;
-	case AFX_IDW_DOCKBAR_RIGHT:
-		dwBorderStyle &= ~CBRS_BORDER_LEFT;
-		rc.DeflateRect(m_cxEdge + 2, m_cyGripper + 2, 2, 6);
-		m_rectBorder.right = m_rectBorder.left + m_cxEdge;
-		m_rectGripper.OffsetRect(m_cxEdge, 0);
-		break;
-	default:
-		m_rectBorder.SetRectEmpty();
-		break;
-	}
-
-	lpncsp->rgrc[0] = rc;
-
-	SetBarStyle(dwBorderStyle);
-}
-
-void CPiecesBar::OnNcPaint() 
-{
-	// get window DC that is clipped to the non-client area
-	CWindowDC dc(this);
-	CRect rectClient;
-	GetClientRect(rectClient);
-	CRect rectWindow;
-	GetWindowRect(rectWindow);
-	ScreenToClient(rectWindow);
-	rectClient.OffsetRect(-rectWindow.left, -rectWindow.top);
-	dc.ExcludeClipRect(rectClient);
-
-	// draw borders in non-client area
-	rectWindow.OffsetRect(-rectWindow.left, -rectWindow.top);
-	DrawBorders(&dc, rectWindow);
-
-	// erase parts not drawn
-	dc.IntersectClipRect(rectWindow);
-
-	// erase NC background the hard way
-	HBRUSH hbr = (HBRUSH)GetClassLong(m_hWnd, GCL_HBRBACKGROUND);
-	::FillRect(dc.m_hDC, rectWindow, hbr);
-
-	// paint the mobile edge
-	dc.Draw3dRect(m_rectBorder, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
-
-	if (m_bHasGripper)
-	{
-		// paint the gripper
-		CRect gripper = m_rectGripper;
-		
-		if (IsHorzDocked())
-		{
-			// gripper at left
-			gripper.right = gripper.left + 3;
-			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-				::GetSysColor(COLOR_BTNSHADOW));
-			gripper.OffsetRect(3, 0);
-			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-				::GetSysColor(COLOR_BTNSHADOW));
-		}
-		else if (IsVertDocked())
-		{
-			// gripper at top
-			gripper.bottom = gripper.top + 3;
-			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-				::GetSysColor(COLOR_BTNSHADOW));
-			gripper.OffsetRect(0, 3);
-			dc.Draw3dRect(gripper, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-				::GetSysColor(COLOR_BTNSHADOW));
-		}
-	}
-
-	ReleaseDC(&dc);
-}
-
-void CPiecesBar::OnPaint() 
-{
-	// overridden to skip border painting based on clientrect
-	CPaintDC dc(this);
-}
-
-UINT CPiecesBar::OnNcHitTest(CPoint point) 
-{
-	if (IsFloating())
-		return CControlBar::OnNcHitTest(point);
-
-	CRect rc;
-	GetWindowRect(rc);
-	point.Offset(-rc.left, -rc.top);
-	if (m_rectBorder.PtInRect(point))
-		return HTSIZE;
-	else
-		return HTCLIENT;
-}
-
-/////////////////////////////////////////////////////////////////////////
-// CPiecesBar implementation helpers
-
-void CPiecesBar::StartTracking()
-{
-	SetCapture();
-
-	// make sure no updates are pending
-	RedrawWindow(NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
-
-	m_bDragShowContent = QueryDragFullWindows();
-
-	if (!m_bDragShowContent)
-		m_pDockSite->LockWindowUpdate();
-
-	m_sizeOld = IsHorzDocked() ? m_sizeHorz : m_sizeVert;
-
-	CRect rect;
-	GetWindowRect(&rect);
-	m_ptOld = m_rectBorder.CenterPoint() + rect.TopLeft();
-
-	m_sizeMax = CalcMaxSize();
-	m_bTracking = TRUE;
-
-	if (!m_bDragShowContent)
-		OnTrackInvertTracker();
-}
-
-void CPiecesBar::StopTracking(BOOL bAccept)
-{
-	if (!m_bDragShowContent)
-	{
-		OnTrackInvertTracker();
-		m_pDockSite->UnlockWindowUpdate();
-	}
-
-	m_bTracking = FALSE;
-	ReleaseCapture();
-
-	if (!bAccept) // resize canceled?
-	{
-		// restore old size
-		if (IsHorzDocked())
-			m_sizeHorz = m_sizeOld;
-		else
-			m_sizeVert = m_sizeOld;
-	}
-
-	m_pDockSite->DelayRecalcLayout();
-}
-
-void CPiecesBar::OnTrackUpdateSize(CPoint& point)
-{
-	BOOL bHorz = IsHorzDocked();
-
-	CSize sizeNew = m_sizeOld;
-
-	if ((m_nDockBarID == AFX_IDW_DOCKBAR_TOP) ||
-		(m_nDockBarID == AFX_IDW_DOCKBAR_LEFT))
-		sizeNew += point - m_ptOld;
-	else
-		sizeNew -= point - m_ptOld;
-
-	// check limits
-	sizeNew.cx = max(m_sizeMin.cx, sizeNew.cx);
-	sizeNew.cy = max(m_sizeMin.cy, sizeNew.cy);
-	sizeNew.cx = min(m_sizeMax.cx, sizeNew.cx);
-	sizeNew.cy = min(m_sizeMax.cy, sizeNew.cy);
-
-	if ((sizeNew.cy == m_sizeHorz.cy) && bHorz || (sizeNew.cx == m_sizeVert.cx) && !bHorz)
-		return; // no size change
-
-	if (!m_bDragShowContent)
-		OnTrackInvertTracker();
-
-	if (bHorz)
-		m_sizeHorz = sizeNew;
-	else
-		m_sizeVert = sizeNew;
-
-	if (!m_bDragShowContent)
-		OnTrackInvertTracker();
-	else
-		m_pDockSite->DelayRecalcLayout();
-}
-
-CSize CPiecesBar::CalcMaxSize()
-{
-	// the control bar cannot grow with more than the size of 
-	// remaining client area of the frame
-	CRect rect;
-	m_pDockSite->GetClientRect(&rect);
-	CSize size = rect.Size();
-	CWnd* pBar;
-	if (IsHorzDocked())
-	{
-		if (pBar = m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_TOP))
-		{
-			pBar->GetWindowRect(&rect);
-			size -= rect.Size();
-		}
-		if (pBar = m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_BOTTOM))
-		{
-			pBar->GetWindowRect(&rect);
-			size -= rect.Size();
-		}
-		if (pBar = m_pDockSite->GetControlBar(AFX_IDW_STATUS_BAR))
-		{
-			pBar->GetWindowRect(&rect);
-			size -= rect.Size();
-		}
-	}
-	else
-	{
-		if (pBar = m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_LEFT))
-		{
-			pBar->GetWindowRect(&rect);
-			size -= rect.Size();
-		}
-		if (pBar = m_pDockSite->GetControlBar(AFX_IDW_DOCKBAR_RIGHT))
-		{
-			pBar->GetWindowRect(&rect);
-			size -= rect.Size();
-		}
-	}
-	
-	size -= CSize(4, 4);
-	size += IsHorzDocked() ? m_sizeHorz : m_sizeVert;
-
-	return size;
-}
-
-void CPiecesBar::OnTrackInvertTracker()
-{
-	ASSERT_VALID(this);
-	ASSERT(m_bTracking);
-
-	CRect rect = m_rectBorder;
-	CRect rectBar, rectFrame;
-	GetWindowRect(rectBar);
-	rect.OffsetRect(rectBar.TopLeft());
-	m_pDockSite->GetWindowRect(rectFrame);
-	rect.OffsetRect(-rectFrame.left, -rectFrame.top);
-
-	switch (m_nDockBarID)
-	{
-	case AFX_IDW_DOCKBAR_TOP:
-		rect.OffsetRect(0, m_sizeHorz.cy - m_sizeOld.cy); break;
-	case AFX_IDW_DOCKBAR_BOTTOM:
-		rect.OffsetRect(0, m_sizeOld.cy - m_sizeHorz.cy); break;
-	case AFX_IDW_DOCKBAR_LEFT:
-		rect.OffsetRect(m_sizeVert.cx - m_sizeOld.cx, 0); break;
-	case AFX_IDW_DOCKBAR_RIGHT:
-		rect.OffsetRect(m_sizeOld.cx - m_sizeVert.cx, 0); break;
-	}
-	if (IsVertDocked())
-		rect.bottom -= 4;
-	rect.DeflateRect(1, 1);
-
-	CDC *pDC = m_pDockSite->GetDCEx(NULL, DCX_WINDOW|DCX_CACHE|DCX_LOCKWINDOWUPDATE);
-
-	CBrush* pBrush = CDC::GetHalftoneBrush();
-	HBRUSH hOldBrush = NULL;
-	if (pBrush != NULL)
-		hOldBrush = (HBRUSH)::SelectObject(pDC->m_hDC, pBrush->m_hObject);
-
-	pDC->PatBlt(rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
-
-	if (hOldBrush != NULL)
-		::SelectObject(pDC->m_hDC, hOldBrush);
-
-	m_pDockSite->ReleaseDC(pDC);
-}
-
-BOOL CPiecesBar::QueryDragFullWindows() const
-{
-	TCHAR sDragfullWindows[2];
-	DWORD cbDragfullWindows = sizeof(DWORD);
-	DWORD dwType;
-	HKEY hKey;
-	BOOL bRet = FALSE;
-
-	RegOpenKeyEx(HKEY_CURRENT_USER, _T("Control Panel\\desktop"),
-		0, KEY_QUERY_VALUE, &hKey);
-
-	if (!FAILED(RegQueryValueEx(hKey, _T("DragfullWindows"),
-		NULL, &dwType, (LPBYTE)&sDragfullWindows, &cbDragfullWindows)))
-		if (!_tcscmp(sDragfullWindows, _T("1")))
-			bRet = TRUE;
-
-	RegCloseKey(hKey);
-
-	return bRet;
-}
-
 void CPiecesBar::OnSize(UINT nType, int cx, int cy) 
 {
-	CControlBar::OnSize(nType, cx, cy);
+	CSizingControlBarG::OnSize(nType, cx, cy);
 
 	if (!IsWindow(m_wndColorsList.m_hWnd))
 		return;
@@ -666,22 +102,9 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	m_wndPiecesCombo.ShowWindow(SW_SHOW);
 }
 
-void CPiecesBar::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler)
-{
-//	CWnd::OnUpdateCmdUI(pTarget, FALSE);
-//	int nID = ID_PIECE_GROUP02;
-
-//	int sta = m_wndGroupsBar.GetToolBarCtrl().GetState(nID) & ~TBSTATE_ENABLED;
-//	if (bEnable)
-//		sta |= TBSTATE_ENABLED|TBSTATE_CHECKED;
-//	m_wndGroupsBar.GetToolBarCtrl().SetState(nID, sta);
-
-	UpdateDialogControls(pTarget, FALSE);
-}
-
 int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	if (CControlBar::OnCreate(lpCreateStruct) == -1)
+	if (CSizingControlBarG::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT|TVS_INFOTIP, 
@@ -751,7 +174,25 @@ LONG CPiecesBar::OnSplitterMoved(UINT lParam, LONG wParam)
 	else
 		m_nPreviewHeight += lParam;
 
+	SetWindowPos(NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
 	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// CPiecesBar implementation helpers
+
+void CPiecesBar::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler)
+{
+//	CWnd::OnUpdateCmdUI(pTarget, FALSE);
+//	int nID = ID_PIECE_GROUP02;
+
+//	int sta = m_wndGroupsBar.GetToolBarCtrl().GetState(nID) & ~TBSTATE_ENABLED;
+//	if (bEnable)
+//		sta |= TBSTATE_ENABLED|TBSTATE_CHECKED;
+//	m_wndGroupsBar.GetToolBarCtrl().SetState(nID, sta);
+
+	UpdateDialogControls(pTarget, FALSE);
 }
 
 void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -1148,5 +589,5 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		}
 	}
 
-	return CControlBar::OnNotify(wParam, lParam, pResult);
+	return CSizingControlBarG::OnNotify(wParam, lParam, pResult);
 }

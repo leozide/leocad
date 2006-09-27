@@ -17,7 +17,6 @@ static char THIS_FILE[] = __FILE__;
 
 CColorsList::CColorsList()
 {
-	m_bLowRes = FALSE;
 }
 
 CColorsList::~CColorsList()
@@ -30,6 +29,7 @@ BEGIN_MESSAGE_MAP(CColorsList, CListBox)
 	ON_WM_CREATE()
 	ON_WM_KEYDOWN()
 	//}}AFX_MSG_MAP
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -39,25 +39,15 @@ void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 {
 	int x = lpDIS->itemID;
 	if (x%2 == 0)
-		x/=2;
+		x /= 2;
 	else
 		x = ((x-1)/2)+14;
 
-	if ((!(lpDIS->itemState & ODS_SELECTED) &&
-		(lpDIS->itemAction & ODA_SELECT)) ||
-		(lpDIS->itemAction & ODA_DRAWENTIRE))
+	if ((!(lpDIS->itemState & ODS_SELECTED) && (lpDIS->itemAction & ODA_SELECT)) ||
+	    (lpDIS->itemAction & ODA_DRAWENTIRE))
 	{
-		if (m_bLowRes)
-		{
-			HBRUSH hbr = CreateSolidBrush(RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
-			FillRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
-			DeleteObject (hbr);
-		}
-		else
-		{
-			SetBkColor(lpDIS->hDC, RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
-			ExtTextOut(lpDIS->hDC, 0, 0, ETO_OPAQUE, &lpDIS->rcItem, NULL, 0, NULL);
-		}
+		SetBkColor(lpDIS->hDC, RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
+		ExtTextOut(lpDIS->hDC, 0, 0, ETO_OPAQUE, &lpDIS->rcItem, NULL, 0, NULL);
 
 		if (x > 13 && x < 22)
 		for (x = lpDIS->rcItem.left; x < lpDIS->rcItem.right; x++)
@@ -74,24 +64,27 @@ void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 			}
 		}
 	}
-	
-	// item has been selected - hilite frame
+
+	// Item has been selected - hilite frame
 	if ((lpDIS->itemState & ODS_SELECTED) &&
 		(lpDIS->itemAction & (ODA_SELECT | ODA_DRAWENTIRE)))
 	{
 		HBRUSH hbr = CreateSolidBrush(RGB(255-FlatColorArray[x][0], 255-FlatColorArray[x][1], 255-FlatColorArray[x][2]));
 		FrameRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
-		DeleteObject (hbr);
+		DeleteObject(hbr);
 	}
 }
 
-void CColorsList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
+void CColorsList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
+	RECT rc;
+	GetClientRect(&rc);
+
 	lpMeasureItemStruct->itemHeight = 12;
-	lpMeasureItemStruct->itemWidth = 15;
+	lpMeasureItemStruct->itemWidth = (rc.right - rc.left) / 14;
 }
 
-BOOL CColorsList::PreTranslateMessage(MSG* pMsg) 
+BOOL CColorsList::PreTranslateMessage(MSG* pMsg)
 {
 	if (m_ToolTip.m_hWnd)
 		m_ToolTip.RelayEvent(pMsg);
@@ -99,31 +92,45 @@ BOOL CColorsList::PreTranslateMessage(MSG* pMsg)
 	return CListBox::PreTranslateMessage(pMsg);
 }
 
-int CColorsList::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+int CColorsList::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CListBox::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
+
 	m_ToolTip.Create(this);
-//	m_ToolTip.Activate(TRUE);
+
+	int ColumnWidth = lpCreateStruct->cx / 14;
 
 	for (int i = 0; i < 14; i++)
 	{
-		CRect rect (i*15,0,(i+1)*15,12);
-		m_ToolTip.AddTool(this, IDS_COLOR01+i, rect, 1);
-		rect.OffsetRect (0,12);
-		m_ToolTip.AddTool(this, IDS_COLOR15+i, rect, 1);
+		CRect rect(i*ColumnWidth, 0, (i+1)*ColumnWidth, 12);
+		m_ToolTip.AddTool(this, IDS_COLOR01+i, rect, i+1);
+		rect.OffsetRect(0, 12);
+		m_ToolTip.AddTool(this, IDS_COLOR15+i, rect, i+15);
 	}
-	
+
 	return 0;
 }
 
-void CColorsList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void CColorsList::OnSize(UINT nType, int cx, int cy)
+{
+	CListBox::OnSize(nType, cx, cy);
+
+	int ColumnWidth = cx / 14;
+
+	for (int i = 0; i < 14; i++)
+	{
+		CRect rect(i*ColumnWidth, 0, (i+1)*ColumnWidth, 12);
+		m_ToolTip.SetToolRect(this, i+1, rect);
+		rect.OffsetRect(0, 12);
+		m_ToolTip.SetToolRect(this, i+15, rect);
+	}
+}
+
+void CColorsList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	if (nChar == VK_INSERT)
 	{
-//		project->HandleCommand(LC_PIECE_INSERT, 0);
-
 		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 		pFrame->PostMessage(WM_COMMAND, ID_PIECE_INSERT, 0);
 

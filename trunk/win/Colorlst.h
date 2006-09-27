@@ -33,7 +33,6 @@ public:
 
 // Implementation
 public:
-	BOOL m_bLowRes;
 	virtual ~CColorsList();
 
 	// Generated message map functions
@@ -43,9 +42,11 @@ protected:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	//}}AFX_MSG
 
-	CToolTipCtrl   m_ToolTip;
+	CToolTipCtrl m_ToolTip;
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 /////////////////////////////////////////////////////////////////////////////

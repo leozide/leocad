@@ -734,6 +734,8 @@ void SystemUpdatePaste(bool enable)
 {
 	CMenu* pMenu = GetMainMenu(1);
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 

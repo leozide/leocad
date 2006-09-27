@@ -308,6 +308,8 @@ public:
 	inline operator const float*() const { return (const float*)this; }
 	inline operator float*() { return (float*)this; }
 
+	inline float Determinant() const;
+
 	Vector3 m_Rows[3];
 };
 
@@ -319,6 +321,7 @@ class Matrix44
 public:
 	inline Matrix44();
 	inline Matrix44(const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4& Row3);
+	inline Matrix44(const Matrix33& a);
 
 	inline operator const float*() const { return (const float*)this; }
 	inline operator float*() const { return (float*)this; }
@@ -625,43 +628,24 @@ inline Matrix33 IdentityMatrix33()
 { return Matrix33(Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f)); }
 
 // Conversions.
-inline Matrix33 MatrixFromAxisAngle(const Vector3& Axis, const float Radians)
-{
-	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
-
-	s = sinf(Radians);
-	c = cosf(Radians);
-	mag = Axis.Length();
-
-	if (mag == 0.0f)
-	{
-		return IdentityMatrix33();
-	}
-
-	Vector3 Normal = Axis / mag;
-
-	xx = Normal[0] * Normal[0];
-	yy = Normal[1] * Normal[1];
-	zz = Normal[2] * Normal[2];
-	xy = Normal[0] * Normal[1];
-	yz = Normal[1] * Normal[2];
-	zx = Normal[2] * Normal[0];
-	xs = Normal[0] * s;
-	ys = Normal[1] * s;
-	zs = Normal[2] * s;
-	one_c = 1.0f - c;
-
-	return Matrix33(Vector3((one_c * xx) + c, (one_c * xy) + zs, (one_c * zx) - ys),
-	                Vector3((one_c * xy) - zs, (one_c * yy) + c, (one_c * yz) + xs),
-	                Vector3((one_c * zx) + ys, (one_c * yz) - xs, (one_c * zz) + c));
-}
-
+Matrix33 MatrixFromAxisAngle(const Vector3& Axis, float Radians);
+Vector4 MatrixToAxisAngle(const Matrix33& Mat);
+Matrix33 MatrixFromEulerAngles(const Vector3& Angles);
 Vector3 MatrixToEulerAngles(const Matrix33& a);
 
 // Math operations.
 inline Vector3 Mul(const Vector3& a, const Matrix33& b)
 { return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
+inline float Determinant(const Matrix33& a)
+{
+	return a.m_Rows[0][0] * a.m_Rows[1][2] * a.m_Rows[2][2] + a.m_Rows[0][1] * a.m_Rows[1][3] * a.m_Rows[2][0] +
+	       a.m_Rows[0][2] * a.m_Rows[1][0] * a.m_Rows[2][1] - a.m_Rows[0][0] * a.m_Rows[1][3] * a.m_Rows[2][1] - 
+	       a.m_Rows[0][1] * a.m_Rows[1][0] * a.m_Rows[2][2] - a.m_Rows[0][2] * a.m_Rows[1][2] * a.m_Rows[2][0];
+}
+
+inline float Matrix33::Determinant() const
+{ return ::Determinant(*this); }
 
 // ============================================================================
 // 4x4 Matrix functions.
@@ -678,6 +662,9 @@ inline Matrix44 IdentityMatrix44()
 	return Matrix44(Vector4(1.0f, 0.0f, 0.0f, 0.0f), Vector4(0.0f, 1.0f, 0.0f, 0.0f),
 	                Vector4(0.0f, 0.0f, 1.0f, 0.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 }
+
+inline Matrix44::Matrix44(const Matrix33& a)
+{ *this = a; }
 
 // Math operations.
 inline Vector3 Mul31(const Vector3& a, const Matrix44& b)

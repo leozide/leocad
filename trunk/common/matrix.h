@@ -14,7 +14,6 @@ public:
 
 	void FromPacked(const float *mat);
 	void FromLDraw(const float *f);
-	void FromEulerAngles(float yaw, float pitch, float roll);
 	void FromAxisAngle(const float *axis, float angle);
 
 	void ToLDraw(float *f) const;
@@ -24,7 +23,6 @@ public:
 	void LoadIdentity();
 	void Translate(float x, float y, float z);
 	void Multiply(const Matrix& m1, const Matrix& m2);
-	bool Invert();
 	float Determinant() const;
 
 	void GetTranslation(float *x, float *y, float *z);

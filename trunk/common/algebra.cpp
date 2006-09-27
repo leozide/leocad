@@ -193,6 +193,145 @@ Matrix44 RotTranInverse(const Matrix44& m)
 // ============================================================================
 // Matrix 3x3 class.
 
+Matrix33 MatrixFromAxisAngle(const Vector3& Axis, float Radians)
+{
+	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+
+	s = sinf(Radians);
+	c = cosf(Radians);
+	mag = Axis.Length();
+
+	if (mag == 0.0f)
+	{
+		return IdentityMatrix33();
+	}
+
+	Vector3 Normal = Axis / mag;
+
+	xx = Normal[0] * Normal[0];
+	yy = Normal[1] * Normal[1];
+	zz = Normal[2] * Normal[2];
+	xy = Normal[0] * Normal[1];
+	yz = Normal[1] * Normal[2];
+	zx = Normal[2] * Normal[0];
+	xs = Normal[0] * s;
+	ys = Normal[1] * s;
+	zs = Normal[2] * s;
+	one_c = 1.0f - c;
+
+	return Matrix33(Vector3((one_c * xx) + c, (one_c * xy) + zs, (one_c * zx) - ys),
+	                Vector3((one_c * xy) - zs, (one_c * yy) + c, (one_c * yz) + xs),
+	                Vector3((one_c * zx) + ys, (one_c * yz) - xs, (one_c * zz) + c));
+}
+
+Vector4 MatrixToAxisAngle(const Matrix33& Mat)
+{
+	Matrix33 tmp(Normalize(Mat.m_Rows[0]), Normalize(Mat.m_Rows[1]), Normalize(Mat.m_Rows[2]));
+
+	// Determinant should be 1 for rotation matrices.
+	if (Determinant(tmp) < 0.0f)
+	{
+		tmp.m_Rows[0] *= -1.0f;
+		tmp.m_Rows[1] *= -1.0f;
+		tmp.m_Rows[2] *= -1.0f;
+	}
+
+	float Trace = tmp.m_Rows[0][0] + tmp.m_Rows[1][1] + tmp.m_Rows[2][2];
+	float Cos = 0.5f * (Trace - 1.0f);
+	Vector4 rot;
+
+	rot[3] = acosf(Cos);  // in [0,PI]
+
+	if (rot[3] > 0.01f)
+	{
+		if (fabsf(LC_PI - rot[3]) > 0.01f)
+		{
+			rot[0] = tmp.m_Rows[1][2] - tmp.m_Rows[2][1];
+			rot[1] = tmp.m_Rows[2][0] - tmp.m_Rows[0][2];
+			rot[2] = tmp.m_Rows[0][1] - tmp.m_Rows[1][0];
+
+			float inv = 1.0f / sqrtf(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+
+			rot[0] *= inv;
+			rot[1] *= inv;
+			rot[2] *= inv;
+		}
+		else
+		{
+			// angle is PI
+			float HalfInverse;
+			if (tmp.m_Rows[0][0] >= tmp.m_Rows[1][1])
+			{
+				// r00 >= r11
+				if (tmp.m_Rows[0][0] >= tmp.m_Rows[2][2])
+				{
+					// r00 is maximum diagonal term
+					rot[0] = 0.5f * sqrtf(tmp.m_Rows[0][0] - tmp.m_Rows[1][1] - tmp.m_Rows[2][2] + 1.0f);
+					HalfInverse = 0.5f / rot[0];
+					rot[1] = HalfInverse * tmp.m_Rows[1][0];
+					rot[2] = HalfInverse * tmp.m_Rows[2][0];
+				}
+				else
+				{
+					// r22 is maximum diagonal term
+					rot[2] = 0.5f * sqrtf(tmp.m_Rows[2][2] - tmp.m_Rows[0][0] - tmp.m_Rows[1][1] + 1.0f);
+					HalfInverse = 0.5f / rot[2];
+					rot[0] = HalfInverse * tmp.m_Rows[2][0];
+					rot[1] = HalfInverse * tmp.m_Rows[2][1];
+				}
+			}
+			else
+			{
+				// r11 > r00
+				if (tmp.m_Rows[1][1] >= tmp.m_Rows[2][2])
+				{
+					// r11 is maximum diagonal term
+					rot[1] = 0.5f * sqrtf(tmp.m_Rows[1][1] - tmp.m_Rows[0][0] - tmp.m_Rows[2][2] + 1.0f);
+					HalfInverse  = 0.5f / rot[1];
+					rot[0] = HalfInverse * tmp.m_Rows[1][0];
+					rot[2] = HalfInverse * tmp.m_Rows[2][1];
+				}
+				else
+				{
+					// r22 is maximum diagonal term
+					rot[2] = 0.5f * sqrtf(tmp.m_Rows[2][2] - tmp.m_Rows[0][0] - tmp.m_Rows[1][1] + 1.0f);
+					HalfInverse = 0.5f / rot[2];
+					rot[0] = HalfInverse * tmp.m_Rows[2][0];
+					rot[1] = HalfInverse * tmp.m_Rows[2][1];
+				}
+			}
+		}
+	}
+	else
+	{
+		// The angle is 0 and the matrix is the identity.
+		rot[0] = 0.0f;
+		rot[1] = 0.0f;
+		rot[2] = 1.0f;
+	}
+
+	return rot;
+}
+
+Matrix33 MatrixFromEulerAngles(const Vector3& Angles)
+{
+	float CosYaw, SinYaw, CosPitch, SinPitch, CosRoll, SinRoll;
+
+	CosRoll = cosf(Angles[0]);
+	SinRoll = sinf(Angles[0]);
+	CosPitch = cosf(Angles[1]);
+	SinPitch = sinf(Angles[1]);
+	CosYaw = cosf(Angles[2]);
+	SinYaw = sinf(Angles[2]);
+
+	Vector3 Rows[3];
+	Rows[0] = Vector3(CosYaw * CosPitch, SinYaw * CosPitch, -SinPitch);
+	Rows[1] = Vector3(CosYaw * SinPitch * SinRoll - SinYaw * CosRoll, CosYaw * CosRoll + SinYaw * SinPitch * SinRoll, CosPitch * SinRoll);
+	Rows[2] = Vector3(CosYaw * SinPitch * CosRoll + SinYaw * SinRoll, SinYaw * SinPitch * CosRoll - CosYaw * SinRoll, CosPitch * CosRoll);
+
+	return Matrix33(Rows[0], Rows[1], Rows[2]);
+}
+
 Vector3 MatrixToEulerAngles(const Matrix33& RotMat)
 {
 	float SinPitch, CosPitch, SinRoll, CosRoll, SinYaw, CosYaw;

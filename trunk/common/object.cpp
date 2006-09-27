@@ -7,7 +7,6 @@
 #include "globals.h"
 #include "project.h"
 #include "object.h"
-#include "matrix.h"
 #include "file.h"
 #include "lc_application.h"
 
@@ -26,6 +25,12 @@ static void GetPolyCoeffs(float x1, float y1, float z1, float x2, float y2, floa
 	*C = ((x1-x2)*(y3-y2)) - ((y1-y2)*(x3-x2));
 	*D = - ((*A)*x1) - ((*B)*y1) - ((*C)*z1);
 }
+
+static void GetPolyCoeffs(const Vector3& p1, const Vector3& p2, const Vector3& p3, float *A, float *B, float *C, float *D)
+{
+	GetPolyCoeffs(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2], A, B, C, D);
+}
+
 
 // =============================================================================
 // ClickLine structure
@@ -477,7 +482,7 @@ bool Object::BoundingBoxIntersectionbyLine(float a1, float b1, float c1, float a
 }
 
 // For pieces
-void Object::BoundingBoxCalculate(Matrix *mat, float Dimensions[6])
+void Object::BoundingBoxCalculate(const Matrix44& Mat, float Dimensions[6])
 {
 	//   BASE       TOP
 	// 1------3  .------4  ^ X
@@ -485,30 +490,25 @@ void Object::BoundingBoxCalculate(Matrix *mat, float Dimensions[6])
 	// |      |  |      |  |   Y
 	// 0------.  2------5  .--->
 
-	float pts[18] =
+	Vector3 pts[6] =
 	{
-		Dimensions[0], Dimensions[1], Dimensions[5],
-		Dimensions[3], Dimensions[1], Dimensions[5],
-		Dimensions[0], Dimensions[1], Dimensions[2],
-		Dimensions[3], Dimensions[4], Dimensions[5],
-		Dimensions[3], Dimensions[4], Dimensions[2],
-		Dimensions[0], Dimensions[4], Dimensions[2]
+		Vector3(Dimensions[0], Dimensions[1], Dimensions[5]),
+		Vector3(Dimensions[3], Dimensions[1], Dimensions[5]),
+		Vector3(Dimensions[0], Dimensions[1], Dimensions[2]),
+		Vector3(Dimensions[3], Dimensions[4], Dimensions[5]),
+		Vector3(Dimensions[3], Dimensions[4], Dimensions[2]),
+		Vector3(Dimensions[0], Dimensions[4], Dimensions[2])
 	};
 
-		mat->TransformPoints(pts, 6);
+	for (int i = 0; i < 6; i++)
+		pts[i] = Mul31(pts[i], Mat);
 
-		GetPolyCoeffs(pts[3], pts[4], pts[5],  pts[0], pts[1], pts[2],  pts[6], pts[7], pts[8],
-			&m_fBoxPlanes[0][0], &m_fBoxPlanes[1][0], &m_fBoxPlanes[2][0], &m_fBoxPlanes[3][0]); //1,0,2
-		GetPolyCoeffs(pts[9], pts[10],pts[11], pts[12],pts[13],pts[14], pts[15],pts[16],pts[17],
-			&m_fBoxPlanes[0][1], &m_fBoxPlanes[1][1], &m_fBoxPlanes[2][1], &m_fBoxPlanes[3][1]); //3,4,5
-		GetPolyCoeffs(pts[15],pts[16],pts[17], pts[6], pts[7], pts[8],  pts[0], pts[1], pts[2],
-			&m_fBoxPlanes[0][2], &m_fBoxPlanes[1][2], &m_fBoxPlanes[2][2], &m_fBoxPlanes[3][2]); //5,2,0
-		GetPolyCoeffs(pts[12],pts[13],pts[14], pts[9], pts[10],pts[11], pts[3], pts[4], pts[5],
-			&m_fBoxPlanes[0][3], &m_fBoxPlanes[1][3], &m_fBoxPlanes[2][3], &m_fBoxPlanes[3][3]); //4,3,1
-		GetPolyCoeffs(pts[6], pts[7], pts[8],  pts[15],pts[16],pts[17], pts[12],pts[13],pts[14],
-			&m_fBoxPlanes[0][4], &m_fBoxPlanes[1][4], &m_fBoxPlanes[2][4], &m_fBoxPlanes[3][4]); //2,5,4
-		GetPolyCoeffs(pts[0], pts[1], pts[2],  pts[3], pts[4], pts[5],  pts[9], pts[10],pts[11],
-			&m_fBoxPlanes[0][5], &m_fBoxPlanes[1][5], &m_fBoxPlanes[2][5], &m_fBoxPlanes[3][5]); //0,1,3
+	GetPolyCoeffs(pts[1], pts[0], pts[2], &m_fBoxPlanes[0][0], &m_fBoxPlanes[1][0], &m_fBoxPlanes[2][0], &m_fBoxPlanes[3][0]);
+	GetPolyCoeffs(pts[3], pts[4], pts[5], &m_fBoxPlanes[0][1], &m_fBoxPlanes[1][1], &m_fBoxPlanes[2][1], &m_fBoxPlanes[3][1]);
+	GetPolyCoeffs(pts[5], pts[2], pts[0], &m_fBoxPlanes[0][2], &m_fBoxPlanes[1][2], &m_fBoxPlanes[2][2], &m_fBoxPlanes[3][2]);
+	GetPolyCoeffs(pts[4], pts[3], pts[1], &m_fBoxPlanes[0][3], &m_fBoxPlanes[1][3], &m_fBoxPlanes[2][3], &m_fBoxPlanes[3][3]);
+	GetPolyCoeffs(pts[2], pts[5], pts[4], &m_fBoxPlanes[0][4], &m_fBoxPlanes[1][4], &m_fBoxPlanes[2][4], &m_fBoxPlanes[3][4]);
+	GetPolyCoeffs(pts[0], pts[1], pts[3], &m_fBoxPlanes[0][5], &m_fBoxPlanes[1][5], &m_fBoxPlanes[2][5], &m_fBoxPlanes[3][5]);
 }
 
 // Cameras

@@ -53,6 +53,14 @@ int CModifyDialogBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_ModifyDlg.Create(CModifyDialog::IDD, this);
 	m_ModifyDlg.OnInitDialogBar();
 
+	CRect rc;
+	m_ModifyDlg.GetClientRect(&rc);
+
+	m_szMinHorz.cx = m_szMinVert.cx = rc.Width();
+	m_szMinFloat.cx = rc.Width() + 4;
+
+	m_szHorz = m_szVert = m_szFloat = CSize(rc.Width(), rc.Height());
+
 	return 0;
 }
 
@@ -69,6 +77,7 @@ BEGIN_MESSAGE_MAP(CModifyDialog, CDialog)
 	ON_BN_CLICKED(IDC_MODDLG_APPLY, OnModdlgApply)
 	ON_CBN_DROPDOWN(IDC_MODDLG_LIST, OnDropdownModdlgList)
 	ON_WM_SHOWWINDOW()
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_MODDLG_PIECES, ID_MODDLG_LIGHTS, OnMenuClick)
 END_MESSAGE_MAP() 
@@ -89,9 +98,11 @@ CModifyDialog::~CModifyDialog()
 
 BOOL CModifyDialog::OnInitDialogBar()
 {
-	m_PieceDlg.Create(CModifyPieceDlg::IDD, this);
-	m_CameraDlg.Create(CModifyCameraDlg::IDD, this);
-	m_LightDlg.Create(CModifyLightDlg::IDD, this);
+	m_RollUp.Create(WS_VISIBLE|WS_CHILD, CRect(4,4,187,362), this, 2);
+
+	m_PieceDlg.Create(CModifyPieceDlg::IDD, &m_RollUp);
+	m_CameraDlg.Create(CModifyCameraDlg::IDD, &m_RollUp);
+	m_LightDlg.Create(CModifyLightDlg::IDD, &m_RollUp);
 
 	PositionChildren();
 
@@ -205,8 +216,31 @@ void CModifyDialog::OnMove(int x, int y)
 		PositionChildren();
 }
 
+void CModifyDialog::OnSize(UINT nType, int cx, int cy)
+{
+	PositionChildren();
+}
+
 void CModifyDialog::PositionChildren()
 {
+	CRect StaticRect, ClientRect;
+
+	if (!IsWindow(m_PieceDlg.m_hWnd))
+		return;
+
+	GetDlgItem(IDC_MODIFY_CHILD)->GetWindowRect(&StaticRect);
+	GetClientRect(&ClientRect);
+
+	// Recompute coordinates relative to parent window.
+	ScreenToClient(&StaticRect);
+
+	m_RollUp.MoveWindow(StaticRect.left, StaticRect.top, ClientRect.Width() - StaticRect.left * 2, ClientRect.Height() - StaticRect.top, TRUE);
+
+	m_ctlCombo.GetWindowRect(&StaticRect);
+	ScreenToClient(&StaticRect);
+	m_ctlCombo.MoveWindow(StaticRect.left, StaticRect.top, ClientRect.Width() - StaticRect.left - 4, StaticRect.Height(), TRUE);
+
+/*
 	CRect Rect;
 
 	if (!IsWindow(m_PieceDlg.m_hWnd))
@@ -221,6 +255,7 @@ void CModifyDialog::PositionChildren()
 	m_PieceDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
 	m_CameraDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
 	m_LightDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
+	*/
 }
 
 
@@ -241,26 +276,26 @@ void CModifyDialog::UpdateControls(int Type)
 
 	m_ctlCombo.SetWindowText("");
 
-	m_PieceDlg.ShowWindow(SW_HIDE);
-	m_CameraDlg.ShowWindow(SW_HIDE);
-	m_LightDlg.ShowWindow(SW_HIDE);
+	m_RollUp.RemoveAllPages();
 
 	switch (Type)
 	{
 	case LC_OBJECT_PIECE:
-		m_PieceDlg.ShowWindow(SW_SHOWNORMAL);
+		m_RollUp.InsertPage("", &m_PieceDlg, FALSE);
 		break;
 
 	case LC_OBJECT_CAMERA:
 	case LC_OBJECT_CAMERA_TARGET:
-		m_CameraDlg.ShowWindow(SW_SHOWNORMAL);
+		m_RollUp.InsertPage("", &m_CameraDlg, FALSE);
 		break;
 
 	case LC_OBJECT_LIGHT:
 	case LC_OBJECT_LIGHT_TARGET:
-		m_LightDlg.ShowWindow(SW_SHOWNORMAL);
+		m_RollUp.InsertPage("", &m_LightDlg, FALSE);
 		break;
 	}
+
+	m_RollUp.ExpandAllPages();
 
 	m_CurrentType = Type;
 }

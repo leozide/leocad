@@ -287,7 +287,15 @@ SOURCE=.\Rmodel.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\scbarg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Seldlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\sizecbar.cpp
 # End Source File
 # Begin Source File
 
@@ -520,7 +528,15 @@ SOURCE=.\RModel.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\scbarg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\SelDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sizecbar.h
 # End Source File
 # Begin Source File
 
@@ -1120,10 +1136,6 @@ SOURCE=..\Common\typedefs.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\vector.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\common\view.h
 # End Source File
 # End Group
@@ -1307,11 +1319,6 @@ SOURCE=..\Common\texture.cpp
 # Begin Source File
 
 SOURCE=..\Common\Tr.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=..\Common\vector.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File

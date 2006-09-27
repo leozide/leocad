@@ -4,6 +4,8 @@
 #define _MODDLG_H_
 
 #include "ClrPick.h"
+#include "sizecbar.h"
+#include "scbarg.h"
 
 class Object;
 
@@ -111,13 +113,13 @@ protected:
 };
 
 // CModifyDialog window 
-class CModifyDialog : public CDialogBar 
+class CModifyDialog : public CDialog
 { 
 	DECLARE_DYNAMIC(CModifyDialog) 
 
 // Construction / Destruction 
 public: 
-	CModifyDialog(); 
+	CModifyDialog(CWnd* pParent = NULL); 
 	virtual ~CModifyDialog(); 
 
 	//{{AFX_DATA(CModifyDialog)
@@ -125,9 +127,6 @@ public:
 	CComboBox	m_ctlCombo;
 	CString	m_strName;
 	//}}AFX_DATA
-
-// Attributes
-public:
 
 // Operations
 public:
@@ -143,11 +142,9 @@ public:
 public:
 	void UpdateInfo(Object* pObject);
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
-	BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID); 
-	BOOL Create(CWnd* pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID); 
+	BOOL OnInitDialogBar();
 
 protected: 
-	virtual BOOL OnInitDialogBar();
 	void PositionChildren();
 
 	Object* m_pObject;
@@ -173,6 +170,39 @@ protected:
 
 	DECLARE_MESSAGE_MAP() 
 }; 
+
+class CModifyDialogBar : public CSizingControlBarG
+{
+// Construction
+public:
+	CModifyDialogBar();
+
+// Attributes
+public:
+	CModifyDialog m_ModifyDlg;
+
+// Operations
+public:
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CModifyDialogBar)
+	//}}AFX_VIRTUAL
+
+// Implementation
+public:
+	virtual ~CModifyDialogBar();
+
+protected:
+
+	// Generated message map functions
+protected:
+	//{{AFX_MSG(CModifyDialogBar)
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
 
 #endif // _MODDLG_H_
 

@@ -20,13 +20,49 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW 
 #endif 
 
+/////////////////////////////////////////////////////////////////////////////
+// CModifyDialogBar
+
+CModifyDialogBar::CModifyDialogBar()
+{
+	m_dwSCBStyle |= SCBS_SHOWEDGES;
+}
+
+CModifyDialogBar::~CModifyDialogBar()
+{
+}
+
+
+BEGIN_MESSAGE_MAP(CModifyDialogBar, CSizingControlBarG)
+	//{{AFX_MSG_MAP(CModifyDialogBar)
+	ON_WM_CREATE()
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+
+/////////////////////////////////////////////////////////////////////////////
+// CModifyDialogBar message handlers
+
+int CModifyDialogBar::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+{
+	if (CSizingControlBarG::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	SetSCBStyle(GetSCBStyle() | SCBS_SIZECHILD);
+
+	m_ModifyDlg.Create(CModifyDialog::IDD, this);
+	m_ModifyDlg.OnInitDialogBar();
+
+	return 0;
+}
+
 ////////////////////////////////////////////////////////////////////// 
 // Construction/Destruction 
 ////////////////////////////////////////////////////////////////////// 
 
-IMPLEMENT_DYNAMIC(CModifyDialog, CDialogBar) 
+IMPLEMENT_DYNAMIC(CModifyDialog, CDialog) 
 
-BEGIN_MESSAGE_MAP(CModifyDialog, CDialogBar) 
+BEGIN_MESSAGE_MAP(CModifyDialog, CDialog) 
 	//{{AFX_MSG_MAP(CModifyDialog) 
 	ON_BN_CLICKED(IDC_MODDLG_PIECE, OnModdlgPiece)
 	ON_CBN_SELENDOK(IDC_MODDLG_LIST, OnSelendokModdlgList)
@@ -37,7 +73,7 @@ BEGIN_MESSAGE_MAP(CModifyDialog, CDialogBar)
 	ON_COMMAND_RANGE(ID_MODDLG_PIECES, ID_MODDLG_LIGHTS, OnMenuClick)
 END_MESSAGE_MAP() 
 
-CModifyDialog::CModifyDialog() 
+CModifyDialog::CModifyDialog(CWnd* pParent) 
 {
 	m_pObject = NULL;
 	m_CurrentType = -1;
@@ -51,39 +87,8 @@ CModifyDialog::~CModifyDialog()
 {
 }
 
-BOOL CModifyDialog::Create(CWnd * pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID) 
-{
-	// Let MFC Create the control.
-	if (!CDialogBar::Create(pParentWnd, lpszTemplateName, nStyle, nID))
-		return FALSE;
-
-	// Since there is no WM_INITDIALOG message we have to call
-	// our own InitDialog function ourselves after m_hWnd is valid
-	if (!OnInitDialogBar())
-		return FALSE;
-
-	return TRUE;
-}
-
-BOOL CModifyDialog::Create(CWnd * pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID)
-{
-	// Let MFC Create the control.
-	if (!CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID))
-		return FALSE;
-
-	// Since there is no WM_INITDIALOG message we have to call
-	// our own InitDialog function ourselves after m_hWnd is valid
-	if (!OnInitDialogBar())
-		return FALSE;
-
-	return TRUE;
-}
-
 BOOL CModifyDialog::OnInitDialogBar()
 {
-	if (IsWindow(m_PieceDlg.m_hWnd))
-		return TRUE;
-
 	m_PieceDlg.Create(CModifyPieceDlg::IDD, this);
 	m_CameraDlg.Create(CModifyCameraDlg::IDD, this);
 	m_LightDlg.Create(CModifyLightDlg::IDD, this);
@@ -104,7 +109,7 @@ void CModifyDialog::DoDataExchange(CDataExchange* pDX)
 	//Derived Classes Overide this function 
 	ASSERT(pDX);
 
-	CDialogBar::DoDataExchange(pDX);
+	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModifyDialog)
 	DDX_Control(pDX, IDC_MODDLG_LIST, m_ctlCombo);
 	DDV_MaxChars(pDX, m_strName, 80);
@@ -185,7 +190,7 @@ void CModifyDialog::OnModdlgPiece()
 
 void CModifyDialog::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
-	CDialogBar::OnShowWindow(bShow, nStatus);
+	CDialog::OnShowWindow(bShow, nStatus);
 
 	if (bShow)
 		PositionChildren();
@@ -193,7 +198,7 @@ void CModifyDialog::OnShowWindow(BOOL bShow, UINT nStatus)
 
 void CModifyDialog::OnMove(int x, int y)
 {
-	CDialogBar::OnMove(x, y);
+	CDialog::OnMove(x, y);
 
 	// Avoid calling before window creation.
 	if (IsWindowVisible())
@@ -203,6 +208,9 @@ void CModifyDialog::OnMove(int x, int y)
 void CModifyDialog::PositionChildren()
 {
 	CRect Rect;
+
+	if (!IsWindow(m_PieceDlg.m_hWnd))
+		return;
 
 	GetDlgItem(IDC_MODIFY_CHILD)->GetWindowRect(&Rect);
 
@@ -692,3 +700,4 @@ void CModifyLightDlg::OnOK()
 void CModifyLightDlg::OnCancel() 
 {
 }
+

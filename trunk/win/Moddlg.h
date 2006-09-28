@@ -145,16 +145,16 @@ public:
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
 	BOOL OnInitDialogBar();
 
+	CRollupCtrl m_RollUp;
+	CModifyPieceDlg m_PieceDlg;
+	CModifyCameraDlg m_CameraDlg;
+	CModifyLightDlg m_LightDlg;
+
 protected: 
 	void PositionChildren();
 
 	Object* m_pObject;
 	int m_CurrentType;
-
-	CRollupCtrl m_RollUp;
-	CModifyPieceDlg m_PieceDlg;
-	CModifyCameraDlg m_CameraDlg;
-	CModifyLightDlg m_LightDlg;
 
 protected: 
 	void UpdateControls(int Type);
@@ -197,11 +197,14 @@ public:
 	virtual ~CModifyDialogBar();
 
 protected:
+	CSize CalcDynamicLayout(int nLength, DWORD dwMode);
+	CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CModifyDialogBar)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void CModifyDialogBar::OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

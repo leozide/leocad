@@ -36,6 +36,7 @@ CModifyDialogBar::~CModifyDialogBar()
 BEGIN_MESSAGE_MAP(CModifyDialogBar, CSizingControlBarG)
 	//{{AFX_MSG_MAP(CModifyDialogBar)
 	ON_WM_CREATE()
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -53,15 +54,65 @@ int CModifyDialogBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_ModifyDlg.Create(CModifyDialog::IDD, this);
 	m_ModifyDlg.OnInitDialogBar();
 
-	CRect rc;
-	m_ModifyDlg.GetClientRect(&rc);
-
-	m_szMinHorz.cx = m_szMinVert.cx = rc.Width();
-	m_szMinFloat.cx = rc.Width() + 4;
-
-	m_szHorz = m_szVert = m_szFloat = CSize(rc.Width(), rc.Height());
-
 	return 0;
+}
+
+CSize CModifyDialogBar::CalcDynamicLayout(int nLength, DWORD dwMode)
+{
+	// Update minimum size.
+	CRect rc;
+
+	m_ModifyDlg.GetDlgItem(IDC_MODIFY_CHILD)->GetWindowRect(&rc);
+	ScreenToClient(&rc);
+
+	int Width = rc.Width() + rc.left * 2 + 4;
+
+	if (dwMode & (LM_LENGTHY | LM_VERTDOCK))
+	{
+		if (m_ModifyDlg.m_RollUp.m_PageHeight >= nLength - rc.top - 10)
+			Width += RC_SCROLLBARWIDTH;
+	}
+	else
+	{
+		m_ModifyDlg.m_RollUp.GetWindowRect(&rc);
+		ScreenToClient(&rc);
+
+		if (m_ModifyDlg.m_RollUp.m_PageHeight >= rc.Height())
+			Width += RC_SCROLLBARWIDTH;
+	}
+
+	m_szMinFloat.cx = Width + 4;
+
+	return CSizingControlBarG::CalcDynamicLayout(nLength, dwMode);
+}
+
+CSize CModifyDialogBar::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
+{
+	// Update minimum size.
+	CRect rc;
+
+	m_ModifyDlg.GetDlgItem(IDC_MODIFY_CHILD)->GetWindowRect(&rc);
+	ScreenToClient(&rc);
+
+	int Width = rc.Width() + rc.left * 2 + 14;
+
+	if (!bHorz)
+	{
+		m_ModifyDlg.m_RollUp.GetWindowRect(&rc);
+		ScreenToClient(&rc);
+
+		if (m_ModifyDlg.m_RollUp.m_PageHeight >= rc.Height())
+			Width += RC_SCROLLBARWIDTH;
+	}
+
+	m_szMinHorz.cx = m_szMinVert.cx = Width;
+
+	return CSizingControlBarG::CalcFixedLayout(bStretch, bHorz);
+}
+
+void CModifyDialogBar::OnSize(UINT nType, int cx, int cy)
+{
+	CSizingControlBarG::OnSize(nType, cx, cy);
 }
 
 ////////////////////////////////////////////////////////////////////// 
@@ -234,28 +285,11 @@ void CModifyDialog::PositionChildren()
 	// Recompute coordinates relative to parent window.
 	ScreenToClient(&StaticRect);
 
-	m_RollUp.MoveWindow(StaticRect.left, StaticRect.top, ClientRect.Width() - StaticRect.left * 2, ClientRect.Height() - StaticRect.top, TRUE);
+	m_RollUp.MoveWindow(StaticRect.left-1, StaticRect.top, ClientRect.Width() - (StaticRect.left-1) * 2, ClientRect.Height() - StaticRect.top, TRUE);
 
 	m_ctlCombo.GetWindowRect(&StaticRect);
 	ScreenToClient(&StaticRect);
 	m_ctlCombo.MoveWindow(StaticRect.left, StaticRect.top, ClientRect.Width() - StaticRect.left - 4, StaticRect.Height(), TRUE);
-
-/*
-	CRect Rect;
-
-	if (!IsWindow(m_PieceDlg.m_hWnd))
-		return;
-
-	GetDlgItem(IDC_MODIFY_CHILD)->GetWindowRect(&Rect);
-
-	// Recompute coordinates relative to parent window.
-	ScreenToClient(&Rect);
-
-	// Now move the child windows.
-	m_PieceDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
-	m_CameraDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
-	m_LightDlg.MoveWindow(Rect.left, Rect.top, Rect.Width(), Rect.Height(), TRUE);
-	*/
 }
 
 

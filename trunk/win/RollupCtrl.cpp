@@ -478,8 +478,6 @@ BOOL CRollupCtrl::IsPageEnabled(int idx)
 }
 
 
-
-
 //---------------------------------------------------------------------------
 // Function name	: RecalLayout
 // Description	  : 
@@ -498,7 +496,10 @@ void CRollupCtrl::RecalLayout()
 	////////////////////////////////////////////
 	//Calc new pages's positions 
 	// used column sub-divisions if necessary
-	int nPageWidth = nWidth-RC_SCROLLBARWIDTH;
+	int nPageWidth = nWidth;
+
+	if (m_PageHeight >= r.Height())
+		nPageWidth -= RC_SCROLLBARWIDTH;
 
 	if (m_bEnabledAutoColumns)
 	{
@@ -592,7 +593,7 @@ void CRollupCtrl::RecalLayout()
 				else
 				{
 					//Update Template position and size
-					DeferWindowPos(hdwp, pi->pwndTemplate->m_hWnd, 0, posx+RC_GRPBOXINDENT, posy, nPageWidth-(RC_GRPBOXINDENT*2), tr.Height(), SWP_NOZORDER);
+					DeferWindowPos(hdwp, pi->pwndTemplate->m_hWnd, 0, posx, posy, nPageWidth, tr.Height(), SWP_NOZORDER);
 				}
 
 			//Collapsed
@@ -826,9 +827,12 @@ BOOL CRollupCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 void CRollupCtrl::OnPaint() 
 {
 	CPaintDC dc(this);
+	CRect r; GetClientRect(&r);
+
+	if (m_PageHeight < r.Height())
+		return;
 
 	//Draw ScrollBar
-	CRect r; GetClientRect(&r);
 	CRect br = CRect(r.right-RC_SCROLLBARWIDTH,r.top, r.right, r.bottom);
 	dc.DrawEdge(&br, EDGE_RAISED, BF_RECT  );
 

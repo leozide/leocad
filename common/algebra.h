@@ -304,9 +304,20 @@ public:
 	// Constructors.
 	inline Matrix33();
 	inline Matrix33(const Vector3& Row0, const Vector3& Row1, const Vector3& Row2);
+	inline Matrix33(const Matrix44& a);
 
 	inline operator const float*() const { return (const float*)this; }
 	inline operator float*() { return (float*)this; }
+	inline const Vector3& operator[](int i) const { return m_Rows[i]; }
+	inline Vector3& operator[](int i) { return m_Rows[i]; }
+
+	inline Matrix33& operator=(const Matrix33& a)
+	{
+		m_Rows[0] = Vector3(a.m_Rows[0][0], a.m_Rows[0][1], a.m_Rows[0][2]);
+		m_Rows[1] = Vector3(a.m_Rows[1][0], a.m_Rows[1][1], a.m_Rows[1][2]);
+		m_Rows[2] = Vector3(a.m_Rows[2][0], a.m_Rows[2][1], a.m_Rows[2][2]);
+		return *this;
+	}
 
 	inline float Determinant() const;
 
@@ -624,6 +635,9 @@ inline Matrix33::Matrix33()
 inline Matrix33::Matrix33(const Vector3& Row0, const Vector3& Row1, const Vector3& Row2)
 { m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; }
 
+inline Matrix33::Matrix33(const Matrix44& a)
+{ *this = a; }
+
 inline Matrix33 IdentityMatrix33()
 { return Matrix33(Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f)); }
 
@@ -642,6 +656,14 @@ inline float Determinant(const Matrix33& a)
 	return a.m_Rows[0][0] * a.m_Rows[1][2] * a.m_Rows[2][2] + a.m_Rows[0][1] * a.m_Rows[1][3] * a.m_Rows[2][0] +
 	       a.m_Rows[0][2] * a.m_Rows[1][0] * a.m_Rows[2][1] - a.m_Rows[0][0] * a.m_Rows[1][3] * a.m_Rows[2][1] - 
 	       a.m_Rows[0][1] * a.m_Rows[1][0] * a.m_Rows[2][2] - a.m_Rows[0][2] * a.m_Rows[1][2] * a.m_Rows[2][0];
+}
+
+inline Matrix33 Transpose(const Matrix33& m)
+{
+	Vector3 a(m.m_Rows[0][0], m.m_Rows[1][0], m.m_Rows[2][0]);
+	Vector3 b(m.m_Rows[0][1], m.m_Rows[1][1], m.m_Rows[2][1]);
+	Vector3 c(m.m_Rows[0][2], m.m_Rows[1][2], m.m_Rows[2][2]);
+	return Matrix33(a, b, c);
 }
 
 inline float Matrix33::Determinant() const

@@ -11,6 +11,8 @@
 #define LC_CAMERA_TARGET_SELECTED   0x08
 #define LC_CAMERA_TARGET_FOCUSED    0x10
 #define LC_CAMERA_ORTHOGRAPHIC      0x20
+#define LC_CAMERA_SHOW_CONE         0x40
+#define LC_CAMERA_AUTO_CLIP         0x80
 
 class Camera;
 class CameraTarget;
@@ -124,6 +126,22 @@ public:
 			m_nState &= ~LC_CAMERA_ORTHOGRAPHIC;
 	}
 
+	void SetAutoClip(bool clip)
+	{
+		if (clip)
+			m_nState |= LC_CAMERA_AUTO_CLIP;
+		else
+			m_nState &= ~LC_CAMERA_AUTO_CLIP;
+	}
+
+	void SetAlwaysShowCone(bool cone)
+	{
+		if (cone)
+			m_nState |= LC_CAMERA_SHOW_CONE;
+		else
+			m_nState &= ~LC_CAMERA_SHOW_CONE;
+	}
+
 	/*
 	void Select()
 		{ m_nState |= (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED); } 
@@ -152,11 +170,13 @@ public:
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
 	void GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const;
+	float GetRoll() const;
 
 	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
 	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
+	void SetRoll(float Roll, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
@@ -166,6 +186,7 @@ public:
 	float m_fovy;
 	float m_zNear;
 	float m_zFar;
+	unsigned char m_nState;
 
 protected:
 	void Initialize();
@@ -176,7 +197,6 @@ protected:
 
 	// Attributes
 	char m_strName[81];
-	unsigned char m_nState;
 	unsigned char m_nType;
 	GLuint m_nList;
 	static GLuint m_nTargetList;

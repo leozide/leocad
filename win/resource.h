@@ -329,6 +329,7 @@
 #define IDC_MODDLG_CLOSE                1151
 #define IDC_POVDLG_LGEOBROWSE           1151
 #define IDC_MODDLG_UPX                  1151
+#define IDC_MODDLG_ROLL                 1151
 #define IDC_MODDLG_APPLY                1152
 #define IDC_POVDLG_POVBROWSE            1152
 #define IDC_POVDLG_OUTPOV               1153
@@ -461,6 +462,8 @@
 #define IDC_CATDLG_NAME                 1246
 #define IDC_MODIFY_CHILD                1247
 #define IDC_MODDLG_ORTHO                1248
+#define IDC_MODDLG_CLIP                 1249
+#define IDC_MODDLG_CONE                 1250
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -707,7 +710,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
 #define _APS_NEXT_COMMAND_VALUE         33176
-#define _APS_NEXT_CONTROL_VALUE         1249
+#define _APS_NEXT_CONTROL_VALUE         1251
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

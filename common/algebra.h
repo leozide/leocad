@@ -651,6 +651,19 @@ Vector3 MatrixToEulerAngles(const Matrix33& a);
 inline Vector3 Mul(const Vector3& a, const Matrix33& b)
 { return Vector3(b.m_Rows[0]*a[0] + b.m_Rows[1]*a[1] + b.m_Rows[2]*a[2]); }
 
+inline Matrix33 Mul(const Matrix33& a, const Matrix33& b)
+{
+	Vector3 Col0(b.m_Rows[0][0], b.m_Rows[1][0], b.m_Rows[2][0]);
+	Vector3 Col1(b.m_Rows[0][1], b.m_Rows[1][1], b.m_Rows[2][1]);
+	Vector3 Col2(b.m_Rows[0][2], b.m_Rows[1][2], b.m_Rows[2][2]);
+
+	Vector3 Ret0(Dot3(a.m_Rows[0], Col0), Dot3(a.m_Rows[0], Col1), Dot3(a.m_Rows[0], Col2));
+	Vector3 Ret1(Dot3(a.m_Rows[1], Col0), Dot3(a.m_Rows[1], Col1), Dot3(a.m_Rows[1], Col2));
+	Vector3 Ret2(Dot3(a.m_Rows[2], Col0), Dot3(a.m_Rows[2], Col1), Dot3(a.m_Rows[2], Col2));
+
+	return Matrix33(Ret0, Ret1, Ret2);
+}
+
 inline float Determinant(const Matrix33& a)
 {
 	return a.m_Rows[0][0] * a.m_Rows[1][2] * a.m_Rows[2][2] + a.m_Rows[0][1] * a.m_Rows[1][3] * a.m_Rows[2][0] +

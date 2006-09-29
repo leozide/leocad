@@ -174,6 +174,7 @@ void CModifyDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModifyDialog)
 	DDX_Control(pDX, IDC_MODDLG_LIST, m_ctlCombo);
+	DDX_Text(pDX, IDC_MODDLG_LIST, m_strName);
 	DDV_MaxChars(pDX, m_strName, 80);
 	//}}AFX_DATA_MAP
 }
@@ -599,7 +600,7 @@ void CModifyPieceDlg::Apply(Piece* piece)
 	mod.to = m_To;
 	mod.hidden = (m_Hidden != FALSE);
 	mod.color = m_Color.GetColorIndex();
-	strcpy(mod.name, ((CModifyDialog*)GetParent())->m_strName);
+	strcpy(mod.name, ((CModifyDialog*)GetParent()->GetParent())->m_strName);
 
 	lcGetActiveProject()->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&mod);
 }
@@ -616,13 +617,13 @@ CModifyCameraDlg::CModifyCameraDlg(CWnd* pParent /*=NULL*/)
 	m_TargetX = 0.0f;
 	m_TargetY = 0.0f;
 	m_TargetZ = 0.0f;
-	m_UpX = 0.0f;
-	m_UpY = 0.0f;
-	m_UpZ = 0.0f;
+	m_Roll = 0.0f;
 	m_FOV = 0.0f;
+	m_Clip = false;
 	m_Near = 0.0f;
 	m_Far = 0.0f;
 	m_Ortho = false;
+	m_Cone = false;
 	m_Hidden = false;
 }
 
@@ -641,13 +642,13 @@ void CModifyCameraDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text_Float(pDX, IDC_MODDLG_TARGETX, m_TargetX);
 	DDX_Text_Float(pDX, IDC_MODDLG_TARGETY, m_TargetY);
 	DDX_Text_Float(pDX, IDC_MODDLG_TARGETZ, m_TargetZ);
-	DDX_Text_Float(pDX, IDC_MODDLG_UPX, m_UpX);
-	DDX_Text_Float(pDX, IDC_MODDLG_UPY, m_UpY);
-	DDX_Text_Float(pDX, IDC_MODDLG_UPZ, m_UpZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_ROLL, m_Roll);
 	DDX_Text_Float(pDX, IDC_MODDLG_FOV, m_FOV);
+	DDX_Check(pDX, IDC_MODDLG_CLIP, m_Clip);
 	DDX_Text(pDX, IDC_MODDLG_NEAR, m_Near);
 	DDX_Text(pDX, IDC_MODDLG_FAR, m_Far);
 	DDX_Check(pDX, IDC_MODDLG_ORTHO, m_Ortho);
+	DDX_Check(pDX, IDC_MODDLG_CONE, m_Cone);
 	DDX_Check(pDX, IDC_MODDLG_HIDDEN, m_Hidden);
 	//}}AFX_DATA_MAP
 }
@@ -676,9 +677,7 @@ void CModifyCameraDlg::UpdateInfo(Camera* camera)
 		m_TargetX = 0.0f;
 		m_TargetY = 0.0f;
 		m_TargetZ = 0.0f;
-		m_UpX = 0.0f;
-		m_UpY = 0.0f;
-		m_UpZ = 0.0f;
+		m_Roll = 0.0f;
 		m_FOV = 0.0f;
 		m_Near = 0.0f;
 		m_Far = 0.0f;
@@ -701,13 +700,10 @@ void CModifyCameraDlg::UpdateInfo(Camera* camera)
 		m_TargetY = tmp[1];
 		m_TargetZ = tmp[2];
 
-		tmp = camera->GetUpVector();
-		lcGetActiveProject()->ConvertToUserUnits(tmp);
-		m_UpX = tmp[0];
-		m_UpY = tmp[1];
-		m_UpZ = tmp[2];
+		m_Roll = camera->GetRoll() * LC_RTOD;
 
 		m_FOV = camera->m_fovy;
+		m_Clip = (camera->m_nState & LC_CAMERA_AUTO_CLIP) == 0;
 		m_Near = camera->m_zNear;
 		m_Far = camera->m_zFar;
 		m_Ortho = camera->IsOrtho();
@@ -728,13 +724,15 @@ void CModifyCameraDlg::Apply(Camera* camera)
 	lcGetActiveProject()->ConvertFromUserUnits(mod.Eye);
 	mod.Target = Vector3(m_TargetX, m_TargetY, m_TargetZ);
 	lcGetActiveProject()->ConvertFromUserUnits(mod.Target);
-	mod.Up = Vector3(m_UpX, m_UpY, m_UpZ);
+	mod.Roll = m_Roll * LC_DTOR;
 	mod.fovy = m_FOV;
 	mod.znear = m_Near;
 	mod.zfar = m_Far;
-	mod.hidden = (m_Hidden != FALSE);
 	mod.ortho = (m_Ortho != FALSE);
-	strcpy(mod.name, ((CModifyDialog*)GetParent())->m_strName);
+	mod.cone = (m_Cone != FALSE);
+	mod.hidden = (m_Hidden != FALSE);
+	mod.clip = (m_Clip != FALSE);
+	strcpy(mod.name, ((CModifyDialog*)GetParent()->GetParent())->m_strName);
 
 	lcGetActiveProject()->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&mod);
 }

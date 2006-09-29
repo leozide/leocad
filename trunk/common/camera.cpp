@@ -663,7 +663,7 @@ void Camera::Render(float fLineWidth)
 	glVertex3fv(m_Target);
 	glEnd();
 
-	if (IsSelected())
+	if (IsSelected() || (m_nState & LC_CAMERA_SHOW_CONE))
 	{
 		Matrix44 projection, modelview;
 		Vector3 frontvec = m_Target - m_Eye;
@@ -873,6 +873,91 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
 	m_Up = Mul30(m_Up, mat);
 
 	ChangeKey(nTime, bAnimation, bAddKey, m_Up, LC_CK_UP);
+	UpdatePosition(nTime, bAnimation);
+}
+
+float Camera::GetRoll() const
+{
+	Vector3 Front = Normalize(m_Target - m_Eye);
+
+	// Calculate pitch and yaw angles.
+	float Pitch, Yaw;
+	Pitch = asinf(Front[2]);
+
+	Front[2] = 0;
+	if (Front.LengthSquared() != 0.0f)
+		Front = Normalize(Front);
+	Yaw = atan2f(-Front[0], Front[1]);
+
+	// Rotate the up and side vectors.
+	Quaternion PitchRot = CreateRotationXQuaternion(Pitch);
+	Quaternion YawRot = CreateRotationZQuaternion(Yaw);
+
+	Vector3 Up(0, 0, 1);
+	Up = Mul(Up, PitchRot);
+	Up = Mul(Up, YawRot);
+
+	Vector3 Side(1, 0, 0);
+	Side = Mul(Side, PitchRot);
+	Side = Mul(Side, YawRot);
+
+	float Angle = acosf(max(min(Dot3(Up, m_Up), 1), -1));
+	float Sign1 = Dot3(Side, m_Up);
+	float Sign2 = Dot3(m_Up, Up);
+
+	if (Sign1 > 0)
+		Angle = -Angle;
+
+	if (Sign2 < 0)
+		Angle -= LC_PI;
+
+	if (Angle <= -LC_PI)
+		Angle += 2*LC_PI;
+
+	return Angle;
+}
+
+void Camera::SetRoll(float Roll, unsigned short nTime, bool bAnimation, bool bAddKey)
+{
+	Vector3 Front = Normalize(m_Target - m_Eye);
+
+	// Calculate pitch and yaw angles.
+	float Pitch, Yaw;
+	Pitch = asinf(Front[2]);
+
+	Front[2] = 0;
+	if (Front.LengthSquared() != 0.0f)
+		Front = Normalize(Front);
+	Yaw = atan2f(-Front[0], Front[1]);
+
+	// Rotate the up and side vectors.
+	Quaternion PitchRot = CreateRotationXQuaternion(Pitch);
+	Quaternion YawRot = CreateRotationZQuaternion(Yaw);
+
+	Vector3 Up(0, 0, 1);
+	Up = Mul(Up, PitchRot);
+	Up = Mul(Up, YawRot);
+
+	Vector3 Side(1, 0, 0);
+	Side = Mul(Side, PitchRot);
+	Side = Mul(Side, YawRot);
+
+	float Sign1 = Dot3(Side, m_Up);
+	float Sign2 = Dot3(m_Up, Up);
+
+	if (Sign1 > 0)
+		Roll = -Roll;
+
+	if (Sign2 < 0)
+		Roll -= LC_PI;
+
+	if (Roll <= -LC_PI)
+		Roll += 2*LC_PI;
+
+	Quaternion RollRot = QuaternionFromAxisAngle(Vector4(Normalize(m_Target - m_Eye), Roll));
+	Up = Mul(Up, RollRot);
+
+	ChangeKey(nTime, bAnimation, bAddKey, Up, LC_CK_UP);
 	UpdatePosition(nTime, bAnimation);
 }
 

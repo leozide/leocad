@@ -66,13 +66,13 @@ public:
 	float	m_TargetX;
 	float	m_TargetY;
 	float	m_TargetZ;
-	float	m_UpX;
-	float	m_UpY;
-	float	m_UpZ;
+	float	m_Roll;
 	float	m_FOV;
+	BOOL  m_Clip;
 	float	m_Near;
 	float	m_Far;
 	BOOL	m_Ortho;
+	BOOL  m_Cone;
 	BOOL	m_Hidden;
 	//}}AFX_DATA
 

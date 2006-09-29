@@ -242,13 +242,15 @@ struct LC_CAMERA_MODIFY
 	Camera* camera;
 	Vector3 Eye;
 	Vector3 Target;
-	Vector3 Up;
+	float Roll;
 	char name[81];
 	float fovy;
 	float znear;
 	float zfar;
 	bool ortho;
 	bool hidden;
+	bool clip;
+	bool cone;
 };
 
 // Image

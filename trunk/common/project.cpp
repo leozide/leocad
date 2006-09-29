@@ -3553,6 +3553,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				pCamera->UnHide();
 
 			pCamera->SetOrtho(mod->ortho);
+			pCamera->SetAlwaysShowCone(mod->cone);
+			pCamera->SetAutoClip(!mod->clip);
 
 			if (pCamera->GetEyePosition() != mod->Eye)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Eye, LC_CK_EYE);
@@ -3560,14 +3562,14 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			if (pCamera->GetTargetPosition() != mod->Target)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Target, LC_CK_TARGET);
 
-			if (pCamera->GetUpVector() != mod->Up)
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Up, LC_CK_UP);
+			if (pCamera->GetRoll() != mod->Roll)
+				pCamera->SetRoll(mod->Roll, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 
 			pCamera->m_fovy = mod->fovy;
 			pCamera->m_zNear = mod->znear;
 			pCamera->m_zFar = mod->zfar;
 			pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-			UpdateAllViews ();
+			UpdateAllViews();
 		} break;
 
 		case LC_LIGHT_MODIFIED:

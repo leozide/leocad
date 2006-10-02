@@ -87,7 +87,7 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 		return;
 
 	int off = 31;
-	int ColorWidth = (cx / 14) * 14;
+	int ColorWidth = ((cx-2) / 14) * 14 + 2;
 	m_wndColorsList.SetWindowPos(NULL, (cx-ColorWidth)/2, cy-off, ColorWidth, 26, SWP_NOZORDER);
 	m_wndColorsList.SetColumnWidth(cx / 14);
 

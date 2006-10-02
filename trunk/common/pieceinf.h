@@ -1,7 +1,3 @@
-//
-//	pieceinf.h
-////////////////////////////////////////////////////
-
 #ifndef _PIECEINF_H_
 #define _PIECEINF_H_
 
@@ -20,6 +16,7 @@
 
 class File;
 class Texture;
+class lcMesh;
 
 typedef struct
 {
@@ -31,7 +28,7 @@ typedef struct
 typedef struct
 {
 	unsigned short connections[6];
-	void* drawinfo;
+	int NumSections;
 } DRAWGROUP;
 
 typedef struct TEXTURE
@@ -85,8 +82,11 @@ class PieceInfo
 	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
+	void WritePOV(FILE* file);
 
 	// Implementation
+	lcMesh* GetMesh() const
+	{ return m_Mesh; }
 	GLuint GetBoxDisplayList()
 	{
 		if (!m_nBoxList)
@@ -107,8 +107,6 @@ public:
 
 	// Nobody should change these
 	unsigned char	m_nFlags;
-	unsigned long 	m_nVertexCount;
-	float*			m_fVertexArray;
 	unsigned short	m_nConnectionCount;
 	CONNECTIONINFO*	m_pConnections;
 	unsigned short	m_nGroupCount;
@@ -119,8 +117,10 @@ public:
 protected:
 	int m_nRef;
 	GLuint m_nBoxList;
+	lcMesh* m_Mesh;
 
 	void LoadInformation();
+	template<typename T> void BuildMesh(void* Data, void* MeshStart, bool LongData);
 	void FreeInformation();
 	void CreateBoxDisplayList();
 };

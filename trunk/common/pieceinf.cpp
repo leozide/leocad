@@ -15,6 +15,7 @@
 #include "config.h"
 #include "library.h"
 #include "lc_application.h"
+#include "lc_mesh.h"
 
 #define SIDES 16
 static float sintbl[SIDES];
@@ -181,14 +182,14 @@ unsigned char ConvertColor(int c)
 /////////////////////////////////////////////////////////////////////////////
 // PieceInfo construction/destruction
 
-PieceInfo::PieceInfo ()
+PieceInfo::PieceInfo()
 {
-  // Do nothing, initialization is done by LoadIndex ()
+  // Do nothing, initialization is done by LoadIndex()
 }
 
-PieceInfo::~PieceInfo ()
+PieceInfo::~PieceInfo()
 {
-  FreeInformation ();
+  FreeInformation();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -213,8 +214,6 @@ void PieceInfo::LoadIndex (File& file)
 
   // TODO: don't change ref. if we're reloading ?
   m_nRef = 0;
-  m_nVertexCount = 0;
-  m_fVertexArray = NULL;
   m_nConnectionCount = 0;
   m_pConnections = NULL;
   m_nGroupCount = 0;
@@ -222,6 +221,7 @@ void PieceInfo::LoadIndex (File& file)
   m_nTextureCount = 0;
   m_pTextures = NULL;
 	m_nBoxList = 0;
+	m_Mesh = NULL;
 
   file.Read (m_strName, 8);
   m_strName[8] = '\0';
@@ -319,17 +319,16 @@ void PieceInfo::LoadInformation()
 	FileDisk bin;
 	char filename[LC_MAXPATH];
 	CONNECTIONINFO* pConnection;
-	DRAWGROUP* pGroup;
 	void* buf;
 	u32 verts, *longs, fixverts;
-	u16 *ushorts, sh;
+	u16 sh;
 	u8 *bytes, *tmp, bt;
 	float scale, shift;
 	i16* shorts;
-	int i, j;
+	int i;
 
 	// We don't want memory leaks.
-	FreeInformation ();
+	FreeInformation();
 
 	// Open pieces.bin and buffer the information we need.
 	strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath());
@@ -420,10 +419,11 @@ void PieceInfo::LoadInformation()
 	m_pGroups = (DRAWGROUP*)malloc(sizeof(DRAWGROUP)*m_nGroupCount);
 	memset(m_pGroups, 0, sizeof(DRAWGROUP)*m_nGroupCount);
 
-	// First we need to know the number of vertexes
+	// Calculate the number of vertices, indices and sections.
 	tmp = bytes;
 	sh = m_nGroupCount;
-	u32 quads = 0, fixquads = 0;
+	u32 lines = 0, tris = 0, quads = 0, fixquads = 0, sections = 0;
+
 	while (sh--)
 	{
 		bt = *bytes;
@@ -444,10 +444,18 @@ void PieceInfo::LoadInformation()
 					while (colors--)
 					{
 						p++; // color code
-						quads += LCUINT32(*p);
 						fixquads += LCUINT32(*p);
+
+						quads += LCUINT32(*p);
+						if (LCUINT32(*p)) sections++;
 						p += LCUINT32(*p) + 1;
+
+						tris += LCUINT32(*p);
+						if (LCUINT32(*p)) sections++;
 						p += LCUINT32(*p) + 1;
+
+						lines += LCUINT32(*p);
+						if (LCUINT32(*p)) sections++;
 						p += LCUINT32(*p) + 1;
 					}
 
@@ -463,10 +471,18 @@ void PieceInfo::LoadInformation()
 					while (colors--)
 					{
 						p++; // color code
-						quads += LCUINT16(*p);
 						fixquads += LCUINT16(*p);
+
+						quads += LCUINT16(*p);
+						if (LCUINT16(*p)) sections++;
 						p += LCUINT16(*p) + 1;
+
+						tris += LCUINT16(*p);
+						if (LCUINT16(*p)) sections++;
 						p += LCUINT16(*p) + 1;
+
+						lines += LCUINT16(*p);
+						if (LCUINT16(*p)) sections++;
 						p += LCUINT16(*p) + 1;
 					}
 
@@ -478,6 +494,11 @@ void PieceInfo::LoadInformation()
 			{
 				verts += (2*SIDES)+1;
 				quads += 4*SIDES;
+				sections++;
+				tris += 3*SIDES;
+				sections++;
+				lines += 4*SIDES;
+				sections++;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
 			}
 
@@ -485,6 +506,9 @@ void PieceInfo::LoadInformation()
 			{
 				verts += 4*SIDES;
 				quads += 12*SIDES;
+				sections++;
+				lines += 8*SIDES;
+				sections++;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
 			}
 
@@ -492,6 +516,11 @@ void PieceInfo::LoadInformation()
 			{
 				verts += (2*SIDES)+1;
 				quads += 4*SIDES;
+				sections++;
+				tris += 3*SIDES;
+				sections++;
+				lines += 4*SIDES;
+				sections++;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
 			}
 
@@ -499,14 +528,15 @@ void PieceInfo::LoadInformation()
 			{
 				verts += 4*SIDES;
 				quads += 12*SIDES;
+				sections++;
+				lines += 8*SIDES;
+				sections++;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
 			}
 		}
 		bytes++; // should be 0
 	}
 
-	m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
-	m_nVertexCount = verts;
 	if ((verts > 65535) || (quads > 65535) || (fixquads > 65535))
 	{
 		if ((m_nFlags & LC_PIECE_LONGDATA) == 0)
@@ -517,28 +547,60 @@ void PieceInfo::LoadInformation()
 	else
 		m_nFlags &= ~(LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME);
 
-	// Copy the 'fixed' vertexes
-	shorts = (i16*)(longs + 1);
+	m_Mesh = new lcMesh(sections, quads + tris + lines, verts, NULL);
+
+	if (m_Mesh->m_IndexType == GL_UNSIGNED_SHORT)
+		BuildMesh<u16>(buf, tmp, (fixverts > 65535) || (fixquads > 65535));
+	else
+		BuildMesh<u32>(buf, tmp, (fixverts > 65535) || (fixquads > 65535));
+
+	free(buf);
+}
+
+template<typename T>
+void PieceInfo::BuildMesh(void* Data, void* MeshStart, bool LongData)
+{
+	lcMeshEditor<T> MeshEdit(m_Mesh);
+
+	// Copy the 'fixed' vertices
+	DRAWGROUP* pGroup;
+	u32* longs = (u32*)Data;
+	i16* shorts = (i16*)(longs + 1);
+	u32 verts;
+	int i;
+
+	float scale = 0.01f;
+	if (m_nFlags & LC_PIECE_MEDIUM)
+		scale = 0.001f;
+	else if (m_nFlags & LC_PIECE_SMALL)
+		scale = 0.0001f;
+
 	for (verts = 0; verts < LCUINT32(*longs); verts++)
 	{
-		m_fVertexArray[verts*3] = (float)LCINT16(*shorts)*scale;
+		float Vert[3];
+		Vert[0] = (float)LCINT16(*shorts) * scale;
 		shorts++;
-		m_fVertexArray[verts*3+1] = (float)LCINT16(*shorts)*scale;
+		Vert[1] = (float)LCINT16(*shorts) * scale;
 		shorts++;
-		m_fVertexArray[verts*3+2] = (float)LCINT16(*shorts)*scale;
+		Vert[2] = (float)LCINT16(*shorts) * scale;
 		shorts++;
+		MeshEdit.AddVertex(Vert);
 	}
 
 	// Read groups
-	bytes = tmp;
-	sh = m_nGroupCount;
+	u8* bytes = (u8*)MeshStart;
+	u16 sh = m_nGroupCount;
+	int CurSection = 0;
+
 	for (pGroup = m_pGroups; sh--; pGroup++)
 	{
-		bt = *bytes;
+		u8 bt = *bytes;
 		bytes++;
 
+		pGroup->NumSections = 0;
 		pGroup->connections[bt] = 0xFFFF;
-		while(bt--)
+
+		while (bt--)
 		{
 			u16 tmp = LCUINT16(*((u16*)bytes));
 			pGroup->connections[bt] = tmp;
@@ -550,7 +612,7 @@ void PieceInfo::LoadInformation()
 		switch (*bytes)
 		{
 		case LC_MESH:
-			if ((fixverts > 65535) || (fixquads > 65535))
+			if (LongData)
 			{
 				u32 colors, *p;
 				bytes++;
@@ -562,25 +624,35 @@ void PieceInfo::LoadInformation()
 				while (colors--)
 				{
 					*p = ConvertColor(LCUINT32(*p));
+					int ColorIndex = *p;
 					p++; // color code
+
+					int PrimTypes[] = { GL_QUADS, GL_TRIANGLES, GL_LINES };
+					for (int PrimType = 0; PrimType < 3; PrimType++)
+					{
+						int NumPrims = LCUINT32(*p);
+						p++;
+
+						if (NumPrims)
+						{
+							pGroup->NumSections++;
+							MeshEdit.StartSection(PrimTypes[PrimType], ColorIndex);
+
 #ifdef LC_BIG_ENDIAN
-					int f;
-					f = LCUINT32(*p) + 1;
-					while (f--) { *p = LCUINT32(*p); p++; };
-					f = LCUINT32(*p) + 1;
-					while (f--) { *p = LCUINT32(*p); p++; };
-					f = LCUINT32(*p) + 1;
-					while (f--) { *p = LCUINT32(*p); p++; };
+							while (NumPrims--)
+							{
+								MeshEdit.AddIndex(LCUINT32(*p));
+								p++;
+							}
 #else
-					p += LCUINT32(*p) + 1;
-					p += LCUINT32(*p) + 1;
-					p += LCUINT32(*p) + 1;
+							MeshEdit.AddIndices32(p, NumPrims);
+							p += NumPrims;
 #endif
+							MeshEdit.EndSection();
+						}
+					}
 				}
 
-				i = (unsigned char*)p - bytes;
-				pGroup->drawinfo = malloc(i);
-				memcpy(pGroup->drawinfo, bytes, i);
 				bytes = (unsigned char*)p;
 			}
 			else
@@ -595,36 +667,33 @@ void PieceInfo::LoadInformation()
 				while (colors--)
 				{
 					*p = ConvertColor(LCUINT16(*p));
+					int ColorIndex = *p;
 					p++; // color code
+
+					int PrimTypes[] = { GL_QUADS, GL_TRIANGLES, GL_LINES };
+					for (int PrimType = 0; PrimType < 3; PrimType++)
+					{
+						int NumPrims = LCUINT16(*p);
+						p++;
+
+						if (NumPrims)
+						{
+							pGroup->NumSections++;
+							MeshEdit.StartSection(PrimTypes[PrimType], ColorIndex);
+
 #ifdef LC_BIG_ENDIAN
-					int f;
-					f = LCUINT16(*p) + 1;
-					while (f--) { *p = LCUINT16(*p); p++; };
-					f = LCUINT16(*p) + 1;
-					while (f--) { *p = LCUINT16(*p); p++; };
-					f = LCUINT16(*p) + 1;
-					while (f--) { *p = LCUINT16(*p); p++; };
+							while (NumPrims--)
+							{
+								MeshEdit.AddIndex(LCUINT16(*p));
+								p++;
+							}
 #else
-					p += *p + 1;
-					p += *p + 1;
-					p += *p + 1;
+							MeshEdit.AddIndices16(p, NumPrims);
+							p += NumPrims;
 #endif
-				}
-
-				i = (unsigned char*)p - bytes;
-
-				if (m_nFlags & LC_PIECE_LONGDATA)
-				{
-					pGroup->drawinfo = malloc(i*sizeof(u32)/sizeof(u16));
-					longs = (u32*)pGroup->drawinfo;
-
-					for (ushorts = (u16*)bytes; ushorts != p; ushorts++, longs++)
-						*longs = *ushorts;//LCUINT16(*ushorts);
-				}
-				else
-				{
-					pGroup->drawinfo = malloc(i);
-					memcpy(pGroup->drawinfo, bytes, i);
+							MeshEdit.EndSection();
+						}
+					}
 				}
 
 				bytes = (unsigned char*)p;
@@ -633,146 +702,87 @@ void PieceInfo::LoadInformation()
 
 		case LC_STUD:
 			{
-				int size;
-				Matrix mat;
-
-				for (i = 0; i < 12; i++)
-					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
-				mat.FromPacked ((float*)(bytes+2));
 				u16 color = ConvertColor(*(bytes+1));
+				float* MatFloats = (float*)(bytes+2);
 
-				// Create the vertexes
+				// Read matrix.
+				for (i = 0; i < 12; i++)
+					MatFloats[i] = LCFLOAT(MatFloats[i]);
+
+				Matrix44 Mat(Vector4(MatFloats[0], MatFloats[1], MatFloats[2], 0.0f),
+				             Vector4(MatFloats[3], MatFloats[4], MatFloats[5], 0.0f),
+				             Vector4(MatFloats[6], MatFloats[7], MatFloats[8], 0.0f),
+				             Vector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
+				Vector3 Verts[2*SIDES+1];
+
+				// Create the vertices.
 				for (i = 0; i < SIDES; i++)
 				{
-					m_fVertexArray[(verts+i+SIDES)*3] = m_fVertexArray[(verts+i)*3] = LC_STUD_RADIUS * costbl[i];
-					m_fVertexArray[(verts+i+SIDES)*3+1] = m_fVertexArray[(verts+i)*3+1] = LC_STUD_RADIUS * sintbl[i];
-					m_fVertexArray[(verts+i)*3+2] = 0;
-					m_fVertexArray[(verts+i+SIDES)*3+2] = LC_STUD_HEIGHT;
+					Verts[i] = Vector3(LC_STUD_RADIUS * costbl[i], LC_STUD_RADIUS * sintbl[i], 0.0f);
+					Verts[i+SIDES] = Vector3(LC_STUD_RADIUS * costbl[i], LC_STUD_RADIUS * sintbl[i], LC_STUD_HEIGHT);
 				}
-				m_fVertexArray[(verts+2*SIDES)*3] = 0;
-				m_fVertexArray[(verts+2*SIDES)*3+1] = 0;
-				m_fVertexArray[(verts+2*SIDES)*3+2] = LC_STUD_HEIGHT;
+				Verts[2*SIDES] = Vector3(0, 0, LC_STUD_HEIGHT);
 
-				mat.TransformPoints(&m_fVertexArray[verts*3], 2*SIDES+1);
-				// colors + 2*num_prim + sides*prims
-				size = 9+SIDES*11;
-
-				if (m_nFlags & LC_PIECE_LONGDATA)
+				for (i = 0; i < 2*SIDES+1; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u32)*size);
-					longs = (u32*)pGroup->drawinfo;
-
-					longs[0] = 2; // colors
-					longs[1] = color;
-					longs[2] = SIDES*4;
-					j = 3;
-
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[3+i*4] = (u32)verts + i;
-						if (i == SIDES-1)
-						{
-							longs[4+i*4] = (u32)verts;
-							longs[5+i*4] = (u32)verts + SIDES;
-						}
-						else
-						{
-							longs[4+i*4] = (u32)verts + i + 1;
-							longs[5+i*4] = (u32)verts + SIDES + i + 1;
-						}
-						longs[6+i*4] = (u32)verts + SIDES + i;
-					}
-					j += 4*SIDES;
-					longs[j] = SIDES*3;
-					j++;
-
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*3] = (u16)verts + 2*SIDES;
-						longs[1+j+i*3] = (u16)verts + SIDES + i;
-						if (i == SIDES-1)
-							longs[2+j+i*3] = (u16)verts + SIDES;
-						else
-							longs[2+j+i*3] = (u16)verts + SIDES + i + 1;
-					}
-
-					j += 3*SIDES;
-					longs[j] = 0; j++; // lines
-					longs[j] = LC_COL_EDGES; j++; // color
-					longs[j] = 0; j++; // quads
-					longs[j] = 0; j++; // tris
-					longs[j] = 4*SIDES; j++;
-
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)verts + i;
-						if (i == SIDES-1)
-							longs[1+j+i*4] = (u32)verts;
-						else
-							longs[1+j+i*4] = (u32)verts + i + 1;
-
-						longs[2+j+i*4] = longs[j+i*4] + SIDES;
-						longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
-					}
+					Vector3 tmp = Mul31(Verts[i], Mat);
+					MeshEdit.AddVertex(tmp);
 				}
-				else
+
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_QUADS, color);
+
+				for (i = 0; i < SIDES; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u16)*size);
-					ushorts = (u16*)pGroup->drawinfo;
-
-					ushorts[0] = 2; // colors
-					ushorts[1] = color;
-					ushorts[2] = SIDES*4;
-					j = 3;
-
-					for (i = 0; i < SIDES; i++)
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
 					{
-						ushorts[3+i*4] = (u16)(verts + i);
-						if (i == SIDES-1)
-						{
-							ushorts[4+i*4] = (u16)verts;
-							ushorts[5+i*4] = (u16)verts + SIDES;
-						}
-						else
-						{
-							ushorts[4+i*4] = (u16)verts + i + 1;
-							ushorts[5+i*4] = (u16)verts + SIDES + i + 1;
-						}
-						ushorts[6+i*4] = (u16)verts + SIDES + i;
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + SIDES);
 					}
-					j += 4*SIDES;
-					ushorts[j] = SIDES*3;
-					j++;
-
-					for (i = 0; i < SIDES; i++)
+					else
 					{
-						ushorts[j+i*3] = (u16)verts + 2*SIDES;
-						ushorts[1+j+i*3] = (u16)verts + SIDES + i;
-						if (i == SIDES-1)
-							ushorts[2+j+i*3] = (u16)verts + SIDES;
-						else
-							ushorts[2+j+i*3] = (u16)verts + SIDES + i + 1;
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + SIDES + i + 1);
 					}
+					MeshEdit.AddIndex(verts + SIDES + i);
+				}
 
-					j += 3*SIDES;
-					ushorts[j] =  0; j++; // lines
-					ushorts[j] =  LC_COL_EDGES; j++; // color
-					ushorts[j] =  0; j++; // quads
-					ushorts[j] =  0; j++; // tris
-					ushorts[j] = 4*SIDES; j++;
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_TRIANGLES, color);
 
-					for (i = 0; i < SIDES; i++)
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + 2*SIDES);
+					MeshEdit.AddIndex(verts + SIDES + i);
+					if (i == SIDES-1)
+						MeshEdit.AddIndex(verts + SIDES);
+					else
+						MeshEdit.AddIndex(verts + SIDES + i + 1);
+				}
+
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)verts + i;
-						if (i == SIDES-1)
-							ushorts[1+j+i*4] = (u16)verts;
-						else
-							ushorts[1+j+i*4] = (u16)verts + i + 1;
-
-						ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
-						ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + i + 1 + SIDES);
 					}
 				}
+				MeshEdit.EndSection();
 
 				verts += 2*SIDES+1;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
@@ -780,230 +790,132 @@ void PieceInfo::LoadInformation()
 
 		case LC_STUD2:
 			{
-				int size;
-				Matrix mat;
-
-				for (i = 0; i < 12; i++)
-					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
-				mat.FromPacked ((float*)(bytes+2));
 				u16 color = ConvertColor(*(bytes+1));
+				float* MatFloats = (float*)(bytes+2);
 
-				// Create the vertexes
+				// Read matrix.
+				for (i = 0; i < 12; i++)
+					MatFloats[i] = LCFLOAT(MatFloats[i]);
+
+				Matrix44 Mat(Vector4(MatFloats[0], MatFloats[1], MatFloats[2], 0.0f),
+				             Vector4(MatFloats[3], MatFloats[4], MatFloats[5], 0.0f),
+				             Vector4(MatFloats[6], MatFloats[7], MatFloats[8], 0.0f),
+				             Vector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
+				Vector3 Verts[4*SIDES];
+
+				// Create the vertices.
 				for (i = 0; i < SIDES; i++)
 				{
-					// outside
-					m_fVertexArray[(verts+i+SIDES)*3] = m_fVertexArray[(verts+i)*3] = LC_STUD_RADIUS * costbl[i];
-					m_fVertexArray[(verts+i+SIDES)*3+1] = m_fVertexArray[(verts+i)*3+1] = LC_STUD_RADIUS * sintbl[i];
-					m_fVertexArray[(verts+i)*3+2] = LC_STUD_HEIGHT;
-					m_fVertexArray[(verts+i+SIDES)*3+2] = 0;
+					// Outside.
+					Verts[i] = Vector3(LC_STUD_RADIUS * costbl[i], LC_STUD_RADIUS * sintbl[i], LC_STUD_HEIGHT);
+					Verts[i+SIDES] = Vector3(LC_STUD_RADIUS * costbl[i], LC_STUD_RADIUS * sintbl[i], 0.0f);
 
-					// inside
-					m_fVertexArray[(verts+i+2*SIDES)*3] = m_fVertexArray[(verts+i+3*SIDES)*3] = 0.16f * costbl[i];
-					m_fVertexArray[(verts+i+2*SIDES)*3+1] = m_fVertexArray[(verts+i+3*SIDES)*3+1] = 0.16f * sintbl[i];
-					m_fVertexArray[(verts+i+3*SIDES)*3+2] = LC_STUD_HEIGHT;
-					m_fVertexArray[(verts+i+2*SIDES)*3+2] = 0;
+					// Inside.
+					Verts[i+2*SIDES] = Vector3(0.16f * costbl[i], 0.16f * sintbl[i], 0.0f);
+					Verts[i+3*SIDES] = Vector3(0.16f * costbl[i], 0.16f * sintbl[i], LC_STUD_HEIGHT);
 				}
 
-				mat.TransformPoints(&m_fVertexArray[verts*3], 4*SIDES);
-				// colors + 2*num_prim + sides*prims
-				size = 9+SIDES*20;
-
-				if (m_nFlags & LC_PIECE_LONGDATA)
+				for (i = 0; i < 4*SIDES; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u32)*size);
-					longs = (u32*)pGroup->drawinfo;
-
-					longs[0] = 2; // colors
-					longs[1] = color;
-					longs[2] = SIDES*12;
-					j = 3;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)(verts + SIDES + i);
-						if (i == SIDES-1)
-						{
-							longs[j+1+i*4] = (u32)verts + SIDES;
-							longs[j+2+i*4] = (u32)verts;
-						}
-						else
-						{
-							longs[j+1+i*4] = (u32)verts + SIDES + i + 1;
-							longs[j+2+i*4] = (u32)verts + i + 1;
-						}
-						longs[j+3+i*4] = (u32)verts + i;
-					}
-					j += 4*SIDES;
-
-					// inside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)(verts + 2*SIDES + i);
-						if (i == SIDES-1)
-						{
-							longs[j+1+i*4] = (u32)verts + 2*SIDES;
-							longs[j+2+i*4] = (u32)verts + 3*SIDES;
-						}
-						else
-						{
-							longs[j+1+i*4] = (u32)verts + 2*SIDES + i + 1;
-							longs[j+2+i*4] = (u32)verts + 3*SIDES + i + 1;
-						}
-						longs[j+3+i*4] = (u32)verts + 3*SIDES + i;
-					}
-					j += 4*SIDES;
-
-					// ring
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)(verts + i);
-						if (i == SIDES-1)
-						{
-							longs[j+1+i*4] = (u32)verts;
-							longs[j+2+i*4] = (u32)verts + 3*SIDES;
-						}
-						else
-						{
-							longs[j+1+i*4] = (u32)verts + i + 1;
-							longs[j+2+i*4] = (u32)verts + 3*SIDES + i + 1;
-						}
-						longs[j+3+i*4] = (u32)verts + 3*SIDES + i;
-					}
-					j += 4*SIDES;
-
-					longs[j] =  0; j++; // tris
-					longs[j] =  0; j++; // lines
-					longs[j] =  LC_COL_EDGES; j++; // color
-					longs[j] =  0; j++; // quads
-					longs[j] =  0; j++; // tris
-					longs[j] = 8*SIDES; j++;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)verts + i;
-						if (i == SIDES-1)
-							longs[1+j+i*4] = (u32)verts;
-						else
-							longs[1+j+i*4] = (u32)verts + i + 1;
-
-						longs[2+j+i*4] = longs[j+i*4] + SIDES;
-						longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
-					}
-					j += 4*SIDES;
-
-					// inside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)verts + 2*SIDES + i;
-						if (i == SIDES-1)
-							longs[1+j+i*4] = (u32)verts + 2*SIDES;
-						else
-							longs[1+j+i*4] = (u32)verts + 2*SIDES + i + 1;
-
-						longs[2+j+i*4] = longs[j+i*4] + SIDES;
-						longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
-					}
+					Vector3 tmp = Mul31(Verts[i], Mat);
+					MeshEdit.AddVertex(tmp);
 				}
-				else
+
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_QUADS, color);
+
+				// Outside.
+				for (i = 0; i < SIDES; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u16)*size);
-					ushorts = (u16*)pGroup->drawinfo;
-
-					ushorts[0] = 2; // colors
-					ushorts[1] = color;
-					ushorts[2] = SIDES*12;
-					j = 3;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
+					MeshEdit.AddIndex(verts + SIDES + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)(verts + SIDES + i);
-						if (i == SIDES-1)
-						{
-							ushorts[j+1+i*4] = (u16)verts + SIDES;
-							ushorts[j+2+i*4] = (u16)verts;
-						}
-						else
-						{
-							ushorts[j+1+i*4] = (u16)verts + SIDES + i + 1;
-							ushorts[j+2+i*4] = (u16)verts + i + 1;
-						}
-						ushorts[j+3+i*4] = (u16)verts + i;
+						MeshEdit.AddIndex(verts + SIDES);
+						MeshEdit.AddIndex(verts);
 					}
-					j += 4*SIDES;
-
-					// inside
-					for (i = 0; i < SIDES; i++)
+					else
 					{
-						ushorts[j+i*4] = (u16)(verts + 3*SIDES + i);
-						if (i == SIDES-1)
-						{
-							ushorts[j+1+i*4] = (u16)verts + 3*SIDES;
-							ushorts[j+2+i*4] = (u16)verts + 2*SIDES;
-						}
-						else
-						{
-							ushorts[j+1+i*4] = (u16)verts + 3*SIDES + i + 1;
-							ushorts[j+2+i*4] = (u16)verts + 2*SIDES + i + 1;
-						}
-						ushorts[j+3+i*4] = (u16)verts + 2*SIDES + i;
+						MeshEdit.AddIndex(verts + SIDES + i + 1);
+						MeshEdit.AddIndex(verts + i + 1);
 					}
-					j += 4*SIDES;
+					MeshEdit.AddIndex(verts + i);
+				}
 
-					// ring
-					for (i = 0; i < SIDES; i++)
+				// Inside.
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + 2*SIDES + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)(verts + i);
-						if (i == SIDES-1)
-						{
-							ushorts[j+1+i*4] = (u16)verts;
-							ushorts[j+2+i*4] = (u16)verts + 3*SIDES;
-						}
-						else
-						{
-							ushorts[j+1+i*4] = (u16)verts + i + 1;
-							ushorts[j+2+i*4] = (u16)verts + 3*SIDES + i + 1;
-						}
-						ushorts[j+3+i*4] = (u16)verts + 3*SIDES + i;
+						MeshEdit.AddIndex(verts + 2*SIDES);
+						MeshEdit.AddIndex(verts + 3*SIDES);
 					}
-					j += 4*SIDES;
-
-					ushorts[j] =  0; j++; // tris
-					ushorts[j] =  0; j++; // lines
-					ushorts[j] =  LC_COL_EDGES; j++; // color
-					ushorts[j] =  0; j++; // quads
-					ushorts[j] =  0; j++; // tris
-					ushorts[j] = 8*SIDES; j++;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
+					else
 					{
-						ushorts[j+i*4] = (u16)verts + i;
-						if (i == SIDES-1)
-							ushorts[1+j+i*4] = (u16)verts;
-						else
-							ushorts[1+j+i*4] = (u16)verts + i + 1;
-
-						ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
-						ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
+						MeshEdit.AddIndex(verts + 2*SIDES + i + 1);
+						MeshEdit.AddIndex(verts + 3*SIDES + i + 1);
 					}
-					j += 4*SIDES;
+					MeshEdit.AddIndex(verts + 3*SIDES + i);
+				}
 
-					// inside
-					for (i = 0; i < SIDES; i++)
+				// ring
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)verts + 2*SIDES + i;
-						if (i == SIDES-1)
-							ushorts[1+j+i*4] = (u16)verts + 2*SIDES;
-						else
-							ushorts[1+j+i*4] = (u16)verts + 2*SIDES + i + 1;
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + 3*SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + 3*SIDES + i + 1);
+					}
+					MeshEdit.AddIndex(verts + 3*SIDES + i);
+				}
 
-						ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
-						ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				// outside
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
+					{
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + i + 1 + SIDES);
 					}
 				}
+
+				// inside
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + 2*SIDES + i);
+					if (i == SIDES-1)
+					{
+						MeshEdit.AddIndex(verts + 2*SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES + SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + 2*SIDES + i + 1);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + 1 + SIDES);
+					}
+				}
+
+				MeshEdit.EndSection();
 
 				verts += 4*SIDES;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
@@ -1011,150 +923,88 @@ void PieceInfo::LoadInformation()
 
 		case LC_STUD3:
 			{
-				int size;
-				Matrix mat;
-
-				for (i = 0; i < 12; i++)
-					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
-				mat.FromPacked ((float*)(bytes+2));
 				u16 color = ConvertColor(*(bytes+1));
+				float* MatFloats = (float*)(bytes+2);
 
-				// Create the vertexes
+				// Read matrix.
+				for (i = 0; i < 12; i++)
+					MatFloats[i] = LCFLOAT(MatFloats[i]);
+
+				Matrix44 Mat(Vector4(MatFloats[0], MatFloats[1], MatFloats[2], 0.0f),
+				             Vector4(MatFloats[3], MatFloats[4], MatFloats[5], 0.0f),
+				             Vector4(MatFloats[6], MatFloats[7], MatFloats[8], 0.0f),
+				             Vector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
+				Vector3 Verts[2*SIDES+1];
+
+				// Create the vertices.
 				for (i = 0; i < SIDES; i++)
 				{
-					m_fVertexArray[(verts+i+SIDES)*3] = 
-						m_fVertexArray[(verts+i)*3] = 
-						0.16f * costbl[i];
-					m_fVertexArray[(verts+i+SIDES)*3+1] = 
-						m_fVertexArray[(verts+i)*3+1] = 
-						0.16f * sintbl[i];
-					m_fVertexArray[(verts+i)*3+2] = 0;
-					m_fVertexArray[(verts+i+SIDES)*3+2] = LC_STUD_HEIGHT;
+					Verts[i] = Vector3(0.16f * costbl[i], 0.16f * sintbl[i], 0.0f);
+					Verts[i+SIDES] = Vector3(0.16f * costbl[i], 0.16f * sintbl[i], LC_STUD_HEIGHT);
 				}
-				m_fVertexArray[(verts+2*SIDES)*3] = 0;
-				m_fVertexArray[(verts+2*SIDES)*3+1] = 0;
-				m_fVertexArray[(verts+2*SIDES)*3+2] = LC_STUD_HEIGHT;
+				Verts[2*SIDES] = Vector3(0.0f, 0.0f, LC_STUD_HEIGHT);
 
-				mat.TransformPoints(&m_fVertexArray[verts*3], 2*SIDES+1);
-				// colors + 2*num_prim + sides*prims
-				size = 9+SIDES*11;
-
-				if (m_nFlags & LC_PIECE_LONGDATA)
+				for (i = 0; i < 2*SIDES+1; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u32)*size);
-					longs = (u32*)pGroup->drawinfo;
-
-					longs[0] = 2; // colors
-					longs[1] = color;
-					longs[2] = SIDES*4;
-					j = 3;
-
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[3+i*4] = (u32)verts + SIDES + i;
-						if (i == SIDES-1)
-						{
-							longs[4+i*4] = (u32)verts + SIDES;
-							longs[5+i*4] = (u32)verts;
-						}
-						else
-						{
-							longs[4+i*4] = (u32)verts + SIDES + i + 1;
-							longs[5+i*4] = (u32)verts + i + 1;
-						}
-						longs[6+i*4] = (u32)verts + i;
-					}
-					j += 4*SIDES;
-					longs[j] = SIDES*3;
-					j++;
-
-					for (i = 0; i < SIDES; i++)
-					{
-						if (i == SIDES-1)
-							longs[j+i*3] = (u16)verts + SIDES;
-						else
-							longs[j+i*3] = (u16)verts + SIDES + i + 1;
-						longs[1+j+i*3] = (u16)verts + SIDES + i;
-						longs[2+j+i*3] = (u16)verts + 2*SIDES;
-					}
-
-					j += 3*SIDES;
-					longs[j] =  0; j++; // lines
-					longs[j] =  LC_COL_EDGES; j++; // color
-					longs[j] =  0; j++; // quads
-					longs[j] =  0; j++; // tris
-					longs[j] = 4*SIDES; j++;
-
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)verts + i;
-						if (i == SIDES-1)
-							longs[1+j+i*4] = (u32)verts;
-						else
-							longs[1+j+i*4] = (u32)verts + i + 1;
-
-						longs[2+j+i*4] = longs[j+i*4] + SIDES;
-						longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
-					}
+					Vector3 tmp = Mul31(Verts[i], Mat);
+					MeshEdit.AddVertex(tmp);
 				}
-				else
+
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_QUADS, color);
+
+				for (i = 0; i < SIDES; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u16)*size);
-					ushorts = (u16*)pGroup->drawinfo;
-
-					ushorts[0] = 2; // colors
-					ushorts[1] = color;
-					ushorts[2] = SIDES*4;
-					j = 3;
-
-					for (i = 0; i < SIDES; i++)
+					MeshEdit.AddIndex(verts + SIDES + i);
+					if (i == SIDES-1)
 					{
-						ushorts[3+i*4] = (u16)(verts + SIDES + i);
-						if (i == SIDES-1)
-						{
-							ushorts[4+i*4] = (u16)verts + SIDES;
-							ushorts[5+i*4] = (u16)verts;
-						}
-						else
-						{
-							ushorts[4+i*4] = (u16)verts + SIDES + i + 1;
-							ushorts[5+i*4] = (u16)verts + i + 1;
-						}
-						ushorts[6+i*4] = (u16)verts + i;
+						MeshEdit.AddIndex(verts + SIDES);
+						MeshEdit.AddIndex(verts);
 					}
-					j += 4*SIDES;
-					ushorts[j] = SIDES*3;
-					j++;
-
-					for (i = 0; i < SIDES; i++)
+					else
 					{
-						if (i == SIDES-1)
-							ushorts[j+i*3] = (u16)verts + SIDES;
-						else
-							ushorts[j+i*3] = (u16)verts + SIDES + i + 1;
-						ushorts[1+j+i*3] = (u16)verts + SIDES + i;
-						ushorts[2+j+i*3] = (u16)verts + 2*SIDES;
+						MeshEdit.AddIndex(verts + SIDES + i + 1);
+						MeshEdit.AddIndex(verts + i + 1);
 					}
+					MeshEdit.AddIndex(verts + i);
+				}
 
-					j += 3*SIDES;
-					ushorts[j] =  0; j++; // lines
-					ushorts[j] =  LC_COL_EDGES; j++; // color
-					ushorts[j] =  0; j++; // quads
-					ushorts[j] =  0; j++; // tris
-					ushorts[j] = 4*SIDES; j++;
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_TRIANGLES, color);
 
-					for (i = 0; i < SIDES; i++)
+				for (i = 0; i < SIDES; i++)
+				{
+					if (i == SIDES-1)
+						MeshEdit.AddIndex(verts + SIDES);
+					else
+						MeshEdit.AddIndex(verts + SIDES + i + 1);
+					MeshEdit.AddIndex(verts + SIDES + i);
+					MeshEdit.AddIndex(verts + 2*SIDES);
+				}
+
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)verts + i;
-						if (i == SIDES-1)
-							ushorts[1+j+i*4] = (u16)verts;
-						else
-							ushorts[1+j+i*4] = (u16)verts + i + 1;
-
-						ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
-						ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + i + 1 + SIDES);
 					}
 				}
+
+				MeshEdit.EndSection();
 
 				verts += 2*SIDES+1;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
@@ -1162,230 +1012,132 @@ void PieceInfo::LoadInformation()
 
 		case LC_STUD4:
 			{
-				int size;
-				Matrix mat;
-
-				for (i = 0; i < 12; i++)
-					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
-				mat.FromPacked ((float*)(bytes+2));
 				u16 color = ConvertColor(*(bytes+1));
+				float* MatFloats = (float*)(bytes+2);
 
-				// Create the vertexes
+				// Read matrix.
+				for (i = 0; i < 12; i++)
+					MatFloats[i] = LCFLOAT(MatFloats[i]);
+
+				Matrix44 Mat(Vector4(MatFloats[0], MatFloats[1], MatFloats[2], 0.0f),
+				             Vector4(MatFloats[3], MatFloats[4], MatFloats[5], 0.0f),
+				             Vector4(MatFloats[6], MatFloats[7], MatFloats[8], 0.0f),
+				             Vector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
+				Vector3 Verts[4*SIDES];
+
+				// Create the vertices.
 				for (i = 0; i < SIDES; i++)
 				{
 					// outside
-					m_fVertexArray[(verts+i+SIDES)*3] = m_fVertexArray[(verts+i)*3] = LC_KNOB_RADIUS * costbl[i];
-					m_fVertexArray[(verts+i+SIDES)*3+1] = m_fVertexArray[(verts+i)*3+1] = LC_KNOB_RADIUS * sintbl[i];
-					m_fVertexArray[(verts+i)*3+2] = LC_STUD_HEIGHT;
-					m_fVertexArray[(verts+i+SIDES)*3+2] = 0;
+					Verts[i] = Vector3(LC_KNOB_RADIUS * costbl[i], LC_KNOB_RADIUS * sintbl[i], LC_STUD_HEIGHT);
+					Verts[i+SIDES] = Vector3(LC_KNOB_RADIUS * costbl[i], LC_KNOB_RADIUS * sintbl[i], 0.0f);
 
 					// inside
-					m_fVertexArray[(verts+i+2*SIDES)*3] = m_fVertexArray[(verts+i+3*SIDES)*3] = LC_STUD_RADIUS * costbl[i];
-					m_fVertexArray[(verts+i+2*SIDES)*3+1] = m_fVertexArray[(verts+i+3*SIDES)*3+1] = LC_STUD_RADIUS * sintbl[i];
-					m_fVertexArray[(verts+i+3*SIDES)*3+2] = LC_STUD_HEIGHT;
-					m_fVertexArray[(verts+i+2*SIDES)*3+2] = 0;
+					Verts[i+2*SIDES] = Vector3(LC_STUD_RADIUS * costbl[i], LC_STUD_RADIUS * sintbl[i], 0.0f);
+					Verts[i+3*SIDES] = Vector3(LC_STUD_RADIUS * costbl[i], LC_STUD_RADIUS * sintbl[i], LC_STUD_HEIGHT);
 				}
 
-				mat.TransformPoints(&m_fVertexArray[verts*3], 4*SIDES);
-				// colors + 2*num_prim + sides*prims
-				size = 9+SIDES*20;
-
-				if (m_nFlags & LC_PIECE_LONGDATA)
+				for (i = 0; i < 4*SIDES; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u32)*size);
-					longs = (u32*)pGroup->drawinfo;
-
-					longs[0] = 2; // colors
-					longs[1] = color;
-					longs[2] = SIDES*12;
-					j = 3;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)(verts + i);
-						if (i == SIDES-1)
-						{
-							longs[j+1+i*4] = (u32)verts;
-							longs[j+2+i*4] = (u32)verts + SIDES;
-						}
-						else
-						{
-							longs[j+1+i*4] = (u32)verts + i + 1;
-							longs[j+2+i*4] = (u32)verts + SIDES + i + 1;
-						}
-						longs[j+3+i*4] = (u32)verts + SIDES + i;
-					}
-					j += 4*SIDES;
-
-					// inside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)(verts + 3*SIDES + i);
-						if (i == SIDES-1)
-						{
-							longs[j+1+i*4] = (u32)verts + 3*SIDES;
-							longs[j+2+i*4] = (u32)verts + 2*SIDES;
-						}
-						else
-						{
-							longs[j+1+i*4] = (u32)verts + 3*SIDES + i + 1;
-							longs[j+2+i*4] = (u32)verts + 2*SIDES + i + 1;
-						}
-						longs[j+3+i*4] = (u32)verts + 2*SIDES + i;
-					}
-					j += 4*SIDES;
-
-					// ring
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)(verts + 3*SIDES + i);
-						if (i == SIDES-1)
-						{
-							longs[j+1+i*4] = (u32)verts + 3*SIDES;
-							longs[j+2+i*4] = (u32)verts;
-						}
-						else
-						{
-							longs[j+1+i*4] = (u32)verts + 3*SIDES + i + 1;
-							longs[j+2+i*4] = (u32)verts + i + 1;
-						}
-						longs[j+3+i*4] = (u32)verts + i;
-					}
-					j += 4*SIDES;
-
-					longs[j] =  0; j++; // tris
-					longs[j] =  0; j++; // lines
-					longs[j] =  LC_COL_EDGES; j++; // color
-					longs[j] =  0; j++; // quads
-					longs[j] =  0; j++; // tris
-					longs[j] = 8*SIDES; j++;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)verts + i;
-						if (i == SIDES-1)
-							longs[1+j+i*4] = (u32)verts;
-						else
-							longs[1+j+i*4] = (u32)verts + i + 1;
-
-						longs[2+j+i*4] = longs[j+i*4] + SIDES;
-						longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
-					}
-					j += 4*SIDES;
-
-					// inside
-					for (i = 0; i < SIDES; i++)
-					{
-						longs[j+i*4] = (u32)verts + 2*SIDES + i;
-						if (i == SIDES-1)
-							longs[1+j+i*4] = (u32)verts + 2*SIDES;
-						else
-							longs[1+j+i*4] = (u32)verts + 2*SIDES + i + 1;
-
-						longs[2+j+i*4] = longs[j+i*4] + SIDES;
-						longs[3+j+i*4] = longs[1+j+i*4] + SIDES;
-					}
+					Vector3 tmp = Mul31(Verts[i], Mat);
+					MeshEdit.AddVertex(tmp);
 				}
-				else
+
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_QUADS, color);
+
+				// outside
+				for (i = 0; i < SIDES; i++)
 				{
-					pGroup->drawinfo = malloc(sizeof(u16)*size);
-					ushorts = (u16*)pGroup->drawinfo;
-
-					ushorts[0] = 2; // colors
-					ushorts[1] = color;
-					ushorts[2] = SIDES*12;
-					j = 3;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)(verts + i);
-						if (i == SIDES-1)
-						{
-							ushorts[j+1+i*4] = (u16)verts;
-							ushorts[j+2+i*4] = (u16)verts + SIDES;
-						}
-						else
-						{
-							ushorts[j+1+i*4] = (u16)verts + i + 1;
-							ushorts[j+2+i*4] = (u16)verts + SIDES + i + 1;
-						}
-						ushorts[j+3+i*4] = (u16)verts + SIDES + i;
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + SIDES);
 					}
-					j += 4*SIDES;
-
-					// inside
-					for (i = 0; i < SIDES; i++)
+					else
 					{
-						ushorts[j+i*4] = (u16)(verts + 2*SIDES + i);
-						if (i == SIDES-1)
-						{
-							ushorts[j+1+i*4] = (u16)verts + 2*SIDES;
-							ushorts[j+2+i*4] = (u16)verts + 3*SIDES;
-						}
-						else
-						{
-							ushorts[j+1+i*4] = (u16)verts + 2*SIDES + i + 1;
-							ushorts[j+2+i*4] = (u16)verts + 3*SIDES + i + 1;
-						}
-						ushorts[j+3+i*4] = (u16)verts + 3*SIDES + i;
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + SIDES + i + 1);
 					}
-					j += 4*SIDES;
+					MeshEdit.AddIndex(verts + SIDES + i);
+				}
 
-					// ring
-					for (i = 0; i < SIDES; i++)
+				// inside
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + 3*SIDES + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)(verts + 3*SIDES + i);
-						if (i == SIDES-1)
-						{
-							ushorts[j+1+i*4] = (u16)verts + 3*SIDES;
-							ushorts[j+2+i*4] = (u16)verts;
-						}
-						else
-						{
-							ushorts[j+1+i*4] = (u16)verts + 3*SIDES + i + 1;
-							ushorts[j+2+i*4] = (u16)verts + i + 1;
-						}
-						ushorts[j+3+i*4] = (u16)verts + i;
+						MeshEdit.AddIndex(verts + 3*SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES);
 					}
-					j += 4*SIDES;
-
-					ushorts[j] =  0; j++; // tris
-					ushorts[j] =  0; j++; // lines
-					ushorts[j] =  LC_COL_EDGES; j++; // color
-					ushorts[j] =  0; j++; // quads
-					ushorts[j] =  0; j++; // tris
-					ushorts[j] = 8*SIDES; j++;
-
-					// outside
-					for (i = 0; i < SIDES; i++)
+					else
 					{
-						ushorts[j+i*4] = (u16)verts + i;
-						if (i == SIDES-1)
-							ushorts[1+j+i*4] = (u16)verts;
-						else
-							ushorts[1+j+i*4] = (u16)verts + i + 1;
-
-						ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
-						ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
+						MeshEdit.AddIndex(verts + 3*SIDES + i + 1);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + 1);
 					}
-					j += 4*SIDES;
+					MeshEdit.AddIndex(verts + 2*SIDES + i);
+				}
 
-					// inside
-					for (i = 0; i < SIDES; i++)
+				// ring
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + 3*SIDES + i);
+					if (i == SIDES-1)
 					{
-						ushorts[j+i*4] = (u16)verts + 2*SIDES + i;
-						if (i == SIDES-1)
-							ushorts[1+j+i*4] = (u16)verts + 2*SIDES;
-						else
-							ushorts[1+j+i*4] = (u16)verts + 2*SIDES + i + 1;
+						MeshEdit.AddIndex(verts + 3*SIDES);
+						MeshEdit.AddIndex(verts);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + 3*SIDES + i + 1);
+						MeshEdit.AddIndex(verts + i + 1);
+					}
+					MeshEdit.AddIndex(verts + i);
+				}
 
-						ushorts[2+j+i*4] = ushorts[j+i*4] + SIDES;
-						ushorts[3+j+i*4] = ushorts[1+j+i*4] + SIDES;
+				MeshEdit.EndSection();
+				pGroup->NumSections++;
+				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				// outside
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + i);
+					if (i == SIDES-1)
+					{
+						MeshEdit.AddIndex(verts);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + i + 1);
+						MeshEdit.AddIndex(verts + i + SIDES);
+						MeshEdit.AddIndex(verts + i + 1 + SIDES);
 					}
 				}
+
+				// inside
+				for (i = 0; i < SIDES; i++)
+				{
+					MeshEdit.AddIndex(verts + 2*SIDES + i);
+					if (i == SIDES-1)
+					{
+						MeshEdit.AddIndex(verts + 2*SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES + SIDES);
+					}
+					else
+					{
+						MeshEdit.AddIndex(verts + 2*SIDES + i + 1);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + SIDES);
+						MeshEdit.AddIndex(verts + 2*SIDES + i + 1 + SIDES);
+					}
+				}
+				MeshEdit.EndSection();
 
 				verts += 4*SIDES;
 				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
@@ -1393,96 +1145,6 @@ void PieceInfo::LoadInformation()
 		}
 		bytes++; // should be 0
 	}
-
-	free(buf);
-	
-/*
-	// Now create the information for the CD
-	// If the object is big this can block the program for serveral seconds.
-	// ATTENTION: The RAPID CD library is based on triangles.
-
-	if (pInfo->pRModel)
-		delete pInfo->pRModel;
-
-	pInfo->pRModel = new CRModel();
-	pInfo->pRModel->BeginModel();
-
-	UINT col, loc, j, i;
-	int vert = 0;
-
-	for (UINT c = 0; c < pInfo->cons; c++)
-	{
-		if (pInfo->connection[c].info == NULL)
-			continue;
-		if (pInfo->count > 65535)
-		{
-			UINT* info = (UINT*)pInfo->connection[c].info;
-			loc = 1;
-			col = info[0];
-			while (col)
-			{
-				loc++;
-
-				j = info[loc];
-				for (i = 0; i < j; i+=4)
-				{
-					pInfo->pRModel->AddTri(&pInfo->vertex[info[loc+i+1]*3], &pInfo->vertex[info[loc+i+2]*3],
-						&pInfo->vertex[info[loc+i+3]*3], vert);
-					vert++;
-					pInfo->pRModel->AddTri(&pInfo->vertex[info[loc+i+3]*3], &pInfo->vertex[info[loc+i+4]*3],
-						&pInfo->vertex[info[loc+i+1]*3], vert);
-					vert++;
-				}
-				loc += j+1;
-				j = info[loc];
-				for (i = 0; i < j; i+=3)
-				{
-					pInfo->pRModel->AddTri(&pInfo->vertex[info[loc+i+1]*3], &pInfo->vertex[info[loc+i+2]*3],
-						&pInfo->vertex[info[loc+i+3]*3], vert);
-					vert++;
-				}
-				loc += j+1;
-				loc += info[loc]+1;
-
-				col--;
-			}
-		}
-		else
-		{
-			WORD* info = (WORD*)pInfo->connection[c].info;
-			loc = 1;
-			col = info[0];
-			while (col)
-			{
-				loc++;
-				
-				j = info[loc];
-				for (i = 0; i < j; i+=4)
-				{
-					pInfo->pRModel->AddTri(&pInfo->vertex[info[loc+i+1]*3], &pInfo->vertex[info[loc+i+2]*3],
-						&pInfo->vertex[info[loc+i+3]*3], vert);
-					vert++;
-					pInfo->pRModel->AddTri(&pInfo->vertex[info[loc+i+3]*3], &pInfo->vertex[info[loc+i+4]*3],
-						&pInfo->vertex[info[loc+i+1]*3], vert);
-					vert++;
-				}
-				loc += j+1;
-				j = info[loc];
-				for (i = 0; i < j; i+=3)
-				{
-					pInfo->pRModel->AddTri(&pInfo->vertex[info[loc+i+1]*3], &pInfo->vertex[info[loc+i+2]*3],
-						&pInfo->vertex[info[loc+i+3]*3], vert);
-					vert++;
-				}
-				loc += j+1;
-				loc += info[loc]+1;
-				
-				col--;
-			}
-		}
-	}
-	pInfo->pRModel->EndModel();
-*/
 }
 
 void PieceInfo::FreeInformation()
@@ -1491,12 +1153,8 @@ void PieceInfo::FreeInformation()
 	glDeleteLists(m_nBoxList, 1);
 	m_nBoxList = 0;
 
-	if (m_fVertexArray != NULL)
-	{
-		free(m_fVertexArray);
-		m_fVertexArray = NULL;
-		m_nVertexCount = 0;
-	}
+	delete m_Mesh;
+	m_Mesh = NULL;
 
 	if (m_pConnections != NULL)
 	{
@@ -1507,10 +1165,6 @@ void PieceInfo::FreeInformation()
 
 	if (m_pGroups != NULL)
 	{
-		while (m_nGroupCount--)
-			if (m_pGroups[m_nGroupCount].drawinfo)
-				free(m_pGroups[m_nGroupCount].drawinfo);
-
 		free(m_pGroups);
 		m_pGroups = NULL;
 	}
@@ -1685,8 +1339,7 @@ void PieceInfo::RenderOnce(int nColor)
 // Called by the piece preview and from RenderOnce()
 void PieceInfo::RenderPiece(int nColor)
 {
-	unsigned short sh, curcolor;
-	DRAWGROUP* pGroup;
+	unsigned short sh;
 
 	for (sh = 0; sh < m_nTextureCount; sh++)
 	{
@@ -1723,209 +1376,158 @@ void PieceInfo::RenderPiece(int nColor)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer (3, GL_FLOAT, 0, m_fVertexArray);
+	m_Mesh->Render(nColor);
 
-	sh = m_nGroupCount;
-	for (pGroup = m_pGroups; sh--; pGroup++)
-	{
-		if (m_nFlags & LC_PIECE_LONGDATA)
-		{
-			unsigned long* info, colors;
-
-			info = (unsigned long*)pGroup->drawinfo;
-			colors = *info;
-			info++;
-
-			while (colors--)
-			{
-				if (*info == LC_COL_DEFAULT)
-					curcolor = nColor;
-				else
-					curcolor = (unsigned short)*info;
-				info++;
-
-				if (curcolor > 13 && curcolor < 22)
-				{
-					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					glEnable (GL_BLEND);
-					glDepthMask (GL_FALSE);
-					glColor4ubv (ColorArray[curcolor]);
-				}
-				else
-				{
-					glDepthMask (GL_TRUE);
-					glDisable (GL_BLEND);
-					glColor3ubv (FlatColorArray[curcolor]);
-				}
-
-				if (*info)
-					glDrawElements(GL_QUADS, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-				if (*info)
-					glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-				if (*info)
-					glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-			}
-		}
-		else
-		{
-			unsigned short* info, colors;
-
-			info = (unsigned short*)pGroup->drawinfo;
-			colors = *info;
-			info++;
-
-			while (colors--)
-			{
-				if (*info == LC_COL_DEFAULT)
-					curcolor = nColor;
-				else
-					curcolor = *info;
-				info++;
-
-				if (curcolor > 13 && curcolor < 22)
-				{
-					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					glEnable (GL_BLEND);
-					glDepthMask (GL_FALSE);
-					glColor4ubv (ColorArray[curcolor]);
-				}
-				else
-				{
-					glDepthMask (GL_TRUE);
-					glDisable (GL_BLEND);
-					glColor3ubv(FlatColorArray[curcolor]);
-				}
-
-				if (*info)
-					glDrawElements(GL_QUADS, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-				if (*info)
-					glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-				if (*info)
-					glDrawElements(GL_LINES, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-			}
-		}
-	}
 	// if glDepthMask is GL_FALSE then glClearBuffer (GL_DEPTH_BUFFER_BIT) doesn't work
 	glDepthMask (GL_TRUE);
 }
 
 void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* start)
 {
-	unsigned short group;
-	const char* colname;
-	
-	for (group = 0; group < m_nGroupCount; group++)
+	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
 	{
-		if (m_nFlags & LC_PIECE_LONGDATA)
-		{
-			unsigned long* info = (unsigned long*)m_pGroups[group].drawinfo;
-			unsigned long count, colors = *info;
-			info++;
+		lcMeshSection* Section = &m_Mesh->m_Sections[i];
 
-			while (colors--)
-			{
-				if (*info == LC_COL_DEFAULT)
-					colname = altcolornames[color];
-				else
-				{
-					if (*info >= LC_MAXCOLORS)
-					{
-						info++;
-						info += *info + 1;
-						info += *info + 1;
-						info += *info + 1;
-						continue;
-					}
-					colname = altcolornames[*info];
-				}
-				info++;
+		const char* colname;
 
-				// skip if color only have lines
-				if ((*info == 0) && (info[1] == 0))
-				{
-					info += 2;
-					info += *info + 1;
-					continue;
-				}
+		// Skip lines.
+		if (Section->PrimitiveType == GL_LINES)
+			continue;
 
-				fprintf(file, "usemtl %s\n", colname);
-
-				for (count = *info, info++; count; count -= 4)
-				{
-					fprintf(file, "f %ld %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start, info[3]+*start);
-					info += 4;
-				}
-
-				for (count = *info, info++; count; count -= 3)
-				{
-					fprintf(file, "f %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start);
-					info += 3;
-				}
-				info += *info + 1;
-			}
-		}
+		if (Section->ColorIndex == LC_COL_DEFAULT)
+			colname = altcolornames[color];
 		else
 		{
-			unsigned short* info = (unsigned short*)m_pGroups[group].drawinfo;
-			unsigned short count, colors = *info;
-			info++;
+			if (Section->ColorIndex >= LC_MAXCOLORS)
+				continue;
 
-			while (colors--)
+			colname = altcolornames[Section->ColorIndex];
+		}
+
+		fprintf(file, "usemtl %s\n", colname);
+
+		if (Section->PrimitiveType == GL_QUADS)
+		{
+			if (m_nFlags & LC_PIECE_LONGDATA)
 			{
-				if (*info == LC_COL_DEFAULT)
-					colname = altcolornames[color];
-				else
-				{
-					if (*info >= LC_MAXCOLORS)
-					{
-						info++;
-						info += *info + 1;
-						info += *info + 1;
-						info += *info + 1;
-						continue;
-					}
-					colname = altcolornames[*info];
-				}
-				info++;
-
-				// skip if color only have lines
-				if ((*info == 0) && (info[1] == 0))
-				{
-					info += 2;
-					info += *info + 1;
-					continue;
-				}
-
-				fprintf(file, "usemtl %s\n", colname);
-
-				for (count = *info, info++; count; count -= 4)
-				{
-					fprintf(file, "f %ld %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start, info[3]+*start);
-					info += 4;
-				}
-
-				for (count = *info, info++; count; count -= 3)
-				{
-					fprintf(file, "f %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start);
-					info += 3;
-				}
-				info += *info + 1;
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 4)
+					fprintf(file, "f %ld %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start, IndexPtr[c+3] + *start);
 			}
-
+			else
+			{
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 4)
+					fprintf(file, "f %ld %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start, IndexPtr[c+3] + *start);
+			}
+		}
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+		{
+			if (m_nFlags & LC_PIECE_LONGDATA)
+			{
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 3)
+					fprintf(file, "f %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start);
+			}
+			else
+			{
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 3)
+					fprintf(file, "f %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start);
+			}
 		}
 	}
 
-	*start += m_nVertexCount;
+	*start += m_Mesh->m_VertexCount;
 	fputs("\n", file);
+}
+
+void PieceInfo::WritePOV(FILE* f)
+{
+	char name[32], *ptr;
+	strcpy(name, m_strName);
+	while ((ptr = strchr(name, '-')))
+		*ptr = '_';
+	fprintf(f, "#declare lc_%s = union {\n", name);
+
+	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
+	{
+		lcMeshSection* Section = &m_Mesh->m_Sections[i];
+
+		// Skip lines.
+		if (Section->PrimitiveType == GL_LINES)
+			continue;
+
+		fputs(" mesh {\n", f);
+		float* VertexPtr = (float*)m_Mesh->m_VertexBuffer;
+
+		if (Section->PrimitiveType == GL_QUADS)
+		{
+			if (m_nFlags & LC_PIECE_LONGDATA)
+			{
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 4)
+				{
+					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+						-VertexPtr[IndexPtr[0]*3+1], -VertexPtr[IndexPtr[0]*3], VertexPtr[IndexPtr[0]*3+2],
+						-VertexPtr[IndexPtr[1]*3+1], -VertexPtr[IndexPtr[1]*3], VertexPtr[IndexPtr[1]*3+2],
+						-VertexPtr[IndexPtr[2]*3+1], -VertexPtr[IndexPtr[2]*3], VertexPtr[IndexPtr[2]*3+2]);
+					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+						-VertexPtr[IndexPtr[2]*3+1], -VertexPtr[IndexPtr[2]*3], VertexPtr[IndexPtr[2]*3+2],
+						-VertexPtr[IndexPtr[3]*3+1], -VertexPtr[IndexPtr[3]*3], VertexPtr[IndexPtr[3]*3+2],
+						-VertexPtr[IndexPtr[0]*3+1], -VertexPtr[IndexPtr[0]*3], VertexPtr[IndexPtr[0]*3+2]);
+					IndexPtr += 4;
+				}
+			}
+			else
+			{
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 4)
+				{
+					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+						-VertexPtr[IndexPtr[0]*3+1], -VertexPtr[IndexPtr[0]*3], VertexPtr[IndexPtr[0]*3+2],
+						-VertexPtr[IndexPtr[1]*3+1], -VertexPtr[IndexPtr[1]*3], VertexPtr[IndexPtr[1]*3+2],
+						-VertexPtr[IndexPtr[2]*3+1], -VertexPtr[IndexPtr[2]*3], VertexPtr[IndexPtr[2]*3+2]);
+					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+						-VertexPtr[IndexPtr[2]*3+1], -VertexPtr[IndexPtr[2]*3], VertexPtr[IndexPtr[2]*3+2],
+						-VertexPtr[IndexPtr[3]*3+1], -VertexPtr[IndexPtr[3]*3], VertexPtr[IndexPtr[3]*3+2],
+						-VertexPtr[IndexPtr[0]*3+1], -VertexPtr[IndexPtr[0]*3], VertexPtr[IndexPtr[0]*3+2]);
+					IndexPtr += 4;
+				}
+			}
+		}
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+		{
+			if (m_nFlags & LC_PIECE_LONGDATA)
+			{
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 3)
+				{
+					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+						-VertexPtr[IndexPtr[0]*3+1], -VertexPtr[IndexPtr[0]*3], VertexPtr[IndexPtr[0]*3+2],
+						-VertexPtr[IndexPtr[1]*3+1], -VertexPtr[IndexPtr[1]*3], VertexPtr[IndexPtr[1]*3+2],
+						-VertexPtr[IndexPtr[2]*3+1], -VertexPtr[IndexPtr[2]*3], VertexPtr[IndexPtr[2]*3+2]);
+					IndexPtr += 3;
+				}
+			}
+			else
+			{
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int c = 0; c < Section->IndexCount; c += 3)
+				{
+					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+						-VertexPtr[IndexPtr[0]*3+1], -VertexPtr[IndexPtr[0]*3], VertexPtr[IndexPtr[0]*3+2],
+						-VertexPtr[IndexPtr[1]*3+1], -VertexPtr[IndexPtr[1]*3], VertexPtr[IndexPtr[1]*3+2],
+						-VertexPtr[IndexPtr[2]*3+1], -VertexPtr[IndexPtr[2]*3], VertexPtr[IndexPtr[2]*3+2]);
+					IndexPtr += 3;
+				}
+			}
+		}
+
+		if (Section->ColorIndex != LC_COL_DEFAULT && Section->ColorIndex != LC_COL_EDGES)
+			fprintf (f, "  texture { lg_%s }\n", lg_colors[Section->ColorIndex]);
+		fputs(" }\n", f);
+	}
+
+	fputs("}\n\n", f);
 }

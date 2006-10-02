@@ -22,6 +22,11 @@ const char* altcolornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"ClearBlue", "ClearLightBlue", "ClearYellow", "ClearWhite",
 	"LightGray", "Tan", "LightBrown", "LightPink", "Turquoise", "Silver" };
 
+const char* lg_colors[28] = { "red", "Orange", "green", "mint", "blue", "LightBlue", "yellow", 
+	"white", "dark_grey", "black", "brown", "pink", "purple", "gold_chrome", "clear_red",
+	"clear_neon_orange", "clear_green", "clear_neon_yellow", "clear_blue", "clear_cyan", 
+	"clear_yellow", "clear", "grey", "tan", "LightBrown", "rose", "Turquoise", "chrome" };
+
 unsigned char FlatColorArray[31][3] = {
 	{ 166,  25,  25 },  // 0 - Red
 	{ 255, 127,  51 },  // 1 - Orange

@@ -5,6 +5,7 @@ class File;
 class Piece;
 class Group;
 class PieceInfo;
+class lcMesh;
 
 #include "object.h"
 #include "globals.h"
@@ -148,7 +149,9 @@ protected:
 	float m_fPosition[3];
 	float m_fRotation[4];
 	CONNECTION* m_pConnections;
-	void* m_pDrawInfo;
+	lcMesh* m_Mesh;
+
+	template<typename T> void BuildMesh();
 };
 
 

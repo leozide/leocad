@@ -1064,6 +1064,10 @@ SOURCE=..\common\lc_application.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\lc_mesh.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\library.h
 # End Source File
 # Begin Source File
@@ -1227,6 +1231,11 @@ SOURCE=..\common\keyboard.cpp
 # Begin Source File
 
 SOURCE=..\common\lc_application.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_mesh.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File

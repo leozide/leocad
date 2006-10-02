@@ -31,6 +31,7 @@
 #include "algebra.h"
 #include "debug.h"
 #include "lc_application.h"
+#include "lc_mesh.h"
 
 // FIXME: temporary function, replace the code!
 void SystemUpdateFocus (void* p)
@@ -4138,11 +4139,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 			}
 
-			const char* lg_colors[28] = { "red", "Orange", "green", "mint", "blue", "LightBlue", "yellow", 
-				"white", "dark_grey", "black", "brown", "pink", "purple", "gold_chrome", "clear_red",
-				"clear_neon_orange", "clear_green", "clear_neon_yellow", "clear_blue", "clear_cyan", 
-				"clear_yellow", "clear", "grey", "tan", "LightBrown", "rose", "Turquoise", "chrome" };
-
 			const float mycol[4][4] = { { 1.0f, 0.5f, 0.2f, 1 }, { 0.2f, 0.4f, 0.9f, 5 }, 
 				{ 0.6f, 0.4f, 0.4f, 24 }, { 0.1f, 0.7f, 0.8f, 26 }};
 
@@ -4174,114 +4170,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				{
 					if (pNext == pPiece)
 					{
-						char name[20];
-						strcpy(name, pInfo->m_strName);
-						while ((ptr = strchr(name, '-')))
-							*ptr = '_';
-						fprintf(f, "#declare lc_%s = union {\n", name);
-
-						unsigned short g;
-						for (g = 0; g < pInfo->m_nGroupCount; g++)
-						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
-						{
-							unsigned long* info = (unsigned long*)pInfo->m_pGroups[g].drawinfo;
-							unsigned long count, curcolor, colors = *info;
-							info++;
-
-							while (colors--)
-							{
-								curcolor = *info;
-								info++;
-
-								// skip if color only have lines
-								if ((*info == 0) && (info[1] == 0))
-								{
-									info += 2;
-									info += *info + 1;
-									continue;
-								}
-
-								fputs(" mesh {\n", f);
-
-								for (count = *info, info++; count; count -= 4)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2],
-										-pInfo->m_fVertexArray[info[3]*3+1], -pInfo->m_fVertexArray[info[3]*3], pInfo->m_fVertexArray[info[3]*3+2],
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2]);
-									info += 4;
-								}
-
-								for (count = *info, info++; count; count -= 3)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									info += 3;
-								}
-								info += *info + 1;
-
-								if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
-									fprintf (f, "  texture { lg_%s }\n", lg_colors[curcolor]);
-								fputs(" }\n", f);
-							}
-						}
-						else
-						{
-							unsigned short* info = (unsigned short*)pInfo->m_pGroups[g].drawinfo;
-							unsigned short count, curcolor, colors = *info;
-							info++;
-
-							while (colors--)
-							{
-								curcolor = *info;
-								info++;
-
-								// skip if color only have lines
-								if ((*info == 0) && (info[1] == 0))
-								{
-									info += 2;
-									info += *info + 1;
-									continue;
-								}
-
-								fputs(" mesh {\n", f);
-
-								for (count = *info, info++; count; count -= 4)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2],
-										-pInfo->m_fVertexArray[info[3]*3+1], -pInfo->m_fVertexArray[info[3]*3], pInfo->m_fVertexArray[info[3]*3+2],
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2]);
-									info += 4;
-								}
-
-								for (count = *info, info++; count; count -= 3)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									info += 3;
-								}
-								info += *info + 1;
-
-								if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
-									fprintf (f, "  texture { lg_%s }\n", lg_colors[curcolor]);
-								fputs(" }\n", f);
-							}
-						}
-
-						fputs("}\n\n", f);
+						pInfo->WritePOV(f);
 						break;
 					}
 
@@ -4445,9 +4334,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Matrix mat(rot, pos);
 				PieceInfo* pInfo = pPiece->GetPieceInfo();
 
-				for (i = 0; i < pInfo->m_nVertexCount*3; i += 3)
+				float* VertexPtr = (float*)pInfo->GetMesh()->m_VertexBuffer;
+
+				for (i = 0; i < (u32)pInfo->GetMesh()->m_VertexCount; i++)
 				{
-					mat.TransformPoint(tmp, &pInfo->m_fVertexArray[i]);
+					mat.TransformPoint(tmp, &VertexPtr[i*3]);
 					fprintf(stream, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
 				}
 				fputs("#\n\n", stream);

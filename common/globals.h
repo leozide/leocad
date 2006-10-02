@@ -15,5 +15,6 @@ extern unsigned char FlatColorArray[31][3];
 extern unsigned char ColorArray[31][4];
 extern const char* colornames[LC_MAXCOLORS];
 extern const char* altcolornames[LC_MAXCOLORS];
+extern const char* lg_colors[28];
 
 #endif // _GLOBALS_H_

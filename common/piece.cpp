@@ -13,6 +13,7 @@
 #include "project.h"
 #include "algebra.h"
 #include "lc_application.h"
+#include "lc_mesh.h"
 #include "matrix.h"
 
 #define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
@@ -76,7 +77,7 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	m_nFrameHide = 65535;
 	memset(m_strName, 0, sizeof(m_strName));
 	m_pGroup = NULL;
-	m_pDrawInfo = NULL;
+	m_Mesh = NULL;
 	m_pConnections = NULL;
 
 	if (m_pPieceInfo != NULL)
@@ -108,14 +109,13 @@ Piece::Piece(PieceInfo* pPieceInfo)
 
 Piece::~Piece()
 {
-  if (m_pPieceInfo != NULL)
-    m_pPieceInfo->DeRef ();
+	delete m_Mesh;
 
-  if (m_pDrawInfo != NULL)
-    free (m_pDrawInfo);
+	if (m_pPieceInfo != NULL)
+		m_pPieceInfo->DeRef ();
 
-  if (m_pConnections != NULL)
-    free (m_pConnections);
+	if (m_pConnections != NULL)
+		free (m_pConnections);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -461,88 +461,82 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
 	Vector3 Intersection;
 
-	float* verts = m_pPieceInfo->m_fVertexArray;
+	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer;
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
 	{
-		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
+		lcMeshSection* Section = &m_Mesh->m_Sections[s];
 
-		while (colors--)
+		if (Section->PrimitiveType == GL_LINES)
+			continue;
+
+		if (Section->PrimitiveType == GL_QUADS)
 		{
-			info++;
-
-			for (i = 0; i < *info; i += 4)
+			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-				Vector3 v4(verts[info[i+4]*3], verts[info[i+4]*3+1], verts[info[i+4]*3+2]);
-
-				if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
-					pLine->pClosest = this;
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
+
+					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
+					{
+						pLine->pClosest = this;
+					}
 				}
 			}
-
-			info += *info + 1;
-
-			for (i = 0; i < *info; i += 3)
+			else
 			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
-					pLine->pClosest = this;
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
+
+					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
+					{
+						pLine->pClosest = this;
+					}
 				}
 			}
-
-			info += *info + 1;
-			info += *info + 1;
 		}
-	}
-	else
-	{
-		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
-
-		while (colors--)
+		else if (Section->PrimitiveType == GL_TRIANGLES)
 		{
-			info++;
-
-			for (i = 0; i < *info; i += 4)
+			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-				Vector3 v4(verts[info[i+4]*3], verts[info[i+4]*3+1], verts[info[i+4]*3+2]);
-
-				if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 3)
 				{
-					pLine->pClosest = this;
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+
+					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+					{
+						pLine->pClosest = this;
+					}
 				}
 			}
-
-			info += *info + 1;
-
-			for (i = 0; i < *info; i += 3)
+			else
 			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 3)
 				{
-					pLine->pClosest = this;
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+
+					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+					{
+						pLine->pClosest = this;
+					}
 				}
 			}
-
-			info += *info + 1;
-			info += *info + 1;
 		}
 	}
 }
@@ -679,79 +673,73 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	}
 
 	// Partial intersection, so check if any triangles are inside.
-	float* verts = m_pPieceInfo->m_fVertexArray;
+	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer;
 	bool ret = false;
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
 	{
-		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
+		lcMeshSection* Section = &m_Mesh->m_Sections[s];
 
-		while (colors--)
+		if (Section->PrimitiveType == GL_LINES)
+			continue;
+
+		if (Section->PrimitiveType == GL_QUADS)
 		{
-			info++;
-
-			for (i = 0; i < *info; i += 4)
+			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
-				                            &verts[info[i+3]*3], &verts[info[i+4]*3], LocalPlanes, NumPlanes))
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
-					ret = true;
-					break;
+					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
+																			&verts[IndexPtr[i+2]*3], &verts[IndexPtr[i+3]*3], LocalPlanes, NumPlanes))
+					{
+						ret = true;
+						break;
+					}
 				}
 			}
-
-			info += *info + 1;
-
-			for (i = 0; i < *info; i += 3)
+			else
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
-				                            &verts[info[i+3]*3], NULL, LocalPlanes, NumPlanes))
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
-					ret = true;
-					break;
+					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
+																			&verts[IndexPtr[i+2]*3], &verts[IndexPtr[i+3]*3], LocalPlanes, NumPlanes))
+					{
+						ret = true;
+						break;
+					}
 				}
 			}
-
-			info += *info + 1;
-			info += *info + 1;
 		}
-	}
-	else
-	{
-		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
-
-		while (colors--)
+		else if (Section->PrimitiveType == GL_QUADS)
 		{
-			info++;
-
-			for (i = 0; i < *info; i += 4)
+			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				                            &verts[info[i+3]*3], &verts[info[i+4]*3], LocalPlanes, NumPlanes))
+				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
-					ret = true;
-					break;
+					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
+																			&verts[IndexPtr[i+2]*3], NULL, LocalPlanes, NumPlanes))
+					{
+						ret = true;
+						break;
+					}
 				}
 			}
-
-			info += *info + 1;
-
-			for (i = 0; i < *info; i += 3)
+			else
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				                            &verts[info[i+3]*3], NULL, LocalPlanes, NumPlanes))
+				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
-					ret = true;
-					break;
+					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
+																			&verts[IndexPtr[i+2]*3], NULL, LocalPlanes, NumPlanes))
+					{
+						ret = true;
+						break;
+					}
 				}
 			}
-
-			info += *info + 1;
-			info += *info + 1;
 		}
 	}
 
@@ -873,266 +861,140 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 
 void Piece::BuildDrawInfo()
 {
-	if (m_pDrawInfo != NULL)
-	{
-		free(m_pDrawInfo);
-		m_pDrawInfo = NULL;
-	}
+	delete m_Mesh;
+	m_Mesh = NULL;
 
-	DRAWGROUP* dg;
-	bool add;
-	unsigned short group, colcount, i, j;
-	unsigned long count[LC_COL_DEFAULT+1][3], vert;
-	memset (count, 0, sizeof(count));
+	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+		BuildMesh<u32>();
+	else
+		BuildMesh<u16>();
+}
 
-	// Get the vertex count
-	for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
+template<typename T>
+void Piece::BuildMesh()
+{
+	unsigned long count[LC_COL_DEFAULT+1][3];
+	memset(count, 0, sizeof(count));
+
+	bool* AddGroups = new bool[m_pPieceInfo->m_nGroupCount];
+	int NumSections = 0, CurSection = 0;
+	int NumIndices = 0;
+
+	// Calculate the number of indices and sections.
+	for (int i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
 	{
+		DRAWGROUP* dg = &m_pPieceInfo->m_pGroups[i];
 		unsigned short* sh = dg->connections;
-		add = IsTransparent() || *sh == 0xFFFF;
+		bool add = IsTransparent() || *sh == 0xFFFF;
 
 		if (!add)
+		{
 			for (; *sh != 0xFFFF; sh++)
+			{
 				if ((m_pConnections[*sh].link == NULL) ||
-					(m_pConnections[*sh].link->owner->IsTransparent()))
-					{
-						add = true;
-						break;
-					}
+				    (m_pConnections[*sh].link->owner->IsTransparent()))
+				{
+					add = true;
+					break;
+				}
+			}
+		}
 
 		if (add)
 		{
-			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+			for (int s = 0; s < dg->NumSections; s++)
 			{
-				unsigned long* p, curcol, colors;
-				p = (unsigned long*)dg->drawinfo;
-				colors = *p;
-				p++;
+				lcMeshSection* Section = &m_pPieceInfo->GetMesh()->m_Sections[CurSection + s];
 
-				while (colors--)
+				switch (Section->PrimitiveType)
 				{
-					curcol = *p;
-					p++;
-					count[curcol][0] += *p;
-					p += *p + 1;
-					count[curcol][1] += *p;
-					p += *p + 1;
-					count[curcol][2] += *p;
-					p += *p + 1;
+				case GL_QUADS:
+					if (!count[Section->ColorIndex][0])
+						NumSections++;
+					count[Section->ColorIndex][0] += Section->IndexCount;
+					break;
+				case GL_TRIANGLES:
+					if (!count[Section->ColorIndex][1])
+						NumSections++;
+					count[Section->ColorIndex][1] += Section->IndexCount;
+					break;
+				case GL_LINES:
+					if (!count[Section->ColorIndex][2])
+						NumSections++;
+					count[Section->ColorIndex][2] += Section->IndexCount;
+					break;
 				}
-			}
-			else
-			{
-				unsigned short* p, curcol, colors;
-				p = (unsigned short*)dg->drawinfo;
-				colors = *p;
-				p++;
 
-				while (colors--)
-				{
-					curcol = *p;
-					p++;
-					count[curcol][0] += *p;
-					p += *p + 1;
-					count[curcol][1] += *p;
-					p += *p + 1;
-					count[curcol][2] += *p;
-					p += *p + 1;
-				}
+				NumIndices += Section->IndexCount;
 			}
 		}
+
+		AddGroups[i] = add;
+		CurSection += dg->NumSections;
 	}
 
-	colcount = 0;
-	vert = 0;
-	for (i = 0; i < LC_COL_DEFAULT+1; i++)
-		if (count[i][0] || count[i][1] || count[i][2])
-		{
-			colcount++;
-			vert += count[i][0] + count[i][1] + count[i][2];
-		}
-	vert += (colcount*4)+1;
+	lcMesh* Mesh = m_pPieceInfo->GetMesh();
+	m_Mesh = new lcMesh(NumSections, NumIndices, Mesh->m_VertexCount, Mesh->m_VertexBuffer);
 
-	// Build the info
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	lcMeshEditor<T> MeshEdit(m_Mesh);
+
+	int SrcSection = 0;
+	lcMeshSection* DstSections[LC_COL_DEFAULT+1][3];
+	memset(DstSections, 0, sizeof(DstSections));
+	CurSection = 0;
+
+	for (int i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
 	{
-		m_pDrawInfo = malloc(vert*sizeof(unsigned long));
-		unsigned long* drawinfo = (unsigned long*)m_pDrawInfo;
-		*drawinfo = colcount;
-		drawinfo++;
-		i = LC_COL_DEFAULT;
+		DRAWGROUP* dg = &m_pPieceInfo->m_pGroups[i];
 
-		for (i = LC_COL_DEFAULT; i != LC_COL_EDGES+1;)
+		if (AddGroups[i])
 		{
-			if (count[i][0] || count[i][1] || count[i][2])
+			for (int s = 0; s < dg->NumSections; s++)
 			{
-				*drawinfo = i;
-				drawinfo++;
+				lcMeshSection* SrcSection = &m_pPieceInfo->GetMesh()->m_Sections[CurSection + s];
+				int ReserveIndices = 0;
 
-				for (j = 0; j < 3; j++)
+				switch (SrcSection->PrimitiveType)
 				{
-					*drawinfo = count[i][j];
-					drawinfo++;
-
-					if (count[i][j] == 0)
-						continue;
-
-					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
-					{
-						unsigned short* sh = dg->connections;
-						add = IsTransparent() || *sh == 0xFFFF;
-
-						if (!add)
-							for (; *sh != 0xFFFF; sh++)
-								if ((m_pConnections[*sh].link == NULL) ||
-									(m_pConnections[*sh].link->owner->IsTransparent()))
-									{
-										add = true;
-										break;
-									}
-
-						if (!add)
-							continue;
-
-						unsigned long* p, colors;
-						p = (unsigned long*)dg->drawinfo;
-						colors = *p;
-						p++;
-
-						while (colors--)
-						{
-							if (*p == i)
-							{
-								p++;
-
-								if (j == 0)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-
-								if (j == 1)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-								
-								if (j == 2)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-							}
-							else
-							{
-								p++;
-								p += *p + 1;
-								p += *p + 1;
-								p += *p + 1;
-							}
-						}
-					}
+				case GL_QUADS:
+					count[SrcSection->ColorIndex][0] -= SrcSection->IndexCount;
+					ReserveIndices = count[SrcSection->ColorIndex][0];
+					if (DstSections[SrcSection->ColorIndex][0])
+						MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][0]);
+					else
+						DstSections[SrcSection->ColorIndex][0] =  MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+					break;
+				case GL_TRIANGLES:
+					count[SrcSection->ColorIndex][1] -= SrcSection->IndexCount;
+					ReserveIndices = count[SrcSection->ColorIndex][1];
+					if (DstSections[SrcSection->ColorIndex][1])
+						MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][1]);
+					else
+						DstSections[SrcSection->ColorIndex][1] =  MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+					break;
+				case GL_LINES:
+					count[SrcSection->ColorIndex][2] -= SrcSection->IndexCount;
+					ReserveIndices = count[SrcSection->ColorIndex][2];
+					if (DstSections[SrcSection->ColorIndex][2])
+						MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][2]);
+					else
+						DstSections[SrcSection->ColorIndex][2] =  MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+					break;
 				}
+
+				if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+					MeshEdit.AddIndices32((char*)m_pPieceInfo->GetMesh()->m_IndexBuffer + SrcSection->IndexOffset, SrcSection->IndexCount);
+				else
+					MeshEdit.AddIndices16((char*)m_pPieceInfo->GetMesh()->m_IndexBuffer + SrcSection->IndexOffset, SrcSection->IndexCount);
+
+				MeshEdit.EndSection(ReserveIndices);
 			}
-						
-			if (i == LC_COL_DEFAULT)
-				i = 0;
-			else
-				i++;
 		}
+
+		CurSection += dg->NumSections;
 	}
-	else
-	{
-		m_pDrawInfo = malloc(vert*sizeof(unsigned short));
-		unsigned short* drawinfo = (unsigned short*)m_pDrawInfo;
-		*drawinfo = colcount;
-		drawinfo++;
 
-		for (i = LC_COL_DEFAULT; i != LC_COL_EDGES+1;)
-		{
-			if (count[i][0] || count[i][1] || count[i][2])
-			{
-				*drawinfo = i;
-				drawinfo++;
-
-				for (j = 0; j < 3; j++)
-				{
-					*drawinfo = (unsigned short)count[i][j];
-					drawinfo++;
-
-					if (count[i][j] == 0)
-						continue;
-
-					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
-					{
-						unsigned short* sh = dg->connections;
-						add = IsTransparent() || *sh == 0xFFFF;
-
-						if (!add)
-							for (; *sh != 0xFFFF; sh++)
-								if ((m_pConnections[*sh].link == NULL) ||
-									(m_pConnections[*sh].link->owner->IsTransparent()))
-									{
-										add = true;
-										break;
-									}
-
-						if (!add)
-							continue;
-
-						unsigned short* p, colors;
-						p = (unsigned short*)dg->drawinfo;
-						colors = *p;
-						p++;
-
-						while (colors--)
-						{
-							if (*p == i)
-							{
-								p++;
-
-								if (j == 0)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-
-								if (j == 1)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-								
-								if (j == 2)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-							}
-							else
-							{
-								p++;
-								p += *p + 1;
-								p += *p + 1;
-								p += *p + 1;
-							}
-						}
-					}
-				}
-			}
-
-			if (i == LC_COL_DEFAULT)
-				i = 0;
-			else
-				i++;
-		}
-	}
+	delete[] AddGroups;
 }
 
 void Piece::RenderBox(bool bHilite, float fLineWidth)
@@ -1164,7 +1026,7 @@ void Piece::Render(bool bLighting, bool bEdges)
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
 	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
-	glVertexPointer (3, GL_FLOAT, 0, m_pPieceInfo->m_fVertexArray);
+	glVertexPointer(3, GL_FLOAT, 0, m_pPieceInfo->GetMesh()->m_VertexBuffer);
 
 	for (int sh = 0; sh < m_pPieceInfo->m_nTextureCount; sh++)
 	{
@@ -1190,137 +1052,7 @@ void Piece::Render(bool bLighting, bool bEdges)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-	{
-		unsigned long colors, *info = (unsigned long*)m_pDrawInfo;
-		colors = *info;
-		info++;
-
-		while (colors--)
-		{
-			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
-
-			if (*info == LC_COL_DEFAULT)
-			{
-				SetCurrentColor(m_nColor, bLighting);
-			}
-			else
-			{
-				SetCurrentColor((unsigned char)*info, bLighting);
-			}
-			info++;
-
-			if (lock)
-				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			if (*info)
-			{
-				glDrawElements(GL_QUADS, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
-				glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
-			  if (m_nState & LC_PIECE_SELECTED)
-			  {
-			    if (lock)
-			      glUnlockArraysEXT();
-
-			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED, bLighting);
-
-			    if (lock)
-			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			    glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
-			  }
-			  else
-			    if (bEdges)
-			      glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
-
-			  info += *info + 1;
-			}
-			else
-				info++;
-
-			if (lock)
-				glUnlockArraysEXT();
-		}
-	}
-	else
-	{
-		unsigned short colors, *info = (unsigned short*)m_pDrawInfo;
-		colors = *info;
-		info++;
-
-		while (colors--)
-		{
-			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
-
-			if (*info == LC_COL_DEFAULT)
-			{
-				SetCurrentColor(m_nColor, bLighting);
-			}
-			else
-			{
-				SetCurrentColor((unsigned char)*info, bLighting);
-			}
-			info++;
-
-			if (lock)
-				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			if (*info)
-			{
-				glDrawElements(GL_QUADS, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
-				glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
-			  if (m_nState & LC_PIECE_SELECTED)
-			  {
-			    if (lock)
-			      glUnlockArraysEXT();
-			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COL_FOCUSED : LC_COL_SELECTED, bLighting);
-			    
-			    if (lock)
-			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			    glDrawElements(GL_LINES, *info, GL_UNSIGNED_SHORT, info+1);
-			  }
-			  else
-			    if (bEdges)
-			      glDrawElements(GL_LINES, *info, GL_UNSIGNED_SHORT, info+1);
-
-			  info += *info + 1;
-			}
-			else
-				info++;
-
-			if (lock)
-				glUnlockArraysEXT();
-		}
-	}
+	m_Mesh->Render(m_nColor, (m_nState & LC_PIECE_SELECTED) != 0, (m_nState & LC_PIECE_FOCUSED) != 0);
 
 	glPopMatrix();
 }
@@ -1329,12 +1061,12 @@ void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short n
 {
 	if (m_pConnections == NULL)
 	{
-		if (m_pDrawInfo == NULL)
+		if (m_Mesh == NULL)
 			BuildDrawInfo();
 		return;
 	}
 
-	bool rebuild = bForceRebuild || (m_pDrawInfo == NULL);
+	bool rebuild = bForceRebuild || (m_Mesh == NULL);
 	Piece* pPiece;
 	CONNECTION_ENTRY* entry;
 	int i, j, c;

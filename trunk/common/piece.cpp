@@ -461,7 +461,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
 	Vector3 Intersection;
 
-	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer;
+	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
 	{
@@ -539,6 +539,8 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 			}
 		}
 	}
+
+	m_pPieceInfo->GetMesh()->m_VertexBuffer->UnmapBuffer();
 }
 
 // Return true if a polygon intersects a set of planes.
@@ -673,7 +675,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	}
 
 	// Partial intersection, so check if any triangles are inside.
-	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer;
+	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 	bool ret = false;
 
 	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
@@ -743,6 +745,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		}
 	}
 
+	m_pPieceInfo->GetMesh()->m_VertexBuffer->UnmapBuffer();
 	delete[] LocalPlanes;
 
 	return ret;
@@ -1026,7 +1029,6 @@ void Piece::Render(bool bLighting, bool bEdges)
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
 	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
-	glVertexPointer(3, GL_FLOAT, 0, m_pPieceInfo->GetMesh()->m_VertexBuffer);
 
 	for (int sh = 0; sh < m_pPieceInfo->m_nTextureCount; sh++)
 	{

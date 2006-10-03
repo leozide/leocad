@@ -1450,6 +1450,8 @@ void PieceInfo::WritePOV(FILE* f)
 		*ptr = '_';
 	fprintf(f, "#declare lc_%s = union {\n", name);
 
+	float* VertexPtr = (float*)m_Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+
 	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
 	{
 		lcMeshSection* Section = &m_Mesh->m_Sections[i];
@@ -1459,7 +1461,6 @@ void PieceInfo::WritePOV(FILE* f)
 			continue;
 
 		fputs(" mesh {\n", f);
-		float* VertexPtr = (float*)m_Mesh->m_VertexBuffer;
 
 		if (Section->PrimitiveType == GL_QUADS)
 		{
@@ -1528,6 +1529,8 @@ void PieceInfo::WritePOV(FILE* f)
 			fprintf (f, "  texture { lg_%s }\n", lg_colors[Section->ColorIndex]);
 		fputs(" }\n", f);
 	}
+
+	m_Mesh->m_VertexBuffer->UnmapBuffer();
 
 	fputs("}\n\n", f);
 }

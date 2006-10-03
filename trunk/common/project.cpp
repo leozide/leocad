@@ -4334,7 +4334,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Matrix mat(rot, pos);
 				PieceInfo* pInfo = pPiece->GetPieceInfo();
 
-				float* VertexPtr = (float*)pInfo->GetMesh()->m_VertexBuffer;
+				float* VertexPtr = (float*)pInfo->GetMesh()->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 				for (i = 0; i < (u32)pInfo->GetMesh()->m_VertexCount; i++)
 				{
@@ -4342,6 +4342,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					fprintf(stream, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
 				}
 				fputs("#\n\n", stream);
+
+				pInfo->GetMesh()->m_VertexBuffer->UnmapBuffer();
 			}
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)

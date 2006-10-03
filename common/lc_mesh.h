@@ -1,6 +1,75 @@
 #ifndef _LC_BUFFER_H_
 #define _LC_BUFFER_H_
 
+#include "opengl.h"
+
+class lcVertexBuffer
+{
+public:
+	lcVertexBuffer(int DataSize)
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glGenBuffersARB(1, &m_Buffer.ID);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, DataSize, NULL, GL_STATIC_DRAW_ARB);
+		}
+		else
+		{
+			m_Buffer.Data = malloc(DataSize);
+		}
+	}
+
+	~lcVertexBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+			glDeleteBuffersARB(1, &m_Buffer.ID);
+		}
+		else
+			free(m_Buffer.Data);
+	}
+
+	void* MapBuffer(GLenum Access)
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			return glMapBufferARB(GL_ARRAY_BUFFER_ARB, Access);
+		}
+		else
+			return m_Buffer.Data;
+	}
+
+	void UnmapBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+		}
+	}
+
+	void BindBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			glVertexPointer(3, GL_FLOAT, 0, NULL);
+		}
+		else
+			glVertexPointer(3, GL_FLOAT, 0, m_Buffer.Data);
+	}
+
+protected:
+	union
+	{
+		void* Data;
+		GLuint ID;
+	} m_Buffer;
+};
+
 struct lcMeshSection
 {
 	int ColorIndex;
@@ -12,7 +81,7 @@ struct lcMeshSection
 class lcMesh
 {
 public:
-	lcMesh(int NumSections, int NumIndices, int NumVertices, void* VertexBuffer);
+	lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer* VertexBuffer);
 	~lcMesh();
 
 	void Clear();
@@ -22,7 +91,7 @@ public:
 	lcMeshSection* m_Sections;
 	int m_SectionCount;
 
-	void* m_VertexBuffer;
+	lcVertexBuffer* m_VertexBuffer;
 	int m_VertexCount;
 	bool m_DeleteVertexBuffer;
 
@@ -42,16 +111,20 @@ public:
 		m_LastIndex = 0;
 		m_UsedSections = 0;
 		m_CurSection = -1;
+		m_VertexBuffer = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_WRITE_ARB);
 	}
 
-	~lcMeshEditor() { };
+	~lcMeshEditor()
+	{
+		m_Mesh->m_VertexBuffer->UnmapBuffer();
+	};
 
 	inline void AddIndex(int Index)
 	{ ((T*)m_Mesh->m_IndexBuffer)[m_CurIndex++] = Index; }
 
 	inline void AddVertex(float* Vert)
 	{
-		float* v = ((float*)m_Mesh->m_VertexBuffer) + 3 * m_CurVertex;
+		float* v = m_VertexBuffer + 3 * m_CurVertex;
 		v[0] = Vert[0];
 		v[1] = Vert[1];
 		v[2] = Vert[2];
@@ -97,6 +170,7 @@ protected:
 	int m_LastIndex;
 	int m_CurSection;
 	int m_UsedSections;
+	float* m_VertexBuffer;
 };
 
 #endif

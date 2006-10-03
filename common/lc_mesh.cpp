@@ -6,7 +6,7 @@
 #include "system.h"
 #include "config.h"
 
-lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, void* VertexBuffer)
+lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer* VertexBuffer)
 {
 	m_Sections = new lcMeshSection[NumSections];
 	m_SectionCount = NumSections;
@@ -18,7 +18,7 @@ lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, void* VertexBuf
 	}
 	else
 	{
-		m_VertexBuffer = malloc(NumVertices * 3 * sizeof(float));
+		m_VertexBuffer = new lcVertexBuffer(NumVertices * 3 * sizeof(float));
 		m_DeleteVertexBuffer = true;
 	}
 
@@ -48,7 +48,7 @@ void lcMesh::Clear()
 	m_SectionCount = 0;
 
 	if (m_DeleteVertexBuffer)
-		free(m_VertexBuffer);
+		delete m_VertexBuffer;
 	m_VertexBuffer = NULL;
 	m_VertexCount = 0;
 
@@ -60,7 +60,7 @@ void lcMesh::Clear()
 void lcMesh::Render(int Color, bool Selected, bool Focused)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, m_VertexBuffer);
+	m_VertexBuffer->BindBuffer();
 
 	for (int i = 0; i < m_SectionCount; i++)
 	{

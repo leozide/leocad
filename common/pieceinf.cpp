@@ -1043,7 +1043,6 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, bool LongData)
 					MeshEdit.AddVertex(tmp);
 				}
 
-				MeshEdit.EndSection();
 				pGroup->NumSections++;
 				MeshEdit.StartSection(GL_QUADS, color);
 

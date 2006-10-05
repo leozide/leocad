@@ -1551,9 +1551,14 @@ bool Project::SetActiveView(View* view)
 
 void Project::Render(View* view, bool AllowFast, bool Interface)
 {
+#if defined(LC_WINDOWS) && defined(LC_DEBUG)
 #define BENCHMARK
+#endif
+
 #ifdef BENCHMARK
-	u64 dwMillis = SystemGetTicks();
+	LARGE_INTEGER li;
+	QueryPerformanceCounter(&li);
+	u64 Start = li.QuadPart;
 #endif
 
 	// Setup the viewport.
@@ -1593,11 +1598,15 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	glFinish();
 
 #ifdef BENCHMARK
-	dwMillis = SystemGetTicks() - dwMillis;
+	QueryPerformanceCounter(&li);
+	u64 End = li.QuadPart;
+
+	QueryPerformanceFrequency(&li);
+
 	char szMsg[30];
 	static int FrameCount = 0;
 	FrameCount++;
-	sprintf(szMsg, "%d - %d ms", FrameCount, dwMillis);
+	sprintf(szMsg, "%d - %d ms", FrameCount, (u32)((End - Start) / (li.QuadPart / 1000.0)));
 	AfxGetMainWnd()->SetWindowText(szMsg);
 #endif
 }

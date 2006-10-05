@@ -967,6 +967,8 @@ void Piece::BuildMesh()
 	memset(DstSections, 0, sizeof(DstSections));
 	CurSection = 0;
 
+	void* SrcIndexBufer = m_pPieceInfo->GetMesh()->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+
 	for (int i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
 	{
 		DRAWGROUP* dg = &m_pPieceInfo->m_pGroups[i];
@@ -1007,9 +1009,9 @@ void Piece::BuildMesh()
 				}
 
 				if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-					MeshEdit.AddIndices32((char*)m_pPieceInfo->GetMesh()->m_IndexBuffer + SrcSection->IndexOffset, SrcSection->IndexCount);
+					MeshEdit.AddIndices32((char*)SrcIndexBufer + SrcSection->IndexOffset, SrcSection->IndexCount);
 				else
-					MeshEdit.AddIndices16((char*)m_pPieceInfo->GetMesh()->m_IndexBuffer + SrcSection->IndexOffset, SrcSection->IndexCount);
+					MeshEdit.AddIndices16((char*)SrcIndexBufer + SrcSection->IndexOffset, SrcSection->IndexCount);
 
 				MeshEdit.EndSection(ReserveIndices);
 			}
@@ -1018,6 +1020,7 @@ void Piece::BuildMesh()
 		CurSection += dg->NumSections;
 	}
 
+	m_pPieceInfo->GetMesh()->m_IndexBuffer->UnmapBuffer();
 	delete[] AddGroups;
 }
 

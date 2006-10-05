@@ -77,6 +77,82 @@ protected:
 	} m_Buffer;
 };
 
+class lcIndexBuffer
+{
+public:
+	lcIndexBuffer(int DataSize)
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glGenBuffersARB(1, &m_Buffer.ID);
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, DataSize, NULL, GL_STATIC_DRAW_ARB);
+		}
+		else
+		{
+			m_Buffer.Data = malloc(DataSize);
+		}
+	}
+
+	~lcIndexBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+			glDeleteBuffersARB(1, &m_Buffer.ID);
+		}
+		else
+			free(m_Buffer.Data);
+	}
+
+	void* MapBuffer(GLenum Access)
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			return glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Access);
+		}
+		else
+			return m_Buffer.Data;
+	}
+
+	void UnmapBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+		{
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
+		}
+	}
+
+	void BindBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+	}
+
+	void UnbindBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+	}
+
+	void* GetDrawElementsOffset()
+	{
+		if (GL_HasVertexBufferObject())
+			return NULL;
+		else
+			return m_Buffer.Data;
+	}
+
+protected:
+	union
+	{
+		void* Data;
+		GLuint ID;
+	} m_Buffer;
+};
+
 struct lcMeshSection
 {
 	int ColorIndex;
@@ -102,7 +178,7 @@ public:
 	int m_VertexCount;
 	bool m_DeleteVertexBuffer;
 
-	void* m_IndexBuffer;
+	lcIndexBuffer* m_IndexBuffer;
 	int m_IndexType;
 };
 
@@ -118,16 +194,20 @@ public:
 		m_LastIndex = 0;
 		m_UsedSections = 0;
 		m_CurSection = -1;
-		m_VertexBuffer = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_WRITE_ARB);
+		m_VertexBuffer = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_WRITE_ONLY_ARB);
+		m_IndexBuffer = (T*)Mesh->m_IndexBuffer->MapBuffer(GL_WRITE_ONLY_ARB);
 	}
 
 	~lcMeshEditor()
 	{
 		m_Mesh->m_VertexBuffer->UnmapBuffer();
+		m_Mesh->m_VertexBuffer->UnbindBuffer();
+		m_Mesh->m_IndexBuffer->UnmapBuffer();
+		m_Mesh->m_IndexBuffer->UnbindBuffer();
 	};
 
 	inline void AddIndex(int Index)
-	{ ((T*)m_Mesh->m_IndexBuffer)[m_CurIndex++] = Index; }
+	{ m_IndexBuffer[m_CurIndex++] = Index; }
 
 	inline void AddVertex(float* Vert)
 	{
@@ -178,6 +258,7 @@ protected:
 	int m_CurSection;
 	int m_UsedSections;
 	float* m_VertexBuffer;
+	T* m_IndexBuffer;
 };
 
 #endif

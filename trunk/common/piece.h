@@ -62,6 +62,7 @@ public:
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
 	void CompareBoundingBox(float box[6]);
+	void GetBoundingBox(Vector3 Verts[8]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);
 	void FileSave(File& file, Group* pGroups);

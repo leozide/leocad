@@ -1551,6 +1551,11 @@ bool Project::SetActiveView(View* view)
 
 void Project::Render(View* view, bool AllowFast, bool Interface)
 {
+#define BENCHMARK
+#ifdef BENCHMARK
+	u64 dwMillis = SystemGetTicks();
+#endif
+
 	// Setup the viewport.
 	glViewport(0, 0, view->GetWidth(), view->GetHeight());
 
@@ -1584,28 +1589,17 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 		}
 	}
 
-/*
-#ifdef _DEBUG
-#ifdef LC_WINDOWS
-#define BENCHMARK
-#endif
-#endif
+	glFlush();
+	glFinish();
 
 #ifdef BENCHMARK
-	DWORD dwMillis = GetTickCount();
-#endif
-
-	RenderScene(Shaded, RenderInterface);
-
-#ifdef BENCHMARK
-	dwMillis = GetTickCount() - dwMillis;
+	dwMillis = SystemGetTicks() - dwMillis;
 	char szMsg[30];
 	static int FrameCount = 0;
 	FrameCount++;
-	sprintf(szMsg, "%d - %.4f sec", FrameCount, (float)dwMillis/1000);
+	sprintf(szMsg, "%d - %d ms", FrameCount, dwMillis);
 	AfxGetMainWnd()->SetWindowText(szMsg);
 #endif
-*/
 }
 
 struct LC_BSPNODE
@@ -5512,35 +5506,22 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
-			// FIXME: rewrite using the FustrumCull function
-			if (m_pPieces == 0) break;
-			bool bControl = Sys_KeyDown (KEY_CONTROL);
+			if (!m_pPieces)
+				break;
 
-			GLdouble modelMatrix[16], projMatrix[16];
-			Vector3 up, eye, target;
+			// Calculate a bounding box that includes all pieces and use its center as the camera target.
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			GLint viewport[4], out;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 					pPiece->CompareBoundingBox(bs);
 
-			float v[24] =
-			{
-				bs[0], bs[1], bs[5],
-				bs[3], bs[1], bs[5],
-				bs[0], bs[1], bs[2],
-				bs[3], bs[4], bs[5],
-				bs[3], bs[4], bs[2],
-				bs[0], bs[4], bs[2],
-				bs[0], bs[4], bs[5],
-				bs[3], bs[1], bs[2]
-			};
-
-			int FirstView, LastView;
+			Vector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
 
 			// If the control key is down then zoom all views, otherwise zoom only the active view.
-			if (bControl)
+			int FirstView, LastView;
+
+			if (Sys_KeyDown(KEY_CONTROL))
 			{
 				FirstView = 0;
 				LastView = m_ViewList.GetSize();
@@ -5554,93 +5535,60 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (int vp = FirstView; vp < LastView; vp++)
 			{
 				View* view = m_ViewList[vp];
-				Camera* pCam = view->GetCamera();
+				Camera* camera = view->GetCamera();
 
-				float w = (float)view->GetWidth();
-				float h = (float)view->GetHeight();
-				float ratio = w/h;
-	
-				glViewport(0, 0, view->GetWidth(), view->GetHeight());
-				pCam->LoadProjection(ratio);
+				// Update eye and target positions.
+				Vector3 Eye = camera->GetEyePosition();
+				Vector3 Target = camera->GetTargetPosition();
 
-				target = pCam->GetTargetPosition();
-				eye = pCam->GetEyePosition();
+				if (camera->IsSide())
+					Eye += Center - Target;
 
-				up[0] = (bs[0] + bs[3])/2 - target[0];
-				up[1] = (bs[1] + bs[4])/2 - target[1];
-				up[2] = (bs[2] + bs[5])/2 - target[2];
+				Target = Center;
+				Vector3 Front = Target - Eye;
 
-				if (pCam->IsSide())
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				// Get the view planes.
+				float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
+				Vector4 Planes[6];
+				camera->GetFrustumPlanes(Aspect, Planes);
+
+				// Calculate the position that is as close as possible to the model and has all pieces visible.
+				float SmallestDistance = FLT_MAX;
+
+				for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 				{
-					eye[0] += up[0];
-					eye[1] += up[1];
-					eye[2] += up[2];
-				}
-				target[0] += up[0];
-				target[1] += up[1];
-				target[2] += up[2];
+					if (!piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+						continue;
 
-				up = pCam->GetUpVector();
-				Vector3 upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
-				frontvec.Normalize();
-				sidevec = Cross3(frontvec, upvec);
-				upvec = Cross3(sidevec, frontvec);
-				up = upvec.Normalize();
-				frontvec *= 0.25f;
+					Vector3 Verts[8];
+					piece->GetBoundingBox(Verts);
 
-				glMatrixMode(GL_MODELVIEW);
-				glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-				glGetIntegerv(GL_VIEWPORT,viewport);
-
-				for (out = 0; out < 10000; out++) // Zoom in
-				{
-					eye[0] -= frontvec[0];
-					eye[1] -= frontvec[1];
-					eye[2] -= frontvec[2];
-					glLoadIdentity();
-					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
-					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-
-					for (int i = 0; i < 24; i+=3)
+					for (int p = 0; p < 4; p++)
 					{
-						double winx, winy, winz;
-						gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz);
-						if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
-							(winx > viewport[0] + viewport[2] - 1) || (winy > viewport[1] + viewport[3] - 1))
+						float ep = Dot3(Eye, Planes[p]);
+						float fp = Dot3(Front, Planes[p]);
+
+						for (int j = 0; j < 8; j++)
 						{
-							out = 10000;
-							continue;
+							// Intersect the eye line with the plane, NewEye = Eye + u * (Target - Eye)
+							float u = (ep - Dot3(Verts[j], Planes[p])) / -fp;
+
+							if (u < SmallestDistance)
+								SmallestDistance = u;
 						}
 					}
 				}
 
-				bool stp = false;
-				for (out = 0; out < 10000 && !stp; out++) // zoom out
-				{
-					stp = true;
-					eye[0] += frontvec[0];
-					eye[1] += frontvec[1];
-					eye[2] += frontvec[2];
-					glLoadIdentity();
-					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
-					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+				Eye += Front * SmallestDistance;
 
-					for (int i = 0; i < 24; i+=3)
-					{
-						double winx, winy, winz;
-						gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz);
-						if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
-							(winx > viewport[0] + viewport[2] - 1) || (winy > viewport[1] + viewport[3] - 1))
-						{
-							stp = false;
-							continue;
-						}
-					}
-				}
-
-				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, eye, LC_CK_EYE);
-				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, target, LC_CK_TARGET);
-				pCam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				// Save new positions.
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 
 			SystemUpdateFocus(NULL);

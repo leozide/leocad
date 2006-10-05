@@ -20,8 +20,6 @@
 #include <AGL/agl.h>
 #endif
 
-void gluLookAt(GLdouble eyex, GLdouble eyey, GLdouble eyez, GLdouble centerx, GLdouble centery, GLdouble centerz,
-               GLdouble upx, GLdouble upy, GLdouble upz);
 void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 GLint gluProject(GLdouble objx, GLdouble objy, GLdouble objz, const GLdouble model[16], const GLdouble proj[16],
                  const GLint viewport[4], GLdouble *winx, GLdouble *winy, GLdouble *winz);

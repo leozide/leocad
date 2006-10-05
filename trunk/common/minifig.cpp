@@ -547,9 +547,9 @@ void MinifigWizard::OnDraw()
 	glLoadIdentity();
 	gluPerspective(30.0f, aspect, 1.0f, 20.0f);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	Matrix44 WorldView = CreateLookAtMatrix(Vector3(0, -9, 4), Vector3(0, 5, 1), Vector3(0, 0, 1));
+	glLoadMatrixf(WorldView);
 
-	gluLookAt(0, -9, 4, 0, 5, 1, 0, 0, 1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

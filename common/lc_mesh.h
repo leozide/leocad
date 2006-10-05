@@ -62,6 +62,13 @@ public:
 			glVertexPointer(3, GL_FLOAT, 0, m_Buffer.Data);
 	}
 
+	void UnbindBuffer()
+	{
+		if (GL_HasVertexBufferObject())
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		glVertexPointer(3, GL_FLOAT, 0, NULL);
+	}
+
 protected:
 	union
 	{

@@ -96,6 +96,7 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 
 		glDrawElements(Section->PrimitiveType, Section->IndexCount, m_IndexType, (char*)m_IndexBuffer + Section->IndexOffset);
 	}
+	m_VertexBuffer->UnbindBuffer();
 }
 
 template<>

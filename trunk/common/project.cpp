@@ -71,6 +71,9 @@ Project::Project()
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
+	RenderSectionPoolSize = 5000;
+	RenderSectionPool = (lcRenderSection*)malloc(RenderSectionPoolSize * sizeof(lcRenderSection));
+
 	if (messenger == NULL)
 		messenger = new Messenger ();
 	messenger->AddRef();
@@ -103,7 +106,9 @@ Project::~Project()
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
 
-	messenger->DecRef ();
+	messenger->DecRef();
+
+	free(RenderSectionPool);
 
 	delete m_pTerrain;
 	delete m_pBackground;
@@ -1613,157 +1618,6 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 #endif
 }
 
-struct LC_BSPNODE
-{
-	float plane[4];
-	Piece* piece;
-	LC_BSPNODE* front;
-	LC_BSPNODE* back;
-
-	~LC_BSPNODE()
-	{
-		if (piece == NULL)
-		{
-			if (front)
-				delete front;
-			if (back)
-				delete back;
-		}
-	}
-};
-
-void Project::RenderBSP(LC_BSPNODE* node, float* eye, bool bLighting, bool bEdges)
-{
-	if (node->piece)
-	{
-		if (node->piece->IsSelected())
-			glLineWidth(2*m_fLineWidth);
-		else
-			glLineWidth(m_fLineWidth);
-
-		node->piece->Render(bLighting, bEdges);
-
-		return;
-	}
-
-	if (eye[0]*node->plane[0] + eye[1]*node->plane[1] +
-	    eye[2]*node->plane[2] + node->plane[3] > 0.0f)
-	{
-		RenderBSP(node->back, eye, bLighting, bEdges);
-		RenderBSP(node->front, eye, bLighting, bEdges);
-	}
-	else
-	{
-		RenderBSP(node->front, eye, bLighting, bEdges);
-		RenderBSP(node->back, eye, bLighting, bEdges);
-	}
-}
-
-void Project::BuildBSP(LC_BSPNODE* node, Piece* pList)
-{
-	Piece *front_list = NULL, *back_list = NULL;
-	Piece *pPiece, *pNext;
-
-	node->piece = NULL;
-
-	if (pList->m_pLink == NULL)
-	{
-		// This is a leaf
-		node->piece = pList;
-		return;
-	}
-
-	float dx, dy, dz, bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	const float *pos;
-
-	for (pPiece = pList; pPiece; pPiece = pPiece->m_pLink)
-	{
-		pos = pPiece->GetConstPosition();
-		if (pos[0] < bs[0]) bs[0] = pos[0];
-		if (pos[1] < bs[1]) bs[1] = pos[1];
-		if (pos[2] < bs[2]) bs[2] = pos[2];
-		if (pos[0] > bs[3]) bs[3] = pos[0];
-		if (pos[1] > bs[4]) bs[4] = pos[1];
-		if (pos[2] > bs[5]) bs[5] = pos[2];
-	}
-
-	dx = ABS(bs[0]-bs[3]);
-	dy = ABS(bs[1]-bs[4]);
-	dz = ABS(bs[2]-bs[5]);
-
-	node->plane[0] = node->plane[1] = node->plane[2] = 0.0f;
-
-	if (dx > dy)
-	{
-		if (dx > dz)
-			node->plane[0] = 1.0f;
-		else
-			node->plane[2] = 1.0f;
-	}
-	else
-	{
-		if (dy > dz)
-			node->plane[1] = 1.0f;
-		else
-			node->plane[2] = 1.0f;
-	}
-
-	// D = -Ax -By -Cz
-	node->plane[3] = -(node->plane[0]*(bs[0]+bs[3])/2)-(node->plane[1]*(bs[1]+bs[4])/2)-(node->plane[2]*(bs[2]+bs[5])/2);
-
-	for (pPiece = pList; pPiece;)
-	{
-		pos = pPiece->GetConstPosition();
-		pNext = pPiece->m_pLink;
-
-		if (pos[0]*node->plane[0] + pos[1]*node->plane[1] +
-			pos[2]*node->plane[2] + node->plane[3] > 0.0f)
-		{
-			pPiece->m_pLink = front_list;
-			front_list = pPiece;
-		}
-		else
-		{
-			pPiece->m_pLink = back_list;
-			back_list = pPiece;
-		}
-
-		pPiece = pNext;
-	}
-
-	if (bs[0] == bs[3] && bs[1] == bs[4] && bs[2] == bs[5])
-	{
-		if (back_list)
-		{
-			front_list = back_list;
-			back_list = back_list->m_pLink;
-			front_list->m_pLink = NULL;
-		}
-		else
-		{
-			back_list = front_list;
-			front_list = front_list->m_pLink;
-			back_list->m_pLink = NULL;
-		}
-	}
-
-	if (front_list)
-	{
-		node->front = new LC_BSPNODE;
-		BuildBSP(node->front, front_list);
-	}
-	else
-		node->front = NULL;
-
-	if (back_list)
-	{
-		node->back = new LC_BSPNODE;
-		BuildBSP(node->back, back_list);
-	}
-	else
-		node->back = NULL;
-}
-
 void Project::RenderBackground(View* view)
 {
 	if (m_nScene & (LC_SCENE_GRADIENT|LC_SCENE_BG))
@@ -2087,45 +1941,217 @@ void Project::RenderScene(View* view)
 		m_pTerrain->Render(view->GetCamera(), ratio);
 	}
 
-	Piece* pPiece;
+	// TODO: Build the render lists outside of the render function and only sort translucent sections here.
 
-	LC_BSPNODE tree;
-	tree.front = tree.back = NULL;
-	Piece* pList = NULL;
+	// Build a list for opaque and another for translucent mesh sections.
+	Piece* piece;
+	lcRenderSection* OpaqueList = NULL;
+	lcRenderSection* TranslucentList = NULL;
 
-	// Render opaque pieces.
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	int SectionPoolAlloc = 0;
+
+	for (piece = m_pPieces; piece != NULL; piece = piece->m_pNext)
 	{
-		if (!pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-			continue;
+		lcMesh* Mesh = piece->GetMesh();
 
-		if (!pPiece->IsTransparent())
+		for (int i = 0; i < Mesh->m_SectionCount; i++)
 		{
-			if (pPiece->IsSelected())
-				glLineWidth (2*m_fLineWidth);
+			if (SectionPoolAlloc == RenderSectionPoolSize)
+			{
+				for (int j = 0; j < SectionPoolAlloc; j++)
+					if (RenderSectionPool[j].Next)
+						RenderSectionPool[j].Next = (lcRenderSection*)(RenderSectionPool[j].Next - RenderSectionPool + 1);
 
-			pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
+				if (OpaqueList)
+					OpaqueList = (lcRenderSection*)(OpaqueList - RenderSectionPool + 1);
+				if (TranslucentList)
+					TranslucentList = (lcRenderSection*)(TranslucentList - RenderSectionPool + 1);
 
-			if (pPiece->IsSelected())
-				glLineWidth(m_fLineWidth);
-		}
-		else
-		{
-			pPiece->m_pLink = pList;
-			pList = pPiece;
+				RenderSectionPoolSize += 1000;
+				RenderSectionPool = (lcRenderSection*)realloc(RenderSectionPool, RenderSectionPoolSize * sizeof(lcRenderSection));
+
+				for (int j = 0; j < SectionPoolAlloc; j++)
+					if (RenderSectionPool[j].Next)
+						RenderSectionPool[j].Next = RenderSectionPool + (int)RenderSectionPool[j].Next - 1;
+
+				if (OpaqueList)
+					OpaqueList = RenderSectionPool + (int)OpaqueList - 1;
+				if (TranslucentList)
+					TranslucentList = RenderSectionPool + (int)TranslucentList - 1;
+			}
+
+			lcRenderSection* RenderSection = &RenderSectionPool[SectionPoolAlloc++];
+
+			RenderSection->Owner = piece;
+			RenderSection->Mesh = Mesh;
+			RenderSection->Section = &Mesh->m_Sections[i];
+			RenderSection->Color = RenderSection->Section->ColorIndex;
+
+			if (RenderSection->Color == LC_COL_DEFAULT)
+				RenderSection->Color = piece->GetColor();
+
+			if (RenderSection->Section->PrimitiveType == GL_LINES)
+			{
+				if ((m_nDetail & LC_DET_BRICKEDGES) == 0)
+				{
+					SectionPoolAlloc--;
+					continue;
+				}
+
+				if (piece->IsFocused())
+					RenderSection->Color = LC_COL_FOCUSED;
+				else if (piece->IsSelected())
+					RenderSection->Color = LC_COL_SELECTED;
+			}
+
+			if (RenderSection->Color > 13 && RenderSection->Color < 22)
+			{
+				Vector3 Pos = Mul31(piece->GetPieceInfo()->m_Center, piece->GetModelWorld());
+				Pos = Mul31(Pos, view->GetCamera()->GetWorldViewMatrix());
+				RenderSection->Distance = Pos[2];
+
+				lcRenderSection* Prev = NULL;
+				lcRenderSection* Next = TranslucentList;
+
+				// Sort sections back to front.
+				while (Next)
+				{
+					if (Next->Distance > RenderSection->Distance)
+						break;
+
+					Prev = Next;
+					Next = Next->Next;
+				}
+
+				RenderSection->Next = Next;
+
+				if (Prev)
+					Prev->Next = RenderSection;
+				else
+					TranslucentList = RenderSection;
+			}
+			else
+			{
+				// Pieces are already sorted by vertex buffer, so no need to sort again here.
+				RenderSection->Next = OpaqueList;
+				OpaqueList = RenderSection;
+			}
 		}
 	}
 
-	// Render translucent pieces sorted from back to front.
-	if (pList)
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+
+	lcRenderSection* RenderSection;
+	lcVertexBuffer* LastVertexBuffer = NULL;
+	lcIndexBuffer* LastIndexBuffer = NULL;
+	Piece* LastPiece = NULL;
+
+	glPushMatrix();
+
+	// Render opaque sections.
+	for (RenderSection = OpaqueList; RenderSection != NULL; RenderSection = RenderSection->Next)
 	{
-		Vector3 Eye = view->GetCamera()->GetEyePosition();
-		BuildBSP(&tree, pList);
-		RenderBSP(&tree, Eye, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
+		lcMesh* Mesh = RenderSection->Mesh;
+
+		if (Mesh->m_VertexBuffer != LastVertexBuffer)
+		{
+			LastVertexBuffer = Mesh->m_VertexBuffer;
+			LastVertexBuffer->BindBuffer();
+		}
+
+		if (Mesh->m_IndexBuffer != LastIndexBuffer)
+		{
+			LastIndexBuffer = Mesh->m_IndexBuffer;
+			LastIndexBuffer->BindBuffer();
+		}
+
+		if (LastPiece != RenderSection->Owner)
+		{
+			LastPiece = RenderSection->Owner;
+			glPopMatrix();
+			glPushMatrix();
+			glMultMatrixf(LastPiece->GetModelWorld());
+
+			if (LastPiece->IsSelected())
+				glLineWidth(2.0f);
+			else
+				glLineWidth(1.0f);
+		}
+
+		glColor3ubv(FlatColorArray[RenderSection->Color]);
+
+		lcMeshSection* Section = RenderSection->Section;
+
+#ifdef LC_PROFILE
+		if (Section->PrimitiveType == GL_QUADS)
+			g_RenderStats.QuadCount += Section->IndexCount / 4;
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+			g_RenderStats.TriCount += Section->IndexCount / 3;
+		if (Section->PrimitiveType == GL_LINES)
+			g_RenderStats.LineCount += Section->IndexCount / 2;
+#endif
+
+		glDrawElements(Section->PrimitiveType, Section->IndexCount, Mesh->m_IndexType, (char*)LastIndexBuffer->GetDrawElementsOffset() + Section->IndexOffset);
 	}
 
+	// Render translucent sections.
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	for (RenderSection = TranslucentList; RenderSection != NULL; RenderSection = RenderSection->Next)
+	{
+		lcMesh* Mesh = RenderSection->Mesh;
+
+		if (Mesh->m_VertexBuffer != LastVertexBuffer)
+		{
+			LastVertexBuffer = Mesh->m_VertexBuffer;
+			LastVertexBuffer->BindBuffer();
+		}
+
+		if (Mesh->m_IndexBuffer != LastIndexBuffer)
+		{
+			LastIndexBuffer = Mesh->m_IndexBuffer;
+			LastIndexBuffer->BindBuffer();
+		}
+
+		if (LastPiece != RenderSection->Owner)
+		{
+			LastPiece = RenderSection->Owner;
+			glPopMatrix();
+			glPushMatrix();
+			glMultMatrixf(LastPiece->GetModelWorld());
+		}
+
+		glColor4ubv(ColorArray[RenderSection->Color]);
+
+		lcMeshSection* Section = RenderSection->Section;
+
+#ifdef LC_PROFILE
+		if (Section->PrimitiveType == GL_QUADS)
+			g_RenderStats.QuadCount += Section->IndexCount / 4;
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+			g_RenderStats.TriCount += Section->IndexCount / 3;
+		if (Section->PrimitiveType == GL_LINES)
+			g_RenderStats.LineCount += Section->IndexCount / 2;
+#endif
+
+		glDrawElements(Section->PrimitiveType, Section->IndexCount, Mesh->m_IndexType, (char*)LastIndexBuffer->GetDrawElementsOffset() + Section->IndexOffset);
+	}
+
+	glPopMatrix();
+
+	// Reset states.
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
+
+	if (LastVertexBuffer)
+		LastVertexBuffer->UnbindBuffer();
+
+	if (LastIndexBuffer)
+		LastIndexBuffer->UnbindBuffer();
 
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
@@ -3003,40 +3029,28 @@ void Project::RenderInitialize()
 /////////////////////////////////////////////////////////////////////////////
 // Project functions
 
-void Project::AddPiece(Piece* pPiece)
+void Project::AddPiece(Piece* NewPiece)
 {
-/*
-// Sort piece array to avoid OpenGL state changes (needs work)
-void CCADDoc::AddPiece(CPiece* pNewPiece)
-{
-	POSITION pos1, pos2;
+	Piece* Prev = NULL;
+	Piece* Next = m_pPieces;
 
-	for (pos1 = m_Pieces.GetHeadPosition(); (pos2 = pos1) != NULL;)
+	while (Next)
 	{
-		CPiece* pPiece = m_Pieces.GetNext(pos1);
-		if (pPiece->IsTransparent())
+		if (Next->GetPieceInfo() > NewPiece->GetPieceInfo())
 			break;
+
+		Prev = Next;
+		Next = Next->m_pNext;
 	}
 
-	if (pos2 == NULL || pNewPiece->IsTransparent())
-		m_Pieces.AddTail(pNewPiece);
-	else
-		m_Pieces.InsertBefore(pos2, pNewPiece);
-}
-*/
-	if (m_pPieces != NULL)
-	{
-		pPiece->m_pNext = m_pPieces;
-		m_pPieces = pPiece;
-	// TODO: sorting and BSP
-	}
-	else
-	{
-		m_pPieces = pPiece;
-		pPiece->m_pNext = NULL;
-	}
+	NewPiece->m_pNext = Next;
 
-	pPiece->AddConnections(m_pConnections);
+	if (Prev)
+		Prev->m_pNext = NewPiece;
+	else
+		m_pPieces = NewPiece;
+
+	NewPiece->AddConnections(m_pConnections);
 }
 
 void Project::RemovePiece(Piece* pPiece)
@@ -3056,8 +3070,6 @@ void Project::RemovePiece(Piece* pPiece)
 		}
 
 	pPiece->RemoveConnections(m_pConnections);
-
-	// TODO: remove from BSP
 }
 
 void Project::CalculateStep()

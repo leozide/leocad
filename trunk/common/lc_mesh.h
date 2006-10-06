@@ -48,6 +48,7 @@ public:
 		{
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
 			glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 		}
 	}
 
@@ -122,6 +123,7 @@ public:
 		{
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
 			glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 		}
 	}
 

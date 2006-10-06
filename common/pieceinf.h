@@ -114,6 +114,10 @@ public:
 	unsigned char	m_nTextureCount;
 	TEXTURE*		m_pTextures;
 
+	// Bounding box / sphere.
+	Vector3 m_Center;
+	Vector4 m_Dimensions; // xyz = box extents, w = sphere radius
+
 protected:
 	int m_nRef;
 	GLuint m_nBoxList;

@@ -39,86 +39,6 @@ static float costbl[SIDES];
 #define LC_KNOB_RADIUS 0.32f
 //#define LC_STUD_TECH_RADIUS (LC_FLAT_HEIGHT/2)
 
-static void GetFrustumPlanes (float planes[6][4])
-{
-	// Storage for the Modelview, Projection and their multiplication (Frustum) matrix.
-	float mv[16], pj[16], fm[16];
-
-	glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-	glGetFloatv(GL_PROJECTION_MATRIX, pj);
-
-	fm[0]  = pj[0] * mv[0]  + pj[4] * mv[1]  + pj[8]  * mv[2]  + pj[12] * mv[3];
-	fm[4]  = pj[0] * mv[4]  + pj[4] * mv[5]  + pj[8]  * mv[6]  + pj[12] * mv[7];
-	fm[8]  = pj[0] * mv[8]  + pj[4] * mv[9]  + pj[8]  * mv[10] + pj[12] * mv[11];
-	fm[12] = pj[0] * mv[12] + pj[4] * mv[13] + pj[8]  * mv[14] + pj[12] * mv[15];
-	fm[1]  = pj[1] * mv[0]  + pj[5] * mv[1]  + pj[9]  * mv[2]  + pj[13] * mv[3];
-	fm[5]  = pj[1] * mv[4]  + pj[5] * mv[5]  + pj[9]  * mv[6]  + pj[13] * mv[7];
-	fm[9]  = pj[1] * mv[8]  + pj[5] * mv[9]  + pj[9]  * mv[10] + pj[13] * mv[11];
-	fm[13] = pj[1] * mv[12] + pj[5] * mv[13] + pj[9]  * mv[14] + pj[13] * mv[15];
-	fm[2]  = pj[2] * mv[0]  + pj[6] * mv[1]  + pj[10] * mv[2]  + pj[14] * mv[3];
-	fm[6]  = pj[2] * mv[4]  + pj[6] * mv[5]  + pj[10] * mv[6]  + pj[14] * mv[7];
-	fm[10] = pj[2] * mv[8]  + pj[6] * mv[9]  + pj[10] * mv[10] + pj[14] * mv[11];
-	fm[14] = pj[2] * mv[12] + pj[6] * mv[13] + pj[10] * mv[14] + pj[14] * mv[15];
-	fm[3]  = pj[3] * mv[0]  + pj[7] * mv[1]  + pj[11] * mv[2]  + pj[15] * mv[3];
-	fm[7]  = pj[3] * mv[4]  + pj[7] * mv[5]  + pj[11] * mv[6]  + pj[15] * mv[7];
-	fm[11] = pj[3] * mv[8]  + pj[7] * mv[9]  + pj[11] * mv[10] + pj[15] * mv[11];
-	fm[15] = pj[3] * mv[12] + pj[7] * mv[13] + pj[11] * mv[14] + pj[15] * mv[15];
-
-	planes[0][0] = (fm[0] - fm[3]) * -1;
-	planes[0][1] = (fm[4] - fm[7]) * -1;
-	planes[0][2] = (fm[8] - fm[11]) * -1;
-	planes[0][3] = (fm[12] - fm[15]) * -1;
-	planes[1][0] = fm[0] + fm[3];
-	planes[1][1] = fm[4] + fm[7];
-	planes[1][2] = fm[8] + fm[11];
-	planes[1][3] = fm[12] + fm[15];
-	planes[2][0] = (fm[1] - fm[3]) * -1;
-	planes[2][1] = (fm[5] - fm[7]) * -1;
-	planes[2][2] = (fm[9] - fm[11]) * -1;
-	planes[2][3] = (fm[13] - fm[15]) * -1;
-	planes[3][0] = fm[1] + fm[3];
-	planes[3][1] = fm[5] + fm[7];
-	planes[3][2] = fm[9] + fm[11];
-	planes[3][3] = fm[13] + fm[15];
-	planes[4][0] = (fm[2] - fm[3]) * -1;
-	planes[4][1] = (fm[6] - fm[7]) * -1;
-	planes[4][2] = (fm[10] - fm[11]) * -1;
-	planes[4][3] = (fm[14] - fm[15]) * -1;
-	planes[5][0] = fm[2] + fm[3];
-	planes[5][1] = fm[6] + fm[7];
-	planes[5][2] = fm[10] + fm[11];
-	planes[5][3] = fm[14] + fm[15];
-}
-
-bool BoxOutsideFrustum (float Dimensions[6])
-{
-	float d, planes[6][4], verts[8][3] =
-	{
-		{ Dimensions[0], Dimensions[1], Dimensions[5] },
-		{ Dimensions[3], Dimensions[1], Dimensions[5] },
-		{ Dimensions[0], Dimensions[1], Dimensions[2] },
-		{ Dimensions[3], Dimensions[4], Dimensions[5] },
-		{ Dimensions[3], Dimensions[4], Dimensions[2] },
-		{ Dimensions[0], Dimensions[4], Dimensions[2] },
-		{ Dimensions[0], Dimensions[4], Dimensions[5] },
-		{ Dimensions[3], Dimensions[1], Dimensions[2] }
-	};
-
-	GetFrustumPlanes (planes);
-
-	for (int i = 0; i < 6; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			d = verts[j][0]*planes[i][0] + verts[j][1]*planes[i][1] + verts[j][2]*planes[i][2] + planes[i][3];
-			if (d < -0.001f)
-				return true;
-		}
-	}
-
-	return false;
-}
-
 // Convert a color from LDraw to LeoCAD
 unsigned char ConvertColor(int c)
 {
@@ -246,6 +166,12 @@ void PieceInfo::LoadIndex (File& file)
   m_fDimensions[3] = (float)sh[3]/scale;
   m_fDimensions[4] = (float)sh[4]/scale;
   m_fDimensions[5] = (float)sh[5]/scale;
+
+	Vector3 p1(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]);
+	Vector3 p2(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]);
+
+	m_Center = p1 + (p2 - p1) / 2;
+	m_Dimensions = Vector4(p2 - m_Center, Length(p2 - p1) / 2);
 }
 
 void PieceInfo::AddRef()
@@ -1383,6 +1309,8 @@ void PieceInfo::RenderPiece(int nColor)
 
 void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* start)
 {
+	void* indices = m_Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+
 	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
 	{
 		lcMeshSection* Section = &m_Mesh->m_Sections[i];
@@ -1409,13 +1337,13 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 		{
 			if (m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 4)
 					fprintf(file, "f %ld %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start, IndexPtr[c+3] + *start);
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 4)
 					fprintf(file, "f %ld %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start, IndexPtr[c+3] + *start);
 			}
@@ -1424,18 +1352,20 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 		{
 			if (m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 3)
 					fprintf(file, "f %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start);
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 3)
 					fprintf(file, "f %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start);
 			}
 		}
 	}
+
+	m_Mesh->m_IndexBuffer->UnmapBuffer();
 
 	*start += m_Mesh->m_VertexCount;
 	fputs("\n", file);
@@ -1450,6 +1380,7 @@ void PieceInfo::WritePOV(FILE* f)
 	fprintf(f, "#declare lc_%s = union {\n", name);
 
 	float* VertexPtr = (float*)m_Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+	void* indices = m_Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
 	{
@@ -1465,7 +1396,7 @@ void PieceInfo::WritePOV(FILE* f)
 		{
 			if (m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 4)
 				{
 					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
@@ -1481,7 +1412,7 @@ void PieceInfo::WritePOV(FILE* f)
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 4)
 				{
 					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
@@ -1500,7 +1431,7 @@ void PieceInfo::WritePOV(FILE* f)
 		{
 			if (m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 3)
 				{
 					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
@@ -1512,7 +1443,7 @@ void PieceInfo::WritePOV(FILE* f)
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int c = 0; c < Section->IndexCount; c += 3)
 				{
 					fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
@@ -1530,6 +1461,7 @@ void PieceInfo::WritePOV(FILE* f)
 	}
 
 	m_Mesh->m_VertexBuffer->UnmapBuffer();
+	m_Mesh->m_IndexBuffer->UnmapBuffer();
 
 	fputs("}\n\n", f);
 }

@@ -55,6 +55,12 @@ public:
 	const char* GetName() const
 	{ return m_strName; };
 
+	lcMesh* GetMesh() const
+	{ return m_Mesh; }
+
+	const Matrix44& GetModelWorld() const
+	{ return m_ModelWorld; }
+
 	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
@@ -147,6 +153,7 @@ protected:
 	char m_strName[81];
 
 	// Temporary variables
+	Matrix44 m_ModelWorld;
 	float m_fPosition[3];
 	float m_fRotation[4];
 	CONNECTION* m_pConnections;

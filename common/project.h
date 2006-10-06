@@ -41,6 +41,8 @@ class View;
 class Image;
 class PiecesLibrary;
 class TexFont;
+class lcMesh;
+struct lcMeshSection;
 
 // Undo support
 
@@ -206,8 +208,19 @@ protected:
 
 	// Rendering helper functions.
 	void RenderBoxes(bool bHilite);
-	void RenderBSP(struct LC_BSPNODE* node, float* eye, bool bLighting, bool bEdges);
-	void BuildBSP(struct LC_BSPNODE* node, Piece* pList);
+
+	struct lcRenderSection
+	{
+		Piece* Owner;
+		lcMesh* Mesh;
+		lcMeshSection* Section;
+		float Distance;
+		int Color;
+		lcRenderSection* Next;
+	};
+
+	lcRenderSection* RenderSectionPool;
+	int RenderSectionPoolSize;
 
 	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);

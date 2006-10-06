@@ -453,15 +453,16 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	if (dist >= pLine->mindist)
 		return;
 
-	Matrix44 WorldToLocal;
-	WorldToLocal = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
+	Matrix44 WorldModel;
+	WorldModel = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldModel.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldModel));
 
-	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
-	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
+	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldModel);
+	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldModel);
 	Vector3 Intersection;
 
 	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+	void* indices = m_pPieceInfo->GetMesh()->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
 	{
@@ -474,7 +475,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		{
 			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
@@ -490,7 +491,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
@@ -509,7 +510,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		{
 			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 3)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
@@ -524,7 +525,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 3)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
@@ -541,6 +542,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 
 	m_pPieceInfo->GetMesh()->m_VertexBuffer->UnmapBuffer();
+	m_pPieceInfo->GetMesh()->m_IndexBuffer->UnmapBuffer();
 }
 
 // Return true if a polygon intersects a set of planes.
@@ -625,17 +627,17 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	};
 
 	// Transform the planes to local space.
-	Matrix44 WorldToLocal;
-	WorldToLocal = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
+	Matrix44 WorldModel;
+	WorldModel = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldModel.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldModel));
 
 	Vector4* LocalPlanes = new Vector4[NumPlanes];
 	int i;
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldToLocal));
-		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldModel));
+		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldModel[3]), Vector3(LocalPlanes[i]));
 	}
 
 	// Start by testing trivial reject/accept cases.
@@ -676,6 +678,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	// Partial intersection, so check if any triangles are inside.
 	float* verts = (float*)m_pPieceInfo->GetMesh()->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+	void* indices = m_pPieceInfo->GetMesh()->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 	bool ret = false;
 
 	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
@@ -689,7 +692,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		{
 			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
 					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
@@ -702,7 +705,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
 					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
@@ -718,7 +721,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		{
 			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				u32* IndexPtr = (u32*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
 					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
@@ -731,7 +734,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 			}
 			else
 			{
-				u16* IndexPtr = (u16*)((char*)m_Mesh->m_IndexBuffer + Section->IndexOffset);
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
 				for (int i = 0; i < Section->IndexCount; i += 4)
 				{
 					if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
@@ -746,6 +749,8 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	}
 
 	m_pPieceInfo->GetMesh()->m_VertexBuffer->UnmapBuffer();
+	m_pPieceInfo->GetMesh()->m_IndexBuffer->UnmapBuffer();
+
 	delete[] LocalPlanes;
 
 	return ret;
@@ -794,11 +799,8 @@ void Piece::GetBoundingBox(Vector3 Verts[8])
 		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
 	};
 
-	Matrix44 m = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
-	m.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
-
 	for (int i = 0; i < 8; i++)
-		Verts[i] = Mul31(v[i], m);
+		Verts[i] = Mul31(v[i], m_ModelWorld);
 }
 
 void Piece::CompareBoundingBox(float box[6])
@@ -815,12 +817,9 @@ void Piece::CompareBoundingBox(float box[6])
 		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
 	};
 
-	Matrix44 m = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
-	m.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
-
 	for (int i = 0; i < 8; i++)
 	{
-		v[i] = Mul31(v[i], m);
+		v[i] = Mul31(v[i], m_ModelWorld);
 
 		if (v[i][0] < box[0]) box[0] = v[i][0];
 		if (v[i][1] < box[1]) box[1] = v[i][1];
@@ -859,20 +858,21 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 	if (!IsVisible(nTime, bAnimation))
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
-	CalculateKeys (nTime, bAnimation);
+	CalculateKeys(nTime, bAnimation);
+
+	m_ModelWorld = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
+	m_ModelWorld.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
+
 //	if (CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation))
 	{
-		Matrix44 mat = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
-		mat.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
-
-		BoundingBoxCalculate(mat, m_pPieceInfo->m_fDimensions);
+		BoundingBoxCalculate(m_ModelWorld, m_pPieceInfo->m_fDimensions);
 
 		for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
 		{
 			float* center = m_pPieceInfo->m_pConnections[i].center;
 			Vector3 tmp(center[0], center[1], center[2]);
 
-			tmp = Mul31(tmp, mat);
+			tmp = Mul31(tmp, m_ModelWorld);
 
 			m_pConnections[i].center[0] = tmp[0];
 			m_pConnections[i].center[1] = tmp[1];

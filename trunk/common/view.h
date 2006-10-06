@@ -2,6 +2,7 @@
 #define _VIEW_H_
 
 #include "glwindow.h"
+#include "typedefs.h"
 
 class Project;
 class Camera;

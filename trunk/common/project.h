@@ -68,7 +68,7 @@ public:
 	void SetModifiedFlag(bool bModified)
 		{ m_bModified = bModified; }
 
-	// Access to protected members
+	// Access to protected members (TODO: clean up all this crap)
 	unsigned char GetLastStep();
 	bool IsAnimation()
 		{ return m_bAnimation; }
@@ -109,6 +109,8 @@ public:
 		*ppCamera = m_pCameras;
 		*ppLight = m_pLights;
 	}
+	TexFont* GetFont() const
+	{ return m_pScreenFont; }
 
 	void UpdateInterface();
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
@@ -153,7 +155,7 @@ protected:
 	char m_strDescription[101];
 	char m_strComments[256];
 
-	// Piece library
+	// Font used to draw text on the screen.
 	TexFont* m_pScreenFont;
 
 	// Undo support

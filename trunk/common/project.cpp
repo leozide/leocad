@@ -32,6 +32,7 @@
 #include "debug.h"
 #include "lc_application.h"
 #include "lc_mesh.h"
+#include "debug.h"
 
 // FIXME: temporary function, replace the code!
 void SystemUpdateFocus (void* p)
@@ -1551,11 +1552,9 @@ bool Project::SetActiveView(View* view)
 
 void Project::Render(View* view, bool AllowFast, bool Interface)
 {
-#if defined(LC_WINDOWS) && defined(LC_DEBUG)
-#define BENCHMARK
-#endif
+#ifdef LC_PROFILE
+	memset(&g_RenderStats, 0, sizeof(g_RenderStats));
 
-#ifdef BENCHMARK
 	LARGE_INTEGER li;
 	QueryPerformanceCounter(&li);
 	u64 Start = li.QuadPart;
@@ -1597,16 +1596,19 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	glFlush();
 	glFinish();
 
-#ifdef BENCHMARK
+#ifdef LC_PROFILE
 	QueryPerformanceCounter(&li);
 	u64 End = li.QuadPart;
 
 	QueryPerformanceFrequency(&li);
+	g_RenderStats.RenderMS = (int)((End - Start) / (li.QuadPart / 1000.0));
+
+	lcRenderProfileStats(view);
 
 	char szMsg[30];
 	static int FrameCount = 0;
 	FrameCount++;
-	sprintf(szMsg, "%d - %d ms", FrameCount, (u32)((End - Start) / (li.QuadPart / 1000.0)));
+	sprintf(szMsg, "%d - %d ms", FrameCount, g_RenderStats.RenderMS);
 	AfxGetMainWnd()->SetWindowText(szMsg);
 #endif
 }

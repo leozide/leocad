@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "lc_mesh.h"
 #include "system.h"
+#include "debug.h"
 #include "config.h"
 
 lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer* VertexBuffer)
@@ -94,6 +95,15 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 			glDisable(GL_BLEND);
 			glColor3ubv(FlatColorArray[CurColor]);
 		}
+
+#ifdef LC_PROFILE
+		if (Section->PrimitiveType == GL_QUADS)
+			g_RenderStats.QuadCount += Section->IndexCount / 4;
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+			g_RenderStats.TriCount += Section->IndexCount / 3;
+		if (Section->PrimitiveType == GL_LINES)
+			g_RenderStats.LineCount += Section->IndexCount / 2;
+#endif
 
 		glDrawElements(Section->PrimitiveType, Section->IndexCount, m_IndexType, (char*)m_IndexBuffer->GetDrawElementsOffset() + Section->IndexOffset);
 	}

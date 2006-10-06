@@ -1,5 +1,65 @@
 #include "opengl.h"
 #include "debug.h"
+#include "view.h"
+#include "texfont.h"
+#include "lc_application.h"
+#include "project.h"
+
+#ifdef LC_PROFILE
+
+lcRenderStats g_RenderStats;
+
+void lcRenderProfileStats(View* view)
+{
+	TexFont* Font = lcGetActiveProject()->GetFont();
+
+	glDisable(GL_DEPTH_TEST);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(0.375, 0.375, 0.0);
+
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	Font->MakeCurrent();
+	glEnable(GL_ALPHA_TEST);
+
+	glColor3f(0, 0, 0);
+	glBegin(GL_QUADS);
+
+	char str[256];
+
+	float Left = (float)view->GetWidth() - 125;
+	float Top = (float)view->GetHeight() - 6;
+
+	sprintf(str, "Quads: %d", g_RenderStats.QuadCount);
+	Font->PrintText(Left, Top, 0.0f, str);
+	Top -= Font->GetFontHeight();
+
+	sprintf(str, "Tris: %d", g_RenderStats.TriCount);
+	Font->PrintText(Left, Top, 0.0f, str);
+	Top -= Font->GetFontHeight();
+
+	sprintf(str, "Lines: %d", g_RenderStats.LineCount);
+	Font->PrintText(Left, Top, 0.0f, str);
+	Top -= Font->GetFontHeight();
+
+	sprintf(str, "Render: %d ms", g_RenderStats.RenderMS);
+	Font->PrintText(Left, Top, 0.0f, str);
+	Top -= Font->GetFontHeight();
+
+	glEnd();
+
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
+
+	glEnable(GL_DEPTH_TEST);
+}
+
+#endif
 
 #ifdef LC_DEBUG
 

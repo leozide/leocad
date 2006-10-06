@@ -22,6 +22,8 @@ public:
 	void PrintText(float Left, float Top, float ScaleX, float ScaleY, const char* Text) const;
 	void PrintCharScaled(float scale, int ch) const;
 	void GetStringDimensions(int* cx, int* cy, const char* Text) const;
+	int GetFontHeight() const
+	{ return m_nFontHeight; }
 
 protected:
 	struct

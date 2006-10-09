@@ -1954,6 +1954,9 @@ void Project::RenderScene(View* view)
 	{
 		lcMesh* Mesh = piece->GetMesh();
 
+		if (!piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			continue;
+
 		for (int i = 0; i < Mesh->m_SectionCount; i++)
 		{
 			if (SectionPoolAlloc == RenderSectionPoolSize)

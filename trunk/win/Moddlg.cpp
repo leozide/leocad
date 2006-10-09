@@ -125,8 +125,8 @@ BEGIN_MESSAGE_MAP(CModifyDialog, CDialog)
 	//{{AFX_MSG_MAP(CModifyDialog) 
 	ON_BN_CLICKED(IDC_MODDLG_PIECE, OnModdlgPiece)
 	ON_CBN_SELENDOK(IDC_MODDLG_LIST, OnSelendokModdlgList)
-	ON_BN_CLICKED(IDC_MODDLG_APPLY, OnModdlgApply)
 	ON_CBN_DROPDOWN(IDC_MODDLG_LIST, OnDropdownModdlgList)
+	ON_BN_CLICKED(IDC_MODDLG_APPLY, OnModdlgApply)
 	ON_WM_SHOWWINDOW()
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
@@ -441,11 +441,11 @@ static void DDX_Text_Float(CDataExchange* pDX, int nIDC, float& value)
 	if (pDX->m_bSaveAndValidate)
 	{
 		::GetWindowText(hWndCtrl, szBuffer, sizeof(szBuffer)/sizeof(szBuffer[0]));
-		double d;
+		double d = 0;
 		if (_stscanf(szBuffer, _T("%lf"), &d) != 1)
 		{
-			AfxMessageBox(AFX_IDP_PARSE_REAL);
-			pDX->Fail();            // throws exception
+//			AfxMessageBox(AFX_IDP_PARSE_REAL);
+//			pDX->Fail();            // throws exception
 		}
 		value = (float)d;
 	}
@@ -525,6 +525,18 @@ void CModifyPieceDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CModifyPieceDlg, CDialog)
+	//{{AFX_MSG_MAP(CModifyPieceDlg)
+	ON_EN_CHANGE(IDC_MODDLG_POSX, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_POSY, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_POSZ, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_ROTX, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_ROTY, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_ROTZ, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_FROM, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_TO, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_HIDDEN, OnDataChange)
+	ON_MESSAGE_VOID(CPN_SELENDOK, OnDataChange)
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -535,6 +547,11 @@ void CModifyPieceDlg::OnOK()
 
 void CModifyPieceDlg::OnCancel() 
 {
+}
+
+void CModifyPieceDlg::OnDataChange()
+{
+	((CModifyDialog*)GetParent()->GetParent())->PostMessage(WM_COMMAND, IDC_MODDLG_APPLY);
 }
 
 void CModifyPieceDlg::UpdateInfo(Piece* piece)
@@ -655,6 +672,22 @@ void CModifyCameraDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CModifyCameraDlg, CDialog)
+	//{{AFX_MSG_MAP(CModifyPieceDlg)
+	ON_EN_CHANGE(IDC_MODDLG_POSX, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_POSY, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_POSZ, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_TARGETX, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_TARGETY, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_TARGETZ, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_ROLL, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_FOV, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_CLIP, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_NEAR, OnDataChange)
+	ON_EN_CHANGE(IDC_MODDLG_FAR, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_ORTHO, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_CONE, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_HIDDEN, OnDataChange)
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -665,6 +698,11 @@ void CModifyCameraDlg::OnOK()
 
 void CModifyCameraDlg::OnCancel() 
 {
+}
+
+void CModifyCameraDlg::OnDataChange()
+{
+	((CModifyDialog*)GetParent()->GetParent())->PostMessage(WM_COMMAND, IDC_MODDLG_APPLY);
 }
 
 void CModifyCameraDlg::UpdateInfo(Camera* camera)

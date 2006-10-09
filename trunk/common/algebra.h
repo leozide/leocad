@@ -666,9 +666,9 @@ inline Matrix33 Mul(const Matrix33& a, const Matrix33& b)
 
 inline float Determinant(const Matrix33& a)
 {
-	return a.m_Rows[0][0] * a.m_Rows[1][2] * a.m_Rows[2][2] + a.m_Rows[0][1] * a.m_Rows[1][3] * a.m_Rows[2][0] +
-	       a.m_Rows[0][2] * a.m_Rows[1][0] * a.m_Rows[2][1] - a.m_Rows[0][0] * a.m_Rows[1][3] * a.m_Rows[2][1] - 
-	       a.m_Rows[0][1] * a.m_Rows[1][0] * a.m_Rows[2][2] - a.m_Rows[0][2] * a.m_Rows[1][2] * a.m_Rows[2][0];
+	return a.m_Rows[0][0] * a.m_Rows[1][1] * a.m_Rows[2][2] + a.m_Rows[0][1] * a.m_Rows[1][2] * a.m_Rows[2][0] +
+	       a.m_Rows[0][2] * a.m_Rows[1][0] * a.m_Rows[2][1] - a.m_Rows[0][0] * a.m_Rows[1][2] * a.m_Rows[2][1] - 
+	       a.m_Rows[0][1] * a.m_Rows[1][0] * a.m_Rows[2][2] - a.m_Rows[0][2] * a.m_Rows[1][1] * a.m_Rows[2][0];
 }
 
 inline Matrix33 Transpose(const Matrix33& m)

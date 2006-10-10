@@ -2242,6 +2242,7 @@ void Project::RenderInterface(View* view)
 	glDisable(GL_LIGHTING);
 	glDisable(GL_FOG);
 	glShadeModel(GL_FLAT);
+	glLineWidth(1.0f);
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);

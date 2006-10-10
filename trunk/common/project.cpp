@@ -1961,7 +1961,9 @@ void Project::RenderScene(View* view)
 		{
 			if (SectionPoolAlloc == RenderSectionPoolSize)
 			{
-				for (int j = 0; j < SectionPoolAlloc; j++)
+				int j;
+
+				for (j = 0; j < SectionPoolAlloc; j++)
 					if (RenderSectionPool[j].Next)
 						RenderSectionPool[j].Next = (lcRenderSection*)(RenderSectionPool[j].Next - RenderSectionPool + 1);
 
@@ -1973,7 +1975,7 @@ void Project::RenderScene(View* view)
 				RenderSectionPoolSize += 1000;
 				RenderSectionPool = (lcRenderSection*)realloc(RenderSectionPool, RenderSectionPoolSize * sizeof(lcRenderSection));
 
-				for (int j = 0; j < SectionPoolAlloc; j++)
+				for (j = 0; j < SectionPoolAlloc; j++)
 					if (RenderSectionPool[j].Next)
 						RenderSectionPool[j].Next = RenderSectionPool + (int)RenderSectionPool[j].Next - 1;
 

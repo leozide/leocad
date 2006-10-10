@@ -837,27 +837,29 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 
 void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
 {
-	Vector3 upvec(m_Up), frontvec = m_Eye - m_Target;
-	Vector3 sidevec = Cross3(frontvec, upvec);
-	sidevec.Normalize();
-	sidevec *= 2.0f*dx/(21-mouse);
-	upvec.Normalize();
-	upvec *= -2.0f*dy/(21-mouse);
+	Vector3 Dir = m_Eye - m_Target;
 
-	// TODO: option to move eye or target
-	float len = frontvec.Length();
-	frontvec += upvec + sidevec;
-	frontvec.Normalize();
-	frontvec *= len;
-	frontvec += m_Target;
-	m_Eye = frontvec;
+	// The X axis of the mouse always corresponds to Z in the world.
+	if (dx)
+	{
+		float AngleX = -2.0f * dx / (21 - mouse) * LC_DTOR;
+		Matrix33 RotX = MatrixFromAxisAngle(Vector3(0, 0, 1), AngleX);
 
-	// Calculate new up
-	upvec = m_Up;
-	frontvec = m_Eye - m_Target;
-	sidevec = Cross3(frontvec, upvec);
-	upvec = Cross3(sidevec, frontvec);
-	m_Up = upvec.Normalize();
+		Dir = Mul(Dir, RotX);
+		m_Up = Mul(m_Up, RotX);
+	}
+
+	// The Y axis will be in the XY plane.
+	if (dy)
+	{
+		float AngleY = 2.0f * dy / (21 - mouse) * LC_DTOR;
+		Matrix33 RotY = MatrixFromAxisAngle(Vector3(m_WorldView[0][0], m_WorldView[1][0], 0), AngleY);
+
+		Dir = Mul(Dir, RotY);
+		m_Up = Mul(m_Up, RotY);
+	}
+
+	m_Eye = m_Target + Dir;
 
 	ChangeKey(nTime, bAnimation, bAddKey, m_Eye, LC_CK_EYE);
 	ChangeKey(nTime, bAnimation, bAddKey, m_Up, LC_CK_UP);

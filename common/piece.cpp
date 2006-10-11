@@ -889,13 +889,13 @@ void Piece::BuildDrawInfo()
 	m_Mesh = NULL;
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-		BuildMesh<u32>();
+		BuildMesh(TypeToType<u32>());
 	else
-		BuildMesh<u16>();
+		BuildMesh(TypeToType<u16>());
 }
 
 template<typename T>
-void Piece::BuildMesh()
+void Piece::BuildMesh(TypeToType<T>)
 {
 	unsigned long count[LC_COL_DEFAULT+1][3];
 	memset(count, 0, sizeof(count));
@@ -903,9 +903,10 @@ void Piece::BuildMesh()
 	bool* AddGroups = new bool[m_pPieceInfo->m_nGroupCount];
 	int NumSections = 0, CurSection = 0;
 	int NumIndices = 0;
+	int i;
 
 	// Calculate the number of indices and sections.
-	for (int i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
+	for (i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
 	{
 		DRAWGROUP* dg = &m_pPieceInfo->m_pGroups[i];
 		unsigned short* sh = dg->connections;
@@ -969,7 +970,7 @@ void Piece::BuildMesh()
 
 	void* SrcIndexBufer = m_pPieceInfo->GetMesh()->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
-	for (int i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
+	for (i = 0; i < m_pPieceInfo->m_nGroupCount; i++)
 	{
 		DRAWGROUP* dg = &m_pPieceInfo->m_pGroups[i];
 

@@ -159,7 +159,15 @@ protected:
 	CONNECTION* m_pConnections;
 	lcMesh* m_Mesh;
 
-	template<typename T> void BuildMesh();
+	// Workaround for MSVC6 poor template support.
+	template <class T>
+	struct TypeToType
+	{
+		typedef T type;
+	};
+
+	template<class T>
+	void BuildMesh(TypeToType<T>);
 };
 
 

@@ -1344,110 +1344,118 @@ bool Project::OpenProject(const char* FileName)
 	return true;
 }
 
-bool Project::OnOpenDocument (const char* lpszPathName)
+bool Project::OnOpenDocument(const char* PathName)
 {
-  FileDisk file;
-  bool bSuccess = false;
+	FileDisk file;
+	bool bSuccess = false;
 
-  if (!file.Open(lpszPathName, "rb"))
-  {
-//    MessageBox("Failed to open file.");
-    return false;
-  }
+	if (!file.Open(PathName, "rb"))
+	{
+		char Message[LC_MAXPATH + 64];
 
-  char ext[4], *ptr;
-  memset(ext, 0, 4);
-  ptr = strrchr(lpszPathName, '.');
-  if (ptr != NULL)
-  {
-    strncpy(ext, ptr+1, 3);
-    strlwr(ext);
-  }
+		sprintf(Message, "Failed to open %s for reading.", PathName);
+		main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
 
-  bool datfile = false;
-  bool mpdfile = false;
+		return false;
+	}
 
-  // Find out what file type we're loading.
-  if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
-    datfile = true;
-  else if (strcmp(ext, "mpd") == 0)
-    mpdfile = true;
+	char ext[4], *ptr;
+	memset(ext, 0, 4);
+	ptr = strrchr(PathName, '.');
+	if (ptr != NULL)
+	{
+		strncpy(ext, ptr+1, 3);
+		strlwr(ext);
+	}
 
-  // Delete the current project.
-  DeleteContents(false);
-  LoadDefaults(datfile || mpdfile);
-  SetModifiedFlag(true);  // dirty during loading
+	bool datfile = false;
+	bool mpdfile = false;
 
-  SystemDoWaitCursor(1);
+	// Find out what file type we're loading.
+	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+		datfile = true;
+	else if (strcmp(ext, "mpd") == 0)
+		mpdfile = true;
 
-  if (file.GetLength() != 0)
-  {
-    PtrArray<File> FileArray;
+	// Delete the current project.
+	DeleteContents(false);
+	LoadDefaults(datfile || mpdfile);
+	SetModifiedFlag(true);  // dirty during loading
 
-    // Unpack the MPD file.
-    if (mpdfile)
-    {
-      FileReadMPD(file, FileArray);
+	SystemDoWaitCursor(1);
 
-      if (FileArray.GetSize() == 0)
-      {
-        file.Seek(0, SEEK_SET);
-        mpdfile = false;
-        datfile = true;
-        console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
-      }
-    }
+	if (file.GetLength() != 0)
+	{
+		PtrArray<File> FileArray;
 
-    if (datfile || mpdfile)
-    {
-      int ok = 0, step = 1;
-      Matrix mat;
+		// Unpack the MPD file.
+		if (mpdfile)
+		{
+			FileReadMPD(file, FileArray);
 
-      if (mpdfile)
-        FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray);
-      else
-        FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
+			if (FileArray.GetSize() == 0)
+			{
+				file.Seek(0, SEEK_SET);
+				mpdfile = false;
+				datfile = true;
+				console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
+			}
+		}
 
-      m_nCurStep = step;
-      SystemUpdateTime(false, m_nCurStep, 255);
-      SystemUpdateFocus(NULL);
-      UpdateSelection();
-      CalculateStep();
-      UpdateAllViews ();
+		if (datfile || mpdfile)
+		{
+			int ok = 0, step = 1;
+			Matrix mat;
 
-      console.PrintMisc("%d objects imported.\n", ok);
-      bSuccess = true;
-    }
-    else
-    {
-      // Load a LeoCAD file.
-      bSuccess = FileLoad(&file, false, false);
-    }
+			if (mpdfile)
+				FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray);
+			else
+				FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
 
-    // Clean up.
-    if (mpdfile)
-    {
-      for (int i = 0; i < FileArray.GetSize(); i++)
-        delete FileArray[i];
-    }
-  }
+			m_nCurStep = step;
+			SystemUpdateTime(false, m_nCurStep, 255);
+			SystemUpdateFocus(NULL);
+			UpdateSelection();
+			CalculateStep();
+			UpdateAllViews ();
 
-  file.Close();
-  SystemDoWaitCursor(-1);
+			console.PrintMisc("%d objects imported.\n", ok);
+			bSuccess = true;
+		}
+		else
+		{
+			// Load a LeoCAD file.
+			bSuccess = FileLoad(&file, false, false);
+		}
 
-  if (bSuccess == false)
-  {
-//    MessageBox("Failed to load.");
-    DeleteContents(false);   // remove failed contents
-    return false;
-  }
+		// Clean up.
+		if (mpdfile)
+		{
+			for (int i = 0; i < FileArray.GetSize(); i++)
+				delete FileArray[i];
+		}
+	}
 
-  CheckPoint("");
-  m_nSaveTimer = 0;
+	file.Close();
+	SystemDoWaitCursor(-1);
 
-  SetModifiedFlag(false);     // start off with unmodified
+	if (bSuccess == false)
+	{
+		char Message[LC_MAXPATH + 64];
 
-  return true;
+		sprintf(Message, "Failed to load %s.", PathName);
+		main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
+
+		DeleteContents(false);   // remove failed contents
+		return false;
+	}
+
+	CheckPoint("");
+	m_nSaveTimer = 0;
+
+	SetModifiedFlag(false);     // start off with unmodified
+
+	return true;
 }
 
 void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
@@ -4454,9 +4462,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_FILE_RECENT:
 		{
 			if (!OpenProject(main_window->GetMRU(nParam)))
-			{
-				// todo: display message box and remove entry from menu.
-			}
+				main_window->RemoveFromMRU(nParam);
 		} break;
 
 		case LC_EDIT_UNDO:

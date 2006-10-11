@@ -849,11 +849,11 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 		m_Up = Mul(m_Up, RotX);
 	}
 
-	// The Y axis will be in the XY plane.
+	// The Y axis will the side vector of the camera.
 	if (dy)
 	{
 		float AngleY = 2.0f * dy / (21 - mouse) * LC_DTOR;
-		Matrix33 RotY = MatrixFromAxisAngle(Vector3(m_WorldView[0][0], m_WorldView[1][0], 0), AngleY);
+		Matrix33 RotY = MatrixFromAxisAngle(Vector3(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0]), AngleY);
 
 		Dir = Mul(Dir, RotY);
 		m_Up = Mul(m_Up, RotY);

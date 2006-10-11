@@ -476,15 +476,15 @@ void PieceInfo::LoadInformation()
 	m_Mesh = new lcMesh(sections, quads + tris + lines, verts, NULL);
 
 	if (m_Mesh->m_IndexType == GL_UNSIGNED_SHORT)
-		BuildMesh<u16>(buf, tmp, (fixverts > 65535) || (fixquads > 65535));
+		BuildMesh(TypeToType<u16>(), buf, tmp, (fixverts > 65535) || (fixquads > 65535));
 	else
-		BuildMesh<u32>(buf, tmp, (fixverts > 65535) || (fixquads > 65535));
+		BuildMesh(TypeToType<u32>(), buf, tmp, (fixverts > 65535) || (fixquads > 65535));
 
 	free(buf);
 }
 
 template<typename T>
-void PieceInfo::BuildMesh(void* Data, void* MeshStart, bool LongData)
+void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongData)
 {
 	lcMeshEditor<T> MeshEdit(m_Mesh);
 

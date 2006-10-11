@@ -123,8 +123,17 @@ protected:
 	GLuint m_nBoxList;
 	lcMesh* m_Mesh;
 
+	// Workaround for MSVC6 poor template support.
+	template <class T>
+	struct TypeToType
+	{
+		typedef T type;
+	};
+
+	template<class T>
+	void BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongData);
+
 	void LoadInformation();
-	template<typename T> void BuildMesh(void* Data, void* MeshStart, bool LongData);
 	void FreeInformation();
 	void CreateBoxDisplayList();
 };

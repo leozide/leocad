@@ -66,18 +66,39 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* SysLibPat
 		if (m_Library->Load(EnvPath))
 			return true;
 
+	// Try the last library path.
+	const char* ProfilePath = Sys_ProfileLoadString("Settings", "PiecesLibrary", "");
+	if (strlen(ProfilePath) != 0)
+		if (m_Library->Load(ProfilePath))
+			return true;
+
 	// Try the executable install path last.
 	if (SysLibPath != NULL)
 		if (m_Library->Load(SysLibPath))
 			return true;
 
-#ifdef LC_WINDOWS
-	SystemDoMessageBox("Cannot load pieces library.\n"
-	                   "Make sure that you have the PIECES.IDX file in the same "
-	                   "folder where you installed the program.", LC_MB_OK|LC_MB_ICONERROR);
-#else
-	printf("Error: Cannot load pieces library.\n");
-#endif
+	// Give the user a chance to select the directory.
+	for (;;)
+	{
+		int Ret = SystemDoMessageBox("LeoCAD was unable to load its Pieces Library, do you want to specify another location?",
+		                             LC_MB_YESNO|LC_MB_ICONQUESTION);
+
+		if (Ret == LC_YES)
+		{
+			LC_DLG_DIRECTORY_BROWSE_OPTS Opts;
+
+			Opts.Title = "Select Pieces Library Directory";
+
+			if (SystemDoDialog(LC_DLG_DIRECTORY_BROWSE, &Opts))
+				if (m_Library->Load(Opts.Path))
+					return true;
+		}
+		else
+			break;
+	}
+
+	SystemDoMessageBox("LeoCAD could not load its Pieces Library and will now exit.\n\n"
+	                   "Make sure that you have the library installed in your computer.", LC_MB_OK|LC_MB_ICONERROR);
 
 	return false;
 }

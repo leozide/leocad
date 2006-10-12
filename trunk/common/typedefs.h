@@ -292,6 +292,7 @@ typedef enum {
 	LC_DLG_FILE_MERGE_PROJECT,
 	LC_DLG_FILE_OPEN,
 	LC_DLG_FILE_SAVE,
+	LC_DLG_DIRECTORY_BROWSE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
 	LC_DLG_POVRAY,
@@ -334,6 +335,12 @@ struct LC_FILESAVEDLG_OPTS
 {
 	int type;
 	char path[LC_MAXPATH];
+};
+
+struct LC_DLG_DIRECTORY_BROWSE_OPTS
+{
+	const char* Title;
+	char Path[LC_MAXPATH];
 };
 
 struct LC_POVRAYDLG_OPTS

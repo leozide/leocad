@@ -181,6 +181,8 @@ bool PiecesLibrary::Load (const char *libpath)
 	m_CategoriesModified = false;
 	m_Modified = false;
 
+	Sys_ProfileSaveString("Settings", "PiecesLibrary", m_LibraryPath);
+
 	return true;
 }
 

@@ -997,7 +997,7 @@ void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
 	}
 }
 
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray)
+void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray, const String& FilePath)
 {
 	char buf[1024];
 
@@ -1074,7 +1074,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				{
 					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
 					{
-						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 						read = false;
 						break;
 					}
@@ -1088,8 +1088,25 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 
 				if (tf.Open(pn, "rt"))
 				{
-					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
+					// Read from the current directory.
+					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 					read = false;
+				}
+				else
+				{
+					// Try the file's directory.
+					String Path = FilePath + pn;
+
+					if (tf.Open(Path, "rt"))
+					{
+						// Read from the current directory.
+						FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray, FilePath);
+						read = false;
+					}
+					else
+					{
+						console.PrintWarning("Could not find %s.\n", pn);
+					}
 				}
 			}
 		}
@@ -1407,10 +1424,23 @@ bool Project::OnOpenDocument(const char* PathName)
 			int ok = 0, step = 1;
 			Matrix mat;
 
-			if (mpdfile)
-				FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray);
+			// Extract the file's directory.
+			String FilePath(PathName);
+			int s1 = FilePath.ReverseFind('\\');
+			int s2 = FilePath.ReverseFind('/');
+
+			if (s2 > s1)
+				s1 = s2;
+
+			if (s1 == -1)
+				FilePath = "";
 			else
-				FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
+				FilePath[s1+1] = 0;
+
+			if (mpdfile)
+				FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray, FilePath);
+			else
+				FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray, FilePath);
 
 			m_nCurStep = step;
 			SystemUpdateTime(false, m_nCurStep, 255);

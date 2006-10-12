@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <dlgs.h>
 #include <direct.h>
+#include <shlobj.h>
 #include "leocad.h"
 #include "bmpmenu.h"
 #include "system.h"
@@ -1373,6 +1374,47 @@ bool SystemDoDialog(int nMode, void* param)
 
 				return true;
 			}
+		} break;
+
+		case LC_DLG_DIRECTORY_BROWSE:
+		{
+			LC_DLG_DIRECTORY_BROWSE_OPTS* Opts = (LC_DLG_DIRECTORY_BROWSE_OPTS*)param;
+
+			strcpy(Opts->Path, "");
+
+			LPMALLOC ShellMalloc;
+			if (SHGetMalloc(&ShellMalloc) == NOERROR)
+			{
+				BROWSEINFO bi;
+				LPITEMIDLIST pidl;
+		
+				if (AfxGetMainWnd())
+					bi.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
+				else
+					bi.hwndOwner = ::GetDesktopWindow();
+				bi.pidlRoot = NULL;
+				bi.pszDisplayName = Opts->Path;
+				bi.lpszTitle = Opts->Title;
+				bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
+				bi.lpfn = NULL;
+				bi.lParam = 0;
+		
+				pidl = SHBrowseForFolder(&bi);
+				if (pidl != NULL)
+				{
+					if (SHGetPathFromIDList(pidl, Opts->Path))
+					{ 
+						if (Opts->Path[strlen(Opts->Path)-1] != '\\') 
+							strcat(Opts->Path, "\\");
+						return true;
+					}
+					ShellMalloc->Free(pidl);
+				}
+				ShellMalloc->Release();
+			}
+
+			return false;
+
 		} break;
 
 		case LC_DLG_HTML:

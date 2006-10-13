@@ -1881,7 +1881,6 @@ void Project::RenderScene(View* view)
 			for (i = 0; i < 4; i++)
 			{
 				float d1 = LinePointMinDistance(Intersections[4], Intersections[i], i == 0 ? Intersections[3] : Intersections[i-1]);
-				float d2 = (Intersections[4] - Intersections[i]).Length();
 
 				if (d1 < MinSize)
 					MinSize = d1;
@@ -7297,9 +7296,9 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		case KEY_PLUS: // case '+': case '=':
 		{
 			if (bShift)
-				HandleCommand(LC_VIEW_ZOOM, -10);
+			  HandleCommand(LC_VIEW_ZOOM, (unsigned int)-10);
 			else
-				HandleCommand(LC_VIEW_ZOOM, -1);
+			  HandleCommand(LC_VIEW_ZOOM, (unsigned int)-1);
 
 			ret = true;
 		} break;

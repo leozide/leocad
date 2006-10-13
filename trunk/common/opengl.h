@@ -580,17 +580,17 @@ typedef ptrdiff_t GLsizeiptrARB;
 // GL_ARB_vertex_buffer_object
 #ifndef GL_ARB_vertex_buffer_object
 #define GL_ARB_vertex_buffer_object 1
-typedef void (APIENTRY *PFNGLBINDBUFFERARB) (GLenum target, GLuint buffer);
-typedef void (APIENTRY *PFNGLDELETEBUFFERSARB) (GLsizei n, const GLuint *buffers);
-typedef void (APIENTRY *PFNGLGENBUFFERSARB) (GLsizei n, GLuint *buffers);
-typedef GLboolean (APIENTRY *PFNGLISBUFFERARB) (GLuint buffer);
-typedef void (APIENTRY *PFNGLBUFFERDATAARB) (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
-typedef void (APIENTRY *PFNGLBUFFERSUBDATAARB) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
-typedef void (APIENTRY *PFNGLGETBUFFERSUBDATAARB) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
-typedef GLvoid* (APIENTRY *PFNGLMAPBUFFERARB) (GLenum target, GLenum access);
-typedef GLboolean (APIENTRY *PFNGLUNMAPBUFFERARB) (GLenum target);
-typedef void (APIENTRY *PFNGLGETBUFFERPARAMETERIVARB) (GLenum target, GLenum pname, GLint *params);
-typedef void (APIENTRY *PFNGLGETBUFFERPOINTERVARB) (GLenum target, GLenum pname, GLvoid* *params);
+typedef void (APIENTRY *PFNGLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
+typedef void (APIENTRY *PFNGLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);
+typedef void (APIENTRY *PFNGLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
+typedef GLboolean (APIENTRY *PFNGLISBUFFERARBPROC) (GLuint buffer);
+typedef void (APIENTRY *PFNGLBUFFERDATAARBPROC) (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
+typedef void (APIENTRY *PFNGLBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+typedef void (APIENTRY *PFNGLGETBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
+typedef GLvoid* (APIENTRY *PFNGLMAPBUFFERARBPROC) (GLenum target, GLenum access);
+typedef GLboolean (APIENTRY *PFNGLUNMAPBUFFERARBPROC) (GLenum target);
+typedef void (APIENTRY *PFNGLGETBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
+typedef void (APIENTRY *PFNGLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
 #endif
 
 // =============================================================================
@@ -971,17 +971,17 @@ extern PFNGLPOINTPARAMETERFEXT pfnglPointParameterfEXT;
 extern PFNGLPOINTPARAMETERFVEXT pfnglPointParameterfvEXT;
 extern PFNGLLOCKARRAYSEXT pfnglLockArraysEXT;
 extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
-extern PFNGLBINDBUFFERARB pfnglBindBufferARB;
-extern PFNGLDELETEBUFFERSARB pfnglDeleteBuffersARB;
-extern PFNGLGENBUFFERSARB pfnglGenBuffersARB;
-extern PFNGLISBUFFERARB pfnglIsBufferARB;
-extern PFNGLBUFFERDATAARB pfnglBufferDataARB;
-extern PFNGLBUFFERSUBDATAARB pfnglBufferSubDataARB;
-extern PFNGLGETBUFFERSUBDATAARB pfnglGetBufferSubDataARB;
-extern PFNGLMAPBUFFERARB pfnglMapBufferARB;
-extern PFNGLUNMAPBUFFERARB pfnglUnmapBufferARB;
-extern PFNGLGETBUFFERPARAMETERIVARB pfnglGetBufferParameterivARB;
-extern PFNGLGETBUFFERPOINTERVARB pfnglGetBufferPointervARB;
+extern PFNGLBINDBUFFERARBPROC pfnglBindBufferARB;
+extern PFNGLDELETEBUFFERSARBPROC pfnglDeleteBuffersARB;
+extern PFNGLGENBUFFERSARBPROC pfnglGenBuffersARB;
+extern PFNGLISBUFFERARBPROC pfnglIsBufferARB;
+extern PFNGLBUFFERDATAARBPROC pfnglBufferDataARB;
+extern PFNGLBUFFERSUBDATAARBPROC pfnglBufferSubDataARB;
+extern PFNGLGETBUFFERSUBDATAARBPROC pfnglGetBufferSubDataARB;
+extern PFNGLMAPBUFFERARBPROC pfnglMapBufferARB;
+extern PFNGLUNMAPBUFFERARBPROC pfnglUnmapBufferARB;
+extern PFNGLGETBUFFERPARAMETERIVARBPROC pfnglGetBufferParameterivARB;
+extern PFNGLGETBUFFERPOINTERVARBPROC pfnglGetBufferPointervARB;
 
 // =============================================================================
 // Replace OpenGL function names with the dynamic functions

@@ -390,17 +390,17 @@ PFNGLPOINTPARAMETERFEXT pfnglPointParameterfEXT;
 PFNGLPOINTPARAMETERFVEXT pfnglPointParameterfvEXT;
 PFNGLLOCKARRAYSEXT pfnglLockArraysEXT;
 PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
-PFNGLBINDBUFFERARB pfnglBindBufferARB;
-PFNGLDELETEBUFFERSARB pfnglDeleteBuffersARB;
-PFNGLGENBUFFERSARB pfnglGenBuffersARB;
-PFNGLISBUFFERARB pfnglIsBufferARB;
-PFNGLBUFFERDATAARB pfnglBufferDataARB;
-PFNGLBUFFERSUBDATAARB pfnglBufferSubDataARB;
-PFNGLGETBUFFERSUBDATAARB pfnglGetBufferSubDataARB;
-PFNGLMAPBUFFERARB pfnglMapBufferARB;
-PFNGLUNMAPBUFFERARB pfnglUnmapBufferARB;
-PFNGLGETBUFFERPARAMETERIVARB pfnglGetBufferParameterivARB;
-PFNGLGETBUFFERPOINTERVARB pfnglGetBufferPointervARB;
+PFNGLBINDBUFFERARBPROC pfnglBindBufferARB;
+PFNGLDELETEBUFFERSARBPROC pfnglDeleteBuffersARB;
+PFNGLGENBUFFERSARBPROC pfnglGenBuffersARB;
+PFNGLISBUFFERARBPROC pfnglIsBufferARB;
+PFNGLBUFFERDATAARBPROC pfnglBufferDataARB;
+PFNGLBUFFERSUBDATAARBPROC pfnglBufferSubDataARB;
+PFNGLGETBUFFERSUBDATAARBPROC pfnglGetBufferSubDataARB;
+PFNGLMAPBUFFERARBPROC pfnglMapBufferARB;
+PFNGLUNMAPBUFFERARBPROC pfnglUnmapBufferARB;
+PFNGLGETBUFFERPARAMETERIVARBPROC pfnglGetBufferParameterivARB;
+PFNGLGETBUFFERPOINTERVARBPROC pfnglGetBufferPointervARB;
 
 // =============================================================================
 // Initialization functions
@@ -1241,17 +1241,17 @@ bool GL_InitializeExtensions ()
 
 	if (GL_ExtensionSupported("GL_ARB_vertex_buffer_object"))
 	{
-		pfnglBindBufferARB = (PFNGLBINDBUFFERARB)Sys_GLGetExtension("glBindBufferARB");
-		pfnglDeleteBuffersARB = (PFNGLDELETEBUFFERSARB)Sys_GLGetExtension("glDeleteBuffersARB");
-		pfnglGenBuffersARB = (PFNGLGENBUFFERSARB)Sys_GLGetExtension("glGenBuffersARB");
-		pfnglIsBufferARB = (PFNGLISBUFFERARB)Sys_GLGetExtension("glIsBufferARB");
-		pfnglBufferDataARB = (PFNGLBUFFERDATAARB)Sys_GLGetExtension("glBufferDataARB");
-		pfnglBufferSubDataARB = (PFNGLBUFFERSUBDATAARB)Sys_GLGetExtension("glBufferSubDataARB");
-		pfnglGetBufferSubDataARB = (PFNGLGETBUFFERSUBDATAARB)Sys_GLGetExtension("glGetBufferSubDataARB");
-		pfnglMapBufferARB = (PFNGLMAPBUFFERARB)Sys_GLGetExtension("glMapBufferARB");
-		pfnglUnmapBufferARB = (PFNGLUNMAPBUFFERARB)Sys_GLGetExtension("glUnmapBufferARB");
-		pfnglGetBufferParameterivARB = (PFNGLGETBUFFERPARAMETERIVARB)Sys_GLGetExtension("glGetBufferParameterivARB");
-		pfnglGetBufferPointervARB = (PFNGLGETBUFFERPOINTERVARB)Sys_GLGetExtension("glGetBufferPointervARB");
+		pfnglBindBufferARB = (PFNGLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB");
+		pfnglDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB");
+		pfnglGenBuffersARB = (PFNGLGENBUFFERSARBPROC)Sys_GLGetExtension("glGenBuffersARB");
+		pfnglIsBufferARB = (PFNGLISBUFFERARBPROC)Sys_GLGetExtension("glIsBufferARB");
+		pfnglBufferDataARB = (PFNGLBUFFERDATAARBPROC)Sys_GLGetExtension("glBufferDataARB");
+		pfnglBufferSubDataARB = (PFNGLBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glBufferSubDataARB");
+		pfnglGetBufferSubDataARB = (PFNGLGETBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glGetBufferSubDataARB");
+		pfnglMapBufferARB = (PFNGLMAPBUFFERARBPROC)Sys_GLGetExtension("glMapBufferARB");
+		pfnglUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)Sys_GLGetExtension("glUnmapBufferARB");
+		pfnglGetBufferParameterivARB = (PFNGLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB");
+		pfnglGetBufferPointervARB = (PFNGLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB");
 		GL_VertexBufferObject = true;
 	}
 

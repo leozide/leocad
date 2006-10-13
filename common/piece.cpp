@@ -963,7 +963,6 @@ void Piece::BuildMesh(TypeToType<T>)
 
 	lcMeshEditor<T> MeshEdit(m_Mesh);
 
-	int SrcSection = 0;
 	lcMeshSection* DstSections[LC_COL_DEFAULT+1][3];
 	memset(DstSections, 0, sizeof(DstSections));
 	CurSection = 0;

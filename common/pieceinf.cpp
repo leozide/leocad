@@ -516,7 +516,6 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 	// Read groups
 	u8* bytes = (u8*)MeshStart;
 	u16 sh = m_nGroupCount;
-	int CurSection = 0;
 
 	for (pGroup = m_pGroups; sh--; pGroup++)
 	{

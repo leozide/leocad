@@ -17,6 +17,7 @@ void modifydlg_toggle ();
 int openprojectdlg_execute (char* filename);
 int saveprojectdlg_execute (char* filename);
 int savepicturedlg_execute (void* param);
+int dirbrowsedlg_execute(void* param);
 int msgbox_execute (const char* text, const char *caption, int flags);
 int filedlg_execute(char* caption, char* filename);
 int arraydlg_execute(void* param);

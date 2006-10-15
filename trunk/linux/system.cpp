@@ -616,6 +616,10 @@ bool SystemDoDialog(int mode, void* param)
       return openprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
+    case LC_DLG_DIRECTORY_BROWSE: {
+      return dirbrowsedlg_execute(param) == LC_OK;
+    } break;
+
     case LC_DLG_ABOUT: {
       return aboutdlg_execute(param) == LC_OK;
     } break;

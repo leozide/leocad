@@ -4918,7 +4918,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 			else
-				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(0, 0, -m_pCurPiece->m_fDimensions[5], m_nCurStep, m_nCurFrame, m_nCurColor);
 
 			SelectAndFocusNone(false);
 			pPiece->CreateName(m_pPieces);
@@ -6530,6 +6530,7 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	Vector3 Intersection;
 	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
 	{
+		Intersection[2] += -m_pCurPiece->m_fDimensions[5];
 		SnapVector(Intersection);
 		Position = Intersection;
 		Rotation = Vector4(0, 0, 1, 0);

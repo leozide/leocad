@@ -280,9 +280,15 @@
 #define IDC_OPENDLG_TEXT                1103
 #define IDC_MODDLG_TARGETZ              1103
 #define IDC_SCNDLG_BGIMAGE_BROWSE       1104
+#define IDC_MODDLG_CONSTANT             1104
 #define IDC_SCNDLG_FOGCOLOR             1105
+#define IDC_MODDLG_POSY3                1105
+#define IDC_MODDLG_LINEAR               1105
 #define IDC_SCNDLG_BGCOLOR              1106
+#define IDC_MODDLG_QUADRATIC            1106
 #define IDC_SCNDLG_AMBIENTLIGHT         1107
+#define IDC_MODDLG_CUTOFF               1107
+#define IDC_MODDLG_EXPONENT             1108
 #define IDC_SCNDLG_BGIMAGE              1109
 #define IDC_SCNDLG_BGTILE               1110
 #define IDC_SCNDLG_FOG                  1111
@@ -311,6 +317,8 @@
 #define IDC_GENDLG_USER                 1133
 #define IDC_MODDLG_LIST                 1136
 #define IDC_MODDLG_COLOR                1137
+#define IDC_MODDLG_DIFFUSE              1138
+#define IDC_MODDLG_SPECULAR             1139
 #define IDC_MODDLG_PIECE                1142
 #define IDC_MODDLG_ROTATION             1145
 #define IDC_MODDLG_FROM                 1146
@@ -464,6 +472,7 @@
 #define IDC_MODDLG_ORTHO                1248
 #define IDC_MODDLG_CLIP                 1249
 #define IDC_MODDLG_CONE                 1250
+#define IDC_MODDLG_AMBIENT              1251
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -710,7 +719,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
 #define _APS_NEXT_COMMAND_VALUE         33176
-#define _APS_NEXT_CONTROL_VALUE         1251
+#define _APS_NEXT_CONTROL_VALUE         1252
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

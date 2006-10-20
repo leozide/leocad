@@ -5,6 +5,7 @@
 #include "stdafx.h" 
 #include "leocad.h" 
 #include "ModDlg.h" 
+#include "tools.h"
 
 #include "project.h"
 #include "globals.h"
@@ -234,10 +235,17 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
 		{
-			// TODO: Lights.
+			Light* light;
+
+			if (m_CurrentType == LC_OBJECT_LIGHT)
+				light = (Light*)m_pObject;
+			else
+				light = ((LightTarget*)m_pObject)->GetParent();
+
+			m_LightDlg.UpdateInfo(light);
+			m_ctlCombo.SetWindowText(((Light*)m_pObject)->GetName());
 		} break;
 	}
-
 }
 
 void CModifyDialog::OnModdlgPiece() 
@@ -373,7 +381,7 @@ void CModifyDialog::OnModdlgApply()
 
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
-			// TODO: Lights.
+			m_LightDlg.Apply((Light*)m_pObject);
 			break;
 	}
 }
@@ -782,6 +790,21 @@ IMPLEMENT_DYNAMIC(CModifyLightDlg, CDialog)
 CModifyLightDlg::CModifyLightDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CModifyLightDlg::IDD, pParent)
 {
+	m_PosX = 0.0f;
+	m_PosY = 0.0f;
+	m_PosZ = 0.0f;
+	m_TargetX = 0.0f;
+	m_TargetY = 0.0f;
+	m_TargetZ = 0.0f;
+	m_AmbientColor = Vector3(0, 0, 0);
+	m_DiffuseColor = Vector3(0, 0, 0);
+	m_SpecularColor = Vector3(0, 0, 0);
+	m_Constant = 0.0f;
+	m_Linear = 0.0f;
+	m_Quadratic = 0.0f;
+	m_Exponent = 0.0f;
+	m_Cutoff = 0.0f;
+	m_Hidden = false;
 }
 
 CModifyLightDlg::~CModifyLightDlg()
@@ -791,19 +814,222 @@ CModifyLightDlg::~CModifyLightDlg()
 void CModifyLightDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+
+	//{{AFX_DATA_MAP(CModifyDialog)
+	DDX_Text_Float(pDX, IDC_MODDLG_POSX, m_PosX);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSY, m_PosY);
+	DDX_Text_Float(pDX, IDC_MODDLG_POSZ, m_PosZ);
+	DDX_Text_Float(pDX, IDC_MODDLG_TARGETX, m_TargetX);
+	DDX_Text_Float(pDX, IDC_MODDLG_TARGETY, m_TargetY);
+	DDX_Text_Float(pDX, IDC_MODDLG_TARGETZ, m_TargetZ);
+	DDX_Control(pDX, IDC_MODDLG_AMBIENT, m_Ambient);
+	DDX_Control(pDX, IDC_MODDLG_DIFFUSE, m_Diffuse);
+	DDX_Control(pDX, IDC_MODDLG_SPECULAR, m_Specular);
+	DDX_Text_Float(pDX, IDC_MODDLG_CONSTANT, m_Constant);
+	DDX_Text_Float(pDX, IDC_MODDLG_LINEAR, m_Linear);
+	DDX_Text_Float(pDX, IDC_MODDLG_QUADRATIC, m_Quadratic);
+	DDX_Text_Float(pDX, IDC_MODDLG_CUTOFF, m_Cutoff);
+	DDX_Text_Float(pDX, IDC_MODDLG_EXPONENT, m_Exponent);
+	DDX_Check(pDX, IDC_MODDLG_HIDDEN, m_Hidden);
+	//}}AFX_DATA_MAP
+
+	if (!pDX->m_bSaveAndValidate)
+	{
+		COLORREF Ambient = RGB(m_AmbientColor[0]*255, m_AmbientColor[1]*255, m_AmbientColor[2]*255);
+		DeleteObject(m_Ambient.SetBitmap(CreateColorBitmap(20, 10, Ambient)));
+
+		COLORREF Diffuse = RGB(m_DiffuseColor[0]*255, m_DiffuseColor[1]*255, m_DiffuseColor[2]*255);
+		DeleteObject(m_Diffuse.SetBitmap(CreateColorBitmap(20, 10, Diffuse)));
+
+		COLORREF Specular = RGB(m_SpecularColor[0]*255, m_SpecularColor[1]*255, m_SpecularColor[2]*255);
+		DeleteObject(m_Specular.SetBitmap(CreateColorBitmap(20, 10, Specular)));
+	}
 }
 
 
 BEGIN_MESSAGE_MAP(CModifyLightDlg, CDialog)
+	ON_EN_KILLFOCUS(IDC_MODDLG_POSX, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_POSY, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_POSZ, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_TARGETX, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_TARGETY, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_TARGETZ, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_AMBIENT, OnAmbient)
+	ON_BN_CLICKED(IDC_MODDLG_DIFFUSE, OnDiffuse)
+	ON_BN_CLICKED(IDC_MODDLG_SPECULAR, OnSpecular)
+	ON_EN_KILLFOCUS(IDC_MODDLG_CONSTANT, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_LINEAR, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_QUADRATIC, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_CUTOFF, OnDataChange)
+	ON_EN_KILLFOCUS(IDC_MODDLG_EXPONENT, OnDataChange)
+	ON_BN_CLICKED(IDC_MODDLG_HIDDEN, OnDataChange)
 END_MESSAGE_MAP()
 
 
 // CModifyLightDlg message handlers
 void CModifyLightDlg::OnOK() 
 {
+	((CModifyDialog*)GetParent()->GetParent())->PostMessage(WM_COMMAND, IDC_MODDLG_APPLY);
 }
 
 void CModifyLightDlg::OnCancel() 
 {
 }
 
+void CModifyLightDlg::OnDataChange()
+{
+	((CModifyDialog*)GetParent()->GetParent())->PostMessage(WM_COMMAND, IDC_MODDLG_APPLY);
+}
+
+void CModifyLightDlg::OnAmbient()
+{
+	COLORREF Color = RGB(m_AmbientColor[0]*255, m_AmbientColor[1]*255, m_AmbientColor[2]*255);
+	CColorDialog dlg(Color);
+	if (dlg.DoModal() == IDOK)
+	{
+		Color = dlg.GetColor();
+		m_AmbientColor = Vector3(GetRValue(Color), GetGValue(Color), GetBValue(Color)) / 255.0f;
+		DeleteObject(m_Ambient.SetBitmap(CreateColorBitmap(20, 10, Color)));
+		OnDataChange();
+	}
+}
+
+void CModifyLightDlg::OnDiffuse()
+{
+	COLORREF Color = RGB(m_DiffuseColor[0]*255, m_DiffuseColor[1]*255, m_DiffuseColor[2]*255);
+	CColorDialog dlg(Color);
+	if (dlg.DoModal() == IDOK)
+	{
+		Color = dlg.GetColor();
+		m_DiffuseColor = Vector3(GetRValue(Color), GetGValue(Color), GetBValue(Color)) / 255.0f;
+		DeleteObject(m_Diffuse.SetBitmap(CreateColorBitmap(20, 10, Color)));
+		OnDataChange();
+	}
+}
+
+void CModifyLightDlg::OnSpecular()
+{
+	COLORREF Color = RGB(m_SpecularColor[0]*255, m_SpecularColor[1]*255, m_SpecularColor[2]*255);
+	CColorDialog dlg(Color);
+	if (dlg.DoModal() == IDOK)
+	{
+		Color = dlg.GetColor();
+		m_SpecularColor = Vector3(GetRValue(Color), GetGValue(Color), GetBValue(Color)) / 255.0f;
+		DeleteObject(m_Specular.SetBitmap(CreateColorBitmap(20, 10, Color)));
+		OnDataChange();
+	}
+}
+
+void CModifyLightDlg::UpdateInfo(Light* light)
+{
+	GetDlgItem(IDC_MODDLG_TARGETX)->EnableWindow(TRUE);
+	GetDlgItem(IDC_MODDLG_TARGETY)->EnableWindow(TRUE);
+	GetDlgItem(IDC_MODDLG_TARGETZ)->EnableWindow(TRUE);
+	GetDlgItem(IDC_MODDLG_CONSTANT)->EnableWindow(TRUE);
+	GetDlgItem(IDC_MODDLG_LINEAR)->EnableWindow(TRUE);
+	GetDlgItem(IDC_MODDLG_QUADRATIC)->EnableWindow(TRUE);
+
+	if (light == NULL)
+	{
+		m_PosX = 0.0f;
+		m_PosY = 0.0f;
+		m_PosZ = 0.0f;
+		m_TargetX = 0.0f;
+		m_TargetY = 0.0f;
+		m_TargetZ = 0.0f;
+		m_AmbientColor = Vector3(0, 0, 0);
+		m_DiffuseColor = Vector3(0, 0, 0);
+		m_SpecularColor = Vector3(0, 0, 0);
+		m_Constant = 0.0f;
+		m_Linear = 0.0f;
+		m_Quadratic = 0.0f;
+		m_Exponent = 0.0f;
+		m_Cutoff = 0.0f;
+		m_Hidden = false;
+	}
+	else
+	{
+		Vector3 tmp;
+
+		bool Omni = (light->GetTarget() == NULL);
+		bool Spot = (light->GetTarget() != NULL) && (light->GetSpotCutoff() != 180.0f);
+
+		tmp = light->GetPosition();
+		lcGetActiveProject()->ConvertToUserUnits(tmp);
+		m_PosX = tmp[0];
+		m_PosY = tmp[1];
+		m_PosZ = tmp[2];
+
+		if (Omni)
+		{
+			m_TargetX = 0.0f;
+			m_TargetY = 0.0f;
+			m_TargetZ = 0.0f;
+			GetDlgItem(IDC_MODDLG_TARGETX)->EnableWindow(FALSE);
+			GetDlgItem(IDC_MODDLG_TARGETY)->EnableWindow(FALSE);
+			GetDlgItem(IDC_MODDLG_TARGETZ)->EnableWindow(FALSE);
+		}
+		else
+		{
+			tmp = light->GetTargetPosition();
+			lcGetActiveProject()->ConvertToUserUnits(tmp);
+			m_TargetX = tmp[0];
+			m_TargetY = tmp[1];
+			m_TargetZ = tmp[2];
+		}
+
+		m_AmbientColor = light->GetAmbientColor();
+		m_DiffuseColor = light->GetDiffuseColor();
+		m_SpecularColor = light->GetSpecularColor();
+
+		if (Omni || Spot)
+		{
+			m_Constant = light->GetConstantAttenuation();
+			m_Linear = light->GetLinearAttenuation();
+			m_Quadratic = light->GetQuadraticAttenuation();
+		}
+		else
+		{
+			m_Constant = 1.0f;
+			m_Linear = 0.0f;
+			m_Quadratic = 0.0f;
+			GetDlgItem(IDC_MODDLG_CONSTANT)->EnableWindow(FALSE);
+			GetDlgItem(IDC_MODDLG_LINEAR)->EnableWindow(FALSE);
+			GetDlgItem(IDC_MODDLG_QUADRATIC)->EnableWindow(FALSE);
+		}
+
+		m_Cutoff = light->GetSpotCutoff();
+		m_Exponent = light->GetSpotExponent();
+
+		m_Hidden = !light->IsVisible();
+	}
+
+	UpdateData(FALSE);
+}
+
+void CModifyLightDlg::Apply(Light* light)
+{
+	UpdateData(TRUE);
+
+	LC_LIGHT_MODIFY mod;
+
+	mod.light = light;
+	mod.Position = Vector3(m_PosX, m_PosY, m_PosZ);
+	lcGetActiveProject()->ConvertFromUserUnits(mod.Position);
+	mod.Target = Vector3(m_TargetX, m_TargetY, m_TargetZ);
+	lcGetActiveProject()->ConvertFromUserUnits(mod.Target);
+
+	mod.AmbientColor = m_AmbientColor;
+	mod.DiffuseColor = m_DiffuseColor;
+	mod.SpecularColor = m_SpecularColor;
+	mod.ConstantAttenuation = m_Constant;
+	mod.LinearAttenuation = m_Linear;
+	mod.QuadraticAttenuation = m_Quadratic;
+	mod.SpotCutoff = m_Cutoff;
+	mod.SpotExponent = m_Exponent;
+	mod.Hidden = (m_Hidden != FALSE);
+
+	strcpy(mod.name, ((CModifyDialog*)GetParent()->GetParent())->m_strName);
+
+	lcGetActiveProject()->HandleNotify(LC_LIGHT_MODIFIED, (unsigned long)&mod);
+}

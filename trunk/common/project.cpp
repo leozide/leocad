@@ -3626,15 +3626,59 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			if (pCamera->GetRoll() != mod->Roll)
 				pCamera->SetRoll(mod->Roll, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 
+			pCamera->SetName(mod->name);
 			pCamera->m_fovy = mod->fovy;
 			pCamera->m_zNear = mod->znear;
 			pCamera->m_zFar = mod->zfar;
+
 			pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			UpdateAllViews();
 		} break;
 
 		case LC_LIGHT_MODIFIED:
 		{
+			LC_LIGHT_MODIFY* mod = (LC_LIGHT_MODIFY*)param;
+			Light* light = (Light*)mod->light;
+
+			if (mod->Hidden)
+				light->Hide();
+			else
+				light->UnHide();
+
+			if (light->GetPosition() != mod->Position)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Position, LC_LK_POSITION);
+
+			if (light->GetTargetPosition() != mod->Target)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Target, LC_LK_TARGET);
+
+			if (light->GetAmbientColor() != mod->AmbientColor)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->AmbientColor, LC_LK_AMBIENT_COLOR);
+
+			if (light->GetDiffuseColor() != mod->DiffuseColor)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->DiffuseColor, LC_LK_DIFFUSE_COLOR);
+
+			if (light->GetSpecularColor() != mod->SpecularColor)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->SpecularColor, LC_LK_SPECULAR_COLOR);
+
+			if (light->GetConstantAttenuation() != mod->ConstantAttenuation)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, &mod->ConstantAttenuation, LC_LK_CONSTANT_ATTENUATION);
+
+			if (light->GetLinearAttenuation() != mod->LinearAttenuation)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, &mod->LinearAttenuation, LC_LK_LINEAR_ATTENUATION);
+
+			if (light->GetQuadraticAttenuation() != mod->QuadraticAttenuation)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, &mod->QuadraticAttenuation, LC_LK_QUADRATIC_ATTENUATION);
+
+			if (light->GetSpotCutoff() != mod->SpotCutoff)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, &mod->SpotCutoff, LC_LK_SPOT_CUTOFF);
+
+			if (light->GetSpotExponent() != mod->SpotExponent)
+				light->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, &mod->SpotExponent, LC_LK_SPOT_EXPONENT);
+
+			light->SetName(mod->name);
+
+			light->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			UpdateAllViews();
 		} break;
 	}
 }

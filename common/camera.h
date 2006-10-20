@@ -98,7 +98,9 @@ public:
 		{ m_nState = LC_CAMERA_HIDDEN; }
 	void UnHide()
 		{ m_nState &= ~LC_CAMERA_HIDDEN; }
-	char* GetName()
+	void SetName(char* name)
+		{ strcpy(m_strName, name); }
+	const char* GetName()
 		{ return m_strName; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }

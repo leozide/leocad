@@ -7,6 +7,7 @@
 #include "sizecbar.h"
 #include "scbarg.h"
 #include "RollUpCtrl.h"
+#include "algebra.h"
 
 class Object;
 
@@ -20,7 +21,7 @@ public:
 	virtual ~CModifyPieceDlg();
 
 // Dialog Data
-	//{{AFX_DATA(CModifyDialog)
+	//{{AFX_DATA(CModifyPieceDlg)
 	enum { IDD = IDD_MODIFY_PIECE };
 	float	m_PosX;
 	float	m_PosY;
@@ -60,7 +61,7 @@ public:
 	virtual ~CModifyCameraDlg();
 
 // Dialog Data
-	//{{AFX_DATA(CModifyDialog)
+	//{{AFX_DATA(CModifyCameraDlg)
 	enum { IDD = IDD_MODIFY_CAMERA };
 	float	m_PosX;
 	float	m_PosY;
@@ -103,7 +104,31 @@ public:
 	virtual ~CModifyLightDlg();
 
 // Dialog Data
+	//{{AFX_DATA(CModifyLightDlg)
 	enum { IDD = IDD_MODIFY_LIGHT };
+	float m_PosX;
+	float m_PosY;
+	float m_PosZ;
+	float m_TargetX;
+	float m_TargetY;
+	float m_TargetZ;
+	CButton m_Ambient;
+	CButton m_Diffuse;
+	CButton m_Specular;
+	float m_Constant;
+	float m_Linear;
+	float m_Quadratic;
+	float m_Cutoff;
+	float m_Exponent;
+	BOOL m_Hidden;
+	//}}AFX_DATA
+
+	Vector3 m_AmbientColor;
+	Vector3 m_DiffuseColor;
+	Vector3 m_SpecularColor;
+
+	void UpdateInfo(class Light* light);
+	void Apply(class Light* light);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -112,6 +137,10 @@ protected:
 	//{{AFX_MSG(CModifyLightDlg)
 	virtual void OnOK();
 	virtual void OnCancel();
+	afx_msg void OnDataChange();
+	afx_msg void OnAmbient();
+	afx_msg void OnDiffuse();
+	afx_msg void OnSpecular();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -212,6 +241,4 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-
 #endif // _MODDLG_H_
-

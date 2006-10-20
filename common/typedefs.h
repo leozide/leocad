@@ -8,6 +8,7 @@ class Group;
 class Piece;
 class PieceInfo;
 class Camera;
+class Light;
 
 #include "defines.h"
 #include "str.h"
@@ -251,6 +252,23 @@ struct LC_CAMERA_MODIFY
 	bool hidden;
 	bool clip;
 	bool cone;
+};
+
+struct LC_LIGHT_MODIFY
+{
+	Light* light;
+	Vector3 Position;
+	Vector3 Target;
+	Vector3 AmbientColor;
+	Vector3 DiffuseColor;
+	Vector3 SpecularColor;
+	float ConstantAttenuation;
+	float LinearAttenuation;
+	float QuadraticAttenuation;
+	float SpotCutoff;
+	float SpotExponent;
+	bool Hidden;
+	char name[81];
 };
 
 // Image

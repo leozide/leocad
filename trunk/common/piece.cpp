@@ -1327,162 +1327,9 @@ void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short n
 		for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
 			pPiece->CalculateConnections(pConnections, nTime, bAnimation, true, false);
 
-/*
-	BOOL bRebuild = FALSE;
-	CONNECTION *c1, *c2;
-	int sz = sizeof(CPiece*)*(m_pInfo->m_nConnectionCount-1);
-	CPiece** pConnections = (CPiece**)malloc(sz);
-	memset(pConnections, 0, sz);
-
-	for (POSITION pos = pDoc->m_Pieces.GetHeadPosition(); pos != NULL;)
-	{
-		CPiece* pPiece = pDoc->m_Pieces.GetNext(pos);
-		if ((pPiece == this) || (pPiece->m_pInfo->m_nConnectionCount == 1) ||
-			(!pPiece->IsVisible(nTime, bAnimator)))
-			continue;
-		pPiece->m_bUpdated = FALSE;
-
-		for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-		{
-			c1 = &m_pInfo->m_pConnections[i+1];
-
-			for (j = 0; j < pPiece->m_pInfo->m_nConnectionCount-1; j++)
-			{
-				c2 = &pPiece->m_pInfo->m_pConnections[j+1];
-			
-				if (ConnectionsMatch(c1->type, c2->type))
-				{
-// normal
-					if ((fabs(m_pConnections[i].pos[0]-pPiece->m_pConnections[j].pos[0]) < 0.1) && 
-						(fabs(m_pConnections[i].pos[1]-pPiece->m_pConnections[j].pos[1]) < 0.1) && 
-						(fabs(m_pConnections[i].pos[2]-pPiece->m_pConnections[j].pos[2]) < 0.1))
-					{
-						pConnections[i] = pPiece;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-	if (m_pConnections[i].pPiece != pConnections[i])
-	{
-		if (bOthers)
-		{
-			if ((m_pConnections[i].pPiece != NULL) &&
-				(m_pConnections[i].pPiece->IsVisible(nTime, bAnimator)))
-				m_pConnections[i].pPiece->UpdateConnections(this);
-			if ((pConnections[i] != NULL) &&
-				(pConnections[i]->IsVisible(nTime, bAnimator)))
-				pConnections[i]->UpdateConnections(this);
-		}
-
-		if (m_pConnections[i].pPiece == NULL)
-		{
-			if (m_pInfo->m_pConnections[i].info != NULL)
-				bRebuild = TRUE;
-		}
-		else
-		{
-			if (pConnections[i] == NULL)
-				if (m_pInfo->m_pConnections[i].info != NULL)
-					bRebuild = TRUE;
-		}
-
-		m_pConnections[i].pPiece = pConnections[i];
-	}
-
-	free(pConnections);
-*/
 	if (rebuild)
 		BuildDrawInfo();
 }
-
-/*
-inline static BOOL ConnectionsMatch(BYTE c1, BYTE c2)
-{
-	if (c1 == 1)
-	{
-		if (c2 == 2)
-			return TRUE;
-		else
-			return FALSE;
-	}
-
-	if (c2 == 1)
-	{
-		if (c1 == 2)
-			return TRUE;
-		else
-			return FALSE;
-	}
-
-	// 1: STUD
-	// 2: STUD CONNECTION
-//	int i = __min (c1, c2);
-//	int j = __max (c1, c2);
-//	switch (i)
-//	{
-//	case 1: if (j == 2) return TRUE;
-//	}
-
-	return FALSE;
-}
-
-void CPiece::UpdateConnections(CPiece* pPiece)
-{
-	if (m_bUpdated || m_pInfo->m_nConnectionCount == 1)
-		return;
-	BOOL bRebuild = FALSE;
-	int sz = sizeof(CPiece*)*(m_pInfo->m_nConnectionCount-1), i, j;
-	CONNECTION *c1, *c2;
-	CPiece** pConnections = (CPiece**)malloc(sz);
-	memset(pConnections, 0, sz);
-
-	for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-	{
-		c1 = &m_pInfo->m_pConnections[i+1];
-
-		for (j = 0; j < pPiece->m_pInfo->m_nConnectionCount-1; j++)
-		{
-			c2 = &pPiece->m_pInfo->m_pConnections[j+1];
-			
-			if (ConnectionsMatch(c1->type, c2->type))
-			{
-// normal
-				if ((fabs(m_pConnections[i].pos[0]-pPiece->m_pConnections[j].pos[0]) < 0.1) && 
-					(fabs(m_pConnections[i].pos[1]-pPiece->m_pConnections[j].pos[1]) < 0.1) && 
-					(fabs(m_pConnections[i].pos[2]-pPiece->m_pConnections[j].pos[2]) < 0.1))
-				{
-					pConnections[i] = pPiece;
-					break;
-				}
-			}
-		}
-	}
-
-	for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-	{
-		if (m_pConnections[i].pPiece == pPiece && pConnections[i] == NULL)
-		{
-			m_pConnections[i].pPiece = NULL;
-			bRebuild = TRUE;
-		}
-
-		if (pConnections[i] == pPiece && m_pConnections[i].pPiece == NULL)
-		{
-			m_pConnections[i].pPiece = pPiece;
-			bRebuild = TRUE;
-		}
-	}
-
-	if (bRebuild)
-		BuildDrawInfo();
-	free(pConnections);
-	m_bUpdated = TRUE;
-}
-*/
 
 void Piece::AddConnections(CONNECTION_TYPE* pConnections)
 {
@@ -1540,7 +1387,7 @@ void Piece::RemoveConnections(CONNECTION_TYPE* pConnections)
 
 			if (Entry->owner == this)
 			{
-				// Save a list of pieces that their lost connection to this one.
+				// Save a list of pieces that lost a connection to this one.
 				for (int k = 0; k < Entry->numcons; k++)
 				{
 					if (Entry->cons[k]->link != NULL)
@@ -1557,18 +1404,6 @@ void Piece::RemoveConnections(CONNECTION_TYPE* pConnections)
 				// Shrink array.
 				for (; j < Type->numentries; j++)
 					Type->entries[j] = Type->entries[j+1];
-
-				// Realloc to save memory.
-				if (Type->numentries % 5 == 0)
-				{
-					if (Type->numentries > 0)
-						Type->entries = (CONNECTION_ENTRY*)realloc(Type->entries, sizeof(CONNECTION_ENTRY)*Type->numentries);
-					else
-					{
-						free(Type->entries);
-						Type->entries = NULL;
-					}
-				}
 			}
 		}
 	}

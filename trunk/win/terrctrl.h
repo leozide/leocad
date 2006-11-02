@@ -11,20 +11,22 @@
 
 #define TERRAINCTRL_CLASSNAME _T("TerrainCtrl")
 
-typedef struct {
+struct GRIDCELL
+{
 	UINT state; // Cell state (selected/focus etc)
 //	float height;
-} GRIDCELL; 
+};
 
-typedef struct CELLID {
+struct CELLID
+{
 	int row, col;
-    CELLID(int nRow = -1, int nCol = -1)
+	CELLID(int nRow = -1, int nCol = -1)
 		: row(nRow), col(nCol) {}
 	BOOL operator==(const CELLID rhs)
 		{ return (row == rhs.row && col == rhs.col); }
 	BOOL operator!=(const CELLID rhs)
 		{ return (row != rhs.row || col != rhs.col); }
-} CELLID;
+};
 
 
 // Cell states

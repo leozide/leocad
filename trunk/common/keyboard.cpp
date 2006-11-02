@@ -298,12 +298,11 @@ void InitKeyboardShortcuts()
 	LoadKeyboardShortcuts(FileName);
 }
 
-typedef struct
+struct LC_KEYNAME_ENTRY
 {
 	int Key;
 	const char* Name;
-
-} LC_KEYNAME_ENTRY;
+};
 
 static LC_KEYNAME_ENTRY KeyNames[] =
 {

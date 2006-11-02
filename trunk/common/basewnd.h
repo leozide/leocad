@@ -7,30 +7,30 @@
 #ifdef WIN32
 #include "stdafx.h"
 typedef CWnd* BaseWndXID;
-typedef struct
+struct BaseMenuItem
 {
   CWnd* wnd;
   int index;
   UINT command;
-} BaseMenuItem;
+};
 #endif
 
 #ifdef LC_LINUX
 #include <gtk/gtk.h>
 typedef GtkWidget* BaseWndXID;
-typedef struct
+struct BaseMenuItem
 {
   GtkWidget* widget;
   GtkAccelGroup* accel;
-} BaseMenuItem;
+};
 #endif
 
 #ifdef LC_MACOSX
 typedef void* BaseWndXID;
-typedef struct
+struct BaseMenuItem
 {
 	void* Dummy;
-} BaseMenuItem;
+};
 #endif
 
 // =============================================================================

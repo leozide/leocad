@@ -210,7 +210,7 @@ void CurvePoint::Select (bool bSelecting, bool bFocus, bool bMultiple)
   }
 }
 
-void CurvePoint::Render (LC_RENDER_INFO* pInfo)
+void CurvePoint::Render ()
 {
   if (m_nState & LC_CURVE_POINT_FOCUSED)
     glColor3ubv (FlatColorArray[LC_COL_FOCUSED]);
@@ -602,35 +602,23 @@ void Curve::TesselateHose ()
 	free (verts);
 }
 
-void Curve::Render (LC_RENDER_INFO* pInfo)
+void Curve::Render ()
 {
 	if ((m_nState & LC_CURVE_HIDDEN) != 0)
 		return;
 
-	// FIXME: create a "set color" function in LC_RENDER_INFO
-	if (pInfo->lighting)
-		glColor4ubv (ColorArray[m_nColor]);
-	else
-		glColor3ubv (FlatColorArray[m_nColor]);
+	glColor4ubv (ColorArray[m_nColor]);
 
-	if (m_nColor > 13 && m_nColor < 22) // FIXME: use a #define
+	if (m_nColor > 13 && m_nColor < 22)
 	{
-		if (!pInfo->transparent)
-		{
-			pInfo->transparent = true;
-			glEnable (GL_BLEND);
-			glDepthMask (GL_FALSE);
-			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
+		glEnable (GL_BLEND);
+		glDepthMask (GL_FALSE);
+		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	else
 	{
-		if (pInfo->transparent)
-		{
-			pInfo->transparent = false;
-			glDepthMask (GL_TRUE);
-			glDisable (GL_BLEND);
-		}
+		glDepthMask (GL_TRUE);
+		glDisable (GL_BLEND);
 	}
 
 	//  glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
@@ -639,18 +627,11 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 	//  if (m_nState & LC_CURVE_SELECTED)
 	{
 		// turn off transparency to draw the control points
-		if (pInfo->transparent)
-		{
-			pInfo->transparent = false;
-			if (pInfo->transparent)
-			{
-				glDepthMask (GL_TRUE);
-				glDisable (GL_BLEND);
-			}
-		}
+		glDepthMask (GL_TRUE);
+		glDisable (GL_BLEND);
 
 		for (int i = 0; i < m_Points.GetSize (); i++)
-			m_Points[i]->Render (pInfo);
+			m_Points[i]->Render ();
 	}
 
 	/*

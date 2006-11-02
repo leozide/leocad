@@ -1663,7 +1663,7 @@ bool SystemDoDialog(int nMode, void* param)
 /////////////////////////////////////////////////////////////////////////////
 // Memory rendering functions
 
-typedef struct
+struct LC_RENDER
 {
 	HDC hdc;
 	HDC oldhdc;
@@ -1671,7 +1671,7 @@ typedef struct
 	HGLRC oldhrc;
 	HBITMAP hbm;
 	HBITMAP oldhbm;
-} LC_RENDER;
+};
 
 void* Sys_StartMemoryRender(int width, int height)
 {

@@ -245,11 +245,11 @@ BOOL CPropertiesPieces::OnInitDialog()
 	return TRUE;
 }
 
-typedef struct
+struct COMPARE_DATA
 {
 	CPropertiesPieces* page;
 	int color;
-} COMPARE_DATA;
+};
 
 static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
 {

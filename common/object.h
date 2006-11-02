@@ -17,35 +17,24 @@ typedef enum
 } LC_OBJECT_TYPE;
 
 // key handling
-typedef struct LC_OBJECT_KEY
+struct LC_OBJECT_KEY
 {
 	unsigned short  time;
 	float           param[4];
 	unsigned char   type;
 	LC_OBJECT_KEY*  next;
-} LC_OBJECT_KEY;
+};
 
-typedef struct
+struct LC_OBJECT_KEY_INFO
 {
 	const char *description;
 	unsigned char size; // number of floats
 	unsigned char type;
-} LC_OBJECT_KEY_INFO;
-
-// rendering parameters
-typedef struct
-{
-	bool lighting;
-	bool edges;
-	float fLineWidth;
-
-	unsigned char lastcolor;
-	bool transparent;
-} LC_RENDER_INFO;
+};
 
 // Callback "closure" struct, used to make the necessary parameters known to
 // the callback function.
-typedef struct LC_CLICKLINE
+struct LC_CLICKLINE
 {
 	float a1, b1, c1;
 	float a2, b2, c2;
@@ -54,7 +43,7 @@ typedef struct LC_CLICKLINE
 
 	float PointDistance(float *point);
 
-} LC_CLICKLINE;
+};
 
 class Object
 {
@@ -79,7 +68,6 @@ public:
 /*
 	virtual void UpdatePosition(unsigned short nTime, bool bAnimation) = 0;
 	virtual void CompareBoundingBox(float *box) { };
-	virtual void Render(LC_RENDER_INFO* pInfo) = 0;
 
 	// Query functions
 	virtual bool IsSelected() const

@@ -65,12 +65,12 @@ void lcRenderProfileStats(View* view)
 
 #define LC_MAX_DEBUG_LINES 100
 
-typedef struct
+struct LC_DEBUG_LINE
 {
 	Vector3 pt1;
 	Vector3 pt2;
 	Vector3 color;
-} LC_DEBUG_LINE;
+};
 
 static LC_DEBUG_LINE DebugLines[LC_MAX_DEBUG_LINES];
 static int NumDebugLines;
@@ -93,14 +93,14 @@ void AddDebugLine(const Vector3& pt1, const Vector3& pt2, const Vector3& Color)
 
 #define LC_MAX_DEBUG_QUADS 100
 
-typedef struct
+struct LC_DEBUG_QUAD
 {
 	Vector3 pt1;
 	Vector3 pt2;
 	Vector3 pt3;
 	Vector3 pt4;
 	Vector4 color;
-} LC_DEBUG_QUAD;
+};
 
 static LC_DEBUG_QUAD DebugQuads[LC_MAX_DEBUG_QUADS];
 static int NumDebugQuads;

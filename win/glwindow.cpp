@@ -6,13 +6,13 @@
 #include "glwindow.h"
 #include "tools.h"
 
-typedef struct
+struct GLWindowPrivate
 {
 	HGLRC m_hrc;
 	CClientDC* m_pDC;
 	CPalette* m_pPal;
 	HWND m_hWnd;
-} GLWindowPrivate;
+};
 
 // ============================================================================
 

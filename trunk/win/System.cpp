@@ -795,7 +795,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i;
 
-	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+	for (i = 0; pCamera; i++, pCamera = (Camera*)pCamera->m_Next)
 	{
 		if (pOld == pCamera)
 		{
@@ -829,7 +829,7 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	while (pPopupMenu->GetMenuItemCount())
 		pPopupMenu->DeleteMenu(0, MF_BYPOSITION);
 
-	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+	for (i = 0; pCamera; i++, pCamera = (Camera*)pCamera->m_Next)
 		if (i > 6)
 		{
 			pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
@@ -843,7 +843,7 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 	}
 
 	pCamera = pFirst;
-	for (i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
+	for (i = 0; pCamera && (i < 7); i++, pCamera = (Camera*)pCamera->m_Next)
 	{
 		pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
 		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());

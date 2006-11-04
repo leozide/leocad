@@ -100,7 +100,7 @@ Camera::Camera(unsigned char nType, Camera* pPrev)
 		m_nState |= LC_CAMERA_HIDDEN;
 
 	if (pPrev)
-		pPrev->m_pNext = this;
+		pPrev->m_Next = this;
 
 	UpdatePosition(1, false);
 }
@@ -134,14 +134,14 @@ Camera::Camera(const float *eye, const float *target, const float *up, Camera* p
 				if (i > max) 
 					max = i;
 
-		if (pCamera->m_pNext == NULL)
+		if (pCamera->m_Next == NULL)
 		{
 			sprintf(m_strName, "Camera %d", max+1);
-			pCamera->m_pNext = this;
+			pCamera->m_Next = this;
 			break;
 		}
 		else
-			pCamera = pCamera->m_pNext;
+			pCamera = (Camera*)pCamera->m_Next;
 	}
 
 	UpdatePosition(1, false);
@@ -183,14 +183,14 @@ Camera::Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camer
 					if (i > max) 
 						max = i;
 
-			if (pCamera->m_pNext == NULL)
+			if (pCamera->m_Next == NULL)
 			{
 				sprintf(m_strName, "Camera %d", max+1);
-				pCamera->m_pNext = this;
+				pCamera->m_Next = this;
 				break;
 			}
 			else
-				pCamera = pCamera->m_pNext;
+				pCamera = (Camera*)pCamera->m_Next;
 		}
 	}
 
@@ -211,7 +211,6 @@ void Camera::Initialize()
 	m_zNear = 1;
 	m_zFar = 500;
 
-	m_pNext = NULL;
 	m_nState = 0;
 	m_nList = 0;
 	m_nType = LC_CAMERA_USER;

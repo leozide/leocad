@@ -401,7 +401,7 @@ void CModifyDialog::OnDropdownModdlgList()
 	{
 		case LC_OBJECT_PIECE:
 		{
-			for (; pPiece; pPiece = pPiece->m_pNext)
+			for (; pPiece; pPiece = (Piece*)pPiece->m_Next)
 			{
 				i = m_ctlCombo.AddString(pPiece->GetName());
 				m_ctlCombo.SetItemDataPtr(i, pPiece);
@@ -414,7 +414,7 @@ void CModifyDialog::OnDropdownModdlgList()
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			for (; pCamera; pCamera = pCamera->m_pNext)
+			for (; pCamera; pCamera = (Camera*)pCamera->m_Next)
 			{
 				i = m_ctlCombo.AddString(pCamera->GetName());
 				m_ctlCombo.SetItemDataPtr(i, pCamera);
@@ -427,7 +427,7 @@ void CModifyDialog::OnDropdownModdlgList()
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
 		{
-			for (; pLight; pLight = pLight->m_pNext)
+			for (; pLight; pLight = (Light*)pLight->m_Next)
 			{
 				i = m_ctlCombo.AddString(pLight->GetName());
 				m_ctlCombo.SetItemDataPtr(i, pLight);

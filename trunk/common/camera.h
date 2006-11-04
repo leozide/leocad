@@ -93,7 +93,6 @@ public:
 		{ return m_pTarget; }
 
 public:
-	Camera* m_pNext;
 	void Hide()
 		{ m_nState = LC_CAMERA_HIDDEN; }
 	void UnHide()

@@ -65,6 +65,7 @@ public:
 	// Check if the object intersects the volume specified by a given set of planes.
 	virtual bool IntersectsVolume(const class Vector4* Planes, int NumPlanes) = 0;
 
+	Object* m_Next;
 /*
 	virtual void UpdatePosition(unsigned short nTime, bool bAnimation) = 0;
 	virtual void CompareBoundingBox(float *box) { };
@@ -168,9 +169,9 @@ private:
 	bool BoundingBoxPointInside(float x, float y, float z) const;
 	float m_fBoxPlanes[4][6];
 
-	 // Object type
- private:
-	 LC_OBJECT_TYPE m_nObjectType;
+	// Object type
+private:
+	LC_OBJECT_TYPE m_nObjectType;
 };
 
 #endif

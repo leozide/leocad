@@ -68,7 +68,6 @@ Piece::Piece(PieceInfo* pPieceInfo)
     lockarrays = GL_HasCompiledVertexArrays ();
   }
 
-	m_pNext = NULL;
 	m_pPieceInfo = pPieceInfo;
 	m_nState = 0;
 	m_nColor = 0;
@@ -360,7 +359,7 @@ void Piece::CreateName(Piece* pPiece)
 {
 	int i, max = 0;
 
-	for (; pPiece; pPiece = pPiece->m_pNext)
+	for (; pPiece; pPiece = (Piece*)pPiece->m_Next)
 		if (strncmp (pPiece->m_strName, m_pPieceInfo->m_strDescription, strlen(m_pPieceInfo->m_strDescription)) == 0)
 			if (sscanf(pPiece->m_strName + strlen(m_pPieceInfo->m_strDescription), " #%d", &i) == 1)
 				if (i > max) 

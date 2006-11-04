@@ -71,9 +71,7 @@ Object::Object(LC_OBJECT_TYPE nType)
 	m_nObjectType = nType;
 	m_pKeyValues = NULL;
 
-	//  m_pParent = NULL;
-	//  m_pNext = NULL;
-	//  m_pNextRender = NULL;
+	m_Next = NULL;
 }
 
 Object::~Object()

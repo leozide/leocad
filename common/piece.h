@@ -38,7 +38,6 @@ public:
 
 
 
-	Piece* m_pNext;
 	Piece* m_pLink;
 
 	void Hide()

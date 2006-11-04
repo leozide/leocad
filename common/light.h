@@ -69,8 +69,6 @@ public:
 	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	Light* m_pNext;
-
 	void Hide()
 	{ m_nState = LC_LIGHT_HIDDEN; }
 	void UnHide()

@@ -420,7 +420,7 @@ static void PrintPiecesThread(void* pv)
 	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
 	memset (&col, 0, sizeof (col));
 
-	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
+	for (Piece* tmp = project->m_pPieces; tmp; tmp = (Piece*)tmp->m_Next)
 	{
 		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
 		pieces[(idx*28)+tmp->GetColor()]++;

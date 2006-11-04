@@ -107,7 +107,6 @@ Light::Light(float px, float py, float pz, float tx, float ty, float tz)
 void Light::Initialize()
 {
 	m_bEnabled = true;
-	m_pNext = NULL;
 	m_nState = 0;
 	m_pTarget = NULL;
 	m_nList = 0;
@@ -155,7 +154,7 @@ void Light::CreateName(const Light* pLight)
 {
 	int i, max = 0;
 
-	for (; pLight; pLight = pLight->m_pNext)
+	for (; pLight; pLight = (Light*)pLight->m_Next)
 	{
 		if (strncmp(pLight->m_strName, "Light ", 6) == 0)
 		{

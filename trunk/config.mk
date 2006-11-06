@@ -58,21 +58,22 @@ NIBS = main.nib
 
 all: bundletree exec bnibs pkginfo infoplist infopliststr
 
-bundletree: $(BUNDLEDIR) $(CONTDIR) $(BINDIR) $(RSRCDIR) $(EN_RSRCDIR)
+bundletree: $(BINDIR) $(BUNDLEDIR) $(CONTDIR) $(RSRCDIR) $(EN_RSRCDIR)
 
 $(BUNDLEDIR):
+	mkdir bin
 	mkdir $(BUNDLEDIR)
 
-$(CONTDIR):
+$(CONTDIR): $(BUNDLEDIR)
 	mkdir $(CONTDIR)
 
-$(BINDIR):
+$(BINDIR): $(CONTDIR)
 	mkdir $(BINDIR)
 
-$(RSRCDIR):
+$(RSRCDIR): $(CONTDIR)
 	mkdir $(RSRCDIR)
 
-$(EN_RSRCDIR):
+$(EN_RSRCDIR): $(RSRCDIR)
 	mkdir $(EN_RSRCDIR)
 
 # The binary executable

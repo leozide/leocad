@@ -50,9 +50,9 @@ void CameraTarget::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 }
 
-void CameraTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
+void CameraTarget::Select(bool bSelecting, bool bFocus)
 {
-	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
+	m_pParent->SelectTarget(bSelecting, bFocus);
 }
 
 const char* CameraTarget::GetName() const
@@ -86,10 +86,10 @@ Camera::Camera(unsigned char nType, Camera* pPrev)
 	float ups [8][3] = { { 0,0,1 }, { 0,0,1 }, { 1,0,0 }, { -1,0,0 }, { 0,0,1 },
 	                     { 0,0,1 }, {-0.2357f, -0.2357f, 0.94281f }, { 0,0,1 } };
 
-	ChangeKey(1, false, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, false, true, ups[nType], LC_CK_UP);
-	ChangeKey(1, true, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, true, true, ups[nType], LC_CK_UP);
+	ChangeKey(1, true, eyes[nType], LC_CK_EYE);
+	ChangeKey(1, true, ups[nType], LC_CK_UP);
+	ChangeKey(1, true, eyes[nType], LC_CK_EYE);
+	ChangeKey(1, true, ups[nType], LC_CK_UP);
 
 	strcpy(m_strName, names[nType]);
 
@@ -102,7 +102,7 @@ Camera::Camera(unsigned char nType, Camera* pPrev)
 	if (pPrev)
 		pPrev->m_Next = this;
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 // From OnMouseMove(), case LC_ACTION_ROTATE_VIEW
@@ -118,12 +118,12 @@ Camera::Camera(const float *eye, const float *target, const float *up, Camera* p
 
 	Initialize();
 
-	ChangeKey(1, false, true, eye, LC_CK_EYE);
-	ChangeKey(1, false, true, target, LC_CK_TARGET);
-	ChangeKey(1, false, true, upvec, LC_CK_UP);
-	ChangeKey(1, true, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, true, upvec, LC_CK_UP);
+	ChangeKey(1, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, upvec, LC_CK_UP);
+	ChangeKey(1, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, upvec, LC_CK_UP);
 
 	int i, max = 0;
 
@@ -144,7 +144,7 @@ Camera::Camera(const float *eye, const float *target, const float *up, Camera* p
 			pCamera = (Camera*)pCamera->m_Next;
 	}
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 // From LC_ACTION_CAMERA
@@ -165,12 +165,12 @@ Camera::Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camer
 
 	float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
 
-	ChangeKey(1, false, true, eye, LC_CK_EYE);
-	ChangeKey(1, false, true, target, LC_CK_TARGET);
-	ChangeKey(1, false, true, upvec, LC_CK_UP);
-	ChangeKey(1, true, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, true, upvec, LC_CK_UP);
+	ChangeKey(1, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, upvec, LC_CK_UP);
+	ChangeKey(1, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, upvec, LC_CK_UP);
 
 	int i, max = 0;
 
@@ -194,7 +194,7 @@ Camera::Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camer
 		}
 	}
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 Camera::~Camera()
@@ -265,22 +265,22 @@ bool Camera::FileLoad(File& file)
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, false, true, f, LC_CK_EYE);
-		ChangeKey(1, true, true, f, LC_CK_EYE);
+		ChangeKey(1, true, f, LC_CK_EYE);
+		ChangeKey(1, true, f, LC_CK_EYE);
 
 		file.ReadDouble(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, false, true, f, LC_CK_TARGET);
-		ChangeKey(1, true, true, f, LC_CK_TARGET);
+		ChangeKey(1, true, f, LC_CK_TARGET);
+		ChangeKey(1, true, f, LC_CK_TARGET);
 
 		file.ReadDouble(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, false, true, f, LC_CK_UP);
-		ChangeKey(1, true, true, f, LC_CK_UP);
+		ChangeKey(1, true, f, LC_CK_UP);
+		ChangeKey(1, true, f, LC_CK_UP);
 	}
 
 	if (version == 3)
@@ -304,20 +304,20 @@ bool Camera::FileLoad(File& file)
 			f[0] = (float)eye[0];
 			f[1] = (float)eye[1];
 			f[2] = (float)eye[2];
-			ChangeKey(step, false, true, f, LC_CK_EYE);
-			ChangeKey(step, true, true, f, LC_CK_EYE);
+			ChangeKey(step, true, f, LC_CK_EYE);
+			ChangeKey(step, true, f, LC_CK_EYE);
 
 			f[0] = (float)target[0];
 			f[1] = (float)target[1];
 			f[2] = (float)target[2];
-			ChangeKey(step, false, true, f, LC_CK_TARGET);
-			ChangeKey(step, true, true, f, LC_CK_TARGET);
+			ChangeKey(step, true, f, LC_CK_TARGET);
+			ChangeKey(step, true, f, LC_CK_TARGET);
 
 			f[0] = (float)up[0];
 			f[1] = (float)up[1];
 			f[2] = (float)up[2];
-			ChangeKey(step, false, true, f, LC_CK_UP);
-			ChangeKey(step, true, true, f, LC_CK_UP);
+			ChangeKey(step, true, f, LC_CK_UP);
+			ChangeKey(step, true, f, LC_CK_UP);
 
 			int snapshot; // BOOL under Windows
 			int cam;
@@ -354,7 +354,7 @@ bool Camera::FileLoad(File& file)
 				file.ReadFloat(param, 3);
 				file.ReadByte(&type, 1);
 
-				ChangeKey(time, false, true, param, type);
+				ChangeKey(time, true, param, type);
 			}
 
 			file.ReadLong(&n, 1);
@@ -364,7 +364,7 @@ bool Camera::FileLoad(File& file)
 				file.ReadFloat(param, 3);
 				file.ReadByte(&type, 1);
 
-				ChangeKey(time, true, true, param, type);
+				ChangeKey(time, true, param, type);
 			}
 		}
 
@@ -423,7 +423,7 @@ void Camera::FileSave(File& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Camera::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
 {
 	if (IsSide())
 	{
@@ -434,8 +434,8 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 		m_Target[1] += dy;
 		m_Target[2] += dz;
 
-		ChangeKey(nTime, bAnimation, bAddKey, m_Eye, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, m_Target, LC_CK_TARGET);
+		ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
+		ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
 	}
 	else
 	{
@@ -445,7 +445,7 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 			m_Eye[1] += dy;
 			m_Eye[2] += dz;
 
-			ChangeKey(nTime, bAnimation, bAddKey, m_Eye, LC_CK_EYE);
+			ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
 		}
 
 		if (IsTargetSelected())
@@ -454,7 +454,7 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 			m_Target[1] += dy;
 			m_Target[2] += dz;
 
-			ChangeKey(nTime, bAnimation, bAddKey, m_Target, LC_CK_TARGET);
+			ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
 		}
 
 		// Fix the up vector
@@ -464,11 +464,11 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 		upvec = Cross3(sidevec, frontvec);
 		m_Up = upvec.Normalize();
 
-		ChangeKey(nTime, bAnimation, bAddKey, m_Up, LC_CK_UP);
+		ChangeKey(nTime, bAddKey, m_Up, LC_CK_UP);
 	}
 }
 
-void Camera::Select(bool bSelecting, bool bFocus, bool bMultiple)
+void Camera::Select(bool bSelecting, bool bFocus)
 {
 	if (bSelecting == true)
 	{
@@ -476,13 +476,13 @@ void Camera::Select(bool bSelecting, bool bFocus, bool bMultiple)
 		{
 			m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED);
 
-			m_pTarget->Select(false, true, bMultiple);
+			m_pTarget->Select(false, true);
 		}
 		else
 			m_nState |= LC_CAMERA_SELECTED;
 
-		if (bMultiple == false)
-			m_pTarget->Select(false, false, bMultiple);
+//		if (bMultiple == false)
+			m_pTarget->Select(false, false);
 	}
 	else
 	{
@@ -493,7 +493,7 @@ void Camera::Select(bool bSelecting, bool bFocus, bool bMultiple)
 	}
 }
 
-void Camera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
+void Camera::SelectTarget(bool bSelecting, bool bFocus)
 {
 	// FIXME: the target should handle this
 
@@ -503,13 +503,13 @@ void Camera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 		{
 			m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED);
 
-			Select(false, true, bMultiple);
+			Select(false, true);
 		}
 		else
 			m_nState |= LC_CAMERA_TARGET_SELECTED;
 
-		if (bMultiple == false)
-			Select(false, false, bMultiple);
+//		if (bMultiple == false)
+			Select(false, false);
 	}
 	else
 	{
@@ -520,9 +520,9 @@ void Camera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 	}
 }
 
-void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
+void Camera::UpdatePosition(unsigned short nTime)
 {
-	CalculateKeys(nTime, bAnimation);
+	CalculateKeys(nTime);
 
 	UpdateBoundingBox();
 }
@@ -789,7 +789,7 @@ void Camera::GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const
 	}
 }
 
-void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey)
 {
 	if (m_nState & LC_CAMERA_ORTHOGRAPHIC)
 	{
@@ -811,13 +811,13 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 		m_Eye += frontvec;
 		m_Target += frontvec;
 
-		ChangeKey(nTime, bAnimation, bAddKey, m_Eye, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, m_Target, LC_CK_TARGET);
-		UpdatePosition(nTime, bAnimation);
+		ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
+		ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
+		UpdatePosition(nTime);
 	}
 }
 
-void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey)
 {
 	Vector3 upvec(m_Up), frontvec = m_Eye - m_Target;
 	Vector3 sidevec = Cross3(frontvec, upvec);
@@ -829,12 +829,12 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 	m_Eye += upvec + sidevec;
 	m_Target += upvec + sidevec;
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_Eye, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, m_Target, LC_CK_TARGET);
-	UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
+	ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
+	UpdatePosition(nTime);
 }
 
-void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
+void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey, float* /*center*/)
 {
 	Vector3 Dir = m_Eye - m_Target;
 
@@ -860,12 +860,12 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 
 	m_Eye = m_Target + Dir;
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_Eye, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, m_Up, LC_CK_UP);
-	UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
+	ChangeKey(nTime, bAddKey, m_Up, LC_CK_UP);
+	UpdatePosition(nTime);
 }
 
-void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAddKey)
 {
 	Matrix44 mat;
 	Vector3 front = m_Eye - m_Target;
@@ -873,8 +873,8 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
 	mat = MatrixFromAxisAngle(front, LC_DTOR * 2.0f*dx/(21-mouse));
 	m_Up = Mul30(m_Up, mat);
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_Up, LC_CK_UP);
-	UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAddKey, m_Up, LC_CK_UP);
+	UpdatePosition(nTime);
 }
 
 float Camera::GetRoll() const
@@ -918,7 +918,7 @@ float Camera::GetRoll() const
 	return Angle;
 }
 
-void Camera::SetRoll(float Roll, unsigned short nTime, bool bAnimation, bool bAddKey)
+void Camera::SetRoll(float Roll, unsigned short nTime, bool bAddKey)
 {
 	Vector3 Front = Normalize(m_Target - m_Eye);
 
@@ -958,8 +958,8 @@ void Camera::SetRoll(float Roll, unsigned short nTime, bool bAnimation, bool bAd
 	Quaternion RollRot = QuaternionFromAxisAngle(Vector4(Normalize(m_Target - m_Eye), Roll));
 	Up = Mul(Up, RollRot);
 
-	ChangeKey(nTime, bAnimation, bAddKey, Up, LC_CK_UP);
-	UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAddKey, Up, LC_CK_UP);
+	UpdatePosition(nTime);
 }
 
 void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)

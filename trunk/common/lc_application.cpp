@@ -335,11 +335,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			}
 		}
 
-		if (ImageInstructions)
-			project->SetAnimation(false);
-		else if (ImageAnimation)
-			project->SetAnimation(true);
-
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
 		else if (ImageStart > ImageEnd)
@@ -358,22 +353,11 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			ImageEnd = ImageStart;
 		}
 
-		if (project->IsAnimation())
-		{
-			if (ImageStart > project->GetTotalFrames())
-				ImageStart = project->GetTotalFrames();
+		if (ImageStart > 255)
+			ImageStart = 255;
 
-			if (ImageEnd > project->GetTotalFrames())
-				ImageEnd = project->GetTotalFrames();
-		}
-		else
-		{
-			if (ImageStart > 255)
-				ImageStart = 255;
-
-			if (ImageEnd > 255)
-				ImageEnd = 255;
-		}
+		if (ImageEnd > 255)
+			ImageEnd = 255;
 
 		Image* images = new Image[ImageEnd - ImageStart + 1];
 		project->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);

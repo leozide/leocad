@@ -11,6 +11,7 @@ class lcMesh;
 #include "globals.h"
 #include "typedefs.h"
 #include "defines.h"
+#include "config.h"
 
 #define LC_PIECE_HIDDEN		0x01
 #define LC_PIECE_SELECTED	0x02
@@ -29,9 +30,9 @@ public:
 	Piece (PieceInfo* pPieceInfo);
 	~Piece ();
 
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
-	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
+	void Select (bool bSelecting, bool bFocus);
+	virtual void InsertTime(u32 start, u32 time);
+	virtual void RemoveTime(u32 start, u32 time);
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes);
 
 
@@ -61,8 +62,8 @@ public:
 	{ return m_ModelWorld; }
 
 	void MinIntersectDist(LC_CLICKLINE* pLine);
-	bool IsVisible(unsigned short nTime, bool bAnimation);
-	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
+	bool IsVisible(u32 Time);
+	void Initialize(float x, float y, float z, u32 Time, unsigned char nColor);
 	void CreateName(Piece* pPiece);
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
@@ -72,9 +73,9 @@ public:
 	bool FileLoad(File& file, char* name);
 	void FileSave(File& file, Group* pGroups);
 
-	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers);
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bForceRebuild, bool bFixOthers);
+	void UpdatePosition(unsigned short nTime);
+	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 
 	void DoGroup(Group* pGroup);
 	void UnGroup(Group* pGroup);
@@ -93,22 +94,14 @@ public:
 		{ m_nColor = color; }
 	PieceInfo* GetPieceInfo()
 		{ return m_pPieceInfo; }
-	void SetStepShow(unsigned char step)
-		{ m_nStepShow = step; }
-	const unsigned char GetStepShow()
-		{ return m_nStepShow; }
-	void SetStepHide(unsigned char step)
-		{ m_nStepHide = step; }
-	const unsigned char GetStepHide()
-		{ return m_nStepHide; }
-	void SetFrameShow(unsigned short frame)
-		{ m_nFrameShow = frame; }
-	const unsigned short GetFrameShow()
-		{ return m_nFrameShow; }
-	void SetFrameHide(unsigned short frame)
-		{ m_nFrameHide = frame; }
-	const unsigned short GetFrameHide()
-		{ return m_nFrameHide; }
+	void SetTimeShow(int Time)
+	{ m_TimeShow = Time; }
+	const unsigned char GetTimeShow()
+	{ return m_TimeShow; }
+	void SetTimeHide(unsigned char Time)
+	{ m_TimeHide = Time; }
+	const unsigned char GetTimeHide()
+	{ return m_TimeHide; }
 	const float* GetConstPosition()
 		{ return m_fPosition; }
 	inline Vector3 GetPosition() const
@@ -142,10 +135,8 @@ protected:
 	PieceInfo* m_pPieceInfo;
 	Group* m_pGroup;
 
-	unsigned short m_nFrameShow;
-	unsigned short m_nFrameHide;
-	unsigned char m_nStepShow;
-	unsigned char m_nStepHide;
+	u32 m_TimeShow;
+	u32 m_TimeHide;
 
 	unsigned char m_nColor;
 	unsigned char m_nState;

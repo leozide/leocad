@@ -10,7 +10,7 @@
 #include "file.h"
 #include "lc_application.h"
 
-#define LC_KEY_SAVE_VERSION 1 // LeoCAD 0.73
+#define LC_KEY_SAVE_VERSION 2 // LeoCAD 0.76
 
 // =============================================================================
 // Static functions
@@ -65,8 +65,7 @@ Object::Object(LC_OBJECT_TYPE nType)
 	//  m_nState = 0;
 	//  m_strName[0] = '\0';
 
-	m_pAnimationKeys = NULL;
-	m_pInstructionKeys = NULL;
+	m_Keys = NULL;
 
 	m_nObjectType = nType;
 	m_pKeyValues = NULL;
@@ -100,17 +99,18 @@ bool Object::FileLoad(File& file)
 		file.ReadFloat(param, 4);
 		file.ReadByte(&type, 1);
 
-		ChangeKey(time, false, true, param, type);
+		ChangeKey(time, true, param, type);
 	}
 
-	file.ReadLong(&n, 1);
-	while (n--)
+	if (version == 1)
 	{
-		file.ReadShort(&time, 1);
-		file.ReadFloat(param, 4);
-		file.ReadByte(&type, 1);
-
-		ChangeKey(time, true, true, param, type);
+		file.ReadLong(&n, 1);
+		while (n--)
+		{
+			file.ReadShort(&time, 1);
+			file.ReadFloat(param, 4);
+			file.ReadByte(&type, 1);
+		}
 	}
 
 	return true;
@@ -124,22 +124,11 @@ void Object::FileSave(File& file) const
 
 	file.WriteByte(&version, 1);
 
-	for (n = 0, node = m_pInstructionKeys; node; node = node->next)
+	for (n = 0, node = m_Keys; node; node = node->next)
 		n++;
 	file.WriteLong(&n, 1);
 
-	for (node = m_pInstructionKeys; node; node = node->next)
-	{
-		file.WriteShort(&node->time, 1);
-		file.WriteFloat(node->param, 4);
-		file.WriteByte(&node->type, 1);
-	}
-
-	for (n = 0, node = m_pAnimationKeys; node; node = node->next)
-		n++;
-	file.WriteLong(&n, 1);
-
-	for (node = m_pAnimationKeys; node; node = node->next)
+	for (node = m_Keys; node; node = node->next)
 	{
 		file.WriteShort(&node->time, 1);
 		file.WriteFloat(node->param, 4);
@@ -178,14 +167,10 @@ void Object::RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count)
 	for (i = 0; i < count; i++)
 		m_pKeyValues[i] = values[i];
 
-	m_pAnimationKeys = AddNode(NULL, 1, 0);
-	m_pInstructionKeys = AddNode(NULL, 1, 0);
+	m_Keys = AddNode(NULL, 1, 0);
 
 	for (i = count-1; i > 0; i--)
-	{
-		AddNode(m_pAnimationKeys, 1, i);
-		AddNode(m_pInstructionKeys, 1, i);
-	}
+		AddNode(m_Keys, 1, i);
 
 	m_pKeyInfo = info;
 	m_nKeyInfoCount = count;
@@ -195,14 +180,7 @@ void Object::RemoveKeys()
 {
 	LC_OBJECT_KEY *node, *prev;
 
-	for (node = m_pInstructionKeys; node;)
-	{
-		prev = node;
-		node = node->next;
-		free(prev);
-	}
-
-	for (node = m_pAnimationKeys; node;)
+	for (node = m_Keys; node;)
 	{
 		prev = node;
 		node = node->next;
@@ -210,13 +188,10 @@ void Object::RemoveKeys()
 	}
 }
 
-void Object::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, const float *param, unsigned char nKeyType)
+void Object::ChangeKey(unsigned short nTime, bool bAddKey, const float *param, unsigned char nKeyType)
 {
 	LC_OBJECT_KEY *node, *poskey = NULL, *newpos = NULL;
-	if (bAnimation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
+	node = m_Keys;
 
 	while (node)
 	{
@@ -244,7 +219,7 @@ void Object::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, cons
 		newpos->param[i] = param[i];
 }
 
-void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
+void Object::CalculateKeys(unsigned short nTime)
 {
 	//  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
 	LC_OBJECT_KEY *next[32], *prev[32], *node;
@@ -253,10 +228,7 @@ void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
 	for (i = 0; i < m_nKeyInfoCount; i++)
 		next[i] = NULL;
 
-	if (bAnimation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
+	node = m_Keys;
 
 	// Get the previous and next keys for each variable
 	while (node && empty)
@@ -281,7 +253,7 @@ void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
 	for (i = 0; i < m_nKeyInfoCount; i++)
 	{
 		LC_OBJECT_KEY *n = next[i], *p = prev[i];
-
+/*
 		if (bAnimation && (n != NULL) && (p->time != nTime))
 		{
 			float t = (float)(nTime - p->time)/(n->time - p->time);
@@ -290,19 +262,17 @@ void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
 				m_pKeyValues[i][j] = p->param[j] + (n->param[j] - p->param[j])*t;
 		}
 		else
+*/
 			for (int j = 0; j < m_pKeyInfo[i].size; j++)
 				m_pKeyValues[i][j] = p->param[j];
 	}
 }
 
-void Object::CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const
+void Object::CalculateSingleKey(unsigned short nTime, int keytype, float *value) const
 {
 	LC_OBJECT_KEY *next = NULL, *prev = NULL, *node;
 
-	if (bAnimation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
+	node = m_Keys;
 
 	while (node)
 	{
@@ -324,6 +294,7 @@ void Object::CalculateSingleKey(unsigned short nTime, bool bAnimation, int keyty
 	}
 
 	// TODO: USE KEY IN/OUT WEIGHTS
+/*
 	if (bAnimation && (next != NULL) && (prev->time != nTime))
 	{
 		float t = (float)(nTime - prev->time)/(next->time - prev->time);
@@ -332,30 +303,23 @@ void Object::CalculateSingleKey(unsigned short nTime, bool bAnimation, int keyty
 			value[j] = prev->param[j] + (next->param[j] - prev->param[j])*t;
 	}
 	else
+*/
 		for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
 			value[j] = prev->param[j];
 }
 
-void Object::InsertTime(unsigned short start, bool animation, unsigned short time)
+void Object::InsertTime(u32 start, u32 time)
 {
 	LC_OBJECT_KEY *node, *prev = NULL;
-	unsigned short last;
+	u32 last;
 	bool end[32];
 	int i;
 
 	for (i = 0; i < m_nKeyInfoCount; i++)
 		end[i] = false;
 
-	if (animation)
-	{
-		node = m_pAnimationKeys;
-		last = lcGetActiveProject()->GetTotalFrames();
-	}
-	else
-	{
-		node = m_pInstructionKeys;
-		last = 255;
-	}
+	node = m_Keys;
+	last = LC_MAX_TIME;
 
 	for (; node != NULL; prev = node, node = node->next)
 	{
@@ -382,14 +346,11 @@ void Object::InsertTime(unsigned short start, bool animation, unsigned short tim
 	}
 }
 
-void Object::RemoveTime(unsigned short start, bool animation, unsigned short time)
+void Object::RemoveTime(u32 start, u32 time)
 {
 	LC_OBJECT_KEY *node, *prev = NULL;
 
-	if (animation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
+	node = m_Keys;
 
 	for (; node != NULL; prev = node, node = node->next)
 	{

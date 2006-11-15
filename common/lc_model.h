@@ -3,15 +3,24 @@
 
 #include "str.h"
 
-class lcObject;
+class Piece;
 
 class lcModel
 {
 public:
-	lcModel(const String& Name);
+	lcModel(const char* Name);
 	~lcModel();
 
 public:
+	// Adds a piece to this model.
+	void AddPiece(Piece* NewPiece);
+
+	// Removes a piece from this model.
+	void RemovePiece(Piece* piece);
+
+	// Returns true if any pieces are currently selected.
+	bool AnyPiecesSelected() const;
+
 	// Selects/Deselects all pieces.
 	void SelectAllPieces(bool Select = true, bool FocusOnly = false);
 
@@ -30,11 +39,13 @@ public:
 	// Deletes all selected pieces and returns true if any pieces were removed.
 	bool RemoveSelectedPieces();
 
+public:
+	// Making these public for now.
+	Piece* m_Pieces;
+	int m_CurTime;
+
 protected:
 	String m_Name;
-	Object* m_Pieces;
-
-	int m_CurTime;
 };
 
 #endif // _LC_MODEL_H_

@@ -40,8 +40,8 @@ public:
 	void MinIntersectDist (LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Select (bool bSelecting, bool bFocus);
+	void Move (unsigned short nTime, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the light target
 	}
@@ -65,8 +65,8 @@ public:
 	Light (float px, float py, float pz, float tx, float ty, float tz);
 	virtual ~Light ();
 
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
+	void Select (bool bSelecting, bool bFocus);
+	void SelectTarget (bool bSelecting, bool bFocus);
 
 public:
 	void Hide()
@@ -111,8 +111,8 @@ public:
 	void MinIntersectDist(LC_CLICKLINE* Line);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void UpdatePosition(unsigned short nTime);
+	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 	void Setup(int index);
 	void CreateName(const Light* pLight);
 

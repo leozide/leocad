@@ -5,6 +5,8 @@ class File;
 class Matrix44;
 class Object;
 
+#include "config.h"
+
 typedef enum
 {
 	LC_OBJECT_PIECE,
@@ -53,14 +55,14 @@ public:
 
 public:
 	// Move the object.
-	virtual void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
+	virtual void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz) = 0;
 
 	// Check if the object intersects the ray.
 	virtual void MinIntersectDist(LC_CLICKLINE* pLine) = 0;
 
 	// bSelecting is the action (add/remove), bFocus means "add focus if selecting"
-	// or "remove focus only if deselecting", bMultiple = Ctrl key is down
-	virtual void Select(bool bSelecting, bool bFocus, bool bMultiple) = 0;
+	// or "remove focus only if deselecting"
+	virtual void Select(bool bSelecting, bool bFocus) = 0;
 
 	// Check if the object intersects the volume specified by a given set of planes.
 	virtual bool IntersectsVolume(const class Vector4* Planes, int NumPlanes) = 0;
@@ -129,10 +131,10 @@ protected:
 
 	// Key handling stuff
 public:
-	void CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const;
-	void ChangeKey(unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
-	virtual void InsertTime(unsigned short start, bool animation, unsigned short time);
-	virtual void RemoveTime(unsigned short start, bool animation, unsigned short time);
+	void CalculateSingleKey(unsigned short nTime, int keytype, float *value) const;
+	void ChangeKey(unsigned short time, bool addkey, const float *param, unsigned char keytype);
+	virtual void InsertTime(u32 start, u32 time);
+	virtual void RemoveTime(u32 start, u32 time);
 
 	int GetKeyTypeCount() const
 	{ return m_nKeyInfoCount; }
@@ -143,13 +145,12 @@ public:
 
 protected:
 	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
-	void CalculateKeys(unsigned short nTime, bool bAnimation);
+	void CalculateKeys(unsigned short nTime);
 
 private:
 	void RemoveKeys();
 
-	LC_OBJECT_KEY* m_pAnimationKeys;
-	LC_OBJECT_KEY* m_pInstructionKeys;
+	LC_OBJECT_KEY* m_Keys;
 	float **m_pKeyValues;
 
 	LC_OBJECT_KEY_INFO *m_pKeyInfo;

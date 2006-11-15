@@ -54,9 +54,9 @@ void LightTarget::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 }
 
-void LightTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
+void LightTarget::Select(bool bSelecting, bool bFocus)
 {
-	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
+	m_pParent->SelectTarget(bSelecting, bFocus);
 }
 
 const char* LightTarget::GetName() const
@@ -75,14 +75,14 @@ Light::Light(float px, float py, float pz)
 
 	float pos[] = { px, py, pz }, target[] = { 0, 0, 0 };
 
-	ChangeKey(1, false, true, pos, LC_LK_POSITION);
-	ChangeKey(1, false, true, target, LC_LK_TARGET);
-	ChangeKey(1, true, true, pos, LC_LK_POSITION);
-	ChangeKey(1, true, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, target, LC_LK_TARGET);
 
 	m_fPos[3] = 0.0f;
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 // New directional light
@@ -93,15 +93,15 @@ Light::Light(float px, float py, float pz, float tx, float ty, float tz)
 
 	float pos[] = { px, py, pz }, target[] = { tx, ty, tz };
 
-	ChangeKey(1, false, true, pos, LC_LK_POSITION);
-	ChangeKey(1, false, true, target, LC_LK_TARGET);
-	ChangeKey(1, true, true, pos, LC_LK_POSITION);
-	ChangeKey(1, true, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, target, LC_LK_TARGET);
 
 	m_pTarget = new LightTarget(this);
 	m_fPos[3] = 1.0f;
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 void Light::Initialize()
@@ -124,22 +124,22 @@ void Light::Initialize()
 	float ambient[] = { 0, 0, 0 }, diffuse[] = { 0.8f, 0.8f, 0.8f }, specular[] = { 1, 1, 1 };
 	float constant = 1, linear = 0, quadratic = 0, cutoff = 30, exponent = 0;
 
-	ChangeKey(1, false, true, ambient, LC_LK_AMBIENT_COLOR);
-	ChangeKey(1, false, true, diffuse, LC_LK_DIFFUSE_COLOR);
-	ChangeKey(1, false, true, specular, LC_LK_SPECULAR_COLOR);
-	ChangeKey(1, false, true, &constant, LC_LK_CONSTANT_ATTENUATION);
-	ChangeKey(1, false, true, &linear, LC_LK_LINEAR_ATTENUATION);
-	ChangeKey(1, false, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
-	ChangeKey(1, false, true, &cutoff, LC_LK_SPOT_CUTOFF);
-	ChangeKey(1, false, true, &exponent, LC_LK_SPOT_EXPONENT);
-	ChangeKey(1, true, true, ambient, LC_LK_AMBIENT_COLOR);
-	ChangeKey(1, true, true, diffuse, LC_LK_DIFFUSE_COLOR);
-	ChangeKey(1, true, true, specular, LC_LK_SPECULAR_COLOR);
-	ChangeKey(1, true, true, &constant, LC_LK_CONSTANT_ATTENUATION);
-	ChangeKey(1, true, true, &linear, LC_LK_LINEAR_ATTENUATION);
-	ChangeKey(1, true, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
-	ChangeKey(1, true, true, &cutoff, LC_LK_SPOT_CUTOFF);
-	ChangeKey(1, true, true, &exponent, LC_LK_SPOT_EXPONENT);
+	ChangeKey(1, true, ambient, LC_LK_AMBIENT_COLOR);
+	ChangeKey(1, true, diffuse, LC_LK_DIFFUSE_COLOR);
+	ChangeKey(1, true, specular, LC_LK_SPECULAR_COLOR);
+	ChangeKey(1, true, &constant, LC_LK_CONSTANT_ATTENUATION);
+	ChangeKey(1, true, &linear, LC_LK_LINEAR_ATTENUATION);
+	ChangeKey(1, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
+	ChangeKey(1, true, &cutoff, LC_LK_SPOT_CUTOFF);
+	ChangeKey(1, true, &exponent, LC_LK_SPOT_EXPONENT);
+	ChangeKey(1, true, ambient, LC_LK_AMBIENT_COLOR);
+	ChangeKey(1, true, diffuse, LC_LK_DIFFUSE_COLOR);
+	ChangeKey(1, true, specular, LC_LK_SPECULAR_COLOR);
+	ChangeKey(1, true, &constant, LC_LK_CONSTANT_ATTENUATION);
+	ChangeKey(1, true, &linear, LC_LK_LINEAR_ATTENUATION);
+	ChangeKey(1, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
+	ChangeKey(1, true, &cutoff, LC_LK_SPOT_CUTOFF);
+	ChangeKey(1, true, &exponent, LC_LK_SPOT_EXPONENT);
 }
 
 Light::~Light()
@@ -169,7 +169,7 @@ void Light::CreateName(const Light* pLight)
 	sprintf(m_strName, "Light #%.2d", max+1);
 }
 
-void Light::Select(bool bSelecting, bool bFocus, bool bMultiple)
+void Light::Select(bool bSelecting, bool bFocus)
 {
 	if (bSelecting == true)
 	{
@@ -178,14 +178,14 @@ void Light::Select(bool bSelecting, bool bFocus, bool bMultiple)
 			m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED);
 
 			if (m_pTarget != NULL)
-				m_pTarget->Select(false, true, bMultiple);
+				m_pTarget->Select(false, true);
 		}
 		else
 			m_nState |= LC_LIGHT_SELECTED;
 
-		if (bMultiple == false)
+//		if (bMultiple == false)
 			if (m_pTarget != NULL)
-				m_pTarget->Select(false, false, bMultiple);
+				m_pTarget->Select(false, false);
 	}
 	else
 	{
@@ -196,7 +196,7 @@ void Light::Select(bool bSelecting, bool bFocus, bool bMultiple)
 	}
 }
 
-void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
+void Light::SelectTarget(bool bSelecting, bool bFocus)
 {
 	// FIXME: the target should handle this
 
@@ -206,13 +206,13 @@ void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 		{
 			m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED);
 
-			Select(false, true, bMultiple);
+			Select(false, true);
 		}
 		else
 			m_nState |= LC_LIGHT_TARGET_SELECTED;
 
-		if (bMultiple == false)
-			Select(false, false, bMultiple);
+//		if (bMultiple == false)
+			Select(false, false);
 	}
 	else
 	{
@@ -241,7 +241,7 @@ void Light::MinIntersectDist(LC_CLICKLINE* pLine)
 		m_pTarget->MinIntersectDist(pLine);
 }
 
-void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Light::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
 {
 	if (IsEyeSelected())
 	{
@@ -249,7 +249,7 @@ void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, 
 		m_fPos[1] += dy;
 		m_fPos[2] += dz;
 
-		ChangeKey(nTime, bAnimation, bAddKey, m_fPos, LC_LK_POSITION);
+		ChangeKey(nTime, bAddKey, m_fPos, LC_LK_POSITION);
 	}
 
 	if (IsTargetSelected())
@@ -258,13 +258,13 @@ void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, 
 		m_fTarget[1] += dy;
 		m_fTarget[2] += dz;
 
-		ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_LK_TARGET);
+		ChangeKey(nTime, bAddKey, m_fTarget, LC_LK_TARGET);
 	}
 }
 
-void Light::UpdatePosition(unsigned short nTime, bool bAnimation)
+void Light::UpdatePosition(unsigned short nTime)
 {
-	CalculateKeys(nTime, bAnimation);
+	CalculateKeys(nTime);
 	BoundingBoxCalculate(m_fPos);
 
 	if (m_pTarget != NULL)

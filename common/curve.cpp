@@ -56,16 +56,16 @@ CurvePoint::CurvePoint (Curve *pParent, const float *pos, const float *dir)
 
   float angle[1] = { 0 };
 
-  ChangeKey (1, false, true, pos, LC_CURVE_POINT_KEY_POSITION);
-  ChangeKey (1, false, true, dir, LC_CURVE_POINT_KEY_DIRECTION1);
-  ChangeKey (1, false, true, dir, LC_CURVE_POINT_KEY_DIRECTION2);
-  ChangeKey (1, false, true, angle, LC_CURVE_POINT_KEY_ANGLE);
-  ChangeKey (1, true, true, pos, LC_CURVE_POINT_KEY_POSITION);
-  ChangeKey (1, true, true, dir, LC_CURVE_POINT_KEY_DIRECTION1);
-  ChangeKey (1, true, true, dir, LC_CURVE_POINT_KEY_DIRECTION2);
-  ChangeKey (1, true, true, angle, LC_CURVE_POINT_KEY_ANGLE);
+  ChangeKey (1, true, pos, LC_CURVE_POINT_KEY_POSITION);
+  ChangeKey (1, true, dir, LC_CURVE_POINT_KEY_DIRECTION1);
+  ChangeKey (1, true, dir, LC_CURVE_POINT_KEY_DIRECTION2);
+  ChangeKey (1, true, angle, LC_CURVE_POINT_KEY_ANGLE);
+  ChangeKey (1, true, pos, LC_CURVE_POINT_KEY_POSITION);
+  ChangeKey (1, true, dir, LC_CURVE_POINT_KEY_DIRECTION1);
+  ChangeKey (1, true, dir, LC_CURVE_POINT_KEY_DIRECTION2);
+  ChangeKey (1, true, angle, LC_CURVE_POINT_KEY_ANGLE);
 
-  UpdatePosition (1, false);
+  UpdatePosition (1);
 }
 
 void CurvePoint::Initialize ()
@@ -160,9 +160,9 @@ void CurvePoint::MinIntersectDist (LC_CLICKLINE* pLine)
   // FIXME: check arrows
 }
 
-void CurvePoint::UpdatePosition (unsigned short nTime, bool bAnimation)
+void CurvePoint::UpdatePosition (unsigned short nTime)
 {
-  CalculateKeys (nTime, bAnimation);
+  CalculateKeys (nTime);
 }
 
 bool CurvePoint::FileLoad (File& file)
@@ -317,10 +317,10 @@ void Curve::MinIntersectDist (LC_CLICKLINE* pLine)
   // FIXME
 }
 
-void Curve::UpdatePosition (unsigned short nTime, bool bAnimation)
+void Curve::UpdatePosition (unsigned short nTime)
 {
   for (int i = 0; i < m_Points.GetSize (); i++)
-    m_Points[i]->UpdatePosition (nTime, bAnimation);
+    m_Points[i]->UpdatePosition (nTime);
 
   glNewList (m_nDisplayList, GL_COMPILE);
 

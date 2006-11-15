@@ -2,7 +2,7 @@
 #include "piece.h"
 #include "system.h"
 
-lcModel::lcModel(const String& Name)
+lcModel::lcModel(const char* Name)
 {
 	m_Pieces = NULL;
 	m_Name = Name;
@@ -13,24 +13,77 @@ lcModel::~lcModel()
 {
 	while (m_Pieces)
 	{
-		Object* piece = m_Pieces;
-		m_Pieces = m_Pieces->m_Next;
+		Piece* piece = m_Pieces;
+		m_Pieces = (Piece*)m_Pieces->m_Next;
 		delete piece;
 	}
+}
+
+void lcModel::AddPiece(Piece* NewPiece)
+{
+	Piece* Prev = NULL;
+	Piece* Next = m_Pieces;
+
+	while (Next)
+	{
+		if (Next->GetPieceInfo() > NewPiece->GetPieceInfo())
+			break;
+
+		Prev = Next;
+		Next = (Piece*)Next->m_Next;
+	}
+
+	NewPiece->m_Next = Next;
+
+	if (Prev)
+		Prev->m_Next = NewPiece;
+	else
+		m_Pieces = NewPiece;
+}
+
+void lcModel::RemovePiece(Piece* piece)
+{
+	Piece* Next = m_Pieces;
+	Piece* Prev = NULL;
+
+	while (Next)
+	{
+		if (Next == piece)
+		{
+			if (Prev != NULL)
+				Prev->m_Next = piece->m_Next;
+			else
+				m_Pieces = (Piece*)piece->m_Next;
+
+			break;
+		}
+
+		Prev = Next;
+		Next = (Piece*)Next->m_Next;
+	}
+}
+
+bool lcModel::AnyPiecesSelected() const
+{
+	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
+		if ((piece->IsVisible(m_CurTime)) && piece->IsSelected())
+			return true;
+
+	return false;
 }
 
 void lcModel::SelectAllPieces(bool Select, bool FocusOnly)
 {
 	LC_ASSERT(!(FocusOnly && Select), "Cannot set focus to more than 1 piece.");
 
-	for (Object* piece = m_Pieces; piece; piece = piece->m_Next)
+	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
 		if (piece->IsVisible(m_CurTime))
 			piece->Select(Select, FocusOnly);
 }
 
 void lcModel::SelectInvertAllPieces()
 {
-	for (Object* piece = m_Pieces; piece; piece = piece->m_Next)
+	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
 	{
 		if (piece->IsVisible(m_CurTime))
 		{
@@ -44,34 +97,34 @@ void lcModel::SelectInvertAllPieces()
 
 void lcModel::HideSelectedPieces()
 {
-	for (Object* piece = m_Pieces; piece; piece = piece->m_Next)
+	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
 		if (piece->IsSelected())
-			piece->SetVisible(false);
+			piece->Hide();
 }
 
 void lcModel::HideUnselectedPieces()
 {
-	for (Object* piece = m_Pieces; piece; piece = piece->m_Next)
+	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
 		if (!piece->IsSelected())
-			piece->SetVisible(false);
+			piece->Hide();
 }
 
 void lcModel::UnhideAllPieces()
 {
-	for (Object* piece = m_Pieces; piece; piece = piece->m_Next)
-		piece->SetVisible();
+	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
+		piece->UnHide();
 }
 
 bool lcModel::RemoveSelectedPieces()
 {
-	Object* piece = m_Pieces;
+	Piece* piece = m_Pieces;
 	bool Deleted = false;
 
 	while (piece)
 	{
 		if (piece->IsSelected())
 		{
-			Object* Temp = piece->m_Next;
+			Piece* Temp = (Piece*)piece->m_Next;
 
 			Deleted = true;
 			RemovePiece(piece);
@@ -79,7 +132,7 @@ bool lcModel::RemoveSelectedPieces()
 			piece = Temp;
 		}
 		else
-			piece = piece->m_Next;
+			piece = (Piece*)piece->m_Next;
 	}
 
 	return Deleted;

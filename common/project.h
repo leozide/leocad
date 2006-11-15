@@ -41,6 +41,7 @@ class View;
 class Image;
 class PiecesLibrary;
 class TexFont;
+class lcModel;
 class lcMesh;
 struct lcMeshSection;
 
@@ -55,6 +56,8 @@ typedef struct LC_UNDOINFO
 	LC_UNDOINFO* pNext;
 	LC_UNDOINFO() { pNext = NULL; };
 } LC_UNDOINFO;
+
+#include "lc_model.h" // temp include for GetTime()
 
 class Project
 {
@@ -72,12 +75,8 @@ public:
 
 	// Access to protected members (TODO: clean up all this crap)
 	unsigned char GetLastStep();
-	bool IsAnimation()
-		{ return m_bAnimation; }
-	void SetAnimation(bool Anim)
-	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
-	unsigned short GetCurrentTime ()
-		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+	int GetCurrentTime ()
+		{ return m_ActiveModel->m_CurTime; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
@@ -93,11 +92,6 @@ public:
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
 	Camera* GetCamera(int i);
 	Camera* GetCamera(const char* Name) const;
-	void GetTimeRange(int* from, int* to)
-	{
-		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
-		*to = m_bAnimation ? m_nTotalFrames : 255;
-	}
 	unsigned short GetTotalFrames () const
 		{ return m_nTotalFrames; }
 	const Vector3& GetOverlayCenter() const
@@ -107,7 +101,6 @@ public:
 	void ConvertFromUserUnits(Vector3& Value) const;
 	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
 	{
-		*ppPiece = m_pPieces;
 		*ppCamera = m_pCameras;
 		*ppLight = m_pLights;
 	}
@@ -167,7 +160,9 @@ protected:
 	void CheckPoint (const char* text);
 
 	// Objects
-	Piece* m_pPieces;
+	lcModel* m_ActiveModel;
+	PtrArray<lcModel> m_ModelList;
+
 	Camera* m_pCameras;
 	Light* m_pLights;
 	Group* m_pGroups;
@@ -275,11 +270,8 @@ protected:
 	unsigned char m_nCurColor;
 	unsigned char m_nCurAction;
 	unsigned char m_PreviousAction;
-	bool m_bAnimation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
-	unsigned char m_nCurStep;
-	unsigned short m_nCurFrame;
 	unsigned short m_nTotalFrames;
 
 	unsigned long m_nScene;

@@ -39,7 +39,7 @@ class CurvePoint : public Object
   void MinIntersectDist (LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-  void UpdatePosition (unsigned short nTime, bool bAnimation);
+  void UpdatePosition (unsigned short nTime);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
   void Render ();
   void Select (bool bSelecting, bool bFocus, bool bMultiple);
@@ -100,7 +100,7 @@ class Curve : public Object
   bool FileLoad (File& file);
   void FileSave (File& file) const;
   void MinIntersectDist (LC_CLICKLINE* pLine);
-  void UpdatePosition (unsigned short nTime, bool bAnimation);
+  void UpdatePosition (unsigned short nTime);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
   void Render ();
   void Select (bool bSelecting, bool bFocus, bool bMultiple);

@@ -116,6 +116,8 @@ int stricmp(const char* str1, const char* str2);
 #define M_PI  3.14159265
 #endif
 
+#define LC_MAX_TIME 0xffffffff
+
 #define LC_FOURCC(ch0, ch1, ch2, ch3) (u32)((u32)(u8)(ch0) | ((u32)(u8)(ch1) << 8) | \
                                       ((u32)(u8)(ch2) << 16) | ((u32)(u8)(ch3) << 24 ))
 

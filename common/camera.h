@@ -49,8 +49,8 @@ public:
 	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Select(bool bSelecting, bool bFocus);
+	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the camera target
 	}
@@ -156,29 +156,29 @@ public:
 		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
 	*/
 
-	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
+	void SelectTarget(bool bSelecting, bool bFocus);
 
 public:
 	bool FileLoad(File& file);
 	void FileSave(File& file) const;
 	void MinIntersectDist(LC_CLICKLINE* pLine);
-	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	void Select(bool bSelecting, bool bFocus);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
 
 
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void UpdatePosition(unsigned short nTime);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
 	void GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const;
 	float GetRoll() const;
 
-	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
-	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void SetRoll(float Roll, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
+	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey);
+	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey);
+	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey, float* center);
+	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAddKey);
+	void SetRoll(float Roll, unsigned short nTime, bool bAddKey);
+	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);

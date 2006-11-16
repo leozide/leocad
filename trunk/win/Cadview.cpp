@@ -289,7 +289,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	pDC->SetBkMode(TRANSPARENT);
 	HPEN hpOld = (HPEN)SelectObject(pDC->m_hDC,(HPEN)GetStockObject(BLACK_PEN));
 
-	unsigned short nOldTime = project->m_bAnimation ? project->m_nCurFrame : project->m_nCurStep;
+	u32 OldTime = project->GetCurrentTime();
 	UINT nRenderTime = 1+((pInfo->m_nCurPage-1)*rows*cols);
 
 	View view(project, NULL);
@@ -301,10 +301,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	{
 		if (nRenderTime > project->GetLastStep())
 			continue;
-		if (project->m_bAnimation)
-			project->m_nCurFrame = nRenderTime;
-		else
-			project->m_nCurStep = nRenderTime;
+		project->m_ActiveModel->m_CurTime = nRenderTime;
 		project->CalculateStep();
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 
@@ -387,10 +384,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		nRenderTime++;
 	}
 
-	if (project->m_bAnimation)
-		project->m_nCurFrame = nOldTime;
-	else
-		project->m_nCurStep = (unsigned char)nOldTime;
+	project->m_ActiveModel->m_CurTime = OldTime;
 
 	pfnwglMakeCurrent(NULL, NULL);
 	pfnwglDeleteContext(hmemrc);

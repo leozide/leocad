@@ -6,7 +6,8 @@ lcModel::lcModel(const char* Name)
 {
 	m_Pieces = NULL;
 	m_Name = Name;
-	m_CurTime = 1;
+	m_CurFrame = 1;
+	m_TotalFrames = 1;
 }
 
 lcModel::~lcModel()
@@ -66,7 +67,7 @@ void lcModel::RemovePiece(Piece* piece)
 bool lcModel::AnyPiecesSelected() const
 {
 	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		if ((piece->IsVisible(m_CurTime)) && piece->IsSelected())
+		if ((piece->IsVisible(m_CurFrame)) && piece->IsSelected())
 			return true;
 
 	return false;
@@ -77,7 +78,7 @@ void lcModel::SelectAllPieces(bool Select, bool FocusOnly)
 	LC_ASSERT(!(FocusOnly && Select), "Cannot set focus to more than 1 piece.");
 
 	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		if (piece->IsVisible(m_CurTime))
+		if (piece->IsVisible(m_CurFrame))
 			piece->Select(Select, FocusOnly);
 }
 
@@ -85,7 +86,7 @@ void lcModel::SelectInvertAllPieces()
 {
 	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
 	{
-		if (piece->IsVisible(m_CurTime))
+		if (piece->IsVisible(m_CurFrame))
 		{
 			if (piece->IsSelected())
 				piece->Select(false, false);

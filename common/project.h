@@ -76,7 +76,7 @@ public:
 	// Access to protected members (TODO: clean up all this crap)
 	unsigned char GetLastStep();
 	int GetCurrentTime ()
-		{ return m_ActiveModel->m_CurTime; }
+		{ return m_ActiveModel->m_CurFrame; }
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
@@ -92,8 +92,6 @@ public:
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
 	Camera* GetCamera(int i);
 	Camera* GetCamera(const char* Name) const;
-	unsigned short GetTotalFrames () const
-		{ return m_nTotalFrames; }
 	const Vector3& GetOverlayCenter() const
 		{ return m_OverlayCenter; }
 
@@ -272,7 +270,6 @@ protected:
 	unsigned char m_PreviousAction;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
-	unsigned short m_nTotalFrames;
 
 	unsigned long m_nScene;
 	unsigned long m_nDetail;

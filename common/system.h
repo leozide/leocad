@@ -4,6 +4,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "str.h"
+#include "array.h"
 
 // Assert macros.
 #ifdef LC_DEBUG
@@ -79,6 +80,7 @@ bool Sys_KeyDown (int key);
 class File;
 class Camera;
 class PieceInfo;
+class lcModel;
 
 // User Interface
 void SystemUpdateAction(int nNew, int nOld);
@@ -95,6 +97,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* 
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemUpdateCategories(bool SearchOnly);
+void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveModel);
 
 void SystemInit();
 void SystemFinish();

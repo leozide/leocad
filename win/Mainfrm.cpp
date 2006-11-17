@@ -371,17 +371,17 @@ HMENU CMainFrame::NewMenu()
 	// The third option is the resource ID of the bitmap.This can also be a
 	// toolbar ID in which case the class searches the toolbar for the
 	// appropriate bitmap. Only Bitmap and Toolbar resources are supported.
-	m_bmpMenu.ModifyODMenu(NULL, ID_FILE_PROPERTIES, IDB_INFO);
 	m_bmpMenu.ModifyODMenu(NULL, ID_FILE_SAVEPICTURE, IDB_PHOTO);
-	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_DELETE, IDB_DELETE);
-	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_GROUP, IDB_GROUP);
-	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_UNGROUP, IDB_UNGROUP);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_PREFERENCES, IDB_PREFERENCES);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMOUT, IDB_ZOOMOUT);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMIN, IDB_ZOOMIN);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_SPLITHORIZONTALLY, IDB_SPLITH);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_SPLITVERTICALLY, IDB_SPLITV);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_FULLSCREEN, IDB_FULLSCREEN);
+	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_DELETE, IDB_DELETE);
+	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_GROUP, IDB_GROUP);
+	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_UNGROUP, IDB_UNGROUP);
+	m_bmpMenu.ModifyODMenu(NULL, ID_MODEL_PROPERTIES, IDB_INFO);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_FINDER, IDB_HELP);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_LEOCADHOMEPAGE, IDB_HOME);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_SENDEMAIL, IDB_MAIL);
@@ -770,8 +770,16 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_FILE_WAVEFRONT, 0);
 		} break;
 
-		case ID_FILE_PROPERTIES: {
-			project->HandleCommand(LC_FILE_PROPERTIES, 0);
+		case ID_MODEL_NEW: {
+			project->HandleCommand(LC_MODEL_NEW, 0);
+		} break;
+
+		case ID_MODEL_DELETE: {
+			project->HandleCommand(LC_MODEL_DELETE, 0);
+		} break;
+
+		case ID_MODEL_PROPERTIES: {
+			project->HandleCommand(LC_MODEL_PROPERTIES, 0);
 		} break;
 
 		case ID_FILE_TERRAINEDITOR: {
@@ -1297,7 +1305,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_FILE_EXPORT_HTML,       // LC_FILE_HTML
 		ID_FILE_EXPORT_POVRAY,     // LC_FILE_POVRAY
 		ID_FILE_EXPORT_WAVEFRONT,  // LC_FILE_WAVEFRONT
-		ID_FILE_PROPERTIES,        // LC_FILE_PROPERTIES
 		ID_FILE_TERRAINEDITOR,     // LC_FILE_TERRAIN
 		ID_FILE_EDITPIECELIBRARY,  // LC_FILE_LIBRARY
 		0,                         // LC_FILE_RECENT
@@ -1325,6 +1332,9 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_PIECE_UNHIDEALL,        // LC_PIECE_UNHIDE_ALL
 		ID_PIECE_PREVIOUS,         // LC_PIECE_PREVIOUS
 		ID_PIECE_NEXT,             // LC_PIECE_NEXT
+		ID_MODEL_NEW,              // LC_MODEL_NEW
+		ID_MODEL_DELETE,           // LC_MODEL_DELETE
+		ID_MODEL_PROPERTIES,       // LC_MODEL_PROPERTIES
 		ID_VIEW_PREFERENCES,       // LC_VIEW_PREFERENCES
 		0,                         // LC_VIEW_ZOOM
 		ID_VIEW_ZOOMIN,            // LC_VIEW_ZOOMIN

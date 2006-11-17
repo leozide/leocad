@@ -301,7 +301,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	{
 		if (nRenderTime > project->GetLastStep())
 			continue;
-		project->m_ActiveModel->m_CurTime = nRenderTime;
+		project->m_ActiveModel->m_CurFrame = nRenderTime;
 		project->CalculateStep();
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 
@@ -384,7 +384,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		nRenderTime++;
 	}
 
-	project->m_ActiveModel->m_CurTime = OldTime;
+	project->m_ActiveModel->m_CurFrame = OldTime;
 
 	pfnwglMakeCurrent(NULL, NULL);
 	pfnwglDeleteContext(hmemrc);

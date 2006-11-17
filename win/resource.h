@@ -282,7 +282,6 @@
 #define IDC_SCNDLG_BGIMAGE_BROWSE       1104
 #define IDC_MODDLG_CONSTANT             1104
 #define IDC_SCNDLG_FOGCOLOR             1105
-#define IDC_MODDLG_POSY3                1105
 #define IDC_MODDLG_LINEAR               1105
 #define IDC_SCNDLG_BGCOLOR              1106
 #define IDC_MODDLG_QUADRATIC            1106
@@ -478,7 +477,6 @@
 #define ID_EDIT_SELECTINVERT            32774
 #define ID_EDIT_SELECTBYNAME            32775
 #define ID_FILE_MERGE                   32776
-#define ID_FILE_PROPERTIES              32777
 #define ID_VIEW_FULLSCREEN              32780
 #define ID_VIEW_STEP_NEXT               32782
 #define ID_VIEW_STEP_PREVIOUS           32783
@@ -707,6 +705,10 @@
 #define ID_VIEW_DELETEVIEW              33172
 #define ID_VIEW_RESETVIEWS              33174
 #define ID_Menu                         33175
+#define ID_MODEL_NEW                    33176
+#define ID_MODEL_DELETE                 33177
+#define ID_MODEL_PROPERTIES             33179
+#define ID_MODEL_MODEL1                 33180
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -718,7 +720,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
-#define _APS_NEXT_COMMAND_VALUE         33176
+#define _APS_NEXT_COMMAND_VALUE         33181
 #define _APS_NEXT_CONTROL_VALUE         1252
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

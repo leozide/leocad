@@ -237,7 +237,6 @@ BEGIN
             MENUITEM "Wavefront...",                ID_FILE_EXPORT_WAVEFRONT
         END
         MENUITEM SEPARATOR
-        MENUITEM "Propert&ies...",              ID_FILE_PROPERTIES
         MENUITEM "Pieces &Library Manager...",  ID_FILE_EDITPIECELIBRARY
         MENUITEM "Terrain &Editor...",          ID_FILE_TERRAINEDITOR
         MENUITEM SEPARATOR
@@ -328,7 +327,6 @@ BEGIN
         MENUITEM "Array...",                    ID_PIECE_ARRAY
         MENUITEM "Mirror...",                   ID_PIECE_MIRROR, GRAYED
         MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
-        MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
         MENUITEM SEPARATOR
         MENUITEM "Group...",                    ID_PIECE_GROUP
         MENUITEM "Ungroup",                     ID_PIECE_UNGROUP
@@ -339,6 +337,14 @@ BEGIN
         MENUITEM "Hide Selected",               ID_PIECE_HIDESELECTED
         MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
         MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
+    END
+    POPUP "&Model"
+    BEGIN
+        MENUITEM "&New...",                     ID_MODEL_NEW
+        MENUITEM "&Delete...",                  ID_MODEL_DELETE
+        MENUITEM "&Properties...",              ID_MODEL_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "Model 1",                     ID_MODEL_MODEL1, GRAYED
     END
     POPUP "&Help"
     BEGIN
@@ -2132,6 +2138,10 @@ BEGIN
     ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."
     ID_VIEW_DELETEVIEW      "Delete the current view"
     ID_VIEW_RESETVIEWS      "Reset all views to the default configuration"
+    ID_MODEL_NEW            "Create a new model."
+    ID_MODEL_DELETE         "Delete current model."
+    ID_MODEL_PROPERTIES     "Display current model properties."
+    ID_MODEL_MODEL1         "Edit this model."
 END
 
 #endif    // English (U.S.) resources

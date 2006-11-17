@@ -872,6 +872,76 @@ void SystemUpdateCategories(bool SearchOnly)
 	pBar->UpdatePiecesTree(SearchOnly);
 }
 
+#define LC_MODEL_MENU_MAX 16
+
+void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveModel)
+{
+	CMenu* Menu = GetMainMenu(4);
+	if (!Menu)
+		return;
+
+	// Delete existing entries.
+	for (int i = 1; i < LC_MODEL_MENU_MAX; i++)
+		Menu->DeleteMenu(ID_MODEL_MODEL1 + i, MF_BYCOMMAND);
+
+	// If the list is empty add a disabled entry.
+	if (ModelList.GetSize() == 0)
+	{
+		UINT State = Menu->GetMenuState(ID_MODEL_MODEL1, MF_BYCOMMAND);
+		State &= ~(MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR | MF_CHECKED);
+		Menu->ModifyMenu(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_STRING | State, ID_MODEL_MODEL1, "Model");
+		Menu->EnableMenuItem(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		return;
+	}
+
+	// Find the position of the first model in the menu.
+	u32 StartPos;
+	for (StartPos = 0; StartPos < Menu->GetMenuItemCount(); StartPos++)
+		if (Menu->GetMenuItemID(StartPos) == ID_MODEL_MODEL1)
+			break;
+
+	// Add models to menu.
+	for (int i = 0; i < ModelList.GetSize(); i++)
+	{
+		lcModel* Model = ModelList[i];
+		String DisplayName;
+
+		// Double up any '&' characters so they are not underlined.
+		char* Dest = DisplayName.GetBuffer(Model->GetName().GetLength() * 2 + 1);
+		char* Src = Model->GetName();
+
+		while (*Src)
+		{
+			if (*Src == '&')
+				*Dest++ = '&';
+			*Dest++ = *Src++;
+		}
+		*Dest = 0;
+		DisplayName.ReleaseBuffer();
+
+		// Insert mnemonic followed by the model name.
+		char* Text = new char[DisplayName.GetLength() + 10];
+		sprintf(Text, "&%d %s", i+1, (const char*)DisplayName);
+
+		if (i != 0)
+		{
+			Menu->InsertMenu(StartPos + i, MF_BYPOSITION | MF_STRING, ID_MODEL_MODEL1 + i, Text);
+		}
+		else
+		{
+			UINT State = Menu->GetMenuState(ID_MODEL_MODEL1, MF_BYCOMMAND);
+			State &= ~(MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR | MF_CHECKED);
+			Menu->ModifyMenu(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_STRING | State, ID_MODEL_MODEL1 + i, Text);
+			Menu->EnableMenuItem(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_ENABLED);
+		}
+
+		if (Model == ActiveModel)
+			Menu->CheckMenuItem(StartPos + i, MF_BYPOSITION | MF_CHECKED);
+
+		delete[] Text;
+	}
+}
+
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
 extern UINT AFXAPI AfxGetFileName(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
 

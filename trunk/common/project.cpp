@@ -140,7 +140,7 @@ void Project::UpdateInterface()
 	SystemUpdateCameraMenu(m_pCameras);
 	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
 	UpdateSelection();
-	SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+	SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
 	{
@@ -311,7 +311,6 @@ void Project::LoadDefaults(bool cameras)
 	m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_nFPS = Sys_ProfileLoadInt ("Default", "FPS", 24);
-	m_nTotalFrames = 100;
 	SystemUpdateTime(false, 1, 255);
 	m_nScene = Sys_ProfileLoadInt ("Default", "Scene", 0);
 	m_nSaveTimer = 0;
@@ -748,7 +747,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadLong (&i, 1); //m_nCurFrame = i;
-				file->ReadShort (&m_nTotalFrames, 1);
+				file->ReadShort (&sh, 1); // m_nTotalFrames
 				file->ReadLong (&i, 1); //m_nGridSize = i;
 				file->ReadLong (&i, 1); //m_nMoveSnap = i;
 			}
@@ -759,7 +758,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadShort (&sh, 1); // m_nCurFrame
-				file->ReadShort (&m_nTotalFrames, 1);
+				file->ReadShort (&sh, 1); // m_nTotalFrames
 				file->ReadShort (&sh, 1); // m_nGridSize
 				file->ReadShort (&sh, 1);
 				if (fv >= 1.4f)
@@ -808,7 +807,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	SystemUpdateCameraMenu(m_pCameras);
 	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
 	UpdateSelection();
-	SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+	SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 	UpdateAllViews ();
 
 	return true;
@@ -837,7 +836,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteLong (&i, 1);
 	i = m_nCurColor; file->WriteLong (&i, 1);
 	i = m_nCurAction; file->WriteLong (&i, 1);
-	i = m_ActiveModel->m_CurTime; file->WriteLong (&i, 1);
+	i = m_ActiveModel->m_CurFrame; file->WriteLong (&i, 1);
 	file->WriteLong (&m_nScene, 1);
 
 	Piece* pPiece;
@@ -901,7 +900,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteByte (&ch, 1);
 	file->WriteByte (&m_nFPS, 1);
 	sh = 1; file->WriteShort (&sh, 1); // m_nCurFrame
-	file->WriteShort (&m_nTotalFrames, 1);
+	sh = 1; file->WriteShort (&sh, 1); // m_nTotalFrames
 	sh = 10; file->WriteShort (&sh, 1); // m_nGridSize
 	file->WriteShort (&m_nMoveSnap, 1);
 	// 0.62 (1.1)
@@ -927,7 +926,7 @@ void Project::FileSave(File* file, bool bUndo)
 			opts.transparent = false;
 			opts.format = LC_IMAGE_GIF;
 
-			i = m_ActiveModel->m_CurTime;
+			i = m_ActiveModel->m_CurFrame;
 			CreateImages(image, 120, 100, i, i, false);
 			image[0].FileSave (*file, &opts);
 			delete []image;
@@ -1430,8 +1429,8 @@ bool Project::OnOpenDocument(const char* PathName)
 			else
 				FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray, FilePath);
 
-			m_ActiveModel->m_CurTime = step;
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			m_ActiveModel->m_CurFrame = step;
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 			SystemUpdateFocus(NULL);
 			UpdateSelection();
 			CalculateStep();
@@ -1979,7 +1978,7 @@ void Project::RenderScene(View* view)
 	{
 		lcMesh* Mesh = piece->GetMesh();
 
-		if (!piece->IsVisible(m_ActiveModel->m_CurTime))
+		if (!piece->IsVisible(m_ActiveModel->m_CurFrame))
 			continue;
 
 		for (int i = 0; i < Mesh->m_SectionCount; i++)
@@ -2966,7 +2965,7 @@ void Project::RenderBoxes(bool bHilite)
 	Piece* pPiece;
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-		if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+		if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 			pPiece->RenderBox(bHilite, m_fLineWidth);
 }
 
@@ -3081,7 +3080,7 @@ void Project::CalculateStep()
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 	{
-		pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
+		pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 		PieceCount++;
 	}
 
@@ -3090,7 +3089,7 @@ void Project::CalculateStep()
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 	{
-		pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, false);
+		pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, false);
 		SytemStepProgressBar();
 	}
 
@@ -3098,10 +3097,10 @@ void Project::CalculateStep()
   SystemDoWaitCursor(-1);
 
 	for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
-		pCamera->UpdatePosition(m_ActiveModel->m_CurTime);
+		pCamera->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 	for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
-		pLight->UpdatePosition(m_ActiveModel->m_CurTime);
+		pLight->UpdatePosition(m_ActiveModel->m_CurFrame);
 }
 
 // Returns true if anything was removed (used by cut and del)
@@ -3335,12 +3334,12 @@ void Project::CheckAnimation()
 
 	if (Frames)
 	{
-		m_ActiveModel->m_CurTime += Frames;
-		while (m_ActiveModel->m_CurTime > m_nTotalFrames)
-			m_ActiveModel->m_CurTime -= m_nTotalFrames;
+		m_ActiveModel->m_CurFrame += Frames;
+		while (m_ActiveModel->m_CurFrame > m_ActiveModel->m_TotalFrames)
+			m_ActiveModel->m_CurFrame -= m_ActiveModel->m_TotalFrames;
 
 		CalculateStep();
-		SystemUpdateTime(true, m_ActiveModel->m_CurTime, m_nTotalFrames);
+		SystemUpdateTime(true, m_ActiveModel->m_CurFrame, m_ActiveModel->m_TotalFrames);
 
 		UpdateAllViews();
 	}
@@ -3361,7 +3360,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 	unsigned short oldtime;
 	void* render = Sys_StartMemoryRender (width, height);
 	unsigned char* buf = (unsigned char*)malloc (width*height*3);
-	oldtime = m_ActiveModel->m_CurTime;
+	oldtime = m_ActiveModel->m_CurFrame;
 
 	View view(this, NULL);
 	view.OnSize(width, height);
@@ -3374,7 +3373,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 
 	for (int i = from; i <= to; i++)
 	{
-		m_ActiveModel->m_CurTime = i;
+		m_ActiveModel->m_CurFrame = i;
 
 		if (hilite)
 		{
@@ -3392,7 +3391,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 		images[i-from].FromOpenGL (width, height);
 	}
 
-	m_ActiveModel->m_CurTime = (unsigned char)oldtime;
+	m_ActiveModel->m_CurFrame = (unsigned char)oldtime;
 	CalculateStep();
 	free (buf);
 	Sys_FinishMemoryRender (render);
@@ -3516,14 +3515,14 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			Vector3 Angles = MatrixToEulerAngles(mat) * LC_RTOD;
 
 			if (Pos != mod->Position)
-				pPiece->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->Position, LC_PK_POSITION);
+				pPiece->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Position, LC_PK_POSITION);
 
 			if (mod->Rotation[0] != Angles[0] || mod->Rotation[1] != Angles[1] || mod->Rotation[2] != Angles[2])
 			{
 				mat = MatrixFromEulerAngles(Vector3(mod->Rotation[0], mod->Rotation[1], mod->Rotation[2]) * LC_DTOR);
 				Vector4 AxisAngle = MatrixToAxisAngle(mat);
 				AxisAngle[3] *= LC_RTOD;
-				pPiece->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, AxisAngle, LC_PK_ROTATION);
+				pPiece->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, AxisAngle, LC_PK_ROTATION);
 			}
 
 			pPiece->SetTimeShow(mod->from);
@@ -3536,8 +3535,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 
 			pPiece->SetName(mod->name);
 			pPiece->SetColor(mod->color);
-			pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
-			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+			pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
+			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 
 			SetModifiedFlag(true);
 			CheckPoint("Modifying");
@@ -3560,20 +3559,20 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			pCamera->SetAutoClip(!mod->clip);
 
 			if (pCamera->GetEyePosition() != mod->Eye)
-				pCamera->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->Eye, LC_CK_EYE);
+				pCamera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Eye, LC_CK_EYE);
 
 			if (pCamera->GetTargetPosition() != mod->Target)
-				pCamera->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->Target, LC_CK_TARGET);
+				pCamera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Target, LC_CK_TARGET);
 
 			if (pCamera->GetRoll() != mod->Roll)
-				pCamera->SetRoll(mod->Roll, m_ActiveModel->m_CurTime, m_bAddKeys);
+				pCamera->SetRoll(mod->Roll, m_ActiveModel->m_CurFrame, m_bAddKeys);
 
 			pCamera->SetName(mod->name);
 			pCamera->m_fovy = mod->fovy;
 			pCamera->m_zNear = mod->znear;
 			pCamera->m_zFar = mod->zfar;
 
-			pCamera->UpdatePosition(m_ActiveModel->m_CurTime);
+			pCamera->UpdatePosition(m_ActiveModel->m_CurFrame);
 			UpdateAllViews();
 		} break;
 
@@ -3588,38 +3587,38 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				light->UnHide();
 
 			if (light->GetPosition() != mod->Position)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->Position, LC_LK_POSITION);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Position, LC_LK_POSITION);
 
 			if (light->GetTargetPosition() != mod->Target)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->Target, LC_LK_TARGET);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Target, LC_LK_TARGET);
 
 			if (light->GetAmbientColor() != mod->AmbientColor)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->AmbientColor, LC_LK_AMBIENT_COLOR);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->AmbientColor, LC_LK_AMBIENT_COLOR);
 
 			if (light->GetDiffuseColor() != mod->DiffuseColor)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->DiffuseColor, LC_LK_DIFFUSE_COLOR);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->DiffuseColor, LC_LK_DIFFUSE_COLOR);
 
 			if (light->GetSpecularColor() != mod->SpecularColor)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, mod->SpecularColor, LC_LK_SPECULAR_COLOR);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->SpecularColor, LC_LK_SPECULAR_COLOR);
 
 			if (light->GetConstantAttenuation() != mod->ConstantAttenuation)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, &mod->ConstantAttenuation, LC_LK_CONSTANT_ATTENUATION);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, &mod->ConstantAttenuation, LC_LK_CONSTANT_ATTENUATION);
 
 			if (light->GetLinearAttenuation() != mod->LinearAttenuation)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, &mod->LinearAttenuation, LC_LK_LINEAR_ATTENUATION);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, &mod->LinearAttenuation, LC_LK_LINEAR_ATTENUATION);
 
 			if (light->GetQuadraticAttenuation() != mod->QuadraticAttenuation)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, &mod->QuadraticAttenuation, LC_LK_QUADRATIC_ATTENUATION);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, &mod->QuadraticAttenuation, LC_LK_QUADRATIC_ATTENUATION);
 
 			if (light->GetSpotCutoff() != mod->SpotCutoff)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, &mod->SpotCutoff, LC_LK_SPOT_CUTOFF);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, &mod->SpotCutoff, LC_LK_SPOT_CUTOFF);
 
 			if (light->GetSpotExponent() != mod->SpotExponent)
-				light->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, &mod->SpotExponent, LC_LK_SPOT_EXPONENT);
+				light->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, &mod->SpotExponent, LC_LK_SPOT_EXPONENT);
 
 			light->SetName(mod->name);
 
-			light->UpdatePosition(m_ActiveModel->m_CurTime);
+			light->UpdatePosition(m_ActiveModel->m_CurFrame);
 			UpdateAllViews();
 		} break;
 	}
@@ -3692,7 +3691,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			LC_IMAGEDLG_OPTS opts;
 			opts.from = 1;
-			opts.to = m_nTotalFrames;
+			opts.to = m_ActiveModel->m_TotalFrames;
 			opts.multiple = false;
 			opts.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
@@ -3713,7 +3712,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					}
 				}
 				else
-					opts.from = opts.to = m_ActiveModel->m_CurTime;
+					opts.from = opts.to = m_ActiveModel->m_CurFrame;
 
 				Image* images = new Image[opts.to-opts.from+1];
 				CreateImages (images, opts.width, opts.height, opts.from, opts.to, false);
@@ -4404,7 +4403,15 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			fclose(stream);
 		} break;
 
-		case LC_FILE_PROPERTIES:
+		case LC_MODEL_NEW:
+		{
+		} break;
+
+		case LC_MODEL_DELETE:
+		{
+		} break;
+
+		case LC_MODEL_PROPERTIES:
 		{
 			LC_PROPERTIESDLG_OPTS opts;
 
@@ -4641,7 +4648,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece = pPasted;
 				pPasted = (Piece*)pPasted->m_Next;
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
-				pPiece->SetTimeShow(m_ActiveModel->m_CurTime);
+				pPiece->SetTimeShow(m_ActiveModel->m_CurFrame);
 				AddPiece(pPiece);
 				pPiece->Select(true, false);
 
@@ -4721,7 +4728,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			Piece* pPiece;
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-				if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+				if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 					pPiece->Select(true, false);
 
 //	pFrame->UpdateInfo();
@@ -4741,7 +4748,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			Piece* pPiece;
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-				if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+				if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 				{
 					if (pPiece->IsSelected())
 						pPiece->Select(false, false);
@@ -4763,7 +4770,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			int i = 0;
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-				if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+				if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 					i++;
 
 			for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
@@ -4789,7 +4796,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			i = 0;
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-				if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+				if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 				{
 					opts[i].name = pPiece->GetName();
 					opts[i].type = LC_SELDLG_PIECE;
@@ -4894,18 +4901,18 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				GetPieceInsertPosition(pLast, Pos, Rot);
 
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurTime, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurFrame, m_nCurColor);
 
-				pPiece->ChangeKey(m_ActiveModel->m_CurTime, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
+				pPiece->ChangeKey(m_ActiveModel->m_CurFrame, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 			}
 			else
-				pPiece->Initialize(0, 0, -m_pCurPiece->m_fDimensions[5], m_ActiveModel->m_CurTime, m_nCurColor);
+				pPiece->Initialize(0, 0, -m_pCurPiece->m_fDimensions[5], m_ActiveModel->m_CurFrame, m_nCurColor);
 
 			SelectAndFocusNone(false);
 			pPiece->CreateName(m_ActiveModel->m_Pieces);
 			AddPiece(pPiece);
-			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, true, true);
+			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, true, true);
 			pPiece->Select (true, true);
 			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
 			UpdateSelection();
@@ -4949,14 +4956,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		      Matrix mat;
 		      Piece* pPiece = new Piece(wiz->m_Info[i]);
 
-		      pPiece->Initialize(wiz->m_Position[i][0], wiz->m_Position[i][1], wiz->m_Position[i][2], m_ActiveModel->m_CurTime, wiz->m_Colors[i]);
+		      pPiece->Initialize(wiz->m_Position[i][0], wiz->m_Position[i][1], wiz->m_Position[i][2], m_ActiveModel->m_CurFrame, wiz->m_Colors[i]);
 		      pPiece->CreateName(m_ActiveModel->m_Pieces);
 		      AddPiece(pPiece);
 		      pPiece->Select(true, false);
 
 		      pPiece->ChangeKey(1, false, wiz->m_Rotation[i], LC_PK_ROTATION);
-		      pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
-		      pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+		      pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
+		      pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 
 		      SystemPieceComboAdd(wiz->m_Info[i]->m_strDescription);
 		    }
@@ -5085,7 +5092,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							else
 								pLast = pFirst = new Piece(pPiece->GetPieceInfo());
 
-							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_ActiveModel->m_CurTime, pPiece->GetColor());
+							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_ActiveModel->m_CurFrame, pPiece->GetColor());
 							pLast->ChangeKey(1, false, param, LC_PK_ROTATION);
 						}
 
@@ -5105,7 +5112,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 									pLast = pFirst = new Piece(pPiece->GetPieceInfo());
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2],
-									m_ActiveModel->m_CurTime, pPiece->GetColor());
+									m_ActiveModel->m_CurFrame, pPiece->GetColor());
 								pLast->ChangeKey(1, false, param, LC_PK_ROTATION);
 							}
 
@@ -5123,7 +5130,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 									pLast = pFirst = new Piece(pPiece->GetPieceInfo());
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2],
-									m_ActiveModel->m_CurTime, pPiece->GetColor());
+									m_ActiveModel->m_CurFrame, pPiece->GetColor());
 								pLast->ChangeKey(1, false, param, LC_PK_ROTATION);
 							}
 						}
@@ -5134,9 +5141,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				{
 					pPiece = (Piece*)pFirst->m_Next;
 					pFirst->CreateName(m_ActiveModel->m_Pieces);
-					pFirst->UpdatePosition(m_ActiveModel->m_CurTime);
+					pFirst->UpdatePosition(m_ActiveModel->m_CurFrame);
 					AddPiece(pFirst);
-					pFirst->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+					pFirst->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 					pFirst = pPiece;
 				}
 
@@ -5158,9 +5165,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 				if (pPiece->IsSelected())
 				{
-					pPiece->CalculateSingleKey (m_ActiveModel->m_CurTime, LC_PK_POSITION, move);
-					pPiece->ChangeKey(m_ActiveModel->m_CurTime, move, LC_PK_POSITION);
-					pPiece->ChangeKey(m_ActiveModel->m_CurTime, rot, LC_PK_ROTATION);
+					pPiece->CalculateSingleKey (m_ActiveModel->m_CurFrame, LC_PK_POSITION, move);
+					pPiece->ChangeKey(m_ActiveModel->m_CurFrame, move, LC_PK_POSITION);
+					pPiece->ChangeKey(m_ActiveModel->m_CurFrame, rot, LC_PK_ROTATION);
 				}
 
 			// TODO: cameras and lights
@@ -5424,7 +5431,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						redraw = true;
 						pPiece->SetTimeShow(t+1);
 
-						if (pPiece->IsSelected () && t == m_ActiveModel->m_CurTime)
+						if (pPiece->IsSelected () && t == m_ActiveModel->m_CurFrame)
 							pPiece->Select (false, false);
 					}
 				}
@@ -5495,7 +5502,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOM:
 		{
-			m_ActiveView->GetCamera()->DoZoom(nParam, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoZoom(nParam, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5503,7 +5510,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMIN:
 		{
-			m_ActiveView->GetCamera()->DoZoom(-1, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoZoom(-1, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5511,7 +5518,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMOUT:
 		{
-			m_ActiveView->GetCamera()->DoZoom(1, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoZoom(1, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5526,7 +5533,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
 			for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-				if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+				if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 					pPiece->CompareBoundingBox(bs);
 
 			Vector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
@@ -5560,9 +5567,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Target = Center;
 				Vector3 Front = Target - Eye;
 
-				camera->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, Eye, LC_CK_EYE);
-				camera->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, Target, LC_CK_TARGET);
-				camera->UpdatePosition(m_ActiveModel->m_CurTime);
+				camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
+				camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
+				camera->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 				// Get the view planes.
 				float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
@@ -5574,7 +5581,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				for (Piece* piece = m_ActiveModel->m_Pieces; piece; piece = (Piece*)piece->m_Next)
 				{
-					if (!piece->IsVisible(m_ActiveModel->m_CurTime))
+					if (!piece->IsVisible(m_ActiveModel->m_CurFrame))
 						continue;
 
 					Vector3 Verts[8];
@@ -5599,9 +5606,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Eye += Front * SmallestDistance;
 
 				// Save new positions.
-				camera->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, Eye, LC_CK_EYE);
-				camera->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, Target, LC_CK_TARGET);
-				camera->UpdatePosition(m_ActiveModel->m_CurTime);
+				camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
+				camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
+				camera->UpdatePosition(m_ActiveModel->m_CurFrame);
 			}
 
 			SystemUpdateFocus(NULL);
@@ -5642,80 +5649,80 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_STEP_NEXT:
 		{
-			m_ActiveModel->m_CurTime++;
+			m_ActiveModel->m_CurFrame++;
 
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 		
 		case LC_VIEW_STEP_PREVIOUS:
 		{
-			m_ActiveModel->m_CurTime--;
+			m_ActiveModel->m_CurFrame--;
 
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 		
 		case LC_VIEW_STEP_FIRST:
 		{
-			m_ActiveModel->m_CurTime = 1;
+			m_ActiveModel->m_CurFrame = 1;
 
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 
 		case LC_VIEW_STEP_LAST:
 		{
-			m_ActiveModel->m_CurTime = GetLastStep ();
+			m_ActiveModel->m_CurFrame = GetLastStep ();
 
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 
 		case LC_VIEW_STEP_CHOOSE:
 		{
 			SystemDoDialog(LC_DLG_STEPCHOOSE, NULL);
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 
 		case LC_VIEW_STEP_SET:
 		{
-			m_ActiveModel->m_CurTime = (nParam < 255) ? (unsigned char)nParam : 255;
+			m_ActiveModel->m_CurFrame = (nParam < 255) ? (unsigned char)nParam : 255;
 
 			CalculateStep();
 			UpdateSelection();
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 
     case LC_VIEW_STEP_INSERT:
     {
       for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-        pPiece->InsertTime (m_ActiveModel->m_CurTime, 1);
+        pPiece->InsertTime (m_ActiveModel->m_CurFrame, 1);
 
       for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
-        pCamera->InsertTime (m_ActiveModel->m_CurTime, 1);
+        pCamera->InsertTime (m_ActiveModel->m_CurFrame, 1);
 
       for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
-        pLight->InsertTime (m_ActiveModel->m_CurTime, 1);
+        pLight->InsertTime (m_ActiveModel->m_CurFrame, 1);
 
       SetModifiedFlag (true);
       CheckPoint ("Adding Step");
@@ -5727,13 +5734,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
     case LC_VIEW_STEP_DELETE:
     {
       for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-        pPiece->RemoveTime (m_ActiveModel->m_CurTime, 1);
+        pPiece->RemoveTime (m_ActiveModel->m_CurFrame, 1);
 
       for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
-        pCamera->RemoveTime (m_ActiveModel->m_CurTime, 1);
+        pCamera->RemoveTime (m_ActiveModel->m_CurFrame, 1);
 
       for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
-        pLight->RemoveTime (m_ActiveModel->m_CurTime, 1);
+        pLight->RemoveTime (m_ActiveModel->m_CurFrame, 1);
 
       SetModifiedFlag (true);
       CheckPoint ("Removing Step");
@@ -5844,7 +5851,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			x -= x > 0 ? 5 : -5;
 			y -= y > 0 ? 5 : -5;
 
-			m_ActiveView->GetCamera()->DoPan(x/4, y/4, 1, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoPan(x/4, y/4, 1, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			m_nDownX = x;
 			m_nDownY = y;
 			UpdateOverlayScale();
@@ -5864,7 +5871,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateAllViews();
 
 			SystemUpdateAnimation(false, m_bAddKeys);
-			SystemUpdateTime(false, m_ActiveModel->m_CurTime, 255);
+			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 		} break;
 		
 		case LC_TOOLBAR_ADDKEYS:
@@ -6475,7 +6482,7 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	pLine->pClosest = NULL;
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-		if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+		if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 			pPiece->MinIntersectDist(pLine);
 
 	if (!PiecesOnly)
@@ -6553,7 +6560,7 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 	// Check if any objects are inside the volume.
 	for (Piece* piece = m_ActiveModel->m_Pieces; piece != NULL; piece = (Piece*)piece->m_Next)
 	{
-		if (piece->IsVisible(m_ActiveModel->m_CurTime))
+		if (piece->IsVisible(m_ActiveModel->m_CurFrame))
 		{
 			if (piece->IntersectsVolume(Planes, 6))
 				Objects.Add(piece);
@@ -6621,7 +6628,7 @@ bool Project::StopTracking(bool bAccept)
 							if (pGroup != NULL)
 							{
 								for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-									if ((pPiece->IsVisible(m_ActiveModel->m_CurTime)) &&
+									if ((pPiece->IsVisible(m_ActiveModel->m_CurFrame)) &&
 											(pPiece->GetTopGroup() == pGroup))
 										pPiece->Select (true, false);
 							}
@@ -6745,9 +6752,9 @@ bool Project::StopTracking(bool bAccept)
 				Target = Target + Dir * ZoomFactor;
 
 				// Change the camera and redraw.
-			  Cam->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, Eye, LC_CK_EYE);
-			  Cam->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, Target, LC_CK_TARGET);
-			  Cam->UpdatePosition(m_ActiveModel->m_CurTime);
+			  Cam->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
+			  Cam->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
+			  Cam->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 				SystemUpdateFocus(NULL);
 				UpdateAllViews();
@@ -6962,27 +6969,27 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 	for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		if (pCamera->IsSelected())
 		{
-			pCamera->Move(m_ActiveModel->m_CurTime, m_bAddKeys, x, y, z);
-			pCamera->UpdatePosition(m_ActiveModel->m_CurTime);
+			pCamera->Move(m_ActiveModel->m_CurFrame, m_bAddKeys, x, y, z);
+			pCamera->UpdatePosition(m_ActiveModel->m_CurFrame);
 		}
 
 	for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
 	  if (pLight->IsSelected())
 	  {
-	    pLight->Move (m_ActiveModel->m_CurTime, m_bAddKeys, x, y, z);
-	    pLight->UpdatePosition (m_ActiveModel->m_CurTime);
+	    pLight->Move (m_ActiveModel->m_CurFrame, m_bAddKeys, x, y, z);
+	    pLight->UpdatePosition (m_ActiveModel->m_CurFrame);
 	  }
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 		if (pPiece->IsSelected())
 		{
-			pPiece->Move(m_ActiveModel->m_CurTime, m_bAddKeys, x, y, z);
-			pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
+			pPiece->Move(m_ActiveModel->m_CurFrame, m_bAddKeys, x, y, z);
+			pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 		}
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 		if (pPiece->IsSelected())
-			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 
 	// TODO: move group centers
 
@@ -7136,7 +7143,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Sna
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			pPiece->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, pos, LC_PK_POSITION);
+			pPiece->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];
@@ -7144,13 +7151,13 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Sna
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		pPiece->ChangeKey(m_ActiveModel->m_CurTime, m_bAddKeys, rot, LC_PK_ROTATION);
-		pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
+		pPiece->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, rot, LC_PK_ROTATION);
+		pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 	}
 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 		if (pPiece->IsSelected())
-			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+			pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 
 	if (m_OverlayActive)
 	{
@@ -7237,14 +7244,14 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				{
 					// Focus the last visible piece.
 					for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-						if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+						if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 							pFocus = pPiece;
 				}
 				else
 				{
 					// Focus the first visible piece.
 					for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-						if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+						if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 						{
 							pFocus = pPiece;
 							break;
@@ -7259,7 +7266,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					Piece* pBest = pPiece = pFocus;
 					for (;;)
 					{
-						if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+						if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 							pBest = pPiece;
 
 						if (pPiece->m_Next != NULL)
@@ -7287,7 +7294,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					for (;;)
 					{
 						if (pPiece != pFocus)
-							if (pPiece->IsVisible(m_ActiveModel->m_CurTime))
+							if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 							{
 								pFocus = pPiece;
 								break;
@@ -7318,7 +7325,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
         if (pGroup != NULL)
         {
           for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-            if ((pPiece->IsVisible(m_ActiveModel->m_CurTime)) &&
+            if ((pPiece->IsVisible(m_ActiveModel->m_CurFrame)) &&
                 (pPiece->GetTopGroup() == pGroup))
               pPiece->Select (true, false);
         }
@@ -7672,7 +7679,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 					bool bTrans = pPiece->IsTransparent();
 					pPiece->SetColor(m_nCurColor);
 					if (bTrans != pPiece->IsTransparent())
-						pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, true, true);
+						pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, true, true);
 
 					SetModifiedFlag(true);
 					CheckPoint("Painting");
@@ -7693,15 +7700,15 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				GetPieceInsertPosition(x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurTime, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurFrame, m_nCurColor);
 
-				pPiece->ChangeKey(m_ActiveModel->m_CurTime, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
+				pPiece->ChangeKey(m_ActiveModel->m_CurFrame, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
 				AddPiece(pPiece);
-				pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+				pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 				pPiece->Select (true, true);
 				UpdateSelection();
 				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
@@ -7930,15 +7937,15 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				GetPieceInsertPosition(x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurTime, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurFrame, m_nCurColor);
 
-				pPiece->ChangeKey(m_ActiveModel->m_CurTime, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_ActiveModel->m_CurTime);
+				pPiece->ChangeKey(m_ActiveModel->m_CurFrame, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
 				AddPiece(pPiece);
-				pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurTime, false, true);
+				pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
 				pPiece->Select (true, true);
 				UpdateSelection();
 				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
@@ -8487,7 +8494,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownY == y)
 				break;
 
-			m_ActiveView->GetCamera()->DoZoom(y - m_nDownY, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoZoom(y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8508,7 +8515,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			m_ActiveView->GetCamera()->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -8544,19 +8551,19 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys, bs);
+					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_X:
-					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, 0, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys, bs);
+					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, 0, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_Y:
-					m_ActiveView->GetCamera()->DoRotate(0, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys, bs);
+					m_ActiveView->GetCamera()->DoRotate(0, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_Z:
-					m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+					m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 			}
 
@@ -8571,7 +8578,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurTime, m_bAddKeys);
+			m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();

@@ -2,6 +2,7 @@
 #define _LC_MODEL_H_
 
 #include "str.h"
+#include "config.h"
 
 class Piece;
 
@@ -12,6 +13,10 @@ public:
 	~lcModel();
 
 public:
+	// Returns the model's name.
+	const String& GetName() const
+	{ return m_Name; }
+
 	// Adds a piece to this model.
 	void AddPiece(Piece* NewPiece);
 
@@ -42,7 +47,9 @@ public:
 public:
 	// Making these public for now.
 	Piece* m_Pieces;
-	int m_CurTime;
+
+	u32 m_CurFrame;
+	u32 m_TotalFrames;
 
 protected:
 	String m_Name;

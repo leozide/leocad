@@ -728,6 +728,12 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	}
 
+	if (nID >= ID_MODEL_MODEL1 && nID <= ID_MODEL_MODEL16)
+	{
+		project->HandleCommand((LC_COMMANDS)(LC_MODEL_MODEL1 + nID - ID_MODEL_MODEL1), 0);
+		return TRUE;
+	}
+
 	switch (nID)
 	{
 		case ID_FILE_NEW: {

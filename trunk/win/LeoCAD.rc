@@ -2142,6 +2142,21 @@ BEGIN
     ID_MODEL_DELETE         "Delete current model."
     ID_MODEL_PROPERTIES     "Display current model properties."
     ID_MODEL_MODEL1         "Edit this model."
+    ID_MODEL_MODEL2         "Edit this model."
+    ID_MODEL_MODEL3         "Edit this model."
+    ID_MODEL_MODEL4         "Edit this model."
+    ID_MODEL_MODEL5         "Edit this model."
+    ID_MODEL_MODEL6         "Edit this model."
+    ID_MODEL_MODEL7         "Edit this model."
+    ID_MODEL_MODEL8         "Edit this model."
+    ID_MODEL_MODEL9         "Edit this model."
+    ID_MODEL_MODEL10        "Edit this model."
+    ID_MODEL_MODEL11        "Edit this model."
+    ID_MODEL_MODEL12        "Edit this model."
+    ID_MODEL_MODEL13        "Edit this model."
+    ID_MODEL_MODEL14        "Edit this model."
+    ID_MODEL_MODEL15        "Edit this model."
+    ID_MODEL_MODEL16        "Edit this model."
 END
 
 #endif    // English (U.S.) resources

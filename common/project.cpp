@@ -4456,9 +4456,36 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SetModifiedFlag(true);
 				CheckPoint("Deleting Model");
 				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+				UpdateAllViews();
 			}
 
 			delete[] Text;
+		} break;
+
+		case LC_MODEL_MODEL1:
+		case LC_MODEL_MODEL2:
+		case LC_MODEL_MODEL3:
+		case LC_MODEL_MODEL4:
+		case LC_MODEL_MODEL5:
+		case LC_MODEL_MODEL6:
+		case LC_MODEL_MODEL7:
+		case LC_MODEL_MODEL8:
+		case LC_MODEL_MODEL9:
+		case LC_MODEL_MODEL10:
+		case LC_MODEL_MODEL11:
+		case LC_MODEL_MODEL12:
+		case LC_MODEL_MODEL13:
+		case LC_MODEL_MODEL14:
+		case LC_MODEL_MODEL15:
+		case LC_MODEL_MODEL16:
+		{
+			int Index = id - LC_MODEL_MODEL1;
+			if (Index < m_ModelList.GetSize())
+			{
+				m_ActiveModel = m_ModelList[Index];
+				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+				UpdateAllViews();
+			}
 		} break;
 
 		case LC_MODEL_PROPERTIES:

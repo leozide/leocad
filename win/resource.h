@@ -69,7 +69,6 @@
 #define IDC_PAN_RIGHT                   168
 #define IDC_PAN_ALL                     169
 #define IDD_GROUP                       170
-#define IDD_NAME                        170
 #define IDB_HELP                        172
 #define IDB_HOME                        173
 #define IDB_MAIL                        174
@@ -710,6 +709,21 @@
 #define ID_MODEL_DELETE                 33177
 #define ID_MODEL_PROPERTIES             33179
 #define ID_MODEL_MODEL1                 33180
+#define ID_MODEL_MODEL2                 33181
+#define ID_MODEL_MODEL3                 33182
+#define ID_MODEL_MODEL4                 33183
+#define ID_MODEL_MODEL5                 33184
+#define ID_MODEL_MODEL6                 33185
+#define ID_MODEL_MODEL7                 33186
+#define ID_MODEL_MODEL8                 33187
+#define ID_MODEL_MODEL9                 33188
+#define ID_MODEL_MODEL10                33189
+#define ID_MODEL_MODEL11                33190
+#define ID_MODEL_MODEL12                33191
+#define ID_MODEL_MODEL13                33192
+#define ID_MODEL_MODEL14                33193
+#define ID_MODEL_MODEL15                33194
+#define ID_MODEL_MODEL16                33195
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -721,7 +735,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
-#define _APS_NEXT_COMMAND_VALUE         33181
+#define _APS_NEXT_COMMAND_VALUE         33196
 #define _APS_NEXT_CONTROL_VALUE         1252
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

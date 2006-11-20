@@ -69,6 +69,7 @@
 #define IDC_PAN_RIGHT                   168
 #define IDC_PAN_ALL                     169
 #define IDD_GROUP                       170
+#define IDD_NAME                        170
 #define IDB_HELP                        172
 #define IDB_HOME                        173
 #define IDB_MAIL                        174

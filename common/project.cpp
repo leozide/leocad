@@ -141,6 +141,7 @@ void Project::UpdateInterface()
 	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
 	UpdateSelection();
 	SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
+	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
 	{
@@ -219,6 +220,7 @@ void Project::DeleteContents(bool bUndo)
 	m_ModelList.RemoveAll();
 
 	m_ActiveModel = NULL;
+	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 
 	for (i = 0; i < LC_CONNECTIONS; i++)
 	{
@@ -323,6 +325,7 @@ void Project::LoadDefaults(bool cameras)
 
 	m_ActiveModel = new lcModel("Main");
 	m_ModelList.Add(m_ActiveModel);
+	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
@@ -4405,10 +4408,57 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_MODEL_NEW:
 		{
+			int Max = 0;
+
+			// Find out the number of the last model added.
+			for (int i = 0; i < m_ModelList.GetSize(); i++)
+			{
+				int Num;
+
+				if (sscanf((char*)m_ModelList[i]->GetName(), "New Model %d", &Num) == 1)
+					if (Num > Max)
+						Max = Num;
+			}
+
+			char Name[256];
+			sprintf(Name, "New Model %d", Max + 1);
+
+			// Create and add new model.
+			lcModel* Model = new lcModel(Name);
+			m_ModelList.Add(Model);
+			m_ActiveModel = Model;
+
+			SetModifiedFlag(true);
+			CheckPoint("Adding Model");
+			SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+			UpdateAllViews();
 		} break;
 
 		case LC_MODEL_DELETE:
 		{
+			// Make sure we aren't deleting the last model.
+			if (m_ModelList.GetSize() < 2)
+			{
+				SystemDoMessageBox("Projects must have at least 1 model.", LC_MB_OK | LC_MB_ICONINFORMATION);
+				break;
+			}
+
+			// Ask the user if he really wants to delete this model.
+			char* Text = new char[m_ActiveModel->GetName().GetLength() + 100];
+			sprintf(Text, "Are you sure you want to delete the model \"%s\"?", (char*)m_ActiveModel->GetName());
+
+			if (SystemDoMessageBox(Text, LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES)
+			{
+				m_ModelList.RemovePointer(m_ActiveModel);
+				delete m_ActiveModel;
+				m_ActiveModel = m_ModelList[0];
+
+				SetModifiedFlag(true);
+				CheckPoint("Deleting Model");
+				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+			}
+
+			delete[] Text;
 		} break;
 
 		case LC_MODEL_PROPERTIES:

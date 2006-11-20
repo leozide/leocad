@@ -880,6 +880,11 @@ void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveMo
 	if (!Menu)
 		return;
 
+	if (ModelList.GetSize() > 1)
+		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_ENABLED);
+	else
+		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+
 	// Delete existing entries.
 	for (int i = 1; i < LC_MODEL_MENU_MAX; i++)
 		Menu->DeleteMenu(ID_MODEL_MODEL1 + i, MF_BYCOMMAND);

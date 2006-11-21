@@ -170,6 +170,7 @@ protected:
 
 	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
 
+	void SetActiveModel(lcModel* Model);
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();

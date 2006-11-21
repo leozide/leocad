@@ -323,9 +323,9 @@ void Project::LoadDefaults(bool cameras)
 	m_OverlayActive = false;
 	m_PlayingAnimation = false;
 
-	m_ActiveModel = new lcModel("Main");
-	m_ModelList.Add(m_ActiveModel);
-	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+	lcModel* Model = new lcModel("Main");
+	m_ModelList.Add(Model);
+	SetActiveModel(Model);
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
@@ -3069,6 +3069,15 @@ void Project::RenderInitialize()
 /////////////////////////////////////////////////////////////////////////////
 // Project functions
 
+void Project::SetActiveModel(lcModel* Model)
+{
+	m_ActiveModel = Model;
+
+	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+	UpdateSelection();
+	UpdateAllViews();
+}
+
 void Project::AddPiece(Piece* NewPiece)
 {
 	m_ActiveModel->AddPiece(NewPiece);
@@ -4433,7 +4442,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			// Create and add new model.
 			lcModel* Model = new lcModel(Name);
 			m_ModelList.Add(Model);
-			m_ActiveModel = Model;
+			SetActiveModel(Model);
 
 			SetModifiedFlag(true);
 			CheckPoint("Adding Model");
@@ -4458,7 +4467,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				m_ModelList.RemovePointer(m_ActiveModel);
 				delete m_ActiveModel;
-				m_ActiveModel = m_ModelList[0];
+				SetActiveModel(m_ModelList[0]);
 
 				SetModifiedFlag(true);
 				CheckPoint("Deleting Model");
@@ -4489,9 +4498,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			int Index = id - LC_MODEL_MODEL1;
 			if (Index < m_ModelList.GetSize())
 			{
-				m_ActiveModel = m_ModelList[Index];
-				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
-				UpdateAllViews();
+				SetActiveModel(m_ModelList[Index]);
 			}
 		} break;
 

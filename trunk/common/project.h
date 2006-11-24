@@ -74,6 +74,8 @@ public:
 		{ m_bModified = bModified; }
 
 	// Access to protected members (TODO: clean up all this crap)
+	lcModel* GetActiveModel() const
+	{ return m_ActiveModel; }
 	unsigned char GetLastStep();
 	int GetCurrentTime ()
 		{ return m_ActiveModel->m_CurFrame; }
@@ -97,11 +99,6 @@ public:
 
 	void ConvertToUserUnits(Vector3& Value) const;
 	void ConvertFromUserUnits(Vector3& Value) const;
-	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
-	{
-		*ppCamera = m_pCameras;
-		*ppLight = m_pLights;
-	}
 	TexFont* GetFont() const
 	{ return m_pScreenFont; }
 
@@ -161,8 +158,6 @@ protected:
 	lcModel* m_ActiveModel;
 	PtrArray<lcModel> m_ModelList;
 
-	Camera* m_pCameras;
-	Light* m_pLights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];

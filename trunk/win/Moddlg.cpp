@@ -388,12 +388,10 @@ void CModifyDialog::OnModdlgApply()
 
 void CModifyDialog::OnDropdownModdlgList() 
 {
-	Piece* pPiece;
-	Camera* pCamera;
-	Light* pLight;
+	Piece* pPiece = lcGetActiveProject()->GetActiveModel()->m_Pieces;
+	Camera* pCamera = lcGetActiveProject()->GetActiveModel()->m_Cameras;
+	Light* pLight = lcGetActiveProject()->GetActiveModel()->m_Lights;
 	int i;
-
-	lcGetActiveProject()->GetArrays(&pPiece, &pCamera, &pLight);
 
 	m_ctlCombo.ResetContent();
 

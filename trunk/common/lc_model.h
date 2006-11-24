@@ -5,6 +5,8 @@
 #include "config.h"
 
 class Piece;
+class Camera;
+class Light;
 
 class lcModel
 {
@@ -44,9 +46,14 @@ public:
 	// Deletes all selected pieces and returns true if any pieces were removed.
 	bool RemoveSelectedPieces();
 
+	// Delete all existing cameras and create new default ones.
+	void ResetCameras();
+
 public:
 	// Making these public for now.
 	Piece* m_Pieces;
+	Camera* m_Cameras;
+	Light* m_Lights;
 
 	u32 m_CurFrame;
 	u32 m_TotalFrames;

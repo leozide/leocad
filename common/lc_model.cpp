@@ -1,11 +1,17 @@
 #include "lc_model.h"
 #include "piece.h"
+#include "camera.h"
+#include "light.h"
 #include "system.h"
 
 lcModel::lcModel(const char* Name)
 {
-	m_Pieces = NULL;
 	m_Name = Name;
+
+	m_Pieces = NULL;
+	m_Cameras = NULL;
+	m_Lights = NULL;
+
 	m_CurFrame = 1;
 	m_TotalFrames = 1;
 }
@@ -17,6 +23,20 @@ lcModel::~lcModel()
 		Piece* piece = m_Pieces;
 		m_Pieces = (Piece*)m_Pieces->m_Next;
 		delete piece;
+	}
+
+	while (m_Cameras)
+	{
+		Camera* camera = m_Cameras;
+		m_Cameras = (Camera*)m_Cameras->m_Next;
+		delete camera;
+	}
+
+	while (m_Lights)
+	{
+		Light* light = m_Lights;
+		m_Lights = (Light*)m_Lights->m_Next;
+		delete light;
 	}
 }
 
@@ -137,4 +157,24 @@ bool lcModel::RemoveSelectedPieces()
 	}
 
 	return Deleted;
+}
+
+void lcModel::ResetCameras()
+{
+	// Delete all cameras.
+	while (m_Cameras)
+	{
+		Camera* camera = m_Cameras;
+		m_Cameras = (Camera*)m_Cameras->m_Next;
+		delete camera;
+	}
+
+	// Create new default cameras.
+	Camera* camera = NULL;
+	for (int i = 0; i < 7; i++)
+	{
+		camera = new Camera(i, camera);
+		if (m_Cameras == NULL)
+			m_Cameras = camera;
+	}
 }

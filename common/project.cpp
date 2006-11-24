@@ -59,8 +59,6 @@ Project::Project()
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
-	m_pCameras = NULL;
-	m_pLights = NULL;
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
@@ -137,8 +135,8 @@ void Project::UpdateInterface()
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-	SystemUpdateCameraMenu(m_pCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+	SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	UpdateSelection();
 	SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
@@ -214,6 +212,9 @@ void Project::DeleteContents(bool bUndo)
 		m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
 	}
 
+	for (i = 0; i < m_ViewList.GetSize(); i++)
+		m_ViewList[i]->SetCamera(NULL);
+
 	// Remove all submodels.
 	for (i = 0; i < m_ModelList.GetSize(); i++)
 		delete m_ModelList[i];
@@ -232,30 +233,12 @@ void Project::DeleteContents(bool bUndo)
 		m_pConnections[i].numentries = 0;
 	}
 
-	for (i = 0; i < m_ViewList.GetSize(); i++)
-		m_ViewList[i]->SetCamera(NULL);
-
-	while (m_pCameras)
-	{
-		Camera* pCamera = m_pCameras;
-		m_pCameras = (Camera*)m_pCameras->m_Next;
-		delete pCamera;
-	}
-
-	while (m_pLights)
-	{
-		Light* pLight = m_pLights;
-		m_pLights = (Light*)m_pLights->m_Next;
-		delete pLight;
-	}
-
 	while (m_pGroups)
 	{
 		pGroup = m_pGroups;
 		m_pGroups = m_pGroups->m_pNext;
 		delete pGroup;
 	}
-
 
 /*
 	if (!m_strTempFile.IsEmpty())
@@ -335,20 +318,14 @@ void Project::LoadDefaults(bool cameras)
 
 	if (cameras)
 	{
-		Camera* pCam;
-		for (pCam = NULL, i = 0; i < 7; i++)
-		{
-			pCam = new Camera(i, pCam);
-			if (m_pCameras == NULL)
-				m_pCameras = pCam;
-		}
+		m_ActiveModel->ResetCameras();
 
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
 			m_ViewList[i]->UpdateCamera();
 
-		SystemUpdateCameraMenu(m_pCameras);
+		SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
 		if (m_ActiveView)
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	}
 	SystemPieceComboAdd(NULL);
 	UpdateSelection();
@@ -399,8 +376,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		for (pCam = NULL, i = 0; i < 7; i++)
 		{
 			pCam = new Camera(i, pCam);
-			if (m_pCameras == NULL)
-				m_pCameras = pCam;
+			if (m_ActiveModel->m_Cameras == NULL)
+				m_ActiveModel->m_Cameras = pCam;
 		}
 
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
@@ -659,8 +636,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			for (i = 0; i < count; i++)
 			{
 				pCam = new Camera(i, pCam);
-				if (m_pCameras == NULL)
-					m_pCameras = pCam;
+				if (m_ActiveModel->m_Cameras == NULL)
+					m_ActiveModel->m_Cameras = pCam;
 
 				if (i < 4 && fv == 0.6f)
 				{
@@ -677,7 +654,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				delete pCam;
 			}
 			else
-				for (pCam = m_pCameras; pCam; pCam = (Camera*)pCam->m_Next)
+				for (pCam = m_ActiveModel->m_Cameras; pCam; pCam = (Camera*)pCam->m_Next)
 					pCam->FileLoad(*file);
 		}
 
@@ -807,8 +784,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-	SystemUpdateCameraMenu(m_pCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+	SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	UpdateSelection();
 	SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
 	UpdateAllViews ();
@@ -873,11 +850,11 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteByte(&dummy, 1);
 
 	Camera* pCamera;
-	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (i = 0, pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		i++;
 	file->WriteLong (&i, 1);
 
-	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (i = 0, pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		pCamera->FileSave(*file);
 
 	file->WriteString(main_window->GetViewLayout(true));
@@ -1574,7 +1551,7 @@ bool Project::SetActiveView(View* view)
 	if (view)
 	{
 		view->Redraw();
-		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_pCameras);
+		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	}
 
 	return true;
@@ -1940,7 +1917,7 @@ void Project::RenderScene(View* view)
 		int index = 0;
 		Light *pLight;
 
-		for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next, index++)
+		for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next, index++)
 			pLight->Setup(index);
 	}
 
@@ -2192,7 +2169,7 @@ void Project::RenderScene(View* view)
 		int index = 0;
 		Light *pLight;
 		
-		for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next, index++)
+		for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next, index++)
 			glDisable ((GLenum)(GL_LIGHT0+index));
 	}
 
@@ -2215,13 +2192,13 @@ void Project::RenderScene(View* view)
 	Camera* pCamera;
 	Light* pLight;
 
-	for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 	{
 		if ((pCamera != view->GetCamera()) && pCamera->IsVisible())
 			pCamera->Render(m_fLineWidth);
 	}
 
-	for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+	for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 		if (pLight->IsVisible())
 			pLight->Render(m_fLineWidth);
 
@@ -3115,10 +3092,10 @@ void Project::CalculateStep()
 	SytemEndProgressBar();
   SystemDoWaitCursor(-1);
 
-	for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		pCamera->UpdatePosition(m_ActiveModel->m_CurFrame);
 
-	for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+	for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 		pLight->UpdatePosition(m_ActiveModel->m_CurFrame);
 }
 
@@ -3149,7 +3126,7 @@ bool Project::RemoveSelectedObjects()
 	}
 
 	// Cameras can't be removed while being used or default
-	for (pPrev = NULL, pCamera = m_pCameras; pCamera; )
+	for (pPrev = NULL, pCamera = m_ActiveModel->m_Cameras; pCamera; )
 	{
 		bool bCanDelete = true;
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
@@ -3171,15 +3148,15 @@ bool Project::RemoveSelectedObjects()
 			}
 			else
 			{
-				m_pCameras = (Camera*)m_pCameras->m_Next;
+				m_ActiveModel->m_Cameras = (Camera*)m_ActiveModel->m_Cameras->m_Next;
 				delete pCamera;
-				pCamera = m_pCameras;
+				pCamera = m_ActiveModel->m_Cameras;
 			}
 			
 			removed = true;
 
-			SystemUpdateCameraMenu(m_pCameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+			SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 		}
 		else
 		{
@@ -3188,7 +3165,7 @@ bool Project::RemoveSelectedObjects()
 		}
 	}
 
-	for (pPrev = NULL, pLight = m_pLights; pLight; )
+	for (pPrev = NULL, pLight = m_ActiveModel->m_Lights; pLight; )
 	{
 		if (pLight->IsSelected())
 		{
@@ -3200,9 +3177,9 @@ bool Project::RemoveSelectedObjects()
 			}
 			else
 			{
-			  m_pLights = (Light*)m_pLights->m_Next;
+			  m_ActiveModel->m_Lights = (Light*)m_ActiveModel->m_Lights->m_Next;
 				delete pLight;
-				pLight = m_pLights;
+				pLight = m_ActiveModel->m_Lights;
 			}
 
 			removed = true;
@@ -3280,7 +3257,7 @@ void Project::UpdateSelection()
 		}
 	}
 
-	for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		if (pCamera->IsSelected())
 		{
 			flags |= LC_SEL_CAMERA;
@@ -3290,7 +3267,7 @@ void Project::UpdateSelection()
 				Focus = pCamera;
 		}
 
-	for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+	for (Light* pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 		if (pLight->IsSelected())
 		{
 			flags |= LC_SEL_LIGHT;
@@ -4667,21 +4644,21 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				pGroup->FileSave(m_pClipboard[m_nCurClipboard], m_pGroups);
 
-			for (i = 0, pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+			for (i = 0, pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 				if (pCamera->IsSelected())
 					i++;
 			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
 
-			for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+			for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 				if (pCamera->IsSelected())
 					pCamera->FileSave(*m_pClipboard[m_nCurClipboard]);
 /*
-			for (i = 0, pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			for (i = 0, pLight = m_ActiveModel->m_Lights; pLight; pLight = pLight->m_pNext)
 				if (pLight->IsSelected())
 					i++;
 			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
 
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			for (pLight = m_ActiveModel->m_Lights; pLight; pLight = pLight->m_pNext)
 				if (pLight->IsSelected())
 					pLight->FileSave(m_pClipboard[m_nCurClipboard]);
 */
@@ -4793,7 +4770,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			
 			free(groups);
 
-			Camera* pCamera = m_pCameras;
+			Camera* pCamera = m_ActiveModel->m_Cameras;
 			while (pCamera->m_Next)
 				pCamera = (Camera*)pCamera->m_Next;
 			file->Read(&i, sizeof(i));
@@ -4864,12 +4841,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 					i++;
 
-			for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+			for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 				if (pCamera != m_ActiveView->GetCamera())
 					if (pCamera->IsVisible())
 						i++;
 
-			for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+			for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 				if (pLight->IsVisible())
 					i++;
 
@@ -4896,7 +4873,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					i++;
 				}
 
-			for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+			for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 				if (pCamera != m_ActiveView->GetCamera())
 					if (pCamera->IsVisible())
 					{
@@ -4907,7 +4884,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						i++;
 					}
 
-			for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+			for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 				if (pLight->IsVisible())
 				{
 					opts[i].name = pLight->GetName();
@@ -5734,7 +5711,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			main_window->SetViewLayout(Viewports[nParam]);
 
-			SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_pCameras);
+			SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 			UpdateOverlayScale();
 		} break;
 
@@ -5809,10 +5786,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
       for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
         pPiece->InsertTime (m_ActiveModel->m_CurFrame, 1);
 
-      for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+      for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
         pCamera->InsertTime (m_ActiveModel->m_CurFrame, 1);
 
-      for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+      for (Light* pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
         pLight->InsertTime (m_ActiveModel->m_CurFrame, 1);
 
       SetModifiedFlag (true);
@@ -5827,10 +5804,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
       for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
         pPiece->RemoveTime (m_ActiveModel->m_CurFrame, 1);
 
-      for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+      for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
         pCamera->RemoveTime (m_ActiveModel->m_CurFrame, 1);
 
-      for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+      for (Light* pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
         pLight->RemoveTime (m_ActiveModel->m_CurFrame, 1);
 
       SetModifiedFlag (true);
@@ -5892,12 +5869,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_MENU:
 		{
-			Camera* pCamera = m_pCameras;
+			Camera* pCamera = m_ActiveModel->m_Cameras;
 
 			while (nParam--)
 				pCamera = (Camera*)pCamera->m_Next;
 
-			SystemUpdateCurrentCamera(m_ActiveView->GetCamera(), pCamera, m_pCameras);
+			SystemUpdateCurrentCamera(m_ActiveView->GetCamera(), pCamera, m_ActiveModel->m_Cameras);
 			m_ActiveView->SetCamera(pCamera);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5905,28 +5882,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_RESET:
 		{
-			Camera* pCamera;
-			int i;
+			m_ActiveModel->ResetCameras();
 
-			while (m_pCameras)
-			{
-				pCamera = m_pCameras;
-				m_pCameras = (Camera*)m_pCameras->m_Next;
-				delete pCamera;
-			}
-
-			for (m_pCameras = pCamera = NULL, i = 0; i < 7; i++)
-			{
-				pCamera = new Camera(i, pCamera);
-				if (m_pCameras == NULL)
-					m_pCameras = pCamera;
-			}
-
-			for (i = 0; i < m_ViewList.GetSize(); i++)
+			for (int i = 0; i < m_ViewList.GetSize(); i++)
 				m_ViewList[i]->UpdateCamera();
 
-			SystemUpdateCameraMenu(m_pCameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+			SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -6354,13 +6316,13 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
   for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
     pPiece->Select (false, bFocusOnly);
 
-  for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+  for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
   {
     pCamera->Select (false, bFocusOnly);
     pCamera->GetTarget ()->Select (false, bFocusOnly);
   }
 
-  for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+  for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
   {
     pLight->Select (false, bFocusOnly);
     if (pLight->GetTarget ())
@@ -6392,14 +6354,14 @@ Camera* Project::GetCamera(int i)
 {
 	Camera* pCamera;
 
-	for (pCamera = m_pCameras; i-- > 0 && pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (pCamera = m_ActiveModel->m_Cameras; i-- > 0 && pCamera; pCamera = (Camera*)pCamera->m_Next)
 		;
 	return pCamera;
 }
 
 Camera* Project::GetCamera(const char* Name) const
 {
-	for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		if (!strcmp(Name, pCamera->GetName()))
 			return pCamera;
 
@@ -6444,7 +6406,7 @@ bool Project::GetFocusPosition(Vector3& Position) const
 		}
 	}
 
-	for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 	{
 		if (pCamera->IsEyeFocused())
 		{
@@ -6475,7 +6437,7 @@ Object* Project::GetFocusObject() const
 			return pPiece;
 	}
 
-	for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 	{
 		if (pCamera->IsEyeFocused() || pCamera->IsTargetFocused())
 			return pCamera;
@@ -6578,11 +6540,11 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 
 	if (!PiecesOnly)
 	{
-		for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+		for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 			if (pCamera != m_ActiveView->GetCamera())
 				pCamera->MinIntersectDist(pLine);
 
-		for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+		for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 			pLight->MinIntersectDist(pLine);
 	}
 }
@@ -6752,8 +6714,8 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_CAMERA:
 			{
-				SystemUpdateCameraMenu(m_pCameras);
-				SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
@@ -7057,14 +7019,14 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 	Light* pLight;
 	float x = Move[0], y = Move[1], z = Move[2];
 
-	for (pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+	for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		if (pCamera->IsSelected())
 		{
 			pCamera->Move(m_ActiveModel->m_CurFrame, m_bAddKeys, x, y, z);
 			pCamera->UpdatePosition(m_ActiveModel->m_CurFrame);
 		}
 
-	for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+	for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 	  if (pLight->IsSelected())
 	  {
 	    pLight->Move (m_ActiveModel->m_CurFrame, m_bAddKeys, x, y, z);
@@ -7732,13 +7694,13 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 						if (bCanDelete)
 						{
 							Camera* pPrev;
-							for (pPrev = m_pCameras; pPrev; pPrev = (Camera*)pPrev->m_Next)
+							for (pPrev = m_ActiveModel->m_Cameras; pPrev; pPrev = (Camera*)pPrev->m_Next)
 								if (pPrev->m_Next == pCamera)
 								{
 									pPrev->m_Next = pCamera->m_Next;
 									delete pCamera;
-									SystemUpdateCameraMenu(m_pCameras);
-									SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_pCameras);
+									SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+									SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 									break;
 								}
 						}
@@ -7815,7 +7777,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				Light *pLight;
 
 				glGetIntegerv (GL_MAX_LIGHTS, &max);
-				for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+				for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 					count++;
 
 				if (count == max)
@@ -7825,9 +7787,9 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				SelectAndFocusNone (false);
 
-				pLight->CreateName(m_pLights);
-				pLight->m_Next = m_pLights;
-				m_pLights = pLight;
+				pLight->CreateName(m_ActiveModel->m_Lights);
+				pLight->m_Next = m_ActiveModel->m_Lights;
+				m_ActiveModel->m_Lights = pLight;
 				SystemUpdateFocus (pLight);
 				pLight->Select (true, true);
 				UpdateSelection ();
@@ -7847,7 +7809,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
       Light *pLight;
 
       glGetIntegerv (GL_MAX_LIGHTS, &max);
-      for (pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+      for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
         count++;
 
       if (count == max)
@@ -7859,8 +7821,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
       StartTracking(LC_TRACK_START_LEFT);
       pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
       pLight->GetTarget ()->Select (true, true);
-      pLight->m_Next = m_pLights;
-      m_pLights = pLight;
+      pLight->m_Next = m_ActiveModel->m_Lights;
+      m_ActiveModel->m_Lights = pLight;
       UpdateSelection();
       UpdateAllViews();
       SystemUpdateFocus(pLight);
@@ -7872,7 +7834,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
       gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
-      Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
+      Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_ActiveModel->m_Cameras);
       pCamera->GetTarget ()->Select (true, true);
       UpdateSelection();
       UpdateAllViews();
@@ -7894,7 +7856,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 			if (!sel)
 			{
-				for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+				for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 				{
 					if (pCamera->IsSelected())
 					{
@@ -7906,7 +7868,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 			if (!sel)
 			{
-				for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+				for (Light* pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 				{
 					if (pLight->IsSelected())
 					{
@@ -8096,7 +8058,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 				}
 
 			if (!sel)
-			for (Camera* pCamera = m_pCameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
+			for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 				if (pCamera->IsSelected())
 				{
 					sel = true;
@@ -8104,7 +8066,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 				}
 
 			if (!sel)
-			for (Light* pLight = m_pLights; pLight; pLight = (Light*)pLight->m_Next)
+			for (Light* pLight = m_ActiveModel->m_Lights; pLight; pLight = (Light*)pLight->m_Next)
 				if (pLight->IsSelected())
 				{
 					sel = true;
@@ -8209,7 +8171,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 			
-			Light* pLight = m_pLights;
+			Light* pLight = m_ActiveModel->m_Lights;
 
 			pLight->Move (1, false, delta[0], delta[1], delta[2]);
 			pLight->UpdatePosition (1);
@@ -8228,7 +8190,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 			
-			Camera* pCamera = m_pCameras;
+			Camera* pCamera = m_ActiveModel->m_Cameras;
 			while (pCamera->m_Next != NULL)
 				pCamera = (Camera*)pCamera->m_Next;
 
@@ -8624,11 +8586,11 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				Vector3 eye = m_ActiveView->GetCamera()->GetEyePosition();
 				Vector3 target = m_ActiveView->GetCamera()->GetTargetPosition();
 				Vector3 up = m_ActiveView->GetCamera()->GetUpVector();
-				Camera* pCamera = new Camera(eye, target, up, m_pCameras);
+				Camera* pCamera = new Camera(eye, target, up, m_ActiveModel->m_Cameras);
 
 				m_ActiveView->SetCamera(pCamera);
-				SystemUpdateCameraMenu(m_pCameras);
-				SystemUpdateCurrentCamera(NULL, pCamera, m_pCameras);
+				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, pCamera, m_ActiveModel->m_Cameras);
 			}
 
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };

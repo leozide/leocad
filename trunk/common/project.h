@@ -92,8 +92,6 @@ public:
 	void GetSnapIndex(int* SnapXY, int* SnapZ) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
-	Camera* GetCamera(int i);
-	Camera* GetCamera(const char* Name) const;
 	const Vector3& GetOverlayCenter() const
 		{ return m_OverlayCenter; }
 

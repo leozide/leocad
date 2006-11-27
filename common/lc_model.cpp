@@ -178,3 +178,22 @@ void lcModel::ResetCameras()
 			m_Cameras = camera;
 	}
 }
+
+Camera* lcModel::GetCamera(int Index) const
+{
+	Camera* camera = m_Cameras;
+
+	while (camera && Index--)
+		camera = (Camera*)camera->m_Next;
+
+	return camera;
+}
+
+Camera* lcModel::GetCamera(const char* Name) const
+{
+	for (Camera* camera = m_Cameras; camera; camera = (Camera*)camera->m_Next)
+		if (!strcmp(camera->GetName(), Name))
+			return camera;
+
+	return NULL;
+}

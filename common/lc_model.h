@@ -49,6 +49,10 @@ public:
 	// Delete all existing cameras and create new default ones.
 	void ResetCameras();
 
+	// Retrieve a pointer to an existing camera.
+	Camera* GetCamera(int Index) const;
+	Camera* GetCamera(const char* Name) const;
+
 public:
 	// Making these public for now.
 	Piece* m_Pieces;

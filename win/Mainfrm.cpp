@@ -672,7 +672,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		Camera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
+		Camera* pCamera = lcGetActiveProject()->GetActiveModel()->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
 		rMessage += pCamera->GetName();
 		rMessage += "\"";
@@ -1659,7 +1659,7 @@ void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
 
 		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CCADView)));
 
-		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->GetCamera(name));
+		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->GetActiveModel()->GetCamera(name));
 
 		return;
 	}

@@ -673,7 +673,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 					file->ReadLong (&i, 1);
 
 					if (m_ViewList.GetSize() > count)
-						m_ViewList[count]->SetCamera(GetCamera(i));
+						m_ViewList[count]->SetCamera(m_ActiveModel->GetCamera(i));
 				}
 			}
 
@@ -3360,7 +3360,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 
 	View view(this, NULL);
 	view.OnSize(width, height);
-	view.SetCamera(GetCamera(LC_CAMERA_MAIN));
+	view.SetCamera(m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
 
 	if (!hilite)
 		SelectAndFocusNone(false);
@@ -6348,24 +6348,6 @@ bool Project::GetSelectionCenter(Vector3& Center) const
 	Center = Vector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 
 	return Selected;
-}
-
-Camera* Project::GetCamera(int i)
-{
-	Camera* pCamera;
-
-	for (pCamera = m_ActiveModel->m_Cameras; i-- > 0 && pCamera; pCamera = (Camera*)pCamera->m_Next)
-		;
-	return pCamera;
-}
-
-Camera* Project::GetCamera(const char* Name) const
-{
-	for (Camera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
-		if (!strcmp(Name, pCamera->GetName()))
-			return pCamera;
-
-	return NULL;
 }
 
 void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4])

@@ -12,7 +12,7 @@ View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
-	m_Camera = pProject->GetCamera(LC_CAMERA_MAIN);
+	m_Camera = pProject->GetActiveModel()->GetCamera(LC_CAMERA_MAIN);
 }
 
 View::~View()
@@ -185,10 +185,10 @@ void View::SetCamera(Camera* cam)
 
 void View::UpdateCamera()
 {
-	Camera* cam = m_Project->GetCamera(m_CameraName);
+	Camera* cam = m_Project->GetActiveModel()->GetCamera(m_CameraName);
 
 	if (!cam)
-		cam = m_Project->GetCamera(LC_CAMERA_MAIN);
+		cam = m_Project->GetActiveModel()->GetCamera(LC_CAMERA_MAIN);
 
 	m_Camera = cam;
 	m_CameraName = m_Camera->GetName();

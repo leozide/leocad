@@ -1343,9 +1343,9 @@ bool Project::OnOpenDocument(const char* PathName)
 		return false;
 	}
 
-	char ext[4], *ptr;
+	char ext[4];
 	memset(ext, 0, 4);
-	ptr = strrchr(PathName, '.');
+	const char* ptr = strrchr(PathName, '.');
 	if (ptr != NULL)
 	{
 		strncpy(ext, ptr+1, 3);

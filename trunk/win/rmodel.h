@@ -86,7 +86,7 @@ protected:
 
 	int build_hierarchy();
 
-	friend RAPID_Collide(double R1[3][3], double T1[3], double s1, CRModel *RAPID_model1,
+	friend int RAPID_Collide(double R1[3][3], double T1[3], double s1, CRModel *RAPID_model1,
 		       double R2[3][3], double T2[3], double s2, CRModel *RAPID_model2, int flag);
 };
 

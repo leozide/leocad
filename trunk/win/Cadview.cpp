@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <windowsx.h>
 #include "LeoCAD.h"
 
 #include "CADDoc.h"

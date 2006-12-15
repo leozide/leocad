@@ -4,6 +4,8 @@
 // TODO: rewrite everything
 
 #include "stdafx.h"
+#include <windowsx.h>
+
 #include "leocad.h"
 #include "Print.h"
 #include "project.h"
@@ -23,9 +25,12 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
   PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	int bricks = 0;
-	for (int j = 0; j < pLib->GetPieceCount (); j++)
+	int j;
+
+	for (j = 0; j < pLib->GetPieceCount (); j++)
 		if (pLib->GetPieceInfo(j)->m_strDescription[0] != '~')
 			bricks++;
+
 	int rows = theApp.GetProfileInt("Default", "Catalog Rows", 10);
 	int cols = theApp.GetProfileInt("Default", "Catalog Columns", 3);
 	PD->m_pd.lpfnPrintHook = PrintHookProc;

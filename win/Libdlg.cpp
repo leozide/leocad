@@ -382,8 +382,9 @@ void CLibraryDlg::UpdateList()
 			for (int i = 0; i < Lib->GetPieceCount(); i++)
 			{
 				PieceInfo* Info = Lib->GetPieceInfo(i);
+				int j;
 
-				for (int j = 0; j < Lib->GetNumCategories(); j++)
+				for (j = 0; j < Lib->GetNumCategories(); j++)
 				{
 					if (Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(j)))
 						break;

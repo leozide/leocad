@@ -1625,7 +1625,7 @@ void CMainFrame::OnViewResetViews()
 	}
 
 	// Load default view layout.
-	char* str = main_window->GetViewLayout(false);
+	const char* str = main_window->GetViewLayout(false);
 	SetViewLayout(NULL, str);
 }
 

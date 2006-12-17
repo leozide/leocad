@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "RModel.h"
 #include <math.h>

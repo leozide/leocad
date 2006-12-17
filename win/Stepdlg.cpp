@@ -1,7 +1,7 @@
 // StepDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "StepDlg.h"
 

@@ -2,7 +2,7 @@
 // OpenGL window
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "glwindow.h"
 #include "tools.h"
 

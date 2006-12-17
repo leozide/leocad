@@ -3,7 +3,7 @@
 // to make it easier to dynamically split windows at run time.
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "dynsplit.h"
 
 BOOL CDynamicSplitterWnd::AttachWindow(CWnd* Wnd, int Row, int Col)

@@ -2,6 +2,7 @@
 // Main LeoCAD window
 //
 
+#include "lc_global.h"
 #include <stdio.h>
 #include "mainwnd.h"
 #include "system.h"
@@ -38,7 +39,7 @@ MainWnd::~MainWnd()
 
 void MainWnd::UpdateMRU()
 {
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 	// FIXME !!
 	void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
 	char names[4][LC_MAXPATH];

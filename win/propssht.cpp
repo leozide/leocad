@@ -1,7 +1,7 @@
 // PropsSht.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "resource.h"
 #include "PropsSht.h"
 

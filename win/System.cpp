@@ -1,7 +1,7 @@
 // System user interface.
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include <dlgs.h>
 #include <direct.h>
 #include <shlobj.h>
@@ -1430,7 +1430,7 @@ bool SystemDoDialog(int nMode, void* param)
 				if (p != NULL)
 				{
 					strcpy(ext, p+1);
-					strlwr(ext);
+					_strlwr(ext);
 
 					if ((strcmp(ext, "jpg") == 0) || (strcmp(ext, "jpeg") == 0) ||
 						(strcmp(ext, "bmp") == 0) || (strcmp(ext, "gif") == 0) ||

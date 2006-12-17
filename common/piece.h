@@ -11,7 +11,6 @@ class lcMesh;
 #include "globals.h"
 #include "typedefs.h"
 #include "defines.h"
-#include "config.h"
 
 #define LC_PIECE_HIDDEN		0x01
 #define LC_PIECE_SELECTED	0x02

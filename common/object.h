@@ -5,8 +5,6 @@ class File;
 class Matrix44;
 class Object;
 
-#include "config.h"
-
 typedef enum
 {
 	LC_OBJECT_PIECE,

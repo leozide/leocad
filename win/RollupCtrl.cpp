@@ -18,7 +18,7 @@
 // user.
 //
 //////////////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "lc_global.h"
 #include "RollupCtrl.h"
 
 #pragma warning( disable : 4312 4311 ) 

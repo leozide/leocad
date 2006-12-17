@@ -1,7 +1,7 @@
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include <afxrich.h>
 #include <afxpriv.h>
 #include "LeoCAD.h"

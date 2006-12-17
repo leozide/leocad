@@ -1,6 +1,7 @@
 // Piece group
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include "group.h"
 #include "file.h"

@@ -1,9 +1,9 @@
+#include "lc_global.h"
 #include <stdio.h>
 #include "lc_application.h"
 #include "library.h"
 #include "system.h"
 #include "console.h"
-#include "config.h"
 #include "opengl.h"
 #include "project.h"
 #include "image.h"

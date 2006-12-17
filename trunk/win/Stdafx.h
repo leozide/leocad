@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
+#define _CRT_SECURE_NO_DEPRECATE 1
+
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN          // Exclude rarely-used stuff from Windows headers
 #endif
@@ -44,6 +46,12 @@
 typedef DWORD ACTIVATEAPPPARAM;
 #else
 typedef HTASK ACTIVATEAPPPARAM;
+#endif
+
+#if _MFC_VER < 0x0800
+#define _strcmpi strcmp
+#define _strlwr strlwr
+#define _strlwr strupr
 #endif
 
 #if _MFC_VER >= 0x0800

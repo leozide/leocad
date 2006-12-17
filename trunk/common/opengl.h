@@ -1,21 +1,22 @@
 #ifndef _OPENGL_H_
 #define _OPENGL_H_
 
-#ifdef LC_WINDOWS
-#include "stdafx.h"
+#if LC_WINDOWS
 #include <GL/gl.h>
 #include "win_gl.h"
-#else
+#endif
+
+#if !LC_WINDOWS
 #define APIENTRY
 #endif
 
-#ifdef LC_LINUX
+#if LC_LINUX
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include "linux_gl.h"
 #endif 
 
-#ifdef LC_MACOSX
+#if LC_MACOSX
 #include <OpenGL/gl.h>
 #include <AGL/agl.h>
 #endif

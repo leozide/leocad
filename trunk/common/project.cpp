@@ -1,6 +1,7 @@
 // Everything that is a part of a LeoCAD project goes here.
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +22,6 @@
 #include "system.h"
 #include "globals.h"
 #include "minifig.h"
-#include "config.h"
 #include "message.h"
 #include "curve.h"
 #include "mainwnd.h"
@@ -163,7 +163,7 @@ void Project::SetTitle(const char* lpszTitle)
 	{
 		strncpy(ext, ptr+1, 3);
 		ext[3] = 0;
-		strlwr(ext);
+		_strlwr(ext);
 
 		if (strcmp(ext, "lcd") == 0)
 			*ptr = 0;
@@ -975,7 +975,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 
 	while (file->ReadLine(buf, 1024))
 	{
-		strupr(buf);
+		_strupr(buf);
 		if (strstr(buf, "STEP"))
 		{
 			(*nStep)++;
@@ -1039,7 +1039,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			{
 				for (int i = 0; i < FileArray.GetSize(); i++)
 				{
-					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					if (_stricmp(FileArray[i]->GetFileName(), pn) == 0)
 					{
 						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 						read = false;
@@ -1122,7 +1122,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	{
 		ptr++;
 		strncpy(ext, ptr, 3);
-		strlwr(ext);
+		_strlwr(ext);
 
 		if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 		{
@@ -1168,7 +1168,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	if (ptr != NULL)
 	{
 		strncpy(ext, ptr+1, 3);
-		strlwr(ext);
+		_strlwr(ext);
 	}
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
@@ -1349,7 +1349,7 @@ bool Project::OnOpenDocument(const char* PathName)
 	if (ptr != NULL)
 	{
 		strncpy(ext, ptr+1, 3);
-		strlwr(ext);
+		_strlwr(ext);
 	}
 
 	bool datfile = false;
@@ -3718,7 +3718,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (ptr != NULL)
 				{
 					strncpy(ext, ptr+1, 3);
-					strlwr(ext);
+					_strlwr(ext);
 				}
 
 				if (strcmp(ext, "avi") == 0)
@@ -3750,7 +3750,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_3DS:
 		{
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 			Export3DStudio();
 #endif
 		} break;
@@ -4294,7 +4294,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (opts.render)
 			{
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 				// TODO: Linux support
 				char buf[600];
 				char tmp[LC_MAXPATH], out[LC_MAXPATH];

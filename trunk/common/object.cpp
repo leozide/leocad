@@ -1,6 +1,7 @@
 // Base class for all drawable objects
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>

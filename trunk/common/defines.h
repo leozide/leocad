@@ -4,15 +4,10 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
-// Check for supported platforms.
-#if !(defined(LC_WINDOWS) || defined(LC_LINUX) || defined(LC_MACOSX))
-#error  YOU NEED TO DEFINE YOUR OS
-#endif
-
 // ============================================================================
 // Old defines (mostly deprecated).
 
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 #define LC_MAXPATH 260 //_MAX_PATH
 #define KEY_SHIFT	VK_SHIFT
 #define KEY_CONTROL	VK_CONTROL
@@ -106,7 +101,7 @@ int stricmp(const char* str1, const char* str2);
 #define ABS(a)	(((a) > 0) ? (a) : -(a))
 #endif
 
-#ifndef LC_WINDOWS
+#if !LC_WINDOWS
 #define RGB(r, g, b) ((unsigned long)(((unsigned char) (r) | ((unsigned short) (g) << 8))|(((unsigned long) (unsigned char) (b)) << 16))) 
 #endif 
 

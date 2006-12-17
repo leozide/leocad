@@ -2,6 +2,7 @@
 // Debug Console
 //
 
+#include "lc_global.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include "console.h"

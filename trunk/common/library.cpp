@@ -2,12 +2,12 @@
 // Pieces library management
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include "library.h"
 #include "file.h"
 #include "texture.h"
 #include "pieceinf.h"
-#include "config.h"
 #include "image.h"
 #include "system.h"
 #include "console.h"
@@ -1207,7 +1207,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 		p = strrchr(file1, '/');
 	if (!p)
 		p = file1;
-	strupr(p);
+	_strupr(p);
 	p++;
 
 	memset(NewTexName, 0, 9);
@@ -1846,7 +1846,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 			strcat (fn, "p/");
 			strcat (fn, filename);
 
-			strupr(filename);
+			_strupr(filename);
 			for (val = 0; val < numvalid; val++)
 				if (strcmp(filename, valid[val]) == 0)
 					break;
@@ -1984,7 +1984,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 
 		if (color == 16) color = defcolor;
 
-		strupr(filename);
+		_strupr(filename);
 		for (val = 0; val < numvalid; val++)
 		if (strcmp(filename, valid[val]) == 0)
 		{
@@ -2224,7 +2224,7 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 	else
 		ptr++;
 	strcpy(piece->name, ptr);
-	strupr(piece->name);
+	_strupr(piece->name);
 
 	f = fopen(filename, "rt");
 	if (f == NULL)

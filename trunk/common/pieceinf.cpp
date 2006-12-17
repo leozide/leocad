@@ -1,6 +1,7 @@
 // Information about how to draw a piece and some more stuff.
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -12,7 +13,6 @@
 #include "globals.h"
 #include "matrix.h"
 #include "defines.h"
-#include "config.h"
 #include "library.h"
 #include "lc_application.h"
 #include "lc_mesh.h"

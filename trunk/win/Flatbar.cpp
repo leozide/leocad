@@ -3,7 +3,7 @@
 // If this code works, it was written by Paul DiLascia.
 // If not, I don't know who wrote it.
 //
-#include "StdAfx.h"
+#include "lc_global.h"
 #include "FlatBar.h"
 #include "BarCmdUI.h"
 #include "resource.h"

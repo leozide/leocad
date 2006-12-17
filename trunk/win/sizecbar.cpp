@@ -55,7 +55,7 @@
 // sizecbar.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "sizecbar.h"
 
 #ifdef _DEBUG

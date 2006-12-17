@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include <malloc.h>
 #include <stdlib.h>
 #include "opengl.h"
@@ -5,7 +6,6 @@
 #include "lc_mesh.h"
 #include "system.h"
 #include "debug.h"
-#include "config.h"
 
 lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer* VertexBuffer)
 {

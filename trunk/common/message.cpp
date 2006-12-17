@@ -2,6 +2,7 @@
 // LeoCAD messaging system
 //
 
+#include "lc_global.h"
 #include "message.h"
 
 Messenger::Messenger ()

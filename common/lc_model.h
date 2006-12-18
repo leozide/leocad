@@ -62,8 +62,10 @@ public:
 	u32 m_CurFrame;
 	u32 m_TotalFrames;
 
-protected:
 	String m_Name;
+	String m_Author;
+	String m_Description;
+	String m_Comments;
 };
 
 #endif // _LC_MODEL_H_

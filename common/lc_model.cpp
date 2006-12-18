@@ -8,6 +8,7 @@
 lcModel::lcModel(const char* Name)
 {
 	m_Name = Name;
+	m_Author = Sys_ProfileLoadString("Default", "User", "");
 
 	m_Pieces = NULL;
 	m_Cameras = NULL;

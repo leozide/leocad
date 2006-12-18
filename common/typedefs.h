@@ -414,11 +414,10 @@ struct LC_ARRAYDLG_OPTS
 
 struct LC_PROPERTIESDLG_OPTS
 {
-	char strAuthor[101];
-	char strDescription[101];
-	char strComments[256];
-	char* strTitle;
-	char* strFilename;
+	String Name;
+	String Author;
+	String Description;
+	String Comments;
 	char** names;
 	unsigned short* count;
 	int lines;

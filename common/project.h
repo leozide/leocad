@@ -139,10 +139,6 @@ protected:
 	View* m_ActiveView;
 	PtrArray<View> m_ViewList;
 
-	char m_strAuthor[101];
-	char m_strDescription[101];
-	char m_strComments[256];
-
 	// Font used to draw text on the screen.
 	TexFont* m_pScreenFont;
 

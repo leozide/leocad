@@ -1615,20 +1615,21 @@ bool SystemDoDialog(int nMode, void* param)
 			CPropertiesSheet ps;
 			LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
 
-			ps.SetTitle(opts->strTitle, PSH_PROPTITLE);
-			ps.m_PageSummary.m_strAuthor = opts->strAuthor;
-			ps.m_PageSummary.m_strDescription = opts->strDescription;
-			ps.m_PageSummary.m_strComments = opts->strComments;
-			ps.m_PageGeneral.m_strFilename = opts->strFilename;
+			ps.SetTitle("Model Properties", PSH_PROPTITLE);
+			ps.m_PageSummary.m_Name = opts->Name;
+			ps.m_PageSummary.m_Author = opts->Author;
+			ps.m_PageSummary.m_Description = opts->Description;
+			ps.m_PageSummary.m_Comments = opts->Comments;
 			ps.m_PagePieces.names = opts->names;
 			ps.m_PagePieces.count = opts->count;
 			ps.m_PagePieces.lines = opts->lines;
 
 			if (ps.DoModal() == IDOK)
 			{
-				strcpy(opts->strAuthor, ps.m_PageSummary.m_strAuthor);
-				strcpy(opts->strDescription, ps.m_PageSummary.m_strDescription);
-				strcpy(opts->strComments, ps.m_PageSummary.m_strComments);
+				opts->Name = ps.m_PageSummary.m_Name;
+				opts->Author = ps.m_PageSummary.m_Author;
+				opts->Description = ps.m_PageSummary.m_Description;
+				opts->Comments = ps.m_PageSummary.m_Comments;
 
 				return true;
 			}
@@ -1909,7 +1910,7 @@ void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 	((CMainFrame*)AfxGetMainWnd())->SetMessageText(Text);
 }
 
-void SytemEndProgressBar()
+void SystemEndProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)
@@ -1922,7 +1923,7 @@ void SytemEndProgressBar()
 	((CMainFrame*)AfxGetMainWnd())->SetMessageText(AFX_IDS_IDLEMESSAGE);
 }
 
-void SytemStepProgressBar()
+void SystemStepProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)

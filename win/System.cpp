@@ -1615,7 +1615,7 @@ bool SystemDoDialog(int nMode, void* param)
 			CPropertiesSheet ps;
 			LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
 
-			ps.SetTitle("Model Properties", PSH_PROPTITLE);
+			ps.SetTitle("Model Properties", 0);
 			ps.m_PageSummary.m_Name = opts->Name;
 			ps.m_PageSummary.m_Author = opts->Author;
 			ps.m_PageSummary.m_Description = opts->Description;

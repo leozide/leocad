@@ -18,11 +18,9 @@ IMPLEMENT_DYNAMIC(CPropertiesSheet, CPropertySheet)
 CPropertiesSheet::CPropertiesSheet(CWnd* pWndParent)
 	 : CPropertySheet("", pWndParent)
 {
-	AddPage(&m_PageGeneral);
 	AddPage(&m_PageSummary);
 	AddPage(&m_PagePieces);
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
-	SetActivePage(1);
 }
 
 CPropertiesSheet::~CPropertiesSheet()

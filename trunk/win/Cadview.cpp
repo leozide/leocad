@@ -460,14 +460,14 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		while ((r = str.Find("&A")) != -1)
 		{
 			tmp = str.Left (r);
-			tmp += project->m_strAuthor;
+			tmp += project->m_ActiveModel->m_Author;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
 		while ((r = str.Find("&N")) != -1)
 		{
 			tmp = str.Left (r);
-			tmp += project->m_strDescription;
+			tmp += project->m_ActiveModel->m_Description;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}

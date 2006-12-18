@@ -183,10 +183,6 @@ void Project::DeleteContents(bool bUndo)
 	Group* pGroup;
 	int i;
 
-	memset(m_strAuthor, 0, sizeof(m_strAuthor));
-	memset(m_strDescription, 0, sizeof(m_strDescription));
-	memset(m_strComments, 0, sizeof(m_strComments));
-
 	if (!bUndo)
 	{
 		LC_UNDOINFO* pUndo;
@@ -485,34 +481,38 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				SystemPieceComboAdd(pInfo->m_strDescription);
 			}
 		}
-		SytemStepProgressBar();
+		SystemStepProgressBar();
 	}
-	SytemEndProgressBar();
+	SystemEndProgressBar();
 
 	if (!bMerge)
 	{
 		if (fv >= 0.4f)
 		{
+			char buf[512];
 			file->Read(&ch, 1);
 			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
 			if (sh > 100)
 				file->Seek(sh, SEEK_CUR);
 			else
-				file->Read(m_strAuthor, sh);
+				file->Read(buf, sh);
+			m_ActiveModel->m_Author = buf;
 
 			file->Read(&ch, 1);
 			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
 			if (sh > 100)
 				file->Seek(sh, SEEK_CUR);
 			else
-				file->Read(m_strDescription, sh);
+				file->Read(buf, sh);
+			m_ActiveModel->m_Description = buf;
 
 			file->Read(&ch, 1);
 			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
 			if (sh > 255)
 				file->Seek(sh, SEEK_CUR);
 			else
-				file->Read(m_strComments, sh);
+				file->Read(buf, sh);
+			m_ActiveModel->m_Comments = buf;
 		}
 	}
 	else
@@ -827,15 +827,15 @@ void Project::FileSave(File* file, bool bUndo)
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 		pPiece->FileSave (*file, m_pGroups);
 
-	ch = strlen(m_strAuthor);
+	ch = strlen(m_ActiveModel->m_Author);
 	file->Write(&ch, 1);
-	file->Write(m_strAuthor, ch);
-	ch = strlen(m_strDescription);
+	file->Write(m_ActiveModel->m_Author, ch);
+	ch = strlen(m_ActiveModel->m_Description);
 	file->Write(&ch, 1);
-	file->Write(m_strDescription, ch);
-	ch = strlen(m_strComments);
+	file->Write(m_ActiveModel->m_Description, ch);
+	ch = strlen(m_ActiveModel->m_Comments);
 	file->Write(&ch, 1);
-	file->Write(m_strComments, ch);
+	file->Write(m_ActiveModel->m_Comments, ch);
 
 	Group* pGroup;
 	for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
@@ -1188,10 +1188,10 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 
 		sprintf(buf, "0 Model exported from LeoCAD\r\n"
 					"0 Original name: %s\r\n", ptr);
-		if (strlen(m_strAuthor) != 0)
+		if (strlen(m_ActiveModel->m_Author) != 0)
 		{
 			strcat(buf, "0 Author: ");
-			strcat(buf, m_strAuthor);
+			strcat(buf, m_ActiveModel->m_Author);
 			strcat(buf, "\r\n");
 		}
 		strcat(buf, "\r\n");
@@ -1293,7 +1293,6 @@ bool Project::OnNewDocument()
 	SetTitle("Untitled");
 	DeleteContents(false);
 	memset(m_strPathName, 0, sizeof(m_strPathName)); // no path name yet
-	strcpy(m_strAuthor, Sys_ProfileLoadString ("Default", "User", ""));
 	SetModifiedFlag(false); // make clean
 	LoadDefaults(true);
 	CheckPoint("");
@@ -3086,11 +3085,11 @@ void Project::CalculateStep()
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
 	{
 		pPiece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, false);
-		SytemStepProgressBar();
+		SystemStepProgressBar();
 	}
 
-	SytemEndProgressBar();
-  SystemDoWaitCursor(-1);
+	SystemEndProgressBar();
+	SystemDoWaitCursor(-1);
 
 	for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (Camera*)pCamera->m_Next)
 		pCamera->UpdatePosition(m_ActiveModel->m_CurFrame);
@@ -4336,8 +4335,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			fputs("# Model exported from LeoCAD\n", stream);
 			if (strlen(buf) != 0)
 				fprintf(stream,"# Original name: %s\n", ptr);
-			if (strlen(m_strAuthor))
-				fprintf(stream, "# Author: %s\n", m_strAuthor);
+			if (strlen(m_ActiveModel->m_Author))
+				fprintf(stream, "# Author: %s\n", m_ActiveModel->m_Author);
 
 			strcpy(buf, filename);
 			ptr = strrchr(buf, '.');
@@ -4483,12 +4482,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			LC_PROPERTIESDLG_OPTS opts;
 
-			opts.strTitle = m_strTitle;
-			strcpy(opts.strAuthor, m_strAuthor);
-			strcpy(opts.strDescription, m_strDescription);
-			strcpy(opts.strComments, m_strComments);
-			opts.strFilename = m_strPathName;
+			// Text fields.
+			opts.Name = m_ActiveModel->m_Name;
+			opts.Author = m_ActiveModel->m_Author;
+			opts.Description = m_ActiveModel->m_Description;
+			opts.Comments = m_ActiveModel->m_Comments;
 
+			// Piece list.
 			opts.lines = lcGetPiecesLibrary()->GetPieceCount();
 			opts.count = (unsigned short*)malloc(lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
 			memset (opts.count, 0, lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
@@ -4504,13 +4504,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
 			{
-				if (strcmp(m_strAuthor, opts.strAuthor) ||
-					strcmp(m_strDescription, opts.strDescription) ||
-					strcmp(m_strComments, opts.strComments))
+				if ((m_ActiveModel->m_Author != opts.Author) || (m_ActiveModel->m_Description != opts.Description) ||
+				    (m_ActiveModel->m_Comments!= opts.Comments) || (m_ActiveModel->m_Name != opts.Name))
 				{
-					strcpy(m_strAuthor, opts.strAuthor);
-					strcpy(m_strDescription, opts.strDescription);
-					strcpy(m_strComments, opts.strComments);
+					m_ActiveModel->m_Name = opts.Name;
+					m_ActiveModel->m_Author = opts.Author;
+					m_ActiveModel->m_Description = opts.Description;
+					m_ActiveModel->m_Comments = opts.Comments;
+					SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 					SetModifiedFlag(true);
 				}
 			}

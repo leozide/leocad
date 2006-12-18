@@ -10,7 +10,6 @@
 #define ID_EDITOR_NEXT                  5
 #define IDD_ABOUTBOX                    100
 #define ID_INDICATOR_POSITION           102
-#define IDD_PROPGENERAL                 103
 #define ID_INDICATOR_STEP               103
 #define IDD_PROPSUMMARY                 104
 #define ID_INDICATOR_SNAP               104
@@ -237,26 +236,22 @@
 #define IDC_DETDLG_LINEAR               1086
 #define IDC_HTMDLG_LIST_STEP            1087
 #define IDC_DETDLG_FAST                 1087
-#define IDC_PROP_GEN_LOCATION           1088
 #define IDC_HTMDLG_LIST_END             1088
 #define IDC_DETDLG_SOLID                1088
 #define IDC_PROP_SUM_AUTHOR             1089
 #define IDC_AIDDLG_LOCKZ                1089
 #define IDC_DETDLG_NOALPHA              1089
-#define IDC_PROP_GEN_DOSNAME            1090
 #define IDC_PROP_SUM_DESCRIPTION        1090
 #define IDC_DETDLG_EDGES                1090
 #define IDC_AIDDLG_CENTIMETERS          1090
-#define IDC_PROP_GEN_SIZE               1091
 #define IDC_PROP_SUM_COMMENTS           1091
 #define IDC_DETDLG_DITHER               1091
 #define IDC_AIDDLG_3DMOUSE              1091
 #define IDC_AIDDLG_GLOBAL               1091
-#define IDC_PROP_GEN_CREATED            1092
 #define IDC_DETDLG_LIGHTING             1092
-#define IDC_PROP_GEN_MODIFIED           1093
+#define IDC_PROP_SUM_AUTHOR2            1092
+#define IDC_PROP_SUM_NAME               1092
 #define IDC_DETDLG_SMOOTH               1093
-#define IDC_PROP_GEN_ACCESSED           1094
 #define IDC_DETDLG_ANTIALIAS            1094
 #define IDC_AIDDLG_ANGLE                1095
 #define IDC_GENDLG_SAVETIME             1095
@@ -734,7 +729,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        242
+#define _APS_NEXT_RESOURCE_VALUE        243
 #define _APS_NEXT_COMMAND_VALUE         33196
 #define _APS_NEXT_CONTROL_VALUE         1252
 #define _APS_NEXT_SYMED_VALUE           121

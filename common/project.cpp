@@ -4415,15 +4415,31 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			char Name[256];
 			sprintf(Name, "New Model %d", Max + 1);
 
-			// Create and add new model.
-			lcModel* Model = new lcModel(Name);
-			m_ModelList.Add(Model);
-			SetActiveModel(Model);
+			// Prompt the user for the model properties.
+			LC_PROPERTIESDLG_OPTS opts;
 
-			SetModifiedFlag(true);
-			CheckPoint("Adding Model");
-			SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
-			UpdateAllViews();
+			opts.Name = Name;
+			opts.Author = Sys_ProfileLoadString("Default", "User", "");
+			opts.lines = 0;
+			opts.count = NULL;
+			opts.names = NULL;
+
+			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
+			{
+				// Create and add new model.
+				lcModel* Model = new lcModel(Name);
+				Model->m_Author = opts.Author;
+				Model->m_Description = opts.Description;
+				Model->m_Comments = opts.Comments;
+
+				m_ModelList.Add(Model);
+				SetActiveModel(Model);
+
+				SetModifiedFlag(true);
+				CheckPoint("Adding Model");
+				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+				UpdateAllViews();
+			}
 		} break;
 
 		case LC_MODEL_DELETE:

@@ -17,7 +17,7 @@ class CPropertiesSheet : public CPropertySheet
 
 // Construction
 public:
-	CPropertiesSheet(CWnd* pWndParent = NULL);
+	CPropertiesSheet(bool ShowPieces, CWnd* pWndParent = NULL);
 
 // Attributes
 public:

@@ -886,7 +886,8 @@ void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveMo
 		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 
 	// Delete existing entries.
-	for (int i = 1; i < LC_MODEL_MENU_MAX; i++)
+	int i;
+	for (i = 1; i < LC_MODEL_MENU_MAX; i++)
 		Menu->DeleteMenu(ID_MODEL_MODEL1 + i, MF_BYCOMMAND);
 
 	// If the list is empty add a disabled entry.
@@ -906,7 +907,7 @@ void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveMo
 			break;
 
 	// Add models to menu.
-	for (int i = 0; i < ModelList.GetSize(); i++)
+	for (i = 0; i < ModelList.GetSize(); i++)
 	{
 		lcModel* Model = ModelList[i];
 		String DisplayName;

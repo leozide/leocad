@@ -52,7 +52,6 @@ BEGIN_MESSAGE_MAP(CPropertiesSummary, CPropertyPage)
 	//{{AFX_MSG_MAP(CPropertiesSummary)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
-	ON_EN_CHANGE(IDC_PROP_SUM_NAME, &CPropertiesSummary::OnEnChangePropSumName)
 END_MESSAGE_MAP()
 
 
@@ -256,14 +255,4 @@ void CPropertiesPieces::OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pRes
 	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)&data);
 
 	*pResult = 0;
-}
-
-void CPropertiesSummary::OnEnChangePropSumName()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CPropertyPage::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
 }

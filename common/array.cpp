@@ -155,8 +155,9 @@ PtrArray<T>& PtrArray<T>::operator=(const PtrArray<T>& Array)
 {
 	m_nLength = Array.m_nLength;
 	m_nAlloc = Array.m_nAlloc;
-	m_pData =(T**)realloc(m_pData, (m_nAlloc) * sizeof(T*));
+	m_pData = (T**)realloc(m_pData, (m_nAlloc) * sizeof(T*));
 	memcpy(m_pData, Array.m_pData, (m_nAlloc) * sizeof(T*));
+	return *this;
 }
 
 template <class T>
@@ -183,7 +184,7 @@ ObjArray<T>::ObjArray(int Size, int Grow)
 }
 
 template <class T>
-ObjArray<T>::~ObjArray ()
+ObjArray<T>::~ObjArray()
 {
 	delete[] m_Data;
 }
@@ -229,15 +230,13 @@ void ObjArray<T>::Add(const T& Obj)
 }
 
 template <class T>
-void ObjArray<T>::AddSorted (const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData)
+void ObjArray<T>::AddSorted(const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData)
 {
-	int i;
-
-	for (i = 0; i < GetSize(); i++)
+	for (int i = 0; i < GetSize(); i++)
 	{
 		if (Func(Obj, m_Data[i], SortData) < 0)
 		{
-			InsertAt (i, Obj);
+			InsertAt(i, Obj);
 			return;
 		}
 	}
@@ -248,6 +247,14 @@ void ObjArray<T>::AddSorted (const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* 
 template <class T>
 void ObjArray<T>::InsertAt(int Index, const T& Obj)
 {
+	InsertAt(Index);
+
+	m_Data[Index] = Obj;
+}
+
+template <class T>
+void ObjArray<T>::InsertAt(int Index)
+{
 	if (Index >= m_Length)
 		Expand(Index - m_Length + 1);
 	else
@@ -256,11 +263,23 @@ void ObjArray<T>::InsertAt(int Index, const T& Obj)
 	m_Length++;
 	for (int i = m_Length - 1; i > Index; i--)
 		m_Data[i] = m_Data[i-1];
-
-	m_Data[Index] = Obj;
 }
 
+template <class T>
+ObjArray<T>& ObjArray<T>::operator=(const ObjArray<T>& Array)
+{
+	int m_Length = Array.m_Length;
+	int m_Alloc = Array.m_Alloc;
+	int m_Grow = Array.m_Grow;
 
+	delete[] m_Data;
+	m_Data = new T[m_Alloc];
+
+	for (int i = 0; i < m_Length; i++)
+		m_Data[i] = Array.m_Data[i];
+
+	return *this;
+}
 
 
 

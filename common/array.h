@@ -52,6 +52,8 @@ public:
 	void Add(const T& Obj);
 	void AddSorted(const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData);
 	void InsertAt(int Index, const T& Obj);
+	void InsertAt(int Index);
+	ObjArray<T>& operator=(const ObjArray<T>& Array);
 
 	T& operator [](int Index) const
 		{ return m_Data[Index]; }

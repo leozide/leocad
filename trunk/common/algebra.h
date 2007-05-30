@@ -2,6 +2,7 @@
 #define _ALGEBRA_H_
 
 #include <math.h>
+#include <float.h>
 
 //
 // Simple math library and linear algebra functions.
@@ -80,6 +81,12 @@ class Matrix44;
 
 #define lcBaseVector_Abs3(res, a) { res.x = fabsf(a.x); res.y = fabsf(a.y); res.z = fabsf(a.z); }
 #define lcBaseVector_Abs4(res, a) { res.x = fabsf(a.x); res.y = fabsf(a.y); res.z = fabsf(a.z); res.w = fabsf(a.w); }
+
+#define lcBaseVector_Min3(res, a, b) { res.x = a.x < b.x ? a.x : b.x; res.y = a.y < b.y ? a.y : b.y; res.z = a.z < b.z ? a.z : b.z; }
+#define lcBaseVector_Min4(res, a, b) { res.x = a.x < b.x ? a.x : b.x; res.y = a.y < b.y ? a.y : b.y; res.z = a.z < b.z ? a.z : b.z; res.w = a.w < b.w ? a.w : b.w; }
+
+#define lcBaseVector_Max3(res, a, b) { res.x = a.x > b.x ? a.x : b.x; res.y = a.y > b.y ? a.y : b.y; res.z = a.z > b.z ? a.z : b.z; }
+#define lcBaseVector_Max4(res, a, b) { res.x = a.x > b.x ? a.x : b.x; res.y = a.y > b.y ? a.y : b.y; res.z = a.z > b.z ? a.z : b.z; res.w = a.w > b.w ? a.w : b.w; }
 
 #define lcBaseVector_Length3(res, a) { res = sqrtf(a.x * a.x + a.y * a.y + a.z * a.z); }
 #define lcBaseVector_Length4(res, a) { res = sqrtf(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w); }
@@ -248,7 +255,6 @@ public:
 	inline explicit Vector4(const float x, const float y, const float z, const float w);
 	inline explicit Vector4(const Vector3& a);
 	inline explicit Vector4(const Vector3& a, const float w);
-	inline explicit Vector4(const Vector4& a, const float w);
 
 	inline operator const float*() const { return (const float*)this; }
 	inline operator float*() const { return (float*)this; }
@@ -374,9 +380,6 @@ inline Vector4::Vector4(const Vector3& a)
 { lcBaseVector_Copy3(v, a.v); }
 
 inline Vector4::Vector4(const Vector3& a, const float w)
-{ lcBaseVector_Copy3(v, a.v); lcBaseVector_SetW(v, v, w); }
-
-inline Vector4::Vector4(const Vector4& a, const float w)
 { lcBaseVector_Copy3(v, a.v); lcBaseVector_SetW(v, v, w); }
 
 inline Vector3::Vector3()
@@ -520,6 +523,9 @@ inline const Vector3& Vector3::Normalize()
 inline float Length(const Vector4& a)
 { float res; lcBaseVector_Length4(res, a.v); return res; }
 
+inline float Length3(const Vector4& a)
+{ float res; lcBaseVector_Length3(res, a.v); return res; }
+
 inline float Length(const Vector3& a)
 { float res; lcBaseVector_Length3(res, a.v); return res; }
 
@@ -546,6 +552,18 @@ inline Vector4 Abs(const Vector4& a)
 
 inline Vector3 Abs(const Vector3& a)
 { Vector3 res; lcBaseVector_Abs3(res.v, a.v); return res; }
+
+inline Vector4 Min(const Vector4& a, const Vector4& b)
+{ Vector4 res; lcBaseVector_Min4(res.v, a.v, b.v); return res; }
+
+inline Vector3 Min(const Vector3& a, const Vector3& b)
+{ Vector3 res; lcBaseVector_Min3(res.v, a.v, b.v); return res; }
+
+inline Vector4 Max(const Vector4& a, const Vector4& b)
+{ Vector4 res; lcBaseVector_Max4(res.v, a.v, b.v); return res; }
+
+inline Vector3 Max(const Vector3& a, const Vector3& b)
+{ Vector3 res; lcBaseVector_Max3(res.v, a.v, b.v); return res; }
 
 // ============================================================================
 // Quaternion functions.
@@ -636,13 +654,22 @@ inline Matrix33::Matrix33(const Vector3& Row0, const Vector3& Row1, const Vector
 { m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; }
 
 inline Matrix33::Matrix33(const Matrix44& a)
-{ *this = a; }
+{
+	m_Rows[0] = Vector3(a.m_Rows[0][0], a.m_Rows[0][1], a.m_Rows[0][2]);
+	m_Rows[1] = Vector3(a.m_Rows[1][0], a.m_Rows[1][1], a.m_Rows[1][2]);
+	m_Rows[2] = Vector3(a.m_Rows[2][0], a.m_Rows[2][1], a.m_Rows[2][2]);
+}
 
 inline Matrix33 IdentityMatrix33()
 { return Matrix33(Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f)); }
 
 // Conversions.
-Matrix33 MatrixFromAxisAngle(const Vector3& Axis, float Radians);
+Matrix33 MatrixFromAxisAngle(const Vector4& AxisAngle);
+inline Matrix33 MatrixFromAxisAngle(const Vector3& Axis, float Radians)
+{
+	return MatrixFromAxisAngle(Vector4(Axis, Radians));
+}
+
 Vector4 MatrixToAxisAngle(const Matrix33& Mat);
 Matrix33 MatrixFromEulerAngles(const Vector3& Angles);
 Vector3 MatrixToEulerAngles(const Matrix33& a);
@@ -744,7 +771,62 @@ Matrix44 CreatePerspectiveMatrix(float FoVy, float Aspect, float Near, float Far
 Matrix44 CreateOrthoMatrix44(float Left, float Right, float Bottom, float Top, float Near, float Far);
 
 // ============================================================================
+// Axis Aligned Bounding Box.
+
+class BoundingBox
+{
+public:
+	BoundingBox()
+	{ }
+
+	BoundingBox(const Vector3& Min, const Vector3& Max)
+		: m_Min(Min), m_Max(Max)
+	{ }
+
+	void Reset()
+	{
+		m_Min = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+		m_Max = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	}
+
+	Vector3 GetCenter() const
+	{
+		return (m_Min + m_Max) * 0.5f;
+	}
+
+	void GetPoints(Vector3* Points) const
+	{
+		Points[0] = Vector3(m_Max[0], m_Max[1], m_Min[2]);
+		Points[1] = Vector3(m_Min[0], m_Max[1], m_Min[5]);
+		Points[2] = Vector3(m_Max[0], m_Max[1], m_Max[2]);
+		Points[3] = Vector3(m_Min[0], m_Min[1], m_Min[2]);
+		Points[4] = Vector3(m_Min[0], m_Min[1], m_Max[2]);
+		Points[5] = Vector3(m_Max[0], m_Min[1], m_Max[2]);
+		Points[6] = Vector3(m_Max[0], m_Min[1], m_Min[2]);
+		Points[7] = Vector3(m_Min[0], m_Max[1], m_Max[2]);
+	}
+
+	void AddPoint(const Vector3& Point)
+	{
+		m_Min = Min(m_Min, Point);
+		m_Max = Max(m_Max, Point);
+	}
+
+public:
+	Vector3 m_Min;
+	Vector3 m_Max;
+};
+
+inline BoundingBox operator+(const BoundingBox& a, const BoundingBox& b)
+{
+	return BoundingBox(Min(a.m_Min, b.m_Min), Max(a.m_Max, b.m_Max));
+}
+
+// ============================================================================
 // Linear Algebra Functions.
+
+Vector3 ZoomExtents(const Vector3& Position, const Matrix44& WorldView, const Matrix44& Projection, const Vector3* Points, int NumPoints);
+void GetFrustumPlanes(const Matrix44& WorldView, const Matrix44& Projection, Vector4 Planes[6]);
 
 Vector3 ProjectPoint(const Vector3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
 void ProjectPoints(Vector3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
@@ -752,9 +834,12 @@ Vector3 UnprojectPoint(const Vector3& Point, const Matrix44& ModelView, const Ma
 void UnprojectPoints(Vector3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
 
 void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, int* NumOutPoints, const Vector4& Plane);
-bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane);
-bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
-bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
+bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes);
+bool LinePlaneIntersection(Vector3* Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane);
+bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float* MinDist, Vector3* Intersection);
+bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float* MinDist, Vector3* Intersection);
 float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End);
+bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist);
+bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const class Vector4* Planes, int NumPlanes);
 
 #endif

@@ -1,8 +1,11 @@
 #include "lc_global.h"
 #include "lc_model.h"
-#include "piece.h"
-#include "camera.h"
-#include "light.h"
+
+#include "lc_object.h"
+#include "lc_pieceobj.h"
+#include "lc_modelref.h"
+#include "lc_camera.h"
+#include "lc_light.h"
 #include "system.h"
 
 lcModel::lcModel(const char* Name)
@@ -22,38 +25,114 @@ lcModel::~lcModel()
 {
 	while (m_Pieces)
 	{
-		Piece* piece = m_Pieces;
-		m_Pieces = (Piece*)m_Pieces->m_Next;
-		delete piece;
+		lcObject* Piece = m_Pieces;
+		m_Pieces = (lcPieceObject*)m_Pieces->m_Next;
+		delete Piece;
 	}
 
 	while (m_Cameras)
 	{
-		Camera* camera = m_Cameras;
-		m_Cameras = (Camera*)m_Cameras->m_Next;
-		delete camera;
+		lcObject* Camera = m_Cameras;
+		m_Cameras = (lcCamera*)m_Cameras->m_Next;
+		delete Camera;
 	}
 
 	while (m_Lights)
 	{
-		Light* light = m_Lights;
-		m_Lights = (Light*)m_Lights->m_Next;
-		delete light;
+		lcObject* Light = m_Lights;
+		m_Lights = (lcLight*)m_Lights->m_Next;
+		delete Light;
 	}
 }
 
-void lcModel::AddPiece(Piece* NewPiece)
+bool lcModel::IsSubModel(const lcModel* Model) const
 {
-	Piece* Prev = NULL;
-	Piece* Next = m_Pieces;
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+	{
+		if (Piece->GetType() != LC_OBJECT_MODELREF)
+			continue;
+
+		lcModelRef* ModelRef = (lcModelRef*)Piece;
+
+		if ((ModelRef->m_Model == Model) || ModelRef->m_Model->IsSubModel(Model))
+			return true;
+	}
+
+	return false;
+}
+
+void lcModel::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+{
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+	{
+		// FIXME: only use current frame for the active model, otherwise use max frame.
+		if (!Piece->IsVisible(m_CurFrame))
+			continue;
+
+		Piece->AddToScene(Scene, ParentWorld, Color);
+	}
+}
+
+void lcModel::SetActive(bool Active)
+{
+	if (Active)
+		Update(m_CurFrame);
+	else
+	{
+		Update(LC_MAX_TIME);
+
+		m_BoundingBox.Reset();
+
+		for (lcPieceObject* Piece = m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
+		{
+			if (Piece->IsVisible(LC_MAX_TIME))
+				Piece->MergeBoundingBox(&m_BoundingBox);
+		}
+	}
+}
+
+void lcModel::Update(u32 Time)
+{
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		Piece->Update(Time);
+
+	for (lcObject* Camera = m_Cameras; Camera; Camera = Camera->m_Next)
+		Camera->Update(Time);
+
+	for (lcObject* Light = m_Lights; Light; Light = Light->m_Next)
+		Light->Update(Time);
+}
+
+bool lcModel::AnyObjectsSelected() const
+{
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		if (Piece->IsSelected())
+			return true;
+
+	for (lcObject* Camera = m_Cameras; Camera; Camera = Camera->m_Next)
+		if (Camera->IsSelected() || (Camera->m_Children && Camera->m_Children->IsSelected()))
+			return true;
+
+	for (lcObject* Light = m_Lights; Light; Light = Light->m_Next)
+		if (Light->IsSelected() || (Light->m_Children && Light->m_Children->IsSelected()))
+			return true;
+
+	return false;
+}
+
+void lcModel::AddPiece(lcPieceObject* NewPiece)
+{
+	lcObject* Prev = NULL;
+	lcObject* Next = m_Pieces;
 
 	while (Next)
 	{
-		if (Next->GetPieceInfo() > NewPiece->GetPieceInfo())
+		// TODO: sort pieces by vertex buffer.
+//		if (Next->GetPieceInfo() > NewPiece->GetPieceInfo())
 			break;
 
 		Prev = Next;
-		Next = (Piece*)Next->m_Next;
+		Next = Next->m_Next;
 	}
 
 	NewPiece->m_Next = Next;
@@ -64,101 +143,107 @@ void lcModel::AddPiece(Piece* NewPiece)
 		m_Pieces = NewPiece;
 }
 
-void lcModel::RemovePiece(Piece* piece)
+void lcModel::RemovePiece(lcPieceObject* Piece)
 {
-	Piece* Next = m_Pieces;
-	Piece* Prev = NULL;
+	lcObject* Next = m_Pieces;
+	lcObject* Prev = NULL;
 
 	while (Next)
 	{
-		if (Next == piece)
+		if (Next == Piece)
 		{
 			if (Prev != NULL)
-				Prev->m_Next = piece->m_Next;
+				Prev->m_Next = Piece->m_Next;
 			else
-				m_Pieces = (Piece*)piece->m_Next;
+				m_Pieces = (lcPieceObject*)Piece->m_Next;
 
 			break;
 		}
 
 		Prev = Next;
-		Next = (Piece*)Next->m_Next;
+		Next = Next->m_Next;
 	}
 }
 
 bool lcModel::AnyPiecesSelected() const
 {
-	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		if ((piece->IsVisible(m_CurFrame)) && piece->IsSelected())
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		if ((Piece->IsVisible(m_CurFrame)) && Piece->IsSelected())
 			return true;
 
 	return false;
 }
 
-void lcModel::SelectAllPieces(bool Select, bool FocusOnly)
+void lcModel::SelectAllPieces(bool Select)
 {
-	LC_ASSERT(!(FocusOnly && Select), "Cannot set focus to more than 1 piece.");
-
-	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		if (piece->IsVisible(m_CurFrame))
-			piece->Select(Select, FocusOnly);
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		if (Piece->IsVisible(m_CurFrame))
+			Piece->SetSelection(Select, true);
 }
 
 void lcModel::SelectInvertAllPieces()
 {
-	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-	{
-		if (piece->IsVisible(m_CurFrame))
-		{
-			if (piece->IsSelected())
-				piece->Select(false, false);
-			else
-				piece->Select(true, false);
-		}
-	}
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		if (Piece->IsVisible(m_CurFrame))
+			Piece->SetSelection(!Piece->IsSelected(), true);
 }
 
 void lcModel::HideSelectedPieces()
 {
-	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		if (piece->IsSelected())
-			piece->Hide();
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		if (Piece->IsSelected())
+			Piece->SetVisible(false);
 }
 
 void lcModel::HideUnselectedPieces()
 {
-	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		if (!piece->IsSelected())
-			piece->Hide();
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		if (!Piece->IsSelected())
+			Piece->SetVisible(false);
 }
 
 void lcModel::UnhideAllPieces()
 {
-	for (Piece* piece = m_Pieces; piece; piece = (Piece*)piece->m_Next)
-		piece->UnHide();
+	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+		Piece->SetVisible(true);
 }
 
 bool lcModel::RemoveSelectedPieces()
 {
-	Piece* piece = m_Pieces;
+	lcObject* Piece = m_Pieces;
 	bool Deleted = false;
 
-	while (piece)
+	while (Piece)
 	{
-		if (piece->IsSelected())
+		if (Piece->IsSelected())
 		{
-			Piece* Temp = (Piece*)piece->m_Next;
+			lcObject* Temp = Piece->m_Next;
 
 			Deleted = true;
-			RemovePiece(piece);
-			delete piece;
-			piece = Temp;
+			RemovePiece((lcPieceObject*)Piece);
+			delete Piece;
+			Piece = Temp;
 		}
 		else
-			piece = (Piece*)piece->m_Next;
+			Piece = Piece->m_Next;
 	}
 
 	return Deleted;
+}
+
+void lcModel::AddCamera(lcCamera* Camera)
+{
+	lcObject* LastCamera = m_Cameras;
+
+	while (LastCamera && LastCamera->m_Next)
+		LastCamera = LastCamera->m_Next;
+
+	if (LastCamera)
+		LastCamera->m_Next = Camera;
+	else
+		m_Cameras = Camera;
+
+	Camera->m_Next = NULL;
 }
 
 void lcModel::ResetCameras()
@@ -166,36 +251,57 @@ void lcModel::ResetCameras()
 	// Delete all cameras.
 	while (m_Cameras)
 	{
-		Camera* camera = m_Cameras;
-		m_Cameras = (Camera*)m_Cameras->m_Next;
-		delete camera;
+		lcObject* Camera = m_Cameras;
+		m_Cameras = (lcCamera*)m_Cameras->m_Next;
+		delete Camera;
 	}
 
 	// Create new default cameras.
-	Camera* camera = NULL;
-	for (int i = 0; i < 7; i++)
+	lcObject* Last = NULL;
+	for (int i = 0; i < LC_CAMERA_USER; i++)
 	{
-		camera = new Camera(i, camera);
-		if (m_Cameras == NULL)
-			m_Cameras = camera;
+		lcCamera* Camera = new lcCamera();
+		Camera->CreateCamera(i, true);
+
+		if (Last == NULL)
+			m_Cameras = Camera;
+		else
+			Last->m_Next = Camera;
+
+		Last = Camera;
 	}
 }
 
-Camera* lcModel::GetCamera(int Index) const
+lcCamera* lcModel::GetCamera(int Index) const
 {
-	Camera* camera = m_Cameras;
+	lcObject* Camera = m_Cameras;
 
-	while (camera && Index--)
-		camera = (Camera*)camera->m_Next;
+	while (Camera && Index--)
+		Camera = Camera->m_Next;
 
-	return camera;
+	return (lcCamera*)Camera;
 }
 
-Camera* lcModel::GetCamera(const char* Name) const
+lcCamera* lcModel::GetCamera(const char* Name) const
 {
-	for (Camera* camera = m_Cameras; camera; camera = (Camera*)camera->m_Next)
-		if (!strcmp(camera->GetName(), Name))
-			return camera;
+	for (lcObject* Camera = m_Cameras; Camera; Camera = Camera->m_Next)
+		if (Camera->m_Name == Name)
+			return (lcCamera*)Camera;
 
 	return NULL;
+}
+
+void lcModel::AddLight(lcLight* Light)
+{
+	if (!m_Lights)
+		m_Lights = Light;
+	else
+	{
+		lcObject* Prev = m_Lights;
+
+		while (Prev->m_Next)
+			Prev = Prev->m_Next;
+
+		Prev->m_Next = Light;
+	}
 }

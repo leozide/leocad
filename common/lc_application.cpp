@@ -30,6 +30,7 @@ Project* lcGetActiveProject()
 
 lcApplication::lcApplication()
 {
+	m_PiecePreview = NULL;
 	m_ActiveProject = NULL;
 	m_Library = NULL;
 }

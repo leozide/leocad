@@ -25,7 +25,7 @@ lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer*
 
 	m_VertexCount = NumVertices;
 
-	if (NumIndices > 0xffff)
+	if (NumVertices > 0xffff)
 	{
 		m_IndexBuffer = new lcIndexBuffer(NumIndices * 4);
 		m_IndexType = GL_UNSIGNED_INT;

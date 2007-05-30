@@ -3,10 +3,13 @@
 
 #include "str.h"
 #include "config.h"
+#include "algebra.h"
 
-class Piece;
-class Camera;
-class Light;
+class lcObject;
+class lcPieceObject;
+class lcCamera;
+class lcLight;
+class lcScene;
 
 class lcModel
 {
@@ -15,57 +18,79 @@ public:
 	~lcModel();
 
 public:
-	// Returns the model's name.
-	const String& GetName() const
-	{ return m_Name; }
+	// Check if a given model is referenced by this model.
+	bool IsSubModel(const lcModel* Model) const;
 
-	// Adds a piece to this model.
-	void AddPiece(Piece* NewPiece);
+	// Tell this model it's now the active model or no longer active.
+	void SetActive(bool Active);
 
-	// Removes a piece from this model.
-	void RemovePiece(Piece* piece);
+	// Update this model to a given time.
+	void Update(u32 Time);
 
-	// Returns true if any pieces are currently selected.
+	// Add this model to a scene.
+	void AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color);
+
+	// Return true if any objects are currently selected.
+	bool AnyObjectsSelected() const;
+
+	// Add a piece to this model.
+	void AddPiece(lcPieceObject* NewPiece);
+
+	// Remove a piece from this model.
+	void RemovePiece(lcPieceObject* Piece);
+
+	// Return true if any pieces are currently selected.
 	bool AnyPiecesSelected() const;
 
-	// Selects/Deselects all pieces.
-	void SelectAllPieces(bool Select = true, bool FocusOnly = false);
+	// Select/Deselect all pieces.
+	void SelectAllPieces(bool Select = true);
 
-	// Inverts current piece selection.
+	// Invert current piece selection.
 	void SelectInvertAllPieces();
 
-	// Hides all currently selected pieces.
+	// Hide all currently selected pieces.
 	void HideSelectedPieces();
 
-	// Hides all pieces not currently selected.
+	// Hide all pieces not currently selected.
 	void HideUnselectedPieces();
 
-	// Shows all hidden pieces.
+	// Show all hidden pieces.
 	void UnhideAllPieces();
 
-	// Deletes all selected pieces and returns true if any pieces were removed.
+	// Delete all selected pieces and returns true if any pieces were removed.
 	bool RemoveSelectedPieces();
+
+	// Add a camera to this model.
+	void AddCamera(lcCamera* Camera);
 
 	// Delete all existing cameras and create new default ones.
 	void ResetCameras();
 
 	// Retrieve a pointer to an existing camera.
-	Camera* GetCamera(int Index) const;
-	Camera* GetCamera(const char* Name) const;
+	lcCamera* GetCamera(int Index) const;
+	lcCamera* GetCamera(const char* Name) const;
+
+	// Adds a light to this model.
+	void AddLight(lcLight* Light);
 
 public:
-	// Making these public for now.
-	Piece* m_Pieces;
-	Camera* m_Cameras;
-	Light* m_Lights;
+	// Objects contained in this model.
+	lcPieceObject* m_Pieces;
+	lcCamera* m_Cameras;
+	lcLight* m_Lights;
 
+	// Frame information.
 	u32 m_CurFrame;
 	u32 m_TotalFrames;
 
+	// Model information.
 	String m_Name;
 	String m_Author;
 	String m_Description;
 	String m_Comments;
+
+	// Data used when the model isn't active.
+	BoundingBox m_BoundingBox;
 };
 
 #endif // _LC_MODEL_H_

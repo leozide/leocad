@@ -208,16 +208,18 @@ public:
 		m_Mesh->m_IndexBuffer->UnbindBuffer();
 	};
 
-	inline void AddIndex(int Index)
+	void AddIndex(int Index)
 	{ m_IndexBuffer[m_CurIndex++] = Index; }
 
-	inline void AddVertex(float* Vert)
+	void AddVertex(float* Vert)
 	{
-		float* v = m_VertexBuffer + 3 * m_CurVertex;
-		v[0] = Vert[0];
-		v[1] = Vert[1];
-		v[2] = Vert[2];
-		m_CurVertex++;
+		AddVertices(Vert, 1);
+	}
+
+	void AddVertices(float* Vert, int Count)
+	{
+		memcpy(m_VertexBuffer + 3 * m_CurVertex, Vert, 3 * sizeof(float) * Count);
+		m_CurVertex += Count;
 	}
 
 	void AddIndices16(void* Indices, int NumIndices);
@@ -252,7 +254,13 @@ public:
 		m_CurSection = -1;
 	}
 
-protected:
+	void OffsetIndices(int FirstIndex, int NumIndices, int Offset)
+	{
+		for (int i = 0; i < NumIndices; i++)
+			m_IndexBuffer[FirstIndex+i] += Offset;
+	}
+
+public:
 	lcMesh* m_Mesh;
 	int m_CurVertex;
 	int m_CurIndex;

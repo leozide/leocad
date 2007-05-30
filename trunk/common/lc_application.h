@@ -5,6 +5,7 @@
 
 class Project;
 class PiecesLibrary;
+class PiecePreview;
 
 class lcApplication
 {
@@ -12,7 +13,7 @@ public:
 	lcApplication();
 	~lcApplication();
 
-	bool Initialize(int argc, char *argv[], const char* SysLibPath);
+	bool Initialize(int argc, char* argv[], const char* SysLibPath);
 	void Shutdown();
 
 	// Pieces library.
@@ -34,6 +35,9 @@ public:
 	{
 		m_ActiveProject = project;
 	}
+
+public:
+	PiecePreview* m_PiecePreview;
 
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);

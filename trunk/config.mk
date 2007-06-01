@@ -2,6 +2,8 @@
 #
 include version.mk
 
+ERROR_SETTING=2> /dev/null
+
 default: all
 
 CC	:= gcc
@@ -164,8 +166,8 @@ config:
 	echo "#include <stdio.h>" > conftest.c; \
 	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
 	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(char)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
+	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_char=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_char"; \
 	else \
@@ -179,8 +181,8 @@ config:
 	echo "#include <stdio.h>" > conftest.c; \
 	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
 	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(short)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
+	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_short=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_short"; \
 	else \
@@ -194,8 +196,8 @@ config:
 	echo "#include <stdio.h>" > conftest.c; \
 	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
 	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(long)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
+	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_long=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_long"; \
 	else \
@@ -209,8 +211,8 @@ config:
 	echo "#include <stdio.h>" > conftest.c; \
 	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
 	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(int)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
+	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_int=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_int"; \
 	else \
@@ -224,8 +226,8 @@ config:
 	echo "#include <stdio.h>" > conftest.c; \
 	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
 	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(void *)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
+	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_void_p=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_void_p"; \
 	else \
@@ -239,8 +241,8 @@ config:
 	echo "#include <stdio.h>" > conftest.c; \
 	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
 	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(long long)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
+	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_long_long=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_long_long"; \
 	else \
@@ -288,8 +290,8 @@ config:
 	@echo -n "Determining endianess... "
 	@echo "main () { union { long l; char c[sizeof (long)]; } u;" > endiantest.c
 	@echo "u.l = 1; exit (u.c[sizeof (long) - 1] == 1); }" >> endiantest.c
-	@if { (eval $(CC) endiantest.c -o endiantest) 2> /dev/null; } && \
-	  (test -s endiantest && (./endiantest; exit) 2> /dev/null); then \
+	@if { (eval $(CC) endiantest.c -o endiantest) ${ERROR_SETTING}; } && \
+	  (test -s endiantest && (./endiantest; exit) ${ERROR_SETTING}); then \
 	  echo "little endian"; \
 	  echo "#define LC_LITTLE_ENDIAN" >> $(OSDIR)/config.h; \
 	  echo "#define LCUINT16(val) val" >> $(OSDIR)/config.h; \
@@ -338,7 +340,7 @@ endif
 	@echo -n "Checking for jpeg support... "
 	@echo "char jpeg_read_header();" > jpegtest.c
 	@echo "int main() { jpeg_read_header(); return 0; }" >> jpegtest.c
-	@if { (eval $(CC) jpegtest.c -ljpeg -o jpegtest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) jpegtest.c -ljpeg -o jpegtest $(CPPFLAGS) $(LDFLAGS)) ${ERROR_SETTING}; } && \
 	  (test -s jpegtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_JPEGLIB = yes" >> $(OSDIR)/config.mk; \
@@ -354,7 +356,7 @@ endif
 	@echo -n "Checking for zlib support... "
 	@echo "char gzread();" > ztest.c
 	@echo "int main() { gzread(); return 0; }" >> ztest.c
-	@if { (eval $(CC) ztest.c -lz -o ztest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) ztest.c -lz -o ztest $(CPPFLAGS) $(LDFLAGS)) ${ERROR_SETTING}; } && \
 	  (test -s ztest); then  \
 	  echo "ok"; \
 	  echo "HAVE_ZLIB = yes" >> $(OSDIR)/config.mk; \
@@ -370,7 +372,7 @@ endif
 	@echo -n "Checking for png support... "
 	@echo "char png_read_info();" > pngtest.c
 	@echo "int main() { png_read_info(); return 0; }" >> pngtest.c
-	@if { (eval $(CC) pngtest.c -lm -lz -lpng -o pngtest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) pngtest.c -lm -lz -lpng -o pngtest $(CPPFLAGS) $(LDFLAGS)) ${ERROR_SETTING}; } && \
 	  (test -s pngtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_PNGLIB = yes" >> $(OSDIR)/config.mk; \

@@ -131,6 +131,10 @@ config-help:
 
 ### Automatic configuration
 
+#USE this with printf and a primitive type - printf "WIDTHTEST" "char" >conftest.c
+CONFTEST="\#include <stdio.h>\nmain() { FILE *f=fopen(\"conftestval\", \"w\");\n\
+	if (!f) exit(1); fprintf(f, \"%%d\\\n\", sizeof(%s)); exit(0); }\n"
+
 config:
 	@echo "Automatic configuration"
 
@@ -163,9 +167,7 @@ config:
 
 ### Determine variable sizes
 	@echo -n "checking size of char... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(char)); exit(0); }" >> conftest.c; \
+	printf ${CONFTEST} "char" > conftest.c; \
 	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
 	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_char=`cat conftestval`; \
@@ -178,9 +180,7 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of short... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(short)); exit(0); }" >> conftest.c; \
+	printf ${CONFTEST} "short" > conftest.c; \
 	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
 	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_short=`cat conftestval`; \
@@ -193,9 +193,7 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of long... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(long)); exit(0); }" >> conftest.c; \
+	printf ${CONFTEST} "long" > conftest.c; \
 	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
 	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_long=`cat conftestval`; \
@@ -208,9 +206,7 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of int... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(int)); exit(0); }" >> conftest.c; \
+	printf ${CONFTEST} "int" > conftest.c; \
 	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
 	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_int=`cat conftestval`; \
@@ -223,9 +219,7 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of void *... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(void *)); exit(0); }" >> conftest.c; \
+	printf ${CONFTEST} "void *" > conftest.c; \
 	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
 	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_void_p=`cat conftestval`; \
@@ -238,9 +232,7 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of long long... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(long long)); exit(0); }" >> conftest.c; \
+	printf ${CONFTEST} "long long" > conftest.c; \
 	if { (eval $(CC) conftest.c -o conftest) ${ERROR_SETTING}; } && \
 	  (test -s conftest && (./conftest; exit) ${ERROR_SETTING}); then \
 	  ac_cv_sizeof_long_long=`cat conftestval`; \

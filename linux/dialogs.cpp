@@ -2146,10 +2146,10 @@ static void propertiesdlg_ok(GtkWidget *widget, gpointer data)
   LC_PROPERTIESDLG_STRUCT* s = (LC_PROPERTIESDLG_STRUCT*)data;
   LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s->data;
 
-  strcpy(opts->strAuthor, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
-  strcpy(opts->strDescription, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
+  strcpy(opts->Author, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
+  strcpy(opts->Description, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
   char* comments = gtk_editable_get_chars(GTK_EDITABLE(s->sum_comments), 0, -1);
-  strcpy(opts->strComments, comments);
+  strcpy(opts->Comments, comments);
   g_free(comments);
 
   *cur_ret = LC_OK;
@@ -2165,10 +2165,9 @@ int propertiesdlg_execute(void* param)
   s.data = param;
 
   struct stat buf;
-  bool exist = (stat(opts->strFilename, &buf) != -1);
-  char* ptr = strrchr(opts->strFilename, '/');
+  /* char* ptr = strrchr(opts->Filename, '/'); - CANNOT COMPILE WITHOUT fileName or strFileName member in properties dialog struct */
   char text[512];
-  strcpy(text, opts->strTitle);
+  strcpy(text, opts->Name);
   strcat(text, " Properties");
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -2202,7 +2201,7 @@ int propertiesdlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 0, 1,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
-  label = gtk_label_new (ptr ? ptr+1 : "(not saved)");
+/*  label = gtk_label_new (ptr ? ptr+1 : "(not saved)");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
   gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
@@ -2214,7 +2213,7 @@ int propertiesdlg_execute(void* param)
     gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 1, 2,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
     *ptr = 0;
-    label = gtk_label_new (opts->strFilename);
+    label = gtk_label_new (opts->Filename);
     *ptr = '/';
 
     gtk_widget_show (label);
@@ -2273,7 +2272,7 @@ int propertiesdlg_execute(void* param)
     gtk_widget_show (label);
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  }
+  }*/
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -2352,7 +2351,7 @@ int propertiesdlg_execute(void* param)
   s.sum_author = gtk_entry_new ();
   gtk_widget_show (s.sum_author);
   gtk_box_pack_start (GTK_BOX (vbox2), s.sum_author, FALSE, FALSE, 0);
-  gtk_entry_set_text (GTK_ENTRY (s.sum_author), opts->strAuthor);
+  gtk_entry_set_text (GTK_ENTRY (s.sum_author), opts->Author);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -2366,7 +2365,7 @@ int propertiesdlg_execute(void* param)
   s.sum_description = gtk_entry_new ();
   gtk_widget_show (s.sum_description);
   gtk_box_pack_start (GTK_BOX (vbox2), s.sum_description, FALSE, FALSE, 0);
-  gtk_entry_set_text (GTK_ENTRY (s.sum_description), opts->strDescription);
+  gtk_entry_set_text (GTK_ENTRY (s.sum_description), opts->Description);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -2385,7 +2384,7 @@ int propertiesdlg_execute(void* param)
 
   GtkTextBuffer *buffer;
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
-  gtk_text_buffer_set_text(buffer, opts->strComments, -1);
+  gtk_text_buffer_set_text(buffer, opts->Comments, -1);
 
   int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
   memset (&totalcount, 0, sizeof (totalcount));

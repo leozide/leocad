@@ -64,7 +64,7 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   menu_separator (menu);
 
   create_pixmap_menu_item (menu, "Propert_ies...", info, accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-                           window, LC_FILE_PROPERTIES, "menu_file_properties");
+                           window, LC_MODEL_PROPERTIES, "menu_model_properties");
   create_menu_item (menu, "Pieces _Library Manager...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_LIBRARY, "menu_file_library");
   create_menu_item (menu, "Terrain _Editor...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),

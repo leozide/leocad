@@ -4,6 +4,10 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 // ============================================================================
 // Old defines (mostly deprecated).
 
@@ -45,6 +49,9 @@
 char* strupr(char* string);
 char* strlwr(char* string);
 int stricmp(const char* str1, const char* str2);
+
+#define _strlwr strlwr
+#define _strupr strupr
 
 #endif
 

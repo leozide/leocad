@@ -358,7 +358,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 
   GList *lst = gtk_container_children (GTK_CONTAINER (menu));
 
-  for (int i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+  for (int i = 0; pCamera; i++, pCamera = (Camera *)pCamera->m_Next)
     if (pNew == pCamera)
     {
       if (i >= 7)
@@ -399,7 +399,7 @@ void SystemUpdateCameraMenu(Camera* pCamera)
     gtk_container_remove (GTK_CONTAINER (menu), GTK_WIDGET (lst->data));
 
   // add user cameras
-  for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+  for (i = 0; pCamera; i++, pCamera = (Camera *)pCamera->m_Next)
     if (i > 6)
     {
       GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
@@ -414,7 +414,7 @@ void SystemUpdateCameraMenu(Camera* pCamera)
     menu_separator (menu);
 
   // add standard cameras
-  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
+  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = (Camera *)pCamera->m_Next)
   {
     GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
     item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());

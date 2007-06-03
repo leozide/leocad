@@ -460,7 +460,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
 					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
 
-					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
+					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, &(pLine->mindist), &Intersection))
 					{
 						pLine->pClosest = this;
 					}
@@ -476,7 +476,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
 					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
 
-					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
+					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, &(pLine->mindist), &Intersection))
 					{
 						pLine->pClosest = this;
 					}
@@ -494,7 +494,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
 					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
 
-					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &(pLine->mindist), &Intersection))
 					{
 						pLine->pClosest = this;
 					}
@@ -509,7 +509,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
 					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
 
-					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &(pLine->mindist), &Intersection))
 					{
 						pLine->pClosest = this;
 					}

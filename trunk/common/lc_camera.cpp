@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_camera.h"
-#include "lc_cameratarget.h"
+#include "lc_camera_target.h"
 
 #include "globals.h"
 
@@ -61,7 +61,7 @@ void lcCamera::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 	m_Children->ClosestRayIntersect(Ray);
 }
 
-bool lcCamera::IntersectsVolume(const class Vector4* Planes, int NumPlanes) const
+bool lcCamera::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
 	BoundingBox Box;
 	Box.m_Max = Vector3(0.3f, 0.3f, 0.3f);

@@ -6,7 +6,6 @@
 #include <afxpriv.h>
 #include "LeoCAD.h"
 #include "MainFrm.h"
-#include "Camera.h"
 #include "project.h"
 #include "message.h"
 #include "globals.h"
@@ -16,9 +15,11 @@
 #include "keyboard.h"
 #include "system.h"
 #include "library.h"
-#include "lc_application.h"
 #include "Print.h"
 #include "view.h"
+
+#include "lc_application.h"
+#include "lc_camera.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -452,7 +453,7 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 
 LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
-	m_wndModifyDlg.m_ModifyDlg.UpdateInfo((Object*)lParam);
+	m_wndModifyDlg.m_ModifyDlg.UpdateInfo((lcObject*)lParam);
 
 	char str[128];
 	Vector3 pos;
@@ -672,9 +673,9 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		Camera* pCamera = lcGetActiveProject()->GetActiveModel()->GetCamera(nID-ID_CAMERA_FIRST);
+		lcCamera* pCamera = lcGetActiveProject()->GetActiveModel()->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
-		rMessage += pCamera->GetName();
+		rMessage += pCamera->m_Name;
 		rMessage += "\"";
 	}
 	else
@@ -1729,7 +1730,7 @@ void CMainFrame::GetViewLayout(CWnd* wnd, String& str) const
 		str += "V";
 
 		// Save camera name.
-		String name = ((CCADView*)wnd)->m_pView->GetCamera()->GetName();
+		const String& name = ((CCADView*)wnd)->m_pView->GetCamera()->m_Name;
 		int len = name.GetLength();
 		char buf[16];
 		sprintf(buf, "%d", len);

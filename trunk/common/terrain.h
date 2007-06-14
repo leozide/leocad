@@ -8,7 +8,7 @@
 #include "defines.h"
 
 class File;
-class Camera;
+class lcCamera;
 class Texture;
 
 class TerrainPatch
@@ -44,7 +44,7 @@ public:
 	Terrain& operator=(const Terrain& source);
 
 	void LoadTexture(bool bLinear);
-	void Render(Camera* pCam, float aspect);
+	void Render(lcCamera* pCam, float aspect);
 	void LoadDefaults(bool bLinear);
 	void SetSize(float uSize, float vSize);
 	void GetSize(float *uSize, float *vSize);
@@ -69,7 +69,7 @@ public:
 
 protected:
 	void FreeMemory();
-	void FindVisiblePatches(Camera* pCam, float aspect);
+	void FindVisiblePatches(lcCamera* pCam, float aspect);
 
 	float** m_pControl;
 	TerrainPatch** m_Patches;

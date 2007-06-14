@@ -40,7 +40,6 @@ MainWnd::~MainWnd()
 void MainWnd::UpdateMRU()
 {
 #if LC_WINDOWS
-	// FIXME !!
 	void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
 	char names[4][LC_MAXPATH];
 

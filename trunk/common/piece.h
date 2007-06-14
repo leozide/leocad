@@ -1,6 +1,8 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
+#if 0
+
 class File;
 class Piece;
 class Group;
@@ -11,10 +13,6 @@ class lcMesh;
 #include "globals.h"
 #include "typedefs.h"
 #include "defines.h"
-
-#define LC_PIECE_HIDDEN		0x01
-#define LC_PIECE_SELECTED	0x02
-#define LC_PIECE_FOCUSED	0x04
 
 typedef enum
 {
@@ -40,19 +38,10 @@ public:
 
 	Piece* m_pLink;
 
-	void Hide()
-		{ m_nState = LC_PIECE_HIDDEN; }
-	void UnHide()
-		{ m_nState &= ~LC_PIECE_HIDDEN; }
-	bool IsHidden()
-		{ return (m_nState & LC_PIECE_HIDDEN) != 0; }
 	bool IsSelected()
 		{ return (m_nState & LC_PIECE_SELECTED) != 0; }
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
-
-	const char* GetName() const
-	{ return m_strName; };
 
 	lcMesh* GetMesh() const
 	{ return m_Mesh; }
@@ -66,7 +55,6 @@ public:
 	void CreateName(Piece* pPiece);
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
-	void CompareBoundingBox(float box[6]);
 	void GetBoundingBox(Vector3 Verts[8]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);
@@ -83,10 +71,6 @@ public:
 		{ m_pGroup = pGroup; }
 	Group* GetGroup()
 		{ return m_pGroup; }
-	void SetName(char* name)
-		{ strcpy(m_strName, name); }
-	const char* GetName()
-		{ return m_strName; }
 	const unsigned char GetColor()
 		{ return m_nColor; }
 	void SetColor(unsigned char color)
@@ -120,30 +104,15 @@ public:
 		return true;
 	};
 
-/*
-	inline void UseTransform()
-	{
-		glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
-		glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
-	}
-*/
 protected:
 	void BuildDrawInfo();
 
 	// Atributes
-	PieceInfo* m_pPieceInfo;
 	Group* m_pGroup;
-
-	u32 m_TimeShow;
-	u32 m_TimeHide;
 
 	unsigned char m_nColor;
 	unsigned char m_nState;
-	char m_strName[81];
 
-	// Temporary variables
-	Matrix44 m_ModelWorld;
-	float m_fPosition[3];
 	float m_fRotation[4];
 	CONNECTION* m_pConnections;
 	lcMesh* m_Mesh;
@@ -159,5 +128,6 @@ protected:
 	void BuildMesh(TypeToType<T>);
 };
 
+#endif // 0
 
 #endif // _PIECE_H

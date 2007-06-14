@@ -4,11 +4,9 @@
 #ifndef _TYPEDEF_H_
 #define _TYPEDEF_H_
 
+class lcObject;
 class Group;
-class Piece;
 class PieceInfo;
-class Camera;
-class Light;
 
 #include "defines.h"
 #include "str.h"
@@ -210,12 +208,12 @@ struct CONNECTION
 	float center[3];
 	float normal[3];
 	CONNECTION* link;
-	Piece* owner;
+	lcObject* owner;
 };
 
 struct CONNECTION_ENTRY
 {
-	Piece* owner;
+	lcObject* owner;
 	CONNECTION** cons; // pointers to the structures in each piece
 	unsigned short numcons;
 };
@@ -246,7 +244,7 @@ struct LC_SEL_DATA
 
 struct LC_PIECE_MODIFY
 {
-	Piece* piece;
+	lcObject* piece;
 	Vector3 Position;
 	Vector3 Rotation;
 	char name[81];
@@ -258,7 +256,7 @@ struct LC_PIECE_MODIFY
 
 struct LC_CAMERA_MODIFY
 {
-	Camera* camera;
+	lcObject* camera;
 	Vector3 Eye;
 	Vector3 Target;
 	float Roll;
@@ -274,7 +272,7 @@ struct LC_CAMERA_MODIFY
 
 struct LC_LIGHT_MODIFY
 {
-	Light* light;
+	lcObject* light;
 	Vector3 Position;
 	Vector3 Target;
 	Vector3 AmbientColor;
@@ -426,7 +424,7 @@ struct LC_PROPERTIESDLG_OPTS
 struct LC_GROUPEDITDLG_OPTS
 {
 	int piececount;
-	Piece** pieces;
+	lcObject** pieces;
 	Group** piecesgroups;
 	int groupcount;
 	Group** groups;

@@ -22,6 +22,9 @@ enum LC_OBJECT_TYPES
 {
 	LC_OBJECT_PIECE,
 	LC_OBJECT_MODELREF,
+	LC_OBJECT_FLEXPIECE,
+	LC_OBJECT_FLEXPIECE_POINT,
+//	LC_OBJECT_PIVOT,
 	LC_OBJECT_CAMERA,
 	LC_OBJECT_CAMERA_TARGET,
 	LC_OBJECT_LIGHT,
@@ -71,7 +74,7 @@ public:
 	bool IsPieceObject() const
 	{
 		int Type = GetType();
-		return (Type == LC_OBJECT_PIECE) || (Type == LC_OBJECT_MODELREF);
+		return (Type == LC_OBJECT_PIECE) || (Type == LC_OBJECT_MODELREF) || (Type == LC_OBJECT_FLEXPIECE);
 	}
 
 	// Set or remove a flag.
@@ -133,6 +136,21 @@ public:
 		return ((m_Flags & LC_OBJECT_FOCUSED) != 0);
 	}
 
+	lcObject* GetFocusedChildren()
+	{
+		if (IsFocused())
+			return this;
+
+		for (lcObject* Object = m_Children; Object; Object = Object->m_Next)
+		{
+			lcObject* Focus = Object->GetFocusedChildren();
+			if (Focus)
+				return Focus;
+		}
+
+		return NULL;
+	}
+
 	// Flag this object as visible or hidden.
 	virtual void SetVisible(bool Visible = true)
 	{
@@ -158,7 +176,7 @@ public:
 	virtual void ClosestRayIntersect(LC_CLICK_RAY* Ray) const = 0;
 
 	// Check if this object intersects the volume specified by a given set of planes.
-	virtual bool IntersectsVolume(const class Vector4* Planes, int NumPlanes) const = 0;
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const = 0;
 
 	// Move all keys after Time by Frames.
 	virtual void InsertTime(u32 Time, u32 Frames);

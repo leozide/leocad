@@ -66,16 +66,6 @@ void CPiecePreview::OnDestroy()
 	CWnd::OnDestroy();
 }
 
-void CPiecePreview::SetPieceInfo(PieceInfo* pInfo)
-{
-	m_Preview->SetCurrentPiece(pInfo);
-}
-
-PieceInfo* CPiecePreview::GetPieceInfo() const
-{
-	return m_Preview->GetCurrentPiece();
-}
-
 BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);
 LRESULT CPiecePreview::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {

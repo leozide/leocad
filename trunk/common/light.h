@@ -5,6 +5,8 @@
 #include "object.h"
 #include "algebra.h"
 
+#if 0
+
 #define LC_LIGHT_HIDDEN           0x01
 #define LC_LIGHT_SELECTED         0x02
 #define LC_LIGHT_FOCUSED          0x04
@@ -37,13 +39,9 @@ public:
 	~LightTarget ();
 
 public:
-	void MinIntersectDist (LC_CLICKLINE* pLine);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
 	void Select (bool bSelecting, bool bFocus);
 	void Move (unsigned short nTime, bool bAddKey, float x, float y, float z)
 	{
-		// FIXME: move the position handling to the light target
 	}
 
 	const char* GetName() const;
@@ -53,9 +51,6 @@ public:
 
 protected:
 	Light* m_pParent;
-
-	friend class Light; // FIXME: needed for BoundingBoxCalculate ()
-	// remove and use UpdatePosition instead
 };
 
 class Light : public Object
@@ -108,9 +103,6 @@ public:
 	{ return m_strName; };
 
 	void Render(float fLineWidth);
-	void MinIntersectDist(LC_CLICKLINE* Line);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
 	void UpdatePosition(unsigned short nTime);
 	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 	void Setup(int index);
@@ -147,7 +139,6 @@ protected:
 	// Attributes
 	float m_fCone;
 	unsigned char m_nState;
-	char m_strName[81];
 	bool m_bEnabled;
 
 	GLuint m_nList;
@@ -155,16 +146,9 @@ protected:
 	static GLuint m_nTargetList;
 
 	// Temporary parameters
-	float m_fPos[4];
 	float m_fTarget[3];
-	float m_fAmbient[4];
-	float m_fDiffuse[4];
-	float m_fSpecular[4];
-	float m_fConstant;
-	float m_fLinear;
-	float m_fQuadratic;
-	float m_fCutoff;
-	float m_fExponent;
 };
+
+#endif
 
 #endif // _LIGHT_H_

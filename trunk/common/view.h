@@ -5,7 +5,7 @@
 #include "typedefs.h"
 
 class Project;
-class Camera;
+class lcCamera;
 
 class View : public GLWindow
 {
@@ -28,11 +28,11 @@ public:
 	void LoadViewportProjection();
 	void UpdateOverlayScale();
 
-	Camera* GetCamera() const
+	lcCamera* GetCamera() const
 	{
 		return m_Camera;
 	}
-	void SetCamera(Camera* cam);
+	void SetCamera(lcCamera* cam);
 	void UpdateCamera();
 
 public:
@@ -41,7 +41,7 @@ public:
 protected:
 	Project* m_Project;
 
-	Camera* m_Camera;
+	lcCamera* m_Camera;
 	String m_CameraName;
 };
 

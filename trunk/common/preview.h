@@ -3,7 +3,7 @@
 
 #include "glwindow.h"
 
-class PieceInfo;
+class lcPieceObject;
 
 class PiecePreview : public GLWindow
 {
@@ -19,13 +19,13 @@ public:
   void OnRightButtonUp(int x, int y, bool Control, bool Shift);
   void OnMouseMove(int x, int y, bool Control, bool Shift);
 
-	PieceInfo* GetCurrentPiece() const
-	{ return m_PieceInfo; }
-	void SetCurrentPiece(PieceInfo* Info);
+	// Call this function when the pieces list selection changes.
+	void SetSelection(void* Selection);
+
+	// Currently selected model or piece, to change the selection use SetSelection().
+	lcPieceObject* m_Selection;
 
 protected:
-	PieceInfo* m_PieceInfo;
-
 	// Mouse tracking.
 	int m_Tracking;
 	int m_DownX;

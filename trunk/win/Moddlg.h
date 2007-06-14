@@ -9,7 +9,8 @@
 #include "RollUpCtrl.h"
 #include "algebra.h"
 
-class Object;
+class lcObject;
+class lcCamera;
 
 // CModifyPieceDlg dialog
 class CModifyPieceDlg : public CDialog
@@ -35,8 +36,8 @@ public:
 	CColorPicker	m_Color;
 	//}}AFX_DATA
 
-	void UpdateInfo(class Piece* piece);
-	void Apply(class Piece* piece);
+	void UpdateInfo(class lcPiece* piece);
+	void Apply(class lcPiece* piece);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -79,8 +80,8 @@ public:
 	BOOL	m_Hidden;
 	//}}AFX_DATA
 
-	void UpdateInfo(class Camera* camera);
-	void Apply(class Camera* camera);
+	void UpdateInfo(class lcCamera* camera);
+	void Apply(class lcCamera* camera);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -127,8 +128,8 @@ public:
 	Vector3 m_DiffuseColor;
 	Vector3 m_SpecularColor;
 
-	void UpdateInfo(class Light* light);
-	void Apply(class Light* light);
+	void UpdateInfo(class lcLight* light);
+	void Apply(class lcLight* light);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -173,7 +174,7 @@ public:
 
 // Implementation
 public:
-	void UpdateInfo(Object* pObject);
+	void UpdateInfo(lcObject* pObject);
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
 	BOOL OnInitDialogBar();
 
@@ -185,7 +186,7 @@ public:
 protected: 
 	void PositionChildren();
 
-	Object* m_pObject;
+	lcObject* m_pObject;
 	int m_CurrentType;
 
 protected: 

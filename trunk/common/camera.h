@@ -1,6 +1,8 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
+#if 0
+
 #include "opengl.h"
 #include "object.h"
 #include "algebra.h"
@@ -14,59 +16,6 @@
 #define LC_CAMERA_SHOW_CONE         0x40
 #define LC_CAMERA_AUTO_CLIP         0x80
 
-class Camera;
-class CameraTarget;
-class File;
-class TiledRender;
-
-typedef enum
-{
-	LC_CAMERA_FRONT,
-	LC_CAMERA_BACK,
-	LC_CAMERA_TOP,
-	LC_CAMERA_UNDER,
-	LC_CAMERA_LEFT,
-	LC_CAMERA_RIGHT,
-	LC_CAMERA_MAIN,
-	LC_CAMERA_USER
-} LC_CAMERA_TYPES;
-
-typedef enum
-{
-	LC_CK_EYE,
-	LC_CK_TARGET,
-	LC_CK_UP,
-	LC_CK_COUNT
-} LC_CK_TYPES;
-
-class CameraTarget : public Object
-{
-public:
-	CameraTarget(Camera *pParent);
-	virtual ~CameraTarget();
-
-public:
-	void MinIntersectDist(LC_CLICKLINE* pLine);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
-	void Select(bool bSelecting, bool bFocus);
-	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z)
-	{
-		// FIXME: move the position handling to the camera target
-	}
-
-	const char* GetName() const;
-
-	Camera* GetParent() const
-	{ return m_pParent; }
-
-protected:
-	Camera* m_pParent;
-
-	friend class Camera; // FIXME: needed for BoundingBoxCalculate()
-	// remove and use UpdatePosition instead
-};
-
 class Camera : public Object
 {
 public:
@@ -76,37 +25,11 @@ public:
 	Camera(const float *eye, const float *target, const float *up, Camera* pCamera);
 	virtual ~Camera();
 
-	// Query functions.
-	inline const Vector3& GetEyePosition() const
-	{ return m_Eye; };
-	inline const Vector3& GetTargetPosition() const
-	{ return m_Target; };
-	inline const Vector3& GetUpVector() const
-	{ return m_Up; }
-	inline const Matrix44& GetWorldViewMatrix() const
-	{ return m_WorldView; }
-
-	const char* GetName() const
-	{ return m_strName; };
-
-	CameraTarget* GetTarget() const
-		{ return m_pTarget; }
-
 public:
-	void Hide()
-		{ m_nState = LC_CAMERA_HIDDEN; }
-	void UnHide()
-		{ m_nState &= ~LC_CAMERA_HIDDEN; }
-	void SetName(char* name)
-		{ strcpy(m_strName, name); }
-	const char* GetName()
-		{ return m_strName; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsUser()
 		{ return m_nType == LC_CAMERA_USER; }
-	bool IsVisible()
-		{ return (m_nState & LC_CAMERA_HIDDEN) == 0; }
 	bool IsSelected()
 		{ return (m_nState & (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED)) != 0; } 
 	bool IsEyeSelected()
@@ -169,8 +92,6 @@ public:
 
 	void UpdatePosition(unsigned short nTime);
 	void Render(float fLineWidth);
-	void LoadProjection(float fAspect);
-	void GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const;
 	float GetRoll() const;
 
 	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey);
@@ -184,31 +105,13 @@ public:
 	void GetTileInfo(int* row, int* col, int* width, int* height);
 	bool EndTile();
 
-	float m_fovy;
-	float m_zNear;
-	float m_zFar;
-	unsigned char m_nState;
-
 protected:
 	void Initialize();
 	void UpdateBoundingBox();
 
-	// Camera target
-	CameraTarget* m_pTarget;
-
-	// Attributes
-	char m_strName[81];
-	unsigned char m_nType;
-	GLuint m_nList;
-	static GLuint m_nTargetList;
-
-	// Current position and orientation.
-	Vector3 m_Eye;
-	Vector3 m_Target;
-	Vector3 m_Up;
-	Matrix44 m_WorldView;
-
 	TiledRender* m_pTR;
 };
+
+#endif
 
 #endif // _CAMERA_H_

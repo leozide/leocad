@@ -852,7 +852,7 @@ bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& S
 }
 
 // Return true if Box intersects the volume defined by Planes.
-bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const class Vector4* Planes, int NumPlanes)
+bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes)
 {
 	Vector3 Points[8];
 	Box.GetPoints(Points);

@@ -3,6 +3,7 @@
 #include "lc_camera_target.h"
 
 #include "globals.h"
+#include "opengl.h"
 
 lcCameraTarget::lcCameraTarget(lcCamera* Parent)
 	: lcObject(LC_OBJECT_CAMERA_TARGET, LC_CAMERA_TARGET_NUMKEYS)

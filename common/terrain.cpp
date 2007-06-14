@@ -2,6 +2,8 @@
 //
 
 #include "lc_global.h"
+#include "lc_camera.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -10,7 +12,6 @@
 #include "defines.h"
 #include "terrain.h"
 #include "file.h"
-#include "camera.h"
 #include "system.h"
 #include "texture.h"
 
@@ -571,14 +572,14 @@ void Terrain::Tesselate()
 	}
 }
 
-void Terrain::Render(Camera* pCam, float aspect)
+void Terrain::Render(lcCamera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
-		Vector3 eye = pCam->GetEyePosition();
+		Vector3 eye = pCam->m_Position;
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
-		glScalef(pCam->m_zFar, pCam->m_zFar, 1);
+		glScalef(pCam->m_FarDist, pCam->m_FarDist, 1);
 
 		if (m_nOptions & LC_TERRAIN_TEXTURE)
 		{
@@ -587,12 +588,12 @@ void Terrain::Render(Camera* pCam, float aspect)
 			glEnable(GL_TEXTURE_2D);
 
 float tw = 15.0f, th = 15.0f;
-//	tw = 2*pCam->m_zFar/m_nBackgroundSize;
-//	th = 2*pCam->m_zFar/m_nBackgroundSize;
+//	tw = 2*pCam->m_FarDist/m_nBackgroundSize;
+//	th = 2*pCam->m_FarDist/m_nBackgroundSize;
 
 float tx, ty;
-tx = (tw*eye[0])/(2*pCam->m_zFar);
-ty = (th*eye[1])/(2*pCam->m_zFar);
+tx = (tw*eye[0])/(2*pCam->m_FarDist);
+ty = (th*eye[1])/(2*pCam->m_FarDist);
 
 			glBegin(GL_QUADS);
 				glTexCoord2f(tx, ty);
@@ -665,7 +666,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 	}
 }
 
-void Terrain::FindVisiblePatches(Camera* pCam, float Aspect)
+void Terrain::FindVisiblePatches(lcCamera* pCam, float Aspect)
 {
 	Vector4 Planes[6];
 	pCam->GetFrustumPlanes(Aspect, Planes);

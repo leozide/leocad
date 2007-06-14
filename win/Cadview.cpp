@@ -13,11 +13,11 @@
 #include "project.h"
 #include "globals.h"
 #include "system.h"
-#include "camera.h"
 #include "view.h"
 #include "MainFrm.h"
 #include "PiecePrv.h"
 #include "lc_application.h"
+#include "lc_camera.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -309,7 +309,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			Camera* pCam = view.GetCamera();
+			/* FIXME tiled rendering
+			lcCamera* pCam = view.GetCamera();
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
 			do 
 			{
@@ -329,6 +330,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 					(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 				if (lpbi) GlobalFreePtr(lpbi);
 			} while (pCam->EndTile());
+			*/
 		}
 		else
 		{

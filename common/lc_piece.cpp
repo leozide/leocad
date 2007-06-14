@@ -336,7 +336,7 @@ void lcPiece::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 
 }
 
-bool lcPiece::IntersectsVolume(const class Vector4* Planes, int NumPlanes) const
+bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
 	// First check the bounding box for quick rejection.
 	Vector3 Box[8];

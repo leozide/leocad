@@ -2,6 +2,9 @@
 //
 
 #include "lc_global.h"
+#include "lc_object.h"
+#include "lc_piece.h"
+
 #include <dlgs.h>
 #include <direct.h>
 #include <shlobj.h>
@@ -9,7 +12,6 @@
 #include "bmpmenu.h"
 #include "system.h"
 #include "defines.h"
-#include "camera.h"
 #include "tools.h"
 #include "file.h"
 #include "image.h"
@@ -575,7 +577,7 @@ void SystemUpdateSnap(const unsigned long nSnap)
 	// TODO: change Snap None & All (or maybe not ?)
 }
 
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focus)
 {
 	CMenu* pMenu;
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
@@ -655,10 +657,10 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 	{
 		char Message[256];
 
-		if (Focus->IsPiece())
-			sprintf(Message, "%s (ID: %s)", Focus->GetName(), ((Piece*)Focus)->GetPieceInfo()->m_strName);
+		if (Focus->GetType() == LC_OBJECT_PIECE)
+			sprintf(Message, "%s (ID: %s)", (char*)Focus->m_Name, ((lcPiece*)Focus)->m_PieceInfo->m_strName);
 		else
-			strcpy(Message, Focus->GetName());
+			strcpy(Message, (char*)Focus->m_Name);
 
 		pFrame->SetStatusBarMessage(Message);
 		pFrame->SetMessageText(Message);
@@ -786,24 +788,24 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
         MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
+void SystemUpdateCurrentCamera(lcObject* OldCamera, lcObject* NewCamera, lcObject* CameraList)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
 	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	int i;
+	int i = 0;
 
-	for (i = 0; pCamera; i++, pCamera = (Camera*)pCamera->m_Next)
+	for (lcObject* Camera = CameraList; Camera; i++, Camera = Camera->m_Next)
 	{
-		if (pOld == pCamera)
+		if (OldCamera == Camera)
 		{
 			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
 			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
 		}
 
-		if (pNew == pCamera)
+		if (NewCamera == Camera)
 		{
 			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
 			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
@@ -814,26 +816,27 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 }
 
 // Update the list of cameras
-void SystemUpdateCameraMenu(Camera* pCamera)
+void SystemUpdateCameraMenu(lcObject* CameraList)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
 	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	Camera* pFirst = pCamera;
-	int i;
 
 	while (pMainMenu->GetMenuItemCount())
 		pMainMenu->DeleteMenu(0, MF_BYPOSITION);
 	while (pPopupMenu->GetMenuItemCount())
 		pPopupMenu->DeleteMenu(0, MF_BYPOSITION);
 
-	for (i = 0; pCamera; i++, pCamera = (Camera*)pCamera->m_Next)
+	lcObject* Camera = CameraList;
+	int i;
+
+	for (i = 0; Camera; i++, Camera = Camera->m_Next)
 		if (i > 6)
 		{
-			pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
-			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
+			pMainMenu->AppendODMenu((const char*)Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
+			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, (const char*)Camera->m_Name);
 		}
 
 	if (i > 7)
@@ -842,11 +845,11 @@ void SystemUpdateCameraMenu(Camera* pCamera)
 		pPopupMenu->AppendMenu(MF_SEPARATOR);
 	}
 
-	pCamera = pFirst;
-	for (i = 0; pCamera && (i < 7); i++, pCamera = (Camera*)pCamera->m_Next)
+	Camera = CameraList;
+	for (i = 0; Camera && (i < 7); i++, Camera = Camera->m_Next)
 	{
-		pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
-		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
+		pMainMenu->AppendODMenu((const char*)Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
+		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, (const char*)Camera->m_Name);
 
 		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
 	}
@@ -913,8 +916,8 @@ void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveMo
 		String DisplayName;
 
 		// Double up any '&' characters so they are not underlined.
-		char* Dest = DisplayName.GetBuffer(Model->GetName().GetLength() * 2 + 1);
-		char* Src = Model->GetName();
+		char* Dest = DisplayName.GetBuffer(Model->m_Name.GetLength() * 2 + 1);
+		char* Src = Model->m_Name;
 
 		while (*Src)
 		{

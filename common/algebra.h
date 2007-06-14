@@ -840,6 +840,6 @@ bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vec
 bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float* MinDist, Vector3* Intersection);
 float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End);
 bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist);
-bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const class Vector4* Planes, int NumPlanes);
+bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes);
 
 #endif

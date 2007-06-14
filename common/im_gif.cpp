@@ -299,7 +299,7 @@ bool Image::LoadGIF (File& file)
 	m_pData = (unsigned char*)malloc(width*height*3);
 	m_nWidth = width;
 	m_nHeight = height;
-	m_bAlpha = false; // FIXME: create the alpha channel for transparent files
+	m_bAlpha = false; // TODO: create the alpha channel for transparent files
 	unsigned char* buf = m_pData;
 
 	for (unsigned long scanline = 0; scanline < height; scanline++) 

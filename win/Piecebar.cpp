@@ -10,6 +10,7 @@
 #include "project.h"
 #include "globals.h"
 #include "lc_application.h"
+#include "preview.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -377,7 +378,7 @@ void CPiecesBar::UpdatePiecesTree(const char* OldCategory, const char* NewCatego
 
 void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 {
-	PiecesLibrary *Lib = lcGetPiecesLibrary();
+	PiecesLibrary* Lib = lcGetPiecesLibrary();
 
 	if (SearchOnly)
 	{
@@ -415,6 +416,7 @@ void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 			m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
 		}
 
+		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Models", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
 		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
 
 		m_PiecesTree.SetRedraw(TRUE);
@@ -446,14 +448,10 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 		if (Notify->hdr.code == TVN_SELCHANGED)
 		{
-			PieceInfo* Info = (PieceInfo*)Notify->itemNew.lParam;
+			void* Selection = (void*)Notify->itemNew.lParam;
 
-			if (Info != NULL)
-			{
-				lcGetActiveProject()->SetCurrentPiece(Info);
-				m_wndPiecePreview.SetPieceInfo(Info);
-				m_wndPiecePreview.PostMessage(WM_PAINT);
-			}
+			if (Selection)
+				g_App->m_PiecePreview->SetSelection(Selection);
 		}
 		else if (Notify->hdr.code == TVN_BEGINDRAG)
 		{
@@ -461,6 +459,8 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 			if (Info != NULL)
 			{
+				m_PiecesTree.SelectItem(Notify->itemNew.hItem);
+
 				lcGetActiveProject()->BeginPieceDrop(Info);
 
 				// Force a cursor update.
@@ -473,11 +473,20 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		{
 			LPNMTVGETINFOTIP Tip = (LPNMTVGETINFOTIP)lParam;
 			HTREEITEM Item = Tip->hItem;
-			PieceInfo* Info = (PieceInfo*)m_PiecesTree.GetItemData(Item);
+			void* Data = (void*)m_PiecesTree.GetItemData(Item);
 
-			if (Info != NULL)
+			if (Data)
 			{
-				_snprintf(Tip->pszText, Tip->cchTextMax, "%s (%s)", Info->m_strDescription, Info->m_strName);
+				if (lcGetActiveProject()->m_ModelList.FindIndex((lcModel*)Data) != -1)
+				{
+					lcModel* Model = (lcModel*)Data;
+					_snprintf(Tip->pszText, Tip->cchTextMax, "%s", (const char*)Model->m_Name);
+				}
+				else
+				{
+					PieceInfo* Info = (PieceInfo*)Data;
+					_snprintf(Tip->pszText, Tip->cchTextMax, "%s (%s)", Info->m_strDescription, Info->m_strName);
+				}
 			}
 		}
 		else if (Notify->hdr.code == TVN_ITEMEXPANDING)
@@ -504,45 +513,70 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					}
 				}
 
-				// Check if we're expanding a category item.
 				if (Notify->itemNew.lParam == NULL)
 				{
 					HTREEITEM CategoryItem = Notify->itemNew.hItem;
 					CString CategoryName = m_PiecesTree.GetItemText(CategoryItem);
-					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
-					PtrArray<PieceInfo> SinglePieces, GroupedPieces;
-
-					if (CategoryIndex != -1)
+					if (CategoryName == "Models")
 					{
-						int i;
+						// List models.
+						Project* project = lcGetActiveProject();
+						bool Empty = true;
 
-						Lib->GetCategoryEntries(CategoryIndex, true, SinglePieces, GroupedPieces);
-
-						// Merge and sort the arrays.
-						SinglePieces += GroupedPieces;
-						SinglePieces.Sort(PiecesSortFunc, NULL);
-
-						for (i = 0; i < SinglePieces.GetSize(); i++)
+						for (int i = 0; i < project->m_ModelList.GetSize(); i++)
 						{
-							PieceInfo* Info = SinglePieces[i];
+							lcModel* Model = project->m_ModelList[i];
 
-							if (!m_bSubParts && Info->IsSubPiece())
+							if ((Model == project->m_ActiveModel) || (Model->IsSubModel(project->m_ActiveModel)))
 								continue;
 
-							if (GroupedPieces.FindIndex(Info) == -1)
-								m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
-							else
-								m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
-						}
-					}
+							Empty = false;
 
-					if (CategoryName == "Search Results")
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Model->m_Name, 0, 0, 0, 0, (LPARAM)Model, CategoryItem, TVI_LAST);
+						}
+
+						if (Empty)
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No Models", 0, 0, 0, 0, (LPARAM)NULL, CategoryItem, TVI_LAST);
+					}
+					else 
 					{
-						// Let the user know if the search is empty.
-						if ((SinglePieces.GetSize() == 0) && (GroupedPieces.GetSize() == 0))
+						// Expanding a category item.
+						int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
+
+						PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+
+						if (CategoryIndex != -1)
 						{
-							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No pieces found", 0, 0, 0, 0, 0, CategoryItem, TVI_SORT);
+							int i;
+
+							Lib->GetCategoryEntries(CategoryIndex, true, SinglePieces, GroupedPieces);
+
+							// Merge and sort the arrays.
+							SinglePieces += GroupedPieces;
+							SinglePieces.Sort(PiecesSortFunc, NULL);
+
+							for (i = 0; i < SinglePieces.GetSize(); i++)
+							{
+								PieceInfo* Info = SinglePieces[i];
+
+								if (!m_bSubParts && Info->IsSubPiece())
+									continue;
+
+								if (GroupedPieces.FindIndex(Info) == -1)
+									m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
+								else
+									m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
+							}
+						}
+
+						if (CategoryName == "Search Results")
+						{
+							// Let the user know if the search is empty.
+							if ((SinglePieces.GetSize() == 0) && (GroupedPieces.GetSize() == 0))
+							{
+								m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No pieces found", 0, 0, 0, 0, 0, CategoryItem, TVI_SORT);
+							}
 						}
 					}
 				}

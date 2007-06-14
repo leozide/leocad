@@ -61,25 +61,6 @@ float LC_CLICKLINE::PointDistance(float *point)
 // =============================================================================
 // Object class
 
-Object::Object(LC_OBJECT_TYPE nType)
-{
-	//  m_nState = 0;
-	//  m_strName[0] = '\0';
-
-	m_Keys = NULL;
-
-	m_nObjectType = nType;
-	m_pKeyValues = NULL;
-
-	m_Next = NULL;
-}
-
-Object::~Object()
-{
-	delete []m_pKeyValues;
-	RemoveKeys();
-}
-
 bool Object::FileLoad(File& file)
 {
 	unsigned char version;

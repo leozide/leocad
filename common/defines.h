@@ -4,8 +4,27 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
-#ifndef NULL
-#define NULL 0
+// Assert macros.
+#ifdef LC_DEBUG
+
+extern bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description);
+
+#define LC_ASSERT(Expr, Desc) \
+do \
+{ \
+	static bool Ignore = false; \
+	if (!(Expr) && !Ignore) \
+		Ignore = lcAssert(__FILE__, __LINE__, #Expr, Desc); \
+} while (0)
+
+#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
+
+#else
+
+#define LC_ASSERT(expr, desc) do { } while(0)
+
+#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
+
 #endif
 
 // ============================================================================
@@ -96,6 +115,29 @@ int stricmp(const char* str1, const char* str2);
 #define PI  3.14159265
 #define PI2 6.28318530
 
+template <typename T, typename U>
+inline T lcMin(const T& a, const U& b)
+{
+	return a < b ? a : b;
+}
+
+template <typename T, typename U>
+inline T lcMax(const T& a, const U& b)
+{
+	return a > b ? a : b;
+}
+
+template <typename T, typename U, typename V>
+inline T lcClamp(const T& Value, const U& Min, const V& Max)
+{
+	if (Value > Max)
+		return Max;
+	else if (Value < Min)
+		return Min;
+	else
+		return Value;
+}
+
 #ifndef min
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -127,6 +169,8 @@ int stricmp(const char* str1, const char* str2);
 
 #define LC_CONNECTIONS	2		// Different piece connections
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
+
+#define LC_COL_TRANSLUCENT(col) ((col) > 13 && (col) < 22)
 
 #define LC_MAXCOLORS	28	// Number of colors supported
 #define LC_COL_EDGES	28	// Piece edges

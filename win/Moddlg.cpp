@@ -10,9 +10,10 @@
 #include "project.h"
 #include "globals.h"
 #include "defines.h"
-#include "piece.h"
-#include "camera.h"
-#include "light.h"
+#include "lc_object.h"
+#include "lc_piece.h"
+#include "lc_camera.h"
+#include "lc_light.h"
 #include "lc_application.h"
 
 #ifdef _DEBUG 
@@ -185,7 +186,7 @@ void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler
 	UpdateDialogControls(pTarget, FALSE);
 }
 
-void CModifyDialog::UpdateInfo(Object* pObject)
+void CModifyDialog::UpdateInfo(lcObject* pObject)
 {
 	if ((GetStyle() & WS_VISIBLE) == 0)
 		return;
@@ -214,36 +215,36 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 	{
 		case LC_OBJECT_PIECE:
 		{
-			m_PieceDlg.UpdateInfo((Piece*)m_pObject);
-			m_ctlCombo.SetWindowText(((Piece*)m_pObject)->GetName());
+			m_PieceDlg.UpdateInfo((lcPiece*)m_pObject);
+			m_ctlCombo.SetWindowText(m_pObject->m_Name);
 		} break;
 
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			Camera* camera;
+			lcCamera* Camera;
 
 			if (m_CurrentType == LC_OBJECT_CAMERA)
-				camera = (Camera*)m_pObject;
+				Camera = (lcCamera*)m_pObject;
 			else
-				camera = ((CameraTarget*)m_pObject)->GetParent();
+				Camera = (lcCamera*)m_pObject->m_Parent;
 
-			m_CameraDlg.UpdateInfo(camera);
-			m_ctlCombo.SetWindowText(((Camera*)m_pObject)->GetName());
+			m_CameraDlg.UpdateInfo(Camera);
+			m_ctlCombo.SetWindowText(m_pObject->m_Name);
 		} break;
 
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
 		{
-			Light* light;
+			lcLight* Light;
 
 			if (m_CurrentType == LC_OBJECT_LIGHT)
-				light = (Light*)m_pObject;
+				Light = (lcLight*)m_pObject;
 			else
-				light = ((LightTarget*)m_pObject)->GetParent();
+				Light = (lcLight*)m_pObject->m_Parent;
 
-			m_LightDlg.UpdateInfo(light);
-			m_ctlCombo.SetWindowText(((Light*)m_pObject)->GetName());
+			m_LightDlg.UpdateInfo(Light);
+			m_ctlCombo.SetWindowText(m_pObject->m_Name);
 		} break;
 	}
 }
@@ -356,9 +357,9 @@ void CModifyDialog::OnMenuClick(UINT nID)
 
 void CModifyDialog::OnSelendokModdlgList() 
 {
-	void* pNew = m_ctlCombo.GetItemDataPtr(m_ctlCombo.GetCurSel());
-	if ((pNew != m_pObject) && (pNew != (void*)-1))
-		UpdateInfo((Object*)pNew);
+	lcObject* NewObject = (lcObject*)m_ctlCombo.GetItemDataPtr(m_ctlCombo.GetCurSel());
+	if ((NewObject != m_pObject) && (NewObject != (lcObject*)-1))
+		UpdateInfo(NewObject);
 }
 
 void CModifyDialog::OnModdlgApply() 
@@ -371,68 +372,63 @@ void CModifyDialog::OnModdlgApply()
 	switch (m_CurrentType)
 	{
 		case LC_OBJECT_PIECE:
-			m_PieceDlg.Apply((Piece*)m_pObject);
+			m_PieceDlg.Apply((lcPiece*)m_pObject);
 			break;
 
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
-			m_CameraDlg.Apply((Camera*)m_pObject);
+			m_CameraDlg.Apply((lcCamera*)m_pObject);
 			break;
 
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
-			m_LightDlg.Apply((Light*)m_pObject);
+			m_LightDlg.Apply((lcLight*)m_pObject);
 			break;
 	}
 }
 
 void CModifyDialog::OnDropdownModdlgList() 
 {
-	Piece* pPiece = lcGetActiveProject()->GetActiveModel()->m_Pieces;
-	Camera* pCamera = lcGetActiveProject()->GetActiveModel()->m_Cameras;
-	Light* pLight = lcGetActiveProject()->GetActiveModel()->m_Lights;
-	int i;
-
 	m_ctlCombo.ResetContent();
 
 	switch (m_CurrentType)
 	{
 		case LC_OBJECT_PIECE:
 		{
-			for (; pPiece; pPiece = (Piece*)pPiece->m_Next)
+			for (lcObject* pPiece = lcGetActiveProject()->GetActiveModel()->m_Pieces; pPiece; pPiece = pPiece->m_Next)
 			{
-				i = m_ctlCombo.AddString(pPiece->GetName());
+				int i = m_ctlCombo.AddString(pPiece->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pPiece);
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((Piece*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, m_pObject->m_Name);
 		} break;
 
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			for (; pCamera; pCamera = (Camera*)pCamera->m_Next)
+			for (lcObject* pCamera = lcGetActiveProject()->GetActiveModel()->m_Cameras; pCamera; pCamera = pCamera->m_Next)
 			{
-				i = m_ctlCombo.AddString(pCamera->GetName());
+				int i = m_ctlCombo.AddString(pCamera->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pCamera);
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((Camera*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, m_pObject->m_Name);
 		} break;
 
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
 		{
-			for (; pLight; pLight = (Light*)pLight->m_Next)
+			for (lcObject* Light = lcGetActiveProject()->GetActiveModel()->m_Lights; Light; Light = Light->m_Next)
 			{
-				i = m_ctlCombo.AddString(pLight->GetName());
-				m_ctlCombo.SetItemDataPtr(i, pLight);
+				int i = m_ctlCombo.AddString(Light->m_Name);
+				m_ctlCombo.SetItemDataPtr(i, Light);
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((Light*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, m_pObject->m_Name);
 		} break;
 	}
 }
@@ -561,7 +557,7 @@ void CModifyPieceDlg::OnDataChange()
 	((CModifyDialog*)GetParent()->GetParent())->PostMessage(WM_COMMAND, IDC_MODDLG_APPLY);
 }
 
-void CModifyPieceDlg::UpdateInfo(Piece* piece)
+void CModifyPieceDlg::UpdateInfo(lcPiece* piece)
 {
 	if (piece == NULL)
 	{
@@ -574,7 +570,7 @@ void CModifyPieceDlg::UpdateInfo(Piece* piece)
 	else
 	{
 		// Position.
-		Vector3 Pos = piece->GetPosition();
+		Vector3 Pos = piece->m_Position;
 		lcGetActiveProject()->ConvertToUserUnits(Pos);
 
 		m_PosX = Pos[0];
@@ -582,27 +578,24 @@ void CModifyPieceDlg::UpdateInfo(Piece* piece)
 		m_PosZ = Pos[2];
 
 		// Rotation.
-		float rot[4];
-		piece->GetRotation(rot);
-		Matrix33 mat = MatrixFromAxisAngle(Vector3(rot[0], rot[1], rot[2]), rot[3] * LC_DTOR);
-		Vector3 Rot = MatrixToEulerAngles(mat) * LC_RTOD;
+		Vector3 Rot = MatrixToEulerAngles(piece->m_ModelWorld) * LC_RTOD;
 
 		m_RotX = Rot[0];
 		m_RotY = Rot[1];
 		m_RotZ = Rot[2];
 
 		// Steps.
-		m_From = piece->GetTimeShow();
-		m_To = piece->GetTimeHide();
+		m_From = piece->m_TimeShow;
+		m_To = piece->m_TimeHide;
 
 		m_Hidden = piece->IsHidden();
-		m_Color.SetColorIndex(piece->GetColor());
+		m_Color.SetColorIndex(piece->m_Color);
 	}
 
 	UpdateData(FALSE);
 }
 
-void CModifyPieceDlg::Apply(Piece* piece)
+void CModifyPieceDlg::Apply(lcPiece* piece)
 {
 	UpdateData(TRUE);
 
@@ -704,7 +697,7 @@ void CModifyCameraDlg::OnDataChange()
 	((CModifyDialog*)GetParent()->GetParent())->PostMessage(WM_COMMAND, IDC_MODDLG_APPLY);
 }
 
-void CModifyCameraDlg::UpdateInfo(Camera* camera)
+void CModifyCameraDlg::UpdateInfo(lcCamera* camera)
 {
 	if (camera == NULL)
 	{
@@ -725,32 +718,41 @@ void CModifyCameraDlg::UpdateInfo(Camera* camera)
 	{
 		Vector3 tmp;
 
-		tmp = camera->GetEyePosition();
+		tmp = camera->m_Position;
 		lcGetActiveProject()->ConvertToUserUnits(tmp);
 		m_PosX = tmp[0];
 		m_PosY = tmp[1];
 		m_PosZ = tmp[2];
 
-		tmp = camera->GetTargetPosition();
-		lcGetActiveProject()->ConvertToUserUnits(tmp);
-		m_TargetX = tmp[0];
-		m_TargetY = tmp[1];
-		m_TargetZ = tmp[2];
+		// TODO: disable target controls for free cameras.
+		if (camera->m_Children)
+		{
+			tmp = camera->m_Children->m_Position;
+			lcGetActiveProject()->ConvertToUserUnits(tmp);
+			m_TargetX = tmp[0];
+			m_TargetY = tmp[1];
+			m_TargetZ = tmp[2];
+		}
+		else
+		{
+			m_TargetX = 0.0f;
+			m_TargetY = 0.0f;
+			m_TargetZ = 0.0f;
+		}
 
-		m_Roll = camera->GetRoll() * LC_RTOD;
-
-		m_FOV = camera->m_fovy;
-		m_Clip = (camera->m_nState & LC_CAMERA_AUTO_CLIP) == 0;
-		m_Near = camera->m_zNear;
-		m_Far = camera->m_zFar;
+		m_Roll = camera->m_Roll * LC_RTOD;
+		m_FOV = camera->m_FOV;
+		m_Clip = camera->IsFlagged(LC_CAMERA_AUTO_CLIP);
+		m_Near = camera->m_NearDist;
+		m_Far = camera->m_FarDist;
 		m_Ortho = camera->IsOrtho();
-		m_Hidden = !camera->IsVisible();
+		m_Hidden = camera->IsHidden();
 	}
 
 	UpdateData(FALSE);
 }
 
-void CModifyCameraDlg::Apply(Camera* camera)
+void CModifyCameraDlg::Apply(lcCamera* camera)
 {
 	UpdateData(TRUE);
 
@@ -910,7 +912,7 @@ void CModifyLightDlg::OnSpecular()
 	}
 }
 
-void CModifyLightDlg::UpdateInfo(Light* light)
+void CModifyLightDlg::UpdateInfo(lcLight* light)
 {
 	GetDlgItem(IDC_MODDLG_TARGETX)->EnableWindow(TRUE);
 	GetDlgItem(IDC_MODDLG_TARGETY)->EnableWindow(TRUE);
@@ -941,10 +943,11 @@ void CModifyLightDlg::UpdateInfo(Light* light)
 	{
 		Vector3 tmp;
 
-		bool Omni = (light->GetTarget() == NULL);
-		bool Spot = (light->GetTarget() != NULL) && (light->GetSpotCutoff() != 180.0f);
+		// TODO: directional lights don't have children either.
+		bool Omni = (light->m_Children == NULL);
+		bool Spot = (light->m_Children != NULL) && (light->m_SpotCutoff != 180.0f);
 
-		tmp = light->GetPosition();
+		tmp = light->m_Position;
 		lcGetActiveProject()->ConvertToUserUnits(tmp);
 		m_PosX = tmp[0];
 		m_PosY = tmp[1];
@@ -961,22 +964,32 @@ void CModifyLightDlg::UpdateInfo(Light* light)
 		}
 		else
 		{
-			tmp = light->GetTargetPosition();
-			lcGetActiveProject()->ConvertToUserUnits(tmp);
-			m_TargetX = tmp[0];
-			m_TargetY = tmp[1];
-			m_TargetZ = tmp[2];
+			// TODO: hide target controls
+			if (light->m_Children)
+			{
+				tmp = light->m_Children->m_Position;
+				lcGetActiveProject()->ConvertToUserUnits(tmp);
+				m_TargetX = tmp[0];
+				m_TargetY = tmp[1];
+				m_TargetZ = tmp[2];
+			}
+			else
+			{
+				m_TargetX = 0.0f;
+				m_TargetY = 0.0f;
+				m_TargetZ = 0.0f;
+			}
 		}
 
-		m_AmbientColor = light->GetAmbientColor();
-		m_DiffuseColor = light->GetDiffuseColor();
-		m_SpecularColor = light->GetSpecularColor();
+		m_AmbientColor = light->m_AmbientColor;
+		m_DiffuseColor = light->m_DiffuseColor;
+		m_SpecularColor = light->m_SpecularColor;
 
 		if (Omni || Spot)
 		{
-			m_Constant = light->GetConstantAttenuation();
-			m_Linear = light->GetLinearAttenuation();
-			m_Quadratic = light->GetQuadraticAttenuation();
+			m_Constant = light->m_ConstantAttenuation;
+			m_Linear = light->m_LinearAttenuation;
+			m_Quadratic = light->m_QuadraticAttenuation;
 		}
 		else
 		{
@@ -988,16 +1001,16 @@ void CModifyLightDlg::UpdateInfo(Light* light)
 			GetDlgItem(IDC_MODDLG_QUADRATIC)->EnableWindow(FALSE);
 		}
 
-		m_Cutoff = light->GetSpotCutoff();
-		m_Exponent = light->GetSpotExponent();
+		m_Cutoff = light->m_SpotCutoff;
+		m_Exponent = light->m_SpotExponent;
 
-		m_Hidden = !light->IsVisible();
+		m_Hidden = !light->IsHidden();
 	}
 
 	UpdateData(FALSE);
 }
 
-void CModifyLightDlg::Apply(Light* light)
+void CModifyLightDlg::Apply(lcLight* light)
 {
 	UpdateData(TRUE);
 

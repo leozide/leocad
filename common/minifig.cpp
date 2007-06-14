@@ -531,8 +531,13 @@ MinifigWizard::~MinifigWizard()
 		free(m_MinifigNames[i]);
 		free(m_MinifigTemplates[i]);
 	}
+
 	free(m_MinifigNames);
 	free(m_MinifigTemplates);
+
+	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+		if (m_Info[i])
+			m_Info[i]->DeRef();
 }
 
 void MinifigWizard::OnDraw()

@@ -271,4 +271,6 @@ public:
 	T* m_IndexBuffer;
 };
 
+lcMesh* lcCreateSphereMesh(float Radius, int Slices);
+
 #endif

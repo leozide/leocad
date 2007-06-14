@@ -9,6 +9,8 @@
 #include "defines.h"
 #include "globals.h"
 
+#if 0
+
 GLuint Light::m_nSphereList = 0;
 GLuint Light::m_nTargetList = 0;
 
@@ -199,7 +201,7 @@ void Light::Select(bool bSelecting, bool bFocus)
 
 void Light::SelectTarget(bool bSelecting, bool bFocus)
 {
-	// FIXME: the target should handle this
+	// TODO: the target should handle this
 
 	if (bSelecting == true)
 	{
@@ -596,3 +598,5 @@ void Light::Setup(int index)
 		glLightfv(light, GL_SPOT_DIRECTION, dir);
 	}
 }
+
+#endif

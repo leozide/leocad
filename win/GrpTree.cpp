@@ -2,10 +2,9 @@
 //
 
 #include "lc_global.h"
-#include "leocad.h"
+#include "lc_object.h"
 #include "GrpTree.h"
 #include "group.h"
-#include "piece.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,7 +64,7 @@ void CGroupEditTree::AddChildren(HTREEITEM hParent, Group* pGroup)
 			tvstruct.item.lParam = i;
 			tvstruct.item.iImage = 2;
 			tvstruct.item.iSelectedImage = 2;
-			tvstruct.item.pszText = (char*)opts->pieces[i]->GetName();
+			tvstruct.item.pszText = (char*)opts->pieces[i]->m_Name;
 			tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
 			InsertItem(&tvstruct);
 		}
@@ -192,7 +191,7 @@ void CGroupEditTree::OnLButtonUp(UINT nFlags, CPoint point)
 
 			tvstruct.item.iImage = 2;
 			tvstruct.item.iSelectedImage = 2;
-			tvstruct.item.pszText = (char*)opts->pieces[source]->GetName();
+			tvstruct.item.pszText = (char*)opts->pieces[source]->m_Name;
 			InsertItem(&tvstruct);
 		}
 		else

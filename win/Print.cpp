@@ -16,6 +16,7 @@
 #include "Piece.h"
 #include "library.h"
 #include "lc_model.h"
+#include "lc_object.h"
 #include "lc_application.h"
 
 static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
@@ -415,6 +416,8 @@ UINT PrintCatalogFunction (LPVOID pv)
 
 static void PrintPiecesThread(void* pv)
 {
+#if 0
+//	FIXME: printing
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
@@ -426,7 +429,7 @@ static void PrintPiecesThread(void* pv)
 	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
 	memset (&col, 0, sizeof (col));
 
-	for (Piece* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = (Piece*)tmp->m_Next)
+	for (lcObject* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = tmp->m_Next)
 	{
 		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
 		pieces[(idx*28)+tmp->GetColor()]++;
@@ -795,14 +798,15 @@ static void PrintPiecesThread(void* pv)
 	pFrame->EnableWindow();
 	dlgPrintStatus.DestroyWindow();
 
-    if (PD != NULL && PD->m_pd.hDC != NULL)
-    {
-        ::DeleteDC(PD->m_pd.hDC);
-        PD->m_pd.hDC = NULL;
-    }
+	if (PD != NULL && PD->m_pd.hDC != NULL)
+	{
+		::DeleteDC(PD->m_pd.hDC);
+		PD->m_pd.hDC = NULL;
+	}
 
 	free (pieces);
-    delete PD;
+	delete PD;
+#endif
 }
 
 UINT PrintPiecesFunction (LPVOID pv)

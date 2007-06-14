@@ -7,6 +7,86 @@
 #include "system.h"
 #include "debug.h"
 
+lcMesh* lcCreateSphereMesh(float Radius, int Slices)
+{
+	int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
+	int NumVertices = (Slices - 1) * Slices + 2;
+
+	lcMesh* SphereMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
+
+	lcMeshEditor<u16> MeshEdit(SphereMesh);
+	MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+
+	MeshEdit.AddVertex(Vector3(0, 0, Radius));
+
+	for (int i = 1; i < Slices; i++ )
+	{
+		float r0 = Radius * sinf (i * (LC_PI / Slices));
+		float z0 = Radius * cosf (i * (LC_PI / Slices));
+
+		for (int j = 0; j < Slices; j++)
+		{
+			float x0 = r0 * sinf(j * (LC_2PI / Slices));
+			float y0 = r0 * cosf(j * (LC_2PI / Slices));
+
+			MeshEdit.AddVertex(Vector3(x0, y0, z0));
+		}
+	}
+
+	MeshEdit.AddVertex(Vector3(0, 0, -Radius));
+
+	for (int i = 0; i < Slices - 1; i++ )
+	{
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(1 + i);
+		MeshEdit.AddIndex(1 + i + 1);
+	}
+
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(1 + Slices - 1);
+
+	for (int i = 0; i < Slices - 2; i++ )
+	{
+		int Row1 = 1 + i * Slices;
+		int Row2 = 1 + (i + 1) * Slices;
+
+		for (int j = 0; j < Slices - 1; j++ )
+		{
+			MeshEdit.AddIndex(Row1 + j);
+			MeshEdit.AddIndex(Row2 + j + 1);
+			MeshEdit.AddIndex(Row2 + j);
+
+			MeshEdit.AddIndex(Row1 + j);
+			MeshEdit.AddIndex(Row1 + j + 1);
+			MeshEdit.AddIndex(Row2 + j + 1);
+		}
+
+		MeshEdit.AddIndex(Row1 + Slices - 1);
+		MeshEdit.AddIndex(Row2 + 0);
+		MeshEdit.AddIndex(Row2 + Slices - 1);
+
+		MeshEdit.AddIndex(Row1 + Slices - 1);
+		MeshEdit.AddIndex(Row2 + 0);
+		MeshEdit.AddIndex(Row1 + 0);
+	}
+
+	for (int i = 0; i < Slices - 1; i++ )
+	{
+		MeshEdit.AddIndex((Slices - 1) * Slices + 1);
+		MeshEdit.AddIndex((Slices - 1) * (Slices - 1) + i);
+		MeshEdit.AddIndex((Slices - 1) * (Slices - 1) + i + 1);
+	}
+
+	MeshEdit.AddIndex((Slices - 1) * Slices + 1);
+	MeshEdit.AddIndex((Slices - 1) * (Slices - 1) + (Slices - 2) + 1);
+	MeshEdit.AddIndex((Slices - 1) * (Slices - 1));
+
+	MeshEdit.EndSection();
+
+	return SphereMesh;
+}
+
 lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer* VertexBuffer)
 {
 	m_Sections = new lcMeshSection[NumSections];

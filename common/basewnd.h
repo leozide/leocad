@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-// FIXME: move this to another place
+// TODO: move this to another place
 #ifdef WIN32
 typedef CWnd* BaseWndXID;
 struct BaseMenuItem
@@ -82,7 +82,7 @@ class BaseWnd
     { m_pXID = id; }
 
 #ifdef LC_LINUX 
-  // FIXME: remove
+  // TODO: remove
   operator GtkWidget* () const
     { return m_pXID; }
 #endif

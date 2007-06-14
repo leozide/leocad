@@ -31,7 +31,7 @@ void lcLight::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 	// FIXME: light intersect
 }
 
-bool lcLight::IntersectsVolume(const class Vector4* Planes, int NumPlanes) const
+bool lcLight::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
 	// FIXME: light intersect
 	return false;

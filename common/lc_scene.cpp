@@ -55,6 +55,7 @@ void lcScene::Render()
 			LastIndexBuffer->BindBuffer();
 		}
 
+		// FIXME: remove Owner
 		if (LastPiece != RenderSection.Owner)
 		{
 			LastPiece = RenderSection.Owner;

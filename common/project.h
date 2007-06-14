@@ -29,9 +29,6 @@ typedef enum
 	LC_OVERLAY_YZ
 } LC_OVERLAY_MODES;
 
-class Piece;
-class Camera;
-class Light;
 class Group;
 class Texture;
 class Terrain;
@@ -41,9 +38,9 @@ class View;
 class Image;
 class PiecesLibrary;
 class TexFont;
+
 class lcModel;
-class lcMesh;
-struct lcMeshSection;
+class lcScene;
 
 // Undo support
 
@@ -79,8 +76,6 @@ public:
 	unsigned char GetLastStep();
 	int GetCurrentTime ()
 		{ return m_ActiveModel->m_CurFrame; }
-	void SetCurrentPiece(PieceInfo* pInfo)
-		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
 		{ return m_nCurColor; }
 	float* GetBackgroundColor()
@@ -116,7 +111,7 @@ public:
 	void CheckAnimation();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
-	Object* GetFocusObject() const;
+	lcObject* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
 	// Views.
@@ -128,6 +123,10 @@ public:
 	View* GetActiveView() const
 		{ return m_ActiveView; }
 	bool SetActiveView(View* view);
+
+public:
+	lcModel* m_ActiveModel;
+	PtrArray<lcModel> m_ModelList;
 
 // Implementation
 protected:
@@ -149,9 +148,6 @@ protected:
 	void CheckPoint (const char* text);
 
 	// Objects
-	lcModel* m_ActiveModel;
-	PtrArray<lcModel> m_ModelList;
-
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
@@ -159,14 +155,18 @@ protected:
 
 	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
 
+	void AddModel(lcModel* Model);
+	void RemoveModel(lcModel* Model);
 	void SetActiveModel(lcModel* Model);
-	void AddPiece(Piece* pPiece);
-	void RemovePiece(Piece* pPiece);
+
+	void AddPiece(Vector3 Pos, Vector4 Rot);
+	void AddPiece(lcPieceObject* pPiece);
+	void RemovePiece(lcPieceObject* pPiece);
 	bool RemoveSelectedObjects();
-	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
+	void GetPieceInsertPosition(lcPieceObject* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
-	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
+	lcObject* FindObjectFromPoint(int x, int y, bool PiecesOnly = false);
+	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<lcObject>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
@@ -189,23 +189,12 @@ protected:
 	void RenderOverlays(View* view);
 	void RenderInterface(View* view);
 
+	lcScene* m_Scene;
+
 	// Rendering helper functions.
 	void RenderBoxes(bool bHilite);
-
-	struct lcRenderSection
-	{
-		Piece* Owner;
-		lcMesh* Mesh;
-		lcMeshSection* Section;
-		float Distance;
-		int Color;
-		lcRenderSection* Next;
-	};
-
-	lcRenderSection* RenderSectionPool;
-	int RenderSectionPoolSize;
-
 	void RenderInitialize();
+
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
 
 	// Animation playback.
@@ -253,8 +242,6 @@ public:
 
 protected:
 	// State variables
-	PieceInfo* m_pCurPiece;
-	PieceInfo* m_PreviousPiece;
 	unsigned char m_nCurColor;
 	unsigned char m_nCurAction;
 	unsigned char m_PreviousAction;

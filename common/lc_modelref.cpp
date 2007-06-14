@@ -62,7 +62,7 @@ void lcModelRef::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 	// FIXME: modelref intersect
 }
 
-bool lcModelRef::IntersectsVolume(const class Vector4* Planes, int NumPlanes) const
+bool lcModelRef::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
 	// FIXME: modelref intersect
 	return false;

@@ -3,10 +3,11 @@
 //
 
 #include "lc_global.h"
+#include "lc_camera.h"
+
 #include <stdlib.h>
 #include "project.h"
 #include "view.h"
-#include "camera.h"
 #include "system.h"
 
 View::View(Project *pProject, GLWindow *share)
@@ -176,21 +177,23 @@ void View::UpdateOverlayScale()
 	m_OverlayScale = Dist.Length() * 5.0f;
 }
 
-void View::SetCamera(Camera* cam)
+void View::SetCamera(lcCamera* Camera)
 {
-	if (cam)
-		m_CameraName = cam->GetName();
+	if (Camera)
+		m_CameraName = Camera->m_Name;
+	else
+		m_CameraName = "";
 
-	m_Camera = cam;
+	m_Camera = Camera;
 }
 
 void View::UpdateCamera()
 {
-	Camera* cam = m_Project->GetActiveModel()->GetCamera(m_CameraName);
+	lcCamera* Camera = m_Project->GetActiveModel()->GetCamera(m_CameraName);
 
-	if (!cam)
-		cam = m_Project->GetActiveModel()->GetCamera(LC_CAMERA_MAIN);
+	if (!Camera)
+		Camera = m_Project->GetActiveModel()->GetCamera(LC_CAMERA_MAIN);
 
-	m_Camera = cam;
-	m_CameraName = m_Camera->GetName();
+	m_Camera = Camera;
+	m_CameraName = m_Camera->m_Name;
 }

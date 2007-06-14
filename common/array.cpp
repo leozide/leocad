@@ -268,9 +268,9 @@ void ObjArray<T>::InsertAt(int Index)
 template <class T>
 ObjArray<T>& ObjArray<T>::operator=(const ObjArray<T>& Array)
 {
-	int m_Length = Array.m_Length;
-	int m_Alloc = Array.m_Alloc;
-	int m_Grow = Array.m_Grow;
+	m_Length = Array.m_Length;
+	m_Alloc = Array.m_Alloc;
+	m_Grow = Array.m_Grow;
 
 	delete[] m_Data;
 	m_Data = new T[m_Alloc];

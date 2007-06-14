@@ -1,6 +1,8 @@
 #include "lc_global.h"
 #include "lc_object.h"
 
+#include <stdio.h>
+
 lcObject::lcObject(u32 Type, int NumKeyTypes)
 {
 	m_Next = NULL;

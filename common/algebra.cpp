@@ -3,6 +3,7 @@
 //
 
 #include "lc_global.h"
+#include <stdio.h>
 #include "defines.h"
 #include "algebra.h"
 

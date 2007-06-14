@@ -1039,7 +1039,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			{
 				for (int i = 0; i < FileArray.GetSize(); i++)
 				{
-					if (_stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
 					{
 						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 						read = false;

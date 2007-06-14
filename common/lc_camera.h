@@ -91,9 +91,9 @@ public:
 	{ Zoom(2.0f*(float)dy/(21-mouse), Time, AddKey); }
 	void DoPan(int dx, int dy, int mouse, u32 Time, bool AddKey)
 	{ Pan(2.0f*dx/(21-mouse), 2.0f*dy/(21-mouse), Time, AddKey); }
-	void lcCamera::DoRotate(int dx, int dy, int mouse, u32 Time, bool AddKey)
+	void DoRotate(int dx, int dy, int mouse, u32 Time, bool AddKey)
 	{ Rotate(2.0f*dx/(21-mouse), 2.0f*dy/(21-mouse), Time, AddKey); }
-	void lcCamera::DoRoll(int dx, int mouse, u32 Time, bool AddKey)
+	void DoRoll(int dx, int mouse, u32 Time, bool AddKey)
 	{	Roll(Time, AddKey, 2.0f*dx/(21-mouse), 0); }
 	bool IsSide() const
 	{ return m_CameraType < LC_CAMERA_MAIN; }

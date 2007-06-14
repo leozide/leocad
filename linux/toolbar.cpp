@@ -355,7 +355,7 @@ static void piecetree_changed(GtkTreeSelection* selection, gpointer data)
     gtk_tree_model_get(model, &iter, 1, &sel, -1);
 
     if (sel)
-      preview->SetCurrentPiece((PieceInfo*)sel);
+      g_App->m_PiecePreview->SetSelection(sel);
   }
 }
 
@@ -793,10 +793,7 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
   if (!Info)
     Info = lcGetPiecesLibrary()->GetPieceInfo(0);
   if (Info)
-  {
-    lcGetActiveProject()->SetCurrentPiece(Info);
-    //    preview->SetCurrentPiece(Info);
-  }
+    g_App->m_PiecePreview->SetSelection(Info);
 
   return frame;
 }

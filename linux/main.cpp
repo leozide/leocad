@@ -680,11 +680,7 @@ int main (int argc, char* argv[])
   if (!Info)
     Info = lcGetPiecesLibrary()->GetPieceInfo(0);
   if (Info)
-  {
-    lcGetActiveProject()->SetCurrentPiece(Info);
-    extern PiecePreview* preview;
-    preview->SetCurrentPiece(Info);
-  }
+    g_App->m_PiecePreview->SetSelection(Info);
 
   lcGetActiveProject()->SetActiveView(view);
 

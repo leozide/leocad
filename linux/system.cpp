@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #include "opengl.h"
 #include "gtkmisc.h"
-#include "camera.h"
+#include "lc_camera.h"
 #include "project.h"
 #include "system.h"
 #include "main.h"
@@ -348,7 +348,7 @@ void SystemUpdateSnap(const unsigned long snap)
   // TODO: popup menu
 }
 
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
+void SystemUpdateCurrentCamera(lcObject* pOld, lcObject* pNew, lcObject* pCamera)
 {
   gpointer item = NULL;
   gpointer menu = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu");
@@ -358,7 +358,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 
   GList *lst = gtk_container_children (GTK_CONTAINER (menu));
 
-  for (int i = 0; pCamera; i++, pCamera = (Camera *)pCamera->m_Next)
+  for (int i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
     if (pNew == pCamera)
     {
       if (i >= 7)
@@ -383,11 +383,16 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
   }
 }
 
-void SystemUpdateCameraMenu(Camera* pCamera)
+void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* CurrentModel)
+{
+  // FIXME: update model menu
+}
+
+void SystemUpdateCameraMenu(lcObject* pCamera)
 {
   GtkWidget *menu = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu"));
   GtkWidget *item = NULL;
-  Camera* pFirst = pCamera;
+  lcObject* pFirst = pCamera;
   GList *lst;
   int i;
 
@@ -399,11 +404,11 @@ void SystemUpdateCameraMenu(Camera* pCamera)
     gtk_container_remove (GTK_CONTAINER (menu), GTK_WIDGET (lst->data));
 
   // add user cameras
-  for (i = 0; pCamera; i++, pCamera = (Camera *)pCamera->m_Next)
+  for (i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
     if (i > 6)
     {
       GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
-      item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
+      item = gtk_radio_menu_item_new_with_label(grp, (const char*)pCamera->m_Name);
       gtk_menu_append (GTK_MENU (menu), item);
       gtk_widget_show (item);
       gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
@@ -414,10 +419,10 @@ void SystemUpdateCameraMenu(Camera* pCamera)
     menu_separator (menu);
 
   // add standard cameras
-  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = (Camera *)pCamera->m_Next)
+  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = (lcCamera*)pCamera->m_Next)
   {
     GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
-    item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
+    item = gtk_radio_menu_item_new_with_label (grp, (const char*)pCamera->m_Name);
     gtk_menu_append (GTK_MENU (menu), item);
     gtk_widget_show (item);
     gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
@@ -485,7 +490,7 @@ void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
   gtk_label_set (GTK_LABEL (label_snap), text);
 }
 
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focus)
 {
   GtkWidget *item;
 
@@ -730,11 +735,11 @@ void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 {
 }
 
-void SytemEndProgressBar()
+void SystemEndProgressBar()
 {
 }
 
-void SytemStepProgressBar()
+void SystemStepProgressBar()
 {
 }
 

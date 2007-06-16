@@ -323,7 +323,7 @@ ifeq ($(TEST_GTK), 1)
 	  echo "LIBS += \$$(shell pkg-config gtk+-2.0 --libs)" >> $(OSDIR)/config.mk; \
 	else \
 	  echo "failed"; \
-	  rm -rf $(OSDIR)/config.mk; \
+	  rm -rf $(OSDIR)/config.mk $(OSDIR)/config.h; \
 	  exit 1; \
 	fi
 endif

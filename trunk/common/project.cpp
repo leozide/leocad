@@ -1039,7 +1039,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			{
 				for (int i = 0; i < FileArray.GetSize(); i++)
 				{
-					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					if (_stricmp(FileArray[i]->GetFileName(), pn) == 0)
 					{
 						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 						read = false;
@@ -5452,6 +5452,7 @@ FIXME: paste
 			// Calculate a bounding box that includes all pieces and use its center as the camera target.
 			ObjArray<Vector3> Points;
 			BoundingBox Box;
+			Box.Reset();
 
 			for (lcPieceObject* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
 			{

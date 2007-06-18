@@ -276,13 +276,12 @@ void lcCamera::Zoom(float MouseY, u32 Time, bool AddKey)
 
 void lcCamera::Pan(float MouseX, float MouseY, u32 Time, bool AddKey)
 {
-	Vector3 DeltaX = Vector3(m_ViewWorld[0]) * MouseX;
-	Vector3 DeltaY = Vector3(m_ViewWorld[1]) * -MouseY;
+	Vector3 Delta = Vector3(m_ViewWorld[0]) * -MouseX + Vector3(m_ViewWorld[1]) * -MouseY;
 
 	if (m_Children)
-		m_Children->Move(Time, AddKey, DeltaX + DeltaY);
+		m_Children->SetPosition(Time, AddKey, m_Children->m_Position + Delta);
 
-	Move(Time, AddKey, DeltaX + DeltaY);
+	SetPosition(Time, AddKey, m_Position + Delta);
 }
 
 void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)

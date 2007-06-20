@@ -849,10 +849,6 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_PIECE_ARRAY, 0);
 		} break;
 
-		case ID_PIECE_COPYKEYS: {
-			project->HandleCommand(LC_PIECE_COPYKEYS, 0);
-		} break;
-
 		case ID_PIECE_GROUP: {
 			project->HandleCommand(LC_PIECE_GROUP, 0);
 		} break;
@@ -1328,7 +1324,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_PIECE_DELETE,           // LC_PIECE_DELETE
 		ID_PIECE_MINIFIGWIZARD,    // LC_PIECE_MINIFIG
 		ID_PIECE_ARRAY,            // LC_PIECE_ARRAY
-		ID_PIECE_COPYKEYS,         // LC_PIECE_COPYKEYS
 		ID_PIECE_GROUP,            // LC_PIECE_GROUP
 		ID_PIECE_UNGROUP,          // LC_PIECE_UNGROUP
 		ID_PIECE_ATTACH,           // LC_PIECE_GROUP_ADD

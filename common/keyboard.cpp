@@ -40,7 +40,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_PIECE_DELETE, "Piece Delete", 0, LC_KEY_DELETE, 0 },
 //	{ LC_PIECE_MINIFIG, "Minifig Wizard", 0, 0, 0 },
 	{ LC_PIECE_ARRAY, "Piece Array", 0, 0, 0 },
-//	{ LC_PIECE_COPYKEYS, "", 0, 0, 0 },
 	{ LC_PIECE_GROUP, "Piece Group", LC_KEYMOD1_CONTROL, LC_KEY_G, 0 },
 	{ LC_PIECE_UNGROUP, "Piece Ungroup", LC_KEYMOD1_CONTROL, LC_KEY_U, 0 },
 	{ LC_PIECE_GROUP_ADD, "Group Add Piece", 0, 0, 0 },

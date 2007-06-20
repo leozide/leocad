@@ -619,8 +619,6 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 	pMenu = GetMainMenu(3);
 	pMenu->EnableMenuItem(ID_PIECE_DELETE, MF_BYCOMMAND | 
 		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-	pMenu->EnableMenuItem(ID_PIECE_COPYKEYS, MF_BYCOMMAND | 
-		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_ARRAY, MF_BYCOMMAND | 
 		(flags & LC_SEL_PIECE ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_MIRROR, MF_BYCOMMAND | 
@@ -772,20 +770,6 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 	pCtrl->CheckButton(ID_ANIMATOR_KEY, bAddKeys ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_ANIMATOR_PLAY, bAnimation ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_ANIMATOR_STOP, FALSE);
-
-	// Menu
-	char* txt;
-	CMenu* pMenu = GetMainMenu(3);
-	UINT nState = pMenu->GetMenuState(ID_PIECE_COPYKEYS, MF_BYCOMMAND);
-	nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
-
-	if (bAnimation)
-		txt = "Copy Keys from Instructions";
-	else
-		txt = "Copy Keys from Animation";
-	
-	pMenu->ModifyMenu(ID_PIECE_COPYKEYS, MF_BYCOMMAND |
-        MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
 void SystemUpdateCurrentCamera(lcObject* OldCamera, lcObject* NewCamera, lcObject* CameraList)

@@ -1872,11 +1872,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_PIECE_COPYKEYS       "Copy position and rotation"
-END
-
-STRINGTABLE 
-BEGIN
     ID_VIEW_CAMERAS_RESET   "Reset cameras to their original positions"
     ID_PREVIEW_ONEPAGE      "Show only one page\nOne Page"
     ID_PREVIEW_TWOPAGES     "Show two pages\nTwo Pages"

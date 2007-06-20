@@ -129,6 +129,7 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_EDIT_ACTION_ZOOM_REGION, "Zoom Region Mode", 0, 0, 0 },
 	{ LC_EDIT_ACTION_PAN, "Pan Mode", LC_KEYMOD1_SHIFT, LC_KEY_P, 0 },
 	{ LC_EDIT_ACTION_ROTATE_VIEW, "Rotate View Mode", LC_KEYMOD1_SHIFT, LC_KEY_T, 0 },
+	{ LC_EDIT_ACTION_ORBIT, "Orbit Mode", LC_KEYMOD1_SHIFT, LC_KEY_O, 0 },
 	{ LC_EDIT_ACTION_ROLL, "Roll Camera Mode", LC_KEYMOD1_SHIFT, LC_KEY_L, 0 },
 };
 

@@ -231,7 +231,7 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 			{
 				if (point == m_ptMouse)
 					break;
-				m_pCamera->DoRotate(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false);
+				m_pCamera->DoOrbit(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false);
 				InvalidateRect (NULL, FALSE);
 			} break;
 		}

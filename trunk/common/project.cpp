@@ -6010,6 +6010,11 @@ FIXME: paste
 			SetAction(LC_ACTION_ROTATE_VIEW);
 		} break;
 
+		case LC_EDIT_ACTION_ORBIT:
+		{
+			SetAction(LC_ACTION_ORBIT);
+		} break;
+
 		case LC_EDIT_ACTION_ROLL:
 		{
 			SetAction(LC_ACTION_ROLL);
@@ -6556,6 +6561,7 @@ bool Project::StopTracking(bool bAccept)
 			case LC_ACTION_ZOOM:
 			case LC_ACTION_PAN:
 			case LC_ACTION_ROTATE_VIEW:
+			case LC_ACTION_ORBIT:
 			case LC_ACTION_ROLL:
 			{
 				// For some reason the scene doesn't get redrawn when changing a camera but it does
@@ -7647,6 +7653,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		case LC_ACTION_ROLL:
 		case LC_ACTION_PAN:
 		case LC_ACTION_ROTATE_VIEW:
+		case LC_ACTION_ORBIT:
 		{
 			StartTracking(LC_TRACK_START_LEFT);
 		} break;
@@ -8246,6 +8253,27 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
+
+if (m_ActiveView->GetCamera()->IsSide())
+break;
+			m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+// FIXME: camera rotation
+
+			m_nDownX = x;
+			m_nDownY = y;
+			SystemUpdateFocus(NULL);
+			UpdateAllViews();
+		} break;
+
+		case LC_ACTION_ORBIT:
+		{
+			if ((m_nDownY == y) && (m_nDownX == x))
+				break;
+
+if (m_ActiveView->GetCamera()->IsSide())
+break;
+			m_ActiveView->GetCamera()->DoOrbit(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+
 /* FIXME: camera rotation
 			// We can't rotate the side cameras.
 			if (m_ActiveView->GetCamera()->IsSide())
@@ -8287,12 +8315,11 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 					m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 			}
-
+*/
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
-*/
 		} break;
 		
 		case LC_ACTION_ROLL:

@@ -70,6 +70,9 @@ public:
 	void Pan(float MouseX, float MouseY, u32 Time, bool AddKey);
 
 	// Rotate the camera around its target.
+	void Orbit(float MouseX, float MouseY, u32 Time, bool AddKey);
+
+	// Rotate the target around the camera.
 	void Rotate(float MouseX, float MouseY, u32 Time, bool AddKey);
 
 	// Rotate the camera around its Z direction.
@@ -91,6 +94,8 @@ public:
 	{ Zoom(2.0f*(float)dy/(21-mouse), Time, AddKey); }
 	void DoPan(int dx, int dy, int mouse, u32 Time, bool AddKey)
 	{ Pan(2.0f*dx/(21-mouse), 2.0f*dy/(21-mouse), Time, AddKey); }
+	void DoOrbit(int dx, int dy, int mouse, u32 Time, bool AddKey)
+	{ Orbit(2.0f*dx/(21-mouse), 2.0f*dy/(21-mouse), Time, AddKey); }
 	void DoRotate(int dx, int dy, int mouse, u32 Time, bool AddKey)
 	{ Rotate(2.0f*dx/(21-mouse), 2.0f*dy/(21-mouse), Time, AddKey); }
 	void DoRoll(int dx, int mouse, u32 Time, bool AddKey)

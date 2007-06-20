@@ -143,6 +143,8 @@
 #define IDD_MODIFY_LIGHT                240
 #define IDB_BITMAP2                     241
 #define IDB_SPLITV                      241
+#define IDC_CURSOR1                     244
+#define IDC_ORBIT                       244
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -249,7 +251,6 @@
 #define IDC_AIDDLG_3DMOUSE              1091
 #define IDC_AIDDLG_GLOBAL               1091
 #define IDC_DETDLG_LIGHTING             1092
-#define IDC_PROP_SUM_AUTHOR2            1092
 #define IDC_PROP_SUM_NAME               1092
 #define IDC_DETDLG_SMOOTH               1093
 #define IDC_DETDLG_ANTIALIAS            1094
@@ -490,8 +491,9 @@
 #define ID_ACTION_ZOOM_REGION           32799
 #define ID_ACTION_PAN                   32800
 #define ID_ACTION_ROTATE_VIEW           32801
-#define ID_ACTION_ROLL                  32802
-#define ID_ACTION_ZOOM_EXTENTS          32803
+#define ID_ACTION_ORBIT                 32802
+#define ID_ACTION_ROLL                  32803
+#define ID_ACTION_ZOOM_EXTENTS          32804
 #define ID_ZOOM_EXTENTS                 32807
 #define ID_PIECE_GROUP                  32808
 #define ID_PIECE_UNGROUP                32809
@@ -729,8 +731,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        243
-#define _APS_NEXT_COMMAND_VALUE         33196
+#define _APS_NEXT_RESOURCE_VALUE        245
+#define _APS_NEXT_COMMAND_VALUE         33197
 #define _APS_NEXT_CONTROL_VALUE         1252
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

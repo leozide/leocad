@@ -284,27 +284,9 @@ void lcCamera::Pan(float MouseX, float MouseY, u32 Time, bool AddKey)
 	SetPosition(Time, AddKey, m_Position + Delta);
 }
 
-void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)
+void lcCamera::Orbit(float MouseX, float MouseY, u32 Time, bool AddKey)
 {
-	Vector3 Target;
-
-	if (m_Children)
-		Target = m_Children->m_Position;
-	else
-	{
-		// FIXME: Camera rotation center.
-		Target = Vector3(0, 0, 0);
-//		Target = lcGetActiveProject()->GetActiveModel()->GetCenter();
-
-		Vector4 Plane;
-		Plane = Vector4(Target - m_Position);
-		Plane[3] = -Dot3(Plane, Target);
-
-		Vector3 Intersection;
-		LinePlaneIntersection(&Intersection, m_Position, Target, Plane);
-	}
-
-	Vector3 Dir = m_Position - Target;
+	Vector3 Dir = m_Position - m_Children->m_Position;
 
 	// The X axis of the mouse always corresponds to Z in the world.
 	if (fabsf(MouseX) > 0.01f)
@@ -324,7 +306,34 @@ void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)
 		Dir = Mul(Dir, RotY);
 	}
 
-	Move(Time, AddKey, Dir);
+	SetPosition(Time, AddKey, Dir + m_Children->m_Position);
+}
+
+void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)
+{
+	Vector3 Dir = m_Children->m_Position - m_Position;
+
+	// The X axis of the mouse always corresponds to Z in the world.
+	if (fabsf(MouseX) > 0.01f)
+	{
+		float AngleX = -MouseX * LC_DTOR;
+		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
+
+		Dir = Mul(Dir, RotX);
+	}
+
+	// The Y axis will the side vector of the camera.
+	if (fabsf(MouseY) > 0.01f)
+	{
+		float AngleY = MouseY * LC_DTOR;
+		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
+
+		Dir = Mul(Dir, RotY);
+	}
+
+	m_Children->SetPosition(Time, AddKey, Dir + m_Position);
+
+	Update(Time);
 }
 
 // FIXME: Move this to the View class, or remove.

@@ -80,6 +80,9 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 					return LC_CURSOR_NONE;
 			}
 
+		case LC_ACTION_ORBIT:
+			return LC_CURSOR_ORBIT;
+
 		case LC_ACTION_ROLL:
 			return LC_CURSOR_ROLL;
 

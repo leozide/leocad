@@ -771,6 +771,7 @@ LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 		case LC_CURSOR_PAN: Cursor = IDC_PAN; break;
 		case LC_CURSOR_ROLL: Cursor = IDC_ROLL; break;
 		case LC_CURSOR_ROTATE_VIEW: Cursor = IDC_ANGLE; break;
+		case LC_CURSOR_ORBIT: Cursor = IDC_ORBIT; break;
 
 		default:
 			LC_ASSERT_FALSE("Unknown cursor type.");

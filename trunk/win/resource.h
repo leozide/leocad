@@ -617,7 +617,6 @@
 #define ID_EDITOR_VIEW_CONNECTIONS      33035
 #define ID_EDITOR_ADD                   33036
 #define ID_EDITOR_FILE_NEW              33038
-#define ID_PIECE_COPYKEYS               33039
 #define ID_LIBDLG_GROUP_INSERT          33053
 #define ID_LIBDLG_GROUP_DELETE          33054
 #define ID_LIBDLG_GROUP_RENAME          33055

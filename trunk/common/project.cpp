@@ -5071,27 +5071,6 @@ FIXME: paste
 			*/
 		} break;
 
-		case LC_PIECE_COPYKEYS:
-		{
-			/*
-			float move[3], rot[4];
-			Piece* pPiece;
-
-			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
-				{
-					pPiece->CalculateSingleKey (m_ActiveModel->m_CurFrame, LC_PK_POSITION, move);
-					pPiece->ChangeKey(m_ActiveModel->m_CurFrame, move, LC_PK_POSITION);
-					pPiece->ChangeKey(m_ActiveModel->m_CurFrame, rot, LC_PK_ROTATION);
-				}
-
-			// TODO: cameras and lights
-
-			CalculateStep();
-			UpdateAllViews();
-			*/
-		} break;
-
 		case LC_PIECE_GROUP:
 		{
 	/* FIXME: group

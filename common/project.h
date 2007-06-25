@@ -148,7 +148,6 @@ protected:
 	void CheckPoint (const char* text);
 
 	// Objects
-	Group* m_pGroups;
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;

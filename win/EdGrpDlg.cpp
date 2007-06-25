@@ -62,6 +62,8 @@ BOOL CEditGroupsDlg::OnInitDialog()
 
 void CEditGroupsDlg::OnEditgrpNewgroup() 
 {
+	/*
+	FIXME: groups
   HTREEITEM hItem, hParent = NULL;
   Group *pGroup, *pParent = NULL;
   TVITEM item;
@@ -102,4 +104,5 @@ void CEditGroupsDlg::OnEditgrpNewgroup()
 
   m_Tree.DeleteAllItems();
 	m_Tree.AddChildren(NULL, NULL);
+	*/
 }

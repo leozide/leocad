@@ -40,6 +40,8 @@ END_MESSAGE_MAP()
 
 void CGroupEditTree::AddChildren(HTREEITEM hParent, Group* pGroup)
 {
+	/*
+	FIXME: groups
 	int i;
 	TV_INSERTSTRUCT tvstruct;
 	tvstruct.hParent = hParent;
@@ -68,6 +70,7 @@ void CGroupEditTree::AddChildren(HTREEITEM hParent, Group* pGroup)
 			tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
 			InsertItem(&tvstruct);
 		}
+		*/
 }
 
 void CGroupEditTree::OnBeginLabelEdit(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -152,7 +155,8 @@ void CGroupEditTree::OnMouseMove(UINT nFlags, CPoint point)
 void CGroupEditTree::OnLButtonUp(UINT nFlags, CPoint point) 
 {
 	CTreeCtrl::OnLButtonUp(nFlags, point);
-
+/*
+FIXME: groups
 	if (m_bDragging)
 	{
 		m_bDragging = FALSE;
@@ -208,6 +212,7 @@ void CGroupEditTree::OnLButtonUp(UINT nFlags, CPoint point)
 
 //		AddChildren(m_hitemDrop, opts->groups[dest]);
 	}
+	*/
 }
 
 BOOL CGroupEditTree::PreTranslateMessage(MSG* pMsg) 

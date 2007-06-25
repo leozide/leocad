@@ -5,7 +5,6 @@
 #define _TYPEDEF_H_
 
 class lcObject;
-class Group;
 class PieceInfo;
 
 #include "defines.h"
@@ -425,12 +424,14 @@ struct LC_PROPERTIESDLG_OPTS
 
 struct LC_GROUPEDITDLG_OPTS
 {
+	/*
 	int piececount;
 	lcObject** pieces;
 	Group** piecesgroups;
 	int groupcount;
 	Group** groups;
 	Group** groupsgroups;
+	*/
 };
 
 struct LC_PREFERENCESDLG_OPTS

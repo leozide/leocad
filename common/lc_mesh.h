@@ -272,5 +272,6 @@ public:
 };
 
 lcMesh* lcCreateSphereMesh(float Radius, int Slices);
+lcMesh* lcCreateWireframeBoxMesh(const Vector3& Min, const Vector3& Max);
 
 #endif

@@ -1,6 +1,6 @@
 // Piece group
 //
-
+/*
 #include "lc_global.h"
 #include <stdlib.h>
 #include "group.h"
@@ -78,3 +78,4 @@ void Group::FileSave(File* file, Group* pGroups)
 	}
 	file->WriteLong(&i, 1);
 }
+*/

@@ -11,6 +11,7 @@
 #include "lc_piece.h"
 #include "lc_flexpiece.h"
 #include "lc_modelref.h"
+#include "lc_pivot.h"
 #include "lc_camera.h"
 #include "lc_light.h"
 #include "lc_mesh.h"
@@ -68,7 +69,6 @@ Project::Project()
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
-	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	m_pTrackFile = NULL;
@@ -185,7 +185,6 @@ void Project::SetTitle(const char* lpszTitle)
 
 void Project::DeleteContents(bool bUndo)
 {
-	Group* pGroup;
 	int i;
 
 	if (!bUndo)
@@ -232,13 +231,6 @@ void Project::DeleteContents(bool bUndo)
 		delete m_pConnections[i].entries;
 		m_pConnections[i].entries = NULL;
 		m_pConnections[i].numentries = 0;
-	}
-
-	while (m_pGroups)
-	{
-		pGroup = m_pGroups;
-		m_pGroups = m_pGroups->m_pNext;
-		delete pGroup;
 	}
 
 /*
@@ -529,7 +521,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	if (fv >= 0.5f)
 	{
 		file->ReadLong (&count, 1);
-
+/*
+FIXME: groups
 		Group* pGroup;
 		Group* pLastGroup = NULL;
 		for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
@@ -582,8 +575,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				i--;
 			}
 		}
-/*
-FIXME: groups
+
 		lcObject* Piece;
 		for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = Piece->m_Next)
 		{
@@ -5073,42 +5065,62 @@ FIXME: paste
 
 		case LC_PIECE_GROUP:
 		{
-	/* FIXME: group
-			Group* pGroup;
-			int i, max = 0;
-			char name[65];
+			lcPivot* Group = new lcPivot();
 
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
-					if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
-						if (i > max)
-							max = i;
-			sprintf(name, "Group #%.2d", max+1);
+			Group->SetUniqueName(m_ActiveModel->m_Pieces, "Group");
 
-			if (SystemDoDialog(LC_DLG_GROUP, name))
+			if (!SystemDoDialog(LC_DLG_GROUP, &Group->m_Name))
 			{
-				pGroup = new Group();
-				strcpy(pGroup->m_strName, name);
-				pGroup->m_pNext = m_pGroups;
-				m_pGroups = pGroup;
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-				for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
-					if (pPiece->IsSelected())
-					{
-						pPiece->DoGroup(pGroup);
-						pPiece->MergeBoundingBox(bs);
-					}
-	
-				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
-
-				RemoveEmptyGroups();
-				SetModifiedFlag(true);
-				CheckPoint("Grouping");
+				delete Group;
+				break;
 			}
-			*/
+
+			BoundingBox Box;
+			Box.Reset();
+
+			lcPieceObject* Add = NULL;
+			lcPieceObject* Remove = NULL;
+			lcPieceObject* Piece = m_ActiveModel->m_Pieces;
+
+			while (Piece)
+			{
+				lcPieceObject* Next = (lcPieceObject*)Piece->m_Next;
+
+				if (Piece->IsSelected())
+				{
+					Piece->MergeBoundingBox(&Box);
+
+					// Remove from model.
+					if (Remove)
+						Remove->m_Next = Piece->m_Next;
+					else
+						m_ActiveModel->m_Pieces = (lcPieceObject*)Piece->m_Next;
+
+					Piece->m_Next = NULL;
+
+					// Add to group.
+					if (Add)
+						Add->m_Next = Piece;
+					else
+						Group->m_Children = Piece;
+
+					Add = Piece;
+				}
+				else
+					Remove = Piece;
+
+				Piece = Next;
+			}
+
+//			Group->SetPosition(Box.GetCenter());
+			// FIXME: move pieces to be relative to the parent
+
+			Group->Update(m_ActiveModel->m_CurFrame);
+			AddPiece(Group);
+
+			SetModifiedFlag(true);
+			CheckPoint("Grouping");
+
 		} break;
 
 		case LC_PIECE_UNGROUP:
@@ -6098,6 +6110,8 @@ void Project::RemoveEmptyGroups()
 
 Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, float z)
 {
+	/*
+	FIXME: addgroup
   Group *pNewGroup = new Group();
 
   if (name == NULL)
@@ -6126,6 +6140,8 @@ Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, fl
   pNewGroup->m_pGroup = pParent;
 
   return pNewGroup;
+	*/
+return NULL;
 }
 
 void Project::SelectAndFocusNone(bool FocusOnly)
@@ -6551,7 +6567,6 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_ZOOM_REGION:
 			{
-/* FIXME: zoom region
 				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 				lcCamera* Camera = m_ActiveView->GetCamera();
@@ -6599,7 +6614,7 @@ bool Project::StopTracking(bool bAccept)
 				Vector3 Eye = Camera->m_Position;
 				Eye = Eye + (Points[0] - Points[1]);
 
-				Vector3 Target = Camera->GetTargetPosition();
+				Vector3 Target = Camera->m_Children->m_Position;
 				Target = Target + (Points[0] - Points[1]);
 
 				// Zoom in/out.
@@ -6613,12 +6628,11 @@ bool Project::StopTracking(bool bAccept)
 
 				// Change the camera and redraw.
 				Camera->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye);
-			  Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
+				Camera->m_Children->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, Target);
 			  Camera->Update(m_ActiveModel->m_CurFrame);
 
 				SystemUpdateFocus(NULL);
 				UpdateAllViews();
-*/
 			} break;
 
 			case LC_ACTION_INSERT:

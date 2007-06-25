@@ -1686,12 +1686,12 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_GROUP:
 		{
 			CGroupDlg dlg;
-			dlg.m_strName = (char*)param;
+			String& Name = *(String*)param;
+			dlg.m_strName = (char*)Name;
 
 			if (dlg.DoModal() == IDOK)
 			{
-				strcpy((char*)param, dlg.m_strName);
-
+				Name = dlg.m_strName;
 				return true;
 			}
 		} break;

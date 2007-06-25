@@ -87,6 +87,57 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 	return SphereMesh;
 }
 
+lcMesh* lcCreateWireframeBoxMesh(const Vector3& Min, const Vector3& Max)
+{
+	int NumIndices = 12;
+	int NumVertices = 8;
+
+	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
+
+	lcMeshEditor<u16> MeshEdit(BoxMesh);
+	MeshEdit.StartSection(GL_LINES, LC_COL_DEFAULT);
+
+	MeshEdit.AddVertex(Vector3(Min[0], Min[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Min[0], Max[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Max[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Min[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Min[0], Min[1], Max[2]));
+	MeshEdit.AddVertex(Vector3(Min[0], Max[1], Max[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Max[1], Max[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Min[1], Max[2]));
+
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(0);
+
+	MeshEdit.AddIndex(4);
+	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(4);
+
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(4);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(7);
+
+	MeshEdit.EndSection();
+
+	return BoxMesh;
+}
+
 lcMesh::lcMesh(int NumSections, int NumIndices, int NumVertices, lcVertexBuffer* VertexBuffer)
 {
 	m_Sections = new lcMeshSection[NumSections];

@@ -105,7 +105,7 @@ void lcPiece::AddToScene(lcScene* Scene, int Color)
 
 		if (RenderSection.Color > 13 && RenderSection.Color < 22)
 		{
-			Vector3 Pos = Mul31(m_BoundingBox.GetCenter(), m_ModelWorld);
+			Vector3 Pos = Mul31(m_BoundingBox.GetCenter(), m_ModelWorld); // FIXME: Have a bounding box for each section
 			Pos = Mul31(Pos, Scene->m_WorldView);
 			RenderSection.Distance = Pos[2];
 

@@ -61,7 +61,7 @@ bool lcModel::IsSubModel(const lcModel* Model) const
 	return false;
 }
 
-void lcModel::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcModel::AddToScene(lcScene* Scene, int Color)
 {
 	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
 	{
@@ -69,7 +69,7 @@ void lcModel::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
 		if (!Piece->IsVisible(m_CurFrame))
 			continue;
 
-		Piece->AddToScene(Scene, ParentWorld, Color);
+		Piece->AddToScene(Scene, Color);
 	}
 }
 
@@ -262,6 +262,7 @@ void lcModel::ResetCameras()
 	{
 		lcCamera* Camera = new lcCamera();
 		Camera->CreateCamera(i, true);
+		Camera->Update(1);
 
 		if (Last == NULL)
 			m_Cameras = Camera;

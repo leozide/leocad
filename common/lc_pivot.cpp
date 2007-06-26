@@ -53,17 +53,15 @@ void lcPivot::Update(u32 Time)
 	// fixme: lcPivot
 }
 
-void lcPivot::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcPivot::AddToScene(lcScene* Scene, int Color)
 {
 	// fixme: lcPivot
 	static lcMesh* BoxMesh = lcCreateWireframeBoxMesh(Vector3(-LC_PIVOT_SIZE, -LC_PIVOT_SIZE, -LC_PIVOT_SIZE), Vector3(LC_PIVOT_SIZE, LC_PIVOT_SIZE, LC_PIVOT_SIZE));
 
-	Matrix44 ModelWorld = Mul(m_ModelWorld, ParentWorld);
-
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = this;
-	RenderSection.ModelWorld = ModelWorld;
+	RenderSection.ModelWorld = m_ModelWorld;
 	RenderSection.Mesh = BoxMesh;
 	RenderSection.Section = &BoxMesh->m_Sections[0];
 	RenderSection.Color = 1;
@@ -76,13 +74,11 @@ void lcPivot::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
 	Scene->m_OpaqueSections.Add(RenderSection);
 
 	for (lcObject* Child = m_Children; Child; Child = Child->m_Next)
-		Child->AddToScene(Scene, ModelWorld, Color);
+		Child->AddToScene(Scene, Color);
 }
 
 void lcPivot::Move(u32 Time, bool AddKey, const Vector3& Delta)
 {
 	if (IsSelected())
-		ChangeKey(Time, AddKey, 0, m_Position + Delta);
-
-	Update(Time);
+		ChangeKey(Time, AddKey, 0, m_ParentPosition + Delta);
 }

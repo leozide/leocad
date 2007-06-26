@@ -119,7 +119,7 @@ void PiecePreview::OnDraw()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(WorldView);
 
-	m_Selection->AddToScene(&Scene, IdentityMatrix44(), lcGetActiveProject()->GetCurrentColor());
+	m_Selection->AddToScene(&Scene, lcGetActiveProject()->GetCurrentColor());
 	Scene.Render();
 
 	SwapBuffers();

@@ -28,11 +28,23 @@ void lcPieceObject::Update(u32 Time)
 		SetSelection(false, true);
 
 	// Update key values.
-	CalculateKey(Time, LC_PIECEOBJ_POSITION, &m_Position);
+	CalculateKey(Time, LC_PIECEOBJ_POSITION, &m_ParentPosition);
 	CalculateKey(Time, LC_PIECEOBJ_ROTATION, &m_AxisAngle);
 
-	m_ModelWorld = MatrixFromAxisAngle(m_AxisAngle);
-	m_ModelWorld.SetTranslation(m_Position);
+	if (m_Parent)
+	{
+		Matrix44 ModelParent = MatrixFromAxisAngle(m_AxisAngle);
+		ModelParent.SetTranslation(m_ParentPosition);
+
+		m_ModelWorld = Mul(ModelParent, ((lcPieceObject*)m_Parent)->m_ModelWorld);
+		m_WorldPosition = Vector3(m_ModelWorld[3]);
+	}
+	else
+	{
+		m_ModelWorld = MatrixFromAxisAngle(m_AxisAngle);
+		m_ModelWorld.SetTranslation(m_ParentPosition);
+		m_WorldPosition = m_ParentPosition;
+	}
 }
 
 void lcPieceObject::SetRotation(u32 Time, bool AddKey, const Vector4& NewRotation)

@@ -36,7 +36,8 @@ lcFlexiblePiece::lcFlexiblePiece(lcFlexiblePiece* Piece)
 	m_Parent = NULL;
 	m_Children = NULL;
 
-	m_Position = Piece->m_Position;
+	m_ParentPosition = Piece->m_ParentPosition;
+	m_WorldPosition = Piece->m_WorldPosition;
 	m_Name = "";
 	m_Flags = Piece->m_Flags;
 
@@ -63,7 +64,7 @@ lcFlexiblePiece::lcFlexiblePiece(lcFlexiblePiece* Piece)
 	for (lcObject* Point = Piece->m_Children; Point; Point = Point->m_Next)
 	{
 		lcFlexiblePiecePoint* NewPoint = new lcFlexiblePiecePoint(this);
-		NewPoint->SetPosition(1, true, Point->m_Position);
+		NewPoint->SetPosition(1, true, Point->m_ParentPosition);
 
 		if (Last)
 			Last->m_Next = NewPoint;
@@ -102,8 +103,6 @@ void lcFlexiblePiece::Move(u32 Time, bool AddKey, const Vector3& Delta)
 
 	if (!ChildSelected)
 		lcObject::Move(Time, AddKey, Delta);
-
-	Update(Time);
 }
 
 void lcFlexiblePiece::Update(u32 Time)
@@ -117,17 +116,14 @@ void lcFlexiblePiece::Update(u32 Time)
 	BuildMesh();
 }
 
-void lcFlexiblePiece::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcFlexiblePiece::AddToScene(lcScene* Scene, int Color)
 {
 	// FIXME: lcFlexiblePiece
-
-	Matrix44 ModelWorld = Mul(m_ModelWorld, ParentWorld);
-
 
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = this;
-	RenderSection.ModelWorld = ModelWorld;
+	RenderSection.ModelWorld = m_ModelWorld;
 	RenderSection.Mesh = m_Mesh;
 	RenderSection.Section = &m_Mesh->m_Sections[0];
 	RenderSection.Color = 1;
@@ -140,7 +136,7 @@ void lcFlexiblePiece::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, in
 	Scene->m_OpaqueSections.Add(RenderSection);
 
 	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
-		Point->AddToScene(Scene, ModelWorld, Color);
+		Point->AddToScene(Scene, Color);
 }
 
 void lcFlexiblePiece::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
@@ -164,7 +160,7 @@ void lcFlexiblePiece::BuildMesh()
 
 	ObjArray<Vector4> ControlPoints(16);
 	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
-		ControlPoints.Add(Vector4(Point->m_Position, 1));
+		ControlPoints.Add(Vector4(Point->m_ParentPosition, 1));
 
 	int NumSections = 3;
 	int NumSegments = 16;
@@ -296,21 +292,19 @@ lcFlexiblePiecePoint::~lcFlexiblePiecePoint()
 
 void lcFlexiblePiecePoint::Update(u32 Time)
 {
-	CalculateKey(Time, LC_FLEXPIECE_POINT_POSITION, &m_Position);
+	CalculateKey(Time, LC_FLEXPIECE_POINT_POSITION, &m_ParentPosition);
+	m_WorldPosition = Mul31(m_ParentPosition, ((lcPieceObject*)m_Parent)->m_ModelWorld);
 }
 
-void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, int Color)
 {
 	// FIXME: lcFlexiblePiece
-
-	Matrix44 ModelWorld = IdentityMatrix44();
-	ModelWorld.SetTranslation(m_Position);
-	ModelWorld = Mul(ModelWorld, ParentWorld);
 
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = (lcPieceObject*)this;
-	RenderSection.ModelWorld = ModelWorld;
+	RenderSection.ModelWorld = IdentityMatrix44();
+	RenderSection.ModelWorld.SetTranslation(m_WorldPosition);
 	RenderSection.Mesh = SphereMesh;
 	RenderSection.Section = &SphereMesh->m_Sections[0];
 	RenderSection.Color = 0;
@@ -325,9 +319,7 @@ void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, const Matrix44& ParentWorl
 
 void lcFlexiblePiecePoint::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 {
-	Vector3 Position = Mul31(m_Position, ((lcPieceObject*)m_Parent)->m_ModelWorld);
-
-	float Dist = LinePointMinDistance(Position, Ray->Start, Ray->End);
+	float Dist = LinePointMinDistance(m_WorldPosition, Ray->Start, Ray->End);
 
 	if (Dist < Ray->Dist)
 	{

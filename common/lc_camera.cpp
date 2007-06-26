@@ -39,8 +39,6 @@ void lcCamera::CreateCamera(int CameraType, bool Target)
 	m_FOV = 30.0f; // TODO: animate FOV
 
 	SetVisible(CameraType == LC_CAMERA_USER);
-
-	Update(1);
 }
 
 void lcCamera::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
@@ -91,12 +89,14 @@ bool lcCamera::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 void lcCamera::Update(u32 Time)
 {
 	// Update key values.
-	CalculateKey(Time, LC_CAMERA_POSITION, &m_Position);
+	CalculateKey(Time, LC_CAMERA_POSITION, &m_ParentPosition);
 	CalculateKey(Time, LC_CAMERA_ROLL, &m_Roll);
+
+	m_WorldPosition = m_ParentPosition;
 
 	m_Children->Update(Time);
 
-	Vector3 Z = Normalize(m_Position - m_Children->m_Position);
+	Vector3 Z = Normalize(m_WorldPosition - m_Children->m_WorldPosition);
 
 	// Build the Y vector of the matrix.
 	Vector3 UpVector;
@@ -121,7 +121,7 @@ void lcCamera::Update(u32 Time)
 	Vector4 Row0 = Vector4(X[0], Y[0], Z[0], 0.0f);
 	Vector4 Row1 = Vector4(X[1], Y[1], Z[1], 0.0f);
 	Vector4 Row2 = Vector4(X[2], Y[2], Z[2], 0.0f);
-	Vector4 Row3 = Vector4(Vector3(Row0 * -m_Position[0] + Row1 * -m_Position[1] + Row2 * -m_Position[2]), 1.0f);
+	Vector4 Row3 = Vector4(Vector3(Row0 * -m_WorldPosition[0] + Row1 * -m_WorldPosition[1] + Row2 * -m_WorldPosition[2]), 1.0f);
 
 	m_WorldView = Matrix44(Row0, Row1, Row2, Row3);
 	m_ViewWorld = RotTranInverse(m_WorldView);
@@ -179,8 +179,8 @@ void lcCamera::Render()
 	glLineWidth(1.0f);
 	glColor3f(0.5f, 0.8f, 0.5f);
 	glBegin(GL_LINES);
-	glVertex3fv(m_Position);
-	glVertex3fv(m_Children->m_Position);
+	glVertex3fv(m_WorldPosition);
+	glVertex3fv(m_Children->m_WorldPosition);
 	glEnd();
 
 	// Draw the view frustum.
@@ -189,7 +189,7 @@ void lcCamera::Render()
 		glPushMatrix();
 		glMultMatrixf(m_ViewWorld);
 
-		float Dist = Length(m_Children->m_Position - m_Position);
+		float Dist = Length(m_Children->m_WorldPosition - m_WorldPosition);
 		Matrix44 Projection;
 		Projection = CreatePerspectiveMatrix(m_FOV, 1.33f, 0.01f, Dist);
 		Projection = Inverse(Projection);
@@ -217,7 +217,7 @@ void lcCamera::Render()
 	}
 }
 
-void lcCamera::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcCamera::AddToScene(lcScene* Scene, int Color)
 {
 }
 
@@ -228,8 +228,6 @@ void lcCamera::Move(u32 Time, bool AddKey, const Vector3& Delta)
 
 	if (m_Children->IsSelected())
 		m_Children->Move(Time, AddKey, Delta);
-
-	Update(Time);
 }
 
 void lcCamera::SetRoll(u32 Time, bool AddKey, const float NewRoll)
@@ -241,8 +239,6 @@ void lcCamera::Roll(u32 Time, bool AddKey, float MouseX, float MouseY)
 {
 	float NewRoll = m_Roll + MouseX / 100;
 	SetRoll(Time, AddKey, NewRoll);
-
-	Update(Time);
 }
 
 
@@ -279,14 +275,14 @@ void lcCamera::Pan(float MouseX, float MouseY, u32 Time, bool AddKey)
 	Vector3 Delta = Vector3(m_ViewWorld[0]) * -MouseX + Vector3(m_ViewWorld[1]) * -MouseY;
 
 	if (m_Children)
-		m_Children->SetPosition(Time, AddKey, m_Children->m_Position + Delta);
+		m_Children->SetPosition(Time, AddKey, m_Children->m_ParentPosition + Delta);
 
-	SetPosition(Time, AddKey, m_Position + Delta);
+	SetPosition(Time, AddKey, m_ParentPosition + Delta);
 }
 
 void lcCamera::Orbit(float MouseX, float MouseY, u32 Time, bool AddKey)
 {
-	Vector3 Dir = m_Position - m_Children->m_Position;
+	Vector3 Dir = m_WorldPosition - m_Children->m_WorldPosition;
 
 	// The X axis of the mouse always corresponds to Z in the world.
 	if (fabsf(MouseX) > 0.01f)
@@ -306,12 +302,12 @@ void lcCamera::Orbit(float MouseX, float MouseY, u32 Time, bool AddKey)
 		Dir = Mul(Dir, RotY);
 	}
 
-	SetPosition(Time, AddKey, Dir + m_Children->m_Position);
+	SetPosition(Time, AddKey, Dir + m_Children->m_ParentPosition);
 }
 
 void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)
 {
-	Vector3 Dir = m_Children->m_Position - m_Position;
+	Vector3 Dir = m_Children->m_WorldPosition - m_WorldPosition;
 
 	// The X axis of the mouse always corresponds to Z in the world.
 	if (fabsf(MouseX) > 0.01f)
@@ -331,9 +327,7 @@ void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)
 		Dir = Mul(Dir, RotY);
 	}
 
-	m_Children->SetPosition(Time, AddKey, Dir + m_Position);
-
-	Update(Time);
+	m_Children->SetPosition(Time, AddKey, Dir + m_ParentPosition);
 }
 
 // FIXME: Move this to the View class, or remove.

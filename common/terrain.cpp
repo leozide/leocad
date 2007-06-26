@@ -576,7 +576,7 @@ void Terrain::Render(lcCamera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
-		Vector3 eye = pCam->m_Position;
+		Vector3 eye = pCam->m_WorldPosition;
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
 		glScalef(pCam->m_FarDist, pCam->m_FarDist, 1);

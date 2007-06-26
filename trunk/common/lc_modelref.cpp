@@ -3,6 +3,7 @@
 
 #include "lc_model.h"
 #include "lc_mesh.h"
+#include "lc_scene.h"
 
 lcModelRef::lcModelRef(lcModel* Model)
 	: lcPieceObject(LC_OBJECT_MODELREF)
@@ -50,13 +51,56 @@ lcModelRef::~lcModelRef()
 void lcModelRef::Update(u32 Time)
 {
 	lcPieceObject::Update(Time);
+
+	// FIXME: don't call BuildMesh() here
+	BuildMesh();
 }
 
 void lcModelRef::AddToScene(lcScene* Scene, int Color)
 {
-	// FIXME: prebuild mesh and use it
-	// FIXME: using m_ModelWorld here at least
-	m_Model->AddToScene(Scene, Color);
+	// FIXME: this should be a function of lcMesh, this is a copy of lcPiece::AddToScene.
+	int RenderColor = (m_Color == LC_COL_DEFAULT) ? Color : m_Color;
+
+	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
+	{
+		lcRenderSection RenderSection;
+
+		RenderSection.Owner = this;
+		RenderSection.ModelWorld = m_ModelWorld;
+		RenderSection.Mesh = m_Mesh;
+		RenderSection.Section = &m_Mesh->m_Sections[i];
+		RenderSection.Color = RenderSection.Section->ColorIndex;
+
+		if (RenderSection.Color == LC_COL_DEFAULT)
+			RenderSection.Color = RenderColor;
+
+		if (RenderSection.Section->PrimitiveType == GL_LINES)
+		{
+			// FIXME: LC_DET_BRICKEDGES
+//			if ((m_nDetail & LC_DET_BRICKEDGES) == 0)
+//				continue;
+
+			if (IsFocused())
+				RenderSection.Color = LC_COL_FOCUSED;
+			else if (IsSelected())
+				RenderSection.Color = LC_COL_SELECTED;
+		}
+
+		if (RenderSection.Color > 13 && RenderSection.Color < 22)
+		{
+			Vector3 Pos = Mul31(m_BoundingBox.GetCenter(), m_ModelWorld); // FIXME: Have a bounding box for each section
+			Pos = Mul31(Pos, Scene->m_WorldView);
+			RenderSection.Distance = Pos[2];
+
+			Scene->m_TranslucentSections.AddSorted(RenderSection, SortRenderSectionsCallback, NULL);
+		}
+		else
+		{
+			// Pieces are already sorted by vertex buffer, so no need to sort again here.
+			// FIXME: not true anymore, need to sort by vertex buffer here.
+			Scene->m_OpaqueSections.Add(RenderSection);
+		}
+	}
 }
 
 void lcModelRef::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
@@ -181,16 +225,24 @@ void lcModelRef::BuildMesh(int SectionIndices[LC_COL_DEFAULT+1][3], TypeToType<T
 				MeshEdit.AddIndices16((char*)SrcIndexBufer + SrcSection->IndexOffset, SrcSection->IndexCount);
 
 			// Fix the indices to point to the right place after the vertex buffers are merged.
-			MeshEdit.OffsetIndices(MeshEdit.m_CurIndex - SrcSection->IndexCount, SrcSection->IndexCount, SrcMesh->m_VertexCount);
+			MeshEdit.OffsetIndices(MeshEdit.m_CurIndex - SrcSection->IndexCount, SrcSection->IndexCount, MeshEdit.m_CurVertex);
 
 			MeshEdit.EndSection(ReserveIndices);
 		}
 
 		SrcMesh->m_IndexBuffer->UnmapBuffer();
 
-		// Copy vertices.
-		void* SrcVertexBuffer = SrcMesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
-		MeshEdit.AddVertices((float*)SrcVertexBuffer, SrcMesh->m_VertexCount);
+		// Transform and copy vertices.
+		float* SrcVertexBuffer = (float*)SrcMesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+
+		for (int i = 0; i < SrcMesh->m_VertexCount; i++)
+		{
+			float* SrcPtr = SrcVertexBuffer + 3 * i;
+			Vector3 Vert(SrcPtr[0], SrcPtr[1], SrcPtr[2]);
+			Vert = Mul31(Vert, Piece->m_ModelWorld);
+			MeshEdit.AddVertex(Vert);
+		}
+
 		SrcMesh->m_VertexBuffer->UnmapBuffer();
 	}
 }

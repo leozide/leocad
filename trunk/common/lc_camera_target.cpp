@@ -19,7 +19,8 @@ lcCameraTarget::~lcCameraTarget()
 
 void lcCameraTarget::Update(u32 Time)
 {
-	CalculateKey(Time, LC_CAMERA_TARGET_POSITION, &m_Position);
+	CalculateKey(Time, LC_CAMERA_TARGET_POSITION, &m_ParentPosition);
+	m_WorldPosition = m_ParentPosition;
 }
 
 void lcCameraTarget::Render()
@@ -27,7 +28,7 @@ void lcCameraTarget::Render()
 	// Draw target box.
 	glPushMatrix();
 	Matrix44 TargetMat = ((lcCamera*)m_Parent)->m_ViewWorld;
-	TargetMat.SetTranslation(m_Position);
+	TargetMat.SetTranslation(m_WorldPosition);
 	glMultMatrixf(TargetMat);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -63,7 +64,7 @@ void lcCameraTarget::Render()
 	glPopMatrix();
 }
 
-void lcCameraTarget::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcCameraTarget::AddToScene(lcScene* Scene, int Color)
 {
 }
 
@@ -74,7 +75,7 @@ void lcCameraTarget::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 	Box.m_Min = Vector3(-0.2f, -0.2f, -0.2f);
 
 	Matrix44 WorldView = ((lcCamera*)m_Parent)->m_WorldView;
-	WorldView.SetTranslation(Mul30(-m_Position, WorldView));
+	WorldView.SetTranslation(Mul30(-m_WorldPosition, WorldView));
 
 	Vector3 Start = Mul31(Ray->Start, WorldView);
 	Vector3 End = Mul31(Ray->End, WorldView);
@@ -98,7 +99,7 @@ bool lcCameraTarget::IntersectsVolume(const Vector4* Planes, int NumPlanes) cons
 	int i;
 
 	Matrix44 WorldView = ((lcCamera*)m_Parent)->m_WorldView;
-	WorldView.SetTranslation(Mul30(-m_Position, WorldView));
+	WorldView.SetTranslation(Mul30(-m_WorldPosition, WorldView));
 
 	for (i = 0; i < NumPlanes; i++)
 	{

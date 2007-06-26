@@ -621,6 +621,7 @@ FIXME: groups
 			{
 				lcCamera* Camera = new lcCamera();
 				Camera->CreateCamera(lcMin(i, LC_CAMERA_USER), true);
+				Camera->Update(m_ActiveModel->m_CurFrame);
 				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
 				m_ActiveModel->AddCamera(Camera);
 
@@ -1708,7 +1709,7 @@ void Project::RenderScene(View* view)
 
 			// Calculate camera offset.
 			Matrix44 ModelView = Camera->m_WorldView;
-			Vector3 offset = Mul30(Camera->m_Position, ModelView);
+			Vector3 offset = Mul30(Camera->m_WorldPosition, ModelView);
 
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
@@ -1933,7 +1934,7 @@ void Project::RenderScene(View* view)
 	m_Scene->m_TranslucentSections.RemoveAll();
 	m_Scene->m_WorldView = view->GetCamera()->m_WorldView;
 
-	m_ActiveModel->AddToScene(m_Scene, IdentityMatrix44(), LC_COL_DEFAULT);
+	m_ActiveModel->AddToScene(m_Scene, LC_COL_DEFAULT);
 
 	// Add piece preview.
 	if (m_nCurAction == LC_ACTION_INSERT)
@@ -1946,7 +1947,9 @@ void Project::RenderScene(View* view)
 		ModelWorld = MatrixFromAxisAngle(Rot);
 		ModelWorld.SetTranslation(Pos);
 
-		g_App->m_PiecePreview->m_Selection->AddToScene(m_Scene, ModelWorld, m_nCurColor);
+		g_App->m_PiecePreview->m_Selection->m_ModelWorld = ModelWorld; // FIXME: preview piece hack
+		g_App->m_PiecePreview->m_Selection->AddToScene(m_Scene, m_nCurColor);
+		g_App->m_PiecePreview->m_Selection->m_ModelWorld = IdentityMatrix44();
 	}
 
 	m_Scene->Render();
@@ -3375,7 +3378,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			Matrix33 Mat = Piece->m_ModelWorld;
 			Vector3 Angles = MatrixToEulerAngles(Mat) * LC_RTOD;
 
-			if (Piece->m_Position != mod->Position)
+			if (Piece->m_ParentPosition != mod->Position)
 				Piece->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Position);
 
 			if (mod->Rotation[0] != Angles[0] || mod->Rotation[1] != Angles[1] || mod->Rotation[2] != Angles[2])
@@ -3409,10 +3412,10 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			Camera->ShowCone(mod->cone);
 //			Camera->SetAutoClip(!mod->clip);
 
-			if (Camera->m_Position != mod->Eye)
+			if (Camera->m_ParentPosition != mod->Eye)
 				Camera->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Eye);
 
-			if (Camera->m_Children && Camera->m_Children->m_Position != mod->Target)
+			if (Camera->m_Children && Camera->m_Children->m_ParentPosition != mod->Target)
 				Camera->m_Children->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Target);
 
 			if (Camera->m_Roll != mod->Roll)
@@ -3435,7 +3438,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 
 			Light->SetVisible(!mod->Hidden);
 
-			if (Light->m_Position != mod->Position)
+			if (Light->m_ParentPosition != mod->Position)
 				Light->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Position);
 
 			if (Light->GetTargetPosition() != mod->Target)
@@ -5097,6 +5100,7 @@ FIXME: paste
 						m_ActiveModel->m_Pieces = (lcPieceObject*)Piece->m_Next;
 
 					Piece->m_Next = NULL;
+					Piece->m_Parent = Group;
 
 					// Add to group.
 					if (Add)
@@ -5111,6 +5115,9 @@ FIXME: paste
 
 				Piece = Next;
 			}
+
+			Group->SetSelection(false, true);
+			Group->SetFocus(true, false);
 
 //			Group->SetPosition(Box.GetCenter());
 			// FIXME: move pieces to be relative to the parent
@@ -5483,8 +5490,8 @@ FIXME: paste
 				lcCamera* Camera = view->GetCamera();
 
 				// Update eye and target positions.
-				Vector3 Eye = Camera->m_Position;
-				Vector3 Target = Camera->m_Children->m_Position;
+				Vector3 Eye = Camera->m_WorldPosition;
+				Vector3 Target = Camera->m_Children->m_WorldPosition;
 
 				if (Camera->IsSide())
 					Eye += Center - Target;
@@ -5731,6 +5738,7 @@ FIXME: paste
 			y -= y > 0 ? 5 : -5;
 
 			m_ActiveView->GetCamera()->DoPan(x/4, y/4, 1, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 			m_nDownX = x;
 			m_nDownY = y;
 			UpdateOverlayScale();
@@ -6227,7 +6235,7 @@ bool Project::GetFocusPosition(Vector3& Position) const
 
 	if (Focus)
 	{
-		Position = Focus->m_Position;
+		Position = Focus->m_WorldPosition;
 		return true;
 	}
 
@@ -6611,10 +6619,10 @@ bool Project::StopTracking(bool bAccept)
 				UnprojectPoints(Points, 3, ModelView, Projection, Viewport);
 
 				// Center camera.
-				Vector3 Eye = Camera->m_Position;
+				Vector3 Eye = Camera->m_WorldPosition;
 				Eye = Eye + (Points[0] - Points[1]);
 
-				Vector3 Target = Camera->m_Children->m_Position;
+				Vector3 Target = Camera->m_Children->m_WorldPosition;
 				Target = Target + (Points[0] - Points[1]);
 
 				// Zoom in/out.
@@ -6832,17 +6840,22 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 	}
 
 	for (lcCamera* Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+	{
 			Camera->Move(m_ActiveModel->m_CurFrame, m_bAddKeys, Move);
+			Camera->Update(m_ActiveModel->m_CurFrame);
+	}
 
 	for (lcLight* Light = m_ActiveModel->m_Lights; Light; Light = (lcLight*)Light->m_Next)
+	{
 	    Light->Move(m_ActiveModel->m_CurFrame, m_bAddKeys, Move);
+			Light->Update(m_ActiveModel->m_CurFrame);
+	}
 
 	for (lcPieceObject* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
+	{
 			Piece->Move(m_ActiveModel->m_CurFrame, m_bAddKeys, Move);
-
-//	for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
-//		if (Piece->IsSelected())
-//			Piece->CalculateConnections(m_pConnections, m_ActiveModel->m_CurFrame, false, true);
+			Piece->Update(m_ActiveModel->m_CurFrame);
+	}
 
 	// TODO: move group centers
 
@@ -6895,7 +6908,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Sna
 
 	Vector3 Center;
 	if (Focus != NULL)
-		Center = Focus->m_Position;
+		Center = Focus->m_WorldPosition;
 	else
 		Center = Box.GetCenter();
 
@@ -6941,7 +6954,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Sna
 		if (!Piece->IsSelected())
 			continue;
 
-		Vector3 Pos = Piece->m_Position;
+		Vector3 Pos = Piece->m_WorldPosition;
 		Vector4 Rot = Piece->m_AxisAngle;
 
 		Vector4 NewRotation;
@@ -7604,6 +7617,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			Camera->m_Children->SetFocus(true, false);
 			Camera->m_Children->SetPosition(1, false, Vector3((float)tmp[0], (float)tmp[1], (float)tmp[2]));
 
+			Camera->Update(m_ActiveModel->m_CurFrame);
+
 			m_ActiveModel->AddCamera(Camera);
 			UpdateSelection();
 			UpdateAllViews();
@@ -8236,6 +8251,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				break;
 
 			m_ActiveView->GetCamera()->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -8250,6 +8266,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 if (m_ActiveView->GetCamera()->IsSide())
 break;
 			m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 // FIXME: camera rotation
 
 			m_nDownX = x;
@@ -8308,6 +8325,7 @@ break;
 					m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 			}
+			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 */
 			m_nDownX = x;
 			m_nDownY = y;
@@ -8321,6 +8339,7 @@ break;
 				break;
 
 			m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();

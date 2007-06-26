@@ -204,7 +204,7 @@ public:
 	virtual void Update(u32 Time) = 0;
 
 	// Render a preview of the object, not optmized.
-	virtual void AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color) = 0;
+	virtual void AddToScene(lcScene* Scene, int Color) = 0;
 
 public:
 	// Parenting information.
@@ -213,7 +213,8 @@ public:
 	lcObject* m_Children;
 
 	// Object data.
-	Vector3 m_Position;
+	Vector3 m_ParentPosition;
+	Vector3 m_WorldPosition;
 	String m_Name;
 	u32 m_Flags;
 

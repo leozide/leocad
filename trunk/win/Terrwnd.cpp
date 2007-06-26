@@ -24,6 +24,7 @@ CTerrainWnd::CTerrainWnd(Terrain* pTerrain)
 	m_pCamera->CreateCamera(LC_CAMERA_USER, true);
 	m_pCamera->SetPosition(1, false, Vector3(20, 20, 20));
 	m_pCamera->m_Children->SetPosition(1, false, Vector3(0, 0, 0));
+	m_pCamera->Update(1);
 
 	m_pTerrain = pTerrain;
 	m_pPalette = NULL;
@@ -224,6 +225,7 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 			case TERRAIN_PAN:
 			{
 				m_pCamera->DoPan(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false);
+				m_pCamera->Update(1);
 				InvalidateRect (NULL, FALSE);
 			} break;
 
@@ -232,6 +234,7 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 				if (point == m_ptMouse)
 					break;
 				m_pCamera->DoOrbit(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false);
+				m_pCamera->Update(1);
 				InvalidateRect (NULL, FALSE);
 			} break;
 		}
@@ -272,4 +275,5 @@ void CTerrainWnd::ResetCamera()
 	m_pCamera->CreateCamera(LC_CAMERA_USER, true);
 	m_pCamera->SetPosition(1, false, Vector3(20, 20, 20));
 	m_pCamera->m_Children->SetPosition(1, false, Vector3(0, 0, 0));
+	m_pCamera->Update(1);
 }

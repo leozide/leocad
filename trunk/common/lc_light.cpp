@@ -21,7 +21,7 @@ void lcLight::Update(u32 Time)
 	// FIXME: light update
 }
 
-void lcLight::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcLight::AddToScene(lcScene* Scene, int Color)
 {
 	// fixme: addtoscene
 }

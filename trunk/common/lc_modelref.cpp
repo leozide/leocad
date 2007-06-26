@@ -20,7 +20,8 @@ lcModelRef::lcModelRef(lcModelRef* ModelRef)
 	m_Parent = NULL;
 	m_Children = NULL;
 
-	m_Position = ModelRef->m_Position;
+	m_ParentPosition = ModelRef->m_ParentPosition;
+	m_WorldPosition = ModelRef->m_WorldPosition;
 	m_Name = "";
 	m_Flags = ModelRef->m_Flags;
 
@@ -51,10 +52,11 @@ void lcModelRef::Update(u32 Time)
 	lcPieceObject::Update(Time);
 }
 
-void lcModelRef::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcModelRef::AddToScene(lcScene* Scene, int Color)
 {
 	// FIXME: prebuild mesh and use it
-	m_Model->AddToScene(Scene, Mul(m_ModelWorld, ParentWorld), Color);
+	// FIXME: using m_ModelWorld here at least
+	m_Model->AddToScene(Scene, Color);
 }
 
 void lcModelRef::ClosestRayIntersect(LC_CLICK_RAY* Ray) const

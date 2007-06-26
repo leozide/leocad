@@ -23,7 +23,8 @@ lcPiece::lcPiece(lcPiece* Piece)
 	m_Parent = NULL;
 	m_Children = NULL;
 
-	m_Position = Piece->m_Position;
+	m_ParentPosition = Piece->m_ParentPosition;
+	m_WorldPosition = Piece->m_WorldPosition;
 	m_Name = "";
 	m_Flags = Piece->m_Flags;
 
@@ -73,7 +74,7 @@ void lcPiece::Update(u32 Time)
 	lcPieceObject::Update(Time);
 }
 
-void lcPiece::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
+void lcPiece::AddToScene(lcScene* Scene, int Color)
 {
 	int RenderColor = (m_Color == LC_COL_DEFAULT) ? Color : m_Color;
 
@@ -82,7 +83,7 @@ void lcPiece::AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color)
 		lcRenderSection RenderSection;
 
 		RenderSection.Owner = this;
-		RenderSection.ModelWorld = Mul(m_ModelWorld, ParentWorld);
+		RenderSection.ModelWorld = m_ModelWorld;
 		RenderSection.Mesh = m_Mesh;
 		RenderSection.Section = &m_Mesh->m_Sections[i];
 		RenderSection.Color = RenderSection.Section->ColorIndex;

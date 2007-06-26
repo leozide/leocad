@@ -28,7 +28,7 @@ public:
 	void Update(u32 Time);
 
 	// Add this model to a scene.
-	void AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color);
+	void AddToScene(lcScene* Scene, int Color);
 
 	// Return true if any objects are currently selected.
 	bool AnyObjectsSelected() const;

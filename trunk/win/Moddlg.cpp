@@ -570,7 +570,7 @@ void CModifyPieceDlg::UpdateInfo(lcPiece* piece)
 	else
 	{
 		// Position.
-		Vector3 Pos = piece->m_Position;
+		Vector3 Pos = piece->m_ParentPosition;
 		lcGetActiveProject()->ConvertToUserUnits(Pos);
 
 		m_PosX = Pos[0];
@@ -718,7 +718,7 @@ void CModifyCameraDlg::UpdateInfo(lcCamera* camera)
 	{
 		Vector3 tmp;
 
-		tmp = camera->m_Position;
+		tmp = camera->m_ParentPosition;
 		lcGetActiveProject()->ConvertToUserUnits(tmp);
 		m_PosX = tmp[0];
 		m_PosY = tmp[1];
@@ -727,7 +727,7 @@ void CModifyCameraDlg::UpdateInfo(lcCamera* camera)
 		// TODO: disable target controls for free cameras.
 		if (camera->m_Children)
 		{
-			tmp = camera->m_Children->m_Position;
+			tmp = camera->m_Children->m_ParentPosition;
 			lcGetActiveProject()->ConvertToUserUnits(tmp);
 			m_TargetX = tmp[0];
 			m_TargetY = tmp[1];
@@ -947,7 +947,7 @@ void CModifyLightDlg::UpdateInfo(lcLight* light)
 		bool Omni = (light->m_Children == NULL);
 		bool Spot = (light->m_Children != NULL) && (light->m_SpotCutoff != 180.0f);
 
-		tmp = light->m_Position;
+		tmp = light->m_ParentPosition;
 		lcGetActiveProject()->ConvertToUserUnits(tmp);
 		m_PosX = tmp[0];
 		m_PosY = tmp[1];
@@ -967,7 +967,7 @@ void CModifyLightDlg::UpdateInfo(lcLight* light)
 			// TODO: hide target controls
 			if (light->m_Children)
 			{
-				tmp = light->m_Children->m_Position;
+				tmp = light->m_Children->m_ParentPosition;
 				lcGetActiveProject()->ConvertToUserUnits(tmp);
 				m_TargetX = tmp[0];
 				m_TargetY = tmp[1];

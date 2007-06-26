@@ -23,7 +23,7 @@ public:
 	virtual void ClosestRayIntersect(LC_CLICK_RAY* Ray) const;
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
 	virtual void Update(u32 Time);
-	virtual void AddToScene(lcScene* Scene, const Matrix44& ParentWorld, int Color);
+	virtual void AddToScene(lcScene* Scene, int Color);
 };
 
 #endif // _LC_CAMERA_TARGET_H_

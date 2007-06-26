@@ -27,14 +27,15 @@ lcObject::~lcObject()
 
 void lcObject::Move(u32 Time, bool AddKey, const Vector3& Delta)
 {
-	ChangeKey(Time, AddKey, 0, m_Position + Delta);
-	Update(Time);
+	if (!IsSelected())
+		return;
+
+	ChangeKey(Time, AddKey, 0, m_ParentPosition + Delta);
 }
 
 void lcObject::SetPosition(u32 Time, bool AddKey, const Vector3& NewPosition)
 {
 	ChangeKey(Time, AddKey, 0, NewPosition);
-	Update(Time);
 }
 
 void lcObject::ChangeKey(u32 Time, bool AddKey, int KeyType, const Vector4& Value)

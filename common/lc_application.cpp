@@ -1,6 +1,8 @@
 #include "lc_global.h"
-#include <stdio.h>
 #include "lc_application.h"
+
+#include <stdio.h>
+#include "lc_mesh.h"
 #include "library.h"
 #include "system.h"
 #include "console.h"
@@ -256,6 +258,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 
 	SystemInit();
 
+	lcCreateDefaultMeshes();
+
 	// Create a new project.
 	Project* project = new Project();
 	AddProject(project);
@@ -408,6 +412,8 @@ void lcApplication::Shutdown()
 
 	delete m_Library;
 	m_Library = NULL;
+
+	lcDestroyDefaultMeshes();
 
 	GL_Shutdown();
 }

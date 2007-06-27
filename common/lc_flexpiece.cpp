@@ -274,16 +274,12 @@ else if (i == 2)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FIXME: split this into another file
 
-// FIXME: move the sphere somewhere else.
-static lcMesh* SphereMesh;
+#define LC_FLEXPIECE_POINT_SIZE 0.2f
 
 lcFlexiblePiecePoint::lcFlexiblePiecePoint(lcFlexiblePiece* Parent)
 	: lcObject(LC_OBJECT_FLEXPIECE_POINT, LC_FLEXPIECE_POINT_NUMKEYS)
 {
 	m_Parent = Parent;
-
-	if (!SphereMesh)
-		SphereMesh = lcCreateSphereMesh(0.2f, 8);
 }
 
 lcFlexiblePiecePoint::~lcFlexiblePiecePoint()
@@ -300,13 +296,17 @@ void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, int Color)
 {
 	// FIXME: lcFlexiblePiece
 
+	Matrix44 ScaleMatrix(Vector4(LC_FLEXPIECE_POINT_SIZE, 0.0f, 0.0f, 0.0f), Vector4(0.0f, LC_FLEXPIECE_POINT_SIZE, 0.0f, 0.0f), Vector4(0.0f, 0.0f, LC_FLEXPIECE_POINT_SIZE, 0.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	Matrix44 ModelWorld = IdentityMatrix44();
+	ModelWorld.SetTranslation(m_WorldPosition);
+
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = (lcPieceObject*)this;
-	RenderSection.ModelWorld = IdentityMatrix44();
-	RenderSection.ModelWorld.SetTranslation(m_WorldPosition);
-	RenderSection.Mesh = SphereMesh;
-	RenderSection.Section = &SphereMesh->m_Sections[0];
+	RenderSection.ModelWorld = Mul(ScaleMatrix, ModelWorld);;
+	RenderSection.Mesh = lcSphereMesh;
+	RenderSection.Section = &lcSphereMesh->m_Sections[0];
 	RenderSection.Color = 0;
 
 	if (IsFocused())

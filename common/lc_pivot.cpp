@@ -55,15 +55,15 @@ void lcPivot::Update(u32 Time)
 
 void lcPivot::AddToScene(lcScene* Scene, int Color)
 {
-	// fixme: lcPivot
-	static lcMesh* BoxMesh = lcCreateWireframeBoxMesh(Vector3(-LC_PIVOT_SIZE, -LC_PIVOT_SIZE, -LC_PIVOT_SIZE), Vector3(LC_PIVOT_SIZE, LC_PIVOT_SIZE, LC_PIVOT_SIZE));
+	Matrix44 ScaleMatrix(Vector4(LC_PIVOT_SIZE, 0.0f, 0.0f, 0.0f), Vector4(0.0f, LC_PIVOT_SIZE, 0.0f, 0.0f), Vector4(0.0f, 0.0f, LC_PIVOT_SIZE, 0.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 
+	// fixme: lcPivot
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = this;
-	RenderSection.ModelWorld = m_ModelWorld;
-	RenderSection.Mesh = BoxMesh;
-	RenderSection.Section = &BoxMesh->m_Sections[0];
+	RenderSection.ModelWorld = Mul(ScaleMatrix, m_ModelWorld);
+	RenderSection.Mesh = lcWireframeBoxMesh;
+	RenderSection.Section = &lcWireframeBoxMesh->m_Sections[0];
 	RenderSection.Color = 1;
 
 	if (IsFocused())

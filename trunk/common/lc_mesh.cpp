@@ -1,11 +1,33 @@
 #include "lc_global.h"
+#include "lc_mesh.h"
+
 #include <malloc.h>
 #include <stdlib.h>
 #include "opengl.h"
 #include "globals.h"
-#include "lc_mesh.h"
 #include "system.h"
 #include "debug.h"
+
+lcMesh* lcSphereMesh;
+lcMesh* lcBoxMesh;
+lcMesh* lcWireframeBoxMesh;
+
+void lcCreateDefaultMeshes()
+{
+	lcSphereMesh = lcCreateSphereMesh(1.0f, 16);
+	lcBoxMesh = lcCreateBoxMesh(Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, 1.0f));
+	lcWireframeBoxMesh = lcCreateWireframeBoxMesh(Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, 1.0f));
+}
+
+void lcDestroyDefaultMeshes()
+{
+	delete lcSphereMesh;
+	lcSphereMesh = NULL;
+	delete lcBoxMesh;
+	lcBoxMesh = NULL;
+	delete lcWireframeBoxMesh;
+	lcWireframeBoxMesh = NULL;
+}
 
 lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 {
@@ -87,9 +109,60 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 	return SphereMesh;
 }
 
+lcMesh* lcCreateBoxMesh(const Vector3& Min, const Vector3& Max)
+{
+	int NumIndices = 24;
+	int NumVertices = 8;
+
+	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
+
+	lcMeshEditor<u16> MeshEdit(BoxMesh);
+	MeshEdit.StartSection(GL_QUADS, LC_COL_DEFAULT);
+
+	MeshEdit.AddVertex(Vector3(Min[0], Min[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Min[0], Max[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Max[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Min[1], Min[2]));
+	MeshEdit.AddVertex(Vector3(Min[0], Min[1], Max[2]));
+	MeshEdit.AddVertex(Vector3(Min[0], Max[1], Max[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Max[1], Max[2]));
+	MeshEdit.AddVertex(Vector3(Max[0], Min[1], Max[2]));
+
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(4);
+
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(4);
+	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(6);
+
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(4);
+	MeshEdit.AddIndex(1);
+	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(5);
+
+	MeshEdit.EndSection();
+
+	return BoxMesh;
+}
+
 lcMesh* lcCreateWireframeBoxMesh(const Vector3& Min, const Vector3& Max)
 {
-	int NumIndices = 12;
+	int NumIndices = 24;
 	int NumVertices = 8;
 
 	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);

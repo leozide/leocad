@@ -2,6 +2,7 @@
 #define _LC_BUFFER_H_
 
 #include "opengl.h"
+#include "algebra.h"
 
 class lcVertexBuffer
 {
@@ -272,6 +273,14 @@ public:
 };
 
 lcMesh* lcCreateSphereMesh(float Radius, int Slices);
+lcMesh* lcCreateBoxMesh(const Vector3& Min, const Vector3& Max);
 lcMesh* lcCreateWireframeBoxMesh(const Vector3& Min, const Vector3& Max);
+
+void lcCreateDefaultMeshes();
+void lcDestroyDefaultMeshes();
+
+extern lcMesh* lcSphereMesh;
+extern lcMesh* lcBoxMesh;
+extern lcMesh* lcWireframeBoxMesh;
 
 #endif

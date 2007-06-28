@@ -561,7 +561,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 						if (NumPrims)
 						{
 							pGroup->NumSections++;
-							MeshEdit.StartSection(PrimTypes[PrimType], ColorIndex);
+							lcMeshSection* Section = MeshEdit.StartSection(PrimTypes[PrimType], ColorIndex);
 
 #ifdef LC_BIG_ENDIAN
 							while (NumPrims--)
@@ -574,6 +574,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 							p += NumPrims;
 #endif
 							MeshEdit.EndSection();
+							MeshEdit.CalculateSectionBoundingBox(Section);
 						}
 					}
 				}
@@ -604,7 +605,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 						if (NumPrims)
 						{
 							pGroup->NumSections++;
-							MeshEdit.StartSection(PrimTypes[PrimType], ColorIndex);
+							lcMeshSection* Section = MeshEdit.StartSection(PrimTypes[PrimType], ColorIndex);
 
 #ifdef LC_BIG_ENDIAN
 							while (NumPrims--)
@@ -617,6 +618,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 							p += NumPrims;
 #endif
 							MeshEdit.EndSection();
+							MeshEdit.CalculateSectionBoundingBox(Section);
 						}
 					}
 				}
@@ -654,8 +656,14 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 					MeshEdit.AddVertex(tmp);
 				}
 
+				Vector3 Min = Mul31(Vector3(-LC_STUD_RADIUS, -LC_STUD_RADIUS, 0.0f), Mat);
+				Vector3 Max = Mul31(Vector3(LC_STUD_RADIUS, LC_STUD_RADIUS, LC_STUD_HEIGHT), Mat);
+
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_QUADS, color);
+				lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, color);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				for (i = 0; i < SIDES; i++)
 				{
@@ -675,7 +683,10 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_TRIANGLES, color);
+				Section = MeshEdit.StartSection(GL_TRIANGLES, color);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				for (i = 0; i < SIDES; i++)
 				{
@@ -689,7 +700,10 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				for (i = 0; i < SIDES; i++)
 				{
@@ -746,8 +760,14 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 					MeshEdit.AddVertex(tmp);
 				}
 
+				Vector3 Min = Mul31(Vector3(-LC_STUD_RADIUS, -LC_STUD_RADIUS, 0.0f), Mat);
+				Vector3 Max = Mul31(Vector3(LC_STUD_RADIUS, LC_STUD_RADIUS, LC_STUD_HEIGHT), Mat);
+
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_QUADS, color);
+				lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, color);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				// Outside.
 				for (i = 0; i < SIDES; i++)
@@ -802,7 +822,10 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				// outside
 				for (i = 0; i < SIDES; i++)
@@ -875,8 +898,14 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 					MeshEdit.AddVertex(tmp);
 				}
 
+				Vector3 Min = Mul31(Vector3(-LC_STUD_RADIUS, -LC_STUD_RADIUS, 0.0f), Mat);
+				Vector3 Max = Mul31(Vector3(LC_STUD_RADIUS, LC_STUD_RADIUS, LC_STUD_HEIGHT), Mat);
+
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_QUADS, color);
+				lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, color);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				for (i = 0; i < SIDES; i++)
 				{
@@ -896,7 +925,10 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_TRIANGLES, color);
+				Section = MeshEdit.StartSection(GL_TRIANGLES, color);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				for (i = 0; i < SIDES; i++)
 				{
@@ -910,7 +942,10 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				for (i = 0; i < SIDES; i++)
 				{
@@ -968,8 +1003,14 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 					MeshEdit.AddVertex(tmp);
 				}
 
+				Vector3 Min = Mul31(Vector3(-LC_STUD_RADIUS, -LC_STUD_RADIUS, 0.0f), Mat);
+				Vector3 Max = Mul31(Vector3(LC_STUD_RADIUS, LC_STUD_RADIUS, LC_STUD_HEIGHT), Mat);
+
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_QUADS, color);
+				lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, color);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				// outside
 				for (i = 0; i < SIDES; i++)
@@ -1024,7 +1065,10 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+
+				Section->Box.m_Min = Min;
+				Section->Box.m_Max = Max;
 
 				// outside
 				for (i = 0; i < SIDES; i++)

@@ -822,6 +822,12 @@ inline BoundingBox operator+(const BoundingBox& a, const BoundingBox& b)
 	return BoundingBox(Min(a.m_Min, b.m_Min), Max(a.m_Max, b.m_Max));
 }
 
+inline const BoundingBox& operator+=(BoundingBox& a, const BoundingBox& b)
+{
+	a = BoundingBox(Min(a.m_Min, b.m_Min), Max(a.m_Max, b.m_Max));
+	return a;
+}
+
 // ============================================================================
 // Linear Algebra Functions.
 

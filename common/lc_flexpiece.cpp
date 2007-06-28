@@ -120,20 +120,7 @@ void lcFlexiblePiece::AddToScene(lcScene* Scene, int Color)
 {
 	// FIXME: lcFlexiblePiece
 
-	lcRenderSection RenderSection;
-
-	RenderSection.Owner = this;
-	RenderSection.ModelWorld = m_ModelWorld;
-	RenderSection.Mesh = m_Mesh;
-	RenderSection.Section = &m_Mesh->m_Sections[0];
-	RenderSection.Color = 1;
-
-	if (IsFocused())
-		RenderSection.Color = LC_COL_FOCUSED;
-	else if (IsSelected())
-		RenderSection.Color = LC_COL_SELECTED;
-
-	Scene->m_OpaqueSections.Add(RenderSection);
+	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COL_DEFAULT) ? Color : m_Color, this);
 
 	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
 		Point->AddToScene(Scene, Color);
@@ -173,6 +160,7 @@ void lcFlexiblePiece::BuildMesh()
 
 	lcMeshEditor<u16> MeshEdit(m_Mesh);
 	MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+	// fixme: section bounding box
 
 //	Matrix44 Blend(Vector4(-1, 3, -3, 1), Vector4(3, -6, 3, 0), Vector4(-3, 3, 0, 0), Vector4(1, 0, 0, 0));
 //	Matrix44 Tangent(Vector4(0, 0, 0, 0), Vector4(-3, 9, -9, 3), Vector4(6,-12, 6, 0), Vector4(-3, 3, 0, 0));

@@ -3,6 +3,8 @@
 
 #include <malloc.h>
 #include <stdlib.h>
+#include "lc_scene.h"
+#include "lc_pieceobj.h"
 #include "opengl.h"
 #include "globals.h"
 #include "system.h"
@@ -37,7 +39,10 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 	lcMesh* SphereMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(SphereMesh);
-	MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+
+	Section->Box.m_Min = Vector3(-Radius, -Radius, -Radius);
+	Section->Box.m_Max = Vector3(Radius, Radius, Radius);
 
 	MeshEdit.AddVertex(Vector3(0, 0, Radius));
 
@@ -117,7 +122,10 @@ lcMesh* lcCreateBoxMesh(const Vector3& Min, const Vector3& Max)
 	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(BoxMesh);
-	MeshEdit.StartSection(GL_QUADS, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, LC_COL_DEFAULT);
+
+	Section->Box.m_Min = Min;
+	Section->Box.m_Max = Max;
 
 	MeshEdit.AddVertex(Vector3(Min[0], Min[1], Min[2]));
 	MeshEdit.AddVertex(Vector3(Min[0], Max[1], Min[2]));
@@ -168,7 +176,10 @@ lcMesh* lcCreateWireframeBoxMesh(const Vector3& Min, const Vector3& Max)
 	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(BoxMesh);
-	MeshEdit.StartSection(GL_LINES, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_LINES, LC_COL_DEFAULT);
+
+	Section->Box.m_Min = Min;
+	Section->Box.m_Max = Max;
 
 	MeshEdit.AddVertex(Vector3(Min[0], Min[1], Min[2]));
 	MeshEdit.AddVertex(Vector3(Min[0], Max[1], Min[2]));
@@ -314,6 +325,51 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 
 	m_IndexBuffer->UnbindBuffer();
 	m_VertexBuffer->UnbindBuffer();
+}
+
+void lcMesh::AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, lcPieceObject* Owner)
+{
+	for (int i = 0; i < m_SectionCount; i++)
+	{
+		lcRenderSection RenderSection;
+		lcMeshSection* Section = &m_Sections[i];
+
+		RenderSection.Owner = Owner;
+		RenderSection.ModelWorld = ModelWorld;
+		RenderSection.Mesh = this;
+		RenderSection.Section = Section;
+		RenderSection.Color = Section->ColorIndex;
+
+		if (RenderSection.Color == LC_COL_DEFAULT)
+			RenderSection.Color = Color;
+
+		if (RenderSection.Section->PrimitiveType == GL_LINES)
+		{
+			// FIXME: LC_DET_BRICKEDGES
+//			if ((m_nDetail & LC_DET_BRICKEDGES) == 0)
+//				continue;
+
+			if (Owner->IsFocused())
+				RenderSection.Color = LC_COL_FOCUSED;
+			else if (Owner->IsSelected())
+				RenderSection.Color = LC_COL_SELECTED;
+		}
+
+		if (RenderSection.Color > 13 && RenderSection.Color < 22)
+		{
+			Vector3 Pos = Mul31(Section->Box.GetCenter(), ModelWorld);
+			Pos = Mul31(Pos, Scene->m_WorldView);
+			RenderSection.Distance = Pos[2];
+
+			Scene->m_TranslucentSections.AddSorted(RenderSection, SortRenderSectionsCallback, NULL);
+		}
+		else
+		{
+			// Pieces are already sorted by vertex buffer, so no need to sort again here.
+			// FIXME: not true anymore, need to sort by vertex buffer here.
+			Scene->m_OpaqueSections.Add(RenderSection);
+		}
+	}
 }
 
 template<>

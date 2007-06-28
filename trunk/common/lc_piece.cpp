@@ -76,48 +76,7 @@ void lcPiece::Update(u32 Time)
 
 void lcPiece::AddToScene(lcScene* Scene, int Color)
 {
-	int RenderColor = (m_Color == LC_COL_DEFAULT) ? Color : m_Color;
-
-	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
-	{
-		lcRenderSection RenderSection;
-
-		RenderSection.Owner = this;
-		RenderSection.ModelWorld = m_ModelWorld;
-		RenderSection.Mesh = m_Mesh;
-		RenderSection.Section = &m_Mesh->m_Sections[i];
-		RenderSection.Color = RenderSection.Section->ColorIndex;
-
-		if (RenderSection.Color == LC_COL_DEFAULT)
-			RenderSection.Color = RenderColor;
-
-		if (RenderSection.Section->PrimitiveType == GL_LINES)
-		{
-			// FIXME: LC_DET_BRICKEDGES
-//			if ((m_nDetail & LC_DET_BRICKEDGES) == 0)
-//				continue;
-
-			if (IsFocused())
-				RenderSection.Color = LC_COL_FOCUSED;
-			else if (IsSelected())
-				RenderSection.Color = LC_COL_SELECTED;
-		}
-
-		if (RenderSection.Color > 13 && RenderSection.Color < 22)
-		{
-			Vector3 Pos = Mul31(m_BoundingBox.GetCenter(), m_ModelWorld); // FIXME: Have a bounding box for each section
-			Pos = Mul31(Pos, Scene->m_WorldView);
-			RenderSection.Distance = Pos[2];
-
-			Scene->m_TranslucentSections.AddSorted(RenderSection, SortRenderSectionsCallback, NULL);
-		}
-		else
-		{
-			// Pieces are already sorted by vertex buffer, so no need to sort again here.
-			// FIXME: not true anymore, need to sort by vertex buffer here.
-			Scene->m_OpaqueSections.Add(RenderSection);
-		}
-	}
+	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COL_DEFAULT) ? Color : m_Color, this);
 }
 
 void lcPiece::BuildMesh()
@@ -202,25 +161,43 @@ void lcPiece::BuildMesh(int SectionIndices[LC_COL_DEFAULT+1][3], TypeToType<T>)
 				SectionIndices[SrcSection->ColorIndex][0] -= SrcSection->IndexCount;
 				ReserveIndices = SectionIndices[SrcSection->ColorIndex][0];
 				if (DstSections[SrcSection->ColorIndex][0])
+				{
 					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][0]);
+					DstSections[SrcSection->ColorIndex][0]->Box += SrcSection->Box;
+				}
 				else
-					DstSections[SrcSection->ColorIndex][0] =  MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+				{
+					DstSections[SrcSection->ColorIndex][0] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+					DstSections[SrcSection->ColorIndex][0]->Box = SrcSection->Box;
+				}
 				break;
 			case GL_TRIANGLES:
 				SectionIndices[SrcSection->ColorIndex][1] -= SrcSection->IndexCount;
 				ReserveIndices = SectionIndices[SrcSection->ColorIndex][1];
 				if (DstSections[SrcSection->ColorIndex][1])
+				{
 					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][1]);
+					DstSections[SrcSection->ColorIndex][2]->Box += SrcSection->Box;
+				}
 				else
-					DstSections[SrcSection->ColorIndex][1] =  MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+				{
+					DstSections[SrcSection->ColorIndex][1] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+					DstSections[SrcSection->ColorIndex][1]->Box = SrcSection->Box;
+				}
 				break;
 			case GL_LINES:
 				SectionIndices[SrcSection->ColorIndex][2] -= SrcSection->IndexCount;
 				ReserveIndices = SectionIndices[SrcSection->ColorIndex][2];
 				if (DstSections[SrcSection->ColorIndex][2])
+				{
 					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][2]);
+					DstSections[SrcSection->ColorIndex][2]->Box += SrcSection->Box;
+				}
 				else
-					DstSections[SrcSection->ColorIndex][2] =  MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+				{
+					DstSections[SrcSection->ColorIndex][2] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+					DstSections[SrcSection->ColorIndex][2]->Box = SrcSection->Box;
+				}
 				break;
 			}
 

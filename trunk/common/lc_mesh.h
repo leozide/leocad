@@ -4,6 +4,9 @@
 #include "opengl.h"
 #include "algebra.h"
 
+class lcScene;
+class lcPieceObject;
+
 class lcVertexBuffer
 {
 public:
@@ -162,6 +165,7 @@ struct lcMeshSection
 	int IndexOffset;
 	int IndexCount;
 	int PrimitiveType;
+	BoundingBox Box;
 };
 
 class lcMesh
@@ -172,6 +176,7 @@ public:
 
 	void Clear();
 	void Render(int Color, bool Selected = false, bool Focused = false);
+	void AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, lcPieceObject* Owner);
 
 public:
 	lcMeshSection* m_Sections;
@@ -253,6 +258,18 @@ public:
 		if (m_LastIndex < m_CurIndex)
 			m_LastIndex = m_CurIndex;
 		m_CurSection = -1;
+	}
+
+	void CalculateSectionBoundingBox(lcMeshSection* Section)
+	{
+		Section->Box.Reset();
+
+		for (int i = Section->IndexOffset; i < Section->IndexOffset + Section->IndexCount; i++)
+		{
+			int Index = m_IndexBuffer[i];
+			Vector3 Vert(m_VertexBuffer[Index*3], m_VertexBuffer[Index*3+1], m_VertexBuffer[Index*3+2]);
+			Section->Box.AddPoint(Vert);
+		}
 	}
 
 	void OffsetIndices(int FirstIndex, int NumIndices, int Offset)

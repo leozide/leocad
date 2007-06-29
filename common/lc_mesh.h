@@ -264,7 +264,8 @@ public:
 	{
 		Section->Box.Reset();
 
-		for (int i = Section->IndexOffset; i < Section->IndexOffset + Section->IndexCount; i++)
+		int Start = Section->IndexOffset / sizeof(T);
+		for (int i = Start; i < Start + Section->IndexCount; i++)
 		{
 			int Index = m_IndexBuffer[i];
 			Vector3 Vert(m_VertexBuffer[Index*3], m_VertexBuffer[Index*3+1], m_VertexBuffer[Index*3+2]);

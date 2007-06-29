@@ -9,6 +9,10 @@
 #include <math.h>
 #include <shlobj.h>
 
+#include "lc_pieceobj.h"
+#include "lc_piece.h"
+#include "lc_mesh.h"
+
 #ifdef LC_HAVE_JPEGLIB
 #pragma comment(lib, "jpeglib")
 #endif
@@ -262,6 +266,7 @@ BOOL FolderBrowse(CString *strFolder, LPCSTR lpszTitle, HWND hWndOwner)
 
 #pragma comment(lib, "3dsftk")
 
+// TODO: rewrite, and look for another 3ds file library
 void Export3DStudio() 
 {
 	CFileDialog dlg(FALSE, "*.dat",NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
@@ -436,164 +441,153 @@ void Export3DStudio()
 		matr->wiresize = 1.0f;
 		matr->shading = Phong;
 		matr->useblur = False3ds;
+		matr->twosided = True3ds;
 		PutMaterial3ds(db, matr);
 		ReleaseMaterial3ds(&matr);
 	}
 
-	Piece* pPiece;
 	int objcount = 0;
-	for (pPiece = project->m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (lcPieceObject* Piece = lcGetActiveProject()->m_ActiveModel->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
 	{
+		// FIXME: 3ds export
+		if (Piece->GetType() != LC_OBJECT_PIECE)
+			continue;
+
+		lcPiece* pPiece = (lcPiece*)Piece;
+
 		// MESH OBJECT
 		mesh3ds *mobj = NULL;
-		UINT facecount = 0, i, j = 0, c, col;
-		UINT facemats[LC_COL_DEFAULT+1];
+		int facecount = 0, j;
+		int facemats[LC_COL_DEFAULT+1];
 		memset(facemats, 0, sizeof(facemats));
 
-		PieceInfo* pInfo = pPiece->GetPieceInfo();
+		PieceInfo* pInfo = pPiece->m_PieceInfo;
 		if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
 			continue; // 3DS can't handle this
 
-		// count number of faces used
-		for (c = 0; c < pInfo->m_nGroupCount; c++)
+		// Count number of triangles used.
+		lcMesh* Mesh = pPiece->m_Mesh;
+
+		for (int i = 0; i < Mesh->m_SectionCount; i++)
 		{
-			WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-			col = *info;
-			info++;
+			lcMeshSection* Section = &Mesh->m_Sections[i];
 
-			while (col--)
-			{
-				i = *info;
-				info++;
+			int NumTris = 0;
 
-				facecount += (*info)*2/4;
-				facemats[i] += (*info)*2/4;
-				info += *info + 1;
-				facecount += (*info)/3;
-				facemats[i] += (*info)/3;
-				info += *info + 1;
-				info += *info + 1;
-			}
+			if (Section->PrimitiveType == GL_TRIANGLES)
+				NumTris = Section->IndexCount / 3;
+			else if (Section->PrimitiveType == GL_QUADS)
+				NumTris = Section->IndexCount / 4 * 2;
+
+			facecount += NumTris;
+			facemats[Section->ColorIndex] += NumTris;
 		}
 
-		InitMeshObj3ds(&mobj, (unsigned short)pInfo->m_nVertexCount, facecount, InitNoExtras3ds);
+		InitMeshObj3ds(&mobj, Mesh->m_VertexCount, facecount, InitNoExtras3ds);
 		sprintf(mobj->name, "Piece%d", objcount);
 		objcount++;
 
-		float tmp[3], pos[3], rot[4];
-		pPiece->GetPosition(pos);
-		pPiece->GetRotation(rot);
-		Matrix mat(rot, pos);
-		for (c = 0; c < pInfo->m_nVertexCount; c++)
+		float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+		u16* indices = (u16*)Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+
+		for (int c = 0; c < Mesh->m_VertexCount; c++)
 		{
-			mat.TransformPoint(tmp, &pInfo->m_fVertexArray[c*3]);
-			mobj->vertexarray[c].x = tmp[0];
-			mobj->vertexarray[c].y = tmp[1];
-			mobj->vertexarray[c].z = tmp[2];
+			Vector3 Vert = Mul31(Vector3(verts[c*3], verts[c*3+1], verts[c*3+2]), Piece->m_ModelWorld);
+			mobj->vertexarray[c].x = Vert[0];
+			mobj->vertexarray[c].y = Vert[1];
+			mobj->vertexarray[c].z = Vert[2];
 		}
 
-		for (c = 0; c < pInfo->m_nGroupCount; c++)
-		{
-			WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-			col = *info;
-			info++;
+		int Indices = 0;
 
-			while (col--)
+		for (int i = 0; i < Mesh->m_SectionCount; i++)
+		{
+			lcMeshSection* Section = &Mesh->m_Sections[i];
+
+			if (Section->PrimitiveType == GL_TRIANGLES)
 			{
-				info++;
-				
-				for (i = 0; i < *info; i+=4)
+				for (int j = Section->IndexOffset / 2; j < Section->IndexOffset / 2 + Section->IndexCount; j+=3)
 				{
-					mobj->facearray[j].v1 = info[i+1];
-					mobj->facearray[j].v2 = info[i+2];
-					mobj->facearray[j].v3 = info[i+3];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-					mobj->facearray[j].v1 = info[i+3];
-					mobj->facearray[j].v2 = info[i+4];
-					mobj->facearray[j].v3 = info[i+1];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
+					mobj->facearray[Indices].v1 = indices[j];
+					mobj->facearray[Indices].v2 = indices[j+1];
+					mobj->facearray[Indices].v3 = indices[j+2];
+					mobj->facearray[Indices].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
+					Indices++;
 				}
-				info += *info + 1;
-				for (i = 0; i < *info; i+=3)
+			}
+			else if (Section->PrimitiveType == GL_QUADS)
+			{
+				for (int j = Section->IndexOffset / 2; j < Section->IndexOffset / 2 + Section->IndexCount; j+=4)
 				{
-					mobj->facearray[j].v1 = info[i+1];
-					mobj->facearray[j].v2 = info[i+2];
-					mobj->facearray[j].v3 = info[i+3];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
+					mobj->facearray[Indices].v1 = indices[j];
+					mobj->facearray[Indices].v2 = indices[j+1];
+					mobj->facearray[Indices].v3 = indices[j+2];
+					mobj->facearray[Indices].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
+					Indices++;
+					mobj->facearray[Indices].v1 = indices[j+2];
+					mobj->facearray[Indices].v2 = indices[j+3];
+					mobj->facearray[Indices].v3 = indices[j];
+					mobj->facearray[Indices].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
+					Indices++;
 				}
-				info += *info + 1;
-				info += *info + 1;
 			}
 		}
 
-		i = 0;
+		Mesh->m_VertexBuffer->UnmapBuffer();
+		Mesh->m_IndexBuffer->UnmapBuffer();
+
+		mobj->nmats = 0;
 		for (j = 0; j < LC_COL_DEFAULT+1; j++)
 			if (facemats[j])
-				i++;
+				mobj->nmats++;
 
-		mobj->nmats = i;
-		InitMeshObjField3ds (mobj, InitMatArray3ds);
+		InitMeshObjField3ds(mobj, InitMatArray3ds);
 
-		i = 0;
+		int Material = 0;
 
 		for (j = 0; j < LC_COL_DEFAULT+1; j++)
 		{
-			if (facemats[j])
+			if (!facemats[j])
+				continue;
+
+			InitMatArrayIndex3ds(mobj, Material, facemats[j]);
+			sprintf(mobj->matarray[Material].name, "Material%02d", j == LC_COL_DEFAULT ? pPiece->m_Color : j);
+			mobj->matarray[Material].nfaces = facemats[j];
+
+			int curface = 0;
+			facecount = 0;
+
+			for (int i = 0; i < Mesh->m_SectionCount; i++)
 			{
-				InitMatArrayIndex3ds (mobj, i, facemats[j]);
-				sprintf(mobj->matarray[i].name, "Material%02d", j == LC_COL_DEFAULT ? pPiece->GetColor() : j);
-				mobj->matarray[i].nfaces = facemats[j];
+				lcMeshSection* Section = &Mesh->m_Sections[i];
 
-				UINT curface = 0;
-				facecount = 0;
+				if (j != Section->ColorIndex)
+					continue;
 
-				for (c = 0; c < pInfo->m_nGroupCount; c++)
+				if (Section->PrimitiveType == GL_TRIANGLES)
 				{
-					WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-					col = *info;
-					info++;
-
-					while (col--)
+					for (int k = 0; k < Section->IndexCount; k+=3)
 					{
-						if (j == *info)
-						{
-							info++;
-							for (UINT k = 0; k < *info; k += 4)
-							{
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-							}
-						
-							info += *info + 1;
-							for (k = 0; k < *info; k += 3)
-							{
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-							}
-							info += *info + 1;
-						}
-						else
-						{
-							info++;
-							curface += (*info)*2/4;
-							info += *info + 1;
-							curface += (*info)/3;
-							info += *info + 1;
-						}
-						info += *info + 1;
+						mobj->matarray[Material].faceindex[facecount] = curface;
+						facecount++;
+						curface++;
 					}
 				}
-
-				i++;
+				else if (Section->PrimitiveType == GL_QUADS)
+				{
+					for (int k = 0; k < Section->IndexCount; k+=4)
+					{
+						mobj->matarray[Material].faceindex[facecount] = curface;
+						facecount++;
+						curface++;
+						mobj->matarray[Material].faceindex[facecount] = curface;
+						facecount++;
+						curface++;
+					}
+				}
 			}
+
+			Material++;
 		}
 	
 		FillMatrix3ds(mobj);

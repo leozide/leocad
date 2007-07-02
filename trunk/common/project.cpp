@@ -1934,7 +1934,13 @@ void Project::RenderScene(View* view)
 	m_Scene->m_TranslucentSections.RemoveAll();
 	m_Scene->m_WorldView = view->GetCamera()->m_WorldView;
 
-	m_ActiveModel->AddToScene(m_Scene, LC_COL_DEFAULT);
+	for (lcObject* Piece = m_ActiveModel->m_Pieces; Piece; Piece = Piece->m_Next)
+	{
+		if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
+			continue;
+
+		Piece->AddToScene(m_Scene, LC_COL_DEFAULT);
+	}
 
 	// Add piece preview.
 	if (m_nCurAction == LC_ACTION_INSERT)
@@ -2761,19 +2767,7 @@ void Project::RenderInitialize()
 		glEnable(GL_DITHER);
 	else
 		glDisable(GL_DITHER);
-/*
-	// TODO: use a blending function
-	if (m_dwDetail & DET_ANTIALIAS)
-	{
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_POLYGON_SMOOTH);
-	}
-	else
-	{
-		glDisable(GL_LINE_SMOOTH);
-		glDisable(GL_POLYGON_SMOOTH);
-	}
-*/
+
 	if (m_nDetail & LC_DET_SMOOTH)
 		glShadeModel(GL_SMOOTH);
 	else

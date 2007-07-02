@@ -61,18 +61,6 @@ bool lcModel::IsSubModel(const lcModel* Model) const
 	return false;
 }
 
-void lcModel::AddToScene(lcScene* Scene, int Color)
-{
-	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
-	{
-		// FIXME: only use current frame for the active model, otherwise use max frame.
-		if (!Piece->IsVisible(m_CurFrame))
-			continue;
-
-		Piece->AddToScene(Scene, Color);
-	}
-}
-
 void lcModel::SetActive(bool Active)
 {
 	if (Active)

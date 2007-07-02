@@ -27,9 +27,6 @@ public:
 	// Update this model to a given time.
 	void Update(u32 Time);
 
-	// Add this model to a scene.
-	void AddToScene(lcScene* Scene, int Color);
-
 	// Return true if any objects are currently selected.
 	bool AnyObjectsSelected() const;
 

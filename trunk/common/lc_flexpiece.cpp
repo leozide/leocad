@@ -18,13 +18,17 @@ lcFlexiblePiece::lcFlexiblePiece(PieceInfo* Info)
 	m_BoundingBox = BoundingBox(Vector3(m_PieceInfo->m_fDimensions[3], m_PieceInfo->m_fDimensions[4], m_PieceInfo->m_fDimensions[5]),
 	                            Vector3(m_PieceInfo->m_fDimensions[0], m_PieceInfo->m_fDimensions[1], m_PieceInfo->m_fDimensions[2]));
 
+	lcObject* Last = NULL;
 	for (int i = 0; i < 4; i++)
 	{
 		lcFlexiblePiecePoint* Point = new lcFlexiblePiecePoint(this);
 		Point->SetPosition(1, true, Vector3(0.0f, 0.0f, 1.0f * i));
 
-		Point->m_Next = m_Children;
-		m_Children = Point;
+		if (Last)
+			Last->m_Next = Point;
+		else
+			m_Children = Point;
+		Last = Point;
 	}
 }
 
@@ -64,7 +68,12 @@ lcFlexiblePiece::lcFlexiblePiece(lcFlexiblePiece* Piece)
 	for (lcObject* Point = Piece->m_Children; Point; Point = Point->m_Next)
 	{
 		lcFlexiblePiecePoint* NewPoint = new lcFlexiblePiecePoint(this);
-		NewPoint->SetPosition(1, true, Point->m_ParentPosition);
+
+		for (int i = 0; i < LC_FLEXPIECE_POINT_NUMKEYS; i++)
+			NewPoint->m_Keys[i] = Point->m_Keys[i];
+
+		NewPoint->m_WorldPosition = Point->m_WorldPosition;
+		NewPoint->m_ParentPosition = Point->m_ParentPosition;
 
 		if (Last)
 			Last->m_Next = NewPoint;
@@ -72,7 +81,6 @@ lcFlexiblePiece::lcFlexiblePiece(lcFlexiblePiece* Piece)
 			m_Children = NewPoint;
 		Last = NewPoint;
 	}
-
 }
 
 lcFlexiblePiece::~lcFlexiblePiece()
@@ -145,9 +153,9 @@ void lcFlexiblePiece::BuildMesh()
 	delete m_Mesh;
 	m_Mesh = NULL;
 
-	ObjArray<Vector4> ControlPoints(16);
+	ObjArray<Vector3> ControlPoints(16);
 	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
-		ControlPoints.Add(Vector4(Point->m_ParentPosition, 1));
+		ControlPoints.Add(Point->m_ParentPosition);
 
 	int NumSections = 3;
 	int NumSegments = 16;
@@ -162,70 +170,76 @@ void lcFlexiblePiece::BuildMesh()
 	MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
 	// fixme: section bounding box
 
-//	Matrix44 Blend(Vector4(-1, 3, -3, 1), Vector4(3, -6, 3, 0), Vector4(-3, 3, 0, 0), Vector4(1, 0, 0, 0));
-//	Matrix44 Tangent(Vector4(0, 0, 0, 0), Vector4(-3, 9, -9, 3), Vector4(6,-12, 6, 0), Vector4(-3, 3, 0, 0));
+	// Calculate the initial rotation matrix for the curve points.
+	Vector3 Z = Normalize(Vector3(ControlPoints[1]) - Vector3(ControlPoints[0]));
 
-	for (int i = 0; i < 3; i++)
+	// Build the Y vector of the matrix.
+	Vector3 UpVector;
+
+	if (fabsf(Z[0]) < 0.001f && fabsf(Z[1]) < 0.001f)
+		UpVector = Vector3(-Z[2], 0, 0);
+	else
+		UpVector = Vector3(0, 0, 1);
+
+	// Calculate X vector.
+	Vector3 X = Cross3(UpVector, Z);
+
+	// Calculate real Y vector.
+	Vector3 Y = Cross3(Z, X);
+
+	Matrix33 LastMat = Matrix33(Normalize(X), Normalize(Y), Normalize(Z));
+
+	for (int i = 0; i < ControlPoints.GetSize() - 1; i++)
 	{
-//		Matrix44 Segment(ControlPoints[i], ControlPoints[i+1], ControlPoints[i+2], ControlPoints[i+3]);
+		Vector3 p0, p1, p2, p3;
 
-		for (int j = 0; j < NumSegments; j++)
+		if (i == 0)
 		{
-			float t = (float)j/(NumSegments-1);
-//			Vector3 Pos = Mul31((Mul31(Vector3(t*t*t,t*t,t), Blend)), Segment);
-//			Vector3 Tan = Mul31((Mul31(Vector3(0,t*t,t), Tangent)), Segment);
-/*
-			Matrix33 RotMat;
-			Vector3 Z = Normalize(Tan);
-
-			if (fabsf(Dot3(Z, Vector3(0, 0, 1))) < 0.99f)
-			{
-				Vector3 X = Normalize(Cross3(Vector3(0, 0, 1), Tan));
-				Vector3 Y = Normalize(Cross3(Tan, X));
-
-				RotMat = Matrix33(X, Y, Z);
-			}
-			else
-			{
-				RotMat = IdentityMatrix33();
-			}
-*/
-Vector3 p0, p1, p2, p3;
-
-if (i == 0)
-{
 			p0 = Vector3(ControlPoints[0]);
 			p1 = Vector3(ControlPoints[0]);
 			p2 = Vector3(ControlPoints[1]);
 			p3 = Vector3(ControlPoints[2]);
-}
-else if (i == 1)
-{
-			p0 = Vector3(ControlPoints[0]);
-			p1 = Vector3(ControlPoints[1]);
-			p2 = Vector3(ControlPoints[2]);
-			p3 = Vector3(ControlPoints[3]);
-}
-else if (i == 2)
-{
-			p0 = Vector3(ControlPoints[1]);
-			p1 = Vector3(ControlPoints[2]);
-			p2 = Vector3(ControlPoints[3]);
-			p3 = Vector3(ControlPoints[3]);
-}
+		}
+		else if (i == ControlPoints.GetSize() - 2)
+		{
+			p0 = Vector3(ControlPoints[i-1]);
+			p1 = Vector3(ControlPoints[i]);
+			p2 = Vector3(ControlPoints[i+1]);
+			p3 = Vector3(ControlPoints[i+1]);
+		}
+		else
+		{
+			p0 = Vector3(ControlPoints[i-1]);
+			p1 = Vector3(ControlPoints[i]);
+			p2 = Vector3(ControlPoints[i+1]);
+			p3 = Vector3(ControlPoints[i+2]);
+		}
 
+		for (int j = 0; j < NumSegments; j++)
+		{
+			float t = (float)j/(NumSegments-1);
 			float t2 = t * t;
 			float t3 = t2 * t;
-			Vector3 Pos = 0.5f * ( ( 2.0f * p1 ) + ( -p0 + p2 ) * t + ( 2.0f * p0 - 5.0f * p1 + 4 * p2 - p3 ) * t2 + ( -p0 + 3.0f * p1 - 3.0f * p2 + p3 ) * t3 );
-			Vector3 Tan = 0.5f * ( ( -p0 + p2 ) + 2 * ( 2.0f * p0 - 5.0f * p1 + 4 * p2 - p3 ) * t + 3 * ( -p0 + 3.0f * p1 - 3.0f * p2 + p3 ) * t2 );
+
+			Vector3 Pos = 0.5f * ((2.0f * p1) + (-p0 + p2) * t + (2.0f * p0 - 5.0f * p1 + 4 * p2 - p3) * t2 + (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
+			Vector3 Tan = 0.5f * ((-p0 + p2) + 2 * (2.0f * p0 - 5.0f * p1 + 4 * p2 - p3) * t + 3 * (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t2);
+
+			Tan.Normalize();
+			float Dot = Dot3(LastMat[2], Tan);
+
+			if (Dot < 0.999f)
+			{
+				Vector3 Axis = Cross3(LastMat[2], Tan);
+				float Angle = acosf(Dot);
+
+				Matrix33 Rot = MatrixFromAxisAngle(Axis, Angle);
+				LastMat = Mul(LastMat, Rot);
+			}
 
 			for (int k = 0; k < NumSlices; k++)
 			{
 				Vector3 Vertex(r * sinf(k * LC_2PI / NumSlices), r * cosf(k * LC_2PI / NumSlices), 0);
-
-//				Vertex = Mul(Vertex, RotMat) + Pos;
-				Vertex = Vertex + Pos;
-
+				Vertex = Mul(Vertex, LastMat) + Pos;
 				MeshEdit.AddVertex(Vertex);
 
 				if (j != NumSegments-1)
@@ -309,13 +323,11 @@ void lcFlexiblePiecePoint::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 {
 	float Dist = LinePointMinDistance(m_WorldPosition, Ray->Start, Ray->End);
 
-	if (Dist < Ray->Dist)
+	if (Dist < Ray->Dist && Dist < LC_FLEXPIECE_POINT_SIZE)
 	{
 		Ray->Object = this;
 		Ray->Dist = Dist;
 	}
-
-	// FIXME: lcFlexiblePiece
 }
 
 bool lcFlexiblePiecePoint::IntersectsVolume(const Vector4* Planes, int NumPlanes) const

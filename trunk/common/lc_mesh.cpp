@@ -372,6 +372,90 @@ void lcMesh::AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, l
 	}
 }
 
+bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float* Dist) const
+{
+	bool Hit = false;
+	*Dist = FLT_MAX;
+	Vector3 Intersection;
+
+	float* verts = (float*)m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+	void* indices = m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+
+	for (int s = 0; s < m_SectionCount; s++)
+	{
+		lcMeshSection* Section = &m_Sections[s];
+
+		if (Section->PrimitiveType == GL_LINES)
+			continue;
+
+		if (Section->PrimitiveType == GL_QUADS)
+		{
+			if (m_IndexType == GL_UNSIGNED_INT)
+			{
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
+				{
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
+
+					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, Dist, &Intersection))
+						Hit = true;
+				}
+			}
+			else
+			{
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 4)
+				{
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
+
+					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, Dist, &Intersection))
+						Hit = true;
+				}
+			}
+		}
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+		{
+			if (m_IndexType == GL_UNSIGNED_INT)
+			{
+				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 3)
+				{
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+
+					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, Dist, &Intersection))
+						Hit = true;
+				}
+			}
+			else
+			{
+				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
+				for (int i = 0; i < Section->IndexCount; i += 3)
+				{
+					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+
+					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, Dist, &Intersection))
+						Hit = true;
+				}
+			}
+		}
+	}
+
+	m_VertexBuffer->UnmapBuffer();
+	m_IndexBuffer->UnmapBuffer();
+
+	return Hit;
+}
+
 template<>
 void lcMeshEditor<u16>::AddIndices16(void* Indices, int NumIndices)
 {

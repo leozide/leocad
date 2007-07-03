@@ -203,92 +203,12 @@ void lcPiece::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 	if (!BoundingBoxRayMinIntersectDistance(m_BoundingBox, Start, End, &Dist) || (Dist >= Ray->Dist))
 		return;
 
-	// Check each triangle.
-	Vector3 Intersection;
+	// Check mesh.
+	if (!m_Mesh->ClosestRayIntersect(Start, End, &Dist) || (Dist >= Ray->Dist))
+		return;
 
-	float* verts = (float*)m_PieceInfo->GetMesh()->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
-	void* indices = m_PieceInfo->GetMesh()->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
-
-	for (int s = 0; s < m_Mesh->m_SectionCount; s++)
-	{
-		lcMeshSection* Section = &m_Mesh->m_Sections[s];
-
-		if (Section->PrimitiveType == GL_LINES)
-			continue;
-
-		if (Section->PrimitiveType == GL_QUADS)
-		{
-			if (m_PieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-			{
-				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 4)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
-
-					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, &Ray->Dist, &Intersection))
-					{
-						Ray->Object = this;
-					}
-				}
-			}
-			else
-			{
-				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 4)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
-
-					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, &Ray->Dist, &Intersection))
-					{
-						Ray->Object = this;
-					}
-				}
-			}
-		}
-		else if (Section->PrimitiveType == GL_TRIANGLES)
-		{
-			if (m_PieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-			{
-				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 3)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-
-					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &Ray->Dist, &Intersection))
-					{
-						Ray->Object = this;
-					}
-				}
-			}
-			else
-			{
-				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 3)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-
-					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &Ray->Dist, &Intersection))
-					{
-						Ray->Object = this;
-					}
-				}
-			}
-		}
-	}
-
-	m_PieceInfo->GetMesh()->m_VertexBuffer->UnmapBuffer();
-	m_PieceInfo->GetMesh()->m_IndexBuffer->UnmapBuffer();
-
+	Ray->Object = this;
+	Ray->Dist = Dist;
 }
 
 bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const

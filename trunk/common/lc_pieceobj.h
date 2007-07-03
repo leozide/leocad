@@ -17,6 +17,7 @@ class lcPieceObject : public lcObject
 {
 public:
 	lcPieceObject(u32 Type);
+	lcPieceObject(const lcPieceObject* Object);
 	virtual ~lcPieceObject();
 
 	// Change this object's orientation.

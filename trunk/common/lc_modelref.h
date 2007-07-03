@@ -9,7 +9,7 @@ class lcModelRef : public lcPieceObject
 {
 public:
 	lcModelRef(lcModel* Model);
-	lcModelRef(lcModelRef* ModelRef);
+	lcModelRef(const lcModelRef* ModelRef);
 	virtual ~lcModelRef();
 
 	// Base class implementation.

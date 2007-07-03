@@ -13,32 +13,9 @@ lcModelRef::lcModelRef(lcModel* Model)
 	m_BoundingBox = Model->m_BoundingBox;
 }
 
-lcModelRef::lcModelRef(lcModelRef* ModelRef)
-	: lcPieceObject(LC_OBJECT_MODELREF)
+lcModelRef::lcModelRef(const lcModelRef* ModelRef)
+	: lcPieceObject(ModelRef)
 {
-	// lcObject members.
-	m_Next = NULL;
-	m_Parent = NULL;
-	m_Children = NULL;
-
-	m_ParentPosition = ModelRef->m_ParentPosition;
-	m_WorldPosition = ModelRef->m_WorldPosition;
-	m_Name = "";
-	m_Flags = ModelRef->m_Flags;
-
-	for (int i = 0; i < LC_PIECEOBJ_NUMKEYS; i++)
-		m_Keys[i] = ModelRef->m_Keys[i];
-
-	// lcPieceObj members.
-	m_Color = ModelRef->m_Color;
-	m_TimeShow = ModelRef->m_TimeShow;
-	m_TimeHide = ModelRef->m_TimeHide;
-	m_Mesh = NULL;
-
-	m_ModelWorld = ModelRef->m_ModelWorld;
-	m_AxisAngle = ModelRef->m_AxisAngle;
-	m_BoundingBox = ModelRef->m_BoundingBox;
-
 	// lcModelRef members.
 	m_Model = ModelRef->m_Model;
 	m_Mesh = NULL;

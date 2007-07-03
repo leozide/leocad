@@ -15,32 +15,9 @@ lcPiece::lcPiece(PieceInfo* Info)
 	SetPieceInfo(Info);
 }
 
-lcPiece::lcPiece(lcPiece* Piece)
-	: lcPieceObject(LC_OBJECT_PIECE)
+lcPiece::lcPiece(const lcPiece* Piece)
+	: lcPieceObject(Piece)
 {
-	// lcObject members.
-	m_Next = NULL;
-	m_Parent = NULL;
-	m_Children = NULL;
-
-	m_ParentPosition = Piece->m_ParentPosition;
-	m_WorldPosition = Piece->m_WorldPosition;
-	m_Name = "";
-	m_Flags = Piece->m_Flags;
-
-	for (int i = 0; i < LC_PIECEOBJ_NUMKEYS; i++)
-		m_Keys[i] = Piece->m_Keys[i];
-
-	// lcPieceObj members.
-	m_Color = Piece->m_Color;
-	m_TimeShow = Piece->m_TimeShow;
-	m_TimeHide = Piece->m_TimeHide;
-	m_Mesh = NULL;
-
-	m_ModelWorld = Piece->m_ModelWorld;
-	m_AxisAngle = Piece->m_AxisAngle;
-	m_BoundingBox = Piece->m_BoundingBox;
-
 	// lcPiece members.
 	m_PieceInfo = NULL;
 	SetPieceInfo(Piece->m_PieceInfo);

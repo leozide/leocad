@@ -9,7 +9,7 @@ class lcFlexiblePiece : public lcPieceObject
 {
 public:
 	lcFlexiblePiece(PieceInfo* Info);
-	lcFlexiblePiece(lcFlexiblePiece* Piece);
+	lcFlexiblePiece(const lcFlexiblePiece* Piece);
 	virtual ~lcFlexiblePiece();
 
 	// Base class implementation.

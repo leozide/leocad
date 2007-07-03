@@ -9,7 +9,7 @@ class lcPiece : public lcPieceObject
 {
 public:
 	lcPiece(PieceInfo* Info);
-	lcPiece(lcPiece* Piece);
+	lcPiece(const lcPiece* Piece);
 	virtual ~lcPiece();
 
 	// Set or change the piece info used by this object.

@@ -32,32 +32,9 @@ lcFlexiblePiece::lcFlexiblePiece(PieceInfo* Info)
 	}
 }
 
-lcFlexiblePiece::lcFlexiblePiece(lcFlexiblePiece* Piece)
-	: lcPieceObject(LC_OBJECT_FLEXPIECE)
+lcFlexiblePiece::lcFlexiblePiece(const lcFlexiblePiece* Piece)
+	: lcPieceObject(Piece)
 {
-	// lcObject members.
-	m_Next = NULL;
-	m_Parent = NULL;
-	m_Children = NULL;
-
-	m_ParentPosition = Piece->m_ParentPosition;
-	m_WorldPosition = Piece->m_WorldPosition;
-	m_Name = "";
-	m_Flags = Piece->m_Flags;
-
-	for (int i = 0; i < LC_PIECEOBJ_NUMKEYS; i++)
-		m_Keys[i] = Piece->m_Keys[i];
-
-	// lcPieceObj members.
-	m_Color = Piece->m_Color;
-	m_TimeShow = Piece->m_TimeShow;
-	m_TimeHide = Piece->m_TimeHide;
-	m_Mesh = NULL;
-
-	m_ModelWorld = Piece->m_ModelWorld;
-	m_AxisAngle = Piece->m_AxisAngle;
-	m_BoundingBox = Piece->m_BoundingBox;
-
 	// lcFlexiblePiece members.
 	m_PieceInfo = Piece->m_PieceInfo;
 	if (m_PieceInfo)
@@ -328,6 +305,8 @@ void lcFlexiblePiecePoint::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 		Ray->Object = this;
 		Ray->Dist = Dist;
 	}
+
+	// FIXME: lcFlexiblePiece
 }
 
 bool lcFlexiblePiecePoint::IntersectsVolume(const Vector4* Planes, int NumPlanes) const

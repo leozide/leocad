@@ -17,6 +17,29 @@ lcPieceObject::lcPieceObject(u32 Type)
 	ChangeKey(0, false, LC_PIECEOBJ_ROTATION, Vector4(0, 0, 1, 0));
 }
 
+lcPieceObject::lcPieceObject(const lcPieceObject* Object)
+	: lcObject(Object->GetType(), LC_PIECEOBJ_NUMKEYS)
+{
+	// lcObject members.
+	m_ParentPosition = Object->m_ParentPosition;
+	m_WorldPosition = Object->m_WorldPosition;
+	m_Name = "";
+	m_Flags = Object->m_Flags;
+
+	for (int i = 0; i < LC_PIECEOBJ_NUMKEYS; i++)
+		m_Keys[i] = Object->m_Keys[i];
+
+	// lcPieceObj members.
+	m_Color = Object->m_Color;
+	m_TimeShow = Object->m_TimeShow;
+	m_TimeHide = Object->m_TimeHide;
+	m_Mesh = NULL;
+
+	m_ModelWorld = Object->m_ModelWorld;
+	m_AxisAngle = Object->m_AxisAngle;
+	m_BoundingBox = Object->m_BoundingBox;
+}
+
 lcPieceObject::~lcPieceObject()
 {
 	delete m_Mesh;

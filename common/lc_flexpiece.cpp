@@ -103,20 +103,74 @@ void lcFlexiblePiece::Update(u32 Time)
 
 void lcFlexiblePiece::AddToScene(lcScene* Scene, int Color)
 {
-	// FIXME: lcFlexiblePiece
-
 	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COL_DEFAULT) ? Color : m_Color, this);
 
-	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
-		Point->AddToScene(Scene, Color);
+	bool AddChildren = IsSelected();
+
+	if (!AddChildren)
+	{
+		for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
+		{
+			if (Point->IsSelected())
+			{
+				AddChildren = true;
+				break;
+			}
+		}
+	}
+
+	if (AddChildren)
+		for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
+			Point->AddToScene(Scene, Color);
 }
 
 void lcFlexiblePiece::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 {
-	// FIXME: lcFlexiblePiece
+	bool HitPoint = false;
 
-	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
-		Point->ClosestRayIntersect(Ray);
+	bool CheckChildren = IsSelected();
+
+	if (!CheckChildren)
+	{
+		for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
+		{
+			if (Point->IsSelected())
+			{
+				CheckChildren = true;
+				break;
+			}
+		}
+	}
+
+	if (CheckChildren)
+	{
+		for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
+		{
+			Point->ClosestRayIntersect(Ray);
+
+			if (Ray->Object == Point)
+				HitPoint = true;
+		}
+	}
+
+	if (!HitPoint)
+	{
+		Matrix44 WorldModel = RotTranInverse(m_ModelWorld);
+		Vector3 Start = Mul31(Ray->Start, WorldModel);
+		Vector3 End = Mul31(Ray->End, WorldModel);
+
+		// Check the bounding box distance first.
+		float Dist;
+		if (!BoundingBoxRayMinIntersectDistance(m_BoundingBox, Start, End, &Dist) || (Dist >= Ray->Dist))
+			return;
+
+		// Check mesh.
+		if (m_Mesh->ClosestRayIntersect(Start, End, &Dist) || (Dist >= Ray->Dist))
+		{
+			Ray->Object = this;
+			Ray->Dist = Dist;
+		}
+	}
 }
 
 bool lcFlexiblePiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
@@ -144,8 +198,8 @@ void lcFlexiblePiece::BuildMesh()
 	m_Mesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(m_Mesh);
-	MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
-	// fixme: section bounding box
+	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+	Section->Box.Reset();
 
 	// Calculate the initial rotation matrix for the curve points.
 	Vector3 Z = Normalize(Vector3(ControlPoints[1]) - Vector3(ControlPoints[0]));
@@ -218,6 +272,7 @@ void lcFlexiblePiece::BuildMesh()
 				Vector3 Vertex(r * sinf(k * LC_2PI / NumSlices), r * cosf(k * LC_2PI / NumSlices), 0);
 				Vertex = Mul(Vertex, LastMat) + Pos;
 				MeshEdit.AddVertex(Vertex);
+				Section->Box.AddPoint(Vertex);
 
 				if (j != NumSegments-1)
 				{
@@ -247,13 +302,15 @@ void lcFlexiblePiece::BuildMesh()
 	}
 
 	MeshEdit.EndSection();
+
+	m_BoundingBox = Section->Box;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FIXME: split this into another file
 
-#define LC_FLEXPIECE_POINT_SIZE 0.2f
+#define LC_FLEXPIECE_POINT_SIZE 0.3f
 
 lcFlexiblePiecePoint::lcFlexiblePiecePoint(lcFlexiblePiece* Parent)
 	: lcObject(LC_OBJECT_FLEXPIECE_POINT, LC_FLEXPIECE_POINT_NUMKEYS)
@@ -286,7 +343,7 @@ void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, int Color)
 	RenderSection.ModelWorld = Mul(ScaleMatrix, ModelWorld);;
 	RenderSection.Mesh = lcSphereMesh;
 	RenderSection.Section = &lcSphereMesh->m_Sections[0];
-	RenderSection.Color = 0;
+	RenderSection.Color = 1;
 
 	if (IsFocused())
 		RenderSection.Color = LC_COL_FOCUSED;
@@ -305,8 +362,6 @@ void lcFlexiblePiecePoint::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 		Ray->Object = this;
 		Ray->Dist = Dist;
 	}
-
-	// FIXME: lcFlexiblePiece
 }
 
 bool lcFlexiblePiecePoint::IntersectsVolume(const Vector4* Planes, int NumPlanes) const

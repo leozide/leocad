@@ -177,7 +177,7 @@ void lcPiece::BuildMesh(int SectionIndices[LC_COL_DEFAULT+1][3], TypeToType<T>)
 				if (DstSections[SrcSection->ColorIndex][1])
 				{
 					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][1]);
-					DstSections[SrcSection->ColorIndex][2]->Box += SrcSection->Box;
+					DstSections[SrcSection->ColorIndex][1]->Box += SrcSection->Box;
 				}
 				else
 				{

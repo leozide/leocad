@@ -34,8 +34,12 @@ public:
 enum LC_FLEXPIECE_POINT_KEY_TYPES
 {
 	LC_FLEXPIECE_POINT_POSITION,
+	LC_FLEXPIECE_POINT_ROTATION,
 	LC_FLEXPIECE_POINT_NUMKEYS
 };
+
+// Flexible piece point flags.
+#define LC_FLEXPIECE_POINT_TANGENT  0x0100
 
 class lcFlexiblePiecePoint : public lcObject
 {
@@ -48,6 +52,10 @@ public:
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
 	virtual void Update(u32 Time);
 	virtual void AddToScene(lcScene* Scene, int Color);
+
+public:
+	Matrix44 m_ModelParent;
+	Matrix44 m_ModelWorld;
 };
 
 #endif // _LC_FLEXPIECE_H_

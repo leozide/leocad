@@ -24,6 +24,9 @@ lcFlexiblePiece::lcFlexiblePiece(PieceInfo* Info)
 		lcFlexiblePiecePoint* Point = new lcFlexiblePiecePoint(this);
 		Point->SetPosition(1, true, Vector3(0.0f, 0.0f, 1.0f * i));
 
+		if (i == 1 || i == 2)
+			Point->SetFlag(LC_FLEXPIECE_POINT_TANGENT);
+
 		if (Last)
 			Last->m_Next = Point;
 		else
@@ -51,6 +54,8 @@ lcFlexiblePiece::lcFlexiblePiece(const lcFlexiblePiece* Piece)
 
 		NewPoint->m_WorldPosition = Point->m_WorldPosition;
 		NewPoint->m_ParentPosition = Point->m_ParentPosition;
+
+		NewPoint->m_Flags = Point->m_Flags;
 
 		if (Last)
 			Last->m_Next = NewPoint;
@@ -184,10 +189,6 @@ void lcFlexiblePiece::BuildMesh()
 	delete m_Mesh;
 	m_Mesh = NULL;
 
-	ObjArray<Vector3> ControlPoints(16);
-	for (lcObject* Point = m_Children; Point; Point = Point->m_Next)
-		ControlPoints.Add(Point->m_ParentPosition);
-
 	int NumSections = 3;
 	int NumSegments = 16;
 	int NumSlices = 12;
@@ -202,7 +203,7 @@ void lcFlexiblePiece::BuildMesh()
 	Section->Box.Reset();
 
 	// Calculate the initial rotation matrix for the curve points.
-	Vector3 Z = Normalize(Vector3(ControlPoints[1]) - Vector3(ControlPoints[0]));
+	Vector3 Z = Normalize(m_Children->m_Next->m_ParentPosition - m_Children->m_ParentPosition);
 
 	// Build the Y vector of the matrix.
 	Vector3 UpVector;
@@ -220,40 +221,83 @@ void lcFlexiblePiece::BuildMesh()
 
 	Matrix33 LastMat = Matrix33(Normalize(X), Normalize(Y), Normalize(Z));
 
-	for (int i = 0; i < ControlPoints.GetSize() - 1; i++)
-	{
-		Vector3 p0, p1, p2, p3;
+	lcFlexiblePiecePoint* PrevPoint = (lcFlexiblePiecePoint*)m_Children;
+	lcFlexiblePiecePoint* Point = (lcFlexiblePiecePoint*)m_Children;
+	lcFlexiblePiecePoint* NextPoint = (lcFlexiblePiecePoint*)m_Children->m_Next;
+	int Segment = 0;
 
-		if (i == 0)
+	while (NextPoint)
+	{
+		Matrix33 StartMat, EndMat;
+
+		Vector3 p0 = PrevPoint->m_ParentPosition;
+		Vector3 p1 = Point->m_ParentPosition;
+		Vector3 p2 = NextPoint->m_ParentPosition;
+		Vector3 p3 = NextPoint->m_Next ? NextPoint->m_Next->m_ParentPosition : NextPoint->m_ParentPosition;
+
+		// Calculate the start and end orientation for this curve segment.
+		if (Point->IsFlagged(LC_FLEXPIECE_POINT_TANGENT))
+			StartMat = LastMat;
+		else
+			StartMat = Point->m_ModelParent;
+
+		if (NextPoint->IsFlagged(LC_FLEXPIECE_POINT_TANGENT))
 		{
-			p0 = Vector3(ControlPoints[0]);
-			p1 = Vector3(ControlPoints[0]);
-			p2 = Vector3(ControlPoints[1]);
-			p3 = Vector3(ControlPoints[2]);
+			// Make the tangent at this point be parallel to a vector between the point before and after it.
+			Vector3 Tan = p3 - p1;
+
+			Tan.Normalize();
+			float Dot = Dot3(StartMat[2], Tan);
+
+			if (Dot < 0.999f)
+			{
+				Vector3 Axis = Cross3(StartMat[2], Tan);
+				float Angle = acosf(Dot);
+
+				Matrix33 Rot = MatrixFromAxisAngle(Axis, Angle);
+				EndMat = Mul(StartMat, Rot);
+			}
+			else
+				EndMat = StartMat;
 		}
-		else if (i == ControlPoints.GetSize() - 2)
+		else
+			EndMat = NextPoint->m_ModelParent;
+
+		float Dot = Dot3(StartMat[2], EndMat[2]);
+		Vector3 Axis;
+		float Angle;
+
+		if (Dot < 0.999f)
 		{
-			p0 = Vector3(ControlPoints[i-1]);
-			p1 = Vector3(ControlPoints[i]);
-			p2 = Vector3(ControlPoints[i+1]);
-			p3 = Vector3(ControlPoints[i+1]);
+			Axis = Cross3(StartMat[2], EndMat[2]);
+			Angle = acosf(Dot);
 		}
 		else
 		{
-			p0 = Vector3(ControlPoints[i-1]);
-			p1 = Vector3(ControlPoints[i]);
-			p2 = Vector3(ControlPoints[i+1]);
-			p3 = Vector3(ControlPoints[i+2]);
+			Axis = Vector3(0, 0, 1);
+			Angle = 0;
 		}
+
+		// Calculate the coefficients of a bezier curve that passes through the 2 end points
+		// for this segment and has the tangent vectors calculated above.
+		p0 = p1;
+		p3 = p2;
+
+		float Len = Length(p1-p2) * 0.5f;
+		p1 = p1 + StartMat[2] * Len;
+		p2 = p2 - EndMat[2] * Len;
+
+		Matrix44 Points = Matrix44(Vector4(p0, 1), Vector4(p1, 1), Vector4(p2, 1), Vector4(p3, 1));
 
 		for (int j = 0; j < NumSegments; j++)
 		{
-			float t = (float)j/(NumSegments-1);
-			float t2 = t * t;
-			float t3 = t2 * t;
+			static Matrix44 Blend(Vector4(-1, 3, -3, 1), Vector4(3, -6, 3, 0), Vector4(-3, 3, 0, 0), Vector4(1, 0, 0, 0));  
+			static Matrix44 Tangent(Vector4(0, 0, 0, 0), Vector4(-3, 9, -9, 3), Vector4(6,-12, 6, 0), Vector4(-3, 3, 0, 0));  
 
-			Vector3 Pos = 0.5f * ((2.0f * p1) + (-p0 + p2) * t + (2.0f * p0 - 5.0f * p1 + 4 * p2 - p3) * t2 + (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
-			Vector3 Tan = 0.5f * ((-p0 + p2) + 2 * (2.0f * p0 - 5.0f * p1 + 4 * p2 - p3) * t + 3 * (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t2);
+			float t = (float)j/(NumSegments-1);
+
+			Vector3 Pos = Vector3(Mul4(Mul4(Vector4(t*t*t,t*t,t,1), Blend), Points));  
+			Vector3 Tan = Vector3(Mul4(Mul4(Vector4(0,t*t,t,1), Tangent), Points));  
 
 			Tan.Normalize();
 			float Dot = Dot3(LastMat[2], Tan);
@@ -267,6 +311,8 @@ void lcFlexiblePiece::BuildMesh()
 				LastMat = Mul(LastMat, Rot);
 			}
 
+			int IndexOffset = NumSlices * NumSegments * Segment;
+
 			for (int k = 0; k < NumSlices; k++)
 			{
 				Vector3 Vertex(r * sinf(k * LC_2PI / NumSlices), r * cosf(k * LC_2PI / NumSlices), 0);
@@ -278,27 +324,33 @@ void lcFlexiblePiece::BuildMesh()
 				{
 					if (k != NumSlices-1)
 					{
-						MeshEdit.AddIndex(j * NumSlices + k);
-						MeshEdit.AddIndex(j * NumSlices + k + 1);
-						MeshEdit.AddIndex((j+1) * NumSlices + k);
-						MeshEdit.AddIndex(j * NumSlices + k + 1);
-						MeshEdit.AddIndex((j+1) * NumSlices + k + 1);
-						MeshEdit.AddIndex((j+1) * NumSlices + k);
+						MeshEdit.AddIndex(IndexOffset +    j  * NumSlices + k);
+						MeshEdit.AddIndex(IndexOffset +    j  * NumSlices + k + 1);
+						MeshEdit.AddIndex(IndexOffset + (j+1) * NumSlices + k);
+						MeshEdit.AddIndex(IndexOffset +    j  * NumSlices + k + 1);
+						MeshEdit.AddIndex(IndexOffset + (j+1) * NumSlices + k + 1);
+						MeshEdit.AddIndex(IndexOffset + (j+1) * NumSlices + k);
 					}
 					else
 					{
-						MeshEdit.AddIndex(j * NumSlices + k);
-						MeshEdit.AddIndex(j * NumSlices);
-						MeshEdit.AddIndex((j+1) * NumSlices + k);
-						MeshEdit.AddIndex(j * NumSlices);
-						MeshEdit.AddIndex((j+1) * NumSlices);
-						MeshEdit.AddIndex((j+1) * NumSlices + k);
+						MeshEdit.AddIndex(IndexOffset +    j  * NumSlices + k);
+						MeshEdit.AddIndex(IndexOffset +    j  * NumSlices);
+						MeshEdit.AddIndex(IndexOffset + (j+1) * NumSlices + k);
+						MeshEdit.AddIndex(IndexOffset +    j  * NumSlices);
+						MeshEdit.AddIndex(IndexOffset + (j+1) * NumSlices);
+						MeshEdit.AddIndex(IndexOffset + (j+1) * NumSlices + k);
 					}
 				}
 			}
 		}
 
-		MeshEdit.OffsetIndices(6 * (NumSlices) * (NumSegments-1) * i, 6 * (NumSlices) * (NumSegments-1), NumSlices * NumSegments * i);
+		LastMat = EndMat;
+
+		PrevPoint = Point;
+		Point = NextPoint;
+		NextPoint = (lcFlexiblePiecePoint*)Point->m_Next;
+
+		Segment++;
 	}
 
 	MeshEdit.EndSection();
@@ -316,6 +368,8 @@ lcFlexiblePiecePoint::lcFlexiblePiecePoint(lcFlexiblePiece* Parent)
 	: lcObject(LC_OBJECT_FLEXPIECE_POINT, LC_FLEXPIECE_POINT_NUMKEYS)
 {
 	m_Parent = Parent;
+
+	ChangeKey(0, false, LC_PIECEOBJ_ROTATION, Vector4(0, 0, 1, 0));
 }
 
 lcFlexiblePiecePoint::~lcFlexiblePiecePoint()
@@ -324,8 +378,16 @@ lcFlexiblePiecePoint::~lcFlexiblePiecePoint()
 
 void lcFlexiblePiecePoint::Update(u32 Time)
 {
+	Vector4 AxisAngle;
+
 	CalculateKey(Time, LC_FLEXPIECE_POINT_POSITION, &m_ParentPosition);
-	m_WorldPosition = Mul31(m_ParentPosition, ((lcPieceObject*)m_Parent)->m_ModelWorld);
+	CalculateKey(Time, LC_PIECEOBJ_ROTATION, &AxisAngle);
+
+	m_ModelParent = MatrixFromAxisAngle(AxisAngle);
+	m_ModelParent.SetTranslation(m_ParentPosition);
+
+	m_ModelWorld = Mul(m_ModelParent, ((lcPieceObject*)m_Parent)->m_ModelWorld);
+	m_WorldPosition = Vector3(m_ModelWorld[3]);
 }
 
 void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, int Color)
@@ -340,7 +402,7 @@ void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, int Color)
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = (lcPieceObject*)this;
-	RenderSection.ModelWorld = Mul(ScaleMatrix, ModelWorld);;
+	RenderSection.ModelWorld = Mul(ScaleMatrix, ModelWorld);
 	RenderSection.Mesh = lcSphereMesh;
 	RenderSection.Section = &lcSphereMesh->m_Sections[0];
 	RenderSection.Color = 1;

@@ -54,6 +54,17 @@ void lcPiece::Update(u32 Time)
 void lcPiece::AddToScene(lcScene* Scene, int Color)
 {
 	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COL_DEFAULT) ? Color : m_Color, this);
+
+	if (IsSelected())
+	{
+		Vector3 Size = m_BoundingBox.m_Max - m_BoundingBox.m_Min;
+
+		Matrix44 ScaleMatrix(Vector4(Size[0], 0.0f, 0.0f, 0.0f), Vector4(0.0f, Size[1], 0.0f, 0.0f), Vector4(0.0f, 0.0f, Size[2], 0.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+		Matrix44 ModelWorld = Mul(ScaleMatrix, m_ModelWorld);
+		ModelWorld.SetTranslation(m_ModelWorld.GetTranslation() + m_BoundingBox.GetCenter());
+
+		lcSelectionMesh->AddToScene(Scene, ModelWorld, LC_COL_SELECTED, this);
+	}
 }
 
 void lcPiece::BuildMesh()

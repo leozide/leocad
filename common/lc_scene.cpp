@@ -34,6 +34,7 @@ void lcScene::Render()
 	lcVertexBuffer* LastVertexBuffer = NULL;
 	lcIndexBuffer* LastIndexBuffer = NULL;
 	lcPieceObject* LastPiece = NULL;
+	lcMesh* LastMesh;
 
 	glPushMatrix();
 
@@ -56,9 +57,10 @@ void lcScene::Render()
 		}
 
 		// FIXME: remove Owner
-		if (LastPiece != RenderSection.Owner)
+		if (LastPiece != RenderSection.Owner || LastMesh != Mesh)
 		{
 			LastPiece = RenderSection.Owner;
+			LastMesh = Mesh;
 			glPopMatrix();
 			glPushMatrix();
 			glMultMatrixf(RenderSection.ModelWorld);

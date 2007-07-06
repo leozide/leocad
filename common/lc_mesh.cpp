@@ -13,12 +13,86 @@
 lcMesh* lcSphereMesh;
 lcMesh* lcBoxMesh;
 lcMesh* lcWireframeBoxMesh;
+lcMesh* lcSelectionMesh;
 
 void lcCreateDefaultMeshes()
 {
 	lcSphereMesh = lcCreateSphereMesh(1.0f, 16);
 	lcBoxMesh = lcCreateBoxMesh(Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, 1.0f));
 	lcWireframeBoxMesh = lcCreateWireframeBoxMesh(Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, 1.0f));
+
+	lcSelectionMesh = new lcMesh(1, 48, 32, NULL);
+
+	lcMeshEditor<u16> MeshEdit(lcSelectionMesh);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_LINES, LC_COL_DEFAULT);
+
+	Section->Box.m_Max = Vector3(0.5f,0.5f,0.5f);
+	Section->Box.m_Min = Vector3(-0.5f,-0.5f,-0.5f);
+
+	Vector3 SizeX(0.2f, 0.0f, 0.0f);
+	Vector3 SizeY(0.0f, 0.2f, 0.0f);
+	Vector3 SizeZ(0.0f, 0.0f, 0.2f);
+	Vector3 Point;
+
+	Point = Vector3(0.5f, 0.5f, -0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point - SizeX);
+	MeshEdit.AddVertex(Point - SizeY);
+	MeshEdit.AddVertex(Point + SizeZ);
+
+	Point = Vector3(-0.5f, 0.5f, -0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point + SizeX);
+	MeshEdit.AddVertex(Point - SizeY);
+	MeshEdit.AddVertex(Point + SizeZ);
+
+	Point = Vector3(0.5f, 0.5f, 0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point - SizeX);
+	MeshEdit.AddVertex(Point - SizeY);
+	MeshEdit.AddVertex(Point - SizeZ);
+
+	Point = Vector3(-0.5f, -0.5f, -0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point + SizeX);
+	MeshEdit.AddVertex(Point + SizeY);
+	MeshEdit.AddVertex(Point + SizeZ);
+
+	Point = Vector3(-0.5f, -0.5f, 0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point + SizeX);
+	MeshEdit.AddVertex(Point + SizeY);
+	MeshEdit.AddVertex(Point - SizeZ);
+
+	Point = Vector3(0.5f, -0.5f, 0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point - SizeX);
+	MeshEdit.AddVertex(Point + SizeY);
+	MeshEdit.AddVertex(Point - SizeZ);
+
+	Point = Vector3(0.5f, -0.5f, -0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point - SizeX);
+	MeshEdit.AddVertex(Point + SizeY);
+	MeshEdit.AddVertex(Point + SizeZ);
+
+	Point = Vector3(-0.5f, 0.5f, 0.5f);
+	MeshEdit.AddVertex(Point);
+	MeshEdit.AddVertex(Point + SizeX);
+	MeshEdit.AddVertex(Point - SizeY);
+	MeshEdit.AddVertex(Point - SizeZ);
+
+	for (int i = 0; i < 8; i++)
+	{
+		MeshEdit.AddIndex(i*4);
+		MeshEdit.AddIndex(i*4+1);
+		MeshEdit.AddIndex(i*4);
+		MeshEdit.AddIndex(i*4+2);
+		MeshEdit.AddIndex(i*4);
+		MeshEdit.AddIndex(i*4+3);
+	}
+
+	MeshEdit.EndSection();
 }
 
 void lcDestroyDefaultMeshes()
@@ -29,6 +103,8 @@ void lcDestroyDefaultMeshes()
 	lcBoxMesh = NULL;
 	delete lcWireframeBoxMesh;
 	lcWireframeBoxMesh = NULL;
+	delete lcSelectionMesh;
+	lcSelectionMesh = NULL;
 }
 
 lcMesh* lcCreateSphereMesh(float Radius, int Slices)

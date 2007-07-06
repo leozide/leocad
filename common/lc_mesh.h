@@ -301,5 +301,6 @@ void lcDestroyDefaultMeshes();
 extern lcMesh* lcSphereMesh;
 extern lcMesh* lcBoxMesh;
 extern lcMesh* lcWireframeBoxMesh;
+extern lcMesh* lcSelectionMesh;
 
 #endif

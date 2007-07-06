@@ -797,7 +797,7 @@ public:
 	void GetPoints(Vector3* Points) const
 	{
 		Points[0] = Vector3(m_Max[0], m_Max[1], m_Min[2]);
-		Points[1] = Vector3(m_Min[0], m_Max[1], m_Min[5]);
+		Points[1] = Vector3(m_Min[0], m_Max[1], m_Min[2]);
 		Points[2] = Vector3(m_Max[0], m_Max[1], m_Max[2]);
 		Points[3] = Vector3(m_Min[0], m_Min[1], m_Min[2]);
 		Points[4] = Vector3(m_Min[0], m_Min[1], m_Max[2]);

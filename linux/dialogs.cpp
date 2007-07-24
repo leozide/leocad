@@ -2164,7 +2164,7 @@ int propertiesdlg_execute(void* param)
   LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
   s.data = param;
 
-  struct stat buf;
+  //  struct stat buf;
   /* char* ptr = strrchr(opts->Filename, '/'); - CANNOT COMPILE WITHOUT fileName or strFileName member in properties dialog struct */
   char text[512];
   strcpy(text, opts->Name);
@@ -2954,8 +2954,9 @@ int librarydlg_execute (void *param)
 
 static GtkWidget* modifydlg;
 
-static void modifydlg_update_list (Object *obj)
+static void modifydlg_update_list(lcObject *obj)
 {
+  /*
   GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (modifydlg), "clist"));
 
   gtk_clist_freeze (clist);
@@ -2989,13 +2990,14 @@ static void modifydlg_update_list (Object *obj)
   }
 
   gtk_clist_thaw (clist);
+  */
 }
 
 static void modifydlg_listener (int message, void *data, void *user)
 {
   if (message == LC_MSG_FOCUS_CHANGED)
   {
-    modifydlg_update_list ((Object*)data);
+    modifydlg_update_list ((lcObject*)data);
   }
 }
 

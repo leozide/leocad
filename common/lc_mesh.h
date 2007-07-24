@@ -1,6 +1,8 @@
 #ifndef _LC_BUFFER_H_
 #define _LC_BUFFER_H_
 
+#include <malloc.h>
+#include <string.h>
 #include "opengl.h"
 #include "algebra.h"
 

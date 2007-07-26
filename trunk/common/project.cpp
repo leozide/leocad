@@ -1166,7 +1166,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		const int col[28] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+		const int col[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
 		lcPieceObject* pPiece;
 		int i, steps = GetLastStep();
 		char buf[256], *ptr;

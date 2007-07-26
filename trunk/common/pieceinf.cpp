@@ -63,6 +63,7 @@ unsigned char ConvertColor(int c)
 	case 15: return 7;	// white		(white)
 	case 16: return LC_COL_DEFAULT; // special case
 	case 24: return LC_COL_EDGES; // edge
+	case 25: return 1;  // orange
 	case 32: return 9;	// black
 	case 33: return 18;	// clear blue
 	case 34: return 16;	// clear green

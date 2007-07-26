@@ -219,7 +219,7 @@ int dlg_domodal(GtkWidget* dlg, int def)
 
 void dlg_default_callback(GtkWidget *widget, gpointer data)
 {
-  *cur_ret = (int)data;
+  *cur_ret = GPOINTER_TO_INT(data);
 }
 
 gint dlg_delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data)

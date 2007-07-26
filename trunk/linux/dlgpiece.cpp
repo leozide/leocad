@@ -64,7 +64,7 @@ static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
 
   info->wizard->ChangeColor (i, GPOINTER_TO_INT (data));
   info->wizard->Redraw ();
-  set_button_pixmap2 (button, FlatColorArray[(int)data]);
+  set_button_pixmap2 (button, FlatColorArray[GPOINTER_TO_INT(data)]);
 }
 
 // A color button was clicked

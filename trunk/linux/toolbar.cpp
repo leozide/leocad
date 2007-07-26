@@ -789,12 +789,6 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 
   fill_piecetree();
 
-  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
-  if (!Info)
-    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
-  if (Info)
-    g_App->m_PiecePreview->SetSelection(Info);
-
   return frame;
 }
 

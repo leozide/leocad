@@ -59,8 +59,8 @@ public:
 	char** names;
 	unsigned short* count;
 	int lines;
-	int col[LC_MAXCOLORS];
-	int totalcount[LC_MAXCOLORS];
+//	int col[LC_MAXCOLORS];
+//	int totalcount[LC_MAXCOLORS];
 
 // Dialog Data
 	//{{AFX_DATA(CPropertiesPieces)

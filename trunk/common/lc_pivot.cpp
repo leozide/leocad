@@ -3,6 +3,7 @@
 
 #include "lc_mesh.h"
 #include "lc_scene.h"
+#include "lc_colors.h"
 
 #define LC_PIVOT_SIZE 0.3f
 
@@ -67,9 +68,9 @@ void lcPivot::AddToScene(lcScene* Scene, int Color)
 	RenderSection.Color = 1;
 
 	if (IsFocused())
-		RenderSection.Color = LC_COL_FOCUSED;
+		RenderSection.Color = LC_COLOR_FOCUS;
 	else if (IsSelected())
-		RenderSection.Color = LC_COL_SELECTED;
+		RenderSection.Color = LC_COLOR_SELECTION;
 
 	Scene->m_OpaqueSections.Add(RenderSection);
 

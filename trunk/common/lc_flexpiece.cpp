@@ -4,6 +4,7 @@
 #include "array.h"
 #include "lc_scene.h"
 #include "lc_mesh.h"
+#include "lc_colors.h"
 #include "pieceinf.h"
 
 lcFlexiblePiece::lcFlexiblePiece(PieceInfo* Info)
@@ -108,7 +109,7 @@ void lcFlexiblePiece::Update(u32 Time)
 
 void lcFlexiblePiece::AddToScene(lcScene* Scene, int Color)
 {
-	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COL_DEFAULT) ? Color : m_Color, this);
+	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COLOR_DEFAULT) ? Color : m_Color, this);
 
 	bool AddChildren = IsSelected();
 
@@ -199,7 +200,7 @@ void lcFlexiblePiece::BuildMesh()
 	m_Mesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(m_Mesh);
-	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COLOR_DEFAULT);
 	Section->Box.Reset();
 
 	// Calculate the initial rotation matrix for the curve points.
@@ -396,21 +397,18 @@ void lcFlexiblePiecePoint::AddToScene(lcScene* Scene, int Color)
 
 	Matrix44 ScaleMatrix(Vector4(LC_FLEXPIECE_POINT_SIZE, 0.0f, 0.0f, 0.0f), Vector4(0.0f, LC_FLEXPIECE_POINT_SIZE, 0.0f, 0.0f), Vector4(0.0f, 0.0f, LC_FLEXPIECE_POINT_SIZE, 0.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	Matrix44 ModelWorld = IdentityMatrix44();
-	ModelWorld.SetTranslation(m_WorldPosition);
-
 	lcRenderSection RenderSection;
 
 	RenderSection.Owner = (lcPieceObject*)this;
-	RenderSection.ModelWorld = Mul(ScaleMatrix, ModelWorld);
+	RenderSection.ModelWorld = Mul(ScaleMatrix, m_ModelWorld);
 	RenderSection.Mesh = lcSphereMesh;
 	RenderSection.Section = &lcSphereMesh->m_Sections[0];
 	RenderSection.Color = 1;
 
 	if (IsFocused())
-		RenderSection.Color = LC_COL_FOCUSED;
+		RenderSection.Color = LC_COLOR_FOCUS;
 	else if (IsSelected())
-		RenderSection.Color = LC_COL_SELECTED;
+		RenderSection.Color = LC_COLOR_SELECTION;
 
 	Scene->m_OpaqueSections.Add(RenderSection);
 }

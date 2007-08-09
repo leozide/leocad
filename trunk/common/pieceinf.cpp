@@ -1,16 +1,14 @@
-// Information about how to draw a piece and some more stuff.
-//
-
 #include "lc_global.h"
+#include "pieceinf.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include "opengl.h"
 #include "texture.h"
-#include "pieceinf.h"
 #include "project.h"
-#include "globals.h"
+#include "lc_colors.h"
 #include "matrix.h"
 #include "defines.h"
 #include "library.h"
@@ -42,62 +40,11 @@ static float costbl[SIDES];
 // Convert a color from LDraw to LeoCAD
 unsigned char ConvertColor(int c)
 {
-	if (c > 255) c -= 256;
-	switch (c)
-	{
-	case 0: return 9;	// black		(black)
-	case 1: return 4;	// blue			(blue)
-	case 2: return 2;	// green		(green)
-	case 3: return 5;	// dark cyan
-	case 4: return 0;	// red			(red)
-	case 5: return 11;	// magenta
-	case 6: return 10;	// brown		(brown)
-	case 7: return 22;	// gray			(gray)
-	case 8: return 8;	// dark gray	(dark gray)
-	case 9: return 5;	// light blue	()
-	case 10: return 3;	// light green	(light green)
-	case 11: return 5;	// cyan			(light blue)
-	case 12: return 1;	// light red
-	case 13: return 11;	// pink			(pink)
-	case 14: return 6;	// yellow		(yellow)
-	case 15: return 7;	// white		(white)
-	case 16: return LC_COL_DEFAULT; // special case
-	case 24: return LC_COL_EDGES; // edge
-	case 25: return 1;  // orange
-	case 32: return 9;	// black
-	case 33: return 18;	// clear blue
-	case 34: return 16;	// clear green
-	case 35: return 5;	// dark cyan
-	case 36: return 14;	// clear red
-	case 37: return 11;	// magenta
-	case 38: return 10;	// brown
-	case 39: return 21;	// clear white (clear gray)
-	case 40: return 8;	// dark gray
-	case 41: return 19;	// clear light blue
-	case 42: return 17;	// clear light green
-	case 43: return 19;	// clear cyan			(clear light blue)
-	case 44: return 15;	// clear light red ??
-	case 45: return 11;	// pink
-	case 46: return 20;	// clear yellow
-	case 47: return 21;	// clear white
-	case 70: return 10; // maroon (326)
-	case 78: return 13;	// gold (334)
-	case 110: return 1; // orange (366 from fire logo pattern)
-	case 126: return 23;// tan (382)
-	case 127: return 27;// silver/chrome (383)
-	case 175: return 3;	// mint green (431)
-	case 206: return 1;	// orange (462)
-	case 238: return 6;	// light yellow (494 eletric contacts)
-	case 239: return 6;	// light yellow (495)
-	case 247: return 27;// 503 chrome
-	case 250: return 3; // 506 mint (Belville)
-	case 253: return 11;// 509 rose (e.g. in Paradisa)
+	for (int i = 0; i < lcNumUserColors; i++)
+		if (lcColorList[i].Code == c)
+			return i;
 
-	// taken from l2p.doc but not verified
-	case 178: return 11;// 434 dark cyan (e.g. in New Technic Models)
-	case 254: return 6; // 510 light yellow (e.g. in Belville)
-	}
-	return 9; // black
+	return 0; // black
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -701,7 +648,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_EDGE);
 
 				Section->Box.m_Min = Min;
 				Section->Box.m_Max = Max;
@@ -823,7 +770,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_EDGE);
 
 				Section->Box.m_Min = Min;
 				Section->Box.m_Max = Max;
@@ -943,7 +890,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_EDGE);
 
 				Section->Box.m_Min = Min;
 				Section->Box.m_Max = Max;
@@ -1066,7 +1013,7 @@ void PieceInfo::BuildMesh(TypeToType<T>, void* Data, void* MeshStart, bool LongD
 
 				MeshEdit.EndSection();
 				pGroup->NumSections++;
-				Section = MeshEdit.StartSection(GL_LINES, LC_COL_EDGES);
+				Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_EDGE);
 
 				Section->Box.m_Min = Min;
 				Section->Box.m_Max = Max;
@@ -1318,17 +1265,17 @@ void PieceInfo::RenderPiece(int nColor)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		m_pTextures[sh].texture->MakeCurrent();
 
-		if (m_pTextures[sh].color == LC_COL_DEFAULT)
-			glColor3ubv(FlatColorArray[nColor]);
-		if (nColor > 13 && nColor < 22)
+		if (m_pTextures[sh].color == LC_COLOR_DEFAULT)
+			glColor4fv(lcColorList[nColor].Value);
+		if (LC_COLOR_TRANSLUCENT(nColor))
 		{
-			glEnable (GL_BLEND);
-			glDepthMask (GL_FALSE);
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
 		}
 		else
 		{
-			glDepthMask (GL_TRUE);
-			glDisable (GL_BLEND);
+			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
 		}
 
 		glEnable(GL_TEXTURE_2D);
@@ -1353,6 +1300,7 @@ void PieceInfo::RenderPiece(int nColor)
 
 void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* start)
 {
+	/* FIXME: wavefront
 	void* indices = m_Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int i = 0; i < m_Mesh->m_SectionCount; i++)
@@ -1413,10 +1361,12 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 	*start += m_Mesh->m_VertexCount;
 	fputs("\n", file);
+	*/
 }
 
 void PieceInfo::WritePOV(FILE* f)
 {
+	/* FIXME: pov
 	char name[32], *ptr;
 	strcpy(name, m_strName);
 	while ((ptr = strchr(name, '-')))
@@ -1499,7 +1449,7 @@ void PieceInfo::WritePOV(FILE* f)
 			}
 		}
 
-		if (Section->ColorIndex != LC_COL_DEFAULT && Section->ColorIndex != LC_COL_EDGES)
+		if (Section->ColorIndex != LC_COL_DEFAULT && Section->ColorIndex != LC_COLOR_EDGE)
 			fprintf (f, "  texture { lg_%s }\n", lg_colors[Section->ColorIndex]);
 		fputs(" }\n", f);
 	}
@@ -1508,4 +1458,5 @@ void PieceInfo::WritePOV(FILE* f)
 	m_Mesh->m_IndexBuffer->UnmapBuffer();
 
 	fputs("}\n\n", f);
+*/
 }

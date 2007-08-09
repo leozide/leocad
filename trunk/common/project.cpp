@@ -16,6 +16,7 @@
 #include "lc_light.h"
 #include "lc_mesh.h"
 #include "lc_scene.h"
+#include "lc_colors.h"
 #include "preview.h"
 
 #include <stdlib.h>
@@ -1939,7 +1940,7 @@ void Project::RenderScene(View* view)
 		if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
 			continue;
 
-		Piece->AddToScene(m_Scene, LC_COL_DEFAULT);
+		Piece->AddToScene(m_Scene, LC_COLOR_DEFAULT);
 	}
 
 	// Add piece preview.
@@ -3341,6 +3342,9 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 		case LC_COLOR_CHANGED:
 		{
 			m_nCurColor = (unsigned char)param;
+
+			if (g_App->m_PiecePreview->m_Selection)
+				g_App->m_PiecePreview->m_Selection->m_Color = m_nCurColor;
 		} break;
 
 		case LC_CAPTURE_LOST:

@@ -3,7 +3,7 @@
 
 #include "lc_mesh.h"
 #include "lc_pieceobj.h"
-#include "globals.h"
+#include "lc_colors.h"
 
 int SortRenderSectionsCallback(const lcRenderSection& a, const lcRenderSection& b, void* SortData)
 {
@@ -71,7 +71,7 @@ void lcScene::Render()
 				glLineWidth(1.0f);
 		}
 
-		glColor3ubv(FlatColorArray[RenderSection.Color]);
+		glColor4fv(lcColorList[RenderSection.Color].Value);
 
 		lcMeshSection* Section = RenderSection.Section;
 
@@ -117,7 +117,7 @@ void lcScene::Render()
 			glMultMatrixf(RenderSection.ModelWorld);
 		}
 
-		glColor4ubv(ColorArray[RenderSection.Color]);
+		glColor4fv(lcColorList[RenderSection.Color].Value);
 
 		lcMeshSection* Section = RenderSection.Section;
 

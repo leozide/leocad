@@ -4,7 +4,7 @@
 #include "lc_global.h"
 #include "leocad.h"
 #include "ColorLst.h"
-#include "globals.h"
+#include "lc_colors.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,41 +37,39 @@ END_MESSAGE_MAP()
 
 void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 {
-	int x = lpDIS->itemID;
-	if (x%2 == 0)
-		x /= 2;
-	else
-		x = ((x-1)/2)+14;
+	int Color = lpDIS->itemID;
 
-	if ((!(lpDIS->itemState & ODS_SELECTED) && (lpDIS->itemAction & ODA_SELECT)) ||
-	    (lpDIS->itemAction & ODA_DRAWENTIRE))
+	if ((!(lpDIS->itemState & ODS_SELECTED) && (lpDIS->itemAction & ODA_SELECT)) || (lpDIS->itemAction & ODA_DRAWENTIRE))
 	{
-		SetBkColor(lpDIS->hDC, RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
+		SetBkColor(lpDIS->hDC, LC_COLOR_RGB(Color));
 		ExtTextOut(lpDIS->hDC, 0, 0, ETO_OPAQUE, &lpDIS->rcItem, NULL, 0, NULL);
 
-		if (x > 13 && x < 22)
-		for (x = lpDIS->rcItem.left; x < lpDIS->rcItem.right; x++)
+		if (LC_COLOR_TRANSLUCENT(Color))
 		{
-			int y;
+			for (int x = lpDIS->rcItem.left; x < lpDIS->rcItem.right; x++)
+			{
+				int y;
 
-			for (y = lpDIS->rcItem.top; y < lpDIS->rcItem.bottom; y+=4)
-			{
-				if (y == lpDIS->rcItem.top) y += x%4;
-				SetPixelV (lpDIS->hDC, x,y,RGB(255,255,255));
-			}
-			for (y = lpDIS->rcItem.bottom; y > lpDIS->rcItem.top; y-=4)
-			{
-				if (y == lpDIS->rcItem.bottom) y-= x%4;
-				SetPixelV (lpDIS->hDC, x,y,RGB(255,255,255));
+				for (y = lpDIS->rcItem.top; y < lpDIS->rcItem.bottom; y+=4)
+				{
+					if (y == lpDIS->rcItem.top) y += x%4;
+					SetPixelV (lpDIS->hDC, x,y, RGB(255,255,255));
+				}
+
+				for (y = lpDIS->rcItem.bottom; y > lpDIS->rcItem.top; y-=4)
+				{
+					if (y == lpDIS->rcItem.bottom) y-= x%4;
+					SetPixelV (lpDIS->hDC, x,y, RGB(255,255,255));
+				}
 			}
 		}
 	}
 
-	// Item has been selected - hilite frame
-	if ((lpDIS->itemState & ODS_SELECTED) &&
-		(lpDIS->itemAction & (ODA_SELECT | ODA_DRAWENTIRE)))
+	// Item is selected, draw a border around it.
+	if ((lpDIS->itemState & ODS_SELECTED) && (lpDIS->itemAction & (ODA_SELECT | ODA_DRAWENTIRE)))
 	{
-		HBRUSH hbr = CreateSolidBrush(RGB(255-FlatColorArray[x][0], 255-FlatColorArray[x][1], 255-FlatColorArray[x][2]));
+		COLORREF cr = LC_COLOR_RGB(Color);
+		HBRUSH hbr = CreateSolidBrush(RGB(255-GetRValue(cr), 255-GetGValue(cr), 255-GetBValue(cr)));
 		FrameRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
 		DeleteObject(hbr);
 	}
@@ -83,7 +81,7 @@ void CColorsList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	GetClientRect(&rc);
 
 	lpMeasureItemStruct->itemHeight = 12;
-	lpMeasureItemStruct->itemWidth = (rc.right - rc.left) / 14;
+	lpMeasureItemStruct->itemWidth = (rc.right - rc.left) / LC_COLORLIST_NUM_COLS;
 }
 
 BOOL CColorsList::PreTranslateMessage(MSG* pMsg)
@@ -101,14 +99,18 @@ int CColorsList::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_ToolTip.Create(this);
 
-	int ColumnWidth = lpCreateStruct->cx / 14;
+	int ColumnWidth = lpCreateStruct->cx / LC_COLORLIST_NUM_COLS;
 
-	for (int i = 0; i < 14; i++)
+	for (int i = 0; i < LC_COLORLIST_NUM_COLS; i++)
 	{
 		CRect rect(i*ColumnWidth, 0, (i+1)*ColumnWidth, 12);
-		m_ToolTip.AddTool(this, IDS_COLOR01+i, rect, i+1);
-		rect.OffsetRect(0, 12);
-		m_ToolTip.AddTool(this, IDS_COLOR15+i, rect, i+15);
+
+		for (int j = 0; j < LC_COLORLIST_NUM_ROWS; j++)
+		{
+			int Index = i*LC_COLORLIST_NUM_ROWS+j;
+			m_ToolTip.AddTool(this, lcColorList[Index].Name, rect, Index+1);
+			rect.OffsetRect(0, 12);
+		}
 	}
 
 	return 0;
@@ -118,14 +120,18 @@ void CColorsList::OnSize(UINT nType, int cx, int cy)
 {
 	CListBox::OnSize(nType, cx, cy);
 
-	int ColumnWidth = cx / 14;
+	int ColumnWidth = cx / LC_COLORLIST_NUM_COLS;
 
-	for (int i = 0; i < 14; i++)
+	for (int i = 0; i < LC_COLORLIST_NUM_COLS; i++)
 	{
 		CRect rect(i*ColumnWidth, 0, (i+1)*ColumnWidth, 12);
-		m_ToolTip.SetToolRect(this, i+1, rect);
-		rect.OffsetRect(0, 12);
-		m_ToolTip.SetToolRect(this, i+15, rect);
+
+		for (int j = 0; j < LC_COLORLIST_NUM_ROWS; j++)
+		{
+			int Index = i*LC_COLORLIST_NUM_ROWS+j;
+			m_ToolTip.SetToolRect(this, Index+1, rect);
+			rect.OffsetRect(0, 12);
+		}
 	}
 }
 

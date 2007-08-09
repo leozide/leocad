@@ -7,6 +7,9 @@
 // ColorLst.h : header file
 //
 
+#define LC_COLORLIST_NUM_ROWS 6
+#define LC_COLORLIST_NUM_COLS 13
+
 /////////////////////////////////////////////////////////////////////////////
 // CColorsList window
 

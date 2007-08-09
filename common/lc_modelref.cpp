@@ -4,6 +4,7 @@
 #include "lc_model.h"
 #include "lc_mesh.h"
 #include "lc_scene.h"
+#include "lc_colors.h"
 
 lcModelRef::lcModelRef(lcModel* Model)
 	: lcPieceObject(LC_OBJECT_MODELREF)
@@ -35,7 +36,7 @@ void lcModelRef::Update(u32 Time)
 
 void lcModelRef::AddToScene(lcScene* Scene, int Color)
 {
-	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COL_DEFAULT) ? Color : m_Color, this);
+	m_Mesh->AddToScene(Scene, m_ModelWorld, (m_Color == LC_COLOR_DEFAULT) ? Color : m_Color, this);
 }
 
 void lcModelRef::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
@@ -55,8 +56,8 @@ void lcModelRef::BuildMesh()
 	m_Mesh = NULL;
 
 	// Calculate the mesh size.
-	int SectionIndices[LC_COL_DEFAULT+1][3];
-	memset(SectionIndices, 0, sizeof(SectionIndices));
+	int* SectionIndices = new int[lcNumColors*3];
+	memset(SectionIndices, 0, sizeof(SectionIndices[0])*lcNumColors*3);
 
 	int NumSections = 0;
 	int NumVertices = 0;
@@ -69,25 +70,24 @@ void lcModelRef::BuildMesh()
 		for (int i = 0; i < Mesh->m_SectionCount; i++)
 		{
 			lcMeshSection* Section = &Mesh->m_Sections[i];
+			int SrcColor;
 
 			switch (Section->PrimitiveType)
 			{
 			case GL_QUADS:
-				if (!SectionIndices[Section->ColorIndex][0])
-					NumSections++;
-				SectionIndices[Section->ColorIndex][0] += Section->IndexCount;
+				SrcColor = Section->ColorIndex*3+0;
 				break;
 			case GL_TRIANGLES:
-				if (!SectionIndices[Section->ColorIndex][1])
-					NumSections++;
-				SectionIndices[Section->ColorIndex][1] += Section->IndexCount;
+				SrcColor = Section->ColorIndex*3+1;
 				break;
 			case GL_LINES:
-				if (!SectionIndices[Section->ColorIndex][2])
-					NumSections++;
-				SectionIndices[Section->ColorIndex][2] += Section->IndexCount;
+				SrcColor = Section->ColorIndex*3+2;
 				break;
 			}
+
+			if (!SectionIndices[SrcColor])
+				NumSections++;
+			SectionIndices[SrcColor] += Section->IndexCount;
 
 			NumIndices += Section->IndexCount;
 		}
@@ -102,16 +102,18 @@ void lcModelRef::BuildMesh()
 		BuildMesh(SectionIndices, TypeToType<u32>());
 	else
 		BuildMesh(SectionIndices, TypeToType<u16>());
+
+	delete[] SectionIndices;
 }
 
 template<typename T>
-void lcModelRef::BuildMesh(int SectionIndices[LC_COL_DEFAULT+1][3], TypeToType<T>)
+void lcModelRef::BuildMesh(int* SectionIndices, TypeToType<T>)
 {
 	// Copy data from all meshes into the new mesh.
 	lcMeshEditor<T> MeshEdit(m_Mesh);
 
-	lcMeshSection* DstSections[LC_COL_DEFAULT+1][3];
-	memset(DstSections, 0, sizeof(DstSections));
+	lcMeshSection** DstSections = new lcMeshSection*[lcNumColors*3];
+	memset(DstSections, 0, sizeof(DstSections[0])*lcNumColors*3);
 
 	for (lcPieceObject* Piece = m_Model->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
 	{
@@ -122,53 +124,33 @@ void lcModelRef::BuildMesh(int SectionIndices[LC_COL_DEFAULT+1][3], TypeToType<T
 		for (int i = 0; i < SrcMesh->m_SectionCount; i++)
 		{
 			lcMeshSection* SrcSection = &SrcMesh->m_Sections[i];
-			int ReserveIndices = 0;
+			int SrcColor;
 
 			// Create a new section if needed.
 			switch (SrcSection->PrimitiveType)
 			{
 			case GL_QUADS:
-				SectionIndices[SrcSection->ColorIndex][0] -= SrcSection->IndexCount;
-				ReserveIndices = SectionIndices[SrcSection->ColorIndex][0];
-				if (DstSections[SrcSection->ColorIndex][0])
-				{
-					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][0]);
-					DstSections[SrcSection->ColorIndex][0]->Box += SrcSection->Box;
-				}
-				else
-				{
-					DstSections[SrcSection->ColorIndex][0] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
-					DstSections[SrcSection->ColorIndex][0]->Box = SrcSection->Box;
-				}
+				SrcColor = SrcSection->ColorIndex*3+0;
 				break;
 			case GL_TRIANGLES:
-				SectionIndices[SrcSection->ColorIndex][1] -= SrcSection->IndexCount;
-				ReserveIndices = SectionIndices[SrcSection->ColorIndex][1];
-				if (DstSections[SrcSection->ColorIndex][1])
-				{
-					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][1]);
-					DstSections[SrcSection->ColorIndex][1]->Box += SrcSection->Box;
-				}
-				else
-				{
-					DstSections[SrcSection->ColorIndex][1] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
-					DstSections[SrcSection->ColorIndex][1]->Box = SrcSection->Box;
-				}
+				SrcColor = SrcSection->ColorIndex*3+1;
 				break;
 			case GL_LINES:
-				SectionIndices[SrcSection->ColorIndex][2] -= SrcSection->IndexCount;
-				ReserveIndices = SectionIndices[SrcSection->ColorIndex][2];
-				if (DstSections[SrcSection->ColorIndex][2])
-				{
-					MeshEdit.SetCurrentSection(DstSections[SrcSection->ColorIndex][2]);
-					DstSections[SrcSection->ColorIndex][2]->Box += SrcSection->Box;
-				}
-				else
-				{
-					DstSections[SrcSection->ColorIndex][2] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
-					DstSections[SrcSection->ColorIndex][2]->Box = SrcSection->Box;
-				}
+				SrcColor = SrcSection->ColorIndex*3+2;
 				break;
+			}
+
+			SectionIndices[SrcColor] -= SrcSection->IndexCount;
+			int ReserveIndices = SectionIndices[SrcColor];
+			if (DstSections[SrcColor])
+			{
+				MeshEdit.SetCurrentSection(DstSections[SrcColor]);
+				DstSections[SrcColor]->Box += SrcSection->Box;
+			}
+			else
+			{
+				DstSections[SrcColor] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+				DstSections[SrcColor]->Box = SrcSection->Box;
 			}
 
 			// Copy indices.

@@ -52,6 +52,7 @@ void PiecePreview::SetSelection(void* Selection)
 		m_Selection = Model;
 	}
 
+	m_Selection->m_Color = lcGetActiveProject()->GetCurrentColor();
 	m_Selection->Update(1);
 
 	Redraw();

@@ -5,7 +5,7 @@
 #include "leocad.h"
 #include "ClrPopup.h"
 #include "ClrPick.h"
-#include "globals.h"
+#include "lc_colors.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -183,9 +183,10 @@ int CColorPicker::GetColorIndex()
 
 void CColorPicker::SetColorIndex(int nColor)
 {
+	/* FIXME: color pick
 	if (nColor != -1)
 		m_crColor = RGB(FlatColorArray[nColor][0], FlatColorArray[nColor][1], FlatColorArray[nColor][2]);
-
+*/
 	if (m_nColor != nColor)
 	{
 		m_nColor = nColor;

@@ -2,7 +2,7 @@
 #include "lc_camera.h"
 #include "lc_camera_target.h"
 
-#include "globals.h"
+#include "lc_colors.h"
 #include "opengl.h"
 
 lcCameraTarget::lcCameraTarget(lcCamera* Parent)
@@ -51,7 +51,7 @@ void lcCameraTarget::Render()
 	if (IsSelected())
 	{
 		glLineWidth(2.0f);
-		glColor3ubv(FlatColorArray[IsFocused() ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+		glColor3fv(lcColorList[IsFocused() ? LC_COLOR_FOCUS : LC_COLOR_SELECTION].Value);
 	}
 	else
 	{

@@ -8,7 +8,7 @@
 #include "library.h"
 #include "pieceinf.h"
 #include "project.h"
-#include "globals.h"
+#include "lc_colors.h"
 #include "lc_application.h"
 #include "preview.h"
 
@@ -87,10 +87,10 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	if (!IsWindow(m_wndColorsList.m_hWnd))
 		return;
 
-	int off = 31;
-	int ColorWidth = ((cx-2) / 14) * 14 + 2;
-	m_wndColorsList.SetWindowPos(NULL, (cx-ColorWidth)/2, cy-off, ColorWidth, 26, SWP_NOZORDER);
-	m_wndColorsList.SetColumnWidth(cx / 14);
+	int off = LC_COLORLIST_NUM_ROWS*12+2+5;
+	int ColorWidth = ((cx-2) / LC_COLORLIST_NUM_COLS) * LC_COLORLIST_NUM_COLS + 2;
+	m_wndColorsList.SetWindowPos(NULL, (cx-ColorWidth)/2, cy-off, ColorWidth, LC_COLORLIST_NUM_ROWS*12+2, SWP_NOZORDER);
+	m_wndColorsList.SetColumnWidth(cx / LC_COLORLIST_NUM_COLS);
 
 	off += 30;
 	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
@@ -117,7 +117,7 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	                       LBS_OWNERDRAWFIXED|WS_VISIBLE|WS_TABSTOP|WS_CHILD|WS_BORDER,
 	                       CRect (0,0,0,0), this, IDW_COLORSLIST);
 
-	for (int i = 0; i < LC_MAXCOLORS; i++)
+	for (int i = 0; i < lcNumUserColors; i++)
 		m_wndColorsList.AddString("");
 
 	m_wndPiecesCombo.Create(CBS_DROPDOWN|CBS_SORT|CBS_HASSTRINGS|WS_VISIBLE|WS_CHILD|
@@ -164,7 +164,7 @@ void CPiecesBar::OnSelChangeColor()
 	if (i == LB_ERR)
 		return;
 
-	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, (i % 2 == 0) ? (i/2) : (((i-1)/2)+14));
+	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, i);
 	m_wndPiecePreview.PostMessage (WM_PAINT);
 }
 

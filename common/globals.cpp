@@ -8,7 +8,7 @@
 
 Messenger* messenger;
 MainWnd* main_window;
-
+/*
 const char* colornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"Light Green", "Blue", "Light Blue", "Yellow", "White",
 	"Dark Gray", "Black", "Brown", "Pink", "Purple", "Gold",
@@ -93,3 +93,4 @@ unsigned char ColorArray[31][4] = {
 	{  51,  51,  51, 255 },  //28 - Edges
 	{ 229,  76, 102, 255 },  //29 - Selected
 	{ 102,  76, 229, 255 }}; //30 - Focused
+*/

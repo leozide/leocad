@@ -88,7 +88,7 @@ END_MESSAGE_MAP()
 BOOL CPropertiesPieces::OnInitDialog() 
 {
 	CPropertyPage::OnInitDialog();
-
+/* FIXME: model pieces
 	char tmp[64];
 	int i, j;
 	memset (&totalcount, 0, sizeof (totalcount));
@@ -175,7 +175,7 @@ BOOL CPropertiesPieces::OnInitDialog()
 	lvi.iItem = idx;
 	lvi.pszText = tmp;
 	m_List.SetItemText(idx, ID, tmp);
-	
+*/
 	return TRUE;
 }
 
@@ -187,6 +187,7 @@ struct COMPARE_DATA
 
 static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
 {
+	/* FIXME: model pieces
 	int i, a, b;
 	COMPARE_DATA* data = (COMPARE_DATA*)lParamData;
 
@@ -231,10 +232,12 @@ static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamDat
 		return -1;
 	else
 		return 1;
+*/
 }
 
 void CPropertiesPieces::OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pResult) 
 {
+	/* FIXME: model pieces
 	int i;
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	COMPARE_DATA data;
@@ -255,4 +258,5 @@ void CPropertiesPieces::OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pRes
 	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)&data);
 
 	*pResult = 0;
+	*/
 }

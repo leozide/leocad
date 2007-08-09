@@ -29,7 +29,7 @@ protected:
 	};
 
 	template<class T>
-	void BuildMesh(int SectionIndices[LC_COL_DEFAULT+1][3], TypeToType<T>);
+	void BuildMesh(int* SectionIndices, TypeToType<T>);
 
 public:
 	lcModel* m_Model;

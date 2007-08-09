@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include "lc_scene.h"
 #include "lc_pieceobj.h"
+#include "lc_colors.h"
 #include "opengl.h"
-#include "globals.h"
 #include "system.h"
 #include "debug.h"
 
@@ -24,7 +24,7 @@ void lcCreateDefaultMeshes()
 	lcSelectionMesh = new lcMesh(1, 48, 32, NULL);
 
 	lcMeshEditor<u16> MeshEdit(lcSelectionMesh);
-	lcMeshSection* Section = MeshEdit.StartSection(GL_LINES, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_DEFAULT);
 
 	Section->Box.m_Max = Vector3(0.5f,0.5f,0.5f);
 	Section->Box.m_Min = Vector3(-0.5f,-0.5f,-0.5f);
@@ -115,7 +115,7 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 	lcMesh* SphereMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(SphereMesh);
-	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COLOR_DEFAULT);
 
 	Section->Box.m_Min = Vector3(-Radius, -Radius, -Radius);
 	Section->Box.m_Max = Vector3(Radius, Radius, Radius);
@@ -198,7 +198,7 @@ lcMesh* lcCreateBoxMesh(const Vector3& Min, const Vector3& Max)
 	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(BoxMesh);
-	lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, LC_COLOR_DEFAULT);
 
 	Section->Box.m_Min = Min;
 	Section->Box.m_Max = Max;
@@ -252,7 +252,7 @@ lcMesh* lcCreateWireframeBoxMesh(const Vector3& Min, const Vector3& Max)
 	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(BoxMesh);
-	lcMeshSection* Section = MeshEdit.StartSection(GL_LINES, LC_COL_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_DEFAULT);
 
 	Section->Box.m_Min = Min;
 	Section->Box.m_Max = Max;
@@ -363,29 +363,29 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 		if (Section->PrimitiveType == GL_LINES)
 		{
 			if (Focused)
-				CurColor = LC_COL_FOCUSED;
+				CurColor = LC_COLOR_FOCUS;
 			else if (Selected)
-				CurColor = LC_COL_SELECTED;
+				CurColor = LC_COLOR_SELECTION;
 			else
 				CurColor = Section->ColorIndex;
 		}
 
-		if (CurColor == LC_COL_DEFAULT)
+		if (CurColor == LC_COLOR_DEFAULT)
 			CurColor = Color;
 
-		if (CurColor > 13 && CurColor < 22)
+		if (LC_COLOR_TRANSLUCENT(CurColor))
 		{
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glDepthMask(GL_FALSE);
-			glColor4ubv(ColorArray[CurColor]);
 		}
 		else
 		{
 			glDepthMask(GL_TRUE);
 			glDisable(GL_BLEND);
-			glColor3ubv(FlatColorArray[CurColor]);
 		}
+
+		glColor4fv(lcColorList[CurColor].Value);
 
 #ifdef LC_PROFILE
 		if (Section->PrimitiveType == GL_QUADS)
@@ -416,7 +416,7 @@ void lcMesh::AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, l
 		RenderSection.Section = Section;
 		RenderSection.Color = Section->ColorIndex;
 
-		if (RenderSection.Color == LC_COL_DEFAULT)
+		if (RenderSection.Color == LC_COLOR_DEFAULT)
 			RenderSection.Color = Color;
 
 		if (RenderSection.Section->PrimitiveType == GL_LINES)
@@ -426,12 +426,12 @@ void lcMesh::AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, l
 //				continue;
 
 			if (Owner->IsFocused())
-				RenderSection.Color = LC_COL_FOCUSED;
+				RenderSection.Color = LC_COLOR_FOCUS;
 			else if (Owner->IsSelected())
-				RenderSection.Color = LC_COL_SELECTED;
+				RenderSection.Color = LC_COLOR_SELECTION;
 		}
 
-		if (RenderSection.Color > 13 && RenderSection.Color < 22)
+		if (LC_COLOR_TRANSLUCENT(RenderSection.Color))
 		{
 			Vector3 Pos = Mul31(Section->Box.GetCenter(), ModelWorld);
 			Pos = Mul31(Pos, Scene->m_WorldView);

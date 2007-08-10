@@ -4,6 +4,7 @@
 #include "str.h"
 #include "config.h"
 #include "algebra.h"
+#include "array.h"
 
 class lcObject;
 class lcPieceObject;
@@ -20,6 +21,9 @@ public:
 public:
 	// Check if a given model is referenced by this model.
 	bool IsSubModel(const lcModel* Model) const;
+
+	// Get a list of all actual pieces used by this model.
+	void GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const;
 
 	// Tell this model it's now the active model or no longer active.
 	void SetActive(bool Active);

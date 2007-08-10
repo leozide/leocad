@@ -18,6 +18,11 @@ lcPivot::~lcPivot()
 	// fixme: lcPivot
 }
 
+void lcPivot::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+{
+	// fixme: lcPivot
+}
+
 void lcPivot::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 {
 	BoundingBox Box;

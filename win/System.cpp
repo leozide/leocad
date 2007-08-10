@@ -1601,16 +1601,14 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_PROPERTIES:
 		{
 			LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
-			CPropertiesSheet ps(opts->names && opts->count);
+			CPropertiesSheet ps(opts->PiecesUsed != NULL);
 
 			ps.SetTitle("Model Properties", 0);
 			ps.m_PageSummary.m_Name = opts->Name;
 			ps.m_PageSummary.m_Author = opts->Author;
 			ps.m_PageSummary.m_Description = opts->Description;
 			ps.m_PageSummary.m_Comments = opts->Comments;
-			ps.m_PagePieces.names = opts->names;
-			ps.m_PagePieces.count = opts->count;
-			ps.m_PagePieces.lines = opts->lines;
+			ps.m_PagePieces.m_PiecesUsed = opts->PiecesUsed;
 
 			if (ps.DoModal() == IDOK)
 			{

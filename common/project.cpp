@@ -4258,9 +4258,7 @@ FIXME: html export
 
 			opts.Name = Name;
 			opts.Author = Sys_ProfileLoadString("Default", "User", "");
-			opts.lines = 0;
-			opts.count = NULL;
-			opts.names = NULL;
+			opts.PiecesUsed = NULL;
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
 			{
@@ -4336,7 +4334,6 @@ FIXME: html export
 
 		case LC_MODEL_PROPERTIES:
 		{
-/* FIXME: model properties
 			LC_PROPERTIESDLG_OPTS opts;
 
 			// Text fields.
@@ -4345,18 +4342,19 @@ FIXME: html export
 			opts.Description = m_ActiveModel->m_Description;
 			opts.Comments = m_ActiveModel->m_Comments;
 
-			// Piece list.
-			opts.lines = lcGetPiecesLibrary()->GetPieceCount();
-			opts.count = (unsigned short*)malloc(lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			memset (opts.count, 0, lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			opts.names = (char**)malloc(lcGetPiecesLibrary()->GetPieceCount()*sizeof(char*));
-			for (int i = 0; i < lcGetPiecesLibrary()->GetPieceCount(); i++)
-				opts.names[i] = lcGetPiecesLibrary()->GetPieceInfo (i)->m_strDescription;
+			// Pieces list.
+			PiecesLibrary* Lib = lcGetPiecesLibrary();
+			int NumPieces = Lib->GetPieceCount() * lcNumUserColors;
+			opts.PiecesUsed = new int[NumPieces];
+			memset(opts.PiecesUsed, 0, NumPieces * sizeof(int));
 
-			for (Piece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (Piece*)pPiece->m_Next)
+			ObjArray<LC_PIECELIST_ENTRY> Pieces;
+			m_ActiveModel->GetPieceList(Pieces, LC_COLOR_DEFAULT);
+
+			for (int i = 0; i < Pieces.GetSize(); i++)
 			{
-				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
-				opts.count[idx*LC_MAXCOLORS+pPiece->GetColor()]++;
+				int Index = Lib->GetPieceIndex(Pieces[i].Info) * lcNumUserColors + Pieces[i].Color;
+				opts.PiecesUsed[Index]++;
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -4373,9 +4371,7 @@ FIXME: html export
 				}
 			}
 
-			free(opts.count);
-			free(opts.names);
-*/
+			delete[] opts.PiecesUsed;
 		} break;
 
 		case LC_FILE_TERRAIN:

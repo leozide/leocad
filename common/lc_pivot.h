@@ -10,6 +10,7 @@ public:
 	virtual ~lcPivot();
 
 	// Base class implementation.
+	virtual void GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const;
 	virtual void ClosestRayIntersect(LC_CLICK_RAY* Ray) const;
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
 	virtual void Update(u32 Time);

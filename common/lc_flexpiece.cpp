@@ -6,6 +6,7 @@
 #include "lc_mesh.h"
 #include "lc_colors.h"
 #include "pieceinf.h"
+#include "typedefs.h"
 
 lcFlexiblePiece::lcFlexiblePiece(PieceInfo* Info)
 	: lcPieceObject(LC_OBJECT_FLEXPIECE)
@@ -77,6 +78,16 @@ lcFlexiblePiece::~lcFlexiblePiece()
 
 	if (m_PieceInfo)
 		m_PieceInfo->DeRef();
+}
+
+void lcFlexiblePiece::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+{
+	LC_PIECELIST_ENTRY Entry;
+
+	Entry.Info = m_PieceInfo;
+	Entry.Color = (m_Color == LC_COLOR_DEFAULT) ? Color : m_Color;
+
+	Pieces.Add(Entry);
 }
 
 void lcFlexiblePiece::Move(u32 Time, bool AddKey, const Vector3& Delta)

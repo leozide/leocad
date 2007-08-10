@@ -26,6 +26,11 @@ lcModelRef::~lcModelRef()
 {
 }
 
+void lcModelRef::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+{
+	m_Model->GetPieceList(Pieces, Color);
+}
+
 void lcModelRef::Update(u32 Time)
 {
 	lcPieceObject::Update(Time);

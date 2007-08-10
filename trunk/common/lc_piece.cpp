@@ -7,6 +7,7 @@
 #include "pieceinf.h"
 #include "texture.h"
 #include "lc_colors.h"
+#include "typedefs.h"
 
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcPieceObject(LC_OBJECT_PIECE)
@@ -44,6 +45,16 @@ void lcPiece::SetPieceInfo(PieceInfo* Info)
 
 		BuildMesh();
 	}
+}
+
+void lcPiece::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+{
+	LC_PIECELIST_ENTRY Entry;
+
+	Entry.Info = m_PieceInfo;
+	Entry.Color = (m_Color == LC_COLOR_DEFAULT) ? Color : m_Color;
+
+	Pieces.Add(Entry);
 }
 
 void lcPiece::Update(u32 Time)

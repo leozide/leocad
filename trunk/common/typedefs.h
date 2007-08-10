@@ -201,8 +201,13 @@ typedef enum
 	LC_CURSOR_COUNT
 } LC_CURSOR_TYPE;
 
-// Piece connections (complicated and wastes memory but fast).
+struct LC_PIECELIST_ENTRY
+{
+	PieceInfo* Info;
+	int Color;
+};
 
+// Piece connections.
 struct CONNECTION
 {
 	unsigned char type;
@@ -226,7 +231,6 @@ struct CONNECTION_TYPE
 };
 
 // Select by Name dialog data
-
 typedef enum
 {
 	LC_SELDLG_PIECE,
@@ -417,9 +421,7 @@ struct LC_PROPERTIESDLG_OPTS
 	String Author;
 	String Description;
 	String Comments;
-	char** names;
-	unsigned short* count;
-	int lines;
+	int* PiecesUsed;
 };
 
 struct LC_GROUPEDITDLG_OPTS

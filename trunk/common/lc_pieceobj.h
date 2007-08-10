@@ -26,6 +26,9 @@ public:
 	// Merges this object's bounding box with another box.
 	void MergeBoundingBox(BoundingBox* Box);
 
+	// Get a list of all actual pieces used by this piece.
+	virtual void GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const = 0;
+
 	// Export this object to an LDraw file.
 	virtual void ExportLDraw(class File& file)
 	{

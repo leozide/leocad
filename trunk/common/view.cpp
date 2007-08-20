@@ -69,19 +69,19 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 			return LC_CURSOR_PAN;
 
 		case LC_ACTION_ROTATE_VIEW:
+				return LC_CURSOR_ROTATE_VIEW;
+
+		case LC_ACTION_ORBIT:
 			switch (m_Project->GetOverlayMode())
 			{
 				case LC_OVERLAY_X: return LC_CURSOR_ROTATEX;
 				case LC_OVERLAY_Y: return LC_CURSOR_ROTATEY;
 				case LC_OVERLAY_Z: return LC_CURSOR_ROLL;
-				case LC_OVERLAY_XYZ: return LC_CURSOR_ROTATE_VIEW;
+				case LC_OVERLAY_XYZ: return LC_CURSOR_ORBIT;
 				default:
 					LC_ASSERT_FALSE("Unknown cursor type.");
-					return LC_CURSOR_NONE;
+					return LC_CURSOR_ORBIT;
 			}
-
-		case LC_ACTION_ORBIT:
-			return LC_CURSOR_ORBIT;
 
 		case LC_ACTION_ROLL:
 			return LC_CURSOR_ROLL;

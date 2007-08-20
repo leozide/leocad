@@ -50,17 +50,11 @@ void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 			{
 				int y;
 
-				for (y = lpDIS->rcItem.top; y < lpDIS->rcItem.bottom; y+=4)
-				{
-					if (y == lpDIS->rcItem.top) y += x%4;
-					SetPixelV (lpDIS->hDC, x,y, RGB(255,255,255));
-				}
+				for (y = lpDIS->rcItem.top + x % 4; y < lpDIS->rcItem.bottom; y += 4)
+					SetPixelV(lpDIS->hDC, x,y, RGB(255,255,255));
 
-				for (y = lpDIS->rcItem.bottom; y > lpDIS->rcItem.top; y-=4)
-				{
-					if (y == lpDIS->rcItem.bottom) y-= x%4;
-					SetPixelV (lpDIS->hDC, x,y, RGB(255,255,255));
-				}
+				for (y = lpDIS->rcItem.bottom - x % 4; y > lpDIS->rcItem.top; y -= 4)
+					SetPixelV(lpDIS->hDC, x,y, RGB(255,255,255));
 			}
 		}
 	}

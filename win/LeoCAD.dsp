@@ -1020,15 +1020,7 @@ SOURCE=..\common\basewnd.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\camera.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\common\console.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\curve.h
 # End Source File
 # Begin Source File
 
@@ -1160,15 +1152,7 @@ SOURCE=..\common\algebra.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\camera.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\common\console.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\curve.cpp
 # End Source File
 # Begin Source File
 
@@ -1181,10 +1165,6 @@ SOURCE=..\Common\file.cpp
 # Begin Source File
 
 SOURCE=..\Common\globals.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Common\group.cpp
 # End Source File
 # Begin Source File
 
@@ -1220,11 +1200,55 @@ SOURCE=..\common\lc_application.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\lc_camera.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_camera_target.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_colors.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_flexpiece.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_light.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\lc_mesh.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\lc_model.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_modelref.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_object.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_piece.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_pieceobj.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_pivot.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\lc_scene.cpp
 # End Source File
 # Begin Source File
 
@@ -1249,10 +1273,6 @@ SOURCE=..\common\message.cpp
 # Begin Source File
 
 SOURCE=..\common\minifig.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\object.cpp
 # End Source File
 # Begin Source File
 

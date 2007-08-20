@@ -155,12 +155,10 @@ protected:
 	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
 
 	void AddModel(lcModel* Model);
-	void RemoveModel(lcModel* Model);
+	void DeleteModel(lcModel* Model);
 	void SetActiveModel(lcModel* Model);
 
 	void AddPiece(Vector3 Pos, Vector4 Rot);
-	void AddPiece(lcPieceObject* pPiece);
-	void RemovePiece(lcPieceObject* pPiece);
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(lcPieceObject* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);

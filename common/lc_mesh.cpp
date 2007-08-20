@@ -111,6 +111,7 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 {
 	int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
 	int NumVertices = (Slices - 1) * Slices + 2;
+	int i;
 
 	lcMesh* SphereMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
@@ -122,7 +123,7 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 
 	MeshEdit.AddVertex(Vector3(0, 0, Radius));
 
-	for (int i = 1; i < Slices; i++ )
+	for (i = 1; i < Slices; i++ )
 	{
 		float r0 = Radius * sinf (i * (LC_PI / Slices));
 		float z0 = Radius * cosf (i * (LC_PI / Slices));
@@ -138,7 +139,7 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 
 	MeshEdit.AddVertex(Vector3(0, 0, -Radius));
 
-	for (int i = 0; i < Slices - 1; i++ )
+	for (i = 0; i < Slices - 1; i++ )
 	{
 		MeshEdit.AddIndex(0);
 		MeshEdit.AddIndex(1 + i);
@@ -174,7 +175,7 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 		MeshEdit.AddIndex(Row1 + 0);
 	}
 
-	for (int i = 0; i < Slices - 1; i++ )
+	for (i = 0; i < Slices - 1; i++ )
 	{
 		MeshEdit.AddIndex((Slices - 1) * Slices + 1);
 		MeshEdit.AddIndex((Slices - 1) * (Slices - 1) + i);

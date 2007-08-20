@@ -2629,7 +2629,7 @@ void Project::RenderOverlays(View* view)
 
 		glEnable(GL_DEPTH_TEST);
 	}
-	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	else if (m_nCurAction == LC_ACTION_ORBIT)
 	{
 		float w = (float)view->GetWidth();
 		float h = (float)view->GetHeight();
@@ -6054,8 +6054,7 @@ void Project::SetAction(int nAction)
 	SystemUpdateAction(nAction, m_nCurAction);
 	m_nCurAction = nAction;
 
-	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE) ||
-	    (m_nCurAction == LC_ACTION_ROTATE_VIEW))
+	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE) || (m_nCurAction == LC_ACTION_ORBIT))
 	{
 		ActivateOverlay();
 
@@ -8286,11 +8285,32 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-if (m_ActiveView->GetCamera()->IsSide())
-break;
-			m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
-			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
-// FIXME: camera rotation
+			lcCamera* Camera = m_ActiveView->GetCamera();
+
+			if (Camera->IsSide())
+			{
+				Vector3 Pos = Camera->m_WorldPosition;
+				Vector3 Target = Camera->m_Children->m_WorldPosition;
+				float Roll = Camera->m_Roll;
+
+				Camera = new lcCamera();
+				Camera->CreateCamera(LC_CAMERA_USER, true);
+
+				Camera->Update(m_ActiveModel->m_CurFrame);
+				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
+				m_ActiveModel->AddCamera(Camera);
+
+				Camera->SetPosition(1, false, Pos);
+				Camera->m_Children->SetPosition(1, false, Pos);
+				Camera->SetRoll(1, false, Roll);
+
+				m_ActiveView->SetCamera(Camera);
+				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
+			}
+
+			Camera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			Camera->Update(m_ActiveModel->m_CurFrame);
 
 			m_nDownX = x;
 			m_nDownY = y;
@@ -8303,53 +8323,51 @@ break;
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-if (m_ActiveView->GetCamera()->IsSide())
-break;
-			m_ActiveView->GetCamera()->DoOrbit(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			lcCamera* Camera = m_ActiveView->GetCamera();
 
-/* FIXME: camera rotation
-			// We can't rotate the side cameras.
-			if (m_ActiveView->GetCamera()->IsSide())
+			if (Camera->IsSide())
 			{
-				Vector3 eye = m_ActiveView->GetCamera()->GetEyePosition();
-				Vector3 target = m_ActiveView->GetCamera()->GetTargetPosition();
-				Vector3 up = m_ActiveView->GetCamera()->GetUpVector();
-				Camera* pCamera = new Camera(eye, target, up, m_ActiveModel->m_Cameras);
+				Vector3 Pos = Camera->m_WorldPosition;
+				Vector3 Target = Camera->m_Children->m_WorldPosition;
+				float Roll = Camera->m_Roll;
 
-				m_ActiveView->SetCamera(pCamera);
+				Camera = new lcCamera();
+				Camera->CreateCamera(LC_CAMERA_USER, true);
+
+				Camera->Update(m_ActiveModel->m_CurFrame);
+				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
+				m_ActiveModel->AddCamera(Camera);
+
+				Camera->SetPosition(1, false, Pos);
+				Camera->m_Children->SetPosition(1, false, Pos);
+				Camera->SetRoll(1, false, Roll);
+
+				m_ActiveView->SetCamera(Camera);
 				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-				SystemUpdateCurrentCamera(NULL, pCamera, m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
 			}
-
-			BoundingBox Box;
-			for (lcPieceObject* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
-				if (Piece->IsSelected())
-					Piece->MergeBoundingBox(Box);
-
-			bs[0] = (bs[0]+bs[3])/2;
-			bs[1] = (bs[1]+bs[4])/2;
-			bs[2] = (bs[2]+bs[5])/2;
 
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys, bs);
+					Camera->DoOrbit(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 
 				case LC_OVERLAY_X:
-					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, 0, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys, bs);
+					Camera->DoOrbit(x - m_nDownX, 0, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 
 				case LC_OVERLAY_Y:
-					m_ActiveView->GetCamera()->DoRotate(0, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys, bs);
+					Camera->DoOrbit(0, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 
 				case LC_OVERLAY_Z:
-					m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+					Camera->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
 					break;
 			}
-			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
-*/
+
+			Camera->Update(m_ActiveModel->m_CurFrame);
+
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -8635,7 +8653,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 			UpdateAllViews();
 		}
 	}
-	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	else if (m_nCurAction == LC_ACTION_ORBIT)
 	{
 		int vw = m_ActiveView->GetWidth();
 		int vh = m_ActiveView->GetHeight();
@@ -8679,7 +8697,7 @@ void Project::ActivateOverlay()
 	}
 	else if ((m_nCurAction == LC_ACTION_ZOOM_REGION) && (m_nTracking == LC_TRACK_START_LEFT))
 		m_OverlayActive = true;
-	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	else if (m_nCurAction == LC_ACTION_ORBIT)
 		m_OverlayActive = true;
 	else
 		m_OverlayActive = false;

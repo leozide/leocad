@@ -40,6 +40,9 @@ public:
 	// Remove a piece from this model.
 	void RemovePiece(lcPieceObject* Piece);
 
+	// Inline the contents of another model into this model.
+	void InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color);
+
 	// Return true if any pieces are currently selected.
 	bool AnyPiecesSelected() const;
 

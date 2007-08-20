@@ -2830,14 +2830,78 @@ void Project::AddModel(lcModel* Model)
 	m_ModelList.Add(Model);
 }
 
-void Project::RemoveModel(lcModel* Model)
+void Project::DeleteModel(lcModel* DeleteModel)
 {
-	m_ModelList.RemovePointer(Model);
+	// Make sure we aren't deleting the last model.
+	if (m_ModelList.GetSize() < 2)
+	{
+		SystemDoMessageBox("Cannot delete model, projects must have at least 1 model.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	// Ask the user if he really wants to delete this model.
+	char Text[1024];
+	sprintf(Text, "Are you sure you want to delete the model \"%s\"?", (char*)DeleteModel->m_Name);
+
+	if (SystemDoMessageBox(Text, LC_MB_YESNO | LC_MB_ICONQUESTION) != LC_YES)
+		return;
+
+	// Check if the current model is referenced by another model.
+	bool Referenced = false;
 
 	for (int i = 0; i < m_ModelList.GetSize(); i++)
 	{
-//		m_ModelList[i].RemoveReferences(Model);
+		lcModel* Model = m_ModelList[i];
+
+		if (Model == DeleteModel)
+			continue;
+
+		if (Model->IsSubModel(DeleteModel))
+		{
+			Referenced = true;
+			break;
+		}
 	}
+
+	if (Referenced)
+	{
+		const char* Prompt = "The model you are about to delete is referenced by other models in this project.\nDo you want to inline those references before deleting?";
+		bool Inline = (SystemDoMessageBox(Prompt, LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES);
+
+		for (int i = 0; i < m_ModelList.GetSize(); i++)
+		{
+			lcModel* Model = m_ModelList[i];
+
+			if (Model == DeleteModel)
+				continue;
+
+			for (lcObject* Piece = Model->m_Pieces; Piece; Piece = Piece->m_Next)
+			{
+				// fixme: pivot
+				if (Piece->GetType() != LC_OBJECT_MODELREF)
+					continue;
+
+				lcModelRef* ModelRef = (lcModelRef*)Piece;
+
+				if (ModelRef->m_Model != DeleteModel)
+					continue;
+
+				if (Inline)
+					Model->InlineModel(DeleteModel, ModelRef->m_ModelWorld, ModelRef->m_Color);
+			}
+		}
+	}
+
+	if (m_ActiveModel == DeleteModel)
+		SetActiveModel(m_ModelList[0]);
+
+	m_ModelList.RemovePointer(DeleteModel);
+	delete DeleteModel;
+
+	SetModifiedFlag(true);
+	CheckPoint("Deleting Model");
+	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
+	UpdateAllViews();
 }
 
 void Project::SetActiveModel(lcModel* Model)
@@ -2853,16 +2917,6 @@ void Project::SetActiveModel(lcModel* Model)
 	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 	UpdateSelection();
 	UpdateAllViews();
-}
-
-void Project::AddPiece(lcPieceObject* NewPiece)
-{
-	m_ActiveModel->AddPiece(NewPiece);
-}
-
-void Project::RemovePiece(lcPieceObject* Piece)
-{
-	m_ActiveModel->RemovePiece(Piece);
 }
 
 void Project::AddPiece(Vector3 Pos, Vector4 Rot)
@@ -2908,7 +2962,7 @@ void Project::AddPiece(Vector3 Pos, Vector4 Rot)
 	Piece->Update(m_ActiveModel->m_CurFrame);
 
 	SelectAndFocusNone(false);
-	AddPiece(Piece);
+	m_ActiveModel->AddPiece(Piece);
 	Piece->SetFocus(true, false);
 	messenger->Dispatch(LC_MSG_FOCUS_CHANGED, Piece);
 	UpdateSelection();
@@ -2972,7 +3026,7 @@ bool Project::RemoveSelectedObjects()
 			Temp = Piece->m_Next;
 
 			Removed = true;
-			RemovePiece((lcPieceObject*)Piece);
+			m_ActiveModel->RemovePiece((lcPieceObject*)Piece);
 			delete Piece;
 			Piece = Temp;
 		}
@@ -4280,32 +4334,7 @@ FIXME: html export
 
 		case LC_MODEL_DELETE:
 		{
-			// Make sure we aren't deleting the last model.
-			if (m_ModelList.GetSize() < 2)
-			{
-				SystemDoMessageBox("Projects must have at least 1 model.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
-
-			// FIXME: check if model is referenced and prompt to inline.
-
-			// Ask the user if he really wants to delete this model.
-			char* Text = new char[m_ActiveModel->m_Name.GetLength() + 100];
-			sprintf(Text, "Are you sure you want to delete the model \"%s\"?", (char*)m_ActiveModel->m_Name);
-
-			if (SystemDoMessageBox(Text, LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES)
-			{
-				RemoveModel(m_ActiveModel);
-				delete m_ActiveModel;
-				SetActiveModel(m_ModelList[0]);
-
-				SetModifiedFlag(true);
-				CheckPoint("Deleting Model");
-				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
-				UpdateAllViews();
-			}
-
-			delete[] Text;
+			DeleteModel(m_ActiveModel);
 		} break;
 
 		case LC_MODEL_MODEL1:
@@ -4868,7 +4897,7 @@ FIXME: paste
 					Piece->SetRotation(1, true, Vector4(Wizard.m_Rotation[i][0], Wizard.m_Rotation[i][1], Wizard.m_Rotation[i][2], Wizard.m_Rotation[i][3]));
 
 					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Wizard.m_Info[i]->m_strDescription);
-					AddPiece(Piece);
+					m_ActiveModel->AddPiece(Piece);
 					Piece->SetSelection(true, false);
 
 					Piece->Update(m_ActiveModel->m_CurFrame);
@@ -5117,7 +5146,7 @@ FIXME: paste
 			// FIXME: move pieces to be relative to the parent
 
 			Group->Update(m_ActiveModel->m_CurFrame);
-			AddPiece(Group);
+			m_ActiveModel->AddPiece(Group);
 
 			SetModifiedFlag(true);
 			CheckPoint("Grouping");
@@ -6443,7 +6472,7 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 			Objects.Add(Piece);
 	}
 
-	for (lcCamera* Camera = m_ActiveModel->m_Cameras; Camera != NULL; Camera = (lcCamera*)Camera->m_Next)
+	for (Camera = m_ActiveModel->m_Cameras; Camera != NULL; Camera = (lcCamera*)Camera->m_Next)
 	{
 		if (!Camera->IsVisible(m_ActiveModel->m_CurFrame))
 			continue;

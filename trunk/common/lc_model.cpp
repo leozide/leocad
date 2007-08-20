@@ -49,6 +49,7 @@ bool lcModel::IsSubModel(const lcModel* Model) const
 {
 	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
 	{
+		// fixme: pivot
 		if (Piece->GetType() != LC_OBJECT_MODELREF)
 			continue;
 
@@ -157,6 +158,11 @@ void lcModel::RemovePiece(lcPieceObject* Piece)
 		Prev = Next;
 		Next = Next->m_Next;
 	}
+}
+
+void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color)
+{
+	// fixme inline
 }
 
 bool lcModel::AnyPiecesSelected() const

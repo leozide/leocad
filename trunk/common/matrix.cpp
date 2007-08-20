@@ -16,7 +16,7 @@ static float Identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
 // Perform a 4x4 matrix multiplication  (product = a x b).
 // WARNING: (product != b) assumed
-static void matmul (float *product, const float *a, const float *b)
+static void matmul(float *product, const float *a, const float *b)
 {
 	int i;
 
@@ -39,18 +39,18 @@ static void matmul (float *product, const float *a, const float *b)
 }
 
 // Generate a 4x4 transformation matrix from rotation parameters.
-static void rotation_matrix (double angle, float x, float y, float z, float m[] )
+static void rotation_matrix(double angle, float x, float y, float z, float m[] )
 {
 	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
 
-	s = (float)sin (angle * DTOR);
-	c = (float)cos (angle * DTOR);
+	s = (float)sin(angle * DTOR);
+	c = (float)cos(angle * DTOR);
 	mag = (float)sqrt(x*x + y*y + z*z);
 
 	if (mag == 0) 
 	{
 		// generate an identity matrix and return
-		memcpy (m, Identity, sizeof(float[16]));
+		memcpy(m, Identity, sizeof(float[16]));
 		return;
 	}
 
@@ -93,18 +93,18 @@ static void rotation_matrix (double angle, float x, float y, float z, float m[] 
 // =============================================================================
 // Matrix class
 
-Matrix::Matrix ()
+Matrix::Matrix()
 {
 	LoadIdentity();
 }
 
-Matrix::Matrix (const float* mat)
+Matrix::Matrix(const float* mat)
 {
-	memcpy (&m[0], mat, sizeof(float[16]));
+	memcpy(&m[0], mat, sizeof(float[16]));
 }
 
 // Create a matrix from axis-angle and a point
-Matrix::Matrix (const float *rot, const float *pos)
+Matrix::Matrix(const float *rot, const float *pos)
 {
 	float tmp[4] = { rot[0], rot[1], rot[2], rot[3]*DTOR };
 	float q[4];
@@ -165,7 +165,7 @@ Matrix::Matrix (const float *rot, const float *pos)
 }
 
 // Expand from the .bin file
-void Matrix::FromPacked (const float *mat)
+void Matrix::FromPacked(const float *mat)
 {
 	m[0] = mat[0];
 	m[1] = mat[1];
@@ -185,9 +185,9 @@ void Matrix::FromPacked (const float *mat)
 	m[15] = 0.0f;
 }
 
-void Matrix::LoadIdentity ()
+void Matrix::LoadIdentity()
 {
-  memcpy (&m[0], &Identity, sizeof(float[16]));
+  memcpy(&m[0], &Identity, sizeof(float[16]));
 }
 
 float Matrix::Determinant() const
@@ -200,7 +200,7 @@ void Matrix::Multiply(const Matrix& m1, const Matrix& m2)
 	matmul(m, m1.m, m2.m);
 }
 
-void Matrix::Rotate (float angle, float x, float y, float z)
+void Matrix::Rotate(float angle, float x, float y, float z)
 {
 	float rm[16];
 
@@ -209,23 +209,23 @@ void Matrix::Rotate (float angle, float x, float y, float z)
 
 	rotation_matrix(angle, x, y, z, rm);
 	matmul(rm, rm, m);
-	memcpy (&m[0], &rm[0], sizeof(rm));
+	memcpy(&m[0], &rm[0], sizeof(rm));
 }
 
-void Matrix::RotateCenter (float angle, float x, float y, float z, float px, float py, float pz)
+void Matrix::RotateCenter(float angle, float x, float y, float z, float px, float py, float pz)
 {
 	m[12] -= px;
 	m[13] -= py;
 	m[14] -= pz;
 
-	Rotate (angle, x, y, z);
+	Rotate(angle, x, y, z);
 
 	m[12] += px;
 	m[13] += py;
 	m[14] += pz;
 }
 
-void Matrix::Translate (float x, float y, float z)
+void Matrix::Translate(float x, float y, float z)
 {
 	m[12] = m[0] * x + m[4] * y + m[8]  * z + m[12];
 	m[13] = m[1] * x + m[5] * y + m[9]  * z + m[13];
@@ -233,7 +233,7 @@ void Matrix::Translate (float x, float y, float z)
 	m[15] = m[3] * x + m[7] * y + m[11] * z + m[15];
 }
 
-void Matrix::SetTranslation (float x, float y, float z)
+void Matrix::SetTranslation(float x, float y, float z)
 {
 	m[12] = x;
 	m[13] = y;
@@ -241,21 +241,21 @@ void Matrix::SetTranslation (float x, float y, float z)
 	m[15] = 1;
 }
 
-void Matrix::GetTranslation (float* x, float* y, float* z)
+void Matrix::GetTranslation(float* x, float* y, float* z)
 {
 	*x = m[12];
 	*y = m[13];
 	*z = m[14];
 }
 
-void Matrix::GetTranslation (float pos[3])
+void Matrix::GetTranslation(float pos[3])
 {
 	pos[0] = m[12];
 	pos[1] = m[13];
 	pos[2] = m[14];
 }
 
-void Matrix::SetTranslation (float pos[3])
+void Matrix::SetTranslation(float pos[3])
 {
 	m[12] = pos[0];
 	m[13] = pos[1];
@@ -285,16 +285,16 @@ void Matrix::TransformPoint(float out[], const float in[3])
 	out[2] = m[2]*in[0] + m[6]*in[1] + m[10]*in[2] + m[14];
 }
 
-void Matrix::TransformPoints (float p[], int n)
+void Matrix::TransformPoints(float p[], int n)
 {
 	for (int i = 0; i < n*3; i += 3)
 	{
 		float tmp[3] = { p[i], p[i+1], p[i+2] };
-		TransformPoint (&p[i], tmp);
+		TransformPoint(&p[i], tmp);
 	}
 }
 
-void Matrix::FromLDraw (const float *f)
+void Matrix::FromLDraw(const float *f)
 {
 	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
 	float t[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
@@ -304,75 +304,23 @@ void Matrix::FromLDraw (const float *f)
 	m[8] = f[5];    m[9] = f[8];    m[10]= f[11];   m[11] = 0.0f;
 	m[12]= f[0]/25; m[13]= f[1]/25; m[14]= f[2]/25; m[15] = 1.0f;
 
-	matmul (m, m, t);
-	matmul (trans, trans, m);
-	memcpy (&m[0], &trans[0], sizeof(m));
+	matmul(m, m, t);
+	matmul(trans, trans, m);
+	memcpy(&m[0], &trans[0], sizeof(m));
 }
 
-void Matrix::ToLDraw (float *f) const
+void Matrix::ToLDraw(float *f) const
 {
 	float trans[16] = { 1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1 };
 	float tmp[16] = { 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
 
 	matmul(tmp, tmp, m);
-	matmul (tmp, tmp, trans);
+	matmul(tmp, tmp, trans);
 
 	f[0] = m[12]*25; f[1] = -m[14]*25; f[2] = m[13]*25;
 	f[3] = tmp[0];   f[4] = tmp[4];    f[5] = tmp[8];
 	f[6] = tmp[1];   f[7] = tmp[5];    f[8] = tmp[9];
 	f[9] = tmp[2];   f[10]= tmp[6];    f[11]= tmp[10];
-}
-
-void Matrix::ToEulerAngles (float *rot) const
-{
-	double sinPitch, cosPitch, sinRoll, cosRoll, sinYaw, cosYaw;
-	float colMatrix[4][4];
-
-	colMatrix[0][0] = m[0];
-	colMatrix[0][1] = m[4];
-	colMatrix[0][2] = m[8];
-	colMatrix[0][3] = m[12];
-
-	colMatrix[1][0] = m[1];
-	colMatrix[1][1] = m[5];
-	colMatrix[1][2] = m[9];
-	colMatrix[1][3] = m[13];
-
-	colMatrix[2][0] = m[2];
-	colMatrix[2][1] = m[6];
-	colMatrix[2][2] = m[10];
-	colMatrix[2][3] = m[14];
-
-	colMatrix[3][0] = 0.0f;
-	colMatrix[3][1] = 0.0f;
-	colMatrix[3][2] = 0.0f;
-	colMatrix[3][3] = 1.0f;
-
-	sinPitch = -colMatrix[2][0];
-	cosPitch = sqrt(1 - sinPitch*sinPitch);
-
-	if (fabs(cosPitch) > 0.0005)
-	{
-		sinRoll = colMatrix[2][1] / cosPitch;
-		cosRoll = colMatrix[2][2] / cosPitch;
-		sinYaw = colMatrix[1][0] / cosPitch;
-		cosYaw = colMatrix[0][0] / cosPitch;
-	} 
-	else
-	{
-		sinRoll = -colMatrix[1][2];
-		cosRoll = colMatrix[1][1];
-		sinYaw = 0;
-		cosYaw = 1;
-	}
-
-	rot[2] = (float)(RTOD*atan2 (sinYaw, cosYaw));
-	rot[1] = (float)(RTOD*atan2 (sinPitch, cosPitch));
-	rot[0] = (float)(RTOD*atan2 (sinRoll, cosRoll));
-
-	if (rot[2] < 0) rot[2] += 360;
-	if (rot[1] < 0) rot[1] += 360;
-	if (rot[0] < 0) rot[0] += 360;
 }
 
 void Matrix::ToAxisAngle(float *rot) const
@@ -403,7 +351,7 @@ void Matrix::ToAxisAngle(float *rot) const
 
 	if (rot[3] > 0.01f)
 	{
-		if (fabs (M_PI - rot[3]) > 0.01f)
+		if (fabs(M_PI - rot[3]) > 0.01f)
 		{
 			rot[0] = tmp.m[6] - tmp.m[9];
 			rot[1] = tmp.m[8] - tmp.m[2];
@@ -478,5 +426,5 @@ void Matrix::FromAxisAngle(const float *axis, float angle)
 {
 	if (angle == 0.0f)
 		return;
-	rotation_matrix (angle, axis[0], axis[1], axis[2], m);
+	rotation_matrix(angle, axis[0], axis[1], axis[2], m);
 }

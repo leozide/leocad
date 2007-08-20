@@ -1,6 +1,3 @@
-// Matrix class
-//
-
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
@@ -17,7 +14,6 @@ public:
 	void FromAxisAngle(const float *axis, float angle);
 
 	void ToLDraw(float *f) const;
-	void ToEulerAngles(float *rot) const;
 	void ToAxisAngle(float *rot) const;
 
 	void LoadIdentity();

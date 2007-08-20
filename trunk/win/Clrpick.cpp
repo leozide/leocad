@@ -36,9 +36,7 @@ void AFXAPI DDX_ColorPicker(CDataExchange *pDX, int nIDC, COLORREF& crColor)
 CColorPicker::CColorPicker()
 {
 	m_bActive = FALSE;
-	m_bDefaultText = FALSE;
-	m_bCustomText = FALSE;
-	m_crColor = GetSysColor(COLOR_3DFACE);
+	m_nColor = -1;
 	SetColorIndex(-1);
 }
 
@@ -98,7 +96,7 @@ BOOL CColorPicker::OnClicked()
 	m_bActive = TRUE;
 	CRect rect;
 	GetWindowRect(rect);
-	new CColorPopup(CPoint(rect.left, rect.bottom), m_crColor, this, m_bDefaultText, m_bCustomText);
+	new CColorPopup(CPoint(rect.left, rect.bottom), m_nColor, this);
 
 	return TRUE;
 }
@@ -130,13 +128,13 @@ void CColorPicker::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// Fill remaining area with colour
 	rect.right -= m_ArrowRect.Width()-1;
 
-	CBrush brush( ((state & ODS_DISABLED) || m_crColor == CLR_DEFAULT)? ::GetSysColor(COLOR_3DFACE) : m_crColor);
+	CBrush brush(((state & ODS_DISABLED) || m_nColor == -1)? ::GetSysColor(COLOR_3DFACE) : LC_COLOR_RGB(m_nColor));
 	CBrush* pOldBrush = (CBrush*) pDC->SelectObject(&brush);
 	pDC->SelectStockObject(NULL_PEN);
 	pDC->Rectangle(rect);
 	pDC->SelectObject(pOldBrush);
 
-	if (GetColorIndex() > 13 && GetColorIndex() < 22)
+	if (LC_COLOR_TRANSLUCENT(m_nColor))
 	{
 		for (int x = rect.left; x < rect.right; x++)
 		{
@@ -183,10 +181,6 @@ int CColorPicker::GetColorIndex()
 
 void CColorPicker::SetColorIndex(int nColor)
 {
-	/* FIXME: color pick
-	if (nColor != -1)
-		m_crColor = RGB(FlatColorArray[nColor][0], FlatColorArray[nColor][1], FlatColorArray[nColor][2]);
-*/
 	if (m_nColor != nColor)
 	{
 		m_nColor = nColor;

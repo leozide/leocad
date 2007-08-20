@@ -12,9 +12,6 @@
 #define CPN_SELENDOK        WM_USER + 1001 // Color Picker end OK
 #define CPN_SELENDCANCEL    WM_USER + 1002 // Color Picker end (cancelled)
 
-// forward declaration
-class CColorPicker;
-
 /////////////////////////////////////////////////////////////////////////////
 // CColorPopup window
 
@@ -23,7 +20,7 @@ class CColorPopup : public CWnd
 	// Construction
 public:
 	CColorPopup();
-	CColorPopup(CPoint p, COLORREF crColor, CWnd* pParentWnd, BOOL bDefaultText = FALSE, BOOL bCustomText = FALSE);
+	CColorPopup(CPoint p, int ColorIndex, CWnd* pParentWnd);
 	void Initialise();
 
 	// Attributes
@@ -31,7 +28,7 @@ public:
 
 	// Operations
 public:
-	BOOL Create(CPoint p, COLORREF crColor, CWnd* pParentWnd, BOOL bDefaultText = FALSE, BOOL bCustomText = NULL);
+	BOOL Create(CPoint p, int ColorIndex, CWnd* pParentWnd);
 
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -46,14 +43,12 @@ public:
 
 protected:
 	BOOL GetCellRect(int nIndex, const LPRECT& rect);
-	void FindCellFromColor(COLORREF crColor);
 	void SetWindowSize();
 	void CreateToolTips();
 	void ChangeSelection(int nIndex);
 	void EndSelection(int nMessage);
 	void DrawCell(CDC* pDC, int nIndex);
 
-	COLORREF GetColor(int nIndex);// { return m_crColors[nIndex].crColor; }
 	int  GetIndex(int row, int col) const;
 	int  GetRow(int nIndex) const;
 	int  GetColumn(int nIndex) const;
@@ -64,12 +59,10 @@ protected:
 	int            m_nBoxSize, m_nMargin;
 	int            m_nCurrentSel;
 	int            m_nChosenColorSel;
-	BOOL m_bDefaultText;
-	BOOL m_bCustomText;
-	CRect          m_CustomTextRect, m_DefaultTextRect, m_WindowRect;
+	int            m_nInitialColor, m_nColor;
+	CRect          m_WindowRect;
 	CFont          m_Font;
 	CPalette       m_Palette;
-	COLORREF       m_crInitialColor, m_crColor;
 	CToolTipCtrl   m_ToolTip;
 	CWnd*          m_pParent;
 

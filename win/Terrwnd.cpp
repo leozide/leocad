@@ -82,7 +82,13 @@ void CTerrainWnd::OnPaint()
 	float aspect = (float)m_szView.cx/(float)m_szView.cy;
 	glViewport(0, 0, m_szView.cx, m_szView.cy);
 
-	m_pCamera->LoadProjection(aspect);
+	Matrix44 Projection = CreatePerspectiveMatrix(m_pCamera->m_FOV, aspect, m_pCamera->m_NearDist, m_pCamera->m_FarDist);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(Projection);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(m_pCamera->m_WorldView);
 
 	m_pTerrain->Render(m_pCamera, aspect);
 

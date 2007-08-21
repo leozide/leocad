@@ -1132,10 +1132,6 @@ SOURCE=..\Common\texture.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Common\Tr.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\Common\typedefs.h
 # End Source File
 # Begin Source File
@@ -1313,10 +1309,6 @@ SOURCE=..\common\texfont.cpp
 # Begin Source File
 
 SOURCE=..\Common\texture.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Common\Tr.cpp
 # End Source File
 # Begin Source File
 

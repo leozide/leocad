@@ -25,7 +25,6 @@ public:
 
 	LC_CURSOR_TYPE GetCursor(int x, int y) const;
 
-	void LoadViewportProjection();
 	void UpdateOverlayScale();
 
 	lcCamera* GetCamera() const

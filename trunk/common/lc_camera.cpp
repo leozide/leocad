@@ -38,6 +38,7 @@ void lcCamera::CreateCamera(int CameraType, bool Target)
 	m_FarDist = 500.0f;
 	m_FOV = 30.0f; // TODO: animate FOV
 
+	SetOrtho(IsSide());
 	SetVisible(CameraType == LC_CAMERA_USER);
 }
 
@@ -339,30 +340,24 @@ void lcCamera::GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const
 
 void lcCamera::LoadProjection(float Aspect)
 {
-	// FIXME: tiled rendering
-//	if (m_pTR != NULL)
-//		m_pTR->BeginTile();
-//	else
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
-		if (IsOrtho())
-		{
-			float ymax, ymin, xmin, xmax, znear, zfar;
-			Vector3 frontvec = Vector3(m_ViewWorld[2]);//m_Target - m_Eye; // FIXME: free ortho cameras = crash
-			ymax = (frontvec.Length())*sinf(DTOR*m_FOV/2);
-			ymin = -ymax;
-			xmin = ymin * Aspect;
-			xmax = ymax * Aspect;
-			znear = m_NearDist;
-			zfar = m_FarDist;
-			glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
-		}
-		else
-		{
-			gluPerspective(m_FOV, Aspect, m_NearDist, m_FarDist);
-		}
+	if (IsOrtho())
+	{
+		float ymax, ymin, xmin, xmax, znear, zfar;
+		Vector3 frontvec = Vector3(m_ViewWorld[2]);//m_Target - m_Eye; // FIXME: free ortho cameras = crash
+		ymax = (frontvec.Length())*sinf(DTOR*m_FOV/2);
+		ymin = -ymax;
+		xmin = ymin * Aspect;
+		xmax = ymax * Aspect;
+		znear = m_NearDist;
+		zfar = m_FarDist;
+		glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
+	}
+	else
+	{
+		gluPerspective(m_FOV, Aspect, m_NearDist, m_FarDist);
 	}
 
 	glMatrixMode(GL_MODELVIEW);

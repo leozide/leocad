@@ -145,7 +145,35 @@ void View::OnSize(int cx, int cy)
 {
 	GLWindow::OnSize(cx, cy);
 
+	m_Viewport[0] = 0;
+	m_Viewport[1] = 0;
+	m_Viewport[2] = cx;
+	m_Viewport[3] = cy;
+
 	UpdateOverlayScale();
+}
+
+Matrix44 View::GetProjectionMatrix() const
+{
+	if (!m_Camera)
+		return IdentityMatrix44();
+
+	float Aspect = (float)m_nWidth/(float)m_nHeight;
+
+	if (m_Camera->IsOrtho())
+	{
+		float ymax, ymin, xmin, xmax, znear, zfar;
+		Vector3 frontvec = Vector3(m_Camera->m_ViewWorld[2]);//m_Target - m_Eye; // FIXME: free ortho cameras = crash
+		ymax = (frontvec.Length())*sinf(DTOR*m_Camera->m_FOV/2);
+		ymin = -ymax;
+		xmin = ymin * Aspect;
+		xmax = ymax * Aspect;
+		znear = m_Camera->m_NearDist;
+		zfar = m_Camera->m_FarDist;
+		return CreateOrthoMatrix(xmin, xmax, ymin, ymax, znear, zfar);
+	}
+	else
+		return CreatePerspectiveMatrix(m_Camera->m_FOV, Aspect, m_Camera->m_NearDist, m_Camera->m_FarDist);
 }
 
 void View::LoadViewportProjection()
@@ -162,19 +190,17 @@ void View::UpdateOverlayScale()
 {
 	GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
 	GLdouble ModelMatrix[16], ProjMatrix[16];
-	GLint Viewport[4];
 
 	LoadViewportProjection();
 	glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-	glGetIntegerv(GL_VIEWPORT, Viewport);
 
 	const Vector3& Center = m_Project->GetOverlayCenter();
 
 	// Calculate the scaling factor by projecting the center to the front plane then
 	// projecting a point close to it back.
-	gluProject(Center[0], Center[1], Center[2], ModelMatrix, ProjMatrix, Viewport, &ScreenX, &ScreenY, &ScreenZ);
-	gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, Viewport, &PointX, &PointY, &PointZ);
+	gluProject(Center[0], Center[1], Center[2], ModelMatrix, ProjMatrix, m_Viewport, &ScreenX, &ScreenY, &ScreenZ);
+	gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, m_Viewport, &PointX, &PointY, &PointZ);
 
 	Vector3 Dist((float)PointX - Center[0], (float)PointY - Center[1], (float)PointZ - Center[2]);
 	m_OverlayScale = Dist.Length() * 5.0f;

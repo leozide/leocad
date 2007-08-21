@@ -1559,12 +1559,14 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	// Render the background.
 	RenderBackground(view);
 
-	// Load the camera.
-	float w = (float)view->GetWidth();
-	float h = (float)view->GetHeight();
-	float ratio = w/h;
+	// Setup the projection and camera matrices.
+	Matrix44 Projection = view->GetProjectionMatrix();
 
-	view->GetCamera()->LoadProjection(ratio);
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(Projection);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(view->GetCamera()->m_WorldView);
 
 	// Render 3D objects.
 	if (AllowFast && ((m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE)))
@@ -1799,29 +1801,28 @@ void Project::RenderScene(View* view)
 			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
 
 			Matrix44 ModelView = Camera->m_WorldView;
-			Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
+			Matrix44 Projection = view->GetProjectionMatrix();
 
 			// Unproject edge center points to world space.
-			int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() }, i;
-
 			Vector3 Points[10] =
 			{
-				Vector3(0, (float)Viewport[3] / 2, 0),
-				Vector3(0, (float)Viewport[3] / 2, 1),
-				Vector3((float)Viewport[2] / 2, 0, 0),
-				Vector3((float)Viewport[2] / 2, 0, 1),
-				Vector3((float)Viewport[2], (float)Viewport[3] / 2, 0),
-				Vector3((float)Viewport[2], (float)Viewport[3] / 2, 1),
-				Vector3((float)Viewport[2] / 2, (float)Viewport[3], 0),
-				Vector3((float)Viewport[2] / 2, (float)Viewport[3], 1),
-				Vector3((float)Viewport[2] / 2, (float)Viewport[3] / 2, 0),
-				Vector3((float)Viewport[2] / 2, (float)Viewport[3] / 2, 1),
+				Vector3(0, (float)view->m_Viewport[3] / 2, 0),
+				Vector3(0, (float)view->m_Viewport[3] / 2, 1),
+				Vector3((float)view->m_Viewport[2] / 2, 0, 0),
+				Vector3((float)view->m_Viewport[2] / 2, 0, 1),
+				Vector3((float)view->m_Viewport[2], (float)view->m_Viewport[3] / 2, 0),
+				Vector3((float)view->m_Viewport[2], (float)view->m_Viewport[3] / 2, 1),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3], 0),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3], 1),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3] / 2, 0),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3] / 2, 1),
 			};
 
-			UnprojectPoints(Points, 10, ModelView, Projection, Viewport);
+			UnprojectPoints(Points, 10, ModelView, Projection, view->m_Viewport);
 
 			// Intersect lines with base plane.
 			Vector3 Intersections[5];
+			int i;
 
 			for (i = 0; i < 5; i++)
 				LinePlaneIntersection(&Intersections[i], Points[i*2], Points[i*2+1], Vector4(0, 0, 1, 0));
@@ -2583,18 +2584,16 @@ void Project::RenderOverlays(View* view)
 				{
 					GLdouble ScreenX, ScreenY, ScreenZ;
 					GLdouble ModelMatrix[16], ProjMatrix[16];
-					GLint Vp[4];
 
 					glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
 					glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-					glGetIntegerv(GL_VIEWPORT, Vp);
 
-					gluProject(0, 0, 0, ModelMatrix, ProjMatrix, Vp, &ScreenX, &ScreenY, &ScreenZ);
+					gluProject(0, 0, 0, ModelMatrix, ProjMatrix, m_ActiveView->m_Viewport, &ScreenX, &ScreenY, &ScreenZ);
 
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();
 					glLoadIdentity();
-					glOrtho(0, Vp[2], 0, Vp[3], -1, 1);
+					glOrtho(m_ActiveView->m_Viewport[0], m_ActiveView->m_Viewport[2], m_ActiveView->m_Viewport[1], m_ActiveView->m_Viewport[3], -1, 1);
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
 					glLoadIdentity();
@@ -2613,7 +2612,7 @@ void Project::RenderOverlays(View* view)
 
 					glBegin(GL_QUADS);
 					glColor3f(0.8f, 0.8f, 0.0f);
-					m_pScreenFont->PrintText((float)ScreenX - Vp[0] - (cx / 2), (float)ScreenY - Vp[1] + (cy / 2), 0.0f, buf);
+					m_pScreenFont->PrintText((float)ScreenX - m_ActiveView->m_Viewport[0] - (cx / 2), (float)ScreenY - m_ActiveView->m_Viewport[1] + (cy / 2), 0.0f, buf);
 					glEnd();
 
 					glDisable(GL_TEXTURE_2D);
@@ -6367,16 +6366,14 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 	// TODO: use math functions instead of OpenGL.
 	GLdouble px, py, pz, rx, ry, rz;
 	GLdouble modelMatrix[16], projMatrix[16];
-	GLint viewport[4];
 
 	m_ActiveView->LoadViewportProjection();
 	glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	// Unproject the selected point against both the front and the back clipping plane
-	gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &px, &py, &pz);
-	gluUnProject(x, y, 1, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
+	gluUnProject(x, y, 0, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &px, &py, &pz);
+	gluUnProject(x, y, 1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &rx, &ry, &rz);
 
 	ClickRay.Start = Vector3((float)px, (float)py, (float)pz);
 	ClickRay.End = Vector3((float)(rx-px), (float)(ry-py), (float)(rz-pz));
@@ -7335,14 +7332,12 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
   				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
 	  			float ax, ay;
-		  		GLint viewport[4];
 
           glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
           glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-          glGetIntegerv(GL_VIEWPORT, viewport);
-          gluUnProject( 5, 5, 0.1, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
-          gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
-          gluUnProject( 5,10, 0.1, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
+          gluUnProject( 5, 5, 0.1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &p1[0], &p1[1], &p1[2]);
+          gluUnProject(10, 5, 0.1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &p2[0], &p2[1], &p2[2]);
+          gluUnProject( 5,10, 0.1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &p3[0], &p3[1], &p3[2]);
 				
           Vector3 vx = Normalize(Vector3((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0));//p2[2] - p1[2] };
           Vector3 x(1, 0, 0);
@@ -7411,7 +7406,6 @@ void Project::BeginPieceDrop(PieceInfo* Info)
 void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
 
 	if (m_nTracking != LC_TRACK_NONE)
 		if (StopTracking(false))
@@ -7429,9 +7423,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	m_ActiveView->LoadViewportProjection();
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
@@ -7604,7 +7597,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				break;
 
 			double tmp[3];
-			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &tmp[0], &tmp[1], &tmp[2]);
 
 			StartTracking(LC_TRACK_START_LEFT);
 
@@ -7624,7 +7617,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		case LC_ACTION_CAMERA:
 		{
 			double tmp[3];
-			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &tmp[0], &tmp[1], &tmp[2]);
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
 
@@ -7693,7 +7686,6 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
 
 	if (SetActiveView(view))
 		return;
@@ -7701,10 +7693,9 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 	m_ActiveView->LoadViewportProjection();
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	// why this is here ?
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	lcObject* Object = FindObjectFromPoint(x, y);
@@ -7758,7 +7749,6 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
 
 	if (StopTracking(false))
 		return;
@@ -7773,9 +7763,8 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	m_ActiveView->LoadViewportProjection();
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
@@ -7826,15 +7815,13 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		m_nTracking = LC_TRACK_LEFT;
 
 	GLdouble modelMatrix[16], projMatrix[16], tmp[3];
-	GLint viewport[4];
 	float ptx, pty, ptz;
 
 	m_ActiveView->LoadViewportProjection();
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &tmp[0], &tmp[1], &tmp[2]);
 	ptx = (float)tmp[0]; pty = (float)tmp[1]; ptz = (float)tmp[2];
 
 	switch (m_nCurAction)
@@ -7843,15 +7830,15 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		{
 			int ptx = x, pty = y;
 
-			if (ptx >= viewport[0] + viewport[2])
-				ptx = viewport[0] + viewport[2] - 1;
-			else if (ptx <= viewport[0])
-				ptx = viewport[0] + 1;
+			if (ptx >= m_ActiveView->m_Viewport[0] + m_ActiveView->m_Viewport[2])
+				ptx = m_ActiveView->m_Viewport[0] + m_ActiveView->m_Viewport[2] - 1;
+			else if (ptx <= m_ActiveView->m_Viewport[0])
+				ptx = m_ActiveView->m_Viewport[0] + 1;
 
-			if (pty >= viewport[1] + viewport[3])
-				pty = viewport[1] + viewport[3] - 1;
-			else if (pty <= viewport[1])
-				pty = viewport[1] + 1;
+			if (pty >= m_ActiveView->m_Viewport[1] + m_ActiveView->m_Viewport[3])
+				pty = m_ActiveView->m_Viewport[1] + m_ActiveView->m_Viewport[3] - 1;
+			else if (pty <= m_ActiveView->m_Viewport[1])
+				pty = m_ActiveView->m_Viewport[1] + 1;
 
 			m_fTrack[0] = (float)ptx;
 			m_fTrack[1] = (float)pty;
@@ -8496,16 +8483,14 @@ void Project::MouseUpdateOverlays(int x, int y)
 		// Calculate the distance from the mouse pointer to the center of the sphere.
 		GLdouble px, py, pz, rx, ry, rz;
 		GLdouble ModelMatrix[16], ProjMatrix[16];
-		GLint Viewport[4];
 
 		m_ActiveView->LoadViewportProjection();
 		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
 		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-		glGetIntegerv(GL_VIEWPORT, Viewport);
 
 		// Unproject the mouse point against both the front and the back clipping planes.
-		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, Viewport, &px, &py, &pz);
-		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, Viewport, &rx, &ry, &rz);
+		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, m_ActiveView->m_Viewport, &px, &py, &pz);
+		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, m_ActiveView->m_Viewport, &rx, &ry, &rz);
 
 		Vector3 SegStart((float)rx, (float)ry, (float)rz);
 		Vector3 SegEnd((float)px, (float)py, (float)pz);

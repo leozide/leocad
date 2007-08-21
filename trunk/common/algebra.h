@@ -768,7 +768,7 @@ Matrix44 Inverse(const Matrix44& m);
 Matrix44 RotTranInverse(const Matrix44& m);
 Matrix44 CreateLookAtMatrix(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
 Matrix44 CreatePerspectiveMatrix(float FoVy, float Aspect, float Near, float Far);
-Matrix44 CreateOrthoMatrix44(float Left, float Right, float Bottom, float Top, float Near, float Far);
+Matrix44 CreateOrthoMatrix(float Left, float Right, float Bottom, float Top, float Near, float Far);
 
 // ============================================================================
 // Axis Aligned Bounding Box.

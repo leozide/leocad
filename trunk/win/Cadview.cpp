@@ -230,15 +230,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	int tw = pw, th = ph; // tile size
 
-	MEMORYSTATUS MemStat;
-	MemStat.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&MemStat);
-
-	if (DWORD(pw*ph*3) > MemStat.dwTotalPhys)
-	{
-		tw = 512;
-		th = 512;
-	}
+	if (tw > 1024 || th > 1024)
+		tw = th = 1024;
 
 	HDC hMemDC = CreateCompatibleDC(GetDC()->m_hDC);
 	LPBITMAPINFOHEADER lpbi;
@@ -309,15 +302,67 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			/* FIXME tiled rendering
-			lcCamera* pCam = view.GetCamera();
-			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
-			do 
+			lcCamera* Camera = view.GetCamera();
+
+			int CurrentTile = 0;
+			int TileWidth = tw;
+			int TileHeight = th;
+			int ImageWidth = pw;
+			int ImageHeight = ph;
+			int Columns = (ImageWidth + TileWidth - 1) / TileWidth;
+			int Rows = (ImageHeight + TileHeight - 1) / TileHeight;
+			float xmin, xmax, ymin, ymax;
+			ymax = Camera->m_NearDist * tan(Camera->m_FOV * 3.14159265f / 360.0f);
+			ymin = -ymax;
+			xmin = ymin * viewaspect;
+			xmax = ymax * viewaspect;
+
+			for (;;)
 			{
-				project->Render(&view, false, false);
+				int CurrentTileWidth, CurrentTileHeight;
+
+				// which tile (by row and column) we're about to render
+				int CurrentRow = CurrentTile / Columns;
+				int CurrentColumn = CurrentTile % Columns;
+
+				// Compute actual size of this tile with border
+				if (CurrentRow < Rows-1)
+					CurrentTileHeight = TileHeight;
+				else
+					CurrentTileHeight = ImageHeight - (Rows-1) * (TileHeight);
+				
+				if (CurrentColumn < Columns-1)
+					CurrentTileWidth = TileWidth;
+				else
+					CurrentTileWidth = ImageWidth - (Columns-1) * (TileWidth);
+	
+				glViewport(0, 0, CurrentTileWidth, CurrentTileHeight);
+
+				project->RenderBackground(&view);
+
+				float left, right, bottom, top;
+
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+
+				// Compute projection parameters.
+				left = xmin + (xmax - xmin) * (CurrentColumn * TileWidth) / ImageWidth;
+				right = left + (xmax - xmin) * CurrentTileWidth / ImageWidth;
+				bottom = ymin + (ymax - ymin) * (CurrentRow * TileHeight) / ImageHeight;
+				top = bottom + (ymax - ymin) * CurrentTileHeight / ImageHeight;
+
+				glFrustum(left, right, bottom, top, Camera->m_NearDist, Camera->m_FarDist);
+
+				glMatrixMode(GL_MODELVIEW);
+				glLoadMatrixf(view.GetCamera()->m_WorldView);
+
+				project->RenderScene(&view);
 				glFinish();
-				int tr, tc, ctw, cth;
-				pCam->GetTileInfo(&tr, &tc, &ctw, &cth);
+
+				int ctw = CurrentTileWidth;
+				int cth = CurrentTileHeight;
+				int tr = Rows - CurrentRow - 1;
+				int tc = CurrentColumn;
 
 				lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 	
@@ -326,11 +371,15 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				memcpy (&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
 
 				pDC->SetStretchBltMode(COLORONCOLOR);
-				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th, ctw, cth, 0, 0, ctw, cth, 
+				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th+th-cth, ctw, cth, 0, 0, ctw, cth, 
 					(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 				if (lpbi) GlobalFreePtr(lpbi);
-			} while (pCam->EndTile());
-			*/
+
+				// Increment tile counter.
+				CurrentTile++;
+				if (CurrentTile >= Rows * Columns) 
+					break;
+			}
 		}
 		else
 		{
@@ -346,11 +395,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 			if (lpbi) GlobalFreePtr(lpbi);
 		}
-
-		// OpenGL Rendering
-//			CCamera* pOld = pDoc->GetActiveCamera();
-//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pDoc->GetCamera(CAMERA_MAIN);
-//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
 
 		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
 		if (dwPrint & PRINT_NUMBERS)

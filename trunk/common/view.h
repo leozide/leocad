@@ -34,15 +34,16 @@ public:
 	}
 	void SetCamera(lcCamera* cam);
 	void UpdateCamera();
+	Matrix44 GetProjectionMatrix() const;
 
 public:
 	float m_OverlayScale;
 
-protected:
-	Project* m_Project;
-
+	int m_Viewport[4];
 	lcCamera* m_Camera;
 	String m_CameraName;
+
+	Project* m_Project; // TODO: remove m_Project.
 };
 
 #endif // _VIEW_H_

@@ -165,7 +165,6 @@ protected:
 	lcObject* FindObjectFromPoint(int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<lcObject>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
-	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
 
 	// Movement.

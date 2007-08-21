@@ -176,33 +176,18 @@ Matrix44 View::GetProjectionMatrix() const
 		return CreatePerspectiveMatrix(m_Camera->m_FOV, Aspect, m_Camera->m_NearDist, m_Camera->m_FarDist);
 }
 
-void View::LoadViewportProjection()
-{
-	if (m_Camera)
-	{
-		float ratio = (float)m_nWidth/(float)m_nHeight;
-		glViewport(0, 0, m_nWidth, m_nHeight);
-		m_Camera->LoadProjection(ratio);
-	}
-}
-
 void View::UpdateOverlayScale()
 {
-	GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
-	GLdouble ModelMatrix[16], ProjMatrix[16];
-
-	LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-
+	Matrix44 Projection = GetProjectionMatrix();
 	const Vector3& Center = m_Project->GetOverlayCenter();
 
 	// Calculate the scaling factor by projecting the center to the front plane then
 	// projecting a point close to it back.
-	gluProject(Center[0], Center[1], Center[2], ModelMatrix, ProjMatrix, m_Viewport, &ScreenX, &ScreenY, &ScreenZ);
-	gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, m_Viewport, &PointX, &PointY, &PointZ);
+	Vector3 Screen = ProjectPoint(Center, m_Camera->m_WorldView, Projection, m_Viewport);
+	Screen[0] += 10.0f;
+	Vector3 Point = UnprojectPoint(Screen, m_Camera->m_WorldView, Projection, m_Viewport);
 
-	Vector3 Dist((float)PointX - Center[0], (float)PointY - Center[1], (float)PointZ - Center[2]);
+	Vector3 Dist = Point - Center;
 	m_OverlayScale = Dist.Length() * 5.0f;
 }
 

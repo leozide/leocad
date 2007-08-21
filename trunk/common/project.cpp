@@ -2582,13 +2582,7 @@ void Project::RenderOverlays(View* view)
 				// Draw text.
 				if (view == m_ActiveView)
 				{
-					GLdouble ScreenX, ScreenY, ScreenZ;
-					GLdouble ModelMatrix[16], ProjMatrix[16];
-
-					glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-					glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-
-					gluProject(0, 0, 0, ModelMatrix, ProjMatrix, m_ActiveView->m_Viewport, &ScreenX, &ScreenY, &ScreenZ);
+					Vector3 ScreenPos = ProjectPoint(Vector3(0.0f, 0.0f, 0.0f), view->GetCamera()->m_WorldView, view->GetProjectionMatrix(), view->m_Viewport);
 
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();
@@ -2612,7 +2606,7 @@ void Project::RenderOverlays(View* view)
 
 					glBegin(GL_QUADS);
 					glColor3f(0.8f, 0.8f, 0.0f);
-					m_pScreenFont->PrintText((float)ScreenX - m_ActiveView->m_Viewport[0] - (cx / 2), (float)ScreenY - m_ActiveView->m_Viewport[1] + (cy / 2), 0.0f, buf);
+					m_pScreenFont->PrintText(ScreenPos[0] - m_ActiveView->m_Viewport[0] - (cx / 2), ScreenPos[1] - m_ActiveView->m_Viewport[1] + (cy / 2), 0.0f, buf);
 					glEnd();
 
 					glDisable(GL_TEXTURE_2D);
@@ -6223,21 +6217,6 @@ bool Project::GetSelectionCenter(Vector3& Center) const
 	return Selected;
 }
 
-void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4])
-{
-	Viewport[0] = 0;
-	Viewport[1] = 0;
-	Viewport[2] = m_ActiveView->GetWidth();
-	Viewport[3] = m_ActiveView->GetHeight();
-
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	lcCamera* Camera = m_ActiveView->GetCamera();
-
-	// Build the matrices.
-	ModelView = Camera->m_WorldView;
-	Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
-}
-
 void Project::ConvertToUserUnits(Vector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
@@ -6330,16 +6309,13 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	}
 
 	// Try to hit the base grid.
-	int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	lcCamera* Camera = m_ActiveView->GetCamera();
 
 	// Build the matrices.
-	Matrix44 ModelView = Camera->m_WorldView;
-	Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
+	Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
 
 	Vector3 ClickPoints[2] = { Vector3((float)m_nDownX, (float)m_nDownY, 0.0f), Vector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
-	UnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
+	UnprojectPoints(ClickPoints, 2, Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
 
 	Vector3 Intersection;
 	if (LinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
@@ -6355,7 +6331,7 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position = UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+	Position = UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
 	Rotation = Vector4(0, 0, 1, 0);
 }
 
@@ -6363,20 +6339,14 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 {
 	LC_CLICK_RAY ClickRay;
 
-	// TODO: use math functions instead of OpenGL.
-	GLdouble px, py, pz, rx, ry, rz;
-	GLdouble modelMatrix[16], projMatrix[16];
+	Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
+	const Matrix44& ModelView = m_ActiveView->GetCamera()->m_WorldView;
 
-	m_ActiveView->LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+	Vector3 Start = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, m_ActiveView->m_Viewport);
+	Vector3 End = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, m_ActiveView->m_Viewport);
 
-	// Unproject the selected point against both the front and the back clipping plane
-	gluUnProject(x, y, 0, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &px, &py, &pz);
-	gluUnProject(x, y, 1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &rx, &ry, &rz);
-
-	ClickRay.Start = Vector3((float)px, (float)py, (float)pz);
-	ClickRay.End = Vector3((float)(rx-px), (float)(ry-py), (float)(rz-pz));
+	ClickRay.Start = Start;
+	ClickRay.End = End - Start;
 	ClickRay.Dist = FLT_MAX;
 	ClickRay.Object = NULL;
 
@@ -6399,13 +6369,7 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<lcObject>& Objects)
 {
-	int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	lcCamera* Camera = m_ActiveView->GetCamera();
-
-	// Build the matrices.
-	Matrix44 ModelView = Camera->m_WorldView;
-	Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
 
 	// Find out the top-left and bottom-right corners in screen coordinates.
 	float Left, Top, Bottom, Right;
@@ -6439,7 +6403,8 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 		Vector3(Right, Top, 0), Vector3(Left, Top, 1), Vector3(Right, Bottom, 1)
 	};
 
-	UnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
+	Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
+	UnprojectPoints(Corners, 6, Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
 
 	// Build the box planes.
 	Vector4 Planes[6];
@@ -6594,14 +6559,6 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_ZOOM_REGION:
 			{
-				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
-				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				lcCamera* Camera = m_ActiveView->GetCamera();
-
-				// Build the matrices.
-				Matrix44 ModelView = Camera->m_WorldView;
-				Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
-
 				// Find out the top-left and bottom-right corners in screen coordinates.
 				float Left, Top, Bottom, Right;
 
@@ -6631,11 +6588,13 @@ bool Project::StopTracking(bool bAccept)
 				Vector3 Points[3] =
 				{
 					Vector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-					Vector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
-					Vector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
+					Vector3((float)m_ActiveView->m_Viewport[2] / 2.0f, (float)m_ActiveView->m_Viewport[3] / 2.0f, 0.9f),
+					Vector3((float)m_ActiveView->m_Viewport[2] / 2.0f, (float)m_ActiveView->m_Viewport[3] / 2.0f, 0.1f),
 				};
 
-				UnprojectPoints(Points, 3, ModelView, Projection, Viewport);
+				lcCamera* Camera = m_ActiveView->GetCamera();
+				Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
+				UnprojectPoints(Points, 3, Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
 
 				// Center camera.
 				Vector3 Eye = Camera->m_WorldPosition;
@@ -6645,8 +6604,8 @@ bool Project::StopTracking(bool bAccept)
 				Target = Target + (Points[0] - Points[1]);
 
 				// Zoom in/out.
-				float RatioX = (Right - Left) / Viewport[2];
-				float RatioY = (Top - Bottom) / Viewport[3];
+				float RatioX = (Right - Left) / m_ActiveView->m_Viewport[2];
+				float RatioY = (Top - Bottom) / m_ActiveView->m_Viewport[3];
 				float ZoomFactor = -max(RatioX, RatioY) + 0.75f;
 
 				Vector3 Dir = Points[1] - Points[2];
@@ -7330,20 +7289,15 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
             } break;
           }
 
-  				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
-	  			float ax, ay;
+					Vector3 Pts[3] = { Vector3(5.0f, 5.0f, 0.1f), Vector3(10.0f, 5.0f, 0.1f), Vector3(5.0f, 10.0f, 0.1f) };
+					UnprojectPoints(Pts, 3, m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
 
-          glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-          glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-          gluUnProject( 5, 5, 0.1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &p1[0], &p1[1], &p1[2]);
-          gluUnProject(10, 5, 0.1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &p2[0], &p2[1], &p2[2]);
-          gluUnProject( 5,10, 0.1, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &p3[0], &p3[1], &p3[2]);
-				
-          Vector3 vx = Normalize(Vector3((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0));//p2[2] - p1[2] };
+	  			float ax, ay;
+					Vector3 vx = Normalize(Vector3((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0));//Pts[1][2] - Pts[0][2] };
           Vector3 x(1, 0, 0);
           ax = acosf(Dot3(vx, x));
 				
-          Vector3 vy = Normalize(Vector3((float)(p3[0] - p1[0]), (float)(p3[1] - p1[1]), 0));//p2[2] - p1[2] };
+          Vector3 vy = Normalize(Vector3((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0));//Pts[2][2] - Pts[0][2] };
           Vector3 y(0, -1, 0);
           ay = acosf(Dot3(vy, y));
 				
@@ -7405,8 +7359,6 @@ void Project::BeginPieceDrop(PieceInfo* Info)
 
 void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-
 	if (m_nTracking != LC_TRACK_NONE)
 		if (StopTracking(false))
 			return;
@@ -7420,12 +7372,9 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	m_MouseTotalDelta = Vector3(0, 0, 0);
 	m_MouseSnapLeftover = Vector3(0, 0, 0);
 
-	m_ActiveView->LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	Matrix44 ProjectionMatrix = m_ActiveView->GetProjectionMatrix();
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, ProjectionMatrix, m_ActiveView->m_Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	switch (m_nCurAction)
 	{
@@ -7596,15 +7545,14 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			if (count == max)
 				break;
 
-			double tmp[3];
-			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &tmp[0], &tmp[1], &tmp[2]);
+			Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), m_ActiveView->GetCamera()->m_WorldView, ProjectionMatrix, m_ActiveView->m_Viewport);
 
 			StartTracking(LC_TRACK_START_LEFT);
 
 			Light = new lcLight();
 			Light->CreateLight(LC_LIGHT_SPOT);
 			Light->SetPosition(1, false, Vector3(m_fTrack[0], m_fTrack[1], m_fTrack[2]));
-			Light->m_Children->SetPosition(1, false, Vector3((float)tmp[0], (float)tmp[1], (float)tmp[2]));
+			Light->m_Children->SetPosition(1, false, tmp);
 			m_ActiveModel->AddLight(Light);
 
 			SelectAndFocusNone(false);
@@ -7616,8 +7564,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 		case LC_ACTION_CAMERA:
 		{
-			double tmp[3];
-			gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &tmp[0], &tmp[1], &tmp[2]);
+			Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), m_ActiveView->GetCamera()->m_WorldView, ProjectionMatrix, m_ActiveView->m_Viewport);
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
 
@@ -7630,7 +7577,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			Camera->SetSelection(false, false);
 
 			Camera->m_Children->SetFocus(true, false);
-			Camera->m_Children->SetPosition(1, false, Vector3((float)tmp[0], (float)tmp[1], (float)tmp[2]));
+			Camera->m_Children->SetPosition(1, false, tmp);
 
 			Camera->Update(m_ActiveModel->m_CurFrame);
 
@@ -7685,18 +7632,12 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-
 	if (SetActiveView(view))
 		return;
 
-	m_ActiveView->LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-
-	// why this is here ?
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	// todo: check if this needs to be done here.
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	lcObject* Object = FindObjectFromPoint(x, y);
 
@@ -7748,8 +7689,6 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 
 void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-
 	if (StopTracking(false))
 		return;
 
@@ -7760,12 +7699,8 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	m_ActiveView->LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	switch (m_nCurAction)
 	{
@@ -7814,15 +7749,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	if (m_nTracking == LC_TRACK_START_LEFT)
 		m_nTracking = LC_TRACK_LEFT;
 
-	GLdouble modelMatrix[16], projMatrix[16], tmp[3];
+	Vector3 tmp = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
 	float ptx, pty, ptz;
-
-	m_ActiveView->LoadViewportProjection();
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, m_ActiveView->m_Viewport, &tmp[0], &tmp[1], &tmp[2]);
-	ptx = (float)tmp[0]; pty = (float)tmp[1]; ptz = (float)tmp[2];
+	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
 
 	switch (m_nCurAction)
 	{
@@ -8384,11 +8313,6 @@ void Project::MouseUpdateOverlays(int x, int y)
 	{
 		const float OverlayMoveArrowSize = 1.5f;
 
-		Matrix44 ModelView, Projection;
-		int Viewport[4];
-
-		GetActiveViewportMatrices(ModelView, Projection, Viewport);
-
 		// Array of points for the arrow edges.
 		Vector3 Points[4] =
 		{
@@ -8418,7 +8342,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 		for (i = 1; i < 4; i++)
 			Points[i] += Points[0];
 
-		ProjectPoints(Points, 4, ModelView, Projection, Viewport);
+		ProjectPoints(Points, 4, m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
 
 		// Check if the mouse is over an arrow.
 		for (i = 1; i < 4; i++)
@@ -8481,19 +8405,11 @@ void Project::MouseUpdateOverlays(int x, int y)
 		const float OverlayRotateRadius = 2.0f;
 
 		// Calculate the distance from the mouse pointer to the center of the sphere.
-		GLdouble px, py, pz, rx, ry, rz;
-		GLdouble ModelMatrix[16], ProjMatrix[16];
+		Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
+		const Matrix44& ModelView = m_ActiveView->GetCamera()->m_WorldView;
 
-		m_ActiveView->LoadViewportProjection();
-		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-
-		// Unproject the mouse point against both the front and the back clipping planes.
-		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, m_ActiveView->m_Viewport, &px, &py, &pz);
-		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, m_ActiveView->m_Viewport, &rx, &ry, &rz);
-
-		Vector3 SegStart((float)rx, (float)ry, (float)rz);
-		Vector3 SegEnd((float)px, (float)py, (float)pz);
+		Vector3 SegStart = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, m_ActiveView->m_Viewport);
+		Vector3 SegEnd = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, m_ActiveView->m_Viewport);
 		Vector3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 		Vector3 Line = SegEnd - SegStart;
@@ -8529,8 +8445,8 @@ void Project::MouseUpdateOverlays(int x, int y)
 			// If it equals 0 then the line is a tangent to the sphere intersecting it at one point
 			// If it is greater then 0 the line intersects the sphere at two points. 
 
-			float x1 = (float)px, y1 = (float)py, z1 = (float)pz;
-			float x2 = (float)rx, y2 = (float)ry, z2 = (float)rz;
+			float x1 = SegStart[0], y1 = SegStart[1], z1 = SegStart[2];
+			float x2 = SegEnd[0], y2 = SegEnd[1], z2 = SegEnd[2];
 			float x3 = m_OverlayCenter[0], y3 = m_OverlayCenter[1], z3 = m_OverlayCenter[2];
 			float r = OverlayRotateRadius * OverlayScale;
 

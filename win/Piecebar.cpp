@@ -455,13 +455,11 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		}
 		else if (Notify->hdr.code == TVN_BEGINDRAG)
 		{
-			PieceInfo* Info = (PieceInfo*)Notify->itemNew.lParam;
-
-			if (Info != NULL)
+			if (Notify->itemNew.lParam)
 			{
 				m_PiecesTree.SelectItem(Notify->itemNew.hItem);
 
-				lcGetActiveProject()->BeginPieceDrop(Info);
+				lcGetActiveProject()->BeginPieceDrop();
 
 				// Force a cursor update.
 				CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();

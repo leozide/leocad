@@ -7349,7 +7349,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 	return ret;
 }
 
-void Project::BeginPieceDrop(PieceInfo* Info)
+void Project::BeginPieceDrop()
 {
 	m_PreviousAction = m_nCurAction;
 

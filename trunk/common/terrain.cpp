@@ -669,7 +669,9 @@ ty = (th*eye[1])/(2*pCam->m_FarDist);
 void Terrain::FindVisiblePatches(lcCamera* pCam, float Aspect)
 {
 	Vector4 Planes[6];
-	pCam->GetFrustumPlanes(Aspect, Planes);
+
+	Matrix44 Projection = CreatePerspectiveMatrix(pCam->m_FOV, Aspect, pCam->m_NearDist, pCam->m_FarDist);
+	GetFrustumPlanes(pCam->m_WorldView, Projection, Planes);
 
 	for (int i = 0; i < m_uPatches; i++)
 	{

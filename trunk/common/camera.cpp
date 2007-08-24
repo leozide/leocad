@@ -1,5 +1,3 @@
-// Camera object.
-
 #include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +7,6 @@
 #include "defines.h"
 #include "file.h"
 #include "camera.h"
-#include "tr.h"
 
 #define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
 
@@ -217,158 +214,6 @@ void Camera::FileSave(File& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void Camera::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
-{
-	if (IsSide())
-	{
-		m_Eye[0] += dx;
-		m_Eye[1] += dy;
-		m_Eye[2] += dz;
-		m_Target[0] += dx;
-		m_Target[1] += dy;
-		m_Target[2] += dz;
-
-		ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
-		ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
-	}
-	else
-	{
-		if (IsEyeSelected())
-		{
-			m_Eye[0] += dx;
-			m_Eye[1] += dy;
-			m_Eye[2] += dz;
-
-			ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
-		}
-
-		if (IsTargetSelected())
-		{
-			m_Target[0] += dx;
-			m_Target[1] += dy;
-			m_Target[2] += dz;
-
-			ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
-		}
-
-		// Fix the up vector
-		Vector3 upvec(m_Up), sidevec;
-		Vector3 frontvec = m_Target - m_Eye;
-		sidevec = Cross3(frontvec, upvec);
-		upvec = Cross3(sidevec, frontvec);
-		m_Up = upvec.Normalize();
-
-		ChangeKey(nTime, bAddKey, m_Up, LC_CK_UP);
-	}
-}
-
-void Camera::LoadProjection(float fAspect)
-{
-	if (m_pTR != NULL)
-		m_pTR->BeginTile();
-	else
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
-		if (m_nState & LC_CAMERA_ORTHOGRAPHIC)
-		{
-			float ymax, ymin, xmin, xmax, znear, zfar;
-			Vector3 frontvec = m_Target - m_Eye;
-			ymax = (frontvec.Length())*sinf(DTOR*m_fovy/2);
-			ymin = -ymax;
-			xmin = ymin * fAspect;
-			xmax = ymax * fAspect;
-			znear = m_zNear;
-			zfar = m_zFar;
-			glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
-		}
-		else
-		{
-			gluPerspective(m_fovy, fAspect, m_zNear, m_zFar);
-		}
-	}
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(m_WorldView);
-}
-
-void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey)
-{
-	if (m_nState & LC_CAMERA_ORTHOGRAPHIC)
-	{
-		// TODO: have a different option to change the fov.
-		m_fovy += (float)dy/(21-mouse);
-
-		if (m_fovy < 0.001f)
-			m_fovy = 0.001f;
-		else if (m_fovy > 179.999f)
-			m_fovy = 179.999f;
-	}
-	else
-	{
-		Vector3 frontvec = m_Eye - m_Target;
-		frontvec.Normalize();
-		frontvec *= 2.0f*dy/(21-mouse);
-
-		// TODO: option to move eye, target or both
-		m_Eye += frontvec;
-		m_Target += frontvec;
-
-		ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
-		ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
-		UpdatePosition(nTime);
-	}
-}
-
-void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey)
-{
-	Vector3 upvec(m_Up), frontvec = m_Eye - m_Target;
-	Vector3 sidevec = Cross3(frontvec, upvec);
-	sidevec.Normalize();
-	sidevec *= 2.0f*dx/(21-mouse);
-	upvec.Normalize();
-	upvec *= -2.0f*dy/(21-mouse);
-
-	m_Eye += upvec + sidevec;
-	m_Target += upvec + sidevec;
-
-	ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, m_Target, LC_CK_TARGET);
-	UpdatePosition(nTime);
-}
-
-void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey, float* /*center*/)
-{
-	Vector3 Dir = m_Eye - m_Target;
-
-	// The X axis of the mouse always corresponds to Z in the world.
-	if (dx)
-	{
-		float AngleX = -2.0f * dx / (21 - mouse) * LC_DTOR;
-		Matrix33 RotX = MatrixFromAxisAngle(Vector3(0, 0, 1), AngleX);
-
-		Dir = Mul(Dir, RotX);
-		m_Up = Mul(m_Up, RotX);
-	}
-
-	// The Y axis will the side vector of the camera.
-	if (dy)
-	{
-		float AngleY = 2.0f * dy / (21 - mouse) * LC_DTOR;
-		Matrix33 RotY = MatrixFromAxisAngle(Vector3(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0]), AngleY);
-
-		Dir = Mul(Dir, RotY);
-		m_Up = Mul(m_Up, RotY);
-	}
-
-	m_Eye = m_Target + Dir;
-
-	ChangeKey(nTime, bAddKey, m_Eye, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, m_Up, LC_CK_UP);
-	UpdatePosition(nTime);
-}
-
 void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAddKey)
 {
 	Matrix44 mat;
@@ -464,37 +309,4 @@ void Camera::SetRoll(float Roll, unsigned short nTime, bool bAddKey)
 
 	ChangeKey(nTime, bAddKey, Up, LC_CK_UP);
 	UpdatePosition(nTime);
-}
-
-void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
-{
-	m_pTR = new TiledRender();
-	m_pTR->TileSize(tw, th, 0);
-	m_pTR->ImageSize(iw, ih);
-	m_pTR->Perspective(m_fovy, fAspect, m_zNear, m_zFar);
-}
-
-void Camera::GetTileInfo(int* row, int* col, int* width, int* height)
-{
-	if (m_pTR != NULL)
-	{
-		*row = m_pTR->m_Rows - m_pTR->m_CurrentRow - 1;
-		*col = m_pTR->m_CurrentColumn;
-		*width = m_pTR->m_CurrentTileWidth;
-		*height = m_pTR->m_CurrentTileHeight;
-	}
-}
-
-bool Camera::EndTile()
-{
-	if (m_pTR != NULL)
-	{
-		if (m_pTR->EndTile())
-			return true;
-
-		delete m_pTR;
-		m_pTR = NULL;
-	}
-
-	return false;
 }

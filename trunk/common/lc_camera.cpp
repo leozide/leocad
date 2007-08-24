@@ -3,6 +3,7 @@
 #include "lc_camera_target.h"
 
 #include "lc_colors.h"
+#include "lc_application.h"
 #include "opengl.h"
 
 lcCamera::lcCamera()
@@ -231,37 +232,34 @@ void lcCamera::Move(u32 Time, bool AddKey, const Vector3& Delta)
 		m_Children->Move(Time, AddKey, Delta);
 }
 
-void lcCamera::SetRoll(u32 Time, bool AddKey, const float NewRoll)
+void lcCamera::SetRoll(u32 Time, bool AddKey, float NewRoll)
 {
 	ChangeKey(Time, AddKey, LC_CAMERA_ROLL, NewRoll);
 }
 
-void lcCamera::Roll(u32 Time, bool AddKey, float MouseX, float MouseY)
+void lcCamera::Roll(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
-	float NewRoll = m_Roll + MouseX / 100;
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+
+	float NewRoll = m_Roll + dx / 100;
 	SetRoll(Time, AddKey, NewRoll);
 }
 
-
-
-
-
-
-
-// ============================================================================
-// Everything from now on needs to be rewritten
-
-void lcCamera::Zoom(float MouseY, u32 Time, bool AddKey)
+void lcCamera::Zoom(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dy = MouseY * Sensitivity;
+
 	if (m_Flags & LC_CAMERA_ORTHOGRAPHIC)
 	{
 		// TODO: have a different option to change the FOV.
-		m_FOV += MouseY;
+		m_FOV += dy;
 		m_FOV = lcClamp(m_FOV, 0.001f, 179.999f);
 	}
 	else
 	{
-		Vector3 Delta = Vector3(m_ViewWorld[2]) * MouseY;
+		Vector3 Delta = Vector3(m_ViewWorld[2]) * dy;
 
 		// TODO: option to move eye, target or both
 		if (m_Children)
@@ -271,9 +269,13 @@ void lcCamera::Zoom(float MouseY, u32 Time, bool AddKey)
 	}
 }
 
-void lcCamera::Pan(float MouseX, float MouseY, u32 Time, bool AddKey)
+void lcCamera::Pan(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
-	Vector3 Delta = Vector3(m_ViewWorld[0]) * -MouseX + Vector3(m_ViewWorld[1]) * -MouseY;
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+	float dy = MouseY * Sensitivity;
+
+	Vector3 Delta = Vector3(m_ViewWorld[0]) * -dx + Vector3(m_ViewWorld[1]) * -dy;
 
 	if (m_Children)
 		m_Children->SetPosition(Time, AddKey, m_Children->m_ParentPosition + Delta);
@@ -281,23 +283,27 @@ void lcCamera::Pan(float MouseX, float MouseY, u32 Time, bool AddKey)
 	SetPosition(Time, AddKey, m_ParentPosition + Delta);
 }
 
-void lcCamera::Orbit(float MouseX, float MouseY, u32 Time, bool AddKey)
+void lcCamera::Orbit(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+	float dy = MouseY * Sensitivity;
+
 	Vector3 Dir = m_WorldPosition - m_Children->m_WorldPosition;
 
 	// The X axis of the mouse always corresponds to Z in the world.
-	if (fabsf(MouseX) > 0.01f)
+	if (fabsf(dx) > 0.01f)
 	{
-		float AngleX = -MouseX * LC_DTOR;
+		float AngleX = -dx * LC_DTOR;
 		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
 
 		Dir = Mul(Dir, RotX);
 	}
 
 	// The Y axis will the side vector of the camera.
-	if (fabsf(MouseY) > 0.01f)
+	if (fabsf(dy) > 0.01f)
 	{
-		float AngleY = MouseY * LC_DTOR;
+		float AngleY = dy * LC_DTOR;
 		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
 
 		Dir = Mul(Dir, RotY);
@@ -306,60 +312,31 @@ void lcCamera::Orbit(float MouseX, float MouseY, u32 Time, bool AddKey)
 	SetPosition(Time, AddKey, Dir + m_Children->m_ParentPosition);
 }
 
-void lcCamera::Rotate(float MouseX, float MouseY, u32 Time, bool AddKey)
+void lcCamera::Rotate(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+	float dy = MouseY * Sensitivity;
+
 	Vector3 Dir = m_Children->m_WorldPosition - m_WorldPosition;
 
 	// The X axis of the mouse always corresponds to Z in the world.
-	if (fabsf(MouseX) > 0.01f)
+	if (fabsf(dx) > 0.01f)
 	{
-		float AngleX = -MouseX * LC_DTOR;
+		float AngleX = -dx * LC_DTOR;
 		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
 
 		Dir = Mul(Dir, RotX);
 	}
 
 	// The Y axis will the side vector of the camera.
-	if (fabsf(MouseY) > 0.01f)
+	if (fabsf(dy) > 0.01f)
 	{
-		float AngleY = MouseY * LC_DTOR;
+		float AngleY = dy * LC_DTOR;
 		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
 
 		Dir = Mul(Dir, RotY);
 	}
 
 	m_Children->SetPosition(Time, AddKey, Dir + m_ParentPosition);
-}
-
-// FIXME: Move this to the View class, or remove.
-void lcCamera::GetFrustumPlanes(float Aspect, Vector4 Planes[6]) const
-{
-	Matrix44 Projection = CreatePerspectiveMatrix(m_FOV, Aspect, m_NearDist, m_FarDist);
-	::GetFrustumPlanes(m_WorldView, Projection, Planes);
-}
-
-void lcCamera::LoadProjection(float Aspect)
-{
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	if (IsOrtho())
-	{
-		float ymax, ymin, xmin, xmax, znear, zfar;
-		Vector3 frontvec = Vector3(m_ViewWorld[2]);//m_Target - m_Eye; // FIXME: free ortho cameras = crash
-		ymax = (frontvec.Length())*sinf(DTOR*m_FOV/2);
-		ymin = -ymax;
-		xmin = ymin * Aspect;
-		xmax = ymax * Aspect;
-		znear = m_NearDist;
-		zfar = m_FarDist;
-		glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
-	}
-	else
-	{
-		gluPerspective(m_FOV, Aspect, m_NearDist, m_FarDist);
-	}
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(m_WorldView);
 }

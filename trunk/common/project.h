@@ -203,7 +203,6 @@ protected:
 	int m_nDownX;
 	int m_nDownY;
 	float m_fTrack[3];
-	int m_nMouse;
 	Vector3 m_MouseSnapLeftover;
 	Vector3 m_MouseTotalDelta;
 

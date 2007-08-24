@@ -35,6 +35,7 @@ lcApplication::lcApplication()
 	m_PiecePreview = NULL;
 	m_ActiveProject = NULL;
 	m_Library = NULL;
+	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);
 }
 
 lcApplication::~lcApplication()

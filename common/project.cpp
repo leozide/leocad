@@ -78,7 +78,6 @@ Project::Project()
 	m_pTerrain = new Terrain();
 	m_pBackground = new Texture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
-	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
 	if (messenger == NULL)
@@ -5382,7 +5381,7 @@ FIXME: paste
 		case LC_VIEW_PREFERENCES:
 		{
 			LC_PREFERENCESDLG_OPTS opts;
-			opts.nMouse = m_nMouse;
+			opts.nMouse = g_App->m_MouseSensitivity;
 			opts.nSaveInterval = m_nAutosave;
 			strcpy(opts.strUser, Sys_ProfileLoadString ("Default", "User", ""));
 			strcpy(opts.strPath, m_strModelsPath);
@@ -5403,7 +5402,7 @@ FIXME: paste
 
 			if (SystemDoDialog(LC_DLG_PREFERENCES, &opts))
 			{
-				m_nMouse = opts.nMouse;
+				g_App->m_MouseSensitivity = opts.nMouse;
 				m_nAutosave = opts.nSaveInterval;
 				strcpy(m_strModelsPath, opts.strPath);
 				Sys_ProfileSaveString ("Default", "User", opts.strUser);
@@ -5436,7 +5435,7 @@ FIXME: paste
 
 		case LC_VIEW_ZOOM:
 		{
-			m_ActiveView->GetCamera()->DoZoom(nParam, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, nParam);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5444,7 +5443,7 @@ FIXME: paste
 
 		case LC_VIEW_ZOOMIN:
 		{
-			m_ActiveView->GetCamera()->DoZoom(-1, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, -1);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5452,7 +5451,7 @@ FIXME: paste
 
 		case LC_VIEW_ZOOMOUT:
 		{
-			m_ActiveView->GetCamera()->DoZoom(1, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, 1);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5753,7 +5752,7 @@ FIXME: paste
 			x -= x > 0 ? 5 : -5;
 			y -= y > 0 ? 5 : -5;
 
-			m_ActiveView->GetCamera()->DoPan(x/4, y/4, 1, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Pan(m_ActiveModel->m_CurFrame, m_bAddKeys, x/4, y/4);
 			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 			m_nDownX = x;
 			m_nDownY = y;
@@ -7788,6 +7787,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 		case LC_ACTION_SPOTLIGHT:
 		{
+			/*
+			// fixme: move this to lc_action_move
 			float mouse = 10.0f/(21 - m_nMouse);
 			Vector3 Delta((ptx - m_fTrack[0])*mouse, (pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse);
 
@@ -7804,10 +7805,13 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
+			*/
 		} break;
 
 		case LC_ACTION_CAMERA:
 		{
+			/*
+			// fixme: move this to lc_action_move
 			float mouse = 10.0f/(21 - m_nMouse);
 			Vector3 Delta((ptx - m_fTrack[0])*mouse, (pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse);
 
@@ -7824,6 +7828,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
+			*/
 		} break;
 
 		case LC_ACTION_MOVE:
@@ -7832,6 +7837,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((x == m_nDownX) && (y == m_nDownY))
 				break;
 
+			float Sensitivity = 0.25f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 			lcCamera* Camera = m_ActiveView->GetCamera();
 			bool Redraw;
 
@@ -7955,8 +7961,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 					}
 				}
 
-				MoveX *= (float)(x - m_nDownX) * 0.25f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 0.25f / (21 - m_nMouse);
+				MoveX *= (float)(x - m_nDownX) * Sensitivity;
+				MoveY *= (float)(y - m_nDownY) * Sensitivity;
 
 				m_nDownX = x;
 				m_nDownY = y;
@@ -7978,8 +7984,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveX, MoveY;
 
-					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+					MoveX = ScreenX * (float)(x - m_nDownX) * Sensitivity;
+					MoveY = ScreenY * (float)(y - m_nDownY) * Sensitivity;
 
 					TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
 				}
@@ -7987,7 +7993,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveZ;
 
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+					MoveZ = ScreenZ * (float)(y - m_nDownY) * Sensitivity;
 
 					TotalMove = MoveZ + m_MouseSnapLeftover;
 				}
@@ -8005,6 +8011,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		
 		case LC_ACTION_ROTATE:
 		{
+			float Sensitivity = 36.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 			lcCamera* Camera = m_ActiveView->GetCamera();
 			bool Redraw;
 
@@ -8113,8 +8120,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 					}
 				}
 
-				MoveX *= (float)(x - m_nDownX) * 36.0f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 36.0f / (21 - m_nMouse);
+				MoveX *= (float)(x - m_nDownX) * Sensitivity;
+				MoveY *= (float)(y - m_nDownY) * Sensitivity;
 
 				m_nDownX = x;
 				m_nDownY = y;
@@ -8136,8 +8143,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveX, MoveY;
 
-					MoveX = ScreenX * (float)(x - m_nDownX) * 36.0f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
+					MoveX = ScreenX * (float)(x - m_nDownX) * Sensitivity;
+					MoveY = ScreenY * (float)(y - m_nDownY) * Sensitivity;
 
 					Delta = MoveX + MoveY + m_MouseSnapLeftover;
 				}
@@ -8145,7 +8152,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveZ;
 
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
+					MoveZ = ScreenZ * (float)(y - m_nDownY) * Sensitivity;
 
 					Delta = MoveZ + m_MouseSnapLeftover;
 				}
@@ -8167,7 +8174,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownY == y)
 				break;
 
-			m_ActiveView->GetCamera()->DoZoom(y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8188,7 +8195,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			m_ActiveView->GetCamera()->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Pan(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 			m_nDownX = x;
 			m_nDownY = y;
@@ -8225,7 +8232,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
 			}
 
-			Camera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			Camera->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			Camera->Update(m_ActiveModel->m_CurFrame);
 
 			m_nDownX = x;
@@ -8266,19 +8273,19 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					Camera->DoOrbit(x - m_nDownX, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_X:
-					Camera->DoOrbit(x - m_nDownX, 0, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
 					break;
 
 				case LC_OVERLAY_Y:
-					Camera->DoOrbit(0, y - m_nDownY, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_Z:
-					Camera->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+					Camera->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 			}
 
@@ -8295,7 +8302,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, m_nMouse, m_ActiveModel->m_CurFrame, m_bAddKeys);
+			m_ActiveView->GetCamera()->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_ActiveView->GetCamera()->Update(m_ActiveModel->m_CurFrame);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);

@@ -39,7 +39,7 @@ public:
 public:
 	BOOL m_bSubParts;
 	BOOL m_bNumbers;
-	CColorsList   m_wndColorsList;
+	CColorList    m_wndColorsList;
 	CPiecesCombo  m_wndPiecesCombo;
 	CPiecePreview m_wndPiecePreview;
 	CySplitterWnd m_wndSplitter;

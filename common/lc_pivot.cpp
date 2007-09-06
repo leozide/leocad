@@ -18,7 +18,7 @@ lcPivot::~lcPivot()
 	// fixme: lcPivot
 }
 
-void lcPivot::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+void lcPivot::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
 {
 	// fixme: lcPivot
 }

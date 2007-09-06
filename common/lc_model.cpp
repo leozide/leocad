@@ -62,7 +62,7 @@ bool lcModel::IsSubModel(const lcModel* Model) const
 	return false;
 }
 
-void lcModel::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+void lcModel::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
 {
 	for (lcPieceObject* Piece = m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
 		Piece->GetPieceList(Pieces, Color);

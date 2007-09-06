@@ -908,7 +908,7 @@ void Project::FileSave(File* file, bool bUndo)
 */
 }
 
-void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
+void Project::FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const
 {
 	FileMem* CurFile = NULL;
 	char Buf[1024];
@@ -956,7 +956,7 @@ void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
 	}
 }
 
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray, const String& FilePath)
+void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray, const String& FilePath)
 {
 	char buf[1024];
 
@@ -1352,7 +1352,7 @@ bool Project::OnOpenDocument(const char* PathName)
 
 	if (file.GetLength() != 0)
 	{
-		PtrArray<File> FileArray;
+		lcPtrArray<File> FileArray;
 
 		// Unpack the MPD file.
 		if (mpdfile)
@@ -4369,7 +4369,7 @@ FIXME: html export
 			opts.PiecesUsed = new int[NumPieces];
 			memset(opts.PiecesUsed, 0, NumPieces * sizeof(int));
 
-			ObjArray<LC_PIECELIST_ENTRY> Pieces;
+			lcObjArray<LC_PIECELIST_ENTRY> Pieces;
 			m_ActiveModel->GetPieceList(Pieces, LC_COLOR_DEFAULT);
 
 			for (int i = 0; i < Pieces.GetSize(); i++)
@@ -5463,7 +5463,7 @@ FIXME: paste
 				break;
 
 			// Calculate a bounding box that includes all pieces and use its center as the camera target.
-			ObjArray<Vector3> Points;
+			lcObjArray<Vector3> Points;
 			BoundingBox Box;
 			Box.Reset();
 
@@ -6366,7 +6366,7 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 	return (lcObject*)ClickRay.Object;
 }
 
-void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<lcObject>& Objects)
+void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects)
 {
 	lcCamera* Camera = m_ActiveView->GetCamera();
 
@@ -6493,7 +6493,7 @@ bool Project::StopTracking(bool bAccept)
 				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
 					// Find objects inside the rectangle.
-					PtrArray<lcObject> Objects;
+					lcPtrArray<lcObject> Objects;
 					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
 
 					// Deselect old pieces.

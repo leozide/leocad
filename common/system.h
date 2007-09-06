@@ -4,7 +4,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "str.h"
-#include "array.h"
+#include "lc_array.h"
 
 // Profile functions
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
@@ -71,7 +71,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, class lcObject
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemUpdateCategories(bool SearchOnly);
-void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveModel);
+void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* ActiveModel);
 
 void SystemInit();
 void SystemFinish();

@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_flexpiece.h"
 
-#include "array.h"
+#include "lc_array.h"
 #include "lc_scene.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
@@ -80,7 +80,7 @@ lcFlexiblePiece::~lcFlexiblePiece()
 		m_PieceInfo->DeRef();
 }
 
-void lcFlexiblePiece::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+void lcFlexiblePiece::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
 {
 	LC_PIECELIST_ENTRY Entry;
 

@@ -861,7 +861,7 @@ void SystemUpdateCategories(bool SearchOnly)
 
 #define LC_MODEL_MENU_MAX 16
 
-void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* ActiveModel)
+void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* ActiveModel)
 {
 	CMenu* Menu = GetMainMenu(4);
 	if (!Menu)

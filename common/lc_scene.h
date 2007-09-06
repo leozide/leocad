@@ -1,7 +1,7 @@
 #ifndef _LC_SCENE_H_
 #define _LC_SCENE_H_
 
-#include "array.h"
+#include "lc_array.h"
 #include "algebra.h"
 
 class lcPieceObject;
@@ -28,8 +28,8 @@ public:
 
 public:
 	Matrix44 m_WorldView;
-	ObjArray<lcRenderSection> m_OpaqueSections;
-	ObjArray<lcRenderSection> m_TranslucentSections;
+	lcObjArray<lcRenderSection> m_OpaqueSections;
+	lcObjArray<lcRenderSection> m_TranslucentSections;
 };
 
 int SortRenderSectionsCallback(const lcRenderSection& a, const lcRenderSection& b, void* SortData);

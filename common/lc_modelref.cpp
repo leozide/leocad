@@ -26,7 +26,7 @@ lcModelRef::~lcModelRef()
 {
 }
 
-void lcModelRef::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+void lcModelRef::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
 {
 	m_Model->GetPieceList(Pieces, Color);
 }

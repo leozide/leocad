@@ -571,7 +571,7 @@ int PiecesLibrary::GetFirstCategory(PieceInfo* Info) const
 	return -1;
 }
 
-void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces) const
+void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcPtrArray<PieceInfo>& SinglePieces, lcPtrArray<PieceInfo>& GroupedPieces) const
 {
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
@@ -635,7 +635,7 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrA
 	}
 }
 
-void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const
+void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>& Pieces) const
 {
 	char Name[9];
 	strcpy(Name, Parent->m_strName);
@@ -687,7 +687,7 @@ void PiecesLibrary::RemoveCategory(int Index)
 // Pieces handling stuff
 
 // Remove pieces from the library
-bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
+bool PiecesLibrary::DeletePieces (lcPtrArray<PieceInfo>& Pieces)
 {
 	FileDisk newbin, newidx, oldbin, oldidx;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];

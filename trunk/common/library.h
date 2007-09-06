@@ -3,7 +3,7 @@
 
 #include "defines.h"
 #include "str.h"
-#include "array.h"
+#include "lc_array.h"
 
 class File;
 class Texture;
@@ -34,8 +34,8 @@ public:
 	// Categories.
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	int GetFirstCategory(PieceInfo* Info) const;
-	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces) const;
-	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcPtrArray<PieceInfo>& SinglePieces, lcPtrArray<PieceInfo>& GroupedPieces) const;
+	void GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>& Pieces) const;
 	void SetCategory(int Index, const String& Name, const String& Keywords);
 	void AddCategory(const String& Name, const String& Keywords);
 	void RemoveCategory(int Index);
@@ -73,7 +73,7 @@ public:
 	Texture* GetTexture(int index) const;
 
 	// File operations.
-	bool DeletePieces(PtrArray<PieceInfo>& Pieces);
+	bool DeletePieces(lcPtrArray<PieceInfo>& Pieces);
 	bool LoadUpdate(const char* update);
 	bool DeleteTextures(char** Names, int NumTextures);
 	bool ImportTexture(const char* Name);
@@ -93,7 +93,7 @@ protected:
 	Texture* m_pTextures;    // textures array
 
 	// Categories.
-	ObjArray<PiecesLibraryCategory> m_Categories;
+	lcObjArray<PiecesLibraryCategory> m_Categories;
 
 	bool m_CategoriesModified;
 	char m_CategoriesFile[LC_MAXPATH];

@@ -1,7 +1,7 @@
 #ifndef _MESSAGE_H_
 #define _MESSAGE_H_
 
-#include "array.h"
+#include "lc_array.h"
 
 typedef void (*LC_MSG_CALLBACK) (int message, void *data, void *user);
 
@@ -34,7 +34,7 @@ public:
 
 protected:
 	int m_nRef;
-	PtrArray<LC_MSG_STRUCT> m_Listeners;
+	lcPtrArray<LC_MSG_STRUCT> m_Listeners;
 };
 
 #endif // _MESSAGE_H_

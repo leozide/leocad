@@ -47,7 +47,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info)
 	}
 }
 
-void lcPiece::GetPieceList(ObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
+void lcPiece::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
 {
 	LC_PIECELIST_ENTRY Entry;
 

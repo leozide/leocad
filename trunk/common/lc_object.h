@@ -2,7 +2,7 @@
 #define _LC_OBJECT_H_
 
 #include "str.h"
-#include "array.h"
+#include "lc_array.h"
 #include "algebra.h"
 
 class lcScene;
@@ -56,7 +56,7 @@ struct LC_CLICK_RAY
 	const lcObject* Object;
 };
 
-typedef ObjArray<LC_OBJECT_KEY> lcObjectKeyArray;
+typedef lcObjArray<LC_OBJECT_KEY> lcObjectKeyArray;
 
 // Base object class.
 class lcObject

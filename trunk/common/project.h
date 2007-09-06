@@ -5,7 +5,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
-#include "array.h"
+#include "lc_array.h"
 #include "algebra.h"
 
 typedef enum 
@@ -126,7 +126,7 @@ public:
 
 public:
 	lcModel* m_ActiveModel;
-	PtrArray<lcModel> m_ModelList;
+	lcPtrArray<lcModel> m_ModelList;
 
 // Implementation
 protected:
@@ -136,7 +136,7 @@ protected:
 	bool m_bModified;    // changed since last saved
 
 	View* m_ActiveView;
-	PtrArray<View> m_ViewList;
+	lcPtrArray<View> m_ViewList;
 
 	// Font used to draw text on the screen.
 	TexFont* m_pScreenFont;
@@ -163,7 +163,7 @@ protected:
 	void GetPieceInsertPosition(lcPieceObject* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
 	lcObject* FindObjectFromPoint(int x, int y, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<lcObject>& Objects);
+	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
 
@@ -270,8 +270,8 @@ protected:
 	bool DoFileSave();
 	bool FileLoad(File* file, bool bUndo, bool bMerge);
 	void FileSave(File* file, bool bUndo);
-	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray, const String& FilePath);
-	void FileReadMPD(File& MPD, PtrArray<File>& FileArray) const;
+	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray, const String& FilePath);
+	void FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const;
 
 public:
 	// File helpers

@@ -532,7 +532,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 						// Expanding a category item.
 						int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
-						PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+						lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
 						if (CategoryIndex != -1)
 						{
@@ -576,7 +576,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					CString CategoryName = m_PiecesTree.GetItemText(CategoryItem);
 					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
-					PtrArray<PieceInfo> Pieces;
+					lcPtrArray<PieceInfo> Pieces;
 					Lib->GetPatternedPieces(Parent, Pieces);
 
 					Pieces.Sort(PiecesSortFunc, NULL);

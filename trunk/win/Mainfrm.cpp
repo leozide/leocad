@@ -324,6 +324,7 @@ void CMainFrame::Dump(CDumpContext& dc) const
 // lParam = update pieces, wParam = update colors
 LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 {
+	// TODO: find out if this function is really needed
 	if (wParam != 0)
 	{
 		int x = wParam-1;
@@ -332,7 +333,7 @@ LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 		else
 			x = ((x-14)*2)+1;
 
-		m_wndPiecesBar.m_wndColorsList.SetCurSel(x);
+		m_wndPiecesBar.m_wndColorsList.SetCurColor(x);
 	}
 
 	return TRUE;

@@ -90,17 +90,16 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	int off = LC_COLORLIST_NUM_ROWS*12+2+5;
 	int ColorWidth = ((cx-2) / LC_COLORLIST_NUM_COLS) * LC_COLORLIST_NUM_COLS + 2;
 	m_wndColorsList.SetWindowPos(NULL, (cx-ColorWidth)/2, cy-off, ColorWidth, LC_COLORLIST_NUM_ROWS*12+2, SWP_NOZORDER);
-	m_wndColorsList.SetColumnWidth(cx / LC_COLORLIST_NUM_COLS);
 
 	off += 30;
 	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
 
-	m_wndSplitter.SetWindowPos (NULL, 5, m_nPreviewHeight+6, cx-10, 4, SWP_NOZORDER);
-	m_PiecesTree.SetWindowPos (NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
-	m_wndPiecePreview.SetWindowPos (NULL, 5, 5, cx-10, m_nPreviewHeight, 0);
-	m_wndPiecePreview.EnableWindow (TRUE);
-	m_wndPiecePreview.ShowWindow (SW_SHOW);
-	m_wndSplitter.ShowWindow (SW_SHOW);
+	m_wndSplitter.SetWindowPos(NULL, 5, m_nPreviewHeight+6, cx-10, 4, SWP_NOZORDER);
+	m_PiecesTree.SetWindowPos(NULL, 5, m_nPreviewHeight+10, cx-10, cy-off-15-m_nPreviewHeight, SWP_NOZORDER);
+	m_wndPiecePreview.SetWindowPos(NULL, 5, 5, cx-10, m_nPreviewHeight, 0);
+	m_wndPiecePreview.EnableWindow(TRUE);
+	m_wndPiecePreview.ShowWindow(SW_SHOW);
+	m_wndSplitter.ShowWindow(SW_SHOW);
 
 	m_wndPiecesCombo.ShowWindow(SW_SHOW);
 }
@@ -113,15 +112,10 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT|TVS_INFOTIP, 
 	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
 
-	m_wndColorsList.Create(LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
-	                       LBS_OWNERDRAWFIXED|WS_VISIBLE|WS_TABSTOP|WS_CHILD|WS_BORDER,
-	                       CRect (0,0,0,0), this, IDW_COLORSLIST);
-
-	for (int i = 0; i < lcNumUserColors; i++)
-		m_wndColorsList.AddString("");
-
 	m_wndPiecesCombo.Create(CBS_DROPDOWN|CBS_SORT|CBS_HASSTRINGS|WS_VISIBLE|WS_CHILD|
-	                        WS_VSCROLL|WS_TABSTOP, CRect (0,0,0,0), this, IDW_PIECESCOMBO);
+	                        WS_VSCROLL|WS_TABSTOP, CRect(0,0,0,0), this, IDW_PIECESCOMBO);
+
+	m_wndColorsList.Create(WS_VISIBLE|WS_TABSTOP|WS_CHILD, CRect(0, 0, 0, 0), this, IDW_COLORSLIST);
 
 	//  Create a font for the combobox
 	LOGFONT logFont;
@@ -160,12 +154,8 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CPiecesBar::OnSelChangeColor()
 {
-	int i = m_wndColorsList.GetCurSel();
-	if (i == LB_ERR)
-		return;
-
-	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, i);
-	m_wndPiecePreview.PostMessage (WM_PAINT);
+	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, m_wndColorsList.GetCurColor());
+	m_wndPiecePreview.PostMessage(WM_PAINT);
 }
 
 LONG CPiecesBar::OnSplitterMoved(UINT lParam, LONG wParam)

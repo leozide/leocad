@@ -23,7 +23,7 @@ void CColorTab::GetTrapezoid(const CRect& rc, CPoint* pts) const
 	pts[3] = CPoint(rc.right - 1, rc.bottom);
 }
 
-void CColorTab::Draw(CDC& dc, CFont& Font, BOOL Selected)
+void CColorTab::Draw(CDC& dc, CFont& Font, BOOL Selected, BOOL Focus)
 {
 	// Tab drawing code based on an article by Paul DiLascia.
 	COLORREF bgColor = GetSysColor(Selected ? COLOR_WINDOW : COLOR_3DFACE);
@@ -72,6 +72,9 @@ void CColorTab::Draw(CDC& dc, CFont& Font, BOOL Selected)
 	CFont* OldFont = dc.SelectObject(&Font);
 	dc.DrawText(m_Text, &rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 	dc.SelectObject(OldFont);
+
+	if (Focus && Selected)
+		dc.DrawFocusRect(rc);
 }
 
 BEGIN_MESSAGE_MAP(CColorList, CWnd)
@@ -81,16 +84,10 @@ BEGIN_MESSAGE_MAP(CColorList, CWnd)
 	ON_WM_SIZE()
 	ON_WM_KEYDOWN()
 	ON_WM_SETFOCUS()
+	ON_WM_KILLFOCUS()
 	ON_WM_GETDLGCODE()
 	ON_WM_SETCURSOR()
 	ON_WM_CREATE()
-	//ON_WM_NCDESTROY()
-	//ON_WM_LBUTTONUP()
-	//ON_WM_MOUSEMOVE()
-	//ON_WM_QUERYNEWPALETTE()
-	//ON_WM_PALETTECHANGED()
-	//ON_WM_KILLFOCUS()
-	//ON_WM_ACTIVATEAPP()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -110,6 +107,7 @@ CColorList::CColorList()
 
 	m_CurTab = 0;
 	m_CurColor = 0;
+	m_ColorFocus = true;
 }
 
 CColorList::~CColorList()
@@ -169,6 +167,7 @@ void CColorList::OnPaint()
 	CPaintDC dc(this);
 
 	CColorTab* CurTab = NULL;
+	BOOL Focus = (GetFocus() == this);
 
 	// Draw all the normal tabs.
 	for (int i = 0; i < m_Tabs.GetSize(); i++) 
@@ -178,12 +177,12 @@ void CColorList::OnPaint()
 		if (i == m_CurTab)
 			CurTab = Tab;
 		else
-			Tab->Draw(dc, m_NormalFont, FALSE);
+			Tab->Draw(dc, m_NormalFont, FALSE, Focus && !m_ColorFocus);
 	}
 
 	// Draw selected tab last so it will be "on top" of the others.
 	if (CurTab)
-		CurTab->Draw(dc, m_SelectedFont, TRUE);
+		CurTab->Draw(dc, m_SelectedFont, TRUE, Focus && !m_ColorFocus);
 
 	// Draw the colors.
 	CPen BlackPen;
@@ -226,22 +225,23 @@ void CColorList::OnPaint()
 
 	COLORREF cr = m_Colors[m_CurColor].Color;
 	CPen BorderPen;
-	BorderPen.CreatePen(PS_SOLID, 2, RGB(255-GetRValue(cr), 255-GetGValue(cr), 255-GetBValue(cr)));
+	BorderPen.CreatePen(PS_SOLID, 1, RGB(255-GetRValue(cr), 255-GetGValue(cr), 255-GetBValue(cr)));
 	dc.SelectObject(&BorderPen);
 
 	CRect rc = m_Colors[m_CurColor].Rect;
 	rc.OffsetRect(1, 1);
-	rc.DeflateRect(1, 1);
+	rc.bottom--;
+	rc.right--;
 	dc.Rectangle(rc);
-
-	// fixme: draw focus
-/*
-		rc.DeflateRect(2, 2);
-		dc.DrawFocusRect(rc);
-*/
 
 	dc.SelectObject(OldPen);
 	dc.SelectObject(OldBrush);
+
+	if (Focus && m_ColorFocus)
+	{
+		rc.DeflateRect(2, 2);
+		dc.DrawFocusRect(rc);
+	}
 }
 
 void CColorList::UpdateLayout()
@@ -341,49 +341,73 @@ void CColorList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	switch (nChar)
 	{
 		case VK_UP:
-			if (Row > 0)
-				Row--;
+			if (m_ColorFocus)
+			{
+				if (Row > 0)
+				{
+					Row--;
+
+					SelectColor(Row * m_ColorCols + Col);
+				}
+				else
+					SelectTab(m_CurTab);
+			}
 			break;
 
 		case VK_DOWN:
-			if (Row < m_ColorRows - 1)
-				Row++;
+			if (m_ColorFocus)
+			{
+				if (Row < m_ColorRows - 1)
+					Row++;
+
+				SelectColor(Row * m_ColorCols + Col);
+			}
+			else
+				SelectColor(m_CurColor);
 			break;
 
 		case VK_LEFT:
-			if (Col > 0)
-				Col--;
-			else if (Row > 0)
+			if (m_ColorFocus)
 			{
-				Row--;
-				Col = m_ColorCols - 1;
+				if (Col > 0)
+					Col--;
+				else if (Row > 0)
+				{
+					Row--;
+					Col = m_ColorCols - 1;
+				}
+
+				SelectColor(Row * m_ColorCols + Col);
+			}
+			else
+			{
+				if (m_CurTab > 0)
+					SelectTab(m_CurTab - 1);
 			}
 			break;
 
 		case VK_RIGHT:
-			if (Col < m_ColorCols - 1)
-				Col++;
-			else if (Row < m_ColorRows - 1)
+			if (m_ColorFocus)
 			{
-				Row++;
-				Col = 0;
+				if (Col < m_ColorCols - 1)
+					Col++;
+				else if (Row < m_ColorRows - 1)
+				{
+					Row++;
+					Col = 0;
+				}
+
+				SelectColor(Row * m_ColorCols + Col);
+			}
+			else
+			{
+				if (m_CurTab < m_Tabs.GetSize() - 1)
+					SelectTab(m_CurTab + 1);
 			}
 			break;
 	}
 
-/*
-	if (nChar == VK_INSERT)
-	{
-		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
-		pFrame->PostMessage(WM_COMMAND, ID_PIECE_INSERT, 0);
-
-		CView* pView = pFrame->GetActiveView();
-		pView->SetFocus();
-	}
-*/
-
-	int Color = Row * m_ColorCols + Col;
-	SelectColor(Color);
+	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 BOOL CColorList::OnSetCursor(CWnd* inWnd, UINT inHitTest, UINT inMessage) 
@@ -406,9 +430,22 @@ UINT CColorList::OnGetDlgCode()
 
 void CColorList::OnSetFocus(CWnd* pOldWnd)
 {
-	// fixme: draw focus
+	if (m_ColorFocus)
+		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
+	else
+		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
 
 	CWnd::OnSetFocus(pOldWnd);
+}
+
+void CColorList::OnKillFocus(CWnd* pNewWnd)
+{
+	if (m_ColorFocus)
+		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
+	else
+		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
+
+	CWnd::OnKillFocus(pNewWnd);
 }
 
 void CColorList::OnSize(UINT nType, int cx, int cy)
@@ -423,6 +460,13 @@ void CColorList::SelectTab(int Tab)
 	if (Tab < 0 || Tab >= m_Tabs.GetSize())
 		return;
 
+	if (m_ColorFocus)
+	{
+		InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
+		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
+		m_ColorFocus = false;
+	}
+
 	if (Tab == m_CurTab)
 		return;
 
@@ -435,6 +479,13 @@ void CColorList::SelectColor(int Color)
 {
 	if (Color < 0 || Color >= m_Colors.GetSize())
 		return;
+
+	if (!m_ColorFocus)
+	{
+		InvalidateRect(m_Colors[Color].Rect, TRUE);
+		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
+		m_ColorFocus = true;
+	}
 
 	if (Color == m_CurColor)
 		return;

@@ -296,7 +296,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3fv(lcColorList[lcGetActiveProject()->GetCurrentColor()].Value);
+			glColor3fv(lcColorList[g_App->m_SelectedColor].Value);
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
@@ -313,7 +313,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			FillRect(pMemDC->m_hDC, CRect(0,h,w,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
+			pInfo->RenderPiece(g_App->m_SelectedColor);
 			glFlush();
 
 			TextOut (pMemDC->m_hDC, 5, 5, pInfo->m_strDescription, strlen(pInfo->m_strDescription));
@@ -692,7 +692,7 @@ static void PrintPiecesThread(void* pv)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3ubv(FlatColorArray[project->m_nCurColor]);
+			glColor3ubv(FlatColorArray[g_App->m_SelectedColor]);
 
 			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
 			node = node->next;
@@ -708,7 +708,7 @@ static void PrintPiecesThread(void* pv)
 			FillRect(pMemDC->m_hDC, CRect(0,h,picw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pInfo->RenderPiece(project->m_nCurColor);
+			pInfo->RenderPiece(g_App->m_SelectedColor);
 			glFlush();
 
 			TextOut (pMemDC->m_hDC, 5, 5, pInfo->m_strDescription, strlen(pInfo->m_strDescription));

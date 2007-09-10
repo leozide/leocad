@@ -52,7 +52,7 @@ void PiecePreview::SetSelection(void* Selection)
 		m_Selection = Model;
 	}
 
-	m_Selection->m_Color = lcGetActiveProject()->GetCurrentColor();
+	m_Selection->m_Color = g_App->m_SelectedColor;
 	m_Selection->Update(1);
 
 	Redraw();
@@ -120,7 +120,7 @@ void PiecePreview::OnDraw()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(WorldView);
 
-	m_Selection->AddToScene(&Scene, lcGetActiveProject()->GetCurrentColor());
+	m_Selection->AddToScene(&Scene, g_App->m_SelectedColor);
 	Scene.Render();
 
 	SwapBuffers();

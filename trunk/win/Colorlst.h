@@ -10,7 +10,7 @@ public:
 	CColorTab(const char* Text) : m_Text(Text) { }
 	~CColorTab() { }
 
-	void Draw(CDC& dc, CFont& Font, BOOL Selected);
+	void Draw(CDC& dc, CFont& Font, BOOL Selected, BOOL Focus);
 	void GetTrapezoid(const CRect& rc, CPoint* pts) const;
 
 	CString	m_Text;
@@ -70,6 +70,8 @@ protected:
 	void SelectTab(int Tab);
 	void SelectColor(int Color);
 
+	bool m_ColorFocus;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CColorList)
@@ -85,6 +87,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg UINT OnGetDlgCode();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

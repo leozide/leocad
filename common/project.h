@@ -76,8 +76,6 @@ public:
 	unsigned char GetLastStep();
 	int GetCurrentTime ()
 		{ return m_ActiveModel->m_CurFrame; }
-	int GetCurrentColor () const
-		{ return m_nCurColor; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	unsigned char GetAction() const
@@ -237,7 +235,6 @@ public:
 
 protected:
 	// State variables
-	unsigned char m_nCurColor;
 	unsigned char m_nCurAction;
 	unsigned char m_PreviousAction;
 	bool m_bAddKeys;

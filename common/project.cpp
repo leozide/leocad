@@ -135,7 +135,7 @@ void Project::UpdateInterface()
 
 	SystemUpdateFocus(NULL);
 	SetAction(m_nCurAction);
-	SystemUpdateColorList(m_nCurColor);
+	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(false, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
@@ -250,8 +250,8 @@ void Project::LoadDefaults(bool cameras)
 
 	// Default values
 	SetAction(0);
-	m_nCurColor = 0;
-	SystemUpdateColorList(m_nCurColor);
+	g_App->m_SelectedColor = 0;
+	SystemUpdateColorList(g_App->m_SelectedColor);
 	m_bAddKeys = false;
 	SystemUpdateAnimation(false, m_bAddKeys);
 	m_bUndoOriginal = true;
@@ -385,7 +385,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		file->ReadFloat (&m_fLineWidth, 1);
 		file->ReadLong (&m_nDetail, 1);
 		file->ReadLong (&i, 1); //m_nCurGroup = i;
-		file->ReadLong (&i, 1); m_nCurColor = i;
+		file->ReadLong (&i, 1); //m_nCurColor = i;
 		file->ReadLong (&i, 1); action = i;
 		file->ReadLong (&i, 1); //m_nCurStep = i;
 	}
@@ -768,7 +768,7 @@ FIXME: groups
 	if (!bMerge)
 		SystemUpdateFocus(NULL);
 	SetAction(action);
-	SystemUpdateColorList(m_nCurColor);
+	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(false, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
@@ -1387,9 +1387,9 @@ bool Project::OnOpenDocument(const char* PathName)
 				FilePath[s1+1] = 0;
 
 			if (mpdfile)
-				FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray, FilePath);
+				FileReadLDraw(FileArray[0], &mat, &ok, g_App->m_SelectedColor, &step, FileArray, FilePath);
 			else
-				FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray, FilePath);
+				FileReadLDraw(&file, &mat, &ok, g_App->m_SelectedColor, &step, FileArray, FilePath);
 
 			m_ActiveModel->m_CurFrame = step;
 			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, 255);
@@ -1955,7 +1955,7 @@ void Project::RenderScene(View* view)
 		ModelWorld.SetTranslation(Pos);
 
 		g_App->m_PiecePreview->m_Selection->m_ModelWorld = ModelWorld; // FIXME: preview piece hack
-		g_App->m_PiecePreview->m_Selection->AddToScene(m_Scene, m_nCurColor);
+		g_App->m_PiecePreview->m_Selection->AddToScene(m_Scene, g_App->m_SelectedColor);
 		g_App->m_PiecePreview->m_Selection->m_ModelWorld = IdentityMatrix44();
 	}
 
@@ -2947,7 +2947,7 @@ void Project::AddPiece(Vector3 Pos, Vector4 Rot)
 		return;
 
 	Piece->m_TimeShow = m_ActiveModel->m_CurFrame;
-	Piece->m_Color = m_nCurColor;
+	Piece->m_Color = g_App->m_SelectedColor;
 	Piece->SetPosition(1, false, Pos);
 	Piece->SetRotation(1, false, Rot);
 
@@ -3387,10 +3387,10 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 	{
 		case LC_COLOR_CHANGED:
 		{
-			m_nCurColor = (unsigned char)param;
+			g_App->m_SelectedColor = (int)param;
 
 			if (g_App->m_PiecePreview->m_Selection)
-				g_App->m_PiecePreview->m_Selection->m_Color = m_nCurColor;
+				g_App->m_PiecePreview->m_Selection->m_Color = g_App->m_SelectedColor;
 		} break;
 
 		case LC_CAPTURE_LOST:
@@ -3912,7 +3912,7 @@ FIXME: html export
 						glEnable(GL_LIGHTING);
 						glEnable(GL_LIGHT0);
 						glEnable(GL_DEPTH_TEST);
-						pInfo->RenderPiece(m_nCurColor);
+						pInfo->RenderPiece(g_App->m_SelectedColor);
 						glFinish();
 
 						Image image;
@@ -7477,9 +7477,9 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 			lcPieceObject* Piece = (lcPieceObject*)Object;
 
-			if (Piece->m_Color != m_nCurColor)
+			if (Piece->m_Color != g_App->m_SelectedColor)
 			{
-				Piece->m_Color = m_nCurColor;
+				Piece->m_Color = g_App->m_SelectedColor;
 
 				SetModifiedFlag(true);
 				CheckPoint("Painting");

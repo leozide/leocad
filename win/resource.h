@@ -720,6 +720,8 @@
 #define ID_MODEL_MODEL14                33193
 #define ID_MODEL_MODEL15                33194
 #define ID_MODEL_MODEL16                33195
+#define ID_FILE_EXPORT_VRML             33197
+#define ID_FILE_EXPORT_X3DV             33198
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -731,7 +733,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        245
-#define _APS_NEXT_COMMAND_VALUE         33197
+#define _APS_NEXT_COMMAND_VALUE         33199
 #define _APS_NEXT_CONTROL_VALUE         1252
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

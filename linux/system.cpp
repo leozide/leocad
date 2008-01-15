@@ -640,6 +640,14 @@ bool SystemDoDialog(int mode, void* param)
       return filedlg_execute("Save File", (char*)param) == LC_OK;
     } break;
 
+    case LC_DLG_VRML97: {
+      return filedlg_execute("Save File", (char*)param) == LC_OK;
+    } break;
+
+    case LC_DLG_X3DV: {
+      return filedlg_execute("Save File", (char*)param) == LC_OK;
+    } break;
+
     case LC_DLG_PREFERENCES: {
       return preferencesdlg_execute(param) == LC_OK;
     } break;

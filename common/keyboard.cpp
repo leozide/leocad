@@ -24,6 +24,8 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_FILE_HTML, "Export HTML", 0, 0, 0 },
 	{ LC_FILE_POVRAY, "Export POV-Ray", 0, 0, 0 },
 	{ LC_FILE_WAVEFRONT, "Export Wavefront", 0, 0, 0 },
+	{ LC_FILE_VRML, "Export VRML", 0, 0, 0 },
+	{ LC_FILE_X3DV, "Export X3DV", 0, 0, 0 },
 //	{ LC_FILE_TERRAIN, "Terrain Editor", 0, 0, 0 },
 	{ LC_FILE_LIBRARY, "Piece Library Manager", 0, 0, 0 },
 //	{ LC_FILE_RECENT, "Open Recent File", 0, 0, 0 },

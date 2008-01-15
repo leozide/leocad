@@ -410,6 +410,7 @@ void lcApplication::Shutdown()
 
 		project->HandleNotify(LC_ACTIVATE, 0);
 		delete project;
+		project = NULL;
 	}
 
 	delete m_Library;

@@ -234,6 +234,8 @@ BEGIN
             MENUITEM "HTML...",                     ID_FILE_EXPORT_HTML
             MENUITEM "POV-Ray...",                  ID_FILE_EXPORT_POVRAY
             MENUITEM "Wavefront...",                ID_FILE_EXPORT_WAVEFRONT
+            MENUITEM "VRML...",                     ID_FILE_EXPORT_VRML
+            MENUITEM "X3DV...",                     ID_FILE_EXPORT_X3DV
         END
         MENUITEM SEPARATOR
         MENUITEM "Pieces &Library Manager...",  ID_FILE_EDITPIECELIBRARY

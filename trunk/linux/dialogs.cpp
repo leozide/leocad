@@ -2143,16 +2143,19 @@ typedef struct
 
 static void propertiesdlg_ok(GtkWidget *widget, gpointer data)
 {
-  LC_PROPERTIESDLG_STRUCT* s = (LC_PROPERTIESDLG_STRUCT*)data;
-  LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s->data;
+	LC_PROPERTIESDLG_STRUCT* s = (LC_PROPERTIESDLG_STRUCT*)data;
+	LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s->data;
 
-  strcpy(opts->Author, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
-  strcpy(opts->Description, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
-  char* comments = gtk_editable_get_chars(GTK_EDITABLE(s->sum_comments), 0, -1);
-  strcpy(opts->Comments, comments);
-  g_free(comments);
+	strcpy(opts->Author, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
+	strcpy(opts->Description, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
+	char* comments = gtk_editable_get_chars(GTK_EDITABLE(s->sum_comments), 0, -1);
+	if (comments)
+	{
+		strcpy(opts->Comments, comments);
+		g_free(comments);
+	}
 
-  *cur_ret = LC_OK;
+	*cur_ret = LC_OK;
 }
 
 int propertiesdlg_execute(void* param)

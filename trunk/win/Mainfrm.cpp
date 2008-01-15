@@ -778,6 +778,14 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_FILE_WAVEFRONT, 0);
 		} break;
 
+		case ID_FILE_EXPORT_VRML: {
+			project->HandleCommand(LC_FILE_VRML, 0);
+		} break;
+
+		case ID_FILE_EXPORT_X3DV: {
+			project->HandleCommand(LC_FILE_X3DV, 0);
+		} break;
+
 		case ID_MODEL_NEW: {
 			project->HandleCommand(LC_MODEL_NEW, 0);
 		} break;
@@ -1309,6 +1317,8 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_FILE_EXPORT_HTML,       // LC_FILE_HTML
 		ID_FILE_EXPORT_POVRAY,     // LC_FILE_POVRAY
 		ID_FILE_EXPORT_WAVEFRONT,  // LC_FILE_WAVEFRONT
+		ID_FILE_EXPORT_VRML,       // LC_FILE_VRML
+		ID_FILE_EXPORT_X3DV,       // LC_FILE_X3DV
 		ID_FILE_TERRAINEDITOR,     // LC_FILE_TERRAIN
 		ID_FILE_EDITPIECELIBRARY,  // LC_FILE_LIBRARY
 		0,                         // LC_FILE_RECENT

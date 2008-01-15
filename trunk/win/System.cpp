@@ -1533,6 +1533,28 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 
+		case LC_DLG_VRML97:
+		{
+			CFileDialog dlg(FALSE, "*.wrl", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				"VRML97 Files (*.wrl)|*.wrl|All Files (*.*)|*.*||", AfxGetMainWnd());
+			if (dlg.DoModal() == IDOK)
+			{
+				strcpy((char*)param, dlg.GetPathName());
+				return true;
+			}
+		} break;
+
+		case LC_DLG_X3DV:
+		{
+			CFileDialog dlg(FALSE, "*.x3dv", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				"X3DV Files (*.x3dv)|*.x3dv|All Files (*.*)|*.*||", AfxGetMainWnd());
+			if (dlg.DoModal() == IDOK)
+			{
+				strcpy((char*)param, dlg.GetPathName());
+				return true;
+			}
+		} break;
+
 		case LC_DLG_MINIFIG:
 		{
 			CMinifigDlg dlg(param);

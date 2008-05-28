@@ -1,5 +1,5 @@
 /* XPM */
-static char * st_prev[] = {
+static const char * st_prev[] = {
 "16 15 6 1",
 "+ 	c None",
 ".	c #000000",

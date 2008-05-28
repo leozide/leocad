@@ -1,6 +1,6 @@
 /* XPM */
-static char *st_paste[] = {
-/* columns rows colors chars-per-pixel */
+static const char *st_paste[] = {
+/* columns rows colors const chars-per-pixel */
 "16 15 8 1",
 "  c Gray0",
 ". c #00007f",

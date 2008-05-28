@@ -1,6 +1,6 @@
 /* XPM */
-static char *cr_move[] = {
-/* columns rows colors chars-per-pixel */
+static const char *cr_move[] = {
+/* columns rows colors const chars-per-pixel */
 "32 32 3 1",
 "  c None",
 ". c #000000",

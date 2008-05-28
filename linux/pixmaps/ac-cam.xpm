@@ -1,5 +1,5 @@
 /* XPM */
-static char * ac_cam[] = {
+static const char * ac_cam[] = {
 "16 15 6 1",
 ".	c None",
 "+	c #7F7F7F",

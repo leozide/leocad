@@ -1,6 +1,6 @@
 /* XPM */
-static char *ac_rotv[] = {
-/* columns rows colors chars-per-pixel */
+static const char *ac_rotv[] = {
+/* columns rows colors const chars-per-pixel */
 "16 15 4 1",
 "  c Gray0",
 ". c #00007f",

@@ -1,6 +1,6 @@
 /* XPM */
-static char *pi_tile[] = {
-/* columns rows colors chars-per-pixel */
+static const char *pi_tile[] = {
+/* columns rows colors const chars-per-pixel */
 "16 15 3 1",
 "  c Gray0",
 ". c Red",

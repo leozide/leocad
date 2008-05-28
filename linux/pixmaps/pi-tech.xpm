@@ -1,6 +1,6 @@
 /* XPM */
-static char *pi_tech[] = {
-/* columns rows colors chars-per-pixel */
+static const char *pi_tech[] = {
+/* columns rows colors const chars-per-pixel */
 "16 15 5 1",
 "  c Gray0",
 ". c None",

@@ -1,6 +1,6 @@
 /* XPM */
-static char *photo[] = {
-/* width height ncolors chars_per_pixel */
+static const char *photo[] = {
+/* width height ncolors const chars_per_pixel */
 "16 15 6 1",
 /* colors */
 "Z c None",

@@ -1,6 +1,6 @@
 /* XPM */
-static char *an_first[] = {
-/* columns rows colors chars-per-pixel */
+static const char *an_first[] = {
+/* columns rows colors const chars-per-pixel */
 "16 15 4 1",
 "  c #00007f",
 ". c Gray50",

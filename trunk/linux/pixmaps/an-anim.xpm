@@ -1,5 +1,5 @@
 /* XPM */
-static char * an_anim[] = {
+static const char * an_anim[] = {
 "16 15 5 1",
 ".	c #000000",
 "+	c #7F7F7F",

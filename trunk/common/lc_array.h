@@ -73,9 +73,9 @@ public:
 	{
 		for (int i = 0; i < GetSize(); i++)
 		{
-			if (Func(Ptr, m_Data[i], Data) < 0)
+			if (Func(Ptr, m_Data[i], SortData) < 0)
 			{
-				InsertAt(i, Obj);
+				InsertAt(i, Ptr);
 				return;
 			}
 		}

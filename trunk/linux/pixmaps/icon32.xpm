@@ -1,6 +1,6 @@
 /* XPM */
-static char *icon32[] = {
-/* columns rows colors chars-per-pixel */
+static const char *icon32[] = {
+/* columns rows colors const chars-per-pixel */
 "32 32 3 1",
 "  c Gray0",
 ". c Red",

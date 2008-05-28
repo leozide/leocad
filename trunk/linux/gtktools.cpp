@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 #include "gtktools.h"
 
-GtkWidget* new_pixmap (GtkWidget *widget, char **data)
+GtkWidget* new_pixmap (GtkWidget *widget, const char **data)
 {
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;

@@ -856,7 +856,10 @@ void SystemUpdateCategories(bool SearchOnly)
 		return;
 
 	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
-	pBar->UpdatePiecesTree(SearchOnly);
+	if (SearchOnly)
+		pBar->UpdatePiecesTreeSearch();
+	else
+		pBar->UpdatePiecesTree();
 }
 
 #define LC_MODEL_MENU_MAX 16
@@ -933,6 +936,14 @@ void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* Active
 
 		delete[] Text;
 	}
+
+	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+
+	if (!pFrame)
+		return;
+
+	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
+	pBar->UpdatePiecesTreeModels();
 }
 
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
@@ -1656,7 +1667,7 @@ bool SystemDoDialog(int nMode, void* param)
 			dlg.DoModal();
 
 			CPiecesBar* pBar = (CPiecesBar*)((CFrameWnd*)AfxGetMainWnd())->GetControlBar(ID_VIEW_PIECES_BAR);
-			pBar->UpdatePiecesTree(false);
+			pBar->UpdatePiecesTree();
 
 			return true;
 		} break;

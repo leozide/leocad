@@ -46,7 +46,9 @@ public:
 
 	CTreeCtrl m_PiecesTree;
 
-	void UpdatePiecesTree(bool SearchOnly);
+	void UpdatePiecesTreeSearch();
+	void UpdatePiecesTreeModels();
+	void UpdatePiecesTree();
 	void UpdatePiecesTree(const char* OldCategory, const char* NewCategory);
 	void SelectPiece(const char* Category, PieceInfo* Info);
 	void RefreshPiecesTree();

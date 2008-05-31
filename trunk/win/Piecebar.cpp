@@ -366,52 +366,74 @@ void CPiecesBar::UpdatePiecesTree(const char* OldCategory, const char* NewCatego
 	}
 }
 
-void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
+void CPiecesBar::UpdatePiecesTreeSearch()
+{
+	HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+
+	while (Item != NULL)
+	{
+		CString Name = m_PiecesTree.GetItemText(Item);
+
+		if (Name == "Search Results")
+			break;
+
+		Item = m_PiecesTree.GetNextSiblingItem(Item);
+	}
+
+	if (Item == NULL)
+	{
+		Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+	}
+
+	m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
+	m_PiecesTree.EnsureVisible(Item);
+	m_PiecesTree.Expand(Item, TVE_EXPAND);
+}
+
+void CPiecesBar::UpdatePiecesTreeModels()
+{
+	HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+
+	while (Item != NULL)
+	{
+		CString Name = m_PiecesTree.GetItemText(Item);
+
+		if (Name == "Models")
+			break;
+
+		Item = m_PiecesTree.GetNextSiblingItem(Item);
+	}
+
+	if (Item == NULL)
+	{
+		Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Models", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+	}
+
+	m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
+	m_PiecesTree.EnsureVisible(Item);
+	m_PiecesTree.Expand(Item, TVE_EXPAND);
+}
+
+void CPiecesBar::UpdatePiecesTree()
 {
 	PiecesLibrary* Lib = lcGetPiecesLibrary();
 
-	if (SearchOnly)
+	m_PiecesTree.SetRedraw(FALSE);
+	m_PiecesTree.DeleteAllItems();
+
+	for (int i = 0; i < Lib->GetNumCategories(); i++)
 	{
-		HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
+		if (Lib->GetCategoryName(i) == "Search Results")
+			continue;
 
-	  while (Item != NULL)
-	  {
-			CString Name = m_PiecesTree.GetItemText(Item);
-
-			if (Name == "Search Results")
-				break;
-
-			Item = m_PiecesTree.GetNextSiblingItem(Item);
-	  }
-
-		if (Item == NULL)
-		{
-			Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
-		}
-
-		m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
-		m_PiecesTree.EnsureVisible(Item);
-		m_PiecesTree.Expand(Item, TVE_EXPAND);
+		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
 	}
-	else
-	{
-		m_PiecesTree.SetRedraw(FALSE);
-		m_PiecesTree.DeleteAllItems();
 
-		for (int i = 0; i < Lib->GetNumCategories(); i++)
-		{
-			if (Lib->GetCategoryName(i) == "Search Results")
-				continue;
+	m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Models", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+	m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
 
-			m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
-		}
-
-		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Models", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
-		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
-
-		m_PiecesTree.SetRedraw(TRUE);
-		m_PiecesTree.Invalidate();
-	}
+	m_PiecesTree.SetRedraw(TRUE);
+	m_PiecesTree.Invalidate();
 }
 
 void CPiecesBar::RefreshPiecesTree()

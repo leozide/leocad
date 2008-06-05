@@ -46,7 +46,21 @@ void lcModelRef::AddToScene(lcScene* Scene, int Color)
 
 void lcModelRef::ClosestRayIntersect(LC_CLICK_RAY* Ray) const
 {
-	// FIXME: modelref intersect
+	Matrix44 WorldModel = RotTranInverse(m_ModelWorld);
+	Vector3 Start = Mul31(Ray->Start, WorldModel);
+	Vector3 End = Mul31(Ray->End, WorldModel);
+
+	// Check the bounding box distance first.
+	float Dist;
+	if (!BoundingBoxRayMinIntersectDistance(m_BoundingBox, Start, End, &Dist) || (Dist >= Ray->Dist))
+		return;
+
+	// Check mesh.
+	if (!m_Mesh->ClosestRayIntersect(Start, End, &Dist) || (Dist >= Ray->Dist))
+		return;
+
+	Ray->Object = this;
+	Ray->Dist = Dist;
 }
 
 bool lcModelRef::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
@@ -185,4 +199,6 @@ void lcModelRef::BuildMesh(int* SectionIndices, TypeToType<T>)
 
 		SrcMesh->m_VertexBuffer->UnmapBuffer();
 	}
+
+	delete[] DstSections;
 }

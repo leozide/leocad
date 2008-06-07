@@ -35,6 +35,15 @@ PiecePreview::~PiecePreview()
 	g_App->m_PiecePreview = NULL;
 }
 
+void PiecePreview::ProcessMessage(lcMessageType Message, void* Data)
+{
+	if (Message == LC_MSG_COLOR_CHANGED)
+	{
+		m_Selection->m_Color = g_App->m_SelectedColor;
+		Redraw();
+	}
+}
+
 void PiecePreview::SetSelection(void* Selection)
 {
 	MakeCurrent();

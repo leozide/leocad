@@ -5,9 +5,6 @@
 #include "typedefs.h"
 #include "console.h"
 
-class Messenger;
-extern Messenger* messenger;
-
 class MainWnd;
 extern MainWnd* main_window;
 

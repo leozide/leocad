@@ -72,7 +72,6 @@ BEGIN_MESSAGE_MAP(CPiecesBar, CSizingControlBarG)
 	ON_WM_CREATE()
 	ON_WM_CONTEXTMENU()
 	//}}AFX_MSG_MAP
-	ON_LBN_SELCHANGE(IDW_COLORSLIST, OnSelChangeColor)
 	ON_MESSAGE(WM_LC_SPLITTER_MOVED, OnSplitterMoved)
 END_MESSAGE_MAP()
 
@@ -150,12 +149,6 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndSplitter.RecalcLayout();
 
 	return 0;
-}
-
-void CPiecesBar::OnSelChangeColor()
-{
-	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, m_wndColorsList.GetCurColor());
-	m_wndPiecePreview.PostMessage(WM_PAINT);
 }
 
 LONG CPiecesBar::OnSplitterMoved(UINT lParam, LONG wParam)
@@ -409,9 +402,11 @@ void CPiecesBar::UpdatePiecesTreeModels()
 		Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Models", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
 	}
 
-	m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
-	m_PiecesTree.EnsureVisible(Item);
-	m_PiecesTree.Expand(Item, TVE_EXPAND);
+	if (m_PiecesTree.GetItemState(Item, TVIS_EXPANDED) & TVIS_EXPANDED)
+	{
+		m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
+		m_PiecesTree.Expand(Item, TVE_EXPAND);
+	}
 }
 
 void CPiecesBar::UpdatePiecesTree()

@@ -15,10 +15,11 @@
 #include "BMPMenu.h"
 #include "ModDlg.h"
 #include "dynsplit.h"
+#include "lc_message.h"
 
 class MainWnd;
 
-class CMainFrame : public CFrameWnd
+class CMainFrame : public CFrameWnd, public lcListener
 {
 protected: // create from serialization only
 	CMainFrame();
@@ -29,6 +30,7 @@ public:
 
 // Operations
 public:
+	void ProcessMessage(lcMessageType Message, void* Data);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -105,7 +107,6 @@ protected:
 	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
 	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);
 	afx_msg LONG OnAddString(UINT lParam, LONG wParam);
-	afx_msg LONG OnUpdateInfo(UINT lParam, LONG wParam);
 	afx_msg LONG UpdateSettings(UINT lParam, LONG wParam);
 
 	DECLARE_MESSAGE_MAP()

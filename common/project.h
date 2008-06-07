@@ -1,6 +1,8 @@
 #ifndef _PROJECT_H_
 #define _PROJECT_H_
 
+#include "lc_message.h"
+
 #include "object.h"
 #include "defines.h"
 #include "typedefs.h"
@@ -56,7 +58,7 @@ typedef struct LC_UNDOINFO
 
 #include "lc_model.h" // temp include for GetTime()
 
-class Project
+class Project : public lcListener
 {
 public:
 // Constructors
@@ -231,7 +233,7 @@ public:
 	void SetAction(int nAction);
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id, unsigned long nParam);
-	void HandleMessage(int Message, void* Data);
+	void ProcessMessage(lcMessageType Message, void* Data);
 
 protected:
 	// State variables

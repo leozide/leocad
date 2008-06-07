@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include "globals.h"
 
-Messenger* messenger;
 MainWnd* main_window;
 /*
 const char* colornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",

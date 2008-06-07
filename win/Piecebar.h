@@ -59,7 +59,6 @@ protected:
 	CFont m_Font;
 	int m_nPreviewHeight;
 	void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
-	void OnSelChangeColor();
 	//{{AFX_MSG(CPiecesBar)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

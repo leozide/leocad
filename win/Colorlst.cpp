@@ -2,6 +2,8 @@
 #include "leocad.h"
 #include "ColorLst.h"
 #include "lc_colors.h"
+#include "lc_message.h"
+#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -493,4 +495,7 @@ void CColorList::SelectColor(int Color)
 	InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
 	InvalidateRect(m_Colors[Color].Rect, TRUE);
 	m_CurColor = Color;
+
+	g_App->m_SelectedColor = Color;
+	lcPostMessage(LC_MSG_COLOR_CHANGED, (void*)Color);
 }

@@ -36,7 +36,6 @@
 #include "system.h"
 #include "globals.h"
 #include "minifig.h"
-#include "message.h"
 #include "mainwnd.h"
 #include "view.h"
 #include "library.h"
@@ -47,12 +46,7 @@
 // TODO: temporary function, rewrite.
 void SystemUpdateFocus (void* p)
 {
-  messenger->Dispatch (LC_MSG_FOCUS_CHANGED, p);
-}
-
-static void ProjectListener(int Message, void* Data, void* User)
-{
-	((Project*)User)->HandleMessage(Message, Data);
+	lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, p);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -80,11 +74,6 @@ Project::Project()
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
-	if (messenger == NULL)
-		messenger = new Messenger ();
-	messenger->AddRef();
-	messenger->Listen(&ProjectListener, this);
-
 	for (i = 0; i < LC_CONNECTIONS; i++)
 	{
 		m_pConnections[i].entries = NULL;
@@ -111,8 +100,6 @@ Project::~Project()
 	for (int i = 0; i < 10; i++)
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
-
-	messenger->DecRef();
 
 	delete m_Scene;
 	delete m_pTerrain;
@@ -1280,7 +1267,7 @@ bool Project::OnNewDocument()
 	LoadDefaults(true);
 	CheckPoint("");
 
-	messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+	lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 
 	return true;
 }
@@ -2956,8 +2943,7 @@ void Project::AddPiece(Vector3 Pos, Vector4 Rot)
 	SelectAndFocusNone(false);
 	m_ActiveModel->AddPiece(Piece);
 	Piece->SetFocus(true, false);
-	messenger->Dispatch(LC_MSG_FOCUS_CHANGED, Piece);
-	UpdateSelection();
+	lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, Piece);
 	SystemUpdateFocus(Piece);
 
 	if (m_nSnap & LC_DRAW_MOVE)
@@ -3521,10 +3507,11 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 	}
 }
 
-void Project::HandleMessage(int Message, void* Data)
+void Project::ProcessMessage(lcMessageType Message, void* Data)
 {
-	if (Message == LC_MSG_FOCUS_CHANGED)
+	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
 	{
+		UpdateSelection();
 	}
 }
 
@@ -4704,16 +4691,14 @@ FIXME: paste
 		case LC_EDIT_SELECT_NONE:
 		{
 			SelectAndFocusNone(false);
-			messenger->Dispatch(LC_MSG_FOCUS_CHANGED, NULL);
-			UpdateSelection();
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateAllViews();
 		} break;
 		
 		case LC_EDIT_SELECT_INVERT:
 		{
 			m_ActiveModel->SelectInvertAllPieces();
-			messenger->Dispatch(LC_MSG_FOCUS_CHANGED, NULL);
-			UpdateSelection();
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateAllViews();
 		} break;
 
@@ -4875,8 +4860,7 @@ FIXME: paste
 		{
 			if (RemoveSelectedObjects())
 			{
-				messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
-				UpdateSelection();
+				lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Deleting");
@@ -4941,8 +4925,7 @@ FIXME: paste
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 */
-        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
-				UpdateSelection();
+				lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Minifig");
@@ -5322,8 +5305,7 @@ FIXME: paste
 			for (lcPieceObject* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPieceObject*)Piece->m_Next)
 				if (Piece->IsSelected())
 					Piece->SetVisible(false);
-			UpdateSelection();
-			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateAllViews();
 		} break;
 

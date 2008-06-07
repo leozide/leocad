@@ -5,6 +5,7 @@ enum lcMessageType
 {
 	LC_MSG_FOCUS_OBJECT_CHANGED, // Focused object changed - Data is the new focused object.
 	LC_MSG_COLOR_CHANGED,        // Color changed - Data is the new color.
+	LC_MSG_MOUSE_CAPTURE_LOST,   // Application lost mouse capture.
 	LC_MSG_COUNT
 };
 

@@ -3371,20 +3371,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 {
 	switch (id)
 	{
-		case LC_COLOR_CHANGED:
-		{
-			g_App->m_SelectedColor = (int)param;
-
-			if (g_App->m_PiecePreview->m_Selection)
-				g_App->m_PiecePreview->m_Selection->m_Color = g_App->m_SelectedColor;
-		} break;
-
-		case LC_CAPTURE_LOST:
-		{
-			if (m_nTracking != LC_TRACK_NONE)
-				StopTracking(false);
-		} break;
-
 		// Application is (de)activated
 		case LC_ACTIVATE:
 		{
@@ -3509,9 +3495,16 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 
 void Project::ProcessMessage(lcMessageType Message, void* Data)
 {
-	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
+	switch (Message)
 	{
+	case LC_MSG_FOCUS_OBJECT_CHANGED:
 		UpdateSelection();
+		break;
+
+	case LC_MSG_MOUSE_CAPTURE_LOST:
+		if (m_nTracking != LC_TRACK_NONE)
+			StopTracking(false);
+		break;
 	}
 }
 

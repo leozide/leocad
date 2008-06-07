@@ -904,7 +904,7 @@ LONG CCADView::OnSetStep(UINT lParam, LONG /*wParam*/)
 void CCADView::OnCaptureChanged(CWnd *pWnd) 
 {
 	if (pWnd != this)
-		lcGetActiveProject()->HandleNotify(LC_CAPTURE_LOST, 0);
+		lcPostMessage(LC_MSG_MOUSE_CAPTURE_LOST, 0);
 	
 	CView::OnCaptureChanged(pWnd);
 }

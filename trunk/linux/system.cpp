@@ -165,7 +165,7 @@ void SystemUpdateCategories(bool SearchOnly)
 {
 }
 
-static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, gchar **xpm)
+static void create_bitmap_and_mask_from_xpm (GdkBitmap** bitmap, GdkBitmap** mask, const char** xpm)
 {
   int height, width, colors;
   char pixmap_buffer [(32 * 32)/8];
@@ -226,7 +226,7 @@ void SystemUpdateAction(int new_action, int old_action)
     return;
 
   GtkWidget* button;
-  char** xpm = NULL;
+  const char** xpm = NULL;
   int x, y;
 
   switch (new_action)
@@ -383,7 +383,7 @@ void SystemUpdateCurrentCamera(lcObject* pOld, lcObject* pNew, lcObject* pCamera
   }
 }
 
-void SystemUpdateModelMenu(const PtrArray<lcModel>& ModelList, lcModel* CurrentModel)
+void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* CurrentModel)
 {
   // FIXME: update model menu
 }

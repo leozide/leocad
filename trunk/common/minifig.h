@@ -44,7 +44,7 @@ public:
 
 	void Calculate();
 	void GetItems(int type, LC_MFW_PIECEINFO*** items, int *count);
-	void GetSelections(char** names);
+	void GetSelections(const char** names);
 	void ChangePiece(int type, LC_MFW_PIECEINFO* info);
 	void ChangeColor(int type, int color);
 	void ChangeAngle(int type, float angle);

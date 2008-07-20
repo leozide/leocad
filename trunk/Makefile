@@ -7,7 +7,7 @@ MODULES := $(OSDIR) common
 ### look for include files in
 ###   each of the modules
 CPPFLAGS += $(patsubst %,-I%,$(MODULES)) $(OS)
-CPPFLAGS += -g -include $(OSDIR)/config.h
+CPPFLAGS += -g
 
 ### extra libraries if required
 LIBS :=

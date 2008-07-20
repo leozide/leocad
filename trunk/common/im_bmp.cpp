@@ -38,49 +38,49 @@ bool Image::LoadBMP (File& file)
 	if ((m1 != 'B') || (m2 != 'M'))
 		return false;
 
-	rc = file.ReadLong ((long*)&(filesize), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&filesize, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort ((int*)&(res1), 1); m_bytesRead+=2;
+	rc = file.ReadShort (&res1, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort ((int*)&(res2), 1); m_bytesRead+=2;
+	rc = file.ReadShort (&res2, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(pixoff), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&pixoff, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(bmisize), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&bmisize, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(bmWidth), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&bmWidth, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(bmHeight), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&bmHeight, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort ((int*)&(bmPlanes), 1); m_bytesRead+=2;
+	rc = file.ReadShort (&bmPlanes, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort ((int*)&(bmBitsPixel), 1); m_bytesRead+=2;
+	rc = file.ReadShort (&bmBitsPixel, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(compression), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&compression, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(sizeimage), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&sizeimage, 1); m_bytesRead+=4;
 	if (rc != 1) {return false; }
 
-	rc = file.ReadLong ((long*)&(xscale), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&xscale, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(yscale), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&yscale, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(colors), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&colors, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong ((long*)&(impcol), 1); m_bytesRead+=4;
+	rc = file.ReadLong (&impcol, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
 	if (colors == 0)

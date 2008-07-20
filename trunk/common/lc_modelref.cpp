@@ -143,7 +143,7 @@ void lcModelRef::BuildMesh(int* SectionIndices, TypeToType<T>)
 		for (int i = 0; i < SrcMesh->m_SectionCount; i++)
 		{
 			lcMeshSection* SrcSection = &SrcMesh->m_Sections[i];
-			int SrcColor;
+			int SrcColor = 0;
 
 			// Create a new section if needed.
 			switch (SrcSection->PrimitiveType)

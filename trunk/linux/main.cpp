@@ -56,7 +56,7 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data);
 static void init_paths (char *argv0)
 {
   char temppath[PATH_MAX];
-  char *home;
+  const char *home;
 
   home = getenv ("HOME");
   if (home == NULL)
@@ -665,7 +665,7 @@ int main (int argc, char* argv[])
   GdkBitmap *mask;
 
   gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask,
-                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], icon32);
+                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], (gchar**)icon32);
   gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
 
   gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));

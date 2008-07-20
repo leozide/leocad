@@ -880,7 +880,7 @@ void MinifigWizard::Calculate()
 	}
 }
 
-void MinifigWizard::GetSelections(char **names)
+void MinifigWizard::GetSelections(const char** names)
 {
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{

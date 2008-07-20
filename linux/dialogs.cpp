@@ -21,8 +21,9 @@
 #include "group.h"
 #include "main.h"
 #include "config.h"
-#include "message.h"
+//#include "message.h"
 #include "project.h"
+#include "lc_colors.h"
 
 // =============================================================================
 // Modal dialog helper functions
@@ -293,7 +294,7 @@ static void filedlg_callback(GtkWidget *widget, gpointer data)
     *cur_ret = LC_CANCEL;
 }
 
-int filedlg_execute(char* caption, char* filename)
+int filedlg_execute(const char* caption, char* filename)
 {
   GtkWidget* dlg;
   dlg = gtk_file_selection_new (caption);
@@ -2388,7 +2389,8 @@ int propertiesdlg_execute(void* param)
   GtkTextBuffer *buffer;
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
   gtk_text_buffer_set_text(buffer, opts->Comments, -1);
-
+/*
+// FIXME: linux properties dialog.
   int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
   memset (&totalcount, 0, sizeof (totalcount));
   for (i = 0; i < opts->lines; i++)
@@ -2423,7 +2425,7 @@ int propertiesdlg_execute(void* param)
       ID++;
       col[i] = ID;
 
-      label = gtk_label_new (colornames[i]);
+      label = gtk_label_new (lcColorList[i].Name);
       gtk_widget_show (label);
       gtk_clist_set_column_widget (GTK_CLIST (list), ID, label);
     }
@@ -2474,7 +2476,7 @@ int propertiesdlg_execute(void* param)
 
   for (i = 1; i <= ID; i++)
     free(row[i]);
-
+*/
   label = gtk_label_new ("General");
   gtk_widget_show (label);
   set_notebook_tab (notebook, 0, label);
@@ -2996,12 +2998,19 @@ static void modifydlg_update_list(lcObject *obj)
   */
 }
 
-static void modifydlg_listener (int message, void *data, void *user)
+// FIXME: linux modify dialog
+class lcModifyListen : public lcListener
 {
-  if (message == LC_MSG_FOCUS_CHANGED)
-  {
-    modifydlg_update_list ((lcObject*)data);
-  }
+public:
+	lcModifyListen() { };
+	~lcModifyListen() { };
+	virtual void ProcessMessage(lcMessageType Message, void* Data);
+};
+
+void lcModifyListen::ProcessMessage(lcMessageType Message, void* Data)
+{
+	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
+		modifydlg_update_list ((lcObject*)Data);
 }
 
 static void modifydlg_create ()
@@ -3078,7 +3087,7 @@ static void modifydlg_create ()
 
 
   modifydlg = dlg;
-  messenger->Listen (&modifydlg_listener, NULL);
+//  messenger->Listen (&modifydlg_listener, NULL);
 }
 
 void modifydlg_toggle ()
@@ -3091,3 +3100,4 @@ void modifydlg_toggle ()
   else
     gtk_widget_show (modifydlg);
 }
+

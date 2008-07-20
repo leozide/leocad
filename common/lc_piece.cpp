@@ -93,12 +93,11 @@ void lcPiece::BuildMesh()
 	for (int i = 0; i < m_PieceInfo->m_nGroupCount; i++)
 	{
 		DRAWGROUP* dg = &m_PieceInfo->m_pGroups[i];
-		unsigned short* sh = dg->connections;
 
 		for (int s = 0; s < dg->NumSections; s++)
 		{
 			lcMeshSection* Section = &m_PieceInfo->GetMesh()->m_Sections[CurSection + s];
-			int SrcColor;
+			int SrcColor = 0;
 
 			switch (Section->PrimitiveType)
 			{
@@ -153,7 +152,7 @@ void lcPiece::BuildMesh(int* SectionIndices, TypeToType<T>)
 		for (int s = 0; s < dg->NumSections; s++)
 		{
 			lcMeshSection* SrcSection = &m_PieceInfo->GetMesh()->m_Sections[CurSection + s];
-			int SrcColor;
+			int SrcColor = 0;
 
 			switch (SrcSection->PrimitiveType)
 			{
@@ -169,7 +168,7 @@ void lcPiece::BuildMesh(int* SectionIndices, TypeToType<T>)
 			}
 
 			SectionIndices[SrcColor] -= SrcSection->IndexCount;
-			int ReserveIndices = ReserveIndices = SectionIndices[SrcColor];
+			int ReserveIndices = SectionIndices[SrcColor];
 			if (DstSections[SrcColor])
 			{
 				MeshEdit.SetCurrentSection(DstSections[SrcColor]);

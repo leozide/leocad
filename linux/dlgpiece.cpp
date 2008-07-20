@@ -21,6 +21,7 @@
 #include "pieceinf.h"
 #include "main.h"
 #include "minifig.h"
+#include "lc_colors.h"
 
 // =========================================================
 // Minifig Wizard
@@ -64,7 +65,7 @@ static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
 
   info->wizard->ChangeColor (i, GPOINTER_TO_INT (data));
   info->wizard->Redraw ();
-  set_button_pixmap2 (button, FlatColorArray[GPOINTER_TO_INT(data)]);
+  set_button_pixmap2 (button, lcColorList[GPOINTER_TO_INT(data)].Value);
 }
 
 // A color button was clicked
@@ -75,9 +76,9 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
 
   menu = gtk_menu_new ();
 
-  for (i = 0; i < LC_MAXCOLORS; i++)
+  for (i = 0; i < lcNumUserColors; i++)
   {
-    menuitem = gtk_menu_item_new_with_label (colornames[i]);
+    menuitem = gtk_menu_item_new_with_label (lcColorList[i].Name);
     gtk_widget_show (menuitem);
     gtk_menu_append (GTK_MENU (menu), menuitem);
 
@@ -150,8 +151,8 @@ static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)
 
 static void minifigdlg_updateselection (LC_MINIFIGDLG_STRUCT* s)
 {
-  char *names[LC_MFW_NUMITEMS];
-  s->wizard->GetSelections (names);
+  const char* names[LC_MFW_NUMITEMS];
+  s->wizard->GetSelections(names);
 
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
@@ -190,7 +191,7 @@ static void minifigdlg_load (GtkWidget *widget, gpointer data)
 
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    set_button_pixmap2 (s->colors[i], FlatColorArray[s->wizard->m_Colors[i]]);
+    set_button_pixmap2 (s->colors[i], lcColorList[s->wizard->m_Colors[i]].Value);
     if (s->angles[i] != NULL)
       gtk_spin_button_set_value (GTK_SPIN_BUTTON (s->angles[i]), s->wizard->m_Angles[i]);
   }
@@ -436,7 +437,7 @@ int minifigdlg_execute (void* param)
   gtk_widget_show(dlg);
 
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
-    set_button_pixmap2(s.colors[i], FlatColorArray[s.wizard->m_Colors[i]]);
+    set_button_pixmap2(s.colors[i], lcColorList[s.wizard->m_Colors[i]].Value);
 
   int ret = dlg_domodal(dlg, LC_CANCEL);
 

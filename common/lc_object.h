@@ -4,6 +4,7 @@
 #include "str.h"
 #include "lc_array.h"
 #include "algebra.h"
+#include "config.h"
 
 class lcScene;
 

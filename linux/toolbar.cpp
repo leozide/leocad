@@ -659,6 +659,7 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
   {
     cur_color = x;
     colorlist_draw_pixmap(widget);
+    g_App->m_SelectedColor = x;
     lcPostMessage(LC_MSG_COLOR_CHANGED, GINT_TO_POINTER(x));
     gtk_widget_draw(widget, NULL);
     preview->Redraw ();
@@ -680,6 +681,7 @@ static gint colorlist_button_press(GtkWidget *widget, GdkEventButton *event)
     {
       cur_color = x;
       colorlist_draw_pixmap(widget);
+      g_App->m_SelectedColor = x;
       lcPostMessage(LC_MSG_COLOR_CHANGED, GINT_TO_POINTER(x));
       gtk_widget_draw(widget, NULL);
       preview->Redraw ();

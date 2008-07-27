@@ -1176,6 +1176,8 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		strcat(buf, "\r\n");
 		file.Write(buf, strlen(buf));
 
+		const char* OldLocale = setlocale(LC_NUMERIC, "C");
+
 		for (i = 1; i <= steps; i++)
 		{
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPieceObject*)pPiece->m_Next)
@@ -1187,6 +1189,9 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			if (i != steps)
 				file.Write("0 STEP\r\n", 8);
 		}
+
+		setlocale(LC_NUMERIC, OldLocale);
+
 		file.Write("0\r\n", 3);
 	}
 	else

@@ -1238,8 +1238,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		else
 			ptr++;
 
-		sprintf(buf, "0 Model exported from LeoCAD\r\n"
-					"0 Original name: %s\r\n", ptr);
+		sprintf(buf, "0 Model exported from LeoCAD\r\n0 Original name: %s\r\n", ptr);
 		if (strlen(m_strAuthor) != 0)
 		{
 			strcat(buf, "0 Author: ");
@@ -1248,6 +1247,8 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		}
 		strcat(buf, "\r\n");
 		file.Write(buf, strlen(buf));
+
+		const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
 		for (i = 1; i <= steps; i++)
 		{
@@ -1269,6 +1270,9 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			if (i != steps)
 				file.Write("0 STEP\r\n", 8);
 		}
+
+		setlocale(LC_NUMERIC, OldLocale);
+
 		file.Write("0\r\n", 3);
 	}
 	else

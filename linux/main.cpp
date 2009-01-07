@@ -508,6 +508,15 @@ static void update_window_layout ()
   }
 }
 
+int lcXErrorHandler(Display* display, XErrorEvent* event)
+{
+	char Text[1024];
+	fprintf(stderr, "Non fatal X11 error ignored\n");
+	XGetErrorText(display, event->error_code, Text, sizeof(Text));
+	fprintf(stderr, "%s\n", Text);
+
+}
+
 int main (int argc, char* argv[])
 {
   GtkWidget *vbox;
@@ -526,6 +535,8 @@ int main (int argc, char* argv[])
 
   if (!g_App->Initialize(argc, argv, lib_path))
     return 1;
+
+  XSetErrorHandler(&lcXErrorHandler);
 
   if (pfnglXQueryExtension (GDK_DISPLAY (), NULL, NULL) != True)
   {

@@ -114,7 +114,7 @@ bool PiecesLibrary::Load (const char *libpath)
 	// Load moved files reference.
 	if (m_pMovedReference != NULL)
 		free(m_pMovedReference);
-	m_pMovedReference = (char*)malloc(18*movedcount);
+	m_pMovedReference = (char*)malloc(18*movedcount+1);
 	memset (m_pMovedReference, 0, 18*movedcount);
 	m_nMovedCount = movedcount;
 

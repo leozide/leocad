@@ -30,6 +30,7 @@ class Piece;
 class Camera;
 class Light;
 class Group;
+class GroupInfo;
 class Texture;
 class Terrain;
 class PieceInfo;
@@ -308,6 +309,34 @@ protected:
 	friend class CCADView;
 	friend void PrintPiecesThread(void* pv);
 	friend void Export3DStudio();
+
+	// VRML export
+	void exportVRML97File(char *filename);
+	void exportX3DVFile(char *filename);
+	void exportVRMLFile(char *filename, int dialect);
+	template<class type> void writeVRMLShapes(type color, FILE *stream, int coordinateCounter, Piece* pPiece, unsigned short group, float *pos, bool beginAndEnd);
+	void writeVRMLShapeBegin(FILE *stream, unsigned long currentColor, bool blackLines);
+	void writeVRMLShapeMeshBegin(FILE *stream);
+	void writeVRMLShapeMeshData(FILE *stream);
+	void writeVRMLShapeMeshEnd(FILE *stream);
+	void writeVRMLShapeEnd(FILE *stream);
+	void writeIndent(FILE *stream);
+	int indent;
+	int numDEF;
+	bool VRMLdialect;
+	bool firstData;
+	int searchForVertex(float *vertex);
+	template<class type> void generateMeshData(type* info, float *pos, Piece* pPiece, int numVertices, int currentColor);
+	template<class type> void getMinMaxData(type* info, Piece* pPiece, int numVertices, GroupInfo* groupInfo);
+	template<class type> void getMinMax(type col, Piece* pPiece, unsigned short group, GroupInfo* groupInfo);
+	bool handleAsGroup(Piece* piece, GroupInfo groupInfo);
+	int numCoords;
+	float *coords;
+	int numCoordIndices;
+	int *coordIndices;
+	float centerOfMass[3];
+	int numFaceColors;
+	int *faceColors;
 };
 
 #endif // _PROJECT_H_

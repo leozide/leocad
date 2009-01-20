@@ -59,6 +59,10 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_FILE_HTML, "menu_file_html");
   create_menu_item (menu_in_menu, "_POV-Ray...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_POVRAY, "menu_file_povray");
+  create_menu_item (menu_in_menu, "_VRML97...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_VRML97, "menu_file_vrml97");
+  create_menu_item (menu_in_menu, "_Rigid Body Physics X3DV Draft...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_X3DV, "menu_file_x3dv");
   create_menu_item (menu_in_menu, "_Wavefront...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_WAVEFRONT, "menu_file_wavefront");
   menu_separator (menu);

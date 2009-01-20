@@ -618,71 +618,65 @@ bool SystemDoDialog(int mode, void* param)
 {
   switch (mode)
   {
-    case LC_DLG_FILE_OPEN_PROJECT: {
+    case LC_DLG_FILE_OPEN_PROJECT:
       return openprojectdlg_execute ((char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_FILE_SAVE_PROJECT: {
+    case LC_DLG_FILE_SAVE_PROJECT:
       return saveprojectdlg_execute ((char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_FILE_MERGE_PROJECT: {
+    case LC_DLG_FILE_MERGE_PROJECT:
       return openprojectdlg_execute ((char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_ABOUT: {
+    case LC_DLG_FILE_OPEN:
+      return openprojectdlg_execute ((char*)param) == LC_OK;
+
+    case LC_DLG_ABOUT:
       return aboutdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_ARRAY: {
+    case LC_DLG_ARRAY:
       return arraydlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_HTML: {
+    case LC_DLG_HTML:
       return htmldlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_POVRAY: {
+    case LC_DLG_POVRAY:
       return povraydlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_WAVEFRONT: {
+    case LC_DLG_VRML97:
       return filedlg_execute("Save File", (char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_PREFERENCES: {
+    case LC_DLG_X3DV:
+      return filedlg_execute("Save File", (char*)param) == LC_OK;
+
+    case LC_DLG_WAVEFRONT:
+      return filedlg_execute("Save File", (char*)param) == LC_OK;
+
+    case LC_DLG_PREFERENCES:
       return preferencesdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_PICTURE_SAVE: {
+    case LC_DLG_PICTURE_SAVE:
       return savepicturedlg_execute (param) == LC_OK;
-    } break;
 
-    case LC_DLG_MINIFIG: {
+    case LC_DLG_MINIFIG:
       return minifigdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_PROPERTIES: {
+    case LC_DLG_PROPERTIES:
       return propertiesdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_LIBRARY: {
+    case LC_DLG_LIBRARY:
       return librarydlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_SELECTBYNAME: {
-    } break;
+    case LC_DLG_SELECTBYNAME:
+      break;
 
-    case LC_DLG_STEPCHOOSE: {
-    } break;
+    case LC_DLG_STEPCHOOSE:
+      break;
 
-    case LC_DLG_EDITGROUPS: {
+    case LC_DLG_EDITGROUPS:
       return groupeditdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_GROUP: {
+    case LC_DLG_GROUP:
       return groupdlg_execute(param) == LC_OK;
-    } break;
   }
 
   return false;

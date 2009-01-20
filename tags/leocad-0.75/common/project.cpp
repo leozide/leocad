@@ -3897,6 +3897,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					strcat (fn, m_strTitle);
           strcat (fn, htmlext);
 					f = fopen (fn, "wt");
+                                        if (f == NULL)
+                                        {
+                                                perror(fn);
+						return;
+                                        }
 					fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 					for (i = 1; i <= last; i++)
@@ -3923,7 +3928,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcat (fn, "-index");
             strcat (fn, htmlext);
 						f = fopen (fn, "wt");
-
+        	                                if (f == NULL)
+        	                                {
+        	                                        perror(fn);
+							return;
+        	                                }
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 						for (i = 1; i <= last; i++)
@@ -3941,7 +3950,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					{
 						sprintf(fn, "%s%s-%02d%s", opts.path, m_strTitle, i, htmlext);
 						f = fopen(fn, "wt");
-
+	                                        if (f == NULL)
+	                                        {
+	                                                perror(fn);
+							return;
+	                                        }
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, i);
 						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n", 
 							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
@@ -3973,6 +3986,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcat (fn, "-pieces");
             strcat (fn, htmlext);
 						f = fopen (fn, "wt");
+	                                        if (f == NULL)
+	                                        {
+	                                                perror(fn);
+							return;
+	                                        }
 						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 				
 						CreateHTMLPieceList(f, 0, opts.images, ext);
@@ -4437,6 +4455,27 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, buf, out, SW_SHOWNORMAL);
 #endif
 			}
+		} break;
+
+		// Export to VRML97, exchange x -> z, z -> y, y -> x, 
+		case LC_FILE_VRML97:
+		{
+			char filename[LC_MAXPATH];
+			if (!SystemDoDialog(LC_DLG_VRML97, filename))
+				break;
+
+			exportVRML97File(filename);
+		} break;
+
+		// Export to X3DV for rigid body component
+                // exchange x -> z, z -> y, y -> x, 
+		case LC_FILE_X3DV:
+		{
+			char filename[LC_MAXPATH];
+			if (!SystemDoDialog(LC_DLG_X3DV, filename))
+				break;
+
+			exportX3DVFile(filename);
 		} break;
 
 		case LC_FILE_WAVEFRONT:
@@ -9337,3 +9376,882 @@ void Project::UpdateOverlayScale()
 		}
 	}
 }
+
+// VRML97 and X3DV export is very similar, cause X3D is the successor of VRML97
+// therefore a lot of the export routines can be reused
+// the member variable VRMLdialect used with the following enum has this information
+
+enum 
+{
+	VRML97,
+	X3DV_WITH_RIGID_BODY_PHYSICS
+};
+
+void Project::exportVRML97File(char *filename)
+{
+	exportVRMLFile(filename, VRML97);
+}
+
+void Project::exportX3DVFile(char *filename)
+{
+	exportVRMLFile(filename, X3DV_WITH_RIGID_BODY_PHYSICS);
+}
+
+void Project::writeIndent(FILE* stream)
+{
+	for (int i = 0; i < indent; i++)
+		fprintf(stream, " ");
+}
+
+#define INDENT_INC 2
+
+// routines to write VRML/X3DV shape related commands
+// for details see 
+// http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/
+// http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification/Part01/Architecture.html
+
+void Project::writeVRMLShapeBegin(FILE *stream, unsigned long currentColor, bool blackLines)
+{
+	// http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/rigid_physics.html#CollidableShape
+
+	if (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS)
+	{
+		numFaceColors = 0;
+		faceColors = (int *) malloc(1);
+
+		writeIndent(stream);
+		fprintf(stream, "DEF CollidableShape%d CollidableShape {\n", numDEF++);
+		indent += INDENT_INC;
+		writeIndent(stream);
+		fprintf(stream, "shape ");
+	}
+	else
+		writeIndent(stream);
+
+	// http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/nodesRef.html#Shape
+
+	fprintf(stream, "Shape {\n");
+	indent += INDENT_INC;
+
+	// http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/nodesRef.html#Appearance
+	// http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/nodesRef.html#Material
+	writeIndent(stream);
+	fprintf(stream, "appearance Appearance {\n");
+	indent += INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "material Material {\n");
+	indent += INDENT_INC;
+	if (blackLines)
+	{
+		writeIndent(stream);
+		fprintf(stream, "diffuseColor 0 0 0\n");
+		writeIndent(stream);
+		fprintf(stream, "emissiveColor 0 0 0\n");
+	}
+	else
+	{
+		writeIndent(stream);
+		fprintf(stream, "diffuseColor %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0);
+		if (currentColor > 13 && currentColor < 22) 
+		{
+			writeIndent(stream);
+			fprintf(stream, "transparency 0.5\n");
+		}
+	}
+	indent -= INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "}\n");                                
+	indent -= INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "}\n");                                
+	
+	if (blackLines)
+	{
+		// http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/nodesRef.html#IndexedLineSet
+		writeIndent(stream);
+		fprintf(stream, "geometry IndexedLineSet {\n");
+		indent += INDENT_INC;
+	}
+	else
+	{
+		// http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification/Part01/components/rendering.html#TriangleSet
+		// http://www.web3d.org/x3d/specifications/vrml/ISO-IEC-14772-VRML97/part1/nodesRef.html#IndexedFaceSet
+		writeIndent(stream);
+		if (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS)
+			fprintf(stream, "geometry TriangleSet {\n");
+		else
+			fprintf(stream, "geometry IndexedFaceSet {\n");
+		indent += INDENT_INC;
+		writeIndent(stream);
+		fprintf(stream, "solid FALSE\n");
+		if (VRMLdialect != X3DV_WITH_RIGID_BODY_PHYSICS)
+		{
+			writeIndent(stream);
+			fprintf(stream, "creaseAngle 0.79\n");
+		}
+	}
+}
+
+void Project::writeVRMLShapeEnd(FILE *stream)
+{
+	indent -= INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "}\n");
+	indent -= INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "}\n");
+}
+
+// search for vertex (vertex[0], vertex[1], vertex[2]) in coords and give
+// back index (-1 if not found)
+
+int Project::searchForVertex(float* vertex) 
+{
+	for (int i = 0; i < numCoords; i++)
+		if (coords[i * 3] == vertex[0])
+			if (coords[i * 3 + 1] == vertex[1])
+				if (coords[i * 3 + 2] == vertex[2])
+					return i;
+	return -1;
+}
+
+// routines to collect VRML indexed polygon mesh data or X3DV triangle mesh data
+
+template<class type> void Project::generateMeshData(type* info, float *pos, Piece* pPiece, int numVertices, int currentColor)
+{
+	float rot[4];
+	Vector3 Pos = pPiece->GetPosition();
+	pPiece->GetRotation(rot);
+	Matrix matrix(rot, Pos);
+
+	bool rigidBody = (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS);
+
+	PieceInfo* pInfo = pPiece->GetPieceInfo();
+	if (rigidBody)
+	{
+		// IndexedLineSet not supported by xj3d RigidBody node
+		if (numVertices == 2)
+			return;
+
+		int maxJ = 1;
+		// write 2 triangles instead of 1 quad
+		if (numVertices == 4)
+			maxJ = 2;
+		for (int j = 0; j < maxJ; j++) 
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				int index = i;
+				if (j == 1)
+				{
+					switch (i) {
+						case 0:
+							index = 2;
+							break;
+						case 1:
+							index = 0;
+							break;
+						case 2:
+							index = 3;
+							break;
+					}
+				}
+				float *localVertex = &pInfo->m_fVertexArray[info[index] * 3];
+				float vertex[3];
+				matrix.TransformPoint(vertex, localVertex);
+				coords = (float *) realloc(coords, (numCoords + 1) * 3 * sizeof(float));
+				coords[numCoords * 3 + 0] = vertex[1] - pos[1];
+				coords[numCoords * 3 + 1] = vertex[2] - pos[2];
+				coords[numCoords * 3 + 2] = vertex[0] - pos[0];
+				numCoords++;
+			}
+			faceColors = (int *) realloc(faceColors, (numFaceColors + 1) * sizeof(int));
+			faceColors[numFaceColors] = currentColor;
+			numFaceColors++;
+		}
+		return;
+	}			
+	for (int i = 0; i < numVertices; i++)
+	{
+		float *localVertex = &pInfo->m_fVertexArray[info[i] * 3];
+		int index = searchForVertex(localVertex);
+		if (index == -1)
+		{
+			float vertex[3];
+			if (rigidBody)
+				matrix.TransformPoint(vertex, localVertex);
+			else
+			{
+				vertex[0] = localVertex[0];
+				vertex[1] = localVertex[1];
+				vertex[2] = localVertex[2];
+			}
+			coords = (float *) realloc(coords, (numCoords + 1) * 3 * sizeof(float));
+			coords[numCoords * 3 + 0] = vertex[1] - (rigidBody ? pos[1] : 0);
+			coords[numCoords * 3 + 1] = vertex[2] - (rigidBody ? pos[2] : 0);
+			coords[numCoords * 3 + 2] = vertex[0] - (rigidBody ? pos[0] : 0);
+			index = numCoords;
+			numCoords++;
+		}
+		coordIndices = (int *) realloc(coordIndices, (numCoordIndices + 1) * sizeof(int));
+		coordIndices[numCoordIndices] = index;
+		numCoordIndices++;
+	}
+	coordIndices = (int *) realloc(coordIndices, (numCoordIndices + 1) * sizeof(int));
+	coordIndices[numCoordIndices] = -1;
+	numCoordIndices++;
+	faceColors = (int *) realloc(faceColors, (numFaceColors + 1) * sizeof(int));
+	faceColors[numFaceColors] = currentColor;
+	numFaceColors++;
+}
+
+// write collected mesh data
+
+void Project::writeVRMLShapeMeshBegin(FILE *stream)
+{
+	writeIndent(stream);
+
+	fprintf(stream, "coord Coordinate {\n");
+	indent += INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "point [\n");
+	indent += INDENT_INC;
+}
+
+void Project::writeVRMLShapeMeshData(FILE *stream)
+{
+	for (int i = 0; i < numCoords; i++) 
+	{
+		writeIndent(stream);
+		fprintf(stream, "%f %f %f\n", coords[i * 3], coords[i * 3 + 1], coords[i * 3 + 2]);
+	}
+}
+
+void Project::writeVRMLShapeMeshEnd(FILE *stream)
+{
+	indent -= INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "]\n");
+	indent -= INDENT_INC;
+	writeIndent(stream);
+	fprintf(stream, "}\n");
+
+	
+	if (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS)
+	{
+		writeIndent(stream);
+		fprintf(stream, "color ColorRGBA {\n"); 
+		indent += INDENT_INC;		
+		writeIndent(stream);
+		fprintf(stream, "color [\n"); 
+		indent += INDENT_INC;		
+
+		for (int i = 0; i < numFaceColors; i++)
+		{
+			int currentColor = faceColors[i];
+			writeIndent(stream);
+			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+			writeIndent(stream);
+			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+			writeIndent(stream);
+			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+
+			fprintf(stderr, "{ %d, %g, %g, %g, %g },\n", currentColor, (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+		}
+
+		indent -= INDENT_INC;		
+		writeIndent(stream);
+		fprintf(stream, "]\n"); 
+
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fprintf(stream, "}\n");
+	}
+	else
+	{
+		writeIndent(stream);
+		fprintf(stream, "coordIndex [\n"); 
+		indent += INDENT_INC;
+
+		for (int i = 0; i < numCoordIndices; i ++) 
+		{
+			writeIndent(stream);
+			fprintf(stream, "%d\n", coordIndices[i]);
+		}
+
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fprintf(stream, "]\n");
+	}
+}
+
+// routine to run through leoCADs internal data space, collect and write data
+
+template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int coordinateCounter, Piece* pPiece, unsigned short group, float *pos, bool beginAndEnd)
+{ 
+	PieceInfo* pInfo = pPiece->GetPieceInfo();
+	const char* colname;
+	type* info = (type*)(pInfo->m_pGroups[group].drawinfo);
+	type currentColor = color;
+	type count, colors = *info;
+	type maxColors = colors;
+	info++;
+
+	while (colors--)
+	{
+		numCoords = 0;
+		coords = (float *) malloc(1);
+		numCoordIndices = 0;
+		coordIndices = (int *) malloc(1);
+
+		if ((*info == LC_COL_DEFAULT) || (*info == LC_COL_EDGES))
+		{
+			colname = altcolornames[color];
+			currentColor = color;
+		}
+		else
+		{
+			if ((*info >= LC_MAXCOLORS))
+			{
+				info++;
+				info += *info + 1;
+				info += *info + 1;
+				info += *info + 1;
+
+				continue;
+			}
+			colname = altcolornames[*info];
+			currentColor = *info;
+		}
+		info++;
+		
+		bool skipNext = (info[0] < 1);
+		if (skipNext)
+			skipNext = (info[1] < 1);
+		if (skipNext)
+			info += 2;                
+		else
+		{
+			for (count = *info, info++; count; count -= 4)
+			{
+				generateMeshData(info, pos, pPiece, 4, currentColor);
+				info += 4;
+			}
+	
+			for (count = *info, info++; count; count -= 3)
+			{
+				generateMeshData(info, pos, pPiece, 3, currentColor);
+				info += 3;
+			}
+			writeIndent(stream);
+			fprintf(stream, "# %s\n", colname);
+
+			bool rigidBody = (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS);
+
+			bool writeBegin = ((!rigidBody) || (beginAndEnd && (colors == (maxColors - 1)))); 
+			bool writeEnd = ((!rigidBody) || (beginAndEnd && (colors == 0)));
+
+			if (writeBegin) 
+			{
+				writeVRMLShapeBegin(stream, currentColor, false);
+				writeVRMLShapeMeshBegin(stream);
+			}
+
+			writeVRMLShapeMeshData(stream);
+
+			if (writeEnd)
+			{
+				writeVRMLShapeMeshEnd(stream);
+				writeVRMLShapeEnd(stream);
+			}
+		}
+
+		if (*info > 0)
+		{
+			// IndexedLineSet not supported in RigidBody node for the xj3d browser 8-(
+			if (VRMLdialect != X3DV_WITH_RIGID_BODY_PHYSICS) 
+			{
+				writeIndent(stream);
+				fprintf(stream, "# lines of color %s\n", colname);
+			}
+
+			for (count = *info, info++; count; count -= 2)
+			{
+				generateMeshData(info, pos, pPiece, 2, currentColor);
+				info += 2;
+			}
+
+			// IndexedLineSet not supported in RigidBody node for the xj3d browser 8-(
+			if (VRMLdialect != X3DV_WITH_RIGID_BODY_PHYSICS) 
+			{
+				writeVRMLShapeBegin(stream, currentColor, true);
+				writeVRMLShapeMeshBegin(stream);
+				writeVRMLShapeMeshData(stream);
+				writeVRMLShapeMeshEnd(stream);
+				writeVRMLShapeEnd(stream);
+			}
+		} else
+			info++;
+		free(coords);
+		free(coordIndices);
+	}
+}
+
+// The X3DV export need to "melt together" faces of different pieces into one triangleSet
+// based on the leocad "piece -> group" menupoint, otherwise the rigid body simulation would simulate all pieces seperatly
+// Additionally a center of mass is required for the X3DV export 
+// Unfortunalty, the origin of a piece in leocad is not usefull for use as center of mass
+// So the exporter use the mid of the boundingbox of all pieces in a group as center of mass
+// the needed information is stored in the following compound datatype
+
+class GroupInfo {
+public:
+	Group *group;
+	float minBoundingBox[3];
+	float maxBoundingBox[3];
+	char  groupname[65];
+	bool  firstData;
+	Piece *firstPiece; 
+	Piece *lastPiece; 
+};
+
+// routines to account a boundingbox 
+
+template<class type> void Project::getMinMaxData(type* info, Piece* pPiece, int numVertices, GroupInfo* groupInfo)
+{
+	float rot[4];
+	Vector3 Pos = pPiece->GetPosition();
+	pPiece->GetRotation(rot);
+	Matrix matrix(rot, Pos);
+
+	PieceInfo* pInfo = pPiece->GetPieceInfo();
+
+	for (int i = 0; i < numVertices; i++)
+	{
+		float vertex[3];
+		float *localVertex = &pInfo->m_fVertexArray[info[i] * 3];
+		matrix.TransformPoint(vertex, localVertex);
+
+		for (int j = 0; j < 3; j++)
+		{
+			if (groupInfo->firstData)
+			{
+				groupInfo->minBoundingBox[j] = vertex[j];
+				groupInfo->maxBoundingBox[j] = vertex[j];
+			}
+			if (vertex[j] < groupInfo->minBoundingBox[j])
+				groupInfo->minBoundingBox[j] = vertex[j];
+			if (vertex[j] > groupInfo->maxBoundingBox[j])
+				groupInfo->maxBoundingBox[j] = vertex[j];
+		}
+		groupInfo->firstData = false;
+	}
+}
+
+template<class type> void Project::getMinMax(type col, Piece* piece, unsigned short group, GroupInfo* groupInfo)
+{ 
+	PieceInfo *pInfo = piece->GetPieceInfo();
+	type* info = (type*)(pInfo->m_pGroups[group].drawinfo);
+	type colors = *info;
+	info++;
+
+	type count;
+
+	while (colors--)
+	{
+		if ((*info == LC_COL_DEFAULT) || (*info == LC_COL_EDGES))
+		{
+		}
+		else
+		{
+			if ((*info >= LC_MAXCOLORS))
+			{
+				info++;
+				info += *info + 1;
+				info += *info + 1;
+				info += *info + 1;
+
+				continue;
+			}
+		}
+		info++;
+		
+		bool skipNext = (info[0] < 1);
+		if (skipNext)
+			skipNext = (info[1] < 1);
+		if (skipNext)
+			info += 2;                
+		else
+		{
+			for (count = *info, info++; count; count -= 4)
+			{
+				getMinMaxData(info, piece, 4, groupInfo);
+				info += 4;
+			}
+	
+			for (count = *info, info++; count; count -= 3)
+			{
+				getMinMaxData(info, piece, 3, groupInfo);
+				info += 3;
+			}
+		}
+
+		if (*info > 0)
+		{
+			// skip lines
+			for (count = *info, info++; count; count -= 2)
+			{
+				info += 2;
+			}
+		} else
+			info++;
+	}
+}
+
+// Pieces without TopGroup represent Pieces without "Piece->Group" in LeoCAD
+// The handleAsGroup function is used with "if" in loops over pieces, 
+// to run the if/loop content for either only single pieces or all pieces part
+// of a LeoCAD "Piece->Group"
+
+bool Project::handleAsGroup(Piece* pPiece, GroupInfo groupInfo)
+{
+	if (pPiece->GetTopGroup() == NULL)
+	{
+		if (groupInfo.firstPiece == pPiece)
+			return true;
+	}
+	else
+	{
+		if (pPiece->GetTopGroup() == groupInfo.group)
+			return true;
+	}
+	return false;
+}
+
+// main routine to export VRML97 or X3DV files
+
+void Project::exportVRMLFile(char *filename, int dialect)
+{
+	numDEF = 0;
+	indent = 0;
+	int coordinateCounter = 1;
+	char buf[LC_MAXPATH], *ptr;
+	FILE* stream = fopen(filename, "wt");
+	Piece* pPiece;
+	bool rigidBody = (dialect == X3DV_WITH_RIGID_BODY_PHYSICS);
+	VRMLdialect = dialect;	
+	strcpy(buf, m_strPathName);
+	ptr = strrchr(buf, '\\');
+	if (ptr)
+		ptr++;
+	else
+	{
+		ptr = strrchr(buf, '/');
+		if (ptr)
+			ptr++;
+		else
+			ptr = buf;
+	}
+
+	// write header
+	switch (VRMLdialect)
+	{
+	case VRML97:
+		fputs("#VRML V2.0 utf8\n", stream);
+		break;
+	case X3DV_WITH_RIGID_BODY_PHYSICS:
+		fputs("#X3D V3.0 utf8\n", stream);
+		fputs("PROFILE Immersive\n", stream);
+		fputs("COMPONENT xj3d_RigidBodyPhysics:2\n", stream);
+		// if xj3d is ready use: fputs("COMPONENT RigidBodyPhysics:2\n", stream);
+		break;
+	}
+
+	// write leading comments
+	fputs("# Model exported from LeoCAD\n", stream);
+	if (strlen(buf) != 0)
+		fprintf(stream,"# Original name: %s\n", ptr);
+	if (strlen(m_strAuthor))
+		fprintf(stream, "# Author: %s\n", m_strAuthor);
+
+	// write leading once needed X3DV commands
+	if (rigidBody)
+	{
+		fputs("\n", stream);
+		writeIndent(stream);
+		fputs("Group {\n", stream);
+		indent += INDENT_INC;
+		writeIndent(stream);
+		fputs("children [\n", stream);
+		indent += INDENT_INC;
+	}
+
+	// initalise "melt together" group information
+	ObjArray<GroupInfo> allGroups;
+	GroupInfo groupObject;
+	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
+		Group *topGroup = pPiece->GetTopGroup();
+		int foundGroup = false;;
+		if (topGroup != NULL)
+		{
+			for (int i = 0; i < allGroups.GetSize(); i++)
+				if (allGroups[i].group == topGroup)
+				{
+					allGroups[i].lastPiece = pPiece;
+					foundGroup = true;
+				} 
+		}
+		if (!foundGroup)
+		{
+			groupObject.group = topGroup;
+			groupObject.firstPiece = pPiece;
+			groupObject.lastPiece = pPiece;
+			groupObject.firstData = true;
+			if (topGroup != NULL)
+				snprintf(groupObject.groupname, 64, "%s", topGroup->m_strName);
+			else
+				snprintf(groupObject.groupname, 64, "%s", pPiece->GetName());
+			allGroups.Add(groupObject);
+		}
+	}
+
+	// account bounding box information
+	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
+		unsigned char color = pPiece->GetColor();
+		PieceInfo *pInfo = pPiece->GetPieceInfo();
+		for (int j = 0; j < allGroups.GetSize(); j++)
+		{
+			if (handleAsGroup(pPiece, allGroups[j]))
+			{
+				unsigned short group;
+
+				for (group = 0; group < pInfo->m_nGroupCount; group++)
+				{
+					if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+					{
+						unsigned long col = color;
+						getMinMax(col, pPiece, group, &(allGroups[j]));
+					}
+					else
+					{
+						unsigned short col = color;
+						getMinMax(col, pPiece, group, &(allGroups[j]));
+					}
+				}
+			}
+		}
+	}		
+
+	// write main VRML97/X3DV data
+	for (int j = 0; j < allGroups.GetSize(); j++)
+	{
+		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		{
+			bool beginGroup = ((allGroups[j].group == NULL) || (allGroups[j].firstPiece == pPiece));
+			bool endGroup = ((allGroups[j].group == NULL) || (allGroups[j].lastPiece == pPiece));
+
+			if (handleAsGroup(pPiece, allGroups[j]))
+			{				
+				PieceInfo* pInfo = pPiece->GetPieceInfo();
+				unsigned char color = pPiece->GetColor();
+			
+				strcpy(buf, pPiece->GetName());
+				for (unsigned int i = 0; i < strlen(buf); i++)
+					if ((buf[i] == '#') || (buf[i] == ' '))
+						buf[i] = '_';
+
+				writeIndent(stream);
+				fprintf(stream, "# %s\n", buf);
+
+				float pos[3];
+				float rot[4];
+
+				switch (VRMLdialect)
+				{
+				case VRML97:
+					pPiece->GetPosition(pos);
+					pPiece->GetRotation(rot);
+					writeIndent(stream);
+					fprintf(stream, "Transform {\n");
+					indent += INDENT_INC;
+					writeIndent(stream);
+					fprintf(stream, "translation %g %g %g\n", pos[1], pos[2], pos[0]);
+					writeIndent(stream);
+					fprintf(stream, "rotation %g %g %g %g\n", rot[1], rot[2], rot[0], rot[3] * M_PI / 180.0);
+					writeIndent(stream);
+					fprintf(stream, "children [\n");
+					indent += INDENT_INC;
+					break;
+                                case X3DV_WITH_RIGID_BODY_PHYSICS:
+					for (int k = 0; k < 3; k++)
+						pos[k] = allGroups[j].minBoundingBox[k] + (allGroups[j].maxBoundingBox[k] - allGroups[j].minBoundingBox[k]) / 2.0f;
+				}
+
+				unsigned short group;
+
+				if (pInfo->m_nGroupCount > 0)
+				{
+
+					if (beginGroup && rigidBody)
+					{
+						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+						{
+							unsigned long col = color;
+							writeVRMLShapeBegin(stream, col, false);
+							writeVRMLShapeMeshBegin(stream);
+						}
+						else
+						{
+							unsigned short col = color;
+							writeVRMLShapeBegin(stream, col, false);
+							writeVRMLShapeMeshBegin(stream);
+						}
+					}
+
+					for (group = 0; group < pInfo->m_nGroupCount; group++)
+					{
+						writeIndent(stream);
+						fprintf(stream, "# group %d\n",(int)group);
+						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+						{
+							unsigned long col = color;
+							writeVRMLShapes(col, stream, coordinateCounter, pPiece, group, pos, !rigidBody);
+						}
+						else
+						{
+							unsigned short col = color;
+							writeVRMLShapes(col, stream, coordinateCounter, pPiece, group, pos, !rigidBody);
+						}
+					}
+
+					if (endGroup && rigidBody)
+					{
+						writeVRMLShapeMeshEnd(stream);
+						writeVRMLShapeEnd(stream);
+					}
+				}
+
+				if (!rigidBody)
+				{
+					indent -= INDENT_INC;
+					writeIndent(stream);
+					fprintf(stream, "]\n");
+				}
+
+				if (endGroup || (!rigidBody))
+				{
+					indent -= INDENT_INC;
+					writeIndent(stream);
+					fprintf(stream, "} # endShape\n");
+				}
+
+				coordinateCounter++;
+			}
+
+		}
+	}
+
+	if (rigidBody)
+	{
+		// write trailing once needed X3DV commands
+        	// http://www.xj3d.org/extensions/rigid_physics.html
+        	// http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification_Revision1_to_Part1/Part01/components/rigid_physics.html
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fputs("]\n", stream);
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fputs("}\n", stream);
+
+		writeIndent(stream);
+		fputs("DEF RigidBodyCollection1 RigidBodyCollection {\n", stream);
+		indent += INDENT_INC;
+		writeIndent(stream);
+		fputs("bodies [\n", stream);
+		indent += INDENT_INC;
+		coordinateCounter = 0;
+		for (int j = 0; j < allGroups.GetSize(); j++)
+		{
+			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
+				bool beginGroup = ((allGroups[j].group == NULL) || (allGroups[j].firstPiece == pPiece));
+				bool endGroup = ((allGroups[j].group == NULL) || (allGroups[j].lastPiece == pPiece));
+
+				if (handleAsGroup(pPiece, allGroups[j]))
+				{				
+					float pos[3];
+
+					if (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS)
+					{
+						if (beginGroup)
+						{
+							for (int k = 0; k < 3; k++)
+								pos[k] = allGroups[j].minBoundingBox[k] + (allGroups[j].maxBoundingBox[k] - allGroups[j].minBoundingBox[k]) / 2.0f;
+							writeIndent(stream);
+							fprintf(stream, "# %s\n", allGroups[j].groupname);
+							writeIndent(stream);
+							fprintf(stream, "RigidBody {\n");
+							indent += INDENT_INC;
+							writeIndent(stream);
+							fprintf(stream, "position %g %g %g\n", pos[1], pos[2], pos[0]);
+							writeIndent(stream);
+							fprintf(stream, "geometry USE CollidableShape%d\n", coordinateCounter);
+						}
+						if (endGroup)
+						{
+							indent -= INDENT_INC;
+							writeIndent(stream);
+							fprintf(stream, "}\n");
+						}
+					}
+				}
+
+			}
+			coordinateCounter++;
+		}
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fputs("]\n", stream);
+
+		writeIndent(stream);
+		fputs("collider DEF CollisionCollection1 CollisionCollection", stream);
+		fputs(" {\n", stream);
+		indent += INDENT_INC;                
+		writeIndent(stream);
+		fputs("collidables [\n", stream);  
+		indent += INDENT_INC;                
+		for (int i = 0; i < numDEF; i++)
+		{
+			writeIndent(stream);
+			fprintf(stream, "USE CollidableShape%d\n", i);
+		}
+		indent -= INDENT_INC;                
+		writeIndent(stream);
+		fputs("]\n", stream);
+		indent -= INDENT_INC;                
+		writeIndent(stream);
+		fputs("}\n", stream);
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fputs("}\n", stream);
+
+		writeIndent(stream);
+		fputs("DEF CollisionSensor1 CollisionSensor {\n", stream);
+		indent += INDENT_INC;
+		writeIndent(stream);
+		fputs("collidables USE CollisionCollection1\n", stream);
+		indent -= INDENT_INC;
+		writeIndent(stream);
+		fputs("}\n", stream);
+		fputs("\n", stream);
+		fputs("ROUTE CollisionSensor1.contacts TO RigidBodyCollection1.set_contacts\n", stream);
+	}
+	
+	if (indent != 0)
+		fprintf(stderr, "internal error: indent %d\n", indent);
+	fclose(stream);
+}
+
+

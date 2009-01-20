@@ -458,8 +458,8 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 		char *ptr, buf[32];
 
 		m_MinifigCount = Sys_ProfileLoadInt ("MinifigWizard", "Count", 0);
-		m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
-		m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
+		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**) * (m_MinifigCount+1));
+		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**) * (m_MinifigCount+1));
 
 		for (i = 0; i < m_MinifigCount; i++)
 		{
@@ -829,7 +829,7 @@ void MinifigWizard::Calculate ()
 	m3.Translate (pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
 	              pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
 	              pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
-	if (strcmp (m_Info[LC_MFW_LEFT_LEG]->m_strName, "773") == 0)
+	if (m_Info[LC_MFW_LEFT_LEG] && strcmp(m_Info[LC_MFW_LEFT_LEG]->m_strName, "773") == 0)
 		m3.Translate (-0.8f, 0, 0);
 	mat.CreateOld (0,0,0,rot[LC_MFW_LEFT_SHOE][0]-rot[LC_MFW_LEFT_LEG][0],
 	               rot[LC_MFW_LEFT_SHOE][1]-rot[LC_MFW_LEFT_LEG][1],

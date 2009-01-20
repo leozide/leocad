@@ -350,7 +350,7 @@ void PieceInfo::LoadInformation()
   // Read connections
   m_nConnectionCount = LCUINT16(*((lcuint16*)bytes));
   bytes += sizeof (lcuint16);
-  m_pConnections = (CONNECTIONINFO*)malloc (m_nConnectionCount * sizeof(CONNECTIONINFO));
+  m_pConnections = (CONNECTIONINFO*)malloc((m_nConnectionCount+1) * sizeof(CONNECTIONINFO));
 
   sh = m_nConnectionCount;
   for (pConnection = m_pConnections; sh--; pConnection++)

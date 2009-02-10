@@ -310,7 +310,7 @@ protected:
 	friend void PrintPiecesThread(void* pv);
 	friend void Export3DStudio();
 
-	// VRML export
+	// VRML/X3DV export
 	void exportVRML97File(char *filename);
 	void exportX3DVFile(char *filename);
 	void exportVRMLFile(char *filename, int dialect);
@@ -337,6 +337,7 @@ protected:
 	float centerOfMass[3];
 	int numFaceColors;
 	int *faceColors;
+	float VRMLScale;
 };
 
 #endif // _PROJECT_H_

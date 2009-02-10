@@ -111,7 +111,7 @@ Project::Project()
 	messenger->AddRef();
 	messenger->Listen(&ProjectListener, this);
 
-  for (i = 0; i < LC_CONNECTIONS; i++)
+	for (i = 0; i < LC_CONNECTIONS; i++)
 	{
 		m_pConnections[i].entries = NULL;
 		m_pConnections[i].numentries = 0;
@@ -121,6 +121,8 @@ Project::Project()
 		m_pClipboard[i] = NULL;
 
 	m_pScreenFont = new TexFont();
+
+	VRMLscale = 0.01f; // centimeter to meter
 }
 
 Project::~Project()
@@ -9623,7 +9625,7 @@ void Project::writeVRMLShapeMeshData(FILE *stream)
 	for (int i = 0; i < numCoords; i++) 
 	{
 		writeIndent(stream);
-		fprintf(stream, "%f %f %f\n", coords[i * 3], coords[i * 3 + 1], coords[i * 3 + 2]);
+		fprintf(stream, "%f %f %f\n", coords[i * 3] * VRMLscale, coords[i * 3 + 1] * VRMLscale, coords[i * 3 + 2] * VRMLscale);
 	}
 }
 
@@ -9655,8 +9657,6 @@ void Project::writeVRMLShapeMeshEnd(FILE *stream)
 			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
 			writeIndent(stream);
 			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
-
-			fprintf(stderr, "{ %d, %g, %g, %g, %g },\n", currentColor, (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
 		}
 
 		indent -= INDENT_INC;		
@@ -9962,8 +9962,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 	case X3DV_WITH_RIGID_BODY_PHYSICS:
 		fputs("#X3D V3.0 utf8\n", stream);
 		fputs("PROFILE Immersive\n", stream);
-		fputs("COMPONENT xj3d_RigidBodyPhysics:2\n", stream);
-		// if xj3d is ready use: fputs("COMPONENT RigidBodyPhysics:2\n", stream);
+		fputs("COMPONENT RigidBodyPhysics:2\n", stream);
 		break;
 	}
 
@@ -10077,7 +10076,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 					fprintf(stream, "Transform {\n");
 					indent += INDENT_INC;
 					writeIndent(stream);
-					fprintf(stream, "translation %g %g %g\n", pos[1], pos[2], pos[0]);
+					fprintf(stream, "translation %g %g %g\n", pos[1] * VRMLscale, pos[2] * VRMLscale, pos[0] * VRMLscale);
 					writeIndent(stream);
 					fprintf(stream, "rotation %g %g %g %g\n", rot[1], rot[2], rot[0], rot[3] * M_PI / 180.0);
 					writeIndent(stream);
@@ -10195,7 +10194,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 							fprintf(stream, "RigidBody {\n");
 							indent += INDENT_INC;
 							writeIndent(stream);
-							fprintf(stream, "position %g %g %g\n", pos[1], pos[2], pos[0]);
+							fprintf(stream, "position %g %g %g\n", pos[1] * VRMLscale, pos[2] * VRMLscale, pos[0] * VRMLscale);
 							writeIndent(stream);
 							fprintf(stream, "geometry USE CollidableShape%d\n", coordinateCounter);
 						}

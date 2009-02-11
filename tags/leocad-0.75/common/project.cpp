@@ -122,7 +122,7 @@ Project::Project()
 
 	m_pScreenFont = new TexFont();
 
-	VRMLscale = 0.01f; // centimeter to meter
+	VRMLScale = 0.01f; // centimeter to meter
 }
 
 Project::~Project()
@@ -9625,7 +9625,7 @@ void Project::writeVRMLShapeMeshData(FILE *stream)
 	for (int i = 0; i < numCoords; i++) 
 	{
 		writeIndent(stream);
-		fprintf(stream, "%f %f %f\n", coords[i * 3] * VRMLscale, coords[i * 3 + 1] * VRMLscale, coords[i * 3 + 2] * VRMLscale);
+		fprintf(stream, "%f %f %f\n", coords[i * 3] * VRMLScale, coords[i * 3 + 1] * VRMLScale, coords[i * 3 + 2] * VRMLScale);
 	}
 }
 
@@ -10076,7 +10076,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 					fprintf(stream, "Transform {\n");
 					indent += INDENT_INC;
 					writeIndent(stream);
-					fprintf(stream, "translation %g %g %g\n", pos[1] * VRMLscale, pos[2] * VRMLscale, pos[0] * VRMLscale);
+					fprintf(stream, "translation %g %g %g\n", pos[1] * VRMLScale, pos[2] * VRMLScale, pos[0] * VRMLScale);
 					writeIndent(stream);
 					fprintf(stream, "rotation %g %g %g %g\n", rot[1], rot[2], rot[0], rot[3] * M_PI / 180.0);
 					writeIndent(stream);
@@ -10194,7 +10194,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 							fprintf(stream, "RigidBody {\n");
 							indent += INDENT_INC;
 							writeIndent(stream);
-							fprintf(stream, "position %g %g %g\n", pos[1] * VRMLscale, pos[2] * VRMLscale, pos[0] * VRMLscale);
+							fprintf(stream, "position %g %g %g\n", pos[1] * VRMLScale, pos[2] * VRMLScale, pos[0] * VRMLScale);
 							writeIndent(stream);
 							fprintf(stream, "geometry USE CollidableShape%d\n", coordinateCounter);
 						}

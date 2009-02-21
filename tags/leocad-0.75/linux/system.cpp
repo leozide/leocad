@@ -688,17 +688,22 @@ void SystemDoPopupMenu(int nMenu, int x, int y)
 
 void SystemDoWaitCursor(int code)
 {
+  GdkWindow* window = ((GtkWidget*)(*main_window))->window;
+
+  if (!GDK_IS_WINDOW(window))
+    return;
+
   if (code == 1)
   {
-    GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-    gdk_window_set_cursor (((GtkWidget*)(*main_window))->window, cursor);
-    gdk_cursor_destroy (cursor);
+    GdkCursor *cursor = gdk_cursor_new(GDK_WATCH);
+    gdk_window_set_cursor(window, cursor);
+    gdk_cursor_destroy(cursor);
   } 
   else
   {
-    GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
-    gdk_window_set_cursor (((GtkWidget*)(*main_window))->window, cursor);
-    gdk_cursor_destroy (cursor);
+    GdkCursor *cursor = gdk_cursor_new(GDK_LEFT_PTR);
+    gdk_window_set_cursor(window, cursor);
+    gdk_cursor_destroy(cursor);
   }
 }
 

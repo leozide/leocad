@@ -133,6 +133,9 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	// File to open.
 	char* ProjectName = NULL;
 
+	// First piece to import.
+	int ImportPieceArg = 0;
+
 	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
 	{
@@ -180,6 +183,17 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 				ImageInstructions = true;
 			else if (strcmp(Param, "--highlight") == 0)
 				ImageHighlight = true;
+			else if (strcmp(Param, "--importpieces") == 0) 
+			{
+				if ((i == argc) || (argv[i+1][0] == '-'))
+				{
+					printf("Expected file name after --importpiece.");
+					return false;
+				}
+
+				ImportPieceArg = i+1;
+				break;
+			}
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD version " LC_VERSION_TEXT LC_VERSION_TAG " for "LC_VERSION_OSNAME"\n");
@@ -214,6 +228,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 				printf("  --animation: Saves animations frames.\n");
 				printf("  --instructions: Saves instructions steps.\n");
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
+				printf("  --importpiece [file]: Import pieces into the library.\n");
 				printf("  \n");
 			}
 			else
@@ -385,6 +400,15 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			return false;
 		else
 			project->OnNewDocument();
+	}
+
+	if (ImportPieceArg)
+	{
+		for (int i = ImportPieceArg; i < argc; i++)
+			if (!ImportLDrawPiece(argv[i]))
+				break;
+
+		return false;
 	}
 
 	return true;

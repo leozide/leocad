@@ -405,7 +405,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	if (ImportPieceArg)
 	{
 		for (int i = ImportPieceArg; i < argc; i++)
-			if (!ImportLDrawPiece(argv[i]))
+			if (!lcGetPiecesLibrary()->ImportLDrawPiece(argv[i]))
 				break;
 
 		return false;

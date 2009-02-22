@@ -32,7 +32,7 @@ CTabCtrlWithDisable::~CTabCtrlWithDisable()
 }
 
 // Subclass the tab control: also make ownder-draw
-CTabCtrlWithDisable::SubclassDlgItem(UINT nID, CWnd* pParent)
+BOOL CTabCtrlWithDisable::SubclassDlgItem(UINT nID, CWnd* pParent)
 {
 	if (!CTabCtrl::SubclassDlgItem(nID, pParent))
 		return FALSE;

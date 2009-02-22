@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "LeoCAD.h"
+#include <windowsx.h>
 
 #include "CADDoc.h"
 #include "CADView.h"

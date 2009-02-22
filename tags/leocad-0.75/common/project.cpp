@@ -1403,7 +1403,8 @@ bool Project::OnOpenDocument (const char* lpszPathName)
     return false;
   }
 
-  char ext[4], *ptr;
+  char ext[4];
+  const char *ptr;
   memset(ext, 0, 4);
   ptr = strrchr(lpszPathName, '.');
   if (ptr != NULL)

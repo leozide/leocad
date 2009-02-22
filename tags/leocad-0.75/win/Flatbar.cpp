@@ -459,8 +459,9 @@ CSize CFlatToolBar::CalcLayout(DWORD dwMode, int nLength)
 			int nControlCount = 0;
 			BOOL bIsDelayed = m_bDelayedButtonLayout;
 			m_bDelayedButtonLayout = FALSE;
+			int i;
 
-			for(int i = 0; i < nCount; i++)
+			for(i = 0; i < nCount; i++)
 				if ((pData[i].fsStyle & TBSTYLE_SEP) && (pData[i].idCommand != 0))
 					nControlCount++;
 

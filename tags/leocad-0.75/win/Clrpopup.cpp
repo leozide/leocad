@@ -783,11 +783,14 @@ void CColorPopup::DrawCell(CDC* pDC, int nIndex)
 	{
 		for (int x = rect.left; x < rect.right; x++)
 		{
-			for (int y = rect.top; y < rect.bottom; y+=4)
+			int y;
+
+			for (y = rect.top; y < rect.bottom; y+=4)
 			{
 				if (y == rect.top) y += x%4;
 				pDC->SetPixel (x,y,RGB(255,255,255));
 			}
+
 			for (y = rect.bottom; y > rect.top; y-=4)
 			{
 				if (y == rect.bottom) y-= x%4;

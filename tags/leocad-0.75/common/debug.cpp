@@ -82,13 +82,13 @@ void RenderDebugPrimitives()
 
 	glBegin(GL_QUADS);
 
-	for (i = 0; i < NumDebugQuads; i++)
+	for (int q = 0; q < NumDebugQuads; q++)
 	{
-		glColor4fv((float*)&DebugQuads[i].color);
-		glVertex3fv((float*)&DebugQuads[i].pt1);
-		glVertex3fv((float*)&DebugQuads[i].pt2);
-		glVertex3fv((float*)&DebugQuads[i].pt3);
-		glVertex3fv((float*)&DebugQuads[i].pt4);
+		glColor4fv((float*)&DebugQuads[q].color);
+		glVertex3fv((float*)&DebugQuads[q].pt1);
+		glVertex3fv((float*)&DebugQuads[q].pt2);
+		glVertex3fv((float*)&DebugQuads[q].pt3);
+		glVertex3fv((float*)&DebugQuads[q].pt4);
 	}
 
 	glEnd();

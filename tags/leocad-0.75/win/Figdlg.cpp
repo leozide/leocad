@@ -99,7 +99,9 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
     WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
-	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+	int i;
+
+	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)

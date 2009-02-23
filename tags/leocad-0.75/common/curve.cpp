@@ -15,6 +15,8 @@
 GLuint CurvePoint::m_nArrowList = 0;
 GLuint CurvePoint::m_nSphereList = 0;
 
+#if 0
+
 static LC_OBJECT_KEY_INFO curve_point_key_info[LC_CURVE_POINT_KEY_COUNT] =
 {
   { "Control Point Position", 3, LC_CURVE_POINT_KEY_POSITION },
@@ -703,6 +705,8 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 	}
 	*/
 }
+
+#endif
 
 
 

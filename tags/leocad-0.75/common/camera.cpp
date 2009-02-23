@@ -579,11 +579,6 @@ void Camera::UpdateBoundingBox()
   glDrawArrays(GL_LINES, 0, 24);
   glDrawArrays(GL_LINE_STRIP, 24, 10);
 
-//	glBegin(GL_LINES);
-//	glVertex3f(0,0,0);
-//	glVertex3f(0,0,len);
-//	glEnd();
-
   glTranslatef(0, 0, -len);
 
   glEndList();
@@ -632,7 +627,7 @@ void Camera::Render(float fLineWidth)
   }
   else
   {
-    glColor3f(0.5f, 0.8f, 0.5f);
+    glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
     glCallList(m_nList);
   }
 
@@ -649,11 +644,17 @@ void Camera::Render(float fLineWidth)
     glCallList(m_nTargetList);
   }
 
+  glEnableClientState(GL_VERTEX_ARRAY);
+
+  float Line[2][3] =
+  {
+	  { m_fEye[0], m_fEye[1], m_fEye[2] },
+	  { m_fTarget[0], m_fTarget[1], m_fTarget[2] },
+  };
+
+  glVertexPointer(3, GL_FLOAT, 0, Line);
   glColor3f(0.5f, 0.8f, 0.5f);
-  glBegin(GL_LINES);
-  glVertex3fv(m_fEye);
-  glVertex3fv(m_fTarget);
-  glEnd();
+  glDrawArrays(GL_LINES, 0, 2);
 
   if (IsSelected())
   {
@@ -671,27 +672,26 @@ void Camera::Render(float fLineWidth)
     projection.Invert ();
     glMultMatrixf (projection.m);
 
-    // draw the viewing frustum
-    glBegin(GL_LINE_LOOP);
-    glVertex3i(1, 1, 1);
-    glVertex3i(-1, 1, 1);
-    glVertex3i(-1, -1, 1);
-    glVertex3i(1, -1, 1);
-    glEnd();
+	// Draw the view frustum.
+	float verts[16][3] =
+	{
+		{  1,  1,  1 }, { -1,  1, 1 },
+		{ -1,  1,  1 }, { -1, -1, 1 },
+		{ -1, -1,  1 }, {  1, -1, 1 },
+		{  1, -1,  1 }, {  1,  1, 1 },
+		{  1,  1, -1 }, {  1,  1, 1 },
+		{ -1,  1, -1 }, { -1,  1, 1 },
+		{ -1, -1, -1 }, { -1, -1, 1 },
+		{  1, -1, -1 }, {  1, -1, 1 },
+	};
 
-    glBegin(GL_LINES);
-    glVertex3i(1, 1, -1);
-    glVertex3i(1, 1, 1);
-    glVertex3i(-1, 1, -1);
-    glVertex3i(-1, 1, 1);
-    glVertex3i(-1, -1, -1);
-    glVertex3i(-1, -1, 1);
-    glVertex3i(1, -1, -1);
-    glVertex3i(1, -1, 1);
-    glEnd();
+	glVertexPointer(3, GL_FLOAT, 0, verts);
+	glDrawArrays(GL_LINES, 0, 16);
 
     glPopMatrix();
   }
+
+  glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Camera::MinIntersectDist(LC_CLICKLINE* pLine)

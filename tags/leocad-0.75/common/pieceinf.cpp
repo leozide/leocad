@@ -1726,16 +1726,14 @@ void PieceInfo::RenderPiece(int nColor)
 		}
 
 		glEnable(GL_TEXTURE_2D);
-		glBegin(GL_QUADS);
-		glTexCoord2fv(m_pTextures[sh].coords[0]);
-		glVertex3fv(m_pTextures[sh].vertex[0]);
-		glTexCoord2fv(m_pTextures[sh].coords[1]);
-		glVertex3fv(m_pTextures[sh].vertex[1]);
-		glTexCoord2fv(m_pTextures[sh].coords[2]);
-		glVertex3fv(m_pTextures[sh].vertex[2]);
-		glTexCoord2fv(m_pTextures[sh].coords[3]);
-		glVertex3fv(m_pTextures[sh].vertex[3]);
-		glEnd();
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, m_pTextures[sh].vertex);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, m_pTextures[sh].coords);
+
+		glDrawArrays(GL_QUADS, 0, 4);
+
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisable(GL_TEXTURE_2D);
 	}
 

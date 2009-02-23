@@ -323,12 +323,16 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
     glVertexPointer (3, GL_FLOAT, 6*sizeof(float), &verts[3]);
     glDrawArrays (GL_LINE_LOOP, 0, 8);
 
-    glBegin (GL_LINE_LOOP);
-    glVertex3f (-0.5f, -0.5f, -0.3f);
-    glVertex3f ( 0.5f, -0.5f, -0.3f);
-    glVertex3f ( 0.5f,  0.5f, -0.3f);
-    glVertex3f (-0.5f,  0.5f, -0.3f);
-    glEnd ();
+	float Lines[4][3] =
+	{
+		{ -0.5f, -0.5f, -0.3f },
+		{  0.5f, -0.5f, -0.3f },
+		{  0.5f,  0.5f, -0.3f },
+		{ -0.5f,  0.5f, -0.3f }
+	};
+
+    glVertexPointer(3, GL_FLOAT, 0, Lines);
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
 
     glTranslatef(0, 0, -len);
     glEndList();
@@ -363,63 +367,73 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
     if (m_nSphereList == 0)
       m_nSphereList = glGenLists (1);
     glNewList (m_nSphereList, GL_COMPILE);
+    glEnableClientState (GL_VERTEX_ARRAY);
 
     const float radius = 0.2f;
     const int slices = 6, stacks = 6;
     float rho, drho, theta, dtheta;
-    float x, y, z;
     int i, j, imin, imax;
     drho = 3.1415926536f/(float)stacks;
     dtheta = 2.0f*3.1415926536f/(float)slices;
 
     // draw +Z end as a triangle fan
-    glBegin (GL_TRIANGLE_FAN);
-    glVertex3f (0.0, 0.0, radius);
-    for (j = 0; j <= slices; j++) 
+	float Cap[slices+2][3];
+
+	Cap[0][0] = 0.0f;
+	Cap[0][1] = 0.0f;
+	Cap[0][2] = radius;
+
+	for (j = 0; j <= slices; j++) 
     {
       theta = (j == slices) ? 0.0f : j * dtheta;
-      x = (float)(-sin(theta) * sin(drho));
-      y = (float)(cos(theta) * sin(drho));
-      z = (float)(cos(drho));
-      glVertex3f (x*radius, y*radius, z*radius);
+      Cap[j+1][0] = (float)(-sin(theta) * sin(drho)) * radius;
+      Cap[j+1][1] = (float)(cos(theta) * sin(drho)) * radius;
+      Cap[j+1][2] = (float)(cos(drho)) * radius;
     }
-    glEnd ();
+
+    glVertexPointer(3, GL_FLOAT, 0, Cap);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, slices+2);
 
     imin = 1;
     imax = stacks-1;
 
-    for (i = imin; i < imax; i++)
-    {
-      rho = i * drho;
-      glBegin (GL_QUAD_STRIP);
-      for (j = 0; j <= slices; j++)
-      {
-	theta = (j == slices) ? 0.0f : j * dtheta;
-	x = (float)(-sin(theta) * sin(rho));
-	y = (float)(cos(theta) * sin(rho));
-	z = (float)(cos(rho));
-	glVertex3f (x*radius, y*radius, z*radius);
-	x = (float)(-sin(theta) * sin(rho+drho));
-	y = (float)(cos(theta) * sin(rho+drho));
-	z = (float)(cos(rho+drho));
-	glVertex3f (x*radius, y*radius, z*radius);
-      }
-      glEnd ();
-    }
+	float Center[(slices+1)*2][3];
+    glVertexPointer(3, GL_FLOAT, 0, Center);
+
+	for (i = imin; i < imax; i++)
+	{
+		rho = i * drho;
+
+		for (j = 0; j <= slices; j++)
+		{
+			theta = (j == slices) ? 0.0f : j * dtheta;
+			Center[j*2][0] = (float)(-sin(theta) * sin(rho)) * radius;
+			Center[j*2][1] = (float)(cos(theta) * sin(rho)) * radius;
+			Center[j*2][2] = (float)(cos(rho)) * radius;
+			Center[j*2+1][0] = (float)(-sin(theta) * sin(rho+drho)) * radius;
+			Center[j*2+1][1] = (float)(cos(theta) * sin(rho+drho)) * radius;
+			Center[j*2+1][2] = (float)(cos(rho+drho)) * radius;
+		}
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, (slices+1)*2);
+	}
 
     // draw -Z end as a triangle fan
-    glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(0.0, 0.0, -radius);
-    rho = 3.1415926536f - drho;
+	Cap[0][0] = 0.0f;
+	Cap[0][1] = 0.0f;
+	Cap[0][2] = -radius;
+
+	rho = 3.1415926536f - drho;
     for (j = slices; j >= 0; j--)
     {
       theta = (j==slices) ? 0.0f : j * dtheta;
-      x = (float)(-sin(theta) * sin(rho));
-      y = (float)(cos(theta) * sin(rho));
-      z = (float)(cos(rho));
-      glVertex3f (x*radius, y*radius, z*radius);
+      Cap[j+1][0] = (float)(-sin(theta) * sin(rho)) * radius;
+      Cap[j+1][1] = (float)(cos(theta) * sin(rho)) * radius;
+      Cap[j+1][2] = (float)(cos(rho)) * radius;
     }
-    glEnd ();
+
+	glVertexPointer(3, GL_FLOAT, 0, Cap);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, slices+2);
 
     glEndList ();
   }
@@ -456,10 +470,16 @@ void Light::Render (float fLineWidth)
     }
 
     glColor3f(0.5f, 0.8f, 0.5f);
-    glBegin(GL_LINES);
-    glVertex3fv(m_fPos);
-    glVertex3fv(m_fTarget);
-    glEnd();
+
+	float Line[2][3] = 
+	{
+		{ m_fPos[0], m_fPos[1], m_fPos[2] },
+		{ m_fTarget[0], m_fTarget[1], m_fTarget[2] }
+	};
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Line);
+	glDrawArrays(GL_LINES, 0, 2);
 
     if (IsSelected())
     {
@@ -492,28 +512,31 @@ void Light::Render (float fLineWidth)
       projection.Invert ();
       glMultMatrixf (projection.m);
 
-      // draw the viewing frustum
-      glBegin (GL_LINE_LOOP);
-      glVertex3f ( 0.5f,  1.0f, 1.0f);
-      glVertex3f ( 1.0f,  0.5f, 1.0f);
-      glVertex3f ( 1.0f, -0.5f, 1.0f);
-      glVertex3f ( 0.5f, -1.0f, 1.0f);
-      glVertex3f (-0.5f, -1.0f, 1.0f);
-      glVertex3f (-1.0f, -0.5f, 1.0f);
-      glVertex3f (-1.0f,  0.5f, 1.0f);
-      glVertex3f (-0.5f,  1.0f, 1.0f);
-      glEnd ();
+		// Draw the light cone.
+		float Verts[16][3] =
+		{
+			{  0.5f,   1.0f,  1.0f },
+			{  1.0f,   0.5f,  1.0f },
+			{  1.0f,  -0.5f,  1.0f },
+			{  0.5f,  -1.0f,  1.0f },
+			{ -0.5f,  -1.0f,  1.0f },
+			{ -1.0f,  -0.5f,  1.0f },
+			{ -1.0f,   0.5f,  1.0f },
+			{ -0.5f,   1.0f,  1.0f },
+			{  1.0f,   1.0f, -1.0f },
+			{  0.75f,  0.75f, 1.0f },
+			{ -1.0f,   1.0f, -1.0f },
+			{ -0.75f,  0.75f, 1.0f },
+			{ -1.0f,  -1.0f, -1.0f },
+			{ -0.75f, -0.75f, 1.0f },
+			{  1.0f,  -1.0f, -1.0f },
+			{  0.75f, -0.75f, 1.0f }
+		};
 
-      glBegin (GL_LINES);
-      glVertex3f (1, 1, -1);
-      glVertex3f (0.75f, 0.75f, 1);
-      glVertex3f (-1, 1, -1);
-      glVertex3f (-0.75f, 0.75f, 1);
-      glVertex3f (-1, -1, -1);
-      glVertex3f (-0.75f, -0.75f, 1);
-      glVertex3f (1, -1, -1);
-      glVertex3f (0.75f, -0.75f, 1);
-      glEnd ();
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, Verts);
+		glDrawArrays(GL_LINE_LOOP, 0, 8);
+		glDrawArrays(GL_LINES, 8, 8);
 
       glPopMatrix();
     }
@@ -538,6 +561,8 @@ void Light::Render (float fLineWidth)
 
     glPopMatrix ();
   }
+
+  glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Light::Setup (int index)

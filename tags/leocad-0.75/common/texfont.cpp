@@ -105,56 +105,46 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
   }
 }
 
-void TexFont::PrintText(float Left, float Top, float ScaleX, float ScaleY, const char* Text) const
-{
-	float Height = m_nFontHeight * ScaleY;
-
-  while (*Text != 0)
-  {
-    int ch = *Text;
-    glTexCoord2f(m_Glyphs[ch].left, m_Glyphs[ch].top);
-    glVertex2f(Left, Top);
-    glTexCoord2f(m_Glyphs[ch].left, m_Glyphs[ch].bottom);
-    glVertex2f(Left, Top - Height);
-    glTexCoord2f(m_Glyphs[ch].right, m_Glyphs[ch].bottom);
-    glVertex2f(Left + m_Glyphs[ch].width * ScaleX, Top - Height);
-    glTexCoord2f(m_Glyphs[ch].right, m_Glyphs[ch].top);
-    glVertex2f(Left + m_Glyphs[ch].width * ScaleX, Top);
-
-    Left += m_Glyphs[ch].width * ScaleX;
-    Text++;
-  }
-}
-
-// Old function, should probably be removed.
 void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 {
+	float Height = m_nFontHeight;
+
+	const int BufferSize = 32;
+	float Verts[BufferSize][3];
+	float Coords[BufferSize][2];
+	int v = 0;
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Verts);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, Coords);
+
 	while (*Text != 0)
 	{
-	  int ch = *Text;
-		glTexCoord2f(m_Glyphs[ch].left, m_Glyphs[ch].top);
-		glVertex3f(Left, Top, Z);
-		glTexCoord2f(m_Glyphs[ch].left, m_Glyphs[ch].bottom);
-		glVertex3f(Left, Top - m_nFontHeight, Z);
-		glTexCoord2f(m_Glyphs[ch].right, m_Glyphs[ch].bottom);
-		glVertex3f(Left + m_Glyphs[ch].width, Top - m_nFontHeight, Z);
-		glTexCoord2f(m_Glyphs[ch].right, m_Glyphs[ch].top);
-		glVertex3f(Left + m_Glyphs[ch].width, Top, Z);
+		int ch = *Text;
+
+		Coords[v][0] = m_Glyphs[ch].left; Coords[v][1] = m_Glyphs[ch].top;
+		Verts[v][0] = Left; Verts[v][1] = Top; Verts[v][2] = Z; v++;
+		Coords[v][0] = m_Glyphs[ch].left; Coords[v][1] = m_Glyphs[ch].bottom;
+		Verts[v][0] = Left; Verts[v][1] = Top - Height; Verts[v][2] = Z; v++;
+		Coords[v][0] = m_Glyphs[ch].right; Coords[v][1] = m_Glyphs[ch].bottom;
+		Verts[v][0] = Left + m_Glyphs[ch].width; Verts[v][1] = Top - Height; Verts[v][2] = Z; v++;
+		Coords[v][0] = m_Glyphs[ch].right; Coords[v][1] = m_Glyphs[ch].top;
+		Verts[v][0] = Left + m_Glyphs[ch].width; Verts[v][1] = Top; Verts[v][2] = Z; v++;
+
+		if (v == BufferSize)
+		{
+			glDrawArrays(GL_QUADS, 0, v);
+			v = 0;
+		}
 
 		Left += m_Glyphs[ch].width;
 		Text++;
 	}
-}
 
-// Temporary function to draw the axis icon text
-void TexFont::PrintCharScaled (float scale, int ch) const
-{
-  glTexCoord2f (m_Glyphs[ch].left, m_Glyphs[ch].top);
-  glVertex2f (-scale * m_Glyphs[ch].width, scale * m_nFontHeight);
-  glTexCoord2f (m_Glyphs[ch].left, m_Glyphs[ch].bottom);
-  glVertex2f (-scale * m_Glyphs[ch].width, -scale * m_nFontHeight);
-  glTexCoord2f (m_Glyphs[ch].right, m_Glyphs[ch].bottom);
-  glVertex2f (scale * m_Glyphs[ch].width, -scale * m_nFontHeight);
-  glTexCoord2f (m_Glyphs[ch].right, m_Glyphs[ch].top);
-  glVertex2f (scale * m_Glyphs[ch].width, scale * m_nFontHeight);
+	if (v)
+		glDrawArrays(GL_QUADS, 0, v);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }

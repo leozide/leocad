@@ -2193,8 +2193,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 			glTranslatef(0.375, 0.375, 0.0);
 
 			glDisable(GL_DEPTH_TEST);
-			glEnable(GL_LINE_STIPPLE);
-			glLineStipple(5, 0x5555);
+			glEnableLineStipple();
 			glColor3f(0, 0, 0);
 
 			float pt1x = (float)(m_nDownX - x);
@@ -2215,7 +2214,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 			glDrawArrays(GL_LINES, 0, 8);
 			glDisableClientState(GL_VERTEX_ARRAY);
 
-			glDisable(GL_LINE_STIPPLE);
+			glDisableLineStipple();
 			glEnable(GL_DEPTH_TEST);
 		}
 
@@ -2815,8 +2814,7 @@ void Project::RenderOverlays(int Viewport)
 		glTranslatef(0.375f, 0.375f, 0.0f);
 
 		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_LINE_STIPPLE);
-		glLineStipple(5, 0x5555);
+		glEnableLineStipple();
 		glColor3f(0, 0, 0);
 
 		float pt1x = (float)(m_nDownX - x);
@@ -2837,7 +2835,7 @@ void Project::RenderOverlays(int Viewport)
 		glDrawArrays(GL_LINES, 0, 8);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		glDisable(GL_LINE_STIPPLE);
+		glDisableLineStipple();
 		glEnable(GL_DEPTH_TEST);
 	}
 }
@@ -3025,7 +3023,6 @@ void Project::RenderBoxes(bool bHilite)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
-	glLineStipple (1, 65280);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_POLYGON_OFFSET_FILL);

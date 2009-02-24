@@ -1271,4 +1271,15 @@ extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
 #define glLockArraysEXT pfnglLockArraysEXT
 #define glUnlockArraysEXT pfnglUnlockArraysEXT
 
+inline void glEnableLineStipple()
+{
+	glEnable(GL_LINE_STIPPLE);
+	glLineStipple(5, 0x5555);
+}
+
+inline void glDisableLineStipple()
+{
+	glDisable(GL_LINE_STIPPLE);
+}
+
 #endif // _OPENGL_H_

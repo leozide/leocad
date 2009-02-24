@@ -181,8 +181,6 @@ protected:
 	char m_strName[81];
 	unsigned char m_nState;
 	unsigned char m_nType;
-	GLuint m_nList;
-	static GLuint m_nTargetList;
 
 	// Current position and orientation.
 	float m_fEye[3];

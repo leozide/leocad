@@ -217,7 +217,6 @@ void PieceInfo::LoadIndex (File& file)
   m_pGroups = NULL;
   m_nTextureCount = 0;
   m_pTextures = NULL;
-	m_nBoxList = 0;
 
   file.Read (m_strName, 8);
   m_strName[8] = '\0';
@@ -267,14 +266,8 @@ void PieceInfo::DeRef()
 		FreeInformation();
 }
 
-void PieceInfo::CreateBoxDisplayList()
+void PieceInfo::RenderBox()
 {
-	if (m_nBoxList)
-		return;
-
-	// Create a display for the bounding box.
-	m_nBoxList = glGenLists(1);
-	glNewList(m_nBoxList, GL_COMPILE);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	float box[24][3] =
@@ -307,7 +300,6 @@ void PieceInfo::CreateBoxDisplayList()
 
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_QUADS, 0, 24);
-	glEndList();
 }
 
 void PieceInfo::LoadInformation()
@@ -1503,10 +1495,6 @@ void PieceInfo::LoadInformation()
 
 void PieceInfo::FreeInformation()
 {
-  if (m_nBoxList != 0)
-	glDeleteLists(m_nBoxList, 1);
-	m_nBoxList = 0;
-
 	if (m_fVertexArray != NULL)
 	{
 		free(m_fVertexArray);

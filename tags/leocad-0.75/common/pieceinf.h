@@ -84,15 +84,10 @@ class PieceInfo
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
+	void RenderBox();
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
 
 	// Implementation
-	GLuint GetBoxDisplayList()
-	{
-		if (!m_nBoxList)
-			CreateBoxDisplayList();
-		return m_nBoxList;
-	};
 	void LoadIndex(File& file);
 	void AddRef();
 	void DeRef();
@@ -118,11 +113,9 @@ public:
 
 protected:
 	int m_nRef;
-	GLuint m_nBoxList;
 
 	void LoadInformation();
 	void FreeInformation();
-	void CreateBoxDisplayList();
 };
 
 #endif // _PIECEINF_H_

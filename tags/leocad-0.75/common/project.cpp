@@ -96,7 +96,6 @@ Project::Project()
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_nGridList = 0;
   m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
@@ -1916,7 +1915,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
 
 			if (m_nSnap & LC_DRAW_GRID)
-				glCallList (m_nGridList);
+				DrawGrid();
 
 			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
 				glEnable(GL_LIGHTING);
@@ -3026,7 +3025,6 @@ void Project::RenderBoxes(bool bHilite)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
-	int i;
 	glLineStipple (1, 65280);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -3123,13 +3121,12 @@ void Project::RenderInitialize()
 
 	// Set the perspective correction hint to fastest or nicest...
 //	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+}
 
-	// Grid display list
-	if (m_nGridList == 0)
-		m_nGridList = glGenLists(1);
-	glNewList (m_nGridList, GL_COMPILE);
+void Project::DrawGrid()
+{
 	glEnableClientState(GL_VERTEX_ARRAY);
-	i = 2*(4*m_nGridSize+2); // verts needed (2*lines)
+	int i = 2*(4*m_nGridSize+2); // verts needed (2*lines)
 	float *grid = (float*)malloc(i*sizeof(float[3]));
 	float x = m_nGridSize*0.8f;
 
@@ -3151,7 +3148,6 @@ void Project::RenderInitialize()
 	}
 	glVertexPointer(3, GL_FLOAT, 0, grid);
 	glDrawArrays(GL_LINES, 0, i);
-	glEndList();
 	free(grid);
 }
 

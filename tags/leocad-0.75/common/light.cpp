@@ -10,9 +10,6 @@
 #include "vector.h"
 #include "matrix.h"
 
-GLuint Light::m_nSphereList = 0;
-GLuint Light::m_nTargetList = 0;
-
 static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 {
   { "Light Position", 3, LC_LK_POSITION },
@@ -112,7 +109,6 @@ void Light::Initialize ()
   m_pNext = NULL;
   m_nState = 0;
   m_pTarget = NULL;
-  m_nList = 0;
   memset (m_strName, 0, sizeof (m_strName));
 
   m_fAmbient[3] = 1.0f;
@@ -147,9 +143,6 @@ void Light::Initialize ()
 
 Light::~Light ()
 {
-  if (m_nList != 0)
-    glDeleteLists (m_nList, 1);
-
   delete m_pTarget;
 }
 
@@ -271,172 +264,7 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
   BoundingBoxCalculate (m_fPos);
 
   if (m_pTarget != NULL)
-  {
     m_pTarget->BoundingBoxCalculate (m_fTarget);
-
-    if (m_nList == 0)
-      m_nList = glGenLists(1);
-
-    glNewList (m_nList, GL_COMPILE);
-
-    glPushMatrix ();
-    glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
-
-    Vector frontvec (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
-    float len = frontvec.Length (), up[3] = { 1, 1, 1 };
-
-    if (fabs (frontvec[0]) < fabs (frontvec[1]))
-    {
-      if (fabs (frontvec[0]) < fabs (frontvec[2]))
-	up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
-      else
-	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
-    }
-    else
-    {
-      if (fabs (frontvec[1]) < fabs (frontvec[2]))
-	up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
-      else
-	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
-    }
-
-    Matrix mat;
-    mat.CreateLookat (m_fPos, m_fTarget, up);
-    mat.Invert ();
-    mat.SetTranslation (0, 0, 0);
-
-    glMultMatrixf (mat.m);
-
-    glEnableClientState (GL_VERTEX_ARRAY);
-    float verts[16*3];
-    for (int i = 0; i < 8; i++)
-    {
-      verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * PI) * 0.3f;
-      verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * PI) * 0.3f;
-      verts[i*6+2] = 0.3f;
-      verts[i*6+5] = -0.3f;
-    }
-    glVertexPointer (3, GL_FLOAT, 0, verts);
-    glDrawArrays (GL_LINES, 0, 16);
-    glVertexPointer (3, GL_FLOAT, 6*sizeof(float), verts);
-    glDrawArrays (GL_LINE_LOOP, 0, 8);
-    glVertexPointer (3, GL_FLOAT, 6*sizeof(float), &verts[3]);
-    glDrawArrays (GL_LINE_LOOP, 0, 8);
-
-	float Lines[4][3] =
-	{
-		{ -0.5f, -0.5f, -0.3f },
-		{  0.5f, -0.5f, -0.3f },
-		{  0.5f,  0.5f, -0.3f },
-		{ -0.5f,  0.5f, -0.3f }
-	};
-
-    glVertexPointer(3, GL_FLOAT, 0, Lines);
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-    glTranslatef(0, 0, -len);
-    glEndList();
-
-    if (m_nTargetList == 0)
-    {
-      m_nTargetList = glGenLists (1);
-      glNewList (m_nTargetList, GL_COMPILE);
-
-      glEnableClientState (GL_VERTEX_ARRAY);
-      float box[24][3] = {
-	{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-	{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-	{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-	{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-	{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-	{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-	{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-	{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-	{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-	{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-	{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-	{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f } };
-      glVertexPointer (3, GL_FLOAT, 0, box);
-      glDrawArrays (GL_LINES, 0, 24);
-      glPopMatrix ();
-      glEndList ();
-    }
-  }
-  else
-  {
-    if (m_nSphereList == 0)
-      m_nSphereList = glGenLists (1);
-    glNewList (m_nSphereList, GL_COMPILE);
-    glEnableClientState (GL_VERTEX_ARRAY);
-
-    const float radius = 0.2f;
-    const int slices = 6, stacks = 6;
-    float rho, drho, theta, dtheta;
-    int i, j, imin, imax;
-    drho = 3.1415926536f/(float)stacks;
-    dtheta = 2.0f*3.1415926536f/(float)slices;
-
-    // draw +Z end as a triangle fan
-	float Cap[slices+2][3];
-
-	Cap[0][0] = 0.0f;
-	Cap[0][1] = 0.0f;
-	Cap[0][2] = radius;
-
-	for (j = 0; j <= slices; j++) 
-    {
-      theta = (j == slices) ? 0.0f : j * dtheta;
-      Cap[j+1][0] = (float)(-sin(theta) * sin(drho)) * radius;
-      Cap[j+1][1] = (float)(cos(theta) * sin(drho)) * radius;
-      Cap[j+1][2] = (float)(cos(drho)) * radius;
-    }
-
-    glVertexPointer(3, GL_FLOAT, 0, Cap);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, slices+2);
-
-    imin = 1;
-    imax = stacks-1;
-
-	float Center[(slices+1)*2][3];
-    glVertexPointer(3, GL_FLOAT, 0, Center);
-
-	for (i = imin; i < imax; i++)
-	{
-		rho = i * drho;
-
-		for (j = 0; j <= slices; j++)
-		{
-			theta = (j == slices) ? 0.0f : j * dtheta;
-			Center[j*2][0] = (float)(-sin(theta) * sin(rho)) * radius;
-			Center[j*2][1] = (float)(cos(theta) * sin(rho)) * radius;
-			Center[j*2][2] = (float)(cos(rho)) * radius;
-			Center[j*2+1][0] = (float)(-sin(theta) * sin(rho+drho)) * radius;
-			Center[j*2+1][1] = (float)(cos(theta) * sin(rho+drho)) * radius;
-			Center[j*2+1][2] = (float)(cos(rho+drho)) * radius;
-		}
-
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, (slices+1)*2);
-	}
-
-    // draw -Z end as a triangle fan
-	Cap[0][0] = 0.0f;
-	Cap[0][1] = 0.0f;
-	Cap[0][2] = -radius;
-
-	rho = 3.1415926536f - drho;
-    for (j = slices; j >= 0; j--)
-    {
-      theta = (j==slices) ? 0.0f : j * dtheta;
-      Cap[j+1][0] = (float)(-sin(theta) * sin(rho)) * radius;
-      Cap[j+1][1] = (float)(cos(theta) * sin(rho)) * radius;
-      Cap[j+1][2] = (float)(cos(rho)) * radius;
-    }
-
-	glVertexPointer(3, GL_FLOAT, 0, Cap);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, slices+2);
-
-    glEndList ();
-  }
 }
 
 void Light::Render (float fLineWidth)
@@ -447,26 +275,26 @@ void Light::Render (float fLineWidth)
     {
       glLineWidth(fLineWidth*2);
       glColor3ubv(FlatColorArray[(m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
-      glCallList(m_nList);
+      DrawCone();
       glLineWidth(fLineWidth);
     }
     else
     {
       glColor3f(0.5f, 0.8f, 0.5f);
-      glCallList(m_nList);
+      DrawCone();
     }
 
     if (IsTargetSelected())
     {
       glLineWidth(fLineWidth*2);
       glColor3ubv(FlatColorArray[(m_nState & LC_LIGHT_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
-      glCallList(m_nTargetList);
+      DrawTarget();
       glLineWidth(fLineWidth);
     }
     else
     {
       glColor3f(0.5f, 0.8f, 0.5f);
-      glCallList(m_nTargetList);
+      DrawTarget();
     }
 
     glColor3f(0.5f, 0.8f, 0.5f);
@@ -550,19 +378,173 @@ void Light::Render (float fLineWidth)
     {
       glLineWidth (fLineWidth*2);
       glColor3ubv (FlatColorArray[(m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
-      glCallList (m_nSphereList);
+      DrawSphere();
       glLineWidth (fLineWidth);
     }
     else
     {
       glColor3f (0.5f, 0.8f, 0.5f);
-      glCallList (m_nSphereList);
+      DrawSphere();
     }
 
     glPopMatrix ();
   }
 
   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void Light::DrawCone()
+{
+	glPushMatrix ();
+	glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
+
+	Vector frontvec (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+	float len = frontvec.Length (), up[3] = { 1, 1, 1 };
+
+	if (fabs (frontvec[0]) < fabs (frontvec[1]))
+	{
+		if (fabs (frontvec[0]) < fabs (frontvec[2]))
+			up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
+		else
+			up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
+	}
+	else
+	{
+		if (fabs (frontvec[1]) < fabs (frontvec[2]))
+			up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
+		else
+			up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
+	}
+
+	Matrix mat;
+	mat.CreateLookat (m_fPos, m_fTarget, up);
+	mat.Invert ();
+	mat.SetTranslation (0, 0, 0);
+
+	glMultMatrixf (mat.m);
+
+	glEnableClientState (GL_VERTEX_ARRAY);
+	float verts[16*3];
+	for (int i = 0; i < 8; i++)
+	{
+		verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * PI) * 0.3f;
+		verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * PI) * 0.3f;
+		verts[i*6+2] = 0.3f;
+		verts[i*6+5] = -0.3f;
+	}
+	glVertexPointer (3, GL_FLOAT, 0, verts);
+	glDrawArrays (GL_LINES, 0, 16);
+	glVertexPointer (3, GL_FLOAT, 6*sizeof(float), verts);
+	glDrawArrays (GL_LINE_LOOP, 0, 8);
+	glVertexPointer (3, GL_FLOAT, 6*sizeof(float), &verts[3]);
+	glDrawArrays (GL_LINE_LOOP, 0, 8);
+
+	float Lines[4][3] =
+	{
+		{ -0.5f, -0.5f, -0.3f },
+		{  0.5f, -0.5f, -0.3f },
+		{  0.5f,  0.5f, -0.3f },
+		{ -0.5f,  0.5f, -0.3f }
+	};
+
+	glVertexPointer(3, GL_FLOAT, 0, Lines);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+	glTranslatef(0, 0, -len);
+}
+
+void Light::DrawTarget()
+{
+	glEnableClientState (GL_VERTEX_ARRAY);
+	float box[24][3] =
+	{
+		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
+		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
+		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
+		{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
+		{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
+		{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
+		{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
+		{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
+		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
+		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
+		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
+		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
+	};
+	glVertexPointer (3, GL_FLOAT, 0, box);
+	glDrawArrays (GL_LINES, 0, 24);
+	glPopMatrix ();
+}
+
+void Light::DrawSphere()
+{
+    glEnableClientState (GL_VERTEX_ARRAY);
+
+    const float radius = 0.2f;
+    const int slices = 6, stacks = 6;
+    float rho, drho, theta, dtheta;
+    int i, j, imin, imax;
+    drho = 3.1415926536f/(float)stacks;
+    dtheta = 2.0f*3.1415926536f/(float)slices;
+
+    // draw +Z end as a triangle fan
+	float Cap[slices+2][3];
+
+	Cap[0][0] = 0.0f;
+	Cap[0][1] = 0.0f;
+	Cap[0][2] = radius;
+
+	for (j = 0; j <= slices; j++) 
+    {
+      theta = (j == slices) ? 0.0f : j * dtheta;
+      Cap[j+1][0] = (float)(-sin(theta) * sin(drho)) * radius;
+      Cap[j+1][1] = (float)(cos(theta) * sin(drho)) * radius;
+      Cap[j+1][2] = (float)(cos(drho)) * radius;
+    }
+
+    glVertexPointer(3, GL_FLOAT, 0, Cap);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, slices+2);
+
+    imin = 1;
+    imax = stacks-1;
+
+	float Center[(slices+1)*2][3];
+    glVertexPointer(3, GL_FLOAT, 0, Center);
+
+	for (i = imin; i < imax; i++)
+	{
+		rho = i * drho;
+
+		for (j = 0; j <= slices; j++)
+		{
+			theta = (j == slices) ? 0.0f : j * dtheta;
+			Center[j*2][0] = (float)(-sin(theta) * sin(rho)) * radius;
+			Center[j*2][1] = (float)(cos(theta) * sin(rho)) * radius;
+			Center[j*2][2] = (float)(cos(rho)) * radius;
+			Center[j*2+1][0] = (float)(-sin(theta) * sin(rho+drho)) * radius;
+			Center[j*2+1][1] = (float)(cos(theta) * sin(rho+drho)) * radius;
+			Center[j*2+1][2] = (float)(cos(rho+drho)) * radius;
+		}
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, (slices+1)*2);
+	}
+
+    // draw -Z end as a triangle fan
+	Cap[0][0] = 0.0f;
+	Cap[0][1] = 0.0f;
+	Cap[0][2] = -radius;
+
+	rho = 3.1415926536f - drho;
+    for (j = slices; j >= 0; j--)
+    {
+      theta = (j==slices) ? 0.0f : j * dtheta;
+      Cap[j+1][0] = (float)(-sin(theta) * sin(rho)) * radius;
+      Cap[j+1][1] = (float)(cos(theta) * sin(rho)) * radius;
+      Cap[j+1][2] = (float)(cos(rho)) * radius;
+    }
+
+	glVertexPointer(3, GL_FLOAT, 0, Cap);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, slices+2);
 }
 
 void Light::Setup (int index)

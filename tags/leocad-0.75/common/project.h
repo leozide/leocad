@@ -190,6 +190,7 @@ protected:
 	void RenderOverlays(int Viewport);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
+	void DrawGrid();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
 
 	inline bool IsDrawing()
@@ -277,7 +278,6 @@ protected:
 	char m_strFooter[256];
 	char m_strHeader[256];
 
-	GLuint m_nGridList;
 	unsigned long m_nAutosave;
 	unsigned long m_nSaveTimer;
 	char m_strModelsPath[LC_MAXPATH];

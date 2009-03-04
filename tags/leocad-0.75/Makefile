@@ -10,7 +10,7 @@ CPPFLAGS += $(patsubst %,-I%,$(MODULES)) $(OS)
 CPPFLAGS += -g
 
 ### extra libraries if required
-LIBS :=
+LIBS := 
 
 ### each module will add to this
 SRC :=
@@ -35,10 +35,10 @@ all: $(BIN)
 
 static: bin/leocad.static
 
-bin/leocad: $(OBJ) bin
+bin/leocad: $(OBJ) bin Makefile
 	$(CXX) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
-bin/leocad.static: $(OBJ) bin
+bin/leocad.static: $(OBJ) bin Makefile
 	$(CXX) -static -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
 bin:

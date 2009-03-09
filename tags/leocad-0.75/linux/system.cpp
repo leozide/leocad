@@ -15,6 +15,7 @@
 #include "toolbar.h"
 #include "dialogs.h"
 #include "globals.h"
+#include "lc_application.h"
 
 // =============================================================================
 // Cursor functions
@@ -490,13 +491,13 @@ void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
   if (!label_snap)
     return;
 
-  char text[11];
-  if (move_snap)
-    sprintf (text, "Move x%i", move_snap);
-  else
-    strcpy (text, "Move /2");
+  char Text[256], xy[32], z[32];
 
-  gtk_label_set (GTK_LABEL (label_snap), text);
+  lcGetActiveProject()->GetSnapDistanceText(xy, z);
+
+  sprintf(Text, " M: %s %s R: %d ", xy, z, RotateSnap);
+
+  gtk_label_set (GTK_LABEL (label_snap), Text);
 }
 
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)

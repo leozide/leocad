@@ -866,7 +866,7 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, TRUE, 0);
   gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
-  gtk_widget_set_usize (frame, 70, -1);
+  gtk_widget_set_usize (frame, 120, -1);
 
   hbox1 = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), hbox1);

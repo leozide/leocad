@@ -2753,29 +2753,72 @@ int groupdlg_execute(void* param)
 
 static void librarydlg_update_list (GtkWidget *dlg)
 {
-  PiecesLibrary *lib = g_App->GetPiecesLibrary();
-  GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
-  GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (dlg), "list"));
-  int row, sel = GTK_CLIST (ctree)->focus_row;
+	PiecesLibrary* Lib = g_App->GetPiecesLibrary();
+	GtkCTree* ctree = GTK_CTREE(gtk_object_get_data(GTK_OBJECT(dlg), "tree"));
+	GtkCList* clist = GTK_CLIST(gtk_object_get_data(GTK_OBJECT(dlg), "list"));
+	int row;
 
-  gtk_clist_freeze (clist);
-  gtk_clist_clear (clist);
+	gchar* CategoryName = GTK_CELL_TEXT(GTK_CTREE_ROW(gtk_ctree_node_nth(ctree, GTK_CLIST(ctree)->focus_row))->row.cell[0])->text;
+	int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
-  PtrArray<PieceInfo> SinglePieces, GroupedPieces;
-  lib->GetCategoryEntries(sel, false, SinglePieces, GroupedPieces);
+	gtk_clist_freeze (clist);
+	gtk_clist_clear (clist);
 
-  for (int i = 0; i < SinglePieces.GetSize(); i++)
-  {
-    PieceInfo* info = SinglePieces[i];
+	if (CategoryIndex != -1)
+	{
+		PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
-    char *text = info->m_strDescription;
-    row = gtk_clist_append (clist, &text);
-    gtk_clist_set_row_data (clist, row, info);
-  }
+		Lib->GetCategoryEntries(CategoryIndex, false, SinglePieces, GroupedPieces);
 
-  gtk_clist_thaw (clist);
-  clist->focus_row = 0;
-  gtk_clist_select_row (clist, 0, 0);
+		for (int i = 0; i < SinglePieces.GetSize(); i++)
+		{
+			PieceInfo* Info = SinglePieces[i];
+
+			char *text = Info->m_strDescription;
+			row = gtk_clist_append(clist, &text);
+			gtk_clist_set_row_data(clist, row, Info);
+		}
+	}
+	else
+	{
+		if (!strcmp(CategoryName, "Unassigned"))
+		{
+			// Test each piece against all categories.
+			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			{
+				PieceInfo* Info = Lib->GetPieceInfo(i);
+				int j;
+
+				for (j = 0; j < Lib->GetNumCategories(); j++)
+				{
+					if (Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(j)))
+						break;
+				}
+
+				if (j == Lib->GetNumCategories())
+				{
+					char *text = Info->m_strDescription;
+					row = gtk_clist_append(clist, &text);
+					gtk_clist_set_row_data(clist, row, Info);
+				}
+			}
+		}
+		else if (!strcmp(CategoryName, "Pieces"))
+		{
+			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			{
+				PieceInfo* Info = Lib->GetPieceInfo(i);
+
+				char *text = Info->m_strDescription;
+				row = gtk_clist_append(clist, &text);
+				gtk_clist_set_row_data(clist, row, Info);
+			}
+		}
+	}
+
+	gtk_clist_thaw(clist);
+	clist->focus_row = 0;
+	gtk_clist_select_row(clist, 0, 0);
 }
 
 static void librarydlg_update_tree (GtkWidget *dlg)
@@ -2783,7 +2826,7 @@ static void librarydlg_update_tree (GtkWidget *dlg)
   PiecesLibrary *lib = g_App->GetPiecesLibrary();
   GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCTreeNode *parent;
-  char *text = "Groups";
+  char *text = "Pieces";
 
   gtk_clist_freeze (GTK_CLIST (ctree));
   gtk_clist_clear (GTK_CLIST (ctree));
@@ -2795,6 +2838,9 @@ static void librarydlg_update_tree (GtkWidget *dlg)
     text = lib->GetCategoryName(i);
     gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
   }
+
+  text = "Unassigned";
+  gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
 
   gtk_clist_thaw (GTK_CLIST (ctree));
 }
@@ -2910,10 +2956,15 @@ int librarydlg_execute (void *param)
   gtk_widget_show (hsplit);
   gtk_container_set_border_width (GTK_CONTAINER (hsplit), 5);
 
+  scr = gtk_scrolled_window_new ((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
+  gtk_widget_show (scr);
+  gtk_paned_add1 (GTK_PANED (hsplit), scr);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
   ctree = gtk_ctree_new (1, 0);
   gtk_object_set_data (GTK_OBJECT (dlg), "ctree", ctree);
   gtk_widget_show (ctree);
-  gtk_paned_add1 (GTK_PANED (hsplit), ctree);
+  gtk_container_add (GTK_CONTAINER (scr), ctree);
   gtk_clist_column_titles_hide (GTK_CLIST (ctree));
   gtk_clist_set_selection_mode (GTK_CLIST (ctree), GTK_SELECTION_BROWSE);
   gtk_signal_connect (GTK_OBJECT (ctree), "tree_select_row",

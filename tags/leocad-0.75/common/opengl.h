@@ -21,18 +21,16 @@
 #endif
 
 //#include <GL/glu.h> // TODO: remove all glu calls
-void gluLookAt (GLdouble eyex, GLdouble eyey, GLdouble eyez,
-		GLdouble centerx, GLdouble centery, GLdouble centerz,
-		GLdouble upx, GLdouble upy, GLdouble upz);
-void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
-GLint gluProject (GLdouble objx, GLdouble objy, GLdouble objz,
-		  const GLdouble model[16], const GLdouble proj[16],
-		  const GLint viewport[4],
-		  GLdouble *winx, GLdouble *winy, GLdouble *winz);
-GLint gluUnProject (GLdouble winx, GLdouble winy, GLdouble winz,
-		    const GLdouble model[16], const GLdouble proj[16],
-		    const GLint viewport[4],
-		    GLdouble *objx, GLdouble *objy, GLdouble *objz);
+void gluLookAt(GLfloat eyex, GLfloat eyey, GLfloat eyez,
+               GLfloat centerx, GLfloat centery, GLfloat centerz,
+               GLfloat upx, GLfloat upy, GLfloat upz);
+void gluPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar);
+GLint gluProject(GLfloat objx, GLfloat objy, GLfloat objz,
+                 const GLfloat model[16], const GLfloat proj[16], const GLint viewport[4],
+                 GLfloat *winx, GLfloat *winy, GLfloat *winz);
+GLint gluUnProject(GLfloat winx, GLfloat winy, GLfloat winz,
+                   const GLfloat model[16], const GLfloat proj[16], const GLint viewport[4],
+                   GLfloat *objx, GLfloat *objy, GLfloat *objz);
 
 bool GL_Initialize (const char* libname);
 void GL_Shutdown ();

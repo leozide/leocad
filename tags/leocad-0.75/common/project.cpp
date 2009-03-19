@@ -2681,12 +2681,12 @@ void Project::RenderOverlays(int Viewport)
 				// Draw text.
 				if (Viewport == m_nActiveViewport)
 				{
-					GLdouble ScreenX, ScreenY, ScreenZ;
-					GLdouble ModelMatrix[16], ProjMatrix[16];
+					GLfloat ScreenX, ScreenY, ScreenZ;
+					GLfloat ModelMatrix[16], ProjMatrix[16];
 					GLint Vp[4];
 
-					glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-					glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+					glGetFloatv(GL_MODELVIEW_MATRIX, ModelMatrix);
+					glGetFloatv(GL_PROJECTION_MATRIX, ProjMatrix);
 					glGetIntegerv(GL_VIEWPORT, Vp);
 
 					gluProject(0, 0, 0, ModelMatrix, ProjMatrix, Vp, &ScreenX, &ScreenY, &ScreenZ);
@@ -5807,7 +5807,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (m_pPieces == 0) break;
 			bool bControl = Sys_KeyDown (KEY_CONTROL);
 
-			GLdouble modelMatrix[16], projMatrix[16];
+			GLfloat modelMatrix[16], projMatrix[16];
 			float up[3], eye[3], target[3];
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			GLint viewport[4], out, x, y, w, h;
@@ -5876,7 +5876,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				frontvec *= 0.25f;
 
 				glMatrixMode(GL_MODELVIEW);
-				glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+				glGetFloatv(GL_PROJECTION_MATRIX,projMatrix);
 				glGetIntegerv(GL_VIEWPORT,viewport);
 
 				for (out = 0; out < 10000; out++) // Zoom in
@@ -5886,11 +5886,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					eye[2] -= frontvec[2];
 					glLoadIdentity();
 					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
-					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+					glGetFloatv(GL_MODELVIEW_MATRIX,modelMatrix);
 
 					for (int i = 0; i < 24; i+=3)
 					{
-						double winx, winy, winz;
+						GLfloat winx, winy, winz;
 						gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz);
 						if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
 							(winx > viewport[0] + viewport[2] - 1) || (winy > viewport[1] + viewport[3] - 1))
@@ -5910,11 +5910,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					eye[2] += frontvec[2];
 					glLoadIdentity();
 					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
-					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+					glGetFloatv(GL_MODELVIEW_MATRIX,modelMatrix);
 
 					for (int i = 0; i < 24; i+=3)
 					{
-						double winx, winy, winz;
+						GLfloat winx, winy, winz;
 						gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz);
 						if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
 							(winx > viewport[0] + viewport[2] - 1) || (winy > viewport[1] + viewport[3] - 1))
@@ -6837,16 +6837,16 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 
 void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly)
 {
-	GLdouble px, py, pz, rx, ry, rz;
-	GLdouble modelMatrix[16], projMatrix[16];
+	GLfloat px, py, pz, rx, ry, rz;
+	GLfloat modelMatrix[16], projMatrix[16];
 	GLint viewport[4];
 	Piece* pPiece;
 	Camera* pCamera;
 	Light* pLight;
 
 	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX,modelMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX,projMatrix);
 	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	// Unproject the selected point against both the front and the back clipping plane
@@ -7918,12 +7918,12 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
             } break;
           }
 
-  				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
+  				GLfloat modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
 	  			float ax, ay;
 		  		GLint viewport[4];
 
-          glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-          glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+          glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+          glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
           glGetIntegerv(GL_VIEWPORT, viewport);
           gluUnProject( 5, 5, 0.1, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
           gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
@@ -7999,7 +7999,7 @@ void Project::BeginPieceDrop(PieceInfo* Info)
 
 void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLfloat modelMatrix[16], projMatrix[16], point[3];
 	GLint viewport[4];
 
 	if (IsDrawing())
@@ -8019,8 +8019,8 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	m_MouseSnapLeftover = Vector3(0, 0, 0);
 
 	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
@@ -8230,7 +8230,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       if (count == max)
         break;
 
-      double tmp[3];
+      GLfloat tmp[3];
       gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
@@ -8245,7 +8245,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
     case LC_ACTION_CAMERA:
     {
-      double tmp[3];
+      GLfloat tmp[3];
       gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
@@ -8336,7 +8336,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
 void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
-  GLdouble modelMatrix[16], projMatrix[16], point[3];
+  GLfloat modelMatrix[16], projMatrix[16], point[3];
   GLint viewport[4];
 
   if (IsDrawing())
@@ -8346,9 +8346,9 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
     return;
 
   LoadViewportProjection(m_nActiveViewport);
-  glGetDoublev (GL_MODELVIEW_MATRIX, modelMatrix);
-  glGetDoublev (GL_PROJECTION_MATRIX, projMatrix);
-  glGetIntegerv (GL_VIEWPORT, viewport);
+  glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+  glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
+  glGetIntegerv(GL_VIEWPORT, viewport);
 
   // why this is here ?
   gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
@@ -8446,7 +8446,7 @@ void Project::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 
 void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLfloat modelMatrix[16], projMatrix[16], point[3];
 	GLint viewport[4];
 
 	if (StopTracking(false))
@@ -8459,8 +8459,8 @@ void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 	m_bTrackCancel = false;
 
 	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
@@ -8545,13 +8545,13 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 	if (IsDrawing())
 		return;
 
-	GLdouble modelMatrix[16], projMatrix[16], tmp[3];
+	GLfloat modelMatrix[16], projMatrix[16], tmp[3];
 	GLint viewport[4];
 	float ptx, pty, ptz;
 
 	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
@@ -9209,13 +9209,13 @@ void Project::MouseUpdateOverlays(int x, int y)
 		const float OverlayRotateRadius = 2.0f;
 
 		// Calculate the distance from the mouse pointer to the center of the sphere.
-		GLdouble px, py, pz, rx, ry, rz;
-		GLdouble ModelMatrix[16], ProjMatrix[16];
+		GLfloat px, py, pz, rx, ry, rz;
+		GLfloat ModelMatrix[16], ProjMatrix[16];
 		GLint Viewport[4];
 
 		LoadViewportProjection(m_nActiveViewport);
-		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+		glGetFloatv(GL_MODELVIEW_MATRIX, ModelMatrix);
+		glGetFloatv(GL_PROJECTION_MATRIX, ProjMatrix);
 		glGetIntegerv(GL_VIEWPORT, Viewport);
 
 		// Unproject the mouse point against both the front and the back clipping planes.
@@ -9436,15 +9436,15 @@ void Project::UpdateOverlayScale()
 {
 	if (m_OverlayActive)
 	{
-		GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
-		GLdouble ModelMatrix[16], ProjMatrix[16];
+		GLfloat ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
+		GLfloat ModelMatrix[16], ProjMatrix[16];
 		GLint Viewport[4];
 
 		for (int i = 0; i < viewports[m_nViewportMode].n; i++)
 		{
 			LoadViewportProjection(i);
-			glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-			glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
+			glGetFloatv(GL_MODELVIEW_MATRIX, ModelMatrix);
+			glGetFloatv(GL_PROJECTION_MATRIX, ProjMatrix);
 			glGetIntegerv(GL_VIEWPORT, Viewport);
 
 			// Calculate the scaling factor by projecting the center to the front plane then

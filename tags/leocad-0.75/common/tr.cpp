@@ -279,13 +279,13 @@ void TiledRender::RasterPos3f(float x, float y, float z)
 	}
 	else 
 	{
-		GLdouble modelview[16], proj[16];
+		GLfloat modelview[16], proj[16];
 		GLint viewport[4];
-		GLdouble winX, winY, winZ;
+		GLfloat winX, winY, winZ;
 		
 		// Get modelview, projection and viewport
-		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-		glGetDoublev(GL_PROJECTION_MATRIX, proj);
+		glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+		glGetFloatv(GL_PROJECTION_MATRIX, proj);
 		viewport[0] = 0;
 		viewport[1] = 0;
 		viewport[2] = m_CurrentTileWidth;

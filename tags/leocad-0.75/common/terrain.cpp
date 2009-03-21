@@ -613,7 +613,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2, GL_FLOAT, 0, coords);
 
-			glDrawArrays(GL_QUADS, 0, 4);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
@@ -623,7 +623,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 		{
 			glColor3fv(m_fColor);
 
-			glDrawArrays(GL_QUADS, 0, 4);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 		}
 
 		glDisableClientState(GL_VERTEX_ARRAY);

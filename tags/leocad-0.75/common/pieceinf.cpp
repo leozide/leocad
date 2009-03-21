@@ -268,38 +268,31 @@ void PieceInfo::DeRef()
 
 void PieceInfo::RenderBox()
 {
-	glEnableClientState(GL_VERTEX_ARRAY);
-
-	float box[24][3] =
+	float Verts[8][3] =
 	{
 		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] }, 
 		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
 		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
 		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
 		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
 		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] }, 
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] }, 
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
 		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
 		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] }
 	};
 
-	glVertexPointer(3, GL_FLOAT, 0, box);
-	glDrawArrays(GL_QUADS, 0, 24);
+	unsigned short Indices[] = 
+	{
+		0, 4, 1, 5, 2, 6, 3, 7,
+		1, 2, 0, 3, 4, 7, 5, 6,
+	};
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Verts);
+
+	glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_SHORT, Indices);
+	glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_SHORT, Indices+8);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void PieceInfo::LoadInformation()
@@ -1719,7 +1712,7 @@ void PieceInfo::RenderPiece(int nColor)
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		glTexCoordPointer(2, GL_FLOAT, 0, m_pTextures[sh].coords);
 
-		glDrawArrays(GL_QUADS, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisable(GL_TEXTURE_2D);

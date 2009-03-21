@@ -82,7 +82,7 @@ void RenderDebugPrimitives()
 	{
 		glColor4fv((float*)&DebugQuads[q].color);
 		glVertexPointer(3, GL_FLOAT, 0, &DebugQuads[q].pt1);
-		glDrawArrays(GL_QUADS, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);

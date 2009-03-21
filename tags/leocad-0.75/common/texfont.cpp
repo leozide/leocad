@@ -109,10 +109,8 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 {
 	float Height = m_nFontHeight;
 
-	const int BufferSize = 32;
-	float Verts[BufferSize][3];
-	float Coords[BufferSize][2];
-	int v = 0;
+	float Verts[4][3];
+	float Coords[4][2];
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, Verts);
@@ -123,27 +121,20 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 	{
 		int ch = *Text;
 
-		Coords[v][0] = m_Glyphs[ch].left; Coords[v][1] = m_Glyphs[ch].top;
-		Verts[v][0] = Left; Verts[v][1] = Top; Verts[v][2] = Z; v++;
-		Coords[v][0] = m_Glyphs[ch].left; Coords[v][1] = m_Glyphs[ch].bottom;
-		Verts[v][0] = Left; Verts[v][1] = Top - Height; Verts[v][2] = Z; v++;
-		Coords[v][0] = m_Glyphs[ch].right; Coords[v][1] = m_Glyphs[ch].bottom;
-		Verts[v][0] = Left + m_Glyphs[ch].width; Verts[v][1] = Top - Height; Verts[v][2] = Z; v++;
-		Coords[v][0] = m_Glyphs[ch].right; Coords[v][1] = m_Glyphs[ch].top;
-		Verts[v][0] = Left + m_Glyphs[ch].width; Verts[v][1] = Top; Verts[v][2] = Z; v++;
+		Coords[0][0] = m_Glyphs[ch].left; Coords[0][1] = m_Glyphs[ch].top;
+		Verts[0][0] = Left; Verts[0][1] = Top; Verts[0][2] = Z;
+		Coords[1][0] = m_Glyphs[ch].left; Coords[1][1] = m_Glyphs[ch].bottom;
+		Verts[1][0] = Left; Verts[1][1] = Top - Height; Verts[1][2] = Z;
+		Coords[2][0] = m_Glyphs[ch].right; Coords[2][1] = m_Glyphs[ch].top;
+		Verts[2][0] = Left + m_Glyphs[ch].width; Verts[2][1] = Top; Verts[2][2] = Z;
+		Coords[3][0] = m_Glyphs[ch].right; Coords[3][1] = m_Glyphs[ch].bottom;
+		Verts[3][0] = Left + m_Glyphs[ch].width; Verts[3][1] = Top - Height; Verts[3][3] = Z;
 
-		if (v == BufferSize)
-		{
-			glDrawArrays(GL_QUADS, 0, v);
-			v = 0;
-		}
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		Left += m_Glyphs[ch].width;
 		Text++;
 	}
-
-	if (v)
-		glDrawArrays(GL_QUADS, 0, v);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);

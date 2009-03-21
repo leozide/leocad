@@ -2279,7 +2279,7 @@ void Project::RenderOverlays(int Viewport)
 
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, verts);
-			glDrawArrays(GL_QUADS, 0, 4);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 			glDisableClientState(GL_VERTEX_ARRAY);
 
 
@@ -2862,9 +2862,8 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 				glShadeModel(GL_SMOOTH);
 			glDisable(GL_DEPTH_TEST);
 
-			float Verts[16][2];
-			float Colors[16][3];
-			int v = 0;
+			float Verts[4][2];
+			float Colors[4][3];
 
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, Verts);
@@ -2878,17 +2877,17 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 				w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
 				h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
 
-				Colors[v][0] = m_fGradient1[0]; Colors[v][1] = m_fGradient1[1]; Colors[v][2] = m_fGradient1[2];
-				Verts[v][0] = x+w; Verts[v][1] = y+h; v++;
-				Colors[v][0] = m_fGradient1[0]; Colors[v][1] = m_fGradient1[1]; Colors[v][2] = m_fGradient1[2];
-				Verts[v][0] = x; Verts[v][1] = y+h; v++;
-				Colors[v][0] = m_fGradient2[0]; Colors[v][1] = m_fGradient2[1]; Colors[v][2] = m_fGradient2[2];
-				Verts[v][0] = x; Verts[v][1] = y; v++;
-				Colors[v][0] = m_fGradient2[0]; Colors[v][1] = m_fGradient2[1]; Colors[v][2] = m_fGradient2[2];
-				Verts[v][0] = x+w; Verts[v][1] = y; v++;
-			}
+				Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2];
+				Verts[0][0] = x+w; Verts[0][1] = y+h;
+				Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2];
+				Verts[1][0] = x; Verts[1][1] = y+h;
+				Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2];
+				Verts[2][0] = x; Verts[2][1] = y;
+				Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2];
+				Verts[3][0] = x+w; Verts[3][1] = y;
 
-			glDrawArrays(GL_QUADS, 0, v);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			}
 
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_COLOR_ARRAY);
@@ -2907,9 +2906,8 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			m_pBackground->MakeCurrent();
 
-			float Verts[16][2];
-			float Coords[16][2];
-			int v = 0;
+			float Verts[4][2];
+			float Coords[4][2];
 
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, Verts);
@@ -2930,17 +2928,17 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 					th = h/m_pBackground->m_nHeight;
 				}
 
-				Coords[v][0] = 0; Coords[v][1] = 0;
-				Verts[v][0] = x; Verts[v][1] = y+h; v++;
-				Coords[v][0] = tw; Coords[v][1] = 0;
-				Verts[v][0] = x+w; Verts[v][1] = y+h; v++;
-				Coords[v][0] = tw; Coords[v][1] = th; 
-				Verts[v][0] = x+w; Verts[v][1] = y; v++;
-				Coords[v][0] = 0; Coords[v][1] = th;
-				Verts[v][0] = x; Verts[v][1] = y; v++;
-			}
+				Coords[0][0] = 0; Coords[0][1] = 0;
+				Verts[0][0] = x; Verts[0][1] = y+h;
+				Coords[1][0] = tw; Coords[1][1] = 0;
+				Verts[1][0] = x+w; Verts[1][1] = y+h;
+				Coords[2][0] = tw; Coords[2][1] = th; 
+				Verts[2][0] = x+w; Verts[2][1] = y;
+				Coords[3][0] = 0; Coords[3][1] = th;
+				Verts[3][0] = x; Verts[3][1] = y;
 
-			glDrawArrays(GL_QUADS, 0, v);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			}
 
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -6850,8 +6848,8 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	// Unproject the selected point against both the front and the back clipping plane
-	gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &px, &py, &pz);
-	gluUnProject(x, y, 1, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
+	gluUnProject(x, y, 0.0f, modelMatrix, projMatrix, viewport, &px, &py, &pz);
+	gluUnProject(x, y, 1.0f, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
 
 	pLine->a1 = (float)px;
 	pLine->b1 = (float)py;
@@ -7925,9 +7923,9 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
           glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
           glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
           glGetIntegerv(GL_VIEWPORT, viewport);
-          gluUnProject( 5, 5, 0.1, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
-          gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
-          gluUnProject( 5,10, 0.1, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
+          gluUnProject( 5, 5, 0.1f, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
+          gluUnProject(10, 5, 0.1f, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
+          gluUnProject( 5,10, 0.1f, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
 				
           Vector vx((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0);//p2[2] - p1[2] };
           Vector x(1, 0, 0);
@@ -8023,7 +8021,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
@@ -8231,7 +8229,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
         break;
 
       GLfloat tmp[3];
-      gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+      gluUnProject(x+1, y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
@@ -8246,7 +8244,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
     case LC_ACTION_CAMERA:
     {
       GLfloat tmp[3];
-      gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+      gluUnProject(x+1, y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
@@ -8351,7 +8349,7 @@ void Project::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
   glGetIntegerv(GL_VIEWPORT, viewport);
 
   // why this is here ?
-  gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+  gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
   m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
   LC_CLICKLINE ClickLine;
@@ -8463,7 +8461,7 @@ void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
@@ -8554,7 +8552,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+	gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
 	ptx = (float)tmp[0]; pty = (float)tmp[1]; ptz = (float)tmp[2];
 
 	switch (m_nCurAction)

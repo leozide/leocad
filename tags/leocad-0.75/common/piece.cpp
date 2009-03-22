@@ -31,9 +31,9 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 	bool Transparent = (nColor > 13 && nColor < 22);
 
 	if (bLighting || Transparent)
-		glColor4ubv(ColorArray[nColor]);
+		glColor4ub(ColorArray[nColor][0], ColorArray[nColor][1], ColorArray[nColor][2], ColorArray[nColor][3]);
 	else
-		glColor3ubv(FlatColorArray[nColor]);
+		glColor4ub(FlatColorArray[nColor][0], FlatColorArray[nColor][1], FlatColorArray[nColor][2], 255);
 
 	if (nColor > 27)
 		return;
@@ -1065,7 +1065,8 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 
 	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
 	{
-		glColor3ubv(FlatColorArray[m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+		int Color = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
+		glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
 		glLineWidth(2*fLineWidth);
 		glPushAttrib(GL_POLYGON_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1075,7 +1076,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 	}
 	else
 	{
-		glColor3ubv(FlatColorArray[m_nColor]);
+		glColor4ub(FlatColorArray[m_nColor][0], FlatColorArray[m_nColor][1], FlatColorArray[m_nColor][2], 255);
 		m_pPieceInfo->RenderBox();
 	}
 	glPopMatrix();

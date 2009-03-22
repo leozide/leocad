@@ -555,7 +555,8 @@ void Camera::Render(float fLineWidth)
   if (IsEyeSelected())
   {
     glLineWidth(fLineWidth*2);
-    glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+	int Color = (m_nState & LC_CAMERA_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
+    glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
   }
   else
   {
@@ -595,7 +596,8 @@ void Camera::Render(float fLineWidth)
   if (IsTargetSelected())
   {
     glLineWidth(fLineWidth*2);
-    glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+	int Color = (m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
+    glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
   }
   else
   {

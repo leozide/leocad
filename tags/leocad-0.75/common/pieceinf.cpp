@@ -1112,7 +1112,7 @@ void PieceInfo::RenderPiece(int nColor)
 		m_pTextures[sh].texture->MakeCurrent();
 
 		if (m_pTextures[sh].color == LC_COL_DEFAULT)
-			glColor3ubv(FlatColorArray[nColor]);
+			glColor4ub(FlatColorArray[nColor][0], FlatColorArray[nColor][1], FlatColorArray[nColor][2], 255);
 		if (nColor > 13 && nColor < 22)
 		{
 			glEnable (GL_BLEND);
@@ -1160,16 +1160,16 @@ void PieceInfo::RenderPiece(int nColor)
 
 				if (curcolor > 13 && curcolor < 22)
 				{
-					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					glEnable (GL_BLEND);
-					glDepthMask (GL_FALSE);
-					glColor4ubv (ColorArray[curcolor]);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					glEnable(GL_BLEND);
+					glDepthMask(GL_FALSE);
+					glColor4ub(ColorArray[curcolor][0], ColorArray[curcolor][1], ColorArray[curcolor][2], ColorArray[curcolor][3]);
 				}
 				else
 				{
-					glDepthMask (GL_TRUE);
-					glDisable (GL_BLEND);
-					glColor3ubv (FlatColorArray[curcolor]);
+					glDepthMask(GL_TRUE);
+					glDisable(GL_BLEND);
+					glColor4ub(FlatColorArray[curcolor][0], FlatColorArray[curcolor][1], FlatColorArray[curcolor][2], 255);
 				}
 
 				if (*info)
@@ -1198,16 +1198,16 @@ void PieceInfo::RenderPiece(int nColor)
 
 				if (curcolor > 13 && curcolor < 22)
 				{
-					glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					glEnable (GL_BLEND);
-					glDepthMask (GL_FALSE);
-					glColor4ubv (ColorArray[curcolor]);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					glEnable(GL_BLEND);
+					glDepthMask(GL_FALSE);
+					glColor4ub(ColorArray[curcolor][0], ColorArray[curcolor][1], ColorArray[curcolor][2], ColorArray[curcolor][3]);
 				}
 				else
 				{
-					glDepthMask (GL_TRUE);
-					glDisable (GL_BLEND);
-					glColor3ubv(FlatColorArray[curcolor]);
+					glDepthMask(GL_TRUE);
+					glDisable(GL_BLEND);
+					glColor4ub(FlatColorArray[curcolor][0], FlatColorArray[curcolor][1], FlatColorArray[curcolor][2], 255);
 				}
 
 				if (*info)

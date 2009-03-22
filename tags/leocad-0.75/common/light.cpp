@@ -281,7 +281,7 @@ void Light::Render (float fLineWidth)
     }
     else
     {
-      glColor3f(0.5f, 0.8f, 0.5f);
+      glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
       DrawCone();
     }
 
@@ -295,11 +295,11 @@ void Light::Render (float fLineWidth)
     }
     else
     {
-      glColor3f(0.5f, 0.8f, 0.5f);
+      glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
       DrawTarget();
     }
 
-    glColor3f(0.5f, 0.8f, 0.5f);
+    glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
 
 	float Line[2][3] = 
 	{
@@ -386,7 +386,7 @@ void Light::Render (float fLineWidth)
     }
     else
     {
-      glColor3f (0.5f, 0.8f, 0.5f);
+      glColor4f (0.5f, 0.8f, 0.5f, 1.0f);
       DrawSphere();
     }
 

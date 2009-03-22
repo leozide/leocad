@@ -1063,6 +1063,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
 	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
 
+#ifndef LC_OPENGLES
 	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
 	{
 		int Color = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
@@ -1075,6 +1076,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 		glLineWidth(fLineWidth);
 	}
 	else
+#endif
 	{
 		glColor4ub(FlatColorArray[m_nColor][0], FlatColorArray[m_nColor][1], FlatColorArray[m_nColor][2], 255);
 		m_pPieceInfo->RenderBox();
@@ -1117,6 +1119,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
+#ifndef LC_OPENGLES
 		unsigned long colors, *info = (unsigned long*)m_pDrawInfo;
 		colors = *info;
 		info++;
@@ -1178,6 +1181,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 			if (lock)
 				glUnlockArraysEXT();
 		}
+#endif
 	}
 	else
 	{

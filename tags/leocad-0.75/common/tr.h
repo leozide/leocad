@@ -36,7 +36,6 @@ public:
 	void Ortho(double left, double right, double bottom, double top, double zNear, double zFar);
 	void Frustum(double left, double right, double bottom, double top, double zNear, double zFar);
 	void Perspective(double fovy, double aspect, double zNear, double zFar );
-	void RasterPos3f(float x, float y, float z);
 	int Get(TRenum param);
 	int EndTile();
 	void BeginTile();

@@ -1144,6 +1144,7 @@ void PieceInfo::RenderPiece(int nColor)
 	{
 		if (m_nFlags & LC_PIECE_LONGDATA)
 		{
+#ifndef LC_OPENGLES
 			unsigned long* info, colors;
 
 			info = (unsigned long*)pGroup->drawinfo;
@@ -1179,6 +1180,7 @@ void PieceInfo::RenderPiece(int nColor)
 					glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
 				info += *info + 1;
 			}
+#endif
 		}
 		else
 		{

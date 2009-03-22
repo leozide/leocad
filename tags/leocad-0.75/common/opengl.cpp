@@ -12,6 +12,8 @@ void Sys_GLCloseLibrary ();
 void* Sys_GLGetProc (const char *symbol);
 void* Sys_GLGetExtension (const char *symbol);
 
+#ifdef LC_OPENGL_DYNAMIC
+
 // =============================================================================
 // OpenGL Function pointers
 
@@ -352,6 +354,8 @@ PFNGLLOADNAME pfnglLoadName;
 PFNGLPUSHNAME pfnglPushName;
 PFNGLPOPNAME pfnglPopName;
 
+#endif // LC_OPENGL_DYNAMIC
+
 PFNGLACTIVETEXTUREARB pfnglActiveTextureARB;
 PFNGLCLIENTACTIVETEXTUREARB pfnglClientActiveTextureARB;
 PFNGLMULTITEXCOORD1DARB pfnglMultiTexCoord1dARB;
@@ -398,6 +402,7 @@ void GL_Shutdown ()
 {
   Sys_GLCloseLibrary ();
 
+#ifdef LC_OPENGL_DYNAMIC
   pfnglClearIndex = NULL;
   pfnglClearColor = NULL;
   pfnglClear = NULL;
@@ -735,6 +740,8 @@ void GL_Shutdown ()
   pfnglPushName = NULL;
   pfnglPopName = NULL;
 
+#endif // LC_OPENGL_DYNAMIC
+	
   pfnglActiveTextureARB = NULL;
   pfnglClientActiveTextureARB = NULL;
   pfnglMultiTexCoord1dARB = NULL;
@@ -783,6 +790,8 @@ bool GL_Initialize (const char* libname)
     return false;
   }
 
+#ifdef LC_OPENGL_DYNAMIC
+	
   pfnglClearIndex = (PFNGLCLEARINDEX) Sys_GLGetProc ("glClearIndex");
   pfnglClearColor = (PFNGLCLEARCOLOR) Sys_GLGetProc ("glClearColor");
   pfnglClear = (PFNGLCLEAR) Sys_GLGetProc ("glClear");
@@ -1120,6 +1129,8 @@ bool GL_Initialize (const char* libname)
   pfnglPushName = (PFNGLPUSHNAME) Sys_GLGetProc ("glPushName");
   pfnglPopName = (PFNGLPOPNAME) Sys_GLGetProc ("glPopName");
 
+#endif // LC_OPENGL_DYNAMIC
+	
   return true;
 }
 

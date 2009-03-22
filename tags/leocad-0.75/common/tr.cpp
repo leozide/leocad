@@ -212,6 +212,7 @@ void TiledRender::BeginTile()
 
 int TiledRender::EndTile()
 {
+#ifndef LC_OPENGLES
 	GLint prevRowLength, prevSkipRows, prevSkipPixels;
 	
 	// be sure OpenGL rendering is finished
@@ -268,58 +269,7 @@ int TiledRender::EndTile()
 	}
 	else
 		return 1;
+#else
+	return 0;
+#endif
 }
-
-void TiledRender::RasterPos3f(float x, float y, float z)
-{
-	if (m_CurrentTile < 0) 
-	{
-		// not doing tile rendering right now.  Let OpenGL do this.
-		glRasterPos3f(x, y, z);
-	}
-	else 
-	{
-		GLfloat modelview[16], proj[16];
-		GLint viewport[4];
-		GLfloat winX, winY, winZ;
-		
-		// Get modelview, projection and viewport
-		glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-		glGetFloatv(GL_PROJECTION_MATRIX, proj);
-		viewport[0] = 0;
-		viewport[1] = 0;
-		viewport[2] = m_CurrentTileWidth;
-		viewport[3] = m_CurrentTileHeight;
-		
-		// Project object coord to window coordinate
-		if (gluProject(x, y, z, modelview, proj, viewport, &winX, &winY, &winZ))
-		{
-			// set raster pos to window coord (0,0)
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
-			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glLoadIdentity();
-			glOrtho(0.0, m_CurrentTileWidth,
-				0.0, m_CurrentTileHeight, 0.0, 1.0);
-			glRasterPos3f(0.0, 0.0, (float)-winZ);
-			
-			// Now use empty bitmap to adjust raster position to (winX,winY)
-			{
-				GLubyte bitmap[1] = {0};
-				glBitmap(1, 1, 0.0, 0.0, (float)winX, (float)winY, bitmap);
-			}
-			
-			// restore original matrices
-			glPopMatrix(); // proj
-			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-		}
-	}
-}
-
-
-
-
-

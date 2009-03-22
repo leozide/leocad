@@ -186,9 +186,10 @@ bool Texture::LoadFromFile (char* strFilename, bool bFilter)
 
 bool Texture::FinishLoadImage (bool bFilter, void *data)
 {
-  GLint w, h, level, maxsize;
-  GLint i, j, k, pow2;
-  GLint components;
+	GLint w, h, level, maxsize;
+	GLint i, j, k, pow2;
+	GLint components;
+	GLint InternalFormat;
 
   if (data == NULL || m_nWidth < 1 || m_nHeight < 1)
     return false;
@@ -197,8 +198,6 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
     glGenTextures(1, &m_nID);
 
   glBindTexture(GL_TEXTURE_2D, m_nID);
-  glDisable(GL_TEXTURE_GEN_S);
-  glDisable(GL_TEXTURE_GEN_T);
   //  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -214,6 +213,12 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
   default: return false;
   }
 
+#if LC_OPENGLES
+	InternalFormat = m_nFormat;
+#else
+	InternalFormat = components;
+#endif
+	
   // create an alpha channel for the texture 
   if (m_nFormat == GL_LUMINANCE_ALPHA)
     for (i = m_nWidth*m_nHeight-1; i >= 0; i--)
@@ -245,7 +250,7 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
     data = tmp;
   }
 
-  glTexImage2D (GL_TEXTURE_2D, 0, components, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
+  glTexImage2D (GL_TEXTURE_2D, 0, InternalFormat, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
 
   if (bFilter)
     for (level = 1; ((w != 1) || (h != 1)); level++)
@@ -263,7 +268,7 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
 	  for (k = 0; k < components; k++)
 	    out[k] = (in[k] + in[k+components] + in[row] + in[row+k+components])>>2;
 
-      glTexImage2D (GL_TEXTURE_2D, level, components, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
+      glTexImage2D (GL_TEXTURE_2D, level, InternalFormat, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
     }
 
   free (data);

@@ -397,22 +397,22 @@ void Project::LoadDefaults(bool cameras)
 bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 {
 	int i, count;
-	char id[32];
+	char fid[32];
 	unsigned long rgb;
 	float fv = 0.4f;
 	unsigned char ch, action = m_nCurAction;
 	unsigned short sh;
 
 	file->Seek(0, SEEK_SET);
-	file->Read(id, 32);
-	sscanf(&id[7], "%f", &fv);
+	file->Read(fid, 32);
+	sscanf(&fid[7], "%f", &fv);
 
 	// Fix the ugly floating point reading on computers with different decimal points.
 	if (fv == 0.0f)
 	{
 		lconv *loc = localeconv();
-		id[8] = loc->decimal_point[0];
-		sscanf(&id[7], "%f", &fv);
+		fid[8] = loc->decimal_point[0];
+		sscanf(&fid[7], "%f", &fv);
 
 		if (fv == 0.0f)
 			return false;
@@ -1855,13 +1855,13 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 				switch (i)
 				{
 				case 0:
-					glColor3f(0.8f, 0.0f, 0.0f);
+					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
 					break;
 				case 1:
-					glColor3f(0.0f, 0.8f, 0.0f);
+					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
 					break;
 				case 2:
-					glColor3f(0.0f, 0.0f, 0.8f);
+					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
 					break;
 				}
 
@@ -1899,7 +1899,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 			glEnable(GL_TEXTURE_2D);
 			glEnable(GL_ALPHA_TEST);
 
-			glColor3f(0, 0, 0);
+			glColor4f(0, 0, 0, 1);
 			m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
 			m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
 			m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
@@ -1912,7 +1912,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 
 		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
 		{
-			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
+			glColor4f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2], 1.0f);
 
 			if (m_nSnap & LC_DRAW_GRID)
 				DrawGrid();
@@ -2099,6 +2099,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 //			glEnable (GL_CULL_FACE);
 //			glShadeModel (GL_FLAT);
 //			glDisable (GL_LIGHTING);
+#ifndef LC_OPENGLES
 			if ((m_nDetail & LC_DET_BOX_FILL) == 0)
 			{
 				if ((m_nDetail & LC_DET_HIDDEN_LINE) != 0)
@@ -2120,6 +2121,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 				}
 			}
 			else
+#endif
 				RenderBoxes(true);
 		}
 
@@ -2194,7 +2196,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 
 			glDisable(GL_DEPTH_TEST);
 			glEnableLineStipple();
-			glColor3f(0, 0, 0);
+			glColor4f(0, 0, 0, 1);
 
 			float pt1x = (float)(m_nDownX - x);
 			float pt1y = (float)(m_nDownY - y);
@@ -2295,21 +2297,21 @@ void Project::RenderOverlays(int Viewport)
 			{
 			case 0:
 				if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_XZ))
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				else
-					glColor3f(0.8f, 0.0f, 0.0f);
+					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
 				break;
 			case 1:
 				if ((m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_YZ))
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				else
-					glColor3f(0.0f, 0.8f, 0.0f);
+					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
 				break;
 			case 2:
 				if ((m_OverlayMode == LC_OVERLAY_Z) || (m_OverlayMode == LC_OVERLAY_XZ) || (m_OverlayMode == LC_OVERLAY_YZ))
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				else
-					glColor3f(0.0f, 0.0f, 0.8f);
+					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
 				break;
 			}
 
@@ -2505,7 +2507,7 @@ void Project::RenderOverlays(int Viewport)
 			Verts[j][2] = Pt[2];
 		}
 
-		glColor3f(0.1f, 0.1f, 0.1f);
+		glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0, Verts);
@@ -2534,20 +2536,20 @@ void Project::RenderOverlays(int Viewport)
 		{
 			if (m_OverlayMode == LC_OVERLAY_X + i)
 			{
-				glColor3f(0.8f, 0.8f, 0.0f);
+				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 			}
 			else
 			{
 				switch (i)
 				{
 				case 0:
-					glColor3f(0.8f, 0.0f, 0.0f);
+					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
 					break;
 				case 1:
-					glColor3f(0.0f, 0.8f, 0.0f);
+					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
 					break;
 				case 2:
-					glColor3f(0.0f, 0.0f, 0.8f);
+					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
 					break;
 				}
 			}
@@ -2670,7 +2672,7 @@ void Project::RenderOverlays(int Viewport)
 					Verts[5][1] = Tip[1] - Arrow[1];
 					Verts[5][2] = Tip[2] - Arrow[2];
 
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 
 					glEnableClientState(GL_VERTEX_ARRAY);
 					glVertexPointer(3, GL_FLOAT, 0, Verts);
@@ -2711,7 +2713,7 @@ void Project::RenderOverlays(int Viewport)
 					int cx, cy;
 					m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 					m_pScreenFont->PrintText((float)ScreenX - Vp[0] - (cx / 2), (float)ScreenY - Vp[1] + (cy / 2), 0.0f, buf);
 
 					glDisable(GL_TEXTURE_2D);
@@ -2745,7 +2747,7 @@ void Project::RenderOverlays(int Viewport)
 		glTranslatef(0.375f, 0.375f, 0.0f);
 
 		glDisable(GL_DEPTH_TEST);
-		glColor3f(0, 0, 0);
+		glColor4f(0, 0, 0, 1);
 
 		// Draw circle.
 		float verts[32][2];
@@ -2815,7 +2817,7 @@ void Project::RenderOverlays(int Viewport)
 
 		glDisable(GL_DEPTH_TEST);
 		glEnableLineStipple();
-		glColor3f(0, 0, 0);
+		glColor4f(0, 0, 0, 1);
 
 		float pt1x = (float)(m_nDownX - x);
 		float pt1y = (float)(m_nDownY - y);
@@ -2953,7 +2955,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 	if (bLines)
 	{
 		// Draw text
-		glColor3f(0, 0, 0);
+		glColor4f(0, 0, 0, 1);
 		if (!bBackground)
 			glEnable(GL_TEXTURE_2D);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -3026,7 +3028,6 @@ void Project::RenderInitialize()
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 
-	glDrawBuffer(GL_BACK);
 	glCullFace(GL_BACK);
 	glDisable (GL_CULL_FACE);
 
@@ -3059,7 +3060,6 @@ void Project::RenderInitialize()
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
 	    glEnable(GL_LIGHTING);
-            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
             glEnable(GL_COLOR_MATERIAL);
 
             GLfloat mat_translucent[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
@@ -3082,7 +3082,6 @@ void Project::RenderInitialize()
 	if (m_nScene & LC_SCENE_FOG)
 	{
 		glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, GL_EXP);
 		glFogf(GL_FOG_DENSITY, m_fFogDensity);
 		glFogfv(GL_FOG_COLOR, m_fFogColor);
 	}
@@ -4134,7 +4133,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						glDepthFunc(GL_LEQUAL);
 						glClearColor(1,1,1,1); 
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-						glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 						glEnable(GL_COLOR_MATERIAL);
 						glDisable (GL_DITHER);
 						glShadeModel(GL_FLAT);

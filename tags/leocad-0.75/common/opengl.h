@@ -13,11 +13,29 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include "linux_gl.h"
+#define LC_OPENGL_DYNAMIC 1
 #endif 
 
 #ifdef LC_MACOSX
 #include <OpenGL/gl.h>
 #include <AGL/agl.h>
+#endif
+
+#ifdef LC_IPHONE
+#import <UIKit/UIKit.h>
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/ES1/gl.h>
+#import <OpenGLES/ES1/glext.h>
+#define LC_OPENGLES 1
+#endif
+
+#ifdef LC_OPENGLES
+
+typedef GLfloat GLdouble;
+
+#define glFrustum(l, r, b, t, n, f) glFrustumf(l, r, b, t, n, f)
+#define glOrtho(l, r, b, t, n, f) glOrthof(l, r, b, t, n, f)
+
 #endif
 
 //#include <GL/glu.h> // TODO: remove all glu calls
@@ -40,6 +58,8 @@ int  GL_GetMultiTextures ();
 bool GL_HasCompiledVertexArrays ();
 bool GL_HasClampToEdge ();
 bool GL_HasPointParameters ();
+
+#ifdef LC_OPENGL_DYNAMIC
 
 // =============================================================================
 // OpenGL functions typedefs
@@ -408,6 +428,8 @@ typedef void (APIENTRY *PFNGLLOADNAME) (GLuint name);
 typedef void (APIENTRY *PFNGLPUSHNAME) (GLuint name);
 typedef void (APIENTRY *PFNGLPOPNAME) (void);
 
+#endif // LC_OPENGL_DYNAMIC
+
 // GL_ARB_multitexture
 typedef void (APIENTRY *PFNGLACTIVETEXTUREARB) (GLenum texture);
 typedef void (APIENTRY *PFNGLCLIENTACTIVETEXTUREARB) (GLenum texture);
@@ -513,6 +535,8 @@ typedef void (APIENTRY *PFNGLUNLOCKARRAYSEXT) (void);
 
 // =============================================================================
 // OpenGL extern declarations
+
+#ifdef LC_OPENGL_DYNAMIC
 
 extern PFNGLCLEARINDEX pfnglClearIndex;
 extern PFNGLCLEARCOLOR pfnglClearColor;
@@ -851,6 +875,8 @@ extern PFNGLLOADNAME pfnglLoadName;
 extern PFNGLPUSHNAME pfnglPushName;
 extern PFNGLPOPNAME pfnglPopName;
 
+#endif // LC_OPENGL_DYNAMIC
+
 extern PFNGLACTIVETEXTUREARB pfnglActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARB pfnglClientActiveTextureARB;
 extern PFNGLMULTITEXCOORD1DARB pfnglMultiTexCoord1dARB;
@@ -892,6 +918,8 @@ extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
 
 // =============================================================================
 // Replace OpenGL function names with the dynamic functions
+
+#ifdef LC_OPENGL_DYNAMIC
 
 #define glClearIndex pfnglClearIndex
 #define glClearColor pfnglClearColor
@@ -1230,6 +1258,8 @@ extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
 #define glPushName pfnglPushName
 #define glPopName pfnglPopName
 
+#endif // LC_OPENGL_DYNAMIC
+
 #define glActiveTextureARB pfnglActiveTextureARB
 #define glClientActiveTextureARB pfnglClientActiveTextureARB
 #define glMultiTexCoord1dARB pfnglMultiTexCoord1dARB
@@ -1271,13 +1301,17 @@ extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
 
 inline void glEnableLineStipple()
 {
+#ifndef LC_OPENGLES
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(5, 0x5555);
+#endif
 }
 
 inline void glDisableLineStipple()
 {
+#ifndef LC_OPENGLES
 	glDisable(GL_LINE_STIPPLE);
+#endif
 }
 
 #endif // _OPENGL_H_

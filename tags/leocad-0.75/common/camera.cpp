@@ -528,8 +528,6 @@ void Camera::UpdateBoundingBox()
   upvec.Normalize();
   upvec.ToFloat(m_fUp);
 
-  float len = frontvec.Length();
-
   Matrix mat;
   mat.CreateLookat (m_fEye, m_fTarget, m_fUp);
   mat.Invert ();
@@ -601,7 +599,7 @@ void Camera::Render(float fLineWidth)
   }
   else
   {
-    glColor3f(0.5f, 0.8f, 0.5f);
+    glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
   }
 
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -633,7 +631,7 @@ void Camera::Render(float fLineWidth)
   };
 
   glVertexPointer(3, GL_FLOAT, 0, Line);
-  glColor3f(0.5f, 0.8f, 0.5f);
+  glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
   glDrawArrays(GL_LINES, 0, 2);
 
   if (IsSelected())

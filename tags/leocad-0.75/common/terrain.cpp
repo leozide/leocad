@@ -621,7 +621,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 		}
 		else
 		{
-			glColor3fv(m_fColor);
+			glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], 1.0f);
 
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 		}
@@ -635,7 +635,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 		FindVisiblePatches(pCam, aspect);
 
 		int i, j;
-		glColor3fv(m_fColor);
+		glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], 1.0f);
 		glEnableClientState(GL_VERTEX_ARRAY);
 
 		if (m_nOptions & LC_TERRAIN_TEXTURE)

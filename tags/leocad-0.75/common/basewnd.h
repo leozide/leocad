@@ -33,6 +33,14 @@ typedef struct
 } BaseMenuItem;
 #endif
 
+#ifdef LC_IPHONE
+typedef void* BaseWndXID;
+typedef struct
+	{
+		void* Dummy;
+	} BaseMenuItem;
+#endif
+
 // =============================================================================
 // Message Box constants
 

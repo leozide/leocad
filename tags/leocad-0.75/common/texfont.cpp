@@ -128,7 +128,7 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 		Coords[2][0] = m_Glyphs[ch].right; Coords[2][1] = m_Glyphs[ch].top;
 		Verts[2][0] = Left + m_Glyphs[ch].width; Verts[2][1] = Top; Verts[2][2] = Z;
 		Coords[3][0] = m_Glyphs[ch].right; Coords[3][1] = m_Glyphs[ch].bottom;
-		Verts[3][0] = Left + m_Glyphs[ch].width; Verts[3][1] = Top - Height; Verts[3][3] = Z;
+		Verts[3][0] = Left + m_Glyphs[ch].width; Verts[3][1] = Top - Height; Verts[3][2] = Z;
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

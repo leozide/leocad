@@ -4347,27 +4347,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								info++;
 
 								// skip if color only have lines
-								if ((*info == 0) && (info[1] == 0))
+								if (*info == 0)
 								{
-									info += 2;
+									info++;
 									info += *info + 1;
 									continue;
 								}
 
 								fputs(" mesh {\n", f);
-
-								for (count = *info, info++; count; count -= 4)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2],
-										-pInfo->m_fVertexArray[info[3]*3+1], -pInfo->m_fVertexArray[info[3]*3], pInfo->m_fVertexArray[info[3]*3+2],
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2]);
-									info += 4;
-								}
 
 								for (count = *info, info++; count; count -= 3)
 								{
@@ -4396,27 +4383,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								info++;
 
 								// skip if color only have lines
-								if ((*info == 0) && (info[1] == 0))
+								if (*info == 0)
 								{
-									info += 2;
+									info++;
 									info += *info + 1;
 									continue;
 								}
 
 								fputs(" mesh {\n", f);
-
-								for (count = *info, info++; count; count -= 4)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2],
-										-pInfo->m_fVertexArray[info[3]*3+1], -pInfo->m_fVertexArray[info[3]*3], pInfo->m_fVertexArray[info[3]*3+2],
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2]);
-									info += 4;
-								}
 
 								for (count = *info, info++; count; count -= 3)
 								{
@@ -9793,7 +9767,6 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 				info++;
 				info += *info + 1;
 				info += *info + 1;
-				info += *info + 1;
 
 				continue;
 			}
@@ -9802,19 +9775,8 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 		}
 		info++;
 		
-		bool skipNext = (info[0] < 1);
-		if (skipNext)
-			skipNext = (info[1] < 1);
-		if (skipNext)
-			info += 2;                
-		else
+		if (*info)
 		{
-			for (count = *info, info++; count; count -= 4)
-			{
-				generateMeshData(info, pos, pPiece, 4, currentColor);
-				info += 4;
-			}
-	
 			for (count = *info, info++; count; count -= 3)
 			{
 				generateMeshData(info, pos, pPiece, 3, currentColor);
@@ -9842,8 +9804,10 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 				writeVRMLShapeEnd(stream);
 			}
 		}
+		else
+			info++;
 
-		if (*info > 0)
+		if (*info)
 		{
 			// IndexedLineSet not supported in RigidBody node for the xj3d browser 8-(
 			if (VRMLdialect != X3DV_WITH_RIGID_BODY_PHYSICS) 
@@ -9867,8 +9831,10 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 				writeVRMLShapeMeshEnd(stream);
 				writeVRMLShapeEnd(stream);
 			}
-		} else
+		}
+		else
 			info++;
+
 		free(coords);
 		free(coordIndices);
 	}
@@ -9881,7 +9847,8 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 // So the exporter use the mid of the boundingbox of all pieces in a group as center of mass
 // the needed information is stored in the following compound datatype
 
-class GroupInfo {
+class GroupInfo
+{
 public:
 	Group *group;
 	float minBoundingBox[3];
@@ -9894,7 +9861,7 @@ public:
 
 // routines to account a boundingbox 
 
-template<class type> void Project::getMinMaxData(type* info, Piece* pPiece, int numVertices, GroupInfo* groupInfo)
+template<class type> void Project::getMinMaxData(type* info, Piece* pPiece, GroupInfo* groupInfo)
 {
 	float rot[4];
 	Vector3 Pos = pPiece->GetPosition();
@@ -9903,7 +9870,7 @@ template<class type> void Project::getMinMaxData(type* info, Piece* pPiece, int 
 
 	PieceInfo* pInfo = pPiece->GetPieceInfo();
 
-	for (int i = 0; i < numVertices; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		float vertex[3];
 		float *localVertex = &pInfo->m_fVertexArray[info[i] * 3];
@@ -9946,7 +9913,6 @@ template<class type> void Project::getMinMax(type col, Piece* piece, unsigned sh
 				info++;
 				info += *info + 1;
 				info += *info + 1;
-				info += *info + 1;
 
 				continue;
 			}
@@ -9960,28 +9926,14 @@ template<class type> void Project::getMinMax(type col, Piece* piece, unsigned sh
 			info += 2;                
 		else
 		{
-			for (count = *info, info++; count; count -= 4)
-			{
-				getMinMaxData(info, piece, 4, groupInfo);
-				info += 4;
-			}
-	
 			for (count = *info, info++; count; count -= 3)
 			{
-				getMinMaxData(info, piece, 3, groupInfo);
+				getMinMaxData(info, piece, groupInfo);
 				info += 3;
 			}
 		}
 
-		if (*info > 0)
-		{
-			// skip lines
-			for (count = *info, info++; count; count -= 2)
-			{
-				info += 2;
-			}
-		} else
-			info++;
+		info += *info + 1;
 	}
 }
 
@@ -10169,7 +10121,6 @@ void Project::exportVRMLFile(char *filename, int dialect)
 
 				if (pInfo->m_nGroupCount > 0)
 				{
-
 					if (beginGroup && rigidBody)
 					{
 						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)

@@ -483,21 +483,6 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		{
 			info++;
 
-			for (i = 0; i < *info; i += 4)
-			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-				Vector3 v4(verts[info[i+4]*3], verts[info[i+4]*3+1], verts[info[i+4]*3+2]);
-
-				if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
-				{
-					pLine->pClosest = this;
-				}
-			}
-
-			info += *info + 1;
-
 			for (i = 0; i < *info; i += 3)
 			{
 				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
@@ -523,21 +508,6 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		while (colors--)
 		{
 			info++;
-
-			for (i = 0; i < *info; i += 4)
-			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-				Vector3 v4(verts[info[i+4]*3], verts[info[i+4]*3+1], verts[info[i+4]*3+2]);
-
-				if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, pLine->mindist, Intersection))
-				{
-					pLine->pClosest = this;
-				}
-			}
-
-			info += *info + 1;
 
 			for (i = 0; i < *info; i += 3)
 			{
@@ -702,18 +672,6 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		{
 			info++;
 
-			for (i = 0; i < *info; i += 4)
-			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
-				                            &verts[info[i+3]*3], &verts[info[i+4]*3], LocalPlanes, NumPlanes))
-				{
-					ret = true;
-					break;
-				}
-			}
-
-			info += *info + 1;
-
 			for (i = 0; i < *info; i += 3)
 			{
 				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
@@ -737,18 +695,6 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 		while (colors--)
 		{
 			info++;
-
-			for (i = 0; i < *info; i += 4)
-			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				                            &verts[info[i+3]*3], &verts[info[i+4]*3], LocalPlanes, NumPlanes))
-				{
-					ret = true;
-					break;
-				}
-			}
-
-			info += *info + 1;
 
 			for (i = 0; i < *info; i += 3)
 			{
@@ -878,7 +824,7 @@ void Piece::BuildDrawInfo()
 	DRAWGROUP* dg;
 	bool add;
 	unsigned short group, colcount, i, j;
-	unsigned long count[LC_COL_DEFAULT+1][3], vert;
+	unsigned long count[LC_COL_DEFAULT+1][2], vert;
 	memset (count, 0, sizeof(count));
 
 	// Get the vertex count
@@ -913,8 +859,6 @@ void Piece::BuildDrawInfo()
 					p += *p + 1;
 					count[curcol][1] += *p;
 					p += *p + 1;
-					count[curcol][2] += *p;
-					p += *p + 1;
 				}
 			}
 			else
@@ -932,8 +876,6 @@ void Piece::BuildDrawInfo()
 					p += *p + 1;
 					count[curcol][1] += *p;
 					p += *p + 1;
-					count[curcol][2] += *p;
-					p += *p + 1;
 				}
 			}
 		}
@@ -942,12 +884,12 @@ void Piece::BuildDrawInfo()
 	colcount = 0;
 	vert = 0;
 	for (i = 0; i < LC_COL_DEFAULT+1; i++)
-		if (count[i][0] || count[i][1] || count[i][2])
+		if (count[i][0] || count[i][1])
 		{
 			colcount++;
-			vert += count[i][0] + count[i][1] + count[i][2];
+			vert += count[i][0] + count[i][1];
 		}
-	vert += (colcount*4)+1;
+	vert += (colcount*3)+1;
 
 	// Build the info
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
@@ -960,12 +902,12 @@ void Piece::BuildDrawInfo()
 
 		for (i = LC_COL_DEFAULT; i != LC_COL_EDGES+1;)
 		{
-			if (count[i][0] || count[i][1] || count[i][2])
+			if (count[i][0] || count[i][1])
 			{
 				*drawinfo = i;
 				drawinfo++;
 
-				for (j = 0; j < 3; j++)
+				for (j = 0; j < 2; j++)
 				{
 					*drawinfo = count[i][j];
 					drawinfo++;
@@ -1014,18 +956,10 @@ void Piece::BuildDrawInfo()
 									drawinfo += *p;
 								}
 								p += *p + 1;
-								
-								if (j == 2)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-							}
+															}
 							else
 							{
 								p++;
-								p += *p + 1;
 								p += *p + 1;
 								p += *p + 1;
 							}
@@ -1049,12 +983,12 @@ void Piece::BuildDrawInfo()
 
 		for (i = LC_COL_DEFAULT; i != LC_COL_EDGES+1;)
 		{
-			if (count[i][0] || count[i][1] || count[i][2])
+			if (count[i][0] || count[i][1])
 			{
 				*drawinfo = i;
 				drawinfo++;
 
-				for (j = 0; j < 3; j++)
+				for (j = 0; j < 2; j++)
 				{
 					*drawinfo = (unsigned short)count[i][j];
 					drawinfo++;
@@ -1103,18 +1037,10 @@ void Piece::BuildDrawInfo()
 									drawinfo += *p;
 								}
 								p += *p + 1;
-								
-								if (j == 2)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
-									drawinfo += *p;
-								}
-								p += *p + 1;
 							}
 							else
 							{
 								p++;
-								p += *p + 1;
 								p += *p + 1;
 								p += *p + 1;
 							}
@@ -1218,14 +1144,6 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 
 			if (*info)
 			{
-				glDrawElements(GL_QUADS, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
 				glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_INT, info+1);
 				info += *info + 1;
 			}
@@ -1287,14 +1205,6 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 
 			if (lock)
 				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			if (*info)
-			{
-				glDrawElements(GL_QUADS, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
 
 			if (*info)
 			{

@@ -327,7 +327,7 @@ protected:
 	bool firstData;
 	int searchForVertex(float *vertex);
 	template<class type> void generateMeshData(type* info, float *pos, Piece* pPiece, int numVertices, int currentColor);
-	template<class type> void getMinMaxData(type* info, Piece* pPiece, int numVertices, GroupInfo* groupInfo);
+	template<class type> void getMinMaxData(type* info, Piece* pPiece, GroupInfo* groupInfo);
 	template<class type> void getMinMax(type col, Piece* pPiece, unsigned short group, GroupInfo* groupInfo);
 	bool handleAsGroup(Piece* piece, GroupInfo groupInfo);
 	int numCoords;

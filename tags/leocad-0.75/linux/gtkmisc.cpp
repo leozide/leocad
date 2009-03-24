@@ -32,7 +32,7 @@
 // Load a pixmap file from the disk
 void load_pixmap (const char* filename, GdkPixmap **gdkpixmap, GdkBitmap **mask)
 {
-  struct { char* name; char** data; } table[14] =
+  struct { const char* name; const char** data; } table[14] =
   {
     { "vports01.xpm", vports01 },
     { "vports02.xpm", vports02 },
@@ -54,14 +54,14 @@ void load_pixmap (const char* filename, GdkPixmap **gdkpixmap, GdkBitmap **mask)
   for (int i = 0; i < 14; i++)
     if (strcmp (table[i].name, filename) == 0)
     {
-      *gdkpixmap = gdk_pixmap_create_from_xpm_d (GDK_ROOT_PARENT(), mask, NULL, table[i].data);
+      *gdkpixmap = gdk_pixmap_create_from_xpm_d (GDK_ROOT_PARENT(), mask, NULL, (gchar**)table[i].data);
       break;
     }
 
   if (*gdkpixmap == NULL)
   {
-    char *dummy[] = { "1 1 1 1", "  c None", " " };
-    *gdkpixmap = gdk_pixmap_create_from_xpm_d (GDK_ROOT_PARENT(), mask, NULL, dummy);
+    const char *dummy[] = { "1 1 1 1", "  c None", " " };
+    *gdkpixmap = gdk_pixmap_create_from_xpm_d (GDK_ROOT_PARENT(), mask, NULL, (gchar**)dummy);
   }
 }
 

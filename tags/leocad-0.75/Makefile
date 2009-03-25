@@ -34,7 +34,8 @@ all: $(BIN)
 static: bin/leocad.static
 
 bin/leocad: $(OBJ) bin Makefile
-	$(CXX) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
+	@echo Linking $@
+	@$(CXX) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
 bin/leocad.static: $(OBJ) bin Makefile
 	$(CXX) -static -o $@ $(OBJ) $(LIBS) $(LDFLAGS)

@@ -4,31 +4,29 @@ include config.mk
 ### Module directories
 MODULES := $(OSDIR) common
 
-### look for include files in
-###   each of the modules
+### Look for include files in each of the modules
 CPPFLAGS += $(patsubst %,-I%,$(MODULES)) $(OS)
 CPPFLAGS += -g
 
-### extra libraries if required
+### Extra libraries if required
 LIBS := 
 
-### each module will add to this
+### Each module will add to this
 SRC :=
 
 BIN := bin/leocad
 
 -include $(OSDIR)/config.mk
 
-### include the description for
-###   each module
+### Include the description for each module
 include $(patsubst %,%/module.mk,$(MODULES))
 
-### determine the object files
+### Determine the object files
 OBJ := \
   $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
   $(patsubst %.cpp,%.o,$(filter %.cpp,$(SRC)))
 
-### link the program
+### Link the program
 .PHONY: all static
 
 all: $(BIN)
@@ -44,14 +42,12 @@ bin/leocad.static: $(OBJ) bin Makefile
 bin:
 	mkdir bin
 
-### include the C/C++ include
-###   dependencies
+### Include the C/C++ include dependencies
 ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean spotless), )
 -include $(OBJ:.o=.d)
 endif
 
-### calculate C/C++ include
-###   dependencies
+### Calculate C/C++ include dependencies
 %.d: %.c
 	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
 	@$(CC) -MM -MT '$(patsubst %.d,%.o, $@)' $(CFLAGS) $(CPPFLAGS) -w $< > $@
@@ -60,6 +56,13 @@ endif
 %.d: %.cpp
 	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
 	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
+	@[ -s $@ ] || rm -f $@
+
+### Main compiler rule
+%.o: %.cpp
+	@echo $<
+	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o '$(patsubst %.cpp,%.o, $@)' $<
 	@[ -s $@ ] || rm -f $@
 
 ### Various cleaning functions
@@ -76,7 +79,7 @@ spotless: veryclean
 	rm -rf arch $(OSDIR)/config.mk $(OSDIR)/config.h
 
 
-### dependency stuff is done automatically, so these do nothing.
+### Dependency stuff is done automatically, so these do nothing.
 .PHONY: dep depend
 
 

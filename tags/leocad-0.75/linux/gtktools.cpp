@@ -4,23 +4,22 @@
 #include <gtk/gtk.h>
 #include "gtktools.h"
 
-GtkWidget* new_pixmap (GtkWidget *widget, char **data)
+GtkWidget* new_pixmap(GtkWidget *widget, const char **data)
 {
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
   GtkWidget *pixmap;
 
-  gdkpixmap = gdk_pixmap_create_from_xpm_d (widget->window, &mask,
-                 &widget->style->bg[GTK_STATE_NORMAL], data);
-  pixmap = gtk_pixmap_new (gdkpixmap, mask);
+  gdkpixmap = gdk_pixmap_create_from_xpm_d(widget->window, &mask, &widget->style->bg[GTK_STATE_NORMAL], (gchar**)data);
+  pixmap = gtk_pixmap_new(gdkpixmap, mask);
 
-  gdk_pixmap_unref (gdkpixmap);
-  gdk_pixmap_unref (mask);
+  gdk_pixmap_unref(gdkpixmap);
+  gdk_pixmap_unref(mask);
 
   return pixmap;
 }
 
-GtkWidget* clist_title_with_arrow (GtkWidget* clist, char col, char* label_text)
+GtkWidget* clist_title_with_arrow(GtkWidget* clist, char col, const char* label_text)
 {
   GtkWidget *hbox = gtk_hbox_new (FALSE, 0);
   GtkWidget *arrow = gtk_arrow_new (GTK_ARROW_DOWN, GTK_SHADOW_IN);
@@ -32,10 +31,11 @@ GtkWidget* clist_title_with_arrow (GtkWidget* clist, char col, char* label_text)
 
   gtk_widget_show (hbox);
   gtk_clist_set_column_widget (GTK_CLIST (clist), col, hbox);
+
   return arrow;
 }
 
-void set_notebook_tab (GtkWidget *notebook, gint page_num, GtkWidget *widget)
+void set_notebook_tab(GtkWidget *notebook, gint page_num, GtkWidget *widget)
 {
   gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook), gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_num), widget);
   /*
@@ -52,7 +52,7 @@ void set_notebook_tab (GtkWidget *notebook, gint page_num, GtkWidget *widget)
   */
 }
 
-void set_button_pixmap (GtkWidget* widget, float* color)
+void set_button_pixmap(GtkWidget* widget, float* color)
 {
   if (widget->window == NULL)
     return;
@@ -79,7 +79,7 @@ void set_button_pixmap (GtkWidget* widget, float* color)
   gdk_gc_destroy(gc);
 }
 
-void set_button_pixmap2 (GtkWidget* widget, unsigned char* color)
+void set_button_pixmap2(GtkWidget* widget, unsigned char* color)
 {
   GdkColor c;
   GdkGC* gc;

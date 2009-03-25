@@ -1,5 +1,5 @@
 /* XPM */
-static char *cr_selm[] = {
+static const char* cr_selm[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 3 1",
 "  c None",

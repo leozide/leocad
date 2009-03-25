@@ -1,5 +1,5 @@
 /* XPM */
-static char *ac_zoom[] = {
+static const char*ac_zoom[] = {
 "16 15 7 1",
 ".	c None",
 "+	c #00007F",

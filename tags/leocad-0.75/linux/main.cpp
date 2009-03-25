@@ -674,8 +674,8 @@ int main (int argc, char* argv[])
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
 
-  gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask,
-                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], icon32);
+  gdkpixmap = gdk_pixmap_create_from_xpm_d(((GtkWidget*)(*main_window))->window, &mask,
+                                           &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], (gchar**)icon32);
   gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
 
   gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));

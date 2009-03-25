@@ -180,7 +180,7 @@ void SystemUpdateCategories(bool SearchOnly)
 {
 }
 
-static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, gchar **xpm)
+static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, const char **xpm)
 {
   int height, width, colors;
   char pixmap_buffer [(32 * 32)/8];
@@ -241,7 +241,7 @@ void SystemUpdateAction(int new_action, int old_action)
     return;
 
   GtkWidget* button;
-  char** xpm = NULL;
+  const char** xpm = NULL;
   int x, y;
 
   switch (new_action)
@@ -293,9 +293,9 @@ void SystemUpdateAction(int new_action, int old_action)
 
   if (xpm != NULL)
   {
-    create_bitmap_and_mask_from_xpm (&bitmap, &mask, xpm);
-    cursor = gdk_cursor_new_from_pixmap (bitmap, mask, &white, &black, x, y);
-    gdk_window_set_cursor (drawing_area->window, cursor);
+    create_bitmap_and_mask_from_xpm(&bitmap, &mask, xpm);
+    cursor = gdk_cursor_new_from_pixmap(bitmap, mask, &white, &black, x, y);
+    gdk_window_set_cursor(drawing_area->window, cursor);
   }
   else
   {

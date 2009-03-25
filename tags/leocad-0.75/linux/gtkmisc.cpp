@@ -66,7 +66,7 @@ void load_pixmap (const char* filename, GdkPixmap **gdkpixmap, GdkBitmap **mask)
 }
 
 // Load a xpm file and return a pixmap widget
-GtkWidget* create_pixmap (char* filename)
+GtkWidget* create_pixmap (const char* filename)
 {
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
@@ -103,7 +103,7 @@ GtkWidget* menu_tearoff (GtkWidget *menu)
   return menu_item;
 }
  
-GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel)
+GtkWidget* create_sub_menu(GtkWidget* bar, const char* label, GtkAccelGroup* accel)
 {
   GtkWidget *item, *menu;
 
@@ -117,7 +117,7 @@ GtkWidget* create_sub_menu (GtkWidget *bar, char *label, GtkAccelGroup *accel)
   return menu;
 }
 
-GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *accel)
+GtkWidget* create_menu_in_menu(GtkWidget* menu, const char* label, GtkAccelGroup* accel)
 {
   GtkWidget *item, *submenu;
 
@@ -131,8 +131,8 @@ GtkWidget* create_menu_in_menu (GtkWidget *menu, gchar *label, GtkAccelGroup *ac
   return submenu;
 }
 
-GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_accel,
-			     GtkSignalFunc func, GtkObject *window, int id, const char* data)
+GtkWidget* create_menu_item(GtkWidget *menu, const char *label, GtkAccelGroup *menu_accel,
+			    GtkSignalFunc func, GtkObject *window, int id, const char* data)
 {
   GtkWidget *item;
 
@@ -147,8 +147,8 @@ GtkWidget* create_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_
   return item;
 }
 
-GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixmap, GtkAccelGroup *menu_accel,
-                                    GtkSignalFunc func, GtkObject *window, int id, const char* data)
+GtkWidget* create_pixmap_menu_item(GtkWidget *menu, const gchar *label, const char **pixmap, GtkAccelGroup *menu_accel,
+                                   GtkSignalFunc func, GtkObject *window, int id, const char* data)
 {
   GtkWidget *item, *pixmap_widget;
 
@@ -168,8 +168,8 @@ GtkWidget* create_pixmap_menu_item (GtkWidget *menu, gchar *label, gchar **pixma
   return item;
 }
 
-GtkWidget* create_check_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup *menu_accel,
-				   GtkSignalFunc func, GtkObject *window, int id, const char* data)
+GtkWidget* create_check_menu_item(GtkWidget *menu, const char *label, GtkAccelGroup *menu_accel,
+				  GtkSignalFunc func, GtkObject *window, int id, const char* data)
 {
   GtkWidget *item;
 
@@ -184,9 +184,9 @@ GtkWidget* create_check_menu_item (GtkWidget *menu, gchar *label, GtkAccelGroup 
   return item;
 }
 
-GtkWidget* create_radio_menu_item (GtkWidget *menu, GtkWidget *last, gchar *label,
-				   GtkAccelGroup *menu_accel, GtkSignalFunc func,
-				   GtkObject *window, int id, const char* data)
+GtkWidget* create_radio_menu_item(GtkWidget *menu, GtkWidget *last, const char *label,
+				  GtkAccelGroup *menu_accel, GtkSignalFunc func,
+				  GtkObject *window, int id, const char* data)
 {
   GtkWidget *item;
   GSList *group = NULL;
@@ -204,9 +204,9 @@ GtkWidget* create_radio_menu_item (GtkWidget *menu, GtkWidget *last, gchar *labe
   return item;
 }
 
-GtkWidget* create_radio_menu_pixmap (GtkWidget *menu, GtkWidget *last, gchar *filename,
-				     GtkAccelGroup *menu_accel, GtkSignalFunc func,
-				     GtkObject *window, int id, const char* data)
+GtkWidget* create_radio_menu_pixmap(GtkWidget *menu, GtkWidget *last, const char *filename,
+				    GtkAccelGroup *menu_accel, GtkSignalFunc func,
+				    GtkObject *window, int id, const char* data)
 {
   GtkWidget *item, *pixmap;
   GSList *group = NULL;

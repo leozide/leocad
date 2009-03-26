@@ -98,7 +98,7 @@ void SystemUpdateCategories(bool SearchOnly);
 
 void SystemInit();
 void SystemFinish();
-int SystemDoMessageBox(char* prompt, int nMode);
+int SystemDoMessageBox(const char* prompt, int nMode);
 bool SystemDoDialog(int nMode, void* param);
 void SystemDoPopupMenu(int nMenu, int x, int y);
 void SystemDoWaitCursor(int nCode);

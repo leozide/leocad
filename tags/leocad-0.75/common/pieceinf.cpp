@@ -1028,10 +1028,11 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] } };
 
 	float SmallestU = 10000.0f;
+	float* PlaneArray[4] = { TopPlane, BottomPlane, LeftPlane, RightPlane };
 
 	for (int i = 0; i < 4; i++)
 	{
-		float* Plane;
+		float* Plane = PlaneArray[i];
 
 		switch (i)
 		{

@@ -168,7 +168,7 @@ void SystemFinish()
 }
 
 // FIXME: remove 
-int SystemDoMessageBox(char* prompt, int mode)
+int SystemDoMessageBox(const char* prompt, int mode)
 {
 	return 0;
 }

@@ -512,7 +512,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_none"));
-  gtk_widget_set_sensitive (item, flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) != 0);
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_invert"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_byname"));
@@ -610,9 +610,9 @@ void SystemFinish()
 }
 
 // FIXME: remove 
-int SystemDoMessageBox(char* prompt, int mode)
+int SystemDoMessageBox(const char* prompt, int mode)
 {
-  return msgbox_execute (prompt, "LeoCAD", mode);
+  return msgbox_execute(prompt, "LeoCAD", mode);
 }
 
 bool SystemDoDialog(int mode, void* param)

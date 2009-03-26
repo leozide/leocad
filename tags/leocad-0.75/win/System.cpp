@@ -1128,20 +1128,15 @@ void SystemSetWindowCaption(char* caption)
 	AfxSetWindowText(AfxGetMainWnd()->m_hWnd, caption);
 }
 
-int SystemDoMessageBox(char* prompt, int nMode)
+int SystemDoMessageBox(const char* prompt, int nMode)
 {
 	return AfxMessageBox(prompt, nMode);
 }
 
 int Sys_MessageBox (const char* text, const char* caption, int type)
-
 {
-
 	return AfxMessageBox(text, type);
-
 }
-
-
 
 extern BOOL AFXAPI AfxFullPath(LPTSTR lpszPathOut, LPCTSTR lpszFileIn);
 

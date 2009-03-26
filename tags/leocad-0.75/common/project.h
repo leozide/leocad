@@ -191,7 +191,7 @@ protected:
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 	void DrawGrid();
-	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
+	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
 	inline bool IsDrawing()
 	{

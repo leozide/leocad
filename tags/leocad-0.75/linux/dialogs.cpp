@@ -294,7 +294,7 @@ static void filedlg_callback(GtkWidget *widget, gpointer data)
     *cur_ret = LC_CANCEL;
 }
 
-int filedlg_execute(char* caption, char* filename)
+int filedlg_execute(const char* caption, char* filename)
 {
   GtkWidget* dlg;
   dlg = gtk_file_selection_new (caption);
@@ -2540,7 +2540,7 @@ typedef struct
   void* data;
 
 } LC_GROUPEDITDLG_STRUCT;
-
+/*
 static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 {
   //  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
@@ -2548,7 +2548,7 @@ static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 
   *cur_ret = LC_OK;
 }
-
+*/
 void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
 {
 #if 0
@@ -2826,21 +2826,21 @@ static void librarydlg_update_tree (GtkWidget *dlg)
   PiecesLibrary *lib = g_App->GetPiecesLibrary();
   GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCTreeNode *parent;
-  char *text = "Pieces";
+  const char *text = "Pieces";
 
   gtk_clist_freeze (GTK_CLIST (ctree));
   gtk_clist_clear (GTK_CLIST (ctree));
 
-  parent = gtk_ctree_insert_node (ctree, NULL, NULL, &text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
+  parent = gtk_ctree_insert_node (ctree, NULL, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
 
   for (int i = 0; i < lib->GetNumCategories(); i++)
   {
     text = lib->GetCategoryName(i);
-    gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
+    gtk_ctree_insert_node (ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
   }
 
   text = "Unassigned";
-  gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
+  gtk_ctree_insert_node (ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
 
   gtk_clist_thaw (GTK_CLIST (ctree));
 }

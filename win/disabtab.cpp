@@ -5,7 +5,7 @@
 //
 // CTabCtrlWithDisable implements a CTabCtrl with tabs that you can disable.
 
-#include "lc_global.h"
+#include "StdAfx.h"
 #include "DisabTab.h"
 
 #ifdef _DEBUG
@@ -32,7 +32,7 @@ CTabCtrlWithDisable::~CTabCtrlWithDisable()
 }
 
 // Subclass the tab control: also make ownder-draw
-BOOL CTabCtrlWithDisable::SubclassDlgItem(UINT nID, CWnd* pParent)
+CTabCtrlWithDisable::SubclassDlgItem(UINT nID, CWnd* pParent)
 {
 	if (!CTabCtrl::SubclassDlgItem(nID, pParent))
 		return FALSE;

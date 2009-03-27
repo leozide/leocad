@@ -4,7 +4,7 @@
 // http://www.rocscience.com/~corkum/BCMenu.html
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "BMPMenu.h"
 #include <afxpriv.h> // makes A2W and other spiffy AFX macros work
 #include "resource.h"

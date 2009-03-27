@@ -14,12 +14,10 @@
 #include "CADBar.h"
 #include "BMPMenu.h"
 #include "ModDlg.h"
-#include "dynsplit.h"
-#include "lc_message.h"
 
 class MainWnd;
 
-class CMainFrame : public CFrameWnd, public lcListener
+class CMainFrame : public CFrameWnd
 {
 protected: // create from serialization only
 	CMainFrame();
@@ -30,7 +28,6 @@ public:
 
 // Operations
 public:
-	void ProcessMessage(lcMessageType Message, void* Data);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -52,18 +49,13 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-	// control bar embedded members
+  // control bar embedded members
 	CCADStatusBar m_wndStatusBar;
 	CFlatToolBar  m_wndStandardBar;
 	CFlatToolBar  m_wndToolsBar;
 	CFlatToolBar  m_wndAnimationBar;
 	CPiecesBar    m_wndPiecesBar;
-	CDynamicSplitterWnd  m_wndSplitter;
-
-	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;
-
-	void SetViewLayout(CWnd* wnd, const char*& str);
-	void GetViewLayout(CWnd* wnd, class String& str) const;
+  CSplitterWnd  m_wndSplitter;
 
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
@@ -71,7 +63,7 @@ public:
 		{ m_strStatusBar = Message; }
 
 protected:
-	CModifyDialogBar	m_wndModifyDlg;
+	CModifyDialog	m_wndModifyDlg;
 
 	CBMPMenu m_bmpMenu;
 	WINDOWPLACEMENT m_wpPrev;
@@ -107,14 +99,10 @@ protected:
 	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
 	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);
 	afx_msg LONG OnAddString(UINT lParam, LONG wParam);
+	afx_msg LONG OnUpdateInfo(UINT lParam, LONG wParam);
 	afx_msg LONG UpdateSettings(UINT lParam, LONG wParam);
 
 	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnViewSplitVertically();
-	afx_msg void OnViewSplitHorizontally();
-	afx_msg void OnViewDeleteView();
-	afx_msg void OnViewResetViews();
 };
 
 /////////////////////////////////////////////////////////////////////////////

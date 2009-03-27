@@ -7,12 +7,17 @@ public:
 	GLWindow(GLWindow *share);
 	virtual ~GLWindow();
 
+	void IncRef()
+	{ m_nRef++; }
+	void DecRef()
+	{ m_nRef--; if (m_nRef == 0) delete this; }
+
 	bool Create(void* data);
 	void DestroyContext();
 
 	bool MakeCurrent();
 	void SwapBuffers();
-	void Redraw(bool ForceRedraw = false);
+	void Redraw();
 	void CaptureMouse();
 	void ReleaseMouse();
 
@@ -41,6 +46,7 @@ protected:
 private:
 	void *m_pData;
 	GLWindow *m_pShare;
+	int m_nRef;
 };
 
 #endif // _GLWINDOW_H_

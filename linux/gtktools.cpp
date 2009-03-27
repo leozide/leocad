@@ -4,14 +4,14 @@
 #include <gtk/gtk.h>
 #include "gtktools.h"
 
-GtkWidget* new_pixmap (GtkWidget *widget, const char **data)
+GtkWidget* new_pixmap (GtkWidget *widget, char **data)
 {
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
   GtkWidget *pixmap;
 
   gdkpixmap = gdk_pixmap_create_from_xpm_d (widget->window, &mask,
-                 &widget->style->bg[GTK_STATE_NORMAL], (gchar**)data);
+                 &widget->style->bg[GTK_STATE_NORMAL], data);
   pixmap = gtk_pixmap_new (gdkpixmap, mask);
 
   gdk_pixmap_unref (gdkpixmap);
@@ -79,7 +79,7 @@ void set_button_pixmap (GtkWidget* widget, float* color)
   gdk_gc_destroy(gc);
 }
 
-void set_button_pixmap2 (GtkWidget* widget, float* color)
+void set_button_pixmap2 (GtkWidget* widget, unsigned char* color)
 {
   GdkColor c;
   GdkGC* gc;
@@ -95,9 +95,9 @@ void set_button_pixmap2 (GtkWidget* widget, float* color)
   pixmap = gdk_pixmap_new (widget->window, widget->allocation.width - 10,
 			   widget->allocation.height - 10, -1);
 
-  c.red = color[0]*65535;
-  c.green = color[1]*65535;
-  c.blue = color[2]*65535;
+  c.red = color[0]*256;
+  c.green = color[1]*256;
+  c.blue = color[2]*256;
   gdk_color_alloc (gtk_widget_get_colormap(widget), &c);
   gdk_gc_set_foreground(gc, &c);
 

@@ -1,6 +1,6 @@
-#include "lc_global.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "config.h"
 #include "quant.h"
 #include "image.h"
 #include "file.h"
@@ -9,78 +9,77 @@
 
 bool Image::LoadBMP (File& file)
 {
-	i32 bmWidth, bmHeight;
-	u8 bmPlanes, bmBitsPixel, m1, m2;
-	struct RGBQUAD
-	{
-		unsigned char rgbBlue;
-		unsigned char rgbGreen;
-		unsigned char rgbRed;
-		unsigned char rgbReserved;
-	};
-	i16 res1,res2;
-	i32 filesize, pixoff;
-	i32 bmisize, compression;
-	i32 xscale, yscale;
-	i32 colors, impcol, rc;
-	u32 sizeimage, m_bytesRead = 0;
+  lcint32 bmWidth, bmHeight;
+  lcuint8 bmPlanes, bmBitsPixel, m1, m2;
+  typedef struct {
+    unsigned char rgbBlue;
+    unsigned char rgbGreen;
+    unsigned char rgbRed;
+    unsigned char rgbReserved;
+  } RGBQUAD;
+  lcint16 res1,res2;
+  lcint32 filesize, pixoff;
+  lcint32 bmisize, compression;
+  lcint32 xscale, yscale;
+  lcint32 colors, impcol, rc;
+  lcuint32 sizeimage, m_bytesRead = 0;
 
-	FreeData ();
+  FreeData ();
 
 	if (file.Read (&m1, 1) != 1)
-		return false;
+    return false;
 	m_bytesRead++;
 
 	if (file.Read (&m2, 1) != 1)
-		return false;
+    return false;
 	m_bytesRead++;
 
 	if ((m1 != 'B') || (m2 != 'M'))
 		return false;
 
-	rc = file.ReadLong (&filesize, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(filesize), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&res1, 1); m_bytesRead+=2;
+	rc = file.ReadShort ((int*)&(res1), 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&res2, 1); m_bytesRead+=2;
+	rc = file.ReadShort ((int*)&(res2), 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&pixoff, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(pixoff), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&bmisize, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(bmisize), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&bmWidth, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(bmWidth), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&bmHeight, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(bmHeight), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&bmPlanes, 1); m_bytesRead+=2;
+	rc = file.ReadShort ((int*)&(bmPlanes), 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&bmBitsPixel, 1); m_bytesRead+=2;
+	rc = file.ReadShort ((int*)&(bmBitsPixel), 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&compression, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(compression), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&sizeimage, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(sizeimage), 1); m_bytesRead+=4;
 	if (rc != 1) {return false; }
 
-	rc = file.ReadLong (&xscale, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(xscale), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&yscale, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(yscale), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&colors, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(colors), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&impcol, 1); m_bytesRead+=4;
+	rc = file.ReadLong ((long*)&(impcol), 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
 	if (colors == 0)
@@ -161,7 +160,7 @@ bool Image::LoadBMP (File& file)
 	{
 		m_nWidth = w;
 		m_nHeight = h;
-		m_bAlpha = false;
+    m_bAlpha = false;
 		unsigned char* outbuf = m_pData;
 		long row = 0;
 		long rowOffset = 0;
@@ -172,7 +171,7 @@ bool Image::LoadBMP (File& file)
 			for (row=bmHeight-1;row>=0;row--)
 			{
 				// which row are we working on?
-				rowOffset = (long unsigned)row*row_size;
+				rowOffset = (long unsigned)row*row_size;						      
 
 				if (bmBitsPixel == 24)
 				{
@@ -197,7 +196,7 @@ bool Image::LoadBMP (File& file)
 						char dummy;
 						if (file.Read (&dummy, 1) != 1)
 						{
-							FreeData ();
+              FreeData ();
 							return false;
 						}
 						m_bytesRead++;
@@ -220,7 +219,7 @@ bool Image::LoadBMP (File& file)
 							bit_count = 8;
 							if (file.Read (&inbyte, 1) != 1)
 							{
-								FreeData ();
+                FreeData ();
 								delete [] colormap;
 								return false;
 							}
@@ -244,7 +243,7 @@ bool Image::LoadBMP (File& file)
 						char dummy;
 						if (file.Read (&dummy, 1) != 1)
 						{
-							FreeData ();
+              FreeData ();
 							if (colormap)
 								delete [] colormap;
 							return false;
@@ -357,7 +356,7 @@ bool Image::LoadBMP (File& file)
 						{
 							for (i = 0; i < c; x++, i++)
 							{
-								if ((i&1) == 0)
+							    if ((i&1) == 0)
 									c1 = file.GetChar ();
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbRed; pp++;
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbGreen; pp++;
@@ -374,7 +373,7 @@ bool Image::LoadBMP (File& file)
 
 		if (colormap)
 			delete [] colormap;
-		}
+    }
 
 	return true;
 }
@@ -413,9 +412,9 @@ bool Image::SaveBMP (File& file, bool quantize) const
 	file.WriteShort (&res, 1);     byteswritten+=2;// bfReserved2
 	file.WriteLong (&pixoff, 1);   byteswritten+=4;// bfOffBits
 
-	u32 biSize = 40, compress = 0, size = 0;
-	i32 width = m_nWidth, height = m_nHeight, pixels = 0;
-	u16 planes = 1;
+	lcuint32 biSize = 40, compress = 0, size = 0;
+	lcint32 width = m_nWidth, height = m_nHeight, pixels = 0;
+	lcuint16 planes = 1;
 	file.WriteLong (&biSize, 1);   byteswritten+=4;// biSize
 	file.WriteLong (&width, 1);    byteswritten+=4;// biWidth
 	file.WriteLong (&height, 1);   byteswritten+=4;// biHeight

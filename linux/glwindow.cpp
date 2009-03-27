@@ -264,7 +264,7 @@ void GLWindow::SwapBuffers ()
     pfnglXSwapBuffers (GDK_WINDOW_XDISPLAY (prv->widget->window), GDK_WINDOW_XWINDOW (prv->widget->window));
 }
 
-void GLWindow::Redraw (bool ForceRedraw)
+void GLWindow::Redraw ()
 {
   GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 

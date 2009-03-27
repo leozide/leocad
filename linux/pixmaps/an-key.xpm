@@ -1,6 +1,6 @@
 /* XPM */
-static const char *an_key[] = {
-/* columns rows colors const chars-per-pixel */
+static char *an_key[] = {
+/* columns rows colors chars-per-pixel */
 "16 15 6 1",
 "  c Gray0",
 ". c #00007f",

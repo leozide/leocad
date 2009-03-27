@@ -1,6 +1,6 @@
 /* XPM */
-static const char *pi_slope[] = {
-/* columns rows colors const chars-per-pixel */
+static char *pi_slope[] = {
+/* columns rows colors chars-per-pixel */
 "16 15 3 1",
 "  c Gray0",
 ". c Red",

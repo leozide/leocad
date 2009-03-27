@@ -3,7 +3,7 @@
 // If this code works, it was written by Paul DiLascia.
 // If not, I don't know who wrote it.
 //
-#include "lc_global.h"
+#include "StdAfx.h"
 #include "FlatBar.h"
 #include "BarCmdUI.h"
 #include "resource.h"
@@ -459,9 +459,8 @@ CSize CFlatToolBar::CalcLayout(DWORD dwMode, int nLength)
 			int nControlCount = 0;
 			BOOL bIsDelayed = m_bDelayedButtonLayout;
 			m_bDelayedButtonLayout = FALSE;
-			int i;
 
-			for(i = 0; i < nCount; i++)
+			for(int i = 0; i < nCount; i++)
 				if ((pData[i].fsStyle & TBSTYLE_SEP) && (pData[i].idCommand != 0))
 					nControlCount++;
 

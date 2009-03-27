@@ -1,12 +1,10 @@
 // PrefSht.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "resource.h"
 #include "PrefSht.h"
 #include "defines.h"
-#include "str.h"
-#include "mainfrm.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -98,7 +96,7 @@ void CPreferencesSheet::OnDefault()
 	int i, j;
 	float f, cr1[4], cr2[4], cr3[4], cr4[4], cr5[4];
 	unsigned long l;
-	unsigned short s1;
+	unsigned short s1, s2;
 
 	m_PageGeneral.GetOptions(&i, &j, str, st1);
 	AfxGetApp()->WriteProfileInt("Settings", "Autosave", i);
@@ -108,9 +106,10 @@ void CPreferencesSheet::OnDefault()
 	m_PageDetail.GetOptions(&l, &f);
 	AfxGetApp()->WriteProfileInt("Default", "Detail", l);
 	AfxGetApp()->WriteProfileInt("Default", "Line", (int)(f*100));
-	m_PageDrawing.GetOptions(&l, &s1);
+	m_PageDrawing.GetOptions(&l, &s1, &s2);
 	AfxGetApp()->WriteProfileInt("Default", "Snap", l);
 	AfxGetApp()->WriteProfileInt("Default", "Angle", s1);
+	AfxGetApp()->WriteProfileInt("Default", "Grid", s2);
 	m_PageScene.GetOptions(&l, &f, str, cr1, cr2, cr3, cr4, cr5);
 	AfxGetApp()->WriteProfileInt("Default", "Scene", l);
 	AfxGetApp()->WriteProfileInt("Default", "Density", (int)(f*100));
@@ -123,9 +122,4 @@ void CPreferencesSheet::OnDefault()
 	m_PagePrint.GetOptions(st1, st2);
 	AfxGetApp()->WriteProfileString("Default", "Header", st1);
 	AfxGetApp()->WriteProfileString("Default", "Footer", st2);
-
-	String views;
-	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
-	Frame->GetViewLayout(NULL, views);
-	AfxGetApp()->WriteProfileString("Settings", "ViewLayout", views);
 }

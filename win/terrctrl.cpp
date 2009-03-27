@@ -1,7 +1,7 @@
 // TerrCtrl.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "TerrCtrl.h"
 #include "IPEdit.h"
@@ -511,9 +511,7 @@ void CTerrainCtrl::OnDraw(CDC* pDC)
 */
 	// calc bottom
 	int bottom = GetFixedRowHeight();
-	int i;
-
-	for (i = idTopLeft.row; i < m_nRows; i++)
+	for (int i = idTopLeft.row; i < m_nRows; i++)
 	{
 		bottom += GetRowHeight(i);
 		if (bottom >= clientRect.bottom)
@@ -1295,9 +1293,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 	else if (point.x < fixedColWidth) // in fixed col
 	{
 		int xpos = 0;
-		int col;
-
-		for (col = 0; col < m_nFixedCols; col++)
+		for (int col = 0; col < m_nFixedCols; col++)
 		{
 			xpos += GetColumnWidth(col);
 			if (xpos > point.x) break;
@@ -1307,9 +1303,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 	else	// in non-fixed col
 	{
 		int xpos = fixedColWidth;
-		int col;
-
-		for (col = idTopLeft.col; col < m_nCols; col++)
+		for (int col = idTopLeft.col; col < m_nCols; col++)
 		{
 			xpos += GetColumnWidth(col);
 			if (xpos > point.x) break;
@@ -1328,9 +1322,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 	else if (point.y < fixedRowHeight) // in fixed col
 	{
 		int ypos = 0;
-		int row;
-
-		for (row = 0; row < m_nFixedRows; row++)
+		for (int row = 0; row < m_nFixedRows; row++)
 		{
 			ypos += GetRowHeight(row);
 			if (ypos > point.y) break;
@@ -1340,9 +1332,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 	else
 	{
 		int ypos = fixedRowHeight;
-		int row;
-
-		for (row = idTopLeft.row; row < GetRowCount(); row++)
+		for (int row = idTopLeft.row; row < GetRowCount(); row++)
 		{
 			ypos += GetRowHeight(row);
 			if (ypos > point.y) break;
@@ -1802,9 +1792,7 @@ void CTerrainCtrl::EnsureVisible(int nRow, int nCol)
 
 	// calc bottom
 	int bottom = GetFixedRowHeight();
-	int i;
-
-	for (i = idTopLeft.row; i < m_nRows; i++)
+	for (int i = idTopLeft.row; i < m_nRows; i++)
 	{
 		bottom += GetRowHeight(i);
 		if (bottom >= rect.bottom)

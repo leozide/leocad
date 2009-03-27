@@ -1,13 +1,10 @@
 #ifndef _LC_APPLICATION_H_
 #define _LC_APPLICATION_H_
 
-#include "lc_array.h"
+#include "array.h"
 
 class Project;
 class PiecesLibrary;
-class PiecePreview;
-
-#define LC_MAX_MOUSE_SENSITIVITY 20
 
 class lcApplication
 {
@@ -15,7 +12,7 @@ public:
 	lcApplication();
 	~lcApplication();
 
-	bool Initialize(int argc, char* argv[], const char* SysLibPath);
+	bool Initialize(int argc, char *argv[], const char* SysLibPath);
 	void Shutdown();
 
 	// Pieces library.
@@ -38,17 +35,12 @@ public:
 		m_ActiveProject = project;
 	}
 
-public:
-	PiecePreview* m_PiecePreview;
-	int m_SelectedColor;
-	int m_MouseSensitivity;
-
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);
 	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
 
 	Project* m_ActiveProject;
-	lcPtrArray<Project> m_Projects;
+	PtrArray<Project> m_Projects;
 	PiecesLibrary* m_Library;
 };
 

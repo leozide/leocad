@@ -1,7 +1,7 @@
 // FigDlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "FigDlg.h"
 #include "minifig.h"
@@ -99,34 +99,20 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
     WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
-	int i;
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-		LC_MFW_PIECEINFO** items;
-		int j, count;
+    char **names;
+    int j, count;
 
-		m_pMinifig->GetItems(i, &items, &count);
+    m_pMinifig->GetDescriptions (i, &names, &count);
 
-		for (j = 0; j < count; j++)
-		{
-			if (items[j])
-			{
-				int idx = pCombo->AddString(items[j]->description);
-				pCombo->SetItemDataPtr(idx, items[j]);
-			}
-			else
-			{
-				int idx = pCombo->AddString("None");
-				pCombo->SetItemDataPtr(idx, NULL);
-			}
-		}
-
-		free(items);
+    for (j = 0; j < count; j++)
+			pCombo->AddString (names[j]);
+    free (names);
 	}
 
   char *names[LC_MFW_NUMITEMS];
@@ -167,11 +153,10 @@ LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 
 void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
-	CComboBox* combo = (CComboBox*)GetDlgItem(nID);
-	LC_MFW_PIECEINFO* info = (LC_MFW_PIECEINFO*)combo->GetItemDataPtr(combo->GetCurSel());
-
-	m_pMinifig->ChangePiece(nID-IDC_MF_HAT, info);
-	m_pMinifig->Redraw();
+  char tmp[65];
+  GetDlgItem(nID)->GetWindowText (tmp, 65);
+	m_pMinifig->ChangePiece (nID-IDC_MF_HAT, tmp);
+	m_pMinifig->Redraw ();
 }
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 

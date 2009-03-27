@@ -1,5 +1,5 @@
 /* XPM */
-static const char * st_snapa[] = {
+static char * st_snapa[] = {
 "16 15 5 1",
 ". 	c None",
 "+	c #000000",

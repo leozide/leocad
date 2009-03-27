@@ -2,7 +2,7 @@
 // Base window class
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "basewnd.h"
 
 BaseWnd::BaseWnd (BaseWnd *parent, int menu_count)

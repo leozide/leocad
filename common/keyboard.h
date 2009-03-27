@@ -128,14 +128,14 @@
 #define LC_KEYMOD_1TO2(a)   ((a & ~LC_KEYMOD_MASK) | ((a & LC_KEYMOD1_MASK) << 2))
 #define LC_KEYMOD_2TO1(a)   ((a & ~LC_KEYMOD_MASK) | ((a & LC_KEYMOD2_MASK) >> 2))
 
-struct LC_KEYBOARD_COMMAND
+typedef struct
 {
 	LC_COMMANDS ID;
 	const char* Description;
 	unsigned char Flags;
 	unsigned char Key1;
 	unsigned char Key2;
-};
+} LC_KEYBOARD_COMMAND;
 
 extern LC_KEYBOARD_COMMAND KeyboardShortcuts[];
 extern const int KeyboardShortcutsCount;

@@ -1667,7 +1667,7 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 		if (i == 15) i = 23;
 	}
 
-	if (piece->verts_count > 65535)
+	if (piece->verts_count > 65535 || quads > 65535)
 	{
 		piece->long_info = true;
 		unsigned long* drawinfo;

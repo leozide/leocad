@@ -1,7 +1,7 @@
 #ifndef _LC_APPLICATION_H_
 #define _LC_APPLICATION_H_
 
-#include "array.h"
+#include "lc_array.h"
 
 class Project;
 class PiecesLibrary;
@@ -40,7 +40,7 @@ protected:
 	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
 
 	Project* m_ActiveProject;
-	PtrArray<Project> m_Projects;
+	lcPtrArray<Project> m_Projects;
 	PiecesLibrary* m_Library;
 };
 

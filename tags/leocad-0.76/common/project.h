@@ -5,7 +5,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
-#include "array.h"
+#include "lc_array.h"
 #include "algebra.h"
 
 typedef enum 
@@ -135,7 +135,7 @@ protected:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;    // changed since last saved
 
-	PtrArray<View> m_ViewList;
+	lcPtrArray<View> m_ViewList;
 
 	char m_strAuthor[101];
 	char m_strDescription[101];
@@ -168,7 +168,7 @@ protected:
 	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
+	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
@@ -290,8 +290,8 @@ protected:
 	bool DoFileSave();
 	bool FileLoad(File* file, bool bUndo, bool bMerge);
 	void FileSave(File* file, bool bUndo);
-	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray);
-	void FileReadMPD(File& MPD, PtrArray<File>& FileArray) const;
+	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray);
+	void FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const;
 
 public:
 	// File helpers

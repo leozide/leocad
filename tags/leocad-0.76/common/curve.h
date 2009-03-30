@@ -3,7 +3,7 @@
 
 #include "object.h"
 #include "opengl.h"
-#include "array.h"
+#include "lc_array.h"
 
 class Curve;
 class CurvePoint;
@@ -121,7 +121,7 @@ class Curve : public Object
 
   GLuint m_nDisplayList;
 
-  PtrArray<CurvePoint> m_Points;
+  lcPtrArray<CurvePoint> m_Points;
 };
 
 #endif // _CURVE_H_

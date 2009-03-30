@@ -1626,7 +1626,7 @@ void Piece::AddConnections(CONNECTION_TYPE* pConnections)
 
 void Piece::RemoveConnections(CONNECTION_TYPE* pConnections)
 {
-	PtrArray<Piece> RebuildList;
+	lcPtrArray<Piece> RebuildList;
 	int i, j;
 
 	for (i = 0; i < LC_CONNECTIONS; i++)

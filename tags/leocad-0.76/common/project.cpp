@@ -989,7 +989,7 @@ void Project::FileSave(File* file, bool bUndo)
 	}
 }
 
-void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
+void Project::FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const
 {
   FileMem* CurFile = NULL;
 	char Buf[1024];
@@ -1037,7 +1037,7 @@ void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
   }
 }
 
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray)
+void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray)
 {
 	char buf[1024];
 
@@ -1433,7 +1433,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
 
   if (file.GetLength() != 0)
   {
-    PtrArray<File> FileArray;
+    lcPtrArray<File> FileArray;
 
     // Unpack the MPD file.
     if (mpdfile)
@@ -6850,7 +6850,7 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	}
 }
 
-void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
+void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<Object>& Objects)
 {
 	int Viewport[4] =
 	{
@@ -7026,7 +7026,7 @@ bool Project::StopTracking(bool bAccept)
 				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
 					// Find objects inside the rectangle.
-					PtrArray<Object> Objects;
+					lcPtrArray<Object> Objects;
 					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
 
 					// Deselect old pieces.
@@ -10014,7 +10014,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 	}
 
 	// initalise "melt together" group information
-	ObjArray<GroupInfo> allGroups;
+	lcObjArray<GroupInfo> allGroups;
 	GroupInfo groupObject;
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{

@@ -317,7 +317,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_PIECE_DELETE:
 		{
-			PtrArray<PieceInfo> Pieces;
+			lcPtrArray<PieceInfo> Pieces;
 
 			for (int i = 0; i < m_List.GetItemCount(); i++)
 			{
@@ -355,7 +355,7 @@ void CLibraryDlg::UpdateList()
 
 	if (CategoryIndex != -1)
 	{
-		PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+		lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
 		Lib->GetCategoryEntries(CategoryIndex, false, SinglePieces, GroupedPieces);
 

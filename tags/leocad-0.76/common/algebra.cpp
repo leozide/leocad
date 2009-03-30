@@ -2,38 +2,36 @@
 // Math and Linear Algebra stuff.
 //
 
-#include "defines.h"
+#include "lc_global.h"
 #include "algebra.h"
+
+#include "defines.h"
 
 // ============================================================================
 // 4x4 Matrix class.
 
-void Matrix44::CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up)
+Matrix44 CreateLookAtMatrix(const Vector3& Eye, const Vector3& Target, const Vector3& Up)
 {
 	Vector3 x, y, z;
 
 	// Z = Eye - Target
-	z = Eye - Target;
+	z = Normalize(Eye - Target);
 
-  // X = Y Cross Z
-	x = Cross3(Up, z);
+	// X = Y Cross Z
+	x = Normalize(Cross(Up, z));
 
-  // Y = Z Cross X
-	y = Cross3(z, x);
+	// Y = Z Cross X
+	y = Normalize(Cross(z, x));
 
-	// Normalize everything.
-	x.Normalize();
-	y.Normalize();
-	z.Normalize();
+	Vector4 Row0 = Vector4(x[0], y[0], z[0], 0.0f);
+	Vector4 Row1 = Vector4(x[1], y[1], z[1], 0.0f);
+	Vector4 Row2 = Vector4(x[2], y[2], z[2], 0.0f);
+	Vector4 Row3 = Vector4(Vector3(Row0 * -Eye[0] + Row1 * -Eye[1] + Row2 * -Eye[2]), 1.0f);
 
-	m_Rows[0] = Vector4(x[0], y[0], z[0], 0.0f);
-	m_Rows[1] = Vector4(x[1], y[1], z[1], 0.0f);
-	m_Rows[2] = Vector4(x[2], y[2], z[2], 0.0f);
-	m_Rows[3] = m_Rows[0]*-Eye[0] + m_Rows[1]*-Eye[1] + m_Rows[2]*-Eye[2];
-	m_Rows[3][3] = 1.0f;
+	return Matrix44(Row0, Row1, Row2, Row3);
 }
 
-void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far)
+Matrix44 CreatePerspectiveMatrix(float FoVy, float Aspect, float Near, float Far)
 {
 	float Left, Right, Bottom, Top;
 
@@ -44,7 +42,7 @@ void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far
 	Right = Top * Aspect;
 
 	if ((Near <= 0.0f) || (Far <= 0.0f) || (Near == Far) || (Left == Right) || (Top == Bottom))
-		return;
+		return IdentityMatrix44();
 
 	float x, y, a, b, c, d;
 
@@ -55,10 +53,80 @@ void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far
 	c = -(Far + Near) / (Far - Near);
 	d = -(2.0f * Far * Near) / (Far - Near);
 
-	m_Rows[0] = Vector4(x, 0, 0,  0);
-	m_Rows[1] = Vector4(0, y, 0,  0);
-	m_Rows[2] = Vector4(a, b, c, -1);
-	m_Rows[3] = Vector4(0, 0, d,  0);
+	return Matrix44(Vector4(x, 0, 0, 0), Vector4(0, y, 0, 0), Vector4(a, b, c, -1), Vector4(0, 0, d, 0));
+}
+
+Matrix44 CreateOrthoMatrix(float Left, float Right, float Bottom, float Top, float Near, float Far)
+{
+	return Matrix44(Vector4(2.0f / (Right-Left), 0.0f, 0.0f, 0.0f),
+	                Vector4(0.0f, 2.0f / (Top-Bottom), 0.0f, 0.0f),
+	                Vector4(0.0f, 0.0f, -2.0f / (Far-Near), 0.0f),
+	                Vector4(-(Right+Left) / (Right-Left), -(Top+Bottom) / (Top-Bottom), -(Far+Near) / (Far-Near), 1.0f));
+}
+
+void GetFrustumPlanes(const Matrix44& WorldView, const Matrix44& Projection, Vector4 Planes[6])
+{
+	// TODO: Use vectors.
+	Matrix44 WorldProj = Mul(WorldView, Projection);
+
+	Planes[0][0] = (WorldProj[0][0] - WorldProj[0][3]) * -1;
+	Planes[0][1] = (WorldProj[1][0] - WorldProj[1][3]) * -1;
+	Planes[0][2] = (WorldProj[2][0] - WorldProj[2][3]) * -1;
+	Planes[0][3] = (WorldProj[3][0] - WorldProj[3][3]) * -1;
+	Planes[1][0] =  WorldProj[0][0] + WorldProj[0][3];
+	Planes[1][1] =  WorldProj[1][0] + WorldProj[1][3];
+	Planes[1][2] =  WorldProj[2][0] + WorldProj[2][3];
+	Planes[1][3] =  WorldProj[3][0] + WorldProj[3][3];
+	Planes[2][0] = (WorldProj[0][1] - WorldProj[0][3]) * -1;
+	Planes[2][1] = (WorldProj[1][1] - WorldProj[1][3]) * -1;
+	Planes[2][2] = (WorldProj[2][1] - WorldProj[2][3]) * -1;
+	Planes[2][3] = (WorldProj[3][1] - WorldProj[3][3]) * -1;
+	Planes[3][0] =  WorldProj[0][1] + WorldProj[0][3];
+	Planes[3][1] =  WorldProj[1][1] + WorldProj[1][3];
+	Planes[3][2] =  WorldProj[2][1] + WorldProj[2][3];
+	Planes[3][3] =  WorldProj[3][1] + WorldProj[3][3];
+	Planes[4][0] = (WorldProj[0][2] - WorldProj[0][3]) * -1;
+	Planes[4][1] = (WorldProj[1][2] - WorldProj[1][3]) * -1;
+	Planes[4][2] = (WorldProj[2][2] - WorldProj[2][3]) * -1;
+	Planes[4][3] = (WorldProj[3][2] - WorldProj[3][3]) * -1;
+	Planes[5][0] =  WorldProj[0][2] + WorldProj[0][3];
+	Planes[5][1] =  WorldProj[1][2] + WorldProj[1][3];
+	Planes[5][2] =  WorldProj[2][2] + WorldProj[2][3];
+	Planes[5][3] =  WorldProj[3][2] + WorldProj[3][3];
+
+	for (int i = 0; i < 6; i++)
+	{
+		float Len = Length(Vector3(Planes[i]));
+		Planes[i] /= -Len;
+	}
+}
+
+Vector3 ZoomExtents(const Vector3& Position, const Matrix44& WorldView, const Matrix44& Projection, const Vector3* Points, int NumPoints)
+{
+	Vector4 Planes[6];
+	GetFrustumPlanes(WorldView, Projection, Planes);
+
+	Vector3 Front = Vector3(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
+
+	// Calculate the position that is as close as possible to the model and has all pieces visible.
+	float SmallestDistance = FLT_MAX;
+
+	for (int p = 0; p < 4; p++)
+	{
+		float ep = Dot3(Position, Planes[p]);
+		float fp = Dot3(Front, Planes[p]);
+
+		for (int j = 0; j < NumPoints; j++)
+		{
+			// Intersect the camera line with the plane that contains this point, NewEye = Eye + u * (Target - Eye)
+			float u = (ep - Dot3(Points[j], Planes[p])) / fp;
+
+			if (u < SmallestDistance)
+				SmallestDistance = u;
+		}
+	}
+
+	return Position - (Front * SmallestDistance);
 }
 
 // Inverse code from the GLU library.
@@ -176,6 +244,191 @@ Matrix44 Inverse(const Matrix44& m)
 #undef SWAP_ROWS
 }
 
+Matrix44 RotTranInverse(const Matrix44& m)
+{
+	Matrix44 tmp = Transpose3(m);
+	tmp[3] = -Mul30(tmp[3], tmp);
+	tmp[3][3] = 1.0f;
+	return tmp;
+}
+
+// ============================================================================
+// Matrix 3x3 class.
+
+Matrix33 MatrixFromAxisAngle(const Vector4& AxisAngle)
+{
+	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+
+	s = sinf(AxisAngle[3]);
+	c = cosf(AxisAngle[3]);
+
+	Vector3 Axis = Vector3(AxisAngle);
+	mag = Length(Axis);
+
+	if (mag == 0.0f)
+	{
+		return IdentityMatrix33();
+	}
+
+	Vector3 Normal = Axis / mag;
+
+	xx = Normal[0] * Normal[0];
+	yy = Normal[1] * Normal[1];
+	zz = Normal[2] * Normal[2];
+	xy = Normal[0] * Normal[1];
+	yz = Normal[1] * Normal[2];
+	zx = Normal[2] * Normal[0];
+	xs = Normal[0] * s;
+	ys = Normal[1] * s;
+	zs = Normal[2] * s;
+	one_c = 1.0f - c;
+
+	return Matrix33(Vector3((one_c * xx) + c, (one_c * xy) + zs, (one_c * zx) - ys),
+	                Vector3((one_c * xy) - zs, (one_c * yy) + c, (one_c * yz) + xs),
+	                Vector3((one_c * zx) + ys, (one_c * yz) - xs, (one_c * zz) + c));
+}
+
+Vector4 MatrixToAxisAngle(const Matrix33& Mat)
+{
+	Matrix33 tmp(Normalize(Mat.m_Rows[0]), Normalize(Mat.m_Rows[1]), Normalize(Mat.m_Rows[2]));
+
+	// Determinant should be 1 for rotation matrices.
+	if (Determinant(tmp) < 0.0f)
+	{
+		tmp.m_Rows[0] *= -1.0f;
+		tmp.m_Rows[1] *= -1.0f;
+		tmp.m_Rows[2] *= -1.0f;
+	}
+
+	float Trace = tmp.m_Rows[0][0] + tmp.m_Rows[1][1] + tmp.m_Rows[2][2];
+	float Cos = 0.5f * (Trace - 1.0f);
+	Vector4 rot;
+
+	rot[3] = acosf(Cos);  // in [0,PI]
+
+	if (rot[3] > 0.01f)
+	{
+		if (fabsf(LC_PI - rot[3]) > 0.01f)
+		{
+			rot[0] = tmp.m_Rows[1][2] - tmp.m_Rows[2][1];
+			rot[1] = tmp.m_Rows[2][0] - tmp.m_Rows[0][2];
+			rot[2] = tmp.m_Rows[0][1] - tmp.m_Rows[1][0];
+
+			float inv = 1.0f / sqrtf(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+
+			rot[0] *= inv;
+			rot[1] *= inv;
+			rot[2] *= inv;
+		}
+		else
+		{
+			// angle is PI
+			float HalfInverse;
+			if (tmp.m_Rows[0][0] >= tmp.m_Rows[1][1])
+			{
+				// r00 >= r11
+				if (tmp.m_Rows[0][0] >= tmp.m_Rows[2][2])
+				{
+					// r00 is maximum diagonal term
+					rot[0] = 0.5f * sqrtf(tmp.m_Rows[0][0] - tmp.m_Rows[1][1] - tmp.m_Rows[2][2] + 1.0f);
+					HalfInverse = 0.5f / rot[0];
+					rot[1] = HalfInverse * tmp.m_Rows[1][0];
+					rot[2] = HalfInverse * tmp.m_Rows[2][0];
+				}
+				else
+				{
+					// r22 is maximum diagonal term
+					rot[2] = 0.5f * sqrtf(tmp.m_Rows[2][2] - tmp.m_Rows[0][0] - tmp.m_Rows[1][1] + 1.0f);
+					HalfInverse = 0.5f / rot[2];
+					rot[0] = HalfInverse * tmp.m_Rows[2][0];
+					rot[1] = HalfInverse * tmp.m_Rows[2][1];
+				}
+			}
+			else
+			{
+				// r11 > r00
+				if (tmp.m_Rows[1][1] >= tmp.m_Rows[2][2])
+				{
+					// r11 is maximum diagonal term
+					rot[1] = 0.5f * sqrtf(tmp.m_Rows[1][1] - tmp.m_Rows[0][0] - tmp.m_Rows[2][2] + 1.0f);
+					HalfInverse  = 0.5f / rot[1];
+					rot[0] = HalfInverse * tmp.m_Rows[1][0];
+					rot[2] = HalfInverse * tmp.m_Rows[2][1];
+				}
+				else
+				{
+					// r22 is maximum diagonal term
+					rot[2] = 0.5f * sqrtf(tmp.m_Rows[2][2] - tmp.m_Rows[0][0] - tmp.m_Rows[1][1] + 1.0f);
+					HalfInverse = 0.5f / rot[2];
+					rot[0] = HalfInverse * tmp.m_Rows[2][0];
+					rot[1] = HalfInverse * tmp.m_Rows[2][1];
+				}
+			}
+		}
+	}
+	else
+	{
+		// The angle is 0 and the matrix is the identity.
+		rot[0] = 0.0f;
+		rot[1] = 0.0f;
+		rot[2] = 1.0f;
+	}
+
+	return rot;
+}
+
+Matrix33 MatrixFromEulerAngles(const Vector3& Angles)
+{
+	float CosYaw, SinYaw, CosPitch, SinPitch, CosRoll, SinRoll;
+
+	CosRoll = cosf(Angles[0]);
+	SinRoll = sinf(Angles[0]);
+	CosPitch = cosf(Angles[1]);
+	SinPitch = sinf(Angles[1]);
+	CosYaw = cosf(Angles[2]);
+	SinYaw = sinf(Angles[2]);
+
+	Vector3 Rows[3];
+	Rows[0] = Vector3(CosYaw * CosPitch, SinYaw * CosPitch, -SinPitch);
+	Rows[1] = Vector3(CosYaw * SinPitch * SinRoll - SinYaw * CosRoll, CosYaw * CosRoll + SinYaw * SinPitch * SinRoll, CosPitch * SinRoll);
+	Rows[2] = Vector3(CosYaw * SinPitch * CosRoll + SinYaw * SinRoll, SinYaw * SinPitch * CosRoll - CosYaw * SinRoll, CosPitch * CosRoll);
+
+	return Matrix33(Rows[0], Rows[1], Rows[2]);
+}
+
+Vector3 MatrixToEulerAngles(const Matrix33& RotMat)
+{
+	float SinPitch, CosPitch, SinRoll, CosRoll, SinYaw, CosYaw;
+
+	SinPitch = -RotMat.m_Rows[0][2];
+	CosPitch = sqrtf(1 - SinPitch*SinPitch);
+
+	if (fabsf(CosPitch) > 0.0005f)
+	{
+		SinRoll = RotMat.m_Rows[1][2] / CosPitch;
+		CosRoll = RotMat.m_Rows[2][2] / CosPitch;
+		SinYaw = RotMat.m_Rows[0][1] / CosPitch;
+		CosYaw = RotMat.m_Rows[0][0] / CosPitch;
+	} 
+	else
+	{
+		SinRoll = -RotMat.m_Rows[2][1];
+		CosRoll = RotMat.m_Rows[1][1];
+		SinYaw = 0.0f;
+		CosYaw = 1.0f;
+	}
+
+	Vector3 Rot(atan2f(SinRoll, CosRoll), atan2f(SinPitch, CosPitch), atan2f(SinYaw, CosYaw));
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (Rot[i] < 0)
+			Rot[i] += 2.0f * LC_PI;
+	}
+
+	return Rot;
+}
+
 // ============================================================================
 // Project/Unproject a point.
 
@@ -269,7 +522,7 @@ void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, in
 			else
 			{
 				// Outside, inside.
-				LinePlaneIntersection(i, *s, *p, Plane);
+				LinePlaneIntersection(&i, *s, *p, Plane);
 
 				OutPoints[*NumOutPoints] = i;
 				*NumOutPoints = *NumOutPoints + 1;
@@ -282,7 +535,7 @@ void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, in
 			if (Dot3(*s, Plane) + Plane[3] <= 0)
 			{
 				// Inside, outside.
-				LinePlaneIntersection(i, *s, *p, Plane);
+				LinePlaneIntersection(&i, *s, *p, Plane);
 
 				OutPoints[*NumOutPoints] = i;
 				*NumOutPoints = *NumOutPoints + 1;
@@ -293,9 +546,75 @@ void PolygonPlaneClip(Vector3* InPoints, int NumInPoints, Vector3* OutPoints, in
 	}
 }
 
+// Return true if a polygon intersects a set of planes.
+bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes)
+{
+	float* Points[4] = { p1, p2, p3, p4 };
+	int Outcodes[4] = { 0, 0, 0, 0 }, i;
+	int NumPoints = (p4 != NULL) ? 4 : 3;
+
+	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
+	for (i = 0; i < NumPoints; i++)
+	{
+		Vector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+
+		for (int j = 0; j < NumPlanes; j++)
+		{
+			if (Dot3(Pt, Planes[j]) + Planes[j][3] > 0)
+				Outcodes[i] |= 1 << j;
+		}
+	}
+
+	if (p4 != NULL)
+	{
+		// Polygon completely outside a plane.
+		if ((Outcodes[0] & Outcodes[1] & Outcodes[2] & Outcodes[3]) != 0)
+			return false;
+
+		// If any vertex has an out code of all zeros then we intersect the volume.
+		if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2] || !Outcodes[3])
+			return true;
+	}
+	else
+	{
+		// Polygon completely outside a plane.
+		if ((Outcodes[0] & Outcodes[1] & Outcodes[2]) != 0)
+			return false;
+
+		// If any vertex has an out code of all zeros then we intersect the volume.
+		if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2])
+			return true;
+	}
+
+	// Buffers for clipping the polygon.
+	Vector3 ClipPoints[2][8];
+	int NumClipPoints[2];
+	int ClipBuffer = 0;
+
+	NumClipPoints[0] = NumPoints;
+	ClipPoints[0][0] = Vector3(p1[0], p1[1], p1[2]);
+	ClipPoints[0][1] = Vector3(p2[0], p2[1], p2[2]);
+	ClipPoints[0][2] = Vector3(p3[0], p3[1], p3[2]);
+
+	if (NumPoints == 4)
+		ClipPoints[0][3] = Vector3(p4[0], p4[1], p4[2]);
+
+	// Now clip the polygon against the planes.
+	for (i = 0; i < NumPlanes; i++)
+	{
+		PolygonPlaneClip(ClipPoints[ClipBuffer], NumClipPoints[ClipBuffer], ClipPoints[ClipBuffer^1], &NumClipPoints[ClipBuffer^1], Planes[i]);
+		ClipBuffer ^= 1;
+
+		if (!NumClipPoints[ClipBuffer])
+			return false;
+	}
+
+	return true;
+}
+
 // Calculate the intersection of a line segment and a plane and returns false
 // if they are parallel or the intersection is outside the line segment.
-bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane)
+bool LinePlaneIntersection(Vector3* Intersection, const Vector3& Start, const Vector3& End, const Vector4& Plane)
 {
 	Vector3 Dir = End - Start;
 
@@ -307,7 +626,7 @@ bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Ve
 
 	float t = -t1 / t2;
 
-	Intersection = Start + t * Dir;
+	*Intersection = Start + t * Dir;
 
 	if ((t < 0.0f) || (t > 1.0f))
 		return false;
@@ -315,11 +634,11 @@ bool LinePlaneIntersection(Vector3& Intersection, const Vector3& Start, const Ve
 	return true;
 }
 
-bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
+bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& Start, const Vector3& End, float* MinDist, Vector3* Intersection)
 {
 	// Calculate the polygon plane.
 	Vector4 Plane;
-	Plane = Cross3(p1 - p2, p3 - p2);
+	Plane = Vector4(Cross(p1 - p2, p3 - p2));
 	Plane[3] = -Dot3(Plane, p1);
 
 	// Check if the line is parallel to the plane.
@@ -337,18 +656,18 @@ bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vec
 		return false;
 
 	// Intersection of the plane and line segment.
-	Intersection = Start - (t1 / t2) * Dir;
+	*Intersection = Start - (t1 / t2) * Dir;
 
-	float Dist = (Start - Intersection).Length();
+	float Dist = Length(Start - *Intersection);
 
-	if (Dist > MinDist)
+	if (Dist > *MinDist)
 		return false;
 
 	// Check if we're inside the triangle.
 	Vector3 pa1, pa2, pa3;
-	pa1 = (p1 - Intersection).Normalize();
-	pa2 = (p2 - Intersection).Normalize();
-	pa3 = (p3 - Intersection).Normalize();
+	pa1 = Normalize(p1 - *Intersection);
+	pa2 = Normalize(p2 - *Intersection);
+	pa3 = Normalize(p3 - *Intersection);
 
 	float a1, a2, a3;
 	a1 = Dot3(pa1, pa2);
@@ -359,18 +678,18 @@ bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vec
 
 	if (fabs(total - 360) <= 0.001f)
 	{
-		MinDist = Dist;
+		*MinDist = Dist;
 		return true;
 	}
 
 	return false;
 }
 
-bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
+bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4, const Vector3& Start, const Vector3& End, float* MinDist, Vector3* Intersection)
 {
 	// Calculate the polygon plane.
 	Vector4 Plane;
-	Plane = Cross3(p1 - p2, p3 - p2);
+	Plane = Vector4(Cross(p1 - p2, p3 - p2));
 	Plane[3] = -Dot3(Plane, p1);
 
 	// Check if the line is parallel to the plane.
@@ -388,18 +707,18 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 		return false;
 
 	// Intersection of the plane and line segment.
-	Intersection = Start - (t1 / t2) * Dir;
+	*Intersection = Start - (t1 / t2) * Dir;
 
-	float Dist = (Start - Intersection).Length();
+	float Dist = Length(Start - *Intersection);
 
-	if (Dist > MinDist)
+	if (Dist > *MinDist)
 		return false;
 
 	// Check if we're inside the triangle.
 	Vector3 pa1, pa2, pa3;
-	pa1 = (p1 - Intersection).Normalize();
-	pa2 = (p2 - Intersection).Normalize();
-	pa3 = (p3 - Intersection).Normalize();
+	pa1 = Normalize(p1 - *Intersection);
+	pa2 = Normalize(p2 - *Intersection);
+	pa3 = Normalize(p3 - *Intersection);
 
 	float a1, a2, a3;
 	a1 = Dot3(pa1, pa2);
@@ -410,12 +729,12 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 
 	if (fabs(total - 360) <= 0.001f)
 	{
-		MinDist = Dist;
+		*MinDist = Dist;
 		return true;
 	}
 
 	// Check if we're inside the second triangle.
-	pa2 = (p4 - Intersection).Normalize();
+	pa2 = Normalize(p4 - *Intersection);
 
 	a1 = Dot3(pa1, pa2);
 	a2 = Dot3(pa2, pa3);
@@ -425,7 +744,7 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 			
 	if (fabs(total - 360) <= 0.001f)
 	{
-		MinDist = Dist;
+		*MinDist = Dist;
 		return true;
 	}
 

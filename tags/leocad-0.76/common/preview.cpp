@@ -2,7 +2,9 @@
 // Piece Preview window
 //
 
+#include "lc_global.h"
 #include "preview.h"
+
 #include "globals.h"
 #include "project.h"
 #include "pieceinf.h"
@@ -54,10 +56,10 @@ void PiecePreview::OnDraw()
 	Vector3 Eye(0, 0, 1.0f);
 	Matrix33 Rot;
 
-	Rot.CreateFromAxisAngle(Vector3(1, 0, 0), -m_RotateX * LC_DTOR);
+	Rot = MatrixFromAxisAngle(Vector4(1, 0, 0, -m_RotateX * LC_DTOR));
 	Eye = Mul(Eye, Rot);
 
-	Rot.CreateFromAxisAngle(Vector3(0, 0, 1), -m_RotateZ * LC_DTOR);
+	Rot = MatrixFromAxisAngle(Vector4(0, 0, 1, -m_RotateZ * LC_DTOR));
 	Eye = Mul(Eye, Rot);
 
 	if (m_AutoZoom)
@@ -67,12 +69,12 @@ void PiecePreview::OnDraw()
 
 		// Update the new camera distance.
 		Vector3 d = Eye - m_PieceInfo->GetCenter();
-		m_Distance = d.Length();
+		m_Distance = Length(d);
 	}
 	else
 	{
 		Matrix44 WorldToView;
-		WorldToView.CreateLookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), Vector3(0, 0, 1));
+		WorldToView = CreateLookAtMatrix(Eye * m_Distance, m_PieceInfo->GetCenter(), Vector3(0, 0, 1));
 		glLoadMatrixf(WorldToView);
 	}
 

@@ -1,15 +1,13 @@
 // A piece object in the LeoCAD world.
 //
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
+#include "lc_global.h"
+#include "piece.h"
+
 #include "opengl.h"
 #include "matrix.h"
 #include "pieceinf.h"
 #include "texture.h"
-#include "piece.h"
 #include "group.h"
 #include "project.h"
 #include "algebra.h"
@@ -464,7 +462,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		return;
 
 	Matrix44 WorldToLocal;
-	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldToLocal = MatrixFromAxisAngle(Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], -m_fRotation[3] * LC_DTOR));
 	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
 
 	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
@@ -489,7 +487,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
 				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
 
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &pLine->mindist, &Intersection))
 				{
 					pLine->pClosest = this;
 				}
@@ -515,7 +513,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
 				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
 
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, pLine->mindist, Intersection))
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &pLine->mindist, &Intersection))
 				{
 					pLine->pClosest = this;
 				}
@@ -525,72 +523,6 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 			info += *info + 1;
 		}
 	}
-}
-
-// Return true if a polygon intersects a set of planes.
-bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes)
-{
-	float* Points[4] = { p1, p2, p3, p4 };
-	int Outcodes[4] = { 0, 0, 0, 0 }, i;
-	int NumPoints = (p4 != NULL) ? 4 : 3;
-
-	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
-	for (i = 0; i < NumPoints; i++)
-	{
-		Vector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
-
-		for (int j = 0; j < NumPlanes; j++)
-		{
-			if (Dot3(Pt, Planes[j]) + Planes[j][3] > 0)
-				Outcodes[i] |= 1 << j;
-		}
-	}
-
-	if (p4 != NULL)
-	{
-		// Polygon completely outside a plane.
-		if ((Outcodes[0] & Outcodes[1] & Outcodes[2] & Outcodes[3]) != 0)
-			return false;
-
-		// If any vertex has an out code of all zeros then we intersect the volume.
-		if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2] || !Outcodes[3])
-			return true;
-	}
-	else
-	{
-		// Polygon completely outside a plane.
-		if ((Outcodes[0] & Outcodes[1] & Outcodes[2]) != 0)
-			return false;
-
-		// If any vertex has an out code of all zeros then we intersect the volume.
-		if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2])
-			return true;
-	}
-
-	// Buffers for clipping the polygon.
-	Vector3 ClipPoints[2][8];
-	int NumClipPoints[2];
-	int ClipBuffer = 0;
-
-	NumClipPoints[0] = NumPoints;
-	ClipPoints[0][0] = Vector3(p1[0], p1[1], p1[2]);
-	ClipPoints[0][1] = Vector3(p2[0], p2[1], p2[2]);
-	ClipPoints[0][2] = Vector3(p3[0], p3[1], p3[2]);
-
-	if (NumPoints == 4)
-		ClipPoints[0][3] = Vector3(p4[0], p4[1], p4[2]);
-
-	// Now clip the polygon against the planes.
-	for (i = 0; i < NumPlanes; i++)
-	{
-		PolygonPlaneClip(ClipPoints[ClipBuffer], NumClipPoints[ClipBuffer], ClipPoints[ClipBuffer^1], &NumClipPoints[ClipBuffer^1], Planes[i]);
-		ClipBuffer ^= 1;
-
-		if (!NumClipPoints[ClipBuffer])
-			return false;
-	}
-
-	return true;
 }
 
 bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
@@ -610,7 +542,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	// Transform the planes to local space.
 	Matrix44 WorldToLocal;
-	WorldToLocal.CreateFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), -m_fRotation[3] * LC_DTOR);
+	WorldToLocal = MatrixFromAxisAngle(Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], -m_fRotation[3] * LC_DTOR));
 	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
 
 	Vector4* LocalPlanes = new Vector4[NumPlanes];
@@ -618,7 +550,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		LocalPlanes[i] = Mul30(Vector3(Planes[i]), WorldToLocal);
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldToLocal));
 		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
 	}
 
@@ -1744,50 +1676,3 @@ void Piece::RemoveConnections(CONNECTION_TYPE* pConnections)
 	for (i = 0; i < RebuildList.GetSize(); i++)
 		RebuildList[i]->BuildDrawInfo();
 }
-
-/*
-// Performs exact collision detection using the RAPID library.
-// Check if there are 2 objects at the same place at the same time
-BOOL CPiece::Collide(CPiece* pPiece)
-{
-	return CollideAt(pPiece, m_fRotation, m_fPosition);
-}
-
-// Use this to check if the piece can be modified
-BOOL CPiece::CollideAt(CPiece* pPiece, float rot[4], float pos[3])
-{
-	double rotation1[3][3], rotation2[3][3];
-	double translation1[3], translation2[3];
-
-	CMatrix m1(rot, pos);
-	rotation1[0][0] = m1.m[0];
-	rotation1[0][1] = m1.m[4];
-	rotation1[0][2] = m1.m[8];
-	rotation1[1][0] = m1.m[1];
-	rotation1[1][1] = m1.m[5];
-	rotation1[1][2] = m1.m[9];
-	rotation1[2][0] = m1.m[2];
-	rotation1[2][1] = m1.m[6];
-	rotation1[2][2] = m1.m[10];
-	translation1[0] = m1.m[12];
-	translation1[1] = m1.m[13];
-	translation1[2] = m1.m[14];
-
-	CMatrix m2(pPiece->m_fRotation, pPiece->m_fPosition);
-	rotation2[0][0] = m2.m[0];
-	rotation2[0][1] = m2.m[4];
-	rotation2[0][2] = m2.m[8];
-	rotation2[1][0] = m2.m[1];
-	rotation2[1][1] = m2.m[5];
-	rotation2[1][2] = m2.m[9];
-	rotation2[2][0] = m2.m[2];
-	rotation2[2][1] = m2.m[6];
-	rotation2[2][2] = m2.m[10];
-	translation2[0] = m2.m[12];
-	translation2[1] = m2.m[13];
-	translation2[2] = m2.m[14];
-
-	return CollisionCheck(rotation1, translation1, m_pInfo->m_pRModel,
-		rotation2, translation2, pPiece->m_pInfo->m_pRModel);
-}
-*/

@@ -1,6 +1,9 @@
 // Everything that is a part of a LeoCAD project goes here.
 //
 
+#include "lc_global.h"
+#include "project.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -2379,7 +2382,7 @@ void Project::RenderOverlays(int Viewport)
 		}
 
 		// Draw a disc showing the rotation amount.
-		if (m_MouseTotalDelta.LengthSquared() != 0.0f && (m_nTracking != LC_TRACK_NONE))
+		if (LengthSquared(m_MouseTotalDelta) != 0.0f && (m_nTracking != LC_TRACK_NONE))
 		{
 			Vector4 Rotation;
 			float Angle, Step;
@@ -2485,8 +2488,8 @@ void Project::RenderOverlays(int Viewport)
 			}
 		}
 
-		Mat.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-		Mat.Transpose3();
+		Mat = CreateLookAtMatrix(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+		Mat = Transpose3(Mat);
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
@@ -2514,14 +2517,13 @@ void Project::RenderOverlays(int Viewport)
 		glDrawArrays(GL_LINE_LOOP, 0, 32);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		Vector3 ViewDir = Cam->GetTargetPosition() - Cam->GetEyePosition();
-		ViewDir.Normalize();
+		Vector3 ViewDir = Normalize(Cam->GetTargetPosition() - Cam->GetEyePosition());
 
 		// Transform ViewDir to local space.
 		if (Focus)
 		{
 			Matrix33 RotMat;
-			RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
+			RotMat = MatrixFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
 
 			ViewDir = Mul(ViewDir, RotMat);
 		}
@@ -2606,8 +2608,8 @@ void Project::RenderOverlays(int Viewport)
 		{
 			if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_Z))
 			{
-				Vector3 Tangent, Normal = m_OverlayTrackStart - m_OverlayCenter;
-				Normal.Normalize();
+				Vector3 Normal = Normalize(m_OverlayTrackStart - m_OverlayCenter);
+				Vector3 Tangent;
 				float Angle = 0;
 
 				switch (m_OverlayMode)
@@ -2652,7 +2654,7 @@ void Project::RenderOverlays(int Viewport)
 					Verts[1][1] = Tip[1];
 					Verts[1][2] = Tip[2];
 
-					Rot.CreateFromAxisAngle(Normal, LC_PI * 0.15f);
+					Rot = MatrixFromAxisAngle(Vector4(Normal, LC_PI * 0.15f));
 					Arrow = Mul(Tangent, Rot) * OverlayRotateArrowCapSize;
 
 					Verts[2][0] = Tip[0];
@@ -2662,7 +2664,7 @@ void Project::RenderOverlays(int Viewport)
 					Verts[3][1] = Tip[1] - Arrow[1];
 					Verts[3][2] = Tip[2] - Arrow[2];
 
-					Rot.CreateFromAxisAngle(Normal, -LC_PI * 0.15f);
+					Rot = MatrixFromAxisAngle(Vector4(Normal, -LC_PI * 0.15f));
 					Arrow = Mul(Tangent, Rot) * OverlayRotateArrowCapSize;
 
 					Verts[4][0] = Tip[0];
@@ -6669,8 +6671,8 @@ void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projectio
 	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
 	// Build the matrices.
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	ModelView = CreateLookAtMatrix(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection = CreatePerspectiveMatrix(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 }
 
 void Project::ConvertToUserUnits(Vector3& Value) const
@@ -6786,14 +6788,14 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 
 	// Build the matrices.
 	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	ModelView = CreateLookAtMatrix(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection = CreatePerspectiveMatrix(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 	Vector3 ClickPoints[2] = { Vector3((float)m_nDownX, (float)m_nDownY, 0.0f), Vector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
 	UnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
 	Vector3 Intersection;
-	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
+	if (LinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
 	{
 		SnapVector(Intersection);
 		Position = Intersection;
@@ -6863,8 +6865,8 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 
 	// Build the matrices.
 	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	ModelView = CreateLookAtMatrix(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection = CreatePerspectiveMatrix(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 	// Find out the top-left and bottom-right corners in screen coordinates.
 	float Left, Top, Bottom, Right;
@@ -6903,12 +6905,12 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 	// Build the box planes.
 	Vector4 Planes[6];
 
-	Planes[0] = Cross3(Corners[4] - Corners[0], Corners[1] - Corners[0]).Normalize(); // Left
-	Planes[1] = Cross3(Corners[5] - Corners[2], Corners[3] - Corners[2]).Normalize(); // Right
-	Planes[2] = Cross3(Corners[3] - Corners[0], Corners[4] - Corners[0]).Normalize(); // Top
-	Planes[3] = Cross3(Corners[1] - Corners[2], Corners[5] - Corners[2]).Normalize(); // Bottom
-	Planes[4] = Cross3(Corners[1] - Corners[0], Corners[3] - Corners[0]).Normalize(); // Front
-	Planes[5] = Cross3(Corners[1] - Corners[2], Corners[3] - Corners[2]).Normalize(); // Back
+	Planes[0] = Vector4(Normalize(Cross(Corners[4] - Corners[0], Corners[1] - Corners[0]))); // Left
+	Planes[1] = Vector4(Normalize(Cross(Corners[5] - Corners[2], Corners[3] - Corners[2]))); // Right
+	Planes[2] = Vector4(Normalize(Cross(Corners[3] - Corners[0], Corners[4] - Corners[0]))); // Top
+	Planes[3] = Vector4(Normalize(Cross(Corners[1] - Corners[2], Corners[5] - Corners[2]))); // Bottom
+	Planes[4] = Vector4(Normalize(Cross(Corners[1] - Corners[0], Corners[3] - Corners[0]))); // Front
+	Planes[5] = Vector4(Normalize(Cross(Corners[1] - Corners[2], Corners[3] - Corners[2]))); // Back
 
 	Planes[0][3] = -Dot3(Planes[0], Corners[0]);
 	Planes[1][3] = -Dot3(Planes[1], Corners[5]);
@@ -7117,8 +7119,8 @@ bool Project::StopTracking(bool bAccept)
 
 				// Build the matrices.
 				Matrix44 ModelView, Projection;
-				ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-				Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+				ModelView = CreateLookAtMatrix(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+				Projection = CreatePerspectiveMatrix(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 				// Find out the top-left and bottom-right corners in screen coordinates.
 				float Left, Top, Bottom, Right;
@@ -7361,7 +7363,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 	// Snap.
 	SnapVector(Move, Remainder);
 
-	if (Move.LengthSquared() < 0.001f)
+	if (LengthSquared(Move) < 0.001f)
 		return false;
 
 	// Transform the translation if we're in relative mode.
@@ -7375,13 +7377,13 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 			((Piece*)Focus)->GetRotation(Rot);
 
 			Matrix33 RotMat;
-			RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+			RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
 
 			Move = Mul(Move, RotMat);
 		}
 	}
 
-	if (Move.LengthSquared() < 0.001f)
+	if (LengthSquared(Move) < 0.001f)
 		return false;
 
 	Piece* pPiece;
@@ -7440,7 +7442,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 	// Snap.
 	SnapRotationVector(Delta, Remainder);
 
-	if (Delta.LengthSquared() < 0.001f)
+	if (LengthSquared(Delta) < 0.001f)
 		return false;
 
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
@@ -7477,21 +7479,21 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 	if (!(m_nSnap & LC_DRAW_LOCK_X) && (Delta[0] != 0.0f))
 	{
 		Quaternion q;
-		q.CreateRotationX(Delta[0] * LC_DTOR);
+		q = CreateRotationXQuaternion(Delta[0] * LC_DTOR);
 		Rotation = Mul(q, Rotation);
 	}
 
 	if (!(m_nSnap & LC_DRAW_LOCK_Y) && (Delta[1] != 0.0f))
 	{
 		Quaternion q;
-		q.CreateRotationY(Delta[1] * LC_DTOR);
+		q = CreateRotationYQuaternion(Delta[1] * LC_DTOR);
 		Rotation = Mul(q, Rotation);
 	}
 
 	if (!(m_nSnap & LC_DRAW_LOCK_Z) && (Delta[2] != 0.0f))
 	{
 		Quaternion q;
-		q.CreateRotationZ(Delta[2] * LC_DTOR);
+		q = CreateRotationZQuaternion(Delta[2] * LC_DTOR);
 		Rotation = Mul(q, Rotation);
 	}
 
@@ -7504,8 +7506,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		float Rot[4];
 		((Piece*)pFocus)->GetRotation(Rot);
 
-		WorldToFocus.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
-		FocusToWorld.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
+		WorldToFocus = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
+		FocusToWorld = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
 
 		Rotation = Mul(FocusToWorld, Rotation);
 	}
@@ -7523,7 +7525,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		if ((nSel == 1) && (pFocus == pPiece))
 		{
 			Quaternion LocalToWorld;
-			LocalToWorld.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+			LocalToWorld = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
 			Quaternion NewLocalToWorld;
 
@@ -7537,14 +7539,14 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 				NewLocalToWorld = Mul(Rotation, LocalToWorld);
 			}
 
-			NewLocalToWorld.ToAxisAngle(NewRotation);
+			NewRotation = QuaternionToAxisAngle(NewLocalToWorld);
 		}
 		else
 		{
 			Vector3 Distance = Vector3(pos[0], pos[1], pos[2]) - Center;
 
 			Quaternion LocalToWorld;
-			LocalToWorld.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+			LocalToWorld = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
 			Quaternion NewLocalToWorld;
 
@@ -7554,7 +7556,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 				NewLocalToWorld = Mul(Rotation, LocalToFocus);
 
 				Quaternion WorldToLocal;
-				WorldToLocal.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
+				WorldToLocal = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
 
 				Distance = Mul(Distance, WorldToLocal);
 				Distance = Mul(Distance, NewLocalToWorld);
@@ -7566,7 +7568,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 				Distance = Mul(Distance, Rotation);
 			}
 
-			NewLocalToWorld.ToAxisAngle(NewRotation);
+			NewRotation = QuaternionToAxisAngle(NewLocalToWorld);
 
 			pos[0] = Center[0] + Distance[0];
 			pos[1] = Center[1] + Distance[1];
@@ -8612,9 +8614,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
+				Vector3 ScreenX = Normalize(Cross(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector()));
 				Vector3 ScreenY = Camera->GetUpVector();
-				ScreenX.Normalize();
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
 
@@ -8669,7 +8670,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 						((Piece*)Focus)->GetRotation(Rot);
 
 						Matrix33 RotMat;
-						RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+						RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
 
 						Axis1 = Mul(Dir1, RotMat);
 						Axis2 = Mul(Dir2, RotMat);
@@ -8749,8 +8750,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
-				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
+				Vector3 ScreenZ = Normalize(Camera->GetTargetPosition() - Camera->GetEyePosition());
+				Vector3 ScreenX = Cross(ScreenZ, Camera->GetUpVector());
 				Vector3 ScreenY = Camera->GetUpVector();
 
 				Vector3 TotalMove;
@@ -8791,9 +8792,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
+				Vector3 ScreenX = Normalize(Cross(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector()));
 				Vector3 ScreenY = Camera->GetUpVector();
-				ScreenX.Normalize();
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
 
@@ -8907,8 +8907,8 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
-				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
+				Vector3 ScreenZ = Normalize(Camera->GetTargetPosition() - Camera->GetEyePosition());
+				Vector3 ScreenX = Cross(ScreenZ, Camera->GetUpVector());
 				Vector3 ScreenY = Camera->GetUpVector();
 
 				Vector3 Delta;
@@ -9104,7 +9104,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 				((Piece*)Focus)->GetRotation(Rot);
 
 				Matrix33 RotMat;
-				RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+				RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
 
 				for (int i = 1; i < 4; i++)
 					Points[i] = Mul(Points[i], RotMat);
@@ -9125,7 +9125,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 			Vector3 Line = Points[i] - Points[0];
 			Vector3 Vec = Pt - Points[0];
 
-			float u = Dot3(Vec, Line) / Line.LengthSquared();
+			float u = Dot3(Vec, Line) / LengthSquared(Line);
 
 			// Point is outside the line segment.
 			if (u < 0.0f || u > 1.0f)
@@ -9134,7 +9134,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 			// Closest point in the line segment to the mouse.
 			Vector3 Closest = Points[0] + u * Line;
 
-			if ((Closest - Pt).LengthSquared() < 100.0f)
+			if (LengthSquared(Closest - Pt) < 100.0f)
 			{
 				// If we already know the mouse is close to another axis, select a plane.
 				if (Mode != -1)
@@ -9200,13 +9200,13 @@ void Project::MouseUpdateOverlays(int x, int y)
 		Vector3 Line = SegEnd - SegStart;
 		Vector3 Vec = Center - SegStart;
 
-		float u = Dot3(Vec, Line) / Line.LengthSquared();
+		float u = Dot3(Vec, Line) / LengthSquared(Line);
 
 		// Closest point in the line to the mouse.
 		Vector3 Closest = SegStart + u * Line;
 
 		int Mode = -1;
-		float Distance = (Closest - Center).Length();
+		float Distance = Length(Closest - Center);
 		const float Epsilon = 0.25f * OverlayScale;
 
 		if (Distance > (OverlayRotateRadius * OverlayScale + Epsilon))
@@ -9273,14 +9273,14 @@ void Project::MouseUpdateOverlays(int x, int y)
 							((Piece*)Focus)->GetRotation(Rot);
 
 							Matrix33 RotMat;
-							RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
+							RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
 
 							Dist = Mul(Dist, RotMat);
 						}
 					}
 
 					// Check if we're close enough to one of the axis.
-					Dist.Normalize();
+					Dist = Normalize(Dist);
 
 					float dx = fabsf(Dist[0]);
 					float dy = fabsf(Dist[1]);
@@ -9424,7 +9424,7 @@ void Project::UpdateOverlayScale()
 			gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, Viewport, &PointX, &PointY, &PointZ);
 
 			Vector3 Dist((float)PointX - m_OverlayCenter[0], (float)PointY - m_OverlayCenter[1], (float)PointZ - m_OverlayCenter[2]);
-			m_OverlayScale[i] = Dist.Length() * 5.0f;
+			m_OverlayScale[i] = Length(Dist) * 5.0f;
 		}
 	}
 }

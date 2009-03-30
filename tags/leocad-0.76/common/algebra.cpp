@@ -5,6 +5,7 @@
 #include "lc_global.h"
 #include "algebra.h"
 
+#include <stdio.h>
 #include "defines.h"
 
 // ============================================================================

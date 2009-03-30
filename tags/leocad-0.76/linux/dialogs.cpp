@@ -2766,7 +2766,7 @@ static void librarydlg_update_list (GtkWidget *dlg)
 
 	if (CategoryIndex != -1)
 	{
-		PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+		lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
 		Lib->GetCategoryEntries(CategoryIndex, false, SinglePieces, GroupedPieces);
 

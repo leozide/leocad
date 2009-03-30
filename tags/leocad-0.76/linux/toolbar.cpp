@@ -291,7 +291,7 @@ void fill_piecetree()
     gtk_tree_store_append(model, &iter, NULL);
     gtk_tree_store_set(model, &iter, 0, (const char*)Lib->GetCategoryName(i), 1, NULL, -1);
 
-    PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+    lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
     Lib->GetCategoryEntries(i, true, SinglePieces, GroupedPieces);
 
@@ -309,7 +309,7 @@ void fill_piecetree()
 
       if (GroupedPieces.FindIndex(Info) != -1)
       {
-	PtrArray<PieceInfo> Patterns;
+	lcPtrArray<PieceInfo> Patterns;
 	Lib->GetPatternedPieces(Info, Patterns);
 
 	for (int k = 0; k < Patterns.GetSize(); k++)
@@ -468,7 +468,7 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &child);	
 
       // Perform search.
-      PtrArray<PieceInfo> SinglePieces, GroupedPieces;
+      lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
       Lib->GetCategoryEntries(Index, true, SinglePieces, GroupedPieces);
 
       // Merge and sort the arrays.

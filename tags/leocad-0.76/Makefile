@@ -41,7 +41,7 @@ bin/leocad.static: $(OBJ) bin Makefile
 	$(CXX) -static -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
 bin:
-	mkdir bin
+	@mkdir bin
 
 ### Include the C/C++ include dependencies
 ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean spotless), )

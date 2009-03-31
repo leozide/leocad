@@ -1,6 +1,6 @@
+#include "lc_global.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "config.h"
 #include "quant.h"
 #include "image.h"
 #include "file.h"
@@ -9,29 +9,30 @@
 
 bool Image::LoadBMP (File& file)
 {
-  lcint32 bmWidth, bmHeight;
-  lcuint8 bmPlanes, bmBitsPixel, m1, m2;
-  typedef struct {
-    unsigned char rgbBlue;
-    unsigned char rgbGreen;
-    unsigned char rgbRed;
-    unsigned char rgbReserved;
-  } RGBQUAD;
-  lcint16 res1,res2;
-  lcint32 filesize, pixoff;
-  lcint32 bmisize, compression;
-  lcint32 xscale, yscale;
-  lcint32 colors, impcol, rc;
-  lcuint32 sizeimage, m_bytesRead = 0;
+	lcint32 bmWidth, bmHeight;
+	lcuint8 bmPlanes, bmBitsPixel, m1, m2;
+	struct RGBQUAD
+	{
+		unsigned char rgbBlue;
+		unsigned char rgbGreen;
+		unsigned char rgbRed;
+		unsigned char rgbReserved;
+	};
+	lcint16 res1,res2;
+	lcint32 filesize, pixoff;
+	lcint32 bmisize, compression;
+	lcint32 xscale, yscale;
+	lcint32 colors, impcol, rc;
+	lcuint32 sizeimage, m_bytesRead = 0;
 
-  FreeData ();
+	FreeData ();
 
 	if (file.Read (&m1, 1) != 1)
-    return false;
+		return false;
 	m_bytesRead++;
 
 	if (file.Read (&m2, 1) != 1)
-    return false;
+		return false;
 	m_bytesRead++;
 
 	if ((m1 != 'B') || (m2 != 'M'))
@@ -160,7 +161,7 @@ bool Image::LoadBMP (File& file)
 	{
 		m_nWidth = w;
 		m_nHeight = h;
-    m_bAlpha = false;
+		m_bAlpha = false;
 		unsigned char* outbuf = m_pData;
 		long row = 0;
 		long rowOffset = 0;
@@ -171,7 +172,7 @@ bool Image::LoadBMP (File& file)
 			for (row=bmHeight-1;row>=0;row--)
 			{
 				// which row are we working on?
-				rowOffset = (long unsigned)row*row_size;						      
+				rowOffset = (long unsigned)row*row_size;
 
 				if (bmBitsPixel == 24)
 				{
@@ -196,7 +197,7 @@ bool Image::LoadBMP (File& file)
 						char dummy;
 						if (file.Read (&dummy, 1) != 1)
 						{
-              FreeData ();
+							FreeData ();
 							return false;
 						}
 						m_bytesRead++;
@@ -219,7 +220,7 @@ bool Image::LoadBMP (File& file)
 							bit_count = 8;
 							if (file.Read (&inbyte, 1) != 1)
 							{
-                FreeData ();
+								FreeData ();
 								delete [] colormap;
 								return false;
 							}
@@ -243,7 +244,7 @@ bool Image::LoadBMP (File& file)
 						char dummy;
 						if (file.Read (&dummy, 1) != 1)
 						{
-              FreeData ();
+							FreeData ();
 							if (colormap)
 								delete [] colormap;
 							return false;
@@ -356,7 +357,7 @@ bool Image::LoadBMP (File& file)
 						{
 							for (i = 0; i < c; x++, i++)
 							{
-							    if ((i&1) == 0)
+								if ((i&1) == 0)
 									c1 = file.GetChar ();
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbRed; pp++;
 								*pp = colormap[(i&1) ? (c1 & 0x0f) : ((c1>>4)&0x0f)].rgbGreen; pp++;
@@ -373,7 +374,7 @@ bool Image::LoadBMP (File& file)
 
 		if (colormap)
 			delete [] colormap;
-    }
+		}
 
 	return true;
 }

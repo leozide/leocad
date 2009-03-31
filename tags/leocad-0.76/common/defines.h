@@ -51,6 +51,10 @@ char* strupr(char* string);
 char* strlwr(char* string);
 int stricmp(const char* str1, const char* str2);
 
+#define _strlwr strlwr
+#define _strupr strupr
+#define _stricmp stricmp
+
 #endif
 
 #if defined(LC_MACOSX) || defined(LC_IPHONE) 

@@ -1,7 +1,7 @@
 // texdlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "texdlg.h"
 #include "library.h"

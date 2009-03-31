@@ -5157,8 +5157,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		  MinifigWizard *wiz = new MinifigWizard (m_ViewList[0]);
 		  int i;
 
-      wiz->IncRef ();
-
       if (SystemDoDialog (LC_DLG_MINIFIG, wiz))
 		  {
 		    SelectAndFocusNone(false);
@@ -5222,8 +5220,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (i = 0; i < LC_MFW_NUMITEMS; i++)
 			  if (wiz->m_Info[i])
 			    wiz->m_Info[i]->DeRef();
-
-      wiz->DecRef ();
 		} break;
 
 		case LC_PIECE_ARRAY:

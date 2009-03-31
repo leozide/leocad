@@ -1,7 +1,7 @@
 // LeoCAD.cpp : Defines the class behaviors for the application.
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "LeoCAD.h"
 
 #include "MainFrm.h"
@@ -67,16 +67,17 @@ static void CheckForUpdates(void* Data)
 	if (hHttpFile)
 	{
 		if(HttpQueryInfo(hHttpFile,HTTP_QUERY_CONTENT_LENGTH, szSizeBuffer, &dwLengthSizeBuffer, NULL))
-		{	 
+		{
 			dwFileSize = atol(szSizeBuffer);
-			LPSTR szContents = Contents.GetBuffer(dwFileSize);
-			
+			LPSTR szContents = Contents.GetBuffer(dwFileSize+1);
+			szContents[dwFileSize] = 0;
+
 			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
 			{
 				float ver;
 				int lib;
 
-				if (sscanf (szContents, "%f %d", &ver, &lib) == 2)
+				if (sscanf(szContents, "%f %d", &ver, &lib) == 2)
 				{
 					CString str;
 					bool Update = false;
@@ -126,6 +127,8 @@ static void CheckForUpdates(void* Data)
 	InternetCloseHandle(session);
 }
 
+CCADApp theApp;
+
 /////////////////////////////////////////////////////////////////////////////
 // CCADApp
 
@@ -140,21 +143,9 @@ BEGIN_MESSAGE_MAP(CCADApp, CWinApp)
 	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CCADApp construction
-
 CCADApp::CCADApp()
 {
-	m_hMutex = NULL;
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// The one and only CCADApp object
-
-CCADApp theApp;
-
-/////////////////////////////////////////////////////////////////////////////
-// CCADApp initialization
 
 BOOL CCADApp::InitInstance()
 {
@@ -177,7 +168,7 @@ BOOL CCADApp::InitInstance()
 	InitKeyboardShortcuts();
 
 	char app[LC_MAXPATH], *ptr;
-	GetModuleFileName (NULL, app, LC_MAXPATH);
+	GetModuleFileName(NULL, app, LC_MAXPATH);
 	ptr = strrchr(app,'\\');
 	if (ptr)
 		*(++ptr) = 0;
@@ -198,7 +189,7 @@ BOOL CCADApp::InitInstance()
 		RUNTIME_CLASS(CCADView));
 	AddDocTemplate(pDocTemplate);
 
-  EnableShellOpen();
+	EnableShellOpen();
 	RegisterShellFileTypes(TRUE);
 
 	UINT cmdshow = m_nCmdShow;
@@ -218,38 +209,30 @@ BOOL CCADApp::InitInstance()
 	}
 
 /*
-	m_hMutex = CreateMutex(NULL, FALSE, _T("LeoCAD_Mutex"));
-	if (GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-//		ParseCommandLine(cmdInfo);
-	}
-	else
-	{
-		char out[_MAX_PATH];
-		GetTempPath (_MAX_PATH, out);
-		strcat (out, "~LC*.lcd");
+	char out[_MAX_PATH];
+	GetTempPath(_MAX_PATH, out);
+	strcat(out, "~LC*.lcd");
 
-		WIN32_FIND_DATA fd;
-		HANDLE fh = FindFirstFile(out, &fd);
-		if (fh != INVALID_HANDLE_VALUE)
+	WIN32_FIND_DATA fd;
+	HANDLE fh = FindFirstFile(out, &fd);
+	if (fh != INVALID_HANDLE_VALUE)
+	{
+		if (char *ptr = strrchr(out, '\\')) *(ptr+1) = 0;
+		strcat(out, fd.cFileName);
+		if (AfxMessageBox(_T("LeoCAD found a file that was being edited while the program exited unexpectdly. Do you want to load it ?"), MB_YESNO) == IDNO)
 		{
-			if (char *ptr = strrchr (out, '\\')) *(ptr+1) = 0;
-			strcat (out, fd.cFileName);
-			if (AfxMessageBox (_T("LeoCAD found a file that was being edited while the program exited unexpectdly. Do you want to load it ?"), MB_YESNO) == IDNO)
-			{
-				if (AfxMessageBox (_T("Delete file ?"), MB_YESNO) == IDYES)
-					DeleteFile (out);
-			}
-			else
-			{
-				cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
-				cmdInfo.m_strFileName = out;
-			}
+			if (AfxMessageBox(_T("Delete file ?"), MB_YESNO) == IDYES)
+				DeleteFile(out);
 		}
-
-//		if (cmdInfo.m_strFileName.IsEmpty())
-//			ParseCommandLine(cmdInfo);
+		else
+		{
+			cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
+			cmdInfo.m_strFileName = out;
+		}
 	}
+
+//	if (cmdInfo.m_strFileName.IsEmpty())
+//		ParseCommandLine(cmdInfo);
 */
 
 	// The one and only window has been initialized, so show and update it.
@@ -262,24 +245,21 @@ BOOL CCADApp::InitInstance()
 	lcGetActiveProject()->HandleNotify(LC_ACTIVATE, 1);
 	lcGetActiveProject()->UpdateInterface();
 
-  main_window->UpdateMRU ();
+	main_window->UpdateMRU();
 
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
-  lcGetActiveProject()->UpdateAllViews (NULL);
+	lcGetActiveProject()->UpdateAllViews(NULL);
 
 	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
 		_beginthread(CheckForUpdates, 0, NULL);
 
-  return TRUE;
+	return TRUE;
 }
 
 int CCADApp::ExitInstance() 
 {
-	if (m_hMutex != NULL)
-		ReleaseMutex(m_hMutex);
-
 	delete main_window;
 	main_window = NULL;
 
@@ -295,9 +275,6 @@ int CCADApp::ExitInstance()
 
 	return CWinApp::ExitInstance();
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// CCADApp commands
 
 void CCADApp::OnHelpUpdates() 
 {

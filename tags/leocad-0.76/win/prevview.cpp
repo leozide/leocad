@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "PrevView.h"
 
@@ -11,6 +11,7 @@
 #if _MFC_VER < 0x0710
 #include <../src/afximpl.h>
 #else
+#include <afxtempl.h>
 #include <../src/mfc/afximpl.h>
 #endif
 

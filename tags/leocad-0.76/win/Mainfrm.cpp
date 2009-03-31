@@ -1,7 +1,7 @@
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include <afxrich.h>
 #include <afxpriv.h>
 #include "LeoCAD.h"
@@ -16,6 +16,7 @@
 #include "keyboard.h"
 #include "system.h"
 #include "library.h"
+#include "view.h"
 #include "lc_application.h"
 #include "Print.h"
 
@@ -266,14 +267,14 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	{
 		int r,l,b,t;
 		char szBuf[60];
-		strcpy (szBuf, theApp.GetProfileString("Settings","Window Position"));
+		strcpy(szBuf, theApp.GetProfileString("Settings","Window Position"));
 		sscanf(szBuf,"%d, %d, %d, %d", &t, &r, &b, &l);
 
 		cs.cx = r - l;
 		cs.cy = b - t;
 		
 		RECT workArea;
-        SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+		SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
 		l += workArea.left;
 		t += workArea.top;
 
@@ -310,7 +311,7 @@ LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 	{
 		int x = wParam-1;
 		if (x < 14)
-		    x *= 2;
+			x *= 2;
 		else
 			x = ((x-14)*2)+1;
 
@@ -334,11 +335,11 @@ LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 	for (int i = 0; i < m_wndPiecesBar.m_wndPiecesCombo.GetCount();i++)
 	{
 		char tmp[100];
-		m_wndPiecesBar.m_wndPiecesCombo.GetLBText (i, tmp);
-		if (strcmp ((char*)lParam, tmp) == 0)
+		m_wndPiecesBar.m_wndPiecesCombo.GetLBText(i, tmp);
+		if (strcmp((char*)lParam, tmp) == 0)
 			return TRUE;
 	}
-	m_wndPiecesBar.m_wndPiecesCombo.AddString ((char*)lParam);
+	m_wndPiecesBar.m_wndPiecesCombo.AddString((char*)lParam);
 
 	return TRUE;
 }
@@ -590,18 +591,18 @@ void CMainFrame::OnViewFullscreen()
 	if (m_pwndFullScrnBar == NULL)
 	{
 		m_wndStatusBar.ShowWindow(SW_HIDE);
-		GetWindowPlacement (&m_wpPrev);
+		GetWindowPlacement(&m_wpPrev);
 		m_wpPrev.length = sizeof m_wpPrev;
 		
 		//Adjust RECT to new size of window
-		::GetWindowRect (::GetDesktopWindow(), &rectDesktop);
+		::GetWindowRect(::GetDesktopWindow(), &rectDesktop);
 		::AdjustWindowRectEx(&rectDesktop, GetStyle(), TRUE, GetExStyle());
 
 		// Remember this for OnGetMinMaxInfo()
 		m_FullScreenWindowRect = rectDesktop;
 		
 		wpNew = m_wpPrev;
-		wpNew.showCmd =  SW_SHOWNORMAL;
+		wpNew.showCmd = SW_SHOWNORMAL;
 		wpNew.rcNormalPosition = rectDesktop;
 		
 		m_pwndFullScrnBar = new CToolBar;
@@ -630,7 +631,7 @@ void CMainFrame::OnViewFullscreen()
 		wpNew = m_wpPrev;
 	}
 
-	SetWindowPlacement (&wpNew);
+	SetWindowPlacement(&wpNew);
 }
 
 void CMainFrame::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
@@ -892,11 +893,11 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_VIEW_STEP_CHOOSE, 0);
 		} break;
 
-    case ID_VIEW_STEP_INSERT: {
+		case ID_VIEW_STEP_INSERT: {
 			project->HandleCommand(LC_VIEW_STEP_INSERT, 0);
 		} break;
 
-    case ID_VIEW_STEP_DELETE: {
+		case ID_VIEW_STEP_DELETE: {
 			project->HandleCommand(LC_VIEW_STEP_DELETE, 0);
 		} break;
 
@@ -1114,10 +1115,9 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	return nIDLast;
 }
 
-#include "view.h"
-LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-void CMainFrame::OnViewNewView() 
+void CMainFrame::OnViewNewView()
 {
 	HINSTANCE hInst = AfxGetInstanceHandle();
 	WNDCLASS wndcls;
@@ -1125,23 +1125,23 @@ void CMainFrame::OnViewNewView()
 #define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
 #define FLOATING_CLASSNAME _T("LeoCADFloatingOpenGLClass")
 
-  // check if our class is registered
-	if(!(GetClassInfo (hInst, FLOATING_CLASSNAME, &wndcls)))
+	// check if our class is registered
+	if(!(GetClassInfo(hInst, FLOATING_CLASSNAME, &wndcls)))
 	{
-  	if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
-	  {
-      // set our class name
-	  	wndcls.lpszClassName = FLOATING_CLASSNAME;
-      wndcls.lpfnWndProc = GLWindowProc;
-      wndcls.hIcon = LoadIcon (hInst, MAKEINTRESOURCE (IDR_MAINFRAME));
+		if (GetClassInfo(hInst, OPENGL_CLASSNAME, &wndcls))
+		{
+			// set our class name
+			wndcls.lpszClassName = FLOATING_CLASSNAME;
+			wndcls.lpfnWndProc = GLWindowProc;
+			wndcls.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDR_MAINFRAME));
 
-  		// register class
-	  	if (!AfxRegisterClass (&wndcls))
-		  	AfxThrowResourceException();
-  	}
+			// register class
+			if (!AfxRegisterClass(&wndcls))
+				AfxThrowResourceException();
+		}
 		else
 			AfxThrowResourceException();
-  }
+	}
 
   View *view = new View (lcGetActiveProject(), NULL);
 
@@ -1153,28 +1153,29 @@ void CMainFrame::OnViewNewView()
 
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 {
-  m_wndSplitter.CreateStatic (this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
+	m_wndSplitter.CreateStatic(this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
 
-  m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
-  m_wndSplitter.CreateView (1, 0, RUNTIME_CLASS (CRichEditView), CSize (0, 0), pContext);
-  m_wndSplitter.SetRowInfo (1, 50, 0);
+	m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CCADView), CSize(0, 1000), pContext);
+	m_wndSplitter.CreateView(1, 0, RUNTIME_CLASS(CRichEditView), CSize(0, 0), pContext);
+
+	m_wndSplitter.SetRowInfo(1, 50, 0);
 
 	// Setup the console.
-	CRichEditCtrl& Edit = ((CRichEditView*) m_wndSplitter.GetPane(1, 0))->GetRichEditCtrl();
-	Edit.SetReadOnly (TRUE);
+	CRichEditCtrl& Edit = ((CRichEditView*)m_wndSplitter.GetPane(1, 0))->GetRichEditCtrl();
+	Edit.SetReadOnly(TRUE);
 
 	CHARFORMAT cf;
 	memset(&cf, 0, sizeof(cf));
 	cf.dwMask = CFM_BOLD | CFM_FACE;
 
 	NONCLIENTMETRICS nm;
-	nm.cbSize = sizeof (NONCLIENTMETRICS);
-	VERIFY (SystemParametersInfo(SPI_GETNONCLIENTMETRICS,nm.cbSize,&nm,0)); 
+	nm.cbSize = sizeof(NONCLIENTMETRICS);
+	VERIFY(SystemParametersInfo(SPI_GETNONCLIENTMETRICS,nm.cbSize,&nm,0)); 
 	strcpy(cf.szFaceName, nm.lfStatusFont.lfFaceName);
 
 	Edit.SetDefaultCharFormat(cf);
 
-  return TRUE;
+	return TRUE;
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 

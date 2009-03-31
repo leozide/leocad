@@ -3,7 +3,7 @@
 
 // TODO: rewrite everything
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include <windowsx.h>
 

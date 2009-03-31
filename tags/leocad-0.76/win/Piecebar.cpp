@@ -1,7 +1,7 @@
 // SizingControlBar.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include "afxpriv.h"    // for CDockContext
 #include "resource.h"
 #include "piecebar.h"

@@ -2,9 +2,12 @@
 // View the project contents
 //
 
+#include "lc_global.h"
+#include "view.h"
+
 #include <stdlib.h>
 #include "project.h"
-#include "view.h"
+#include "camera.h"
 #include "system.h"
 
 View::View(Project *pProject, GLWindow *share)

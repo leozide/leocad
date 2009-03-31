@@ -1,7 +1,7 @@
 // System user interface.
 //
 
-#include "stdafx.h"
+#include "lc_global.h"
 #include <dlgs.h>
 #include <direct.h>
 #include "leocad.h"

@@ -1,9 +1,9 @@
 // CADView.cpp : implementation of the CCADView class
 //
 
-#include "stdafx.h"
-#include "LeoCAD.h"
+#include "lc_global.h"
 #include <windowsx.h>
+#include "LeoCAD.h"
 
 #include "CADDoc.h"
 #include "CADView.h"
@@ -984,9 +984,11 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		if (pDoc->m_nCurAction == ACTION_SELECT)
 		{
 			POINT pt;
+
 			GetCursorPos(&pt);
 			CRect rc;
 			GetWindowRect(rc);
+
 			if (rc.PtInRect(pt))
 				OnSetCursor(this, HTCLIENT, 0);
 		}
@@ -1024,17 +1026,17 @@ void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
 {
-  if (m_pView)
-  {
-    MSG msg;
+	if (m_pView)
+	{
+		MSG msg;
 
 		msg.message = message;
-    msg.wParam = wParam;
-    msg.lParam = lParam;
+		msg.wParam = wParam;
+		msg.lParam = lParam;
 
 		if (GLWindowPreTranslateMessage(m_pView, &msg))
 			return TRUE;
-  }
-	
+	}
+
 	return CView::WindowProc(message, wParam, lParam);
 }

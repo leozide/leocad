@@ -2,6 +2,7 @@
 // Texture Font
 //
 
+#include "lc_global.h"
 #include "globals.h"
 #include "project.h"
 #include "texfont.h"

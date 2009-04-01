@@ -1037,39 +1037,76 @@ void Project::FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const
   }
 }
 
+inline String GetToken(char*& ptr)
+{
+	String Ret;
+
+	while (*ptr && *ptr <= 32)
+		ptr++;
+
+	while (*ptr > 32)
+	{
+		Ret += *ptr;
+		ptr++;
+	}
+
+	return Ret;
+}
+
 void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray)
 {
 	char buf[1024];
 
-  // Save file offset.
-  lcuint32 Offset = file->GetPosition();
-  file->Seek(0, SEEK_SET);
+	// Save file offset.
+	lcuint32 Offset = file->GetPosition();
+	file->Seek(0, SEEK_SET);
 
-  while (file->ReadLine(buf, 1024))
+	while (file->ReadLine(buf, 1024))
 	{
 		strupr(buf);
-		if (strstr(buf, "STEP"))
+
+		char* ptr = buf;
+		String LineType = GetToken(ptr);
+		bool PieceHidden = false;
+
+		if (LineType == "0")
 		{
-			(*nStep)++;
-			continue;
+			String Token = GetToken(ptr);
+
+			if (Token == "STEP")
+			{
+				(*nStep)++;
+				continue;
+			}
+
+			if (Token == "!LEOCAD")
+			{
+				Token = GetToken(ptr);
+
+				if (Token == "HIDDEN")
+				{
+					PieceHidden = true;
+					LineType = GetToken(ptr);
+				}
+			}
 		}
 
-		bool read = true;
-		char *ptr, tmp[LC_MAXPATH], pn[LC_MAXPATH];
-		int color, cmd;
-		float fmat[12];
-
-		if (sscanf(buf, "%d %d %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
-			&cmd, &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6], 
-			&fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 15)
-			continue;
-
-		Matrix incmat, tmpmat;
-		incmat.FromLDraw(fmat);
-		tmpmat.Multiply(*prevmat, incmat);
-
-		if (cmd == 1)
+		if (LineType == "1")
 		{
+			bool read = true;
+			char tmp[LC_MAXPATH], pn[LC_MAXPATH];
+			int color;
+			float fmat[12];
+
+			if (sscanf(ptr, "%d %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
+					   &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6], 
+					   &fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 14)
+				continue;
+
+			Matrix incmat, tmpmat;
+			incmat.FromLDraw(fmat);
+			tmpmat.Multiply(*prevmat, incmat);
+
 			int cl = 0;
 			if (color == 16) 
 				cl = DefColor;
@@ -1082,7 +1119,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			if (ptr != NULL)
 				*ptr = 0;
 
-      // See if it's a piece in the library
+			// See if it's a piece in the library
 			if (strlen(tmp) < 9)
 			{
 				char name[9];
@@ -1104,39 +1141,42 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 					pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
 					SystemPieceComboAdd(pInfo->m_strDescription);
 					(*nOk)++;
+
+					if (PieceHidden)
+						pPiece->Hide();
 				}
 			}
 
-      // Check for MPD files first.
-      if (read)
-      {
-        for (int i = 0; i < FileArray.GetSize(); i++)
-        {
-          if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
-          {
-  					FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
-  					read = false;
-            break;
-          }
-        }
-      }
+			// Check for MPD files first.
+			if (read)
+			{
+				for (int i = 0; i < FileArray.GetSize(); i++)
+				{
+					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					{
+						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+						read = false;
+						break;
+					}
+				}
+			}
 
-      // Try to read the file from disk.
+			// Try to read the file from disk.
 			if (read)
 			{
 				FileDisk tf;
 
-        if (tf.Open(pn, "rt"))
-        {
+				if (tf.Open(pn, "rt"))
+				{
 					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
 					read = false;
-        }
+				}
 			}
 		}
 	}
 
-  // Restore file offset.
-  file->Seek(Offset, SEEK_SET);
+	// Restore file offset.
+	file->Seek(Offset, SEEK_SET);
 }
 
 bool Project::DoFileSave()
@@ -1258,17 +1298,23 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		{
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				if ((pPiece->IsVisible(i, false)) && (pPiece->GetStepShow() == i))
+				if (pPiece->GetStepShow() != i)
+					continue;
+
+				if (pPiece->IsHidden())
 				{
-					float f[12], position[3], rotation[4];
-					pPiece->GetPosition(position);
-					pPiece->GetRotation(rotation);
-					Matrix mat(rotation, position);
-					mat.ToLDraw(f);
-					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-						col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
-					file.Write(buf, strlen(buf));
+					const char* HiddenText = " 0 !LEOCAD HIDDEN";
+					file.Write(HiddenText, strlen(HiddenText));
 				}
+
+				float f[12], position[3], rotation[4];
+				pPiece->GetPosition(position);
+				pPiece->GetRotation(rotation);
+				Matrix mat(rotation, position);
+				mat.ToLDraw(f);
+				sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
+				        col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
+				file.Write(buf, strlen(buf));
 			}
 
 			if (i != steps)

@@ -40,15 +40,15 @@ public:
 	unsigned long WriteDouble(const void* pBuf, unsigned long nCount);
 
 	void ReadString(String& Value);
-	void ReadInt(lcint32* Value)
+	void ReadInt(i32* Value)
 	{ ReadLong(Value, 1); }
-	void ReadInt(lcuint32* Value)
+	void ReadInt(u32* Value)
 	{ ReadLong(Value, 1); }
 
 	void WriteString(const String& Value);
-	void WriteInt(lcint32 Value)
+	void WriteInt(i32 Value)
 	{ WriteLong(&Value, 1); }
-	void WriteInt(lcuint32 Value)
+	void WriteInt(u32 Value)
 	{ WriteLong(&Value, 1); }
 
 	virtual void Abort()=0;

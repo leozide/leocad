@@ -12,7 +12,7 @@
 // ============================================================================
 // Old defines (mostly deprecated).
 
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 #define LC_MAXPATH 260 //_MAX_PATH
 #define KEY_SHIFT	VK_SHIFT
 #define KEY_CONTROL	VK_CONTROL
@@ -30,7 +30,7 @@
 #define KEY_MINUS	VK_SUBTRACT
 #endif
 
-#ifdef LC_LINUX
+#if LC_LINUX
 #define LC_MAXPATH 1024 //FILENAME_MAX
 #define KEY_SHIFT	0x01
 #define KEY_CONTROL	0x02
@@ -57,7 +57,7 @@ int stricmp(const char* str1, const char* str2);
 
 #endif
 
-#if defined(LC_MACOSX) || defined(LC_IPHONE) 
+#if LC_MACOSX || LC_IPHONE 
 #include <sys/param.h>
 #define LC_MAXPATH MAXPATHLEN
 
@@ -110,7 +110,7 @@ int stricmp(const char* str1, const char* str2);
 #define ABS(a)	(((a) > 0) ? (a) : -(a))
 #endif
 
-#ifndef LC_WINDOWS
+#if !LC_WINDOWS
 #define RGB(r, g, b) ((unsigned long)(((unsigned char) (r) | ((unsigned short) (g) << 8))|(((unsigned long) (unsigned char) (b)) << 16))) 
 #endif 
 
@@ -120,8 +120,10 @@ int stricmp(const char* str1, const char* str2);
 #define M_PI  3.14159265
 #endif
 
-#define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
-                                                ((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))
+#define LC_MAX_TIME 0xffffffff
+
+#define LC_FOURCC(ch0, ch1, ch2, ch3) (u32)((u32)(u8)(ch0) | ((u32)(u8)(ch1) << 8) | \
+                                      ((u32)(u8)(ch2) << 16) | ((u32)(u8)(ch3) << 24 ))
 
 #define LC_FILE_ID LC_FOURCC('L','C','D', 0)
 

@@ -200,7 +200,7 @@ void Project::SetTitle(const char* lpszTitle)
 	{
 		strncpy(ext, ptr+1, 3);
 		ext[3] = 0;
-		strlwr(ext);
+		_strlwr(ext);
 
 		if (strcmp(ext, "lcd") == 0)
 			*ptr = 0;
@@ -1058,12 +1058,12 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 	char buf[1024];
 
 	// Save file offset.
-	lcuint32 Offset = file->GetPosition();
+	u32 Offset = file->GetPosition();
 	file->Seek(0, SEEK_SET);
 
 	while (file->ReadLine(buf, 1024))
 	{
-		strupr(buf);
+		_strupr(buf);
 
 		char* ptr = buf;
 		String LineType = GetToken(ptr);
@@ -1152,7 +1152,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			{
 				for (int i = 0; i < FileArray.GetSize(); i++)
 				{
-					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					if (_stricmp(FileArray[i]->GetFileName(), pn) == 0)
 					{
 						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
 						read = false;
@@ -1218,7 +1218,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	{
 		ptr++;
 		strncpy(ext, ptr, 3);
-		strlwr(ext);
+		_strlwr(ext);
 
 		if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 		{
@@ -1264,7 +1264,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	if (ptr != NULL)
 	{
 		strncpy(ext, ptr+1, 3);
-		strlwr(ext);
+		_strlwr(ext);
 	}
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
@@ -1458,7 +1458,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
   if (ptr != NULL)
   {
     strncpy(ext, ptr+1, 3);
-    strlwr(ext);
+    _strlwr(ext);
   }
 
   bool datfile = false;
@@ -3861,7 +3861,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (ptr != NULL)
 				{
 					strncpy(ext, ptr+1, 3);
-					strlwr(ext);
+					_strlwr(ext);
 				}
 
 				if (strcmp(ext, "avi") == 0)

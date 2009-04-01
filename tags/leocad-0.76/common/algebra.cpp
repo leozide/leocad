@@ -751,3 +751,139 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 
 	return false;
 }
+
+float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
+{
+	Vector3 Dir = End - Start;
+
+	float t1 = Dot3(Start - Point, Dir);
+	float t2 = LengthSquared(Dir);
+
+	float t = -t1 / t2;
+
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+
+	Vector3 Closest = Start + t * Dir;
+
+	return Length(Closest - Point);
+}
+
+// Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
+bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist)
+{
+	bool MiddleQuadrant[3];
+	bool Inside = true;
+	float CandidatePlane[3];
+	float MaxT[3];
+	int i;
+
+	// Find candidate planes.
+	for (i = 0; i < 3; i++)
+	{
+		if (Start[i] < Box.m_Min[i])
+		{
+			MiddleQuadrant[i] = false;
+			CandidatePlane[i] = Box.m_Min[i];
+			Inside = false;
+		}
+		else if (Start[i] > Box.m_Max[i])
+		{
+			MiddleQuadrant[i] = false;
+			CandidatePlane[i] = Box.m_Max[i];
+			Inside = false;
+		}
+		else
+		{
+			MiddleQuadrant[i] = true;
+		}
+	}
+
+	// Ray origin inside box.
+	if (Inside)
+	{
+		*Dist = 0;
+		return true;
+	}
+
+	// Calculate T distances to candidate planes.
+	Vector3 Dir = End - Start;
+
+	for (i = 0; i < 3; i++)
+	{
+		if (!MiddleQuadrant[i] && Dir[i] != 0.0f)
+			MaxT[i] = (CandidatePlane[i] - Start[i]) / Dir[i];
+		else
+			MaxT[i] = -1.0f;
+	}
+
+	// Get largest of the MaxT's for final choice of intersection.
+	int WhichPlane = 0;
+	for (i = 1; i < 3; i++)
+		if (MaxT[WhichPlane] < MaxT[i])
+			WhichPlane = i;
+
+	// Check final candidate actually inside box.
+	if (MaxT[WhichPlane] < 0.0f)
+		return false;
+
+	Vector3 Intersection;
+
+	for (i = 0; i < 3; i++)
+	{
+		if (WhichPlane != i)
+		{
+			Intersection[i] = Start[i] + MaxT[WhichPlane] * Dir[i];
+			if (Intersection[i] < Box.m_Min[i] || Intersection[i] > Box.m_Max[i])
+				return false;
+		}
+		else
+			Intersection[i] = CandidatePlane[i];
+	}
+
+	*Dist = Length(Intersection - Start);
+
+	return true;
+}
+
+// Return true if Box intersects the volume defined by Planes.
+bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes)
+{
+	Vector3 Points[8];
+	Box.GetPoints(Points);
+
+	// Start by testing trivial reject/accept cases.
+	int Outcodes[8];
+	int i;
+
+	for (i = 0; i < 8; i++)
+	{
+		Outcodes[i] = 0;
+
+		for (int j = 0; j < NumPlanes; j++)
+		{
+			if (Dot3(Points[i], Planes[j]) + Planes[j][3] > 0)
+				Outcodes[i] |= 1 << j;
+		}
+	}
+
+	int OutcodesOR = 0, OutcodesAND = 0x3f;
+
+	for (i = 0; i < 8; i++)
+	{
+		OutcodesAND &= Outcodes[i];
+		OutcodesOR |= Outcodes[i];
+	}
+
+	// All corners outside the same plane.
+	if (OutcodesAND != 0)
+		return false;
+
+	// All corners inside the volume.
+	if (OutcodesOR == 0)
+		return true;
+
+	return true;
+}

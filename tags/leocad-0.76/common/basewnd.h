@@ -3,42 +3,42 @@
 
 #include <string.h>
 
-// FIXME: move this to another place
+// TODO: move this to another place
 #ifdef WIN32
 #include "stdafx.h"
 typedef CWnd* BaseWndXID;
-typedef struct
+struct BaseMenuItem
 {
   CWnd* wnd;
   int index;
   UINT command;
-} BaseMenuItem;
+};
 #endif
 
 #ifdef LC_LINUX
 #include <gtk/gtk.h>
 typedef GtkWidget* BaseWndXID;
-typedef struct
+struct BaseMenuItem
 {
   GtkWidget* widget;
   GtkAccelGroup* accel;
-} BaseMenuItem;
+};
 #endif
 
 #ifdef LC_MACOSX
 typedef void* BaseWndXID;
-typedef struct
+struct BaseMenuItem
 {
 	void* Dummy;
-} BaseMenuItem;
+};
 #endif
 
 #ifdef LC_IPHONE
 typedef void* BaseWndXID;
-typedef struct
-	{
-		void* Dummy;
-	} BaseMenuItem;
+struct BaseMenuItem
+{
+	void* Dummy;
+};
 #endif
 
 // =============================================================================
@@ -91,7 +91,7 @@ class BaseWnd
     { m_pXID = id; }
 
 #ifdef LC_LINUX 
-  // FIXME: remove
+  // TODO: remove
   operator GtkWidget* () const
     { return m_pXID; }
 #endif

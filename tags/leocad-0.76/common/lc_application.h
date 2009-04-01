@@ -12,7 +12,7 @@ public:
 	lcApplication();
 	~lcApplication();
 
-	bool Initialize(int argc, char *argv[], const char* SysLibPath);
+	bool Initialize(int argc, char* argv[], const char* SysLibPath);
 	void Shutdown();
 
 	// Pieces library.

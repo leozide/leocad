@@ -1,5 +1,5 @@
-// Information about how to draw a piece and some more stuff.
-//
+#include "lc_global.h"
+#include "pieceinf.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -7,17 +7,20 @@
 #include <math.h>
 #include "opengl.h"
 #include "texture.h"
-#include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
 #include "matrix.h"
 #include "vector.h"
 #include "defines.h"
-#include "config.h"
 #include "library.h"
 #include "lc_application.h"
 
+#if LC_IPHONE
 #define SIDES 8
+#else
+#define SIDES 16
+#endif
+
 static float sintbl[SIDES];
 static float costbl[SIDES];
 
@@ -177,14 +180,14 @@ unsigned char ConvertColor(int c)
 /////////////////////////////////////////////////////////////////////////////
 // PieceInfo construction/destruction
 
-PieceInfo::PieceInfo ()
+PieceInfo::PieceInfo()
 {
-  // Do nothing, initialization is done by LoadIndex ()
+  // Do nothing, initialization is done by LoadIndex()
 }
 
-PieceInfo::~PieceInfo ()
+PieceInfo::~PieceInfo()
 {
-  FreeInformation ();
+  FreeInformation();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -224,7 +227,7 @@ void PieceInfo::LoadIndex (File& file)
   m_strDescription[64] = '\0';
   file.ReadShort (sh, 6);
   file.ReadByte (&m_nFlags, 1);
-  lcuint32 Groups; file.ReadLong (&Groups, 1);
+  u32 Groups; file.ReadLong (&Groups, 1);
   file.ReadLong (&m_nOffset, 1);
   file.ReadLong (&m_nSize, 1);
 
@@ -295,18 +298,18 @@ void PieceInfo::RenderBox()
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-inline lcuint16 EndianSwap(lcuint16 Val)
+inline u16 EndianSwap(u16 Val)
 {
 	return LCUINT16(Val);
 }
 
-inline lcuint32 EndianSwap(lcuint32 Val)
+inline u32 EndianSwap(u32 Val)
 {
 	return LCUINT32(Val);
 }
 
 template<class S, class D>
-static void WriteMeshDrawInfo(lcuint8*& Data, DRAWGROUP* Group)
+static void WriteMeshDrawInfo(u8*& Data, DRAWGROUP* Group)
 {
 	S* SrcPtr = (S*)Data;
 	int NumColors = EndianSwap(*SrcPtr);
@@ -381,7 +384,7 @@ static void WriteMeshDrawInfo(lcuint8*& Data, DRAWGROUP* Group)
 			*DestPtr = EndianSwap(*SrcPtr);
 	}
 
-	Data = (lcuint8*)SrcPtr;
+	Data = (u8*)SrcPtr;
 }
 
 template<class T>
@@ -581,15 +584,15 @@ void PieceInfo::LoadInformation()
 	CONNECTIONINFO* pConnection;
 	DRAWGROUP* pGroup;
 	void* buf;
-	lcuint32 verts, *longs, fixverts;
-	lcuint16 sh;
-	lcuint8 *bytes, *tmp, bt;
+	u32 verts, *longs, fixverts;
+	u16 sh;
+	u8 *bytes, *tmp, bt;
 	float scale, shift;
-	lcint16* shorts;
+	i16* shorts;
 	int i;
 
 	// We don't want memory leaks.
-	FreeInformation ();
+	FreeInformation();
 
 	// Open pieces.bin and buffer the information we need.
 	strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath());
@@ -606,14 +609,14 @@ void PieceInfo::LoadInformation()
 	scale = 0.01f;
 	if (m_nFlags & LC_PIECE_MEDIUM) scale = 0.001f;
 	if (m_nFlags & LC_PIECE_SMALL)  scale = 0.0001f;
-	longs = (lcuint32*)buf;
+	longs = (u32*)buf;
 	fixverts = verts = LCUINT32(*longs);
 	bytes = (unsigned char*)(longs + 1);
-	bytes += verts * sizeof(lcint16) * 3;
+	bytes += verts * sizeof(i16) * 3;
 
 	// Read connections
-	m_nConnectionCount = LCUINT16(*((lcuint16*)bytes));
-	bytes += sizeof (lcuint16);
+	m_nConnectionCount = LCUINT16(*((u16*)bytes));
+	bytes += sizeof (u16);
 	m_pConnections = (CONNECTIONINFO*)malloc((m_nConnectionCount+1) * sizeof(CONNECTIONINFO));
 
 	sh = m_nConnectionCount;
@@ -622,7 +625,7 @@ void PieceInfo::LoadInformation()
 		pConnection->type = *bytes;
 		bytes++;
 
-		shorts = (lcint16*)bytes;
+		shorts = (i16*)bytes;
 		pConnection->center[0] = (float)(LCINT16(*shorts))*scale;
 		shorts++;
 		pConnection->center[1] = (float)(LCINT16(*shorts))*scale;
@@ -655,7 +658,7 @@ void PieceInfo::LoadInformation()
 		strcpy(name, (char*)bytes);
 		tex->texture = lcGetPiecesLibrary()->FindTexture(name);
 
-		shorts = (lcint16*)(bytes + 8);
+		shorts = (i16*)(bytes + 8);
 		for (i = 0; i < 4; i++)
 		{
 			tex->vertex[i][0] = (float)LCINT16(shorts[0])*scale;
@@ -671,24 +674,24 @@ void PieceInfo::LoadInformation()
 			shorts += 2;
 		}
 
-		bytes += 8 + 20*sizeof(lcuint16);
+		bytes += 8 + 20*sizeof(u16);
 	}
 
 	// Read groups
-	m_nGroupCount = LCUINT16(*((lcuint16*)bytes));
-	bytes += sizeof(lcuint16);
+	m_nGroupCount = LCUINT16(*((u16*)bytes));
+	bytes += sizeof(u16);
 	m_pGroups = (DRAWGROUP*)malloc(sizeof(DRAWGROUP)*m_nGroupCount);
 	memset(m_pGroups, 0, sizeof(DRAWGROUP)*m_nGroupCount);
 
 	// Calculate number of vertices.
 	tmp = bytes;
 	sh = m_nGroupCount;
-	lcuint32 tris = 0;
+	u32 tris = 0;
 	while (sh--)
 	{
 		bt = *bytes;
 		bytes++;
-		bytes += bt*sizeof(lcuint16);
+		bytes += bt*sizeof(u16);
 
 		while (*bytes)
 		{
@@ -696,8 +699,8 @@ void PieceInfo::LoadInformation()
 			{
 				if (m_nFlags & LC_PIECE_LONGDATA_FILE)
 				{
-					lcuint32 colors, *p;
-					p = (lcuint32*)(bytes + 1);
+					u32 colors, *p;
+					p = (u32*)(bytes + 1);
 					colors = LCUINT32(*p);
 					p++;
 
@@ -715,8 +718,8 @@ void PieceInfo::LoadInformation()
 				}
 				else
 				{
-					lcuint16 colors, *p;
-					p = (lcuint16*)(bytes + 1);
+					u16 colors, *p;
+					p = (u16*)(bytes + 1);
 					colors = LCUINT16(*p);
 					p++;
 
@@ -774,7 +777,7 @@ void PieceInfo::LoadInformation()
 		m_nFlags &= ~LC_PIECE_LONGDATA;
 
 	// Copy the 'fixed' vertexes
-	shorts = (lcint16*)(longs + 1);
+	shorts = (i16*)(longs + 1);
 	for (verts = 0; verts < LCUINT32(*longs); verts++)
 	{
 		m_fVertexArray[verts*3] = (float)LCINT16(*shorts)*scale;
@@ -796,9 +799,9 @@ void PieceInfo::LoadInformation()
 		pGroup->connections[bt] = 0xFFFF;
 		while(bt--)
 		{
-			lcuint16 tmp = LCUINT16(*((lcuint16*)bytes));
+			u16 tmp = LCUINT16(*((u16*)bytes));
 			pGroup->connections[bt] = tmp;
-			bytes += sizeof(lcuint16);
+			bytes += sizeof(u16);
 		}
 
 		switch (*bytes)
@@ -810,16 +813,16 @@ void PieceInfo::LoadInformation()
 				if (m_nFlags & LC_PIECE_LONGDATA_FILE)
 				{
 					if (m_nFlags & LC_PIECE_LONGDATA)
-						WriteMeshDrawInfo<lcuint32, lcuint32>(bytes, pGroup);
+						WriteMeshDrawInfo<u32, u32>(bytes, pGroup);
 					else
-						WriteMeshDrawInfo<lcuint32, lcuint16>(bytes, pGroup);
+						WriteMeshDrawInfo<u32, u16>(bytes, pGroup);
 				}
 				else
 				{
 					if (m_nFlags & LC_PIECE_LONGDATA)
-						WriteMeshDrawInfo<lcuint16, lcuint32>(bytes, pGroup);
+						WriteMeshDrawInfo<u16, u32>(bytes, pGroup);
 					else
-						WriteMeshDrawInfo<lcuint16, lcuint16>(bytes, pGroup);
+						WriteMeshDrawInfo<u16, u16>(bytes, pGroup);
 				}
 			} break;
 
@@ -830,12 +833,12 @@ void PieceInfo::LoadInformation()
 				for (i = 0; i < 12; i++)
 					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
 				mat.FromPacked ((float*)(bytes+2));
-				lcuint16 color = ConvertColor(*(bytes+1));
+				u16 color = ConvertColor(*(bytes+1));
 
 				if (m_nFlags & LC_PIECE_LONGDATA)
-					WriteStudDrawInfo<lcuint32>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
+					WriteStudDrawInfo<u32>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
 				else
-					WriteStudDrawInfo<lcuint16>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
+					WriteStudDrawInfo<u16>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
 
 				mat.TransformPoints(m_fVertexArray+verts*3, 2 * SIDES + 1);
 
@@ -850,12 +853,12 @@ void PieceInfo::LoadInformation()
 				for (i = 0; i < 12; i++)
 					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
 				mat.FromPacked ((float*)(bytes+2));
-				lcuint16 color = ConvertColor(*(bytes+1));
+				u16 color = ConvertColor(*(bytes+1));
 
 				if (m_nFlags & LC_PIECE_LONGDATA)
-					WriteHollowStudDrawInfo<lcuint32>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
+					WriteHollowStudDrawInfo<u32>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
 				else
-					WriteHollowStudDrawInfo<lcuint16>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
+					WriteHollowStudDrawInfo<u16>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
 
 				mat.TransformPoints(m_fVertexArray+verts*3, 4 * SIDES);
 
@@ -870,12 +873,12 @@ void PieceInfo::LoadInformation()
 				for (i = 0; i < 12; i++)
 					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
 				mat.FromPacked ((float*)(bytes+2));
-				lcuint16 color = ConvertColor(*(bytes+1));
+				u16 color = ConvertColor(*(bytes+1));
 
 				if (m_nFlags & LC_PIECE_LONGDATA)
-					WriteStudDrawInfo<lcuint32>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
+					WriteStudDrawInfo<u32>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
 				else
-					WriteStudDrawInfo<lcuint16>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
+					WriteStudDrawInfo<u16>(color, m_fVertexArray+verts*3, verts, pGroup, LC_STUD_RADIUS);
 
 				mat.TransformPoints(m_fVertexArray+verts*3, 2 * SIDES + 1);
 
@@ -890,12 +893,12 @@ void PieceInfo::LoadInformation()
 				for (i = 0; i < 12; i++)
 					((float*)(bytes+2))[i] = LCFLOAT (((float*)(bytes+2))[i]);
 				mat.FromPacked ((float*)(bytes+2));
-				lcuint16 color = ConvertColor(*(bytes+1));
+				u16 color = ConvertColor(*(bytes+1));
 
 				if (m_nFlags & LC_PIECE_LONGDATA)
-					WriteHollowStudDrawInfo<lcuint32>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
+					WriteHollowStudDrawInfo<u32>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
 				else
-					WriteHollowStudDrawInfo<lcuint16>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
+					WriteHollowStudDrawInfo<u16>(color, m_fVertexArray+verts*3, verts, pGroup, 0.16f, LC_STUD_RADIUS);
 
 				mat.TransformPoints(m_fVertexArray+verts*3, 4 * SIDES);
 
@@ -1067,15 +1070,12 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 		EyePos[2] = NewEye[2];
 	}
 
-	Vector FrontVec, RightVec, UpVec;
+	Vector3 FrontVec, RightVec, UpVec;
 
 	// Calculate view matrix.
-	UpVec = Vector(Top[0], Top[1], Top[2]);
-	UpVec.Normalize();
-	FrontVec = Vector(Front[0], Front[1], Front[2]);
-	FrontVec.Normalize();
-	RightVec = Vector(Side[0], Side[1], Side[2]);
-	RightVec.Normalize();
+	UpVec = Normalize(Vector3(Top[0], Top[1], Top[2]));
+	FrontVec = Normalize(Vector3(Front[0], Front[1], Front[2]));
+	RightVec = Normalize(Vector3(Side[0], Side[1], Side[2]));
 
   float ViewMat[16];
   ViewMat[0] = -RightVec[0]; ViewMat[4] = -RightVec[1]; ViewMat[8]  = -RightVec[2]; ViewMat[12] = 0.0;

@@ -1,7 +1,3 @@
-//
-//	pieceinf.h
-////////////////////////////////////////////////////
-
 #ifndef _PIECEINF_H_
 #define _PIECEINF_H_
 
@@ -21,12 +17,12 @@
 class File;
 class Texture;
 
-typedef struct
+struct CONNECTIONINFO
 {
 	unsigned char type;
 	float center[3];
 	float normal[3];
-} CONNECTIONINFO;
+};
 
 typedef struct
 {
@@ -34,21 +30,21 @@ typedef struct
 	void* drawinfo;
 } DRAWGROUP;
 
-typedef struct TEXTURE
+struct TEXTURE
 {
 	Texture* texture;
 	unsigned char color;
 	float vertex[4][3];
 	float coords[4][2];
-} TEXTURE;
+};
 
 unsigned char ConvertColor(int c);
 
 class PieceInfo
 {
- public:
-  PieceInfo ();
-  ~PieceInfo ();
+public:
+	PieceInfo();
+	~PieceInfo();
 
 	bool IsPatterned() const
 	{

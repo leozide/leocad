@@ -78,58 +78,69 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 #define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
 #define MINIFIG_CLASSNAME _T("LeoCADMinifigOpenGLClass")
 
-  // check if our class is registered
+	// check if our class is registered
 	if(!(GetClassInfo (hInst, MINIFIG_CLASSNAME, &wndcls)))
 	{
-  	if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
-	  {
-      // set our class name
-	  	wndcls.lpszClassName = MINIFIG_CLASSNAME;
-      wndcls.lpfnWndProc = GLWindowProc;
+		if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
+		{
+			// set our class name
+			wndcls.lpszClassName = MINIFIG_CLASSNAME;
+			wndcls.lpfnWndProc = GLWindowProc;
 
-  		// register class
-	  	if (!AfxRegisterClass (&wndcls))
-		  	AfxThrowResourceException();
-  	}
+			// register class
+			if (!AfxRegisterClass (&wndcls))
+				AfxThrowResourceException();
+		}
 		else
 			AfxThrowResourceException();
-  }
+	}
 
 	m_pMinifigWnd = new CWnd;
-  m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
-    WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
+	m_pMinifigWnd->CreateEx(0, MINIFIG_CLASSNAME, "LeoCAD", WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
 	int i;
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
-		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
+	((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-    char **names;
-    int j, count;
+		LC_MFW_PIECEINFO** items;
+		int j, count;
 
-    m_pMinifig->GetDescriptions (i, &names, &count);
+		m_pMinifig->GetItems(i, &items, &count);
 
-    for (j = 0; j < count; j++)
-			pCombo->AddString (names[j]);
-    free (names);
+		for (j = 0; j < count; j++)
+		{
+			if (items[j])
+			{
+				int idx = pCombo->AddString(items[j]->description);
+				pCombo->SetItemDataPtr(idx, items[j]);
+			}
+			else
+			{
+				int idx = pCombo->AddString("None");
+				pCombo->SetItemDataPtr(idx, NULL);
+			}
+		}
+
+		free(items);
 	}
 
-  char *names[LC_MFW_NUMITEMS];
-  m_pMinifig->GetSelections (names);
+	const char *names[LC_MFW_NUMITEMS];
+	m_pMinifig->GetSelections (names);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-    pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
-  }
+		pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
+	}
 
-  for (i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
+	for (i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
 		((CSpinButtonCtrl*)GetDlgItem(i))->SetRange(-360, 360);
 
-  return TRUE;  // return TRUE unless you set the focus to a control
+	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
@@ -155,10 +166,11 @@ LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 
 void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
-  char tmp[65];
-  GetDlgItem(nID)->GetWindowText (tmp, 65);
-	m_pMinifig->ChangePiece (nID-IDC_MF_HAT, tmp);
-	m_pMinifig->Redraw ();
+	CComboBox* combo = (CComboBox*)GetDlgItem(nID);
+	LC_MFW_PIECEINFO* info = (LC_MFW_PIECEINFO*)combo->GetItemDataPtr(combo->GetCurSel());
+
+	m_pMinifig->ChangePiece(nID-IDC_MF_HAT, info);
+	m_pMinifig->Redraw();
 }
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 

@@ -1,12 +1,14 @@
 // Base class for all drawable objects
 //
 
+#include "lc_global.h"
+#include "object.h"
+
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
 #include "globals.h"
 #include "project.h"
-#include "object.h"
 #include "matrix.h"
 #include "vector.h"
 #include "file.h"

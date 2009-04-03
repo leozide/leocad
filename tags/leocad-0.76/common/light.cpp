@@ -1,10 +1,12 @@
 // Light object.
 
+#include "lc_global.h"
+#include "light.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include "light.h"
 #include "defines.h"
 #include "globals.h"
 #include "vector.h"

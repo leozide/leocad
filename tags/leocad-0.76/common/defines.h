@@ -4,9 +4,27 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
-// Check for supported platforms.
-#if !(defined(LC_WINDOWS) || defined(LC_LINUX) || defined(LC_MACOSX) || defined(LC_IPHONE))
-#error  YOU NEED TO DEFINE YOUR OS
+// Assert macros.
+#ifdef LC_DEBUG
+
+extern bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description);
+
+#define LC_ASSERT(Expr, Desc) \
+do \
+{ \
+	static bool Ignore = false; \
+	if (!(Expr) && !Ignore) \
+		Ignore = lcAssert(__FILE__, __LINE__, #Expr, Desc); \
+} while (0)
+
+#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
+
+#else
+
+#define LC_ASSERT(expr, desc) do { } while(0)
+
+#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
+
 #endif
 
 // ============================================================================

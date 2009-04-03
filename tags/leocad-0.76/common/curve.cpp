@@ -1,10 +1,12 @@
 // Curve class, used to represent all flexible objects
 //
 
+#include "lc_global.h"
+#include "curve.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include "globals.h"
-#include "curve.h"
 #include "opengl.h"
 #include "matrix.h"
 #include "vector.h"

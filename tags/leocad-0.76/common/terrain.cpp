@@ -1,13 +1,15 @@
 // Terrain: a Bezier surface.
 //
 
+#include "lc_global.h"
+#include "terrain.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include "opengl.h"
 #include "defines.h"
-#include "terrain.h"
 #include "file.h"
 #include "camera.h"
 #include "matrix.h"

@@ -1412,7 +1412,7 @@ extern PFNGLGETBUFFERPOINTERVARBPROC pfnglGetBufferPointervARB;
 
 inline void glEnableLineStipple()
 {
-#if LC_OPENGLES
+#if !LC_OPENGLES
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(5, 0x5555);
 #endif
@@ -1420,7 +1420,7 @@ inline void glEnableLineStipple()
 
 inline void glDisableLineStipple()
 {
-#if LC_OPENGLES
+#if !LC_OPENGLES
 	glDisable(GL_LINE_STIPPLE);
 #endif
 }

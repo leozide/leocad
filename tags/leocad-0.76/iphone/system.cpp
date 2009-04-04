@@ -48,7 +48,7 @@ bool Sys_KeyDown (int key)
 }
 
 // String
-char* strupr(char* string)
+char* _strupr(char* string)
 {
 	char *cp;
 	for (cp=string; *cp; ++cp)
@@ -60,7 +60,7 @@ char* strupr(char* string)
 	return string;
 }
 
-char* strlwr(char* string)
+char* _strlwr(char* string)
 {
 	char *cp;
 	for (cp = string; *cp; ++cp)
@@ -72,7 +72,7 @@ char* strlwr(char* string)
 	return string;
 }
 
-int stricmp(const char* str1, const char* str2)
+int _stricmp(const char* str1, const char* str2)
 {
 	return strcasecmp(str1, str2);
 }

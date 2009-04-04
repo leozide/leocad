@@ -94,9 +94,9 @@ int stricmp(const char* str1, const char* str2);
 #define KEY_PLUS        '+'
 #define KEY_MINUS       '-'
 
-char* strupr(char* string);
-char* strlwr(char* string);
-int stricmp(const char* str1, const char* str2);
+char* _strupr(char* string);
+char* _strlwr(char* string);
+int _stricmp(const char* str1, const char* str2);
 
 #endif
 

@@ -5,7 +5,7 @@
 #include "defines.h"
 
 // Check for supported platforms.
-#if !LC_WINDOWS && !LC_LINUX && !LC_MACOSX && LC_IPHONE
+#if !LC_WINDOWS && !LC_LINUX && !LC_MACOSX && !LC_IPHONE
 #error No OS defined.
 #endif
 

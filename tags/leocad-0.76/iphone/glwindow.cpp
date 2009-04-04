@@ -48,7 +48,7 @@ void GLWindow::SwapBuffers()
 	[View SwapBuffers];
 }
 
-void GLWindow::Redraw()
+void GLWindow::Redraw(bool ForceRedraw)
 {
 	EAGLView* View = (EAGLView*)m_pData;
 	[View setNeedsDisplay];

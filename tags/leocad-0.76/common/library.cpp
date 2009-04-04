@@ -1212,7 +1212,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 #ifdef LC_WINDOWS
 	strupr(p);
 #else
-	strlwr(p);
+	_strlwr(p);
 #endif
 	p++;
 
@@ -1861,7 +1861,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 #ifdef LC_WINDOWS
 			strupr(filename);
 #else
-			strlwr(filename);
+			_strlwr(filename);
 			for (unsigned int i = 0; i < strlen(filename); i++)
 				if (filename[i] == '\\')
 					filename[i] = '/';
@@ -2006,7 +2006,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 #ifdef LC_WINDOWS
 		strupr(filename);
 #else
-		strlwr(filename);
+		_strlwr(filename);
 #endif
 		if (color == 16) color = defcolor;
 

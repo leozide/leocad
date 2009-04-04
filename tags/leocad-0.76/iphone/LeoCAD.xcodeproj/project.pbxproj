@@ -77,8 +77,6 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B37BC4280F4E06FA00C208E5 /* algebra.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = algebra.cpp; path = ../common/algebra.cpp; sourceTree = SOURCE_ROOT; };
 		B37BC4290F4E06FA00C208E5 /* algebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = algebra.h; path = ../common/algebra.h; sourceTree = SOURCE_ROOT; };
-		B37BC42A0F4E06FA00C208E5 /* array.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = array.cpp; path = ../common/array.cpp; sourceTree = SOURCE_ROOT; };
-		B37BC42B0F4E06FA00C208E5 /* array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = array.h; path = ../common/array.h; sourceTree = SOURCE_ROOT; };
 		B37BC42C0F4E06FA00C208E5 /* basewnd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basewnd.h; path = ../common/basewnd.h; sourceTree = SOURCE_ROOT; };
 		B37BC42D0F4E06FA00C208E5 /* camera.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = camera.cpp; path = ../common/camera.cpp; sourceTree = SOURCE_ROOT; };
 		B37BC42E0F4E06FA00C208E5 /* camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = camera.h; path = ../common/camera.h; sourceTree = SOURCE_ROOT; };
@@ -149,6 +147,8 @@
 		B37BC4710F4E06FA00C208E5 /* view.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = view.cpp; path = ../common/view.cpp; sourceTree = SOURCE_ROOT; };
 		B37BC4720F4E06FA00C208E5 /* view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = view.h; path = ../common/view.h; sourceTree = SOURCE_ROOT; };
 		B37BC4D30F4E0A2500C208E5 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		B38C0B230F873CB4004DD3F4 /* lc_array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lc_array.h; path = ../common/lc_array.h; sourceTree = SOURCE_ROOT; };
+		B38C0B240F873CB4004DD3F4 /* lc_global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lc_global.h; path = ../common/lc_global.h; sourceTree = SOURCE_ROOT; };
 		B38CAC880F76170E006495F1 /* basewnd.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = basewnd.cpp; sourceTree = "<group>"; };
 		B38CAC8D0F76184D006495F1 /* system.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = system.cpp; sourceTree = "<group>"; };
 		B38CAC990F761A53006495F1 /* glwindow.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = glwindow.cpp; sourceTree = "<group>"; };
@@ -245,10 +245,10 @@
 		B37BC4270F4E06E500C208E5 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				B38C0B230F873CB4004DD3F4 /* lc_array.h */,
+				B38C0B240F873CB4004DD3F4 /* lc_global.h */,
 				B37BC4280F4E06FA00C208E5 /* algebra.cpp */,
 				B37BC4290F4E06FA00C208E5 /* algebra.h */,
-				B37BC42A0F4E06FA00C208E5 /* array.cpp */,
-				B37BC42B0F4E06FA00C208E5 /* array.h */,
 				B37BC42C0F4E06FA00C208E5 /* basewnd.h */,
 				B37BC42D0F4E06FA00C208E5 /* camera.cpp */,
 				B37BC42E0F4E06FA00C208E5 /* camera.h */,

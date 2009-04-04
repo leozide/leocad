@@ -2913,12 +2913,12 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 			glDisable(GL_DEPTH_TEST);
 
 			float Verts[4][2];
-			float Colors[4][3];
+			float Colors[4][4];
 
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, Verts);
 			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(3, GL_FLOAT, 0, Colors);
+			glColorPointer(4, GL_FLOAT, 0, Colors);
 
 			for (vp = 0; vp < viewports[m_nViewportMode].n; vp++)
 			{
@@ -2927,13 +2927,13 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 				w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
 				h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
 
-				Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2];
+				Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2]; Colors[0][3] = 1.0f;
 				Verts[0][0] = x+w; Verts[0][1] = y+h;
-				Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2];
+				Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2]; Colors[1][3] = 1.0f;
 				Verts[1][0] = x; Verts[1][1] = y+h;
-				Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2];
+				Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2]; Colors[2][3] = 1.0f;
 				Verts[2][0] = x; Verts[2][1] = y;
-				Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2];
+				Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2]; Colors[3][3] = 1.0f;
 				Verts[3][0] = x+w; Verts[3][1] = y;
 
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

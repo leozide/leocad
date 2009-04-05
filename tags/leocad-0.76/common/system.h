@@ -4,29 +4,6 @@
 #include "defines.h"
 #include "typedefs.h"
 
-// Assert macros.
-#ifdef LC_DEBUG
-
-extern bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description);
-
-#define LC_ASSERT(Expr, Desc) \
-do \
-{ \
-	static bool Ignore = false; \
-	if (!Expr && !Ignore) \
-		Ignore = lcAssert(__FILE__, __LINE__, #Expr, Desc); \
-} while (0)
-
-#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
-
-#else
-
-#define LC_ASSERT(expr, desc) do { } while(0)
-
-#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
-
-#endif
-
 // Profile functions
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
 bool Sys_ProfileSaveString (const char *section, const char *key, const char *value);
@@ -37,7 +14,7 @@ char* Sys_ProfileLoadString (const char *section, const char *key, const char *d
 void* Sys_StartMemoryRender (int width, int height);
 void Sys_FinishMemoryRender (void* param);
 
-// FIXME: moved to basewnd, remove
+// TODO: message box functions moved to basewnd, remove
 
 // Message Box
 #define LC_OK           1
@@ -64,8 +41,6 @@ void Sys_FinishMemoryRender (void* param);
 #define LC_MB_ICONMASK           0x0F0
 
 int Sys_MessageBox (const char* text, const char* caption="LeoCAD", int type=LC_MB_OK|LC_MB_ICONINFORMATION);
-
-// FIXME end
 
 // Misc stuff
 bool Sys_KeyDown (int key);

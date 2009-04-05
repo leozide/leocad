@@ -264,7 +264,7 @@ static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamDat
 		else if (lP2 == -1)
 			return -1;
 
-		return strcmpi(data->page->names[lP1], data->page->names[lP2]);
+		return _strcmpi(data->page->names[lP1], data->page->names[lP2]);
 	}
 
 	// last column

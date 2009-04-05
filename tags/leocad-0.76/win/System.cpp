@@ -1358,7 +1358,7 @@ bool SystemDoDialog(int nMode, void* param)
 				if (p != NULL)
 				{
 					strcpy(ext, p+1);
-					strlwr(ext);
+					_strlwr(ext);
 
 					if ((strcmp(ext, "jpg") == 0) || (strcmp(ext, "jpeg") == 0) ||
 						(strcmp(ext, "bmp") == 0) || (strcmp(ext, "gif") == 0) ||

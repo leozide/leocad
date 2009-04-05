@@ -31,9 +31,9 @@ static int CALLBACK ListCompare(LPARAM lP1, LPARAM lP2, LPARAM lParamSort)
 		return 0;
 
 	if ((lParamSort & ~0xF0) == 0)
-		ret = strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
+		ret = _strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
 	else
-		ret = strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
+		ret = _strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
 
 	return ret;
 }

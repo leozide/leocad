@@ -1323,7 +1323,7 @@ void gluLookAt(GLfloat ex, GLfloat ey, GLfloat ez, GLfloat cx, GLfloat cy, GLflo
 
 void gluPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar)
 {
-	GLfloat y = zNear * tan (fovy * M_PI / 360.0f);
+	GLfloat y = zNear * tanf(fovy * LC_PI / 360.0f);
 	glFrustum (-y*aspect, y*aspect, -y, y, zNear, zFar);
 }
 

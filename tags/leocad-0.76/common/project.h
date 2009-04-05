@@ -26,6 +26,21 @@ typedef enum
 	LC_OVERLAY_YZ
 } LC_OVERLAY_MODES;
 
+enum LC_TOUCH_PHASE
+{
+	LC_TOUCH_BEGAN,
+	LC_TOUCH_MOVED,
+	LC_TOUCH_ENDED
+};
+
+struct TouchState
+{
+	LC_TOUCH_PHASE Phase;
+	int TapCount;
+	int x, y;
+	int StartX, StartY;
+};
+
 class Piece;
 class Camera;
 class Light;
@@ -212,6 +227,16 @@ protected:
 	Vector3 m_MouseSnapLeftover;
 	Vector3 m_MouseTotalDelta;
 
+	lcObjArray<TouchState> m_TouchState;
+	int FindTouchIndex(int x, int y) const
+	{
+		for (int TouchIndex = 0; TouchIndex < m_TouchState.GetSize(); TouchIndex++)
+			if ((m_TouchState[TouchIndex].x == x) && (m_TouchState[TouchIndex].y == y))
+				return TouchIndex;
+
+		return -1;
+	}
+
 	int m_OverlayMode;
 	bool m_OverlayActive;
 	float m_OverlayScale[4];
@@ -238,6 +263,7 @@ public:
 	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
 	void OnMouseMove(int x, int y, bool bControl, bool bShift);
 	bool OnKeyDown(char nKey, bool bControl, bool bShift);
+	void OnTouch(LC_TOUCH_PHASE Phase, int TapCount, int x, int y, int PrevX, int PrevY);
 
 	void SetAction(int nAction);
 	void HandleNotify(LC_NOTIFY id, unsigned long param);

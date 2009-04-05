@@ -8012,6 +8012,113 @@ void Project::BeginPieceDrop(PieceInfo* Info)
 	SetAction(LC_ACTION_INSERT);
 }
 
+void Project::OnTouch(LC_TOUCH_PHASE Phase, int TapCount, int x, int y, int PrevX, int PrevY)
+{
+	if (Phase == LC_TOUCH_BEGAN)
+	{
+		// Reset action if it's the first touch.
+		if (m_TouchState.GetSize() == 0)
+			SetAction(LC_ACTION_SELECT);
+
+		// Add touch to the array.
+		if (m_nCurAction == LC_ACTION_SELECT)
+		{
+			TouchState Touch;
+			Touch.Phase = Phase;
+			Touch.TapCount = TapCount;
+			Touch.x = x;
+			Touch.y = y;
+			Touch.StartX = x;
+			Touch.StartY = y;
+			m_TouchState.Add(Touch);
+		}
+		else
+		{
+			// TODO: cancel action
+		}
+	}
+	else if (Phase == LC_TOUCH_ENDED)
+	{
+		// Remove touch from the array.
+		int TouchIndex = FindTouchIndex(x, y);
+		if (TouchIndex < 0)
+			return;
+
+		m_TouchState.RemoveIndex(TouchIndex);
+
+		switch (m_nCurAction)
+		{
+			case LC_ACTION_SELECT:
+				break;
+//				LC_ACTION_INSERT,
+//				LC_ACTION_LIGHT,
+//				LC_ACTION_SPOTLIGHT,
+//				LC_ACTION_CAMERA,
+//				LC_ACTION_MOVE,
+//				LC_ACTION_ROTATE,
+//				LC_ACTION_ERASER,
+//				LC_ACTION_PAINT,
+//				LC_ACTION_ZOOM,
+//				LC_ACTION_ZOOM_REGION,
+			case LC_ACTION_PAN:
+				if (m_TouchState.GetSize() == 0)
+					OnLeftButtonUp(x, y, false, false);
+				break;
+//				LC_ACTION_ROTATE_VIEW,
+//				LC_ACTION_ROLL,
+//				LC_ACTION_CURVE
+		}
+	}
+	else if (Phase == LC_TOUCH_MOVED)
+	{
+		int TouchIndex = FindTouchIndex(PrevX, PrevY);
+
+		if (TouchIndex < 0)
+			return;
+		
+		m_TouchState[TouchIndex].x = x;
+		m_TouchState[TouchIndex].y = y;
+		const int MinTouchDist = 10;
+
+		switch (m_nCurAction)
+		{
+			case LC_ACTION_SELECT:
+				if (ABS(m_TouchState[TouchIndex].StartX - x) + ABS(m_TouchState[TouchIndex].StartY - y) < MinTouchDist)
+					break;
+
+				if (0)//AnyObjectSelected())
+				{
+				}
+				else
+				{
+					if (m_TouchState.GetSize() == 1)
+					{
+						SetAction(LC_ACTION_PAN);
+						OnLeftButtonDown(x, y, false, false);
+					}
+				}
+				break;
+
+//				LC_ACTION_INSERT,
+//				LC_ACTION_LIGHT,
+//				LC_ACTION_SPOTLIGHT,
+//				LC_ACTION_CAMERA,
+//				LC_ACTION_MOVE,
+//				LC_ACTION_ROTATE,
+//				LC_ACTION_ERASER,
+//				LC_ACTION_PAINT,
+//				LC_ACTION_ZOOM,
+//				LC_ACTION_ZOOM_REGION,
+			case LC_ACTION_PAN:
+				OnMouseMove(x, y, false, false);
+				break;
+//				LC_ACTION_ROTATE_VIEW,
+//				LC_ACTION_ROLL,
+//				LC_ACTION_CURVE
+		};
+	}
+}
+
 void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
 	GLfloat modelMatrix[16], projMatrix[16], point[3];

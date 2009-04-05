@@ -51,7 +51,7 @@ void GLWindow::SwapBuffers()
 void GLWindow::Redraw(bool ForceRedraw)
 {
 	EAGLView* View = (EAGLView*)m_pData;
-	[View setNeedsDisplay];
+	[View setNeedsRedraw];
 }
 
 void GLWindow::CaptureMouse()

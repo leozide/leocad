@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "view.h"
 #include "lc_application.h"
+#include "project.h"
 
 #define USE_DEPTH_BUFFER 1
 
@@ -50,8 +51,10 @@
             [self release];
             return nil;
         }
+
+		self.multipleTouchEnabled = YES;
         
-        animationInterval = 1.0 / 60.0;
+        animationInterval = 1.0 / 30.0;
     }
 
 	view = new View(lcGetActiveProject(), NULL);
@@ -62,6 +65,9 @@
 
 - (void)drawView
 {
+	if (!needsRedraw)
+		return;
+	
 	[EAGLContext setCurrentContext:context];
     
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, viewFramebuffer);
@@ -73,10 +79,13 @@
 	
     glBindRenderbufferOES(GL_RENDERBUFFER_OES, viewRenderbuffer);
     [context presentRenderbuffer:GL_RENDERBUFFER_OES];
+
+	needsRedraw = false;
 }
 
 - (void)layoutSubviews
 {
+	needsRedraw = true;
     [EAGLContext setCurrentContext:context];
     [self destroyFramebuffer];
     [self createFramebuffer];
@@ -128,7 +137,7 @@
 
 
 - (void)startAnimation {
-//    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:animationInterval target:self selector:@selector(drawView) userInfo:nil repeats:YES];
+    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:animationInterval target:self selector:@selector(drawView) userInfo:nil repeats:YES];
 }
 
 
@@ -144,12 +153,16 @@
 
 - (void)setAnimationInterval:(NSTimeInterval)interval
 {
-    
     animationInterval = interval;
     if (animationTimer) {
         [self stopAnimation];
         [self startAnimation];
     }
+}
+
+- (void)setNeedsRedraw
+{
+	needsRedraw = true;
 }
 
 - (void)dealloc
@@ -177,6 +190,37 @@
 {
 	glBindRenderbufferOES(GL_RENDERBUFFER_OES, viewRenderbuffer);
 	[context presentRenderbuffer:GL_RENDERBUFFER_OES];
+}
+
+- (void)touchesBegan: (NSSet*)touches withEvent: (UIEvent*)event
+{
+	UITouch* Touch = [[event allTouches] anyObject];
+	CGPoint Point = [Touch locationInView:self];
+	CGPoint Prev = [Touch previousLocationInView:self];
+
+	lcGetActiveProject()->OnTouch(LC_TOUCH_BEGAN, [Touch tapCount], (int)Point.x, backingHeight - (int)Point.y - 1, (int)Prev.x, backingHeight - (int)Prev.y - 1);
+}
+
+- (void)touchesMoved: (NSSet*)touches withEvent: (UIEvent*)event
+{
+	UITouch* Touch = [[event allTouches] anyObject];
+	CGPoint Point = [Touch locationInView:self];
+	CGPoint Prev = [Touch previousLocationInView:self];
+	
+	lcGetActiveProject()->OnTouch(LC_TOUCH_MOVED, [Touch tapCount], (int)Point.x, backingHeight - (int)Point.y - 1, (int)Prev.x, backingHeight - (int)Prev.y - 1);
+}
+
+- (void)touchesEnded: (NSSet*)touches withEvent: (UIEvent*)event
+{
+	UITouch* Touch = [[event allTouches] anyObject];
+	CGPoint Point = [Touch locationInView:self];
+	CGPoint Prev = [Touch previousLocationInView:self];
+	
+	lcGetActiveProject()->OnTouch(LC_TOUCH_ENDED, [Touch tapCount], (int)Point.x, backingHeight - (int)Point.y - 1, (int)Prev.x, backingHeight - (int)Prev.y - 1);
+}
+
+- (void)touchesCancelled: (NSSet*)touches withEvent: (UIEvent*)event
+{
 }
 
 @end

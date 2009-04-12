@@ -42,7 +42,7 @@ struct TouchState
 };
 
 class Piece;
-class Camera;
+class lcCamera;
 class Light;
 class Group;
 class GroupInfo;
@@ -102,7 +102,11 @@ public:
 	void GetSnapIndex(int* SnapXY, int* SnapZ) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
-	Camera* GetCamera(int i);
+
+	// Retrieve a pointer to an existing camera.
+	lcCamera* GetCamera(int Index) const;
+	lcCamera* GetCamera(const char* Name) const;
+
 	void GetTimeRange(int* from, int* to)
 	{
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
@@ -113,7 +117,7 @@ public:
 
 	void ConvertToUserUnits(Vector3& Value) const;
 	void ConvertFromUserUnits(Vector3& Value) const;
-	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
+	void GetArrays(Piece** ppPiece, lcCamera** ppCamera, Light** ppLight)
 	{
 		*ppPiece = m_pPieces;
 		*ppCamera = m_pCameras;
@@ -136,7 +140,7 @@ public:
 	void CheckAutoSave();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
-	Object* GetFocusObject() const;
+	lcObject* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
 	void AddView (View* pView);
@@ -167,10 +171,10 @@ protected:
 
 	// Objects
 	Piece* m_pPieces;
-	Camera* m_pCameras;
+	lcCamera* m_pCameras;
 	Light* m_pLights;
 	Group* m_pGroups;
-	Camera* m_pViewCameras[4];
+	lcCamera* m_pViewCameras[4];
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
@@ -183,7 +187,7 @@ protected:
 	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<Object>& Objects);
+	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();

@@ -14,6 +14,7 @@
 #include "CADBar.h"
 #include "BMPMenu.h"
 #include "ModDlg.h"
+#include "dynsplit.h"
 
 class MainWnd;
 
@@ -49,13 +50,18 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-  // control bar embedded members
+	// control bar embedded members
 	CCADStatusBar m_wndStatusBar;
 	CFlatToolBar  m_wndStandardBar;
 	CFlatToolBar  m_wndToolsBar;
 	CFlatToolBar  m_wndAnimationBar;
 	CPiecesBar    m_wndPiecesBar;
-  CSplitterWnd  m_wndSplitter;
+	CDynamicSplitterWnd  m_wndSplitter;
+
+	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;
+
+	void SetViewLayout(CWnd* wnd, const char*& str);
+	void GetViewLayout(CWnd* wnd, class String& str) const;
 
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
@@ -103,6 +109,11 @@ protected:
 	afx_msg LONG UpdateSettings(UINT lParam, LONG wParam);
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnViewSplitVertically();
+	afx_msg void OnViewSplitHorizontally();
+	afx_msg void OnViewDeleteView();
+	afx_msg void OnViewResetViews();
 };
 
 /////////////////////////////////////////////////////////////////////////////

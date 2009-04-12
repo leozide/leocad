@@ -22,7 +22,7 @@ typedef enum
 	LC_PK_COUNT
 } LC_PK_TYPES;
 
-class Piece : public Object
+class Piece : public lcObject
 {
 public:
 	Piece (PieceInfo* pPieceInfo);

@@ -22,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTerrainWnd::CTerrainWnd(Terrain* pTerrain)
 {
-	m_pCamera = new Camera(20,20,20,0,0,0, NULL);
+	m_pCamera = new lcCamera(20,20,20,0,0,0, NULL);
 	m_pTerrain = pTerrain;
 	m_pPalette = NULL;
 	m_pDC = NULL;
@@ -267,5 +267,5 @@ BOOL CTerrainWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 void CTerrainWnd::ResetCamera()
 {
 	delete m_pCamera;
-	m_pCamera = new Camera(20,20,20,0,0,0, NULL);
+	m_pCamera = new lcCamera(20,20,20,0,0,0, NULL);
 }

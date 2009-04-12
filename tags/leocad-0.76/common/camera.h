@@ -11,7 +11,7 @@
 #define LC_CAMERA_TARGET_SELECTED   0x08
 #define LC_CAMERA_TARGET_FOCUSED    0x10
 
-class Camera;
+class lcCamera;
 class CameraTarget;
 class File;
 class TiledRender;
@@ -32,10 +32,10 @@ typedef enum
 	LC_CK_COUNT
 } LC_CK_TYPES;
 
-class CameraTarget : public Object
+class CameraTarget : public lcObject
 {
 public:
-	CameraTarget (Camera *pParent);
+	CameraTarget (lcCamera *pParent);
 	virtual ~CameraTarget ();
 
 public:
@@ -50,24 +50,24 @@ public:
 
 	const char* GetName() const;
 
-	Camera* GetParent () const
+	lcCamera* GetParent () const
 	{ return m_pParent; }
 
 protected:
-	Camera* m_pParent;
+	lcCamera* m_pParent;
 
-	friend class Camera; // FIXME: needed for BoundingBoxCalculate ()
+	friend class lcCamera; // FIXME: needed for BoundingBoxCalculate ()
 	// remove and use UpdatePosition instead
 };
 
-class Camera : public Object
+class lcCamera : public lcObject
 {
 public:
-	Camera ();
-	Camera (unsigned char nType, Camera* pPrev);
-	Camera (float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
-	Camera (const float *eye, const float *target, const float *up, Camera* pCamera);
-	virtual ~Camera ();
+	lcCamera();
+	lcCamera(unsigned char nType, lcCamera* pPrev);
+	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcCamera* pCamera);
+	lcCamera(const float *eye, const float *target, const float *up, lcCamera* pCamera);
+	virtual ~lcCamera();
 
 	// Query functions.
 	inline Vector3 GetEyePosition() const
@@ -76,9 +76,6 @@ public:
 	{ return Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
 	inline Vector3 GetUpVector() const
 	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
-
-	const char* GetName() const
-	{ return m_strName; };
 
 	CameraTarget* GetTarget () const
 		{ return m_pTarget; }
@@ -104,13 +101,13 @@ public:
 
 
 public:
-	Camera* m_pNext;
+	lcCamera* m_pNext;
 	void Hide()
 		{ m_nState = LC_CAMERA_HIDDEN; }
 	void UnHide()
 		{ m_nState &= ~LC_CAMERA_HIDDEN; }
-	char* GetName()
-		{ return m_strName; }
+	const char* GetName() const
+		{ return m_Name; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsUser()
@@ -178,7 +175,6 @@ protected:
 	CameraTarget* m_pTarget;
 
 	// Attributes
-	char m_strName[81];
 	unsigned char m_nState;
 	unsigned char m_nType;
 

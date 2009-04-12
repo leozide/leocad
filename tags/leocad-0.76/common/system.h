@@ -3,6 +3,7 @@
 
 #include "defines.h"
 #include "typedefs.h"
+#include "str.h"
 
 // Profile functions
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
@@ -51,7 +52,7 @@ bool Sys_KeyDown (int key);
 
 
 class File;
-class Camera;
+class lcCamera;
 class PieceInfo;
 
 // User Interface
@@ -61,12 +62,12 @@ void SystemUpdateColorList(int nNew);
 void SystemUpdateRenderingMode(bool bBackground, bool bFast);
 void SystemUpdateUndoRedo(char* undo, char* redo);
 void SystemUpdateSnap(const unsigned long nSnap);
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera);
-void SystemUpdateCameraMenu(Camera* pCamera);
+void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera);
+void SystemUpdateCameraMenu(lcCamera* pCamera);
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, class lcObject* Focus);
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemUpdateCategories(bool SearchOnly);
@@ -91,7 +92,10 @@ void SystemPumpMessages();
 long SystemGetTicks();
 
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text);
-void SytemEndProgressBar();
-void SytemStepProgressBar();
+void SystemEndProgressBar();
+void SystemStepProgressBar();
+
+void SystemUpdateViewLayout();
+String SystemGetViewLayout();
 
 #endif // _SYSTEM_H_

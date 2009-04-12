@@ -14,6 +14,7 @@ View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
+	m_Camera = pProject->GetCamera(LC_CAMERA_MAIN);
 }
 
 View::~View()
@@ -91,12 +92,15 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 
 void View::OnDraw()
 {
-	MakeCurrent();
+	if (m_Camera)
+	{
+		MakeCurrent();
 
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->Render(false);
+		m_Project->SetViewSize(m_nWidth, m_nHeight);
+		m_Project->Render(false);
 
-	SwapBuffers();
+		SwapBuffers();
+	}
 }
 
 void View::OnInitialUpdate()
@@ -139,4 +143,41 @@ void View::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
 	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnMouseMove(x, y, bControl, bShift);
+}
+
+void View::OnSize(int cx, int cy)
+{
+	GLWindow::OnSize(cx, cy);
+
+	m_Viewport[0] = 0;
+	m_Viewport[1] = 0;
+	m_Viewport[2] = cx;
+	m_Viewport[3] = cy;
+
+	UpdateOverlayScale();
+}
+
+void View::UpdateOverlayScale()
+{
+}
+
+void View::SetCamera(lcCamera* Camera)
+{
+	if (Camera)
+		m_CameraName = Camera->m_Name;
+	else
+		m_CameraName = "";
+
+	m_Camera = Camera;
+}
+
+void View::UpdateCamera()
+{
+	lcCamera* Camera = m_Project->GetCamera(m_CameraName);
+
+	if (!Camera)
+		Camera = m_Project->GetCamera(LC_CAMERA_MAIN);
+
+	m_Camera = Camera;
+	m_CameraName = m_Camera->m_Name;
 }

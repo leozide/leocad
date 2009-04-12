@@ -30,7 +30,7 @@ static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 // CameraTarget class
 
 LightTarget::LightTarget (Light *pParent)
-  : Object (LC_OBJECT_LIGHT_TARGET)
+  : lcObject (LC_OBJECT_LIGHT_TARGET)
 {
   m_pParent = pParent;
   /*
@@ -70,7 +70,7 @@ const char* LightTarget::GetName() const
 
 // New positional light
 Light::Light (float px, float py, float pz)
-  : Object (LC_OBJECT_LIGHT)
+  : lcObject (LC_OBJECT_LIGHT)
 {
   Initialize ();
 
@@ -88,7 +88,7 @@ Light::Light (float px, float py, float pz)
 
 // New directional light
 Light::Light (float px, float py, float pz, float tx, float ty, float tz)
-  : Object (LC_OBJECT_LIGHT)
+  : lcObject (LC_OBJECT_LIGHT)
 {
   Initialize ();
 

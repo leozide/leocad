@@ -4,6 +4,7 @@
 #include "lc_global.h"
 #include <dlgs.h>
 #include <direct.h>
+#include <shlobj.h>
 #include "leocad.h"
 #include "bmpmenu.h"
 #include "system.h"
@@ -585,7 +586,7 @@ void SystemUpdateSnap(const unsigned long nSnap)
 	// TODO: change Snap None & All (or maybe not ?)
 }
 
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focus)
 {
 	CMenu* pMenu;
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
@@ -745,6 +746,8 @@ void SystemUpdatePaste(bool enable)
 {
 	CMenu* pMenu = GetMainMenu(1);
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+	if (!pFrame->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
+		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
@@ -794,7 +797,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
         MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
+void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
@@ -822,14 +825,14 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 }
 
 // Update the list of cameras
-void SystemUpdateCameraMenu(Camera* pCamera)
+void SystemUpdateCameraMenu(lcCamera* pCamera)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
 	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	Camera* pFirst = pCamera;
+	lcCamera* pFirst = pCamera;
 	int i;
 
 	while (pMainMenu->GetMenuItemCount())
@@ -1379,6 +1382,47 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 
+		case LC_DLG_DIRECTORY_BROWSE:
+		{
+			LC_DLG_DIRECTORY_BROWSE_OPTS* Opts = (LC_DLG_DIRECTORY_BROWSE_OPTS*)param;
+
+			strcpy(Opts->Path, "");
+
+			LPMALLOC ShellMalloc;
+			if (SHGetMalloc(&ShellMalloc) == NOERROR)
+			{
+				BROWSEINFO bi;
+				LPITEMIDLIST pidl;
+		
+				if (AfxGetMainWnd())
+					bi.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
+				else
+					bi.hwndOwner = ::GetDesktopWindow();
+				bi.pidlRoot = NULL;
+				bi.pszDisplayName = Opts->Path;
+				bi.lpszTitle = Opts->Title;
+				bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
+				bi.lpfn = NULL;
+				bi.lParam = 0;
+		
+				pidl = SHBrowseForFolder(&bi);
+				if (pidl != NULL)
+				{
+					if (SHGetPathFromIDList(pidl, Opts->Path))
+					{ 
+						if (Opts->Path[strlen(Opts->Path)-1] != '\\') 
+							strcat(Opts->Path, "\\");
+						return true;
+					}
+					ShellMalloc->Free(pidl);
+				}
+				ShellMalloc->Release();
+			}
+
+			return false;
+
+		} break;
+
 		case LC_DLG_HTML:
 		{
 			LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)param;
@@ -1625,7 +1669,7 @@ bool SystemDoDialog(int nMode, void* param)
 /////////////////////////////////////////////////////////////////////////////
 // Memory rendering functions
 
-typedef struct
+struct LC_RENDER
 {
 	HDC hdc;
 	HDC oldhdc;
@@ -1633,7 +1677,7 @@ typedef struct
 	HGLRC oldhrc;
 	HBITMAP hbm;
 	HBITMAP oldhbm;
-} LC_RENDER;
+};
 
 void* Sys_StartMemoryRender(int width, int height)
 {
@@ -1796,7 +1840,7 @@ void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 	((CMainFrame*)AfxGetMainWnd())->SetMessageText(Text);
 }
 
-void SytemEndProgressBar()
+void SystemEndProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)
@@ -1809,7 +1853,7 @@ void SytemEndProgressBar()
 	((CMainFrame*)AfxGetMainWnd())->SetMessageText(AFX_IDS_IDLEMESSAGE);
 }
 
-void SytemStepProgressBar()
+void SystemStepProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)
@@ -1817,4 +1861,29 @@ void SytemStepProgressBar()
 	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
 
 	pStatusBar->StepProgressBar();
+}
+
+void SystemUpdateViewLayout()
+{
+	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
+
+	if (Frame)
+		Frame->OnViewResetViews();
+}
+
+String SystemGetViewLayout()
+{
+	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
+	String Layout;
+
+	if (Frame)
+	{
+		Frame->GetViewLayout(NULL, Layout);
+	}
+	else
+	{
+		Layout = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
+	}
+
+	return Layout;
 }

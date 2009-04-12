@@ -316,7 +316,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			Camera* pCam = project->m_pCameras;
+			lcCamera* pCam = project->m_pCameras;
 			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
 				if (i-- == 0)
 					break;

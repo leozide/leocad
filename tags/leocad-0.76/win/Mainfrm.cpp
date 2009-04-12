@@ -38,7 +38,7 @@ void mainframe_listener (int message, void *data, void *user)
   }
 }
 
-static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, void* user_data)
+static void mainframe_console_func(LC_CONSOLE_LEVEL level, const char* text, void* user_data)
 {
 	CRichEditCtrl& ctrl = ((CRichEditView *) user_data)->GetRichEditCtrl ();
 	CHARFORMAT cf;
@@ -150,38 +150,35 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  sizeof(indicators)/sizeof(UINT)))
+	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT)))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
 	}
 	m_wndStatusBar.SetPaneStyle(0, SBPS_STRETCH|SBPS_NORMAL);
 
-	if (!m_wndStandardBar.Create(this) ||
-		!m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
+	if (!m_wndStandardBar.Create(this) || !m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
 	m_wndStandardBar.SetBarStyle(m_wndStandardBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndStandardBar.SetWindowText (_T("Standard"));
+	m_wndStandardBar.SetWindowText(_T("Standard"));
 	m_wndStandardBar.SendMessage(TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
 	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndToolsBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_TOOLS_BAR) ||
-		!m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
+	    !m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
 	m_wndToolsBar.SetBarStyle(m_wndToolsBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndToolsBar.SetWindowText (_T("Drawing"));
+	m_wndToolsBar.SetWindowText(_T("Drawing"));
 	m_wndToolsBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndAnimationBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_ANIMATION_BAR) ||
@@ -192,7 +189,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndAnimationBar.SetBarStyle(m_wndAnimationBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndAnimationBar.SetWindowText (_T("Animation"));
+	m_wndAnimationBar.SetWindowText(_T("Animation"));
 	m_wndAnimationBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CSize(200, 100),
@@ -223,12 +220,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
 //	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
 	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT);
+	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	DockControlBar(&m_wndStandardBar);
 	DockControlBar(&m_wndToolsBar);
 	DockControlBar(&m_wndPiecesBar, AFX_IDW_DOCKBAR_RIGHT);
-		
+
 	CRect rect;
 	RecalcLayout(TRUE);
 	m_wndToolsBar.GetWindowRect(&rect);
@@ -243,17 +240,21 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (pMenu)
 		pMenu->DestroyMenu();
 	HMENU hMenu = NewMenu();
-	pMenu = CMenu::FromHandle (hMenu);
-	SetMenu (pMenu);
+	pMenu = CMenu::FromHandle(hMenu);
+	SetMenu(pMenu);
 	m_hMenuDefault = hMenu;
 
 	UpdateMenuAccelerators();
 
-  messenger->Listen (&mainframe_listener, this);
+	messenger->Listen (&mainframe_listener, this);
 
-  main_window->SetXID (this);
+	main_window->SetXID(this);
 
-  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
+	console.SetWindowCallback(&mainframe_console_func, m_wndSplitter.GetPane(1, 0));
+
+	// Load default view layout.
+	const char* Layout = main_window->GetViewLayout(false);
+	SetViewLayout(NULL, Layout);
 
 	return 0;
 }
@@ -307,6 +308,7 @@ void CMainFrame::Dump(CDumpContext& dc) const
 // lParam = update pieces, wParam = update colors
 LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 {
+	// TODO: find out if this function is really needed
 	if (wParam != 0)
 	{
 		int x = wParam-1;
@@ -434,7 +436,7 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 
 LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
-	m_wndModifyDlg.UpdateInfo((Object*)lParam);
+	m_wndModifyDlg.UpdateInfo((lcObject*)lParam);
 
 	char str[128];
 	Vector3 pos;
@@ -651,7 +653,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		Camera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
+		lcCamera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
 		rMessage += pCamera->GetName();
 		rMessage += "\"";
@@ -1413,9 +1415,9 @@ void CMainFrame::UpdateMenuAccelerators()
 	m_bmpMenu.Detach();
 }
 
-void CMainFrame::OnDropFiles(HDROP hDropInfo) 
+void CMainFrame::OnDropFiles(HDROP hDropInfo)
 {
-	SetActiveWindow();      // activate us first !
+	SetActiveWindow();      // activate us first!
 	UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 
 	if (nFiles > 0)
@@ -1426,4 +1428,316 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		lcGetActiveProject()->OpenProject(szFileName);
 	}
 	::DragFinish(hDropInfo);
+}
+
+
+void CMainFrame::OnViewSplitVertically()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Calculate the new view size.
+	RECT rect;
+	view->GetClientRect(&rect);
+	int Width = (rect.right - rect.left) / 2;
+	int Height = rect.bottom - rect.top;
+
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+
+	// Remove current view from the parent.
+	parent->DetachWindow(Row, Col);
+
+	// Create the new splitter and attach it to the parent.
+	CDynamicSplitterWnd* splitter = new CDynamicSplitterWnd();
+	m_SplitterList.Add(splitter);
+
+	splitter->CreateStatic(parent, 1, 2, WS_CHILD | WS_VISIBLE, parent->IdFromRowCol(Row, Col));
+	parent->AttachWindow(splitter, Row, Col);
+
+	// Attach views to the new splitter.
+	splitter->AttachWindow(view, 0, 0);
+	splitter->SetColumnInfo(0, Width, 0);
+	splitter->CreateView(0, 1, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
+
+	// Update layout.
+	parent->RecalcLayout();
+}
+
+void CMainFrame::OnViewSplitHorizontally()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Calculate the new view size.
+	RECT rect;
+	view->GetClientRect(&rect);
+	int Width = rect.right - rect.left;
+	int Height = (rect.bottom - rect.top) / 2;
+
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+
+	// Remove current view from the parent.
+	parent->DetachWindow(Row, Col);
+
+	// Create the new splitter and attach it to the parent.
+	CDynamicSplitterWnd* splitter = new CDynamicSplitterWnd();
+	m_SplitterList.Add(splitter);
+
+	splitter->CreateStatic(parent, 2, 1, WS_CHILD | WS_VISIBLE, parent->IdFromRowCol(Row, Col));
+	parent->AttachWindow(splitter, Row, Col);
+
+	// Attach views to the new splitter.
+	splitter->AttachWindow(view, 0, 0);
+	splitter->SetRowInfo(0, Height, 0);
+	splitter->CreateView(1, 0, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
+
+	// Update layout.
+	parent->RecalcLayout();
+}
+
+void CMainFrame::OnViewDeleteView()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Don't do anything if there's only one view.
+	if (parent == &m_wndSplitter)
+		return;
+
+	// Calculate the sibling position.
+	int Row, Col;
+	parent->GetViewRowCol(view, &Row, &Col);
+
+	if (parent->GetRowCount() == 2)
+	{
+		ASSERT(parent->GetColumnCount() == 1);
+
+		if (Row == 0)
+			Row = 1;
+		else
+			Row = 0;
+	}
+	else
+	{
+		ASSERT(parent->GetColumnCount() == 2);
+		ASSERT(parent->GetRowCount() == 1);
+
+		if (Col == 0)
+			Col = 1;
+		else
+			Col = 0;
+	}
+
+	// Detach sibling.
+	CWnd* sibling = parent->GetPane(Row, Col);
+	parent->DetachWindow(Row, Col);
+
+	// Find the parent's parent splitter.
+	CDynamicSplitterWnd* parent2 = (CDynamicSplitterWnd*)parent->GetParent();
+	parent2->GetViewRowCol(parent, &Row, &Col);
+
+	// Detach the splitter from its parent and replace it with the sibling view.
+	parent2->DetachWindow(Row, Col);
+	parent2->AttachWindow(sibling, Row, Col);
+
+	// Find first view.
+	while (!sibling->IsKindOf(RUNTIME_CLASS(CCADView)))
+		sibling = ((CDynamicSplitterWnd*)sibling)->GetPane(0, 0);
+	SetActiveView((CView*)sibling);
+
+	// Destroy parent splitter and view.
+	parent->DestroyWindow();
+
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
+	{
+		if (m_SplitterList[i] == parent)
+		{
+			delete m_SplitterList[i];
+			m_SplitterList.RemoveAt(i);
+			break;
+		}
+	}
+
+	// Update layout.
+	parent2->RecalcLayout();
+}
+
+void CMainFrame::OnViewResetViews()
+{
+	CView* view = GetActiveView();
+	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	// Don't do anything if there's only one view.
+	if (parent != &m_wndSplitter)
+	{
+		// Save the active view.
+		int Row, Col;
+		parent->GetViewRowCol(view, &Row, &Col);
+		parent->DetachWindow(Row, Col);
+
+		// Delete all other views.
+		m_wndSplitter.GetPane(0, 0)->DestroyWindow();
+
+		for (int i = 0; i < m_SplitterList.GetSize(); i++)
+			delete m_SplitterList[i];
+		m_SplitterList.RemoveAll();
+
+		// Add the active view back.
+		m_wndSplitter.AttachWindow(view, 0, 0);
+		m_wndSplitter.RecalcLayout();
+		SetActiveView(view);
+	}
+
+	// Load default view layout.
+	const char* str = main_window->GetViewLayout(false);
+	SetViewLayout(NULL, str);
+}
+
+// Creates views based on a string describing the layout.
+void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
+{
+	if (!wnd)
+	{
+		wnd = m_wndSplitter.GetPane(0, 0);
+	}
+
+	if (!*str || *str == 'V')
+	{
+		str++;
+
+		// Read camera name.
+		int count = 0;
+		char buf[16];
+
+		while (*str && isdigit(*str) && count < 15)
+			buf[count++] = *str++;
+		buf[count] = 0;
+
+		int len = atoi(buf);
+		str++;
+
+		String name;
+		strncpy(name.GetBuffer(len), str, len);
+		name[len] = 0;
+		str += len;
+
+		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CCADView)));
+
+		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->GetCamera(name));
+
+		return;
+	}
+	else if (*str == 'S')
+	{
+		str++;
+		SetActiveView((CView*)wnd);
+
+		// Save splitter direction.
+		char dir = *str;
+		str++;
+
+		// Get view size.
+		int count = 0;
+		char buf[16];
+
+		while (*str && isdigit(*str) && count < 15)
+			buf[count++] = *str++;
+		buf[count] = 0;
+
+		int pos = atoi(buf);
+
+		RECT rc;
+		wnd->GetClientRect(&rc);
+
+		// Split view.
+		if (dir == 'H')
+		{
+			OnViewSplitHorizontally();
+
+			CSplitterWnd* splitter = (CSplitterWnd*)wnd->GetParent();
+			splitter->SetRowInfo(0, pos * rc.bottom / 100, 0);
+			splitter->RecalcLayout();
+
+			SetViewLayout(splitter->GetPane(0, 0), str);
+			SetViewLayout(splitter->GetPane(1, 0), str);
+		}
+		else
+		{
+			OnViewSplitVertically();
+
+			CSplitterWnd* splitter = (CSplitterWnd*)wnd->GetParent();
+			splitter->SetColumnInfo(0, pos * rc.right / 100, 0);
+			splitter->RecalcLayout();
+
+			SetViewLayout(splitter->GetPane(0, 0), str);
+			SetViewLayout(splitter->GetPane(0, 1), str);
+		}
+	}
+	else
+	{
+		str++;
+		return;
+	}
+}
+
+// Creates a string describing the view layout.
+void CMainFrame::GetViewLayout(CWnd* wnd, String& str) const
+{
+	if (!wnd)
+	{
+		wnd = m_wndSplitter.GetPane(0, 0);
+	}
+
+	if (wnd->IsKindOf(RUNTIME_CLASS(CCADView)))
+	{
+		str += "V";
+
+		// Save camera name.
+		const String& name = ((CCADView*)wnd)->m_pView->GetCamera()->m_Name;
+		int len = name.GetLength();
+		char buf[16];
+		sprintf(buf, "%d", len);
+		str += buf;
+		str += '|';
+		str += name;
+	}
+	else
+	{
+		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CSplitterWnd)));
+
+		CSplitterWnd* splitter = (CSplitterWnd*)wnd;
+		int pos, dummy;
+		RECT rc;
+
+		splitter->GetClientRect(&rc);
+
+		// Save splitter direction.
+		if (splitter->GetRowCount() > splitter->GetColumnCount())
+		{
+			str += "SH";
+			splitter->GetRowInfo(0, pos, dummy);
+			pos = 100 * pos / rc.bottom;
+		}
+		else
+		{
+			str += "SV";
+			splitter->GetColumnInfo(0, pos, dummy);
+			pos = 100 * pos / rc.right;
+		}
+
+		// Save splitter size.
+		char buf[16];
+		sprintf(buf, "%d", pos);
+		str += buf;
+
+		// Save children.
+		GetViewLayout(splitter->GetPane(0, 0), str);
+
+		if (splitter->GetRowCount() > splitter->GetColumnCount())
+			GetViewLayout(splitter->GetPane(1, 0), str);
+		else
+			GetViewLayout(splitter->GetPane(0, 1), str);
+	}
 }

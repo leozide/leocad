@@ -11,7 +11,7 @@
 
 #include "ClrPick.h"
 
-class Object;
+class lcObject;
 
 ///////////////////////////////////////////////////////////////////////////// 
 // CModifyDialog window 
@@ -63,14 +63,14 @@ public:
 // Implementation 
 public: 
 
-	void UpdateInfo(Object* pObject);
+	void UpdateInfo(lcObject* pObject);
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
 	BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID); 
 	BOOL Create(CWnd* pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID); 
 
 protected: 
 	virtual BOOL OnInitDialogBar(); 
-	Object* m_pObject;
+	lcObject* m_pObject;
 	BYTE m_nType;
 
 protected: 

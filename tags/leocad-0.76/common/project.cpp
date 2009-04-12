@@ -218,7 +218,7 @@ void Project::SetTitle(const char* lpszTitle)
 void Project::DeleteContents(bool bUndo)
 {
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	Light* pLight;
 	Group* pGroup;
 
@@ -371,10 +371,10 @@ void Project::LoadDefaults(bool cameras)
 
 	if (cameras)
 	{
-		Camera* pCam;
+		lcCamera* pCam;
 		for (pCam = NULL, i = 0; i < 7; i++)
 		{
-			pCam = new Camera(i, pCam);
+			pCam = new lcCamera(i, pCam);
 			if (m_pCameras == NULL)
 				m_pCameras = pCam;
 
@@ -434,10 +434,10 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 	if (fv < 0.6f) // old view
 	{
-		Camera* pCam;
+		lcCamera* pCam;
 		for (pCam = NULL, i = 0; i < 7; i++)
 		{
-			pCam = new Camera(i, pCam);
+			pCam = new lcCamera(i, pCam);
 			if (m_pCameras == NULL)
 				m_pCameras = pCam;
 
@@ -557,9 +557,9 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				SystemPieceComboAdd(pInfo->m_strDescription);
 			}
 		}
-		SytemStepProgressBar();
+		SystemStepProgressBar();
 	}
-	SytemEndProgressBar();
+	SystemEndProgressBar();
 
 	if (!bMerge)
 	{
@@ -703,10 +703,10 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			}
 
 			file->ReadLong (&count, 1);
-			Camera* pCam = NULL;
+			lcCamera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
-				pCam = new Camera(i, pCam);
+				pCam = new lcCamera(i, pCam);
 				if (m_pCameras == NULL)
 					m_pCameras = pCam;
 
@@ -716,7 +716,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			if (count < 7)
 			{
-				pCam = new Camera(0, NULL);
+				pCam = new lcCamera(0, NULL);
 				for (i = 0; i < count; i++)
 					pCam->FileLoad(*file);
 				delete pCam;
@@ -732,7 +732,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			{
 				file->ReadLong (&i, 1);
 
-				Camera* pCam = m_pCameras;
+				lcCamera* pCam = m_pCameras;
 				while (i--)
 					pCam = pCam->m_pNext;
 				m_pViewCameras[count] = pCam;
@@ -912,7 +912,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteByte (&m_nViewportMode, 1);
 	file->WriteByte (&m_nActiveViewport, 1);
 
-	Camera* pCamera;
+	lcCamera* pCamera;
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		i++;
 	file->WriteLong (&i, 1);
@@ -2206,7 +2206,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 					glDisable ((GLenum)(GL_LIGHT0+index));
 			}
 			
-			Camera* pCamera;
+			lcCamera* pCamera;
 			Light* pLight;
 			
 			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
@@ -2288,7 +2288,7 @@ void Project::RenderOverlays(int Viewport)
 		glDisable(GL_DEPTH_TEST);
 
 		// Find the rotation from the focused piece if relative snap is enabled.
-		Object* Focus = NULL;
+		lcObject* Focus = NULL;
 		float Rot[4];
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
@@ -2409,12 +2409,12 @@ void Project::RenderOverlays(int Viewport)
 
 		glDisable(GL_DEPTH_TEST);
 
-		Camera* Cam = m_pViewCameras[Viewport];
+		lcCamera* Cam = m_pViewCameras[Viewport];
 		Matrix44 Mat;
 		int j;
 
 		// Find the rotation from the focused piece if relative snap is enabled.
-		Object* Focus = NULL;
+		lcObject* Focus = NULL;
 		float Rot[4];
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
@@ -3257,7 +3257,7 @@ void Project::CalculateStep()
 {
 	int PieceCount = 0;
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	Light* pLight;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -3266,17 +3266,17 @@ void Project::CalculateStep()
 		PieceCount++;
 	}
 
-  SystemDoWaitCursor(1);
+	SystemDoWaitCursor(1);
 	SystemStartProgressBar(0, PieceCount, 1, "Updating pieces...");
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
 		pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, false);
-		SytemStepProgressBar();
+		SystemStepProgressBar();
 	}
 
-	SytemEndProgressBar();
-  SystemDoWaitCursor(-1);
+	SystemEndProgressBar();
+	SystemDoWaitCursor(-1);
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
@@ -3289,7 +3289,7 @@ void Project::CalculateStep()
 bool Project::RemoveSelectedObjects()
 {
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	Light* pLight;
 	void* pPrev;
 	bool removed = false;
@@ -3328,9 +3328,9 @@ bool Project::RemoveSelectedObjects()
 		{
 			if (pPrev)
 			{
-				((Camera*)pPrev)->m_pNext = pCamera->m_pNext;
+				((lcCamera*)pPrev)->m_pNext = pCamera->m_pNext;
 				delete pCamera;
-				pCamera = ((Camera*)pPrev)->m_pNext;
+				pCamera = ((lcCamera*)pPrev)->m_pNext;
 			}
 			else
 			{
@@ -3388,7 +3388,7 @@ void Project::UpdateSelection()
 {
 	unsigned long flags = 0;
 	int SelectedCount = 0;
-	Object* Focus = NULL;
+	lcObject* Focus = NULL;
 
 	if (m_pPieces == NULL)
 		flags |= LC_SEL_NO_PIECES;
@@ -3443,7 +3443,7 @@ void Project::UpdateSelection()
 		}
 	}
 
-	for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+	for (lcCamera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		if (pCamera->IsSelected())
 		{
 			flags |= LC_SEL_CAMERA;
@@ -3731,7 +3731,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 		case LC_CAMERA_MODIFIED:
 		{
 			LC_CAMERA_MODIFY* mod = (LC_CAMERA_MODIFY*)param;
-			Camera* pCamera = (Camera*)mod->camera;
+			lcCamera* pCamera = (lcCamera*)mod->camera;
 
 			if (mod->hidden)
 				pCamera->Hide();
@@ -4810,7 +4810,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			int i = 0;
 			Piece* pPiece;
-			Camera* pCamera;
+			lcCamera* pCamera;
 			Group* pGroup;
 //			Light* pLight;
 
@@ -4960,14 +4960,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			
 			free(groups);
 
-			Camera* pCamera = m_pCameras;
+			lcCamera* pCamera = m_pCameras;
 			while (pCamera->m_pNext)
 				pCamera = pCamera->m_pNext;
 			file->Read(&i, sizeof(i));
 
 			while (i--)
 			{
-				pCamera = new Camera(8, pCamera);
+				pCamera = new lcCamera(8, pCamera);
 				pCamera->FileLoad(*file);
 				pCamera->Select(true, false, false);
 				pCamera->GetTarget ()->Select(true, false, false);
@@ -5022,7 +5022,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_SELECT_BYNAME:
 		{
 			Piece* pPiece;
-			Camera* pCamera;
+			lcCamera* pCamera;
 			Light* pLight;
 			Group* pGroup;
 			int i = 0;
@@ -5114,7 +5114,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						case LC_SELDLG_CAMERA:
 						{
-							((Camera*)opts[i].pointer)->Select(true, false, false);
+							((lcCamera*)opts[i].pointer)->Select(true, false, false);
 						} break;
 
 						case LC_SELDLG_LIGHT:
@@ -5843,7 +5843,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
 			{
-				Camera* pCam;
+				lcCamera* pCam;
 				if (bControl)
 					pCam = m_pViewCameras[vp];
 				else
@@ -6072,7 +6072,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
       for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
         pPiece->InsertTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-      for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+      for (lcCamera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
         pCamera->InsertTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
       for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
@@ -6093,7 +6093,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
       for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
         pPiece->RemoveTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
-      for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+      for (lcCamera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
         pCamera->RemoveTime (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
 
       for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
@@ -6184,7 +6184,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_MENU:
 		{
-			Camera* pCamera = m_pCameras;
+			lcCamera* pCamera = m_pCameras;
 
 			while (nParam--)
 				pCamera = pCamera->m_pNext;
@@ -6197,7 +6197,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_RESET:
 		{
-			Camera* pCamera;
+			lcCamera* pCamera;
 			int i;
 
 			while (m_pCameras)
@@ -6209,7 +6209,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (m_pCameras = pCamera = NULL, i = 0; i < 7; i++)
 			{
-				pCamera = new Camera(i, pCamera);
+				pCamera = new lcCamera(i, pCamera);
 				if (m_pCameras == NULL)
 					m_pCameras = pCamera;
 				
@@ -6653,7 +6653,7 @@ Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, fl
 void Project::SelectAndFocusNone(bool bFocusOnly)
 {
   Piece* pPiece;
-  Camera* pCamera;
+  lcCamera* pCamera;
   Light* pLight;
 
   for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -6693,13 +6693,22 @@ bool Project::GetSelectionCenter(Vector3& Center) const
 	return Selected;
 }
 
-Camera* Project::GetCamera(int i)
+lcCamera* Project::GetCamera(int i) const
 {
-	Camera* pCamera;
+	lcCamera* pCamera;
 
 	for (pCamera = m_pCameras; i-- > 0 && pCamera; pCamera = pCamera->m_pNext)
 		;
 	return pCamera;
+}
+
+lcCamera* Project::GetCamera(const char* Name) const
+{
+	for (lcCamera* Camera = m_pCameras; Camera; Camera = Camera->m_pNext)
+		if (Camera->m_Name == Name)
+			return (lcCamera*)Camera;
+
+	return NULL;
 }
 
 void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4])
@@ -6710,7 +6719,7 @@ void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projectio
 	Viewport[3] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = m_pViewCameras[m_nActiveViewport];
+	lcCamera* Cam = m_pViewCameras[m_nActiveViewport];
 
 	// Build the matrices.
 	ModelView = CreateLookAtMatrix(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
@@ -6732,7 +6741,7 @@ void Project::ConvertFromUserUnits(Vector3& Value) const
 bool Project::GetFocusPosition(Vector3& Position) const
 {
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	float* pos = &Position[0];
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -6765,7 +6774,7 @@ bool Project::GetFocusPosition(Vector3& Position) const
 }
 
 // Returns the object that currently has focus.
-Object* Project::GetFocusObject() const
+lcObject* Project::GetFocusObject() const
 {
 	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
@@ -6773,7 +6782,7 @@ Object* Project::GetFocusObject() const
 			return pPiece;
 	}
 
-	for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+	for (lcCamera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 	{
 		if (pCamera->IsEyeFocused() || pCamera->IsTargetFocused())
 			return pCamera;
@@ -6826,7 +6835,7 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	};
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = m_pViewCameras[m_nActiveViewport];
+	lcCamera* Cam = m_pViewCameras[m_nActiveViewport];
 
 	// Build the matrices.
 	Matrix44 ModelView, Projection;
@@ -6856,7 +6865,7 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	GLfloat modelMatrix[16], projMatrix[16];
 	GLint viewport[4];
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	Light* pLight;
 
 	LoadViewportProjection(m_nActiveViewport);
@@ -6892,7 +6901,7 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	}
 }
 
-void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<Object>& Objects)
+void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects)
 {
 	int Viewport[4] =
 	{
@@ -6903,7 +6912,7 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArra
 	};
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = m_pViewCameras[m_nActiveViewport];
+	lcCamera* Cam = m_pViewCameras[m_nActiveViewport];
 
 	// Build the matrices.
 	Matrix44 ModelView, Projection;
@@ -7068,7 +7077,7 @@ bool Project::StopTracking(bool bAccept)
 				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
 					// Find objects inside the rectangle.
-					lcPtrArray<Object> Objects;
+					lcPtrArray<lcObject> Objects;
 					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
 
 					// Deselect old pieces.
@@ -7157,7 +7166,7 @@ bool Project::StopTracking(bool bAccept)
 				};
 
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = m_pViewCameras[m_nActiveViewport];
+				lcCamera* Cam = m_pViewCameras[m_nActiveViewport];
 
 				// Build the matrices.
 				Matrix44 ModelView, Projection;
@@ -7411,7 +7420,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 	// Transform the translation if we're in relative mode.
 	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 	{
-		Object* Focus = GetFocusObject();
+		lcObject* Focus = GetFocusObject();
 
 		if ((Focus != NULL) && Focus->IsPiece())
 		{
@@ -7429,7 +7438,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		return false;
 
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	Light* pLight;
 	float x = Move[0], y = Move[1], z = Move[2];
 
@@ -7867,7 +7876,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-        Camera *camera = m_pViewCameras[m_nActiveViewport];
+        lcCamera *camera = m_pViewCameras[m_nActiveViewport];
 
         if (camera->IsSide ())
         {
@@ -8216,9 +8225,9 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 					case LC_OBJECT_CAMERA:
 					case LC_OBJECT_CAMERA_TARGET:
 					{
-						Camera* pCamera;
+						lcCamera* pCamera;
 						if (ClickLine.pClosest->GetType () == LC_OBJECT_CAMERA)
-							pCamera = (Camera*)ClickLine.pClosest;
+							pCamera = (lcCamera*)ClickLine.pClosest;
 						else
 							pCamera = ((CameraTarget*)ClickLine.pClosest)->GetParent();
 						bool bCanDelete = pCamera->IsUser();
@@ -8229,7 +8238,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
 						if (bCanDelete)
 						{
-							Camera* pPrev;
+							lcCamera* pPrev;
 							for (pPrev = m_pCameras; pPrev; pPrev = pPrev->m_pNext)
 								if (pPrev->m_pNext == pCamera)
 								{
@@ -8371,7 +8380,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
       gluUnProject(x+1, y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
-      Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
+      lcCamera* pCamera = new lcCamera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
       pCamera->GetTarget ()->Select (true, true, false);
       UpdateSelection();
       UpdateAllViews();
@@ -8393,7 +8402,7 @@ void Project::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 
 			if (!sel)
 			{
-				for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+				for (lcCamera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 				{
 					if (pCamera->IsSelected())
 					{
@@ -8602,7 +8611,7 @@ void Project::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 				}
 
 			if (!sel)
-			for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+			for (lcCamera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 				if (pCamera->IsSelected())
 				{
 					sel = true;
@@ -8741,7 +8750,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 			
-			Camera* pCamera = m_pCameras;
+			lcCamera* pCamera = m_pCameras;
 			while (pCamera->m_pNext != NULL)
 				pCamera = pCamera->m_pNext;
 
@@ -8758,7 +8767,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 			if ((x == m_nDownX) && (y == m_nDownY))
 				break;
 
-			Camera* Camera = m_pViewCameras[m_nActiveViewport];
+			lcCamera* Camera = m_pViewCameras[m_nActiveViewport];
 			bool Redraw;
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
@@ -8811,7 +8820,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 
 				if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 				{
-					Object* Focus = GetFocusObject();
+					lcObject* Focus = GetFocusObject();
 
 					if ((Focus != NULL) && Focus->IsPiece())
 					{
@@ -8936,7 +8945,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 		
 		case LC_ACTION_ROTATE:
 		{
-			Camera* Camera = m_pViewCameras[m_nActiveViewport];
+			lcCamera* Camera = m_pViewCameras[m_nActiveViewport];
 			bool Redraw;
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
@@ -9137,7 +9146,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_pViewCameras[m_nActiveViewport]->GetEyePos(eye);
 				m_pViewCameras[m_nActiveViewport]->GetTargetPos(target);
 				m_pViewCameras[m_nActiveViewport]->GetUpVec(up);
-				Camera* pCamera = new Camera(eye, target, up, m_pCameras);
+				lcCamera* pCamera = new lcCamera(eye, target, up, m_pCameras);
 
 				m_pViewCameras[m_nActiveViewport] = pCamera;
 				SystemUpdateCameraMenu(m_pCameras);
@@ -9194,7 +9203,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
       float dx = (ptx - m_fTrack[0])*mouse;
       float dy = (pty - m_fTrack[1])*mouse;
       float dz = (ptz - m_fTrack[2])*mouse;
-      Object *pObj = NULL;
+      lcObject *pObj = NULL;
       Curve *pCurve;
 
       m_fTrack[0] = ptx;
@@ -9245,7 +9254,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 		// Find the rotation from the focused piece if relative snap is enabled.
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
-			Object* Focus = GetFocusObject();
+			lcObject* Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
 			{
@@ -9392,7 +9401,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 			if (f >= 0.0f)
 			{
-				Camera* Cam = m_pViewCameras[m_nActiveViewport];
+				lcCamera* Cam = m_pViewCameras[m_nActiveViewport];
 				Vector3 ViewDir = Cam->GetTargetPosition() - Cam->GetEyePosition();
 
 				float u1 = (-b + sqrtf(f)) / (2*a);
@@ -9414,7 +9423,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 					// Find the rotation from the focused piece if relative snap is enabled.
 					if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 					{
-						Object* Focus = GetFocusObject();
+						lcObject* Focus = GetFocusObject();
 
 						if ((Focus != NULL) && Focus->IsPiece())
 						{

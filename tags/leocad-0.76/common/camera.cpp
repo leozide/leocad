@@ -23,8 +23,8 @@ static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 // =============================================================================
 // CameraTarget class
 
-CameraTarget::CameraTarget (Camera *pParent)
-  : Object (LC_OBJECT_CAMERA_TARGET)
+CameraTarget::CameraTarget (lcCamera *pParent)
+  : lcObject (LC_OBJECT_CAMERA_TARGET)
 {
   m_pParent = pParent;
   /*
@@ -62,15 +62,15 @@ const char* CameraTarget::GetName() const
 /////////////////////////////////////////////////////////////////////////////
 // Camera construction/destruction
 
-Camera::Camera ()
-  : Object (LC_OBJECT_CAMERA)
+lcCamera::lcCamera()
+  : lcObject(LC_OBJECT_CAMERA)
 {
   Initialize();
 }
 
 // Start with a standard camera.
-Camera::Camera (unsigned char nType, Camera* pPrev)
-  : Object (LC_OBJECT_CAMERA)
+lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
+  : lcObject (LC_OBJECT_CAMERA)
 {
   if (nType > 7)
     nType = 8;
@@ -88,7 +88,7 @@ Camera::Camera (unsigned char nType, Camera* pPrev)
   ChangeKey (1, true, true, eyes[nType], LC_CK_EYE);
   ChangeKey (1, true, true, ups[nType], LC_CK_UP);
 
-  strcpy (m_strName, names[nType]);
+  m_Name = names[nType];
   if (nType != 8)
     m_nState = LC_CAMERA_HIDDEN;
   m_nType = nType;
@@ -100,8 +100,8 @@ Camera::Camera (unsigned char nType, Camera* pPrev)
 }
 
 // From OnMouseMove(), case LC_ACTION_ROTATE_VIEW
-Camera::Camera (const float *eye, const float *target, const float *up, Camera* pCamera)
-  : Object (LC_OBJECT_CAMERA)
+lcCamera::lcCamera(const float *eye, const float *target, const float *up, lcCamera* pCamera)
+  : lcObject(LC_OBJECT_CAMERA)
 {
   // Fix the up vector
   Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
@@ -123,14 +123,16 @@ Camera::Camera (const float *eye, const float *target, const float *up, Camera* 
 
   for (;;)
   {
-    if (strncmp (pCamera->m_strName, "Camera ", 7) == 0)
-      if (sscanf(pCamera->m_strName, "Camera %d", &i) == 1)
+    if (strncmp (pCamera->m_Name, "Camera ", 7) == 0)
+      if (sscanf(pCamera->m_Name, "Camera %d", &i) == 1)
 	if (i > max) 
 	  max = i;
 
     if (pCamera->m_pNext == NULL)
     {
-      sprintf(m_strName, "Camera %d", max+1);
+		char Name[256];
+      sprintf(Name, "Camera %d", max+1);
+	  m_Name = Name;
       pCamera->m_pNext = this;
       break;
     }
@@ -142,8 +144,8 @@ Camera::Camera (const float *eye, const float *target, const float *up, Camera* 
 }
 
 // From LC_ACTION_CAMERA
-Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera)
-  : Object (LC_OBJECT_CAMERA)
+lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcCamera* pCamera)
+  : lcObject (LC_OBJECT_CAMERA)
 {
   // Fix the up vector
   Vector upvec(0,0,1), frontvec(ex-tx, ey-ty, ez-tz), sidevec;
@@ -171,14 +173,16 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
   if (pCamera)
     for (;;)
     {
-      if (strncmp (pCamera->m_strName, "Camera ", 7) == 0)
-	if (sscanf(pCamera->m_strName, "Camera %d", &i) == 1)
+      if (strncmp (pCamera->m_Name, "Camera ", 7) == 0)
+	if (sscanf(pCamera->m_Name, "Camera %d", &i) == 1)
 	  if (i > max) 
 	    max = i;
 
       if (pCamera->m_pNext == NULL)
       {
-	sprintf(m_strName, "Camera %d", max+1);
+		char Name[256];
+      sprintf(Name, "Camera %d", max+1);
+	  m_Name = Name;
 	pCamera->m_pNext = this;
 	break;
       }
@@ -189,12 +193,12 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
   UpdatePosition (1, false);
 }
 
-Camera::~Camera()
+lcCamera::~lcCamera()
 {
   delete m_pTarget;
 }
 
-void Camera::Initialize()
+void lcCamera::Initialize()
 {
   m_fovy = 30;
   m_zNear = 1;
@@ -205,8 +209,7 @@ void Camera::Initialize()
   m_nType = LC_CAMERA_USER;
 
   m_pTR = NULL;
-  for (unsigned char i = 0 ; i < sizeof(m_strName) ; i++ )
-    m_strName[i] = 0;
+  m_Name = "";
 
   float *values[] = { m_fEye, m_fTarget, m_fUp };
   RegisterKeys (values, camera_key_info, LC_CK_COUNT);
@@ -217,7 +220,7 @@ void Camera::Initialize()
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 
-bool Camera::FileLoad (File& file)
+bool lcCamera::FileLoad (File& file)
 {
   unsigned char version, ch;
 
@@ -227,21 +230,25 @@ bool Camera::FileLoad (File& file)
     return false;
 
   if (version > 5)
-    if (!Object::FileLoad (file))
+    if (!lcObject::FileLoad (file))
       return false;
 
   if (version == 4)
   {
-    file.Read(m_strName, 80);
-    m_strName[80] = 0;
+	  char buf[81];
+    file.Read(buf, 80);
+    buf[80] = 0;
+	m_Name = buf;
   }
   else
   {
     file.Read(&ch, 1);
     if (ch == 0xFF)
       return false; // don't read CString
-    file.Read(m_strName, ch);
-    m_strName[ch] = 0;
+	char buf[81];
+    file.Read(buf, ch);
+    buf[ch] = 0;
+	m_Name = buf;
   }
 
   if (version < 3)
@@ -388,30 +395,30 @@ bool Camera::FileLoad (File& file)
   return true;
 }
 
-void Camera::FileSave (File& file) const
+void lcCamera::FileSave (File& file) const
 {
-  unsigned char ch = LC_CAMERA_SAVE_VERSION;
+	unsigned char ch = LC_CAMERA_SAVE_VERSION;
 
-  file.WriteByte (&ch, 1);
+	file.WriteByte (&ch, 1);
 
-  Object::FileSave (file);
+	lcObject::FileSave (file);
 
-  ch = (unsigned char)strlen(m_strName);
-  file.Write (&ch, 1);
-  file.Write (m_strName, ch);
+	ch = (unsigned char)m_Name.GetLength();
+	file.Write(&ch, 1);
+	file.Write((char*)m_Name, ch);
 
-  file.WriteFloat (&m_fovy, 1);
-  file.WriteFloat (&m_zFar, 1);
-  file.WriteFloat (&m_zNear, 1);
-  // version 5
-  file.WriteByte (&m_nState, 1);
-  file.WriteByte (&m_nType, 1);
+	file.WriteFloat(&m_fovy, 1);
+	file.WriteFloat(&m_zFar, 1);
+	file.WriteFloat(&m_zNear, 1);
+	// version 5
+	file.WriteByte(&m_nState, 1);
+	file.WriteByte(&m_nType, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void lcCamera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
   if (IsSide())
   {
@@ -457,7 +464,7 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
   }
 }
 
-void Camera::Select (bool bSelecting, bool bFocus, bool bMultiple)
+void lcCamera::Select (bool bSelecting, bool bFocus, bool bMultiple)
 {
   if (bSelecting == true)
   {
@@ -482,7 +489,7 @@ void Camera::Select (bool bSelecting, bool bFocus, bool bMultiple)
   } 
 }
 
-void Camera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
+void lcCamera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
 {
   // FIXME: the target should handle this
 
@@ -509,14 +516,14 @@ void Camera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
   } 
 }
 
-void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
+void lcCamera::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
   CalculateKeys(nTime, bAnimation);
 
 	UpdateBoundingBox();
 }
 
-void Camera::UpdateBoundingBox()
+void lcCamera::UpdateBoundingBox()
 {
   // Fix the up vector
   Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
@@ -538,7 +545,7 @@ void Camera::UpdateBoundingBox()
   mat.SetTranslation (0, 0, 0);
 }
 
-void Camera::Render(float fLineWidth)
+void lcCamera::Render(float fLineWidth)
 {
   // Fix the up vector
   Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
@@ -671,7 +678,7 @@ void Camera::Render(float fLineWidth)
   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void Camera::MinIntersectDist(LC_CLICKLINE* pLine)
+void lcCamera::MinIntersectDist(LC_CLICKLINE* pLine)
 {
   float dist;
 
@@ -688,7 +695,7 @@ void Camera::MinIntersectDist(LC_CLICKLINE* pLine)
   m_pTarget->MinIntersectDist (pLine);
 }
 
-void Camera::LoadProjection(float fAspect)
+void lcCamera::LoadProjection(float fAspect)
 {
   if (m_pTR != NULL)
     m_pTR->BeginTile();
@@ -713,7 +720,7 @@ void Camera::LoadProjection(float fAspect)
   gluLookAt(m_fEye[0], m_fEye[1], m_fEye[2], m_fTarget[0], m_fTarget[1], m_fTarget[2], m_fUp[0], m_fUp[1], m_fUp[2]);
 }
 
-void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void lcCamera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
   Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
   frontvec.Normalize();
@@ -732,7 +739,7 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
   UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void lcCamera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
   Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
   sidevec.Cross(frontvec, upvec);
@@ -753,7 +760,7 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
   UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
+void lcCamera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
 {
   Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
   sidevec.Cross(frontvec, upvec);
@@ -783,7 +790,7 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
   UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void lcCamera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
   Matrix mat;
   float front[3] = { m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2] };
@@ -795,7 +802,7 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
   UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
+void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
 {
   m_pTR = new TiledRender();
   m_pTR->TileSize(tw, th, 0);
@@ -803,7 +810,7 @@ void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
   m_pTR->Perspective(m_fovy, fAspect, m_zNear, m_zFar);
 }
 
-void Camera::GetTileInfo(int* row, int* col, int* width, int* height)
+void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
 {
   if (m_pTR != NULL)
   {
@@ -814,7 +821,7 @@ void Camera::GetTileInfo(int* row, int* col, int* width, int* height)
   }
 }
 
-bool Camera::EndTile()
+bool lcCamera::EndTile()
 {
   if (m_pTR != NULL)
   {

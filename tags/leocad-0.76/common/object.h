@@ -1,9 +1,11 @@
 #ifndef _OBJECT_H_
 #define _OBJECT_H_
 
+#include "str.h"
+
 class File;
 class Matrix;
-class Object;
+class lcObject;
 /*
 #define LC_OBJECT_NAME_LEN         80
 #define LC_OBJECT_HIDDEN         0x01
@@ -55,20 +57,20 @@ typedef struct
 // the callback function.
 typedef struct LC_CLICKLINE
 {
-  float a1, b1, c1;
-  float a2, b2, c2;
-  float mindist;
-  Object *pClosest;
+	float a1, b1, c1;
+	float a2, b2, c2;
+	float mindist;
+	lcObject *pClosest;
 
-  double PointDistance (float *point);
+	float PointDistance(float *point);
 
 } LC_CLICKLINE;
 
-class Object
+class lcObject
 {
 public:
-	Object (LC_OBJECT_TYPE nType);
-	virtual ~Object ();
+	lcObject(LC_OBJECT_TYPE nType);
+	virtual ~lcObject();
 
 public:
 	// Move the object.
@@ -144,70 +146,59 @@ public:
     { return m_nObjectType; }
 
   virtual const char* GetName() const = 0;
-  /*
-  // For linked lists
-  Object* m_pNext;
-  Object* m_pNextRender;
-  Object* m_pParent;
 
-  Object* GetTopAncestor () const
-    { return m_pParent ? m_pParent->GetTopAncestor () : this; }
-  */
-
- protected:
-  //  Str m_strName;
-  //  unsigned char m_nState;
-
-  virtual bool FileLoad (File& file);
-  virtual void FileSave (File& file) const;
+protected:
+	virtual bool FileLoad(File& file);
+	virtual void FileSave(File& file) const;
 
 
-  // Key handling stuff
- public:
-  void CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value) const;
-  void ChangeKey (unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
-  virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
-  virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
+	// Key handling stuff
+public:
+	void CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const;
+	void ChangeKey(unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
+	virtual void InsertTime(unsigned short start, bool animation, unsigned short time);
+	virtual void RemoveTime(unsigned short start, bool animation, unsigned short time);
 
-  int GetKeyTypeCount () const
-    { return m_nKeyInfoCount; }
-  const LC_OBJECT_KEY_INFO* GetKeyTypeInfo (int index) const
-    { return &m_pKeyInfo[index]; };
-  const float* GetKeyTypeValue (int index) const
-    { return m_pKeyValues[index]; };
+	int GetKeyTypeCount () const
+	{ return m_nKeyInfoCount; }
+	const LC_OBJECT_KEY_INFO* GetKeyTypeInfo (int index) const
+	{ return &m_pKeyInfo[index]; };
+	const float* GetKeyTypeValue (int index) const
+	{ return m_pKeyValues[index]; };
 
- protected:
-  void RegisterKeys (float *values[], LC_OBJECT_KEY_INFO* info, int count);
-  void CalculateKeys (unsigned short nTime, bool bAnimation);
+protected:
+	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
+	void CalculateKeys(unsigned short nTime, bool bAnimation);
 
- private:
-  void RemoveKeys ();
+private:
+	void RemoveKeys();
 
-  LC_OBJECT_KEY* m_pAnimationKeys;
-  LC_OBJECT_KEY* m_pInstructionKeys;
-  float **m_pKeyValues;
+	LC_OBJECT_KEY* m_pAnimationKeys;
+	LC_OBJECT_KEY* m_pInstructionKeys;
+	float **m_pKeyValues;
 
-  LC_OBJECT_KEY_INFO *m_pKeyInfo;
-  int m_nKeyInfoCount;
-
-
-  // Bounding box stuff
- protected:
-  double BoundingBoxIntersectDist (LC_CLICKLINE* pLine) const;
-  void BoundingBoxCalculate (float pos[3]);
-  void BoundingBoxCalculate (Matrix *mat);
-  void BoundingBoxCalculate (Matrix *mat, float Dimensions[6]);
-
- private:
-  bool BoundingBoxIntersectionbyLine (double a1, double b1, double c1, double a2, double b2, double c2,
-				      double *x, double *y, double *z) const;
-  bool BoundingBoxPointInside (double x, double y, double z) const;
-  float m_fBoxPlanes[4][6];
+	LC_OBJECT_KEY_INFO *m_pKeyInfo;
+	int m_nKeyInfoCount;
 
 
-  // Object type
- private:
-  LC_OBJECT_TYPE m_nObjectType;
+	// Bounding box stuff
+protected:
+	float BoundingBoxIntersectDist(LC_CLICKLINE* pLine) const;
+	void BoundingBoxCalculate(float pos[3]);
+	void BoundingBoxCalculate(Matrix *mat);
+	void BoundingBoxCalculate(Matrix *mat, float Dimensions[6]);
+
+private:
+	bool BoundingBoxIntersectionbyLine(float a1, float b1, float c1, float a2, float b2, float c2, float *x, float *y, float *z) const;
+	bool BoundingBoxPointInside(float x, float y, float z) const;
+	float m_fBoxPlanes[4][6];
+
+public:
+	String m_Name;
+
+	// Object type
+private:
+	LC_OBJECT_TYPE m_nObjectType;
 };
 
 #endif

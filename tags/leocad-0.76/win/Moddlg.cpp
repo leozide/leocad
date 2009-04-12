@@ -138,7 +138,7 @@ void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler
 	UpdateDialogControls(pTarget, FALSE);
 }
 
-void CModifyDialog::UpdateInfo(Object* pObject)
+void CModifyDialog::UpdateInfo(lcObject* pObject)
 {
 	if ((GetStyle() & WS_VISIBLE) == 0)
 		return;
@@ -202,9 +202,9 @@ void CModifyDialog::UpdateInfo(Object* pObject)
 		case LC_OBJECT_CAMERA_TARGET:
 		{
 			Vector3 tmp;
-			Camera* pCamera;
+			lcCamera* pCamera;
 			if (m_nType == LC_OBJECT_CAMERA)
-				pCamera = (Camera*)m_pObject;
+				pCamera = (lcCamera*)m_pObject;
 			else
 				pCamera = ((CameraTarget*)m_pObject)->GetParent();
 
@@ -334,7 +334,7 @@ void CModifyDialog::OnSelendokModdlgList()
 {
 	void* pNew = m_ctlCombo.GetItemDataPtr(m_ctlCombo.GetCurSel());
 	if ((pNew != m_pObject) && (pNew != (void*)-1))
-		UpdateInfo((Object*)pNew);
+		UpdateInfo((lcObject*)pNew);
 }
 
 void CModifyDialog::OnModdlgApply() 
@@ -366,7 +366,7 @@ void CModifyDialog::OnModdlgApply()
 		{
 			LC_CAMERA_MODIFY mod;
 
-			mod.camera = (Camera*)m_pObject;
+			mod.camera = (lcCamera*)m_pObject;
 			mod.hidden = (m_bHidden != FALSE);
 			mod.Eye = Vector3(m_fPosX, m_fPosY, m_fPosZ);
 			mod.Target = Vector3(m_fRotX, m_fRotY, m_fRotZ);
@@ -399,7 +399,7 @@ void CModifyDialog::OnModdlgClose()
 void CModifyDialog::OnDropdownModdlgList() 
 {
 	Piece* pPiece;
-	Camera* pCamera;
+	lcCamera* pCamera;
 	Light* pLight;
 	int i;
 
@@ -431,7 +431,7 @@ void CModifyDialog::OnDropdownModdlgList()
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((Camera*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, ((lcCamera*)m_pObject)->GetName());
 		} break;
 
 		case LC_OBJECT_LIGHT:

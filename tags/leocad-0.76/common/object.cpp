@@ -33,7 +33,7 @@ static void GetPolyCoeffs (float x1, float y1, float z1, float x2, float y2, flo
 // =============================================================================
 // ClickLine structure
 
-double LC_CLICKLINE::PointDistance (float *point)
+float LC_CLICKLINE::PointDistance(float *point)
 {
   Vector op ((float)(point[0] - a1), (float)(point[1] - b1), (float)(point[2] - c1));
   Vector d ((float)a2, (float)b2, (float)c2);
@@ -56,31 +56,31 @@ double LC_CLICKLINE::PointDistance (float *point)
 }
 
 // =============================================================================
-// Object class
+// lcObject class
 
-Object::Object (LC_OBJECT_TYPE nType)
+lcObject::lcObject(LC_OBJECT_TYPE nType)
 {
-  //  m_nState = 0;
-  //  m_strName[0] = '\0';
+//	m_nState = 0;
+//	m_strName[0] = '\0';
 
-  m_pAnimationKeys = NULL;
-  m_pInstructionKeys = NULL;
+	m_pAnimationKeys = NULL;
+	m_pInstructionKeys = NULL;
 
-  m_nObjectType = nType;
-  m_pKeyValues = NULL;
+	m_nObjectType = nType;
+	m_pKeyValues = NULL;
 
-  //  m_pParent = NULL;
-  //  m_pNext = NULL;
-  //  m_pNextRender = NULL;
+//	m_pParent = NULL;
+//	m_pNext = NULL;
+//	m_pNextRender = NULL;
 }
 
-Object::~Object ()
+lcObject::~lcObject()
 {
-  delete []m_pKeyValues;
-  RemoveKeys ();
+	delete []m_pKeyValues;
+	RemoveKeys ();
 }
 
-bool Object::FileLoad (File& file)
+bool lcObject::FileLoad (File& file)
 {
   unsigned char version;
 
@@ -116,7 +116,7 @@ bool Object::FileLoad (File& file)
   return true;
 }
 
-void Object::FileSave (File& file) const
+void lcObject::FileSave(File& file) const
 {
   unsigned char version = LC_KEY_SAVE_VERSION;
   LC_OBJECT_KEY *node;
@@ -169,7 +169,7 @@ static LC_OBJECT_KEY* AddNode (LC_OBJECT_KEY *node, unsigned short nTime, unsign
   return newnode;
 }
 
-void Object::RegisterKeys (float *values[], LC_OBJECT_KEY_INFO* info, int count)
+void lcObject::RegisterKeys (float *values[], LC_OBJECT_KEY_INFO* info, int count)
 {
   int i;
 
@@ -191,7 +191,7 @@ void Object::RegisterKeys (float *values[], LC_OBJECT_KEY_INFO* info, int count)
   m_nKeyInfoCount = count;
 }
 
-void Object::RemoveKeys ()
+void lcObject::RemoveKeys()
 {
   LC_OBJECT_KEY *node, *prev;
 
@@ -210,7 +210,7 @@ void Object::RemoveKeys ()
   }
 }
 
-void Object::ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, const float *param, unsigned char nKeyType)
+void lcObject::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, const float *param, unsigned char nKeyType)
 {
   LC_OBJECT_KEY *node, *poskey = NULL, *newpos = NULL;
   if (bAnimation)
@@ -245,7 +245,7 @@ void Object::ChangeKey (unsigned short nTime, bool bAnimation, bool bAddKey, con
     newpos->param[i] = param[i];
 }
 
-void Object::CalculateKeys (unsigned short nTime, bool bAnimation)
+void lcObject::CalculateKeys(unsigned short nTime, bool bAnimation)
 {
 //  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
   LC_OBJECT_KEY *next[32], *prev[32], *node;
@@ -301,7 +301,7 @@ void Object::CalculateKeys (unsigned short nTime, bool bAnimation)
   }
 }
 
-void Object::CalculateSingleKey (unsigned short nTime, bool bAnimation, int keytype, float *value) const
+void lcObject::CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const
 {
 	LC_OBJECT_KEY *next = NULL, *prev = NULL, *node;
 
@@ -342,7 +342,7 @@ void Object::CalculateSingleKey (unsigned short nTime, bool bAnimation, int keyt
 			value[j] = prev->param[j];
 }
 
-void Object::InsertTime (unsigned short start, bool animation, unsigned short time)
+void lcObject::InsertTime(unsigned short start, bool animation, unsigned short time)
 {
   LC_OBJECT_KEY *node, *prev = NULL;
   unsigned short last;
@@ -388,7 +388,7 @@ void Object::InsertTime (unsigned short start, bool animation, unsigned short ti
   }
 }
 
-void Object::RemoveTime (unsigned short start, bool animation, unsigned short time)
+void lcObject::RemoveTime(unsigned short start, bool animation, unsigned short time)
 {
   LC_OBJECT_KEY *node, *prev = NULL;
 
@@ -423,68 +423,66 @@ void Object::RemoveTime (unsigned short start, bool animation, unsigned short ti
 // BoundingBox stuff
 
 // Find the distance from the object to the beginning of the "click line".
-double Object::BoundingBoxIntersectDist (LC_CLICKLINE* pLine) const
+float lcObject::BoundingBoxIntersectDist(LC_CLICKLINE* pLine) const
 {
-  double x, y, z;
+	float x, y, z;
 
-  if (BoundingBoxIntersectionbyLine (pLine->a1, pLine->b1, pLine->c1, pLine->a2, pLine->b2, pLine->c2, &x, &y, &z))
-    return (float)sqrt ((pLine->a1-x)*(pLine->a1-x)+(pLine->b1-y)*(pLine->b1-y)+(pLine->c1-z)*(pLine->c1-z));
+	if (BoundingBoxIntersectionbyLine(pLine->a1, pLine->b1, pLine->c1, pLine->a2, pLine->b2, pLine->c2, &x, &y, &z))
+		return sqrtf((pLine->a1-x)*(pLine->a1-x)+(pLine->b1-y)*(pLine->b1-y)+(pLine->c1-z)*(pLine->c1-z));
 
-  return DBL_MAX;
+	return FLT_MAX;
 }
 
 // Returns TRUE if the specified point is inside the bounding box of this object.
-bool Object::BoundingBoxPointInside(double x, double y, double z) const
+bool lcObject::BoundingBoxPointInside(float x, float y, float z) const
 {
-  int i = 0;
-  while (i < 6 && ((m_fBoxPlanes[0][i]*x + m_fBoxPlanes[1][i]*y + 
-		    m_fBoxPlanes[2][i]*z + m_fBoxPlanes[3][i]) <= 0.001)) 
-    i++;
-  return (i == 6);
+	int i = 0;
+	while (i < 6 && ((m_fBoxPlanes[0][i]*x + m_fBoxPlanes[1][i]*y + m_fBoxPlanes[2][i]*z + m_fBoxPlanes[3][i]) <= 0.001)) 
+		i++;
+	return (i == 6);
 }
 
 // Returns TRUE if the line is intersecting any of the planes of the bounding
 // box and if this point is also inside this bounding box.
-bool Object::BoundingBoxIntersectionbyLine (double a1, double b1, double c1, double a2, double b2,
-					    double c2, double *x, double *y, double *z) const
+bool lcObject::BoundingBoxIntersectionbyLine(float a1, float b1, float c1, float a2, float b2, float c2, float *x, float *y, float *z) const
 {
-  double curr_t = DBL_MAX;
-  double t, t1, t2;
+	float curr_t = FLT_MAX;
+	float t, t1, t2;
 
-  for (int i = 0; i < 6; i++)
-  {
-    t1 = (m_fBoxPlanes[0][i]*a1 + m_fBoxPlanes[1][i]*b1 + m_fBoxPlanes[2][i]*c1 + m_fBoxPlanes[3][i]);
-    t2 = (m_fBoxPlanes[0][i]*a2 + m_fBoxPlanes[1][i]*b2 + m_fBoxPlanes[2][i]*c2);
+	for (int i = 0; i < 6; i++)
+	{
+		t1 = (m_fBoxPlanes[0][i]*a1 + m_fBoxPlanes[1][i]*b1 + m_fBoxPlanes[2][i]*c1 + m_fBoxPlanes[3][i]);
+		t2 = (m_fBoxPlanes[0][i]*a2 + m_fBoxPlanes[1][i]*b2 + m_fBoxPlanes[2][i]*c2);
 
-    if (t1!=0 && t2!=0)
-    {
-      t = -( t1 / t2 );
-      if (t>=0)
-      {
-	*x=a1+a2*t;
-	*y=b1+b2*t;
-	*z=c1+c2*t;
+		if (t1!=0 && t2!=0)
+		{
+			t = -( t1 / t2 );
+			if (t>=0)
+			{
+				*x=a1+a2*t;
+				*y=b1+b2*t;
+				*z=c1+c2*t;
 
-	if (BoundingBoxPointInside(*x,*y,*z))
-	  if (t < curr_t)
-	    curr_t = t;
-      }
-    }
-  }
+				if (BoundingBoxPointInside(*x,*y,*z))
+					if (t < curr_t)
+						curr_t = t;
+			}
+		}
+	}
 
-  if (curr_t != DBL_MAX)
-  {
-    *x=a1+a2*curr_t;
-    *y=b1+b2*curr_t;
-    *z=c1+c2*curr_t;
-    return true;
-  }
-  else
-    return false;
+	if (curr_t != FLT_MAX)
+	{
+		*x=a1+a2*curr_t;
+		*y=b1+b2*curr_t;
+		*z=c1+c2*curr_t;
+		return true;
+	}
+	else
+		return false;
 }
 
 // For pieces
-void Object::BoundingBoxCalculate (Matrix *mat, float Dimensions[6])
+void lcObject::BoundingBoxCalculate (Matrix *mat, float Dimensions[6])
 {
   //   BASE       TOP
   // 1------3  .------4  ^ X
@@ -517,7 +515,7 @@ void Object::BoundingBoxCalculate (Matrix *mat, float Dimensions[6])
 }
 
 // Cameras
-void Object::BoundingBoxCalculate (Matrix *mat)
+void lcObject::BoundingBoxCalculate (Matrix *mat)
 {
   float normals[6][3] = {
     { 1,0,0 }, { 0,1,0 }, { 0,0,1 },
@@ -549,7 +547,7 @@ void Object::BoundingBoxCalculate (Matrix *mat)
 }
 
 // Light
-void Object::BoundingBoxCalculate (float pos[3])
+void lcObject::BoundingBoxCalculate(float pos[3])
 {
   float pts[18] = {
      0.3f+pos[0],  0.3f+pos[1], -0.3f+pos[2],

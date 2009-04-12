@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -32,18 +32,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
@@ -69,8 +69,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\idr_main.ico"
-IDR_PARTFRAME           ICON    DISCARDABLE     "res\\idr_part.ico"
+IDR_MAINFRAME           ICON                    "res\\idr_main.ico"
+IDR_PARTFRAME           ICON                    "res\\idr_part.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -108,7 +108,7 @@ IDR_PREVIEW             BITMAP  DISCARDABLE     "res\\preview.bmp"
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+IDR_MAINFRAME TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -132,7 +132,7 @@ BEGIN
     BUTTON      ID_CONTEXT_HELP
 END
 
-IDR_TOOLSBAR TOOLBAR DISCARDABLE  16, 15
+IDR_TOOLSBAR TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_ACTION_INSERT
     BUTTON      ID_ACTION_LIGHT
@@ -158,7 +158,7 @@ BEGIN
     BUTTON      ID_PIECE_ARRAY
 END
 
-IDR_ANIMATORBAR TOOLBAR DISCARDABLE  16, 15
+IDR_ANIMATORBAR TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_VIEW_STEP_FIRST
     BUTTON      ID_VIEW_STEP_PREVIOUS
@@ -170,19 +170,12 @@ BEGIN
     BUTTON      ID_ANIMATOR_KEY
 END
 
-IDR_FULLSCREEN TOOLBAR DISCARDABLE  16, 15
+IDR_FULLSCREEN TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_VIEW_FULLSCREEN
 END
 
-IDR_PIECEEDITOR TOOLBAR DISCARDABLE  16, 15
-BEGIN
-    BUTTON      ID_EDITOR_FILE_NEW
-    BUTTON      ID_EDITOR_FILE_OPEN
-    BUTTON      ID_EDITOR_FILE_SAVE
-END
-
-IDR_LIBRARY TOOLBAR DISCARDABLE  16, 15
+IDR_LIBRARY TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_LIBDLG_FILE_OPEN
     BUTTON      ID_LIBDLG_FILE_SAVE
@@ -193,7 +186,7 @@ BEGIN
     BUTTON      ID_LIBDLG_CATEGORY_EDIT
 END
 
-IDR_TERRAIN TOOLBAR DISCARDABLE  16, 15
+IDR_TERRAIN TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_TERDLG_FILE_OPEN
     BUTTON      ID_TERDLG_FILE_SAVE
@@ -204,7 +197,7 @@ BEGIN
     BUTTON      ID_TERDLG_EDIT_ROTATE
 END
 
-IDR_PREVIEW TOOLBAR DISCARDABLE  16, 15
+IDR_PREVIEW TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_PREVIEW_PRINT
     BUTTON      ID_PREVIEW_PREV
@@ -222,7 +215,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -240,6 +233,8 @@ BEGIN
             MENUITEM "HTML...",                     ID_FILE_EXPORT_HTML
             MENUITEM "POV-Ray...",                  ID_FILE_EXPORT_POVRAY
             MENUITEM "Wavefront...",                ID_FILE_EXPORT_WAVEFRONT
+            MENUITEM "VRML...",                     ID_FILE_EXPORT_VRML
+            MENUITEM "X3DV...",                     ID_FILE_EXPORT_X3DV
         END
         MENUITEM SEPARATOR
         MENUITEM "Propert&ies...",              ID_FILE_PROPERTIES
@@ -352,7 +347,7 @@ BEGIN
     END
 END
 
-IDR_POPUPS MENU DISCARDABLE 
+IDR_POPUPS MENU 
 BEGIN
     POPUP "0"
     BEGIN
@@ -458,8 +453,7 @@ BEGIN
         MENUITEM "3 Studs",                     ID_SNAP_7
         MENUITEM "4 Studs",                     ID_SNAP_8
         MENUITEM "8 Studs",                     ID_SNAP_9
-        MENUITEM "Z Snap",                      ID_SNAP_Z
-        , INACTIVE, MENUBARBREAK
+        MENUITEM "Z Snap",                      ID_SNAP_Z, INACTIVE, MENUBARBREAK
         MENUITEM SEPARATOR
         MENUITEM "None",                        ID_SNAP_10
         MENUITEM "1/20 Stud",                   ID_SNAP_11
@@ -481,29 +475,7 @@ BEGIN
     END
 END
 
-IDR_PIECEEDITOR MENU DISCARDABLE 
-BEGIN
-    POPUP "File"
-    BEGIN
-        MENUITEM "New",                         ID_EDITOR_FILE_NEW
-        MENUITEM "Open...",                     ID_EDITOR_FILE_OPEN
-        MENUITEM "Save",                        ID_EDITOR_FILE_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "Return",                      ID_EDITOR_FILE_RETURN
-    END
-    POPUP "View"
-    BEGIN
-        MENUITEM "Fix Backfaces",               ID_EDITOR_VIEW_BACKFACES
-        MENUITEM "Background...",               ID_EDITOR_VIEW_BACKGROUND
-        MENUITEM "Connections",                 ID_EDITOR_VIEW_CONNECTIONS
-    END
-    POPUP "Help"
-    BEGIN
-        MENUITEM SEPARATOR
-    END
-END
-
-IDR_LIBRARY MENU DISCARDABLE 
+IDR_LIBRARY MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -534,14 +506,13 @@ BEGIN
     END
 END
 
-IDR_TERRAIN MENU DISCARDABLE 
+IDR_TERRAIN MENU 
 BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Open...",                    ID_TERDLG_FILE_OPEN, GRAYED
         MENUITEM "&Save",                       ID_TERDLG_FILE_SAVE, GRAYED
-        MENUITEM "Save &As...",                 ID_TERDLG_FILE_SAVEAS
-        , GRAYED
+        MENUITEM "Save &As...",                 ID_TERDLG_FILE_SAVEAS, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "&Apply Changes",              IDOK
         MENUITEM "&Discard Changes",            IDCANCEL
@@ -569,7 +540,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS 
 BEGIN
     "F",            ID_VIEW_FULLSCREEN,     VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT

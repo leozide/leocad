@@ -7,7 +7,7 @@
 class Group;
 class Piece;
 class PieceInfo;
-class Camera;
+class lcCamera;
 
 #include "defines.h"
 #include "str.h"
@@ -260,7 +260,7 @@ struct LC_PIECE_MODIFY
 
 struct LC_CAMERA_MODIFY
 {
-	Camera* camera;
+	lcCamera* camera;
 	Vector3 Eye;
 	Vector3 Target;
 	Vector3 Up;

@@ -25,7 +25,7 @@ typedef enum
   LC_CURVE_POINT_KEY_COUNT
 } LC_CURVE_POINT_KEY_TYPES;
 
-class CurvePoint : public Object
+class CurvePoint : public lcObject
 {
  public:
   // constructors / destructor
@@ -88,7 +88,7 @@ typedef enum
   LC_CURVE_TYPE_HOSE
 } LC_CURVE_TYPE;
 
-class Curve : public Object
+class Curve : public lcObject
 {
  public:
   // constructors / destructor

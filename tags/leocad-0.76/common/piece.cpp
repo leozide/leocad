@@ -63,7 +63,7 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 static bool lockarrays = false;
 
 Piece::Piece(PieceInfo* pPieceInfo)
-  : Object (LC_OBJECT_PIECE)
+  : lcObject (LC_OBJECT_PIECE)
 {
   static bool first_time = true;
 
@@ -156,7 +156,7 @@ bool Piece::FileLoad (File& file, char* name)
     return false;
 
   if (version > 8)
-    if (!Object::FileLoad (file))
+    if (!lcObject::FileLoad (file))
       return false;
 
   if (version < 9)
@@ -317,7 +317,7 @@ void Piece::FileSave (File& file, Group* pGroups)
 
   file.WriteByte (&ch, 1);
 
-  Object::FileSave (file);
+  lcObject::FileSave (file);
 
   file.Write(m_pPieceInfo->m_strName, 9);
   file.WriteByte(&m_nColor, 1);
@@ -420,7 +420,7 @@ void Piece::InsertTime (unsigned short start, bool animation, unsigned short tim
       Select (false, false, false);
   }
 
-  Object::InsertTime (start, animation, time);
+  lcObject::InsertTime (start, animation, time);
 }
 
 void Piece::RemoveTime (unsigned short start, bool animation, unsigned short time)
@@ -450,7 +450,7 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
       Select (false, false, false);
   }
 
-  Object::RemoveTime (start, animation, time);
+  lcObject::RemoveTime (start, animation, time);
 }
 
 void Piece::MinIntersectDist(LC_CLICKLINE* pLine)

@@ -31,7 +31,7 @@ static LC_OBJECT_KEY_INFO curve_point_key_info[LC_CURVE_POINT_KEY_COUNT] =
 // CurvePoint class
 
 CurvePoint::CurvePoint (Curve *pParent)
-  : Object (LC_OBJECT_CURVE_POINT)
+  : lcObject (LC_OBJECT_CURVE_POINT)
 {
   m_pParent = pParent;
 
@@ -46,7 +46,7 @@ CurvePoint::CurvePoint (Curve *pParent)
 }
 
 CurvePoint::CurvePoint (Curve *pParent, const float *pos, const float *dir)
-  : Object (LC_OBJECT_CURVE_POINT)
+  : lcObject (LC_OBJECT_CURVE_POINT)
 {
   m_pParent = pParent;
 
@@ -248,13 +248,13 @@ void CurvePoint::Render (LC_RENDER_INFO* pInfo)
 // Curve class
 
 Curve::Curve ()
-  : Object (LC_OBJECT_CURVE)
+  : lcObject (LC_OBJECT_CURVE)
 {
   Initialize ();
 }
 
 Curve::Curve (PieceInfo *pInfo, const float *pos, unsigned char color)
-  : Object (LC_OBJECT_CURVE)
+  : lcObject (LC_OBJECT_CURVE)
 {
 	/*
   Initialize ();
@@ -834,7 +834,7 @@ void Curve::MinIntersectDist (LC_CLICKLINE* pLine)
 
 void Curve::SetSelection (bool bSelect, void *pParam)
 {
-  Object::SetSelection (bSelect, pParam);
+  lcObject::SetSelection (bSelect, pParam);
 
   if (pParam != NULL)
   {
@@ -859,7 +859,7 @@ void Curve::SetSelection (bool bSelect, void *pParam)
 
 void Curve::SetFocus (bool bFocus, void *pParam)
 {
-  Object::SetFocus (bFocus, pParam);
+  lcObject::SetFocus (bFocus, pParam);
 
   if (pParam != NULL)
   {

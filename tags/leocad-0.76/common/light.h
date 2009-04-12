@@ -23,7 +23,7 @@ typedef enum
   LC_LK_COUNT
 } LC_LK_TYPES;
 
-class LightTarget : public Object
+class LightTarget : public lcObject
 {
 public:
 	LightTarget (Light *pParent);
@@ -51,7 +51,7 @@ protected:
 	// remove and use UpdatePosition instead
 };
 
-class Light : public Object
+class Light : public lcObject
 {
 public:
 	Light (float px, float py, float pz);

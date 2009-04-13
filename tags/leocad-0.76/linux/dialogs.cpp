@@ -3015,7 +3015,7 @@ int librarydlg_execute (void *param)
 
 static GtkWidget* modifydlg;
 
-static void modifydlg_update_list (Object *obj)
+static void modifydlg_update_list (lcObject *obj)
 {
   GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (modifydlg), "clist"));
 
@@ -3056,7 +3056,7 @@ static void modifydlg_listener (int message, void *data, void *user)
 {
   if (message == LC_MSG_FOCUS_CHANGED)
   {
-    modifydlg_update_list ((Object*)data);
+    modifydlg_update_list ((lcObject*)data);
   }
 }
 

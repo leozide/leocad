@@ -3,13 +3,11 @@
 //
 
 #include "lc_global.h"
-#include "library.h"
-
 #include <stdlib.h>
+#include "library.h"
 #include "file.h"
 #include "texture.h"
 #include "pieceinf.h"
-#include "config.h"
 #include "image.h"
 #include "system.h"
 #include "console.h"
@@ -1209,7 +1207,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 		p = strrchr(file1, '/');
 	if (!p)
 		p = file1;
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 	_strupr(p);
 #else
 	_strlwr(p);
@@ -1858,7 +1856,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 			strcat (fn, "p/");
 			strcat (fn, filename);
 
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 			_strupr(filename);
 #else
 			_strlwr(filename);
@@ -2003,7 +2001,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		strcat (fn, "P/");
 		strcat (fn, filename);
 
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 		_strupr(filename);
 #else
 		_strlwr(filename);

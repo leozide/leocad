@@ -59,15 +59,12 @@ END_MESSAGE_MAP()
 
 CCADView::CCADView()
 {
-	m_pPixels = NULL;
 	m_hCursor = NULL;
-  m_pView = NULL;
+	m_pView = NULL;
 }
 
 CCADView::~CCADView()
 {
-	if (m_pPixels)
-		free (m_pPixels);
 }
 
 BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
@@ -233,15 +230,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	int tw = pw, th = ph; // tile size
 
-	MEMORYSTATUS MemStat;
-	MemStat.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&MemStat);
-
-	if (DWORD(pw*ph*3) > MemStat.dwTotalPhys)
-	{
-		tw = 512;
-		th = 512;
-	}
+	if (tw > 1024 || th > 1024)
+		tw = th = 1024;
 
 	HDC hMemDC = CreateCompatibleDC(GetDC()->m_hDC);
 	LPBITMAPINFOHEADER lpbi;
@@ -316,8 +306,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			lcCamera* pCam = project->m_pCameras;
-			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
+			lcCamera* pCam = project->m_Cameras;
+			for (int i = LC_CAMERA_MAIN; pCam; pCam = (lcCamera*)pCam->m_Next)
 				if (i-- == 0)
 					break;
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
@@ -354,11 +344,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 			if (lpbi) GlobalFreePtr(lpbi);
 		}
-
-		// OpenGL Rendering
-//			CCamera* pOld = pDoc->GetActiveCamera();
-//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pDoc->GetCamera(CAMERA_MAIN);
-//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
 
 		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
 		if (dwPrint & PRINT_NUMBERS)
@@ -412,7 +397,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 	glFinish();
-//		pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);
 	lf.lfWeight = FW_REGULAR;
@@ -535,7 +519,6 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 
 void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-//	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
 }
 
 void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView) 
@@ -570,44 +553,7 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 	pParent->RecalcLayout();
 	pParent->SendMessage(WM_SETMESSAGESTRING, (WPARAM)AFX_IDS_IDLEMESSAGE, 0L);
 	pParent->UpdateWindow();
-///
 
-
-	pfnwglMakeCurrent(NULL, NULL);
-/*
-	if (OpenGLGetPixelFormat(m_pDC->GetSafeHdc()) == 0)
-	{
-		delete m_pDC;
-		m_pDC = new CClientDC(this);
-
-		PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR), 1,
-			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
- 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	
-		int pixelformat = OpenGLChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
-		if (pixelformat == 0)
-		{
-			AfxMessageBox("ChoosePixelFormat failed");
-		}
-
-		if (OpenGLSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
-		{
-			AfxMessageBox("SetPixelFormat failed");
-		}
-	}
-
-	if (pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC) == FALSE)
-	{
-		LPTSTR lpMsgBuf;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		    NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf, 0, NULL);
-
-		::MessageBox(NULL, lpMsgBuf, "Error", MB_OK|MB_ICONINFORMATION);
-		LocalFree(lpMsgBuf);	
-	}
-*/
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -908,14 +854,6 @@ void CCADView::OnCaptureChanged(CWnd *pWnd)
 	CView::OnCaptureChanged(pWnd);
 }
 
-
-
-
-
-
-
-
-
 void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
 	char nKey = nChar;
@@ -1000,28 +938,6 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
 {
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
-/*
-	if (IsWindowEnabled())
-	{
-		if (bActivate)
-		{
-			if (m_pPixels)
-				free (m_pPixels);
-			m_pPixels = NULL;
-		}
-		else
-		{
-			if (m_pPixels)
-				free (m_pPixels);
-
-			CCADDoc* pDoc = GetDocument();
-			m_pPixels = malloc(pDoc->m_szView.cx * pDoc->m_szView.cy * sizeof(GLubyte) * 4);
-			if (!m_pPixels)
-				return;
-			glReadPixels(0, 0, pDoc->m_szView.cx, pDoc->m_szView.cy, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
-		}
-	}
-*/
 }
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 

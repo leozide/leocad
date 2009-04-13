@@ -5,7 +5,7 @@
 #define _TYPEDEF_H_
 
 class Group;
-class Piece;
+class lcPiece;
 class PieceInfo;
 class lcCamera;
 
@@ -213,12 +213,12 @@ struct CONNECTION
 	float center[3];
 	float normal[3];
 	CONNECTION* link;
-	Piece* owner;
+	lcPiece* owner;
 };
 
 struct CONNECTION_ENTRY
 {
-	Piece* owner;
+	lcPiece* owner;
 	CONNECTION** cons; // pointers to the structures in each piece
 	unsigned short numcons;
 };
@@ -248,7 +248,7 @@ struct LC_SEL_DATA
 
 struct LC_PIECE_MODIFY
 {
-	Piece* piece;
+	lcPiece* piece;
 	Vector3 Position;
 	Vector3 Rotation;
 	char name[81];
@@ -411,7 +411,7 @@ struct LC_PROPERTIESDLG_OPTS
 struct LC_GROUPEDITDLG_OPTS
 {
 	int piececount;
-	Piece** pieces;
+	lcPiece** pieces;
 	Group** piecesgroups;
 	int groupcount;
 	Group** groups;

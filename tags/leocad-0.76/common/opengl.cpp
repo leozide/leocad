@@ -16,7 +16,7 @@ void* Sys_GLGetExtension(const char *symbol);
 // =============================================================================
 // OpenGL Function pointers
 
-#ifdef LC_OPENGL_DYNAMIC
+#if LC_OPENGL_DYNAMIC
 PFNGLCLEARINDEX pfnglClearIndex;
 PFNGLCLEARCOLOR pfnglClearColor;
 PFNGLCLEAR pfnglClear;
@@ -412,7 +412,7 @@ void GL_Shutdown()
 {
 	Sys_GLCloseLibrary();
 
-#ifdef LC_OPENGL_DYNAMIC
+#if LC_OPENGL_DYNAMIC
 	pfnglClearIndex = NULL;
 	pfnglClearColor = NULL;
 	pfnglClear = NULL;
@@ -799,7 +799,7 @@ bool GL_Initialize(const char* libname)
 		return false;
 	}
 
-#ifdef LC_OPENGL_DYNAMIC
+#if LC_OPENGL_DYNAMIC
 	pfnglClearIndex = (PFNGLCLEARINDEX) Sys_GLGetProc ("glClearIndex");
 	pfnglClearColor = (PFNGLCLEARCOLOR) Sys_GLGetProc ("glClearColor");
 	pfnglClear = (PFNGLCLEAR) Sys_GLGetProc ("glClear");

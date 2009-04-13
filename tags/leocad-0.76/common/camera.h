@@ -48,8 +48,6 @@ public:
 		// FIXME: move the position handling to the camera target
 	}
 
-	const char* GetName() const;
-
 	lcCamera* GetParent () const
 	{ return m_pParent; }
 
@@ -65,35 +63,23 @@ class lcCamera : public lcObject
 public:
 	lcCamera();
 	lcCamera(unsigned char nType, lcCamera* pPrev);
-	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcCamera* pCamera);
-	lcCamera(const float *eye, const float *target, const float *up, lcCamera* pCamera);
+	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcObject* pCamera);
+	lcCamera(const float *eye, const float *target, const float *up, lcObject* pCamera);
 	virtual ~lcCamera();
 
 	// Query functions.
-	inline Vector3 GetEyePosition() const
-	{ return Vector3(m_fEye[0], m_fEye[1], m_fEye[2]); };
-	inline Vector3 GetTargetPosition() const
-	{ return Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
-	inline Vector3 GetUpVector() const
-	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
-
-	CameraTarget* GetTarget () const
+	CameraTarget* GetTarget() const
 		{ return m_pTarget; }
 
 
+
 	// Deprecated functions:
-	const float* GetEyePos () const
-		{ return m_fEye; };
-	void GetEyePos (float* eye) const
-		{ memcpy(eye, m_fEye, sizeof(m_fEye)); };
-	const float* GetTargetPos () const
-		{ return m_fTarget; };
-	void GetTargetPos (float* target) const
-		{ memcpy(target, m_fTarget, sizeof(m_fTarget)); };
 	const float* GetUpVec () const
 		{ return m_fUp; };
 	void GetUpVec (float* up) const
 		{ memcpy(up, m_fUp, sizeof(m_fUp)); };
+	inline Vector3 GetUpVector() const
+	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
 
 
 
@@ -101,13 +87,10 @@ public:
 
 
 public:
-	lcCamera* m_pNext;
 	void Hide()
 		{ m_nState = LC_CAMERA_HIDDEN; }
 	void UnHide()
 		{ m_nState &= ~LC_CAMERA_HIDDEN; }
-	const char* GetName() const
-		{ return m_Name; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsUser()
@@ -138,13 +121,13 @@ public:
 		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
 	*/
 
-	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
+	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	bool FileLoad (File& file);
-	void FileSave (File& file) const;
-	void MinIntersectDist (LC_CLICKLINE* pLine);
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	bool FileLoad(File& file);
+	void FileSave(File& file) const;
+	void MinIntersectDist(LC_CLICKLINE* pLine);
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
 
@@ -163,9 +146,18 @@ public:
 	void GetTileInfo(int* row, int* col, int* width, int* height);
 	bool EndTile();
 
-	float m_fovy;
-	float m_zNear;
-	float m_zFar;
+	// Camera properties.
+	float m_NearDist;
+	float m_FarDist;
+	float m_FOV;
+
+	// Temporary values.
+	Matrix44 m_WorldView;
+	Matrix44 m_ViewWorld;
+
+	// Current position.
+	Vector3 m_Position;
+	Vector3 m_TargetPosition;
 
 protected:
 	void Initialize();
@@ -178,9 +170,6 @@ protected:
 	unsigned char m_nState;
 	unsigned char m_nType;
 
-	// Current position and orientation.
-	float m_fEye[3];
-	float m_fTarget[3];
 	float m_fUp[3];
 
 	TiledRender* m_pTR;

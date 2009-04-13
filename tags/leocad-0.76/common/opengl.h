@@ -39,7 +39,6 @@ typedef GLfloat GLdouble;
 
 #endif
 
-//#include <GL/glu.h> // TODO: remove all glu calls
 void gluLookAt(GLfloat eyex, GLfloat eyey, GLfloat eyez,
                GLfloat centerx, GLfloat centery, GLfloat centerz,
                GLfloat upx, GLfloat upy, GLfloat upz);
@@ -625,7 +624,7 @@ typedef void (APIENTRY *PFNGLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pn
 // =============================================================================
 // OpenGL extern declarations
 
-#ifdef LC_OPENGL_DYNAMIC
+#if LC_OPENGL_DYNAMIC
 
 extern PFNGLCLEARINDEX pfnglClearIndex;
 extern PFNGLCLEARCOLOR pfnglClearColor;

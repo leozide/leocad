@@ -5,7 +5,6 @@
 
 // TODO: move this to another place
 #ifdef WIN32
-#include "stdafx.h"
 typedef CWnd* BaseWndXID;
 struct BaseMenuItem
 {

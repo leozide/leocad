@@ -425,7 +425,7 @@ static void PrintPiecesThread(void* pv)
 	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
 	memset (&col, 0, sizeof (col));
 
-	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
+	for (lcPiece* tmp = project->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
 	{
 		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
 		pieces[(idx*28)+tmp->GetColor()]++;
@@ -794,14 +794,14 @@ static void PrintPiecesThread(void* pv)
 	pFrame->EnableWindow();
 	dlgPrintStatus.DestroyWindow();
 
-    if (PD != NULL && PD->m_pd.hDC != NULL)
-    {
-        ::DeleteDC(PD->m_pd.hDC);
-        PD->m_pd.hDC = NULL;
-    }
+	if (PD != NULL && PD->m_pd.hDC != NULL)
+	{
+		::DeleteDC(PD->m_pd.hDC);
+		PD->m_pd.hDC = NULL;
+	}
 
 	free (pieces);
-    delete PD;
+	delete PD;
 }
 
 UINT PrintPiecesFunction (LPVOID pv)

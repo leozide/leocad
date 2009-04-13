@@ -62,7 +62,7 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 
 static bool lockarrays = false;
 
-Piece::Piece(PieceInfo* pPieceInfo)
+lcPiece::lcPiece(PieceInfo* pPieceInfo)
   : lcObject (LC_OBJECT_PIECE)
 {
   static bool first_time = true;
@@ -73,14 +73,14 @@ Piece::Piece(PieceInfo* pPieceInfo)
     lockarrays = GL_HasCompiledVertexArrays ();
   }
 
-	m_pNext = NULL;
+	m_Next = NULL;
 	m_pPieceInfo = pPieceInfo;
 	m_nState = 0;
 	m_nColor = 0;
 	m_nStepShow = 1;
 	m_nStepHide = 255;
 	m_nFrameHide = 65535;
-	memset(m_strName, 0, sizeof(m_strName));
+	m_Name = "";
 	m_pGroup = NULL;
 	m_pDrawInfo = NULL;
 	m_pConnections = NULL;
@@ -112,7 +112,7 @@ Piece::Piece(PieceInfo* pPieceInfo)
   ChangeKey (1, true, true, rot, LC_PK_ROTATION);
 }
 
-Piece::~Piece()
+lcPiece::~lcPiece()
 {
   if (m_pPieceInfo != NULL)
     m_pPieceInfo->DeRef ();
@@ -128,7 +128,7 @@ Piece::~Piece()
 // Piece save/load
 
 // Use only when loading from a file
-void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
+void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 {
 	m_pPieceInfo = pPieceInfo;
 	m_pPieceInfo->AddRef();
@@ -146,7 +146,7 @@ void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 	}
 }
 
-bool Piece::FileLoad (File& file, char* name)
+bool lcPiece::FileLoad (File& file, char* name)
 {
   unsigned char version, ch;
 
@@ -275,7 +275,10 @@ bool Piece::FileLoad (File& file, char* name)
       file.ReadByte(&m_nState, 1);
       Select (false, false, false);
       file.ReadByte(&ch, 1);
-      file.Read(m_strName, ch);
+	  char buf[81];
+      file.Read(buf, ch);
+	  buf[80] = 0;
+	  m_Name = buf;
     }
     else
     {
@@ -283,7 +286,10 @@ bool Piece::FileLoad (File& file, char* name)
       file.ReadLong(&hide, 1);
       if (hide != 0)
         m_nState |= LC_PIECE_HIDDEN;
-      file.Read(m_strName, 81);
+	  char buf[81];
+      file.Read(buf, 81);
+	  buf[80] = 0;
+	  m_Name = buf;
     }
 
     // 7 (0.64)
@@ -311,7 +317,7 @@ bool Piece::FileLoad (File& file, char* name)
   return true;
 }
 
-void Piece::FileSave (File& file, Group* pGroups)
+void lcPiece::FileSave (File& file, Group* pGroups)
 {
   unsigned char ch = LC_PIECE_SAVE_VERSION;
 
@@ -328,9 +334,9 @@ void Piece::FileSave (File& file, Group* pGroups)
 
   // version 8
   file.WriteByte(&m_nState, 1);
-  ch = strlen(m_strName);
+  ch = m_Name.GetLength();
   file.WriteByte(&ch, 1);
-  file.Write(m_strName, ch);
+  file.Write((const char*)m_Name, ch);
 
   // version 7
   int i;
@@ -348,7 +354,7 @@ void Piece::FileSave (File& file, Group* pGroups)
   file.WriteLong(&i, 1);
 }
 
-void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)
+void lcPiece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)
 {
   m_nFrameShow = nFrame;
   m_nStepShow = nStep;
@@ -364,20 +370,22 @@ void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned 
   m_nColor = nColor;
 }
 
-void Piece::CreateName(Piece* pPiece)
+void lcPiece::CreateName(lcPiece* pPiece)
 {
 	int i, max = 0;
 
-	for (; pPiece; pPiece = pPiece->m_pNext)
-		if (strncmp (pPiece->m_strName, m_pPieceInfo->m_strDescription, strlen(m_pPieceInfo->m_strDescription)) == 0)
-			if (sscanf(pPiece->m_strName + strlen(m_pPieceInfo->m_strDescription), " #%d", &i) == 1)
+	for (; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+		if (strncmp(pPiece->m_Name, m_pPieceInfo->m_strDescription, strlen(m_pPieceInfo->m_strDescription)) == 0)
+			if (sscanf((char*)pPiece->m_Name + strlen(m_pPieceInfo->m_strDescription), " #%d", &i) == 1)
 				if (i > max) 
 					max = i;
 
-	sprintf (m_strName, "%s #%.2d", m_pPieceInfo->m_strDescription, max+1);
+	char buf[256];
+	sprintf(buf, "%s #%.2d", m_pPieceInfo->m_strDescription, max+1);
+	m_Name = buf;
 }
 
-void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
+void lcPiece::Select(bool bSelecting, bool bFocus, bool bMultiple)
 {
   if (bSelecting == true)
   {
@@ -395,7 +403,7 @@ void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
   } 
 }
 
-void Piece::InsertTime (unsigned short start, bool animation, unsigned short time)
+void lcPiece::InsertTime (unsigned short start, bool animation, unsigned short time)
 {
   if (animation)
   {
@@ -423,7 +431,7 @@ void Piece::InsertTime (unsigned short start, bool animation, unsigned short tim
   lcObject::InsertTime (start, animation, time);
 }
 
-void Piece::RemoveTime (unsigned short start, bool animation, unsigned short time)
+void lcPiece::RemoveTime (unsigned short start, bool animation, unsigned short time)
 {
   if (animation)
   {
@@ -453,7 +461,7 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
   lcObject::RemoveTime (start, animation, time);
 }
 
-void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
+void lcPiece::MinIntersectDist(LC_CLICKLINE* pLine)
 {
 	double dist;
 
@@ -525,7 +533,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 }
 
-bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
+bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 {
 	// First check the bounding box for quick rejection.
 	Vector3 Box[8] =
@@ -648,7 +656,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	return ret;
 }
 
-void Piece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void lcPiece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
   m_fPosition[0] += dx;
   m_fPosition[1] += dy;
@@ -657,7 +665,7 @@ void Piece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
   ChangeKey (nTime, bAnimation, bAddKey, m_fPosition, LC_PK_POSITION);
 }
 
-bool Piece::IsVisible(unsigned short nTime, bool bAnimation)
+bool lcPiece::IsVisible(unsigned short nTime, bool bAnimation)
 {
 	if (m_nState & LC_PIECE_HIDDEN)
 		return false;
@@ -677,7 +685,7 @@ bool Piece::IsVisible(unsigned short nTime, bool bAnimation)
 	}
 }
 
-void Piece::CompareBoundingBox(float box[6])
+void lcPiece::CompareBoundingBox(float box[6])
 {
 	float v[24] = {
 		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5],
@@ -703,12 +711,12 @@ void Piece::CompareBoundingBox(float box[6])
 	}
 }
 
-Group* Piece::GetTopGroup()
+Group* lcPiece::GetTopGroup()
 {
 	return m_pGroup ? m_pGroup->GetTopGroup() : NULL;
 }
 
-void Piece::DoGroup(Group* pGroup)
+void lcPiece::DoGroup(Group* pGroup)
 {
 	if (m_pGroup != NULL && m_pGroup != (Group*)-1 && m_pGroup > (Group*)0xFFFF)
 		m_pGroup->SetGroup(pGroup);
@@ -716,7 +724,7 @@ void Piece::DoGroup(Group* pGroup)
 		m_pGroup = pGroup;
 }
 
-void Piece::UnGroup(Group* pGroup)
+void lcPiece::UnGroup(Group* pGroup)
 {
 	if ((m_pGroup == pGroup) || (pGroup == NULL))
 		m_pGroup = NULL;
@@ -726,7 +734,7 @@ void Piece::UnGroup(Group* pGroup)
 }
 
 // Recalculates current position and connections
-void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
+void lcPiece::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
 	if (!IsVisible(nTime, bAnimation))
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
@@ -745,7 +753,7 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 	}
 }
 
-void Piece::BuildDrawInfo()
+void lcPiece::BuildDrawInfo()
 {
 	if (m_pDrawInfo != NULL)
 	{
@@ -989,7 +997,7 @@ void Piece::BuildDrawInfo()
 	}
 }
 
-void Piece::RenderBox(bool bHilite, float fLineWidth)
+void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 {
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
@@ -1016,7 +1024,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 	glPopMatrix();
 }
 
-void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
 {
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
@@ -1182,7 +1190,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 	glPopMatrix();
 }
 
-void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers)
+void lcPiece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers)
 {
 	if (m_pConnections == NULL)
 	{
@@ -1192,7 +1200,7 @@ void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short n
 	}
 
 	bool rebuild = bForceRebuild || (m_pDrawInfo == NULL);
-	Piece* pPiece;
+	lcPiece* pPiece;
 	CONNECTION_ENTRY* entry;
 	int i, j, c;
 
@@ -1243,7 +1251,7 @@ void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short n
 					// Update old connection
 					if (m_pConnections[j].link != NULL)
 					{
-						Piece* pOwner = m_pConnections[j].link->owner;
+						lcPiece* pOwner = m_pConnections[j].link->owner;
 
 						if (pOwner != this)
 						{
@@ -1334,7 +1342,7 @@ void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short n
 
 				if (bFixOthers)
 				{
-					Piece* pOwner;
+					lcPiece* pOwner;
 
 					// Update old connection
 					if (m_pConnections[j].link != NULL)
@@ -1396,7 +1404,7 @@ void Piece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short n
 					if (!m_pConnections[j].link)
 						continue;
 
-					Piece* pOwner = m_pConnections[j].link->owner;
+					lcPiece* pOwner = m_pConnections[j].link->owner;
 
 					if (m_pLink == NULL)
 					{
@@ -1583,7 +1591,7 @@ void CPiece::UpdateConnections(CPiece* pPiece)
 }
 */
 
-void Piece::AddConnections(CONNECTION_TYPE* pConnections)
+void lcPiece::AddConnections(CONNECTION_TYPE* pConnections)
 {
 	int i, j, c;
 
@@ -1624,9 +1632,9 @@ void Piece::AddConnections(CONNECTION_TYPE* pConnections)
 	}
 }
 
-void Piece::RemoveConnections(CONNECTION_TYPE* pConnections)
+void lcPiece::RemoveConnections(CONNECTION_TYPE* pConnections)
 {
-	lcPtrArray<Piece> RebuildList;
+	lcPtrArray<lcPiece> RebuildList;
 	int i, j;
 
 	for (i = 0; i < LC_CONNECTIONS; i++)

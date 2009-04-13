@@ -101,7 +101,7 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	int i;
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
-	((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
+		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{

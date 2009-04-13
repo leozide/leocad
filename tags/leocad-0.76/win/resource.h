@@ -137,7 +137,15 @@
 #define IDD_TRANSFORM                   236
 #define IDD_CATEGORY                    237
 #define IDC_ROTX                        238
+#define IDD_MODIFY_PIECE                238
 #define IDC_ROTY                        239
+#define IDD_MODIFY_CAMERA               239
+#define IDB_SPLITH                      240
+#define IDD_MODIFY_LIGHT                240
+#define IDB_BITMAP2                     241
+#define IDB_SPLITV                      241
+#define IDC_CURSOR1                     244
+#define IDC_ORBIT                       244
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -678,6 +686,10 @@
 #define ID_LIBDLG_CATEGORY_RESET        33166
 #define ID_SNAP_XY                      33167
 #define ID_SNAP_Z                       33168
+#define ID_VIEW_SPLITHORIZONTALLY       33169
+#define ID_VIEW_SPLITVERTICALLY         33170
+#define ID_VIEW_DELETEVIEW              33172
+#define ID_VIEW_RESETVIEWS              33174
 #define ID_FILE_EXPORT_VRML             33197
 #define ID_FILE_EXPORT_X3DV             33198
 #define ID_VIEW_PIECES_BAR              59425

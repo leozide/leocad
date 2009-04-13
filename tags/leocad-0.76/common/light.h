@@ -4,30 +4,36 @@
 #include "opengl.h"
 #include "object.h"
 
-#define LC_LIGHT_HIDDEN			0x01
-#define LC_LIGHT_SELECTED		0x02
-#define LC_LIGHT_FOCUSED		0x04
-#define LC_LIGHT_TARGET_SELECTED	0x08
-#define LC_LIGHT_TARGET_FOCUSED		0x10
-#define LC_LIGHT_ENABLED		0x20
+#define LC_LIGHT_HIDDEN           0x01
+#define LC_LIGHT_SELECTED         0x02
+#define LC_LIGHT_FOCUSED          0x04
+#define LC_LIGHT_TARGET_SELECTED  0x08
+#define LC_LIGHT_TARGET_FOCUSED   0x10
+#define LC_LIGHT_ENABLED          0x20
 
-class Light;
+class lcLight;
 class LightTarget;
 
 typedef enum
 {
-  LC_LK_POSITION, LC_LK_TARGET, // position
-  LC_LK_AMBIENT, LC_LK_DIFFUSE, LC_LK_SPECULAR, // color
-  LC_LK_CONSTANT, LC_LK_LINEAR, LC_LK_QUADRATIC, // attenuation
-  LC_LK_CUTOFF, LC_LK_EXPONENT, // spot
-  LC_LK_COUNT
+	LC_LK_POSITION,
+	LC_LK_TARGET,
+	LC_LK_AMBIENT_COLOR,
+	LC_LK_DIFFUSE_COLOR,
+	LC_LK_SPECULAR_COLOR,
+	LC_LK_CONSTANT_ATTENUATION,
+	LC_LK_LINEAR_ATTENUATION,
+	LC_LK_QUADRATIC_ATTENUATION,
+	LC_LK_SPOT_CUTOFF,
+	LC_LK_SPOT_EXPONENT,
+	LC_LK_COUNT
 } LC_LK_TYPES;
 
 class LightTarget : public lcObject
 {
 public:
-	LightTarget (Light *pParent);
-	~LightTarget ();
+	LightTarget(lcLight *pParent);
+	~LightTarget();
 
 public:
 	void MinIntersectDist (LC_CLICKLINE* pLine);
@@ -39,31 +45,27 @@ public:
 		// FIXME: move the position handling to the light target
 	}
 
-	const char* GetName() const;
-
-	Light* GetParent () const
+	lcLight* GetParent () const
 	{ return m_pParent; }
 
 protected:
-	Light* m_pParent;
+	lcLight* m_pParent;
 
-	friend class Light; // FIXME: needed for BoundingBoxCalculate ()
+	friend class lcLight; // FIXME: needed for BoundingBoxCalculate ()
 	// remove and use UpdatePosition instead
 };
 
-class Light : public lcObject
+class lcLight : public lcObject
 {
 public:
-	Light (float px, float py, float pz);
-	Light (float px, float py, float pz, float tx, float ty, float tz);
-	virtual ~Light ();
+	lcLight(float px, float py, float pz);
+	lcLight(float px, float py, float pz, float tx, float ty, float tz);
+	virtual ~lcLight();
 
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	Light* m_pNext;
-
 	bool IsVisible()
 	{ return (m_nState & LC_LIGHT_HIDDEN) == 0; }
 	bool IsSelected()
@@ -87,52 +89,44 @@ public:
 	{ m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED); }
 	void FocusTarget()
 	{ m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED); }
-	const char* GetName()
-	{ return m_strName; }
-	void GetTargetPos (float *pos) const
-	{ memcpy (pos, m_fTarget, sizeof (float[3])); }
-	LightTarget* GetTarget () const
+	LightTarget* GetTarget() const
 	{ return m_pTarget; }
 
-	const char* GetName() const
-	{ return m_strName; };
-
-  void Render (float fLineWidth);
-  void MinIntersectDist (LC_CLICKLINE* Line);
+	void Render(float fLineWidth);
+	void MinIntersectDist(LC_CLICKLINE* Line);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-  void UpdatePosition (unsigned short nTime, bool bAnimation);
-  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void Setup (int index);
-	void CreateName(const Light* pLight);
+	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void Setup(int index);
+	void CreateName(const lcLight* pLight);
 
 protected:
-  void Initialize ();
+	void Initialize ();
 
-  // Camera target
-  LightTarget* m_pTarget;
+	// Camera target
+	LightTarget* m_pTarget;
 
-  // Attributes
-  float m_fCone;
-  unsigned char m_nState;
-  char m_strName[81];
-  bool m_bEnabled;
+	// Attributes
+	float m_fCone;
+	unsigned char m_nState;
+	bool m_bEnabled;
 
-  void DrawCone();
-  void DrawTarget();
-  void DrawSphere();
+	void DrawCone();
+	void DrawTarget();
+	void DrawSphere();
 
-  // Temporary parameters
-  float m_fPos[4];
-  float m_fTarget[3];
-  float m_fAmbient[4];
-  float m_fDiffuse[4];
-  float m_fSpecular[4];
-  float m_fConstant;
-  float m_fLinear;
-  float m_fQuadratic;
-  float m_fCutoff;
-  float m_fExponent;
+	// Temporary parameters
+	float m_fPos[4];
+	float m_fTarget[3];
+	float m_fAmbient[4];
+	float m_fDiffuse[4];
+	float m_fSpecular[4];
+	float m_fConstant;
+	float m_fLinear;
+	float m_fQuadratic;
+	float m_fCutoff;
+	float m_fExponent;
 };
 
 #endif // _LIGHT_H_

@@ -99,8 +99,6 @@ public:
     { return (m_nState & LC_OBJECT_FOCUSED) != 0; };
   virtual bool IsVisible (unsigned short nTime, bool bAnimation) const
     { return (m_nState & LC_OBJECT_HIDDEN) == 0; }
-  const char* GetName() const
-    { return m_strName; }
 
 
   // State change, most classes will have to replace these functions
@@ -144,8 +142,6 @@ public:
 
   LC_OBJECT_TYPE GetType () const
     { return m_nObjectType; }
-
-  virtual const char* GetName() const = 0;
 
 protected:
 	virtual bool FileLoad(File& file);
@@ -194,6 +190,8 @@ private:
 	float m_fBoxPlanes[4][6];
 
 public:
+	lcObject* m_Next;
+
 	String m_Name;
 
 	// Object type

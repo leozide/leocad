@@ -10,8 +10,11 @@
 
 typedef enum 
 {
-	LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
-	LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
+	LC_TRACK_NONE,
+	LC_TRACK_START_LEFT,
+	LC_TRACK_LEFT,
+	LC_TRACK_START_RIGHT,
+	LC_TRACK_RIGHT
 } LC_MOUSE_TRACK;
 
 // Mouse control overlays.
@@ -41,9 +44,9 @@ struct TouchState
 	int StartX, StartY;
 };
 
-class Piece;
+class lcPiece;
 class lcCamera;
-class Light;
+class lcLight;
 class Group;
 class GroupInfo;
 class Texture;
@@ -117,11 +120,11 @@ public:
 
 	void ConvertToUserUnits(Vector3& Value) const;
 	void ConvertFromUserUnits(Vector3& Value) const;
-	void GetArrays(Piece** ppPiece, lcCamera** ppCamera, Light** ppLight)
+	void GetArrays(lcPiece** ppPiece, lcCamera** ppCamera, lcLight** ppLight)
 	{
-		*ppPiece = m_pPieces;
-		*ppCamera = m_pCameras;
-		*ppLight = m_pLights;
+		*ppPiece = m_Pieces;
+		*ppCamera = m_Cameras;
+		*ppLight = m_Lights;
 	}
 
 	void UpdateInterface();
@@ -143,9 +146,10 @@ public:
 	lcObject* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
-	void AddView (View* pView);
-	void RemoveView (View* pView);
-	void UpdateAllViews (View* pSender = NULL);
+	// Views.
+	void AddView(View* pView);
+	void RemoveView(View* pView);
+	void UpdateAllViews(View* pSender = NULL);
 
 // Implementation
 protected:
@@ -160,7 +164,7 @@ protected:
 	char m_strDescription[101];
 	char m_strComments[256];
 
-	// Piece library
+	// Font used to draw text on the screen.
 	TexFont* m_pScreenFont;
 
 	// Undo support
@@ -170,9 +174,9 @@ protected:
 	void CheckPoint (const char* text);
 
 	// Objects
-	Piece* m_pPieces;
-	lcCamera* m_pCameras;
-	Light* m_pLights;
+	lcPiece* m_Pieces;
+	lcCamera* m_Cameras;
+	lcLight* m_Lights;
 	Group* m_pGroups;
 	lcCamera* m_pViewCameras[4];
 	Terrain* m_pTerrain;
@@ -181,10 +185,10 @@ protected:
 
 	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
 
-	void AddPiece(Piece* pPiece);
-	void RemovePiece(Piece* pPiece);
+	void AddPiece(lcPiece* pPiece);
+	void RemovePiece(lcPiece* pPiece);
 	bool RemoveSelectedObjects();
-	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
+	void GetPieceInsertPosition(lcPiece* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects);
@@ -203,7 +207,7 @@ protected:
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
-	// Rendering
+	// Rendering functions.
 	void RenderScene(bool bShaded, bool bDrawViewports);
 	void RenderViewports(bool bBackground, bool bLines);
 	void RenderOverlays(int Viewport);
@@ -259,15 +263,15 @@ protected:
 	void RemoveEmptyGroups();
 
 public:
-	// Call this functions from each OS
-	void OnLeftButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnMouseMove(int x, int y, bool bControl, bool bShift);
+	// Call these functions from each OS
+	void OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift);
+	void OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);
 	bool OnKeyDown(char nKey, bool bControl, bool bShift);
-	void OnTouch(LC_TOUCH_PHASE Phase, int TapCount, int x, int y, int PrevX, int PrevY);
+	void OnTouch(View* view, LC_TOUCH_PHASE Phase, int TapCount, int x, int y, int PrevX, int PrevY);
 
 	void SetAction(int nAction);
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
@@ -344,7 +348,7 @@ protected:
 	void exportVRML97File(char *filename);
 	void exportX3DVFile(char *filename);
 	void exportVRMLFile(char *filename, int dialect);
-	template<class type> void writeVRMLShapes(type color, FILE *stream, int coordinateCounter, Piece* pPiece, unsigned short group, float *pos, bool beginAndEnd);
+	template<class type> void writeVRMLShapes(type color, FILE *stream, int coordinateCounter, lcPiece* pPiece, unsigned short group, float *pos, bool beginAndEnd);
 	void writeVRMLShapeBegin(FILE *stream, unsigned long currentColor, bool blackLines);
 	void writeVRMLShapeMeshBegin(FILE *stream);
 	void writeVRMLShapeMeshData(FILE *stream);
@@ -356,10 +360,10 @@ protected:
 	bool VRMLdialect;
 	bool firstData;
 	int searchForVertex(float *vertex);
-	template<class type> void generateMeshData(type* info, float *pos, Piece* pPiece, int numVertices, int currentColor);
-	template<class type> void getMinMaxData(type* info, Piece* pPiece, GroupInfo* groupInfo);
-	template<class type> void getMinMax(type col, Piece* pPiece, unsigned short group, GroupInfo* groupInfo);
-	bool handleAsGroup(Piece* piece, GroupInfo groupInfo);
+	template<class type> void generateMeshData(type* info, float *pos, lcPiece* pPiece, int numVertices, int currentColor);
+	template<class type> void getMinMaxData(type* info, lcPiece* pPiece, GroupInfo* groupInfo);
+	template<class type> void getMinMax(type col, lcPiece* pPiece, unsigned short group, GroupInfo* groupInfo);
+	bool handleAsGroup(lcPiece* piece, GroupInfo groupInfo);
 	int numCoords;
 	float *coords;
 	int numCoordIndices;

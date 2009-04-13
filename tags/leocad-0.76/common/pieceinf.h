@@ -24,11 +24,11 @@ struct CONNECTIONINFO
 	float normal[3];
 };
 
-typedef struct
+struct DRAWGROUP
 {
 	unsigned short connections[6];
 	void* drawinfo;
-} DRAWGROUP;
+};
 
 struct TEXTURE
 {

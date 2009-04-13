@@ -10,7 +10,6 @@
 #include "project.h"
 #include "globals.h"
 #include "matrix.h"
-#include "vector.h"
 #include "defines.h"
 #include "library.h"
 #include "lc_application.h"

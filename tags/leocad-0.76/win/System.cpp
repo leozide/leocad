@@ -667,9 +667,9 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 		char Message[256];
 
 		if (Focus->IsPiece())
-			sprintf(Message, "%s (ID: %s)", Focus->GetName(), ((Piece*)Focus)->GetPieceInfo()->m_strName);
+			sprintf(Message, "%s (ID: %s)", Focus->m_Name, ((lcPiece*)Focus)->GetPieceInfo()->m_strName);
 		else
-			strcpy(Message, Focus->GetName());
+			strcpy(Message, Focus->m_Name);
 
 		pFrame->SetStatusBarMessage(Message);
 		pFrame->SetMessageText(Message);
@@ -806,7 +806,7 @@ void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i;
 
-	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+	for (i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
 	{
 		if (pOld == pCamera)
 		{
@@ -840,11 +840,11 @@ void SystemUpdateCameraMenu(lcCamera* pCamera)
 	while (pPopupMenu->GetMenuItemCount())
 		pPopupMenu->DeleteMenu(0, MF_BYPOSITION);
 
-	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
+	for (i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
 		if (i > 6)
 		{
-			pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
-			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
+			pMainMenu->AppendODMenu(pCamera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
+			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->m_Name);
 		}
 
 	if (i > 7)
@@ -854,10 +854,10 @@ void SystemUpdateCameraMenu(lcCamera* pCamera)
 	}
 
 	pCamera = pFirst;
-	for (i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
+	for (i = 0; pCamera && (i < 7); i++, pCamera = (lcCamera*)pCamera->m_Next)
 	{
-		pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
-		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
+		pMainMenu->AppendODMenu(pCamera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
+		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->m_Name);
 
 		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
 	}

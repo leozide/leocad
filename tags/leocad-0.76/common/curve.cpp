@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "opengl.h"
 #include "matrix.h"
-#include "vector.h"
 
 #define LC_CURVE_SAVE_VERSION 1 // LeoCAD 0.73
 #define LC_CURVE_POINT_SAVE_VERSION 1 // LeoCAD 0.73

@@ -166,7 +166,7 @@ void CModifyDialog::UpdateInfo(lcObject* pObject)
 		case LC_OBJECT_PIECE:
 		{
 			float rot[4];
-			Piece* pPiece = (Piece*)m_pObject;
+			lcPiece* pPiece = (lcPiece*)m_pObject;
 			Vector3 Pos = pPiece->GetPosition();
 			pPiece->GetRotation(rot);
 			Matrix mat(rot, Pos);
@@ -195,7 +195,7 @@ void CModifyDialog::UpdateInfo(lcObject* pObject)
 			m_bHidden = pPiece->IsHidden();
 			m_ctlColor.SetColorIndex(pPiece->GetColor());
 			UpdateData(FALSE);
-			m_ctlCombo.SetWindowText(pPiece->GetName());
+			m_ctlCombo.SetWindowText(pPiece->m_Name);
 		} break;
 
 		case LC_OBJECT_CAMERA:
@@ -208,13 +208,13 @@ void CModifyDialog::UpdateInfo(lcObject* pObject)
 			else
 				pCamera = ((CameraTarget*)m_pObject)->GetParent();
 
-			tmp = pCamera->GetEyePosition();
+			tmp = pCamera->m_Position;
 			lcGetActiveProject()->ConvertToUserUnits(tmp);
 			m_fPosX = tmp[0];
 			m_fPosY = tmp[1];
 			m_fPosZ = tmp[2];
 
-			tmp = pCamera->GetTargetPosition();
+			tmp = pCamera->m_TargetPosition;
 			lcGetActiveProject()->ConvertToUserUnits(tmp);
 			m_fRotX = tmp[0];
 			m_fRotY = tmp[1];
@@ -226,12 +226,12 @@ void CModifyDialog::UpdateInfo(lcObject* pObject)
 			m_fUpY = tmp[1];
 			m_fUpZ = tmp[2];
 
-			m_fFOV = pCamera->m_fovy;
-			m_fNear = pCamera->m_zNear;
-			m_fFar = pCamera->m_zFar;
+			m_fFOV = pCamera->m_FOV;
+			m_fNear = pCamera->m_NearDist;
+			m_fFar = pCamera->m_FarDist;
 			m_bHidden = !pCamera->IsVisible();
 			UpdateData(FALSE);
-			m_ctlCombo.SetWindowText(pCamera->GetName());
+			m_ctlCombo.SetWindowText(pCamera->m_Name);
 		} break;
 
 		case LC_OBJECT_LIGHT:
@@ -349,7 +349,7 @@ void CModifyDialog::OnModdlgApply()
 		{
 			LC_PIECE_MODIFY mod;
 
-			mod.piece = (Piece*)m_pObject;
+			mod.piece = (lcPiece*)m_pObject;
 			mod.Position = Vector3(m_fPosX, m_fPosY, m_fPosZ);
 			lcGetActiveProject()->ConvertFromUserUnits(mod.Position);
 			mod.Rotation = Vector3(m_fRotX, m_fRotY, m_fRotZ);
@@ -398,9 +398,9 @@ void CModifyDialog::OnModdlgClose()
 
 void CModifyDialog::OnDropdownModdlgList() 
 {
-	Piece* pPiece;
+	lcPiece* pPiece;
 	lcCamera* pCamera;
-	Light* pLight;
+	lcLight* pLight;
 	int i;
 
 	lcGetActiveProject()->GetArrays(&pPiece, &pCamera, &pLight);
@@ -411,40 +411,40 @@ void CModifyDialog::OnDropdownModdlgList()
 	{
 		case LC_OBJECT_PIECE:
 		{
-			for (; pPiece; pPiece = pPiece->m_pNext)
+			for (; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				i = m_ctlCombo.AddString(pPiece->GetName());
+				i = m_ctlCombo.AddString(pPiece->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pPiece);
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((Piece*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, m_pObject->m_Name);
 		} break;
 
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			for (; pCamera; pCamera = pCamera->m_pNext)
+			for (; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
 			{
-				i = m_ctlCombo.AddString(pCamera->GetName());
+				i = m_ctlCombo.AddString(pCamera->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pCamera);
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((lcCamera*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, m_pObject->m_Name);
 		} break;
 
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
 		{
-			for (; pLight; pLight = pLight->m_pNext)
+			for (; pLight; pLight = (lcLight*)pLight->m_Next)
 			{
-				i = m_ctlCombo.AddString(pLight->GetName());
+				i = m_ctlCombo.AddString(pLight->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pLight);
 			}
 
 			if (m_pObject)
-				m_ctlCombo.SelectString(-1, ((Light*)m_pObject)->GetName());
+				m_ctlCombo.SelectString(-1, m_pObject->m_Name);
 		} break;
 	}
 }

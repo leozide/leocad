@@ -577,11 +577,10 @@ void Terrain::Render(lcCamera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
-		float eye[3];
-		pCam->GetEyePos(eye);
+		const Vector3& eye = pCam->m_Position;
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
-		glScalef(pCam->m_zFar, pCam->m_zFar, 1);
+		glScalef(pCam->m_FarDist, pCam->m_FarDist, 1);
 
 		float verts[4][2] =
 		{
@@ -599,12 +598,12 @@ void Terrain::Render(lcCamera* pCam, float aspect)
 			glEnable(GL_TEXTURE_2D);
 
 float tw = 15.0f, th = 15.0f;
-//	tw = 2*pCam->m_zFar/m_nBackgroundSize;
-//	th = 2*pCam->m_zFar/m_nBackgroundSize;
+//	tw = 2*pCam->m_FarDist/m_nBackgroundSize;
+//	th = 2*pCam->m_FarDist/m_nBackgroundSize;
 
 float tx, ty;
-tx = (tw*eye[0])/(2*pCam->m_zFar);
-ty = (th*eye[1])/(2*pCam->m_zFar);
+tx = (tw*eye[0])/(2*pCam->m_FarDist);
+ty = (th*eye[1])/(2*pCam->m_FarDist);
 
 			float coords[4][2] =
 			{
@@ -677,24 +676,23 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 	}
 }
 
-void Terrain::FindVisiblePatches(lcCamera* pCam, float aspect)
+void Terrain::FindVisiblePatches(lcCamera* pCam, float Aspect)
 {
 	// Get camera position information.
-	float eye[3];
-	pCam->GetEyePos(eye);
+	const Vector3& eye = pCam->m_Position;
 	
 	// Get perspective information.
-	float alpha = pCam->m_fovy / 2.0f;
-	float halfFovY = pCam->m_fovy / 2.0f;
+	float alpha = pCam->m_FOV / 2.0f;
+	float halfFovY = pCam->m_FOV / 2.0f;
 	halfFovY = halfFovY * 3.1415f / 180.0f;
-	float halfFovX = (float)atan(tan(halfFovY) * aspect);
+	float halfFovX = (float)atan(tan(halfFovY) * Aspect);
 	halfFovX = halfFovX * 180.0f / 3.1415f;
 	float beta = 2.0f * halfFovX;
 
 	// Get vector stuff from the position.
-	float nonOrthoTop[3], target[3];
+	float nonOrthoTop[3];
 	pCam->GetUpVec(nonOrthoTop);
-	pCam->GetTargetPos(target);
+	const Vector3& target = pCam->m_TargetPosition;
 	float front[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]};
 	float side[3];
 	side[0] = nonOrthoTop[1]*front[2] - nonOrthoTop[2]*front[1];
@@ -735,7 +733,7 @@ void Terrain::FindVisiblePatches(lcCamera* pCam, float aspect)
 	float nearD = eye[0]*-nearNormal[0] + eye[1]*-nearNormal[1] + eye[2]*-nearNormal[2];
 	
 	// For the far plane, find the point farDist away from the eye along the front vector.
-	float farDist = pCam->m_zFar;
+	float farDist = pCam->m_FarDist;
 	float farPt[3] = { front[0], front[1], front[2] };
 	float invR = farDist/(float)sqrt(farPt[0]*farPt[0]+farPt[1]*farPt[1]+farPt[2]*farPt[2]);
 	farPt[0] = farPt[0]*invR;

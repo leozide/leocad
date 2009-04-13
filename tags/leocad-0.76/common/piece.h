@@ -2,7 +2,7 @@
 #define _PIECE_H_
 
 class File;
-class Piece;
+class lcPiece;
 class Group;
 class PieceInfo;
 
@@ -22,11 +22,11 @@ typedef enum
 	LC_PK_COUNT
 } LC_PK_TYPES;
 
-class Piece : public lcObject
+class lcPiece : public lcObject
 {
 public:
-	Piece (PieceInfo* pPieceInfo);
-	~Piece ();
+	lcPiece(PieceInfo* pPieceInfo);
+	~lcPiece();
 
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
@@ -37,8 +37,7 @@ public:
 
 
 
-	Piece* m_pNext;
-	Piece* m_pLink;
+	lcPiece* m_pLink;
 
 	void Hide()
 		{ m_nState = LC_PIECE_HIDDEN; }
@@ -51,13 +50,10 @@ public:
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 
-	const char* GetName() const
-	{ return m_strName; };
-
 	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
-	void CreateName(Piece* pPiece);
+	void CreateName(lcPiece* pPiece);
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
 	void CompareBoundingBox(float box[6]);
@@ -76,10 +72,6 @@ public:
 		{ m_pGroup = pGroup; }
 	Group* GetGroup()
 		{ return m_pGroup; }
-	void SetName(char* name)
-		{ strcpy(m_strName, name); }
-	const char* GetName()
-		{ return m_strName; }
 	const unsigned char GetColor()
 		{ return m_nColor; }
 	void SetColor(unsigned char color)
@@ -142,7 +134,6 @@ protected:
 
 	unsigned char m_nColor;
 	unsigned char m_nState;
-	char m_strName[81];
 
 	// Temporary variables
 	float m_fPosition[3];

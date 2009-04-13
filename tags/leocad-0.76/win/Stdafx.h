@@ -12,7 +12,7 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 
 #ifndef VC_EXTRALEAN
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define VC_EXTRALEAN          // Exclude rarely-used stuff from Windows headers
 #endif
 
 #if _MSC_VER >= 1400
@@ -44,7 +44,7 @@
 #include <afxtempl.h>
 
 #ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>			// MFC support for Windows Common Controls
+#include <afxcmn.h>         // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #if _MFC_VER >= 0x0710

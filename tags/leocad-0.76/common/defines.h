@@ -116,6 +116,29 @@ int _stricmp(const char* str1, const char* str2);
 #define PI  3.14159265
 #define PI2 6.28318530
 
+template <typename T, typename U>
+inline T lcMin(const T& a, const U& b)
+{
+	return a < b ? a : b;
+}
+
+template <typename T, typename U>
+inline T lcMax(const T& a, const U& b)
+{
+	return a > b ? a : b;
+}
+
+template <typename T, typename U, typename V>
+inline T lcClamp(const T& Value, const U& Min, const V& Max)
+{
+	if (Value > Max)
+		return Max;
+	else if (Value < Min)
+		return Min;
+	else
+		return Value;
+}
+
 #ifndef min
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #endif

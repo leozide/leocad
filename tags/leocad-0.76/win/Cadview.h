@@ -54,7 +54,6 @@ protected:
 	HCURSOR m_hCursor;
 
 	BOOL DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass* pPreviewViewClass, CPrintPreviewState* pState);
-	void* m_pPixels;
 	//{{AFX_MSG(CCADView)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();

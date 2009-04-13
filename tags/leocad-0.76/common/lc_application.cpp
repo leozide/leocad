@@ -33,6 +33,7 @@ lcApplication::lcApplication()
 {
 	m_ActiveProject = NULL;
 	m_Library = NULL;
+	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);
 }
 
 lcApplication::~lcApplication()
@@ -444,6 +445,7 @@ void lcApplication::Shutdown()
 
 		project->HandleNotify(LC_ACTIVATE, 0);
 		delete project;
+		project = NULL;
 	}
 
 	delete m_Library;

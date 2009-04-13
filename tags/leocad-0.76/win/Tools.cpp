@@ -427,9 +427,9 @@ void Export3DStudio()
 		ReleaseMaterial3ds(&matr);
 	}
 
-	Piece* pPiece;
+	lcPiece* pPiece;
 	int objcount = 0;
-	for (pPiece = project->m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (pPiece = project->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
 		// MESH OBJECT
 		mesh3ds *mobj = NULL;

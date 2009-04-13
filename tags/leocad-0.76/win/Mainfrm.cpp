@@ -127,6 +127,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, OnUpdateControlBarMenu)
+	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
+	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
+	ON_COMMAND(ID_VIEW_DELETEVIEW, OnViewDeleteView)
+	ON_COMMAND(ID_VIEW_RESETVIEWS, OnViewResetViews)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -143,6 +147,8 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
+		delete m_SplitterList[i];
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -204,7 +210,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		ID_VIEW_MODIFY_BAR))
 	{
 		TRACE0("Failed to create modify dialog bar\n");
-		return -1;		// fail to create
+		return -1;      // fail to create
 	}
 
 	EnableDocking(CBRS_ALIGN_ANY);
@@ -365,6 +371,8 @@ HMENU CMainFrame::NewMenu()
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_PREFERENCES, IDB_PREFERENCES);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMOUT, IDB_ZOOMOUT);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMIN, IDB_ZOOMIN);
+	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_SPLITHORIZONTALLY, IDB_SPLITH);
+	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_SPLITVERTICALLY, IDB_SPLITV);
 	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_FULLSCREEN, IDB_FULLSCREEN);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_FINDER, IDB_HELP);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_LEOCADHOMEPAGE, IDB_HOME);
@@ -655,7 +663,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 	{
 		lcCamera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
-		rMessage += pCamera->GetName();
+		rMessage += pCamera->m_Name;
 		rMessage += "\"";
 	}
 	else
@@ -1145,12 +1153,10 @@ void CMainFrame::OnViewNewView()
 			AfxThrowResourceException();
 	}
 
-  View *view = new View (lcGetActiveProject(), NULL);
+	View *view = new View (lcGetActiveProject(), NULL);
 
-  CreateWindowEx (0, FLOATING_CLASSNAME, "LeoCAD",
-    WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
-    m_hWnd, (HMENU)0, hInst, view);
+	CreateWindowEx(0, FLOATING_CLASSNAME, "LeoCAD", WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
+	               CW_USEDEFAULT, CW_USEDEFAULT, 200, 100, m_hWnd, (HMENU)0, hInst, view);
 }
 
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 

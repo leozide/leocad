@@ -6,6 +6,8 @@
 class Project;
 class PiecesLibrary;
 
+#define LC_MAX_MOUSE_SENSITIVITY 20
+
 class lcApplication
 {
 public:
@@ -34,6 +36,9 @@ public:
 	{
 		m_ActiveProject = project;
 	}
+
+public:
+	int m_MouseSensitivity;
 
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);

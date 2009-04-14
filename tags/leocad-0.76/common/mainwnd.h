@@ -35,4 +35,6 @@ protected:
 	String m_ViewLayout;
 };
 
+extern MainWnd* main_window;
+
 #endif // _MAINWND_H_

@@ -32,7 +32,6 @@
 #include "cadbar.h"
 #include "mainfrm.h"
 #include "project.h"
-#include "globals.h"
 #include "lc_application.h"
 #include "piece.h"
 #include "pieceinf.h"
@@ -880,7 +879,10 @@ void SystemUpdateCategories(bool SearchOnly)
 		return;
 
 	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
-	pBar->UpdatePiecesTree(SearchOnly);
+	if (SearchOnly)
+		pBar->UpdatePiecesTreeSearch();
+	else
+		pBar->UpdatePiecesTree();
 }
 
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
@@ -1551,9 +1553,7 @@ bool SystemDoDialog(int nMode, void* param)
 			ps.m_PageSummary.m_strDescription = opts->strDescription;
 			ps.m_PageSummary.m_strComments = opts->strComments;
 			ps.m_PageGeneral.m_strFilename = opts->strFilename;
-			ps.m_PagePieces.names = opts->names;
-			ps.m_PagePieces.count = opts->count;
-			ps.m_PagePieces.lines = opts->lines;
+			ps.m_PagePieces.m_PiecesUsed = opts->PiecesUsed;
 
 			if (ps.DoModal() == IDOK)
 			{
@@ -1578,7 +1578,7 @@ bool SystemDoDialog(int nMode, void* param)
 			dlg.DoModal();
 
 			CPiecesBar* pBar = (CPiecesBar*)((CFrameWnd*)AfxGetMainWnd())->GetControlBar(ID_VIEW_PIECES_BAR);
-			pBar->UpdatePiecesTree(false);
+			pBar->UpdatePiecesTree();
 
 			return true;
 		} break;

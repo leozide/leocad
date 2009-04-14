@@ -6,8 +6,18 @@
 #include "resource.h"
 #include "PrefSht.h"
 #include "lc_application.h"
+#include "lc_colors.h"
 #include <math.h>
 #include <shlobj.h>
+
+#if LC_HAVE_JPEGLIB
+#pragma comment(lib, "jpeglib")
+#endif
+
+#if LC_HAVE_PNGLIB
+#pragma comment(lib, "libpng")
+#pragma comment(lib, "zlib")
+#endif
 
 // Create a bitmap of a given size and color
 HBITMAP CreateColorBitmap (UINT cx, UINT cy, COLORREF cr)
@@ -242,13 +252,17 @@ BOOL FolderBrowse(CString *strFolder, LPCSTR lpszTitle, HWND hWndOwner)
 	return FALSE;
 } 
 
+#if LC_HAVE_3DSFTK
+
 #include "3dsftk\inc\3dsftk.h"
-#include "globals.h"
 #include "project.h"
 #include "piece.h"
 #include "pieceinf.h"
 #include "matrix.h"
 
+#pragma comment(lib, "3dsftk")
+
+// TODO: rewrite, and look for another 3ds file library
 void Export3DStudio() 
 {
 	CFileDialog dlg(FALSE, "*.dat",NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
@@ -398,9 +412,9 @@ void Export3DStudio()
 		InitMaterial3ds(&matr);
 		sprintf(matr->name, "Material%02d", i);
 
-		matr->ambient.r = matr->diffuse.r = (float)FlatColorArray[i][0]/255;
-		matr->ambient.g = matr->diffuse.g = (float)FlatColorArray[i][1]/255;
-		matr->ambient.b = matr->diffuse.b = (float)FlatColorArray[i][2]/255;
+		matr->ambient.r = matr->diffuse.r = g_ColorList[i].Value[0];
+		matr->ambient.g = matr->diffuse.g = g_ColorList[i].Value[1];
+		matr->ambient.b = matr->diffuse.b = g_ColorList[i].Value[2];
 		matr->specular.r = 0.9f;
 		matr->specular.g = 0.9f;
 		matr->specular.b = 0.9f;
@@ -423,19 +437,20 @@ void Export3DStudio()
 		matr->wiresize = 1.0f;
 		matr->shading = Phong;
 		matr->useblur = False3ds;
+		matr->twosided = True3ds;
 		PutMaterial3ds(db, matr);
 		ReleaseMaterial3ds(&matr);
 	}
 
 	lcPiece* pPiece;
 	int objcount = 0;
+	u32* facemats = new u32[lcNumColors];
 	for (pPiece = project->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
 		// MESH OBJECT
 		mesh3ds *mobj = NULL;
 		UINT facecount = 0, i, j = 0, c, col;
-		UINT facemats[LC_COL_DEFAULT+1];
-		memset(facemats, 0, sizeof(facemats));
+		memset(facemats, 0, sizeof(u32)*lcNumColors);
 
 		PieceInfo* pInfo = pPiece->GetPieceInfo();
 		if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
@@ -517,7 +532,7 @@ void Export3DStudio()
 		}
 
 		i = 0;
-		for (j = 0; j < LC_COL_DEFAULT+1; j++)
+		for (j = 0; j < (u32)lcNumColors; j++)
 			if (facemats[j])
 				i++;
 
@@ -526,12 +541,12 @@ void Export3DStudio()
 
 		i = 0;
 
-		for (j = 0; j < LC_COL_DEFAULT+1; j++)
+		for (j = 0; j < (u32)lcNumColors; j++)
 		{
 			if (facemats[j])
 			{
 				InitMatArrayIndex3ds (mobj, i, facemats[j]);
-				sprintf(mobj->matarray[i].name, "Material%02d", j == LC_COL_DEFAULT ? pPiece->GetColor() : j);
+				sprintf(mobj->matarray[i].name, "Material%02d", j == LC_COLOR_DEFAULT ? pPiece->GetColor() : j);
 				mobj->matarray[i].nfaces = facemats[j];
 
 				UINT curface = 0;
@@ -593,6 +608,7 @@ void Export3DStudio()
 		RelMeshObj3ds(&mobj);
 	}
 
+	delete[] facemats;
 /*	
 	InitMeshObj3ds(&mobj, 12, 8, InitNoExtras3ds);
 	SetPoint(mobj->vertexarray[0],  -46.62F,   -2.31F, -103.57F);
@@ -790,3 +806,11 @@ void Export3DStudio()
 	CloseFile3ds(file);
 	ReleaseDatabase3ds(&db);
 }
+
+#else
+
+void Export3DStudio() 
+{
+}
+
+#endif // LC_HAVE_3DSFTK

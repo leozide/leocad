@@ -2,9 +2,6 @@
 #define _PIECEINF_H_
 
 #include <stdio.h>
-#ifndef GLuint
-#include "opengl.h"
-#endif
 #include "algebra.h"
 
 #define LC_PIECE_COUNT              0x01 // Count this piece in the totals ?

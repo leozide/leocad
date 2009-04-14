@@ -8,8 +8,6 @@
 #include "MainFrm.h"
 #include "Camera.h"
 #include "project.h"
-#include "message.h"
-#include "globals.h"
 #include "mainwnd.h"
 #include "cadview.h"
 #include "console.h"
@@ -27,16 +25,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define TOOLBAR_VERSION 1
-
-void mainframe_listener (int message, void *data, void *user)
-{
-  if (message == LC_MSG_FOCUS_CHANGED)
-  {
-    CWnd* pFrame = AfxGetMainWnd();
-    if (pFrame != NULL)
-      pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)data, 0);
-  }
-}
 
 static void mainframe_console_func(LC_CONSOLE_LEVEL level, const char* text, void* user_data)
 {
@@ -116,7 +104,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_MESSAGE(WM_LC_UPDATE_LIST, OnUpdateList)
 	ON_MESSAGE(WM_LC_POPUP_CLOSE, OnPopupClose)
 	ON_MESSAGE(WM_LC_ADD_COMBO_STRING, OnAddString)
-	ON_MESSAGE(WM_LC_UPDATE_INFO, OnUpdateInfo)
 	ON_MESSAGE(WM_LC_UPDATE_SETTINGS, UpdateSettings)
 	// Toolbar show/hide
 	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR, OnBarCheck)
@@ -239,7 +226,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockControlBar(&m_wndAnimationBar, AFX_IDW_DOCKBAR_TOP, &rect);
 
 	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) == TOOLBAR_VERSION)
+	{
+		CSizingControlBar::GlobalLoadState(this, "SizingBars");
 		LoadBarState("Toolbars");
+	}
 
 	// Bitmap menus are cool !
 	CMenu* pMenu = GetMenu();
@@ -251,8 +241,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hMenuDefault = hMenu;
 
 	UpdateMenuAccelerators();
-
-	messenger->Listen (&mainframe_listener, this);
 
 	main_window->SetXID(this);
 
@@ -323,7 +311,7 @@ LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 		else
 			x = ((x-14)*2)+1;
 
-		m_wndPiecesBar.m_wndColorsList.SetCurSel(x);
+		m_wndPiecesBar.m_wndColorsList.SetCurColor(x);
 	}
 
 	return TRUE;
@@ -442,20 +430,21 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 	}
 }
 
-LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
+void CMainFrame::ProcessMessage(lcMessageType Message, void* Data)
 {
-	m_wndModifyDlg.UpdateInfo((lcObject*)lParam);
+	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
+	{
+		m_wndModifyDlg.UpdateInfo((lcObject*)Data);
 
-	char str[128];
-	Vector3 pos;
+		char str[128];
+		Vector3 pos;
 
-	lcGetActiveProject()->GetFocusPosition(pos);
-	lcGetActiveProject()->ConvertToUserUnits(pos);
+		lcGetActiveProject()->GetFocusPosition(pos);
+		lcGetActiveProject()->ConvertToUserUnits(pos);
 
-	sprintf (str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
-	SetStatusBarPane(ID_INDICATOR_POSITION, str);
-
-	return TRUE;
+		sprintf(str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
+		SetStatusBarPane(ID_INDICATOR_POSITION, str);
+	}
 }
 
 // Helper function change the text of a status bar pane and resize it.
@@ -535,6 +524,7 @@ void CMainFrame::OnClose()
 		theApp.WriteProfileInt("Settings", "Window Status", wp.showCmd);
 
 		SaveBarState("Toolbars");
+		CSizingControlBar::GlobalSaveState(this, "SizingBars");
 		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), TOOLBAR_VERSION);
 	}
 

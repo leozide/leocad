@@ -7,7 +7,6 @@ class Group;
 class PieceInfo;
 
 #include "object.h"
-#include "globals.h"
 #include "typedefs.h"
 #include "defines.h"
 

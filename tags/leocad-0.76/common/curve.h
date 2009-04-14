@@ -2,7 +2,6 @@
 #define _CURVE_H_
 
 #include "object.h"
-#include "opengl.h"
 #include "lc_array.h"
 
 class Curve;

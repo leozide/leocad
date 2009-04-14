@@ -1,7 +1,6 @@
 #ifndef _LIGHT_H_
 #define _LIGHT_H_
 
-#include "opengl.h"
 #include "object.h"
 
 #define LC_LIGHT_HIDDEN           0x01

@@ -5,6 +5,7 @@
 
 class Project;
 class PiecesLibrary;
+class PiecePreview;
 
 #define LC_MAX_MOUSE_SENSITIVITY 20
 
@@ -38,6 +39,8 @@ public:
 	}
 
 public:
+	PiecePreview* m_PiecePreview;
+	int m_SelectedColor;
 	int m_MouseSensitivity;
 
 protected:

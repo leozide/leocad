@@ -1,13 +1,11 @@
 #include "lc_global.h"
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "camera.h"
+
 #include "opengl.h"
-#include "globals.h"
 #include "defines.h"
 #include "matrix.h"
 #include "file.h"
-#include "camera.h"
+#include "lc_colors.h"
 #include "tr.h"
 
 #define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
@@ -563,8 +561,7 @@ void lcCamera::Render(float fLineWidth)
 	if (IsEyeSelected())
 	{
 		glLineWidth(2.0f);
-		int Color = (m_nState & LC_CAMERA_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
-		glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
+		lcSetColor((m_nState & LC_CAMERA_FOCUSED) != 0 ? LC_COLOR_FOCUS : LC_COLOR_SELECTION);
 	}
 	else
 	{
@@ -587,8 +584,7 @@ void lcCamera::Render(float fLineWidth)
 	if (IsTargetSelected())
 	{
 		glLineWidth(2.0f);
-		int Color = (m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
-		glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
+		lcSetColor((m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COLOR_FOCUS : LC_COLOR_SELECTION);
 	}
 	else
 	{

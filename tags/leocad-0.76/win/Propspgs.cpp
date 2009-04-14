@@ -5,6 +5,10 @@
 #include "resource.h"
 #include "PropsPgs.h"
 #include "defines.h"
+#include "lc_colors.h"
+#include "library.h"
+#include "lc_application.h"
+#include "pieceinf.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -129,10 +133,13 @@ CPropertiesPieces::CPropertiesPieces() : CPropertyPage(CPropertiesPieces::IDD)
 	//{{AFX_DATA_INIT(CPropertiesPieces)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
+
+	m_ColorColumn = new int[lcNumUserColors];
 }
 
 CPropertiesPieces::~CPropertiesPieces()
 {
+	delete[] m_ColorColumn;
 }
 
 void CPropertiesPieces::DoDataExchange(CDataExchange* pDX)
@@ -143,81 +150,145 @@ void CPropertiesPieces::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CPropertiesPieces, CPropertyPage)
 	//{{AFX_MSG_MAP(CPropertiesPieces)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_PROP_PIECES_LIST, OnColumnclickPropPiecesList)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
+{
+	CPropertiesPieces* Dlg = (CPropertiesPieces*)lParamData;
+	int* Line1 = (int*)lP1;
+	int* Line2 = (int*)lP2;
+
+	// Keep the total row at the bottom of the list.
+	if (lP1 == -1)
+		return 1;
+	else if (lP2 == -1)
+		return -1;
+
+	if (Dlg->m_SortColumn != 0)
+	{
+		int Num1, Num2;
+
+		if (Dlg->m_SortColumn == Dlg->m_List.GetHeaderCtrl()->GetItemCount() - 1)
+		{
+			Num1 = 0;
+			Num2 = 0;
+
+			for (int i = 0; i < lcNumUserColors; i++)
+			{
+				Num1 += Line1[i];
+				Num2 += Line2[i];
+			}
+		}
+		else
+		{
+			int i;
+
+			for (i = 0; i < lcNumUserColors; i++)
+				if (Dlg->m_ColorColumn[i] == Dlg->m_SortColumn)
+					break;
+
+			Num1 = Line1[i];
+			Num2 = Line2[i];
+		}
+
+		if (Num1 < Num2)
+			return Dlg->m_SortAscending ? 1 : -1;
+		else if (Num1 > Num2)
+			return Dlg->m_SortAscending ? -1 : 1;
+		else
+			return 0;
+	}
+
+	int Index1 = (Line1 - Dlg->m_PiecesUsed) / lcNumUserColors;
+	int Index2 = (Line2 - Dlg->m_PiecesUsed) / lcNumUserColors;
+
+	PiecesLibrary* Lib = lcGetPiecesLibrary();
+	PieceInfo* Info1 = Lib->GetPieceInfo(Index1);
+	PieceInfo* Info2 = Lib->GetPieceInfo(Index2);
+
+	if (Dlg->m_SortAscending)
+		return _strcmpi(Info1->m_strDescription, Info2->m_strDescription);
+	else
+		return - _strcmpi(Info1->m_strDescription, Info2->m_strDescription);
+}
 
 BOOL CPropertiesPieces::OnInitDialog() 
 {
 	CPropertyPage::OnInitDialog();
 
-	char tmp[64];
+	int* ColorTotal = new int[lcNumUserColors];
+	memset(ColorTotal, 0, lcNumUserColors * sizeof(int));
+	memset(m_ColorColumn, 0, lcNumUserColors * sizeof(int));
 	int i, j;
-	memset (&totalcount, 0, sizeof (totalcount));
-	for (i = 0; i < lines; i++)
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			totalcount[j] += count[i*LC_MAXCOLORS+j];
 
-	int ID = 0;
+	PiecesLibrary* Lib = lcGetPiecesLibrary();
+
+	// Count the number of pieces used for each color.
+	for (i = 0; i < Lib->GetPieceCount(); i++)
+		for (j = 0; j < lcNumUserColors; j++)
+			ColorTotal[j] += m_PiecesUsed[j + i * lcNumUserColors];
+
+	// Add columns to the list header.
 	m_List.InsertColumn(0, "Piece", LVCFMT_LEFT, 130, 0);
-	for (i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
-		{
-			col[i] = ID;
-			ID++;
 
-			CString str;
-			str.LoadString(IDS_COLOR01 + i);
-			m_List.InsertColumn(ID, (LPCSTR)str, LVCFMT_LEFT, 80, 0);
-		}
-		else
-			col[i] = -1;
-	ID++;
-	m_List.InsertColumn(ID, "Total", LVCFMT_LEFT, 60, 0);
+	int Column = 1;
 
-	for (i = 0; i < lines; i++)
+	for (i = 0; i < lcNumUserColors; i++)
 	{
-		int total = 0;
-
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			total += count[i*LC_MAXCOLORS+j];
-
-		if (total == 0)
+		if (!ColorTotal[i])
 			continue;
 
-		char name[65];
+		m_ColorColumn[i] = Column;
+		m_List.InsertColumn(Column, g_ColorList[i].Name, LVCFMT_LEFT, 80, 0);
+		Column++;
+	}
+
+	m_List.InsertColumn(Column, "Total", LVCFMT_LEFT, 60, 0);
+
+	m_List.SetRedraw(FALSE);
+
+	// Add pieces to the list.
+	for (i = 0; i < Lib->GetPieceCount(); i++)
+	{
+		int* Line = m_PiecesUsed + i * lcNumUserColors;
+		int LineTotal = 0;
+
+		for (j = 0; j < lcNumUserColors; j++)
+			LineTotal += Line[j];
+
+		if (!LineTotal)
+			continue;
+
+		char name[256], tmp[256];
 		LV_ITEM lvi;
 		lvi.mask = LVIF_TEXT|LVIF_PARAM;
 		lvi.iItem = 0;
 		lvi.iSubItem = 0;
 		lvi.pszText = name;
-		lvi.lParam = i;
-		strcpy (name, names[i]);
+		lvi.lParam = (LPARAM)Line;
+		strcpy(name, Lib->GetPieceInfo(i)->m_strDescription);
+
 		int idx = m_List.InsertItem(&lvi);
 
-		for (j = 0; j < LC_MAXCOLORS; j++)
-//			if (totalcount[j])
-			if (count[i*LC_MAXCOLORS+j])
-			{
-				sprintf (tmp, "%d", count[i*LC_MAXCOLORS+j]);
-				lvi.iItem = idx;
-				lvi.pszText = tmp;
-				m_List.SetItemText(idx, col[j] + 1, tmp);
-			}
+		for (j = 0; j < lcNumUserColors; j++)
+		{
+			if (!Line[j])
+				continue;
 
-		sprintf (tmp, "%d", total);
-		lvi.iItem = idx;
-		lvi.pszText = tmp;
-		m_List.SetItemText(idx, ID, tmp);
+			sprintf(tmp, "%d", Line[j]);
+			m_List.SetItemText(idx, m_ColorColumn[j], tmp);
+		}
+
+		sprintf (tmp, "%d", LineTotal);
+		m_List.SetItemText(idx, Column, tmp);
 	}
 
-	m_List.ModifyStyle(LVS_SORTASCENDING | LVS_SORTDESCENDING, 0L);
-
-	char name[65];
+	// Add totals.
+	char name[256], tmp[256];
 	strcpy (name, "Total");
 	LV_ITEM lvi;
 	lvi.mask = LVIF_TEXT|LVIF_PARAM;
@@ -225,100 +296,52 @@ BOOL CPropertiesPieces::OnInitDialog()
 	lvi.iSubItem = 0;
 	lvi.pszText = name;
 	lvi.lParam = -1;
+
 	int idx = m_List.InsertItem(&lvi), total = 0;
+	int Total = 0;
 
-	for (i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
-		{
-			sprintf (tmp, "%d", totalcount[i]);
-			lvi.iItem = idx;
-			lvi.pszText = tmp;
-			m_List.SetItemText(idx, col[i] + 1, tmp);
-			total += totalcount[i];
-		}
+	for (i = 0; i < lcNumUserColors; i++)
+	{
+		if (!ColorTotal[i])
+			continue;
 
-	sprintf (tmp, "%d", total);
-	lvi.iItem = idx;
-	lvi.pszText = tmp;
-	m_List.SetItemText(idx, ID, tmp);
-	
+		Total += ColorTotal[i];
+
+		sprintf (tmp, "%d", ColorTotal[i]);
+		m_List.SetItemText(idx, m_ColorColumn[i], tmp);
+	}
+
+	sprintf (tmp, "%d", Total);
+	m_List.SetItemText(idx, Column, tmp);
+
+	delete[] ColorTotal;
+
+	m_SortColumn = 0;
+	m_SortAscending = true;
+
+	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)this);
+
+	m_List.SetRedraw(TRUE);
+	m_List.Invalidate();
+
 	return TRUE;
-}
-
-typedef struct
-{
-	CPropertiesPieces* page;
-	int color;
-} COMPARE_DATA;
-
-static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
-{
-	int i, a, b;
-	COMPARE_DATA* data = (COMPARE_DATA*)lParamData;
-
-	if (data->color == -1)
-	{
-		// check if we're comparing the "total" row
-		if (lP1 == -1)
-			return 1;
-		else if (lP2 == -1)
-			return -1;
-
-		return _strcmpi(data->page->names[lP1], data->page->names[lP2]);
-	}
-
-	// last column
-	if (data->color == LC_MAXCOLORS)
-	{
-		a = b = 0;
-		for (i = 0; i < LC_MAXCOLORS; i++)
-		{
-			a += data->page->count[lP1*LC_MAXCOLORS+i];
-			b += data->page->count[lP2*LC_MAXCOLORS+i];
-		}
-	}
-	else
-	{
-		if (lP1 == -1)
-			a = data->page->totalcount[data->color];
-		else
-			a = data->page->count[lP1*LC_MAXCOLORS+data->color];
-		
-		if (lP2 == -1)
-			b = data->page->totalcount[data->color];
-		else
-			b = data->page->count[lP2*LC_MAXCOLORS+data->color];
-	}
-
-	if (a == b)
-		return 0;
-
-	if (a < b)
-		return -1;
-	else
-		return 1;
 }
 
 void CPropertiesPieces::OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	int i;
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	COMPARE_DATA data;
 
-	data.page = this;
-
-	if (pNMListView->iSubItem == 0)
-		data.color = -1;
+	if (m_SortColumn == pNMListView->iSubItem)
+		m_SortAscending = !m_SortAscending;
 	else
-	{
-		for (i = 0; i < LC_MAXCOLORS; i++)
-			if (col[i] == pNMListView->iSubItem-1)
-				break;
+		m_SortColumn = pNMListView->iSubItem;
 
-		data.color = i;
-	}
+	m_List.SetRedraw(FALSE);
 
-	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)&data);
+	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)this);
+
+	m_List.SetRedraw(TRUE);
+	m_List.Invalidate();
 
 	*pResult = 0;
 }

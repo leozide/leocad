@@ -11,7 +11,6 @@
 #include "ProgDlg.h"
 #include "project.h"
 #include "pieceinf.h"
-#include "globals.h"
 #include "system.h"
 #include "library.h"
 #include "lc_application.h"

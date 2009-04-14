@@ -4,7 +4,6 @@
 #include "lc_global.h"
 #include "leocad.h"
 #include "EdGrpDlg.h"
-#include "globals.h"
 #include "project.h"
 #include "lc_application.h"
 

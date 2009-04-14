@@ -31,6 +31,8 @@ Project* lcGetActiveProject()
 
 lcApplication::lcApplication()
 {
+	m_PiecePreview = NULL;
+	m_SelectedColor = 0;
 	m_ActiveProject = NULL;
 	m_Library = NULL;
 	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);

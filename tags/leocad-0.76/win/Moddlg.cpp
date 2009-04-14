@@ -7,7 +7,6 @@
 #include "ModDlg.h" 
 
 #include "project.h"
-#include "globals.h"
 #include "defines.h"
 #include "piece.h"
 #include "camera.h"

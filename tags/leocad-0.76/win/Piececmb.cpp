@@ -7,7 +7,6 @@
 #include "PieceBar.h"
 #include "pieceinf.h"
 #include "project.h"
-#include "globals.h"
 #include "library.h"
 #include "lc_application.h"
 

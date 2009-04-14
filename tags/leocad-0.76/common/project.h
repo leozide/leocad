@@ -1,6 +1,8 @@
 #ifndef _PROJECT_H_
 #define _PROJECT_H_
 
+#include "lc_message.h"
+
 #include "object.h"
 #include "defines.h"
 #include "typedefs.h"
@@ -70,7 +72,7 @@ typedef struct LC_UNDOINFO
 	LC_UNDOINFO() { pNext = NULL; };
 } LC_UNDOINFO;
 
-class Project
+class Project : public lcListener
 {
 public:
 // Constructors
@@ -276,7 +278,7 @@ public:
 	void SetAction(int nAction);
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id, unsigned long nParam);
-	void HandleMessage(int Message, void* Data);
+	void ProcessMessage(lcMessageType Message, void* Data);
 
 protected:
 	// State variables
@@ -357,7 +359,7 @@ protected:
 	void writeIndent(FILE *stream);
 	int indent;
 	int numDEF;
-	bool VRMLdialect;
+	int VRMLdialect;
 	bool firstData;
 	int searchForVertex(float *vertex);
 	template<class type> void generateMeshData(type* info, float *pos, lcPiece* pPiece, int numVertices, int currentColor);

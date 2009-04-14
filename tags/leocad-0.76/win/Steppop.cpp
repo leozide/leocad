@@ -5,7 +5,6 @@
 #include "leocad.h"
 #include "StepPop.h"
 #include "project.h"
-#include "globals.h"
 #include "lc_application.h"
 
 #ifdef _DEBUG

@@ -4,6 +4,9 @@
 #include "lc_global.h"
 #include "project.h"
 
+#include "lc_colors.h"
+#include "preview.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,13 +22,9 @@
 #include "light.h"
 #include "group.h"
 #include "terrain.h"
-#include "project.h"
 #include "image.h"
 #include "system.h"
-#include "globals.h"
 #include "minifig.h"
-#include "config.h"
-#include "message.h"
 #include "curve.h"
 #include "mainwnd.h"
 #include "view.h"
@@ -33,17 +32,13 @@
 #include "texfont.h"
 #include "algebra.h"
 #include "debug.h"
+#include "console.h"
 #include "lc_application.h"
 
-// FIXME: temporary function, replace the code !!!
-void SystemUpdateFocus (void* p)
+// TODO: temporary function, rewrite.
+void SystemUpdateFocus(void* p)
 {
-  messenger->Dispatch (LC_MSG_FOCUS_CHANGED, p);
-}
-
-static void ProjectListener(int Message, void* Data, void* User)
-{
-	((Project*)User)->HandleMessage(Message, Data);
+	lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, p);
 }
 
 typedef struct
@@ -107,11 +102,6 @@ Project::Project()
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
-	if (messenger == NULL)
-		messenger = new Messenger ();
-	messenger->AddRef();
-	messenger->Listen(&ProjectListener, this);
-
 	for (i = 0; i < LC_CONNECTIONS; i++)
 	{
 		m_pConnections[i].entries = NULL;
@@ -131,17 +121,15 @@ Project::~Project()
 	DeleteContents(false);
 	SystemFinish();
 
-  if (m_pTrackFile)
-  {
-    delete m_pTrackFile;
-    m_pTrackFile = NULL;
-  }
+	if (m_pTrackFile)
+	{
+		delete m_pTrackFile;
+		m_pTrackFile = NULL;
+	}
 
 	for (int i = 0; i < 10; i++)
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
-
-  messenger->DecRef ();
 
 	delete m_pTerrain;
 	delete m_pBackground;
@@ -1402,14 +1390,8 @@ bool Project::OnNewDocument()
 	LoadDefaults(true);
 	CheckPoint("");
 
-        //	SystemUpdateRecentMenu(m_strRecentFiles);
-        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+	lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 
-//	CWnd* pFrame = AfxGetMainWnd();
-//	if (pFrame != NULL)
-//		pFrame->PostMessage (WM_LC_UPDATE_LIST, 1, m_nCurColor+1);
-// set cur group to 0
- 
 	return true;
 }
 
@@ -3568,8 +3550,9 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
 {
 	lcPiece* pPiece;
-	int col[LC_MAXCOLORS], ID = 0, c;
-	memset (&col, 0, sizeof (col));
+	int* col = new int[lcNumColors], ID = 0, c;
+	int* count = new int[lcNumColors];
+	memset(&col, 0, sizeof(int)*lcNumColors);
 	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
 		if ((pPiece->GetStepShow() == nStep) || (nStep == 0))
@@ -3577,12 +3560,12 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	}
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
 
-	for (c = 0; c < LC_MAXCOLORS; c++)
+	for (c = 0; c < lcNumColors; c++)
 	if (col[c])
 	{
 		col[c] = ID;
 		ID++;
-		fprintf(f, "<td><center>%s</center></td>\n", colornames[c]);
+		fprintf(f, "<td><center>%s</center></td>\n", g_ColorList[c].Name);
 	}
 	ID++;
 	fputs("</tr>\n",f);
@@ -3591,8 +3574,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	for (int j = 0; j < lcGetPiecesLibrary()->GetPieceCount (); j++)
 	{
 		bool Add = false;
-		int count[LC_MAXCOLORS];
-		memset (&count, 0, sizeof (count));
+		memset(&count, 0, sizeof(int)*lcNumColors);
 		pInfo = lcGetPiecesLibrary()->GetPieceInfo (j);
 
 		for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -3613,7 +3595,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 				fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
 
 			int curcol = 1;
-			for (c = 0; c < LC_MAXCOLORS; c++)
+			for (c = 0; c < lcNumColors; c++)
 				if (count[c])
 				{
 					while (curcol != col[c] + 1)
@@ -3636,6 +3618,8 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 		}
 	}
 	fputs("</table>\n<br>", f);
+	delete[] col;
+	delete[] count;
 }
 
 // Special notifications.
@@ -3750,10 +3734,18 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 	}
 }
 
-void Project::HandleMessage(int Message, void* Data)
+void Project::ProcessMessage(lcMessageType Message, void* Data)
 {
-	if (Message == LC_MSG_FOCUS_CHANGED)
+	switch (Message)
 	{
+	case LC_MSG_FOCUS_OBJECT_CHANGED:
+		UpdateSelection();
+		break;
+
+	case LC_MSG_MOUSE_CAPTURE_LOST:
+		if (m_nTracking != LC_TRACK_NONE)
+			StopTracking(false);
+		break;
 	}
 }
 
@@ -4328,6 +4320,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 			}
 
+			// TODO: table doesn't match new colors in 0.76
 			const char* lg_colors[28] = { "red", "Orange", "green", "mint", "blue", "LightBlue", "yellow", 
 				"white", "dark_grey", "black", "brown", "pink", "purple", "gold_chrome", "clear_red",
 				"clear_neon_orange", "clear_green", "clear_neon_yellow", "clear_blue", "clear_cyan", 
@@ -4339,16 +4332,23 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (strlen(opts.libpath))
 			{
 				for (u = 0; u < 4; u++)
+				{
+					char altname[256];
+					strcpy(altname, g_ColorList[(int)mycol[u][3]].Name);
+					while (char* ptr = (char*)strchr(altname, ' '))
+						*ptr = '_';
+
 					fprintf(f, "\n#declare lg_%s = texture {\n pigment { rgb <%.2f, %.2f, %.2f> }\n finish {\n  ambient 0.1\n  phong 0.3\n  phong_size 20\n }\n}\n",
-						altcolornames[(int)mycol[u][3]], mycol[u][0], mycol[u][1], mycol[u][2]);
+						altname, mycol[u][0], mycol[u][1], mycol[u][2]);
+				}
 			}
 			else
 			{
 				fputs("#include \"colors.inc\"\n\n", f);
 
-				for (u = 0; u < LC_MAXCOLORS; u++)
+				for (int u = 0; u < lcNumColors; u++)
 					fprintf(f, "\n#declare lg_%s = texture {\n pigment { rgbf <%.2f, %.2f, %.2f, %.2f> }\n finish {\n  ambient 0.1\n  phong 0.3\n  phong_size 20\n }\n}\n",
-						lg_colors[u], (float)ColorArray[u][0]/255, (float)ColorArray[u][1]/255, (float)ColorArray[u][2]/255, ((ColorArray[u][3] == 255) ? 0.0f : 0.9f));
+						lg_colors[u], g_ColorList[u].Value[0], g_ColorList[u].Value[1], g_ColorList[u].Value[2], ((g_ColorList[u].Value[3] == 1.0f) ? 0.0f : 0.9f));
 			}
 
 			// if not in lgeo, create it
@@ -4403,7 +4403,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								}
 								info += *info + 1;
 
-								if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
+								if (curcolor != LC_COLOR_DEFAULT && curcolor != LC_COLOR_EDGE)
 									fprintf (f, "  texture { lg_%s }\n", lg_colors[curcolor]);
 								fputs(" }\n", f);
 							}
@@ -4439,7 +4439,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								}
 								info += *info + 1;
 
-								if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
+								if (curcolor != LC_COLOR_DEFAULT && curcolor != LC_COLOR_EDGE)
 									fprintf (f, "  texture { lg_%s }\n", lg_colors[curcolor]);
 								fputs(" }\n", f);
 							}
@@ -4619,8 +4619,15 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			FILE* mat = fopen(buf, "wt");
 			fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
-			for (i = 0; i < LC_MAXCOLORS; i++)
-				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", altcolornames[i], (float)FlatColorArray[i][0]/255, (float)FlatColorArray[i][1]/255, (float)FlatColorArray[i][2]/255);
+			for (int i = 0; i < lcNumColors; i++)
+			{
+				char altname[256];
+				strcpy(altname, g_ColorList[i].Name);
+				while (char* ptr = (char*)strchr(altname, ' '))
+					*ptr = '_';
+
+				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", altname, g_ColorList[i].Value[0], g_ColorList[i].Value[1], g_ColorList[i].Value[2]);
+			}
 			fclose(mat);
 
 			for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -4663,17 +4670,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			strcpy(opts.strComments, m_strComments);
 			opts.strFilename = m_strPathName;
 
-			opts.lines = lcGetPiecesLibrary()->GetPieceCount();
-			opts.count = (unsigned short*)malloc(lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			memset (opts.count, 0, lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			opts.names = (char**)malloc(lcGetPiecesLibrary()->GetPieceCount()*sizeof(char*));
-			for (int i = 0; i < lcGetPiecesLibrary()->GetPieceCount(); i++)
-				opts.names[i] = lcGetPiecesLibrary()->GetPieceInfo (i)->m_strDescription;
+			opts.PiecesUsed = (int*)malloc(lcGetPiecesLibrary()->GetPieceCount()*lcNumColors*sizeof(int));
+			memset(opts.PiecesUsed, 0, lcGetPiecesLibrary()->GetPieceCount()*lcNumColors*sizeof(int));
 
 			for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
-				opts.count[idx*LC_MAXCOLORS+pPiece->GetColor()]++;
+				int idx = lcGetPiecesLibrary()->GetPieceIndex(pPiece->GetPieceInfo());
+				opts.PiecesUsed[idx*lcNumColors+pPiece->GetColor()]++;
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -4689,8 +4692,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 			}
 
-			free(opts.count);
-			free(opts.names);
+			free(opts.PiecesUsed);
 		} break;
 
 		case LC_FILE_TERRAIN:
@@ -4987,7 +4989,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_SELECT_NONE:
 		{
 			SelectAndFocusNone(false);
-                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
@@ -5004,7 +5006,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
                                     pPiece->Select(true, false, false);
 				}
 
-                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
@@ -5163,7 +5165,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			AddPiece(pPiece);
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 			pPiece->Select (true, true, false);
-			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, pPiece);
 			UpdateSelection();
 			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
@@ -5180,7 +5182,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			if (RemoveSelectedObjects())
 			{
-                          messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+				lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 				UpdateSelection();
 				UpdateAllViews();
 				SetModifiedFlag(true);
@@ -5246,7 +5248,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 
-        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+				lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 				UpdateSelection();
 				UpdateAllViews();
 				SetModifiedFlag(true);
@@ -5625,7 +5627,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (pPiece->IsSelected())
 					pPiece->Hide();
 			UpdateSelection();
-			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateAllViews();
 		} break;
 
@@ -6867,8 +6869,8 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	// Unproject the selected point against both the front and the back clipping plane
-	gluUnProject(x, y, 0.0f, modelMatrix, projMatrix, viewport, &px, &py, &pz);
-	gluUnProject(x, y, 1.0f, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
+	gluUnProject((float)x, (float)y, 0.0f, modelMatrix, projMatrix, viewport, &px, &py, &pz);
+	gluUnProject((float)x, (float)y, 1.0f, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
 
 	pLine->a1 = (float)px;
 	pLine->b1 = (float)py;
@@ -8143,7 +8145,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject((float)x, (float)y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
@@ -8351,7 +8353,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
         break;
 
       GLfloat tmp[3];
-      gluUnProject(x+1, y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+      gluUnProject((float)x+1, (float)y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       pLight = new lcLight (m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
@@ -8366,7 +8368,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
     case LC_ACTION_CAMERA:
     {
       GLfloat tmp[3];
-      gluUnProject(x+1, y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+      gluUnProject((float)x+1, (float)y-1, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       lcCamera* pCamera = new lcCamera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_Cameras);
@@ -8471,7 +8473,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
   glGetIntegerv(GL_VIEWPORT, viewport);
 
   // why this is here ?
-  gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+  gluUnProject((float)x, (float)y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
   m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
   LC_CLICKLINE ClickLine;
@@ -8583,7 +8585,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	gluUnProject((float)x, (float)y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
 	switch (m_nCurAction)
@@ -8674,7 +8676,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	gluUnProject(x, y, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+	gluUnProject((float)x, (float)y, 0.9f, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
 	ptx = (float)tmp[0]; pty = (float)tmp[1]; ptz = (float)tmp[2];
 
 	switch (m_nCurAction)
@@ -9339,8 +9341,8 @@ void Project::MouseUpdateOverlays(int x, int y)
 		glGetIntegerv(GL_VIEWPORT, Viewport);
 
 		// Unproject the mouse point against both the front and the back clipping planes.
-		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, Viewport, &px, &py, &pz);
-		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, Viewport, &rx, &ry, &rz);
+		gluUnProject((float)x, (float)y, 0, ModelMatrix, ProjMatrix, Viewport, &px, &py, &pz);
+		gluUnProject((float)x, (float)y, 1, ModelMatrix, ProjMatrix, Viewport, &rx, &ry, &rz);
 
 		Vector3 SegStart((float)rx, (float)ry, (float)rz);
 		Vector3 SegEnd((float)px, (float)py, (float)pz);
@@ -9652,7 +9654,7 @@ void Project::writeVRMLShapeBegin(FILE *stream, unsigned long currentColor, bool
 	else
 	{
 		writeIndent(stream);
-		fprintf(stream, "diffuseColor %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0);
+		fprintf(stream, "diffuseColor %g %g %g\n", g_ColorList[currentColor].Value[0], g_ColorList[currentColor].Value[1], g_ColorList[currentColor].Value[2]);
 		if (currentColor > 13 && currentColor < 22) 
 		{
 			writeIndent(stream);
@@ -9851,11 +9853,11 @@ void Project::writeVRMLShapeMeshEnd(FILE *stream)
 		{
 			int currentColor = faceColors[i];
 			writeIndent(stream);
-			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+			fprintf(stream, "%g %g %g %g\n", g_ColorList[currentColor].Value[0], g_ColorList[currentColor].Value[1], g_ColorList[currentColor].Value[2], LC_COLOR_TRANSLUCENT(currentColor) ? 0.5f : 1.0f);
 			writeIndent(stream);
-			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+			fprintf(stream, "%g %g %g %g\n", g_ColorList[currentColor].Value[0], g_ColorList[currentColor].Value[1], g_ColorList[currentColor].Value[2], LC_COLOR_TRANSLUCENT(currentColor) ? 0.5f : 1.0f);
 			writeIndent(stream);
-			fprintf(stream, "%g %g %g %g\n", (float)(FlatColorArray[currentColor][0]) / 256.0, (float)(FlatColorArray[currentColor][1]) / 256.0, (float)(FlatColorArray[currentColor][2]) / 256.0, (currentColor > 13 && currentColor < 22) ? 0.5 : 1);
+			fprintf(stream, "%g %g %g %g\n", g_ColorList[currentColor].Value[0], g_ColorList[currentColor].Value[1], g_ColorList[currentColor].Value[2], LC_COLOR_TRANSLUCENT(currentColor) ? 0.5f : 1.0f);
 		}
 
 		indent -= INDENT_INC;		
@@ -9903,14 +9905,14 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 		numCoordIndices = 0;
 		coordIndices = (int *) malloc(1);
 
-		if ((*info == LC_COL_DEFAULT) || (*info == LC_COL_EDGES))
+		if ((*info == LC_COLOR_DEFAULT) || (*info == LC_COLOR_EDGE))
 		{
-			colname = altcolornames[color];
+			colname = g_ColorList[color].Name;
 			currentColor = color;
 		}
 		else
 		{
-			if ((*info >= LC_MAXCOLORS))
+			if ((*info >= (u32)lcNumColors))
 			{
 				info++;
 				info += *info + 1;
@@ -9918,7 +9920,7 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 
 				continue;
 			}
-			colname = altcolornames[*info];
+			colname = g_ColorList[*info].Name;
 			currentColor = *info;
 		}
 		info++;
@@ -9930,8 +9932,13 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 				generateMeshData(info, pos, pPiece, 3, currentColor);
 				info += 3;
 			}
+
 			writeIndent(stream);
-			fprintf(stream, "# %s\n", colname);
+			char altname[256];
+			strcpy(altname, colname);
+			while (char* ptr = (char*)strchr(altname, ' '))
+				*ptr = '_';
+			fprintf(stream, "# %s\n", altname);
 
 			bool rigidBody = (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS);
 
@@ -10051,12 +10058,12 @@ template<class type> void Project::getMinMax(type col, lcPiece* piece, unsigned 
 
 	while (colors--)
 	{
-		if ((*info == LC_COL_DEFAULT) || (*info == LC_COL_EDGES))
+		if ((*info == LC_COLOR_DEFAULT) || (*info == LC_COLOR_EDGE))
 		{
 		}
 		else
 		{
-			if ((*info >= LC_MAXCOLORS))
+			if ((*info >= (u32)lcNumColors))
 			{
 				info++;
 				info += *info + 1;

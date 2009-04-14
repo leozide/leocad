@@ -8,7 +8,6 @@
 #include "file.h"
 #include "texture.h"
 #include "project.h"
-#include "globals.h"
 #include "image.h"
 #include "library.h"
 #include "lc_application.h"

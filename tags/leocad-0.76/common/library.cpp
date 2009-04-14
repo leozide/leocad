@@ -1419,7 +1419,6 @@ bool PiecesLibrary::ImportLDrawPiece (const char* Filename)
 
 #include <string.h>
 #include <math.h>
-#include "globals.h"
 #include "project.h"
 #include "matrix.h"
 

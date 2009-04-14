@@ -53,7 +53,6 @@ protected:
 	BOOL m_bActive; // Is the dropdown active?
 	CRect m_ArrowRect;
 	int m_nColor;
-	COLORREF m_crColor;
 
 	// Generated message map functions
 protected:

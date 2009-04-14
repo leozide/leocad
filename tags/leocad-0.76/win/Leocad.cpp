@@ -10,7 +10,6 @@
 #include <wininet.h>
 #include <process.h>
 #include "project.h"
-#include "globals.h"
 #include "system.h"
 #include "pieceinf.h" // TODO: remove
 #include "config.h"
@@ -18,6 +17,7 @@
 #include "library.h"
 #include "keyboard.h"
 #include "lc_application.h"
+#include "preview.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -202,11 +202,7 @@ BOOL CCADApp::InitInstance()
 		Info = lcGetPiecesLibrary()->GetPieceInfo(0);
 
 	if (Info)
-	{
-		lcGetActiveProject()->SetCurrentPiece(Info);
-		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.SetPieceInfo(Info);
-		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.PostMessage(WM_PAINT);
-	}
+		g_App->m_PiecePreview->SetSelection(Info);
 
 /*
 	char out[_MAX_PATH];

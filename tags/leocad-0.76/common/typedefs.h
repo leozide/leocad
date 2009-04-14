@@ -403,9 +403,7 @@ struct LC_PROPERTIESDLG_OPTS
 	char strComments[256];
 	char* strTitle;
 	char* strFilename;
-	char** names;
-	unsigned short* count;
-	int lines;
+	int* PiecesUsed;
 };
 
 struct LC_GROUPEDITDLG_OPTS

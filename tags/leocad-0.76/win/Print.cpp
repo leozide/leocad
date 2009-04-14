@@ -10,7 +10,7 @@
 #include "Print.h"
 #include "project.h"
 #include "pieceinf.h"
-#include "globals.h"
+#include "lc_colors.h"
 #include "CADView.h"
 #include "Tools.h"
 #include "Piece.h"
@@ -294,7 +294,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3ubv(FlatColorArray[lcGetActiveProject()->GetCurrentColor()]);
+			lcSetColor(lcGetActiveProject()->GetCurrentColor());
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
@@ -688,7 +688,7 @@ static void PrintPiecesThread(void* pv)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3ubv(FlatColorArray[project->m_nCurColor]);
+			lcSetColor(project->m_nCurColor);
 
 			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
 			node = node->next;

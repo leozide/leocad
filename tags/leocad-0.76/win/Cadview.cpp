@@ -11,7 +11,6 @@
 #include "Tools.h"
 #include "PrevView.h"
 #include "project.h"
-#include "globals.h"
 #include "system.h"
 #include "camera.h"
 #include "view.h"

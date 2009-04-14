@@ -4,8 +4,6 @@
 
 #include "lc_global.h"
 #include "preview.h"
-
-#include "globals.h"
 #include "project.h"
 #include "pieceinf.h"
 #include "system.h"
@@ -14,7 +12,9 @@
 PiecePreview::PiecePreview(GLWindow *share)
 	: GLWindow(share)
 {
-	m_PieceInfo = NULL;
+	g_App->m_PiecePreview = this;
+	m_Selection = NULL;
+
 	m_RotateX = 60.0f;
 	m_RotateZ = 225.0f;
 	m_Distance = 10.0f;
@@ -24,18 +24,33 @@ PiecePreview::PiecePreview(GLWindow *share)
 
 PiecePreview::~PiecePreview()
 {
+	delete m_Selection;
+	g_App->m_PiecePreview = NULL;
+}
+
+void PiecePreview::ProcessMessage(lcMessageType Message, void* Data)
+{
+	if (Message == LC_MSG_COLOR_CHANGED)
+	{
+		Redraw();
+	}
 }
 
 void PiecePreview::OnDraw()
 {
-	if (m_PieceInfo == NULL)
-		return;
-
 	if (!MakeCurrent())
 		return;
 
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
+	float* bg = lcGetActiveProject()->GetBackgroundColor();
+	glClearColor(bg[0], bg[1], bg[2], bg[3]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (!m_Selection)
+	{
+		SwapBuffers();
+		return;
+	}
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_POLYGON_OFFSET_FILL);
@@ -45,11 +60,11 @@ void PiecePreview::OnDraw()
 	glDisable(GL_DITHER);
 	glShadeModel(GL_FLAT);
 
-	float aspect = (float)m_nWidth/(float)m_nHeight;
+	float Aspect = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(30.0f, aspect, 1.0f, 100.0f);
+	gluPerspective(30.0f, Aspect, 1.0f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -65,42 +80,38 @@ void PiecePreview::OnDraw()
 	if (m_AutoZoom)
 	{
 		Eye = Eye * 100.0f;
-		m_PieceInfo->ZoomExtents(30.0f, aspect, Eye);
+		m_Selection->ZoomExtents(30.0f, Aspect, Eye);
 
 		// Update the new camera distance.
-		Vector3 d = Eye - m_PieceInfo->GetCenter();
+		Vector3 d = Eye - m_Selection->GetCenter();
 		m_Distance = Length(d);
 	}
 	else
 	{
 		Matrix44 WorldToView;
-		WorldToView = CreateLookAtMatrix(Eye * m_Distance, m_PieceInfo->GetCenter(), Vector3(0, 0, 1));
+		WorldToView = CreateLookAtMatrix(Eye * m_Distance, m_Selection->GetCenter(), Vector3(0, 0, 1));
 		glLoadMatrixf(WorldToView);
 	}
 
-	float pos[4] = { 0, 0, 10, 0 }, *bg = lcGetActiveProject()->GetBackgroundColor ();
-	glLightfv(GL_LIGHT0, GL_POSITION, pos);
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
+	m_Selection->RenderPiece(lcGetActiveProject()->GetCurrentColor());
 
 	glFinish();
 	SwapBuffers();
 }
 
-void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
+void PiecePreview::SetSelection(void* Selection)
 {
 	MakeCurrent();
 
-	if (m_PieceInfo != NULL)
-		m_PieceInfo->DeRef();
+	if (m_Selection != NULL)
+		m_Selection->DeRef();
 
-	m_PieceInfo = pInfo;
+	m_Selection = (PieceInfo*)Selection;
 
-	if (m_PieceInfo != NULL)
+	if (m_Selection != NULL)
 	{
-		m_PieceInfo->AddRef();
-		lcGetActiveProject()->SetCurrentPiece(m_PieceInfo);
+		m_Selection->AddRef();
+		lcGetActiveProject()->SetCurrentPiece(m_Selection);
 		Redraw();
 	}
 }
@@ -159,10 +170,7 @@ void PiecePreview::OnMouseMove(int x, int y, bool Control, bool Shift)
 		m_RotateZ += x - m_DownX;
 		m_RotateX += y - m_DownY;
 
-		if (m_RotateX > 179.5f)
-			m_RotateX = 179.5f;
-		else if (m_RotateX < 0.5f)
-			m_RotateX = 0.5f;
+		m_RotateX = lcClamp(m_RotateX, 0.5f, 179.5f);
 
 		m_DownX = x;
 		m_DownY = y;
@@ -175,8 +183,7 @@ void PiecePreview::OnMouseMove(int x, int y, bool Control, bool Shift)
 		m_Distance += (float)(y - m_DownY) * 0.2f;
 		m_AutoZoom = false;
 
-		if (m_Distance < 0.5f)
-			m_Distance = 0.5f;
+		m_Distance = lcClamp(m_Distance, 0.5f, 50.0f);
 
 		m_DownX = x;
 		m_DownY = y;

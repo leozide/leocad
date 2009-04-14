@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include "globals.h"
 #include "opengl.h"
 #include "matrix.h"
 

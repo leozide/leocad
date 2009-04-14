@@ -12,6 +12,7 @@
 #include "project.h"
 #include "algebra.h"
 #include "lc_application.h"
+#include "lc_colors.h"
 
 #define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
 
@@ -28,10 +29,7 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 {
 	bool Transparent = (nColor > 13 && nColor < 22);
 
-	if (bLighting || Transparent)
-		glColor4ub(ColorArray[nColor][0], ColorArray[nColor][1], ColorArray[nColor][2], ColorArray[nColor][3]);
-	else
-		glColor4ub(FlatColorArray[nColor][0], FlatColorArray[nColor][1], FlatColorArray[nColor][2], 255);
+	lcSetColor(nColor);
 
 	if (nColor > 27)
 		return;
@@ -764,8 +762,8 @@ void lcPiece::BuildDrawInfo()
 	DRAWGROUP* dg;
 	bool add;
 	unsigned short group, colcount, i, j;
-	unsigned long count[LC_COL_DEFAULT+1][2], vert;
-	memset (count, 0, sizeof(count));
+	u32* count = new u32[lcNumColors*2], vert;
+	memset(count, 0, sizeof(u32)*lcNumColors*2);
 
 	// Get the vertex count
 	for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
@@ -795,9 +793,9 @@ void lcPiece::BuildDrawInfo()
 				{
 					curcol = *p;
 					p++;
-					count[curcol][0] += *p;
+					count[curcol*2+0] += *p;
 					p += *p + 1;
-					count[curcol][1] += *p;
+					count[curcol*2+1] += *p;
 					p += *p + 1;
 				}
 			}
@@ -812,9 +810,9 @@ void lcPiece::BuildDrawInfo()
 				{
 					curcol = *p;
 					p++;
-					count[curcol][0] += *p;
+					count[curcol*2+0] += *p;
 					p += *p + 1;
-					count[curcol][1] += *p;
+					count[curcol*2+1] += *p;
 					p += *p + 1;
 				}
 			}
@@ -823,11 +821,11 @@ void lcPiece::BuildDrawInfo()
 
 	colcount = 0;
 	vert = 0;
-	for (i = 0; i < LC_COL_DEFAULT+1; i++)
-		if (count[i][0] || count[i][1])
+	for (i = 0; i < lcNumColors; i++)
+		if (count[i*2+0] || count[i*2+1])
 		{
 			colcount++;
-			vert += count[i][0] + count[i][1];
+			vert += count[i*2+0] + count[i*2+1];
 		}
 	vert += (colcount*3)+1;
 
@@ -838,21 +836,20 @@ void lcPiece::BuildDrawInfo()
 		unsigned long* drawinfo = (unsigned long*)m_pDrawInfo;
 		*drawinfo = colcount;
 		drawinfo++;
-		i = LC_COL_DEFAULT;
 
-		for (i = LC_COL_DEFAULT; i != LC_COL_EDGES+1;)
+		for (i = 0; i < lcNumColors; i++)
 		{
-			if (count[i][0] || count[i][1])
+			if (count[i*2+0] || count[i*2+1])
 			{
 				*drawinfo = i;
 				drawinfo++;
 
 				for (j = 0; j < 2; j++)
 				{
-					*drawinfo = count[i][j];
+					*drawinfo = count[i*2+j];
 					drawinfo++;
 
-					if (count[i][j] == 0)
+					if (count[i*2+j] == 0)
 						continue;
 
 					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
@@ -907,11 +904,6 @@ void lcPiece::BuildDrawInfo()
 					}
 				}
 			}
-						
-			if (i == LC_COL_DEFAULT)
-				i = 0;
-			else
-				i++;
 		}
 	}
 	else
@@ -921,19 +913,19 @@ void lcPiece::BuildDrawInfo()
 		*drawinfo = colcount;
 		drawinfo++;
 
-		for (i = LC_COL_DEFAULT; i != LC_COL_EDGES+1;)
+		for (i = 0; i < lcNumColors; i++)
 		{
-			if (count[i][0] || count[i][1])
+			if (count[i*2+0] || count[i*2+1])
 			{
 				*drawinfo = i;
 				drawinfo++;
 
 				for (j = 0; j < 2; j++)
 				{
-					*drawinfo = (unsigned short)count[i][j];
+					*drawinfo = (unsigned short)count[i*2+j];
 					drawinfo++;
 
-					if (count[i][j] == 0)
+					if (count[i*2+j] == 0)
 						continue;
 
 					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
@@ -988,13 +980,10 @@ void lcPiece::BuildDrawInfo()
 					}
 				}
 			}
-
-			if (i == LC_COL_DEFAULT)
-				i = 0;
-			else
-				i++;
 		}
 	}
+
+	delete[] count;
 }
 
 void lcPiece::RenderBox(bool bHilite, float fLineWidth)
@@ -1006,8 +995,7 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 #ifndef LC_OPENGLES
 	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
 	{
-		int Color = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
-		glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
+		lcSetColor(m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION);
 		glLineWidth(2*fLineWidth);
 		glPushAttrib(GL_POLYGON_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1018,7 +1006,7 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 	else
 #endif
 	{
-		glColor4ub(FlatColorArray[m_nColor][0], FlatColorArray[m_nColor][1], FlatColorArray[m_nColor][2], 255);
+		lcSetColor(m_nColor);
 		m_pPieceInfo->RenderBox();
 	}
 	glPopMatrix();
@@ -1036,7 +1024,7 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		m_pPieceInfo->m_pTextures[sh].texture->MakeCurrent();
 
-		if (m_pPieceInfo->m_pTextures[sh].color == LC_COL_DEFAULT)
+		if (m_pPieceInfo->m_pTextures[sh].color == LC_COLOR_DEFAULT)
 		{
 			SetCurrentColor(m_nColor, bTrans, bLighting);
 			*nLastColor = m_nColor;
@@ -1066,11 +1054,11 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 
 		while (colors--)
 		{
-			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
+			bool lock = lockarrays && (*info == LC_COLOR_DEFAULT || *info == LC_COLOR_EDGE);
 
 			if (*info != *nLastColor)
 			{
-				if (*info == LC_COL_DEFAULT)
+				if (*info == LC_COLOR_DEFAULT)
 				{
 					SetCurrentColor(m_nColor, bTrans, bLighting);
 					*nLastColor = m_nColor;
@@ -1101,8 +1089,8 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 			    if (lock)
 			      glUnlockArraysEXT();
 
-			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting);
-			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
+			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bTrans, bLighting);
+			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION;
 
 			    if (lock)
 			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
@@ -1131,11 +1119,11 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 
 		while (colors--)
 		{
-			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
+			bool lock = lockarrays && (*info == LC_COLOR_DEFAULT || *info == LC_COLOR_EDGE);
 
 			if (*info != *nLastColor)
 			{
-				if (*info == LC_COL_DEFAULT)
+				if (*info == LC_COLOR_DEFAULT)
 				{
 					SetCurrentColor(m_nColor, bTrans, bLighting);
 					*nLastColor = m_nColor;
@@ -1165,8 +1153,8 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 			  {
 			    if (lock)
 			      glUnlockArraysEXT();
-			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COL_FOCUSED : LC_COL_SELECTED, bTrans, bLighting);
-			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COL_FOCUSED : LC_COL_SELECTED;
+			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bTrans, bLighting);
+			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION;
 			    
 			    if (lock)
 			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);

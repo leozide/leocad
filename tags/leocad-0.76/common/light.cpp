@@ -3,12 +3,8 @@
 #include "lc_global.h"
 #include "light.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-#include "defines.h"
-#include "globals.h"
+#include "algebra.h"
+#include "lc_colors.h"
 #include "matrix.h"
 
 static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
@@ -267,8 +263,7 @@ void lcLight::Render(float fLineWidth)
 		if (IsEyeSelected())
 		{
 			glLineWidth(fLineWidth*2);
-			int Color = (m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
-			glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
+			lcSetColor((m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COLOR_FOCUS : LC_COLOR_SELECTION);
 			DrawCone();
 			glLineWidth(fLineWidth);
 		}
@@ -281,8 +276,7 @@ void lcLight::Render(float fLineWidth)
 		if (IsTargetSelected())
 		{
 			glLineWidth(fLineWidth*2);
-			int Color = (m_nState & LC_LIGHT_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
-			glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
+			lcSetColor((m_nState & LC_LIGHT_TARGET_FOCUSED) != 0 ? LC_COLOR_FOCUS : LC_COLOR_SELECTION);
 			DrawTarget();
 			glLineWidth(fLineWidth);
 		}
@@ -373,8 +367,7 @@ void lcLight::Render(float fLineWidth)
 		if (IsEyeSelected())
 		{
 			glLineWidth(fLineWidth*2);
-			int Color = (m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED;
-			glColor4ub(FlatColorArray[Color][0], FlatColorArray[Color][1], FlatColorArray[Color][2], 255);
+			lcSetColor((m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COLOR_FOCUS : LC_COLOR_SELECTION);
 			DrawSphere();
 			glLineWidth(fLineWidth);
 		}

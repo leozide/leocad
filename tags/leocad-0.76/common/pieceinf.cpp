@@ -1,18 +1,14 @@
 #include "lc_global.h"
 #include "pieceinf.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
 #include "opengl.h"
 #include "texture.h"
 #include "project.h"
-#include "globals.h"
 #include "matrix.h"
 #include "defines.h"
 #include "library.h"
 #include "lc_application.h"
+#include "lc_colors.h"
 
 #if LC_IPHONE
 #define SIDES 8
@@ -138,8 +134,8 @@ unsigned char ConvertColor(int c)
 	case 13: return 11;	// pink			(pink)
 	case 14: return 6;	// yellow		(yellow)
 	case 15: return 7;	// white		(white)
-	case 16: return LC_COL_DEFAULT; // special case
-	case 24: return LC_COL_EDGES; // edge
+	case 16: return LC_COLOR_DEFAULT; // special case
+	case 24: return LC_COLOR_EDGE; // edge
 	case 32: return 9;	// black
 	case 33: return 18;	// clear blue
 	case 34: return 16;	// clear green
@@ -444,7 +440,7 @@ static void WriteStudDrawInfo(int Color, float* Verts, int BaseVertex, DRAWGROUP
 	*Indices++ = 0;
 
 	// Lines.
-	*Indices++ = LC_COL_EDGES;
+	*Indices++ = LC_COLOR_EDGE;
 	*Indices++ = 0;
 	*Indices++ = 4 * SIDES;
 
@@ -544,7 +540,7 @@ static void WriteHollowStudDrawInfo(int Color, float* Verts, int BaseVertex, DRA
 	*Indices++ = 0;
 
 	// Lines.
-	*Indices++ = LC_COL_EDGES;
+	*Indices++ = LC_COLOR_EDGE;
 	*Indices++ = 0;
 	*Indices++ = 8 * SIDES;
 
@@ -1111,8 +1107,9 @@ void PieceInfo::RenderPiece(int nColor)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		m_pTextures[sh].texture->MakeCurrent();
 
-		if (m_pTextures[sh].color == LC_COL_DEFAULT)
-			glColor4ub(FlatColorArray[nColor][0], FlatColorArray[nColor][1], FlatColorArray[nColor][2], 255);
+		if (m_pTextures[sh].color == LC_COLOR_DEFAULT)
+			lcSetColor(nColor);
+
 		if (nColor > 13 && nColor < 22)
 		{
 			glEnable (GL_BLEND);
@@ -1153,7 +1150,7 @@ void PieceInfo::RenderPiece(int nColor)
 
 			while (colors--)
 			{
-				if (*info == LC_COL_DEFAULT)
+				if (*info == LC_COLOR_DEFAULT)
 					curcolor = nColor;
 				else
 					curcolor = (unsigned short)*info;
@@ -1164,13 +1161,13 @@ void PieceInfo::RenderPiece(int nColor)
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glEnable(GL_BLEND);
 					glDepthMask(GL_FALSE);
-					glColor4ub(ColorArray[curcolor][0], ColorArray[curcolor][1], ColorArray[curcolor][2], ColorArray[curcolor][3]);
+					lcSetColor(curcolor);
 				}
 				else
 				{
 					glDepthMask(GL_TRUE);
 					glDisable(GL_BLEND);
-					glColor4ub(FlatColorArray[curcolor][0], FlatColorArray[curcolor][1], FlatColorArray[curcolor][2], 255);
+					lcSetColor(curcolor);
 				}
 
 				if (*info)
@@ -1192,7 +1189,7 @@ void PieceInfo::RenderPiece(int nColor)
 
 			while (colors--)
 			{
-				if (*info == LC_COL_DEFAULT)
+				if (*info == LC_COLOR_DEFAULT)
 					curcolor = nColor;
 				else
 					curcolor = *info;
@@ -1203,13 +1200,13 @@ void PieceInfo::RenderPiece(int nColor)
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glEnable(GL_BLEND);
 					glDepthMask(GL_FALSE);
-					glColor4ub(ColorArray[curcolor][0], ColorArray[curcolor][1], ColorArray[curcolor][2], ColorArray[curcolor][3]);
+					lcSetColor(curcolor);
 				}
 				else
 				{
 					glDepthMask(GL_TRUE);
 					glDisable(GL_BLEND);
-					glColor4ub(FlatColorArray[curcolor][0], FlatColorArray[curcolor][1], FlatColorArray[curcolor][2], 255);
+					lcSetColor(curcolor);
 				}
 
 				if (*info)
@@ -1240,11 +1237,11 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 			while (colors--)
 			{
-				if (*info == LC_COL_DEFAULT)
-					colname = altcolornames[color];
+				if (*info == LC_COLOR_DEFAULT)
+					colname = g_ColorList[color].Name;
 				else
 				{
-					if (*info >= LC_MAXCOLORS)
+					if (*info >= (u32)lcNumColors)
 					{
 						info++;
 						info += *info + 1;
@@ -1252,7 +1249,7 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 						info += *info + 1;
 						continue;
 					}
-					colname = altcolornames[*info];
+					colname = g_ColorList[*info].Name;
 				}
 				info++;
 
@@ -1264,7 +1261,12 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 					continue;
 				}
 
-				fprintf(file, "usemtl %s\n", colname);
+				char altname[256];
+				strcpy(altname, colname);
+				while (char* ptr = (char*)strchr(altname, ' '))
+					*ptr = '_';
+
+				fprintf(file, "usemtl %s\n", altname);
 
 				for (count = *info, info++; count; count -= 4)
 				{
@@ -1290,11 +1292,11 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 			while (colors--)
 			{
-				if (*info == LC_COL_DEFAULT)
-					colname = altcolornames[color];
+				if (*info == LC_COLOR_DEFAULT)
+					colname = g_ColorList[color].Name;
 				else
 				{
-					if (*info >= LC_MAXCOLORS)
+					if (*info >= lcNumColors)
 					{
 						info++;
 						info += *info + 1;
@@ -1302,7 +1304,7 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 						info += *info + 1;
 						continue;
 					}
-					colname = altcolornames[*info];
+					colname = g_ColorList[*info].Name;
 				}
 				info++;
 
@@ -1314,7 +1316,12 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 					continue;
 				}
 
-				fprintf(file, "usemtl %s\n", colname);
+				char altname[256];
+				strcpy(altname, colname);
+				while (char* ptr = (char*)strchr(altname, ' '))
+					*ptr = '_';
+
+				fprintf(file, "usemtl %s\n", altname);
 
 				for (count = *info, info++; count; count -= 4)
 				{

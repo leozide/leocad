@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
-#include "globals.h"
 #include "project.h"
 #include "matrix.h"
 #include "file.h"

@@ -24,7 +24,7 @@ PiecePreview::PiecePreview(GLWindow *share)
 
 PiecePreview::~PiecePreview()
 {
-	delete m_Selection;
+	m_Selection->DeRef();
 	g_App->m_PiecePreview = NULL;
 }
 
@@ -93,7 +93,7 @@ void PiecePreview::OnDraw()
 		glLoadMatrixf(WorldToView);
 	}
 
-	m_Selection->RenderPiece(lcGetActiveProject()->GetCurrentColor());
+	m_Selection->RenderPiece(g_App->m_SelectedColor);
 
 	glFinish();
 	SwapBuffers();
@@ -111,7 +111,6 @@ void PiecePreview::SetSelection(void* Selection)
 	if (m_Selection != NULL)
 	{
 		m_Selection->AddRef();
-		lcGetActiveProject()->SetCurrentPiece(m_Selection);
 		Redraw();
 	}
 }

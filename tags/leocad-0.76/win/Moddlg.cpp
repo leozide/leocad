@@ -205,7 +205,7 @@ void CModifyDialog::UpdateInfo(lcObject* pObject)
 			if (m_nType == LC_OBJECT_CAMERA)
 				pCamera = (lcCamera*)m_pObject;
 			else
-				pCamera = ((CameraTarget*)m_pObject)->GetParent();
+				pCamera = ((CameraTarget*)m_pObject)->m_Parent;
 
 			tmp = pCamera->m_Position;
 			lcGetActiveProject()->ConvertToUserUnits(tmp);

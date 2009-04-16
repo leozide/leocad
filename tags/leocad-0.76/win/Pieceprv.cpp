@@ -46,7 +46,7 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_Preview = new PiecePreview(NULL);
+	m_Preview = new PiecePreview((GLWindow*)lcGetActiveProject()->GetFirstView());
 	m_Preview->Create(m_hWnd);
 	m_Preview->MakeCurrent();
 

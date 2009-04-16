@@ -34,9 +34,9 @@ typedef unsigned __int64 u64;
 #define LCINT32(val) val
 #define LCFLOAT(val) val
 
-#define LC_HAVE_3DSFTK
-#define LC_HAVE_JPEGLIB
-#define LC_HAVE_ZLIB
-#define LC_HAVE_PNGLIB
+#define LC_HAVE_3DSFTK 1
+#define LC_HAVE_JPEGLIB 1
+#define LC_HAVE_ZLIB 1
+#define LC_HAVE_PNGLIB 1
 
 #endif // _CONFIG_H_

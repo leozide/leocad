@@ -14,9 +14,9 @@
 #include "keyboard.h"
 #include "system.h"
 #include "library.h"
+#include "Print.h"
 #include "view.h"
 #include "lc_application.h"
-#include "Print.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1143,7 +1143,8 @@ void CMainFrame::OnViewNewView()
 			AfxThrowResourceException();
 	}
 
-	View *view = new View (lcGetActiveProject(), NULL);
+	Project* project = lcGetActiveProject();
+	View *view = new View(project, project->GetFirstView());
 
 	CreateWindowEx(0, FLOATING_CLASSNAME, "LeoCAD", WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
 	               CW_USEDEFAULT, CW_USEDEFAULT, 200, 100, m_hWnd, (HMENU)0, hInst, view);

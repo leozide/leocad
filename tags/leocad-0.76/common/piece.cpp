@@ -18,14 +18,14 @@
 
 static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 {
-  { "Position", 3, LC_PK_POSITION },
-  { "Rotation", 4, LC_PK_ROTATION }
+	{ "Position", 3, LC_PK_POSITION },
+	{ "Rotation", 4, LC_PK_ROTATION }
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // Static functions
 
-inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLighting)
+inline static void SetCurrentColor(unsigned char nColor, bool bLighting)
 {
 	bool Transparent = (nColor > 13 && nColor < 22);
 
@@ -36,22 +36,14 @@ inline static void SetCurrentColor(unsigned char nColor, bool* bTrans, bool bLig
 
 	if (Transparent)
 	{
-		if (!*bTrans)
-		{
-			*bTrans = true;
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
+		glEnable(GL_BLEND);
+		glDepthMask(GL_FALSE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	else
 	{
-		if (*bTrans)
-		{
-			*bTrans = false;
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
-		}
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
 	}
 }
 
@@ -68,7 +60,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
   if (first_time)
   {
     first_time = false;
-    lockarrays = GL_HasCompiledVertexArrays ();
+    lockarrays = GL_HasCompiledVertexArrays();
   }
 
 	m_Next = NULL;
@@ -198,15 +190,13 @@ bool lcPiece::FileLoad (File& file, char* name)
           Matrix mat;
           if (version > 3)
           {
-            float m[16];
-            file.ReadFloat (m, 16);
-            mat.FromFloat (m);
+            file.ReadFloat(mat.m, 16);
           }
           else
           {
             float move[3], rotate[3];
-            file.ReadFloat (move, 3);
-            file.ReadFloat (rotate, 3);
+            file.ReadFloat(move, 3);
+            file.ReadFloat(rotate, 3);
             mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
           }
 
@@ -231,18 +221,18 @@ bool lcPiece::FileLoad (File& file, char* name)
       {
         Matrix mat;
         float move[3], rotate[3];
-        file.ReadFloat (move, 3);
-        file.ReadFloat (rotate, 3);
-        mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+        file.ReadFloat(move, 3);
+        file.ReadFloat(rotate, 3);
+        mat.CreateOld(move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
 
         mat.GetTranslation(&param[0], &param[1], &param[2]);
         param[3] = 0;
         ChangeKey (1, false, true, param, LC_PK_POSITION);
         ChangeKey (1, true, true, param, LC_PK_POSITION);
 
-        mat.ToAxisAngle (param);
-        ChangeKey (1, false, true, param, LC_PK_ROTATION);
-        ChangeKey (1, true, true, param, LC_PK_ROTATION);
+        mat.ToAxisAngle(param);
+        ChangeKey(1, false, true, param, LC_PK_ROTATION);
+        ChangeKey(1, true, true, param, LC_PK_ROTATION);
       }
     }
   }
@@ -459,23 +449,25 @@ void lcPiece::RemoveTime (unsigned short start, bool animation, unsigned short t
   lcObject::RemoveTime (start, animation, time);
 }
 
-void lcPiece::MinIntersectDist(LC_CLICKLINE* pLine)
+void lcPiece::ClosestLineIntersect(lcClickLine& ClickLine) const
 {
-	double dist;
+	Matrix44 WorldModel;
+	WorldModel = MatrixFromAxisAngle(Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], -m_fRotation[3] * LC_DTOR));
+	WorldModel.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldModel));
 
-	dist = BoundingBoxIntersectDist(pLine);
-	if (dist >= pLine->mindist)
+	Vector3 Start = Mul31(ClickLine.Start, WorldModel);
+	Vector3 End = Mul31(ClickLine.End, WorldModel);
+
+	// Check the bounding box distance first.
+	float Dist;
+	BoundingBox Box = BoundingBox(Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
+		                          Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]));
+
+	if (!BoundingBoxRayMinIntersectDistance(Box, Start, End, &Dist) || (Dist >= ClickLine.Dist))
 		return;
 
-	Matrix44 WorldToLocal;
-	WorldToLocal = MatrixFromAxisAngle(Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], -m_fRotation[3] * LC_DTOR));
-	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
-
-	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
-	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
-	Vector3 Intersection;
-
 	float* verts = m_pPieceInfo->m_fVertexArray;
+	Vector3 Intersection;
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
@@ -493,9 +485,9 @@ void lcPiece::MinIntersectDist(LC_CLICKLINE* pLine)
 				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
 				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
 
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &pLine->mindist, &Intersection))
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &ClickLine.Dist, &Intersection))
 				{
-					pLine->pClosest = this;
+					ClickLine.Object = this;
 				}
 			}
 
@@ -519,9 +511,9 @@ void lcPiece::MinIntersectDist(LC_CLICKLINE* pLine)
 				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
 				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
 
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &pLine->mindist, &Intersection))
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &ClickLine.Dist, &Intersection))
 				{
-					pLine->pClosest = this;
+					ClickLine.Object = this;
 				}
 			}
 
@@ -531,7 +523,7 @@ void lcPiece::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 }
 
-bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
+bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
 	// First check the bounding box for quick rejection.
 	Vector3 Box[8] =
@@ -737,14 +729,16 @@ void lcPiece::UpdatePosition(unsigned short nTime, bool bAnimation)
 	if (!IsVisible(nTime, bAnimation))
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
-	CalculateKeys (nTime, bAnimation);
+	CalculateKeys(nTime, bAnimation);
 //	if (CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation))
 	{
-		Matrix mat(m_fRotation, m_fPosition);
-		BoundingBoxCalculate(&mat, m_pPieceInfo->m_fDimensions);
+		Matrix44 mat;
+		mat = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
+		mat.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
+
 		for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
 		{
-			mat.TransformPoint(m_pConnections[i].center, m_pPieceInfo->m_pConnections[i].center);
+			m_pConnections[i].center = Mul31(m_pPieceInfo->m_pConnections[i].center, mat);
 
 			// TODO: rotate normal
 		}
@@ -1012,7 +1006,7 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 	glPopMatrix();
 }
 
-void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+void lcPiece::Render(bool bLighting, bool bEdges)
 {
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
@@ -1025,10 +1019,7 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 		m_pPieceInfo->m_pTextures[sh].texture->MakeCurrent();
 
 		if (m_pPieceInfo->m_pTextures[sh].color == LC_COLOR_DEFAULT)
-		{
-			SetCurrentColor(m_nColor, bTrans, bLighting);
-			*nLastColor = m_nColor;
-		}
+			SetCurrentColor(m_nColor, bLighting);
 
 		glEnable(GL_TEXTURE_2D);
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -1056,18 +1047,13 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 		{
 			bool lock = lockarrays && (*info == LC_COLOR_DEFAULT || *info == LC_COLOR_EDGE);
 
-			if (*info != *nLastColor)
+			if (*info == LC_COLOR_DEFAULT)
 			{
-				if (*info == LC_COLOR_DEFAULT)
-				{
-					SetCurrentColor(m_nColor, bTrans, bLighting);
-					*nLastColor = m_nColor;
-				}
-				else
-				{
-					SetCurrentColor((unsigned char)*info, bTrans, bLighting);
-					*nLastColor = (unsigned char)*info;
-				}
+				SetCurrentColor(m_nColor, bLighting);
+			}
+			else
+			{
+				SetCurrentColor((unsigned char)*info, bLighting);
 			}
 			info++;
 
@@ -1089,8 +1075,7 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 			    if (lock)
 			      glUnlockArraysEXT();
 
-			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bTrans, bLighting);
-			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION;
+			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bLighting);
 
 			    if (lock)
 			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
@@ -1121,18 +1106,13 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 		{
 			bool lock = lockarrays && (*info == LC_COLOR_DEFAULT || *info == LC_COLOR_EDGE);
 
-			if (*info != *nLastColor)
+			if (*info == LC_COLOR_DEFAULT)
 			{
-				if (*info == LC_COLOR_DEFAULT)
-				{
-					SetCurrentColor(m_nColor, bTrans, bLighting);
-					*nLastColor = m_nColor;
-				}
-				else
-				{
-					SetCurrentColor((unsigned char)*info, bTrans, bLighting);
-					*nLastColor = (unsigned char)*info;
-				}
+				SetCurrentColor(m_nColor, bLighting);
+			}
+			else
+			{
+				SetCurrentColor((unsigned char)*info, bLighting);
 			}
 			info++;
 
@@ -1153,8 +1133,7 @@ void lcPiece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, boo
 			  {
 			    if (lock)
 			      glUnlockArraysEXT();
-			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bTrans, bLighting);
-			    *nLastColor = m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION;
+			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bLighting);
 			    
 			    if (lock)
 			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
@@ -1422,162 +1401,9 @@ void lcPiece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short
 		for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
 			pPiece->CalculateConnections(pConnections, nTime, bAnimation, true, false);
 
-/*
-	BOOL bRebuild = FALSE;
-	CONNECTION *c1, *c2;
-	int sz = sizeof(CPiece*)*(m_pInfo->m_nConnectionCount-1);
-	CPiece** pConnections = (CPiece**)malloc(sz);
-	memset(pConnections, 0, sz);
-
-	for (POSITION pos = pDoc->m_Pieces.GetHeadPosition(); pos != NULL;)
-	{
-		CPiece* pPiece = pDoc->m_Pieces.GetNext(pos);
-		if ((pPiece == this) || (pPiece->m_pInfo->m_nConnectionCount == 1) ||
-			(!pPiece->IsVisible(nTime, bAnimator)))
-			continue;
-		pPiece->m_bUpdated = FALSE;
-
-		for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-		{
-			c1 = &m_pInfo->m_pConnections[i+1];
-
-			for (j = 0; j < pPiece->m_pInfo->m_nConnectionCount-1; j++)
-			{
-				c2 = &pPiece->m_pInfo->m_pConnections[j+1];
-			
-				if (ConnectionsMatch(c1->type, c2->type))
-				{
-// normal
-					if ((fabs(m_pConnections[i].pos[0]-pPiece->m_pConnections[j].pos[0]) < 0.1) && 
-						(fabs(m_pConnections[i].pos[1]-pPiece->m_pConnections[j].pos[1]) < 0.1) && 
-						(fabs(m_pConnections[i].pos[2]-pPiece->m_pConnections[j].pos[2]) < 0.1))
-					{
-						pConnections[i] = pPiece;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-	if (m_pConnections[i].pPiece != pConnections[i])
-	{
-		if (bOthers)
-		{
-			if ((m_pConnections[i].pPiece != NULL) &&
-				(m_pConnections[i].pPiece->IsVisible(nTime, bAnimator)))
-				m_pConnections[i].pPiece->UpdateConnections(this);
-			if ((pConnections[i] != NULL) &&
-				(pConnections[i]->IsVisible(nTime, bAnimator)))
-				pConnections[i]->UpdateConnections(this);
-		}
-
-		if (m_pConnections[i].pPiece == NULL)
-		{
-			if (m_pInfo->m_pConnections[i].info != NULL)
-				bRebuild = TRUE;
-		}
-		else
-		{
-			if (pConnections[i] == NULL)
-				if (m_pInfo->m_pConnections[i].info != NULL)
-					bRebuild = TRUE;
-		}
-
-		m_pConnections[i].pPiece = pConnections[i];
-	}
-
-	free(pConnections);
-*/
 	if (rebuild)
 		BuildDrawInfo();
 }
-
-/*
-inline static BOOL ConnectionsMatch(BYTE c1, BYTE c2)
-{
-	if (c1 == 1)
-	{
-		if (c2 == 2)
-			return TRUE;
-		else
-			return FALSE;
-	}
-
-	if (c2 == 1)
-	{
-		if (c1 == 2)
-			return TRUE;
-		else
-			return FALSE;
-	}
-
-	// 1: STUD
-	// 2: STUD CONNECTION
-//	int i = __min (c1, c2);
-//	int j = __max (c1, c2);
-//	switch (i)
-//	{
-//	case 1: if (j == 2) return TRUE;
-//	}
-
-	return FALSE;
-}
-
-void CPiece::UpdateConnections(CPiece* pPiece)
-{
-	if (m_bUpdated || m_pInfo->m_nConnectionCount == 1)
-		return;
-	BOOL bRebuild = FALSE;
-	int sz = sizeof(CPiece*)*(m_pInfo->m_nConnectionCount-1), i, j;
-	CONNECTION *c1, *c2;
-	CPiece** pConnections = (CPiece**)malloc(sz);
-	memset(pConnections, 0, sz);
-
-	for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-	{
-		c1 = &m_pInfo->m_pConnections[i+1];
-
-		for (j = 0; j < pPiece->m_pInfo->m_nConnectionCount-1; j++)
-		{
-			c2 = &pPiece->m_pInfo->m_pConnections[j+1];
-			
-			if (ConnectionsMatch(c1->type, c2->type))
-			{
-// normal
-				if ((fabs(m_pConnections[i].pos[0]-pPiece->m_pConnections[j].pos[0]) < 0.1) && 
-					(fabs(m_pConnections[i].pos[1]-pPiece->m_pConnections[j].pos[1]) < 0.1) && 
-					(fabs(m_pConnections[i].pos[2]-pPiece->m_pConnections[j].pos[2]) < 0.1))
-				{
-					pConnections[i] = pPiece;
-					break;
-				}
-			}
-		}
-	}
-
-	for (i = 0; i < m_pInfo->m_nConnectionCount-1; i++)
-	{
-		if (m_pConnections[i].pPiece == pPiece && pConnections[i] == NULL)
-		{
-			m_pConnections[i].pPiece = NULL;
-			bRebuild = TRUE;
-		}
-
-		if (pConnections[i] == pPiece && m_pConnections[i].pPiece == NULL)
-		{
-			m_pConnections[i].pPiece = pPiece;
-			bRebuild = TRUE;
-		}
-	}
-
-	if (bRebuild)
-		BuildDrawInfo();
-	free(pConnections);
-	m_bUpdated = TRUE;
-}
-*/
 
 void lcPiece::AddConnections(CONNECTION_TYPE* pConnections)
 {

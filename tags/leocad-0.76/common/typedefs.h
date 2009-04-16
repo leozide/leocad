@@ -5,9 +5,11 @@
 #define _TYPEDEF_H_
 
 class Group;
+class lcObject;
 class lcPiece;
-class PieceInfo;
 class lcCamera;
+class lcLight;
+class PieceInfo;
 
 #include "defines.h"
 #include "str.h"
@@ -15,8 +17,6 @@ class lcCamera;
 
 typedef enum
 {
-	LC_COLOR_CHANGED,
-	LC_CAPTURE_LOST,
 	LC_ACTIVATE,
 	LC_PIECE_MODIFIED,
 	LC_CAMERA_MODIFIED,
@@ -140,6 +140,7 @@ typedef enum
 	LC_EDIT_ACTION_ZOOM_REGION,
 	LC_EDIT_ACTION_PAN,
 	LC_EDIT_ACTION_ROTATE_VIEW,
+	LC_EDIT_ACTION_ORBIT,
 	LC_EDIT_ACTION_ROLL,
 	LC_LIBDLG_FILE_RESET,
 	LC_LIBDLG_FILE_OPEN,
@@ -179,6 +180,7 @@ typedef enum
 	LC_ACTION_ZOOM_REGION,
 	LC_ACTION_PAN,
 	LC_ACTION_ROTATE_VIEW,
+	LC_ACTION_ORBIT,
 	LC_ACTION_ROLL,
 	LC_ACTION_CURVE
 } LC_ACTIONS;
@@ -203,6 +205,7 @@ typedef enum
 	LC_CURSOR_PAN,
 	LC_CURSOR_ROLL,
 	LC_CURSOR_ROTATE_VIEW,
+	LC_CURSOR_ORBIT,
 	LC_CURSOR_COUNT
 } LC_CURSOR_TYPE;
 
@@ -210,8 +213,8 @@ typedef enum
 struct CONNECTION
 {
 	unsigned char type;
-	float center[3];
-	float normal[3];
+	Vector3 center;
+	Vector3 normal;
 	CONNECTION* link;
 	lcPiece* owner;
 };
@@ -248,7 +251,7 @@ struct LC_SEL_DATA
 
 struct LC_PIECE_MODIFY
 {
-	lcPiece* piece;
+	lcObject* piece;
 	Vector3 Position;
 	Vector3 Rotation;
 	char name[81];
@@ -260,7 +263,7 @@ struct LC_PIECE_MODIFY
 
 struct LC_CAMERA_MODIFY
 {
-	lcCamera* camera;
+	lcObject* camera;
 	Vector3 Eye;
 	Vector3 Target;
 	Vector3 Up;
@@ -268,7 +271,26 @@ struct LC_CAMERA_MODIFY
 	float fovy;
 	float znear;
 	float zfar;
+	bool ortho;
 	bool hidden;
+	bool cone;
+};
+
+struct LC_LIGHT_MODIFY
+{
+	lcObject* light;
+	Vector3 Position;
+	Vector3 Target;
+	Vector3 AmbientColor;
+	Vector3 DiffuseColor;
+	Vector3 SpecularColor;
+	float ConstantAttenuation;
+	float LinearAttenuation;
+	float QuadraticAttenuation;
+	float SpotCutoff;
+	float SpotExponent;
+	bool Hidden;
+	char name[81];
 };
 
 // Image

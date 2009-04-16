@@ -2,6 +2,7 @@
 #define _OBJECT_H_
 
 #include "str.h"
+#include "algebra.h"
 
 class File;
 class Matrix;
@@ -53,18 +54,13 @@ typedef struct
   bool transparent;
 } LC_RENDER_INFO;
 
-// Callback "closure" struct, used to make the necessary parameters known to
-// the callback function.
-typedef struct LC_CLICKLINE
+struct lcClickLine
 {
-	float a1, b1, c1;
-	float a2, b2, c2;
-	float mindist;
-	lcObject *pClosest;
-
-	float PointDistance(float *point);
-
-} LC_CLICKLINE;
+	Vector3 Start;
+	Vector3 End;
+	float Dist;
+	const lcObject* Object;
+};
 
 class lcObject
 {
@@ -76,15 +72,21 @@ public:
 	// Move the object.
 	virtual void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
 
-	// Check if the object intersects the ray.
-	virtual void MinIntersectDist(LC_CLICKLINE* pLine) = 0;
-
 	// bSelecting is the action (add/remove), bFocus means "add focus if selecting"
 	// or "remove focus only if deselecting", bMultiple = Ctrl key is down
 	virtual void Select(bool bSelecting, bool bFocus, bool bMultiple) = 0;
 
-	// Check if the object intersects the volume specified by a given set of planes.
-	virtual bool IntersectsVolume(const class Vector4* Planes, int NumPlanes) = 0;
+
+
+	// Creates a unique name for this object starting with an existing prefix.
+	void SetUniqueName(lcObject* List, const String& Prefix);
+
+	// Check if this object intersects a ray at a point closer to its start.
+	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const = 0;
+
+	// Check if this object intersects the volume specified by a given set of planes.
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const = 0;
+
 
 
   /*
@@ -177,25 +179,13 @@ private:
 	int m_nKeyInfoCount;
 
 
-	// Bounding box stuff
-protected:
-	float BoundingBoxIntersectDist(LC_CLICKLINE* pLine) const;
-	void BoundingBoxCalculate(float pos[3]);
-	void BoundingBoxCalculate(Matrix *mat);
-	void BoundingBoxCalculate(Matrix *mat, float Dimensions[6]);
-
-private:
-	bool BoundingBoxIntersectionbyLine(float a1, float b1, float c1, float a2, float b2, float c2, float *x, float *y, float *z) const;
-	bool BoundingBoxPointInside(float x, float y, float z) const;
-	float m_fBoxPlanes[4][6];
-
 public:
 	lcObject* m_Next;
 
 	String m_Name;
 
-	// Object type
 private:
+	// Object type
 	LC_OBJECT_TYPE m_nObjectType;
 };
 

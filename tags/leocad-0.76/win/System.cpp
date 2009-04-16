@@ -666,9 +666,9 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 		char Message[256];
 
 		if (Focus->IsPiece())
-			sprintf(Message, "%s (ID: %s)", Focus->m_Name, ((lcPiece*)Focus)->GetPieceInfo()->m_strName);
+			sprintf(Message, "%s (ID: %s)", (char*)Focus->m_Name, ((lcPiece*)Focus)->GetPieceInfo()->m_strName);
 		else
-			strcpy(Message, Focus->m_Name);
+			strcpy(Message, (char*)Focus->m_Name);
 
 		pFrame->SetStatusBarMessage(Message);
 		pFrame->SetMessageText(Message);
@@ -796,24 +796,24 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
         MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
-void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera)
+void SystemUpdateCurrentCamera(lcCamera* OldCamera, lcCamera* NewCamera, lcCamera* CameraList)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
 	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	int i;
+	int i = 0;
 
-	for (i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
+	for (lcCamera* Camera = CameraList; Camera; i++, Camera = (lcCamera*)Camera->m_Next)
 	{
-		if (pOld == pCamera)
+		if (OldCamera == Camera)
 		{
 			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
 			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
 		}
 
-		if (pNew == pCamera)
+		if (NewCamera == Camera)
 		{
 			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
 			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
@@ -824,26 +824,27 @@ void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera
 }
 
 // Update the list of cameras
-void SystemUpdateCameraMenu(lcCamera* pCamera)
+void SystemUpdateCameraMenu(lcCamera* CameraList)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
 	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	lcCamera* pFirst = pCamera;
-	int i;
 
 	while (pMainMenu->GetMenuItemCount())
 		pMainMenu->DeleteMenu(0, MF_BYPOSITION);
 	while (pPopupMenu->GetMenuItemCount())
 		pPopupMenu->DeleteMenu(0, MF_BYPOSITION);
 
-	for (i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
+	lcObject* Camera = CameraList;
+	int i;
+
+	for (i = 0; Camera; i++, Camera = Camera->m_Next)
 		if (i > 6)
 		{
-			pMainMenu->AppendODMenu(pCamera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
-			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->m_Name);
+			pMainMenu->AppendODMenu(Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
+			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, Camera->m_Name);
 		}
 
 	if (i > 7)
@@ -852,11 +853,11 @@ void SystemUpdateCameraMenu(lcCamera* pCamera)
 		pPopupMenu->AppendMenu(MF_SEPARATOR);
 	}
 
-	pCamera = pFirst;
-	for (i = 0; pCamera && (i < 7); i++, pCamera = (lcCamera*)pCamera->m_Next)
+	Camera = CameraList;
+	for (i = 0; Camera && (i < 7); i++, Camera = (lcCamera*)Camera->m_Next)
 	{
-		pMainMenu->AppendODMenu(pCamera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
-		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->m_Name);
+		pMainMenu->AppendODMenu(Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
+		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, Camera->m_Name);
 
 		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
 	}
@@ -1471,6 +1472,28 @@ bool SystemDoDialog(int nMode, void* param)
 		{
 			CFileDialog dlg(FALSE, "*.obj", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 				"Wavefront Files (*.obj)|*.obj|All Files (*.*)|*.*||", AfxGetMainWnd());
+			if (dlg.DoModal() == IDOK)
+			{
+				strcpy((char*)param, dlg.GetPathName());
+				return true;
+			}
+		} break;
+
+		case LC_DLG_VRML97:
+		{
+			CFileDialog dlg(FALSE, "*.wrl", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				"VRML97 Files (*.wrl)|*.wrl|All Files (*.*)|*.*||", AfxGetMainWnd());
+			if (dlg.DoModal() == IDOK)
+			{
+				strcpy((char*)param, dlg.GetPathName());
+				return true;
+			}
+		} break;
+
+		case LC_DLG_X3DV:
+		{
+			CFileDialog dlg(FALSE, "*.x3dv", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				"X3DV Files (*.x3dv)|*.x3dv|All Files (*.*)|*.*||", AfxGetMainWnd());
 			if (dlg.DoModal() == IDOK)
 			{
 				strcpy((char*)param, dlg.GetPathName());

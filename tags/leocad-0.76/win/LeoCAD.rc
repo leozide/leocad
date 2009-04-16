@@ -150,14 +150,13 @@ BEGIN
     BUTTON      ID_ACTION_ZOOM
     BUTTON      ID_ACTION_PAN
     BUTTON      ID_ACTION_ROTATE_VIEW
+    BUTTON      ID_ACTION_ORBIT
     BUTTON      ID_ACTION_ROLL
     BUTTON      ID_ACTION_ZOOM_REGION
     BUTTON      ID_ZOOM_EXTENTS
     SEPARATOR
     BUTTON      ID_PIECE_PREVIOUS
     BUTTON      ID_PIECE_NEXT
-    BUTTON      ID_PIECE_MIRROR
-    BUTTON      ID_PIECE_ARRAY
 END
 
 IDR_ANIMATORBAR TOOLBAR  16, 15
@@ -1511,6 +1510,7 @@ IDC_PAN_SE              CURSOR                  "res\\pan_se.cur"
 IDC_PAN_SW              CURSOR                  "res\\pan_sw.cur"
 IDC_ROTX                CURSOR                  "res\\rotx.cur"
 IDC_ROTY                CURSOR                  "res\\roty.cur"
+IDC_ORBIT               CURSOR                  "res\\orbit.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

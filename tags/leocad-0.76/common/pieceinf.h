@@ -17,8 +17,8 @@ class Texture;
 struct CONNECTIONINFO
 {
 	unsigned char type;
-	float center[3];
-	float normal[3];
+	Vector3 center;
+	Vector3 normal;
 };
 
 struct DRAWGROUP

@@ -20,31 +20,66 @@ static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 // =============================================================================
 // CameraTarget class
 
-CameraTarget::CameraTarget(lcCamera *pParent)
+CameraTarget::CameraTarget(lcCamera* Parent)
 	: lcObject(LC_OBJECT_CAMERA_TARGET)
 {
-	m_pParent = pParent;
-	m_Name = pParent->m_Name + ".Target";
+	m_Parent = Parent;
+	m_Name = Parent->m_Name + ".Target";
 }
 
 CameraTarget::~CameraTarget()
 {
 }
 
-void CameraTarget::MinIntersectDist(LC_CLICKLINE* pLine)
+void CameraTarget::ClosestLineIntersect(lcClickLine& ClickLine) const
 {
-	float dist = (float)BoundingBoxIntersectDist(pLine);
+	BoundingBox Box;
+	Box.m_Max = Vector3(0.2f, 0.2f, 0.2f);
+	Box.m_Min = Vector3(-0.2f, -0.2f, -0.2f);
 
-	if (dist < pLine->mindist)
+	Matrix44 WorldView = ((lcCamera*)m_Parent)->m_WorldView;
+	WorldView.SetTranslation(Mul30(-((lcCamera*)m_Parent)->m_TargetPosition, WorldView));
+
+	Vector3 Start = Mul31(ClickLine.Start, WorldView);
+	Vector3 End = Mul31(ClickLine.End, WorldView);
+
+	float Dist;
+	if (BoundingBoxRayMinIntersectDistance(Box, Start, End, &Dist) && (Dist < ClickLine.Dist))
 	{
-		pLine->mindist = dist;
-		pLine->pClosest = this;
+		ClickLine.Object = this;
+		ClickLine.Dist = Dist;
 	}
+}
+
+bool CameraTarget::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
+{
+	BoundingBox Box;
+	Box.m_Max = Vector3(0.2f, 0.2f, 0.2f);
+	Box.m_Min = Vector3(-0.2f, -0.2f, -0.2f);
+
+	// Transform the planes to local space.
+	Vector4* LocalPlanes = new Vector4[NumPlanes];
+	int i;
+
+	Matrix44 WorldView = ((lcCamera*)m_Parent)->m_WorldView;
+	WorldView.SetTranslation(Mul30(-((lcCamera*)m_Parent)->m_TargetPosition, WorldView));
+
+	for (i = 0; i < NumPlanes; i++)
+	{
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldView));
+		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldView[3]), Vector3(LocalPlanes[i]));
+	}
+
+	bool Intersect = BoundingBoxIntersectsVolume(Box, LocalPlanes, NumPlanes);
+
+	delete[] LocalPlanes;
+
+	return Intersect;
 }
 
 void CameraTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
 {
-	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
+	m_Parent->SelectTarget(bSelecting, bFocus, bMultiple);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -183,7 +218,7 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, l
 
 lcCamera::~lcCamera()
 {
-	delete m_pTarget;
+	delete m_Target;
 }
 
 void lcCamera::Initialize()
@@ -202,7 +237,7 @@ void lcCamera::Initialize()
 	float *values[] = { m_Position, m_TargetPosition, m_fUp };
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
 
-	m_pTarget = new CameraTarget(this);
+	m_Target = new CameraTarget(this);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -454,13 +489,13 @@ void lcCamera::Select(bool bSelecting, bool bFocus, bool bMultiple)
 		{
 			m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED);
 
-			m_pTarget->Select(false, true, bMultiple);
+			m_Target->Select(false, true, bMultiple);
 		}
 		else
 			m_nState |= LC_CAMERA_SELECTED;
 
 		if (bMultiple == false)
-			m_pTarget->Select(false, false, bMultiple);
+			m_Target->Select(false, false, bMultiple);
 	}
 	else
 	{
@@ -502,11 +537,6 @@ void lcCamera::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
 	CalculateKeys(nTime, bAnimation);
 
-	UpdateBoundingBox();
-}
-
-void lcCamera::UpdateBoundingBox()
-{
 	// Fix the up vector
 	Vector3 frontvec = m_Position - m_TargetPosition;
 	Vector3 upvec(m_fUp[0], m_fUp[1], m_fUp[2]), sidevec;
@@ -520,14 +550,6 @@ void lcCamera::UpdateBoundingBox()
 
 	m_WorldView = CreateLookAtMatrix(m_Position, m_TargetPosition, Vector3(m_fUp[0], m_fUp[1], m_fUp[2]));
 	m_ViewWorld = RotTranInverse(m_WorldView);
-
-	Matrix mat = (Matrix&)m_ViewWorld;
-
-	mat.SetTranslation(m_Position[0], m_Position[1], m_Position[2]);
-	BoundingBoxCalculate(&mat);
-	mat.SetTranslation(m_TargetPosition[0], m_TargetPosition[1], m_TargetPosition[2]);
-	m_pTarget->BoundingBoxCalculate(&mat);
-	mat.SetTranslation(0, 0, 0);
 }
 
 void lcCamera::Render(float fLineWidth)
@@ -657,21 +679,49 @@ void lcCamera::Render(float fLineWidth)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void lcCamera::MinIntersectDist(LC_CLICKLINE* pLine)
+void lcCamera::ClosestLineIntersect(lcClickLine& ClickLine) const
 {
-	float dist;
+	BoundingBox Box;
+	Box.m_Max = Vector3(0.2f, 0.2f, 0.2f);
+	Box.m_Min = Vector3(-0.2f, -0.2f, -0.2f);
 
-	if (m_nState & LC_CAMERA_HIDDEN)
-		return;
+	Vector3 Start = Mul31(ClickLine.Start, m_WorldView);
+	Vector3 End = Mul31(ClickLine.End, m_WorldView);
 
-	dist = (float)BoundingBoxIntersectDist(pLine);
-	if (dist < pLine->mindist)
+	float Dist;
+	if (BoundingBoxRayMinIntersectDistance(Box, Start, End, &Dist) && (Dist < ClickLine.Dist))
 	{
-		pLine->mindist = dist;
-		pLine->pClosest = this;
+		ClickLine.Object = this;
+		ClickLine.Dist = Dist;
 	}
 
-	m_pTarget->MinIntersectDist(pLine);
+	m_Target->ClosestLineIntersect(ClickLine);
+}
+
+bool lcCamera::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
+{
+	BoundingBox Box;
+	Box.m_Max = Vector3(0.3f, 0.3f, 0.3f);
+	Box.m_Min = Vector3(-0.3f, -0.3f, -0.3f);
+
+	// Transform the planes to local space.
+	Vector4* LocalPlanes = new Vector4[NumPlanes];
+	int i;
+
+	for (i = 0; i < NumPlanes; i++)
+	{
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), m_WorldView));
+		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(m_WorldView[3]), Vector3(LocalPlanes[i]));
+	}
+
+	bool Intersect = BoundingBoxIntersectsVolume(Box, LocalPlanes, NumPlanes);
+
+	delete[] LocalPlanes;
+
+	if (!Intersect)
+		Intersect = m_Target->IntersectsVolume(Planes, NumPlanes);
+
+	return Intersect;
 }
 
 void lcCamera::LoadProjection(float fAspect)

@@ -99,7 +99,6 @@ Project::Project()
 	m_pTerrain = new Terrain();
 	m_pBackground = new Texture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
-	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
 	for (i = 0; i < LC_CONNECTIONS; i++)
@@ -152,7 +151,7 @@ void Project::UpdateInterface()
 	SystemUpdateFocus(NULL);
 	SetAction(m_nCurAction);
 	SystemUpdateViewport(m_nViewportMode, 0);
-	SystemUpdateColorList(m_nCurColor);
+	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
@@ -297,8 +296,8 @@ void Project::LoadDefaults(bool cameras)
 	SystemUpdateViewport(0, m_nViewportMode);
 	m_nViewportMode = 0;
 	SetAction(0);
-	m_nCurColor = 0;
-	SystemUpdateColorList(m_nCurColor);
+	g_App->m_SelectedColor = 0;
+	SystemUpdateColorList(g_App->m_SelectedColor);
 	m_bAnimation = false;
 	m_bAddKeys = false;
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
@@ -469,7 +468,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		file->ReadFloat (&m_fLineWidth, 1);
 		file->ReadLong (&m_nDetail, 1);
 		file->ReadLong (&i, 1); //m_nCurGroup = i;
-		file->ReadLong (&i, 1); m_nCurColor = i;
+		file->ReadLong (&i, 1); //m_nCurColor = i;
 		file->ReadLong (&i, 1); action = i;
 		file->ReadLong (&i, 1); m_nCurStep = i;
 	}
@@ -485,30 +484,30 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		if (fv > 0.4f)
 		{
 			char name[9];
-			lcPiece* pPiece = new lcPiece(NULL);
-			pPiece->FileLoad(*file, name);
+			lcPiece* Piece = new lcPiece(NULL);
+			Piece->FileLoad(*file, name);
 			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 			if (pInfo)
 			{
-				pPiece->SetPieceInfo(pInfo);
+				Piece->SetPieceInfo(pInfo);
 
 				if (bMerge)
 					for (lcPiece* p = m_Pieces; p; p = (lcPiece*)p->m_Next)
-						if (p->m_Name == pPiece->m_Name)
+						if (p->m_Name == Piece->m_Name)
 						{
-							pPiece->CreateName(m_Pieces);
+							Piece->CreateName(m_Pieces);
 							break;
 						}
 
-				if (pPiece->m_Name.GetLength() == 0)
-					pPiece->CreateName(m_Pieces);
+				if (Piece->m_Name.GetLength() == 0)
+					Piece->CreateName(m_Pieces);
 
-				AddPiece(pPiece);
+				AddPiece(Piece);
 				if (!bUndo)
 					SystemPieceComboAdd(pInfo->m_strDescription);
 			}
 			else 
-				delete pPiece;
+				delete Piece;
 		}
 		else
 		{
@@ -526,21 +525,21 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
 
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
-			if (pInfo != NULL)
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(name);
+			if (Info != NULL)
 			{
-				lcPiece* pPiece = new lcPiece(pInfo);
+				lcPiece* Piece = new lcPiece(Info);
 				Matrix mat;
 
-				pPiece->Initialize(pos[0], pos[1], pos[2], step, 1, color);
-				pPiece->CreateName(m_Pieces);
-				AddPiece(pPiece);
+				Piece->Initialize(pos[0], pos[1], pos[2], step, 1, color);
+				Piece->CreateName(m_Pieces);
+				AddPiece(Piece);
 				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
 				mat.ToAxisAngle(param);
-				pPiece->ChangeKey(1, false, false, param, LC_PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, param, LC_PK_ROTATION);
-//				pPiece->SetGroup((Group*)group);
-				SystemPieceComboAdd(pInfo->m_strDescription);
+				Piece->ChangeKey(1, false, false, param, LC_PK_ROTATION);
+				Piece->ChangeKey(1, true, false, param, LC_PK_ROTATION);
+//				Piece->SetGroup((Group*)group);
+				SystemPieceComboAdd(Info->m_strDescription);
 			}
 		}
 		SystemStepProgressBar();
@@ -826,7 +825,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		SystemUpdateFocus(NULL);
 	SetAction(action);
 	SystemUpdateViewport(m_nViewportMode, 0);
-	SystemUpdateColorList(m_nCurColor);
+	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
@@ -864,18 +863,18 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteLong (&m_nDetail, 1);
 	//i = m_nCurGroup;
 	file->WriteLong (&i, 1);
-	i = m_nCurColor; file->WriteLong (&i, 1);
+	i = 0; file->WriteLong (&i, 1); //m_nCurColor
 	i = m_nCurAction; file->WriteLong (&i, 1);
 	i = m_nCurStep; file->WriteLong (&i, 1);
 	file->WriteLong (&m_nScene, 1);
 
-	lcPiece* pPiece;
-	for (i = 0, pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	lcPiece* Piece;
+	for (i = 0, Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		i++;
-	file->WriteLong (&i, 1);
+	file->WriteLong(&i, 1);
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		pPiece->FileSave (*file, m_pGroups);
+	for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		Piece->FileSave(*file, m_pGroups);
 
 	ch = strlen(m_strAuthor);
 	file->Write(&ch, 1);
@@ -898,18 +897,18 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteByte (&m_nViewportMode, 1);
 	file->WriteByte (&m_nActiveViewport, 1);
 
-	lcCamera* pCamera;
-	for (i = 0, pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
+	lcCamera* Camera;
+	for (i = 0, Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
 		i++;
 	file->WriteLong (&i, 1);
 
-	for (i = 0, pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-		pCamera->FileSave(*file);
+	for (i = 0, Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+		Camera->FileSave(*file);
 
 	for (j = 0; j < 4; j++)
 	{
-		for (i = 0, pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-			if (pCamera == m_pViewCameras[j])
+		for (i = 0, Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+			if (Camera == m_pViewCameras[j])
 				break;
 			else
 				i++;
@@ -977,50 +976,50 @@ void Project::FileSave(File* file, bool bUndo)
 
 void Project::FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const
 {
-  FileMem* CurFile = NULL;
+	FileMem* CurFile = NULL;
 	char Buf[1024];
 
 	while (MPD.ReadLine(Buf, 1024))
-  {
-    String Line(Buf);
+	{
+		String Line(Buf);
 
-    Line.TrimLeft();
+		Line.TrimLeft();
 
-    if (Line[0] != '0')
-    {
-      // Copy current line.
-      if (CurFile != NULL)
-        CurFile->Write(Buf, strlen(Buf));
+		if (Line[0] != '0')
+		{
+			// Copy current line.
+			if (CurFile != NULL)
+				CurFile->Write(Buf, strlen(Buf));
 
-      continue;
-    }
+			continue;
+		}
 
-    Line.TrimRight();
-    Line = Line.Right(Line.GetLength() - 1);
-    Line.TrimLeft();
+		Line.TrimRight();
+		Line = Line.Right(Line.GetLength() - 1);
+		Line.TrimLeft();
 
-    // Find where a subfile starts.
-    if (Line.CompareNoCase("FILE", 4) == 0)
-    {
-      Line = Line.Right(Line.GetLength() - 4);
-      Line.TrimLeft();
+		// Find where a subfile starts.
+		if (Line.CompareNoCase("FILE", 4) == 0)
+		{
+			Line = Line.Right(Line.GetLength() - 4);
+			Line.TrimLeft();
 
-      // Create a new file.
-      CurFile = new FileMem();
-      CurFile->SetFileName(Line);
-      FileArray.Add(CurFile);
-    }
-    else if (Line.CompareNoCase("ENDFILE", 7) == 0)
-    {
-      // File ends here.
-      CurFile = NULL;
-    }
-    else if (CurFile != NULL)
-    {
-      // Copy current line.
-      CurFile->Write(Buf, strlen(Buf));
-    }
-  }
+			// Create a new file.
+			CurFile = new FileMem();
+			CurFile->SetFileName(Line);
+			FileArray.Add(CurFile);
+		}
+		else if (Line.CompareNoCase("ENDFILE", 7) == 0)
+		{
+			// File ends here.
+			CurFile = NULL;
+		}
+		else if (CurFile != NULL)
+		{
+			// Copy current line.
+			CurFile->Write(Buf, strlen(Buf));
+		}
+	}
 }
 
 inline String GetToken(char*& ptr)
@@ -1039,7 +1038,7 @@ inline String GetToken(char*& ptr)
 	return Ret;
 }
 
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray)
+void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray, const String& FilePath)
 {
 	char buf[1024];
 
@@ -1140,7 +1139,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				{
 					if (_stricmp(FileArray[i]->GetFileName(), pn) == 0)
 					{
-						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 						read = false;
 						break;
 					}
@@ -1154,8 +1153,25 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 
 				if (tf.Open(pn, "rt"))
 				{
-					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
+					// Read from the current directory.
+					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray, FilePath);
 					read = false;
+				}
+				else
+				{
+					// Try the file's directory.
+					String Path = FilePath + pn;
+
+					if (tf.Open(Path, "rt"))
+					{
+						// Read from the current directory.
+						FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray, FilePath);
+						read = false;
+					}
+					else
+					{
+						console.PrintWarning("Could not find %s.\n", pn);
+					}
 				}
 			}
 		}
@@ -1184,18 +1200,18 @@ bool Project::DoFileSave()
 }
 
 // Save the document data to a file
-// lpszPathName = path name where to save document file
-// if lpszPathName is NULL then the user will be prompted (SaveAs)
-// note: lpszPathName can be different than 'm_strPathName'
+// PathName = path name where to save document file
+// if PathName is NULL then the user will be prompted (SaveAs)
+// note: PathName can be different than 'm_strPathName'
 // if 'bReplace' is TRUE will change file name if successful (SaveAs)
 // if 'bReplace' is FALSE will not change path name (SaveCopyAs)
-bool Project::DoSave(char* lpszPathName, bool bReplace)
+bool Project::DoSave(char* PathName, bool bReplace)
 {
 	FileDisk file;
 	char newName[LC_MAXPATH];
 	memset(newName, 0, sizeof(newName));
-	if (lpszPathName)
-		strcpy(newName, lpszPathName);
+	if (PathName)
+		strcpy(newName, PathName);
 
 	char ext[4], *ptr;
 	memset(ext, 0, 4);
@@ -1239,7 +1255,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 //		MessageBox("Failed to save.");
 
 		// be sure to delete the file
-		if (lpszPathName == NULL)
+		if (PathName == NULL)
 			remove(newName);
 
 		return false;
@@ -1255,7 +1271,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		const int col[28] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+		const int col[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
 		lcPiece* pPiece;
 		int i, steps = GetLastStep();
 		char buf[256], *ptr;
@@ -1420,120 +1436,140 @@ bool Project::OpenProject(const char* FileName)
 	return true;
 }
 
-bool Project::OnOpenDocument (const char* lpszPathName)
+bool Project::OnOpenDocument(const char* PathName)
 {
-  FileDisk file;
-  bool bSuccess = false;
+	FileDisk file;
+	bool bSuccess = false;
 
-  if (!file.Open(lpszPathName, "rb"))
-  {
-//    MessageBox("Failed to open file.");
-    return false;
-  }
+	if (!file.Open(PathName, "rb"))
+	{
+		char Message[LC_MAXPATH + 64];
 
-  char ext[4];
-  const char *ptr;
-  memset(ext, 0, 4);
-  ptr = strrchr(lpszPathName, '.');
-  if (ptr != NULL)
-  {
-    strncpy(ext, ptr+1, 3);
-    _strlwr(ext);
-  }
+		sprintf(Message, "Failed to open %s for reading.", PathName);
+		main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
 
-  bool datfile = false;
-  bool mpdfile = false;
+		return false;
+	}
 
-  // Find out what file type we're loading.
-  if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
-    datfile = true;
-  else if (strcmp(ext, "mpd") == 0)
-    mpdfile = true;
+	char ext[4];
+	memset(ext, 0, 4);
+	const char* ptr = strrchr(PathName, '.');
+	if (ptr != NULL)
+	{
+		strncpy(ext, ptr+1, 3);
+		_strlwr(ext);
+	}
 
-  // Delete the current project.
-  DeleteContents(false);
-  LoadDefaults(datfile || mpdfile);
-  SetModifiedFlag(true);  // dirty during loading
+	bool datfile = false;
+	bool mpdfile = false;
 
-  SystemDoWaitCursor(1);
+	// Find out what file type we're loading.
+	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+		datfile = true;
+	else if (strcmp(ext, "mpd") == 0)
+		mpdfile = true;
 
-  if (file.GetLength() != 0)
-  {
-    lcPtrArray<File> FileArray;
+	// Delete the current project.
+	DeleteContents(false);
+	LoadDefaults(datfile || mpdfile);
+	SetModifiedFlag(true);  // dirty during loading
 
-    // Unpack the MPD file.
-    if (mpdfile)
-    {
-      FileReadMPD(file, FileArray);
+	SystemDoWaitCursor(1);
 
-      if (FileArray.GetSize() == 0)
-      {
-        file.Seek(0, SEEK_SET);
-        mpdfile = false;
-        datfile = true;
-        console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
-      }
-    }
+	if (file.GetLength() != 0)
+	{
+		lcPtrArray<File> FileArray;
 
-    if (datfile || mpdfile)
-    {
-      int ok = 0, step = 1;
-      Matrix mat;
+		// Unpack the MPD file.
+		if (mpdfile)
+		{
+			FileReadMPD(file, FileArray);
 
-      if (mpdfile)
-        FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray);
-      else
-        FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
+			if (FileArray.GetSize() == 0)
+			{
+				file.Seek(0, SEEK_SET);
+				mpdfile = false;
+				datfile = true;
+				console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
+			}
+		}
 
-      m_nCurStep = step;
-      SystemUpdateTime(false, m_nCurStep, 255);
-      SystemUpdateFocus(NULL);
-      UpdateSelection();
-      CalculateStep();
-      UpdateAllViews ();
+		if (datfile || mpdfile)
+		{
+			int ok = 0, step = 1;
+			Matrix mat;
 
-      console.PrintMisc("%d objects imported.\n", ok);
-      bSuccess = true;
-    }
-    else
-    {
-      // Load a LeoCAD file.
-      bSuccess = FileLoad(&file, false, false);
-    }
+			// Extract the file's directory.
+			String FilePath(PathName);
+			int s1 = FilePath.ReverseFind('\\');
+			int s2 = FilePath.ReverseFind('/');
 
-    // Clean up.
-    if (mpdfile)
-    {
-      for (int i = 0; i < FileArray.GetSize(); i++)
-        delete FileArray[i];
-    }
-  }
+			if (s2 > s1)
+				s1 = s2;
 
-  file.Close();
-  SystemDoWaitCursor(-1);
+			if (s1 == -1)
+				FilePath = "";
+			else
+				FilePath[s1+1] = 0;
 
-  if (bSuccess == false)
-  {
-//    MessageBox("Failed to load.");
-    DeleteContents(false);   // remove failed contents
-    return false;
-  }
+			if (mpdfile)
+				FileReadLDraw(FileArray[0], &mat, &ok, g_App->m_SelectedColor, &step, FileArray, FilePath);
+			else
+				FileReadLDraw(&file, &mat, &ok, g_App->m_SelectedColor, &step, FileArray, FilePath);
 
-  CheckPoint("");
-  m_nSaveTimer = 0;
+			m_nCurStep = step;
+			SystemUpdateTime(false, m_nCurStep, 255);
+			SystemUpdateFocus(NULL);
+			UpdateSelection();
+			CalculateStep();
+			UpdateAllViews ();
 
-  SetModifiedFlag(false);     // start off with unmodified
+			console.PrintMisc("%d objects imported.\n", ok);
+			bSuccess = true;
+		}
+		else
+		{
+			// Load a LeoCAD file.
+			bSuccess = FileLoad(&file, false, false);
+		}
 
-  return true;
+		// Clean up.
+		if (mpdfile)
+		{
+			for (int i = 0; i < FileArray.GetSize(); i++)
+				delete FileArray[i];
+		}
+	}
+
+	file.Close();
+	SystemDoWaitCursor(-1);
+
+	if (bSuccess == false)
+	{
+		char Message[LC_MAXPATH + 64];
+
+		sprintf(Message, "Failed to load %s.", PathName);
+		main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
+
+		DeleteContents(false);   // remove failed contents
+		return false;
+	}
+
+	CheckPoint("");
+	m_nSaveTimer = 0;
+
+	SetModifiedFlag(false);     // start off with unmodified
+
+	return true;
 }
 
-void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
+void Project::SetPathName(const char* PathName, bool bAddToMRU)
 {
-	strcpy(m_strPathName, lpszPathName);
+	strcpy(m_strPathName, PathName);
 
 	// always capture the complete file name including extension (if present)
-	const char* lpszTemp = lpszPathName;
-	for (const char* lpsz = lpszPathName; *lpsz != '\0'; lpsz++)
+	const char* lpszTemp = PathName;
+	for (const char* lpsz = PathName; *lpsz != '\0'; lpsz++)
 	{
 		// remember last directory/drive separator
 		if (*lpsz == '\\' || *lpsz == '/' || *lpsz == ':')
@@ -1545,7 +1581,7 @@ void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
 
 	// add it to the file MRU list
 	if (bAddToMRU)
-		main_window->AddToMRU (lpszPathName);
+		main_window->AddToMRU(PathName);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1585,22 +1621,48 @@ void Project::CheckPoint (const char* text)
 
 void Project::AddView (View* pView)
 {
-  m_ViewList.Add (pView);
+	m_ViewList.Add(pView);
 
-  pView->MakeCurrent ();
-  RenderInitialize ();
+	pView->MakeCurrent();
+	RenderInitialize();
 }
 
-void Project::RemoveView (View* pView)
+void Project::RemoveView(View* pView)
 {
-  m_ViewList.RemovePointer (pView);
+	if (pView == m_ActiveView)
+		m_ActiveView = NULL;
+	m_ViewList.RemovePointer(pView);
 }
 
-void Project::UpdateAllViews (View* pSender)
+void Project::UpdateAllViews()
 {
-  for (int i = 0; i < m_ViewList.GetSize (); i++)
-    if (m_ViewList[i] != pSender)
-      m_ViewList[i]->Redraw ();
+	for (int i = 0; i < m_ViewList.GetSize(); i++)
+		m_ViewList[i]->Redraw(true);
+}
+
+// Returns true if the active view changed.
+bool Project::SetActiveView(View* view)
+{
+	if (view == m_ActiveView)
+		return false;
+
+	lcCamera* OldCamera = NULL;
+	View* OldView = m_ActiveView;
+	m_ActiveView = view;
+
+	if (OldView)
+	{
+		OldView->Redraw();
+		OldCamera = OldView->GetCamera();
+	}
+
+	if (view)
+	{
+		view->Redraw();
+		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_Cameras);
+	}
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1693,7 +1755,7 @@ static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel,
 			}
 		}
 
-		node->piece->Render(bLighting, bEdges, nLastColor, bTrans);
+		node->piece->Render(bLighting, bEdges);
 		return;
 	}
 
@@ -2034,7 +2096,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 							}
 						}
 */
-						pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+						pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
 					}
 					else
 					{
@@ -2164,7 +2226,7 @@ void Project::RenderScene(bool bShaded, bool bDrawViewports)
 				glTranslatef(Pos[0], Pos[1], Pos[2]);
 				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
 				glLineWidth(2*m_fLineWidth);
-				m_pCurPiece->RenderPiece(m_nCurColor);
+				g_App->m_PiecePreview->m_Selection->RenderPiece(g_App->m_SelectedColor);
 				glLineWidth(m_fLineWidth);
 				glPopMatrix();
 			}
@@ -3059,19 +3121,7 @@ void Project::RenderInitialize()
 		glEnable(GL_DITHER);
 	else
 		glDisable(GL_DITHER);
-/*
-	// TODO: use a blending function
-	if (m_dwDetail & DET_ANTIALIAS)
-	{
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_POLYGON_SMOOTH);
-	}
-	else
-	{
-		glDisable(GL_LINE_SMOOTH);
-		glDisable(GL_POLYGON_SMOOTH);
-	}
-*/
+
 	if (m_nDetail & LC_DET_SMOOTH)
 		glShadeModel(GL_SMOOTH);
 	else
@@ -3079,16 +3129,16 @@ void Project::RenderInitialize()
 
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
-	    glEnable(GL_LIGHTING);
-            glEnable(GL_COLOR_MATERIAL);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_COLOR_MATERIAL);
 
-            GLfloat mat_translucent[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
-            GLfloat mat_opaque[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
-            GLfloat medium_shininess[] = { (GLfloat)64.0 };
+		GLfloat mat_translucent[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
+		GLfloat mat_opaque[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
+		GLfloat medium_shininess[] = { (GLfloat)64.0 };
 
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, medium_shininess);
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_opaque);
-            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_translucent);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, medium_shininess);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_opaque);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_translucent);
 	}
 	else
 	{
@@ -3109,17 +3159,17 @@ void Project::RenderInitialize()
 		glDisable (GL_FOG);
 
 	// Load font
-  if (!m_pScreenFont->IsLoaded ())
-  {
-    char filename[LC_MAXPATH];
-    FileDisk file;
+	if (!m_pScreenFont->IsLoaded())
+	{
+		char filename[LC_MAXPATH];
+		FileDisk file;
 
-    strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath ());
-    strcat (filename, "sysfont.txf");
+		strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
+		strcat(filename, "sysfont.txf");
 
-    if (file.Open (filename, "rb"))
-      m_pScreenFont->FileLoad (file);
-  }
+		if (file.Open(filename, "rb"))
+			m_pScreenFont->FileLoad(file);
+	}
 
 	glAlphaFunc(GL_GREATER, 0.0625);
 
@@ -3132,9 +3182,6 @@ void Project::RenderInitialize()
 			m_nScene &= ~LC_SCENE_BG;
 //			AfxMessageBox ("Could not load background");
 		}
-
-	// Set the perspective correction hint to fastest or nicest...
-//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 }
 
 void Project::DrawGrid()
@@ -3228,33 +3275,33 @@ void Project::RemovePiece(lcPiece* pPiece)
 void Project::CalculateStep()
 {
 	int PieceCount = 0;
-	lcPiece* pPiece;
-	lcCamera* pCamera;
-	lcLight* pLight;
+	lcPiece* Piece;
+	lcCamera* Camera;
+	lcLight* Light;
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+		Piece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		PieceCount++;
 	}
 
 	SystemDoWaitCursor(1);
 	SystemStartProgressBar(0, PieceCount, 1, "Updating pieces...");
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, false);
+		Piece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, false);
 		SystemStepProgressBar();
 	}
 
 	SystemEndProgressBar();
 	SystemDoWaitCursor(-1);
 
-	for (pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-		pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+	for (Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+		Camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
-	for (pLight = m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-		pLight->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+	for (Light = m_Lights; Light; Light = (lcLight*)Light->m_Next)
+		Light->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 }
 
 // Returns true if anything was removed (used by cut and del)
@@ -3366,39 +3413,39 @@ void Project::UpdateSelection()
 		flags |= LC_SEL_NO_PIECES;
 	else
 	{
-		lcPiece* pPiece;
+		lcPiece* Piece;
 		Group* pGroup = NULL;
 		bool first = true;
 
-		for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+		for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		{
-			if (pPiece->IsSelected())
+			if (Piece->IsSelected())
 			{
 				SelectedCount++;
 
-				if (pPiece->IsFocused())
-					Focus = pPiece;
+				if (Piece->IsFocused())
+					Focus = Piece;
 
 				if (flags & LC_SEL_PIECE)
 					flags |= LC_SEL_MULTIPLE;
 				else
 					flags |= LC_SEL_PIECE;
 
-				if (pPiece->GetGroup() != NULL)
+				if (Piece->GetGroup() != NULL)
 				{
 					flags |= LC_SEL_GROUP;
-					if (pPiece->IsFocused())
+					if (Piece->IsFocused())
 						flags |= LC_SEL_FOCUSGROUP;
 				}
 
 				if (first)
 				{
-					pGroup = pPiece->GetGroup();
+					pGroup = Piece->GetGroup();
 					first = false;
 				}
 				else
 				{
-					if (pGroup != pPiece->GetGroup())
+					if (pGroup != Piece->GetGroup())
 						flags |= LC_SEL_CANGROUP;
 					else
 						if (pGroup == NULL)
@@ -3409,30 +3456,30 @@ void Project::UpdateSelection()
 			{
 				flags |= LC_SEL_UNSELECTED;
 
-				if (pPiece->IsHidden())
+				if (Piece->IsHidden())
 					flags |= LC_SEL_HIDDEN;
 			}
 		}
 	}
 
-	for (lcCamera* pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-		if (pCamera->IsSelected())
+	for (lcCamera* Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+		if (Camera->IsSelected())
 		{
 			flags |= LC_SEL_CAMERA;
 			SelectedCount++;
 
-			if (pCamera->IsEyeFocused() || pCamera->IsTargetFocused())
-				Focus = pCamera;
+			if (Camera->IsEyeFocused() || Camera->IsTargetFocused())
+				Focus = Camera;
 		}
 
-	for (lcLight* pLight = m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-		if (pLight->IsSelected())
+	for (lcLight* Light = m_Lights; Light; Light = (lcLight*)Light->m_Next)
+		if (Light->IsSelected())
 		{
 			flags |= LC_SEL_LIGHT;
 			SelectedCount++;
 
-			if (pLight->IsEyeFocused() || pLight->IsTargetFocused())
-				Focus = pLight;
+			if (Light->IsEyeFocused() || Light->IsTargetFocused())
+				Focus = Light;
 		}
 
 	if (m_nTracking == LC_TRACK_NONE)
@@ -3627,17 +3674,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 {
 	switch (id)
 	{
-		case LC_COLOR_CHANGED:
-		{
-			m_nCurColor = (unsigned char)param;
-		} break;
-
-		case LC_CAPTURE_LOST:
-		{
-			if (m_nTracking != LC_TRACK_NONE)
-				StopTracking(false);
-		} break;
-
 		// Application is (de)activated
 		case LC_ACTIVATE:
 		{
@@ -3874,7 +3910,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_3DS:
 		{
-#ifdef LC_WINDOWS
+#if LC_WINDOWS
 			Export3DStudio();
 #endif
 		} break;
@@ -3975,29 +4011,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
           strcat (opts.path, "/");
         Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
 
-/*
-				// Create destination folder
-        char *MyPath = strdup(dlg.m_strFolder);
-        char *p = MyPath;
-        int psave;
-        while(*p)
-        {
-          while(*p && *p != '\\')
-						++p;
-
-					psave = *p;
-					if (*p == '\\')
-						*p = 0;
-
-					if (strlen(MyPath) > 3)
-						CreateDirectory(MyPath, NULL);
-
-					*p = psave;
-					if (*p)
-						++p;
-				}
-				free(MyPath);
-*/
         main_window->BeginWait ();
 
 				if (opts.singlepage)
@@ -4174,7 +4187,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						glEnable(GL_LIGHTING);
 						glEnable(GL_LIGHT0);
 						glEnable(GL_DEPTH_TEST);
-						pInfo->RenderPiece(m_nCurColor);
+						pInfo->RenderPiece(g_App->m_SelectedColor);
 						glFinish();
 
 						Image image;
@@ -4962,7 +4975,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pCamera = new lcCamera(8, pCamera);
 				pCamera->FileLoad(*file);
 				pCamera->Select(true, false, false);
-				pCamera->GetTarget ()->Select(true, false, false);
+				pCamera->GetTarget()->Select(true, false, false);
 			}
 
 			// TODO: lights
@@ -5135,10 +5148,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_INSERT:
 		{
-			if (m_pCurPiece == NULL)
-				break;
 			lcPiece* pLast = NULL;
-			lcPiece* pPiece = new lcPiece(m_pCurPiece);
+			lcPiece* pPiece = new lcPiece(g_App->m_PiecePreview->m_Selection);
 
 			for (pLast = m_Pieces; pLast; pLast = (lcPiece*)pLast->m_Next)
 				if ((pLast->IsFocused()) || (pLast->m_Next == NULL))
@@ -5151,14 +5162,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				GetPieceInsertPosition(pLast, Pos, Rot);
 
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, g_App->m_SelectedColor);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
 				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 			else
-				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame, g_App->m_SelectedColor);
 
 			SelectAndFocusNone(false);
 			pPiece->CreateName(m_Pieces);
@@ -5167,7 +5178,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			pPiece->Select (true, true, false);
 			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, pPiece);
 			UpdateSelection();
-			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+			SystemPieceComboAdd(g_App->m_PiecePreview->m_Selection->m_strDescription);
 
 			if (m_nSnap & LC_DRAW_MOVE)
 				SetAction(LC_ACTION_MOVE);
@@ -5652,32 +5663,32 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_PREVIOUS:
 		{
-			bool redraw = false;
+			bool Redraw = false;
 
-			for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
+			for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+				if (Piece->IsSelected())
 				{
 					if (m_bAnimation)
 					{
-						unsigned short t = pPiece->GetFrameShow();
+						unsigned short t = Piece->GetFrameShow();
 						if (t > 1)
 						{
-							redraw = true;
-							pPiece->SetFrameShow(t-1);
+							Redraw = true;
+							Piece->SetFrameShow(t-1);
 						}
 					}
 					else
 					{
-						unsigned char t = pPiece->GetStepShow();
+						unsigned char t = Piece->GetStepShow();
 						if (t > 1)
 						{
-							redraw = true;
-							pPiece->SetStepShow(t-1);
+							Redraw = true;
+							Piece->SetStepShow(t-1);
 						}
 					}
 				}
 
-			if (redraw)
+			if (Redraw)
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
@@ -5687,38 +5698,38 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_NEXT:
 		{
-			bool redraw = false;
+			bool Redraw = false;
 
-			for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
+			for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+				if (Piece->IsSelected())
 				{
 					if (m_bAnimation)
 					{
-						unsigned short t = pPiece->GetFrameShow();
+						unsigned short t = Piece->GetFrameShow();
 						if (t < m_nTotalFrames)
 						{
-							redraw = true;
-							pPiece->SetFrameShow(t+1);
+							Redraw = true;
+							Piece->SetFrameShow(t+1);
 
-							if (pPiece->IsSelected () && t == m_nCurFrame)
-								pPiece->Select (false, false, false);
+							if (Piece->IsSelected () && t == m_nCurFrame)
+								Piece->Select (false, false, false);
 						}
 					}
 					else
 					{
-						unsigned char t = pPiece->GetStepShow();
+						unsigned char t = Piece->GetStepShow();
 						if (t < 255)
 						{
-							redraw = true;
-							pPiece->SetStepShow(t+1);
+							Redraw = true;
+							Piece->SetStepShow(t+1);
 
-							if (pPiece->IsSelected () && t == m_nCurStep)
-								pPiece->Select (false, false, false);
+							if (Piece->IsSelected () && t == m_nCurStep)
+								Piece->Select (false, false, false);
 						}
 					}
 				}
 
-			if (redraw)
+			if (Redraw)
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
@@ -5730,7 +5741,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_VIEW_PREFERENCES:
 		{
 			LC_PREFERENCESDLG_OPTS opts;
-			opts.nMouse = m_nMouse;
+			opts.nMouse = g_App->m_MouseSensitivity;
 			opts.nSaveInterval = m_nAutosave;
 			strcpy(opts.strUser, Sys_ProfileLoadString ("Default", "User", ""));
 			strcpy(opts.strPath, m_strModelsPath);
@@ -5752,7 +5763,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_PREFERENCES, &opts))
 			{
-				m_nMouse = opts.nMouse;
+				g_App->m_MouseSensitivity = opts.nMouse;
 				m_nAutosave = opts.nSaveInterval;
 				strcpy(m_strModelsPath, opts.strPath);
 				Sys_ProfileSaveString ("Default", "User", opts.strUser);
@@ -5786,7 +5797,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOM:
 		{
-			m_pViewCameras[m_nActiveViewport]->DoZoom(nParam, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_pViewCameras[m_nActiveViewport]->DoZoom(nParam, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5794,7 +5805,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMIN:
 		{
-			m_pViewCameras[m_nActiveViewport]->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_pViewCameras[m_nActiveViewport]->DoZoom(-1, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5802,7 +5813,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMOUT:
 		{
-			m_pViewCameras[m_nActiveViewport]->DoZoom(1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_pViewCameras[m_nActiveViewport]->DoZoom(1, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -6791,7 +6802,7 @@ lcObject* Project::GetFocusObject() const
 // Find a good starting position/orientation relative to an existing piece.
 void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, Vector3& Position, Vector4& Rotation)
 {
-	Vector3 Dist(0, 0, OffsetPiece->GetPieceInfo()->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
+	Vector3 Dist(0, 0, OffsetPiece->GetPieceInfo()->m_fDimensions[2] - g_App->m_PiecePreview->m_Selection->m_fDimensions[5]);
 	SnapVector(Dist);
 
 	float pos[3], rot[4];
@@ -6810,10 +6821,8 @@ void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, Vector3& Position, Ve
 void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Rotation)
 {
 	// See if the mouse is over a piece.
-	LC_CLICKLINE ClickLine;
-	FindObjectFromPoint(MouseX, MouseY, &ClickLine, true);
+	lcPiece* HitPiece = (lcPiece*)FindObjectFromPoint(MouseX, MouseY, true);
 
-	lcPiece* HitPiece = (lcPiece*)ClickLine.pClosest;
 	if (HitPiece)
 	{
 		GetPieceInsertPosition(HitPiece, Position, Rotation);
@@ -6854,14 +6863,11 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	Rotation = Vector4(0, 0, 1, 0);
 }
 
-void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly)
+lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 {
 	GLfloat px, py, pz, rx, ry, rz;
 	GLfloat modelMatrix[16], projMatrix[16];
 	GLint viewport[4];
-	lcPiece* pPiece;
-	lcCamera* pCamera;
-	lcLight* pLight;
 
 	LoadViewportProjection(m_nActiveViewport);
 	glGetFloatv(GL_MODELVIEW_MATRIX,modelMatrix);
@@ -6872,28 +6878,27 @@ void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool Pieces
 	gluUnProject((float)x, (float)y, 0.0f, modelMatrix, projMatrix, viewport, &px, &py, &pz);
 	gluUnProject((float)x, (float)y, 1.0f, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
 
-	pLine->a1 = (float)px;
-	pLine->b1 = (float)py;
-	pLine->c1 = (float)pz;
-	pLine->a2 = (float)(rx-px);
-	pLine->b2 = (float)(ry-py);
-	pLine->c2 = (float)(rz-pz);
-	pLine->mindist = FLT_MAX;
-	pLine->pClosest = NULL;
+	lcClickLine ClickLine;
+	ClickLine.Start = Vector3(px, py, pz);
+	ClickLine.End = Vector3(rx, ry, rz) - ClickLine.Start;
+	ClickLine.Dist = FLT_MAX;
+	ClickLine.Object = NULL;
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-			pPiece->MinIntersectDist(pLine);
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		if (Piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			Piece->ClosestLineIntersect(ClickLine);
 
 	if (!PiecesOnly)
 	{
-		for (pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-			if (pCamera != m_pViewCameras[m_nActiveViewport])
-				pCamera->MinIntersectDist(pLine);
+		for (lcCamera* Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+			if (Camera != m_pViewCameras[m_nActiveViewport])
+				Camera->ClosestLineIntersect(ClickLine);
 
-		for (pLight = m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-			pLight->MinIntersectDist(pLine);
+		for (lcLight* Light = m_Lights; Light; Light = (lcLight*)Light->m_Next)
+			Light->ClosestLineIntersect(ClickLine);
 	}
+
+	return (lcObject*)ClickLine.Object;
 }
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects)
@@ -6966,13 +6971,13 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArra
 	Planes[5][3] = -Dot3(Planes[5], Corners[5]);
 
 	// Check if any objects are inside the volume.
-	for (lcPiece* piece = m_Pieces; piece != NULL; piece = (lcPiece*)piece->m_Next)
+	for (lcPiece* Piece = m_Pieces; Piece != NULL; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if (piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-		{
-			if (piece->IntersectsVolume(Planes, 6))
-				Objects.Add(piece);
-		}
+		if (!Piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			continue;
+
+		if (Piece->IntersectsVolume(Planes, 6))
+			Objects.Add(Piece);
 	}
 
 	// TODO: lights and cameras.
@@ -7142,6 +7147,7 @@ bool Project::StopTracking(bool bAccept)
 			case LC_ACTION_ZOOM:
 			case LC_ACTION_PAN:
 			case LC_ACTION_ROTATE_VIEW:
+			case LC_ACTION_ORBIT:
 			case LC_ACTION_ROLL:
 			{
 				// For some reason the scene doesn't get redrawn when changing a camera but it does
@@ -7220,9 +7226,9 @@ bool Project::StopTracking(bool bAccept)
 				Target = Target + Dir * ZoomFactor;
 
 				// Change the camera and redraw.
-			  Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
-			  Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
-			  Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
+				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
+				Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
 				SystemUpdateFocus(NULL);
 				UpdateAllViews();
@@ -7409,7 +7415,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 	// Snap.
 	SnapVector(Move, Remainder);
 
-	if (LengthSquared(Move) < 0.001f)
+	if (LengthSquared(Move) < 0.00001f)
 		return false;
 
 	// Transform the translation if we're in relative mode.
@@ -7493,24 +7499,26 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	float pos[3], rot[4];
+
+	lcPiece* Piece;
+	lcPiece* Focus = NULL;
 	int nSel = 0;
-	lcPiece *pPiece, *pFocus = NULL;
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if (pPiece->IsSelected())
+		if (Piece->IsSelected())
 		{
-			if (pPiece->IsFocused())
-				pFocus = pPiece;
+			if (Piece->IsFocused())
+				Focus = Piece;
 
-			pPiece->CompareBoundingBox(bs);
+			Piece->CompareBoundingBox(bs);
 			nSel++;
 		}
 	}
 
-	if (pFocus != NULL)
+	if (Focus != NULL)
 	{
-		pFocus->GetPosition(pos);
+		Focus->GetPosition(pos);
 		bs[0] = bs[3] = pos[0];
 		bs[1] = bs[4] = pos[1];
 		bs[2] = bs[5] = pos[2];
@@ -7545,12 +7553,12 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 	// Transform the rotation relative to the focused piece.
 	if (m_nSnap & LC_DRAW_GLOBAL_SNAP)
-		pFocus = NULL;
+		Focus = NULL;
 
-	if (pFocus != NULL)
+	if (Focus != NULL)
 	{
 		float Rot[4];
-		((lcPiece*)pFocus)->GetRotation(Rot);
+		((lcPiece*)Focus)->GetRotation(Rot);
 
 		WorldToFocus = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
 		FocusToWorld = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
@@ -7558,24 +7566,24 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		Rotation = Mul(FocusToWorld, Rotation);
 	}
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if (!pPiece->IsSelected())
+		if (!Piece->IsSelected())
 			continue;
 
-		pPiece->GetPosition(pos);
-		pPiece->GetRotation(rot);
+		Piece->GetPosition(pos);
+		Piece->GetRotation(rot);
 
 		Vector4 NewRotation;
 
-		if ((nSel == 1) && (pFocus == pPiece))
+		if ((nSel == 1) && (Focus == Piece))
 		{
 			Quaternion LocalToWorld;
 			LocalToWorld = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
 			Quaternion NewLocalToWorld;
 
-			if (pFocus != NULL)
+			if (Focus != NULL)
 			{
 				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
 				NewLocalToWorld = Mul(LocalToFocus, Rotation);
@@ -7596,7 +7604,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 			Quaternion NewLocalToWorld;
 
-			if (pFocus != NULL)
+			if (Focus != NULL)
 			{
 				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
 				NewLocalToWorld = Mul(Rotation, LocalToFocus);
@@ -7620,7 +7628,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
+			Piece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];
@@ -7628,13 +7636,13 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
-		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+		Piece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
+		Piece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 	}
 
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		if (pPiece->IsSelected())
-			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+	for (Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		if (Piece->IsSelected())
+			Piece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
 	if (m_OverlayActive)
 	{
@@ -7689,9 +7697,9 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		case KEY_PLUS: // case '+': case '=':
 		{
 			if (bShift)
-				HandleCommand(LC_VIEW_ZOOM, -10);
+				HandleCommand(LC_VIEW_ZOOM, (unsigned int)-10);
 			else
-				HandleCommand(LC_VIEW_ZOOM, -1);
+				HandleCommand(LC_VIEW_ZOOM, (unsigned int)-1);
 
 			ret = true;
 		} break;
@@ -8000,15 +8008,11 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 	return ret;
 }
 
-void Project::BeginPieceDrop(PieceInfo* Info)
+void Project::BeginPieceDrop()
 {
-	StartTracking(LC_TRACK_LEFT);
-
 	m_PreviousAction = m_nCurAction;
-	m_PreviousPiece = m_pCurPiece;
 
-	m_pCurPiece = Info;
-	m_pCurPiece->AddRef();
+	StartTracking(LC_TRACK_LEFT);
 	SetAction(LC_ACTION_INSERT);
 }
 
@@ -8154,18 +8158,17 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		case LC_ACTION_ERASER:
 		case LC_ACTION_PAINT:
 		{
-			LC_CLICKLINE ClickLine;
-			FindObjectFromPoint (x, y, &ClickLine);
+			lcObject* Object = FindObjectFromPoint(x, y);
 
 			if (m_nCurAction == LC_ACTION_SELECT) 
 			{
-				if (ClickLine.pClosest != NULL)
+				if (Object != NULL)
 				{
-					switch (ClickLine.pClosest->GetType ())
+					switch (Object->GetType ())
 					{
 						case LC_OBJECT_PIECE:
 						{
-							lcPiece* pPiece = (lcPiece*)ClickLine.pClosest;
+							lcPiece* pPiece = (lcPiece*)Object;
 							Group* pGroup = pPiece->GetTopGroup();
 							bool bFocus = pPiece->IsFocused ();
 
@@ -8186,7 +8189,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 						case LC_OBJECT_LIGHT_TARGET:
 						{
 							SelectAndFocusNone (bControl);
-							ClickLine.pClosest->Select (true, true, bControl);
+							Object->Select (true, true, bControl);
 						} break;
 					}
 				}
@@ -8195,18 +8198,18 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				UpdateSelection();
 				UpdateAllViews();
-				SystemUpdateFocus(ClickLine.pClosest);
+				SystemUpdateFocus(Object);
 
 				StartTracking(LC_TRACK_START_LEFT);
 			}
 
-			if ((m_nCurAction == LC_ACTION_ERASER) && (ClickLine.pClosest != NULL))
+			if ((m_nCurAction == LC_ACTION_ERASER) && (Object != NULL))
 			{
-				switch (ClickLine.pClosest->GetType ())
+				switch (Object->GetType ())
 				{
 					case LC_OBJECT_PIECE:
 					{
-						lcPiece* pPiece = (lcPiece*)ClickLine.pClosest;
+						lcPiece* pPiece = (lcPiece*)Object;
 						RemovePiece(pPiece);
 						delete pPiece;
 //						CalculateStep();
@@ -8217,10 +8220,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 					case LC_OBJECT_CAMERA_TARGET:
 					{
 						lcCamera* pCamera;
-						if (ClickLine.pClosest->GetType () == LC_OBJECT_CAMERA)
-							pCamera = (lcCamera*)ClickLine.pClosest;
+						if (Object->GetType () == LC_OBJECT_CAMERA)
+							pCamera = (lcCamera*)Object;
 						else
-							pCamera = ((CameraTarget*)ClickLine.pClosest)->GetParent();
+							pCamera = ((CameraTarget*)Object)->m_Parent;
 						bool bCanDelete = pCamera->IsUser();
 
 						for (int i = 0; i < 4; i++)
@@ -8258,15 +8261,15 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 			}
 
-			if ((m_nCurAction == LC_ACTION_PAINT) && (ClickLine.pClosest != NULL) && 
-				(ClickLine.pClosest->GetType() == LC_OBJECT_PIECE))
+			if ((m_nCurAction == LC_ACTION_PAINT) && (Object != NULL) && 
+				(Object->GetType() == LC_OBJECT_PIECE))
 			{
-				lcPiece* pPiece = (lcPiece*)ClickLine.pClosest;
+				lcPiece* pPiece = (lcPiece*)Object;
 
-				if (pPiece->GetColor() != m_nCurColor)
+				if (pPiece->GetColor() != g_App->m_SelectedColor)
 				{
 					bool bTrans = pPiece->IsTransparent();
-					pPiece->SetColor(m_nCurColor);
+					pPiece->SetColor(g_App->m_SelectedColor);
 					if (bTrans != pPiece->IsTransparent())
 						pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 
@@ -8288,8 +8291,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				GetPieceInsertPosition(x, y, Pos, Rot);
 
-				lcPiece* pPiece = new lcPiece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				lcPiece* pPiece = new lcPiece(g_App->m_PiecePreview->m_Selection);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, g_App->m_SelectedColor);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
@@ -8301,7 +8304,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
-				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+				SystemPieceComboAdd(g_App->m_PiecePreview->m_Selection->m_strDescription);
 				SystemUpdateFocus(pPiece);
 
 				if (m_nSnap & LC_DRAW_MOVE)
@@ -8476,19 +8479,18 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
   gluUnProject((float)x, (float)y, 0.9f, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
   m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
 
-  LC_CLICKLINE ClickLine;
-  FindObjectFromPoint (x, y, &ClickLine);
+  lcObject* Object = FindObjectFromPoint (x, y);
 
 //  if (m_nCurAction == LC_ACTION_SELECT) 
   {
     SelectAndFocusNone(bControl);
 
-    if (ClickLine.pClosest != NULL)
-      switch (ClickLine.pClosest->GetType ())
+    if (Object != NULL)
+      switch (Object->GetType ())
       {
         case LC_OBJECT_PIECE:
         {
-          lcPiece* pPiece = (lcPiece*)ClickLine.pClosest;
+          lcPiece* pPiece = (lcPiece*)Object;
           pPiece->Select (true, true, false);
           Group* pGroup = pPiece->GetTopGroup();
 
@@ -8503,13 +8505,13 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
         case LC_OBJECT_LIGHT:
         case LC_OBJECT_LIGHT_TARGET:
         {
-          ClickLine.pClosest->Select (true, true, bControl);
+          Object->Select (true, true, bControl);
         } break;
       }
 
     UpdateSelection();
     UpdateAllViews();
-    SystemUpdateFocus(ClickLine.pClosest);
+    SystemUpdateFocus(Object);
   }
 }
 
@@ -8533,8 +8535,8 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 
 				GetPieceInsertPosition(x, y, Pos, Rot);
 
-				lcPiece* pPiece = new lcPiece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				lcPiece* pPiece = new lcPiece(g_App->m_PiecePreview->m_Selection);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, g_App->m_SelectedColor);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
@@ -8546,7 +8548,7 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
-				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+				SystemPieceComboAdd(g_App->m_PiecePreview->m_Selection->m_strDescription);
 				SystemUpdateFocus(pPiece);
 
 				if (m_nSnap & LC_DRAW_MOVE)
@@ -8556,14 +8558,10 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 			}
 			else
 				SetAction(m_PreviousAction);
-
-			m_pCurPiece->DeRef();
-			m_pCurPiece = m_PreviousPiece;
-			m_PreviousPiece = NULL;
 		}
 	}
 
-  StopTracking(true);
+	StopTracking(true);
 }
 
 void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift)
@@ -8714,7 +8712,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 		case LC_ACTION_SPOTLIGHT:
 		{
-			float mouse = 10.0f/(21 - m_nMouse);
+			float mouse = 10.0f/(21 - g_App->m_MouseSensitivity);
 			float delta[3] = { (ptx - m_fTrack[0])*mouse,
 				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
 
@@ -8733,7 +8731,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 		case LC_ACTION_CAMERA:
 		{
-			float mouse = 10.0f/(21 - m_nMouse);
+			float mouse = 10.0f/(21 - g_App->m_MouseSensitivity);
 			float delta[3] = { (ptx - m_fTrack[0])*mouse,
 				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
 
@@ -8758,6 +8756,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((x == m_nDownX) && (y == m_nDownY))
 				break;
 
+			float Sensitivity = 0.25f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 			lcCamera* Camera = m_pViewCameras[m_nActiveViewport];
 			bool Redraw;
 
@@ -8887,8 +8886,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 					}
 				}
 
-				MoveX *= (float)(x - m_nDownX) * 0.25f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 0.25f / (21 - m_nMouse);
+				MoveX *= (float)(x - m_nDownX) * Sensitivity;
+				MoveY *= (float)(y - m_nDownY) * Sensitivity;
 
 				m_nDownX = x;
 				m_nDownY = y;
@@ -8910,8 +8909,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveX, MoveY;
 
-					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+					MoveX = ScreenX * (float)(x - m_nDownX) * Sensitivity;
+					MoveY = ScreenY * (float)(y - m_nDownY) * Sensitivity;
 
 					TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
 				}
@@ -8919,7 +8918,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveZ;
 
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+					MoveZ = ScreenZ * (float)(y - m_nDownY) * Sensitivity;
 
 					TotalMove = MoveZ + m_MouseSnapLeftover;
 				}
@@ -8937,6 +8936,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		
 		case LC_ACTION_ROTATE:
 		{
+			float Sensitivity = 36.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 			lcCamera* Camera = m_pViewCameras[m_nActiveViewport];
 			bool Redraw;
 
@@ -9045,8 +9045,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 					}
 				}
 
-				MoveX *= (float)(x - m_nDownX) * 36.0f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 36.0f / (21 - m_nMouse);
+				MoveX *= (float)(x - m_nDownX) * Sensitivity;
+				MoveY *= (float)(y - m_nDownY) * Sensitivity;
 
 				m_nDownX = x;
 				m_nDownY = y;
@@ -9068,8 +9068,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveX, MoveY;
 
-					MoveX = ScreenX * (float)(x - m_nDownX) * 36.0f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
+					MoveX = ScreenX * (float)(x - m_nDownX) * Sensitivity;
+					MoveY = ScreenY * (float)(y - m_nDownY) * Sensitivity;
 
 					Delta = MoveX + MoveY + m_MouseSnapLeftover;
 				}
@@ -9077,7 +9077,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				{
 					Vector3 MoveZ;
 
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
+					MoveZ = ScreenZ * (float)(y - m_nDownY) * Sensitivity;
 
 					Delta = MoveZ + m_MouseSnapLeftover;
 				}
@@ -9099,7 +9099,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownY == y)
 				break;
 
-			m_pViewCameras[m_nActiveViewport]->DoZoom(y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_pViewCameras[m_nActiveViewport]->DoZoom(y - m_nDownY, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -9120,7 +9120,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			m_pViewCameras[m_nActiveViewport]->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_pViewCameras[m_nActiveViewport]->DoPan(x - m_nDownX, y - m_nDownY, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -9157,19 +9157,19 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, y - m_nDownY, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_X:
-					m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, 0, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_pViewCameras[m_nActiveViewport]->DoRotate(x - m_nDownX, 0, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_Y:
-					m_pViewCameras[m_nActiveViewport]->DoRotate(0, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_pViewCameras[m_nActiveViewport]->DoRotate(0, y - m_nDownY, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_Z:
-					m_pViewCameras[m_nActiveViewport]->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+					m_pViewCameras[m_nActiveViewport]->DoRoll(x - m_nDownX, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 					break;
 			}
 
@@ -9184,7 +9184,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_pViewCameras[m_nActiveViewport]->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_pViewCameras[m_nActiveViewport]->DoRoll(x - m_nDownX, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -9192,7 +9192,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		/*
     case LC_ACTION_CURVE:
     {
-      float mouse = 10.0f/(21 - m_nMouse);
+      float mouse = 10.0f/(21 - g_App->m_MouseSensitivity);
       float dx = (ptx - m_fTrack[0])*mouse;
       float dy = (pty - m_fTrack[1])*mouse;
       float dz = (ptz - m_fTrack[2])*mouse;

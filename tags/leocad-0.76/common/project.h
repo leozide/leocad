@@ -94,10 +94,6 @@ public:
 	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
 	unsigned short GetCurrentTime ()
 		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
-	void SetCurrentPiece(PieceInfo* pInfo)
-		{ m_pCurPiece = pInfo; }
-	int GetCurrentColor () const
-		{ return m_nCurColor; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	unsigned char GetAction() const
@@ -107,6 +103,8 @@ public:
 	void GetSnapIndex(int* SnapXY, int* SnapZ) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
+	const Vector3& GetOverlayCenter() const
+		{ return m_OverlayCenter; }
 
 	// Retrieve a pointer to an existing camera.
 	lcCamera* GetCamera(int Index) const;
@@ -137,7 +135,7 @@ public:
 	// Special notifications
 	void DeleteContents(bool bUndo); // delete doc items etc
 	void LoadDefaults(bool cameras);
-	void BeginPieceDrop(PieceInfo* Info);
+	void BeginPieceDrop();
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(bool bToMemory);
@@ -151,7 +149,12 @@ public:
 	// Views.
 	void AddView(View* pView);
 	void RemoveView(View* pView);
-	void UpdateAllViews(View* pSender = NULL);
+	void UpdateAllViews();
+	View* GetFirstView() const
+		{ return m_ViewList.GetSize() ? m_ViewList[0] : NULL; }
+	View* GetActiveView() const
+		{ return m_ActiveView; }
+	bool SetActiveView(View* view);
 
 // Implementation
 protected:
@@ -160,6 +163,7 @@ protected:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;    // changed since last saved
 
+	View* m_ActiveView;
 	lcPtrArray<View> m_ViewList;
 
 	char m_strAuthor[101];
@@ -192,7 +196,7 @@ protected:
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
-	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
+	lcObject* FindObjectFromPoint(int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
@@ -233,7 +237,6 @@ protected:
 	int m_nDownX;
 	int m_nDownY;
 	float m_fTrack[3];
-	int m_nMouse;
 	Vector3 m_MouseSnapLeftover;
 	Vector3 m_MouseTotalDelta;
 
@@ -286,9 +289,6 @@ protected:
 	unsigned char m_nActiveViewport;
 	int m_nViewX;
 	int m_nViewY;
-	PieceInfo* m_pCurPiece;
-	PieceInfo* m_PreviousPiece;
-	unsigned char m_nCurColor;
 	unsigned char m_nCurAction;
 	unsigned char m_PreviousAction;
 	bool m_bAnimation;
@@ -326,7 +326,7 @@ protected:
 	bool DoFileSave();
 	bool FileLoad(File* file, bool bUndo, bool bMerge);
 	void FileSave(File* file, bool bUndo);
-	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray);
+	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray, const String& FilePath);
 	void FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const;
 
 public:

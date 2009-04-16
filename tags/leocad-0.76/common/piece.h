@@ -27,10 +27,15 @@ public:
 	lcPiece(PieceInfo* pPieceInfo);
 	~lcPiece();
 
+	// Base class implementation.
+	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const;
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
+
+
+
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
 	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
-	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes);
 
 
 
@@ -49,7 +54,6 @@ public:
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 
-	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
 	void CreateName(lcPiece* pPiece);
@@ -102,7 +106,7 @@ public:
 	void GetRotation (float* rotation)
 		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
 
-	void Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans);
+	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
 
 	inline bool IsTransparent()
@@ -112,13 +116,6 @@ public:
 		return true;
 	};
 
-/*
-	inline void UseTransform()
-	{
-		glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
-		glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
-	}
-*/
 protected:
 	void BuildDrawInfo();
 

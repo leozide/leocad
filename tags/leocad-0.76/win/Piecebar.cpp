@@ -466,7 +466,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 			{
 				m_PiecesTree.SelectItem(Notify->itemNew.hItem);
 
-				lcGetActiveProject()->BeginPieceDrop((PieceInfo*)Notify->itemNew.lParam);
+				lcGetActiveProject()->BeginPieceDrop();
 
 				// Force a cursor update.
 				CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();

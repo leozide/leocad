@@ -2,6 +2,7 @@
 #define _LIGHT_H_
 
 #include "object.h"
+#include "algebra.h"
 
 #define LC_LIGHT_HIDDEN           0x01
 #define LC_LIGHT_SELECTED         0x02
@@ -31,27 +32,23 @@ typedef enum
 class LightTarget : public lcObject
 {
 public:
-	LightTarget(lcLight *pParent);
+	LightTarget(lcLight* Parent);
 	~LightTarget();
 
+	// Base class implementation.
+	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const;
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
+
+
+
 public:
-	void MinIntersectDist (LC_CLICKLINE* pLine);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the light target
 	}
 
-	lcLight* GetParent () const
-	{ return m_pParent; }
-
-protected:
-	lcLight* m_pParent;
-
-	friend class lcLight; // FIXME: needed for BoundingBoxCalculate ()
-	// remove and use UpdatePosition instead
+	lcLight* m_Parent;
 };
 
 class lcLight : public lcObject
@@ -61,8 +58,14 @@ public:
 	lcLight(float px, float py, float pz, float tx, float ty, float tz);
 	virtual ~lcLight();
 
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
+	// Base class implementation.
+	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const;
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
+
+
+
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
 	bool IsVisible()
@@ -89,12 +92,9 @@ public:
 	void FocusTarget()
 	{ m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED); }
 	LightTarget* GetTarget() const
-	{ return m_pTarget; }
+	{ return m_Target; }
 
 	void Render(float fLineWidth);
-	void MinIntersectDist(LC_CLICKLINE* Line);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
 	void Setup(int index);
@@ -104,7 +104,7 @@ protected:
 	void Initialize ();
 
 	// Camera target
-	LightTarget* m_pTarget;
+	LightTarget* m_Target;
 
 	// Attributes
 	float m_fCone;
@@ -115,17 +115,19 @@ protected:
 	void DrawTarget();
 	void DrawSphere();
 
+public:
 	// Temporary parameters
-	float m_fPos[4];
-	float m_fTarget[3];
-	float m_fAmbient[4];
-	float m_fDiffuse[4];
-	float m_fSpecular[4];
-	float m_fConstant;
-	float m_fLinear;
-	float m_fQuadratic;
-	float m_fCutoff;
-	float m_fExponent;
+	Matrix44 m_WorldLight;
+	Vector3 m_Position;
+	Vector3 m_TargetPosition;
+	Vector4 m_AmbientColor;
+	Vector4 m_DiffuseColor;
+	Vector4 m_SpecularColor;
+	float m_ConstantAttenuation;
+	float m_LinearAttenuation;
+	float m_QuadraticAttenuation;
+	float m_SpotCutoff;
+	float m_SpotExponent;
 };
 
 #endif // _LIGHT_H_

@@ -481,8 +481,9 @@
 #define ID_ACTION_ZOOM_REGION           32799
 #define ID_ACTION_PAN                   32800
 #define ID_ACTION_ROTATE_VIEW           32801
-#define ID_ACTION_ROLL                  32802
-#define ID_ACTION_ZOOM_EXTENTS          32803
+#define ID_ACTION_ORBIT                 32802
+#define ID_ACTION_ROLL                  32803
+#define ID_ACTION_ZOOM_EXTENTS          32804
 #define ID_ZOOM_EXTENTS                 32807
 #define ID_PIECE_GROUP                  32808
 #define ID_PIECE_UNGROUP                32809

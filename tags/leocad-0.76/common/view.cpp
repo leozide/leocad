@@ -69,15 +69,18 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 			return LC_CURSOR_PAN;
 
 		case LC_ACTION_ROTATE_VIEW:
+			return LC_CURSOR_ROTATE_VIEW;
+
+		case LC_ACTION_ORBIT:
 			switch (m_Project->GetOverlayMode())
 			{
 				case LC_OVERLAY_X: return LC_CURSOR_ROTATEX;
 				case LC_OVERLAY_Y: return LC_CURSOR_ROTATEY;
 				case LC_OVERLAY_Z: return LC_CURSOR_ROLL;
-				case LC_OVERLAY_XYZ: return LC_CURSOR_ROTATE_VIEW;
+				case LC_OVERLAY_XYZ: return LC_CURSOR_ORBIT;
 				default:
 					LC_ASSERT_FALSE("Unknown cursor type.");
-					return LC_CURSOR_NONE;
+					return LC_CURSOR_ORBIT;
 			}
 
 		case LC_ACTION_ROLL:
@@ -157,8 +160,42 @@ void View::OnSize(int cx, int cy)
 	UpdateOverlayScale();
 }
 
+Matrix44 View::GetProjectionMatrix() const
+{
+	if (!m_Camera)
+		return IdentityMatrix44();
+
+	float Aspect = (float)m_nWidth/(float)m_nHeight;
+
+	if (m_Camera->IsOrtho())
+	{
+		float ymax, ymin, xmin, xmax, znear, zfar;
+		Vector3 frontvec = Vector3(m_Camera->m_ViewWorld[2]);//m_Target - m_Eye; // FIXME: free ortho cameras = crash
+		ymax = (Length(frontvec))*sinf(DTOR*m_Camera->m_FOV/2);
+		ymin = -ymax;
+		xmin = ymin * Aspect;
+		xmax = ymax * Aspect;
+		znear = m_Camera->m_NearDist;
+		zfar = m_Camera->m_FarDist;
+		return CreateOrthoMatrix(xmin, xmax, ymin, ymax, znear, zfar);
+	}
+	else
+		return CreatePerspectiveMatrix(m_Camera->m_FOV, Aspect, m_Camera->m_NearDist, m_Camera->m_FarDist);
+}
+
 void View::UpdateOverlayScale()
 {
+	Matrix44 Projection = GetProjectionMatrix();
+	const Vector3& Center = m_Project->GetOverlayCenter();
+
+	// Calculate the scaling factor by projecting the center to the front plane then
+	// projecting a point close to it back.
+	Vector3 Screen = ProjectPoint(Center, m_Camera->m_WorldView, Projection, m_Viewport);
+	Screen[0] += 10.0f;
+	Vector3 Point = UnprojectPoint(Screen, m_Camera->m_WorldView, Projection, m_Viewport);
+
+	Vector3 Dist = Point - Center;
+	m_OverlayScale = Length(Dist) * 5.0f;
 }
 
 void View::SetCamera(lcCamera* Camera)

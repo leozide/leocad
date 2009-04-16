@@ -223,7 +223,7 @@ void CColorList::OnPaint()
 		dc.SelectObject(OldBrush);
 	}
 
-	CBrush* OldBrush = (CBrush*)dc.SelectObject(GetStockObject(NULL_BRUSH));
+	CBrush* OldBrush = dc.SelectObject(CBrush::FromHandle((HBRUSH)GetStockObject(NULL_BRUSH)));
 
 	COLORREF cr = m_Colors[m_CurColor].Color;
 	CPen BorderPen;

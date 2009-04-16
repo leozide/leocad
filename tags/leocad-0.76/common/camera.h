@@ -10,6 +10,8 @@
 #define LC_CAMERA_FOCUSED           0x04
 #define LC_CAMERA_TARGET_SELECTED   0x08
 #define LC_CAMERA_TARGET_FOCUSED    0x10
+#define LC_CAMERA_ORTHOGRAPHIC      0x20
+#define LC_CAMERA_SHOW_CONE         0x40
 
 class lcCamera;
 class CameraTarget;
@@ -18,10 +20,14 @@ class TiledRender;
 
 typedef enum
 {
-	LC_CAMERA_FRONT,LC_CAMERA_BACK,
-	LC_CAMERA_TOP,  LC_CAMERA_UNDER,
-	LC_CAMERA_LEFT, LC_CAMERA_RIGHT,
-	LC_CAMERA_MAIN, LC_CAMERA_USER
+	LC_CAMERA_FRONT,
+	LC_CAMERA_BACK,
+	LC_CAMERA_TOP,
+	LC_CAMERA_UNDER,
+	LC_CAMERA_LEFT,
+	LC_CAMERA_RIGHT,
+	LC_CAMERA_MAIN,
+	LC_CAMERA_USER
 } LC_CAMERA_TYPES;
 
 typedef enum
@@ -35,27 +41,21 @@ typedef enum
 class CameraTarget : public lcObject
 {
 public:
-	CameraTarget (lcCamera *pParent);
-	virtual ~CameraTarget ();
+	CameraTarget(lcCamera* Parent);
+	virtual ~CameraTarget();
 
-public:
-	void MinIntersectDist (LC_CLICKLINE* pLine);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	// Base class implementation.
+	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const;
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
+
+
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the camera target
 	}
 
-	lcCamera* GetParent () const
-	{ return m_pParent; }
-
-protected:
-	lcCamera* m_pParent;
-
-	friend class lcCamera; // FIXME: needed for BoundingBoxCalculate ()
-	// remove and use UpdatePosition instead
+	lcCamera* m_Parent;
 };
 
 class lcCamera : public lcObject
@@ -67,13 +67,14 @@ public:
 	lcCamera(const float *eye, const float *target, const float *up, lcObject* pCamera);
 	virtual ~lcCamera();
 
-	// Query functions.
-	CameraTarget* GetTarget() const
-		{ return m_pTarget; }
-
+	// Base class implementation.
+	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const;
+	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
 
 
 	// Deprecated functions:
+	CameraTarget* GetTarget() const
+		{ return m_Target; }
 	const float* GetUpVec () const
 		{ return m_fUp; };
 	void GetUpVec (float* up) const
@@ -107,6 +108,8 @@ public:
 		{ return (m_nState & LC_CAMERA_FOCUSED) != 0; } 
 	bool IsTargetFocused()
 		{ return (m_nState & LC_CAMERA_TARGET_FOCUSED) != 0; } 
+	bool IsOrtho() const
+		{ return (m_nState & LC_CAMERA_ORTHOGRAPHIC) != 0; }
 
 	/*
 	void Select()
@@ -126,10 +129,7 @@ public:
 public:
 	bool FileLoad(File& file);
 	void FileSave(File& file) const;
-	void MinIntersectDist(LC_CLICKLINE* pLine);
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
-	{ return false; }
 
 
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
@@ -146,6 +146,7 @@ public:
 	void GetTileInfo(int* row, int* col, int* width, int* height);
 	bool EndTile();
 
+public:
 	// Camera properties.
 	float m_NearDist;
 	float m_FarDist;
@@ -161,10 +162,9 @@ public:
 
 protected:
 	void Initialize();
-	void UpdateBoundingBox();
 
 	// Camera target
-	CameraTarget* m_pTarget;
+	CameraTarget* m_Target;
 
 	// Attributes
 	unsigned char m_nState;

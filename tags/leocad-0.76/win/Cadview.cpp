@@ -687,9 +687,17 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_pView = new View (lcGetActiveProject(), NULL);
-	m_pView->Create (m_hWnd);
-	m_pView->OnInitialUpdate ();
+	Project* project = lcGetActiveProject();
+
+	m_pView = new View(project, project->GetFirstView());
+	m_pView->Create(m_hWnd);
+	m_pView->OnInitialUpdate();
+
+	CCADView* ActiveView = (CCADView*)GetParentFrame()->GetActiveView();
+	if (ActiveView)
+	{
+		m_pView->SetCamera(ActiveView->m_pView->GetCamera());
+	}
 
 	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
@@ -760,6 +768,7 @@ LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 		case LC_CURSOR_PAN: Cursor = IDC_PAN; break;
 		case LC_CURSOR_ROLL: Cursor = IDC_ROLL; break;
 		case LC_CURSOR_ROTATE_VIEW: Cursor = IDC_ANGLE; break;
+		case LC_CURSOR_ORBIT: Cursor = IDC_ORBIT; break;
 
 		default:
 			LC_ASSERT_FALSE("Unknown cursor type.");
@@ -848,7 +857,7 @@ LONG CCADView::OnSetStep(UINT lParam, LONG /*wParam*/)
 void CCADView::OnCaptureChanged(CWnd *pWnd) 
 {
 	if (pWnd != this)
-		lcGetActiveProject()->HandleNotify(LC_CAPTURE_LOST, 0);
+		lcPostMessage(LC_MSG_MOUSE_CAPTURE_LOST, 0);
 	
 	CView::OnCaptureChanged(pWnd);
 }
@@ -857,68 +866,15 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	char nKey = nChar;
 
-	switch (nChar)
+	if (nChar >= VK_NUMPAD0 && nChar <= VK_NUMPAD9)
 	{
-		case VK_NUMPAD0 : case VK_NUMPAD1 : case VK_NUMPAD2 : case VK_NUMPAD3 : case VK_NUMPAD4 : 
-		case VK_NUMPAD5 : case VK_NUMPAD6 : case VK_NUMPAD7 : case VK_NUMPAD8 : case VK_NUMPAD9 :
-		{
-			nKey = nChar - VK_NUMPAD0 + 0x30;
-		} break;
-
-    // select the next/previous piece on the pieces list
-    case VK_HOME:
-    case VK_END:
-    {
-      /*
-      CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd ();
-      CPiecesList& pList = pMain->m_wndPiecesBar.m_wndPiecesList;
-      LV_FINDINFO lvfi;
-      int sel;
-
-			lvfi.flags = LVFI_PARAM;
-			lvfi.lParam = (LPARAM)pMain->m_wndPiecesBar.m_wndPiecePreview.GetPieceInfo ();
-			sel = pList.FindItem (&lvfi);
-
-      if (sel != -1)
-      {
-        if (nChar == VK_HOME)
-          sel--;
-        else
-          sel++;
-
-  			pList.SetItemState (sel, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
-	  		pList.EnsureVisible (sel, FALSE);
-      }
-*/
-    } break;
+		nKey = nChar - VK_NUMPAD0 + '0';
 	}
 
-	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);
-/*
-	switch (nChar)
+	// Update cursor for multiple selection.
+	if (nChar == VK_CONTROL)
 	{
-// HANDLE CTRL if action == pan/zoom
-		case VK_CONTROL: 
-		if (m_nCurAction == ACTION_SELECT)
-		{
-			POINT pt;
-			GetCursorPos(&pt);
-			CRect rc;
-			GetWindowRect(rc);
-			if (rc.PtInRect(pt))
-				OnSetCursor(this, HTCLIENT, 0);
-		} break;
-*/
-	CView::OnKeyDown(nChar, nRepCnt, nFlags);
-}
-
-void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-{
-/*	if (nChar == VK_CONTROL)
-	{
-// HANDLE CTRL if action == pan/zoom
-		CCADDoc* pDoc = GetDocument();
-		if (pDoc->m_nCurAction == ACTION_SELECT)
+		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
 		{
 			POINT pt;
 
@@ -930,12 +886,40 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 				OnSetCursor(this, HTCLIENT, 0);
 		}
 	}
-*/	
+
+	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_SHIFT) < 0);
+
+	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	// Update cursor for multiple selection.
+	if (nChar == VK_CONTROL)
+	{
+		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
+		{
+			POINT pt;
+
+			GetCursorPos(&pt);
+			CRect rc;
+			GetWindowRect(rc);
+
+			if (rc.PtInRect(pt))
+				OnSetCursor(this, HTCLIENT, 0);
+		}
+	}
+
 	CView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
 void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
 {
+	if (pActivateView && pActivateView->IsKindOf(RUNTIME_CLASS(CCADView)))
+		lcGetActiveProject()->SetActiveView(((CCADView*)pActivateView)->m_pView);
+	else
+		lcGetActiveProject()->SetActiveView(NULL);
+
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 }
 

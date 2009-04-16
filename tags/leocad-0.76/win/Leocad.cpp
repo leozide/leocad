@@ -11,8 +11,6 @@
 #include <process.h>
 #include "project.h"
 #include "system.h"
-#include "pieceinf.h" // TODO: remove
-#include "config.h"
 #include "mainwnd.h"
 #include "library.h"
 #include "keyboard.h"
@@ -246,7 +244,7 @@ BOOL CCADApp::InitInstance()
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
-	lcGetActiveProject()->UpdateAllViews(NULL);
+	lcGetActiveProject()->UpdateAllViews();
 
 	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
 		_beginthread(CheckForUpdates, 0, NULL);

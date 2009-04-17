@@ -13,6 +13,7 @@
 
 class File;
 class Texture;
+class lcMesh;
 
 struct CONNECTIONINFO
 {
@@ -24,7 +25,7 @@ struct CONNECTIONINFO
 struct DRAWGROUP
 {
 	unsigned short connections[6];
-	void* drawinfo;
+	int NumSections;
 };
 
 struct TEXTURE
@@ -94,18 +95,20 @@ public:
 	unsigned long m_nSize;
 
 	// Nobody should change these
-	unsigned char	m_nFlags;
-	unsigned long 	m_nVertexCount;
-	float*			m_fVertexArray;
-	unsigned short	m_nConnectionCount;
-	CONNECTIONINFO*	m_pConnections;
-	unsigned short	m_nGroupCount;
-	DRAWGROUP*		m_pGroups;
-	unsigned char	m_nTextureCount;
-	TEXTURE*		m_pTextures;
+	unsigned char m_nFlags;
+	unsigned short m_nConnectionCount;
+	CONNECTIONINFO* m_pConnections;
+	unsigned short m_nGroupCount;
+	DRAWGROUP* m_pGroups;
+	unsigned char m_nTextureCount;
+	TEXTURE* m_pTextures;
+	lcMesh* m_Mesh;
 
 protected:
 	int m_nRef;
+
+	template<typename T>
+	void BuildMesh(void* Data, void* MeshStart, u32* SectionIndices);
 
 	void LoadInformation();
 	void FreeInformation();

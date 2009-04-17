@@ -9,6 +9,7 @@
 #include "lc_colors.h"
 #include <math.h>
 #include <shlobj.h>
+#include "lc_mesh.h"
 
 #if LC_HAVE_JPEGLIB
 #pragma comment(lib, "jpeglib")
@@ -449,36 +450,28 @@ void Export3DStudio()
 	{
 		// MESH OBJECT
 		mesh3ds *mobj = NULL;
-		UINT facecount = 0, i, j = 0, c, col;
+		UINT facecount = 0, i, j = 0;
 		memset(facemats, 0, sizeof(u32)*lcNumColors);
 
-		PieceInfo* pInfo = pPiece->GetPieceInfo();
-		if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+		lcMesh* Mesh = pPiece->GetPieceInfo()->m_Mesh;
+
+		if (Mesh->m_IndexType == GL_UNSIGNED_INT)
 			continue; // 3DS can't handle this
 
 		// count number of faces used
-		for (c = 0; c < pInfo->m_nGroupCount; c++)
+		for (int SectionIndex = 0; SectionIndex < Mesh->m_SectionCount; SectionIndex++)
 		{
-			WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-			col = *info;
-			info++;
+			lcMeshSection* Section = &Mesh->m_Sections[SectionIndex];
 
-			while (col--)
-			{
-				i = *info;
-				info++;
+			// Skip lines.
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
 
-				facecount += (*info)*2/4;
-				facemats[i] += (*info)*2/4;
-				info += *info + 1;
-				facecount += (*info)/3;
-				facemats[i] += (*info)/3;
-				info += *info + 1;
-				info += *info + 1;
-			}
+			facecount += Section->IndexCount/3;
+			facemats[Section->ColorIndex] += Section->IndexCount/3;
 		}
 
-		InitMeshObj3ds(&mobj, (unsigned short)pInfo->m_nVertexCount, facecount, InitNoExtras3ds);
+		InitMeshObj3ds(&mobj, (unsigned short)Mesh->m_VertexCount, facecount, InitNoExtras3ds);
 		sprintf(mobj->name, "Piece%d", objcount);
 		objcount++;
 
@@ -486,50 +479,37 @@ void Export3DStudio()
 		pPiece->GetPosition(pos);
 		pPiece->GetRotation(rot);
 		Matrix mat(rot, pos);
-		for (c = 0; c < pInfo->m_nVertexCount; c++)
+		float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+		for (int c = 0; c < Mesh->m_VertexCount; c++)
 		{
-			mat.TransformPoint(tmp, &pInfo->m_fVertexArray[c*3]);
+			mat.TransformPoint(tmp, &verts[c*3]);
 			mobj->vertexarray[c].x = tmp[0];
 			mobj->vertexarray[c].y = tmp[1];
 			mobj->vertexarray[c].z = tmp[2];
 		}
+		Mesh->m_VertexBuffer->UnmapBuffer();
 
-		for (c = 0; c < pInfo->m_nGroupCount; c++)
+		void* indices = Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+		for (int SectionIndex = 0; SectionIndex < Mesh->m_SectionCount; SectionIndex++)
 		{
-			WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-			col = *info;
-			info++;
+			lcMeshSection* Section = &Mesh->m_Sections[SectionIndex];
 
-			while (col--)
+			// Skip lines.
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
+			for (int i = 0; i < Section->IndexCount; i += 3)
 			{
-				info++;
-				
-				for (i = 0; i < *info; i+=4)
-				{
-					mobj->facearray[j].v1 = info[i+1];
-					mobj->facearray[j].v2 = info[i+2];
-					mobj->facearray[j].v3 = info[i+3];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-					mobj->facearray[j].v1 = info[i+3];
-					mobj->facearray[j].v2 = info[i+4];
-					mobj->facearray[j].v3 = info[i+1];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-				}
-				info += *info + 1;
-				for (i = 0; i < *info; i+=3)
-				{
-					mobj->facearray[j].v1 = info[i+1];
-					mobj->facearray[j].v2 = info[i+2];
-					mobj->facearray[j].v3 = info[i+3];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-				}
-				info += *info + 1;
-				info += *info + 1;
+				mobj->facearray[j].v1 = IndexPtr[i+0];
+				mobj->facearray[j].v2 = IndexPtr[i+1];
+				mobj->facearray[j].v3 = IndexPtr[i+2];
+				mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
+				j++;
 			}
 		}
+
+		Mesh->m_IndexBuffer->UnmapBuffer();
 
 		i = 0;
 		for (j = 0; j < (u32)lcNumColors; j++)
@@ -552,47 +532,22 @@ void Export3DStudio()
 				UINT curface = 0;
 				facecount = 0;
 
-				for (c = 0; c < pInfo->m_nGroupCount; c++)
+				for (int SectionIndex = 0; SectionIndex < Mesh->m_SectionCount; SectionIndex++)
 				{
-					WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-					col = *info;
-					info++;
+					lcMeshSection* Section = &Mesh->m_Sections[SectionIndex];
 
-					while (col--)
+					// Skip lines.
+					if (Section->PrimitiveType != GL_TRIANGLES)
+						continue;
+
+					if (j != Section->ColorIndex)
+						continue;
+
+					for (int k = 0; k < Section->IndexCount; k += 3)
 					{
-						if (j == *info)
-						{
-							UINT k;
-
-							info++;
-							for (k = 0; k < *info; k += 4)
-							{
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-							}
-						
-							info += *info + 1;
-							for (k = 0; k < *info; k += 3)
-							{
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-							}
-							info += *info + 1;
-						}
-						else
-						{
-							info++;
-							curface += (*info)*2/4;
-							info += *info + 1;
-							curface += (*info)/3;
-							info += *info + 1;
-						}
-						info += *info + 1;
+						mobj->matarray[i].faceindex[facecount] = curface;
+						facecount++;
+						curface++;
 					}
 				}
 

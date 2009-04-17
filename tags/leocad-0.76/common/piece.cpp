@@ -5,7 +5,6 @@
 #include "piece.h"
 
 #include "opengl.h"
-#include "matrix.h"
 #include "pieceinf.h"
 #include "texture.h"
 #include "group.h"
@@ -13,6 +12,8 @@
 #include "algebra.h"
 #include "lc_application.h"
 #include "lc_colors.h"
+#include "lc_mesh.h"
+#include "matrix.h"
 
 #define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
 
@@ -21,31 +22,6 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 	{ "Position", 3, LC_PK_POSITION },
 	{ "Rotation", 4, LC_PK_ROTATION }
 };
-
-/////////////////////////////////////////////////////////////////////////////
-// Static functions
-
-inline static void SetCurrentColor(unsigned char nColor, bool bLighting)
-{
-	bool Transparent = (nColor > 13 && nColor < 22);
-
-	lcSetColor(nColor);
-
-	if (nColor > 27)
-		return;
-
-	if (Transparent)
-	{
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-	else
-	{
-		glDepthMask(GL_TRUE);
-		glDisable(GL_BLEND);
-	}
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
@@ -72,46 +48,24 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	m_nFrameHide = 65535;
 	m_Name = "";
 	m_pGroup = NULL;
-	m_pDrawInfo = NULL;
-	m_pConnections = NULL;
 
 	if (m_pPieceInfo != NULL)
-	{
 		m_pPieceInfo->AddRef();
 
-		if (m_pPieceInfo->m_nConnectionCount > 0)
-		{
-			m_pConnections = (CONNECTION*)malloc(sizeof(CONNECTION)*(m_pPieceInfo->m_nConnectionCount));
+	float *values[] = { m_fPosition, m_fRotation };
+	RegisterKeys (values, piece_key_info, LC_PK_COUNT);
 
-			for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
-			{
-				m_pConnections[i].type = m_pPieceInfo->m_pConnections[i].type;
-				m_pConnections[i].link = NULL;
-				m_pConnections[i].owner = this;
-			}
-		}
-	}
-
-  float *values[] = { m_fPosition, m_fRotation };
-  RegisterKeys (values, piece_key_info, LC_PK_COUNT);
-
-  float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
-  ChangeKey (1, false, true, pos, LC_PK_POSITION);
-  ChangeKey (1, false, true, rot, LC_PK_ROTATION);
-  ChangeKey (1, true, true, pos, LC_PK_POSITION);
-  ChangeKey (1, true, true, rot, LC_PK_ROTATION);
+	float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
+	ChangeKey (1, false, true, pos, LC_PK_POSITION);
+	ChangeKey (1, false, true, rot, LC_PK_ROTATION);
+	ChangeKey (1, true, true, pos, LC_PK_POSITION);
+	ChangeKey (1, true, true, rot, LC_PK_ROTATION);
 }
 
 lcPiece::~lcPiece()
 {
-  if (m_pPieceInfo != NULL)
-    m_pPieceInfo->DeRef ();
-
-  if (m_pDrawInfo != NULL)
-    free (m_pDrawInfo);
-
-  if (m_pConnections != NULL)
-    free (m_pConnections);
+	if (m_pPieceInfo)
+		m_pPieceInfo->DeRef();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -122,18 +76,6 @@ void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 {
 	m_pPieceInfo = pPieceInfo;
 	m_pPieceInfo->AddRef();
-
-	if (m_pPieceInfo->m_nConnectionCount > 0)
-	{
-		m_pConnections = (CONNECTION*)malloc(sizeof(CONNECTION)*(m_pPieceInfo->m_nConnectionCount));
-
-		for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
-		{
-			m_pConnections[i].type = m_pPieceInfo->m_pConnections[i].type;
-			m_pConnections[i].link = NULL;
-			m_pConnections[i].owner = this;
-		}
-	}
 }
 
 bool lcPiece::FileLoad (File& file, char* name)
@@ -466,61 +408,12 @@ void lcPiece::ClosestLineIntersect(lcClickLine& ClickLine) const
 	if (!BoundingBoxRayMinIntersectDistance(Box, Start, End, &Dist) || (Dist >= ClickLine.Dist))
 		return;
 
-	float* verts = m_pPieceInfo->m_fVertexArray;
-	Vector3 Intersection;
+	// Check mesh.
+	if (!m_pPieceInfo->m_Mesh->ClosestRayIntersect(Start, End, &Dist) || (Dist >= ClickLine.Dist))
+		return;
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-	{
-		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
-
-		while (colors--)
-		{
-			info++;
-
-			for (i = 0; i < *info; i += 3)
-			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &ClickLine.Dist, &Intersection))
-				{
-					ClickLine.Object = this;
-				}
-			}
-
-			info += *info + 1;
-			info += *info + 1;
-		}
-	}
-	else
-	{
-		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
-
-		while (colors--)
-		{
-			info++;
-
-			for (i = 0; i < *info; i += 3)
-			{
-				Vector3 v1(verts[info[i+1]*3], verts[info[i+1]*3+1], verts[info[i+1]*3+2]);
-				Vector3 v2(verts[info[i+2]*3], verts[info[i+2]*3+1], verts[info[i+2]*3+2]);
-				Vector3 v3(verts[info[i+3]*3], verts[info[i+3]*3+1], verts[info[i+3]*3+2]);
-
-				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, &ClickLine.Dist, &Intersection))
-				{
-					ClickLine.Object = this;
-				}
-			}
-
-			info += *info + 1;
-			info += *info + 1;
-		}
-	}
+	ClickLine.Object = this;
+	ClickLine.Dist = Dist;
 }
 
 bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
@@ -589,57 +482,48 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 	}
 
 	// Partial intersection, so check if any triangles are inside.
-	float* verts = m_pPieceInfo->m_fVertexArray;
+	lcMesh* Mesh = m_pPieceInfo->m_Mesh;
+	float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+	void* indices = Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 	bool ret = false;
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	for (int s = 0; s < Mesh->m_SectionCount; s++)
 	{
-		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
+		lcMeshSection* Section = &Mesh->m_Sections[s];
 
-		while (colors--)
+		if (Section->PrimitiveType != GL_TRIANGLES)
+			continue;
+
+		if (Mesh->m_IndexType == GL_UNSIGNED_INT)
 		{
-			info++;
-
-			for (i = 0; i < *info; i += 3)
+			u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
+			for (int i = 0; i < Section->IndexCount; i += 4)
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3],
-				                            &verts[info[i+3]*3], NULL, LocalPlanes, NumPlanes))
+				if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
+				    &verts[IndexPtr[i+2]*3], NULL, LocalPlanes, NumPlanes))
 				{
 					ret = true;
 					break;
 				}
 			}
-
-			info += *info + 1;
-			info += *info + 1;
 		}
-	}
-	else
-	{
-		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
-		colors = *info;
-		info++;
-
-		while (colors--)
+		else
 		{
-			info++;
-
-			for (i = 0; i < *info; i += 3)
+			u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
+			for (int i = 0; i < Section->IndexCount; i += 4)
 			{
-				if (PolygonIntersectsPlanes(&verts[info[i+1]*3], &verts[info[i+2]*3], 
-				                            &verts[info[i+3]*3], NULL, LocalPlanes, NumPlanes))
+				if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
+				    &verts[IndexPtr[i+2]*3], NULL, LocalPlanes, NumPlanes))
 				{
 					ret = true;
 					break;
 				}
 			}
-
-			info += *info + 1;
-			info += *info + 1;
 		}
 	}
+
+	Mesh->m_VertexBuffer->UnmapBuffer();
+	Mesh->m_IndexBuffer->UnmapBuffer();
 
 	delete[] LocalPlanes;
 
@@ -723,7 +607,7 @@ void lcPiece::UnGroup(Group* pGroup)
 			m_pGroup->UnGroup(pGroup);
 }
 
-// Recalculates current position and connections
+// Recalculates current position
 void lcPiece::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
 	if (!IsVisible(nTime, bAnimation))
@@ -735,249 +619,7 @@ void lcPiece::UpdatePosition(unsigned short nTime, bool bAnimation)
 		Matrix44 mat;
 		mat = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
 		mat.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
-
-		for (int i = 0; i < m_pPieceInfo->m_nConnectionCount; i++)
-		{
-			m_pConnections[i].center = Mul31(m_pPieceInfo->m_pConnections[i].center, mat);
-
-			// TODO: rotate normal
-		}
 	}
-}
-
-void lcPiece::BuildDrawInfo()
-{
-	if (m_pDrawInfo != NULL)
-	{
-		free(m_pDrawInfo);
-		m_pDrawInfo = NULL;
-	}
-
-	DRAWGROUP* dg;
-	bool add;
-	unsigned short group, colcount, i, j;
-	u32* count = new u32[lcNumColors*2], vert;
-	memset(count, 0, sizeof(u32)*lcNumColors*2);
-
-	// Get the vertex count
-	for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
-	{
-		unsigned short* sh = dg->connections;
-		add = IsTransparent() || *sh == 0xFFFF;
-
-		if (!add)
-			for (; *sh != 0xFFFF; sh++)
-				if ((m_pConnections[*sh].link == NULL) ||
-					(m_pConnections[*sh].link->owner->IsTransparent()))
-					{
-						add = true;
-						break;
-					}
-
-		if (add)
-		{
-			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-			{
-				unsigned long* p, curcol, colors;
-				p = (unsigned long*)dg->drawinfo;
-				colors = *p;
-				p++;
-
-				while (colors--)
-				{
-					curcol = *p;
-					p++;
-					count[curcol*2+0] += *p;
-					p += *p + 1;
-					count[curcol*2+1] += *p;
-					p += *p + 1;
-				}
-			}
-			else
-			{
-				unsigned short* p, curcol, colors;
-				p = (unsigned short*)dg->drawinfo;
-				colors = *p;
-				p++;
-
-				while (colors--)
-				{
-					curcol = *p;
-					p++;
-					count[curcol*2+0] += *p;
-					p += *p + 1;
-					count[curcol*2+1] += *p;
-					p += *p + 1;
-				}
-			}
-		}
-	}
-
-	colcount = 0;
-	vert = 0;
-	for (i = 0; i < lcNumColors; i++)
-		if (count[i*2+0] || count[i*2+1])
-		{
-			colcount++;
-			vert += count[i*2+0] + count[i*2+1];
-		}
-	vert += (colcount*3)+1;
-
-	// Build the info
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-	{
-		m_pDrawInfo = malloc(vert*sizeof(unsigned long));
-		unsigned long* drawinfo = (unsigned long*)m_pDrawInfo;
-		*drawinfo = colcount;
-		drawinfo++;
-
-		for (i = 0; i < lcNumColors; i++)
-		{
-			if (count[i*2+0] || count[i*2+1])
-			{
-				*drawinfo = i;
-				drawinfo++;
-
-				for (j = 0; j < 2; j++)
-				{
-					*drawinfo = count[i*2+j];
-					drawinfo++;
-
-					if (count[i*2+j] == 0)
-						continue;
-
-					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
-					{
-						unsigned short* sh = dg->connections;
-						add = IsTransparent() || *sh == 0xFFFF;
-
-						if (!add)
-							for (; *sh != 0xFFFF; sh++)
-								if ((m_pConnections[*sh].link == NULL) ||
-									(m_pConnections[*sh].link->owner->IsTransparent()))
-									{
-										add = true;
-										break;
-									}
-
-						if (!add)
-							continue;
-
-						unsigned long* p, colors;
-						p = (unsigned long*)dg->drawinfo;
-						colors = *p;
-						p++;
-
-						while (colors--)
-						{
-							if (*p == i)
-							{
-								p++;
-
-								if (j == 0)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-
-								if (j == 1)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-															}
-							else
-							{
-								p++;
-								p += *p + 1;
-								p += *p + 1;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		m_pDrawInfo = malloc(vert*sizeof(unsigned short));
-		unsigned short* drawinfo = (unsigned short*)m_pDrawInfo;
-		*drawinfo = colcount;
-		drawinfo++;
-
-		for (i = 0; i < lcNumColors; i++)
-		{
-			if (count[i*2+0] || count[i*2+1])
-			{
-				*drawinfo = i;
-				drawinfo++;
-
-				for (j = 0; j < 2; j++)
-				{
-					*drawinfo = (unsigned short)count[i*2+j];
-					drawinfo++;
-
-					if (count[i*2+j] == 0)
-						continue;
-
-					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
-					{
-						unsigned short* sh = dg->connections;
-						add = IsTransparent() || *sh == 0xFFFF;
-
-						if (!add)
-							for (; *sh != 0xFFFF; sh++)
-								if ((m_pConnections[*sh].link == NULL) ||
-									(m_pConnections[*sh].link->owner->IsTransparent()))
-									{
-										add = true;
-										break;
-									}
-
-						if (!add)
-							continue;
-
-						unsigned short* p, colors;
-						p = (unsigned short*)dg->drawinfo;
-						colors = *p;
-						p++;
-
-						while (colors--)
-						{
-							if (*p == i)
-							{
-								p++;
-
-								if (j == 0)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-
-								if (j == 1)
-								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
-									drawinfo += *p;
-								}
-								p += *p + 1;
-							}
-							else
-							{
-								p++;
-								p += *p + 1;
-								p += *p + 1;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	delete[] count;
 }
 
 void lcPiece::RenderBox(bool bHilite, float fLineWidth)
@@ -1011,490 +653,8 @@ void lcPiece::Render(bool bLighting, bool bEdges)
 	glPushMatrix();
 	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
 	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
-	glVertexPointer (3, GL_FLOAT, 0, m_pPieceInfo->m_fVertexArray);
 
-	for (int sh = 0; sh < m_pPieceInfo->m_nTextureCount; sh++)
-	{
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-		m_pPieceInfo->m_pTextures[sh].texture->MakeCurrent();
-
-		if (m_pPieceInfo->m_pTextures[sh].color == LC_COLOR_DEFAULT)
-			SetCurrentColor(m_nColor, bLighting);
-
-		glEnable(GL_TEXTURE_2D);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0, m_pPieceInfo->m_pTextures[sh].vertex);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, m_pPieceInfo->m_pTextures[sh].coords);
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
-	{
-#ifndef LC_OPENGLES
-		unsigned long colors, *info = (unsigned long*)m_pDrawInfo;
-		colors = *info;
-		info++;
-
-		while (colors--)
-		{
-			bool lock = lockarrays && (*info == LC_COLOR_DEFAULT || *info == LC_COLOR_EDGE);
-
-			if (*info == LC_COLOR_DEFAULT)
-			{
-				SetCurrentColor(m_nColor, bLighting);
-			}
-			else
-			{
-				SetCurrentColor((unsigned char)*info, bLighting);
-			}
-			info++;
-
-			if (lock)
-				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			if (*info)
-			{
-				glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_INT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
-			  if (m_nState & LC_PIECE_SELECTED)
-			  {
-			    if (lock)
-			      glUnlockArraysEXT();
-
-			    SetCurrentColor(m_nState & LC_PIECE_FOCUSED ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bLighting);
-
-			    if (lock)
-			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			    glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
-			  }
-			  else
-			    if (bEdges)
-			      glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
-
-			  info += *info + 1;
-			}
-			else
-				info++;
-
-			if (lock)
-				glUnlockArraysEXT();
-		}
-#endif
-	}
-	else
-	{
-		unsigned short colors, *info = (unsigned short*)m_pDrawInfo;
-		colors = *info;
-		info++;
-
-		while (colors--)
-		{
-			bool lock = lockarrays && (*info == LC_COLOR_DEFAULT || *info == LC_COLOR_EDGE);
-
-			if (*info == LC_COLOR_DEFAULT)
-			{
-				SetCurrentColor(m_nColor, bLighting);
-			}
-			else
-			{
-				SetCurrentColor((unsigned char)*info, bLighting);
-			}
-			info++;
-
-			if (lock)
-				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			if (*info)
-			{
-				glDrawElements(GL_TRIANGLES, *info, GL_UNSIGNED_SHORT, info+1);
-				info += *info + 1;
-			}
-			else
-				info++;
-
-			if (*info)
-			{
-			  if (m_nState & LC_PIECE_SELECTED)
-			  {
-			    if (lock)
-			      glUnlockArraysEXT();
-			    SetCurrentColor((m_nState & LC_PIECE_FOCUSED) ? LC_COLOR_FOCUS : LC_COLOR_SELECTION, bLighting);
-			    
-			    if (lock)
-			      glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
-
-			    glDrawElements(GL_LINES, *info, GL_UNSIGNED_SHORT, info+1);
-			  }
-			  else
-			    if (bEdges)
-			      glDrawElements(GL_LINES, *info, GL_UNSIGNED_SHORT, info+1);
-
-			  info += *info + 1;
-			}
-			else
-				info++;
-
-			if (lock)
-				glUnlockArraysEXT();
-		}
-	}
+	m_pPieceInfo->m_Mesh->Render(m_nColor, IsSelected(), IsFocused());
 
 	glPopMatrix();
-}
-
-void lcPiece::CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers)
-{
-	if (m_pConnections == NULL)
-	{
-		if (m_pDrawInfo == NULL)
-			BuildDrawInfo();
-		return;
-	}
-
-	bool rebuild = bForceRebuild || (m_pDrawInfo == NULL);
-	lcPiece* pPiece;
-	CONNECTION_ENTRY* entry;
-	int i, j, c;
-
-	if (bFixOthers)
-		m_pLink = NULL;
-
-	for (j = 0; j < m_pPieceInfo->m_nConnectionCount; j++)
-	{
-		CONNECTION* new_link = NULL;
-
-		// studs
-		if (m_pConnections[j].type == 0)
-		{
-			i = pConnections[1].numentries;
-			entry = pConnections[1].entries;
-
-			for (; i--; entry++)
-			{
-				if ((entry->owner == this) ||
-					(!entry->owner->IsVisible(nTime, bAnimation)))
-					continue;
-
-				for (c = 0; c < entry->numcons; c++)
-				{
-					CONNECTION* con = entry->cons[c];
-
-					if (((m_pConnections[j].center[0] - con->center[0]) <  0.1f) && 
-						((m_pConnections[j].center[1] - con->center[1]) <  0.1f) && 
-						((m_pConnections[j].center[2] - con->center[2]) <  0.1f) &&
-						((m_pConnections[j].center[0] - con->center[0]) > -0.1f) && 
-						((m_pConnections[j].center[1] - con->center[1]) > -0.1f) && 
-						((m_pConnections[j].center[2] - con->center[2]) > -0.1f))
-					{
-						new_link = con;
-						i = 0;
-						break;
-					}
-				}
-			}
-
-			if (new_link != m_pConnections[j].link)
-			{
-				if ((m_pConnections[j].link != NULL) != (new_link != NULL))
-					rebuild = true;
-
-				if (bFixOthers)
-				{
-					// Update old connection
-					if (m_pConnections[j].link != NULL)
-					{
-						lcPiece* pOwner = m_pConnections[j].link->owner;
-
-						if (pOwner != this)
-						{
-							if (m_pLink == NULL)
-							{
-								m_pLink = pOwner;
-								pOwner->m_pLink = NULL;
-							}
-							else
-								for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
-								{
-									if (pPiece == pOwner)
-										break;
-
-									if (pPiece->m_pLink == NULL)
-									{
-										pPiece->m_pLink = pOwner;
-										pOwner->m_pLink = NULL;
-									}
-							}
-						}
-
-						if (new_link)
-						{
-							pOwner = new_link->owner;
-
-							if (m_pLink == NULL)
-							{
-								m_pLink = pOwner;
-								pOwner->m_pLink = NULL;
-							}
-							else
-								for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
-								{
-									if (pPiece == pOwner)
-										break;
-
-									if (pPiece->m_pLink == NULL)
-									{
-										pPiece->m_pLink = pOwner;
-										pOwner->m_pLink = NULL;
-									}
-							}
-						}
-					}
-				}
-
-				m_pConnections[j].link = new_link;
-			}
-
-			continue;
-		}
-
-		// invert studs
-		if (m_pConnections[j].type == 1)
-		{
-			i = pConnections[0].numentries;
-			entry = pConnections[0].entries;
-
-			for (; i--; entry++)
-			{
-				if ((entry->owner == this) ||
-					(!entry->owner->IsVisible(nTime, bAnimation)))
-					continue;
-
-				for (c = 0; c < entry->numcons; c++)
-				{
-					CONNECTION* con = entry->cons[c];
-
-					if (((m_pConnections[j].center[0] - con->center[0]) <  0.1f) && 
-						((m_pConnections[j].center[1] - con->center[1]) <  0.1f) && 
-						((m_pConnections[j].center[2] - con->center[2]) <  0.1f) &&
-						((m_pConnections[j].center[0] - con->center[0]) > -0.1f) && 
-						((m_pConnections[j].center[1] - con->center[1]) > -0.1f) && 
-						((m_pConnections[j].center[2] - con->center[2]) > -0.1f))
-					{
-						new_link = con;
-						i = 0;
-						break;
-					}
-				}
-			}
-
-			if (new_link != m_pConnections[j].link)
-			{
-				if ((m_pConnections[j].link != NULL) != (new_link != NULL))
-					rebuild = true;
-
-				if (bFixOthers)
-				{
-					lcPiece* pOwner;
-
-					// Update old connection
-					if (m_pConnections[j].link != NULL)
-					{
-						pOwner = m_pConnections[j].link->owner;
-
-						if (pOwner != this)
-						{
-							if (m_pLink == NULL)
-							{
-								m_pLink = pOwner;
-								pOwner->m_pLink = NULL;
-							}
-							else
-								for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
-								{
-									if (pPiece == pOwner)
-										break;
-
-									if (pPiece->m_pLink == NULL)
-									{
-										pPiece->m_pLink = pOwner;
-										pOwner->m_pLink = NULL;
-									}
-							}
-						}
-					}
-
-					if (new_link)
-					{
-						pOwner = new_link->owner;
-
-						if (m_pLink == NULL)
-						{
-							m_pLink = pOwner;
-							pOwner->m_pLink = NULL;
-						}
-						else
-							for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
-							{
-								if (pPiece == pOwner)
-									break;
-
-								if (pPiece->m_pLink == NULL)
-								{
-									pPiece->m_pLink = pOwner;
-									pOwner->m_pLink = NULL;
-								}
-							}
-					}
-				}
-
-				m_pConnections[j].link = new_link;
-			}
-			else
-			{
-				if (bFixOthers && bForceRebuild)
-				{
-					if (!m_pConnections[j].link)
-						continue;
-
-					lcPiece* pOwner = m_pConnections[j].link->owner;
-
-					if (m_pLink == NULL)
-					{
-						m_pLink = pOwner;
-						pOwner->m_pLink = NULL;
-					}
-					else
-						for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
-						{
-							if (pPiece == pOwner)
-								break;
-
-							if (pPiece->m_pLink == NULL)
-							{
-								pPiece->m_pLink = pOwner;
-								pOwner->m_pLink = NULL;
-							}
-						}
-				}
-			}
-
-			continue;
-		}
-	}
-
-	if (bFixOthers)
-		for (pPiece = m_pLink; pPiece; pPiece = pPiece->m_pLink)
-			pPiece->CalculateConnections(pConnections, nTime, bAnimation, true, false);
-
-	if (rebuild)
-		BuildDrawInfo();
-}
-
-void lcPiece::AddConnections(CONNECTION_TYPE* pConnections)
-{
-	int i, j, c;
-
-	for (i = 0; i < LC_CONNECTIONS; i++)
-	{
-		c = 0;
-
-		for (j = 0; j < m_pPieceInfo->m_nConnectionCount; j++)
-			if (m_pConnections[j].type == i)
-				c++;
-
-		if (c > 0)
-		{
-			// check if we need to realloc
-			if (pConnections[i].numentries % 5 == 0)
-			{
-				if (pConnections[i].numentries > 0)
-					pConnections[i].entries = (CONNECTION_ENTRY*)realloc(pConnections[i].entries, sizeof(CONNECTION_ENTRY)*(pConnections[i].numentries+5));
-				else
-					pConnections[i].entries = (CONNECTION_ENTRY*)realloc(pConnections[i].entries, sizeof(CONNECTION_ENTRY)*5);
-			}
-
-			CONNECTION_ENTRY* entry = &pConnections[i].entries[pConnections[i].numentries];
-			pConnections[i].numentries++;
-
-			entry->owner = this;
-			entry->numcons = c;
-			entry->cons = (CONNECTION**)malloc(c*sizeof(CONNECTION*));
-
-			c = 0;
-			for (j = 0; j < m_pPieceInfo->m_nConnectionCount; j++)
-				if (m_pConnections[j].type == i)
-				{
-					entry->cons[c] = &m_pConnections[j];
-					c++;
-				}
-		}
-	}
-}
-
-void lcPiece::RemoveConnections(CONNECTION_TYPE* pConnections)
-{
-	lcPtrArray<lcPiece> RebuildList;
-	int i, j;
-
-	for (i = 0; i < LC_CONNECTIONS; i++)
-	{
-		CONNECTION_TYPE* Type = &pConnections[i];
-
-		for (j = 0; j < Type->numentries; j++)
-		{
-			CONNECTION_ENTRY* Entry = &Type->entries[j];
-
-			if (Entry->owner == this)
-			{
-				// Save a list of pieces that their lost connection to this one.
-				for (int k = 0; k < Entry->numcons; k++)
-				{
-					if (Entry->cons[k]->link != NULL)
-					{
-						if (RebuildList.FindIndex(Entry->cons[k]->link->owner) == -1)
-							RebuildList.Add(Entry->cons[k]->link->owner);
-						Entry->cons[k]->link->link = NULL;
-					}
-				}
-
-				free(Entry->cons);
-				Type->numentries--;
-
-				// Shrink array.
-				for (; j < Type->numentries; j++)
-					Type->entries[j] = Type->entries[j+1];
-
-				// Realloc to save memory.
-				if (Type->numentries % 5 == 0)
-				{
-					if (Type->numentries > 0)
-						Type->entries = (CONNECTION_ENTRY*)realloc(Type->entries, sizeof(CONNECTION_ENTRY)*Type->numentries);
-					else
-					{
-						free(Type->entries);
-						Type->entries = NULL;
-					}
-				}
-			}
-		}
-	}
-
-	// Fix pieces that lost their connection to this one.
-	for (i = 0; i < RebuildList.GetSize(); i++)
-		RebuildList[i]->BuildDrawInfo();
 }

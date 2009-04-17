@@ -71,7 +71,7 @@ void RenderDebugPrimitives()
 	for (int i = 0; i < NumDebugLines; i++)
 	{
 		glColor3fv((float*)&DebugLines[i].color);
-		glVertexPointer(3, GL_FLOAT, 0, &DebugLines[i].pt1);
+		glVertexPointer(3, GL_FLOAT, sizeof(DebugLines[i].pt1), &DebugLines[i].pt1);
 		glDrawArrays(GL_LINES, 0, 2);
 	}
 
@@ -82,7 +82,7 @@ void RenderDebugPrimitives()
 	for (int q = 0; q < NumDebugQuads; q++)
 	{
 		glColor4fv((float*)&DebugQuads[q].color);
-		glVertexPointer(3, GL_FLOAT, 0, &DebugQuads[q].pt1);
+		glVertexPointer(3, GL_FLOAT, sizeof(DebugQuads[q].pt1), &DebugQuads[q].pt1);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 

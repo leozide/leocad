@@ -829,5 +829,7 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End);
 bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist);
 bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes);
+bool SphereRayMinIntersectDistance(const Vector3& Center, float Radius, const Vector3& Start, const Vector3& End, float* Dist);
+bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes);
 
 #endif

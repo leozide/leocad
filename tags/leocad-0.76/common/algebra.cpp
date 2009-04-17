@@ -887,3 +887,44 @@ bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, 
 
 	return true;
 }
+
+bool SphereRayMinIntersectDistance(const Vector3& Center, float Radius, const Vector3& Start, const Vector3& End, float* Dist)
+{
+	Vector3 Dir = Center - Start;
+	float LengthSquaredDir = LengthSquared(Dir);
+	float RadiusSquared = Radius * Radius;
+
+	if (LengthSquaredDir < RadiusSquared)
+	{
+		// Ray origin inside sphere.
+		*Dist = 0;
+		return true;
+	}
+	else
+	{
+		Vector3 RayDir = End - Start;
+		float t = Dot3(Dir, RayDir) / LengthSquared(RayDir);
+
+		// Ray points away from sphere.
+		if (t < 0)
+			return false;
+
+		float c = (RadiusSquared - LengthSquaredDir) / LengthSquared(RayDir) + (t * t);
+		if (c > 0)
+		{
+			*Dist = t - sqrtf(c);
+			return true;
+		}
+
+		return false;
+	}
+}
+
+bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes)
+{
+	for (int j = 0; j < NumPlanes; j++)
+		if (Dot3(Center, Planes[j]) + Planes[j][3] > Radius)
+			return false;
+
+	return true;
+}

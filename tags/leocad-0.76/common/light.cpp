@@ -57,7 +57,28 @@ void LightTarget::ClosestLineIntersect(lcClickLine& ClickLine) const
 
 bool LightTarget::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
-	return false; // TODO: LightTarget::IntersectsVolume
+	BoundingBox Box;
+	Box.m_Max = Vector3(0.2f, 0.2f, 0.2f);
+	Box.m_Min = Vector3(-0.2f, -0.2f, -0.2f);
+
+	// Transform the planes to local space.
+	Vector4* LocalPlanes = new Vector4[NumPlanes];
+	int i;
+
+	Matrix44 WorldLight = ((lcLight*)m_Parent)->m_WorldLight;
+	WorldLight.SetTranslation(Mul30(-((lcLight*)m_Parent)->m_TargetPosition, WorldLight));
+
+	for (i = 0; i < NumPlanes; i++)
+	{
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldLight));
+		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldLight[3]), Vector3(LocalPlanes[i]));
+	}
+
+	bool Intersect = BoundingBoxIntersectsVolume(Box, LocalPlanes, NumPlanes);
+
+	delete[] LocalPlanes;
+
+	return Intersect;
 }
 
 void LightTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
@@ -221,14 +242,14 @@ void lcLight::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 
 void lcLight::ClosestLineIntersect(lcClickLine& ClickLine) const
 {
-	Vector3 Start = Mul31(ClickLine.Start, m_WorldLight);
-	Vector3 End = Mul31(ClickLine.End, m_WorldLight);
-
 	if (m_Target)
 	{
 		BoundingBox Box;
 		Box.m_Max = Vector3(0.2f, 0.2f, 0.2f);
 		Box.m_Min = Vector3(-0.2f, -0.2f, -0.2f);
+
+		Vector3 Start = Mul31(ClickLine.Start, m_WorldLight);
+		Vector3 End = Mul31(ClickLine.End, m_WorldLight);
 
 		float Dist;
 		if (BoundingBoxRayMinIntersectDistance(Box, Start, End, &Dist) && (Dist < ClickLine.Dist))
@@ -241,13 +262,46 @@ void lcLight::ClosestLineIntersect(lcClickLine& ClickLine) const
 	}
 	else
 	{
-		// TODO: sphere check
+		float Dist;
+		if (SphereRayMinIntersectDistance(m_Position, 0.2f, ClickLine.Start, ClickLine.End, &Dist))
+		{
+			ClickLine.Object = this;
+			ClickLine.Dist = Dist;
+		}
 	}
 }
 
 bool lcLight::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 {
-	return false; // TODO: lcLight::IntersectsVolume
+	if (m_Target)
+	{
+		BoundingBox Box;
+		Box.m_Max = Vector3(0.3f, 0.3f, 0.3f);
+		Box.m_Min = Vector3(-0.3f, -0.3f, -0.3f);
+
+		// Transform the planes to local space.
+		Vector4* LocalPlanes = new Vector4[NumPlanes];
+		int i;
+
+		for (i = 0; i < NumPlanes; i++)
+		{
+			LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), m_WorldLight));
+			LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(m_WorldLight[3]), Vector3(LocalPlanes[i]));
+		}
+
+		bool Intersect = BoundingBoxIntersectsVolume(Box, LocalPlanes, NumPlanes);
+
+		delete[] LocalPlanes;
+
+		if (!Intersect)
+			Intersect = m_Target->IntersectsVolume(Planes, NumPlanes);
+
+		return Intersect;
+	}
+	else
+	{
+		return SphereIntersectsVolume(m_Position, 0.2f, Planes, NumPlanes);
+	}
 }
 
 void lcLight::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)

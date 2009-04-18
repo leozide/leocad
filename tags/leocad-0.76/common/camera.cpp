@@ -5,6 +5,7 @@
 #include "defines.h"
 #include "matrix.h"
 #include "file.h"
+#include "lc_application.h"
 #include "lc_colors.h"
 #include "tr.h"
 
@@ -533,9 +534,9 @@ void lcCamera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 	} 
 }
 
-void lcCamera::UpdatePosition(unsigned short nTime, bool bAnimation)
+void lcCamera::UpdatePosition(u32 Time, bool Animation)
 {
-	CalculateKeys(nTime, bAnimation);
+	CalculateKeys(Time, Animation);
 
 	// Fix the up vector
 	Vector3 frontvec = m_Position - m_TargetPosition;
@@ -739,35 +740,46 @@ void lcCamera::LoadProjection(float fAspect)
 	glLoadMatrixf(m_WorldView);
 }
 
-void lcCamera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void lcCamera::Zoom(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
 {
-	Vector3 frontvec = Normalize(m_Position - m_TargetPosition);
-	frontvec *= 2.0f*dy/(21-mouse);
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dy = MouseY * Sensitivity;
 
-	// TODO: option to move eye, target or both
-	m_Position += frontvec;
-	m_TargetPosition += frontvec;
+	if (IsOrtho())
+	{
+		// TODO: have a different option to change the FOV.
+		m_FOV += dy;
+		m_FOV = lcClamp(m_FOV, 0.001f, 179.999f);
+	}
+	else
+	{
+		Vector3 Delta = Vector3(m_ViewWorld[2]) * dy;
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_Position, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, m_TargetPosition, LC_CK_TARGET);
-	UpdatePosition(nTime, bAnimation);
+		// TODO: option to move eye, target or both
+		m_Position += Delta;
+		m_TargetPosition += Delta;
+
+		ChangeKey(Time, Animation, AddKey, m_Position, LC_CK_EYE);
+		ChangeKey(Time, Animation, AddKey, m_TargetPosition, LC_CK_TARGET);
+	}
+
+	UpdatePosition(Time, Animation);
 }
 
-void lcCamera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void lcCamera::Pan(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
 {
-	Vector3 upvec(m_fUp[0], m_fUp[1], m_fUp[2]), frontvec = m_Position - m_TargetPosition, sidevec;
-	sidevec = Cross(frontvec, upvec);
-	sidevec = Normalize(sidevec);
-	sidevec *= 2.0f*dx/(21-mouse);
-	upvec = Normalize(upvec);
-	upvec *= -2.0f*dy/(21-mouse);
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+	float dy = MouseY * Sensitivity;
 
-	m_Position += upvec + sidevec;
-	m_TargetPosition += upvec + sidevec;
+	Vector3 Delta = Vector3(m_ViewWorld[0]) * -dx + Vector3(m_ViewWorld[1]) * -dy;
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_Position, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, m_TargetPosition, LC_CK_TARGET);
-	UpdatePosition(nTime, bAnimation);
+	m_Position += Delta;
+	m_TargetPosition += Delta;
+
+	ChangeKey(Time, Animation, AddKey, m_Position, LC_CK_EYE);
+	ChangeKey(Time, Animation, AddKey, m_TargetPosition, LC_CK_TARGET);
+	UpdatePosition(Time, Animation);
 }
 
 void lcCamera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)

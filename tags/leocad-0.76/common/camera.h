@@ -75,8 +75,6 @@ public:
 	// Deprecated functions:
 	CameraTarget* GetTarget() const
 		{ return m_Target; }
-	const float* GetUpVec () const
-		{ return m_fUp; };
 	void GetUpVec (float* up) const
 		{ memcpy(up, m_fUp, sizeof(m_fUp)); };
 	inline Vector3 GetUpVector() const
@@ -132,12 +130,12 @@ public:
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void UpdatePosition(u32 Time, bool Animation);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
 
-	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
+	void Zoom(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
+	void Pan(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
 	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
 	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);

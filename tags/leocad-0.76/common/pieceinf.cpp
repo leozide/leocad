@@ -114,6 +114,9 @@ void PieceInfo::LoadIndex (File& file)
   m_fDimensions[3] = (float)sh[3]/scale;
   m_fDimensions[4] = (float)sh[4]/scale;
   m_fDimensions[5] = (float)sh[5]/scale;
+
+  m_BoundingBox = BoundingBox(Vector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]),
+                              Vector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]));
 }
 
 void PieceInfo::AddRef()

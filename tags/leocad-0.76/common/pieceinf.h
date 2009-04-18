@@ -103,6 +103,7 @@ public:
 	unsigned char m_nTextureCount;
 	TEXTURE* m_pTextures;
 	lcMesh* m_Mesh;
+	BoundingBox m_BoundingBox;
 
 protected:
 	int m_nRef;

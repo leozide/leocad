@@ -99,8 +99,7 @@ void View::OnDraw()
 	{
 		MakeCurrent();
 
-		m_Project->SetViewSize(m_nWidth, m_nHeight);
-		m_Project->Render(false);
+		m_Project->Render(this, false);
 
 		SwapBuffers();
 	}
@@ -114,37 +113,31 @@ void View::OnInitialUpdate()
 
 void View::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnLeftButtonDown(this, x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnLeftButtonUp(this, x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnLeftButtonDoubleClick(this, x, y, bControl, bShift);
 }
 
 void View::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnRightButtonDown(this, x, y, bControl, bShift);
 }
 
 void View::OnRightButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnRightButtonUp(this, x, y, bControl, bShift);
 }
 
 void View::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->SetViewSize(m_nWidth, m_nHeight);
 	m_Project->OnMouseMove(this, x, y, bControl, bShift);
 }
 

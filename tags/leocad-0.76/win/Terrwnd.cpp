@@ -220,14 +220,14 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			case TERRAIN_ZOOM:
 			{
-				m_pCamera->DoZoom(point.y - m_ptMouse.y, 11, 1, false, false);
+				m_pCamera->Zoom(1, false, false, 0, point.y - m_ptMouse.y);
 				InvalidateRect (NULL, FALSE);
 			} break;
 
 			case TERRAIN_PAN:
 			{
-				m_pCamera->DoPan(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false, false);
-				InvalidateRect (NULL, FALSE);
+				m_pCamera->Pan(1, false, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
+				InvalidateRect(NULL, FALSE);
 			} break;
 
 			case TERRAIN_ROTATE:

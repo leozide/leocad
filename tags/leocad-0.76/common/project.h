@@ -138,8 +138,7 @@ public:
 	void BeginPieceDrop();
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
-	void Render(bool bToMemory);
-	void SetViewSize(int cx, int cy);
+	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
@@ -184,7 +183,6 @@ protected:
 	lcCamera* m_Cameras;
 	lcLight* m_Lights;
 	Group* m_pGroups;
-	lcCamera* m_pViewCameras[4];
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
@@ -197,7 +195,6 @@ protected:
 	lcObject* FindObjectFromPoint(int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
-	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
 
 	// Movement.
@@ -212,9 +209,9 @@ protected:
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
 	// Rendering functions.
-	void RenderScene(bool bShaded, bool bDrawViewports);
-	void RenderViewports(bool bBackground, bool bLines);
-	void RenderOverlays(int Viewport);
+	void RenderScene(View* view, bool bShaded, bool bDrawViewports);
+	void RenderViewports(View* view, bool bBackground, bool bLines);
+	void RenderOverlays(View* view);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 	void DrawGrid();
@@ -250,7 +247,6 @@ protected:
 
 	int m_OverlayMode;
 	bool m_OverlayActive;
-	float m_OverlayScale[4];
 	Vector3 m_OverlayCenter;
 	Vector3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
@@ -258,8 +254,6 @@ protected:
 	void ActivateOverlay();
 	void UpdateOverlayScale();
 
-	void LoadViewportProjection(int Viewport);
-	bool SetActiveViewport(int x, int y);
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
 	void UpdateSelection();
@@ -283,10 +277,6 @@ public:
 
 protected:
 	// State variables
-	unsigned char m_nViewportMode;
-	unsigned char m_nActiveViewport;
-	int m_nViewX;
-	int m_nViewY;
 	unsigned char m_nCurAction;
 	unsigned char m_PreviousAction;
 	bool m_bAnimation;

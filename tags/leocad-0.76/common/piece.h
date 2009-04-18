@@ -107,12 +107,9 @@ public:
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
 
-	inline bool IsTransparent()
-	{
-		if (m_nColor < 14) return false;
-		if (m_nColor > 21) return false;
-		return true;
-	};
+	// Temporary variables
+	float m_fPosition[3];
+	float m_fRotation[4];
 
 protected:
 	// Atributes
@@ -126,10 +123,6 @@ protected:
 
 	unsigned char m_nColor;
 	unsigned char m_nState;
-
-	// Temporary variables
-	float m_fPosition[3];
-	float m_fRotation[4];
 };
 
 

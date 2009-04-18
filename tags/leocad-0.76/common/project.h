@@ -140,6 +140,7 @@ public:
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
+	void CheckAnimation();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
 	lcObject* GetFocusObject() const;
@@ -217,15 +218,10 @@ protected:
 	void DrawGrid();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
-	inline bool IsDrawing()
-	{
-		if (m_bRendering)
-			m_bStopRender = true;
-		return m_bRendering;
-	}
+	// Animation playback.
+	bool m_PlayingAnimation;
+	u64 m_LastFrameTime;
 
-	bool m_bRendering;
-	bool m_bStopRender;
 	File* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;

@@ -95,30 +95,30 @@ public:
   virtual void Render (LC_RENDER_INFO* pInfo) = 0;
 
   // Query functions
-  virtual bool IsSelected () const
+  virtual bool IsSelected() const
     { return (m_nState & LC_OBJECT_SELECTED) != 0; };
-  virtual bool IsFocused () const
+  virtual bool IsFocused() const
     { return (m_nState & LC_OBJECT_FOCUSED) != 0; };
-  virtual bool IsVisible (unsigned short nTime, bool bAnimation) const
+  virtual bool IsVisible(unsigned short nTime, bool bAnimation) const
     { return (m_nState & LC_OBJECT_HIDDEN) == 0; }
 
 
   // State change, most classes will have to replace these functions
-  virtual void SetSelection (bool bSelect, void *pParam = NULL)
+  virtual void SetSelection(bool bSelect, void *pParam = NULL)
     {
       if (bSelect)
 	m_nState |= LC_OBJECT_SELECTED;
       else
 	m_nState &= ~(LC_OBJECT_SELECTED | LC_OBJECT_FOCUSED);
     };
-  virtual void SetFocus (bool bFocus, void *pParam = NULL)
+  virtual void SetFocus(bool bFocus, void *pParam = NULL)
     {
       if (bFocus)
 	m_nState |= (LC_OBJECT_SELECTED | LC_OBJECT_FOCUSED);
       else
 	m_nState &= ~LC_OBJECT_FOCUSED;
     };
-  virtual void SetVisible (bool bVisible)
+  virtual void SetVisible(bool bVisible)
     {
       if (bVisible)
 	m_nState &= ~LC_OBJECT_HIDDEN;
@@ -128,8 +128,6 @@ public:
 	SetSelection (false, NULL);
       }
     }
-  virtual bool SetColor (int nColor)
-    { return false; };
   */
 
   // determine the object type
@@ -156,13 +154,6 @@ public:
 	void ChangeKey(unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
 	virtual void InsertTime(unsigned short start, bool animation, unsigned short time);
 	virtual void RemoveTime(unsigned short start, bool animation, unsigned short time);
-
-	int GetKeyTypeCount () const
-	{ return m_nKeyInfoCount; }
-	const LC_OBJECT_KEY_INFO* GetKeyTypeInfo (int index) const
-	{ return &m_pKeyInfo[index]; };
-	const float* GetKeyTypeValue (int index) const
-	{ return m_pKeyValues[index]; };
 
 protected:
 	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);

@@ -56,14 +56,13 @@ class lcCamera;
 class PieceInfo;
 
 // User Interface
-void SystemUpdateViewport(int nNew, int nOld);
 void SystemUpdateAction(int nNew, int nOld);
 void SystemUpdateColorList(int nNew);
 void SystemUpdateRenderingMode(bool bBackground, bool bFast);
 void SystemUpdateUndoRedo(char* undo, char* redo);
 void SystemUpdateSnap(const unsigned long nSnap);
-void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera);
-void SystemUpdateCameraMenu(lcCamera* pCamera);
+void SystemUpdateCurrentCamera(lcCamera* OldCamera, lcCamera* NewCamera, lcCamera* CameraList);
+void SystemUpdateCameraMenu(lcCamera* Camera);
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);

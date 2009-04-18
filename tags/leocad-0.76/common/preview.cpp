@@ -62,12 +62,8 @@ void PiecePreview::OnDraw()
 
 	float Aspect = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(30.0f, Aspect, 1.0f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
+	Vector3 Target = m_Selection->m_BoundingBox.GetCenter();
 	Vector3 Eye(0, 0, 1.0f);
 	Matrix33 Rot;
 
@@ -77,25 +73,30 @@ void PiecePreview::OnDraw()
 	Rot = MatrixFromAxisAngle(Vector4(0, 0, 1, -m_RotateZ * LC_DTOR));
 	Eye = Mul(Eye, Rot);
 
+	Eye = Target + Eye * m_Distance;
+
+	Matrix44 Projection = CreatePerspectiveMatrix(30.0f, Aspect, 1.0f, 100.0f);
+	Matrix44 WorldView = CreateLookAtMatrix(Eye, Target, Vector3(0, 0, 1));
+
 	if (m_AutoZoom)
 	{
-		Eye = Eye * 100.0f;
-		m_Selection->ZoomExtents(30.0f, Aspect, Eye);
+		Vector3 Points[8];
+		m_Selection->m_BoundingBox.GetPoints(Points);
 
-		// Update the new camera distance.
-		Vector3 d = Eye - m_Selection->GetCenter();
-		m_Distance = Length(d);
+		Eye = ZoomExtents(Eye, WorldView, Projection, Points, 8);
+
+		WorldView = CreateLookAtMatrix(Eye, Target, Vector3(0, 0, 1));
+		m_Distance = Length(Eye - Target);
 	}
-	else
-	{
-		Matrix44 WorldToView;
-		WorldToView = CreateLookAtMatrix(Eye * m_Distance, m_Selection->GetCenter(), Vector3(0, 0, 1));
-		glLoadMatrixf(WorldToView);
-	}
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(Projection);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(WorldView);
 
 	m_Selection->RenderPiece(g_App->m_SelectedColor);
 
-	glFinish();
 	SwapBuffers();
 }
 

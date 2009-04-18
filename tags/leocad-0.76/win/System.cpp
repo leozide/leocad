@@ -449,17 +449,6 @@ void SystemInit()
 	}
 }
 
-// Viewport menu.
-void SystemUpdateViewport(int nNew, int nOld)
-{
-	CMenu* pMenu = GetMainMenu(2);
-	if (!pMenu)
-		return;
-	pMenu = pMenu->GetSubMenu(13);
-	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
-	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
-}
-
 // Action toolbar, popup menu and cursor.
 void SystemUpdateAction(int nNew, int nOld)
 {
@@ -702,7 +691,7 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 	pCtrl->EnableButton(ID_VIEW_STEP_LAST, nTime != nTotal ? TRUE : FALSE);
 
 	// Main menu
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(14);
+	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
 
 	pMainMenu->EnableMenuItem(ID_VIEW_STEP_NEXT, MF_BYCOMMAND | 
 		(nTime < nTotal ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
@@ -801,7 +790,7 @@ void SystemUpdateCurrentCamera(lcCamera* OldCamera, lcCamera* NewCamera, lcCamer
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i = 0;
 
@@ -829,7 +818,7 @@ void SystemUpdateCameraMenu(lcCamera* CameraList)
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 
 	while (pMainMenu->GetMenuItemCount())
@@ -1656,7 +1645,6 @@ bool SystemDoDialog(int nMode, void* param)
 			if (dlg.DoModal() == IDOK)
 			{
 				strcpy((char*)param, dlg.m_strName);
-
 				return true;
 			}
 		} break;

@@ -279,24 +279,6 @@ BEGIN
         MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
         MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
         MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
-        POPUP "&Viewports"
-        BEGIN
-            MENUITEM "01",                          ID_VIEWPORT01
-            MENUITEM "02",                          ID_VIEWPORT02
-            MENUITEM "03",                          ID_VIEWPORT03
-            MENUITEM "04",                          ID_VIEWPORT04
-            MENUITEM "05",                          ID_VIEWPORT05
-            MENUITEM "06",                          ID_VIEWPORT06
-            MENUITEM "07",                          ID_VIEWPORT07
-            MENUITEM "08",                          ID_VIEWPORT08
-            , MENUBARBREAK
-            MENUITEM "09",                          ID_VIEWPORT09
-            MENUITEM "10",                          ID_VIEWPORT10
-            MENUITEM "11",                          ID_VIEWPORT11
-            MENUITEM "12",                          ID_VIEWPORT12
-            MENUITEM "13",                          ID_VIEWPORT13
-            MENUITEM "14",                          ID_VIEWPORT14
-        END
         POPUP "C&ameras"
         BEGIN
             MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
@@ -314,8 +296,30 @@ BEGIN
             MENUITEM "&Delete",                     ID_VIEW_STEP_DELETE
         END
         MENUITEM SEPARATOR
-        MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
         MENUITEM "New View",                    ID_VIEW_NEWVIEW
+        MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
+        MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
+        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
+        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
+        POPUP "Default &Viewports"
+        BEGIN
+            MENUITEM "01",                          ID_VIEWPORT01
+            MENUITEM "02",                          ID_VIEWPORT02
+            MENUITEM "03",                          ID_VIEWPORT03
+            MENUITEM "04",                          ID_VIEWPORT04
+            MENUITEM "05",                          ID_VIEWPORT05
+            MENUITEM "06",                          ID_VIEWPORT06
+            MENUITEM "07",                          ID_VIEWPORT07
+            MENUITEM "08",                          ID_VIEWPORT08, MENUBARBREAK
+            MENUITEM "09",                          ID_VIEWPORT09
+            MENUITEM "10",                          ID_VIEWPORT10
+            MENUITEM "11",                          ID_VIEWPORT11
+            MENUITEM "12",                          ID_VIEWPORT12
+            MENUITEM "13",                          ID_VIEWPORT13
+            MENUITEM "14",                          ID_VIEWPORT14
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
     END
     POPUP "&Piece"
     BEGIN
@@ -1865,6 +1869,14 @@ BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_SPLITHORIZONTALLY "Split the current view in 2 horizontally."
+    ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."
+    ID_VIEW_DELETEVIEW      "Delete the current view"
+    ID_VIEW_RESETVIEWS      "Reset all views to the default configuration"
 END
 
 #endif    // English (U.S.) resources

@@ -103,9 +103,6 @@ public:
 protected:
 	void Initialize ();
 
-	// Camera target
-	LightTarget* m_Target;
-
 	// Attributes
 	float m_fCone;
 	unsigned char m_nState;
@@ -116,6 +113,9 @@ protected:
 	void DrawSphere();
 
 public:
+	// Camera target
+	LightTarget* m_Target;
+
 	// Temporary parameters
 	Matrix44 m_WorldLight;
 	Vector3 m_Position;

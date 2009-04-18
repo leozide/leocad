@@ -192,17 +192,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	if (!m_wndModifyDlg.Create(this, IDD_MODIFY,
-	    CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE,
-		ID_VIEW_MODIFY_BAR))
+	if (!m_wndModifyDlg.Create(_T("Modify"), this, ID_VIEW_MODIFY_BAR))
 	{
 		TRACE0("Failed to create modify dialog bar\n");
 		return -1;      // fail to create
 	}
 
 	EnableDocking(CBRS_ALIGN_ANY);
-	m_wndModifyDlg.SetWindowText (_T("Modify"));
-	m_wndModifyDlg.EnableDocking(0);
+	m_wndModifyDlg.SetBarStyle(m_wndModifyDlg.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
+	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_ANY);
 	ShowControlBar(&m_wndModifyDlg, FALSE, FALSE);
 	FloatControlBar(&m_wndModifyDlg, CPoint(10,10));
 
@@ -434,7 +432,7 @@ void CMainFrame::ProcessMessage(lcMessageType Message, void* Data)
 {
 	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
 	{
-		m_wndModifyDlg.UpdateInfo((lcObject*)Data);
+		m_wndModifyDlg.m_ModifyDlg.UpdateInfo((lcObject*)Data);
 
 		char str[128];
 		Vector3 pos;

@@ -266,7 +266,7 @@ struct LC_CAMERA_MODIFY
 	lcObject* camera;
 	Vector3 Eye;
 	Vector3 Target;
-	Vector3 Up;
+	float Roll;
 	char name[81];
 	float fovy;
 	float znear;
@@ -281,9 +281,9 @@ struct LC_LIGHT_MODIFY
 	lcObject* light;
 	Vector3 Position;
 	Vector3 Target;
-	Vector3 AmbientColor;
-	Vector3 DiffuseColor;
-	Vector3 SpecularColor;
+	Vector4 AmbientColor;
+	Vector4 DiffuseColor;
+	Vector4 SpecularColor;
 	float ConstantAttenuation;
 	float LinearAttenuation;
 	float QuadraticAttenuation;

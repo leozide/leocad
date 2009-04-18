@@ -232,10 +232,9 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 
 			case TERRAIN_ROTATE:
 			{
-				float center[3] = { 0,0,0 };
 				if (point == m_ptMouse)
 					break;
-				m_pCamera->DoRotate(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false, false, center);
+				m_pCamera->Rotate(1, false, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
 				InvalidateRect (NULL, FALSE);
 			} break;
 		}

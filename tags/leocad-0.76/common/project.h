@@ -156,6 +156,11 @@ public:
 		{ return m_ActiveView; }
 	bool SetActiveView(View* view);
 
+	// Objects
+	lcPiece* m_Pieces;
+	lcCamera* m_Cameras;
+	lcLight* m_Lights;
+
 // Implementation
 protected:
 	// default implementation
@@ -179,10 +184,6 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	// Objects
-	lcPiece* m_Pieces;
-	lcCamera* m_Cameras;
-	lcLight* m_Lights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];

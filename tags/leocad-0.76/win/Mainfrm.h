@@ -71,7 +71,7 @@ public:
 		{ m_strStatusBar = Message; }
 
 protected:
-	CModifyDialog	m_wndModifyDlg;
+	CModifyDialogBar	m_wndModifyDlg;
 
 	CBMPMenu m_bmpMenu;
 	WINDOWPLACEMENT m_wpPrev;

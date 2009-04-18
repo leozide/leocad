@@ -387,18 +387,9 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		tmp[0] = (float)target[0]; tmp[1] = (float)target[1]; tmp[2] = (float)target[2];
 		pCam->ChangeKey(1, false, false, tmp, LC_CK_TARGET);
 		pCam->ChangeKey(1, true, false, tmp, LC_CK_TARGET);
-
-		// Create up vector
-		Vector3 upvec(0,0,1), frontvec((float)(eye[0]-target[0]), (float)(eye[1]-target[1]), (float)(eye[2]-target[2])), sidevec;
-		frontvec = Normalize(frontvec);
-		if (frontvec == upvec)
-			sidevec = Vector3(1,0,0);
-		else
-			sidevec = Cross(frontvec, upvec);
-		upvec = Cross(sidevec, frontvec);
-		upvec = Normalize(upvec);
-		pCam->ChangeKey(1, false, false, upvec, LC_CK_UP);
-		pCam->ChangeKey(1, true, false, upvec, LC_CK_UP);
+		float roll = 0;
+		pCam->ChangeKey(1, false, false, &roll, LC_CK_ROLL);
+		pCam->ChangeKey(1, true, false, &roll, LC_CK_ROLL);
 	}
 
 	if (bMerge)
@@ -3500,8 +3491,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			if (pCamera->m_TargetPosition != mod->Target)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Target, LC_CK_TARGET);
 
-			if (pCamera->GetUpVector() != mod->Up)
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Up, LC_CK_UP);
+			if (pCamera->m_Roll != mod->Roll)
+				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, &mod->Roll, LC_CK_ROLL);
 
 			pCamera->m_FOV = mod->fovy;
 			pCamera->m_NearDist = mod->znear;
@@ -8620,11 +8611,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			// We can't rotate the side cameras.
 			if (m_ActiveView->GetCamera()->IsSide())
 			{
-				float up[3];
 				const Vector3& eye = m_ActiveView->GetCamera()->m_Position;
 				const Vector3& target = m_ActiveView->GetCamera()->m_TargetPosition;
-				m_ActiveView->GetCamera()->GetUpVec(up);
-				lcCamera* pCamera = new lcCamera(eye, target, up, m_Cameras);
+				float roll = m_ActiveView->GetCamera()->m_Roll;
+				lcCamera* pCamera = new lcCamera(eye, target, roll, m_Cameras);
 
 				m_ActiveView->SetCamera(pCamera);
 				SystemUpdateCameraMenu(m_Cameras);
@@ -8642,19 +8632,19 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, y - m_nDownY, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_ActiveView->GetCamera()->Rotate(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_X:
-					m_ActiveView->GetCamera()->DoRotate(x - m_nDownX, 0, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_ActiveView->GetCamera()->Rotate(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, x - m_nDownX, 0);
 					break;
 
 				case LC_OVERLAY_Y:
-					m_ActiveView->GetCamera()->DoRotate(0, y - m_nDownY, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_ActiveView->GetCamera()->Rotate(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, 0, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_Z:
-					m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+					m_ActiveView->GetCamera()->Roll(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, x - m_nDownX, 0);
 					break;
 			}
 
@@ -8669,7 +8659,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->GetCamera()->DoRoll(x - m_nDownX, g_App->m_MouseSensitivity, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->GetCamera()->Roll(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, x - m_nDownX, 0);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();

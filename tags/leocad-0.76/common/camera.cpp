@@ -15,7 +15,7 @@ static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 {
 	{ "Camera Position", 3, LC_CK_EYE },
 	{ "Camera Target", 3, LC_CK_TARGET },
-	{ "Camera Up Vector", 3, LC_CK_UP }
+	{ "Camera Roll", 1, LC_CK_ROLL }
 };
 
 // =============================================================================
@@ -102,15 +102,14 @@ lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
 	char names[8][7] = { "Front", "Back",  "Top",  "Under", "Left", "Right", "Main", "User" };
 	float eyes[8][3] = { { 50,0,0 }, { -50,0,0 }, { 0,0,50 }, { 0,0,-50 },
 	                     { 0,50,0 }, { 0,-50,0 }, { -10,-10,5}, { 0,5,0 } };
-	float ups [8][3] = {  { 0,0,1 }, { 0,0,1 }, { 1,0,0 }, { -1,0,0 }, { 0,0,1 },
-	                      { 0,0,1 }, {-0.2357f, -0.2357f, 0.94281f }, { 0,0,1 } };
+	float roll = 0.0f;
 
 	Initialize();
 
 	ChangeKey(1, false, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, false, true, ups[nType], LC_CK_UP);
+	ChangeKey(1, false, true, &roll, LC_CK_ROLL);
 	ChangeKey(1, true, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, true, true, ups[nType], LC_CK_UP);
+	ChangeKey(1, true, true, &roll, LC_CK_ROLL);
 
 	m_Name = names[nType];
 	if (nType != 8)
@@ -124,24 +123,17 @@ lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
 }
 
 // From OnMouseMove(), case LC_ACTION_ROTATE_VIEW
-lcCamera::lcCamera(const float *eye, const float *target, const float *up, lcObject* pCamera)
+lcCamera::lcCamera(const float *eye, const float *target, float roll, lcObject* pCamera)
 	: lcObject(LC_OBJECT_CAMERA)
 {
-	// Fix the up vector
-	Vector3 upvec(up[0], up[1], up[2]), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
-	frontvec = Normalize(frontvec);
-	sidevec = Cross(frontvec, upvec);
-	upvec = Cross(sidevec, frontvec);
-	upvec = Normalize(upvec);
-
 	Initialize();
 
 	ChangeKey(1, false, true, eye, LC_CK_EYE);
 	ChangeKey(1, false, true, target, LC_CK_TARGET);
-	ChangeKey(1, false, true, upvec, LC_CK_UP);
+	ChangeKey(1, false, true, &roll, LC_CK_ROLL);
 	ChangeKey(1, true, true, eye, LC_CK_EYE);
 	ChangeKey(1, true, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, true, upvec, LC_CK_UP);
+	ChangeKey(1, true, true, &roll, LC_CK_ROLL);
 
 	int i, max = 0;
 
@@ -171,26 +163,17 @@ lcCamera::lcCamera(const float *eye, const float *target, const float *up, lcObj
 lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcObject* pCamera)
 	: lcObject(LC_OBJECT_CAMERA)
 {
-	// Fix the up vector
-	Vector3 upvec(0,0,1), frontvec(ex-tx, ey-ty, ez-tz), sidevec;
-	frontvec = Normalize(frontvec);
-	if (frontvec == upvec)
-		sidevec = Vector3(1,0,0);
-	else
-		sidevec = Cross(frontvec, upvec);
-	upvec = Cross(sidevec, frontvec);
-	upvec = Normalize(upvec);
-
 	Initialize();
 
 	float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
+	float roll = 0.0f;
 
 	ChangeKey(1, false, true, eye, LC_CK_EYE);
 	ChangeKey(1, false, true, target, LC_CK_TARGET);
-	ChangeKey(1, false, true, upvec, LC_CK_UP);
+	ChangeKey(1, false, true, &roll, LC_CK_ROLL);
 	ChangeKey(1, true, true, eye, LC_CK_EYE);
 	ChangeKey(1, true, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, true, upvec, LC_CK_UP);
+	ChangeKey(1, true, true, &roll, LC_CK_ROLL);
 
 	int i, max = 0;
 
@@ -235,7 +218,7 @@ void lcCamera::Initialize()
 	m_pTR = NULL;
 	m_Name = "";
 
-	float *values[] = { m_Position, m_TargetPosition, m_fUp };
+	float *values[] = { m_Position, m_TargetPosition, &m_Roll };
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
 
 	m_Target = new CameraTarget(this);
@@ -298,8 +281,11 @@ bool lcCamera::FileLoad(File& file)
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, false, true, f, LC_CK_UP);
-		ChangeKey(1, true, true, f, LC_CK_UP);
+//		ChangeKey(1, false, true, f, LC_CK_UP);
+//		ChangeKey(1, true, true, f, LC_CK_UP);
+		float roll = 0.0f;
+		ChangeKey(1, false, true, &roll, LC_CK_ROLL);
+		ChangeKey(1, true, true, &roll, LC_CK_ROLL);
 	}
 
 	if (version == 3)
@@ -335,8 +321,11 @@ bool lcCamera::FileLoad(File& file)
 			f[0] = (float)up[0];
 			f[1] = (float)up[1];
 			f[2] = (float)up[2];
-			ChangeKey(step, false, true, f, LC_CK_UP);
-			ChangeKey(step, true, true, f, LC_CK_UP);
+//			ChangeKey(step, false, true, f, LC_CK_UP);
+//			ChangeKey(step, true, true, f, LC_CK_UP);
+			float roll = 0.0f;
+			ChangeKey(step, false, true, &roll, LC_CK_ROLL);
+			ChangeKey(step, true, true, &roll, LC_CK_ROLL);
 
 			int snapshot; // BOOL under Windows
 			int cam;
@@ -467,18 +456,6 @@ void lcCamera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float d
 
 			ChangeKey(nTime, bAnimation, bAddKey, m_TargetPosition, LC_CK_TARGET);
 		}
-
-		// Fix the up vector
-		Vector3 upvec(m_fUp[0], m_fUp[1], m_fUp[2]), sidevec;
-		Vector3 frontvec = m_TargetPosition - m_Position;
-		sidevec = Cross(frontvec, upvec);
-		upvec = Cross(sidevec, frontvec);
-		upvec = Normalize(upvec);
-		m_fUp[0] = upvec[0];
-		m_fUp[1] = upvec[1];
-		m_fUp[2] = upvec[2];
-
-		ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
 	}
 }
 
@@ -538,18 +515,34 @@ void lcCamera::UpdatePosition(u32 Time, bool Animation)
 {
 	CalculateKeys(Time, Animation);
 
-	// Fix the up vector
-	Vector3 frontvec = m_Position - m_TargetPosition;
-	Vector3 upvec(m_fUp[0], m_fUp[1], m_fUp[2]), sidevec;
+	Vector3 Z = Normalize(m_Position - m_TargetPosition);
 
-	sidevec = Cross(frontvec, upvec);
-	upvec = Cross(sidevec, frontvec);
-	upvec = Normalize(upvec);
-	m_fUp[0] = upvec[0];
-	m_fUp[1] = upvec[1];
-	m_fUp[2] = upvec[2];
+	// Build the Y vector of the matrix.
+	Vector3 UpVector;
 
-	m_WorldView = CreateLookAtMatrix(m_Position, m_TargetPosition, Vector3(m_fUp[0], m_fUp[1], m_fUp[2]));
+	if (fabsf(Z[0]) < 0.001f && fabsf(Z[1]) < 0.001f)
+		UpVector = Vector3(-Z[2], 0, 0);
+	else
+		UpVector = Vector3(0, 0, 1);
+
+	// Calculate X vector.
+	Vector3 X = Cross(UpVector, Z);
+
+	// Calculate real Y vector.
+	Vector3 Y = Cross(Z, X);
+
+	// Apply the roll rotation and recalculate X and Y.
+	Matrix33 RollMat = MatrixFromAxisAngle(Z, m_Roll);
+	Y = Normalize(Mul(Y, RollMat));
+	X = Normalize(Cross(Y, Z));
+
+	// Build matrices.
+	Vector4 Row0 = Vector4(X[0], Y[0], Z[0], 0.0f);
+	Vector4 Row1 = Vector4(X[1], Y[1], Z[1], 0.0f);
+	Vector4 Row2 = Vector4(X[2], Y[2], Z[2], 0.0f);
+	Vector4 Row3 = Vector4(Vector3(Row0 * -m_Position[0] + Row1 * -m_Position[1] + Row2 * -m_Position[2]), 1.0f);
+
+	m_WorldView = Matrix44(Row0, Row1, Row2, Row3);
 	m_ViewWorld = RotTranInverse(m_WorldView);
 }
 
@@ -782,48 +775,75 @@ void lcCamera::Pan(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY
 	UpdatePosition(Time, Animation);
 }
 
-void lcCamera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
+void lcCamera::Orbit(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
 {
-	Vector3 upvec(m_fUp[0], m_fUp[1], m_fUp[2]), frontvec = m_Position - m_TargetPosition, sidevec;
-	sidevec = Cross(frontvec, upvec);
-	sidevec = Normalize(sidevec);
-	sidevec *= 2.0f*dx/(21-mouse);
-	upvec = Normalize(upvec);
-	upvec *= -2.0f*dy/(21-mouse);
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+	float dy = MouseY * Sensitivity;
 
-	// TODO: option to move eye or target
-	float len = Length(frontvec);
-	frontvec += Vector3(upvec[0] + sidevec[0], upvec[1] + sidevec[1], upvec[2] + sidevec[2]);
-	frontvec = Normalize(frontvec);
-	frontvec *= len;
-	frontvec += m_TargetPosition;
-	m_Position = frontvec;
+	Vector3 Dir = m_Position - m_TargetPosition;
 
-	// Calculate new up
-	upvec = Vector3(m_fUp[0], m_fUp[1], m_fUp[2]);
-	frontvec = m_Position - m_TargetPosition;
-	sidevec = Cross(frontvec, upvec);
-	upvec = Cross(sidevec, frontvec);
-	upvec = Normalize(upvec);
-	m_fUp[0] = upvec[0];
-	m_fUp[1] = upvec[1];
-	m_fUp[2] = upvec[2];
+	// The X axis of the mouse always corresponds to Z in the world.
+	if (fabsf(dx) > 0.01f)
+	{
+		float AngleX = -dx * LC_DTOR;
+		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_Position, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
-	UpdatePosition(nTime, bAnimation);
+		Dir = Mul(Dir, RotX);
+	}
+
+	// The Y axis will the side vector of the camera.
+	if (fabsf(dy) > 0.01f)
+	{
+		float AngleY = dy * LC_DTOR;
+		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
+
+		Dir = Mul(Dir, RotY);
+	}
+
+	ChangeKey(Time, Animation, AddKey, Dir + m_TargetPosition, LC_CK_EYE);
+	UpdatePosition(Time, Animation);
 }
 
-void lcCamera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
+void lcCamera::Rotate(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
 {
-	Matrix mat;
-	Vector3 front = m_Position - m_TargetPosition;
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+	float dy = MouseY * Sensitivity;
 
-	mat.FromAxisAngle(front, 2.0f*dx/(21-mouse));
-	mat.TransformPoints(m_fUp, 1);
+	Vector3 Dir = m_TargetPosition - m_Position;
 
-	ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
-	UpdatePosition(nTime, bAnimation);
+	// The X axis of the mouse always corresponds to Z in the world.
+	if (fabsf(dx) > 0.01f)
+	{
+		float AngleX = -dx * LC_DTOR;
+		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
+
+		Dir = Mul(Dir, RotX);
+	}
+
+	// The Y axis will the side vector of the camera.
+	if (fabsf(dy) > 0.01f)
+	{
+		float AngleY = dy * LC_DTOR;
+		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
+
+		Dir = Mul(Dir, RotY);
+	}
+
+	ChangeKey(Time, Animation, AddKey, Dir + m_Position, LC_CK_TARGET);
+	UpdatePosition(Time, Animation);
+}
+
+void lcCamera::Roll(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
+{
+	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
+	float dx = MouseX * Sensitivity;
+
+	float NewRoll = m_Roll + dx / 100;
+
+	ChangeKey(Time, Animation, AddKey, &NewRoll, LC_CK_ROLL);
+	UpdatePosition(Time, Animation);
 }
 
 void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)

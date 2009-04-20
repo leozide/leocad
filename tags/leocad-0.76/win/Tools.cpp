@@ -453,7 +453,7 @@ void Export3DStudio()
 		UINT facecount = 0, i, j = 0;
 		memset(facemats, 0, sizeof(u32)*lcNumColors);
 
-		lcMesh* Mesh = pPiece->GetPieceInfo()->m_Mesh;
+		lcMesh* Mesh = pPiece->m_PieceInfo->m_Mesh;
 
 		if (Mesh->m_IndexType == GL_UNSIGNED_INT)
 			continue; // 3DS can't handle this
@@ -475,10 +475,8 @@ void Export3DStudio()
 		sprintf(mobj->name, "Piece%d", objcount);
 		objcount++;
 
-		float tmp[3], pos[3], rot[4];
-		pPiece->GetPosition(pos);
-		pPiece->GetRotation(rot);
-		Matrix mat(rot, pos);
+		float tmp[3];
+		Matrix mat(pPiece->m_AxisAngle, pPiece->m_Position);
 		float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 		for (int c = 0; c < Mesh->m_VertexCount; c++)
 		{

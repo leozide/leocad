@@ -569,7 +569,7 @@ void CModifyPieceDlg::UpdateInfo(lcPiece* piece)
 	else
 	{
 		// Position.
-		Vector3 Pos(piece->m_fPosition[0], piece->m_fPosition[1], piece->m_fPosition[2]);
+		Vector3 Pos = piece->m_Position;
 		lcGetActiveProject()->ConvertToUserUnits(Pos);
 
 		m_PosX = Pos[0];
@@ -577,11 +577,7 @@ void CModifyPieceDlg::UpdateInfo(lcPiece* piece)
 		m_PosZ = Pos[2];
 
 		// Rotation.
-		float rot[4];
-		piece->GetRotation(rot);
-
-		Matrix33 RotMat;
-		RotMat = MatrixFromAxisAngle(Vector3(rot[0], rot[1], rot[2]), rot[3] * LC_DTOR);
+		Matrix33 RotMat = MatrixFromAxisAngle(piece->m_AxisAngle);
 		Vector3 Rot = MatrixToEulerAngles(RotMat) * LC_RTOD;
 
 		m_RotX = Rot[0];

@@ -15,7 +15,7 @@
 #include "lc_mesh.h"
 #include "matrix.h"
 
-#define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
+#define LC_PIECE_SAVE_VERSION 10 // LeoCAD 0.76
 
 static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 {
@@ -40,7 +40,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
   }
 
 	m_Next = NULL;
-	m_pPieceInfo = pPieceInfo;
+	m_PieceInfo = pPieceInfo;
 	m_nState = 0;
 	m_nColor = 0;
 	m_nStepShow = 1;
@@ -49,10 +49,10 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	m_Name = "";
 	m_pGroup = NULL;
 
-	if (m_pPieceInfo != NULL)
-		m_pPieceInfo->AddRef();
+	if (m_PieceInfo != NULL)
+		m_PieceInfo->AddRef();
 
-	float *values[] = { m_fPosition, m_fRotation };
+	float *values[] = { m_Position, m_AxisAngle };
 	RegisterKeys (values, piece_key_info, LC_PK_COUNT);
 
 	float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
@@ -64,8 +64,8 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 
 lcPiece::~lcPiece()
 {
-	if (m_pPieceInfo)
-		m_pPieceInfo->DeRef();
+	if (m_PieceInfo)
+		m_PieceInfo->DeRef();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -74,8 +74,8 @@ lcPiece::~lcPiece()
 // Use only when loading from a file
 void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 {
-	m_pPieceInfo = pPieceInfo;
-	m_pPieceInfo->AddRef();
+	m_PieceInfo = pPieceInfo;
+	m_PieceInfo->AddRef();
 }
 
 bool lcPiece::FileLoad (File& file, char* name)
@@ -88,8 +88,21 @@ bool lcPiece::FileLoad (File& file, char* name)
     return false;
 
   if (version > 8)
+  {
     if (!lcObject::FileLoad (file))
       return false;
+
+	if (version < 10)
+	{
+		for (LC_OBJECT_KEY* node = m_pAnimationKeys; node; node = node->next)
+			if (node->type == LC_PK_ROTATION)
+				node->param[3] *= LC_DTOR;
+
+		for (LC_OBJECT_KEY* node = m_pInstructionKeys; node; node = node->next)
+			if (node->type == LC_PK_ROTATION)
+				node->param[3] *= LC_DTOR;
+	}
+  }
 
   if (version < 9)
   {
@@ -108,6 +121,9 @@ bool lcPiece::FileLoad (File& file, char* name)
         file.ReadShort (&time, 1);
         file.ReadByte (&type, 1);
 
+		if (type == LC_PK_ROTATION)
+			param[3] *= LC_DTOR;
+
         ChangeKey (time, false, true, param, type);
       }
 
@@ -117,6 +133,9 @@ bool lcPiece::FileLoad (File& file, char* name)
         file.ReadFloat (param, 4);
         file.ReadShort (&time, 1);
         file.ReadByte (&type, 1);
+
+		if (type == LC_PK_ROTATION)
+			param[3] *= LC_DTOR;
 
         ChangeKey (time, true, true, param, type);
       }
@@ -181,11 +200,11 @@ bool lcPiece::FileLoad (File& file, char* name)
 
   // Common to all versions.
   file.Read (name, 9);
-  file.ReadByte (&m_nColor, 1);
+  file.ReadByte (&m_nColor, 1); // TODO: fix colors to new mapping in 0.76
 
   if (version < 5)
   {
-    const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
+    const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 }; // TODO: fix colors to new mapping in 0.76
     m_nColor = conv[m_nColor];
   }
 
@@ -255,7 +274,7 @@ void lcPiece::FileSave (File& file, Group* pGroups)
 
   lcObject::FileSave (file);
 
-  file.Write(m_pPieceInfo->m_strName, 9);
+  file.Write(m_PieceInfo->m_strName, 9);
   file.WriteByte(&m_nColor, 1);
   file.WriteByte(&m_nStepShow, 1);
   file.WriteByte(&m_nStepHide, 1);
@@ -305,13 +324,13 @@ void lcPiece::CreateName(lcPiece* pPiece)
 	int i, max = 0;
 
 	for (; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		if (strncmp(pPiece->m_Name, m_pPieceInfo->m_strDescription, strlen(m_pPieceInfo->m_strDescription)) == 0)
-			if (sscanf((char*)pPiece->m_Name + strlen(m_pPieceInfo->m_strDescription), " #%d", &i) == 1)
+		if (strncmp(pPiece->m_Name, m_PieceInfo->m_strDescription, strlen(m_PieceInfo->m_strDescription)) == 0)
+			if (sscanf((char*)pPiece->m_Name + strlen(m_PieceInfo->m_strDescription), " #%d", &i) == 1)
 				if (i > max) 
 					max = i;
 
 	char buf[256];
-	sprintf(buf, "%s #%.2d", m_pPieceInfo->m_strDescription, max+1);
+	sprintf(buf, "%s #%.2d", m_PieceInfo->m_strDescription, max+1);
 	m_Name = buf;
 }
 
@@ -393,23 +412,21 @@ void lcPiece::RemoveTime (unsigned short start, bool animation, unsigned short t
 
 void lcPiece::ClosestLineIntersect(lcClickLine& ClickLine) const
 {
-	Matrix44 WorldModel;
-	WorldModel = MatrixFromAxisAngle(Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], -m_fRotation[3] * LC_DTOR));
-	WorldModel.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldModel));
+	Matrix44 WorldModel = RotTranInverse(m_ModelWorld);
 
 	Vector3 Start = Mul31(ClickLine.Start, WorldModel);
 	Vector3 End = Mul31(ClickLine.End, WorldModel);
 
 	// Check the bounding box distance first.
 	float Dist;
-	BoundingBox Box = BoundingBox(Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
-		                          Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]));
+	BoundingBox Box = BoundingBox(Vector3(m_PieceInfo->m_fDimensions[3], m_PieceInfo->m_fDimensions[4], m_PieceInfo->m_fDimensions[5]),
+		                          Vector3(m_PieceInfo->m_fDimensions[0], m_PieceInfo->m_fDimensions[1], m_PieceInfo->m_fDimensions[2]));
 
 	if (!BoundingBoxRayMinIntersectDistance(Box, Start, End, &Dist) || (Dist >= ClickLine.Dist))
 		return;
 
 	// Check mesh.
-	if (!m_pPieceInfo->m_Mesh->ClosestRayIntersect(Start, End, &Dist) || (Dist >= ClickLine.Dist))
+	if (!m_PieceInfo->m_Mesh->ClosestRayIntersect(Start, End, &Dist) || (Dist >= ClickLine.Dist))
 		return;
 
 	ClickLine.Object = this;
@@ -421,28 +438,26 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 	// First check the bounding box for quick rejection.
 	Vector3 Box[8] =
 	{
-		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
-		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5]),
-		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2]),
-		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
-		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
-		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2]),
-		Vector3(m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5]),
-		Vector3(m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2])
+		Vector3(m_PieceInfo->m_fDimensions[0], m_PieceInfo->m_fDimensions[1], m_PieceInfo->m_fDimensions[5]),
+		Vector3(m_PieceInfo->m_fDimensions[3], m_PieceInfo->m_fDimensions[1], m_PieceInfo->m_fDimensions[5]),
+		Vector3(m_PieceInfo->m_fDimensions[0], m_PieceInfo->m_fDimensions[1], m_PieceInfo->m_fDimensions[2]),
+		Vector3(m_PieceInfo->m_fDimensions[3], m_PieceInfo->m_fDimensions[4], m_PieceInfo->m_fDimensions[5]),
+		Vector3(m_PieceInfo->m_fDimensions[3], m_PieceInfo->m_fDimensions[4], m_PieceInfo->m_fDimensions[2]),
+		Vector3(m_PieceInfo->m_fDimensions[0], m_PieceInfo->m_fDimensions[4], m_PieceInfo->m_fDimensions[2]),
+		Vector3(m_PieceInfo->m_fDimensions[0], m_PieceInfo->m_fDimensions[4], m_PieceInfo->m_fDimensions[5]),
+		Vector3(m_PieceInfo->m_fDimensions[3], m_PieceInfo->m_fDimensions[1], m_PieceInfo->m_fDimensions[2])
 	};
 
-	// Transform the planes to local space.
-	Matrix44 WorldToLocal;
-	WorldToLocal = MatrixFromAxisAngle(Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], -m_fRotation[3] * LC_DTOR));
-	WorldToLocal.SetTranslation(Mul31(Vector3(-m_fPosition[0], -m_fPosition[1], -m_fPosition[2]), WorldToLocal));
+	// Transform the planes to model space.
+	Matrix44 WorldModel = RotTranInverse(m_ModelWorld);
 
 	Vector4* LocalPlanes = new Vector4[NumPlanes];
 	int i;
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldToLocal));
-		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
+		LocalPlanes[i] = Vector4(Mul30(Vector3(Planes[i]), WorldModel));
+		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldModel[3]), Vector3(LocalPlanes[i]));
 	}
 
 	// Start by testing trivial reject/accept cases.
@@ -482,7 +497,7 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 	}
 
 	// Partial intersection, so check if any triangles are inside.
-	lcMesh* Mesh = m_pPieceInfo->m_Mesh;
+	lcMesh* Mesh = m_PieceInfo->m_Mesh;
 	float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 	void* indices = Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 	bool ret = false;
@@ -532,11 +547,9 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 
 void lcPiece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-  m_fPosition[0] += dx;
-  m_fPosition[1] += dy;
-  m_fPosition[2] += dz;
+	m_Position += Vector3(dx, dy, dz);
 
-  ChangeKey (nTime, bAnimation, bAddKey, m_fPosition, LC_PK_POSITION);
+	ChangeKey (nTime, bAnimation, bAddKey, m_Position, LC_PK_POSITION);
 }
 
 bool lcPiece::IsVisible(unsigned short nTime, bool bAnimation)
@@ -559,30 +572,14 @@ bool lcPiece::IsVisible(unsigned short nTime, bool bAnimation)
 	}
 }
 
-void lcPiece::CompareBoundingBox(float box[6])
+void lcPiece::MergeBoundingBox(BoundingBox* Box)
 {
-	float v[24] = {
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2],
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[2],
-		m_pPieceInfo->m_fDimensions[0], m_pPieceInfo->m_fDimensions[4], m_pPieceInfo->m_fDimensions[5],
-		m_pPieceInfo->m_fDimensions[3], m_pPieceInfo->m_fDimensions[1], m_pPieceInfo->m_fDimensions[2] };
+	Vector3 Points[8];
 
-	Matrix m(m_fRotation, m_fPosition);
-	m.TransformPoints(v, 8);
+	m_PieceInfo->m_BoundingBox.GetPoints(Points);
 
-	for (int i = 0; i < 24; i += 3)
-	{
-		if (v[i]   < box[0]) box[0] = v[i];
-		if (v[i+1] < box[1]) box[1] = v[i+1];
-		if (v[i+2] < box[2]) box[2] = v[i+2];
-		if (v[i]   > box[3]) box[3] = v[i];
-		if (v[i+1] > box[4]) box[4] = v[i+1];
-		if (v[i+2] > box[5]) box[5] = v[i+2];
-	}
+	for (int i = 0; i < 8; i++)
+		Box->AddPoint(Mul31(Points[i], m_ModelWorld));
 }
 
 Group* lcPiece::GetTopGroup()
@@ -614,19 +611,15 @@ void lcPiece::UpdatePosition(unsigned short nTime, bool bAnimation)
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
 	CalculateKeys(nTime, bAnimation);
-//	if (CalculatePositionRotation(nTime, bAnimation, m_fPosition, m_fRotation))
-	{
-		Matrix44 mat;
-		mat = MatrixFromAxisAngle(Vector3(m_fRotation[0], m_fRotation[1], m_fRotation[2]), m_fRotation[3] * LC_DTOR);
-		mat.SetTranslation(Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]));
-	}
+
+	m_ModelWorld = MatrixFromAxisAngle(m_AxisAngle);
+	m_ModelWorld.SetTranslation(m_Position);
 }
 
 void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 {
 	glPushMatrix();
-	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
-	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
+	glMultMatrixf(m_ModelWorld);
 
 #ifndef LC_OPENGLES
 	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
@@ -635,7 +628,7 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 		glLineWidth(2*fLineWidth);
 		glPushAttrib(GL_POLYGON_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		m_pPieceInfo->RenderBox();
+		m_PieceInfo->RenderBox();
 		glPopAttrib();
 		glLineWidth(fLineWidth);
 	}
@@ -643,7 +636,7 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 #endif
 	{
 		lcSetColor(m_nColor);
-		m_pPieceInfo->RenderBox();
+		m_PieceInfo->RenderBox();
 	}
 	glPopMatrix();
 }
@@ -651,10 +644,9 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 void lcPiece::Render(bool bLighting, bool bEdges)
 {
 	glPushMatrix();
-	glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
-	glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
+	glMultMatrixf(m_ModelWorld);
 
-	m_pPieceInfo->m_Mesh->Render(m_nColor, IsSelected(), IsFocused());
+	m_PieceInfo->m_Mesh->Render(m_nColor, IsSelected(), IsFocused());
 
 	glPopMatrix();
 }

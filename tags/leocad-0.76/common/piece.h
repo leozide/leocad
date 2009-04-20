@@ -58,7 +58,7 @@ public:
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
 	void CreateName(lcPiece* pPiece);
-	void CompareBoundingBox(float box[6]);
+	void MergeBoundingBox(BoundingBox* Box);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);
 	void FileSave(File& file, Group* pGroups);
@@ -77,8 +77,6 @@ public:
 		{ return m_nColor; }
 	void SetColor(unsigned char color)
 		{ m_nColor = color; }
-	PieceInfo* GetPieceInfo()
-		{ return m_pPieceInfo; }
 	void SetStepShow(unsigned char step)
 		{ m_nStepShow = step; }
 	const unsigned char GetStepShow()
@@ -95,25 +93,13 @@ public:
 		{ m_nFrameHide = frame; }
 	const unsigned short GetFrameHide()
 		{ return m_nFrameHide; }
-	const float* GetConstPosition()
-		{ return m_fPosition; }
-	inline Vector3 GetPosition() const
-		{ return Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]); }
-	void GetPosition (float* position)
-		{ memcpy(position, m_fPosition, sizeof(m_fPosition)); }
-	void GetRotation (float* rotation)
-		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
 
-	// Temporary variables
-	float m_fPosition[3];
-	float m_fRotation[4];
-
-protected:
+public:
 	// Atributes
-	PieceInfo* m_pPieceInfo;
+	PieceInfo* m_PieceInfo;
 	Group* m_pGroup;
 
 	unsigned short m_nFrameShow;
@@ -123,7 +109,11 @@ protected:
 
 	unsigned char m_nColor;
 	unsigned char m_nState;
-};
 
+	// Temporary variables
+	Vector3 m_Position;
+	Vector4 m_AxisAngle;
+	Matrix44 m_ModelWorld;
+};
 
 #endif // _PIECE_H

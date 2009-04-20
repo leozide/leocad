@@ -1246,13 +1246,11 @@ bool Project::DoSave(char* PathName, bool bReplace)
 					file.Write(HiddenText, strlen(HiddenText));
 				}
 
-				float f[12], position[3], rotation[4];
-				pPiece->GetPosition(position);
-				pPiece->GetRotation(rotation);
-				Matrix mat(rotation, position);
+				float f[12];
+				Matrix mat(pPiece->m_AxisAngle, pPiece->m_Position);
 				mat.ToLDraw(f);
 				sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-				        col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
+				        col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->m_PieceInfo->m_strName);
 				file.Write(buf, strlen(buf));
 			}
 
@@ -1716,11 +1714,11 @@ static void BuildBSP(LC_BSPNODE* node, lcPiece* pList)
 	}
 
 	float dx, dy, dz, bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	const float *pos;
+	Vector3 pos;
 
 	for (pPiece = pList; pPiece; pPiece = pPiece->m_pLink)
 	{
-		pos = pPiece->GetConstPosition();
+		pos = pPiece->m_Position;
 		if (pos[0] < bs[0]) bs[0] = pos[0];
 		if (pos[1] < bs[1]) bs[1] = pos[1];
 		if (pos[2] < bs[2]) bs[2] = pos[2];
@@ -1755,7 +1753,7 @@ static void BuildBSP(LC_BSPNODE* node, lcPiece* pList)
 
 	for (pPiece = pList; pPiece;)
 	{
-		pos = pPiece->GetConstPosition();
+		pos = pPiece->m_Position;
 		pNext = pPiece->m_pLink;
 
 		if (pos[0]*node->plane[0] + pos[1]*node->plane[1] +
@@ -2141,14 +2139,14 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		lcObject* Focus = NULL;
-		float Rot[4];
+		Vector4 AxisAngle(0, 0, 1, 0);
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				((lcPiece*)Focus)->GetRotation(Rot);
+				AxisAngle = ((lcPiece*)Focus)->m_AxisAngle;
 			else
 				Focus = NULL;
 		}
@@ -2160,7 +2158,7 @@ void Project::RenderOverlays(View* view)
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 			if (Focus)
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+				glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
 
 			if (m_OverlayMode == LC_OVERLAY_XZ)
 				glRotatef(90.0f, 0.0f, 0.0f, -1.0f);
@@ -2220,7 +2218,7 @@ void Project::RenderOverlays(View* view)
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 			if (Focus)
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+				glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
 
 			if (i == 1)
 				glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
@@ -2267,14 +2265,14 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		lcObject* Focus = NULL;
-		float Rot[4];
+		Vector4 AxisAngle(0, 0, 1, 0);
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				((lcPiece*)Focus)->GetRotation(Rot);
+				AxisAngle = ((lcPiece*)Focus)->m_AxisAngle;
 			else
 				Focus = NULL;
 		}
@@ -2323,7 +2321,7 @@ void Project::RenderOverlays(View* view)
 				glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 				if (Focus)
-					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+					glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
 
 				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
 
@@ -2420,7 +2418,7 @@ void Project::RenderOverlays(View* view)
 		if (Focus)
 		{
 			Matrix33 RotMat;
-			RotMat = MatrixFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
+			RotMat = MatrixFromAxisAngle(Vector4(AxisAngle[0], AxisAngle[1], AxisAngle[2], -AxisAngle[3]));
 
 			ViewDir = Mul(ViewDir, RotMat);
 		}
@@ -2428,7 +2426,7 @@ void Project::RenderOverlays(View* view)
 		glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 		if (Focus)
-			glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+			glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
 
 		// Draw each axis circle.
 		for (int i = 0; i < 3; i++)
@@ -3364,7 +3362,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 
 		for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 		{
-			if ((pPiece->GetPieceInfo() == pInfo) && 
+			if ((pPiece->m_PieceInfo == pInfo) && 
 				((pPiece->GetStepShow() == nStep) || (nStep == 0)))
 			{
 				count [pPiece->GetColor()]++;
@@ -3433,20 +3431,17 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			LC_PIECE_MODIFY* mod = (LC_PIECE_MODIFY*)param;
 			lcPiece* pPiece = (lcPiece*)mod->piece;
 
-			float rot[4];
-			Vector3 Pos = pPiece->GetPosition();
-			pPiece->GetRotation(rot);
-			Matrix mat(rot, Pos);
-			mat.ToEulerAngles(rot);
+			Matrix33 Mat = pPiece->m_ModelWorld;
+			Vector3 Angles = MatrixToEulerAngles(Mat) * LC_RTOD;
 
-			if (Pos != mod->Position)
+			if (pPiece->m_Position != mod->Position)
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Position, LC_PK_POSITION);
 
-			if (mod->Rotation[0] != rot[0] || mod->Rotation[1] != rot[1] || mod->Rotation[2] != rot[2])
+			if (mod->Rotation[0] != Angles[0] || mod->Rotation[1] != Angles[1] || mod->Rotation[2] != Angles[2])
 			{
-				mat.FromEulerAngles(mod->Rotation[0], mod->Rotation[1], mod->Rotation[2]);
-				mat.ToAxisAngle(rot);
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
+				Mat = MatrixFromEulerAngles(mod->Rotation * LC_DTOR);
+				Vector4 Rot = MatrixToAxisAngle(Mat);
+				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Rot, LC_PK_ROTATION);
 			}
 
 			if (m_bAnimation)
@@ -3889,14 +3884,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					for (p1 = m_Pieces; p1; p1 = (lcPiece*)p1->m_Next)
 					{
 						bool bSkip = false;
-						pInfo = p1->GetPieceInfo();
+						pInfo = p1->m_PieceInfo;
 
 						for (p2 = m_Pieces; p2; p2 = (lcPiece*)p2->m_Next)
 						{
 							if (p2 == p1)
 								break;
 
-							if (p2->GetPieceInfo() == pInfo)
+							if (p2->m_PieceInfo == pInfo)
 							{
 								bSkip = true;
 								break;
@@ -4051,7 +4046,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				for (pNext = m_Pieces; pNext; pNext = (lcPiece*)pNext->m_Next)
 				{
-					pInfo = pNext->GetPieceInfo();
+					pInfo = pNext->m_PieceInfo;
 
 					if (pNext == pPiece)
 					{
@@ -4065,7 +4060,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						break;
 					}
 
-					if (pInfo == pPiece->GetPieceInfo())
+					if (pInfo == pPiece->m_PieceInfo)
 						break;
 				}
 			}
@@ -4109,7 +4104,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				pInfo = pPiece->GetPieceInfo();
+				pInfo = pPiece->m_PieceInfo;
 				int idx = lcGetPiecesLibrary()->GetPieceIndex(pInfo);
 				if (conv[idx*9] != 0)
 					continue;
@@ -4223,14 +4218,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				float fl[12], pos[3], rot[4];
+				float fl[12];
 				char name[20];
-				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
+				int idx = lcGetPiecesLibrary()->GetPieceIndex(pPiece->m_PieceInfo);
 
 				if (conv[idx*9] == 0)
 				{
 					char* ptr;
-					sprintf(name, "lc_%s", pPiece->GetPieceInfo()->m_strName);
+					sprintf(name, "lc_%s", pPiece->m_PieceInfo->m_strName);
 					while ((ptr = strchr(name, '-')))
 						*ptr = '_';
 				}
@@ -4241,9 +4236,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcat(name, "_clear");			
 				}
 
-				pPiece->GetPosition(pos);
-				pPiece->GetRotation(rot);
-				Matrix mat(rot, pos);
+				Matrix mat(pPiece->m_AxisAngle, pPiece->m_Position);
+				const Vector3& Position = pPiece->m_Position;
 				mat.ToLDraw(fl);
 
 				// Slope needs to be handled correctly
@@ -4253,11 +4247,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						 " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
 						name, lg_colors[pPiece->GetColor()], &conv[idx*9], lg_colors[pPiece->GetColor()],
 						 -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
-						 -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+						 -fl[10], -fl[4], fl[7], Position[1], Position[0], Position[2]);
 				else
 					fprintf(f, "object {\n %s\n texture { lg_%s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
 						name, lg_colors[pPiece->GetColor()], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
-						-fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+						-fl[10], -fl[4], fl[7], Position[1], Position[0], Position[2]);
 			}
 			fclose (f);
 			free (conv);
@@ -4366,17 +4360,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				float pos[3], rot[4], tmp[3];
-				pPiece->GetPosition(pos);
-				pPiece->GetRotation(rot);
-				Matrix mat(rot, pos);
-				PieceInfo* pInfo = pPiece->GetPieceInfo();
+				PieceInfo* pInfo = pPiece->m_PieceInfo;
 
 				float* VertexPtr = (float*)pInfo->m_Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 				for (int v = 0; v < pInfo->m_Mesh->m_VertexCount*3; v += 3)
 				{
-					mat.TransformPoint(tmp, &VertexPtr[v]);
+					Vector3 tmp = Mul31(Vector3(VertexPtr[v+0], VertexPtr[v+1], VertexPtr[v+2]), pPiece->m_ModelWorld);
 					fprintf(stream, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
 				}
 				fputs("#\n\n", stream);
@@ -4392,7 +4382,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						buf[i] = '_';
 
 				fprintf(stream, "g %s\n", buf);
-				pPiece->GetPieceInfo()->WriteWavefront(stream, pPiece->GetColor(), &vert);
+				pPiece->m_PieceInfo->WriteWavefront(stream, pPiece->GetColor(), &vert);
 			}
 
 			fclose(stream);
@@ -4413,7 +4403,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				int idx = lcGetPiecesLibrary()->GetPieceIndex(pPiece->GetPieceInfo());
+				int idx = lcGetPiecesLibrary()->GetPieceIndex(pPiece->m_PieceInfo);
 				opts.PiecesUsed[idx*lcNumColors+pPiece->GetColor()]++;
 			}
 
@@ -4950,7 +4940,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);
 				}
 
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 				int max = 0;
 
 				Group* pGroup;
@@ -4965,16 +4954,20 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pGroup->m_pNext = m_pGroups;
 				m_pGroups = pGroup;
 
+				BoundingBox Box;
+				Box.Reset();
+
 				for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 					if (Piece->IsSelected())
 					{
 						Piece->SetGroup(pGroup);
-						Piece->CompareBoundingBox(bs);
+						Piece->MergeBoundingBox(&Box);
 					}
 
-				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
+				Vector3 Center = Box.GetCenter();
+				pGroup->m_fCenter[0] = Center[0];
+				pGroup->m_fCenter[1] = Center[1];
+				pGroup->m_fCenter[2] = Center[2];
 
 				lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 				UpdateSelection();
@@ -5018,16 +5011,20 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 
 				lcPiece *pPiece, *pFirst = NULL, *pLast = NULL;
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 				int sel = 0;
 				unsigned long i, j, k;
+
+				BoundingBox Box;
+				Box.Reset();
 
 				for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 					if (pPiece->IsSelected())
 					{
-						pPiece->CompareBoundingBox(bs);
+						pPiece->MergeBoundingBox(&Box);
 						sel++;
 					}
+
+				Vector3 Center = Box.GetCenter();
 
 				for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 				{
@@ -5036,9 +5033,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					for (i = 0; i < opts.n1DCount; i++)
 					{
-						float pos[3], param[4];
-						pPiece->GetRotation(param);
-						pPiece->GetPosition(pos);
+						Vector3 pos = pPiece->m_Position;
+						Vector4 param = pPiece->m_AxisAngle;
 						Matrix mat(param, pos);
 
 						if (sel == 1)
@@ -5051,9 +5047,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						}
 						else
 						{
-							mat.RotateCenter(i*opts.fRotate[0],1,0,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-							mat.RotateCenter(i*opts.fRotate[1],0,1,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-							mat.RotateCenter(i*opts.fRotate[2],0,0,1,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
+							mat.RotateCenter(i*opts.fRotate[0],1,0,0,Center[0],Center[1],Center[2]);
+							mat.RotateCenter(i*opts.fRotate[1],0,1,0,Center[0],Center[1],Center[2]);
+							mat.RotateCenter(i*opts.fRotate[2],0,0,1,Center[0],Center[1],Center[2]);
 						}
 						mat.ToAxisAngle(param);
 						mat.GetTranslation(pos);
@@ -5062,11 +5058,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						{
 							if (pLast)
 							{
-								pLast->m_Next = new lcPiece(pPiece->GetPieceInfo());
+								pLast->m_Next = new lcPiece(pPiece->m_PieceInfo);
 								pLast = (lcPiece*)pLast->m_Next;
 							}
 							else
-								pLast = pFirst = new lcPiece(pPiece->GetPieceInfo());
+								pLast = pFirst = new lcPiece(pPiece->m_PieceInfo);
 
 							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], 
 								m_nCurStep, m_nCurFrame, pPiece->GetColor());
@@ -5083,11 +5079,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							{
 								if (pLast)
 								{
-									pLast->m_Next = new lcPiece(pPiece->GetPieceInfo());
+									pLast->m_Next = new lcPiece(pPiece->m_PieceInfo);
 									pLast = (lcPiece*)pLast->m_Next;
 								}
 								else
-									pLast = pFirst = new lcPiece(pPiece->GetPieceInfo());
+									pLast = pFirst = new lcPiece(pPiece->m_PieceInfo);
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2],
 									m_nCurStep, m_nCurFrame, pPiece->GetColor());
@@ -5102,11 +5098,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							{
 								if (pLast)
 								{
-									pLast->m_Next = new lcPiece(pPiece->GetPieceInfo());
+									pLast->m_Next = new lcPiece(pPiece->m_PieceInfo);
 									pLast = (lcPiece*)pLast->m_Next;
 								}
 								else
-									pLast = pFirst = new lcPiece(pPiece->GetPieceInfo());
+									pLast = pFirst = new lcPiece(pPiece->m_PieceInfo);
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2],
 									m_nCurStep, m_nCurFrame, pPiece->GetColor());
@@ -5174,18 +5170,21 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				strcpy(pGroup->m_strName, name);
 				pGroup->m_pNext = m_pGroups;
 				m_pGroups = pGroup;
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+
+				BoundingBox Box;
+				Box.Reset();
 
 				for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 					if (pPiece->IsSelected())
 					{
 						pPiece->DoGroup(pGroup);
-						pPiece->CompareBoundingBox(bs);
+						pPiece->MergeBoundingBox(&Box);
 					}
-	
-				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
+
+				Vector3 Center = Box.GetCenter();
+				pGroup->m_fCenter[0] = Center[0];
+				pGroup->m_fCenter[1] = Center[1];
+				pGroup->m_fCenter[2] = Center[2];
 
 				RemoveEmptyGroups();
 				SetModifiedFlag(true);
@@ -5547,15 +5546,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					continue;
 
 				Vector3 Corners[8];
-				Piece->GetPieceInfo()->m_BoundingBox.GetPoints(Corners);
-
-				Matrix44 ModelWorld;
-				ModelWorld = MatrixFromAxisAngle(Vector3(Piece->m_fRotation[0], Piece->m_fRotation[1], Piece->m_fRotation[2]), Piece->m_fRotation[3] * LC_DTOR);
-				ModelWorld.SetTranslation(Vector3(Piece->m_fPosition[0], Piece->m_fPosition[1], Piece->m_fPosition[2]));
+				Piece->m_PieceInfo->m_BoundingBox.GetPoints(Corners);
 
 				for (int i = 0; i < 8; i++)
 				{
-					Vector3 Point = Mul31(Corners[i], ModelWorld);
+					Vector3 Point = Mul31(Corners[i], Piece->m_ModelWorld);
 					Points.Add(Point);
 					Box.AddPoint(Point);
 				}
@@ -6322,19 +6317,21 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 
 bool Project::GetSelectionCenter(Vector3& Center) const
 {
-	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	bool Selected = false;
 
-	for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	BoundingBox Box;
+	Box.Reset();
+
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if (pPiece->IsSelected())
+		if (Piece->IsSelected())
 		{
-			pPiece->CompareBoundingBox(bs);
+			Piece->MergeBoundingBox(&Box);
 			Selected = true;
 		}
 	}
 
-	Center = Vector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
+	Center = Box.GetCenter();
 
 	return Selected;
 }
@@ -6373,12 +6370,11 @@ bool Project::GetFocusPosition(Vector3& Position) const
 {
 	lcPiece* pPiece;
 	lcCamera* pCamera;
-	float* pos = &Position[0];
 
 	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 		if (pPiece->IsFocused())
 		{
-			pPiece->GetPosition(pos);
+			Position = pPiece->m_Position;
 			return true;
 		}
 
@@ -6399,7 +6395,7 @@ bool Project::GetFocusPosition(Vector3& Position) const
 
 	// TODO: light
 
-	pos[0] = pos[1] = pos[2] = 0.0f;
+	Position = Vector3(0, 0, 0);
 
 	return false;
 }
@@ -6427,19 +6423,27 @@ lcObject* Project::GetFocusObject() const
 // Find a good starting position/orientation relative to an existing piece.
 void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, Vector3& Position, Vector4& Rotation)
 {
-	Vector3 Dist(0, 0, OffsetPiece->GetPieceInfo()->m_fDimensions[2] - g_App->m_PiecePreview->m_Selection->m_fDimensions[5]);
+	Vector3 Dist(0, 0, 0);
+
+	if (OffsetPiece)
+		Dist[2] += OffsetPiece->m_PieceInfo->m_BoundingBox.m_Max[2];
+
+	PieceInfo* Selection = g_App->m_PiecePreview->m_Selection;
+	if (Selection)
+		Dist[2] -= Selection->m_BoundingBox.m_Min[2];
+
 	SnapVector(Dist);
 
-	float pos[3], rot[4];
-	OffsetPiece->GetPosition(pos);
-	OffsetPiece->GetRotation(rot);
-
-	Matrix mat(rot, pos);
-	mat.Translate(Dist[0], Dist[1], Dist[2]);
-	mat.GetTranslation(pos);
-
-	Position = Vector3(pos[0], pos[1], pos[2]);
-	Rotation = Vector4(rot[0], rot[1], rot[2], rot[3]);
+	if (OffsetPiece)
+	{
+		Position = Mul31(Dist, OffsetPiece->m_ModelWorld);
+		Rotation = OffsetPiece->m_AxisAngle;
+	}
+	else
+	{
+		Position = Dist;
+		Rotation = Vector4(0, 0, 1, 0);
+	}
 }
 
 // Try to find a good starting position/orientation for a new piece.
@@ -6973,13 +6977,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 
 		if ((Focus != NULL) && Focus->IsPiece())
 		{
-			float Rot[4];
-			((lcPiece*)Focus)->GetRotation(Rot);
-
-			Matrix33 RotMat;
-			RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
-
-			Move = Mul(Move, RotMat);
+			Move = Mul30(Move, ((lcPiece*)Focus)->m_ModelWorld);
 		}
 	}
 
@@ -7041,8 +7039,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 	if (LengthSquared(Delta) < 0.001f)
 		return false;
 
-	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	float pos[3], rot[4];
+	BoundingBox Box;
+	Box.Reset();
 
 	lcPiece* Piece;
 	lcPiece* Focus = NULL;
@@ -7055,20 +7053,16 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 			if (Piece->IsFocused())
 				Focus = Piece;
 
-			Piece->CompareBoundingBox(bs);
+			Piece->MergeBoundingBox(&Box);
 			nSel++;
 		}
 	}
 
+	Vector3 Center;
 	if (Focus != NULL)
-	{
-		Focus->GetPosition(pos);
-		bs[0] = bs[3] = pos[0];
-		bs[1] = bs[4] = pos[1];
-		bs[2] = bs[5] = pos[2];
-	}
-
-	Vector3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
+		Center = Focus->m_Position;
+	else
+		Center = Box.GetCenter();
 
 	// Create the rotation matrix.
 	Quaternion Rotation(0, 0, 0, 1);
@@ -7098,11 +7092,11 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 	if (Focus != NULL)
 	{
-		float Rot[4];
-		((lcPiece*)Focus)->GetRotation(Rot);
+		Vector4 Rot = Focus->m_AxisAngle;
+		FocusToWorld = QuaternionFromAxisAngle(Rot);
 
-		WorldToFocus = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
-		FocusToWorld = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
+		Rot[3] = -Rot[3];
+		WorldToFocus = QuaternionFromAxisAngle(Rot);
 
 		Rotation = Mul(FocusToWorld, Rotation);
 	}
@@ -7112,16 +7106,14 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		if (!Piece->IsSelected())
 			continue;
 
-		Piece->GetPosition(pos);
-		Piece->GetRotation(rot);
+		Vector3 Pos = Piece->m_Position;
+		Vector4 Rot = Piece->m_AxisAngle;
 
 		Vector4 NewRotation;
 
 		if ((nSel == 1) && (Focus == Piece))
 		{
-			Quaternion LocalToWorld;
-			LocalToWorld = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
-
+			Quaternion LocalToWorld = QuaternionFromAxisAngle(Rot);
 			Quaternion NewLocalToWorld;
 
 			if (Focus != NULL)
@@ -7138,10 +7130,9 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		}
 		else
 		{
-			Vector3 Distance = Vector3(pos[0], pos[1], pos[2]) - Center;
+			Vector3 Distance = Pos - Center;
 
-			Quaternion LocalToWorld;
-			LocalToWorld = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+			Quaternion LocalToWorld = QuaternionFromAxisAngle(Rot);
 
 			Quaternion NewLocalToWorld;
 
@@ -7150,8 +7141,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
 				NewLocalToWorld = Mul(Rotation, LocalToFocus);
 
-				Quaternion WorldToLocal;
-				WorldToLocal = QuaternionFromAxisAngle(Vector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
+				Quaternion WorldToLocal = QuaternionFromAxisAngle(Vector4(Vector3(Rot), -Rot[3]));
 
 				Distance = Mul(Distance, WorldToLocal);
 				Distance = Mul(Distance, NewLocalToWorld);
@@ -7165,19 +7155,14 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 			NewRotation = QuaternionToAxisAngle(NewLocalToWorld);
 
-			pos[0] = Center[0] + Distance[0];
-			pos[1] = Center[1] + Distance[1];
-			pos[2] = Center[2] + Distance[2];
+			Pos = Center + Distance;
 
-			Piece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
+			Piece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Pos, LC_PK_POSITION);
 		}
 
-		rot[0] = NewRotation[0];
-		rot[1] = NewRotation[1];
-		rot[2] = NewRotation[2];
-		rot[3] = NewRotation[3] * LC_RTOD;
+		Rot = NewRotation;
 
-		Piece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
+		Piece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Rot, LC_PK_ROTATION);
 		Piece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 	}
 
@@ -8291,14 +8276,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 					if ((Focus != NULL) && Focus->IsPiece())
 					{
-						float Rot[4];
-						((lcPiece*)Focus)->GetRotation(Rot);
-
-						Matrix33 RotMat;
-						RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
-
-						Axis1 = Mul(Dir1, RotMat);
-						Axis2 = Mul(Dir2, RotMat);
+						Axis1 = Mul30(Dir1, ((lcPiece*)Focus)->m_ModelWorld);
+						Axis2 = Mul30(Dir2, ((lcPiece*)Focus)->m_ModelWorld);
 					}
 				}
 
@@ -8620,15 +8599,14 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				SystemUpdateCameraMenu(m_Cameras);
 				SystemUpdateCurrentCamera(NULL, pCamera, m_Cameras);
 			}
+/*
+			BoundingBox Box;
+			Box.Reset();
 
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 				if (pPiece->IsSelected())
-					pPiece->CompareBoundingBox(bs);
-			bs[0] = (bs[0]+bs[3])/2;
-			bs[1] = (bs[1]+bs[4])/2;
-			bs[2] = (bs[2]+bs[5])/2;
-
+					pPiece->MergeBoundingBox(&Box);
+*/
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
@@ -8721,14 +8699,10 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 			if ((Focus != NULL) && Focus->IsPiece())
 			{
-				float Rot[4];
-				((lcPiece*)Focus)->GetRotation(Rot);
-
-				Matrix33 RotMat;
-				RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+				const Matrix44& Mat = ((lcPiece*)Focus)->m_ModelWorld;
 
 				for (int i = 1; i < 4; i++)
-					Points[i] = Mul(Points[i], RotMat);
+					Points[i] = Mul30(Points[i], Mat);
 			}
 		}
 
@@ -8880,13 +8854,8 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 						if ((Focus != NULL) && Focus->IsPiece())
 						{
-							float Rot[4];
-							((lcPiece*)Focus)->GetRotation(Rot);
-
-							Matrix33 RotMat;
-							RotMat = MatrixFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
-
-							Dist = Mul(Dist, RotMat);
+							Matrix44 WorldModel = RotTranInverse(((lcPiece*)Focus)->m_ModelWorld);
+							Dist = Mul30(Dist, WorldModel);
 						}
 					}
 
@@ -9162,10 +9131,7 @@ int Project::searchForVertex(float* vertex)
 
 template<class type> void Project::generateMeshData(type* info, float *pos, lcPiece* pPiece, int numVertices, int currentColor)
 {
-	float rot[4];
-	Vector3 Pos = pPiece->GetPosition();
-	pPiece->GetRotation(rot);
-	Matrix matrix(rot, Pos);
+	Matrix matrix(pPiece->m_AxisAngle, pPiece->m_Position);
 
 	bool rigidBody = (VRMLdialect == X3DV_WITH_RIGID_BODY_PHYSICS);
 
@@ -9180,7 +9146,7 @@ template<class type> void Project::generateMeshData(type* info, float *pos, lcPi
 		if (numVertices == 4)
 			maxJ = 2;
 
-		lcMesh* Mesh = pPiece->GetPieceInfo()->m_Mesh;
+		lcMesh* Mesh = pPiece->m_PieceInfo->m_Mesh;
 		float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 		for (int j = 0; j < maxJ; j++) 
@@ -9220,7 +9186,7 @@ template<class type> void Project::generateMeshData(type* info, float *pos, lcPi
 		return;
 	}			
 
-	lcMesh* Mesh = pPiece->GetPieceInfo()->m_Mesh;
+	lcMesh* Mesh = pPiece->m_PieceInfo->m_Mesh;
 	float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int i = 0; i < numVertices; i++)
@@ -9341,7 +9307,7 @@ void Project::writeVRMLShapeMeshEnd(FILE *stream)
 
 template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int coordinateCounter, lcPiece* pPiece, unsigned short group, float *pos, bool beginAndEnd)
 { 
-	lcMesh* Mesh = pPiece->GetPieceInfo()->m_Mesh;
+	lcMesh* Mesh = pPiece->m_PieceInfo->m_Mesh;
 	void* indices = Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int SectionIndex = 0; SectionIndex < Mesh->m_SectionCount; SectionIndex++)
@@ -9458,12 +9424,9 @@ public:
 
 template<class type> void Project::getMinMaxData(type* info, lcPiece* pPiece, GroupInfo* groupInfo)
 {
-	float rot[4];
-	Vector3 Pos = pPiece->GetPosition();
-	pPiece->GetRotation(rot);
-	Matrix matrix(rot, Pos);
+	Matrix matrix(pPiece->m_AxisAngle, pPiece->m_Position);
 
-	lcMesh* Mesh = pPiece->GetPieceInfo()->m_Mesh;
+	lcMesh* Mesh = pPiece->m_PieceInfo->m_Mesh;
 	float* verts = (float*)Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int i = 0; i < 3; i++)
@@ -9492,7 +9455,7 @@ template<class type> void Project::getMinMaxData(type* info, lcPiece* pPiece, Gr
 
 template<class type> void Project::getMinMax(type col, lcPiece* piece, unsigned short group, GroupInfo* groupInfo)
 { 
-	lcMesh* Mesh = piece->GetPieceInfo()->m_Mesh;
+	lcMesh* Mesh = piece->m_PieceInfo->m_Mesh;
 	void* indices = Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
 
 	for (int SectionIndex = 0; SectionIndex < Mesh->m_SectionCount; SectionIndex++)
@@ -9625,7 +9588,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
 		unsigned char color = pPiece->GetColor();
-		PieceInfo *pInfo = pPiece->GetPieceInfo();
+		PieceInfo *pInfo = pPiece->m_PieceInfo;
 		for (int j = 0; j < allGroups.GetSize(); j++)
 		{
 			if (handleAsGroup(pPiece, allGroups[j]))
@@ -9659,7 +9622,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 
 			if (handleAsGroup(pPiece, allGroups[j]))
 			{				
-				PieceInfo* pInfo = pPiece->GetPieceInfo();
+				PieceInfo* pInfo = pPiece->m_PieceInfo;
 				unsigned char color = pPiece->GetColor();
 			
 				strcpy(buf, pPiece->m_Name);
@@ -9670,14 +9633,14 @@ void Project::exportVRMLFile(char *filename, int dialect)
 				writeIndent(stream);
 				fprintf(stream, "# %s\n", buf);
 
-				float pos[3];
-				float rot[4];
+				Vector3 pos;
+				Vector4 rot;
 
 				switch (VRMLdialect)
 				{
 				case VRML97:
-					pPiece->GetPosition(pos);
-					pPiece->GetRotation(rot);
+					pos = pPiece->m_Position;
+					rot = pPiece->m_AxisAngle;
 					writeIndent(stream);
 					fprintf(stream, "Transform {\n");
 					indent += INDENT_INC;
@@ -9689,7 +9652,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 					fprintf(stream, "children [\n");
 					indent += INDENT_INC;
 					break;
-                                case X3DV_WITH_RIGID_BODY_PHYSICS:
+				case X3DV_WITH_RIGID_BODY_PHYSICS:
 					for (int k = 0; k < 3; k++)
 						pos[k] = allGroups[j].minBoundingBox[k] + (allGroups[j].maxBoundingBox[k] - allGroups[j].minBoundingBox[k]) / 2.0f;
 				}

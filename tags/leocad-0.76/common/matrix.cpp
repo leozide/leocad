@@ -106,7 +106,7 @@ Matrix::Matrix(const float* mat)
 // Create a matrix from axis-angle and a point
 Matrix::Matrix(const float *rot, const float *pos)
 {
-	float tmp[4] = { rot[0], rot[1], rot[2], rot[3]*DTOR };
+	float tmp[4] = { rot[0], rot[1], rot[2], rot[3] };
 	float q[4];
 	float length, cosA, sinA;
 	length = (float)sqrt(tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2]);
@@ -366,9 +366,9 @@ void Matrix::ToEulerAngles (float *rot) const
     cosYaw = 1;
   }
 
-  rot[2] = (float)(RTOD*atan2 (sinYaw, cosYaw));
-  rot[1] = (float)(RTOD*atan2 (sinPitch, cosPitch));
-  rot[0] = (float)(RTOD*atan2 (sinRoll, cosRoll));
+  rot[2] = (float)(atan2(sinYaw, cosYaw));
+  rot[1] = (float)(atan2(sinPitch, cosPitch));
+  rot[0] = (float)(atan2(sinRoll, cosRoll));
 
   if (rot[2] < 0) rot[2] += 360;
   if (rot[1] < 0) rot[1] += 360;
@@ -469,8 +469,6 @@ void Matrix::ToAxisAngle(float *rot) const
 		rot[1] = 0.0f;
 		rot[2] = 1.0f;
 	}
-
-	rot[3] *= RTOD;
 }
 
 void Matrix::FromEulerAngles (float roll, float pitch, float yaw)

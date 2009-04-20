@@ -427,7 +427,7 @@ static void PrintPiecesThread(void* pv)
 
 	for (lcPiece* tmp = project->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
 	{
-		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
+		int idx = pLib->GetPieceIndex(tmp->m_PieceInfo);
 		pieces[(idx*28)+tmp->GetColor()]++;
 		col[tmp->GetColor()]++;
 	}

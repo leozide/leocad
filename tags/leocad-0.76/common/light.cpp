@@ -292,22 +292,18 @@ bool lcLight::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 	}
 }
 
-void lcLight::Move(u32 Time, bool AddKey, float dx, float dy, float dz)
+void lcLight::Move(u32 Time, bool AddKey, const Vector3& Delta)
 {
 	if (IsEyeSelected())
 	{
-		m_Position[0] += dx;
-		m_Position[1] += dy;
-		m_Position[2] += dz;
+		m_Position += Delta;
 
 		ChangeKey(Time, AddKey, m_Position, LC_LK_POSITION);
 	}
 
 	if (IsTargetSelected())
 	{
-		m_TargetPosition[0] += dx;
-		m_TargetPosition[1] += dy;
-		m_TargetPosition[2] += dz;
+		m_TargetPosition += Delta;
 
 		ChangeKey(Time, AddKey, m_TargetPosition, LC_LK_TARGET);
 	}

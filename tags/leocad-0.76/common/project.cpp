@@ -119,10 +119,7 @@ void Project::UpdateInterface()
 	SystemUpdateCameraMenu(m_Cameras);
 	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_Cameras);
 	UpdateSelection();
-	if (m_Animation)
-		SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-	else
-		SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+	SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
 	{
@@ -288,7 +285,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nFPS = Sys_ProfileLoadInt ("Default", "FPS", 24);
 	m_CurTime = 1;
 	m_TotalFrames = LC_OBJECT_TIME_MAX;
-	SystemUpdateTime(false, 1, 255);
+	SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 	m_nScene = Sys_ProfileLoadInt ("Default", "Scene", 0);
 	m_nSaveTimer = 0;
 	strcpy(m_strHeader, Sys_ProfileLoadString ("Default", "Header", ""));
@@ -702,7 +699,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadLong (&i, 1); // m_nCurFrame = i;
-				file->ReadShort (&sh, 1); // m_TotalFrames = sh;
+				file->ReadShort (&sh, 1); m_TotalFrames = sh;
 				file->ReadLong (&i, 1); m_nGridSize = i;
 				file->ReadLong (&i, 1); //m_nMoveSnap = i;
 			}
@@ -761,10 +758,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	SystemUpdateCameraMenu(m_Cameras);
 	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_Cameras);
 	UpdateSelection();
-	if (m_Animation)
-		SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-	else
-		SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+	SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 	UpdateAllViews ();
 
 	return true;
@@ -2132,14 +2126,17 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		lcObject* Focus = NULL;
-		Vector4 AxisAngle(0, 0, 1, 0);
+		Matrix44 Rot;
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				AxisAngle = ((lcPiece*)Focus)->m_AxisAngle;
+			{
+				Rot = ((lcPiece*)Focus)->m_ModelWorld;
+				Rot.SetTranslation(Vector3(0, 0, 0));
+			}
 			else
 				Focus = NULL;
 		}
@@ -2151,7 +2148,7 @@ void Project::RenderOverlays(View* view)
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 			if (Focus)
-				glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
+				glMultMatrixf(Rot);
 
 			if (m_OverlayMode == LC_OVERLAY_XZ)
 				glRotatef(90.0f, 0.0f, 0.0f, -1.0f);
@@ -2211,7 +2208,7 @@ void Project::RenderOverlays(View* view)
 			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 			if (Focus)
-				glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
+				glMultMatrixf(Rot);
 
 			if (i == 1)
 				glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
@@ -2258,14 +2255,17 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		lcObject* Focus = NULL;
-		Vector4 AxisAngle(0, 0, 1, 0);
+		Matrix44 Rot;
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				AxisAngle = ((lcPiece*)Focus)->m_AxisAngle;
+			{
+				Rot = ((lcPiece*)Focus)->m_ModelWorld;
+				Rot.SetTranslation(Vector3(0, 0, 0));
+			}
 			else
 				Focus = NULL;
 		}
@@ -2314,7 +2314,7 @@ void Project::RenderOverlays(View* view)
 				glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 				if (Focus)
-					glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
+					glMultMatrixf(Rot);
 
 				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
 
@@ -2410,16 +2410,14 @@ void Project::RenderOverlays(View* view)
 		// Transform ViewDir to local space.
 		if (Focus)
 		{
-			Matrix33 RotMat;
-			RotMat = MatrixFromAxisAngle(Vector4(AxisAngle[0], AxisAngle[1], AxisAngle[2], -AxisAngle[3]));
-
-			ViewDir = Mul(ViewDir, RotMat);
+			Matrix33 WorldModel = RotTranInverse(Rot);
+			ViewDir = Mul30(ViewDir, WorldModel);
 		}
 
 		glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 		if (Focus)
-			glRotatef(AxisAngle[3] * LC_RTOD, AxisAngle[0], AxisAngle[1], AxisAngle[2]);
+			glMultMatrixf(Rot);
 
 		// Draw each axis circle.
 		for (int i = 0; i < 3; i++)
@@ -5564,10 +5562,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 		
 		case LC_VIEW_STEP_PREVIOUS:
@@ -5579,10 +5574,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 		
 		case LC_VIEW_STEP_FIRST:
@@ -5594,10 +5586,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 
 		case LC_VIEW_STEP_LAST:
@@ -5612,19 +5601,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 
 		case LC_VIEW_STEP_CHOOSE:
 		{
 			SystemDoDialog(LC_DLG_STEPCHOOSE, NULL);
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 
 		case LC_VIEW_STEP_SET:
@@ -5639,10 +5622,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 
 		case LC_VIEW_STEP_INSERT:
@@ -5811,10 +5791,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateAllViews();
 
 			SystemUpdateAnimation(m_Animation, m_bAddKeys);
-			if (m_Animation)
-				SystemUpdateTime(m_Animation, m_CurTime, m_TotalFrames);
-			else
-				SystemUpdateTime(m_Animation, m_CurTime, LC_OBJECT_TIME_MAX);
+			SystemUpdateTime(m_Animation, m_CurTime, m_Animation ? m_TotalFrames : LC_OBJECT_TIME_MAX);
 		} break;
 		
 		case LC_TOOLBAR_ADDKEYS:
@@ -6416,11 +6393,12 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 	if (!PiecesOnly)
 	{
 		for (lcCamera* Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
-			if (Camera != m_ActiveView->GetCamera())
+			if (Camera != m_ActiveView->GetCamera() && Camera->IsVisible())
 				Camera->ClosestLineIntersect(ClickLine);
 
 		for (lcLight* Light = m_Lights; Light; Light = (lcLight*)Light->m_Next)
-			Light->ClosestLineIntersect(ClickLine);
+			if (Light->IsVisible())
+				Light->ClosestLineIntersect(ClickLine);
 	}
 
 	return (lcObject*)ClickLine.Object;
@@ -6862,7 +6840,7 @@ void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
 	}
 }
 
-bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
+bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -6875,7 +6853,8 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		Move[2] = 0;
 
 	// Snap.
-	SnapVector(Move, Remainder);
+	if (Snap)
+		SnapVector(Move, Remainder);
 
 	if (LengthSquared(Move) < 0.00001f)
 		return false;
@@ -6891,33 +6870,25 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		}
 	}
 
-	if (LengthSquared(Move) < 0.001f)
-		return false;
-
-	lcPiece* pPiece;
-	lcCamera* pCamera;
-	lcLight* pLight;
-	float x = Move[0], y = Move[1], z = Move[2];
-
-	for (pCamera = m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-		if (pCamera->IsSelected())
+	for (lcCamera* Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+		if (Camera->IsSelected())
 		{
-			pCamera->Move(m_CurTime, m_bAddKeys, x, y, z);
-			pCamera->UpdatePosition(m_CurTime);
+			Camera->Move(m_CurTime, m_bAddKeys, Move);
+			Camera->UpdatePosition(m_CurTime);
 		}
 
-	for (pLight = m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-	  if (pLight->IsSelected())
-	  {
-	    pLight->Move (m_CurTime, m_bAddKeys, x, y, z);
-	    pLight->UpdatePosition (m_CurTime);
-	  }
-
-	for (pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		if (pPiece->IsSelected())
+	for (lcLight* Light = m_Lights; Light; Light = (lcLight*)Light->m_Next)
+		if (Light->IsSelected())
 		{
-			pPiece->Move(m_CurTime, m_bAddKeys, x, y, z);
-			pPiece->UpdatePosition(m_CurTime);
+			Light->Move(m_CurTime, m_bAddKeys, Move);
+			Light->UpdatePosition(m_CurTime);
+		}
+
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		if (Piece->IsSelected())
+		{
+			Piece->Move(m_CurTime, m_bAddKeys, Move);
+			Piece->UpdatePosition(m_CurTime);
 		}
 
 	// TODO: move group centers
@@ -6931,7 +6902,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 	return true;
 }
 
-bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
+bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Snap)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -6944,7 +6915,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		Delta[2] = 0;
 
 	// Snap.
-	SnapRotationVector(Delta, Remainder);
+	if (Snap)
+		SnapRotationVector(Delta, Remainder);
 
 	if (LengthSquared(Delta) < 0.001f)
 		return false;
@@ -7410,12 +7382,12 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (bShift)
 			{
 				Vector3 tmp;
-				RotateSelectedObjects(axis, tmp);
+				RotateSelectedObjects(axis, tmp, false);
 			}
 			else
 			{
 				Vector3 tmp;
-				MoveSelectedObjects(axis, tmp);
+				MoveSelectedObjects(axis, tmp, false);
 			}
 
 			UpdateOverlayScale();
@@ -8082,8 +8054,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		case LC_ACTION_SPOTLIGHT:
 		{
 			float mouse = 10.0f/(21 - g_App->m_MouseSensitivity);
-			float delta[3] = { (ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
+			Vector3 Delta((ptx - m_fTrack[0])*mouse, (pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse);
 
 			m_fTrack[0] = ptx;
 			m_fTrack[1] = pty;
@@ -8091,7 +8062,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			
 			lcLight* pLight = m_Lights;
 
-			pLight->Move(1, false, delta[0], delta[1], delta[2]);
+			pLight->Move(1, false, Delta);
 			pLight->UpdatePosition(1);
 
 			SystemUpdateFocus(NULL);
@@ -8101,8 +8072,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		case LC_ACTION_CAMERA:
 		{
 			float mouse = 10.0f/(21 - g_App->m_MouseSensitivity);
-			float delta[3] = { (ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
+			Vector3 Delta((ptx - m_fTrack[0])*mouse, (pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse);
 
 			m_fTrack[0] = ptx;
 			m_fTrack[1] = pty;
@@ -8112,7 +8082,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			while (Camera->m_Next != NULL)
 				Camera = (lcCamera*)Camera->m_Next;
 
-			Camera->Move(1, false, delta[0], delta[1], delta[2]);
+			Camera->Move(1, false, Delta);
 			Camera->UpdatePosition(1);
 
 			SystemUpdateFocus(NULL);
@@ -8256,7 +8226,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8289,7 +8259,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true);
 			}
 
 			SystemUpdateFocus(NULL);
@@ -8415,7 +8385,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8448,7 +8418,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 

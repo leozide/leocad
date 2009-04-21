@@ -64,7 +64,7 @@ public:
 	void FileSave(File& file, Group* pGroups);
 
 	void UpdatePosition(u32 Time);
-	void Move(u32 Time, bool AddKey, float dx, float dy, float dz);
+	void Move(u32 Time, bool AddKey, const Vector3& Delta);
 
 	void DoGroup(Group* pGroup);
 	void UnGroup(Group* pGroup);

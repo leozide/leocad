@@ -415,12 +415,12 @@ void lcCamera::FileSave(File& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void lcCamera::Move(u32 Time, bool AddKey, float dx, float dy, float dz)
+void lcCamera::Move(u32 Time, bool AddKey, const Vector3& Delta)
 {
 	if (IsSide())
 	{
-		m_Position += Vector3(dx, dy, dz);
-		m_TargetPosition += Vector3(dx, dy, dz);
+		m_Position += Delta;
+		m_TargetPosition += Delta;
 
 		ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
 		ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
@@ -429,14 +429,14 @@ void lcCamera::Move(u32 Time, bool AddKey, float dx, float dy, float dz)
 	{
 		if (IsEyeSelected())
 		{
-			m_Position += Vector3(dx, dy, dz);
+			m_Position += Delta;
 
 			ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
 		}
 
 		if (IsTargetSelected())
 		{
-			m_TargetPosition += Vector3(dx, dy, dz);
+			m_TargetPosition += Delta;
 
 			ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
 		}

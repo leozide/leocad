@@ -501,9 +501,9 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 	return ret;
 }
 
-void lcPiece::Move(u32 Time, bool AddKey, float dx, float dy, float dz)
+void lcPiece::Move(u32 Time, bool AddKey, const Vector3& Delta)
 {
-	m_Position += Vector3(dx, dy, dz);
+	m_Position += Delta;
 
 	ChangeKey(Time, AddKey, m_Position, LC_PK_POSITION);
 }

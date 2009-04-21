@@ -50,7 +50,7 @@ public:
 
 
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(u32 Time, bool AddKey, float x, float y, float z)
+	void Move(u32 Time, bool AddKey, const Vector3& Delta)
 	{
 		// FIXME: move the position handling to the camera target
 	}
@@ -136,7 +136,7 @@ public:
 	bool FileLoad(File& file);
 	void FileSave(File& file) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(u32 Time, bool AddKey, float x, float y, float z);
+	void Move(u32 Time, bool AddKey, const Vector3& Delta);
 
 	void UpdatePosition(u32 Time);
 	void Render(float fLineWidth);

@@ -61,7 +61,7 @@ public:
 
 public:
 	// Move the object.
-	virtual void Move(u32 Time, bool AddKey, float dx, float dy, float dz) = 0;
+	virtual void Move(u32 Time, bool AddKey, const Vector3& Delta) = 0;
 
 	// bSelecting is the action (add/remove), bFocus means "add focus if selecting"
 	// or "remove focus only if deselecting", bMultiple = Ctrl key is down

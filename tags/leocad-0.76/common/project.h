@@ -87,13 +87,13 @@ public:
 		{ m_bModified = bModified; }
 
 	// Access to protected members
-	unsigned char GetLastStep();
+	u32 GetLastStep();
 	bool IsAnimation()
-		{ return m_bAnimation; }
+		{ return m_Animation; }
 	void SetAnimation(bool Anim)
-	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
-	unsigned short GetCurrentTime ()
-		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+	{ m_Animation = Anim; } // only to be called from lcApplication::Initialize()
+	u32 GetCurrentTime ()
+		{ return m_CurTime; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	unsigned char GetAction() const
@@ -110,13 +110,13 @@ public:
 	lcCamera* GetCamera(int Index) const;
 	lcCamera* GetCamera(const char* Name) const;
 
-	void GetTimeRange(int* from, int* to)
+	void GetTimeRange(u32* from, u32* to)
 	{
-		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
-		*to = m_bAnimation ? m_nTotalFrames : 255;
+		*from = m_CurTime;
+		*to = m_Animation ? m_TotalFrames : GetLastStep();
 	}
-	unsigned short GetTotalFrames () const
-		{ return m_nTotalFrames; }
+	u32 GetTotalFrames() const
+	{ return m_TotalFrames; }
 
 	void ConvertToUserUnits(Vector3& Value) const;
 	void ConvertFromUserUnits(Vector3& Value) const;
@@ -276,12 +276,11 @@ protected:
 	// State variables
 	unsigned char m_nCurAction;
 	unsigned char m_PreviousAction;
-	bool m_bAnimation;
+	bool m_Animation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
-	unsigned char m_nCurStep;
-	unsigned short m_nCurFrame;
-	unsigned short m_nTotalFrames;
+	u32 m_CurTime;
+	u32 m_TotalFrames;
 
 	unsigned long m_nScene;
 	unsigned long m_nDetail;

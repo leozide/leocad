@@ -220,13 +220,13 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			case TERRAIN_ZOOM:
 			{
-				m_pCamera->Zoom(1, false, false, 0, point.y - m_ptMouse.y);
+				m_pCamera->Zoom(1, false, 0, point.y - m_ptMouse.y);
 				InvalidateRect (NULL, FALSE);
 			} break;
 
 			case TERRAIN_PAN:
 			{
-				m_pCamera->Pan(1, false, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
+				m_pCamera->Pan(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
 				InvalidateRect(NULL, FALSE);
 			} break;
 
@@ -234,7 +234,7 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 			{
 				if (point == m_ptMouse)
 					break;
-				m_pCamera->Rotate(1, false, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
+				m_pCamera->Rotate(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
 				InvalidateRect (NULL, FALSE);
 			} break;
 		}

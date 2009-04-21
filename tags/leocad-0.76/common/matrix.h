@@ -5,17 +5,13 @@ class Matrix
 {
 public:
 	Matrix();
-	Matrix(const float *mat);
 	Matrix(const float *rot, const float *pos);
 	~Matrix() { };
 
-	void FromPacked(const float *mat);
 	void FromLDraw(const float *f);
-	void FromEulerAngles(float yaw, float pitch, float roll);
 	void FromAxisAngle(const float *axis, float angle);
 
 	void ToLDraw(float *f) const;
-	void ToEulerAngles(float *rot) const;
 	void ToAxisAngle(float *rot) const;
 
 	void LoadIdentity();

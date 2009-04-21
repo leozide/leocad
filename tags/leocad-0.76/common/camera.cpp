@@ -106,10 +106,8 @@ lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
 
 	Initialize();
 
-	ChangeKey(1, false, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, false, true, &roll, LC_CK_ROLL);
-	ChangeKey(1, true, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, true, true, &roll, LC_CK_ROLL);
+	ChangeKey(1, true, eyes[nType], LC_CK_EYE);
+	ChangeKey(1, true, &roll, LC_CK_ROLL);
 
 	m_Name = names[nType];
 	if (nType != 8)
@@ -119,7 +117,7 @@ lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
 	if (pPrev)
 		pPrev->m_Next = this;
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 // From OnMouseMove(), case LC_ACTION_ROTATE_VIEW
@@ -128,12 +126,9 @@ lcCamera::lcCamera(const float *eye, const float *target, float roll, lcObject* 
 {
 	Initialize();
 
-	ChangeKey(1, false, true, eye, LC_CK_EYE);
-	ChangeKey(1, false, true, target, LC_CK_TARGET);
-	ChangeKey(1, false, true, &roll, LC_CK_ROLL);
-	ChangeKey(1, true, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, true, &roll, LC_CK_ROLL);
+	ChangeKey(1, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, &roll, LC_CK_ROLL);
 
 	int i, max = 0;
 
@@ -156,7 +151,7 @@ lcCamera::lcCamera(const float *eye, const float *target, float roll, lcObject* 
 			pCamera = pCamera->m_Next;
 	}
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 // From LC_ACTION_CAMERA
@@ -168,12 +163,9 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, l
 	float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
 	float roll = 0.0f;
 
-	ChangeKey(1, false, true, eye, LC_CK_EYE);
-	ChangeKey(1, false, true, target, LC_CK_TARGET);
-	ChangeKey(1, false, true, &roll, LC_CK_ROLL);
-	ChangeKey(1, true, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, true, &roll, LC_CK_ROLL);
+	ChangeKey(1, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, &roll, LC_CK_ROLL);
 
 	int i, max = 0;
 
@@ -197,7 +189,7 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, l
 				pCamera = pCamera->m_Next;
 		}
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 lcCamera::~lcCamera()
@@ -267,15 +259,13 @@ bool lcCamera::FileLoad(File& file)
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, false, true, f, LC_CK_EYE);
-		ChangeKey(1, true, true, f, LC_CK_EYE);
+		ChangeKey(1, true, f, LC_CK_EYE);
 
 		file.ReadDouble(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, false, true, f, LC_CK_TARGET);
-		ChangeKey(1, true, true, f, LC_CK_TARGET);
+		ChangeKey(1, true, f, LC_CK_TARGET);
 
 		file.ReadDouble(d, 3);
 		f[0] = (float)d[0];
@@ -284,8 +274,7 @@ bool lcCamera::FileLoad(File& file)
 //		ChangeKey(1, false, true, f, LC_CK_UP);
 //		ChangeKey(1, true, true, f, LC_CK_UP);
 		float roll = 0.0f;
-		ChangeKey(1, false, true, &roll, LC_CK_ROLL);
-		ChangeKey(1, true, true, &roll, LC_CK_ROLL);
+		ChangeKey(1, true, &roll, LC_CK_ROLL);
 	}
 
 	if (version == 3)
@@ -309,14 +298,12 @@ bool lcCamera::FileLoad(File& file)
 			f[0] = (float)eye[0];
 			f[1] = (float)eye[1];
 			f[2] = (float)eye[2];
-			ChangeKey(step, false, true, f, LC_CK_EYE);
-			ChangeKey(step, true, true, f, LC_CK_EYE);
+			ChangeKey(step, true, f, LC_CK_EYE);
 
 			f[0] = (float)target[0];
 			f[1] = (float)target[1];
 			f[2] = (float)target[2];
-			ChangeKey(step, false, true, f, LC_CK_TARGET);
-			ChangeKey(step, true, true, f, LC_CK_TARGET);
+			ChangeKey(step, true, f, LC_CK_TARGET);
 
 			f[0] = (float)up[0];
 			f[1] = (float)up[1];
@@ -324,8 +311,7 @@ bool lcCamera::FileLoad(File& file)
 //			ChangeKey(step, false, true, f, LC_CK_UP);
 //			ChangeKey(step, true, true, f, LC_CK_UP);
 			float roll = 0.0f;
-			ChangeKey(step, false, true, &roll, LC_CK_ROLL);
-			ChangeKey(step, true, true, &roll, LC_CK_ROLL);
+			ChangeKey(step, true, &roll, LC_CK_ROLL);
 
 			int snapshot; // BOOL under Windows
 			int cam;
@@ -362,7 +348,7 @@ bool lcCamera::FileLoad(File& file)
 				file.ReadFloat(param, 3);
 				file.ReadByte(&type, 1);
 
-				ChangeKey(time, false, true, param, type);
+				ChangeKey(time, true, param, type);
 			}
 
 			file.ReadLong(&n, 1);
@@ -371,8 +357,6 @@ bool lcCamera::FileLoad(File& file)
 				file.ReadShort(&time, 1);
 				file.ReadFloat(param, 3);
 				file.ReadByte(&type, 1);
-
-				ChangeKey(time, true, true, param, type);
 			}
 		}
 
@@ -431,15 +415,15 @@ void lcCamera::FileSave(File& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void lcCamera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void lcCamera::Move(u32 Time, bool AddKey, float dx, float dy, float dz)
 {
 	if (IsSide())
 	{
 		m_Position += Vector3(dx, dy, dz);
 		m_TargetPosition += Vector3(dx, dy, dz);
 
-		ChangeKey(nTime, bAnimation, bAddKey, m_Position, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, m_TargetPosition, LC_CK_TARGET);
+		ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
+		ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
 	}
 	else
 	{
@@ -447,14 +431,14 @@ void lcCamera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float d
 		{
 			m_Position += Vector3(dx, dy, dz);
 
-			ChangeKey(nTime, bAnimation, bAddKey, m_Position, LC_CK_EYE);
+			ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
 		}
 
 		if (IsTargetSelected())
 		{
 			m_TargetPosition += Vector3(dx, dy, dz);
 
-			ChangeKey(nTime, bAnimation, bAddKey, m_TargetPosition, LC_CK_TARGET);
+			ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
 		}
 	}
 }
@@ -511,9 +495,9 @@ void lcCamera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 	} 
 }
 
-void lcCamera::UpdatePosition(u32 Time, bool Animation)
+void lcCamera::UpdatePosition(u32 Time)
 {
-	CalculateKeys(Time, Animation);
+	CalculateKeys(Time);
 
 	Vector3 Z = Normalize(m_Position - m_TargetPosition);
 
@@ -733,7 +717,7 @@ void lcCamera::LoadProjection(float fAspect)
 	glLoadMatrixf(m_WorldView);
 }
 
-void lcCamera::Zoom(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
+void lcCamera::Zoom(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
 	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 	float dy = MouseY * Sensitivity;
@@ -752,14 +736,14 @@ void lcCamera::Zoom(u32 Time, bool Animation, bool AddKey, int MouseX, int Mouse
 		m_Position += Delta;
 		m_TargetPosition += Delta;
 
-		ChangeKey(Time, Animation, AddKey, m_Position, LC_CK_EYE);
-		ChangeKey(Time, Animation, AddKey, m_TargetPosition, LC_CK_TARGET);
+		ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
+		ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
 	}
 
-	UpdatePosition(Time, Animation);
+	UpdatePosition(Time);
 }
 
-void lcCamera::Pan(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
+void lcCamera::Pan(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
 	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 	float dx = MouseX * Sensitivity;
@@ -770,12 +754,12 @@ void lcCamera::Pan(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY
 	m_Position += Delta;
 	m_TargetPosition += Delta;
 
-	ChangeKey(Time, Animation, AddKey, m_Position, LC_CK_EYE);
-	ChangeKey(Time, Animation, AddKey, m_TargetPosition, LC_CK_TARGET);
-	UpdatePosition(Time, Animation);
+	ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
+	ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
+	UpdatePosition(Time);
 }
 
-void lcCamera::Orbit(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
+void lcCamera::Orbit(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
 	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 	float dx = MouseX * Sensitivity;
@@ -801,11 +785,11 @@ void lcCamera::Orbit(u32 Time, bool Animation, bool AddKey, int MouseX, int Mous
 		Dir = Mul(Dir, RotY);
 	}
 
-	ChangeKey(Time, Animation, AddKey, Dir + m_TargetPosition, LC_CK_EYE);
-	UpdatePosition(Time, Animation);
+	ChangeKey(Time, AddKey, Dir + m_TargetPosition, LC_CK_EYE);
+	UpdatePosition(Time);
 }
 
-void lcCamera::Rotate(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
+void lcCamera::Rotate(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
 	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 	float dx = MouseX * Sensitivity;
@@ -831,19 +815,19 @@ void lcCamera::Rotate(u32 Time, bool Animation, bool AddKey, int MouseX, int Mou
 		Dir = Mul(Dir, RotY);
 	}
 
-	ChangeKey(Time, Animation, AddKey, Dir + m_Position, LC_CK_TARGET);
-	UpdatePosition(Time, Animation);
+	ChangeKey(Time, AddKey, Dir + m_Position, LC_CK_TARGET);
+	UpdatePosition(Time);
 }
 
-void lcCamera::Roll(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY)
+void lcCamera::Roll(u32 Time, bool AddKey, int MouseX, int MouseY)
 {
 	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
 	float dx = MouseX * Sensitivity;
 
 	float NewRoll = m_Roll + dx / 100;
 
-	ChangeKey(Time, Animation, AddKey, &NewRoll, LC_CK_ROLL);
-	UpdatePosition(Time, Animation);
+	ChangeKey(Time, AddKey, &NewRoll, LC_CK_ROLL);
+	UpdatePosition(Time);
 }
 
 void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)

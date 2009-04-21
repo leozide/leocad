@@ -676,7 +676,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 }
 
 // Changed current step/frame
-void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
+void SystemUpdateTime(bool bAnimation, u32 nTime, u32 nTotal)
 {
 	// Toolbar
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();

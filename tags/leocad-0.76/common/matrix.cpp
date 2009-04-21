@@ -98,11 +98,6 @@ Matrix::Matrix()
 	LoadIdentity();
 }
 
-Matrix::Matrix(const float* mat)
-{
-	memcpy(&m[0], mat, sizeof(float[16]));
-}
-
 // Create a matrix from axis-angle and a point
 Matrix::Matrix(const float *rot, const float *pos)
 {
@@ -162,27 +157,6 @@ Matrix::Matrix(const float *rot, const float *pos)
 	m[7] = 0.0f;
 	m[11] = 0.0f;
 	m[15] = 1.0f;
-}
-
-// Expand from the .bin file
-void Matrix::FromPacked(const float *mat)
-{
-	m[0] = mat[0];
-	m[1] = mat[1];
-	m[2] = mat[2];
-	m[3] = 0.0f;
-	m[4] = mat[3];
-	m[5] = mat[4];
-	m[6] = mat[5];
-	m[7] = 0.0f;
-	m[8] = mat[6];
-	m[9] = mat[7];
-	m[10] = mat[8];
-	m[11] = 0.0f;
-	m[12] = mat[9];
-	m[13] = mat[10];
-	m[14] = mat[11];
-	m[15] = 0.0f;
 }
 
 void Matrix::LoadIdentity()
@@ -323,58 +297,6 @@ void Matrix::ToLDraw(float *f) const
 	f[9] = tmp[2];   f[10]= tmp[6];    f[11]= tmp[10];
 }
 
-void Matrix::ToEulerAngles (float *rot) const
-{
-  double sinPitch, cosPitch, sinRoll, cosRoll, sinYaw, cosYaw;
-  float colMatrix[4][4];
-
-  colMatrix[0][0] = m[0];
-  colMatrix[0][1] = m[4];
-  colMatrix[0][2] = m[8];
-  colMatrix[0][3] = m[12];
-
-  colMatrix[1][0] = m[1];
-  colMatrix[1][1] = m[5];
-  colMatrix[1][2] = m[9];
-  colMatrix[1][3] = m[13];
-
-  colMatrix[2][0] = m[2];
-  colMatrix[2][1] = m[6];
-  colMatrix[2][2] = m[10];
-  colMatrix[2][3] = m[14];
-
-  colMatrix[3][0] = 0.0f;
-  colMatrix[3][1] = 0.0f;
-  colMatrix[3][2] = 0.0f;
-  colMatrix[3][3] = 1.0f;
-
-  sinPitch = -colMatrix[2][0];
-  cosPitch = sqrt(1 - sinPitch*sinPitch);
-
-  if (fabs(cosPitch) > 0.0005)
-  {
-    sinRoll = colMatrix[2][1] / cosPitch;
-    cosRoll = colMatrix[2][2] / cosPitch;
-    sinYaw = colMatrix[1][0] / cosPitch;
-    cosYaw = colMatrix[0][0] / cosPitch;
-  } 
-  else
-  {
-    sinRoll = -colMatrix[1][2];
-    cosRoll = colMatrix[1][1];
-    sinYaw = 0;
-    cosYaw = 1;
-  }
-
-  rot[2] = (float)(atan2(sinYaw, cosYaw));
-  rot[1] = (float)(atan2(sinPitch, cosPitch));
-  rot[0] = (float)(atan2(sinRoll, cosRoll));
-
-  if (rot[2] < 0) rot[2] += 360;
-  if (rot[1] < 0) rot[1] += 360;
-  if (rot[0] < 0) rot[0] += 360;
-}
-
 void Matrix::ToAxisAngle(float *rot) const
 {
 	Matrix tmp(*this);
@@ -469,38 +391,6 @@ void Matrix::ToAxisAngle(float *rot) const
 		rot[1] = 0.0f;
 		rot[2] = 1.0f;
 	}
-}
-
-void Matrix::FromEulerAngles (float roll, float pitch, float yaw)
-{
-	float  cosYaw, sinYaw, cosPitch, sinPitch, cosRoll, sinRoll;
-
-	cosYaw = (float)cos(yaw*DTOR);
-	sinYaw = (float)sin(yaw*DTOR);
-	cosPitch = (float)cos(pitch*DTOR);
-	sinPitch = (float)sin(pitch*DTOR);
-	cosRoll = (float)cos(roll*DTOR);
-	sinRoll = (float)sin(roll*DTOR);
-
-	m[0] = cosYaw * cosPitch;
-	m[4] = cosYaw * sinPitch * sinRoll - sinYaw * cosRoll;
-	m[8] = cosYaw * sinPitch * cosRoll + sinYaw * sinRoll;
-	m[12] = 0.0f;
-
-	m[1] = sinYaw * cosPitch;
-	m[5] = cosYaw * cosRoll + sinYaw * sinPitch * sinRoll;
-	m[9] = sinYaw * sinPitch * cosRoll - cosYaw * sinRoll;
-	m[13] = 0.0f;
-
-	m[2] = -sinPitch;
-	m[6] = cosPitch * sinRoll;
-	m[10] = cosPitch * cosRoll;
-	m[14] = 0.0f;
-
-	m[3] = 0.0f;
-	m[7] = 0.0f;
-	m[11] = 0.0f;
-	m[15] = 1.0f;
 }
 
 // Create a rotation matrix (angle is in degrees)

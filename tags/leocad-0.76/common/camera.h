@@ -50,7 +50,7 @@ public:
 
 
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Move(u32 Time, bool AddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the camera target
 	}
@@ -72,19 +72,19 @@ public:
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
 
 	// Move the camera along its Z axis.
-	void Zoom(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
+	void Zoom(u32 Time, bool AddKey, int MouseX, int MouseY);
 
 	// Move the camera along its XY plane.
-	void Pan(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
+	void Pan(u32 Time, bool AddKey, int MouseX, int MouseY);
 
 	// Rotate the camera around its target.
-	void Orbit(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
+	void Orbit(u32 Time, bool AddKey, int MouseX, int MouseY);
 
 	// Rotate the target around the camera.
-	void Rotate(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
+	void Rotate(u32 Time, bool AddKey, int MouseX, int MouseY);
 
 	// Rotate the camera around its Z axis.
-	void Roll(u32 Time, bool Animation, bool AddKey, int MouseX, int MouseY);
+	void Roll(u32 Time, bool AddKey, int MouseX, int MouseY);
 
 
 
@@ -136,9 +136,9 @@ public:
 	bool FileLoad(File& file);
 	void FileSave(File& file) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
+	void Move(u32 Time, bool AddKey, float x, float y, float z);
 
-	void UpdatePosition(u32 Time, bool Animation);
+	void UpdatePosition(u32 Time);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
 

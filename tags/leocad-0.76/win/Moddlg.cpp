@@ -585,16 +585,8 @@ void CModifyPieceDlg::UpdateInfo(lcPiece* piece)
 		m_RotZ = Rot[2];
 
 		// Steps.
-		if (lcGetActiveProject()->IsAnimation())
-		{
-			m_From = piece->GetFrameShow();
-			m_To = piece->GetFrameHide();
-		}
-		else
-		{
-			m_From = piece->GetStepShow();
-			m_To = piece->GetStepHide();
-		}
+		m_From = piece->GetTimeShow();
+		m_To = piece->GetTimeHide();
 
 		m_Hidden = piece->IsHidden();
 		m_Color.SetColorIndex(piece->GetColor());

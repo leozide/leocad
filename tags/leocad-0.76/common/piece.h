@@ -35,8 +35,8 @@ public:
 
 
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	virtual void InsertTime(unsigned short start, bool animation, unsigned short time);
-	virtual void RemoveTime(unsigned short start, bool animation, unsigned short time);
+	virtual void InsertTime(u32 Start, u32 Time);
+	virtual void RemoveTime(u32 Start, u32 Time);
 
 
 
@@ -55,16 +55,16 @@ public:
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 
-	bool IsVisible(unsigned short nTime, bool bAnimation);
-	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
+	bool IsVisible(u32 Time);
+	void Initialize(float x, float y, float z, u32 Time, int Color);
 	void CreateName(lcPiece* pPiece);
 	void MergeBoundingBox(BoundingBox* Box);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);
 	void FileSave(File& file, Group* pGroups);
 
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void UpdatePosition(u32 Time);
+	void Move(u32 Time, bool AddKey, float dx, float dy, float dz);
 
 	void DoGroup(Group* pGroup);
 	void UnGroup(Group* pGroup);
@@ -77,22 +77,14 @@ public:
 		{ return m_nColor; }
 	void SetColor(unsigned char color)
 		{ m_nColor = color; }
-	void SetStepShow(unsigned char step)
-		{ m_nStepShow = step; }
-	const unsigned char GetStepShow()
-		{ return m_nStepShow; }
-	void SetStepHide(unsigned char step)
-		{ m_nStepHide = step; }
-	const unsigned char GetStepHide()
-		{ return m_nStepHide; }
-	void SetFrameShow(unsigned short frame)
-		{ m_nFrameShow = frame; }
-	const unsigned short GetFrameShow()
-		{ return m_nFrameShow; }
-	void SetFrameHide(unsigned short frame)
-		{ m_nFrameHide = frame; }
-	const unsigned short GetFrameHide()
-		{ return m_nFrameHide; }
+	void SetTimeShow(u32 Time)
+		{ m_TimeShow = Time; }
+	u32 GetTimeShow() const
+		{ return m_TimeShow; }
+	void SetTimeHide(u32 Time)
+		{ m_TimeHide = Time; }
+	u32 GetTimeHide() const
+		{ return m_TimeHide; }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
@@ -102,12 +94,10 @@ public:
 	PieceInfo* m_PieceInfo;
 	Group* m_pGroup;
 
-	unsigned short m_nFrameShow;
-	unsigned short m_nFrameHide;
-	unsigned char m_nStepShow;
-	unsigned char m_nStepHide;
+	u32 m_TimeShow;
+	u32 m_TimeHide;
 
-	unsigned char m_nColor;
+	int m_nColor;
 	unsigned char m_nState;
 
 	// Temporary variables

@@ -14,45 +14,36 @@ class lcObject;
 #define LC_OBJECT_FOCUSED        0x04
 */
 
+#define LC_OBJECT_TIME_MAX 0xffffffff
+
 typedef enum
 {
-  LC_OBJECT_PIECE,
-  LC_OBJECT_CAMERA,
-  LC_OBJECT_CAMERA_TARGET,
-  LC_OBJECT_LIGHT,
-  LC_OBJECT_LIGHT_TARGET,
-  LC_OBJECT_CURVE,
-  LC_OBJECT_CURVE_POINT,
-  //  LC_OBJECT_GROUP,
-  //  LC_OBJECT_GROUP_PIVOT,
+	LC_OBJECT_PIECE,
+	LC_OBJECT_CAMERA,
+	LC_OBJECT_CAMERA_TARGET,
+	LC_OBJECT_LIGHT,
+	LC_OBJECT_LIGHT_TARGET,
+//	LC_OBJECT_CURVE,
+//	LC_OBJECT_CURVE_POINT,
+//	LC_OBJECT_GROUP,
+//	LC_OBJECT_GROUP_PIVOT,
 } LC_OBJECT_TYPE;
 
 // key handling
-typedef struct LC_OBJECT_KEY
+struct LC_OBJECT_KEY
 {
-  unsigned short  time;
-  float	          param[4];
-  unsigned char   type;
-  LC_OBJECT_KEY*  next;
-} LC_OBJECT_KEY;
+	u32 Time;
+	float Value[4];
+	int Type;
+	LC_OBJECT_KEY* Next;
+};
 
-typedef struct
+struct LC_OBJECT_KEY_INFO
 {
-  const char *description;
-  unsigned char size; // number of floats
-  unsigned char type;
-} LC_OBJECT_KEY_INFO;
-
-// rendering parameters
-typedef struct
-{
-  bool lighting;
-  bool edges;
-  float fLineWidth;
-
-  unsigned char lastcolor;
-  bool transparent;
-} LC_RENDER_INFO;
+	const char* Description;
+	int Size; // number of floats
+	int Type;
+};
 
 struct lcClickLine
 {
@@ -70,7 +61,7 @@ public:
 
 public:
 	// Move the object.
-	virtual void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
+	virtual void Move(u32 Time, bool AddKey, float dx, float dy, float dz) = 0;
 
 	// bSelecting is the action (add/remove), bFocus means "add focus if selecting"
 	// or "remove focus only if deselecting", bMultiple = Ctrl key is down
@@ -90,7 +81,7 @@ public:
 
 
   /*
-  virtual void UpdatePosition (unsigned short nTime, bool bAnimation) = 0;
+  virtual void UpdatePosition (u32 Time) = 0;
   virtual void CompareBoundingBox (float *box) { };
   virtual void Render (LC_RENDER_INFO* pInfo) = 0;
 
@@ -99,7 +90,7 @@ public:
     { return (m_nState & LC_OBJECT_SELECTED) != 0; };
   virtual bool IsFocused() const
     { return (m_nState & LC_OBJECT_FOCUSED) != 0; };
-  virtual bool IsVisible(unsigned short nTime, bool bAnimation) const
+  virtual bool IsVisible(u32 Time) const
     { return (m_nState & LC_OBJECT_HIDDEN) == 0; }
 
 
@@ -130,18 +121,18 @@ public:
     }
   */
 
-  // determine the object type
-  bool IsPiece () const
-    { return m_nObjectType == LC_OBJECT_PIECE; }
-  bool IsCamera () const
-    { return m_nObjectType == LC_OBJECT_CAMERA; }
-  bool IsLight () const
-    { return m_nObjectType == LC_OBJECT_LIGHT; }
-  bool IsCurve () const
-    { return m_nObjectType == LC_OBJECT_CURVE; }
+	// determine the object type
+	bool IsPiece () const
+	{ return m_nObjectType == LC_OBJECT_PIECE; }
+	bool IsCamera () const
+	{ return m_nObjectType == LC_OBJECT_CAMERA; }
+	bool IsLight () const
+	{ return m_nObjectType == LC_OBJECT_LIGHT; }
+//	bool IsCurve () const
+//	{ return m_nObjectType == LC_OBJECT_CURVE; }
 
-  LC_OBJECT_TYPE GetType () const
-    { return m_nObjectType; }
+	LC_OBJECT_TYPE GetType () const
+	{ return m_nObjectType; }
 
 protected:
 	virtual bool FileLoad(File& file);
@@ -150,19 +141,18 @@ protected:
 
 	// Key handling stuff
 public:
-	void CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const;
-	void ChangeKey(unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
-	virtual void InsertTime(unsigned short start, bool animation, unsigned short time);
-	virtual void RemoveTime(unsigned short start, bool animation, unsigned short time);
+	void CalculateSingleKey(u32 Time, bool Animation, int KeyType, float* Value) const;
+	void ChangeKey(u32 Time, bool AddKey, const float* Value, int KeyType);
+	virtual void InsertTime(u32 Start, u32 Time);
+	virtual void RemoveTime(u32 Start, u32 Time);
 
 protected:
 	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
-	void CalculateKeys(unsigned short nTime, bool bAnimation);
+	void CalculateKeys(u32 Time);
 	void RemoveKeys();
 
-	LC_OBJECT_KEY* m_pAnimationKeys;
-	LC_OBJECT_KEY* m_pInstructionKeys;
-	float **m_pKeyValues;
+	LC_OBJECT_KEY* m_Keys;
+	float** m_pKeyValues;
 
 	LC_OBJECT_KEY_INFO *m_pKeyInfo;
 	int m_nKeyInfoCount;

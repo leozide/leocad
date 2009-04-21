@@ -63,7 +63,7 @@ void SystemUpdateUndoRedo(char* undo, char* redo);
 void SystemUpdateSnap(const unsigned long nSnap);
 void SystemUpdateCurrentCamera(lcCamera* OldCamera, lcCamera* NewCamera, lcCamera* CameraList);
 void SystemUpdateCameraMenu(lcCamera* Camera);
-void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
+void SystemUpdateTime(bool bAnimation, u32 nTime, u32 nTotal);
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, class lcObject* Focus);

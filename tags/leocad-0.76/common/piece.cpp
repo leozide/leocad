@@ -43,9 +43,8 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	m_PieceInfo = pPieceInfo;
 	m_nState = 0;
 	m_nColor = 0;
-	m_nStepShow = 1;
-	m_nStepHide = 255;
-	m_nFrameHide = 65535;
+	m_TimeShow = 1;
+	m_TimeHide = LC_OBJECT_TIME_MAX;
 	m_Name = "";
 	m_pGroup = NULL;
 
@@ -56,10 +55,8 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	RegisterKeys (values, piece_key_info, LC_PK_COUNT);
 
 	float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
-	ChangeKey (1, false, true, pos, LC_PK_POSITION);
-	ChangeKey (1, false, true, rot, LC_PK_ROTATION);
-	ChangeKey (1, true, true, pos, LC_PK_POSITION);
-	ChangeKey (1, true, true, rot, LC_PK_ROTATION);
+	ChangeKey (1, true, pos, LC_PK_POSITION);
+	ChangeKey (1, true, rot, LC_PK_ROTATION);
 }
 
 lcPiece::~lcPiece()
@@ -94,13 +91,9 @@ bool lcPiece::FileLoad (File& file, char* name)
 
 	if (version < 10)
 	{
-		for (LC_OBJECT_KEY* node = m_pAnimationKeys; node; node = node->next)
-			if (node->type == LC_PK_ROTATION)
-				node->param[3] *= LC_DTOR;
-
-		for (LC_OBJECT_KEY* node = m_pInstructionKeys; node; node = node->next)
-			if (node->type == LC_PK_ROTATION)
-				node->param[3] *= LC_DTOR;
+		for (LC_OBJECT_KEY* node = m_Keys; node; node = node->Next)
+			if (node->Type == LC_PK_ROTATION)
+				node->Value[3] *= LC_DTOR;
 	}
   }
 
@@ -124,7 +117,7 @@ bool lcPiece::FileLoad (File& file, char* name)
 		if (type == LC_PK_ROTATION)
 			param[3] *= LC_DTOR;
 
-        ChangeKey (time, false, true, param, type);
+        ChangeKey(time, true, param, type);
       }
 
       file.ReadLong (&keys, 1);
@@ -133,11 +126,6 @@ bool lcPiece::FileLoad (File& file, char* name)
         file.ReadFloat (param, 4);
         file.ReadShort (&time, 1);
         file.ReadByte (&type, 1);
-
-		if (type == LC_PK_ROTATION)
-			param[3] *= LC_DTOR;
-
-        ChangeKey (time, true, true, param, type);
       }
     }
     else
@@ -167,12 +155,10 @@ bool lcPiece::FileLoad (File& file, char* name)
 
           mat.GetTranslation(&param[0], &param[1], &param[2]);
           param[3] = 0;
-          ChangeKey (time, false, true, param, LC_PK_POSITION);
-          ChangeKey (time, true, true, param, LC_PK_POSITION);
+          ChangeKey(time, true, param, LC_PK_POSITION);
 
-          mat.ToAxisAngle (param);
-          ChangeKey (time, false, true, param, LC_PK_ROTATION);
-          ChangeKey (time, true, true, param, LC_PK_ROTATION);
+          mat.ToAxisAngle(param);
+          ChangeKey(time, true, param, LC_PK_ROTATION);
 
           int bl;
           file.ReadLong (&bl, 1);
@@ -188,12 +174,10 @@ bool lcPiece::FileLoad (File& file, char* name)
 
         mat.GetTranslation(&param[0], &param[1], &param[2]);
         param[3] = 0;
-        ChangeKey (1, false, true, param, LC_PK_POSITION);
-        ChangeKey (1, true, true, param, LC_PK_POSITION);
+        ChangeKey(1, true, param, LC_PK_POSITION);
 
         mat.ToAxisAngle(param);
-        ChangeKey(1, false, true, param, LC_PK_ROTATION);
-        ChangeKey(1, true, true, param, LC_PK_ROTATION);
+        ChangeKey(1, true, param, LC_PK_ROTATION);
       }
     }
   }
@@ -208,16 +192,22 @@ bool lcPiece::FileLoad (File& file, char* name)
     m_nColor = conv[m_nColor];
   }
 
-  file.ReadByte(&m_nStepShow, 1);
+  u8 step;
+  file.ReadByte(&step, 1);
+  m_TimeShow = step;
   if (version > 1)
-    file.ReadByte(&m_nStepHide, 1);
+  {
+    file.ReadByte(&step, 1);
+    m_TimeHide = step;
+  }
   else
-    m_nStepHide = 255;
+    m_TimeHide = LC_OBJECT_TIME_MAX;
 
   if (version > 5)
   {
-    file.ReadShort(&m_nFrameShow, 1);
-    file.ReadShort(&m_nFrameHide, 1);
+    u16 sh;
+    file.ReadShort(&sh, 1); // m_nFrameShow
+    file.ReadShort(&sh, 1); // m_nFrameHide
 
     if (version > 7)
     {
@@ -249,8 +239,8 @@ bool lcPiece::FileLoad (File& file, char* name)
   }
   else
   {
-    m_nFrameShow = 1;
-    m_nFrameHide = 65535;
+    m_TimeShow = 1;
+    m_TimeHide = LC_OBJECT_TIME_MAX;
 
     file.ReadByte(&ch, 1);
     if (ch == 0)
@@ -275,11 +265,9 @@ void lcPiece::FileSave (File& file, Group* pGroups)
   lcObject::FileSave (file);
 
   file.Write(m_PieceInfo->m_strName, 9);
-  file.WriteByte(&m_nColor, 1);
-  file.WriteByte(&m_nStepShow, 1);
-  file.WriteByte(&m_nStepHide, 1);
-  file.WriteShort(&m_nFrameShow, 1);
-  file.WriteShort(&m_nFrameHide, 1);
+  file.WriteLong(&m_nColor, 1); // TODO: fix color index to new tables in 0.76
+  file.WriteLong(&m_TimeShow, 1);
+  file.WriteLong(&m_TimeHide, 1);
 
   // version 8
   file.WriteByte(&m_nState, 1);
@@ -303,20 +291,16 @@ void lcPiece::FileSave (File& file, Group* pGroups)
   file.WriteLong(&i, 1);
 }
 
-void lcPiece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)
+void lcPiece::Initialize(float x, float y, float z, u32 Time, int Color)
 {
-  m_nFrameShow = nFrame;
-  m_nStepShow = nStep;
+  m_TimeShow = Time;
+  m_nColor = Color;
 
   float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
-  ChangeKey (1, false, true, pos, LC_PK_POSITION);
-  ChangeKey (1, false, true, rot, LC_PK_ROTATION);
-  ChangeKey (1, true, true, pos, LC_PK_POSITION);
-  ChangeKey (1, true, true, rot, LC_PK_ROTATION);
+  ChangeKey(1, true, pos, LC_PK_POSITION);
+  ChangeKey(1, true, rot, LC_PK_ROTATION);
 
-  UpdatePosition (1, false);
-
-  m_nColor = nColor;
+  UpdatePosition(1);
 }
 
 void lcPiece::CreateName(lcPiece* pPiece)
@@ -352,62 +336,34 @@ void lcPiece::Select(bool bSelecting, bool bFocus, bool bMultiple)
   } 
 }
 
-void lcPiece::InsertTime (unsigned short start, bool animation, unsigned short time)
+void lcPiece::InsertTime(u32 Start, u32 Time)
 {
-  if (animation)
-  {
-    if (m_nFrameShow >= start)
-      m_nFrameShow = min(m_nFrameShow + time, lcGetActiveProject()->GetTotalFrames());
+	if (m_TimeShow >= Start)
+		m_TimeShow = min(m_TimeShow + Time, lcGetActiveProject()->GetTotalFrames());
 
-    if (m_nFrameHide >= start)
-      m_nFrameHide = min(m_nFrameHide + time, lcGetActiveProject()->GetTotalFrames());
+	if (m_TimeHide >= Start)
+		m_TimeHide = min(m_TimeHide + Time, lcGetActiveProject()->GetTotalFrames());
 
-    if (m_nFrameShow > lcGetActiveProject()->GetCurrentTime())
-      Select (false, false, false);
-  }
-  else
-  {
-    if (m_nStepShow >= start)
-      m_nStepShow = min(m_nStepShow + time, 255);
+	if (m_TimeShow > lcGetActiveProject()->GetCurrentTime())
+		Select(false, false, false);
 
-    if (m_nStepHide >= start)
-      m_nStepHide = min(m_nStepHide + time, 255);
-
-    if (m_nStepShow > lcGetActiveProject()->GetCurrentTime ())
-      Select (false, false, false);
-  }
-
-  lcObject::InsertTime (start, animation, time);
+	lcObject::InsertTime(Start, Time);
 }
 
-void lcPiece::RemoveTime (unsigned short start, bool animation, unsigned short time)
+void lcPiece::RemoveTime(u32 Start, u32 Time)
 {
-  if (animation)
-  {
-    if (m_nFrameShow >= start)
-      m_nFrameShow = max(m_nFrameShow - time, 1);
+	if (m_TimeShow >= Start)
+		m_TimeShow = max(m_TimeShow - Time, 1);
 
-    if (m_nFrameHide == lcGetActiveProject()->GetTotalFrames())
-      m_nFrameHide = lcGetActiveProject()->GetTotalFrames();
-    else
-      m_nFrameHide = max(m_nFrameHide - time, 1);
+	if (m_TimeHide == lcGetActiveProject()->GetTotalFrames())
+		m_TimeHide = lcGetActiveProject()->GetTotalFrames();
+	else
+		m_TimeHide = max(m_TimeHide - Time, 1);
 
-    if (m_nFrameHide < lcGetActiveProject()->GetCurrentTime())
-      Select (false, false, false);
-  }
-  else
-  {
-    if (m_nStepShow >= start)
-      m_nStepShow = max (m_nStepShow - time, 1);
+	if (m_TimeHide < lcGetActiveProject()->GetCurrentTime())
+		Select(false, false, false);
 
-    if (m_nStepHide != 255)
-      m_nStepHide = max (m_nStepHide - time, 1);
-
-    if (m_nStepHide < lcGetActiveProject()->GetCurrentTime())
-      Select (false, false, false);
-  }
-
-  lcObject::RemoveTime (start, animation, time);
+	lcObject::RemoveTime(Start, Time);
 }
 
 void lcPiece::ClosestLineIntersect(lcClickLine& ClickLine) const
@@ -545,31 +501,23 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 	return ret;
 }
 
-void lcPiece::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void lcPiece::Move(u32 Time, bool AddKey, float dx, float dy, float dz)
 {
 	m_Position += Vector3(dx, dy, dz);
 
-	ChangeKey (nTime, bAnimation, bAddKey, m_Position, LC_PK_POSITION);
+	ChangeKey(Time, AddKey, m_Position, LC_PK_POSITION);
 }
 
-bool lcPiece::IsVisible(unsigned short nTime, bool bAnimation)
+bool lcPiece::IsVisible(u32 Time)
 {
 	if (m_nState & LC_PIECE_HIDDEN)
 		return false;
 
-	if (bAnimation)
-	{
-		if (m_nFrameShow > nTime) return false;
-		if (m_nFrameHide < nTime) return false;
+	if (m_TimeShow > Time) return false;
+	if ((m_TimeHide == LC_OBJECT_TIME_MAX) || (m_TimeHide > Time))
 		return true;
-	}
-	else
-	{
-		if (m_nStepShow > nTime) return false;
-		if ((m_nStepHide == 255) || (m_nStepHide > nTime))
-			return true;
-		return false;
-	}
+
+	return false;
 }
 
 void lcPiece::MergeBoundingBox(BoundingBox* Box)
@@ -605,12 +553,12 @@ void lcPiece::UnGroup(Group* pGroup)
 }
 
 // Recalculates current position
-void lcPiece::UpdatePosition(unsigned short nTime, bool bAnimation)
+void lcPiece::UpdatePosition(u32 Time)
 {
-	if (!IsVisible(nTime, bAnimation))
+	if (!IsVisible(Time))
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
-	CalculateKeys(nTime, bAnimation);
+	CalculateKeys(Time);
 
 	m_ModelWorld = MatrixFromAxisAngle(m_AxisAngle);
 	m_ModelWorld.SetTranslation(m_Position);

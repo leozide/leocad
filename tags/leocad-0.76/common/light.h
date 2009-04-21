@@ -43,7 +43,7 @@ public:
 
 public:
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Move(u32 Time, bool AddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the light target
 	}
@@ -95,8 +95,8 @@ public:
 	{ return m_Target; }
 
 	void Render(float fLineWidth);
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void UpdatePosition(u32 Time);
+	void Move(u32 Time, bool AddKey, float dx, float dy, float dz);
 	void Setup(int index);
 	void CreateName(const lcLight* pLight);
 

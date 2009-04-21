@@ -151,8 +151,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	bool ImageHighlight = false;
 	int ImageWidth = Sys_ProfileLoadInt("Default", "Image Width", 640);
 	int ImageHeight = Sys_ProfileLoadInt("Default", "Image Height", 480);
-	int ImageStart = 0;
-	int ImageEnd = 0;
+	u32 ImageStart = 0;
+	u32 ImageEnd = 0;
 	char* ImageName = NULL;
 
 	// File to open.
@@ -196,11 +196,11 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			}
 			else if ((strcmp(Param, "-f") == 0) || (strcmp(Param, "--from") == 0))
 			{
-				ParseIntegerArgument(&i, argc, argv, &ImageStart);
+				ParseIntegerArgument(&i, argc, argv, (int*)&ImageStart);
 			}
 			else if ((strcmp(Param, "-t") == 0) || (strcmp(Param, "--to") == 0))
 			{
-				ParseIntegerArgument(&i, argc, argv, &ImageEnd);
+				ParseIntegerArgument(&i, argc, argv, (int*)&ImageEnd);
 			}
 			else if (strcmp(Param, "--animation") == 0)
 				ImageAnimation = true;
@@ -379,25 +379,27 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 
 		if (project->IsAnimation())
 		{
-			if (ImageStart > project->GetTotalFrames())
-				ImageStart = project->GetTotalFrames();
+			u32 End = project->GetTotalFrames();
+			if (ImageStart > End)
+				ImageStart = End;
 
-			if (ImageEnd > project->GetTotalFrames())
-				ImageEnd = project->GetTotalFrames();
+			if (ImageEnd > End)
+				ImageEnd = End;
 		}
 		else
 		{
-			if (ImageStart > 255)
-				ImageStart = 255;
+			u32 End = project->GetLastStep();
+			if (ImageStart > End)
+				ImageStart = End;
 
-			if (ImageEnd > 255)
-				ImageEnd = 255;
+			if (ImageEnd > End)
+				ImageEnd = End;
 		}
 
 		Image* images = new Image[ImageEnd - ImageStart + 1];
 		project->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
 
-		for (int i = 0; i <= ImageEnd - ImageStart; i++)
+		for (u32 i = 0; i <= ImageEnd - ImageStart; i++)
 		{
 			char idx[256];
 			String Frame;

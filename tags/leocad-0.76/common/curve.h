@@ -37,7 +37,7 @@ class CurvePoint : public lcObject
   void FileSave (File& file) const;
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void Render (LC_RENDER_INFO* pInfo);
+  void Render ();
   void Select (bool bSelecting, bool bFocus, bool bMultiple);
 
   // query functions
@@ -97,7 +97,7 @@ class Curve : public lcObject
   void FileSave (File& file) const;
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void Render (LC_RENDER_INFO* pInfo);
+  void Render ();
   void Select (bool bSelecting, bool bFocus, bool bMultiple);
 
   // implementation

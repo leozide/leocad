@@ -15,78 +15,9 @@
 static char BASED_CODE THIS_FILE[] = __FILE__;
 #endif
 
-IMPLEMENT_DYNCREATE(CPropertiesGeneral, CPropertyPage)
 IMPLEMENT_DYNCREATE(CPropertiesSummary, CPropertyPage)
 IMPLEMENT_DYNCREATE(CPropertiesPieces, CPropertyPage)
 
-
-/////////////////////////////////////////////////////////////////////////////
-// CPropertiesGeneral property page
-
-CPropertiesGeneral::CPropertiesGeneral() : CPropertyPage(CPropertiesGeneral::IDD)
-{
-	//{{AFX_DATA_INIT(CPropertiesGeneral)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
-}
-
-CPropertiesGeneral::~CPropertiesGeneral()
-{
-}
-
-void CPropertiesGeneral::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPropertiesGeneral)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
-	//}}AFX_DATA_MAP
-}
-
-
-BEGIN_MESSAGE_MAP(CPropertiesGeneral, CPropertyPage)
-	//{{AFX_MSG_MAP(CPropertiesGeneral)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-BOOL CPropertiesGeneral::OnInitDialog() 
-{
-	CPropertyPage::OnInitDialog();
-	
-	WIN32_FIND_DATA fd;
-
-	if (FindFirstFile(m_strFilename, &fd) != INVALID_HANDLE_VALUE)
-	{
-		char tf[] = "%A, %B %d, %Y %I:%M:%S %p";
-		SetDlgItemText(IDC_PROP_GEN_DOSNAME, m_strFilename.Right(m_strFilename.GetLength() - m_strFilename.ReverseFind('\\') - 1));
-		SetDlgItemText(IDC_PROP_GEN_LOCATION, m_strFilename.Left(m_strFilename.ReverseFind('\\') + 1));
-
-		CString str;
-		str.Format("%.1fKB (%d bytes)", (float)fd.nFileSizeLow/1024, fd.nFileSizeLow);
-		SetDlgItemText(IDC_PROP_GEN_SIZE, str);
-		CTime timeFile(fd.ftCreationTime);
-		str = timeFile.Format (tf);
-		SetDlgItemText(IDC_PROP_GEN_CREATED, str);
-		timeFile = fd.ftLastWriteTime;
-		str = timeFile.Format (tf);
-		SetDlgItemText(IDC_PROP_GEN_MODIFIED, str);
-		timeFile = fd.ftLastAccessTime;
-		str = timeFile.Format ("%A, %B %d, %Y");
-		SetDlgItemText(IDC_PROP_GEN_ACCESSED, str);
-	}
-	else
-	{
-		char* str = "(Unknown)";
-		SetDlgItemText(IDC_PROP_GEN_CREATED, str);
-		SetDlgItemText(IDC_PROP_GEN_MODIFIED, str);
-		SetDlgItemText(IDC_PROP_GEN_ACCESSED, str);
-	}
-
-	UpdateData (FALSE);
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CPropertiesSummary property page
@@ -94,9 +25,10 @@ BOOL CPropertiesGeneral::OnInitDialog()
 CPropertiesSummary::CPropertiesSummary() : CPropertyPage(CPropertiesSummary::IDD)
 {
 	//{{AFX_DATA_INIT(CPropertiesSummary)
-	m_strAuthor = _T("");
-	m_strComments = _T("");
-	m_strDescription = _T("");
+	m_Name = _T("");
+	m_Author = _T("");
+	m_Comments = _T("");
+	m_Description = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -108,12 +40,14 @@ void CPropertiesSummary::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPropertiesSummary)
-	DDX_Text(pDX, IDC_PROP_SUM_AUTHOR, m_strAuthor);
-	DDV_MaxChars(pDX, m_strAuthor, 100);
-	DDX_Text(pDX, IDC_PROP_SUM_COMMENTS, m_strComments);
-	DDV_MaxChars(pDX, m_strComments, 255);
-	DDX_Text(pDX, IDC_PROP_SUM_DESCRIPTION, m_strDescription);
-	DDV_MaxChars(pDX, m_strDescription, 100);
+	DDX_Text(pDX, IDC_PROP_SUM_NAME, m_Name);
+	DDV_MaxChars(pDX, m_Name, 100);
+	DDX_Text(pDX, IDC_PROP_SUM_AUTHOR, m_Author);
+	DDV_MaxChars(pDX, m_Author, 100);
+	DDX_Text(pDX, IDC_PROP_SUM_COMMENTS, m_Comments);
+	DDV_MaxChars(pDX, m_Comments, 255);
+	DDX_Text(pDX, IDC_PROP_SUM_DESCRIPTION, m_Description);
+	DDV_MaxChars(pDX, m_Description, 100);
 	//}}AFX_DATA_MAP
 }
 

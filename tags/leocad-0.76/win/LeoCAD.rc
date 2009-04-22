@@ -238,7 +238,6 @@ BEGIN
             MENUITEM "X3DV...",                     ID_FILE_EXPORT_X3DV
         END
         MENUITEM SEPARATOR
-        MENUITEM "Propert&ies...",              ID_FILE_PROPERTIES
         MENUITEM "Pieces &Library Manager...",  ID_FILE_EDITPIECELIBRARY
         MENUITEM "Terrain &Editor...",          ID_FILE_TERRAINEDITOR
         MENUITEM SEPARATOR
@@ -328,7 +327,6 @@ BEGIN
         MENUITEM "Array...",                    ID_PIECE_ARRAY
         MENUITEM "Mirror...",                   ID_PIECE_MIRROR, GRAYED
         MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
-        MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
         MENUITEM SEPARATOR
         MENUITEM "Group...",                    ID_PIECE_GROUP
         MENUITEM "Ungroup",                     ID_PIECE_UNGROUP
@@ -339,6 +337,14 @@ BEGIN
         MENUITEM "Hide Selected",               ID_PIECE_HIDESELECTED
         MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
         MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
+    END
+    POPUP "&Model"
+    BEGIN
+        MENUITEM "&New...",                     ID_MODEL_NEW
+        MENUITEM "&Delete...",                  ID_MODEL_DELETE
+        MENUITEM "&Properties...",              ID_MODEL_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "Model 1",                     ID_MODEL_MODEL1, GRAYED
     END
     POPUP "&Help"
     BEGIN
@@ -579,36 +585,19 @@ BEGIN
     LTEXT           "http://www.leocad.org",IDC_ABTDLG_HOMEPAGE,40,63,151,8,SS_NOTIFY
 END
 
-IDD_PROPGENERAL DIALOG 0, 0, 220, 105
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "General"
-FONT 8, "MS Sans Serif"
-BEGIN
-    LTEXT           "MS-DOS Name:",IDC_STATIC,7,14,57,8,NOT WS_GROUP
-    LTEXT           "Location:",IDC_STATIC,7,27,57,8,NOT WS_GROUP
-    LTEXT           "Size:",IDC_STATIC,7,40,57,8,NOT WS_GROUP
-    LTEXT           "Created:",IDC_STATIC,7,53,57,8,NOT WS_GROUP
-    LTEXT           "Modified:",IDC_STATIC,7,66,57,8,NOT WS_GROUP
-    LTEXT           "Accessed:",IDC_STATIC,7,79,57,8,NOT WS_GROUP
-    LTEXT           "",IDC_PROP_GEN_DOSNAME,77,14,136,8,NOT WS_GROUP
-    LTEXT           "",IDC_PROP_GEN_LOCATION,77,27,136,8,NOT WS_GROUP
-    LTEXT           "",IDC_PROP_GEN_SIZE,77,40,136,8,NOT WS_GROUP
-    LTEXT           "",IDC_PROP_GEN_CREATED,77,53,136,8,NOT WS_GROUP
-    LTEXT           "",IDC_PROP_GEN_MODIFIED,77,66,136,8,NOT WS_GROUP
-    LTEXT           "",IDC_PROP_GEN_ACCESSED,77,79,136,8,NOT WS_GROUP
-END
-
-IDD_PROPSUMMARY DIALOG 0, 0, 220, 105
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_PROPSUMMARY DIALOGEX 0, 0, 220, 186
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Summary"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    LTEXT           "Author:",IDC_STATIC,13,15,50,8
-    LTEXT           "Description:",IDC_STATIC,13,32,50,8
-    LTEXT           "Comments:",IDC_STATIC,13,49,50,8
-    EDITTEXT        IDC_PROP_SUM_AUTHOR,71,14,136,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_PROP_SUM_DESCRIPTION,71,31,136,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_PROP_SUM_COMMENTS,71,47,136,50,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
+    LTEXT           "Name:",IDC_STATIC,7,9,50,8
+    EDITTEXT        IDC_PROP_SUM_NAME,65,7,148,12,ES_AUTOHSCROLL
+    LTEXT           "Author:",IDC_STATIC,7,27,50,8
+    EDITTEXT        IDC_PROP_SUM_AUTHOR,65,25,148,12,ES_AUTOHSCROLL
+    LTEXT           "Description:",IDC_STATIC,7,45,50,8
+    EDITTEXT        IDC_PROP_SUM_DESCRIPTION,65,43,148,12,ES_AUTOHSCROLL
+    LTEXT           "Comments:",IDC_STATIC,7,63,50,8
+    EDITTEXT        IDC_PROP_SUM_COMMENTS,65,61,148,117,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
 END
 
 IDD_PROPPIECES DIALOGEX 0, 0, 220, 186
@@ -1031,30 +1020,6 @@ BEGIN
     PUSHBUTTON      "Options...",IDC_SAVEPICTURE_OPTIONS,222,8,50,14
 END
 
-IDD_PIECEEDITOR DIALOG  0, 0, 270, 186
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Piece Editor"
-MENU IDR_PIECEEDITOR
-FONT 8, "MS Sans Serif"
-BEGIN
-    LTEXT           "",IDC_EDITORSTATIC,7,7,120,148,NOT WS_VISIBLE | WS_BORDER
-    CONTROL         "List1",IDC_EDTDLG_LIST,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,144,7,119,80
-    PUSHBUTTON      "Add",ID_EDITOR_ADD,144,89,28,11
-    PUSHBUTTON      "Delete",IDC_BUTTON2,174,89,28,11
-    EDITTEXT        IDC_EDTDLG_CONNECTION,144,116,119,12,ES_AUTOHSCROLL
-    CONTROL         "Slider1",IDC_EDTDLG_VERT,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,128,7,10,148
-    CONTROL         "Slider2",IDC_EDTDLG_HORZ,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,7,157,120,10
-    LTEXT           "Connection",IDC_STATIC,144,106,50,8
-    DEFPUSHBUTTON   "Ok",IDOK,206,168,28,11,NOT WS_VISIBLE
-    PUSHBUTTON      "Cancel",IDCANCEL,235,168,28,11,NOT WS_VISIBLE
-    EDITTEXT        IDC_EDTDLG_DESCRIPTION,144,132,119,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDTDLG_NAME,144,148,52,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Guess",ID_EDITOR_GUESS,204,89,28,11
-    PUSHBUTTON      "<-",ID_EDITOR_PREV,23,168,28,11
-    PUSHBUTTON      "Flip",ID_EDITOR_FLIP,54,168,28,11
-    PUSHBUTTON      "->",ID_EDITOR_NEXT,85,168,28,11
-END
-
 IDD_LIBRARY DIALOG  0, 0, 300, 200
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Pieces Library Manager"
@@ -1314,20 +1279,12 @@ BEGIN
         BOTTOMMARGIN, 135
     END
 
-    IDD_PROPGENERAL, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 213
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 97
-    END
-
     IDD_PROPSUMMARY, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 213
         TOPMARGIN, 7
-        BOTTOMMARGIN, 97
+        BOTTOMMARGIN, 178
     END
 
     IDD_PROPPIECES, DIALOG
@@ -1335,7 +1292,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 213
         TOPMARGIN, 7
-        BOTTOMMARGIN, 97
+        BOTTOMMARGIN, 178
     END
 
     IDD_SELECT_OBJECTS, DIALOG
@@ -1895,11 +1852,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_PIECE_COPYKEYS       "Copy position and rotation"
-END
-
-STRINGTABLE 
-BEGIN
     ID_VIEW_CAMERAS_RESET   "Reset cameras to their original positions"
     ID_PREVIEW_ONEPAGE      "Show only one page\nOne Page"
     ID_PREVIEW_TWOPAGES     "Show two pages\nTwo Pages"
@@ -1938,6 +1890,29 @@ BEGIN
     ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."
     ID_VIEW_DELETEVIEW      "Delete the current view"
     ID_VIEW_RESETVIEWS      "Reset all views to the default configuration"
+    ID_MODEL_NEW            "Create a new model."
+    ID_MODEL_DELETE         "Delete current model."
+    ID_MODEL_PROPERTIES     "Display current model properties."
+    ID_MODEL_MODEL1         "Edit this model."
+    ID_MODEL_MODEL2         "Edit this model."
+    ID_MODEL_MODEL3         "Edit this model."
+    ID_MODEL_MODEL4         "Edit this model."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_MODEL_MODEL5         "Edit this model."
+    ID_MODEL_MODEL6         "Edit this model."
+    ID_MODEL_MODEL7         "Edit this model."
+    ID_MODEL_MODEL8         "Edit this model."
+    ID_MODEL_MODEL9         "Edit this model."
+    ID_MODEL_MODEL10        "Edit this model."
+    ID_MODEL_MODEL11        "Edit this model."
+    ID_MODEL_MODEL12        "Edit this model."
+    ID_MODEL_MODEL13        "Edit this model."
+    ID_MODEL_MODEL14        "Edit this model."
+    ID_MODEL_MODEL15        "Edit this model."
+    ID_MODEL_MODEL16        "Edit this model."
 END
 
 #endif    // English (U.S.) resources

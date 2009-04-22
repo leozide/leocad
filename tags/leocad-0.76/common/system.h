@@ -4,6 +4,7 @@
 #include "defines.h"
 #include "typedefs.h"
 #include "str.h"
+#include "lc_array.h"
 
 // Profile functions
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
@@ -54,6 +55,7 @@ bool Sys_KeyDown (int key);
 class File;
 class lcCamera;
 class PieceInfo;
+class lcModel;
 
 // User Interface
 void SystemUpdateAction(int nNew, int nOld);
@@ -70,6 +72,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, class lcObject
 void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemUpdateCategories(bool SearchOnly);
+void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* ActiveModel);
 
 void SystemInit();
 void SystemFinish();

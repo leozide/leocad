@@ -16,6 +16,7 @@
 #include "MainFrm.h"
 #include "PiecePrv.h"
 #include "lc_application.h"
+#include "lc_model.h"
 #include "camera.h"
 
 #ifdef _DEBUG
@@ -282,7 +283,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	pDC->SetBkMode(TRANSPARENT);
 	HPEN hpOld = (HPEN)SelectObject(pDC->m_hDC,(HPEN)GetStockObject(BLACK_PEN));
 
-	u32 OldTime = project->m_CurTime;
+	u32 OldTime = project->m_ActiveModel->m_CurFrame;
 	UINT nRenderTime = 1+((pInfo->m_nCurPage-1)*rows*cols);
 
 	View view(project, project->m_ActiveView);
@@ -294,14 +295,14 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	{
 		if (nRenderTime > project->GetLastStep())
 			continue;
-		project->m_CurTime = nRenderTime;
+		project->m_ActiveModel->m_CurFrame = nRenderTime;
 		project->CalculateStep();
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 
 		// Tile rendering
 		if (tw != pw)
 		{
-			lcCamera* pCam = project->m_Cameras;
+			lcCamera* pCam = project->m_ActiveModel->m_Cameras;
 			for (int i = LC_CAMERA_MAIN; pCam; pCam = (lcCamera*)pCam->m_Next)
 				if (i-- == 0)
 					break;
@@ -375,7 +376,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		nRenderTime++;
 	}
 
-	project->m_CurTime = OldTime;
+	project->m_ActiveModel->m_CurFrame = OldTime;
 
 	pfnwglMakeCurrent(NULL, NULL);
 	pfnwglDeleteContext(hmemrc);

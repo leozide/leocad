@@ -16,6 +16,7 @@
 #include "Piece.h"
 #include "library.h"
 #include "lc_application.h"
+#include "lc_model.h"
 
 static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 {
@@ -425,7 +426,7 @@ static void PrintPiecesThread(void* pv)
 	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
 	memset (&col, 0, sizeof (col));
 
-	for (lcPiece* tmp = project->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
+	for (lcPiece* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
 	{
 		int idx = pLib->GetPieceIndex(tmp->m_PieceInfo);
 		pieces[(idx*28)+tmp->GetColor()]++;

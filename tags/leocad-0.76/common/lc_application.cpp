@@ -2,6 +2,7 @@
 #include "lc_application.h"
 
 #include <stdio.h>
+#include "lc_model.h"
 #include "library.h"
 #include "system.h"
 #include "console.h"
@@ -366,7 +367,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 
 		if ((ImageStart == 0) && (ImageEnd == 0))
 		{
-			ImageStart = ImageEnd = project->GetCurrentTime();
+			ImageStart = ImageEnd = project->m_ActiveModel->m_CurFrame;
 		}
 		else if ((ImageStart == 0) && (ImageEnd != 0))
 		{
@@ -379,7 +380,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 
 		if (project->IsAnimation())
 		{
-			u32 End = project->GetTotalFrames();
+			u32 End = project->m_ActiveModel->m_TotalFrames;
 			if (ImageStart > End)
 				ImageStart = End;
 

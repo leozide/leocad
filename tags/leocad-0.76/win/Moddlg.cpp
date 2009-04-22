@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "light.h"
 #include "lc_application.h"
+#include "lc_model.h"
 
 #ifdef _DEBUG 
 #undef THIS_FILE 
@@ -394,7 +395,7 @@ void CModifyDialog::OnDropdownModdlgList()
 	{
 		case LC_OBJECT_PIECE:
 		{
-			for (lcObject* pPiece = lcGetActiveProject()->m_Pieces; pPiece; pPiece = pPiece->m_Next)
+			for (lcObject* pPiece = lcGetActiveProject()->m_ActiveModel->m_Pieces; pPiece; pPiece = pPiece->m_Next)
 			{
 				int i = m_ctlCombo.AddString(pPiece->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pPiece);
@@ -407,7 +408,7 @@ void CModifyDialog::OnDropdownModdlgList()
 		case LC_OBJECT_CAMERA:
 		case LC_OBJECT_CAMERA_TARGET:
 		{
-			for (lcObject* pCamera = lcGetActiveProject()->m_Cameras; pCamera; pCamera = pCamera->m_Next)
+			for (lcObject* pCamera = lcGetActiveProject()->m_ActiveModel->m_Cameras; pCamera; pCamera = pCamera->m_Next)
 			{
 				int i = m_ctlCombo.AddString(pCamera->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, pCamera);
@@ -420,7 +421,7 @@ void CModifyDialog::OnDropdownModdlgList()
 		case LC_OBJECT_LIGHT:
 		case LC_OBJECT_LIGHT_TARGET:
 		{
-			for (lcObject* Light = lcGetActiveProject()->m_Lights; Light; Light = Light->m_Next)
+			for (lcObject* Light = lcGetActiveProject()->m_ActiveModel->m_Lights; Light; Light = Light->m_Next)
 			{
 				int i = m_ctlCombo.AddString(Light->m_Name);
 				m_ctlCombo.SetItemDataPtr(i, Light);

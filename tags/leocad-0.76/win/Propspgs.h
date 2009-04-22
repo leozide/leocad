@@ -4,43 +4,6 @@
 #include "defines.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CPropertiesGeneral dialog
-
-class CPropertiesGeneral : public CPropertyPage
-{
-	DECLARE_DYNCREATE(CPropertiesGeneral)
-
-// Construction
-public:
-	CString m_strFilename;
-	CPropertiesGeneral();
-	~CPropertiesGeneral();
-
-// Dialog Data
-	//{{AFX_DATA(CPropertiesGeneral)
-	enum { IDD = IDD_PROPGENERAL };
-		// NOTE - ClassWizard will add data members here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
-	//}}AFX_DATA
-
-
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CPropertiesGeneral)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-	// Generated message map functions
-	//{{AFX_MSG(CPropertiesGeneral)
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CPropertiesSummary dialog
 
 class CPropertiesSummary : public CPropertyPage
@@ -55,9 +18,10 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CPropertiesSummary)
 	enum { IDD = IDD_PROPSUMMARY };
-	CString	m_strAuthor;
-	CString	m_strComments;
-	CString	m_strDescription;
+	CString m_Name;
+	CString	m_Author;
+	CString	m_Comments;
+	CString	m_Description;
 	//}}AFX_DATA
 
 

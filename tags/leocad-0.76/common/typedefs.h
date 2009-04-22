@@ -37,7 +37,6 @@ typedef enum
 	LC_FILE_WAVEFRONT,
 	LC_FILE_VRML97,
 	LC_FILE_X3DV,
-	LC_FILE_PROPERTIES,
 	LC_FILE_TERRAIN,
 	LC_FILE_LIBRARY,
 	LC_FILE_RECENT,
@@ -54,7 +53,6 @@ typedef enum
 	LC_PIECE_DELETE,
 	LC_PIECE_MINIFIG,
 	LC_PIECE_ARRAY,
-//	LC_PIECE_COPYKEYS,
 	LC_PIECE_GROUP,
 	LC_PIECE_UNGROUP,
 	LC_PIECE_GROUP_ADD,
@@ -65,6 +63,10 @@ typedef enum
 	LC_PIECE_UNHIDE_ALL,
 	LC_PIECE_PREVIOUS,
 	LC_PIECE_NEXT,
+	LC_MODEL_NEW,
+	LC_MODEL_DELETE,
+	LC_MODEL_PROPERTIES,
+	LC_MODEL_SET_ACTIVE,
 	LC_VIEW_PREFERENCES,
 	LC_VIEW_ZOOM,
 	LC_VIEW_ZOOMIN,
@@ -420,11 +422,10 @@ struct LC_ARRAYDLG_OPTS
 
 struct LC_PROPERTIESDLG_OPTS
 {
-	char strAuthor[101];
-	char strDescription[101];
-	char strComments[256];
-	char* strTitle;
-	char* strFilename;
+	String Name;
+	String Author;
+	String Description;
+	String Comments;
 	int* PiecesUsed;
 };
 

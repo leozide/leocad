@@ -17,11 +17,10 @@ class CPropertiesSheet : public CPropertySheet
 
 // Construction
 public:
-	CPropertiesSheet(CWnd* pWndParent = NULL);
+	CPropertiesSheet(bool ShowPieces, CWnd* pWndParent = NULL);
 
 // Attributes
 public:
-	CPropertiesGeneral	m_PageGeneral;
 	CPropertiesSummary	m_PageSummary;
 	CPropertiesPieces	m_PagePieces;
 

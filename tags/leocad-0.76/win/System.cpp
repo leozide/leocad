@@ -33,6 +33,7 @@
 #include "mainfrm.h"
 #include "project.h"
 #include "lc_application.h"
+#include "lc_model.h"
 #include "piece.h"
 #include "pieceinf.h"
 
@@ -616,8 +617,6 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 	pMenu = GetMainMenu(3);
 	pMenu->EnableMenuItem(ID_PIECE_DELETE, MF_BYCOMMAND | 
 		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-	pMenu->EnableMenuItem(ID_PIECE_COPYKEYS, MF_BYCOMMAND | 
-		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_ARRAY, MF_BYCOMMAND | 
 		(flags & LC_SEL_PIECE ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_MIRROR, MF_BYCOMMAND | 
@@ -769,20 +768,6 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 	pCtrl->CheckButton(ID_ANIMATOR_KEY, bAddKeys ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_ANIMATOR_PLAY, bAnimation ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_ANIMATOR_STOP, FALSE);
-
-	// Menu
-	char* txt;
-	CMenu* pMenu = GetMainMenu(3);
-	UINT nState = pMenu->GetMenuState(ID_PIECE_COPYKEYS, MF_BYCOMMAND);
-	nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
-
-	if (bAnimation)
-		txt = "Copy Keys from Instructions";
-	else
-		txt = "Copy Keys from Animation";
-	
-	pMenu->ModifyMenu(ID_PIECE_COPYKEYS, MF_BYCOMMAND |
-        MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
 void SystemUpdateCurrentCamera(lcCamera* OldCamera, lcCamera* NewCamera, lcCamera* CameraList)
@@ -873,6 +858,90 @@ void SystemUpdateCategories(bool SearchOnly)
 		pBar->UpdatePiecesTreeSearch();
 	else
 		pBar->UpdatePiecesTree();
+}
+
+#define LC_MODEL_MENU_MAX 16
+
+void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* ActiveModel)
+{
+	CMenu* Menu = GetMainMenu(4);
+	if (!Menu)
+		return;
+
+	if (ModelList.GetSize() > 1)
+		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_ENABLED);
+	else
+		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+
+	// Delete existing entries.
+	int i;
+	for (i = 1; i < LC_MODEL_MENU_MAX; i++)
+		Menu->DeleteMenu(ID_MODEL_MODEL1 + i, MF_BYCOMMAND);
+
+	// If the list is empty add a disabled entry.
+	if (ModelList.GetSize() == 0)
+	{
+		UINT State = Menu->GetMenuState(ID_MODEL_MODEL1, MF_BYCOMMAND);
+		State &= ~(MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR | MF_CHECKED);
+		Menu->ModifyMenu(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_STRING | State, ID_MODEL_MODEL1, "Model");
+		Menu->EnableMenuItem(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		return;
+	}
+
+	// Find the position of the first model in the menu.
+	u32 StartPos;
+	for (StartPos = 0; StartPos < Menu->GetMenuItemCount(); StartPos++)
+		if (Menu->GetMenuItemID(StartPos) == ID_MODEL_MODEL1)
+			break;
+
+	// Add models to menu.
+	for (i = 0; i < ModelList.GetSize(); i++)
+	{
+		lcModel* Model = ModelList[i];
+		String DisplayName;
+
+		// Double up any '&' characters so they are not underlined.
+		char* Dest = DisplayName.GetBuffer(Model->m_Name.GetLength() * 2 + 1);
+		char* Src = Model->m_Name;
+
+		while (*Src)
+		{
+			if (*Src == '&')
+				*Dest++ = '&';
+			*Dest++ = *Src++;
+		}
+		*Dest = 0;
+		DisplayName.ReleaseBuffer();
+
+		// Insert mnemonic followed by the model name.
+		char* Text = new char[DisplayName.GetLength() + 10];
+		sprintf(Text, "&%d %s", i+1, (const char*)DisplayName);
+
+		if (i != 0)
+		{
+			Menu->InsertMenu(StartPos + i, MF_BYPOSITION | MF_STRING, ID_MODEL_MODEL1 + i, Text);
+		}
+		else
+		{
+			UINT State = Menu->GetMenuState(ID_MODEL_MODEL1, MF_BYCOMMAND);
+			State &= ~(MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR | MF_CHECKED);
+			Menu->ModifyMenu(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_STRING | State, ID_MODEL_MODEL1 + i, Text);
+			Menu->EnableMenuItem(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_ENABLED);
+		}
+
+		if (Model == ActiveModel)
+			Menu->CheckMenuItem(StartPos + i, MF_BYPOSITION | MF_CHECKED);
+
+		delete[] Text;
+	}
+
+	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+
+	if (!pFrame)
+		return;
+
+	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
+	pBar->UpdatePiecesTreeModels();
 }
 
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
@@ -1557,21 +1626,22 @@ bool SystemDoDialog(int nMode, void* param)
 
 		case LC_DLG_PROPERTIES:
 		{
-			CPropertiesSheet ps;
 			LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
+			CPropertiesSheet ps(opts->PiecesUsed != NULL);
 
-			ps.SetTitle(opts->strTitle, PSH_PROPTITLE);
-			ps.m_PageSummary.m_strAuthor = opts->strAuthor;
-			ps.m_PageSummary.m_strDescription = opts->strDescription;
-			ps.m_PageSummary.m_strComments = opts->strComments;
-			ps.m_PageGeneral.m_strFilename = opts->strFilename;
+			ps.SetTitle("Model Properties", 0);
+			ps.m_PageSummary.m_Name = opts->Name;
+			ps.m_PageSummary.m_Author = opts->Author;
+			ps.m_PageSummary.m_Description = opts->Description;
+			ps.m_PageSummary.m_Comments = opts->Comments;
 			ps.m_PagePieces.m_PiecesUsed = opts->PiecesUsed;
 
 			if (ps.DoModal() == IDOK)
 			{
-				strcpy(opts->strAuthor, ps.m_PageSummary.m_strAuthor);
-				strcpy(opts->strDescription, ps.m_PageSummary.m_strDescription);
-				strcpy(opts->strComments, ps.m_PageSummary.m_strComments);
+				opts->Name = ps.m_PageSummary.m_Name;
+				opts->Author = ps.m_PageSummary.m_Author;
+				opts->Description = ps.m_PageSummary.m_Description;
+				opts->Comments = ps.m_PageSummary.m_Comments;
 
 				return true;
 			}

@@ -13,6 +13,7 @@
 #include "lc_application.h"
 #include "lc_colors.h"
 #include "lc_mesh.h"
+#include "lc_model.h"
 #include "matrix.h"
 
 #define LC_PIECE_SAVE_VERSION 10 // LeoCAD 0.76
@@ -338,13 +339,15 @@ void lcPiece::Select(bool bSelecting, bool bFocus, bool bMultiple)
 
 void lcPiece::InsertTime(u32 Start, u32 Time)
 {
+	u32 Total = lcGetActiveProject()->IsAnimation() ? lcGetActiveProject()->m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX;
+
 	if (m_TimeShow >= Start)
-		m_TimeShow = min(m_TimeShow + Time, lcGetActiveProject()->GetTotalFrames());
+		m_TimeShow = min(m_TimeShow + Time, Total);
 
 	if (m_TimeHide >= Start)
-		m_TimeHide = min(m_TimeHide + Time, lcGetActiveProject()->GetTotalFrames());
+		m_TimeHide = min(m_TimeHide + Time, Total);
 
-	if (m_TimeShow > lcGetActiveProject()->GetCurrentTime())
+	if (m_TimeShow > lcGetActiveProject()->m_ActiveModel->m_CurFrame)
 		Select(false, false, false);
 
 	lcObject::InsertTime(Start, Time);
@@ -355,12 +358,10 @@ void lcPiece::RemoveTime(u32 Start, u32 Time)
 	if (m_TimeShow >= Start)
 		m_TimeShow = max(m_TimeShow - Time, 1);
 
-	if (m_TimeHide == lcGetActiveProject()->GetTotalFrames())
-		m_TimeHide = lcGetActiveProject()->GetTotalFrames();
-	else
+	if (m_TimeHide >= Start)
 		m_TimeHide = max(m_TimeHide - Time, 1);
 
-	if (m_TimeHide < lcGetActiveProject()->GetCurrentTime())
+	if (m_TimeHide < lcGetActiveProject()->m_ActiveModel->m_CurFrame)
 		Select(false, false, false);
 
 	lcObject::RemoveTime(Start, Time);

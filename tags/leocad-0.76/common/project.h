@@ -46,9 +46,6 @@ struct TouchState
 	int StartX, StartY;
 };
 
-class lcPiece;
-class lcCamera;
-class lcLight;
 class Group;
 class GroupInfo;
 class Texture;
@@ -59,6 +56,7 @@ class View;
 class Image;
 class PiecesLibrary;
 class TexFont;
+class lcModel;
 
 // Undo support
 
@@ -92,8 +90,6 @@ public:
 		{ return m_Animation; }
 	void SetAnimation(bool Anim)
 	{ m_Animation = Anim; } // only to be called from lcApplication::Initialize()
-	u32 GetCurrentTime ()
-		{ return m_CurTime; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	unsigned char GetAction() const
@@ -110,22 +106,10 @@ public:
 	lcCamera* GetCamera(int Index) const;
 	lcCamera* GetCamera(const char* Name) const;
 
-	void GetTimeRange(u32* from, u32* to)
-	{
-		*from = m_CurTime;
-		*to = m_Animation ? m_TotalFrames : GetLastStep();
-	}
-	u32 GetTotalFrames() const
-	{ return m_TotalFrames; }
+	void GetTimeRange(u32* from, u32* to);
 
 	void ConvertToUserUnits(Vector3& Value) const;
 	void ConvertFromUserUnits(Vector3& Value) const;
-	void GetArrays(lcPiece** ppPiece, lcCamera** ppCamera, lcLight** ppLight)
-	{
-		*ppPiece = m_Pieces;
-		*ppCamera = m_Cameras;
-		*ppLight = m_Lights;
-	}
 
 	void UpdateInterface();
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
@@ -156,10 +140,9 @@ public:
 		{ return m_ActiveView; }
 	bool SetActiveView(View* view);
 
-	// Objects
-	lcPiece* m_Pieces;
-	lcCamera* m_Cameras;
-	lcLight* m_Lights;
+public:
+	lcModel* m_ActiveModel;
+	lcPtrArray<lcModel> m_ModelList;
 
 // Implementation
 protected:
@@ -188,6 +171,10 @@ protected:
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
+
+	void AddModel(lcModel* Model);
+	void DeleteModel(lcModel* Model);
+	void SetActiveModel(lcModel* Model);
 
 	void AddPiece(lcPiece* pPiece);
 	void RemovePiece(lcPiece* pPiece);
@@ -279,8 +266,6 @@ protected:
 	bool m_Animation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
-	u32 m_CurTime;
-	u32 m_TotalFrames;
 
 	unsigned long m_nScene;
 	unsigned long m_nDetail;

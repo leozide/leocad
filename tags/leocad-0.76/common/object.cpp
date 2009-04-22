@@ -11,6 +11,7 @@
 #include "matrix.h"
 #include "file.h"
 #include "lc_application.h"
+#include "lc_model.h"
 
 #define LC_KEY_SAVE_VERSION 2 // LeoCAD 0.76
 
@@ -290,14 +291,13 @@ void lcObject::CalculateSingleKey(u32 Time, bool Animation, int KeyType, float* 
 void lcObject::InsertTime(u32 Start, u32 Time)
 {
 	LC_OBJECT_KEY *node, *prev = NULL;
-	unsigned short last;
 	bool end[32];
 	int i;
 
 	for (i = 0; i < m_nKeyInfoCount; i++)
 		end[i] = false;
 
-	last = lcGetActiveProject()->GetTotalFrames();
+	u32 last = lcGetActiveProject()->IsAnimation() ? lcGetActiveProject()->m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX;
 
 	for (node = m_Keys; node != NULL; prev = node, node = node->Next)
 	{

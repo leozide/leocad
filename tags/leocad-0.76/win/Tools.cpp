@@ -7,6 +7,7 @@
 #include "PrefSht.h"
 #include "lc_application.h"
 #include "lc_colors.h"
+#include "lc_model.h"
 #include <math.h>
 #include <shlobj.h>
 #include "lc_mesh.h"
@@ -446,7 +447,7 @@ void Export3DStudio()
 	lcPiece* pPiece;
 	int objcount = 0;
 	u32* facemats = new u32[lcNumColors];
-	for (pPiece = project->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	for (pPiece = project->m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
 		// MESH OBJECT
 		mesh3ds *mobj = NULL;

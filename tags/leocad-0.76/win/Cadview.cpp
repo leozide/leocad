@@ -288,7 +288,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	View view(project, project->m_ActiveView);
 	view.OnSize(tw, th);
-	view.SetCamera(project->GetCamera(LC_CAMERA_MAIN));
+	view.SetCamera(project->m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
 
 	for (int r = 0; r < rows; r++)
 	for (int c = 0; c < cols; c++)

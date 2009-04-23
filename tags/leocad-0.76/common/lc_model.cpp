@@ -98,24 +98,24 @@ void lcModel::Update(u32 Time)
 	for (lcObject* Light = m_Lights; Light; Light = Light->m_Next)
 		Light->Update(Time);
 }
-
+*/
 bool lcModel::AnyObjectsSelected() const
 {
-	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		if (Piece->IsSelected())
 			return true;
 
-	for (lcObject* Camera = m_Cameras; Camera; Camera = Camera->m_Next)
-		if (Camera->IsSelected() || (Camera->m_Children && Camera->m_Children->IsSelected()))
+	for (lcCamera* Camera = m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+		if (Camera->IsEyeSelected() || Camera->IsTargetSelected())
 			return true;
 
-	for (lcObject* Light = m_Lights; Light; Light = Light->m_Next)
-		if (Light->IsSelected() || (Light->m_Children && Light->m_Children->IsSelected()))
+	for (lcLight* Light = m_Lights; Light; Light = (lcLight*)Light->m_Next)
+		if (Light->IsEyeSelected() || Light->IsTargetSelected())
 			return true;
 
 	return false;
 }
-
+/*
 void lcModel::AddPiece(lcPieceObject* NewPiece)
 {
 	lcObject* Prev = NULL;
@@ -165,16 +165,16 @@ void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color)
 {
 	// fixme inline
 }
-
+*/
 bool lcModel::AnyPiecesSelected() const
 {
-	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		if ((Piece->IsVisible(m_CurFrame)) && Piece->IsSelected())
 			return true;
 
 	return false;
 }
-
+/*
 void lcModel::SelectAllPieces(bool Select)
 {
 	for (lcObject* Piece = m_Pieces; Piece; Piece = Piece->m_Next)
@@ -246,7 +246,7 @@ void lcModel::AddCamera(lcCamera* Camera)
 
 	Camera->m_Next = NULL;
 }
-
+*/
 void lcModel::ResetCameras()
 {
 	// Delete all cameras.
@@ -258,6 +258,15 @@ void lcModel::ResetCameras()
 	}
 
 	// Create new default cameras.
+	lcCamera* Camera = NULL;
+	for (int i = 0; i < 7; i++)
+	{
+		Camera = new lcCamera(i, Camera);
+		if (m_Cameras == NULL)
+			m_Cameras = Camera;
+	}
+
+/*
 	lcObject* Last = NULL;
 	for (int i = 0; i < LC_CAMERA_USER; i++)
 	{
@@ -272,6 +281,7 @@ void lcModel::ResetCameras()
 
 		Last = Camera;
 	}
+*/
 }
 
 lcCamera* lcModel::GetCamera(int Index) const
@@ -292,7 +302,7 @@ lcCamera* lcModel::GetCamera(const char* Name) const
 
 	return NULL;
 }
-
+/*
 void lcModel::AddLight(lcLight* Light)
 {
 	if (!m_Lights)

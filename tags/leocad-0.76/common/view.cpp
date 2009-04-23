@@ -9,12 +9,13 @@
 #include "project.h"
 #include "camera.h"
 #include "system.h"
+#include "lc_model.h"
 
 View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
-	m_Camera = pProject->GetCamera(LC_CAMERA_MAIN);
+	m_Camera = pProject->m_ActiveModel->GetCamera(LC_CAMERA_MAIN);
 }
 
 View::~View()
@@ -203,10 +204,10 @@ void View::SetCamera(lcCamera* Camera)
 
 void View::UpdateCamera()
 {
-	lcCamera* Camera = m_Project->GetCamera(m_CameraName);
+	lcCamera* Camera = m_Project->m_ActiveModel->GetCamera(m_CameraName);
 
 	if (!Camera)
-		Camera = m_Project->GetCamera(LC_CAMERA_MAIN);
+		Camera = m_Project->m_ActiveModel->GetCamera(LC_CAMERA_MAIN);
 
 	m_Camera = Camera;
 	m_CameraName = m_Camera->m_Name;

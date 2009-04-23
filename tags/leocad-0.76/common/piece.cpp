@@ -43,7 +43,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	m_Next = NULL;
 	m_PieceInfo = pPieceInfo;
 	m_nState = 0;
-	m_nColor = 0;
+	m_Color = 0;
 	m_TimeShow = 1;
 	m_TimeHide = LC_OBJECT_TIME_MAX;
 	m_Name = "";
@@ -76,7 +76,7 @@ void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 	m_PieceInfo->AddRef();
 }
 
-bool lcPiece::FileLoad (File& file, char* name)
+bool lcPiece::FileLoad(File& file, char* name)
 {
   unsigned char version, ch;
 
@@ -183,15 +183,30 @@ bool lcPiece::FileLoad (File& file, char* name)
     }
   }
 
-  // Common to all versions.
-  file.Read (name, 9);
-  file.ReadByte (&m_nColor, 1); // TODO: fix colors to new mapping in 0.76
+	// Common to all versions.
+	file.Read(name, 9);
+	if (version < 10)
+	{
+		u8 Color;
+		file.ReadByte(&Color, 1);
 
-  if (version < 5)
-  {
-    const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 }; // TODO: fix colors to new mapping in 0.76
-    m_nColor = conv[m_nColor];
-  }
+		if (version < 5)
+		{
+			// Convert from the old values to the 0.75 colors.
+			const int ColorTable[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
+			Color = ColorTable[Color];
+		}
+
+		// Convert from 0.75 to LDraw.
+		const int ColorTable[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+		m_Color = lcConvertLDrawColor(ColorTable[Color]);
+	}
+	else
+	{
+		u32 Color;
+		file.ReadLong(&Color, 1);
+		m_Color = lcConvertLDrawColor(Color);
+	}
 
   u8 step;
   file.ReadByte(&step, 1);
@@ -266,7 +281,7 @@ void lcPiece::FileSave (File& file, Group* pGroups)
   lcObject::FileSave (file);
 
   file.Write(m_PieceInfo->m_strName, 9);
-  file.WriteLong(&m_nColor, 1); // TODO: fix color index to new tables in 0.76
+  file.WriteLong(&g_ColorList[m_Color].Code, 1);
   file.WriteLong(&m_TimeShow, 1);
   file.WriteLong(&m_TimeHide, 1);
 
@@ -295,7 +310,7 @@ void lcPiece::FileSave (File& file, Group* pGroups)
 void lcPiece::Initialize(float x, float y, float z, u32 Time, int Color)
 {
   m_TimeShow = Time;
-  m_nColor = Color;
+  m_Color = Color;
 
   float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
   ChangeKey(1, true, pos, LC_PK_POSITION);
@@ -584,7 +599,7 @@ void lcPiece::RenderBox(bool bHilite, float fLineWidth)
 	else
 #endif
 	{
-		lcSetColor(m_nColor);
+		lcSetColor(m_Color);
 		m_PieceInfo->RenderBox();
 	}
 	glPopMatrix();
@@ -595,7 +610,7 @@ void lcPiece::Render(bool bLighting, bool bEdges)
 	glPushMatrix();
 	glMultMatrixf(m_ModelWorld);
 
-	m_PieceInfo->m_Mesh->Render(m_nColor, IsSelected(), IsFocused());
+	m_PieceInfo->m_Mesh->Render(m_Color, IsSelected(), IsFocused());
 
 	glPopMatrix();
 }

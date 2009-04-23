@@ -32,4 +32,14 @@ inline void lcSetColor(int Index)
 	glColor4f(g_ColorList[Index].Value[0], g_ColorList[Index].Value[1], g_ColorList[Index].Value[2], g_ColorList[Index].Value[3]);
 }
 
+// Convert a color from LDraw to LeoCAD.
+inline int lcConvertLDrawColor(int Color)
+{
+	for (int i = 0; i < lcNumColors; i++)
+		if (g_ColorList[i].Code == Color)
+			return i;
+
+	return 0; // black
+}
+
 #endif // _LC_COLORS_H_

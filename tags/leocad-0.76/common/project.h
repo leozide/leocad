@@ -102,10 +102,6 @@ public:
 	const Vector3& GetOverlayCenter() const
 		{ return m_OverlayCenter; }
 
-	// Retrieve a pointer to an existing camera.
-	lcCamera* GetCamera(int Index) const;
-	lcCamera* GetCamera(const char* Name) const;
-
 	void GetTimeRange(u32* from, u32* to);
 
 	void ConvertToUserUnits(Vector3& Value) const;

@@ -290,13 +290,7 @@ void Project::LoadDefaults(bool cameras)
 
 	if (cameras)
 	{
-		lcCamera* pCam;
-		for (pCam = NULL, i = 0; i < 7; i++)
-		{
-			pCam = new lcCamera(i, pCam);
-			if (m_ActiveModel->m_Cameras == NULL)
-				m_ActiveModel->m_Cameras = pCam;
-		}
+		m_ActiveModel->ResetCameras();
 
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
 			m_ViewList[i]->UpdateCamera();
@@ -351,13 +345,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	if (fv < 0.6f)
 	{
 		// Old view format, ignore it.
-		lcCamera* pCam;
-		for (pCam = NULL, i = 0; i < 7; i++)
-		{
-			pCam = new lcCamera(i, pCam);
-			if (m_ActiveModel->m_Cameras == NULL)
-				m_ActiveModel->m_Cameras = pCam;
-		}
+		m_ActiveModel->ResetCameras();
 
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
 			m_ViewList[i]->UpdateCamera();
@@ -365,12 +353,6 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		double eye[3], target[3];
 		file->ReadDouble(&eye, 3);
 		file->ReadDouble(&target, 3);
-		float tmp[3] = { (float)eye[0], (float)eye[1], (float)eye[2] };
-		pCam->ChangeKey(1, false, tmp, LC_CK_EYE);
-		tmp[0] = (float)target[0]; tmp[1] = (float)target[1]; tmp[2] = (float)target[2];
-		pCam->ChangeKey(1, false, tmp, LC_CK_TARGET);
-		float roll = 0;
-		pCam->ChangeKey(1, false, &roll, LC_CK_ROLL);
 	}
 
 	if (bMerge)
@@ -436,7 +418,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			file->ReadByte (&step, 1);
 			file->ReadByte (&group, 1);
 
-			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
+			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 }; // TODO: fix color mapping to new 0.76 colors
 			color = conv[color];
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(name);
@@ -634,7 +616,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadLong (&i, 1);
 
 				if (m_ViewList.GetSize() > count)
-					m_ViewList[count]->SetCamera(GetCamera(i));
+					m_ViewList[count]->SetCamera(m_ActiveModel->GetCamera(i));
 			}
 
 			file->ReadLong (&rgb, 1);
@@ -977,11 +959,11 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				continue;
 			}
 
-			if (Token == "!LEOCAD")
+			if (Token == "!MLCAD")
 			{
 				Token = GetToken(ptr);
 
-				if (Token == "HIDDEN")
+				if (Token == "HIDE")
 				{
 					PieceHidden = true;
 					LineType = GetToken(ptr);
@@ -1009,7 +991,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			if (color == 16) 
 				cl = DefColor;
 			else
-				cl = ConvertColor(color);
+				cl = lcConvertLDrawColor(color);
 
 			strcpy(pn, tmp);
 			ptr = strrchr(tmp, '.');
@@ -1183,7 +1165,6 @@ bool Project::DoSave(char* PathName, bool bReplace)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		const int col[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
 		lcPiece* pPiece;
 		int i, steps = GetLastStep();
 		char buf[256], *ptr;
@@ -1225,7 +1206,7 @@ bool Project::DoSave(char* PathName, bool bReplace)
 				Matrix mat(pPiece->m_AxisAngle, pPiece->m_Position);
 				mat.ToLDraw(f);
 				sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-				        col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->m_PieceInfo->m_strName);
+					g_ColorList[pPiece->m_Color].Code, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->m_PieceInfo->m_strName);
 				file.Write(buf, strlen(buf));
 			}
 
@@ -1931,7 +1912,7 @@ void Project::RenderScene(View* view, bool bShaded, bool bDrawViewports)
 		{
 			if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
 			{
-				if (!LC_COLOR_TRANSLUCENT(pPiece->GetColor()))
+				if (!LC_COLOR_TRANSLUCENT(pPiece->m_Color))
 				{
 					if (pPiece->IsSelected())
 					{
@@ -3060,30 +3041,10 @@ void Project::GetTimeRange(u32* from, u32* to)
 
 void Project::AddPiece(lcPiece* pPiece)
 {
-/*
-// Sort piece array to avoid OpenGL state changes (needs work)
-void CCADDoc::AddPiece(CPiece* pNewPiece)
-{
-	POSITION pos1, pos2;
-
-	for (pos1 = m_Pieces.GetHeadPosition(); (pos2 = pos1) != NULL;)
-	{
-		CPiece* pPiece = m_Pieces.GetNext(pos1);
-		if (pPiece->IsTransparent())
-			break;
-	}
-
-	if (pos2 == NULL || pNewPiece->IsTransparent())
-		m_Pieces.AddTail(pNewPiece);
-	else
-		m_Pieces.InsertBefore(pos2, pNewPiece);
-}
-*/
 	if (m_ActiveModel->m_Pieces != NULL)
 	{
 		pPiece->m_Next = m_ActiveModel->m_Pieces;
 		m_ActiveModel->m_Pieces = pPiece;
-	// TODO: sorting and BSP
 	}
 	else
 	{
@@ -3107,8 +3068,6 @@ void Project::RemovePiece(lcPiece* pPiece)
 
 			break;
 		}
-
-	// TODO: remove from BSP
 }
 
 void Project::CalculateStep()
@@ -3388,7 +3347,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 
 	View view(this, m_ActiveView);
 	view.OnSize(width, height);
-	view.SetCamera(GetCamera(LC_CAMERA_MAIN));
+	view.SetCamera(m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
 
 	if (!hilite)
 		SelectAndFocusNone(false);
@@ -3430,7 +3389,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
 		if ((pPiece->GetTimeShow() == nStep) || (nStep == 0))
-			col[pPiece->GetColor()]++;
+			col[pPiece->m_Color]++;
 	}
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
 
@@ -3455,7 +3414,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 		{
 			if ((pPiece->m_PieceInfo == pInfo) && ((pPiece->GetTimeShow() == nStep) || (nStep == 0)))
 			{
-				count [pPiece->GetColor()]++;
+				count [pPiece->m_Color]++;
 				Add = true;
 			}
 		}
@@ -3533,8 +3492,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				Piece->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Rot, LC_PK_ROTATION);
 			}
 
-			Piece->SetTimeShow(mod->from);
-			Piece->SetTimeHide(mod->to);
+			Piece->m_TimeShow = mod->from;
+			Piece->m_TimeHide = mod->to;
 
 			if (mod->hidden)
 				Piece->Hide();
@@ -3542,7 +3501,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				Piece->UnHide();
 
 			Piece->m_Name = mod->name;
-			Piece->SetColor(mod->color);
+			Piece->m_Color = mod->color;
 			Piece->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 			SetModifiedFlag(true);
@@ -3570,6 +3529,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			if (Camera->m_Roll != mod->Roll)
 				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, &mod->Roll, LC_CK_ROLL);
 
+			Camera->m_Name = mod->name;
 			Camera->m_FOV = mod->fovy;
 			Camera->m_NearDist = mod->znear;
 			Camera->m_FarDist = mod->zfar;
@@ -4313,7 +4273,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				else
 				{
 					strcpy (name, &conv[idx*9]);
-					if (LC_COLOR_TRANSLUCENT(pPiece->GetColor()))
+					if (LC_COLOR_TRANSLUCENT(pPiece->m_Color))
 						strcat(name, "_clear");			
 				}
 
@@ -4326,12 +4286,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					fprintf (f, "merge {\n object {\n  %s\n  texture { lg_%s }\n }\n"
 						 " object {\n  %s_slope\n  texture { lg_%s normal { bumps 0.3 scale 0.02 } }\n }\n"
 						 " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-						name, lg_colors[pPiece->GetColor()], &conv[idx*9], lg_colors[pPiece->GetColor()],
+						name, lg_colors[pPiece->m_Color], &conv[idx*9], lg_colors[pPiece->m_Color],
 						 -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
 						 -fl[10], -fl[4], fl[7], Position[1], Position[0], Position[2]);
 				else
 					fprintf(f, "object {\n %s\n texture { lg_%s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-						name, lg_colors[pPiece->GetColor()], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
+						name, lg_colors[pPiece->m_Color], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
 						-fl[10], -fl[4], fl[7], Position[1], Position[0], Position[2]);
 			}
 			fclose (f);
@@ -4463,7 +4423,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						buf[i] = '_';
 
 				fprintf(stream, "g %s\n", buf);
-				pPiece->m_PieceInfo->WriteWavefront(stream, pPiece->GetColor(), &vert);
+				pPiece->m_PieceInfo->WriteWavefront(stream, pPiece->m_Color, &vert);
 			}
 
 			fclose(stream);
@@ -4544,7 +4504,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (lcPiece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
 				int idx = lcGetPiecesLibrary()->GetPieceIndex(pPiece->m_PieceInfo);
-				opts.PiecesUsed[idx*lcNumUserColors+pPiece->GetColor()]++;
+				opts.PiecesUsed[idx*lcNumUserColors+pPiece->m_Color]++;
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -5201,7 +5161,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							else
 								pLast = pFirst = new lcPiece(pPiece->m_PieceInfo);
 
-							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_ActiveModel->m_CurFrame, pPiece->GetColor());
+							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_ActiveModel->m_CurFrame, pPiece->m_Color);
 							pLast->ChangeKey(1, false, param, LC_PK_ROTATION);
 						}
 
@@ -5220,7 +5180,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								else
 									pLast = pFirst = new lcPiece(pPiece->m_PieceInfo);
 
-								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2], m_ActiveModel->m_CurFrame, pPiece->GetColor());
+								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2], m_ActiveModel->m_CurFrame, pPiece->m_Color);
 								pLast->ChangeKey(1, false, param, LC_PK_ROTATION);
 							}
 
@@ -5237,7 +5197,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								else
 									pLast = pFirst = new lcPiece(pPiece->m_PieceInfo);
 
-								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_ActiveModel->m_CurFrame, pPiece->GetColor());
+								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_ActiveModel->m_CurFrame, pPiece->m_Color);
 								pLast->ChangeKey(1, false, param, LC_PK_ROTATION);
 							}
 						}
@@ -5899,22 +5859,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_RESET:
 		{
-			lcCamera* pCamera;
-			int i;
-
-			while (m_ActiveModel->m_Cameras)
-			{
-				pCamera = m_ActiveModel->m_Cameras;
-				m_ActiveModel->m_Cameras = (lcCamera*)m_ActiveModel->m_Cameras->m_Next;
-				delete pCamera;
-			}
-
-			for (m_ActiveModel->m_Cameras = pCamera = NULL, i = 0; i < 7; i++)
-			{
-				pCamera = new lcCamera(i, pCamera);
-				if (m_ActiveModel->m_Cameras == NULL)
-					m_ActiveModel->m_Cameras = pCamera;
-			}
+			m_ActiveModel->ResetCameras();
 
 			for (int i = 0; i < m_ViewList.GetSize(); i++)
 				m_ViewList[i]->UpdateCamera();
@@ -6388,24 +6333,6 @@ bool Project::GetSelectionCenter(Vector3& Center) const
 	Center = Box.GetCenter();
 
 	return Selected;
-}
-
-lcCamera* Project::GetCamera(int i) const
-{
-	lcCamera* pCamera;
-
-	for (pCamera = m_ActiveModel->m_Cameras; i-- > 0 && pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-		;
-	return pCamera;
-}
-
-lcCamera* Project::GetCamera(const char* Name) const
-{
-	for (lcCamera* Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
-		if (Camera->m_Name == Name)
-			return (lcCamera*)Camera;
-
-	return NULL;
 }
 
 void Project::ConvertToUserUnits(Vector3& Value) const
@@ -7182,7 +7109,6 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Sna
 			Vector3 Distance = Pos - Center;
 
 			Quaternion LocalToWorld = QuaternionFromAxisAngle(Rot);
-
 			Quaternion NewLocalToWorld;
 
 			if (Focus != NULL)
@@ -7817,10 +7743,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			{
 				lcPiece* pPiece = (lcPiece*)Object;
 
-				if (pPiece->GetColor() != g_App->m_SelectedColor)
+				if (pPiece->m_Color != g_App->m_SelectedColor)
 				{
-					bool bTrans = LC_COLOR_TRANSLUCENT(pPiece->GetColor());
-					pPiece->SetColor(g_App->m_SelectedColor);
+					bool bTrans = LC_COLOR_TRANSLUCENT(pPiece->m_Color);
+					pPiece->m_Color = g_App->m_SelectedColor;
 
 					SetModifiedFlag(true);
 					CheckPoint("Painting");
@@ -7895,6 +7821,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			int count = 0;
 			lcLight* Light;
 
+			// TODO: Warn user that the maximum light count was reached but still add the light anyway.
 			glGetIntegerv(GL_MAX_LIGHTS, &max);
 			for (Light = m_ActiveModel->m_Lights; Light; Light = (lcLight*)Light->m_Next)
 				count++;
@@ -7983,6 +7910,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				{
 					StartTracking(LC_TRACK_START_LEFT);
 					m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
+					m_MouseSnapLeftover = Vector3(0.0f, 0.0f, 0.0f);
 					break;
 				}
 			}
@@ -8109,49 +8037,20 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	{
 		case LC_ACTION_MOVE:
 		{
-			bool sel = false;
-
-			for (lcPiece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-
-			if (!sel)
-			for (lcCamera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-				if (pCamera->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-
-			if (!sel)
-			for (lcLight* pLight = m_ActiveModel->m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-				if (pLight->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-
-			if (sel)
-      {
+			if (m_ActiveModel->AnyObjectsSelected())
+			{
 				StartTracking(LC_TRACK_START_RIGHT);
-        m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
-      }
+				m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
+ 			}
 		} break;
 
 		case LC_ACTION_ROTATE:
 		{
-			lcPiece* pPiece;
-
-			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
-				{
-					StartTracking(LC_TRACK_START_RIGHT);
-					m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
-					break;
-				}
+			if (m_ActiveModel->AnyPiecesSelected())
+			{
+				StartTracking(LC_TRACK_START_RIGHT);
+				m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
+			}
 		} break;
 	}
 }
@@ -8227,10 +8126,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 			
-			lcLight* pLight = m_ActiveModel->m_Lights;
+			lcLight* Light = m_ActiveModel->m_Lights;
 
-			pLight->Move(1, false, Delta);
-			pLight->UpdatePosition(1);
+			Light->Move(1, false, Delta);
+			Light->UpdatePosition(1);
 
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -9632,7 +9531,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 	// account bounding box information
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
-		unsigned char color = pPiece->GetColor();
+		u32 color = pPiece->m_Color;
 		PieceInfo *pInfo = pPiece->m_PieceInfo;
 		for (int j = 0; j < allGroups.GetSize(); j++)
 		{
@@ -9668,7 +9567,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 			if (handleAsGroup(pPiece, allGroups[j]))
 			{				
 				PieceInfo* pInfo = pPiece->m_PieceInfo;
-				unsigned char color = pPiece->GetColor();
+				u32 color = pPiece->m_Color;
 			
 				strcpy(buf, pPiece->m_Name);
 				for (unsigned int i = 0; i < strlen(buf); i++)

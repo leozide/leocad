@@ -578,19 +578,18 @@ void CModifyPieceDlg::UpdateInfo(lcPiece* piece)
 		m_PosZ = Pos[2];
 
 		// Rotation.
-		Matrix33 RotMat = MatrixFromAxisAngle(piece->m_AxisAngle);
-		Vector3 Rot = MatrixToEulerAngles(RotMat) * LC_RTOD;
+		Vector3 Rot = MatrixToEulerAngles(piece->m_ModelWorld) * LC_RTOD;
 
 		m_RotX = Rot[0];
 		m_RotY = Rot[1];
 		m_RotZ = Rot[2];
 
 		// Steps.
-		m_From = piece->GetTimeShow();
-		m_To = piece->GetTimeHide();
+		m_From = piece->m_TimeShow;
+		m_To = piece->m_TimeHide;
 
 		m_Hidden = piece->IsHidden();
-		m_Color.SetColorIndex(piece->GetColor());
+		m_Color.SetColorIndex(piece->m_Color);
 	}
 
 	UpdateData(FALSE);

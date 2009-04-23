@@ -38,16 +38,6 @@ static float costbl[SIDES];
 #define LC_KNOB_RADIUS 0.32f
 //#define LC_STUD_TECH_RADIUS (LC_FLAT_HEIGHT/2)
 
-// Convert a color from LDraw to LeoCAD
-unsigned char ConvertColor(int c)
-{
-	for (int i = 0; i < lcNumColors; i++)
-		if (g_ColorList[i].Code == c)
-			return i;
-
-	return 0; // black
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // PieceInfo construction/destruction
 
@@ -190,7 +180,7 @@ static void WriteMeshDrawInfo(u8*& Data, lcMeshEditor<D>& MeshEdit, DRAWGROUP* G
 
 	for (int Color = 0; Color < NumColors; Color++)
 	{
-		int ColorIndex = ConvertColor(EndianSwap(*SrcPtr));
+		int ColorIndex = lcConvertLDrawColor(EndianSwap(*SrcPtr));
 		SrcPtr++;
 
 		int NumQuads = EndianSwap(*SrcPtr);
@@ -525,7 +515,7 @@ void PieceInfo::LoadInformation()
 	{
 		char name[9];
 		TEXTURE* tex = &m_pTextures[sh];
-		tex->color = ConvertColor(*bytes);
+		tex->color = lcConvertLDrawColor(*bytes);
 		bytes++;
 
 		strcpy(name, (char*)bytes);
@@ -582,7 +572,7 @@ void PieceInfo::LoadInformation()
 
 					while (colors--)
 					{
-						int color = ConvertColor(LCUINT32(*p));
+						int color = lcConvertLDrawColor(LCUINT32(*p));
 						p++;
 
 						SectionIndices[color*2] += LCUINT32(*p) / 4 * 6;
@@ -606,7 +596,7 @@ void PieceInfo::LoadInformation()
 
 					while (colors--)
 					{
-						int color = ConvertColor(LCUINT16(*p));
+						int color = lcConvertLDrawColor(LCUINT16(*p));
 						p++;
 
 						SectionIndices[color*2] += LCUINT16(*p) / 4 * 6;
@@ -625,7 +615,7 @@ void PieceInfo::LoadInformation()
 
 			if ((*bytes == LC_STUD) || (*bytes == LC_STUD3))
 			{
-				int color = ConvertColor(*(bytes+1));
+				int color = lcConvertLDrawColor(*(bytes+1));
 				verts += (2*SIDES)+1;
 				SectionIndices[color*2] += 9*SIDES;
 				SectionIndices[LC_COLOR_EDGE*2+1] += 4*SIDES;
@@ -634,7 +624,7 @@ void PieceInfo::LoadInformation()
 
 			if ((*bytes == LC_STUD2) || (*bytes == LC_STUD4))
 			{
-				int color = ConvertColor(*(bytes+1));
+				int color = lcConvertLDrawColor(*(bytes+1));
 				verts += 4*SIDES;
 				SectionIndices[color*2] += 18*SIDES;
 				SectionIndices[LC_COLOR_EDGE*2+1] += 8*SIDES;
@@ -758,7 +748,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 
 		case LC_STUD:
 			{
-				u16 color = ConvertColor(*(bytes+1));
+				u16 color = lcConvertLDrawColor(*(bytes+1));
 				float* MatFloats = (float*)(bytes+2);
 
 				// Read matrix.
@@ -778,7 +768,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 
 		case LC_STUD2:
 			{
-				u16 color = ConvertColor(*(bytes+1));
+				u16 color = lcConvertLDrawColor(*(bytes+1));
 				float* MatFloats = (float*)(bytes+2);
 
 				// Read matrix.
@@ -798,7 +788,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 
 		case LC_STUD3:
 			{
-				u16 color = ConvertColor(*(bytes+1));
+				u16 color = lcConvertLDrawColor(*(bytes+1));
 				float* MatFloats = (float*)(bytes+2);
 
 				// Read matrix.
@@ -818,7 +808,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 
 		case LC_STUD4:
 			{
-				u16 color = ConvertColor(*(bytes+1));
+				u16 color = lcConvertLDrawColor(*(bytes+1));
 				float* MatFloats = (float*)(bytes+2);
 
 				// Read matrix.

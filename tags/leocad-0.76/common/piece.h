@@ -73,10 +73,6 @@ public:
 		{ m_pGroup = pGroup; }
 	Group* GetGroup()
 		{ return m_pGroup; }
-	const unsigned char GetColor()
-		{ return m_nColor; }
-	void SetColor(unsigned char color)
-		{ m_nColor = color; }
 	void SetTimeShow(u32 Time)
 		{ m_TimeShow = Time; }
 	u32 GetTimeShow() const
@@ -97,7 +93,7 @@ public:
 	u32 m_TimeShow;
 	u32 m_TimeHide;
 
-	int m_nColor;
+	u32 m_Color;
 	unsigned char m_nState;
 
 	// Temporary variables

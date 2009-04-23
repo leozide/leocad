@@ -17,6 +17,7 @@
 #include "Print.h"
 #include "view.h"
 #include "lc_application.h"
+#include "lc_model.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -659,7 +660,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		lcCamera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
+		lcCamera* pCamera = lcGetActiveProject()->m_ActiveModel->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
 		rMessage += pCamera->m_Name;
 		rMessage += "\"";
@@ -1651,7 +1652,7 @@ void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
 
 		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CCADView)));
 
-		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->GetCamera(name));
+		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->m_ActiveModel->GetCamera(name));
 
 		return;
 	}

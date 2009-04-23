@@ -32,7 +32,7 @@ public:
 //	void Update(u32 Time);
 
 	// Return true if any objects are currently selected.
-//	bool AnyObjectsSelected() const;
+	bool AnyObjectsSelected() const;
 
 	// Add a piece to this model.
 //	void AddPiece(lcPieceObject* NewPiece);
@@ -44,7 +44,7 @@ public:
 //	void InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color);
 
 	// Return true if any pieces are currently selected.
-//	bool AnyPiecesSelected() const;
+	bool AnyPiecesSelected() const;
 
 	// Select/Deselect all pieces.
 //	void SelectAllPieces(bool Select = true);
@@ -68,11 +68,11 @@ public:
 //	void AddCamera(lcCamera* Camera);
 
 	// Delete all existing cameras and create new default ones.
-//	void ResetCameras();
+	void ResetCameras();
 
 	// Retrieve a pointer to an existing camera.
-//	lcCamera* GetCamera(int Index) const;
-//	lcCamera* GetCamera(const char* Name) const;
+	lcCamera* GetCamera(int Index) const;
+	lcCamera* GetCamera(const char* Name) const;
 
 	// Adds a light to this model.
 //	void AddLight(lcLight* Light);

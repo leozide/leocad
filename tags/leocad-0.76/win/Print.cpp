@@ -429,8 +429,8 @@ static void PrintPiecesThread(void* pv)
 	for (lcPiece* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
 	{
 		int idx = pLib->GetPieceIndex(tmp->m_PieceInfo);
-		pieces[(idx*28)+tmp->GetColor()]++;
-		col[tmp->GetColor()]++;
+		pieces[(idx*28)+tmp->m_Color]++;
+		col[tmp->m_Color]++;
 	}
 
 	int rows = 0, cols = 1, i, j;

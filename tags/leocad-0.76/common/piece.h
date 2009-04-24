@@ -42,7 +42,6 @@ public:
 
 
 
-	lcPiece* m_pLink;
 
 	void Hide()
 		{ m_nState = LC_PIECE_HIDDEN; }

@@ -115,8 +115,8 @@ bool lcModel::AnyObjectsSelected() const
 
 	return false;
 }
-/*
-void lcModel::AddPiece(lcPieceObject* NewPiece)
+
+void lcModel::AddPiece(lcPiece* NewPiece)
 {
 	lcObject* Prev = NULL;
 	lcObject* Next = m_Pieces;
@@ -139,7 +139,7 @@ void lcModel::AddPiece(lcPieceObject* NewPiece)
 		m_Pieces = NewPiece;
 }
 
-void lcModel::RemovePiece(lcPieceObject* Piece)
+void lcModel::RemovePiece(lcPiece* Piece)
 {
 	lcObject* Next = m_Pieces;
 	lcObject* Prev = NULL;
@@ -151,7 +151,7 @@ void lcModel::RemovePiece(lcPieceObject* Piece)
 			if (Prev != NULL)
 				Prev->m_Next = Piece->m_Next;
 			else
-				m_Pieces = (lcPieceObject*)Piece->m_Next;
+				m_Pieces = (lcPiece*)Piece->m_Next;
 
 			break;
 		}
@@ -160,7 +160,7 @@ void lcModel::RemovePiece(lcPieceObject* Piece)
 		Next = Next->m_Next;
 	}
 }
-
+/*
 void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color)
 {
 	// fixme inline
@@ -231,7 +231,7 @@ bool lcModel::RemoveSelectedPieces()
 
 	return Deleted;
 }
-
+*/
 void lcModel::AddCamera(lcCamera* Camera)
 {
 	lcObject* LastCamera = m_Cameras;
@@ -246,7 +246,7 @@ void lcModel::AddCamera(lcCamera* Camera)
 
 	Camera->m_Next = NULL;
 }
-*/
+
 void lcModel::ResetCameras()
 {
 	// Delete all cameras.
@@ -258,12 +258,11 @@ void lcModel::ResetCameras()
 	}
 
 	// Create new default cameras.
-	lcCamera* Camera = NULL;
 	for (int i = 0; i < 7; i++)
 	{
-		Camera = new lcCamera(i, Camera);
-		if (m_Cameras == NULL)
-			m_Cameras = Camera;
+		lcCamera* Camera = new lcCamera(i);
+
+		AddCamera(Camera);
 	}
 
 /*

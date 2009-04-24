@@ -3,7 +3,6 @@
 
 #include "opengl.h"
 #include "defines.h"
-#include "matrix.h"
 #include "file.h"
 #include "lc_application.h"
 #include "lc_colors.h"
@@ -93,7 +92,7 @@ lcCamera::lcCamera()
 }
 
 // Start with a standard camera.
-lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
+lcCamera::lcCamera(unsigned char nType)
 	: lcObject(LC_OBJECT_CAMERA)
 {
 	if (nType > 7)
@@ -107,6 +106,7 @@ lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
 	Initialize();
 
 	ChangeKey(1, true, eyes[nType], LC_CK_EYE);
+	ChangeKey(1, true, Vector3(0, 0, 0), LC_CK_TARGET);
 	ChangeKey(1, true, &roll, LC_CK_ROLL);
 
 	m_Name = names[nType];
@@ -114,80 +114,32 @@ lcCamera::lcCamera(unsigned char nType, lcCamera* pPrev)
 		m_nState = LC_CAMERA_HIDDEN;
 	m_nType = nType;
 
-	if (pPrev)
-		pPrev->m_Next = this;
-
 	UpdatePosition(1);
 }
 
-// From OnMouseMove(), case LC_ACTION_ROTATE_VIEW
-lcCamera::lcCamera(const float *eye, const float *target, float roll, lcObject* pCamera)
+lcCamera::lcCamera(lcCamera* Camera)
 	: lcObject(LC_OBJECT_CAMERA)
 {
 	Initialize();
 
-	ChangeKey(1, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, &roll, LC_CK_ROLL);
-
-	int i, max = 0;
-
-	for (;;)
-	{
-		if (strncmp(pCamera->m_Name, "Camera ", 7) == 0)
-			if (sscanf(pCamera->m_Name, "Camera %d", &i) == 1)
-				if (i > max) 
-					max = i;
-
-		if (pCamera->m_Next == NULL)
-		{
-			char Name[256];
-			sprintf(Name, "Camera %d", max+1);
-			m_Name = Name;
-			pCamera->m_Next = this;
-			break;
-		}
-		else
-			pCamera = pCamera->m_Next;
-	}
+	ChangeKey(1, true, Camera->m_Position, LC_CK_EYE);
+	ChangeKey(1, true, Camera->m_TargetPosition, LC_CK_TARGET);
+	ChangeKey(1, true, &Camera->m_Roll, LC_CK_ROLL);
 
 	UpdatePosition(1);
 }
 
 // From LC_ACTION_CAMERA
-lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcObject* pCamera)
+lcCamera::lcCamera(const Vector3& Position, const Vector3& Target)
 	: lcObject(LC_OBJECT_CAMERA)
 {
 	Initialize();
 
-	float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
 	float roll = 0.0f;
 
-	ChangeKey(1, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, Position, LC_CK_EYE);
+	ChangeKey(1, true, Target, LC_CK_TARGET);
 	ChangeKey(1, true, &roll, LC_CK_ROLL);
-
-	int i, max = 0;
-
-	if (pCamera)
-		for (;;)
-		{
-			if (strncmp(pCamera->m_Name, "Camera ", 7) == 0)
-				if (sscanf(pCamera->m_Name, "Camera %d", &i) == 1)
-					if (i > max) 
-						max = i;
-
-			if (pCamera->m_Next == NULL)
-			{
-				char Name[256];
-				sprintf(Name, "Camera %d", max+1);
-				m_Name = Name;
-				pCamera->m_Next = this;
-				break;
-			}
-			else
-				pCamera = pCamera->m_Next;
-		}
 
 	UpdatePosition(1);
 }
@@ -268,11 +220,6 @@ bool lcCamera::FileLoad(File& file)
 		ChangeKey(1, true, f, LC_CK_TARGET);
 
 		file.ReadDouble(d, 3);
-		f[0] = (float)d[0];
-		f[1] = (float)d[1];
-		f[2] = (float)d[2];
-//		ChangeKey(1, false, true, f, LC_CK_UP);
-//		ChangeKey(1, true, true, f, LC_CK_UP);
 		float roll = 0.0f;
 		ChangeKey(1, true, &roll, LC_CK_ROLL);
 	}
@@ -292,9 +239,6 @@ bool lcCamera::FileLoad(File& file)
 			file.ReadDouble(up, 3);
 			file.ReadByte(&step, 1);
 
-			if (up[0] == 0 && up[1] == 0 && up[2] == 0)
-				up[2] = 1;
-
 			f[0] = (float)eye[0];
 			f[1] = (float)eye[1];
 			f[2] = (float)eye[2];
@@ -305,15 +249,10 @@ bool lcCamera::FileLoad(File& file)
 			f[2] = (float)target[2];
 			ChangeKey(step, true, f, LC_CK_TARGET);
 
-			f[0] = (float)up[0];
-			f[1] = (float)up[1];
-			f[2] = (float)up[2];
-//			ChangeKey(step, false, true, f, LC_CK_UP);
-//			ChangeKey(step, true, true, f, LC_CK_UP);
 			float roll = 0.0f;
 			ChangeKey(step, true, &roll, LC_CK_ROLL);
 
-			int snapshot; // BOOL under Windows
+			int snapshot;
 			int cam;
 			file.ReadLong(&snapshot, 1);
 			file.ReadLong(&cam, 1);
@@ -700,21 +639,6 @@ bool lcCamera::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 		Intersect = m_Target->IntersectsVolume(Planes, NumPlanes);
 
 	return Intersect;
-}
-
-void lcCamera::LoadProjection(float fAspect)
-{
-	if (m_pTR != NULL)
-		m_pTR->BeginTile();
-	else
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluPerspective(m_FOV, fAspect, m_NearDist, m_FarDist);
-	}
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(m_WorldView);
 }
 
 void lcCamera::Zoom(u32 Time, bool AddKey, int MouseX, int MouseY)

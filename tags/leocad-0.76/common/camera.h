@@ -62,9 +62,9 @@ class lcCamera : public lcObject
 {
 public:
 	lcCamera();
-	lcCamera(unsigned char nType, lcCamera* pPrev);
-	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz, lcObject* pCamera);
-	lcCamera(const float *eye, const float *target, float roll, lcObject* pCamera);
+	lcCamera(unsigned char nType);
+	lcCamera(const Vector3& Position, const Vector3& Target);
+	lcCamera(lcCamera* Camera);
 	virtual ~lcCamera();
 
 	// Base class implementation.
@@ -137,7 +137,6 @@ public:
 
 	void UpdatePosition(u32 Time);
 	void Render(float fLineWidth);
-	void LoadProjection(float fAspect);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);

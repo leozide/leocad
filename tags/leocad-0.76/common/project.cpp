@@ -397,7 +397,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				if (Piece->m_Name.GetLength() == 0)
 					Piece->CreateName(m_ActiveModel->m_Pieces);
 
-				AddPiece(Piece);
+				m_ActiveModel->AddPiece(Piece);
 				if (!bUndo)
 					SystemPieceComboAdd(pInfo->m_strDescription);
 			}
@@ -431,7 +431,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 				Piece->Initialize(pos[0], pos[1], pos[2], step, color);
 				Piece->CreateName(m_ActiveModel->m_Pieces);
-				AddPiece(Piece);
+				m_ActiveModel->AddPiece(Piece);
 				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
 				mat.ToAxisAngle(param);
 				Piece->ChangeKey(1, false, param, LC_PK_ROTATION);
@@ -588,9 +588,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			lcCamera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
-				pCam = new lcCamera(i, pCam);
-				if (m_ActiveModel->m_Cameras == NULL)
-					m_ActiveModel->m_Cameras = pCam;
+				pCam = new lcCamera(i);
+				m_ActiveModel->AddCamera(pCam);
 
 				if (i < 4 && fv == 0.6f)
 				{
@@ -601,7 +600,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			if (count < 7)
 			{
-				pCam = new lcCamera(0, NULL);
+				pCam = new lcCamera((unsigned char)0);
 				for (i = 0; i < count; i++)
 					pCam->FileLoad(*file);
 				delete pCam;
@@ -1017,7 +1016,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 					tmpmat.GetTranslation(&x, &y, &z);
 					Piece->Initialize(x, y, z, *nStep, cl);
 					Piece->CreateName(m_ActiveModel->m_Pieces);
-					AddPiece(Piece);
+					m_ActiveModel->AddPiece(Piece);
 					tmpmat.ToAxisAngle(rot);
 					Piece->ChangeKey(1, false, rot, LC_PK_ROTATION);
 					SystemPieceComboAdd(Info->m_strDescription);
@@ -3041,37 +3040,6 @@ void Project::GetTimeRange(u32* from, u32* to)
 	*to = m_Animation ? m_ActiveModel->m_TotalFrames : GetLastStep();
 }
 
-void Project::AddPiece(lcPiece* pPiece)
-{
-	if (m_ActiveModel->m_Pieces != NULL)
-	{
-		pPiece->m_Next = m_ActiveModel->m_Pieces;
-		m_ActiveModel->m_Pieces = pPiece;
-	}
-	else
-	{
-		m_ActiveModel->m_Pieces = pPiece;
-		pPiece->m_Next = NULL;
-	}
-}
-
-void Project::RemovePiece(lcPiece* pPiece)
-{
-	lcPiece* pTemp, *pLast;
-	pLast = NULL;
-
-	for (pTemp = m_ActiveModel->m_Pieces; pTemp; pLast = pTemp, pTemp = (lcPiece*)pTemp->m_Next)
-		if (pTemp == pPiece)
-		{
-			if (pLast != NULL)
-				pLast->m_Next = pTemp->m_Next;
-			else
-				m_ActiveModel->m_Pieces = (lcPiece*)pTemp->m_Next;
-
-			break;
-		}
-}
-
 void Project::CalculateStep()
 {
 	lcPiece* Piece;
@@ -3106,7 +3074,7 @@ bool Project::RemoveSelectedObjects()
 			Temp = (lcPiece*)Piece->m_Next;
 
 			Removed = true;
-			RemovePiece(Piece);
+			m_ActiveModel->RemovePiece(Piece);
 			delete Piece;
 			Piece = Temp;
 		}
@@ -4728,7 +4696,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPasted = (lcPiece*)pPasted->m_Next;
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
 				pPiece->m_TimeShow = m_ActiveModel->m_CurFrame;
-				AddPiece(pPiece);
+				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select(true, false, false);
 
 				j = (int)pPiece->GetGroup();
@@ -4788,7 +4756,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			while (i--)
 			{
-				pCamera = new lcCamera(8, pCamera);
+				pCamera = new lcCamera(8);
+				m_ActiveModel->AddCamera(pCamera);
 				pCamera->FileLoad(*file);
 				pCamera->Select(true, false, false);
 				pCamera->m_Target->Select(true, false, false);
@@ -4988,7 +4957,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			SelectAndFocusNone(false);
 			Piece->CreateName(m_ActiveModel->m_Pieces);
-			AddPiece(Piece);
+			m_ActiveModel->AddPiece(Piece);
 			Piece->Select (true, true, false);
 			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, Piece);
 			UpdateSelection();
@@ -5034,7 +5003,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					Piece->Initialize(Wizard.m_Position[i][0], Wizard.m_Position[i][1], Wizard.m_Position[i][2], m_ActiveModel->m_CurFrame, Wizard.m_Colors[i]);
 					Piece->CreateName(m_ActiveModel->m_Pieces);
-					AddPiece(Piece);
+					m_ActiveModel->AddPiece(Piece);
 					Piece->Select(true, false, false);
 
 					Piece->ChangeKey(1, false, Wizard.m_Rotation[i], LC_PK_ROTATION);
@@ -5215,7 +5184,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					pPiece = (lcPiece*)pFirst->m_Next;
 					pFirst->CreateName(m_ActiveModel->m_Pieces);
 					pFirst->UpdatePosition(m_ActiveModel->m_CurFrame);
-					AddPiece(pFirst);
+					m_ActiveModel->AddPiece(pFirst);
 					pFirst = pPiece;
 				}
 
@@ -7692,7 +7661,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 					case LC_OBJECT_PIECE:
 					{
 						lcPiece* pPiece = (lcPiece*)Object;
-						RemovePiece(pPiece);
+						m_ActiveModel->RemovePiece(pPiece);
 						delete pPiece;
 //						CalculateStep();
 						RemoveEmptyGroups();
@@ -7779,7 +7748,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
-				AddPiece(pPiece);
+				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
 				SystemPieceComboAdd(g_App->m_PiecePreview->m_Selection->m_strDescription);
@@ -7853,7 +7822,9 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
 
-			lcCamera* pCamera = new lcCamera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_ActiveModel->m_Cameras);
+			lcCamera* pCamera = new lcCamera(Vector3(m_fTrack[0], m_fTrack[1], m_fTrack[2]), tmp);
+			pCamera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
+			m_ActiveModel->AddCamera(pCamera);
 			pCamera->m_Target->Select (true, true, false);
 			UpdateSelection();
 			UpdateAllViews();
@@ -7967,7 +7938,7 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
-				AddPiece(pPiece);
+				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
 				SystemPieceComboAdd(g_App->m_PiecePreview->m_Selection->m_strDescription);
@@ -8501,14 +8472,12 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			lcCamera* Camera = m_ActiveView->GetCamera();
 
-			// Create a new camera if the user is trying to rotate a side camera.
 			if (Camera->IsSide())
 			{
-				const Vector3& Pos = Camera->m_Position;
-				const Vector3& Target = Camera->m_TargetPosition;
-				float Roll = Camera->m_Roll;
-
-				Camera = new lcCamera(Pos, Target, Roll, m_ActiveModel->m_Cameras);
+				// Create a new camera if the user is trying to rotate a side camera.
+				Camera = new lcCamera(Camera);
+				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
+				m_ActiveModel->AddCamera(Camera);
 
 				m_ActiveView->SetCamera(Camera);
 				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
@@ -8530,14 +8499,12 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			lcCamera* Camera = m_ActiveView->GetCamera();
 
-			// Create a new camera if the user is trying to rotate a side camera.
 			if (Camera->IsSide())
 			{
-				const Vector3& Pos = Camera->m_Position;
-				const Vector3& Target = Camera->m_TargetPosition;
-				float Roll = Camera->m_Roll;
-
-				Camera = new lcCamera(Pos, Target, Roll, m_ActiveModel->m_Cameras);
+				// Create a new camera if the user is trying to rotate a side camera.
+				Camera = new lcCamera(Camera);
+				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
+				m_ActiveModel->AddCamera(Camera);
 
 				m_ActiveView->SetCamera(Camera);
 				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);

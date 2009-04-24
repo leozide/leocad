@@ -172,8 +172,6 @@ protected:
 	void DeleteModel(lcModel* Model);
 	void SetActiveModel(lcModel* Model);
 
-	void AddPiece(lcPiece* pPiece);
-	void RemovePiece(lcPiece* pPiece);
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);

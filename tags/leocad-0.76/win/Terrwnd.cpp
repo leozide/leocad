@@ -8,7 +8,6 @@
 
 #include "camera.h"
 #include "Tools.h"
-#include "Matrix.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTerrainWnd::CTerrainWnd(Terrain* pTerrain)
 {
-	m_pCamera = new lcCamera(20,20,20,0,0,0, NULL);
+	m_pCamera = new lcCamera(Vector3(20,20,20), Vector3(0,0,0));
 	m_pTerrain = pTerrain;
 	m_pPalette = NULL;
 	m_pDC = NULL;
@@ -220,7 +219,7 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			case TERRAIN_ZOOM:
 			{
-				m_pCamera->Zoom(1, false, 0, point.y - m_ptMouse.y);
+				m_pCamera->Zoom(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
 				InvalidateRect (NULL, FALSE);
 			} break;
 
@@ -234,7 +233,7 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 			{
 				if (point == m_ptMouse)
 					break;
-				m_pCamera->Rotate(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
+				m_pCamera->Orbit(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
 				InvalidateRect (NULL, FALSE);
 			} break;
 		}
@@ -271,5 +270,5 @@ BOOL CTerrainWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 void CTerrainWnd::ResetCamera()
 {
 	delete m_pCamera;
-	m_pCamera = new lcCamera(20,20,20,0,0,0, NULL);
+	m_pCamera = new lcCamera(Vector3(20,20,20), Vector3(0,0,0));
 }

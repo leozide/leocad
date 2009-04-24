@@ -35,10 +35,10 @@ public:
 	bool AnyObjectsSelected() const;
 
 	// Add a piece to this model.
-//	void AddPiece(lcPieceObject* NewPiece);
+	void AddPiece(lcPiece* NewPiece);
 
 	// Remove a piece from this model.
-//	void RemovePiece(lcPieceObject* Piece);
+	void RemovePiece(lcPiece* Piece);
 
 	// Inline the contents of another model into this model.
 //	void InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color);
@@ -65,7 +65,7 @@ public:
 //	bool RemoveSelectedPieces();
 
 	// Add a camera to this model.
-//	void AddCamera(lcCamera* Camera);
+	void AddCamera(lcCamera* Camera);
 
 	// Delete all existing cameras and create new default ones.
 	void ResetCameras();

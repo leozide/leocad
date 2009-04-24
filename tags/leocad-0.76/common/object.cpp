@@ -351,3 +351,25 @@ void lcObject::RemoveTime(u32 Start, u32 Time)
 			node->Time = 1;
 	}
 }
+
+void lcObject::SetUniqueName(lcObject* List, const String& Prefix)
+{
+	int Len = Prefix.GetLength();
+	int Max = 0;
+
+	for (lcObject* Object = List; Object; Object = Object->m_Next)
+	{
+		if (strncmp(Object->m_Name, Prefix, Len) == 0)
+		{
+			int i;
+
+			if (sscanf((const char*)Object->m_Name + Len, " #%d", &i) == 1)
+				Max = lcMax(Max, i);
+		}
+	}
+
+	char Suffix[128];
+	sprintf(Suffix, " #%.2d", Max + 1);
+
+	m_Name = Prefix + Suffix;
+}

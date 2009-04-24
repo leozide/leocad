@@ -309,7 +309,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
 			do 
 			{
-				project->Render(&view, true);
+				project->Render(&view, false, false);
 				glFinish();
 				int tr, tc, ctw, cth;
 				pCam->GetTileInfo(&tr, &tc, &ctw, &cth);
@@ -328,7 +328,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		}
 		else
 		{
-			project->Render(&view, true);
+			project->Render(&view, false, false);
 			glFinish();
 			lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 			

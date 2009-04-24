@@ -449,7 +449,6 @@ struct LC_PREFERENCESDLG_OPTS
 	float fLineWidth;
 	unsigned long nSnap;
 	unsigned short nAngleSnap;
-	unsigned short nGridSize;
 	unsigned long nScene;
 	float fDensity;
 	char strBackground[LC_MAXPATH];

@@ -118,7 +118,7 @@ public:
 	void BeginPieceDrop();
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
-	void Render(View* view, bool bToMemory);
+	void Render(View* view, bool AllowFast, bool RenderInterface);
 	void CheckAutoSave();
 	void CheckAnimation();
 	bool GetSelectionCenter(Vector3& Center) const;
@@ -194,12 +194,14 @@ protected:
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
 	// Rendering functions.
-	void RenderScene(View* view, bool bShaded, bool bDrawViewports);
-	void RenderViewports(View* view, bool bBackground, bool bLines);
+	void RenderBackground(View* view);
+	void RenderScene(View* view);
+	void RenderSceneBoxes(View* view);
 	void RenderOverlays(View* view);
+	void RenderInterface(View* view);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
-	void DrawGrid();
+
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
 	// Animation playback.
@@ -268,7 +270,6 @@ protected:
 	unsigned long m_nSnap;
 	unsigned short m_nMoveSnap;
 	unsigned short m_nAngleSnap;
-	unsigned short m_nGridSize;
 	float m_fLineWidth;
 	float m_fFogDensity;
 	float m_fFogColor[4];

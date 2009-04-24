@@ -1602,7 +1602,7 @@ bool SystemDoDialog(int nMode, void* param)
 
 			ps.m_PageGeneral.SetOptions(opts->nSaveInterval, opts->nMouse, opts->strPath, opts->strUser);
 			ps.m_PageDetail.SetOptions(opts->nDetail, opts->fLineWidth);
-			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap, opts->nGridSize);
+			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap);
 			ps.m_PageScene.SetOptions(opts->nScene, opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 			ps.m_PagePrint.SetOptions(opts->strHeader, opts->strFooter);
 			ps.m_PageKeyboard.SetOptions();
@@ -1611,7 +1611,7 @@ bool SystemDoDialog(int nMode, void* param)
 			{
 				ps.m_PageGeneral.GetOptions(&opts->nSaveInterval, &opts->nMouse, opts->strPath, opts->strUser);
 				ps.m_PageDetail.GetOptions(&opts->nDetail, &opts->fLineWidth);
-				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap, &opts->nGridSize);
+				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap);
 				ps.m_PageScene.GetOptions(&opts->nScene, &opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 				ps.m_PagePrint.GetOptions(opts->strHeader, opts->strFooter);
 				ps.m_PageKeyboard.GetOptions();

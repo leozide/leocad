@@ -73,14 +73,6 @@ public:
 		{ m_pGroup = pGroup; }
 	Group* GetGroup()
 		{ return m_pGroup; }
-	void SetTimeShow(u32 Time)
-		{ m_TimeShow = Time; }
-	u32 GetTimeShow() const
-		{ return m_TimeShow; }
-	void SetTimeHide(u32 Time)
-		{ m_TimeHide = Time; }
-	u32 GetTimeHide() const
-		{ return m_TimeHide; }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);

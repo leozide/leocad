@@ -247,7 +247,6 @@ void Project::LoadDefaults(bool cameras)
 	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fFogColor[3] = 1.0f;
-	m_nGridSize = (unsigned short)Sys_ProfileLoadInt ("Default", "Grid", 20);
 	rgb = Sys_ProfileLoadInt ("Default", "Ambient", 0x4B4B4B);
 	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
@@ -418,8 +417,11 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			file->ReadByte (&step, 1);
 			file->ReadByte (&group, 1);
 
-			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 }; // TODO: fix color mapping to new 0.76 colors
+			// Convert from the old colors to 0.75 and then to LDraw.
+			const int conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
+			const int ColorTable[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+			color = lcConvertLDrawColor(ColorTable[color]);
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(name);
 			if (Info != NULL)
@@ -670,8 +672,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadLong (&i, 1); // m_nCurFrame = i;
 				file->ReadShort (&sh, 1); m_ActiveModel->m_TotalFrames = sh;
-				file->ReadLong (&i, 1); m_nGridSize = i;
-				file->ReadLong (&i, 1); //m_nMoveSnap = i;
+				file->ReadLong (&i, 1); // m_nGridSize = i;
+				file->ReadLong (&i, 1); // m_nMoveSnap = i;
 			}
 			else
 			{
@@ -679,8 +681,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
 				file->ReadByte (&m_nFPS, 1);
 				file->ReadShort (&sh, 1); // m_nCurFrame
-				file->ReadShort (&sh, 1); // m_TotalFrames = sh;
-				file->ReadShort (&m_nGridSize, 1);
+				file->ReadShort (&sh, 1); m_ActiveModel->m_TotalFrames = sh;
+				file->ReadShort (&sh, 1); // m_nGridSize
 				file->ReadShort (&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
@@ -834,7 +836,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteByte (&m_nFPS, 1);
 	sh = 1; file->WriteShort (&sh, 1); // m_nCurFrame
 	sh = 0xffff; file->WriteShort (&sh, 1); // m_nTotalFrames
-	file->WriteShort (&m_nGridSize, 1);
+	sh = 10; file->WriteShort (&sh, 1); // m_nGridSize
 	file->WriteShort (&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = FLOATRGB(m_fGradient1);
@@ -1193,7 +1195,7 @@ bool Project::DoSave(char* PathName, bool bReplace)
 		{
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 			{
-				if (pPiece->GetTimeShow() != i)
+				if (pPiece->m_TimeShow != i)
 					continue;
 
 				if (pPiece->IsHidden())
@@ -1559,7 +1561,7 @@ bool Project::SetActiveView(View* view)
 /////////////////////////////////////////////////////////////////////////////
 // Project rendering
 
-void Project::Render(View* view, bool bToMemory)
+void Project::Render(View* view, bool AllowFast, bool Interface)
 {
 #if LC_PROFILE
 	memset(&g_RenderStats, 0, sizeof(g_RenderStats));
@@ -1569,18 +1571,44 @@ void Project::Render(View* view, bool bToMemory)
 	u64 Start = li.QuadPart;
 #endif
 
-	if (bToMemory)
+	// Setup the viewport.
+	glViewport(0, 0, view->GetWidth(), view->GetHeight());
+
+	// Render the background.
+	RenderBackground(view);
+
+	// Setup the projection and camera matrices.
+	Matrix44 Projection = view->GetProjectionMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(Projection);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(view->GetCamera()->m_WorldView);
+
+	// Render 3D objects.
+	if (AllowFast && (m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
+		RenderSceneBoxes(view);
+	else
+		RenderScene(view);
+
+	// Render user interface elements.
+	if (Interface)
 	{
-		RenderScene(view, true, false);
-		return;
+		RenderInterface(view);
 	}
 
-	if ((m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
-		RenderScene(view, false, true);
-	else
-		RenderScene(view, true, true);
+	if (m_PlayingAnimation)
+	{
+		if (view == m_ActiveView)
+		{
+			m_LastFrameTime = SystemGetTicks();
+		}
+	}
 
 #ifdef LC_PROFILE
+	glFlush();
+	glFinish();
 	QueryPerformanceCounter(&li);
 	u64 End = li.QuadPart;
 
@@ -1597,202 +1625,470 @@ void Project::Render(View* view, bool bToMemory)
 #endif
 }
 
-typedef struct LC_BSPNODE
+void Project::RenderBackground(View* view)
 {
-	float plane[4];
-	lcPiece* piece;
-	LC_BSPNODE* front;
-	LC_BSPNODE* back;
-
-	~LC_BSPNODE()
+	if (m_nScene & (LC_SCENE_GRADIENT|LC_SCENE_BG))
 	{
-		if (piece == NULL)
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		glDepthMask(GL_FALSE);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_FOG);
+
+		float w = (float)view->GetWidth();
+		float h = (float)view->GetHeight();
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, w, 0, h, -1, 1);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(0.375, 0.375, 0.0);
+
+		// Draw gradient quad.
+		if (m_nScene & LC_SCENE_GRADIENT)
 		{
-			if (front)
-				delete front;
-			if (back)
-				delete back;
+			glShadeModel(GL_SMOOTH);
+
+			float Verts[4][2];
+			float Colors[4][4];
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, Verts);
+			glEnableClientState(GL_COLOR_ARRAY);
+			glColorPointer(4, GL_FLOAT, 0, Colors);
+
+			Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2]; Colors[0][3] = 1.0f;
+			Verts[0][0] = (float)view->GetWidth(); Verts[0][1] = (float)view->GetHeight();
+			Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2]; Colors[1][3] = 1.0f;
+			Verts[1][0] = 0; Verts[1][1] = (float)view->GetHeight();
+			Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2]; Colors[2][3] = 1.0f;
+			Verts[2][0] = 0; Verts[2][1] = 0;
+			Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2]; Colors[3][3] = 1.0f;
+			Verts[3][0] = (float)view->GetWidth(); Verts[3][1] = 0;
+
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_COLOR_ARRAY);
+
+			glShadeModel(GL_FLAT);
 		}
-	}
-} LC_BSPNODE;
 
-static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel,
-	bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
-{
-	if (node->piece)
-	{
-		if (node->piece->IsSelected())
+		// Draw the background picture.
+		if (m_nScene & LC_SCENE_BG)
 		{
-			if (!*bSel)
+			glEnable(GL_TEXTURE_2D);
+
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			m_pBackground->MakeCurrent();
+
+			float Verts[4][2];
+			float Coords[4][2];
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, Verts);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(2, GL_FLOAT, 0, Coords);
+
+			float tw = 1.0f, th = 1.0f;
+			if (m_nScene & LC_SCENE_BG_TILE)
 			{
-				*bSel = true;
-				glLineWidth (2);//*m_fLineWidth);
+				tw = w/m_pBackground->m_nWidth;
+				th = h/m_pBackground->m_nHeight;
 			}
-		}
-		else
-		{
-			if (*bSel)
-			{
-				*bSel = false;
-				glLineWidth(1);//m_fLineWidth);
-			}
+
+			Coords[0][0] = 0; Coords[0][1] = 0;
+			Verts[0][0] = 0; Verts[0][1] = (float)view->GetHeight();
+			Coords[1][0] = tw; Coords[1][1] = 0;
+			Verts[1][0] = (float)view->GetWidth(); Verts[1][1] = (float)view->GetHeight();
+			Coords[2][0] = tw; Coords[2][1] = th; 
+			Verts[2][0] = (float)view->GetWidth(); Verts[2][1] = 0;
+			Coords[3][0] = 0; Coords[3][1] = th;
+			Verts[3][0] = 0; Verts[3][1] = 0;
+
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			glDisable(GL_TEXTURE_2D);
 		}
 
-		node->piece->Render(bLighting, bEdges);
-		return;
-	}
-
-	if (eye[0]*node->plane[0] + eye[1]*node->plane[1] +
-		eye[2]*node->plane[2] + node->plane[3] > 0.0f)
-	{
-		RenderBSP(node->back, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
-		RenderBSP(node->front, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
+		glEnable(GL_DEPTH_TEST);
 	}
 	else
 	{
-		RenderBSP(node->front, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
-		RenderBSP(node->back, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
+		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 }
 
-static void BuildBSP(LC_BSPNODE* node, lcPiece* pList)
+void Project::RenderScene(View* view)
 {
-	lcPiece *front_list = NULL, *back_list = NULL;
-	lcPiece *pPiece, *pNext;
+	glDepthMask(GL_TRUE);
+	glLineWidth(m_fLineWidth);
 
-	node->piece = NULL;
-
-	if (pList->m_pLink == NULL)
+	// Draw the base grid.
+	if (m_nSnap & LC_DRAW_GRID)
 	{
-		// This is a leaf
-		node->piece = pList;
-		return;
-	}
+		glDisable(GL_LIGHTING);
+		glDisable(GL_FOG);
+		glShadeModel(GL_FLAT);
 
-	float dx, dy, dz, bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	Vector3 pos;
+		lcCamera* Camera = view->GetCamera();
 
-	for (pPiece = pList; pPiece; pPiece = pPiece->m_pLink)
-	{
-		pos = pPiece->m_Position;
-		if (pos[0] < bs[0]) bs[0] = pos[0];
-		if (pos[1] < bs[1]) bs[1] = pos[1];
-		if (pos[2] < bs[2]) bs[2] = pos[2];
-		if (pos[0] > bs[3]) bs[3] = pos[0];
-		if (pos[1] > bs[4]) bs[4] = pos[1];
-		if (pos[2] > bs[5]) bs[5] = pos[2];
-	}
+		if (Camera->IsSide() && Camera->IsOrtho())
+		{
+			Vector3 frontvec = Vector3(Camera->m_ViewWorld[2]);
+			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
+			float ymax, ymin, xmin, xmax, x, y;
 
-	dx = ABS(bs[0]-bs[3]);
-	dy = ABS(bs[1]-bs[4]);
-	dz = ABS(bs[2]-bs[5]);
+			ymax = (Length(frontvec))*sinf(DTOR*Camera->m_FOV/2);
+			ymin = -ymax;
+			xmin = ymin * Aspect;
+			xmax = ymax * Aspect;
 
-	node->plane[0] = node->plane[1] = node->plane[2] = 0.0f;
+			// Calculate camera offset.
+			Matrix44 ModelView = Camera->m_WorldView;
+			Vector3 offset = Mul30(Camera->m_Position, ModelView);
 
-	if (dx > dy)
-	{
-		if (dx > dz)
-			node->plane[0] = 1.0f;
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+			glTranslatef(-offset[0], -offset[1], 0.0f);
+
+			xmin += offset[0];
+			xmax += offset[0];
+			ymin += offset[1];
+			ymax += offset[1];
+
+			float z = -Camera->m_FarDist;
+
+			Vector3 up = Abs(Vector3(Camera->m_ViewWorld[1]));
+			float incx = 0.8f, incy;
+
+			if ((up[2] > up[0]) && (up[2] > up[1]))
+				incy = 0.96f;
+			else
+				incy = 0.8f;
+
+			float scale = 1;
+
+			// Calculate minor line increment.
+			while ((ymax - ymin) / (incy * scale) > 100)
+				scale *= 2;
+
+			while ((xmax - xmin) / (incx * scale) > 100)
+				scale *= 2;
+
+			incx *= scale;
+			incy *= scale;
+
+			glBegin(GL_LINES);
+
+			// Draw minor lines.
+			glColor3f(0.75f, 0.75f, 0.75f);
+			for (x = (int)(xmin / incx) * incx; x < xmax; x += incx)
+			{
+				glVertex3f(x, ymin, z);
+				glVertex3f(x, ymax, z);
+			}
+
+			for (y = (int)(ymin / incy) * incy; y < ymax; y += incy)
+			{
+				glVertex3f(xmin, y, z);
+				glVertex3f(xmax, y, z);
+			}
+
+			// Reset increments and scale.
+			incx /= scale;
+			incy /= scale;
+			scale = 1;
+
+			// Calculate major line increment.
+			while ((ymax - ymin) / (incy * scale) > 10)
+				scale *= 2;
+
+			while ((xmax - xmin) / (incx * scale) > 10)
+				scale *= 2;
+
+			incx *= scale;
+			incy *= scale;
+
+			// Draw major lines.
+			glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+			for (x = (int)(xmin / incx) * incx; x < xmax; x += incx)
+			{
+				glVertex3f(x, ymin, z);
+				glVertex3f(x, ymax, z);
+			}
+
+			for (y = (int)(ymin / incy) * incy; y < ymax; y += incy)
+			{
+				glVertex3f(xmin, y, z);
+				glVertex3f(xmax, y, z);
+			}
+
+			glEnd();
+
+			glPopMatrix();
+		}
 		else
-			node->plane[2] = 1.0f;
+		{
+			// Calculate view matrices.
+			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
+
+			Matrix44 ModelView = Camera->m_WorldView;
+			Matrix44 Projection = view->GetProjectionMatrix();
+
+			// Unproject edge center points to world space.
+			Vector3 Points[10] =
+			{
+				Vector3(0, (float)view->m_Viewport[3] / 2, 0),
+				Vector3(0, (float)view->m_Viewport[3] / 2, 1),
+				Vector3((float)view->m_Viewport[2] / 2, 0, 0),
+				Vector3((float)view->m_Viewport[2] / 2, 0, 1),
+				Vector3((float)view->m_Viewport[2], (float)view->m_Viewport[3] / 2, 0),
+				Vector3((float)view->m_Viewport[2], (float)view->m_Viewport[3] / 2, 1),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3], 0),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3], 1),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3] / 2, 0),
+				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3] / 2, 1),
+			};
+
+			UnprojectPoints(Points, 10, ModelView, Projection, view->m_Viewport);
+
+			// Intersect lines with base plane.
+			Vector3 Intersections[5];
+			int i;
+
+			for (i = 0; i < 5; i++)
+				LinePlaneIntersection(&Intersections[i], Points[i*2], Points[i*2+1], Vector4(0, 0, 1, 0));
+
+			// Find the smallest edge length.
+			float MinSize = FLT_MAX;
+			for (i = 0; i < 4; i++)
+			{
+				float d1 = LinePointMinDistance(Intersections[4], Intersections[i], i == 0 ? Intersections[3] : Intersections[i-1]);
+
+				if (d1 < MinSize)
+					MinSize = d1;
+			}
+
+			// Draw grid.
+			float inc = 0.8f;
+			float z = 0.0f;
+			float xsteps = ceilf(MinSize / inc);
+
+			while (xsteps > 10)
+			{
+				xsteps = floorf(xsteps / 2);
+				inc *= 2;
+			}
+
+			float ysteps = xsteps;
+
+			float xmin = floorf((Intersections[4][0] + (10 * inc)) / (20 * inc)) * (20 * inc) - (xsteps * inc);
+			float ymin = floorf((Intersections[4][1] + (10 * inc)) / (20 * inc)) * (20 * inc) - (ysteps * inc);
+			xmin -= inc * 10;
+			ymin -= inc * 10;
+
+			xsteps *= 2;
+			ysteps *= 2;
+
+			if (fmodf(Intersections[4][0] + (10 * inc), (20 * inc)) > 0.5f)
+				xsteps += 20;
+			else
+				xsteps += 10;
+
+			if (fmodf(Intersections[4][1] + (10 * inc), (20 * inc)) > 0.5f)
+				ysteps += 20;
+			else
+				ysteps += 10;
+
+			float xmax = xmin + (xsteps + 1) * inc;
+			float ymax = ymin + (ysteps + 1) * inc;
+
+			glBegin(GL_LINES);
+
+			// Draw lines.
+			glColor3f(0.75f, 0.75f, 0.75f);
+
+			for (int x = 0; x < xsteps + 2; x++)
+			{
+				glVertex3f(xmin + x * inc, ymin, z);
+				glVertex3f(xmin + x * inc, ymax, z);
+			}
+
+			for (int y = 0; y < ysteps + 2; y++)
+			{
+				glVertex3f(xmin, ymin + y * inc, z);
+				glVertex3f(xmax, ymin + y * inc, z);
+			}
+
+			glEnd();
+
+		}
+	}
+
+	// Setup lights.
+	if (m_nDetail & LC_DET_LIGHTING)
+	{
+		glEnable(GL_LIGHTING);
+
+		int index = 0;
+		lcObject* Light;
+
+		for (Light = m_ActiveModel->m_Lights; Light; Light = Light->m_Next, index++)
+			((lcLight*)Light)->Setup(index);
+	}
+
+	// Set render states.
+	if (m_nScene & LC_SCENE_FOG)
+	{
+		glEnable(GL_FOG);
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogf(GL_FOG_DENSITY, m_fFogDensity);
+		glFogfv(GL_FOG_COLOR, m_fFogColor);
 	}
 	else
+		glDisable(GL_FOG);
+
+	if (m_nDetail & LC_DET_SMOOTH)
+		glShadeModel(GL_SMOOTH);
+
+	// Render the terrain.
+	if (m_nScene & LC_SCENE_FLOOR)
 	{
-		if (dy > dz)
-			node->plane[1] = 1.0f;
-		else
-			node->plane[2] = 1.0f;
+		float w = (float)view->GetWidth();
+		float h = (float)view->GetHeight();
+		float ratio = w/h;
+
+		m_pTerrain->Render(view->GetCamera(), ratio);
 	}
 
-	// D = -Ax -By -Cz
-	node->plane[3] = -(node->plane[0]*(bs[0]+bs[3])/2)-(node->plane[1]*(bs[1]+bs[4])/2)-(node->plane[2]*(bs[2]+bs[5])/2);
-
-	for (pPiece = pList; pPiece;)
 	{
-		pos = pPiece->m_Position;
-		pNext = pPiece->m_pLink;
+		bool bTrans = false;
+		lcPiece* pPiece;
 
-		if (pos[0]*node->plane[0] + pos[1]*node->plane[1] +
-			pos[2]*node->plane[2] + node->plane[3] > 0.0f)
+		for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 		{
-			pPiece->m_pLink = front_list;
-			front_list = pPiece;
+			if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
+			{
+				if (pPiece->IsSelected())
+					glLineWidth (2*m_fLineWidth);
+				else
+					glLineWidth(m_fLineWidth);
+				pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
+			}
 		}
-		else
+
+		if (bTrans)
 		{
-			pPiece->m_pLink = back_list;
-			back_list = pPiece;
+			glDepthMask(GL_TRUE);
+			glDisable(GL_BLEND);
 		}
-
-		pPiece = pNext;
+		glLineWidth(m_fLineWidth);
+		glDisable(GL_CULL_FACE);
 	}
 
-	if (bs[0] == bs[3] && bs[1] == bs[4] && bs[2] == bs[5])
+	// Add piece preview.
+	if (m_nCurAction == LC_ACTION_INSERT)
 	{
-		if (back_list)
-		{
-			front_list = back_list;
-			back_list = back_list->m_pLink;
-			front_list->m_pLink = NULL;
-		}
-		else
-		{
-			back_list = front_list;
-			front_list = front_list->m_pLink;
-			back_list->m_pLink = NULL;
-		}
+		Vector3 Pos;
+		Vector4 Rot;
+		GetPieceInsertPosition(m_nDownX, m_nDownY, Pos, Rot);
+
+		glPushMatrix();
+		glTranslatef(Pos[0], Pos[1], Pos[2]);
+		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+		glLineWidth(2*m_fLineWidth);
+		g_App->m_PiecePreview->m_Selection->RenderPiece(g_App->m_SelectedColor);
+		glLineWidth(m_fLineWidth);
+		glPopMatrix();
 	}
 
-	if (front_list)
+	if (m_nDetail & LC_DET_LIGHTING)
 	{
-		node->front = new LC_BSPNODE;
-		BuildBSP(node->front, front_list);
-	}
-	else
-		node->front = NULL;
+		glDisable(GL_LIGHTING);
 
-	if (back_list)
-	{
-		node->back = new LC_BSPNODE;
-		BuildBSP(node->back, back_list);
+		int index = 0;
+		lcLight* Light;
+
+		for (Light = m_ActiveModel->m_Lights; Light; Light = (lcLight*)Light->m_Next, index++)
+			glDisable((GLenum)(GL_LIGHT0+index));
 	}
-	else
-		node->back = NULL;
+
+	// Draw cameras and lights.
+	for (lcCamera* Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+	{
+		if ((Camera == view->GetCamera()) || !Camera->IsVisible())
+			continue;
+		Camera->Render(m_fLineWidth);
+	}
+
+	for (lcLight* Light = m_ActiveModel->m_Lights; Light; Light = (lcLight*)Light->m_Next)
+	{
+		if (Light->IsVisible())
+			Light->Render(m_fLineWidth);
+	}
+
+#ifdef LC_DEBUG
+	RenderDebugPrimitives();
+#endif
 }
 
-void Project::RenderScene(View* view, bool bShaded, bool bDrawViewports)
+void Project::RenderSceneBoxes(View* view)
 {
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_FOG);
+	glShadeModel(GL_FLAT);
+//	glEnable(GL_CULL_FACE);
 
-	if (bDrawViewports)
+	if ((m_nDetail & LC_DET_BOX_FILL) == 0)
 	{
-		if (bShaded)
+		if ((m_nDetail & LC_DET_HIDDEN_LINE) != 0) // TODO: Remove LC_DET_HIDDEN_LINE
 		{
-			if (m_nDetail & LC_DET_LIGHTING)
-				glDisable (GL_LIGHTING);
-			if (m_nScene & LC_SCENE_FOG)
-				glDisable (GL_FOG);
-			RenderViewports(view, true, true);
-			if (m_nDetail & LC_DET_LIGHTING)
-				glEnable(GL_LIGHTING);
-			if (m_nScene & LC_SCENE_FOG)
-				glEnable (GL_FOG);
+			// Wireframe with hidden lines removed
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			RenderBoxes(false);
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			RenderBoxes(true);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 		else
-			RenderViewports(view, true, true);
+		{
+			// Wireframe
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			RenderBoxes(true);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
 	}
 	else
-		RenderViewports(view, true, false);
-
-	float ratio = (float)view->GetWidth() / view->GetHeight();
-	glViewport(0, 0, view->GetWidth(), view->GetHeight());
-
-	// Disable lighting.
-	if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
 	{
-		if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-			glDisable(GL_LIGHTING);
+		RenderBoxes(true);
 	}
+}
+
+void Project::RenderInterface(View* view)
+{
+	// Set render states.
+	glDisable(GL_LIGHTING);
+	glDisable(GL_FOG);
+	glShadeModel(GL_FLAT);
+	glLineWidth(1.0f);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+
+	// Start with a new Z buffer.
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	float w = (float)view->GetWidth();
+	float h = (float)view->GetHeight();
 
 	// Render axis icon.
 	if (m_nSnap & LC_DRAW_AXIS)
@@ -1806,7 +2102,7 @@ void Project::RenderScene(View* view, bool bShaded, bool bDrawViewports)
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -50, 50);
+		glOrtho(0, w, 0, h, -50, 50);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(25.375f, 25.375f, 0.0f);
@@ -1869,183 +2165,17 @@ void Project::RenderScene(View* view, bool bShaded, bool bDrawViewports)
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_ALPHA_TEST);
 	}
-					
-	view->GetCamera()->LoadProjection(ratio);
 
-	if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
-	{
-		glColor4f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2], 1.0f);
-
-		if (m_nSnap & LC_DRAW_GRID)
-			DrawGrid();
-
-		if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-			glEnable(GL_LIGHTING);
-	}
-
-	if ((m_nDetail & LC_DET_LIGHTING) != 0)
-	{
-		int index = 0;
-		lcLight *pLight;
-
-		for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (lcLight*)pLight->m_Next, index++)
-			pLight->Setup(index);
-	}
-
-	if (bShaded)
-	{
-		if (m_nScene & LC_SCENE_FLOOR)
-			m_pTerrain->Render(view->GetCamera(), ratio);
-
-		unsigned char nLastColor = 255;
-		bool bTrans = false;
-		bool bSel = false;
-		bool bCull = false;
-		lcPiece* pPiece;
-
-		LC_BSPNODE tree;
-		tree.front = tree.back = NULL;
-		lcPiece* pList = NULL;
-
-		// Draw opaque pieces first
-		for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		{
-			if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
-			{
-				if (!LC_COLOR_TRANSLUCENT(pPiece->m_Color))
-				{
-					if (pPiece->IsSelected())
-					{
-						if (!bSel)
-						{
-							bSel = true;
-							glLineWidth (2*m_fLineWidth);
-						}
-					}
-					else
-					{
-						if (bSel)
-						{
-							bSel = false;
-							glLineWidth(m_fLineWidth);
-						}
-					}
-					pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
-				}
-				else
-				{
-					pPiece->m_pLink = pList;
-					pList = pPiece;
-				}
-			}
-		}
-
-		if (pList)
-		{
-			BuildBSP(&tree, pList);
-			RenderBSP(&tree, view->GetCamera()->m_Position, &bSel,
-				(m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
-		}
-
-		if (bTrans)
-		{
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
-		}
-		if (bSel)
-			glLineWidth(m_fLineWidth);
-		if (bCull)
-			glDisable(GL_CULL_FACE);
-	}
-	else
-	{
-//		glEnable (GL_CULL_FACE);
-//		glShadeModel (GL_FLAT);
-//		glDisable (GL_LIGHTING);
-#ifndef LC_OPENGLES
-		if ((m_nDetail & LC_DET_BOX_FILL) == 0)
-		{
-			if ((m_nDetail & LC_DET_HIDDEN_LINE) != 0)
-			{
-				// Wireframe with hidden lines removed
-				glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-				RenderBoxes(false);
-				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				RenderBoxes(true);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
-			else
-			{
-				// Wireframe
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				RenderBoxes(true);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
-		}
-		else
-#endif
-			RenderBoxes(true);
-	}
-
-#ifdef LC_DEBUG
-	RenderDebugPrimitives();
-#endif
-
-	// Draw cameras & lights
-	if (bDrawViewports)
-	{
-		if (m_nCurAction == LC_ACTION_INSERT)
-		{
-			Vector3 Pos;
-			Vector4 Rot;
-			GetPieceInsertPosition(m_nDownX, m_nDownY, Pos, Rot);
-
-			glPushMatrix();
-			glTranslatef(Pos[0], Pos[1], Pos[2]);
-			glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
-			glLineWidth(2*m_fLineWidth);
-			g_App->m_PiecePreview->m_Selection->RenderPiece(g_App->m_SelectedColor);
-			glLineWidth(m_fLineWidth);
-			glPopMatrix();
-		}
-
-		if (m_nDetail & LC_DET_LIGHTING)
-		{
-			glDisable (GL_LIGHTING);
-			int index = 0;
-			lcLight *pLight;
-			
-			for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (lcLight*)pLight->m_Next, index++)
-				glDisable((GLenum)(GL_LIGHT0+index));
-		}
-		
-		lcCamera* pCamera;
-		lcLight* pLight;
-		
-		for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-		{
-			if ((pCamera == view->GetCamera()) || !pCamera->IsVisible())
-				continue;
-			pCamera->Render(m_fLineWidth);
-		}
-
-		for (pLight = m_ActiveModel->m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-			if (pLight->IsVisible ())
-				pLight->Render(m_fLineWidth);
-			
-			if (m_nDetail & LC_DET_LIGHTING)
-				glEnable (GL_LIGHTING);
-	}
+	// Render overlays.
+	if (m_OverlayActive)
+		RenderOverlays(view);
 
 	// Draw the selection rectangle.
 	if ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT))
 	{
-		glViewport(0, 0, view->GetWidth(), view->GetHeight());
-
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -1, 1);
+		glOrtho(0, w, 0, h, -1, 1);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(0.375, 0.375, 0.0);
@@ -2076,12 +2206,56 @@ void Project::RenderScene(View* view, bool bShaded, bool bDrawViewports)
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	if (bDrawViewports && m_OverlayActive)
-		RenderOverlays(view);
+	// Setup the viewport.
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, w, 0, h, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(0.375f, 0.375f, 0.0);
+
+	// Draw border.
+	glLineWidth(1.0f);
+	if (view == m_ActiveView)
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	else
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	float Verts[4][2] =
+	{
+		{ 0, 0 }, { (float)view->GetWidth(), 0 }, { (float)view->GetWidth(), (float)view->GetHeight() }, { 0, (float)view->GetHeight() }
+	};
+
+	glVertexPointer(2, GL_FLOAT, 0, Verts);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	// Draw camera name.
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	m_pScreenFont->MakeCurrent();
+	glEnable(GL_ALPHA_TEST);
+
+	glColor4f(0, 0, 0, 1);
+	m_pScreenFont->PrintText(3, h - 6, 0.0f, view->GetCamera()->m_Name);
+
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
 }
 
 void Project::RenderOverlays(View* view)
 {
+	Matrix44 Projection = view->GetProjectionMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(Projection);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(view->GetCamera()->m_WorldView);
+
 	const float OverlayScale = view->m_OverlayScale;
 
 	if (m_nCurAction == LC_ACTION_MOVE)
@@ -2683,140 +2857,6 @@ void Project::RenderOverlays(View* view)
 	}
 }
 
-void Project::RenderViewports(View* view, bool bBackground, bool bLines)
-{
-	float w = (float)view->GetWidth(), h = (float)view->GetHeight();
-
-	glViewport(0, 0, view->GetWidth(), view->GetHeight());
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, w, 0, h, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0.375, 0.375, 0.0);
-
-	if (bBackground)
-	{
-		// Draw gradient
-		if (m_nScene & LC_SCENE_GRADIENT)
-		{
-			if ((m_nDetail & LC_DET_SMOOTH) == 0)
-				glShadeModel(GL_SMOOTH);
-			glDisable(GL_DEPTH_TEST);
-
-			float Verts[4][2];
-			float Colors[4][4];
-
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, Verts);
-			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(4, GL_FLOAT, 0, Colors);
-
-			Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2]; Colors[0][3] = 1.0f;
-			Verts[0][0] = (float)view->GetWidth(); Verts[0][1] = (float)view->GetHeight();
-			Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2]; Colors[1][3] = 1.0f;
-			Verts[1][0] = 0; Verts[1][1] = (float)view->GetHeight();
-			Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2]; Colors[2][3] = 1.0f;
-			Verts[2][0] = 0; Verts[2][1] = 0;
-			Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2]; Colors[3][3] = 1.0f;
-			Verts[3][0] = (float)view->GetWidth(); Verts[3][1] = 0;
-
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_COLOR_ARRAY);
-
-			glEnable(GL_DEPTH_TEST);
-			if ((m_nDetail & LC_DET_SMOOTH) == 0)
-				glShadeModel(GL_FLAT);
-		}
-
-		glEnable(GL_TEXTURE_2D);
-
-		// Draw the background
-		if (m_nScene & LC_SCENE_BG)
-		{
-			glDisable (GL_DEPTH_TEST);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			m_pBackground->MakeCurrent();
-
-			float Verts[4][2];
-			float Coords[4][2];
-
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, Verts);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glTexCoordPointer(2, GL_FLOAT, 0, Coords);
-
-			float tw = 1.0f, th = 1.0f;
-			if (m_nScene & LC_SCENE_BG_TILE)
-			{
-				tw = w/m_pBackground->m_nWidth;
-				th = h/m_pBackground->m_nHeight;
-			}
-
-			Coords[0][0] = 0; Coords[0][1] = 0;
-			Verts[0][0] = 0; Verts[0][1] = (float)view->GetHeight();
-			Coords[1][0] = tw; Coords[1][1] = 0;
-			Verts[1][0] = (float)view->GetWidth(); Verts[1][1] = (float)view->GetHeight();
-			Coords[2][0] = tw; Coords[2][1] = th; 
-			Verts[2][0] = (float)view->GetWidth(); Verts[2][1] = 0;
-			Coords[3][0] = 0; Coords[3][1] = th;
-			Verts[3][0] = 0; Verts[3][1] = 0;
-
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-			glEnable(GL_DEPTH_TEST);
-		}
-
-		if (!bLines)
-			glDisable(GL_TEXTURE_2D);
-	}
-
-	if (bLines)
-	{
-		// Draw text
-		glColor4f(0, 0, 0, 1);
-		if (!bBackground)
-			glEnable(GL_TEXTURE_2D);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_pScreenFont->MakeCurrent();
-		glEnable(GL_ALPHA_TEST);
-
-		m_pScreenFont->PrintText(3, (float)view->GetHeight() - 6, 0.0f, view->GetCamera()->m_Name);
-	
-		glDisable(GL_ALPHA_TEST);
-		glDisable(GL_TEXTURE_2D);
-
-		// Borders
-		if (m_fLineWidth != 1.0f)
-			glLineWidth (1.0f);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-
-		if (view == m_ActiveView)
-			glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-		else
-			glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-
-		float Verts[4][2] =
-		{
-			{ 0, 0 }, { (float)view->GetWidth(), 0 }, { (float)view->GetWidth(), (float)view->GetHeight() }, { 0, (float)view->GetHeight() }
-		};
-
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-
-		if (m_fLineWidth != 1.0f)
-			glLineWidth (m_fLineWidth);
-	}
-}
-
 // bHilite - Draws focus/selection, not used for the 
 // first rendering pass if remove hidden lines is enabled
 void Project::RenderBoxes(bool bHilite)
@@ -2871,16 +2911,6 @@ void Project::RenderInitialize()
 	}
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, m_fAmbient);
-	glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 1.0f);
-
-	if (m_nScene & LC_SCENE_FOG)
-	{
-		glEnable(GL_FOG);
-		glFogf(GL_FOG_DENSITY, m_fFogDensity);
-		glFogfv(GL_FOG_COLOR, m_fFogColor);
-	}
-	else
-		glDisable (GL_FOG);
 
 	// Load font
 	if (!m_pScreenFont->IsLoaded())
@@ -2906,34 +2936,6 @@ void Project::RenderInitialize()
 			m_nScene &= ~LC_SCENE_BG;
 //			AfxMessageBox ("Could not load background");
 		}
-}
-
-void Project::DrawGrid()
-{
-	glEnableClientState(GL_VERTEX_ARRAY);
-	int i = 2*(4*m_nGridSize+2); // verts needed (2*lines)
-	float *grid = (float*)malloc(i*sizeof(float[3]));
-	float x = m_nGridSize*0.8f;
-
-	for (int j = 0; j <= m_nGridSize*2; j++)
-	{
-		grid[j*12] = x;
-		grid[j*12+1] = m_nGridSize*0.8f;
-		grid[j*12+2] = 0;
-		grid[j*12+3] = x;
-		grid[j*12+4] = -m_nGridSize*0.8f;
-		grid[j*12+5] = 0;
-		grid[j*12+6] = m_nGridSize*0.8f;
-		grid[j*12+7] = x;
-		grid[j*12+8] = 0;
-		grid[j*12+9] = -m_nGridSize*0.8f;
-		grid[j*12+10] = x;
-		grid[j*12+11] = 0;
-		x -= 0.8f;
-	}
-	glVertexPointer(3, GL_FLOAT, 0, grid);
-	glDrawArrays(GL_LINES, 0, i);
-	free(grid);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3092,7 +3094,7 @@ bool Project::RemoveSelectedObjects()
 	lcPiece* Piece;
 	lcCamera* Camera;
 	lcLight* Light;
-	void* Prev;
+	lcObject* Prev;
 	bool Removed = false;
 
 	Piece = m_ActiveModel->m_Pieces;
@@ -3130,9 +3132,9 @@ bool Project::RemoveSelectedObjects()
 		{
 			if (Prev)
 			{
-				((lcCamera*)Prev)->m_Next = Camera->m_Next;
+				Prev->m_Next = Camera->m_Next;
 				delete Camera;
-				Camera = (lcCamera*)((lcCamera*)Prev)->m_Next;
+				Camera = (lcCamera*)Prev->m_Next;
 			}
 			else
 			{
@@ -3159,9 +3161,9 @@ bool Project::RemoveSelectedObjects()
 		{
 			if (Prev)
 			{
-				((lcLight*)Prev)->m_Next = Light->m_Next;
+				Prev->m_Next = Light->m_Next;
 				delete Light;
-				Light = (lcLight*)((lcLight*)Prev)->m_Next;
+				Light = (lcLight*)Prev->m_Next;
 			}
 			else
 			{
@@ -3370,7 +3372,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 		}
 
 		CalculateStep();
-		Render(&view, true);
+		Render(&view, false, false);
 		images[i-from].FromOpenGL (width, height);
 	}
 
@@ -3388,7 +3390,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	memset(&col, 0, sizeof(int)*lcNumColors);
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
-		if ((pPiece->GetTimeShow() == nStep) || (nStep == 0))
+		if ((pPiece->m_TimeShow == nStep) || (nStep == 0))
 			col[pPiece->m_Color]++;
 	}
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
@@ -3412,7 +3414,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 
 		for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 		{
-			if ((pPiece->m_PieceInfo == pInfo) && ((pPiece->GetTimeShow() == nStep) || (nStep == 0)))
+			if ((pPiece->m_PieceInfo == pInfo) && ((pPiece->m_TimeShow == nStep) || (nStep == 0)))
 			{
 				count [pPiece->m_Color]++;
 				Add = true;
@@ -4721,7 +4723,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece = pPasted;
 				pPasted = (lcPiece*)pPasted->m_Next;
 				pPiece->CreateName(m_ActiveModel->m_Pieces);
-				pPiece->SetTimeShow(m_ActiveModel->m_CurFrame);
+				pPiece->m_TimeShow = m_ActiveModel->m_CurFrame;
 				AddPiece(pPiece);
 				pPiece->Select(true, false, false);
 
@@ -4958,33 +4960,33 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_INSERT:
 		{
-			lcPiece* pLast = NULL;
-			lcPiece* pPiece = new lcPiece(g_App->m_PiecePreview->m_Selection);
+			lcPiece* Last = NULL;
+			lcPiece* Piece = new lcPiece(g_App->m_PiecePreview->m_Selection);
 
-			for (pLast = m_ActiveModel->m_Pieces; pLast; pLast = (lcPiece*)pLast->m_Next)
-				if ((pLast->IsFocused()) || (pLast->m_Next == NULL))
+			for (Last = m_ActiveModel->m_Pieces; Last; Last = (lcPiece*)Last->m_Next)
+				if ((Last->IsFocused()) || (Last->m_Next == NULL))
 					break;
 
-			if (pLast != NULL)
+			if (Last != NULL)
 			{
 				Vector3 Pos;
 				Vector4 Rot;
 
-				GetPieceInsertPosition(pLast, Pos, Rot);
+				GetPieceInsertPosition(Last, Pos, Rot);
 
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurFrame, g_App->m_SelectedColor);
+				Piece->Initialize(Pos[0], Pos[1], Pos[2], m_ActiveModel->m_CurFrame, g_App->m_SelectedColor);
 
-				pPiece->ChangeKey(m_ActiveModel->m_CurFrame, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
+				Piece->ChangeKey(m_ActiveModel->m_CurFrame, false, Rot, LC_PK_ROTATION);
+				Piece->UpdatePosition(m_ActiveModel->m_CurFrame);
 			}
 			else
-				pPiece->Initialize(0, 0, 0, m_ActiveModel->m_CurFrame, g_App->m_SelectedColor);
+				Piece->Initialize(0, 0, 0, m_ActiveModel->m_CurFrame, g_App->m_SelectedColor);
 
 			SelectAndFocusNone(false);
-			pPiece->CreateName(m_ActiveModel->m_Pieces);
-			AddPiece(pPiece);
-			pPiece->Select (true, true, false);
-			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, pPiece);
+			Piece->CreateName(m_ActiveModel->m_Pieces);
+			AddPiece(Piece);
+			Piece->Select (true, true, false);
+			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, Piece);
 			UpdateSelection();
 			SystemPieceComboAdd(g_App->m_PiecePreview->m_Selection->m_strDescription);
 
@@ -5415,10 +5417,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_HIDE_SELECTED:
 		{
-			lcPiece* pPiece;
-			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
-					pPiece->Hide();
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+				if (Piece->IsSelected())
+					Piece->Hide();
 			UpdateSelection();
 			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, NULL);
 			UpdateAllViews();
@@ -5426,19 +5427,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_HIDE_UNSELECTED:
 		{
-			lcPiece* pPiece;
-			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (!pPiece->IsSelected())
-					pPiece->Hide();
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+				if (!Piece->IsSelected())
+					Piece->Hide();
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
 
 		case LC_PIECE_UNHIDE_ALL:
 		{
-			lcPiece* pPiece;
-			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				pPiece->UnHide();
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+				Piece->UnHide();
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
@@ -5448,15 +5447,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			bool Redraw = false;
 
 			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			{
 				if (Piece->IsSelected())
 				{
-					u32 t = Piece->GetTimeShow();
-					if (t > 1)
+					if (Piece->m_TimeShow > 1)
 					{
+						Piece->m_TimeShow--;
 						Redraw = true;
-						Piece->SetTimeShow(t-1);
 					}
 				}
+			}
 
 			if (Redraw)
 			{
@@ -5471,18 +5471,20 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			bool Redraw = false;
 
 			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			{
 				if (Piece->IsSelected())
 				{
-					u32 t = Piece->GetTimeShow();
+					u32 t = Piece->m_TimeShow;
 					if (t < m_ActiveModel->m_TotalFrames)
 					{
+						Piece->m_TimeShow++;
 						Redraw = true;
-						Piece->SetTimeShow(t+1);
 
 						if (Piece->IsSelected() && t == m_ActiveModel->m_CurFrame)
 							Piece->Select(false, false, false);
 					}
 				}
+			}
 
 			if (Redraw)
 			{
@@ -5504,7 +5506,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.fLineWidth = m_fLineWidth;
 			opts.nSnap = m_nSnap;
 			opts.nAngleSnap = m_nAngleSnap;
-			opts.nGridSize = m_nGridSize;
 			opts.nScene = m_nScene;
 			opts.fDensity = m_fFogDensity;
 			strcpy(opts.strBackground, m_strBackground);
@@ -5526,7 +5527,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				m_fLineWidth = opts.fLineWidth;
 				m_nSnap = opts.nSnap;
 				m_nAngleSnap = opts.nAngleSnap;
-				m_nGridSize = opts.nGridSize;
 				m_nScene = opts.nScene;
 				m_fFogDensity = opts.fDensity;
 				strcpy(m_strBackground, opts.strBackground);
@@ -8498,7 +8498,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownY == y)
 				break;
 
-			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, y - m_nDownY);
+			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -9764,4 +9764,3 @@ void Project::exportVRMLFile(char *filename, int dialect)
 		fprintf(stderr, "internal error: indent %d\n", indent);
 	fclose(stream);
 }
-

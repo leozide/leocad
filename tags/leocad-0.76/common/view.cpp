@@ -100,7 +100,7 @@ void View::OnDraw()
 	{
 		MakeCurrent();
 
-		m_Project->Render(this, false);
+		m_Project->Render(this, true, true);
 
 		SwapBuffers();
 	}

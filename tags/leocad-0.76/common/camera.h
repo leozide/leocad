@@ -89,9 +89,6 @@ public:
 
 
 
-	// Deprecated functions:
-	CameraTarget* GetTarget() const
-		{ return m_Target; }
 
 public:
 	void Hide()

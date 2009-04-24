@@ -3384,15 +3384,17 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 
 void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
 {
-	lcPiece* pPiece;
+	lcPiece* Piece;
 	int* col = new int[lcNumColors], ID = 0, c;
 	int* count = new int[lcNumColors];
 	memset(&col, 0, sizeof(int)*lcNumColors);
-	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+
+	for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if ((pPiece->m_TimeShow == nStep) || (nStep == 0))
-			col[pPiece->m_Color]++;
+		if ((Piece->m_TimeShow == nStep) || (nStep == 0))
+			col[Piece->m_Color]++;
 	}
+
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
 
 	for (c = 0; c < lcNumColors; c++)
@@ -3412,11 +3414,11 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 		memset(&count, 0, sizeof(int)*lcNumColors);
 		pInfo = lcGetPiecesLibrary()->GetPieceInfo (j);
 
-		for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+		for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		{
-			if ((pPiece->m_PieceInfo == pInfo) && ((pPiece->m_TimeShow == nStep) || (nStep == 0)))
+			if ((Piece->m_PieceInfo == pInfo) && ((Piece->m_TimeShow == nStep) || (nStep == 0)))
 			{
-				count [pPiece->m_Color]++;
+				count[Piece->m_Color]++;
 				Add = true;
 			}
 		}
@@ -3521,6 +3523,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				Camera->Hide();
 			else
 				Camera->UnHide();
+//			Camera->SetOrtho(mod->ortho);
+//			Camera->ShowCone(mod->cone);
 
 			if (Camera->m_Position != mod->Eye)
 				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, mod->Eye, LC_CK_EYE);
@@ -4787,7 +4791,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pCamera = new lcCamera(8, pCamera);
 				pCamera->FileLoad(*file);
 				pCamera->Select(true, false, false);
-				pCamera->GetTarget()->Select(true, false, false);
+				pCamera->m_Target->Select(true, false, false);
 			}
 
 			// TODO: lights
@@ -5639,6 +5643,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				Eye = ZoomExtents(Eye, Camera->m_WorldView, Projection, &Points[0], Points.GetSize());
 
+				// Save new positions.
 				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
 				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
 				Camera->UpdatePosition(m_ActiveModel->m_CurFrame);
@@ -6302,7 +6307,7 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 	for (Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
 	{
 		Camera->Select(false, bFocusOnly, false);
-		Camera->GetTarget()->Select(false, bFocusOnly, false);
+		Camera->m_Target->Select(false, bFocusOnly, false);
 	}
 
 	for (Light = m_ActiveModel->m_Lights; Light; Light = (lcLight*)Light->m_Next)
@@ -7326,7 +7331,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			Vector3 axis;
 			if (bShift)
 			{
-				if (m_nSnap & LC_DRAW_SNAP_A)
+				if ((m_nSnap & LC_DRAW_SNAP_A) && !bControl)
 					axis[0] = axis[1] = axis[2] = m_nAngleSnap;
 				else
 					axis[0] = axis[1] = axis[2] = 1;
@@ -7805,7 +7810,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				m_ActiveModel->m_Lights = pLight;
 				SystemUpdateFocus (pLight);
 				pLight->Select (true, true, false);
-				UpdateSelection ();
+				UpdateSelection();
 			}
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
@@ -7849,7 +7854,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			StartTracking(LC_TRACK_START_LEFT);
 
 			lcCamera* pCamera = new lcCamera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_ActiveModel->m_Cameras);
-			pCamera->GetTarget ()->Select (true, true, false);
+			pCamera->m_Target->Select (true, true, false);
 			UpdateSelection();
 			UpdateAllViews();
 			SystemUpdateFocus(pCamera);
@@ -7857,42 +7862,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 		case LC_ACTION_MOVE:
 		{
-			bool sel = false;
-
-			for (lcPiece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-			{
-				if (pPiece->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-			}
-
-			if (!sel)
-			{
-				for (lcCamera* pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-				{
-					if (pCamera->IsSelected())
-					{
-						sel = true;
-						break;
-					}
-				}
-			}
-
-			if (!sel)
-			{
-				for (lcLight* pLight = m_ActiveModel->m_Lights; pLight; pLight = (lcLight*)pLight->m_Next)
-				{
-					if (pLight->IsSelected())
-					{
-						sel = true;
-						break;
-					}
-				}
-			}
-
-			if (sel)
+			if (m_ActiveModel->AnyObjectsSelected())
 			{
 				StartTracking(LC_TRACK_START_LEFT);
 				m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
@@ -7902,9 +7872,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 		case LC_ACTION_ROTATE:
 		{
-			lcPiece* Piece;
-
-			for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 			{
 				if (Piece->IsSelected())
 				{
@@ -8531,42 +8499,67 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			// We can't rotate the side cameras.
-			if (m_ActiveView->GetCamera()->IsSide())
+			lcCamera* Camera = m_ActiveView->GetCamera();
+
+			// Create a new camera if the user is trying to rotate a side camera.
+			if (Camera->IsSide())
 			{
-				const Vector3& eye = m_ActiveView->GetCamera()->m_Position;
-				const Vector3& target = m_ActiveView->GetCamera()->m_TargetPosition;
-				float roll = m_ActiveView->GetCamera()->m_Roll;
-				lcCamera* pCamera = new lcCamera(eye, target, roll, m_ActiveModel->m_Cameras);
+				const Vector3& Pos = Camera->m_Position;
+				const Vector3& Target = Camera->m_TargetPosition;
+				float Roll = Camera->m_Roll;
 
-				m_ActiveView->SetCamera(pCamera);
+				Camera = new lcCamera(Pos, Target, Roll, m_ActiveModel->m_Cameras);
+
+				m_ActiveView->SetCamera(Camera);
 				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-				SystemUpdateCurrentCamera(NULL, pCamera, m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
 			}
-/*
-			BoundingBox Box;
-			Box.Reset();
 
-			for (lcPiece* pPiece = m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-				if (pPiece->IsSelected())
-					pPiece->MergeBoundingBox(&Box);
-*/
+			Camera->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+
+			m_nDownX = x;
+			m_nDownY = y;
+			SystemUpdateFocus(NULL);
+			UpdateAllViews();
+		} break;
+
+		case LC_ACTION_ORBIT:
+		{
+			if ((m_nDownY == y) && (m_nDownX == x))
+				break;
+
+			lcCamera* Camera = m_ActiveView->GetCamera();
+
+			// Create a new camera if the user is trying to rotate a side camera.
+			if (Camera->IsSide())
+			{
+				const Vector3& Pos = Camera->m_Position;
+				const Vector3& Target = Camera->m_TargetPosition;
+				float Roll = Camera->m_Roll;
+
+				Camera = new lcCamera(Pos, Target, Roll, m_ActiveModel->m_Cameras);
+
+				m_ActiveView->SetCamera(Camera);
+				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
+			}
+
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					m_ActiveView->GetCamera()->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_X:
-					m_ActiveView->GetCamera()->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
+					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
 					break;
 
 				case LC_OVERLAY_Y:
-					m_ActiveView->GetCamera()->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, y - m_nDownY);
+					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_Z:
-					m_ActiveView->GetCamera()->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
+					Camera->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 			}
 
@@ -8581,7 +8574,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->GetCamera()->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
+			m_ActiveView->GetCamera()->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();

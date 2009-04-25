@@ -20,17 +20,12 @@
 
 lcObject::lcObject(LC_OBJECT_TYPE nType)
 {
-//	m_nState = 0;
-//	m_strName[0] = '\0';
-
 	m_Keys = NULL;
 
 	m_nObjectType = nType;
 	m_pKeyValues = NULL;
 
-//	m_pParent = NULL;
-//	m_pNext = NULL;
-//	m_pNextRender = NULL;
+	m_Next = NULL;
 }
 
 lcObject::~lcObject()

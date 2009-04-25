@@ -56,7 +56,6 @@ public:
 
 	bool IsVisible(u32 Time);
 	void Initialize(float x, float y, float z, u32 Time, int Color);
-	void CreateName(lcPiece* pPiece);
 	void MergeBoundingBox(BoundingBox* Box);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);

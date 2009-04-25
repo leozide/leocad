@@ -8,7 +8,7 @@
 #include "lc_colors.h"
 #include "tr.h"
 
-#define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
+#define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.76
 
 static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 {
@@ -129,7 +129,6 @@ lcCamera::lcCamera(lcCamera* Camera)
 	UpdatePosition(1);
 }
 
-// From LC_ACTION_CAMERA
 lcCamera::lcCamera(const Vector3& Position, const Vector3& Target)
 	: lcObject(LC_OBJECT_CAMERA)
 {
@@ -155,12 +154,10 @@ void lcCamera::Initialize()
 	m_NearDist = 1;
 	m_FarDist = 500;
 
-	m_Next = NULL;
 	m_nState = 0;
 	m_nType = LC_CAMERA_USER;
 
 	m_pTR = NULL;
-	m_Name = "";
 
 	float *values[] = { m_Position, m_TargetPosition, &m_Roll };
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
@@ -183,6 +180,20 @@ bool lcCamera::FileLoad(File& file)
 	if (version > 5)
 		if (!lcObject::FileLoad(file))
 			return false;
+
+	if (version == 6)
+	{
+		for (LC_OBJECT_KEY* node = m_Keys; node; node = node->Next)
+		{
+			if (node->Type == LC_CK_ROLL)
+			{
+				node->Value[0] = 0.0f;
+				node->Value[1] = 0.0f;
+				node->Value[2] = 0.0f;
+				node->Value[3] = 0.0f;
+			}
+		}
+	}
 
 	if (version == 4)
 	{

@@ -27,37 +27,25 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 /////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
 
-static bool lockarrays = false;
-
 lcPiece::lcPiece(PieceInfo* pPieceInfo)
-  : lcObject (LC_OBJECT_PIECE)
+  : lcObject(LC_OBJECT_PIECE)
 {
-  static bool first_time = true;
-
-  if (first_time)
-  {
-    first_time = false;
-    lockarrays = GL_HasCompiledVertexArrays();
-  }
-
-	m_Next = NULL;
 	m_PieceInfo = pPieceInfo;
 	m_nState = 0;
 	m_Color = 0;
 	m_TimeShow = 1;
 	m_TimeHide = LC_OBJECT_TIME_MAX;
-	m_Name = "";
 	m_pGroup = NULL;
 
 	if (m_PieceInfo != NULL)
 		m_PieceInfo->AddRef();
 
 	float *values[] = { m_Position, m_AxisAngle };
-	RegisterKeys (values, piece_key_info, LC_PK_COUNT);
+	RegisterKeys(values, piece_key_info, LC_PK_COUNT);
 
 	float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
-	ChangeKey (1, true, pos, LC_PK_POSITION);
-	ChangeKey (1, true, rot, LC_PK_ROTATION);
+	ChangeKey(1, true, pos, LC_PK_POSITION);
+	ChangeKey(1, true, rot, LC_PK_ROTATION);
 }
 
 lcPiece::~lcPiece()
@@ -78,110 +66,110 @@ void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 
 bool lcPiece::FileLoad(File& file, char* name)
 {
-  unsigned char version, ch;
+	unsigned char version, ch;
 
-  file.ReadByte (&version, 1);
+	file.ReadByte (&version, 1);
 
-  if (version > LC_PIECE_SAVE_VERSION)
-    return false;
+	if (version > LC_PIECE_SAVE_VERSION)
+		return false;
 
-  if (version > 8)
-  {
-    if (!lcObject::FileLoad (file))
-      return false;
-
-	if (version < 10)
+	if (version > 8)
 	{
-		for (LC_OBJECT_KEY* node = m_Keys; node; node = node->Next)
-			if (node->Type == LC_PK_ROTATION)
-				node->Value[3] *= LC_DTOR;
+		if (!lcObject::FileLoad (file))
+			return false;
+
+		if (version < 10)
+		{
+			for (LC_OBJECT_KEY* node = m_Keys; node; node = node->Next)
+				if (node->Type == LC_PK_ROTATION)
+					node->Value[3] *= LC_DTOR;
+		}
 	}
-  }
 
-  if (version < 9)
-  {
-    unsigned short time;
-    float param[4];
-    unsigned char type;
+	if (version < 9)
+	{
+		unsigned short time;
+		float param[4];
+		unsigned char type;
 
-    if (version > 5)
-    {
-      unsigned long keys;
+		if (version > 5)
+		{
+			unsigned long keys;
 
-      file.ReadLong (&keys, 1);
-      while (keys--)
-      {
-        file.ReadFloat (param, 4);
-        file.ReadShort (&time, 1);
-        file.ReadByte (&type, 1);
+			file.ReadLong (&keys, 1);
+			while (keys--)
+			{
+				file.ReadFloat (param, 4);
+				file.ReadShort (&time, 1);
+				file.ReadByte (&type, 1);
 
-		if (type == LC_PK_ROTATION)
-			param[3] *= LC_DTOR;
+				if (type == LC_PK_ROTATION)
+					param[3] *= LC_DTOR;
 
-        ChangeKey(time, true, param, type);
-      }
+				ChangeKey(time, true, param, type);
+			}
 
-      file.ReadLong (&keys, 1);
-      while (keys--)
-      {
-        file.ReadFloat (param, 4);
-        file.ReadShort (&time, 1);
-        file.ReadByte (&type, 1);
-      }
-    }
-    else
-    {
-      if (version > 2)
-      {
-        file.Read (&ch, 1);
+			file.ReadLong (&keys, 1);
+			while (keys--)
+			{
+				file.ReadFloat (param, 4);
+				file.ReadShort (&time, 1);
+				file.ReadByte (&type, 1);
+			}
+		}
+		else
+		{
+			if (version > 2)
+			{
+				file.Read (&ch, 1);
 
-        while (ch--)
-        {
-          Matrix mat;
-          if (version > 3)
-          {
-            file.ReadFloat(mat.m, 16);
-          }
-          else
-          {
-            float move[3], rotate[3];
-            file.ReadFloat(move, 3);
-            file.ReadFloat(rotate, 3);
-            mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
-          }
+				while (ch--)
+				{
+					Matrix mat;
+					if (version > 3)
+					{
+						file.ReadFloat(mat.m, 16);
+					}
+					else
+					{
+						float move[3], rotate[3];
+						file.ReadFloat(move, 3);
+						file.ReadFloat(rotate, 3);
+						mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+					}
 
-          unsigned char b;
-          file.ReadByte(&b, 1);
-          time = b;
+					unsigned char b;
+					file.ReadByte(&b, 1);
+					time = b;
 
-          mat.GetTranslation(&param[0], &param[1], &param[2]);
-          param[3] = 0;
-          ChangeKey(time, true, param, LC_PK_POSITION);
+					mat.GetTranslation(&param[0], &param[1], &param[2]);
+					param[3] = 0;
+					ChangeKey(time, true, param, LC_PK_POSITION);
 
-          mat.ToAxisAngle(param);
-          ChangeKey(time, true, param, LC_PK_ROTATION);
+					mat.ToAxisAngle(param);
+					ChangeKey(time, true, param, LC_PK_ROTATION);
 
-          int bl;
-          file.ReadLong (&bl, 1);
-        }
-      }
-      else
-      {
-        Matrix mat;
-        float move[3], rotate[3];
-        file.ReadFloat(move, 3);
-        file.ReadFloat(rotate, 3);
-        mat.CreateOld(move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+					int bl;
+					file.ReadLong (&bl, 1);
+				}
+			}
+			else
+			{
+				Matrix mat;
+				float move[3], rotate[3];
+				file.ReadFloat(move, 3);
+				file.ReadFloat(rotate, 3);
+				mat.CreateOld(move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
 
-        mat.GetTranslation(&param[0], &param[1], &param[2]);
-        param[3] = 0;
-        ChangeKey(1, true, param, LC_PK_POSITION);
+				mat.GetTranslation(&param[0], &param[1], &param[2]);
+				param[3] = 0;
+				ChangeKey(1, true, param, LC_PK_POSITION);
 
-        mat.ToAxisAngle(param);
-        ChangeKey(1, true, param, LC_PK_ROTATION);
-      }
-    }
-  }
+				mat.ToAxisAngle(param);
+				ChangeKey(1, true, param, LC_PK_ROTATION);
+			}
+		}
+	}
 
 	// Common to all versions.
 	file.Read(name, 9);
@@ -208,68 +196,79 @@ bool lcPiece::FileLoad(File& file, char* name)
 		m_Color = lcConvertLDrawColor(Color);
 	}
 
-  u8 step;
-  file.ReadByte(&step, 1);
-  m_TimeShow = step;
-  if (version > 1)
-  {
-    file.ReadByte(&step, 1);
-    m_TimeHide = step;
-  }
-  else
-    m_TimeHide = LC_OBJECT_TIME_MAX;
+	if (version < 10)
+	{
+		u8 step;
+		file.ReadByte(&step, 1);
+		m_TimeShow = step;
+		if (version > 1)
+		{
+			file.ReadByte(&step, 1);
+			m_TimeHide = step;
+		}
+		else
+			m_TimeHide = LC_OBJECT_TIME_MAX;
+	}
+	else
+	{
+		file.ReadLong(&m_TimeShow, 1);
+		file.ReadLong(&m_TimeHide, 1);
+	}
 
-  if (version > 5)
-  {
-    u16 sh;
-    file.ReadShort(&sh, 1); // m_nFrameShow
-    file.ReadShort(&sh, 1); // m_nFrameHide
+	if (version > 5)
+	{
+		if (version < 10)
+		{
+			u16 sh;
+			file.ReadShort(&sh, 1); // m_nFrameShow
+			file.ReadShort(&sh, 1); // m_nFrameHide
+		}
 
-    if (version > 7)
-    {
-      file.ReadByte(&m_nState, 1);
-      Select (false, false, false);
-      file.ReadByte(&ch, 1);
-	  char buf[81];
-      file.Read(buf, ch);
-	  buf[80] = 0;
-	  m_Name = buf;
-    }
-    else
-    {
-      int hide;
-      file.ReadLong(&hide, 1);
-      if (hide != 0)
-        m_nState |= LC_PIECE_HIDDEN;
-	  char buf[81];
-      file.Read(buf, 81);
-	  buf[80] = 0;
-	  m_Name = buf;
-    }
+		if (version > 7)
+		{
+			file.ReadByte(&m_nState, 1);
+			Select (false, false, false);
+			file.ReadByte(&ch, 1);
+			char buf[81];
+			file.Read(buf, ch);
+			buf[80] = 0;
+			m_Name = buf;
+		}
+		else
+		{
+			int hide;
+			file.ReadLong(&hide, 1);
+			if (hide != 0)
+				m_nState |= LC_PIECE_HIDDEN;
+			char buf[81];
+			file.Read(buf, 81);
+			buf[80] = 0;
+			m_Name = buf;
+		}
 
-    // 7 (0.64)
-    int i = -1;
-    if (version > 6)
-      file.ReadLong(&i, 1);
-    m_pGroup = (Group*)i;
-  }
-  else
-  {
-    m_TimeShow = 1;
-    m_TimeHide = LC_OBJECT_TIME_MAX;
+		// 7 (0.64)
+		int i = -1;
+		if (version > 6)
+			file.ReadLong(&i, 1);
+		m_pGroup = (Group*)i;
+	}
+	else
+	{
+		m_TimeShow = 1;
+		m_TimeHide = LC_OBJECT_TIME_MAX;
 
-    file.ReadByte(&ch, 1);
-    if (ch == 0)
-      m_pGroup = (Group*)-1;
-    else
-      m_pGroup = (Group*)(unsigned long)ch;
+		file.ReadByte(&ch, 1);
+		if (ch == 0)
+			m_pGroup = (Group*)-1;
+		else
+			m_pGroup = (Group*)(unsigned long)ch;
 
-    file.ReadByte(&ch, 1);
-    if (ch & 0x01)
-      m_nState |= LC_PIECE_HIDDEN;
-  }
+		file.ReadByte(&ch, 1);
+		if (ch & 0x01)
+			m_nState |= LC_PIECE_HIDDEN;
+	}
 
-  return true;
+	return true;
 }
 
 void lcPiece::FileSave (File& file, Group* pGroups)
@@ -278,7 +277,7 @@ void lcPiece::FileSave (File& file, Group* pGroups)
 
   file.WriteByte (&ch, 1);
 
-  lcObject::FileSave (file);
+  lcObject::FileSave(file);
 
   file.Write(m_PieceInfo->m_strName, 9);
   file.WriteLong(&g_ColorList[m_Color].Code, 1);
@@ -317,21 +316,6 @@ void lcPiece::Initialize(float x, float y, float z, u32 Time, int Color)
   ChangeKey(1, true, rot, LC_PK_ROTATION);
 
   UpdatePosition(1);
-}
-
-void lcPiece::CreateName(lcPiece* pPiece)
-{
-	int i, max = 0;
-
-	for (; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-		if (strncmp(pPiece->m_Name, m_PieceInfo->m_strDescription, strlen(m_PieceInfo->m_strDescription)) == 0)
-			if (sscanf((char*)pPiece->m_Name + strlen(m_PieceInfo->m_strDescription), " #%d", &i) == 1)
-				if (i > max) 
-					max = i;
-
-	char buf[256];
-	sprintf(buf, "%s #%.2d", m_PieceInfo->m_strDescription, max+1);
-	m_Name = buf;
 }
 
 void lcPiece::Select(bool bSelecting, bool bFocus, bool bMultiple)

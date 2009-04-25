@@ -124,7 +124,6 @@ void lcLight::Initialize()
 	m_bEnabled = true;
 	m_nState = 0;
 	m_Target = NULL;
-	m_Name = "";
 
 	m_AmbientColor[3] = 1.0f;
 	m_DiffuseColor[3] = 1.0f;
@@ -135,12 +134,11 @@ void lcLight::Initialize()
 	RegisterKeys(values, light_key_info, LC_LK_COUNT);
 
 	// set the default values
-	float ambient[] = { 0, 0, 0 }, diffuse[] = { 0.8f, 0.8f, 0.8f }, specular[] = { 1, 1, 1 };
 	float constant = 1, linear = 0, quadratic = 0, cutoff = 30, exponent = 0;
 
-	ChangeKey(1, true, ambient, LC_LK_AMBIENT_COLOR);
-	ChangeKey(1, true, diffuse, LC_LK_DIFFUSE_COLOR);
-	ChangeKey(1, true, specular, LC_LK_SPECULAR_COLOR);
+	ChangeKey(1, true, Vector4(0.0f, 0.0f, 0.0f, 1.0f), LC_LK_AMBIENT_COLOR);
+	ChangeKey(1, true, Vector4(0.8f, 0.8f, 0.8f, 1.0f), LC_LK_DIFFUSE_COLOR);
+	ChangeKey(1, true, Vector4(1.0f, 1.0f, 1.0f, 1.0f), LC_LK_SPECULAR_COLOR);
 	ChangeKey(1, true, &constant, LC_LK_CONSTANT_ATTENUATION);
 	ChangeKey(1, true, &linear, LC_LK_LINEAR_ATTENUATION);
 	ChangeKey(1, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
@@ -151,27 +149,6 @@ void lcLight::Initialize()
 lcLight::~lcLight()
 {
 	delete m_Target;
-}
-
-void lcLight::CreateName(const lcLight* pLight)
-{
-	int i, max = 0;
-
-	for (; pLight; pLight = (lcLight*)pLight->m_Next)
-	{
-		if (strncmp(pLight->m_Name, "Light ", 6) == 0)
-		{
-			if (sscanf((char*)pLight->m_Name + 6, " #%d", &i) == 1)
-			{
-				if (i > max)
-					max = i;
-			}
-		}
-	}
-
-	char Name[256];
-	sprintf(Name, "Light #%.2d", max+1);
-	m_Name = Name;
 }
 
 void lcLight::Select(bool bSelecting, bool bFocus, bool bMultiple)

@@ -98,7 +98,6 @@ public:
 	void UpdatePosition(u32 Time);
 	void Move(u32 Time, bool AddKey, const Vector3& Delta);
 	void Setup(int index);
-	void CreateName(const lcLight* pLight);
 
 protected:
 	void Initialize ();

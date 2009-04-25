@@ -388,7 +388,7 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 
 		lcSetColor(CurColor);
 
-#ifdef LC_PROFILE
+#if LC_PROFILE
 		if (Section->PrimitiveType == GL_QUADS)
 			g_RenderStats.QuadCount += Section->IndexCount / 4;
 		else if (Section->PrimitiveType == GL_TRIANGLES)
@@ -404,9 +404,9 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 	m_VertexBuffer->UnbindBuffer();
 }
 
+/*
 void lcMesh::AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, lcPieceObject* Owner)
 {
-	/*
 	for (int i = 0; i < m_SectionCount; i++)
 	{
 		lcRenderSection RenderSection;
@@ -448,8 +448,8 @@ void lcMesh::AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, l
 			Scene->m_OpaqueSections.Add(RenderSection);
 		}
 	}
-	*/
 }
+*/
 
 bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float* Dist) const
 {

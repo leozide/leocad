@@ -7,7 +7,6 @@
 #include "algebra.h"
 
 class lcScene;
-class lcPieceObject;
 
 class lcVertexBuffer
 {
@@ -178,7 +177,7 @@ public:
 
 	void Clear();
 	void Render(int Color, bool Selected = false, bool Focused = false);
-	void AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, lcPieceObject* Owner);
+//	void AddToScene(lcScene* Scene, const Matrix44& ModelWorld, int Color, lcPieceObject* Owner);
 	bool ClosestRayIntersect(const Vector3& Start, const Vector3& End, float* Dist) const;
 
 public:

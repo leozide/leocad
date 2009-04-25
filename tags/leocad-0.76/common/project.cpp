@@ -390,12 +390,12 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 					for (lcPiece* p = m_ActiveModel->m_Pieces; p; p = (lcPiece*)p->m_Next)
 						if (p->m_Name == Piece->m_Name)
 						{
-							Piece->CreateName(m_ActiveModel->m_Pieces);
+							Piece->SetUniqueName(m_ActiveModel->m_Pieces, pInfo->m_strDescription);
 							break;
 						}
 
 				if (Piece->m_Name.GetLength() == 0)
-					Piece->CreateName(m_ActiveModel->m_Pieces);
+					Piece->SetUniqueName(m_ActiveModel->m_Pieces, pInfo->m_strDescription);
 
 				m_ActiveModel->AddPiece(Piece);
 				if (!bUndo)
@@ -430,7 +430,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				Matrix mat;
 
 				Piece->Initialize(pos[0], pos[1], pos[2], step, color);
-				Piece->CreateName(m_ActiveModel->m_Pieces);
+				Piece->SetUniqueName(m_ActiveModel->m_Pieces, Info->m_strDescription);
 				m_ActiveModel->AddPiece(Piece);
 				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
 				mat.ToAxisAngle(param);
@@ -796,7 +796,7 @@ void Project::FileSave(File* file, bool bUndo)
 		i++;
 	file->WriteLong (&i, 1);
 
-	for (i = 0, Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
+	for (Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
 		Camera->FileSave(*file);
 
 	for (j = 0; j < 4; j++)
@@ -1015,7 +1015,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 
 					tmpmat.GetTranslation(&x, &y, &z);
 					Piece->Initialize(x, y, z, *nStep, cl);
-					Piece->CreateName(m_ActiveModel->m_Pieces);
+					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Info->m_strDescription);
 					m_ActiveModel->AddPiece(Piece);
 					tmpmat.ToAxisAngle(rot);
 					Piece->ChangeKey(1, false, rot, LC_PK_ROTATION);
@@ -1968,30 +1968,191 @@ void Project::RenderScene(View* view)
 		m_pTerrain->Render(view->GetCamera(), ratio);
 	}
 
-	{
-		bool bTrans = false;
-		lcPiece* pPiece;
+	// TODO: Build the render lists outside of the render function and only sort translucent sections here.
 
-		for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+	struct lcRenderSection
+	{
+//		Matrix44 ModelWorld;
+		lcPiece* Owner;
+		lcMesh* Mesh;
+		lcMeshSection* Section;
+		float Distance;
+		int Color;
+	};
+
+	// Build a list for opaque and another for translucent mesh sections.
+	lcObjArray<lcRenderSection> OpaqueSections(1024);
+	lcObjArray<lcRenderSection> TranslucentSections(1024);
+
+	const Matrix44& WorldView = view->GetCamera()->m_WorldView;
+
+	for (lcPiece * Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	{
+		if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
+			continue;
+
+		lcMesh* Mesh = Piece->m_PieceInfo->m_Mesh;
+
+		for (int i = 0; i < Mesh->m_SectionCount; i++)
 		{
-			if (pPiece->IsVisible(m_ActiveModel->m_CurFrame))
+			lcRenderSection RenderSection;
+			lcMeshSection* Section = &Mesh->m_Sections[i];
+
+			RenderSection.Owner = Piece;
+			RenderSection.Mesh = Mesh;
+			RenderSection.Section = Section;
+
+			if (Section->ColorIndex == LC_COLOR_DEFAULT)
+				RenderSection.Color = Piece->m_Color;
+			else
+				RenderSection.Color = Section->ColorIndex;
+
+			if (RenderSection.Section->PrimitiveType == GL_LINES)
 			{
-				if (pPiece->IsSelected())
-					glLineWidth (2*m_fLineWidth);
-				else
-					glLineWidth(m_fLineWidth);
-				pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
+				// FIXME: LC_DET_BRICKEDGES
+//				if ((m_nDetail & LC_DET_BRICKEDGES) == 0)
+//					continue;
+
+				if (Piece->IsFocused())
+					RenderSection.Color = LC_COLOR_FOCUS;
+				else if (Piece->IsSelected())
+					RenderSection.Color = LC_COLOR_SELECTION;
+			}
+
+			if (LC_COLOR_TRANSLUCENT(RenderSection.Color))
+			{
+				// Sort by distance to the camera.
+				Vector3 Pos = Mul31(Section->Box.GetCenter(), Piece->m_ModelWorld);
+				Pos = Mul31(Pos, WorldView);
+				RenderSection.Distance = Pos[2];
+
+				TranslucentSections.Add(RenderSection);
+			}
+			else
+			{
+				// Pieces are already sorted by vertex buffer, so no need to sort again here.
+				// TODO: not true anymore, need to sort by vertex buffer here.
+				OpaqueSections.Add(RenderSection);
 			}
 		}
-
-		if (bTrans)
-		{
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
-		}
-		glLineWidth(m_fLineWidth);
-		glDisable(GL_CULL_FACE);
 	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+
+	lcVertexBuffer* LastVertexBuffer = NULL;
+	lcIndexBuffer* LastIndexBuffer = NULL;
+	lcPiece* LastPiece = NULL;
+	lcMesh* LastMesh;
+
+	glPushMatrix();
+
+	// Render opaque sections.
+	for (int i = 0; i < OpaqueSections.GetSize(); i++)
+	{
+		lcRenderSection& RenderSection = OpaqueSections[i];
+		lcMesh* Mesh = RenderSection.Mesh;
+
+		if (Mesh->m_VertexBuffer != LastVertexBuffer)
+		{
+			LastVertexBuffer = Mesh->m_VertexBuffer;
+			LastVertexBuffer->BindBuffer();
+		}
+
+		if (Mesh->m_IndexBuffer != LastIndexBuffer)
+		{
+			LastIndexBuffer = Mesh->m_IndexBuffer;
+			LastIndexBuffer->BindBuffer();
+		}
+
+		if (LastPiece != RenderSection.Owner || LastMesh != Mesh)
+		{
+			LastPiece = RenderSection.Owner;
+			LastMesh = Mesh;
+			glPopMatrix();
+			glPushMatrix();
+			glMultMatrixf(LastPiece->m_ModelWorld);
+
+			if (LastPiece->IsSelected())
+				glLineWidth(2.0f);
+			else
+				glLineWidth(1.0f);
+		}
+
+		lcSetColor(RenderSection.Color);
+
+		lcMeshSection* Section = RenderSection.Section;
+
+#if LC_PROFILE
+		if (Section->PrimitiveType == GL_QUADS)
+			g_RenderStats.QuadCount += Section->IndexCount / 4;
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+			g_RenderStats.TriCount += Section->IndexCount / 3;
+		else if (Section->PrimitiveType == GL_LINES)
+			g_RenderStats.LineCount += Section->IndexCount / 2;
+#endif
+
+		glDrawElements(Section->PrimitiveType, Section->IndexCount, Mesh->m_IndexType, (char*)LastIndexBuffer->GetDrawElementsOffset() + Section->IndexOffset);
+	}
+
+	// Render translucent sections.
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	for (int j = 0; j < TranslucentSections.GetSize(); j++)
+	{
+		lcRenderSection& RenderSection = TranslucentSections[j];
+		lcMesh* Mesh = RenderSection.Mesh;
+
+		if (Mesh->m_VertexBuffer != LastVertexBuffer)
+		{
+			LastVertexBuffer = Mesh->m_VertexBuffer;
+			LastVertexBuffer->BindBuffer();
+		}
+
+		if (Mesh->m_IndexBuffer != LastIndexBuffer)
+		{
+			LastIndexBuffer = Mesh->m_IndexBuffer;
+			LastIndexBuffer->BindBuffer();
+		}
+
+		if (LastPiece != RenderSection.Owner)
+		{
+			LastPiece = RenderSection.Owner;
+			glPopMatrix();
+			glPushMatrix();
+			glMultMatrixf(LastPiece->m_ModelWorld);
+		}
+
+		lcSetColor(RenderSection.Color);
+
+		lcMeshSection* Section = RenderSection.Section;
+
+#if LC_PROFILE
+		if (Section->PrimitiveType == GL_QUADS)
+			g_RenderStats.QuadCount += Section->IndexCount / 4;
+		else if (Section->PrimitiveType == GL_TRIANGLES)
+			g_RenderStats.TriCount += Section->IndexCount / 3;
+		else if (Section->PrimitiveType == GL_LINES)
+			g_RenderStats.LineCount += Section->IndexCount / 2;
+#endif
+
+		glDrawElements(Section->PrimitiveType, Section->IndexCount, Mesh->m_IndexType, (char*)LastIndexBuffer->GetDrawElementsOffset() + Section->IndexOffset);
+	}
+
+	glPopMatrix();
+
+	// Reset states.
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);
+
+	if (LastVertexBuffer)
+		LastVertexBuffer->UnbindBuffer();
+
+	if (LastIndexBuffer)
+		LastIndexBuffer->UnbindBuffer();
 
 	// Add piece preview.
 	if (m_nCurAction == LC_ACTION_INSERT)
@@ -3032,12 +3193,6 @@ void Project::SetActiveModel(lcModel* Model)
 	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 	UpdateSelection();
 	UpdateAllViews();
-}
-
-void Project::GetTimeRange(u32* from, u32* to)
-{
-	*from = m_ActiveModel->m_CurFrame;
-	*to = m_Animation ? m_ActiveModel->m_TotalFrames : GetLastStep();
 }
 
 void Project::CalculateStep()
@@ -4694,7 +4849,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				pPiece = pPasted;
 				pPasted = (lcPiece*)pPasted->m_Next;
-				pPiece->CreateName(m_ActiveModel->m_Pieces);
+				pPiece->SetUniqueName(m_ActiveModel->m_Pieces, pPiece->m_PieceInfo->m_strDescription);
 				pPiece->m_TimeShow = m_ActiveModel->m_CurFrame;
 				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select(true, false, false);
@@ -4956,7 +5111,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Piece->Initialize(0, 0, 0, m_ActiveModel->m_CurFrame, g_App->m_SelectedColor);
 
 			SelectAndFocusNone(false);
-			Piece->CreateName(m_ActiveModel->m_Pieces);
+			Piece->SetUniqueName(m_ActiveModel->m_Pieces, Piece->m_PieceInfo->m_strDescription);
 			m_ActiveModel->AddPiece(Piece);
 			Piece->Select (true, true, false);
 			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, Piece);
@@ -5002,7 +5157,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					lcPiece* Piece = new lcPiece(Wizard.m_Info[i]);
 
 					Piece->Initialize(Wizard.m_Position[i][0], Wizard.m_Position[i][1], Wizard.m_Position[i][2], m_ActiveModel->m_CurFrame, Wizard.m_Colors[i]);
-					Piece->CreateName(m_ActiveModel->m_Pieces);
+					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Piece->m_PieceInfo->m_strDescription);
 					m_ActiveModel->AddPiece(Piece);
 					Piece->Select(true, false, false);
 
@@ -5182,7 +5337,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				while (pFirst)
 				{
 					pPiece = (lcPiece*)pFirst->m_Next;
-					pFirst->CreateName(m_ActiveModel->m_Pieces);
+					pFirst->SetUniqueName(m_ActiveModel->m_Pieces, pFirst->m_PieceInfo->m_strDescription);
 					pFirst->UpdatePosition(m_ActiveModel->m_CurFrame);
 					m_ActiveModel->AddPiece(pFirst);
 					pFirst = pPiece;
@@ -5442,20 +5597,21 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_NEXT:
 		{
 			bool Redraw = false;
+			u32 MaxTime = m_Animation ? m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX;
 
 			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 			{
-				if (Piece->IsSelected())
-				{
-					u32 t = Piece->m_TimeShow;
-					if (t < m_ActiveModel->m_TotalFrames)
-					{
-						Piece->m_TimeShow++;
-						Redraw = true;
+				if (!Piece->IsSelected())
+					continue;
 
-						if (Piece->IsSelected() && t == m_ActiveModel->m_CurFrame)
-							Piece->Select(false, false, false);
-					}
+				u32 t = Piece->m_TimeShow;
+				if (t < MaxTime)
+				{
+					Piece->m_TimeShow++;
+					Redraw = true;
+
+					if (Piece->IsSelected() && t == m_ActiveModel->m_CurFrame)
+						Piece->Select(false, false, false);
 				}
 			}
 
@@ -7090,7 +7246,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder, bool Sna
 				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
 				NewLocalToWorld = Mul(Rotation, LocalToFocus);
 
-				Quaternion WorldToLocal = QuaternionFromAxisAngle(Vector4(Vector3(Rot), -Rot[3]));
+				Quaternion WorldToLocal = QuaternionFromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3]));
 
 				Distance = Mul(Distance, WorldToLocal);
 				Distance = Mul(Distance, NewLocalToWorld);
@@ -7747,7 +7903,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 				SelectAndFocusNone(false);
-				pPiece->CreateName(m_ActiveModel->m_Pieces);
+				pPiece->SetUniqueName(m_ActiveModel->m_Pieces, pPiece->m_PieceInfo->m_strDescription);
 				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
@@ -7770,11 +7926,11 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				if (count == max)
 					break;
 
-				pLight = new lcLight (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
+				pLight = new lcLight(m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 
 				SelectAndFocusNone (false);
 
-				pLight->CreateName(m_ActiveModel->m_Lights);
+				pLight->SetUniqueName(m_ActiveModel->m_Lights, "Light");
 				pLight->m_Next = m_ActiveModel->m_Lights;
 				m_ActiveModel->m_Lights = pLight;
 				SystemUpdateFocus (pLight);
@@ -7808,8 +7964,9 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
 			Light = new lcLight(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
-			Light->GetTarget ()->Select (true, true, false);
+			Light->GetTarget()->Select (true, true, false);
 			Light->m_Next = m_ActiveModel->m_Lights;
+			Light->SetUniqueName(m_ActiveModel->m_Lights, "Light");
 			m_ActiveModel->m_Lights = Light;
 			UpdateSelection();
 			UpdateAllViews();
@@ -7937,7 +8094,7 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				pPiece->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 				SelectAndFocusNone(false);
-				pPiece->CreateName(m_ActiveModel->m_Pieces);
+				pPiece->SetUniqueName(m_ActiveModel->m_Pieces, pPiece->m_PieceInfo->m_strDescription);
 				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select (true, true, false);
 				UpdateSelection();

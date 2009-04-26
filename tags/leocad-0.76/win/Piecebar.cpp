@@ -10,6 +10,7 @@
 #include "project.h"
 #include "lc_colors.h"
 #include "lc_application.h"
+#include "lc_model.h"
 #include "preview.h"
 
 #ifdef _DEBUG
@@ -515,6 +516,28 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					HTREEITEM CategoryItem = Notify->itemNew.hItem;
 					CString CategoryName = m_PiecesTree.GetItemText(CategoryItem);
 
+					if (CategoryName == "Models")
+					{
+						// List models.
+						Project* project = lcGetActiveProject();
+						bool Empty = true;
+
+						for (int i = 0; i < project->m_ModelList.GetSize(); i++)
+						{
+							lcModel* Model = project->m_ModelList[i];
+
+							if ((Model == project->m_ActiveModel) || (Model->IsSubModel(project->m_ActiveModel)))
+								continue;
+
+							Empty = false;
+
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Model->m_Name, 0, 0, 0, 0, (LPARAM)Model->m_PieceInfo, CategoryItem, TVI_LAST);
+						}
+
+						if (Empty)
+							m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, "No Models", 0, 0, 0, 0, (LPARAM)NULL, CategoryItem, TVI_LAST);
+					}
+					else 
 					{
 						// Expanding a category item.
 						int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);

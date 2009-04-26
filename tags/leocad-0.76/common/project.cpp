@@ -196,6 +196,9 @@ void Project::DeleteContents(bool bUndo)
 
 	// Remove all submodels.
 	for (int i = 0; i < m_ModelList.GetSize(); i++)
+		m_ModelList[i]->DeleteContents();
+
+	for (int i = 0; i < m_ModelList.GetSize(); i++)
 		delete m_ModelList[i];
 	m_ModelList.RemoveAll();
 

@@ -10,6 +10,7 @@
 #include "library.h"
 #include "lc_application.h"
 #include "lc_mesh.h"
+#include "lc_model.h"
 
 #if LC_IPHONE
 #define SIDES 8
@@ -43,18 +44,18 @@ static float costbl[SIDES];
 
 PieceInfo::PieceInfo()
 {
-  // Do nothing, initialization is done by LoadIndex()
+	// Do nothing, initialization is done by LoadIndex() or CreateFromModel().
 }
 
 PieceInfo::~PieceInfo()
 {
-  FreeInformation();
+	FreeInformation();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // File I/O
 
-void PieceInfo::LoadIndex (File& file)
+void PieceInfo::LoadIndex(File& file)
 {
   static bool init = false;
   short sh[6];
@@ -107,6 +108,34 @@ void PieceInfo::LoadIndex (File& file)
 
   m_BoundingBox = BoundingBox(Vector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]),
                               Vector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]));
+}
+
+void PieceInfo::CreateFromModel(lcModel* Model)
+{
+	strncpy(m_strDescription, Model->m_Name, sizeof(m_strDescription));
+	m_strDescription[sizeof(m_strDescription)-1] = 0;
+
+	m_fDimensions[3] = Model->m_BoundingBox.m_Min[0];
+	m_fDimensions[4] = Model->m_BoundingBox.m_Min[1];
+	m_fDimensions[5] = Model->m_BoundingBox.m_Min[2];
+	m_fDimensions[0] = Model->m_BoundingBox.m_Max[0];
+	m_fDimensions[1] = Model->m_BoundingBox.m_Max[1];
+	m_fDimensions[2] = Model->m_BoundingBox.m_Max[2];
+	m_nOffset = 0;
+	m_nSize = 0;
+
+	m_nFlags = LC_PIECE_MODEL;
+	m_nConnectionCount = 0;
+	m_pConnections = NULL;
+	m_nGroupCount = 0;
+	m_pGroups = NULL;
+	m_nTextureCount = 0;
+	m_pTextures = NULL;
+	m_Mesh = Model->m_Mesh;
+	m_BoundingBox = Model->m_BoundingBox;
+	m_Model = Model;
+
+	m_nRef = 0;
 }
 
 void PieceInfo::AddRef()
@@ -443,6 +472,9 @@ static void WriteHollowStudDrawInfo(int Color, const Matrix44& Mat, lcMeshEditor
 
 void PieceInfo::LoadInformation()
 {
+	if (m_nFlags & LC_PIECE_MODEL)
+		return;
+
 	FileDisk bin;
 	char filename[LC_MAXPATH];
 	CONNECTIONINFO* pConnection;
@@ -829,6 +861,9 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 
 void PieceInfo::FreeInformation()
 {
+	if (m_nFlags & LC_PIECE_MODEL)
+		return;
+
 	delete m_Mesh;
 	m_Mesh = NULL;
 
@@ -989,15 +1024,6 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
   glTranslatef(-NewEye[0], -NewEye[1], -NewEye[2]);
 }
 
-// Used by the print catalog and HTML instructions functions.
-void PieceInfo::RenderOnce(int nColor)
-{
-	AddRef();
-	RenderPiece(nColor);
-	DeRef();
-}
-
-// Called by the piece preview and from RenderOnce()
 void PieceInfo::RenderPiece(int nColor)
 {
 	unsigned short sh;

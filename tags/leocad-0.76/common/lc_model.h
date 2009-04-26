@@ -2,14 +2,15 @@
 #define _LC_MODEL_H_
 
 #include "str.h"
-//#include "config.h"
-//#include "algebra.h"
+#include "algebra.h"
 //#include "lc_array.h"
 
 class lcObject;
 class lcPiece;
 class lcCamera;
 class lcLight;
+class lcMesh;
+class PieceInfo;
 //class lcScene;
 
 class lcModel
@@ -19,8 +20,11 @@ public:
 	~lcModel();
 
 public:
+	// Empty model.
+	void DeleteContents();
+
 	// Check if a given model is referenced by this model.
-//	bool IsSubModel(const lcModel* Model) const;
+	bool IsSubModel(const lcModel* Model) const;
 
 	// Get a list of all actual pieces used by this model.
 //	void GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const;
@@ -94,7 +98,14 @@ public:
 	String m_Comments;
 
 	// Data used when the model isn't active.
-//	BoundingBox m_BoundingBox;
+	BoundingBox m_BoundingBox;
+	lcMesh* m_Mesh;
+	PieceInfo* m_PieceInfo;
+
+protected:
+	// Helper function to build a mesh for the current state of this model.
+	template<typename T>
+	void BuildMesh(u32* SectionIndices);
 };
 
 #endif // _LC_MODEL_H_

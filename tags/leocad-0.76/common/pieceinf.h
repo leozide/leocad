@@ -9,10 +9,12 @@
 #define LC_PIECE_CCW                0x04 // Use back-face culling
 #define LC_PIECE_SMALL              0x10 // scale = 10000
 #define LC_PIECE_MEDIUM             0x20 // scale = 1000 (otherwise = 100)
+#define LC_PIECE_MODEL              0x40 // This is a model instead of a piece from the library.
 
 class File;
 class Texture;
 class lcMesh;
+class lcModel;
 
 struct CONNECTIONINFO
 {
@@ -66,22 +68,15 @@ public:
 		return (m_strDescription[0] == '~');
 	}
 
-	Vector3 GetCenter() const
-	{
-		return Vector3((m_fDimensions[0] + m_fDimensions[3]) * 0.5f,
-		               (m_fDimensions[1] + m_fDimensions[4]) * 0.5f,
-		               (m_fDimensions[2] + m_fDimensions[5]) * 0.5f);
-	}
-
 	// Operations
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
-	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
 	void RenderBox();
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
 
 	// Implementation
 	void LoadIndex(File& file);
+	void CreateFromModel(lcModel* Model);
 	void AddRef();
 	void DeRef();
 
@@ -90,19 +85,20 @@ public:
 	char m_strName[9];
 	char m_strDescription[65];
 	float m_fDimensions[6];
-	unsigned long m_nOffset;
-	unsigned long m_nSize;
+	u32 m_nOffset;
+	u32 m_nSize;
 
 	// Nobody should change these
-	unsigned char m_nFlags;
-	unsigned short m_nConnectionCount;
+	u8 m_nFlags;
+	u16 m_nConnectionCount;
 	CONNECTIONINFO* m_pConnections;
-	unsigned short m_nGroupCount;
+	u16 m_nGroupCount;
 	DRAWGROUP* m_pGroups;
-	unsigned char m_nTextureCount;
+	u8 m_nTextureCount;
 	TEXTURE* m_pTextures;
 	lcMesh* m_Mesh;
 	BoundingBox m_BoundingBox;
+	lcModel* m_Model;
 
 protected:
 	int m_nRef;

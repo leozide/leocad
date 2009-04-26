@@ -650,11 +650,6 @@ void PieceInfo::LoadInformation()
 		}
 	}
 
-	if (verts > 65535)
-		m_nFlags |= LC_PIECE_LONGDATA;
-	else
-		m_nFlags &= ~LC_PIECE_LONGDATA;
-
 	m_Mesh = new lcMesh(sections, tris + lines, verts, NULL);
 
 	if (m_Mesh->m_IndexType == GL_UNSIGNED_SHORT)

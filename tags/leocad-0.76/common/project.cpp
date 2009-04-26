@@ -9658,7 +9658,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 
 				for (group = 0; group < pInfo->m_nGroupCount; group++)
 				{
-					if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+					if (pInfo->m_Mesh->m_IndexType == GL_UNSIGNED_INT)
 					{
 						unsigned long col = color;
 						getMinMax(col, pPiece, group, &(allGroups[j]));
@@ -9724,7 +9724,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 				{
 					if (beginGroup && rigidBody)
 					{
-						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+						if (pInfo->m_Mesh->m_IndexType == GL_UNSIGNED_INT)
 						{
 							unsigned long col = color;
 							writeVRMLShapeBegin(stream, col, false);
@@ -9742,7 +9742,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 					{
 						writeIndent(stream);
 						fprintf(stream, "# group %d\n",(int)group);
-						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+						if (pInfo->m_Mesh->m_IndexType == GL_UNSIGNED_INT)
 						{
 							unsigned long col = color;
 							writeVRMLShapes(col, stream, coordinateCounter, pPiece, group, pos, !rigidBody);

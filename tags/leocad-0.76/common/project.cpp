@@ -1520,10 +1520,16 @@ void Project::AddView (View* pView)
 
 	pView->MakeCurrent();
 	RenderInitialize();
+
+	if (m_ViewList.GetSize() == 1)
+		lcCreateDefaultMeshes();
 }
 
 void Project::RemoveView(View* pView)
 {
+	if (m_ViewList.GetSize() == 1)
+		lcDestroyDefaultMeshes();
+
 	if (pView == m_ActiveView)
 		m_ActiveView = NULL;
 	m_ViewList.RemovePointer(pView);
@@ -2156,6 +2162,26 @@ void Project::RenderScene(View* view)
 
 	if (LastIndexBuffer)
 		LastIndexBuffer->UnbindBuffer();
+
+	glLineWidth(2.0f);
+
+	// Draw selection boxes.
+	for (lcPiece * Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	{
+		if (!Piece->IsVisible(m_ActiveModel->m_CurFrame) || !Piece->IsSelected())
+			continue;
+
+		const BoundingBox& Box = Piece->m_PieceInfo->m_BoundingBox;
+		Vector3 Size = Box.m_Max - Box.m_Min;
+
+		Matrix44 ScaleMatrix(Vector4(Size[0], 0.0f, 0.0f, 0.0f), Vector4(0.0f, Size[1], 0.0f, 0.0f), Vector4(0.0f, 0.0f, Size[2], 0.0f), Vector4(Box.GetCenter(), 1.0f));
+		Matrix44 ModelWorld = Mul(ScaleMatrix, Piece->m_ModelWorld);
+
+		glPushMatrix();
+		glMultMatrixf(ModelWorld);
+		lcSelectionMesh->Render(LC_COLOR_SELECTION, true, Piece->IsFocused());
+		glPopMatrix();
+	}
 
 	// Add piece preview.
 	if (m_nCurAction == LC_ACTION_INSERT)

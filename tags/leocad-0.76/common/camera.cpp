@@ -6,7 +6,6 @@
 #include "file.h"
 #include "lc_application.h"
 #include "lc_colors.h"
-#include "tr.h"
 
 #define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.76
 
@@ -156,8 +155,6 @@ void lcCamera::Initialize()
 
 	m_nState = 0;
 	m_nType = LC_CAMERA_USER;
-
-	m_pTR = NULL;
 
 	float *values[] = { m_Position, m_TargetPosition, &m_Roll };
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
@@ -763,37 +760,4 @@ void lcCamera::Roll(u32 Time, bool AddKey, int MouseX, int MouseY)
 
 	ChangeKey(Time, AddKey, &NewRoll, LC_CK_ROLL);
 	UpdatePosition(Time);
-}
-
-void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
-{
-	m_pTR = new TiledRender();
-	m_pTR->TileSize(tw, th, 0);
-	m_pTR->ImageSize(iw, ih);
-	m_pTR->Perspective(m_FOV, fAspect, m_NearDist, m_FarDist);
-}
-
-void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
-{
-	if (m_pTR != NULL)
-	{
-		*row = m_pTR->m_Rows - m_pTR->m_CurrentRow - 1;
-		*col = m_pTR->m_CurrentColumn;
-		*width = m_pTR->m_CurrentTileWidth;
-		*height = m_pTR->m_CurrentTileHeight;
-	}
-}
-
-bool lcCamera::EndTile()
-{
-	if (m_pTR != NULL)
-	{
-		if (m_pTR->EndTile())
-			return true;
-
-		delete m_pTR;
-		m_pTR = NULL;
-	}
-
-	return false;
 }

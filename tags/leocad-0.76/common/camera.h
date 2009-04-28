@@ -16,7 +16,6 @@
 class lcCamera;
 class CameraTarget;
 class File;
-class TiledRender;
 
 enum LC_CAMERA_TYPES
 {
@@ -138,10 +137,6 @@ public:
 	void UpdatePosition(u32 Time);
 	void Render(float fLineWidth);
 
-	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
-	void GetTileInfo(int* row, int* col, int* width, int* height);
-	bool EndTile();
-
 public:
 	// Camera properties.
 	float m_NearDist;
@@ -166,8 +161,6 @@ protected:
 	// Attributes
 	unsigned char m_nState;
 	unsigned char m_nType;
-
-	TiledRender* m_pTR;
 };
 
 #endif // _CAMERA_H_

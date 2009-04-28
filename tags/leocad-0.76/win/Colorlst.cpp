@@ -95,8 +95,8 @@ END_MESSAGE_MAP()
 
 CColorList::CColorList()
 {
-	m_Tabs.Add(new CColorTab("test"));
-	m_Tabs.Add(new CColorTab("test 2"));
+	m_Tabs.Add(new CColorTab("All Colors"));
+//	m_Tabs.Add(new CColorTab("test 2"));
 
 	m_Colors.SetSize(lcNumUserColors);
 	for (int i = 0; i < lcNumUserColors; i++)

@@ -472,10 +472,13 @@ void SystemUpdateAction(int nNew, int nOld)
 }
 
 // Current color in the listbox;
-void SystemUpdateColorList(int nNew)
+void SystemUpdateColorList(int Color)
 {
-	if (AfxGetMainWnd())
-		AfxGetMainWnd()->PostMessage (WM_LC_UPDATE_LIST, 0, nNew+1);
+	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
+	if (!Frame)
+		return;
+
+	Frame->m_wndPiecesBar.m_wndColorsList.SetCurColor(Color);
 }
 
 void SystemUpdateRenderingMode(bool bBackground, bool bFast)

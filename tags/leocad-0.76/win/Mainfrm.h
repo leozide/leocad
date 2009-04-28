@@ -104,7 +104,6 @@ protected:
 	afx_msg void OnPieceBar(UINT nID);
 	afx_msg void OnUpdatePieceBar(CCmdUI* pCmdUI);
 	
-	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
 	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);
 	afx_msg LONG OnAddString(UINT lParam, LONG wParam);
 	afx_msg LONG UpdateSettings(UINT lParam, LONG wParam);

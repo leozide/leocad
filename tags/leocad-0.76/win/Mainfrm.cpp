@@ -108,7 +108,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_CONTEXT_HELP, CFrameWnd::OnContextHelp)
 	ON_COMMAND(ID_DEFAULT_HELP, CFrameWnd::OnHelpFinder)
 	// User messages
-	ON_MESSAGE(WM_LC_UPDATE_LIST, OnUpdateList)
 	ON_MESSAGE(WM_LC_POPUP_CLOSE, OnPopupClose)
 	ON_MESSAGE(WM_LC_ADD_COMBO_STRING, OnAddString)
 	ON_MESSAGE(WM_LC_UPDATE_SETTINGS, UpdateSettings)
@@ -306,24 +305,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame message handlers
 
-// lParam = update pieces, wParam = update colors
-LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
-{
-	// TODO: find out if this function is really needed
-	if (wParam != 0)
-	{
-		int x = wParam-1;
-		if (x < 14)
-			x *= 2;
-		else
-			x = ((x-14)*2)+1;
-
-		m_wndPiecesBar.m_wndColorsList.SetCurColor(x);
-	}
-
-	return TRUE;
-}
-
 // Add a string to the pieces combo
 LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 {
@@ -493,7 +474,6 @@ LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
 	RECT rc;
 	m_wndPiecesBar.GetClientRect(&rc);
 	m_wndPiecesBar.PostMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right, rc.bottom));
-	PostMessage(WM_LC_UPDATE_LIST, 1, 0);
 
 	return TRUE;
 }
@@ -570,9 +550,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 		RECT rc;
 		m_wndPiecesBar.GetClientRect(&rc);
 		m_wndPiecesBar.PostMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right, rc.bottom));
-		
-		if (nID == ID_PIECEBAR_NUMBERS)
-			PostMessage(WM_LC_UPDATE_LIST, 1, 0);
 	}
 
 	UINT u = 0;

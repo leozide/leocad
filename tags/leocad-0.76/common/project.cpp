@@ -229,7 +229,7 @@ void Project::LoadDefaults(bool cameras)
 
 	// Default values
 	SetAction(0);
-	g_App->m_SelectedColor = 0;
+	g_App->m_SelectedColor = lcConvertLDrawColor(4);
 	SystemUpdateColorList(g_App->m_SelectedColor);
 	m_Animation = false;
 	m_bAddKeys = false;

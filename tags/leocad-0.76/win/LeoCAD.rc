@@ -1413,14 +1413,6 @@ BEGIN
         BOTTOMMARGIN, 92
     END
 
-    IDD_PIECEEDITOR, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 263
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 179
-    END
-
     IDD_LIBRARY, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1667,7 +1659,6 @@ BEGIN
     ID_VIEWPORT12           "View"
     ID_VIEWPORT13           "View"
     ID_VIEWPORT14           "View"
-    ID_PIECE_GROUP01        "Plates"
 END
 
 STRINGTABLE 
@@ -1678,87 +1669,15 @@ BEGIN
     ID_SNAP_SNAPALL         "Snap Toggle"
     ID_SNAP_SNAPNONE        "Snap Toggle"
     ID_FILE_SAVEPICTURE     "Save a picture"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_COLOR01             "Red"
-    IDS_COLOR02             "Orange"
-    IDS_COLOR03             "Green"
-    IDS_COLOR04             "Light Green"
-    IDS_COLOR05             "Blue"
-    IDS_COLOR06             "Light Blue"
-    IDS_COLOR07             "Yellow"
-    IDS_COLOR08             "White"
-    IDS_COLOR09             "Dark Gray"
-    IDS_COLOR10             "Black"
-    IDS_COLOR11             "Brown"
-    IDS_COLOR12             "Pink"
-    IDS_COLOR13             "Purple"
-    IDS_COLOR14             "Gold"
-    IDS_COLOR15             "Clear Red"
-    IDS_COLOR16             "Clear Orange"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_COLOR17             "Clear Green"
-    IDS_COLOR18             "Clear Light Green"
-    IDS_COLOR19             "Clear Blue"
-    IDS_COLOR20             "Clear Light Blue"
-    IDS_COLOR21             "Clear Yellow"
-    IDS_COLOR22             "Clear White"
-    IDS_COLOR23             "Light Gray"
-    IDS_COLOR24             "Tan"
-    IDS_COLOR25             "Light Brown"
-    IDS_COLOR26             "Light Pink"
-    IDS_COLOR27             "Turquoise"
-    IDS_COLOR28             "Silver"
-END
-
-STRINGTABLE 
-BEGIN
-    ID_PIECE_GROUP02        "Bricks"
-    ID_PIECE_GROUP03        "Tiles"
-    ID_PIECE_GROUP04        "Slope Bricks"
-    ID_PIECE_GROUP05        "Technic"
-    ID_PIECE_GROUP06        "Space"
-    ID_PIECE_GROUP07        "Train"
-    ID_PIECE_GROUP08        "Other Bricks"
-    ID_PIECE_GROUP09        "Accessories"
-    ID_PIECE_GROUP10        "Group 10"
-    ID_PIECE_GROUP11        "Group 11"
-    ID_PIECE_GROUP12        "Group 12"
-    ID_PIECE_GROUP13        "Group 13"
-    ID_PIECE_GROUP14        "Group 14"
-    ID_PIECE_GROUP15        "Group 15"
-    ID_PIECE_GROUP16        "Group 16"
-    ID_PIECE_GROUP17        "Group 17"
-END
-
-STRINGTABLE 
-BEGIN
-    ID_PIECE_GROUP18        "Group 18"
-    ID_PIECE_GROUP19        "Group 19"
-    ID_PIECE_GROUP20        "Group 20"
-    ID_PIECE_GROUP21        "Group 21"
-    ID_PIECE_GROUP22        "Group 22"
-    ID_PIECE_GROUP23        "Group 23"
-    ID_PIECE_GROUP24        "Group 24"
-    ID_PIECE_GROUP25        "Group 25"
-    ID_PIECE_GROUP26        "Group 26"
-    ID_PIECE_GROUP27        "Group 27"
-    ID_PIECE_GROUP28        "Group 28"
-    ID_PIECE_GROUP29        "Group 29"
-    ID_PIECE_GROUP30        "Group 30"
-    ID_PIECE_GROUP31        "Group 31"
-    ID_PIECE_GROUP32        "Group 32"
+    ID_FILE_PRINTPIECELIST  "Print a list of all pieces available"
 END
 
 STRINGTABLE 
 BEGIN
     ID_RENDER_BACKGROUND    "Fully renders the scene in the background\nBackground Render"
     ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
+    ID_PIECE_INSERT         "Add a new piece"
+    ID_PIECE_DELETE         "Delete selected objects"
     ID_VIEW_STEP_FIRST      "Go to the first step or frame\nGo to Start"
     ID_VIEW_STEP_LAST       "Go to the last step or frame\nGo to End"
     ID_PIECE_HIDESELECTED   "Hide selected objects"
@@ -1774,12 +1693,13 @@ BEGIN
     IDS_CANCEL_PROMPT       "Are you sure you want to stop ?"
     IDS_FAIL_ALLOC          "Could not allocate memory."
     IDS_PROPSHT_CAPTION     "Preferences"
-    IDS_OPENFILE_ERROR      "Cannot open file !"
+    IDS_OPENFILE_ERROR      "Cannot open file!"
 END
 
 STRINGTABLE 
 BEGIN
-    ID_PIECE_ARRAY          "Make copies of the selected pieces\nArray"
+    ID_PIECE_ARRAY          "Make copies of the selected pieces"
+    ID_PIECE_MINIFIGWIZARD  "Add a new minifig"
     ID_HELP_LEOCADHOMEPAGE  "Go to the LeoCAD Home page on the internet"
     ID_HELP_CHECKFORUPDATES "Check for a newer version of the program on the internet"
 END
@@ -1819,6 +1739,8 @@ BEGIN
     ID_FILE_EDITPIECELIBRARY "Configure the LeoCAD Pieces Library"
     ID_VIEW_ZOOMIN          "Zoom In"
     ID_VIEW_ZOOMOUT         "Zoom Out"
+    ID_PIECE_DETACH         "Remove focused piece from its group"
+    ID_PIECE_ATTACH         "Add focused piece to group"
     ID_PIECE_EDITGROUPS     "Edit groups"
 END
 
@@ -1828,6 +1750,8 @@ BEGIN
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
     ID_ACTION_ROLL          "Roll view\nRoll"
     ID_ZOOM_EXTENTS         "Zoom extents (hold CTRL to zoom all views)\nZoom Extents"
+    ID_PIECE_GROUP          "Group selected pieces"
+    ID_PIECE_UNGROUP        "Ungroup selected pieces"
     ID_VIEW_PREFERENCES     "Change application settings"
     ID_ANIMATOR_PLAY        "Play animation sequence\nPlay"
     ID_ANIMATOR_STOP        "Stop playing animation\nStop"
@@ -1836,13 +1760,13 @@ END
 STRINGTABLE 
 BEGIN
     ID_ACTION_SELECT        "Select objects (hold CTRL down or drag the mouse to select multiple objects)\nSelect"
-    ID_ACTION_INSERT        "Add pieces to the project\nInsert"
-    ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
-    ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"
+    ID_ACTION_INSERT        "Add a new piece to the project\nInsert Piece"
+    ID_ACTION_LIGHT         "Add a new omni light\nOmni Light"
+    ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpot Light"
     ID_ACTION_CAMERA        "Create a camera\nCamera"
-    ID_ACTION_MOVE          "Move objects\nMove"
-    ID_ACTION_ROTATE        "Rotate pieces\nRotate"
-    ID_ACTION_REMOVE        "Remove objects\nRemove"
+    ID_ACTION_MOVE          "Move selected objects\nMove"
+    ID_ACTION_ROTATE        "Rotate selected pieces\nRotate"
+    ID_ACTION_REMOVE        "Remove selected objects\nRemove"
     ID_ACTION_PAINT         "Change piece color\nPaint"
     ID_ACTION_ZOOM          "Zoom in or out\nZoom"
     ID_ACTION_ZOOM_REGION   "Zoom region\nZoom Region"
@@ -1872,7 +1796,7 @@ BEGIN
     ID_LOCK_LOCKZ           "Prevents movement in the Z direction"
     ID_LOCK_UNLOCKALL       "Allows movement in all directions"
     ID_LOCK_ON              "Axis lock toggle\nAxis Lock Toggle"
-    ID_PIECE_MIRROR         "Mirror pieces\nMirror"
+    ID_PIECE_MIRROR         "Mirror pieces"
 END
 
 STRINGTABLE 
@@ -1888,21 +1812,21 @@ BEGIN
     ID_VIEW_SPLITVERTICALLY "Split the current view in 2 vertically."
     ID_VIEW_DELETEVIEW      "Delete the current view"
     ID_VIEW_RESETVIEWS      "Reset all views to the default configuration"
-    ID_MODEL_NEW            "Create a new model."
-    ID_MODEL_DELETE         "Delete current model."
-    ID_MODEL_PROPERTIES     "Display current model properties."
-    ID_MODEL_MODEL1         "Edit this model."
-    ID_MODEL_MODEL2         "Edit this model."
-    ID_MODEL_MODEL3         "Edit this model."
-    ID_MODEL_MODEL4         "Edit this model."
+    ID_MODEL_NEW            "Create a new model"
+    ID_MODEL_DELETE         "Delete current model"
+    ID_MODEL_PROPERTIES     "Display current model properties"
+    ID_MODEL_MODEL1         "Edit this model"
+    ID_MODEL_MODEL2         "Edit this model"
+    ID_MODEL_MODEL3         "Edit this model"
+    ID_MODEL_MODEL4         "Edit this model"
 END
 
 STRINGTABLE 
 BEGIN
-    ID_MODEL_MODEL5         "Edit this model."
-    ID_MODEL_MODEL6         "Edit this model."
-    ID_MODEL_MODEL7         "Edit this model."
-    ID_MODEL_MODEL8         "Edit this model."
+    ID_MODEL_MODEL5         "Edit this model"
+    ID_MODEL_MODEL6         "Edit this model"
+    ID_MODEL_MODEL7         "Edit this model"
+    ID_MODEL_MODEL8         "Edit this model"
     ID_MODEL_MODEL9         "Edit this model."
     ID_MODEL_MODEL10        "Edit this model."
     ID_MODEL_MODEL11        "Edit this model."
@@ -1911,6 +1835,11 @@ BEGIN
     ID_MODEL_MODEL14        "Edit this model."
     ID_MODEL_MODEL15        "Edit this model."
     ID_MODEL_MODEL16        "Edit this model."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_TERRAINEDITOR   "Open the terrain editor"
 END
 
 #endif    // English (U.S.) resources

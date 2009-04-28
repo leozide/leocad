@@ -89,7 +89,7 @@ void LightTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
 // =============================================================================
 // Light class
 
-// New positional light
+// New omni light
 lcLight::lcLight(float px, float py, float pz)
 	: lcObject(LC_OBJECT_LIGHT)
 {
@@ -103,7 +103,7 @@ lcLight::lcLight(float px, float py, float pz)
 	UpdatePosition(1);
 }
 
-// New directional light
+// New spot light
 lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
 	: lcObject(LC_OBJECT_LIGHT)
 {

@@ -191,7 +191,7 @@ protected:
 
 	// Rendering functions.
 	void RenderBackground(View* view);
-	void RenderScene(View* view);
+	void RenderScene(View* view, bool Interface);
 	void RenderSceneBoxes(View* view);
 	void RenderOverlays(View* view);
 	void RenderInterface(View* view);

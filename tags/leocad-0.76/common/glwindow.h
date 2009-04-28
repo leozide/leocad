@@ -4,10 +4,11 @@
 class GLWindow
 {
 public:
-	GLWindow(GLWindow *share);
+	GLWindow(GLWindow* Share);
 	virtual ~GLWindow();
 
-	bool Create(void* data);
+	bool CreateFromWindow(void* Data);
+	bool CreateFromBitmap(void* Data);
 	void DestroyContext();
 
 	bool MakeCurrent();

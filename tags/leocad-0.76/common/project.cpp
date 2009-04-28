@@ -1598,7 +1598,7 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	if (AllowFast && (m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
 		RenderSceneBoxes(view);
 	else
-		RenderScene(view);
+		RenderScene(view, Interface);
 
 	// Render user interface elements.
 	if (Interface)
@@ -1733,13 +1733,13 @@ void Project::RenderBackground(View* view)
 	}
 }
 
-void Project::RenderScene(View* view)
+void Project::RenderScene(View* view, bool Interface)
 {
 	glDepthMask(GL_TRUE);
 	glLineWidth(m_fLineWidth);
 
 	// Draw the base grid.
-	if (m_nSnap & LC_DRAW_GRID)
+	if (Interface && (m_nSnap & LC_DRAW_GRID))
 	{
 		glDisable(GL_LIGHTING);
 		glDisable(GL_FOG);
@@ -2163,40 +2163,43 @@ void Project::RenderScene(View* view)
 	if (LastIndexBuffer)
 		LastIndexBuffer->UnbindBuffer();
 
-	glLineWidth(2.0f);
-
-	// Draw selection boxes.
-	for (lcPiece * Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	if (Interface)
 	{
-		if (!Piece->IsVisible(m_ActiveModel->m_CurFrame) || !Piece->IsSelected())
-			continue;
+		glLineWidth(2.0f);
 
-		const BoundingBox& Box = Piece->m_PieceInfo->m_BoundingBox;
-		Vector3 Size = Box.m_Max - Box.m_Min;
+		// Draw selection boxes.
+		for (lcPiece * Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		{
+			if (!Piece->IsVisible(m_ActiveModel->m_CurFrame) || !Piece->IsSelected())
+				continue;
 
-		Matrix44 ScaleMatrix(Vector4(Size[0], 0.0f, 0.0f, 0.0f), Vector4(0.0f, Size[1], 0.0f, 0.0f), Vector4(0.0f, 0.0f, Size[2], 0.0f), Vector4(Box.GetCenter(), 1.0f));
-		Matrix44 ModelWorld = Mul(ScaleMatrix, Piece->m_ModelWorld);
+			const BoundingBox& Box = Piece->m_PieceInfo->m_BoundingBox;
+			Vector3 Size = Box.m_Max - Box.m_Min;
 
-		glPushMatrix();
-		glMultMatrixf(ModelWorld);
-		lcSelectionMesh->Render(LC_COLOR_SELECTION, true, Piece->IsFocused());
-		glPopMatrix();
-	}
+			Matrix44 ScaleMatrix(Vector4(Size[0], 0.0f, 0.0f, 0.0f), Vector4(0.0f, Size[1], 0.0f, 0.0f), Vector4(0.0f, 0.0f, Size[2], 0.0f), Vector4(Box.GetCenter(), 1.0f));
+			Matrix44 ModelWorld = Mul(ScaleMatrix, Piece->m_ModelWorld);
 
-	// Add piece preview.
-	if (m_nCurAction == LC_ACTION_INSERT)
-	{
-		Vector3 Pos;
-		Vector4 Rot;
-		GetPieceInsertPosition(m_nDownX, m_nDownY, Pos, Rot);
+			glPushMatrix();
+			glMultMatrixf(ModelWorld);
+			lcSelectionMesh->Render(LC_COLOR_SELECTION, true, Piece->IsFocused());
+			glPopMatrix();
+		}
 
-		glPushMatrix();
-		glTranslatef(Pos[0], Pos[1], Pos[2]);
-		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
-		glLineWidth(2*m_fLineWidth);
-		g_App->m_PiecePreview->m_Selection->RenderPiece(g_App->m_SelectedColor);
-		glLineWidth(m_fLineWidth);
-		glPopMatrix();
+		// Add piece preview.
+		if (m_nCurAction == LC_ACTION_INSERT)
+		{
+			Vector3 Pos;
+			Vector4 Rot;
+			GetPieceInsertPosition(m_nDownX, m_nDownY, Pos, Rot);
+
+			glPushMatrix();
+			glTranslatef(Pos[0], Pos[1], Pos[2]);
+			glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+			glLineWidth(2*m_fLineWidth);
+			g_App->m_PiecePreview->m_Selection->RenderPiece(g_App->m_SelectedColor);
+			glLineWidth(m_fLineWidth);
+			glPopMatrix();
+		}
 	}
 
 	if (m_nDetail & LC_DET_LIGHTING)

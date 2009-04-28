@@ -9,7 +9,7 @@
 struct GLWindowPrivate
 {
 	HGLRC m_hrc;
-	CClientDC* m_pDC;
+	CDC* m_pDC;
 	CPalette* m_pPal;
 	HWND m_hWnd;
 };
@@ -74,11 +74,11 @@ BOOL GLWindowPreTranslateMessage(GLWindow *wnd, MSG *pMsg)
 			if (prv->m_pPal)
 			{
 				prv->m_pDC->SelectPalette(prv->m_pPal, FALSE);
-					if (prv->m_pDC->RealizePalette() != 0)
-					{
-						// Some colors changed, so we need to do a repaint.
-						InvalidateRect(prv->m_hWnd, NULL, TRUE);
-					}
+				if (prv->m_pDC->RealizePalette() != 0)
+				{
+					// Some colors changed, so we need to do a repaint.
+					InvalidateRect(prv->m_hWnd, NULL, TRUE);
+				}
 			}
 		} break;
 
@@ -99,7 +99,7 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 		LPCREATESTRUCT cs = (LPCREATESTRUCT)lParam;
 
 		wnd = (GLWindow*)cs->lpCreateParams;
-		wnd->Create(hwnd);
+		wnd->CreateFromWindow(hwnd);
 
 		WindowMap.SetAt(hwnd, wnd);
 	}
@@ -144,9 +144,9 @@ GLWindow::~GLWindow()
 	free(m_pData);
 }
 
-bool GLWindow::Create(void* data)
+bool GLWindow::CreateFromWindow(void* data)
 {
-	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
 
 	prv->m_hWnd = (HWND)data;
 	prv->m_pDC = new CClientDC(CWnd::FromHandle(prv->m_hWnd));
@@ -154,14 +154,68 @@ bool GLWindow::Create(void* data)
 
 	// Fill in the Pixel Format Descriptor
 	PIXELFORMATDESCRIPTOR pfd;
-	memset(&pfd,0, sizeof(PIXELFORMATDESCRIPTOR));
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
 
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
 	pfd.nVersion = 1;
-	pfd.dwFlags  =  PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
+	pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 24;
 	pfd.cDepthBits = 24;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+
+	int nPixelFormat = OpenGLChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
+	if (nPixelFormat == 0)
+		return false;
+
+	if (!OpenGLSetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
+		return false;
+
+	prv->m_pPal = new CPalette;
+
+	if (CreateRGBPalette(prv->m_pDC->m_hDC, &prv->m_pPal))
+	{
+		prv->m_pDC->SelectPalette(prv->m_pPal, FALSE);
+		prv->m_pDC->RealizePalette();
+	}
+	else
+	{
+		delete prv->m_pPal;
+		prv->m_pPal = NULL;
+	}
+
+	// Create a rendering context.
+	prv->m_hrc = pfnwglCreateContext(prv->m_pDC->m_hDC);
+	if (!prv->m_hrc)
+		return false;
+
+	if (m_pShare)
+	{
+		GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
+		pfnwglShareLists(share->m_hrc, prv->m_hrc);
+	}
+
+	return true;
+}
+
+bool GLWindow::CreateFromBitmap(void* Data)
+{
+	GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
+
+	prv->m_pDC = new CDC;
+	prv->m_pDC->Attach((HDC)Data);
+	ASSERT(prv->m_pDC != NULL);
+
+	// Fill in the Pixel Format Descriptor
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 16;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
 	int nPixelFormat = OpenGLChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);

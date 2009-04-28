@@ -17,7 +17,10 @@
 #include "PiecePrv.h"
 #include "lc_application.h"
 #include "lc_model.h"
+#include "lc_mesh.h"
+#include "piece.h"
 #include "camera.h"
+#include "pieceinf.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -248,25 +251,53 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	bi.bmiHeader.biSizeImage = tw * th * 3;
 	bi.bmiHeader.biXPelsPerMeter = 2925;
 	bi.bmiHeader.biYPelsPerMeter = 2925;
-	
-  HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
+
+	HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
 	HBITMAP hBmOld = (HBITMAP)SelectObject(hMemDC, hBm);
 
-    // Setting up a Pixel format for the DIB surface
-	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),
-			1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
-			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
-			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = OpenGLChoosePixelFormat(hMemDC, &pfd);
-	OpenGLDescribePixelFormat (hMemDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	OpenGLSetPixelFormat (hMemDC, pixelformat, &pfd);
-	
-	// Creating OpenGL context
-  HGLRC hmemrc = pfnwglCreateContext(hMemDC);
-	pfnwglMakeCurrent(hMemDC, hmemrc);
-//	if (!pfnwglShareLists(m_hglRC, hmemrc))
-//		pDoc->RebuildDisplayLists(TRUE);
+	lcPtrArray<PieceInfo> PieceList;
+	bool ReloadPieces = GL_HasVertexBufferObject();
+
+	if (ReloadPieces)
+	{
+		for (lcPiece* Piece = project->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		{
+			if (PieceList.FindIndex(Piece->m_PieceInfo) == -1)
+				PieceList.Add(Piece->m_PieceInfo);
+		}
+
+		for (int i = 0; i < PieceList.GetSize(); i++)
+			PieceList[i]->FreeInformation();
+
+		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
+			if (project->m_ModelList[i] != project->m_ActiveModel)
+			{
+				delete project->m_ModelList[i]->m_Mesh;
+				project->m_ModelList[i]->m_Mesh = NULL;
+			}
+
+		extern bool GL_VertexBufferObject;
+		GL_VertexBufferObject = false;
+	}
+
+	View view(project, project->GetFirstView());
+	view.CreateFromBitmap(hMemDC);
+	view.MakeCurrent();
+	view.OnSize(tw, th);
+	view.SetCamera(project->m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
+	project->AddView(&view);
+
 	project->RenderInitialize();
+
+	if (ReloadPieces)
+	{
+		for (int i = 0; i < PieceList.GetSize(); i++)
+			PieceList[i]->LoadInformation();
+
+		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
+			if (project->m_ModelList[i] != project->m_ActiveModel)
+				project->m_ModelList[i]->SetActive(false);
+	}
 
 	LOGFONT lf;
 	memset(&lf, 0, sizeof(LOGFONT));
@@ -286,15 +317,12 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	u32 OldTime = project->m_ActiveModel->m_CurFrame;
 	UINT nRenderTime = 1+((pInfo->m_nCurPage-1)*rows*cols);
 
-	View view(project, project->m_ActiveView);
-	view.OnSize(tw, th);
-	view.SetCamera(project->m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
-
 	for (int r = 0; r < rows; r++)
 	for (int c = 0; c < cols; c++)
 	{
 		if (nRenderTime > project->GetLastStep())
 			continue;
+
 		project->m_ActiveModel->m_CurFrame = nRenderTime;
 		project->CalculateStep();
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
@@ -302,17 +330,69 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			lcCamera* pCam = project->m_ActiveModel->m_Cameras;
-			for (int i = LC_CAMERA_MAIN; pCam; pCam = (lcCamera*)pCam->m_Next)
-				if (i-- == 0)
-					break;
-			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
+			lcCamera* Camera = view.GetCamera();
+
+			int CurrentTile = 0;
+			int TileWidth = tw;
+			int TileHeight = th;
+			int ImageWidth = pw;
+			int ImageHeight = ph;
+			int Columns = (ImageWidth + TileWidth - 1) / TileWidth;
+			int Rows = (ImageHeight + TileHeight - 1) / TileHeight;
+			float xmin, xmax, ymin, ymax;
+			ymax = Camera->m_NearDist * tan(Camera->m_FOV * 3.14159265f / 360.0f);
+			ymin = -ymax;
+			xmin = ymin * viewaspect;
+			xmax = ymax * viewaspect;
+
 			do 
 			{
-				project->Render(&view, false, false);
+				int CurrentTileWidth, CurrentTileHeight;
+
+				// which tile (by row and column) we're about to render
+				int CurrentRow = CurrentTile / Columns;
+				int CurrentColumn = CurrentTile % Columns;
+
+				// Compute actual size of this tile with border
+				if (CurrentRow < Rows-1)
+					CurrentTileHeight = TileHeight;
+				else
+					CurrentTileHeight = ImageHeight - (Rows-1) * (TileHeight);
+				
+				if (CurrentColumn < Columns-1)
+					CurrentTileWidth = TileWidth;
+				else
+					CurrentTileWidth = ImageWidth - (Columns-1) * (TileWidth);
+
+				glViewport(0, 0, CurrentTileWidth, CurrentTileHeight);
+
+// TODO: fix background
+				project->RenderBackground(&view);
+
+				float left, right, bottom, top;
+
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+
+				// Compute projection parameters.
+				left = xmin + (xmax - xmin) * (CurrentColumn * TileWidth) / ImageWidth;
+				right = left + (xmax - xmin) * CurrentTileWidth / ImageWidth;
+				bottom = ymin + (ymax - ymin) * (CurrentRow * TileHeight) / ImageHeight;
+				top = bottom + (ymax - ymin) * CurrentTileHeight / ImageHeight;
+
+				glFrustum(left, right, bottom, top, Camera->m_NearDist, Camera->m_FarDist);
+
+				glMatrixMode(GL_MODELVIEW);
+				glLoadMatrixf(view.GetCamera()->m_WorldView);
+
+				project->RenderScene(&view, false);
+
 				glFinish();
-				int tr, tc, ctw, cth;
-				pCam->GetTileInfo(&tr, &tc, &ctw, &cth);
+
+				int ctw = CurrentTileWidth;
+				int cth = CurrentTileHeight;
+				int tr = Rows - CurrentRow - 1;
+				int tc = CurrentColumn;
 
 				lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 	
@@ -321,10 +401,11 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				memcpy (&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
 
 				pDC->SetStretchBltMode(COLORONCOLOR);
-				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th, ctw, cth, 0, 0, ctw, cth, 
+				int res = StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th+th-cth, ctw, cth, 0, 0, ctw, cth, 
 					(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 				if (lpbi) GlobalFreePtr(lpbi);
-			} while (pCam->EndTile());
+
+			} while (++CurrentTile < Rows * Columns);
 		}
 		else
 		{
@@ -378,8 +459,20 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	project->m_ActiveModel->m_CurFrame = OldTime;
 
-	pfnwglMakeCurrent(NULL, NULL);
-	pfnwglDeleteContext(hmemrc);
+	if (ReloadPieces)
+	{
+		for (int i = 0; i < PieceList.GetSize(); i++)
+			PieceList[i]->FreeInformation();
+
+		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
+			if (project->m_ModelList[i] != project->m_ActiveModel)
+			{
+				delete project->m_ModelList[i]->m_Mesh;
+				project->m_ModelList[i]->m_Mesh = NULL;
+			}
+	}
+
+	view.DestroyContext();
 	SelectObject(hMemDC, hBmOld);
 	DeleteObject(hBm);
 	DeleteDC(hMemDC);
@@ -388,6 +481,21 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 	glFinish();
+
+	if (ReloadPieces)
+	{
+		extern bool GL_VertexBufferObject;
+		GL_VertexBufferObject = true;
+
+		project->GetFirstView()->MakeCurrent();
+
+		for (int i = 0; i < PieceList.GetSize(); i++)
+			PieceList[i]->LoadInformation();
+
+		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
+			if (project->m_ModelList[i] != project->m_ActiveModel)
+				project->m_ModelList[i]->SetActive(false);
+	}
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);
 	lf.lfWeight = FW_REGULAR;
@@ -682,7 +790,7 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	Project* project = lcGetActiveProject();
 
 	m_pView = new View(project, project->GetFirstView());
-	m_pView->Create(m_hWnd);
+	m_pView->CreateFromWindow(m_hWnd);
 	m_pView->OnInitialUpdate();
 
 	CCADView* ActiveView = (CCADView*)GetParentFrame()->GetActiveView();

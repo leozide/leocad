@@ -80,6 +80,9 @@ public:
 	void AddRef();
 	void DeRef();
 
+	void LoadInformation();
+	void FreeInformation();
+
 public:
 	// Attributes
 	char m_strName[9];
@@ -105,9 +108,6 @@ protected:
 
 	template<typename T>
 	void BuildMesh(void* Data, void* MeshStart, u32* SectionIndices);
-
-	void LoadInformation();
-	void FreeInformation();
 };
 
 #endif // _PIECEINF_H_

@@ -129,8 +129,8 @@ protected:
 };
 
 // Zoom States
-#define ZOOM_OUT    0
-#define ZOOM_MIDDLE 1
-#define ZOOM_IN     2
+#define PREVIEW_ZOOM_OUT    0
+#define PREVIEW_ZOOM_MIDDLE 1
+#define PREVIEW_ZOOM_IN     2
 
 #endif // !defined(AFX_PREVVIEW_H__FB79E301_F771_11D2_8204_C75E663DC515__INCLUDED_)

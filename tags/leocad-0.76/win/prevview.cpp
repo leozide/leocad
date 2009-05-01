@@ -71,7 +71,7 @@ CPreviewViewEx::CPreviewViewEx()
 	m_pPreviewState = NULL;
 	m_hMagnifyCursor = NULL;
 	m_bPageNumDisplayed = FALSE;
-	m_nZoomState = ZOOM_OUT;
+	m_nZoomState = PREVIEW_ZOOM_OUT;
 
 	// default to pointing to embedded array.  Allows for 2 pages
 	m_pPageInfo = m_pageInfoArray;
@@ -224,7 +224,7 @@ BOOL CPreviewViewEx::SetPrintView(CCADView* pPrintView)
 void CPreviewViewEx::OnSize(UINT nType, int cx, int cy)
 {
 	// CScrollView handles everything if zoomed in.
-	if (m_nZoomState == ZOOM_OUT)
+	if (m_nZoomState == PREVIEW_ZOOM_OUT)
 	{
 		// Force recalc of scale ratios on next draw
 		for (UINT i = 0; i < m_nMaxPages; i++)
@@ -332,7 +332,7 @@ CSize CPreviewViewEx::CalcPageDisplaySize()
 
 	// subtract out vertical scrollbar if zoomed out and page range is known
 	// and there is more than one page.
-	if (m_nZoomState == ZOOM_OUT && (m_pPreviewInfo->GetMaxPage() != 0xffff) &&
+	if (m_nZoomState == PREVIEW_ZOOM_OUT && (m_pPreviewInfo->GetMaxPage() != 0xffff) &&
 		(m_pPreviewInfo->GetMaxPage() - m_pPreviewInfo->GetMinPage() != 0))
 		windowSize.cx -= scrollSize.cx;
 
@@ -356,11 +356,11 @@ void CPreviewViewEx::SetScaledSize(UINT nPage)
 
 	switch (m_nZoomState)
 	{
-	case ZOOM_OUT:
+	case PREVIEW_ZOOM_OUT:
 		*pRatio = *pZoomOutRatio;
 		break;
 
-	case ZOOM_MIDDLE:
+	case PREVIEW_ZOOM_MIDDLE:
 		// the middle zoom state is a ratio between cx/cy and
 		// 1/1 (or cy/cy).  It is, therefore:
 		//
@@ -387,7 +387,7 @@ void CPreviewViewEx::SetScaledSize(UINT nPage)
 		}
 		break;
 
-	case ZOOM_IN:
+	case PREVIEW_ZOOM_IN:
 		if (bPaperLarger)
 			pRatio->cx = pRatio->cy = 1;
 		else
@@ -415,7 +415,7 @@ void CPreviewViewEx::SetScaledSize(UINT nPage)
 				   scaledSize.cx + PREVIEW_MARGIN + 3,
 				   scaledSize.cy + PREVIEW_MARGIN + 3);
 
-	if (m_nZoomState == ZOOM_OUT)
+	if (m_nZoomState == PREVIEW_ZOOM_OUT)
 	{
 		pRect->OffsetRect((windowSize.cx - pRect->Size().cx) / 2 - 1,
 						  (windowSize.cy - pRect->Size().cy) / 2 - 1);
@@ -437,7 +437,7 @@ void CPreviewViewEx::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 {
 	ASSERT_VALID(pDC);
 
-	if (m_nZoomState == ZOOM_OUT)
+	if (m_nZoomState == PREVIEW_ZOOM_OUT)
 		CView::OnPrepareDC(pDC, pInfo);
 	else if (m_pPageInfo[0].sizeScaleRatio.cx != 0)
 		CScrollView::OnPrepareDC(pDC, pInfo);
@@ -505,7 +505,7 @@ void CPreviewViewEx::OnDraw(CDC* pDC)
 		if (pRatio->cx == 0)
 		{   // page position has not been determined
 			PositionPage(nPage);    // compute page position
-			if (m_nZoomState != ZOOM_OUT)
+			if (m_nZoomState != PREVIEW_ZOOM_OUT)
 				ViewportOrg = -GetDeviceScrollPosition();
 		}
 
@@ -577,13 +577,13 @@ void CPreviewViewEx::OnDraw(CDC* pDC)
 
 void CPreviewViewEx::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	if (m_nZoomState != ZOOM_OUT)
+	if (m_nZoomState != PREVIEW_ZOOM_OUT)
 		CScrollView::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CPreviewViewEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	if (m_nZoomState != ZOOM_OUT)
+	if (m_nZoomState != PREVIEW_ZOOM_OUT)
 	{
 		CScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
 		return;
@@ -647,7 +647,7 @@ void CPreviewViewEx::OnPreviewPrint()
 // Finds page pointed to and convert to 1:1 screen device units
 BOOL CPreviewViewEx::FindPageRect(CPoint& point, UINT& nPage)
 {
-	if (m_nZoomState != ZOOM_OUT)
+	if (m_nZoomState != PREVIEW_ZOOM_OUT)
 		point += (CSize)GetDeviceScrollPosition();
 
 	for (nPage = 0; nPage < m_nPages; nPage++)
@@ -676,7 +676,7 @@ void CPreviewViewEx::OnLButtonDown(UINT, CPoint point)
 		return;                         // Didn't click on a page
 
 	// Set new zoom state
-	SetZoomState((m_nZoomState == ZOOM_IN) ? ZOOM_OUT : m_nZoomState + 1,
+	SetZoomState((m_nZoomState == PREVIEW_ZOOM_IN) ? PREVIEW_ZOOM_OUT : m_nZoomState + 1,
 								nPage, point);
 }
 
@@ -691,20 +691,20 @@ void CPreviewViewEx::SetZoomState(UINT nNewState, UINT nPage, CPoint point)
 
 void CPreviewViewEx::OnZoomIn()
 {
-	if (m_nZoomState != ZOOM_IN)
+	if (m_nZoomState != PREVIEW_ZOOM_IN)
 		SetZoomState(m_nZoomState + 1, 0, CPoint(0, 0));
 }
 
 void CPreviewViewEx::OnZoomOut()
 {
-	if (m_nZoomState != ZOOM_OUT)
+	if (m_nZoomState != PREVIEW_ZOOM_OUT)
 		SetZoomState(m_nZoomState - 1, 0, CPoint(0, 0));
 }
 
 // Actual zoom code.
 void CPreviewViewEx::DoZoom(UINT nPage, CPoint point)
 {
-	if (m_nZoomState == ZOOM_OUT)
+	if (m_nZoomState == PREVIEW_ZOOM_OUT)
 	{
 		// taking over scroll bars
 		m_nPages = m_nZoomOutPages;
@@ -761,7 +761,7 @@ void CPreviewViewEx::SetCurrentPage(UINT nPage, BOOL bClearRatios)
 		m_nCurrentPage = m_pPreviewInfo->GetMinPage();
 
 
-	if (m_nZoomState == ZOOM_OUT)
+	if (m_nZoomState == PREVIEW_ZOOM_OUT)
 		SetScrollPos(SB_VERT, m_nCurrentPage);
 
 	if (bClearRatios)
@@ -815,12 +815,12 @@ void CPreviewViewEx::OnUpdatePrevPage(CCmdUI* pCmdUI)
 
 void CPreviewViewEx::OnUpdateZoomIn(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(m_nZoomState != ZOOM_IN);
+	pCmdUI->Enable(m_nZoomState != PREVIEW_ZOOM_IN);
 }
 
 void CPreviewViewEx::OnUpdateZoomOut(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(m_nZoomState != ZOOM_OUT);
+	pCmdUI->Enable(m_nZoomState != PREVIEW_ZOOM_OUT);
 }
 
 BOOL CPreviewViewEx::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -833,7 +833,7 @@ BOOL CPreviewViewEx::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	ScreenToClient(&point);     // client coordinates of mouse position
 
 	UINT nPage;
-	if (m_nZoomState != ZOOM_IN && FindPageRect(point, nPage))
+	if (m_nZoomState != PREVIEW_ZOOM_IN && FindPageRect(point, nPage))
 	{                       // On a page and not zoomed all the way in
 		if (m_hMagnifyCursor == NULL)
 		{
@@ -864,9 +864,9 @@ void CPreviewViewEx::AssertValid() const
 
 	switch (m_nZoomState)
 	{
-	case ZOOM_OUT:
-	case ZOOM_IN:
-	case ZOOM_MIDDLE:
+	case PREVIEW_ZOOM_OUT:
+	case PREVIEW_ZOOM_IN:
+	case PREVIEW_ZOOM_MIDDLE:
 		break;
 	default:
 		ASSERT(FALSE); // unknown zoom state
@@ -905,14 +905,14 @@ void CPreviewViewEx::Dump(CDumpContext& dc) const
 	dc << "\nm_nZoomState = ";
 	switch (m_nZoomState)
 	{
-	case ZOOM_OUT:
-		dc << "ZOOM_OUT";
+	case PREVIEW_ZOOM_OUT:
+		dc << "PREVIEW_ZOOM_OUT";
 		break;
-	case ZOOM_IN:
-		dc << "ZOOM_IN";
+	case PREVIEW_ZOOM_IN:
+		dc << "PREVIEW_ZOOM_IN";
 		break;
-	case ZOOM_MIDDLE:
-		dc << "ZOOM_MIDDLE";
+	case PREVIEW_ZOOM_MIDDLE:
+		dc << "PREVIEW_ZOOM_MIDDLE";
 		break;
 	default:
 		dc << "*unknown*";
@@ -978,7 +978,7 @@ void CPreviewViewEx::OnPreviewOnepage()
 void CPreviewViewEx::OnUpdatePreviewOnepage(CCmdUI* pCmdUI) 
 {
 	// enable it only if valid to display another page and not zoomed
-	pCmdUI->Enable(m_nZoomState == ZOOM_OUT && m_nMaxPages != 1 &&
+	pCmdUI->Enable(m_nZoomState == PREVIEW_ZOOM_OUT && m_nMaxPages != 1 &&
 		(m_pPreviewInfo->GetMaxPage() > 1 || m_nPages > 1) && (m_nPages == 2));
 }
 
@@ -996,6 +996,6 @@ void CPreviewViewEx::OnPreviewTwopages()
 void CPreviewViewEx::OnUpdatePreviewTwopages(CCmdUI* pCmdUI) 
 {
 	// enable it only if valid to display another page and not zoomed
-	pCmdUI->Enable(m_nZoomState == ZOOM_OUT && m_nMaxPages != 1 &&
+	pCmdUI->Enable(m_nZoomState == PREVIEW_ZOOM_OUT && m_nMaxPages != 1 &&
 		(m_pPreviewInfo->GetMaxPage() > 1 || m_nPages > 1) && (m_nPages == 1));
 }

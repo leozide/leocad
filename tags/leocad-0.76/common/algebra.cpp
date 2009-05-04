@@ -295,11 +295,7 @@ Vector4 MatrixToAxisAngle(const Matrix33& Mat)
 
 	// Determinant should be 1 for rotation matrices.
 	if (Determinant(tmp) < 0.0f)
-	{
 		tmp.m_Rows[0] *= -1.0f;
-		tmp.m_Rows[1] *= -1.0f;
-		tmp.m_Rows[2] *= -1.0f;
-	}
 
 	float Trace = tmp.m_Rows[0][0] + tmp.m_Rows[1][1] + tmp.m_Rows[2][2];
 	float Cos = 0.5f * (Trace - 1.0f);

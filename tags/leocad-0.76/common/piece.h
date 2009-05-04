@@ -3,7 +3,7 @@
 
 class File;
 class lcPiece;
-class Group;
+class lcGroup;
 class PieceInfo;
 class lcMesh;
 
@@ -59,18 +59,18 @@ public:
 	void MergeBoundingBox(BoundingBox* Box);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);
-	void FileSave(File& file, Group* pGroups);
+	void FileSave(File& file, lcGroup* Groups);
 
 	void UpdatePosition(u32 Time);
 	void Move(u32 Time, bool AddKey, const Vector3& Delta);
 
-	void DoGroup(Group* pGroup);
-	void UnGroup(Group* pGroup);
-	Group* GetTopGroup();
-	void SetGroup(Group* pGroup)
-		{ m_pGroup = pGroup; }
-	Group* GetGroup()
-		{ return m_pGroup; }
+	void DoGroup(lcGroup* Group);
+	void UnGroup(lcGroup* Group);
+	lcGroup* GetTopGroup();
+	void SetGroup(lcGroup* Group)
+		{ m_Group = Group; }
+	lcGroup* GetGroup()
+		{ return m_Group; }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
@@ -78,7 +78,7 @@ public:
 public:
 	// Atributes
 	PieceInfo* m_PieceInfo;
-	Group* m_pGroup;
+	lcGroup* m_Group;
 
 	u32 m_TimeShow;
 	u32 m_TimeHide;

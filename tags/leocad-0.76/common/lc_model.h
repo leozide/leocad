@@ -5,10 +5,12 @@
 #include "algebra.h"
 //#include "lc_array.h"
 
+class File;
 class lcObject;
 class lcPiece;
 class lcCamera;
 class lcLight;
+class lcGroup;
 class lcMesh;
 class PieceInfo;
 //class lcScene;
@@ -16,15 +18,30 @@ class PieceInfo;
 class lcModel
 {
 public:
-	lcModel(/*const char* Name*/);
+	lcModel();
 	~lcModel();
 
 public:
 	// Empty model.
 	void DeleteContents();
 
+	// Load model from file.
+	bool FileLoad(File& file);
+
+	// Save model to file.
+	void FileSave(File& file);
+
+	// Import a model from an LDraw file.
+	void ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath);
+
+	// Save the model in LDraw format.
+	void ExportLDraw(File& file, bool SaveMPD, const Matrix44& ParentWorld, int Color);
+
 	// Check if a given model is referenced by this model.
 	bool IsSubModel(const lcModel* Model) const;
+
+	// Return the last step where a piece is added.
+	u32 GetLastStep() const;
 
 	// Get a list of all actual pieces used by this model.
 //	void GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const;
@@ -86,6 +103,7 @@ public:
 	lcPiece* m_Pieces;
 	lcCamera* m_Cameras;
 	lcLight* m_Lights;
+	lcGroup* m_Groups;
 
 	// Frame information.
 	u32 m_CurFrame;

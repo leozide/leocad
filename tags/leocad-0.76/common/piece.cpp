@@ -35,7 +35,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	m_Color = 0;
 	m_TimeShow = 1;
 	m_TimeHide = LC_OBJECT_TIME_MAX;
-	m_pGroup = NULL;
+	m_Group = NULL;
 
 	if (m_PieceInfo != NULL)
 		m_PieceInfo->AddRef();
@@ -250,7 +250,7 @@ bool lcPiece::FileLoad(File& file, char* name)
 		int i = -1;
 		if (version > 6)
 			file.ReadLong(&i, 1);
-		m_pGroup = (Group*)i;
+		m_Group = (lcGroup*)i;
 	}
 	else
 	{
@@ -259,9 +259,9 @@ bool lcPiece::FileLoad(File& file, char* name)
 
 		file.ReadByte(&ch, 1);
 		if (ch == 0)
-			m_pGroup = (Group*)-1;
+			m_Group = (lcGroup*)-1;
 		else
-			m_pGroup = (Group*)(unsigned long)ch;
+			m_Group = (lcGroup*)(unsigned long)ch;
 
 		file.ReadByte(&ch, 1);
 		if (ch & 0x01)
@@ -271,7 +271,7 @@ bool lcPiece::FileLoad(File& file, char* name)
 	return true;
 }
 
-void lcPiece::FileSave (File& file, Group* pGroups)
+void lcPiece::FileSave(File& file, lcGroup* Groups)
 {
   unsigned char ch = LC_PIECE_SAVE_VERSION;
 
@@ -292,11 +292,11 @@ void lcPiece::FileSave (File& file, Group* pGroups)
 
   // version 7
   int i;
-  if (m_pGroup != NULL)
+  if (m_Group != NULL)
   {
-    for (i = 0; pGroups; pGroups = pGroups->m_pNext)
+    for (i = 0; Groups; Groups = Groups->m_Next)
     {
-      if (m_pGroup == pGroups)
+      if (m_Group == Groups)
         break;
       i++;
     }
@@ -530,26 +530,26 @@ void lcPiece::MergeBoundingBox(BoundingBox* Box)
 		Box->AddPoint(Mul31(Points[i], m_ModelWorld));
 }
 
-Group* lcPiece::GetTopGroup()
+lcGroup* lcPiece::GetTopGroup()
 {
-	return m_pGroup ? m_pGroup->GetTopGroup() : NULL;
+	return m_Group ? m_Group->GetTopGroup() : NULL;
 }
 
-void lcPiece::DoGroup(Group* pGroup)
+void lcPiece::DoGroup(lcGroup* Group)
 {
-	if (m_pGroup != NULL && m_pGroup != (Group*)-1 && m_pGroup > (Group*)0xFFFF)
-		m_pGroup->SetGroup(pGroup);
+	if (m_Group != NULL && m_Group != (lcGroup*)-1 && m_Group > (lcGroup*)0xFFFF)
+		m_Group->SetGroup(Group);
 	else
-		m_pGroup = pGroup;
+		m_Group = Group;
 }
 
-void lcPiece::UnGroup(Group* pGroup)
+void lcPiece::UnGroup(lcGroup* pGroup)
 {
-	if ((m_pGroup == pGroup) || (pGroup == NULL))
-		m_pGroup = NULL;
+	if ((m_Group == pGroup) || (pGroup == NULL))
+		m_Group = NULL;
 	else
-		if (m_pGroup != NULL)
-			m_pGroup->UnGroup(pGroup);
+		if (m_Group != NULL)
+			m_Group->UnGroup(pGroup);
 }
 
 // Recalculates current position

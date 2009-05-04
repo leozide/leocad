@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGroupEditTree message handlers
 
-void CGroupEditTree::AddChildren(HTREEITEM hParent, Group* pGroup)
+void CGroupEditTree::AddChildren(HTREEITEM hParent, lcGroup* pGroup)
 {
 	int i;
 	TV_INSERTSTRUCT tvstruct;

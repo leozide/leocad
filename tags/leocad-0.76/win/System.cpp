@@ -1236,7 +1236,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_FILE_SAVE_PROJECT:
 		{
 			CFileDialog dlg(FALSE, "*.lcd", (char*)param, OFN_HIDEREADONLY|OFN_PATHMUSTEXIST|OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE,
-				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat;*.ldr)|*.dat;*.ldr|All Files (*.*)|*.*||");
+				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat;*.ldr;*.mpd)|*.dat;*.ldr;*.mpd|All Files (*.*)|*.*||");
 
 			dlg.m_ofn.lpfnHook = OFNSaveHookProc;
 			dlg.m_ofn.hInstance = AfxGetInstanceHandle();
@@ -1282,8 +1282,8 @@ bool SystemDoDialog(int nMode, void* param)
 
 				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
 					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
-				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 32);
-		    dlg.m_ofn.nMaxFile = _MAX_PATH;
+				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 256);
+		    dlg.m_ofn.nMaxFile = _MAX_PATH * 256;
 				dlg.m_ofn.lpstrInitialDir = opts->path;
 
 	      if (dlg.DoModal() == IDOK)

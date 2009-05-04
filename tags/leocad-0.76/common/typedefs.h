@@ -4,7 +4,7 @@
 #ifndef _TYPEDEF_H_
 #define _TYPEDEF_H_
 
-class Group;
+class lcGroup;
 class lcObject;
 class lcPiece;
 class lcCamera;
@@ -433,10 +433,10 @@ struct LC_GROUPEDITDLG_OPTS
 {
 	int piececount;
 	lcPiece** pieces;
-	Group** piecesgroups;
+	lcGroup** piecesgroups;
 	int groupcount;
-	Group** groups;
-	Group** groupsgroups;
+	lcGroup** groups;
+	lcGroup** groupsgroups;
 };
 
 struct LC_PREFERENCESDLG_OPTS

@@ -9,43 +9,43 @@
 /////////////////////////////////////////////////////////////////////////////
 // Group construction/destruction
 
-Group::Group()
+lcGroup::lcGroup()
 {
-	m_pGroup = NULL;
-	m_pNext = NULL;
+	m_Group = NULL;
+	m_Next = NULL;
 }
 
-Group::~Group()
+lcGroup::~lcGroup()
 {
 
 }
 
-Group* Group::GetTopGroup()
+lcGroup* lcGroup::GetTopGroup()
 {
-	return m_pGroup ? m_pGroup->GetTopGroup() : this;
+	return m_Group ? m_Group->GetTopGroup() : this;
 }
 
-void Group::SetGroup(Group* pGroup)
+void lcGroup::SetGroup(lcGroup* Group)
 {
-	if (pGroup == this)
+	if (Group == this)
 		return;
 
-	if (m_pGroup != NULL && m_pGroup != (Group*)-1)
-		m_pGroup->SetGroup(pGroup);
+	if (m_Group != NULL && m_Group != (lcGroup*)-1)
+		m_Group->SetGroup(Group);
 	else
-		m_pGroup = pGroup;
+		m_Group = Group;
 }
 
-void Group::UnGroup(Group* pGroup)
+void lcGroup::UnGroup(lcGroup* Group)
 {
-	if (m_pGroup == pGroup)
-		m_pGroup = NULL;
+	if (m_Group == Group)
+		m_Group = NULL;
 	else
-		if (m_pGroup != NULL)
-			m_pGroup->UnGroup(pGroup);
+		if (m_Group != NULL)
+			m_Group->UnGroup(Group);
 }
 
-void Group::FileLoad(File* file)
+void lcGroup::FileLoad(File* file)
 {
 	unsigned char version;
 	int i;
@@ -54,10 +54,10 @@ void Group::FileLoad(File* file)
 	file->Read(m_strName, 65);
 	file->Read(m_fCenter, 12);
 	file->ReadLong(&i, 1);
-	m_pGroup = (Group*)i;
+	m_Group = (lcGroup*)i;
 }
 
-void Group::FileSave(File* file, Group* pGroups)
+void lcGroup::FileSave(File* file, lcGroup* Groups)
 {
 	unsigned char version = 1; // LeoCAD 0.60
 
@@ -66,12 +66,12 @@ void Group::FileSave(File* file, Group* pGroups)
 	file->Write(m_fCenter, 12);
 
 	int i = 0;
-	if (m_pGroup == NULL)
+	if (m_Group == NULL)
 		i = -1;
 	else
 	{
-		for (; pGroups; pGroups = pGroups->m_pNext)
-			if (pGroups == m_pGroup)
+		for (; Groups; Groups = Groups->m_Next)
+			if (Groups == m_Group)
 				break;
 			else
 				i++;

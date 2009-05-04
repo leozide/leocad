@@ -56,7 +56,6 @@ Project::Project()
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
-	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	m_pTrackFile = NULL;
@@ -126,8 +125,6 @@ void Project::UpdateInterface()
 		m_ViewList[i]->MakeCurrent();
 		RenderInitialize();
 	}
-
-	UpdateSelection();
 }
 
 void Project::SetTitle(const char* lpszTitle)
@@ -151,6 +148,8 @@ void Project::SetTitle(const char* lpszTitle)
 			*ptr = 0;
 		if (strcmp(ext, "ldr") == 0)
 			*ptr = 0;
+		if (strcmp(ext, "mpd") == 0)
+			*ptr = 0;
 	}
 
 	strcat(title, " - LeoCAD");
@@ -160,8 +159,6 @@ void Project::SetTitle(const char* lpszTitle)
 
 void Project::DeleteContents(bool bUndo)
 {
-	Group* pGroup;
-
 	memset(m_strAuthor, 0, sizeof(m_strAuthor));
 	memset(m_strDescription, 0, sizeof(m_strDescription));
 	memset(m_strComments, 0, sizeof(m_strComments));
@@ -204,13 +201,6 @@ void Project::DeleteContents(bool bUndo)
 
 	m_ActiveModel = NULL;
 	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
-
-	while (m_pGroups)
-	{
-		pGroup = m_pGroups;
-		m_pGroups = m_pGroups->m_pNext;
-		delete pGroup;
-	}
 
 /*
 	if (!m_strTempFile.IsEmpty())
@@ -278,20 +268,19 @@ void Project::LoadDefaults(bool cameras)
 	m_OverlayActive = false;
 	m_PlayingAnimation = false;
 
-	lcModel* Model = new lcModel();
-	Model->m_Name = "Main";
-	m_ModelList.Add(Model);
-	SetActiveModel(Model);
-	SystemUpdateTime(m_Animation, m_ActiveModel->m_CurFrame, m_Animation ? m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX);
-
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
-		m_ViewList[i]->MakeCurrent ();
+		m_ViewList[i]->MakeCurrent();
 		RenderInitialize();
 	}
 
 	if (cameras)
 	{
+		lcModel* Model = new lcModel();
+		Model->m_Name = "Main";
+		m_ModelList.Add(Model);
+		SetActiveModel(Model);
+
 		m_ActiveModel->ResetCameras();
 
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
@@ -301,28 +290,30 @@ void Project::LoadDefaults(bool cameras)
 		if (m_ActiveView)
 			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	}
+
 	SystemPieceComboAdd(NULL);
-	UpdateSelection();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Standard file menu commands
+
+static u32 LC_FILE_VERSION = 0x0076;
 
 // Read a .lcd file
 bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 {
 	int i, count;
 	char fid[32];
-	unsigned long rgb;
 	float fv = 0.4f;
-	unsigned char ch, action = m_nCurAction;
-	unsigned short sh;
+	u32 Version = 0;
+	u16 sh;
+	u8 ch;
 
 	file->Seek(0, SEEK_SET);
 	file->Read(fid, 32);
 	sscanf(&fid[7], "%f", &fv);
 
-	// Fix the ugly floating point reading on computers with different decimal points.
+	// Fix floating point reading on computers with different decimal separators.
 	if (fv == 0.0f)
 	{
 		lconv *loc = localeconv();
@@ -334,322 +325,320 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	}
 
 	if (fv > 0.4f)
-		file->ReadFloat (&fv, 1);
+		file->ReadFloat(&fv, 1);
 
-	file->ReadLong (&rgb, 1);
-	if (!bMerge)
+	if (fv > 1.4f)
+		file->ReadLong(&Version, 1);
+
+	if (Version > LC_FILE_VERSION)
+		return false;
+
+	if (Version < 0x0076)
 	{
-		m_fBackground[0] = (float)((unsigned char) (rgb))/255;
-		m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	}
+		u32 rgb;
+		file->ReadLong(&rgb, 1);
 
-	if (fv < 0.6f)
-	{
-		// Old view format, ignore it.
-		m_ActiveModel->ResetCameras();
+		if (!bMerge)
+		{
+			m_fBackground[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
+			m_fBackground[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
+			m_fBackground[2] = (float)((rgb & 0xff0000) >> 16) / 255;
+		}
 
-		for (int i = 0; i < m_ViewList.GetSize(); i++)
-			m_ViewList[i]->UpdateCamera();
+		if (fv < 0.6f)
+		{
+			// Old view format, ignore it.
+			m_ActiveModel->ResetCameras();
 
-		double eye[3], target[3];
-		file->ReadDouble(&eye, 3);
-		file->ReadDouble(&target, 3);
+			for (int i = 0; i < m_ViewList.GetSize(); i++)
+				m_ViewList[i]->UpdateCamera();
+
+			file->Seek(48, SEEK_SET); // eye, target
+		}
 	}
 
 	if (bMerge)
-		file->Seek(32, SEEK_CUR);
+		file->Seek(16, SEEK_CUR);
 	else
 	{
-		file->ReadLong (&i, 1); m_nAngleSnap = i;
-		file->ReadLong (&m_nSnap, 1);
-		file->ReadFloat (&m_fLineWidth, 1);
-		file->ReadLong (&m_nDetail, 1);
-		file->ReadLong (&i, 1); //m_nCurGroup = i;
-		file->ReadLong (&i, 1); //m_nCurColor = i;
-		file->ReadLong (&i, 1); action = i;
-		file->ReadLong (&i, 1); m_ActiveModel->m_CurFrame = i;
+		file->ReadLong(&i, 1); m_nAngleSnap = i;
+		file->ReadLong(&m_nSnap, 1);
+		file->ReadFloat(&m_fLineWidth, 1);
+		file->ReadLong(&m_nDetail, 1);
 	}
 
+	if (Version < 0x0076)
+		file->Seek(16, SEEK_SET); // m_nCurGroup, m_nCurColor, m_nCurAction, m_CurFrame
+
 	if (fv > 0.8f)
-		file->ReadLong (&m_nScene, 1);
+		file->ReadLong(&m_nScene, 1);
 
-	file->ReadLong (&count, 1);
-	SystemStartProgressBar(0, count, 1, "Loading project...");
+	int NumModels = 1;
+	if (Version > 0x0075)
+		file->ReadLong(&NumModels, 1);
 
-	while (count--)
-	{	
-		if (fv > 0.4f)
-		{
-			char name[9];
-			lcPiece* Piece = new lcPiece(NULL);
-			Piece->FileLoad(*file, name);
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
-			if (pInfo)
+	for (int ModelIndex = 0; ModelIndex < NumModels; i++)
+	{
+		lcModel* Model = new lcModel();
+		m_ModelList.Add(Model);
+		m_ActiveModel = Model;
+
+		file->ReadLong(&count, 1);
+		SystemStartProgressBar(0, count, 1, "Loading model...");
+
+		while (count--)
+		{	
+			if (fv > 0.4f)
 			{
-				Piece->SetPieceInfo(pInfo);
+				char name[9];
+				lcPiece* Piece = new lcPiece(NULL);
+				Piece->FileLoad(*file, name);
+				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
+				if (pInfo)
+				{
+					Piece->SetPieceInfo(pInfo);
 
-				if (bMerge)
-					for (lcPiece* p = m_ActiveModel->m_Pieces; p; p = (lcPiece*)p->m_Next)
-						if (p->m_Name == Piece->m_Name)
-						{
-							Piece->SetUniqueName(m_ActiveModel->m_Pieces, pInfo->m_strDescription);
-							break;
-						}
+					if (bMerge)
+					{
+						for (lcPiece* p = m_ActiveModel->m_Pieces; p; p = (lcPiece*)p->m_Next)
+							if (p->m_Name == Piece->m_Name)
+							{
+								Piece->SetUniqueName(m_ActiveModel->m_Pieces, pInfo->m_strDescription);
+								break;
+							}
+					}
 
-				if (Piece->m_Name.GetLength() == 0)
-					Piece->SetUniqueName(m_ActiveModel->m_Pieces, pInfo->m_strDescription);
+					if (Piece->m_Name.GetLength() == 0)
+						Piece->SetUniqueName(m_ActiveModel->m_Pieces, pInfo->m_strDescription);
 
-				m_ActiveModel->AddPiece(Piece);
-				if (!bUndo)
-					SystemPieceComboAdd(pInfo->m_strDescription);
+					m_ActiveModel->AddPiece(Piece);
+					if (!bUndo)
+						SystemPieceComboAdd(pInfo->m_strDescription);
+				}
+				else 
+					delete Piece; // TODO: create a dummy piece instead.
 			}
-			else 
-				delete Piece;
+			else
+			{
+				char name[9];
+				float pos[3], rot[3], param[4];
+				unsigned char color, step, group;
+			
+				file->ReadFloat(pos, 3);
+				file->ReadFloat(rot, 3);
+				file->ReadByte(&color, 1);
+				file->Read(name, sizeof(name));
+				file->ReadByte(&step, 1);
+				file->ReadByte(&group, 1);
+
+				// Convert from the old colors to 0.75 and then to LDraw.
+				const int conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
+				color = conv[color];
+				const int ColorTable[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+				color = lcConvertLDrawColor(ColorTable[color]);
+
+				PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(name);
+				if (Info != NULL)
+				{
+					lcPiece* Piece = new lcPiece(Info);
+					Matrix mat;
+
+					Piece->Initialize(pos[0], pos[1], pos[2], step, color);
+					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Info->m_strDescription);
+					m_ActiveModel->AddPiece(Piece);
+					mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
+					mat.ToAxisAngle(param);
+					Piece->ChangeKey(1, false, param, LC_PK_ROTATION);
+//					Piece->SetGroup((Group*)group);
+					SystemPieceComboAdd(Info->m_strDescription);
+				}
+			}
+			SystemStepProgressBar();
+		}
+		SystemEndProgressBar();
+
+		if (!bMerge)
+		{
+			if (fv >= 0.4f)
+			{
+				file->Read(&ch, 1);
+				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				if (sh > 100)
+					file->Seek(sh, SEEK_CUR);
+				else
+					file->Read(m_strAuthor, sh);
+
+				file->Read(&ch, 1);
+				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				if (sh > 100)
+					file->Seek(sh, SEEK_CUR);
+				else
+					file->Read(m_strDescription, sh);
+
+				file->Read(&ch, 1);
+				if (ch == 0xFF && fv < 1.3f) file->ReadShort(&sh, 1); else sh = ch;
+				if (sh > 255)
+					file->Seek(sh, SEEK_CUR);
+				else
+					file->Read(m_strComments, sh);
+			}
 		}
 		else
 		{
-			char name[9];
-			float pos[3], rot[3], param[4];
-			unsigned char color, step, group;
-		
-			file->ReadFloat (pos, 3);
-			file->ReadFloat (rot, 3);
-			file->ReadByte (&color, 1);
-			file->Read(name, sizeof(name));
-			file->ReadByte (&step, 1);
-			file->ReadByte (&group, 1);
-
-			// Convert from the old colors to 0.75 and then to LDraw.
-			const int conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
-			color = conv[color];
-			const int ColorTable[28] = { 4,25,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
-			color = lcConvertLDrawColor(ColorTable[color]);
-
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(name);
-			if (Info != NULL)
+			if (fv >= 0.4f)
 			{
-				lcPiece* Piece = new lcPiece(Info);
-				Matrix mat;
+				file->Read (&ch, 1);
+				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				file->Seek(sh, SEEK_CUR);
 
-				Piece->Initialize(pos[0], pos[1], pos[2], step, color);
-				Piece->SetUniqueName(m_ActiveModel->m_Pieces, Info->m_strDescription);
-				m_ActiveModel->AddPiece(Piece);
-				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
-				mat.ToAxisAngle(param);
-				Piece->ChangeKey(1, false, param, LC_PK_ROTATION);
-//				Piece->SetGroup((Group*)group);
-				SystemPieceComboAdd(Info->m_strDescription);
+				file->Read(&ch, 1);
+				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				file->Seek(sh, SEEK_CUR);
+
+				file->Read(&ch, 1);
+				if (ch == 0xFF && fv < 1.3f) file->ReadShort(&sh, 1); else sh = ch;
+				file->Seek(sh, SEEK_CUR);
 			}
 		}
-		SystemStepProgressBar();
-	}
-	SystemEndProgressBar();
 
-	if (!bMerge)
-	{
-		if (fv >= 0.4f)
+		if (fv >= 0.5f)
 		{
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-			if (sh > 100)
-				file->Seek(sh, SEEK_CUR);
-			else
-				file->Read(m_strAuthor, sh);
+			file->ReadLong(&count, 1);
 
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-			if (sh > 100)
-				file->Seek(sh, SEEK_CUR);
-			else
-				file->Read(m_strDescription, sh);
+			lcGroup* pGroup;
+			lcGroup* pLastGroup = NULL;
+			for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
+				pLastGroup = pGroup;
 
-			file->Read(&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
-			if (sh > 255)
-				file->Seek(sh, SEEK_CUR);
-			else
-				file->Read(m_strComments, sh);
-		}
-	}
-	else
-	{
-		if (fv >= 0.4f)
-		{
-			file->Read (&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-			file->Seek (sh, SEEK_CUR);
-
-			file->Read (&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
-			file->Seek (sh, SEEK_CUR);
-
-			file->Read (&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
-			file->Seek (sh, SEEK_CUR);
-		}
-	}
-
-	if (fv >= 0.5f)
-	{
-		file->ReadLong (&count, 1);
-
-		Group* pGroup;
-		Group* pLastGroup = NULL;
-		for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-			pLastGroup = pGroup;
-
-		pGroup = pLastGroup;
-		for (i = 0; i < count; i++)
-		{
-			if (pGroup)
+			pGroup = pLastGroup;
+			for (i = 0; i < count; i++)
 			{
-				pGroup->m_pNext = new Group();
-				pGroup = pGroup->m_pNext;
+				if (pGroup)
+				{
+					pGroup->m_Next = new lcGroup();
+					pGroup = pGroup->m_Next;
+				}
+				else
+					m_ActiveModel->m_Groups = pGroup = new lcGroup();
 			}
-			else
-				m_pGroups = pGroup = new Group();
-		}
-		pLastGroup = pLastGroup ? pLastGroup->m_pNext : m_pGroups;
+			pLastGroup = pLastGroup ? pLastGroup->m_Next : m_ActiveModel->m_Groups;
 
-		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
+			for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_Next)
+			{
+				if (fv < 1.0f)
+				{
+					file->Read(pGroup->m_strName, 65);
+					file->Read(&ch, 1);
+					pGroup->m_fCenter[0] = 0;
+					pGroup->m_fCenter[1] = 0;
+					pGroup->m_fCenter[2] = 0;
+					pGroup->m_Group = (lcGroup*)-1;
+				}
+				else
+					pGroup->FileLoad(file);
+			}
+
+			for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_Next)
+			{
+				i = (int)pGroup->m_Group;
+				pGroup->m_Group = NULL;
+
+				if (i > 0xFFFF || i == -1)
+					continue;
+
+				for (lcGroup* g2 = pLastGroup; g2; g2 = g2->m_Next)
+				{
+					if (i == 0)
+					{
+						pGroup->m_Group = g2;
+						break;
+					}
+
+					i--;
+				}
+			}
+
+			lcPiece* Piece;
+			for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			{
+				i = (int)Piece->GetGroup();
+				Piece->SetGroup(NULL);
+
+				if (i > 0xFFFF || i == -1)
+					continue;
+
+				for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_Next)
+				{
+					if (i == 0)
+					{
+						Piece->SetGroup(pGroup);
+						break;
+					}
+
+					i--;
+				}
+			}
+
+			RemoveEmptyGroups();
+		}
+
+		if (fv >= 0.6f && Version < 0x0076)
 		{
 			if (fv < 1.0f)
-			{
-				file->Read(pGroup->m_strName, 65);
-				file->Read(&ch, 1);
-				pGroup->m_fCenter[0] = 0;
-				pGroup->m_fCenter[1] = 0;
-				pGroup->m_fCenter[2] = 0;
-				pGroup->m_pGroup = (Group*)-1;
-			}
+				file->Seek(4, SEEK_CUR); // m_nViewportMode
 			else
-				pGroup->FileLoad(file);
+				file->Seek(2, SEEK_CUR); // m_nViewportMode, m_nActiveViewport 
 		}
 
-		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
-		{
-			i = (int)pGroup->m_pGroup;
-			pGroup->m_pGroup = NULL;
-
-			if (i > 0xFFFF || i == -1)
-				continue;
-
-			for (Group* g2 = pLastGroup; g2; g2 = g2->m_pNext)
-			{
-				if (i == 0)
-				{
-					pGroup->m_pGroup = g2;
-					break;
-				}
-
-				i--;
-			}
-		}
-
-		lcPiece* Piece;
-		for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-		{
-			i = (int)Piece->GetGroup();
-			Piece->SetGroup(NULL);
-
-			if (i > 0xFFFF || i == -1)
-				continue;
-
-			for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
-			{
-				if (i == 0)
-				{
-					Piece->SetGroup(pGroup);
-					break;
-				}
-
-				i--;
-			}
-		}
-
-		RemoveEmptyGroups();
-	}
-
-	if (!bMerge)
-	{
 		if (fv >= 0.6f)
 		{
-			if (fv < 1.0f)
-			{
-				file->ReadLong (&i, 1);
-				// m_nViewportMode = i;
-			}
-			else
-			{
-				u8 ch;
-				file->ReadByte(&ch, 1); // m_nViewportMode
-				file->ReadByte(&ch, 1); // m_nActiveViewport
-			}
-
-			file->ReadLong (&count, 1);
+			file->ReadLong(&count, 1);
 			lcCamera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
 				pCam = new lcCamera(i);
 				m_ActiveModel->AddCamera(pCam);
-
-				if (i < 4 && fv == 0.6f)
-				{
-					if (m_ViewList.GetSize() > i)
-						m_ViewList[i]->SetCamera(pCam);
-				}
+				pCam->FileLoad(*file);
 			}
 
 			if (count < 7)
-			{
-				pCam = new lcCamera((unsigned char)0);
-				for (i = 0; i < count; i++)
-					pCam->FileLoad(*file);
-				delete pCam;
-			}
-			else
-				for (pCam = m_ActiveModel->m_Cameras; pCam; pCam = (lcCamera*)pCam->m_Next)
-					pCam->FileLoad(*file);
+				m_ActiveModel->ResetCameras();
 		}
 
 		if (fv >= 0.7f)
 		{
-			for (count = 0; count < 4; count++)
-			{
-				file->ReadLong (&i, 1);
+			if (Version < 0x0076)
+				file->Seek(16, SEEK_SET); // view camera index.
 
-				if (m_ViewList.GetSize() > count)
-					m_ViewList[count]->SetCamera(m_ActiveModel->GetCamera(i));
-			}
+			u32 rgb;
+			file->ReadLong(&rgb, 1);
 
-			file->ReadLong (&rgb, 1);
-			m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
-			m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+			m_fFogColor[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
+			m_fFogColor[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
+			m_fFogColor[2] = (float)((rgb & 0xff0000) >> 16) / 255;
 
 			if (fv < 1.0f)
 			{
-				file->ReadLong (&rgb, 1);
+				file->ReadLong(&rgb, 1);
 				m_fFogDensity = (float)rgb/100;
 			}
 			else
-				file->ReadFloat (&m_fFogDensity, 1);
+				file->ReadFloat(&m_fFogDensity, 1);
 
 			if (fv < 1.3f)
 			{
-				file->ReadByte (&ch, 1);
+				file->ReadByte(&ch, 1);
 				if (ch == 0xFF)
-					file->ReadShort (&sh, 1);
+					file->ReadShort(&sh, 1);
 				sh = ch;
 			}
 			else
-				file->ReadShort (&sh, 1);
+				file->ReadShort(&sh, 1);
 
 			if (sh < LC_MAXPATH)
-				file->Read (m_strBackground, sh);
+				file->Read(m_strBackground, sh); // TODO: make background be part of the model.
 			else
-				file->Seek (sh, SEEK_CUR);
+				file->Seek(sh, SEEK_CUR);
 		}
 
 		if (fv >= 0.8f)
@@ -662,60 +651,85 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 		if (fv > 0.9f)
 		{
-			file->ReadLong (&rgb, 1);
-			m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
-			m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+			u32 rgb;
+			file->ReadLong(&rgb, 1);
+
+			m_fAmbient[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
+			m_fAmbient[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
+			m_fAmbient[2] = (float)((rgb & 0xff0000) >> 16) / 255;
 
 			if (fv < 1.3f)
 			{
-				file->ReadLong (&i, 1); m_Animation = (i != 0);
-				file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
-				file->ReadByte (&m_nFPS, 1);
-				file->ReadLong (&i, 1); // m_nCurFrame = i;
-				file->ReadShort (&sh, 1); m_ActiveModel->m_TotalFrames = sh;
-				file->ReadLong (&i, 1); // m_nGridSize = i;
-				file->ReadLong (&i, 1); // m_nMoveSnap = i;
+				file->ReadLong(&i, 1); m_Animation = (i != 0);
+				file->ReadLong(&i, 1); m_bAddKeys = (i != 0);
+				file->ReadByte(&m_nFPS, 1);
+				file->ReadLong(&i, 1); // m_nCurFrame = i;
+				file->ReadShort(&sh, 1); m_ActiveModel->m_TotalFrames = sh;
+				file->ReadLong(&i, 1); // m_nGridSize = i;
+				file->ReadLong(&i, 1); // m_nMoveSnap = i;
 			}
 			else
 			{
-				file->ReadByte (&ch, 1); m_Animation = (ch != 0);
-				file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
-				file->ReadByte (&m_nFPS, 1);
-				file->ReadShort (&sh, 1); // m_nCurFrame
-				file->ReadShort (&sh, 1); m_ActiveModel->m_TotalFrames = sh;
-				file->ReadShort (&sh, 1); // m_nGridSize
-				file->ReadShort (&sh, 1);
+				file->ReadByte(&ch, 1); m_Animation = (ch != 0);
+				file->ReadByte(&ch, 1); m_bAddKeys = (ch != 0);
+				file->ReadByte(&m_nFPS, 1);
+				file->ReadShort(&sh, 1); // m_nCurFrame
+				file->ReadShort(&sh, 1); m_ActiveModel->m_TotalFrames = sh;
+				file->ReadShort(&sh, 1); // m_nGridSize
+				file->ReadShort(&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
 			}
 		}
-			
+
 		if (fv > 1.0f)
 		{
-			file->ReadLong (&rgb, 1);
-			m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
-			m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-			file->ReadLong (&rgb, 1);
-			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
-			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+			u32 rgb;
+
+			file->ReadLong(&rgb, 1);
+			m_fGradient1[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
+			m_fGradient1[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
+			m_fGradient1[2] = (float)((rgb & 0xff0000) >> 16) / 255;
+			file->ReadLong(&rgb, 1);
+			m_fGradient2[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
+			m_fGradient2[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
+			m_fGradient2[2] = (float)((rgb & 0xff0000) >> 16) / 255;
 			
 			if (fv > 1.1f)
-				m_pTerrain->FileLoad (file);
+				m_pTerrain->FileLoad(file); // TODO: move terrain to model.
 			else
 			{
-				file->Seek (4, SEEK_CUR);
-				file->Read (&ch, 1);
-				file->Seek (ch, SEEK_CUR);
+				file->Seek(4, SEEK_CUR);
+				file->Read(&ch, 1);
+				file->Seek(ch, SEEK_CUR);
 			}
 		}
 	}
 
-	for (i = 0; i < m_ViewList.GetSize (); i++)
+	int ActiveModelIndex = 0;
+
+	if (Version > 0x0075)
 	{
-		m_ViewList[i]->MakeCurrent ();
+		file->ReadLong(&ActiveModelIndex, 1);
+
+		for (int i = 0; i < m_ModelList.GetSize(); i++)
+			if (ActiveModelIndex != i)
+				m_ModelList[i]->SetActive(false);
+	}
+
+	m_ModelList[ActiveModelIndex]->SetActive(true);
+
+	// TODO: update piece model mesh pointers.
+	// TODO: load model references.
+
+	if (!bMerge)
+	{
+		// TODO: fix file merge
+	}
+
+	for (i = 0; i < m_ViewList.GetSize(); i++)
+	{
+		m_ViewList[i]->MakeCurrent();
 		RenderInitialize();
 	}
 	CalculateStep();
@@ -723,7 +737,6 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		SelectAndFocusNone(false);
 	if (!bMerge)
 		SystemUpdateFocus(NULL);
-	SetAction(action);
 	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(m_Animation, m_bAddKeys);
 	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
@@ -733,36 +746,37 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	UpdateSelection();
 	SystemUpdateTime(m_Animation, m_ActiveModel->m_CurFrame, m_Animation ? m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX);
-	UpdateAllViews ();
+	UpdateAllViews();
 
 	return true;
 }
 
 void Project::FileSave(File* file, bool bUndo)
 {
-	float ver_flt = 1.4f; // LeoCAD 0.75 - (and this should have been an integer).
-	unsigned long rgb;
-	unsigned char ch;
-	unsigned short sh;
+	float ver_flt = 1.5f; // LeoCAD 0.76
+	u32 rgb;
+	u16 sh;
+	u8 ch;
 	int i, j;
 
-	file->Seek (0, SEEK_SET);
-	file->Write (LC_STR_VERSION, 32);
-	file->WriteFloat (&ver_flt, 1);
+	file->Seek(0, SEEK_SET);
+	file->Write(LC_STR_VERSION, 32);
+	file->WriteFloat(&ver_flt, 1);
+	file->WriteLong(&LC_FILE_VERSION, 1);
 
 	rgb = FLOATRGB(m_fBackground);
-	file->WriteLong (&rgb, 1);
+	file->WriteLong(&rgb, 1);
 
 	i = m_nAngleSnap; file->WriteLong (&i, 1);
-	file->WriteLong (&m_nSnap, 1);
-	file->WriteFloat (&m_fLineWidth, 1);
-	file->WriteLong (&m_nDetail, 1);
+	file->WriteLong(&m_nSnap, 1);
+	file->WriteFloat(&m_fLineWidth, 1);
+	file->WriteLong(&m_nDetail, 1);
 	//i = m_nCurGroup;
-	file->WriteLong (&i, 1);
-	i = 0; file->WriteLong (&i, 1); //m_nCurColor
+	file->WriteLong(&i, 1);
+	i = 0; file->WriteLong(&i, 1); //m_nCurColor
 	i = m_nCurAction; file->WriteLong (&i, 1);
-	file->WriteLong (&m_ActiveModel->m_CurFrame, 1);
-	file->WriteLong (&m_nScene, 1);
+	file->WriteLong(&m_ActiveModel->m_CurFrame, 1);
+	file->WriteLong(&m_nScene, 1);
 
 	lcPiece* Piece;
 	for (i = 0, Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
@@ -770,7 +784,7 @@ void Project::FileSave(File* file, bool bUndo)
 	file->WriteLong(&i, 1);
 
 	for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-		Piece->FileSave(*file, m_pGroups);
+		Piece->FileSave(*file, m_ActiveModel->m_Groups);
 
 	ch = strlen(m_strAuthor);
 	file->Write(&ch, 1);
@@ -782,13 +796,13 @@ void Project::FileSave(File* file, bool bUndo)
 	file->Write(&ch, 1);
 	file->Write(m_strComments, ch);
 
-	Group* pGroup;
-	for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+	lcGroup* pGroup;
+	for (i = 0, pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 		i++;
 	file->WriteLong (&i, 1);
 
-	for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-		pGroup->FileSave(file, m_pGroups);
+	for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
+		pGroup->FileSave(file, m_ActiveModel->m_Groups);
 
 	ch = 0;
 	file->WriteByte(&ch, 1); // m_nViewportMode
@@ -873,212 +887,6 @@ void Project::FileSave(File* file, bool bUndo)
 	}
 }
 
-void Project::FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const
-{
-	FileMem* CurFile = NULL;
-	char Buf[1024];
-
-	while (MPD.ReadLine(Buf, 1024))
-	{
-		String Line(Buf);
-
-		Line.TrimLeft();
-
-		if (Line[0] != '0')
-		{
-			// Copy current line.
-			if (CurFile != NULL)
-				CurFile->Write(Buf, strlen(Buf));
-
-			continue;
-		}
-
-		Line.TrimRight();
-		Line = Line.Right(Line.GetLength() - 1);
-		Line.TrimLeft();
-
-		// Find where a subfile starts.
-		if (Line.CompareNoCase("FILE", 4) == 0)
-		{
-			Line = Line.Right(Line.GetLength() - 4);
-			Line.TrimLeft();
-
-			// Create a new file.
-			CurFile = new FileMem();
-			CurFile->SetFileName(Line);
-			FileArray.Add(CurFile);
-		}
-		else if (Line.CompareNoCase("ENDFILE", 7) == 0)
-		{
-			// File ends here.
-			CurFile = NULL;
-		}
-		else if (CurFile != NULL)
-		{
-			// Copy current line.
-			CurFile->Write(Buf, strlen(Buf));
-		}
-	}
-}
-
-inline String GetToken(char*& ptr)
-{
-	String Ret;
-
-	while (*ptr && *ptr <= 32)
-		ptr++;
-
-	while (*ptr > 32)
-	{
-		Ret += *ptr;
-		ptr++;
-	}
-
-	return Ret;
-}
-
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray, const String& FilePath)
-{
-	char buf[1024];
-
-	// Save file offset.
-	u32 Offset = file->GetPosition();
-	file->Seek(0, SEEK_SET);
-
-	while (file->ReadLine(buf, 1024))
-	{
-		_strupr(buf);
-
-		char* ptr = buf;
-		String LineType = GetToken(ptr);
-		bool PieceHidden = false;
-
-		if (LineType == "0")
-		{
-			String Token = GetToken(ptr);
-
-			if (Token == "STEP")
-			{
-				(*nStep)++;
-				continue;
-			}
-
-			if (Token == "!MLCAD")
-			{
-				Token = GetToken(ptr);
-
-				if (Token == "HIDE")
-				{
-					PieceHidden = true;
-					LineType = GetToken(ptr);
-				}
-			}
-		}
-
-		if (LineType == "1")
-		{
-			bool read = true;
-			char tmp[LC_MAXPATH], pn[LC_MAXPATH];
-			int color;
-			float fmat[12];
-
-			if (sscanf(ptr, "%d %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
-					   &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6], 
-					   &fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 14)
-				continue;
-
-			Matrix incmat, tmpmat;
-			incmat.FromLDraw(fmat);
-			tmpmat.Multiply(*prevmat, incmat);
-
-			int cl = 0;
-			if (color == 16) 
-				cl = DefColor;
-			else
-				cl = lcConvertLDrawColor(color);
-
-			strcpy(pn, tmp);
-			ptr = strrchr(tmp, '.');
-
-			if (ptr != NULL)
-				*ptr = 0;
-
-			// See if it's a piece in the library
-			if (strlen(tmp) < 9)
-			{
-				char name[9];
-				strcpy(name, tmp);
-
-				PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(name);
-				if (Info != NULL)
-				{
-					float x, y, z, rot[4];
-					lcPiece* Piece = new lcPiece(Info);
-					read = false;
-
-					tmpmat.GetTranslation(&x, &y, &z);
-					Piece->Initialize(x, y, z, *nStep, cl);
-					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Info->m_strDescription);
-					m_ActiveModel->AddPiece(Piece);
-					tmpmat.ToAxisAngle(rot);
-					Piece->ChangeKey(1, false, rot, LC_PK_ROTATION);
-					SystemPieceComboAdd(Info->m_strDescription);
-					(*nOk)++;
-
-					if (PieceHidden)
-						Piece->Hide();
-				}
-			}
-
-			// Check for MPD files first.
-			if (read)
-			{
-				for (int i = 0; i < FileArray.GetSize(); i++)
-				{
-					if (_stricmp(FileArray[i]->GetFileName(), pn) == 0)
-					{
-						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray, FilePath);
-						read = false;
-						break;
-					}
-				}
-			}
-
-			// Try to read the file from disk.
-			if (read)
-			{
-				FileDisk tf;
-
-				if (tf.Open(pn, "rt"))
-				{
-					// Read from the current directory.
-					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray, FilePath);
-					read = false;
-				}
-				else
-				{
-					// Try the file's directory.
-					String Path = FilePath + pn;
-
-					if (tf.Open(Path, "rt"))
-					{
-						// Read from the current directory.
-						FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray, FilePath);
-						read = false;
-					}
-					else
-					{
-						console.PrintWarning("Could not find %s.\n", pn);
-					}
-				}
-			}
-		}
-	}
-
-	// Restore file offset.
-	file->Seek(Offset, SEEK_SET);
-}
-
 bool Project::DoFileSave()
 {
 /*
@@ -1091,7 +899,7 @@ bool Project::DoFileSave()
 	}
 	else
 */	{
-		if (!DoSave(m_strPathName, true))
+		if (!DoSave(m_strPathName))
 			return false;
 	}
 	return true;
@@ -1101,136 +909,100 @@ bool Project::DoFileSave()
 // PathName = path name where to save document file
 // if PathName is NULL then the user will be prompted (SaveAs)
 // note: PathName can be different than 'm_strPathName'
-// if 'bReplace' is TRUE will change file name if successful (SaveAs)
-// if 'bReplace' is FALSE will not change path name (SaveCopyAs)
-bool Project::DoSave(char* PathName, bool bReplace)
+bool Project::DoSave(char* PathName)
 {
 	FileDisk file;
-	char newName[LC_MAXPATH];
-	memset(newName, 0, sizeof(newName));
+	char NewName[LC_MAXPATH];
+	memset(NewName, 0, sizeof(NewName));
 	if (PathName)
-		strcpy(newName, PathName);
+		strcpy(NewName, PathName);
 
-	char ext[4], *ptr;
-	memset(ext, 0, 4);
-	ptr = strrchr(newName, '.');
-	if (ptr != NULL)
+	int Len = strlen(NewName);
+	if (Len > 4)
 	{
-		ptr++;
-		strncpy(ext, ptr, 3);
-		_strlwr(ext);
+		char* ext = &NewName[Len - 3];
 
-		if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+		if (!_stricmp(ext, "dat") || !_stricmp(ext, "ldr") || !_stricmp(ext, "mpd"))
 		{
-			*ptr = 0;
-			strcat(newName, "lcd");
+			*ext = 0;
+			strcat(NewName, "lcd");
 		}
 	}
 
-	if (strlen(newName) == 0)
+	if (Len == 0)
 	{
-		strcpy(newName, m_strPathName);
-		if (bReplace && strlen(newName) == 0)
+		strcpy(NewName, m_strPathName);
+		if (strlen(NewName) == 0)
 		{
-			strcpy(newName, m_strTitle);
+			strcpy(NewName, m_strTitle);
 
 			// check for dubious filename
-			int iBad = strcspn(newName, " #%;/\\");
-			if (iBad != -1)
-				newName[iBad] = 0;
+			char* Bad = strpbrk(NewName, " #%;/\\");
+			if (Bad)
+				*Bad = 0;
 
-			strcat(newName, ".lcd");
+			strcat(NewName, ".lcd");
 		}
 
-		if (!SystemDoDialog(LC_DLG_FILE_SAVE_PROJECT, &newName))
+		if (!SystemDoDialog(LC_DLG_FILE_SAVE_PROJECT, &NewName))
 			return false; // don't even attempt to save
 	}
 
-//	CWaitCursor wait;
-
-	if (!file.Open(newName, "wb"))
+	if (!file.Open(NewName, "wb"))
 	{
-//		MessageBox("Failed to save.");
+		char Message[LC_MAXPATH+1024];
+		sprintf(Message, "Failed to open file %s for writing.", NewName);
+		main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
 
 		// be sure to delete the file
 		if (PathName == NULL)
-			remove(newName);
+			remove(NewName);
 
 		return false;
 	}
 
-	memset(ext, 0, 4);
-	ptr = strrchr(newName, '.');
-	if (ptr != NULL)
+	bool SaveLDR = false;
+	bool SaveMPD = false;
+
+	Len = strlen(NewName);
+	if (Len > 4)
 	{
-		strncpy(ext, ptr+1, 3);
-		_strlwr(ext);
+		const char* ext = &NewName[Len - 3];
+
+		if (!_stricmp(ext, "dat") || !_stricmp(ext, "ldr"))
+			SaveLDR = true;
+		else if (!_stricmp(ext, "mpd"))
+			SaveMPD = true;
 	}
 
-	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+	if (SaveLDR || SaveMPD)
 	{
-		lcPiece* pPiece;
-		int i, steps = GetLastStep();
-		char buf[256], *ptr;
-
-		ptr = strrchr(m_strPathName, '\\');
-		if (ptr == NULL)
-			ptr = strrchr(m_strPathName, '/');
-		if (ptr == NULL)
-			ptr = m_strPathName;
-		else
-			ptr++;
-
-		sprintf(buf, "0 Model exported from LeoCAD\r\n0 Original name: %s\r\n", ptr);
-		if (strlen(m_strAuthor) != 0)
-		{
-			strcat(buf, "0 Author: ");
-			strcat(buf, m_strAuthor);
-			strcat(buf, "\r\n");
-		}
-		strcat(buf, "\r\n");
-		file.Write(buf, strlen(buf));
-
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
-		for (i = 1; i <= steps; i++)
+		m_ActiveModel->ExportLDraw(file, SaveMPD, IdentityMatrix44(), LC_COLOR_DEFAULT);
+
+		if (SaveMPD)
 		{
-			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+			for (int ModelIndex = 0; ModelIndex < m_ModelList.GetSize(); ModelIndex++)
 			{
-				if (pPiece->m_TimeShow != i)
+				if (m_ModelList[ModelIndex] == m_ActiveModel)
 					continue;
 
-				if (pPiece->IsHidden())
-				{
-					const char* HiddenText = " 0 !LEOCAD HIDDEN";
-					file.Write(HiddenText, strlen(HiddenText));
-				}
-
-				float f[12];
-				Matrix mat(pPiece->m_AxisAngle, pPiece->m_Position);
-				mat.ToLDraw(f);
-				sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-					g_ColorList[pPiece->m_Color].Code, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->m_PieceInfo->m_strName);
-				file.Write(buf, strlen(buf));
+				m_ModelList[ModelIndex]->ExportLDraw(file, SaveMPD, IdentityMatrix44(), LC_COLOR_DEFAULT);
 			}
-
-			if (i != steps)
-				file.Write("0 STEP\r\n", 8);
 		}
 
 		setlocale(LC_NUMERIC, OldLocale);
-
-		file.Write("0\r\n", 3);
 	}
 	else
 		FileSave(&file, false);     // save me
+
 	file.Close();
 
 	SetModifiedFlag(false);     // back to unmodified
 
 	// reset the title and change the document name
-	if (bReplace)
-		SetPathName(newName, true);
+	SetPathName(NewName, true);
 
 	return true; // success
 }
@@ -1334,9 +1106,9 @@ bool Project::OpenProject(const char* FileName)
 bool Project::OnOpenDocument(const char* PathName)
 {
 	FileDisk file;
-	bool bSuccess = false;
+	bool Success = false;
 
-	if (!file.Open(PathName, "rb"))
+	if (!file.Open(PathName, "rb") || !file.GetLength())
 	{
 		char Message[LC_MAXPATH + 64];
 
@@ -1346,100 +1118,154 @@ bool Project::OnOpenDocument(const char* PathName)
 		return false;
 	}
 
-	char ext[4];
-	memset(ext, 0, 4);
-	const char* ptr = strrchr(PathName, '.');
-	if (ptr != NULL)
+	bool LoadLDR = false;
+	bool LoadMPD = false;
+
+	int Len = strlen(PathName);
+	if (Len > 4)
 	{
-		strncpy(ext, ptr+1, 3);
-		_strlwr(ext);
+		const char* ext = &PathName[Len - 3];
+
+		if (!_stricmp(ext, "dat") || !_stricmp(ext, "ldr"))
+			LoadLDR = true;
+		else if (!_stricmp(ext, "mpd"))
+			LoadMPD = true;
 	}
-
-	bool datfile = false;
-	bool mpdfile = false;
-
-	// Find out what file type we're loading.
-	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
-		datfile = true;
-	else if (strcmp(ext, "mpd") == 0)
-		mpdfile = true;
 
 	// Delete the current project.
 	DeleteContents(false);
-	LoadDefaults(datfile || mpdfile);
+	LoadDefaults(false);
 	SetModifiedFlag(true);  // dirty during loading
 
 	SystemDoWaitCursor(1);
 
-	if (file.GetLength() != 0)
+	if (LoadMPD || LoadLDR)
 	{
-		lcPtrArray<File> FileArray;
+		// Extract the file's directory.
+		String FilePath(PathName);
+		int s1 = FilePath.ReverseFind('\\');
+		int s2 = FilePath.ReverseFind('/');
 
-		// Unpack the MPD file.
-		if (mpdfile)
+		if (s2 > s1)
+			s1 = s2;
+
+		if (s1 == -1)
+			FilePath = "";
+		else
+			FilePath[s1+1] = 0;
+
+		if (LoadMPD)
 		{
-			FileReadMPD(file, FileArray);
+			lcPtrArray<File> FileArray;
+			File* CurrentFile = NULL;
+			char Buf[1024];
+			bool Skip = true;
+
+			// Split MPD into separate files.
+			while (file.ReadLine(Buf, 1024))
+			{
+				char* ptr = Buf;
+				String LineType = GetToken(ptr);
+
+				if (LineType == "0")
+				{
+					String Token = GetToken(ptr);
+
+					if (!Token.CompareNoCase("FILE"))
+					{
+						while (*ptr && *ptr <= 32)
+							ptr++;
+						char* Name = ptr;
+						while (*ptr > 32)
+							ptr++;
+						*ptr = 0;
+
+						CurrentFile = new FileMem();
+						CurrentFile->SetFileName(Name);
+						FileArray.Add(CurrentFile);
+						Skip = false;
+						continue;
+					}
+					else if (!Token.CompareNoCase("NOFILE"))
+					{
+						CurrentFile = NULL;
+						Skip = true;
+						continue;
+					}
+				}
+
+				if (!Skip)
+					CurrentFile->Write(Buf, strlen(Buf));
+			}
+
+			// Read MPD files.
+			for (int FileIndex = 0; FileIndex < FileArray.GetSize(); FileIndex++)
+			{
+				lcModel* Model = new lcModel();
+				Model->m_Name = FileArray[FileIndex]->GetFileName();
+				FileArray[FileIndex]->Seek(0, SEEK_SET);
+				m_ModelList.Add(Model);
+
+				Model->ResetCameras();
+				Model->SetActive(false);
+			}
+
+			for (int FileIndex = 0; FileIndex < FileArray.GetSize(); FileIndex++)
+			{
+				m_ModelList[FileIndex]->ImportLDraw(*FileArray[FileIndex], LC_COLOR_DEFAULT, IdentityMatrix44(), FilePath);
+				delete FileArray[FileIndex];
+			}
+
+			for (int ModelIndex = 0; ModelIndex < m_ModelList.GetSize(); ModelIndex++)
+				m_ModelList[ModelIndex]->SetActive(false);
 
 			if (FileArray.GetSize() == 0)
 			{
+				LoadMPD = false;
+				LoadLDR = true;
 				file.Seek(0, SEEK_SET);
-				mpdfile = false;
-				datfile = true;
-				console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
+				console.PrintWarning("No files found inside the MPD file, trying to load it as a .DAT file instead.\n");
 			}
 		}
 
-		if (datfile || mpdfile)
+		if (LoadLDR)
 		{
-			int ok = 0, step = 1;
-			Matrix mat;
+			lcModel* Model = new lcModel();
+			Model->m_Name = "Main";
+			m_ModelList.Add(Model);
 
-			// Extract the file's directory.
-			String FilePath(PathName);
-			int s1 = FilePath.ReverseFind('\\');
-			int s2 = FilePath.ReverseFind('/');
-
-			if (s2 > s1)
-				s1 = s2;
-
-			if (s1 == -1)
-				FilePath = "";
-			else
-				FilePath[s1+1] = 0;
-
-			if (mpdfile)
-				FileReadLDraw(FileArray[0], &mat, &ok, g_App->m_SelectedColor, &step, FileArray, FilePath);
-			else
-				FileReadLDraw(&file, &mat, &ok, g_App->m_SelectedColor, &step, FileArray, FilePath);
-
-			m_ActiveModel->m_CurFrame = step;
-			SystemUpdateTime(false, m_ActiveModel->m_CurFrame, LC_OBJECT_TIME_MAX);
-			SystemUpdateFocus(NULL);
-			UpdateSelection();
-			CalculateStep();
-			UpdateAllViews ();
-
-			console.PrintMisc("%d objects imported.\n", ok);
-			bSuccess = true;
-		}
-		else
-		{
-			// Load a LeoCAD file.
-			bSuccess = FileLoad(&file, false, false);
+			Model->ResetCameras();
+			Model->ImportLDraw(file, LC_COLOR_DEFAULT, IdentityMatrix44(), FilePath);
 		}
 
-		// Clean up.
-		if (mpdfile)
-		{
-			for (int i = 0; i < FileArray.GetSize(); i++)
-				delete FileArray[i];
-		}
+		SetActiveModel(m_ModelList[0]);
+
+		for (int i = 0; i < m_ViewList.GetSize(); i++)
+			m_ViewList[i]->UpdateCamera();
+
+		SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
+		if (m_ActiveView)
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+
+		SystemUpdateTime(false, m_ActiveModel->m_CurFrame, LC_OBJECT_TIME_MAX);
+		SystemUpdateFocus(NULL);
+		UpdateSelection();
+		CalculateStep();
+		UpdateAllViews();
+
+//		console.PrintMisc("%d objects imported.\n", Pieces);
+		Success = true;
+	}
+	else
+	{
+		// Load a LeoCAD file.
+		Success = FileLoad(&file, false, false);
 	}
 
 	file.Close();
 	SystemDoWaitCursor(-1);
 
-	if (bSuccess == false)
+	if (!Success)
 	{
 		char Message[LC_MAXPATH + 64];
 
@@ -3354,7 +3180,7 @@ void Project::UpdateSelection()
 	else
 	{
 		lcPiece* Piece;
-		Group* pGroup = NULL;
+		lcGroup* pGroup = NULL;
 		bool first = true;
 
 		for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
@@ -3486,13 +3312,9 @@ void Project::CheckAnimation()
 	}
 }
 
-u32 Project::GetLastStep()
+u32 Project::GetLastStep() // TODO: remove function
 {
-	u32 Last = 1;
-	for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-		Last = lcMax(Last, Piece->m_TimeShow);
-
-	return Last;
+	return m_ActiveModel->GetLastStep();
 }
 
 // Create a series of pictures
@@ -3772,7 +3594,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_SAVEAS:
 		{
-			DoSave(NULL, true);
+			DoSave(NULL);
 		} break;
 
 		case LC_FILE_PICTURE:
@@ -4791,7 +4613,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			int i = 0;
 			lcPiece* pPiece;
 			lcCamera* pCamera;
-			Group* pGroup;
+			lcGroup* pGroup;
 //			lcLight* pLight;
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -4801,14 +4623,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 				if (pPiece->IsSelected())
-					pPiece->FileSave(*m_pClipboard[m_nCurClipboard], m_pGroups);
+					pPiece->FileSave(*m_pClipboard[m_nCurClipboard], m_ActiveModel->m_Groups);
 
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+			for (i = 0, pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 				i++;
 			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
 
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				pGroup->FileSave(m_pClipboard[m_nCurClipboard], m_pGroups);
+			for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
+				pGroup->FileSave(m_pClipboard[m_nCurClipboard], m_ActiveModel->m_Groups);
 
 			for (i = 0, pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
 				if (pCamera->IsSelected())
@@ -4819,12 +4641,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (pCamera->IsSelected())
 					pCamera->FileSave(*m_pClipboard[m_nCurClipboard]);
 /*
-			for (i = 0, pLight = m_Lights; pLight; pLight = pLight->m_pNext)
+			for (i = 0, pLight = m_Lights; pLight; pLight = pLight->m_Next)
 				if (pLight->IsSelected())
 					i++;
 			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
 
-			for (pLight = m_Lights; pLight; pLight = pLight->m_pNext)
+			for (pLight = m_Lights; pLight; pLight = pLight->m_Next)
 				if (pLight->IsSelected())
 					pLight->FileSave(m_pClipboard[m_nCurClipboard]);
 */
@@ -4870,10 +4692,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			file->Read(&i, sizeof(i));
 			lcPiece* pPiece;
-			Group** groups = (Group**)malloc(i*sizeof(Group**));
+			lcGroup** groups = (lcGroup**)malloc(i*sizeof(lcGroup**));
 			for (j = 0; j < i; j++)
 			{
-				groups[j] = new Group();
+				groups[j] = new lcGroup();
 				groups[j]->FileLoad(file);
 			}
 
@@ -4895,17 +4717,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (j = 0; j < i; j++)
 			{
-				int g = (int)groups[j]->m_pGroup;
-				groups[j]->m_pGroup = (g != -1) ? groups[g] : NULL;
+				int g = (int)groups[j]->m_Group;
+				groups[j]->m_Group = (g != -1) ? groups[g] : NULL;
 			}
 
 			for (j = 0; j < i; j++)
 			{
-				Group* pGroup;
+				lcGroup* pGroup;
 				bool add = false;
 				for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 				{
-					for (pGroup = pPiece->GetGroup(); pGroup; pGroup = pGroup->m_pGroup)
+					for (pGroup = pPiece->GetGroup(); pGroup; pGroup = pGroup->m_Group)
 						if (pGroup == groups[j])
 						{
 							add = true;
@@ -4920,15 +4742,15 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				{
 					int a, max = 0;
 
-					for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+					for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 						if (strncmp("Pasted Group #", pGroup->m_strName, 14) == 0)
 							if (sscanf(pGroup->m_strName + 14, "%d", &a) == 1)
 								if (a > max) 
 									max = a;
 
 					sprintf(groups[j]->m_strName, "Pasted Group #%.2d", max+1);
-					groups[j]->m_pNext = m_pGroups;
-					m_pGroups = groups[j];
+					groups[j]->m_Next = m_ActiveModel->m_Groups;
+					m_ActiveModel->m_Groups = groups[j];
 				}
 				else
 					delete groups[j];
@@ -5001,7 +4823,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			lcPiece* pPiece;
 			lcCamera* pCamera;
 			lcLight* pLight;
-			Group* pGroup;
+			lcGroup* pGroup;
 			int i = 0;
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -5018,7 +4840,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					i++;
 
 			// TODO: add only groups with visible pieces
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+			for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 				i++;
 
 			if (i == 0)
@@ -5062,7 +4884,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 
 			// TODO: add only groups with visible pieces
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+			for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 			{
 				opts[i].name = pGroup->m_strName;
 				opts[i].type = LC_SELDLG_GROUP;
@@ -5101,7 +4923,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						case LC_SELDLG_GROUP:
 						{
-							pGroup = (Group*)opts[i].pointer;
+							pGroup = (lcGroup*)opts[i].pointer;
 							pGroup = pGroup->GetTopGroup();
 							for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 								if (pPiece->GetTopGroup() == pGroup)
@@ -5201,17 +5023,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				int max = 0;
 
-				Group* pGroup;
-				for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+				lcGroup* pGroup;
+				for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 					if (strncmp (pGroup->m_strName, "Minifig #", 9) == 0)
 						if (sscanf(pGroup->m_strName, "Minifig #%d", &i) == 1)
 							if (i > max)
 								max = i;
-				pGroup = new Group;
+				pGroup = new lcGroup;
 				sprintf(pGroup->m_strName, "Minifig #%.2d", max+1);
 
-				pGroup->m_pNext = m_pGroups;
-				m_pGroups = pGroup;
+				pGroup->m_Next = m_ActiveModel->m_Groups;
+				m_ActiveModel->m_Groups = pGroup;
 
 				BoundingBox Box;
 				Box.Reset();
@@ -5386,11 +5208,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_GROUP:
 		{
-			Group* pGroup;
+			lcGroup* pGroup;
 			int i, max = 0;
 			char name[65];
 
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+			for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 				if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
 					if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
 						if (i > max)
@@ -5399,10 +5221,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_GROUP, name))
 			{
-				pGroup = new Group();
+				pGroup = new lcGroup();
 				strcpy(pGroup->m_strName, name);
-				pGroup->m_pNext = m_pGroups;
-				m_pGroups = pGroup;
+				pGroup->m_Next = m_ActiveModel->m_Groups;
+				m_ActiveModel->m_Groups = pGroup;
 
 				BoundingBox Box;
 				Box.Reset();
@@ -5427,9 +5249,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_UNGROUP:
 		{
-			Group* pList = NULL;
-			Group* pGroup;
-			Group* tmp;
+			lcGroup* pList = NULL;
+			lcGroup* pGroup;
+			lcGroup* tmp;
 			lcPiece* pPiece;
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -5438,25 +5260,25 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					pGroup = pPiece->GetTopGroup();
 
 					// Check if we already removed the group
-					for (tmp = pList; tmp; tmp = tmp->m_pNext)
+					for (tmp = pList; tmp; tmp = tmp->m_Next)
 						if (pGroup == tmp)
 							pGroup = NULL;
 
 					if (pGroup != NULL)
 					{
 						// First remove the group from the array
-						for (tmp = m_pGroups; tmp->m_pNext; tmp = tmp->m_pNext)
-							if (tmp->m_pNext == pGroup)
+						for (tmp = m_ActiveModel->m_Groups; tmp->m_Next; tmp = tmp->m_Next)
+							if (tmp->m_Next == pGroup)
 							{
-								tmp->m_pNext = pGroup->m_pNext;
+								tmp->m_Next = pGroup->m_Next;
 								break;
 							}
 
-						if (pGroup == m_pGroups)
-							m_pGroups = pGroup->m_pNext;
+						if (pGroup == m_ActiveModel->m_Groups)
+							m_ActiveModel->m_Groups = pGroup->m_Next;
 
 						// Now add it to the list of top groups
-						pGroup->m_pNext = pList;
+						pGroup->m_Next = pList;
 						pList = pGroup;
 					}
 				}
@@ -5468,7 +5290,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						pPiece->UnGroup(pList);
 
 				pGroup = pList;
-				pList = pList->m_pNext;
+				pList = pList->m_Next;
 				delete pGroup;
 			}
 
@@ -5479,7 +5301,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_GROUP_ADD:
 		{
-			Group* pGroup = NULL;
+			lcGroup* pGroup = NULL;
 			lcPiece* pPiece;
 
 			for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -5524,7 +5346,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_GROUP_EDIT:
 		{
 			int i;
-			Group* pGroup;
+			lcGroup* pGroup;
 			lcPiece* pPiece;
 			LC_GROUPEDITDLG_OPTS opts;
 
@@ -5532,7 +5354,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				i++;
 			opts.piececount = i;
 			opts.pieces = (lcPiece**)malloc(i*sizeof(lcPiece*));
-			opts.piecesgroups = (Group**)malloc(i*sizeof(Group*));
+			opts.piecesgroups = (lcGroup**)malloc(i*sizeof(lcGroup*));
 
 			for (i = 0, pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next, i++)
 			{
@@ -5540,16 +5362,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				opts.piecesgroups[i] = pPiece->GetGroup();
 			}
 
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+			for (i = 0, pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 				i++;
 			opts.groupcount = i;
-			opts.groups = (Group**)malloc(i*sizeof(Group*));
-			opts.groupsgroups = (Group**)malloc(i*sizeof(Group*));
+			opts.groups = (lcGroup**)malloc(i*sizeof(lcGroup*));
+			opts.groupsgroups = (lcGroup**)malloc(i*sizeof(lcGroup*));
 
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext, i++)
+			for (i = 0, pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next, i++)
 			{
 				opts.groups[i] = pGroup;
-				opts.groupsgroups[i] = pGroup->m_pGroup;
+				opts.groupsgroups[i] = pGroup->m_Group;
 			}
 
 			if (SystemDoDialog(LC_DLG_EDITGROUPS, &opts))
@@ -5558,7 +5380,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					opts.pieces[i]->SetGroup(opts.piecesgroups[i]);
 
 				for (i = 0; i < opts.groupcount; i++)
-					opts.groups[i]->m_pGroup = opts.groupsgroups[i];
+					opts.groups[i]->m_Group = opts.groupsgroups[i];
 
 				RemoveEmptyGroups();
 				SelectAndFocusNone(false);
@@ -6362,11 +6184,11 @@ void Project::SetAction(int nAction)
 void Project::RemoveEmptyGroups()
 {
 	bool recurse = false;
-	Group *g1, *g2;
+	lcGroup *g1, *g2;
 	lcPiece* pPiece;
 	int ref;
 
-	for (g1 = m_pGroups; g1;)
+	for (g1 = m_ActiveModel->m_Groups; g1;)
 	{
 		ref = 0;
 
@@ -6374,8 +6196,8 @@ void Project::RemoveEmptyGroups()
 			if (pPiece->GetGroup() == g1)
 				ref++;
 
-		for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
-			if (g2->m_pGroup == g1)
+		for (g2 = m_ActiveModel->m_Groups; g2; g2 = g2->m_Next)
+			if (g2->m_Group == g1)
 				ref++;
 
 		if (ref < 2)
@@ -6384,52 +6206,52 @@ void Project::RemoveEmptyGroups()
 			{
 				for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 					if (pPiece->GetGroup() == g1)
-						pPiece->SetGroup(g1->m_pGroup);
+						pPiece->SetGroup(g1->m_Group);
 
-				for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
-					if (g2->m_pGroup == g1)
-						g2->m_pGroup = g1->m_pGroup;
+				for (g2 = m_ActiveModel->m_Groups; g2; g2 = g2->m_Next)
+					if (g2->m_Group == g1)
+						g2->m_Group = g1->m_Group;
 			}
 
-			if (g1 == m_pGroups)
+			if (g1 == m_ActiveModel->m_Groups)
 			{
-				m_pGroups = g1->m_pNext;
+				m_ActiveModel->m_Groups = g1->m_Next;
 				delete g1;
-				g1 = m_pGroups;
+				g1 = m_ActiveModel->m_Groups;
 			}
 			else
 			{
-				for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
-					if (g2->m_pNext == g1)
+				for (g2 = m_ActiveModel->m_Groups; g2; g2 = g2->m_Next)
+					if (g2->m_Next == g1)
 					{
-						g2->m_pNext = g1->m_pNext;
+						g2->m_Next = g1->m_Next;
 						break;
 					}
 
 				delete g1;
-				g1 = g2->m_pNext;
+				g1 = g2->m_Next;
 			}
 
 			recurse = true;
 		}
 		else
-			g1 = g1->m_pNext;
+			g1 = g1->m_Next;
 	}
 
 	if (recurse)
 		RemoveEmptyGroups();
 }
 
-Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, float z)
+lcGroup* Project::AddGroup(const char* name, lcGroup* pParent, float x, float y, float z)
 {
-  Group *pNewGroup = new Group();
+  lcGroup *pNewGroup = new lcGroup();
 
   if (name == NULL)
   {
     int i, max = 0;
     char str[65];
 
-    for (Group *pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+    for (lcGroup *pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
       if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
         if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
           if (i > max)
@@ -6441,13 +6263,13 @@ Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, fl
   else
     strcpy (pNewGroup->m_strName, name);
 
-  pNewGroup->m_pNext = m_pGroups;
-  m_pGroups = pNewGroup;
+  pNewGroup->m_Next = m_ActiveModel->m_Groups;
+  m_ActiveModel->m_Groups = pNewGroup;
 
   pNewGroup->m_fCenter[0] = x;
   pNewGroup->m_fCenter[1] = y;
   pNewGroup->m_fCenter[2] = z;
-  pNewGroup->m_pGroup = pParent;
+  pNewGroup->m_Group = pParent;
 
   return pNewGroup;
 }
@@ -6799,7 +6621,7 @@ bool Project::StopTracking(bool bAccept)
 					{
 						if (Objects[i]->GetType() == LC_OBJECT_PIECE)
 						{
-							Group* pGroup = ((lcPiece*)Objects[i])->GetTopGroup();
+							lcGroup* pGroup = ((lcPiece*)Objects[i])->GetTopGroup();
 							if (pGroup != NULL)
 							{
 								for (lcPiece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -7465,7 +7287,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (pFocus != NULL)
 			{
         pFocus->Select (true, true, false);
-        Group* pGroup = pFocus->GetTopGroup();
+        lcGroup* pGroup = pFocus->GetTopGroup();
         if (pGroup != NULL)
         {
           for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -7808,7 +7630,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 						case LC_OBJECT_PIECE:
 						{
 							lcPiece* pPiece = (lcPiece*)Object;
-							Group* pGroup = pPiece->GetTopGroup();
+							lcGroup* pGroup = pPiece->GetTopGroup();
 							bool bFocus = pPiece->IsFocused ();
 
 							SelectAndFocusNone (bControl);
@@ -8083,7 +7905,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
         {
           lcPiece* pPiece = (lcPiece*)Object;
           pPiece->Select (true, true, false);
-          Group* pGroup = pPiece->GetTopGroup();
+          lcGroup* pGroup = pPiece->GetTopGroup();
 
           if (pGroup != NULL)
             for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
@@ -9504,7 +9326,7 @@ template<class type> void Project::writeVRMLShapes(type color, FILE *stream, int
 class GroupInfo
 {
 public:
-	Group *group;
+	lcGroup *group;
 	float minBoundingBox[3];
 	float maxBoundingBox[3];
 	char  groupname[65];
@@ -9652,7 +9474,7 @@ void Project::exportVRMLFile(char *filename, int dialect)
 	GroupInfo groupObject;
 	for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
 	{
-		Group *topGroup = pPiece->GetTopGroup();
+		lcGroup *topGroup = pPiece->GetTopGroup();
 		int foundGroup = false;;
 		if (topGroup != NULL)
 		{

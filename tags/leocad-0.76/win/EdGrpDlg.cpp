@@ -62,7 +62,7 @@ BOOL CEditGroupsDlg::OnInitDialog()
 void CEditGroupsDlg::OnEditgrpNewgroup() 
 {
   HTREEITEM hItem, hParent = NULL;
-  Group *pGroup, *pParent = NULL;
+  lcGroup *pGroup, *pParent = NULL;
   TVITEM item;
   
   hItem = m_Tree.GetSelectedItem ();
@@ -93,8 +93,8 @@ void CEditGroupsDlg::OnEditgrpNewgroup()
   pGroup = lcGetActiveProject()->AddGroup (NULL, pParent, 0, 0, 0);
 
   m_Tree.opts->groupcount++;
-  m_Tree.opts->groups = (Group**)realloc(m_Tree.opts->groups, m_Tree.opts->groupcount*sizeof(Group*));
-  m_Tree.opts->groupsgroups = (Group**)realloc(m_Tree.opts->groupsgroups, m_Tree.opts->groupcount*sizeof(Group*));
+  m_Tree.opts->groups = (lcGroup**)realloc(m_Tree.opts->groups, m_Tree.opts->groupcount*sizeof(lcGroup*));
+  m_Tree.opts->groupsgroups = (lcGroup**)realloc(m_Tree.opts->groupsgroups, m_Tree.opts->groupcount*sizeof(lcGroup*));
 
   m_Tree.opts->groups[m_Tree.opts->groupcount-1] = pGroup;
   m_Tree.opts->groupsgroups[m_Tree.opts->groupcount-1] = pParent;

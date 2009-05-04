@@ -3,21 +3,21 @@
 
 class File;
 
-class Group
+class lcGroup
 {
 public:
-	Group();
-	~Group();
+	lcGroup();
+	~lcGroup();
 
-	void SetGroup(Group* pGroup);
-	void UnGroup(Group* pGroup);
-	Group* GetTopGroup();
+	void SetGroup(lcGroup* Group);
+	void UnGroup(lcGroup* Group);
+	lcGroup* GetTopGroup();
 
-	Group* m_pNext;
-	Group* m_pGroup;
+	lcGroup* m_Next;
+	lcGroup* m_Group;
 
 	void FileLoad(File* file);
-	void FileSave(File* file, Group* pGroups);
+	void FileSave(File* file, lcGroup* Groups);
 
 	char m_strName[65];
 	float m_fCenter[3];

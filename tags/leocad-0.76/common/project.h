@@ -46,7 +46,7 @@ struct TouchState
 	int StartX, StartY;
 };
 
-class Group;
+class lcGroup;
 class GroupInfo;
 class Texture;
 class Terrain;
@@ -122,7 +122,7 @@ public:
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
 	lcObject* GetFocusObject() const;
-	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
+	lcGroup* AddGroup(const char* name, lcGroup* pParent, float x, float y, float z);
 
 	// Views.
 	void AddView(View* pView);
@@ -161,7 +161,6 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	Group* m_pGroups;
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
@@ -284,12 +283,10 @@ protected:
 
 protected:
 	// File load/save implementation.
-	bool DoSave(char* lpszPathName, bool bReplace);
+	bool DoSave(char* PathName);
 	bool DoFileSave();
 	bool FileLoad(File* file, bool bUndo, bool bMerge);
 	void FileSave(File* file, bool bUndo);
-	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, lcPtrArray<File>& FileArray, const String& FilePath);
-	void FileReadMPD(File& MPD, lcPtrArray<File>& FileArray) const;
 
 public:
 	// File helpers

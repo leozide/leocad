@@ -5,21 +5,24 @@
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
+#include "group.h"
 #include "lc_colors.h"
 #include "lc_mesh.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "lc_application.h"
-//#include "system.h"
+#include "library.h"
+#include "system.h"
+#include "console.h"
 
-lcModel::lcModel(/*const char* Name*/)
+lcModel::lcModel()
 {
-//	m_Name = Name;
 //	m_Author = Sys_ProfileLoadString("Default", "User", "");
 
 	m_Pieces = NULL;
 	m_Cameras = NULL;
 	m_Lights = NULL;
+	m_Groups = NULL;
 
 	m_CurFrame = 1;
 	m_TotalFrames = 100;
@@ -70,9 +73,259 @@ void lcModel::DeleteContents()
 		delete Light;
 	}
 
+	while (m_Groups)
+	{
+		lcGroup* Group = m_Groups;
+		m_Groups = m_Groups->m_Next;
+		delete Group;
+	}
+
 	delete m_Mesh;
 	m_Mesh = NULL;
 	m_PieceInfo->m_Mesh = NULL;
+}
+
+bool lcModel::FileLoad(File& file)
+{
+	return true;
+}
+
+void lcModel::FileSave(File& file)
+{
+}
+
+void lcModel::ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath)
+{
+	char Buf[1024];
+
+	while (file.ReadLine(Buf, 1024))
+	{
+		char* ptr = Buf;
+		String LineType = GetToken(ptr);
+		bool PieceHidden = false;
+
+		if (LineType == "0")
+		{
+			String Token = GetToken(ptr);
+
+			if (!Token.CompareNoCase("STEP"))
+			{
+				m_CurFrame++;
+				continue;
+			}
+
+			if (Token == "!MLCAD")
+			{
+				Token = GetToken(ptr);
+
+				if (Token == "HIDE")
+				{
+					PieceHidden = true;
+					LineType = GetToken(ptr);
+				}
+			}
+		}
+
+		if (LineType == "1")
+		{
+			char tmp[LC_MAXPATH], pn[LC_MAXPATH];
+			int Color;
+			float Mat[12];
+
+			if (sscanf(ptr, "%d %g %g %g %g %g %g %g %g %g %g %g %g %s[256]",
+					   &Color, &Mat[0], &Mat[1], &Mat[2], &Mat[3], &Mat[4], &Mat[5], &Mat[6], 
+					   &Mat[7], &Mat[8], &Mat[9], &Mat[10], &Mat[11], &tmp[0]) != 14)
+				continue;
+
+			Matrix44 ModelWorld = IdentityMatrix44();
+			float* ModelMatrix = ModelWorld;
+
+			ModelMatrix[12] =  Mat[0] / 25.0f;
+			ModelMatrix[14] = -Mat[1] / 25.0f;
+			ModelMatrix[13] =  Mat[2] / 25.0f;
+			ModelMatrix[0] =  Mat[3];
+			ModelMatrix[8] = -Mat[4];
+			ModelMatrix[4] =  Mat[5];
+			ModelMatrix[2] = -Mat[6];
+			ModelMatrix[10] = Mat[7];
+			ModelMatrix[6] = -Mat[8];
+			ModelMatrix[1] =  Mat[9];
+			ModelMatrix[9] = -Mat[10];
+			ModelMatrix[5] =  Mat[11];
+
+			ModelWorld = Mul(ModelWorld, ParentWorld);
+
+			if (Color == 16) 
+				Color = DefaultColor;
+			else
+				Color = lcConvertLDrawColor(Color);
+
+			strcpy(pn, tmp);
+			ptr = strrchr(tmp, '.');
+
+			if (ptr != NULL)
+				*ptr = 0;
+
+			PieceInfo* Info = NULL;
+
+			// See if it's a piece in the library.
+			if (strlen(tmp) < 9)
+			{
+				char name[9];
+				strcpy(name, tmp);
+				_strupr(name);
+
+				Info = lcGetPiecesLibrary()->FindPieceInfo(name);
+			}
+
+			// Check for one of the other models.
+			if (!Info)
+			{
+				for (int ModelIndex = 0; ModelIndex < lcGetActiveProject()->m_ModelList.GetSize(); ModelIndex++)
+				{
+					lcModel* Model = lcGetActiveProject()->m_ModelList[ModelIndex];
+
+					if (Model->m_Name == (const char*)pn)
+					{
+						Info = Model->m_PieceInfo;
+						break;
+					}
+				}
+			}
+
+			if (Info)
+			{
+				lcPiece* Piece = new lcPiece(Info);
+
+				Vector3 Pos = ModelWorld.GetTranslation();
+				Vector4 Rot = MatrixToAxisAngle(ModelWorld);
+				Piece->Initialize(Pos[0], Pos[1], Pos[2], m_CurFrame, Color);
+				Piece->SetUniqueName(m_Pieces, Info->m_strDescription);
+				AddPiece(Piece);
+				Piece->ChangeKey(1, false, Rot, LC_PK_ROTATION);
+				SystemPieceComboAdd(Info->m_strDescription);
+
+				if (PieceHidden)
+					Piece->Hide();
+
+				continue;
+			}
+
+			// Try to read the file from disk.
+			FileDisk tf;
+
+			if (tf.Open(pn, "rt"))
+			{
+				// Read from the current directory.
+				ImportLDraw(tf, Color, ModelWorld, FilePath);
+			}
+			else
+			{
+				// Try the file's directory.
+				String Path = FilePath + pn;
+
+				if (tf.Open(Path, "rt"))
+				{
+					// Read from the current directory.
+					ImportLDraw(tf, Color, ModelWorld, FilePath);
+				}
+				else
+				{
+					console.PrintWarning("Could not find %s.\n", pn);
+				}
+			}
+		}
+	}
+}
+
+void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorld, int Color)
+{
+	char buf[1024];
+
+	String Name = m_Name;
+
+	for (;;)
+	{
+		int Bad = Name.FindOneOf(" #%;/\\");
+		if (Bad == -1)
+			break;
+		Name[Bad] = '_';
+	}
+
+	if (ExportMPD)
+	{
+		sprintf(buf, "0 FILE %s\r\n", (const char*)Name);
+		file.Write(buf, strlen(buf));
+	}
+
+	if (!m_Description.IsEmpty())
+		sprintf(buf, "0 %s\r\n", (const char*)m_Description);
+	else
+		sprintf(buf, "0 %s\r\n", (const char*)Name);
+	file.Write(buf, strlen(buf));
+
+	if (m_Author.IsEmpty())
+		strcpy(buf, "0 Author: LeoCAD\r\n");
+	else
+		sprintf(buf, "0 Author: %s\r\n", m_Author);
+	file.Write(buf, strlen(buf));
+
+	strcpy(buf, "\r\n");
+	file.Write(buf, strlen(buf));
+
+	int LastStep = GetLastStep();
+
+	for (int Step = 1; Step <= LastStep; Step++)
+	{
+		for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		{
+			if (Piece->m_TimeShow != Step)
+				continue;
+
+			int PieceColor = (Piece->m_Color == LC_COLOR_DEFAULT) ? Color : Piece->m_Color;
+
+			if (!ExportMPD && (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL))
+			{
+				Matrix44 ModelWorld = Mul(Piece->m_ModelWorld, ParentWorld);
+				Piece->m_PieceInfo->m_Model->ExportLDraw(file, ExportMPD, ModelWorld, PieceColor);
+				continue;
+			}
+
+			if (Piece->IsHidden())
+			{
+				const char* HiddenText = " 0 !MLCAD HIDE";
+				file.Write(HiddenText, strlen(HiddenText));
+			}
+
+			// Convert matrix to LDraw coordinates.
+			Matrix44 ModelWorld = Mul(Piece->m_ModelWorld, ParentWorld);
+			float* ModelMatrix = ModelWorld;
+			float Mat[12];
+
+			Mat[0] =  ModelMatrix[12] * 25.0f;
+			Mat[1] = -ModelMatrix[14] * 25.0f;
+			Mat[2] =  ModelMatrix[13] * 25.0f;
+			Mat[3] =  ModelMatrix[0];
+			Mat[4] = -ModelMatrix[8];
+			Mat[5] =  ModelMatrix[4];
+			Mat[6] = -ModelMatrix[2];
+			Mat[7] =  ModelMatrix[10];
+			Mat[8] = -ModelMatrix[6];
+			Mat[9] =  ModelMatrix[1];
+			Mat[10] = -ModelMatrix[9];
+			Mat[11] =  ModelMatrix[5];
+
+			sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
+			        g_ColorList[PieceColor].Code, Mat[0], Mat[1], Mat[2], Mat[3], Mat[4], Mat[5],
+			        Mat[6], Mat[7], Mat[8], Mat[9], Mat[10], Mat[11], Piece->m_PieceInfo->m_strName);
+			file.Write(buf, strlen(buf));
+		}
+
+		if (Step != LastStep)
+			file.Write("0 STEP\r\n", 8);
+	}
+
+	file.Write("0\r\n", 3);
 }
 
 bool lcModel::IsSubModel(const lcModel* Model) const
@@ -90,6 +343,17 @@ bool lcModel::IsSubModel(const lcModel* Model) const
 
 	return false;
 }
+
+u32 lcModel::GetLastStep() const
+{
+	u32 Last = 1;
+
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		Last = lcMax(Last, Piece->m_TimeShow);
+
+	return Last;
+}
+
 /*
 void lcModel::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const
 {
@@ -100,7 +364,16 @@ void lcModel::GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Co
 void lcModel::SetActive(bool Active)
 {
 	if (Active)
+	{
+		for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		{
+			if (!Piece->IsVisible(m_CurFrame))
+				continue;
+
+			Piece->UpdatePosition(m_CurFrame);
+		}
 		return;
+	}
 
 	u32 Time = lcMax(m_TotalFrames, LC_OBJECT_TIME_MAX);
 
@@ -115,6 +388,7 @@ void lcModel::SetActive(bool Active)
 		if (!Piece->IsVisible(Time))
 			continue;
 
+		Piece->UpdatePosition(Time);
 		Piece->MergeBoundingBox(&m_BoundingBox);
 
 		lcMesh* Mesh = Piece->m_PieceInfo->m_Mesh;
@@ -123,7 +397,8 @@ void lcModel::SetActive(bool Active)
 		for (int SectionIndex = 0; SectionIndex < Mesh->m_SectionCount; SectionIndex++)
 		{
 			lcMeshSection* Section = &Mesh->m_Sections[SectionIndex];
-			int Index = Section->PrimitiveType == GL_TRIANGLES ? Section->ColorIndex * 2 : Section->ColorIndex * 2 + 1;
+			int Color = (Section->ColorIndex == LC_COLOR_DEFAULT) ? Piece->m_Color : Section->ColorIndex;
+			int Index = (Section->PrimitiveType == GL_TRIANGLES) ? Color * 2 : Color * 2 + 1;
 			SectionIndices[Index] += Section->IndexCount;
 		}
 	}
@@ -189,19 +464,11 @@ void lcModel::BuildMesh(u32* SectionIndices)
 		for (int i = 0; i < SrcMesh->m_SectionCount; i++)
 		{
 			lcMeshSection* SrcSection = &SrcMesh->m_Sections[i];
-			int SrcColor = 0;
+
+			int Color = (SrcSection->ColorIndex == LC_COLOR_DEFAULT) ? Piece->m_Color : SrcSection->ColorIndex;
+			int SrcColor = (SrcSection->PrimitiveType == GL_TRIANGLES) ? Color * 2 : Color * 2 + 1;
 
 			// Create a new section if needed.
-			switch (SrcSection->PrimitiveType)
-			{
-			case GL_TRIANGLES:
-				SrcColor = SrcSection->ColorIndex*2;
-				break;
-			case GL_LINES:
-				SrcColor = SrcSection->ColorIndex*2+1;
-				break;
-			}
-
 			SectionIndices[SrcColor] -= SrcSection->IndexCount;
 			int ReserveIndices = SectionIndices[SrcColor];
 			if (DstSections[SrcColor])
@@ -211,7 +478,7 @@ void lcModel::BuildMesh(u32* SectionIndices)
 			}
 			else
 			{
-				DstSections[SrcColor] = MeshEdit.StartSection(SrcSection->PrimitiveType, SrcSection->ColorIndex);
+				DstSections[SrcColor] = MeshEdit.StartSection(SrcSection->PrimitiveType, Color);
 				DstSections[SrcColor]->Box = SrcSection->Box;
 			}
 

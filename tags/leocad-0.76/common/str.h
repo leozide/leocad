@@ -154,4 +154,20 @@ inline bool operator>=(const String& s1, const char *s2)
 inline bool operator>=(const char *s1, const String& s2)
 { return s2.Compare(s1) <= 0; }
 
+inline String GetToken(char*& ptr)
+{
+	String Ret;
+
+	while (*ptr && *ptr <= 32)
+		ptr++;
+
+	while (*ptr > 32)
+	{
+		Ret += *ptr;
+		ptr++;
+	}
+
+	return Ret;
+}
+
 #endif // _STR_H_

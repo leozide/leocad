@@ -6460,7 +6460,7 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 
 	lcClickLine ClickLine;
 	ClickLine.Start = Start;
-	ClickLine.End = End - Start;
+	ClickLine.End = End;
 	ClickLine.Dist = FLT_MAX;
 	ClickLine.Object = NULL;
 

@@ -294,9 +294,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		for (int i = 0; i < PieceList.GetSize(); i++)
 			PieceList[i]->LoadInformation();
 
-		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
-			if (project->m_ModelList[i] != project->m_ActiveModel)
-				project->m_ModelList[i]->SetActive(false);
+		project->UpdateAllModelMeshes();
 	}
 
 	LOGFONT lf;
@@ -492,9 +490,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		for (int i = 0; i < PieceList.GetSize(); i++)
 			PieceList[i]->LoadInformation();
 
-		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
-			if (project->m_ModelList[i] != project->m_ActiveModel)
-				project->m_ModelList[i]->SetActive(false);
+		project->UpdateAllModelMeshes();
 	}
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);

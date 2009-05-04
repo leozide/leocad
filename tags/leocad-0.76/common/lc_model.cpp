@@ -42,6 +42,9 @@ lcModel::lcModel()
 	}
 
 	sprintf(m_PieceInfo->m_strName, "MODEL%.3d", Max+1);
+
+	m_PieceInfo->m_nFlags = LC_PIECE_MODEL;
+	m_PieceInfo->m_Model = this;
 }
 
 lcModel::~lcModel()
@@ -386,7 +389,14 @@ void lcModel::SetActive(bool Active)
 		}
 		return;
 	}
+	else
+	{
+		UpdateMesh();
+	}
+}
 
+void lcModel::UpdateMesh()
+{
 	u32 Time = lcMax(m_TotalFrames, LC_OBJECT_TIME_MAX);
 
 	u32 VertexCount = 0;
@@ -437,25 +447,12 @@ void lcModel::SetActive(bool Active)
 
 	delete[] SectionIndices;
 
-	m_PieceInfo->CreateFromModel(this);
-
-	// TODO: This loop can cause models to be updated multiple times.
-	for (int ModelIndex = 0; ModelIndex < lcGetActiveProject()->m_ModelList.GetSize(); ModelIndex++)
+	if (!m_Pieces)
 	{
-		lcModel* Model = lcGetActiveProject()->m_ModelList[ModelIndex];
-
-		for (lcPiece* Piece = Model->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-		{
-			if (!(Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL))
-				continue;
-
-			if (Piece->m_PieceInfo->m_Model == this)
-			{
-				Model->SetActive(false);
-				break;
-			}
-		}
+		m_BoundingBox = BoundingBox(Vector3(0, 0, 0), Vector3(0, 0, 0));
 	}
+
+	m_PieceInfo->CreateFromModel(this);
 }
 
 template<typename T>

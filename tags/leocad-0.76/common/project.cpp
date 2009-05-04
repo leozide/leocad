@@ -711,10 +711,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	if (Version > 0x0075)
 	{
 		file->ReadLong(&ActiveModelIndex, 1);
-
-		for (int i = 0; i < m_ModelList.GetSize(); i++)
-			if (ActiveModelIndex != i)
-				m_ModelList[i]->SetActive(false);
+		UpdateAllModelMeshes();
 	}
 
 	m_ModelList[ActiveModelIndex]->SetActive(true);
@@ -1207,7 +1204,7 @@ bool Project::OnOpenDocument(const char* PathName)
 				m_ModelList.Add(Model);
 
 				Model->ResetCameras();
-				Model->SetActive(false);
+//				Model->SetActive(false);
 			}
 
 			for (int FileIndex = 0; FileIndex < FileArray.GetSize(); FileIndex++)
@@ -1216,8 +1213,7 @@ bool Project::OnOpenDocument(const char* PathName)
 				delete FileArray[FileIndex];
 			}
 
-			for (int ModelIndex = 0; ModelIndex < m_ModelList.GetSize(); ModelIndex++)
-				m_ModelList[ModelIndex]->SetActive(false);
+			UpdateAllModelMeshes();
 
 			if (FileArray.GetSize() == 0)
 			{
@@ -3051,6 +3047,33 @@ void Project::SetActiveModel(lcModel* Model)
 	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 	UpdateSelection();
 	UpdateAllViews();
+}
+
+void Project::UpdateAllModelMeshes()
+{
+	lcPtrArray<lcModel> ModelList;
+
+	// Sort models by dependency.
+	for (int ModelIndex = 0; ModelIndex < m_ModelList.GetSize(); ModelIndex++)
+	{
+		lcModel* Model = m_ModelList[ModelIndex];
+
+		int ListIndex;
+		for (ListIndex = 0; ListIndex < ModelList.GetSize(); ListIndex++)
+		{
+			if (Model->IsSubModel(ModelList[ListIndex]))
+			{
+				ModelList.InsertAt(ListIndex, Model);
+				break;
+			}
+		}
+
+		if (ListIndex == ModelList.GetSize())
+			ModelList.Add(Model);
+	}
+
+	for (int ListIndex = ModelList.GetSize()-1; ListIndex >= 0; ListIndex--)
+		ModelList[ListIndex]->UpdateMesh();
 }
 
 void Project::CalculateStep()

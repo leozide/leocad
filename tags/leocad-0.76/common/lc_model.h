@@ -49,6 +49,9 @@ public:
 	// Tell this model it's now the active model or no longer active.
 	void SetActive(bool Active);
 
+	// Rebuild this model's mesh.
+	void UpdateMesh();
+
 	// Update this model to a given time.
 //	void Update(u32 Time);
 

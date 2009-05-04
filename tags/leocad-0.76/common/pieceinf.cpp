@@ -45,6 +45,8 @@ static float costbl[SIDES];
 PieceInfo::PieceInfo()
 {
 	// Do nothing, initialization is done by LoadIndex() or CreateFromModel().
+	m_nRef = 0;
+	m_nTextureCount = 0;
 }
 
 PieceInfo::~PieceInfo()

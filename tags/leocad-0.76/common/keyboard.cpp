@@ -36,7 +36,7 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_EDIT_PASTE, "Paste", LC_KEYMOD1_CONTROL, LC_KEY_V, 0 },
 	{ LC_EDIT_SELECT_ALL, "Select All", LC_KEYMOD1_CONTROL, LC_KEY_A, 0 },
 	{ LC_EDIT_SELECT_NONE, "Select None", 0, 0, 0 },
-	{ LC_EDIT_SELECT_INVERT, "Select Invert", 0, 0, 0 },
+	{ LC_EDIT_SELECT_INVERT, "Select Invert", LC_KEYMOD1_CONTROL, LC_KEY_I, 0 },
 	{ LC_EDIT_SELECT_BYNAME, "Select By Name", 0, 0, 0 },
 	{ LC_PIECE_INSERT, "Piece Insert", 0, LC_KEY_INSERT, 0 },
 	{ LC_PIECE_DELETE, "Piece Delete", 0, LC_KEY_DELETE, 0 },

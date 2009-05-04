@@ -30,7 +30,7 @@ lcModel::lcModel()
 	m_Mesh = NULL;
 	m_PieceInfo = new PieceInfo();
 
-	int Max = 1;
+	int Max = 0;
 
 	for (int ModelIndex = 0; ModelIndex < lcGetActiveProject()->m_ModelList.GetSize(); ModelIndex++)
 	{
@@ -41,7 +41,7 @@ lcModel::lcModel()
 			Max = lcMax(Max, i);
 	}
 
-	sprintf(m_PieceInfo->m_strName, "MODEL%.3d", Max);
+	sprintf(m_PieceInfo->m_strName, "MODEL%.3d", Max+1);
 }
 
 lcModel::~lcModel()
@@ -283,12 +283,24 @@ void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorl
 				continue;
 
 			int PieceColor = (Piece->m_Color == LC_COLOR_DEFAULT) ? Color : Piece->m_Color;
+			const char* Name;
+			const char* Ext = "";
 
-			if (!ExportMPD && (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL))
+			if (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL)
 			{
-				Matrix44 ModelWorld = Mul(Piece->m_ModelWorld, ParentWorld);
-				Piece->m_PieceInfo->m_Model->ExportLDraw(file, ExportMPD, ModelWorld, PieceColor);
-				continue;
+				if (ExportMPD)
+					Name = Piece->m_PieceInfo->m_Model->m_Name;
+				else
+				{
+					Matrix44 ModelWorld = Mul(Piece->m_ModelWorld, ParentWorld);
+					Piece->m_PieceInfo->m_Model->ExportLDraw(file, ExportMPD, ModelWorld, PieceColor);
+					continue;
+				}
+			}
+			else
+			{
+				Name = Piece->m_PieceInfo->m_strName;
+				Ext = ".DAT";
 			}
 
 			if (Piece->IsHidden())
@@ -315,9 +327,9 @@ void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorl
 			Mat[10] = -ModelMatrix[9];
 			Mat[11] =  ModelMatrix[5];
 
-			sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
+			sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s%s\r\n",
 			        g_ColorList[PieceColor].Code, Mat[0], Mat[1], Mat[2], Mat[3], Mat[4], Mat[5],
-			        Mat[6], Mat[7], Mat[8], Mat[9], Mat[10], Mat[11], Piece->m_PieceInfo->m_strName);
+			        Mat[6], Mat[7], Mat[8], Mat[9], Mat[10], Mat[11], Name, Ext);
 			file.Write(buf, strlen(buf));
 		}
 

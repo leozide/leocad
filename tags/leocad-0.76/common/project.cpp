@@ -6888,12 +6888,12 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 		int i = (int)(Delta[0] / SnapXY);
 		Leftover[0] = Delta[0] - (SnapXY * i);
 
-		if (Leftover[0] > SnapXY / 2)
+		if (Leftover[0] -SnapXY / 2 > 0.001f)
 		{
 			Leftover[0] -= SnapXY;
 			i++;
 		}
-		else if (Leftover[0] < -SnapXY / 2)
+		else if (Leftover[0] + SnapXY / 2 < 0.001f)
 		{
 			Leftover[0] += SnapXY;
 			i--;
@@ -6907,12 +6907,12 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 		int i = (int)(Delta[1] / SnapXY);
 		Leftover[1] = Delta[1] - (SnapXY * i);
 
-		if (Leftover[1] > SnapXY / 2)
+		if (Leftover[1] - SnapXY / 2 > 0.001f)
 		{
 			Leftover[1] -= SnapXY;
 			i++;
 		}
-		else if (Leftover[1] < -SnapXY / 2)
+		else if (Leftover[1] + SnapXY / 2 < 0.001f)
 		{
 			Leftover[1] += SnapXY;
 			i--;
@@ -6926,12 +6926,12 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 		int i = (int)(Delta[2] / SnapZ);
 		Leftover[2] = Delta[2] - (SnapZ * i);
 
-		if (Leftover[2] > SnapZ / 2)
+		if (Leftover[2] - SnapZ / 2 > 0.001f)
 		{
 			Leftover[2] -= SnapZ;
 			i++;
 		}
-		else if (Leftover[2] < -SnapZ / 2)
+		else if (Leftover[2] + SnapZ / 2 < 0.001f)
 		{
 			Leftover[2] += SnapZ;
 			i--;

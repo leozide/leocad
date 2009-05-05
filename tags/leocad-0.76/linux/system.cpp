@@ -6,6 +6,7 @@
 #include <gtk/gtk.h>
 #include <X11/keysym.h>
 #include <sys/time.h>
+#include "lc_global.h"
 #include "opengl.h"
 #include "gtkmisc.h"
 #include "camera.h"
@@ -14,7 +15,6 @@
 #include "main.h"
 #include "toolbar.h"
 #include "dialogs.h"
-#include "globals.h"
 #include "lc_application.h"
 
 // =============================================================================
@@ -177,6 +177,10 @@ void SystemUpdateViewport(int new_vp, int old_vp)
 }
 
 void SystemUpdateCategories(bool SearchOnly)
+{
+}
+
+void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* ActiveModel)
 {
 }
 
@@ -440,7 +444,7 @@ void SystemUpdateCameraMenu(lcCamera* pCamera)
   }
 }
 
-void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
+void SystemUpdateTime(bool bAnimation, u32 nTime, u32 nTotal)
 {
   GtkWidget *item;
 

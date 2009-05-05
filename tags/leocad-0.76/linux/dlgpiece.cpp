@@ -12,16 +12,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "lc_global.h"
 #include "opengl.h"
 #include "gtktools.h"
 #include "system.h"
 #include "typedefs.h"
-#include "globals.h"
 #include "dialogs.h"
 #include "matrix.h"
 #include "pieceinf.h"
 #include "main.h"
 #include "minifig.h"
+#include "lc_colors.h"
 
 // =========================================================
 // Minifig Wizard
@@ -65,7 +66,7 @@ static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
 
   info->wizard->ChangeColor (i, GPOINTER_TO_INT (data));
   info->wizard->Redraw ();
-  set_button_pixmap2 (button, FlatColorArray[(int)data]);
+  set_button_pixmap2 (button, g_ColorList[(int)data].Value);
 }
 
 // A color button was clicked
@@ -76,9 +77,9 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
 
   menu = gtk_menu_new ();
 
-  for (i = 0; i < LC_MAXCOLORS; i++)
+  for (i = 0; i < lcNumUserColors; i++)
   {
-    menuitem = gtk_menu_item_new_with_label (colornames[i]);
+    menuitem = gtk_menu_item_new_with_label (g_ColorList[i].Name);
     gtk_widget_show (menuitem);
     gtk_menu_append (GTK_MENU (menu), menuitem);
 
@@ -191,7 +192,7 @@ static void minifigdlg_load (GtkWidget *widget, gpointer data)
 
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    set_button_pixmap2 (s->colors[i], FlatColorArray[s->wizard->m_Colors[i]]);
+    set_button_pixmap2 (s->colors[i], g_ColorList[s->wizard->m_Colors[i]].Value);
     if (s->angles[i] != NULL)
       gtk_spin_button_set_value (GTK_SPIN_BUTTON (s->angles[i]), s->wizard->m_Angles[i]);
   }
@@ -328,7 +329,7 @@ int minifigdlg_execute (void* param)
   minifigdlg_createpair (&s, 6, LC_MFW_RIGHT_LEG, table);
   minifigdlg_createpair (&s, 7, LC_MFW_RIGHT_SHOE, table);
 
-  s.wizard->Create (&s.preview);
+  s.wizard->CreateFromWindow (&s.preview);
 
   frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);
@@ -438,7 +439,7 @@ int minifigdlg_execute (void* param)
 
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    set_button_pixmap2(s.colors[i], FlatColorArray[s.wizard->m_Colors[i]]);
+    set_button_pixmap2(s.colors[i], g_ColorList[s.wizard->m_Colors[i]].Value);
   }
 
   return dlg_domodal(dlg, LC_CANCEL);

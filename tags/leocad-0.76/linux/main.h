@@ -4,7 +4,6 @@
 // FIXME: clean up
 //extern GtkWidget* main_window;
 #include "mainwnd.h"
-#include "globals.h"
 
 extern GtkWidget* drawing_area;
 

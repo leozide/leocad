@@ -1103,7 +1103,6 @@ bool Project::OpenProject(const char* FileName)
 bool Project::OnOpenDocument(const char* PathName)
 {
 	FileDisk file;
-	bool Success = false;
 
 	if (!file.Open(PathName, "rb") || !file.GetLength())
 	{
@@ -1251,27 +1250,25 @@ bool Project::OnOpenDocument(const char* PathName)
 		UpdateAllViews();
 
 //		console.PrintMisc("%d objects imported.\n", Pieces);
-		Success = true;
 	}
 	else
 	{
 		// Load a LeoCAD file.
-		Success = FileLoad(&file, false, false);
+		if (!FileLoad(&file, false, false))
+		{
+			char Message[LC_MAXPATH + 64];
+
+			sprintf(Message, "Failed to load %s.", PathName);
+			main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
+
+			DeleteContents(false);   // remove failed contents
+			SystemDoWaitCursor(-1);
+			return false;
+		}
 	}
 
 	file.Close();
 	SystemDoWaitCursor(-1);
-
-	if (!Success)
-	{
-		char Message[LC_MAXPATH + 64];
-
-		sprintf(Message, "Failed to load %s.", PathName);
-		main_window->MessageBox(Message, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
-
-		DeleteContents(false);   // remove failed contents
-		return false;
-	}
 
 	CheckPoint("");
 	m_nSaveTimer = 0;
@@ -1556,6 +1553,16 @@ void Project::RenderBackground(View* view)
 	}
 }
 
+struct lcRenderSection
+{
+//	Matrix44 ModelWorld;
+	lcPiece* Owner;
+	lcMesh* Mesh;
+	lcMeshSection* Section;
+	float Distance;
+	int Color;
+};
+
 void Project::RenderScene(View* view, bool Interface)
 {
 	glDepthMask(GL_TRUE);
@@ -1669,8 +1676,6 @@ void Project::RenderScene(View* view, bool Interface)
 		else
 		{
 			// Calculate view matrices.
-			float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
-
 			Matrix44 ModelView = Camera->m_WorldView;
 			Matrix44 Projection = view->GetProjectionMatrix();
 
@@ -1801,16 +1806,6 @@ void Project::RenderScene(View* view, bool Interface)
 	}
 
 	// TODO: Build the render lists outside of the render function and only sort translucent sections here.
-
-	struct lcRenderSection
-	{
-//		Matrix44 ModelWorld;
-		lcPiece* Owner;
-		lcMesh* Mesh;
-		lcMeshSection* Section;
-		float Distance;
-		int Color;
-	};
 
 	// Build a list for opaque and another for translucent mesh sections.
 	lcObjArray<lcRenderSection> OpaqueSections(1024);
@@ -7769,7 +7764,6 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				if (pPiece->m_Color != g_App->m_SelectedColor)
 				{
-					bool bTrans = LC_COLOR_TRANSLUCENT(pPiece->m_Color);
 					pPiece->m_Color = g_App->m_SelectedColor;
 
 					SetModifiedFlag(true);

@@ -2,6 +2,7 @@
 //
 
 #include <limits.h>
+#include "lc_global.h"
 //#include "leocad.h"
 #include "libdlg.h"
 //#include "GroupDlg.h"
@@ -9,7 +10,6 @@
 //#include "Tools.h"
 #include "project.h"
 #include "pieceinf.h"
-#include "globals.h"
 #include "system.h"
 #include "library.h"
 #include "lc_application.h"

@@ -146,7 +146,7 @@ GLWindow::~GLWindow ()
   g_free (m_pData);
 }
 
-bool GLWindow::Create (void *data)
+bool GLWindow::CreateFromWindow(void *data)
 {
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;

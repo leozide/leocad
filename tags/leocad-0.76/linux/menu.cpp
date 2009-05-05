@@ -67,8 +67,8 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_FILE_WAVEFRONT, "menu_file_wavefront");
   menu_separator (menu);
 
-  create_pixmap_menu_item (menu, "Propert_ies...", info, accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-                           window, LC_FILE_PROPERTIES, "menu_file_properties");
+//  create_pixmap_menu_item (menu, "Propert_ies...", info, accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+//                           window, LC_FILE_PROPERTIES, "menu_file_properties");
   create_menu_item (menu, "Pieces _Library Manager...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_LIBRARY, "menu_file_library");
   create_menu_item (menu, "Terrain _Editor...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
@@ -135,8 +135,8 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_PIECE_MINIFIG, "menu_piece_minifig");
   create_menu_item (menu, "Ar_ray...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_PIECE_ARRAY, "menu_piece_array");
-  create_menu_item (menu, "_Copy Keys", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_PIECE_COPYKEYS, "menu_piece_copykeys");
+//  create_menu_item (menu, "_Copy Keys", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+//		    window, LC_PIECE_COPYKEYS, "menu_piece_copykeys");
   menu_separator (menu);
 
   create_menu_item (menu, "_Group", accel, GTK_SIGNAL_FUNC (OnCommandDirect),

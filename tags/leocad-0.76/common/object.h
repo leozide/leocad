@@ -146,6 +146,13 @@ public:
 	virtual void InsertTime(u32 Start, u32 Time);
 	virtual void RemoveTime(u32 Start, u32 Time);
 
+	int GetKeyTypeCount () const
+	{ return m_nKeyInfoCount; }
+	const LC_OBJECT_KEY_INFO* GetKeyTypeInfo (int index) const
+	{ return &m_pKeyInfo[index]; };
+	const float* GetKeyTypeValue (int index) const
+	{ return m_pKeyValues[index]; };
+
 protected:
 	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
 	void CalculateKeys(u32 Time);

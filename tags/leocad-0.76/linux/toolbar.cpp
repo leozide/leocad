@@ -4,17 +4,18 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
+#include "lc_global.h"
 #include "opengl.h"
 #include "gtktools.h"
 #include "main.h"
-#include "globals.h" 
 #include "project.h"
 #include "pieceinf.h"
 #include "toolbar.h"
-#include "message.h"
+#include "lc_message.h"
 #include "preview.h"
 #include "library.h"
 #include "lc_application.h"
+#include "lc_colors.h"
 
 // =============================================================================
 // Variables
@@ -355,7 +356,7 @@ static void piecetree_changed(GtkTreeSelection* selection, gpointer data)
     gtk_tree_model_get(model, &iter, 1, &sel, -1);
 
     if (sel)
-      preview->SetCurrentPiece((PieceInfo*)sel);
+      g_App->m_PiecePreview->SetSelection((PieceInfo*)sel);
   }
 }
 
@@ -529,6 +530,9 @@ static void piececombo_changed (GtkWidget *widget, gpointer data)
   }
 }
 
+const int cols = 13;
+const int rows = 6;
+  
 // Draw a pixmap for the colorlist control
 static void colorlist_draw_pixmap(GtkWidget *widget)
 {
@@ -538,23 +542,26 @@ static void colorlist_draw_pixmap(GtkWidget *widget)
   GdkColor c;
 
   gdk_gc_set_fill(gc, GDK_SOLID);
-  rect.y = 0;
-  rect.width = widget->allocation.width/14+1;
-  rect.height = widget->allocation.height/2;
 
-  for (i = 0; i < 28; i++)
+  rect.width = widget->allocation.width/cols;
+  rect.height = widget->allocation.height/rows;
+
+    c.red = 0;
+    c.green = 0;
+    c.blue = 0;
+    gdk_gc_set_foreground(gc, &c);
+
+  gdk_draw_rectangle (colorlist_pixmap, gc, TRUE,
+      0, 0, widget->allocation.width, widget->allocation.height);
+
+  for (i = 0; i < lcNumUserColors; i++)
   {
-    if (i == 14)
-      rect.y = rect.height;
+      rect.y = rect.height * (i / cols);
+      rect.x = rect.width * (i % cols);
 
-    if (i < 14)
-      rect.x = widget->allocation.width * i / 14;
-    else
-      rect.x = widget->allocation.width * (i-14) / 14;
-
-    c.red = (gushort)(FlatColorArray[i][0]*0xFF);
-    c.green = (gushort)(FlatColorArray[i][1]*0xFF);
-    c.blue = (gushort)(FlatColorArray[i][2]*0xFF);
+    c.red = (gushort)(g_ColorList[i].Value[0]*0xFFFF);
+    c.green = (gushort)(g_ColorList[i].Value[1]*0xFFFF);
+    c.blue = (gushort)(g_ColorList[i].Value[2]*0xFFFF);
     gdk_color_alloc(gtk_widget_get_colormap(widget), &c);
     gdk_gc_set_foreground(gc, &c);
 
@@ -562,7 +569,7 @@ static void colorlist_draw_pixmap(GtkWidget *widget)
 		      rect.x, rect.y,
 		      rect.width, rect.height);
 
-    if (i > 13 && i < 21)
+    if (LC_COLOR_TRANSLUCENT(i))
     {
       int x, y;
       gdk_color_white(gtk_widget_get_colormap(widget), &c);
@@ -584,18 +591,13 @@ static void colorlist_draw_pixmap(GtkWidget *widget)
   gdk_gc_set_line_attributes(gc, 1,
 	GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_MITER);
 
-  for (i = 0; i < 14; i++)
-    gdk_draw_line (colorlist_pixmap, gc,
-       widget->allocation.width * i / 14, 0,
-       widget->allocation.width * i / 14, widget->allocation.height);
+  for (i = 0; i <= cols; i++)
+    gdk_draw_line (colorlist_pixmap, gc, rect.width * i, 0,
+       rect.width * i, widget->allocation.height);
   
-  gdk_draw_line (colorlist_pixmap, gc, 0, widget->allocation.height-1,
-      widget->allocation.width, widget->allocation.height-1);
-  gdk_draw_line (colorlist_pixmap, gc, 0, widget->allocation.height/2,
-      widget->allocation.width, widget->allocation.height/2);
-  gdk_draw_line (colorlist_pixmap, gc, widget->allocation.width-1, 0,
-      widget->allocation.width-1, widget->allocation.height);
-  gdk_draw_line (colorlist_pixmap, gc, 0, 0, widget->allocation.width, 0);
+  for (i = 0; i <= rows; i++)
+    gdk_draw_line(colorlist_pixmap, gc, 0, rect.height * i,
+        widget->allocation.width, rect.height * i);
 
   c.red = (gushort)(0.4f*0xFFFF);
   c.green = (gushort)(0.8f*0xFFFF);
@@ -604,12 +606,10 @@ static void colorlist_draw_pixmap(GtkWidget *widget)
   gdk_gc_set_foreground(gc, &c);
 
   int l, r, t, b;
-  i = cur_color;
-  if (i > 13) i -= 14;
-  l = widget->allocation.width * i / 14;
-  r = widget->allocation.width * (i+1) / 14;
-  t = (cur_color < 14) ? 0 : widget->allocation.height/2;
-  b = (cur_color < 14) ? widget->allocation.height/2 : widget->allocation.height-1;
+  l = rect.width * (cur_color % cols);
+  r = rect.width * ((cur_color+1) % cols);
+  t = rect.height * (cur_color / cols);
+  b = rect.height * ((cur_color+1) / cols);
 
   gdk_draw_rectangle (colorlist_pixmap, gc, FALSE, l, t, r-l, b-t);
 
@@ -645,8 +645,8 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
 
   switch (event->keyval)
   {
-    case GDK_Up: x = cur_color - 14; break;
-    case GDK_Down: x = cur_color + 14; break;
+    case GDK_Up: x = cur_color - cols; break;
+    case GDK_Down: x = cur_color + cols; break;
     case GDK_Left: x = cur_color - 1; break;
     case GDK_Right: x = cur_color + 1; break;
 
@@ -654,11 +654,11 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
     return TRUE;
   }
 
-  if ((x > -1) && (x < 28))
+  if ((x > -1) && (x < lcNumUserColors))
   {
     cur_color = x;
     colorlist_draw_pixmap(widget);
-    lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
+    lcPostMessage(LC_MSG_COLOR_CHANGED, GINT_TO_POINTER(x));
     gtk_widget_draw(widget, NULL);
     preview->Redraw ();
   }
@@ -679,7 +679,7 @@ static gint colorlist_button_press(GtkWidget *widget, GdkEventButton *event)
     {
       cur_color = x;
       colorlist_draw_pixmap(widget);
-      lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
+      lcPostMessage(LC_MSG_COLOR_CHANGED, GINT_TO_POINTER(x));
       gtk_widget_draw(widget, NULL);
       preview->Redraw ();
     }
@@ -694,9 +694,13 @@ void colorlist_set(int new_color)
   if (new_color != cur_color)
   {
     cur_color = new_color;
-    colorlist_draw_pixmap(colorlist);
-    gtk_widget_draw(colorlist, NULL);
-    preview->Redraw ();
+    if (colorlist)
+    {
+      colorlist_draw_pixmap(colorlist);
+      gtk_widget_draw(colorlist, NULL);
+    }
+    if (preview)
+      preview->Redraw();
   }
 }
 
@@ -719,8 +723,8 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
   gtk_box_pack_start (GTK_BOX (vbox1), vpan, TRUE, TRUE, 0);
 
   GtkWidget *w;
-  preview = new PiecePreview (share);
-  preview->Create (&w);
+  preview = new PiecePreview(share);
+  preview->CreateFromWindow(&w);
   gtk_widget_set_usize (w, 100, 100);
   gtk_widget_show (w);
   gtk_container_add (GTK_CONTAINER (vpan), w);
@@ -789,15 +793,6 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 
   fill_piecetree();
 
-  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
-  if (!Info)
-    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
-  if (Info)
-  {
-    lcGetActiveProject()->SetCurrentPiece(Info);
-    //    preview->SetCurrentPiece(Info);
-  }
-
   return frame;
 }
 
@@ -808,7 +803,7 @@ GtkWidget *label_message, *label_position, *label_snap, *label_step;
 
 static void statusbar_listener (int message, void *data, void *user)
 {
-  if (message == LC_MSG_FOCUS_CHANGED)
+  if (message == LC_MSG_FOCUS_OBJECT_CHANGED)
   {
     char text[32];
     Vector3 pos;
@@ -892,5 +887,5 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   gtk_widget_show (label_step);
   gtk_box_pack_start (GTK_BOX (hbox1), label_step, TRUE, TRUE, 0);
 
-  messenger->Listen (&statusbar_listener, NULL);
+//  messenger->Listen (&statusbar_listener, NULL);
 }

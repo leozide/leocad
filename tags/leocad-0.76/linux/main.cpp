@@ -11,10 +11,10 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <string.h>
+#include "lc_global.h"
 #include "opengl.h"
 #include "project.h"
 #include "toolbar.h"
-#include "globals.h"
 #include "main.h"
 #include "system.h"
 #include "config.h"
@@ -194,8 +194,8 @@ void OnCommand(GtkWidget* widget, gpointer data)
       gtk_container_add (GTK_CONTAINER (wnd), frame);
       gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
 
-      View *v = new View (project, view);
-      v->Create (&w);
+      View *v = new View(project, view);
+      v->CreateFromWindow(&w);
 
       gtk_container_add (GTK_CONTAINER (frame), w);
       gtk_widget_show (w);
@@ -432,7 +432,7 @@ static void update_window_layout ()
   // first thing we need to create the widgets
   if (drawing_area == NULL)
   {
-    view->Create (&drawing_area);
+    view->CreateFromWindow(&drawing_area);
 
     gtk_widget_set_events (GTK_WIDGET (drawing_area), GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK |
@@ -690,11 +690,7 @@ int main (int argc, char* argv[])
   if (!Info)
     Info = lcGetPiecesLibrary()->GetPieceInfo(0);
   if (Info)
-  {
-    lcGetActiveProject()->SetCurrentPiece(Info);
-    extern PiecePreview* preview;
-    preview->SetCurrentPiece(Info);
-  }
+    g_App->m_PiecePreview->SetSelection(Info);
 
   gtk_main();
 

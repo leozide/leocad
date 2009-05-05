@@ -5,8 +5,8 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <string.h>
+#include "lc_global.h"
 #include "gtkmisc.h"
-#include "globals.h"
 #include "project.h"
 //#include "pixmenu.h"
 #include "gtktools.h"

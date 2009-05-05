@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include "lc_global.h"
 #include "system.h"
 #include "dialogs.h"
 #include "file.h"

@@ -27,6 +27,7 @@
 #include "terrdlg.h"
 #include "LibDlg.h"
 #include "EdGrpDlg.h"
+#include "ModelListDlg.h"
 #include "AboutDlg.h"
 #include "categdlg.h"
 #include "cadbar.h"
@@ -898,7 +899,7 @@ void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* Active
 			break;
 
 	// Add models to menu.
-	for (i = 0; i < ModelList.GetSize(); i++)
+	for (i = 0; i < ModelList.GetSize() && i < LC_MODEL_MENU_MAX; i++)
 	{
 		lcModel* Model = ModelList[i];
 		String DisplayName;
@@ -918,7 +919,7 @@ void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* Active
 
 		// Insert mnemonic followed by the model name.
 		char* Text = new char[DisplayName.GetLength() + 10];
-		sprintf(Text, "&%d %s", i+1, (const char*)DisplayName);
+		sprintf(Text, i < 9 ? "&%d %s" : "%d %s", i+1, (const char*)DisplayName);
 
 		if (i != 0)
 		{
@@ -1739,11 +1740,19 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 
+		case LC_DLG_MODEL_LIST:
+		{
+			CModelListDlg Dlg;
+			Dlg.DoModal();
+			return true;
+		} break;
+
 		case LC_DLG_ABOUT:
 		{
 			CAboutDlg dlg;
 			dlg.m_hViewDC = pfnwglGetCurrentDC();
 			dlg.DoModal();
+			return true;
 		} break;
 	}
 

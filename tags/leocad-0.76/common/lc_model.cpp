@@ -597,12 +597,37 @@ void lcModel::RemovePiece(lcPiece* Piece)
 		Next = Next->m_Next;
 	}
 }
-/*
-void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color)
+
+void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color, u32 TimeShow, u32 TimeHide)
 {
-	// fixme inline
+	u32 Time = lcMax(Model->m_TotalFrames, LC_OBJECT_TIME_MAX);
+
+	for (lcPiece* SrcPiece = Model->m_Pieces; SrcPiece; SrcPiece = (lcPiece*)SrcPiece->m_Next)
+	{
+		lcPiece* Piece = new lcPiece(SrcPiece->m_PieceInfo);
+
+		SrcPiece->UpdatePosition(Time);
+
+		Matrix44 Mat = Mul(SrcPiece->m_ModelWorld, ModelWorld);
+
+		Vector3 Pos = Mat.GetTranslation();
+		Vector4 Rot = MatrixToAxisAngle(Mat);
+
+		Piece->Initialize(Pos[0], Pos[1], Pos[2], TimeShow, (SrcPiece->m_Color == LC_COLOR_DEFAULT) ? Color : SrcPiece->m_Color);
+		Piece->ChangeKey(TimeShow, false, Rot, LC_PK_ROTATION);
+		Piece->UpdatePosition(m_CurFrame);
+		Piece->m_TimeHide = TimeHide;
+
+//			SelectAndFocusNone(false);
+		Piece->SetUniqueName(m_Pieces, Piece->m_PieceInfo->m_strDescription);
+		AddPiece(Piece);
+//			Piece->Select(true, true, false);
+//			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, Piece);
+//			UpdateSelection();
+		SystemPieceComboAdd(Piece->m_PieceInfo->m_strDescription);
+	}
 }
-*/
+
 bool lcModel::AnyPiecesSelected() const
 {
 	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)

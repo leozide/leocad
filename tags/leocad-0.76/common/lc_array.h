@@ -83,6 +83,11 @@ public:
 		Add(Ptr);
 	}
 
+	void SetAt(int Index, T* Ptr)
+	{
+		m_Data[Index] = Ptr;
+	}
+
 	void InsertAt(int Index, T* Ptr)
 	{
 		if (Index >= m_Length)

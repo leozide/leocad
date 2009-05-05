@@ -345,6 +345,7 @@ BEGIN
         MENUITEM "&Properties...",              ID_MODEL_PROPERTIES
         MENUITEM SEPARATOR
         MENUITEM "Model 1",                     ID_MODEL_MODEL1, GRAYED
+        MENUITEM "&Models...",                  ID_MODEL_LIST
     END
     POPUP "&Help"
     BEGIN
@@ -1221,6 +1222,20 @@ BEGIN
     CONTROL         "Hidden",IDC_MODDLG_HIDDEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,0,146,40,8
 END
 
+IDD_MODEL_LIST DIALOGEX 0, 0, 316, 185
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Models"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_LIST,7,7,236,171,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&New",IDC_MODEL_NEW,259,7,50,14
+    PUSHBUTTON      "&Delete",IDC_MODEL_DELETE,259,27,50,14
+    PUSHBUTTON      "Move &Up",IDC_MODEL_UP,259,47,50,14
+    PUSHBUTTON      "Move D&own",IDC_MODEL_DOWN,259,67,50,14
+    PUSHBUTTON      "&Activate",IDC_MODEL_ACTIVATE,259,87,50,14
+    DEFPUSHBUTTON   "&Close",IDCANCEL,259,164,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1485,6 +1500,14 @@ BEGIN
     IDD_MODIFY_LIGHT, DIALOG
     BEGIN
         BOTTOMMARGIN, 120
+    END
+
+    IDD_MODEL_LIST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 178
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1840,6 +1863,11 @@ END
 STRINGTABLE 
 BEGIN
     ID_FILE_TERRAINEDITOR   "Open the terrain editor"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_MODEL_LIST           "List models in this project"
 END
 
 #endif    // English (U.S.) resources

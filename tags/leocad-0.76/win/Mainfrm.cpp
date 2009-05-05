@@ -754,11 +754,15 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 		} break;
 
 		case ID_MODEL_DELETE: {
-			project->HandleCommand(LC_MODEL_DELETE, 0);
+			project->HandleCommand(LC_MODEL_DELETE, project->m_ModelList.FindIndex(project->m_ActiveModel));
 		} break;
 
 		case ID_MODEL_PROPERTIES: {
 			project->HandleCommand(LC_MODEL_PROPERTIES, 0);
+		} break;
+
+		case ID_MODEL_LIST: {
+			project->HandleCommand(LC_MODEL_LIST, 0);
 		} break;
 
 		case ID_FILE_TERRAINEDITOR: {

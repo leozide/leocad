@@ -301,7 +301,7 @@ Vector4 MatrixToAxisAngle(const Matrix33& Mat)
 	float Cos = 0.5f * (Trace - 1.0f);
 	Vector4 rot;
 
-	rot[3] = acosf(Cos);  // in [0,PI]
+	rot[3] = acosf(lcClamp(Cos, -1.0f, 1.0f));  // in [0,PI]
 
 	if (rot[3] > 0.01f)
 	{

@@ -1200,11 +1200,12 @@ bool Project::OnOpenDocument(const char* PathName)
 			{
 				lcModel* Model = new lcModel();
 				Model->m_Name = FileArray[FileIndex]->GetFileName();
+				strncpy(Model->m_PieceInfo->m_strDescription, Model->m_Name, sizeof(Model->m_PieceInfo->m_strDescription)-1);
+				Model->m_PieceInfo->m_strDescription[sizeof(Model->m_PieceInfo->m_strDescription)-1] = 0;
 				FileArray[FileIndex]->Seek(0, SEEK_SET);
 				m_ModelList.Add(Model);
 
 				Model->ResetCameras();
-//				Model->SetActive(false);
 			}
 
 			for (int FileIndex = 0; FileIndex < FileArray.GetSize(); FileIndex++)
@@ -2978,7 +2979,7 @@ void Project::DeleteModel(lcModel* DeleteModel)
 
 	// Check if the current model is referenced by another model.
 	bool Referenced = false;
-/*
+
 	for (int i = 0; i < m_ModelList.GetSize(); i++)
 	{
 		lcModel* Model = m_ModelList[i];
@@ -3005,23 +3006,34 @@ void Project::DeleteModel(lcModel* DeleteModel)
 			if (Model == DeleteModel)
 				continue;
 
-			for (lcObject* Piece = Model->m_Pieces; Piece; Piece = Piece->m_Next)
+			lcPiece* Piece = Model->m_Pieces;
+			lcPiece* Prev = NULL;
+
+			while (Piece)
 			{
-				// fixme: pivot
-				if (Piece->GetType() != LC_OBJECT_MODELREF)
-					continue;
+				PieceInfo* Info = Piece->m_PieceInfo;
 
-				lcModelRef* ModelRef = (lcModelRef*)Piece;
-
-				if (ModelRef->m_Model != DeleteModel)
+				if (!(Info->m_nFlags & LC_PIECE_MODEL) || (Info->m_Model != DeleteModel))
+				{
+					Prev = Piece;
+					Piece = (lcPiece*)Piece->m_Next;
 					continue;
+				}
 
 				if (Inline)
-					Model->InlineModel(DeleteModel, ModelRef->m_ModelWorld, ModelRef->m_Color);
+					Model->InlineModel(DeleteModel, Piece->m_ModelWorld, Piece->m_Color, Piece->m_TimeShow, Piece->m_TimeHide);
+
+				Model->RemovePiece(Piece);
+				delete Piece;
+
+				if (Prev)
+					Piece = Prev;
+				else
+					Piece = Model->m_Pieces;
 			}
 		}
 	}
-*/
+
 	if (m_ActiveModel == DeleteModel)
 		SetActiveModel(m_ModelList[0]);
 
@@ -4456,7 +4468,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			LC_PROPERTIESDLG_OPTS opts;
 
 			opts.Name = Name;
-			opts.Author = Sys_ProfileLoadString("Default", "User", "");
+			opts.Author = Sys_ProfileLoadString("Default", "User", "LeoCAD");
 			opts.PiecesUsed = NULL;
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -4480,7 +4492,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_MODEL_DELETE:
 		{
-			DeleteModel(m_ActiveModel);
+			DeleteModel(m_ModelList[nParam]);
 		} break;
 
 		case LC_MODEL_SET_ACTIVE:
@@ -4528,6 +4540,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			delete[] opts.PiecesUsed;
+		} break;
+
+		case LC_MODEL_LIST:
+		{
+			SystemDoDialog(LC_DLG_MODEL_LIST, NULL);
 		} break;
 
 		case LC_FILE_TERRAIN:

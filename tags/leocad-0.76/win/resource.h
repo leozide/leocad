@@ -473,7 +473,6 @@
 #define IDC_MODEL_DELETE                1258
 #define IDC_MODEL_UP                    1259
 #define IDC_MODEL_DOWN                  1260
-#define IDC_BUTTON6                     1261
 #define IDC_MODEL_ACTIVATE              1261
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
@@ -730,6 +729,27 @@
 #define ID_FILE_EXPORT_X3DV             33198
 #define ID_MODEL_MODELS                 33199
 #define ID_MODEL_LIST                   33200
+#define ID_7_ANGLESNAP                  33201
+#define ID_7_1                          33202
+#define ID_7_5                          33203
+#define ID_7_10                         33204
+#define ID_7_15                         33205
+#define ID_7_30                         33206
+#define ID_7_45                         33207
+#define ID_7_60                         33208
+#define ID_7_90                         33209
+#define ID_7_91                         33210
+#define ID_7_92                         33211
+#define ID_SNAP_20                      33212
+#define ID_SNAP_21                      33213
+#define ID_SNAP_22                      33214
+#define ID_SNAP_23                      33215
+#define ID_SNAP_24                      33216
+#define ID_SNAP_25                      33217
+#define ID_SNAP_26                      33218
+#define ID_SNAP_27                      33219
+#define ID_SNAP_28                      33220
+#define ID_SNAP_29                      33221
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -741,7 +761,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        246
-#define _APS_NEXT_COMMAND_VALUE         33201
+#define _APS_NEXT_COMMAND_VALUE         33222
 #define _APS_NEXT_CONTROL_VALUE         1255
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

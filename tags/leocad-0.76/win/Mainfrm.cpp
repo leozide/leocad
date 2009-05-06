@@ -642,6 +642,14 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 		rMessage += pCamera->m_Name;
 		rMessage += "\"";
 	}
+	else if (nID >= ID_SNAP_0 && nID <= ID_SNAP_19)
+	{
+		rMessage = "Change snap";
+	}
+	else if (nID >= ID_SNAP_20 && nID <= ID_SNAP_29)
+	{
+		rMessage = "Change angle snap";
+	}
 	else
 		CFrameWnd::GetMessageString(nID, rMessage);
 }
@@ -666,6 +674,12 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 	if (nID >= ID_SNAP_10 && nID <= ID_SNAP_19)
 	{
 		project->HandleCommand((LC_COMMANDS)(LC_EDIT_MOVEZ_SNAP_0 + nID - ID_SNAP_10), 0);
+		return TRUE;
+	}
+
+	if (nID >= ID_SNAP_20 && nID <= ID_SNAP_29)
+	{
+		project->HandleCommand((LC_COMMANDS)(LC_EDIT_ANGLE_SNAP_0 + nID - ID_SNAP_20), 0);
 		return TRUE;
 	}
 
@@ -1367,6 +1381,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_EDIT_ANGLE_SNAP_6
 		0,                         // LC_EDIT_ANGLE_SNAP_7
 		0,                         // LC_EDIT_ANGLE_SNAP_8
+		0,                         // LC_EDIT_ANGLE_SNAP_9
 		0,                         // LC_EDIT_ACTION_SELECT
 		0,                         // LC_EDIT_ACTION_INSERT
 		0,                         // LC_EDIT_ACTION_LIGHT

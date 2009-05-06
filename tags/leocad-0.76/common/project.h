@@ -96,7 +96,7 @@ public:
 		{ return m_nCurAction; }
 	int GetOverlayMode() const
 		{ return m_OverlayMode; }
-	void GetSnapIndex(int* SnapXY, int* SnapZ) const;
+	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
 	const Vector3& GetOverlayCenter() const

@@ -445,7 +445,7 @@ BEGIN
     END
     POPUP "5"
     BEGIN
-        MENUITEM "Pieces",                      ID_MODDLG_PIECES
+        MENUITEM "Pieces",                      ID_SNAP_ANGLE
         MENUITEM "Cameras",                     ID_MODDLG_CAMERAS
         MENUITEM "Lights",                      ID_MODDLG_LIGHTS
     END
@@ -482,6 +482,18 @@ BEGIN
         MENUITEM "2 Bricks",                    ID_SNAP_17
         MENUITEM "4 Bricks",                    ID_SNAP_18
         MENUITEM "8 Bricks",                    ID_SNAP_19
+        MENUITEM "Angle Snap",                  ID_SNAP_ANGLE, INACTIVE, MENUBARBREAK
+        MENUITEM SEPARATOR
+        MENUITEM "None",                        ID_SNAP_20
+        MENUITEM "1 Degree",                    ID_SNAP_21
+        MENUITEM "5 Degrees",                   ID_SNAP_22
+        MENUITEM "10 Degrees",                  ID_SNAP_23
+        MENUITEM "15 Degrees",                  ID_SNAP_24
+        MENUITEM "30 Degrees",                  ID_SNAP_25
+        MENUITEM "45 Degrees",                  ID_SNAP_26
+        MENUITEM "60 Degrees",                  ID_SNAP_27
+        MENUITEM "90 Degrees",                  ID_SNAP_28
+        MENUITEM "180 Degrees",                 ID_SNAP_29
     END
     POPUP "8"
     BEGIN

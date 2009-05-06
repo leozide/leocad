@@ -723,14 +723,21 @@ void SystemUpdateTime(bool bAnimation, u32 nTime, u32 nTotal)
 
 void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap)
 {
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	if (!pFrame)
+		return;
+
 	char Text[256], xy[32], z[32];
 
 	lcGetActiveProject()->GetSnapDistanceText(xy, z);
 
 	sprintf(Text, " M: %s %s R: %d ", xy, z, RotateSnap);
 
-	if (AfxGetMainWnd())
-		((CMainFrame*)AfxGetMainWnd())->SetStatusBarPane(ID_INDICATOR_SNAP, Text);
+	pFrame->SetStatusBarPane(ID_INDICATOR_SNAP, Text);
+
+	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
+	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
+	pCtrl->CheckButton(ID_SNAP_ANGLE, (RotateSnap & LC_DRAW_SNAP_A) != 0);
 }
 
 void SystemUpdatePaste(bool enable)

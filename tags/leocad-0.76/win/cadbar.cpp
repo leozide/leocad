@@ -75,14 +75,17 @@ void CCADStatusBar::OnLButtonDown(UINT nFlags, CPoint point)
 		CTitleMenu TitleMenu;
 		TitleMenu.Attach(menuPopups.GetSubMenu(7)->Detach());
 
-		int SXY, SZ;
-		lcGetActiveProject()->GetSnapIndex(&SXY, &SZ);
+		int SXY, SZ, SA;
+		lcGetActiveProject()->GetSnapIndex(&SXY, &SZ, &SA);
 
 		TitleMenu.SetMenuTitle(ID_SNAP_XY, "XY Snap");
 		TitleMenu.SetMenuTitle(ID_SNAP_Z, "Z Snap");
+		TitleMenu.SetMenuTitle(ID_SNAP_ANGLE, "Angle Snap");
 
 		TitleMenu.CheckMenuRadioItem(2, 11, SXY + 2, MF_BYPOSITION);
 		TitleMenu.CheckMenuRadioItem(14, 23, SZ + 14, MF_BYPOSITION);
+		if (SA != -1)
+			TitleMenu.CheckMenuRadioItem(26, 35, SA + 26, MF_BYPOSITION);
 
 		TitleMenu.TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 	}

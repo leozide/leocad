@@ -6036,6 +6036,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_MOVEXY_SNAP_9:
 		{
 			m_nMoveSnap = (id - LC_EDIT_MOVEXY_SNAP_0) | (m_nMoveSnap & ~0xff);
+			if (id != LC_EDIT_MOVEXY_SNAP_0)
+				m_nSnap |= LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y;
+			else
+				m_nSnap &= ~(LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y);
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
@@ -6051,60 +6055,30 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_MOVEZ_SNAP_9:
 		{
 			m_nMoveSnap = (((id - LC_EDIT_MOVEZ_SNAP_0) << 8) | (m_nMoveSnap & ~0xff00));
+			if (id != LC_EDIT_MOVEZ_SNAP_0)
+				m_nSnap |= LC_DRAW_SNAP_Z;
+			else
+				m_nSnap &= ~LC_DRAW_SNAP_Z;
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
 		case LC_EDIT_ANGLE_SNAP_0:
-		{
-			m_nAngleSnap = 1;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_1:
-		{
-			m_nAngleSnap = 5;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_2:
-		{
-			m_nAngleSnap = 10;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_3:
-		{
-			m_nAngleSnap = 15;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_4:
-		{
-			m_nAngleSnap = 30;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_5:
-		{
-			m_nAngleSnap = 45;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_6:
-		{
-			m_nAngleSnap = 60;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_7:
-		{
-			m_nAngleSnap = 90;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-		} break;
-
 		case LC_EDIT_ANGLE_SNAP_8:
+		case LC_EDIT_ANGLE_SNAP_9:
 		{
-			m_nAngleSnap = 180;
+			int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+			m_nAngleSnap = Angles[id - LC_EDIT_ANGLE_SNAP_0];
+			if (m_nAngleSnap)
+				m_nSnap |= LC_DRAW_SNAP_A;
+			else
+				m_nSnap &= ~LC_DRAW_SNAP_A;
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
@@ -6825,10 +6799,26 @@ void Project::StartTracking(int mode)
 	FileSave(m_pTrackFile, true);
 }
 
-void Project::GetSnapIndex(int* SnapXY, int* SnapZ) const
+void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
 {
 	*SnapXY = (m_nMoveSnap & 0xff);
 	*SnapZ = ((m_nMoveSnap >> 8) & 0xff);
+
+	if (m_nSnap & LC_DRAW_SNAP_A)
+	{
+		int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+		*SnapAngle = -1;
+		for (int i = 0; i < sizeof(Angles)/sizeof(Angles[0]); i++)
+		{
+			if (m_nAngleSnap == Angles[i])
+			{
+				*SnapAngle = i;
+				break;
+			}
+		}
+	}
+	else
+		SnapAngle = 0;
 }
 
 void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
@@ -6836,8 +6826,8 @@ void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 	const float SnapXYTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 1.6f, 2.4f, 3.2f, 6.4f };
 	const float SnapZTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 0.96f, 1.92f, 3.84f, 7.68f };
 
-	int SXY, SZ;
-	GetSnapIndex(&SXY, &SZ);
+	int SXY, SZ, SA;
+	GetSnapIndex(&SXY, &SZ, &SA);
 
 	SXY = min(SXY, 9);
 	SZ = min(SZ, 9);
@@ -6862,8 +6852,8 @@ void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
 		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
 		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
 
-		int SXY, SZ;
-		GetSnapIndex(&SXY, &SZ);
+		int SXY, SZ, SA;
+		GetSnapIndex(&SXY, &SZ, &SA);
 
 		SXY = min(SXY, 9);
 		SZ = min(SZ, 9);

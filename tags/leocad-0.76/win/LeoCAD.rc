@@ -1783,6 +1783,7 @@ STRINGTABLE
 BEGIN
     ID_ACTION_PAN           "Pan\nPan"
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
+    ID_ACTION_ORBIT         "Orbit camera around its target\nOrbit"
     ID_ACTION_ROLL          "Roll view\nRoll"
     ID_ZOOM_EXTENTS         "Zoom extents (hold CTRL to zoom all views)\nZoom Extents"
     ID_PIECE_GROUP          "Group selected pieces"

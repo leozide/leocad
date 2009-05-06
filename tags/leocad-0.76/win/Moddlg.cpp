@@ -186,6 +186,15 @@ void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler
 	UpdateDialogControls(pTarget, FALSE);
 }
 
+void CModifyDialog::OnOK() 
+{
+	OnModdlgApply();
+}
+
+void CModifyDialog::OnCancel() 
+{
+}
+
 void CModifyDialog::UpdateInfo(lcObject* pObject)
 {
 	if ((GetStyle() & WS_VISIBLE) == 0)

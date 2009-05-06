@@ -195,6 +195,8 @@ protected:
 
 	// Generated message map functions 
 	//{{AFX_MSG(CModifyDialog)
+	virtual void OnOK();
+	virtual void OnCancel();
 	afx_msg void OnModdlgPiece();
 	afx_msg void OnSelendokModdlgList();
 	afx_msg void OnModdlgApply();

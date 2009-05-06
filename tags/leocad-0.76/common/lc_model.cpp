@@ -14,6 +14,7 @@
 #include "library.h"
 #include "system.h"
 #include "console.h"
+#include "view.h"
 
 lcModel::lcModel()
 {
@@ -763,6 +764,59 @@ lcCamera* lcModel::GetCamera(const char* Name) const
 
 	return NULL;
 }
+
+void lcModel::ZoomExtents(View* view, lcCamera* Camera, bool AddKeys)
+{
+	if (!m_Pieces)
+		return;
+
+	// Calculate a bounding box that includes all pieces and use its center as the camera target.
+	lcObjArray<Vector3> Points;
+	BoundingBox Box;
+	Box.Reset();
+
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	{
+		if (!Piece->IsVisible(m_CurFrame))
+			continue;
+
+		Vector3 Corners[8];
+		Piece->m_PieceInfo->m_BoundingBox.GetPoints(Corners);
+
+		for (int i = 0; i < 8; i++)
+		{
+			Vector3 Point = Mul31(Corners[i], Piece->m_ModelWorld);
+			Points.Add(Point);
+			Box.AddPoint(Point);
+		}
+	}
+
+	Vector3 Center = Box.GetCenter();
+
+	// Update eye and target positions.
+	Vector3 Eye = Camera->m_Position;
+	Vector3 Target = Camera->m_TargetPosition;
+
+	if (Camera->IsSide())
+		Eye += Center - Target;
+
+	Target = Center;
+
+	Camera->ChangeKey(m_CurFrame, AddKeys, Eye, LC_CK_EYE);
+	Camera->ChangeKey(m_CurFrame, AddKeys, Target, LC_CK_TARGET);
+	Camera->UpdatePosition(m_CurFrame);
+
+	float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
+	Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
+
+	Eye = ::ZoomExtents(Eye, Camera->m_WorldView, Projection, &Points[0], Points.GetSize());
+
+	// Save new positions.
+	Camera->ChangeKey(m_CurFrame, AddKeys, Eye, LC_CK_EYE);
+	Camera->ChangeKey(m_CurFrame, AddKeys, Target, LC_CK_TARGET);
+	Camera->UpdatePosition(m_CurFrame);
+}
+
 /*
 void lcModel::AddLight(lcLight* Light)
 {

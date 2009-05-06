@@ -1215,6 +1215,12 @@ bool Project::OnOpenDocument(const char* PathName)
 
 			UpdateAllModelMeshes();
 
+			for (int ModelIndex = 0; ModelIndex < m_ModelList.GetSize(); ModelIndex++)
+			{
+				lcModel* Model = m_ModelList[ModelIndex];
+				Model->ZoomExtents(m_ActiveView, Model->GetCamera(LC_CAMERA_MAIN), false);
+			}
+
 			if (FileArray.GetSize() == 0)
 			{
 				LoadMPD = false;
@@ -1232,6 +1238,7 @@ bool Project::OnOpenDocument(const char* PathName)
 
 			Model->ResetCameras();
 			Model->ImportLDraw(file, LC_COLOR_DEFAULT, IdentityMatrix44(), FilePath);
+			Model->ZoomExtents(m_ActiveView, Model->GetCamera(LC_CAMERA_MAIN), false);
 		}
 
 		SetActiveModel(m_ModelList[0]);
@@ -5594,32 +5601,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
-			if (!m_ActiveModel->m_Pieces)
-				break;
-
-			// Calculate a bounding box that includes all pieces and use its center as the camera target.
-			lcObjArray<Vector3> Points;
-			BoundingBox Box;
-			Box.Reset();
-
-			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-			{
-				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
-					continue;
-
-				Vector3 Corners[8];
-				Piece->m_PieceInfo->m_BoundingBox.GetPoints(Corners);
-
-				for (int i = 0; i < 8; i++)
-				{
-					Vector3 Point = Mul31(Corners[i], Piece->m_ModelWorld);
-					Points.Add(Point);
-					Box.AddPoint(Point);
-				}
-			}
-
-			Vector3 Center = Box.GetCenter();
-
 			// If the control key is down then zoom all views, otherwise zoom only the active view.
 			int FirstView, LastView;
 
@@ -5639,28 +5620,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				View* view = m_ViewList[vp];
 				lcCamera* Camera = view->GetCamera();
 
-				// Update eye and target positions.
-				Vector3 Eye = Camera->m_Position;
-				Vector3 Target = Camera->m_TargetPosition;
-
-				if (Camera->IsSide())
-					Eye += Center - Target;
-
-				Target = Center;
-
-				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
-				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
-				Camera->UpdatePosition(m_ActiveModel->m_CurFrame);
-
-				float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
-				Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
-
-				Eye = ZoomExtents(Eye, Camera->m_WorldView, Projection, &Points[0], Points.GetSize());
-
-				// Save new positions.
-				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
-				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
-				Camera->UpdatePosition(m_ActiveModel->m_CurFrame);
+				m_ActiveModel->ZoomExtents(view, Camera, m_bAddKeys);
 			}
 
 			SystemUpdateFocus(NULL);

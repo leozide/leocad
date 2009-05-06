@@ -13,6 +13,7 @@ class lcLight;
 class lcGroup;
 class lcMesh;
 class PieceInfo;
+class View;
 //class lcScene;
 
 class lcModel
@@ -97,6 +98,9 @@ public:
 	// Retrieve a pointer to an existing camera.
 	lcCamera* GetCamera(int Index) const;
 	lcCamera* GetCamera(const char* Name) const;
+
+	// Make sure all pieces in the model are completely visible.
+	void ZoomExtents(View* view, lcCamera* Camera, bool AddKeys);
 
 	// Adds a light to this model.
 //	void AddLight(lcLight* Light);

@@ -3,7 +3,7 @@
 #include "image.h"
 #include "file.h"
 
-#ifdef LC_HAVE_PNGLIB
+#if LC_HAVE_PNGLIB
 
 #include <png.h>
 

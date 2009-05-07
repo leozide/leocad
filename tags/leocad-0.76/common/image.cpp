@@ -144,7 +144,7 @@ bool Image::FileLoad (File& file)
     return true;
   }
 
-#ifdef LC_HAVE_JPEGLIB
+#if LC_HAVE_JPEGLIB
   if ((buf[0] == 0xFF) && (buf[1] == 0xD8))
   {
     if (!LoadJPG (file))
@@ -154,7 +154,7 @@ bool Image::FileLoad (File& file)
   }
 #endif
 
-#ifdef LC_HAVE_PNGLIB
+#if LC_HAVE_PNGLIB
   const unsigned char png_signature[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 
   // Check for the PNG header
@@ -196,7 +196,7 @@ bool Image::FileSave (File& file, LC_IMAGE_OPTS* opts) const
 {
   switch (opts->format)
   {
-#ifdef LC_HAVE_JPEGLIB
+#if LC_HAVE_JPEGLIB
   case LC_IMAGE_JPG:
     return SaveJPG (file, opts->quality, opts->interlaced);
 #endif
@@ -207,7 +207,7 @@ bool Image::FileSave (File& file, LC_IMAGE_OPTS* opts) const
   case LC_IMAGE_BMP:
     return SaveBMP (file, opts->truecolor == false);
 
-#ifdef LC_HAVE_PNGLIB
+#if LC_HAVE_PNGLIB
   case LC_IMAGE_PNG:
     return SavePNG (file, opts->transparent, opts->interlaced, opts->background);
 #endif

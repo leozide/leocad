@@ -4,7 +4,7 @@
 #include "image.h"
 #include "file.h"
 
-#ifdef LC_HAVE_JPEGLIB
+#if LC_HAVE_JPEGLIB
 
 extern "C" {
 #include <jpeglib.h>

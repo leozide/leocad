@@ -4521,10 +4521,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.PiecesUsed = new int[NumPieces];
 			memset(opts.PiecesUsed, 0, NumPieces * sizeof(int));
 
-			for (lcPiece* pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 			{
-				int idx = lcGetPiecesLibrary()->GetPieceIndex(pPiece->m_PieceInfo);
-				opts.PiecesUsed[idx*lcNumUserColors+pPiece->m_Color]++;
+				if (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL)
+					continue;
+
+				int idx = lcGetPiecesLibrary()->GetPieceIndex(Piece->m_PieceInfo);
+				opts.PiecesUsed[idx*lcNumUserColors+Piece->m_Color]++;
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))

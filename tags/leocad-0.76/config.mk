@@ -336,11 +336,11 @@ endif
 	  (test -s jpegtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_JPEGLIB = yes" >> $(OSDIR)/config.mk; \
-	  echo "#define LC_HAVE_JPEGLIB" >> $(OSDIR)/config.h; \
+	  echo "#define LC_HAVE_JPEGLIB 1" >> $(OSDIR)/config.h; \
 	else \
 	  echo "no (libjpeg optional)"; \
 	  echo "HAVE_JPEGLIB = no" >> $(OSDIR)/config.mk; \
-	  echo "#undef LC_HAVE_JPEGLIB" >> $(OSDIR)/config.h; \
+	  echo "#define LC_HAVE_JPEGLIB 0" >> $(OSDIR)/config.h; \
 	fi
 	@rm -f jpegtest.c jpegtest
 
@@ -352,11 +352,11 @@ endif
 	  (test -s ztest); then  \
 	  echo "ok"; \
 	  echo "HAVE_ZLIB = yes" >> $(OSDIR)/config.mk; \
-	  echo "#define LC_HAVE_ZLIB" >> $(OSDIR)/config.h; \
+	  echo "#define LC_HAVE_ZLIB 1" >> $(OSDIR)/config.h; \
 	else \
 	  echo "no (zlib optional)"; \
 	  echo "HAVE_ZLIB = no" >> $(OSDIR)/config.mk; \
-	  echo "#undef LC_HAVE_ZLIB" >> $(OSDIR)/config.h; \
+	  echo "#define LC_HAVE_ZLIB 0" >> $(OSDIR)/config.h; \
 	fi
 	@rm -f ztest.c ztest
 
@@ -368,11 +368,11 @@ endif
 	  (test -s pngtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_PNGLIB = yes" >> $(OSDIR)/config.mk; \
-	  echo "#define LC_HAVE_PNGLIB" >> $(OSDIR)/config.h; \
+	  echo "#define LC_HAVE_PNGLIB 1" >> $(OSDIR)/config.h; \
 	else \
 	  echo "no (libpng optional)"; \
 	  echo "HAVE_PNGLIB = no" >> $(OSDIR)/config.mk; \
-	  echo "#undef LC_HAVE_PNGLIB" >> $(OSDIR)/config.h; \
+	  echo "#define LC_HAVE_PNGLIB 0" >> $(OSDIR)/config.h; \
 	fi
 	@rm -f pngtest.c pngtest
 

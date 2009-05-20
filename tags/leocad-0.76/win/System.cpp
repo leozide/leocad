@@ -1290,16 +1290,16 @@ bool SystemDoDialog(int nMode, void* param)
 
 				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
 					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
-				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 256);
-		    dlg.m_ofn.nMaxFile = _MAX_PATH * 256;
+				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 512);
+				dlg.m_ofn.nMaxFile = _MAX_PATH * 256;
 				dlg.m_ofn.lpstrInitialDir = opts->path;
 
-	      if (dlg.DoModal() == IDOK)
+				if (dlg.DoModal() == IDOK)
 				{
-		      POSITION pos = dlg.GetStartPosition ();
+					POSITION pos = dlg.GetStartPosition ();
 					int count = 0;
 
-		      while (pos != NULL)
+					while (pos != NULL)
 					{
 						dlg.GetNextPathName (pos);
 						count++;
@@ -1311,9 +1311,9 @@ bool SystemDoDialog(int nMode, void* param)
 					pos = dlg.GetStartPosition ();
 					count = 0;
 
-		      while (pos != NULL)
-				  {
-		        CString str = dlg.GetNextPathName (pos);
+					while (pos != NULL)
+					{
+						CString str = dlg.GetNextPathName (pos);
 						opts->filenames[count] = (char*)malloc(LC_MAXPATH);
 						strcpy (opts->filenames[count], str);
 						count++;

@@ -1364,12 +1364,11 @@ bool PiecesLibrary::ImportLDrawPiece (const char* Filename)
 //		if (FindPieceInfo (piece.name) != NULL)
 //			Sys_MessageBox ("Piece already exists in the library !");
 
-		if (SaveLDrawPiece (&piece))
-			Sys_MessageBox ("Piece successfully imported.");
-		else
+		if (!SaveLDrawPiece (&piece))
 		{
 			fprintf(stderr, "Error saving library after importing %s.\n", Filename);
 			Sys_MessageBox ("Error saving library.");
+			return false;
 		}
 	}
 	else

@@ -195,16 +195,28 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			strcpy(opts.path, Sys_ProfileLoadString ("Default", "LDraw Pieces Path", ""));
 			opts.type = LC_FILEOPENDLG_DAT;
 
-			if (SystemDoDialog (LC_DLG_FILE_OPEN, &opts))
+			if (SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
 			{
+				CProgressDlg Dlg("Importing pieces");
+				Dlg.Create(this);
+				Dlg.SetRange(0, opts.numfiles);
+
 				for (int i = 0; i < opts.numfiles; i++)
 				{
+					Dlg.SetStatus(opts.filenames[i]);
+					Dlg.StepIt();
+
 					lcGetPiecesLibrary ()->ImportLDrawPiece (opts.filenames[i]);
 					free (opts.filenames[i]);
+
+					if (Dlg.CheckCancelButton())
+						if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
+							for (; i < opts.numfiles; i++)
+								free(opts.filenames[i]);
 				}
 
-				free (opts.filenames);
-				Sys_ProfileSaveString ("Default", "LDraw Pieces Path", opts.path);
+				free(opts.filenames);
+				Sys_ProfileSaveString("Default", "LDraw Pieces Path", opts.path);
 
 				UpdateList();
 			}

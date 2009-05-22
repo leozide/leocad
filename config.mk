@@ -2,6 +2,8 @@
 #
 include version.mk
 
+ERROR_SETTING=2> /dev/null
+
 default: all
 
 CC	:= gcc
@@ -58,21 +60,22 @@ NIBS = main.nib
 
 all: bundletree exec bnibs pkginfo infoplist infopliststr
 
-bundletree: $(BUNDLEDIR) $(CONTDIR) $(BINDIR) $(RSRCDIR) $(EN_RSRCDIR)
+bundletree: $(BINDIR) $(BUNDLEDIR) $(CONTDIR) $(RSRCDIR) $(EN_RSRCDIR)
 
 $(BUNDLEDIR):
+	mkdir bin
 	mkdir $(BUNDLEDIR)
 
-$(CONTDIR):
+$(CONTDIR): $(BUNDLEDIR)
 	mkdir $(CONTDIR)
 
-$(BINDIR):
+$(BINDIR): $(CONTDIR)
 	mkdir $(BINDIR)
 
-$(RSRCDIR):
+$(RSRCDIR): $(CONTDIR)
 	mkdir $(RSRCDIR)
 
-$(EN_RSRCDIR):
+$(EN_RSRCDIR): $(RSRCDIR)
 	mkdir $(EN_RSRCDIR)
 
 # The binary executable
@@ -128,6 +131,10 @@ config-help:
 
 ### Automatic configuration
 
+#USE this with printf and a primitive type - printf "WIDTHTEST" "char" >conftest.c
+CONFTEST="\#include <stdio.h>\nint main() { FILE *f=fopen(\"conftestval\", \"w\");\n\
+	if (!f) return 1; fprintf(f, \"%%d\\\n\", sizeof(%s)); return 0; }\n"
+
 config:
 	@echo "Automatic configuration"
 
@@ -160,11 +167,9 @@ config:
 
 ### Determine variable sizes
 	@echo -n "checking size of char... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(char)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	printf ${CONFTEST} "char" > conftest.c; \
+	if { (eval $(CC) conftest.c -o conftest); } && \
+	  (test -s conftest && (./conftest; exit)); then \
 	  ac_cv_sizeof_char=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_char"; \
 	else \
@@ -175,11 +180,9 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of short... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(short)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	printf ${CONFTEST} "short" > conftest.c; \
+	if { (eval $(CC) conftest.c -o conftest); } && \
+	  (test -s conftest && (./conftest; exit)); then \
 	  ac_cv_sizeof_short=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_short"; \
 	else \
@@ -190,11 +193,9 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of long... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(long)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	printf ${CONFTEST} "long" > conftest.c; \
+	if { (eval $(CC) conftest.c -o conftest); } && \
+	  (test -s conftest && (./conftest; exit)); then \
 	  ac_cv_sizeof_long=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_long"; \
 	else \
@@ -205,11 +206,9 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of int... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(int)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	printf ${CONFTEST} "int" > conftest.c; \
+	if { (eval $(CC) conftest.c -o conftest); } && \
+	  (test -s conftest && (./conftest; exit)); then \
 	  ac_cv_sizeof_int=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_int"; \
 	else \
@@ -220,11 +219,9 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of void *... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(void *)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	printf ${CONFTEST} "void *" > conftest.c; \
+	if { (eval $(CC) conftest.c -o conftest); } && \
+	  (test -s conftest && (./conftest; exit)); then \
 	  ac_cv_sizeof_void_p=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_void_p"; \
 	else \
@@ -235,11 +232,9 @@ config:
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of long long... "; \
-	echo "#include <stdio.h>" > conftest.c; \
-	echo "main() { FILE *f=fopen(\"conftestval\", \"w\");" >> conftest.c; \
-	echo "if (!f) exit(1); fprintf(f, \"%d\\n\", sizeof(long long)); exit(0); }" >> conftest.c; \
-	if { (eval $(CC) conftest.c -o conftest) 2> /dev/null; } && \
-	  (test -s conftest && (./conftest; exit) 2> /dev/null); then \
+	printf ${CONFTEST} "long long" > conftest.c; \
+	if { (eval $(CC) conftest.c -o conftest); } && \
+	  (test -s conftest && (./conftest; exit)); then \
 	  ac_cv_sizeof_long_long=`cat conftestval`; \
 	  echo "$$ac_cv_sizeof_long_long"; \
 	else \
@@ -257,6 +252,9 @@ config:
 	  $$ac_cv_sizeof_int)		lcint32=int;; \
 	  $$ac_cv_sizeof_long)		lcint32=long;; \
 	esac; \
+	case 8 in \
+	  $$ac_cv_sizeof_long_long)	lcint64="long long";; \
+	esac; \
 	echo "" >> $(OSDIR)/config.h; \
 	echo "typedef signed char lcint8;" >> $(OSDIR)/config.h; \
 	echo "typedef unsigned char lcuint8;" >> $(OSDIR)/config.h; \
@@ -272,14 +270,20 @@ config:
 	else \
 	  echo "#error need to define lcint32 and lcuint32" >> $(OSDIR)/config.h; \
 	fi; \
+	if test -n "$$lcint64"; then \
+	echo "typedef signed $$lcint64 lcint64;" >> $(OSDIR)/config.h; \
+	echo "typedef unsigned $$lcint64 lcuint64;" >> $(OSDIR)/config.h; \
+	else \
+	  echo "#error need to define lcint64 and lcuint64" >> $(OSDIR)/config.h; \
+	fi; \
 	echo "" >> $(OSDIR)/config.h
 
 ### Check if machine is little or big endian
 	@echo -n "Determining endianess... "
-	@echo "main () { union { long l; char c[sizeof (long)]; } u;" > endiantest.c
-	@echo "u.l = 1; exit (u.c[sizeof (long) - 1] == 1); }" >> endiantest.c
-	@if { (eval $(CC) endiantest.c -o endiantest) 2> /dev/null; } && \
-	  (test -s endiantest && (./endiantest; exit) 2> /dev/null); then \
+	@echo "int main () { union { long l; char c[sizeof (long)]; } u;" > endiantest.c
+	@echo "u.l = 1; return (u.c[sizeof (long) - 1] == 1); }" >> endiantest.c
+	@if { (eval $(CC) endiantest.c -o endiantest); } && \
+	  (test -s endiantest && (./endiantest; exit)); then \
 	  echo "little endian"; \
 	  echo "#define LC_LITTLE_ENDIAN" >> $(OSDIR)/config.h; \
 	  echo "#define LCUINT16(val) val" >> $(OSDIR)/config.h; \
@@ -319,7 +323,7 @@ ifeq ($(TEST_GTK), 1)
 	  echo "LIBS += \$$(shell pkg-config gtk+-2.0 --libs)" >> $(OSDIR)/config.mk; \
 	else \
 	  echo "failed"; \
-	  rm -rf $(OSDIR)/config.mk; \
+	  rm -rf $(OSDIR)/config.mk $(OSDIR)/config.h; \
 	  exit 1; \
 	fi
 endif
@@ -328,7 +332,7 @@ endif
 	@echo -n "Checking for jpeg support... "
 	@echo "char jpeg_read_header();" > jpegtest.c
 	@echo "int main() { jpeg_read_header(); return 0; }" >> jpegtest.c
-	@if { (eval $(CC) jpegtest.c -ljpeg -o jpegtest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) jpegtest.c -ljpeg -o jpegtest $(CPPFLAGS) $(LDFLAGS)); } && \
 	  (test -s jpegtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_JPEGLIB = yes" >> $(OSDIR)/config.mk; \
@@ -344,7 +348,7 @@ endif
 	@echo -n "Checking for zlib support... "
 	@echo "char gzread();" > ztest.c
 	@echo "int main() { gzread(); return 0; }" >> ztest.c
-	@if { (eval $(CC) ztest.c -lz -o ztest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) ztest.c -lz -o ztest $(CPPFLAGS) $(LDFLAGS)); } && \
 	  (test -s ztest); then  \
 	  echo "ok"; \
 	  echo "HAVE_ZLIB = yes" >> $(OSDIR)/config.mk; \
@@ -360,7 +364,7 @@ endif
 	@echo -n "Checking for png support... "
 	@echo "char png_read_info();" > pngtest.c
 	@echo "int main() { png_read_info(); return 0; }" >> pngtest.c
-	@if { (eval $(CC) pngtest.c -lm -lz -lpng -o pngtest $(CPPFLAGS) $(LDFLAGS)) 2> /dev/null; } && \
+	@if { (eval $(CC) pngtest.c -lm -lz -lpng -o pngtest $(CPPFLAGS) $(LDFLAGS)); } && \
 	  (test -s pngtest); then  \
 	  echo "ok"; \
 	  echo "HAVE_PNGLIB = yes" >> $(OSDIR)/config.mk; \

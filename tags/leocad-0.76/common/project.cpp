@@ -4095,6 +4095,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				break;
 			}
 
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			fputs("// Stuff that doesn't need to be changed\n\n", f);
 
 			if (strlen(opts.libpath))
@@ -4254,6 +4255,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (!f)
 			{
 				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				setlocale(LC_NUMERIC, OldLocale);
 				break;
 			}
 
@@ -4317,6 +4319,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			fclose (f);
 			free (conv);
 			free (flags);
+			setlocale(LC_NUMERIC, OldLocale);
 
 			if (opts.render)
 			{

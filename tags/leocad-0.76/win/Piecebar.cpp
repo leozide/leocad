@@ -436,8 +436,8 @@ void CPiecesBar::RefreshPiecesTree()
 {
 	HTREEITEM Item = m_PiecesTree.GetChildItem(TVI_ROOT);
 
-  while (Item != NULL)
-  {
+	while (Item != NULL)
+	{
 		if ((m_PiecesTree.GetItemState(Item, TVIF_STATE) & TVIS_EXPANDED) != 0)
 		{
 			m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
@@ -445,7 +445,7 @@ void CPiecesBar::RefreshPiecesTree()
 		}
 
 		Item = m_PiecesTree.GetNextSiblingItem(Item);
-  }
+	}
 }
 
 BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult) 
@@ -460,6 +460,8 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 			if (Selection)
 				g_App->m_PiecePreview->SetSelection(Selection);
+
+			return TRUE;
 		}
 		else if (Notify->hdr.code == TVN_BEGINDRAG)
 		{
@@ -474,6 +476,8 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				CView* pView = pFrame->GetActiveView();
 				pView->PostMessage(WM_LC_SET_CURSOR, 0, 0);
 			}
+
+			return TRUE;
 		}
 		else if (Notify->hdr.code == TVN_GETINFOTIP)
 		{
@@ -486,6 +490,8 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				PieceInfo* Info = (PieceInfo*)Data;
 				_snprintf(Tip->pszText, Tip->cchTextMax, "%s (%s)", Info->m_strDescription, Info->m_strName);
 			}
+
+			return TRUE;
 		}
 		else if (Notify->hdr.code == TVN_ITEMEXPANDING)
 		{
@@ -539,6 +545,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					}
 					else 
 					{
+//						m_PiecesTree.SetItemState(CategoryItem, 0, TVIS_EXPANDPARTIAL );
 						// Expanding a category item.
 						int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -564,7 +571,18 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								if (GroupedPieces.FindIndex(Info) == -1)
 									m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
 								else
-									m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
+								{
+									TVINSERTSTRUCT NewItem;
+
+									NewItem.hParent = CategoryItem;
+									NewItem.hInsertAfter = TVI_LAST;
+									NewItem.item.mask = TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT;
+									NewItem.item.lParam = (LPARAM)Info;
+									NewItem.item.cChildren = 1;
+									NewItem.item.pszText = Info->m_strDescription;
+
+									m_PiecesTree.InsertItem(&NewItem);
+								}
 							}
 						}
 
@@ -615,10 +633,14 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 				m_PiecesTree.SetRedraw(TRUE);
 				m_PiecesTree.Invalidate();
+
+				return TRUE;
 			}
 			else if (Notify->action == TVE_COLLAPSE)
 			{
 				m_PiecesTree.Expand(Notify->itemNew.hItem, TVE_COLLAPSE | TVE_COLLAPSERESET);
+
+				return TRUE;
 			}
 		}
 	}

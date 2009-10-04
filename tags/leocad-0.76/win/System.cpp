@@ -1291,7 +1291,7 @@ bool SystemDoDialog(int nMode, void* param)
 				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
 					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
 				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 512);
-				dlg.m_ofn.nMaxFile = _MAX_PATH * 256;
+				dlg.m_ofn.nMaxFile = _MAX_PATH * 512;
 				dlg.m_ofn.lpstrInitialDir = opts->path;
 
 				if (dlg.DoModal() == IDOK)

@@ -650,6 +650,23 @@ void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>&
 		if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
 			Pieces.Add(Info);
 	}
+
+	// Sometimes pieces with A and B versions don't follow the same convention (for example, 3040Pxx instead of 3040BPxx).
+	if (Pieces.GetSize() == 0)
+	{
+		strcpy(Name, Parent->m_strName);
+		int Len = strlen(Name);
+		if (Name[Len-1] < '0' || Name[Len-1] > '9')
+			Name[Len-1] = 'P';
+
+		for (int i = 0; i < m_nPieceCount; i++)
+		{
+			PieceInfo* Info = &m_pPieceIdx[i];
+
+			if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
+				Pieces.Add(Info);
+		}
+	}
 }
 
 void PiecesLibrary::SetCategory(int Index, const String& Name, const String& Keywords)

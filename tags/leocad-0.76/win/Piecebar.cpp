@@ -270,17 +270,20 @@ void CPiecesBar::SelectPiece(const char* Category, PieceInfo* Info)
 
 			while (Item != NULL)
 			{
-				CString Name = m_PiecesTree.GetItemText(Item);
-
-				if (Name == Parent->m_strDescription)
+				if (m_PiecesTree.GetItemData(Item) == (LPARAM)Parent)
 				{
-					m_PiecesTree.Expand(Item, TVE_EXPAND);
+					CString Name = m_PiecesTree.GetItemText(Item);
 
-					// If both descriptions begin with the same text, only show the difference.
-					if (!strncmp(Info->m_strDescription, Parent->m_strDescription, strlen(Parent->m_strDescription)))
-						PieceName = Info->m_strDescription + strlen(Parent->m_strDescription) + 1;
+					if (Name == Parent->m_strDescription)
+					{
+						m_PiecesTree.Expand(Item, TVE_EXPAND);
 
-					break;
+						// If both descriptions begin with the same text, only show the difference.
+						if (!strncmp(Info->m_strDescription, Parent->m_strDescription, strlen(Parent->m_strDescription)))
+							PieceName = Info->m_strDescription + strlen(Parent->m_strDescription) + 1;
+
+						break;
+					}
 				}
 
 				Item = m_PiecesTree.GetNextSiblingItem(Item);
@@ -545,7 +548,6 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					}
 					else 
 					{
-//						m_PiecesTree.SetItemState(CategoryItem, 0, TVIS_EXPANDPARTIAL );
 						// Expanding a category item.
 						int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 

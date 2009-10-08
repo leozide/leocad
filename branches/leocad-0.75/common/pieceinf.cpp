@@ -1701,7 +1701,7 @@ void PieceInfo::RenderOnce(int nColor)
 // Called by the piece preview and from RenderOnce()
 void PieceInfo::RenderPiece(int nColor)
 {
-	unsigned short sh, curcolor;
+	lcuint16 sh, curcolor;
 	DRAWGROUP* pGroup;
 
 	for (sh = 0; sh < m_nTextureCount; sh++)
@@ -1747,9 +1747,9 @@ void PieceInfo::RenderPiece(int nColor)
 	{
 		if (m_nFlags & LC_PIECE_LONGDATA)
 		{
-			unsigned long* info, colors;
+			lcuint32* info, colors;
 
-			info = (unsigned long*)pGroup->drawinfo;
+			info = (lcuint32*)pGroup->drawinfo;
 			colors = *info;
 			info++;
 
@@ -1788,9 +1788,9 @@ void PieceInfo::RenderPiece(int nColor)
 		}
 		else
 		{
-			unsigned short* info, colors;
+			lcuint16* info, colors;
 
-			info = (unsigned short*)pGroup->drawinfo;
+			info = (lcuint16*)pGroup->drawinfo;
 			colors = *info;
 			info++;
 

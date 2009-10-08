@@ -128,7 +128,7 @@ void OnCommandDirect(GtkWidget *w, gpointer data)
   if (ignore_commands)
     return;
 
-  lcGetActiveProject()->HandleCommand((LC_COMMANDS)(int)data, 0);
+  lcGetActiveProject()->HandleCommand((LC_COMMANDS)GPOINTER_TO_INT(data), 0);
 }
 
 static void view_destroy (GtkWidget *widget, gpointer data)
@@ -139,7 +139,7 @@ static void view_destroy (GtkWidget *widget, gpointer data)
 void OnCommand(GtkWidget* widget, gpointer data)
 {
   Project* project = lcGetActiveProject();
-  int id = (int)data;
+  int id = GPOINTER_TO_INT(data);
 
   if (ignore_commands)
     return;

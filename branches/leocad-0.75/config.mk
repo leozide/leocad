@@ -229,6 +229,11 @@ config:
 	  ac_cv_sizeof_void_p=0; \
 	fi; \
 	echo "#define LC_SIZEOF_VOID_P $$ac_cv_sizeof_void_p" >> $(OSDIR)/config.h; \
+	if test "$$ac_cv_sizeof_void_p" -eq "8"; then \
+	  echo "#define LC_POINTER_TO_INT(p) ((lcint32)(lcint64)(p))" >> $(OSDIR)/config.h; \
+	else \
+	  echo "#define LC_POINTER_TO_INT(p) ((lcint32)(p))" >> $(OSDIR)/config.h; \
+	fi; \
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of long long... "; \

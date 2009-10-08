@@ -14,6 +14,7 @@
 #define LC_VERSION_TEXT "0.75"
 #define LC_VERSION_TAG ""
 #define LC_INSTALL_PREFIX "C:\\leocad"
+#define LC_POINTER_TO_INT(p) ((lcint32)(p))
 
 typedef signed char lcint8;
 typedef unsigned char lcuint8;

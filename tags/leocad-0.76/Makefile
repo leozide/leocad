@@ -16,7 +16,9 @@ SRC :=
 
 BIN := bin/leocad
 
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean), )
 -include $(OSDIR)/config.mk
+endif
 
 ### Include the description for each module
 include $(patsubst %,%/module.mk,$(MODULES))
@@ -44,25 +46,22 @@ bin:
 	@mkdir bin
 
 ### Include the C/C++ include dependencies
-ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean spotless), )
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean), )
 -include $(OBJ:.o=.d)
 endif
 
 ### Calculate C/C++ include dependencies
-%.d: %.c
-	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
+%.d: %.c $(OSDIR)/config.h $(OSDIR)/config.mk
 	@$(CC) -MM -MT '$(patsubst %.d,%.o, $@)' $(CFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
-%.d: %.cpp
-	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
+%.d: %.cpp $(OSDIR)/config.h $(OSDIR)/config.mk
 	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
 ### Main compiler rule
-%.o: %.cpp
+%.o: %.cpp $(OSDIR)/config.h $(OSDIR)/config.mk
 	@echo $<
-	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
 	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o '$(patsubst %.cpp,%.o, $@)' $<
 	@[ -s $@ ] || rm -f $@
 
@@ -75,8 +74,6 @@ clean:
 veryclean: clean
 	find $(MODULES) -name \*.d | xargs rm -f
 	rm -rf bin
-
-spotless: veryclean
 	rm -rf arch $(OSDIR)/config.mk $(OSDIR)/config.h
 
 
@@ -98,7 +95,6 @@ help:
 	@echo   '        a -zip or -tgz variants)'
 	@echo   '       clean'
 	@echo   '       veryclean'
-	@echo   '       spotless'
 	@echo
 
 ###  Rules to make various packaging

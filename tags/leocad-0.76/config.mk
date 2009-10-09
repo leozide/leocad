@@ -133,7 +133,10 @@ config-help:
 
 #USE this with printf and a primitive type - printf "WIDTHTEST" "char" >conftest.c
 CONFTEST="\#include <stdio.h>\nint main() { FILE *f=fopen(\"conftestval\", \"w\");\n\
-	if (!f) return 1; fprintf(f, \"%%d\\\n\", sizeof(%s)); return 0; }\n"
+	if (!f) return 1; fprintf(f, \"%%d\\\n\", (int)sizeof(%s)); return 0; }\n"
+
+$(OSDIR)/config.h $(OSDIR)/config.mk:
+	make config
 
 config:
 	@echo "Automatic configuration"
@@ -328,6 +331,21 @@ ifeq ($(TEST_GTK), 1)
 	fi
 endif
 
+## Check if the user has OpenGL installed
+	@echo -n "Checking for OpenGL support... "
+	@echo "#include <GL/gl.h>" > gltest.c
+	@echo "int main() { return 0; }" >> gltest.c
+	@if { (eval $(CC) gltest.c -o gltest $(CPPFLAGS) $(LDFLAGS)); } && \
+	  (test -s gltest); then  \
+	  echo "ok"; \
+	else \
+	  rm -f gltest.c gltest; \
+	  echo "failed"; \
+	  rm -rf $(OSDIR)/config.mk $(OSDIR)/config.h; \
+	  exit 1; \
+	fi
+	@rm -f gltest.c gltest
+
 ## Check if the user has libjpeg installed
 	@echo -n "Checking for jpeg support... "
 	@echo "char jpeg_read_header();" > jpegtest.c
@@ -378,3 +396,4 @@ endif
 
 	@echo "" >> $(OSDIR)/config.h
 	@echo "#endif // _CONFIG_H_" >> $(OSDIR)/config.h
+

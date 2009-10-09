@@ -133,7 +133,7 @@ config-help:
 
 #USE this with printf and a primitive type - printf "WIDTHTEST" "char" >conftest.c
 CONFTEST="\#include <stdio.h>\nint main() { FILE *f=fopen(\"conftestval\", \"w\");\n\
-	if (!f) return 1; fprintf(f, \"%%d\\\n\", sizeof(%s)); return 0; }\n"
+	if (!f) return 1; fprintf(f, \"%%d\\\n\", (int)sizeof(%s)); return 0; }\n"
 
 config:
 	@echo "Automatic configuration"

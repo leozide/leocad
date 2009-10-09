@@ -475,7 +475,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
-		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
+		lcuint32* info = (lcuint32*)m_pDrawInfo, colors, i;
 		colors = *info;
 		info++;
 
@@ -516,7 +516,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	}
 	else
 	{
-		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
+		lcuint16* info = (lcuint16*)m_pDrawInfo, colors, i;
 		colors = *info;
 		info++;
 
@@ -694,7 +694,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
-		unsigned long* info = (unsigned long*)m_pDrawInfo, colors, i;
+		lcuint32* info = (lcuint32*)m_pDrawInfo, colors, i;
 		colors = *info;
 		info++;
 
@@ -730,7 +730,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	}
 	else
 	{
-		unsigned short* info = (unsigned short*)m_pDrawInfo, colors, i;
+		lcuint16* info = (lcuint16*)m_pDrawInfo, colors, i;
 		colors = *info;
 		info++;
 
@@ -884,7 +884,7 @@ void Piece::BuildDrawInfo()
 	// Get the vertex count
 	for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
 	{
-		unsigned short* sh = dg->connections;
+		lcuint16* sh = dg->connections;
 		add = IsTransparent() || *sh == 0xFFFF;
 
 		if (!add)
@@ -900,8 +900,8 @@ void Piece::BuildDrawInfo()
 		{
 			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 			{
-				unsigned long* p, curcol, colors;
-				p = (unsigned long*)dg->drawinfo;
+				lcuint32* p, curcol, colors;
+				p = (lcuint32*)dg->drawinfo;
 				colors = *p;
 				p++;
 
@@ -919,8 +919,8 @@ void Piece::BuildDrawInfo()
 			}
 			else
 			{
-				unsigned short* p, curcol, colors;
-				p = (unsigned short*)dg->drawinfo;
+				lcuint16* p, curcol, colors;
+				p = (lcuint16*)dg->drawinfo;
 				colors = *p;
 				p++;
 
@@ -952,8 +952,8 @@ void Piece::BuildDrawInfo()
 	// Build the info
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
-		m_pDrawInfo = malloc(vert*sizeof(unsigned long));
-		unsigned long* drawinfo = (unsigned long*)m_pDrawInfo;
+		m_pDrawInfo = malloc(vert*sizeof(lcuint32));
+		lcuint32* drawinfo = (lcuint32*)m_pDrawInfo;
 		*drawinfo = colcount;
 		drawinfo++;
 		i = LC_COL_DEFAULT;
@@ -975,7 +975,7 @@ void Piece::BuildDrawInfo()
 
 					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
 					{
-						unsigned short* sh = dg->connections;
+						lcuint16* sh = dg->connections;
 						add = IsTransparent() || *sh == 0xFFFF;
 
 						if (!add)
@@ -990,8 +990,8 @@ void Piece::BuildDrawInfo()
 						if (!add)
 							continue;
 
-						unsigned long* p, colors;
-						p = (unsigned long*)dg->drawinfo;
+						lcuint32* p, colors;
+						p = (lcuint32*)dg->drawinfo;
 						colors = *p;
 						p++;
 
@@ -1003,21 +1003,21 @@ void Piece::BuildDrawInfo()
 
 								if (j == 0)
 								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
+									memcpy(drawinfo, p+1, (*p)*sizeof(lcuint32));
 									drawinfo += *p;
 								}
 								p += *p + 1;
 
 								if (j == 1)
 								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
+									memcpy(drawinfo, p+1, (*p)*sizeof(lcuint32));
 									drawinfo += *p;
 								}
 								p += *p + 1;
 								
 								if (j == 2)
 								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned long));
+									memcpy(drawinfo, p+1, (*p)*sizeof(lcuint32));
 									drawinfo += *p;
 								}
 								p += *p + 1;
@@ -1042,8 +1042,8 @@ void Piece::BuildDrawInfo()
 	}
 	else
 	{
-		m_pDrawInfo = malloc(vert*sizeof(unsigned short));
-		unsigned short* drawinfo = (unsigned short*)m_pDrawInfo;
+		m_pDrawInfo = malloc(vert*sizeof(lcuint16));
+		lcuint16* drawinfo = (lcuint16*)m_pDrawInfo;
 		*drawinfo = colcount;
 		drawinfo++;
 
@@ -1056,7 +1056,7 @@ void Piece::BuildDrawInfo()
 
 				for (j = 0; j < 3; j++)
 				{
-					*drawinfo = (unsigned short)count[i][j];
+					*drawinfo = (lcuint16)count[i][j];
 					drawinfo++;
 
 					if (count[i][j] == 0)
@@ -1064,7 +1064,7 @@ void Piece::BuildDrawInfo()
 
 					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
 					{
-						unsigned short* sh = dg->connections;
+						lcuint16* sh = dg->connections;
 						add = IsTransparent() || *sh == 0xFFFF;
 
 						if (!add)
@@ -1079,8 +1079,8 @@ void Piece::BuildDrawInfo()
 						if (!add)
 							continue;
 
-						unsigned short* p, colors;
-						p = (unsigned short*)dg->drawinfo;
+						lcuint16* p, colors;
+						p = (lcuint16*)dg->drawinfo;
 						colors = *p;
 						p++;
 
@@ -1092,21 +1092,21 @@ void Piece::BuildDrawInfo()
 
 								if (j == 0)
 								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
+									memcpy(drawinfo, p+1, (*p)*sizeof(lcuint16));
 									drawinfo += *p;
 								}
 								p += *p + 1;
 
 								if (j == 1)
 								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
+									memcpy(drawinfo, p+1, (*p)*sizeof(lcuint16));
 									drawinfo += *p;
 								}
 								p += *p + 1;
 								
 								if (j == 2)
 								{
-									memcpy(drawinfo, p+1, (*p)*sizeof(unsigned short));
+									memcpy(drawinfo, p+1, (*p)*sizeof(lcuint16));
 									drawinfo += *p;
 								}
 								p += *p + 1;
@@ -1189,7 +1189,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 
 	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
 	{
-		unsigned long colors, *info = (unsigned long*)m_pDrawInfo;
+		lcuint32 colors, *info = (lcuint32*)m_pDrawInfo;
 		colors = *info;
 		info++;
 
@@ -1261,7 +1261,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 	}
 	else
 	{
-		unsigned short colors, *info = (unsigned short*)m_pDrawInfo;
+		lcuint16 colors, *info = (lcuint16*)m_pDrawInfo;
 		colors = *info;
 		info++;
 

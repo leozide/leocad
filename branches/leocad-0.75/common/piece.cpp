@@ -163,13 +163,13 @@ bool Piece::FileLoad (File& file, char* name)
 
   if (version < 9)
   {
-    unsigned short time;
+    lcuint16 time;
     float param[4];
     unsigned char type;
 
     if (version > 5)
     {
-      unsigned long keys;
+      lcuint32 keys;
 
       file.ReadLong (&keys, 1);
       while (keys--)
@@ -303,7 +303,7 @@ bool Piece::FileLoad (File& file, char* name)
     if (ch == 0)
       m_pGroup = (Group*)-1;
     else
-      m_pGroup = (Group*)(unsigned long)ch;
+      m_pGroup = (Group*)(lcuint32)ch;
 
     file.ReadByte(&ch, 1);
     if (ch & 0x01)

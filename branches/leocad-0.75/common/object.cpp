@@ -80,16 +80,16 @@ Object::~Object ()
 
 bool Object::FileLoad (File& file)
 {
-  unsigned char version;
+  lcuint8 version;
 
   file.ReadByte (&version, 1);
   if (version > LC_KEY_SAVE_VERSION)
     return false;
 
-  unsigned short time;
+  lcuint16 time;
   float param[4];
-  unsigned char type;
-  unsigned long n;
+  lcuint8 type;
+  lcuint32 n;
 
   file.ReadLong (&n, 1);
   while (n--)
@@ -116,9 +116,9 @@ bool Object::FileLoad (File& file)
 
 void Object::FileSave (File& file) const
 {
-  unsigned char version = LC_KEY_SAVE_VERSION;
+  lcuint8 version = LC_KEY_SAVE_VERSION;
   LC_OBJECT_KEY *node;
-  unsigned long n;
+  lcuint32 n;
 
   file.WriteByte (&version, 1);
 

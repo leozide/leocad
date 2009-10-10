@@ -2163,9 +2163,18 @@ static void propertiesdlg_ok(GtkWidget *widget, gpointer data)
 
   strcpy(opts->strAuthor, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
   strcpy(opts->strDescription, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
-  char* comments = gtk_editable_get_chars(GTK_EDITABLE(s->sum_comments), 0, -1);
-  strcpy(opts->strComments, comments);
-  g_free(comments);
+
+  GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s->sum_comments));
+  GtkTextIter start;
+  GtkTextIter end;
+  gchar *text;
+
+  gtk_text_buffer_get_start_iter(buffer, &start);
+  gtk_text_buffer_get_end_iter(buffer, &end);
+  text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+  strncpy(opts->strComments, text, sizeof(opts->strComments));
+  opts->strComments[sizeof(opts->strComments)-1] = 0;
+  g_free (text);
 
   *cur_ret = LC_OK;
 }

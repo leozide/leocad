@@ -219,7 +219,7 @@ int dlg_domodal(GtkWidget* dlg, int def)
 
 void dlg_default_callback(GtkWidget *widget, gpointer data)
 {
-  *cur_ret = (int)data;
+  *cur_ret = GPOINTER_TO_INT(data);
 }
 
 gint dlg_delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data)
@@ -2149,12 +2149,17 @@ static void propertiesdlg_ok(GtkWidget *widget, gpointer data)
 
   opts->Author = gtk_entry_get_text(GTK_ENTRY(s->sum_author));
   opts->Description = gtk_entry_get_text(GTK_ENTRY(s->sum_description));
-  char* comments = gtk_editable_get_chars(GTK_EDITABLE(s->sum_comments), 0, -1);
-  if (comments != NULL)
-  {
-    opts->Comments = comments;
-    g_free(comments);
-  }
+
+  GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s->sum_comments));
+  GtkTextIter start;
+  GtkTextIter end;
+  gchar *text;
+
+  gtk_text_buffer_get_start_iter(buffer, &start);
+  gtk_text_buffer_get_end_iter(buffer, &end);
+  text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+  opts->Comments = text;
+  g_free (text);
 
   *cur_ret = LC_OK;
 }

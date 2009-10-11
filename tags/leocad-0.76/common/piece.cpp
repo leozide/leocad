@@ -66,7 +66,7 @@ void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 
 bool lcPiece::FileLoad(File& file, char* name)
 {
-	unsigned char version, ch;
+	u8 version, ch;
 
 	file.ReadByte (&version, 1);
 
@@ -88,13 +88,13 @@ bool lcPiece::FileLoad(File& file, char* name)
 
 	if (version < 9)
 	{
-		unsigned short time;
+		u16 time;
 		float param[4];
-		unsigned char type;
+		u8 type;
 
 		if (version > 5)
 		{
-			unsigned long keys;
+			u32 keys;
 
 			file.ReadLong (&keys, 1);
 			while (keys--)
@@ -261,7 +261,7 @@ bool lcPiece::FileLoad(File& file, char* name)
 		if (ch == 0)
 			m_Group = (lcGroup*)-1;
 		else
-			m_Group = (lcGroup*)(unsigned long)ch;
+			m_Group = (lcGroup*)(u32)ch;
 
 		file.ReadByte(&ch, 1);
 		if (ch & 0x01)
@@ -273,7 +273,7 @@ bool lcPiece::FileLoad(File& file, char* name)
 
 void lcPiece::FileSave(File& file, lcGroup* Groups)
 {
-  unsigned char ch = LC_PIECE_SAVE_VERSION;
+  u8 ch = LC_PIECE_SAVE_VERSION;
 
   file.WriteByte (&ch, 1);
 

@@ -508,7 +508,7 @@ void PieceInfo::LoadInformation()
 	if (m_nFlags & LC_PIECE_SMALL)  scale = 0.0001f;
 	longs = (u32*)buf;
 	fixverts = verts = LCUINT32(*longs);
-	bytes = (unsigned char*)(longs + 1);
+	bytes = (u8*)(longs + 1);
 	bytes += verts * sizeof(i16) * 3;
 
 	// Read connections
@@ -536,7 +536,7 @@ void PieceInfo::LoadInformation()
 		pConnection->normal[2] = (float)(LCINT16(*shorts))*shift;
 		shorts++;
 
-		bytes = (unsigned char*)shorts;
+		bytes = (u8*)shorts;
 	}
 
 	// Load textures
@@ -619,7 +619,7 @@ void PieceInfo::LoadInformation()
 						p += LCUINT32(*p) + 1;
 					}
 
-					bytes = (unsigned char*)p;
+					bytes = (u8*)p;
 				}
 				else
 				{
@@ -643,7 +643,7 @@ void PieceInfo::LoadInformation()
 						p += LCUINT16(*p) + 1;
 					}
 
-					bytes = (unsigned char*)p;
+					bytes = (u8*)p;
 				}
 			}
 
@@ -653,7 +653,7 @@ void PieceInfo::LoadInformation()
 				verts += (2*SIDES)+1;
 				SectionIndices[color*2] += 9*SIDES;
 				SectionIndices[LC_COLOR_EDGE*2+1] += 4*SIDES;
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				bytes += 2*sizeof(u8) + 12*sizeof(float);
 			}
 
 			if ((*bytes == LC_STUD2) || (*bytes == LC_STUD4))
@@ -662,7 +662,7 @@ void PieceInfo::LoadInformation()
 				verts += 4*SIDES;
 				SectionIndices[color*2] += 18*SIDES;
 				SectionIndices[LC_COLOR_EDGE*2+1] += 8*SIDES;
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				bytes += 2*sizeof(u8) + 12*sizeof(float);
 			}
 		}
 		bytes++; // should be 0
@@ -792,7 +792,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 				WriteStudDrawInfo<T>(color, Mat, MeshEdit, verts, pGroup, LC_STUD_RADIUS, SectionIndices, DstSections);
 
 				verts += 2*SIDES+1;
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				bytes += 2*sizeof(u8) + 12*sizeof(float);
 			} break;
 
 		case LC_STUD2:
@@ -812,7 +812,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 				WriteHollowStudDrawInfo<T>(color, Mat, MeshEdit, verts, pGroup, 0.16f, LC_STUD_RADIUS, SectionIndices, DstSections);
 
 				verts += 4*SIDES;
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				bytes += 2*sizeof(u8) + 12*sizeof(float);
 			} break;
 
 		case LC_STUD3:
@@ -832,7 +832,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 				WriteStudDrawInfo<T>(color, Mat, MeshEdit, verts, pGroup, LC_STUD_RADIUS, SectionIndices, DstSections);
 
 				verts += 2*SIDES+1;
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				bytes += 2*sizeof(u8) + 12*sizeof(float);
 			} break;
 
 		case LC_STUD4:
@@ -852,7 +852,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 				WriteHollowStudDrawInfo<T>(color, Mat, MeshEdit, verts, pGroup, 0.16f, LC_STUD_RADIUS, SectionIndices, DstSections);
 
 				verts += 4*SIDES;
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				bytes += 2*sizeof(u8) + 12*sizeof(float);
 			} break;
 		}
 		bytes++; // should be 0
@@ -1028,7 +1028,7 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 
 void PieceInfo::RenderPiece(int nColor)
 {
-	unsigned short sh;
+	u16 sh;
 
 	for (sh = 0; sh < m_nTextureCount; sh++)
 	{

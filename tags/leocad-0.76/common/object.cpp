@@ -36,7 +36,7 @@ lcObject::~lcObject()
 
 bool lcObject::FileLoad(File& file)
 {
-	unsigned char version;
+	u8 version;
 
 	file.ReadByte(&version, 1);
 	if (version > LC_KEY_SAVE_VERSION)
@@ -90,9 +90,9 @@ bool lcObject::FileLoad(File& file)
 
 void lcObject::FileSave(File& file) const
 {
-	unsigned char version = LC_KEY_SAVE_VERSION;
+	u8 version = LC_KEY_SAVE_VERSION;
 	LC_OBJECT_KEY *node;
-	unsigned long n;
+	u32 n;
 
 	file.WriteByte(&version, 1);
 

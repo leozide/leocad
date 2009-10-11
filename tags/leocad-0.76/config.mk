@@ -258,6 +258,11 @@ config:
 	case 8 in \
 	  $$ac_cv_sizeof_long_long)	lcint64="long long";; \
 	esac; \
+	if test "$$ac_cv_sizeof_void_p" -eq "8"; then \
+	  echo "#define LC_POINTER_TO_INT(p) ((i32)(i64)(p))" >> $(OSDIR)/config.h; \
+	else \
+	  echo "#define LC_POINTER_TO_INT(p) ((i32)(p))" >> $(OSDIR)/config.h; \
+	fi; \
 	echo "" >> $(OSDIR)/config.h; \
 	echo "typedef signed char i8;" >> $(OSDIR)/config.h; \
 	echo "typedef unsigned char u8;" >> $(OSDIR)/config.h; \

@@ -540,7 +540,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_Next)
 			{
-				i = (int)pGroup->m_Group;
+				i = LC_POINTER_TO_INT(pGroup->m_Group);
 				pGroup->m_Group = NULL;
 
 				if (i > 0xFFFF || i == -1)
@@ -561,7 +561,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			lcPiece* Piece;
 			for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 			{
-				i = (int)Piece->GetGroup();
+				i = LC_POINTER_TO_INT(Piece->GetGroup());
 				Piece->SetGroup(NULL);
 
 				if (i > 0xFFFF || i == -1)
@@ -4756,7 +4756,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				m_ActiveModel->AddPiece(pPiece);
 				pPiece->Select(true, false, false);
 
-				j = (int)pPiece->GetGroup();
+				j = LC_POINTER_TO_INT(pPiece->GetGroup());
 				if (j != -1)
 					pPiece->SetGroup(groups[j]);
 				else
@@ -4765,7 +4765,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (j = 0; j < i; j++)
 			{
-				int g = (int)groups[j]->m_Group;
+				int g = LC_POINTER_TO_INT(groups[j]->m_Group);
 				groups[j]->m_Group = (g != -1) ? groups[g] : NULL;
 			}
 

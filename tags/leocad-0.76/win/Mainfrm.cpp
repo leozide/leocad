@@ -823,6 +823,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_EDIT_SELECT_BYNAME, 0);
 		} break;
 
+		case ID_EDIT_SELECTBYCOLOR: {
+			project->HandleCommand(LC_EDIT_SELECT_BYCOLOR, 0);
+		} break;
+
 		case ID_PIECE_INSERT: {
 			project->HandleCommand(LC_PIECE_INSERT, 0);
 		} break;
@@ -1312,6 +1316,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_EDIT_SELECTNONE,        // LC_EDIT_SELECT_NONE
 		ID_EDIT_SELECTINVERT,      // LC_EDIT_SELECT_INVERT
 		ID_EDIT_SELECTBYNAME,      // LC_EDIT_SELECT_BYNAME
+		ID_EDIT_SELECTBYCOLOR,     // LC_EDIT_SELECT_BYCOLOR
 		ID_PIECE_INSERT,           // LC_PIECE_INSERT
 		ID_PIECE_DELETE,           // LC_PIECE_DELETE
 		ID_PIECE_MINIFIGWIZARD,    // LC_PIECE_MINIFIG

@@ -750,6 +750,7 @@
 #define ID_SNAP_27                      33219
 #define ID_SNAP_28                      33220
 #define ID_SNAP_29                      33221
+#define ID_EDIT_SELECTBYCOLOR           33222
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -761,7 +762,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        246
-#define _APS_NEXT_COMMAND_VALUE         33222
+#define _APS_NEXT_COMMAND_VALUE         33223
 #define _APS_NEXT_CONTROL_VALUE         1255
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

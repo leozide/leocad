@@ -263,6 +263,7 @@ BEGIN
         MENUITEM "Select None",                 ID_EDIT_SELECTNONE
         MENUITEM "Select Invert",               ID_EDIT_SELECTINVERT
         MENUITEM "Select By Name...",           ID_EDIT_SELECTBYNAME
+        MENUITEM "Select By Color",             ID_EDIT_SELECTBYCOLOR
     END
     POPUP "&View"
     BEGIN
@@ -1881,6 +1882,11 @@ END
 STRINGTABLE 
 BEGIN
     ID_MODEL_LIST           "List models in this project"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_SELECTBYCOLOR   "Select all objects using the current color"
 END
 
 #endif    // English (U.S.) resources

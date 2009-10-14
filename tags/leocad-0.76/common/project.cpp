@@ -4988,6 +4988,31 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			free(opts);
 		} break;
 
+		case LC_EDIT_SELECT_BYCOLOR:
+		{
+			SelectAndFocusNone(false);
+
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			{
+				if (Piece->m_Color != g_App->m_SelectedColor || !Piece->IsVisible(m_ActiveModel->m_CurFrame))
+					continue;
+
+				lcGroup* Group = Piece->GetTopGroup();
+				if (Group)
+				{
+					for (lcPiece* GroupPiece = m_ActiveModel->m_Pieces; GroupPiece; GroupPiece = (lcPiece*)GroupPiece->m_Next)
+						if ((GroupPiece->IsVisible(m_ActiveModel->m_CurFrame)) && (GroupPiece->GetTopGroup() == Group))
+							GroupPiece->Select (true, false, false);
+				}
+				else
+					Piece->Select(true, false, false);
+			}
+
+			UpdateSelection();
+			UpdateAllViews();
+//	pFrame->UpdateInfo();
+		} break;
+
 		case LC_PIECE_INSERT:
 		{
 			lcPiece* Last = NULL;

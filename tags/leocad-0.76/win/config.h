@@ -13,6 +13,8 @@
 #define LC_VERSION_TAG ""
 #define LC_INSTALL_PREFIX "C:\\leocad"
 
+#define LC_POINTER_TO_INT(p) ((i32)(p))
+
 typedef signed char i8;
 typedef unsigned char u8;
 typedef signed short i16;

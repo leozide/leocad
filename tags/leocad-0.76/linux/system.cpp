@@ -541,8 +541,6 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_unhide_all"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_HIDDEN) != 0);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys"));
-  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
   // groups (menu)
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_group"));

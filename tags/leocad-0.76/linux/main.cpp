@@ -544,7 +544,6 @@ int main (int argc, char* argv[])
   }
 
   view = new View(lcGetActiveProject(), NULL);
-  lcGetActiveProject()->SetActiveView(view);
 
   //  main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), "LeoCAD");
@@ -687,6 +686,7 @@ int main (int argc, char* argv[])
 			    pieces_width);
 
 
+  lcGetActiveProject()->SetActiveView(view);
   PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
   if (!Info)
     Info = lcGetPiecesLibrary()->GetPieceInfo(0);

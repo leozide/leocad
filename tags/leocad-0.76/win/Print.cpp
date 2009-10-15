@@ -418,32 +418,32 @@ static void PrintPiecesThread(void* pv)
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
-  PiecesLibrary *pLib = lcGetPiecesLibrary();
+	PiecesLibrary *pLib = lcGetPiecesLibrary();
 	Project* project = lcGetActiveProject();
 
-	UINT *pieces = (UINT*)malloc(pLib->GetPieceCount ()*28*sizeof(UINT));
-	int col[28];
-	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
-	memset (&col, 0, sizeof (col));
+	u32* pieces = new u32[pLib->GetPieceCount() * lcNumColors];
+	u32* col = new u32[lcNumColors];
+	memset(pieces, 0, pLib->GetPieceCount() * lcNumColors * sizeof(u32));
+	memset(col, 0, lcNumColors * sizeof(u32));
 
 	for (lcPiece* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
 	{
 		int idx = pLib->GetPieceIndex(tmp->m_PieceInfo);
-		pieces[(idx*28)+tmp->m_Color]++;
+		pieces[(idx*lcNumColors)+tmp->m_Color]++;
 		col[tmp->m_Color]++;
 	}
 
 	int rows = 0, cols = 1, i, j;
 	for (i = 0; i < pLib->GetPieceCount (); i++)
-		for (j = 0; j < 28; j++)
-			if (pieces[(i*28)+j] > 0)
+		for (j = 0; j < lcNumColors; j++)
+			if (pieces[(i*lcNumColors)+j] > 0)
 			{
 				rows++;
-				j = 28;
+				break;
 			}
 
 	int ID = 1;
-	for (i = 0; i < 28; i++)
+	for (i = 0; i < lcNumColors; i++)
 		if (col[i])
 		{
 			col[i] = ID;
@@ -515,7 +515,7 @@ static void PrintPiecesThread(void* pv)
 	CRect rectDraw (0, 0, GetDeviceCaps(PD->m_pd.hDC, HORZRES), GetDeviceCaps(PD->m_pd.hDC, VERTRES));
 	DPtoLP(PD->m_pd.hDC, (LPPOINT)(RECT*)&rectDraw, 2);
 	rectDraw.DeflateRect(resx*theApp.GetProfileInt("Default","Margin Left", 50)/100, resy*theApp.GetProfileInt("Default","Margin Top", 50)/100,
-						 resx*theApp.GetProfileInt("Default","Margin Right", 50)/100, resy*theApp.GetProfileInt("Default","Margin Bottom", 50)/100);
+	                     resx*theApp.GetProfileInt("Default","Margin Right", 50)/100, resy*theApp.GetProfileInt("Default","Margin Bottom", 50)/100);
 
 	int rowspp = rectDraw.Height()/(int)(resy*0.75); 
 
@@ -567,7 +567,7 @@ static void PrintPiecesThread(void* pv)
 	LPBITMAPINFOHEADER lpbi[1];
 
 	HBITMAP hBm, hBmOld;
-    hBm = CreateDIBSection(pView->GetDC()->GetSafeHdc(), &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
+	hBm = CreateDIBSection(pView->GetDC()->GetSafeHdc(), &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
 	if (!hBm) return;
 	hBmOld = (HBITMAP)::SelectObject(pMemDC->GetSafeHdc(), hBm);
 	if (!hBmOld) return;
@@ -577,7 +577,7 @@ static void PrintPiecesThread(void* pv)
 	int pixelformat = OpenGLChoosePixelFormat(pMemDC->m_hDC, &pfd);
 	OpenGLDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 	OpenGLSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
-  HGLRC hmemrc = pfnwglCreateContext(pMemDC->GetSafeHdc());
+	HGLRC hmemrc = pfnwglCreateContext(pMemDC->GetSafeHdc());
 	pfnwglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
 	float aspect = (float)picw/(float)h;
 	glMatrixMode(GL_MODELVIEW);
@@ -599,8 +599,8 @@ static void PrintPiecesThread(void* pv)
 			continue;
 
 		BOOL bAdd = FALSE;
-		for (i = 0; i < 28; i++)
-			if (pieces[(j*28)+i])
+		for (i = 0; i < lcNumColors; i++)
+			if (pieces[(j*lcNumColors)+i])
 				bAdd = TRUE;
 		if (!bAdd) continue;
 
@@ -663,7 +663,7 @@ static void PrintPiecesThread(void* pv)
 		int printed = 0;
 		CString str;
 		CRect rc(rectDraw.left+picw, rectDraw.top, rectDraw.left+picw+w, rectDraw.top+h);
-		for (i = 0; i < 28; i++)
+		for (i = 0; i < lcNumColors; i++)
 			if (col[i])
 			{
 				str.LoadString(IDS_COLOR01 + i);
@@ -714,13 +714,13 @@ static void PrintPiecesThread(void* pv)
 			char tmp[5];
 	
 			int idx = (pLib->GetPieceIndex (pInfo));
-			for (i = 0; i < 28; i++)
-				if (pieces[(idx*28)+i])
+			for (i = 0; i < lcNumColors; i++)
+				if (pieces[(idx*lcNumColors)+i])
 				{
 					CRect rc(rectDraw.left+picw+w*(col[i]-1), rectDraw.top+h*r, rectDraw.left+picw+w*col[i], rectDraw.top+h*(r+1));
-					sprintf (tmp, "%d", pieces[(idx*28)+i]);
+					sprintf (tmp, "%d", pieces[(idx*lcNumColors)+i]);
 					DrawText(PD->m_pd.hDC, tmp, strlen(tmp), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-					rowtotal += pieces[(idx*28)+i];
+					rowtotal += pieces[(idx*lcNumColors)+i];
 				}
 			sprintf (tmp, "%d", rowtotal);
 			CRect rc(rectDraw.right-w, rectDraw.top+h*r, rectDraw.right, rectDraw.top+h*(r+1));
@@ -801,7 +801,8 @@ static void PrintPiecesThread(void* pv)
 		PD->m_pd.hDC = NULL;
 	}
 
-	free (pieces);
+	delete[] col;
+	delete[] pieces;
 	delete PD;
 }
 

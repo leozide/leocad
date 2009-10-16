@@ -141,12 +141,6 @@ int stricmp(const char* str1, const char* str2)
 
 
 
-void SystemPumpMessages()
-{
-  while (gtk_events_pending ())
-    gtk_main_iteration ();
-}
-
 long SystemGetTicks()
 {
   static int basetime = 0;
@@ -318,7 +312,7 @@ void SystemUpdateColorList(int new_color)
   colorlist_set(new_color);
 }
 
-void SystemUpdateRenderingMode(bool bBackground, bool bFast)
+void SystemUpdateRenderingMode(bool bFast)
 {
   if (!main_toolbar.fast)
     return;

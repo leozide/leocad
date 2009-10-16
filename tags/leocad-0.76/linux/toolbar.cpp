@@ -64,7 +64,7 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 #include "pixmaps/st-fast.xpm"
 #include "pixmaps/st-paste.xpm"
 #include "pixmaps/st-save.xpm"
-#include "pixmaps/st-help.xpm"
+//#include "pixmaps/st-help.xpm"
 #include "pixmaps/st-prev.xpm"
 #include "pixmaps/st-snap.xpm"
 #include "pixmaps/st-copy.xpm"
@@ -135,8 +135,8 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
      new_pixmap (window, st_fast), GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_TOOLBAR_FASTRENDER);
   gtk_toolbar_append_item (GTK_TOOLBAR (main_toolbar.toolbar), "About", "About LeoCAD", "", 
      new_pixmap (window, st_about), GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_HELP_ABOUT);
-  gtk_toolbar_append_item (GTK_TOOLBAR (main_toolbar.toolbar), "Help", "Help", "",
-     new_pixmap (window, st_help), GTK_SIGNAL_FUNC (OnCommand), NULL);
+//  gtk_toolbar_append_item (GTK_TOOLBAR (main_toolbar.toolbar), "Help", "Help", "",
+//     new_pixmap (window, st_help), GTK_SIGNAL_FUNC (OnCommand), NULL);
   gtk_widget_set_sensitive (button, FALSE);
 
   // Tools Toolbar

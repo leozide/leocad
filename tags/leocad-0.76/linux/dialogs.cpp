@@ -1642,9 +1642,8 @@ int povraydlg_execute(void* param)
 typedef struct
 {
   void* data;
-  GtkWidget *det_edges, *det_dither, *det_lighting, *det_smooth;
-  GtkWidget *det_antialias, *det_linear, *det_fast;
-  GtkWidget *det_solid, *det_hidden, *det_background, *det_width;
+  GtkWidget *det_edges, *det_lighting, *det_smooth, *det_antialias, *det_fast;
+  GtkWidget *det_solid, *det_hidden, *det_width;
   GtkWidget *draw_grid, *draw_axis;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
   GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
@@ -1663,15 +1662,12 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   unsigned long detail = 0;
   float line_width;
   if (GTK_TOGGLE_BUTTON (s->det_edges)->active) detail |= LC_DET_BRICKEDGES;
-  if (GTK_TOGGLE_BUTTON (s->det_dither)->active) detail |= LC_DET_DITHER;
   if (GTK_TOGGLE_BUTTON (s->det_lighting)->active) detail |= LC_DET_LIGHTING;
   if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
   if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
-  if (GTK_TOGGLE_BUTTON (s->det_linear)->active) detail |= LC_DET_LINEAR;
   if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
   if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
   if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
-  if (GTK_TOGGLE_BUTTON (s->det_background)->active) detail |= LC_DET_BACKGROUND;
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
@@ -1723,19 +1719,16 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   unsigned long detail = 0;
   float line_width;
   if (GTK_TOGGLE_BUTTON (s->det_edges)->active) detail |= LC_DET_BRICKEDGES;
-  if (GTK_TOGGLE_BUTTON (s->det_dither)->active) detail |= LC_DET_DITHER;
   if (GTK_TOGGLE_BUTTON (s->det_lighting)->active) detail |= LC_DET_LIGHTING;
   if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
   if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
-  if (GTK_TOGGLE_BUTTON (s->det_linear)->active) detail |= LC_DET_LINEAR;
   if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
   if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
   if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
-  if (GTK_TOGGLE_BUTTON (s->det_background)->active) detail |= LC_DET_BACKGROUND;
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
-  int grid_size, angle_snap;
+  int angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
@@ -1764,7 +1757,6 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   Sys_ProfileSaveInt ("Default", "Line", (int)(line_width*100));
   Sys_ProfileSaveInt ("Default", "Snap", snap);
   Sys_ProfileSaveInt ("Default", "Angle", angle_snap);
-  Sys_ProfileSaveInt ("Default", "Grid", grid_size);
   Sys_ProfileSaveInt ("Default", "Scene", scene);
   Sys_ProfileSaveInt ("Default", "Density", fog);
   Sys_ProfileSaveString("Default", "BMP", gtk_entry_get_text (GTK_ENTRY (s->scn_imagename)));
@@ -1840,11 +1832,6 @@ int preferencesdlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), s.det_edges, 0, 1, 0, 1,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
-  s.det_dither = gtk_check_button_new_with_label ("Dithering");
-  gtk_widget_show (s.det_dither);
-  gtk_table_attach (GTK_TABLE (table), s.det_dither, 0, 1, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
   s.det_lighting = gtk_check_button_new_with_label ("Lighting");
   gtk_widget_show (s.det_lighting);
   gtk_table_attach (GTK_TABLE (table), s.det_lighting, 0, 1, 2, 3,
@@ -1860,11 +1847,6 @@ int preferencesdlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), s.det_antialias, 0, 1, 4, 5,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
-  s.det_linear = gtk_check_button_new_with_label ("Linear filtering");
-  gtk_widget_show (s.det_linear);
-  gtk_table_attach (GTK_TABLE (table), s.det_linear, 0, 1, 5, 6,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
   s.det_fast = gtk_check_button_new_with_label ("Fast rendering");
   gtk_widget_show (s.det_fast);
   gtk_table_attach (GTK_TABLE (table), s.det_fast, 1, 2, 0, 1,
@@ -1878,11 +1860,6 @@ int preferencesdlg_execute(void* param)
   s.det_hidden = gtk_check_button_new_with_label ("Remove hidden lines");
   gtk_widget_show (s.det_hidden);
   gtk_table_attach (GTK_TABLE (table), s.det_hidden, 1, 2, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_background = gtk_check_button_new_with_label ("Background rendering");
-  gtk_widget_show (s.det_background);
-  gtk_table_attach (GTK_TABLE (table), s.det_background, 1, 2, 3, 4,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   hbox = gtk_hbox_new (FALSE, 5);
@@ -2185,24 +2162,18 @@ int preferencesdlg_execute(void* param)
   // Set initial values
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_edges),
 			       (opts->nDetail & LC_DET_BRICKEDGES) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_dither),
-			       (opts->nDetail & LC_DET_DITHER) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_lighting),
 			       (opts->nDetail & LC_DET_LIGHTING) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_smooth),
 			       (opts->nDetail & LC_DET_SMOOTH) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_antialias),
 			       (opts->nDetail & LC_DET_ANTIALIAS) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_linear),
-			       (opts->nDetail & LC_DET_LINEAR) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_fast),
 			       (opts->nDetail & LC_DET_FAST) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_solid),
 			       (opts->nDetail & LC_DET_BOX_FILL) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_hidden),
 			       (opts->nDetail & LC_DET_HIDDEN_LINE) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_background),
-			       (opts->nDetail & LC_DET_BACKGROUND) ? TRUE : FALSE);
   write_float(s.det_width, opts->fLineWidth);
 
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_grid),

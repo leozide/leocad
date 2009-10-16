@@ -111,7 +111,7 @@ void Project::UpdateInterface()
 	SetAction(m_nCurAction);
 	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(m_Animation, m_bAddKeys);
-	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
+	SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
@@ -185,7 +185,7 @@ void Project::DeleteContents(bool bUndo)
 		m_pUndoList = NULL;
 
 		m_pBackground->Unload();
-		m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
+		m_pTerrain->LoadDefaults();
 	}
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
@@ -227,7 +227,7 @@ void Project::LoadDefaults(bool cameras)
 	m_bUndoOriginal = true;
 	SystemUpdateUndoRedo(NULL, NULL);
 	m_nDetail = Sys_ProfileLoadInt ("Default", "Detail", LC_DET_BRICKEDGES);
-	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
+	SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z | LC_DRAW_MOVE);
 	SystemUpdateSnap(m_nSnap);
@@ -264,7 +264,7 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strHeader, Sys_ProfileLoadString ("Default", "Header", ""));
 	strcpy(m_strFooter, Sys_ProfileLoadString ("Default", "Footer", "Page &P"));
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
-	m_pTerrain->LoadDefaults((m_nDetail & LC_DET_LINEAR) != 0);
+	m_pTerrain->LoadDefaults();
 	m_OverlayActive = false;
 	m_PlayingAnimation = false;
 
@@ -736,7 +736,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		SystemUpdateFocus(NULL);
 	SystemUpdateColorList(g_App->m_SelectedColor);
 	SystemUpdateAnimation(m_Animation, m_bAddKeys);
-	SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
+	SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
@@ -2898,11 +2898,6 @@ void Project::RenderInitialize()
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_TRUE);
 
-	if (m_nDetail & LC_DET_DITHER)
-		glEnable(GL_DITHER);
-	else
-		glDisable(GL_DITHER);
-
 	if (m_nDetail & LC_DET_SMOOTH)
 		glShadeModel(GL_SMOOTH);
 	else
@@ -2945,10 +2940,10 @@ void Project::RenderInitialize()
 	glAlphaFunc(GL_GREATER, 0.0625);
 
 	if (m_nScene & LC_SCENE_FLOOR)
-		m_pTerrain->LoadTexture((m_nDetail & LC_DET_LINEAR) != 0);
+		m_pTerrain->LoadTexture();
 
 	if (m_nScene & LC_SCENE_BG)
-		if (!m_pBackground->LoadFromFile(m_strBackground, (m_nDetail & LC_DET_LINEAR) != 0))
+		if (!m_pBackground->LoadFromFile(m_strBackground))
 		{
 			m_nScene &= ~LC_SCENE_BG;
 //			AfxMessageBox ("Could not load background");
@@ -4563,7 +4558,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (SystemDoDialog(LC_DLG_TERRAIN, temp))
 			{
 				*m_pTerrain = *temp;
-				m_pTerrain->LoadTexture((m_nDetail & LC_DET_LINEAR) != 0);
+				m_pTerrain->LoadTexture();
 			}
 			delete temp;
 		} break;
@@ -5993,26 +5988,15 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateSnap(m_nSnap);
 		} break;
 
-		case LC_TOOLBAR_BACKGROUND:
 		case LC_TOOLBAR_FASTRENDER:
 		{
-			if (id == LC_TOOLBAR_BACKGROUND)
-			{
-				if (m_nDetail & LC_DET_BACKGROUND) 
-					m_nDetail &= ~LC_DET_BACKGROUND; 
-				else
-					m_nDetail |= LC_DET_BACKGROUND;
-			}
+			if (m_nDetail & LC_DET_FAST) 
+				m_nDetail &= ~LC_DET_FAST; 
 			else
-			{
-				if (m_nDetail & LC_DET_FAST) 
-					m_nDetail &= ~(LC_DET_FAST | LC_DET_BACKGROUND); 
-				else
-					m_nDetail |= LC_DET_FAST; 
-				UpdateAllViews();
-			}
+				m_nDetail |= LC_DET_FAST; 
+			UpdateAllViews();
 
-			SystemUpdateRenderingMode((m_nDetail & LC_DET_BACKGROUND) != 0, (m_nDetail & LC_DET_FAST) != 0);
+			SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 		} break;
 
 		case LC_EDIT_MOVEXY_SNAP_0:

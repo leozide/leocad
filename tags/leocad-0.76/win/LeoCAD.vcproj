@@ -2088,6 +2088,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\orbit.cur"
+				>
+			</File>
+			<File
 				RelativePath="res\Paint.cur"
 				>
 			</File>
@@ -2192,6 +2196,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\splith.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\splitv.bmp"
+				>
+			</File>
+			<File
 				RelativePath="res\terrain.bmp"
 				>
 			</File>
@@ -2232,15 +2244,15 @@
 			Name="Help Files"
 			>
 			<File
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				>
+			</File>
+			<File
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				>
+			</File>
+			<File
 				RelativePath="hlp\AfxCore.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2248,15 +2260,15 @@
 				>
 			</File>
 			<File
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				>
+			</File>
+			<File
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				>
+			</File>
+			<File
 				RelativePath="hlp\AfxPrint.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File

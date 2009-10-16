@@ -506,7 +506,6 @@
 #define ID_VIEW_PREFERENCES             32810
 #define ID_ANIMATOR_PLAY                32814
 #define ID_ANIMATOR_STOP                32815
-#define ID_RENDER_BACKGROUND            32820
 #define ID_RENDER_BOX                   32821
 #define ID_PIECE_INSERT                 32822
 #define ID_PIECE_DELETE                 32823

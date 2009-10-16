@@ -92,7 +92,7 @@ BOOL CTerrainDlg::OnInitDialog()
 
 	m_pTerrainWnd = new CTerrainWnd(m_pTerrain);
 	m_pTerrainWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, CRect (0,0,20,20), this, 501);
-	m_pTerrainWnd->LoadTexture(m_bLinear);
+	m_pTerrainWnd->LoadTexture();
 
 	m_Grid.SetControlPoints(m_pTerrain->GetCountU(), m_pTerrain->GetCountV(), m_pTerrain->GetControlPoints());
 
@@ -167,7 +167,7 @@ BOOL CTerrainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				dlg.GetOptions(m_pTerrain);
 				m_Grid.SetControlPoints(m_pTerrain->GetCountU(), m_pTerrain->GetCountV(), m_pTerrain->GetControlPoints());
 				m_pTerrain->Tesselate();
-				m_pTerrainWnd->LoadTexture(m_bLinear);
+				m_pTerrainWnd->LoadTexture();
 
 				m_pTerrainWnd->InvalidateRect(NULL, FALSE);
 			}

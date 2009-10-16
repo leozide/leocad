@@ -25,12 +25,12 @@ class Texture
 
   bool IsLoaded()
     { return ((m_nID != 0) && (glIsTexture(m_nID) == GL_TRUE)); }
-  void Load(bool bFilter);
-  bool LoadFromFile(char* strFilename, bool bFilter);
+  void Load();
+  bool LoadFromFile(const char* strFilename);
   void Unload();
 
   void LoadIndex(File* idx);
-  void AddRef(bool bFilter);
+  void AddRef();
   void DeRef();
 
   // Read-only
@@ -39,7 +39,7 @@ class Texture
   u16 m_nHeight;
 
 protected:
-  bool FinishLoadImage (bool bFilter, void *data);
+  bool FinishLoadImage(void *data);
 
   int m_nRef;
   GLuint m_nID;

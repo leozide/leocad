@@ -68,10 +68,10 @@ Texture::~Texture()
 /////////////////////////////////////////////////////////////////////////////
 // Texture attributes
 
-void Texture::AddRef(bool bFilter)
+void Texture::AddRef()
 {
   if (m_nRef == 0)
-    Load(bFilter);
+    Load();
 
   m_nRef++;
 }
@@ -126,7 +126,7 @@ void Texture::Unload()
 }
 
 // Load from textures.bin file
-void Texture::Load(bool bFilter)
+void Texture::Load()
 {
   char filename[LC_MAXPATH];
   FileDisk bin;
@@ -146,12 +146,12 @@ void Texture::Load(bool bFilter)
   bin.Read (bits, m_nFileSize);
   bin.Close ();
 
-  FinishLoadImage (bFilter, bits);
+  FinishLoadImage(bits);
 
   free(bits);
 }
 
-bool Texture::LoadFromFile (char* strFilename, bool bFilter)
+bool Texture::LoadFromFile(const char* strFilename)
 {
   Image image;
   
@@ -167,7 +167,7 @@ bool Texture::LoadFromFile (char* strFilename, bool bFilter)
     else
       m_nFormat = GL_RGB;
 
-    if (FinishLoadImage (bFilter, image.GetData ()) == true)
+    if (FinishLoadImage(image.GetData ()) == true)
       return true;
   }
 
@@ -184,7 +184,7 @@ bool Texture::LoadFromFile (char* strFilename, bool bFilter)
   return false;
 }
 
-bool Texture::FinishLoadImage (bool bFilter, void *data)
+bool Texture::FinishLoadImage(void *data)
 {
 	GLint w, h, level, maxsize;
 	GLint i, j, k, pow2;
@@ -201,8 +201,10 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
   //  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, bFilter ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, bFilter ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST);
+//  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+//  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
   switch (m_nFormat)
@@ -252,24 +254,23 @@ bool Texture::FinishLoadImage (bool bFilter, void *data)
 
   glTexImage2D (GL_TEXTURE_2D, 0, InternalFormat, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
 
-  if (bFilter)
-    for (level = 1; ((w != 1) || (h != 1)); level++)
-    {
-      GLubyte *out, *in;
-      int row;
+  for (level = 1; ((w != 1) || (h != 1)); level++)
+  {
+    GLubyte *out, *in;
+    int row;
 
-      row = w * components;
-      if (w != 1) w >>= 1;
-      if (h != 1) h >>= 1;
-      in = out = (GLubyte*)data;
+    row = w * components;
+    if (w != 1) w >>= 1;
+    if (h != 1) h >>= 1;
+    in = out = (GLubyte*)data;
 
-      for (i = 0; i < h; i++, in+=row)
-	for (j = 0; j < w; j++, out+=components, in+=2*components)
-	  for (k = 0; k < components; k++)
-	    out[k] = (in[k] + in[k+components] + in[row] + in[row+k+components])>>2;
+    for (i = 0; i < h; i++, in+=row)
+      for (j = 0; j < w; j++, out+=components, in+=2*components)
+        for (k = 0; k < components; k++)
+          out[k] = (in[k] + in[k+components] + in[row] + in[row+k+components])>>2;
 
-      glTexImage2D (GL_TEXTURE_2D, level, InternalFormat, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
-    }
+    glTexImage2D (GL_TEXTURE_2D, level, InternalFormat, w, h, 0, m_nFormat, GL_UNSIGNED_BYTE, data);
+  }
 
   free (data);
   return true;

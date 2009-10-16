@@ -22,7 +22,7 @@ public:
 // Attributes
 public:
 	int m_nAction;
-	void LoadTexture(bool linear);
+	void LoadTexture();
 
 // Operations
 public:

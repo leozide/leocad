@@ -64,7 +64,7 @@ bool TexFont::FileLoad (File& file)
     console.PrintError ("Cannot find texture for font %s.\n", buf);
     return false;
   }
-  m_pTexture->AddRef (false);
+  m_pTexture->AddRef();
  
   file.ReadByte (&m_nFontHeight, 1);
 

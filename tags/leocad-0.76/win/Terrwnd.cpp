@@ -193,13 +193,13 @@ int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CTerrainWnd::LoadTexture(bool linear)
+void CTerrainWnd::LoadTexture()
 {
 	HDC oldDC = pfnwglGetCurrentDC();
 	HGLRC oldRC = pfnwglGetCurrentContext();
 
 	pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
-	m_pTerrain->LoadTexture(linear);
+	m_pTerrain->LoadTexture();
 	pfnwglMakeCurrent(oldDC, oldRC);
 }
 

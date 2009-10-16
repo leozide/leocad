@@ -43,9 +43,9 @@ public:
 	~Terrain();
 	Terrain& operator=(const Terrain& source);
 
-	void LoadTexture(bool bLinear);
+	void LoadTexture();
 	void Render(lcCamera* pCam, float aspect);
-	void LoadDefaults(bool bLinear);
+	void LoadDefaults();
 	void SetSize(float uSize, float vSize);
 	void GetSize(float *uSize, float *vSize);
 	void FileLoad(File* file);

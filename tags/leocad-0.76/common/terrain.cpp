@@ -700,7 +700,7 @@ void Terrain::FindVisiblePatches(lcCamera* pCam, float Aspect)
 	}
 }
 
-void Terrain::LoadDefaults(bool bLinear)
+void Terrain::LoadDefaults()
 {
 	unsigned long rgb = Sys_ProfileLoadInt ("Default", "Floor", RGB (0,191,0));
 	m_fColor[0] = (float)((unsigned char) (rgb))/255;
@@ -717,7 +717,7 @@ void Terrain::LoadDefaults(bool bLinear)
 	if (strlen(m_strTexture))
 	{
 		m_nOptions |= LC_TERRAIN_TEXTURE;
-		LoadTexture(bLinear);
+		LoadTexture();
 	}
 
 	SetPatchCount(4, 4);
@@ -734,14 +734,14 @@ void Terrain::LoadDefaults(bool bLinear)
 	Tesselate();
 }
 
-void Terrain::LoadTexture(bool bLinear)
+void Terrain::LoadTexture()
 {
 	m_pTexture->Unload();
 
 	if ((m_nOptions & LC_TERRAIN_TEXTURE) == 0)
 		return;
 
-	if (m_pTexture->LoadFromFile(m_strTexture, bLinear) == false)
+	if (m_pTexture->LoadFromFile(m_strTexture) == false)
 	{
 //		AfxMessageBox("Could not load terrain texture.", MB_OK|MB_ICONEXCLAMATION);
 		m_nOptions &= ~LC_TERRAIN_TEXTURE;

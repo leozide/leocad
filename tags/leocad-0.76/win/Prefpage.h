@@ -76,13 +76,10 @@ public:
 	//{{AFX_DATA(CPreferencesDetail)
 	enum { IDD = IDD_PREFDETAIL };
 	BOOL	m_bAntialiasing;
-	BOOL	m_bDithering;
 	BOOL	m_bEdges;
 	BOOL	m_bLighting;
-	BOOL	m_bLinear;
 	BOOL	m_bSmooth;
 	float	m_fLineWidth;
-	BOOL	m_bBackground;
 	BOOL	m_bFast;
 	BOOL	m_bHidden;
 	BOOL	m_bSolid;
@@ -100,7 +97,6 @@ public:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesDetail)
-	afx_msg void OnFastClick();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnDetdlgSolid();
 	//}}AFX_MSG

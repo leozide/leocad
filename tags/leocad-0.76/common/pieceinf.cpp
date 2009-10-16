@@ -148,8 +148,7 @@ void PieceInfo::AddRef()
 
 	for (int i = 0; i < m_nTextureCount; i++)
 		if (m_pTextures[i].texture != NULL)
-			m_pTextures[i].texture->AddRef(false);
-// TODO: get correct filter paramenter
+			m_pTextures[i].texture->AddRef();
 }
 
 void PieceInfo::DeRef()

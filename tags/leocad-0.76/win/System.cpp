@@ -482,24 +482,13 @@ void SystemUpdateColorList(int Color)
 	Frame->m_wndPiecesBar.m_wndColorsList.SetCurColor(Color);
 }
 
-void SystemUpdateRenderingMode(bool bBackground, bool bFast)
+void SystemUpdateRenderingMode(bool bFast)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)
 		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
-
-//	if (bFast)
-//	{
-//		pCtrl->EnableButton(ID_RENDER_BACKGROUND, TRUE);
-//		pCtrl->CheckButton(ID_RENDER_BACKGROUND, bBackground);
-//	}
-//	else
-	{
-		pCtrl->CheckButton(ID_RENDER_BACKGROUND, FALSE);
-		pCtrl->EnableButton(ID_RENDER_BACKGROUND, FALSE);
-	}
 
 	pCtrl->CheckButton(ID_RENDER_BOX, bFast);
 }

@@ -21,9 +21,9 @@ void Sys_FinishMemoryRender (void* param);
 // Message Box
 #define LC_OK           1
 #define LC_CANCEL       2
-#define LC_ABORT        3
-#define LC_RETRY        4
-#define LC_IGNORE       5
+//#define LC_ABORT        3
+//#define LC_RETRY        4
+//#define LC_IGNORE       5
 #define LC_YES          6
 #define LC_NO           7
  

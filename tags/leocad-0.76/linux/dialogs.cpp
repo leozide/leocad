@@ -293,11 +293,12 @@ static void filedlg_callback(GtkWidget *widget, gpointer data)
     *cur_ret = LC_CANCEL;
 }
 
+// FIXME: Deprecated, use GtkFileChooserDialog instead
 int filedlg_execute(const char* caption, char* filename)
 {
   GtkWidget* dlg;
-  dlg = gtk_file_selection_new (caption);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
+  dlg = gtk_file_selection_new(caption);
+  gtk_window_set_transient_for(GTK_WINDOW (dlg), GTK_WINDOW(((GtkWidget*)*main_window)));
   filedlg_str = filename;
 
   gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(dlg)->ok_button),
@@ -1404,122 +1405,236 @@ int imageoptsdlg_execute(void* param, bool from_htmldlg)
 
 typedef struct
 {
-  void* data;
-  GtkWidget *lgeo, *pov, *output, *render;
+	void* data;
+	GtkWidget* dlg;
+	GtkWidget *lgeo, *pov, *output, *render;
 } LC_POVRAYDLG_STRUCT;
 
 static void povraydlg_ok(GtkWidget *widget, gpointer data)
 {
-  LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
-  LC_POVRAYDLG_OPTS* opts = (LC_POVRAYDLG_OPTS*)s->data;
+	LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
+	LC_POVRAYDLG_OPTS* opts = (LC_POVRAYDLG_OPTS*)s->data;
 
-  opts->render =  (GTK_TOGGLE_BUTTON (s->render)->active) ? true : false;
-  strcpy(opts->povpath, gtk_entry_get_text (GTK_ENTRY (s->pov)));
-  strcpy(opts->outpath, gtk_entry_get_text (GTK_ENTRY (s->output)));
-  strcpy(opts->libpath, gtk_entry_get_text (GTK_ENTRY (s->lgeo)));
+	opts->render = (GTK_TOGGLE_BUTTON(s->render)->active) ? true : false;
+	strcpy(opts->povpath, gtk_entry_get_text(GTK_ENTRY(s->pov)));
+	strcpy(opts->outpath, gtk_entry_get_text(GTK_ENTRY(s->output)));
+	strcpy(opts->libpath, gtk_entry_get_text(GTK_ENTRY(s->lgeo)));
 
-  *cur_ret = LC_OK;
+	Sys_ProfileSaveInt("Settings", "POV Render", opts->render);
+	Sys_ProfileSaveString("Settings", "POV-Ray", opts->povpath);
+	Sys_ProfileSaveString("Settings", "LGEO", opts->libpath);
+
+	*cur_ret = LC_OK;
+}
+
+static void povraydlg_browse_output(GtkWidget *widget, gpointer data)
+{
+	LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
+	GtkFileFilter* filter;
+	GtkWidget* dlg;
+
+	dlg = gtk_file_chooser_dialog_new("Export As", GTK_WINDOW(s->dlg), 
+	                                  GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->output)));
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "All Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.[pP][oO][vV]");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "POV-Ray files (*.pov)");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		gtk_entry_set_text(GTK_ENTRY(s->output), filename);
+		g_free(filename);
+	}
+
+	gtk_widget_destroy(dlg);
+}
+
+static void povraydlg_browse_povray(GtkWidget *widget, gpointer data)
+{
+	LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
+	GtkWidget* dlg;
+
+	dlg = gtk_file_chooser_dialog_new("Select POV-Ray executable", GTK_WINDOW(s->dlg), 
+	                                  GTK_FILE_CHOOSER_ACTION_OPEN,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->pov)));
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		gtk_entry_set_text(GTK_ENTRY(s->pov), filename);
+		g_free(filename);
+	}
+
+	gtk_widget_destroy(dlg);
+}
+
+static void povraydlg_browse_lgeo(GtkWidget *widget, gpointer data)
+{
+	LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
+	GtkWidget* dlg;
+
+	dlg = gtk_file_chooser_dialog_new("Select LGEO path", GTK_WINDOW(s->dlg), 
+	                                  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->lgeo)));
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		gtk_entry_set_text(GTK_ENTRY(s->lgeo), filename);
+		g_free(filename);
+	}
+
+	gtk_widget_destroy(dlg);
 }
 
 int povraydlg_execute(void* param)
 {
-  GtkWidget *dlg;
-  GtkWidget *vbox, *hbox1, *hbox2;
-  GtkWidget *label, *button;
-  LC_POVRAYDLG_STRUCT s;
-  s.data = param;
+	GtkWidget *dlg;
+	GtkWidget *vbox, *hbox1, *hbox2;
+	GtkWidget *label, *button;
+	LC_POVRAYDLG_STRUCT s;
+	s.data = param;
 
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 375, 190);
-  gtk_window_set_title (GTK_WINDOW (dlg), "POV-Ray Export");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
+	dlg = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_transient_for(GTK_WINDOW(dlg), GTK_WINDOW(((GtkWidget*)(*main_window))));
+	gtk_signal_connect(GTK_OBJECT(dlg), "delete_event", GTK_SIGNAL_FUNC(dlg_delete_callback), NULL);
+	gtk_signal_connect(GTK_OBJECT(dlg), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroy), NULL);
+	gtk_window_set_title(GTK_WINDOW(dlg), "POV-Ray Export");
+	gtk_window_set_policy(GTK_WINDOW(dlg), FALSE, FALSE, FALSE);
+	gtk_widget_realize(dlg);
+	s.dlg = dlg;
 
-  hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), hbox1);
+	hbox1 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox1);
+	gtk_container_add(GTK_CONTAINER(dlg), hbox1);
 
-  vbox = gtk_vbox_new (FALSE, 10);
-  gtk_widget_show (vbox);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, TRUE, 0);
-  gtk_widget_set_usize (vbox, 250, -2);
-  gtk_container_border_width (GTK_CONTAINER (vbox), 10);
+	vbox = gtk_vbox_new(FALSE, 10);
+	gtk_widget_show(vbox);
+	gtk_box_pack_start(GTK_BOX(hbox1), vbox, FALSE, TRUE, 0);
+	gtk_widget_set_usize(vbox, 250, -2);
+	gtk_container_border_width(GTK_CONTAINER(vbox), 10);
 
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox2, FALSE, TRUE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
-  label = gtk_label_new ("LGEO Path (optional)");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
+	label = gtk_label_new("Output File");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-  s.lgeo = gtk_entry_new ();
-  gtk_widget_show (s.lgeo);
-  gtk_box_pack_start (GTK_BOX (vbox), s.lgeo, FALSE, TRUE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox2, FALSE, TRUE, 0);
+	s.output = gtk_entry_new();
+	gtk_widget_show(s.output);
+	gtk_box_pack_start(GTK_BOX(hbox2), s.output, TRUE, TRUE, 0);
 
-  label = gtk_label_new ("POV-Ray Executable");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
+	button = gtk_button_new_with_label("...");
+	gtk_widget_show(button);
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, TRUE, 0);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_browse_output), &s);
 
-  s.pov = gtk_entry_new ();
-  gtk_widget_show (s.pov);
-  gtk_box_pack_start (GTK_BOX (vbox), s.pov, FALSE, TRUE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox2, FALSE, TRUE, 0);
+	label = gtk_label_new("POV-Ray Executable");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-  label = gtk_label_new ("Output File");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
-  s.output = gtk_entry_new ();
-  gtk_widget_show (s.output);
-  gtk_box_pack_start (GTK_BOX (vbox), s.output, FALSE, TRUE, 0);
+	s.pov = gtk_entry_new();
+	gtk_widget_show(s.pov);
+	gtk_box_pack_start(GTK_BOX(hbox2), s.pov, TRUE, TRUE, 0);
 
-  vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, TRUE, 0);
-  gtk_container_border_width (GTK_CONTAINER (vbox), 10);
+	button = gtk_button_new_with_label("...");
+	gtk_widget_show(button);
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, TRUE, 0);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_browse_povray), &s);
 
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (povraydlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, TRUE, 5);
-  gtk_widget_set_usize (button, -2, 25);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, TRUE, 5);
-  gtk_widget_set_usize (button, -2, 25);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	label = gtk_label_new("LGEO Path");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-  s.render = gtk_check_button_new_with_label ("Render Scene");
-  gtk_widget_show (s.render);
-  gtk_box_pack_start (GTK_BOX (vbox), s.render, FALSE, TRUE, 5);
-  gtk_widget_set_sensitive (s.render, FALSE);
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
-  return dlg_domodal(dlg, LC_CANCEL);
+	s.lgeo = gtk_entry_new();
+	gtk_widget_show(s.lgeo);
+	gtk_box_pack_start(GTK_BOX(hbox2), s.lgeo, TRUE, TRUE, 0);
+
+	button = gtk_button_new_with_label("...");
+	gtk_widget_show(button);
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, TRUE, 0);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_browse_lgeo), &s);
+
+	vbox = gtk_vbox_new(FALSE, 0);
+	gtk_widget_show(vbox);
+	gtk_box_pack_start(GTK_BOX(hbox1), vbox, FALSE, TRUE, 0);
+	gtk_container_border_width(GTK_CONTAINER(vbox), 10);
+
+	button = gtk_button_new_with_label("OK");
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_ok), &s);
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, TRUE, 5);
+	gtk_widget_set_usize(button, -2, 25);
+	GtkAccelGroup *accel_group = gtk_accel_group_new();
+	gtk_window_add_accel_group(GTK_WINDOW(dlg), accel_group);
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+	                           GDK_Return,(GdkModifierType)0, GTK_ACCEL_VISIBLE);
+
+	button = gtk_button_new_with_label("Cancel");
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+	                   GTK_SIGNAL_FUNC(dlg_default_callback), GINT_TO_POINTER(LC_CANCEL));
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, TRUE, 5);
+	gtk_widget_set_usize(button, -2, 25);
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+	                           GDK_Escape,(GdkModifierType)0, GTK_ACCEL_VISIBLE);
+
+	s.render = gtk_check_button_new_with_label("Render Scene");
+	gtk_widget_show(s.render);
+	gtk_box_pack_start(GTK_BOX(vbox), s.render, FALSE, TRUE, 5);
+
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.render),
+	                            Sys_ProfileLoadInt("Settings", "POV Render", 1) ? TRUE : FALSE);
+	gtk_entry_set_text(GTK_ENTRY(s.pov), Sys_ProfileLoadString("Settings", "POV-Ray", ""));
+	gtk_entry_set_text(GTK_ENTRY(s.lgeo), Sys_ProfileLoadString("Settings", "LGEO", ""));
+
+	return dlg_domodal(dlg, LC_CANCEL);
 }
 
 // Preferences Dialog

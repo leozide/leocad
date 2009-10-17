@@ -209,7 +209,7 @@ void BaseWnd::SetMenuItemText (int id, const char *text)
     return;
 
   length = strlen (text);
-  pattern = g_new (gchar, length+1);
+  pattern = g_new (gchar, 2*length);
   
   underscore = FALSE;
   
@@ -225,17 +225,22 @@ void BaseWnd::SetMenuItemText (int id, const char *text)
       else
       {
         *r++ = '_';
-	*r++ = *p;
+        *r++ = *p;
       }
 
       underscore = FALSE;
     }
     else
     {
-      if (*p == '&')
+      if (*p == '_')
+      {
+        *r++ = '_';
+        *r++ = '_';
+      }
+      else if (*p == '&')
         underscore = TRUE;
       else
-	*r++ = *p;
+        *r++ = *p;
     }
     p++;
   }

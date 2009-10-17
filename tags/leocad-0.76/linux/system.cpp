@@ -549,38 +549,6 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
   gtk_widget_set_sensitive (tool_toolbar.next, (flags & LC_SEL_PIECE) != 0);
 }
 
-void SystemUpdateRecentMenu (String names[4])
-{
-  GtkWidget *item;
-  char buf[32];
-
-  for (int i = 0; i < 4; i++)
-  {
-    sprintf (buf, "menu_file_recent%d", i+1);
-    item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), buf));
-
-    if (!names[i].IsEmpty ())
-    {
-      if (i == 0)
-      {
-	gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), "Recent Files");
-	gtk_widget_set_sensitive (item, FALSE);
-      }
-      else
-	gtk_widget_hide (item);
-    }
-    else
-    {
-      char text[LC_MAXPATH+4];
-
-      sprintf (text, "_%d- %s", i+1, (char*)names[i]);
-      gtk_label_set_text_with_mnemonic(GTK_LABEL(GTK_BIN(item)->child), text);
-      gtk_widget_show(item);
-      gtk_widget_set_sensitive(item, TRUE);
-    }
-  }
-}
-
 void SystemUpdatePaste(bool enable)
 {
   gtk_widget_set_sensitive (main_toolbar.paste, enable);

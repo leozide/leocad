@@ -42,7 +42,7 @@ MainWnd::~MainWnd()
 void MainWnd::UpdateMRU()
 {
 #if LC_WINDOWS
-	void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
+	void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]); // TODO: remove Win32 code
 	char names[4][LC_MAXPATH];
 
 	for (int i = 0; i < LC_MRU_MAX; i++)
@@ -64,8 +64,20 @@ void MainWnd::UpdateMRU()
 		}
 		else
 		{
-			char text[LC_MAXPATH+8];
-			sprintf(text, "&%d- %s", i+1, (char*)m_strMRU[i]);
+			char text[2*LC_MAXPATH];
+			sprintf(text, "&%d- ", i+1);
+
+			const char *p = (char*)m_strMRU[i];
+			char* r = text + strlen(text);
+
+			while (*p)
+			{
+				if (*p == '&')
+					*r++ = '&';
+
+				*r++ = *p++;
+			}
+			*r = 0;
 
 			ShowMenuItem(LC_MAINWND_RECENT1+i, true);
 			EnableMenuItem(LC_MAINWND_RECENT1+i, true);

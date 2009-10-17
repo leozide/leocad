@@ -1496,6 +1496,7 @@ bool SystemDoDialog(int nMode, void* param)
       dlg.m_bListStep = opts->liststep;
       dlg.m_bHighlight = opts->highlight;
       dlg.m_bHtmlExt = opts->htmlext;
+      dlg.m_strFolder = opts->path;
 
       if (dlg.DoModal() == IDOK)
 			{

@@ -843,6 +843,7 @@ int aboutdlg_execute (void* param)
 typedef struct
 {
   void* data;
+  GtkWidget *dlg;
   GtkWidget *single, *multiple, *index;
   GtkWidget *list_end, *list_step, *images;
   GtkWidget *highlight, *htmlext, *directory;
@@ -894,6 +895,29 @@ static void htmldlg_list (GtkWidget *widget, gpointer data)
     gtk_widget_set_sensitive (s->images, FALSE);
 }
 
+static void htmldlg_browse_output(GtkWidget *widget, gpointer data)
+{
+	LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
+	GtkWidget* dlg;
+
+	dlg = gtk_file_chooser_dialog_new("Select output path", GTK_WINDOW(s->dlg), 
+	                                  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->directory)));
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		gtk_entry_set_text(GTK_ENTRY(s->directory), filename);
+		g_free(filename);
+	}
+
+	gtk_widget_destroy(dlg);
+}
+
 int htmldlg_execute (void* param)
 {
   GtkWidget *dlg;
@@ -909,6 +933,7 @@ int htmldlg_execute (void* param)
   gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
 		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
   gtk_window_set_title (GTK_WINDOW (dlg), "HTML Options");
+  s.dlg = dlg;
 
   vbox = gtk_vbox_new (FALSE, 10);
   gtk_widget_show (vbox);
@@ -1021,12 +1046,14 @@ int htmldlg_execute (void* param)
   button = gtk_button_new_with_label ("...");
   gtk_widget_show (button);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+  gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(htmldlg_browse_output), &s);
 
   gtk_signal_connect (GTK_OBJECT (s.single), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
   gtk_signal_connect (GTK_OBJECT (s.multiple), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
   gtk_signal_connect (GTK_OBJECT (s.list_step), "toggled", GTK_SIGNAL_FUNC (htmldlg_list), &s);
   gtk_signal_connect (GTK_OBJECT (s.list_end), "toggled", GTK_SIGNAL_FUNC (htmldlg_list), &s);
 
+  gtk_entry_set_text(GTK_ENTRY(s.directory), opts->path);
   if (opts->singlepage)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.single), TRUE);
   else

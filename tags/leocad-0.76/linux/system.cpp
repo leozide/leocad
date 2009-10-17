@@ -478,9 +478,6 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
   gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
-  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), 
-      bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
   ignore_commands = false;
 }
 

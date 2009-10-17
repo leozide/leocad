@@ -3748,6 +3748,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
       opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
       opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
       opts.htmlext = (ul & LC_HTML_HTMLEXT) != 0;
+      strcpy(opts.path, Sys_ProfileLoadString("Default", "HTML Path", ""));
 
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{

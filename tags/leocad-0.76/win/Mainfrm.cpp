@@ -656,7 +656,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 
 void CMainFrame::OnFilePrintPieceList() 
 {
-	AfxBeginThread(PrintPiecesFunction, this);
+	PrintPiecesFunction(this);
 }
 
 // Pass all commands to the project.

@@ -17,6 +17,9 @@
 #include "library.h"
 #include "lc_application.h"
 #include "lc_model.h"
+#include "lc_mesh.h"
+#include "view.h"
+#include "lc_map.h"
 
 static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 {
@@ -418,29 +421,29 @@ static void PrintPiecesThread(void* pv)
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
 	Project* project = lcGetActiveProject();
 
-	u32* pieces = new u32[pLib->GetPieceCount() * lcNumColors];
+	lcHashMap<PieceInfo*, u32*> PiecesUsed;
 	u32* col = new u32[lcNumColors];
-	memset(pieces, 0, pLib->GetPieceCount() * lcNumColors * sizeof(u32));
 	memset(col, 0, lcNumColors * sizeof(u32));
 
-	for (lcPiece* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = (lcPiece*)tmp->m_Next)
+	for (lcPiece* Piece = project->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		int idx = pLib->GetPieceIndex(tmp->m_PieceInfo);
-		pieces[(idx*lcNumColors)+tmp->m_Color]++;
-		col[tmp->m_Color]++;
+		if (Piece->m_PieceInfo->m_strDescription[0] == '~')
+			continue;
+
+		u32*& Colors = PiecesUsed[Piece->m_PieceInfo];
+		if (!Colors)
+		{
+			Colors = new u32[lcNumColors];
+			memset(Colors, 0, lcNumColors * sizeof(u32));
+		}
+
+		Colors[Piece->m_Color]++;
+		col[Piece->m_Color]++;
 	}
 
-	int rows = 0, cols = 1, i, j;
-	for (i = 0; i < pLib->GetPieceCount (); i++)
-		for (j = 0; j < lcNumColors; j++)
-			if (pieces[(i*lcNumColors)+j] > 0)
-			{
-				rows++;
-				break;
-			}
+	int rows = PiecesUsed.GetSize(), cols = 1, i, j;
 
 	int ID = 1;
 	for (i = 0; i < lcNumColors; i++)
@@ -450,6 +453,18 @@ static void PrintPiecesThread(void* pv)
 			ID++;
 			cols++;
 		}
+
+	if (GL_HasVertexBufferObject())
+	{
+		project->GetFirstView()->MakeCurrent();
+
+		for (lcHashMapAssoc Assoc = PiecesUsed.GetFirstAssoc(); Assoc; Assoc = PiecesUsed.GetNextAssoc(Assoc))
+		{
+			PieceInfo* Info = PiecesUsed.GetAssocKey(Assoc);
+			Info->m_Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+			Info->m_Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+		}
+	}
 
 	if (theApp.DoPrintDialog(PD) != IDOK) return; 
 	if (PD->m_pd.hDC == NULL) return;
@@ -519,8 +534,9 @@ static void PrintPiecesThread(void* pv)
 
 	int rowspp = rectDraw.Height()/(int)(resy*0.75); 
 
-	PD->m_pd.nMaxPage = rows/(rowspp+1);
-	if (rows%(rowspp+1) > 0) PD->m_pd.nMaxPage++;
+	PD->m_pd.nMinPage = 1;
+	PD->m_pd.nMaxPage = rows/rowspp;
+	if (rows%rowspp) PD->m_pd.nMaxPage++;
 
 	UINT nEndPage = PD->m_pd.nToPage;
 	UINT nStartPage = PD->m_pd.nFromPage;
@@ -584,40 +600,33 @@ static void PrintPiecesThread(void* pv)
 	glViewport(0, 0, picw, h);
 
 	// Sort pieces by description
-	struct BRICKSORT {
-		char name[64];
-		int actual;
-		struct BRICKSORT *next;
+	struct BRICKSORT
+	{
+		const char* desc;
+		PieceInfo* info;
+		BRICKSORT *next;
 	} start, *node, *previous, *news;
 	start.next = NULL;
 	
-	for (j = 0; j < pLib->GetPieceCount (); j++)
+	for (lcHashMapAssoc Assoc = PiecesUsed.GetFirstAssoc(); Assoc; Assoc = PiecesUsed.GetNextAssoc(Assoc))
 	{
-		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
-
-		if (desc[0] == '~')
-			continue;
-
-		BOOL bAdd = FALSE;
-		for (i = 0; i < lcNumColors; i++)
-			if (pieces[(j*lcNumColors)+i])
-				bAdd = TRUE;
-		if (!bAdd) continue;
+		PieceInfo* Info = PiecesUsed.GetAssocKey(Assoc);
+		const char* desc = Info->m_strDescription;
 
 		// Find the correct location
 		previous = &start;
 		node = start.next;
-		while ((node) && (strcmp(desc, node->name) > 0))
+		while ((node) && (strcmp(desc, node->desc) > 0))
 		{
 			node = node->next;
 			previous = previous->next;
 		}
 		
-		news = (struct BRICKSORT*) malloc(sizeof(struct BRICKSORT));
+		news = (BRICKSORT*)malloc(sizeof(BRICKSORT));
 		news->next = node;
 		previous->next = news;
-		strcpy(news->name, desc);
-		news->actual = j;
+		news->desc = desc;
+		news->info = Info;
 	}
 	node = start.next;
 
@@ -643,7 +652,7 @@ static void PrintPiecesThread(void* pv)
 	SetTextAlign (PD->m_pd.hDC, TA_CENTER|TA_NOUPDATECP);
 
 	SetTextColor (pMemDC->m_hDC, 0x000000);
-	lf.lfHeight = -MulDiv(10, GetDeviceCaps(pMemDC->m_hDC, LOGPIXELSY), 72);
+	lf.lfHeight = -MulDiv(40, GetDeviceCaps(pMemDC->m_hDC, LOGPIXELSY), 72);
 	lf.lfWeight = FW_BOLD;
 	HFONT CatalogFont = CreateFontIndirect(&lf);
 	HFONT OldMemFont = (HFONT)SelectObject(pMemDC->m_hDC, CatalogFont);
@@ -666,7 +675,7 @@ static void PrintPiecesThread(void* pv)
 		for (i = 0; i < lcNumColors; i++)
 			if (col[i])
 			{
-				str.LoadString(IDS_COLOR01 + i);
+				str = g_ColorList[i].Name;
 				DrawText(PD->m_pd.hDC, (LPCTSTR)str, str.GetLength(), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 				rc.OffsetRect (w, 0);
 			}
@@ -691,7 +700,7 @@ static void PrintPiecesThread(void* pv)
 
 			lcSetColor(g_App->m_SelectedColor);
 
-			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
+			PieceInfo* pInfo = node->info;
 			node = node->next;
 			pInfo->ZoomExtents(30.0f, aspect);
 
@@ -713,14 +722,14 @@ static void PrintPiecesThread(void* pv)
 			int rowtotal = 0;
 			char tmp[5];
 	
-			int idx = (pLib->GetPieceIndex (pInfo));
+			u32* Colors = PiecesUsed[pInfo];
 			for (i = 0; i < lcNumColors; i++)
-				if (pieces[(idx*lcNumColors)+i])
+				if (Colors[i])
 				{
 					CRect rc(rectDraw.left+picw+w*(col[i]-1), rectDraw.top+h*r, rectDraw.left+picw+w*col[i], rectDraw.top+h*(r+1));
-					sprintf (tmp, "%d", pieces[(idx*lcNumColors)+i]);
+					sprintf (tmp, "%d", Colors[i]);
 					DrawText(PD->m_pd.hDC, tmp, strlen(tmp), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-					rowtotal += pieces[(idx*lcNumColors)+i];
+					rowtotal += Colors[i];
 				}
 			sprintf (tmp, "%d", rowtotal);
 			CRect rc(rectDraw.right-w, rectDraw.top+h*r, rectDraw.right, rectDraw.top+h*(r+1));
@@ -787,6 +796,18 @@ static void PrintPiecesThread(void* pv)
 	DeleteObject(hBm);
 	delete pMemDC;
 
+	if (GL_HasVertexBufferObject())
+	{
+		project->GetFirstView()->MakeCurrent();
+
+		for (lcHashMapAssoc Assoc = PiecesUsed.GetFirstAssoc(); Assoc; Assoc = PiecesUsed.GetNextAssoc(Assoc))
+		{
+			PieceInfo* Info = PiecesUsed.GetAssocKey(Assoc);
+			Info->m_Mesh->m_IndexBuffer->UnmapBuffer();
+			Info->m_Mesh->m_VertexBuffer->UnmapBuffer();
+		}
+	}
+
 	if (!bError)
 		EndDoc(PD->m_pd.hDC);
 	else
@@ -801,8 +822,10 @@ static void PrintPiecesThread(void* pv)
 		PD->m_pd.hDC = NULL;
 	}
 
+	for (lcHashMapAssoc Assoc = PiecesUsed.GetFirstAssoc(); Assoc; Assoc = PiecesUsed.GetNextAssoc(Assoc))
+		delete[] PiecesUsed.GetAssocValue(Assoc);
+
 	delete[] col;
-	delete[] pieces;
 	delete PD;
 }
 

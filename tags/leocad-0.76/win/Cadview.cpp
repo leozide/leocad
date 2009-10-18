@@ -256,9 +256,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	HBITMAP hBmOld = (HBITMAP)SelectObject(hMemDC, hBm);
 
 	lcPtrArray<PieceInfo> PieceList;
-	bool ReloadPieces = GL_HasVertexBufferObject();
 
-	if (ReloadPieces)
+	if (GL_HasVertexBufferObject())
 	{
 		for (lcPiece* Piece = project->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		{
@@ -267,17 +266,10 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		}
 
 		for (int i = 0; i < PieceList.GetSize(); i++)
-			PieceList[i]->FreeInformation();
-
-		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
-			if (project->m_ModelList[i] != project->m_ActiveModel)
-			{
-				delete project->m_ModelList[i]->m_Mesh;
-				project->m_ModelList[i]->m_Mesh = NULL;
-			}
-
-		extern bool GL_VertexBufferObject;
-		GL_VertexBufferObject = false;
+		{
+			PieceList[i]->m_Mesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+			PieceList[i]->m_Mesh->m_VertexBuffer->MapBuffer(GL_READ_ONLY_ARB);
+		}
 	}
 
 	View view(project, project->GetFirstView());
@@ -288,14 +280,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	project->AddView(&view);
 
 	project->RenderInitialize();
-
-	if (ReloadPieces)
-	{
-		for (int i = 0; i < PieceList.GetSize(); i++)
-			PieceList[i]->LoadInformation();
-
-		project->UpdateAllModelMeshes();
-	}
 
 	LOGFONT lf;
 	memset(&lf, 0, sizeof(LOGFONT));
@@ -457,19 +441,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	project->m_ActiveModel->m_CurFrame = OldTime;
 
-	if (ReloadPieces)
-	{
-		for (int i = 0; i < PieceList.GetSize(); i++)
-			PieceList[i]->FreeInformation();
-
-		for (int i = 0; i < project->m_ModelList.GetSize(); i++)
-			if (project->m_ModelList[i] != project->m_ActiveModel)
-			{
-				delete project->m_ModelList[i]->m_Mesh;
-				project->m_ModelList[i]->m_Mesh = NULL;
-			}
-	}
-
 	view.DestroyContext();
 	SelectObject(hMemDC, hBmOld);
 	DeleteObject(hBm);
@@ -480,17 +451,15 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	DeleteObject(font);
 	glFinish();
 
-	if (ReloadPieces)
+	if (GL_HasVertexBufferObject())
 	{
-		extern bool GL_VertexBufferObject;
-		GL_VertexBufferObject = true;
-
 		project->GetFirstView()->MakeCurrent();
 
 		for (int i = 0; i < PieceList.GetSize(); i++)
-			PieceList[i]->LoadInformation();
-
-		project->UpdateAllModelMeshes();
+		{
+			PieceList[i]->m_Mesh->m_IndexBuffer->UnmapBuffer();
+			PieceList[i]->m_Mesh->m_VertexBuffer->UnmapBuffer();
+		}
 	}
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);

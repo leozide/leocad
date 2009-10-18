@@ -8,6 +8,10 @@
 
 class lcScene;
 
+// Vertex/Index buffer wrappers.
+// They try to workaround the problem of not being able to share buffer objects between some
+// GL contexts by using keeping the buffers mapped and using that data instead.
+
 class lcVertexBuffer
 {
 public:
@@ -15,43 +19,48 @@ public:
 	{
 		if (GL_HasVertexBufferObject())
 		{
-			glGenBuffersARB(1, &m_Buffer.ID);
-			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			mData = NULL;
+
+			glGenBuffersARB(1, &mID);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, mID);
 			glBufferDataARB(GL_ARRAY_BUFFER_ARB, DataSize, NULL, GL_STATIC_DRAW_ARB);
 		}
 		else
 		{
-			m_Buffer.Data = malloc(DataSize);
+			mData = malloc(DataSize);
+			mID = 0;
 		}
 	}
 
 	~lcVertexBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 		{
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-			glDeleteBuffersARB(1, &m_Buffer.ID);
+			glDeleteBuffersARB(1, &mID);
 		}
 		else
-			free(m_Buffer.Data);
+			free(mData);
 	}
 
 	void* MapBuffer(GLenum Access)
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 		{
-			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
-			return glMapBufferARB(GL_ARRAY_BUFFER_ARB, Access);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, mID);
+			mData = glMapBufferARB(GL_ARRAY_BUFFER_ARB, Access);
 		}
-		else
-			return m_Buffer.Data;
+
+		return mData;
 	}
 
 	void UnmapBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 		{
-			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			mData = NULL;
+
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, mID);
 			glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 		}
@@ -59,28 +68,25 @@ public:
 
 	void BindBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mData)
+			glVertexPointer(3, GL_FLOAT, 0, mData);
+		else
 		{
-			glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, mID);
 			glVertexPointer(3, GL_FLOAT, 0, NULL);
 		}
-		else
-			glVertexPointer(3, GL_FLOAT, 0, m_Buffer.Data);
 	}
 
 	void UnbindBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 		glVertexPointer(3, GL_FLOAT, 0, NULL);
 	}
 
 protected:
-	union
-	{
-		void* Data;
-		GLuint ID;
-	} m_Buffer;
+	void* mData;
+	GLuint mID;
 };
 
 class lcIndexBuffer
@@ -90,43 +96,48 @@ public:
 	{
 		if (GL_HasVertexBufferObject())
 		{
-			glGenBuffersARB(1, &m_Buffer.ID);
-			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			mData = NULL;
+
+			glGenBuffersARB(1, &mID);
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mID);
 			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, DataSize, NULL, GL_STATIC_DRAW_ARB);
 		}
 		else
 		{
-			m_Buffer.Data = malloc(DataSize);
+			mData = malloc(DataSize);
+			mID = 0;
 		}
 	}
 
 	~lcIndexBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 		{
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-			glDeleteBuffersARB(1, &m_Buffer.ID);
+			glDeleteBuffersARB(1, &mID);
 		}
 		else
-			free(m_Buffer.Data);
+			free(mData);
 	}
 
 	void* MapBuffer(GLenum Access)
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 		{
-			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
-			return glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Access);
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mID);
+			mData = glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Access);
 		}
-		else
-			return m_Buffer.Data;
+
+		return mData;
 	}
 
 	void UnmapBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 		{
-			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+			mData = NULL;
+
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mID);
 			glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 		}
@@ -134,30 +145,24 @@ public:
 
 	void BindBuffer()
 	{
-		if (GL_HasVertexBufferObject())
-			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, m_Buffer.ID);
+		if (mID && !mData)
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mID);
 	}
 
 	void UnbindBuffer()
 	{
-		if (GL_HasVertexBufferObject())
+		if (mID)
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
 
 	void* GetDrawElementsOffset()
 	{
-		if (GL_HasVertexBufferObject())
-			return NULL;
-		else
-			return m_Buffer.Data;
+		return mData;
 	}
 
 protected:
-	union
-	{
-		void* Data;
-		GLuint ID;
-	} m_Buffer;
+	void* mData;
+	GLuint mID;
 };
 
 struct lcMeshSection

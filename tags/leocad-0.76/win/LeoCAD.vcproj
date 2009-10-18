@@ -248,30 +248,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\common\array.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="Arraydlg.cpp"
 				>
 				<FileConfiguration
@@ -2373,7 +2349,7 @@
 			Filter="h"
 			>
 			<File
-				RelativePath="..\common\array.h"
+				RelativePath="..\common\algebra.h"
 				>
 			</File>
 			<File
@@ -2390,6 +2366,10 @@
 			</File>
 			<File
 				RelativePath="..\common\curve.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\debug.h"
 				>
 			</File>
 			<File
@@ -2422,6 +2402,34 @@
 			</File>
 			<File
 				RelativePath="..\common\lc_application.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_array.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_colors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_global.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_mesh.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_message.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_model.h"
 				>
 			</File>
 			<File

@@ -1457,6 +1457,8 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 void CMainFrame::OnViewSplitVertically()
 {
 	CView* view = GetActiveView();
+	if (!view->IsKindOf(RUNTIME_CLASS(CCADView)))
+		return;
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
 
 	// Calculate the new view size.
@@ -1490,6 +1492,8 @@ void CMainFrame::OnViewSplitVertically()
 void CMainFrame::OnViewSplitHorizontally()
 {
 	CView* view = GetActiveView();
+	if (!view->IsKindOf(RUNTIME_CLASS(CCADView)))
+		return;
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
 
 	// Calculate the new view size.
@@ -1523,6 +1527,8 @@ void CMainFrame::OnViewSplitHorizontally()
 void CMainFrame::OnViewDeleteView()
 {
 	CView* view = GetActiveView();
+	if (!view->IsKindOf(RUNTIME_CLASS(CCADView)))
+		return;
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
 
 	// Don't do anything if there's only one view.
@@ -1591,6 +1597,17 @@ void CMainFrame::OnViewResetViews()
 {
 	CView* view = GetActiveView();
 	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+
+	if (!view->IsKindOf(RUNTIME_CLASS(CCADView)))
+	{
+		CWnd* Sibling = &m_wndSplitter;
+
+		while (!Sibling->IsKindOf(RUNTIME_CLASS(CCADView)))
+			Sibling = ((CDynamicSplitterWnd*)Sibling)->GetPane(0, 0);
+
+		view = (CView*)Sibling;
+		parent = (CDynamicSplitterWnd*)view->GetParent();
+	}
 
 	// Don't do anything if there's only one view.
 	if (parent != &m_wndSplitter)

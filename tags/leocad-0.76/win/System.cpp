@@ -6,6 +6,7 @@
 #include <direct.h>
 #include <shlobj.h>
 #include "leocad.h"
+#include "cadview.h"
 #include "bmpmenu.h"
 #include "system.h"
 #include "defines.h"
@@ -465,7 +466,7 @@ void SystemUpdateAction(int nNew, int nOld)
 	pCtrl->CheckButton(ID_ACTION_SELECT+nNew, TRUE);
 
 	// TODO: make sure this works if loading a file from the cmd line.
-	if (pView)
+	if (pView && pView->IsKindOf(RUNTIME_CLASS(CCADView)))
 		pView->SendMessage(WM_LC_SET_CURSOR, nNew);
 
 	// TODO: update popup context menu

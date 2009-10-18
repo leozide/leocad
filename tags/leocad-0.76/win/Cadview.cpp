@@ -982,8 +982,8 @@ void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 {
 	if (pActivateView && pActivateView->IsKindOf(RUNTIME_CLASS(CCADView)))
 		lcGetActiveProject()->SetActiveView(((CCADView*)pActivateView)->m_pView);
-	else
-		lcGetActiveProject()->SetActiveView(NULL);
+//	else
+//		lcGetActiveProject()->SetActiveView(NULL);
 
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 }

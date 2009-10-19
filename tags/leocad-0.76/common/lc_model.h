@@ -36,7 +36,7 @@ public:
 	void ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath);
 
 	// Save the model in LDraw format.
-	void ExportLDraw(File& file, bool SaveMPD, const Matrix44& ParentWorld, int Color);
+	void ExportLDraw(File& file, bool SaveMPD, const Matrix44& ParentWorld, u32 Color);
 
 	// Check if a given model is referenced by this model.
 	bool IsSubModel(const lcModel* Model) const;
@@ -45,7 +45,7 @@ public:
 	u32 GetLastStep() const;
 
 	// Get a list of all actual pieces used by this model.
-//	void GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, int Color) const;
+//	void GetPieceList(lcObjArray<struct LC_PIECELIST_ENTRY>& Pieces, u32 Color) const;
 
 	// Tell this model it's now the active model or no longer active.
 	void SetActive(bool Active);
@@ -66,7 +66,7 @@ public:
 	void RemovePiece(lcPiece* Piece);
 
 	// Inline the contents of another model into this model.
-	void InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color, u32 TimeShow, u32 TimeHide);
+	void InlineModel(lcModel* Model, const Matrix44& ModelWorld, u32 Color, u32 TimeShow, u32 TimeHide);
 
 	// Return true if any pieces are currently selected.
 	bool AnyPiecesSelected() const;

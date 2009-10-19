@@ -668,7 +668,7 @@ void PieceInfo::LoadInformation()
 	}
 
 	u32 lines = 0, tris = 0, sections = 0;
-	for (int c = 0; c < lcNumColors; c++)
+	for (u32 c = 0; c < lcNumColors; c++)
 	{
 		if (SectionIndices[c*2])
 		{
@@ -703,7 +703,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 	lcMeshSection** DstSections = new lcMeshSection*[lcNumColors*2];
 	memset(DstSections, 0, sizeof(DstSections[0])*lcNumColors*2);
 
-	for (int c = 0; c < lcNumColors; c++)
+	for (u32 c = 0; c < lcNumColors; c++)
 	{
 		if (SectionIndices[c*2])
 		{
@@ -1102,13 +1102,13 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 		if (m_Mesh->m_IndexType == GL_UNSIGNED_INT)
 		{
 			u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-			for (int c = 0; c < Section->IndexCount; c += 3)
+			for (u32 c = 0; c < Section->IndexCount; c += 3)
 				fprintf(file, "f %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start);
 		}
 		else
 		{
 			u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-			for (int c = 0; c < Section->IndexCount; c += 3)
+			for (u32 c = 0; c < Section->IndexCount; c += 3)
 				fprintf(file, "f %ld %ld %ld\n", IndexPtr[c+0] + *start, IndexPtr[c+1] + *start, IndexPtr[c+2] + *start);
 		}
 	}

@@ -88,8 +88,8 @@ lcColor g_ColorList[] =
 	{  -2, { 0.4000f, 0.2980f, 0.8980f, 1.0000f }, false, "Focused" },
 };
 
-int lcNumUserColors = sizeof(g_ColorList)/sizeof(g_ColorList[0]) - 3;
-int lcNumColors = sizeof(g_ColorList)/sizeof(g_ColorList[0]);
+u32 lcNumUserColors = sizeof(g_ColorList)/sizeof(g_ColorList[0]) - 3;
+u32 lcNumColors = sizeof(g_ColorList)/sizeof(g_ColorList[0]);
 
 
 /*

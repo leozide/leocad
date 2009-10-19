@@ -227,7 +227,8 @@ void lcObject::CalculateKeys(u32 Time)
 	// TODO: USE KEY IN/OUT WEIGHTS
 	for (i = 0; i < m_nKeyInfoCount; i++)
 	{
-		LC_OBJECT_KEY *n = Next[i], *p = prev[i];
+//		LC_OBJECT_KEY *n = Next[i];
+		LC_OBJECT_KEY *p = prev[i];
 
 		if (p == NULL) continue;
 /*

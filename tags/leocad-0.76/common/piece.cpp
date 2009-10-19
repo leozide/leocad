@@ -468,7 +468,7 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 		if (Mesh->m_IndexType == GL_UNSIGNED_INT)
 		{
 			u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-			for (int i = 0; i < Section->IndexCount; i += 3)
+			for (u32 i = 0; i < Section->IndexCount; i += 3)
 			{
 				if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
 				    &verts[IndexPtr[i+2]*3], NULL, LocalPlanes, NumPlanes))
@@ -481,7 +481,7 @@ bool lcPiece::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 		else
 		{
 			u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-			for (int i = 0; i < Section->IndexCount; i += 3)
+			for (u32 i = 0; i < Section->IndexCount; i += 3)
 			{
 				if (PolygonIntersectsPlanes(&verts[IndexPtr[i+0]*3], &verts[IndexPtr[i+1]*3],
 				    &verts[IndexPtr[i+2]*3], NULL, LocalPlanes, NumPlanes))

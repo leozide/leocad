@@ -294,7 +294,7 @@ void lcLight::UpdatePosition(u32 Time)
 	{
 		Vector3 frontvec = m_TargetPosition - m_Position;
 		Vector3 up(1, 1, 1);
-		float len = Length(frontvec);
+//		float len = Length(frontvec);
 
 		if (fabs(frontvec[0]) < fabs(frontvec[1]))
 		{

@@ -242,7 +242,7 @@ void lcModel::ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWo
 	}
 }
 
-void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorld, int Color)
+void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorld, u32 Color)
 {
 	char buf[1024];
 
@@ -271,22 +271,22 @@ void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorl
 	if (m_Author.IsEmpty())
 		strcpy(buf, "0 Author: LeoCAD\r\n");
 	else
-		sprintf(buf, "0 Author: %s\r\n", m_Author);
+		sprintf(buf, "0 Author: %s\r\n", (const char*)m_Author);
 	file.Write(buf, strlen(buf));
 
 	strcpy(buf, "\r\n");
 	file.Write(buf, strlen(buf));
 
-	int LastStep = GetLastStep();
+	u32 LastStep = GetLastStep();
 
-	for (int Step = 1; Step <= LastStep; Step++)
+	for (u32 Step = 1; Step <= LastStep; Step++)
 	{
 		for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		{
 			if (Piece->m_TimeShow != Step)
 				continue;
 
-			int PieceColor = (Piece->m_Color == LC_COLOR_DEFAULT) ? Color : Piece->m_Color;
+			u32 PieceColor = (Piece->m_Color == LC_COLOR_DEFAULT) ? Color : Piece->m_Color;
 			const char* Name;
 			const char* Ext = "";
 
@@ -429,7 +429,7 @@ void lcModel::UpdateMesh()
 	u32 SectionCount = 0;
 	u32 IndexCount = 0;
 
-	for (int i = 0; i < lcNumColors*2; i++)
+	for (u32 i = 0; i < lcNumColors*2; i++)
 	{
 		if (SectionIndices[i])
 		{
@@ -599,7 +599,7 @@ void lcModel::RemovePiece(lcPiece* Piece)
 	}
 }
 
-void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, int Color, u32 TimeShow, u32 TimeHide)
+void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, u32 Color, u32 TimeShow, u32 TimeHide)
 {
 	u32 Time = lcMax(Model->m_TotalFrames, LC_OBJECT_TIME_MAX);
 

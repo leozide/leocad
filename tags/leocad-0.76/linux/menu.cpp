@@ -15,7 +15,7 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 #include "pixmaps/st-open.xpm"
 #include "pixmaps/st-save.xpm"
 #include "pixmaps/photo.xpm"
-#include "pixmaps/info.xpm"
+//#include "pixmaps/info.xpm"
 #include "pixmaps/st-undo.xpm"
 #include "pixmaps/st-redo.xpm"
 #include "pixmaps/st-cut.xpm"

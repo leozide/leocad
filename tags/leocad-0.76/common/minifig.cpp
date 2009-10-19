@@ -434,7 +434,7 @@ static int mfw_pieces = sizeof(mfw_pieceinfo)/sizeof(LC_MFW_PIECEINFO);
 MinifigWizard::MinifigWizard(GLWindow *share)
 	: GLWindow(share)
 {
-	const int colors[LC_MFW_NUMITEMS] = { 4, 14, 1, 6, 4, 4, 14, 14, 6, 6, 0, 0, 0, 6, 6 };
+	const u32 colors[LC_MFW_NUMITEMS] = { 4, 14, 1, 6, 4, 4, 14, 14, 6, 6, 0, 0, 0, 6, 6 };
 	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "976", "975", "977", "977",
 	                                        "None", "None", "970", "972", "971", "None", "None" };
 	int i;
@@ -443,7 +443,7 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 	{
 		m_Colors[i] = 0;
 
-		for (int j = 0; j < lcNumUserColors; j++)
+		for (u32 j = 0; j < lcNumUserColors; j++)
 			if (g_ColorList[j].Code == colors[i])
 			{
 				m_Colors[i] = j;

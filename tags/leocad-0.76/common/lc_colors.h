@@ -5,15 +5,15 @@
 
 struct lcColor
 {
-	int Code;
+	u32 Code;
 	float Value[4];
 	bool Translucent;
 	const char* Name;
 };
 
 extern lcColor g_ColorList[];
-extern int lcNumUserColors;
-extern int lcNumColors;
+extern u32 lcNumUserColors;
+extern u32 lcNumColors;
 
 #define LC_COLOR_TRANSLUCENT(Color) g_ColorList[Color].Translucent
 #define LC_COLOR_RGB(Color) RGB(g_ColorList[Color].Value[0]*255, g_ColorList[Color].Value[1]*255, g_ColorList[Color].Value[2]*255)
@@ -29,15 +29,15 @@ extern int lcNumColors;
 //#define LC_COL_FOCUSED	30	// Focused object
 //#define LC_COL_DEFAULT	31	// Default piece color
 
-inline void lcSetColor(int Index)
+inline void lcSetColor(u32 Index)
 {
 	glColor4f(g_ColorList[Index].Value[0], g_ColorList[Index].Value[1], g_ColorList[Index].Value[2], g_ColorList[Index].Value[3]);
 }
 
 // Convert a color from LDraw to LeoCAD.
-inline int lcConvertLDrawColor(int Color)
+inline int lcConvertLDrawColor(u32 Color)
 {
-	for (int i = 0; i < lcNumColors; i++)
+	for (u32 i = 0; i < lcNumColors; i++)
 		if (g_ColorList[i].Code == Color)
 			return i;
 

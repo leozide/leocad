@@ -167,9 +167,9 @@ protected:
 
 struct lcMeshSection
 {
-	int ColorIndex;
-	int IndexOffset;
-	int IndexCount;
+	u32 ColorIndex;
+	u32 IndexOffset;
+	u32 IndexCount;
 	int PrimitiveType;
 	BoundingBox Box;
 };
@@ -271,8 +271,8 @@ public:
 	{
 		Section->Box.Reset();
 
-		int Start = Section->IndexOffset / sizeof(T);
-		for (int i = Start; i < Start + Section->IndexCount; i++)
+		u32 Start = Section->IndexOffset / sizeof(T);
+		for (u32 i = Start; i < Start + Section->IndexCount; i++)
 		{
 			int Index = m_IndexBuffer[i];
 			Vector3 Vert(m_VertexBuffer[Index*3], m_VertexBuffer[Index*3+1], m_VertexBuffer[Index*3+2]);

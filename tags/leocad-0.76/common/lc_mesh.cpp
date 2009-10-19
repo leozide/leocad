@@ -359,7 +359,7 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 	for (int i = 0; i < m_SectionCount; i++)
 	{
 		lcMeshSection* Section = &m_Sections[i];
-		int CurColor = Section->ColorIndex;
+		u32 CurColor = Section->ColorIndex;
 
 		if (Section->PrimitiveType == GL_LINES)
 		{
@@ -472,7 +472,7 @@ bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float
 			if (m_IndexType == GL_UNSIGNED_INT)
 			{
 				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 4)
+				for (u32 i = 0; i < Section->IndexCount; i += 4)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
 					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
@@ -486,7 +486,7 @@ bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float
 			else
 			{
 				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 4)
+				for (u32 i = 0; i < Section->IndexCount; i += 4)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
 					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
@@ -503,7 +503,7 @@ bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float
 			if (m_IndexType == GL_UNSIGNED_INT)
 			{
 				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 3)
+				for (u32 i = 0; i < Section->IndexCount; i += 3)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
 					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
@@ -516,7 +516,7 @@ bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float
 			else
 			{
 				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-				for (int i = 0; i < Section->IndexCount; i += 3)
+				for (u32 i = 0; i < Section->IndexCount; i += 3)
 				{
 					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
 					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);

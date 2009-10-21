@@ -318,7 +318,7 @@ void SystemUpdateRenderingMode(bool bFast)
     return;
 
   ignore_commands = true;
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.fast), bFast);
+  gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(main_toolbar.fast), bFast);
   ignore_commands = false;
 }
 
@@ -355,10 +355,19 @@ void SystemUpdateSnap(const unsigned long snap)
     return;
 
   ignore_commands = true;
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.angle), (snap & LC_DRAW_SNAP_A) != 0);
+  gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(main_toolbar.angle), (snap & LC_DRAW_SNAP_A) != 0);
   ignore_commands = false;
 
-  // TODO: popup menu
+  void* item;
+
+  ignore_commands = true;
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_x");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_y");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Y) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_z");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
+  ignore_commands = false;
 }
 
 void SystemUpdateCurrentCamera(lcCamera* pOld, lcCamera* pNew, lcCamera* pCamera)

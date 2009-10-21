@@ -64,6 +64,9 @@ void OnCommandDirect(GtkWidget *w, gpointer data);
 #define ID_SNAP_X              131
 #define ID_SNAP_Y              132
 #define ID_SNAP_Z              133
+#define ID_SNAP_ALL            134
+#define ID_SNAP_NONE           135
+#define ID_SNAP_ON             136
 
 #endif
 

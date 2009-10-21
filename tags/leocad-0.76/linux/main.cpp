@@ -180,6 +180,31 @@ void OnCommand(GtkWidget* widget, gpointer data)
       project->HandleCommand(LC_TOOLBAR_SNAPMENU, 5);
     } break;
 
+    case ID_SNAP_X:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 0);
+    } break;
+
+    case ID_SNAP_Y:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 1);
+    } break;
+
+    case ID_SNAP_Z:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 2);
+    } break;
+
+    case ID_SNAP_ALL:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 3);
+    } break;
+
+    case ID_SNAP_NONE:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 4);
+    } break;
+
     case ID_VIEW_CREATE:
     {
       GtkWidget *wnd, *w, *frame;

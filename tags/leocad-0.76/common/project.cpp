@@ -5942,10 +5942,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nSnap |= LC_DRAW_SNAP_Z;
 				break;
 			case 3:
-				if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
-					m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-				else
-					m_nSnap |= LC_DRAW_SNAP_XYZ;
+				m_nSnap |= LC_DRAW_SNAP_XYZ;
 				break;
 			case 4:
 				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
@@ -5955,6 +5952,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nSnap &= ~LC_DRAW_SNAP_A;
 				else
 					m_nSnap |= LC_DRAW_SNAP_A;
+				break;
+			case 6:
+				if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
+					m_nSnap &= ~LC_DRAW_SNAP_XYZ;
+				else
+					m_nSnap |= LC_DRAW_SNAP_XYZ;
 				break;
 			}
 			SystemUpdateSnap(m_nSnap);
@@ -5984,6 +5987,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				break;
 			case 3:
 				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+				break;
+			case 4:
+				if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
+					m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+				else
+					m_nSnap |= LC_DRAW_LOCK_XYZ;
 				break;
 			}
 			SystemUpdateSnap(m_nSnap);

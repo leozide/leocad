@@ -361,12 +361,21 @@ void SystemUpdateSnap(const unsigned long snap)
   void* item;
 
   ignore_commands = true;
+
   item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_x");
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
   item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_y");
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Y) ? TRUE : FALSE);
   item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_z");
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
+
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_x");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_X) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_y");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_z");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
+
   ignore_commands = false;
 }
 

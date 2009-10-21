@@ -32,6 +32,7 @@ MAIN_TOOLBAR main_toolbar;
 ANIM_TOOLBAR anim_toolbar;
 
 extern GtkWidget* create_snap_menu();
+extern GtkWidget* create_lock_menu();
 
 // =========================================================
 
@@ -69,6 +70,7 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 //#include "pixmaps/st-help.xpm"
 //#include "pixmaps/st-prev.xpm"
 #include "pixmaps/st-snap.xpm"
+#include "pixmaps/st-lock.xpm"
 //#include "pixmaps/st-copy.xpm"
 //#include "pixmaps/st-new.xpm"
 //#include "pixmaps/st-print.xpm"
@@ -143,23 +145,29 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 	item = gtk_separator_tool_item_new();
 	gtk_toolbar_insert(GTK_TOOLBAR(main_toolbar.toolbar), item, -1);
 
-	// TODO: add xyz lock
+	item = gtk_menu_tool_button_new(new_pixmap(window, st_lock), "3D lock");
+	gtk_tool_item_set_tooltip_text(item, "Toggle 3D lock");
+	g_signal_connect(item, "clicked", G_CALLBACK(OnCommand), GINT_TO_POINTER(ID_LOCK_ON));
+	gtk_toolbar_insert(GTK_TOOLBAR(main_toolbar.toolbar), item, -1);
+	main_toolbar.lock = (GtkWidget*)item;
+
+	main_toolbar.lock_menu = create_lock_menu();
+	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(item), main_toolbar.lock_menu);
 
 	item = gtk_menu_tool_button_new(new_pixmap(window, st_snap), "3D snap");
 	gtk_tool_item_set_tooltip_text(item, "Toggle 3D snap");
-	g_signal_connect(item, "clicked", G_CALLBACK(OnCommandDirect), GINT_TO_POINTER(ID_SNAP_ON));
+	g_signal_connect(item, "clicked", G_CALLBACK(OnCommand), GINT_TO_POINTER(ID_SNAP_ON));
 	gtk_toolbar_insert(GTK_TOOLBAR(main_toolbar.toolbar), item, -1);
 	main_toolbar.snap = (GtkWidget*)item;
 
-	GtkWidget* menu = create_snap_menu();
-	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(item), menu);
-	main_toolbar.snap_menu = menu;
+	main_toolbar.snap_menu = create_snap_menu();
+	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(item), main_toolbar.snap_menu);
 
 	item = gtk_toggle_tool_button_new();
 	gtk_tool_item_set_tooltip_text(item, "Toggle angle snap");
 	gtk_tool_button_set_label(GTK_TOOL_BUTTON(item), "Angle snap");
 	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(item), new_pixmap(window, st_snapa));
-	g_signal_connect(item, "clicked", G_CALLBACK(OnCommandDirect), GINT_TO_POINTER(ID_SNAP_A));
+	g_signal_connect(item, "clicked", G_CALLBACK(OnCommand), GINT_TO_POINTER(ID_SNAP_A));
 	gtk_toolbar_insert(GTK_TOOLBAR(main_toolbar.toolbar), item, -1);
 	main_toolbar.angle = (GtkWidget*)item;
 

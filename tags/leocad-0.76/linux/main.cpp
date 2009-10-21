@@ -205,6 +205,36 @@ void OnCommand(GtkWidget* widget, gpointer data)
       project->HandleCommand(LC_TOOLBAR_SNAPMENU, 4);
     } break;
 
+    case ID_SNAP_ON:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 6);
+    } break;
+
+    case ID_LOCK_X:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 0);
+    } break;
+
+    case ID_LOCK_Y:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 1);
+    } break;
+
+    case ID_LOCK_Z:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 2);
+    } break;
+
+    case ID_LOCK_NONE:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 3);
+    } break;
+
+    case ID_LOCK_ON:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 4);
+    } break;
+
     case ID_VIEW_CREATE:
     {
       GtkWidget *wnd, *w, *frame;

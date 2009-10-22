@@ -177,7 +177,7 @@ lcFileDisk::~lcFileDisk()
 		Close();
 }
 
-char* lcFileMem::ReadLine(char* Buffer, size_t Max)
+char* lcFileMem::ReadLine(char* Buffer, int Max)
 {
 	int Read = 0;
 	unsigned char ch;
@@ -204,7 +204,7 @@ char* lcFileMem::ReadLine(char* Buffer, size_t Max)
 	return Buffer;
 }
 
-char* lcFileDisk::ReadLine(char* Buffer, size_t Max)
+char* lcFileDisk::ReadLine(char* Buffer, int Max)
 {
 	return fgets(Buffer, Max, mFile);
 }

@@ -160,7 +160,7 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 
 				float fv;
 				char id[32];
-				FileDisk file;
+				lcFileDisk file;
 				file.Open(filename, "rb");
 				file.Read(id, 32);
 				sscanf(strchr(id, ' '), "%f", &fv);
@@ -1846,7 +1846,7 @@ void SystemReleaseMouse()
 	ReleaseCapture();
 }
 
-void SystemExportClipboard(File* clip)
+void SystemExportClipboard(lcFile* clip)
 {
 	if (clip == NULL)
 		return;
@@ -1866,9 +1866,9 @@ void SystemExportClipboard(File* clip)
 //		AfxMessageBox(IDS_CANNOT_OPEN_CLIPBOARD);
 }
 
-File* SystemImportClipboard()
+lcFile* SystemImportClipboard()
 {
-	File* clip = NULL;
+	lcFile* clip = NULL;
 
 	if (ClipboardFormat != 0)
 	if (OpenClipboard(NULL))
@@ -1876,7 +1876,7 @@ File* SystemImportClipboard()
 		HANDLE hData = ::GetClipboardData(ClipboardFormat);
 		if (hData != NULL)
 		{
-			clip = new FileMem();
+			clip = new lcFileMem();
 
 			BYTE* lpBuffer = (BYTE*)::GlobalLock(hData);
 			long nBufferSize = ::GlobalSize(hData);

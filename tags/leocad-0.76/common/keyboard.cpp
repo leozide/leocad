@@ -144,7 +144,7 @@ LC_KEYBOARD_COMMAND KeyboardShortcuts[KeyboardShortcutsCount];
 
 bool SaveKeyboardShortcuts(const char* FileName)
 {
-	FileDisk f;
+	lcFileDisk f;
 
 	if (!f.Open(FileName, "wt"))
 		return false;
@@ -195,7 +195,7 @@ bool SaveKeyboardShortcuts(const char* FileName)
 
 bool LoadKeyboardShortcuts(const char* FileName)
 {
-	FileDisk f;
+	lcFileDisk f;
 	int i;
 
 	if (!f.Open(FileName, "rt"))

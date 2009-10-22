@@ -19,7 +19,7 @@ public:
 	virtual void SetLength(long Length) = 0;
 	virtual long GetLength() const = 0;
 
-	virtual char* ReadLine(char* Buffer, unsigned long Max)=0;
+	virtual char* ReadLine(char* Buffer, int Max)=0;
 	virtual size_t Read(void* Buffer, size_t Count)=0;
 	virtual size_t Write(const void* Buffer, size_t Count)=0;
 	virtual int GetChar()=0;
@@ -72,7 +72,7 @@ public:
 	void SetLength(long Length);
 	long GetLength() const;
 
-	char* ReadLine(char* Buffer, size_t Max);
+	char* ReadLine(char* Buffer, int Max);
 	size_t Read(void* Buffer, size_t Count);
 	size_t Write(const void* Buffer, size_t Count);
 	int GetChar();
@@ -105,9 +105,9 @@ public:
 	void SetLength(long Length);
 	long GetLength() const;
 
-	char* ReadLine(char* Buffer, unsigned long Max);
-	unsigned long Read(void* Buffer, size_t Count);
-	unsigned long Write(const void* Buffer, size_t Count);
+	char* ReadLine(char* Buffer, int Max);
+	size_t Read(void* Buffer, size_t Count);
+	size_t Write(const void* Buffer, size_t Count);
 	int GetChar();
 	int PutChar(int c);
 

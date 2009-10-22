@@ -5,7 +5,7 @@
 #include "algebra.h"
 //#include "lc_array.h"
 
-class File;
+class lcFile;
 class lcObject;
 class lcPiece;
 class lcCamera;
@@ -27,16 +27,16 @@ public:
 	void DeleteContents();
 
 	// Load model from file.
-	bool FileLoad(File& file);
+	bool FileLoad(lcFile& file);
 
 	// Save model to file.
-	void FileSave(File& file);
+	void FileSave(lcFile& file);
 
 	// Import a model from an LDraw file.
-	void ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath);
+	void ImportLDraw(lcFile& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath);
 
 	// Save the model in LDraw format.
-	void ExportLDraw(File& file, bool SaveMPD, const Matrix44& ParentWorld, u32 Color);
+	void ExportLDraw(lcFile& file, bool SaveMPD, const Matrix44& ParentWorld, u32 Color);
 
 	// Check if a given model is referenced by this model.
 	bool IsSubModel(const lcModel* Model) const;

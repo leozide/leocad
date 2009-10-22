@@ -89,16 +89,16 @@ void lcModel::DeleteContents()
 	m_PieceInfo->m_Mesh = NULL;
 }
 
-bool lcModel::FileLoad(File& file)
+bool lcModel::FileLoad(lcFile& file)
 {
 	return true;
 }
 
-void lcModel::FileSave(File& file)
+void lcModel::FileSave(lcFile& file)
 {
 }
 
-void lcModel::ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath)
+void lcModel::ImportLDraw(lcFile& file, int DefaultColor, const Matrix44& ParentWorld, const String& FilePath)
 {
 	char Buf[1024];
 
@@ -216,7 +216,7 @@ void lcModel::ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWo
 			}
 
 			// Try to read the file from disk.
-			FileDisk tf;
+			lcFileDisk tf;
 
 			if (tf.Open(pn, "rt"))
 			{
@@ -242,7 +242,7 @@ void lcModel::ImportLDraw(File& file, int DefaultColor, const Matrix44& ParentWo
 	}
 }
 
-void lcModel::ExportLDraw(File& file, bool ExportMPD, const Matrix44& ParentWorld, u32 Color)
+void lcModel::ExportLDraw(lcFile& file, bool ExportMPD, const Matrix44& ParentWorld, u32 Color)
 {
 	char buf[1024];
 

@@ -7,7 +7,7 @@
 
 // ========================================================
 
-bool Image::LoadBMP (File& file)
+bool Image::LoadBMP(lcFile& file)
 {
 	i32 bmWidth, bmHeight;
 	u8 bmPlanes, bmBitsPixel, m1, m2;
@@ -38,49 +38,49 @@ bool Image::LoadBMP (File& file)
 	if ((m1 != 'B') || (m2 != 'M'))
 		return false;
 
-	rc = file.ReadLong (&filesize, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&filesize, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&res1, 1); m_bytesRead+=2;
+	rc = file.ReadShorts (&res1, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&res2, 1); m_bytesRead+=2;
+	rc = file.ReadShorts (&res2, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&pixoff, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&pixoff, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&bmisize, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&bmisize, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&bmWidth, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&bmWidth, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&bmHeight, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&bmHeight, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&bmPlanes, 1); m_bytesRead+=2;
+	rc = file.ReadShorts (&bmPlanes, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadShort (&bmBitsPixel, 1); m_bytesRead+=2;
+	rc = file.ReadShorts (&bmBitsPixel, 1); m_bytesRead+=2;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&compression, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&compression, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&sizeimage, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&sizeimage, 1); m_bytesRead+=4;
 	if (rc != 1) {return false; }
 
-	rc = file.ReadLong (&xscale, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&xscale, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&yscale, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&yscale, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&colors, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&colors, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
-	rc = file.ReadLong (&impcol, 1); m_bytesRead+=4;
+	rc = file.ReadInts (&impcol, 1); m_bytesRead+=4;
 	if (rc != 1) { return false; }
 
 	if (colors == 0)
@@ -381,7 +381,7 @@ bool Image::LoadBMP (File& file)
 
 // ========================================================
 
-bool Image::SaveBMP (File& file, bool quantize) const
+bool Image::SaveBMP(lcFile& file, bool quantize) const
 {
 	unsigned short bits;
 	unsigned long cmap, bfSize;
@@ -406,27 +406,27 @@ bool Image::SaveBMP (File& file, bool quantize) const
 	long pixoff = 54 + cmap*4;
 	short res = 0;
 	char m1 ='B', m2 ='M';
-	file.WriteByte (&m1, 1);       byteswritten++; // B
-	file.WriteByte (&m2, 1);       byteswritten++; // M
-	file.WriteLong (&bfSize, 1);   byteswritten+=4;// bfSize
-	file.WriteShort (&res, 1);     byteswritten+=2;// bfReserved1
-	file.WriteShort (&res, 1);     byteswritten+=2;// bfReserved2
-	file.WriteLong (&pixoff, 1);   byteswritten+=4;// bfOffBits
+	file.WriteBytes (&m1, 1);       byteswritten++; // B
+	file.WriteBytes (&m2, 1);       byteswritten++; // M
+	file.WriteInts (&bfSize, 1);   byteswritten+=4;// bfSize
+	file.WriteShorts (&res, 1);     byteswritten+=2;// bfReserved1
+	file.WriteShorts (&res, 1);     byteswritten+=2;// bfReserved2
+	file.WriteInts (&pixoff, 1);   byteswritten+=4;// bfOffBits
 
 	u32 biSize = 40, compress = 0, size = 0;
 	i32 width = m_nWidth, height = m_nHeight, pixels = 0;
 	u16 planes = 1;
-	file.WriteLong (&biSize, 1);   byteswritten+=4;// biSize
-	file.WriteLong (&width, 1);    byteswritten+=4;// biWidth
-	file.WriteLong (&height, 1);   byteswritten+=4;// biHeight
-	file.WriteShort (&planes, 1);  byteswritten+=2;// biPlanes
-	file.WriteShort (&bits, 1);    byteswritten+=2;// biBitCount
-	file.WriteLong (&compress, 1); byteswritten+=4;// biCompression
-	file.WriteLong (&size, 1);     byteswritten+=4;// biSizeImage
-	file.WriteLong (&pixels, 1);   byteswritten+=4;// biXPelsPerMeter
-	file.WriteLong (&pixels, 1);   byteswritten+=4;// biYPelsPerMeter
-	file.WriteLong (&cmap, 1);     byteswritten+=4;// biClrUsed
-	file.WriteLong (&cmap, 1);     byteswritten+=4;// biClrImportant
+	file.WriteInts (&biSize, 1);   byteswritten+=4;// biSize
+	file.WriteInts (&width, 1);    byteswritten+=4;// biWidth
+	file.WriteInts (&height, 1);   byteswritten+=4;// biHeight
+	file.WriteShorts (&planes, 1);  byteswritten+=2;// biPlanes
+	file.WriteShorts (&bits, 1);    byteswritten+=2;// biBitCount
+	file.WriteInts (&compress, 1); byteswritten+=4;// biCompression
+	file.WriteInts (&size, 1);     byteswritten+=4;// biSizeImage
+	file.WriteInts (&pixels, 1);   byteswritten+=4;// biXPelsPerMeter
+	file.WriteInts (&pixels, 1);   byteswritten+=4;// biYPelsPerMeter
+	file.WriteInts (&cmap, 1);     byteswritten+=4;// biClrUsed
+	file.WriteInts (&cmap, 1);     byteswritten+=4;// biClrImportant
 
 	if (quantize)
 	{

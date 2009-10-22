@@ -165,11 +165,11 @@ void lcCamera::Initialize()
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 
-bool lcCamera::FileLoad(File& file)
+bool lcCamera::FileLoad(lcFile& file)
 {
-	unsigned char version, ch;
+	u8 version, ch;
 
-	file.ReadByte(&version, 1);
+	file.ReadBytes(&version);
 
 	if (version > LC_CAMERA_SAVE_VERSION)
 		return false;
@@ -215,37 +215,37 @@ bool lcCamera::FileLoad(File& file)
 		double d[3];
 		float f[3];
 
-		file.ReadDouble(d, 3);
+		file.ReadDoubles(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
 		ChangeKey(1, true, f, LC_CK_EYE);
 
-		file.ReadDouble(d, 3);
+		file.ReadDoubles(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
 		ChangeKey(1, true, f, LC_CK_TARGET);
 
-		file.ReadDouble(d, 3);
+		file.ReadDoubles(d, 3);
 		float roll = 0.0f;
 		ChangeKey(1, true, &roll, LC_CK_ROLL);
 	}
 
 	if (version == 3)
 	{
-		file.Read(&ch, 1);
+		file.ReadBytes(&ch);
 
 		while (ch--)
 		{
-			unsigned char step;
+			u8 step;
 			double eye[3], target[3], up[3];
 			float f[3];
 
-			file.ReadDouble(eye, 3);
-			file.ReadDouble(target, 3);
-			file.ReadDouble(up, 3);
-			file.ReadByte(&step, 1);
+			file.ReadDoubles(eye, 3);
+			file.ReadDoubles(target, 3);
+			file.ReadDoubles(up, 3);
+			file.ReadBytes(&step);
 
 			f[0] = (float)eye[0];
 			f[1] = (float)eye[1];
@@ -260,10 +260,10 @@ bool lcCamera::FileLoad(File& file)
 			float roll = 0.0f;
 			ChangeKey(step, true, &roll, LC_CK_ROLL);
 
-			int snapshot;
-			int cam;
-			file.ReadLong(&snapshot, 1);
-			file.ReadLong(&cam, 1);
+			u32 snapshot;
+			u32 cam;
+			file.ReadInts(&snapshot);
+			file.ReadInts(&cam);
 //			if (cam == -1)
 //				node->pCam = NULL;
 //			else
@@ -274,9 +274,9 @@ bool lcCamera::FileLoad(File& file)
 	if (version < 4)
 	{
 		double d;
-		file.ReadDouble(&d, 1); m_FOV = (float)d;
-		file.ReadDouble(&d, 1); m_FarDist = (float)d;
-		file.ReadDouble(&d, 1); m_NearDist = (float)d;
+		file.ReadDoubles(&d); m_FOV = (float)d;
+		file.ReadDoubles(&d); m_FarDist = (float)d;
+		file.ReadDoubles(&d); m_NearDist = (float)d;
 	}
 	else
 	{
@@ -288,39 +288,39 @@ bool lcCamera::FileLoad(File& file)
 			float param[4];
 			unsigned char type;
 
-			file.ReadLong(&n, 1);
+			file.ReadInts(&n);
 			while (n--)
 			{
-				file.ReadShort(&time, 1);
-				file.ReadFloat(param, 3);
-				file.ReadByte(&type, 1);
+				file.ReadShorts(&time);
+				file.ReadFloats(param, 3);
+				file.ReadBytes(&type);
 
 				ChangeKey(time, true, param, type);
 			}
 
-			file.ReadLong(&n, 1);
+			file.ReadInts(&n);
 			while (n--)
 			{
-				file.ReadShort(&time, 1);
-				file.ReadFloat(param, 3);
-				file.ReadByte(&type, 1);
+				file.ReadShorts(&time);
+				file.ReadFloats(param, 3);
+				file.ReadBytes(&type);
 			}
 		}
 
-		file.ReadFloat(&m_FOV, 1);
-		file.ReadFloat(&m_FarDist, 1);
-		file.ReadFloat(&m_NearDist, 1);
+		file.ReadFloats(&m_FOV);
+		file.ReadFloats(&m_FarDist);
+		file.ReadFloats(&m_NearDist);
 
 		if (version < 5)
 		{
-			file.ReadLong(&n, 1);
+			file.ReadInts(&n);
 			if (n != 0)
 				m_nState |= LC_CAMERA_HIDDEN;
 		}
 		else
 		{
-			file.ReadByte(&m_nState, 1);
-			file.ReadByte(&m_nType, 1);
+			file.ReadBytes(&m_nState);
+			file.ReadBytes(&m_nType);
 		}
 	}
 
@@ -329,9 +329,9 @@ bool lcCamera::FileLoad(File& file)
 		unsigned long show;
 		int user;
 
-		file.ReadLong(&show, 1);
+		file.ReadInts(&show);
 //		if (version > 2)
-		file.ReadLong(&user, 1);
+		file.ReadInts(&user);
 		if (show == 0)
 			m_nState |= LC_CAMERA_HIDDEN;
 	}
@@ -339,24 +339,24 @@ bool lcCamera::FileLoad(File& file)
 	return true;
 }
 
-void lcCamera::FileSave(File& file) const
+void lcCamera::FileSave(lcFile& file) const
 {
 	unsigned char ch = LC_CAMERA_SAVE_VERSION;
 
-	file.WriteByte(&ch, 1);
+	file.WriteBytes(&ch, 1);
 
 	lcObject::FileSave(file);
 
-	ch = (unsigned char)m_Name.GetLength();
-	file.Write(&ch, 1);
+	ch = (u8)m_Name.GetLength();
+	file.WriteBytes(&ch);
 	file.Write((char*)m_Name, ch);
 
-	file.WriteFloat(&m_FOV, 1);
-	file.WriteFloat(&m_FarDist, 1);
-	file.WriteFloat(&m_NearDist, 1);
+	file.WriteFloats(&m_FOV);
+	file.WriteFloats(&m_FarDist);
+	file.WriteFloats(&m_NearDist);
 	// version 5
-	file.WriteByte(&m_nState, 1);
-	file.WriteByte(&m_nType, 1);
+	file.WriteBytes(&m_nState);
+	file.WriteBytes(&m_nType);
 }
 
 /////////////////////////////////////////////////////////////////////////////

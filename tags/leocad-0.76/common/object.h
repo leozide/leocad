@@ -4,7 +4,7 @@
 #include "str.h"
 #include "algebra.h"
 
-class File;
+class lcFile;
 class Matrix;
 class lcObject;
 /*
@@ -135,8 +135,8 @@ public:
 	{ return m_nObjectType; }
 
 protected:
-	virtual bool FileLoad(File& file);
-	virtual void FileSave(File& file) const;
+	virtual bool FileLoad(lcFile& file);
+	virtual void FileSave(lcFile& file) const;
 
 
 	// Key handling stuff

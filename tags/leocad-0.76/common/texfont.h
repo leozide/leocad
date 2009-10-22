@@ -1,7 +1,7 @@
 #ifndef _TEXFONT_H_
 #define _TEXFONT_H_
 
-class File;
+class lcFile;
 class Texture;
 
 #include "texture.h"
@@ -17,7 +17,7 @@ public:
 	void MakeCurrent ()
 	{ if (m_bLoaded) m_pTexture->MakeCurrent (); }
 
-	bool FileLoad(File& file);
+	bool FileLoad(lcFile& file);
 	void PrintText(float Left, float Top, float Z, const char* Text) const;
 	void GetStringDimensions(int* cx, int* cy, const char* Text) const;
 

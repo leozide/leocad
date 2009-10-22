@@ -34,11 +34,11 @@ lcObject::~lcObject()
 	RemoveKeys ();
 }
 
-bool lcObject::FileLoad(File& file)
+bool lcObject::FileLoad(lcFile& file)
 {
 	u8 version;
 
-	file.ReadByte(&version, 1);
+	file.ReadBytes(&version, 1);
 	if (version > LC_KEY_SAVE_VERSION)
 		return false;
 
@@ -49,22 +49,22 @@ bool lcObject::FileLoad(File& file)
 		u8 type;
 		u32 n;
 
-		file.ReadLong(&n, 1);
+		file.ReadInts(&n, 1);
 		while (n--)
 		{
-			file.ReadShort(&time, 1);
-			file.ReadFloat(param, 4);
-			file.ReadByte(&type, 1);
+			file.ReadShorts(&time);
+			file.ReadFloats(param, 4);
+			file.ReadBytes(&type);
 
 			ChangeKey(time, true, param, type);
 		}
 
-		file.ReadLong(&n, 1);
+		file.ReadInts(&n, 1);
 		while (n--)
 		{
-			file.ReadShort(&time, 1);
-			file.ReadFloat(param, 4);
-			file.ReadByte(&type, 1);
+			file.ReadShorts(&time);
+			file.ReadFloats(param, 4);
+			file.ReadBytes(&type);
 		}
 	}
 	else
@@ -74,12 +74,12 @@ bool lcObject::FileLoad(File& file)
 		u32 type;
 		u32 n;
 
-		file.ReadLong(&n, 1);
+		file.ReadInts(&n);
 		while (n--)
 		{
-			file.ReadLong(&time, 1);
-			file.ReadFloat(param, 4);
-			file.ReadLong(&type, 1);
+			file.ReadInts(&time);
+			file.ReadFloats(param, 4);
+			file.ReadInts(&type);
 
 			ChangeKey(time, true, param, type);
 		}
@@ -88,23 +88,23 @@ bool lcObject::FileLoad(File& file)
 	return true;
 }
 
-void lcObject::FileSave(File& file) const
+void lcObject::FileSave(lcFile& file) const
 {
 	u8 version = LC_KEY_SAVE_VERSION;
 	LC_OBJECT_KEY *node;
 	u32 n;
 
-	file.WriteByte(&version, 1);
+	file.WriteBytes(&version, 1);
 
 	for (n = 0, node = m_Keys; node; node = node->Next)
 		n++;
-	file.WriteLong(&n, 1);
+	file.WriteInts(&n, 1);
 
 	for (node = m_Keys; node; node = node->Next)
 	{
-		file.WriteLong(&node->Time, 1);
-		file.WriteFloat(node->Value, 4);
-		file.WriteLong(&node->Type, 1);
+		file.WriteInts(&node->Time, 1);
+		file.WriteFloats(node->Value, 4);
+		file.WriteInts(&node->Type, 1);
 	}
 }
 

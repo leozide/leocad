@@ -80,7 +80,7 @@ typedef struct
 {
   struct jpeg_source_mgr pub;	// public fields
 
-  File * infile;		// source stream
+  lcFile * infile;		// source stream
   JOCTET * buffer;		// start of buffer
   boolean start_of_file;	// have we gotten any data yet?
 } my_source_mgr;
@@ -160,7 +160,7 @@ static void term_source (j_decompress_ptr cinfo)
 }
 
 // Prepare for input from a File object.
-static void jpeg_file_src (j_decompress_ptr cinfo, File& infile)
+static void jpeg_file_src (j_decompress_ptr cinfo, lcFile& infile)
 {
   my_src_ptr src;
 
@@ -195,7 +195,7 @@ static void jpeg_file_src (j_decompress_ptr cinfo, File& infile)
 
 // =============================================================================
 
-bool Image::LoadJPG (File& file)
+bool Image::LoadJPG(lcFile& file)
 {
   struct jpeg_decompress_struct cinfo;
   struct bt_jpeg_error_mgr jerr;
@@ -259,7 +259,7 @@ typedef struct
 {
   struct jpeg_destination_mgr pub; // public fields
 
-  File * outfile;   // target stream
+  lcFile * outfile;   // target stream
   JOCTET * buffer;  // start of buffer
 } my_destination_mgr;
 
@@ -324,7 +324,7 @@ static void term_destination (j_compress_ptr cinfo)
 }
 
 // Prepare for output to a File object.
-static void jpeg_file_dest (j_compress_ptr cinfo, File& outfile)
+static void jpeg_file_dest (j_compress_ptr cinfo, lcFile& outfile)
 {
   my_dest_ptr dest;
 
@@ -350,7 +350,7 @@ static void jpeg_file_dest (j_compress_ptr cinfo, File& outfile)
 
 // =============================================================================
 
-bool Image::SaveJPG (File& file, int quality, bool progressive) const
+bool Image::SaveJPG(lcFile& file, int quality, bool progressive) const
 {
   struct jpeg_compress_struct cinfo;
   struct bt_jpeg_error_mgr jerr;

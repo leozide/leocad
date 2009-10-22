@@ -57,7 +57,7 @@ PieceInfo::~PieceInfo()
 /////////////////////////////////////////////////////////////////////////////
 // File I/O
 
-void PieceInfo::LoadIndex(File& file)
+void PieceInfo::LoadIndex(lcFile& file)
 {
   static bool init = false;
   short sh[6];
@@ -86,13 +86,13 @@ void PieceInfo::LoadIndex(File& file)
 
   file.Read (m_strName, 8);
   m_strName[8] = '\0';
-  file.Read (m_strDescription, 64);
+  file.Read(m_strDescription, 64);
   m_strDescription[64] = '\0';
-  file.ReadShort (sh, 6);
-  file.ReadByte (&m_nFlags, 1);
-  u32 Groups; file.ReadLong (&Groups, 1);
-  file.ReadLong (&m_nOffset, 1);
-  file.ReadLong (&m_nSize, 1);
+  file.ReadShorts(sh, 6);
+  file.ReadBytes(&m_nFlags, 1);
+  u32 Groups; file.ReadInts(&Groups, 1);
+  file.ReadInts(&m_nOffset, 1);
+  file.ReadInts(&m_nSize, 1);
 
   if (m_nFlags & LC_PIECE_SMALL)
     scale = 10000;
@@ -476,7 +476,7 @@ void PieceInfo::LoadInformation()
 	if (m_nFlags & LC_PIECE_MODEL)
 		return;
 
-	FileDisk bin;
+	lcFileDisk bin;
 	char filename[LC_MAXPATH];
 	CONNECTIONINFO* pConnection;
 	void* buf;

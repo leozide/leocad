@@ -8,80 +8,106 @@
 
 class String;
 
-class File
+class lcFile
 {
 public:
-	// Constructors
-	File();
-	virtual ~File();
+	lcFile();
+	virtual ~lcFile();
 
-	// Implementation
-public:
-	virtual unsigned long GetPosition() const = 0;
-	virtual unsigned long Seek(long lOff, int nFrom) = 0;
-	virtual void SetLength(unsigned long nNewLen) = 0;
-	virtual unsigned long GetLength() const = 0;
+	virtual long GetPosition() const = 0;
+	virtual long Seek(long Offset, int From) = 0;
+	virtual void SetLength(long Length) = 0;
+	virtual long GetLength() const = 0;
 
-	virtual char* ReadLine(char* pBuf, unsigned long nMax)=0;
-	virtual unsigned long Read(void* pBuf, unsigned long nCount)=0;
-	virtual unsigned long Write(const void* pBuf, unsigned long nCount)=0;
+	virtual char* ReadLine(char* Buffer, unsigned long Max)=0;
+	virtual size_t Read(void* Buffer, size_t Count)=0;
+	virtual size_t Write(const void* Buffer, size_t Count)=0;
 	virtual int GetChar()=0;
 	virtual int PutChar(int c)=0;
 
-	unsigned long ReadByte(void* pBuf, unsigned long nCount);
-	unsigned long ReadShort(void* pBuf, unsigned long nCount);
-	unsigned long ReadLong(void* pBuf, unsigned long nCount);
-	unsigned long ReadFloat(void* pBuf, unsigned long nCount);
-	unsigned long ReadDouble(void* pBuf, unsigned long nCount);
-	unsigned long WriteByte(const void* pBuf, unsigned long nCount);
-	unsigned long WriteShort(const void* pBuf, unsigned long nCount);
-	unsigned long WriteLong(const void* pBuf, unsigned long nCount);
-	unsigned long WriteFloat(const void* pBuf, unsigned long nCount);
-	unsigned long WriteDouble(const void* pBuf, unsigned long nCount);
+	size_t ReadBytes(void* Buffer, size_t Count = 1)
+	{ return Read(Buffer, Count); }
+	size_t WriteBytes(const void* Buffer, size_t Count = 1)
+	{ return Write(Buffer, Count); }
+
+	size_t ReadShorts(void* Buffer, size_t Count = 1);
+	size_t WriteShorts(const void* Buffer, size_t Count = 1);
+
+	size_t ReadInts(void* Buffer, size_t Count = 1);
+	size_t WriteInts(const void* Buffer, size_t Count = 1);
+
+	size_t ReadFloats(void* Buffer, size_t Count = 1)
+	{ return ReadInts(Buffer, Count); }
+	size_t WriteFloats(const void* Buffer, size_t Count = 1)
+	{ return WriteInts(Buffer, Count); }
+
+	size_t ReadDoubles(void* Buffer, size_t Count = 1);
+	size_t WriteDoubles(const void* Buffer, size_t Count = 1);
 
 	void ReadString(String& Value);
-	void ReadInt(i32* Value)
-	{ ReadLong(Value, 1); }
-	void ReadInt(u32* Value)
-	{ ReadLong(Value, 1); }
-
 	void WriteString(const String& Value);
-	void WriteInt(i32 Value)
-	{ WriteLong(&Value, 1); }
-	void WriteInt(u32 Value)
-	{ WriteLong(&Value, 1); }
 
 	virtual void Abort()=0;
 	virtual void Flush()=0;
 	virtual void Close()=0;
 
 	const char* GetFileName() const
-	{ return FileName; }
+	{ return mFileName; }
 	
-	void SetFileName(const char* Name)
-	{ strncpy(FileName, Name, LC_MAXPATH); }
+	void SetFileName(const char* FileName)
+	{ strncpy(mFileName, FileName, LC_MAXPATH); }
 
 protected:
-	char FileName[LC_MAXPATH];
+	char mFileName[LC_MAXPATH];
 };
 
-class FileMem : public File
+class lcFileMem : public lcFile
 {
 public:
-// Constructors
-	FileMem();
-	~FileMem();
+	lcFileMem();
+	~lcFileMem();
 
-// Implementation
+	long GetPosition() const;
+	long Seek(long Offset, int From);
+	void SetLength(long Length);
+	long GetLength() const;
+
+	char* ReadLine(char* Buffer, size_t Max);
+	size_t Read(void* Buffer, size_t Count);
+	size_t Write(const void* Buffer, size_t Count);
+	int GetChar();
+	int PutChar(int c);
+
+	void Abort();
+	void Flush();
+	void Close();
+	bool Open(const char* FileName, const char* Mode);
+
+protected:
+	void GrowFile(long Length);
+
+	long mGrowBytes;
+	long mPosition;
+	long mBufferSize;
+	long mFileSize;
+	unsigned char* mBuffer;
+	bool mAutoDelete;
+};
+
+class lcFileDisk : public lcFile
+{
 public:
-	unsigned long GetPosition() const;
-	unsigned long Seek(long lOff, int nFrom);
-	void SetLength(unsigned long nNewLen);
-	unsigned long GetLength() const;
+	lcFileDisk();
+	~lcFileDisk();
 
-	char* ReadLine(char* pBuf, unsigned long nMax);
-	unsigned long Read(void* pBuf, unsigned long nCount);
-	unsigned long Write(const void* pBuf, unsigned long nCount);
+	long GetPosition() const;
+	long Seek(long Offset, int From);
+	void SetLength(long Length);
+	long GetLength() const;
+
+	char* ReadLine(char* Buffer, unsigned long Max);
+	unsigned long Read(void* Buffer, size_t Count);
+	unsigned long Write(const void* Buffer, size_t Count);
 	int GetChar();
 	int PutChar(int c);
 
@@ -91,45 +117,9 @@ public:
 	bool Open(const char *filename, const char *mode);
 
 protected:
-	// MemFile specific:
-	unsigned long m_nGrowBytes;
-	unsigned long m_nPosition;
-	unsigned long m_nBufferSize;
-	unsigned long m_nFileSize;
-	unsigned char* m_pBuffer;
-	bool m_bAutoDelete;
-	void GrowFile(unsigned long nNewLen);
-};
-
-class FileDisk : public File
-{
-public:
-// Constructors
-	FileDisk();
-	~FileDisk();
-
-// Implementation
-public:
-	unsigned long GetPosition() const;
-	unsigned long Seek(long lOff, int nFrom);
-	void SetLength(unsigned long nNewLen);
-	unsigned long GetLength() const;
-
-	char* ReadLine(char* pBuf, unsigned long nMax);
-	unsigned long Read(void* pBuf, unsigned long nCount);
-	unsigned long Write(const void* pBuf, unsigned long nCount);
-	int GetChar();
-	int PutChar(int c);
-
-	void Abort();
-	void Flush();
-	void Close();
-	bool Open(const char *filename, const char *mode);
-
-protected:
-	// DiscFile specific:
-	FILE* m_hFile;
-	bool m_bCloseOnDelete;
+	FILE* mFile;
+	bool mCloseOnDelete;
 };
 
 #endif // _FILE_H_
+

@@ -5,7 +5,7 @@
 #include "str.h"
 #include "lc_array.h"
 
-class File;
+class lcFile;
 class Texture;
 class PieceInfo;
 
@@ -98,8 +98,8 @@ protected:
 	bool m_CategoriesModified;
 	char m_CategoriesFile[LC_MAXPATH];
 
-	bool ValidatePiecesFile (File& IdxFile, File& BinFile) const;
-	bool ValidateTexturesFile (File& IdxFile, File& BinFile) const;
+	bool ValidatePiecesFile (lcFile& IdxFile, lcFile& BinFile) const;
+	bool ValidateTexturesFile (lcFile& IdxFile, lcFile& BinFile) const;
 
 	// File headers
 	static const char PiecesBinHeader[32];

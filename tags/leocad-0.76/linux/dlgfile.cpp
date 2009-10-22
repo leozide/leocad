@@ -36,7 +36,7 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
   {
     float fv;
     char id[32];
-    FileDisk file;
+    lcFileDisk file;
     file.Open (filename, "rb");
     file.Read (id, 32);
     sscanf (strchr(id, ' '), "%f", &fv);

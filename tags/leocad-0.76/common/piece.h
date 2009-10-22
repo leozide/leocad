@@ -1,7 +1,7 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
-class File;
+class lcFile;
 class lcPiece;
 class lcGroup;
 class PieceInfo;
@@ -58,8 +58,8 @@ public:
 	void Initialize(float x, float y, float z, u32 Time, int Color);
 	void MergeBoundingBox(BoundingBox* Box);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
-	bool FileLoad(File& file, char* name);
-	void FileSave(File& file, lcGroup* Groups);
+	bool FileLoad(lcFile& file, char* name);
+	void FileSave(lcFile& file, lcGroup* Groups);
 
 	void UpdatePosition(u32 Time);
 	void Move(u32 Time, bool AddKey, const Vector3& Delta);

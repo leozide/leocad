@@ -64,7 +64,7 @@ class lcModel;
 
 typedef struct LC_UNDOINFO
 {
-	FileMem file;
+	lcFileMem file;
 	char strText[21];
 	LC_UNDOINFO* pNext;
 	LC_UNDOINFO() { pNext = NULL; };
@@ -162,7 +162,7 @@ protected:
 	void CheckPoint (const char* text);
 
 	Terrain* m_pTerrain;
-	File* m_pClipboard[10];
+	lcFile* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
 
 	void AddModel(lcModel* Model);
@@ -204,7 +204,7 @@ protected:
 	bool m_PlayingAnimation;
 	u64 m_LastFrameTime;
 
-	File* m_pTrackFile;
+	lcFile* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;
@@ -286,8 +286,8 @@ protected:
 	// File load/save implementation.
 	bool DoSave(char* PathName);
 	bool DoFileSave();
-	bool FileLoad(File* file, bool bUndo, bool bMerge);
-	void FileSave(File* file, bool bUndo);
+	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
+	void FileSave(lcFile* file, bool bUndo);
 
 public:
 	// File helpers

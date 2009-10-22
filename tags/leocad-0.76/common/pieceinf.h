@@ -11,7 +11,7 @@
 #define LC_PIECE_MEDIUM             0x20 // scale = 1000 (otherwise = 100)
 #define LC_PIECE_MODEL              0x40 // This is a model instead of a piece from the library.
 
-class File;
+class lcFile;
 class Texture;
 class lcMesh;
 class lcModel;
@@ -75,7 +75,7 @@ public:
 	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
 
 	// Implementation
-	void LoadIndex(File& file);
+	void LoadIndex(lcFile& file);
 	void CreateFromModel(lcModel* Model);
 	void AddRef();
 	void DeRef();

@@ -1,7 +1,3 @@
-// File class, can be a memory file or in the disk.
-// Needed to work with the clipboard and undo/redo easily.
-// NOTE: Because of endianess issues, all I/O must be done from a File class.
-
 #include "lc_global.h"
 #include <stdio.h>
 #include <memory.h>
@@ -11,561 +7,430 @@
 #include "defines.h"
 #include "str.h"
 
-// =============================================================================
-// File construction/destruction
-
-File::File ()
+lcFile::lcFile()
 {
-  strcpy(FileName, "");
+	strcpy(mFileName, "");
 }
 
-File::~File ()
+lcFile::~lcFile()
 {
 }
 
-// =============================================================================
-// Endian-safe functions
-
-// reads 1-byte integers
-unsigned long File::ReadByte (void* pBuf, unsigned long nCount)
+size_t lcFile::ReadShorts(void* Buffer, size_t Count)
 {
-  return Read (pBuf, nCount);
-}
+	size_t ReadCount = Read(Buffer, Count * 2) / 2;
 
-// reads 2-byte integers
-unsigned long File::ReadShort (void* pBuf, unsigned long nCount)
-{
-  unsigned long read;
-
-  read = Read (pBuf, nCount*2)/2;
-
-#ifdef LC_BIG_ENDIAN
-  unsigned long i;
-  u16* val = (u16*)pBuf, x;
-
-  for (i = 0; i < read; i++)
-  {
-    x = *val;
-    *val = ((x>>8) | (x<<8));
-    val++;
-  }
+#if LC_BIG_ENDIAN
+	for (size_t i = 0, u16* val = (u16*)Buffer; i < ReadCount; i++, val++)
+		*val = LCUINT16(*val);
 #endif
 
-  return read;
+	return ReadCount;
 }
 
-// reads 4-byte integers
-unsigned long File::ReadLong (void* pBuf, unsigned long nCount)
+size_t lcFile::ReadInts(void* Buffer, size_t Count)
 {
-  unsigned long read;
+	size_t ReadCount = Read(Buffer, Count * 4) / 4;
 
-  read = Read (pBuf, nCount*4)/4;
-
-#ifdef LC_BIG_ENDIAN
-  unsigned long i;
-  u32* val = (u32*)pBuf, x;
-
-  for (i = 0; i < read; i++)
-  {
-    x = *val;
-    *val = ((x>>24) | ((x>>8) & 0xff00) | ((x<<8) & 0xff0000) | (x<<24));
-    val++;
-  }
+#if LC_BIG_ENDIAN
+	for (size_t i = 0, u32* val = (u32*)Buffer; i < ReadCount; i++, val++)
+		*val = LCUINT32(*val);
 #endif
 
-  return read;
+  return ReadCount;
 }
 
-// reads 4-byte floats
-unsigned long File::ReadFloat (void* pBuf, unsigned long nCount)
+size_t lcFile::ReadDoubles(void* Buffer, size_t Count)
 {
-  unsigned long read;
+  size_t ReadCount = Read(Buffer, Count * 8) / 8;
 
-  read = Read (pBuf, nCount*4)/4;
+#if LC_BIG_ENDIAN
+	union { unsigned char b[8]; double d; } in, out;
 
-#ifdef LC_BIG_ENDIAN
-  unsigned long i;
-  float* val = (float*)pBuf;
-  union { unsigned char b[4]; float f; } in, out;
+	for (size_t i = 0, double* val = (double*)Buffer; i < ReadCount; i++, val++)
+	{
+		in.d = *val;
 
-  for (i = 0; i < read; i++)
-  {
-    in.f = *val;
+		out.b[0] = in.b[7];
+		out.b[1] = in.b[6];
+		out.b[2] = in.b[5];
+		out.b[3] = in.b[4];
+		out.b[4] = in.b[3];
+		out.b[5] = in.b[2];
+		out.b[6] = in.b[1];
+		out.b[7] = in.b[0];
 
-    out.b[0] = in.b[3];
-    out.b[1] = in.b[2];
-    out.b[2] = in.b[1];
-    out.b[3] = in.b[0];
-
-    *val = out.f;
-    val++;
-  }
+		*val = out.d;
+	}
 #endif
 
-  return read;
+	return ReadCount;
 }
 
-// reads 8-byte floats
-unsigned long File::ReadDouble (void* pBuf, unsigned long nCount)
+size_t lcFile::WriteShorts(const void* Buffer, size_t Count)
 {
-  unsigned long read;
+#if LC_BIG_ENDIAN
+	size_t WriteCount = 0;
 
-  read = Read (pBuf, nCount*8)/8;
+	for (size_t i = 0, u16* val = (u16*)Buffer; i < Count; i++, val++)
+	{
+		u16 x = LCUINT16(*val);
+		WriteCount += Write(&x, 2) / 2;
+	}
 
-#ifdef LC_BIG_ENDIAN
-  unsigned long i;
-  double* val = (double*)pBuf;
-  union { unsigned char b[8]; double d; } in, out;
-
-  for (i = 0; i < read; i++)
-  {
-    in.d = *val;
-
-    out.b[0] = in.b[7];
-    out.b[1] = in.b[6];
-    out.b[2] = in.b[5];
-    out.b[3] = in.b[4];
-    out.b[4] = in.b[3];
-    out.b[5] = in.b[2];
-    out.b[6] = in.b[1];
-    out.b[7] = in.b[0];
-
-    *val = out.d;
-    val++;
-  }
-#endif
-
-  return read;
-}
-
-// writes 1-byte integers
-unsigned long File::WriteByte (const void* pBuf, unsigned long nCount)
-{
-  return Write (pBuf, nCount);
-}
-
-// writes 2-byte integers
-unsigned long File::WriteShort (const void* pBuf, unsigned long nCount)
-{
-#ifdef LC_BIG_ENDIAN
-  unsigned long wrote = 0, i;
-  u16* val = (u16*)pBuf, x;
-
-  for (i = 0; i < nCount; i++)
-  {
-    x = (((*val)>>8) | ((*val)<<8));
-    val++;
-    wrote += Write (&x, 2)/2;
-  }
-
-  return wrote;
+	return WriteCount;
 #else
-  return Write(pBuf, nCount*2)/2;
+	return Write(Buffer, Count * 2) / 2;
 #endif
 }
 
-// writes 4-byte integers
-unsigned long File::WriteLong (const void* pBuf, unsigned long nCount)
+size_t lcFile::WriteInts(const void* Buffer, size_t Count)
 {
-#ifdef LC_BIG_ENDIAN
-  unsigned long wrote = 0, i;
-  u32* val = (u32*)pBuf, x;
+#if LC_BIG_ENDIAN
+	size_t WriteCount = 0;
 
-  for (i = 0; i < nCount; i++)
-  {
-    x = (((*val)>>24) | (((*val)>>8) & 0xff00) | (((*val)<<8) & 0xff0000) | ((*val)<<24));
-    val++;
-    wrote += Write (&x, 4)/4;
-  }
+	for (size_t i = 0, u32* val = (u32*)Buffer; i < Count; i++, val++)
+	{
+		u32 x = LCUINT32(*val);
+		WriteCount += Write(&x, 4) / 4;
+	}
 
-  return wrote;
+	return WriteCount;
 #else
-  return Write (pBuf, nCount*4)/4;
+	return Write(Buffer, Count * 4) / 4;
 #endif
 }
 
-// writes 4-byte floats
-unsigned long File::WriteFloat (const void* pBuf, unsigned long nCount)
+size_t lcFile::WriteDoubles(const void* Buffer, size_t Count)
 {
-#ifdef LC_BIG_ENDIAN
-  unsigned long wrote = 0, i;
-  float* val = (float*)pBuf, x;
-  union { unsigned char b[4]; float f; } in, out;
+#if LC_BIG_ENDIAN
+	size_t WriteCount = 0;
+	union { unsigned char b[8]; double d; } in, out;
 
-  for (i = 0; i < nCount; i++)
-  {
-    in.f = *val;
-    val++;
+	for (size_t i = 0, double* val = (double*)Buffer; i < Count; i++, val++)
+	{
+		in.d = *val;
 
-    out.b[0] = in.b[3];
-    out.b[1] = in.b[2];
-    out.b[2] = in.b[1];
-    out.b[3] = in.b[0];
-    x = out.f;
+		out.b[0] = in.b[7];
+		out.b[1] = in.b[6];
+		out.b[2] = in.b[5];
+		out.b[3] = in.b[4];
+		out.b[4] = in.b[3];
+		out.b[5] = in.b[2];
+		out.b[6] = in.b[1];
+		out.b[7] = in.b[0];
 
-    wrote += Write (&x, 4)/4;
-  }
+		WriteCount += Write(&out, 8) / 8;
+	}
 
-  return wrote;
+	return WriteCount;
 #else
-  return Write (pBuf, nCount*4)/4;
+	return Write(Buffer, Count * 8) / 8;
 #endif
 }
 
-// writes 8-byte floats
-unsigned long File::WriteDouble (const void* pBuf, unsigned long nCount)
-{
-#ifdef LC_BIG_ENDIAN
-  unsigned long wrote = 0, i;
-  double* val = (double*)pBuf, x;
-  union { unsigned char b[8]; double d; } in, out;
-
-  for (i = 0; i < nCount; i++)
-  {
-    in.d = *val;
-    val++;
-
-    out.b[0] = in.b[7];
-    out.b[1] = in.b[6];
-    out.b[2] = in.b[5];
-    out.b[3] = in.b[4];
-    out.b[4] = in.b[3];
-    out.b[5] = in.b[2];
-    out.b[6] = in.b[1];
-    out.b[7] = in.b[0];
-    x = out.d;
-
-    wrote += Write (&x, 8)/8;
-  }
-
-  return wrote;
-#else
-  return Write (pBuf, nCount*8)/8;
-#endif
-}
-
-void File::ReadString(String& Value)
+void lcFile::ReadString(String& Value)
 {
 	u32 l;
-	ReadInt(&l);
+	ReadInts(&l);
 	Read(Value.GetBuffer(l+1), l);
 	((char*)Value)[l] = 0;
 }
 
-void File::WriteString(const String& Value)
+void lcFile::WriteString(const String& Value)
 {
-	WriteInt(Value.GetLength());
-	Write((const char*)Value, Value.GetLength());
+	int Length = Value.GetLength();
+	WriteInts(&Length);
+	Write((const char*)Value, Length);
 }
 
-// =============================================================================
-
-FileMem::FileMem()
+lcFileMem::lcFileMem()
 {
-  m_nGrowBytes = 1024;
-  m_nPosition = 0;
-  m_nBufferSize = 0;
-  m_nFileSize = 0;
-  m_pBuffer = NULL;
-  m_bAutoDelete = true;
+	mGrowBytes = 1024;
+	mPosition = 0;
+	mBufferSize = 0;
+	mFileSize = 0;
+	mBuffer = NULL;
+	mAutoDelete = true;
 }
 
-FileDisk::FileDisk()
+lcFileDisk::lcFileDisk()
 {
-  m_hFile = NULL;
-  m_bCloseOnDelete = false;
+	mFile = NULL;
+	mCloseOnDelete = false;
 }
 
-FileMem::~FileMem()
+lcFileMem::~lcFileMem()
 {
-  if (m_pBuffer)
-    Close();
+	if (mBuffer)
+		Close();
 
-  m_nGrowBytes = 0;
-  m_nPosition = 0;
-  m_nBufferSize = 0;
-  m_nFileSize = 0;
+	mGrowBytes = 0;
+	mPosition = 0;
+	mBufferSize = 0;
+	mFileSize = 0;
 }
 
-FileDisk::~FileDisk()
+lcFileDisk::~lcFileDisk()
 {
-  if (m_hFile != NULL && m_bCloseOnDelete)
-    Close();
+	if (mFile && mCloseOnDelete)
+		Close();
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// File operations
-
-char* FileMem::ReadLine(char* pBuf, unsigned long nMax)
+char* lcFileMem::ReadLine(char* Buffer, size_t Max)
 {
-  int nRead = 0;
-  unsigned char ch;
+	int Read = 0;
+	unsigned char ch;
 
-  if (nMax <= 0)
-    return NULL;
-  if (m_nPosition >= m_nFileSize)
-    return NULL;
+	if (Max <= 0)
+		return NULL;
+	if (mPosition >= mFileSize)
+		return NULL;
 
-  while ((--nMax))
-  {
-    if (m_nPosition == m_nFileSize)
-      break;
+	while ((--Max))
+	{
+		if (mPosition == mFileSize)
+			break;
 
-    ch = m_pBuffer[m_nPosition];
-    m_nPosition++;
-    pBuf[nRead++] = ch;
+		ch = mBuffer[mPosition];
+		mPosition++;
+		Buffer[Read++] = ch;
 
-    if (ch == '\n')
-      break;
-  }
+		if (ch == '\n')
+			break;
+	}
 
-  pBuf[nRead] = '\0';
-  return pBuf;
+	Buffer[Read] = '\0';
+	return Buffer;
 }
 
-char* FileDisk::ReadLine(char* pBuf, unsigned long nMax)
+char* lcFileDisk::ReadLine(char* Buffer, size_t Max)
 {
-  return fgets(pBuf, nMax, m_hFile);
+	return fgets(Buffer, Max, mFile);
 }
 
-unsigned long FileMem::Read(void* pBuf, unsigned long nCount)
+size_t lcFileMem::Read(void* Buffer, size_t Count)
 {
-  if (nCount == 0)
-    return 0;
+	if (!Count)
+		return 0;
 
-  if (m_nPosition > m_nFileSize)
-    return 0;
+	if (mPosition > mFileSize)
+		return 0;
 
-  unsigned long nRead;
-  if (m_nPosition + nCount > m_nFileSize)
-    nRead = (unsigned long)(m_nFileSize - m_nPosition);
-  else
-    nRead = nCount;
+	size_t Read;
+	if (mPosition + Count > (size_t)mFileSize)
+		Read = mFileSize - mPosition;
+	else
+		Read = Count;
 
-  memcpy((unsigned char*)pBuf, (unsigned char*)m_pBuffer + m_nPosition, nRead);
-  m_nPosition += nRead;
+	memcpy(Buffer, (unsigned char*)mBuffer + mPosition, Read);
+	mPosition += Read;
 
-  return nRead;
+	return Read;
 }
 
-unsigned long FileDisk::Read(void* pBuf, unsigned long nCount)
+size_t lcFileDisk::Read(void* Buffer, size_t Count)
 {
-  return fread(pBuf, 1, nCount, m_hFile);
+	return fread(Buffer, 1, Count, mFile);
 }
 
-int FileMem::GetChar()
+int lcFileMem::GetChar()
 {
-  if (m_nPosition > m_nFileSize)
-    return EOF;
+	if (mPosition > mFileSize)
+		return EOF;
 
-  unsigned char* ret = (unsigned char*)m_pBuffer + m_nPosition;
-  m_nPosition++;
+	unsigned char* ret = (unsigned char*)mBuffer + mPosition;
+	mPosition++;
 
-  return *ret;
+	return *ret;
 }
 
-int FileDisk::GetChar()
+int lcFileDisk::GetChar()
 {
-  return fgetc(m_hFile);
+	return fgetc(mFile);
 }
 
-unsigned long FileMem::Write(const void* pBuf, unsigned long nCount)
+size_t lcFileMem::Write(const void* Buffer, size_t Count)
 {
-  if (nCount == 0)
-    return 0;
+	if (!Count)
+		return 0;
 
-  if (m_nPosition + nCount > m_nBufferSize)
-    GrowFile(m_nPosition + nCount);
+	if (mPosition + Count > (size_t)mBufferSize)
+		GrowFile(mPosition + Count);
 
-  memcpy((unsigned char*)m_pBuffer + m_nPosition, (unsigned char*)pBuf, nCount);
+	memcpy((unsigned char*)mBuffer + mPosition, Buffer, Count);
 
-  m_nPosition += nCount;
+	mPosition += Count;
 
-  if (m_nPosition > m_nFileSize)
-    m_nFileSize = m_nPosition;
+	if (mPosition > mFileSize)
+		mFileSize = mPosition;
 
-  return nCount;
+	return Count;
 }
 
-unsigned long FileDisk::Write(const void* pBuf, unsigned long nCount)
+size_t lcFileDisk::Write(const void* Buffer, size_t Count)
 {
-  return fwrite(pBuf, 1, nCount, m_hFile);
+  return fwrite(Buffer, 1, Count, mFile);
 }
 
-int FileMem::PutChar(int c)
+int lcFileMem::PutChar(int c)
 {
-  if (m_nPosition + 1 > m_nBufferSize)
-    GrowFile(m_nPosition + 1);
+	if (mPosition + 1 > mBufferSize)
+		GrowFile(mPosition + 1);
 
-  unsigned char* bt = (unsigned char*)m_pBuffer + m_nPosition;
-  *bt = c;
+	unsigned char* bt = (unsigned char*)mBuffer + mPosition;
+	*bt = c;
+	mPosition++;
 
-  m_nPosition++;
+	if (mPosition > mFileSize)
+		mFileSize = mPosition;
 
-  if (m_nPosition > m_nFileSize)
-    m_nFileSize = m_nPosition;
-
-  return 1;
+	return 1;
 }
 
-int FileDisk::PutChar(int c)
+int lcFileDisk::PutChar(int c)
 {
-  return fputc(c, m_hFile);
+	return fputc(c, mFile);
 }
 
-bool FileDisk::Open(const char *filename, const char *mode)
+bool lcFileDisk::Open(const char* FileName, const char* Mode)
 {
-	if (*filename == 0)
-		return false;
+	strcpy(mFileName, FileName);
 
-  strcpy(FileName, filename);
+	mFile = fopen(mFileName, Mode);
+	mCloseOnDelete = true;
 
-  m_hFile = fopen(filename, mode);
-  m_bCloseOnDelete = true;
-
-  return (m_hFile != NULL);
+	return (mFile != NULL);
 }
 
-void FileMem::Close()
+void lcFileMem::Close()
 {
-  m_nGrowBytes = 0;
-  m_nPosition = 0;
-  m_nBufferSize = 0;
-  m_nFileSize = 0;
-  if (m_pBuffer && m_bAutoDelete)
-    free(m_pBuffer);
-  m_pBuffer = NULL;
-  strcpy(FileName, "");
+	if (mBuffer && mAutoDelete)
+		free(mBuffer);
+
+	mGrowBytes = 0;
+	mPosition = 0;
+	mBufferSize = 0;
+	mFileSize = 0;
+	mBuffer = NULL;
+	strcpy(mFileName, "");
 }
 
-void FileDisk::Close()
+void lcFileDisk::Close()
 {
-  if (m_hFile != NULL)
-    fclose(m_hFile);
+	if (mFile)
+		fclose(mFile);
 
-  m_hFile = NULL;
-  m_bCloseOnDelete = false;
-  strcpy(FileName, "");
+	mFile = NULL;
+	mCloseOnDelete = false;
+	strcpy(mFileName, "");
 }
 
-unsigned long FileMem::Seek(long lOff, int nFrom)
+long lcFileMem::Seek(long Offset, int From)
 {
-  unsigned long lNewPos = m_nPosition;
+	if (From == SEEK_SET)
+		mPosition = Offset;
+	else if (From == SEEK_CUR)
+		mPosition += Offset;
+	else if (From == SEEK_END)
+		mPosition = mFileSize + Offset;
+	else
+		return -1;
 
-  if (nFrom == SEEK_SET)
-    lNewPos = lOff;
-  else if (nFrom == SEEK_CUR)
-    lNewPos += lOff;
-  else if (nFrom == SEEK_END)
-    lNewPos = m_nFileSize + lOff;
-  else
-    return (unsigned long)-1;
-
-  m_nPosition = lNewPos;
-
-  return 0;
+	return 0;
 }
 
-unsigned long FileDisk::Seek(long lOff, int nFrom)
+long lcFileDisk::Seek(long Offset, int From)
 {
-  fseek (m_hFile, lOff, nFrom);
+	fseek(mFile, Offset, From);
 
-  return ftell(m_hFile);
+	return ftell(mFile);
 }
 
-unsigned long FileMem::GetPosition() const
+long lcFileMem::GetPosition() const
 {
-    return m_nPosition;
+    return mPosition;
 }
 
-unsigned long FileDisk::GetPosition() const
+long lcFileDisk::GetPosition() const
 {
-  return ftell(m_hFile);
+	return ftell(mFile);
 }
 
-void FileMem::GrowFile(unsigned long nNewLen)
+void lcFileMem::GrowFile(long Length)
 {
-  if (nNewLen > m_nBufferSize)
-  {
-    // grow the buffer
-    unsigned long nNewBufferSize = m_nBufferSize;
+	if (Length > mBufferSize)
+	{
+		long NewBufferSize = mBufferSize;
 
-    // determine new buffer size
-    while (nNewBufferSize < nNewLen)
-      nNewBufferSize += m_nGrowBytes;
+		while (NewBufferSize < Length)
+			NewBufferSize += mGrowBytes;
 
-    // allocate new buffer
-    unsigned char* lpNew;
-    if (m_pBuffer == NULL)
-      lpNew = (unsigned char*)malloc(nNewBufferSize);
-    else
-      lpNew = (unsigned char*)realloc(m_pBuffer, nNewBufferSize);
+		if (!mBuffer)
+			mBuffer = (unsigned char*)malloc(NewBufferSize);
+		else
+			mBuffer = (unsigned char*)realloc(mBuffer, NewBufferSize);
 
-    m_pBuffer = lpNew;
-    m_nBufferSize = nNewBufferSize;
-  }
+		mBufferSize = NewBufferSize;
+	}
 }
 
-void FileMem::Flush()
+void lcFileMem::Flush()
 {
-  // Nothing to be done
 }
 
-void FileDisk::Flush()
+void lcFileDisk::Flush()
 {
-  if (m_hFile == NULL)
-    return;
-
-  fflush(m_hFile);
+	if (mFile)
+		fflush(mFile);
 }
 
-void FileMem::Abort()
+void lcFileMem::Abort()
 {
-  Close();
+	Close();
 }
 
-void FileDisk::Abort()
+void lcFileDisk::Abort()
 {
-  if (m_hFile != NULL)
-  {
-    // close but ignore errors
-    if (m_bCloseOnDelete)
-      fclose(m_hFile);
-    m_hFile = NULL;
-    m_bCloseOnDelete = false;
-  }
+	if (mFile)
+	{
+		if (mCloseOnDelete)
+		  fclose(mFile);
+		mFile = NULL;
+		mCloseOnDelete = false;
+	}
 }
 
-void FileMem::SetLength(unsigned long nNewLen)
+void lcFileMem::SetLength(long Length)
 {
-  if (nNewLen > m_nBufferSize)
-    GrowFile(nNewLen);
+	if (Length > mBufferSize)
+		GrowFile(Length);
 
-  if (nNewLen < m_nPosition)
-    m_nPosition = nNewLen;
+	if (Length < mPosition)
+		mPosition = Length;
 
-  m_nFileSize = nNewLen;
+	mFileSize = Length;
 }
 
-void FileDisk::SetLength(unsigned long nNewLen)
+void lcFileDisk::SetLength(long Length)
 {
-  fseek(m_hFile, nNewLen, SEEK_SET);
+	fseek(mFile, Length, SEEK_SET);
 }
 
-unsigned long FileMem::GetLength() const
+long lcFileMem::GetLength() const
 {
-  return m_nFileSize;
+	return mFileSize;
 }
 
-unsigned long FileDisk::GetLength() const
+long lcFileDisk::GetLength() const
 {
-  unsigned long nLen, nCur;
+	long Length, Current;
 
-  // Seek is a non const operation
-  nCur = ftell(m_hFile);
-  fseek(m_hFile, 0, SEEK_END);
-  nLen = ftell(m_hFile);
-  fseek(m_hFile, nCur, SEEK_SET);
+	Current = ftell(mFile);
+	fseek(mFile, 0, SEEK_END);
+	Length = ftell(mFile);
+	fseek(mFile, Current, SEEK_SET);
 
-  return nLen;
+	return Length;
 }
+

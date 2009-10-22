@@ -15,7 +15,6 @@
 
 class lcCamera;
 class CameraTarget;
-class File;
 
 enum LC_CAMERA_TYPES
 {
@@ -129,8 +128,8 @@ public:
 	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	bool FileLoad(File& file);
-	void FileSave(File& file) const;
+	bool FileLoad(lcFile& file);
+	void FileSave(lcFile& file) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 	void Move(u32 Time, bool AddKey, const Vector3& Delta);
 

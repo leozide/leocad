@@ -126,7 +126,7 @@ void Image::FromOpenGL (int width, int height)
   free (buf);
 }
 
-bool Image::FileLoad (File& file)
+bool Image::FileLoad(lcFile& file)
 {
   unsigned char buf[8];
 
@@ -184,7 +184,7 @@ bool Image::FileLoad (File& file)
 
 bool Image::FileLoad (const char* filename)
 {
-  FileDisk file;
+  lcFileDisk file;
   
   if (!file.Open (filename, "rb"))
     return false;
@@ -192,7 +192,7 @@ bool Image::FileLoad (const char* filename)
   return FileLoad (file);
 }
 
-bool Image::FileSave (File& file, LC_IMAGE_OPTS* opts) const
+bool Image::FileSave(lcFile& file, LC_IMAGE_OPTS* opts) const
 {
   switch (opts->format)
   {
@@ -224,7 +224,7 @@ bool Image::FileSave (File& file, LC_IMAGE_OPTS* opts) const
 bool Image::FileSave (const char* filename, LC_IMAGE_OPTS* opts) const
 {
   char name[LC_MAXPATH], ext[5], *p;
-  FileDisk file;
+  lcFileDisk file;
   bool needext = false;
 
   strcpy (name, filename);

@@ -86,18 +86,18 @@ void Texture::DeRef()
 /////////////////////////////////////////////////////////////////////////////
 // Load methods
 
-void Texture::LoadIndex(File* idx)
+void Texture::LoadIndex(lcFile* idx)
 {
-  unsigned char bt;
+  u8 bt;
 
   // TODO: don't change ref. if reloading
   m_nRef = 0;
   m_nID = 0;
 
   idx->Read(m_strName, 8);
-  idx->ReadShort(&m_nWidth, 1);
-  idx->ReadShort(&m_nHeight, 1);
-  idx->ReadByte(&bt, 1);
+  idx->ReadShorts(&m_nWidth, 1);
+  idx->ReadShorts(&m_nHeight, 1);
+  idx->ReadBytes(&bt, 1);
 
   switch (bt)
   {
@@ -115,7 +115,7 @@ void Texture::LoadIndex(File* idx)
     break;
   }
 
-  idx->ReadLong(&m_nOffset, 1);
+  idx->ReadInts(&m_nOffset, 1);
 }
 
 void Texture::Unload()
@@ -129,7 +129,7 @@ void Texture::Unload()
 void Texture::Load()
 {
   char filename[LC_MAXPATH];
-  FileDisk bin;
+  lcFileDisk bin;
   void* bits;
 
   strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
@@ -142,9 +142,9 @@ void Texture::Load()
   else
     bits = malloc (m_nFileSize);
 
-  bin.Seek (m_nOffset, SEEK_SET);
-  bin.Read (bits, m_nFileSize);
-  bin.Close ();
+  bin.Seek(m_nOffset, SEEK_SET);
+  bin.Read(bits, m_nFileSize);
+  bin.Close();
 
   FinishLoadImage(bits);
 

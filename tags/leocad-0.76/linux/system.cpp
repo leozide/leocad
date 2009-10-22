@@ -687,11 +687,11 @@ void SystemDoWaitCursor(int code)
   }
 }
 
-void SystemExportClipboard(File* clip)
+void SystemExportClipboard(lcFile* clip)
 {
 }
 
-File* SystemImportClipboard()
+lcFile* SystemImportClipboard()
 {
   return NULL;
 }

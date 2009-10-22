@@ -7,7 +7,7 @@
 
 #include "defines.h"
 
-class File;
+class lcFile;
 class lcCamera;
 class Texture;
 
@@ -48,8 +48,8 @@ public:
 	void LoadDefaults();
 	void SetSize(float uSize, float vSize);
 	void GetSize(float *uSize, float *vSize);
-	void FileLoad(File* file);
-	void FileSave(File* file);
+	void FileLoad(lcFile* file);
+	void FileSave(lcFile* file);
 	void Tesselate();
 	void SetControlPoints();
 	void GenerateRandom();

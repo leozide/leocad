@@ -300,7 +300,7 @@ void Project::LoadDefaults(bool cameras)
 static u32 LC_FILE_VERSION = 0x0076;
 
 // Read a .lcd file
-bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
+bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 {
 	int i, count;
 	char fid[32];
@@ -325,10 +325,10 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	}
 
 	if (fv > 0.4f)
-		file->ReadFloat(&fv, 1);
+		file->ReadFloats(&fv, 1);
 
 	if (fv > 1.4f)
-		file->ReadLong(&Version, 1);
+		file->ReadInts(&Version, 1);
 
 	if (Version > LC_FILE_VERSION)
 		return false;
@@ -336,7 +336,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	if (Version < 0x0076)
 	{
 		u32 rgb;
-		file->ReadLong(&rgb, 1);
+		file->ReadInts(&rgb, 1);
 
 		if (!bMerge)
 		{
@@ -361,21 +361,21 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		file->Seek(16, SEEK_CUR);
 	else
 	{
-		file->ReadLong(&i, 1); m_nAngleSnap = i;
-		file->ReadLong(&m_nSnap, 1);
-		file->ReadFloat(&m_fLineWidth, 1);
-		file->ReadLong(&m_nDetail, 1);
+		file->ReadInts(&i, 1); m_nAngleSnap = i;
+		file->ReadInts(&m_nSnap, 1);
+		file->ReadFloats(&m_fLineWidth, 1);
+		file->ReadInts(&m_nDetail, 1);
 	}
 
 	if (Version < 0x0076)
 		file->Seek(16, SEEK_SET); // m_nCurGroup, m_nCurColor, m_nCurAction, m_CurFrame
 
 	if (fv > 0.8f)
-		file->ReadLong(&m_nScene, 1);
+		file->ReadInts(&m_nScene, 1);
 
 	int NumModels = 1;
 	if (Version > 0x0075)
-		file->ReadLong(&NumModels, 1);
+		file->ReadInts(&NumModels, 1);
 
 	for (int ModelIndex = 0; ModelIndex < NumModels; i++)
 	{
@@ -383,7 +383,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		m_ModelList.Add(Model);
 		m_ActiveModel = Model;
 
-		file->ReadLong(&count, 1);
+		file->ReadInts(&count, 1);
 		SystemStartProgressBar(0, count, 1, "Loading model...");
 
 		while (count--)
@@ -424,12 +424,12 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				float pos[3], rot[3], param[4];
 				unsigned char color, step, group;
 			
-				file->ReadFloat(pos, 3);
-				file->ReadFloat(rot, 3);
-				file->ReadByte(&color, 1);
+				file->ReadFloats(pos, 3);
+				file->ReadFloats(rot, 3);
+				file->ReadBytes(&color, 1);
 				file->Read(name, sizeof(name));
-				file->ReadByte(&step, 1);
-				file->ReadByte(&group, 1);
+				file->ReadBytes(&step, 1);
+				file->ReadBytes(&group, 1);
 
 				// Convert from the old colors to 0.75 and then to LDraw.
 				const int conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
@@ -462,21 +462,21 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			if (fv >= 0.4f)
 			{
 				file->Read(&ch, 1);
-				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				if (ch == 0xFF) file->ReadShorts(&sh, 1); else sh = ch;
 				if (sh > 100)
 					file->Seek(sh, SEEK_CUR);
 				else
 					file->Read(m_strAuthor, sh);
 
 				file->Read(&ch, 1);
-				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				if (ch == 0xFF) file->ReadShorts(&sh, 1); else sh = ch;
 				if (sh > 100)
 					file->Seek(sh, SEEK_CUR);
 				else
 					file->Read(m_strDescription, sh);
 
 				file->Read(&ch, 1);
-				if (ch == 0xFF && fv < 1.3f) file->ReadShort(&sh, 1); else sh = ch;
+				if (ch == 0xFF && fv < 1.3f) file->ReadShorts(&sh, 1); else sh = ch;
 				if (sh > 255)
 					file->Seek(sh, SEEK_CUR);
 				else
@@ -488,22 +488,22 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			if (fv >= 0.4f)
 			{
 				file->Read (&ch, 1);
-				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				if (ch == 0xFF) file->ReadShorts(&sh, 1); else sh = ch;
 				file->Seek(sh, SEEK_CUR);
 
 				file->Read(&ch, 1);
-				if (ch == 0xFF) file->ReadShort(&sh, 1); else sh = ch;
+				if (ch == 0xFF) file->ReadShorts(&sh, 1); else sh = ch;
 				file->Seek(sh, SEEK_CUR);
 
 				file->Read(&ch, 1);
-				if (ch == 0xFF && fv < 1.3f) file->ReadShort(&sh, 1); else sh = ch;
+				if (ch == 0xFF && fv < 1.3f) file->ReadShorts(&sh, 1); else sh = ch;
 				file->Seek(sh, SEEK_CUR);
 			}
 		}
 
 		if (fv >= 0.5f)
 		{
-			file->ReadLong(&count, 1);
+			file->ReadInts(&count, 1);
 
 			lcGroup* pGroup;
 			lcGroup* pLastGroup = NULL;
@@ -592,7 +592,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 		if (fv >= 0.6f)
 		{
-			file->ReadLong(&count, 1);
+			file->ReadInts(&count, 1);
 			lcCamera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
@@ -611,7 +611,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				file->Seek(16, SEEK_SET); // view camera index.
 
 			u32 rgb;
-			file->ReadLong(&rgb, 1);
+			file->ReadInts(&rgb, 1);
 
 			m_fFogColor[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
 			m_fFogColor[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
@@ -619,21 +619,21 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			if (fv < 1.0f)
 			{
-				file->ReadLong(&rgb, 1);
+				file->ReadInts(&rgb, 1);
 				m_fFogDensity = (float)rgb/100;
 			}
 			else
-				file->ReadFloat(&m_fFogDensity, 1);
+				file->ReadFloats(&m_fFogDensity, 1);
 
 			if (fv < 1.3f)
 			{
-				file->ReadByte(&ch, 1);
+				file->ReadBytes(&ch, 1);
 				if (ch == 0xFF)
-					file->ReadShort(&sh, 1);
+					file->ReadShorts(&sh, 1);
 				sh = ch;
 			}
 			else
-				file->ReadShort(&sh, 1);
+				file->ReadShorts(&sh, 1);
 
 			if (sh < LC_MAXPATH)
 				file->Read(m_strBackground, sh); // TODO: make background be part of the model.
@@ -652,7 +652,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		if (fv > 0.9f)
 		{
 			u32 rgb;
-			file->ReadLong(&rgb, 1);
+			file->ReadInts(&rgb, 1);
 
 			m_fAmbient[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
 			m_fAmbient[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
@@ -660,23 +660,23 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 			if (fv < 1.3f)
 			{
-				file->ReadLong(&i, 1); m_Animation = (i != 0);
-				file->ReadLong(&i, 1); m_bAddKeys = (i != 0);
-				file->ReadByte(&m_nFPS, 1);
-				file->ReadLong(&i, 1); // m_nCurFrame = i;
-				file->ReadShort(&sh, 1); m_ActiveModel->m_TotalFrames = sh;
-				file->ReadLong(&i, 1); // m_nGridSize = i;
-				file->ReadLong(&i, 1); // m_nMoveSnap = i;
+				file->ReadInts(&i, 1); m_Animation = (i != 0);
+				file->ReadInts(&i, 1); m_bAddKeys = (i != 0);
+				file->ReadBytes(&m_nFPS, 1);
+				file->ReadInts(&i, 1); // m_nCurFrame = i;
+				file->ReadShorts(&sh, 1); m_ActiveModel->m_TotalFrames = sh;
+				file->ReadInts(&i, 1); // m_nGridSize = i;
+				file->ReadInts(&i, 1); // m_nMoveSnap = i;
 			}
 			else
 			{
-				file->ReadByte(&ch, 1); m_Animation = (ch != 0);
-				file->ReadByte(&ch, 1); m_bAddKeys = (ch != 0);
-				file->ReadByte(&m_nFPS, 1);
-				file->ReadShort(&sh, 1); // m_nCurFrame
-				file->ReadShort(&sh, 1); m_ActiveModel->m_TotalFrames = sh;
-				file->ReadShort(&sh, 1); // m_nGridSize
-				file->ReadShort(&sh, 1);
+				file->ReadBytes(&ch, 1); m_Animation = (ch != 0);
+				file->ReadBytes(&ch, 1); m_bAddKeys = (ch != 0);
+				file->ReadBytes(&m_nFPS, 1);
+				file->ReadShorts(&sh, 1); // m_nCurFrame
+				file->ReadShorts(&sh, 1); m_ActiveModel->m_TotalFrames = sh;
+				file->ReadShorts(&sh, 1); // m_nGridSize
+				file->ReadShorts(&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
 			}
@@ -686,11 +686,11 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			u32 rgb;
 
-			file->ReadLong(&rgb, 1);
+			file->ReadInts(&rgb, 1);
 			m_fGradient1[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
 			m_fGradient1[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
 			m_fGradient1[2] = (float)((rgb & 0xff0000) >> 16) / 255;
-			file->ReadLong(&rgb, 1);
+			file->ReadInts(&rgb, 1);
 			m_fGradient2[0] = (float)((rgb & 0x0000ff) >> 0) / 255;
 			m_fGradient2[1] = (float)((rgb & 0x00ff00) >> 8) / 255;
 			m_fGradient2[2] = (float)((rgb & 0xff0000) >> 16) / 255;
@@ -710,7 +710,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 
 	if (Version > 0x0075)
 	{
-		file->ReadLong(&ActiveModelIndex, 1);
+		file->ReadInts(&ActiveModelIndex, 1);
 		UpdateAllModelMeshes();
 	}
 
@@ -748,7 +748,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	return true;
 }
 
-void Project::FileSave(File* file, bool bUndo)
+void Project::FileSave(lcFile* file, bool bUndo)
 {
 	float ver_flt = 1.5f; // LeoCAD 0.76
 	u32 rgb;
@@ -758,27 +758,27 @@ void Project::FileSave(File* file, bool bUndo)
 
 	file->Seek(0, SEEK_SET);
 	file->Write(LC_STR_VERSION, 32);
-	file->WriteFloat(&ver_flt, 1);
-	file->WriteLong(&LC_FILE_VERSION, 1);
+	file->WriteFloats(&ver_flt, 1);
+	file->WriteInts(&LC_FILE_VERSION, 1);
 
 	rgb = FLOATRGB(m_fBackground);
-	file->WriteLong(&rgb, 1);
+	file->WriteInts(&rgb, 1);
 
-	i = m_nAngleSnap; file->WriteLong (&i, 1);
-	file->WriteLong(&m_nSnap, 1);
-	file->WriteFloat(&m_fLineWidth, 1);
-	file->WriteLong(&m_nDetail, 1);
+	i = m_nAngleSnap; file->WriteInts(&i, 1);
+	file->WriteInts(&m_nSnap, 1);
+	file->WriteFloats(&m_fLineWidth, 1);
+	file->WriteInts(&m_nDetail, 1);
 	//i = m_nCurGroup;
-	file->WriteLong(&i, 1);
-	i = 0; file->WriteLong(&i, 1); //m_nCurColor
-	i = m_nCurAction; file->WriteLong (&i, 1);
-	file->WriteLong(&m_ActiveModel->m_CurFrame, 1);
-	file->WriteLong(&m_nScene, 1);
+	file->WriteInts(&i, 1);
+	i = 0; file->WriteInts(&i, 1); //m_nCurColor
+	i = m_nCurAction; file->WriteInts(&i, 1);
+	file->WriteInts(&m_ActiveModel->m_CurFrame, 1);
+	file->WriteInts(&m_nScene, 1);
 
 	lcPiece* Piece;
 	for (i = 0, Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		i++;
-	file->WriteLong(&i, 1);
+	file->WriteInts(&i, 1);
 
 	for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 		Piece->FileSave(*file, m_ActiveModel->m_Groups);
@@ -796,19 +796,19 @@ void Project::FileSave(File* file, bool bUndo)
 	lcGroup* pGroup;
 	for (i = 0, pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 		i++;
-	file->WriteLong (&i, 1);
+	file->WriteInts(&i, 1);
 
 	for (pGroup = m_ActiveModel->m_Groups; pGroup; pGroup = pGroup->m_Next)
 		pGroup->FileSave(file, m_ActiveModel->m_Groups);
 
 	ch = 0;
-	file->WriteByte(&ch, 1); // m_nViewportMode
-	file->WriteByte(&ch, 1); // m_nActiveViewport
+	file->WriteBytes(&ch, 1); // m_nViewportMode
+	file->WriteBytes(&ch, 1); // m_nActiveViewport
 
 	lcCamera* Camera;
 	for (i = 0, Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
 		i++;
-	file->WriteLong (&i, 1);
+	file->WriteInts(&i, 1);
 
 	for (Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
 		Camera->FileSave(*file);
@@ -824,14 +824,14 @@ void Project::FileSave(File* file, bool bUndo)
 		*/
 		i = 0;
 
-		file->WriteLong(&i, 1);
+		file->WriteInts(&i, 1);
 	}
 
 	rgb = FLOATRGB(m_fFogColor);
-	file->WriteLong (&rgb, 1);
-	file->WriteFloat (&m_fFogDensity, 1);
+	file->WriteInts(&rgb, 1);
+	file->WriteFloats(&m_fFogDensity, 1);
 	sh = strlen(m_strBackground);
-	file->WriteShort (&sh, 1);
+	file->WriteShorts(&sh, 1);
 	file->Write(m_strBackground, sh);
 	ch = strlen(m_strHeader);
 	file->Write(&ch, 1);
@@ -841,21 +841,21 @@ void Project::FileSave(File* file, bool bUndo)
 	file->Write(m_strFooter, ch);
 	// 0.60 (1.0)
 	rgb = FLOATRGB(m_fAmbient);
-	file->WriteLong (&rgb, 1);
+	file->WriteInts(&rgb, 1);
 	ch = m_Animation;
 	file->Write(&ch, 1);
 	ch = m_bAddKeys;
-	file->WriteByte (&ch, 1);
-	file->WriteByte (&m_nFPS, 1);
-	sh = 1; file->WriteShort (&sh, 1); // m_nCurFrame
-	sh = 0xffff; file->WriteShort (&sh, 1); // m_nTotalFrames
-	sh = 10; file->WriteShort (&sh, 1); // m_nGridSize
-	file->WriteShort (&m_nMoveSnap, 1);
+	file->WriteBytes(&ch, 1);
+	file->WriteBytes(&m_nFPS, 1);
+	sh = 1; file->WriteShorts(&sh, 1); // m_nCurFrame
+	sh = 0xffff; file->WriteShorts(&sh, 1); // m_nTotalFrames
+	sh = 10; file->WriteShorts(&sh, 1); // m_nGridSize
+	file->WriteShorts(&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = FLOATRGB(m_fGradient1);
-	file->WriteLong (&rgb, 1);
+	file->WriteInts(&rgb, 1);
 	rgb = FLOATRGB(m_fGradient2);
-	file->WriteLong (&rgb, 1);
+	file->WriteInts(&rgb, 1);
 	// 0.64 (1.2)
 	m_pTerrain->FileSave(file);
 
@@ -879,7 +879,7 @@ void Project::FileSave(File* file, bool bUndo)
 			delete []image;
 		}
 
-		file->WriteLong (&pos, 1);
+		file->WriteInts(&pos, 1);
 		m_nSaveTimer = 0;
 	}
 }
@@ -908,7 +908,7 @@ bool Project::DoFileSave()
 // note: PathName can be different than 'm_strPathName'
 bool Project::DoSave(char* PathName)
 {
-	FileDisk file;
+	lcFileDisk file;
 	char NewName[LC_MAXPATH];
 	memset(NewName, 0, sizeof(NewName));
 	if (PathName)
@@ -1102,7 +1102,7 @@ bool Project::OpenProject(const char* FileName)
 
 bool Project::OnOpenDocument(const char* PathName)
 {
-	FileDisk file;
+	lcFileDisk file;
 
 	if (!file.Open(PathName, "rb") || !file.GetLength())
 	{
@@ -1152,8 +1152,8 @@ bool Project::OnOpenDocument(const char* PathName)
 
 		if (LoadMPD)
 		{
-			lcPtrArray<File> FileArray;
-			File* CurrentFile = NULL;
+			lcPtrArray<lcFile> FileArray;
+			lcFile* CurrentFile = NULL;
 			char Buf[1024];
 			bool Skip = true;
 
@@ -1176,7 +1176,7 @@ bool Project::OnOpenDocument(const char* PathName)
 							ptr++;
 						*ptr = 0;
 
-						CurrentFile = new FileMem();
+						CurrentFile = new lcFileMem();
 						CurrentFile->SetFileName(Name);
 						FileArray.Add(CurrentFile);
 						Skip = false;
@@ -2928,7 +2928,7 @@ void Project::RenderInitialize()
 	if (!m_pScreenFont->IsLoaded())
 	{
 		char filename[LC_MAXPATH];
-		FileDisk file;
+		lcFileDisk file;
 
 		strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
 		strcat(filename, "sysfont.txf");
@@ -3605,7 +3605,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_MERGE_PROJECT, filename))
 			{
-				FileDisk file;
+				lcFileDisk file;
 				if (file.Open(filename, "rb"))
 				{
 //				CWaitCursor wait;
@@ -4566,7 +4566,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_LIBRARY:
 		{
-			FileMem file;
+			lcFileMem file;
 			FileSave(&file, true);
 
 			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
@@ -4652,7 +4652,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			if (m_pClipboard[m_nCurClipboard] != NULL)
 				delete m_pClipboard[m_nCurClipboard];
-			m_pClipboard[m_nCurClipboard] = new FileMem;
+			m_pClipboard[m_nCurClipboard] = new lcFileMem;
 
 			int i = 0;
 			lcPiece* pPiece;
@@ -4711,7 +4711,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			int i, j;
 			lcPiece* pPasted = NULL;
-			File* file = m_pClipboard[m_nCurClipboard];
+			lcFile* file = m_pClipboard[m_nCurClipboard];
 			if (file == NULL)
 				break;
 			file->Seek(0, SEEK_SET);
@@ -6779,7 +6779,7 @@ void Project::StartTracking(int mode)
   if (m_pTrackFile != NULL)
     m_pTrackFile->SetLength (0);
   else
-  	m_pTrackFile = new FileMem;
+  	m_pTrackFile = new lcFileMem;
 
 	FileSave(m_pTrackFile, true);
 }

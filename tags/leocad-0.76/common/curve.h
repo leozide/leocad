@@ -33,8 +33,8 @@ class CurvePoint : public lcObject
   virtual ~CurvePoint ();
 
   // object functions
-  bool FileLoad (File& file);
-  void FileSave (File& file) const;
+  bool FileLoad (lcFile& file);
+  void FileSave (lcFile& file) const;
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
   void Render ();
@@ -93,8 +93,8 @@ class Curve : public lcObject
   virtual ~Curve ();
 
   // object functions
-  bool FileLoad (File& file);
-  void FileSave (File& file) const;
+  bool FileLoad (lcFile& file);
+  void FileSave (lcFile& file) const;
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
   void Render ();

@@ -262,19 +262,19 @@ Terrain::~Terrain()
 /////////////////////////////////////////////////////////////////////////////
 // Terrain functions
 
-void Terrain::FileLoad(File* file)
+void Terrain::FileLoad(lcFile* file)
 {
   unsigned char ch;
   unsigned short sh;
   int i, j;
 
-  file->ReadByte (&ch, 1);
-  file->ReadLong (&i, 1);
-  file->ReadLong (&j, 1);
-  file->ReadFloat (&m_uSize, 1);
-  file->ReadFloat (&m_vSize, 1);
-  file->ReadLong (&m_nOptions, 1);
-  file->ReadFloat (&m_fColor, 3);
+  file->ReadBytes(&ch, 1);
+  file->ReadInts(&i, 1);
+  file->ReadInts(&j, 1);
+  file->ReadFloats(&m_uSize, 1);
+  file->ReadFloats(&m_vSize, 1);
+  file->ReadInts(&m_nOptions, 1);
+  file->ReadFloats(&m_fColor, 3);
 
   if (ch == 1)
   {
@@ -282,7 +282,7 @@ void Terrain::FileLoad(File* file)
     sh = ch;
   }
   else
-    file->ReadShort (&sh, 1);
+    file->ReadShorts(&sh, 1);
 
   if (sh > LC_MAXPATH)
     file->Seek (sh, SEEK_CUR);
@@ -292,29 +292,29 @@ void Terrain::FileLoad(File* file)
   SetPatchCount(i, j);
   for (i = 0; i < GetCountU(); i++)
     for (j = 0; j < GetCountV(); j++)
-      file->ReadFloat (&m_pControl[i][j*3+2], 1);
+      file->ReadFloats(&m_pControl[i][j*3+2], 1);
 }
 
-void Terrain::FileSave(File* file)
+void Terrain::FileSave(lcFile* file)
 {
   unsigned char version = 2; // LeoCAD 0.70
   unsigned short sh;
 
-  file->WriteByte (&version, 1);
-  file->WriteLong (&m_uPatches, 1);
-  file->WriteLong (&m_vPatches, 1);
-  file->WriteFloat (&m_uSize, 1);
-  file->WriteFloat (&m_vSize, 1);
-  file->WriteLong (&m_nOptions, 1);
-  file->WriteFloat (&m_fColor, 3);
+  file->WriteBytes(&version, 1);
+  file->WriteInts(&m_uPatches, 1);
+  file->WriteInts(&m_vPatches, 1);
+  file->WriteFloats(&m_uSize, 1);
+  file->WriteFloats(&m_vSize, 1);
+  file->WriteInts(&m_nOptions, 1);
+  file->WriteFloats(&m_fColor, 3);
 
   sh = strlen (m_strTexture);
-  file->WriteShort (&sh, 1);
+  file->WriteShorts(&sh, 1);
   file->Write (m_strTexture, sh);
 
   for (int i = 0; i < GetCountU(); i++)
     for (int j = 0; j < GetCountV(); j++)
-      file->WriteFloat (&m_pControl[i][j*3+2], 1);
+      file->WriteFloats(&m_pControl[i][j*3+2], 1);
 }
 
 void Terrain::FreeMemory()

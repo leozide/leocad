@@ -45,7 +45,7 @@ struct gif_source_struct
 	u32 pass3_offset;    // # of pixel rows in passes 1&2
 	u32 pass4_offset;    // # of pixel rows in passes 1,2,3
 
-	File* input_file;
+	lcFile* input_file;
 	bool first_interlace;
 	unsigned char* buffer;//JSAMPARRAY buffer;
 	unsigned int width, height;
@@ -193,7 +193,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
 	return sinfo->firstcode;	// return first byte of symbol's expansion
 }
 
-bool Image::LoadGIF (File& file)
+bool Image::LoadGIF (lcFile& file)
 {
 	gif_source_ptr source;
 	source = (gif_source_ptr)malloc (sizeof(gif_source_struct));
@@ -417,14 +417,14 @@ struct gif_dest_struct
 	hash_entry *hash_value;
 	int bytesinpkt;
 	char packetbuf[256];
-	File* output_file;
+	lcFile* output_file;
 	void* buffer;//JSAMPARRAY buffer;
 };
 
 typedef gif_dest_struct* gif_dest_ptr;
 
 // Emit a 16-bit word, LSB first
-static void put_word(File& output_file, unsigned int w)
+static void put_word(lcFile& output_file, unsigned int w)
 {
 	output_file.PutChar(w & 0xFF);
 	output_file.PutChar((w >> 8) & 0xFF);
@@ -528,7 +528,7 @@ static void compress_byte (gif_dest_ptr dinfo, int c)
 	dinfo->waiting_code = c;
 }
 
-bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned char* background) const
+bool Image::SaveGIF (lcFile& file, bool transparent, bool interlaced, unsigned char* background) const
 {
 	int InitCodeSize, FlagByte, i;
 	unsigned char pal[3][256];

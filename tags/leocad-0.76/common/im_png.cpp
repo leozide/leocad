@@ -21,13 +21,13 @@ static void user_read_fn (png_structp png_ptr, png_bytep data, png_size_t length
 
   // Read() returns 0 on error, so it is OK to store this in a png_size_t
   // instead of an int, which is what Read() actually returns.
-  check = (png_size_t)((File*)png_ptr->io_ptr)->Read (data, length);
+  check = (png_size_t)((lcFile*)png_ptr->io_ptr)->Read (data, length);
 
   if (check != length)
     png_error(png_ptr, "Read Error");
 }
 
-bool Image::LoadPNG (File& file)
+bool Image::LoadPNG(lcFile& file)
 {
   unsigned char sig[8], red, green, blue;
   unsigned char *image_data = NULL;
@@ -263,7 +263,7 @@ static void user_write_fn (png_structp png_ptr, png_bytep data, png_size_t lengt
 {
   png_uint_32 check;
 
-  check = ((File*)png_ptr->io_ptr)->Write (data, length);
+  check = ((lcFile*)png_ptr->io_ptr)->Write (data, length);
   if (check != length)
   {
     png_error(png_ptr, "Write Error");
@@ -272,10 +272,10 @@ static void user_write_fn (png_structp png_ptr, png_bytep data, png_size_t lengt
 
 static void user_flush_fn (png_structp png_ptr)
 {
-  ((File*)png_ptr->io_ptr)->Flush ();
+  ((lcFile*)png_ptr->io_ptr)->Flush ();
 }
 
-bool Image::SavePNG (File& file, bool transparent, bool interlaced, unsigned char* background) const
+bool Image::SavePNG(lcFile& file, bool transparent, bool interlaced, unsigned char* background) const
 {
   png_structp png_ptr;
   png_infop info_ptr;

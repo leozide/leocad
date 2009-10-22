@@ -45,21 +45,21 @@ void lcGroup::UnGroup(lcGroup* Group)
 			m_Group->UnGroup(Group);
 }
 
-void lcGroup::FileLoad(File* file)
+void lcGroup::FileLoad(lcFile* file)
 {
-	unsigned char version;
+	u8 version;
 	int i;
 
 	file->Read(&version, 1);
 	file->Read(m_strName, 65);
 	file->Read(m_fCenter, 12);
-	file->ReadLong(&i, 1);
+	file->ReadInts(&i, 1);
 	m_Group = (lcGroup*)i;
 }
 
-void lcGroup::FileSave(File* file, lcGroup* Groups)
+void lcGroup::FileSave(lcFile* file, lcGroup* Groups)
 {
-	unsigned char version = 1; // LeoCAD 0.60
+	u8 version = 1; // LeoCAD 0.60
 
 	file->Write(&version, 1);
 	file->Write(m_strName, 65);
@@ -76,5 +76,5 @@ void lcGroup::FileSave(File* file, lcGroup* Groups)
 			else
 				i++;
 	}
-	file->WriteLong(&i, 1);
+	file->WriteInts(&i, 1);
 }

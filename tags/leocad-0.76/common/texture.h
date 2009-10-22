@@ -5,7 +5,7 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 
-class File;
+class lcFile;
 
 #include "opengl.h"
 
@@ -29,7 +29,7 @@ class Texture
   bool LoadFromFile(const char* strFilename);
   void Unload();
 
-  void LoadIndex(File* idx);
+  void LoadIndex(lcFile* idx);
   void AddRef();
   void DeRef();
 

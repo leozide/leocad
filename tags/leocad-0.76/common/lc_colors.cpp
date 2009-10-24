@@ -152,11 +152,11 @@ void lcColorInit(const char* FileName)
 				int Value;
 				sscanf(Token, "%x", &Value);
 
-				Color.Value[0] = (float)(Value & 0xff) / 255.0f;
+				Color.Value[2] = (float)(Value & 0xff) / 255.0f;
 				Value >>= 8;
 				Color.Value[1] = (float)(Value & 0xff) / 255.0f;
 				Value >>= 8;
-				Color.Value[2] = (float)(Value & 0xff) / 255.0f;
+				Color.Value[0] = (float)(Value & 0xff) / 255.0f;
 			}
 			else if (!Token.CompareNoCase("EDGE"))
 			{

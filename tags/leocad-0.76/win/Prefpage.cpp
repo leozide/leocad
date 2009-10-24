@@ -25,6 +25,8 @@ IMPLEMENT_DYNCREATE(CPreferencesKeyboard, CPropertyPage)
 // CPreferencesGeneral property page
 
 CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::IDD)
+, m_strLibrary(_T(""))
+, m_strColor(_T(""))
 {
 	//{{AFX_DATA_INIT(CPreferencesGeneral)
 	m_bSubparts = FALSE;
@@ -56,6 +58,8 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDV_MaxChars(pDX, m_strUser, 100);
 	DDX_Check(pDX, IDC_GENDLG_UPDATES, m_Updates);
 	//}}AFX_DATA_MAP
+	DDX_Text(pDX, IDC_GENDLG_LIBRARY, m_strLibrary);
+	DDX_Text(pDX, IDC_GENDLG_COLOR, m_strColor);
 }
 
 
@@ -63,6 +67,8 @@ BEGIN_MESSAGE_MAP(CPreferencesGeneral, CPropertyPage)
 	//{{AFX_MSG_MAP(CPreferencesGeneral)
 	ON_BN_CLICKED(IDC_GENDLG_FOLDERBTN, OnFolderBrowse)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_GENDLG_COLOR_BROWSE, &CPreferencesGeneral::OnBnClickedGendlgColorBrowse)
+	ON_BN_CLICKED(IDC_GENDLG_LIBRARY_BROWSE, &CPreferencesGeneral::OnBnClickedGendlgLibraryBrowse)
 END_MESSAGE_MAP()
 
 void CPreferencesGeneral::OnFolderBrowse() 
@@ -72,6 +78,30 @@ void CPreferencesGeneral::OnFolderBrowse()
 	if (FolderBrowse(&str, _T("Select default folder"), GetSafeHwnd()))
 	{
 		m_strFolder = str;
+		UpdateData(FALSE);
+	}
+}
+
+void CPreferencesGeneral::OnBnClickedGendlgLibraryBrowse()
+{
+	UpdateData(TRUE);
+	CString str = m_strLibrary;
+	if (FolderBrowse(&str, _T("Select library folder"), GetSafeHwnd()))
+	{
+		m_strLibrary = str;
+		UpdateData(FALSE);
+	}
+}
+
+void CPreferencesGeneral::OnBnClickedGendlgColorBrowse()
+{
+	UpdateData(TRUE);
+
+	CFileDialog dlg(TRUE, "*.ldr", m_strColor, 0, "Color Config Files (*.ldr)|*.ldr||", this);
+
+	if (dlg.DoModal() == IDOK)
+	{
+		m_strColor = dlg.GetPathName();
 		UpdateData(FALSE);
 	}
 }
@@ -88,6 +118,8 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 0);
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
+	m_strLibrary = AfxGetApp()->GetProfileString("Settings", "PiecesLibrary", "");
+	m_strColor = AfxGetApp()->GetProfileString("Settings", "ColorConfig", "");
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
@@ -104,6 +136,8 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 		
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
 	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);
+	AfxGetApp()->WriteProfileString("Settings", "PiecesLibrary", m_strLibrary);
+	AfxGetApp()->WriteProfileString("Settings", "ColorConfig", m_strColor);
 }
 
 BOOL CPreferencesGeneral::OnInitDialog() 

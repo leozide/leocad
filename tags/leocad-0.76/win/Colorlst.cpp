@@ -280,8 +280,8 @@ void CColorList::UpdateLayout()
 	GetClientRect(&rc);
 	rc.top = ((CColorTab*)m_Tabs[0])->m_Rect.bottom;
 
+	m_ColorCols = lcNumUserColors / 6;
 	m_ColorRows = 6;
-	m_ColorCols = 13;
 
 	int CellWidth = rc.Width() / m_ColorCols;
 	int CellHeight = rc.Height() / m_ColorRows;

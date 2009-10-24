@@ -8,12 +8,15 @@ struct lcColor
 	u32 Code;
 	float Value[4];
 	bool Translucent;
-	const char* Name;
+	char* Name;
 };
 
-extern lcColor g_ColorList[];
+extern lcColor* g_ColorList;
 extern u32 lcNumUserColors;
 extern u32 lcNumColors;
+
+void lcColorInit(const char* FileName);
+void lcColorShutdown();
 
 #define LC_COLOR_TRANSLUCENT(Color) g_ColorList[Color].Translucent
 #define LC_COLOR_RGB(Color) RGB(g_ColorList[Color].Value[0]*255, g_ColorList[Color].Value[1]*255, g_ColorList[Color].Value[2]*255)

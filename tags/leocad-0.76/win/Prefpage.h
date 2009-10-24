@@ -55,6 +55,13 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+public:
+//	afx_msg void OnEnChangeEdit1();
+//	afx_msg void OnEnChangeGendlgUser();
+	afx_msg void OnBnClickedGendlgColorBrowse();
+	afx_msg void OnBnClickedGendlgLibraryBrowse();
+	CString m_strLibrary;
+	CString m_strColor;
 };
 
 

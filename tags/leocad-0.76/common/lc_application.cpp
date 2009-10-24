@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "lc_model.h"
+#include "lc_colors.h"
 #include "library.h"
 #include "system.h"
 #include "console.h"
@@ -37,10 +38,13 @@ lcApplication::lcApplication()
 	m_ActiveProject = NULL;
 	m_Library = NULL;
 	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);
+
+	lcColorInit(Sys_ProfileLoadString("Settings", "ColorConfig", ""));
 }
 
 lcApplication::~lcApplication()
 {
+	lcColorShutdown();
 }
 
 void lcApplication::AddProject(Project* project)

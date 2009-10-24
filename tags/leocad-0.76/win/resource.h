@@ -401,6 +401,7 @@
 #define IDC_TEROPT_FLAT                 1211
 #define IDC_TRANSDLG_GY                 1211
 #define IDC_CATDLG_KEYWORDS             1211
+#define IDC_GENDLG_COLOR                1211
 #define IDC_MF_TOOLL                    1212
 #define IDC_EDIT2                       1212
 #define IDC_SCNDLG_SOLID                1212
@@ -470,6 +471,10 @@
 #define IDC_MODDLG_AMBIENT              1251
 #define IDC_LIST                        1252
 #define IDC_MODEL_NEW                   1254
+#define IDC_GENDLG_LIBRARY_BROWSE       1255
+#define IDC_BUTTON3                     1256
+#define IDC_GENDLG_COLOR_BROWSE         1256
+#define IDC_GENDLG_LIBRARY              1257
 #define IDC_MODEL_DELETE                1258
 #define IDC_MODEL_UP                    1259
 #define IDC_MODEL_DOWN                  1260
@@ -762,7 +767,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        246
 #define _APS_NEXT_COMMAND_VALUE         33223
-#define _APS_NEXT_CONTROL_VALUE         1255
+#define _APS_NEXT_CONTROL_VALUE         1258
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

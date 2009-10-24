@@ -2224,11 +2224,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				RelativePath="hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxCore.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2240,11 +2240,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				RelativePath="hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxPrint.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File
@@ -3426,5 +3426,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="LeoCAD.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

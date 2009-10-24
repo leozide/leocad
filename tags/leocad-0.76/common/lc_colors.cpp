@@ -1,7 +1,11 @@
 #include "lc_global.h"
 #include "lc_colors.h"
+#include "file.h"
+#include "lc_array.h"
+#include "str.h"
+#include <float.h>
 
-lcColor g_ColorList[] =
+static lcColor sDefaultColors[] =
 {
 	{   0, { 0.1294f, 0.1294f, 0.1294f, 1.0000f }, false, "Black" },
 	{   1, { 0.0000f, 0.2000f, 0.6980f, 1.0000f }, false, "Blue" },
@@ -88,9 +92,187 @@ lcColor g_ColorList[] =
 	{  -2, { 0.4000f, 0.2980f, 0.8980f, 1.0000f }, false, "Focused" },
 };
 
-u32 lcNumUserColors = sizeof(g_ColorList)/sizeof(g_ColorList[0]) - 3;
-u32 lcNumColors = sizeof(g_ColorList)/sizeof(g_ColorList[0]);
+lcColor* g_ColorList;
+u32 lcNumUserColors;
+u32 lcNumColors;
 
+void lcColorInit(const char* FileName)
+{
+	lcFileDisk File;
+
+	if (!FileName[0] || !File.Open(FileName, "rt"))
+	{
+		g_ColorList = sDefaultColors;
+		lcNumUserColors = sizeof(sDefaultColors)/sizeof(sDefaultColors[0]) - 3;
+		lcNumColors = sizeof(sDefaultColors)/sizeof(sDefaultColors[0]);
+
+		return;
+	}
+
+	char Buf[1024];
+	lcObjArray<lcColor> Colors(128);
+
+	while (File.ReadLine(Buf, sizeof(Buf)))
+	{
+		char* ptr = Buf;
+		String Token;
+
+		Token = GetToken(ptr);
+		if (Token.CompareNoCase("0"))
+			continue;
+
+		Token = GetToken(ptr);
+		if (Token.CompareNoCase("!COLOUR"))
+			continue;
+
+		lcColor Color;
+
+		Color.Code = -1;
+		Color.Translucent = false;
+		Color.Value[0] = FLT_MAX;
+		Color.Value[1] = FLT_MAX;
+		Color.Value[2] = FLT_MAX;
+		Color.Value[3] = 1.0f;
+
+		String Name = GetToken(ptr);
+
+		for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
+		{
+			if (!Token.CompareNoCase("CODE"))
+			{
+				Token = GetToken(ptr);
+				Color.Code = atoi(Token);
+			}
+			else if (!Token.CompareNoCase("VALUE"))
+			{
+				Token = GetToken(ptr);
+				if (Token[0] == '#')
+					Token[0] = ' ';
+
+				int Value;
+				sscanf(Token, "%x", &Value);
+
+				Color.Value[0] = (float)(Value & 0xff) / 255.0f;
+				Value >>= 8;
+				Color.Value[1] = (float)(Value & 0xff) / 255.0f;
+				Value >>= 8;
+				Color.Value[2] = (float)(Value & 0xff) / 255.0f;
+			}
+			else if (!Token.CompareNoCase("EDGE"))
+			{
+				Token = GetToken(ptr); // Ignored.
+			}
+			else if (!Token.CompareNoCase("ALPHA"))
+			{
+				Token = GetToken(ptr);
+				int Value = atoi(Token);
+				Color.Value[3] = (float)(Value & 0xff) / 255.0f;
+				if (Value != 255)
+					Color.Translucent = true;
+			}
+			else if (!Token.CompareNoCase("CHROME") || !Token.CompareNoCase("PEARLESCENT") || !Token.CompareNoCase("RUBBER") ||
+			         !Token.CompareNoCase("MATTE_METALIC") || !Token.CompareNoCase("METAL"))
+			{
+				// Ignored.
+			}
+			else if (!Token.CompareNoCase("MATERIAL"))
+			{
+				break; // Material is always last so ignore it and the rest of the line.
+			}
+		}
+
+		// Check if color is valid.
+		if (Color.Code == -1 || Color.Value[0] == FLT_MAX)
+			continue;
+
+		// Check for duplicates.
+		for (int i = 0; i < Colors.GetSize(); i++)
+		{
+			if (Colors[i].Code == Color.Code)
+			{
+				free(Colors[i].Name);
+				Colors.RemoveIndex(i);
+				break;
+			}
+		}
+
+		Color.Name = _strdup(Name);
+		Colors.Add(Color);
+	}
+
+	// Use default colors if there were errors loading the file.
+	if (Colors.GetSize() < 2)
+	{
+		g_ColorList = sDefaultColors;
+		lcNumUserColors = sizeof(sDefaultColors)/sizeof(sDefaultColors[0]) - 3;
+		lcNumColors = sizeof(sDefaultColors)/sizeof(sDefaultColors[0]);
+
+		return;
+	}
+
+	// Reorder colors.
+	lcColor Default;
+	Default.Code = -1;
+	lcColor Edge;
+	Edge.Code = -1;
+
+	for (int i = 0; i < Colors.GetSize(); i++)
+	{
+		if (Colors[i].Code != 16)
+			continue;
+
+		Default = Colors[i];
+		Colors.RemoveIndex(i);
+	}
+
+	for (int i = 0; i < Colors.GetSize(); i++)
+	{
+		if (Colors[i].Code != 24)
+			continue;
+
+		Edge = Colors[i];
+		Colors.RemoveIndex(i);
+	}
+
+	if (Default.Code == -1)
+	{
+		Default = sDefaultColors[sizeof(sDefaultColors)/sizeof(sDefaultColors[0]) - 4];
+		Default.Name = _strdup(Default.Name);
+	}
+	Colors.Add(Default);
+
+	if (Edge.Code == -1)
+	{
+		Edge = sDefaultColors[sizeof(sDefaultColors)/sizeof(sDefaultColors[0]) - 3];
+		Edge.Name = _strdup(Edge.Name);
+	}
+	Colors.Add(Edge);
+
+	lcColor Color;
+	Color = sDefaultColors[sizeof(sDefaultColors)/sizeof(sDefaultColors[0]) - 2];
+	Color.Name = _strdup(Color.Name);
+	Colors.Add(Color);
+
+	Color = sDefaultColors[sizeof(sDefaultColors)/sizeof(sDefaultColors[0]) - 1];
+	Color.Name = _strdup(Color.Name);
+	Colors.Add(Color);
+
+	lcNumColors = Colors.GetSize();
+	lcNumUserColors = lcNumColors - 3;
+	g_ColorList = new lcColor[lcNumColors];
+	memcpy(g_ColorList, &Colors[0], lcNumColors * sizeof(lcColor));
+}
+
+void lcColorShutdown()
+{
+	if (g_ColorList == sDefaultColors)
+		return;
+
+	for (u32 i = 0; i < lcNumColors; i++)
+		free(g_ColorList[i].Name);
+
+	delete[] g_ColorList;
+}
 
 /*
 0 LDraw.org Configuration File

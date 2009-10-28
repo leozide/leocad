@@ -198,7 +198,7 @@ protected:
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 
-	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
+	void CreateHTMLPieceList(FILE* f, u32 nStep, bool bImages, const char* ext);
 
 	// Animation playback.
 	bool m_PlayingAnimation;

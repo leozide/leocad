@@ -52,73 +52,72 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data);
 // =============================================================================
 // Static functions
 
-// try to find the path of the executable
-static void init_paths (char *argv0)
+static void init_paths(char *argv0)
 {
-  char temppath[PATH_MAX];
-  char *home;
+	char temppath[PATH_MAX];
+	char *home;
 
-  home = getenv ("HOME");
-  if (home == NULL)
-  {
-    uid_t id = getuid();
-    struct passwd *pwd;
+	home = getenv("HOME");
+	if (home == NULL)
+	{
+		uid_t id = getuid();
+		struct passwd *pwd;
 
-    setpwent();
-    while ((pwd = getpwent()) != NULL)
-      if (pwd->pw_uid == id)
-      {
-	home = pwd->pw_dir;
-	break;
-      }
-    endpwent();
-  }
+		setpwent();
+		while ((pwd = getpwent()) != NULL)
+		if (pwd->pw_uid == id)
+		{
+			home = pwd->pw_dir;
+			break;
+		}
+		endpwent();
+	}
 
-  if (home == NULL)
-    home = ".";
+	strcpy(temppath, argv0);
+	if (!strrchr(temppath, '/'))
+	{
+		char *path;
+		char *last;
+		int found;
 
-  strcpy (temppath, argv0);
-  if (!strrchr(temppath, '/'))
-  {
-    char *path;
-    char *last;
-    int found;
+		found = 0;
+		path = getenv("PATH");
+		do
+		{
+			temppath[0] = '\0';
 
-    found = 0;
-    path = getenv("PATH");
-    do
-    {
-      temppath[0] = '\0';
+			last = strchr(path, ':');
+			if (!last)
+				last = path + strlen(path);
 
-      last = strchr(path, ':');
-      if (!last)
-	last = path + strlen (path);
+			if (*path == '~')
+			{
+				if (home)
+					strcpy(temppath, home);
+				else
+					strcpy(temppath, ".");
+				path++;
+			}
 
-      if (*path == '~')
-      {
-	strcpy(temppath, home);
-	++path;
-      }
+			if (last > (path+1))
+			{
+				strncat(temppath, path, (last-path));
+				strcat(temppath, "/");
+			}
+			strcat(temppath, "./");
+			strcat(temppath, argv0);
 
-      if (last > (path+1))
-      {
-	strncat(temppath, path, (last-path));
-	strcat(temppath, "/");
-      }
-      strcat (temppath, "./");
-      strcat (temppath, argv0);
+			if (access(temppath, X_OK) == 0)
+				found++;
+			path = last+1;
 
-      if (access(temppath, X_OK) == 0 )
-	++found;
-      path = last+1;
+		} while (*last && !found);
+	}
+	else
+		argv0 = strrchr(argv0, '/') + 1;
 
-    } while (*last && !found);
-  }
-  else
-    argv0 = strrchr (argv0, '/') + 1;
-
-  if (realpath (temppath, app_path))
-    *(strrchr (app_path, '/') + 1) = '\0';
+	if (realpath(temppath, app_path))
+		*(strrchr(app_path, '/') + 1) = '\0';
 }
 
 // Functions

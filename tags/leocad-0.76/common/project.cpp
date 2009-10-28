@@ -1866,6 +1866,7 @@ void Project::RenderScene(View* view, bool Interface)
 			{
 				// Pieces are already sorted by vertex buffer, so no need to sort again here.
 				// TODO: not true anymore, need to sort by vertex buffer here.
+				RenderSection.Distance = 0;
 				OpaqueSections.Add(RenderSection);
 			}
 		}
@@ -1878,7 +1879,7 @@ void Project::RenderScene(View* view, bool Interface)
 	lcVertexBuffer* LastVertexBuffer = NULL;
 	lcIndexBuffer* LastIndexBuffer = NULL;
 	lcPiece* LastPiece = NULL;
-	lcMesh* LastMesh;
+	lcMesh* LastMesh = NULL;
 
 	glPushMatrix();
 
@@ -2611,6 +2612,7 @@ void Project::RenderOverlays(View* view)
 
 				switch (i)
 				{
+				default:
 				case 0:
 					v1 = Vector3(0.0f, cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32));
 					v2 = Vector3(0.0f, cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32));
@@ -3391,7 +3393,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 	Sys_FinishMemoryRender (render);
 }
 
-void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
+void Project::CreateHTMLPieceList(FILE* f, u32 nStep, bool bImages, const char* ext)
 {
 	lcPiece* Piece;
 	u32* col = new u32[lcNumColors], ID = 0, c;
@@ -3439,7 +3441,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 			else
 				fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
 
-			int curcol = 1;
+			u32 curcol = 1;
 			for (c = 0; c < lcNumColors; c++)
 				if (count[c])
 				{
@@ -3569,6 +3571,9 @@ void Project::ProcessMessage(lcMessageType Message, void* Data)
 	case LC_MSG_MOUSE_CAPTURE_LOST:
 		if (m_nTracking != LC_TRACK_NONE)
 			StopTracking(false);
+		break;
+
+	default:
 		break;
 	}
 }
@@ -6141,6 +6146,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			SetAction(LC_ACTION_ROLL);
 		} break;
+
+
+		default:
+			break;
 	}
 }
 
@@ -6793,7 +6802,7 @@ void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
 	{
 		int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
 		*SnapAngle = -1;
-		for (int i = 0; i < sizeof(Angles)/sizeof(Angles[0]); i++)
+		for (u32 i = 0; i < sizeof(Angles)/sizeof(Angles[0]); i++)
 		{
 			if (m_nAngleSnap == Angles[i])
 			{
@@ -8317,6 +8326,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 				switch (OverlayMode)
 				{
+				default:
 				case LC_OVERLAY_X:
 					Dir1 = Vector3(1, 0, 0);
 					break;

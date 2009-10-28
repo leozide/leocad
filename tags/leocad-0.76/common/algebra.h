@@ -258,6 +258,7 @@ public:
 	inline Vector3(const Vector3& a);
 	inline explicit Vector3(const float x, const float y, const float z);
 	inline explicit Vector3(const Vector4& a);
+	inline Vector3& operator=(const Vector3& a);
 
 	inline operator const float*() const { return (const float*)this; }
 	inline operator float*() { return (float*)this; }
@@ -376,6 +377,9 @@ inline Vector3::Vector3(const Vector3& a)
 inline Vector3::Vector3(const Vector4& a)
 { lcBaseVector_Copy3(v, a.v); }
 
+inline Vector3& Vector3::operator=(const Vector3& a)
+{ lcBaseVector_Copy3(v, a.v); return *this; }
+	
 inline Vector4::Vector4()
 { }
 

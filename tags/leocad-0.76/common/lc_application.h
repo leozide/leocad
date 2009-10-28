@@ -40,7 +40,7 @@ public:
 
 public:
 	PiecePreview* m_PiecePreview;
-	int m_SelectedColor;
+	u32 m_SelectedColor;
 	int m_MouseSensitivity;
 
 protected:

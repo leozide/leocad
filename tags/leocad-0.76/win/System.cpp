@@ -25,7 +25,6 @@
 #include "htmldlg.h"
 #include "stepdlg.h"
 #include "povdlg.h"
-#include "terrdlg.h"
 #include "LibDlg.h"
 #include "EdGrpDlg.h"
 #include "ModelListDlg.h"
@@ -1647,13 +1646,6 @@ bool SystemDoDialog(int nMode, void* param)
 
 				return true;
 			}
-		} break;
-
-		case LC_DLG_TERRAIN:
-		{
-			CTerrainDlg dlg((Terrain*)param, false);
-			if (dlg.DoModal() == IDOK)
-				return true;
 		} break;
 
 		case LC_DLG_LIBRARY:

@@ -82,7 +82,7 @@ typedef UINT NCHITTESTRETURN;
 #define WM_LC_ADD_COMBO_STRING	(WM_USER+217)
 //#define WM_LC_UPDATE_INFO		(WM_USER+218) // wParam = object, lParam = type
 #define WM_LC_UPDATE_SETTINGS	(WM_USER+219) // Preferences changed
-#define WM_LC_EDIT_CLOSED		(WM_USER+220) // Terrain grid was edited
+//#define WM_LC_EDIT_CLOSED		(WM_USER+220) // Terrain grid was edited
 #define WM_LC_SET_CURSOR		(WM_USER+221) // New action, must change the view cursor
 
 #define PRINT_NUMBERS	0x001

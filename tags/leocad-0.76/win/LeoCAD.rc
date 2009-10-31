@@ -100,7 +100,6 @@ IDB_PHOTO               BITMAP                  "res\\photo.bmp"
 IDB_DELETE              BITMAP                  "res\\delete.bmp"
 IDB_PREFERENCES         BITMAP                  "res\\preferen.bmp"
 IDR_LIBRARY             BITMAP                  "res\\library.bmp"
-IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
 IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
 IDB_SPLITH              BITMAP                  "res\\splith.bmp"
 IDB_SPLITV              BITMAP                  "res\\splitv.bmp"
@@ -186,17 +185,6 @@ BEGIN
     BUTTON      ID_LIBDLG_CATEGORY_EDIT
 END
 
-IDR_TERRAIN TOOLBAR  16, 15
-BEGIN
-    BUTTON      ID_TERDLG_FILE_OPEN
-    BUTTON      ID_TERDLG_FILE_SAVE
-    SEPARATOR
-    BUTTON      ID_TERDLG_EDIT_SELECT
-    BUTTON      ID_TERDLG_EDIT_ZOOM
-    BUTTON      ID_TERDLG_EDIT_PAN
-    BUTTON      ID_TERDLG_EDIT_ROTATE
-END
-
 IDR_PREVIEW TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_PREVIEW_PRINT
@@ -238,14 +226,13 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Pieces &Library Manager...",  ID_FILE_EDITPIECELIBRARY
-        MENUITEM "Terrain &Editor...",          ID_FILE_TERRAINEDITOR
         MENUITEM SEPARATOR
         MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
         MENUITEM "Print Piece Lis&t...",        ID_FILE_PRINTPIECELIST
         MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
         MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
-        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END
@@ -309,7 +296,7 @@ BEGIN
             MENUITEM "05",                          ID_VIEWPORT05
             MENUITEM "06",                          ID_VIEWPORT06
             MENUITEM "07",                          ID_VIEWPORT07
-            MENUITEM "08",                          ID_VIEWPORT08, MENUBARBREAK
+            MENUITEM "08",                          ID_VIEWPORT08
             MENUITEM "09",                          ID_VIEWPORT09
             MENUITEM "10",                          ID_VIEWPORT10
             MENUITEM "11",                          ID_VIEWPORT11
@@ -325,7 +312,7 @@ BEGIN
         MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
         MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
         MENUITEM "Array...",                    ID_PIECE_ARRAY
-        MENUITEM "Mirror...",                   ID_PIECE_MIRROR, GRAYED
+        MENUITEM "Mirror...",                   ID_PIECE_MIRROR
         MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
         MENUITEM SEPARATOR
         MENUITEM "Group...",                    ID_PIECE_GROUP
@@ -344,7 +331,7 @@ BEGIN
         MENUITEM "&Delete...",                  ID_MODEL_DELETE
         MENUITEM "&Properties...",              ID_MODEL_PROPERTIES
         MENUITEM SEPARATOR
-        MENUITEM "Model 1",                     ID_MODEL_MODEL1, GRAYED
+        MENUITEM "Model 1",                     ID_MODEL_MODEL1
         MENUITEM "&Models...",                  ID_MODEL_LIST
     END
     POPUP "&Help"
@@ -532,34 +519,6 @@ BEGIN
         MENUITEM "&New",                        ID_LIBDLG_PIECE_NEW, GRAYED
         MENUITEM "&Edit",                       ID_LIBDLG_PIECE_EDIT, GRAYED
         MENUITEM "&Delete...",                  ID_LIBDLG_PIECE_DELETE
-    END
-END
-
-IDR_TERRAIN MENU 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Open...",                    ID_TERDLG_FILE_OPEN, GRAYED
-        MENUITEM "&Save",                       ID_TERDLG_FILE_SAVE, GRAYED
-        MENUITEM "Save &As...",                 ID_TERDLG_FILE_SAVEAS, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "&Apply Changes",              IDOK
-        MENUITEM "&Discard Changes",            IDCANCEL
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Options...",                 ID_TERDLG_EDIT_PREFERENCES
-        MENUITEM "&Random",                     ID_TERDLG_EDIT_RANDOM
-        MENUITEM "Reset &Camera",               ID_TERDLG_EDIT_RESETCAMERA
-        MENUITEM SEPARATOR
-        MENUITEM "&Select",                     ID_TERDLG_EDIT_SELECT
-        MENUITEM "&Zoom",                       ID_TERDLG_EDIT_ZOOM
-        MENUITEM "&Pan",                        ID_TERDLG_EDIT_PAN
-        MENUITEM "Ro&tate",                     ID_TERDLG_EDIT_ROTATE
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "Terrain &Help...",            ID_TERDLG_HELP
     END
 END
 
@@ -1046,44 +1005,6 @@ BEGIN
     CONTROL         "List1",IDC_LIBDLG_LIST,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_AUTOARRANGE | WS_BORDER | WS_TABSTOP,102,7,191,186
 END
 
-IDD_TERRAIN DIALOG  0, 0, 320, 201
-STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
-CAPTION "Terrain Editor"
-MENU IDR_TERRAIN
-FONT 8, "MS Sans Serif"
-BEGIN
-    CONTROL         "Terrain Grid",IDC_GRID,"TerrainCtrl",WS_BORDER | WS_TABSTOP,7,7,145,187
-END
-
-IDD_TERRAIN_OPTIONS DIALOG  0, 0, 234, 126
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Terrain Options"
-FONT 8, "MS Sans Serif"
-BEGIN
-    GROUPBOX        "Dimensions",IDC_STATIC,7,7,91,61
-    CTEXT           "X",IDC_STATIC,48,19,11,8
-    CTEXT           "Y",IDC_STATIC,74,18,11,8
-    LTEXT           "Patches",IDC_STATIC,13,34,28,8
-    EDITTEXT        IDC_TEROPT_XPAT,44,32,20,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_TEROPT_YPAT,70,32,20,12,ES_AUTOHSCROLL
-    LTEXT           "Size (cm)",IDC_STATIC,13,48,28,8
-    EDITTEXT        IDC_TEROPT_XSIZE,44,47,20,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_TEROPT_YSIZE,70,47,20,12,ES_AUTOHSCROLL
-    GROUPBOX        "Appearence",IDC_STATIC,106,7,121,112
-    LTEXT           "Color",IDC_STATIC,115,22,26,8
-    PUSHBUTTON      "",IDC_TEROPT_COLOR,144,20,20,12,BS_BITMAP
-    CONTROL         "Texture",IDC_TEROPT_TEXTURE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,112,40,39,8
-    EDITTEXT        IDC_TEROPT_TEXTURENAME,123,52,90,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_TEROPT_TEXTUREBROWSE,215,52,8,12
-    DEFPUSHBUTTON   "OK",IDOK,7,105,41,14
-    PUSHBUTTON      "Cancel",IDCANCEL,50,105,41,14
-    CONTROL         "Smooth",IDC_TEROPT_SMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,178,22,37,8
-    EDITTEXT        IDC_EDIT1,151,72,20,12,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "Repeat",IDC_STATIC,115,74,28,8,WS_DISABLED
-    CONTROL         "Flat",IDC_TEROPT_FLAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,79,47,8
-    EDITTEXT        IDC_EDIT2,178,72,20,12,ES_AUTOHSCROLL | WS_DISABLED
-END
-
 IDD_EDIT_GROUPS DIALOG  0, 0, 193, 157
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Edit Groups"
@@ -1449,22 +1370,6 @@ BEGIN
         RIGHTMARGIN, 293
         TOPMARGIN, 7
         BOTTOMMARGIN, 193
-    END
-
-    IDD_TERRAIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 313
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 194
-    END
-
-    IDD_TERRAIN_OPTIONS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 227
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 119
     END
 
     IDD_EDIT_GROUPS, DIALOG

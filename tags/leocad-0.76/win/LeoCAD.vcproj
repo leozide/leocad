@@ -769,31 +769,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="Ipedit.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="2"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="keyedit.cpp"
 				>
 				<FileConfiguration
@@ -1473,106 +1448,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="Teropdlg.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="2"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="Terrctrl.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="2"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="Terrdlg.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="2"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="Terrwnd.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="2"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="texdlg.cpp"
 				>
 				<FileConfiguration
@@ -1780,10 +1655,6 @@
 			</File>
 			<File
 				RelativePath="ImageDlg.h"
-				>
-			</File>
-			<File
-				RelativePath="Ipedit.h"
 				>
 			</File>
 			<File
@@ -2220,11 +2091,11 @@
 			Name="Help Files"
 			>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				RelativePath="hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxCore.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2236,11 +2107,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				RelativePath="hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxPrint.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File

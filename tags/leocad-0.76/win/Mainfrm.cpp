@@ -779,10 +779,6 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_MODEL_LIST, 0);
 		} break;
 
-		case ID_FILE_TERRAINEDITOR: {
-			project->HandleCommand(LC_FILE_TERRAIN, 0);
-		} break;
-
 		case ID_FILE_EDITPIECELIBRARY: {
 			project->HandleCommand(LC_FILE_LIBRARY, 0);
 		} break;
@@ -1300,7 +1296,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_FILE_EXPORT_WAVEFRONT,  // LC_FILE_WAVEFRONT
 		ID_FILE_EXPORT_VRML,       // LC_FILE_VRML
 		ID_FILE_EXPORT_X3DV,       // LC_FILE_X3DV
-		ID_FILE_TERRAINEDITOR,     // LC_FILE_TERRAIN
 		ID_FILE_EDITPIECELIBRARY,  // LC_FILE_LIBRARY
 		0,                         // LC_FILE_RECENT
 		ID_EDIT_UNDO,              // LC_EDIT_UNDO

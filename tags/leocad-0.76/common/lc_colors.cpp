@@ -198,6 +198,9 @@ void lcColorInit(const char* FileName)
 
 		Color.Name = _strdup(Name);
 		Colors.Add(Color);
+
+		for (char* Ptr = strchr(Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
+			*Ptr = ' ';
 	}
 
 	// Use default colors if there were errors loading the file.

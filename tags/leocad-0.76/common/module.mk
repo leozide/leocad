@@ -4,8 +4,7 @@ SRC += common/algebra.cpp common/camera.cpp common/console.cpp common/file.cpp \
        common/lc_model.cpp common/library.cpp common/light.cpp common/mainwnd.cpp \
        common/matrix.cpp common/minifig.cpp common/object.cpp common/opengl.cpp \
        common/piece.cpp common/pieceinf.cpp common/preview.cpp common/project.cpp common/quant.cpp \
-       common/str.cpp common/terrain.cpp common/texfont.cpp common/texture.cpp \
-       common/view.cpp
+       common/str.cpp common/texfont.cpp common/texture.cpp common/view.cpp
 
 ifeq ($(HAVE_JPEGLIB), yes)
 	LIBS += -ljpeg

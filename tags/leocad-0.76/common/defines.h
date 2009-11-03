@@ -218,10 +218,6 @@ inline T lcClamp(const T& Value, const U& Min, const V& Max)
 #define LC_SCENE_FLOOR			0x080	// Render floor
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
 
-#define LC_TERRAIN_FLAT			0x01	// Flat terrain
-#define LC_TERRAIN_TEXTURE		0x02	// Use texture
-#define LC_TERRAIN_SMOOTH		0x04	// Smooth shading
-
 #define LC_AUTOSAVE_FLAG		0x100000 // Enable auto-saving
 
 #define LC_SEL_NO_PIECES	0x001 // No pieces in the project

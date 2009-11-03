@@ -24,7 +24,6 @@
 #include "camera.h"
 #include "light.h"
 #include "group.h"
-#include "terrain.h"
 #include "image.h"
 #include "system.h"
 #include "minifig.h"
@@ -61,7 +60,6 @@ Project::Project()
 	m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
-	m_pTerrain = new Terrain();
 	m_pBackground = new Texture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
@@ -89,7 +87,6 @@ Project::~Project()
 		if (m_pClipboard[i] != NULL)
 			delete m_pClipboard[i];
 
-	delete m_pTerrain;
 	delete m_pBackground;
 	delete m_pScreenFont;
 }
@@ -185,7 +182,6 @@ void Project::DeleteContents(bool bUndo)
 		m_pUndoList = NULL;
 
 		m_pBackground->Unload();
-		m_pTerrain->LoadDefaults();
 	}
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
@@ -264,7 +260,6 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strHeader, Sys_ProfileLoadString ("Default", "Header", ""));
 	strcpy(m_strFooter, Sys_ProfileLoadString ("Default", "Footer", "Page &P"));
 	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
-	m_pTerrain->LoadDefaults();
 	m_OverlayActive = false;
 	m_PlayingAnimation = false;
 
@@ -696,7 +691,31 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			m_fGradient2[2] = (float)((rgb & 0xff0000) >> 16) / 255;
 			
 			if (fv > 1.1f)
-				m_pTerrain->FileLoad(file); // TODO: move terrain to model.
+			{
+				u8 ch;
+
+				file->ReadBytes(&ch);
+				if (ch != 3)
+				{
+					u16 sh;
+					u32 i, j;
+
+					file->ReadInts(&i);
+					file->ReadInts(&j);
+					file->Seek(6*4, SEEK_CUR);
+
+					if (ch == 1)
+					{
+						file->ReadBytes(&ch);
+						sh = ch;
+					}
+					else
+						file->ReadShorts(&sh);
+
+					file->Seek(sh, SEEK_CUR);
+					file->Seek(i*j*4, SEEK_CUR);
+				}
+			}
 			else
 			{
 				file->Seek(4, SEEK_CUR);
@@ -857,7 +876,8 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	rgb = FLOATRGB(m_fGradient2);
 	file->WriteInts(&rgb, 1);
 	// 0.64 (1.2)
-	m_pTerrain->FileSave(file);
+	ch = 3;
+	file->WriteBytes(&ch); // m_pTerrain->FileSave(file);
 
 	if (!bUndo)
 	{
@@ -1801,16 +1821,6 @@ void Project::RenderScene(View* view, bool Interface)
 
 	if (m_nDetail & LC_DET_SMOOTH)
 		glShadeModel(GL_SMOOTH);
-
-	// Render the terrain.
-	if (m_nScene & LC_SCENE_FLOOR)
-	{
-		float w = (float)view->GetWidth();
-		float h = (float)view->GetHeight();
-		float ratio = w/h;
-
-		m_pTerrain->Render(view->GetCamera(), ratio);
-	}
 
 	// TODO: Build the render lists outside of the render function and only sort translucent sections here.
 
@@ -2940,9 +2950,6 @@ void Project::RenderInitialize()
 	}
 
 	glAlphaFunc(GL_GREATER, 0.0625);
-
-	if (m_nScene & LC_SCENE_FLOOR)
-		m_pTerrain->LoadTexture();
 
 	if (m_nScene & LC_SCENE_BG)
 		if (!m_pBackground->LoadFromFile(m_strBackground))
@@ -4554,19 +4561,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_MODEL_LIST:
 		{
 			SystemDoDialog(LC_DLG_MODEL_LIST, NULL);
-		} break;
-
-		case LC_FILE_TERRAIN:
-		{
-			Terrain* temp = new Terrain();
-			*temp = *m_pTerrain;
-
-			if (SystemDoDialog(LC_DLG_TERRAIN, temp))
-			{
-				*m_pTerrain = *temp;
-				m_pTerrain->LoadTexture();
-			}
-			delete temp;
 		} break;
 
 		case LC_FILE_LIBRARY:

@@ -49,7 +49,6 @@ struct TouchState
 class lcGroup;
 class GroupInfo;
 class Texture;
-class Terrain;
 class PieceInfo;
 class Matrix;
 class View;
@@ -161,7 +160,6 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	Terrain* m_pTerrain;
 	lcFile* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
 

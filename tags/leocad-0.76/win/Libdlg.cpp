@@ -197,6 +197,36 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
 			{
+				char file1[LC_MAXPATH], file2[LC_MAXPATH];
+				PiecesLibrary* Library = lcGetPiecesLibrary();
+				lcFileDisk DiskIdx, DiskBin;
+
+				strcpy(file1, Library->GetLibraryPath());
+				strcat(file1, "pieces.idx");
+				strcpy(file2, Library->GetLibraryPath());
+				strcat(file2, "pieces.bin");
+
+				if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
+					break;
+
+				lcFileMem IdxFile1, IdxFile2, BinFile1, BinFile2;
+				long Length;
+
+				Length = DiskIdx.GetLength();
+				IdxFile1.SetLength(Length);
+				DiskIdx.Read(IdxFile1.GetBuffer(), Length);
+				DiskIdx.Close();
+
+				Length = DiskBin.GetLength();
+				BinFile1.SetLength(Length);
+				DiskBin.Read(BinFile1.GetBuffer(), Length);
+				DiskBin.Close();
+
+				lcFileMem* NewIdx = &IdxFile1;
+				lcFileMem* NewBin = &BinFile1;
+				lcFileMem* OldIdx = &IdxFile2;
+				lcFileMem* OldBin = &BinFile2;
+
 				CProgressDlg Dlg("Importing pieces");
 				Dlg.Create(this);
 				Dlg.SetRange(0, opts.numfiles);
@@ -206,14 +236,49 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 					Dlg.SetStatus(opts.filenames[i]);
 					Dlg.StepIt();
 
-					lcGetPiecesLibrary ()->ImportLDrawPiece (opts.filenames[i]);
-					free (opts.filenames[i]);
+					lcFileMem* TmpFile;
+
+					TmpFile = NewBin;
+					NewBin = OldBin;
+					OldBin = TmpFile;
+					NewBin->SetLength(0);
+
+					TmpFile = NewIdx;
+					NewIdx = OldIdx;
+					OldIdx = TmpFile;
+					NewIdx->SetLength(0);
+
+					lcGetPiecesLibrary()->ImportLDrawPiece(opts.filenames[i], NewIdx, NewBin, OldIdx, OldBin);
+					free(opts.filenames[i]);
 
 					if (Dlg.CheckCancelButton())
 						if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
 							for (; i < opts.numfiles; i++)
 								free(opts.filenames[i]);
 				}
+
+				if ((!DiskIdx.Open(file1, "wb")) || (!DiskBin.Open(file2, "wb")))
+					break;
+
+				strcpy(file1, Library->GetLibraryPath());
+				strcat(file1, "pieces-b.old");
+				remove(file1);
+				strcpy(file2, Library->GetLibraryPath());
+				strcat(file2, "pieces.bin");
+				rename(file2, file1);
+
+				strcpy(file1, Library->GetLibraryPath());
+				strcat(file1, "pieces-i.old");
+				remove(file1);
+				strcpy(file2, Library->GetLibraryPath());
+				strcat(file2, "pieces.idx");
+				rename(file2, file1);
+
+				DiskBin.Seek(0, SEEK_SET);
+				DiskBin.Write(NewBin->GetBuffer(), NewBin->GetLength());
+
+				DiskIdx.Seek(0, SEEK_SET);
+				DiskIdx.Write(NewIdx->GetBuffer(), NewIdx->GetLength());
 
 				free(opts.filenames);
 				Sys_ProfileSaveString("Default", "LDraw Pieces Path", opts.path);

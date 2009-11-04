@@ -77,7 +77,7 @@ public:
 	bool LoadUpdate(const char* update);
 	bool DeleteTextures(char** Names, int NumTextures);
 	bool ImportTexture(const char* Name);
-	bool ImportLDrawPiece(const char* Filename);
+	bool ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, lcFile* NewBinFile, lcFile* OldIdxFile, lcFile* OldBinFile);
 
 	// Set when pieces are added/removed from the library.
 	bool m_Modified;
@@ -161,7 +161,7 @@ struct LC_LDRAW_PIECE
 };
 
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
-bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);
+bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFile, lcFile* OldIdxFile, lcFile* OldBinFile);
 void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
 
 #endif // _LIBRARY_H_

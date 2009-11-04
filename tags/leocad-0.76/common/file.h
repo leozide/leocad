@@ -83,6 +83,11 @@ public:
 	void Close();
 	bool Open(const char* FileName, const char* Mode);
 
+	void* GetBuffer() const
+	{
+		return mBuffer;
+	}
+
 protected:
 	void GrowFile(long Length);
 

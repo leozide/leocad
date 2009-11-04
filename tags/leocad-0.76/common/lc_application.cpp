@@ -437,8 +437,33 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	if (ImportPieceArg)
 	{
 		for (int i = ImportPieceArg; i < argc; i++)
-			if (!lcGetPiecesLibrary()->ImportLDrawPiece(argv[i]))
+		{
+			lcFileDisk newbin, newidx, oldbin, oldidx;
+			char file1[LC_MAXPATH], file2[LC_MAXPATH];
+
+			strcpy(file1, lcGetPiecesLibrary()->GetLibraryPath());
+			strcat(file1, "pieces-b.old");
+			remove(file1);
+			strcpy(file2, lcGetPiecesLibrary()->GetLibraryPath());
+			strcat(file2, "pieces.bin");
+			rename(file2, file1);
+
+			if ((!oldbin.Open(file1, "rb")) || (!newbin.Open(file2, "wb")))
+				return false;
+
+			strcpy(file1, lcGetPiecesLibrary()->GetLibraryPath());
+			strcat(file1, "pieces-i.old");
+			remove(file1);
+			strcpy(file2, lcGetPiecesLibrary()->GetLibraryPath());
+			strcat(file2, "pieces.idx");
+			rename(file2, file1);
+
+			if ((!oldidx.Open(file1, "rb")) || (!newidx.Open(file2, "wb")))
+				return false;
+
+			if (!lcGetPiecesLibrary()->ImportLDrawPiece(argv[i], &newidx, &newbin, &oldidx, &oldbin))
 				break;
+		}
 
 		return false;
 	}

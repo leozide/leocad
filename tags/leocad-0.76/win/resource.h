@@ -143,6 +143,8 @@
 #define IDC_CURSOR1                     244
 #define IDC_ORBIT                       244
 #define IDD_MODEL_LIST                  245
+#define IDC_CURSOR2                     246
+#define IDC_HSPLITBAR                   246
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -727,7 +729,8 @@
 #define ID_SNAP_28                      33220
 #define ID_SNAP_29                      33221
 #define ID_EDIT_SELECTBYCOLOR           33222
-#define ID_VIEW_PIECES_BAR              59425
+#define ID_VIEW_PIECES_BAR              59424
+#define ID_VIEW_TIME_BAR                59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
 #define ID_VIEW_MODIFY_BAR              59428
@@ -737,7 +740,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        246
+#define _APS_NEXT_RESOURCE_VALUE        247
 #define _APS_NEXT_COMMAND_VALUE         33223
 #define _APS_NEXT_CONTROL_VALUE         1258
 #define _APS_NEXT_SYMED_VALUE           121

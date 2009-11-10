@@ -1466,6 +1466,7 @@ IDC_PAN_SW              CURSOR                  "res\\pan_sw.cur"
 IDC_ROTX                CURSOR                  "res\\rotx.cur"
 IDC_ROTY                CURSOR                  "res\\roty.cur"
 IDC_ORBIT               CURSOR                  "res\\orbit.cur"
+IDC_HSPLITBAR           CURSOR                  "res\\splith.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

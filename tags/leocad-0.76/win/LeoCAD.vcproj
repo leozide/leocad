@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="LeoCAD"
 	ProjectGUID="{4087671F-6FF4-4373-99B1-2825B48C3D53}"
+	RootNamespace="LeoCAD"
 	Keyword="MFCProj"
 	>
 	<Platforms>
@@ -518,6 +519,18 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="lc_global.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\columntreectrl.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
 						PrecompiledHeaderThrough="lc_global.h"
 					/>
 				</FileConfiguration>
@@ -1473,6 +1486,42 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\timebar.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="lc_global.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\timectrl.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="lc_global.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\timetree.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="lc_global.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="Tools.cpp"
 				>
 				<FileConfiguration
@@ -1778,6 +1827,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\timebar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\timectrl.h"
+				>
+			</File>
+			<File
 				RelativePath="Titletip.h"
 				>
 			</File>
@@ -2047,6 +2104,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\splith.cur"
+				>
+			</File>
+			<File
 				RelativePath=".\res\splitv.bmp"
 				>
 			</File>
@@ -2091,15 +2152,15 @@
 			Name="Help Files"
 			>
 			<File
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				>
+			</File>
+			<File
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				>
+			</File>
+			<File
 				RelativePath="hlp\AfxCore.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2107,15 +2168,15 @@
 				>
 			</File>
 			<File
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				>
+			</File>
+			<File
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				>
+			</File>
+			<File
 				RelativePath="hlp\AfxPrint.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File

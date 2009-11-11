@@ -123,6 +123,8 @@ public:
 	lcObject* GetFocusObject() const;
 	lcGroup* AddGroup(const char* name, lcGroup* pParent, float x, float y, float z);
 
+	void UpdateSelection();
+
 	// Views.
 	void AddView(View* pView);
 	void RemoveView(View* pView);
@@ -232,7 +234,6 @@ protected:
 
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
-	void UpdateSelection();
 	void RemoveEmptyGroups();
 
 public:

@@ -25,7 +25,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define TOOLBAR_VERSION 1
+#define TOOLBAR_VERSION 2
 #define LC_ANIM_TIMER 100
 
 void MainFrameTimer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -198,6 +198,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
+	if (!m_wndTimeBar.Create(_T("Timeline"), this, CSize(200, 100), TRUE, ID_VIEW_TIME_BAR))
+	{
+		TRACE0("Failed to create timeline bar\n");
+		return -1;      // fail to create
+	}
+
 	if (!m_wndModifyDlg.Create(_T("Modify"), this, ID_VIEW_MODIFY_BAR))
 	{
 		TRACE0("Failed to create modify dialog bar\n");
@@ -219,9 +225,13 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
 
+	m_wndTimeBar.SetBarStyle(m_wndTimeBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
+	m_wndTimeBar.EnableDocking(CBRS_ALIGN_ANY);
+
 	DockControlBar(&m_wndStandardBar);
 	DockControlBar(&m_wndToolsBar);
 	DockControlBar(&m_wndPiecesBar, AFX_IDW_DOCKBAR_RIGHT);
+	DockControlBar(&m_wndTimeBar, AFX_IDW_DOCKBAR_BOTTOM);
 
 	CRect rect;
 	RecalcLayout(TRUE);

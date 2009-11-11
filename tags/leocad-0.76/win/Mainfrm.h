@@ -11,6 +11,7 @@
 
 #include "FlatBar.h"
 #include "PieceBar.h"
+#include "timebar.h"
 #include "CADBar.h"
 #include "BMPMenu.h"
 #include "ModDlg.h"
@@ -58,6 +59,7 @@ public:
 	CFlatToolBar  m_wndToolsBar;
 	CFlatToolBar  m_wndAnimationBar;
 	CPiecesBar    m_wndPiecesBar;
+	CTimeBar      m_wndTimeBar;
 	CDynamicSplitterWnd  m_wndSplitter;
 
 	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;

@@ -33,14 +33,14 @@ protected:
 	COLORREF		m_TextColor;
 	COLORREF		m_TextBgColor;
 	COLORREF		m_HeaderColor;
-//	COLORREF		m_crConnectingLines;
 
-	int				m_TotalHeight;
-	
-	int				m_LineHeight;
-	int				m_Indent;
-	int				m_TreeWidth;
-	int				m_StepWidth;
+	int m_TotalHeight;
+	int m_HeaderHeight;
+	int m_LineHeight;
+
+	int m_Indent;
+	int m_TreeWidth;
+	int m_StepWidth;
 
 	CArray<CTimelineNode, CTimelineNode> m_Nodes;
 	int		m_Selected;
@@ -86,6 +86,7 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

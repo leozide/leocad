@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(CTimelineCtrl, CWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_CAPTURECHANGED()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -107,6 +108,7 @@ BOOL CTimelineCtrl::Create(const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD d
 	TEXTMETRIC tm;
 	GetTextMetrics(pDC->m_hDC, &tm);
 	m_LineHeight = tm.tmHeight + 4;
+	m_HeaderHeight = m_LineHeight;
 	pDC->SelectObject(pOldFont);
 	pDC->RestoreDC(iSaved);
 	ReleaseDC(pDC);
@@ -144,7 +146,7 @@ void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int x, int y, CRect rFrame
 	CRect RowRect;
 
 	RowRect.left = x + m_Indent;
-	RowRect.top = pNode->y - GetScrollPos(SB_VERT);
+	RowRect.top = pNode->y - GetScrollPos(SB_VERT) + m_HeaderHeight;
 	RowRect.right = rFrame.right;
 	RowRect.bottom = RowRect.top + m_LineHeight;
 
@@ -236,7 +238,7 @@ void CTimelineCtrl::ResetScrollBar()
 	GetClientRect(rFrame);
 
 	// Need for scrollbars?
-	if (rFrame.Height() > m_TotalHeight + 8)
+	if (rFrame.Height() > m_TotalHeight + m_HeaderHeight)
 	{
 		ShowScrollBar(SB_VERT, FALSE);	// Hide it
 		SetScrollPos(SB_VERT, 0);
@@ -247,7 +249,7 @@ void CTimelineCtrl::ResetScrollBar()
 		si.cbSize = sizeof(SCROLLINFO);
 		si.fMask = SIF_PAGE | SIF_RANGE;
 		si.nPage = rFrame.Height();
-		si.nMax = m_TotalHeight + 8;
+		si.nMax = m_TotalHeight + m_HeaderHeight;
 		si.nMin = 0 ;
 
 		SetScrollInfo(SB_VERT, &si);
@@ -257,7 +259,7 @@ void CTimelineCtrl::ResetScrollBar()
 
 int CTimelineCtrl::FindNodeByPoint(const CPoint& point)
 {
-	int y = point.y - GetScrollPos(SB_VERT); 
+	int y = point.y + GetScrollPos(SB_VERT) - m_HeaderHeight; 
 
 	for (int i = 0; i < m_Nodes.GetSize(); i++)
 		if (y > m_Nodes[i].y && y < m_Nodes[i].y + m_LineHeight)
@@ -269,13 +271,13 @@ int CTimelineCtrl::FindNodeByPoint(const CPoint& point)
 /////////////////////////////////////////////////////////////////////////////
 // CTimelineCtrl message handlers
 
-void CTimelineCtrl::OnPaint() 
+void CTimelineCtrl::OnPaint()
 {
 	CPaintDC dc(this);		// device context for painting
 
 	CDC MemDC;
 	CRect rect;
-    CBitmap bitmap, *pOldBitmap;
+	CBitmap bitmap, *pOldBitmap;
 	dc.GetClipBox(&rect);
 	MemDC.CreateCompatibleDC(&dc);
 	bitmap.CreateCompatibleBitmap(&dc, rect.Width(), rect.Height());
@@ -293,21 +295,20 @@ BOOL CTimelineCtrl::OnEraseBkgnd(CDC* pDC)
 
 void CTimelineCtrl::EraseBkgnd(CDC* pDC)
 {
-	CRect  VisRect, ClipRect, rect;
+	CRect VisRect, ClipRect, rect;
 	CBrush FixedBack(m_HeaderColor), TextBack(m_TextBgColor);
 
 	if (pDC->GetClipBox(ClipRect) == ERROR)
 		return;
 
-int m_HeaderHeight = 0;
 	GetClientRect(VisRect);
 	VisRect.top = m_HeaderHeight;
 	VisRect.left = 0;
-/*
+
 	// Draw header background
 	if (ClipRect.top < m_HeaderHeight && ClipRect.right > 0 && ClipRect.left < VisRect.right)
 		pDC->FillRect(CRect(-1, ClipRect.top, VisRect.right, m_HeaderHeight), &FixedBack);
-*/
+
 	if (rect.IntersectRect(VisRect, ClipRect)) 
 	{
 		CRect CellRect(max(0, rect.left), max(m_HeaderHeight, rect.top), rect.right, rect.bottom);
@@ -329,14 +330,55 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 	UINT Mode = pDC->SetBkMode(TRANSPARENT);
 	CFont* OldFont = pDC->SelectObject(&m_Font);
 
+	// Draw header.
+	CRect TimeHeader(m_TreeWidth, 0, ClientRect.right, m_HeaderHeight);
+
+	CPen BlackPen;
+	BlackPen.CreatePen(PS_SOLID | PS_COSMETIC, 1, RGB(0, 0, 0));
+	CPen* OldPen = pDC->SelectObject(&BlackPen);
+	COLORREF OldText = pDC->SetTextColor(m_TextColor);
+	UINT OldAlign = pDC->SetTextAlign(TA_CENTER|TA_BASELINE);
+
+	pDC->MoveTo(TimeHeader.left , TimeHeader.top);
+	pDC->LineTo(TimeHeader.left, TimeHeader.bottom);
+
+	pDC->Draw3dRect(TimeHeader, GetSysColor(COLOR_3DHILIGHT), GetSysColor(COLOR_3DSHADOW));
+
+	for (int Step = 1, x = TimeHeader.left + m_StepWidth; x < TimeHeader.right; Step++, x += m_StepWidth)
+	{
+		int TickHeight = 3;
+
+		if (Step % 5 == 0)
+			TickHeight += 2;
+
+		pDC->MoveTo(x, TimeHeader.bottom - TickHeight);
+		pDC->LineTo(x, TimeHeader.bottom - 1);
+
+		if (Step % 10 == 0)
+		{
+			CString str;
+			str.Format("%d", Step);
+			pDC->TextOut(x, TimeHeader.bottom - TickHeight - 1, str);
+		}
+	}
+
+	pDC->SetTextAlign(OldAlign);
+	pDC->SetTextColor(OldText);
+	pDC->SelectObject(OldPen);
+
+	// Draw items.
 	int ScrollPos = GetScrollPos(SB_VERT);
+
+	CRgn rgn;
+	rgn.CreateRectRgn(ClientRect.left, m_HeaderHeight, ClientRect.right, ClientRect.bottom);
+	pDC->SelectClipRgn(&rgn, RGN_AND);
 
 	for (int i = 0; i < m_Nodes.GetSize(); i++)
 	{
 		CTimelineNode* Node = &m_Nodes[i];
 		int y = Node->y - ScrollPos;
 
-		if (y + m_LineHeight < 0)
+		if (y + m_LineHeight < ClipRect.top)
 			continue;
 
 		DrawNode(pDC, i, 0, ScrollPos, ClientRect);
@@ -421,7 +463,7 @@ CRect CTimelineCtrl::CalcTimeRect(CTimelineNode* Node, int Time)
 
 	Rect.left = m_TreeWidth + 4 + (Time - 1) * m_StepWidth;
 	Rect.right = Rect.left + 8;
-	Rect.bottom = Node->y + m_LineHeight - (m_LineHeight - 8) / 2;
+	Rect.bottom = Node->y + m_LineHeight - (m_LineHeight - 8) / 2 + m_HeaderHeight - GetScrollPos(SB_VERT);
 	Rect.top = Rect.bottom - 8;
 
 	return Rect;
@@ -439,8 +481,6 @@ BOOL CTimelineCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		CTimelineNode* Node = &m_Nodes[ClickedIndex];
 		CRect Rect = CalcTimeRect(Node, Node->Piece->m_TimeShow);
-
-		point.y += GetScrollPos(SB_VERT);
 
 		if (Rect.PtInRect(point))
 		{
@@ -484,8 +524,6 @@ void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		CTimelineNode* Node = &m_Nodes[ClickedIndex];
 		CRect Rect = CalcTimeRect(Node, Node->Piece->m_TimeShow);
 
-		point.y += GetScrollPos(SB_VERT);
-
 		if (Rect.PtInRect(point))
 		{
 			m_TrackNode = ClickedIndex;
@@ -513,4 +551,18 @@ BOOL CTimelineCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	OnVScroll(zDelta > 0 ? SB_LINEUP : SB_LINEDOWN, 0, NULL);
 
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CTimelineCtrl::OnCaptureChanged(CWnd *pWnd)
+{
+	if (pWnd != this)
+	{
+		if (m_TrackMode == LC_TIMELINE_TRACK_SHOW)
+		{
+			m_TrackMode = LC_TIMELINE_TRACK_NONE;
+			InvalidateRect(NULL, FALSE);
+		}
+	}
+
+	CWnd::OnCaptureChanged(pWnd);
 }

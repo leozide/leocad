@@ -19,23 +19,11 @@ static char THIS_FILE[] = __FILE__;
 
 CTimelineCtrl::CTimelineCtrl()
 {
-	m_TrackNode			= NULL;
-
-	m_Indent				= 16;				// Indentation for tree branches
-	m_TreeWidth				= 100;
-	m_StepWidth				= 8;
-
-	m_TotalHeight			= 0;				// A polite yet meaningless default
-
-	m_TextColor = GetSysColor(COLOR_WINDOWTEXT);
-	m_TextBgColor = GetSysColor(COLOR_WINDOW);
-	m_HeaderColor = GetSysColor(COLOR_3DFACE);
-//	m_crConnectingLines		= RGB(128,128,128);	// Some default
+	m_TreeWidth = 100;
+	m_StepWidth = 8;
 
 	m_TrackMode = LC_TIMELINE_TRACK_NONE;
-
-	// Safeguards
-	m_Selected				= NULL;
+	m_TotalHeight = 0;
 }
 
 CTimelineCtrl::~CTimelineCtrl()
@@ -140,39 +128,51 @@ void CTimelineCtrl::Repopulate(lcPiece* Piece)
 	InvalidateRect(NULL, FALSE);
 }
 
-void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int x, int y, CRect rFrame)
+void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int ScrollPos, const CRect& ClientRect)
 {
-	CTimelineNode* pNode = &m_Nodes[NodeIndex];
-	CRect RowRect;
+	CTimelineNode* Node = &m_Nodes[NodeIndex];
+	lcPiece* Piece = Node->Piece;
 
-	RowRect.left = x + m_Indent;
-	RowRect.top = pNode->y - GetScrollPos(SB_VERT) + m_HeaderHeight;
-	RowRect.right = rFrame.right;
+	CRect RowRect;
+	RowRect.left = ClientRect.left;
+	RowRect.top = Node->y - ScrollPos + m_HeaderHeight;
+	RowRect.right = ClientRect.right;
 	RowRect.bottom = RowRect.top + m_LineHeight;
 
-	COLORREF crOldText = pDC->SetTextColor(m_TextColor);
+	// Draw text.
+	CRect TextRect(RowRect);
+	TextRect.right = m_TreeWidth;
 
-	int iJointX = RowRect.left - m_Indent - 8;
-	int iJointY = RowRect.top + (m_LineHeight / 2);
+	COLORREF OldText;
+	if (Piece->IsFocused())
+	{
+		pDC->FillSolidRect(TextRect, GetSysColor(COLOR_HIGHLIGHT));
+		OldText = pDC->SetTextColor(GetSysColor(COLOR_HIGHLIGHTTEXT));
+	}
+	else if (Piece->IsSelected())
+	{
+		pDC->FillSolidRect(TextRect, GetSysColor(COLOR_BTNFACE));
+		OldText = pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
+	}
+	else
+	{
+		OldText = pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+	}
 
-	pDC->FillSolidRect(iJointX + m_Indent - 2, iJointY - 2, 5, 5, m_TextColor);
-	pDC->FillSolidRect(iJointX + m_Indent - 1, iJointY - 1, 3, 3, RGB(255,255,255));
+	TextRect.DeflateRect(1,1);
+	pDC->DrawText(CString(Piece->m_Name), TextRect, DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS);
+	pDC->SetTextColor(OldText);
 
-	CString	cs = pNode->Piece->m_Name;
-	RowRect.right = m_TreeWidth;
-	pDC->DrawText(cs, RowRect, DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS);
-
-	pDC->SetTextColor(crOldText);
-
+	// Draw grid.
 	CPen GrayPen;
 	GrayPen.CreatePen(PS_SOLID | PS_COSMETIC, 1, RGB(192, 192, 192));
 	CPen* OldPen = pDC->SelectObject(&GrayPen);
 
-	pDC->MoveTo(RowRect.right, RowRect.bottom);
-	pDC->LineTo(rFrame.right, RowRect.bottom);
+	pDC->MoveTo(TextRect.right, RowRect.bottom);
+	pDC->LineTo(RowRect.right, RowRect.bottom);
 
-	int px = RowRect.right + 10 * m_StepWidth;
-	while (px < rFrame.right)
+	int px = TextRect.right + 10 * m_StepWidth;
+	while (px < RowRect.right)
 	{
 		pDC->MoveTo(px, RowRect.top);
 		pDC->LineTo(px, RowRect.bottom);
@@ -183,15 +183,15 @@ void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int x, int y, CRect rFrame
 	BlackPen.CreatePen(PS_SOLID | PS_COSMETIC, 1, RGB(0, 0, 0));
 	pDC->SelectObject(&BlackPen);
 
-	pDC->MoveTo(RowRect.right, RowRect.top);
-	pDC->LineTo(RowRect.right, RowRect.bottom);
+	pDC->MoveTo(TextRect.right, RowRect.top);
+	pDC->LineTo(TextRect.right, RowRect.bottom);
 
 	CBrush GreenBrush;
 	GreenBrush.CreateSolidBrush(RGB(0, 192, 0));
 	CBrush* OldBrush = pDC->SelectObject(&GreenBrush);
 
 	CRect Rect;
-	int Time = pNode->Piece->m_TimeShow;
+	int Time = Piece->m_TimeShow;
 
 	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW && m_TrackNode == NodeIndex)
 	{
@@ -204,7 +204,7 @@ void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int x, int y, CRect rFrame
 			Time = 1;
 	}
 
-	Rect = CalcTimeRect(pNode, Time);
+	Rect = CalcTimeRect(Node, Time);
 	pDC->Rectangle(Rect);
 
 	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW && m_TrackNode == NodeIndex)
@@ -213,17 +213,17 @@ void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int x, int y, CRect rFrame
 		GrayBrush.CreateSolidBrush(RGB(224, 224, 224));
 		pDC->SelectObject(&GrayBrush);
 
-		Rect = CalcTimeRect(pNode, pNode->Piece->m_TimeShow);
+		Rect = CalcTimeRect(Node, Piece->m_TimeShow);
 		pDC->Rectangle(Rect);
 	}
 
-	if (pNode->Piece->m_TimeHide != (u32)-1)
+	if (Piece->m_TimeHide != (u32)-1)
 	{
 		CBrush RedBrush;
 		RedBrush.CreateSolidBrush(RGB(192, 0, 0));
 		pDC->SelectObject(&RedBrush);
 
-		Rect = CalcTimeRect(pNode, pNode->Piece->m_TimeHide);
+		Rect = CalcTimeRect(Node, Piece->m_TimeHide);
 		pDC->Rectangle(Rect);
 	}
 
@@ -296,7 +296,7 @@ BOOL CTimelineCtrl::OnEraseBkgnd(CDC* pDC)
 void CTimelineCtrl::EraseBkgnd(CDC* pDC)
 {
 	CRect VisRect, ClipRect, rect;
-	CBrush FixedBack(m_HeaderColor), TextBack(m_TextBgColor);
+	CBrush FixedBack(GetSysColor(COLOR_3DFACE)), TextBack(GetSysColor(COLOR_WINDOW));
 
 	if (pDC->GetClipBox(ClipRect) == ERROR)
 		return;
@@ -336,7 +336,7 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 	CPen BlackPen;
 	BlackPen.CreatePen(PS_SOLID | PS_COSMETIC, 1, RGB(0, 0, 0));
 	CPen* OldPen = pDC->SelectObject(&BlackPen);
-	COLORREF OldText = pDC->SetTextColor(m_TextColor);
+	COLORREF OldText = pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	UINT OldAlign = pDC->SetTextAlign(TA_CENTER|TA_BASELINE);
 
 	pDC->MoveTo(TimeHeader.left , TimeHeader.top);
@@ -381,10 +381,39 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 		if (y + m_LineHeight < ClipRect.top)
 			continue;
 
-		DrawNode(pDC, i, 0, ScrollPos, ClientRect);
+		DrawNode(pDC, i, ScrollPos, ClientRect);
 
 		if (y > ClipRect.bottom)
 			break;
+	}
+
+	if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
+	{
+		POINT pt;
+		GetCursorPos(&pt);
+		ScreenToClient(&pt);
+
+		int EndTime = (pt.x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
+		CRect SelRect(m_TreeWidth + m_TrackTime * m_StepWidth - m_StepWidth / 2, ClientRect.top, m_TreeWidth + EndTime * m_StepWidth + m_StepWidth / 2, ClientRect.bottom);
+
+		CDC MemDC;
+		CRect rect(0, 0, 4, 4);
+		CBitmap bitmap, *OldBitmap;
+
+		MemDC.CreateCompatibleDC(pDC);
+		bitmap.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
+		OldBitmap = MemDC.SelectObject(&bitmap);
+		MemDC.SetWindowOrg(rect.left, rect.top);
+
+		MemDC.FillSolidRect(rect, 0);
+		BLENDFUNCTION Blend;
+		Blend.BlendOp = AC_SRC_OVER;
+		Blend.BlendFlags = 0;
+		Blend.SourceConstantAlpha = 128;
+		Blend.AlphaFormat = 0;
+
+		pDC->AlphaBlend(SelRect.left, SelRect.top, SelRect.Width(), SelRect.Height(), &MemDC, rect.left, rect.top, rect.Width(), rect.Height(), Blend);
+		MemDC.SelectObject(OldBitmap);
 	}
 
 	pDC->SelectObject(OldFont);
@@ -513,22 +542,37 @@ void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		InvalidateRect(NULL, FALSE);
 		ReleaseCapture();
 	}
+	else if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
+	{
+		m_TrackMode = LC_TIMELINE_TRACK_NONE;
+		InvalidateRect(NULL, FALSE);
+		ReleaseCapture();
+	}
 }
 
 void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	int ClickedIndex = FindNodeByPoint(point);
-
-	if (ClickedIndex != -1)
+	if (point.y < m_HeaderHeight)
 	{
-		CTimelineNode* Node = &m_Nodes[ClickedIndex];
-		CRect Rect = CalcTimeRect(Node, Node->Piece->m_TimeShow);
+		m_TrackTime = (point.x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
+		m_TrackMode = LC_TIMELINE_TRACK_TIME;
+		SetCapture();
+	}
+	else
+	{
+		int ClickedIndex = FindNodeByPoint(point);
 
-		if (Rect.PtInRect(point))
+		if (ClickedIndex != -1)
 		{
-			m_TrackNode = ClickedIndex;
-			m_TrackMode = LC_TIMELINE_TRACK_SHOW;
-			SetCapture();
+			CTimelineNode* Node = &m_Nodes[ClickedIndex];
+			CRect Rect = CalcTimeRect(Node, Node->Piece->m_TimeShow);
+
+			if (Rect.PtInRect(point))
+			{
+				m_TrackNode = ClickedIndex;
+				m_TrackMode = LC_TIMELINE_TRACK_SHOW;
+				SetCapture();
+			}
 		}
 	}
 
@@ -537,7 +581,7 @@ void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CTimelineCtrl::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW)
+	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW || m_TrackMode == LC_TIMELINE_TRACK_TIME)
 	{
 		InvalidateRect(NULL, FALSE);
 	}
@@ -557,7 +601,7 @@ void CTimelineCtrl::OnCaptureChanged(CWnd *pWnd)
 {
 	if (pWnd != this)
 	{
-		if (m_TrackMode == LC_TIMELINE_TRACK_SHOW)
+		if (m_TrackMode != LC_TIMELINE_TRACK_NONE)
 		{
 			m_TrackMode = LC_TIMELINE_TRACK_NONE;
 			InvalidateRect(NULL, FALSE);

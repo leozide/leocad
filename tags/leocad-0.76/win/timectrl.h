@@ -18,7 +18,8 @@ class CTimelineCtrl : public CWnd
 	{
 		LC_TIMELINE_TRACK_NONE,
 		LC_TIMELINE_TRACK_SHOW,
-		LC_TIMELINE_TRACK_HIDE
+		LC_TIMELINE_TRACK_HIDE,
+		LC_TIMELINE_TRACK_TIME
 	};
 
 // Construction
@@ -29,23 +30,19 @@ public:
 
 // Attributes
 protected:
-	CFont			m_Font;
-	COLORREF		m_TextColor;
-	COLORREF		m_TextBgColor;
-	COLORREF		m_HeaderColor;
+	CFont m_Font;
 
 	int m_TotalHeight;
 	int m_HeaderHeight;
 	int m_LineHeight;
 
-	int m_Indent;
 	int m_TreeWidth;
 	int m_StepWidth;
 
 	CArray<CTimelineNode, CTimelineNode> m_Nodes;
-	int		m_Selected;
-	int		m_TrackNode;
 
+	int m_TrackNode;
+	int m_TrackTime;
 	LC_TIMELINE_TRACK_MODE m_TrackMode;
 
 // Operations
@@ -53,7 +50,7 @@ public:
 	void Repopulate(lcPiece* PieceList);
 
 protected:
-	void DrawNode(CDC* pDC, int NodeIndex, int x, int y, CRect rFrame);
+	void DrawNode(CDC* pDC, int NodeIndex, int ScrollPos, const CRect& ClientRect);
 
 	void ResetScrollBar();
 

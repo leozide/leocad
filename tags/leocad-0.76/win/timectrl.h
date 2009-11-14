@@ -39,15 +39,18 @@ protected:
 	int m_TreeWidth;
 	int m_StepWidth;
 
-	CArray<CTimelineNode, CTimelineNode> m_Nodes;
+	u32 m_FilterStart;
+	u32 m_FilterEnd;
 
 	int m_TrackNode;
-	int m_TrackTime;
+	u32 m_TrackTime;
 	LC_TIMELINE_TRACK_MODE m_TrackMode;
+
+	CArray<CTimelineNode, CTimelineNode> m_Nodes;
 
 // Operations
 public:
-	void Repopulate(lcPiece* PieceList);
+	void Repopulate();
 
 protected:
 	void DrawNode(CDC* pDC, int NodeIndex, int ScrollPos, const CRect& ClientRect);
@@ -55,7 +58,22 @@ protected:
 	void ResetScrollBar();
 
 	int FindNodeByPoint(const CPoint& point);
-	CRect CalcTimeRect(CTimelineNode* Node, int Time);
+	CRect CalcTimeRect(CTimelineNode* Node, u32 Time);
+
+	// Return the time at x in client coordinates.
+	u32 GetTimeFromX(int x)
+	{
+		if (x < m_TreeWidth + m_StepWidth / 2)
+			return 1;
+
+		return (x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
+	}
+
+	// Return the x position of a given time in client coordinates.
+	int GetXFromTime(u32 Time)
+	{
+		return m_TreeWidth + Time * m_StepWidth;
+	}
 
 	void OnDraw(CDC* pDC);
 	void EraseBkgnd(CDC* pDC);

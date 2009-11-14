@@ -1,10 +1,7 @@
 #include "lc_global.h"
 #include "timebar.h"
 
-#include "lc_application.h"
 #include "project.h"
-#include "lc_model.h"
-#include "piece.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,5 +55,5 @@ int CTimeBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CTimeBar::ProcessMessage(lcMessageType Message, void* Data)
 {
 	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
-		m_TimeCtrl.Repopulate(lcGetActiveProject()->m_ActiveModel->m_Pieces);
+		m_TimeCtrl.Repopulate();
 }

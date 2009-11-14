@@ -24,6 +24,9 @@ CTimelineCtrl::CTimelineCtrl()
 
 	m_TrackMode = LC_TIMELINE_TRACK_NONE;
 	m_TotalHeight = 0;
+
+	m_FilterStart = 1;
+	m_FilterEnd = LC_OBJECT_TIME_MAX;
 }
 
 CTimelineCtrl::~CTimelineCtrl()
@@ -106,13 +109,19 @@ BOOL CTimelineCtrl::Create(const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD d
 	return TRUE;
 }
 
-void CTimelineCtrl::Repopulate(lcPiece* Piece)
+void CTimelineCtrl::Repopulate()
 {
 	m_Nodes.RemoveAll();
 	m_TotalHeight = 0;
 
-	while (Piece)
+	for (lcPiece* Piece = lcGetActiveProject()->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
+		if (Piece->IsHidden())
+			continue;
+
+		if (Piece->m_TimeShow < m_FilterStart || Piece->m_TimeShow > m_FilterEnd)
+			continue;
+
 		CTimelineNode Node;
 
 		Node.Piece = Piece;
@@ -120,8 +129,6 @@ void CTimelineCtrl::Repopulate(lcPiece* Piece)
 		m_TotalHeight += m_LineHeight;
 
 		m_Nodes.Add(Node);
-
-		Piece = (lcPiece*)Piece->m_Next;
 	}
 
 	ResetScrollBar();
@@ -199,9 +206,7 @@ void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int ScrollPos, const CRect
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 
-		Time = (pt.x - m_TreeWidth - 4) / m_StepWidth + 1;
-		if (Time < 1)
-			Time = 1;
+		Time = GetTimeFromX(pt.x);
 	}
 
 	Rect = CalcTimeRect(Node, Time);
@@ -387,14 +392,21 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 			break;
 	}
 
+	u32 FilterStart = m_FilterStart, FilterEnd = m_FilterEnd;
+
 	if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
 	{
 		POINT pt;
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 
-		int EndTime = (pt.x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
-		CRect SelRect(m_TreeWidth + m_TrackTime * m_StepWidth - m_StepWidth / 2, ClientRect.top, m_TreeWidth + EndTime * m_StepWidth + m_StepWidth / 2, ClientRect.bottom);
+		FilterStart = m_TrackTime;
+		FilterEnd = GetTimeFromX(pt.x);
+	}
+
+	if (FilterStart != 1 || FilterEnd != LC_OBJECT_TIME_MAX)
+	{
+		CRect SelRect(GetXFromTime(FilterStart) - m_StepWidth / 2, ClientRect.top, GetXFromTime(FilterEnd) + m_StepWidth / 2, ClientRect.bottom);
 
 		CDC MemDC;
 		CRect rect(0, 0, 4, 4);
@@ -486,11 +498,11 @@ LRESULT CTimelineCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 	return CWnd::WindowProc(message, wParam, lParam);
 }
 
-CRect CTimelineCtrl::CalcTimeRect(CTimelineNode* Node, int Time)
+CRect CTimelineCtrl::CalcTimeRect(CTimelineNode* Node, u32 Time)
 {
 	CRect Rect;
 
-	Rect.left = m_TreeWidth + 4 + (Time - 1) * m_StepWidth;
+	Rect.left = GetXFromTime(Time) - 4;
 	Rect.right = Rect.left + 8;
 	Rect.bottom = Node->y + m_LineHeight - (m_LineHeight - 8) / 2 + m_HeaderHeight - GetScrollPos(SB_VERT);
 	Rect.top = Rect.bottom - 8;
@@ -526,9 +538,7 @@ void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW)
 	{
-		int Time = (point.x - m_TreeWidth - 4) / m_StepWidth + 1;
-		if (Time < 1)
-			Time = 1;
+		u32 Time = GetTimeFromX(point.x);
 
 		CTimelineNode* Node = &m_Nodes[m_TrackNode];
 		Node->Piece->m_TimeShow = Time;
@@ -544,6 +554,10 @@ void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	else if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
 	{
+		m_FilterStart = m_TrackTime;
+		m_FilterEnd = GetTimeFromX(point.x);
+		Repopulate();
+
 		m_TrackMode = LC_TIMELINE_TRACK_NONE;
 		InvalidateRect(NULL, FALSE);
 		ReleaseCapture();
@@ -554,9 +568,19 @@ void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	if (point.y < m_HeaderHeight)
 	{
-		m_TrackTime = (point.x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
-		m_TrackMode = LC_TIMELINE_TRACK_TIME;
-		SetCapture();
+		if (m_FilterStart != 1 || m_FilterEnd != LC_OBJECT_TIME_MAX)
+		{
+			m_FilterStart = 1;
+			m_FilterEnd = LC_OBJECT_TIME_MAX;
+			Repopulate();
+			InvalidateRect(NULL, FALSE);
+		}
+		else
+		{
+			m_TrackTime = (point.x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
+			m_TrackMode = LC_TIMELINE_TRACK_TIME;
+			SetCapture();
+		}
 	}
 	else
 	{

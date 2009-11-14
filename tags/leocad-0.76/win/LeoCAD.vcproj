@@ -524,18 +524,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\columntreectrl.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="Disabtab.cpp"
 				>
 				<FileConfiguration
@@ -1499,18 +1487,6 @@
 			</File>
 			<File
 				RelativePath=".\timectrl.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PrecompiledHeaderThrough="lc_global.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\timetree.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

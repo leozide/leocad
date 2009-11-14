@@ -264,6 +264,9 @@ void CTimelineCtrl::ResetScrollBar()
 
 int CTimelineCtrl::FindNodeByPoint(const CPoint& point)
 {
+	if (point.y < m_HeaderHeight)
+		return -1;
+
 	int y = point.y + GetScrollPos(SB_VERT) - m_HeaderHeight; 
 
 	for (int i = 0; i < m_Nodes.GetSize(); i++)
@@ -566,7 +569,19 @@ void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	if (point.y < m_HeaderHeight)
+	if (point.x < m_TreeWidth)
+	{
+		int ClickedIndex = FindNodeByPoint(point);
+
+		if (ClickedIndex != -1)
+		{
+			Project* project = lcGetActiveProject();
+			lcPiece* Piece = m_Nodes[ClickedIndex].Piece;
+
+			project->ToggleObjectSelectedState(Piece, nFlags & MK_CONTROL ? true : false);
+		}
+	}
+	else if (point.y < m_HeaderHeight)
 	{
 		if (m_FilterStart != 1 || m_FilterEnd != LC_OBJECT_TIME_MAX)
 		{

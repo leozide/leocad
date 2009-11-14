@@ -1,12 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3dsftk", "3dsftk\3dsftk.vcproj", "{73A4453C-78F2-44EC-A782-B7DFA36F0A25}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeoCAD", "LeoCAD.vcproj", "{4087671F-6FF4-4373-99B1-2825B48C3D53}"
-	ProjectSection(ProjectDependencies) = postProject
-		{73A4453C-78F2-44EC-A782-B7DFA36F0A25} = {73A4453C-78F2-44EC-A782-B7DFA36F0A25}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpeglib", "jpeglib\jpeglib.vcproj", "{E5996224-6C4C-4309-8D66-13DB3337C55E}"
 EndProject
@@ -20,10 +15,6 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{73A4453C-78F2-44EC-A782-B7DFA36F0A25}.Debug|Win32.ActiveCfg = Debug|Win32
-		{73A4453C-78F2-44EC-A782-B7DFA36F0A25}.Debug|Win32.Build.0 = Debug|Win32
-		{73A4453C-78F2-44EC-A782-B7DFA36F0A25}.Release|Win32.ActiveCfg = Release|Win32
-		{73A4453C-78F2-44EC-A782-B7DFA36F0A25}.Release|Win32.Build.0 = Release|Win32
 		{4087671F-6FF4-4373-99B1-2825B48C3D53}.Debug|Win32.ActiveCfg = Debug|Win32
 		{4087671F-6FF4-4373-99B1-2825B48C3D53}.Debug|Win32.Build.0 = Debug|Win32
 		{4087671F-6FF4-4373-99B1-2825B48C3D53}.Release|Win32.ActiveCfg = Release|Win32

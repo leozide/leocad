@@ -6271,6 +6271,47 @@ lcGroup* Project::AddGroup(const char* name, lcGroup* pParent, float x, float y,
   return pNewGroup;
 }
 
+void Project::ToggleObjectSelectedState(lcObject* Object, bool AllowMultiple)
+{
+	if (Object)
+	{
+		switch (Object->GetType())
+		{
+			case LC_OBJECT_PIECE:
+			{
+				lcPiece* Piece = (lcPiece*)Object;
+				lcGroup* Group = Piece->GetTopGroup();
+				bool Focus = Piece->IsFocused();
+
+				SelectAndFocusNone(AllowMultiple);
+
+				// If a piece has focus deselect it, otherwise set the focus.
+				Piece->Select(!Focus, !Focus, false);
+
+				if (Group)
+					for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+						if (Piece->GetTopGroup() == Group)
+							Piece->Select(!Focus, false, false);
+			} break;
+
+			case LC_OBJECT_CAMERA:
+			case LC_OBJECT_CAMERA_TARGET:
+			case LC_OBJECT_LIGHT:
+			case LC_OBJECT_LIGHT_TARGET:
+			{
+				SelectAndFocusNone(AllowMultiple);
+				Object->Select(true, true, AllowMultiple);
+			} break;
+		}
+	}
+	else
+		SelectAndFocusNone(AllowMultiple);
+
+	UpdateSelection();
+	UpdateAllViews();
+	SystemUpdateFocus(Object);
+}
+
 void Project::SelectAndFocusNone(bool bFocusOnly)
 {
 	lcPiece* Piece;
@@ -7636,43 +7677,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 			if (m_nCurAction == LC_ACTION_SELECT) 
 			{
-				if (Object != NULL)
-				{
-					switch (Object->GetType ())
-					{
-						case LC_OBJECT_PIECE:
-						{
-							lcPiece* pPiece = (lcPiece*)Object;
-							lcGroup* pGroup = pPiece->GetTopGroup();
-							bool bFocus = pPiece->IsFocused ();
-
-							SelectAndFocusNone (bControl);
-
-							// if a piece has focus deselect it, otherwise set the focus
-							pPiece->Select (!bFocus, !bFocus, false);
-
-							if (pGroup != NULL)
-								for (pPiece = m_ActiveModel->m_Pieces; pPiece; pPiece = (lcPiece*)pPiece->m_Next)
-									if (pPiece->GetTopGroup() == pGroup)
-										pPiece->Select (!bFocus, false, false);
-						} break;
-
-						case LC_OBJECT_CAMERA:
-						case LC_OBJECT_CAMERA_TARGET:
-						case LC_OBJECT_LIGHT:
-						case LC_OBJECT_LIGHT_TARGET:
-						{
-							SelectAndFocusNone (bControl);
-							Object->Select (true, true, bControl);
-						} break;
-					}
-				}
-				else
-					SelectAndFocusNone (bControl);
-
-				UpdateSelection();
-				UpdateAllViews();
-				SystemUpdateFocus(Object);
+				ToggleObjectSelectedState(Object, bControl);
 
 				StartTracking(LC_TRACK_START_LEFT);
 			}

@@ -123,6 +123,7 @@ public:
 	lcObject* GetFocusObject() const;
 	lcGroup* AddGroup(const char* name, lcGroup* pParent, float x, float y, float z);
 
+	void ToggleObjectSelectedState(lcObject* Object, bool AllowMultiple);
 	void UpdateSelection();
 
 	// Views.

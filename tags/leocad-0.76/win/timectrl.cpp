@@ -403,8 +403,9 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 
-		FilterStart = m_TrackTime;
-		FilterEnd = GetTimeFromX(pt.x);
+		u32 EndTime = GetTimeFromX(pt.x);
+		FilterStart = lcMin(m_TrackTime, EndTime);
+		FilterEnd = lcMax(m_TrackTime, EndTime);
 	}
 
 	if (FilterStart != 1 || FilterEnd != LC_OBJECT_TIME_MAX)
@@ -557,8 +558,9 @@ void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	else if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
 	{
-		m_FilterStart = m_TrackTime;
-		m_FilterEnd = GetTimeFromX(point.x);
+		u32 EndTime = GetTimeFromX(point.x);
+		m_FilterStart = lcMin(m_TrackTime, EndTime);
+		m_FilterEnd = lcMax(m_TrackTime, EndTime);
 		Repopulate();
 
 		m_TrackMode = LC_TIMELINE_TRACK_NONE;

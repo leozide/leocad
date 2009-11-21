@@ -253,13 +253,6 @@ BEGIN
     BEGIN
         MENUITEM "P&references...",             ID_VIEW_PREFERENCES
         MENUITEM SEPARATOR
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
-        MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
-        MENUITEM "Pie&ces",                     ID_VIEW_PIECES_BAR
-        MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM SEPARATOR
         MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
         MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
         MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
@@ -280,7 +273,6 @@ BEGIN
             MENUITEM "&Delete",                     ID_VIEW_STEP_DELETE
         END
         MENUITEM SEPARATOR
-        MENUITEM "New View",                    ID_VIEW_NEWVIEW
         MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
         MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
         MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
@@ -303,6 +295,15 @@ BEGIN
             MENUITEM "14",                          ID_VIEWPORT14
         END
         MENUITEM SEPARATOR
+        POPUP "Toolbars"
+        BEGIN
+            MENUITEM "&File",                       ID_VIEW_TOOLBAR
+            MENUITEM "&Tools",                      ID_VIEW_TOOLS_BAR
+            MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
+            MENUITEM "&Pieces",                     ID_VIEW_PIECES_BAR
+            MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
+            MENUITEM "Time&line",                   ID_VIEW_TIMELINE_BAR
+        END
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
     END
     POPUP "&Piece"
@@ -1670,6 +1671,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_VIEW_PIECES_BAR      "Show or hide the pieces toolbar\nToggle PiecesBar"
+    ID_VIEW_TIMELINE_BAR    "Show or hide the Timeline toolbar"
     ID_VIEW_TOOLS_BAR       "Show or hide the drawing toolbar\nToggle DrawingBar"
     ID_VIEW_ANIMATION_BAR   "Show or hide the animation toolbar\nToggle AnimationBar"
     ID_VIEW_MODIFY_BAR      "Show or hide the modify dialog\nToggle Modify Dialog"
@@ -1744,7 +1746,6 @@ END
 STRINGTABLE 
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
-    ID_VIEW_NEWVIEW         "Creates a new view window"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
 END
 

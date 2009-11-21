@@ -96,7 +96,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_GETMINMAXINFO()
 	ON_COMMAND(ID_FILE_PRINTPIECELIST, OnFilePrintPieceList)
 	ON_WM_ACTIVATEAPP()
-	ON_COMMAND(ID_VIEW_NEWVIEW, OnViewNewView)
 	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
 	ON_WM_DROPFILES()
 	//}}AFX_MSG_MAP
@@ -115,10 +114,12 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR, OnBarCheck)
 	ON_COMMAND_EX(ID_VIEW_TOOLS_BAR, OnBarCheck)
 	ON_COMMAND_EX(ID_VIEW_PIECES_BAR, OnBarCheck)
+	ON_COMMAND_EX(ID_VIEW_TIMELINE_BAR, OnBarCheck)
 	ON_COMMAND_EX(ID_VIEW_MODIFY_BAR, OnBarCheck)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_ANIMATION_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, OnUpdateControlBarMenu)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TIMELINE_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, OnUpdateControlBarMenu)
 	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
 	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
@@ -198,7 +199,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	if (!m_wndTimeBar.Create(_T("Timeline"), this, CSize(200, 100), TRUE, ID_VIEW_TIME_BAR))
+	if (!m_wndTimeBar.Create(_T("Timeline"), this, CSize(200, 100), TRUE, ID_VIEW_TIMELINE_BAR))
 	{
 		TRACE0("Failed to create timeline bar\n");
 		return -1;      // fail to create
@@ -1151,41 +1152,6 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	return nIDLast;
 }
 
-LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-void CMainFrame::OnViewNewView()
-{
-	HINSTANCE hInst = AfxGetInstanceHandle();
-	WNDCLASS wndcls;
-
-#define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
-#define FLOATING_CLASSNAME _T("LeoCADFloatingOpenGLClass")
-
-	// check if our class is registered
-	if(!(GetClassInfo(hInst, FLOATING_CLASSNAME, &wndcls)))
-	{
-		if (GetClassInfo(hInst, OPENGL_CLASSNAME, &wndcls))
-		{
-			// set our class name
-			wndcls.lpszClassName = FLOATING_CLASSNAME;
-			wndcls.lpfnWndProc = GLWindowProc;
-			wndcls.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDR_MAINFRAME));
-
-			// register class
-			if (!AfxRegisterClass(&wndcls))
-				AfxThrowResourceException();
-		}
-		else
-			AfxThrowResourceException();
-	}
-
-	Project* project = lcGetActiveProject();
-	View *view = new View(project, project->GetFirstView());
-
-	CreateWindowEx(0, FLOATING_CLASSNAME, "LeoCAD", WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
-	               CW_USEDEFAULT, CW_USEDEFAULT, 200, 100, m_hWnd, (HMENU)0, hInst, view);
-}
-
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 {
 	m_wndSplitter.CreateStatic(this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
@@ -1343,6 +1309,8 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_MODEL_NEW,              // LC_MODEL_NEW
 		ID_MODEL_DELETE,           // LC_MODEL_DELETE
 		ID_MODEL_PROPERTIES,       // LC_MODEL_PROPERTIES
+		0,                         // LC_MODEL_SET_ACTIVE,
+		0,                         // LC_MODEL_LIST,
 		ID_VIEW_PREFERENCES,       // LC_VIEW_PREFERENCES
 		0,                         // LC_VIEW_ZOOM
 		ID_VIEW_ZOOMIN,            // LC_VIEW_ZOOMIN
@@ -1375,16 +1343,26 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_SNAPMENU
 		0,                         // LC_TOOLBAR_LOCKMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
-		0,                         // LC_EDIT_MOVE_SNAP_0
-		0,                         // LC_EDIT_MOVE_SNAP_1
-		0,                         // LC_EDIT_MOVE_SNAP_2
-		0,                         // LC_EDIT_MOVE_SNAP_3
-		0,                         // LC_EDIT_MOVE_SNAP_4
-		0,                         // LC_EDIT_MOVE_SNAP_5
-		0,                         // LC_EDIT_MOVE_SNAP_6
-		0,                         // LC_EDIT_MOVE_SNAP_7
-		0,                         // LC_EDIT_MOVE_SNAP_8
-		0,                         // LC_EDIT_MOVE_SNAP_9
+		0,                         // LC_EDIT_MOVEXY_SNAP_0,
+		0,                         // LC_EDIT_MOVEXY_SNAP_1,
+		0,                         // LC_EDIT_MOVEXY_SNAP_2,
+		0,                         // LC_EDIT_MOVEXY_SNAP_3,
+		0,                         // LC_EDIT_MOVEXY_SNAP_4,
+		0,                         // LC_EDIT_MOVEXY_SNAP_5,
+		0,                         // LC_EDIT_MOVEXY_SNAP_6,
+		0,                         // LC_EDIT_MOVEXY_SNAP_7,
+		0,                         // LC_EDIT_MOVEXY_SNAP_8,
+		0,                         // LC_EDIT_MOVEXY_SNAP_9,
+		0,                         // LC_EDIT_MOVEZ_SNAP_0
+		0,                         // LC_EDIT_MOVEZ_SNAP_1
+		0,                         // LC_EDIT_MOVEZ_SNAP_2
+		0,                         // LC_EDIT_MOVEZ_SNAP_3
+		0,                         // LC_EDIT_MOVEZ_SNAP_4
+		0,                         // LC_EDIT_MOVEZ_SNAP_5
+		0,                         // LC_EDIT_MOVEZ_SNAP_6
+		0,                         // LC_EDIT_MOVEZ_SNAP_7
+		0,                         // LC_EDIT_MOVEZ_SNAP_8
+		0,                         // LC_EDIT_MOVEZ_SNAP_9
 		0,                         // LC_EDIT_ANGLE_SNAP_0
 		0,                         // LC_EDIT_ANGLE_SNAP_1
 		0,                         // LC_EDIT_ANGLE_SNAP_2
@@ -1408,8 +1386,10 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_EDIT_ACTION_ZOOM_REGION
 		0,                         // LC_EDIT_ACTION_PAN
 		0,                         // LC_EDIT_ACTION_ROTATE_VIEW
+		0,                         // LC_EDIT_ACTION_ORBIT
 		0,                         // LC_EDIT_ACTION_ROLL
 	};
+	LC_CASSERT(sizeof(CmdToID)/sizeof(CmdToID[0]) == LC_NUM_COMMANDS);
 
 	m_bmpMenu.Attach(m_hMenuDefault);
 

@@ -668,7 +668,6 @@
 #define ID_LOCK_ON                      33149
 #define ID_PIECE_MIRROR                 33150
 #define ID_FILE_IMPORTPIECE             33152
-#define ID_VIEW_NEWVIEW                 33153
 #define ID_VIEW_STEP_DELETE             33154
 #define ID_LIBDLG_FILE_TEXTURES         33157
 #define ID_PIECEBAR_NEWCATEGORY         33159
@@ -730,8 +729,10 @@
 #define ID_SNAP_28                      33220
 #define ID_SNAP_29                      33221
 #define ID_EDIT_SELECTBYCOLOR           33222
+#define ID_VIEW_TOOLBARS                33224
+#define ID_TOOLBARS_SA                  33225
 #define ID_VIEW_PIECES_BAR              59424
-#define ID_VIEW_TIME_BAR                59425
+#define ID_VIEW_TIMELINE_BAR            59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
 #define ID_VIEW_MODIFY_BAR              59428
@@ -742,7 +743,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        248
-#define _APS_NEXT_COMMAND_VALUE         33223
+#define _APS_NEXT_COMMAND_VALUE         33226
 #define _APS_NEXT_CONTROL_VALUE         1258
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

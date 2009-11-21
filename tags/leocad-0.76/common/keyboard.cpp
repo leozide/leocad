@@ -54,7 +54,7 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_PIECE_NEXT, "Piece Next Step", 0, 0, 0 },
 	{ LC_VIEW_PREFERENCES, "Preferences", 0, 0, 0 },
 	{ LC_MODEL_NEW, "New Model", 0, 0, 0 },
-	{ LC_MODEL_DELETE, "Delete Properties", 0, 0, 0 },
+	{ LC_MODEL_DELETE, "Delete Model", 0, 0, 0 },
 	{ LC_MODEL_PROPERTIES, "Model Properties", 0, 0, 0 },
 //	{ LC_VIEW_ZOOM, "", 0, 0, 0 },
 	{ LC_VIEW_ZOOMIN, "Zoom In", 0, 0, 0 },

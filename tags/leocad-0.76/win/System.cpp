@@ -683,7 +683,7 @@ void SystemUpdateTime(bool bAnimation, u32 nTime, u32 nTotal)
 	pCtrl->EnableButton(ID_VIEW_STEP_LAST, nTime != nTotal ? TRUE : FALSE);
 
 	// Main menu
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(6);
 
 	pMainMenu->EnableMenuItem(ID_VIEW_STEP_NEXT, MF_BYCOMMAND | 
 		(nTime < nTotal ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
@@ -775,7 +775,7 @@ void SystemUpdateCurrentCamera(lcCamera* OldCamera, lcCamera* NewCamera, lcCamer
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(5);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 	int i = 0;
 
@@ -803,7 +803,7 @@ void SystemUpdateCameraMenu(lcCamera* CameraList)
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(5);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
 
 	while (pMainMenu->GetMenuItemCount())
@@ -833,7 +833,7 @@ void SystemUpdateCameraMenu(lcCamera* CameraList)
 		pMainMenu->AppendODMenu(Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
 		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, Camera->m_Name);
 
-		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
+//		pMainMenu->ChangeMenuItemShortcut("", i + ID_CAMERA_FIRST);
 	}
 
 	pMainMenu->AppendODMenu("", MF_SEPARATOR);

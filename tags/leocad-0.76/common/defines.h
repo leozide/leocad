@@ -27,6 +27,8 @@ do \
 
 #endif
 
+#define LC_CASSERT(x) extern int LC_CASSERT_CHECK[(x) ? 1 : -1]
+
 // ============================================================================
 // Old defines (mostly deprecated).
 

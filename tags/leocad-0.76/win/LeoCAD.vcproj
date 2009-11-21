@@ -1836,6 +1836,10 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 			>
 			<File
+				RelativePath=".\res\about.bmp"
+				>
+			</File>
+			<File
 				RelativePath="res\Angle.cur"
 				>
 			</File>
@@ -2132,11 +2136,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				RelativePath="hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxCore.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2148,11 +2152,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				RelativePath="hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxPrint.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File

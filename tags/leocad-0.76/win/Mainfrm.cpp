@@ -363,6 +363,7 @@ HMENU CMainFrame::NewMenu()
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_FINDER, IDB_HELP);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_LEOCADHOMEPAGE, IDB_HOME);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_SENDEMAIL, IDB_MAIL);
+	m_bmpMenu.ModifyODMenu(NULL, ID_APP_ABOUT, IDB_ABOUT);
 
 	m_bmpMenu.ModifyODMenu(NULL, _T("Cameras"), IDB_CAMERA);
 
@@ -969,7 +970,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 2);
 		} break;
 
-		case ID_SNAP_ON:
+		case ID_SNAP_ON: {
+			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 6);
+		} break;
+
 		case ID_SNAP_SNAPALL: {
 			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 3);
 		} break;
@@ -988,6 +992,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LOCK_LOCKZ: {
 			project->HandleCommand(LC_TOOLBAR_LOCKMENU, 2);
+		} break;
+
+		case ID_LOCK_ON: {
+			project->HandleCommand(LC_TOOLBAR_LOCKMENU, 4);
 		} break;
 
 		case ID_LOCK_UNLOCKALL: {

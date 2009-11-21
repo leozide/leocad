@@ -103,6 +103,7 @@ IDR_LIBRARY             BITMAP                  "res\\library.bmp"
 IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
 IDB_SPLITH              BITMAP                  "res\\splith.bmp"
 IDB_SPLITV              BITMAP                  "res\\splitv.bmp"
+IDB_ABOUT               BITMAP                  "res\\about.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -127,9 +128,6 @@ BEGIN
     BUTTON      ID_SNAP_ON
     BUTTON      ID_SNAP_ANGLE
     BUTTON      ID_RENDER_BOX
-    SEPARATOR
-    BUTTON      ID_APP_ABOUT
-    BUTTON      ID_CONTEXT_HELP
 END
 
 IDR_TOOLSBAR TOOLBAR  16, 15

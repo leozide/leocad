@@ -143,8 +143,9 @@
 #define IDC_CURSOR1                     244
 #define IDC_ORBIT                       244
 #define IDD_MODEL_LIST                  245
-#define IDC_CURSOR2                     246
 #define IDC_HSPLITBAR                   246
+#define IDB_BITMAP1                     247
+#define IDB_ABOUT                       247
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -740,7 +741,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        247
+#define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         33223
 #define _APS_NEXT_CONTROL_VALUE         1258
 #define _APS_NEXT_SYMED_VALUE           121

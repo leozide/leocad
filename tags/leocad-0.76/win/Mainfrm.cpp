@@ -150,7 +150,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT)))
+	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT)))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
@@ -164,25 +164,23 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndStandardBar.SetBarStyle(m_wndStandardBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndStandardBar.SetWindowText(_T("Standard"));
+	m_wndStandardBar.SetWindowText(_T("File"));
 	m_wndStandardBar.SendMessage(TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
 	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndToolsBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_TOOLS_BAR) ||
-	    !m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
+	if (!m_wndToolsBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_TOOLS_BAR) || !m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
 	m_wndToolsBar.SetBarStyle(m_wndToolsBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndToolsBar.SetWindowText(_T("Drawing"));
+	m_wndToolsBar.SetWindowText(_T("Tools"));
 	m_wndToolsBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndAnimationBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_ANIMATION_BAR) ||
-		!m_wndAnimationBar.LoadToolBar(IDR_ANIMATORBAR))
+	if (!m_wndAnimationBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_ANIMATION_BAR) || !m_wndAnimationBar.LoadToolBar(IDR_ANIMATORBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
@@ -192,8 +190,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndAnimationBar.SetWindowText(_T("Animation"));
 	m_wndAnimationBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CSize(200, 100),
-		TRUE, ID_VIEW_PIECES_BAR))
+	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CSize(200, 100), TRUE, ID_VIEW_PIECES_BAR))
 	{
 		TRACE0("Failed to create pieces bar\n");
 		return -1;      // fail to create
@@ -221,8 +218,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// members. If you need to change them later, don't forget to call
 	// RecalcLayout() or DelayRecalcLayout() after you set the size.
 	// You can use this technique to load/save the size of the control bar.
-//	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
-//	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
 	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
 
@@ -301,6 +296,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 // CMainFrame diagnostics
 
 #ifdef _DEBUG
+
 void CMainFrame::AssertValid() const
 {
 	CFrameWnd::AssertValid();

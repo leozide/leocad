@@ -19,6 +19,7 @@ class CTimelineCtrl : public CWnd
 		LC_TIMELINE_TRACK_NONE,
 		LC_TIMELINE_TRACK_SHOW,
 		LC_TIMELINE_TRACK_HIDE,
+		LC_TIMELINE_TRACK_TREE_SPLIT,
 		LC_TIMELINE_TRACK_TIME
 	};
 
@@ -39,11 +40,11 @@ protected:
 	int m_TreeWidth;
 	int m_StepWidth;
 
-	u32 m_FilterStart;
-	u32 m_FilterEnd;
+	int m_FilterStart;
+	int m_FilterEnd;
 
 	int m_TrackNode;
-	u32 m_TrackTime;
+	int m_TrackTime;
 	LC_TIMELINE_TRACK_MODE m_TrackMode;
 
 	CArray<CTimelineNode, CTimelineNode> m_Nodes;
@@ -58,10 +59,10 @@ protected:
 	void ResetScrollBar();
 
 	int FindNodeByPoint(const CPoint& point);
-	CRect CalcTimeRect(CTimelineNode* Node, u32 Time);
+	CRect CalcTimeRect(CTimelineNode* Node, int Time);
 
 	// Return the time at x in client coordinates.
-	u32 GetTimeFromX(int x)
+	int GetTimeFromX(int x)
 	{
 		if (x < m_TreeWidth + m_StepWidth / 2)
 			return 1;
@@ -70,7 +71,7 @@ protected:
 	}
 
 	// Return the x position of a given time in client coordinates.
-	int GetXFromTime(u32 Time)
+	int GetXFromTime(int Time)
 	{
 		return m_TreeWidth + Time * m_StepWidth;
 	}
@@ -99,6 +100,7 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnCaptureChanged(CWnd *pWnd);

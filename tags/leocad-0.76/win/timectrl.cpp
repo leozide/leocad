@@ -45,6 +45,7 @@ BEGIN_MESSAGE_MAP(CTimelineCtrl, CWnd)
 	ON_WM_VSCROLL()
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_CAPTURECHANGED()
@@ -114,9 +115,11 @@ void CTimelineCtrl::Repopulate()
 	m_Nodes.RemoveAll();
 	m_TotalHeight = 0;
 
-	for (lcPiece* Piece = lcGetActiveProject()->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	lcModel* Model = lcGetActiveProject()->m_ActiveModel;
+
+	for (lcPiece* Piece = Model->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if (Piece->IsHidden())
+		if (!Piece->IsVisible(Model->m_CurFrame))
 			continue;
 
 		if (Piece->m_TimeShow < m_FilterStart || Piece->m_TimeShow > m_FilterEnd)
@@ -200,19 +203,21 @@ void CTimelineCtrl::DrawNode(CDC* pDC, int NodeIndex, int ScrollPos, const CRect
 	CRect Rect;
 	int Time = Piece->m_TimeShow;
 
-	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW && m_TrackNode == NodeIndex)
+	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW && Piece->IsSelected())
 	{
 		POINT pt;
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 
-		Time = GetTimeFromX(pt.x);
+		Time = GetTimeFromX(pt.x) - m_TrackTime + Piece->m_TimeShow;
+		if (Time < 1)
+			Time = 1;
 	}
 
 	Rect = CalcTimeRect(Node, Time);
 	pDC->Rectangle(Rect);
 
-	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW && m_TrackNode == NodeIndex)
+	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW && Piece->IsSelected())
 	{
 		CBrush GrayBrush;
 		GrayBrush.CreateSolidBrush(RGB(224, 224, 224));
@@ -339,19 +344,23 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 	CFont* OldFont = pDC->SelectObject(&m_Font);
 
 	// Draw header.
-	CRect TimeHeader(m_TreeWidth, 0, ClientRect.right, m_HeaderHeight);
-
 	CPen BlackPen;
 	BlackPen.CreatePen(PS_SOLID | PS_COSMETIC, 1, RGB(0, 0, 0));
 	CPen* OldPen = pDC->SelectObject(&BlackPen);
 	COLORREF OldText = pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-	UINT OldAlign = pDC->SetTextAlign(TA_CENTER|TA_BASELINE);
 
-	pDC->MoveTo(TimeHeader.left , TimeHeader.top);
+	CRect ListHeader(0, 0, m_TreeWidth, m_HeaderHeight);
+	pDC->Draw3dRect(ListHeader, GetSysColor(COLOR_3DHILIGHT), GetSysColor(COLOR_3DSHADOW));
+	ListHeader.DeflateRect(2,1);
+	pDC->DrawText("Pieces", ListHeader, DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS);
+
+	CRect TimeHeader(m_TreeWidth, 0, ClientRect.right, m_HeaderHeight);
+	pDC->MoveTo(TimeHeader.left, TimeHeader.top);
 	pDC->LineTo(TimeHeader.left, TimeHeader.bottom);
 
 	pDC->Draw3dRect(TimeHeader, GetSysColor(COLOR_3DHILIGHT), GetSysColor(COLOR_3DSHADOW));
 
+	UINT OldAlign = pDC->SetTextAlign(TA_CENTER|TA_BASELINE);
 	for (int Step = 1, x = TimeHeader.left + m_StepWidth; x < TimeHeader.right; Step++, x += m_StepWidth)
 	{
 		int TickHeight = 3;
@@ -370,6 +379,21 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 		}
 	}
 
+	CBrush BlackBrush;
+	BlackBrush.CreateSolidBrush(GetSysColor(COLOR_3DFACE));
+	CBrush* OldBrush = pDC->SelectObject(&BlackBrush);
+
+	int tx = GetXFromTime(lcGetActiveProject()->m_ActiveModel->m_CurFrame);
+	CPoint Arrow[3];
+	Arrow[0].x = tx - 2;
+	Arrow[0].y = m_HeaderHeight - 6;
+	Arrow[1].x = tx + 2;
+	Arrow[1].y = m_HeaderHeight - 6;
+	Arrow[2].x = tx;
+	Arrow[2].y = m_HeaderHeight - 1;
+	pDC->Polygon(Arrow, 3);
+
+	pDC->SelectObject(OldBrush);
 	pDC->SetTextAlign(OldAlign);
 	pDC->SetTextColor(OldText);
 	pDC->SelectObject(OldPen);
@@ -395,7 +419,7 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 			break;
 	}
 
-	u32 FilterStart = m_FilterStart, FilterEnd = m_FilterEnd;
+	int FilterStart = m_FilterStart, FilterEnd = m_FilterEnd;
 
 	if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
 	{
@@ -403,7 +427,7 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 
-		u32 EndTime = GetTimeFromX(pt.x);
+		int EndTime = GetTimeFromX(pt.x);
 		FilterStart = lcMin(m_TrackTime, EndTime);
 		FilterEnd = lcMax(m_TrackTime, EndTime);
 	}
@@ -430,6 +454,16 @@ void CTimelineCtrl::OnDraw(CDC* pDC)
 
 		pDC->AlphaBlend(SelRect.left, SelRect.top, SelRect.Width(), SelRect.Height(), &MemDC, rect.left, rect.top, rect.Width(), rect.Height(), Blend);
 		MemDC.SelectObject(OldBitmap);
+	}
+
+	if (m_TrackMode == LC_TIMELINE_TRACK_TREE_SPLIT)
+	{
+		POINT pt;
+		GetCursorPos(&pt);
+		ScreenToClient(&pt);
+
+		pDC->MoveTo(pt.x, 0);
+		pDC->LineTo(pt.x, ClientRect.bottom);
 	}
 
 	pDC->SelectObject(OldFont);
@@ -502,7 +536,7 @@ LRESULT CTimelineCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 	return CWnd::WindowProc(message, wParam, lParam);
 }
 
-CRect CTimelineCtrl::CalcTimeRect(CTimelineNode* Node, u32 Time)
+CRect CTimelineCtrl::CalcTimeRect(CTimelineNode* Node, int Time)
 {
 	CRect Rect;
 
@@ -520,83 +554,14 @@ BOOL CTimelineCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	GetCursorPos(&point);
 	ScreenToClient(&point);
 
-	int ClickedIndex = FindNodeByPoint(point);
-
-	if (ClickedIndex != -1)
+	if (point.y < m_HeaderHeight)
 	{
-		CTimelineNode* Node = &m_Nodes[ClickedIndex];
-		CRect Rect = CalcTimeRect(Node, Node->Piece->m_TimeShow);
+		CRect Rect(m_TreeWidth - 2, 0, m_TreeWidth + 2, m_HeaderHeight);
 
 		if (Rect.PtInRect(point))
 		{
 			::SetCursor(AfxGetApp()->LoadCursor(IDC_HSPLITBAR));
 			return TRUE;
-		}
-	}
-
-	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-	return TRUE;
-}
-
-void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point) 
-{
-	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW)
-	{
-		u32 Time = GetTimeFromX(point.x);
-
-		CTimelineNode* Node = &m_Nodes[m_TrackNode];
-		Node->Piece->m_TimeShow = Time;
-		if (!Node->Piece->IsVisible(lcGetActiveProject()->m_ActiveModel->m_CurFrame))
-			Node->Piece->Select(false, false, false);
-
-		lcGetActiveProject()->UpdateSelection();
-		lcGetActiveProject()->UpdateAllViews();
-
-		m_TrackMode = LC_TIMELINE_TRACK_NONE;
-		InvalidateRect(NULL, FALSE);
-		ReleaseCapture();
-	}
-	else if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
-	{
-		u32 EndTime = GetTimeFromX(point.x);
-		m_FilterStart = lcMin(m_TrackTime, EndTime);
-		m_FilterEnd = lcMax(m_TrackTime, EndTime);
-		Repopulate();
-
-		m_TrackMode = LC_TIMELINE_TRACK_NONE;
-		InvalidateRect(NULL, FALSE);
-		ReleaseCapture();
-	}
-}
-
-void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
-{
-	if (point.x < m_TreeWidth)
-	{
-		int ClickedIndex = FindNodeByPoint(point);
-
-		if (ClickedIndex != -1)
-		{
-			Project* project = lcGetActiveProject();
-			lcPiece* Piece = m_Nodes[ClickedIndex].Piece;
-
-			project->ToggleObjectSelectedState(Piece, nFlags & MK_CONTROL ? true : false);
-		}
-	}
-	else if (point.y < m_HeaderHeight)
-	{
-		if (m_FilterStart != 1 || m_FilterEnd != LC_OBJECT_TIME_MAX)
-		{
-			m_FilterStart = 1;
-			m_FilterEnd = LC_OBJECT_TIME_MAX;
-			Repopulate();
-			InvalidateRect(NULL, FALSE);
-		}
-		else
-		{
-			m_TrackTime = (point.x - m_TreeWidth + m_StepWidth / 2) / m_StepWidth;
-			m_TrackMode = LC_TIMELINE_TRACK_TIME;
-			SetCapture();
 		}
 	}
 	else
@@ -610,8 +575,119 @@ void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			if (Rect.PtInRect(point))
 			{
+				::SetCursor(AfxGetApp()->LoadCursor(IDC_HSPLITBAR));
+				return TRUE;
+			}
+		}
+	}
+
+	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+	return TRUE;
+}
+
+void CTimelineCtrl::OnLButtonUp(UINT nFlags, CPoint point) 
+{
+	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW)
+	{
+		int Time = GetTimeFromX(point.x) - m_TrackTime;
+
+		for (int i = 0; i < m_Nodes.GetSize(); i++)
+		{
+			CTimelineNode* Node = &m_Nodes[i];
+			lcPiece* Piece = Node->Piece;
+
+			if (!Piece->IsSelected())
+				continue;
+
+			int NewTime = Piece->m_TimeShow + Time;
+			if (NewTime < 1)
+				NewTime = 1;
+//			NewTime = lcClamp(NewTime, 1, LC_OBJECT_TIME_MAX);
+			Piece->m_TimeShow = NewTime;
+
+			if (!Piece->IsVisible(lcGetActiveProject()->m_ActiveModel->m_CurFrame))
+				Piece->Select(false, false, false);
+		}
+
+		lcGetActiveProject()->UpdateSelection();
+		lcGetActiveProject()->UpdateAllViews();
+
+		m_TrackMode = LC_TIMELINE_TRACK_NONE;
+		Repopulate();
+		InvalidateRect(NULL, FALSE);
+		ReleaseCapture();
+	}
+	else if (m_TrackMode == LC_TIMELINE_TRACK_TIME)
+	{
+		int EndTime = GetTimeFromX(point.x);
+		m_FilterStart = lcMin(m_TrackTime, EndTime);
+		m_FilterEnd = lcMax(m_TrackTime, EndTime);
+		Repopulate();
+
+		m_TrackMode = LC_TIMELINE_TRACK_NONE;
+		InvalidateRect(NULL, FALSE);
+		ReleaseCapture();
+	}
+	else if (m_TrackMode == LC_TIMELINE_TRACK_TREE_SPLIT)
+	{
+		m_TreeWidth = point.x;
+		InvalidateRect(NULL, FALSE);
+		ReleaseCapture();
+	}
+}
+
+void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
+{
+	if (point.y < m_HeaderHeight)
+	{
+		CRect Rect(m_TreeWidth - 2, 0, m_TreeWidth + 2, m_HeaderHeight);
+
+		if (Rect.PtInRect(point))
+		{
+			m_TrackMode = LC_TIMELINE_TRACK_TREE_SPLIT;
+			InvalidateRect(NULL, FALSE);
+			SetCapture();
+		}
+
+		/*
+		if (m_FilterStart != 1 || m_FilterEnd != LC_OBJECT_TIME_MAX)
+		{
+			m_FilterStart = 1;
+			m_FilterEnd = LC_OBJECT_TIME_MAX;
+			Repopulate();
+			InvalidateRect(NULL, FALSE);
+		}
+		else
+		{
+			m_TrackTime = GetTimeFromX(point.x);
+			m_TrackMode = LC_TIMELINE_TRACK_TIME;
+			SetCapture();
+		}
+		*/
+	}
+	else
+	{
+		int ClickedIndex = FindNodeByPoint(point);
+
+		if (ClickedIndex != -1)
+		{
+			Project* project = lcGetActiveProject();
+			lcPiece* Piece = m_Nodes[ClickedIndex].Piece;
+
+			if (point.x < m_TreeWidth)
+				project->ToggleObjectSelectedState(Piece, nFlags & MK_CONTROL ? true : false);
+
+			CTimelineNode* Node = &m_Nodes[ClickedIndex];
+			CRect Rect = CalcTimeRect(Node, Node->Piece->m_TimeShow);
+
+			if (Rect.PtInRect(point))
+			{
+				if (!Piece->IsSelected())
+					project->ToggleObjectSelectedState(Piece, nFlags & MK_CONTROL ? true : false);
+
 				m_TrackNode = ClickedIndex;
 				m_TrackMode = LC_TIMELINE_TRACK_SHOW;
+				m_TrackTime = GetTimeFromX(point.x);
 				SetCapture();
 			}
 		}
@@ -620,9 +696,20 @@ void CTimelineCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
+void CTimelineCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	if (point.y < m_HeaderHeight)
+	{
+		int Time = GetTimeFromX(point.x);
+		lcGetActiveProject()->HandleCommand(LC_VIEW_STEP_SET, Time);
+	}
+
+	CWnd::OnLButtonDblClk(nFlags, point);
+}
+
 void CTimelineCtrl::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW || m_TrackMode == LC_TIMELINE_TRACK_TIME)
+	if (m_TrackMode == LC_TIMELINE_TRACK_SHOW || m_TrackMode == LC_TIMELINE_TRACK_TIME || m_TrackMode == LC_TIMELINE_TRACK_TREE_SPLIT)
 	{
 		InvalidateRect(NULL, FALSE);
 	}

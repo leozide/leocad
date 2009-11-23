@@ -2,6 +2,7 @@
 #define _LC_APPLICATION_H_
 
 #include "lc_array.h"
+#include "lc_colors.h"
 
 class Project;
 class PiecesLibrary;
@@ -40,12 +41,15 @@ public:
 
 public:
 	PiecePreview* m_PiecePreview;
-	u32 m_SelectedColor;
 	int m_MouseSensitivity;
+	u32 m_SelectedColor;
+	lcColorConfig m_ColorConfig;
 
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);
 	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
+
+	void InitColors();
 
 	Project* m_ActiveProject;
 	lcPtrArray<Project> m_Projects;

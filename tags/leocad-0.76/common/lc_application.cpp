@@ -39,12 +39,11 @@ lcApplication::lcApplication()
 	m_Library = NULL;
 	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);
 
-	lcColorInit(Sys_ProfileLoadString("Settings", "ColorConfig", ""));
+	InitColors();
 }
 
 lcApplication::~lcApplication()
 {
-	lcColorShutdown();
 }
 
 void lcApplication::AddProject(Project* project)
@@ -486,4 +485,31 @@ void lcApplication::Shutdown()
 	m_Library = NULL;
 
 	GL_Shutdown();
+}
+
+void lcApplication::InitColors()
+{
+	const char* Path = Sys_ProfileLoadString("Settings", "ColorConfig", "");
+
+	lcFileDisk File;
+	if (File.Open(Path, "rt"))
+		m_ColorConfig.Load(File);
+
+	if (m_ColorConfig.mColors.GetSize() < 5)
+		m_ColorConfig.LoadDefault();
+
+	lcNumColors = m_ColorConfig.mColors.GetSize();
+	lcNumUserColors = lcNumColors - 3;
+	g_ColorList = &m_ColorConfig.mColors[0];
+
+	if (m_ColorConfig.mColorGroups.GetSize() == 0)
+	{
+		lcColorGroup Group;
+		Group.Name = "All Colors";
+
+		for (int i = 0; i < lcNumUserColors; i++)
+			Group.Colors.Add(i);
+
+		m_ColorConfig.mColorGroups.Add(Group);
+	}
 }

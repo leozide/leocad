@@ -5,6 +5,8 @@
 #define __PREFPAGE_H__
 
 #include "keyedit.h"
+#include "lc_colors.h"
+#include "afxwin.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesGeneral dialog
@@ -160,6 +162,56 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+};
+
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesColors dialog
+
+class CPreferencesColors : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CPreferencesColors)
+
+// Construction
+public:
+	void SetOptions();
+	void GetOptions();
+	CPreferencesColors();
+	~CPreferencesColors();
+
+// Dialog Data
+	//{{AFX_DATA(CPreferencesColors)
+	enum { IDD = IDD_PREFCOLORS };
+	//}}AFX_DATA
+
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CPreferencesColors)
+	public:
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	lcColorConfig m_ColorConfig;
+
+	// Generated message map functions
+	//{{AFX_MSG(CPreferencesColors)
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+public:
+	virtual BOOL OnInitDialog();
+	CListBox m_AvailableList;
+	CListBox m_CurrentList;
+	CListBox m_TabList;
+	afx_msg void OnLbnSelchangeTabList();
+	afx_msg void OnBnClickedAddColor();
+	afx_msg void OnBnClickedRemoveColor();
+	afx_msg void OnBnClickedUpColor();
+	afx_msg void OnBnClickedDownColor();
 };
 
 

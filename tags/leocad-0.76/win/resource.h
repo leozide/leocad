@@ -144,6 +144,7 @@
 #define IDC_ORBIT                       244
 #define IDD_MODEL_LIST                  245
 #define IDC_HSPLITBAR                   246
+#define IDD_PREFCOLORS                  246
 #define IDB_BITMAP1                     247
 #define IDB_ABOUT                       247
 #define IDC_SELDLG_LIST                 1000
@@ -354,7 +355,10 @@
 #define IDC_EDITORSTATIC                1167
 #define IDC_EDTDLG_LIST                 1168
 #define IDC_BUTTON2                     1170
+#define IDC_CLRDLG_REMOVECOLOR          1170
 #define ID_EDITOR_GUESS                 1171
+#define IDC_BUTTON9                     1171
+#define IDC_CLRDLG_DOWNCOLOR            1171
 #define IDC_EDTDLG_VERT                 1177
 #define IDC_EDTDLG_HORZ                 1178
 #define IDC_SCNDLG_SKYCOLOR1            1185
@@ -462,9 +466,20 @@
 #define IDC_GENDLG_COLOR_BROWSE         1256
 #define IDC_GENDLG_LIBRARY              1257
 #define IDC_MODEL_DELETE                1258
+#define IDC_CLRDLG_AVAILABLE            1258
 #define IDC_MODEL_UP                    1259
+#define IDC_CLRDLG_CURRENT              1259
 #define IDC_MODEL_DOWN                  1260
+#define IDC_CLRDLG_ADDCOLOR             1260
 #define IDC_MODEL_ACTIVATE              1261
+#define IDC_CLRDLG_TABLIST              1261
+#define IDC_BUTTON3                     1262
+#define IDC_BUTTON4                     1263
+#define IDC_BUTTON5                     1264
+#define IDC_BUTTON6                     1265
+#define IDC_BUTTON7                     1266
+#define IDC_CLRDLG_UPCOLOR              1267
+#define IDC_BUTTON10                    1268
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -744,7 +759,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         33226
-#define _APS_NEXT_CONTROL_VALUE         1258
+#define _APS_NEXT_CONTROL_VALUE         1267
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

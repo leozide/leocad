@@ -2,13 +2,22 @@
 #define _LC_COLORS_H_
 
 #include "opengl.h"
+#include "lc_array.h"
+#include "str.h"
+#include "file.h"
 
 struct lcColor
 {
 	u32 Code;
 	float Value[4];
 	bool Translucent;
-	char* Name;
+	String Name;
+};
+
+struct lcColorGroup
+{
+	String Name;
+	lcObjArray<int> Colors;
 };
 
 extern lcColor* g_ColorList;
@@ -46,5 +55,23 @@ inline int lcConvertLDrawColor(u32 Color)
 
 	return 0; // black
 }
+
+class lcColorConfig
+{
+public:
+	lcColorConfig() { };
+	~lcColorConfig() { };
+
+	void Load(lcFile& File);
+	void LoadDefault();
+
+	int GetNumUserColors() const
+	{
+		return mColors.GetSize() - 3;
+	}
+
+	lcObjArray<lcColor> mColors;
+	lcObjArray<lcColorGroup> mColorGroups;
+};
 
 #endif // _LC_COLORS_H_

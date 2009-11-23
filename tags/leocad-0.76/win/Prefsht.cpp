@@ -26,6 +26,7 @@ CPreferencesSheet::CPreferencesSheet(CWnd* pWndParent)
 	AddPage(&m_PageGeneral);
 	AddPage(&m_PageDetail);
 	AddPage(&m_PageDrawing);
+	AddPage(&m_PageColors);
 	AddPage(&m_PageScene);
 	AddPage(&m_PagePrint);
 	AddPage(&m_PageKeyboard);

@@ -369,6 +369,8 @@ BEGIN_MESSAGE_MAP(CPreferencesColors, CPropertyPage)
 	ON_BN_CLICKED(IDC_CLRDLG_REMOVECOLOR, &CPreferencesColors::OnBnClickedRemoveColor)
 	ON_BN_CLICKED(IDC_CLRDLG_UPCOLOR, &CPreferencesColors::OnBnClickedUpColor)
 	ON_BN_CLICKED(IDC_CLRDLG_DOWNCOLOR, &CPreferencesColors::OnBnClickedDownColor)
+	ON_LBN_SELCHANGE(IDC_CLRDLG_AVAILABLE, &CPreferencesColors::OnLbnSelchangeAvailable)
+	ON_LBN_SELCHANGE(IDC_CLRDLG_CURRENT, &CPreferencesColors::OnLbnSelchangeCurrent)
 END_MESSAGE_MAP()
 
 BOOL CPreferencesColors::OnInitDialog()
@@ -382,7 +384,7 @@ BOOL CPreferencesColors::OnInitDialog()
 	return TRUE;
 }
 
-void CPreferencesColors::OnLbnSelchangeTabList()
+void CPreferencesColors::UpdateColors()
 {
 	m_AvailableList.ResetContent();
 	m_CurrentList.ResetContent();
@@ -414,8 +416,40 @@ void CPreferencesColors::OnLbnSelchangeTabList()
 			m_AvailableList.SetItemData(Idx, i);
 		}
 	}
+
+	UpdateColorControls();
 }
 
+void CPreferencesColors::UpdateColorControls()
+{
+	int Available = m_AvailableList.GetSelCount();
+	int Current = m_CurrentList.GetSelCount();
+	int CurCount = m_CurrentList.GetCount();
+	int CurSel = -1;
+
+	if (Current == 1)
+		m_CurrentList.GetSelItems(1, &CurSel);
+
+	GetDlgItem(IDC_CLRDLG_ADDCOLOR)->EnableWindow(Available > 0);
+	GetDlgItem(IDC_CLRDLG_REMOVECOLOR)->EnableWindow(Current > 0);
+	GetDlgItem(IDC_CLRDLG_UPCOLOR)->EnableWindow(Current == 1 && CurSel != 0);
+	GetDlgItem(IDC_CLRDLG_DOWNCOLOR)->EnableWindow(Current == 1 && CurSel != CurCount - 1);
+}
+
+void CPreferencesColors::OnLbnSelchangeTabList()
+{
+	UpdateColors();
+}
+
+void CPreferencesColors::OnLbnSelchangeAvailable()
+{
+	UpdateColorControls();
+}
+
+void CPreferencesColors::OnLbnSelchangeCurrent()
+{
+	UpdateColorControls();
+}
 
 void CPreferencesColors::OnBnClickedAddColor()
 {
@@ -438,7 +472,7 @@ void CPreferencesColors::OnBnClickedAddColor()
 
 	delete[] Sel;
 
-	OnLbnSelchangeTabList();
+	UpdateColors();
 }
 
 void CPreferencesColors::OnBnClickedRemoveColor()
@@ -458,24 +492,88 @@ void CPreferencesColors::OnBnClickedRemoveColor()
 	{
 		int Color = m_CurrentList.GetItemData(Sel[i]);
 		for (int j = 0; j < Group.Colors.GetSize(); j++)
+		{
 			if (Color == Group.Colors[j])
 			{
 				Group.Colors.RemoveIndex(j);
 				break;
 			}
+		}
 	}
 
 	delete[] Sel;
 
-	OnLbnSelchangeTabList();
+	UpdateColors();
 }
 
 void CPreferencesColors::OnBnClickedUpColor()
 {
+	int GroupIdx = m_TabList.GetCurSel();
+	if (GroupIdx == LB_ERR)
+		return;
+
+	int Count = m_CurrentList.GetSelCount();
+	if (Count != 1)
+		return;
+
+	int Sel;
+	m_CurrentList.GetSelItems(1, &Sel);
+	if (Sel == 0)
+		return;
+
+	int Color = m_CurrentList.GetItemData(Sel);
+	lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
+
+	for (int j = 0; j < Group.Colors.GetSize(); j++)
+	{
+		if (Color == Group.Colors[j])
+		{
+			m_CurrentList.DeleteString(Sel-1);
+			int Idx = m_CurrentList.InsertString(Sel, m_ColorConfig.mColors[Group.Colors[j-1]].Name);
+			m_CurrentList.SetItemData(Idx, Group.Colors[j-1]);
+
+			Group.Colors[j] = Group.Colors[j-1];
+			Group.Colors[j-1] = Color;
+			break;
+		}
+	}
+
+	UpdateColorControls();
 }
 
 void CPreferencesColors::OnBnClickedDownColor()
 {
+	int GroupIdx = m_TabList.GetCurSel();
+	if (GroupIdx == LB_ERR)
+		return;
+
+	int Count = m_CurrentList.GetSelCount();
+	if (Count != 1)
+		return;
+
+	int Sel;
+	m_CurrentList.GetSelItems(1, &Sel);
+	if (Sel == m_CurrentList.GetCount())
+		return;
+
+	int Color = m_CurrentList.GetItemData(Sel);
+	lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
+
+	for (int j = 0; j < Group.Colors.GetSize(); j++)
+	{
+		if (Color == Group.Colors[j])
+		{
+			m_CurrentList.DeleteString(Sel+1);
+			int Idx = m_CurrentList.InsertString(Sel, m_ColorConfig.mColors[Group.Colors[j+1]].Name);
+			m_CurrentList.SetItemData(Idx, Group.Colors[j+1]);
+
+			Group.Colors[j] = Group.Colors[j+1];
+			Group.Colors[j+1] = Color;
+			break;
+		}
+	}
+
+	UpdateColorControls();
 }
 
 /*

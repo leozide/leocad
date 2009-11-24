@@ -197,6 +197,9 @@ public:
 protected:
 	lcColorConfig m_ColorConfig;
 
+	void UpdateColors();
+	void UpdateColorControls();
+
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesColors)
 	//}}AFX_MSG
@@ -212,6 +215,8 @@ public:
 	afx_msg void OnBnClickedRemoveColor();
 	afx_msg void OnBnClickedUpColor();
 	afx_msg void OnBnClickedDownColor();
+	afx_msg void OnLbnSelchangeAvailable();
+	afx_msg void OnLbnSelchangeCurrent();
 };
 
 

@@ -6,8 +6,8 @@
 #include <float.h>
 
 lcColor* g_ColorList;
-u32 lcNumUserColors;
-u32 lcNumColors;
+int lcNumUserColors;
+int lcNumColors;
 
 static const char sDefaultColors[] =
 {
@@ -160,6 +160,62 @@ static const char sDefaultColors[] =
 	"0 !COLOUR Speckle_Black_Silver                                  CODE 132   VALUE #000000   EDGE #595959                               MATERIAL SPECKLE VALUE #595959 FRACTION 0.4 MINSIZE 1 MAXSIZE 3\n"
 };
 
+void lcColorConfig::Save(lcFile& File)
+{
+	char Buf[1024];
+	char Name[256];
+
+	for (int ColorIdx = 0; ColorIdx < lcNumUserColors; ColorIdx++)
+	{
+		lcColor& Color = mColors[ColorIdx];
+
+		strcpy(Name, Color.Name);
+
+		for (char* ptr = strchr(Name, ' '); ptr; ptr = strchr(Buf, ' '))
+			*ptr = '_';
+
+		int Red = (int)(Color.Value[0] * 255);
+		int Green = (int)(Color.Value[1] * 255);
+		int Blue = (int)(Color.Value[2] * 255);
+
+		sprintf(Buf, "0 !COLOUR %s CODE %d VALUE #%.02X%.02X%.02X", Name, Color.Code, Red, Green, Blue);
+
+		if (Color.Translucent)
+		{
+			char Alpha[128];
+			sprintf(Alpha, " ALPHA %d\n", (int)(Color.Value[3] * 255));
+			strcat(Buf, Alpha);
+		}
+		else
+			strcat(Buf, "\n");
+
+		File.Write(Buf, strlen(Buf));
+	}
+
+	for (int GroupIdx = 0; GroupIdx < mColorGroups.GetSize(); GroupIdx++)
+	{
+		lcColorGroup& Group = mColorGroups[GroupIdx];
+
+		strcpy(Name, Group.Name);
+
+		for (char* ptr = strchr(Name, ' '); ptr; ptr = strchr(Buf, ' '))
+			*ptr = '_';
+
+		sprintf(Buf, "0 !LEOCAD COLOUR_GROUP %s", Name);
+
+		for (int Color = 0; Color < Group.Colors.GetSize(); Color++)
+		{
+			char CurColor[64];
+			sprintf(CurColor, " %d", Group.Colors[Color]);
+			strcat(Buf, CurColor);
+		}
+
+		strcat(Buf, "\n");
+
+		File.Write(Buf, strlen(Buf));
+	}
+}
+
 void lcColorConfig::Load(lcFile& File)
 {
 	mColors.RemoveAll();
@@ -177,84 +233,107 @@ void lcColorConfig::Load(lcFile& File)
 			continue;
 
 		Token = GetToken(ptr);
-		if (Token.CompareNoCase("!COLOUR"))
-			continue;
-
-		lcColor Color;
-
-		Color.Code = -1;
-		Color.Translucent = false;
-		Color.Value[0] = FLT_MAX;
-		Color.Value[1] = FLT_MAX;
-		Color.Value[2] = FLT_MAX;
-		Color.Value[3] = 1.0f;
-
-		Color.Name = GetToken(ptr);
-
-		for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
+		if (!Token.CompareNoCase("!COLOUR"))
 		{
-			if (!Token.CompareNoCase("CODE"))
-			{
-				Token = GetToken(ptr);
-				Color.Code = atoi(Token);
-			}
-			else if (!Token.CompareNoCase("VALUE"))
-			{
-				Token = GetToken(ptr);
-				if (Token[0] == '#')
-					Token[0] = ' ';
+			lcColor Color;
 
-				int Value;
-				sscanf(Token, "%x", &Value);
+			Color.Code = -1;
+			Color.Translucent = false;
+			Color.Value[0] = FLT_MAX;
+			Color.Value[1] = FLT_MAX;
+			Color.Value[2] = FLT_MAX;
+			Color.Value[3] = 1.0f;
 
-				Color.Value[2] = (float)(Value & 0xff) / 255.0f;
-				Value >>= 8;
-				Color.Value[1] = (float)(Value & 0xff) / 255.0f;
-				Value >>= 8;
-				Color.Value[0] = (float)(Value & 0xff) / 255.0f;
-			}
-			else if (!Token.CompareNoCase("EDGE"))
+			Color.Name = GetToken(ptr);
+
+			for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
 			{
-				Token = GetToken(ptr); // Ignored.
+				if (!Token.CompareNoCase("CODE"))
+				{
+					Token = GetToken(ptr);
+					Color.Code = atoi(Token);
+				}
+				else if (!Token.CompareNoCase("VALUE"))
+				{
+					Token = GetToken(ptr);
+					if (Token[0] == '#')
+						Token[0] = ' ';
+
+					int Value;
+					sscanf(Token, "%x", &Value);
+
+					Color.Value[2] = (float)(Value & 0xff) / 255.0f;
+					Value >>= 8;
+					Color.Value[1] = (float)(Value & 0xff) / 255.0f;
+					Value >>= 8;
+					Color.Value[0] = (float)(Value & 0xff) / 255.0f;
+				}
+				else if (!Token.CompareNoCase("EDGE"))
+				{
+					Token = GetToken(ptr); // Ignored.
+				}
+				else if (!Token.CompareNoCase("ALPHA"))
+				{
+					Token = GetToken(ptr);
+					int Value = atoi(Token);
+					Color.Value[3] = (float)(Value & 0xff) / 255.0f;
+					if (Value != 255)
+						Color.Translucent = true;
+				}
+				else if (!Token.CompareNoCase("CHROME") || !Token.CompareNoCase("PEARLESCENT") || !Token.CompareNoCase("RUBBER") ||
+						 !Token.CompareNoCase("MATTE_METALIC") || !Token.CompareNoCase("METAL"))
+				{
+					// Ignored.
+				}
+				else if (!Token.CompareNoCase("MATERIAL"))
+				{
+					break; // Material is always last so ignore it and the rest of the line.
+				}
 			}
-			else if (!Token.CompareNoCase("ALPHA"))
+
+			// Check if the new color is valid.
+			if (Color.Code == -1 || Color.Value[0] == FLT_MAX)
+				continue;
+
+			// Check for duplicates.
+			for (int i = 0; i < mColors.GetSize(); i++)
 			{
-				Token = GetToken(ptr);
-				int Value = atoi(Token);
-				Color.Value[3] = (float)(Value & 0xff) / 255.0f;
-				if (Value != 255)
-					Color.Translucent = true;
+				if (mColors[i].Code == Color.Code)
+				{
+					mColors.RemoveIndex(i);
+					break;
+				}
 			}
-			else if (!Token.CompareNoCase("CHROME") || !Token.CompareNoCase("PEARLESCENT") || !Token.CompareNoCase("RUBBER") ||
-			         !Token.CompareNoCase("MATTE_METALIC") || !Token.CompareNoCase("METAL"))
-			{
-				// Ignored.
-			}
-			else if (!Token.CompareNoCase("MATERIAL"))
-			{
-				break; // Material is always last so ignore it and the rest of the line.
-			}
+
+			// Replace underscores with spaces.
+			for (char* Ptr = strchr((char*)Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
+				*Ptr = ' ';
+
+			mColors.Add(Color);
 		}
-
-		// Check if the new color is valid.
-		if (Color.Code == -1 || Color.Value[0] == FLT_MAX)
-			continue;
-
-		// Check for duplicates.
-		for (int i = 0; i < mColors.GetSize(); i++)
+		else if (!Token.CompareNoCase("!LEOCAD"))
 		{
-			if (mColors[i].Code == Color.Code)
+			Token = GetToken(ptr);
+			if (Token.CompareNoCase("COLOUR_GROUP"))
+				continue;
+
+			lcColorGroup Group;
+
+			Group.Name = GetToken(ptr);
+
+			// Replace underscores with spaces.
+			for (char* Ptr = strchr((char*)Group.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
+				*Ptr = ' ';
+
+			for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
 			{
-				mColors.RemoveIndex(i);
-				break;
+				int Color;
+				if (sscanf(Token, "%d", &Color))
+					Group.Colors.Add(Color);
 			}
+
+			mColorGroups.Add(Group);
 		}
-
-		// Replace underscores with spaces.
-		for (char* Ptr = strchr((char*)Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
-			*Ptr = ' ';
-
-		mColors.Add(Color);
 	}
 
 	lcColor DefaultColors[] =
@@ -310,94 +389,3 @@ void lcColorConfig::LoadDefault()
 	File.Seek(0, SEEK_SET);
 	Load(File);
 }
-
-
-
-/*
-static lcColor sDefaultColors[] =
-{
-	{   0, { 0.1294f, 0.1294f, 0.1294f, 1.0000f }, false, "Black" },
-	{   1, { 0.0000f, 0.2000f, 0.6980f, 1.0000f }, false, "Blue" },
-	{   2, { 0.0000f, 0.5490f, 0.0784f, 1.0000f }, false, "Green" },
-	{   3, { 0.0000f, 0.6000f, 0.6235f, 1.0000f }, false, "Teal" },
-	{   4, { 0.7686f, 0.0000f, 0.1490f, 1.0000f }, false, "Red" },
-	{   5, { 0.8745f, 0.4000f, 0.5843f, 1.0000f }, false, "Dark Pink" },
-	{   6, { 0.3608f, 0.1255f, 0.0000f, 1.0000f }, false, "Brown" },
-	{   7, { 0.7569f, 0.7608f, 0.7569f, 1.0000f }, false, "Gray" },
-	{   8, { 0.3882f, 0.3725f, 0.3216f, 1.0000f }, false, "Dark Gray" },
-	{   9, { 0.4196f, 0.6706f, 0.8627f, 1.0000f }, false, "Light Blue" },
-	{  10, { 0.4196f, 0.9333f, 0.5647f, 1.0000f }, false, "Bright Green" },
-	{  11, { 0.2000f, 0.6510f, 0.6549f, 1.0000f }, false, "Turquiose" },
-	{  12, { 1.0000f, 0.5216f, 0.4784f, 1.0000f }, false, "Light Red" },
-	{  13, { 0.9765f, 0.6431f, 0.7765f, 1.0000f }, false, "Pink" },
-	{  14, { 1.0000f, 0.8627f, 0.0000f, 1.0000f }, false, "Yellow" },
-	{  15, { 1.0000f, 1.0000f, 1.0000f, 1.0000f }, false, "White" },
-	{  17, { 0.7294f, 1.0000f, 0.8078f, 1.0000f }, false, "Light Green" },
-	{  18, { 0.9922f, 0.9098f, 0.5882f, 1.0000f }, false, "Light Yellow" },
-	{  19, { 0.9098f, 0.8118f, 0.6314f, 1.0000f }, false, "Tan" },
-	{  20, { 0.8431f, 0.7686f, 0.9020f, 1.0000f }, false, "Light Violet" },
-	{  21, { 0.8784f, 1.0000f, 0.6902f, 0.9804f }, false, "Phosphor White" },
-	{  22, { 0.5059f, 0.0000f, 0.4824f, 1.0000f }, false, "Violet" },
-	{  23, { 0.2784f, 0.1961f, 0.6902f, 1.0000f }, false, "Violet Blue" },
-	{  25, { 0.9765f, 0.3765f, 0.0000f, 1.0000f }, false, "Orange" },
-	{  26, { 0.8471f, 0.1059f, 0.4275f, 1.0000f }, false, "Magenta" },
-	{  27, { 0.8431f, 0.9412f, 0.0000f, 1.0000f }, false, "Lime" },
-	{  28, { 0.7725f, 0.5922f, 0.3137f, 1.0000f }, false, "Dark Tan" },
-	{  33, { 0.0000f, 0.1255f, 0.6275f, 0.5020f },  true, "Trans Blue" },
-	{  34, { 0.0235f, 0.3921f, 0.1961f, 0.5020f },  true, "Trans Green" },
-	{  36, { 0.7686f, 0.0000f, 0.1490f, 0.5020f },  true, "Trans Red" },
-	{  37, { 0.3922f, 0.0000f, 0.3804f, 0.5020f },  true, "Trans Violet" },
-	{  40, { 0.3882f, 0.3725f, 0.3216f, 0.5020f },  true, "Trans Gray" },
-	{  41, { 0.6824f, 0.9373f, 0.9255f, 0.5020f },  true, "Trans Light Cyan" },
-	{  42, { 0.7529f, 1.0000f, 0.0000f, 0.5020f },  true, "Trans Flu Lime" },
-	{  45, { 0.8745f, 0.4000f, 0.5843f, 0.5020f },  true, "Trans Pink" },
-	{  46, { 0.7922f, 0.6902f, 0.0000f, 0.5020f },  true, "Trans Yellow" },
-	{  47, { 1.0000f, 1.0000f, 1.0000f, 0.5020f },  true, "Clear" },
-	{  57, { 0.9765f, 0.3765f, 0.0000f, 0.5020f },  true, "Trans Flu Orange" },
-	{  70, { 0.4118f, 0.2510f, 0.1529f, 1.0000f }, false, "Reddish Brown" },
-	{  71, { 0.6392f, 0.6353f, 0.6431f, 1.0000f }, false, "Stone Gray" },
-	{  72, { 0.3882f, 0.3725f, 0.3804f, 1.0000f }, false, "Dark Stone Gray" },
-	{ 134, { 0.5765f, 0.5294f, 0.4039f, 1.0000f }, false, "Pearl Copper" },
-	{ 135, { 0.6706f, 0.6784f, 0.6745f, 1.0000f }, false, "Pearl Gray" },
-	{ 137, { 0.4157f, 0.4784f, 0.5882f, 1.0000f }, false, "Pearl Sand Blue" },
-	{ 142, { 0.8431f, 0.6627f, 0.2941f, 1.0000f }, false, "Pearl Gold" },
-	{ 256, { 0.1294f, 0.1294f, 0.1294f, 1.0000f }, false, "Rubber Black" },
-	{ 272, { 0.0000f, 0.1137f, 0.4078f, 1.0000f }, false, "Dark Blue" },
-	{ 273, { 0.0000f, 0.2000f, 0.6980f, 1.0000f }, false, "Rubber Blue" },
-	{ 288, { 0.1529f, 0.2745f, 0.1725f, 1.0000f }, false, "Dark Green" },
-	{ 320, { 0.4706f, 0.0000f, 0.1098f, 1.0000f }, false, "Dark Red" },
-	{ 324, { 0.7686f, 0.0000f, 0.1490f, 1.0000f }, false, "Rubber Red" },
-	{ 334, { 0.8824f, 0.4314f, 0.0745f, 1.0000f }, false, "Chrome Gold" },
-	{ 335, { 0.7490f, 0.5294f, 0.5098f, 1.0000f }, false, "Sand Red" },
-	{ 366, { 0.8196f, 0.5137f, 0.0157f, 1.0000f }, false, "Earth Orange" },
-	{ 373, { 0.5176f, 0.3686f, 0.5176f, 1.0000f }, false, "Sand Violet" },
-	{ 375, { 0.7569f, 0.7608f, 0.7569f, 1.0000f }, false, "Rubber Gray" },
-	{ 378, { 0.6275f, 0.7373f, 0.6745f, 1.0000f }, false, "Sand Green" },
-	{ 379, { 0.4157f, 0.4784f, 0.5882f, 1.0000f }, false, "Sand Blue" },
-	{ 383, { 0.8784f, 0.8784f, 0.8784f, 1.0000f }, false, "Chrome Silver" },
-	{ 462, { 0.9961f, 0.6235f, 0.0235f, 1.0000f }, false, "Light Orange" },
-	{ 484, { 0.7020f, 0.2431f, 0.0000f, 1.0000f }, false, "Dark Orange" },
-	{ 494, { 0.8157f, 0.8157f, 0.8157f, 1.0000f }, false, "Electric Contact" },
-	{ 503, { 0.9020f, 0.8902f, 0.8549f, 1.0000f }, false, "Light Gray" },
-	{ 511, { 1.0000f, 1.0000f, 1.0000f, 1.0000f }, false, "Rubber White" },
-
-	{  29, { 0.8941f, 0.6784f, 0.7843f, 1.0000f }, false, "Light Purple" },
-	{  69, { 0.8039f, 0.3843f, 0.5961f, 1.0000f }, false, "Bright Purple" },
-	{  73, { 0.4314f, 0.6000f, 0.7882f, 1.0000f }, false, "Medium Blue" },
-	{  74, { 0.6314f, 0.7686f, 0.5451f, 1.0000f }, false, "Medium Green" },
-	{  77, { 0.9961f, 0.8000f, 0.8000f, 1.0000f }, false, "Paradisa Pink" },
-	{  78, { 0.9804f, 0.8431f, 0.7647f, 1.0000f }, false, "Light Flesh" },
-	{  79, { 1.0000f, 1.0000f, 1.0000f, 0.8784f },  true, "Translucent White" },
-	{  85, { 0.2039f, 0.1686f, 0.4588f, 1.0000f }, false, "Medium Lilac" },
-	{  86, { 0.4863f, 0.3608f, 0.2706f, 1.0000f }, false, "Dark Flesh" },
-	{  89, { 0.6078f, 0.6980f, 0.9373f, 1.0000f }, false, "Royal Blue" },
-	{  92, { 0.8000f, 0.5569f, 0.4078f, 1.0000f }, false, "Flesh" },
-	{ 151, { 0.8980f, 0.8941f, 0.8706f, 1.0000f }, false, "Light Stone" },
-	{ 313, { 0.2078f, 0.6353f, 0.7412f, 1.0000f }, false, "Maersk Blue" },
-
-	{  16, { 0.5000f, 0.5000f, 0.5000f, 1.0000f }, false, "Default" },
-	{  24, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Edge" },
-	{  -1, { 0.8980f, 0.2980f, 0.4000f, 1.0000f }, false, "Selected" },
-	{  -2, { 0.4000f, 0.2980f, 0.8980f, 1.0000f }, false, "Focused" },
-};
-*/

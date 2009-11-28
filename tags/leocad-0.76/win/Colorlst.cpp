@@ -95,19 +95,10 @@ END_MESSAGE_MAP()
 
 CColorList::CColorList()
 {
-	m_Tabs.Add(new CColorTab("All Colors"));
-//	m_Tabs.Add(new CColorTab("test 2"));
+	m_CurTab = -1;
 
-	m_Colors.SetSize(lcNumUserColors);
-	for (int i = 0; i < lcNumUserColors; i++)
-	{
-		CColorEntry& Entry = m_Colors[i];
-		Entry.Name = g_ColorList[i].Name;
-		Entry.Color = LC_COLOR_RGB(i);
-		Entry.Index = i;
-	}
+	UpdateColorConfig();
 
-	m_CurTab = 0;
 	m_CurColor = 0;
 	m_ColorFocus = true;
 }
@@ -225,29 +216,35 @@ void CColorList::OnPaint()
 
 	CBrush* OldBrush = dc.SelectObject(CBrush::FromHandle((HBRUSH)GetStockObject(NULL_BRUSH)));
 
-	COLORREF cr = m_Colors[m_CurColor].Color;
-	CPen BorderPen;
-	BorderPen.CreatePen(PS_SOLID, 1, RGB(255-GetRValue(cr), 255-GetGValue(cr), 255-GetBValue(cr)));
-	dc.SelectObject(&BorderPen);
+	if (m_CurColor < m_Colors.GetSize())
+	{
+		COLORREF cr = m_Colors[m_CurColor].Color;
+		CPen BorderPen;
+		BorderPen.CreatePen(PS_SOLID, 1, RGB(255-GetRValue(cr), 255-GetGValue(cr), 255-GetBValue(cr)));
+		dc.SelectObject(&BorderPen);
 
-	CRect rc = m_Colors[m_CurColor].Rect;
-	rc.OffsetRect(1, 1);
-	rc.bottom--;
-	rc.right--;
-	dc.Rectangle(rc);
+		CRect rc = m_Colors[m_CurColor].Rect;
+		rc.OffsetRect(1, 1);
+		rc.bottom--;
+		rc.right--;
+		dc.Rectangle(rc);
+
+		if (Focus && m_ColorFocus)
+		{
+			rc.DeflateRect(2, 2);
+			dc.DrawFocusRect(rc);
+		}
+	}
 
 	dc.SelectObject(OldPen);
 	dc.SelectObject(OldBrush);
-
-	if (Focus && m_ColorFocus)
-	{
-		rc.DeflateRect(2, 2);
-		dc.DrawFocusRect(rc);
-	}
 }
 
 void CColorList::UpdateLayout()
 {
+	if (!IsWindow(m_hWnd))
+		return;
+
 	CClientDC dc(this);
 
 	CFont* OldFont = dc.SelectObject(&m_SelectedFont);
@@ -293,10 +290,14 @@ void CColorList::UpdateLayout()
 	{
 		for (int j = 0; j < m_ColorCols; j++)
 		{
+			int Index = i*m_ColorCols + j;
+
+			if (Index >= m_Colors.GetSize())
+				break;
+
 			CRect cell(0, 0, CellWidth, CellHeight);
 			cell.OffsetRect(j * CellWidth + rc.left, i * CellHeight + rc.top);
 
-			int Index = i*m_ColorCols + j;
 			m_Colors[Index].Rect = cell;
 			m_ToolTip.AddTool(this, g_ColorList[Index].Name, cell, Index+1);
 		}
@@ -433,7 +434,10 @@ UINT CColorList::OnGetDlgCode()
 void CColorList::OnSetFocus(CWnd* pOldWnd)
 {
 	if (m_ColorFocus)
+	{
+		if (m_CurColor < m_Colors.GetSize())
 		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
+	}
 	else
 		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
 
@@ -443,7 +447,10 @@ void CColorList::OnSetFocus(CWnd* pOldWnd)
 void CColorList::OnKillFocus(CWnd* pNewWnd)
 {
 	if (m_ColorFocus)
-		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
+	{
+		if (m_CurColor < m_Colors.GetSize())
+			InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
+	}
 	else
 		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
 
@@ -462,7 +469,7 @@ void CColorList::SelectTab(int Tab)
 	if (Tab < 0 || Tab >= m_Tabs.GetSize())
 		return;
 
-	if (m_ColorFocus)
+	if (m_ColorFocus && m_Colors.GetSize())
 	{
 		InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
 		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
@@ -472,8 +479,29 @@ void CColorList::SelectTab(int Tab)
 	if (Tab == m_CurTab)
 		return;
 
-	InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
-	InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
+	lcColorGroup& Group = g_App->m_ColorConfig.mColorGroups[Tab];
+
+	m_Colors.RemoveAll();
+	m_Colors.SetSize(Group.Colors.GetSize());
+
+	for (int i = 0; i < Group.Colors.GetSize(); i++)
+	{
+		CColorEntry& Entry = m_Colors[i];
+		int Color = Group.Colors[i];
+
+		Entry.Name = g_ColorList[Color].Name;
+		Entry.Color = LC_COLOR_RGB(Color);
+		Entry.Index = Color;
+	}
+
+	UpdateLayout();
+
+	m_CurColor = 0;
+
+	if (IsWindow(m_hWnd))
+		InvalidateRect(NULL, FALSE);
+//	InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
+//	InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
 	m_CurTab = Tab;
 }
 
@@ -498,4 +526,22 @@ void CColorList::SelectColor(int Color)
 
 	g_App->m_SelectedColor = Color;
 	lcPostMessage(LC_MSG_COLOR_CHANGED, (void*)Color);
+}
+
+void CColorList::UpdateColorConfig()
+{
+	m_Tabs.RemoveAll();
+
+	for (int TabIndex = 0; TabIndex < g_App->m_ColorConfig.mColorGroups.GetSize(); TabIndex++)
+	{
+		lcColorGroup& Group = g_App->m_ColorConfig.mColorGroups[TabIndex];
+
+		m_Tabs.Add(new CColorTab(Group.Name));
+	}
+
+	m_CurTab = -1;
+	m_CurColor = 0;
+	m_ColorFocus = true;
+
+	SelectTab(0);
 }

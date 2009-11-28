@@ -21,8 +21,8 @@ struct lcColorGroup
 };
 
 extern lcColor* g_ColorList;
-extern u32 lcNumUserColors;
-extern u32 lcNumColors;
+extern int lcNumUserColors;
+extern int lcNumColors;
 
 void lcColorInit(const char* FileName);
 void lcColorShutdown();
@@ -49,7 +49,7 @@ inline void lcSetColor(u32 Index)
 // Convert a color from LDraw to LeoCAD.
 inline int lcConvertLDrawColor(u32 Color)
 {
-	for (u32 i = 0; i < lcNumColors; i++)
+	for (int i = 0; i < lcNumColors; i++)
 		if (g_ColorList[i].Code == Color)
 			return i;
 
@@ -62,6 +62,7 @@ public:
 	lcColorConfig() { };
 	~lcColorConfig() { };
 
+	void Save(lcFile& File);
 	void Load(lcFile& File);
 	void LoadDefault();
 
@@ -73,5 +74,31 @@ public:
 	lcObjArray<lcColor> mColors;
 	lcObjArray<lcColorGroup> mColorGroups;
 };
+
+inline bool operator!=(const lcColorConfig& a, const lcColorConfig& b)
+{
+	if (a.mColors.GetSize() != b.mColors.GetSize())
+		return true;
+
+	if (a.mColorGroups.GetSize() != b.mColorGroups.GetSize())
+		return true;
+
+	if (memcmp(&a.mColors[0], &b.mColors[0], sizeof(a.mColors[0]) * a.mColors.GetSize()))
+		return true;
+
+	for (int GroupIdx = 0; GroupIdx < a.mColorGroups.GetSize(); GroupIdx++)
+	{
+		lcColorGroup& ga = a.mColorGroups[GroupIdx];
+		lcColorGroup& gb = b.mColorGroups[GroupIdx];
+
+		if (ga.Colors.GetSize() != gb.Colors.GetSize())
+			return true;
+
+		if (memcmp(&ga.Colors[0], &gb.Colors[0], sizeof(ga.Colors[0]) * ga.Colors.GetSize()))
+			return true;
+	}
+
+	return false;
+}
 
 #endif // _LC_COLORS_H_

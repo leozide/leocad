@@ -58,12 +58,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-//	afx_msg void OnEnChangeEdit1();
-//	afx_msg void OnEnChangeGendlgUser();
-	afx_msg void OnBnClickedGendlgColorBrowse();
 	afx_msg void OnBnClickedGendlgLibraryBrowse();
 	CString m_strLibrary;
-	CString m_strColor;
 };
 
 
@@ -197,6 +193,8 @@ public:
 protected:
 	lcColorConfig m_ColorConfig;
 
+	void UpdateTabs();
+	void UpdateTabControls();
 	void UpdateColors();
 	void UpdateColorControls();
 
@@ -217,6 +215,14 @@ public:
 	afx_msg void OnBnClickedDownColor();
 	afx_msg void OnLbnSelchangeAvailable();
 	afx_msg void OnLbnSelchangeCurrent();
+	afx_msg void OnBnClickedUpTab();
+	afx_msg void OnBnClickedDownTab();
+	afx_msg void OnBnClickedDeleteTab();
+	afx_msg void OnBnClickedNewTab();
+	afx_msg void OnBnClickedRenameTab();
+	CString m_TabName;
+	afx_msg void OnBnClickedImport();
+	afx_msg void OnBnClickedReset();
 };
 
 

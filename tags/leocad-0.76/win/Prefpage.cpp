@@ -9,6 +9,7 @@
 #include "defines.h"
 #include "keyboard.h"
 #include "lc_application.h"
+#include "library.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -28,7 +29,6 @@ IMPLEMENT_DYNCREATE(CPreferencesKeyboard, CPropertyPage)
 
 CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::IDD)
 , m_strLibrary(_T(""))
-, m_strColor(_T(""))
 {
 	//{{AFX_DATA_INIT(CPreferencesGeneral)
 	m_bSubparts = FALSE;
@@ -61,7 +61,6 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_GENDLG_UPDATES, m_Updates);
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_GENDLG_LIBRARY, m_strLibrary);
-	DDX_Text(pDX, IDC_GENDLG_COLOR, m_strColor);
 }
 
 
@@ -69,7 +68,6 @@ BEGIN_MESSAGE_MAP(CPreferencesGeneral, CPropertyPage)
 	//{{AFX_MSG_MAP(CPreferencesGeneral)
 	ON_BN_CLICKED(IDC_GENDLG_FOLDERBTN, OnFolderBrowse)
 	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_GENDLG_COLOR_BROWSE, &CPreferencesGeneral::OnBnClickedGendlgColorBrowse)
 	ON_BN_CLICKED(IDC_GENDLG_LIBRARY_BROWSE, &CPreferencesGeneral::OnBnClickedGendlgLibraryBrowse)
 END_MESSAGE_MAP()
 
@@ -95,19 +93,6 @@ void CPreferencesGeneral::OnBnClickedGendlgLibraryBrowse()
 	}
 }
 
-void CPreferencesGeneral::OnBnClickedGendlgColorBrowse()
-{
-	UpdateData(TRUE);
-
-	CFileDialog dlg(TRUE, "*.ldr", m_strColor, 0, "Color Config Files (*.ldr)|*.ldr||", this);
-
-	if (dlg.DoModal() == IDOK)
-	{
-		m_strColor = dlg.GetPathName();
-		UpdateData(FALSE);
-	}
-}
-
 void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* strFolder, const char* strUser)
 {
 	m_nSaveTime = nSaveInterval & ~LC_AUTOSAVE_FLAG;
@@ -121,7 +106,6 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 	m_strLibrary = AfxGetApp()->GetProfileString("Settings", "PiecesLibrary", "");
-	m_strColor = AfxGetApp()->GetProfileString("Settings", "ColorConfig", "");
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
@@ -139,7 +123,6 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
 	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);
 	AfxGetApp()->WriteProfileString("Settings", "PiecesLibrary", m_strLibrary);
-	AfxGetApp()->WriteProfileString("Settings", "ColorConfig", m_strColor);
 }
 
 BOOL CPreferencesGeneral::OnInitDialog() 
@@ -341,6 +324,7 @@ void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAng
 // CPreferencesColors property page
 
 CPreferencesColors::CPreferencesColors() : CPropertyPage(CPreferencesColors::IDD)
+, m_TabName(_T(""))
 {
 	//{{AFX_DATA_INIT(CPreferencesColors)
 	//}}AFX_DATA_INIT
@@ -358,6 +342,8 @@ void CPreferencesColors::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CLRDLG_AVAILABLE, m_AvailableList);
 	DDX_Control(pDX, IDC_CLRDLG_CURRENT, m_CurrentList);
 	DDX_Control(pDX, IDC_CLRDLG_TABLIST, m_TabList);
+	DDX_Text(pDX, IDC_CLRDLG_TABNAME, m_TabName);
+	DDV_MaxChars(pDX, m_TabName, 255);
 }
 
 
@@ -371,17 +357,76 @@ BEGIN_MESSAGE_MAP(CPreferencesColors, CPropertyPage)
 	ON_BN_CLICKED(IDC_CLRDLG_DOWNCOLOR, &CPreferencesColors::OnBnClickedDownColor)
 	ON_LBN_SELCHANGE(IDC_CLRDLG_AVAILABLE, &CPreferencesColors::OnLbnSelchangeAvailable)
 	ON_LBN_SELCHANGE(IDC_CLRDLG_CURRENT, &CPreferencesColors::OnLbnSelchangeCurrent)
+	ON_BN_CLICKED(IDC_CLRDLG_UPTAB, &CPreferencesColors::OnBnClickedUpTab)
+	ON_BN_CLICKED(IDC_CLRDLG_DOWNTAB, &CPreferencesColors::OnBnClickedDownTab)
+	ON_BN_CLICKED(IDC_CLRDLG_DELETETAB, &CPreferencesColors::OnBnClickedDeleteTab)
+	ON_BN_CLICKED(IDC_CLRDLG_NEWTAB, &CPreferencesColors::OnBnClickedNewTab)
+	ON_BN_CLICKED(IDC_CLRDLG_RENAMETAB, &CPreferencesColors::OnBnClickedRenameTab)
+	ON_BN_CLICKED(IDC_CLRDLG_IMPORT, &CPreferencesColors::OnBnClickedImport)
+	ON_BN_CLICKED(IDC_CLRDLG_RESET, &CPreferencesColors::OnBnClickedReset)
 END_MESSAGE_MAP()
 
 BOOL CPreferencesColors::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
+	UpdateTabs();
+	m_TabList.SetCurSel(0);
+	UpdateTabControls();
+	UpdateColors();
+
+	return TRUE;
+}
+
+void CPreferencesColors::OnBnClickedImport()
+{
+	CFileDialog dlg(TRUE, "*.ldr", NULL, 0, "Color Config Files (*.ldr)|*.ldr||", this);
+
+	if (dlg.DoModal() == IDOK)
+	{
+		lcFileDisk File;
+
+		if (File.Open(dlg.GetPathName(), "rt"))
+			m_ColorConfig.Load(File);
+
+		if (m_ColorConfig.mColors.GetSize() < 5)
+			m_ColorConfig.LoadDefault();
+
+		UpdateTabs();
+		m_TabList.SetCurSel(0);
+		UpdateTabControls();
+		UpdateColors();
+	}
+}
+
+void CPreferencesColors::OnBnClickedReset()
+{
+	m_ColorConfig.LoadDefault();
+
+	UpdateTabs();
+	m_TabList.SetCurSel(0);
+	UpdateTabControls();
+	UpdateColors();
+}
+
+void CPreferencesColors::UpdateTabs()
+{
 	m_TabList.ResetContent();
 	for (int i = 0; i < m_ColorConfig.mColorGroups.GetSize(); i++)
 		m_TabList.AddString(m_ColorConfig.mColorGroups[i].Name);
+}
 
-	return TRUE;
+void CPreferencesColors::UpdateTabControls()
+{
+	int Sel = m_TabList.GetCurSel();
+	int Count = m_TabList.GetCount();
+
+	if (Sel == LB_ERR)
+		return;
+
+	GetDlgItem(IDC_CLRDLG_UPTAB)->EnableWindow(Sel != 0 && Count > 1);
+	GetDlgItem(IDC_CLRDLG_DOWNTAB)->EnableWindow(Sel != Count - 1 && Count > 1);
+	GetDlgItem(IDC_CLRDLG_DELETETAB)->EnableWindow(Count > 1);
 }
 
 void CPreferencesColors::UpdateColors()
@@ -393,6 +438,10 @@ void CPreferencesColors::UpdateColors()
 
 	if (Sel == LB_ERR)
 		return;
+
+	UpdateData(TRUE);
+	m_TabName = m_ColorConfig.mColorGroups[Sel].Name;
+	UpdateData(FALSE);
 
 	lcColorGroup& Group = m_ColorConfig.mColorGroups[Sel];
 
@@ -432,8 +481,83 @@ void CPreferencesColors::UpdateColorControls()
 
 	GetDlgItem(IDC_CLRDLG_ADDCOLOR)->EnableWindow(Available > 0);
 	GetDlgItem(IDC_CLRDLG_REMOVECOLOR)->EnableWindow(Current > 0);
-	GetDlgItem(IDC_CLRDLG_UPCOLOR)->EnableWindow(Current == 1 && CurSel != 0);
-	GetDlgItem(IDC_CLRDLG_DOWNCOLOR)->EnableWindow(Current == 1 && CurSel != CurCount - 1);
+	GetDlgItem(IDC_CLRDLG_UPCOLOR)->EnableWindow(Current == 1 && CurSel != 0 && CurCount > 1);
+	GetDlgItem(IDC_CLRDLG_DOWNCOLOR)->EnableWindow(Current == 1 && CurSel != CurCount - 1 && CurCount > 1);
+}
+
+void CPreferencesColors::OnBnClickedUpTab()
+{
+	int Sel = m_TabList.GetCurSel();
+	if (Sel == LB_ERR || Sel == 0)
+		return;
+
+	lcColorGroup Group;
+	Group = m_ColorConfig.mColorGroups[Sel];
+	m_ColorConfig.mColorGroups[Sel] = m_ColorConfig.mColorGroups[Sel - 1];
+	m_ColorConfig.mColorGroups[Sel - 1] = Group;
+
+	UpdateTabs();
+	m_TabList.SetCurSel(Sel - 1);
+	UpdateTabControls();
+}
+
+void CPreferencesColors::OnBnClickedDownTab()
+{
+	int Sel = m_TabList.GetCurSel();
+	if (Sel == LB_ERR || Sel == m_TabList.GetCount())
+		return;
+
+	lcColorGroup Group;
+	Group = m_ColorConfig.mColorGroups[Sel];
+	m_ColorConfig.mColorGroups[Sel] = m_ColorConfig.mColorGroups[Sel + 1];
+	m_ColorConfig.mColorGroups[Sel + 1] = Group;
+
+	UpdateTabs();
+	m_TabList.SetCurSel(Sel + 1);
+	UpdateTabControls();
+}
+
+void CPreferencesColors::OnBnClickedDeleteTab()
+{
+	int Sel = m_TabList.GetCurSel();
+
+	if (Sel == LB_ERR)
+		return;
+
+	m_ColorConfig.mColorGroups.RemoveIndex(Sel);
+
+	UpdateTabs();
+	m_TabList.SetCurSel(0);
+	UpdateTabControls();
+	UpdateColors();
+}
+
+void CPreferencesColors::OnBnClickedNewTab()
+{
+	UpdateData(TRUE);
+
+	lcColorGroup Group;
+	Group.Name = m_TabName;
+	m_ColorConfig.mColorGroups.Add(Group);
+
+	UpdateTabs();
+	m_TabList.SetCurSel(m_TabList.GetCount() - 1);
+	UpdateTabControls();
+	UpdateColors();
+}
+
+void CPreferencesColors::OnBnClickedRenameTab()
+{
+	int Sel = m_TabList.GetCurSel();
+
+	if (Sel == LB_ERR)
+		return;
+
+	UpdateData(TRUE);
+	m_ColorConfig.mColorGroups[Sel].Name = m_TabName;
+
+	UpdateTabs();
+	m_TabList.SetCurSel(Sel);
 }
 
 void CPreferencesColors::OnLbnSelchangeTabList()
@@ -576,20 +700,6 @@ void CPreferencesColors::OnBnClickedDownColor()
 	UpdateColorControls();
 }
 
-/*
-void CPreferencesColors::OnBnClickedGendlgColorBrowse()
-{
-	UpdateData(TRUE);
-
-	CFileDialog dlg(TRUE, "*.ldr", m_strColor, 0, "Color Config Files (*.ldr)|*.ldr||", this);
-
-	if (dlg.DoModal() == IDOK)
-	{
-		m_strColor = dlg.GetPathName();
-		UpdateData(FALSE);
-	}
-}
-*/
 void CPreferencesColors::SetOptions()
 {
 	m_ColorConfig = g_App->m_ColorConfig;
@@ -597,6 +707,19 @@ void CPreferencesColors::SetOptions()
 
 void CPreferencesColors::GetOptions()
 {
+	if (m_ColorConfig != g_App->m_ColorConfig)
+	{
+		g_App->SetColorConfig(m_ColorConfig);
+		((CMainFrame*)AfxGetMainWnd())->m_wndPiecesBar.m_wndColorsList.UpdateColorConfig();
+
+		char Path[LC_MAXPATH];
+		strcpy(Path, lcGetPiecesLibrary()->GetLibraryPath());
+		strcat(Path, "lccolors.cfg");
+
+		lcFileDisk File;
+		File.Open(Path, "wt");
+		m_ColorConfig.Save(File);
+	}
 }
 
 

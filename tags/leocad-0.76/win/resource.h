@@ -357,7 +357,6 @@
 #define IDC_BUTTON2                     1170
 #define IDC_CLRDLG_REMOVECOLOR          1170
 #define ID_EDITOR_GUESS                 1171
-#define IDC_BUTTON9                     1171
 #define IDC_CLRDLG_DOWNCOLOR            1171
 #define IDC_EDTDLG_VERT                 1177
 #define IDC_EDTDLG_HORZ                 1178
@@ -473,13 +472,16 @@
 #define IDC_CLRDLG_ADDCOLOR             1260
 #define IDC_MODEL_ACTIVATE              1261
 #define IDC_CLRDLG_TABLIST              1261
-#define IDC_BUTTON3                     1262
-#define IDC_BUTTON4                     1263
-#define IDC_BUTTON5                     1264
-#define IDC_BUTTON6                     1265
-#define IDC_BUTTON7                     1266
+#define IDC_CLRDLG_UPTAB                1262
+#define IDC_CLRDLG_DOWNTAB              1263
+#define IDC_CLRDLG_RESET                1264
+#define IDC_CLRDLG_IMPORT               1265
+#define IDC_CLRDLG_NEWTAB               1266
 #define IDC_CLRDLG_UPCOLOR              1267
-#define IDC_BUTTON10                    1268
+#define IDC_CLRDLG_DELETETAB            1268
+#define IDC_EDIT1                       1269
+#define IDC_CLRDLG_TABNAME              1269
+#define IDC_CLRDLG_RENAMETAB            1270
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -759,7 +761,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         33226
-#define _APS_NEXT_CONTROL_VALUE         1267
+#define _APS_NEXT_CONTROL_VALUE         1270
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

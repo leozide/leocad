@@ -51,6 +51,8 @@ public:
 		return m_Colors[m_CurColor].Index;
 	}
 
+	void UpdateColorConfig();
+
 protected:
 	CToolTipCtrl m_ToolTip;
 

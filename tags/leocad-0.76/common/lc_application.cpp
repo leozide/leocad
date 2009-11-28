@@ -10,6 +10,7 @@
 #include "opengl.h"
 #include "project.h"
 #include "image.h"
+#include "piece.h"
 
 // ----------------------------------------------------------------------------
 // Global functions.
@@ -38,8 +39,6 @@ lcApplication::lcApplication()
 	m_ActiveProject = NULL;
 	m_Library = NULL;
 	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);
-
-	InitColors();
 }
 
 lcApplication::~lcApplication()
@@ -276,6 +275,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	if (!LoadPiecesLibrary(LibPath, SysLibPath))
 		return false;
 
+	InitColors();
+
 	SystemInit();
 
 	// Create a new project.
@@ -489,7 +490,9 @@ void lcApplication::Shutdown()
 
 void lcApplication::InitColors()
 {
-	const char* Path = Sys_ProfileLoadString("Settings", "ColorConfig", "");
+	char Path[LC_MAXPATH];
+	strcpy(Path, lcGetPiecesLibrary()->GetLibraryPath());
+	strcat(Path, "lccolors.cfg");
 
 	lcFileDisk File;
 	if (File.Open(Path, "rt"))
@@ -512,4 +515,31 @@ void lcApplication::InitColors()
 
 		m_ColorConfig.mColorGroups.Add(Group);
 	}
+}
+
+void lcApplication::SetColorConfig(const lcColorConfig& ColorConfig)
+{
+	for (int ModelIdx = 0; ModelIdx < m_ActiveProject->m_ModelList.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = m_ActiveProject->m_ModelList[ModelIdx];
+
+		for (lcPiece* Piece = Model->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			Piece->m_Color = g_ColorList[Piece->m_Color].Code;
+	}
+
+	m_ColorConfig = ColorConfig;
+
+	lcNumColors = m_ColorConfig.mColors.GetSize();
+	lcNumUserColors = lcNumColors - 3;
+	g_ColorList = &m_ColorConfig.mColors[0];
+
+	for (int ModelIdx = 0; ModelIdx < m_ActiveProject->m_ModelList.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = m_ActiveProject->m_ModelList[ModelIdx];
+
+		for (lcPiece* Piece = Model->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+			Piece->m_Color = lcConvertLDrawColor(Piece->m_Color);
+	}
+
+	m_ActiveProject->UpdateAllViews();
 }

@@ -19,6 +19,8 @@ public:
 	bool Initialize(int argc, char* argv[], const char* SysLibPath);
 	void Shutdown();
 
+	void SetColorConfig(const lcColorConfig& ColorConfig);
+
 	// Pieces library.
 	bool LoadPiecesLibrary(const char* LibPath, const char* SysLibPath);
 	PiecesLibrary* GetPiecesLibrary() const

@@ -714,7 +714,7 @@ void CPreferencesColors::GetOptions()
 
 		char Path[LC_MAXPATH];
 		strcpy(Path, lcGetPiecesLibrary()->GetLibraryPath());
-		strcat(Path, "lccolors.cfg");
+		strcat(Path, "lccolors.ldr");
 
 		lcFileDisk File;
 		File.Open(Path, "wt");

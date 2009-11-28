@@ -206,7 +206,7 @@ void lcColorConfig::Save(lcFile& File)
 		for (int Color = 0; Color < Group.Colors.GetSize(); Color++)
 		{
 			char CurColor[64];
-			sprintf(CurColor, " %d", Group.Colors[Color]);
+			sprintf(CurColor, " %d", mColors[Group.Colors[Color]].Code);
 			strcat(Buf, CurColor);
 		}
 
@@ -329,7 +329,14 @@ void lcColorConfig::Load(lcFile& File)
 			{
 				int Color;
 				if (sscanf(Token, "%d", &Color))
-					Group.Colors.Add(Color);
+				{
+					for (int i = 0; i < mColors.GetSize(); i++)
+						if (mColors[i].Code == Color)
+						{
+							Group.Colors.Add(i);
+							break;
+						}
+				}
 			}
 
 			mColorGroups.Add(Group);

@@ -492,7 +492,7 @@ void lcApplication::InitColors()
 {
 	char Path[LC_MAXPATH];
 	strcpy(Path, lcGetPiecesLibrary()->GetLibraryPath());
-	strcat(Path, "lccolors.cfg");
+	strcat(Path, "lccolors.ldr");
 
 	lcFileDisk File;
 	if (File.Open(Path, "rt"))

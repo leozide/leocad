@@ -45,7 +45,7 @@ public:
 
 	void* MapBuffer(GLenum Access)
 	{
-		if (mID)
+		if (mID && !mData)
 		{
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, mID);
 			mData = glMapBufferARB(GL_ARRAY_BUFFER_ARB, Access);
@@ -122,7 +122,7 @@ public:
 
 	void* MapBuffer(GLenum Access)
 	{
-		if (mID)
+		if (mID && !mData)
 		{
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mID);
 			mData = glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Access);

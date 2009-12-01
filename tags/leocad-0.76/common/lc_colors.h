@@ -10,6 +10,7 @@ struct lcColor
 {
 	u32 Code;
 	float Value[4];
+	float Edge[4];
 	bool Translucent;
 	String Name;
 };
@@ -44,6 +45,11 @@ void lcColorShutdown();
 inline void lcSetColor(u32 Index)
 {
 	glColor4f(g_ColorList[Index].Value[0], g_ColorList[Index].Value[1], g_ColorList[Index].Value[2], g_ColorList[Index].Value[3]);
+}
+
+inline void lcSetEdgeColor(u32 Index)
+{
+	glColor4f(g_ColorList[Index].Edge[0], g_ColorList[Index].Edge[1], g_ColorList[Index].Edge[2], g_ColorList[Index].Edge[3]);
 }
 
 // Convert a color from LDraw to LeoCAD.

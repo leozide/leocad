@@ -386,7 +386,10 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 			glDisable(GL_BLEND);
 		}
 
-		lcSetColor(CurColor);
+		if (CurColor != LC_COLOR_EDGE || Section->PrimitiveType != GL_LINES)
+			lcSetColor(CurColor);
+		else
+			lcSetEdgeColor(CurColor);
 
 #if LC_PROFILE
 		if (Section->PrimitiveType == GL_QUADS)

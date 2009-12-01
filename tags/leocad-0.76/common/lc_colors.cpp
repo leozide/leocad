@@ -243,6 +243,10 @@ void lcColorConfig::Load(lcFile& File)
 			Color.Value[1] = FLT_MAX;
 			Color.Value[2] = FLT_MAX;
 			Color.Value[3] = 1.0f;
+			Color.Edge[0] = FLT_MAX;
+			Color.Edge[1] = FLT_MAX;
+			Color.Edge[2] = FLT_MAX;
+			Color.Edge[3] = 1.0f;
 
 			Color.Name = GetToken(ptr);
 
@@ -270,7 +274,18 @@ void lcColorConfig::Load(lcFile& File)
 				}
 				else if (!Token.CompareNoCase("EDGE"))
 				{
-					Token = GetToken(ptr); // Ignored.
+					Token = GetToken(ptr);
+					if (Token[0] == '#')
+						Token[0] = ' ';
+
+					int Value;
+					sscanf(Token, "%x", &Value);
+
+					Color.Edge[2] = (float)(Value & 0xff) / 255.0f;
+					Value >>= 8;
+					Color.Edge[1] = (float)(Value & 0xff) / 255.0f;
+					Value >>= 8;
+					Color.Edge[0] = (float)(Value & 0xff) / 255.0f;
 				}
 				else if (!Token.CompareNoCase("ALPHA"))
 				{
@@ -345,10 +360,10 @@ void lcColorConfig::Load(lcFile& File)
 
 	lcColor DefaultColors[] =
 	{
-		{  16, { 0.5000f, 0.5000f, 0.5000f, 1.0000f }, false, "Default" },
-		{  24, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Edge" },
-		{  -1, { 0.8980f, 0.2980f, 0.4000f, 1.0000f }, false, "Selected" },
-		{  -2, { 0.4000f, 0.2980f, 0.8980f, 1.0000f }, false, "Focused" },
+		{  16, { 0.5000f, 0.5000f, 0.5000f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Default" },
+		{  24, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Edge" },
+		{  -1, { 0.8980f, 0.2980f, 0.4000f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Selected" },
+		{  -2, { 0.4000f, 0.2980f, 0.8980f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Focused" },
 	};
 
 	// Reorder colors.
@@ -379,12 +394,22 @@ void lcColorConfig::Load(lcFile& File)
 
 	if (Default.Code == -1)
 		Default = DefaultColors[0];
-	mColors.Add(Default);
 
 	if (Edge.Code == -1)
 		Edge = DefaultColors[1];
-	mColors.Add(Edge);
 
+	for (int i = 0; i < mColors.GetSize(); i++)
+	{
+		if (mColors[i].Edge[0] != FLT_MAX)
+			continue;
+
+		mColors[i].Edge[0] = Edge.Value[0];
+		mColors[i].Edge[1] = Edge.Value[1];
+		mColors[i].Edge[2] = Edge.Value[2];
+	}
+
+	mColors.Add(Default);
+	mColors.Add(Edge);
 	mColors.Add(DefaultColors[2]);
 	mColors.Add(DefaultColors[3]);
 }

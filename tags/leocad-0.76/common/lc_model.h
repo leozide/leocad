@@ -23,6 +23,9 @@ public:
 	~lcModel();
 
 public:
+	// Rename model.
+	void SetName(const char* Name);
+
 	// Empty model.
 	void DeleteContents();
 

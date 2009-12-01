@@ -54,6 +54,13 @@ lcModel::~lcModel()
 	delete m_PieceInfo;
 }
 
+void lcModel::SetName(const char* Name)
+{
+	m_Name = Name;
+	strncpy(m_PieceInfo->m_strDescription, Name, sizeof(m_PieceInfo->m_strDescription));
+	m_PieceInfo->m_strDescription[sizeof(m_PieceInfo->m_strDescription)-1] = 0;
+}
+
 void lcModel::DeleteContents()
 {
 	while (m_Pieces)

@@ -272,7 +272,7 @@ void Project::LoadDefaults(bool cameras)
 	if (cameras)
 	{
 		lcModel* Model = new lcModel();
-		Model->m_Name = "Main";
+		Model->SetName("Main");
 		m_ModelList.Add(Model);
 		SetActiveModel(Model);
 
@@ -1218,7 +1218,7 @@ bool Project::OnOpenDocument(const char* PathName)
 			for (int FileIndex = 0; FileIndex < FileArray.GetSize(); FileIndex++)
 			{
 				lcModel* Model = new lcModel();
-				Model->m_Name = FileArray[FileIndex]->GetFileName();
+				Model->SetName(FileArray[FileIndex]->GetFileName());
 				strncpy(Model->m_PieceInfo->m_strDescription, Model->m_Name, sizeof(Model->m_PieceInfo->m_strDescription)-1);
 				Model->m_PieceInfo->m_strDescription[sizeof(Model->m_PieceInfo->m_strDescription)-1] = 0;
 				FileArray[FileIndex]->Seek(0, SEEK_SET);
@@ -1253,7 +1253,7 @@ bool Project::OnOpenDocument(const char* PathName)
 		if (LoadLDR)
 		{
 			lcModel* Model = new lcModel();
-			Model->m_Name = "Main";
+			Model->SetName("Main");
 			m_ModelList.Add(Model);
 
 			Model->ResetCameras();
@@ -4462,6 +4462,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_MODEL_NEW:
 		{
+			bool MovePieces = false;
+
+			if (m_ActiveModel->AnyPiecesSelected())
+				if (SystemDoMessageBox("Would you like to move the selected pieces to the new model?", LC_MB_YESNO|LC_MB_ICONQUESTION) == LC_YES)
+					MovePieces = true;
+
 			int Max = 0;
 
 			// Find out the number of the last model added.
@@ -4484,14 +4490,56 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.Author = Sys_ProfileLoadString("Default", "User", "LeoCAD");
 			opts.PiecesUsed = NULL;
 
+			if (MovePieces)
+			{
+				PiecesLibrary* Lib = lcGetPiecesLibrary();
+				int NumPieces = Lib->GetPieceCount() * lcNumUserColors;
+				opts.PiecesUsed = new int[NumPieces];
+				memset(opts.PiecesUsed, 0, NumPieces * sizeof(int));
+
+				for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+				{
+					if (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL)
+						continue;
+
+					int idx = lcGetPiecesLibrary()->GetPieceIndex(Piece->m_PieceInfo);
+					opts.PiecesUsed[idx*lcNumUserColors+Piece->m_Color]++;
+				}
+			}
+
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
 			{
 				// Create and add new model.
 				lcModel* Model = new lcModel();
-				Model->m_Name = opts.Name;
+				Model->SetName(opts.Name);
 				Model->m_Author = opts.Author;
 				Model->m_Description = opts.Description;
 				Model->m_Comments = opts.Comments;
+
+				if (MovePieces)
+				{
+					for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; )
+					{
+						lcPiece* Next = (lcPiece*)Piece->m_Next;
+
+						if (Piece->IsSelected())
+						{
+							m_ActiveModel->RemovePiece(Piece);
+							Model->AddPiece(Piece);
+						}
+
+						Piece = Next;
+					}
+
+					lcPiece* Piece = new lcPiece(Model->m_PieceInfo);
+					Piece->Initialize(0, 0, 0, m_ActiveModel->m_CurFrame, LC_COLOR_DEFAULT);
+					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Piece->m_PieceInfo->m_strDescription);
+					m_ActiveModel->AddPiece(Piece);
+					Piece->UpdatePosition(m_ActiveModel->m_CurFrame);
+
+					Model->UpdateMesh();
+					Model->m_CurFrame = m_ActiveModel->m_CurFrame;
+				}
 
 				AddModel(Model);
 				SetActiveModel(Model);
@@ -4501,6 +4549,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 				UpdateAllViews();
 			}
+
+			delete[] opts.PiecesUsed;
 		} break;
 
 		case LC_MODEL_DELETE:
@@ -4546,7 +4596,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if ((m_ActiveModel->m_Author != opts.Author) || (m_ActiveModel->m_Description != opts.Description) ||
 				    (m_ActiveModel->m_Comments!= opts.Comments) || (m_ActiveModel->m_Name != opts.Name))
 				{
-					m_ActiveModel->m_Name = opts.Name;
+					m_ActiveModel->SetName(opts.Name);
 					m_ActiveModel->m_Author = opts.Author;
 					m_ActiveModel->m_Description = opts.Description;
 					m_ActiveModel->m_Comments = opts.Comments;

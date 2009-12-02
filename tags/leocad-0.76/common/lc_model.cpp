@@ -338,7 +338,7 @@ void lcModel::ExportLDraw(lcFile& file, bool ExportMPD, const Matrix44& ParentWo
 			Mat[10] = -ModelMatrix[9];
 			Mat[11] =  ModelMatrix[5];
 
-			sprintf(buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s%s\r\n",
+			sprintf(buf, " 1 %d %g %g %g %g %g %g %g %g %g %g %g %g %s%s\r\n",
 			        g_ColorList[PieceColor].Code, Mat[0], Mat[1], Mat[2], Mat[3], Mat[4], Mat[5],
 			        Mat[6], Mat[7], Mat[8], Mat[9], Mat[10], Mat[11], Name, Ext);
 			file.Write(buf, strlen(buf));

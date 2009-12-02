@@ -411,10 +411,16 @@ void CPreferencesColors::LoadColorConfig(const CString& Path)
 
 	m_ColorConfig.LoadConfig();
 
-	UpdateTabs();
-	m_TabList.SetCurSel(0);
-	UpdateTabControls();
-	UpdateColors();
+	if (m_ColorConfig.mColorGroups.GetSize() == 0)
+		m_ColorConfig.LoadDefaultConfig();
+
+	if (IsWindow(m_hWnd))
+	{
+		UpdateTabs();
+		m_TabList.SetCurSel(0);
+		UpdateTabControls();
+		UpdateColors();
+	}
 }
 
 void CPreferencesColors::OnBnClickedReset()

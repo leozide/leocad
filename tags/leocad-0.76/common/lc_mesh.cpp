@@ -389,7 +389,7 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 		if (CurColor != LC_COLOR_EDGE || Section->PrimitiveType != GL_LINES)
 			lcSetColor(CurColor);
 		else
-			lcSetEdgeColor(CurColor);
+			lcSetEdgeColor(Color);
 
 #if LC_PROFILE
 		if (Section->PrimitiveType == GL_QUADS)

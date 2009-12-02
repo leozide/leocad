@@ -490,31 +490,23 @@ void lcApplication::Shutdown()
 
 void lcApplication::InitColors()
 {
-	char Path[LC_MAXPATH];
-	strcpy(Path, lcGetPiecesLibrary()->GetLibraryPath());
-	strcat(Path, "lccolors.ldr");
+	const char* Path = Sys_ProfileLoadString("Settings", "ColorConfig", "");
 
 	lcFileDisk File;
 	if (File.Open(Path, "rt"))
-		m_ColorConfig.Load(File);
+		m_ColorConfig.LoadColors(File);
 
 	if (m_ColorConfig.mColors.GetSize() < 5)
-		m_ColorConfig.LoadDefault();
+		m_ColorConfig.LoadDefaultColors();
+
+	m_ColorConfig.LoadConfig();
 
 	lcNumColors = m_ColorConfig.mColors.GetSize();
 	lcNumUserColors = lcNumColors - 3;
 	g_ColorList = &m_ColorConfig.mColors[0];
 
 	if (m_ColorConfig.mColorGroups.GetSize() == 0)
-	{
-		lcColorGroup Group;
-		Group.Name = "All Colors";
-
-		for (int i = 0; i < lcNumUserColors; i++)
-			Group.Colors.Add(i);
-
-		m_ColorConfig.mColorGroups.Add(Group);
-	}
+		m_ColorConfig.LoadDefaultConfig();
 }
 
 void lcApplication::SetColorConfig(const lcColorConfig& ColorConfig)

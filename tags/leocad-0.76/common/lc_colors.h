@@ -68,9 +68,12 @@ public:
 	lcColorConfig() { };
 	~lcColorConfig() { };
 
-	void Save(lcFile& File);
-	void Load(lcFile& File);
-	void LoadDefault();
+	void SaveConfig();
+	void LoadConfig();
+	void LoadDefaultConfig();
+
+	void LoadColors(lcFile& File);
+	void LoadDefaultColors();
 
 	int GetNumUserColors() const
 	{

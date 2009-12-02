@@ -3,6 +3,7 @@
 #include "file.h"
 #include "lc_array.h"
 #include "str.h"
+#include "system.h"
 #include <float.h>
 
 lcColor* g_ColorList;
@@ -160,63 +161,76 @@ static const char sDefaultColors[] =
 	"0 !COLOUR Speckle_Black_Silver                                  CODE 132   VALUE #000000   EDGE #595959                               MATERIAL SPECKLE VALUE #595959 FRACTION 0.4 MINSIZE 1 MAXSIZE 3\n"
 };
 
-void lcColorConfig::Save(lcFile& File)
+void lcColorConfig::LoadConfig()
 {
-	char Buf[1024];
-	char Name[256];
+	int NumGroups = Sys_ProfileLoadInt("ColorConfig", "NumGroups", 0);
+	char Entry[128];
 
-	for (int ColorIdx = 0; ColorIdx < lcNumUserColors; ColorIdx++)
+	for (int GroupIdx = 0; GroupIdx < NumGroups; GroupIdx++)
 	{
-		lcColor& Color = mColors[ColorIdx];
+		lcColorGroup Group;
 
-		strcpy(Name, Color.Name);
+		sprintf(Entry, "Group%02dName", GroupIdx);
+		Group.Name = Sys_ProfileLoadString("ColorConfig", Entry, "");
 
-		for (char* ptr = strchr(Name, ' '); ptr; ptr = strchr(Buf, ' '))
-			*ptr = '_';
+		sprintf(Entry, "Group%02dColors", GroupIdx);
+		char* ptr = Sys_ProfileLoadString("ColorConfig", Entry, "");
 
-		int Red = (int)(Color.Value[0] * 255);
-		int Green = (int)(Color.Value[1] * 255);
-		int Blue = (int)(Color.Value[2] * 255);
-
-		sprintf(Buf, "0 !COLOUR %s CODE %d VALUE #%.02X%.02X%.02X", Name, Color.Code, Red, Green, Blue);
-
-		if (Color.Translucent)
+		for (String Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
 		{
-			char Alpha[128];
-			sprintf(Alpha, " ALPHA %d\n", (int)(Color.Value[3] * 255));
-			strcat(Buf, Alpha);
+			int Color;
+			if (sscanf(Token, "%d", &Color))
+			{
+				for (int i = 0; i < mColors.GetSize(); i++)
+					if (mColors[i].Code == Color)
+					{
+						Group.Colors.Add(i);
+						break;
+					}
+			}
 		}
-		else
-			strcat(Buf, "\n");
 
-		File.Write(Buf, strlen(Buf));
+		mColorGroups.Add(Group);
 	}
+}
+
+void lcColorConfig::SaveConfig()
+{
+	Sys_ProfileSaveInt("ColorConfig", "NumGroups", mColorGroups.GetSize());
+	char ColorList[1024], Entry[128];
 
 	for (int GroupIdx = 0; GroupIdx < mColorGroups.GetSize(); GroupIdx++)
 	{
 		lcColorGroup& Group = mColorGroups[GroupIdx];
-
-		strcpy(Name, Group.Name);
-
-		for (char* ptr = strchr(Name, ' '); ptr; ptr = strchr(Buf, ' '))
-			*ptr = '_';
-
-		sprintf(Buf, "0 !LEOCAD COLOUR_GROUP %s", Name);
+		strcpy(ColorList, "");
 
 		for (int Color = 0; Color < Group.Colors.GetSize(); Color++)
 		{
 			char CurColor[64];
 			sprintf(CurColor, " %d", mColors[Group.Colors[Color]].Code);
-			strcat(Buf, CurColor);
+
+			strcat(ColorList, CurColor);
 		}
 
-		strcat(Buf, "\n");
-
-		File.Write(Buf, strlen(Buf));
+		sprintf(Entry, "Group%02dColors", GroupIdx);
+		Sys_ProfileSaveString("ColorConfig", Entry, ColorList);
+		sprintf(Entry, "Group%02dName", GroupIdx);
+		Sys_ProfileSaveString("ColorConfig", Entry, Group.Name);
 	}
 }
 
-void lcColorConfig::Load(lcFile& File)
+void lcColorConfig::LoadDefaultConfig()
+{
+	lcColorGroup Group;
+	Group.Name = "All Colors";
+
+	for (int i = 0; i < lcNumUserColors; i++)
+		Group.Colors.Add(i);
+
+	mColorGroups.Add(Group);
+}
+
+void lcColorConfig::LoadColors(lcFile& File)
 {
 	mColors.RemoveAll();
 	mColorGroups.RemoveAll();
@@ -233,129 +247,99 @@ void lcColorConfig::Load(lcFile& File)
 			continue;
 
 		Token = GetToken(ptr);
-		if (!Token.CompareNoCase("!COLOUR"))
+		if (Token.CompareNoCase("!COLOUR"))
+			continue;
+
+		lcColor Color;
+
+		Color.Code = -1;
+		Color.Translucent = false;
+		Color.Value[0] = FLT_MAX;
+		Color.Value[1] = FLT_MAX;
+		Color.Value[2] = FLT_MAX;
+		Color.Value[3] = 1.0f;
+		Color.Edge[0] = FLT_MAX;
+		Color.Edge[1] = FLT_MAX;
+		Color.Edge[2] = FLT_MAX;
+		Color.Edge[3] = 1.0f;
+
+		Color.Name = GetToken(ptr);
+
+		for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
 		{
-			lcColor Color;
-
-			Color.Code = -1;
-			Color.Translucent = false;
-			Color.Value[0] = FLT_MAX;
-			Color.Value[1] = FLT_MAX;
-			Color.Value[2] = FLT_MAX;
-			Color.Value[3] = 1.0f;
-			Color.Edge[0] = FLT_MAX;
-			Color.Edge[1] = FLT_MAX;
-			Color.Edge[2] = FLT_MAX;
-			Color.Edge[3] = 1.0f;
-
-			Color.Name = GetToken(ptr);
-
-			for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
+			if (!Token.CompareNoCase("CODE"))
 			{
-				if (!Token.CompareNoCase("CODE"))
-				{
-					Token = GetToken(ptr);
-					Color.Code = atoi(Token);
-				}
-				else if (!Token.CompareNoCase("VALUE"))
-				{
-					Token = GetToken(ptr);
-					if (Token[0] == '#')
-						Token[0] = ' ';
-
-					int Value;
-					sscanf(Token, "%x", &Value);
-
-					Color.Value[2] = (float)(Value & 0xff) / 255.0f;
-					Value >>= 8;
-					Color.Value[1] = (float)(Value & 0xff) / 255.0f;
-					Value >>= 8;
-					Color.Value[0] = (float)(Value & 0xff) / 255.0f;
-				}
-				else if (!Token.CompareNoCase("EDGE"))
-				{
-					Token = GetToken(ptr);
-					if (Token[0] == '#')
-						Token[0] = ' ';
-
-					int Value;
-					sscanf(Token, "%x", &Value);
-
-					Color.Edge[2] = (float)(Value & 0xff) / 255.0f;
-					Value >>= 8;
-					Color.Edge[1] = (float)(Value & 0xff) / 255.0f;
-					Value >>= 8;
-					Color.Edge[0] = (float)(Value & 0xff) / 255.0f;
-				}
-				else if (!Token.CompareNoCase("ALPHA"))
-				{
-					Token = GetToken(ptr);
-					int Value = atoi(Token);
-					Color.Value[3] = (float)(Value & 0xff) / 255.0f;
-					if (Value != 255)
-						Color.Translucent = true;
-				}
-				else if (!Token.CompareNoCase("CHROME") || !Token.CompareNoCase("PEARLESCENT") || !Token.CompareNoCase("RUBBER") ||
-						 !Token.CompareNoCase("MATTE_METALIC") || !Token.CompareNoCase("METAL"))
-				{
-					// Ignored.
-				}
-				else if (!Token.CompareNoCase("MATERIAL"))
-				{
-					break; // Material is always last so ignore it and the rest of the line.
-				}
+				Token = GetToken(ptr);
+				Color.Code = atoi(Token);
 			}
-
-			// Check if the new color is valid.
-			if (Color.Code == -1 || Color.Value[0] == FLT_MAX)
-				continue;
-
-			// Check for duplicates.
-			for (int i = 0; i < mColors.GetSize(); i++)
+			else if (!Token.CompareNoCase("VALUE"))
 			{
-				if (mColors[i].Code == Color.Code)
-				{
-					mColors.RemoveIndex(i);
-					break;
-				}
+				Token = GetToken(ptr);
+				if (Token[0] == '#')
+					Token[0] = ' ';
+
+				int Value;
+				sscanf(Token, "%x", &Value);
+
+				Color.Value[2] = (float)(Value & 0xff) / 255.0f;
+				Value >>= 8;
+				Color.Value[1] = (float)(Value & 0xff) / 255.0f;
+				Value >>= 8;
+				Color.Value[0] = (float)(Value & 0xff) / 255.0f;
 			}
+			else if (!Token.CompareNoCase("EDGE"))
+			{
+				Token = GetToken(ptr);
+				if (Token[0] == '#')
+					Token[0] = ' ';
 
-			// Replace underscores with spaces.
-			for (char* Ptr = strchr((char*)Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
-				*Ptr = ' ';
+				int Value;
+				sscanf(Token, "%x", &Value);
 
-			mColors.Add(Color);
+				Color.Edge[2] = (float)(Value & 0xff) / 255.0f;
+				Value >>= 8;
+				Color.Edge[1] = (float)(Value & 0xff) / 255.0f;
+				Value >>= 8;
+				Color.Edge[0] = (float)(Value & 0xff) / 255.0f;
+			}
+			else if (!Token.CompareNoCase("ALPHA"))
+			{
+				Token = GetToken(ptr);
+				int Value = atoi(Token);
+				Color.Value[3] = (float)(Value & 0xff) / 255.0f;
+				if (Value != 255)
+					Color.Translucent = true;
+			}
+			else if (!Token.CompareNoCase("CHROME") || !Token.CompareNoCase("PEARLESCENT") || !Token.CompareNoCase("RUBBER") ||
+					 !Token.CompareNoCase("MATTE_METALIC") || !Token.CompareNoCase("METAL"))
+			{
+				// Ignored.
+			}
+			else if (!Token.CompareNoCase("MATERIAL"))
+			{
+				break; // Material is always last so ignore it and the rest of the line.
+			}
 		}
-		else if (!Token.CompareNoCase("!LEOCAD"))
+
+		// Check if the new color is valid.
+		if (Color.Code == -1 || Color.Value[0] == FLT_MAX)
+			continue;
+
+		// Check for duplicates.
+		for (int i = 0; i < mColors.GetSize(); i++)
 		{
-			Token = GetToken(ptr);
-			if (Token.CompareNoCase("COLOUR_GROUP"))
-				continue;
-
-			lcColorGroup Group;
-
-			Group.Name = GetToken(ptr);
-
-			// Replace underscores with spaces.
-			for (char* Ptr = strchr((char*)Group.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
-				*Ptr = ' ';
-
-			for (Token = GetToken(ptr); !Token.IsEmpty(); Token = GetToken(ptr))
+			if (mColors[i].Code == Color.Code)
 			{
-				int Color;
-				if (sscanf(Token, "%d", &Color))
-				{
-					for (int i = 0; i < mColors.GetSize(); i++)
-						if (mColors[i].Code == Color)
-						{
-							Group.Colors.Add(i);
-							break;
-						}
-				}
+				mColors.RemoveIndex(i);
+				break;
 			}
-
-			mColorGroups.Add(Group);
 		}
+
+		// Replace underscores with spaces.
+		for (char* Ptr = strchr((char*)Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
+			*Ptr = ' ';
+
+		mColors.Add(Color);
 	}
 
 	lcColor DefaultColors[] =
@@ -414,10 +398,10 @@ void lcColorConfig::Load(lcFile& File)
 	mColors.Add(DefaultColors[3]);
 }
 
-void lcColorConfig::LoadDefault()
+void lcColorConfig::LoadDefaultColors()
 {
 	lcFileMem File;
 	File.Write(sDefaultColors, sizeof(sDefaultColors));
 	File.Seek(0, SEEK_SET);
-	Load(File);
+	LoadColors(File);
 }

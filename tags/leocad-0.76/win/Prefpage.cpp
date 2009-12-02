@@ -4,6 +4,7 @@
 #include "lc_global.h"
 #include "resource.h"
 #include "PrefPage.h"
+#include "prefsht.h"
 #include "Tools.h"
 #include "MainFrm.h"
 #include "defines.h"
@@ -29,6 +30,7 @@ IMPLEMENT_DYNCREATE(CPreferencesKeyboard, CPropertyPage)
 
 CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::IDD)
 , m_strLibrary(_T(""))
+, m_strColor(_T(""))
 {
 	//{{AFX_DATA_INIT(CPreferencesGeneral)
 	m_bSubparts = FALSE;
@@ -61,6 +63,7 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_GENDLG_UPDATES, m_Updates);
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_GENDLG_LIBRARY, m_strLibrary);
+	DDX_Text(pDX, IDC_GENDLG_COLOR, m_strColor);
 }
 
 
@@ -69,6 +72,7 @@ BEGIN_MESSAGE_MAP(CPreferencesGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_GENDLG_FOLDERBTN, OnFolderBrowse)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_GENDLG_LIBRARY_BROWSE, &CPreferencesGeneral::OnBnClickedGendlgLibraryBrowse)
+	ON_BN_CLICKED(IDC_GENDLG_COLOR_BROWSE, &CPreferencesGeneral::OnBnClickedColorBrowse)
 END_MESSAGE_MAP()
 
 void CPreferencesGeneral::OnFolderBrowse() 
@@ -93,6 +97,22 @@ void CPreferencesGeneral::OnBnClickedGendlgLibraryBrowse()
 	}
 }
 
+void CPreferencesGeneral::OnBnClickedColorBrowse()
+{
+    UpdateData(TRUE);  
+
+	CFileDialog dlg(TRUE, "*.ldr", m_strColor, 0, "Color Config Files (*.ldr)|*.ldr||", this);  
+
+	if (dlg.DoModal() == IDOK)  
+	{
+		m_strColor = dlg.GetPathName();  
+		UpdateData(FALSE);  
+
+		CPreferencesSheet* Parent = (CPreferencesSheet*)GetParent();
+		Parent->m_PageColors.LoadColorConfig(m_strColor);
+	}  
+}
+
 void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* strFolder, const char* strUser)
 {
 	m_nSaveTime = nSaveInterval & ~LC_AUTOSAVE_FLAG;
@@ -106,6 +126,7 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 	m_strLibrary = AfxGetApp()->GetProfileString("Settings", "PiecesLibrary", "");
+	m_strColor = AfxGetApp()->GetProfileString("Settings", "ColorConfig", "");
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
@@ -123,6 +144,7 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
 	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);
 	AfxGetApp()->WriteProfileString("Settings", "PiecesLibrary", m_strLibrary);
+	AfxGetApp()->WriteProfileString("Settings", "ColorConfig", m_strColor);
 }
 
 BOOL CPreferencesGeneral::OnInitDialog() 
@@ -362,7 +384,6 @@ BEGIN_MESSAGE_MAP(CPreferencesColors, CPropertyPage)
 	ON_BN_CLICKED(IDC_CLRDLG_DELETETAB, &CPreferencesColors::OnBnClickedDeleteTab)
 	ON_BN_CLICKED(IDC_CLRDLG_NEWTAB, &CPreferencesColors::OnBnClickedNewTab)
 	ON_BN_CLICKED(IDC_CLRDLG_RENAMETAB, &CPreferencesColors::OnBnClickedRenameTab)
-	ON_BN_CLICKED(IDC_CLRDLG_IMPORT, &CPreferencesColors::OnBnClickedImport)
 	ON_BN_CLICKED(IDC_CLRDLG_RESET, &CPreferencesColors::OnBnClickedReset)
 END_MESSAGE_MAP()
 
@@ -378,30 +399,31 @@ BOOL CPreferencesColors::OnInitDialog()
 	return TRUE;
 }
 
-void CPreferencesColors::OnBnClickedImport()
+void CPreferencesColors::LoadColorConfig(const CString& Path)
 {
-	CFileDialog dlg(TRUE, "*.ldr", NULL, 0, "Color Config Files (*.ldr)|*.ldr||", this);
+	lcFileDisk File;
 
-	if (dlg.DoModal() == IDOK)
-	{
-		lcFileDisk File;
+	if (File.Open(Path, "rt"))
+		m_ColorConfig.LoadColors(File);
 
-		if (File.Open(dlg.GetPathName(), "rt"))
-			m_ColorConfig.Load(File);
+	if (m_ColorConfig.mColors.GetSize() < 5)
+		m_ColorConfig.LoadDefaultColors();
 
-		if (m_ColorConfig.mColors.GetSize() < 5)
-			m_ColorConfig.LoadDefault();
+	m_ColorConfig.LoadConfig();
 
-		UpdateTabs();
-		m_TabList.SetCurSel(0);
-		UpdateTabControls();
-		UpdateColors();
-	}
+	UpdateTabs();
+	m_TabList.SetCurSel(0);
+	UpdateTabControls();
+	UpdateColors();
 }
 
 void CPreferencesColors::OnBnClickedReset()
 {
-	m_ColorConfig.LoadDefault();
+	if (MessageBox("Are you sure you want to reset the color groups?", "LeoCAD", MB_YESNO|MB_ICONQUESTION) == IDNO)
+		return;
+
+	m_ColorConfig.LoadDefaultColors();
+	m_ColorConfig.LoadDefaultConfig();
 
 	UpdateTabs();
 	m_TabList.SetCurSel(0);
@@ -711,14 +733,7 @@ void CPreferencesColors::GetOptions()
 	{
 		g_App->SetColorConfig(m_ColorConfig);
 		((CMainFrame*)AfxGetMainWnd())->m_wndPiecesBar.m_wndColorsList.UpdateColorConfig();
-
-		char Path[LC_MAXPATH];
-		strcpy(Path, lcGetPiecesLibrary()->GetLibraryPath());
-		strcat(Path, "lccolors.ldr");
-
-		lcFileDisk File;
-		File.Open(Path, "wt");
-		m_ColorConfig.Save(File);
+		m_ColorConfig.SaveConfig();
 	}
 }
 

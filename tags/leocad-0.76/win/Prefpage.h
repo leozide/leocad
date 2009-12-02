@@ -60,6 +60,8 @@ protected:
 public:
 	afx_msg void OnBnClickedGendlgLibraryBrowse();
 	CString m_strLibrary;
+	CString m_strColor;
+	afx_msg void OnBnClickedColorBrowse();
 };
 
 
@@ -174,6 +176,8 @@ public:
 	void GetOptions();
 	CPreferencesColors();
 	~CPreferencesColors();
+
+	void LoadColorConfig(const CString& Path);
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesColors)

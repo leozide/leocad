@@ -1588,6 +1588,7 @@ struct lcRenderSection
 	lcMeshSection* Section;
 	float Distance;
 	int Color;
+	bool Edge;
 };
 
 void Project::RenderScene(View* view, bool Interface)
@@ -1845,8 +1846,9 @@ void Project::RenderScene(View* view, bool Interface)
 			RenderSection.Owner = Piece;
 			RenderSection.Mesh = Mesh;
 			RenderSection.Section = Section;
+			RenderSection.Edge = false;
 
-			if (Section->ColorIndex == LC_COLOR_DEFAULT)
+			if (Section->ColorIndex == LC_COLOR_DEFAULT || Section->ColorIndex == LC_COLOR_EDGE)
 				RenderSection.Color = Piece->m_Color;
 			else
 				RenderSection.Color = Section->ColorIndex;
@@ -1861,9 +1863,11 @@ void Project::RenderScene(View* view, bool Interface)
 					RenderSection.Color = LC_COLOR_FOCUS;
 				else if (Piece->IsSelected())
 					RenderSection.Color = LC_COLOR_SELECTION;
+				else if (Section->ColorIndex == LC_COLOR_EDGE)
+					RenderSection.Edge = true;
 			}
 
-			if (LC_COLOR_TRANSLUCENT(RenderSection.Color))
+			if (!RenderSection.Edge && LC_COLOR_TRANSLUCENT(RenderSection.Color))
 			{
 				// Sort by distance to the camera.
 				Vector3 Pos = Mul31(Section->Box.GetCenter(), Piece->m_ModelWorld);
@@ -1925,7 +1929,10 @@ void Project::RenderScene(View* view, bool Interface)
 				glLineWidth(1.0f);
 		}
 
-		lcSetColor(RenderSection.Color);
+		if (RenderSection.Edge)
+			lcSetEdgeColor(RenderSection.Color);
+		else
+			lcSetColor(RenderSection.Color);
 
 		lcMeshSection* Section = RenderSection.Section;
 

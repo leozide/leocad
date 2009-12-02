@@ -443,7 +443,7 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 	{
 		m_Colors[i] = 0;
 
-		for (u32 j = 0; j < lcNumUserColors; j++)
+		for (int j = 0; j < lcNumUserColors; j++)
 			if (g_ColorList[j].Code == colors[i])
 			{
 				m_Colors[i] = j;

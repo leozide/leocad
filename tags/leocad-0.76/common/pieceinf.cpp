@@ -668,7 +668,7 @@ void PieceInfo::LoadInformation()
 	}
 
 	u32 lines = 0, tris = 0, sections = 0;
-	for (u32 c = 0; c < lcNumColors; c++)
+	for (int c = 0; c < lcNumColors; c++)
 	{
 		if (SectionIndices[c*2])
 		{
@@ -703,7 +703,7 @@ void PieceInfo::BuildMesh(void* Data, void* MeshStart, u32* SectionIndices)
 	lcMeshSection** DstSections = new lcMeshSection*[lcNumColors*2];
 	memset(DstSections, 0, sizeof(DstSections[0])*lcNumColors*2);
 
-	for (u32 c = 0; c < lcNumColors; c++)
+	for (int c = 0; c < lcNumColors; c++)
 	{
 		if (SectionIndices[c*2])
 		{

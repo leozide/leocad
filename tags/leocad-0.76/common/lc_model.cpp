@@ -436,7 +436,7 @@ void lcModel::UpdateMesh()
 	u32 SectionCount = 0;
 	u32 IndexCount = 0;
 
-	for (u32 i = 0; i < lcNumColors*2; i++)
+	for (int i = 0; i < lcNumColors*2; i++)
 	{
 		if (SectionIndices[i])
 		{

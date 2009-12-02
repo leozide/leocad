@@ -3410,7 +3410,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 void Project::CreateHTMLPieceList(FILE* f, u32 nStep, bool bImages, const char* ext)
 {
 	lcPiece* Piece;
-	u32* col = new u32[lcNumColors], ID = 0, c;
+	int* col = new int[lcNumColors], ID = 0, c;
 	int* count = new int[lcNumColors];
 	memset(&col, 0, sizeof(int)*lcNumColors);
 
@@ -3423,12 +3423,12 @@ void Project::CreateHTMLPieceList(FILE* f, u32 nStep, bool bImages, const char* 
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
 
 	for (c = 0; c < lcNumColors; c++)
-	if (col[c])
-	{
-		col[c] = ID;
-		ID++;
-		fprintf(f, "<td><center>%s</center></td>\n", g_ColorList[c].Name);
-	}
+		if (col[c])
+		{
+			col[c] = ID;
+			ID++;
+			fprintf(f, "<td><center>%s</center></td>\n", g_ColorList[c].Name);
+		}
 	ID++;
 	fputs("</tr>\n",f);
 
@@ -4168,7 +4168,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				fputs("#include \"colors.inc\"\n\n", f);
 
-				for (u32 u = 0; u < lcNumColors; u++)
+				for (int u = 0; u < lcNumColors; u++)
 					fprintf(f, "\n#declare lg_%s = texture {\n pigment { rgbf <%.2f, %.2f, %.2f, %.2f> }\n finish {\n  ambient 0.1\n  phong 0.3\n  phong_size 20\n }\n}\n",
 						lg_colors[u], g_ColorList[u].Value[0], g_ColorList[u].Value[1], g_ColorList[u].Value[2], ((g_ColorList[u].Value[3] == 1.0f) ? 0.0f : 0.9f));
 			}
@@ -4426,7 +4426,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			FILE* mat = fopen(buf, "wt");
 			fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
-			for (u32 i = 0; i < lcNumColors; i++)
+			for (int i = 0; i < lcNumColors; i++)
 			{
 				char altname[256];
 				strcpy(altname, g_ColorList[i].Name);

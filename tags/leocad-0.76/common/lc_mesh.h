@@ -167,7 +167,7 @@ protected:
 
 struct lcMeshSection
 {
-	u32 ColorIndex;
+	int ColorIndex;
 	u32 IndexOffset;
 	u32 IndexCount;
 	int PrimitiveType;

@@ -416,6 +416,33 @@ UINT PrintCatalogFunction (LPVOID pv)
 	return 0;
 }
 
+struct lcPiecesUsedEntry
+{
+	PieceInfo* Info;
+	int Color;
+	int Count;
+};
+
+int PiecesUsedSortFunc(const lcPiecesUsedEntry& a, const lcPiecesUsedEntry& b, void* Data)
+{
+	if (a.Color == b.Color)
+	{
+		if (a.Info < b.Info)
+			return -1;
+		else
+			return 1;
+	}
+	else
+	{
+		if (a.Color < b.Color)
+			return -1;
+		else
+			return 1;
+	}
+
+	return 0;
+}
+
 static void PrintPiecesThread(void* pv)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
@@ -428,15 +455,8 @@ static void PrintPiecesThread(void* pv)
 	if (PD.m_pd.hDC == NULL)
 		return;
 
-	struct PiecesUsedEntry
-	{
-		PieceInfo* Info;
-		int Color;
-		int Count;
-	};
-
 	Project* project = lcGetActiveProject();
-	lcObjArray<PiecesUsedEntry> PiecesUsed;
+	lcObjArray<lcPiecesUsedEntry> PiecesUsed;
 
 	for (lcPiece* Piece = project->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
@@ -453,13 +473,13 @@ static void PrintPiecesThread(void* pv)
 
 		if (PieceIdx == PiecesUsed.GetSize())
 		{
-			PiecesUsedEntry Entry;
+			lcPiecesUsedEntry Entry;
 
 			Entry.Info = Piece->m_PieceInfo;
 			Entry.Color = Piece->m_Color;
 			Entry.Count = 1;
 
-			PiecesUsed.Add(Entry);
+			PiecesUsed.AddSorted(Entry, PiecesUsedSortFunc, NULL);
 		}
 	}
 
@@ -490,12 +510,12 @@ static void PrintPiecesThread(void* pv)
 		strOutput = dlg.GetPathName();
 	}
 
-	CString strDocName = "LeoCAD - Pieces used in ";
-	strDocName += project->m_strTitle;
+	CString DocName;
+	DocName.Format("LeoCAD - %s BOM", project->m_strTitle);
 	DOCINFO docInfo;
 	memset(&docInfo, 0, sizeof(DOCINFO));
 	docInfo.cbSize = sizeof(DOCINFO);
-	docInfo.lpszDocName = strDocName;
+	docInfo.lpszDocName = DocName;
 	CString strPortName;
 
 	int nFormatID;
@@ -517,7 +537,7 @@ static void PrintPiecesThread(void* pv)
 	CPrintingDialog dlgPrintStatus(NULL);
 
 	CString strTemp;
-	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, strDocName);
+	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, DocName);
 	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_PRINTERNAME, PD.GetDeviceName());
 	AfxFormatString1(strTemp, nFormatID, strPortName);
 	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_PORTNAME, strTemp);
@@ -689,12 +709,12 @@ static void PrintPiecesThread(void* pv)
 
 			// Draw count.
 			SelectObject(pMemDC->m_hDC, CountFont);
-			TextRect = CRect(0, 0, PicWidth, PicHeight);
+			TextRect = CRect(0, 0, PicWidth, TextRect.top);
 			TextRect.DeflateRect(5, 5);
 
 			char CountStr[16];
-			sprintf(CountStr, "x%d", PiecesUsed[CurPiece].Count);
-			pMemDC->DrawText(CountStr, strlen(CountStr), TextRect, DT_TOP | DT_RIGHT | DT_SINGLELINE);
+			sprintf(CountStr, "%dx", PiecesUsed[CurPiece].Count);
+			pMemDC->DrawText(CountStr, strlen(CountStr), TextRect, DT_BOTTOM | DT_LEFT | DT_SINGLELINE);
 
 			LPBITMAPINFOHEADER lpbi[1];
 			lpbi[0] = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));

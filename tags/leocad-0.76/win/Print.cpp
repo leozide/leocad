@@ -511,7 +511,8 @@ static void PrintPiecesThread(void* pv)
 	}
 
 	CString DocName;
-	DocName.Format("LeoCAD - %s BOM", project->m_strTitle);
+	char* Ext = strrchr(project->m_strTitle, '.');
+	DocName.Format("LeoCAD - %.*s BOM", Ext ? Ext - project->m_strTitle : strlen(project->m_strTitle), project->m_strTitle);
 	DOCINFO docInfo;
 	memset(&docInfo, 0, sizeof(DOCINFO));
 	docInfo.cbSize = sizeof(DOCINFO);

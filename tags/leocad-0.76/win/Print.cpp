@@ -416,13 +416,6 @@ UINT PrintCatalogFunction (LPVOID pv)
 	return 0;
 }
 
-struct lcPiecesUsedEntry
-{
-	PieceInfo* Info;
-	int Color;
-	int Count;
-};
-
 int PiecesUsedSortFunc(const lcPiecesUsedEntry& a, const lcPiecesUsedEntry& b, void* Data)
 {
 	if (a.Color == b.Color)
@@ -458,30 +451,8 @@ static void PrintPiecesThread(void* pv)
 	Project* project = lcGetActiveProject();
 	lcObjArray<lcPiecesUsedEntry> PiecesUsed;
 
-	for (lcPiece* Piece = project->m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-	{
-		if (Piece->m_PieceInfo->m_strDescription[0] == '~')
-			continue;
-
-		int PieceIdx;
-		for (PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
-			if (PiecesUsed[PieceIdx].Info == Piece->m_PieceInfo && PiecesUsed[PieceIdx].Color == Piece->m_Color)
-			{
-				PiecesUsed[PieceIdx].Count++;
-				break;
-			}
-
-		if (PieceIdx == PiecesUsed.GetSize())
-		{
-			lcPiecesUsedEntry Entry;
-
-			Entry.Info = Piece->m_PieceInfo;
-			Entry.Color = Piece->m_Color;
-			Entry.Count = 1;
-
-			PiecesUsed.AddSorted(Entry, PiecesUsedSortFunc, NULL);
-		}
-	}
+	project->m_ActiveModel->GetPiecesUsed(PiecesUsed);
+	PiecesUsed.Sort(PiecesUsedSortFunc, NULL);
 
 	if (GL_HasVertexBufferObject())
 	{

@@ -4500,18 +4500,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (MovePieces)
 			{
 				PiecesLibrary* Lib = lcGetPiecesLibrary();
-				int NumPieces = Lib->GetPieceCount() * lcNumUserColors;
-				opts.PiecesUsed = new int[NumPieces];
-				memset(opts.PiecesUsed, 0, NumPieces * sizeof(int));
-
-				for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-				{
-					if (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL)
-						continue;
-
-					int idx = lcGetPiecesLibrary()->GetPieceIndex(Piece->m_PieceInfo);
-					opts.PiecesUsed[idx*lcNumUserColors+Piece->m_Color]++;
-				}
+				m_ActiveModel->GetPiecesUsed(opts.PiecesUsed);
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -4556,8 +4545,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 				UpdateAllViews();
 			}
-
-			delete[] opts.PiecesUsed;
 		} break;
 
 		case LC_MODEL_DELETE:
@@ -4584,19 +4571,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.Comments = m_ActiveModel->m_Comments;
 
 			// Pieces list.
-			PiecesLibrary* Lib = lcGetPiecesLibrary();
-			int NumPieces = Lib->GetPieceCount() * lcNumUserColors;
-			opts.PiecesUsed = new int[NumPieces];
-			memset(opts.PiecesUsed, 0, NumPieces * sizeof(int));
-
-			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-			{
-				if (Piece->m_PieceInfo->m_nFlags & LC_PIECE_MODEL)
-					continue;
-
-				int idx = lcGetPiecesLibrary()->GetPieceIndex(Piece->m_PieceInfo);
-				opts.PiecesUsed[idx*lcNumUserColors+Piece->m_Color]++;
-			}
+			m_ActiveModel->GetPiecesUsed(opts.PiecesUsed);
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
 			{
@@ -4611,8 +4586,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					SetModifiedFlag(true);
 				}
 			}
-
-			delete[] opts.PiecesUsed;
 		} break;
 
 		case LC_MODEL_LIST:

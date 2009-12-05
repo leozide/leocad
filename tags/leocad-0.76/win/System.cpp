@@ -1630,7 +1630,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_PROPERTIES:
 		{
 			LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
-			CPropertiesSheet ps(opts->PiecesUsed != NULL);
+			CPropertiesSheet ps(opts->PiecesUsed.GetSize() != 0);
 
 			ps.SetTitle("Model Properties", 0);
 			ps.m_PageSummary.m_Name = opts->Name;

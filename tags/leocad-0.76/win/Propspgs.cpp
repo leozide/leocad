@@ -8,6 +8,7 @@
 #include "lc_colors.h"
 #include "library.h"
 #include "lc_application.h"
+#include "lc_model.h"
 #include "pieceinf.h"
 
 #ifdef _DEBUG
@@ -92,42 +93,26 @@ END_MESSAGE_MAP()
 
 static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
 {
-	CPropertiesPieces* Dlg = (CPropertiesPieces*)lParamData;
-	int* Line1 = (int*)lP1;
-	int* Line2 = (int*)lP2;
-
 	// Keep the total row at the bottom of the list.
-	if (lP1 == -1)
+	if (lP1 == 0)
 		return 1;
-	else if (lP2 == -1)
+	else if (lP2 == 0)
 		return -1;
+
+	CPropertiesPieces* Dlg = (CPropertiesPieces*)lParamData;
 
 	if (Dlg->m_SortColumn != 0)
 	{
-		int Num1, Num2;
+		LVFINDINFO FindInfo;
+		FindInfo.flags = LVFI_PARAM;
 
-		if (Dlg->m_SortColumn == Dlg->m_List.GetHeaderCtrl()->GetItemCount() - 1)
-		{
-			Num1 = 0;
-			Num2 = 0;
+		FindInfo.lParam = lP1;
+		int Row1 = Dlg->m_List.FindItem(&FindInfo);
+		FindInfo.lParam = lP2;
+		int Row2 = Dlg->m_List.FindItem(&FindInfo);
 
-			for (int i = 0; i < lcNumUserColors; i++)
-			{
-				Num1 += Line1[i];
-				Num2 += Line2[i];
-			}
-		}
-		else
-		{
-			int i;
-
-			for (i = 0; i < lcNumUserColors; i++)
-				if (Dlg->m_ColorColumn[i] == Dlg->m_SortColumn)
-					break;
-
-			Num1 = Line1[i];
-			Num2 = Line2[i];
-		}
+		int Num1 = atoi(Dlg->m_List.GetItemText(Row1, Dlg->m_SortColumn));
+		int Num2 = atoi(Dlg->m_List.GetItemText(Row2, Dlg->m_SortColumn));
 
 		if (Num1 < Num2)
 			return Dlg->m_SortAscending ? 1 : -1;
@@ -137,12 +122,8 @@ static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamDat
 			return 0;
 	}
 
-	int Index1 = (Line1 - Dlg->m_PiecesUsed) / lcNumUserColors;
-	int Index2 = (Line2 - Dlg->m_PiecesUsed) / lcNumUserColors;
-
-	PiecesLibrary* Lib = lcGetPiecesLibrary();
-	PieceInfo* Info1 = Lib->GetPieceInfo(Index1);
-	PieceInfo* Info2 = Lib->GetPieceInfo(Index2);
+	PieceInfo* Info1 = (PieceInfo*)lP1;
+	PieceInfo* Info2 = (PieceInfo*)lP2;
 
 	if (Dlg->m_SortAscending)
 		return _strcmpi(Info1->m_strDescription, Info2->m_strDescription);
@@ -157,14 +138,17 @@ BOOL CPropertiesPieces::OnInitDialog()
 	int* ColorTotal = new int[lcNumUserColors];
 	memset(ColorTotal, 0, lcNumUserColors * sizeof(int));
 	memset(m_ColorColumn, 0, lcNumUserColors * sizeof(int));
-	int i, j;
+	char Count[256];
+	int i;
 
 	PiecesLibrary* Lib = lcGetPiecesLibrary();
 
 	// Count the number of pieces used for each color.
-	for (i = 0; i < Lib->GetPieceCount(); i++)
-		for (j = 0; j < lcNumUserColors; j++)
-			ColorTotal[j] += m_PiecesUsed[j + i * lcNumUserColors];
+	for (int EntryIdx = 0; EntryIdx < m_PiecesUsed.GetSize(); EntryIdx++)
+	{
+		lcPiecesUsedEntry& Entry = m_PiecesUsed[EntryIdx];
+		ColorTotal[Entry.Color] += Entry.Count;
+	}
 
 	// Add columns to the list header.
 	m_List.InsertColumn(0, "Piece", LVCFMT_LEFT, 130, 0);
@@ -186,52 +170,52 @@ BOOL CPropertiesPieces::OnInitDialog()
 	m_List.SetRedraw(FALSE);
 
 	// Add pieces to the list.
-	for (i = 0; i < Lib->GetPieceCount(); i++)
+	for (int EntryIdx = 0; EntryIdx < m_PiecesUsed.GetSize(); EntryIdx++)
 	{
-		int* Line = m_PiecesUsed + i * lcNumUserColors;
-		int LineTotal = 0;
+		lcPiecesUsedEntry& Entry = m_PiecesUsed[EntryIdx];
 
-		for (j = 0; j < lcNumUserColors; j++)
-			LineTotal += Line[j];
+		LVFINDINFO FindInfo;
+		FindInfo.flags = LVFI_PARAM;
+		FindInfo.lParam = (LPARAM)Entry.Info;
 
-		if (!LineTotal)
-			continue;
+		int Row = m_List.FindItem(&FindInfo);
 
-		char name[256], tmp[256];
-		LV_ITEM lvi;
-		lvi.mask = LVIF_TEXT|LVIF_PARAM;
-		lvi.iItem = 0;
-		lvi.iSubItem = 0;
-		lvi.pszText = name;
-		lvi.lParam = (LPARAM)Line;
-		strcpy(name, Lib->GetPieceInfo(i)->m_strDescription);
-
-		int idx = m_List.InsertItem(&lvi);
-
-		for (j = 0; j < lcNumUserColors; j++)
+		if (Row == -1)
 		{
-			if (!Line[j])
-				continue;
+			LV_ITEM Item;
+			Item.mask = LVIF_TEXT|LVIF_PARAM;
+			Item.iItem = 0;
+			Item.iSubItem = 0;
+			Item.pszText = Entry.Info->m_strDescription;
+			Item.lParam = (LPARAM)Entry.Info;
 
-			sprintf(tmp, "%d", Line[j]);
-			m_List.SetItemText(idx, m_ColorColumn[j], tmp);
+			Row = m_List.InsertItem(&Item);
+
+			int Total = 0;
+			for (int CountEntryIdx = 0; CountEntryIdx < m_PiecesUsed.GetSize(); CountEntryIdx++)
+			{
+				lcPiecesUsedEntry& CountEntry = m_PiecesUsed[CountEntryIdx];
+				if (CountEntry.Info == Entry.Info)
+					Total += CountEntry.Count;
+			}
+
+			sprintf(Count, "%d", Total);
+			m_List.SetItemText(Row, Column, Count);
 		}
 
-		sprintf (tmp, "%d", LineTotal);
-		m_List.SetItemText(idx, Column, tmp);
+		sprintf(Count, "%d", Entry.Count);
+		m_List.SetItemText(Row, m_ColorColumn[Entry.Color], Count);
 	}
 
 	// Add totals.
-	char name[256], tmp[256];
-	strcpy (name, "Total");
-	LV_ITEM lvi;
-	lvi.mask = LVIF_TEXT|LVIF_PARAM;
-	lvi.iItem = m_List.GetItemCount();
-	lvi.iSubItem = 0;
-	lvi.pszText = name;
-	lvi.lParam = -1;
+	LV_ITEM Item;
+	Item.mask = LVIF_TEXT|LVIF_PARAM;
+	Item.iItem = m_List.GetItemCount();
+	Item.iSubItem = 0;
+	Item.pszText = "Total";
+	Item.lParam = 0;
 
-	int idx = m_List.InsertItem(&lvi), total = 0;
+	int Row = m_List.InsertItem(&Item);
 	int Total = 0;
 
 	for (i = 0; i < lcNumUserColors; i++)
@@ -241,12 +225,12 @@ BOOL CPropertiesPieces::OnInitDialog()
 
 		Total += ColorTotal[i];
 
-		sprintf (tmp, "%d", ColorTotal[i]);
-		m_List.SetItemText(idx, m_ColorColumn[i], tmp);
+		sprintf(Count, "%d", ColorTotal[i]);
+		m_List.SetItemText(Row, m_ColorColumn[i], Count);
 	}
 
-	sprintf (tmp, "%d", Total);
-	m_List.SetItemText(idx, Column, tmp);
+	sprintf(Count, "%d", Total);
+	m_List.SetItemText(Row, Column, Count);
 
 	delete[] ColorTotal;
 

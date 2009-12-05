@@ -2,6 +2,8 @@
 #define _PROPSPGS_H_
 
 #include "defines.h"
+#include "typedefs.h"
+#include "lc_array.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPropertiesSummary dialog
@@ -59,7 +61,7 @@ public:
 	CListCtrl	m_List;
 	//}}AFX_DATA
 
-	int* m_PiecesUsed;
+	lcObjArray<lcPiecesUsedEntry> m_PiecesUsed;
 	int* m_ColorColumn;
 	int m_SortColumn;
 	bool m_SortAscending;

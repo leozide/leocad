@@ -3,7 +3,7 @@
 
 #include "str.h"
 #include "algebra.h"
-//#include "lc_array.h"
+#include "lc_array.h"
 
 class lcFile;
 class lcObject;
@@ -15,6 +15,13 @@ class lcMesh;
 class PieceInfo;
 class View;
 //class lcScene;
+
+struct lcPiecesUsedEntry
+{
+	PieceInfo* Info;
+	int Color;
+	int Count;
+};
 
 class lcModel
 {
@@ -70,6 +77,9 @@ public:
 
 	// Inline the contents of another model into this model.
 	void InlineModel(lcModel* Model, const Matrix44& ModelWorld, u32 Color, u32 TimeShow, u32 TimeHide);
+
+	// Get the number of pieces used for every piece/color combination.
+	void GetPiecesUsed(lcObjArray<lcPiecesUsedEntry>& PiecesUsed) const;
 
 	// Return true if any pieces are currently selected.
 	bool AnyPiecesSelected() const;

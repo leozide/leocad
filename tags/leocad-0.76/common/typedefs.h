@@ -10,10 +10,12 @@ class lcPiece;
 class lcCamera;
 class lcLight;
 class PieceInfo;
+struct lcPiecesUsedEntry;
 
 #include "defines.h"
 #include "str.h"
 #include "algebra.h"
+#include "lc_array.h"
 
 typedef enum
 {
@@ -430,7 +432,7 @@ struct LC_PROPERTIESDLG_OPTS
 	String Author;
 	String Description;
 	String Comments;
-	int* PiecesUsed;
+	lcObjArray<lcPiecesUsedEntry> PiecesUsed;
 };
 
 struct LC_GROUPEDITDLG_OPTS

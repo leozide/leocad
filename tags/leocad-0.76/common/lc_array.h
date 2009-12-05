@@ -140,7 +140,6 @@ public:
 		} while ((++i < Count) && Flipped);
 	}
 
-
 	lcPtrArray<T>& operator=(const lcPtrArray<T>& Array)
 	{
 		m_Length = Array.m_Length;
@@ -255,6 +254,36 @@ public:
 		m_Length++;
 		for (int i = m_Length - 1; i > Index; i--)
 			m_Data[i] = m_Data[i-1];
+	}
+
+	void Sort(LC_OBJARRAY_COMPARE_FUNC SortFunc, void* SortData)
+	{
+		int Count = GetSize();
+
+		if (Count <= 1)
+			return;
+
+		int i = 1;
+		bool Flipped;
+
+		do
+		{
+			Flipped = false;
+
+			for (int j = Count - 1; j >= i; --j)
+			{
+				const T& a = m_Data[j];
+				const T& b = m_Data[j - 1];
+
+				if (SortFunc(b, a, SortData) > 0)
+				{
+					T tmp = b;
+					m_Data[j - 1] = a;
+					m_Data[j] = tmp;
+					Flipped = true;
+				}
+			}
+		} while ((++i < Count) && Flipped);
 	}
 
 	lcObjArray<T>& operator=(const lcObjArray<T>& Array)

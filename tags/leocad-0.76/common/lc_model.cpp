@@ -636,6 +636,34 @@ void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, u32 Color,
 	}
 }
 
+void lcModel::GetPiecesUsed(lcObjArray<lcPiecesUsedEntry>& PiecesUsed) const
+{
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	{
+		if (Piece->m_PieceInfo->m_strDescription[0] == '~')
+			continue;
+
+		int PieceIdx;
+		for (PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
+			if (PiecesUsed[PieceIdx].Info == Piece->m_PieceInfo && PiecesUsed[PieceIdx].Color == Piece->m_Color)
+			{
+				PiecesUsed[PieceIdx].Count++;
+				break;
+			}
+
+		if (PieceIdx == PiecesUsed.GetSize())
+		{
+			lcPiecesUsedEntry Entry;
+
+			Entry.Info = Piece->m_PieceInfo;
+			Entry.Color = Piece->m_Color;
+			Entry.Count = 1;
+
+			PiecesUsed.Add(Entry);
+		}
+	}
+}
+
 bool lcModel::AnyPiecesSelected() const
 {
 	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)

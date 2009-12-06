@@ -276,7 +276,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	view.CreateFromBitmap(hMemDC);
 	view.MakeCurrent();
 	view.OnSize(tw, th);
-	view.SetCamera(project->m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
+	view.SetCamera(project->GetActiveView()->GetCamera());
 	project->AddView(&view);
 
 	project->RenderInitialize();

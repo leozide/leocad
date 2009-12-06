@@ -301,10 +301,15 @@
 #define IDC_PRNDLG_NUMBERS              1121
 #define IDC_PRNDLG_BORDER               1122
 #define IDC_PRNDLG_MARGIN_LEFT          1123
+#define IDC_PRNDLG_CAT_HEADER           1124
 #define IDC_AIDDLG_GRID                 1125
+#define IDC_PRNDLG_CAT_HEADERBTN        1125
 #define IDC_AIDDLG_AXIS                 1126
+#define IDC_PRNDLG_CAT_FOOTER           1126
 #define IDC_AIDDLG_SNAPY                1127
+#define IDC_PRNDLG_CAT_FOOTERBTN        1127
 #define IDC_AIDDLG_SNAPZ                1128
+#define IDC_PRNDLG_CAT_NAMES            1128
 #define IDC_AIDDLG_SNAPA                1129
 #define IDC_GENDLG_FOLDER               1130
 #define IDC_GENDLG_FOLDERBTN            1131
@@ -482,6 +487,9 @@
 #define IDC_EDIT1                       1269
 #define IDC_CLRDLG_TABNAME              1269
 #define IDC_CLRDLG_RENAMETAB            1270
+#define IDC_PRNDLG_CAT_HORIZONTAL       1270
+#define IDC_RADIO2                      1271
+#define IDC_PRNDLG_CAT_VERTICAL         1271
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -761,7 +769,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         33226
-#define _APS_NEXT_CONTROL_VALUE         1270
+#define _APS_NEXT_CONTROL_VALUE         1271
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

@@ -85,10 +85,12 @@ typedef UINT NCHITTESTRETURN;
 //#define WM_LC_EDIT_CLOSED		(WM_USER+220) // Terrain grid was edited
 #define WM_LC_SET_CURSOR		(WM_USER+221) // New action, must change the view cursor
 
-#define PRINT_NUMBERS	0x001
+#define PRINT_NUMBERS		0x001
 //	#define PRINT_BRIGHT	0x002
 //	#define PRINT_QUALITY	0x004
-#define PRINT_BORDER	0x008
+#define PRINT_BORDER		0x008
+#define PRINT_NAMES			0x010
+#define PRINT_HORIZONTAL	0x020
 
 // Piecebar settings
 //#define PIECEBAR_PREVIEW      0x01 // Show piece preview

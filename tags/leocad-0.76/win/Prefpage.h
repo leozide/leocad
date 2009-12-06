@@ -312,13 +312,17 @@ public:
 	float	m_fRight;
 	float	m_fTop;
 	BOOL	m_bNumbers;
-	CString	m_strHeader;
-	CString	m_strFooter;
+	CString	m_strInstHeader;
+	CString	m_strInstFooter;
 	BOOL	m_bBorder;
 	int		m_nInstCols;
 	int		m_nInstRows;
 	int		m_nCatCols;
 	int		m_nCatRows;
+	CString	m_strCatHeader;
+	CString	m_strCatFooter;
+	BOOL	m_bCatNames;
+	int		m_nCatOrientation;
 	//}}AFX_DATA
 
 
@@ -338,7 +342,6 @@ protected:
 	afx_msg void OnFooterButton();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

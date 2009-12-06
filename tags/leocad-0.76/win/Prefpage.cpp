@@ -924,13 +924,17 @@ CPreferencesPrint::CPreferencesPrint() : CPropertyPage(CPreferencesPrint::IDD)
 	m_fRight = 0.0f;
 	m_fTop = 0.0f;
 	m_bNumbers = FALSE;
-	m_strHeader = _T("");
-	m_strFooter = _T("");
+	m_strInstHeader = _T("");
+	m_strInstFooter = _T("");
 	m_bBorder = FALSE;
 	m_nInstCols = 0;
 	m_nInstRows = 0;
 	m_nCatCols = 0;
 	m_nCatRows = 0;
+	m_strCatHeader = _T("");
+	m_strCatFooter = _T("");
+	m_bCatNames = FALSE;
+	m_nCatOrientation = 0;
 	//}}AFX_DATA_INIT
 }
 
@@ -947,8 +951,8 @@ void CPreferencesPrint::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_PRNDLG_MARGIN_RIGHT, m_fRight);
 	DDX_Text(pDX, IDC_PRNDLG_MARGIN_TOP, m_fTop);
 	DDX_Check(pDX, IDC_PRNDLG_NUMBERS, m_bNumbers);
-	DDX_Text(pDX, IDC_PRNDLG_HEADER, m_strHeader);
-	DDX_Text(pDX, IDC_PRNDLG_FOOTER, m_strFooter);
+	DDX_Text(pDX, IDC_PRNDLG_HEADER, m_strInstHeader);
+	DDX_Text(pDX, IDC_PRNDLG_FOOTER, m_strInstFooter);
 	DDX_Check(pDX, IDC_PRNDLG_BORDER, m_bBorder);
 	DDX_Text(pDX, IDC_PRNDLG_INST_COLS, m_nInstCols);
 	DDV_MinMaxInt(pDX, m_nInstCols, 1, 20);
@@ -958,6 +962,10 @@ void CPreferencesPrint::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_nCatCols, 1, 40);
 	DDX_Text(pDX, IDC_PRNDLG_CAT_ROWS, m_nCatRows);
 	DDV_MinMaxInt(pDX, m_nCatRows, 1, 50);
+	DDX_Text(pDX, IDC_PRNDLG_CAT_HEADER, m_strCatHeader);
+	DDX_Text(pDX, IDC_PRNDLG_CAT_FOOTER, m_strCatFooter);
+	DDX_Check(pDX, IDC_PRNDLG_CAT_NAMES, m_bCatNames);
+	DDX_Radio(pDX, IDC_PRNDLG_CAT_HORIZONTAL, m_nCatOrientation);
 	//}}AFX_DATA_MAP
 }
 
@@ -966,6 +974,8 @@ BEGIN_MESSAGE_MAP(CPreferencesPrint, CPropertyPage)
 	//{{AFX_MSG_MAP(CPreferencesPrint)
 	ON_BN_CLICKED(IDC_PRNDLG_FOOTERBTN, OnFooterButton)
 	ON_BN_CLICKED(IDC_PRNDLG_HEADERBTN, OnFooterButton)
+	ON_BN_CLICKED(IDC_PRNDLG_CAT_FOOTERBTN, OnFooterButton)
+	ON_BN_CLICKED(IDC_PRNDLG_CAT_HEADERBTN, OnFooterButton)
 	//}}AFX_MSG_MAP
 	ON_COMMAND_RANGE(ID_PRINT_FILENAME, ID_PRINT_RIGHTALIGN, OnHeaderClick)
 END_MESSAGE_MAP()
@@ -1002,6 +1012,8 @@ BOOL CPreferencesPrint::OnInitDialog()
 	
 	SendDlgItemMessage(IDC_PRNDLG_HEADERBTN, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)CreateArrow());
 	SendDlgItemMessage(IDC_PRNDLG_FOOTERBTN, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)CreateArrow());
+	SendDlgItemMessage(IDC_PRNDLG_CAT_HEADERBTN, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)CreateArrow());
+	SendDlgItemMessage(IDC_PRNDLG_CAT_FOOTERBTN, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)CreateArrow());
 	
 	return TRUE;
 }
@@ -1011,8 +1023,16 @@ void CPreferencesPrint::OnFooterButton()
 	CMenu menu;
 	CMenu* pPopup;
 	RECT rc;
-	int i = SendDlgItemMessage (IDC_PRNDLG_HEADERBTN, BM_GETSTATE, 0, 0);
-	::GetWindowRect(::GetDlgItem(m_hWnd, (i & BST_FOCUS) ? IDC_PRNDLG_HEADERBTN : IDC_PRNDLG_FOOTERBTN), &rc);
+
+	if (SendDlgItemMessage(IDC_PRNDLG_HEADERBTN, BM_GETSTATE, 0, 0) & BST_FOCUS)
+		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_PRNDLG_HEADERBTN), &rc);
+	else if (SendDlgItemMessage(IDC_PRNDLG_FOOTERBTN, BM_GETSTATE, 0, 0) & BST_FOCUS)
+		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_PRNDLG_FOOTERBTN), &rc);
+	else if (SendDlgItemMessage(IDC_PRNDLG_CAT_HEADERBTN, BM_GETSTATE, 0, 0) & BST_FOCUS)
+		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_PRNDLG_CAT_HEADERBTN), &rc);
+	else
+		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_PRNDLG_CAT_FOOTERBTN), &rc);
+
 	menu.LoadMenu(IDR_POPUPS);
 	pPopup = menu.GetSubMenu(3);
 	pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, rc.right, rc.top, this);
@@ -1034,28 +1054,42 @@ void CPreferencesPrint::OnHeaderClick(UINT nID)
 	case ID_PRINT_AUTHOR:		c[1] = 'A'; break;
 	case ID_PRINT_DESCRIPTION:	c[1] = 'N'; break;
 	}
-	int i = SendDlgItemMessage (IDC_PRNDLG_HEADERBTN, BM_GETSTATE, 0, 0);
-	SendDlgItemMessage ((i & BST_FOCUS) ? IDC_PRNDLG_HEADER : IDC_PRNDLG_FOOTER, EM_REPLACESEL, TRUE, (LPARAM)&c);
-	::SetFocus (::GetDlgItem(m_hWnd, (i & BST_FOCUS) ? IDC_PRNDLG_HEADER : IDC_PRNDLG_FOOTER));
+
+	UINT CtrlID;
+	if (SendDlgItemMessage(IDC_PRNDLG_HEADERBTN, BM_GETSTATE, 0, 0) & BST_FOCUS)
+		CtrlID = IDC_PRNDLG_HEADER;
+	else if (SendDlgItemMessage(IDC_PRNDLG_FOOTERBTN, BM_GETSTATE, 0, 0) & BST_FOCUS)
+		CtrlID = IDC_PRNDLG_FOOTER;
+	else if (SendDlgItemMessage(IDC_PRNDLG_CAT_HEADERBTN, BM_GETSTATE, 0, 0) & BST_FOCUS)
+		CtrlID = IDC_PRNDLG_CAT_HEADER;
+	else
+		CtrlID = IDC_PRNDLG_CAT_FOOTER;
+
+	SendDlgItemMessage(CtrlID, EM_REPLACESEL, TRUE, (LPARAM)&c);
+	::SetFocus(::GetDlgItem(m_hWnd, CtrlID));
 }
 
 void CPreferencesPrint::SetOptions(CString strHeader, CString strFooter)
 {
-	DWORD dwPrint = AfxGetApp()->GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
+	DWORD dwPrint = AfxGetApp()->GetProfileInt("Settings", "Print", PRINT_NUMBERS|PRINT_BORDER|PRINT_NAMES);
 	m_bNumbers = (dwPrint & PRINT_NUMBERS) != 0;
 	m_bBorder = (dwPrint & PRINT_BORDER) != 0;
+	m_bCatNames = (dwPrint & PRINT_NAMES) != 0;
+	m_nCatOrientation = (dwPrint & PRINT_HORIZONTAL) ? 0 : 1;
 
-	m_strHeader = strHeader;
-	m_strFooter = strFooter;
+	m_strInstHeader = strHeader;
+	m_strInstFooter = strFooter;
 
-	m_fLeft = (float)AfxGetApp()->GetProfileInt("Default","Margin Left", 50)/100;
-	m_fTop = (float)AfxGetApp()->GetProfileInt("Default","Margin Top", 50)/100;
-	m_fRight = (float)AfxGetApp()->GetProfileInt("Default","Margin Right", 50)/100; 
-	m_fBottom = (float)AfxGetApp()->GetProfileInt("Default","Margin Bottom", 50)/100;
-	m_nInstRows = AfxGetApp()->GetProfileInt("Default","Print Rows", 1);
-	m_nInstCols = AfxGetApp()->GetProfileInt("Default","Print Columns", 1);
-	m_nCatRows = AfxGetApp()->GetProfileInt("Default","Catalog Rows", 10);
-	m_nCatCols = AfxGetApp()->GetProfileInt("Default","Catalog Columns", 3);
+	m_fLeft = (float)AfxGetApp()->GetProfileInt("Default", "Margin Left", 50)/100;
+	m_fTop = (float)AfxGetApp()->GetProfileInt("Default", "Margin Top", 50)/100;
+	m_fRight = (float)AfxGetApp()->GetProfileInt("Default", "Margin Right", 50)/100; 
+	m_fBottom = (float)AfxGetApp()->GetProfileInt("Default", "Margin Bottom", 50)/100;
+	m_nInstRows = AfxGetApp()->GetProfileInt("Default", "Print Rows", 1);
+	m_nInstCols = AfxGetApp()->GetProfileInt("Default", "Print Columns", 1);
+	m_nCatRows = AfxGetApp()->GetProfileInt("Default", "Catalog Rows", 10);
+	m_nCatCols = AfxGetApp()->GetProfileInt("Default", "Catalog Columns", 3);
+	m_strCatHeader = AfxGetApp()->GetProfileString("Default", "Catalog Header", "");
+	m_strCatFooter = AfxGetApp()->GetProfileString("Default", "Catalog Footer", "Page &P");
 }
 
 void CPreferencesPrint::GetOptions(char* strHeader, char* strFooter)
@@ -1063,19 +1097,23 @@ void CPreferencesPrint::GetOptions(char* strHeader, char* strFooter)
 	DWORD dwPrint = 0;
 	if (m_bNumbers) dwPrint |= PRINT_NUMBERS;
 	if (m_bBorder) dwPrint |= PRINT_BORDER;
+	if (m_bCatNames) dwPrint |= PRINT_NAMES;
+	if (m_nCatOrientation == 0) dwPrint |= PRINT_HORIZONTAL;
 	AfxGetApp()->WriteProfileInt("Settings","Print", dwPrint);
 
-	strcpy(strHeader, (LPCSTR)m_strHeader);
-	strcpy(strFooter, (LPCSTR)m_strFooter);
+	strcpy(strHeader, (LPCSTR)m_strInstHeader);
+	strcpy(strFooter, (LPCSTR)m_strInstFooter);
 
-	AfxGetApp()->WriteProfileInt("Default","Margin Left", (int)(m_fLeft*100));
-	AfxGetApp()->WriteProfileInt("Default","Margin Top", (int)(m_fTop*100));
-	AfxGetApp()->WriteProfileInt("Default","Margin Right", (int)(m_fRight*100)); 
-	AfxGetApp()->WriteProfileInt("Default","Margin Bottom", (int)(m_fBottom*100));
-	AfxGetApp()->WriteProfileInt("Default","Print Rows", m_nInstRows);
-	AfxGetApp()->WriteProfileInt("Default","Print Columns", m_nInstCols);
-	AfxGetApp()->WriteProfileInt("Default","Catalog Rows", m_nCatRows);
-	AfxGetApp()->WriteProfileInt("Default","Catalog Columns", m_nCatCols);
+	AfxGetApp()->WriteProfileInt("Default", "Margin Left", (int)(m_fLeft*100));
+	AfxGetApp()->WriteProfileInt("Default", "Margin Top", (int)(m_fTop*100));
+	AfxGetApp()->WriteProfileInt("Default", "Margin Right", (int)(m_fRight*100)); 
+	AfxGetApp()->WriteProfileInt("Default", "Margin Bottom", (int)(m_fBottom*100));
+	AfxGetApp()->WriteProfileInt("Default", "Print Rows", m_nInstRows);
+	AfxGetApp()->WriteProfileInt("Default", "Print Columns", m_nInstCols);
+	AfxGetApp()->WriteProfileInt("Default", "Catalog Rows", m_nCatRows);
+	AfxGetApp()->WriteProfileInt("Default", "Catalog Columns", m_nCatCols);
+	AfxGetApp()->WriteProfileString("Default", "Catalog Header", m_strCatHeader);
+	AfxGetApp()->WriteProfileString("Default", "Catalog Footer", m_strCatFooter);
 }
 
 /////////////////////////////////////////////////////////////////////////////

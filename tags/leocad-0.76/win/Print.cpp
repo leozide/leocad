@@ -436,6 +436,97 @@ int PiecesUsedSortFunc(const lcPiecesUsedEntry& a, const lcPiecesUsedEntry& b, v
 	return 0;
 }
 
+void FormatHeader(CString& Result, UINT& Align, const char* Format, const char* Title, const char* Author, const char* Description, int CurPage, int TotalPages)
+{
+	char Buffer[128];
+	const char* Ptr = Format;
+
+	Result.Empty();
+	Align = DT_CENTER;
+
+	while (*Ptr)
+	{
+		if (*Ptr != '&')
+		{
+			Result.AppendChar(*Ptr);
+			Ptr++;
+			continue;
+		}
+
+		if (Ptr[1] == '&')
+		{
+			Result.AppendChar(*Ptr);
+			Ptr++;
+			Ptr++;
+			continue;
+		}
+
+		switch (Ptr[1])
+		{
+		case 'L':
+			Align = DT_LEFT;
+			Ptr++;
+			break;
+
+		case 'C':
+			Align = DT_CENTER;
+			Ptr++;
+			break;
+
+		case 'R':
+			Align = DT_RIGHT;
+			Ptr++;
+			break;
+
+		case 'F':
+			Result.Append(Title);
+			Ptr++;
+			break;
+
+		case 'A':
+			Result.Append(Author);
+			Ptr++;
+			break;
+
+		case 'N':
+			Result.Append(Description);
+			Ptr++;
+			break;
+
+		case 'D':
+			_strdate(Buffer);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 'T':
+			_strtime(Buffer);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 'P':
+			sprintf(Buffer, "%d", CurPage);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 'O':
+			sprintf(Buffer, "%d", TotalPages);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 0:
+		default:
+			Result.AppendChar(*Ptr);
+			break;
+		}
+
+		Ptr++;
+	}
+}
+
 static void PrintPiecesThread(void* pv)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
@@ -534,10 +625,14 @@ static void PrintPiecesThread(void* pv)
 	                     (int)(ResX*(float)theApp.GetProfileInt("Default","Margin Right", 50)/100.0f),
 	                     (int)(ResY*(float)theApp.GetProfileInt("Default","Margin Bottom", 50)/100.0f));
 
-	int PicWidth = (int)(ResX*0.75f);
-	int PicHeight = (int)(ResY*0.75f);
-	int ColsPerPage = RectDraw.Width() / PicWidth;
-	int RowsPerPage = RectDraw.Height() / PicHeight;
+	CRect HeaderRect = RectDraw;
+ 	HeaderRect.top -= (int)(ResY*theApp.GetProfileInt("Default", "Margin Top", 50) / 200.0f);
+	HeaderRect.bottom += (int)(ResY*theApp.GetProfileInt("Default", "Margin Bottom", 50) / 200.0f);
+
+	int RowsPerPage = AfxGetApp()->GetProfileInt("Default", "Catalog Rows", 10);
+	int ColsPerPage = AfxGetApp()->GetProfileInt("Default", "Catalog Columns", 3);
+	int PicHeight = RectDraw.Height() / RowsPerPage;
+	int PicWidth = RectDraw.Width() / ColsPerPage;
 	int TotalRows = (PiecesUsed.GetSize() + ColsPerPage - 1) / ColsPerPage;
 	int TotalPages = (TotalRows + RowsPerPage - 1) / RowsPerPage;
 	int RowHeight = RectDraw.Height() / RowsPerPage;
@@ -603,8 +698,8 @@ static void PrintPiecesThread(void* pv)
 
 	LOGFONT lf;
 	memset(&lf, 0, sizeof(LOGFONT));
-	lf.lfHeight = -MulDiv(10, ResY, 72);
-	lf.lfWeight = FW_BOLD;
+	lf.lfHeight = -MulDiv(12, ResY, 72);
+	lf.lfWeight = FW_REGULAR;
 	lf.lfCharSet = DEFAULT_CHARSET;
 	lf.lfQuality = PROOF_QUALITY;
 	strcpy(lf.lfFaceName , "Arial");
@@ -614,6 +709,10 @@ static void PrintPiecesThread(void* pv)
 	SetBkMode(PD.m_pd.hDC, TRANSPARENT);
 	SetTextColor(PD.m_pd.hDC, 0x000000);
 	SetTextAlign(PD.m_pd.hDC, TA_CENTER|TA_NOUPDATECP);
+
+	DWORD PrintOptions = AfxGetApp()->GetProfileInt("Settings", "Print", PRINT_NUMBERS|PRINT_BORDER|PRINT_NAMES);
+	bool DrawNames = (PrintOptions & PRINT_NAMES) != 0;
+	bool Horizontal = (PrintOptions & PRINT_HORIZONTAL) != 0;
 
 	pMemDC->SetTextColor(0x000000);
 	pMemDC->SetBkMode(TRANSPARENT);
@@ -636,6 +735,22 @@ static void PrintPiecesThread(void* pv)
 			break;
 		}
 
+		// Draw header and footer.
+		SelectObject(PD.m_pd.hDC, HeaderFont);
+
+		CString Header;
+		UINT Align;
+
+		FormatHeader(Header, Align, AfxGetApp()->GetProfileString("Default", "Catalog Header", ""), project->m_strTitle, project->m_strAuthor, project->m_strDescription, CurPage, TotalPages);
+		Align |= DT_TOP|DT_SINGLELINE;
+
+		DrawText(PD.m_pd.hDC, (LPCTSTR)Header, Header.GetLength(), HeaderRect, Align);
+
+		FormatHeader(Header, Align, AfxGetApp()->GetProfileString("Default", "Catalog Footer", "Page &P"), project->m_strTitle, project->m_strAuthor, project->m_strDescription, CurPage, TotalPages);
+		Align |= DT_BOTTOM|DT_SINGLELINE;
+
+		DrawText(PD.m_pd.hDC, (LPCTSTR)Header, Header.GetLength(), HeaderRect, Align);
+
 		int StartPiece = (CurPage - 1) * RowsPerPage * ColsPerPage;
 		int EndPiece = lcMin(StartPiece + RowsPerPage * ColsPerPage, PiecesUsed.GetSize());
 
@@ -648,10 +763,10 @@ static void PrintPiecesThread(void* pv)
 			glLoadIdentity();
 			glDepthFunc(GL_LEQUAL);
 			glClearColor(1,1,1,1); 
-			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE) ;
+			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 			glEnable(GL_COLOR_MATERIAL) ;
-			glDisable (GL_DITHER);
-			glShadeModel (GL_FLAT);
+			glDisable(GL_DITHER);
+			glShadeModel(GL_FLAT);
 
 			lcSetColor(g_App->m_SelectedColor);
 
@@ -672,12 +787,16 @@ static void PrintPiecesThread(void* pv)
 			glFlush();
 
 			// Draw description text at the bottom.
-			SelectObject(pMemDC->m_hDC, CatalogFont);
 			CRect TextRect(0, 0, PicWidth, PicHeight);
-			pMemDC->DrawText(pInfo->m_strDescription, strlen(pInfo->m_strDescription), TextRect, DT_CALCRECT | DT_WORDBREAK);
 
-			TextRect.OffsetRect(0, PicHeight - TextRect.Height() - 5);
-			pMemDC->DrawText(pInfo->m_strDescription, strlen(pInfo->m_strDescription), TextRect, DT_WORDBREAK);
+			if (DrawNames)
+			{
+				SelectObject(pMemDC->m_hDC, CatalogFont);
+				pMemDC->DrawText(pInfo->m_strDescription, strlen(pInfo->m_strDescription), TextRect, DT_CALCRECT | DT_WORDBREAK);
+
+				TextRect.OffsetRect(0, PicHeight - TextRect.Height() - 5);
+				pMemDC->DrawText(pInfo->m_strDescription, strlen(pInfo->m_strDescription), TextRect, DT_WORDBREAK);
+			}
 
 			// Draw count.
 			SelectObject(pMemDC->m_hDC, CountFont);
@@ -695,8 +814,19 @@ static void PrintPiecesThread(void* pv)
 			memcpy (&bi.bmiHeader, lpbi[0], sizeof(BITMAPINFOHEADER));
 			SetStretchBltMode(PD.m_pd.hDC, COLORONCOLOR);
 
-			int CurRow = (CurPiece - StartPiece) / ColsPerPage;
-			int CurCol = (CurPiece - StartPiece) % ColsPerPage;
+			int CurRow, CurCol;
+
+			if (Horizontal)
+			{
+				CurRow = (CurPiece - StartPiece) / ColsPerPage;
+				CurCol = (CurPiece - StartPiece) % ColsPerPage;
+			}
+			else
+			{
+				CurRow = (CurPiece - StartPiece) % RowsPerPage;
+				CurCol = (CurPiece - StartPiece) / RowsPerPage;
+			}
+
 			int Left = RectDraw.left + ColWidth * CurCol + (ColWidth - PicWidth) / 2;
 			int Top = RectDraw.top + RowHeight * CurRow + (RowHeight - PicHeight) / 2;
 

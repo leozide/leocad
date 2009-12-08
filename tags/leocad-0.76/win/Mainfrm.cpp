@@ -1302,6 +1302,10 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_PIECE_UNHIDEALL,        // LC_PIECE_UNHIDE_ALL
 		ID_PIECE_PREVIOUS,         // LC_PIECE_PREVIOUS
 		ID_PIECE_NEXT,             // LC_PIECE_NEXT
+		0,                         // LC_PIECE_FIND_NEXT
+		0,                         // LC_PIECE_FIND_PREVIOUS
+		0,                         // LC_PIECE_FIND_NEXT_IN_STEP
+		0,                         // LC_PIECE_FIND_PREVIOUS_IN_STEP
 		ID_MODEL_NEW,              // LC_MODEL_NEW
 		ID_MODEL_DELETE,           // LC_MODEL_DELETE
 		ID_MODEL_PROPERTIES,       // LC_MODEL_PROPERTIES

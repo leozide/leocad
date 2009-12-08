@@ -5576,6 +5576,156 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
+		case LC_PIECE_FIND_NEXT:
+		{
+			lcObject* Focus = GetFocusObject();
+
+			if (!Focus || !Focus->IsPiece())
+				break;
+
+			for (lcPiece* Piece = (lcPiece*)Focus->m_Next; Piece; Piece = (lcPiece*)Piece->m_Next)
+			{
+				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
+					continue;
+
+				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+					continue;
+
+				SelectAndFocusNone(false);
+				Piece->Select(true, true, false);
+				lcGroup* Group = ((lcPiece*)Piece)->GetTopGroup();
+				if (Group)
+				{
+					for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+						if ((Piece->IsVisible(m_ActiveModel->m_CurFrame)) && (Piece->GetTopGroup() == Group))
+							Piece->Select(true, false, false);
+				}
+
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(Piece);
+
+				break;
+			}
+		} break;
+
+		case LC_PIECE_FIND_PREVIOUS:
+		{
+			lcObject* Focus = GetFocusObject();
+
+			if (!Focus || !Focus->IsPiece())
+				break;
+
+			lcPiece* Last = NULL;
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece && Piece != Focus; Piece = (lcPiece*)Piece->m_Next)
+			{
+				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
+					continue;
+
+				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+					continue;
+
+				Last = Piece;
+			}
+
+			if (Last)
+			{
+				SelectAndFocusNone(false);
+				Last->Select(true, true, false);
+				lcGroup* Group = ((lcPiece*)Last)->GetTopGroup();
+				if (Group)
+				{
+					for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+						if ((Piece->IsVisible(m_ActiveModel->m_CurFrame)) && (Piece->GetTopGroup() == Group))
+							Piece->Select(true, false, false);
+				}
+
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(Last);
+
+				break;
+			}
+		} break;
+
+		case LC_PIECE_FIND_NEXT_IN_STEP:
+		{
+			lcObject* Focus = GetFocusObject();
+
+			if (!Focus || !Focus->IsPiece())
+				break;
+
+			for (lcPiece* Piece = (lcPiece*)Focus->m_Next; Piece; Piece = (lcPiece*)Piece->m_Next)
+			{
+				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
+					continue;
+
+				if (Piece->m_TimeShow != m_ActiveModel->m_CurFrame)
+					continue;
+
+				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+					continue;
+
+				SelectAndFocusNone(false);
+				Piece->Select(true, true, false);
+				lcGroup* Group = ((lcPiece*)Piece)->GetTopGroup();
+				if (Group)
+				{
+					for (Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+						if ((Piece->IsVisible(m_ActiveModel->m_CurFrame)) && (Piece->GetTopGroup() == Group))
+							Piece->Select(true, false, false);
+				}
+
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(Piece);
+
+				break;
+			}
+		} break;
+
+		case LC_PIECE_FIND_PREVIOUS_IN_STEP:
+		{
+			lcObject* Focus = GetFocusObject();
+
+			if (!Focus || !Focus->IsPiece())
+				break;
+
+			lcPiece* Last = NULL;
+			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece && Piece != Focus; Piece = (lcPiece*)Piece->m_Next)
+			{
+				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
+					continue;
+
+				if (Piece->m_TimeShow != m_ActiveModel->m_CurFrame)
+					continue;
+
+				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+					continue;
+
+				Last = Piece;
+			}
+
+			if (Last)
+			{
+				SelectAndFocusNone(false);
+				Last->Select(true, true, false);
+				lcGroup* Group = ((lcPiece*)Last)->GetTopGroup();
+				if (Group)
+				{
+					for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+						if ((Piece->IsVisible(m_ActiveModel->m_CurFrame)) && (Piece->GetTopGroup() == Group))
+							Piece->Select(true, false, false);
+				}
+
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(Last);
+
+				break;
+			}
+		} break;
+
 		case LC_VIEW_PREFERENCES:
 		{
 			LC_PREFERENCESDLG_OPTS opts;

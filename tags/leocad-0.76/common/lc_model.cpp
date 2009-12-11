@@ -214,7 +214,7 @@ void lcModel::ImportLDraw(lcFile& file, int DefaultColor, const Matrix44& Parent
 				Piece->SetUniqueName(m_Pieces, Info->m_strDescription);
 				AddPiece(Piece);
 				Piece->ChangeKey(1, false, Rot, LC_PK_ROTATION);
-				SystemPieceComboAdd(Info->m_strDescription);
+//				SystemPieceComboAdd(Info->m_strDescription);
 
 				if (PieceHidden)
 					Piece->Hide();
@@ -632,7 +632,7 @@ void lcModel::InlineModel(lcModel* Model, const Matrix44& ModelWorld, u32 Color,
 //			Piece->Select(true, true, false);
 //			lcPostMessage(LC_MSG_FOCUS_OBJECT_CHANGED, Piece);
 //			UpdateSelection();
-		SystemPieceComboAdd(Piece->m_PieceInfo->m_strDescription);
+//		SystemPieceComboAdd(Piece->m_PieceInfo->m_strDescription);
 	}
 }
 

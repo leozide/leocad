@@ -2,6 +2,10 @@
 #include "opengl.h"
 #include "debug.h"
 
+#if LC_PROFILE
+lcRenderStats g_RenderStats;
+#endif
+
 #ifdef LC_DEBUG
 
 #define LC_MAX_DEBUG_LINES 100

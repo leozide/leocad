@@ -1470,7 +1470,7 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	QueryPerformanceFrequency(&li);
 	g_RenderStats.RenderMS = (int)((End - Start) / (li.QuadPart / 1000.0));
 
-	lcRenderProfileStats(view);
+//	lcRenderProfileStats(view);
 
 	char szMsg[30];
 	static int FrameCount = 0;
@@ -1937,9 +1937,7 @@ void Project::RenderScene(View* view, bool Interface)
 		lcMeshSection* Section = RenderSection.Section;
 
 #if LC_PROFILE
-		if (Section->PrimitiveType == GL_QUADS)
-			g_RenderStats.QuadCount += Section->IndexCount / 4;
-		else if (Section->PrimitiveType == GL_TRIANGLES)
+		if (Section->PrimitiveType == GL_TRIANGLES)
 			g_RenderStats.TriCount += Section->IndexCount / 3;
 		else if (Section->PrimitiveType == GL_LINES)
 			g_RenderStats.LineCount += Section->IndexCount / 2;
@@ -1983,9 +1981,7 @@ void Project::RenderScene(View* view, bool Interface)
 		lcMeshSection* Section = RenderSection.Section;
 
 #if LC_PROFILE
-		if (Section->PrimitiveType == GL_QUADS)
-			g_RenderStats.QuadCount += Section->IndexCount / 4;
-		else if (Section->PrimitiveType == GL_TRIANGLES)
+		if (Section->PrimitiveType == GL_TRIANGLES)
 			g_RenderStats.TriCount += Section->IndexCount / 3;
 		else if (Section->PrimitiveType == GL_LINES)
 			g_RenderStats.LineCount += Section->IndexCount / 2;

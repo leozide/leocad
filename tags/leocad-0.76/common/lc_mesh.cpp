@@ -392,9 +392,7 @@ void lcMesh::Render(int Color, bool Selected, bool Focused)
 			lcSetEdgeColor(Color);
 
 #if LC_PROFILE
-		if (Section->PrimitiveType == GL_QUADS)
-			g_RenderStats.QuadCount += Section->IndexCount / 4;
-		else if (Section->PrimitiveType == GL_TRIANGLES)
+		if (Section->PrimitiveType == GL_TRIANGLES)
 			g_RenderStats.TriCount += Section->IndexCount / 3;
 		else if (Section->PrimitiveType == GL_LINES)
 			g_RenderStats.LineCount += Section->IndexCount / 2;

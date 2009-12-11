@@ -196,7 +196,7 @@ void lcModel::ImportLDraw(lcFile& file, int DefaultColor, const Matrix44& Parent
 				{
 					lcModel* Model = lcGetActiveProject()->m_ModelList[ModelIndex];
 
-					if (Model->m_Name == (const char*)pn)
+					if (!Model->m_Name.CompareNoCase(pn))
 					{
 						Info = Model->m_PieceInfo;
 						break;

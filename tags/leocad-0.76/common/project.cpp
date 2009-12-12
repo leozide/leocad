@@ -5575,16 +5575,26 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_FIND_NEXT:
 		{
 			lcObject* Focus = GetFocusObject();
+			lcPiece* Start;
+			PieceInfo* Info;
 
 			if (!Focus || !Focus->IsPiece())
-				break;
+			{
+				Info = g_App->m_PiecePreview->m_Selection;
+				Start = m_ActiveModel->m_Pieces;
+			}
+			else
+			{
+				Info = ((lcPiece*)Focus)->m_PieceInfo;
+				Start = (lcPiece*)Focus->m_Next;
+			}
 
-			for (lcPiece* Piece = (lcPiece*)Focus->m_Next; Piece; Piece = (lcPiece*)Piece->m_Next)
+			for (lcPiece* Piece = Start; Piece; Piece = (lcPiece*)Piece->m_Next)
 			{
 				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
 					continue;
 
-				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+				if (Piece->m_PieceInfo != Info)
 					continue;
 
 				SelectAndFocusNone(false);
@@ -5608,9 +5618,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_FIND_PREVIOUS:
 		{
 			lcObject* Focus = GetFocusObject();
+			PieceInfo* Info;
 
 			if (!Focus || !Focus->IsPiece())
-				break;
+				Info = g_App->m_PiecePreview->m_Selection;
+			else
+				Info = ((lcPiece*)Focus)->m_PieceInfo;
 
 			lcPiece* Last = NULL;
 			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece && Piece != Focus; Piece = (lcPiece*)Piece->m_Next)
@@ -5618,7 +5631,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
 					continue;
 
-				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+				if (Piece->m_PieceInfo != Info)
 					continue;
 
 				Last = Piece;
@@ -5647,11 +5660,21 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_FIND_NEXT_IN_STEP:
 		{
 			lcObject* Focus = GetFocusObject();
+			lcPiece* Start;
+			PieceInfo* Info;
 
 			if (!Focus || !Focus->IsPiece())
-				break;
+			{
+				Info = g_App->m_PiecePreview->m_Selection;
+				Start = m_ActiveModel->m_Pieces;
+			}
+			else
+			{
+				Info = ((lcPiece*)Focus)->m_PieceInfo;
+				Start = (lcPiece*)Focus->m_Next;
+			}
 
-			for (lcPiece* Piece = (lcPiece*)Focus->m_Next; Piece; Piece = (lcPiece*)Piece->m_Next)
+			for (lcPiece* Piece = Start; Piece; Piece = (lcPiece*)Piece->m_Next)
 			{
 				if (!Piece->IsVisible(m_ActiveModel->m_CurFrame))
 					continue;
@@ -5659,7 +5682,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (Piece->m_TimeShow != m_ActiveModel->m_CurFrame)
 					continue;
 
-				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+				if (Piece->m_PieceInfo != Info)
 					continue;
 
 				SelectAndFocusNone(false);
@@ -5683,9 +5706,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_PIECE_FIND_PREVIOUS_IN_STEP:
 		{
 			lcObject* Focus = GetFocusObject();
+			PieceInfo* Info;
 
 			if (!Focus || !Focus->IsPiece())
-				break;
+				Info = g_App->m_PiecePreview->m_Selection;
+			else
+				Info = ((lcPiece*)Focus)->m_PieceInfo;
 
 			lcPiece* Last = NULL;
 			for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece && Piece != Focus; Piece = (lcPiece*)Piece->m_Next)
@@ -5696,7 +5722,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (Piece->m_TimeShow != m_ActiveModel->m_CurFrame)
 					continue;
 
-				if (Piece->m_PieceInfo != ((lcPiece*)Focus)->m_PieceInfo)
+				if (Piece->m_PieceInfo != Info)
 					continue;
 
 				Last = Piece;

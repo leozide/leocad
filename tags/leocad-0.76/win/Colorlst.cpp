@@ -106,7 +106,7 @@ CColorList::CColorList()
 CColorList::~CColorList()
 {
 	for (int i = 0; i < m_Tabs.GetSize(); i++)
-		delete (CColorTab*)m_Tabs[i];
+		delete m_Tabs[i];
 	m_Tabs.RemoveAll();
 }
 
@@ -165,7 +165,7 @@ void CColorList::OnPaint()
 	// Draw all the normal tabs.
 	for (int i = 0; i < m_Tabs.GetSize(); i++) 
 	{
-		CColorTab* Tab = (CColorTab*)m_Tabs[i];
+		CColorTab* Tab = m_Tabs[i];
 
 		if (i == m_CurTab)
 			CurTab = Tab;
@@ -252,7 +252,7 @@ void CColorList::UpdateLayout()
 
 	for (int i = 0; i < m_Tabs.GetSize(); i++) 
 	{
-		CColorTab* Tab = (CColorTab*)m_Tabs[i];
+		CColorTab* Tab = m_Tabs[i];
 
 		// Calculate desired text rectangle.
 		CRect& rc = Tab->m_Rect;
@@ -275,7 +275,7 @@ void CColorList::UpdateLayout()
 
 	CRect rc;
 	GetClientRect(&rc);
-	rc.top = ((CColorTab*)m_Tabs[0])->m_Rect.bottom;
+	rc.top = m_Tabs[0]->m_Rect.bottom;
 
 	m_ColorCols = lcNumUserColors / 6;
 	m_ColorRows = 6;
@@ -317,7 +317,7 @@ void CColorList::OnLButtonDown(UINT Flags, CPoint pt)
 
 	for (int i = 0; i < m_Tabs.GetSize(); i++) 
 	{
-		CColorTab* TabPtr = (CColorTab*)m_Tabs[i];
+		CColorTab* TabPtr = m_Tabs[i];
 
 		if (TabPtr->m_Rgn.PtInRegion(pt))
 		{
@@ -439,7 +439,7 @@ void CColorList::OnSetFocus(CWnd* pOldWnd)
 		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
 	}
 	else
-		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
+		InvalidateRect(m_Tabs[m_CurTab]->m_Rect, TRUE);
 
 	CWnd::OnSetFocus(pOldWnd);
 }
@@ -452,7 +452,7 @@ void CColorList::OnKillFocus(CWnd* pNewWnd)
 			InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
 	}
 	else
-		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
+		InvalidateRect(m_Tabs[m_CurTab]->m_Rect, TRUE);
 
 	CWnd::OnKillFocus(pNewWnd);
 }
@@ -471,7 +471,7 @@ void CColorList::SelectTab(int Tab)
 
 	if (m_ColorFocus && m_Colors.GetSize())
 	{
-		InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
+		InvalidateRect(m_Tabs[Tab]->m_Rect, TRUE);
 		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
 		m_ColorFocus = false;
 	}
@@ -500,8 +500,8 @@ void CColorList::SelectTab(int Tab)
 
 	if (IsWindow(m_hWnd))
 		InvalidateRect(NULL, FALSE);
-//	InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
-//	InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
+//	InvalidateRect(m_Tabs[m_CurTab]->m_Rect, TRUE);
+//	InvalidateRect(m_Tabs[Tab]->m_Rect, TRUE);
 	m_CurTab = Tab;
 }
 
@@ -513,7 +513,7 @@ void CColorList::SelectColor(int Color)
 	if (!m_ColorFocus)
 	{
 		InvalidateRect(m_Colors[Color].Rect, TRUE);
-		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
+		InvalidateRect(m_Tabs[m_CurTab]->m_Rect, TRUE);
 		m_ColorFocus = true;
 	}
 
@@ -530,6 +530,8 @@ void CColorList::SelectColor(int Color)
 
 void CColorList::UpdateColorConfig()
 {
+	for (int i = 0; i < m_Tabs.GetSize(); i++)
+		delete m_Tabs[i];
 	m_Tabs.RemoveAll();
 
 	for (int TabIndex = 0; TabIndex < g_App->m_ColorConfig.mColorGroups.GetSize(); TabIndex++)

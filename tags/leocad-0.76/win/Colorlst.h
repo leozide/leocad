@@ -59,7 +59,7 @@ protected:
 	CFont m_NormalFont;
 	CFont m_SelectedFont;
 
-	CPtrArray m_Tabs;
+	CTypedPtrArray<CPtrArray, CColorTab*> m_Tabs;
 	int m_CurTab;
 
 	CArray<CColorEntry, const CColorEntry&> m_Colors;

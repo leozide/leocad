@@ -15,6 +15,28 @@ struct lcColor
 	String Name;
 };
 
+inline bool operator!=(const lcColor& a, const lcColor& b)
+{
+	if (a.Code != b.Code)
+		return true;
+
+	for (int i = 0; i < 4; i++)
+		if (a.Value[0] != b.Value[0])
+			return true;
+
+	for (int i = 0; i < 4; i++)
+		if (a.Edge[0] != b.Edge[0])
+			return true;
+
+	if (a.Translucent != b.Translucent)
+		return true;
+
+	if (a.Name != b.Name)
+		return true;
+
+	return false;
+}
+
 struct lcColorGroup
 {
 	String Name;
@@ -92,8 +114,9 @@ inline bool operator!=(const lcColorConfig& a, const lcColorConfig& b)
 	if (a.mColorGroups.GetSize() != b.mColorGroups.GetSize())
 		return true;
 
-	if (memcmp(&a.mColors[0], &b.mColors[0], sizeof(a.mColors[0]) * a.mColors.GetSize()))
-		return true;
+	for (int ColorIdx = 0; ColorIdx < a.mColors.GetSize(); ColorIdx++)
+		if (a.mColors[ColorIdx] != b.mColors[ColorIdx])
+			return true;
 
 	for (int GroupIdx = 0; GroupIdx < a.mColorGroups.GetSize(); GroupIdx++)
 	{

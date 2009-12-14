@@ -196,7 +196,6 @@ protected:
 	void RenderSceneBoxes(View* view);
 	void RenderOverlays(View* view);
 	void RenderInterface(View* view);
-	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 
 	void CreateHTMLPieceList(FILE* f, u32 nStep, bool bImages, const char* ext);

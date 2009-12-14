@@ -176,8 +176,7 @@ CPreferencesDetail::CPreferencesDetail() : CPropertyPage(CPreferencesDetail::IDD
 	m_bSmooth = FALSE;
 	m_fLineWidth = 0.0f;
 	m_bFast = FALSE;
-	m_bHidden = FALSE;
-	m_bSolid = FALSE;
+	m_DisableExt = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -196,25 +195,16 @@ void CPreferencesDetail::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DETDLG_LINE, m_fLineWidth);
 	DDV_MinMaxFloat(pDX, m_fLineWidth, 0.f, 10.f);
 	DDX_Check(pDX, IDC_DETDLG_FAST, m_bFast);
-	DDX_Check(pDX, IDC_DETDLG_HIDDEN, m_bHidden);
-	DDX_Check(pDX, IDC_DETDLG_SOLID, m_bSolid);
+	DDX_Check(pDX, IDC_DETDLG_DISABLEEXT, m_DisableExt);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CPreferencesDetail, CPropertyPage)
 	//{{AFX_MSG_MAP(CPreferencesDetail)
-	ON_BN_CLICKED(IDC_DETDLG_SOLID, OnDetdlgSolid)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-
-BOOL CPreferencesDetail::OnInitDialog() 
-{
-	CPropertyPage::OnInitDialog();
-	OnDetdlgSolid();
-	return TRUE;
-}
 
 void CPreferencesDetail::SetOptions(DWORD dwDetail, float fLine)
 {
@@ -223,9 +213,9 @@ void CPreferencesDetail::SetOptions(DWORD dwDetail, float fLine)
 	m_bLighting = (dwDetail & LC_DET_LIGHTING) != 0;
 	m_bSmooth =	(dwDetail & LC_DET_SMOOTH) != 0;
 	m_bFast = (dwDetail & LC_DET_FAST) != 0;
-	m_bHidden = (dwDetail & LC_DET_HIDDEN_LINE) != 0;
-	m_bSolid = (dwDetail & LC_DET_BOX_FILL) != 0;
 	m_fLineWidth = fLine;
+
+	m_DisableExt = AfxGetApp()->GetProfileInt("Settings", "DisableGLExtensions", 0);
 }
 
 void CPreferencesDetail::GetOptions(DWORD* dwDetail, float* fLine)
@@ -236,15 +226,9 @@ void CPreferencesDetail::GetOptions(DWORD* dwDetail, float* fLine)
 	if (m_bLighting) *dwDetail |= LC_DET_LIGHTING;
 	if (m_bSmooth) *dwDetail |= LC_DET_SMOOTH;
 	if (m_bFast) *dwDetail |= LC_DET_FAST;
-	if (m_bHidden) *dwDetail |= LC_DET_HIDDEN_LINE;
-	if (m_bSolid) *dwDetail |= LC_DET_BOX_FILL;
 	*fLine = m_fLineWidth;
-}
 
-void CPreferencesDetail::OnDetdlgSolid() 
-{
-	UpdateData (TRUE);
-	GetDlgItem (IDC_DETDLG_HIDDEN)->EnableWindow(!m_bSolid);
+	AfxGetApp()->WriteProfileInt("Settings", "DisableGLExtensions", m_DisableExt);
 }
 
 /////////////////////////////////////////////////////////////////////////////

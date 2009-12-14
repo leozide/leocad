@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "opengl.h"
+#include "system.h"
 
 // These functions should be defined in (system)_gl.cpp
 bool Sys_GLOpenLibrary(const char* libname);
@@ -1186,8 +1187,11 @@ static bool GL_ExtensionSupported (const char *extension)
 }
 
 // Extensions can only be initialized if there's a current OpenGL context.
-bool GL_InitializeExtensions ()
+bool GL_InitializeExtensions()
 {
+	if (Sys_ProfileLoadInt("Settings", "DisableGLExtensions", 0))
+		return true;
+
 	if (GL_ExtensionSupported ("GL_ARB_multitexture"))
 	{
 		pfnglActiveTextureARB = (PFNGLACTIVETEXTUREARB) Sys_GLGetExtension ("glActiveTextureARB");

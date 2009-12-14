@@ -2078,30 +2078,14 @@ void Project::RenderSceneBoxes(View* view)
 	glShadeModel(GL_FLAT);
 //	glEnable(GL_CULL_FACE);
 
-	if ((m_nDetail & LC_DET_BOX_FILL) == 0)
-	{
-		if ((m_nDetail & LC_DET_HIDDEN_LINE) != 0) // TODO: Remove LC_DET_HIDDEN_LINE
-		{
-			// Wireframe with hidden lines removed
-			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-			RenderBoxes(false);
-			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			RenderBoxes(true);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
-		else
-		{
-			// Wireframe
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			RenderBoxes(true);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
-	}
-	else
-	{
-		RenderBoxes(true);
-	}
+	// Wireframe
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+		if (Piece->IsVisible(m_ActiveModel->m_CurFrame))
+			Piece->RenderBox(true, m_fLineWidth);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Project::RenderInterface(View* view)
@@ -2887,15 +2871,6 @@ void Project::RenderOverlays(View* view)
 		glDisableLineStipple();
 		glEnable(GL_DEPTH_TEST);
 	}
-}
-
-// bHilite - Draws focus/selection, not used for the 
-// first rendering pass if remove hidden lines is enabled
-void Project::RenderBoxes(bool bHilite)
-{
-	for (lcPiece* Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-		if (Piece->IsVisible(m_ActiveModel->m_CurFrame))
-			Piece->RenderBox(bHilite, m_fLineWidth);
 }
 
 // Initialize OpenGL

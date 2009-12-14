@@ -88,8 +88,7 @@ public:
 	BOOL	m_bSmooth;
 	float	m_fLineWidth;
 	BOOL	m_bFast;
-	BOOL	m_bHidden;
-	BOOL	m_bSolid;
+	BOOL	m_DisableExt;
 	//}}AFX_DATA
 
 
@@ -104,11 +103,8 @@ public:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesDetail)
-	virtual BOOL OnInitDialog();
-	afx_msg void OnDetdlgSolid();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
 
 

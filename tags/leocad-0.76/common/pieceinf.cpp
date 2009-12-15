@@ -140,6 +140,35 @@ void PieceInfo::CreateFromModel(lcModel* Model)
 	m_nRef = 0;
 }
 
+void PieceInfo::CreatePlaceholder(const char* Name)
+{
+	m_nRef = 0;
+	m_nConnectionCount = 0;
+	m_pConnections = NULL;
+	m_nGroupCount = 0;
+	m_pGroups = NULL;
+	m_nTextureCount = 0;
+	m_pTextures = NULL;
+	m_Mesh = NULL;
+
+	strncpy(m_strName, Name, sizeof(m_strName));
+	m_strName[sizeof(m_strName)-1] = 0;
+	strncpy(m_strDescription, Name, sizeof(m_strDescription));
+	m_strDescription[sizeof(m_strDescription)-1] = 0;
+
+	m_nFlags = LC_PIECE_PLACEHOLDER;
+
+	m_fDimensions[0] = 1.0f;
+	m_fDimensions[1] = 1.0f;
+	m_fDimensions[2] = 1.0f;
+	m_fDimensions[3] = -1.0f;
+	m_fDimensions[4] = -1.0f;
+	m_fDimensions[5] = -1.0f;
+
+	m_BoundingBox = BoundingBox(Vector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]),
+	                            Vector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]));
+}
+
 void PieceInfo::AddRef()
 {
 	if (m_nRef == 0)
@@ -475,6 +504,114 @@ void PieceInfo::LoadInformation()
 {
 	if (m_nFlags & LC_PIECE_MODEL)
 		return;
+
+	if (m_nFlags & LC_PIECE_PLACEHOLDER)
+	{
+		int NumIndices = 36 + 24;
+		int NumVertices = 8;
+
+		Vector3 Min(-1.0f, -1.0f, -1.0f);
+		Vector3 Max(1.0f, 1.0f, 1.0f);
+
+		lcMesh* BoxMesh = new lcMesh(2, NumIndices, NumVertices, NULL);
+		lcMeshEditor<u16> MeshEdit(BoxMesh);
+
+		MeshEdit.AddVertex(Vector3(Min[0], Min[1], Min[2]));
+		MeshEdit.AddVertex(Vector3(Min[0], Max[1], Min[2]));
+		MeshEdit.AddVertex(Vector3(Max[0], Max[1], Min[2]));
+		MeshEdit.AddVertex(Vector3(Max[0], Min[1], Min[2]));
+		MeshEdit.AddVertex(Vector3(Min[0], Min[1], Max[2]));
+		MeshEdit.AddVertex(Vector3(Min[0], Max[1], Max[2]));
+		MeshEdit.AddVertex(Vector3(Max[0], Max[1], Max[2]));
+		MeshEdit.AddVertex(Vector3(Max[0], Min[1], Max[2]));
+
+		lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COLOR_DEFAULT);
+
+		Section->Box.m_Min = Min;
+		Section->Box.m_Max = Max;
+
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(3);
+
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(6);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(4);
+
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(4);
+
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(3);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(6);
+
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(3);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(4);
+
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(6);
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(6);
+		MeshEdit.AddIndex(5);
+
+		MeshEdit.EndSection();
+
+		Section = MeshEdit.StartSection(GL_LINES, LC_COLOR_EDGE);
+
+		Section->Box.m_Min = Min;
+		Section->Box.m_Max = Max;
+
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(3);
+		MeshEdit.AddIndex(3);
+		MeshEdit.AddIndex(0);
+
+		MeshEdit.AddIndex(4);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(6);
+		MeshEdit.AddIndex(6);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(7);
+		MeshEdit.AddIndex(4);
+
+		MeshEdit.AddIndex(0);
+		MeshEdit.AddIndex(4);
+		MeshEdit.AddIndex(1);
+		MeshEdit.AddIndex(5);
+		MeshEdit.AddIndex(2);
+		MeshEdit.AddIndex(6);
+		MeshEdit.AddIndex(3);
+		MeshEdit.AddIndex(7);
+
+		MeshEdit.EndSection();
+
+		m_Mesh = BoxMesh;
+
+		return;
+	}
 
 	lcFileDisk bin;
 	char filename[LC_MAXPATH];

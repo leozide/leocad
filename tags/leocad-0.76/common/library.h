@@ -25,11 +25,19 @@ public:
 	~PiecesLibrary();
 
 	const char* GetLibraryPath() const
-		{ return m_LibraryPath; }
+	{
+		return m_LibraryPath;
+	}
+
 	int GetPieceCount () const
-		{ return m_nPieceCount; }
+	{
+		return m_Pieces.GetSize();
+	}
+
 	int GetTextureCount () const
-		{ return m_nTextureCount; }
+	{
+		return m_nTextureCount;
+	}
 
 	// Categories.
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
@@ -72,6 +80,8 @@ public:
 	Texture* FindTexture(const char* name) const;
 	Texture* GetTexture(int index) const;
 
+	PieceInfo* CreatePiecePlaceholder(const char* Name);
+
 	// File operations.
 	bool DeletePieces(lcPtrArray<PieceInfo>& Pieces);
 	bool LoadUpdate(const char* update);
@@ -83,12 +93,14 @@ public:
 	bool m_Modified;
 
 protected:
+	lcPtrArray<PieceInfo> m_Pieces;
+
 	char m_LibraryPath[LC_MAXPATH];	// path to the library files
 
 	int m_nMovedCount;       // number of moved pieces
 	char* m_pMovedReference; // moved pieces list
-	int m_nPieceCount;       // number of pieces
-	PieceInfo* m_pPieceIdx;	 // pieces array
+//	int m_nPieceCount;       // number of pieces
+//	PieceInfo* m_pPieceIdx;	 // pieces array
 	int m_nTextureCount;     // number of textures
 	Texture* m_pTextures;    // textures array
 

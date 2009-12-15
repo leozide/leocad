@@ -29,8 +29,6 @@ PiecesLibrary::PiecesLibrary()
 	strcpy(m_CategoriesFile, "");
 	m_pMovedReference = NULL;
 	m_nMovedCount = 0;
-	m_pPieceIdx = NULL;
-	m_nPieceCount = 0;
 	m_pTextures = NULL;
 	m_nTextureCount = 0;
 	m_Modified = false;
@@ -44,22 +42,21 @@ PiecesLibrary::~PiecesLibrary()
 
 void PiecesLibrary::Unload ()
 {
+	for (int PieceIdx = 0; PieceIdx < m_Pieces.GetSize(); PieceIdx++)
+		delete m_Pieces[PieceIdx];
+	m_Pieces.RemoveAll();
+
 	strcpy(m_LibraryPath, "");
 
 	free(m_pMovedReference);
 	m_pMovedReference = NULL;
 	m_nMovedCount = 0;
-
-	delete [] m_pPieceIdx;
-	m_pPieceIdx = NULL;
-	m_nPieceCount = 0;
-
 	delete [] m_pTextures;
 	m_pTextures = NULL;
 	m_nTextureCount = 0;
 }
 
-bool PiecesLibrary::Load (const char *libpath)
+bool PiecesLibrary::Load(const char *libpath)
 {
 	lcFileDisk idx, bin;
 	char filename[LC_MAXPATH];
@@ -67,6 +64,8 @@ bool PiecesLibrary::Load (const char *libpath)
 	u32 binsize;
 	Texture* pTexture;
 	int i;
+
+	Unload();
 
 	strcpy (m_LibraryPath, libpath);
 
@@ -103,13 +102,14 @@ bool PiecesLibrary::Load (const char *libpath)
 	idx.ReadShorts(&count, 1);
 	idx.Seek(34, SEEK_SET);
 
-	// Load piece indexes
-	delete [] m_pPieceIdx;
-	m_pPieceIdx = new PieceInfo[count];
-	m_nPieceCount = count;
-
-	for (PieceInfo *pElements = m_pPieceIdx; count--; pElements++)
-		pElements->LoadIndex (idx);
+	// Load piece indices
+	m_Pieces.SetSize(count);
+	for (int PieceIdx = 0; PieceIdx < count; PieceIdx++)
+	{
+		PieceInfo* Info = new PieceInfo();
+		Info->LoadIndex(idx);
+		m_Pieces.SetAt(PieceIdx, Info);
+	}
 
 	// Load moved files reference.
 	if (m_pMovedReference != NULL)
@@ -281,30 +281,30 @@ bool PiecesLibrary::ValidateTexturesFile (lcFile& IdxFile, lcFile& BinFile) cons
 	return true;
 }
 
+PieceInfo* PiecesLibrary::CreatePiecePlaceholder(const char* Name)
+{
+	PieceInfo* Info = new PieceInfo();
+	Info->CreatePlaceholder(Name);
+	m_Pieces.Add(Info);
+	return Info;
+}
+
 // =============================================================================
 // Search functions
 
 // Remember to make 'name' uppercase.
-PieceInfo* PiecesLibrary::FindPieceInfo (const char* name) const
+PieceInfo* PiecesLibrary::FindPieceInfo(const char* name) const
 {
-	PieceInfo* pInfo;
-	int i;
+	for (int PieceIdx = 0; PieceIdx < m_Pieces.GetSize(); PieceIdx++)
+		if (!strcmp(name, m_Pieces[PieceIdx]->m_strName))
+			return m_Pieces[PieceIdx];
 
-	for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
-		if (!strcmp (name, pInfo->m_strName))
-			return pInfo;
-
-	for (i = 0; i < m_nMovedCount; i++)
+	for (int i = 0; i < m_nMovedCount; i++)
 	{
-		if (!strcmp (&m_pMovedReference[i*18], name))
+		if (!strcmp(&m_pMovedReference[i*18], name))
 		{
 			char* tmp = &m_pMovedReference[i*18+9];
-
-			for (i = 0, pInfo = m_pPieceIdx; i < m_nPieceCount; i++, pInfo++)
-				if (!strcmp (tmp, pInfo->m_strName))
-					return pInfo;
-
-			break; // something went wrong.
+			return FindPieceInfo(tmp);
 		}
 	}
 
@@ -313,12 +313,12 @@ PieceInfo* PiecesLibrary::FindPieceInfo (const char* name) const
 
 PieceInfo* PiecesLibrary::GetPieceInfo(int index) const
 {
-	return &m_pPieceIdx[index];
+	return m_Pieces[index];
 }
 
 int PiecesLibrary::GetPieceIndex(PieceInfo *pInfo) const
 {
-	return (((char*)pInfo - (char*)m_pPieceIdx) / sizeof (PieceInfo));
+	return m_Pieces.FindIndex(pInfo);
 }
 
 Texture* PiecesLibrary::FindTexture(const char* name) const
@@ -583,9 +583,9 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcPt
 	if (m_Categories[CategoryIndex].Name == "Search Results")
 		GroupPieces = false;
 
-	for (int i = 0; i < m_nPieceCount; i++)
+	for (int i = 0; i < m_Pieces.GetSize(); i++)
 	{
-		PieceInfo* Info = &m_pPieceIdx[i];
+		PieceInfo* Info = m_Pieces[i];
 
 		if (!PieceInCategory(Info, m_Categories[CategoryIndex].Keywords))
 			continue;
@@ -646,9 +646,9 @@ void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>&
 
 	Pieces.RemoveAll();
 
-	for (int i = 0; i < m_nPieceCount; i++)
+	for (int i = 0; i < m_Pieces.GetSize(); i++)
 	{
-		PieceInfo* Info = &m_pPieceIdx[i];
+		PieceInfo* Info = m_Pieces[i];
 
 		if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
 			Pieces.Add(Info);
@@ -662,9 +662,9 @@ void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>&
 		if (Name[Len-1] < '0' || Name[Len-1] > '9')
 			Name[Len-1] = 'P';
 
-		for (int i = 0; i < m_nPieceCount; i++)
+		for (int i = 0; i < m_Pieces.GetSize(); i++)
 		{
-			PieceInfo* Info = &m_pPieceIdx[i];
+			PieceInfo* Info = m_Pieces[i];
 
 			if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
 				Pieces.Add(Info);

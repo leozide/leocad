@@ -204,47 +204,48 @@ void lcModel::ImportLDraw(lcFile& file, int DefaultColor, const Matrix44& Parent
 				}
 			}
 
-			if (Info)
-			{
-				lcPiece* Piece = new lcPiece(Info);
-
-				Vector3 Pos = ModelWorld.GetTranslation();
-				Vector4 Rot = MatrixToAxisAngle(ModelWorld);
-				Piece->Initialize(Pos[0], Pos[1], Pos[2], m_CurFrame, Color);
-				Piece->SetUniqueName(m_Pieces, Info->m_strDescription);
-				AddPiece(Piece);
-				Piece->ChangeKey(1, false, Rot, LC_PK_ROTATION);
-//				SystemPieceComboAdd(Info->m_strDescription);
-
-				if (PieceHidden)
-					Piece->Hide();
-
-				continue;
-			}
-
 			// Try to read the file from disk.
-			lcFileDisk tf;
-
-			if (tf.Open(pn, "rt"))
+			if (!Info)
 			{
-				// Read from the current directory.
-				ImportLDraw(tf, Color, ModelWorld, FilePath);
-			}
-			else
-			{
-				// Try the file's directory.
-				String Path = FilePath + pn;
+				lcFileDisk tf;
 
-				if (tf.Open(Path, "rt"))
+				if (tf.Open(pn, "rt"))
 				{
 					// Read from the current directory.
 					ImportLDraw(tf, Color, ModelWorld, FilePath);
 				}
 				else
 				{
-					console.PrintWarning("Could not find %s.\n", pn);
+					// Try the file's directory.
+					String Path = FilePath + pn;
+
+					if (tf.Open(Path, "rt"))
+					{
+						ImportLDraw(tf, Color, ModelWorld, FilePath);
+						continue;
+					}
 				}
 			}
+
+			// Create a placeholder.
+			if (!Info)
+			{
+				Info = lcGetPiecesLibrary()->CreatePiecePlaceholder(pn);
+				console.PrintWarning("Could not find %s.\n", pn);
+			}
+
+			lcPiece* Piece = new lcPiece(Info);
+
+			Vector3 Pos = ModelWorld.GetTranslation();
+			Vector4 Rot = MatrixToAxisAngle(ModelWorld);
+			Piece->Initialize(Pos[0], Pos[1], Pos[2], m_CurFrame, Color);
+			Piece->SetUniqueName(m_Pieces, Info->m_strDescription);
+			AddPiece(Piece);
+			Piece->ChangeKey(1, false, Rot, LC_PK_ROTATION);
+//				SystemPieceComboAdd(Info->m_strDescription);
+
+			if (PieceHidden)
+				Piece->Hide();
 		}
 	}
 }

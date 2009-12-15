@@ -10,6 +10,7 @@
 #define LC_PIECE_SMALL              0x10 // scale = 10000
 #define LC_PIECE_MEDIUM             0x20 // scale = 1000 (otherwise = 100)
 #define LC_PIECE_MODEL              0x40 // This is a model instead of a piece from the library.
+#define LC_PIECE_PLACEHOLDER        0x80 // Placeholder for a piece not in the library.
 
 class lcFile;
 class Texture;
@@ -77,6 +78,7 @@ public:
 	// Implementation
 	void LoadIndex(lcFile& file);
 	void CreateFromModel(lcModel* Model);
+	void CreatePlaceholder(const char* Name);
 	void AddRef();
 	void DeRef();
 
@@ -85,7 +87,7 @@ public:
 
 public:
 	// Attributes
-	char m_strName[9];
+	char m_strName[LC_MAXPATH];
 	char m_strDescription[65];
 	float m_fDimensions[6];
 	u32 m_nOffset;

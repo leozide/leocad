@@ -30,6 +30,14 @@ public:
 		return m_Length;
 	}
 
+	void SetSize(int Size)
+	{
+		if (Size > m_Length)
+			Expand(Size - m_Length);
+
+		m_Length = Size;
+	}
+
 	T* RemoveIndex(int Index)
 	{
 		T* ret = NULL;

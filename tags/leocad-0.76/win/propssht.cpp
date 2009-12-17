@@ -19,6 +19,7 @@ CPropertiesSheet::CPropertiesSheet(bool ShowPieces, CWnd* pWndParent)
 	 : CPropertySheet("", pWndParent)
 {
 	AddPage(&m_PageSummary);
+	AddPage(&m_PageScene);
 	if (ShowPieces)
 		AddPage(&m_PagePieces);
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;

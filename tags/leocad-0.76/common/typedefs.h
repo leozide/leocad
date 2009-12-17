@@ -436,6 +436,16 @@ struct LC_PROPERTIESDLG_OPTS
 	String Author;
 	String Description;
 	String Comments;
+
+	u32 SceneFlags;
+	float BackgroundColor[4];
+	float Gradient1[3];
+	float Gradient2[3];
+	String BackgroundImage;
+	float FogColor[4];
+	float FogDensity;
+	float AmbientColor[4];
+
 	lcObjArray<lcPiecesUsedEntry> PiecesUsed;
 };
 
@@ -459,14 +469,6 @@ struct LC_PREFERENCESDLG_OPTS
 	float fLineWidth;
 	unsigned long nSnap;
 	unsigned short nAngleSnap;
-	unsigned long nScene;
-	float fDensity;
-	char strBackground[LC_MAXPATH];
-	float fBackground[4];
-	float fFog[4];
-	float fAmbient[4];
-	float fGrad1[3];
-	float fGrad2[3];
 	char strFooter[256];
 	char strHeader[256];
 };

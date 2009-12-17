@@ -21,8 +21,9 @@ public:
 
 // Attributes
 public:
-	CPropertiesSummary	m_PageSummary;
-	CPropertiesPieces	m_PagePieces;
+	CPropertiesSummary m_PageSummary;
+	CPropertiesScene m_PageScene;
+	CPropertiesPieces m_PagePieces;
 
 // Operations
 public:

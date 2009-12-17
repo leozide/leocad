@@ -10,6 +10,7 @@
 #include "lc_application.h"
 #include "lc_model.h"
 #include "pieceinf.h"
+#include "tools.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -17,6 +18,7 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 #endif
 
 IMPLEMENT_DYNCREATE(CPropertiesSummary, CPropertyPage)
+IMPLEMENT_DYNCREATE(CPropertiesScene, CPropertyPage)
 IMPLEMENT_DYNCREATE(CPropertiesPieces, CPropertyPage)
 
 
@@ -59,6 +61,132 @@ BEGIN_MESSAGE_MAP(CPropertiesSummary, CPropertyPage)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+
+/////////////////////////////////////////////////////////////////////////////
+// CPropertiesScene property page
+
+CPropertiesScene::CPropertiesScene() : CPropertyPage(CPropertiesScene::IDD)
+{
+	//{{AFX_DATA_INIT(CPropertiesScene)
+	m_strBackground = _T("");
+	m_bTile = FALSE;
+	m_bFog = FALSE;
+	m_nFogDensity = 0;
+	m_bFloor = FALSE;
+	m_nBackground = 0;
+	//}}AFX_DATA_INIT
+}
+
+CPropertiesScene::~CPropertiesScene()
+{
+}
+
+void CPropertiesScene::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CPropertiesScene)
+	DDX_Control(pDX, IDC_SCNDLG_GRAD1, m_btnGrad1);
+	DDX_Control(pDX, IDC_SCNDLG_GRAD2, m_btnGrad2);
+	DDX_Control(pDX, IDC_SCNDLG_AMBIENTLIGHT, m_btnAmbient);
+	DDX_Control(pDX, IDC_SCNDLG_FOGCOLOR, m_btnFog);
+	DDX_Control(pDX, IDC_SCNDLG_BGCOLOR, m_btnBackground);
+	DDX_Text(pDX, IDC_SCNDLG_BGIMAGE, m_strBackground);
+	DDX_Check(pDX, IDC_SCNDLG_BGTILE, m_bTile);
+	DDX_Check(pDX, IDC_SCNDLG_FOG, m_bFog);
+	DDX_Text(pDX, IDC_SCNDLG_FOGDENSITY, m_nFogDensity);
+	DDV_MinMaxByte(pDX, m_nFogDensity, 0, 100);
+	DDX_Check(pDX, IDC_SCNDLG_TERRAIN, m_bFloor);
+	DDX_Radio(pDX, IDC_SCNDLG_SOLID, m_nBackground);
+	//}}AFX_DATA_MAP
+}
+
+
+BEGIN_MESSAGE_MAP(CPropertiesScene, CPropertyPage)
+	//{{AFX_MSG_MAP(CPropertiesScene)
+	ON_BN_CLICKED(IDC_SCNDLG_BGIMAGE_BROWSE, OnBackgroundBrowse)
+	ON_BN_CLICKED(IDC_SCNDLG_BGCOLOR, OnBackgroundColor)
+	ON_BN_CLICKED(IDC_SCNDLG_AMBIENTLIGHT, OnAmbientLight)
+	ON_BN_CLICKED(IDC_SCNDLG_FOGCOLOR, OnFogColor)
+	ON_BN_CLICKED(IDC_SCNDLG_SKYCOLOR1, OnGradColor1)
+	ON_BN_CLICKED(IDC_SCNDLG_SKYCOLOR2, OnGradColor2)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+
+void CPropertiesScene::OnBackgroundBrowse() 
+{
+	CFileDialog dlg(TRUE, NULL, m_strBackground, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		"All Image Files|*.bmp;*.gif;*.jpg;*.png|JPEG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif|BMP Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png|All Files (*.*)|*.*||", this);
+	if (dlg.DoModal() == IDOK)
+	{
+		UpdateData(TRUE);
+		m_strBackground = dlg.GetPathName();
+		UpdateData(FALSE);
+	}
+}
+
+void CPropertiesScene::OnBackgroundColor() 
+{
+	CColorDialog dlg(m_crBackground);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_crBackground = dlg.GetColor();
+		DeleteObject(m_btnBackground.SetBitmap(CreateColorBitmap(20, 10, m_crBackground)));
+	}
+}
+
+void CPropertiesScene::OnAmbientLight() 
+{
+	CColorDialog dlg(m_crAmbient);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_crAmbient = dlg.GetColor();
+		DeleteObject(m_btnAmbient.SetBitmap(CreateColorBitmap(20, 10, m_crAmbient)));
+	}
+}
+
+void CPropertiesScene::OnFogColor() 
+{
+	CColorDialog dlg(m_crFog);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_crFog = dlg.GetColor();
+		DeleteObject(m_btnFog.SetBitmap(CreateColorBitmap(20, 10, m_crFog)));
+	}
+}
+
+void CPropertiesScene::OnGradColor1() 
+{
+	CColorDialog dlg(m_crGrad1);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_crGrad1 = dlg.GetColor();
+		DeleteObject(m_btnGrad1.SetBitmap(CreateColorBitmap(20, 10, m_crGrad1)));
+	}
+}
+
+void CPropertiesScene::OnGradColor2() 
+{
+	CColorDialog dlg(m_crGrad2);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_crGrad2 = dlg.GetColor();
+		DeleteObject(m_btnGrad2.SetBitmap(CreateColorBitmap(20, 10, m_crGrad2)));
+	}
+}
+
+BOOL CPropertiesScene::OnInitDialog() 
+{
+	CPropertyPage::OnInitDialog();
+
+	m_btnAmbient.SetBitmap(CreateColorBitmap(20, 10, m_crAmbient));
+	m_btnBackground.SetBitmap(CreateColorBitmap(20, 10, m_crBackground));
+	m_btnFog.SetBitmap(CreateColorBitmap(20, 10, m_crFog));
+	m_btnGrad1.SetBitmap(CreateColorBitmap(20, 10, m_crGrad1));
+	m_btnGrad2.SetBitmap(CreateColorBitmap(20, 10, m_crGrad2));
+	
+	return TRUE;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CPropertiesPieces property page

@@ -26,7 +26,6 @@ public:
 	CPreferencesDetail m_PageDetail;
 	CPreferencesDrawing m_PageDrawing;
 	CPreferencesColors m_PageColors;
-	CPreferencesScene m_PageScene;
 	CPreferencesPrint m_PagePrint;
 	CPreferencesKeyboard m_PageKeyboard;
 

@@ -4541,6 +4541,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.Description = m_ActiveModel->m_Description;
 			opts.Comments = m_ActiveModel->m_Comments;
 
+			// Scene options.
+			opts.SceneFlags = m_nScene;
+			opts.FogDensity = m_fFogDensity;
+			opts.BackgroundImage = m_strBackground;
+			memcpy(opts.BackgroundColor, m_fBackground, sizeof(m_fBackground));
+			memcpy(opts.FogColor, m_fFogColor, sizeof(m_fFogColor));
+			memcpy(opts.AmbientColor, m_fAmbient, sizeof(m_fAmbient));
+			memcpy(opts.Gradient1, m_fGradient1, sizeof(m_fGradient1));
+			memcpy(opts.Gradient2, m_fGradient2, sizeof(m_fGradient2));
+
 			// Pieces list.
 			m_ActiveModel->GetPiecesUsed(opts.PiecesUsed);
 
@@ -4555,6 +4565,29 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_ActiveModel->m_Comments = opts.Comments;
 					SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
 					SetModifiedFlag(true);
+				}
+
+				if ((m_nScene != opts.SceneFlags) || (m_fFogDensity != opts.FogDensity) || strcmp(m_strBackground, opts.BackgroundImage) ||
+				    memcmp(m_fBackground, opts.BackgroundColor, sizeof(m_fBackground)) || memcmp(m_fFogColor, opts.FogColor, sizeof(m_fFogColor)) ||
+				    memcmp(m_fAmbient, opts.AmbientColor, sizeof(m_fAmbient)) || memcmp(m_fGradient1, opts.Gradient1, sizeof(m_fGradient1)) ||
+				    memcmp(m_fGradient2, opts.Gradient2, sizeof(m_fGradient2)))
+				{
+					m_nScene = opts.SceneFlags;
+					m_fFogDensity = opts.FogDensity;
+					strcpy(m_strBackground, opts.BackgroundImage);
+					memcpy(m_fBackground, opts.BackgroundColor, sizeof(m_fBackground));
+					memcpy(m_fFogColor, opts.FogColor, sizeof(m_fFogColor));
+					memcpy(m_fAmbient, opts.AmbientColor, sizeof(m_fAmbient));
+					memcpy(m_fGradient1, opts.Gradient1, sizeof(m_fGradient1));
+					memcpy(m_fGradient2, opts.Gradient2, sizeof(m_fGradient2));
+
+					for (int i = 0; i < m_ViewList.GetSize (); i++)
+					{
+						m_ViewList[i]->MakeCurrent ();
+						RenderInitialize();
+					}
+
+					UpdateAllViews();
 				}
 			}
 		} break;
@@ -5734,14 +5767,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.fLineWidth = m_fLineWidth;
 			opts.nSnap = m_nSnap;
 			opts.nAngleSnap = m_nAngleSnap;
-			opts.nScene = m_nScene;
-			opts.fDensity = m_fFogDensity;
-			strcpy(opts.strBackground, m_strBackground);
-			memcpy(opts.fBackground, m_fBackground, sizeof(m_fBackground));
-			memcpy(opts.fFog, m_fFogColor, sizeof(m_fFogColor));
-			memcpy(opts.fAmbient, m_fAmbient, sizeof(m_fAmbient));
-			memcpy(opts.fGrad1, m_fGradient1, sizeof(m_fGradient1));
-			memcpy(opts.fGrad2, m_fGradient2, sizeof(m_fGradient2));
 			strcpy(opts.strFooter, m_strFooter);
 			strcpy(opts.strHeader, m_strHeader);
 
@@ -5755,14 +5780,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				m_fLineWidth = opts.fLineWidth;
 				m_nSnap = opts.nSnap;
 				m_nAngleSnap = opts.nAngleSnap;
-				m_nScene = opts.nScene;
-				m_fFogDensity = opts.fDensity;
-				strcpy(m_strBackground, opts.strBackground);
-				memcpy(m_fBackground, opts.fBackground, sizeof(m_fBackground));
-				memcpy(m_fFogColor, opts.fFog, sizeof(m_fFogColor));
-				memcpy(m_fAmbient, opts.fAmbient, sizeof(m_fAmbient));
-				memcpy(m_fGradient1, opts.fGrad1, sizeof(m_fGradient1));
-				memcpy(m_fGradient2, opts.fGrad2, sizeof(m_fGradient2));
 				strcpy(m_strFooter, opts.strFooter);
 				strcpy(m_strHeader, opts.strHeader);
 				SystemUpdateSnap(m_nSnap);

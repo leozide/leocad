@@ -227,66 +227,6 @@ public:
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesScene dialog
-
-class CPreferencesScene : public CPropertyPage
-{
-	DECLARE_DYNCREATE(CPreferencesScene)
-
-// Construction
-public:
-	void SetOptions(unsigned long nScene, float fDensity, char* strBackground, float* fBackground, float* fFog, float* fAmbient, float* fGrad1, float* fGrad2);
-	void GetOptions(unsigned long* nScene, float* fDensity, char* strBackground, float* fBackground, float* fFog, float* fAmbient, float* fGrad1, float* fGrad2);
-	CPreferencesScene();
-	~CPreferencesScene();
-	COLORREF m_crBackground;
-	COLORREF m_crAmbient;
-	COLORREF m_crFog;
-	COLORREF m_crGrad1;
-	COLORREF m_crGrad2;
-
-// Dialog Data
-	//{{AFX_DATA(CPreferencesScene)
-	enum { IDD = IDD_PREFSCENE };
-	CButton	m_btnGrad1;
-	CButton	m_btnGrad2;
-	CButton	m_btnAmbient;
-	CButton	m_btnFog;
-	CButton	m_btnBackground;
-	CString	m_strBackground;
-	BOOL	m_bTile;
-	BOOL	m_bFog;
-	BYTE	m_nFogDensity;
-	BOOL	m_bFloor;
-	int		m_nBackground;
-	//}}AFX_DATA
-
-
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CPreferencesScene)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-	// Generated message map functions
-	//{{AFX_MSG(CPreferencesScene)
-	afx_msg void OnBackgroundBrowse();
-	afx_msg void OnBackgroundColor();
-	afx_msg void OnAmbientLight();
-	afx_msg void OnFogColor();
-	virtual BOOL OnInitDialog();
-	afx_msg void OnGradColor1();
-	afx_msg void OnGradColor2();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-
-};
-
-
-/////////////////////////////////////////////////////////////////////////////
 // CPreferencesPrint dialog
 
 class CPreferencesPrint : public CPropertyPage

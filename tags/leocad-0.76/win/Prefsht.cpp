@@ -27,7 +27,6 @@ CPreferencesSheet::CPreferencesSheet(CWnd* pWndParent)
 	AddPage(&m_PageDetail);
 	AddPage(&m_PageDrawing);
 	AddPage(&m_PageColors);
-	AddPage(&m_PageScene);
 	AddPage(&m_PagePrint);
 	AddPage(&m_PageKeyboard);
 	SetActivePage(AfxGetApp()->GetProfileInt("Settings", "Page", 0));
@@ -88,8 +87,6 @@ void CPreferencesSheet::OnDefault()
 		m_PageDetail.UpdateData();
 	if (m_PageDrawing.m_hWnd)
 		m_PageDrawing.UpdateData();
-	if (m_PageScene.m_hWnd)
-		m_PageScene.UpdateData();
 	if (m_PagePrint.m_hWnd)
 		m_PagePrint.UpdateData();
 	if (m_PageKeyboard.m_hWnd)
@@ -97,7 +94,7 @@ void CPreferencesSheet::OnDefault()
 
 	char str[LC_MAXPATH], st1[256], st2[256];
 	int i, j;
-	float f, cr1[4], cr2[4], cr3[4], cr4[4], cr5[4];
+	float f;
 	unsigned long l;
 	unsigned short s1;
 
@@ -113,15 +110,6 @@ void CPreferencesSheet::OnDefault()
 	AfxGetApp()->WriteProfileInt("Default", "Snap", l);
 	AfxGetApp()->WriteProfileInt("Default", "Angle", s1);
 	m_PageColors.GetOptions();
-	m_PageScene.GetOptions(&l, &f, str, cr1, cr2, cr3, cr4, cr5);
-	AfxGetApp()->WriteProfileInt("Default", "Scene", l);
-	AfxGetApp()->WriteProfileInt("Default", "Density", (int)(f*100));
-	AfxGetApp()->WriteProfileString("Default", "BMP", str);
-	AfxGetApp()->WriteProfileInt("Default", "Background", RGB(cr1[0]*255, cr1[1]*255, cr1[2]*255));
-	AfxGetApp()->WriteProfileInt("Default", "Fog", RGB(cr2[0]*255, cr2[1]*255, cr2[2]*255));
-	AfxGetApp()->WriteProfileInt("Default", "Ambient", RGB(cr3[0]*255, cr3[1]*255, cr3[2]*255));
-	AfxGetApp()->WriteProfileInt("Default", "Gradient1", RGB(cr4[0]*255, cr4[1]*255, cr4[2]*255));
-	AfxGetApp()->WriteProfileInt("Default", "Gradient2", RGB(cr5[0]*255, cr5[1]*255, cr5[2]*255));
 	m_PagePrint.GetOptions(st1, st2);
 	AfxGetApp()->WriteProfileString("Default", "Header", st1);
 	AfxGetApp()->WriteProfileString("Default", "Footer", st2);

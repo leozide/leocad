@@ -1605,7 +1605,6 @@ bool SystemDoDialog(int nMode, void* param)
 			ps.m_PageDetail.SetOptions(opts->nDetail, opts->fLineWidth);
 			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap);
 			ps.m_PageColors.SetOptions();
-			ps.m_PageScene.SetOptions(opts->nScene, opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 			ps.m_PagePrint.SetOptions(opts->strHeader, opts->strFooter);
 			ps.m_PageKeyboard.SetOptions();
 
@@ -1615,7 +1614,6 @@ bool SystemDoDialog(int nMode, void* param)
 				ps.m_PageDetail.GetOptions(&opts->nDetail, &opts->fLineWidth);
 				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap);
 				ps.	m_PageColors.GetOptions();
-				ps.m_PageScene.GetOptions(&opts->nScene, &opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 				ps.m_PagePrint.GetOptions(opts->strHeader, opts->strFooter);
 				ps.m_PageKeyboard.GetOptions();
 				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_SETTINGS);
@@ -1637,6 +1635,24 @@ bool SystemDoDialog(int nMode, void* param)
 			ps.m_PageSummary.m_Author = opts->Author;
 			ps.m_PageSummary.m_Description = opts->Description;
 			ps.m_PageSummary.m_Comments = opts->Comments;
+
+			if (opts->SceneFlags & LC_SCENE_BG)
+				ps.m_PageScene.m_nBackground = 2;
+			else if (opts->SceneFlags & LC_SCENE_GRADIENT)
+				ps.m_PageScene.m_nBackground = 1;
+			else
+				ps.m_PageScene.m_nBackground = 0;
+			ps.m_PageScene.m_bTile = (opts->SceneFlags & LC_SCENE_BG_TILE) != 0;
+			ps.m_PageScene.m_bFog = (opts->SceneFlags & LC_SCENE_FOG) != 0;
+			ps.m_PageScene.m_bFloor = (opts->SceneFlags & LC_SCENE_FLOOR) != 0;
+			ps.m_PageScene.m_nFogDensity = (BYTE)(opts->FogDensity * 100);
+			ps.m_PageScene.m_strBackground = opts->BackgroundImage;
+			ps.m_PageScene.m_crBackground = RGB(opts->BackgroundColor[0] * 255, opts->BackgroundColor[1] * 255, opts->BackgroundColor[2] * 255);
+			ps.m_PageScene.m_crFog = RGB(opts->FogColor[0] * 255, opts->FogColor[1] * 255, opts->FogColor[2] * 255);
+			ps.m_PageScene.m_crAmbient = RGB(opts->AmbientColor[0] * 255, opts->AmbientColor[1] * 255, opts->AmbientColor[2] * 255);
+			ps.m_PageScene.m_crGrad1 = RGB(opts->Gradient1[0] * 255, opts->Gradient1[1] * 255, opts->Gradient1[2] * 255);
+			ps.m_PageScene.m_crGrad2 = RGB(opts->Gradient2[0] * 255, opts->Gradient2[1] * 255, opts->Gradient2[2] * 255);
+
 			ps.m_PagePieces.m_PiecesUsed = opts->PiecesUsed;
 
 			if (ps.DoModal() == IDOK)
@@ -1645,6 +1661,35 @@ bool SystemDoDialog(int nMode, void* param)
 				opts->Author = ps.m_PageSummary.m_Author;
 				opts->Description = ps.m_PageSummary.m_Description;
 				opts->Comments = ps.m_PageSummary.m_Comments;
+
+				opts->SceneFlags = 0;
+				if (ps.m_PageScene.m_nBackground == 2)
+					opts->SceneFlags |= LC_SCENE_BG;
+				else if (ps.m_PageScene.m_nBackground == 1)
+					opts->SceneFlags |= LC_SCENE_GRADIENT;
+				if (ps.m_PageScene.m_bTile)
+					opts->SceneFlags |= LC_SCENE_BG_TILE;
+				if (ps.m_PageScene.m_bFog)
+					opts->SceneFlags |= LC_SCENE_FOG;
+				if (ps.m_PageScene.m_bFloor)
+					opts->SceneFlags |= LC_SCENE_FLOOR;
+				opts->FogDensity = (float)ps.m_PageScene.m_nFogDensity / 100;
+				opts->BackgroundImage = ps.m_PageScene.m_strBackground;
+				opts->BackgroundColor[0] = (float)GetRValue(ps.m_PageScene.m_crBackground) / 255;
+				opts->BackgroundColor[1] = (float)GetGValue(ps.m_PageScene.m_crBackground) / 255;
+				opts->BackgroundColor[2] = (float)GetBValue(ps.m_PageScene.m_crBackground) / 255;
+				opts->FogColor[0] = (float)GetRValue(ps.m_PageScene.m_crFog) / 255;
+				opts->FogColor[1] = (float)GetGValue(ps.m_PageScene.m_crFog) / 255;
+				opts->FogColor[2] = (float)GetBValue(ps.m_PageScene.m_crFog) / 255;
+				opts->AmbientColor[0] = (float)GetRValue(ps.m_PageScene.m_crAmbient) / 255;
+				opts->AmbientColor[1] = (float)GetGValue(ps.m_PageScene.m_crAmbient) / 255;
+				opts->AmbientColor[2] = (float)GetBValue(ps.m_PageScene.m_crAmbient) / 255;
+				opts->Gradient1[0] = (float)GetRValue(ps.m_PageScene.m_crGrad1) / 255;
+				opts->Gradient1[1] = (float)GetGValue(ps.m_PageScene.m_crGrad1) / 255;
+				opts->Gradient1[2] = (float)GetBValue(ps.m_PageScene.m_crGrad1) / 255;
+				opts->Gradient2[0] = (float)GetRValue(ps.m_PageScene.m_crGrad2) / 255;
+				opts->Gradient2[1] = (float)GetGValue(ps.m_PageScene.m_crGrad2) / 255;
+				opts->Gradient2[2] = (float)GetBValue(ps.m_PageScene.m_crGrad2) / 255;
 
 				return true;
 			}

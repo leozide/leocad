@@ -31,6 +31,7 @@
 #define IDD_PREFDRAWING                 117
 #define IDD_PREFDETAIL                  118
 #define IDD_PREFSCENE                   119
+#define IDD_PROPSCENE                   119
 #define IDD_PREFPRINT                   120
 #define IDR_MAINFRAME                   128
 #define IDR_POPUPS                      130
@@ -490,7 +491,6 @@
 #define IDC_PRNDLG_CAT_HORIZONTAL       1270
 #define IDC_RADIO2                      1271
 #define IDC_PRNDLG_CAT_VERTICAL         1271
-#define IDC_DETDLG_GLEXTENSIONS         1271
 #define IDC_DETDLG_DISABLEEXT           1271
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773

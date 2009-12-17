@@ -510,8 +510,8 @@ void PieceInfo::LoadInformation()
 		int NumIndices = 36 + 24;
 		int NumVertices = 8;
 
-		Vector3 Min(-1.0f, -1.0f, -1.0f);
-		Vector3 Max(1.0f, 1.0f, 1.0f);
+		Vector3 Min(-0.4f, -0.4f, -0.96f);
+		Vector3 Max(0.4f, 0.4f, 0.16f);
 
 		lcMesh* BoxMesh = new lcMesh(2, NumIndices, NumVertices, NULL);
 		lcMeshEditor<u16> MeshEdit(BoxMesh);

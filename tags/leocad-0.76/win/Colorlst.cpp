@@ -499,7 +499,7 @@ void CColorList::SelectTab(int Tab)
 	m_CurColor = 0;
 
 	if (IsWindow(m_hWnd))
-		InvalidateRect(NULL, FALSE);
+		InvalidateRect(NULL, TRUE);
 //	InvalidateRect(m_Tabs[m_CurTab]->m_Rect, TRUE);
 //	InvalidateRect(m_Tabs[Tab]->m_Rect, TRUE);
 	m_CurTab = Tab;
@@ -524,7 +524,7 @@ void CColorList::SelectColor(int Color)
 	InvalidateRect(m_Colors[Color].Rect, TRUE);
 	m_CurColor = Color;
 
-	g_App->m_SelectedColor = Color;
+	g_App->m_SelectedColor = m_Colors[Color].Index;
 	lcPostMessage(LC_MSG_COLOR_CHANGED, (void*)Color);
 }
 

@@ -573,6 +573,7 @@ void CPreferencesColors::OnBnClickedRenameTab()
 
 void CPreferencesColors::OnLbnSelchangeTabList()
 {
+	UpdateTabControls();
 	UpdateColors();
 }
 

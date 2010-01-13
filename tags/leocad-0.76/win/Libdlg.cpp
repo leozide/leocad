@@ -136,6 +136,94 @@ BOOL CLibraryDlg::OnInitDialog()
 	return TRUE;
 }
 
+bool CLibraryDlg::ImportPieces(const lcObjArray<String>& FileList)
+{
+	char file1[LC_MAXPATH], file2[LC_MAXPATH];
+	PiecesLibrary* Library = lcGetPiecesLibrary();
+	lcFileDisk DiskIdx, DiskBin;
+
+	strcpy(file1, Library->GetLibraryPath());
+	strcat(file1, "pieces.idx");
+	strcpy(file2, Library->GetLibraryPath());
+	strcat(file2, "pieces.bin");
+
+	if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
+		return false;
+
+	lcFileMem IdxFile1, IdxFile2, BinFile1, BinFile2;
+	long Length;
+
+	Length = DiskIdx.GetLength();
+	IdxFile1.SetLength(Length);
+	DiskIdx.Read(IdxFile1.GetBuffer(), Length);
+	DiskIdx.Close();
+
+	Length = DiskBin.GetLength();
+	BinFile1.SetLength(Length);
+	DiskBin.Read(BinFile1.GetBuffer(), Length);
+	DiskBin.Close();
+
+	lcFileMem* NewIdx = &IdxFile1;
+	lcFileMem* NewBin = &BinFile1;
+	lcFileMem* OldIdx = &IdxFile2;
+	lcFileMem* OldBin = &BinFile2;
+
+	CProgressDlg Dlg("Importing pieces");
+	Dlg.Create(this);
+	Dlg.SetRange(0, FileList.GetSize());
+
+	for (int i = 0; i < FileList.GetSize(); i++)
+	{
+		Dlg.SetStatus(FileList[i]);
+		Dlg.StepIt();
+
+		lcFileMem* TmpFile;
+
+		TmpFile = NewBin;
+		NewBin = OldBin;
+		OldBin = TmpFile;
+		NewBin->SetLength(0);
+
+		TmpFile = NewIdx;
+		NewIdx = OldIdx;
+		OldIdx = TmpFile;
+		NewIdx->SetLength(0);
+
+		lcGetPiecesLibrary()->ImportLDrawPiece(FileList[i], NewIdx, NewBin, OldIdx, OldBin);
+
+		if (Dlg.CheckCancelButton())
+			if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
+				break;
+	}
+
+	if ((!DiskIdx.Open(file1, "wb")) || (!DiskBin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, Library->GetLibraryPath());
+	strcat(file1, "pieces-b.old");
+	remove(file1);
+	strcpy(file2, Library->GetLibraryPath());
+	strcat(file2, "pieces.bin");
+	rename(file2, file1);
+
+	strcpy(file1, Library->GetLibraryPath());
+	strcat(file1, "pieces-i.old");
+	remove(file1);
+	strcpy(file2, Library->GetLibraryPath());
+	strcat(file2, "pieces.idx");
+	rename(file2, file1);
+
+	DiskBin.Seek(0, SEEK_SET);
+	DiskBin.Write(NewBin->GetBuffer(), NewBin->GetLength());
+
+	DiskIdx.Seek(0, SEEK_SET);
+	DiskIdx.Write(NewIdx->GetBuffer(), NewIdx->GetLength());
+
+	UpdateList();
+
+	return true;
+}
+
 BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
 {
 	switch (LOWORD(wParam))
@@ -197,94 +285,76 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
 			{
-				char file1[LC_MAXPATH], file2[LC_MAXPATH];
-				PiecesLibrary* Library = lcGetPiecesLibrary();
-				lcFileDisk DiskIdx, DiskBin;
-
-				strcpy(file1, Library->GetLibraryPath());
-				strcat(file1, "pieces.idx");
-				strcpy(file2, Library->GetLibraryPath());
-				strcat(file2, "pieces.bin");
-
-				if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
-					break;
-
-				lcFileMem IdxFile1, IdxFile2, BinFile1, BinFile2;
-				long Length;
-
-				Length = DiskIdx.GetLength();
-				IdxFile1.SetLength(Length);
-				DiskIdx.Read(IdxFile1.GetBuffer(), Length);
-				DiskIdx.Close();
-
-				Length = DiskBin.GetLength();
-				BinFile1.SetLength(Length);
-				DiskBin.Read(BinFile1.GetBuffer(), Length);
-				DiskBin.Close();
-
-				lcFileMem* NewIdx = &IdxFile1;
-				lcFileMem* NewBin = &BinFile1;
-				lcFileMem* OldIdx = &IdxFile2;
-				lcFileMem* OldBin = &BinFile2;
-
-				CProgressDlg Dlg("Importing pieces");
-				Dlg.Create(this);
-				Dlg.SetRange(0, opts.numfiles);
+				lcObjArray<String> FileList;
 
 				for (int i = 0; i < opts.numfiles; i++)
 				{
-					Dlg.SetStatus(opts.filenames[i]);
-					Dlg.StepIt();
-
-					lcFileMem* TmpFile;
-
-					TmpFile = NewBin;
-					NewBin = OldBin;
-					OldBin = TmpFile;
-					NewBin->SetLength(0);
-
-					TmpFile = NewIdx;
-					NewIdx = OldIdx;
-					OldIdx = TmpFile;
-					NewIdx->SetLength(0);
-
-					lcGetPiecesLibrary()->ImportLDrawPiece(opts.filenames[i], NewIdx, NewBin, OldIdx, OldBin);
+					FileList.Add(opts.filenames[i]);
 					free(opts.filenames[i]);
-
-					if (Dlg.CheckCancelButton())
-						if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
-							for (; i < opts.numfiles; i++)
-								free(opts.filenames[i]);
 				}
 
-				if ((!DiskIdx.Open(file1, "wb")) || (!DiskBin.Open(file2, "wb")))
-					break;
-
-				strcpy(file1, Library->GetLibraryPath());
-				strcat(file1, "pieces-b.old");
-				remove(file1);
-				strcpy(file2, Library->GetLibraryPath());
-				strcat(file2, "pieces.bin");
-				rename(file2, file1);
-
-				strcpy(file1, Library->GetLibraryPath());
-				strcat(file1, "pieces-i.old");
-				remove(file1);
-				strcpy(file2, Library->GetLibraryPath());
-				strcat(file2, "pieces.idx");
-				rename(file2, file1);
-
-				DiskBin.Seek(0, SEEK_SET);
-				DiskBin.Write(NewBin->GetBuffer(), NewBin->GetLength());
-
-				DiskIdx.Seek(0, SEEK_SET);
-				DiskIdx.Write(NewIdx->GetBuffer(), NewIdx->GetLength());
-
 				free(opts.filenames);
+
+				ImportPieces(FileList);
+
 				Sys_ProfileSaveString("Default", "LDraw Pieces Path", opts.path);
 
 				UpdateList();
 			}
+
+			return TRUE;
+		}
+
+
+		case ID_FILE_IMPORTFOLDER:
+		{
+			LC_DLG_DIRECTORY_BROWSE_OPTS Opts;
+
+			Opts.Title = "Select Folder";
+			strcpy(Opts.Path, Sys_ProfileLoadString ("Default", "LDraw Pieces Path", ""));
+
+			if (!SystemDoDialog(LC_DLG_DIRECTORY_BROWSE, &Opts))
+				return TRUE;
+
+			lcObjArray<String> FileList;
+
+			WIN32_FIND_DATA FindData;
+			HANDLE Find = INVALID_HANDLE_VALUE;
+
+			int Len = strlen(Opts.Path);
+
+			if (Opts.Path[Len-1] != '\\' && Opts.Path[Len-1] != '/')
+				strcat(Opts.Path, "\\");
+
+			char Dir[MAX_PATH];
+			strcpy(Dir, Opts.Path);
+			strcat(Dir, "*.dat");
+
+			Find = FindFirstFile(Dir, &FindData);
+
+			if (Find == INVALID_HANDLE_VALUE) 
+			{
+				SystemDoMessageBox("No files found.", LC_MB_OK | LC_MB_ICONERROR);
+				return TRUE;
+			}
+
+			do
+			{
+				if (FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+					continue;
+
+				char File[MAX_PATH];
+				strcpy(File, Opts.Path);
+				strcat(File, FindData.cFileName);
+				FileList.Add(File);
+			}
+			while (FindNextFile(Find, &FindData) != 0);
+
+			FindClose(Find);
+
+			ImportPieces(FileList);
+
+			Sys_ProfileSaveString("Default", "LDraw Pieces Path", Opts.Path);
 
 			return TRUE;
 		}

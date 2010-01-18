@@ -83,7 +83,8 @@ public:
 	PieceInfo* CreatePiecePlaceholder(const char* Name);
 
 	// File operations.
-	bool DeletePieces(lcPtrArray<PieceInfo>& Pieces);
+	bool DeleteAllPieces();
+	bool DeletePieces(lcPtrArray<const char>& Pieces);
 	bool LoadUpdate(const char* update);
 	bool DeleteTextures(char** Names, int NumTextures);
 	bool ImportTexture(const char* Name);

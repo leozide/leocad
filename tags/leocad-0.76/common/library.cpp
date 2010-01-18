@@ -706,8 +706,61 @@ void PiecesLibrary::RemoveCategory(int Index)
 // =============================================================================
 // Pieces handling stuff
 
+bool PiecesLibrary::DeleteAllPieces()
+{
+	lcFileDisk newbin, newidx, oldbin, oldidx;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[256];
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-b.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) ||
+		(!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-i.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) ||
+		(!newidx.Open(file2, "wb")))
+		return false;
+
+	oldidx.Seek(0, SEEK_SET);
+	oldidx.Read(tmp, 34);
+	newidx.Write(tmp, 34);
+	oldbin.Read(tmp, 32);
+	newbin.Write(tmp, 32);
+
+	// list of moved pieces
+	u16 moved = 0;
+	newidx.WriteShorts(&moved, 1);
+
+	// info at the end
+	u32 binoff = newbin.GetPosition();
+	newidx.WriteInts(&binoff, 1);
+	u16 count = 0;
+	newidx.WriteShorts(&count, 1);
+
+	oldidx.Close();
+	oldbin.Close();
+	newidx.Close();
+	newbin.Close();
+
+	m_Modified = true;
+
+	return true;
+}
+
 // Remove pieces from the library
-bool PiecesLibrary::DeletePieces (lcPtrArray<PieceInfo>& Pieces)
+bool PiecesLibrary::DeletePieces(lcPtrArray<const char>& Pieces)
 {
 	lcFileDisk newbin, newidx, oldbin, oldidx;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
@@ -763,7 +816,7 @@ bool PiecesLibrary::DeletePieces (lcPtrArray<PieceInfo>& Pieces)
 		oldidx.Read(&name, 8);
 
 		for (i = 0; i < Pieces.GetSize(); i++)
-			if (strcmp(name, Pieces[i]->m_strName) == 0)
+			if (strcmp(name, Pieces[i]) == 0)
 				break;
 
 		if (i != Pieces.GetSize())
@@ -1381,7 +1434,78 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 
 	if (ReadLDrawPiece(Filename, &piece))
 	{
-		if (!SaveLDrawPiece(&piece, NewIdxFile, NewBinFile, OldIdxFile, OldBinFile))
+		char* Moved = strstr(piece.description, "~Moved to ");
+		if (Moved)
+		{
+			u16 Count;
+			OldIdxFile->Seek(-(2+4+2), SEEK_END);
+			OldIdxFile->ReadShorts(&Count, 1);
+			u32 cs = 2+(Count*16);
+			OldIdxFile->Seek(-(long)cs, SEEK_CUR);
+
+			u32 Length = OldIdxFile->GetPosition();
+			void* Buffer = malloc(Length);
+			OldIdxFile->Seek(0, SEEK_SET);
+			OldIdxFile->Read(Buffer, Length);
+			NewIdxFile->Seek(0, SEEK_SET);
+			NewIdxFile->Write(Buffer, Length);
+			free(Buffer);
+
+			Buffer = malloc(cs);
+			OldIdxFile->Read(Buffer, cs);
+			char* Reference = (char*)Buffer+2;
+
+			// Add piece to moved list.
+			if (!strchr(Moved, '\\') && !strchr(Moved, '/'))
+			{
+				Moved += strlen("~Moved to ");
+				_strupr(Moved);
+
+				char* Dst = NULL;
+				for (int i = 0; i < Count; i++)
+				{
+					if (!strcmp(&Reference[i*16], piece.name))
+					{
+						Dst = &Reference[i*16+8];
+						memset(Dst, 0, 8);
+						memcpy(Dst, Moved, strlen(Moved));
+					}
+				}
+
+				if (!Dst)
+				{
+					Buffer = realloc(Buffer, 2+16*(Count+1));
+					Reference = (char*)Buffer+2;
+					memset(&Reference[Count*16], 0, 16);
+					memcpy(&Reference[Count*16], piece.name, strlen(piece.name));
+					memcpy(&Reference[Count*16+8], Moved, strlen(Moved));
+					Count++;
+				}
+			}
+
+			NewIdxFile->Write(Reference, Count*16);
+			NewIdxFile->WriteShorts(&Count, 1);
+			free(Buffer);
+
+			Buffer = malloc(4+2);
+			OldIdxFile->Read(Buffer, 4+2);
+			NewIdxFile->Write(Buffer, 4+2);
+			free(Buffer);
+
+			Length = OldBinFile->GetPosition();
+			Buffer = malloc(Length);
+			OldBinFile->Seek(0, SEEK_SET);
+			OldBinFile->Read(Buffer, Length);
+			NewBinFile->Seek(0, SEEK_SET);
+			NewBinFile->Write(Buffer, Length);
+			free(Buffer);
+
+			// Delete existing piece.
+//			lcPtrArray<const char> Pieces;
+//			Pieces.Add(piece.name);
+//			DeletePieces(Pieces);
+		}
+		else if (!SaveLDrawPiece(&piece, NewIdxFile, NewBinFile, OldIdxFile, OldBinFile))
 		{
 			fprintf(stderr, "Error saving library after importing %s.\n", Filename);
 			Sys_MessageBox("Error saving library.");

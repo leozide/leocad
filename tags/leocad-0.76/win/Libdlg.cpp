@@ -352,6 +352,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			FindClose(Find);
 
+			lcGetPiecesLibrary()->DeleteAllPieces();
 			ImportPieces(FileList);
 
 			Sys_ProfileSaveString("Default", "LDraw Pieces Path", Opts.Path);
@@ -463,12 +464,15 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_PIECE_DELETE:
 		{
-			lcPtrArray<PieceInfo> Pieces;
+			lcPtrArray<const char> Pieces;
 
 			for (int i = 0; i < m_List.GetItemCount(); i++)
 			{
 				if (m_List.GetItemState(i, LVIS_SELECTED))
-					Pieces.Add((PieceInfo*)m_List.GetItemData(i));
+				{
+					PieceInfo* Info = (PieceInfo*)m_List.GetItemData(i);
+					Pieces.Add(Info->m_strName);
+				}
 			}
 
 			if (Pieces.GetSize() == 0)

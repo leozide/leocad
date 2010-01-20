@@ -174,7 +174,16 @@ bool CLibraryDlg::ImportPieces(const lcObjArray<String>& FileList)
 
 	for (int i = 0; i < FileList.GetSize(); i++)
 	{
-		Dlg.SetStatus(FileList[i]);
+		char* Name = FileList[i];
+		char* Slash = strrchr(Name, '\\');
+		if (Slash > Name)
+			Name = Slash+1;
+
+		Slash = strrchr(Name, '/');
+		if (Slash > Name)
+			Name = Slash+1;
+
+		Dlg.SetStatus(Name);
 		Dlg.StepIt();
 
 		lcFileMem* TmpFile;

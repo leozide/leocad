@@ -1788,24 +1788,17 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 
 	for (a = info->next; a; a = a->next)
 	{
-		// Fix the 'extended colors' that shouldn't be there in the first place.
-		if ((a->color > 16) && (a->color < 24))
-			a->color = 0;
-
 		count[a->color][a->type-2]++;
 		vert += a->type;
 	}
 
 	k = 0;
-	for (i = 16; i < 256; i++)
+	for (i = 0; i < 256; i++)
 	{
 		if (count[i][0] || count[i][1] || count[i][2])
 			k++;
 
 		quads += count[i][2] * 4;
-
-		if (i == 16) i = -1;
-		if (i == 15) i = 23;
 	}
 
 	if (piece->verts_count > 65535 || quads > 65535)
@@ -1820,7 +1813,7 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 		*drawinfo = k; // number colors
 		drawinfo++;
 
-		for (i = 16; i < 256; i++)
+		for (i = 0; i < 256; i++)
 		{
 			if (count[i][0] || count[i][1] || count[i][2])
 			{
@@ -1860,9 +1853,6 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 					}
 				}
 			}
-
-			if (i == 16) i = -1;
-			if (i == 15) i = 23;
 		}
 	}
 	else
@@ -1877,7 +1867,7 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 		*drawinfo = k; // number colors
 		drawinfo++;
 
-		for (i = 16; i < 256; i++)
+		for (i = 0; i < 256; i++)
 		{
 			if (count[i][0] || count[i][1] || count[i][2])
 			{
@@ -1920,9 +1910,6 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 					}
 				}
 			}
-
-			if (i == 16) i = -1;
-			if (i == 15) i = 23;
 		}
 	}
 
@@ -2050,7 +2037,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5]);
 			if (color == 16) color = defcolor;
-			if (color > 256) color -= 256;
+			if (color > 255) color -= 255;
 			info->color = color;
 			ConvertPoints(info->points, 2);
 			mat->TransformPoints(info->points, 2);
@@ -2063,7 +2050,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				&info->points[3], &info->points[4], &info->points[5],
 				&info->points[6], &info->points[7], &info->points[8]);
 			if (color == 16) color = defcolor;
-			if (color > 256) color -= 256;
+			if (color > 255) color -= 255;
 			info->color = color;
 			ConvertPoints(info->points, 3);
 			mat->TransformPoints(info->points, 3);
@@ -2077,7 +2064,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				&info->points[6], &info->points[7], &info->points[8],
 				&info->points[9], &info->points[10], &info->points[11]);
 			if (color == 16) color = defcolor;
-			if (color > 256) color -= 256;
+			if (color > 255) color -= 255;
 			info->color = color;
 			ConvertPoints(info->points, 4);
 			mat->TransformPoints(info->points, 4);

@@ -1954,7 +1954,7 @@ inline int FixupColor(int Color)
 	return 0;
 }
 
-static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t* info, char* dir, LC_LDRAW_PIECE* piece)
+static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, char* dir, LC_LDRAW_PIECE* piece)
 {
 	char buf[1024], fn[LC_MAXPATH], filename[32];
 	unsigned char val;
@@ -2060,7 +2060,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				m1.FromLDraw(fm);
 				m2.Multiply(*mat, m1);
 
-				decodefile(tf, &m2, (unsigned char)color, info, dir, piece);
+				decodefile(tf, &m2, color, info, dir, piece);
 				while (info->next)
 					info = info->next;
 				fclose(tf);
@@ -2171,6 +2171,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		_strlwr(filename);
 #endif
 		if (color == 16) color = defcolor;
+		color = FixupColor(color);
 
 		_strupr(filename);
 		for (val = 0; val < numvalid; val++)

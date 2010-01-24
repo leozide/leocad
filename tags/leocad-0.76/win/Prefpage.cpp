@@ -30,6 +30,7 @@ IMPLEMENT_DYNCREATE(CPreferencesKeyboard, CPropertyPage)
 CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::IDD)
 , m_strLibrary(_T(""))
 , m_strColor(_T(""))
+, m_Updates(0)
 {
 	//{{AFX_DATA_INIT(CPreferencesGeneral)
 	m_bSubparts = FALSE;
@@ -38,7 +39,6 @@ CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::
 	m_strFolder = _T("");
 	m_bAutoSave = FALSE;
 	m_strUser = _T("");
-	m_Updates = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -59,10 +59,10 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_GENDLG_AUTOSAVE, m_bAutoSave);
 	DDX_Text(pDX, IDC_GENDLG_USER, m_strUser);
 	DDV_MaxChars(pDX, m_strUser, 100);
-	DDX_Check(pDX, IDC_GENDLG_UPDATES, m_Updates);
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_GENDLG_LIBRARY, m_strLibrary);
 	DDX_Text(pDX, IDC_GENDLG_COLOR, m_strColor);
+	DDX_CBIndex(pDX, IDC_GENDLG_UPDATES, m_Updates);
 }
 
 

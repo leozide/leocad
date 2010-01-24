@@ -33,7 +33,7 @@ public:
 	BOOL	m_bAutoSave;
 	CString	m_bUser;
 	CString	m_strUser;
-	BOOL	m_Updates;
+	int		m_Updates;
 	//}}AFX_DATA
 
 

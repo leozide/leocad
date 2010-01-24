@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Leocad.rc
+// Used by LeoCAD.rc
 //
 #define IDAPPLY                         3
 #define IDC_HTMDLG_IMAGEOPTIONS         3
@@ -492,6 +492,7 @@
 #define IDC_RADIO2                      1271
 #define IDC_PRNDLG_CAT_VERTICAL         1271
 #define IDC_DETDLG_DISABLEEXT           1271
+#define IDC_COMBO1                      1272
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -770,9 +771,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        248
+#define _APS_NEXT_RESOURCE_VALUE        249
 #define _APS_NEXT_COMMAND_VALUE         33227
-#define _APS_NEXT_CONTROL_VALUE         1272
+#define _APS_NEXT_CONTROL_VALUE         1273
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

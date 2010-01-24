@@ -100,11 +100,11 @@ static void CheckForUpdates(void* Data)
 					{
 						if (Update)
 						{
-							str += "Would you like to visit the LeoCAD website now?\n";
+							str += "Would you like to visit the LeoCAD downloads page now?\n";
 
 							if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
 							{
-								ShellExecute(::GetDesktopWindow(), _T("open"), _T("http://www.leocad.org"), NULL, NULL, SW_NORMAL); 
+								ShellExecute(::GetDesktopWindow(), _T("open"), _T("http://www.leocad.org/files/"), NULL, NULL, SW_NORMAL); 
 							}
 						}
 						else
@@ -246,8 +246,31 @@ BOOL CCADApp::InitInstance()
 
 	lcGetActiveProject()->UpdateAllViews();
 
-	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
-		_beginthread(CheckForUpdates, 0, NULL);
+	int CheckUpdates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
+	if (CheckUpdates)
+	{
+		struct tm When;
+		__time64_t Now, Next;
+
+		if (CheckUpdates == 2)
+			CheckUpdates = 7;
+
+		memset(&When, 0, sizeof(When));
+		CString LastCheck = GetProfileString("Settings", "LastUpdate", NULL);
+		sscanf(LastCheck, "%d %d %d", &When.tm_mday, &When.tm_mon, &When.tm_year);
+		When.tm_mday = When.tm_mday + CheckUpdates;
+		Next = _mktime64(&When);
+
+		_time64(&Now);
+
+		if (Next < Now)
+		{
+			When = *_localtime64(&Now);
+			_beginthread(CheckForUpdates, 0, NULL);
+			LastCheck.Format("%d %d %d", When.tm_mday, When.tm_mon, When.tm_year);
+			WriteProfileString("Settings", "LastUpdate", LastCheck);
+		}
+	}
 
 	return TRUE;
 }

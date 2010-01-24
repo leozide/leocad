@@ -805,7 +805,8 @@ BEGIN
     EDITTEXT        IDC_GENDLG_USER,62,122,158,12,ES_AUTOHSCROLL
     LTEXT           "Mouse sensitivity",IDC_STATIC,11,144,59,8
     CONTROL         "Slider1",IDC_GENDLG_MOUSE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,76,143,31,10
-    CONTROL         "Check for updates on startup",IDC_GENDLG_UPDATES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,164,119,8
+    LTEXT           "Check for updates",IDC_STATIC,11,158,75,8
+    COMBOBOX        IDC_GENDLG_UPDATES,103,155,60,59,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_PREFDRAWING DIALOGEX 0, 0, 240, 114
@@ -1507,6 +1508,23 @@ IDC_ROTX                CURSOR                  "res\\rotx.cur"
 IDC_ROTY                CURSOR                  "res\\roty.cur"
 IDC_ORBIT               CURSOR                  "res\\orbit.cur"
 IDC_HSPLITBAR           CURSOR                  "res\\splith.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PREFGENERAL DLGINIT
+BEGIN
+    IDC_GENDLG_UPDATES, 0x403, 6, 0
+0x654e, 0x6576, 0x0072, 
+    IDC_GENDLG_UPDATES, 0x403, 6, 0
+0x6144, 0x6c69, 0x0079, 
+    IDC_GENDLG_UPDATES, 0x403, 7, 0
+0x6557, 0x6b65, 0x796c, "\000" 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -10,12 +10,19 @@
 #include "camera.h"
 #include "system.h"
 #include "lc_model.h"
+#include "lc_mesh.h"
+#include "lc_colors.h"
+#include "texfont.h"
+#include "lc_application.h"
 
 View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
 	m_Camera = pProject->m_ActiveModel->GetCamera(LC_CAMERA_MAIN);
+
+	m_ViewCubeTrack = false;
+	m_ViewCubeHover = 0;
 }
 
 View::~View()
@@ -114,32 +121,58 @@ void View::OnInitialUpdate()
 
 void View::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnLeftButtonDown(this, x, y, bControl, bShift);
+	if (m_ViewCubeHover)
+	{
+		m_ViewCubeTrack = true;
+		CaptureMouse();
+		ViewCubeClick();
+	}
+	else
+		m_Project->OnLeftButtonDown(this, x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnLeftButtonUp(this, x, y, bControl, bShift);
+	if (m_ViewCubeTrack)
+	{
+		m_ViewCubeTrack = false;
+		ReleaseMouse();
+	}
+	else
+		m_Project->OnLeftButtonUp(this, x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnLeftButtonDoubleClick(this, x, y, bControl, bShift);
+	if (!m_ViewCubeTrack)
+		m_Project->OnLeftButtonDoubleClick(this, x, y, bControl, bShift);
 }
 
 void View::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnRightButtonDown(this, x, y, bControl, bShift);
+	if (!m_ViewCubeTrack)
+		m_Project->OnRightButtonDown(this, x, y, bControl, bShift);
 }
 
 void View::OnRightButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnRightButtonUp(this, x, y, bControl, bShift);
+	if (!m_ViewCubeTrack)
+		m_Project->OnRightButtonUp(this, x, y, bControl, bShift);
 }
 
 void View::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnMouseMove(this, x, y, bControl, bShift);
+	if (!m_ViewCubeTrack)
+	{
+		int CubeHover = ViewCubeHitTest(x, y);
+		if (CubeHover != m_ViewCubeHover)
+		{
+			m_ViewCubeHover = CubeHover;
+			Redraw();
+		}
+
+		m_Project->OnMouseMove(this, x, y, bControl, bShift);
+	}
 }
 
 void View::OnSize(int cx, int cy)
@@ -202,6 +235,9 @@ void View::SetCamera(lcCamera* Camera)
 	m_Camera = Camera;
 }
 
+#define LC_VIEWPOINT_CUBE_WIDTH 100
+#define LC_VIEWPOINT_CUBE_HEIGHT 100
+
 void View::UpdateCamera()
 {
 	lcCamera* Camera = m_Project->m_ActiveModel->GetCamera(m_CameraName);
@@ -211,4 +247,167 @@ void View::UpdateCamera()
 
 	m_Camera = Camera;
 	m_CameraName = m_Camera->m_Name;
+}
+
+void View::DrawViewCube()
+{
+	if (m_nWidth < LC_VIEWPOINT_CUBE_WIDTH || m_nHeight < LC_VIEWPOINT_CUBE_HEIGHT)
+		return;
+
+	Project* project = lcGetActiveProject();
+
+	glViewport(m_nWidth - LC_VIEWPOINT_CUBE_WIDTH, m_nHeight - LC_VIEWPOINT_CUBE_HEIGHT, LC_VIEWPOINT_CUBE_WIDTH, LC_VIEWPOINT_CUBE_HEIGHT);
+
+	glMatrixMode(GL_PROJECTION);
+	Matrix44 Projection = CreatePerspectiveMatrix(60.0f, 1.0f, 0.1f, 20.0f);
+	glLoadMatrixf(Projection);
+
+	glMatrixMode(GL_MODELVIEW);
+	Matrix44 WorldView = GetCamera()->m_WorldView;
+	WorldView.m_Rows[3] = Vector4(0, 0, -4, 1);
+	glLoadMatrixf(WorldView);
+
+	lcBoxMesh->Render(LC_COLOR_DEFAULT);
+	lcWireframeBoxMesh->Render(0);
+
+	if (m_ViewCubeHover)
+	{
+		glColor3f(0.5f, 0.5f, 0.5f);
+		int Centers = (m_ViewCubeHover & 0x2) + ((m_ViewCubeHover & 0x20) >> 4) + ((m_ViewCubeHover & 0x200) >> 8);
+
+		float d = 0.77f;// + 0.125f;
+
+		float x = (m_ViewCubeHover & 0x001) / 0x001 * -d + (m_ViewCubeHover & 0x004) / 0x004 * d;
+		float y = (m_ViewCubeHover & 0x010) / 0x010 * -d + (m_ViewCubeHover & 0x040) / 0x040 * d;
+		float z = (m_ViewCubeHover & 0x100) / 0x100 * -d + (m_ViewCubeHover & 0x400) / 0x400 * d;
+
+		float sx = 0.25f + (m_ViewCubeHover & 0x002) / 0x002 * 0.25f;
+		float sy = 0.25f + (m_ViewCubeHover & 0x020) / 0x020 * 0.25f;
+		float sz = 0.25f + (m_ViewCubeHover & 0x200) / 0x200 * 0.25f;
+
+		glPushMatrix();
+		glTranslatef(x, y, z);
+		glScalef(sx, sy, sz);
+		lcBoxMesh->Render(4);
+		glPopMatrix();
+	}
+
+	glColor3f(0.0f, 0.0f, 0.0f);
+
+	project->m_pScreenFont->MakeCurrent();
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glColor4f(0, 0, 0, 1);
+	int cx[6], cy[6], MaxWidth = -1;
+	const char* Names[6] = { "Top", "Bottom", "Left", "Right", "Front", "Back" };
+
+	for (int i = 0; i < 6; i++)
+	{
+		project->m_pScreenFont->GetStringDimensions(&cx[i], &cy[i], Names[i]);
+		MaxWidth = lcMax(MaxWidth, cx[i]);
+		MaxWidth = lcMax(MaxWidth, cy[i]);
+	}
+
+	float Scale = 1.5f / MaxWidth;
+	Vector4 AxisAngle[6] = 
+	{
+		Vector4(0, 0, 1, 0),
+		Vector4(1, 0, 0, 180),
+		Vector4(1, 0, 0, -90),
+		Vector4(1, 0, 0, 90),
+		Vector4(0, 1, 0, 90),
+		Vector4(0, 1, 0, -90),
+	};
+
+	// TODO: prebuild the mesh and rotate the text right.
+
+	for (int i = 0; i < 6; i++)
+	{
+		glPushMatrix();
+		glRotatef(AxisAngle[i][3], AxisAngle[i][0], AxisAngle[i][1], AxisAngle[i][2]);
+		glScalef(Scale, Scale, 1);
+		glTranslatef(0, 0, 1.02f);
+		project->m_pScreenFont->PrintText(-cx[i]/2.0f, cy[i]/2.0f, 0, Names[i]);
+		glPopMatrix();
+	}
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+
+	glViewport(0, 0, m_nWidth, m_nHeight);
+}
+
+// Return a bit to code meaning which face/edge/corner was hit, or zero.
+int View::ViewCubeHitTest(int x, int y)
+{
+	x -= m_nWidth - LC_VIEWPOINT_CUBE_WIDTH ;
+	y -= m_nHeight - LC_VIEWPOINT_CUBE_HEIGHT;
+
+	if (x < 0 || y < 0 || x > LC_VIEWPOINT_CUBE_WIDTH || y > LC_VIEWPOINT_CUBE_HEIGHT)
+		return 0;
+
+	Matrix44 Projection = CreatePerspectiveMatrix(60.0f, 1.0f, 0.1f, 20.0f);
+	Matrix44 WorldView = GetCamera()->m_WorldView;
+	WorldView.m_Rows[3] = Vector4(0, 0, -4, 1);
+	int Viewport[4] = { 0, 0, LC_VIEWPOINT_CUBE_WIDTH, LC_VIEWPOINT_CUBE_HEIGHT };
+
+	Vector3 ClickPoints[2] = { Vector3((float)x, (float)y, 0.0f), Vector3((float)x, (float)y, 1.0f) };
+	UnprojectPoints(ClickPoints, 2, WorldView, Projection, Viewport);
+
+	BoundingBox Box(Vector3(-1,-1,-1), Vector3(1,1,1));
+
+	Vector3 Intersection;
+	float Dist;
+
+	if (!BoundingBoxRayMinIntersectDistance(Box, ClickPoints[0], ClickPoints[1], &Dist, &Intersection))
+		return 0;
+
+	int Code = 0;
+
+	if (Intersection[0] < -0.75f)
+		Code |= 0x001;
+	else if (Intersection[0] < 0.75f)
+		Code |= 0x002;
+	else
+		Code |= 0x004;
+
+	if (Intersection[1] < -0.75f)
+		Code |= 0x010;
+	else if (Intersection[1] < 0.75f)
+		Code |= 0x020;
+	else
+		Code |= 0x040;
+
+	if (Intersection[2] < -0.75f)
+		Code |= 0x100;
+	else if (Intersection[2] < 0.75f)
+		Code |= 0x200;
+	else
+		Code |= 0x400;
+
+	return Code;
+}
+
+void View::ViewCubeClick()
+{
+	float x = (m_ViewCubeHover & 0x001) / 0x001 * -1.0f + (m_ViewCubeHover & 0x004) / 0x004 * 1.0f;
+	float y = (m_ViewCubeHover & 0x010) / 0x010 * -1.0f + (m_ViewCubeHover & 0x040) / 0x040 * 1.0f;
+	float z = (m_ViewCubeHover & 0x100) / 0x100 * -1.0f + (m_ViewCubeHover & 0x400) / 0x400 * 1.0f;
+
+	lcCamera* Camera = GetCamera();
+	u32 Time = lcGetActiveProject()->m_ActiveModel->m_CurFrame;
+	bool AddKey = false;
+	Camera->ChangeKey(Time, AddKey, Vector3(x,y,z) * 10, LC_CK_EYE);
+	Camera->ChangeKey(Time, AddKey, Vector3(0,0,0), LC_CK_TARGET);
+	Camera->UpdatePosition(Time);
+
+	Redraw();
 }

@@ -2105,6 +2105,9 @@ void Project::RenderInterface(View* view)
 	float w = (float)view->GetWidth();
 	float h = (float)view->GetHeight();
 
+	// Draw camera cube.
+	view->DrawViewCube();
+
 	// Render axis icon.
 	if (m_nSnap & LC_DRAW_AXIS)
 	{

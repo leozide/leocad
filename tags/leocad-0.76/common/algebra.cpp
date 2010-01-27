@@ -768,7 +768,7 @@ float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vec
 }
 
 // Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
-bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist)
+bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist, Vector3* Intersection)
 {
 	bool MiddleQuadrant[3];
 	bool Inside = true;
@@ -801,6 +801,10 @@ bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& S
 	if (Inside)
 	{
 		*Dist = 0;
+
+		if (*Intersection)
+			*Intersection = Start;
+
 		return true;
 	}
 
@@ -825,21 +829,24 @@ bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& S
 	if (MaxT[WhichPlane] < 0.0f)
 		return false;
 
-	Vector3 Intersection;
+	Vector3 Point;
 
 	for (i = 0; i < 3; i++)
 	{
 		if (WhichPlane != i)
 		{
-			Intersection[i] = Start[i] + MaxT[WhichPlane] * Dir[i];
-			if (Intersection[i] < Box.m_Min[i] || Intersection[i] > Box.m_Max[i])
+			Point[i] = Start[i] + MaxT[WhichPlane] * Dir[i];
+			if (Point[i] < Box.m_Min[i] || Point[i] > Box.m_Max[i])
 				return false;
 		}
 		else
-			Intersection[i] = CandidatePlane[i];
+			Point[i] = CandidatePlane[i];
 	}
 
-	*Dist = Length(Intersection - Start);
+	*Dist = Length(Point - Start);
+
+	if (*Intersection)
+		*Intersection = Point;
 
 	return true;
 }

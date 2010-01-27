@@ -25,6 +25,10 @@ public:
 
 	LC_CURSOR_TYPE GetCursor(int x, int y) const;
 
+	void DrawViewCube();
+	int ViewCubeHitTest(int x, int y);
+	void ViewCubeClick();
+
 	void UpdateOverlayScale();
 
 	lcCamera* GetCamera() const
@@ -37,6 +41,9 @@ public:
 
 public:
 	float m_OverlayScale;
+
+	bool m_ViewCubeTrack;
+	int m_ViewCubeHover;
 
 	int m_Viewport[4];
 	lcCamera* m_Camera;

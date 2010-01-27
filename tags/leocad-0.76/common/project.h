@@ -140,6 +140,9 @@ public:
 	lcModel* m_ActiveModel;
 	lcPtrArray<lcModel> m_ModelList;
 
+	// Font used to draw text on the screen.
+	TexFont* m_pScreenFont;
+
 // Implementation
 protected:
 	// default implementation
@@ -153,9 +156,6 @@ protected:
 	char m_strAuthor[101];
 	char m_strDescription[101];
 	char m_strComments[256];
-
-	// Font used to draw text on the screen.
-	TexFont* m_pScreenFont;
 
 	// Undo support
 	LC_UNDOINFO* m_pUndoList;

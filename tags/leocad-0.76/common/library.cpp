@@ -1780,7 +1780,7 @@ static connection_t* AddConnection(connection_t* newcon, LC_LDRAW_PIECE* piece)
 static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 {
 	lineinfo_t *a, *b;
-	int i, j, k, v;
+	int i, j, k;
 	unsigned int count[256][3], vert = 0;
 	unsigned int quads = 0;
 	unsigned char* bytes;
@@ -1833,13 +1833,10 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 						if ((a->type == j) && (a->color == i))
 						{
 							for (k = 0; k < a->type; k++)
-							for (v = 0; v < (int)piece->verts_count; v++)
-								if (FloatPointsClose(&piece->verts[v*3], &a->points[k*3]))
-								{
-									*drawinfo = v;
-									drawinfo++;
-									break;
-								}
+							{
+								*drawinfo = a->indices[k];
+								drawinfo++;
+							}
 									
 							b->next = a->next;
 							free(a);
@@ -1891,13 +1888,10 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 					if ((a->type == j) && (a->color == i))
 					{
 						for (k = 0; k < a->type; k++)
-						for (v = 0; v < (int)piece->verts_count; v++)
-							if (FloatPointsClose(&piece->verts[v*3], &a->points[k*3]))
-							{
-								*drawinfo = v;
-								drawinfo++;
-								break;
-							}
+						{
+							*drawinfo = a->indices[k];
+							drawinfo++;
+						}
 									
 						b->next = a->next;
 						free(a);
@@ -2459,8 +2453,11 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 				if ((unique % 500) == 0)
 					verts = (float*)realloc(verts, sizeof(float)*3*(unique+500));
 				memcpy(&verts[unique*3], &lf->points[j*3], sizeof(float)*3);
+				i = unique;
 				unique++;
 			}
+
+			lf->indices[j] = i;
 		}
 	}
 

@@ -398,15 +398,33 @@ int View::ViewCubeHitTest(int x, int y)
 
 void View::ViewCubeClick()
 {
+	Project* project = lcGetActiveProject();
+
+	// Center and zoom around points of interest.
+	lcObjArray<Vector3> Points;
+	Vector3 Center;
+
+	project->m_ActiveModel->GetPointsOfInterest(Points, Center);
+
 	float x = (m_ViewCubeHover & 0x001) / 0x001 * -1.0f + (m_ViewCubeHover & 0x004) / 0x004 * 1.0f;
 	float y = (m_ViewCubeHover & 0x010) / 0x010 * -1.0f + (m_ViewCubeHover & 0x040) / 0x040 * 1.0f;
 	float z = (m_ViewCubeHover & 0x100) / 0x100 * -1.0f + (m_ViewCubeHover & 0x400) / 0x400 * 1.0f;
 
+	Vector3 CameraPos = Center + Vector3(x, y, z) * 10.0f;
+
 	lcCamera* Camera = GetCamera();
-	u32 Time = lcGetActiveProject()->m_ActiveModel->m_CurFrame;
+	u32 Time = project->m_ActiveModel->m_CurFrame;
 	bool AddKey = false;
-	Camera->ChangeKey(Time, AddKey, Vector3(x,y,z) * 10, LC_CK_EYE);
-	Camera->ChangeKey(Time, AddKey, Vector3(0,0,0), LC_CK_TARGET);
+	float Roll = 0;
+
+	Camera->ChangeKey(Time, AddKey, Center, LC_CK_TARGET);
+	Camera->ChangeKey(Time, AddKey, CameraPos, LC_CK_EYE);
+	Camera->ChangeKey(Time, AddKey, &Roll, LC_CK_ROLL);
+	Camera->UpdatePosition(Time);
+	
+	CameraPos = ZoomExtents(CameraPos, Camera->m_WorldView, GetProjectionMatrix(), &Points[0], Points.GetSize());
+
+	Camera->ChangeKey(Time, AddKey, CameraPos, LC_CK_EYE);
 	Camera->UpdatePosition(Time);
 
 	Redraw();

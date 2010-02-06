@@ -115,6 +115,9 @@ public:
 	// Make sure all pieces in the model are completely visible.
 	void ZoomExtents(View* view, lcCamera* Camera, bool AddKeys);
 
+	// Get a point cloud with either the selected objects or all objects.
+	void GetPointsOfInterest(lcObjArray<Vector3>& Points, Vector3& Center);
+
 	// Adds a light to this model.
 //	void AddLight(lcLight* Light);
 

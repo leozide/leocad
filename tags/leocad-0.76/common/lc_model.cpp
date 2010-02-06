@@ -808,26 +808,9 @@ void lcModel::ZoomExtents(View* view, lcCamera* Camera, bool AddKeys)
 
 	// Calculate a bounding box that includes all pieces and use its center as the camera target.
 	lcObjArray<Vector3> Points;
-	BoundingBox Box;
-	Box.Reset();
+	Vector3 Center;
 
-	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
-	{
-		if (!Piece->IsVisible(m_CurFrame))
-			continue;
-
-		Vector3 Corners[8];
-		Piece->m_PieceInfo->m_BoundingBox.GetPoints(Corners);
-
-		for (int i = 0; i < 8; i++)
-		{
-			Vector3 Point = Mul31(Corners[i], Piece->m_ModelWorld);
-			Points.Add(Point);
-			Box.AddPoint(Point);
-		}
-	}
-
-	Vector3 Center = Box.GetCenter();
+	GetPointsOfInterest(Points, Center);
 
 	// Update eye and target positions.
 	Vector3 Eye = Camera->m_Position;
@@ -851,6 +834,52 @@ void lcModel::ZoomExtents(View* view, lcCamera* Camera, bool AddKeys)
 	Camera->ChangeKey(m_CurFrame, AddKeys, Eye, LC_CK_EYE);
 	Camera->ChangeKey(m_CurFrame, AddKeys, Target, LC_CK_TARGET);
 	Camera->UpdatePosition(m_CurFrame);
+}
+
+void lcModel::GetPointsOfInterest(lcObjArray<Vector3>& Points, Vector3& Center)
+{
+	lcObjArray<Vector3> SelPoints;
+	BoundingBox Box, SelBox;
+
+	Box.Reset();
+	SelBox.Reset();
+	Points.RemoveAll();
+
+	if (!m_Pieces)
+	{
+		Center = Vector3(0, 0, 0);
+		return;
+	}
+
+	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
+	{
+		if (!Piece->IsVisible(m_CurFrame))
+			continue;
+
+		Vector3 Corners[8];
+		Piece->m_PieceInfo->m_BoundingBox.GetPoints(Corners);
+
+		for (int i = 0; i < 8; i++)
+		{
+			Vector3 Point = Mul31(Corners[i], Piece->m_ModelWorld);
+			Points.Add(Point);
+			Box.AddPoint(Point);
+
+			if (Piece->IsSelected())
+			{
+				SelPoints.Add(Point);
+				SelBox.AddPoint(Point);
+			}
+		}
+	}
+
+	if (SelPoints.GetSize())
+	{
+		Points = SelPoints;
+		Center = SelBox.GetCenter();
+	}
+	else
+		Center = Box.GetCenter();
 }
 
 /*

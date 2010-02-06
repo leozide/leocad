@@ -104,6 +104,9 @@ void GetFrustumPlanes(const Matrix44& WorldView, const Matrix44& Projection, Vec
 
 Vector3 ZoomExtents(const Vector3& Position, const Matrix44& WorldView, const Matrix44& Projection, const Vector3* Points, int NumPoints)
 {
+	if (!NumPoints)
+		return Position;
+
 	Vector4 Planes[6];
 	GetFrustumPlanes(WorldView, Projection, Planes);
 

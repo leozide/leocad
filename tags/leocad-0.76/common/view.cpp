@@ -304,7 +304,7 @@ void View::DrawViewCube()
 
 	glColor4f(0, 0, 0, 1);
 	int cx[6], cy[6], MaxWidth = -1;
-	const char* Names[6] = { "Top", "Bottom", "Left", "Right", "Front", "Back" };
+	const char* Names[6] = { "TOP", "BOTTOM", "LEFT", "RIGHT", "FRONT", "BACK" };
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -314,24 +314,23 @@ void View::DrawViewCube()
 	}
 
 	float Scale = 1.5f / MaxWidth;
-	Vector4 AxisAngle[6] = 
+	float Translation = 1.02f;
+	Matrix44 Rotations[6] = 
 	{
-		Vector4(0, 0, 1, 0),
-		Vector4(1, 0, 0, 180),
-		Vector4(1, 0, 0, -90),
-		Vector4(1, 0, 0, 90),
-		Vector4(0, 1, 0, 90),
-		Vector4(0, 1, 0, -90),
+		Matrix44(Vector4( Scale, 0, 0, 0), Vector4(0, Scale, 0, 0), Vector4(0, 0, 1.0f, 0), Vector4(0, 0,  Translation, 1.0f)),
+		Matrix44(Vector4(-Scale, 0, 0, 0), Vector4(0, Scale, 0, 0), Vector4(0, 0, 1.0f, 0), Vector4(0, 0, -Translation, 1.0f)),
+		Matrix44(Vector4(0, -Scale, 0, 0), Vector4(0, 0, Scale, 0), Vector4(1.0f, 0, 0, 0), Vector4(-Translation, 0, 0, 1.0f)),
+		Matrix44(Vector4(0,  Scale, 0, 0), Vector4(0, 0, Scale, 0), Vector4(1.0f, 0, 0, 0), Vector4( Translation, 0, 0, 1.0f)),
+		Matrix44(Vector4( Scale, 0, 0, 0), Vector4(0, 0, Scale, 0), Vector4(0, 1.0f, 0, 0), Vector4(0, -Translation, 0, 1.0f)),
+		Matrix44(Vector4(-Scale, 0, 0, 0), Vector4(0, 0, Scale, 0), Vector4(0, 1.0f, 0, 0), Vector4(0,  Translation, 0, 1.0f)),
 	};
 
-	// TODO: prebuild the mesh and rotate the text right.
+	// TODO: prebuild the mesh.
 
 	for (int i = 0; i < 6; i++)
 	{
 		glPushMatrix();
-		glRotatef(AxisAngle[i][3], AxisAngle[i][0], AxisAngle[i][1], AxisAngle[i][2]);
-		glScalef(Scale, Scale, 1);
-		glTranslatef(0, 0, 1.02f);
+		glMultMatrixf(Rotations[i]);
 		project->m_pScreenFont->PrintText(-cx[i]/2.0f, cy[i]/2.0f, 0, Names[i]);
 		glPopMatrix();
 	}

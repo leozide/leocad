@@ -97,16 +97,16 @@ lcCamera::lcCamera(unsigned char nType)
 	if (nType > 7)
 		nType = 8;
 
-	char names[8][7] = { "Front", "Back",  "Top",  "Under", "Left", "Right", "Main", "User" };
+	char names[8][7] = { "Right", "Left",  "Top",  "Bottom", "Back", "Front", "Main", "User" };
 	float eyes[8][3] = { { 50,0,0 }, { -50,0,0 }, { 0,0,50 }, { 0,0,-50 },
 	                     { 0,50,0 }, { 0,-50,0 }, { -10,-10,5}, { 0,5,0 } };
-	float roll = 0.0f;
+	float rolls[8] = { 0.0f, 0.0f, -LC_PI/2, -LC_PI/2, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	Initialize();
 
 	ChangeKey(1, true, eyes[nType], LC_CK_EYE);
 	ChangeKey(1, true, Vector3(0, 0, 0), LC_CK_TARGET);
-	ChangeKey(1, true, &roll, LC_CK_ROLL);
+	ChangeKey(1, true, &rolls[nType], LC_CK_ROLL);
 
 	m_Name = names[nType];
 	if (nType != 8)

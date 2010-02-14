@@ -4,6 +4,7 @@
 #include "lc_colors.h"
 #include "lc_message.h"
 #include "lc_application.h"
+#include <math.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -82,6 +83,7 @@ void CColorTab::Draw(CDC& dc, CFont& Font, BOOL Selected, BOOL Focus)
 BEGIN_MESSAGE_MAP(CColorList, CWnd)
 	//{{AFX_MSG_MAP(CColorList)
 	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_SIZE()
 	ON_WM_KEYDOWN()
@@ -158,6 +160,31 @@ BOOL CColorList::PreTranslateMessage(MSG* pMsg)
 void CColorList::OnPaint() 
 {
 	CPaintDC dc(this);
+
+	CDC MemDC;
+	CRect rect;
+	CBitmap bitmap, *pOldBitmap;
+	dc.GetClipBox(&rect);
+	MemDC.CreateCompatibleDC(&dc);
+	bitmap.CreateCompatibleBitmap(&dc, rect.Width(), rect.Height());
+	pOldBitmap = MemDC.SelectObject(&bitmap);
+	MemDC.SetWindowOrg(rect.left, rect.top);
+	Draw(MemDC);
+	dc.BitBlt(rect.left, rect.top, rect.Width(), rect.Height(), &MemDC, rect.left, rect.top, SRCCOPY);
+	MemDC.SelectObject(pOldBitmap);
+}
+
+BOOL CColorList::OnEraseBkgnd(CDC* pDC) 
+{
+	return TRUE;	// Don't erase the background.
+}
+
+void CColorList::Draw(CDC& dc)
+{
+	CRect VisRect, ClipRect, rect;
+	GetClientRect(VisRect);
+	CBrush Back(GetSysColor(COLOR_BTNFACE));
+	dc.FillRect(VisRect, &Back);
 
 	CColorTab* CurTab = NULL;
 	BOOL Focus = (GetFocus() == this);
@@ -277,30 +304,47 @@ void CColorList::UpdateLayout()
 	GetClientRect(&rc);
 	rc.top = m_Tabs[0]->m_Rect.bottom;
 
-	m_ColorCols = lcNumUserColors / 6;
-	m_ColorRows = 6;
+	int TotalWidth = rc.Width();
+	int TotalHeight = rc.Height();
 
-	int CellWidth = rc.Width() / m_ColorCols;
-	int CellHeight = rc.Height() / m_ColorRows;
+	if (!TotalWidth || !TotalHeight)
+		return;
+
+	TotalWidth -= 2;
+	TotalHeight -= 2;
+
+	int Aspect = ABS(TotalWidth / TotalHeight);
+
+//	Cols = Aspect * Rows
+//	Cols * Rows = m_Colors.GetSize()
+
+	m_ColorRows = (int)sqrtf((float)(m_Colors.GetSize()) / (float)Aspect);
+
+	if (!m_ColorRows)
+		return;
+
+	m_ColorCols = (m_Colors.GetSize() + m_ColorRows - 1) / m_ColorRows;
+
+	float CellWidth = (float)TotalWidth / (float)m_ColorCols;
+	float CellHeight = (float)TotalHeight / (float)m_ColorRows;
 
 	for (int i = 0; i < lcNumUserColors; i++)
 		m_ToolTip.DelTool(this, i+1);
 
-	for (int i = 0; i < m_ColorRows; i++)
+	for (int ColorIndex = 0; ColorIndex < m_Colors.GetSize(); ColorIndex++)
 	{
-		for (int j = 0; j < m_ColorCols; j++)
-		{
-			int Index = i*m_ColorCols + j;
+		int Row = ColorIndex / m_ColorCols;
+		int Col = ColorIndex % m_ColorCols;
 
-			if (Index >= m_Colors.GetSize())
-				break;
+		float Left = Col * CellWidth + rc.left + 1;
+		float Right = (Col + 1) * CellWidth + rc.left + 1;
+		float Top = Row * CellHeight + rc.top + 1;
+		float Bottom = (Row + 1) * CellHeight + rc.top + 1;
 
-			CRect cell(0, 0, CellWidth, CellHeight);
-			cell.OffsetRect(j * CellWidth + rc.left, i * CellHeight + rc.top);
+		CRect Cell((int)Left, (int)Top, (int)Right, (int)Bottom);
 
-			m_Colors[Index].Rect = cell;
-			m_ToolTip.AddTool(this, g_ColorList[Index].Name, cell, Index+1);
-		}
+		m_Colors[ColorIndex].Rect = Cell;
+		m_ToolTip.AddTool(this, m_Colors[ColorIndex].Name, Cell, ColorIndex+1);
 	}
 }
 

@@ -87,9 +87,9 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 	if (!IsWindow(m_wndColorsList.m_hWnd))
 		return;
 
-	int off = LC_COLORLIST_NUM_ROWS*12+2+5;
-	int ColorWidth = ((cx-2) / LC_COLORLIST_NUM_COLS) * LC_COLORLIST_NUM_COLS + 2;
-	m_wndColorsList.SetWindowPos(NULL, (cx-ColorWidth)/2, cy-off, ColorWidth, LC_COLORLIST_NUM_ROWS*12+2, SWP_NOZORDER);
+	int off = 72+2+5;
+//	int ColorWidth = ((cx-2) / LC_COLORLIST_NUM_COLS) * LC_COLORLIST_NUM_COLS + 2;
+	m_wndColorsList.SetWindowPos(NULL, 5, cy-off, cx - 10, 72+2, SWP_NOZORDER);
 
 	off += 30;
 	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);

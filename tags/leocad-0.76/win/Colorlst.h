@@ -1,9 +1,6 @@
 #ifndef _COLORLST_H_
 #define _COLORLST_H_
 
-#define LC_COLORLIST_NUM_ROWS 6
-#define LC_COLORLIST_NUM_COLS 13
-
 class CColorTab
 {
 public:
@@ -74,6 +71,8 @@ protected:
 
 	bool m_ColorFocus;
 
+	void Draw(CDC& dc);
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CColorList)
@@ -85,6 +84,7 @@ protected:
 protected:
 	//{{AFX_MSG(CColorList)
 	afx_msg void OnPaint();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

@@ -272,11 +272,15 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		}
 	}
 
-	View view(project, project->GetFirstView());
+	View* ActiveView = project->GetActiveView();
+	View view(project, ActiveView);
 	view.CreateFromBitmap(hMemDC);
 	view.MakeCurrent();
 	view.OnSize(tw, th);
-	view.SetCamera(project->GetActiveView()->GetCamera());
+	if (ActiveView->GetCamera1())
+		view.SetCamera1(ActiveView->GetCamera1());
+	else
+		view.SetViewpoint(ActiveView->GetViewpoint());
 	project->AddView(&view);
 
 	project->RenderInitialize();
@@ -312,7 +316,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (tw != pw)
 		{
-			lcCamera* Camera = view.GetCamera();
+			lcViewpoint* Viewpoint = view.GetViewpoint();
 
 			int CurrentTile = 0;
 			int TileWidth = tw;
@@ -322,7 +326,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 			int Columns = (ImageWidth + TileWidth - 1) / TileWidth;
 			int Rows = (ImageHeight + TileHeight - 1) / TileHeight;
 			float xmin, xmax, ymin, ymax;
-			ymax = Camera->m_NearDist * tan(Camera->m_FOV * 3.14159265f / 360.0f);
+			ymax = Viewpoint->mNearDist * tan(Viewpoint->mFOV * 3.14159265f / 360.0f);
 			ymin = -ymax;
 			xmin = ymin * viewaspect;
 			xmax = ymax * viewaspect;
@@ -362,10 +366,10 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				bottom = ymin + (ymax - ymin) * (CurrentRow * TileHeight) / ImageHeight;
 				top = bottom + (ymax - ymin) * CurrentTileHeight / ImageHeight;
 
-				glFrustum(left, right, bottom, top, Camera->m_NearDist, Camera->m_FarDist);
+				glFrustum(left, right, bottom, top, Viewpoint->mNearDist, Viewpoint->mFarDist);
 
 				glMatrixMode(GL_MODELVIEW);
-				glLoadMatrixf(view.GetCamera()->m_WorldView);
+				glLoadMatrixf(Viewpoint->mWorldView);
 
 				project->RenderScene(&view, false);
 
@@ -761,7 +765,15 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CCADView* ActiveView = (CCADView*)GetParentFrame()->GetActiveView();
 	if (ActiveView)
 	{
-		m_pView->SetCamera(ActiveView->m_pView->GetCamera());
+		lcCamera* Camera = ActiveView->m_pView->GetCamera1();
+		if (Camera)
+			m_pView->SetCamera1(Camera);
+		else
+			m_pView->SetViewpoint(ActiveView->m_pView->GetViewpoint());
+	}
+	else
+	{
+		m_pView->mViewpoint.SetDefault(LC_VIEWPOINT_HOME);
 	}
 
 	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);

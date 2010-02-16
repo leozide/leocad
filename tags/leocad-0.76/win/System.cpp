@@ -1954,6 +1954,19 @@ long SystemGetTicks()
 	return GetTickCount();
 }
 
+u64 SystemGetMilliseconds()
+{
+	static LARGE_INTEGER TicksPerSecond;
+	LARGE_INTEGER Now;
+
+	QueryPerformanceCounter(&Now);
+
+	if (!TicksPerSecond.QuadPart)
+		QueryPerformanceFrequency(&TicksPerSecond);
+
+	return (u64)(Now.QuadPart / (TicksPerSecond.QuadPart / 1000.0));
+}
+
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();

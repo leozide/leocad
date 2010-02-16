@@ -4,6 +4,7 @@
 #include "opengl.h"
 #include "object.h"
 #include "algebra.h"
+#include "lc_viewpoint.h"
 
 #define LC_CAMERA_HIDDEN            0x01
 #define LC_CAMERA_SELECTED          0x02
@@ -15,18 +16,6 @@
 
 class lcCamera;
 class CameraTarget;
-
-enum LC_CAMERA_TYPES
-{
-	LC_CAMERA_RIGHT,
-	LC_CAMERA_LEFT,
-	LC_CAMERA_TOP,
-	LC_CAMERA_UNDER,
-	LC_CAMERA_BACK,
-	LC_CAMERA_FRONT,
-	LC_CAMERA_MAIN,
-	LC_CAMERA_USER
-};
 
 enum LC_CK_TYPES
 {
@@ -56,11 +45,10 @@ public:
 	lcCamera* m_Parent;
 };
 
-class lcCamera : public lcObject
+class lcCamera : public lcObject, public lcViewpoint
 {
 public:
 	lcCamera();
-	lcCamera(unsigned char nType);
 	lcCamera(const Vector3& Position, const Vector3& Target);
 	lcCamera(lcCamera* Camera);
 	virtual ~lcCamera();
@@ -69,20 +57,29 @@ public:
 	virtual void ClosestLineIntersect(lcClickLine& ClickLine) const;
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes) const;
 
-	// Move the camera along its Z axis.
-	void Zoom(u32 Time, bool AddKey, int MouseX, int MouseY);
+	// Set new position.
+	virtual void SetPosition(u32 Time, bool AddKey, const Vector3& Position)
+	{
+		lcViewpoint::SetPosition(Time, AddKey, Position);
 
-	// Move the camera along its XY plane.
-	void Pan(u32 Time, bool AddKey, int MouseX, int MouseY);
+		ChangeKey(Time, AddKey, mPosition, LC_CK_TARGET);
+	}
 
-	// Rotate the camera around its target.
-	void Orbit(u32 Time, bool AddKey, int MouseX, int MouseY);
+	// Set new target.
+	virtual void SetTarget(u32 Time, bool AddKey, const Vector3& Target)
+	{
+		lcViewpoint::SetTarget(Time, AddKey, Target);
 
-	// Rotate the target around the camera.
-	void Rotate(u32 Time, bool AddKey, int MouseX, int MouseY);
+		ChangeKey(Time, AddKey, mTarget, LC_CK_TARGET);
+	}
 
-	// Rotate the camera around its Z axis.
-	void Roll(u32 Time, bool AddKey, int MouseX, int MouseY);
+	// Set new roll.
+	virtual void SetRoll(u32 Time, bool AddKey, float Roll)
+	{
+		lcViewpoint::SetRoll(Time, AddKey, Roll);
+
+		ChangeKey(Time, AddKey, &mRoll, LC_CK_ROLL);
+	}
 
 
 
@@ -93,10 +90,6 @@ public:
 		{ m_nState = LC_CAMERA_HIDDEN; }
 	void UnHide()
 		{ m_nState &= ~LC_CAMERA_HIDDEN; }
-	bool IsSide()
-		{ return m_nType < LC_CAMERA_MAIN; }
-	bool IsUser()
-		{ return m_nType == LC_CAMERA_USER; }
 	bool IsVisible()
 		{ return (m_nState & LC_CAMERA_HIDDEN) == 0; }
 	bool IsSelected()
@@ -159,7 +152,6 @@ protected:
 
 	// Attributes
 	unsigned char m_nState;
-	unsigned char m_nType;
 };
 
 #endif // _CAMERA_H_

@@ -92,6 +92,7 @@ lcFile* SystemImportClipboard();
 
 void SystemPumpMessages();
 long SystemGetTicks();
+u64 SystemGetMilliseconds();
 
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text);
 void SystemEndProgressBar();

@@ -755,31 +755,6 @@ void lcModel::ResetCameras()
 		m_Cameras = (lcCamera*)m_Cameras->m_Next;
 		delete Camera;
 	}
-
-	// Create new default cameras.
-	for (int i = 0; i < 7; i++)
-	{
-		lcCamera* Camera = new lcCamera(i);
-
-		AddCamera(Camera);
-	}
-
-/*
-	lcObject* Last = NULL;
-	for (int i = 0; i < LC_CAMERA_USER; i++)
-	{
-		lcCamera* Camera = new lcCamera();
-		Camera->CreateCamera(i, true);
-		Camera->Update(1);
-
-		if (Last == NULL)
-			m_Cameras = Camera;
-		else
-			Last->m_Next = Camera;
-
-		Last = Camera;
-	}
-*/
 }
 
 lcCamera* lcModel::GetCamera(int Index) const
@@ -799,41 +774,6 @@ lcCamera* lcModel::GetCamera(const char* Name) const
 			return (lcCamera*)Camera;
 
 	return NULL;
-}
-
-void lcModel::ZoomExtents(View* view, lcCamera* Camera, bool AddKeys)
-{
-	if (!m_Pieces)
-		return;
-
-	// Calculate a bounding box that includes all pieces and use its center as the camera target.
-	lcObjArray<Vector3> Points;
-	Vector3 Center;
-
-	GetPointsOfInterest(Points, Center);
-
-	// Update eye and target positions.
-	Vector3 Eye = Camera->m_Position;
-	Vector3 Target = Camera->m_TargetPosition;
-
-	if (Camera->IsSide())
-		Eye += Center - Target;
-
-	Target = Center;
-
-	Camera->ChangeKey(m_CurFrame, AddKeys, Eye, LC_CK_EYE);
-	Camera->ChangeKey(m_CurFrame, AddKeys, Target, LC_CK_TARGET);
-	Camera->UpdatePosition(m_CurFrame);
-
-	float Aspect = (float)view->GetWidth()/(float)view->GetHeight();
-	Matrix44 Projection = CreatePerspectiveMatrix(Camera->m_FOV, Aspect, Camera->m_NearDist, Camera->m_FarDist);
-
-	Eye = ::ZoomExtents(Eye, Camera->m_WorldView, Projection, &Points[0], Points.GetSize());
-
-	// Save new positions.
-	Camera->ChangeKey(m_CurFrame, AddKeys, Eye, LC_CK_EYE);
-	Camera->ChangeKey(m_CurFrame, AddKeys, Target, LC_CK_TARGET);
-	Camera->UpdatePosition(m_CurFrame);
 }
 
 void lcModel::GetPointsOfInterest(lcObjArray<Vector3>& Points, Vector3& Center)

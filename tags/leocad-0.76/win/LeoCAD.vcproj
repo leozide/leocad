@@ -53,7 +53,7 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="lc_global.h"
 				PrecompiledHeaderFile=".\Debug/LeoCAD.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -2148,15 +2148,15 @@
 			Name="Help Files"
 			>
 			<File
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				>
+			</File>
+			<File
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				>
+			</File>
+			<File
 				RelativePath="hlp\AfxCore.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2164,15 +2164,15 @@
 				>
 			</File>
 			<File
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				>
+			</File>
+			<File
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				>
+			</File>
+			<File
 				RelativePath="hlp\AfxPrint.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
-				>
-			</File>
-			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File
@@ -2354,6 +2354,10 @@
 			</File>
 			<File
 				RelativePath="..\common\lc_model.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\lc_viewpoint.h"
 				>
 			</File>
 			<File
@@ -2888,6 +2892,10 @@
 						PrecompiledHeaderThrough="lc_global.h"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\common\lc_viewpoint.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\common\library.cpp"

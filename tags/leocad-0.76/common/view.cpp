@@ -14,12 +14,15 @@
 #include "lc_colors.h"
 #include "texfont.h"
 #include "lc_application.h"
+#include "system.h"
 
 View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
-	m_Camera = pProject->m_ActiveModel->GetCamera(LC_CAMERA_MAIN);
+	mCamera = NULL;//pProject->m_ActiveModel->GetCamera(LC_CAMERA_MAIN);
+
+	mTransitionActive = false;
 
 	m_ViewCubeTrack = false;
 	m_ViewCubeHover = 0;
@@ -103,14 +106,12 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 
 void View::OnDraw()
 {
-	if (m_Camera)
-	{
-		MakeCurrent();
+	if (mTransitionActive)
+		UpdateViewpointTransition();
 
-		m_Project->Render(this, true, true);
-
-		SwapBuffers();
-	}
+	MakeCurrent();
+	m_Project->Render(this, true, true);
+	SwapBuffers();
 }
 
 void View::OnInitialUpdate()
@@ -179,21 +180,21 @@ void View::OnSize(int cx, int cy)
 {
 	GLWindow::OnSize(cx, cy);
 
-	m_Viewport[0] = 0;
-	m_Viewport[1] = 0;
-	m_Viewport[2] = cx;
-	m_Viewport[3] = cy;
+	mViewport[0] = 0;
+	mViewport[1] = 0;
+	mViewport[2] = cx;
+	mViewport[3] = cy;
 
 	UpdateOverlayScale();
 }
 
 Matrix44 View::GetProjectionMatrix() const
 {
-	if (!m_Camera)
-		return IdentityMatrix44();
+	const lcViewpoint* Viewpoint = GetViewpoint();
 
 	float Aspect = (float)m_nWidth/(float)m_nHeight;
 
+	/*
 	if (m_Camera->IsOrtho())
 	{
 		float ymax, ymin, xmin, xmax, znear, zfar;
@@ -207,37 +208,29 @@ Matrix44 View::GetProjectionMatrix() const
 		return CreateOrthoMatrix(xmin, xmax, ymin, ymax, znear, zfar);
 	}
 	else
-		return CreatePerspectiveMatrix(m_Camera->m_FOV, Aspect, m_Camera->m_NearDist, m_Camera->m_FarDist);
+	*/
+		return CreatePerspectiveMatrix(Viewpoint->mFOV, Aspect, Viewpoint->mNearDist, Viewpoint->mFarDist);
 }
 
 void View::UpdateOverlayScale()
 {
 	Matrix44 Projection = GetProjectionMatrix();
 	const Vector3& Center = m_Project->GetOverlayCenter();
+	lcViewpoint* Viewpoint = GetViewpoint();
 
-	// Calculate the scaling factor by projecting the center to the front plane then
+	// Calculate the scaling factor by projecting the center to the front plane and then
 	// projecting a point close to it back.
-	Vector3 Screen = ProjectPoint(Center, m_Camera->m_WorldView, Projection, m_Viewport);
+	Vector3 Screen = ProjectPoint(Center, Viewpoint->mWorldView, Projection, mViewport);
 	Screen[0] += 10.0f;
-	Vector3 Point = UnprojectPoint(Screen, m_Camera->m_WorldView, Projection, m_Viewport);
+	Vector3 Point = UnprojectPoint(Screen, Viewpoint->mWorldView, Projection, mViewport);
 
 	Vector3 Dist = Point - Center;
 	m_OverlayScale = Length(Dist) * 5.0f;
 }
 
-void View::SetCamera(lcCamera* Camera)
-{
-	if (Camera)
-		m_CameraName = Camera->m_Name;
-	else
-		m_CameraName = "";
-
-	m_Camera = Camera;
-}
-
 #define LC_VIEWPOINT_CUBE_WIDTH 100
 #define LC_VIEWPOINT_CUBE_HEIGHT 100
-
+/*
 void View::UpdateCamera()
 {
 	lcCamera* Camera = m_Project->m_ActiveModel->GetCamera(m_CameraName);
@@ -248,7 +241,7 @@ void View::UpdateCamera()
 	m_Camera = Camera;
 	m_CameraName = m_Camera->m_Name;
 }
-
+*/
 void View::DrawViewCube()
 {
 	if (m_nWidth < LC_VIEWPOINT_CUBE_WIDTH || m_nHeight < LC_VIEWPOINT_CUBE_HEIGHT)
@@ -263,7 +256,7 @@ void View::DrawViewCube()
 	glLoadMatrixf(Projection);
 
 	glMatrixMode(GL_MODELVIEW);
-	Matrix44 WorldView = GetCamera()->m_WorldView;
+	Matrix44 WorldView = GetViewpoint()->mWorldView;
 	WorldView.m_Rows[3] = Vector4(0, 0, -4, 1);
 	glLoadMatrixf(WorldView);
 
@@ -354,7 +347,7 @@ int View::ViewCubeHitTest(int x, int y)
 		return 0;
 
 	Matrix44 Projection = CreatePerspectiveMatrix(60.0f, 1.0f, 0.1f, 20.0f);
-	Matrix44 WorldView = GetCamera()->m_WorldView;
+	Matrix44 WorldView = GetViewpoint()->mWorldView;
 	WorldView.m_Rows[3] = Vector4(0, 0, -4, 1);
 	int Viewport[4] = { 0, 0, LC_VIEWPOINT_CUBE_WIDTH, LC_VIEWPOINT_CUBE_HEIGHT };
 
@@ -411,20 +404,52 @@ void View::ViewCubeClick()
 
 	Vector3 CameraPos = Center + Vector3(x, y, z) * 10.0f;
 
-	lcCamera* Camera = GetCamera();
+	lcViewpoint Viewpoint = *GetViewpoint();
+	SetCamera1(NULL);
+
 	u32 Time = project->m_ActiveModel->m_CurFrame;
 	bool AddKey = false;
 	float Roll = 0;
 
-	Camera->ChangeKey(Time, AddKey, Center, LC_CK_TARGET);
-	Camera->ChangeKey(Time, AddKey, CameraPos, LC_CK_EYE);
-	Camera->ChangeKey(Time, AddKey, &Roll, LC_CK_ROLL);
-	Camera->UpdatePosition(Time);
+	Viewpoint.SetPosition(Time, AddKey, CameraPos);
+	Viewpoint.SetTarget(Time, AddKey, Center);
+	Viewpoint.SetRoll(Time, AddKey, Roll);
+	Viewpoint.CalculateMatrices();
 	
-	CameraPos = ZoomExtents(CameraPos, Camera->m_WorldView, GetProjectionMatrix(), &Points[0], Points.GetSize());
+	CameraPos = ZoomExtents(CameraPos, Viewpoint.mWorldView, GetProjectionMatrix(), &Points[0], Points.GetSize());
 
-	Camera->ChangeKey(Time, AddKey, CameraPos, LC_CK_EYE);
-	Camera->UpdatePosition(Time);
+	Viewpoint.SetPosition(Time, AddKey, CameraPos);
+	Viewpoint.CalculateMatrices();
+
+	StartViewpointTransition(&Viewpoint);
+}
+
+void View::StartViewpointTransition(const lcViewpoint* Viewpoint)
+{
+	// FIXME: block commands while animating
+	mTransitionActive = true;
+	mTransitionStart = SystemGetMilliseconds();
+	mViewpointStart = mViewpoint;
+	mViewpointEnd = *Viewpoint;
+	Redraw();
+}
+
+void View::UpdateViewpointTransition()
+{
+	float Elapsed = (SystemGetMilliseconds() - mTransitionStart) / 500.0f;
+
+	if (Elapsed > 1.0f)
+	{
+		mTransitionActive = false;
+		mViewpoint = mViewpointEnd;
+		Redraw();
+		return;
+	}
+
+	mViewpoint.mPosition = mViewpointStart.mPosition + (mViewpointEnd.mPosition - mViewpointStart.mPosition) * Elapsed;
+	mViewpoint.mTarget = mViewpointStart.mTarget + (mViewpointEnd.mTarget - mViewpointStart.mTarget) * Elapsed;
+	mViewpoint.mRoll = mViewpointStart.mRoll + (mViewpointEnd.mRoll - mViewpointStart.mRoll) * Elapsed;
+	mViewpoint.CalculateMatrices();
 
 	Redraw();
 }

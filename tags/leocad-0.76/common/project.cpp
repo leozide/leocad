@@ -112,7 +112,7 @@ void Project::UpdateInterface()
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 	UpdateSelection();
 	SystemUpdateTime(m_Animation, m_ActiveModel->m_CurFrame, m_Animation ? m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX);
 	SystemUpdateModelMenu(m_ModelList, m_ActiveModel);
@@ -185,7 +185,7 @@ void Project::DeleteContents(bool bUndo)
 	}
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
-		m_ViewList[i]->SetCamera(NULL);
+		m_ViewList[i]->SetCamera1(NULL);
 
 	// Remove all submodels.
 	for (int i = 0; i < m_ModelList.GetSize(); i++)
@@ -283,7 +283,7 @@ void Project::LoadDefaults(bool cameras)
 
 		SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
 		if (m_ActiveView)
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 	}
 
 	SystemPieceComboAdd(NULL);
@@ -591,7 +591,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			lcCamera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
-				pCam = new lcCamera(i);
+				pCam = new lcCamera();
 				m_ActiveModel->AddCamera(pCam);
 				pCam->FileLoad(*file);
 			}
@@ -759,7 +759,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 	UpdateSelection();
 	SystemUpdateTime(m_Animation, m_ActiveModel->m_CurFrame, m_Animation ? m_ActiveModel->m_TotalFrames : LC_OBJECT_TIME_MAX);
 	UpdateAllViews();
@@ -1235,12 +1235,6 @@ bool Project::OnOpenDocument(const char* PathName)
 
 			UpdateAllModelMeshes();
 
-			for (int ModelIndex = 0; ModelIndex < m_ModelList.GetSize(); ModelIndex++)
-			{
-				lcModel* Model = m_ModelList[ModelIndex];
-				Model->ZoomExtents(m_ActiveView, Model->GetCamera(LC_CAMERA_MAIN), false);
-			}
-
 			if (FileArray.GetSize() == 0)
 			{
 				LoadMPD = false;
@@ -1258,7 +1252,6 @@ bool Project::OnOpenDocument(const char* PathName)
 
 			Model->ResetCameras();
 			Model->ImportLDraw(file, LC_COLOR_DEFAULT, IdentityMatrix44(), FilePath);
-			Model->ZoomExtents(m_ActiveView, Model->GetCamera(LC_CAMERA_MAIN), false);
 		}
 
 		SetActiveModel(m_ModelList[0]);
@@ -1268,7 +1261,7 @@ bool Project::OnOpenDocument(const char* PathName)
 
 		SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
 		if (m_ActiveView)
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 
 		SystemUpdateTime(false, m_ActiveModel->m_CurFrame, LC_OBJECT_TIME_MAX);
 		SystemUpdateFocus(NULL);
@@ -1401,13 +1394,13 @@ bool Project::SetActiveView(View* view)
 	if (OldView)
 	{
 		OldView->Redraw();
-		OldCamera = OldView->GetCamera();
+		OldCamera = OldView->GetCamera1();
 	}
 
 	if (view)
 	{
 		view->Redraw();
-		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 	}
 
 	return true;
@@ -1439,7 +1432,7 @@ void Project::Render(View* view, bool AllowFast, bool Interface)
 	glLoadMatrixf(Projection);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(view->GetCamera()->m_WorldView);
+	glLoadMatrixf(view->GetViewpoint()->mWorldView);
 
 	// Render 3D objects.
 	if (AllowFast && (m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
@@ -1603,8 +1596,8 @@ void Project::RenderScene(View* view, bool Interface)
 		glDisable(GL_FOG);
 		glShadeModel(GL_FLAT);
 
-		lcCamera* Camera = view->GetCamera();
-
+		lcViewpoint* Viewpoint = view->GetViewpoint();
+/*
 		if (Camera->IsSide() && Camera->IsOrtho())
 		{
 			Vector3 frontvec = Vector3(Camera->m_ViewWorld[2]);
@@ -1702,27 +1695,28 @@ void Project::RenderScene(View* view, bool Interface)
 			glPopMatrix();
 		}
 		else
+*/
 		{
 			// Calculate view matrices.
-			Matrix44 ModelView = Camera->m_WorldView;
+			Matrix44 ModelView = Viewpoint->mWorldView;
 			Matrix44 Projection = view->GetProjectionMatrix();
 
 			// Unproject edge center points to world space.
 			Vector3 Points[10] =
 			{
-				Vector3(0, (float)view->m_Viewport[3] / 2, 0),
-				Vector3(0, (float)view->m_Viewport[3] / 2, 1),
-				Vector3((float)view->m_Viewport[2] / 2, 0, 0),
-				Vector3((float)view->m_Viewport[2] / 2, 0, 1),
-				Vector3((float)view->m_Viewport[2], (float)view->m_Viewport[3] / 2, 0),
-				Vector3((float)view->m_Viewport[2], (float)view->m_Viewport[3] / 2, 1),
-				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3], 0),
-				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3], 1),
-				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3] / 2, 0),
-				Vector3((float)view->m_Viewport[2] / 2, (float)view->m_Viewport[3] / 2, 1),
+				Vector3(0, (float)view->mViewport[3] / 2, 0),
+				Vector3(0, (float)view->mViewport[3] / 2, 1),
+				Vector3((float)view->mViewport[2] / 2, 0, 0),
+				Vector3((float)view->mViewport[2] / 2, 0, 1),
+				Vector3((float)view->mViewport[2], (float)view->mViewport[3] / 2, 0),
+				Vector3((float)view->mViewport[2], (float)view->mViewport[3] / 2, 1),
+				Vector3((float)view->mViewport[2] / 2, (float)view->mViewport[3], 0),
+				Vector3((float)view->mViewport[2] / 2, (float)view->mViewport[3], 1),
+				Vector3((float)view->mViewport[2] / 2, (float)view->mViewport[3] / 2, 0),
+				Vector3((float)view->mViewport[2] / 2, (float)view->mViewport[3] / 2, 1),
 			};
 
-			UnprojectPoints(Points, 10, ModelView, Projection, view->m_Viewport);
+			UnprojectPoints(Points, 10, ModelView, Projection, view->mViewport);
 
 			// Intersect lines with base plane.
 			Vector3 Intersections[5];
@@ -1829,7 +1823,7 @@ void Project::RenderScene(View* view, bool Interface)
 	lcObjArray<lcRenderSection> OpaqueSections(1024);
 	lcObjArray<lcRenderSection> TranslucentSections(1024);
 
-	const Matrix44& WorldView = view->GetCamera()->m_WorldView;
+	const Matrix44& WorldView = view->GetViewpoint()->mWorldView;
 
 	for (lcPiece * Piece = m_ActiveModel->m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
@@ -2055,7 +2049,7 @@ void Project::RenderScene(View* view, bool Interface)
 	// Draw cameras and lights.
 	for (lcCamera* Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
 	{
-		if ((Camera == view->GetCamera()) || !Camera->IsVisible())
+		if ((Camera == view->GetCamera1()) || !Camera->IsVisible())
 			continue;
 		Camera->Render(m_fLineWidth);
 	}
@@ -2112,7 +2106,7 @@ void Project::RenderInterface(View* view)
 	if (m_nSnap & LC_DRAW_AXIS)
 	{
 		Matrix44 Mats[3];
-		Mats[0] = view->GetCamera()->m_WorldView;
+		Mats[0] = view->GetViewpoint()->mWorldView;
 		Mats[1] = Matrix44(Mats[0][1], Mats[0][0], Mats[0][2], Mats[0][3]);
 		Mats[2] = Matrix44(Mats[0][2], Mats[0][1], Mats[0][0], Mats[0][3]);
 
@@ -2252,16 +2246,21 @@ void Project::RenderInterface(View* view)
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Draw camera name.
-	glEnable(GL_TEXTURE_2D);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_pScreenFont->MakeCurrent();
-	glEnable(GL_ALPHA_TEST);
+	lcCamera* Camera = view->GetCamera1();
 
-	glColor4f(0, 0, 0, 1);
-	m_pScreenFont->PrintText(3, h - 6, 0.0f, view->GetCamera()->m_Name);
+	if (Camera)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		m_pScreenFont->MakeCurrent();
+		glEnable(GL_ALPHA_TEST);
 
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_TEXTURE_2D);
+		glColor4f(0, 0, 0, 1);
+		m_pScreenFont->PrintText(3, h - 6, 0.0f, Camera->m_Name);
+
+		glDisable(GL_ALPHA_TEST);
+		glDisable(GL_TEXTURE_2D);
+	}
 }
 
 void Project::RenderOverlays(View* view)
@@ -2272,7 +2271,7 @@ void Project::RenderOverlays(View* view)
 	glLoadMatrixf(Projection);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(view->GetCamera()->m_WorldView);
+	glLoadMatrixf(view->GetViewpoint()->mWorldView);
 
 	const float OverlayScale = view->m_OverlayScale;
 
@@ -2410,7 +2409,7 @@ void Project::RenderOverlays(View* view)
 
 		glDisable(GL_DEPTH_TEST);
 
-		lcCamera* Cam = view->GetCamera();
+		lcViewpoint* Viewpoint = view->GetViewpoint();
 		Matrix44 Mat;
 		int j;
 
@@ -2538,7 +2537,7 @@ void Project::RenderOverlays(View* view)
 			}
 		}
 
-		Mat = Cam->m_ViewWorld;
+		Mat = Viewpoint->mViewWorld;
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
@@ -2566,7 +2565,7 @@ void Project::RenderOverlays(View* view)
 		glDrawArrays(GL_LINE_LOOP, 0, 32);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		Vector3 ViewDir = Vector3(Cam->m_ViewWorld[2]);
+		Vector3 ViewDir = Vector3(Viewpoint->mViewWorld[2]);
 
 		// Transform ViewDir to local space.
 		if (Focus)
@@ -2733,12 +2732,12 @@ void Project::RenderOverlays(View* view)
 				// Draw text.
 				if (view == m_ActiveView)
 				{
-					Vector3 ScreenPos = ProjectPoint(Vector3(0.0f, 0.0f, 0.0f), view->GetCamera()->m_WorldView, view->GetProjectionMatrix(), view->m_Viewport);
+					Vector3 ScreenPos = ProjectPoint(Vector3(0.0f, 0.0f, 0.0f), view->GetViewpoint()->mWorldView, view->GetProjectionMatrix(), view->mViewport);
 
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();
 					glLoadIdentity();
-					glOrtho(m_ActiveView->m_Viewport[0], m_ActiveView->m_Viewport[2], m_ActiveView->m_Viewport[1], m_ActiveView->m_Viewport[3], -1, 1);
+					glOrtho(m_ActiveView->mViewport[0], m_ActiveView->mViewport[2], m_ActiveView->mViewport[1], m_ActiveView->mViewport[3], -1, 1);
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
 					glLoadIdentity();
@@ -2756,7 +2755,7 @@ void Project::RenderOverlays(View* view)
 					m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
 					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-					m_pScreenFont->PrintText(ScreenPos[0] - m_ActiveView->m_Viewport[0] - (cx / 2), ScreenPos[1] - m_ActiveView->m_Viewport[1] + (cy / 2), 0.0f, buf);
+					m_pScreenFont->PrintText(ScreenPos[0] - m_ActiveView->mViewport[0] - (cx / 2), ScreenPos[1] - m_ActiveView->mViewport[1] + (cy / 2), 0.0f, buf);
 
 					glDisable(GL_TEXTURE_2D);
 					glDisable(GL_ALPHA_TEST);
@@ -3124,14 +3123,14 @@ bool Project::RemoveSelectedObjects()
 
 		for (int i = 0; i < m_ViewList.GetSize(); i++)
 		{
-			if (Camera == m_ViewList[i]->GetCamera())
+			if (Camera == m_ViewList[i]->GetCamera1())
 			{
 				CanDelete = false;
 				break;
 			}
 		}
 
-		if (CanDelete && Camera->IsSelected() && Camera->IsUser())
+		if (CanDelete && Camera->IsSelected())
 		{
 			if (Prev)
 			{
@@ -3149,7 +3148,7 @@ bool Project::RemoveSelectedObjects()
 			Removed = true;
 
 			SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 		}
 		else
 		{
@@ -3340,7 +3339,7 @@ u32 Project::GetLastStep() // TODO: remove function
 }
 
 // Create a series of pictures
-void Project::CreateImages (Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
+void Project::CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {
 	void* render = Sys_StartMemoryRender (width, height);
 	unsigned char* buf = (unsigned char*)malloc(width*height*3);
@@ -3348,7 +3347,12 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 
 	View view(this, m_ActiveView);
 	view.OnSize(width, height);
-	view.SetCamera(m_ActiveModel->GetCamera(LC_CAMERA_MAIN));
+
+	lcCamera* Camera = m_ActiveView->GetCamera1();
+	if (Camera)
+		view.SetCamera1(Camera);
+	else
+		view.SetViewpoint(m_ActiveView->GetViewpoint());
 
 	if (!hilite)
 		SelectAndFocusNone(false);
@@ -4259,12 +4263,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				ptr = fn;
 
 			fprintf(f, "// File created by LeoCAD\n//\n\n#include \"%s.inc\"\n", ptr);
-			Vector3 eye = m_ActiveView->GetCamera()->m_Position;
-			Vector3 target = m_ActiveView->GetCamera()->m_TargetPosition;
-			Vector3 up = Vector3(m_ActiveView->GetCamera()->m_ViewWorld[1]);
+			Vector3 eye = m_ActiveView->GetViewpoint()->mPosition;
+			Vector3 target = m_ActiveView->GetViewpoint()->mTarget;
+			Vector3 up = Vector3(m_ActiveView->GetViewpoint()->mViewWorld[1]);
 
 			fprintf(f, "\ncamera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
-				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_ActiveView->GetCamera()->m_FOV);
+				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_ActiveView->GetViewpoint()->mFOV);
 			fprintf(f, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
 				m_fBackground[0], m_fBackground[1], m_fBackground[2]);
 
@@ -4845,7 +4849,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			while (i--)
 			{
-				pCamera = new lcCamera(8);
+				pCamera = new lcCamera();
 				m_ActiveModel->AddCamera(pCamera);
 				pCamera->FileLoad(*file);
 				pCamera->Select(true, false, false);
@@ -4911,7 +4915,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					i++;
 
 			for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-				if (pCamera != m_ActiveView->GetCamera())
+				if (pCamera != m_ActiveView->GetCamera1())
 					if (pCamera->IsVisible())
 						i++;
 
@@ -4943,7 +4947,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 
 			for (pCamera = m_ActiveModel->m_Cameras; pCamera; pCamera = (lcCamera*)pCamera->m_Next)
-				if (pCamera != m_ActiveView->GetCamera())
+				if (pCamera != m_ActiveView->GetCamera1())
 					if (pCamera->IsVisible())
 					{
 						opts[i].name = pCamera->m_Name;
@@ -5800,7 +5804,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOM:
 		{
-			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, nParam);
+			m_ActiveView->GetViewpoint()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, nParam);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5808,7 +5812,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMIN:
 		{
-			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, -1);
+			m_ActiveView->GetViewpoint()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, -1);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5816,7 +5820,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMOUT:
 		{
-			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, 1);
+			m_ActiveView->GetViewpoint()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, 1);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5838,12 +5842,21 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				LastView = FirstView + 1;
 			}
 
+			lcObjArray<Vector3> Points;
+			Vector3 Center;
+
+			m_ActiveModel->GetPointsOfInterest(Points, Center);
+
 			for (int vp = FirstView; vp < LastView; vp++)
 			{
 				View* view = m_ViewList[vp];
-				lcCamera* Camera = view->GetCamera();
+				lcViewpoint* Viewpoint = view->GetViewpoint();
 
-				m_ActiveModel->ZoomExtents(view, Camera, m_bAddKeys);
+				Viewpoint->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, Viewpoint->mPosition + Center - Viewpoint->mTarget);
+				Viewpoint->SetTarget(m_ActiveModel->m_CurFrame, m_bAddKeys, Center);
+				Viewpoint->CalculateMatrices();
+
+				Viewpoint->ZoomExtents(m_ActiveModel->m_CurFrame, m_bAddKeys, view, Points);
 			}
 
 			SystemUpdateFocus(NULL);
@@ -5874,11 +5887,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			LC_ASSERT((nParam >= 0) && (nParam < 14), "Invalid view parameter.");
 
-			lcCamera* OldCamera = m_ActiveView->GetCamera();
+			lcCamera* OldCamera = m_ActiveView->GetCamera1();
 
 			main_window->SetViewLayout(Viewports[nParam]);
 
-			SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 			UpdateOverlayScale();
 		} break;
 
@@ -6013,37 +6026,37 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_FRONT:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_FRONT);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_FRONT);
 		} break;
 
 		case LC_VIEW_CAMERA_BACK:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_BACK);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_BACK);
 		} break;
 
 		case LC_VIEW_CAMERA_TOP:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_TOP);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_TOP);
 		} break;
 
 		case LC_VIEW_CAMERA_BOTTOM:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_UNDER);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_BOTTOM);
 		} break;
 
 		case LC_VIEW_CAMERA_LEFT:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_LEFT);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_LEFT);
 		} break;
 
 		case LC_VIEW_CAMERA_RIGHT:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_RIGHT);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_RIGHT);
 		} break;
 
 		case LC_VIEW_CAMERA_MAIN:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_MAIN);
+			HandleCommand(LC_VIEW_CAMERA_MENU, LC_VIEWPOINT_HOME);
 		} break;
 
 		case LC_VIEW_CAMERA_MENU:
@@ -6053,8 +6066,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			while (nParam--)
 				Camera = (lcCamera*)Camera->m_Next;
 
-			SystemUpdateCurrentCamera(m_ActiveView->GetCamera(), Camera, m_ActiveModel->m_Cameras);
-			m_ActiveView->SetCamera(Camera);
+			SystemUpdateCurrentCamera(m_ActiveView->GetCamera1(), Camera, m_ActiveModel->m_Cameras);
+			m_ActiveView->SetCamera1(Camera);
 			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
@@ -6067,7 +6080,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				m_ViewList[i]->UpdateCamera();
 
 			SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -6083,7 +6096,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			x -= x > 0 ? 5 : -5;
 			y -= y > 0 ? 5 : -5;
 
-			m_ActiveView->GetCamera()->Pan(m_ActiveModel->m_CurFrame, m_bAddKeys, x/4, y/4);
+			m_ActiveView->GetViewpoint()->Pan(m_ActiveModel->m_CurFrame, m_bAddKeys, x/4, y/4);
 			m_nDownX = x;
 			m_nDownY = y;
 			UpdateOverlayScale();
@@ -6659,13 +6672,13 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	}
 
 	// Try to hit the base grid.
-	lcCamera* Camera = m_ActiveView->GetCamera();
+	lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
 
 	// Build the matrices.
 	Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
 
 	Vector3 ClickPoints[2] = { Vector3((float)m_nDownX, (float)m_nDownY, 0.0f), Vector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
-	UnprojectPoints(ClickPoints, 2, Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
+	UnprojectPoints(ClickPoints, 2, Viewpoint->mWorldView, Projection, m_ActiveView->mViewport);
 
 	Vector3 Intersection;
 	if (LinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
@@ -6681,17 +6694,17 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position = UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
+	Position = UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), Viewpoint->mWorldView, Projection, m_ActiveView->mViewport);
 	Rotation = Vector4(0, 0, 1, 0);
 }
 
 lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 {
 	Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
-	const Matrix44& ModelView = m_ActiveView->GetCamera()->m_WorldView;
+	const Matrix44& ModelView = m_ActiveView->GetViewpoint()->mWorldView;
 
-	Vector3 Start = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, m_ActiveView->m_Viewport);
-	Vector3 End = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, m_ActiveView->m_Viewport);
+	Vector3 Start = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, m_ActiveView->mViewport);
+	Vector3 End = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, m_ActiveView->mViewport);
 
 	lcClickLine ClickLine;
 	ClickLine.Start = Start;
@@ -6706,7 +6719,7 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 	if (!PiecesOnly)
 	{
 		for (lcCamera* Camera = m_ActiveModel->m_Cameras; Camera; Camera = (lcCamera*)Camera->m_Next)
-			if (Camera != m_ActiveView->GetCamera() && Camera->IsVisible())
+			if (Camera != m_ActiveView->GetCamera1() && Camera->IsVisible())
 				Camera->ClosestLineIntersect(ClickLine);
 
 		for (lcLight* Light = m_ActiveModel->m_Lights; Light; Light = (lcLight*)Light->m_Next)
@@ -6719,7 +6732,7 @@ lcObject* Project::FindObjectFromPoint(int x, int y, bool PiecesOnly)
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArray<lcObject>& Objects)
 {
-	lcCamera* Camera = m_ActiveView->GetCamera();
+	lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
 
 	// Find out the top-left and bottom-right corners in screen coordinates.
 	float Left, Top, Bottom, Right;
@@ -6754,7 +6767,7 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcPtrArra
 	};
 
 	Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
-	UnprojectPoints(Corners, 6, Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
+	UnprojectPoints(Corners, 6, Viewpoint->mWorldView, Projection, m_ActiveView->mViewport);
 
 	// Build the box planes.
 	Vector4 Planes[6];
@@ -6894,7 +6907,7 @@ bool Project::StopTracking(bool bAccept)
 			case LC_ACTION_CAMERA:
 			{
 				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-				SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+				SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
@@ -6954,24 +6967,24 @@ bool Project::StopTracking(bool bAccept)
 				Vector3 Points[3] =
 				{
 					Vector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-					Vector3((float)m_ActiveView->m_Viewport[2] / 2.0f, (float)m_ActiveView->m_Viewport[3] / 2.0f, 0.9f),
-					Vector3((float)m_ActiveView->m_Viewport[2] / 2.0f, (float)m_ActiveView->m_Viewport[3] / 2.0f, 0.1f),
+					Vector3((float)m_ActiveView->mViewport[2] / 2.0f, (float)m_ActiveView->mViewport[3] / 2.0f, 0.9f),
+					Vector3((float)m_ActiveView->mViewport[2] / 2.0f, (float)m_ActiveView->mViewport[3] / 2.0f, 0.1f),
 				};
 
-				lcCamera* Camera = m_ActiveView->GetCamera();
+				lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
 				Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
-				UnprojectPoints(Points, 3, Camera->m_WorldView, Projection, m_ActiveView->m_Viewport);
+				UnprojectPoints(Points, 3, Viewpoint->mWorldView, Projection, m_ActiveView->mViewport);
 
 				// Center camera.
-				Vector3 Eye = Camera->m_Position;
+				Vector3 Eye = Viewpoint->mPosition;
 				Eye = Eye + (Points[0] - Points[1]);
 
-				Vector3 Target = Camera->m_TargetPosition;
+				Vector3 Target = Viewpoint->mTarget;
 				Target = Target + (Points[0] - Points[1]);
 
 				// Zoom in/out.
-				float RatioX = (Right - Left) / m_ActiveView->m_Viewport[2];
-				float RatioY = (Top - Bottom) / m_ActiveView->m_Viewport[3];
+				float RatioX = (Right - Left) / m_ActiveView->mViewport[2];
+				float RatioY = (Top - Bottom) / m_ActiveView->mViewport[3];
 				float ZoomFactor = -max(RatioX, RatioY) + 0.75f;
 
 				Vector3 Dir = Points[1] - Points[2];
@@ -6979,9 +6992,9 @@ bool Project::StopTracking(bool bAccept)
 				Target = Target + Dir * ZoomFactor;
 
 				// Change the camera and redraw.
-				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye, LC_CK_EYE);
-				Camera->ChangeKey(m_ActiveModel->m_CurFrame, m_bAddKeys, Target, LC_CK_TARGET);
-				Camera->UpdatePosition(m_ActiveModel->m_CurFrame);
+				Viewpoint->SetPosition(m_ActiveModel->m_CurFrame, m_bAddKeys, Eye);
+				Viewpoint->SetTarget(m_ActiveModel->m_CurFrame, m_bAddKeys, Target);
+				Viewpoint->CalculateMatrices();
 
 				SystemUpdateFocus(NULL);
 				UpdateAllViews();
@@ -7608,11 +7621,11 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-				lcCamera* Camera = m_ActiveView->GetCamera();
-
+				lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
+/*
 				if (Camera->IsSide())
 				{
-					Matrix44 mat = Camera->m_ViewWorld;
+					Matrix44 mat = Viewpoint->mViewWorld;
 
 					switch (nKey)
 					{
@@ -7644,6 +7657,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					axis = Mul30(axis, mat);
 				}
 				else
+*/
 				{
 
 					// TODO: rewrite this
@@ -7671,7 +7685,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					}
 
 					Vector3 Pts[3] = { Vector3(5.0f, 5.0f, 0.1f), Vector3(10.0f, 5.0f, 0.1f), Vector3(5.0f, 10.0f, 0.1f) };
-					UnprojectPoints(Pts, 3, m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+					UnprojectPoints(Pts, 3, m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
 
 					float ax, ay;
 					Vector3 vx = Normalize(Vector3((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0));//Pts[1][2] - Pts[0][2] };
@@ -7861,7 +7875,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	m_MouseSnapLeftover = Vector3(0, 0, 0);
 
 	Matrix44 ProjectionMatrix = m_ActiveView->GetProjectionMatrix();
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, ProjectionMatrix, m_ActiveView->m_Viewport);
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, ProjectionMatrix, m_ActiveView->mViewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	switch (m_nCurAction)
@@ -7900,10 +7914,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 							pCamera = (lcCamera*)Object;
 						else
 							pCamera = ((CameraTarget*)Object)->m_Parent;
-						bool bCanDelete = pCamera->IsUser();
+						bool bCanDelete = true;
 
 						for (int i = 0; i < m_ViewList.GetSize(); i++)
-							if (pCamera == m_ViewList[i]->GetCamera())
+							if (pCamera == m_ViewList[i]->GetCamera1())
 								bCanDelete = false;
 
 						if (bCanDelete)
@@ -7915,7 +7929,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 									pPrev->m_Next = pCamera->m_Next;
 									delete pCamera;
 									SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-									SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+									SystemUpdateCurrentCamera(NULL, m_ActiveView->GetCamera1(), m_ActiveModel->m_Cameras);
 									break;
 								}
 						}
@@ -8027,7 +8041,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			if (count == max)
 				break;
 
-			Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), m_ActiveView->GetCamera()->m_WorldView, ProjectionMatrix, m_ActiveView->m_Viewport);
+			Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, ProjectionMatrix, m_ActiveView->mViewport);
 
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
@@ -8043,7 +8057,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 		case LC_ACTION_CAMERA:
 		{
-			Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), m_ActiveView->GetCamera()->m_WorldView, ProjectionMatrix, m_ActiveView->m_Viewport);
+			Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, ProjectionMatrix, m_ActiveView->mViewport);
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
 
@@ -8105,7 +8119,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 		return;
 
 	// todo: check if this needs to be done here.
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	lcObject* Object = FindObjectFromPoint(x, y);
@@ -8194,7 +8208,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	switch (m_nCurAction)
@@ -8244,7 +8258,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	if (m_nTracking == LC_TRACK_START_LEFT)
 		m_nTracking = LC_TRACK_LEFT;
 
-	Vector3 tmp = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+	Vector3 tmp = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
 	float ptx, pty, ptz;
 	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
 
@@ -8254,15 +8268,15 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		{
 			int ptx = x, pty = y;
 
-			if (ptx >= m_ActiveView->m_Viewport[0] + m_ActiveView->m_Viewport[2])
-				ptx = m_ActiveView->m_Viewport[0] + m_ActiveView->m_Viewport[2] - 1;
-			else if (ptx <= m_ActiveView->m_Viewport[0])
-				ptx = m_ActiveView->m_Viewport[0] + 1;
+			if (ptx >= m_ActiveView->mViewport[0] + m_ActiveView->mViewport[2])
+				ptx = m_ActiveView->mViewport[0] + m_ActiveView->mViewport[2] - 1;
+			else if (ptx <= m_ActiveView->mViewport[0])
+				ptx = m_ActiveView->mViewport[0] + 1;
 
-			if (pty >= m_ActiveView->m_Viewport[1] + m_ActiveView->m_Viewport[3])
-				pty = m_ActiveView->m_Viewport[1] + m_ActiveView->m_Viewport[3] - 1;
-			else if (pty <= m_ActiveView->m_Viewport[1])
-				pty = m_ActiveView->m_Viewport[1] + 1;
+			if (pty >= m_ActiveView->mViewport[1] + m_ActiveView->mViewport[3])
+				pty = m_ActiveView->mViewport[1] + m_ActiveView->mViewport[3] - 1;
+			else if (pty <= m_ActiveView->mViewport[1])
+				pty = m_ActiveView->mViewport[1] + 1;
 
 			m_fTrack[0] = (float)ptx;
 			m_fTrack[1] = (float)pty;
@@ -8326,13 +8340,13 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				break;
 
 			float Sensitivity = 0.25f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-			lcCamera* Camera = m_ActiveView->GetCamera();
+			lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
 			bool Redraw;
 
-			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
+			if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
 			{
-				Vector3 ScreenX = Vector3(Camera->m_ViewWorld[0]);
-				Vector3 ScreenY = Vector3(Camera->m_ViewWorld[1]);
+				Vector3 ScreenX = Vector3(Viewpoint->mViewWorld[0]);
+				Vector3 ScreenY = Vector3(Viewpoint->mViewWorld[1]);
 
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
@@ -8462,9 +8476,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenX = Vector3(Camera->m_ViewWorld[0]);
-				Vector3 ScreenY = Vector3(Camera->m_ViewWorld[1]);
-				Vector3 ScreenZ = Vector3(Camera->m_ViewWorld[2]);
+				Vector3 ScreenX = Vector3(Viewpoint->mViewWorld[0]);
+				Vector3 ScreenY = Vector3(Viewpoint->mViewWorld[1]);
+				Vector3 ScreenZ = Vector3(Viewpoint->mViewWorld[2]);
 
 				Vector3 TotalMove;
 
@@ -8500,13 +8514,13 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		case LC_ACTION_ROTATE:
 		{
 			float Sensitivity = 36.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-			lcCamera* Camera = m_ActiveView->GetCamera();
+			lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
 			bool Redraw;
 
-			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
+			if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ))
 			{
-				Vector3 ScreenX = Vector3(Camera->m_ViewWorld[0]);
-				Vector3 ScreenY = Vector3(Camera->m_ViewWorld[1]);
+				Vector3 ScreenX = Vector3(Viewpoint->mViewWorld[0]);
+				Vector3 ScreenY = Vector3(Viewpoint->mViewWorld[1]);
 
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
@@ -8622,9 +8636,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenX = Vector3(Camera->m_ViewWorld[0]);
-				Vector3 ScreenY = Vector3(Camera->m_ViewWorld[1]);
-				Vector3 ScreenZ = Vector3(Camera->m_ViewWorld[2]);
+				Vector3 ScreenX = Vector3(Viewpoint->mViewWorld[0]);
+				Vector3 ScreenY = Vector3(Viewpoint->mViewWorld[1]);
+				Vector3 ScreenZ = Vector3(Viewpoint->mViewWorld[2]);
 
 				Vector3 Delta;
 
@@ -8663,7 +8677,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownY == y)
 				break;
 
-			m_ActiveView->GetCamera()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+			m_ActiveView->GetViewpoint()->Zoom(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8684,7 +8698,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			m_ActiveView->GetCamera()->Pan(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+			m_ActiveView->GetViewpoint()->Pan(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -8696,21 +8710,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			lcCamera* Camera = m_ActiveView->GetCamera();
-
-			if (Camera->IsSide())
-			{
-				// Create a new camera if the user is trying to rotate a side camera.
-				Camera = new lcCamera(Camera);
-				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
-				m_ActiveModel->AddCamera(Camera);
-
-				m_ActiveView->SetCamera(Camera);
-				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
-			}
-
-			Camera->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+			m_ActiveView->GetViewpoint()->Rotate(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 
 			m_nDownX = x;
 			m_nDownY = y;
@@ -8723,36 +8723,36 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			lcCamera* Camera = m_ActiveView->GetCamera();
+			lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
+			Vector3 Target;
 
-			if (Camera->IsSide())
+			if (m_ActiveView->GetCamera1())
+				Target = Viewpoint->mTarget;
+			else
 			{
-				// Create a new camera if the user is trying to rotate a side camera.
-				Camera = new lcCamera(Camera);
-				Camera->SetUniqueName(m_ActiveModel->m_Cameras, "Camera");
-				m_ActiveModel->AddCamera(Camera);
-
-				m_ActiveView->SetCamera(Camera);
-				SystemUpdateCameraMenu(m_ActiveModel->m_Cameras);
-				SystemUpdateCurrentCamera(NULL, Camera, m_ActiveModel->m_Cameras);
+				lcObjArray<Vector3> Points;
+				m_ActiveModel->GetPointsOfInterest(Points, Target);
 			}
 
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_XYZ:
-					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+					Viewpoint->mTarget = Target;
+					Viewpoint->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_X:
-					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
+					Viewpoint->mTarget = Target;
+					Viewpoint->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, 0);
 					break;
 
 				case LC_OVERLAY_Y:
-					Camera->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, y - m_nDownY);
+					Viewpoint->mTarget = Target;
+					Viewpoint->Orbit(m_ActiveModel->m_CurFrame, m_bAddKeys, 0, y - m_nDownY);
 					break;
 
 				case LC_OVERLAY_Z:
-					Camera->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+					Viewpoint->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 					break;
 			}
 
@@ -8767,7 +8767,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->GetCamera()->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
+			m_ActiveView->GetViewpoint()->Roll(m_ActiveModel->m_CurFrame, m_bAddKeys, x - m_nDownX, y - m_nDownY);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8842,7 +8842,7 @@ void Project::MouseUpdateOverlays(int x, int y)
 		for (i = 1; i < 4; i++)
 			Points[i] += Points[0];
 
-		ProjectPoints(Points, 4, m_ActiveView->GetCamera()->m_WorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->m_Viewport);
+		ProjectPoints(Points, 4, m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
 
 		// Check if the mouse is over an arrow.
 		for (i = 1; i < 4; i++)
@@ -8906,10 +8906,10 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 		// Calculate the distance from the mouse pointer to the center of the sphere.
 		Matrix44 Projection = m_ActiveView->GetProjectionMatrix();
-		const Matrix44& ModelView = m_ActiveView->GetCamera()->m_WorldView;
+		const Matrix44& ModelView = m_ActiveView->GetViewpoint()->mWorldView;
 
-		Vector3 SegStart = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, m_ActiveView->m_Viewport);
-		Vector3 SegEnd = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, m_ActiveView->m_Viewport);
+		Vector3 SegStart = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, m_ActiveView->mViewport);
+		Vector3 SegEnd = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, m_ActiveView->mViewport);
 		Vector3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 		Vector3 Line = SegEnd - SegStart;
@@ -8958,8 +8958,8 @@ void Project::MouseUpdateOverlays(int x, int y)
 
 			if (f >= 0.0f)
 			{
-				lcCamera* Camera = m_ActiveView->GetCamera();
-				Vector3 ViewDir = Vector3(Camera->m_ViewWorld[2]);
+				lcViewpoint* Viewpoint = m_ActiveView->GetViewpoint();
+				Vector3 ViewDir = Vector3(Viewpoint->mViewWorld[2]);
 
 				float u1 = (-b + sqrtf(f)) / (2*a);
 				float u2 = (-b - sqrtf(f)) / (2*a);

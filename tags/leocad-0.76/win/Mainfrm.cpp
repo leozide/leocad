@@ -1631,6 +1631,8 @@ void CMainFrame::OnViewResetViews()
 // Creates views based on a string describing the layout.
 void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
 {
+	/*
+	FIXME: view layout
 	if (!wnd)
 	{
 		wnd = m_wndSplitter.GetPane(0, 0);
@@ -1713,11 +1715,14 @@ void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
 		str++;
 		return;
 	}
+	*/
 }
 
 // Creates a string describing the view layout.
 void CMainFrame::GetViewLayout(CWnd* wnd, String& str) const
 {
+	/*
+	FIXME: view layout
 	if (!wnd)
 	{
 		wnd = m_wndSplitter.GetPane(0, 0);
@@ -1773,4 +1778,5 @@ void CMainFrame::GetViewLayout(CWnd* wnd, String& str) const
 		else
 			GetViewLayout(splitter->GetPane(0, 1), str);
 	}
+	*/
 }

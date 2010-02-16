@@ -3,6 +3,8 @@
 
 #include "glwindow.h"
 #include "typedefs.h"
+#include "camera.h"
+#include "lc_viewpoint.h"
 
 class Project;
 class lcCamera;
@@ -31,23 +33,61 @@ public:
 
 	void UpdateOverlayScale();
 
-	lcCamera* GetCamera() const
+	lcCamera* GetCamera1() const
 	{
-		return m_Camera;
+		return mCamera;
 	}
-	void SetCamera(lcCamera* cam);
-	void UpdateCamera();
+
+	void SetCamera1(lcCamera* Camera)
+	{
+		if (mCamera && !Camera)
+			mViewpoint = *mCamera;
+
+		mCamera = Camera;
+	}
+
+	lcViewpoint* GetViewpoint()
+	{
+		if (mCamera)
+			return mCamera;
+		else
+			return &mViewpoint;
+	}
+
+	const lcViewpoint* GetViewpoint() const
+	{
+		if (mCamera)
+			return mCamera;
+		else
+			return &mViewpoint;
+	}
+
+	void SetViewpoint(const lcViewpoint* Viewpoint)
+	{
+		mViewpoint = *Viewpoint;
+	}
+
+	void StartViewpointTransition(const lcViewpoint* Viewpoint);
+	void UpdateViewpointTransition();
+
+	void UpdateCamera() { };
 	Matrix44 GetProjectionMatrix() const;
 
 public:
-	float m_OverlayScale;
+	float m_OverlayScale; // TODO: Remove m_OverlayScale
 
 	bool m_ViewCubeTrack;
 	int m_ViewCubeHover;
 
-	int m_Viewport[4];
-	lcCamera* m_Camera;
-	String m_CameraName;
+	int mViewport[4];
+	lcCamera* mCamera;
+	lcViewpoint mViewpoint;
+
+	// Transition.
+	bool mTransitionActive;
+	u64 mTransitionStart;
+	lcViewpoint mViewpointStart;
+	lcViewpoint mViewpointEnd;
 
 	Project* m_Project; // TODO: remove m_Project.
 };

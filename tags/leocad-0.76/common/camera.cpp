@@ -90,32 +90,6 @@ lcCamera::lcCamera()
 	Initialize();
 }
 
-// Start with a standard camera.
-lcCamera::lcCamera(unsigned char nType)
-	: lcObject(LC_OBJECT_CAMERA)
-{
-	if (nType > 7)
-		nType = 8;
-
-	char names[8][7] = { "Right", "Left",  "Top",  "Bottom", "Back", "Front", "Main", "User" };
-	float eyes[8][3] = { { 50,0,0 }, { -50,0,0 }, { 0,0,50 }, { 0,0,-50 },
-	                     { 0,50,0 }, { 0,-50,0 }, { -10,-10,5}, { 0,5,0 } };
-	float rolls[8] = { 0.0f, 0.0f, -LC_PI/2, -LC_PI/2, 0.0f, 0.0f, 0.0f, 0.0f };
-
-	Initialize();
-
-	ChangeKey(1, true, eyes[nType], LC_CK_EYE);
-	ChangeKey(1, true, Vector3(0, 0, 0), LC_CK_TARGET);
-	ChangeKey(1, true, &rolls[nType], LC_CK_ROLL);
-
-	m_Name = names[nType];
-	if (nType != 8)
-		m_nState = LC_CAMERA_HIDDEN;
-	m_nType = nType;
-
-	UpdatePosition(1);
-}
-
 lcCamera::lcCamera(lcCamera* Camera)
 	: lcObject(LC_OBJECT_CAMERA)
 {
@@ -154,7 +128,6 @@ void lcCamera::Initialize()
 	m_FarDist = 500;
 
 	m_nState = 0;
-	m_nType = LC_CAMERA_USER;
 
 	float *values[] = { m_Position, m_TargetPosition, &m_Roll };
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
@@ -319,8 +292,9 @@ bool lcCamera::FileLoad(lcFile& file)
 		}
 		else
 		{
+			unsigned char Type;
 			file.ReadBytes(&m_nState);
-			file.ReadBytes(&m_nType);
+			file.ReadBytes(&Type);
 		}
 	}
 
@@ -356,7 +330,8 @@ void lcCamera::FileSave(lcFile& file) const
 	file.WriteFloats(&m_NearDist);
 	// version 5
 	file.WriteBytes(&m_nState);
-	file.WriteBytes(&m_nType);
+	unsigned char Type = 0;
+	file.WriteBytes(&Type);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -364,6 +339,7 @@ void lcCamera::FileSave(lcFile& file) const
 
 void lcCamera::Move(u32 Time, bool AddKey, const Vector3& Delta)
 {
+	/*
 	if (IsSide())
 	{
 		m_Position += Delta;
@@ -373,6 +349,7 @@ void lcCamera::Move(u32 Time, bool AddKey, const Vector3& Delta)
 		ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
 	}
 	else
+	*/
 	{
 		if (IsEyeSelected())
 		{
@@ -446,35 +423,7 @@ void lcCamera::UpdatePosition(u32 Time)
 {
 	CalculateKeys(Time);
 
-	Vector3 Z = Normalize(m_Position - m_TargetPosition);
-
-	// Build the Y vector of the matrix.
-	Vector3 UpVector;
-
-	if (fabsf(Z[0]) < 0.001f && fabsf(Z[1]) < 0.001f)
-		UpVector = Vector3(-Z[2], 0, 0);
-	else
-		UpVector = Vector3(0, 0, 1);
-
-	// Calculate X vector.
-	Vector3 X = Cross(UpVector, Z);
-
-	// Calculate real Y vector.
-	Vector3 Y = Cross(Z, X);
-
-	// Apply the roll rotation and recalculate X and Y.
-	Matrix33 RollMat = MatrixFromAxisAngle(Z, m_Roll);
-	Y = Normalize(Mul(Y, RollMat));
-	X = Normalize(Cross(Y, Z));
-
-	// Build matrices.
-	Vector4 Row0 = Vector4(X[0], Y[0], Z[0], 0.0f);
-	Vector4 Row1 = Vector4(X[1], Y[1], Z[1], 0.0f);
-	Vector4 Row2 = Vector4(X[2], Y[2], Z[2], 0.0f);
-	Vector4 Row3 = Vector4(Vector3(Row0 * -m_Position[0] + Row1 * -m_Position[1] + Row2 * -m_Position[2]), 1.0f);
-
-	m_WorldView = Matrix44(Row0, Row1, Row2, Row3);
-	m_ViewWorld = RotTranInverse(m_WorldView);
+	CalculateMatrices();
 }
 
 void lcCamera::Render(float fLineWidth)
@@ -647,117 +596,4 @@ bool lcCamera::IntersectsVolume(const Vector4* Planes, int NumPlanes) const
 		Intersect = m_Target->IntersectsVolume(Planes, NumPlanes);
 
 	return Intersect;
-}
-
-void lcCamera::Zoom(u32 Time, bool AddKey, int MouseX, int MouseY)
-{
-	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-	float dy = MouseY * Sensitivity;
-
-	if (IsOrtho())
-	{
-		// TODO: have a different option to change the FOV.
-		m_FOV += dy;
-		m_FOV = lcClamp(m_FOV, 0.001f, 179.999f);
-	}
-	else
-	{
-		Vector3 Delta = Vector3(m_ViewWorld[2]) * dy;
-
-		// TODO: option to move eye, target or both
-		m_Position += Delta;
-		m_TargetPosition += Delta;
-
-		ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
-		ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
-	}
-
-	UpdatePosition(Time);
-}
-
-void lcCamera::Pan(u32 Time, bool AddKey, int MouseX, int MouseY)
-{
-	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-	float dx = MouseX * Sensitivity;
-	float dy = MouseY * Sensitivity;
-
-	Vector3 Delta = Vector3(m_ViewWorld[0]) * -dx + Vector3(m_ViewWorld[1]) * -dy;
-
-	m_Position += Delta;
-	m_TargetPosition += Delta;
-
-	ChangeKey(Time, AddKey, m_Position, LC_CK_EYE);
-	ChangeKey(Time, AddKey, m_TargetPosition, LC_CK_TARGET);
-	UpdatePosition(Time);
-}
-
-void lcCamera::Orbit(u32 Time, bool AddKey, int MouseX, int MouseY)
-{
-	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-	float dx = MouseX * Sensitivity;
-	float dy = MouseY * Sensitivity;
-
-	Vector3 Dir = m_Position - m_TargetPosition;
-
-	// The X axis of the mouse always corresponds to Z in the world.
-	if (fabsf(dx) > 0.01f)
-	{
-		float AngleX = -dx * LC_DTOR;
-		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
-
-		Dir = Mul(Dir, RotX);
-	}
-
-	// The Y axis will the side vector of the camera.
-	if (fabsf(dy) > 0.01f)
-	{
-		float AngleY = dy * LC_DTOR;
-		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
-
-		Dir = Mul(Dir, RotY);
-	}
-
-	ChangeKey(Time, AddKey, Dir + m_TargetPosition, LC_CK_EYE);
-	UpdatePosition(Time);
-}
-
-void lcCamera::Rotate(u32 Time, bool AddKey, int MouseX, int MouseY)
-{
-	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-	float dx = MouseX * Sensitivity;
-	float dy = MouseY * Sensitivity;
-
-	Vector3 Dir = m_TargetPosition - m_Position;
-
-	// The X axis of the mouse always corresponds to Z in the world.
-	if (fabsf(dx) > 0.01f)
-	{
-		float AngleX = -dx * LC_DTOR;
-		Matrix33 RotX = MatrixFromAxisAngle(Vector4(0, 0, 1, AngleX));
-
-		Dir = Mul(Dir, RotX);
-	}
-
-	// The Y axis will the side vector of the camera.
-	if (fabsf(dy) > 0.01f)
-	{
-		float AngleY = dy * LC_DTOR;
-		Matrix33 RotY = MatrixFromAxisAngle(Vector4(m_WorldView[0][0], m_WorldView[1][0], m_WorldView[2][0], AngleY));
-
-		Dir = Mul(Dir, RotY);
-	}
-
-	ChangeKey(Time, AddKey, Dir + m_Position, LC_CK_TARGET);
-	UpdatePosition(Time);
-}
-
-void lcCamera::Roll(u32 Time, bool AddKey, int MouseX, int MouseY)
-{
-	float Sensitivity = 2.0f / (LC_MAX_MOUSE_SENSITIVITY+1 - g_App->m_MouseSensitivity);
-	float dx = MouseX * Sensitivity;
-
-	float NewRoll = m_Roll + dx / 100;
-
-	ChangeKey(Time, AddKey, &NewRoll, LC_CK_ROLL);
-	UpdatePosition(Time);
 }

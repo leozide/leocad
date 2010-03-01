@@ -155,7 +155,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="lc_global.h"
 				PrecompiledHeaderFile=".\Release/LeoCAD.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -2152,11 +2152,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
+				RelativePath="hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxCore.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxCore.rtf"
 				>
 			</File>
 			<File
@@ -2168,11 +2168,11 @@
 				>
 			</File>
 			<File
-				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
+				RelativePath="hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File
-				RelativePath="hlp\AfxPrint.rtf"
+				RelativePath="$(ProjDir)\hlp\AfxPrint.rtf"
 				>
 			</File>
 			<File

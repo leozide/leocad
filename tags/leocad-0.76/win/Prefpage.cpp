@@ -548,13 +548,17 @@ void CPreferencesColors::OnBnClickedNewTab()
 	UpdateData(TRUE);
 
 	lcColorGroup Group;
-	Group.Name = m_TabName;
+	Group.Name = "New Tab";
 	m_ColorConfig.mColorGroups.Add(Group);
 
 	UpdateTabs();
 	m_TabList.SetCurSel(m_TabList.GetCount() - 1);
 	UpdateTabControls();
 	UpdateColors();
+
+	CEdit* NameCtrl = (CEdit*)GetDlgItem(IDC_CLRDLG_TABNAME);
+	NameCtrl->SetFocus();
+	NameCtrl->SetSel(0, -1, FALSE);
 }
 
 void CPreferencesColors::OnBnClickedRenameTab()

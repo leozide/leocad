@@ -222,7 +222,7 @@ void lcColorConfig::SaveConfig()
 void lcColorConfig::LoadDefaultConfig()
 {
 	lcColorGroup Group;
-	Group.Name = "All Colors";
+	Group.Name = "Colors";
 
 	for (int i = 0; i < lcNumUserColors; i++)
 		Group.Colors.Add(i);

@@ -523,6 +523,10 @@ void CColorList::SelectTab(int Tab)
 	if (Tab == m_CurTab)
 		return;
 
+	int OldColorCode = -1;
+	if (m_CurColor < m_Colors.GetSize())
+		OldColorCode = m_Colors[m_CurColor].Index;
+
 	lcColorGroup& Group = g_App->m_ColorConfig.mColorGroups[Tab];
 
 	m_Colors.RemoveAll();
@@ -541,6 +545,22 @@ void CColorList::SelectTab(int Tab)
 	UpdateLayout();
 
 	m_CurColor = 0;
+
+	for (int i = 0; i < m_Colors.GetSize(); i++)
+	{
+		if (OldColorCode == m_Colors[i].Index)
+		{
+			m_CurColor = i;
+			break;
+		}
+	}
+
+	if (m_Colors.GetSize())
+		g_App->m_SelectedColor = m_Colors[m_CurColor].Index;
+	else
+		g_App->m_SelectedColor = LC_COLOR_DEFAULT;
+
+	lcPostMessage(LC_MSG_COLOR_CHANGED, NULL);
 
 	if (IsWindow(m_hWnd))
 		InvalidateRect(NULL, TRUE);
@@ -569,7 +589,7 @@ void CColorList::SelectColor(int Color)
 	m_CurColor = Color;
 
 	g_App->m_SelectedColor = m_Colors[Color].Index;
-	lcPostMessage(LC_MSG_COLOR_CHANGED, (void*)Color);
+	lcPostMessage(LC_MSG_COLOR_CHANGED, NULL);
 }
 
 void CColorList::UpdateColorConfig()

@@ -128,6 +128,9 @@ inline bool operator!=(const lcColorConfig& a, const lcColorConfig& b)
 
 		if (memcmp(&ga.Colors[0], &gb.Colors[0], sizeof(ga.Colors[0]) * ga.Colors.GetSize()))
 			return true;
+
+		if (ga.Name != gb.Name)
+			return true;
 	}
 
 	return false;

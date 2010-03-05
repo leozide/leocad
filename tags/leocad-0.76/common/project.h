@@ -113,6 +113,7 @@ public:
 	void DeleteContents(bool bUndo); // delete doc items etc
 	void LoadDefaults(bool cameras);
 	void BeginPieceDrop();
+	void BeginColorDrop();
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool AllowFast, bool RenderInterface);

@@ -7752,6 +7752,14 @@ void Project::BeginPieceDrop()
 	SetAction(LC_ACTION_INSERT);
 }
 
+void Project::BeginColorDrop()
+{
+	m_PreviousAction = m_nCurAction;
+
+	StartTracking(LC_TRACK_LEFT);
+	SetAction(LC_ACTION_PAINT);
+}
+
 void Project::OnTouch(View* view, LC_TOUCH_PHASE Phase, int TapCount, int x, int y, int PrevX, int PrevY)
 {
 	if (Phase == LC_TOUCH_BEGAN)
@@ -8190,6 +8198,26 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 			}
 			else
 				SetAction(m_PreviousAction);
+		}
+		else if (m_nCurAction == LC_ACTION_PAINT)
+		{
+			// Dragging a color from the color list.
+			lcObject* Object = FindObjectFromPoint(x, y);
+
+			if (Object && (Object->GetType() == LC_OBJECT_PIECE))
+			{
+				lcPiece* pPiece = (lcPiece*)Object;
+
+				if (pPiece->m_Color != g_App->m_SelectedColor)
+				{
+					pPiece->m_Color = g_App->m_SelectedColor;
+
+					SetModifiedFlag(true);
+					CheckPoint("Painting");
+					SystemUpdateFocus(NULL);
+					UpdateAllViews();
+				}
+			}
 		}
 	}
 

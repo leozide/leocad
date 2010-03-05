@@ -4,6 +4,7 @@
 #include "lc_colors.h"
 #include "lc_message.h"
 #include "lc_application.h"
+#include "project.h"
 #include <math.h>
 
 #ifdef _DEBUG
@@ -84,7 +85,9 @@ BEGIN_MESSAGE_MAP(CColorList, CWnd)
 	//{{AFX_MSG_MAP(CColorList)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_KEYDOWN()
 	ON_WM_SETFOCUS()
@@ -103,6 +106,8 @@ CColorList::CColorList()
 
 	m_CurColor = 0;
 	m_ColorFocus = true;
+
+	m_Tracking = FALSE;
 }
 
 CColorList::~CColorList()
@@ -372,12 +377,46 @@ void CColorList::OnLButtonDown(UINT Flags, CPoint pt)
 
 	for (int i = 0; i < m_Colors.GetSize(); i++)
 	{
-		if (m_Colors[i].Rect.PtInRect(pt))
+		if (!m_Colors[i].Rect.PtInRect(pt))
+			continue;
+
+		if (m_ColorFocus && (i == m_CurColor))
+		{
+			SetCapture();
+			m_MouseDown = pt;
+			m_Tracking = TRUE;
+		}
+		else
 		{
 			SelectColor(i);
 			return;
 		}
 	}
+}
+
+void CColorList::OnLButtonUp(UINT Flags, CPoint pt)
+{
+	m_Tracking = FALSE;
+	ReleaseCapture();
+
+	CWnd::OnLButtonUp(Flags, pt);
+}
+
+void CColorList::OnMouseMove(UINT Flags, CPoint pt)
+{
+	if (m_Tracking && m_MouseDown != pt)
+	{
+		m_Tracking = FALSE;
+		ReleaseCapture();
+		lcGetActiveProject()->BeginColorDrop();
+
+		// Force a cursor update.
+		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+		CView* pView = pFrame->GetActiveView();
+		pView->PostMessage(WM_LC_SET_CURSOR, 0, 0);
+	}
+
+	CWnd::OnMouseMove(Flags, pt);
 }
 
 void CColorList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)

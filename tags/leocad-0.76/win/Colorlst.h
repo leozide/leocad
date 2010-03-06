@@ -1,6 +1,21 @@
 #ifndef _COLORLST_H_
 #define _COLORLST_H_
 
+class CColorToolTipCtrl : public CToolTipCtrl
+{
+	DECLARE_DYNAMIC(CColorToolTipCtrl)
+
+public:
+	CColorToolTipCtrl();
+	virtual ~CColorToolTipCtrl();
+
+protected:
+	afx_msg void OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+
+	DECLARE_MESSAGE_MAP()
+};
+
 class CColorTab
 {
 public:
@@ -51,7 +66,7 @@ public:
 	void UpdateColorConfig();
 
 protected:
-	CToolTipCtrl m_ToolTip;
+	CColorToolTipCtrl m_ToolTip;
 
 	CFont m_NormalFont;
 	CFont m_SelectedFont;

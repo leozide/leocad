@@ -6,12 +6,75 @@
 #include "lc_application.h"
 #include "project.h"
 #include <math.h>
+#include <windowsx.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+IMPLEMENT_DYNAMIC(CColorToolTipCtrl, CToolTipCtrl)
+
+BEGIN_MESSAGE_MAP(CColorToolTipCtrl, CToolTipCtrl)
+	ON_NOTIFY_REFLECT(TTN_SHOW, OnNotifyShow)
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
+END_MESSAGE_MAP()
+
+CColorToolTipCtrl::CColorToolTipCtrl()
+{
+}
+
+CColorToolTipCtrl::~CColorToolTipCtrl()
+{
+}
+
+void CColorToolTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// Grow window by 55 pixels.
+	CRect rc;
+	GetClientRect(&rc);
+	CPoint pt(rc.left, rc.top);
+	ClientToScreen(&pt);
+	SetWindowPos(0, pt.x, pt.y, rc.right + 55, rc.bottom, SWP_NOACTIVATE | SWP_NOZORDER);
+}
+
+void CColorToolTipCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMTTCUSTOMDRAW pcd = (LPNMTTCUSTOMDRAW)pNMHDR;
+
+	switch (pcd->nmcd.dwDrawStage) 
+	{
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYPOSTPAINT;
+		return;
+
+	case CDDS_POSTPAINT:
+		CRect rc;
+		::GetClientRect(pNMHDR->hwndFrom, rc);
+		rc.left = rc.right - 50;
+
+		CString Text;
+		GetWindowText(Text);
+		COLORREF clr = RGB(0,0,0);
+
+		// String compares are terrible but I can't find a better way to get the colors.
+		for (int i = 0; i < lcNumUserColors; i++)
+			if (g_ColorList[i].Name == (const char*)Text)
+			{
+				clr = RGB(g_ColorList[i].Value[0]*255, g_ColorList[i].Value[1]*255, g_ColorList[i].Value[2]*255);
+				break;
+			}
+
+		SetBkColor(pcd->nmcd.hdc, clr);
+		ExtTextOut(pcd->nmcd.hdc, 0, 0, ETO_OPAQUE, rc, NULL, 0, NULL);
+
+		*pResult = CDRF_DODEFAULT;
+		return;
+	}
+
+	*pResult = CDRF_DODEFAULT;
+}
 
 #define CXOFFSET 8  // Defined pitch of trapezoid slant.
 #define CXMARGIN 2  // Left/Right text margin.

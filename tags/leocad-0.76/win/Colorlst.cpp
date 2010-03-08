@@ -443,17 +443,11 @@ void CColorList::OnLButtonDown(UINT Flags, CPoint pt)
 		if (!m_Colors[i].Rect.PtInRect(pt))
 			continue;
 
-		if (m_ColorFocus && (i == m_CurColor))
-		{
-			SetCapture();
-			m_MouseDown = pt;
-			m_Tracking = TRUE;
-		}
-		else
-		{
-			SelectColor(i);
-			return;
-		}
+		SelectColor(i);
+
+		SetCapture();
+		m_MouseDown = pt;
+		m_Tracking = TRUE;
 	}
 }
 

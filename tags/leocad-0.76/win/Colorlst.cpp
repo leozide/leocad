@@ -33,10 +33,14 @@ void CColorToolTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// Grow window by 55 pixels.
 	CRect rc;
-	GetClientRect(&rc);
-	CPoint pt(rc.left, rc.top);
-	ClientToScreen(&pt);
-	SetWindowPos(0, pt.x, pt.y, rc.right + 55, rc.bottom, SWP_NOACTIVATE | SWP_NOZORDER);
+	GetWindowRect(&rc);
+	rc.right += 55;
+	int sx = GetSystemMetrics(SM_CXSCREEN);
+	if (rc.right > sx)
+		rc.OffsetRect(sx - rc.right, 0);
+
+	SetWindowPos(0, rc.left, rc.top, rc.Width(), rc.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+	*pResult = TRUE;
 }
 
 void CColorToolTipCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)

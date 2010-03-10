@@ -88,6 +88,7 @@ protected:
 
 	CPoint m_MouseDown;
 	BOOL m_Tracking;
+	int m_MenuIndex;
 
 	void Draw(CDC& dc);
 
@@ -113,7 +114,14 @@ protected:
 	afx_msg UINT OnGetDlgCode();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	//}}AFX_MSG
+	afx_msg void OnNewTab();
+	afx_msg void OnRenameTab();
+	afx_msg void OnRemoveTab();
+	afx_msg void OnInsertColor(UINT nID);
+	afx_msg void OnRemoveColor();
+
 	DECLARE_MESSAGE_MAP()
 };
 

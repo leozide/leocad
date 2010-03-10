@@ -760,6 +760,12 @@
 #define ID_VIEW_TOOLBARS                33224
 #define ID_TOOLBARS_SA                  33225
 #define ID_FILE_IMPORTFOLDER            33226
+#define ID_COLORLIST_NEW_TAB            33227
+#define ID_COLORLIST_RENAME_TAB         33228
+#define ID_COLORLIST_REMOVE_TAB         33229
+#define ID_COLORLIST_INSERT_COLOR_START 33230
+#define ID_COLORLIST_INSERT_COLOR_END   33485
+#define ID_COLORLIST_REMOVE_COLOR       33486
 #define ID_VIEW_PIECES_BAR              59424
 #define ID_VIEW_TIMELINE_BAR            59425
 #define ID_VIEW_TOOLS_BAR               59426
@@ -772,7 +778,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        249
-#define _APS_NEXT_COMMAND_VALUE         33227
+#define _APS_NEXT_COMMAND_VALUE         33487
 #define _APS_NEXT_CONTROL_VALUE         1273
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

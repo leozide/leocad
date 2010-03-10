@@ -5,6 +5,7 @@
 #include "lc_message.h"
 #include "lc_application.h"
 #include "project.h"
+#include "groupdlg.h"
 #include <math.h>
 #include <windowsx.h>
 
@@ -162,7 +163,13 @@ BEGIN_MESSAGE_MAP(CColorList, CWnd)
 	ON_WM_GETDLGCODE()
 	ON_WM_SETCURSOR()
 	ON_WM_CREATE()
+	ON_WM_CONTEXTMENU()
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_COLORLIST_NEW_TAB, OnNewTab)
+	ON_COMMAND(ID_COLORLIST_RENAME_TAB, OnRenameTab)
+	ON_COMMAND(ID_COLORLIST_REMOVE_TAB, OnRemoveTab)
+	ON_COMMAND_RANGE(ID_COLORLIST_INSERT_COLOR_START, ID_COLORLIST_INSERT_COLOR_END, OnInsertColor)
+	ON_COMMAND(ID_COLORLIST_REMOVE_COLOR, OnRemoveColor)
 END_MESSAGE_MAP()
 
 CColorList::CColorList()
@@ -382,6 +389,9 @@ void CColorList::UpdateLayout()
 	if (!TotalWidth || !TotalHeight)
 		return;
 
+	for (int i = 0; i < lcNumUserColors; i++)
+		m_ToolTip.DelTool(this, i+1);
+
 	TotalWidth -= 2;
 	TotalHeight -= 2;
 
@@ -390,7 +400,10 @@ void CColorList::UpdateLayout()
 //	Cols = Aspect * Rows
 //	Cols * Rows = m_Colors.GetSize()
 
-	m_ColorRows = (int)sqrtf((float)(m_Colors.GetSize()) / (float)Aspect);
+	if (m_Colors.GetSize() <= Aspect)
+		m_ColorRows = 1;
+	else
+		m_ColorRows = (int)sqrtf((float)(m_Colors.GetSize()) / (float)Aspect);
 
 	if (!m_ColorRows)
 		return;
@@ -399,9 +412,6 @@ void CColorList::UpdateLayout()
 
 	float CellWidth = (float)TotalWidth / (float)m_ColorCols;
 	float CellHeight = (float)TotalHeight / (float)m_ColorRows;
-
-	for (int i = 0; i < lcNumUserColors; i++)
-		m_ToolTip.DelTool(this, i+1);
 
 	for (int ColorIndex = 0; ColorIndex < m_Colors.GetSize(); ColorIndex++)
 	{
@@ -710,4 +720,174 @@ void CColorList::UpdateColorConfig()
 	m_ColorFocus = true;
 
 	SelectTab(0);
+}
+
+void CColorList::OnContextMenu(CWnd* pWnd, CPoint point) 
+{
+	bool ColorMenu;
+	int MenuIndex = -1;
+	CPoint MenuPoint;
+
+	if (point.x == -1 && point.y == -1)
+	{
+		CPoint Client;
+		ColorMenu = m_ColorFocus;
+
+		if (m_ColorFocus)
+		{
+			MenuIndex = m_CurColor;
+			Client.x = m_Colors[m_CurColor].Rect.left;
+			Client.y = m_Colors[m_CurColor].Rect.bottom;
+		}
+		else
+		{
+			MenuIndex = m_CurTab;
+			Client.x = m_Tabs[m_CurTab]->m_Rect.left;
+			Client.y = m_Tabs[m_CurTab]->m_Rect.bottom;
+		}
+
+		ClientToScreen(&Client);
+		MenuPoint = Client;
+	}
+	else
+	{
+		CPoint Client(point);
+		ScreenToClient(&Client);
+
+		MenuPoint = point;
+
+		if (Client.y < GetSystemMetrics(SM_CYHSCROLL))
+		{
+			ColorMenu = false;
+
+			for (int i = 0; i < m_Tabs.GetSize(); i++) 
+			{
+				if (m_Tabs[i]->m_Rgn.PtInRegion(Client))
+				{
+					MenuIndex = i;
+					break;
+				}
+			}
+		}
+		else
+		{
+			ColorMenu = true;
+
+			for (int i = 0; i < m_Colors.GetSize(); i++)
+			{
+				if (m_Colors[i].Rect.PtInRect(Client))
+				{
+					MenuIndex = i;
+					break;
+				}
+			}
+		}
+	}
+
+	CMenu Menu;
+	Menu.CreatePopupMenu();
+	UINT Disable = (MenuIndex == -1) ? MF_GRAYED : 0;
+
+	if (ColorMenu)
+	{
+		Menu.AppendMenu(Disable|MF_STRING, ID_COLORLIST_REMOVE_COLOR, "Remove Color");
+
+		CMenu ColorMenu;
+		ColorMenu.CreatePopupMenu();
+		for (int i = 0; i < lcNumUserColors; i++)
+		{
+			UINT Flags = (i && i % 30 == 0) ? MF_MENUBARBREAK|MF_STRING : MF_STRING;
+			ColorMenu.AppendMenu(Flags, ID_COLORLIST_INSERT_COLOR_START+i, g_ColorList[i].Name);
+		}
+		Menu.AppendMenu(MF_POPUP|MF_STRING, (UINT)ColorMenu.m_hMenu, "Insert Color");
+	}
+	else
+	{
+		Menu.AppendMenu(MF_STRING, ID_COLORLIST_NEW_TAB, "New Tab...");
+		Menu.AppendMenu(Disable|MF_STRING, ID_COLORLIST_RENAME_TAB, "Rename Tab...");
+		if (m_Tabs.GetSize() == 1)
+			Disable = MF_GRAYED;
+		Menu.AppendMenu(Disable|MF_STRING, ID_COLORLIST_REMOVE_TAB, "Remove Tab...");
+	}
+
+	m_MenuIndex = MenuIndex;
+	Menu.TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, MenuPoint.x, MenuPoint.y, this);
+}
+
+void CColorList::OnNewTab()
+{
+	CGroupDlg dlg;
+	dlg.m_strName = "New Tab";
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	lcColorGroup Group;
+	Group.Name = dlg.m_strName;
+
+	g_App->m_ColorConfig.mColorGroups.Add(Group);
+
+	UpdateColorConfig();
+	g_App->m_ColorConfig.SaveConfig();
+	SelectTab(m_Tabs.GetSize()-1);
+}
+
+void CColorList::OnRenameTab()
+{
+	if (m_MenuIndex < 0 || m_MenuIndex >= g_App->m_ColorConfig.mColorGroups.GetSize())
+		return;
+
+	CGroupDlg dlg;
+	dlg.SetWindowText(g_App->m_ColorConfig.mColorGroups[m_MenuIndex].Name);
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	g_App->m_ColorConfig.mColorGroups[m_MenuIndex].Name = dlg.m_strName;
+
+	int CurTab = m_CurTab;
+	UpdateColorConfig();
+	g_App->m_ColorConfig.SaveConfig();
+	SelectTab(CurTab);
+}
+
+void CColorList::OnRemoveTab()
+{
+	if (m_MenuIndex < 0 || m_MenuIndex >= g_App->m_ColorConfig.mColorGroups.GetSize())
+		return;
+
+	if (MessageBox("Are you sure you want to remove this tab?", "Remove Tab", MB_YESNO) != IDYES)
+		return;
+
+	g_App->m_ColorConfig.mColorGroups.RemoveIndex(m_MenuIndex);
+
+	UpdateColorConfig();
+	g_App->m_ColorConfig.SaveConfig();
+}
+
+void CColorList::OnInsertColor(UINT nID)
+{
+	int Color = nID - ID_COLORLIST_INSERT_COLOR_START;
+	if (m_MenuIndex < 0 || m_MenuIndex >= g_App->m_ColorConfig.mColorGroups[m_CurTab].Colors.GetSize())
+		g_App->m_ColorConfig.mColorGroups[m_CurTab].Colors.Add(Color);
+	else
+		g_App->m_ColorConfig.mColorGroups[m_CurTab].Colors.InsertAt(m_MenuIndex, Color);
+
+	int CurTab = m_CurTab;
+	UpdateColorConfig();
+	g_App->m_ColorConfig.SaveConfig();
+	SelectTab(CurTab);
+}
+
+void CColorList::OnRemoveColor()
+{
+	if (m_MenuIndex < 0 || m_MenuIndex >= g_App->m_ColorConfig.mColorGroups[m_CurTab].Colors.GetSize())
+		return;
+
+	g_App->m_ColorConfig.mColorGroups[m_CurTab].Colors.RemoveIndex(m_MenuIndex);
+
+	int CurTab = m_CurTab;
+	UpdateColorConfig();
+	g_App->m_ColorConfig.SaveConfig();
+	SelectTab(CurTab);
 }

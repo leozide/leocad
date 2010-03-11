@@ -8218,6 +8218,8 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 					UpdateAllViews();
 				}
 			}
+
+			SetAction(m_PreviousAction);
 		}
 	}
 

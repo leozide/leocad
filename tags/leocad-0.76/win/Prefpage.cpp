@@ -483,17 +483,13 @@ void CPreferencesColors::UpdateColors()
 void CPreferencesColors::UpdateColorControls()
 {
 	int Available = m_AvailableList.GetSelCount();
-	int Current = m_CurrentList.GetSelCount();
+	int CurSel = m_CurrentList.GetSelCount();
 	int CurCount = m_CurrentList.GetCount();
-	int CurSel = -1;
-
-	if (Current == 1)
-		m_CurrentList.GetSelItems(1, &CurSel);
 
 	GetDlgItem(IDC_CLRDLG_ADDCOLOR)->EnableWindow(Available > 0);
-	GetDlgItem(IDC_CLRDLG_REMOVECOLOR)->EnableWindow(Current > 0);
-	GetDlgItem(IDC_CLRDLG_UPCOLOR)->EnableWindow(Current == 1 && CurSel != 0 && CurCount > 1);
-	GetDlgItem(IDC_CLRDLG_DOWNCOLOR)->EnableWindow(Current == 1 && CurSel != CurCount - 1 && CurCount > 1);
+	GetDlgItem(IDC_CLRDLG_REMOVECOLOR)->EnableWindow(CurSel > 0);
+	GetDlgItem(IDC_CLRDLG_UPCOLOR)->EnableWindow(CurSel > 0 && m_CurrentList.GetSel(0) == 0);
+	GetDlgItem(IDC_CLRDLG_DOWNCOLOR)->EnableWindow(CurSel > 0 && m_CurrentList.GetSel(CurCount-1) == 0);
 }
 
 void CPreferencesColors::OnBnClickedUpTab()
@@ -639,14 +635,14 @@ void CPreferencesColors::OnBnClickedAddColor()
 
 void CPreferencesColors::OnBnClickedRemoveColor()
 {
+	int GroupIdx = m_TabList.GetCurSel();
+	if (GroupIdx == LB_ERR)
+		return;
+
 	int Count = m_CurrentList.GetSelCount();
 	int* Sel = new int[Count];
 
 	m_CurrentList.GetSelItems(Count, Sel);
-
-	int GroupIdx = m_TabList.GetCurSel();
-	if (GroupIdx == LB_ERR)
-		return;
 
 	lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
 
@@ -678,32 +674,34 @@ void CPreferencesColors::OnBnClickedUpColor()
 	if (GroupIdx == LB_ERR)
 		return;
 
-	int Count = m_CurrentList.GetSelCount();
-	if (Count != 1)
+	int SelCount = m_CurrentList.GetSelCount();
+	if (SelCount == 0 || m_CurrentList.GetSel(0))
 		return;
 
-	int Sel;
-	m_CurrentList.GetSelItems(1, &Sel);
-	if (Sel == 0)
-		return;
+	int* Sel = new int[SelCount];
+	m_CurrentList.GetSelItems(SelCount, Sel);
 
-	int Color = m_CurrentList.GetItemData(Sel);
-	lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
-
-	for (int j = 0; j < Group.Colors.GetSize(); j++)
+	for (int i = 0; i < SelCount; i++)
 	{
-		if (Color == Group.Colors[j])
-		{
-			m_CurrentList.DeleteString(Sel-1);
-			int Idx = m_CurrentList.InsertString(Sel, m_ColorConfig.mColors[Group.Colors[j-1]].Name);
-			m_CurrentList.SetItemData(Idx, Group.Colors[j-1]);
+		int Color = m_CurrentList.GetItemData(Sel[i]);
+		lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
 
-			Group.Colors[j] = Group.Colors[j-1];
-			Group.Colors[j-1] = Color;
-			break;
+		for (int j = 0; j < Group.Colors.GetSize(); j++)
+		{
+			if (Color == Group.Colors[j])
+			{
+				m_CurrentList.DeleteString(Sel[i]-1);
+				int Idx = m_CurrentList.InsertString(Sel[i], m_ColorConfig.mColors[Group.Colors[j-1]].Name);
+				m_CurrentList.SetItemData(Idx, Group.Colors[j-1]);
+
+				Group.Colors[j] = Group.Colors[j-1];
+				Group.Colors[j-1] = Color;
+				break;
+			}
 		}
 	}
 
+	delete[] Sel;
 	UpdateColorControls();
 }
 
@@ -713,32 +711,34 @@ void CPreferencesColors::OnBnClickedDownColor()
 	if (GroupIdx == LB_ERR)
 		return;
 
-	int Count = m_CurrentList.GetSelCount();
-	if (Count != 1)
+	int SelCount = m_CurrentList.GetSelCount();
+	if (SelCount == 0 || m_CurrentList.GetSel(m_CurrentList.GetCount() - 1))
 		return;
 
-	int Sel;
-	m_CurrentList.GetSelItems(1, &Sel);
-	if (Sel == m_CurrentList.GetCount())
-		return;
+	int* Sel = new int[SelCount];
+	m_CurrentList.GetSelItems(SelCount, Sel);
 
-	int Color = m_CurrentList.GetItemData(Sel);
-	lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
-
-	for (int j = 0; j < Group.Colors.GetSize(); j++)
+	for (int i = SelCount-1; i >= 0; i--)
 	{
-		if (Color == Group.Colors[j])
-		{
-			m_CurrentList.DeleteString(Sel+1);
-			int Idx = m_CurrentList.InsertString(Sel, m_ColorConfig.mColors[Group.Colors[j+1]].Name);
-			m_CurrentList.SetItemData(Idx, Group.Colors[j+1]);
+		int Color = m_CurrentList.GetItemData(Sel[i]);
+		lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
 
-			Group.Colors[j] = Group.Colors[j+1];
-			Group.Colors[j+1] = Color;
-			break;
+		for (int j = 0; j < Group.Colors.GetSize(); j++)
+		{
+			if (Color == Group.Colors[j])
+			{
+				m_CurrentList.DeleteString(Sel[i]+1);
+				int Idx = m_CurrentList.InsertString(Sel[i], m_ColorConfig.mColors[Group.Colors[j+1]].Name);
+				m_CurrentList.SetItemData(Idx, Group.Colors[j+1]);
+
+				Group.Colors[j] = Group.Colors[j+1];
+				Group.Colors[j+1] = Color;
+				break;
+			}
 		}
 	}
 
+	delete[] Sel;
 	UpdateColorControls();
 }
 

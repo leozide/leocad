@@ -794,12 +794,31 @@ void CColorList::OnContextMenu(CWnd* pWnd, CPoint point)
 
 		CMenu ColorMenu;
 		ColorMenu.CreatePopupMenu();
+
+		int Count = 0;
 		for (int i = 0; i < lcNumUserColors; i++)
 		{
-			UINT Flags = (i && i % 30 == 0) ? MF_MENUBARBREAK|MF_STRING : MF_STRING;
-			ColorMenu.AppendMenu(Flags, ID_COLORLIST_INSERT_COLOR_START+i, g_ColorList[i].Name);
+			bool Found = false;
+
+			for (int j = 0; j < m_Colors.GetSize(); j++)
+			{
+				if (m_Colors[j].Index == i)
+				{
+					Found = true;
+					break;
+				}
+			}
+
+			if (!Found)
+			{
+				UINT Flags = (Count && Count % 30 == 0) ? MF_MENUBARBREAK|MF_STRING : MF_STRING;
+				ColorMenu.AppendMenu(Flags, ID_COLORLIST_INSERT_COLOR_START+i, g_ColorList[i].Name);
+				Count++;
+			}
 		}
-		Menu.AppendMenu(MF_POPUP|MF_STRING, (UINT)ColorMenu.m_hMenu, "Insert Color");
+
+		if (Count)
+			Menu.AppendMenu(MF_POPUP|MF_STRING, (UINT)ColorMenu.m_hMenu, "Insert Color");
 	}
 	else
 	{

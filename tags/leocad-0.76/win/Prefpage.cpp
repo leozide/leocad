@@ -612,7 +612,9 @@ void CPreferencesColors::OnBnClickedAddColor()
 
 	delete[] Sel;
 
+	int Top = m_AvailableList.GetTopIndex();
 	UpdateColors();
+	m_AvailableList.SetTopIndex(Top);
 }
 
 void CPreferencesColors::OnBnClickedRemoveColor()
@@ -643,7 +645,9 @@ void CPreferencesColors::OnBnClickedRemoveColor()
 
 	delete[] Sel;
 
+	int Top = m_CurrentList.GetTopIndex();
 	UpdateColors();
+	m_CurrentList.SetTopIndex(Top);
 }
 
 void CPreferencesColors::OnBnClickedUpColor()

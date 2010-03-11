@@ -426,7 +426,10 @@ void CColorList::UpdateLayout()
 		CRect Cell((int)Left, (int)Top, (int)Right, (int)Bottom);
 
 		m_Colors[ColorIndex].Rect = Cell;
-		m_ToolTip.AddTool(this, m_Colors[ColorIndex].Name, Cell, ColorIndex+1);
+
+		CString Text;
+		Text.Format("%s (%d)", m_Colors[ColorIndex].Name, g_ColorList[m_Colors[ColorIndex].Index].Code);
+		m_ToolTip.AddTool(this, Text, Cell, ColorIndex+1);
 	}
 }
 

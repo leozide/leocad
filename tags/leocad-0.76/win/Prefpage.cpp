@@ -125,7 +125,7 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
 	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 	m_strLibrary = AfxGetApp()->GetProfileString("Settings", "PiecesLibrary", "");
-	m_strColor = AfxGetApp()->GetProfileString("Settings", "ColorConfig", "");
+	m_strColor = AfxGetApp()->GetProfileString("Settings", "ColorConfig", "%LDRAWDIR%/ldconfig.ldr");
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)

@@ -490,7 +490,11 @@ void lcApplication::Shutdown()
 
 void lcApplication::InitColors()
 {
-	const char* Path = Sys_ProfileLoadString("Settings", "ColorConfig", "");
+	String Path = Sys_ProfileLoadString("Settings", "ColorConfig", "%LDRAWDIR%/ldconfig.ldr");
+
+	char* LDrawDir = getenv("LDRAWDIR");
+	if (LDrawDir)
+		Path.Replace("%LDRAWDIR%", LDrawDir);
 
 	lcFileDisk File;
 	if (File.Open(Path, "rt"))

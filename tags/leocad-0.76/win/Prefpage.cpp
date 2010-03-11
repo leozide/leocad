@@ -593,28 +593,48 @@ void CPreferencesColors::OnLbnSelchangeCurrent()
 
 void CPreferencesColors::OnBnClickedAddColor()
 {
+	int GroupIdx = m_TabList.GetCurSel();
+	if (GroupIdx == LB_ERR)
+		return;
+
 	int Count = m_AvailableList.GetSelCount();
 	int* Sel = new int[Count];
 
 	m_AvailableList.GetSelItems(Count, Sel);
 
-	int GroupIdx = m_TabList.GetCurSel();
-	if (GroupIdx == LB_ERR)
-		return;
+	int CurCount = m_CurrentList.GetSelCount();
+	int* CurSel = new int[CurCount];
+
+	m_CurrentList.GetSelItems(CurCount, CurSel);
+
+	int InsertPos = -1;
+	for (int i = 0; i < CurCount; i++)
+		if (InsertPos < CurSel[i])
+			InsertPos = CurSel[i];
 
 	lcColorGroup& Group = m_ColorConfig.mColorGroups[GroupIdx];
 
 	for (int i = 0; i < Count; i++)
 	{
 		int Color = m_AvailableList.GetItemData(Sel[i]);
-		Group.Colors.Add(Color);
+
+		if (InsertPos == -1)
+			Group.Colors.Add(Color);
+		else
+		{
+			Group.Colors.InsertAt(InsertPos, Color);
+			InsertPos++;
+		}
 	}
 
 	delete[] Sel;
+	delete[] CurSel;
 
-	int Top = m_AvailableList.GetTopIndex();
+	int TopAvailable = m_AvailableList.GetTopIndex();
+	int TopCurrent = m_CurrentList.GetTopIndex();
 	UpdateColors();
-	m_AvailableList.SetTopIndex(Top);
+	m_AvailableList.SetTopIndex(TopAvailable);
+	m_CurrentList.SetTopIndex(TopCurrent);
 }
 
 void CPreferencesColors::OnBnClickedRemoveColor()
@@ -645,9 +665,11 @@ void CPreferencesColors::OnBnClickedRemoveColor()
 
 	delete[] Sel;
 
-	int Top = m_CurrentList.GetTopIndex();
+	int TopAvailable = m_AvailableList.GetTopIndex();
+	int TopCurrent = m_CurrentList.GetTopIndex();
 	UpdateColors();
-	m_CurrentList.SetTopIndex(Top);
+	m_AvailableList.SetTopIndex(TopAvailable);
+	m_CurrentList.SetTopIndex(TopCurrent);
 }
 
 void CPreferencesColors::OnBnClickedUpColor()

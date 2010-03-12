@@ -255,8 +255,9 @@ public:
 
 protected:
 	// State variables
-	unsigned char m_nCurAction;
-	unsigned char m_PreviousAction;
+	int m_nCurAction;
+	int m_PreviousAction;
+	bool m_RestoreAction;
 	bool m_Animation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;

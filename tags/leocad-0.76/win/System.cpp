@@ -1932,9 +1932,9 @@ lcFile* SystemImportClipboard()
 	return clip;
 }
 
-bool Sys_KeyDown (int key)
+bool Sys_KeyDown(int key)
 {
-  return GetKeyState (KEY_CONTROL) < 0;
+  return GetKeyState(key) < 0;
 }
 
 

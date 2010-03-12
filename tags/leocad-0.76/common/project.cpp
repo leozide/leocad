@@ -6364,8 +6364,9 @@ void Project::SetAction(int nAction)
 	if (m_nCurAction == LC_ACTION_INSERT)
 		Redraw = true;
 
-	SystemUpdateAction(nAction, m_nCurAction);
+	m_PreviousAction = m_nCurAction;
 	m_nCurAction = nAction;
+	SystemUpdateAction(m_nCurAction, m_PreviousAction);
 
 	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE) || (m_nCurAction == LC_ACTION_ORBIT))
 	{
@@ -7746,18 +7747,16 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 void Project::BeginPieceDrop()
 {
-	m_PreviousAction = m_nCurAction;
-
 	StartTracking(LC_TRACK_LEFT);
 	SetAction(LC_ACTION_INSERT);
+	m_RestoreAction = true;
 }
 
 void Project::BeginColorDrop()
 {
-	m_PreviousAction = m_nCurAction;
-
 	StartTracking(LC_TRACK_LEFT);
 	SetAction(LC_ACTION_PAINT);
+	m_RestoreAction = true;
 }
 
 void Project::OnTouch(View* view, LC_TOUCH_PHASE Phase, int TapCount, int x, int y, int PrevX, int PrevY)
@@ -7885,6 +7884,12 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	Matrix44 ProjectionMatrix = m_ActiveView->GetProjectionMatrix();
 	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, ProjectionMatrix, m_ActiveView->mViewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
+
+	if (Sys_KeyDown(KEY_ALT))
+	{
+		SetAction(LC_ACTION_PAN);
+		m_RestoreAction = true;
+	}
 
 	switch (m_nCurAction)
 	{
@@ -8192,12 +8197,11 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				SystemUpdateFocus(pPiece);
 
 				if (m_nSnap & LC_DRAW_MOVE)
+				{
 					SetAction(LC_ACTION_MOVE);
-				else
-					SetAction(m_PreviousAction);
+					m_RestoreAction = false;
+				}
 			}
-			else
-				SetAction(m_PreviousAction);
 		}
 		else if (m_nCurAction == LC_ACTION_PAINT)
 		{
@@ -8218,8 +8222,12 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 					UpdateAllViews();
 				}
 			}
+		}
 
+		if (m_RestoreAction)
+		{
 			SetAction(m_PreviousAction);
+			m_RestoreAction = false;
 		}
 	}
 

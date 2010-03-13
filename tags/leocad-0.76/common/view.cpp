@@ -149,6 +149,18 @@ void View::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 		m_Project->OnLeftButtonDoubleClick(this, x, y, bControl, bShift);
 }
 
+void View::OnMiddleButtonDown(int x, int y, bool bControl, bool bShift)
+{
+	if (!m_ViewCubeTrack)
+		m_Project->OnMiddleButtonDown(this, x, y, bControl, bShift);
+}
+
+void View::OnMiddleButtonUp(int x, int y, bool bControl, bool bShift)
+{
+	if (!m_ViewCubeTrack)
+		m_Project->OnMiddleButtonUp(this, x, y, bControl, bShift);
+}
+
 void View::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
 	if (!m_ViewCubeTrack)

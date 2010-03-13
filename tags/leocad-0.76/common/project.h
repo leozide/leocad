@@ -242,6 +242,8 @@ public:
 	void OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift);
 	void OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift);
 	void OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift);
 	void OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift);
 	void OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift);
 	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);

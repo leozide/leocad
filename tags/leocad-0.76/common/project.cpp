@@ -7007,6 +7007,12 @@ bool Project::StopTracking(bool bAccept)
 			case LC_ACTION_PAINT:
 				break;
 		}
+
+		if (m_RestoreAction)
+		{
+			SetAction(m_PreviousAction);
+			m_RestoreAction = false;
+		}
 	}
 	else if (m_pTrackFile != NULL)
 	{
@@ -7887,7 +7893,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 	if (Sys_KeyDown(KEY_ALT))
 	{
-		SetAction(LC_ACTION_PAN);
+		SetAction(LC_ACTION_ORBIT);
 		m_RestoreAction = true;
 	}
 
@@ -8223,14 +8229,43 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				}
 			}
 		}
-
-		if (m_RestoreAction)
-		{
-			SetAction(m_PreviousAction);
-			m_RestoreAction = false;
-		}
 	}
 
+	StopTracking(true);
+}
+
+void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift)
+{
+	if (StopTracking(false))
+		return;
+
+	if (SetActiveView(view))
+		return;
+
+	m_nDownX = x;
+	m_nDownY = y;
+	m_bTrackCancel = false;
+
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
+
+	if (Sys_KeyDown(KEY_ALT))
+	{
+		SetAction(LC_ACTION_PAN);
+		m_RestoreAction = true;
+	}
+
+	switch (m_nCurAction)
+	{
+		case LC_ACTION_PAN:
+		{
+			StartTracking(LC_TRACK_START_RIGHT);
+		} break;
+	}
+}
+
+void Project::OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift)
+{
 	StopTracking(true);
 }
 
@@ -8248,6 +8283,12 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 
 	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), m_ActiveView->GetViewpoint()->mWorldView, m_ActiveView->GetProjectionMatrix(), m_ActiveView->mViewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
+
+	if (Sys_KeyDown(KEY_ALT))
+	{
+		SetAction(LC_ACTION_ZOOM);
+		m_RestoreAction = true;
+	}
 
 	switch (m_nCurAction)
 	{
@@ -8267,6 +8308,11 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 				StartTracking(LC_TRACK_START_RIGHT);
 				m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
 			}
+		} break;
+
+		case LC_ACTION_ZOOM:
+		{
+			StartTracking(LC_TRACK_START_RIGHT);
 		} break;
 	}
 }

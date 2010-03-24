@@ -406,8 +406,6 @@ void lcModel::SetActive(bool Active)
 
 void lcModel::UpdateMesh()
 {
-	u32 Time = lcMax(m_TotalFrames, LC_OBJECT_TIME_MAX);
-
 	u32 VertexCount = 0;
 	u32* SectionIndices = new u32[lcNumColors*2];
 	memset(SectionIndices, 0, sizeof(u32)*lcNumColors*2);
@@ -416,10 +414,10 @@ void lcModel::UpdateMesh()
 	// Update bounding box and count the number of vertices and indices needed.
 	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
-		if (!Piece->IsVisible(Time))
+		if (Piece->m_TimeHide < m_TotalFrames)
 			continue;
 
-		Piece->UpdatePosition(Time);
+		Piece->UpdatePosition(m_TotalFrames);
 		Piece->MergeBoundingBox(&m_BoundingBox);
 
 		lcMesh* Mesh = Piece->m_PieceInfo->m_Mesh;
@@ -475,6 +473,9 @@ void lcModel::BuildMesh(u32* SectionIndices)
 
 	for (lcPiece* Piece = m_Pieces; Piece; Piece = (lcPiece*)Piece->m_Next)
 	{
+		if (Piece->m_TimeHide < m_TotalFrames)
+			continue;
+
 		lcMesh* SrcMesh = Piece->m_PieceInfo->m_Mesh;
 
 		void* SrcIndexBufer = SrcMesh->m_IndexBuffer->MapBuffer(GL_READ_ONLY_ARB);

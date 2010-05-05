@@ -193,13 +193,13 @@ lcMesh* lcCreateSphereMesh(float Radius, int Slices)
 
 lcMesh* lcCreateBoxMesh(const Vector3& Min, const Vector3& Max)
 {
-	int NumIndices = 24;
+	int NumIndices = 36;
 	int NumVertices = 8;
 
 	lcMesh* BoxMesh = new lcMesh(1, NumIndices, NumVertices, NULL);
 
 	lcMeshEditor<u16> MeshEdit(BoxMesh);
-	lcMeshSection* Section = MeshEdit.StartSection(GL_QUADS, LC_COLOR_DEFAULT);
+	lcMeshSection* Section = MeshEdit.StartSection(GL_TRIANGLES, LC_COLOR_DEFAULT);
 
 	Section->Box.m_Min = Min;
 	Section->Box.m_Max = Max;
@@ -216,27 +216,42 @@ lcMesh* lcCreateBoxMesh(const Vector3& Min, const Vector3& Max)
 	MeshEdit.AddIndex(0);
 	MeshEdit.AddIndex(1);
 	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(2);
 	MeshEdit.AddIndex(3);
+
 	MeshEdit.AddIndex(7);
 	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(7);
 	MeshEdit.AddIndex(5);
 	MeshEdit.AddIndex(4);
 
 	MeshEdit.AddIndex(0);
 	MeshEdit.AddIndex(1);
 	MeshEdit.AddIndex(5);
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(5);
 	MeshEdit.AddIndex(4);
+
 	MeshEdit.AddIndex(2);
 	MeshEdit.AddIndex(3);
+	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(2);
 	MeshEdit.AddIndex(7);
 	MeshEdit.AddIndex(6);
 
 	MeshEdit.AddIndex(0);
 	MeshEdit.AddIndex(3);
 	MeshEdit.AddIndex(7);
+	MeshEdit.AddIndex(0);
+	MeshEdit.AddIndex(7);
 	MeshEdit.AddIndex(4);
+
 	MeshEdit.AddIndex(1);
 	MeshEdit.AddIndex(2);
+	MeshEdit.AddIndex(6);
+	MeshEdit.AddIndex(1);
 	MeshEdit.AddIndex(6);
 	MeshEdit.AddIndex(5);
 
@@ -468,64 +483,30 @@ bool lcMesh::ClosestRayIntersect(const Vector3& Start, const Vector3& End, float
 		if (Section->PrimitiveType == GL_LINES)
 			continue;
 
-		if (Section->PrimitiveType == GL_QUADS)
+		if (m_IndexType == GL_UNSIGNED_INT)
 		{
-			if (m_IndexType == GL_UNSIGNED_INT)
+			u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
+			for (u32 i = 0; i < Section->IndexCount; i += 3)
 			{
-				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-				for (u32 i = 0; i < Section->IndexCount; i += 4)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
+				Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+				Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+				Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
 
-					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, Dist, &Intersection))
-						Hit = true;
-				}
-			}
-			else
-			{
-				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-				for (u32 i = 0; i < Section->IndexCount; i += 4)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-					Vector3 v4(verts[IndexPtr[i+3]*3], verts[IndexPtr[i+3]*3+1], verts[IndexPtr[i+3]*3+2]);
-
-					if (LineQuadMinIntersection(v1, v2, v3, v4, Start, End, Dist, &Intersection))
-						Hit = true;
-				}
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, Dist, &Intersection))
+					Hit = true;
 			}
 		}
-		else if (Section->PrimitiveType == GL_TRIANGLES)
+		else
 		{
-			if (m_IndexType == GL_UNSIGNED_INT)
+			u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
+			for (u32 i = 0; i < Section->IndexCount; i += 3)
 			{
-				u32* IndexPtr = (u32*)((char*)indices + Section->IndexOffset);
-				for (u32 i = 0; i < Section->IndexCount; i += 3)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
+				Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
+				Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
+				Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
 
-					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, Dist, &Intersection))
-						Hit = true;
-				}
-			}
-			else
-			{
-				u16* IndexPtr = (u16*)((char*)indices + Section->IndexOffset);
-				for (u32 i = 0; i < Section->IndexCount; i += 3)
-				{
-					Vector3 v1(verts[IndexPtr[i+0]*3], verts[IndexPtr[i+0]*3+1], verts[IndexPtr[i+0]*3+2]);
-					Vector3 v2(verts[IndexPtr[i+1]*3], verts[IndexPtr[i+1]*3+1], verts[IndexPtr[i+1]*3+2]);
-					Vector3 v3(verts[IndexPtr[i+2]*3], verts[IndexPtr[i+2]*3+1], verts[IndexPtr[i+2]*3+2]);
-
-					if (LineTriangleMinIntersection(v1, v2, v3, Start, End, Dist, &Intersection))
-						Hit = true;
-				}
+				if (LineTriangleMinIntersection(v1, v2, v3, Start, End, Dist, &Intersection))
+					Hit = true;
 			}
 		}
 	}

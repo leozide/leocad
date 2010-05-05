@@ -1769,25 +1769,37 @@ void Project::RenderScene(View* view, bool Interface)
 			float xmax = xmin + (xsteps + 1) * inc;
 			float ymax = ymin + (ysteps + 1) * inc;
 
-			glBegin(GL_LINES);
-
 			// Draw lines.
 			glColor3f(0.75f, 0.75f, 0.75f);
 
+			float* Verts = new float[((int)xsteps + (int)ysteps + 4) * 6];
+			float* v = Verts;
+
 			for (int x = 0; x < xsteps + 2; x++)
 			{
-				glVertex3f(xmin + x * inc, ymin, z);
-				glVertex3f(xmin + x * inc, ymax, z);
+				*v++ = xmin + x * inc;
+				*v++ = ymin;
+				*v++ = z;
+				*v++ = xmin + x * inc;
+				*v++ = ymax;
+				*v++ = z;
 			}
 
 			for (int y = 0; y < ysteps + 2; y++)
 			{
-				glVertex3f(xmin, ymin + y * inc, z);
-				glVertex3f(xmax, ymin + y * inc, z);
+				*v++ = xmin;
+				*v++ = ymin + y * inc;
+				*v++ = z;
+				*v++ = xmax;
+				*v++ = ymin + y * inc;
+				*v++ = z;
 			}
 
-			glEnd();
-
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINES, 0, ((int)xsteps + (int)ysteps + 4) * 2);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			delete[] Verts;
 		}
 	}
 

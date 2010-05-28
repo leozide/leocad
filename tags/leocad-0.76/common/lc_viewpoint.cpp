@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "lc_global.h"
 #include "lc_viewpoint.h"
 

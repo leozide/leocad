@@ -3,6 +3,7 @@
 
 #include <gtk/gtk.h>
 #include <stdio.h>
+#include "lc_global.h"
 #include "typedefs.h"
 #include "main.h"
 #include "gtkmisc.h"

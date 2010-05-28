@@ -1605,12 +1605,12 @@ int povraydlg_execute(void* param)
 }
 
 // Preferences Dialog
-
+/*
 typedef struct
 {
   void* data;
   GtkWidget *det_edges, *det_lighting, *det_smooth, *det_antialias, *det_fast;
-  GtkWidget *det_solid, *det_hidden, *det_width;
+  GtkWidget *det_width;
   GtkWidget *draw_grid, *draw_axis;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
   GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
@@ -1633,8 +1633,6 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
   if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
   if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
-  if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
-  if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
@@ -1690,8 +1688,6 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
   if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
   if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
-  if (GTK_TOGGLE_BUTTON (s->det_solid)->active) detail |= LC_DET_BOX_FILL;
-  if (GTK_TOGGLE_BUTTON (s->det_hidden)->active) detail |= LC_DET_HIDDEN_LINE;
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
@@ -1737,7 +1733,6 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
 		      RGB (opts->fGrad1[0]*255, opts->fGrad1[1]*255, opts->fGrad1[2]*255));
   Sys_ProfileSaveInt ("Default", "Gradient2",
 		      RGB (opts->fGrad2[0]*255, opts->fGrad2[1]*255, opts->fGrad2[2]*255));
-
   // int nMouse;
   // int nSaveInterval;
   // char strPath[LC_MAXPATH];
@@ -1754,9 +1749,12 @@ static void preferencesdlg_realize(GtkWidget *widget)
   void* data = gtk_object_get_data (GTK_OBJECT (widget), "color_flt");
   set_button_pixmap (widget, (float*)data);
 }
+*/
 
 int preferencesdlg_execute(void* param)
 {
+return 0;
+/*
   GtkWidget *dlg;
   GtkWidget *vbox1, *vbox2, *hbox;
   GtkWidget *frame, *label, *button, *table, *notebook;
@@ -1817,16 +1815,6 @@ int preferencesdlg_execute(void* param)
   s.det_fast = gtk_check_button_new_with_label ("Fast rendering");
   gtk_widget_show (s.det_fast);
   gtk_table_attach (GTK_TABLE (table), s.det_fast, 1, 2, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_solid = gtk_check_button_new_with_label ("Draw solid boxes");
-  gtk_widget_show (s.det_solid);
-  gtk_table_attach (GTK_TABLE (table), s.det_solid, 1, 2, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_hidden = gtk_check_button_new_with_label ("Remove hidden lines");
-  gtk_widget_show (s.det_hidden);
-  gtk_table_attach (GTK_TABLE (table), s.det_hidden, 1, 2, 2, 3,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   hbox = gtk_hbox_new (FALSE, 5);
@@ -2137,10 +2125,6 @@ int preferencesdlg_execute(void* param)
 			       (opts->nDetail & LC_DET_ANTIALIAS) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_fast),
 			       (opts->nDetail & LC_DET_FAST) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_solid),
-			       (opts->nDetail & LC_DET_BOX_FILL) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_hidden),
-			       (opts->nDetail & LC_DET_HIDDEN_LINE) ? TRUE : FALSE);
   write_float(s.det_width, opts->fLineWidth);
 
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_grid),
@@ -2185,6 +2169,7 @@ int preferencesdlg_execute(void* param)
   write_int(s.scn_density, (int)(opts->fDensity*100));
 
   return dlg_domodal(dlg, LC_CANCEL);
+*/
 }
 
 // Properties Dialog

@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
+#include "lc_global.h"
 #include "basewnd.h"
 #include "dialogs.h"
 #include "main.h"

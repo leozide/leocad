@@ -155,6 +155,16 @@ long SystemGetTicks()
   return (tp.tv_sec-basetime)*1000 + tp.tv_usec/1000;
 }
 
+u64 SystemGetMilliseconds()
+{
+  struct timezone tzp;
+  struct timeval tp;
+
+  gettimeofday (&tp, &tzp);
+
+  return tp.tv_sec*1000 + tp.tv_usec/1000;
+}
+
 // User Interface
 void SystemUpdateViewport(int new_vp, int old_vp)
 {

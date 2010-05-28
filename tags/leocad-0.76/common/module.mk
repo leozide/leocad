@@ -1,7 +1,7 @@
 SRC += common/algebra.cpp common/camera.cpp common/console.cpp common/file.cpp \
        common/group.cpp common/image.cpp common/im_bmp.cpp common/im_gif.cpp \
        common/lc_application.cpp common/lc_colors.cpp common/lc_mesh.cpp common/lc_message.cpp \
-       common/lc_model.cpp common/library.cpp common/light.cpp common/mainwnd.cpp \
+       common/lc_model.cpp common/lc_viewpoint.cpp common/library.cpp common/light.cpp common/mainwnd.cpp \
        common/matrix.cpp common/minifig.cpp common/object.cpp common/opengl.cpp \
        common/piece.cpp common/pieceinf.cpp common/preview.cpp common/project.cpp common/quant.cpp \
        common/str.cpp common/texfont.cpp common/texture.cpp common/view.cpp

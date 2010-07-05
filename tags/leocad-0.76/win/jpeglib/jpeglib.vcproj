@@ -160,6 +160,10 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\jaricom.c"
+			>
+		</File>
+		<File
 			RelativePath="jcapimin.c"
 			>
 			<FileConfiguration
@@ -198,6 +202,10 @@
 					PreprocessorDefinitions=""
 				/>
 			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\jcarith.c"
+			>
 		</File>
 		<File
 			RelativePath="jccoefct.c"
@@ -408,26 +416,6 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="jcphuff.c"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-		</File>
-		<File
 			RelativePath="jcprepct.c"
 			>
 			<FileConfiguration
@@ -526,6 +514,10 @@
 					PreprocessorDefinitions=""
 				/>
 			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\jdarith.c"
+			>
 		</File>
 		<File
 			RelativePath="jdatadst.c"
@@ -756,26 +748,6 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="jdphuff.c"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-		</File>
-		<File
 			RelativePath="jdpostct.c"
 			>
 			<FileConfiguration
@@ -961,26 +933,6 @@
 		</File>
 		<File
 			RelativePath="jidctint.c"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="jidctred.c"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"

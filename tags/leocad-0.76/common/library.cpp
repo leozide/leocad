@@ -1440,8 +1440,8 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 			u16 Count;
 			OldIdxFile->Seek(-(2+4+2), SEEK_END);
 			OldIdxFile->ReadShorts(&Count, 1);
-			u32 cs = 2+(Count*16);
-			OldIdxFile->Seek(-(long)cs, SEEK_CUR);
+			u32 cs = Count * 16;
+			OldIdxFile->Seek(-(long)(cs+2), SEEK_CUR);
 
 			u32 Length = OldIdxFile->GetPosition();
 			void* Buffer = malloc(Length);
@@ -1453,7 +1453,7 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 
 			Buffer = malloc(cs);
 			OldIdxFile->Read(Buffer, cs);
-			char* Reference = (char*)Buffer+2;
+			char* Reference = (char*)Buffer;
 
 			// Add piece to moved list.
 			if (!strchr(Moved, '\\') && !strchr(Moved, '/'))
@@ -1464,7 +1464,7 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 				char* Dst = NULL;
 				for (int i = 0; i < Count; i++)
 				{
-					if (!strcmp(&Reference[i*16], piece.name))
+					if (!strncmp(&Reference[i*16], piece.name, 8))
 					{
 						Dst = &Reference[i*16+8];
 						memset(Dst, 0, 8);
@@ -1474,8 +1474,8 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 
 				if (!Dst)
 				{
-					Buffer = realloc(Buffer, 2+16*(Count+1));
-					Reference = (char*)Buffer+2;
+					Buffer = realloc(Buffer, 16*(Count+1));
+					Reference = (char*)Buffer;
 					memset(&Reference[Count*16], 0, 16);
 					memcpy(&Reference[Count*16], piece.name, strlen(piece.name));
 					memcpy(&Reference[Count*16+8], Moved, strlen(Moved));
@@ -1488,10 +1488,12 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 			free(Buffer);
 
 			Buffer = malloc(4+2);
+			OldIdxFile->Seek(-(4+2), SEEK_END);
 			OldIdxFile->Read(Buffer, 4+2);
 			NewIdxFile->Write(Buffer, 4+2);
 			free(Buffer);
 
+			OldBinFile->Seek(0, SEEK_END);
 			Length = OldBinFile->GetPosition();
 			Buffer = malloc(Length);
 			OldBinFile->Seek(0, SEEK_SET);
@@ -1514,6 +1516,27 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 	}
 	else
 	{
+		void* Buffer;
+		u32 Length;
+
+		OldBinFile->Seek(0, SEEK_END);
+		Length = OldBinFile->GetPosition();
+		Buffer = malloc(Length);
+		OldBinFile->Seek(0, SEEK_SET);
+		OldBinFile->Read(Buffer, Length);
+		NewBinFile->Seek(0, SEEK_SET);
+		NewBinFile->Write(Buffer, Length);
+		free(Buffer);
+
+		OldIdxFile->Seek(0, SEEK_END);
+		Length = OldIdxFile->GetPosition();
+		Buffer = malloc(Length);
+		OldIdxFile->Seek(0, SEEK_SET);
+		OldIdxFile->Read(Buffer, Length);
+		NewIdxFile->Seek(0, SEEK_SET);
+		NewIdxFile->Write(Buffer, Length);
+		free(Buffer);
+
 		fprintf(stderr, "Error reading file %s\n", Filename);
 		Sys_MessageBox("Error reading file.");
 	}
@@ -2406,6 +2429,10 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 		ptr = tmp;
 	else
 		ptr++;
+
+	if (strlen(ptr) > 8)
+		return false;
+
 	strcpy(piece->name, ptr);
 	_strupr(piece->name);
 

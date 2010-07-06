@@ -93,7 +93,7 @@ BOOL CArrayDlg::OnInitDialog()
 
 	for (int i = 0; i < 3; i++)
 		((CSpinButtonCtrl*)GetDlgItem(IDs[i]))->SetRange(1, 1000);
-	for (i = 3; i < 15; i++)
+	for (int i = 3; i < 15; i++)
 		((CSpinButtonCtrl*)GetDlgItem(IDs[i]))->SetRange(-1000, 1000);
 
 	m_bInitDone = TRUE;
@@ -109,11 +109,11 @@ void CArrayDlg::OnArrayDimension()
 	UpdateData();
 	for (UINT u = IDC_ARRAY_2D_COUNT; u <= IDC_ARRAY_2D_Z; u++)
 		GetDlgItem(u)->EnableWindow(m_nArrayDimension > 0);
-	for (u = IDC_ARRAY_2D_X_SPIN; u <= IDC_ARRAY_2D_Z_SPIN; u++)
+	for (UINT u = IDC_ARRAY_2D_X_SPIN; u <= IDC_ARRAY_2D_Z_SPIN; u++)
 		GetDlgItem(u)->EnableWindow(m_nArrayDimension > 0);
-	for (u = IDC_ARRAY_3D_COUNT; u <= IDC_ARRAY_3D_Z; u++)
+	for (UINT u = IDC_ARRAY_3D_COUNT; u <= IDC_ARRAY_3D_Z; u++)
 		GetDlgItem(u)->EnableWindow(m_nArrayDimension > 1);
-	for (u = IDC_ARRAY_3D_X_SPIN; u <= IDC_ARRAY_3D_Z_SPIN; u++)
+	for (UINT u = IDC_ARRAY_3D_X_SPIN; u <= IDC_ARRAY_3D_Z_SPIN; u++)
 		GetDlgItem(u)->EnableWindow(m_nArrayDimension > 1);
 	OnChangeArrayCount();
 }

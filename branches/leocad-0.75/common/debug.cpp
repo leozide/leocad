@@ -82,7 +82,7 @@ void RenderDebugPrimitives()
 
 	glBegin(GL_QUADS);
 
-	for (i = 0; i < NumDebugQuads; i++)
+	for (int i = 0; i < NumDebugQuads; i++)
 	{
 		glColor4fv((float*)&DebugQuads[i].color);
 		glVertex3fv((float*)&DebugQuads[i].pt1);

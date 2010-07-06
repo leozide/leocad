@@ -147,7 +147,7 @@ void CColorPicker::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				if (y == rect.top) y += x%4;
 				pDC->SetPixel (x,y,RGB(255,255,255));
 			}
-			for (y = rect.bottom; y > rect.top; y-=4)
+			for (int y = rect.bottom; y > rect.top; y-=4)
 			{
 				if (y == rect.bottom) y-= x%4;
 				pDC->SetPixel (x,y,RGB(255,255,255));

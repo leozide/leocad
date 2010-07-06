@@ -11,6 +11,7 @@
 #if _MFC_VER < 0x0710
 #include <../src/afximpl.h>
 #else
+#include <afxtempl.h>
 #include <../src/mfc/afximpl.h>
 #endif
 

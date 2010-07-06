@@ -488,7 +488,7 @@ CSize CFlatToolBar::CalcLayout(DWORD dwMode, int nLength)
 
 			if ((m_dwStyle & CBRS_FLOATING) && (m_dwStyle & CBRS_SIZE_DYNAMIC))
 				m_nMRUWidth = sizeResult.cx;
-			for (i = 0; i < nCount; i++)
+			for (int i = 0; i < nCount; i++)
 				SetButton(i, &pData[i]); // **PD** renamed from _SetButton
 
 			if (nControlCount > 0)

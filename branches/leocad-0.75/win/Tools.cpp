@@ -559,7 +559,7 @@ void Export3DStudio()
 							}
 						
 							info += *info + 1;
-							for (k = 0; k < *info; k += 3)
+							for (UINT k = 0; k < *info; k += 3)
 							{
 								mobj->matarray[i].faceindex[facecount] = curface;
 								facecount++;

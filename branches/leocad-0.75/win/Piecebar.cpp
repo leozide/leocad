@@ -434,7 +434,7 @@ void CPiecesBar::OnPaint()
 	CPaintDC dc(this);
 }
 
-UINT CPiecesBar::OnNcHitTest(CPoint point) 
+LRESULT CPiecesBar::OnNcHitTest(CPoint point) 
 {
 	if (IsFloating())
 		return CControlBar::OnNcHitTest(point);

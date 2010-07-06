@@ -204,7 +204,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 
 	start.next = NULL;
 	
-	for (j = 0; j < pLib->GetPieceCount (); j++)
+	for (int j = 0; j < pLib->GetPieceCount (); j++)
 	{
 		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
 
@@ -231,7 +231,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 
 	if (PD->PrintRange())
 	{
-		for (j = 0; j < (int)(nStartPage - 1)*rows*cols; j++)
+		for (int j = 0; j < (int)(nStartPage - 1)*rows*cols; j++)
 			if (node)
 				node = node->next;
 	}

@@ -102,7 +102,7 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
     char **names;
@@ -118,13 +118,13 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   char *names[LC_MFW_NUMITEMS];
   m_pMinifig->GetSelections (names);
 
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
     pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
   }
 
-  for (i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
+  for (int i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
 		((CSpinButtonCtrl*)GetDlgItem(i))->SetRange(-360, 360);
 
   return TRUE;  // return TRUE unless you set the focus to a control

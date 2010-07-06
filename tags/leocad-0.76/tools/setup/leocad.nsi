@@ -24,6 +24,8 @@
   !define MUI_ICON "setup.ico"
   !define MUI_UNICON "setup.ico"
 
+  SetCompressor /SOLID lzma
+
 ;--------------------------------
 ;Interface Settings
 

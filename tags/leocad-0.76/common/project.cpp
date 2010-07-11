@@ -5128,15 +5128,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					if (Wizard.m_Info[i] == NULL)
 						continue;
 
-					Matrix mat;
+					Vector4& Position = Wizard.m_Matrices[i][3];  
+					Vector4 Rotation = MatrixToAxisAngle(Wizard.m_Matrices[i]);  
 					lcPiece* Piece = new lcPiece(Wizard.m_Info[i]);
 
-					Piece->Initialize(Wizard.m_Position[i][0], Wizard.m_Position[i][1], Wizard.m_Position[i][2], m_ActiveModel->m_CurFrame, Wizard.m_Colors[i]);
+					Piece->Initialize(Position[0], Position[1], Position[2], m_ActiveModel->m_CurFrame, Wizard.m_Colors[i]);
 					Piece->SetUniqueName(m_ActiveModel->m_Pieces, Piece->m_PieceInfo->m_strDescription);
 					m_ActiveModel->AddPiece(Piece);
 					Piece->Select(true, false, false);
 
-					Piece->ChangeKey(1, false, Wizard.m_Rotation[i], LC_PK_ROTATION);
+					Piece->ChangeKey(1, false, Rotation, LC_PK_ROTATION);
 					Piece->UpdatePosition(m_ActiveModel->m_CurFrame);
 
 					SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);

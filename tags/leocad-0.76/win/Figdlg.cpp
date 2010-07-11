@@ -106,35 +106,16 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-		LC_MFW_PIECEINFO** items;
-		int j, count;
+		lcObjArray<lcMinifigPieceInfo>& Pieces = m_pMinifig->mSettings[i];
 
-		m_pMinifig->GetItems(i, &items, &count);
-
-		for (j = 0; j < count; j++)
-		{
-			if (items[j])
-			{
-				int idx = pCombo->AddString(items[j]->description);
-				pCombo->SetItemDataPtr(idx, items[j]);
-			}
-			else
-			{
-				int idx = pCombo->AddString("None");
-				pCombo->SetItemDataPtr(idx, NULL);
-			}
-		}
-
-		free(items);
+		for (int j = 0; j < Pieces.GetSize(); j++)  
+			pCombo->AddString(Pieces[j].Description);  
 	}
-
-	const char *names[LC_MFW_NUMITEMS];
-	m_pMinifig->GetSelections (names);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-		pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
+		pCombo->SetCurSel(m_pMinifig->GetSelectionIndex(i));
 	}
 
 	for (i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
@@ -158,32 +139,30 @@ BOOL CMinifigDlg::DestroyWindow()
 
 LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 {
-	m_pMinifig->ChangeColor (wParam-IDC_MF_HATCOLOR, lParam);
-	m_pMinifig->Redraw ();
+	m_pMinifig->SetColor(wParam-IDC_MF_HATCOLOR, lParam);
+	m_pMinifig->Redraw();
 
 	return TRUE;
 }
 
 void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
-	CComboBox* combo = (CComboBox*)GetDlgItem(nID);
-	LC_MFW_PIECEINFO* info = (LC_MFW_PIECEINFO*)combo->GetItemDataPtr(combo->GetCurSel());
-
-	m_pMinifig->ChangePiece(nID-IDC_MF_HAT, info);
+	CComboBox* Combo = (CComboBox*)GetDlgItem(nID);
+	m_pMinifig->SetSelectionIndex(nID - IDC_MF_HAT, Combo->GetCurSel()); 
 	m_pMinifig->Redraw();
 }
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 
 {
-  char tmp[65];
-  GetDlgItem(nID)->GetWindowText (tmp, 65);
-  if (m_pMinifigWnd)
-  {
-    int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_NECK,
-      LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND,
-      LC_MFW_RIGHT_HAND, LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL,
-      LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
-  	m_pMinifig->ChangeAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
-	  m_pMinifig->Redraw ();
-  }
+	int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_NECK, LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND, LC_MFW_RIGHT_HAND,
+	                LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL, LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
+
+	char tmp[65];
+	GetDlgItem(nID)->GetWindowText (tmp, 65);
+
+	if (m_pMinifigWnd)
+	{
+		m_pMinifig->SetAngle(index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
+		m_pMinifig->Redraw();
+	}
 }

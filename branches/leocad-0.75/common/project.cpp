@@ -5070,22 +5070,23 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		    for (i = 0; i < LC_MFW_NUMITEMS; i++)
 		    {
 		      if (wiz->m_Info[i] == NULL)
-            continue;
+				continue;
 
 		      Matrix mat;
 		      Piece* pPiece = new Piece(wiz->m_Info[i]);
 
-		      pPiece->Initialize(wiz->m_Position[i][0], wiz->m_Position[i][1], wiz->m_Position[i][2],
-					 m_nCurStep, m_nCurFrame, wiz->m_Colors[i]);
+			  Vector4& Position = wiz->m_Matrices[i][3];
+			  Vector4 Rotation = wiz->m_Matrices[i].ToAxisAngle();
+			  Rotation[3] *= LC_RTOD;
+		      pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame, wiz->m_Colors[i]);
 		      pPiece->CreateName(m_pPieces);
 		      AddPiece(pPiece);
 		      pPiece->Select(true, false, false);
 
-		      pPiece->ChangeKey(1, false, false, wiz->m_Rotation[i], LC_PK_ROTATION);
-		      pPiece->ChangeKey(1, true, false, wiz->m_Rotation[i], LC_PK_ROTATION);
+		      pPiece->ChangeKey(1, false, false, Rotation, LC_PK_ROTATION);
+		      pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
 		      pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-		      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep,
-						   m_bAnimation, false, true);
+		      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
 		      SystemPieceComboAdd(wiz->m_Info[i]->m_strDescription);
 		    }

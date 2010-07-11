@@ -96,7 +96,7 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   }
 
 	m_pMinifigWnd = new CWnd;
-  m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
+	m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
     WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
@@ -105,26 +105,19 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-    char **names;
-    int j, count;
+		ObjArray<lcMinifigPieceInfo>& Pieces = m_pMinifig->mSettings[i];
 
-    m_pMinifig->GetDescriptions (i, &names, &count);
-
-    for (j = 0; j < count; j++)
-			pCombo->AddString (names[j]);
-    free (names);
+	    for (int j = 0; j < Pieces.GetSize(); j++)
+			pCombo->AddString(Pieces[j].Description);
 	}
-
-  char *names[LC_MFW_NUMITEMS];
-  m_pMinifig->GetSelections (names);
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-    pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
-  }
+		pCombo->SetCurSel(m_pMinifig->GetSelectionIndex(i));
+	}
 
-  for (int i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
+	for (int i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
 		((CSpinButtonCtrl*)GetDlgItem(i))->SetRange(-360, 360);
 
   return TRUE;  // return TRUE unless you set the focus to a control
@@ -145,7 +138,7 @@ BOOL CMinifigDlg::DestroyWindow()
 
 LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 {
-	m_pMinifig->ChangeColor (wParam-IDC_MF_HATCOLOR, lParam);
+	m_pMinifig->SetColor(wParam-IDC_MF_HATCOLOR, lParam);
 	m_pMinifig->Redraw ();
 
 	return TRUE;
@@ -153,10 +146,9 @@ LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 
 void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
-  char tmp[65];
-  GetDlgItem(nID)->GetWindowText (tmp, 65);
-	m_pMinifig->ChangePiece (nID-IDC_MF_HAT, tmp);
-	m_pMinifig->Redraw ();
+	CComboBox* Combo = (CComboBox*)GetDlgItem(nID);
+	m_pMinifig->SetSelectionIndex(nID - IDC_MF_HAT, Combo->GetCurSel());
+	m_pMinifig->Redraw();
 }
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 
@@ -169,7 +161,7 @@ void CMinifigDlg::OnChangeAngle(UINT nID)
       LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND,
       LC_MFW_RIGHT_HAND, LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL,
       LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
-  	m_pMinifig->ChangeAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
+  	m_pMinifig->SetAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
 	  m_pMinifig->Redraw ();
   }
 }

@@ -594,6 +594,99 @@ public:
 		*this = Mat;
 	}
 
+	Vector4 ToAxisAngle()
+	{
+		Matrix33 tmp(Vector3(m_Rows[0]).Normalize(), Vector3(m_Rows[1]).Normalize(), Vector3(m_Rows[2]).Normalize());
+
+		// Determinant should be 1 for rotation matrices.
+		float Determinant = tmp.m_Rows[0][0] * tmp.m_Rows[1][1] * tmp.m_Rows[2][2] + tmp.m_Rows[0][1] * tmp.m_Rows[1][2] * tmp.m_Rows[2][0] +
+	                        tmp.m_Rows[0][2] * tmp.m_Rows[1][0] * tmp.m_Rows[2][1] - tmp.m_Rows[0][0] * tmp.m_Rows[1][2] * tmp.m_Rows[2][1] - 
+	                        tmp.m_Rows[0][1] * tmp.m_Rows[1][0] * tmp.m_Rows[2][2] - tmp.m_Rows[0][2] * tmp.m_Rows[1][1] * tmp.m_Rows[2][0];
+
+		if (Determinant < 0.0f)
+			tmp.m_Rows[0] *= -1.0f;
+
+		float Trace = tmp.m_Rows[0][0] + tmp.m_Rows[1][1] + tmp.m_Rows[2][2];
+		float Cos = 0.5f * (Trace - 1.0f);
+		Vector4 rot;
+
+		if (Cos < -1.0f)
+			Cos = -1.0f;
+		else if (Cos > 1.0f)
+			Cos = 1.0f;
+		rot[3] = acosf(Cos);  // in [0,PI]
+
+		if (rot[3] > 0.01f)
+		{
+			if (fabsf(3.141592f - rot[3]) > 0.01f)
+			{
+				rot[0] = tmp.m_Rows[1][2] - tmp.m_Rows[2][1];
+				rot[1] = tmp.m_Rows[2][0] - tmp.m_Rows[0][2];
+				rot[2] = tmp.m_Rows[0][1] - tmp.m_Rows[1][0];
+
+				float inv = 1.0f / sqrtf(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+
+				rot[0] *= inv;
+				rot[1] *= inv;
+				rot[2] *= inv;
+			}
+			else
+			{
+				// angle is PI
+				float HalfInverse;
+				if (tmp.m_Rows[0][0] >= tmp.m_Rows[1][1])
+				{
+					// r00 >= r11
+					if (tmp.m_Rows[0][0] >= tmp.m_Rows[2][2])
+					{
+						// r00 is maximum diagonal term
+						rot[0] = 0.5f * sqrtf(tmp.m_Rows[0][0] - tmp.m_Rows[1][1] - tmp.m_Rows[2][2] + 1.0f);
+						HalfInverse = 0.5f / rot[0];
+						rot[1] = HalfInverse * tmp.m_Rows[1][0];
+						rot[2] = HalfInverse * tmp.m_Rows[2][0];
+					}
+					else
+					{
+						// r22 is maximum diagonal term
+						rot[2] = 0.5f * sqrtf(tmp.m_Rows[2][2] - tmp.m_Rows[0][0] - tmp.m_Rows[1][1] + 1.0f);
+						HalfInverse = 0.5f / rot[2];
+						rot[0] = HalfInverse * tmp.m_Rows[2][0];
+						rot[1] = HalfInverse * tmp.m_Rows[2][1];
+					}
+				}
+				else
+				{
+					// r11 > r00
+					if (tmp.m_Rows[1][1] >= tmp.m_Rows[2][2])
+					{
+						// r11 is maximum diagonal term
+						rot[1] = 0.5f * sqrtf(tmp.m_Rows[1][1] - tmp.m_Rows[0][0] - tmp.m_Rows[2][2] + 1.0f);
+						HalfInverse  = 0.5f / rot[1];
+						rot[0] = HalfInverse * tmp.m_Rows[1][0];
+						rot[2] = HalfInverse * tmp.m_Rows[2][1];
+					}
+					else
+					{
+						// r22 is maximum diagonal term
+						rot[2] = 0.5f * sqrtf(tmp.m_Rows[2][2] - tmp.m_Rows[0][0] - tmp.m_Rows[1][1] + 1.0f);
+						HalfInverse = 0.5f / rot[2];
+						rot[0] = HalfInverse * tmp.m_Rows[2][0];
+						rot[1] = HalfInverse * tmp.m_Rows[2][1];
+					}
+				}
+			}
+		}
+		else
+		{
+			// The angle is 0 and the matrix is the identity.
+			rot[0] = 0.0f;
+			rot[1] = 0.0f;
+			rot[2] = 1.0f;
+		}
+
+		return rot;
+	}
+
 protected:
 	Vector4 m_Rows[4];
 };

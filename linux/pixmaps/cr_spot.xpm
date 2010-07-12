@@ -1,6 +1,6 @@
 /* XPM */
-static const char *cr_spot[] = {
-/* columns rows colors const chars-per-pixel */
+static char *cr_spot[] = {
+/* columns rows colors chars-per-pixel */
 "32 32 3 1",
 "  c None",
 ". c #000000",

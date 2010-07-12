@@ -340,40 +340,6 @@ int savepicturedlg_execute (void* param)
   return ret;
 }
 
-int dirbrowsedlg_execute(void* param)
-{
-  GtkWidget *dlg;
-  int ret = LC_CANCEL, loop = 1;
-  LC_DLG_DIRECTORY_BROWSE_OPTS* opts = (LC_DLG_DIRECTORY_BROWSE_OPTS*)param;
-
-  dlg = gtk_file_selection_new(opts->Title);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->ok_button), "clicked",
-                      GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->cancel_button), "clicked",
-                      GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_object_set_data (GTK_OBJECT (dlg), "loop", &loop);
-  gtk_object_set_data (GTK_OBJECT (dlg), "ret", &ret);
-
-  gtk_widget_show (dlg);
-  gtk_grab_add (dlg);
-
-  while (loop)
-    gtk_main_iteration ();
-
-  if (ret == LC_OK)
-    strcpy (opts->Path, gtk_file_selection_get_filename (GTK_FILE_SELECTION (dlg)));
-
-  gtk_grab_remove (dlg);
-  gtk_widget_destroy (dlg);
-
-  return ret;
-}
-
 // =============================================================================
 // Piece Library Manager
 

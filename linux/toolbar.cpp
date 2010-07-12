@@ -11,11 +11,10 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "toolbar.h"
-#include "lc_message.h"
+#include "message.h"
 #include "preview.h"
 #include "library.h"
 #include "lc_application.h"
-#include "lc_colors.h"
 
 // =============================================================================
 // Variables
@@ -292,7 +291,7 @@ void fill_piecetree()
     gtk_tree_store_append(model, &iter, NULL);
     gtk_tree_store_set(model, &iter, 0, (const char*)Lib->GetCategoryName(i), 1, NULL, -1);
 
-    lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
+    PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
     Lib->GetCategoryEntries(i, true, SinglePieces, GroupedPieces);
 
@@ -310,7 +309,7 @@ void fill_piecetree()
 
       if (GroupedPieces.FindIndex(Info) != -1)
       {
-	lcPtrArray<PieceInfo> Patterns;
+	PtrArray<PieceInfo> Patterns;
 	Lib->GetPatternedPieces(Info, Patterns);
 
 	for (int k = 0; k < Patterns.GetSize(); k++)
@@ -356,7 +355,7 @@ static void piecetree_changed(GtkTreeSelection* selection, gpointer data)
     gtk_tree_model_get(model, &iter, 1, &sel, -1);
 
     if (sel)
-      g_App->m_PiecePreview->SetSelection(sel);
+      preview->SetCurrentPiece((PieceInfo*)sel);
   }
 }
 
@@ -469,7 +468,7 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &child);	
 
       // Perform search.
-      lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
+      PtrArray<PieceInfo> SinglePieces, GroupedPieces;
       Lib->GetCategoryEntries(Index, true, SinglePieces, GroupedPieces);
 
       // Merge and sort the arrays.
@@ -553,9 +552,9 @@ static void colorlist_draw_pixmap(GtkWidget *widget)
     else
       rect.x = widget->allocation.width * (i-14) / 14;
 
-    c.red = (gushort)(lcColorList[i].Value[0]*0xFFFF);
-    c.green = (gushort)(lcColorList[i].Value[1]*0xFFFF);
-    c.blue = (gushort)(lcColorList[i].Value[2]*0xFFFF);
+    c.red = (gushort)(FlatColorArray[i][0]*0xFF);
+    c.green = (gushort)(FlatColorArray[i][1]*0xFF);
+    c.blue = (gushort)(FlatColorArray[i][2]*0xFF);
     gdk_color_alloc(gtk_widget_get_colormap(widget), &c);
     gdk_gc_set_foreground(gc, &c);
 
@@ -659,8 +658,7 @@ static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer 
   {
     cur_color = x;
     colorlist_draw_pixmap(widget);
-    g_App->m_SelectedColor = x;
-    lcPostMessage(LC_MSG_COLOR_CHANGED, GINT_TO_POINTER(x));
+    lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
     gtk_widget_draw(widget, NULL);
     preview->Redraw ();
   }
@@ -681,8 +679,7 @@ static gint colorlist_button_press(GtkWidget *widget, GdkEventButton *event)
     {
       cur_color = x;
       colorlist_draw_pixmap(widget);
-      g_App->m_SelectedColor = x;
-      lcPostMessage(LC_MSG_COLOR_CHANGED, GINT_TO_POINTER(x));
+      lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
       gtk_widget_draw(widget, NULL);
       preview->Redraw ();
     }
@@ -792,6 +789,15 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 
   fill_piecetree();
 
+  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
+  if (!Info)
+    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+  if (Info)
+  {
+    lcGetActiveProject()->SetCurrentPiece(Info);
+    //    preview->SetCurrentPiece(Info);
+  }
+
   return frame;
 }
 
@@ -802,7 +808,7 @@ GtkWidget *label_message, *label_position, *label_snap, *label_step;
 
 static void statusbar_listener (int message, void *data, void *user)
 {
-  if (message == LC_MSG_FOCUS_OBJECT_CHANGED)
+  if (message == LC_MSG_FOCUS_CHANGED)
   {
     char text[32];
     Vector3 pos;
@@ -886,6 +892,5 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   gtk_widget_show (label_step);
   gtk_box_pack_start (GTK_BOX (hbox1), label_step, TRUE, TRUE, 0);
 
-// FIXME: linux status bar listener
-//  messenger->Listen (&statusbar_listener, NULL);
+  messenger->Listen (&statusbar_listener, NULL);
 }

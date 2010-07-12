@@ -1,5 +1,5 @@
 /* XPM */
-static const char * ac_spot[] = {
+static char * ac_spot[] = {
 "16 15 6 1",
 ". 	c None",
 "+	c #000000",

@@ -1,5 +1,5 @@
 /* XPM */
-static const char * st_bg[] = {
+static char * st_bg[] = {
 "16 15 5 1",
 ". 	c None",
 "+	c #000000",

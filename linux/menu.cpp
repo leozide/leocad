@@ -54,16 +54,17 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   create_pixmap_menu_item (menu, "Save Pic_ture...", photo, accel, GTK_SIGNAL_FUNC (OnCommandDirect),
                            window, LC_FILE_PICTURE, "menu_file_picture");
 
-	menu_in_menu = create_menu_in_menu (menu, "Ex_port", accel);
-	create_menu_item (menu_in_menu, "_HTML...", accel, GTK_SIGNAL_FUNC (OnCommandDirect), window, LC_FILE_HTML, "menu_file_html");
-	create_menu_item (menu_in_menu, "_POV-Ray...", accel, GTK_SIGNAL_FUNC (OnCommandDirect), window, LC_FILE_POVRAY, "menu_file_povray");
-	create_menu_item (menu_in_menu, "_Wavefront...", accel, GTK_SIGNAL_FUNC (OnCommandDirect), window, LC_FILE_WAVEFRONT, "menu_file_wavefront");
-	create_menu_item (menu_in_menu, "_VRML97...", accel, GTK_SIGNAL_FUNC (OnCommandDirect), window, LC_FILE_VRML, "menu_file_vrml");
-	create_menu_item (menu_in_menu, "_X3DV...", accel, GTK_SIGNAL_FUNC (OnCommandDirect), window, LC_FILE_X3DV, "menu_file_x3dv");
-	menu_separator (menu);
+  menu_in_menu = create_menu_in_menu (menu, "Ex_port", accel);
+  create_menu_item (menu_in_menu, "_HTML...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_HTML, "menu_file_html");
+  create_menu_item (menu_in_menu, "_POV-Ray...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_POVRAY, "menu_file_povray");
+  create_menu_item (menu_in_menu, "_Wavefront...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_FILE_WAVEFRONT, "menu_file_wavefront");
+  menu_separator (menu);
 
   create_pixmap_menu_item (menu, "Propert_ies...", info, accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-                           window, LC_MODEL_PROPERTIES, "menu_model_properties");
+                           window, LC_FILE_PROPERTIES, "menu_file_properties");
   create_menu_item (menu, "Pieces _Library Manager...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_LIBRARY, "menu_file_library");
   create_menu_item (menu, "Terrain _Editor...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
@@ -130,6 +131,8 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_PIECE_MINIFIG, "menu_piece_minifig");
   create_menu_item (menu, "Ar_ray...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_PIECE_ARRAY, "menu_piece_array");
+  create_menu_item (menu, "_Copy Keys", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_COPYKEYS, "menu_piece_copykeys");
   menu_separator (menu);
 
   create_menu_item (menu, "_Group", accel, GTK_SIGNAL_FUNC (OnCommandDirect),

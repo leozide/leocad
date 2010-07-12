@@ -2,7 +2,6 @@
 // General purpose string class
 //
 
-#include "lc_global.h"
 #include <ctype.h>
 #include "str.h"
 
@@ -198,6 +197,7 @@ bool String::Match(const String& Expression) const
 		}
 		else if (*p == '(')
 		{
+			const char* Start = p;
 			int c = 0;
 
 			// Skip what's inside the parenthesis.

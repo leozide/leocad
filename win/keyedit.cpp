@@ -1,7 +1,7 @@
 // keyedit.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "keyedit.h"
 #include "keyboard.h"

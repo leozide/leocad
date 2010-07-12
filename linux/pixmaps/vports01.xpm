@@ -1,5 +1,5 @@
 /* XPM */
-static const char * vports01[] = {
+static char * vports01[] = {
 "41 31 2 1",
 ".	c #000000",
 "+	c #808080",

@@ -19,6 +19,11 @@ class CPiecePreview : public CWnd
 public:
 	CPiecePreview();
 
+// Attributes
+public:
+	void SetPieceInfo(PieceInfo* pInfo);
+	PieceInfo* GetPieceInfo () const;
+
 // Operations
 public:
 

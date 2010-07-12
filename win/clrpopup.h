@@ -9,77 +9,84 @@
 //
 
 // CColorPopup messages
-#define CPN_SELENDOK        WM_USER + 1001 // Color Picker end OK
-#define CPN_SELENDCANCEL    WM_USER + 1002 // Color Picker end (cancelled)
+#define CPN_SELENDOK		WM_USER + 1001 // Color Picker end OK
+#define CPN_SELENDCANCEL	WM_USER + 1002 // Color Picker end (cancelled)
+
+// forward declaration
+class CColorPicker;
 
 /////////////////////////////////////////////////////////////////////////////
 // CColorPopup window
 
 class CColorPopup : public CWnd
 {
-	// Construction
+// Construction
 public:
-	CColorPopup();
-	CColorPopup(CPoint p, int ColorIndex, CWnd* pParentWnd);
-	void Initialise();
+    CColorPopup();
+    CColorPopup(CPoint p, COLORREF crColor, CWnd* pParentWnd, BOOL bDefaultText = FALSE, BOOL bCustomText = FALSE);
+    void Initialise();
 
-	// Attributes
+// Attributes
 public:
 
-	// Operations
+// Operations
 public:
-	BOOL Create(CPoint p, int ColorIndex, CWnd* pParentWnd);
+    BOOL Create(CPoint p, COLORREF crColor, CWnd* pParentWnd, BOOL bDefaultText = FALSE, BOOL bCustomText = NULL);
 
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CColorPopup)
-public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//}}AFX_VIRTUAL
+// Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CColorPopup)
+    public:
+    virtual BOOL PreTranslateMessage(MSG* pMsg);
+    //}}AFX_VIRTUAL
 
-	// Implementation
+// Implementation
 public:
-	virtual ~CColorPopup();
+    virtual ~CColorPopup();
 
 protected:
-	BOOL GetCellRect(int nIndex, const LPRECT& rect);
-	void SetWindowSize();
-	void CreateToolTips();
-	void ChangeSelection(int nIndex);
-	void EndSelection(int nMessage);
-	void DrawCell(CDC* pDC, int nIndex);
+    BOOL GetCellRect(int nIndex, const LPRECT& rect);
+    void FindCellFromColor(COLORREF crColor);
+    void SetWindowSize();
+    void CreateToolTips();
+    void ChangeSelection(int nIndex);
+    void EndSelection(int nMessage);
+    void DrawCell(CDC* pDC, int nIndex);
 
-	int  GetIndex(int row, int col) const;
-	int  GetRow(int nIndex) const;
-	int  GetColumn(int nIndex) const;
+    COLORREF GetColor(int nIndex);// { return m_crColors[nIndex].crColor; }
+    int  GetIndex(int row, int col) const;
+    int  GetRow(int nIndex) const;
+    int  GetColumn(int nIndex) const;
 
 // protected attributes
 protected:
-	int            m_nNumColumns, m_nNumRows;
-	int            m_nBoxSize, m_nMargin;
-	int            m_nCurrentSel;
-	int            m_nChosenColorSel;
-	int            m_nInitialColor, m_nColor;
-	CRect          m_WindowRect;
-	CFont          m_Font;
-	CPalette       m_Palette;
-	CToolTipCtrl   m_ToolTip;
-	CWnd*          m_pParent;
+    int            m_nNumColumns, m_nNumRows;
+    int            m_nBoxSize, m_nMargin;
+    int            m_nCurrentSel;
+    int            m_nChosenColorSel;
+    BOOL m_bDefaultText;
+    BOOL m_bCustomText;
+    CRect          m_CustomTextRect, m_DefaultTextRect, m_WindowRect;
+    CFont          m_Font;
+    CPalette       m_Palette;
+    COLORREF       m_crInitialColor, m_crColor;
+    CToolTipCtrl   m_ToolTip;
+    CWnd*          m_pParent;
 
-	// Generated message map functions
+    // Generated message map functions
 protected:
-	//{{AFX_MSG(CColorPopup)
-	afx_msg void OnNcDestroy();
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnPaint();
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg BOOL OnQueryNewPalette();
-	afx_msg void OnPaletteChanged(CWnd* pFocusWnd);
+    //{{AFX_MSG(CColorPopup)
+    afx_msg void OnNcDestroy();
+    afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+    afx_msg void OnPaint();
+    afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+    afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+    afx_msg BOOL OnQueryNewPalette();
+    afx_msg void OnPaletteChanged(CWnd* pFocusWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask);
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

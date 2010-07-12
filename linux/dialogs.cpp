@@ -21,9 +21,8 @@
 #include "group.h"
 #include "main.h"
 #include "config.h"
-//#include "message.h"
+#include "message.h"
 #include "project.h"
-#include "lc_colors.h"
 
 // =============================================================================
 // Modal dialog helper functions
@@ -294,7 +293,7 @@ static void filedlg_callback(GtkWidget *widget, gpointer data)
     *cur_ret = LC_CANCEL;
 }
 
-int filedlg_execute(const char* caption, char* filename)
+int filedlg_execute(char* caption, char* filename)
 {
   GtkWidget* dlg;
   dlg = gtk_file_selection_new (caption);
@@ -1531,7 +1530,7 @@ typedef struct
   GtkWidget *det_edges, *det_dither, *det_lighting, *det_smooth;
   GtkWidget *det_antialias, *det_linear, *det_fast;
   GtkWidget *det_solid, *det_hidden, *det_background, *det_width;
-  GtkWidget *draw_grid, *draw_axis;
+  GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
   GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
   GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
   GtkWidget *draw_move, *draw_fixed;
@@ -1561,7 +1560,7 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
-  int angle_snap;
+  int grid_size, angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
@@ -1575,6 +1574,7 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
   if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
+  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
   if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
 
   int fog;
@@ -1591,6 +1591,7 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   opts->fLineWidth = line_width;
   opts->nSnap = snap;
   opts->nAngleSnap = angle_snap;
+  opts->nGridSize = grid_size;
   opts->nScene = scene;
   opts->fDensity = (float)fog/100;
 
@@ -1621,7 +1622,7 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
 
   unsigned long snap = 0;
-  int angle_snap;
+  int grid_size, angle_snap;
   if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
   if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
   if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
@@ -1635,6 +1636,7 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
   if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
   if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
+  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
   if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
 
   int fog;
@@ -1650,6 +1652,7 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   Sys_ProfileSaveInt ("Default", "Line", (int)(line_width*100));
   Sys_ProfileSaveInt ("Default", "Snap", snap);
   Sys_ProfileSaveInt ("Default", "Angle", angle_snap);
+  Sys_ProfileSaveInt ("Default", "Grid", grid_size);
   Sys_ProfileSaveInt ("Default", "Scene", scene);
   Sys_ProfileSaveInt ("Default", "Density", fog);
   Sys_ProfileSaveString("Default", "BMP", gtk_entry_get_text (GTK_ENTRY (s->scn_imagename)));
@@ -1798,6 +1801,16 @@ int preferencesdlg_execute(void* param)
   s.draw_grid = gtk_check_button_new_with_label ("Base grid");
   gtk_widget_show (s.draw_grid);
   gtk_box_pack_start (GTK_BOX (hbox), s.draw_grid, FALSE, FALSE, 0);
+
+  s.draw_gridunits = gtk_entry_new ();
+  gtk_widget_show (s.draw_gridunits);
+  gtk_box_pack_start (GTK_BOX (hbox), s.draw_gridunits, FALSE, FALSE, 0);
+  gtk_widget_set_usize (s.draw_gridunits, 50, -2);
+
+  label = gtk_label_new ("units");
+  gtk_widget_show (label);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
 
   s.draw_axis = gtk_check_button_new_with_label ("Axis icon");
   gtk_widget_show (s.draw_axis);
@@ -2116,6 +2129,7 @@ int preferencesdlg_execute(void* param)
 			       (opts->nSnap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_relative),
 			       (opts->nSnap & LC_DRAW_GLOBAL_SNAP) ? TRUE : FALSE);
+  write_int(s.draw_gridunits, opts->nGridSize);
   write_int(s.draw_anglesnap, opts->nAngleSnap);
 
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_gradient),
@@ -2144,19 +2158,25 @@ typedef struct
 
 static void propertiesdlg_ok(GtkWidget *widget, gpointer data)
 {
-	LC_PROPERTIESDLG_STRUCT* s = (LC_PROPERTIESDLG_STRUCT*)data;
-	LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s->data;
+  LC_PROPERTIESDLG_STRUCT* s = (LC_PROPERTIESDLG_STRUCT*)data;
+  LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s->data;
 
-	strcpy(opts->Author, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
-	strcpy(opts->Description, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
-	char* comments = gtk_editable_get_chars(GTK_EDITABLE(s->sum_comments), 0, -1);
-	if (comments)
-	{
-		strcpy(opts->Comments, comments);
-		g_free(comments);
-	}
+  strcpy(opts->strAuthor, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
+  strcpy(opts->strDescription, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
 
-	*cur_ret = LC_OK;
+  GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s->sum_comments));
+  GtkTextIter start;
+  GtkTextIter end;
+  gchar *text;
+
+  gtk_text_buffer_get_start_iter(buffer, &start);
+  gtk_text_buffer_get_end_iter(buffer, &end);
+  text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+  strncpy(opts->strComments, text, sizeof(opts->strComments));
+  opts->strComments[sizeof(opts->strComments)-1] = 0;
+  g_free (text);
+
+  *cur_ret = LC_OK;
 }
 
 int propertiesdlg_execute(void* param)
@@ -2168,10 +2188,11 @@ int propertiesdlg_execute(void* param)
   LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
   s.data = param;
 
-  //  struct stat buf;
-  /* char* ptr = strrchr(opts->Filename, '/'); - CANNOT COMPILE WITHOUT fileName or strFileName member in properties dialog struct */
+  struct stat buf;
+  bool exist = (stat(opts->strFilename, &buf) != -1);
+  char* ptr = strrchr(opts->strFilename, '/');
   char text[512];
-  strcpy(text, opts->Name);
+  strcpy(text, opts->strTitle);
   strcat(text, " Properties");
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -2205,7 +2226,7 @@ int propertiesdlg_execute(void* param)
   gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 0, 1,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
-/*  label = gtk_label_new (ptr ? ptr+1 : "(not saved)");
+  label = gtk_label_new (ptr ? ptr+1 : "(not saved)");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
   gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
@@ -2217,7 +2238,7 @@ int propertiesdlg_execute(void* param)
     gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 1, 2,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
     *ptr = 0;
-    label = gtk_label_new (opts->Filename);
+    label = gtk_label_new (opts->strFilename);
     *ptr = '/';
 
     gtk_widget_show (label);
@@ -2276,7 +2297,7 @@ int propertiesdlg_execute(void* param)
     gtk_widget_show (label);
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  }*/
+  }
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -2355,7 +2376,7 @@ int propertiesdlg_execute(void* param)
   s.sum_author = gtk_entry_new ();
   gtk_widget_show (s.sum_author);
   gtk_box_pack_start (GTK_BOX (vbox2), s.sum_author, FALSE, FALSE, 0);
-  gtk_entry_set_text (GTK_ENTRY (s.sum_author), opts->Author);
+  gtk_entry_set_text (GTK_ENTRY (s.sum_author), opts->strAuthor);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -2369,7 +2390,7 @@ int propertiesdlg_execute(void* param)
   s.sum_description = gtk_entry_new ();
   gtk_widget_show (s.sum_description);
   gtk_box_pack_start (GTK_BOX (vbox2), s.sum_description, FALSE, FALSE, 0);
-  gtk_entry_set_text (GTK_ENTRY (s.sum_description), opts->Description);
+  gtk_entry_set_text (GTK_ENTRY (s.sum_description), opts->strDescription);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -2388,9 +2409,8 @@ int propertiesdlg_execute(void* param)
 
   GtkTextBuffer *buffer;
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
-  gtk_text_buffer_set_text(buffer, opts->Comments, -1);
-/*
-// FIXME: linux properties dialog.
+  gtk_text_buffer_set_text(buffer, opts->strComments, -1);
+
   int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
   memset (&totalcount, 0, sizeof (totalcount));
   for (i = 0; i < opts->lines; i++)
@@ -2425,7 +2445,7 @@ int propertiesdlg_execute(void* param)
       ID++;
       col[i] = ID;
 
-      label = gtk_label_new (lcColorList[i].Name);
+      label = gtk_label_new (colornames[i]);
       gtk_widget_show (label);
       gtk_clist_set_column_widget (GTK_CLIST (list), ID, label);
     }
@@ -2476,7 +2496,7 @@ int propertiesdlg_execute(void* param)
 
   for (i = 1; i <= ID; i++)
     free(row[i]);
-*/
+
   label = gtk_label_new ("General");
   gtk_widget_show (label);
   set_notebook_tab (notebook, 0, label);
@@ -2526,7 +2546,6 @@ typedef struct
 
 } LC_GROUPEDITDLG_STRUCT;
 
-/*
 static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 {
   //  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
@@ -2534,7 +2553,6 @@ static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
 
   *cur_ret = LC_OK;
 }
-*/
 
 void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
 {
@@ -2959,9 +2977,8 @@ int librarydlg_execute (void *param)
 
 static GtkWidget* modifydlg;
 
-static void modifydlg_update_list(lcObject *obj)
+static void modifydlg_update_list (Object *obj)
 {
-  /*
   GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (modifydlg), "clist"));
 
   gtk_clist_freeze (clist);
@@ -2995,22 +3012,14 @@ static void modifydlg_update_list(lcObject *obj)
   }
 
   gtk_clist_thaw (clist);
-  */
 }
 
-// FIXME: linux modify dialog
-class lcModifyListen : public lcListener
+static void modifydlg_listener (int message, void *data, void *user)
 {
-public:
-	lcModifyListen() { };
-	~lcModifyListen() { };
-	virtual void ProcessMessage(lcMessageType Message, void* Data);
-};
-
-void lcModifyListen::ProcessMessage(lcMessageType Message, void* Data)
-{
-	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
-		modifydlg_update_list ((lcObject*)Data);
+  if (message == LC_MSG_FOCUS_CHANGED)
+  {
+    modifydlg_update_list ((Object*)data);
+  }
 }
 
 static void modifydlg_create ()
@@ -3087,7 +3096,7 @@ static void modifydlg_create ()
 
 
   modifydlg = dlg;
-//  messenger->Listen (&modifydlg_listener, NULL);
+  messenger->Listen (&modifydlg_listener, NULL);
 }
 
 void modifydlg_toggle ()
@@ -3100,4 +3109,3 @@ void modifydlg_toggle ()
   else
     gtk_widget_show (modifydlg);
 }
-

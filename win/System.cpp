@@ -1,17 +1,14 @@
 // System user interface.
 //
 
-#include "lc_global.h"
-#include "lc_object.h"
-#include "lc_piece.h"
-
+#include "stdafx.h"
 #include <dlgs.h>
 #include <direct.h>
-#include <shlobj.h>
 #include "leocad.h"
 #include "bmpmenu.h"
 #include "system.h"
 #include "defines.h"
+#include "camera.h"
 #include "tools.h"
 #include "file.h"
 #include "image.h"
@@ -452,6 +449,17 @@ void SystemInit()
 	}
 }
 
+// Viewport menu.
+void SystemUpdateViewport(int nNew, int nOld)
+{
+	CMenu* pMenu = GetMainMenu(2);
+	if (!pMenu)
+		return;
+	pMenu = pMenu->GetSubMenu(13);
+	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
+	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
+}
+
 // Action toolbar, popup menu and cursor.
 void SystemUpdateAction(int nNew, int nOld)
 {
@@ -577,7 +585,7 @@ void SystemUpdateSnap(const unsigned long nSnap)
 	// TODO: change Snap None & All (or maybe not ?)
 }
 
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focus)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 {
 	CMenu* pMenu;
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
@@ -619,6 +627,8 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 	pMenu = GetMainMenu(3);
 	pMenu->EnableMenuItem(ID_PIECE_DELETE, MF_BYCOMMAND | 
 		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+	pMenu->EnableMenuItem(ID_PIECE_COPYKEYS, MF_BYCOMMAND | 
+		(flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_ARRAY, MF_BYCOMMAND | 
 		(flags & LC_SEL_PIECE ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 	pMenu->EnableMenuItem(ID_PIECE_MIRROR, MF_BYCOMMAND | 
@@ -655,10 +665,10 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
 	{
 		char Message[256];
 
-		if (Focus->GetType() == LC_OBJECT_PIECE)
-			sprintf(Message, "%s (ID: %s)", (char*)Focus->m_Name, ((lcPiece*)Focus)->m_PieceInfo->m_strName);
+		if (Focus->IsPiece())
+			sprintf(Message, "%s (ID: %s)", Focus->GetName(), ((Piece*)Focus)->GetPieceInfo()->m_strName);
 		else
-			strcpy(Message, (char*)Focus->m_Name);
+			strcpy(Message, Focus->GetName());
 
 		pFrame->SetStatusBarMessage(Message);
 		pFrame->SetMessageText(Message);
@@ -692,7 +702,7 @@ void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 	pCtrl->EnableButton(ID_VIEW_STEP_LAST, nTime != nTotal ? TRUE : FALSE);
 
 	// Main menu
-	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(13);
+	CBMPMenu* pMainMenu = (CBMPMenu*)GetMainMenu(2)->GetSubMenu(14);
 
 	pMainMenu->EnableMenuItem(ID_VIEW_STEP_NEXT, MF_BYCOMMAND | 
 		(nTime < nTotal ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
@@ -735,8 +745,6 @@ void SystemUpdatePaste(bool enable)
 {
 	CMenu* pMenu = GetMainMenu(1);
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
-	if (!pFrame->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
-		return;
 	CToolBar* pBar = (CToolBar*)pFrame->GetControlBar(AFX_IDW_TOOLBAR);
 	CToolBarCtrl* pCtrl = &pBar->GetToolBarCtrl();
 
@@ -770,26 +778,40 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 	pCtrl->CheckButton(ID_ANIMATOR_KEY, bAddKeys ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_ANIMATOR_PLAY, bAnimation ? TRUE : FALSE);
 	pCtrl->EnableButton(ID_ANIMATOR_STOP, FALSE);
+
+	// Menu
+	char* txt;
+	CMenu* pMenu = GetMainMenu(3);
+	UINT nState = pMenu->GetMenuState(ID_PIECE_COPYKEYS, MF_BYCOMMAND);
+	nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
+
+	if (bAnimation)
+		txt = "Copy Keys from Instructions";
+	else
+		txt = "Copy Keys from Animation";
+	
+	pMenu->ModifyMenu(ID_PIECE_COPYKEYS, MF_BYCOMMAND |
+        MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
-void SystemUpdateCurrentCamera(lcObject* OldCamera, lcObject* NewCamera, lcObject* CameraList)
+void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	int i = 0;
+	int i;
 
-	for (lcObject* Camera = CameraList; Camera; i++, Camera = Camera->m_Next)
+	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
 	{
-		if (OldCamera == Camera)
+		if (pOld == pCamera)
 		{
 			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
 			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
 		}
 
-		if (NewCamera == Camera)
+		if (pNew == pCamera)
 		{
 			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
 			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
@@ -800,27 +822,26 @@ void SystemUpdateCurrentCamera(lcObject* OldCamera, lcObject* NewCamera, lcObjec
 }
 
 // Update the list of cameras
-void SystemUpdateCameraMenu(lcObject* CameraList)
+void SystemUpdateCameraMenu(Camera* pCamera)
 {
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
-	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(12);
+	CBMPMenu* pMainMenu = (CBMPMenu*)Menu->GetSubMenu(13);
 	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
+	Camera* pFirst = pCamera;
+	int i;
 
 	while (pMainMenu->GetMenuItemCount())
 		pMainMenu->DeleteMenu(0, MF_BYPOSITION);
 	while (pPopupMenu->GetMenuItemCount())
 		pPopupMenu->DeleteMenu(0, MF_BYPOSITION);
 
-	lcObject* Camera = CameraList;
-	int i;
-
-	for (i = 0; Camera; i++, Camera = Camera->m_Next)
+	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
 		if (i > 6)
 		{
-			pMainMenu->AppendODMenu((const char*)Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
-			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, (const char*)Camera->m_Name);
+			pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
+			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
 		}
 
 	if (i > 7)
@@ -829,11 +850,11 @@ void SystemUpdateCameraMenu(lcObject* CameraList)
 		pPopupMenu->AppendMenu(MF_SEPARATOR);
 	}
 
-	Camera = CameraList;
-	for (i = 0; Camera && (i < 7); i++, Camera = Camera->m_Next)
+	pCamera = pFirst;
+	for (i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
 	{
-		pMainMenu->AppendODMenu((const char*)Camera->m_Name, MF_ENABLED, i + ID_CAMERA_FIRST);
-		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, (const char*)Camera->m_Name);
+		pMainMenu->AppendODMenu(pCamera->GetName(), MF_ENABLED, i + ID_CAMERA_FIRST);
+		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
 
 		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
 	}
@@ -856,94 +877,7 @@ void SystemUpdateCategories(bool SearchOnly)
 		return;
 
 	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
-	if (SearchOnly)
-		pBar->UpdatePiecesTreeSearch();
-	else
-		pBar->UpdatePiecesTree();
-}
-
-#define LC_MODEL_MENU_MAX 16
-
-void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* ActiveModel)
-{
-	CMenu* Menu = GetMainMenu(4);
-	if (!Menu)
-		return;
-
-	if (ModelList.GetSize() > 1)
-		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_ENABLED);
-	else
-		Menu->EnableMenuItem(ID_MODEL_DELETE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-
-	// Delete existing entries.
-	int i;
-	for (i = 1; i < LC_MODEL_MENU_MAX; i++)
-		Menu->DeleteMenu(ID_MODEL_MODEL1 + i, MF_BYCOMMAND);
-
-	// If the list is empty add a disabled entry.
-	if (ModelList.GetSize() == 0)
-	{
-		UINT State = Menu->GetMenuState(ID_MODEL_MODEL1, MF_BYCOMMAND);
-		State &= ~(MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR | MF_CHECKED);
-		Menu->ModifyMenu(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_STRING | State, ID_MODEL_MODEL1, "Model");
-		Menu->EnableMenuItem(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-		return;
-	}
-
-	// Find the position of the first model in the menu.
-	u32 StartPos;
-	for (StartPos = 0; StartPos < Menu->GetMenuItemCount(); StartPos++)
-		if (Menu->GetMenuItemID(StartPos) == ID_MODEL_MODEL1)
-			break;
-
-	// Add models to menu.
-	for (i = 0; i < ModelList.GetSize(); i++)
-	{
-		lcModel* Model = ModelList[i];
-		String DisplayName;
-
-		// Double up any '&' characters so they are not underlined.
-		char* Dest = DisplayName.GetBuffer(Model->m_Name.GetLength() * 2 + 1);
-		char* Src = Model->m_Name;
-
-		while (*Src)
-		{
-			if (*Src == '&')
-				*Dest++ = '&';
-			*Dest++ = *Src++;
-		}
-		*Dest = 0;
-		DisplayName.ReleaseBuffer();
-
-		// Insert mnemonic followed by the model name.
-		char* Text = new char[DisplayName.GetLength() + 10];
-		sprintf(Text, "&%d %s", i+1, (const char*)DisplayName);
-
-		if (i != 0)
-		{
-			Menu->InsertMenu(StartPos + i, MF_BYPOSITION | MF_STRING, ID_MODEL_MODEL1 + i, Text);
-		}
-		else
-		{
-			UINT State = Menu->GetMenuState(ID_MODEL_MODEL1, MF_BYCOMMAND);
-			State &= ~(MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR | MF_CHECKED);
-			Menu->ModifyMenu(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_STRING | State, ID_MODEL_MODEL1 + i, Text);
-			Menu->EnableMenuItem(ID_MODEL_MODEL1, MF_BYCOMMAND | MF_ENABLED);
-		}
-
-		if (Model == ActiveModel)
-			Menu->CheckMenuItem(StartPos + i, MF_BYPOSITION | MF_CHECKED);
-
-		delete[] Text;
-	}
-
-	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
-
-	if (!pFrame)
-		return;
-
-	CPiecesBar* pBar = (CPiecesBar*)pFrame->GetControlBar(ID_VIEW_PIECES_BAR);
-	pBar->UpdatePiecesTreeModels();
+	pBar->UpdatePiecesTree(SearchOnly);
 }
 
 extern UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
@@ -1194,7 +1128,7 @@ void SystemSetWindowCaption(char* caption)
 	AfxSetWindowText(AfxGetMainWnd()->m_hWnd, caption);
 }
 
-int SystemDoMessageBox(const char* prompt, int nMode)
+int SystemDoMessageBox(char* prompt, int nMode)
 {
 	return AfxMessageBox(prompt, nMode);
 }
@@ -1429,7 +1363,7 @@ bool SystemDoDialog(int nMode, void* param)
 				if (p != NULL)
 				{
 					strcpy(ext, p+1);
-					_strlwr(ext);
+					strlwr(ext);
 
 					if ((strcmp(ext, "jpg") == 0) || (strcmp(ext, "jpeg") == 0) ||
 						(strcmp(ext, "bmp") == 0) || (strcmp(ext, "gif") == 0) ||
@@ -1448,47 +1382,6 @@ bool SystemDoDialog(int nMode, void* param)
 
 				return true;
 			}
-		} break;
-
-		case LC_DLG_DIRECTORY_BROWSE:
-		{
-			LC_DLG_DIRECTORY_BROWSE_OPTS* Opts = (LC_DLG_DIRECTORY_BROWSE_OPTS*)param;
-
-			strcpy(Opts->Path, "");
-
-			LPMALLOC ShellMalloc;
-			if (SHGetMalloc(&ShellMalloc) == NOERROR)
-			{
-				BROWSEINFO bi;
-				LPITEMIDLIST pidl;
-		
-				if (AfxGetMainWnd())
-					bi.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
-				else
-					bi.hwndOwner = ::GetDesktopWindow();
-				bi.pidlRoot = NULL;
-				bi.pszDisplayName = Opts->Path;
-				bi.lpszTitle = Opts->Title;
-				bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
-				bi.lpfn = NULL;
-				bi.lParam = 0;
-		
-				pidl = SHBrowseForFolder(&bi);
-				if (pidl != NULL)
-				{
-					if (SHGetPathFromIDList(pidl, Opts->Path))
-					{ 
-						if (Opts->Path[strlen(Opts->Path)-1] != '\\') 
-							strcat(Opts->Path, "\\");
-						return true;
-					}
-					ShellMalloc->Free(pidl);
-				}
-				ShellMalloc->Release();
-			}
-
-			return false;
-
 		} break;
 
 		case LC_DLG_HTML:
@@ -1544,28 +1437,6 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 
-		case LC_DLG_VRML97:
-		{
-			CFileDialog dlg(FALSE, "*.wrl", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-				"VRML97 Files (*.wrl)|*.wrl|All Files (*.*)|*.*||", AfxGetMainWnd());
-			if (dlg.DoModal() == IDOK)
-			{
-				strcpy((char*)param, dlg.GetPathName());
-				return true;
-			}
-		} break;
-
-		case LC_DLG_X3DV:
-		{
-			CFileDialog dlg(FALSE, "*.x3dv", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-				"X3DV Files (*.x3dv)|*.x3dv|All Files (*.*)|*.*||", AfxGetMainWnd());
-			if (dlg.DoModal() == IDOK)
-			{
-				strcpy((char*)param, dlg.GetPathName());
-				return true;
-			}
-		} break;
-
 		case LC_DLG_MINIFIG:
 		{
 			CMinifigDlg dlg(param);
@@ -1609,7 +1480,7 @@ bool SystemDoDialog(int nMode, void* param)
 
 			ps.m_PageGeneral.SetOptions(opts->nSaveInterval, opts->nMouse, opts->strPath, opts->strUser);
 			ps.m_PageDetail.SetOptions(opts->nDetail, opts->fLineWidth);
-			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap);
+			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap, opts->nGridSize);
 			ps.m_PageScene.SetOptions(opts->nScene, opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 			ps.m_PagePrint.SetOptions(opts->strHeader, opts->strFooter);
 			ps.m_PageKeyboard.SetOptions();
@@ -1618,7 +1489,7 @@ bool SystemDoDialog(int nMode, void* param)
 			{
 				ps.m_PageGeneral.GetOptions(&opts->nSaveInterval, &opts->nMouse, opts->strPath, opts->strUser);
 				ps.m_PageDetail.GetOptions(&opts->nDetail, &opts->fLineWidth);
-				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap);
+				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap, &opts->nGridSize);
 				ps.m_PageScene.GetOptions(&opts->nScene, &opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 				ps.m_PagePrint.GetOptions(opts->strHeader, opts->strFooter);
 				ps.m_PageKeyboard.GetOptions();
@@ -1633,22 +1504,23 @@ bool SystemDoDialog(int nMode, void* param)
 
 		case LC_DLG_PROPERTIES:
 		{
+			CPropertiesSheet ps;
 			LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
-			CPropertiesSheet ps(opts->PiecesUsed != NULL);
 
-			ps.SetTitle("Model Properties", 0);
-			ps.m_PageSummary.m_Name = opts->Name;
-			ps.m_PageSummary.m_Author = opts->Author;
-			ps.m_PageSummary.m_Description = opts->Description;
-			ps.m_PageSummary.m_Comments = opts->Comments;
-			ps.m_PagePieces.m_PiecesUsed = opts->PiecesUsed;
+			ps.SetTitle(opts->strTitle, PSH_PROPTITLE);
+			ps.m_PageSummary.m_strAuthor = opts->strAuthor;
+			ps.m_PageSummary.m_strDescription = opts->strDescription;
+			ps.m_PageSummary.m_strComments = opts->strComments;
+			ps.m_PageGeneral.m_strFilename = opts->strFilename;
+			ps.m_PagePieces.names = opts->names;
+			ps.m_PagePieces.count = opts->count;
+			ps.m_PagePieces.lines = opts->lines;
 
 			if (ps.DoModal() == IDOK)
 			{
-				opts->Name = ps.m_PageSummary.m_Name;
-				opts->Author = ps.m_PageSummary.m_Author;
-				opts->Description = ps.m_PageSummary.m_Description;
-				opts->Comments = ps.m_PageSummary.m_Comments;
+				strcpy(opts->strAuthor, ps.m_PageSummary.m_strAuthor);
+				strcpy(opts->strDescription, ps.m_PageSummary.m_strDescription);
+				strcpy(opts->strComments, ps.m_PageSummary.m_strComments);
 
 				return true;
 			}
@@ -1667,7 +1539,7 @@ bool SystemDoDialog(int nMode, void* param)
 			dlg.DoModal();
 
 			CPiecesBar* pBar = (CPiecesBar*)((CFrameWnd*)AfxGetMainWnd())->GetControlBar(ID_VIEW_PIECES_BAR);
-			pBar->UpdatePiecesTree();
+			pBar->UpdatePiecesTree(false);
 
 			return true;
 		} break;
@@ -1717,12 +1589,12 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_GROUP:
 		{
 			CGroupDlg dlg;
-			String& Name = *(String*)param;
-			dlg.m_strName = (char*)Name;
+			dlg.m_strName = (char*)param;
 
 			if (dlg.DoModal() == IDOK)
 			{
-				Name = dlg.m_strName;
+				strcpy((char*)param, dlg.m_strName);
+
 				return true;
 			}
 		} break;
@@ -1758,7 +1630,7 @@ bool SystemDoDialog(int nMode, void* param)
 /////////////////////////////////////////////////////////////////////////////
 // Memory rendering functions
 
-struct LC_RENDER
+typedef struct
 {
 	HDC hdc;
 	HDC oldhdc;
@@ -1766,7 +1638,7 @@ struct LC_RENDER
 	HGLRC oldhrc;
 	HBITMAP hbm;
 	HBITMAP oldhbm;
-};
+} LC_RENDER;
 
 void* Sys_StartMemoryRender(int width, int height)
 {
@@ -1929,7 +1801,7 @@ void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 	((CMainFrame*)AfxGetMainWnd())->SetMessageText(Text);
 }
 
-void SystemEndProgressBar()
+void SytemEndProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)
@@ -1942,7 +1814,7 @@ void SystemEndProgressBar()
 	((CMainFrame*)AfxGetMainWnd())->SetMessageText(AFX_IDS_IDLEMESSAGE);
 }
 
-void SystemStepProgressBar()
+void SytemStepProgressBar()
 {
 	CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
 	if (!pFrame)
@@ -1950,29 +1822,4 @@ void SystemStepProgressBar()
 	CCADStatusBar* pStatusBar = (CCADStatusBar*)pFrame->GetControlBar(AFX_IDW_STATUS_BAR);
 
 	pStatusBar->StepProgressBar();
-}
-
-void SystemUpdateViewLayout()
-{
-	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
-
-	if (Frame)
-		Frame->OnViewResetViews();
-}
-
-String SystemGetViewLayout()
-{
-	CMainFrame* Frame = (CMainFrame*)AfxGetMainWnd();
-	String Layout;
-
-	if (Frame)
-	{
-		Frame->GetViewLayout(NULL, Layout);
-	}
-	else
-	{
-		Layout = Sys_ProfileLoadString("Settings", "ViewLayout", "V4|Main");
-	}
-
-	return Layout;
 }

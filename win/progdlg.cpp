@@ -1,7 +1,7 @@
 // ProgDlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "ProgDlg.h"
 

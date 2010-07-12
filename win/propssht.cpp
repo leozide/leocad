@@ -1,7 +1,7 @@
 // PropsSht.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "resource.h"
 #include "PropsSht.h"
 
@@ -15,13 +15,14 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CPropertiesSheet, CPropertySheet)
 
-CPropertiesSheet::CPropertiesSheet(bool ShowPieces, CWnd* pWndParent)
+CPropertiesSheet::CPropertiesSheet(CWnd* pWndParent)
 	 : CPropertySheet("", pWndParent)
 {
+	AddPage(&m_PageGeneral);
 	AddPage(&m_PageSummary);
-	if (ShowPieces)
-		AddPage(&m_PagePieces);
+	AddPage(&m_PagePieces);
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
+	SetActivePage(1);
 }
 
 CPropertiesSheet::~CPropertiesSheet()

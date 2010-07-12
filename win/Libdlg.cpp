@@ -1,7 +1,7 @@
 // LibDlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "LibDlg.h"
 #include "GroupDlg.h"
@@ -31,9 +31,9 @@ static int CALLBACK ListCompare(LPARAM lP1, LPARAM lP2, LPARAM lParamSort)
 		return 0;
 
 	if ((lParamSort & ~0xF0) == 0)
-		ret = _strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
+		ret = strcmpi(((PieceInfo*)lP1)->m_strDescription, ((PieceInfo*)lP2)->m_strDescription);
 	else
-		ret = _strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
+		ret = strcmpi(((PieceInfo*)lP1)->m_strName, ((PieceInfo*)lP2)->m_strName);
 
 	return ret;
 }
@@ -317,7 +317,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_PIECE_DELETE:
 		{
-			lcPtrArray<PieceInfo> Pieces;
+			PtrArray<PieceInfo> Pieces;
 
 			for (int i = 0; i < m_List.GetItemCount(); i++)
 			{
@@ -355,7 +355,7 @@ void CLibraryDlg::UpdateList()
 
 	if (CategoryIndex != -1)
 	{
-		lcPtrArray<PieceInfo> SinglePieces, GroupedPieces;
+		PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
 		Lib->GetCategoryEntries(CategoryIndex, false, SinglePieces, GroupedPieces);
 

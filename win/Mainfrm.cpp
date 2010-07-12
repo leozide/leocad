@@ -1,12 +1,14 @@
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include <afxrich.h>
 #include <afxpriv.h>
 #include "LeoCAD.h"
 #include "MainFrm.h"
+#include "Camera.h"
 #include "project.h"
+#include "message.h"
 #include "globals.h"
 #include "mainwnd.h"
 #include "cadview.h"
@@ -14,11 +16,8 @@
 #include "keyboard.h"
 #include "system.h"
 #include "library.h"
-#include "Print.h"
-#include "view.h"
-
 #include "lc_application.h"
-#include "lc_camera.h"
+#include "Print.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,14 +26,18 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define TOOLBAR_VERSION 1
-#define LC_ANIM_TIMER 100
 
-void MainFrameTimer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+void mainframe_listener (int message, void *data, void *user)
 {
-	lcGetActiveProject()->CheckAnimation();
+  if (message == LC_MSG_FOCUS_CHANGED)
+  {
+    CWnd* pFrame = AfxGetMainWnd();
+    if (pFrame != NULL)
+      pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)data, 0);
+  }
 }
 
-static void mainframe_console_func(LC_CONSOLE_LEVEL level, const char* text, void* user_data)
+static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, void* user_data)
 {
 	CRichEditCtrl& ctrl = ((CRichEditView *) user_data)->GetRichEditCtrl ();
 	CHARFORMAT cf;
@@ -112,6 +115,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_MESSAGE(WM_LC_UPDATE_LIST, OnUpdateList)
 	ON_MESSAGE(WM_LC_POPUP_CLOSE, OnPopupClose)
 	ON_MESSAGE(WM_LC_ADD_COMBO_STRING, OnAddString)
+	ON_MESSAGE(WM_LC_UPDATE_INFO, OnUpdateInfo)
 	ON_MESSAGE(WM_LC_UPDATE_SETTINGS, UpdateSettings)
 	// Toolbar show/hide
 	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR, OnBarCheck)
@@ -122,10 +126,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, OnUpdateControlBarMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, OnUpdateControlBarMenu)
-	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
-	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
-	ON_COMMAND(ID_VIEW_DELETEVIEW, OnViewDeleteView)
-	ON_COMMAND(ID_VIEW_RESETVIEWS, OnViewResetViews)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -142,8 +142,6 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
-	for (int i = 0; i < m_SplitterList.GetSize(); i++)
-		delete m_SplitterList[i];
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -151,35 +149,38 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT)))
+	if (!m_wndStatusBar.Create(this) ||
+		!m_wndStatusBar.SetIndicators(indicators,
+		  sizeof(indicators)/sizeof(UINT)))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
 	}
 	m_wndStatusBar.SetPaneStyle(0, SBPS_STRETCH|SBPS_NORMAL);
 
-	if (!m_wndStandardBar.Create(this) || !m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
+	if (!m_wndStandardBar.Create(this) ||
+		!m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
 	m_wndStandardBar.SetBarStyle(m_wndStandardBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndStandardBar.SetWindowText(_T("Standard"));
+	m_wndStandardBar.SetWindowText (_T("Standard"));
 	m_wndStandardBar.SendMessage(TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
 	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndToolsBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_TOOLS_BAR) ||
-	    !m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
+		!m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
 	m_wndToolsBar.SetBarStyle(m_wndToolsBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndToolsBar.SetWindowText(_T("Drawing"));
+	m_wndToolsBar.SetWindowText (_T("Drawing"));
 	m_wndToolsBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndAnimationBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_ANIMATION_BAR) ||
@@ -190,7 +191,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndAnimationBar.SetBarStyle(m_wndAnimationBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndAnimationBar.SetWindowText(_T("Animation"));
+	m_wndAnimationBar.SetWindowText (_T("Animation"));
 	m_wndAnimationBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CSize(200, 100),
@@ -200,15 +201,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	if (!m_wndModifyDlg.Create(_T("Modify"), this, ID_VIEW_MODIFY_BAR))
+	if (!m_wndModifyDlg.Create(this, IDD_MODIFY,
+	    CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE,
+		ID_VIEW_MODIFY_BAR))
 	{
 		TRACE0("Failed to create modify dialog bar\n");
-		return -1;      // fail to create
+		return -1;		// fail to create
 	}
 
 	EnableDocking(CBRS_ALIGN_ANY);
-	m_wndModifyDlg.SetBarStyle(m_wndModifyDlg.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_ANY);
+	m_wndModifyDlg.SetWindowText (_T("Modify"));
+	m_wndModifyDlg.EnableDocking(0);
 	ShowControlBar(&m_wndModifyDlg, FALSE, FALSE);
 	FloatControlBar(&m_wndModifyDlg, CPoint(10,10));
 
@@ -219,12 +222,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
 //	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
 	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
+	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT);
 
 	DockControlBar(&m_wndStandardBar);
 	DockControlBar(&m_wndToolsBar);
 	DockControlBar(&m_wndPiecesBar, AFX_IDW_DOCKBAR_RIGHT);
-
+		
 	CRect rect;
 	RecalcLayout(TRUE);
 	m_wndToolsBar.GetWindowRect(&rect);
@@ -232,31 +235,24 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockControlBar(&m_wndAnimationBar, AFX_IDW_DOCKBAR_TOP, &rect);
 
 	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) == TOOLBAR_VERSION)
-	{
-		CSizingControlBar::GlobalLoadState(this, "SizingBars");
 		LoadBarState("Toolbars");
-	}
 
 	// Bitmap menus are cool !
 	CMenu* pMenu = GetMenu();
 	if (pMenu)
 		pMenu->DestroyMenu();
 	HMENU hMenu = NewMenu();
-	pMenu = CMenu::FromHandle(hMenu);
-	SetMenu(pMenu);
+	pMenu = CMenu::FromHandle (hMenu);
+	SetMenu (pMenu);
 	m_hMenuDefault = hMenu;
 
 	UpdateMenuAccelerators();
 
-	main_window->SetXID(this);
+  messenger->Listen (&mainframe_listener, this);
 
-	console.SetWindowCallback(&mainframe_console_func, m_wndSplitter.GetPane(1, 0));
+  main_window->SetXID (this);
 
-	// Load default view layout.
-	const char* Layout = main_window->GetViewLayout(false);
-	SetViewLayout(NULL, Layout);
-
-	SetTimer(LC_ANIM_TIMER, 1000/60, (TIMERPROC)&MainFrameTimer);
+  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
 
 	return 0;
 }
@@ -270,14 +266,14 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	{
 		int r,l,b,t;
 		char szBuf[60];
-		strcpy(szBuf, theApp.GetProfileString("Settings","Window Position"));
+		strcpy (szBuf, theApp.GetProfileString("Settings","Window Position"));
 		sscanf(szBuf,"%d, %d, %d, %d", &t, &r, &b, &l);
 
 		cs.cx = r - l;
 		cs.cy = b - t;
 		
 		RECT workArea;
-		SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
 		l += workArea.left;
 		t += workArea.top;
 
@@ -310,16 +306,15 @@ void CMainFrame::Dump(CDumpContext& dc) const
 // lParam = update pieces, wParam = update colors
 LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 {
-	// TODO: find out if this function is really needed
 	if (wParam != 0)
 	{
 		int x = wParam-1;
 		if (x < 14)
-			x *= 2;
+		    x *= 2;
 		else
 			x = ((x-14)*2)+1;
 
-		m_wndPiecesBar.m_wndColorsList.SetCurColor(x);
+		m_wndPiecesBar.m_wndColorsList.SetCurSel(x);
 	}
 
 	return TRUE;
@@ -339,11 +334,11 @@ LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 	for (int i = 0; i < m_wndPiecesBar.m_wndPiecesCombo.GetCount();i++)
 	{
 		char tmp[100];
-		m_wndPiecesBar.m_wndPiecesCombo.GetLBText(i, tmp);
-		if (strcmp((char*)lParam, tmp) == 0)
+		m_wndPiecesBar.m_wndPiecesCombo.GetLBText (i, tmp);
+		if (strcmp ((char*)lParam, tmp) == 0)
 			return TRUE;
 	}
-	m_wndPiecesBar.m_wndPiecesCombo.AddString((char*)lParam);
+	m_wndPiecesBar.m_wndPiecesCombo.AddString ((char*)lParam);
 
 	return TRUE;
 }
@@ -359,17 +354,15 @@ HMENU CMainFrame::NewMenu()
 	// The third option is the resource ID of the bitmap.This can also be a
 	// toolbar ID in which case the class searches the toolbar for the
 	// appropriate bitmap. Only Bitmap and Toolbar resources are supported.
+	m_bmpMenu.ModifyODMenu(NULL, ID_FILE_PROPERTIES, IDB_INFO);
 	m_bmpMenu.ModifyODMenu(NULL, ID_FILE_SAVEPICTURE, IDB_PHOTO);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_PREFERENCES, IDB_PREFERENCES);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMOUT, IDB_ZOOMOUT);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMIN, IDB_ZOOMIN);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_SPLITHORIZONTALLY, IDB_SPLITH);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_SPLITVERTICALLY, IDB_SPLITV);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_FULLSCREEN, IDB_FULLSCREEN);
 	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_DELETE, IDB_DELETE);
 	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_GROUP, IDB_GROUP);
 	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_UNGROUP, IDB_UNGROUP);
-	m_bmpMenu.ModifyODMenu(NULL, ID_MODEL_PROPERTIES, IDB_INFO);
+	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_PREFERENCES, IDB_PREFERENCES);
+	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMOUT, IDB_ZOOMOUT);
+	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMIN, IDB_ZOOMIN);
+	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_FULLSCREEN, IDB_FULLSCREEN);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_FINDER, IDB_HELP);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_LEOCADHOMEPAGE, IDB_HOME);
 	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_SENDEMAIL, IDB_MAIL);
@@ -438,21 +431,20 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 	}
 }
 
-void CMainFrame::ProcessMessage(lcMessageType Message, void* Data)
+LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
-	if (Message == LC_MSG_FOCUS_OBJECT_CHANGED)
-	{
-		m_wndModifyDlg.m_ModifyDlg.UpdateInfo((lcObject*)Data);
+	m_wndModifyDlg.UpdateInfo((Object*)lParam);
 
-		char str[128];
-		Vector3 pos;
+	char str[128];
+	Vector3 pos;
 
-		lcGetActiveProject()->GetFocusPosition(pos);
-		lcGetActiveProject()->ConvertToUserUnits(pos);
+	lcGetActiveProject()->GetFocusPosition(pos);
+	lcGetActiveProject()->ConvertToUserUnits(pos);
 
-		sprintf(str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
-		SetStatusBarPane(ID_INDICATOR_POSITION, str);
-	}
+	sprintf (str, "X: %.2f Y: %.2f Z: %.2f", pos[0], pos[1], pos[2]);
+	SetStatusBarPane(ID_INDICATOR_POSITION, str);
+
+	return TRUE;
 }
 
 // Helper function change the text of a status bar pane and resize it.
@@ -532,11 +524,8 @@ void CMainFrame::OnClose()
 		theApp.WriteProfileInt("Settings", "Window Status", wp.showCmd);
 
 		SaveBarState("Toolbars");
-		CSizingControlBar::GlobalSaveState(this, "SizingBars");
 		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), TOOLBAR_VERSION);
 	}
-
-	KillTimer(LC_ANIM_TIMER);
 
 	AfxGetApp()->HideApplication();
 	GetActiveDocument()->OnCloseDocument();
@@ -601,18 +590,18 @@ void CMainFrame::OnViewFullscreen()
 	if (m_pwndFullScrnBar == NULL)
 	{
 		m_wndStatusBar.ShowWindow(SW_HIDE);
-		GetWindowPlacement(&m_wpPrev);
+		GetWindowPlacement (&m_wpPrev);
 		m_wpPrev.length = sizeof m_wpPrev;
 		
 		//Adjust RECT to new size of window
-		::GetWindowRect(::GetDesktopWindow(), &rectDesktop);
+		::GetWindowRect (::GetDesktopWindow(), &rectDesktop);
 		::AdjustWindowRectEx(&rectDesktop, GetStyle(), TRUE, GetExStyle());
 
 		// Remember this for OnGetMinMaxInfo()
 		m_FullScreenWindowRect = rectDesktop;
 		
 		wpNew = m_wpPrev;
-		wpNew.showCmd = SW_SHOWNORMAL;
+		wpNew.showCmd =  SW_SHOWNORMAL;
 		wpNew.rcNormalPosition = rectDesktop;
 		
 		m_pwndFullScrnBar = new CToolBar;
@@ -641,7 +630,7 @@ void CMainFrame::OnViewFullscreen()
 		wpNew = m_wpPrev;
 	}
 
-	SetWindowPlacement(&wpNew);
+	SetWindowPlacement (&wpNew);
 }
 
 void CMainFrame::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
@@ -661,9 +650,9 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		lcCamera* pCamera = lcGetActiveProject()->GetActiveModel()->GetCamera(nID-ID_CAMERA_FIRST);
+		Camera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
 		rMessage = "Use the camera \"";
-		rMessage += pCamera->m_Name;
+		rMessage += pCamera->GetName();
 		rMessage += "\"";
 	}
 	else
@@ -717,12 +706,6 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	}
 
-	if (nID >= ID_MODEL_MODEL1 && nID <= ID_MODEL_MODEL16)
-	{
-		project->HandleCommand((LC_COMMANDS)(LC_MODEL_MODEL1 + nID - ID_MODEL_MODEL1), 0);
-		return TRUE;
-	}
-
 	switch (nID)
 	{
 		case ID_FILE_NEW: {
@@ -765,24 +748,8 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_FILE_WAVEFRONT, 0);
 		} break;
 
-		case ID_FILE_EXPORT_VRML: {
-			project->HandleCommand(LC_FILE_VRML, 0);
-		} break;
-
-		case ID_FILE_EXPORT_X3DV: {
-			project->HandleCommand(LC_FILE_X3DV, 0);
-		} break;
-
-		case ID_MODEL_NEW: {
-			project->HandleCommand(LC_MODEL_NEW, 0);
-		} break;
-
-		case ID_MODEL_DELETE: {
-			project->HandleCommand(LC_MODEL_DELETE, 0);
-		} break;
-
-		case ID_MODEL_PROPERTIES: {
-			project->HandleCommand(LC_MODEL_PROPERTIES, 0);
+		case ID_FILE_PROPERTIES: {
+			project->HandleCommand(LC_FILE_PROPERTIES, 0);
 		} break;
 
 		case ID_FILE_TERRAINEDITOR: {
@@ -843,6 +810,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_PIECE_ARRAY: {
 			project->HandleCommand(LC_PIECE_ARRAY, 0);
+		} break;
+
+		case ID_PIECE_COPYKEYS: {
+			project->HandleCommand(LC_PIECE_COPYKEYS, 0);
 		} break;
 
 		case ID_PIECE_GROUP: {
@@ -921,11 +892,11 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_VIEW_STEP_CHOOSE, 0);
 		} break;
 
-		case ID_VIEW_STEP_INSERT: {
+    case ID_VIEW_STEP_INSERT: {
 			project->HandleCommand(LC_VIEW_STEP_INSERT, 0);
 		} break;
 
-		case ID_VIEW_STEP_DELETE: {
+    case ID_VIEW_STEP_DELETE: {
 			project->HandleCommand(LC_VIEW_STEP_DELETE, 0);
 		} break;
 
@@ -1143,9 +1114,10 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	return nIDLast;
 }
 
-LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#include "view.h"
+LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-void CMainFrame::OnViewNewView()
+void CMainFrame::OnViewNewView() 
 {
 	HINSTANCE hInst = AfxGetInstanceHandle();
 	WNDCLASS wndcls;
@@ -1153,56 +1125,56 @@ void CMainFrame::OnViewNewView()
 #define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
 #define FLOATING_CLASSNAME _T("LeoCADFloatingOpenGLClass")
 
-	// check if our class is registered
-	if(!(GetClassInfo(hInst, FLOATING_CLASSNAME, &wndcls)))
+  // check if our class is registered
+	if(!(GetClassInfo (hInst, FLOATING_CLASSNAME, &wndcls)))
 	{
-		if (GetClassInfo(hInst, OPENGL_CLASSNAME, &wndcls))
-		{
-			// set our class name
-			wndcls.lpszClassName = FLOATING_CLASSNAME;
-			wndcls.lpfnWndProc = GLWindowProc;
-			wndcls.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDR_MAINFRAME));
+  	if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
+	  {
+      // set our class name
+	  	wndcls.lpszClassName = FLOATING_CLASSNAME;
+      wndcls.lpfnWndProc = GLWindowProc;
+      wndcls.hIcon = LoadIcon (hInst, MAKEINTRESOURCE (IDR_MAINFRAME));
 
-			// register class
-			if (!AfxRegisterClass(&wndcls))
-				AfxThrowResourceException();
-		}
+  		// register class
+	  	if (!AfxRegisterClass (&wndcls))
+		  	AfxThrowResourceException();
+  	}
 		else
 			AfxThrowResourceException();
-	}
+  }
 
-	Project* project = lcGetActiveProject();
-	View *view = new View(project, project->GetFirstView());
+  View *view = new View (lcGetActiveProject(), NULL);
 
-	CreateWindowEx(0, FLOATING_CLASSNAME, "LeoCAD", WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
-	               CW_USEDEFAULT, CW_USEDEFAULT, 200, 100, m_hWnd, (HMENU)0, hInst, view);
+  CreateWindowEx (0, FLOATING_CLASSNAME, "LeoCAD",
+    WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
+    CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
+    m_hWnd, (HMENU)0, hInst, view);
 }
 
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 {
-	m_wndSplitter.CreateStatic(this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
+  m_wndSplitter.CreateStatic (this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
 
-	m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CCADView), CSize(0, 1000), pContext);
-	m_wndSplitter.CreateView(1, 0, RUNTIME_CLASS(CRichEditView), CSize(0, 0), pContext);
-
-	m_wndSplitter.SetRowInfo(1, 50, 0);
+  m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
+  m_wndSplitter.CreateView (1, 0, RUNTIME_CLASS (CRichEditView), CSize (0, 0), pContext);
+  m_wndSplitter.SetRowInfo (1, 50, 0);
 
 	// Setup the console.
-	CRichEditCtrl& Edit = ((CRichEditView*)m_wndSplitter.GetPane(1, 0))->GetRichEditCtrl();
-	Edit.SetReadOnly(TRUE);
+	CRichEditCtrl& Edit = ((CRichEditView*) m_wndSplitter.GetPane(1, 0))->GetRichEditCtrl();
+	Edit.SetReadOnly (TRUE);
 
 	CHARFORMAT cf;
 	memset(&cf, 0, sizeof(cf));
 	cf.dwMask = CFM_BOLD | CFM_FACE;
 
 	NONCLIENTMETRICS nm;
-	nm.cbSize = sizeof(NONCLIENTMETRICS);
-	VERIFY(SystemParametersInfo(SPI_GETNONCLIENTMETRICS,nm.cbSize,&nm,0)); 
+	nm.cbSize = sizeof (NONCLIENTMETRICS);
+	VERIFY (SystemParametersInfo(SPI_GETNONCLIENTMETRICS,nm.cbSize,&nm,0)); 
 	strcpy(cf.szFaceName, nm.lfStatusFont.lfFaceName);
 
 	Edit.SetDefaultCharFormat(cf);
 
-	return TRUE;
+  return TRUE;
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 
@@ -1304,8 +1276,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_FILE_EXPORT_HTML,       // LC_FILE_HTML
 		ID_FILE_EXPORT_POVRAY,     // LC_FILE_POVRAY
 		ID_FILE_EXPORT_WAVEFRONT,  // LC_FILE_WAVEFRONT
-		ID_FILE_EXPORT_VRML,       // LC_FILE_VRML
-		ID_FILE_EXPORT_X3DV,       // LC_FILE_X3DV
+		ID_FILE_PROPERTIES,        // LC_FILE_PROPERTIES
 		ID_FILE_TERRAINEDITOR,     // LC_FILE_TERRAIN
 		ID_FILE_EDITPIECELIBRARY,  // LC_FILE_LIBRARY
 		0,                         // LC_FILE_RECENT
@@ -1322,6 +1293,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_PIECE_DELETE,           // LC_PIECE_DELETE
 		ID_PIECE_MINIFIGWIZARD,    // LC_PIECE_MINIFIG
 		ID_PIECE_ARRAY,            // LC_PIECE_ARRAY
+		ID_PIECE_COPYKEYS,         // LC_PIECE_COPYKEYS
 		ID_PIECE_GROUP,            // LC_PIECE_GROUP
 		ID_PIECE_UNGROUP,          // LC_PIECE_UNGROUP
 		ID_PIECE_ATTACH,           // LC_PIECE_GROUP_ADD
@@ -1332,9 +1304,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_PIECE_UNHIDEALL,        // LC_PIECE_UNHIDE_ALL
 		ID_PIECE_PREVIOUS,         // LC_PIECE_PREVIOUS
 		ID_PIECE_NEXT,             // LC_PIECE_NEXT
-		ID_MODEL_NEW,              // LC_MODEL_NEW
-		ID_MODEL_DELETE,           // LC_MODEL_DELETE
-		ID_MODEL_PROPERTIES,       // LC_MODEL_PROPERTIES
 		ID_VIEW_PREFERENCES,       // LC_VIEW_PREFERENCES
 		0,                         // LC_VIEW_ZOOM
 		ID_VIEW_ZOOMIN,            // LC_VIEW_ZOOMIN
@@ -1443,9 +1412,9 @@ void CMainFrame::UpdateMenuAccelerators()
 	m_bmpMenu.Detach();
 }
 
-void CMainFrame::OnDropFiles(HDROP hDropInfo)
+void CMainFrame::OnDropFiles(HDROP hDropInfo) 
 {
-	SetActiveWindow();      // activate us first!
+	SetActiveWindow();      // activate us first !
 	UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 
 	if (nFiles > 0)
@@ -1456,316 +1425,4 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		lcGetActiveProject()->OpenProject(szFileName);
 	}
 	::DragFinish(hDropInfo);
-}
-
-
-void CMainFrame::OnViewSplitVertically()
-{
-	CView* view = GetActiveView();
-	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
-
-	// Calculate the new view size.
-	RECT rect;
-	view->GetClientRect(&rect);
-	int Width = (rect.right - rect.left) / 2;
-	int Height = rect.bottom - rect.top;
-
-	int Row, Col;
-	parent->GetViewRowCol(view, &Row, &Col);
-
-	// Remove current view from the parent.
-	parent->DetachWindow(Row, Col);
-
-	// Create the new splitter and attach it to the parent.
-	CDynamicSplitterWnd* splitter = new CDynamicSplitterWnd();
-	m_SplitterList.Add(splitter);
-
-	splitter->CreateStatic(parent, 1, 2, WS_CHILD | WS_VISIBLE, parent->IdFromRowCol(Row, Col));
-	parent->AttachWindow(splitter, Row, Col);
-
-	// Attach views to the new splitter.
-	splitter->AttachWindow(view, 0, 0);
-	splitter->SetColumnInfo(0, Width, 0);
-	splitter->CreateView(0, 1, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
-
-	// Update layout.
-	parent->RecalcLayout();
-}
-
-void CMainFrame::OnViewSplitHorizontally()
-{
-	CView* view = GetActiveView();
-	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
-
-	// Calculate the new view size.
-	RECT rect;
-	view->GetClientRect(&rect);
-	int Width = rect.right - rect.left;
-	int Height = (rect.bottom - rect.top) / 2;
-
-	int Row, Col;
-	parent->GetViewRowCol(view, &Row, &Col);
-
-	// Remove current view from the parent.
-	parent->DetachWindow(Row, Col);
-
-	// Create the new splitter and attach it to the parent.
-	CDynamicSplitterWnd* splitter = new CDynamicSplitterWnd();
-	m_SplitterList.Add(splitter);
-
-	splitter->CreateStatic(parent, 2, 1, WS_CHILD | WS_VISIBLE, parent->IdFromRowCol(Row, Col));
-	parent->AttachWindow(splitter, Row, Col);
-
-	// Attach views to the new splitter.
-	splitter->AttachWindow(view, 0, 0);
-	splitter->SetRowInfo(0, Height, 0);
-	splitter->CreateView(1, 0, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
-
-	// Update layout.
-	parent->RecalcLayout();
-}
-
-void CMainFrame::OnViewDeleteView()
-{
-	CView* view = GetActiveView();
-	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
-
-	// Don't do anything if there's only one view.
-	if (parent == &m_wndSplitter)
-		return;
-
-	// Calculate the sibling position.
-	int Row, Col;
-	parent->GetViewRowCol(view, &Row, &Col);
-
-	if (parent->GetRowCount() == 2)
-	{
-		ASSERT(parent->GetColumnCount() == 1);
-
-		if (Row == 0)
-			Row = 1;
-		else
-			Row = 0;
-	}
-	else
-	{
-		ASSERT(parent->GetColumnCount() == 2);
-		ASSERT(parent->GetRowCount() == 1);
-
-		if (Col == 0)
-			Col = 1;
-		else
-			Col = 0;
-	}
-
-	// Detach sibling.
-	CWnd* sibling = parent->GetPane(Row, Col);
-	parent->DetachWindow(Row, Col);
-
-	// Find the parent's parent splitter.
-	CDynamicSplitterWnd* parent2 = (CDynamicSplitterWnd*)parent->GetParent();
-	parent2->GetViewRowCol(parent, &Row, &Col);
-
-	// Detach the splitter from its parent and replace it with the sibling view.
-	parent2->DetachWindow(Row, Col);
-	parent2->AttachWindow(sibling, Row, Col);
-
-	// Find first view.
-	while (!sibling->IsKindOf(RUNTIME_CLASS(CCADView)))
-		sibling = ((CDynamicSplitterWnd*)sibling)->GetPane(0, 0);
-	SetActiveView((CView*)sibling);
-
-	// Destroy parent splitter and view.
-	parent->DestroyWindow();
-
-	for (int i = 0; i < m_SplitterList.GetSize(); i++)
-	{
-		if (m_SplitterList[i] == parent)
-		{
-			delete m_SplitterList[i];
-			m_SplitterList.RemoveAt(i);
-			break;
-		}
-	}
-
-	// Update layout.
-	parent2->RecalcLayout();
-}
-
-void CMainFrame::OnViewResetViews()
-{
-	CView* view = GetActiveView();
-	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
-
-	// Don't do anything if there's only one view.
-	if (parent != &m_wndSplitter)
-	{
-		// Save the active view.
-		int Row, Col;
-		parent->GetViewRowCol(view, &Row, &Col);
-		parent->DetachWindow(Row, Col);
-
-		// Delete all other views.
-		m_wndSplitter.GetPane(0, 0)->DestroyWindow();
-
-		for (int i = 0; i < m_SplitterList.GetSize(); i++)
-			delete m_SplitterList[i];
-		m_SplitterList.RemoveAll();
-
-		// Add the active view back.
-		m_wndSplitter.AttachWindow(view, 0, 0);
-		m_wndSplitter.RecalcLayout();
-		SetActiveView(view);
-	}
-
-	// Load default view layout.
-	const char* str = main_window->GetViewLayout(false);
-	SetViewLayout(NULL, str);
-}
-
-// Creates views based on a string describing the layout.
-void CMainFrame::SetViewLayout(CWnd* wnd, const char*& str)
-{
-	if (!wnd)
-	{
-		wnd = m_wndSplitter.GetPane(0, 0);
-	}
-
-	if (!*str || *str == 'V')
-	{
-		str++;
-
-		// Read camera name.
-		int count = 0;
-		char buf[16];
-
-		while (*str && isdigit(*str) && count < 15)
-			buf[count++] = *str++;
-		buf[count] = 0;
-
-		int len = atoi(buf);
-		str++;
-
-		String name;
-		strncpy(name.GetBuffer(len), str, len);
-		name[len] = 0;
-		str += len;
-
-		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CCADView)));
-
-		((CCADView*)wnd)->m_pView->SetCamera(lcGetActiveProject()->GetActiveModel()->GetCamera(name));
-
-		return;
-	}
-	else if (*str == 'S')
-	{
-		str++;
-		SetActiveView((CView*)wnd);
-
-		// Save splitter direction.
-		char dir = *str;
-		str++;
-
-		// Get view size.
-		int count = 0;
-		char buf[16];
-
-		while (*str && isdigit(*str) && count < 15)
-			buf[count++] = *str++;
-		buf[count] = 0;
-
-		int pos = atoi(buf);
-
-		RECT rc;
-		wnd->GetClientRect(&rc);
-
-		// Split view.
-		if (dir == 'H')
-		{
-			OnViewSplitHorizontally();
-
-			CSplitterWnd* splitter = (CSplitterWnd*)wnd->GetParent();
-			splitter->SetRowInfo(0, pos * rc.bottom / 100, 0);
-			splitter->RecalcLayout();
-
-			SetViewLayout(splitter->GetPane(0, 0), str);
-			SetViewLayout(splitter->GetPane(1, 0), str);
-		}
-		else
-		{
-			OnViewSplitVertically();
-
-			CSplitterWnd* splitter = (CSplitterWnd*)wnd->GetParent();
-			splitter->SetColumnInfo(0, pos * rc.right / 100, 0);
-			splitter->RecalcLayout();
-
-			SetViewLayout(splitter->GetPane(0, 0), str);
-			SetViewLayout(splitter->GetPane(0, 1), str);
-		}
-	}
-	else
-	{
-		str++;
-		return;
-	}
-}
-
-// Creates a string describing the view layout.
-void CMainFrame::GetViewLayout(CWnd* wnd, String& str) const
-{
-	if (!wnd)
-	{
-		wnd = m_wndSplitter.GetPane(0, 0);
-	}
-
-	if (wnd->IsKindOf(RUNTIME_CLASS(CCADView)))
-	{
-		str += "V";
-
-		// Save camera name.
-		const String& name = ((CCADView*)wnd)->m_pView->GetCamera()->m_Name;
-		int len = name.GetLength();
-		char buf[16];
-		sprintf(buf, "%d", len);
-		str += buf;
-		str += '|';
-		str += name;
-	}
-	else
-	{
-		ASSERT(wnd->IsKindOf(RUNTIME_CLASS(CSplitterWnd)));
-
-		CSplitterWnd* splitter = (CSplitterWnd*)wnd;
-		int pos, dummy;
-		RECT rc;
-
-		splitter->GetClientRect(&rc);
-
-		// Save splitter direction.
-		if (splitter->GetRowCount() > splitter->GetColumnCount())
-		{
-			str += "SH";
-			splitter->GetRowInfo(0, pos, dummy);
-			pos = 100 * pos / rc.bottom;
-		}
-		else
-		{
-			str += "SV";
-			splitter->GetColumnInfo(0, pos, dummy);
-			pos = 100 * pos / rc.right;
-		}
-
-		// Save splitter size.
-		char buf[16];
-		sprintf(buf, "%d", pos);
-		str += buf;
-
-		// Save children.
-		GetViewLayout(splitter->GetPane(0, 0), str);
-
-		if (splitter->GetRowCount() > splitter->GetColumnCount())
-			GetViewLayout(splitter->GetPane(1, 0), str);
-		else
-			GetViewLayout(splitter->GetPane(0, 1), str);
-	}
 }

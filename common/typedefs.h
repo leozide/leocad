@@ -4,8 +4,10 @@
 #ifndef _TYPEDEF_H_
 #define _TYPEDEF_H_
 
-class lcObject;
+class Group;
+class Piece;
 class PieceInfo;
+class Camera;
 
 #include "defines.h"
 #include "str.h"
@@ -13,6 +15,8 @@ class PieceInfo;
 
 typedef enum
 {
+	LC_COLOR_CHANGED,
+	LC_CAPTURE_LOST,
 	LC_ACTIVATE,
 	LC_PIECE_MODIFIED,
 	LC_CAMERA_MODIFIED,
@@ -31,8 +35,7 @@ typedef enum
 	LC_FILE_HTML,
 	LC_FILE_POVRAY,
 	LC_FILE_WAVEFRONT,
-	LC_FILE_VRML,
-	LC_FILE_X3DV,
+	LC_FILE_PROPERTIES,
 	LC_FILE_TERRAIN,
 	LC_FILE_LIBRARY,
 	LC_FILE_RECENT,
@@ -49,6 +52,7 @@ typedef enum
 	LC_PIECE_DELETE,
 	LC_PIECE_MINIFIG,
 	LC_PIECE_ARRAY,
+	LC_PIECE_COPYKEYS,
 	LC_PIECE_GROUP,
 	LC_PIECE_UNGROUP,
 	LC_PIECE_GROUP_ADD,
@@ -59,25 +63,6 @@ typedef enum
 	LC_PIECE_UNHIDE_ALL,
 	LC_PIECE_PREVIOUS,
 	LC_PIECE_NEXT,
-	LC_MODEL_NEW,
-	LC_MODEL_DELETE,
-	LC_MODEL_PROPERTIES,
-	LC_MODEL_MODEL1,
-	LC_MODEL_MODEL2,
-	LC_MODEL_MODEL3,
-	LC_MODEL_MODEL4,
-	LC_MODEL_MODEL5,
-	LC_MODEL_MODEL6,
-	LC_MODEL_MODEL7,
-	LC_MODEL_MODEL8,
-	LC_MODEL_MODEL9,
-	LC_MODEL_MODEL10,
-	LC_MODEL_MODEL11,
-	LC_MODEL_MODEL12,
-	LC_MODEL_MODEL13,
-	LC_MODEL_MODEL14,
-	LC_MODEL_MODEL15,
-	LC_MODEL_MODEL16,
 	LC_VIEW_PREFERENCES,
 	LC_VIEW_ZOOM,
 	LC_VIEW_ZOOMIN,
@@ -153,7 +138,6 @@ typedef enum
 	LC_EDIT_ACTION_ZOOM_REGION,
 	LC_EDIT_ACTION_PAN,
 	LC_EDIT_ACTION_ROTATE_VIEW,
-	LC_EDIT_ACTION_ORBIT,
 	LC_EDIT_ACTION_ROLL,
 } LC_COMMANDS;
 
@@ -172,7 +156,6 @@ typedef enum
 	LC_ACTION_ZOOM_REGION,
 	LC_ACTION_PAN,
 	LC_ACTION_ROTATE_VIEW,
-	LC_ACTION_ORBIT,
 	LC_ACTION_ROLL,
 	LC_ACTION_CURVE
 } LC_ACTIONS;
@@ -197,40 +180,35 @@ typedef enum
 	LC_CURSOR_PAN,
 	LC_CURSOR_ROLL,
 	LC_CURSOR_ROTATE_VIEW,
-	LC_CURSOR_ORBIT,
 	LC_CURSOR_COUNT
 } LC_CURSOR_TYPE;
 
-struct LC_PIECELIST_ENTRY
-{
-	PieceInfo* Info;
-	int Color;
-};
+// Piece connections (complicated and wastes memory but fast).
 
-// Piece connections.
-struct CONNECTION
+typedef struct CONNECTION
 {
 	unsigned char type;
 	float center[3];
 	float normal[3];
 	CONNECTION* link;
-	lcObject* owner;
-};
+	Piece* owner;
+} CONNECTION;
 
-struct CONNECTION_ENTRY
+typedef struct
 {
-	lcObject* owner;
+	Piece* owner;
 	CONNECTION** cons; // pointers to the structures in each piece
 	unsigned short numcons;
-};
+} CONNECTION_ENTRY;
 
-struct CONNECTION_TYPE
+typedef struct
 {
 	CONNECTION_ENTRY* entries;
 	unsigned short numentries;
-};
+} CONNECTION_TYPE;
 
 // Select by Name dialog data
+
 typedef enum
 {
 	LC_SELDLG_PIECE,
@@ -239,17 +217,17 @@ typedef enum
 	LC_SELDLG_GROUP
 } LC_SEL_DATA_TYPE;
 
-struct LC_SEL_DATA
+typedef struct
 {
 	const char* name;
 	unsigned char type;
 	bool selected;
 	void* pointer;
-};
+} LC_SEL_DATA;
 
-struct LC_PIECE_MODIFY
+typedef struct
 {
-	lcObject* piece;
+	Piece* piece;
 	Vector3 Position;
 	Vector3 Rotation;
 	char name[81];
@@ -257,40 +235,20 @@ struct LC_PIECE_MODIFY
 	int to;
 	bool hidden;
 	int color;
-};
+} LC_PIECE_MODIFY;
 
-struct LC_CAMERA_MODIFY
+typedef struct
 {
-	lcObject* camera;
+	Camera* camera;
 	Vector3 Eye;
 	Vector3 Target;
-	float Roll;
+	Vector3 Up;
 	char name[81];
 	float fovy;
 	float znear;
 	float zfar;
-	bool ortho;
 	bool hidden;
-	bool clip;
-	bool cone;
-};
-
-struct LC_LIGHT_MODIFY
-{
-	lcObject* light;
-	Vector3 Position;
-	Vector3 Target;
-	Vector3 AmbientColor;
-	Vector3 DiffuseColor;
-	Vector3 SpecularColor;
-	float ConstantAttenuation;
-	float LinearAttenuation;
-	float QuadraticAttenuation;
-	float SpotCutoff;
-	float SpotExponent;
-	bool Hidden;
-	char name[81];
-};
+} LC_CAMERA_MODIFY;
 
 // Image
 
@@ -303,7 +261,7 @@ typedef enum
 	LC_IMAGE_AVI
 } LC_IMAGE_FORMATS;
 
-struct LC_IMAGE_OPTS
+typedef struct
 {
 	unsigned char quality;
 	bool interlaced;
@@ -312,9 +270,9 @@ struct LC_IMAGE_OPTS
 	unsigned char background[3];
 	float pause;
 	unsigned int format;
-};
+} LC_IMAGE_OPTS;
 
-struct LC_IMAGEDLG_OPTS
+typedef struct
 {
 	char filename[LC_MAXPATH];
 	unsigned short from;
@@ -323,7 +281,7 @@ struct LC_IMAGEDLG_OPTS
 	unsigned short width;
 	unsigned short height;
 	LC_IMAGE_OPTS imopts;
-};
+} LC_IMAGEDLG_OPTS;
 
 typedef enum {
 	LC_DLG_FILE_OPEN_PROJECT,
@@ -331,13 +289,10 @@ typedef enum {
 	LC_DLG_FILE_MERGE_PROJECT,
 	LC_DLG_FILE_OPEN,
 	LC_DLG_FILE_SAVE,
-	LC_DLG_DIRECTORY_BROWSE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
 	LC_DLG_POVRAY,
 	LC_DLG_WAVEFRONT,
-	LC_DLG_VRML97,
-	LC_DLG_X3DV,
 	LC_DLG_MINIFIG,
 	LC_DLG_ARRAY,
 	LC_DLG_PREFERENCES,
@@ -359,40 +314,34 @@ typedef enum
 	LC_FILEOPENDLG_LUP
 } LC_FILEOPENDLG_TYPES;
 
-struct LC_FILEOPENDLG_OPTS
+typedef struct
 {
 	int type;
 	char path[LC_MAXPATH];
 	int numfiles;
 	char** filenames;
-};
+} LC_FILEOPENDLG_OPTS;
 
 typedef enum
 {
 	LC_FILESAVEDLG_LCF,
 } LC_FILESAVEDLG_TYPES;
 
-struct LC_FILESAVEDLG_OPTS
+typedef struct
 {
 	int type;
 	char path[LC_MAXPATH];
-};
+} LC_FILESAVEDLG_OPTS;
 
-struct LC_DLG_DIRECTORY_BROWSE_OPTS
-{
-	const char* Title;
-	char Path[LC_MAXPATH];
-};
-
-struct LC_POVRAYDLG_OPTS
+typedef struct
 {
 	bool render;
 	char povpath[LC_MAXPATH];
 	char outpath[LC_MAXPATH];
 	char libpath[LC_MAXPATH];
-};
+} LC_POVRAYDLG_OPTS;
 
-struct LC_HTMLDLG_OPTS
+typedef struct
 {
 	char path[LC_MAXPATH];
 	bool singlepage;
@@ -401,11 +350,11 @@ struct LC_HTMLDLG_OPTS
 	bool listend;
 	bool liststep;
 	bool highlight;
-	bool htmlext;
+  bool htmlext;
 	LC_IMAGEDLG_OPTS imdlg;
-};
+} LC_HTMLDLG_OPTS;
 
-struct LC_ARRAYDLG_OPTS
+typedef struct
 {
 	unsigned short n1DCount;
 	unsigned short n2DCount;
@@ -415,30 +364,31 @@ struct LC_ARRAYDLG_OPTS
 	float f3D[3];
 	float fMove[3];
 	float fRotate[3];
-};
+} LC_ARRAYDLG_OPTS;
 
-struct LC_PROPERTIESDLG_OPTS
+typedef struct
 {
-	String Name;
-	String Author;
-	String Description;
-	String Comments;
-	int* PiecesUsed;
-};
+	char strAuthor[101];
+	char strDescription[101];
+	char strComments[256];
+	char* strTitle;
+	char* strFilename;
+	char** names;
+	unsigned short* count;
+	int lines;
+} LC_PROPERTIESDLG_OPTS;
 
-struct LC_GROUPEDITDLG_OPTS
+typedef struct
 {
-	/*
 	int piececount;
-	lcObject** pieces;
+	Piece** pieces;
 	Group** piecesgroups;
 	int groupcount;
 	Group** groups;
 	Group** groupsgroups;
-	*/
-};
+} LC_GROUPEDITDLG_OPTS;
 
-struct LC_PREFERENCESDLG_OPTS
+typedef struct
 {
 	int nMouse;
 	int nSaveInterval;
@@ -448,6 +398,7 @@ struct LC_PREFERENCESDLG_OPTS
 	float fLineWidth;
 	unsigned long nSnap;
 	unsigned short nAngleSnap;
+	unsigned short nGridSize;
 	unsigned long nScene;
 	float fDensity;
 	char strBackground[LC_MAXPATH];
@@ -458,12 +409,12 @@ struct LC_PREFERENCESDLG_OPTS
 	float fGrad2[3];
 	char strFooter[256];
 	char strHeader[256];
-};
+} LC_PREFERENCESDLG_OPTS;
 
-struct LC_CATEGORYDLG_OPTS
+typedef struct
 {
 	String Name;
 	String Keywords;
-};
+} LC_CATEGORYDLG_OPTS;
 
 #endif

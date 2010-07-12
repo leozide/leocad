@@ -1,16 +1,18 @@
 // Image I/O routines
 //
 
-#include "lc_global.h"
 #include "opengl.h"
-#if LC_WINDOWS
+#ifdef LC_WINDOWS
+#include <windows.h>
 #include <windowsx.h>
+//#include <mmsystem.h>
 #include <vfw.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "config.h"
 #include "image.h"
 #include "file.h"
 
@@ -242,7 +244,7 @@ bool Image::FileSave (const char* filename, LC_IMAGE_OPTS* opts) const
     else
     {
       strcpy (ext, p+1);
-      _strlwr (ext);
+      strlwr (ext);
 
       if (strcmp (ext, "bmp") == 0)
         opts->format = LC_IMAGE_BMP;
@@ -302,7 +304,7 @@ bool Image::FileSave (const char* filename, LC_IMAGE_OPTS* opts) const
 // =============================================================================
 // Global functions
 
-#if LC_WINDOWS
+#ifdef LC_WINDOWS
 #include "system.h"
 
 #define AVIIF_KEYFRAME	0x00000010L // this frame is a key frame.

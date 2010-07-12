@@ -56,7 +56,7 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data);
 static void init_paths (char *argv0)
 {
   char temppath[PATH_MAX];
-  const char *home;
+  char *home;
 
   home = getenv ("HOME");
   if (home == NULL)
@@ -508,15 +508,6 @@ static void update_window_layout ()
   }
 }
 
-int lcXErrorHandler(Display* display, XErrorEvent* event)
-{
-	char Text[1024];
-	fprintf(stderr, "Non fatal X11 error ignored\n");
-	XGetErrorText(display, event->error_code, Text, sizeof(Text));
-	fprintf(stderr, "%s\n", Text);
-
-}
-
 int main (int argc, char* argv[])
 {
   GtkWidget *vbox;
@@ -535,8 +526,6 @@ int main (int argc, char* argv[])
 
   if (!g_App->Initialize(argc, argv, lib_path))
     return 1;
-
-  XSetErrorHandler(&lcXErrorHandler);
 
   if (pfnglXQueryExtension (GDK_DISPLAY (), NULL, NULL) != True)
   {
@@ -676,7 +665,7 @@ int main (int argc, char* argv[])
   GdkBitmap *mask;
 
   gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask,
-                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], (gchar**)icon32);
+                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], icon32);
   gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
 
   gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));
@@ -691,9 +680,11 @@ int main (int argc, char* argv[])
   if (!Info)
     Info = lcGetPiecesLibrary()->GetPieceInfo(0);
   if (Info)
-    g_App->m_PiecePreview->SetSelection(Info);
-
-  lcGetActiveProject()->SetActiveView(view);
+  {
+    lcGetActiveProject()->SetCurrentPiece(Info);
+    extern PiecePreview* preview;
+    preview->SetCurrentPiece(Info);
+  }
 
   gtk_main();
 

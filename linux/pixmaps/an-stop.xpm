@@ -1,6 +1,6 @@
 /* XPM */
-static const char *an_stop[] = {
-/* columns rows colors const chars-per-pixel */
+static char *an_stop[] = {
+/* columns rows colors chars-per-pixel */
 "16 15 5 1",
 "  c #00007f",
 ". c Gray50",

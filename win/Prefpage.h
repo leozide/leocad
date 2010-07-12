@@ -118,8 +118,8 @@ class CPreferencesDrawing : public CPropertyPage
 
 // Construction
 public:
-	void SetOptions(unsigned long dwSnap, unsigned short nAngle);
-	void GetOptions(unsigned long* dwSnap, unsigned short* nAngle);
+	void SetOptions(unsigned long dwSnap, unsigned short nAngle, unsigned short nGrid);
+	void GetOptions(unsigned long* dwSnap, unsigned short* nAngle, unsigned short* nGrid);
 	CPreferencesDrawing();
 	~CPreferencesDrawing();
 
@@ -131,6 +131,7 @@ public:
 	BOOL	m_bCentimeters;
 	BOOL	m_bFixed;
 	BOOL	m_bGrid;
+	int		m_nGridSize;
 	BOOL	m_bLockX;
 	BOOL	m_bLockY;
 	BOOL	m_bLockZ;

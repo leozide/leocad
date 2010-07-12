@@ -1,7 +1,7 @@
 // PrefPage.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "resource.h"
 #include "PrefPage.h"
 #include "Tools.h"
@@ -244,6 +244,7 @@ CPreferencesDrawing::CPreferencesDrawing() : CPropertyPage(CPreferencesDrawing::
 	m_bCentimeters = FALSE;
 	m_bFixed = FALSE;
 	m_bGrid = FALSE;
+	m_nGridSize = 0;
 	m_bLockX = FALSE;
 	m_bLockY = FALSE;
 	m_bLockZ = FALSE;
@@ -270,6 +271,7 @@ void CPreferencesDrawing::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AIDDLG_CENTIMETERS, m_bCentimeters);
 	DDX_Check(pDX, IDC_AIDDLG_FIXEDKEYS, m_bFixed);
 	DDX_Check(pDX, IDC_AIDDLG_GRID, m_bGrid);
+	DDX_Text(pDX, IDC_AIDDLG_GRIDSIZE, m_nGridSize);
 	DDX_Check(pDX, IDC_AIDDLG_LOCKX, m_bLockX);
 	DDX_Check(pDX, IDC_AIDDLG_LOCKY, m_bLockY);
 	DDX_Check(pDX, IDC_AIDDLG_LOCKZ, m_bLockZ);
@@ -289,9 +291,10 @@ BEGIN_MESSAGE_MAP(CPreferencesDrawing, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle)
+void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle, unsigned short nGrid)
 {
 	m_nAngle = nAngle;
+	m_nGridSize = nGrid;
 
 	m_bAxis = (dwSnap & LC_DRAW_AXIS) != 0;
 	m_bCentimeters = (dwSnap & LC_DRAW_CM_UNITS) != 0;
@@ -308,9 +311,10 @@ void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle
 	m_bGlobal = (dwSnap & LC_DRAW_GLOBAL_SNAP) != 0;
 }
 
-void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAngle)
+void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAngle, unsigned short* nGrid)
 {
 	*nAngle = m_nAngle;
+	*nGrid = m_nGridSize;
 
 	*dwSnap = 0;
 	if (m_bAxis) *dwSnap |= LC_DRAW_AXIS;

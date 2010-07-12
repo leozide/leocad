@@ -2,33 +2,30 @@
 #define _PREVIEW_H_
 
 #include "glwindow.h"
-#include "lc_message.h"
 
-class lcPieceObject;
+class PieceInfo;
 
-class PiecePreview : public GLWindow, public lcListener
+class PiecePreview : public GLWindow
 {
 public:
 	PiecePreview(GLWindow *share);
 	virtual ~PiecePreview();
 
 	void OnDraw();
-	void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
-	void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
-	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
-	void OnRightButtonDown(int x, int y, bool Control, bool Shift);
-	void OnRightButtonUp(int x, int y, bool Control, bool Shift);
-	void OnMouseMove(int x, int y, bool Control, bool Shift);
+  void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
+  void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
+  void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
+  void OnRightButtonDown(int x, int y, bool Control, bool Shift);
+  void OnRightButtonUp(int x, int y, bool Control, bool Shift);
+  void OnMouseMove(int x, int y, bool Control, bool Shift);
 
-	// Call this function when the pieces list selection changes.
-	void SetSelection(void* Selection);
-
-	void ProcessMessage(lcMessageType Message, void* Data);
-
-	// Currently selected model or piece, to change the selection use SetSelection().
-	lcPieceObject* m_Selection;
+	PieceInfo* GetCurrentPiece() const
+	{ return m_PieceInfo; }
+	void SetCurrentPiece(PieceInfo* Info);
 
 protected:
+	PieceInfo* m_PieceInfo;
+
 	// Mouse tracking.
 	int m_Tracking;
 	int m_DownX;

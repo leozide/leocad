@@ -62,7 +62,7 @@ static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
     if (info->colors[i] == button)
       break;
 
-  info->wizard->ChangeColor (i, GPOINTER_TO_INT (data));
+  info->wizard->SetColor (i, GPOINTER_TO_INT (data));
   info->wizard->Redraw ();
   set_button_pixmap2 (button, FlatColorArray[GPOINTER_TO_INT(data)]);
 }
@@ -93,7 +93,7 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
 static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* info;
-  int i, piece_type;
+  int i, piece_type, piece_index;
   const gchar* desc;
 
   info = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "info");
@@ -107,9 +107,19 @@ static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
       break;
     }
 
+  ObjArray<lcMinifigPieceInfo>& InfoArray = info->wizard->mSettings[piece_type];
   desc = gtk_entry_get_text (GTK_ENTRY (widget));
 
-  info->wizard->ChangePiece (i, desc);
+  for (i = 0; i < InfoArray.GetSize(); i++)
+  {
+     if (!strcmp(InfoArray[i].Description, desc))
+     {
+        piece_index = i;
+        break;
+     }
+  }
+
+  info->wizard->SetSelectionIndex (piece_type, piece_index);
   info->wizard->Redraw ();
 }
 
@@ -132,35 +142,16 @@ static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)
 
 static void minifigdlg_updateselection (LC_MINIFIGDLG_STRUCT* s)
 {
-  char *names[LC_MFW_NUMITEMS];
-  s->wizard->GetSelections (names);
-
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    GtkList *list = GTK_LIST (GTK_COMBO (s->pieces[i])->list);
-    GtkWidget *child;
-    GList *children;
-    gchar* str;
-    int index = 0;
+    int index = s->wizard->GetSelectionIndex(i);
 
-    children = list->children;
-    while (children)
-    {
-      child = (GtkWidget*)children->data;
-      children = children->next;
-
-      gtk_label_get (GTK_LABEL (GTK_BIN (child)->child), &str);
-      if (strcmp (str, names[i]) == 0)
-      {
-	gtk_signal_handler_block_by_func (GTK_OBJECT (GTK_COMBO (s->pieces[i])->entry),
+    gtk_signal_handler_block_by_func (GTK_OBJECT (GTK_COMBO (s->pieces[i])->entry),
 					  GTK_SIGNAL_FUNC (minifigdlg_piece_changed), NULL);
-	gtk_entry_set_text (GTK_ENTRY (GTK_COMBO (s->pieces[i])->entry), names[i]);
-	gtk_list_select_item (GTK_LIST (GTK_COMBO (s->pieces[i])->list), index);
-	gtk_signal_handler_unblock_by_func (GTK_OBJECT (GTK_COMBO (s->pieces[i])->entry),
+    gtk_entry_set_text (GTK_ENTRY (GTK_COMBO (s->pieces[i])->entry), s->wizard->mSettings[i][index].Description);
+    gtk_list_select_item (GTK_LIST (GTK_COMBO (s->pieces[i])->list), index);
+    gtk_signal_handler_unblock_by_func (GTK_OBJECT (GTK_COMBO (s->pieces[i])->entry),
 					    GTK_SIGNAL_FUNC (minifigdlg_piece_changed), NULL);
-      }
-      index++;
-    }
   }
 }
 
@@ -213,7 +204,7 @@ static void adj_changed (GtkAdjustment *adj, gpointer data)
   if (val == info->wizard->m_Angles[i])
     return;
 
-  info->wizard->ChangeAngle (i, val);
+  info->wizard->SetAngle (i, val);
 
   if (info->preview != NULL)
     info->wizard->Redraw ();
@@ -384,12 +375,10 @@ int minifigdlg_execute (void* param)
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
   {
     GList* names = NULL;
-    int count;
-    char **list;
-    s.wizard->GetDescriptions (i, &list, &count);
+    int count = s.wizard->mSettings[i].GetSize();
 
     for (int j = 0; j < count; j++)
-      names = g_list_append (names, list[j]);
+      names = g_list_append (names, s.wizard->mSettings[i][j].Description);
 
     if (names != NULL)
     {
@@ -400,7 +389,6 @@ int minifigdlg_execute (void* param)
       gtk_signal_handler_unblock_by_func(GTK_OBJECT(GTK_COMBO(s.pieces[i])->entry),
 					 GTK_SIGNAL_FUNC(minifigdlg_piece_changed), NULL);
     }
-    free (list);
   }
 
   minifigdlg_updatecombo (&s);

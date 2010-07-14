@@ -30,7 +30,7 @@ typedef	enum LC_MFW_TYPES
 
 struct lcMinifigPieceInfo
 {
-	char Description[64];
+	char Description[128];
 	PieceInfo* Info;
 	Matrix44 Offset;
 };

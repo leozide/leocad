@@ -1007,7 +1007,8 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			OffsetMatrix[13] =  Mat[11] / 25.0f;
 
 			lcMinifigPieceInfo MinifigInfo;
-			strcpy(MinifigInfo.Description, DescriptionStart);
+			strncpy(MinifigInfo.Description, DescriptionStart, sizeof(MinifigInfo.Description));
+			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
 			MinifigInfo.Offset = Offset;
 			MinifigInfo.Info = Info;
 

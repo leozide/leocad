@@ -313,6 +313,9 @@ PieceInfo* PiecesLibrary::FindPieceInfo(const char* name) const
 
 PieceInfo* PiecesLibrary::GetPieceInfo(int index) const
 {
+	if (index < 0 || index >= m_Pieces.GetSize())
+		return NULL;
+
 	return m_Pieces[index];
 }
 

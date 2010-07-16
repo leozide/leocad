@@ -1030,7 +1030,7 @@ void MinifigWizard::OnDraw()
 	glLoadIdentity();
 	gluPerspective(30.0f, aspect, 1.0f, 20.0f);
 	glMatrixMode(GL_MODELVIEW);
-	Matrix44 WorldView = CreateLookAtMatrix(Vector3(0, -9, 4), Vector3(0, 5, 1), Vector3(0, 0, 1));
+	Matrix44 WorldView = CreateLookAtMatrix(Vector3(0, -9, 1), Vector3(0, 5, -2), Vector3(0, 0, 1));
 	glLoadMatrixf(WorldView);
 
 	glEnable(GL_DEPTH_TEST);
@@ -1066,13 +1066,11 @@ void MinifigWizard::Calculate()
 	float HeadOffset = 0.0f;
 	Matrix44 Mat, Mat2;
 
-	Mat = IdentityMatrix44();
-	Mat.SetTranslation(Vector3(0, 0, 2.88f));
-	m_Matrices[LC_MFW_TORSO] = Mat;
+	m_Matrices[LC_MFW_TORSO] = mSettings[LC_MFW_TORSO][GetSelectionIndex(LC_MFW_TORSO)].Offset;
 
 	if (m_Info[LC_MFW_NECK])
 	{
-		m_Matrices[LC_MFW_NECK] = Mul(mSettings[LC_MFW_NECK][GetSelectionIndex(LC_MFW_NECK)].Offset, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_NECK] = mSettings[LC_MFW_NECK][GetSelectionIndex(LC_MFW_NECK)].Offset;
 		HeadOffset = 0.08f;
 	}
 
@@ -1080,8 +1078,7 @@ void MinifigWizard::Calculate()
 	{
 		Mat = MatrixFromAxisAngle(Vector3(0, 0, 1), -LC_DTOR * m_Angles[LC_MFW_HEAD]);
 		Mat.SetTranslation(Vector3(0, 0, 0.96f + HeadOffset));
-		Mat = Mul(mSettings[LC_MFW_HEAD][GetSelectionIndex(LC_MFW_HEAD)].Offset, Mat);
-		m_Matrices[LC_MFW_HEAD] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_HEAD] = Mul(mSettings[LC_MFW_HEAD][GetSelectionIndex(LC_MFW_HEAD)].Offset, Mat);
 	}
 
 	if (m_Info[LC_MFW_HAT])
@@ -1095,7 +1092,7 @@ void MinifigWizard::Calculate()
 	{
 		Mat = MatrixFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_ARM]);
 
-		if (!strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
 			Mat2 = IdentityMatrix44();
 		else
 			Mat2 = MatrixFromAxisAngle(Vector3(0, 1, 0), LC_DTOR * 9.791f);
@@ -1103,7 +1100,7 @@ void MinifigWizard::Calculate()
 		Mat = Mul(mSettings[LC_MFW_RIGHT_ARM][GetSelectionIndex(LC_MFW_RIGHT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
 		Mat.SetTranslation(Vector3(-0.62f, 0, -0.32f));
-		m_Matrices[LC_MFW_RIGHT_ARM] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_RIGHT_ARM] = Mat;
 	}
 
 	if (m_Info[LC_MFW_RIGHT_HAND])
@@ -1128,7 +1125,7 @@ void MinifigWizard::Calculate()
 	{
 		Mat = MatrixFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_ARM]);
 
-		if (!strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
 			Mat2 = IdentityMatrix44();
 		else
 			Mat2 = MatrixFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * 9.791f);
@@ -1136,7 +1133,7 @@ void MinifigWizard::Calculate()
 		Mat = Mul(mSettings[LC_MFW_LEFT_ARM][GetSelectionIndex(LC_MFW_LEFT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
 		Mat.SetTranslation(Vector3(0.62f, 0, -0.32f));
-		m_Matrices[LC_MFW_LEFT_ARM] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_LEFT_ARM] = Mat;
 	}
 
 	if (m_Info[LC_MFW_LEFT_HAND])
@@ -1161,16 +1158,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat = IdentityMatrix44();
 		Mat.SetTranslation(Vector3(0, 0, -1.28f));
-		Mat = Mul(mSettings[LC_MFW_HIPS][GetSelectionIndex(LC_MFW_HIPS)].Offset, Mat);
-		m_Matrices[LC_MFW_HIPS] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_HIPS] = Mul(mSettings[LC_MFW_HIPS][GetSelectionIndex(LC_MFW_HIPS)].Offset, Mat);
 	}
 
 	if (m_Info[LC_MFW_RIGHT_LEG])
 	{
 		Mat = MatrixFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_LEG]);
 		Mat.SetTranslation(Vector3(0, 0, -1.76f));
-		Mat = Mul(mSettings[LC_MFW_RIGHT_LEG][GetSelectionIndex(LC_MFW_RIGHT_LEG)].Offset, Mat);
-		m_Matrices[LC_MFW_RIGHT_LEG] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_RIGHT_LEG] = Mul(mSettings[LC_MFW_RIGHT_LEG][GetSelectionIndex(LC_MFW_RIGHT_LEG)].Offset, Mat);
 	}
 
 	if (m_Info[LC_MFW_RIGHT_SHOE])
@@ -1188,8 +1183,7 @@ void MinifigWizard::Calculate()
 	{
 		Mat = MatrixFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_LEG]);
 		Mat.SetTranslation(Vector3(0, 0, -1.76f));
-		Mat = Mul(mSettings[LC_MFW_LEFT_LEG][GetSelectionIndex(LC_MFW_LEFT_LEG)].Offset, Mat);
-		m_Matrices[LC_MFW_LEFT_LEG] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
+		m_Matrices[LC_MFW_LEFT_LEG] = Mul(mSettings[LC_MFW_LEFT_LEG][GetSelectionIndex(LC_MFW_LEFT_LEG)].Offset, Mat);
 	}
 
 	if (m_Info[LC_MFW_LEFT_SHOE])

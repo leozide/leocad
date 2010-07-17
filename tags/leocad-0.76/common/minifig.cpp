@@ -1066,6 +1066,9 @@ void MinifigWizard::Calculate()
 	float HeadOffset = 0.0f;
 	Matrix44 Mat, Mat2;
 
+	bool DroidTorso = m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375");
+	bool SkeletonTorso = m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "6260");
+
 	m_Matrices[LC_MFW_TORSO] = mSettings[LC_MFW_TORSO][GetSelectionIndex(LC_MFW_TORSO)].Offset;
 
 	if (m_Info[LC_MFW_NECK])
@@ -1092,14 +1095,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat = MatrixFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_ARM]);
 
-		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (DroidTorso || SkeletonTorso)
 			Mat2 = IdentityMatrix44();
 		else
 			Mat2 = MatrixFromAxisAngle(Vector3(0, 1, 0), LC_DTOR * 9.791f);
+		Mat2.SetTranslation(Vector3(-0.62f, 0, -0.32f));
 
 		Mat = Mul(mSettings[LC_MFW_RIGHT_ARM][GetSelectionIndex(LC_MFW_RIGHT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
-		Mat.SetTranslation(Vector3(-0.62f, 0, -0.32f));
 		m_Matrices[LC_MFW_RIGHT_ARM] = Mat;
 	}
 
@@ -1125,14 +1128,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat = MatrixFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_ARM]);
 
-		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (DroidTorso || SkeletonTorso)
 			Mat2 = IdentityMatrix44();
 		else
 			Mat2 = MatrixFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * 9.791f);
+		Mat2.SetTranslation(Vector3(0.62f, 0, -0.32f));
 
 		Mat = Mul(mSettings[LC_MFW_LEFT_ARM][GetSelectionIndex(LC_MFW_LEFT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
-		Mat.SetTranslation(Vector3(0.62f, 0, -0.32f));
 		m_Matrices[LC_MFW_LEFT_ARM] = Mat;
 	}
 

@@ -18,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 CMinifigDlg::CMinifigDlg(void* param, CWnd* pParent /*=NULL*/)
 	: CDialog(CMinifigDlg::IDD, pParent)
 {
-  m_pMinifig = (MinifigWizard*)param;
+	m_pMinifig = (MinifigWizard*)param;
 	m_pMinifigWnd = NULL;
 
 	//{{AFX_DATA_INIT(CMinifigDlg)
@@ -64,31 +64,31 @@ BOOL CMinifigDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	ModifyStyle (0, WS_CLIPCHILDREN, 0);
+	ModifyStyle(0, WS_CLIPCHILDREN, 0);
 
 	RECT r;
 	//RECT r = { 200, 15, 400, 320 };
-	::GetWindowRect (::GetDlgItem(m_hWnd, IDC_PREVIEWSTATIC), &r);
-	ScreenToClient (&r);
+	::GetWindowRect(::GetDlgItem(m_hWnd, IDC_PREVIEWSTATIC), &r);
+	ScreenToClient(&r);
 
 	HINSTANCE hInst = AfxGetInstanceHandle();
 	WNDCLASS wndcls;
-LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 #define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
 #define MINIFIG_CLASSNAME _T("LeoCADMinifigOpenGLClass")
 
 	// check if our class is registered
-	if(!(GetClassInfo (hInst, MINIFIG_CLASSNAME, &wndcls)))
+	if(!(GetClassInfo(hInst, MINIFIG_CLASSNAME, &wndcls)))
 	{
-		if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
+		if (GetClassInfo(hInst, OPENGL_CLASSNAME, &wndcls))
 		{
 			// set our class name
 			wndcls.lpszClassName = MINIFIG_CLASSNAME;
 			wndcls.lpfnWndProc = GLWindowProc;
 
 			// register class
-			if (!AfxRegisterClass (&wndcls))
+			if (!AfxRegisterClass(&wndcls))
 				AfxThrowResourceException();
 		}
 		else
@@ -101,7 +101,7 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	int i;
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
-		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
+		((CColorPicker*)GetDlgItem(IDC_MF_HATCOLOR+i))->SetColorIndex(m_pMinifig->m_Colors[i]);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
@@ -154,15 +154,15 @@ void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 
 {
-	int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_NECK, LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND, LC_MFW_RIGHT_HAND,
+	int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND, LC_MFW_RIGHT_HAND,
 	                LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL, LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
 
 	char tmp[65];
-	GetDlgItem(nID)->GetWindowText (tmp, 65);
+	GetDlgItem(nID)->GetWindowText(tmp, 65);
 
 	if (m_pMinifigWnd)
 	{
-		m_pMinifig->SetAngle(index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
+		m_pMinifig->SetAngle(index[nID-IDC_MF_HATANGLE], (float)strtod(tmp, NULL));
 		m_pMinifig->Redraw();
 	}
 }

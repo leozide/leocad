@@ -782,37 +782,12 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 		ParseSettings(MemSettings);
 	}
 
-	const u32 colors[LC_MFW_NUMITEMS] = { 4, 14, 1, 6, 4, 4, 14, 14, 6, 6, 0, 0, 0, 6, 6 };
-	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
-	                                        "None", "None", "970", "3817", "3816", "None", "None" };
-	int i;
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
-	{
-		m_Colors[i] = 0;
-
-		for (int j = 0; j < lcNumUserColors; j++)
-			if (g_ColorList[j].Code == colors[i])
-			{
-				m_Colors[i] = j;
-				break;
-			}
-
-		m_Angles[i] = 0;
-
-		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
-		if (m_Info[i] != NULL)
-			m_Info[i]->AddRef();
-	}
-
-	Calculate();
-
 	m_MinifigCount = 0;
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
 
-	i = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
-	if (i == 1)
+	int Version = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
+	if (Version == 1)
 	{
 		char *ptr, buf[32];
 
@@ -820,7 +795,7 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**) * (m_MinifigCount+1));
 		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**) * (m_MinifigCount+1));
 
-		for (i = 0; i < m_MinifigCount; i++)
+		for (int i = 0; i < m_MinifigCount; i++)
 		{
 			sprintf(buf, "Minifig%.2dName", i);
 			ptr = Sys_ProfileLoadString("MinifigWizard", buf, buf);
@@ -847,6 +822,35 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 	}
 	else
 		Sys_MessageBox("Unknown Minifig Preferences.");
+}
+
+void MinifigWizard::OnInitialUpdate()
+{
+	const u32 colors[LC_MFW_NUMITEMS] = { 4, 14, 1, 6, 4, 4, 14, 14, 6, 6, 0, 0, 0, 6, 6 };
+	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
+	                                        "None", "None", "970", "3817", "3816", "None", "None" };
+
+	MakeCurrent();
+
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+	{
+		m_Colors[i] = 0;
+
+		for (int j = 0; j < lcNumUserColors; j++)
+			if (g_ColorList[j].Code == colors[i])
+			{
+				m_Colors[i] = j;
+				break;
+			}
+
+		m_Angles[i] = 0;
+
+		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
+		if (m_Info[i] != NULL)
+			m_Info[i]->AddRef();
+	}
+
+	Calculate();
 }
 
 MinifigWizard::~MinifigWizard()

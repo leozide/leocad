@@ -42,6 +42,7 @@ public:
 	~MinifigWizard();
 
 	void OnDraw();
+	void OnInitialUpdate();
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;

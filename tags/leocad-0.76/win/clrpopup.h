@@ -62,7 +62,6 @@ protected:
 	int            m_nInitialColor, m_nColor;
 	CRect          m_WindowRect;
 	CFont          m_Font;
-	CPalette       m_Palette;
 	CToolTipCtrl   m_ToolTip;
 	CWnd*          m_pParent;
 
@@ -74,8 +73,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg BOOL OnQueryNewPalette();
-	afx_msg void OnPaletteChanged(CWnd* pFocusWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask);
 	//}}AFX_MSG

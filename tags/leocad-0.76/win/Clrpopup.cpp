@@ -54,28 +54,11 @@ void CColorPopup::Initialise()
 	ncm.cbSize = sizeof(NONCLIENTMETRICS);
 	VERIFY(SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0));
 	m_Font.CreateFontIndirect(&(ncm.lfMessageFont));
-
-	// Create the palette
-	LOGPALETTE LogPalette;
-
-	LogPalette.palVersion    = 0x300;
-	LogPalette.palNumEntries = lcNumUserColors; 
-
-	for (int i = 0; i < lcNumUserColors; i++)
-	{
-		LogPalette.palPalEntry[i].peRed   = (BYTE)(g_ColorList[i].Value[0] * 255);
-		LogPalette.palPalEntry[i].peGreen = (BYTE)(g_ColorList[i].Value[1] * 255);
-		LogPalette.palPalEntry[i].peBlue  = (BYTE)(g_ColorList[i].Value[2] * 255);
-		LogPalette.palPalEntry[i].peFlags = 0;
-	}
-
-	m_Palette.CreatePalette(&LogPalette);
 }
 
 CColorPopup::~CColorPopup()
 {
 	m_Font.DeleteObject();
-	m_Palette.DeleteObject();
 }
 
 BOOL CColorPopup::Create(CPoint p, int ColorIndex, CWnd* pParentWnd)
@@ -115,8 +98,6 @@ BEGIN_MESSAGE_MAP(CColorPopup, CWnd)
 	ON_WM_PAINT()
 	ON_WM_MOUSEMOVE()
 	ON_WM_KEYDOWN()
-	ON_WM_QUERYNEWPALETTE()
-	ON_WM_PALETTECHANGED()
 	ON_WM_KILLFOCUS()
 	ON_WM_ACTIVATEAPP()
 	//}}AFX_MSG_MAP
@@ -141,8 +122,10 @@ void CColorPopup::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	if (nChar == VK_DOWN) 
 	{
 		row++;
-		if (GetIndex(row,col) < 0)
-			row = col = 0;
+
+		if (row >= m_nNumRows || row * m_nNumColumns + col >= lcNumUserColors)
+			row = 0;
+
 		ChangeSelection(GetIndex(row, col));
 	}
 
@@ -152,24 +135,20 @@ void CColorPopup::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			row--;
 		else
 		{
-			row = GetRow(lcNumUserColors-1); 
-			col = GetColumn(lcNumUserColors-1); 
+			col = GetColumn(GetIndex(row, col));
+			row = m_nNumRows - 1;
+			if (row * m_nNumColumns + col >= lcNumUserColors)
+				row--;
 		}
+
 		ChangeSelection(GetIndex(row, col));
 	}
 
 	if (nChar == VK_RIGHT) 
 	{
-		if (col < m_nNumColumns-1) 
-			col++;
-		else 
-		{ 
+		col++;
+		if (col >= m_nNumColumns || row * m_nNumColumns + col >= lcNumUserColors)
 			col = 0;
-			row++;
-		}
-
-		if (GetIndex(row,col) == INVALID_COLOUR)
-			row = col = 0;
 
 		ChangeSelection(GetIndex(row, col));
 	}
@@ -180,17 +159,12 @@ void CColorPopup::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			col--;
 		else
 		{
-			if (row > 0)
-			{
-				row--;
-				col = m_nNumColumns-1;
-			}
-			else 
-			{
-				row = GetRow(lcNumUserColors-1); 
-				col = GetColumn(lcNumUserColors-1); 
-			}
+			col = m_nNumColumns - 1;
+
+			if (row * m_nNumColumns + col >= lcNumUserColors)
+				col = lcNumUserColors - row * m_nNumColumns - 1;
 		}
+
 		ChangeSelection(GetIndex(row, col));
 	}
 
@@ -221,14 +195,17 @@ void CColorPopup::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 
+	CRect rect;
+	GetClientRect(rect);
+
+	dc.FillSolidRect(rect, ::GetSysColor(COLOR_3DFACE));
+
 	// Draw colour cells
 	for (int i = 0; i < lcNumUserColors; i++)
 		DrawCell(&dc, i);
 
 	// Draw raised window edge (ex-window style WS_EX_WINDOWEDGE is sposed to do this,
 	// but for some reason isn't
-	CRect rect;
-	GetClientRect(rect);
 	dc.DrawEdge(rect, EDGE_RAISED, BF_RECT);
 }
 
@@ -411,14 +388,6 @@ void CColorPopup::DrawCell(CDC* pDC, int nIndex)
 	if (!GetCellRect(nIndex, rect))
 		return;
 
-	// Select and realize the palette
-	CPalette* pOldPalette;
-	if (pDC->GetDeviceCaps(RASTERCAPS) & RC_PALETTE)
-	{
-		pOldPalette = pDC->SelectPalette(&m_Palette, FALSE);
-		pDC->RealizePalette();
-	}
-
 	// fill background
 	if (m_nChosenColorSel == nIndex && m_nCurrentSel != nIndex)
 		pDC->FillSolidRect(rect, ::GetSysColor(COLOR_3DHILIGHT));
@@ -466,23 +435,6 @@ void CColorPopup::DrawCell(CDC* pDC, int nIndex)
 	pDC->SelectObject(pOldPen);
 	brush.DeleteObject();
 	pen.DeleteObject();
-
-	if (pDC->GetDeviceCaps(RASTERCAPS) & RC_PALETTE)
-		pDC->SelectPalette(pOldPalette, FALSE);
-}
-
-BOOL CColorPopup::OnQueryNewPalette() 
-{
-	Invalidate();
-	return CWnd::OnQueryNewPalette();
-}
-
-void CColorPopup::OnPaletteChanged(CWnd* pFocusWnd) 
-{
-	CWnd::OnPaletteChanged(pFocusWnd);
-
-	if (pFocusWnd->GetSafeHwnd() != GetSafeHwnd())
-		Invalidate();
 }
 
 void CColorPopup::OnKillFocus(CWnd* pNewWnd) 

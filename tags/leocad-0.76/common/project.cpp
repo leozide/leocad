@@ -2247,10 +2247,9 @@ void Project::RenderInterface(View* view)
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-	float Verts[4][2] =
-	{
-		{ 0, 0 }, { (float)view->GetWidth(), 0 }, { (float)view->GetWidth(), (float)view->GetHeight() }, { 0, (float)view->GetHeight() }
-	};
+	float cx = (float)view->GetWidth() - 1.0f;
+	float cy = (float)view->GetHeight() - 1.0f;
+	float Verts[4][2] = { { 0, 0 }, { cx, 0 }, { cx, cy }, { 0, cy } };
 
 	glVertexPointer(2, GL_FLOAT, 0, Verts);
 	glDrawArrays(GL_LINE_LOOP, 0, 4);
@@ -2263,8 +2262,8 @@ void Project::RenderInterface(View* view)
 	if (Camera)
 	{
 		glEnable(GL_TEXTURE_2D);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		m_pScreenFont->MakeCurrent();
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_ALPHA_TEST);
 
 		glColor4f(0, 0, 0, 1);

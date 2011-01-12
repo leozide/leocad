@@ -7253,7 +7253,7 @@ void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
 	}
 }
 
-bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
+bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -7266,10 +7266,13 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 		Move[2] = 0;
 
 	// Snap.
-	SnapVector(Move, Remainder);
+	if (Snap)
+	{
+		SnapVector(Move, Remainder);
 
-	if (Move.LengthSquared() < 0.001f)
-		return false;
+		if (Move.LengthSquared() < 0.001f)
+			return false;
+	}
 
 	// Transform the translation if we're in relative mode.
 	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
@@ -7287,9 +7290,6 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder)
 			Move = Mul(Move, RotMat);
 		}
 	}
-
-	if (Move.LengthSquared() < 0.001f)
-		return false;
 
 	Piece* pPiece;
 	Camera* pCamera;
@@ -7848,7 +7848,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			else
 			{
 				Vector3 tmp;
-				MoveSelectedObjects(axis, tmp);
+				MoveSelectedObjects(axis, tmp, false);
 			}
 
 			UpdateOverlayScale();
@@ -8650,7 +8650,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8683,7 +8683,7 @@ void Project::OnMouseMove(int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover);
+				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true);
 			}
 
 			SystemUpdateFocus(NULL);

@@ -141,7 +141,7 @@ void CCADView::OnFilePrintPreview()
 	// must be done here.
 
 	if (!DoPrintPreview(IDR_PREVIEW, this,
-			RUNTIME_CLASS(CPreviewViewEx), pState))
+			RUNTIME_CLASS(CCADPreviewView), pState))
 	{
 		// In derived classes, reverse special window handling here for
 		// Preview failure case
@@ -589,7 +589,7 @@ void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 }
 
-void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView) 
+void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CCADPreviewView* pView) 
 {
 //	CView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT, CPreviewView* pView)
 	ASSERT_VALID(pDC);
@@ -630,7 +630,7 @@ BOOL CCADView::DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass
 	ASSERT_VALID_IDR(nIDResource);
 	ASSERT_VALID(pPrintView);
 	ASSERT(pPreviewViewClass != NULL);
-	ASSERT(pPreviewViewClass->IsDerivedFrom(RUNTIME_CLASS(CPreviewViewEx)));
+	ASSERT(pPreviewViewClass->IsDerivedFrom(RUNTIME_CLASS(CCADPreviewView)));
 	ASSERT(pState != NULL);
 
 	CFrameWnd* pParent;
@@ -648,13 +648,13 @@ BOOL CCADView::DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass
 	context.m_pLastView = this;
 
 	// Create the preview view object
-	CPreviewViewEx* pView = (CPreviewViewEx*)pPreviewViewClass->CreateObject();
+	CCADPreviewView* pView = (CCADPreviewView*)pPreviewViewClass->CreateObject();
 	if (pView == NULL)
 	{
 		TRACE0("Error: Failed to create preview view.\n");
 		return FALSE;
 	}
-	ASSERT_KINDOF(CPreviewViewEx, pView);
+	ASSERT_KINDOF(CCADPreviewView, pView);
 	pView->m_pPreviewState = pState;        // save pointer
 
 	pParent->OnSetPreviewMode(TRUE, pState);    // Take over Frame Window

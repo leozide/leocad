@@ -1,4 +1,4 @@
-// PrevView.h: interface for the CPreviewViewEx class.
+// PrevView.h: interface for the CCADPreviewView class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,13 +14,13 @@
 
 class CCADView;
 
-class CPreviewViewEx : public CScrollView
+class CCADPreviewView : public CScrollView
 {
-	DECLARE_DYNCREATE(CPreviewViewEx)
+	DECLARE_DYNCREATE(CCADPreviewView)
 
 // Constructors
 public:
-	CPreviewViewEx();
+	CCADPreviewView();
 	BOOL SetPrintView(CCADView* pPrintView);
 
 // Attributes
@@ -52,7 +52,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CPreviewViewEx();
+	virtual ~CCADPreviewView();
 	virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
 #ifdef _DEBUG
 	void AssertValid() const;
@@ -63,7 +63,7 @@ public:
 #endif
 
 protected:
-	//{{AFX_MSG(CPreviewViewEx)
+	//{{AFX_MSG(CCADPreviewView)
 	afx_msg void OnPreviewClose();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

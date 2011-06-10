@@ -783,7 +783,7 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 
 	const unsigned char colors[LC_MFW_NUMITEMS] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
 	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
-	                                        "None", "None", "970", "3817", "3816", "None", "None" };
+	                                        "None", "None", "3815", "3817", "3816", "None", "None" };
 	int i;
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
@@ -1066,7 +1066,7 @@ void MinifigWizard::Calculate()
 	if (m_Info[LC_MFW_HEAD])
 	{
 		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), -LC_DTOR * m_Angles[LC_MFW_HEAD]);
-		Mat.SetTranslation(Vector3(0, 0, 0.96 + HeadOffset));
+		Mat.SetTranslation(Vector3(0.0f, 0.0f, 0.96f + HeadOffset));
 		Mat = Mul(mSettings[LC_MFW_HEAD][GetSelectionIndex(LC_MFW_HEAD)].Offset, Mat);
 		m_Matrices[LC_MFW_HEAD] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
 	}
@@ -1082,14 +1082,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_ARM]);
 
-		if (!strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
 			Mat2.LoadIdentity();
 		else
-			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), LC_DTOR * 9.791);
+			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), LC_DTOR * 9.791f);
 
 		Mat = Mul(mSettings[LC_MFW_RIGHT_ARM][GetSelectionIndex(LC_MFW_RIGHT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
-		Mat.SetTranslation(Vector3(-0.62, 0, -0.32f));
+		Mat.SetTranslation(Vector3(-0.62f, 0.0f, -0.32f));
 		m_Matrices[LC_MFW_RIGHT_ARM] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
 	}
 
@@ -1115,14 +1115,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_ARM]);
 
-		if (!strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
 			Mat2.LoadIdentity();
 		else
-			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * 9.791);
+			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * 9.791f);
 
 		Mat = Mul(mSettings[LC_MFW_LEFT_ARM][GetSelectionIndex(LC_MFW_LEFT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
-		Mat.SetTranslation(Vector3(0.62, 0, -0.32f));
+		Mat.SetTranslation(Vector3(0.62f, 0.0f, -0.32f));
 		m_Matrices[LC_MFW_LEFT_ARM] = Mul(Mat, m_Matrices[LC_MFW_TORSO]);
 	}
 

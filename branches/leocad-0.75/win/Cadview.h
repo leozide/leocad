@@ -7,7 +7,7 @@
 
 class View;
 class CCADDoc;
-class CPreviewViewEx;
+class CCADPreviewView;
 
 class CCADView : public CView
 {
@@ -35,7 +35,7 @@ public:
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
-	virtual void OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView);
+	virtual void OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CCADPreviewView* pView);
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
@@ -73,7 +73,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	friend class CPreviewViewEx;
+	friend class CCADPreviewView;
 };
 
 #ifndef _DEBUG  // debug version in CADView.cpp

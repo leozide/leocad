@@ -90,6 +90,11 @@ public:
 	void Close();
 	bool Open(const char *filename, const char *mode);
 
+	void* GetBuffer() const
+	{
+		return m_pBuffer;
+	}
+
 protected:
 	// MemFile specific:
 	unsigned long m_nGrowBytes;

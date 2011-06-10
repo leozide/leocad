@@ -1233,7 +1233,7 @@ void MinifigWizard::GetMinifigNames (char ***names, int *count)
 
 void MinifigWizard::SaveMinifig (const char* name)
 {
-  char tmp[16];
+  char tmp[LC_PIECE_NAME_LEN];
   int i, j;
 
   // check if the name is already being used

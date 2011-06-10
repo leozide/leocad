@@ -18,6 +18,8 @@
 #define LC_PIECE_MEDIUM						0x20 // scale = 1000 (otherwise = 100)
 #define LC_PIECE_LONGDATA_RUNTIME	0x40 // If the original data is 16 bits but we expanded to 32 bits
 
+#define LC_PIECE_NAME_LEN 256
+
 class File;
 class Texture;
 
@@ -99,7 +101,7 @@ class PieceInfo
 
 public:
 	// Attributes
-	char m_strName[9];
+	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[65];
 	float m_fDimensions[6];
 	unsigned long m_nOffset;

@@ -15,7 +15,7 @@
 #include "algebra.h"
 #include "lc_application.h"
 
-#define LC_PIECE_SAVE_VERSION 9 // LeoCAD 0.73
+#define LC_PIECE_SAVE_VERSION 10 // LeoCAD 0.75.2
 
 static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 {
@@ -252,8 +252,14 @@ bool Piece::FileLoad (File& file, char* name)
   }
 
   // Common to all versions.
-  file.Read (name, 9);
-  file.ReadByte (&m_nColor, 1);
+  if (version < 10)
+  {
+	  memset(name, 0, LC_PIECE_NAME_LEN);
+	  file.Read(name, 9);
+  }
+  else
+	  file.Read(name, LC_PIECE_NAME_LEN);
+  file.ReadByte(&m_nColor, 1);
 
   if (version < 5)
   {
@@ -321,7 +327,7 @@ void Piece::FileSave (File& file, Group* pGroups)
 
   Object::FileSave (file);
 
-  file.Write(m_pPieceInfo->m_strName, 9);
+  file.Write(m_pPieceInfo->m_strName, LC_PIECE_NAME_LEN);
   file.WriteByte(&m_nColor, 1);
   file.WriteByte(&m_nStepShow, 1);
   file.WriteByte(&m_nStepHide, 1);

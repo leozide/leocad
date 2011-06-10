@@ -6,6 +6,7 @@
 #include "array.h"
 
 class File;
+class FileDisk;
 class Texture;
 class PieceInfo;
 
@@ -98,8 +99,8 @@ protected:
 	bool m_CategoriesModified;
 	char m_CategoriesFile[LC_MAXPATH];
 
-	bool ValidatePiecesFile (File& IdxFile, File& BinFile) const;
-	bool ValidateTexturesFile (File& IdxFile, File& BinFile) const;
+	bool ValidatePiecesFile(FileDisk& IdxFile, FileDisk& BinFile) const;
+	bool ValidateTexturesFile(File& IdxFile, File& BinFile) const;
 
 	// File headers
 	static const char PiecesBinHeader[32];
@@ -148,7 +149,7 @@ typedef struct texture_s
 	texture_s* next;
 } texture_t;
 
-typedef struct
+struct LC_LDRAW_PIECE
 {
 	float* verts;
 	unsigned int verts_count;
@@ -156,9 +157,9 @@ typedef struct
 	connection_t* connections;
 	group_t* groups;
 	texture_t* textures;
-	char name[9];
+	char name[LC_MAXPATH];
 	char description[65];
-} LC_LDRAW_PIECE;
+};
 
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
 bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);

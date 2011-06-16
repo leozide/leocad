@@ -18,7 +18,7 @@
 
 const char PiecesLibrary::PiecesBinHeader[32] = "LeoCAD piece library data file\0";
 const char PiecesLibrary::PiecesIdxHeader[32] = "LeoCAD piece library index file";
-const int PiecesLibrary::PiecesFileVersion = 3;
+const int PiecesLibrary::PiecesFileVersion = 4;
 const char PiecesLibrary::TexturesBinHeader[32] = "LeoCAD texture data file\0\0\0\0\0\0\0";
 const char PiecesLibrary::TexturesIdxHeader[32] = "LeoCAD texture index file\0\0\0\0\0\0";
 const int PiecesLibrary::TexturesFileVersion = 1;
@@ -114,14 +114,14 @@ bool PiecesLibrary::Load(const char *libpath)
 	// Load moved files reference.
 	if (m_pMovedReference != NULL)
 		free(m_pMovedReference);
-	m_pMovedReference = (char*)malloc(18*movedcount+1);
-	memset (m_pMovedReference, 0, 18*movedcount);
+	m_pMovedReference = (char*)malloc(LC_PIECE_NAME_LEN*2*movedcount);
+	memset (m_pMovedReference, 0, LC_PIECE_NAME_LEN*2*movedcount);
 	m_nMovedCount = movedcount;
 
 	for (i = 0; i < movedcount; i++)
 	{
-		idx.Read (&m_pMovedReference[i*18], 8);
-		idx.Read (&m_pMovedReference[i*18+9], 8);
+		idx.Read (&m_pMovedReference[i*LC_PIECE_NAME_LEN*2], LC_PIECE_NAME_LEN);
+		idx.Read (&m_pMovedReference[i*LC_PIECE_NAME_LEN*2+LC_PIECE_NAME_LEN], LC_PIECE_NAME_LEN);
 	}
 
 	idx.Close();
@@ -301,9 +301,9 @@ PieceInfo* PiecesLibrary::FindPieceInfo(const char* name) const
 
 	for (int i = 0; i < m_nMovedCount; i++)
 	{
-		if (!strcmp(&m_pMovedReference[i*18], name))
+		if (!strcmp (&m_pMovedReference[i*LC_PIECE_NAME_LEN*2], name))
 		{
-			char* tmp = &m_pMovedReference[i*18+9];
+			char* tmp = &m_pMovedReference[i*LC_PIECE_NAME_LEN*2+LC_PIECE_NAME_LEN];
 			return FindPieceInfo(tmp);
 		}
 	}
@@ -605,7 +605,7 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcPt
 			PieceInfo* Parent;
 
 			// Find the parent of this patterned piece.
-			char ParentName[9];
+			char ParentName[LC_PIECE_NAME_LEN];
 			strcpy(ParentName, Info->m_strName);
 			*strchr(ParentName, 'P') = '\0';
 
@@ -643,7 +643,7 @@ void PiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcPt
 
 void PiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>& Pieces) const
 {
-	char Name[9];
+	char Name[LC_PIECE_NAME_LEN];
 	strcpy(Name, Parent->m_strName);
 	strcat(Name, "P");
 
@@ -813,10 +813,10 @@ bool PiecesLibrary::DeletePieces(lcPtrArray<const char>& Pieces)
 //			if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
 //				break;
 
-		char name[9];
+		char name[LC_PIECE_NAME_LEN];
 		int i;
-		name[8] = 0;
-		oldidx.Read(&name, 8);
+
+		oldidx.Read(&name, LC_PIECE_NAME_LEN);
 
 		for (i = 0; i < Pieces.GetSize(); i++)
 			if (strcmp(name, Pieces[i]) == 0)
@@ -829,7 +829,7 @@ bool PiecesLibrary::DeletePieces(lcPtrArray<const char>& Pieces)
 			continue;
 		}
 
-		newidx.Write(name, 8);
+		newidx.Write(name, LC_PIECE_NAME_LEN);
 		oldidx.Read(tmp, 64+12+1+4);
 		newidx.Write(tmp, 64+12+1+4);
 
@@ -884,12 +884,12 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 	u8 bt;
 	void* membuf;
 
-	typedef struct
+	struct LC_UPDATE_INFO
 	{
-		char name[9];
-		u8 type;
-		u32 offset;
-	} LC_UPDATE_INFO;
+		char Name[LC_PIECE_NAME_LEN];
+		u8 Type;
+		u32 Offset;
+	};
 	LC_UPDATE_INFO* upinfo;
 
 	strcpy(file1, m_LibraryPath);
@@ -942,16 +942,16 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 
 	for (i = 0; i < changes; i++)
 	{
-		up.Read(&upinfo[i].name, 8);
-		up.Read(&upinfo[i].type, 1);
-		upinfo[i].offset = up.GetPosition();
+		up.Read(&upinfo[i].Name, 8);
+		up.Read(&upinfo[i].Type, 1);
+		upinfo[i].Offset = up.GetPosition();
 
-		if ((upinfo[i].type & LC_UPDATE_DESCRIPTION) ||
-			(upinfo[i].type & LC_UPDATE_NEWPIECE))
+		if ((upinfo[i].Type & LC_UPDATE_DESCRIPTION) ||
+			(upinfo[i].Type & LC_UPDATE_NEWPIECE))
 			up.Seek(64+4, SEEK_CUR);
 
-		if ((upinfo[i].type & LC_UPDATE_DRAWINFO) ||
-			(upinfo[i].type & LC_UPDATE_NEWPIECE))
+		if ((upinfo[i].Type & LC_UPDATE_DRAWINFO) ||
+			(upinfo[i].Type & LC_UPDATE_NEWPIECE))
 		{
 			up.Seek(12+1, SEEK_CUR);
 			up.ReadInts(&cs, 1);
@@ -965,9 +965,8 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 
 	for (i = 0; i < count; i++)
 	{
-		char name[9];
-		name[8] = 0;
-		oldidx.Read (&name, 8);
+		char Name[LC_PIECE_NAME_LEN];
+		oldidx.Read(&Name, LC_PIECE_NAME_LEN);
 
 //		dlg.StepIt();
 //		if(dlg.CheckCancelButton())
@@ -978,20 +977,22 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 //			}
 
 		for (j = 0; j < changes; j++)
-		if (strcmp(name, upinfo[j].name) == 0)
 		{
-			if (upinfo[j].type == LC_UPDATE_DELETE)
+			if (strcmp(Name, upinfo[j].Name))
+				continue;
+
+			if (upinfo[j].Type == LC_UPDATE_DELETE)
 			{
 				oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
 				break;
 			}
 
 			newcount++;
-			up.Seek(upinfo[j].offset, SEEK_SET);
-			newidx.Write(name, 8);
+			up.Seek(upinfo[j].Offset, SEEK_SET);
+			newidx.Write(Name, LC_PIECE_NAME_LEN);
 
 			// description
-			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
+			if (upinfo[j].Type & LC_UPDATE_DESCRIPTION)
 			{
 				up.Read(&tmp, 64);
 				up.Read(&group, 4);
@@ -1003,7 +1004,7 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 //			dlg.SetStatus(tmp);
 
 			// bounding box & flags
-			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
+			if (upinfo[j].Type & LC_UPDATE_DRAWINFO)
 			{
 				up.Read(&tmp, 12+1);
 				oldidx.Seek(12+1, SEEK_CUR);
@@ -1013,7 +1014,7 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 			newidx.Write(tmp, 12+1);
 
 			// group
-			if (upinfo[j].type & LC_UPDATE_DESCRIPTION)
+			if (upinfo[j].Type & LC_UPDATE_DESCRIPTION)
 				oldidx.Seek(4, SEEK_CUR);
 			else
 				oldidx.Read(&group, 4);
@@ -1022,7 +1023,7 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 			binoff = newbin.GetLength();
 			newidx.WriteInts(&binoff, 1);
 
-			if (upinfo[j].type & LC_UPDATE_DRAWINFO)
+			if (upinfo[j].Type & LC_UPDATE_DRAWINFO)
 			{
 				up.ReadInts(&cs, 1);
 				oldidx.Seek(4+4, SEEK_CUR);
@@ -1051,7 +1052,7 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 		if (j == changes)
 		{
 			newcount++;
-			newidx.Write(name, 8);
+			newidx.Write(Name, LC_PIECE_NAME_LEN);
 			oldidx.Read(tmp, 64+12+1+4);
 			newidx.Write(tmp, 64+12+1+4);
 			binoff = newbin.GetLength();
@@ -1073,11 +1074,11 @@ bool PiecesLibrary::LoadUpdate (const char* update)
 
 	// now add new pieces
 	for (j = 0; j < changes; j++)
-		if (upinfo[j].type == LC_UPDATE_NEWPIECE)
+		if (upinfo[j].Type == LC_UPDATE_NEWPIECE)
 		{
 			newcount++;
-			newidx.Write(upinfo[j].name, 8);
-			up.Seek(upinfo[j].offset, SEEK_SET);
+			newidx.Write(upinfo[j].Name, LC_PIECE_NAME_LEN);
+			up.Seek(upinfo[j].Offset, SEEK_SET);
 			up.Read(&tmp, 64+12);
 			newidx.Write(tmp, 64+12);
 			up.Read(&group, 4);
@@ -1443,7 +1444,7 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 			u16 Count;
 			OldIdxFile->Seek(-(2+4+2), SEEK_END);
 			OldIdxFile->ReadShorts(&Count, 1);
-			u32 cs = Count * 16;
+			u32 cs = Count * 2 * LC_PIECE_NAME_LEN;
 			OldIdxFile->Seek(-(long)(cs+2), SEEK_CUR);
 
 			u32 Length = OldIdxFile->GetPosition();
@@ -1467,26 +1468,26 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, l
 				char* Dst = NULL;
 				for (int i = 0; i < Count; i++)
 				{
-					if (!strncmp(&Reference[i*16], piece.name, 8))
+					if (!strncmp(&Reference[i*2*LC_PIECE_NAME_LEN], piece.name, LC_PIECE_NAME_LEN))
 					{
-						Dst = &Reference[i*16+8];
-						memset(Dst, 0, 8);
+						Dst = &Reference[i*LC_PIECE_NAME_LEN+LC_PIECE_NAME_LEN];
+						memset(Dst, 0, LC_PIECE_NAME_LEN);
 						memcpy(Dst, Moved, strlen(Moved));
 					}
 				}
 
 				if (!Dst)
 				{
-					Buffer = realloc(Buffer, 16*(Count+1));
+					Buffer = realloc(Buffer, 2*LC_PIECE_NAME_LEN*(Count+1));
 					Reference = (char*)Buffer;
-					memset(&Reference[Count*16], 0, 16);
-					memcpy(&Reference[Count*16], piece.name, strlen(piece.name));
-					memcpy(&Reference[Count*16+8], Moved, strlen(Moved));
+					memset(&Reference[Count*2*LC_PIECE_NAME_LEN], 0, 2*LC_PIECE_NAME_LEN);
+					memcpy(&Reference[Count*2*LC_PIECE_NAME_LEN], piece.name, strlen(piece.name));
+					memcpy(&Reference[Count*2*LC_PIECE_NAME_LEN+LC_PIECE_NAME_LEN], Moved, strlen(Moved));
 					Count++;
 				}
 			}
 
-			NewIdxFile->Write(Reference, Count*16);
+			NewIdxFile->Write(Reference, Count*2*LC_PIECE_NAME_LEN);
 			NewIdxFile->WriteShorts(&Count, 1);
 			free(Buffer);
 
@@ -2433,9 +2434,6 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 	else
 		ptr++;
 
-	if (strlen(ptr) > 8)
-		return false;
-
 	strcpy(piece->name, ptr);
 	_strupr(piece->name);
 
@@ -2540,15 +2538,15 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 
 	for (j = 0; j < count; j++)
 	{
-		char name[9];
-		name[8] = 0;
-		OldIdx.Read(name, 8);
+		char name[LC_PIECE_NAME_LEN];
+		OldIdx.Read(name, LC_PIECE_NAME_LEN);
+
 		if (strcmp(name, piece->name) == 0)
 		{
 			OldIdx.Seek(64+12+1+4, SEEK_CUR);
 			OldIdx.ReadInts(&binoff, 1);
 			OldIdx.ReadInts(&delta, 1);
-			OldIdx.Seek(-(8+64+12+1+4+4+4), SEEK_CUR);
+			OldIdx.Seek(-(LC_PIECE_NAME_LEN+64+12+1+4+4+4), SEEK_CUR);
 			delta += binoff;
 			break;
 		}
@@ -2777,7 +2775,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 	}
 
 	// Now write the index
-	NewIdx.Write(piece->name, 8);
+	NewIdx.Write(piece->name, LC_PIECE_NAME_LEN);
 	NewIdx.Write(piece->description, 64);
 
 	for (i = 0; i < 6; i++)
@@ -2814,15 +2812,15 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 	if (j != count)
 	{
 		unsigned long d = NewBin.GetPosition() - delta;
-		OldIdx.Seek (8+64+12+1+4+4+4, SEEK_CUR);
+		OldIdx.Seek (LC_PIECE_NAME_LEN+64+12+1+4+4+4, SEEK_CUR);
 		for (j++; j < count; j++)
 		{
 			u32 dw;
-			char buf[8+64+12+1+4];
-			OldIdx.Read(buf, 8+64+12+1+4);
+			char buf[LC_PIECE_NAME_LEN+64+12+1+4];
+			OldIdx.Read(buf, LC_PIECE_NAME_LEN+64+12+1+4);
 			OldIdx.ReadInts(&dw, 1);
 			dw += d;
-			NewIdx.Write(buf, 8+64+12+1+4);
+			NewIdx.Write(buf, LC_PIECE_NAME_LEN+64+12+1+4);
 			NewIdx.WriteInts(&dw, 1);
 			OldIdx.ReadInts(&dw, 1);
 			NewIdx.WriteInts(&dw, 1);

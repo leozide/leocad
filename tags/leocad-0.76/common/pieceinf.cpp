@@ -82,10 +82,9 @@ void PieceInfo::LoadIndex(lcFile& file)
   m_pGroups = NULL;
   m_nTextureCount = 0;
   m_pTextures = NULL;
-	m_Mesh = NULL;
+  m_Mesh = NULL;
 
-  file.Read (m_strName, 8);
-  m_strName[8] = '\0';
+  file.Read(m_strName, LC_PIECE_NAME_LEN);
   file.Read(m_strDescription, 64);
   m_strDescription[64] = '\0';
   file.ReadShorts(sh, 6);

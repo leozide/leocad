@@ -170,7 +170,7 @@ struct LC_LDRAW_PIECE
 	connection_t* connections;
 	group_t* groups;
 	texture_t* textures;
-	char name[9];
+	char name[LC_MAXPATH];
 	char description[65];
 };
 

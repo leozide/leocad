@@ -16,7 +16,7 @@
 #include "lc_model.h"
 #include "matrix.h"
 
-#define LC_PIECE_SAVE_VERSION 10 // LeoCAD 0.76
+#define LC_PIECE_SAVE_VERSION 11 // LeoCAD 0.76
 
 static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 {
@@ -172,8 +172,15 @@ bool lcPiece::FileLoad(lcFile& file, char* name)
 	}
 
 	// Common to all versions.
-	file.Read(name, 9);
 	if (version < 10)
+	{
+		memset(name, 0, LC_PIECE_NAME_LEN);
+		file.Read(name, 9);
+	}
+	else
+		file.Read(name, LC_PIECE_NAME_LEN);
+
+	if (version < 11)
 	{
 		u8 Color;
 		file.ReadBytes(&Color, 1);
@@ -279,7 +286,7 @@ void lcPiece::FileSave(lcFile& file, lcGroup* Groups)
 
   lcObject::FileSave(file);
 
-  file.Write(m_PieceInfo->m_strName, 9);
+  file.Write(m_PieceInfo->m_strName, LC_PIECE_NAME_LEN);
   file.WriteInts(&g_ColorList[m_Color].Code, 1);
   file.WriteInts(&m_TimeShow, 1);
   file.WriteInts(&m_TimeHide, 1);

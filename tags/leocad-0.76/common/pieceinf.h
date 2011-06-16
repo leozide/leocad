@@ -12,6 +12,8 @@
 #define LC_PIECE_MODEL              0x40 // This is a model instead of a piece from the library.
 #define LC_PIECE_PLACEHOLDER        0x80 // Placeholder for a piece not in the library.
 
+#define LC_PIECE_NAME_LEN 256
+
 class lcFile;
 class Texture;
 class lcMesh;
@@ -87,7 +89,7 @@ public:
 
 public:
 	// Attributes
-	char m_strName[LC_MAXPATH];
+	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[65];
 	float m_fDimensions[6];
 	u32 m_nOffset;

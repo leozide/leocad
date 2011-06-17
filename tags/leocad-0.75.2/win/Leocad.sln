@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3dsftk", "3dsftk\3dsftk.vcproj", "{E30CACDB-116F-4A85-AC64-0B9987FC9ADB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeoCAD", "LeoCAD.vcproj", "{1B733132-1205-4908-8DB4-60AFFD5B2345}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E30CACDB-116F-4A85-AC64-0B9987FC9ADB} = {E30CACDB-116F-4A85-AC64-0B9987FC9ADB}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpeglib", "jpeglib\jpeglib.vcproj", "{D5089BC4-5BF2-4327-B225-766E854C710A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "libpng\libpng.vcproj", "{03C3A022-452E-40B3-BFD3-095713E5FFA2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcproj", "{A7D39990-9822-4302-9709-08D03ADF1170}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E30CACDB-116F-4A85-AC64-0B9987FC9ADB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E30CACDB-116F-4A85-AC64-0B9987FC9ADB}.Debug|Win32.Build.0 = Debug|Win32
+		{E30CACDB-116F-4A85-AC64-0B9987FC9ADB}.Release|Win32.ActiveCfg = Release|Win32
+		{E30CACDB-116F-4A85-AC64-0B9987FC9ADB}.Release|Win32.Build.0 = Release|Win32
+		{1B733132-1205-4908-8DB4-60AFFD5B2345}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1B733132-1205-4908-8DB4-60AFFD5B2345}.Debug|Win32.Build.0 = Debug|Win32
+		{1B733132-1205-4908-8DB4-60AFFD5B2345}.Release|Win32.ActiveCfg = Release|Win32
+		{1B733132-1205-4908-8DB4-60AFFD5B2345}.Release|Win32.Build.0 = Release|Win32
+		{D5089BC4-5BF2-4327-B225-766E854C710A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5089BC4-5BF2-4327-B225-766E854C710A}.Debug|Win32.Build.0 = Debug|Win32
+		{D5089BC4-5BF2-4327-B225-766E854C710A}.Release|Win32.ActiveCfg = Release|Win32
+		{D5089BC4-5BF2-4327-B225-766E854C710A}.Release|Win32.Build.0 = Release|Win32
+		{03C3A022-452E-40B3-BFD3-095713E5FFA2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{03C3A022-452E-40B3-BFD3-095713E5FFA2}.Debug|Win32.Build.0 = Debug|Win32
+		{03C3A022-452E-40B3-BFD3-095713E5FFA2}.Release|Win32.ActiveCfg = Release|Win32
+		{03C3A022-452E-40B3-BFD3-095713E5FFA2}.Release|Win32.Build.0 = Release|Win32
+		{A7D39990-9822-4302-9709-08D03ADF1170}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A7D39990-9822-4302-9709-08D03ADF1170}.Debug|Win32.Build.0 = Debug|Win32
+		{A7D39990-9822-4302-9709-08D03ADF1170}.Release|Win32.ActiveCfg = Release|Win32
+		{A7D39990-9822-4302-9709-08D03ADF1170}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

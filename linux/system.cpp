@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #include "opengl.h"
 #include "gtkmisc.h"
-#include "lc_camera.h"
+#include "camera.h"
 #include "project.h"
 #include "system.h"
 #include "main.h"
@@ -161,11 +161,25 @@ long SystemGetTicks()
 }
 
 // User Interface
+void SystemUpdateViewport(int new_vp, int old_vp)
+{
+  char buf[64];
+  sprintf (buf, "menu_view_viewports_%02d", new_vp+1);
+  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), buf);
+
+  if (!item)
+    return;
+
+  ignore_commands = true;
+  gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
+  ignore_commands = false;
+}
+
 void SystemUpdateCategories(bool SearchOnly)
 {
 }
 
-static void create_bitmap_and_mask_from_xpm (GdkBitmap** bitmap, GdkBitmap** mask, const char** xpm)
+static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, gchar **xpm)
 {
   int height, width, colors;
   char pixmap_buffer [(32 * 32)/8];
@@ -226,7 +240,7 @@ void SystemUpdateAction(int new_action, int old_action)
     return;
 
   GtkWidget* button;
-  const char** xpm = NULL;
+  char** xpm = NULL;
   int x, y;
 
   switch (new_action)
@@ -348,7 +362,7 @@ void SystemUpdateSnap(const unsigned long snap)
   // TODO: popup menu
 }
 
-void SystemUpdateCurrentCamera(lcObject* pOld, lcObject* pNew, lcObject* pCamera)
+void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
   gpointer item = NULL;
   gpointer menu = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu");
@@ -358,7 +372,7 @@ void SystemUpdateCurrentCamera(lcObject* pOld, lcObject* pNew, lcObject* pCamera
 
   GList *lst = gtk_container_children (GTK_CONTAINER (menu));
 
-  for (int i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
+  for (int i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
     if (pNew == pCamera)
     {
       if (i >= 7)
@@ -383,16 +397,11 @@ void SystemUpdateCurrentCamera(lcObject* pOld, lcObject* pNew, lcObject* pCamera
   }
 }
 
-void SystemUpdateModelMenu(const lcPtrArray<lcModel>& ModelList, lcModel* CurrentModel)
-{
-  // FIXME: update model menu
-}
-
-void SystemUpdateCameraMenu(lcObject* pCamera)
+void SystemUpdateCameraMenu(Camera* pCamera)
 {
   GtkWidget *menu = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu"));
   GtkWidget *item = NULL;
-  lcObject* pFirst = pCamera;
+  Camera* pFirst = pCamera;
   GList *lst;
   int i;
 
@@ -404,11 +413,11 @@ void SystemUpdateCameraMenu(lcObject* pCamera)
     gtk_container_remove (GTK_CONTAINER (menu), GTK_WIDGET (lst->data));
 
   // add user cameras
-  for (i = 0; pCamera; i++, pCamera = (lcCamera*)pCamera->m_Next)
+  for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
     if (i > 6)
     {
       GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
-      item = gtk_radio_menu_item_new_with_label(grp, (const char*)pCamera->m_Name);
+      item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
       gtk_menu_append (GTK_MENU (menu), item);
       gtk_widget_show (item);
       gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
@@ -419,10 +428,10 @@ void SystemUpdateCameraMenu(lcObject* pCamera)
     menu_separator (menu);
 
   // add standard cameras
-  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = (lcCamera*)pCamera->m_Next)
+  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
   {
     GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
-    item = gtk_radio_menu_item_new_with_label (grp, (const char*)pCamera->m_Name);
+    item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
     gtk_menu_append (GTK_MENU (menu), item);
     gtk_widget_show (item);
     gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
@@ -470,6 +479,9 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
   gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
+  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
+  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), 
+      bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
   ignore_commands = false;
 }
 
@@ -487,7 +499,7 @@ void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
   gtk_label_set (GTK_LABEL (label_snap), text);
 }
 
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focus)
+void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 {
   GtkWidget *item;
 
@@ -513,7 +525,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
   gtk_widget_set_sensitive (main_toolbar.cut, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   gtk_widget_set_sensitive (main_toolbar.copy, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
-  // delete, array, hide sel/unsel, unhideall (menu)
+  // delete, array, hide sel/unsel, unhideall, copykeys (menu)
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_delete"));
   gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_array"));
@@ -524,6 +536,8 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, lcObject* Focu
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_unhide_all"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_HIDDEN) != 0);
+  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys"));
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
 
   // groups (menu)
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_group"));
@@ -595,7 +609,7 @@ void SystemFinish()
 }
 
 // FIXME: remove 
-int SystemDoMessageBox(const char* prompt, int mode)
+int SystemDoMessageBox(char* prompt, int mode)
 {
   return msgbox_execute (prompt, "LeoCAD", mode);
 }
@@ -616,10 +630,6 @@ bool SystemDoDialog(int mode, void* param)
       return openprojectdlg_execute ((char*)param) == LC_OK;
     } break;
 
-    case LC_DLG_DIRECTORY_BROWSE: {
-      return dirbrowsedlg_execute(param) == LC_OK;
-    } break;
-
     case LC_DLG_ABOUT: {
       return aboutdlg_execute(param) == LC_OK;
     } break;
@@ -637,14 +647,6 @@ bool SystemDoDialog(int mode, void* param)
     } break;
 
     case LC_DLG_WAVEFRONT: {
-      return filedlg_execute("Save File", (char*)param) == LC_OK;
-    } break;
-
-    case LC_DLG_VRML97: {
-      return filedlg_execute("Save File", (char*)param) == LC_OK;
-    } break;
-
-    case LC_DLG_X3DV: {
       return filedlg_execute("Save File", (char*)param) == LC_OK;
     } break;
 
@@ -738,19 +740,10 @@ void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 {
 }
 
-void SystemEndProgressBar()
+void SytemEndProgressBar()
 {
 }
 
-void SystemStepProgressBar()
+void SytemStepProgressBar()
 {
-}
-
-void SystemUpdateViewLayout()
-{
-}
-
-String SystemGetViewLayout()
-{
-  return String("V4|Main");
 }

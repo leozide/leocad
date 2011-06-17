@@ -1,6 +1,10 @@
+//
+//	group.h
+////////////////////////////////////////////////////
+
 #ifndef _GROUP_H
 #define _GROUP_H
-/*
+
 class File;
 
 class Group
@@ -23,5 +27,5 @@ public:
 	char m_strName[65];
 	float m_fCenter[3];
 };
-*/
+
 #endif // _GROUP_H

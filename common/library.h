@@ -3,20 +3,21 @@
 
 #include "defines.h"
 #include "str.h"
-#include "lc_array.h"
+#include "array.h"
 
 class File;
+class FileDisk;
 class Texture;
 class PieceInfo;
 
 #define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
 #define LC_CATEGORY_FILE_VERSION  0x0100
 
-struct PiecesLibraryCategory
+typedef struct
 {
 	String Name;
 	String Keywords;
-};
+} PiecesLibraryCategory;
 
 class PiecesLibrary
 {
@@ -34,8 +35,8 @@ public:
 	// Categories.
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	int GetFirstCategory(PieceInfo* Info) const;
-	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcPtrArray<PieceInfo>& SinglePieces, lcPtrArray<PieceInfo>& GroupedPieces) const;
-	void GetPatternedPieces(PieceInfo* Parent, lcPtrArray<PieceInfo>& Pieces) const;
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces) const;
+	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
 	void SetCategory(int Index, const String& Name, const String& Keywords);
 	void AddCategory(const String& Name, const String& Keywords);
 	void RemoveCategory(int Index);
@@ -73,7 +74,7 @@ public:
 	Texture* GetTexture(int index) const;
 
 	// File operations.
-	bool DeletePieces(lcPtrArray<PieceInfo>& Pieces);
+	bool DeletePieces(PtrArray<PieceInfo>& Pieces);
 	bool LoadUpdate(const char* update);
 	bool DeleteTextures(char** Names, int NumTextures);
 	bool ImportTexture(const char* Name);
@@ -93,13 +94,13 @@ protected:
 	Texture* m_pTextures;    // textures array
 
 	// Categories.
-	lcObjArray<PiecesLibraryCategory> m_Categories;
+	ObjArray<PiecesLibraryCategory> m_Categories;
 
 	bool m_CategoriesModified;
 	char m_CategoriesFile[LC_MAXPATH];
 
-	bool ValidatePiecesFile (File& IdxFile, File& BinFile) const;
-	bool ValidateTexturesFile (File& IdxFile, File& BinFile) const;
+	bool ValidatePiecesFile(FileDisk& IdxFile, FileDisk& BinFile) const;
+	bool ValidateTexturesFile(File& IdxFile, File& BinFile) const;
 
 	// File headers
 	static const char PiecesBinHeader[32];
@@ -116,37 +117,37 @@ protected:
 // ============================================================================
 
 // This should be cleaned and moved to the PiecesLibrary class
-struct connection_t
+typedef struct connection_s
 {
 	unsigned char type;
 	float pos[3];
 	float up[3];
-	connection_t* next;
-};
+	connection_s* next;
+} connection_t;
 
-struct group_t
+typedef struct group_s
 {
 	connection_t* connections[5];
 	void* drawinfo;
 	unsigned long infosize;
-	group_t* next;
-};
+	group_s* next;
+} group_t;
 
-struct lineinfo_t
+typedef struct lineinfo_s
 {
 	unsigned char type;
 	unsigned char color;
 	float points[12];
-	lineinfo_t* next;
-};
+	lineinfo_s* next;
+} lineinfo_t;
 
-struct texture_t
+typedef struct texture_s
 {
 	float points[20];
 	unsigned char color;
 	char name[9];
-	texture_t* next;
-};
+	texture_s* next;
+} texture_t;
 
 struct LC_LDRAW_PIECE
 {
@@ -156,7 +157,7 @@ struct LC_LDRAW_PIECE
 	connection_t* connections;
 	group_t* groups;
 	texture_t* textures;
-	char name[9];
+	char name[LC_MAXPATH];
 	char description[65];
 };
 

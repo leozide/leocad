@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by LeoCAD.rc
 //
 #define IDAPPLY                         3
@@ -10,6 +10,7 @@
 #define ID_EDITOR_NEXT                  5
 #define IDD_ABOUTBOX                    100
 #define ID_INDICATOR_POSITION           102
+#define IDD_PROPGENERAL                 103
 #define ID_INDICATOR_STEP               103
 #define IDD_PROPSUMMARY                 104
 #define ID_INDICATOR_SNAP               104
@@ -123,7 +124,9 @@
 #define IDS_COLOR28                     203
 #define IDC_PAN_SE                      203
 #define IDC_PAN_SW                      204
+#define IDR_PIECEEDITOR                 205
 #define IDD_PIECEEDITOR                 208
+#define IDB_EDITOR_ICONS                209
 #define IDD_LIBRARY                     211
 #define IDR_LIBRARY                     213
 #define IDD_TERRAIN                     216
@@ -136,15 +139,7 @@
 #define IDD_TRANSFORM                   236
 #define IDD_CATEGORY                    237
 #define IDC_ROTX                        238
-#define IDD_MODIFY_PIECE                238
 #define IDC_ROTY                        239
-#define IDD_MODIFY_CAMERA               239
-#define IDB_SPLITH                      240
-#define IDD_MODIFY_LIGHT                240
-#define IDB_BITMAP2                     241
-#define IDB_SPLITV                      241
-#define IDC_CURSOR1                     244
-#define IDC_ORBIT                       244
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -215,7 +210,6 @@
 #define IDC_MODDLG_HIDDEN               1074
 #define IDC_SAVEDLG_PREVIEW             1074
 #define IDC_GENDLG_PREVIEW              1075
-#define IDC_MODDLG_HIDDEN2              1075
 #define IDC_AIDDLG_SNAPX                1076
 #define IDC_GENDLG_ZOOM                 1076
 #define IDC_IMGDLG_HIGHCOLOR            1076
@@ -238,21 +232,26 @@
 #define IDC_DETDLG_LINEAR               1086
 #define IDC_HTMDLG_LIST_STEP            1087
 #define IDC_DETDLG_FAST                 1087
+#define IDC_PROP_GEN_LOCATION           1088
 #define IDC_HTMDLG_LIST_END             1088
 #define IDC_DETDLG_SOLID                1088
 #define IDC_PROP_SUM_AUTHOR             1089
 #define IDC_AIDDLG_LOCKZ                1089
 #define IDC_DETDLG_NOALPHA              1089
+#define IDC_PROP_GEN_DOSNAME            1090
 #define IDC_PROP_SUM_DESCRIPTION        1090
 #define IDC_DETDLG_EDGES                1090
 #define IDC_AIDDLG_CENTIMETERS          1090
+#define IDC_PROP_GEN_SIZE               1091
 #define IDC_PROP_SUM_COMMENTS           1091
 #define IDC_DETDLG_DITHER               1091
 #define IDC_AIDDLG_3DMOUSE              1091
 #define IDC_AIDDLG_GLOBAL               1091
+#define IDC_PROP_GEN_CREATED            1092
 #define IDC_DETDLG_LIGHTING             1092
-#define IDC_PROP_SUM_NAME               1092
+#define IDC_PROP_GEN_MODIFIED           1093
 #define IDC_DETDLG_SMOOTH               1093
+#define IDC_PROP_GEN_ACCESSED           1094
 #define IDC_DETDLG_ANTIALIAS            1094
 #define IDC_AIDDLG_ANGLE                1095
 #define IDC_GENDLG_SAVETIME             1095
@@ -270,20 +269,12 @@
 #define IDC_MODDLG_POSX                 1098
 #define IDC_MODDLG_POSY                 1099
 #define IDC_MODDLG_POSZ                 1100
-#define IDC_MODDLG_TARGETX              1101
 #define IDC_OPENDLG_PREVIEW             1102
-#define IDC_MODDLG_TARGETY              1102
 #define IDC_OPENDLG_TEXT                1103
-#define IDC_MODDLG_TARGETZ              1103
 #define IDC_SCNDLG_BGIMAGE_BROWSE       1104
-#define IDC_MODDLG_CONSTANT             1104
 #define IDC_SCNDLG_FOGCOLOR             1105
-#define IDC_MODDLG_LINEAR               1105
 #define IDC_SCNDLG_BGCOLOR              1106
-#define IDC_MODDLG_QUADRATIC            1106
 #define IDC_SCNDLG_AMBIENTLIGHT         1107
-#define IDC_MODDLG_CUTOFF               1107
-#define IDC_MODDLG_EXPONENT             1108
 #define IDC_SCNDLG_BGIMAGE              1109
 #define IDC_SCNDLG_BGTILE               1110
 #define IDC_SCNDLG_FOG                  1111
@@ -312,8 +303,6 @@
 #define IDC_GENDLG_USER                 1133
 #define IDC_MODDLG_LIST                 1136
 #define IDC_MODDLG_COLOR                1137
-#define IDC_MODDLG_DIFFUSE              1138
-#define IDC_MODDLG_SPECULAR             1139
 #define IDC_MODDLG_PIECE                1142
 #define IDC_MODDLG_ROTATION             1145
 #define IDC_MODDLG_FROM                 1146
@@ -332,7 +321,6 @@
 #define IDC_MODDLG_CLOSE                1151
 #define IDC_POVDLG_LGEOBROWSE           1151
 #define IDC_MODDLG_UPX                  1151
-#define IDC_MODDLG_ROLL                 1151
 #define IDC_MODDLG_APPLY                1152
 #define IDC_POVDLG_POVBROWSE            1152
 #define IDC_POVDLG_OUTPOV               1153
@@ -463,16 +451,12 @@
 #define IDC_TRANSDLG_GX                 1245
 #define IDC_TRANSDLG_OX                 1246
 #define IDC_CATDLG_NAME                 1246
-#define IDC_MODIFY_CHILD                1247
-#define IDC_MODDLG_ORTHO                1248
-#define IDC_MODDLG_CLIP                 1249
-#define IDC_MODDLG_CONE                 1250
-#define IDC_MODDLG_AMBIENT              1251
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
 #define ID_EDIT_SELECTBYNAME            32775
 #define ID_FILE_MERGE                   32776
+#define ID_FILE_PROPERTIES              32777
 #define ID_VIEW_FULLSCREEN              32780
 #define ID_VIEW_STEP_NEXT               32782
 #define ID_VIEW_STEP_PREVIOUS           32783
@@ -491,9 +475,8 @@
 #define ID_ACTION_ZOOM_REGION           32799
 #define ID_ACTION_PAN                   32800
 #define ID_ACTION_ROTATE_VIEW           32801
-#define ID_ACTION_ORBIT                 32802
-#define ID_ACTION_ROLL                  32803
-#define ID_ACTION_ZOOM_EXTENTS          32804
+#define ID_ACTION_ROLL                  32802
+#define ID_ACTION_ZOOM_EXTENTS          32803
 #define ID_ZOOM_EXTENTS                 32807
 #define ID_PIECE_GROUP                  32808
 #define ID_PIECE_UNGROUP                32809
@@ -617,6 +600,7 @@
 #define ID_EDITOR_VIEW_CONNECTIONS      33035
 #define ID_EDITOR_ADD                   33036
 #define ID_EDITOR_FILE_NEW              33038
+#define ID_PIECE_COPYKEYS               33039
 #define ID_LIBDLG_GROUP_INSERT          33053
 #define ID_LIBDLG_GROUP_DELETE          33054
 #define ID_LIBDLG_GROUP_RENAME          33055
@@ -696,32 +680,6 @@
 #define ID_LIBDLG_CATEGORY_RESET        33166
 #define ID_SNAP_XY                      33167
 #define ID_SNAP_Z                       33168
-#define ID_VIEW_SPLITHORIZONTALLY       33169
-#define ID_VIEW_SPLITVERTICALLY         33170
-#define ID_VIEW_DELETEVIEW              33172
-#define ID_VIEW_RESETVIEWS              33174
-#define ID_Menu                         33175
-#define ID_MODEL_NEW                    33176
-#define ID_MODEL_DELETE                 33177
-#define ID_MODEL_PROPERTIES             33179
-#define ID_MODEL_MODEL1                 33180
-#define ID_MODEL_MODEL2                 33181
-#define ID_MODEL_MODEL3                 33182
-#define ID_MODEL_MODEL4                 33183
-#define ID_MODEL_MODEL5                 33184
-#define ID_MODEL_MODEL6                 33185
-#define ID_MODEL_MODEL7                 33186
-#define ID_MODEL_MODEL8                 33187
-#define ID_MODEL_MODEL9                 33188
-#define ID_MODEL_MODEL10                33189
-#define ID_MODEL_MODEL11                33190
-#define ID_MODEL_MODEL12                33191
-#define ID_MODEL_MODEL13                33192
-#define ID_MODEL_MODEL14                33193
-#define ID_MODEL_MODEL15                33194
-#define ID_MODEL_MODEL16                33195
-#define ID_FILE_EXPORT_VRML             33197
-#define ID_FILE_EXPORT_X3DV             33198
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -732,9 +690,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        245
-#define _APS_NEXT_COMMAND_VALUE         33199
-#define _APS_NEXT_CONTROL_VALUE         1252
+#define _APS_NEXT_RESOURCE_VALUE        240
+#define _APS_NEXT_COMMAND_VALUE         33169
+#define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

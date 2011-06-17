@@ -95,6 +95,10 @@ long SystemGetTicks()
 }
 
 // User Interface
+void SystemUpdateViewport(int new_vp, int old_vp)
+{
+}
+
 void SystemUpdateCategories(bool SearchOnly)
 {
 }

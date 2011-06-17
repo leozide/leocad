@@ -1,7 +1,7 @@
 // FigDlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "FigDlg.h"
 #include "minifig.h"
@@ -96,49 +96,28 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   }
 
 	m_pMinifigWnd = new CWnd;
-  m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
+	m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
     WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
-	int i;
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
 
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-		LC_MFW_PIECEINFO** items;
-		int j, count;
+		ObjArray<lcMinifigPieceInfo>& Pieces = m_pMinifig->mSettings[i];
 
-		m_pMinifig->GetItems(i, &items, &count);
-
-		for (j = 0; j < count; j++)
-		{
-			if (items[j])
-			{
-				int idx = pCombo->AddString(items[j]->description);
-				pCombo->SetItemDataPtr(idx, items[j]);
-			}
-			else
-			{
-				int idx = pCombo->AddString("None");
-				pCombo->SetItemDataPtr(idx, NULL);
-			}
-		}
-
-		free(items);
+	    for (int j = 0; j < Pieces.GetSize(); j++)
+			pCombo->AddString(Pieces[j].Description);
 	}
 
-  char *names[LC_MFW_NUMITEMS];
-  m_pMinifig->GetSelections (names);
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		CComboBox* pCombo = (CComboBox*)GetDlgItem(i+IDC_MF_HAT);
-    pCombo->SetCurSel (pCombo->FindString (-1, names[i]));
-  }
+		pCombo->SetCurSel(m_pMinifig->GetSelectionIndex(i));
+	}
 
-  for (i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
+	for (int i = IDC_MF_HATSPIN; i <= IDC_MF_SHOERSPIN; i++)
 		((CSpinButtonCtrl*)GetDlgItem(i))->SetRange(-360, 360);
 
   return TRUE;  // return TRUE unless you set the focus to a control
@@ -159,7 +138,7 @@ BOOL CMinifigDlg::DestroyWindow()
 
 LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 {
-	m_pMinifig->ChangeColor (wParam-IDC_MF_HATCOLOR, lParam);
+	m_pMinifig->SetColor(wParam-IDC_MF_HATCOLOR, lParam);
 	m_pMinifig->Redraw ();
 
 	return TRUE;
@@ -167,10 +146,8 @@ LONG CMinifigDlg::OnColorSelEndOK(UINT lParam, LONG wParam)
 
 void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 {
-	CComboBox* combo = (CComboBox*)GetDlgItem(nID);
-	LC_MFW_PIECEINFO* info = (LC_MFW_PIECEINFO*)combo->GetItemDataPtr(combo->GetCurSel());
-
-	m_pMinifig->ChangePiece(nID-IDC_MF_HAT, info);
+	CComboBox* Combo = (CComboBox*)GetDlgItem(nID);
+	m_pMinifig->SetSelectionIndex(nID - IDC_MF_HAT, Combo->GetCurSel());
 	m_pMinifig->Redraw();
 }
 
@@ -184,7 +161,7 @@ void CMinifigDlg::OnChangeAngle(UINT nID)
       LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND,
       LC_MFW_RIGHT_HAND, LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL,
       LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
-  	m_pMinifig->ChangeAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
+  	m_pMinifig->SetAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
 	  m_pMinifig->Redraw ();
   }
 }

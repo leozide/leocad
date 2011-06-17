@@ -2,7 +2,6 @@
 // Minifig Wizard base class, calculates position/rotation of all pieces.
 //
 
-#include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -15,448 +14,811 @@
 #include "matrix.h"
 #include "library.h"
 #include "lc_application.h"
-#include "lc_colors.h"
 
 // =============================================================================
 // Static variables
 
-static LC_MFW_PIECEINFO mfw_pieceinfo[] =
-{
-	// Helms
-	{ "193",     "Helmet Classic",                      LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "193A",    "Helmet with Thin Chin Guard",         LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "193B",    "Helmet with Thick Chin Guard",        LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "390",     "Hair Female with Pigtails",           LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "524",     "Darth Vader Helmet",                  LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "526",     "Samurai Helmet",                      LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "526C01",  "Samurai Helmet with Horn",            LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "527",     "Helmet with Chinstrap and Wide Brim", LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "530",     "Knit Cap",                            LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "775",     "Forestman Cap",                       LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "775C01",  "Forestman Cap with Red Plume",        LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "2446",    "Helmet Modern",                       LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "2528",    "Bicorne Hat",                         LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "2544",    "Tricorne Hat",                        LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "2544C01", "Tricorne Hat with White Plume",       LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "2545",    "Imperial Guard Shako",                LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3624",    "Police Hat",                          LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3629",    "Cowboy Hat",                          LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3833",    "Construction Helmet",                 LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3834",    "Fire Helmet",                         LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3844",    "Castle Helmet with Neck Protect",     LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3878",    "Top Hat",                             LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3896",    "Castle Helmet with Chin-Guard",       LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3901",    "Hair Male",                           LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "4485",    "Baseball Cap",                        LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "6093",    "Hair Shoulder Length",                LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "6131",    "Wizard Hat",                          LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "30048",   "Helmet Morion",                       LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "30171",   "Aviator Cap",                         LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "71015",   "Crown",                               LC_MFW_HAT, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-
-	// Faces
-	{ "3626B",    "Plain Face",                             LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP01", "Smiley Face",                            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP02", "Woman Face",                             LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP03", "Pointed Moustache",                      LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP04", "Sunglasses",                             LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP05", "Grin and Eyebrows",                      LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f }, 
-	{ "3626BP06", "Grin, Eyebrows and Microphone",          LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP30", "Messy Hair and Moustache",               LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP31", "Messy Hair and Eye Patch",               LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP32", "Messy Hair, Moustache and Eye Patch",    LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP33", "Messy Hair, Moustache and Beard",        LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP34", "Messy Hair, Beard and Eye Patch",        LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP39", "Dark Grey Facial Hair",                  LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP3E", "Wiry Moustache and Eyebrows",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP3J", "Islander White/Red Painted Face",        LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP3K", "Islander White/Blue Painted Face",       LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP3N", "Sideburns and Droopy Moustache Black",   LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP3Q", "Sideburns and Droopy Moustache Brown",   LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP40", "Messy Hair Female",                      LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP61", "Ice Planet Moustache and Eyebrows",      LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP62", "Ice Planet Messy White Hair",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP63", "Silver Robot",                           LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP65", "Ice Planet Female Red Hair",             LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP69", "Headset Over Brown Hair and Eyebrows",   LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP6F", "Red Lips and Black Upswept Eyelashes",   LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP7A", "Brown Hair Over Eye and Black Eyebrows", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP7B", "Blue Sunglasses",                        LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BP7C", "Blue Wrap-Around Sunglasses",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA1", "Glasses and White Muttonchops",          LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA2", "Adventurers Mummy",                      LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA3", "Smirk and Black Moustache",              LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA4", "Villan Black Facial Hair",               LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA5", "Stubble Moustache and Smirk",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA6", "Brown Hair, Eyelashes and Lipstick",     LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA7", "Monacle, Scar and Moustache",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPA9", "Villainous Glasses & Black Facial Hair", LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPAC", "Tribal Paint and Frown",                 LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS2", "SW Brown Eyebrows",                      LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS3", "SW Small Black Eyebrows",                LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS4", "SW Grey Beard and Eyebrows",             LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS5", "SW Smirk and Brown Eyebrows",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS7", "SW Black Eyebrows and Scar",             LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS8", "SW Darth Maul",                          LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPS9", "SW Brown Eyebrows and Beard",            LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPSB", "SW Alien with Large Black Eyes",         LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPSC", "SW Grey Eyebrows and Implant",           LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPSE", "SW Scout Trooper Black Visor",           LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "3626BPST", "SW Tusken Raider",                       LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-	{ "82359",    "Skeleton Skull",                         LC_MFW_HEAD, 0.0f, 0.0f, 3.84f, 0.0f, 0.0f, 0.0f },
-
-	// Torsos
-	{ "973",    "Plain Torso",                            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P01", "Vertical Strips Red/Blue",               LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P02", "Vertical Strips Blue/Red",               LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
-	{ "973P03", "White Shirt and Jacket",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P04", "Six Button Suit and Airplane",           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P05", "Six Button Suit and Anchor",             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P09", "Anchor Motif",                           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P0A", "White Diagonal Zip and Pocket",          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P0B", "Black Diagonal Zip and Pocket",          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P11", "Dungarees",                              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P12", "Riding Jacket",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P13", "Straight Zipper Jacket",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P14", "'S' Logo",                               LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P15", "Horizontal Stripes",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P16", "Airplane Logo",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P17", "Red V-Neck and Buttons",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P18", "Suit and Tie ",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P19", "Train Chevron",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1A", "Black Dungarees",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1B", "Blue Dungarees",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1C", "Red Dungarees",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1D", "Blue Horizontal Stripes",                LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1E", "Red Horizontal Stripes",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1H", "Racing Jacket and Two Stars",            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1J", "Green Dungarees",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1M", "TV Logo Pattern Large",                  LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P1Q", "Launch Command Logo and Equipment",      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P20", "Waiter",                                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P21", "Five Button Fire Fighter",               LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P22", "Red Shirt and Suit",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P23", "'S' Logo Yellow / Blue Pattern",         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P24", "Red Cross Pattern",                      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P25", "Red Cross & Stethoscope",                LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P26", "Patch Pocket",                           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P27", "Autoroute Pattern",                      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P28", "Leather Jacket",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P29", "Air Gauge and Pocket",                   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P2A", "Chef Pattern",                           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P2C", "Strapless Suntop",                       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P2E", "Blue and Mint Green Stripes",            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P2F", "Spotted Singlet and Necklace",           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P30", "Pirate Purple Vest and Anchor Tattoo",   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P31", "Pirate Strips (Red/Cream)",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P32", "Pirate Strips (Blue/Cream)",             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P33", "Pirate Strips (Red/Black)",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P34", "Open Jacket over Striped Vest",          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P35", "Imperial Guard",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P36", "Pirate Captain",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P37", "Imperial Guard Officer",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P38", "Female Pirate",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P39", "Pirate Open Jacket over Brown Shirt",    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3A", "Pirate Ragged Shirt and Dagger",         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3B", "Brown Vest, Ascot and Belt",             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3C", "Pirate Green Vest, Shirt and Belt",      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3D", "Medallion, Belt, And Silver Buttons",    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3N", "Blue Imperial Guard",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3Q", "Red Imperial Guard",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3R", "Blue Imperial Guard Officer",            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P3S", "Red Imperial Guard Officer",             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P40", "Castle Breastplate",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P41", "Castle Chainmail",                       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P42", "Castle Crossed Pikes",                   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P43", "Black Falcon Pattern",                   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P44", "Wolfman Pattern",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P45", "Studded Armor",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P46", "Forestman and Purse",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P47", "Castle Red/Gray Symbol",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f }, 
-	{ "973P48", "Forestman Maroon Collar",                LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P49", "Forestman Blue Collar",                  LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4B", "Dragon Head",                            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4D", "Royal Knights Lion-Head Sheild",         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4E", "Royal Knights Lion-Head & Neck-Chain",   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4G", "Castle Female Armor",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4N", "Blue Castle Bodice",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4Q", "Green Castle Bodice",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4R", "Tri-Colored Shield",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4S", "Suzerain Goldcrest",                     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4T", "Red/Peach Quarters Shield",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P4U", "Maroon/Red Quarters Shield",             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P50", "Forestman Black Collar",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P51", "Blacktron II",                           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P52", "Blacktron I Pattern",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P54", "UFO Alien Orange and Silver",            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P55", "Explorien Logo",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P60", "Shell Logo",                             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P61", "Gold Ice Planet",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P62", "Silver Ice Planet",                      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P63", "Robot Pattern",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P64", "Unitron Pattern",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P65", "Futuron Pattern",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P66", "Spyrius Pattern",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P68", "Mtron Logo",                             LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P69", "Space Police II and Radio",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P6B", "Black Futuron",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P6C", "Blue Futuron",                           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P6D", "Red Fututon",                            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P6E", "Yellow Futuron",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P70", "Bomber Jacket and Black Shirt",          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P71", "Red Necklace and Blue Undershirt",       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P72", "Gold Necklace and Yellow Undershirt",    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P73", "Vest and Patch Pockets",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P74", "Vest, Patch Pockets and Police Badge",   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P76", "Jacket, Tie and Police Badge",           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P77", "Modern Firefighter Type 1",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P78", "Modern Firefighter Type 2",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P7A", "Arctic Parka A1",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P7B", "Arctic Parka A2",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P83", "Suit, Tie with Train Pattern",           LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P8A", "Extreme Team Jacket Logo",               LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P8B", "RES-Q Orange Pockets and Logo",          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973P90", "Classic Space",                          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA1", "Suspenders and Red Bowtie",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA2", "Pharoah Breastplate",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA3", "Safari Shirt, Gun & Red Bandana",        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA4", "White Suit, Brown Vest and Tie",         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA5", "Bomber Jacket, Belt and Black Shirt",    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA6", "Safari Shirt, Blue Tee and Red Bandana", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA7", "Safair Shirt, Black Tee and Holster",    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PA8", "Jacket, White Shirt and Necklace",       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PAB", "Tank Top, Stains, Wrench and Tattoo",    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PAC", "Mayan Necklace, Tribal Shirt and Naval", LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PAJ", "Rock Raiders Jet",                       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PDF", "Black Suit, Red Shirt, Gold Clasps",     LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PDG", "White Rope & Patched Collar",            LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PHB", "Purple Greatcoat",                       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PN0", "Samurai Dragon Robe",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PN1", "Samurai, Sash and Dagger",               LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PN5", "Ninja Wrap, Silver Shuriken & Dagger",   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PN6", "Ninja Wrap, Gold Shuriken, and Armour",  LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS0", "SW Rebel A-Wing Pilot",                  LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS1", "SW Rebel Pilot",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS2", "SW Jedi Robes and Sash",                 LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS3", "SW Wrap-Around Tunic",                   LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS4", "SW Shirt (Open Collar, No Vest)",        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS5", "SW Black Vest and White Shirt",          LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS6", "SW Old Obi-Wan",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PS7", "SW Darth Vader",                         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSA", "SW Rebel Mechanic",                      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSB", "SW Blast Armour (Green Plates)",         LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSC", "SW Pocket-Vest and Techno-Buckle",       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSE", "SW Scout Trooper",                       LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSF", "SW Tunic and Belt",                      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSK", "SW Stormtrooper",                        LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSM", "SW Camouflage Smock",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSN", "SW Imperial Shuttle Pilot",              LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSQ", "SW Imperial Officer",                    LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "973PSR", "SW Protocol Droid",                      LC_MFW_TORSO, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-
-	// Neck
-	{ "522",   "Cape Cloth",                  LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
-	{ "2524",  "Backpack Non-Opening",        LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "2526",  "Epaulette",                   LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
-	{ "2587",  "Armor Plate",                 LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
-	{ "2610",  "Lifevest",                    LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "3838",  "Airtanks",                    LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
-	{ "3840",  "Vest",                        LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "4498",  "Arrow Quiver",                LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 180.0f },
-	{ "4523",  "D-Basket",                    LC_MFW_NECK, 0.0f, 0.0f, 2.84f, 0.0f, 0.0f, 0.0f },
-	{ "4524",  "Cape",                        LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
-	{ "4736",  "Jet-Pack with Stud On Front", LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "6132",  "Hair Beard",                  LC_MFW_NECK, 0.0f, 0.0f, 2.96f, 0.0f, 0.0f, 0.0f },
-	{ "30091", "Scuba Tank",                  LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-	{ "30174", "Armor Samurai",               LC_MFW_NECK, 0.0f, 0.0f, 2.88f, 0.0f, 0.0f, 0.0f },
-
-	// Arms
-	{ "976", "Left Arm",  LC_MFW_LEFT_ARM, 0.0f, 0.0f, 2.56f, 0.0f, 0.0f, 0.0f },
-	{ "975", "Right Arm", LC_MFW_RIGHT_ARM, 0.0f, 0.0f, 2.56f, 0.0f, 0.0f, 0.0f },
-
-	// Hands
-	{ "977", "Hand", LC_MFW_LEFT_HAND, 0.9f, -0.62f, 1.76f, 45.0f, 0.0f, 90.0f },
-
-	// Accessories
-	{ "37",      "Knife",                             LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.58f, 45.0f, 0.0f, 0.0f },
-	{ "38",      "Harpoon",                           LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.0f, 45.0f, 0.0f, 0.0f },
-	{ "59",      "Greatsword",                        LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
-	{ "194",     "Hose Nozzle",                       LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.22f, 45.0f, 0.0f, 180.0f },
-	{ "375",     "Ice Axe",                           LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.32f, 45.0f, 0.0f, 0.0f },
-	{ "577",     "Light Sabre Hilt",                  LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.52f, 45.0f, 0.0f, 0.0f },
-	{ "577C01",  "Light Sabre On",                    LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.52f, 45.0f, 0.0f, 0.0f },
-	{ "774",     "Handaxe",                           LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.20f, 45.0f, 0.0f, 0.0f },
-	{ "2530",    "Cutlass",                           LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
-	{ "2542",    "Oar",                               LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 0.52f, 45.0f, 180.0f, 0.0f },
-	{ "2561",    "Musket",                            LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.34f, 45.0f, 0.0f, 0.0f },
-	{ "2562",    "Flintlock Pistol",                  LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
-	{ "2570",    "Crossbow",                          LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 1.82f, 45.0f, 0.0f, 0.0f },
-	{ "2614",    "Fishing Rod",                       LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.74f, 45.0f, 0.0f, 0.0f },
-	{ "3841",    "Pickaxe",                           LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.24f, 45.0f, 0.0f, 180.0f },
-	{ "3846",    "Shield",                            LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P43", "Shield Black Falcon",               LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P44", "Shield Wolfpack",                   LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P45", "Shield Black Falcon Blue Border",   LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P46", "Shield Black Falcon Yellow Border", LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P47", "Shield Red/Gray",                   LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P48", "Shield Forestman",                  LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4C", "Shield Blue Dragon",                LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4D", "Shield Royal Knights Lion",         LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4E", "Shield Lion Head, Blue & Yellow",   LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4G", "Shield Blue Lion on Yellow",        LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4H", "Shield Yellow Lion on Blue",        LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4T", "Shield Red/Peach Quarters",         LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3846P4U", "Shield Maroon/Red Quarters",        LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3847",    "Shortsword",                        LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.04f, 45.0f, 0.0f, 0.0f },
-	{ "3848",    "Battleaxe",                         LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.04f, 45.0f, 0.0f, 180.0f },
-	{ "3852",    "Hairbrush",                         LC_MFW_LEFT_TOOL, 0.82f, -0.64f, 1.98f, 45.0f, 0.0f, -90.0f },
-	{ "3876",    "Shield Round",                      LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 0.0f },
-	{ "3899",    "Cup",                               LC_MFW_LEFT_TOOL, -0.06f, -0.62f, 2.16f, 45.0f, 0.0f, 0.0f },
-	{ "3959",    "Space Gun",                         LC_MFW_LEFT_TOOL, 0.74f, -0.62f, 2.1f, 45.0f, 0.0f, 0.0f },
-	{ "3962",    "Radio",                             LC_MFW_LEFT_TOOL, 0.72f, -0.66f, 1.62f, 45.0f, 0.0f, 90.0f },
-	{ "4006",    "Spanner/Screwdriver",               LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 2.18f, 45.0f, 0.0f, 180.0f },
-	{ "4349",    "Loudhailer",                        LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.28f, 45.0f, 0.0f, 0.0f },
-	{ "4360",    "Space Laser Gun",                   LC_MFW_LEFT_TOOL, 0.96f, -0.62f, 2.64f, 45.0f, 0.0f, -90.0f },
-	{ "4479",    "Metal Detector",                    LC_MFW_LEFT_TOOL, 0.74f, -0.64f, 2.64f, 45.0f, 0.0f, 90.0f },
-	{ "4497",    "Spear",                             LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 3.48f, 45.0f, 0.0f, 90.0f },
-	{ "4499",    "Bow with Arrow",                    LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.52f, 45.0f, 0.0f, -10.0f },
-	{ "4522",    "Mallet",                            LC_MFW_LEFT_TOOL, 0.72f, -0.64f, 2.72f, 45.0f, 0.0f, 0.0f },
-	{ "4528",    "Frypan",                            LC_MFW_LEFT_TOOL, 0.90f, -0.62f, 2.64f, -45.0f, 90.0f, 90.0f },
-	{ "4529",    "Saucepan",                          LC_MFW_LEFT_TOOL, 0.96f, -0.62f, 2.56f, -45.0f, 90.0f, 90.0f },
-	{ "6124",    "Magic Wand",                        LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.32f, 45.0f, 0.0f, 0.0f },
-	{ "6246A",   "Screwdriver",                       LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
-	{ "6246B",   "Hammer",                            LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
-	{ "6246D",   "Box Wrench",                        LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
-	{ "6246E",   "Open End Wrench",                   LC_MFW_LEFT_TOOL, 0.72f, -0.61f, 3.12f, 45.0f, 0.0f, 90.0f },
-	{ "6246C",   "Power Drill",                       LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.96f, 45.0f, 0.0f, 0.0f },
-	{ "30132",   "Revolver",                          LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
-	{ "30141",   "Rifle",                             LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, -10.0f },
-	{ "30152",   "Magnifying Glass",                  LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 3.76f, 45.0f, 0.0f, 0.0f },
-	{ "30173",   "Katana",                            LC_MFW_LEFT_TOOL, 0.72f, -0.62f, 1.72f, 45.0f, 0.0f, 0.0f },
-
-	// Hips
-	{ "970",    "Hips",                               LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
-	{ "970P4F", "Hips with Leather Belt (Red Studs)", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
-	{ "970P63", "Hips with Robot Pattern",            LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
-	{ "970PHB", "Hips with Purple Greatcoat Pattern", LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
-	{ "970PS5", "Hips with SW Gun Belt",              LC_MFW_HIPS, 0.0f, 0.0f, 1.6f, 0.0f, 0.0f, 0.0f },
-
-	// Left Legs
-	{ "773",    "Wooden Leg",                               LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "972",    "Left Leg",                                 LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f }, 
-	{ "972PHB", "Purple Greatcoat",                         LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "972P3J", "Grass Skirt",                              LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "972P4F", "Leather Straps (Red Studs)",               LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "972P63", "Robot Pattern",                            LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "972PA2", "Green Kilt and Toes",                      LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-
-	// Right Legs
-	{ "971",    "Right Leg",                                LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "971P3J", "Grass Skirt",                              LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "971P4F", "Leather Straps (Red Studs)",               LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "971P63", "Robot Pattern",                            LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "971PA2", "Kilt and Toes",                            LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "971PHB", "Purple Greatcoat",                         LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-	{ "971PS5", "SW Gunbelt",                               LC_MFW_RIGHT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-
-	// Footwear
-	{ "2599", "Flipper", LC_MFW_LEFT_SHOE, 0.42f, -0.12f, 0.0f, 0.0f, 0.0f, 0.0f },
-	{ "6120", "Ski",     LC_MFW_LEFT_SHOE, 0.42f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
-
-//  2447       Minifig Helmet Visor                                            
-//  769        Minifig Helmet Visor Space                                      
-//  30090      Minifig Diver Mask
-//  { "30362", "Robot Leg", LC_MFW_LEFT_LEG, 0.0f, 0.0f, 1.12f, 0.0f, 0.0f, 0.0f },
-/*
-22       7  30304      Binoculars Space
-25       4  30162      Binoculars Town
-22   2   5  3836       Pushbroom
-*/
-};
-
-/*
-981.DAT       Minifig Arm Left                                                
-982.DAT       Minifig Arm Right                                               
-33009.DAT     Minifig Book                                                    
-30148.DAT     Minifig Camera Movie                                            
-30089.DAT     Minifig Camera Snapshot                                         
-4360.DAT      Minifig Camera with Side Sight                                  
-30170.DAT     Minifig Cap Aviator Goggles                                     
-208C01.DAT    Minifig Chain 17L (Complete)                                    
-30090.DAT     Minifig Diver Mask                                              
-2343.DAT      Minifig Goblet                                                  
-983.DAT       Minifig Hand                                                    
-3849.DAT      Minifig Lance                                                   
-30377.DAT     Minifig Mechanical Arm                                          
-30378.DAT     Minifig Mechanical Head SW Battle Droid                         
-30378PS1.DAT  Minifig Mechanical Head with Orange Insignia Pattern            
-30378PS2.DAT  Minifig Mechanical Head with Rust Insignia Pattern              
-30376.DAT     Minifig Mechanical Legs                                         
-30375CS0.DAT  Minifig Mechanical SW Battle Droid (Shortcut)                   
-30375CS1.DAT  Minifig Mechanical SW Battle Droid Commander (Shortcut)         
-30375CS3.DAT  Minifig Mechanical SW Battle Droid Pilot (Shortcut)             
-30375CS2.DAT  Minifig Mechanical SW Battle Droid Security (Shortcut)          
-30375.DAT     Minifig Mechanical Torso                                        
-30375PS3.DAT  Minifig Mechanical Torso with Blue Insignia Pattern             
-30375PS1.DAT  Minifig Mechanical Torso with Orange Insignia Pattern           
-30375PS2.DAT  Minifig Mechanical Torso with Tan Insignia Pattern              
-4502A.DAT     Minifig Plume Small                                             
-6123.DAT      Minifig Polearm Halberd                                         
-3962B.DAT     Minifig Radio with Long Handle                                  
-3962A.DAT     Minifig Radio with Short Handle                                 
-30362.DAT     Minifig Robot Leg                                               
-30154.DAT     Minifig Sextant                                                 
-3837.DAT      Minifig Shovel                                                  
-3900.DAT      Minifig Signal Holder                                           
-6260C01.DAT   Minifig Skeleton (Shortcut)                                     
-6265.DAT      Minifig Skeleton Arm                                            
-6266.DAT      Minifig Skeleton Leg                                            
-82359.DAT     Minifig Skeleton Skull                                          
-6260.DAT      Minifig Skeleton Torso                                          
-770.DAT       Minifig Shield Ovoid                                            
-770PW1.DAT    Minifig Shield Ovoid with American Indian Pattern               
-770P4C.DAT    Minifig Shield Ovoid with Blue Dragon Pattern                   
-770PH1.DAT    Minifig Shield Ovoid with Golden Lion                           
-770P4B.DAT    Minifig Shield Ovoid with Green Dragon Pattern                  
-770P4D.DAT    Minifig Shield Ovoid with Royal Knights Lion Pattern            
-770PS1.DAT    Minifig Shield Ovoid with SW Gungans Patrol Shield Pattern      
-30088.DAT     Minifig Speargun                                                
-4449.DAT      Minifig Suitcase                                                
-3836.DAT      Minifig Tool Pushbroom                                          
-30092.DAT     Minifig Underwater Scooter                                      
-2488.DAT      Minifig Whip                                                    
-*/
-
-static int mfw_pieces = sizeof(mfw_pieceinfo)/sizeof(LC_MFW_PIECEINFO);
+// Settings for the 2010.3 update (from holly-wood@holly-wood.it).
+static const char* DefaultSettings = 
+	"[HATS]\n"
+	"\"Cap\" \"4485.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Cap Aviator\" \"30171.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Helmet with Chin-Guard\" \"3896.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Helmet with Neck Protector\" \"3844.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Construction Helmet\" \"3833.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Cook's Hat\" \"3898.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Fire Helmet\" \"3834.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Forestman Cap\" \"775.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Forestman Cap with Small Plume (Shortcut)\" \"775c01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Female with Pigtails\" \"390.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Male\" \"3901.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Long Straight\" \"40239.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Long with Headband\" \"30114.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Long with Headband and Feathers\" \"30114C01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Ponytail\" \"6093a.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Ponytail with Long Bangs\" \"62696.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Shoulder Length\" \"4530.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Spiky Long\" \"53982.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hair Spiky Short\" \"53981.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Bicorne\" \"2528.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Cowboy\" \"3629.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Cowboy with Cavalry Logo\" \"3629PW1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Cowboy with Silver Star\" \"3629PW2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Crown\" \"71015.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Imperial Guard Shako\" \"2545.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Fez\" \"85975.dat\" 0 1 0 0 0 1 0 0 0 1 0 -14 0\n"
+	"\"Hat Kepi\" \"30135.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Knit Cap\" \"41334.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Rag\" \"2543.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Tricorne\" \"2544.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Tricorne with Plume\" \"2544C01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hat Wide Brim Flat\" \"30167.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Alien Skull with Fangs\" \"85945.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Castle with Fixed Face Grille\" \"4503.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Classic with Thin Chin Guard\" \"3842a.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Classic with Thick Chin Guard\" \"3842b.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Darth Vader\" \"30368.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Imperial AT-ST Pilot\" \"57900.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Modern\" \"2446.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Morion\" \"30048.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Samurai\" \"30175.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Samurai with Horn (Shortcut)\" \"30175c01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet Skateboard\" \"46303.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Helmet with Chinstrap and Wide Brim\" \"30273.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Police Hat\" \"3624.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Top Hat\" \"3878.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Wizards Hat\" \"6131.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[HEAD]\n"
+	"\"Stud Solid\" \"3626A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Stud Solid with Standard Grin Pattern\" \"3626AP01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Standard Grin Pattern\" \"3626BP01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Adventurers Mummy Pattern\" \"3626BPA2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Alien with Green Brain and Yellow Mouth\" \"3626BP6Y.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Alien with Large Blue Mask\" \"3626BP6V.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Alien with Silver Mask and Mouth Grille\" \"3626BP6X.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Alien with Small Blue Mask\" \"3626BP6W.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Sunglasses Pattern\" \"3626bp7b.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Wrap-Around Sunglasses Pattern\" \"3626bp7c.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Brown Hair over Eye and Black Eyebrows Pattern\" \"3626BP7A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Brown Hair, Eyelashes, and Lipstick Pattern\" \"3626BPA6.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Dark Grey Facial Hair Pattern\" \"3626BP39.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Evil Skeleton Skull Pattern\" \"3626BPA8.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Glasses and White Muttonchops Pattern\" \"3626BPA1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Gold Robot Pattern\" \"3626BP64.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Half-Moon Glasses and Grey Eyebrows Pattern\" \"3626BPHA.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Headset Over Brown Hair & Eyebrows Pattern\" \"3626BP69.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ice Planet Female Red Hair Pattern\" \"3626BP65.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ice Planet Messy White Hair\" \"3626BP62.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ice Planet Moustache and Eyebrows Pattern\" \"3626BP61.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Islander White/Blue Painted Face Pattern\" \"3626BP3K.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Islander White/Red Painted Face Pattern\" \"3626BP3J.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Messy Hair and Eye Patch Pattern\" \"3626BP31.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Messy Hair and Moustache Pattern\" \"3626BP30.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Messy Hair Female Pattern\" \"3626BP40.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Messy Hair, Beard and Eye Patch Pattern\" \"3626BP34.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Messy Hair, Moustache, and Beard Pattern\" \"3626BP33.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Messy Hair, Moustache, and Eye Patch Pattern\" \"3626BP32.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Monocle, Scar, and Moustache Pattern\" \"3626BPA7.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ron Weasley Pattern\" \"3626bph3.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pursed Lips and White Forehead Pattern\" \"3626BPB1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Lips and Black Upswept Eyelashes Pattern\" \"3626bp6f.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Severus Snape Pattern\" \"3626BPHB.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Sideburns and Droopy Moustache Black Pattern\" \"3626BP3N.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Sideburns and Droopy Moustache Brown Pattern\" \"3626BP3Q.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Silver Robot Pattern\" \"3626BP63.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Skull Type 1 (Happy) Pattern\" \"82359.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Smirk & Black Moustache Pattern\" \"3626BPA3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Standard Grin and Eyebrows Pattern\" \"3626BP05.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Standard Grin and Pointed Moustache Pattern\" \"3626BP03.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Standard Grin and Sunglasses Pattern\" \"3626BP04.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Standard Grin, Eyebrows and Microphone Pattern\" \"3626BP06.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Standard Woman Pattern\" \"3626BP02.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Stubble, Moustache and Smirk Pattern\" \"3626BPA5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Alien with Large Black Eyes Pattern\" \"3626BPSB.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Black Eyebrows and Scars Pattern\" \"3626BPS7.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Brown Eyebrows and Beard Pattern\" \"3626BPS9.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Brown Eyebrows Pattern\" \"3626BPS2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Darth Maul Pattern\" \"3626BPS8.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Grey Beard and Eyebrows Pattern\" \"3626BPS4.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Grey Eyebrows & Implant Pattern\" \"3626BPSC.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Scout Trooper Black Visor Pattern\" \"3626BPSE.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Small Black Eyebrows Pattern\" \"3626BPS3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Smirk and Brown Eyebrows Pattern\" \"3626BPS5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Tusken Raider Pattern\" \"3626BPST.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tan Eyebrows and Frown\" \"3626BPH2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tribal Paint and Frown Pattern\" \"3626BPAC.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Villian Black Facial Hair Pattern\" \"3626BPA4.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Villainous Glasses & Black Facial Hair Pattern\" \"3626bpa9.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vincent Crabbe/Ron Weasley Pattern\" \"3626bph5.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"White Hair, Eyebrows, and Moustache Pattern\" \"3626BPN1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Wiry Moustache, Goatee and Eyebrows Pattern\" \"3626bp3e.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Head SW Battle Droid\" \"30378.DAT\" 0 1 0 0 0 1 0 0 0 1 0 32 0\n"
+	"\"Stud Hollow\" \"3626B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[BODY]\n"
+	"\"Plain\" \"973.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"'S' Logo Grey / Blue Pattern\" \"973P23.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"'S' Logo Red / Black Pattern\" \"973P14.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"2 Chinese Letters Yellow Stripe Pattern\" \"973PAQ.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"3-Piece Suit, White Shirt and Red Tie Pattern\" \"973PDB.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Air Gauge and Pocket Pattern\" \"973P29.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Airplane Logo and 'AIR' Badge Pattern\" \"973P85.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Airplane Logo Pattern\" \"973P16.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Anchor Motif Pattern\" \"973P09.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Arctic Parka A1 Pattern\" \"973P7A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Arctic Parka A2 Pattern\" \"973P7B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Astro Pattern\" \"973P6F.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Autoroute Pattern\" \"973P27.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Black Diagonal Zip and Pocket Pattern\" \"973p0b.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Black Dungaree Pattern\" \"973P1A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Black Falcon Pattern\" \"973P43.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Black Futuron Pattern\" \"973P6B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blacktron I Pattern\" \"973P52.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blacktron II Pattern\" \"973P51.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue and Mint Green Stripes Pattern\" \"973p2e.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Castle Bodice Pattern\" \"973P4N.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Dungaree Pattern\" \"973P1B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Futuron Pattern\" \"973P6C.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Flowers on Tied Shirt Pattern\" \"973P2G.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Horizontal Stripes Pattern\" \"973p1d.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Imperial Guard Officer Pattern\" \"973P3R.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Imperial Guard Pattern\" \"973P3N.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Shirt and Safety Stripes Pattern\" \"973P8G.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Striped Dungarees Pattern\" \"973P1R.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Blue Undershirt Green Bow and Gun Pattern\" \"973PW5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bomber Jacket & Black Shirt Pattern\" \"973P70.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bomber Jacket, Belt, & Black Shirt Pattern\" \"973PA5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Brown Vest, Ascot and Belt Pattern\" \"973P3B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Brown Vest, Buckle and String Bowtie Pattern\" \"973PW9.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Buttons and Old Police Badge Pattern\" \"973P1F.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Card, Suit, Vest, and Gold Fob Pattern\" \"973PW8.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Breastplate Pattern\" \"973P40.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Bodice and Cloak Pattern\" \"973P4H.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Chainmail Pattern\" \"973P41.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Crossed Pikes Pattern\" \"973P42.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Female Armor Pattern\" \"973P4G.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Castle Red/Gray Pattern\" \"973P47.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Chef Pattern\" \"973p2a.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Classic Space Pattern\" \"973P90.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"DkGray, Black, and Yellow Batman Pattern\" \"973PB1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Dragon Head Pattern\" \"973P4B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Explorien Logo Pattern\" \"973p55.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Extreme Team Jacket Logo Pattern\" \"973P8A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Female Pirate Pattern\" \"973P38.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Five Button Fire Fighter Pattern\" \"973P21.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Forestman and Purse Pattern\" \"973P46.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Forestman Black Collar Pattern\" \"973P50.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Forestman Blue Collar Pattern\" \"973P49.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Forestman Maroon Collar Pattern\" \"973P48.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Four Button Suit and Train Logo Pattern\" \"973P84.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Gold Fob and 100 Dollar Bills Pattern\" \"973PWA.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Gold Ice Planet Pattern\" \"973P61.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Gold Necklace and Yellow Undershirt Pattern\" \"973P72.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Green Castle Bodice Pattern\" \"973P4Q.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Green Dungaree Pattern\" \"973P1J.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Gryffindor Uniform Pattern\" \"973PH1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hogwarts Uniform Pattern\" \"973PH0.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Jacket, Orange Vest, Green Neck-chief Pattern\" \"973PB3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Jacket, Tie and Police Badge Pattern\" \"973p76.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Jacket, White Shirt, and Necklace Pattern\" \"973PA8.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Launch Command Logo and Equipment Pattern\" \"973p1q.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leather Jacket Pattern\" \"973P28.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leather Jacket and Light Gray Shirt Pattern\" \"973PA9.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Lifebelt Logo and ID Card Pattern\" \"973P79.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Maroon/Red Quarters Shield Pattern\" \"973P4U.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mayan Necklace, Tribal Shirt, & Navel Pattern\" \"973PAC.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Medallion, Belt, And Silver Buttons Pattern\" \"973p3d.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Modern Firefighter Type 1 Pattern\" \"973p77.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Modern Firefighter Type 2 Pattern\" \"973p78.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"MTron Logo Pattern\" \"973P68.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ninja Wrap, Gold Shuriken, and Armour Pattern\" \"973PN6.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ninja Wrap, Silver Shuriken & Dagger Pattern\" \"973PN5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Octan OIL Badge\" \"973P81.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Octan Logo Pattern\" \"973PT2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Old Obi-Wan Pattern\" \"973PS6.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Open Jacket over Striped Vest Pattern\" \"973P34.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Patch Pocket Pattern\" \"973P26.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pharaoh Breastplate Pattern\" \"973PA2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Captain Pattern\" \"973P36.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Green Vest, Shirt, and Belt Pattern\" \"973P3C.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Open Jacket over Brown Vest Pattern\" \"973P39.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Purple Vest and Anchor Tattoo Pattern\" \"973P30.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Ragged Shirt and Dagger Pattern\" \"973P3A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Stripes Pattern\" (Blue/Cream) \"973P32.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Stripes Pattern\" (Red/Black) \"973P33.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Pirate Stripes Pattern\" (Red/Cream) \"973P31.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Plain Shirt with Pockets Pattern\" \"973P7G.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Purple Greatcoat Pattern\" \"973phb.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Racing Jacket and Two Stars Pattern\" \"973P1H.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Racing Jacket and Two Stars Red Pattern\" \"973P1N.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Cross and Stethoscope Pattern\" \"973P25.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Cross Pattern\" \"973P24.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Dungaree Pattern\" \"973P1C.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Futuron Pattern\" \"973P6D.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Horizontal Stripes Pattern\" \"973p1E.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Imperial Guard Officer Pattern\" \"973P3S.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Imperial Guard Pattern\" \"973P3Q.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Necklace and Blue Undershirt Pattern\" \"973P71.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Shirt and Suit Pattern\" \"973P22.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Undershirt and Fringe Pattern\" \"973PW7.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red V-Neck and Buttons Pattern\" \"973P17.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red Vest and Train Logo Pattern\" \"973P82.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Red/Peach Quarters Shield Pattern\" \"973P4T.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"RES-Q Orange Pockets and Logo Pattern\" \"973P8B.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Riding Jacket Pattern\" \"973P12.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Robot Pattern\" \"973P63.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Rock Raiders Jet Pattern\" \"973PAJ.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Royal Knights Lion Head & Neck-Chain Pattern\" \"973P4E.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Royal Knights Lion-Head Shield Pattern\" \"973P4D.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Safari Shirt, Black Tee, and Holster Pattern\" \"973PA7.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Safari Shirt, Gun & Red Bandana Pattern\" \"973PA3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Safari Shirt,Blue Tee & Red Bandana Pattern\" \"973PA6.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Samurai Dragon Robe Pattern\" \"973PN0.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Samurai Robe, Sash and Dagger Pattern\" \"973PN1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Shell Logo Pattern\" \"973P60.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Sheriff Pattern\" \"973PW4.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Silver Ice Planet Pattern\" \"973P62.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Six Button Suit and Airplane Pattern\" \"973p04.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Six Button Suit and Anchor Pattern\" \"973p05.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Slytherin Uniform Pattern\" \"973PH2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Space Police II and Radio Pattern\" \"973P69.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Space Police II Chief\" \"973P6A.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Spotted Singlet and Necklace Pattern\" \"973p2f.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Spyrius Pattern\" \"973P66.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Stethoscope and Pocket with Pens Pattern\" \"973P86.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Straight Zipper Jacket Pattern\" \"973P13.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Strapless Suntop Pattern\" \"973P2C.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Striped Shirt and Silver Buttons Pattern\" \"973P3F.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Studded Armor Pattern\" \"973P45.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Suit and Tie Pattern\" \"973P18.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Suit and Tie with Train Pattern\" \"973P83.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Suspenders and Red Bowtie Pattern\" \"973PA1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Black Vest & White Shirt Pattern\" \"973PS5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Blast Armor (Green Plates) Pattern\" \"973PSB.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Blast Armor (Silver Plates) Pattern\" \"973PSJ.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Camouflage Smock Pattern\" \"973PSM.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Darth Vader Pattern\" \"973PS7.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Hoth Trooper Pattern\" \"973PSH.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Imperial Officer Pattern\" \"973PSQ.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Imperial Shuttle Pilot Pattern\" \"973PSN.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Jawa Pattern\" \"973PSS.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Jedi Robes and Sash Pattern\" \"973PS2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Moisture Farmer Pattern\" \"973PSV.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Pocket-Vest and Techno-Buckle Pattern\" \"973PSC.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Protocol Droid Pattern\" \"973psr.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Rebel A-Wing Pilot Pattern\" \"973PS0.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Rebel Mechanic Pattern\" \"973PSA.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Rebel Pilot Pattern\" \"973PS1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Scout Trooper Pattern\" \"973PSE.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Shirt (Open Collar, No Vest) Pattern\" \"973PS4.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Stormtrooper Pattern\" \"973PSK.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Tunic and Belt Pattern\" \"973psf.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Wrap-Around Tunic Pattern\" \"973PS3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tank Top, Stains, Wrench, and Tattoo Pattern\" \"973PAB.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Telephone\" \"973P8F.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Train Chevron Pattern\" \"973P19.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tri-Coloured Shield and Gold Trim Pattern\" \"973p4s.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tri-Coloured Shield Large Pattern\" \"973P4R.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"TV Logo Pattern Large\" \"973p1m.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"TV Logo Pattern Small\" \"973P1K.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"UFO Alien Orange and Silver Pattern\" \"973P54.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"UFO Alien Triangular Insignia\" \"973P6U.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"UFO Alien Yellow Insignia, 3 Blue Bars\" \"973P6V.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"UFO Alien Circuitry, Red Level\" \"973P6W.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"UFO Silver and Gold Circuitry\" \"973P6X.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Unitron Pattern\" \"973P64.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"US Cavalry General Pattern\" \"973PW1.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"US Cavalry Officer Pattern\" \"973PW2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"US Cavalry Soldier Pattern\" \"973PW3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vertical Striped Blue/Red Pattern\" \"973P02.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vertical Striped Red/Blue Pattern\" \"973P01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Patch Pockets Pattern\" \"973P73.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest, Patch Pockets and Police Badge Pattern\" \"973P74.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Waiter Pattern\" \"973P20.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"White Braces and Cartridge Belt Pattern\" \"973PW6.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"White Diagonal Zip and Pocket Pattern\" \"973p0a.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"White Rope & Patched Collar Pattern\" \"973pdg.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0 \n"
+	"\"White Shirt and Jacket Pattern\" \"973P03.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"White Suit, Brown Vest and Tie Pattern\" \"973PA4.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Windsurfboard Pattern\" \"973P2D.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Wolfpack Pattern\" \"973P44.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Yellow Futuron Pattern\" \"973P6E.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Zipper and Old Police Badge Pattern\" \"973P1G.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Zipper Jacket and Police Logo\" \"973P75.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Torso\" \"30375.DAT\" 0 1 0 0 0 1 0 0 0 1 0 40 0\n"
+	"\"Mechanical Torso with 4 Side Attachment Cylinders\" \"54275.DAT\" 0 1 0 0 0 1 0 0 0 1 0 10 0\n"
+	"\"Skeleton Torso\" \"6260.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Torso Old\" \"17.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[BODY2]\n"
+	"\"Plain\" \"3815.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Gold Belt and Orange Cable\" \"3815P6U.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leather Belt (Red Studs) Pattern\" \"3815p4f.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Purple Greatcoat Pattern\" \"970phb.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Robot Pattern\" \"970P63.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Silver Belt\" \"3815P6W.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Silver Belt and Salmon Cable\" \"3815P6V.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Gunbelt Pattern\" \"970PS5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hips and Legs Short\" \"41879.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Legs Old\" \"15.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Legs\" \"30376.DAT\" 0 1 0 0 0 1 0 0 0 1 0 46 0\n"
+	"\"Slope Brick 65 2 x 2 x 2\" \"3678a.DAT\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"Slope Brick 65 2 x 2 x 2 with Queen's Dress Pattern\" \"3678p4h.DAT\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"Slope Brick 65 2 x 2 x 2 with Witch's Dress Pattern\" \"3678ap01.DAT\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[NECK]\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Armour Plate\" \"2587.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Armour Samurai\" \"30174.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bandana\" \"30133.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Beard Long Forked\" \"60750.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Beard Long with Five Braids\" \"60749.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bracket 1 x 1 - 1 x 1\" \"42446.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Cape Cloth\" \"522.DAT\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Epaulette\" \"2526.DAT\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Airtanks\" \"3838.DAT\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Arrow Quiver\" \"4498.DAT\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"Backpack Non-Opening\" \"2524.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Cape\" \"4524.DAT\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Container D-Basket\" \"4523.DAT\" 0 1 0 0 0 1 0 0 0 1 0 1 0\n"
+	"\"Hair Beard\" \"6132.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Jet-Pack with Stud On Front\" \"4736.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Lifevest\" \"2610.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Scuba Tank\" \"30091.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest\" \"3840.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Crown on Dark Pink Sticker\" \"3840D01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Crown on Violet Sticker\" \"3840D05.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Green Chevrons on Yellow Sticker\" \"3840D03.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Green Chevrons on Yellow/LtGrey Sticker\" \"3840D07.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with White Maltese Cross on Red Sticker\" \"3840D02.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with White Maltese Cross on Red/LtGrey Sticker\" \"3840D06.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Yellow Trefoils on Blue Sticker\" \"3840D04.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Vest with Yellow Trefoils on DkBlue Sticker\" \"3840D08.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[LARM]\n"
+	"\"Right\" \"3818.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bionicle Arm Barraki\" \"57588.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Arm\" \"30377.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Arm Straight\" \"59230.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Arm with Clip and Rod Hole\" \"53989.DAT\" 0 0 0 1 0 1 0 -1 0 0 0 0 0\n"
+	"\"Skeleton Arm\" \"6265.DAT\" 0 1 0 0 0 1 0 0 0 1 -6 0 0.5\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[RARM]\n"
+	"\"Left\" \"3819.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bionicle Arm Barraki\" \"57588.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Arm\" \"30377.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Arm Straight\" \"59230.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Arm with Clip and Rod Hole\" \"53989.DAT\" 0 0 0 1 0 1 0 -1 0 0 0 0 0\n"
+	"\"Skeleton Arm\" \"6265.DAT\" 0 1 0 0 0 1 0 0 0 1 6 0 0.5\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[LHAND]\n"
+	"\"Hand\" \"3820.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hand Hook\" \"2531.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0.4 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[RHAND]\n"
+	"\"Hand\" \"3820.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hand Hook\" \"2531.DAT\" 0 -1 0 0 0 1 0 0 0 1 0 0.4 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[LHANDA]\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Animal Snake\" \"30115.dat\" 0 0.469472 0 -0.882948 0.882948 0 0.469472 0 -1 0 0 -4 -4\n"
+	"\"Animal Starfish\" \"33122.dat\" 0 -1 0 0 0 0 1 0 1 0 0 -26 -6\n"
+	"\"Battleaxe\" \"3848.dat\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"Bar 1.5L with Clip\" \"48729.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Bar 3L\" \"87994.dat\" 0 1 0 0 0 1 0 0 0 1 0 -40 0\n"
+	"\"Bar 3L with White Ends\" \"87994p01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -40 0\n"
+	"\"Bar 4L Light Sabre Blade\" \"30374.dat\" 0 1 0 0 0 -1 0 0 0 -1 0 12 0\n"
+	"\"Bar 4.5L Straight\" \"71184.dat\" 0 1 0 0 0 1 0 0 0 1 0 20 0\n"
+	"\"Bar 4.5L with Handle\" \"87618.dat\" 0 -1 0 0 0 -1 0 0 0 1 0 -80 0\n"
+	"\"Bar 6L with Thick Stop\" \"63965.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Bar 6.6L with Stop\" \"4095.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Bow with Arrow\" \"4499.dat\" 0 0 0 -1 0 1 0 1 0 0 0 1 0\n"
+	"\"Bugle\" \"71342.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Camera Movie\" \"30148.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Camera Snapshot\" \"30089.dat\" 0 0 0.5 0.866025 0 0.866025 -0.5 -1 0 0 -4.062 2.5 -18\n"
+	"\"Camera with Side Sight\" \"4360.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -24 6.5\n"
+	"\"Castle Lance\" \"3849.dat\" 0 1 0 0 0 0 1 0 -1 0 0 40 0\n"
+	"\"Circular Blade Saw\" \"30194.dat\" 0 -1 0 0 0 -0.422618 0.906308 0 0.906308 0.422618 0 15 -17\n"
+	"\"Coin with 10 Mark\" \"70501a.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Coin with 20 Mark\" \"70501b.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Coin with 30 Mark\" \"70501c.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Coin with 40 Mark\" \"70501d.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Compass\" \"889c01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Crossbow\" \"2570.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Cup\" \"3899.dat\" 0 1 0 0 0 1 0 0 0 1 0 -15 -20\n"
+	"\"Dinner Plate\" \"6256.dat\" 0 0.0954045 -0.866025 -0.490814 0.981627 0 0.190809 -0.165245 -0.5 0.850114 7 -5 -26\n"
+	"\"Dynamite Sticks Bundle\" \"64728.dat\" 0 0.5 0 0.866025 0 1 0 -0.866025 0 0.5 0 -28 -9\n"
+	"\"Figur Club\" \"60659.dat\" 0 1 0 0 0 1 0 0 0 1 0 3 0\n"
+	"\"Food Banana\" \"33085.dat\" 0 0 -1 0 1 0 0 0 0 1 0 0 0\n"
+	"\"Food Carrot\" \"33172.dat\" 0 1 0 0 0 1 0 0 0 1 0 -50 0\n"
+	"\"Food Carrot Top\" \"33183.dat\" 0 1 0 0 0 1 0 0 0 1 0 12 0\n"
+	"\"Food Cherry\" \"22667.dat\" 0 1 0 0 0 1 0 0 0 1 0 -11 0\n"
+	"\"Food Croissant\" \"33125.dat\" 0 0 1 0 -0.819152 0 0.573576 0.573576 0 0.819152 4 -27 -9\n"
+	"\"Food French Bread\" \"4342.dat\" 0 0 -0.292372 0.956305 1 0 0 0 0.956305 0.292372 4.5 0 5\n"
+	"\"Food Popsicle\" \"30222.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Food Turkey Leg\" \"33057.dat\" 0 0 0.985 -0.174 0 0.174 0.985 1 0 0 9 -24 -1\n"
+	"\"Frypan\" \"4528.dat\" 0 0 1 0 0 0 1 1 0 0 -4 -24 0\n"
+	"\"Hairbrush\" \"3852.dat\" 0 -1 0 0 0 1 0 0 0 -1 2.7 -8 0\n"
+	"\"Hand Truck (Complete)\" \"2495c01.dat\" 0 1 0 0 0 0 1 0 -1 0 22 -4 -58\n"
+	"\"Harpoon\" \"57467.dat\" 0 1 0 0 0 1 0 0 0 1 0 28 0\n"
+	"\"Hose Nozzle with Side String Hole\" \"58367.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Hose Nozzle with Side String Hole Simplified\" \"60849.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Goblet\" \"2343.dat\" 0 1 0 0 0 1 0 0 0 1 0 -26 0\n"
+	"\"Gun Flintlock Pistol\" \"2562.dat\" 0 1 0 0 0 1 0 0 0 1 0 -1 0\n"
+	"\"Gun Musket\" \"2561.dat\" 0 0 0.707 0.707 0 0.707 -0.707 -1 0 0 -25.1 -33.7 0\n"
+	"\"Gun Revolver\" \"30132.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Gun Rifle\" \"30141.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -8 0\n"
+	"\"Gun Semiautomatic Pistol\" \"55707a.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Gun SW Small Blaster DC-17\" \"61190a.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Ice Axe\" \"30193.dat\" 0 1 0 0 0 1 0 0 0 1 0 6 0\n"
+	"\"Jackhammer\" \"30228.dat\" 0 0.326 0 0.946 -0.899 -0.309 0.31 0.292 -0.951 0.101 2.5 -18.5 11\n"
+	"\"Knife\" \"37.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ladle\" \"4337.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Lightning\" \"59233.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Loudhailer\" \"4349.dat\" 0 1 0 0 0 1 0 0 0 1 0 -16 0\n"
+	"\"Magic Wand\" \"6124.dat\" 0 1 0 0 0 1 0 0 0 1 0 8 0\n"
+	"\"Metal Detector\" \"4479.dat\" 0 1 0 0 0 1 0 0 0 1 0 -24 0\n"
+	"\"Mug\" \"33054.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 -20\n"
+	"\"Polearm Halberd\" \"6123.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Radio with Long Handle\" \"3962b.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -1 0\n"
+	"\"Radio with Short Handle\" \"3962a.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -1 0\n"
+	"\"Rock 1 x 1 Gem Facetted\" \"30153.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Saucepan\" \"4529.dat\" 0 0 1 0 0 0 1 1 0 0 -6 -24 0\n"
+	"\"Sextant\" \"30154.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -35 0\n"
+	"\"Shield Octagonal with Stud\" \"48494.dat\" 0 0 0 1 -1 0 0 0 -1 0 0 -2 0\n"
+	"\"Shield Octagonal without Stud\" \"61856.dat\" 0 0 0 1 -1 0 0 0 -1 0 0 -2 0\n"
+	"\"Shield Ovoid\" \"2586.dat\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with American Indian Pattern\" \"2586PW1.dat\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Batlord Pattern\" \"2586P4F.dat\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Blue Dragon Pattern\" \"2586P4C.dat\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Bull Head Pattern\" \"2586P4G.DAT\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Golden Lion Pattern\" \"2586PH1.DAT\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Green Dragon Pattern\" \"2586P4B.dat\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Royal Knights Lion Pattern\" \"2586P4D.dat\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with Silver Snake Pattern\" \"2586PH2.DAT\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Ovoid with SW Gungans Patrol Pattern\" \"2586PS1.DAT\" 0 0 0 1 -1 0 0 0 -1 0 -4 -1 0\n"
+	"\"Shield Round\" \"3876.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular\" \"3846.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Batlord Pattern\" \"3846p4f.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Black Falcon Pattern\" \"3846p43.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Black Falcon Blue Border Pattern\" \"3846p45.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Black Falcon Yellow Border Pattern\" \"3846p46.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Blue Dragon Pattern\" \"3846p4c.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Blue Lion on Yellow Background\" \"3846p4g.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Forestman Pattern\" \"3846p48.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Green Chevrons on Yellow Sticker\" \"3846d03.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Green Chevrons on Yellow/LtGray\" \"3846d06.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Crown on Dark-Pink Sticker\" \"3846d01.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Crown on Violet Sticker\" \"3846d05.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Lion Head, Blue & Yellow Pattern\" \"3846p4e.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Maroon/Red Quarters Pattern\" \"3846p4u.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Red and Gray Pattern, Blue Frame\" \"3846p47.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Red/Peach Quarters Pattern\" \"3846p4t.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Royal Knights Lion Pattern\" \"3846p4d.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with White Maltese Cross on Red Sticker\" \"3846d02.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Wolfpack Pattern\" \"3846p44.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Yellow Lion on Blue Background\" \"3846p4h.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Yellow Trefoils on Blue Sticker\" \"3846d04.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Yellow Trefoils on DkBlue Sticker\" \"3846d07.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -12 0\n"
+	"\"Shovel\" \"3837.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\"Signal Holder\" \"3900.dat\" 0 1 0 0 0 0 -1 0 1 0 0 -36 -2\n"
+	"\"Ski Pole\" \"90514.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Space Scanner Tool\" \"30035.dat\" 0 1 0 0 0 1 0 0 0 1 0 -19 -10\n"
+	"\"Spear\" \"4497.dat\" 0 1 0 0 0 1 0 0 0 1 0 -40 0\n"
+	"\"Spear with Four Side Blades\" \"43899.dat\" 0 1 0 0 0 1 0 0 0 1 0 -144 0\n"
+	"\"Speargun\" \"30088.dat\" 0 1 0 0 0 1 0 0 0 1 0 -13 0\n"
+	"\"Statuette\" \"90398.dat\" 0 1 0 0 0 1 0 0 0 1 0 -1 0\n"
+	"\"Suitcase\" \"4449.dat\" 0 0 0 -1 1 0 0 0 -1 0 0 0 0\n"
+	"\"Sword Cutlass\" \"2530.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Sword Greatsword\" \"59.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Sword Katana\" \"30173.dat\" 0 1 0 0 0 1 0 0 0 1 0 6 0\n"
+	"\"Sword Scimitar\" \"43887.dat\" 0 1 0 0 0 1 0 0 0 1 0 -18 0\n"
+	"\"Sword Shortsword\" \"3847.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\"Syringe\" \"87989.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Telescope\" \"64644.dat\" 0 1 0 0 0 1 0 0 0 1 0 -11 0\n"
+	"\"Tool Binoculars Space\" \"30304.dat\" 0 1 0 0 0 0 -1 0 1 0 -5 -1 0\n"
+	"\"Tool Binoculars Town\" \"30162.dat\" 0 1 0 0 0 0 -1 0 1 0 -5 -1.6 0\n"
+	"\"Tool Box Wrench\" \"6246d.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Tool Hammer\" \"6246b.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Tool Handaxe\" \"3835.dat\" 0 1 0 0 0 1 0 0 0 1 0 -16 0\n"
+	"\"Tool Light Sabre Hilt\" \"577.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Tool Light Sabre - On (Shortcut)\" \"577c01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Tool Light Sabre - Dual On (Shortcut)\" \"577c02.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Tool Magnifying Glass\" \"30152.dat\" 0 1 0 0 0 1 0 0 0 1 0 -52 0\n"
+	"\"Tool Mallet\" \"4522.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -28 0\n"
+	"\"Tool Oar\" \"2542.dat\" 0 -1 0 0 0 -1 0 0 0 1 0 40 0\n"
+	"\"Tool Oilcan\" \"55296.DAT\" 0 1 0 0 0 1 0 0 0 1 0 -6 0\n"
+	"\"Tool Open End Wrench\" \"6246e.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Tool Pickaxe\" \"3841.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\"Tool Power Drill\" \"6246c.dat\" 0 1 0 0 0 1 0 0 0 1 0 -6 0\n"
+	"\"Tool Screwdriver\" \"6246a.dat\" 0 1 0 0 0 1 0 0 0 1 0 -34 0\n"
+	"\"Tool Spanner/Screwdriver\" \"4006.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -14 0\n"
+	"\"Tool Pushbroom\" \"3836.dat\" 0 0 0 -1 0 -1 0 -1 0 0 0 44 0\n"
+	"\"Tool Fishing Rod\" \"2614.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tool Hose Nozzle with Handle\" \"4210a.dat\" 0 -1 0 0 0 1 0 0 0 -1 0 -12 0\n"
+	"\"Torch\" \"3959.dat\" 0 1 0 0 0 1 0 0 0 1 0 -13 0\n"
+	"\"Underwater Scooter\" \"30092.dat\" 0 -1 0 0 0 1 0 0 0 -1 20 -22 -8.5\n"
+	"\"Whip\" \"2488.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Whip in Latched Position\" \"2488c01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Wine Glass\" \"33061.dat\" 0 1 0 0 0 1 0 0 0 1 0 -32 0\n"
+	"\"Minifig Zip Line Handle\" \"30229.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\n"
+	"[RHANDA]\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Animal Snake\" \"30115.dat\" 0 -0.469472 0 0.882948 0.882948 0 0.469472 0 1 0 0 -4 4\n"
+	"\"Animal Starfish\" \"33122.dat\" 0 -1 0 0 0 0 1 0 1 0 0 -26 -6\n"
+	"\"Battleaxe\" \"3848.dat\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"Bar 1.5L with Clip\" \"48729.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Bar 3L\" \"87994.dat\" 0 1 0 0 0 1 0 0 0 1 0 -40 0\n"
+	"\"Bar 3L with White Ends\" \"87994p01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -40 0\n"
+	"\"Bar 4L Light Sabre Blade\" \"30374.dat\" 0 1 0 0 0 -1 0 0 0 -1 0 12 0\n"
+	"\"Bar 4.5L Straight\" \"71184.dat\" 0 1 0 0 0 1 0 0 0 1 0 20 0\n"
+	"\"Bar 4.5L with Handle\" \"87618.dat\" 0 -1 0 0 0 -1 0 0 0 1 0 -80 0\n"
+	"\"Bar 6L with Thick Stop\" \"63965.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Bar 6.6L with Stop\" \"4095.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Bugle\" \"71342.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Bow with Arrow\" \"4499.dat\" 0 0 0 -1 0 1 0 1 0 0 0 1 0\n"
+	"\"Camera Movie\" \"30148.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Camera Snapshot\" \"30089.dat\" 0 0 0.5 0.866025 0 0.866025 -0.5 -1 0 0 -4.062 2.5 -18\n"
+	"\"Camera with Side Sight\" \"4360.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -24 6.5\n"
+	"\"Castle Lance\" \"3849.dat\" 0 1 0 0 0 0 1 0 -1 0 0 40 0\n"
+	"\"Circular Blade Saw\" \"30194.dat\" 0 -1 0 0 0 -0.422618 0.906308 0 0.906308 0.422618 0 15 -17\n"
+	"\"Coin with 10 Mark\" \"70501a.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Coin with 20 Mark\" \"70501b.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Coin with 30 Mark\" \"70501c.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Coin with 40 Mark\" \"70501d.dat\" 0 0 1 0 0 0 -1 -1 0 0 -2 -4 -10\n"
+	"\"Compass\" \"889c01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Crossbow\" \"2570.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Cup\" \"3899.dat\" 0 1 0 0 0 1 0 0 0 1 0 -15 -20\n"
+	"\"Dinner Plate\" \"6256.dat\" 0 -0.0954045 0.866025 0.490814 -0.981627 0 -0.190809 -0.165245 -0.5 0.850114 -7 -5 -26\n"
+	"\"Dynamite Sticks Bundle\" \"64728.dat\" 0 0.5 0 0.866025 0 1 0 -0.866025 0 0.5 0 -28 -9\n"
+	"\"Figur Club\" \"60659.dat\" 0 1 0 0 0 1 0 0 0 1 0 3 0\n"
+	"\"Food Banana\" \"33085.dat\" 0 0 -1 0 1 0 0 0 0 1 0 0 0\n"
+	"\"Food Carrot\" \"33172.dat\" 0 1 0 0 0 1 0 0 0 1 0 -50 0\n"
+	"\"Food Cherry\" \"22667.dat\" 0 1 0 0 0 1 0 0 0 1 0 -11 0\n"
+	"\"Food Croissant\" \"33125.dat\" 0 0 1 0 -0.819152 0 0.573576 0.573576 0 0.819152 4 -27 -9\n"
+	"\"Food French Bread\" \"4342.dat\" 0 0 0.292372 0.956305 1 0 0 0 0.956305 -0.292372 -4.5 0 5\n"
+	"\"Food Popsicle\" \"30222.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Food Turkey Leg\" \"33057.dat\" 0 0 -0.985 0.174 0 0.174 0.985 -1 0 0 -9 -24 -1\n"
+	"\"Frypan\" \"4528.dat\" 0 0 1 0 0 0 1 1 0 0 -4 -24 0\n"
+	"\"Hairbrush\" \"3852.dat\" 0 -1 0 0 0 1 0 0 0 -1 2.7 -8 0\n"
+	"\"Hand Truck (Complete)\" \"2495c01.dat\" 0 1 0 0 0 0 1 0 -1 0 -22 -4 -58\n"
+	"\"Harpoon\" \"57467.dat\" 0 1 0 0 0 1 0 0 0 1 0 28 0\n"
+	"\"Hose Nozzle with Side String Hole\" \"58367.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Hose Nozzle with Side String Hole Simplified\" \"60849.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Goblet\" \"2343.dat\" 0 1 0 0 0 1 0 0 0 1 0 -26 0\n"
+	"\"Gun Flintlock Pistol\" \"2562.dat\" 0 1 0 0 0 1 0 0 0 1 0 -1 0\n"
+	"\"Gun Musket\" \"2561.dat\" 0 0 0.707 0.707 0 0.707 -0.707 -1 0 0 -25.1 -33.7 0\n"
+	"\"Gun Revolver\" \"30132.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Gun Rifle\" \"30141.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -8 0\n"
+	"\"Gun Semiautomatic Pistol\" \"55707a.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Gun SW Small Blaster DC-17\" \"61190a.dat\" 0 1 0 0 0 1 0 0 0 1 0 -3 0\n"
+	"\"Ice Axe\" \"30193.dat\" 0 1 0 0 0 1 0 0 0 1 0 6 0\n"
+	"\"Jackhammer\" \"30228.dat\" 0 0.326 0 -0.946 0.899 -0.309 0.31 -0.292 -0.951 -0.101 -2.5 -18.5 11\n"
+	"\"Knife\" \"37.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Ladle\" \"4337.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Lightning\" \"59233.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Loudhailer\" \"4349.dat\" 0 1 0 0 0 1 0 0 0 1 0 -16 0\n"
+	"\"Magic Wand\" \"6124.dat\" 0 1 0 0 0 1 0 0 0 1 0 8 0\n"
+	"\"Metal Detector\" \"4479.dat\" 0 1 0 0 0 1 0 0 0 1 0 -24 0\n"
+	"\"Mug\" \"33054.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 -20\n"
+	"\"Polearm Halberd\" \"6123.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Radio with Long Handle\" \"3962b.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -1 0\n"
+	"\"Radio with Short Handle\" \"3962a.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -1 0\n"
+	"\"Rock 1 x 1 Gem Facetted\" \"30153.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Saucepan\" \"4529.dat\" 0 0 1 0 0 0 1 1 0 0 -6 -24 0\n"
+	"\"Sextant\" \"30154.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -35 0\n"
+	"\"Shield Octagonal with Stud\" \"48494.dat\" 0 0 0 -1 1 0 0 0 -1 0 0 -2 0\n"
+	"\"Shield Octagonal without Stud\" \"61856.dat\" 0 0 0 -1 1 0 0 0 -1 0 0 -2 0\n"
+	"\"Shield Ovoid\" \"2586.dat\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with American Indian Pattern\" \"2586pw1.dat\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Batlord Pattern\" \"2586P4F.dat\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Blue Dragon Pattern\" \"2586p4c.dat\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Bull Head Pattern\" \"2586P4G.DAT\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Golden Lion Pattern\" \"2586ph1.DAT\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Green Dragon Pattern\" \"2586p4b.dat\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Royal Knights Lion Pattern\" \"2586p4d.dat\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with Silver Snake Pattern\" \"2586PH2.DAT\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Ovoid with SW Gungans Patrol Pattern\" \"2586ps1.DAT\" 0 0 0 -1 1 0 0 0 -1 0 4 -1 0\n"
+	"\"Shield Round\" \"3876.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular\" \"3846.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Batlord Pattern\" \"3846p4f.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Black Falcon Pattern\" \"3846p43.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Black Falcon Blue Border Pattern\" \"3846p45.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Black Falcon Yellow Border Pattern\" \"3846p46.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Blue Dragon Pattern\" \"3846p4c.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Blue Lion on Yellow Background\" \"3846p4g.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Forestman Pattern\" \"3846p48.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Green Chevrons on Yellow Sticker\" \"3846d03.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Green Chevrons on Yellow/LtGray\" \"3846d06.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Crown on Dark-Pink Sticker\" \"3846d01.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Crown on Violet Sticker\" \"3846d05.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Lion Head, Blue & Yellow Pattern\" \"3846p4e.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Maroon/Red Quarters Pattern\" \"3846p4u.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Red and Gray Pattern, Blue Frame\" \"3846p47.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Red/Peach Quarters Pattern\" \"3846p4t.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Royal Knights Lion Pattern\" \"3846p4d.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with White Maltese Cross on Red Sticker\" \"3846d02.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Wolfpack Pattern\" \"3846p44.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Yellow Lion on Blue Background\" \"3846p4h.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Yellow Trefoils on Blue Sticker\" \"3846d04.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shield Triangular with Yellow Trefoils on DkBlue Sticker\" \"3846d07.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -12 0\n"
+	"\"Shovel\" \"3837.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\"Signal Holder\" \"3900.dat\" 0 1 0 0 0 0 -1 0 1 0 0 -36 -2\n"
+	"\"Ski Pole\" \"90514.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Space Scanner Tool\" \"30035.dat\" 0 1 0 0 0 1 0 0 0 1 0 -19 -10\n"
+	"\"Spear\" \"4497.dat\" 0 1 0 0 0 1 0 0 0 1 0 -40 0\n"
+	"\"Spear with Four Side Blades\" \"43899.dat\" 0 1 0 0 0 1 0 0 0 1 0 -144 0\n"
+	"\"Speargun\" \"30088.dat\" 0 1 0 0 0 1 0 0 0 1 0 -13 0\n"
+	"\"Statuette\" \"90398.dat\" 0 1 0 0 0 1 0 0 0 1 0 -1 0\n"
+	"\"Suitcase\" \"4449.dat\" 0 0 0 -1 1 0 0 0 -1 0 0 0 0\n"
+	"\"Sword Cutlass\" \"2530.dat\" 0 1 0 0 0 1 0 0 0 1 0 -2 0\n"
+	"\"Sword Greatsword\" \"59.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Sword Katana\" \"30173.dat\" 0 1 0 0 0 1 0 0 0 1 0 6 0\n"
+	"\"Sword Scimitar\" \"43887.dat\" 0 1 0 0 0 1 0 0 0 1 0 -18 0\n"
+	"\"Sword Shortsword\" \"3847.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\"Syringe\" \"87989.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Telescope\" \"64644.dat\" 0 1 0 0 0 1 0 0 0 1 0 -11 0\n"
+	"\"Tool Binoculars Space\" \"30304.dat\" 0 1 0 0 0 0 -1 0 1 0 -5 -1 0\n"
+	"\"Tool Binoculars Town\" \"30162.dat\" 0 1 0 0 0 0 -1 0 1 0 -5 -1.6 0\n"
+	"\"Tool Box Wrench\" \"6246d.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Tool Hammer\" \"6246b.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Tool Handaxe\" \"3835.dat\" 0 1 0 0 0 1 0 0 0 1 0 -16 0\n"
+	"\"Tool Light Sabre Hilt\" \"577.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Tool Light Sabre - On (Shortcut)\" \"577c01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Tool Light Sabre - Dual On (Shortcut)\" \"577c02.dat\" 0 1 0 0 0 1 0 0 0 1 0 -20 0\n"
+	"\"Tool Magnifying Glass\" \"30152.dat\" 0 1 0 0 0 1 0 0 0 1 0 -52 0\n"
+	"\"Tool Mallet\" \"4522.dat\" 0 0 0 1 0 1 0 -1 0 0 0 -28 0\n"
+	"\"Tool Oar\" \"2542.dat\" 0 -1 0 0 0 -1 0 0 0 1 0 40 0\n"
+	"\"Tool Oilcan\" \"55296.DAT\" 0 1 0 0 0 1 0 0 0 1 0 -6 0\n"
+	"\"Tool Open End Wrench\" \"6246e.dat\" 0 1 0 0 0 1 0 0 0 1 0 -36 0\n"
+	"\"Tool Pickaxe\" \"3841.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\"Tool Power Drill\" \"6246c.dat\" 0 1 0 0 0 1 0 0 0 1 0 -6 0\n"
+	"\"Tool Screwdriver\" \"6246a.dat\" 0 1 0 0 0 1 0 0 0 1 0 -34 0\n"
+	"\"Tool Spanner/Screwdriver\" \"4006.dat\" 0 0 0 -1 0 1 0 1 0 0 0 -14 0\n"
+	"\"Tool Pushbroom\" \"3836.dat\" 0 0 0 -1 0 -1 0 -1 0 0 0 44 0\n"
+	"\"Tool Fishing Rod\" \"2614.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Tool Hose Nozzle with Handle\" \"4210a.dat\" 0 -1 0 0 0 1 0 0 0 -1 0 -12 0\n"
+	"\"Torch\" \"3959.dat\" 0 1 0 0 0 1 0 0 0 1 0 -13 0\n"
+	"\"Underwater Scooter\" \"30092.dat\" 0 -1 0 0 0 1 0 0 0 -1 -20 -22 -8.5\n"
+	"\"Whip\" \"2488.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Whip in Latched Position\" \"2488c01.dat\" 0 1 0 0 0 1 0 0 0 1 0 -8 0\n"
+	"\"Wine Glass\" \"33061.dat\" 0 1 0 0 0 1 0 0 0 1 0 -32 0\n"
+	"\"Minifig Zip Line Handle\" \"30229.dat\" 0 1 0 0 0 1 0 0 0 1 0 -12 0\n"
+	"\n"
+	"[LLEG]\n"
+	"\"Plain Leg\" \"3816.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Astro Pattern\" \"3816P6F.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Buttoned Pocket Pattern\" \"3816PA3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Golden Circuit Pattern\" \"3816P6W.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Grass Skirt Pattern\" \"3816p3j.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Green Kilt and Toes Pattern\" \"3816pa2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Laboratory Smock Pattern\" \"3816PDE.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leather Straps (Red Studs) Pattern\" \"3816p4f.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Orange Cable Pattern\" \"3816P6u.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Purple Greatcoat Pattern\" \"971phb.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Robot Pattern\" \"971P63.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Salmon Cable Pattern\" \"3816P6V.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"SW Gunbelt Pattern\" \"971PS5.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leg Skeleton\" \"6266.DAT\" 0 1 0 0 0 1 0 0 0 1 -10 0 0\n"
+	"\"Leg Wooden\" \"2532.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hips and Legs Short -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Legs Old -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Legs -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Skirts (Slope Brick 65 2 x 2 x 2) -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[RLEG]\n"
+	"\"Plain Leg\" \"3817.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Astro Pattern\" \"3817P6F.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Buttoned Pocket Pattern\" \"3817PA3.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Golden Circuit Pattern\" \"3817P6W.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Grass Skirt Pattern\" \"3817p3j.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Green Kilt and Toes Pattern\" \"3817pa2.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Laboratory Smock Pattern\" \"3817PDE.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leather Straps (Red Studs) Pattern\" \"3817p4f.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Orange Cable Pattern\" \"3817P6u.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Purple Greatcoat Pattern\" \"972phb.dat\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Robot Pattern\" \"972P63.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Salmon Cable Pattern\" \"3817P6V.DAT\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Leg Wooden\" \"2532.DAT\" 0 -1 0 0 0 1 0 0 0 -1 0 0 0\n"
+	"\"Leg Skeleton\" \"6266.DAT\" 0 1 0 0 0 1 0 0 0 1 10 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Hips and Legs Short -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Legs Old -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Mechanical Legs -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Skirts (Slope Brick 65 2 x 2 x 2) -> Hips:\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\n"
+	"[LLEGA]\n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Flipper\" \"2599.DAT\" 0 0.996 0 0.087 0 1 0 -0.087 0 0.996 -10 28 -1\n"
+	"\"Skakeboard with Black Wheels\" \"42511c01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 28 1\n"
+	"\"Snowshoe\" \"30284.DAT\" 0 1 0 0 0 1 0 0 0 1 -10 28 -1\n"
+	"\"Ski\" \"6120.DAT\" 0 1 0 0 0 1 0 0 0 1 -10 28 1\n"
+	"\"Ski 6L\" \"90509.DAT\" 0 1 0 0 0 1 0 0 0 1 -10 28 -1\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Plate 2x4 with Curved Beveled Sides\" \"88000.DAT\" 0 1 0 0 0 1 0 0 0 1 0 28 0\n"
+	"\n"
+	"[RLEGA] \n"
+	"\"None\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Flipper\" \"2599.DAT\" 0 0.996 0 -0.087 0 1 0 0.087 0 0.996 10 28 -1\n"
+	"\"Skakeboard with Black Wheels\" \"42511c01.DAT\" 0 1 0 0 0 1 0 0 0 1 0 28 1\n"
+	"\"Snowshoe\" \"30284.DAT\" 0 1 0 0 0 1 0 0 0 1 10 28 -1\n"
+	"\"Ski\" \"6120.dat\" 0 1 0 0 0 1 0 0 0 1 10 28 1\n"
+	"\"Ski 6L\" \"90509.DAT\" 0 1 0 0 0 1 0 0 0 1 -10 28 -1\n"
+	"\"--------------------------------------------------------------------------------\" \"\" 0 1 0 0 0 1 0 0 0 1 0 0 0\n"
+	"\"Plate 2x4 with Curved Beveled Sides\" \"88000.DAT\" 0 1 0 0 0 1 0 0 0 1 0 28 0\n"
+	"\n";
 
 // =============================================================================
 // MinifigWizard class
 
-MinifigWizard::MinifigWizard(GLWindow *share)
-	: GLWindow(share)
+MinifigWizard::MinifigWizard (GLWindow *share)
+	: GLWindow (share)
 {
-	const int colors[LC_MFW_NUMITEMS] = { 4, 14, 1, 6, 4, 4, 14, 14, 6, 6, 0, 0, 0, 6, 6 };
-	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "976", "975", "977", "977",
-	                                        "None", "None", "970", "972", "971", "None", "None" };
+	char Filename[LC_MAXPATH];
+	strcpy(Filename, lcGetPiecesLibrary()->GetLibraryPath());
+	strcat(Filename, "mlcad.ini");
+
+	FileDisk DiskSettings;
+	if (DiskSettings.Open(Filename, "rt"))
+	{
+		ParseSettings(DiskSettings);
+	}
+	else
+	{
+		FileMem MemSettings;
+		MemSettings.Write(DefaultSettings, strlen(DefaultSettings)+1);
+		ParseSettings(MemSettings);
+	}
+
+	const unsigned char colors[LC_MFW_NUMITEMS] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
+	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
+	                                        "None", "None", "3815", "3817", "3816", "None", "None" };
 	int i;
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
-		m_Colors[i] = 0;
-
-		for (int j = 0; j < lcNumUserColors; j++)
-			if (lcColorList[j].Code == colors[i])
-			{
-				m_Colors[i] = j;
-				break;
-			}
-
+		m_Colors[i] = colors[i];
 		m_Angles[i] = 0;
 
 		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
 		if (m_Info[i] != NULL)
 			m_Info[i]->AddRef();
 	}
+
+	Calculate();
 
 	m_MinifigCount = 0;
 	m_MinifigNames = NULL;
@@ -467,115 +829,230 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 	{
 		char *ptr, buf[32];
 
-		m_MinifigCount = Sys_ProfileLoadInt("MinifigWizard", "Count", 0);
-		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**)*m_MinifigCount);
-		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**)*m_MinifigCount);
+		m_MinifigCount = Sys_ProfileLoadInt ("MinifigWizard", "Count", 0);
+		m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
+		m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
 
 		for (i = 0; i < m_MinifigCount; i++)
 		{
-			sprintf(buf, "Minifig%.2dName", i);
-			ptr = Sys_ProfileLoadString("MinifigWizard", buf, buf);
-			m_MinifigNames[i] = (char*)malloc(strlen(ptr) + 1);
-			strcpy(m_MinifigNames[i], ptr);
+			sprintf (buf, "Minifig%.2dName", i);
+			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, buf);
+			m_MinifigNames[i] = (char*)malloc (strlen (ptr) + 1);
+			strcpy (m_MinifigNames[i], ptr);
 
-			m_MinifigTemplates[i] = (char*)malloc(768);
-			sprintf(buf, "Minifig%.2dColors", i);
-			ptr = Sys_ProfileLoadString("MinifigWizard", buf, "");
-			if (ptr[strlen(ptr) - 1] != ' ')
-				strcat(ptr, " ");
-			strcpy(m_MinifigTemplates[i], ptr);
+			m_MinifigTemplates[i] = (char*)malloc (768);
+			sprintf (buf, "Minifig%.2dColors", i);
+			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
+			if (ptr[strlen (ptr) - 1] != ' ')
+				strcat (ptr, " ");
+			strcpy (m_MinifigTemplates[i], ptr);
 
-			sprintf(buf, "Minifig%.2dPieces", i);
-			ptr = Sys_ProfileLoadString("MinifigWizard", buf, "");
-			if (ptr[strlen(ptr) - 1] != ' ')
-				strcat(ptr, " ");
-			strcat(m_MinifigTemplates[i], ptr);
+			sprintf (buf, "Minifig%.2dPieces", i);
+			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
+			if (ptr[strlen (ptr) - 1] != ' ')
+				strcat (ptr, " ");
+			strcat (m_MinifigTemplates[i], ptr);
 
-			sprintf(buf, "Minifig%.2dAngles", i);
-			ptr = Sys_ProfileLoadString("MinifigWizard", buf, "");
-			strcat(m_MinifigTemplates[i], ptr);
+			sprintf (buf, "Minifig%.2dAngles", i);
+			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
+			strcat (m_MinifigTemplates[i], ptr);
 		}
 	}
 	else
-		Sys_MessageBox("Unknown Minifig Preferences.");
+		Sys_MessageBox ("Unknown Minifig Preferences.");
 }
 
-MinifigWizard::~MinifigWizard()
+MinifigWizard::~MinifigWizard ()
 {
 	char *ptr, buf[32];
 	int i, j;
 
-	Sys_ProfileSaveInt("MinifigWizard", "Version", 1);
-	Sys_ProfileSaveInt("MinifigWizard", "Count", m_MinifigCount);
+	Sys_ProfileSaveInt ("MinifigWizard", "Version", 1);
+	Sys_ProfileSaveInt ("MinifigWizard", "Count", m_MinifigCount);
 
 	for (i = 0; i < m_MinifigCount; i++)
 	{
 		char *value;
 		ptr = m_MinifigTemplates[i];
 
-		sprintf(buf, "Minifig%.2dName", i);
-		Sys_ProfileSaveString("MinifigWizard", buf, m_MinifigNames[i]);
+		sprintf (buf, "Minifig%.2dName", i);
+		Sys_ProfileSaveString ("MinifigWizard", buf, m_MinifigNames[i]);
 
 		value = ptr;
 		for (j = 0; j < LC_MFW_NUMITEMS; j++)
-			ptr = strchr(ptr, ' ') + 1;
+			ptr = strchr (ptr, ' ') + 1;
 		*(--ptr) = '\0';
 
-		sprintf(buf, "Minifig%.2dColors", i);
-		Sys_ProfileSaveString("MinifigWizard", buf, value);
+		sprintf (buf, "Minifig%.2dColors", i);
+		Sys_ProfileSaveString ("MinifigWizard", buf, value);
 		ptr++;
 
 		value = ptr;
 		for (j = 0; j < LC_MFW_NUMITEMS; j++)
-			ptr = strchr(ptr, ' ') + 1;
+			ptr = strchr (ptr, ' ') + 1;
 		*(--ptr) = '\0';
 
-		sprintf(buf, "Minifig%.2dPieces", i);
-		Sys_ProfileSaveString("MinifigWizard", buf, value);
+		sprintf (buf, "Minifig%.2dPieces", i);
+		Sys_ProfileSaveString ("MinifigWizard", buf, value);
 		ptr++;
 
-		sprintf(buf, "Minifig%.2dAngles", i);
-		Sys_ProfileSaveString("MinifigWizard", buf, ptr);
+		sprintf (buf, "Minifig%.2dAngles", i);
+		Sys_ProfileSaveString ("MinifigWizard", buf, ptr);
 
-		free(m_MinifigNames[i]);
-		free(m_MinifigTemplates[i]);
+		free (m_MinifigNames[i]);
+		free (m_MinifigTemplates[i]);
 	}
-
-	free(m_MinifigNames);
-	free(m_MinifigTemplates);
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
-		if (m_Info[i])
-			m_Info[i]->DeRef();
+	free (m_MinifigNames);
+	free (m_MinifigTemplates);
 }
 
-void MinifigWizard::OnDraw()
+void MinifigWizard::ParseSettings(File& Settings)
+{
+	const char* SectionNames[LC_MFW_NUMITEMS] =
+	{
+		"[HATS]", // LC_MFW_HAT
+		"[HEAD]", // LC_MFW_HEAD
+		"[BODY]", // LC_MFW_TORSO
+		"[NECK]", // LC_MFW_NECK
+		"[RARM]", // LC_MFW_LEFT_ARM
+		"[LARM]", // LC_MFW_RIGHT_ARM
+		"[RHAND]", // LC_MFW_LEFT_HAND
+		"[LHAND]", // LC_MFW_RIGHT_HAND
+		"[RHANDA]", // LC_MFW_LEFT_TOOL
+		"[LHANDA]", // LC_MFW_RIGHT_TOOL
+		"[BODY2]", // LC_MFW_HIPS
+		"[RLEG]", // LC_MFW_LEFT_LEG
+		"[LLEG]", // LC_MFW_RIGHT_LEG
+		"[RLEGA]", // LC_MFW_LEFT_SHOE
+		"[LLEGA]", // LC_MFW_RIGHT_SHOE
+	};
+
+	for (int SectionIndex = 0; SectionIndex < LC_MFW_NUMITEMS; SectionIndex++)
+	{
+		ObjArray<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
+
+		InfoArray.RemoveAll();
+		Settings.Seek(0, SEEK_SET);
+
+		char Line[1024];
+		bool FoundSection = false;
+		const char* SectionName = SectionNames[SectionIndex];
+		int SectionNameLength = strlen(SectionName);
+
+		// Find start of section
+		while (Settings.ReadLine(Line, sizeof(Line)))
+		{
+			if (!strncmp(Line, SectionName, SectionNameLength))
+			{
+				FoundSection = true;
+				break;
+			}
+		}
+
+		if (!FoundSection)
+			continue;
+
+		// Parse section.
+		while (Settings.ReadLine(Line, sizeof(Line)))
+		{
+			if (Line[0] == '[')
+				break;
+
+			char* DescriptionStart = strchr(Line, '"');
+			if (!DescriptionStart)
+				continue;
+			DescriptionStart++;
+			char* DescriptionEnd = strchr(DescriptionStart, '"');
+			if (!DescriptionEnd)
+				continue;
+			*DescriptionEnd = 0;
+			DescriptionEnd++;
+
+			char* NameStart = strchr(DescriptionEnd, '"');
+			if (!NameStart)
+				continue;
+			NameStart++;
+			char* NameEnd = strchr(NameStart, '"');
+			if (!NameEnd)
+				continue;
+			*NameEnd = 0;
+			NameEnd++;
+
+			strupr(NameStart);
+			char* Ext = strrchr(NameStart, '.');
+			if (Ext != NULL)
+			{
+				if (!stricmp(Ext, ".DAT"))
+					*Ext = 0;
+			}
+
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(NameStart);
+			if (!Info && *NameStart)
+				continue;
+
+			float Mat[12];
+			int Flags;
+
+			if (sscanf(NameEnd, "%d %g %g %g %g %g %g %g %g %g %g %g %g",
+					   &Flags, &Mat[0], &Mat[1], &Mat[2], &Mat[3], &Mat[4], &Mat[5], &Mat[6], 
+					   &Mat[7], &Mat[8], &Mat[9], &Mat[10], &Mat[11]) != 13)
+				continue;
+
+			Matrix44 Offset;
+			Offset.LoadIdentity();
+			float* OffsetMatrix = &Offset[0][0];
+
+			OffsetMatrix[0] =  Mat[0];
+			OffsetMatrix[8] = -Mat[1];
+			OffsetMatrix[4] =  Mat[2];
+			OffsetMatrix[2] = -Mat[3];
+			OffsetMatrix[10] = Mat[4];
+			OffsetMatrix[6] = -Mat[5];
+			OffsetMatrix[1] =  Mat[6];
+			OffsetMatrix[9] = -Mat[7];
+			OffsetMatrix[5] =  Mat[8];
+			OffsetMatrix[12] =  Mat[9] / 25.0f;
+			OffsetMatrix[14] = -Mat[10] / 25.0f;
+			OffsetMatrix[13] =  Mat[11] / 25.0f;
+
+			lcMinifigPieceInfo MinifigInfo;
+			strncpy(MinifigInfo.Description, DescriptionStart, sizeof(MinifigInfo.Description));
+			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
+			MinifigInfo.Offset = Offset;
+			MinifigInfo.Info = Info;
+
+			InfoArray.Add(MinifigInfo);
+		}
+	}
+}
+
+void MinifigWizard::OnDraw ()
 {
 	int i;
 
-	if (!MakeCurrent())
+	if (!MakeCurrent ())
 		return;
 
 	float aspect = (float)m_nWidth/(float)m_nHeight;
-	glViewport(0, 0, m_nWidth, m_nHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(30.0f, aspect, 1.0f, 20.0f);
-	glMatrixMode(GL_MODELVIEW);
-	Matrix44 WorldView = CreateLookAtMatrix(Vector3(0, -9, 4), Vector3(0, 5, 1), Vector3(0, 0, 1));
-	glLoadMatrixf(WorldView);
+	glViewport (0, 0, m_nWidth, m_nHeight);
+	glMatrixMode (GL_PROJECTION);
+	glLoadIdentity ();
+	gluPerspective (30.0f, aspect, 1.0f, 20.0f);
+	glMatrixMode (GL_MODELVIEW);
+	glLoadIdentity ();
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gluLookAt (0, -9, 4, 0, 5, 1, 0, 0, 1);
+	glEnable (GL_DEPTH_TEST);
+	glDepthFunc (GL_LEQUAL);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_DITHER);
-	glShadeModel(GL_FLAT);
+	glClearColor (bg[0], bg[1], bg[2], bg[3]);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable (GL_DITHER);
+	glShadeModel (GL_FLAT);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Calculate();
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Calculate ();
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
@@ -583,555 +1060,310 @@ void MinifigWizard::OnDraw()
 			continue;
 
 		glPushMatrix();
-		glTranslatef(m_Position[i][0], m_Position[i][1], m_Position[i][2]);
-		glRotatef(m_Rotation[i][3], m_Rotation[i][0], m_Rotation[i][1], m_Rotation[i][2]);
+		glMultMatrixf(m_Matrices[i]);
 		m_Info[i]->RenderPiece(m_Colors[i]);
 		glPopMatrix();
 	}
 
 	glFinish();
 
-	SwapBuffers();
+	SwapBuffers ();
 }
 
 void MinifigWizard::Calculate()
 {
-	float pos[LC_MFW_NUMITEMS][3];
-	float rot[LC_MFW_NUMITEMS][3];
-	Matrix mat, m2, m3;
+	float HeadOffset = 0.0f;
+	Matrix44 Root, Mat, Mat2;
 
-	// Get the pieces in the right place
-	for (int type = 0; type < LC_MFW_NUMITEMS; type++)
+	Root.LoadIdentity();
+	Root.SetTranslation(Vector3(0, 0, 2.88f));
+	m_Matrices[LC_MFW_TORSO] = Mul(mSettings[LC_MFW_TORSO][GetSelectionIndex(LC_MFW_TORSO)].Offset, Root);
+
+	if (m_Info[LC_MFW_NECK])
 	{
-		PieceInfo* piece_info = m_Info[type];
-		int j;
-
-		if (piece_info == NULL)
-			continue;
-
-		for (j = 0; j < mfw_pieces; j++)
-			if (strcmp(piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
-				break;
-
-		pos[type][0] = mfw_pieceinfo[j].x;
-		pos[type][1] = mfw_pieceinfo[j].y;
-		pos[type][2] = mfw_pieceinfo[j].z;
-		rot[type][0] = mfw_pieceinfo[j].rx;
-		rot[type][1] = mfw_pieceinfo[j].ry;
-		rot[type][2] = mfw_pieceinfo[j].rz;
-
-		switch (type)
-		{
-		case LC_MFW_HAT:
-		case LC_MFW_HEAD:
-			if (m_Info[LC_MFW_NECK] != NULL)
-			{
-				if (strcmp(m_Info[LC_MFW_NECK]->m_strName, "522") == 0) // Cape Cloth
-					pos[type][2] += 0.02f;
-				else if (strcmp(m_Info[LC_MFW_NECK]->m_strName, "30174") == 0) // Armor Samurai
-					pos[type][2] += 0.04f;
-				else
-					pos[type][2] += 0.08f;
-			}
-			break;
-
-		case LC_MFW_RIGHT_HAND:
-		case LC_MFW_RIGHT_SHOE:
-			pos[type][0] = -pos[type][0];
-			break;
-
-		case LC_MFW_RIGHT_TOOL:
-			if ((strcmp(piece_info->m_strName, "4499") == 0) || // Bow with Arrow
-			    (strcmp(piece_info->m_strName, "30141") == 0))  // Rifle
-				rot[type][2] = -rot[type][2];
-			break;
-
-		case LC_MFW_LEFT_LEG:
-			if (strcmp(piece_info->m_strName, "773") == 0) // Wooden Leg
-			{
-				rot[type][2] += 180;//= -pos[type][0];
-//				pos[type][0] += 0.8f;
-			}
-		}
+		m_Matrices[LC_MFW_NECK] = Mul(mSettings[LC_MFW_NECK][GetSelectionIndex(LC_MFW_NECK)].Offset, Root);
+		HeadOffset = 0.08f;
 	}
 
-	// hat
-	m_Position[LC_MFW_HAT][0] = pos[LC_MFW_HAT][0];
-	m_Position[LC_MFW_HAT][1] = pos[LC_MFW_HAT][1];
-	m_Position[LC_MFW_HAT][2] = pos[LC_MFW_HAT][2];
-	m_Rotation[LC_MFW_HAT][0] = 0.0f;
-	m_Rotation[LC_MFW_HAT][1] = 0.0f;
-	m_Rotation[LC_MFW_HAT][2] = -1.0f;
-	m_Rotation[LC_MFW_HAT][3] = m_Angles[LC_MFW_HAT] + m_Angles[LC_MFW_HEAD];
-
-	// head
-	m_Position[LC_MFW_HEAD][0] = pos[LC_MFW_HEAD][0];
-	m_Position[LC_MFW_HEAD][1] = pos[LC_MFW_HEAD][1];
-	m_Position[LC_MFW_HEAD][2] = pos[LC_MFW_HEAD][2];
-	m_Rotation[LC_MFW_HEAD][0] = 0.0f;
-	m_Rotation[LC_MFW_HEAD][1] = 0.0f;
-	m_Rotation[LC_MFW_HEAD][2] = -1.0f;
-	m_Rotation[LC_MFW_HEAD][3] = m_Angles[LC_MFW_HEAD];
-
-	// neck
-	mat.LoadIdentity();
-	mat.CreateOld(0,0,0,rot[LC_MFW_NECK][0], rot[LC_MFW_NECK][1], rot[LC_MFW_NECK][2]);
-	mat.Rotate(m_Angles[LC_MFW_NECK], 0, 0, -1);
-	mat.SetTranslation(pos[LC_MFW_NECK][0], pos[LC_MFW_NECK][1], pos[LC_MFW_NECK][2]);
-	mat.ToAxisAngle(m_Rotation[LC_MFW_NECK]);
-	mat.GetTranslation(m_Position[LC_MFW_NECK]);
-
-	// torso
-	m_Position[LC_MFW_TORSO][0] = pos[LC_MFW_TORSO][0];
-	m_Position[LC_MFW_TORSO][1] = pos[LC_MFW_TORSO][1];
-	m_Position[LC_MFW_TORSO][2] = pos[LC_MFW_TORSO][2];
-	m_Rotation[LC_MFW_TORSO][0] = 0.0f;
-	m_Rotation[LC_MFW_TORSO][1] = 0.0f;
-	m_Rotation[LC_MFW_TORSO][2] = 1.0f;
-	m_Rotation[LC_MFW_TORSO][3] = 0.0f;
-
-	// left arm/hand/tool
-	mat.LoadIdentity();
-	mat.Rotate(m_Angles[LC_MFW_LEFT_ARM], -1, 0, 0);
-	mat.SetTranslation(pos[LC_MFW_LEFT_ARM][0], pos[LC_MFW_LEFT_ARM][1], pos[LC_MFW_LEFT_ARM][2]);
-	mat.ToAxisAngle(m_Rotation[LC_MFW_LEFT_ARM]);
-	mat.GetTranslation(m_Position[LC_MFW_LEFT_ARM]);
-
-	mat.Translate(pos[LC_MFW_LEFT_HAND][0]-pos[LC_MFW_LEFT_ARM][0],
-	              pos[LC_MFW_LEFT_HAND][1]-pos[LC_MFW_LEFT_ARM][1],
-	              pos[LC_MFW_LEFT_HAND][2]-pos[LC_MFW_LEFT_ARM][2]);
-	m2.CreateOld(0,0,0,rot[LC_MFW_LEFT_HAND][0],rot[LC_MFW_LEFT_HAND][1],rot[LC_MFW_LEFT_HAND][2]);
-	m3.Multiply(mat, m2);
-	m3.Translate(0,0,-0.16f);
-	mat.LoadIdentity();
-	mat.Translate(0,0,0.16f);
-	mat.Rotate(m_Angles[LC_MFW_LEFT_HAND], 1, 0, 0);
-	m2.Multiply(m3, mat);
-	m2.ToAxisAngle(m_Rotation[LC_MFW_LEFT_HAND]);
-	m2.GetTranslation(m_Position[LC_MFW_LEFT_HAND]);
-
-	if (m_Info[LC_MFW_LEFT_TOOL] != NULL)
+	if (m_Info[LC_MFW_HEAD])
 	{
-		m2.Translate(pos[LC_MFW_LEFT_TOOL][0]-0.9f,
-		             pos[LC_MFW_LEFT_TOOL][1]-pos[LC_MFW_LEFT_HAND][1],
-		             pos[LC_MFW_LEFT_TOOL][2]-pos[LC_MFW_LEFT_HAND][2]);
-		m3.CreateOld(0,0,0,rot[LC_MFW_LEFT_TOOL][0]-rot[LC_MFW_LEFT_HAND][0],
-		             rot[LC_MFW_LEFT_TOOL][1]-rot[LC_MFW_LEFT_HAND][1],
-		             rot[LC_MFW_LEFT_TOOL][2]-rot[LC_MFW_LEFT_HAND][2]);
-		mat.Multiply(m2, m3);
-		m2.LoadIdentity();
+		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), -LC_DTOR * m_Angles[LC_MFW_HEAD]);
+		Mat.SetTranslation(Vector3(0.0f, 0.0f, 0.96f + HeadOffset));
+		Mat = Mul(mSettings[LC_MFW_HEAD][GetSelectionIndex(LC_MFW_HEAD)].Offset, Mat);
+		m_Matrices[LC_MFW_HEAD] = Mul(Mat, Root);
+	}
 
-		// Center the rotation points
-		if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			mat.Translate(0.11f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
-			mat.Translate(0, 0.8f, 0);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			mat.Translate(0.26f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
-			mat.Translate(0, 0, -0.16f);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			mat.Translate(0, 0, -0.24f);
+	if (m_Info[LC_MFW_HAT])
+	{
+		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), -LC_DTOR * m_Angles[LC_MFW_HAT]);
+		Mat = Mul(mSettings[LC_MFW_HAT][GetSelectionIndex(LC_MFW_HAT)].Offset, Mat);
+		m_Matrices[LC_MFW_HAT] = Mul(Mat, m_Matrices[LC_MFW_HEAD]);
+	}
 
-		// Saucepan and Frypan have a different rotation axis
-		if ((strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) ||
-		    (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0))
-			m2.Rotate(m_Angles[LC_MFW_LEFT_TOOL], 0, -1, 0);
+	if (m_Info[LC_MFW_RIGHT_ARM])
+	{
+		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_ARM]);
+
+		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+			Mat2.LoadIdentity();
 		else
-			m2.Rotate(m_Angles[LC_MFW_LEFT_TOOL], 0, 0, 1);
+			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), LC_DTOR * 9.791f);
 
-		m3.Multiply(mat, m2);
-
-		if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			m3.Translate(-0.11f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "3899") == 0) // Cup
-			m3.Translate(0, -0.8f, 0);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			m3.Translate(-0.26f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4528") == 0) // Frypan
-			m3.Translate(0, 0, 0.16f);
-		else if (strcmp(m_Info[LC_MFW_LEFT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			m3.Translate(0, 0, 0.24f);
-
-		m3.ToAxisAngle(m_Rotation[LC_MFW_LEFT_TOOL]);
-		m3.GetTranslation(m_Position[LC_MFW_LEFT_TOOL]);
+		Mat = Mul(mSettings[LC_MFW_RIGHT_ARM][GetSelectionIndex(LC_MFW_RIGHT_ARM)].Offset, Mat);
+		Mat = Mul(Mat, Mat2);
+		Mat.SetTranslation(Vector3(-0.62f, 0.0f, -0.32f));
+		m_Matrices[LC_MFW_RIGHT_ARM] = Mul(Mat, Root);
 	}
 
-	// right arm/hand/tool
-	mat.LoadIdentity(); m2.LoadIdentity(); m3.LoadIdentity();
-	mat.Rotate(m_Angles[LC_MFW_RIGHT_ARM], -1, 0, 0);
-	mat.SetTranslation(pos[LC_MFW_RIGHT_ARM][0], pos[LC_MFW_RIGHT_ARM][1], pos[LC_MFW_RIGHT_ARM][2]);
-	mat.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_ARM]);
-	mat.GetTranslation(m_Position[LC_MFW_RIGHT_ARM]);
-
-	mat.Translate(pos[LC_MFW_RIGHT_HAND][0]-pos[LC_MFW_RIGHT_ARM][0],
-	              pos[LC_MFW_RIGHT_HAND][1]-pos[LC_MFW_RIGHT_ARM][1],
-	              pos[LC_MFW_RIGHT_HAND][2]-pos[LC_MFW_RIGHT_ARM][2]);
-	m2.CreateOld(0,0,0,rot[LC_MFW_RIGHT_HAND][0],rot[LC_MFW_RIGHT_HAND][1],rot[LC_MFW_RIGHT_HAND][2]);
-	m3.Multiply(mat, m2);
-	m3.Translate(0,0,-0.16f);
-	mat.LoadIdentity();
-	mat.Translate(0,0,0.16f);
-	mat.Rotate(m_Angles[LC_MFW_RIGHT_HAND], 1, 0, 0);
-	m2.Multiply(m3, mat);
-	m2.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_HAND]);
-	m2.GetTranslation(m_Position[LC_MFW_RIGHT_HAND]);
-
-	if (m_Info[LC_MFW_RIGHT_TOOL] != NULL)
+	if (m_Info[LC_MFW_RIGHT_HAND])
 	{
-		m2.Translate(pos[LC_MFW_RIGHT_TOOL][0]-0.9f,
-		             pos[LC_MFW_RIGHT_TOOL][1]-pos[LC_MFW_RIGHT_HAND][1],
-		             pos[LC_MFW_RIGHT_TOOL][2]-pos[LC_MFW_RIGHT_HAND][2]);
-		m3.CreateOld(0,0,0,rot[LC_MFW_RIGHT_TOOL][0]-rot[LC_MFW_RIGHT_HAND][0],
-		             rot[LC_MFW_RIGHT_TOOL][1]-rot[LC_MFW_RIGHT_HAND][1],
-		             rot[LC_MFW_RIGHT_TOOL][2]-rot[LC_MFW_RIGHT_HAND][2]);
-		mat.Multiply(m2, m3);
-		m2.LoadIdentity();
+		Mat.CreateFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_HAND]);
+		Mat2.CreateFromAxisAngle(Vector3(1, 0, 0), LC_DTOR * 45);
+		Mat = Mul(mSettings[LC_MFW_RIGHT_HAND][GetSelectionIndex(LC_MFW_RIGHT_HAND)].Offset, Mat);
+		Mat = Mul(Mat, Mat2);
+		Mat.SetTranslation(Vector3(-0.2f, -0.4f, -0.76f));
+		m_Matrices[LC_MFW_RIGHT_HAND] = Mul(Mat, m_Matrices[LC_MFW_RIGHT_ARM]);
+	}
 
-		// Center the rotation points
-		if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			mat.Translate(0.11f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
-			mat.Translate(0, 0.8f, 0);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			mat.Translate(0.26f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
-			mat.Translate(0, 0, -0.16f);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			mat.Translate(0, 0, -0.24f);
+	if (m_Info[LC_MFW_RIGHT_TOOL])
+	{
+		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), LC_DTOR * m_Angles[LC_MFW_RIGHT_TOOL]);
+		Mat.SetTranslation(Vector3(0, -0.4f, 0));
+		Mat = Mul(mSettings[LC_MFW_RIGHT_TOOL][GetSelectionIndex(LC_MFW_RIGHT_TOOL)].Offset, Mat);
+		m_Matrices[LC_MFW_RIGHT_TOOL] = Mul(Mat, m_Matrices[LC_MFW_RIGHT_HAND]);
+	}
 
-		// Saucepan and Frypan have a different rotation axis
-		if ((strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) ||
-		    (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0))
-			m2.Rotate(m_Angles[LC_MFW_RIGHT_TOOL], 0, -1, 0);
+	if (m_Info[LC_MFW_LEFT_ARM])
+	{
+		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_ARM]);
+
+		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+			Mat2.LoadIdentity();
 		else
-			m2.Rotate(m_Angles[LC_MFW_RIGHT_TOOL], 0, 0, 1);
+			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * 9.791f);
 
-		m3.Multiply(mat, m2);
-
-		if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3852") == 0) // Hairbrush
-			m3.Translate(-0.11f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "3899") == 0) // Cup
-			m3.Translate(0, -0.8f, 0);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4360") == 0) // Space Laser Gun
-			m3.Translate(-0.26f, 0, 0);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4528") == 0) // Frypan
-			m3.Translate(0, 0, 0.16f);
-		else if (strcmp(m_Info[LC_MFW_RIGHT_TOOL]->m_strName, "4529") == 0) // Saucepan
-			m3.Translate(0, 0, 0.24f);
-
-		m3.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_TOOL]);
-		m3.GetTranslation(m_Position[LC_MFW_RIGHT_TOOL]);
+		Mat = Mul(mSettings[LC_MFW_LEFT_ARM][GetSelectionIndex(LC_MFW_LEFT_ARM)].Offset, Mat);
+		Mat = Mul(Mat, Mat2);
+		Mat.SetTranslation(Vector3(0.62f, 0.0f, -0.32f));
+		m_Matrices[LC_MFW_LEFT_ARM] = Mul(Mat, Root);
 	}
 
-	// hips
-	m_Position[LC_MFW_HIPS][0] = pos[LC_MFW_HIPS][0];
-	m_Position[LC_MFW_HIPS][1] = pos[LC_MFW_HIPS][1];
-	m_Position[LC_MFW_HIPS][2] = pos[LC_MFW_HIPS][2];
-	m_Rotation[LC_MFW_HIPS][0] = 0.0f;
-	m_Rotation[LC_MFW_HIPS][1] = 0.0f;
-	m_Rotation[LC_MFW_HIPS][2] = 1.0f;
-	m_Rotation[LC_MFW_HIPS][3] = 0.0f;
-
-	// left leg/shoe
-	if (m_Info[LC_MFW_LEFT_LEG])
+	if (m_Info[LC_MFW_LEFT_HAND])
 	{
-		mat.CreateOld(0,0,0,rot[LC_MFW_LEFT_LEG][0],rot[LC_MFW_LEFT_LEG][1],rot[LC_MFW_LEFT_LEG][2]);
-		m2.LoadIdentity();
-		m2.Rotate(m_Angles[LC_MFW_LEFT_LEG], -1, 0, 0);
-		m2.SetTranslation(pos[LC_MFW_LEFT_LEG][0], pos[LC_MFW_LEFT_LEG][1], pos[LC_MFW_LEFT_LEG][2]);
-		m3.Multiply(m2, mat);
-		m3.ToAxisAngle(m_Rotation[LC_MFW_LEFT_LEG]);
-		m3.GetTranslation(m_Position[LC_MFW_LEFT_LEG]);
-		m3.Translate(pos[LC_MFW_LEFT_SHOE][0]-pos[LC_MFW_LEFT_LEG][0],
-		             pos[LC_MFW_LEFT_SHOE][1]-pos[LC_MFW_LEFT_LEG][1],
-		             pos[LC_MFW_LEFT_SHOE][2]-pos[LC_MFW_LEFT_LEG][2]);
-		if (strcmp(m_Info[LC_MFW_LEFT_LEG]->m_strName, "773") == 0)
-			m3.Translate(-0.8f, 0, 0);
-		mat.CreateOld(0,0,0,rot[LC_MFW_LEFT_SHOE][0]-rot[LC_MFW_LEFT_LEG][0],
-		              rot[LC_MFW_LEFT_SHOE][1]-rot[LC_MFW_LEFT_LEG][1],
-		              rot[LC_MFW_LEFT_SHOE][2]-rot[LC_MFW_LEFT_LEG][2]);
-		m2.Multiply(m3, mat);
-		m3.LoadIdentity();
-		m3.Rotate(m_Angles[LC_MFW_LEFT_SHOE], 0, 0, 1);
-		mat.Multiply(m2, m3);
-		mat.ToAxisAngle(m_Rotation[LC_MFW_LEFT_SHOE]);
-		mat.GetTranslation(m_Position[LC_MFW_LEFT_SHOE]);
+		Mat.CreateFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_HAND]);
+		Mat2.CreateFromAxisAngle(Vector3(1, 0, 0), LC_DTOR * 45);
+		Mat = Mul(mSettings[LC_MFW_LEFT_HAND][GetSelectionIndex(LC_MFW_LEFT_HAND)].Offset, Mat);
+		Mat = Mul(Mat, Mat2);
+		Mat.SetTranslation(Vector3(0.2f, -0.4f, -0.76f));
+		m_Matrices[LC_MFW_LEFT_HAND] = Mul(Mat, m_Matrices[LC_MFW_LEFT_ARM]);
 	}
 
-	// right leg/shoe
+	if (m_Info[LC_MFW_LEFT_TOOL])
+	{
+		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), LC_DTOR * m_Angles[LC_MFW_LEFT_TOOL]);
+		Mat.SetTranslation(Vector3(0, -0.4f, 0));
+		Mat = Mul(mSettings[LC_MFW_LEFT_TOOL][GetSelectionIndex(LC_MFW_LEFT_TOOL)].Offset, Mat);
+		m_Matrices[LC_MFW_LEFT_TOOL] = Mul(Mat, m_Matrices[LC_MFW_LEFT_HAND]);
+	}
+
+	if (m_Info[LC_MFW_HIPS])
+	{
+		Mat.LoadIdentity();
+		Mat.SetTranslation(Vector3(0, 0, -1.28f));
+		Mat = Mul(mSettings[LC_MFW_HIPS][GetSelectionIndex(LC_MFW_HIPS)].Offset, Mat);
+		m_Matrices[LC_MFW_HIPS] = Mul(Mat, Root);
+	}
+
 	if (m_Info[LC_MFW_RIGHT_LEG])
 	{
-		mat.LoadIdentity();
-		mat.Rotate(m_Angles[LC_MFW_RIGHT_LEG], -1, 0, 0);
-		mat.SetTranslation(pos[LC_MFW_RIGHT_LEG][0], pos[LC_MFW_RIGHT_LEG][1], pos[LC_MFW_RIGHT_LEG][2]);
-		mat.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_LEG]);
-		mat.GetTranslation(m_Position[LC_MFW_RIGHT_LEG]);
-		mat.Translate(pos[LC_MFW_RIGHT_SHOE][0]-pos[LC_MFW_RIGHT_LEG][0],
-		              pos[LC_MFW_RIGHT_SHOE][1]-pos[LC_MFW_RIGHT_LEG][1],
-		              pos[LC_MFW_RIGHT_SHOE][2]-pos[LC_MFW_RIGHT_LEG][2]);
-		m2.CreateOld(0,0,0,rot[LC_MFW_RIGHT_SHOE][0],rot[LC_MFW_RIGHT_SHOE][1],rot[LC_MFW_RIGHT_SHOE][2]);
-		m3.Multiply(mat, m2);
-		mat.LoadIdentity();
-		mat.Rotate(m_Angles[LC_MFW_RIGHT_SHOE], 0, 0, 1);
-		m2.Multiply(m3, mat);
-		m2.ToAxisAngle(m_Rotation[LC_MFW_RIGHT_SHOE]);
-		m2.GetTranslation(m_Position[LC_MFW_RIGHT_SHOE]);
+		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_LEG]);
+		Mat.SetTranslation(Vector3(0, 0, -1.76f));
+		Mat = Mul(mSettings[LC_MFW_RIGHT_LEG][GetSelectionIndex(LC_MFW_RIGHT_LEG)].Offset, Mat);
+		m_Matrices[LC_MFW_RIGHT_LEG] = Mul(Mat, Root);
 	}
-}
 
-void MinifigWizard::GetSelections(const char** names)
-{
-	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+	if (m_Info[LC_MFW_RIGHT_SHOE])
 	{
-		PieceInfo* piece_info = m_Info[i];
-		names[i] = "None";
-
-		if (piece_info == NULL)
-			continue;
-
-		for (int j = 0; j < mfw_pieces; j++)
-			if (strcmp(piece_info->m_strName, mfw_pieceinfo[j].name) == 0)
-			{
-				names[i] = mfw_pieceinfo[j].description;
-				break;
-			}
+		Vector3 Center(-0.4f, -0.04f, -1.12f);
+		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), LC_DTOR * m_Angles[LC_MFW_RIGHT_SHOE]);
+		Mat2 = mSettings[LC_MFW_RIGHT_SHOE][GetSelectionIndex(LC_MFW_RIGHT_SHOE)].Offset;
+		Mat2.SetTranslation(Mul31(-Center, Mat2));
+		Mat = Mul(Mat2, Mat);
+		Mat.SetTranslation(Mul31(Center, Mat2));
+		m_Matrices[LC_MFW_RIGHT_SHOE] = Mul(Mat, m_Matrices[LC_MFW_RIGHT_LEG]);
 	}
-}
 
-void MinifigWizard::GetItems(int type, LC_MFW_PIECEINFO*** items, int *count)
-{
-	LC_MFW_PIECEINFO** list = (LC_MFW_PIECEINFO**)malloc(sizeof(LC_MFW_PIECEINFO*)*mfw_pieces);
-	*items = list;
-	*count = 0;
-	int i, j;
-
-	for (i = 0; i < mfw_pieces; i++)
+	if (m_Info[LC_MFW_LEFT_LEG])
 	{
-		PieceInfo* piece_info;
-
-		piece_info = lcGetPiecesLibrary()->FindPieceInfo(mfw_pieceinfo[i].name);
-		if (piece_info == NULL)
-			continue;
-
-		strcpy(mfw_pieceinfo[i].name, piece_info->m_strName);
-
-		switch (type)
-		{
-		case LC_MFW_HAT:
-		case LC_MFW_HEAD:
-		case LC_MFW_TORSO:
-		case LC_MFW_NECK:
-		case LC_MFW_LEFT_ARM:
-		case LC_MFW_RIGHT_ARM:
-		case LC_MFW_HIPS:
-		case LC_MFW_LEFT_LEG:
-		case LC_MFW_LEFT_HAND:
-		case LC_MFW_LEFT_TOOL:
-		case LC_MFW_LEFT_SHOE:
-			if (mfw_pieceinfo[i].type != type)
-				continue;
-			break;
-
-		case LC_MFW_RIGHT_HAND:
-			if (mfw_pieceinfo[i].type != LC_MFW_LEFT_HAND)
-				continue;
-			break;
-
-		case LC_MFW_RIGHT_TOOL:
-			if (mfw_pieceinfo[i].type != LC_MFW_LEFT_TOOL)
-				continue;
-			break;
-
-		case LC_MFW_RIGHT_LEG:
-			if ((mfw_pieceinfo[i].type != LC_MFW_RIGHT_LEG) &&
-			    ((mfw_pieceinfo[i].type != LC_MFW_LEFT_LEG) ||
-			    (strcmp(mfw_pieceinfo[i].name, "773") != 0))) // Wooden Leg
-				continue;
-			break;
-
-		case LC_MFW_RIGHT_SHOE:
-			if (mfw_pieceinfo[i].type != LC_MFW_LEFT_SHOE)
-				continue;
-			break;
-
-		default:
-			continue;
-		}
-
-		list[(*count)++] = &mfw_pieceinfo[i];
+		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_LEG]);
+		Mat.SetTranslation(Vector3(0, 0, -1.76f));
+		Mat = Mul(mSettings[LC_MFW_LEFT_LEG][GetSelectionIndex(LC_MFW_LEFT_LEG)].Offset, Mat);
+		m_Matrices[LC_MFW_LEFT_LEG] = Mul(Mat, Root);
 	}
 
-	// ugly sort
-	for (i = 0; i < (*count) - 1; i++)
-		for (j = 0; j < (*count) - 1; j++)
-		{
-			if (strcmp(list[j]->description, list[j+1]->description) > 0)
-			{
-				LC_MFW_PIECEINFO* tmp = list[j];
-				list[j] = list[j+1];
-				list[j+1] = tmp;
-			}
-		}
-
-	if ((type == LC_MFW_HAT) || (type == LC_MFW_NECK) ||
-	    (type == LC_MFW_LEFT_TOOL) || (type == LC_MFW_RIGHT_TOOL) ||
-	    (type == LC_MFW_LEFT_SHOE) || (type == LC_MFW_RIGHT_SHOE))
+	if (m_Info[LC_MFW_LEFT_SHOE])
 	{
-		memmove(list+1, list, (*count) * sizeof(LC_MFW_PIECEINFO*));
-		list[0] = NULL;
-		(*count)++;
+		Vector3 Center(0.4f, -0.04f, -1.12f);
+		Mat.CreateFromAxisAngle(Vector3(0, 0, 1), LC_DTOR * m_Angles[LC_MFW_LEFT_SHOE]);
+		Mat2 = mSettings[LC_MFW_LEFT_SHOE][GetSelectionIndex(LC_MFW_LEFT_SHOE)].Offset;
+		Mat2.SetTranslation(Mul31(-Center, Mat2));
+		Mat = Mul(Mat2, Mat);
+		Mat.SetTranslation(Mul31(Center, Mat2));
+		m_Matrices[LC_MFW_LEFT_SHOE] = Mul(Mat, m_Matrices[LC_MFW_LEFT_LEG]);
 	}
 }
 
-void MinifigWizard::ChangePiece(int type, LC_MFW_PIECEINFO* info)
+int MinifigWizard::GetSelectionIndex(int Type) const
 {
-	PieceInfo* piece_info = NULL;
+	const ObjArray<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
-	if (info)
-	{
-		piece_info = lcGetPiecesLibrary()->FindPieceInfo(info->name);
+	for (int Index = 0; Index < InfoArray.GetSize(); Index++)
+		if (InfoArray[Index].Info == m_Info[Type])
+			return Index;
 
-		if (m_Info[type])
-			m_Info[type]->DeRef();
-		m_Info[type] = piece_info;
-		piece_info->AddRef();
-	}
-	else
-	{
-		if (m_Info[type])
-			m_Info[type]->DeRef();
-		m_Info[type] = NULL;
-	}
+	return 0;
 }
 
-void MinifigWizard::ChangeColor(int type, int color)
+void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
-	m_Colors[type] = color;
+	if (m_Info[Type])
+		m_Info[Type]->DeRef();
+
+	m_Info[Type] = mSettings[Type][Index].Info;
+
+	if (m_Info[Type])
+		m_Info[Type]->AddRef();
+
+	Calculate();
 }
 
-void MinifigWizard::ChangeAngle(int type, float angle)
+void MinifigWizard::SetColor(int Type, int Color)
 {
-	m_Angles[type] = angle;
+	m_Colors[Type] = Color;
 }
 
-void MinifigWizard::GetMinifigNames(char ***names, int *count)
+void MinifigWizard::SetAngle(int Type, float Angle)
+{
+	m_Angles[Type] = Angle;
+}
+
+void MinifigWizard::GetMinifigNames (char ***names, int *count)
 {
 	*count = m_MinifigCount;
 	*names = m_MinifigNames;
 }
 
-void MinifigWizard::SaveMinifig(const char* name)
+void MinifigWizard::SaveMinifig (const char* name)
 {
-	char tmp[16];
-	int i, j;
+  char tmp[LC_PIECE_NAME_LEN];
+  int i, j;
 
-	// check if the name is already being used
-	for (i = 0; i < m_MinifigCount; i++)
-		if (strcmp(m_MinifigNames[i], name) == 0)
-			break;
+  // check if the name is already being used
+  for (i = 0; i < m_MinifigCount; i++)
+    if (strcmp (m_MinifigNames[i], name) == 0)
+      break;
 
-	if (i == m_MinifigCount)
-	{
-		m_MinifigCount++;
-		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**)*m_MinifigCount);
-		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**)*m_MinifigCount);
-		m_MinifigNames[i] = (char*)malloc(strlen(name) + 1);
-		strcpy(m_MinifigNames[i], name);
-		m_MinifigTemplates[i] = (char*)malloc(768);
-	}
-	strcpy(m_MinifigTemplates[i], "");
+  if (i == m_MinifigCount)
+  {
+    m_MinifigCount++;
+    m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
+    m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
+    m_MinifigNames[i] = (char*)malloc (strlen (name) + 1);
+    strcpy (m_MinifigNames[i], name);
+    m_MinifigTemplates[i] = (char*)malloc (768);
+  }
+  strcpy (m_MinifigTemplates[i], "");
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		sprintf(tmp, "%d ", m_Colors[j]);
-		strcat(m_MinifigTemplates[i], tmp);
-	}
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    sprintf (tmp, "%d ", m_Colors[j]);
+    strcat (m_MinifigTemplates[i], tmp);
+  }
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		if (m_Info[j] != NULL)
-			sprintf(tmp, "%s ", m_Info[j]->m_strName);
-		else
-			strcpy(tmp, "None ");
-		strcat(m_MinifigTemplates[i], tmp);
-	}
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    if (m_Info[j] != NULL)
+      sprintf (tmp, "%s ", m_Info[j]->m_strName);
+    else
+      strcpy (tmp, "None ");
+    strcat (m_MinifigTemplates[i], tmp);
+  }
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		sprintf(tmp, "%f ", m_Angles[j]);
-		strcat(m_MinifigTemplates[i], tmp);
-	}
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    sprintf (tmp, "%f ", m_Angles[j]);
+    strcat (m_MinifigTemplates[i], tmp);
+  }
 }
 
-bool MinifigWizard::LoadMinifig(const char* name)
+bool MinifigWizard::LoadMinifig (const char* name)
 {
-	char *ptr;
-	int i, j;
+  char *ptr;
+  int i, j;
 
-	// check if the name is valid
-	for (i = 0; i < m_MinifigCount; i++)
-		if (strcmp(m_MinifigNames[i], name) == 0)
-			break;
+  // check if the name is valid
+  for (i = 0; i < m_MinifigCount; i++)
+    if (strcmp (m_MinifigNames[i], name) == 0)
+      break;
 
-	if (i == m_MinifigCount)
-	{
-		//    Sys_MessageBox("Unknown Minifig");
-		return false;
-	}
-	else
-		ptr = m_MinifigTemplates[i];
+  if (i == m_MinifigCount)
+  {
+    //    Sys_MessageBox ("Unknown Minifig");
+    return false;
+  }
+  else
+    ptr = m_MinifigTemplates[i];
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-		if (m_Info[j] != NULL)
-			m_Info[j]->DeRef();
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+    if (m_Info[j] != NULL)
+      m_Info[j]->DeRef ();
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-		m_Colors[j] = strtol(ptr, &ptr, 10);
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+    m_Colors[j] = strtol (ptr, &ptr, 10);
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		char *endptr;
-		ptr++;
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+  {
+    char *endptr;
+    ptr++;
 
-		endptr = strchr(ptr, ' ');
-		*endptr = '\0';
-		m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo(ptr);
-		*endptr = ' ';
-		ptr = endptr;
+    endptr = strchr (ptr, ' ');
+    *endptr = '\0';
+    m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo (ptr);
+    *endptr = ' ';
+    ptr = endptr;
 
-		if (m_Info[j] != NULL)
-			m_Info[j]->AddRef();
-	}
+    if (m_Info[j] != NULL)
+      m_Info[j]->AddRef();
+  }
 
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-		m_Angles[j] = (float)strtod(ptr, &ptr);
+  for (j = 0; j < LC_MFW_NUMITEMS; j++)
+    m_Angles[j] = (float)strtod (ptr, &ptr);
 
-	return true;
+  return true;
 }
 
-void MinifigWizard::DeleteMinifig(const char* name)
+void MinifigWizard::DeleteMinifig (const char* name)
 {
-	int i;
+  int i;
 
-	// check if the name is valid
-	for (i = 0; i < m_MinifigCount; i++)
-		if (strcmp(m_MinifigNames[i], name) == 0)
-			break;
+  // check if the name is valid
+  for (i = 0; i < m_MinifigCount; i++)
+    if (strcmp (m_MinifigNames[i], name) == 0)
+      break;
 
-	if (i == m_MinifigCount)
-	{
-		Sys_MessageBox("Unknown Minifig");
-		return;
-	}
+  if (i == m_MinifigCount)
+  {
+    Sys_MessageBox ("Unknown Minifig");
+    return;
+  }
 
-	free(m_MinifigNames[i]);
-	free(m_MinifigTemplates[i]);
-	m_MinifigCount--;
+  free (m_MinifigNames[i]);
+  free (m_MinifigTemplates[i]);
+  m_MinifigCount--;
 
-	for (; i < m_MinifigCount; i++)
-	{
-		m_MinifigNames[i] = m_MinifigNames[i+1];
-		m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
-	}
+  for (; i < m_MinifigCount; i++)
+  {
+    m_MinifigNames[i] = m_MinifigNames[i+1];
+    m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
+  }
 }

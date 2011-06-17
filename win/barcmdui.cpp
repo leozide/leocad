@@ -4,7 +4,7 @@
 // a "checked" button state into a "pressed" button state. Changed 
 // lines marked with "PD"
 
-#include "lc_global.h"
+#include "StdAfx.h"
 #include "BarCmdUI.h"
 
 void CFlatOrCoolBarCmdUI::Enable(BOOL bOn)

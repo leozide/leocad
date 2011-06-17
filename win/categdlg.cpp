@@ -1,7 +1,7 @@
 // categdlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "categdlg.h"
 

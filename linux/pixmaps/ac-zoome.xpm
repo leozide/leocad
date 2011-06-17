@@ -1,6 +1,6 @@
 /* XPM */
-static const char *ac_zoome[] = {
-/* columns rows colors const chars-per-pixel */
+static char *ac_zoome[] = {
+/* columns rows colors chars-per-pixel */
 "16 15 6 1",
 "  c #00007f",
 ". c #7f0000",

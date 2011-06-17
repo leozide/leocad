@@ -3,20 +3,16 @@
 
 // TODO: rewrite everything
 
-#include "lc_global.h"
-#include <windowsx.h>
-
+#include "stdafx.h"
 #include "leocad.h"
 #include "Print.h"
 #include "project.h"
 #include "pieceinf.h"
-#include "lc_colors.h"
+#include "globals.h"
 #include "CADView.h"
 #include "Tools.h"
 #include "Piece.h"
 #include "library.h"
-#include "lc_model.h"
-#include "lc_object.h"
 #include "lc_application.h"
 
 static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
@@ -26,12 +22,9 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
   PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	int bricks = 0;
-	int j;
-
-	for (j = 0; j < pLib->GetPieceCount (); j++)
+	for (int j = 0; j < pLib->GetPieceCount (); j++)
 		if (pLib->GetPieceInfo(j)->m_strDescription[0] != '~')
 			bricks++;
-
 	int rows = theApp.GetProfileInt("Default", "Catalog Rows", 10);
 	int cols = theApp.GetProfileInt("Default", "Catalog Columns", 3);
 	PD->m_pd.lpfnPrintHook = PrintHookProc;
@@ -211,7 +204,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 
 	start.next = NULL;
 	
-	for (j = 0; j < pLib->GetPieceCount (); j++)
+	for (int j = 0; j < pLib->GetPieceCount (); j++)
 	{
 		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
 
@@ -238,7 +231,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 
 	if (PD->PrintRange())
 	{
-		for (j = 0; j < (int)(nStartPage - 1)*rows*cols; j++)
+		for (int j = 0; j < (int)(nStartPage - 1)*rows*cols; j++)
 			if (node)
 				node = node->next;
 	}
@@ -296,7 +289,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3fv(lcColorList[g_App->m_SelectedColor].Value);
+			glColor3ubv(FlatColorArray[lcGetActiveProject()->GetCurrentColor()]);
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
@@ -313,7 +306,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
 			FillRect(pMemDC->m_hDC, CRect(0,h,w,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pInfo->RenderPiece(g_App->m_SelectedColor);
+			pInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
 			glFlush();
 
 			TextOut (pMemDC->m_hDC, 5, 5, pInfo->m_strDescription, strlen(pInfo->m_strDescription));
@@ -416,8 +409,6 @@ UINT PrintCatalogFunction (LPVOID pv)
 
 static void PrintPiecesThread(void* pv)
 {
-#if 0
-//	FIXME: printing
 	CFrameWnd* pFrame = (CFrameWnd*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
@@ -429,7 +420,7 @@ static void PrintPiecesThread(void* pv)
 	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
 	memset (&col, 0, sizeof (col));
 
-	for (lcObject* tmp = project->m_ActiveModel->m_Pieces; tmp; tmp = tmp->m_Next)
+	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
 	{
 		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
 		pieces[(idx*28)+tmp->GetColor()]++;
@@ -692,7 +683,7 @@ static void PrintPiecesThread(void* pv)
 			glDisable (GL_DITHER);
 			glShadeModel (GL_FLAT);
 
-			glColor3ubv(FlatColorArray[g_App->m_SelectedColor]);
+			glColor3ubv(FlatColorArray[project->m_nCurColor]);
 
 			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
 			node = node->next;
@@ -708,7 +699,7 @@ static void PrintPiecesThread(void* pv)
 			FillRect(pMemDC->m_hDC, CRect(0,h,picw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pInfo->RenderPiece(g_App->m_SelectedColor);
+			pInfo->RenderPiece(project->m_nCurColor);
 			glFlush();
 
 			TextOut (pMemDC->m_hDC, 5, 5, pInfo->m_strDescription, strlen(pInfo->m_strDescription));
@@ -798,15 +789,14 @@ static void PrintPiecesThread(void* pv)
 	pFrame->EnableWindow();
 	dlgPrintStatus.DestroyWindow();
 
-	if (PD != NULL && PD->m_pd.hDC != NULL)
-	{
-		::DeleteDC(PD->m_pd.hDC);
-		PD->m_pd.hDC = NULL;
-	}
+    if (PD != NULL && PD->m_pd.hDC != NULL)
+    {
+        ::DeleteDC(PD->m_pd.hDC);
+        PD->m_pd.hDC = NULL;
+    }
 
 	free (pieces);
-	delete PD;
-#endif
+    delete PD;
 }
 
 UINT PrintPiecesFunction (LPVOID pv)

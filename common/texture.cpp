@@ -1,7 +1,6 @@
 // Texture object.
 //
 
-#include "lc_global.h"
 #include <string.h>
 #include <stdlib.h>
 #include "opengl.h"

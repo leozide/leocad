@@ -1,7 +1,7 @@
 // TerOpDlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "TerOpDlg.h"
 #include "Terrain.h"

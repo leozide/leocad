@@ -1,9 +1,6 @@
 // Terrain: a Bezier surface.
 //
 
-#include "lc_global.h"
-#include "lc_camera.h"
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -12,6 +9,8 @@
 #include "defines.h"
 #include "terrain.h"
 #include "file.h"
+#include "camera.h"
+#include "matrix.h"
 #include "system.h"
 #include "texture.h"
 
@@ -104,7 +103,7 @@ bool TerrainPatch::BoxIsOutside(const float plane[4]) const
 	{
 		planeEqVal = plane[0] * corners[i][0] + plane[1] * corners[i][1] + plane[2] * corners[i][2] + plane[3];
 
-		if (planeEqVal < 0)
+		if (planeEqVal > 0)
 			return false;
 	}
 
@@ -572,14 +571,15 @@ void Terrain::Tesselate()
 	}
 }
 
-void Terrain::Render(lcCamera* pCam, float aspect)
+void Terrain::Render(Camera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
-		Vector3 eye = pCam->m_WorldPosition;
+		float eye[3];
+		pCam->GetEyePos(eye);
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
-		glScalef(pCam->m_FarDist, pCam->m_FarDist, 1);
+		glScalef(pCam->m_zFar, pCam->m_zFar, 1);
 
 		if (m_nOptions & LC_TERRAIN_TEXTURE)
 		{
@@ -588,12 +588,12 @@ void Terrain::Render(lcCamera* pCam, float aspect)
 			glEnable(GL_TEXTURE_2D);
 
 float tw = 15.0f, th = 15.0f;
-//	tw = 2*pCam->m_FarDist/m_nBackgroundSize;
-//	th = 2*pCam->m_FarDist/m_nBackgroundSize;
+//	tw = 2*pCam->m_zFar/m_nBackgroundSize;
+//	th = 2*pCam->m_zFar/m_nBackgroundSize;
 
 float tx, ty;
-tx = (tw*eye[0])/(2*pCam->m_FarDist);
-ty = (th*eye[1])/(2*pCam->m_FarDist);
+tx = (tw*eye[0])/(2*pCam->m_zFar);
+ty = (th*eye[1])/(2*pCam->m_zFar);
 
 			glBegin(GL_QUADS);
 				glTexCoord2f(tx, ty);
@@ -666,12 +666,88 @@ ty = (th*eye[1])/(2*pCam->m_FarDist);
 	}
 }
 
-void Terrain::FindVisiblePatches(lcCamera* pCam, float Aspect)
+void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 {
-	Vector4 Planes[6];
+	// Get camera position information.
+	float eye[3];
+	pCam->GetEyePos(eye);
+	
+	// Get perspective information.
+	float alpha = pCam->m_fovy / 2.0f;
+	float halfFovY = pCam->m_fovy / 2.0f;
+	halfFovY = halfFovY * 3.1415f / 180.0f;
+	float halfFovX = (float)atan(tan(halfFovY) * aspect);
+	halfFovX = halfFovX * 180.0f / 3.1415f;
+	float beta = 2.0f * halfFovX;
 
-	Matrix44 Projection = CreatePerspectiveMatrix(pCam->m_FOV, Aspect, pCam->m_NearDist, pCam->m_FarDist);
-	GetFrustumPlanes(pCam->m_WorldView, Projection, Planes);
+	// Get vector stuff from the position.
+	float nonOrthoTop[3], target[3];
+	pCam->GetUpVec(nonOrthoTop);
+	pCam->GetTargetPos(target);
+	float front[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]};
+	float side[3];
+	side[0] = nonOrthoTop[1]*front[2] - nonOrthoTop[2]*front[1];
+	side[1] = nonOrthoTop[2]*front[0] - nonOrthoTop[0]*front[2];
+	side[2] = nonOrthoTop[0]*front[1] - nonOrthoTop[1]*front[0];
+	
+	// Make sure our up vector is orthogonal.
+	float top[3];
+	top[0] = front[1]*side[2] - front[2]*side[1];
+	top[1] = front[2]*side[0] - front[0]*side[2];
+	top[2] = front[0]*side[1] - front[1]*side[0];
+	
+	// Get our plane normals.
+	Matrix mat;
+	float topNormal[3] = { -top[0], -top[1], -top[2] };
+	mat.FromAxisAngle(side, -alpha);
+	mat.TransformPoints(topNormal, 1);
+
+	float bottomNormal[3] = { top[0], top[1], top[2] };
+	mat.FromAxisAngle(side, alpha);
+	mat.TransformPoints(bottomNormal, 1);
+
+	float rightNormal[3] = { side[0], side[1], side[2] };
+	mat.FromAxisAngle(top, -beta);
+	mat.TransformPoints(rightNormal, 1);
+
+	float leftNormal[3] = { -side[0], -side[1], -side[2] };
+	mat.FromAxisAngle(top, beta);
+	mat.TransformPoints(leftNormal, 1);
+
+	float nearNormal[3] = { front[0], front[1], front[2] };
+
+	// Now calculate our plane offsets from the normals and the eye position.
+	float topD = eye[0]*-topNormal[0] + eye[1]*-topNormal[1] + eye[2]*-topNormal[2];
+	float bottomD = eye[0]*-bottomNormal[0] + eye[1]*-bottomNormal[1] + eye[2]*-bottomNormal[2];
+	float leftD = eye[0]*-leftNormal[0] + eye[1]*-leftNormal[1] + eye[2]*-leftNormal[2];
+	float rightD = eye[0]*-rightNormal[0] + eye[1]*-rightNormal[1] + eye[2]*-rightNormal[2];
+	float nearD = eye[0]*-nearNormal[0] + eye[1]*-nearNormal[1] + eye[2]*-nearNormal[2];
+	
+	// For the far plane, find the point farDist away from the eye along the front vector.
+	float farDist = pCam->m_zFar;
+	float farPt[3] = { front[0], front[1], front[2] };
+	float invR = farDist/(float)sqrt(farPt[0]*farPt[0]+farPt[1]*farPt[1]+farPt[2]*farPt[2]);
+	farPt[0] = farPt[0]*invR;
+	farPt[1] = farPt[1]*invR;
+	farPt[2] = farPt[2]*invR;
+	farPt[0] += eye[0];
+	farPt[1] += eye[1];
+	farPt[2] += eye[2];
+	float farD = farPt[0]*nearNormal[0] + farPt[1]*nearNormal[1] + farPt[2]*nearNormal[2];
+	
+	// Now generate the planes
+	invR = 1.0f/(float)sqrt(topNormal[0]*topNormal[0]+topNormal[1]*topNormal[1]+topNormal[2]*topNormal[2]);
+	float topPlane[4] = { topNormal[0]*invR, topNormal[1]*invR, topNormal[2]*invR, topD*invR };
+	invR = 1.0f/(float)sqrt(bottomNormal[0]*bottomNormal[0]+bottomNormal[1]*bottomNormal[1]+bottomNormal[2]*bottomNormal[2]);
+	float bottomPlane[4] = { bottomNormal[0]*invR, bottomNormal[1]*invR, bottomNormal[2]*invR, bottomD*invR };
+	invR = 1.0f/(float)sqrt(leftNormal[0]*leftNormal[0]+leftNormal[1]*leftNormal[1]+leftNormal[2]*leftNormal[2]);
+	float leftPlane[4] = { leftNormal[0]*invR, leftNormal[1]*invR, leftNormal[2]*invR, leftD*invR };
+	invR = 1.0f/(float)sqrt(rightNormal[0]*rightNormal[0]+rightNormal[1]*rightNormal[1]+rightNormal[2]*rightNormal[2]);
+	float rightPlane[4] = { rightNormal[0]*invR, rightNormal[1]*invR, rightNormal[2]*invR, rightD*invR };
+	invR = 1.0f/(float)sqrt(nearNormal[0]*nearNormal[0]+nearNormal[1]*nearNormal[1]+nearNormal[2]*nearNormal[2]);
+	float nearPlane[4] = { nearNormal[0]*invR, nearNormal[1]*invR, nearNormal[2]*invR, nearD*invR };
+	invR = 1.0f/(float)sqrt(-nearNormal[0]*-nearNormal[0]+-nearNormal[1]*-nearNormal[1]+-nearNormal[2]*-nearNormal[2]);
+	float farPlane[4] = { -nearNormal[0]*invR, -nearNormal[1]*invR, -nearNormal[2]*invR, farD*invR };
 
 	for (int i = 0; i < m_uPatches; i++)
 	{
@@ -679,13 +755,40 @@ void Terrain::FindVisiblePatches(lcCamera* pCam, float Aspect)
 		{
 			m_Patches[i][j].visible = true;
 
-			for (int k = 0; k < 6; k++)
+			if (m_Patches[i][j].BoxIsOutside(leftPlane))
 			{
-				if (m_Patches[i][j].BoxIsOutside(Planes[k]))
-				{
-					m_Patches[i][j].visible = false;
-					break;
-				}
+				m_Patches[i][j].visible = false;
+				continue;
+			}
+
+			if (m_Patches[i][j].BoxIsOutside(rightPlane))
+			{
+				m_Patches[i][j].visible = false;
+				continue;
+			}
+
+			if (m_Patches[i][j].BoxIsOutside(nearPlane))
+			{
+				m_Patches[i][j].visible = false;
+				continue;
+			}
+
+			if (m_Patches[i][j].BoxIsOutside(farPlane))
+			{
+				m_Patches[i][j].visible = false;
+				continue;
+			}
+
+			if (m_Patches[i][j].BoxIsOutside(bottomPlane))
+			{
+				m_Patches[i][j].visible = false;
+				continue;
+			}
+
+			if (m_Patches[i][j].BoxIsOutside(topPlane))
+			{
+				m_Patches[i][j].visible = false;
+				continue;
 			}
 		}
 	}

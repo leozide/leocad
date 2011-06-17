@@ -1,13 +1,15 @@
 // TerrWnd.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "TerrWnd.h"
 #include "Terrain.h"
 
-#include "lc_camera.h"
+#include "camera.h"
 #include "Tools.h"
+#include "Matrix.h"
+#include "Vector.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,12 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTerrainWnd::CTerrainWnd(Terrain* pTerrain)
 {
-	m_pCamera = new lcCamera();
-	m_pCamera->CreateCamera(LC_CAMERA_USER, true);
-	m_pCamera->SetPosition(1, false, Vector3(20, 20, 20));
-	m_pCamera->m_Children->SetPosition(1, false, Vector3(0, 0, 0));
-	m_pCamera->Update(1);
-
+	m_pCamera = new Camera(20,20,20,0,0,0, NULL);
 	m_pTerrain = pTerrain;
 	m_pPalette = NULL;
 	m_pDC = NULL;
@@ -82,13 +79,7 @@ void CTerrainWnd::OnPaint()
 	float aspect = (float)m_szView.cx/(float)m_szView.cy;
 	glViewport(0, 0, m_szView.cx, m_szView.cy);
 
-	Matrix44 Projection = CreatePerspectiveMatrix(m_pCamera->m_FOV, aspect, m_pCamera->m_NearDist, m_pCamera->m_FarDist);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(Projection);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(m_pCamera->m_WorldView);
+	m_pCamera->LoadProjection(aspect);
 
 	m_pTerrain->Render(m_pCamera, aspect);
 
@@ -224,24 +215,22 @@ void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			case TERRAIN_ZOOM:
 			{
-				m_pCamera->Zoom(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
-				m_pCamera->Update(1);
+				m_pCamera->DoZoom(point.y - m_ptMouse.y, 11, 1, false, false);
 				InvalidateRect (NULL, FALSE);
 			} break;
 
 			case TERRAIN_PAN:
 			{
-				m_pCamera->Pan(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
-				m_pCamera->Update(1);
+				m_pCamera->DoPan(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false, false);
 				InvalidateRect (NULL, FALSE);
 			} break;
 
 			case TERRAIN_ROTATE:
 			{
+				float center[3] = { 0,0,0 };
 				if (point == m_ptMouse)
 					break;
-				m_pCamera->Orbit(1, false, point.x - m_ptMouse.x, point.y - m_ptMouse.y);
-				m_pCamera->Update(1);
+				m_pCamera->DoRotate(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false, false, center);
 				InvalidateRect (NULL, FALSE);
 			} break;
 		}
@@ -278,9 +267,5 @@ BOOL CTerrainWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 void CTerrainWnd::ResetCamera()
 {
 	delete m_pCamera;
-	m_pCamera = new lcCamera();
-	m_pCamera->CreateCamera(LC_CAMERA_USER, true);
-	m_pCamera->SetPosition(1, false, Vector3(20, 20, 20));
-	m_pCamera->m_Children->SetPosition(1, false, Vector3(0, 0, 0));
-	m_pCamera->Update(1);
+	m_pCamera = new Camera(20,20,20,0,0,0, NULL);
 }

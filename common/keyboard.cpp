@@ -2,7 +2,6 @@
 // Code to handle user-defined keyboard shortcuts.
 //
 
-#include "lc_global.h"
 #include <stdio.h>
 #include "system.h"
 #include "keyboard.h"
@@ -24,8 +23,7 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_FILE_HTML, "Export HTML", 0, 0, 0 },
 	{ LC_FILE_POVRAY, "Export POV-Ray", 0, 0, 0 },
 	{ LC_FILE_WAVEFRONT, "Export Wavefront", 0, 0, 0 },
-	{ LC_FILE_VRML, "Export VRML", 0, 0, 0 },
-	{ LC_FILE_X3DV, "Export X3DV", 0, 0, 0 },
+	{ LC_FILE_PROPERTIES, "Project Properties", 0, 0, 0 },
 //	{ LC_FILE_TERRAIN, "Terrain Editor", 0, 0, 0 },
 	{ LC_FILE_LIBRARY, "Piece Library Manager", 0, 0, 0 },
 //	{ LC_FILE_RECENT, "Open Recent File", 0, 0, 0 },
@@ -42,6 +40,7 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_PIECE_DELETE, "Piece Delete", 0, LC_KEY_DELETE, 0 },
 //	{ LC_PIECE_MINIFIG, "Minifig Wizard", 0, 0, 0 },
 	{ LC_PIECE_ARRAY, "Piece Array", 0, 0, 0 },
+//	{ LC_PIECE_COPYKEYS, "", 0, 0, 0 },
 	{ LC_PIECE_GROUP, "Piece Group", LC_KEYMOD1_CONTROL, LC_KEY_G, 0 },
 	{ LC_PIECE_UNGROUP, "Piece Ungroup", LC_KEYMOD1_CONTROL, LC_KEY_U, 0 },
 	{ LC_PIECE_GROUP_ADD, "Group Add Piece", 0, 0, 0 },
@@ -53,9 +52,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_PIECE_PREVIOUS, "Piece Previous Step", 0, 0, 0 },
 	{ LC_PIECE_NEXT, "Piece Next Step", 0, 0, 0 },
 	{ LC_VIEW_PREFERENCES, "Preferences", 0, 0, 0 },
-	{ LC_MODEL_NEW, "New Model", 0, 0, 0 },
-	{ LC_MODEL_DELETE, "Delete Properties", 0, 0, 0 },
-	{ LC_MODEL_PROPERTIES, "Model Properties", 0, 0, 0 },
 //	{ LC_VIEW_ZOOM, "", 0, 0, 0 },
 	{ LC_VIEW_ZOOMIN, "Zoom In", 0, 0, 0 },
 	{ LC_VIEW_ZOOMOUT, "Zoom Out", 0, 0, 0 },
@@ -130,7 +126,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_EDIT_ACTION_ZOOM_REGION, "Zoom Region Mode", 0, 0, 0 },
 	{ LC_EDIT_ACTION_PAN, "Pan Mode", LC_KEYMOD1_SHIFT, LC_KEY_P, 0 },
 	{ LC_EDIT_ACTION_ROTATE_VIEW, "Rotate View Mode", LC_KEYMOD1_SHIFT, LC_KEY_T, 0 },
-	{ LC_EDIT_ACTION_ORBIT, "Orbit Mode", LC_KEYMOD1_SHIFT, LC_KEY_O, 0 },
 	{ LC_EDIT_ACTION_ROLL, "Roll Camera Mode", LC_KEYMOD1_SHIFT, LC_KEY_L, 0 },
 };
 
@@ -303,11 +298,12 @@ void InitKeyboardShortcuts()
 	LoadKeyboardShortcuts(FileName);
 }
 
-struct LC_KEYNAME_ENTRY
+typedef struct
 {
 	int Key;
 	const char* Name;
-};
+
+} LC_KEYNAME_ENTRY;
 
 static LC_KEYNAME_ENTRY KeyNames[] =
 {

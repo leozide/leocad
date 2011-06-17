@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "config.h"
 #include "defines.h"
+#include "config.h"
 
 class String;
 
@@ -40,15 +40,15 @@ public:
 	unsigned long WriteDouble(const void* pBuf, unsigned long nCount);
 
 	void ReadString(String& Value);
-	void ReadInt(i32* Value)
+	void ReadInt(lcint32* Value)
 	{ ReadLong(Value, 1); }
-	void ReadInt(u32* Value)
+	void ReadInt(lcuint32* Value)
 	{ ReadLong(Value, 1); }
 
 	void WriteString(const String& Value);
-	void WriteInt(i32 Value)
+	void WriteInt(lcint32 Value)
 	{ WriteLong(&Value, 1); }
-	void WriteInt(u32 Value)
+	void WriteInt(lcuint32 Value)
 	{ WriteLong(&Value, 1); }
 
 	virtual void Abort()=0;
@@ -89,6 +89,11 @@ public:
 	void Flush();
 	void Close();
 	bool Open(const char *filename, const char *mode);
+
+	void* GetBuffer() const
+	{
+		return m_pBuffer;
+	}
 
 protected:
 	// MemFile specific:

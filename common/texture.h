@@ -8,6 +8,7 @@
 class File;
 
 #include "opengl.h"
+#include "config.h"
 
 typedef enum { LC_INTENSITY, LC_RGB, LC_RGBA } LC_TEXTURE_TYPES;
 
@@ -35,8 +36,8 @@ class Texture
 
   // Read-only
   char m_strName[9];
-  u16 m_nWidth;
-  u16 m_nHeight;
+  lcuint16 m_nWidth;
+  lcuint16 m_nHeight;
 
 protected:
   bool FinishLoadImage (bool bFilter, void *data);
@@ -44,8 +45,8 @@ protected:
   int m_nRef;
   GLuint m_nID;
   GLenum m_nFormat;
-  u32 m_nOffset;
-  u32 m_nFileSize;
+  lcuint32 m_nOffset;
+  lcuint32 m_nFileSize;
 };
 
 

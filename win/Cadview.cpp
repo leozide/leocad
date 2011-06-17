@@ -1,8 +1,7 @@
 // CADView.cpp : implementation of the CCADView class
 //
 
-#include "lc_global.h"
-#include <windowsx.h>
+#include "stdafx.h"
 #include "LeoCAD.h"
 
 #include "CADDoc.h"
@@ -13,11 +12,11 @@
 #include "project.h"
 #include "globals.h"
 #include "system.h"
+#include "camera.h"
 #include "view.h"
 #include "MainFrm.h"
 #include "PiecePrv.h"
 #include "lc_application.h"
-#include "lc_camera.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,12 +58,15 @@ END_MESSAGE_MAP()
 
 CCADView::CCADView()
 {
+	m_pPixels = NULL;
 	m_hCursor = NULL;
   m_pView = NULL;
 }
 
 CCADView::~CCADView()
 {
+	if (m_pPixels)
+		free (m_pPixels);
 }
 
 BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
@@ -138,7 +140,7 @@ void CCADView::OnFilePrintPreview()
 	// must be done here.
 
 	if (!DoPrintPreview(IDR_PREVIEW, this,
-			RUNTIME_CLASS(CPreviewViewEx), pState))
+			RUNTIME_CLASS(CCADPreviewView), pState))
 	{
 		// In derived classes, reverse special window handling here for
 		// Preview failure case
@@ -230,8 +232,15 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	int tw = pw, th = ph; // tile size
 
-	if (tw > 1024 || th > 1024)
-		tw = th = 1024;
+	MEMORYSTATUS MemStat;
+	MemStat.dwLength = sizeof(MEMORYSTATUS);
+	GlobalMemoryStatus(&MemStat);
+
+	if (DWORD(pw*ph*3) > MemStat.dwTotalPhys)
+	{
+		tw = 512;
+		th = 512;
+	}
 
 	HDC hMemDC = CreateCompatibleDC(GetDC()->m_hDC);
 	LPBITMAPINFOHEADER lpbi;
@@ -283,86 +292,40 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	pDC->SetBkMode(TRANSPARENT);
 	HPEN hpOld = (HPEN)SelectObject(pDC->m_hDC,(HPEN)GetStockObject(BLACK_PEN));
 
-	u32 OldTime = project->GetCurrentTime();
+	unsigned short nOldTime = project->m_bAnimation ? project->m_nCurFrame : project->m_nCurStep;
 	UINT nRenderTime = 1+((pInfo->m_nCurPage-1)*rows*cols);
 
-	View view(project, NULL);
-	view.OnSize(tw, th);
-	view.SetCamera(project->GetActiveModel()->GetCamera(LC_CAMERA_MAIN));
+	int oldSizex = project->m_nViewX;
+	int oldSizey = project->m_nViewY;
+	project->m_nViewX = tw;
+	project->m_nViewY = th;
 
 	for (int r = 0; r < rows; r++)
 	for (int c = 0; c < cols; c++)
 	{
 		if (nRenderTime > project->GetLastStep())
 			continue;
-		project->m_ActiveModel->m_CurFrame = nRenderTime;
+		if (project->m_bAnimation)
+			project->m_nCurFrame = nRenderTime;
+		else
+			project->m_nCurStep = nRenderTime;
 		project->CalculateStep();
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 
 		// Tile rendering
 		if (tw != pw)
 		{
-			lcCamera* Camera = view.GetCamera();
-
-			int CurrentTile = 0;
-			int TileWidth = tw;
-			int TileHeight = th;
-			int ImageWidth = pw;
-			int ImageHeight = ph;
-			int Columns = (ImageWidth + TileWidth - 1) / TileWidth;
-			int Rows = (ImageHeight + TileHeight - 1) / TileHeight;
-			float xmin, xmax, ymin, ymax;
-			ymax = Camera->m_NearDist * tan(Camera->m_FOV * 3.14159265f / 360.0f);
-			ymin = -ymax;
-			xmin = ymin * viewaspect;
-			xmax = ymax * viewaspect;
-
-			for (;;)
+			Camera* pCam = project->m_pCameras;
+			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
+				if (i-- == 0)
+					break;
+			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
+			do 
 			{
-				int CurrentTileWidth, CurrentTileHeight;
-
-				// which tile (by row and column) we're about to render
-				int CurrentRow = CurrentTile / Columns;
-				int CurrentColumn = CurrentTile % Columns;
-
-				// Compute actual size of this tile with border
-				if (CurrentRow < Rows-1)
-					CurrentTileHeight = TileHeight;
-				else
-					CurrentTileHeight = ImageHeight - (Rows-1) * (TileHeight);
-				
-				if (CurrentColumn < Columns-1)
-					CurrentTileWidth = TileWidth;
-				else
-					CurrentTileWidth = ImageWidth - (Columns-1) * (TileWidth);
-	
-				glViewport(0, 0, CurrentTileWidth, CurrentTileHeight);
-
-				project->RenderBackground(&view);
-
-				float left, right, bottom, top;
-
-				glMatrixMode(GL_PROJECTION);
-				glLoadIdentity();
-
-				// Compute projection parameters.
-				left = xmin + (xmax - xmin) * (CurrentColumn * TileWidth) / ImageWidth;
-				right = left + (xmax - xmin) * CurrentTileWidth / ImageWidth;
-				bottom = ymin + (ymax - ymin) * (CurrentRow * TileHeight) / ImageHeight;
-				top = bottom + (ymax - ymin) * CurrentTileHeight / ImageHeight;
-
-				glFrustum(left, right, bottom, top, Camera->m_NearDist, Camera->m_FarDist);
-
-				glMatrixMode(GL_MODELVIEW);
-				glLoadMatrixf(view.GetCamera()->m_WorldView);
-
-				project->RenderScene(&view);
+				project->Render(true);
 				glFinish();
-
-				int ctw = CurrentTileWidth;
-				int cth = CurrentTileHeight;
-				int tr = Rows - CurrentRow - 1;
-				int tc = CurrentColumn;
+				int tr, tc, ctw, cth;
+				pCam->GetTileInfo(&tr, &tc, &ctw, &cth);
 
 				lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 	
@@ -371,19 +334,14 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				memcpy (&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
 
 				pDC->SetStretchBltMode(COLORONCOLOR);
-				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th+th-cth, ctw, cth, 0, 0, ctw, cth, 
+				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th, ctw, cth, 0, 0, ctw, cth, 
 					(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 				if (lpbi) GlobalFreePtr(lpbi);
-
-				// Increment tile counter.
-				CurrentTile++;
-				if (CurrentTile >= Rows * Columns) 
-					break;
-			}
+			} while (pCam->EndTile());
 		}
 		else
 		{
-			project->Render(&view, false, false);
+			project->Render(true);
 			glFinish();
 			lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 			
@@ -395,6 +353,11 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 			if (lpbi) GlobalFreePtr(lpbi);
 		}
+
+		// OpenGL Rendering
+//			CCamera* pOld = pDoc->GetActiveCamera();
+//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pDoc->GetCamera(CAMERA_MAIN);
+//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
 
 		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
 		if (dwPrint & PRINT_NUMBERS)
@@ -431,7 +394,12 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		nRenderTime++;
 	}
 
-	project->m_ActiveModel->m_CurFrame = OldTime;
+	if (project->m_bAnimation)
+		project->m_nCurFrame = nOldTime;
+	else
+		project->m_nCurStep = (unsigned char)nOldTime;
+	project->m_nViewX = oldSizex;
+	project->m_nViewY = oldSizey;
 
 	pfnwglMakeCurrent(NULL, NULL);
 	pfnwglDeleteContext(hmemrc);
@@ -443,6 +411,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 	glFinish();
+//		pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);
 	lf.lfWeight = FW_REGULAR;
@@ -506,14 +475,14 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		while ((r = str.Find("&A")) != -1)
 		{
 			tmp = str.Left (r);
-			tmp += project->m_ActiveModel->m_Author;
+			tmp += project->m_strAuthor;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
 		while ((r = str.Find("&N")) != -1)
 		{
 			tmp = str.Left (r);
-			tmp += project->m_ActiveModel->m_Description;
+			tmp += project->m_strDescription;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
@@ -565,9 +534,10 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 
 void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
+//	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
 }
 
-void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewViewEx* pView) 
+void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CCADPreviewView* pView) 
 {
 //	CView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT, CPreviewView* pView)
 	ASSERT_VALID(pDC);
@@ -599,7 +569,44 @@ void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CPrev
 	pParent->RecalcLayout();
 	pParent->SendMessage(WM_SETMESSAGESTRING, (WPARAM)AFX_IDS_IDLEMESSAGE, 0L);
 	pParent->UpdateWindow();
+///
 
+
+	pfnwglMakeCurrent(NULL, NULL);
+/*
+	if (OpenGLGetPixelFormat(m_pDC->GetSafeHdc()) == 0)
+	{
+		delete m_pDC;
+		m_pDC = new CClientDC(this);
+
+		PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR), 1,
+			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
+ 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
+	
+		int pixelformat = OpenGLChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
+		if (pixelformat == 0)
+		{
+			AfxMessageBox("ChoosePixelFormat failed");
+		}
+
+		if (OpenGLSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
+		{
+			AfxMessageBox("SetPixelFormat failed");
+		}
+	}
+
+	if (pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC) == FALSE)
+	{
+		LPTSTR lpMsgBuf;
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		    NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+			(LPTSTR) &lpMsgBuf, 0, NULL);
+
+		::MessageBox(NULL, lpMsgBuf, "Error", MB_OK|MB_ICONINFORMATION);
+		LocalFree(lpMsgBuf);	
+	}
+*/
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -608,7 +615,7 @@ BOOL CCADView::DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass
 	ASSERT_VALID_IDR(nIDResource);
 	ASSERT_VALID(pPrintView);
 	ASSERT(pPreviewViewClass != NULL);
-	ASSERT(pPreviewViewClass->IsDerivedFrom(RUNTIME_CLASS(CPreviewViewEx)));
+	ASSERT(pPreviewViewClass->IsDerivedFrom(RUNTIME_CLASS(CCADPreviewView)));
 	ASSERT(pState != NULL);
 
 	CFrameWnd* pParent;
@@ -626,13 +633,13 @@ BOOL CCADView::DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass
 	context.m_pLastView = this;
 
 	// Create the preview view object
-	CPreviewViewEx* pView = (CPreviewViewEx*)pPreviewViewClass->CreateObject();
+	CCADPreviewView* pView = (CCADPreviewView*)pPreviewViewClass->CreateObject();
 	if (pView == NULL)
 	{
 		TRACE0("Error: Failed to create preview view.\n");
 		return FALSE;
 	}
-	ASSERT_KINDOF(CPreviewViewEx, pView);
+	ASSERT_KINDOF(CCADPreviewView, pView);
 	pView->m_pPreviewState = pState;        // save pointer
 
 	pParent->OnSetPreviewMode(TRUE, pState);    // Take over Frame Window
@@ -734,17 +741,9 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	Project* project = lcGetActiveProject();
-
-	m_pView = new View(project, project->GetFirstView());
-	m_pView->Create(m_hWnd);
-	m_pView->OnInitialUpdate();
-
-	CCADView* ActiveView = (CCADView*)GetParentFrame()->GetActiveView();
-	if (ActiveView)
-	{
-		m_pView->SetCamera(ActiveView->m_pView->GetCamera());
-	}
+	m_pView = new View (lcGetActiveProject(), NULL);
+	m_pView->Create (m_hWnd);
+	m_pView->OnInitialUpdate ();
 
 	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
 
@@ -815,7 +814,6 @@ LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 		case LC_CURSOR_PAN: Cursor = IDC_PAN; break;
 		case LC_CURSOR_ROLL: Cursor = IDC_ROLL; break;
 		case LC_CURSOR_ROTATE_VIEW: Cursor = IDC_ANGLE; break;
-		case LC_CURSOR_ORBIT: Cursor = IDC_ORBIT; break;
 
 		default:
 			LC_ASSERT_FALSE("Unknown cursor type.");
@@ -904,85 +902,138 @@ LONG CCADView::OnSetStep(UINT lParam, LONG /*wParam*/)
 void CCADView::OnCaptureChanged(CWnd *pWnd) 
 {
 	if (pWnd != this)
-		lcPostMessage(LC_MSG_MOUSE_CAPTURE_LOST, 0);
+		lcGetActiveProject()->HandleNotify(LC_CAPTURE_LOST, 0);
 	
 	CView::OnCaptureChanged(pWnd);
 }
+
+
+
+
+
+
+
+
 
 void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
 	char nKey = nChar;
 
-	if (nChar >= VK_NUMPAD0 && nChar <= VK_NUMPAD9)
+	switch (nChar)
 	{
-		nKey = nChar - VK_NUMPAD0 + '0';
+		case VK_NUMPAD0 : case VK_NUMPAD1 : case VK_NUMPAD2 : case VK_NUMPAD3 : case VK_NUMPAD4 : 
+		case VK_NUMPAD5 : case VK_NUMPAD6 : case VK_NUMPAD7 : case VK_NUMPAD8 : case VK_NUMPAD9 :
+		{
+			nKey = nChar - VK_NUMPAD0 + 0x30;
+		} break;
+
+    // select the next/previous piece on the pieces list
+    case VK_HOME:
+    case VK_END:
+    {
+      /*
+      CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd ();
+      CPiecesList& pList = pMain->m_wndPiecesBar.m_wndPiecesList;
+      LV_FINDINFO lvfi;
+      int sel;
+
+			lvfi.flags = LVFI_PARAM;
+			lvfi.lParam = (LPARAM)pMain->m_wndPiecesBar.m_wndPiecePreview.GetPieceInfo ();
+			sel = pList.FindItem (&lvfi);
+
+      if (sel != -1)
+      {
+        if (nChar == VK_HOME)
+          sel--;
+        else
+          sel++;
+
+  			pList.SetItemState (sel, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
+	  		pList.EnsureVisible (sel, FALSE);
+      }
+*/
+    } break;
 	}
 
-	// Update cursor for multiple selection.
-	if (nChar == VK_CONTROL)
+	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);
+/*
+	switch (nChar)
 	{
-		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
+// HANDLE CTRL if action == pan/zoom
+		case VK_CONTROL: 
+		if (m_nCurAction == ACTION_SELECT)
 		{
 			POINT pt;
-
 			GetCursorPos(&pt);
 			CRect rc;
 			GetWindowRect(rc);
-
 			if (rc.PtInRect(pt))
 				OnSetCursor(this, HTCLIENT, 0);
-		}
-	}
-
-	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_SHIFT) < 0);
-
+		} break;
+*/
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	// Update cursor for multiple selection.
-	if (nChar == VK_CONTROL)
+/*	if (nChar == VK_CONTROL)
 	{
-		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
+// HANDLE CTRL if action == pan/zoom
+		CCADDoc* pDoc = GetDocument();
+		if (pDoc->m_nCurAction == ACTION_SELECT)
 		{
 			POINT pt;
-
 			GetCursorPos(&pt);
 			CRect rc;
 			GetWindowRect(rc);
-
 			if (rc.PtInRect(pt))
 				OnSetCursor(this, HTCLIENT, 0);
 		}
 	}
-
+*/	
 	CView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
 void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
 {
-	if (pActivateView && pActivateView->IsKindOf(RUNTIME_CLASS(CCADView)))
-		lcGetActiveProject()->SetActiveView(((CCADView*)pActivateView)->m_pView);
-	else
-		lcGetActiveProject()->SetActiveView(NULL);
-
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+/*
+	if (IsWindowEnabled())
+	{
+		if (bActivate)
+		{
+			if (m_pPixels)
+				free (m_pPixels);
+			m_pPixels = NULL;
+		}
+		else
+		{
+			if (m_pPixels)
+				free (m_pPixels);
+
+			CCADDoc* pDoc = GetDocument();
+			m_pPixels = malloc(pDoc->m_szView.cx * pDoc->m_szView.cy * sizeof(GLubyte) * 4);
+			if (!m_pPixels)
+				return;
+			glReadPixels(0, 0, pDoc->m_szView.cx, pDoc->m_szView.cy, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
+		}
+	}
+*/
 }
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
 {
-	if (m_pView)
-	{
-		MSG msg;
+  if (m_pView)
+  {
+    MSG msg;
 
 		msg.message = message;
-		msg.wParam = wParam;
-		msg.lParam = lParam;
+    msg.wParam = wParam;
+    msg.lParam = lParam;
 
 		if (GLWindowPreTranslateMessage(m_pView, &msg))
 			return TRUE;
-	}
-
+  }
+	
 	return CView::WindowProc(message, wParam, lParam);
 }

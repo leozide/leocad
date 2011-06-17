@@ -2,9 +2,6 @@
 // View the project contents
 //
 
-#include "lc_global.h"
-#include "lc_camera.h"
-
 #include <stdlib.h>
 #include "project.h"
 #include "view.h"
@@ -14,7 +11,6 @@ View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
-	m_Camera = pProject->GetActiveModel()->GetCamera(LC_CAMERA_MAIN);
 }
 
 View::~View()
@@ -69,18 +65,15 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 			return LC_CURSOR_PAN;
 
 		case LC_ACTION_ROTATE_VIEW:
-				return LC_CURSOR_ROTATE_VIEW;
-
-		case LC_ACTION_ORBIT:
 			switch (m_Project->GetOverlayMode())
 			{
 				case LC_OVERLAY_X: return LC_CURSOR_ROTATEX;
 				case LC_OVERLAY_Y: return LC_CURSOR_ROTATEY;
 				case LC_OVERLAY_Z: return LC_CURSOR_ROLL;
-				case LC_OVERLAY_XYZ: return LC_CURSOR_ORBIT;
+				case LC_OVERLAY_XYZ: return LC_CURSOR_ROTATE_VIEW;
 				default:
 					LC_ASSERT_FALSE("Unknown cursor type.");
-					return LC_CURSOR_ORBIT;
+					return LC_CURSOR_NONE;
 			}
 
 		case LC_ACTION_ROLL:
@@ -95,14 +88,12 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 
 void View::OnDraw()
 {
-	if (m_Camera)
-	{
-		MakeCurrent();
+	MakeCurrent();
 
-		m_Project->Render(this, true, true);
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->Render(false);
 
-		SwapBuffers();
-	}
+	SwapBuffers();
 }
 
 void View::OnInitialUpdate()
@@ -113,101 +104,36 @@ void View::OnInitialUpdate()
 
 void View::OnLeftButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnLeftButtonDown(this, x, y, bControl, bShift);
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->OnLeftButtonDown(x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnLeftButtonUp(this, x, y, bControl, bShift);
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->OnLeftButtonUp(x, y, bControl, bShift);
 }
 
 void View::OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnLeftButtonDoubleClick(this, x, y, bControl, bShift);
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->OnLeftButtonDoubleClick(x, y, bControl, bShift);
 }
 
 void View::OnRightButtonDown(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnRightButtonDown(this, x, y, bControl, bShift);
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->OnRightButtonDown(x, y, bControl, bShift);
 }
 
 void View::OnRightButtonUp(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnRightButtonUp(this, x, y, bControl, bShift);
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->OnRightButtonUp(x, y, bControl, bShift);
 }
 
 void View::OnMouseMove(int x, int y, bool bControl, bool bShift)
 {
-	m_Project->OnMouseMove(this, x, y, bControl, bShift);
-}
-
-void View::OnSize(int cx, int cy)
-{
-	GLWindow::OnSize(cx, cy);
-
-	m_Viewport[0] = 0;
-	m_Viewport[1] = 0;
-	m_Viewport[2] = cx;
-	m_Viewport[3] = cy;
-
-	UpdateOverlayScale();
-}
-
-Matrix44 View::GetProjectionMatrix() const
-{
-	if (!m_Camera)
-		return IdentityMatrix44();
-
-	float Aspect = (float)m_nWidth/(float)m_nHeight;
-
-	if (m_Camera->IsOrtho())
-	{
-		float ymax, ymin, xmin, xmax, znear, zfar;
-		Vector3 frontvec = Vector3(m_Camera->m_ViewWorld[2]);//m_Target - m_Eye; // FIXME: free ortho cameras = crash
-		ymax = (frontvec.Length())*sinf(DTOR*m_Camera->m_FOV/2);
-		ymin = -ymax;
-		xmin = ymin * Aspect;
-		xmax = ymax * Aspect;
-		znear = m_Camera->m_NearDist;
-		zfar = m_Camera->m_FarDist;
-		return CreateOrthoMatrix(xmin, xmax, ymin, ymax, znear, zfar);
-	}
-	else
-		return CreatePerspectiveMatrix(m_Camera->m_FOV, Aspect, m_Camera->m_NearDist, m_Camera->m_FarDist);
-}
-
-void View::UpdateOverlayScale()
-{
-	Matrix44 Projection = GetProjectionMatrix();
-	const Vector3& Center = m_Project->GetOverlayCenter();
-
-	// Calculate the scaling factor by projecting the center to the front plane then
-	// projecting a point close to it back.
-	Vector3 Screen = ProjectPoint(Center, m_Camera->m_WorldView, Projection, m_Viewport);
-	Screen[0] += 10.0f;
-	Vector3 Point = UnprojectPoint(Screen, m_Camera->m_WorldView, Projection, m_Viewport);
-
-	Vector3 Dist = Point - Center;
-	m_OverlayScale = Dist.Length() * 5.0f;
-}
-
-void View::SetCamera(lcCamera* Camera)
-{
-	if (Camera)
-		m_CameraName = Camera->m_Name;
-	else
-		m_CameraName = "";
-
-	m_Camera = Camera;
-}
-
-void View::UpdateCamera()
-{
-	lcCamera* Camera = m_Project->GetActiveModel()->GetCamera(m_CameraName);
-
-	if (!Camera)
-		Camera = m_Project->GetActiveModel()->GetCamera(LC_CAMERA_MAIN);
-
-	m_Camera = Camera;
-	m_CameraName = m_Camera->m_Name;
+	m_Project->SetViewSize(m_nWidth, m_nHeight);
+	m_Project->OnMouseMove(x, y, bControl, bShift);
 }

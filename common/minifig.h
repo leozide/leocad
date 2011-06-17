@@ -2,10 +2,13 @@
 #define _MINIFIG_H_
 
 #include "glwindow.h"
+#include "file.h"
+#include "algebra.h"
+#include "array.h"
 
 class PieceInfo;
 
-typedef enum
+typedef	enum LC_MFW_TYPES
 {
 	LC_MFW_HAT,
 	LC_MFW_HEAD,
@@ -23,49 +26,48 @@ typedef enum
 	LC_MFW_LEFT_SHOE,
 	LC_MFW_RIGHT_SHOE,
 	LC_MFW_NUMITEMS
-} LC_MFW_TYPES;
+};
 
-struct LC_MFW_PIECEINFO
+struct lcMinifigPieceInfo
 {
-	char name[9];
-	char description[65];
-	int type;
-	float x, y, z;
-	float rx, ry, rz;
+	char Description[80];
+	PieceInfo* Info;
+	Matrix44 Offset;
 };
 
 class MinifigWizard : public GLWindow
 {
 public:
-	MinifigWizard(GLWindow *share);
-	~MinifigWizard();
+	MinifigWizard (GLWindow *share);
+	~MinifigWizard ();
 
-	void OnDraw();
+	void OnDraw ();
 
 	void Calculate();
-	void GetItems(int type, LC_MFW_PIECEINFO*** items, int *count);
-	void GetSelections(const char** names);
-	void ChangePiece(int type, LC_MFW_PIECEINFO* info);
-	void ChangeColor(int type, int color);
-	void ChangeAngle(int type, float angle);
+	int GetSelectionIndex(int Type) const;
+	void SetSelectionIndex(int Type, int Index);
+	void SetColor(int Type, int Color);
+	void SetAngle(int Type, float Angle);
 
-	void GetMinifigNames(char*** names, int* count);
-	void SaveMinifig(const char* name);
-	bool LoadMinifig(const char* name);
-	void DeleteMinifig(const char* name);
+	void GetMinifigNames (char ***names, int *count);
+	void SaveMinifig (const char* name);
+	bool LoadMinifig (const char* name);
+	void DeleteMinifig (const char* name);
 
-public:
+	void ParseSettings(File& Settings);
+
+	ObjArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
+
 	PieceInfo* m_Info[LC_MFW_NUMITEMS];
 	int m_Colors[LC_MFW_NUMITEMS];
 	float m_Angles[LC_MFW_NUMITEMS];
-	float m_Position[LC_MFW_NUMITEMS][3];
-	float m_Rotation[LC_MFW_NUMITEMS][4];
+	Matrix44 m_Matrices[LC_MFW_NUMITEMS];
 
 protected:
 	// saved minifig templates
-	int m_MinifigCount;
-	char** m_MinifigNames;
-	char** m_MinifigTemplates;
+	int  m_MinifigCount;
+	char **m_MinifigNames;
+	char **m_MinifigTemplates;
 };
 
 #endif // _MINIFIG_H_

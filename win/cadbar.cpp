@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "CADBar.h"
 #include "StepPop.h"

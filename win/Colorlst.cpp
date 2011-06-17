@@ -1,9 +1,10 @@
-#include "lc_global.h"
+// ColorLst.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "ColorLst.h"
-#include "lc_colors.h"
-#include "lc_message.h"
-#include "lc_application.h"
+#include "globals.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -11,491 +12,124 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define CXOFFSET 8  // Defined pitch of trapezoid slant.
-#define CXMARGIN 2  // Left/Right text margin.
-#define CYMARGIN 1  // Top/Bottom text margin.
-#define CYBORDER 1  // Top border thickness.
+/////////////////////////////////////////////////////////////////////////////
+// CColorsList
 
-// Given the boundint rect, compute trapezoid region.
-void CColorTab::GetTrapezoid(const CRect& rc, CPoint* pts) const
+CColorsList::CColorsList()
 {
-	pts[0] = CPoint(rc.left, rc.bottom);
-	pts[1] = CPoint(rc.left + CXOFFSET, rc.top);
-	pts[2] = CPoint(rc.right - CXOFFSET-1, rc.top);
-	pts[3] = CPoint(rc.right - 1, rc.bottom);
+	m_bLowRes = FALSE;
 }
 
-void CColorTab::Draw(CDC& dc, CFont& Font, BOOL Selected, BOOL Focus)
+CColorsList::~CColorsList()
 {
-	// Tab drawing code based on an article by Paul DiLascia.
-	COLORREF bgColor = GetSysColor(Selected ? COLOR_WINDOW : COLOR_3DFACE);
-	COLORREF fgColor = GetSysColor(Selected ? COLOR_WINDOWTEXT : COLOR_BTNTEXT);
-
-	CBrush brush(bgColor);
-	dc.SetBkColor(bgColor);
-	dc.SetTextColor(fgColor);
-
-	CPen blackPen(PS_SOLID, 1, RGB(0, 0, 0));
-	CPen shadowPen(PS_SOLID, 1, GetSysColor(COLOR_3DSHADOW));
-
-	// Fill trapezoid.
-	CPoint pts[4];
-	CRect rc = m_Rect;
-	GetTrapezoid(rc, pts);
-	CPen* pOldPen = dc.SelectObject(&blackPen);
-	dc.FillRgn(&m_Rgn, &brush);
-
-	// Draw edges. This is requires two corrections:
-	// 1) Trapezoid dimensions don't include the right and bottom edges,
-	// so must use one pixel less on bottom (cybottom)
-	// 2) the endpoint of LineTo is not included when drawing the line, so
-	// must add one pixel (cytop)
-	pts[0].y--;
-	dc.MoveTo(pts[0]);            // bottom left
-	dc.LineTo(pts[1]);            // upper left
-	dc.SelectObject(&shadowPen);  // top line is shadow color
-	dc.MoveTo(pts[1]);            // line is inside trapezoid top
-	dc.LineTo(pts[2]);
-	dc.SelectObject(&blackPen);   // upstroke is black
-	dc.LineTo(pts[3]);            // y-1 to include endpoint
-	if (!Selected) 
-	{
-		// If not highlighted, upstroke has a 3D shadow, one pixel inside.
-		pts[2].x--;  // offset left one pixel
-		pts[3].x--;  // ...ditto
-		dc.SelectObject(&shadowPen);
-		dc.MoveTo(pts[2]);
-		dc.LineTo(pts[3]);
-	}
-	dc.SelectObject(pOldPen);
-
-	// draw text
-	rc.DeflateRect(CXOFFSET + CXMARGIN, CYMARGIN);
-	CFont* OldFont = dc.SelectObject(&Font);
-	dc.DrawText(m_Text, &rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-	dc.SelectObject(OldFont);
-
-	if (Focus && Selected)
-		dc.DrawFocusRect(rc);
 }
 
-BEGIN_MESSAGE_MAP(CColorList, CWnd)
-	//{{AFX_MSG_MAP(CColorList)
-	ON_WM_PAINT()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_SIZE()
-	ON_WM_KEYDOWN()
-	ON_WM_SETFOCUS()
-	ON_WM_KILLFOCUS()
-	ON_WM_GETDLGCODE()
-	ON_WM_SETCURSOR()
+
+BEGIN_MESSAGE_MAP(CColorsList, CListBox)
+	//{{AFX_MSG_MAP(CColorsList)
 	ON_WM_CREATE()
+	ON_WM_KEYDOWN()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-CColorList::CColorList()
-{
-	m_Tabs.Add(new CColorTab("test"));
-	m_Tabs.Add(new CColorTab("test 2"));
+/////////////////////////////////////////////////////////////////////////////
+// CColorsList message handlers
 
-	m_Colors.SetSize(lcNumUserColors);
-	for (int i = 0; i < lcNumUserColors; i++)
+void CColorsList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
+{
+	int x = lpDIS->itemID;
+	if (x%2 == 0)
+		x/=2;
+	else
+		x = ((x-1)/2)+14;
+
+	if ((!(lpDIS->itemState & ODS_SELECTED) &&
+		(lpDIS->itemAction & ODA_SELECT)) ||
+		(lpDIS->itemAction & ODA_DRAWENTIRE))
 	{
-		CColorEntry& Entry = m_Colors[i];
-		Entry.Name = lcColorList[i].Name;
-		Entry.Color = LC_COLOR_RGB(i);
-		Entry.Index = i;
+		if (m_bLowRes)
+		{
+			HBRUSH hbr = CreateSolidBrush(RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
+			FillRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
+			DeleteObject (hbr);
+		}
+		else
+		{
+			SetBkColor(lpDIS->hDC, RGB(FlatColorArray[x][0], FlatColorArray[x][1], FlatColorArray[x][2]));
+			ExtTextOut(lpDIS->hDC, 0, 0, ETO_OPAQUE, &lpDIS->rcItem, NULL, 0, NULL);
+		}
+
+		if (x > 13 && x < 22)
+		for (x = lpDIS->rcItem.left; x < lpDIS->rcItem.right; x++)
+		{
+			for (int y = lpDIS->rcItem.top; y < lpDIS->rcItem.bottom; y+=4)
+			{
+				if (y == lpDIS->rcItem.top) y += x%4;
+				SetPixelV (lpDIS->hDC, x,y,RGB(255,255,255));
+			}
+			for (int y = lpDIS->rcItem.bottom; y > lpDIS->rcItem.top; y-=4)
+			{
+				if (y == lpDIS->rcItem.bottom) y-= x%4;
+				SetPixelV (lpDIS->hDC, x,y,RGB(255,255,255));
+			}
+		}
 	}
-
-	m_CurTab = 0;
-	m_CurColor = 0;
-	m_ColorFocus = true;
+	
+	// item has been selected - hilite frame
+	if ((lpDIS->itemState & ODS_SELECTED) &&
+		(lpDIS->itemAction & (ODA_SELECT | ODA_DRAWENTIRE)))
+	{
+		HBRUSH hbr = CreateSolidBrush(RGB(255-FlatColorArray[x][0], 255-FlatColorArray[x][1], 255-FlatColorArray[x][2]));
+		FrameRect(lpDIS->hDC, &lpDIS->rcItem, hbr);
+		DeleteObject (hbr);
+	}
 }
 
-CColorList::~CColorList()
+void CColorsList::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
 {
-	for (int i = 0; i < m_Tabs.GetSize(); i++)
-		delete (CColorTab*)m_Tabs[i];
-	m_Tabs.RemoveAll();
+	lpMeasureItemStruct->itemHeight = 12;
+	lpMeasureItemStruct->itemWidth = 15;
 }
 
-BOOL CColorList::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
-{
-	ASSERT(pParentWnd && ::IsWindow(pParentWnd->GetSafeHwnd()));
-
-	// Get the class name and create the window
-	CString ClassName = AfxRegisterWndClass(CS_CLASSDC|CS_SAVEBITS|CS_HREDRAW|CS_VREDRAW, 0, CreateSolidBrush(GetSysColor(COLOR_BTNFACE)), 0);
-
-	if (!CWnd::Create(ClassName, _T(""), dwStyle, rect, pParentWnd, nID, NULL))
-		return FALSE;
-
-	// Initialize fonts.
-	LOGFONT lf;
-	memset(&lf, 0, sizeof(lf));
-	lf.lfHeight = GetSystemMetrics(SM_CYHSCROLL)-CYMARGIN;
-	lf.lfWeight = FW_NORMAL;
-	lf.lfCharSet = DEFAULT_CHARSET;
-	_tcscpy(lf.lfFaceName, _T("Arial"));
-	m_NormalFont.CreateFontIndirect(&lf);
-
-	lf.lfWeight = FW_BOLD;
-	m_SelectedFont.CreateFontIndirect(&lf);
-
-	UpdateLayout();
-
-	return TRUE;
-}
-
-int CColorList::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (CWnd::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	m_ToolTip.Create(this);
-
-	return 0;
-}
-
-BOOL CColorList::PreTranslateMessage(MSG* pMsg)
+BOOL CColorsList::PreTranslateMessage(MSG* pMsg) 
 {
 	if (m_ToolTip.m_hWnd)
 		m_ToolTip.RelayEvent(pMsg);
 
-	return CWnd::PreTranslateMessage(pMsg);
+	return CListBox::PreTranslateMessage(pMsg);
 }
 
-void CColorList::OnPaint() 
+int CColorsList::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	CPaintDC dc(this);
+	if (CListBox::OnCreate(lpCreateStruct) == -1)
+		return -1;
+	
+	m_ToolTip.Create(this);
+//	m_ToolTip.Activate(TRUE);
 
-	CColorTab* CurTab = NULL;
-	BOOL Focus = (GetFocus() == this);
-
-	// Draw all the normal tabs.
-	for (int i = 0; i < m_Tabs.GetSize(); i++) 
+	for (int i = 0; i < 14; i++)
 	{
-		CColorTab* Tab = (CColorTab*)m_Tabs[i];
-
-		if (i == m_CurTab)
-			CurTab = Tab;
-		else
-			Tab->Draw(dc, m_NormalFont, FALSE, Focus && !m_ColorFocus);
+		CRect rect (i*15,0,(i+1)*15,12);
+		m_ToolTip.AddTool(this, IDS_COLOR01+i, rect, 1);
+		rect.OffsetRect (0,12);
+		m_ToolTip.AddTool(this, IDS_COLOR15+i, rect, 1);
 	}
-
-	// Draw selected tab last so it will be "on top" of the others.
-	if (CurTab)
-		CurTab->Draw(dc, m_SelectedFont, TRUE, Focus && !m_ColorFocus);
-
-	// Draw the colors.
-	CPen BlackPen;
-	BlackPen.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
-	CPen* OldPen = (CPen*)dc.SelectObject(&BlackPen);
-
-	for (int i = 0; i < m_Colors.GetSize(); i++)
-	{
-		CBrush brush;
-
-		if (LC_COLOR_TRANSLUCENT(m_Colors[i].Index))
-		{
-			WORD CheckerBits[8] = { 0xCC, 0xCC, 0x33, 0x33, 0xCC, 0xCC, 0x33, 0x33 };
-
-			// Use the bit pattern to create a bitmap.
-			CBitmap bm;
-			bm.CreateBitmap(8, 8, 1, 1, CheckerBits);
-
-			// Create a pattern brush from the bitmap.
-			brush.CreatePatternBrush(&bm);
-			dc.SetTextColor(m_Colors[i].Color);
-			dc.SetBkColor(RGB(255, 255, 255));
-		}
-		else
-		{
-			brush.CreateSolidBrush(m_Colors[i].Color);
-		}
-
-		CBrush* OldBrush = (CBrush*)dc.SelectObject(&brush);
-
-		CRect rc = m_Colors[i].Rect;
-		rc.bottom++;
-		rc.right++;
-		dc.Rectangle(rc);
-
-		dc.SelectObject(OldBrush);
-	}
-
-	CBrush* OldBrush = (CBrush*)dc.SelectObject(GetStockObject(NULL_BRUSH));
-
-	COLORREF cr = m_Colors[m_CurColor].Color;
-	CPen BorderPen;
-	BorderPen.CreatePen(PS_SOLID, 1, RGB(255-GetRValue(cr), 255-GetGValue(cr), 255-GetBValue(cr)));
-	dc.SelectObject(&BorderPen);
-
-	CRect rc = m_Colors[m_CurColor].Rect;
-	rc.OffsetRect(1, 1);
-	rc.bottom--;
-	rc.right--;
-	dc.Rectangle(rc);
-
-	dc.SelectObject(OldPen);
-	dc.SelectObject(OldBrush);
-
-	if (Focus && m_ColorFocus)
-	{
-		rc.DeflateRect(2, 2);
-		dc.DrawFocusRect(rc);
-	}
+	
+	return 0;
 }
 
-void CColorList::UpdateLayout()
+void CColorsList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	CClientDC dc(this);
-
-	CFont* OldFont = dc.SelectObject(&m_SelectedFont);
-	int x = 0;
-
-	for (int i = 0; i < m_Tabs.GetSize(); i++) 
+	if (nChar == VK_INSERT)
 	{
-		CColorTab* Tab = (CColorTab*)m_Tabs[i];
+//		project->HandleCommand(LC_PIECE_INSERT, 0);
 
-		// Calculate desired text rectangle.
-		CRect& rc = Tab->m_Rect;
-		rc.SetRectEmpty();
-		dc.DrawText(Tab->m_Text, &rc, DT_CALCRECT);
-		rc.right += 2 * CXOFFSET + 3 * CXMARGIN;
-		rc.bottom = rc.top + GetSystemMetrics(SM_CYHSCROLL);
-		rc += CPoint(x,0);
+		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+		pFrame->PostMessage(WM_COMMAND, ID_PIECE_INSERT, 0);
 
-		// Create trapezoid region.
-		CPoint pts[4];
-		Tab->GetTrapezoid(rc, pts);
-		Tab->m_Rgn.DeleteObject();
-		Tab->m_Rgn.CreatePolygonRgn(pts, 4, WINDING);
-
-		x += rc.Width() - CXOFFSET;
+		CView* pView = pFrame->GetActiveView();
+		pView->SetFocus();
 	}
-
-	dc.SelectObject(OldFont);
-
-	CRect rc;
-	GetClientRect(&rc);
-	rc.top = ((CColorTab*)m_Tabs[0])->m_Rect.bottom;
-
-	m_ColorRows = 6;
-	m_ColorCols = 13;
-
-	int CellWidth = rc.Width() / m_ColorCols;
-	int CellHeight = rc.Height() / m_ColorRows;
-
-	for (int i = 0; i < lcNumUserColors; i++)
-		m_ToolTip.DelTool(this, i+1);
-
-	for (int i = 0; i < m_ColorRows; i++)
-	{
-		for (int j = 0; j < m_ColorCols; j++)
-		{
-			CRect cell(0, 0, CellWidth, CellHeight);
-			cell.OffsetRect(j * CellWidth + rc.left, i * CellHeight + rc.top);
-
-			int Index = i*m_ColorCols + j;
-			m_Colors[Index].Rect = cell;
-			m_ToolTip.AddTool(this, lcColorList[Index].Name, cell, Index+1);
-		}
-	}
-}
-
-void CColorList::OnLButtonDown(UINT Flags, CPoint pt)
-{
-	CWnd::OnLButtonDown(Flags, pt);
-	SetFocus();
-
-	CRect rc;
-	GetClientRect(&rc);
-
-	if (!rc.PtInRect(pt)) 
-		return;
-
-	for (int i = 0; i < m_Tabs.GetSize(); i++) 
-	{
-		CColorTab* TabPtr = (CColorTab*)m_Tabs[i];
-
-		if (TabPtr->m_Rgn.PtInRegion(pt))
-		{
-			SelectTab(i);
-			return;
-		}
-	}
-
-	for (int i = 0; i < m_Colors.GetSize(); i++)
-	{
-		if (m_Colors[i].Rect.PtInRect(pt))
-		{
-			SelectColor(i);
-			return;
-		}
-	}
-}
-
-void CColorList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	int Row = m_CurColor / m_ColorCols;
-	int Col = m_CurColor % m_ColorCols;
-
-	switch (nChar)
-	{
-		case VK_UP:
-			if (m_ColorFocus)
-			{
-				if (Row > 0)
-				{
-					Row--;
-
-					SelectColor(Row * m_ColorCols + Col);
-				}
-				else
-					SelectTab(m_CurTab);
-			}
-			break;
-
-		case VK_DOWN:
-			if (m_ColorFocus)
-			{
-				if (Row < m_ColorRows - 1)
-					Row++;
-
-				SelectColor(Row * m_ColorCols + Col);
-			}
-			else
-				SelectColor(m_CurColor);
-			break;
-
-		case VK_LEFT:
-			if (m_ColorFocus)
-			{
-				if (Col > 0)
-					Col--;
-				else if (Row > 0)
-				{
-					Row--;
-					Col = m_ColorCols - 1;
-				}
-
-				SelectColor(Row * m_ColorCols + Col);
-			}
-			else
-			{
-				if (m_CurTab > 0)
-					SelectTab(m_CurTab - 1);
-			}
-			break;
-
-		case VK_RIGHT:
-			if (m_ColorFocus)
-			{
-				if (Col < m_ColorCols - 1)
-					Col++;
-				else if (Row < m_ColorRows - 1)
-				{
-					Row++;
-					Col = 0;
-				}
-
-				SelectColor(Row * m_ColorCols + Col);
-			}
-			else
-			{
-				if (m_CurTab < m_Tabs.GetSize() - 1)
-					SelectTab(m_CurTab + 1);
-			}
-			break;
-	}
-
-	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-}
-
-BOOL CColorList::OnSetCursor(CWnd* inWnd, UINT inHitTest, UINT inMessage) 
-{
-	HCURSOR Cursor = LoadCursor(NULL, IDC_ARROW);
-
-	if (Cursor)
-	{
-		SetCursor(Cursor);
-		return TRUE;
-	}
-
-	return CWnd::OnSetCursor(inWnd, inHitTest, inMessage);
-}
-
-UINT CColorList::OnGetDlgCode()
-{
-	return DLGC_WANTARROWS;
-}
-
-void CColorList::OnSetFocus(CWnd* pOldWnd)
-{
-	if (m_ColorFocus)
-		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
 	else
-		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
-
-	CWnd::OnSetFocus(pOldWnd);
-}
-
-void CColorList::OnKillFocus(CWnd* pNewWnd)
-{
-	if (m_ColorFocus)
-		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
-	else
-		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
-
-	CWnd::OnKillFocus(pNewWnd);
-}
-
-void CColorList::OnSize(UINT nType, int cx, int cy)
-{
-	CWnd::OnSize(nType, cx, cy);
-
-	UpdateLayout();
-}
-
-void CColorList::SelectTab(int Tab)
-{
-	if (Tab < 0 || Tab >= m_Tabs.GetSize())
-		return;
-
-	if (m_ColorFocus)
-	{
-		InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
-		InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
-		m_ColorFocus = false;
-	}
-
-	if (Tab == m_CurTab)
-		return;
-
-	InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
-	InvalidateRect(((CColorTab*)m_Tabs[Tab])->m_Rect, TRUE);
-	m_CurTab = Tab;
-}
-
-void CColorList::SelectColor(int Color)
-{
-	if (Color < 0 || Color >= m_Colors.GetSize())
-		return;
-
-	if (!m_ColorFocus)
-	{
-		InvalidateRect(m_Colors[Color].Rect, TRUE);
-		InvalidateRect(((CColorTab*)m_Tabs[m_CurTab])->m_Rect, TRUE);
-		m_ColorFocus = true;
-	}
-
-	if (Color == m_CurColor)
-		return;
-
-	InvalidateRect(m_Colors[m_CurColor].Rect, TRUE);
-	InvalidateRect(m_Colors[Color].Rect, TRUE);
-	m_CurColor = Color;
-
-	g_App->m_SelectedColor = Color;
-	lcPostMessage(LC_MSG_COLOR_CHANGED, (void*)Color);
+		CListBox::OnKeyDown(nChar, nRepCnt, nFlags);
 }

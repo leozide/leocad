@@ -11,7 +11,7 @@
 // CTerrainWnd window
 
 class Terrain;
-class lcCamera;
+class Camera;
 
 class CTerrainWnd : public CWnd
 {
@@ -44,7 +44,7 @@ protected:
 	CClientDC* m_pDC;
 	CPalette* m_pPalette;
 	Terrain* m_pTerrain;
-	lcCamera* m_pCamera;
+	Camera* m_pCamera;
 
 	CPoint m_ptMouse;
 

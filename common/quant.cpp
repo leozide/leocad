@@ -1,7 +1,6 @@
 ///////////////////////////////////////
 // DL1 Quantization
 
-#include "lc_global.h"
 #include <stdlib.h>
 #include <math.h>
 #include <memory.h>

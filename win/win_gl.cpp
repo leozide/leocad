@@ -2,7 +2,7 @@
 // Windows OpenGL functions
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "opengl.h"
 
 static HMODULE gl_module;

@@ -1,7 +1,7 @@
 // EdGrpDlg.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "EdGrpDlg.h"
 #include "globals.h"
@@ -62,8 +62,6 @@ BOOL CEditGroupsDlg::OnInitDialog()
 
 void CEditGroupsDlg::OnEditgrpNewgroup() 
 {
-	/*
-	FIXME: groups
   HTREEITEM hItem, hParent = NULL;
   Group *pGroup, *pParent = NULL;
   TVITEM item;
@@ -104,5 +102,4 @@ void CEditGroupsDlg::OnEditgrpNewgroup()
 
   m_Tree.DeleteAllItems();
 	m_Tree.AddChildren(NULL, NULL);
-	*/
 }

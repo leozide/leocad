@@ -42,8 +42,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"lc_global.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /D "NDEBUG" /D "WIN32" /D "LC_WINDOWS" /Yu"lc_global.h" /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../common" /I "../win" /D "NDEBUG" /D "WIN32" /D "LC_WINDOWS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 vfw32.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libc.lib" /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libc.lib" /libpath:"./jpeglib/release" /libpath:"./3dsftk/release" /libpath:"./libpng/release" /libpath:"./zlib/release"
 
 !ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
 
@@ -68,8 +68,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"lc_global.h" /FD /c
-# ADD CPP /nologo /G6 /MTd /W3 /Gm /Gi /GX /ZI /Od /I "../common" /I "../win" /D "_DEBUG" /D "WIN32" /D "LC_WINDOWS" /D "LC_DEBUG" /Yu"lc_global.h" /FD /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MTd /W3 /Gm /Gi /GX /ZI /Od /I "../common" /I "../win" /D "_DEBUG" /D "WIN32" /D "LC_WINDOWS" /D "LC_DEBUG" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vfw32.lib gdi32.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
+# ADD LINK32 vfw32.lib jpeglib.lib 3dsftk.lib libpng.lib zlib.lib gdi32.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libcd.lib" /libpath:"./jpeglib/debug" /libpath:"./3dsftk/debug" /libpath:"./libpng/debug" /libpath:"./zlib/debug"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -147,10 +147,6 @@ SOURCE=.\Colorlst.cpp
 # Begin Source File
 
 SOURCE=.\Disabtab.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\dynsplit.cpp
 # End Source File
 # Begin Source File
 
@@ -283,19 +279,11 @@ SOURCE=.\Propssht.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\RollupCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\scbarg.cpp
+SOURCE=.\Rmodel.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\Seldlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\sizecbar.cpp
 # End Source File
 # Begin Source File
 
@@ -304,7 +292,7 @@ SOURCE=.\Splitter.cpp
 # Begin Source File
 
 SOURCE=.\Stdafx.cpp
-# ADD CPP /Yc"lc_global.h"
+# ADD CPP /Yc"stdafx.h"
 # End Source File
 # Begin Source File
 
@@ -409,10 +397,6 @@ SOURCE=.\Config.h
 # Begin Source File
 
 SOURCE=.\Disabtab.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\dynsplit.h
 # End Source File
 # Begin Source File
 
@@ -524,19 +508,11 @@ SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\RollupCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\scbarg.h
+SOURCE=.\RModel.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\SelDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\sizecbar.h
 # End Source File
 # Begin Source File
 
@@ -1012,7 +988,15 @@ SOURCE=..\common\basewnd.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\Common\camera.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\console.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\curve.h
 # End Source File
 # Begin Source File
 
@@ -1045,10 +1029,6 @@ SOURCE=..\common\keyboard.h
 # Begin Source File
 
 SOURCE=..\common\lc_application.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_mesh.h
 # End Source File
 # Begin Source File
 
@@ -1124,7 +1104,15 @@ SOURCE=..\Common\texture.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\Common\Tr.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\Common\typedefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\vector.h
 # End Source File
 # Begin Source File
 
@@ -1137,174 +1125,191 @@ SOURCE=..\common\view.h
 # Begin Source File
 
 SOURCE=..\common\algebra.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\camera.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\console.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\curve.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\debug.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\file.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\globals.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\group.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_bmp.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_gif.cpp
 # ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_jpg.cpp
 # ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\im_png.cpp
 # ADD CPP /I "./libpng" /I "./zlib"
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\image.cpp
 # ADD CPP /I "./jpeglib"
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\keyboard.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\lc_application.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_camera.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_camera_target.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_colors.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_flexpiece.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_light.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_mesh.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_model.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_modelref.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_object.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_piece.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_pieceobj.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_pivot.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\lc_scene.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\library.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\light.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\mainwnd.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\matrix.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\message.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\minifig.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\object.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\opengl.cpp
+
+!IF  "$(CFG)" == "LeoCAD - Win32 Release"
+
+# ADD CPP /YX
+
+!ELSEIF  "$(CFG)" == "LeoCAD - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\piece.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\pieceinf.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\preview.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\project.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\quant.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\str.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\terrain.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\texfont.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\Common\texture.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\Tr.cpp
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=..\Common\vector.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\view.cpp
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # End Group
 # Begin Source File

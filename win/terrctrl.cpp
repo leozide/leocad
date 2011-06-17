@@ -1,7 +1,7 @@
 // TerrCtrl.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "TerrCtrl.h"
 #include "IPEdit.h"
@@ -510,9 +510,7 @@ void CTerrainCtrl::OnDraw(CDC* pDC)
 		maxVisibleCol = VisCellRange.GetMaxCol();
 */
 	// calc bottom
-	int bottom = GetFixedRowHeight();
-	int i;
-
+	int i, bottom = GetFixedRowHeight();
 	for (i = idTopLeft.row; i < m_nRows; i++)
 	{
 		bottom += GetRowHeight(i);
@@ -1294,9 +1292,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 		cellID.col = -1;
 	else if (point.x < fixedColWidth) // in fixed col
 	{
-		int xpos = 0;
-		int col;
-
+		int col, xpos = 0;
 		for (col = 0; col < m_nFixedCols; col++)
 		{
 			xpos += GetColumnWidth(col);
@@ -1306,9 +1302,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 	}
 	else	// in non-fixed col
 	{
-		int xpos = fixedColWidth;
-		int col;
-
+		int col, xpos = fixedColWidth;
 		for (col = idTopLeft.col; col < m_nCols; col++)
 		{
 			xpos += GetColumnWidth(col);
@@ -1327,9 +1321,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 		cellID.row = -1;
 	else if (point.y < fixedRowHeight) // in fixed col
 	{
-		int ypos = 0;
-		int row;
-
+		int row, ypos = 0;
 		for (row = 0; row < m_nFixedRows; row++)
 		{
 			ypos += GetRowHeight(row);
@@ -1339,9 +1331,7 @@ CELLID CTerrainCtrl::GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck)
 	}
 	else
 	{
-		int ypos = fixedRowHeight;
-		int row;
-
+		int row, ypos = fixedRowHeight;
 		for (row = idTopLeft.row; row < GetRowCount(); row++)
 		{
 			ypos += GetRowHeight(row);
@@ -1801,9 +1791,7 @@ void CTerrainCtrl::EnsureVisible(int nRow, int nCol)
 	CELLID idTopLeft = GetTopleftNonFixedCell();
 
 	// calc bottom
-	int bottom = GetFixedRowHeight();
-	int i;
-
+	int i, bottom = GetFixedRowHeight();
 	for (i = idTopLeft.row; i < m_nRows; i++)
 	{
 		bottom += GetRowHeight(i);

@@ -2,12 +2,12 @@
 // Global variables common to all platforms.
 //
 
-#include "lc_global.h"
 #include <stdlib.h>
 #include "globals.h"
 
+Messenger* messenger;
 MainWnd* main_window;
-/*
+
 const char* colornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"Light Green", "Blue", "Light Blue", "Yellow", "White",
 	"Dark Gray", "Black", "Brown", "Pink", "Purple", "Gold",
@@ -21,11 +21,6 @@ const char* altcolornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
 	"ClearRed", "ClearOrange", "ClearGreen", "ClearLightGreen",
 	"ClearBlue", "ClearLightBlue", "ClearYellow", "ClearWhite",
 	"LightGray", "Tan", "LightBrown", "LightPink", "Turquoise", "Silver" };
-
-const char* lg_colors[28] = { "red", "Orange", "green", "mint", "blue", "LightBlue", "yellow", 
-	"white", "dark_grey", "black", "brown", "pink", "purple", "gold_chrome", "clear_red",
-	"clear_neon_orange", "clear_green", "clear_neon_yellow", "clear_blue", "clear_cyan", 
-	"clear_yellow", "clear", "grey", "tan", "LightBrown", "rose", "Turquoise", "chrome" };
 
 unsigned char FlatColorArray[31][3] = {
 	{ 166,  25,  25 },  // 0 - Red
@@ -92,4 +87,3 @@ unsigned char ColorArray[31][4] = {
 	{  51,  51,  51, 255 },  //28 - Edges
 	{ 229,  76, 102, 255 },  //29 - Selected
 	{ 102,  76, 229, 255 }}; //30 - Focused
-*/

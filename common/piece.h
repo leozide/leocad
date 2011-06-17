@@ -1,18 +1,19 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
-#if 0
-
 class File;
 class Piece;
 class Group;
 class PieceInfo;
-class lcMesh;
 
 #include "object.h"
 #include "globals.h"
 #include "typedefs.h"
 #include "defines.h"
+
+#define LC_PIECE_HIDDEN		0x01
+#define LC_PIECE_SELECTED	0x02
+#define LC_PIECE_FOCUSED	0x04
 
 typedef enum
 {
@@ -27,42 +28,46 @@ public:
 	Piece (PieceInfo* pPieceInfo);
 	~Piece ();
 
-	void Select (bool bSelecting, bool bFocus);
-	virtual void InsertTime(u32 start, u32 time);
-	virtual void RemoveTime(u32 start, u32 time);
+	void Select (bool bSelecting, bool bFocus, bool bMultiple);
+	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
+	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
 	virtual bool IntersectsVolume(const Vector4* Planes, int NumPlanes);
 
 
 
 
 
+	Piece* m_pNext;
 	Piece* m_pLink;
 
+	void Hide()
+		{ m_nState = LC_PIECE_HIDDEN; }
+	void UnHide()
+		{ m_nState &= ~LC_PIECE_HIDDEN; }
+	bool IsHidden()
+		{ return (m_nState & LC_PIECE_HIDDEN) != 0; }
 	bool IsSelected()
 		{ return (m_nState & LC_PIECE_SELECTED) != 0; }
 	bool IsFocused()
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 
-	lcMesh* GetMesh() const
-	{ return m_Mesh; }
-
-	const Matrix44& GetModelWorld() const
-	{ return m_ModelWorld; }
+	const char* GetName() const
+	{ return m_strName; };
 
 	void MinIntersectDist(LC_CLICKLINE* pLine);
-	bool IsVisible(u32 Time);
-	void Initialize(float x, float y, float z, u32 Time, unsigned char nColor);
+	bool IsVisible(unsigned short nTime, bool bAnimation);
+	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
 	void CreateName(Piece* pPiece);
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
-	void GetBoundingBox(Vector3 Verts[8]);
+	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(File& file, char* name);
 	void FileSave(File& file, Group* pGroups);
 
-	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bForceRebuild, bool bFixOthers);
-	void UpdatePosition(unsigned short nTime);
-	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
+	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers);
+	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
 
 	void DoGroup(Group* pGroup);
 	void UnGroup(Group* pGroup);
@@ -71,20 +76,32 @@ public:
 		{ m_pGroup = pGroup; }
 	Group* GetGroup()
 		{ return m_pGroup; }
+	void SetName(char* name)
+		{ strcpy(m_strName, name); }
+	const char* GetName()
+		{ return m_strName; }
 	const unsigned char GetColor()
 		{ return m_nColor; }
 	void SetColor(unsigned char color)
 		{ m_nColor = color; }
 	PieceInfo* GetPieceInfo()
 		{ return m_pPieceInfo; }
-	void SetTimeShow(int Time)
-	{ m_TimeShow = Time; }
-	const unsigned char GetTimeShow()
-	{ return m_TimeShow; }
-	void SetTimeHide(unsigned char Time)
-	{ m_TimeHide = Time; }
-	const unsigned char GetTimeHide()
-	{ return m_TimeHide; }
+	void SetStepShow(unsigned char step)
+		{ m_nStepShow = step; }
+	const unsigned char GetStepShow()
+		{ return m_nStepShow; }
+	void SetStepHide(unsigned char step)
+		{ m_nStepHide = step; }
+	const unsigned char GetStepHide()
+		{ return m_nStepHide; }
+	void SetFrameShow(unsigned short frame)
+		{ m_nFrameShow = frame; }
+	const unsigned short GetFrameShow()
+		{ return m_nFrameShow; }
+	void SetFrameHide(unsigned short frame)
+		{ m_nFrameHide = frame; }
+	const unsigned short GetFrameHide()
+		{ return m_nFrameHide; }
 	const float* GetConstPosition()
 		{ return m_fPosition; }
 	inline Vector3 GetPosition() const
@@ -94,7 +111,7 @@ public:
 	void GetRotation (float* rotation)
 		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
 
-	void Render(bool bLighting, bool bEdges);
+	void Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans);
 	void RenderBox(bool bHilite, float fLineWidth);
 
 	inline bool IsTransparent()
@@ -104,30 +121,35 @@ public:
 		return true;
 	};
 
+/*
+	inline void UseTransform()
+	{
+		glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
+		glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
+	}
+*/
 protected:
 	void BuildDrawInfo();
 
 	// Atributes
+	PieceInfo* m_pPieceInfo;
 	Group* m_pGroup;
+
+	unsigned short m_nFrameShow;
+	unsigned short m_nFrameHide;
+	unsigned char m_nStepShow;
+	unsigned char m_nStepHide;
 
 	unsigned char m_nColor;
 	unsigned char m_nState;
+	char m_strName[81];
 
+	// Temporary variables
+	float m_fPosition[3];
 	float m_fRotation[4];
 	CONNECTION* m_pConnections;
-	lcMesh* m_Mesh;
-
-	// Workaround for MSVC6 poor template support.
-	template <class T>
-	struct TypeToType
-	{
-		typedef T type;
-	};
-
-	template<class T>
-	void BuildMesh(TypeToType<T>);
+	void* m_pDrawInfo;
 };
 
-#endif // 0
 
 #endif // _PIECE_H

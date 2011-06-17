@@ -1,11 +1,9 @@
-#include "lc_global.h"
-#include "lc_application.h"
-
 #include <stdio.h>
-#include "lc_mesh.h"
+#include "lc_application.h"
 #include "library.h"
 #include "system.h"
 #include "console.h"
+#include "config.h"
 #include "opengl.h"
 #include "project.h"
 #include "image.h"
@@ -32,11 +30,8 @@ Project* lcGetActiveProject()
 
 lcApplication::lcApplication()
 {
-	m_PiecePreview = NULL;
-	m_SelectedColor = 0;
 	m_ActiveProject = NULL;
 	m_Library = NULL;
-	m_MouseSensitivity = Sys_ProfileLoadInt("Default", "Mouse", 11);
 }
 
 lcApplication::~lcApplication()
@@ -71,39 +66,18 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* SysLibPat
 		if (m_Library->Load(EnvPath))
 			return true;
 
-	// Try the last library path.
-	const char* ProfilePath = Sys_ProfileLoadString("Settings", "PiecesLibrary", "");
-	if (strlen(ProfilePath) != 0)
-		if (m_Library->Load(ProfilePath))
-			return true;
-
 	// Try the executable install path last.
 	if (SysLibPath != NULL)
 		if (m_Library->Load(SysLibPath))
 			return true;
 
-	// Give the user a chance to select the directory.
-	for (;;)
-	{
-		int Ret = SystemDoMessageBox("LeoCAD was unable to load its Pieces Library, do you want to specify another location?",
-		                             LC_MB_YESNO|LC_MB_ICONQUESTION);
-
-		if (Ret == LC_YES)
-		{
-			LC_DLG_DIRECTORY_BROWSE_OPTS Opts;
-
-			Opts.Title = "Select Pieces Library Directory";
-
-			if (SystemDoDialog(LC_DLG_DIRECTORY_BROWSE, &Opts))
-				if (m_Library->Load(Opts.Path))
-					return true;
-		}
-		else
-			break;
-	}
-
-	SystemDoMessageBox("LeoCAD could not load its Pieces Library and will now exit.\n\n"
-	                   "Make sure that you have the library installed in your computer.", LC_MB_OK|LC_MB_ICONERROR);
+#ifdef LC_WINDOWS
+	SystemDoMessageBox("Cannot load pieces library.\n"
+	                   "Make sure that you have the PIECES.IDX file in the same "
+	                   "folder where you installed the program.", LC_MB_OK|LC_MB_ICONERROR);
+#else
+	printf("Error: Cannot load pieces library.\n");
+#endif
 
 	return false;
 }
@@ -260,8 +234,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 
 	SystemInit();
 
-	lcCreateDefaultMeshes();
-
 	// Create a new project.
 	Project* project = new Project();
 	AddProject(project);
@@ -342,6 +314,11 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			}
 		}
 
+		if (ImageInstructions)
+			project->SetAnimation(false);
+		else if (ImageAnimation)
+			project->SetAnimation(true);
+
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
 		else if (ImageStart > ImageEnd)
@@ -360,11 +337,22 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			ImageEnd = ImageStart;
 		}
 
-		if (ImageStart > 255)
-			ImageStart = 255;
+		if (project->IsAnimation())
+		{
+			if (ImageStart > project->GetTotalFrames())
+				ImageStart = project->GetTotalFrames();
 
-		if (ImageEnd > 255)
-			ImageEnd = 255;
+			if (ImageEnd > project->GetTotalFrames())
+				ImageEnd = project->GetTotalFrames();
+		}
+		else
+		{
+			if (ImageStart > 255)
+				ImageStart = 255;
+
+			if (ImageEnd > 255)
+				ImageEnd = 255;
+		}
 
 		Image* images = new Image[ImageEnd - ImageStart + 1];
 		project->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
@@ -410,13 +398,10 @@ void lcApplication::Shutdown()
 
 		project->HandleNotify(LC_ACTIVATE, 0);
 		delete project;
-		project = NULL;
 	}
 
 	delete m_Library;
 	m_Library = NULL;
-
-	lcDestroyDefaultMeshes();
 
 	GL_Shutdown();
 }

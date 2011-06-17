@@ -1,7 +1,7 @@
 // PiecePrv.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "PiecePrv.h"
 #include "Tools.h"
@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "project.h"
 #include "preview.h"
-#include "lc_application.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,7 +46,7 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_Preview = new PiecePreview((GLWindow*)lcGetActiveProject()->GetFirstView());
+	m_Preview = new PiecePreview(NULL);
 	m_Preview->Create(m_hWnd);
 	m_Preview->MakeCurrent();
 
@@ -64,6 +63,16 @@ void CPiecePreview::OnDestroy()
 	}
 
 	CWnd::OnDestroy();
+}
+
+void CPiecePreview::SetPieceInfo(PieceInfo* pInfo)
+{
+	m_Preview->SetCurrentPiece(pInfo);
+}
+
+PieceInfo* CPiecePreview::GetPieceInfo() const
+{
+	return m_Preview->GetCurrentPiece();
 }
 
 BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);

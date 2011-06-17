@@ -1,7 +1,7 @@
 // StepPop.cpp : implementation file
 //
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "StepPop.h"
 #include "project.h"
@@ -32,8 +32,8 @@ CStepPopup::CStepPopup(CPoint pt, CWnd* pParentWnd)
 
 	m_Slider.Create (WS_CHILD|WS_VISIBLE|TBS_BOTH|TBS_HORZ|TBS_NOTICKS, CRect(5,10,90,30), this, 1000);
 
-	int from = 1;
-	int to = lcGetActiveProject()->GetLastStep();
+	int from, to;
+	lcGetActiveProject()->GetTimeRange(&from, &to);
 	m_Slider.SetRange(1, to);
 	m_Slider.SetPos(from);
 }

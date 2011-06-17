@@ -1,8 +1,8 @@
-// PrevView.cpp: implementation of the CPreviewViewEx class.
+// PrevView.cpp: implementation of the CCADPreviewView class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "lc_global.h"
+#include "stdafx.h"
 #include "leocad.h"
 #include "PrevView.h"
 
@@ -25,8 +25,8 @@ BOOL CALLBACK _AfxPreviewCloseProcEx(CFrameWnd* pFrameWnd)
 {
 	ASSERT_VALID(pFrameWnd);
 
-	CPreviewViewEx* pView = (CPreviewViewEx*) pFrameWnd->GetDlgItem(AFX_IDW_PANE_FIRST);
-	ASSERT_KINDOF(CPreviewViewEx, pView);
+	CCADPreviewView* pView = (CCADPreviewView*) pFrameWnd->GetDlgItem(AFX_IDW_PANE_FIRST);
+	ASSERT_KINDOF(CCADPreviewView, pView);
 
 	pView->OnPreviewClose();
 	return FALSE;
@@ -35,8 +35,8 @@ BOOL CALLBACK _AfxPreviewCloseProcEx(CFrameWnd* pFrameWnd)
 /////////////////////////////////////////////////////////////////////////////
 // Preview View
 
-BEGIN_MESSAGE_MAP(CPreviewViewEx, CScrollView)
-	//{{AFX_MSG_MAP(CPreviewViewEx)
+BEGIN_MESSAGE_MAP(CCADPreviewView, CScrollView)
+	//{{AFX_MSG_MAP(CCADPreviewView)
 	ON_COMMAND(ID_PREVIEW_CLOSE, OnPreviewClose)
 	ON_COMMAND(AFX_ID_PREVIEW_CLOSE, OnPreviewClose)
 	ON_WM_CREATE()
@@ -62,7 +62,7 @@ BEGIN_MESSAGE_MAP(CPreviewViewEx, CScrollView)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-CPreviewViewEx::CPreviewViewEx()
+CCADPreviewView::CCADPreviewView()
 {
 	m_pPrintView = NULL;
 	m_pOrigView = NULL;
@@ -82,7 +82,7 @@ CPreviewViewEx::CPreviewViewEx()
 	m_nMapMode = MM_TEXT;
 }
 
-CPreviewViewEx::~CPreviewViewEx()
+CCADPreviewView::~CCADPreviewView()
 {
 	m_dcPrint.Detach();         // print DC is deleted by CPrintInfo destructor
 
@@ -98,7 +98,7 @@ CPreviewViewEx::~CPreviewViewEx()
 	}
 }
 
-int CPreviewViewEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CCADPreviewView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	int retVal = CView::OnCreate(lpCreateStruct);
 	if (retVal == -1)
@@ -114,7 +114,7 @@ int CPreviewViewEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 #ifdef _MAC
-void CPreviewViewEx::CalcWindowRect(LPRECT lpClientRect)
+void CCADPreviewView::CalcWindowRect(LPRECT lpClientRect)
 {
 	CView::CalcWindowRect(lpClientRect);
 
@@ -150,7 +150,7 @@ void CPreviewViewEx::CalcWindowRect(LPRECT lpClientRect)
 }
 #endif
 
-BOOL CPreviewViewEx::SetPrintView(CCADView* pPrintView)
+BOOL CCADPreviewView::SetPrintView(CCADView* pPrintView)
 {
 	ASSERT_VALID(pPrintView);
 
@@ -221,7 +221,7 @@ BOOL CPreviewViewEx::SetPrintView(CCADView* pPrintView)
 	return TRUE;
 }
 
-void CPreviewViewEx::OnSize(UINT nType, int cx, int cy)
+void CCADPreviewView::OnSize(UINT nType, int cx, int cy)
 {
 	// CScrollView handles everything if zoomed in.
 	if (m_nZoomState == ZOOM_OUT)
@@ -243,7 +243,7 @@ void CPreviewViewEx::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CPreviewViewEx::OnActivateView(BOOL bActivate, CView*, CView*)
+void CCADPreviewView::OnActivateView(BOOL bActivate, CView*, CView*)
 {
 	if (bActivate)
 	{
@@ -263,7 +263,7 @@ void CPreviewViewEx::OnActivateView(BOOL bActivate, CView*, CView*)
 #endif
 }
 
-void CPreviewViewEx::OnPreviewClose()
+void CCADPreviewView::OnPreviewClose()
 {
 	m_pToolBar->DestroyWindow();
 	m_pToolBar = NULL;
@@ -277,7 +277,7 @@ void CPreviewViewEx::OnPreviewClose()
 #define PREVIEW_PAGEGAP 8
 
 // Return is actually the fraction cx/cy. Simply using CSize for convenience
-CSize CPreviewViewEx::CalcScaleRatio(CSize screenSize, CSize actualSize)
+CSize CCADPreviewView::CalcScaleRatio(CSize screenSize, CSize actualSize)
 {
 	// Test ratio based on vertical dimension to see if it is the one to use
 	int nNum = screenSize.cy;
@@ -304,7 +304,7 @@ CSize CPreviewViewEx::CalcScaleRatio(CSize screenSize, CSize actualSize)
 // This routine is called once for each page with the preview DC set up for
 // that page
 
-void CPreviewViewEx::PositionPage(UINT nPage)
+void CCADPreviewView::PositionPage(UINT nPage)
 {
 	CSize windowSize = CalcPageDisplaySize();
 
@@ -322,7 +322,7 @@ void CPreviewViewEx::PositionPage(UINT nPage)
 	SetScaledSize(nPage);
 }
 
-CSize CPreviewViewEx::CalcPageDisplaySize()
+CSize CCADPreviewView::CalcPageDisplaySize()
 	// calculate the current page size
 	//  set 'm_nSecondPageOffset' to start of second page
 	// return size of current page less margins
@@ -345,7 +345,7 @@ CSize CPreviewViewEx::CalcPageDisplaySize()
 	return windowSize;
 }
 
-void CPreviewViewEx::SetScaledSize(UINT nPage)
+void CCADPreviewView::SetScaledSize(UINT nPage)
 {
 	CSize* pSize = &m_pPageInfo[nPage].sizeUnscaled;
 	CSize* pRatio = &m_pPageInfo[nPage].sizeScaleRatio;
@@ -433,7 +433,7 @@ void CPreviewViewEx::SetScaledSize(UINT nPage)
 }
 
 // Only use the PrepareDC from CScrollView if we are zoomed in
-void CPreviewViewEx::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
+void CCADPreviewView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 {
 	ASSERT_VALID(pDC);
 
@@ -443,7 +443,7 @@ void CPreviewViewEx::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 		CScrollView::OnPrepareDC(pDC, pInfo);
 }
 
-BOOL CPreviewViewEx::OnEraseBkgnd(CDC* pDC)
+BOOL CCADPreviewView::OnEraseBkgnd(CDC* pDC)
 {
 	ASSERT_VALID(pDC);
 
@@ -458,7 +458,7 @@ BOOL CPreviewViewEx::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-void CPreviewViewEx::OnDraw(CDC* pDC)
+void CCADPreviewView::OnDraw(CDC* pDC)
 {
 	ASSERT_VALID(pDC);
 
@@ -575,13 +575,13 @@ void CPreviewViewEx::OnDraw(CDC* pDC)
 	shadowPen.DeleteObject();
 }
 
-void CPreviewViewEx::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CCADPreviewView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	if (m_nZoomState != ZOOM_OUT)
 		CScrollView::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CPreviewViewEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CCADPreviewView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	if (m_nZoomState != ZOOM_OUT)
 	{
@@ -623,17 +623,17 @@ void CPreviewViewEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 }
 
-void CPreviewViewEx::OnNextPage()
+void CCADPreviewView::OnNextPage()
 {
 	SetCurrentPage(m_nCurrentPage + 1, TRUE);
 }
 
-void CPreviewViewEx::OnPrevPage()
+void CCADPreviewView::OnPrevPage()
 {
 	SetCurrentPage(m_nCurrentPage - 1, TRUE);
 }
 
-void CPreviewViewEx::OnPreviewPrint()
+void CCADPreviewView::OnPreviewPrint()
 {
 	CView* pOrigView = m_pOrigView;
 	OnPreviewClose();               // force close of Preview
@@ -645,7 +645,7 @@ void CPreviewViewEx::OnPreviewPrint()
 }
 
 // Finds page pointed to and convert to 1:1 screen device units
-BOOL CPreviewViewEx::FindPageRect(CPoint& point, UINT& nPage)
+BOOL CCADPreviewView::FindPageRect(CPoint& point, UINT& nPage)
 {
 	if (m_nZoomState != ZOOM_OUT)
 		point += (CSize)GetDeviceScrollPosition();
@@ -669,7 +669,7 @@ BOOL CPreviewViewEx::FindPageRect(CPoint& point, UINT& nPage)
 }
 
 
-void CPreviewViewEx::OnLButtonDown(UINT, CPoint point)
+void CCADPreviewView::OnLButtonDown(UINT, CPoint point)
 {
 	UINT nPage;
 	if (!FindPageRect(point, nPage))
@@ -680,7 +680,7 @@ void CPreviewViewEx::OnLButtonDown(UINT, CPoint point)
 								nPage, point);
 }
 
-void CPreviewViewEx::SetZoomState(UINT nNewState, UINT nPage, CPoint point)
+void CCADPreviewView::SetZoomState(UINT nNewState, UINT nPage, CPoint point)
 {
 	if (m_nZoomState != nNewState)
 	{
@@ -689,20 +689,20 @@ void CPreviewViewEx::SetZoomState(UINT nNewState, UINT nPage, CPoint point)
 	}
 }
 
-void CPreviewViewEx::OnZoomIn()
+void CCADPreviewView::OnZoomIn()
 {
 	if (m_nZoomState != ZOOM_IN)
 		SetZoomState(m_nZoomState + 1, 0, CPoint(0, 0));
 }
 
-void CPreviewViewEx::OnZoomOut()
+void CCADPreviewView::OnZoomOut()
 {
 	if (m_nZoomState != ZOOM_OUT)
 		SetZoomState(m_nZoomState - 1, 0, CPoint(0, 0));
 }
 
 // Actual zoom code.
-void CPreviewViewEx::DoZoom(UINT nPage, CPoint point)
+void CCADPreviewView::DoZoom(UINT nPage, CPoint point)
 {
 	if (m_nZoomState == ZOOM_OUT)
 	{
@@ -752,7 +752,7 @@ void CPreviewViewEx::DoZoom(UINT nPage, CPoint point)
 	}
 }
 
-void CPreviewViewEx::SetCurrentPage(UINT nPage, BOOL bClearRatios)
+void CCADPreviewView::SetCurrentPage(UINT nPage, BOOL bClearRatios)
 {
 	m_nCurrentPage = nPage;
 	if (m_nCurrentPage > m_pPreviewInfo->GetMaxPage())
@@ -774,7 +774,7 @@ void CPreviewViewEx::SetCurrentPage(UINT nPage, BOOL bClearRatios)
 	Invalidate(TRUE);
 }
 
-void CPreviewViewEx::OnDisplayPageNumber(UINT nPage, UINT nPagesDisplayed)
+void CCADPreviewView::OnDisplayPageNumber(UINT nPage, UINT nPagesDisplayed)
 {
 	UINT nEndPage = nPage + nPagesDisplayed - 1;
 
@@ -801,29 +801,29 @@ void CPreviewViewEx::OnDisplayPageNumber(UINT nPage, UINT nPagesDisplayed)
 	}
 }
 
-void CPreviewViewEx::OnUpdateNextPage(CCmdUI* pCmdUI)
+void CCADPreviewView::OnUpdateNextPage(CCmdUI* pCmdUI)
 {
 	// enable if not showing last page
 	pCmdUI->Enable(m_nCurrentPage+m_nPages-1 < m_pPreviewInfo->GetMaxPage());
 }
 
-void CPreviewViewEx::OnUpdatePrevPage(CCmdUI* pCmdUI)
+void CCADPreviewView::OnUpdatePrevPage(CCmdUI* pCmdUI)
 {
 	// enable if not showing First page
 	pCmdUI->Enable(m_nCurrentPage > m_pPreviewInfo->GetMinPage());
 }
 
-void CPreviewViewEx::OnUpdateZoomIn(CCmdUI* pCmdUI)
+void CCADPreviewView::OnUpdateZoomIn(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(m_nZoomState != ZOOM_IN);
 }
 
-void CPreviewViewEx::OnUpdateZoomOut(CCmdUI* pCmdUI)
+void CCADPreviewView::OnUpdateZoomOut(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(m_nZoomState != ZOOM_OUT);
 }
 
-BOOL CPreviewViewEx::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+BOOL CCADPreviewView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if (nHitTest != HTCLIENT)
 		return CScrollView::OnSetCursor(pWnd, nHitTest, message);
@@ -852,10 +852,10 @@ BOOL CPreviewViewEx::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreviewViewEx diagnostics
+// CCADPreviewView diagnostics
 
 #ifdef _DEBUG
-void CPreviewViewEx::AssertValid() const
+void CCADPreviewView::AssertValid() const
 {
 	CView::AssertValid();
 	ASSERT_VALID(&m_dcPrint);
@@ -888,7 +888,7 @@ void CPreviewViewEx::AssertValid() const
 	}
 }
 
-void CPreviewViewEx::Dump(CDumpContext& dc) const
+void CCADPreviewView::Dump(CDumpContext& dc) const
 {
 	CView::Dump(dc);
 
@@ -960,11 +960,11 @@ void CPreviewViewEx::Dump(CDumpContext& dc) const
 #pragma code_seg(AFX_INIT_SEG)
 #endif
 
-IMPLEMENT_DYNCREATE(CPreviewViewEx, CScrollView)
+IMPLEMENT_DYNCREATE(CCADPreviewView, CScrollView)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CPreviewViewEx::OnPreviewOnepage() 
+void CCADPreviewView::OnPreviewOnepage() 
 {
 	ASSERT(m_nPages == 1 || m_nPages == 2);
 	m_nPages = 1;
@@ -975,14 +975,14 @@ void CPreviewViewEx::OnPreviewOnepage()
 	SetCurrentPage(m_nCurrentPage, TRUE);
 }
 
-void CPreviewViewEx::OnUpdatePreviewOnepage(CCmdUI* pCmdUI) 
+void CCADPreviewView::OnUpdatePreviewOnepage(CCmdUI* pCmdUI) 
 {
 	// enable it only if valid to display another page and not zoomed
 	pCmdUI->Enable(m_nZoomState == ZOOM_OUT && m_nMaxPages != 1 &&
 		(m_pPreviewInfo->GetMaxPage() > 1 || m_nPages > 1) && (m_nPages == 2));
 }
 
-void CPreviewViewEx::OnPreviewTwopages() 
+void CCADPreviewView::OnPreviewTwopages() 
 {
 	ASSERT(m_nPages == 1 || m_nPages == 2);
 	m_nPages = 2;
@@ -993,7 +993,7 @@ void CPreviewViewEx::OnPreviewTwopages()
 	SetCurrentPage(m_nCurrentPage, TRUE);
 }
 
-void CPreviewViewEx::OnUpdatePreviewTwopages(CCmdUI* pCmdUI) 
+void CCADPreviewView::OnUpdatePreviewTwopages(CCmdUI* pCmdUI) 
 {
 	// enable it only if valid to display another page and not zoomed
 	pCmdUI->Enable(m_nZoomState == ZOOM_OUT && m_nMaxPages != 1 &&

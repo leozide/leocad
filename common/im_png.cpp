@@ -1,5 +1,5 @@
-#include "lc_global.h"
 #include <stdlib.h>
+#include "config.h"
 #include "image.h"
 #include "file.h"
 

@@ -9,9 +9,9 @@
 
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 75
-#define LC_VERSION_PATCH 1
+#define LC_VERSION_PATCH 2
 #define LC_VERSION_OSNAME "Windows"
-#define LC_VERSION_TEXT "0.75.1"
+#define LC_VERSION_TEXT "0.75.2"
 #define LC_VERSION_TAG ""
 #define LC_INSTALL_PREFIX "C:\\leocad"
 #define LC_POINTER_TO_INT(p) ((lcint32)(p))

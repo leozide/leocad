@@ -494,7 +494,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	{	
 		if (fv > 0.4f)
 		{
-			char name[9];
+			char name[LC_PIECE_NAME_LEN];
 			Piece* pPiece = new Piece(NULL);
 			pPiece->FileLoad(*file, name);
 			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);

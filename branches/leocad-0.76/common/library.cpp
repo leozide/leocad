@@ -2839,7 +2839,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 	// Fix the end of the index
 	OldIdx.Seek(-(2+4+2), SEEK_END);
 	OldIdx.ReadShorts(&moved, 1);
-	cs = 2+(moved*16);
+	cs = 2+(moved*LC_PIECE_NAME_LEN*2);
 	OldIdx.Seek(-(long)cs, SEEK_CUR);
 	membuf = malloc(cs);
 	OldIdx.Read(membuf, cs);

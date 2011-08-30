@@ -522,7 +522,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		}
 		else
 		{
-			char name[9];
+			char name[LC_PIECE_NAME_LEN];
 			float pos[3], rot[3], param[4];
 			unsigned char color, step, group;
 		
@@ -1079,9 +1079,9 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				*ptr = 0;
 
       // See if it's a piece in the library
-			if (strlen(tmp) < 9)
+			if (strlen(tmp) < LC_PIECE_NAME_LEN)
 			{
-				char name[9];
+				char name[LC_PIECE_NAME_LEN];
 				strcpy(name, tmp);
 
 				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
@@ -4735,7 +4735,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			file->Read(&i, sizeof(i));
 			while (i--)
 			{
-				char name[9];
+				char name[LC_PIECE_NAME_LEN];
 				Piece* pPiece = new Piece(NULL);
 				pPiece->FileLoad(*file, name);
 				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);

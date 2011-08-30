@@ -830,7 +830,7 @@ void CPiecesBar::SelectPiece(const char* Category, PieceInfo* Info)
 		PieceInfo* Parent;
 
 		// Find the parent of this patterned piece and expand it.
-		char ParentName[9];
+		char ParentName[LC_PIECE_NAME_LEN];
 		strcpy(ParentName, Info->m_strName);
 		*strchr(ParentName, 'P') = '\0';
 

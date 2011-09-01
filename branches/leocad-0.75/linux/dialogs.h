@@ -18,7 +18,7 @@ int openprojectdlg_execute (char* filename);
 int saveprojectdlg_execute (char* filename);
 int savepicturedlg_execute (void* param);
 int msgbox_execute (const char* text, const char *caption, int flags);
-int filedlg_execute(char* caption, char* filename);
+int filedlg_execute(const char* caption, char* filename);
 int arraydlg_execute(void* param);
 int aboutdlg_execute(void* param);
 int htmldlg_execute(void* param);

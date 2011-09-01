@@ -180,7 +180,7 @@ void SystemUpdateCategories(bool SearchOnly)
 {
 }
 
-static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, gchar **xpm)
+static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, const char **xpm)
 {
   int height, width, colors;
   char pixmap_buffer [(32 * 32)/8];
@@ -241,7 +241,7 @@ void SystemUpdateAction(int new_action, int old_action)
     return;
 
   GtkWidget* button;
-  char** xpm = NULL;
+  const char** xpm = NULL;
   int x, y;
 
   switch (new_action)
@@ -320,7 +320,7 @@ void SystemUpdateRenderingMode(bool bBackground, bool bFast)
     return;
 
   ignore_commands = true;
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.fast), bFast);
+  gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(main_toolbar.fast), bFast);
   ignore_commands = false;
 }
 
@@ -357,10 +357,28 @@ void SystemUpdateSnap(const unsigned long snap)
     return;
 
   ignore_commands = true;
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(main_toolbar.angle), (snap & LC_DRAW_SNAP_A) != 0);
+  gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(main_toolbar.angle), (snap & LC_DRAW_SNAP_A) != 0);
   ignore_commands = false;
 
-  // TODO: popup menu
+  void* item;
+
+  ignore_commands = true;
+
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_x");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_y");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Y) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_z");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
+
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_x");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_X) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_y");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);
+  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_z");
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
+
+  ignore_commands = false;
 }
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
@@ -610,7 +628,7 @@ void SystemFinish()
 }
 
 // FIXME: remove 
-int SystemDoMessageBox(char* prompt, int mode)
+int SystemDoMessageBox(const char* prompt, int mode)
 {
   return msgbox_execute (prompt, "LeoCAD", mode);
 }
@@ -619,71 +637,59 @@ bool SystemDoDialog(int mode, void* param)
 {
   switch (mode)
   {
-    case LC_DLG_FILE_OPEN_PROJECT: {
+    case LC_DLG_FILE_OPEN_PROJECT:
       return openprojectdlg_execute ((char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_FILE_SAVE_PROJECT: {
+    case LC_DLG_FILE_SAVE_PROJECT:
       return saveprojectdlg_execute ((char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_FILE_MERGE_PROJECT: {
+    case LC_DLG_FILE_MERGE_PROJECT:
       return openprojectdlg_execute ((char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_ABOUT: {
+    case LC_DLG_FILE_OPEN:
+      return openprojectdlg_execute ((char*)param) == LC_OK;
+
+    case LC_DLG_ABOUT:
       return aboutdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_ARRAY: {
+    case LC_DLG_ARRAY:
       return arraydlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_HTML: {
+    case LC_DLG_HTML:
       return htmldlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_POVRAY: {
+    case LC_DLG_POVRAY:
       return povraydlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_WAVEFRONT: {
+    case LC_DLG_WAVEFRONT:
       return filedlg_execute("Save File", (char*)param) == LC_OK;
-    } break;
 
-    case LC_DLG_PREFERENCES: {
+    case LC_DLG_PREFERENCES:
       return preferencesdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_PICTURE_SAVE: {
+    case LC_DLG_PICTURE_SAVE:
       return savepicturedlg_execute (param) == LC_OK;
-    } break;
 
-    case LC_DLG_MINIFIG: {
+    case LC_DLG_MINIFIG:
       return minifigdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_PROPERTIES: {
+    case LC_DLG_PROPERTIES:
       return propertiesdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_LIBRARY: {
+    case LC_DLG_LIBRARY:
       return librarydlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_SELECTBYNAME: {
-    } break;
+    case LC_DLG_SELECTBYNAME:
+      break;
 
-    case LC_DLG_STEPCHOOSE: {
-    } break;
+    case LC_DLG_STEPCHOOSE:
+      break;
 
-    case LC_DLG_EDITGROUPS: {
+    case LC_DLG_EDITGROUPS:
       return groupeditdlg_execute(param) == LC_OK;
-    } break;
 
-    case LC_DLG_GROUP: {
+    case LC_DLG_GROUP:
       return groupdlg_execute(param) == LC_OK;
-    } break;
   }
 
   return false;
@@ -695,16 +701,21 @@ void SystemDoPopupMenu(int nMenu, int x, int y)
 
 void SystemDoWaitCursor(int code)
 {
+  GdkWindow* window = ((GtkWidget*)(*main_window))->window;
+
+  if (!GDK_IS_WINDOW(window))
+    return;
+
   if (code == 1)
   {
     GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-    gdk_window_set_cursor (((GtkWidget*)(*main_window))->window, cursor);
+    gdk_window_set_cursor(window, cursor);
     gdk_cursor_destroy (cursor);
   } 
   else
   {
     GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
-    gdk_window_set_cursor (((GtkWidget*)(*main_window))->window, cursor);
+    gdk_window_set_cursor(window, cursor);
     gdk_cursor_destroy (cursor);
   }
 }

@@ -22,7 +22,10 @@ typedef struct
   GtkWidget* paste;
   GtkWidget* undo;
   GtkWidget* redo;
+  GtkWidget* lock;
+  GtkWidget* lock_menu;
   GtkWidget* snap;
+  GtkWidget* snap_menu;
   GtkWidget* angle;
   GtkWidget* fast;
 

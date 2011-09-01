@@ -1,5 +1,5 @@
 /* XPM */
-static char *ac_pan[] = {
+static const char*ac_pan[] = {
 "16 15 5 1",
 ".	c None",
 "+	c #000000",

@@ -8,7 +8,7 @@
 
 class PieceInfo;
 
-typedef	enum LC_MFW_TYPES
+enum LC_MFW_TYPES
 {
 	LC_MFW_HAT,
 	LC_MFW_HEAD,

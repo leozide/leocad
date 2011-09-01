@@ -1,5 +1,5 @@
 /* XPM */
-static char *st_redo[] = {
+static const char*st_redo[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 3 1",
 "  c #00007f",

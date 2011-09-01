@@ -52,7 +52,6 @@ static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data);
 // =============================================================================
 // Static functions
 
-// try to find the path of the executable
 static void init_paths (char *argv0)
 {
   char temppath[PATH_MAX];
@@ -74,9 +73,6 @@ static void init_paths (char *argv0)
     endpwent();
   }
 
-  if (home == NULL)
-    home = ".";
-
   strcpy (temppath, argv0);
   if (!strrchr(temppath, '/'))
   {
@@ -96,8 +92,11 @@ static void init_paths (char *argv0)
 
       if (*path == '~')
       {
+				if (home)
 	strcpy(temppath, home);
-	++path;
+				else
+					strcpy(temppath, ".");
+				path++;
       }
 
       if (last > (path+1))
@@ -109,7 +108,7 @@ static void init_paths (char *argv0)
       strcat (temppath, argv0);
 
       if (access(temppath, X_OK) == 0 )
-	++found;
+				found++;
       path = last+1;
 
     } while (*last && !found);
@@ -178,6 +177,61 @@ void OnCommand(GtkWidget* widget, gpointer data)
     case ID_SNAP_A:
     {
       project->HandleCommand(LC_TOOLBAR_SNAPMENU, 5);
+    } break;
+
+    case ID_SNAP_X:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 0);
+    } break;
+
+    case ID_SNAP_Y:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 1);
+    } break;
+
+    case ID_SNAP_Z:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 2);
+    } break;
+
+    case ID_SNAP_ALL:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 3);
+    } break;
+
+    case ID_SNAP_NONE:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 4);
+    } break;
+
+    case ID_SNAP_ON:
+    {
+      project->HandleCommand(LC_TOOLBAR_SNAPMENU, 6);
+    } break;
+
+    case ID_LOCK_X:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 0);
+    } break;
+
+    case ID_LOCK_Y:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 1);
+    } break;
+
+    case ID_LOCK_Z:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 2);
+    } break;
+
+    case ID_LOCK_NONE:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 3);
+    } break;
+
+    case ID_LOCK_ON:
+    {
+      project->HandleCommand(LC_TOOLBAR_LOCKMENU, 4);
     } break;
 
     case ID_VIEW_CREATE:
@@ -326,6 +380,16 @@ static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data
     case GDK_Prior: case GDK_KP_Prior: code = KEY_PRIOR; break;
     case GDK_Next:  case GDK_KP_Next: code = KEY_NEXT; break;
     }
+  }
+
+  if ((code >= '0') && (code <= '9') && ((event->state & GDK_CONTROL_MASK) == 0))
+  {
+    if (event->state & GDK_SHIFT_MASK)
+      lcGetActiveProject()->HandleCommand((LC_COMMANDS)(LC_EDIT_MOVEZ_SNAP_0 + code - '0'), 0);
+    else
+      lcGetActiveProject()->HandleCommand((LC_COMMANDS)(LC_EDIT_MOVEXY_SNAP_0 + code - '0'), 0);
+
+    return TRUE;
   }
 
   if (code != 0)
@@ -666,7 +730,7 @@ int main (int argc, char* argv[])
   GdkBitmap *mask;
 
   gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask,
-                 &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], icon32);
+                                           &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], (gchar**)icon32);
   gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
 
   gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));

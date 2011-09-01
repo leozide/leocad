@@ -1,5 +1,5 @@
 /* XPM */
-static char *pi_space[] = {
+static const char* pi_space[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 4 1",
 "  c Gray0",

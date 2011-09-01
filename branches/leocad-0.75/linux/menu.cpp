@@ -67,8 +67,6 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
                            window, LC_FILE_PROPERTIES, "menu_file_properties");
   create_menu_item (menu, "Pieces _Library Manager...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_FILE_LIBRARY, "menu_file_library");
-  create_menu_item (menu, "Terrain _Editor...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_FILE_TERRAIN, "menu_file_terrain");
   menu_separator (menu);
 
   BaseMenuItem base;
@@ -295,3 +293,84 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   item = GTK_WIDGET (gtk_object_get_data (window, "menu_piece_group_add"));
   gtk_widget_add_accelerator (item, "activate", accel, 'D', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 }
+
+GtkWidget* create_snap_menu()
+{
+	GtkWidget* menu;
+	GtkWidget* menu_item;
+
+	menu = gtk_menu_new();
+
+	menu_item = gtk_check_menu_item_new_with_mnemonic("Snap _X");
+	gtk_object_set_data(GTK_OBJECT(menu), "snap_x", menu_item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_SNAP_X));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_check_menu_item_new_with_mnemonic("Snap _Y");
+	gtk_object_set_data(GTK_OBJECT(menu), "snap_y", menu_item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_SNAP_Y));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_check_menu_item_new_with_mnemonic("Snap _Z");
+	gtk_object_set_data(GTK_OBJECT(menu), "snap_z", menu_item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_SNAP_Z));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_menu_item_new_with_mnemonic("Snap _None");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_SNAP_NONE));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_menu_item_new_with_mnemonic("Snap _All");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_SNAP_ALL));
+	gtk_widget_show(menu_item);
+
+	return menu;
+}
+
+GtkWidget* create_lock_menu()
+{
+	GtkWidget* menu;
+	GtkWidget* menu_item;
+
+	menu = gtk_menu_new();
+
+	menu_item = gtk_check_menu_item_new_with_mnemonic("Lock _X");
+	gtk_object_set_data(GTK_OBJECT(menu), "lock_x", menu_item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_LOCK_X));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_check_menu_item_new_with_mnemonic("Lock _Y");
+	gtk_object_set_data(GTK_OBJECT(menu), "lock_y", menu_item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_LOCK_Y));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_check_menu_item_new_with_mnemonic("Lock _Z");
+	gtk_object_set_data(GTK_OBJECT(menu), "lock_z", menu_item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_LOCK_Z));
+	gtk_widget_show(menu_item);
+
+	menu_item = gtk_menu_item_new_with_mnemonic("Unlock All");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(OnCommand),
+	                   GINT_TO_POINTER(ID_LOCK_NONE));
+	gtk_widget_show(menu_item);
+
+	return menu;
+}
+

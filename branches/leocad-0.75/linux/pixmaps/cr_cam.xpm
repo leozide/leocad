@@ -1,5 +1,5 @@
 /* XPM */
-static char *cr_cam[] = {
+static const char* cr_cam[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 3 1",
 "  c None",

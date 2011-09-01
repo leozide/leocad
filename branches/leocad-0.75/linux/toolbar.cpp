@@ -15,6 +15,7 @@
 #include "preview.h"
 #include "library.h"
 #include "lc_application.h"
+#include "gtkmisc.h"
 
 // =============================================================================
 // Variables
@@ -89,7 +90,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   gtk_container_add (GTK_CONTAINER (main_toolbar.handle_box), main_toolbar.toolbar);
   gtk_widget_show (main_toolbar.toolbar);
 
-  gtk_container_border_width (GTK_CONTAINER (main_toolbar.toolbar), 2);
   //  gtk_toolbar_set_button_relief (GTK_TOOLBAR (main_toolbar.toolbar), GTK_RELIEF_NONE);
   //  gtk_toolbar_set_space_style (GTK_TOOLBAR (main_toolbar.toolbar), GTK_TOOLBAR_SPACE_LINE);
   //  gtk_toolbar_set_space_size (GTK_TOOLBAR (main_toolbar.toolbar), 10);
@@ -151,7 +151,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   gtk_container_add (GTK_CONTAINER (tool_toolbar.handle_box), tool_toolbar.toolbar);
   gtk_widget_show (tool_toolbar.toolbar);
 
-  gtk_container_border_width (GTK_CONTAINER (tool_toolbar.toolbar), 2);
   //  gtk_toolbar_set_button_relief (GTK_TOOLBAR (tool_toolbar.toolbar), GTK_RELIEF_NONE);
 
   tool_toolbar.brick = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
@@ -216,7 +215,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   gtk_container_add (GTK_CONTAINER (anim_toolbar.handle_box), anim_toolbar.toolbar);
   gtk_widget_show (anim_toolbar.toolbar);
 
-  gtk_container_border_width (GTK_CONTAINER (anim_toolbar.toolbar), 2);
   //  gtk_toolbar_set_button_relief (GTK_TOOLBAR (anim_toolbar.toolbar), GTK_RELIEF_NONE);
 
   anim_toolbar.first = gtk_toolbar_append_item (GTK_TOOLBAR (anim_toolbar.toolbar),
@@ -821,13 +819,35 @@ static void statusbar_listener (int message, void *data, void *user)
   }
 }
 
+static gint statusbar_popup(GtkWidget *widget, GdkEvent *event,
+                            GtkWidget *menu_widget)
+{
+	GtkMenu *menu;
+	GdkEventButton *event_button;
+	g_return_val_if_fail(widget != NULL, FALSE);
+	g_return_val_if_fail(event != NULL, FALSE);
+	g_return_val_if_fail(menu_widget != NULL, FALSE);
+	g_return_val_if_fail(GTK_IS_MENU(menu_widget), FALSE);
+	menu = GTK_MENU(menu_widget);
+	if (event->type == GDK_BUTTON_PRESS)
+	{
+		event_button = (GdkEventButton *) event;
+		if (event_button->button == 3)
+		{
+			gtk_menu_popup(menu, NULL, NULL, NULL, NULL,
+			               event_button->button, event_button->time);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 void create_statusbar(GtkWidget *window, GtkWidget *vbox)
 {
-  GtkWidget *hbox, *hbox1, *frame;
+  GtkWidget *hbox, *hbox1, *frame, *ebox_snap;
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
-  gtk_widget_set_usize (hbox, -1, 24);
   gtk_container_border_width (GTK_CONTAINER (hbox), 1);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 2);
 
@@ -851,7 +871,6 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, TRUE, 0);
   gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
-  gtk_widget_set_usize (frame, 150, -1);
 
   hbox1 = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
@@ -866,22 +885,24 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, TRUE, 0);
   gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
-  gtk_widget_set_usize (frame, 70, -1);
 
   hbox1 = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
   gtk_container_border_width (GTK_CONTAINER (hbox1), 0);
   gtk_widget_show (hbox1);
 
+	ebox_snap = gtk_event_box_new();
+	gtk_widget_show(ebox_snap);
+	gtk_box_pack_start(GTK_BOX(hbox1), ebox_snap, TRUE, TRUE, 0);
+
   label_snap = gtk_label_new (" ");
   gtk_widget_show (label_snap);
-  gtk_box_pack_start (GTK_BOX (hbox1), label_snap, TRUE, TRUE, 0);
+	gtk_container_add(GTK_CONTAINER(ebox_snap), label_snap);
 
   frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, TRUE, 0);
   gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
-  gtk_widget_set_usize (frame, 70, -1);
 
   hbox1 = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
@@ -893,4 +914,58 @@ void create_statusbar(GtkWidget *window, GtkWidget *vbox)
   gtk_box_pack_start (GTK_BOX (hbox1), label_step, TRUE, TRUE, 0);
 
   messenger->Listen (&statusbar_listener, NULL);
+
+	// Add snap popup menu
+	GtkWidget *menu, *item;
+	menu = gtk_menu_new();
+	item = gtk_menu_item_new_with_label("XY Snap");
+	gtk_widget_set_sensitive(item, FALSE);
+	gtk_menu_append(menu, item);
+	create_menu_item(menu, "None", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_0, NULL);
+	create_menu_item(menu, "1/20 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_1, NULL);
+	create_menu_item(menu, "1/4 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_2, NULL);
+	create_menu_item(menu, "1 Flat", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_3, NULL);
+	create_menu_item(menu, "1/2 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_4, NULL);
+	create_menu_item(menu, "1 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_5, NULL);
+	create_menu_item(menu, "2 Studs", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_6, NULL);
+	create_menu_item(menu, "3 Studs", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_7, NULL);
+	create_menu_item(menu, "4 Studs", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_8, NULL);
+	create_menu_item(menu, "8 Studs", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEXY_SNAP_9, NULL);
+	menu_separator(menu);
+	item = gtk_menu_item_new_with_label("Z Snap");
+	gtk_widget_set_sensitive(item, FALSE);
+	gtk_menu_append(menu, item);
+	create_menu_item(menu, "None", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_0, NULL);
+	create_menu_item(menu, "1/20 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_1, NULL);
+	create_menu_item(menu, "1/4 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_2, NULL);
+	create_menu_item(menu, "1 Flat", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_3, NULL);
+	create_menu_item(menu, "1/2 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_4, NULL);
+	create_menu_item(menu, "1 Stud", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_5, NULL);
+	create_menu_item(menu, "1 Brick", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_6, NULL);
+	create_menu_item(menu, "2 Bricks", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_7, NULL);
+	create_menu_item(menu, "4 Bricks", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_8, NULL);
+	create_menu_item(menu, "8 Bricks", NULL, GTK_SIGNAL_FUNC(OnCommandDirect),
+	                 NULL, LC_EDIT_MOVEZ_SNAP_9, NULL);
+	gtk_widget_show_all(menu);
+	gtk_signal_connect(GTK_OBJECT(ebox_snap), "button_press_event",
+	                   GTK_SIGNAL_FUNC(statusbar_popup), menu);
 }

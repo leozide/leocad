@@ -15,6 +15,7 @@
 #include "toolbar.h"
 #include "dialogs.h"
 #include "globals.h"
+#include "lc_application.h"
 
 // =============================================================================
 // Cursor functions
@@ -487,16 +488,16 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
 {
-  if (!label_snap)
-    return;
+	if (!label_snap)
+		return;
 
-  char text[11];
-  if (move_snap)
-    sprintf (text, "Move x%i", move_snap);
-  else
-    strcpy (text, "Move /2");
+	char Text[256], xy[32], z[32];
 
-  gtk_label_set (GTK_LABEL (label_snap), text);
+	lcGetActiveProject()->GetSnapDistanceText(xy, z);
+
+	sprintf(Text, " M: %s %s R: %d ", xy, z, RotateSnap);
+
+	gtk_label_set (GTK_LABEL (label_snap), Text);
 }
 
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
@@ -511,7 +512,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 
   gtk_widget_set_sensitive (item, (flags & LC_SEL_UNSELECTED) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_none"));
-  gtk_widget_set_sensitive (item, flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT) != 0);
+  gtk_widget_set_sensitive (item, (flags & (LC_SEL_PIECE|LC_SEL_CAMERA|LC_SEL_LIGHT)) != 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_invert"));
   gtk_widget_set_sensitive (item, (flags & LC_SEL_NO_PIECES) == 0);
   item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_select_byname"));

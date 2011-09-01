@@ -659,6 +659,7 @@ int main (int argc, char* argv[])
 
 #include "pixmaps/icon32.xpm"
 
+	lcGetActiveProject()->UpdateInterface();
   main_window->UpdateMRU ();
 
   GdkPixmap *gdkpixmap;

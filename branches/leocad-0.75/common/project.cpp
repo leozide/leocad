@@ -3446,7 +3446,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 	Sys_FinishMemoryRender (render);
 }
 
-void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext)
+void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
 {
 	Piece* pPiece;
 	int col[LC_MAXCOLORS], ID = 0, c;
@@ -3817,7 +3817,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
 				FILE* f;
-				char *ext, *htmlext, fn[LC_MAXPATH];
+				const char *ext, *htmlext;
+				char fn[LC_MAXPATH];
 				int i;
 				unsigned short last = GetLastStep();
 

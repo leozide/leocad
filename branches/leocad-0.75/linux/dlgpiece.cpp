@@ -93,7 +93,7 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
 static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
 {
   LC_MINIFIGDLG_STRUCT* info;
-  int i, piece_type, piece_index;
+  int i, piece_type = -1, piece_index = -1;
   const gchar* desc;
 
   info = (LC_MINIFIGDLG_STRUCT*)gtk_object_get_data (GTK_OBJECT (widget), "info");
@@ -119,8 +119,11 @@ static void minifigdlg_piece_changed (GtkWidget *widget, gpointer data)
      }
   }
 
-  info->wizard->SetSelectionIndex (piece_type, piece_index);
-  info->wizard->Redraw ();
+	if (piece_index == -1 || piece_type == -1)
+		return;
+
+	info->wizard->SetSelectionIndex (piece_type, piece_index);
+	info->wizard->Redraw ();
 }
 
 static void minifigdlg_updatecombo (LC_MINIFIGDLG_STRUCT* s)

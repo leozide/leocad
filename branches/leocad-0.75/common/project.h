@@ -189,7 +189,7 @@ protected:
 	void RenderOverlays(int Viewport);
 	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
-	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, char* ext);
+	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
 	inline bool IsDrawing()
 	{

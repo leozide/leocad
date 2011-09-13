@@ -30,6 +30,7 @@ typedef unsigned int lcuint32;
 #define LCINT32(val) val
 #define LCFLOAT(val) val
 
+#define LC_HAVE_3DSFTK
 #define LC_HAVE_JPEGLIB
 #define LC_HAVE_ZLIB
 #define LC_HAVE_PNGLIB

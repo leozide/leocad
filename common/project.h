@@ -81,6 +81,8 @@ public:
 		{ return m_fBackground; }
 	unsigned char GetAction() const
 		{ return m_nCurAction; }
+	unsigned long GetSnap() const
+		{ return m_nSnap; }
 	int GetOverlayMode() const
 		{ return m_OverlayMode; }
 	void GetSnapIndex(int* SnapXY, int* SnapZ) const;

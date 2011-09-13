@@ -5,7 +5,7 @@ UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
 
 typedef struct {
 	CWnd* pParent;
-	CFrameWnd* pMainFrame;
+	CFrameWndEx* pMainFrame;
 } PRINT_PARAMS;
 
 class CPrintingDialog : public CDialog

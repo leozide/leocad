@@ -9,15 +9,23 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
-#include "FlatBar.h"
 #include "PieceBar.h"
 #include "CADBar.h"
-#include "BMPMenu.h"
 #include "ModDlg.h"
+#include "propertiespane.h"
 
 class MainWnd;
 
-class CMainFrame : public CFrameWnd
+class CMFCToolBarNoUpdate : public CMFCToolBar
+{
+public:
+	virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
+	{
+		CMFCToolBar::OnUpdateCmdUI(pTarget, FALSE);
+	}
+};
+
+class CMainFrame : public CFrameWndEx
 {
 protected: // create from serialization only
 	CMainFrame();
@@ -42,20 +50,21 @@ public:
 
 // Implementation
 public:
-	HMENU NewMenu();
 	virtual ~CMainFrame();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-  // control bar embedded members
+	// Control bar embedded members
+	CMFCMenuBar m_wndMenuBar;
 	CCADStatusBar m_wndStatusBar;
-	CFlatToolBar  m_wndStandardBar;
-	CFlatToolBar  m_wndToolsBar;
-	CFlatToolBar  m_wndAnimationBar;
-	CPiecesBar    m_wndPiecesBar;
-  CSplitterWnd  m_wndSplitter;
+	CMFCToolBarNoUpdate m_wndStandardBar;
+	CMFCToolBarNoUpdate m_wndToolsBar;
+	CMFCToolBarNoUpdate m_wndAnimationBar;
+	CMFCToolBar m_wndInvisibleToolBar;
+	CPiecesBar m_wndPiecesBar;
+	CSplitterWnd m_wndSplitter;
 
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
@@ -64,8 +73,8 @@ public:
 
 protected:
 	CModifyDialog	m_wndModifyDlg;
+	CPropertiesPane m_wndProperties;
 
-	CBMPMenu m_bmpMenu;
 	WINDOWPLACEMENT m_wpPrev;
 	CToolBar* m_pwndFullScrnBar;
 	CRect m_FullScreenWindowRect;
@@ -79,12 +88,10 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void CMainFrame::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
-	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
-	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 	afx_msg void OnViewFullscreen();
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	afx_msg void OnFilePrintPieceList();
-	afx_msg void OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask);
+	afx_msg void OnActivateApp(BOOL bActive, DWORD hTask);
 	afx_msg void OnViewNewView();
 	afx_msg LRESULT OnSetMessageString(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
@@ -95,6 +102,9 @@ protected:
 
 	afx_msg void OnPieceBar(UINT nID);
 	afx_msg void OnUpdatePieceBar(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateAction(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSnap(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateLock(CCmdUI* pCmdUI);
 	
 	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
 	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);

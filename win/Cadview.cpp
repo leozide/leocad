@@ -3,12 +3,12 @@
 
 #include "stdafx.h"
 #include "LeoCAD.h"
+#include <WindowsX.h>
 
 #include "CADDoc.h"
 #include "CADView.h"
 #include "WheelWnd.h"
 #include "Tools.h"
-#include "PrevView.h"
 #include "project.h"
 #include "globals.h"
 #include "system.h"
@@ -123,32 +123,9 @@ void CCADView::OnDraw(CDC* /*pDC*/)
 // Derived to use our version of the toolbar
 void CCADView::OnFilePrintPreview() 
 {
-	// In derived classes, implement special window handling here
-	// Be sure to Unhook Frame Window close if hooked.
-
-	// must not create this on the frame.  Must outlive this function
-	CPrintPreviewState* pState = new CPrintPreviewState;
-	pState->lpfnCloseProc = _AfxPreviewCloseProcEx;
-
-	// DoPrintPreview's return value does not necessarily indicate that
-	// Print preview succeeded or failed, but rather what actions are necessary
-	// at this point.  If DoPrintPreview returns TRUE, it means that
-	// OnEndPrintPreview will be (or has already been) called and the
-	// pState structure will be/has been deleted.
-	// If DoPrintPreview returns FALSE, it means that OnEndPrintPreview
-	// WILL NOT be called and that cleanup, including deleting pState
-	// must be done here.
-
-	if (!DoPrintPreview(IDR_PREVIEW, this,
-			RUNTIME_CLASS(CCADPreviewView), pState))
-	{
-		// In derived classes, reverse special window handling here for
-		// Preview failure case
-
-		TRACE0("Error: DoPrintPreview failed.\n");
-		AfxMessageBox(AFX_IDP_COMMAND_FAILURE);
-		delete pState;      // preview failed to initialize, delete State now
-	}
+#ifndef SHARED_HANDLERS
+	AFXPrintPreview(this);
+#endif
 }
 
 BOOL CCADView::OnPreparePrinting(CPrintInfo* pInfo)
@@ -168,7 +145,7 @@ BOOL CCADView::OnPreparePrinting(CPrintInfo* pInfo)
 
 	if (pInfo->m_bPreview)
 	{
-		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+		CFrameWndEx* pFrame = (CFrameWndEx*)AfxGetMainWnd();
 
 		POSITION pos = pFrame->m_listControlBars.GetHeadPosition();
 		while (pos != NULL)
@@ -535,181 +512,6 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 void CCADView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 //	pfnwglMakeCurrent(m_pDC->GetSafeHdc(), m_hglRC);
-}
-
-void CCADView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CCADPreviewView* pView) 
-{
-//	CView::OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT, CPreviewView* pView)
-	ASSERT_VALID(pDC);
-	ASSERT_VALID(pView);
-
-	if (pView->m_pPrintView != NULL)
-		pView->m_pPrintView->OnEndPrinting(pDC, pInfo);
-
-	CFrameWnd* pParent;
-	CWnd* pNaturalParent = pView->GetParentFrame();
-	pParent = DYNAMIC_DOWNCAST(CFrameWnd, pNaturalParent);
-	if (pParent == NULL || pParent->IsIconic())
-		pParent = (CFrameWnd*)AfxGetThread()->m_pMainWnd;
-
-	ASSERT_VALID(pParent);
-	ASSERT_KINDOF(CFrameWnd, pParent);
-
-	// restore the old main window
-	pParent->OnSetPreviewMode(FALSE, pView->m_pPreviewState);
-
-	// Force active view back to old one
-	pParent->SetActiveView(pView->m_pPreviewState->pViewActiveOld);
-	if (pParent != GetParentFrame())
-		OnActivateView(TRUE, this, this);   // re-activate view in real frame
-	pView->DestroyWindow();     // destroy preview view
-			// C++ object will be deleted in PostNcDestroy
-
-	// restore main frame layout and idle message
-	pParent->RecalcLayout();
-	pParent->SendMessage(WM_SETMESSAGESTRING, (WPARAM)AFX_IDS_IDLEMESSAGE, 0L);
-	pParent->UpdateWindow();
-///
-
-
-	pfnwglMakeCurrent(NULL, NULL);
-/*
-	if (OpenGLGetPixelFormat(m_pDC->GetSafeHdc()) == 0)
-	{
-		delete m_pDC;
-		m_pDC = new CClientDC(this);
-
-		PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR), 1,
-			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
- 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	
-		int pixelformat = OpenGLChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
-		if (pixelformat == 0)
-		{
-			AfxMessageBox("ChoosePixelFormat failed");
-		}
-
-		if (OpenGLSetPixelFormat(m_pDC->m_hDC, pixelformat, &pfd) == FALSE)
-		{
-			AfxMessageBox("SetPixelFormat failed");
-		}
-	}
-
-	if (pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC) == FALSE)
-	{
-		LPTSTR lpMsgBuf;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		    NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf, 0, NULL);
-
-		::MessageBox(NULL, lpMsgBuf, "Error", MB_OK|MB_ICONINFORMATION);
-		LocalFree(lpMsgBuf);	
-	}
-*/
-	InvalidateRect(NULL, FALSE);
-}
-
-BOOL CCADView::DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass* pPreviewViewClass, CPrintPreviewState* pState)
-{
-	ASSERT_VALID_IDR(nIDResource);
-	ASSERT_VALID(pPrintView);
-	ASSERT(pPreviewViewClass != NULL);
-	ASSERT(pPreviewViewClass->IsDerivedFrom(RUNTIME_CLASS(CCADPreviewView)));
-	ASSERT(pState != NULL);
-
-	CFrameWnd* pParent;
-	CWnd* pNaturalParent = pPrintView->GetParentFrame();
-	pParent = DYNAMIC_DOWNCAST(CFrameWnd, pNaturalParent);
-	if (pParent == NULL || pParent->IsIconic())
-		pParent = (CFrameWnd*)AfxGetThread()->m_pMainWnd;
-
-	ASSERT_VALID(pParent);
-	ASSERT_KINDOF(CFrameWnd, pParent);
-
-	CCreateContext context;
-	context.m_pCurrentFrame = pParent;
-	context.m_pCurrentDoc = GetDocument();
-	context.m_pLastView = this;
-
-	// Create the preview view object
-	CCADPreviewView* pView = (CCADPreviewView*)pPreviewViewClass->CreateObject();
-	if (pView == NULL)
-	{
-		TRACE0("Error: Failed to create preview view.\n");
-		return FALSE;
-	}
-	ASSERT_KINDOF(CCADPreviewView, pView);
-	pView->m_pPreviewState = pState;        // save pointer
-
-	pParent->OnSetPreviewMode(TRUE, pState);    // Take over Frame Window
-
-	// Create the toolbar from the dialog resource
-	pView->m_pToolBar = new CFlatToolBar;
-
-	if (!pView->m_pToolBar->Create(pParent, WS_CHILD | WS_VISIBLE | CBRS_TOP, AFX_IDW_PREVIEW_BAR) ||
-		!pView->m_pToolBar->LoadToolBar(nIDResource))
-	{
-		TRACE0("Error: Preview could not create toolbar.\n");
-		pParent->OnSetPreviewMode(FALSE, pState);   // restore Frame Window
-		delete pView->m_pToolBar;       // not autodestruct yet
-		pView->m_pToolBar = NULL;
-		pView->m_pPreviewState = NULL;  // do not delete state structure
-		delete pView;
-		return FALSE;
-	}
-	pView->m_pToolBar->SetBarStyle(pView->m_pToolBar->GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY);
-
-/*
-	pView->m_pToolBar = new CDialogBar;
-	if (!pView->m_pToolBar->Create(pParent, MAKEINTRESOURCE(nIDResource),
-		CBRS_TOP, AFX_IDW_PREVIEW_BAR))
-	{
-		TRACE0("Error: Preview could not create toolbar dialog.\n");
-		pParent->OnSetPreviewMode(FALSE, pState);   // restore Frame Window
-		delete pView->m_pToolBar;       // not autodestruct yet
-		pView->m_pToolBar = NULL;
-		pView->m_pPreviewState = NULL;  // do not delete state structure
-		delete pView;
-		return FALSE;
-	}
-*/	pView->m_pToolBar->m_bAutoDelete = TRUE;    // automatic cleanup
-
-	// Create the preview view as a child of the App Main Window.  This
-	// is a sibling of this view if this is an SDI app.  This is NOT a sibling
-	// if this is an MDI app.
-
-	if (!pView->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
-		CRect(0,0,0,0), pParent, AFX_IDW_PANE_FIRST, &context))
-	{
-		TRACE0("Error: couldn't create preview view for frame.\n");
-		pParent->OnSetPreviewMode(FALSE, pState);   // restore Frame Window
-		pView->m_pPreviewState = NULL;  // do not delete state structure
-		delete pView;
-		return FALSE;
-	}
-
-	// Preview window shown now
-
-	pState->pViewActiveOld = pParent->GetActiveView();
-	CCADView* pActiveView = (CCADView*)pParent->GetActiveFrame()->GetActiveView();
-	if (pActiveView != NULL)
-		pActiveView->OnActivateView(FALSE, pActiveView, pActiveView);
-
-	if (!pView->SetPrintView((CCADView*)pPrintView))
-	{
-		pView->OnPreviewClose();
-		return TRUE;            // signal that OnEndPrintPreview was called
-	}
-
-	pParent->SetActiveView(pView);  // set active view - even for MDI
-
-	// update toolbar and redraw everything
-	pView->m_pToolBar->SendMessage(WM_IDLEUPDATECMDUI, (WPARAM)TRUE);
-	pParent->RecalcLayout();            // position and size everything
-	pParent->UpdateWindow();
-
-	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -13,18 +13,17 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
+#include "verrsrc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -40,23 +39,26 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
-    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
     "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
-    "#ifdef _WIN32\r\n"
     "LANGUAGE 9, 1\r\n"
-    "#pragma code_page(1252)\r\n"
-    "#endif\r\n"
     "#include ""res\\LeoCAD.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#include ""afxprint.rc""       // printing/print preview resources\r\n"
-    "#endif\0"
+    "#if !defined(_AFXDLL)\r\n"
+    "#include ""afxribbon.rc""        // MFC ribbon and control bar resources\r\n"
+    "#endif\r\n"
+    "#endif\r\n"
+    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -83,34 +85,23 @@ IDR_TOOLSBAR            BITMAP                  "res\\toolsbar.bmp"
 IDR_ANIMATORBAR         BITMAP                  "res\\animator.bmp"
 IDB_PARTICONS           BITMAP                  "res\\particon.bmp"
 IDB_AUTOPAN             BITMAP                  "res\\autopan.bmp"
-IDB_HELP                BITMAP                  "res\\help.bmp"
-IDB_HOME                BITMAP                  "res\\home.bmp"
-IDB_MAIL                BITMAP                  "res\\mail.bmp"
-IDB_INFO                BITMAP                  "res\\info.bmp"
 IDB_PIECE               BITMAP                  "res\\piece.bmp"
 IDB_CAMERA              BITMAP                  "res\\camera.bmp"
 IDB_LIGHT               BITMAP                  "res\\light.bmp"
-IDB_ZOOMIN              BITMAP                  "res\\zoomin.bmp"
-IDB_ZOOMOUT             BITMAP                  "res\\zoomout.bmp"
-IDB_GROUP               BITMAP                  "res\\group.bmp"
-IDB_UNGROUP             BITMAP                  "res\\ungroup.bmp"
 IDR_FULLSCREEN          BITMAP                  "res\\fullscr.bmp"
-IDB_FULLSCREEN          BITMAP                  "res\\fullscre.bmp"
-IDB_PHOTO               BITMAP                  "res\\photo.bmp"
-IDB_DELETE              BITMAP                  "res\\delete.bmp"
-IDB_PREFERENCES         BITMAP                  "res\\preferen.bmp"
 IDR_PIECEEDITOR         BITMAP                  "res\\pieceed.bmp"
 IDB_EDITOR_ICONS        BITMAP                  "res\\editor.bmp"
 IDR_LIBRARY             BITMAP                  "res\\library.bmp"
 IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
 IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
+IDR_INVISIBLE           BITMAP                  "res\\invisible.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 15
+IDR_MAINFRAME TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -128,13 +119,9 @@ BEGIN
     BUTTON      ID_SNAP_ON
     BUTTON      ID_SNAP_ANGLE
     BUTTON      ID_RENDER_BOX
-    BUTTON      ID_RENDER_BACKGROUND
-    SEPARATOR
-    BUTTON      ID_APP_ABOUT
-    BUTTON      ID_CONTEXT_HELP
 END
 
-IDR_TOOLSBAR TOOLBAR  16, 15
+IDR_TOOLSBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_ACTION_INSERT
     BUTTON      ID_ACTION_LIGHT
@@ -156,11 +143,9 @@ BEGIN
     SEPARATOR
     BUTTON      ID_PIECE_PREVIOUS
     BUTTON      ID_PIECE_NEXT
-    BUTTON      ID_PIECE_MIRROR
-    BUTTON      ID_PIECE_ARRAY
 END
 
-IDR_ANIMATORBAR TOOLBAR  16, 15
+IDR_ANIMATORBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_VIEW_STEP_FIRST
     BUTTON      ID_VIEW_STEP_PREVIOUS
@@ -172,19 +157,19 @@ BEGIN
     BUTTON      ID_ANIMATOR_KEY
 END
 
-IDR_FULLSCREEN TOOLBAR  16, 15
+IDR_FULLSCREEN TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_VIEW_FULLSCREEN
 END
 
-IDR_PIECEEDITOR TOOLBAR  16, 15
+IDR_PIECEEDITOR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_EDITOR_FILE_NEW
     BUTTON      ID_EDITOR_FILE_OPEN
     BUTTON      ID_EDITOR_FILE_SAVE
 END
 
-IDR_LIBRARY TOOLBAR  16, 15
+IDR_LIBRARY TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_LIBDLG_FILE_OPEN
     BUTTON      ID_LIBDLG_FILE_SAVE
@@ -195,7 +180,7 @@ BEGIN
     BUTTON      ID_LIBDLG_CATEGORY_EDIT
 END
 
-IDR_TERRAIN TOOLBAR  16, 15
+IDR_TERRAIN TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_TERDLG_FILE_OPEN
     BUTTON      ID_TERDLG_FILE_SAVE
@@ -206,7 +191,7 @@ BEGIN
     BUTTON      ID_TERDLG_EDIT_ROTATE
 END
 
-IDR_PREVIEW TOOLBAR  16, 15
+IDR_PREVIEW TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_PREVIEW_PRINT
     BUTTON      ID_PREVIEW_PREV
@@ -218,13 +203,30 @@ BEGIN
     BUTTON      ID_PREVIEW_CLOSE
 END
 
+IDR_INVISIBLE TOOLBAR 16, 15
+BEGIN
+    BUTTON      ID_FILE_SAVEPICTURE
+    BUTTON      ID_FILE_PROPERTIES
+    BUTTON      ID_VIEW_PREFERENCES
+    BUTTON      ID_VIEW_ZOOMIN
+    BUTTON      ID_VIEW_ZOOMOUT
+    BUTTON      ID_PIECE_DELETE
+    BUTTON      ID_PIECE_GROUP
+    BUTTON      ID_PIECE_UNGROUP
+    BUTTON      ID_VIEW_FULLSCREEN
+    BUTTON      ID_HELP_FINDER
+    BUTTON      ID_HELP_LEOCADHOMEPAGE
+    BUTTON      ID_HELP_SENDEMAIL
+    BUTTON      ID_APP_ABOUT
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_MAINFRAME MENU 
+IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -275,12 +277,12 @@ BEGIN
     BEGIN
         MENUITEM "P&references...",             ID_VIEW_PREFERENCES
         MENUITEM SEPARATOR
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Standard",                   ID_VIEW_TOOLBAR
         MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
         MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
         MENUITEM "Pie&ces",                     ID_VIEW_PIECES_BAR
         MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "S&tatus Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
         MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
         MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
@@ -353,7 +355,7 @@ BEGIN
     END
 END
 
-IDR_POPUPS MENU 
+IDR_POPUPS MENU
 BEGIN
     POPUP "0"
     BEGIN
@@ -481,7 +483,7 @@ BEGIN
     END
 END
 
-IDR_PIECEEDITOR MENU 
+IDR_PIECEEDITOR MENU
 BEGIN
     POPUP "File"
     BEGIN
@@ -503,7 +505,7 @@ BEGIN
     END
 END
 
-IDR_LIBRARY MENU 
+IDR_LIBRARY MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -534,7 +536,7 @@ BEGIN
     END
 END
 
-IDR_TERRAIN MENU 
+IDR_TERRAIN MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -568,7 +570,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS 
+IDR_MAINFRAME ACCELERATORS
 BEGIN
     "F",            ID_VIEW_FULLSCREEN,     VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
@@ -582,7 +584,7 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG  0, 0, 217, 142
+IDD_ABOUTBOX DIALOG 0, 0, 217, 142
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About LeoCAD"
 FONT 8, "MS Sans Serif"
@@ -597,7 +599,7 @@ BEGIN
     LTEXT           "http://www.leocad.org",IDC_ABTDLG_HOMEPAGE,40,63,151,8,SS_NOTIFY
 END
 
-IDD_PROPGENERAL DIALOG  0, 0, 220, 105
+IDD_PROPGENERAL DIALOG 0, 0, 220, 105
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
@@ -616,7 +618,7 @@ BEGIN
     LTEXT           "",IDC_PROP_GEN_ACCESSED,77,79,136,8,NOT WS_GROUP
 END
 
-IDD_PROPSUMMARY DIALOG  0, 0, 220, 105
+IDD_PROPSUMMARY DIALOG 0, 0, 220, 105
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Summary"
 FONT 8, "MS Sans Serif"
@@ -629,7 +631,7 @@ BEGIN
     EDITTEXT        IDC_PROP_SUM_COMMENTS,71,47,136,50,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
 END
 
-IDD_PROPPIECES DIALOG  0, 0, 220, 105
+IDD_PROPPIECES DIALOG 0, 0, 220, 105
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Pieces Used"
 FONT 8, "MS Sans Serif"
@@ -637,7 +639,7 @@ BEGIN
     CONTROL         "List1",IDC_PROP_PIECES_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,7,206,90
 END
 
-IDD_SELECT_OBJECTS DIALOG  0, 0, 246, 230
+IDD_SELECT_OBJECTS DIALOG 0, 0, 246, 230
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Select Objects"
 FONT 8, "MS Sans Serif"
@@ -655,7 +657,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,198,209,41,14
 END
 
-IDD_ARRAY DIALOG  0, 0, 224, 170
+IDD_ARRAY DIALOG 0, 0, 224, 170
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Array"
 FONT 8, "MS Sans Serif"
@@ -791,7 +793,7 @@ BEGIN
     LTEXT           "",IDC_PREVIEWSTATIC,149,7,96,158,NOT WS_VISIBLE | NOT WS_GROUP
 END
 
-IDD_HTML DIALOG  0, 0, 187, 172
+IDD_HTML DIALOG 0, 0, 187, 172
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "HTML Options"
 FONT 8, "MS Sans Serif"
@@ -815,7 +817,7 @@ BEGIN
     PUSHBUTTON      "Images...",IDC_HTMDLG_IMAGEOPTIONS,139,45,41,14
 END
 
-IDD_PROGRESS DIALOG  0, 0, 187, 57
+IDD_PROGRESS DIALOG 0, 0, 187, 57
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "Progress"
 FONT 8, "MS Sans Serif"
@@ -826,7 +828,7 @@ BEGIN
     LTEXT           "",IDC_PRGDLG_TEXT2,7,19,173,8
 END
 
-IDD_GROUP DIALOG  0, 0, 170, 45
+IDD_GROUP DIALOG 0, 0, 170, 45
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Group Name"
 FONT 8, "MS Sans Serif"
@@ -836,7 +838,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,122,24,41,14
 END
 
-IDD_PREFGENERAL DIALOG  0, 0, 245, 132
+IDD_PREFGENERAL DIALOG 0, 0, 245, 132
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
@@ -859,7 +861,7 @@ BEGIN
     CONTROL         "Check for updates on startup",IDC_GENDLG_UPDATES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,113,119,8
 END
 
-IDD_PREFDRAWING DIALOG  0, 0, 240, 114
+IDD_PREFDRAWING DIALOG 0, 0, 240, 114
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Drawing Aids"
 FONT 8, "MS Sans Serif"
@@ -883,7 +885,7 @@ BEGIN
     CONTROL         "Lock Z",IDC_AIDDLG_LOCKZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,72,111,8
 END
 
-IDD_PREFDETAIL DIALOG  0, 0, 240, 114
+IDD_PREFDETAIL DIALOG 0, 0, 240, 114
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Details"
 FONT 8, "MS Sans Serif"
@@ -902,7 +904,7 @@ BEGIN
     EDITTEXT        IDC_DETDLG_LINE,157,62,20,10,ES_AUTOHSCROLL
 END
 
-IDD_PREFSCENE DIALOG  0, 0, 240, 114
+IDD_PREFSCENE DIALOG 0, 0, 240, 114
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Scene"
 FONT 8, "MS Sans Serif"
@@ -927,7 +929,7 @@ BEGIN
     CONTROL         "Draw Floor",IDC_SCNDLG_TERRAIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,164,75,62,8
 END
 
-IDD_PREFPRINT DIALOG  0, 0, 240, 114
+IDD_PREFPRINT DIALOG 0, 0, 240, 114
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Print"
 FONT 8, "MS Sans Serif"
@@ -970,9 +972,9 @@ BEGIN
     CTEXT           "Preview",IDC_OPENDLG_TEXT,2,20,60,8
 END
 
-IDD_MODIFY DIALOG  0, 0, 106, 92
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "MS Sans Serif"
+IDD_MODIFY DIALOGEX 0, 0, 106, 92
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     PUSHBUTTON      "",IDC_MODDLG_PIECE,4,4,12,12,BS_BITMAP
     COMBOBOX        IDC_MODDLG_LIST,22,4,80,63,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
@@ -1001,7 +1003,7 @@ BEGIN
     LTEXT           "Clip",IDC_MODDLG_PLANESSTATIC,40,77,15,8
 END
 
-IDD_IMAGE DIALOG  0, 0, 212, 155
+IDD_IMAGE DIALOG 0, 0, 212, 155
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Image Options"
 FONT 8, "MS Sans Serif"
@@ -1035,7 +1037,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,62,134,41,14
 END
 
-IDD_SAVEDLG_TEMPLATE DIALOG  0, 0, 280, 22
+IDD_SAVEDLG_TEMPLATE DIALOG 0, 0, 280, 22
 STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1063,7 +1065,7 @@ BEGIN
     LTEXT           "Output File",IDC_STATIC,13,65,66,8
 END
 
-IDD_SAVEPICTUREDLG_TEMPLATE DIALOG  0, 0, 280, 27
+IDD_SAVEPICTUREDLG_TEMPLATE DIALOG 0, 0, 280, 27
 STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1071,7 +1073,7 @@ BEGIN
     PUSHBUTTON      "Options...",IDC_SAVEPICTURE_OPTIONS,222,8,50,14
 END
 
-IDD_PIECEEDITOR DIALOG  0, 0, 270, 186
+IDD_PIECEEDITOR DIALOG 0, 0, 270, 186
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Piece Editor"
 MENU IDR_PIECEEDITOR
@@ -1095,7 +1097,7 @@ BEGIN
     PUSHBUTTON      "->",ID_EDITOR_NEXT,85,168,28,11
 END
 
-IDD_LIBRARY DIALOG  0, 0, 300, 200
+IDD_LIBRARY DIALOG 0, 0, 300, 200
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Pieces Library Manager"
 MENU IDR_LIBRARY
@@ -1107,7 +1109,7 @@ BEGIN
     CONTROL         "List1",IDC_LIBDLG_LIST,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_AUTOARRANGE | WS_BORDER | WS_TABSTOP,102,7,191,186
 END
 
-IDD_TERRAIN DIALOG  0, 0, 320, 201
+IDD_TERRAIN DIALOG 0, 0, 320, 201
 STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Terrain Editor"
 MENU IDR_TERRAIN
@@ -1116,7 +1118,7 @@ BEGIN
     CONTROL         "Terrain Grid",IDC_GRID,"TerrainCtrl",WS_BORDER | WS_TABSTOP,7,7,145,187
 END
 
-IDD_TERRAIN_OPTIONS DIALOG  0, 0, 234, 126
+IDD_TERRAIN_OPTIONS DIALOG 0, 0, 234, 126
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Terrain Options"
 FONT 8, "MS Sans Serif"
@@ -1145,7 +1147,7 @@ BEGIN
     EDITTEXT        IDC_EDIT2,178,72,20,12,ES_AUTOHSCROLL | WS_DISABLED
 END
 
-IDD_EDIT_GROUPS DIALOG  0, 0, 193, 157
+IDD_EDIT_GROUPS DIALOG 0, 0, 193, 157
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Edit Groups"
 FONT 8, "MS Sans Serif"
@@ -1156,7 +1158,7 @@ BEGIN
     PUSHBUTTON      "New",IDC_EDITGRP_NEWGROUP,7,136,41,14
 END
 
-IDD_LIBRARY_TEXTURES DIALOG  0, 0, 226, 201
+IDD_LIBRARY_TEXTURES DIALOG 0, 0, 226, 201
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "LeoCAD Pieces Library Textures"
 FONT 8, "MS Sans Serif"
@@ -1167,7 +1169,7 @@ BEGIN
     PUSHBUTTON      "Remove",ID_LIBTEX_REMOVE,169,41,50,14
 END
 
-IDD_PREFKEYBOARD DIALOG  0, 0, 246, 132
+IDD_PREFKEYBOARD DIALOG 0, 0, 246, 132
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Keyboard"
 FONT 8, "MS Sans Serif"
@@ -1186,7 +1188,7 @@ BEGIN
     LTEXT           "Shortcuts File:",IDC_STATIC,100,76,139,8
 END
 
-IDD_TRANSFORM DIALOG  0, 0, 249, 84
+IDD_TRANSFORM DIALOG 0, 0, 249, 84
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Transform"
 FONT 8, "MS Sans Serif"
@@ -1209,7 +1211,7 @@ BEGIN
     GROUPBOX        "Offset",IDC_STATIC,105,7,80,68
 END
 
-IDD_CATEGORY DIALOG  0, 0, 205, 67
+IDD_CATEGORY DIALOG 0, 0, 205, 67
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Category"
 FONT 8, "MS Sans Serif"
@@ -1268,7 +1270,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -1535,7 +1537,7 @@ IDC_ROTY                CURSOR                  "res\\roty.cur"
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_POSITION   " X: 0.00 Y: 0.00 Z:0.00 "
     ID_INDICATOR_STEP       " Step 100 "
@@ -1549,19 +1551,19 @@ BEGIN
     IDS_CANNOT_OPEN_CLIPBOARD "Failed to open Clipboard!"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "LeoCAD\n\nLeoCAD\nLeoCAD Files (*.lcd)\n.lcd\nLeoCAD.Project\nLeoCAD Project"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "LeoCAD"
     AFX_IDS_IDLEMESSAGE     "For Help, press F1"
     AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEW             "Create a new project\nNew"
     ID_FILE_OPEN            "Open an existing project\nOpen"
@@ -1577,7 +1579,7 @@ BEGIN
     ID_FILE_SEND_MAIL       "Send the active project through electronic mail\nSend Mail"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
@@ -1588,7 +1590,7 @@ BEGIN
     ID_HELP                 "Display help for current task or command\nHelp"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -1596,12 +1598,12 @@ BEGIN
     ID_FILE_MRU_FILE4       "Open this document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -1616,13 +1618,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the standard toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -1631,18 +1633,18 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_SNAP_ON              "3D snap toggle\n3D Snap Toggle"
     ID_SNAP_ANGLE           "Angle snap toggle\nAngle Snap Toggle"
@@ -1654,7 +1656,7 @@ BEGIN
     ID_VIEWPORT05           "View"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEWPORT06           "View"
     ID_VIEWPORT07           "View"
@@ -1668,7 +1670,7 @@ BEGIN
     ID_PIECE_GROUP01        "Plates"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_SNAP_SNAPX           "Snap X Toggle"
     ID_SNAP_SNAPY           "Snap Y Toggle"
@@ -1678,7 +1680,7 @@ BEGIN
     ID_FILE_SAVEPICTURE     "Save a picture"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_COLOR01             "Red"
     IDS_COLOR02             "Orange"
@@ -1698,7 +1700,7 @@ BEGIN
     IDS_COLOR16             "Clear Orange"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_COLOR17             "Clear Green"
     IDS_COLOR18             "Clear Light Green"
@@ -1714,7 +1716,7 @@ BEGIN
     IDS_COLOR28             "Silver"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PIECE_GROUP02        "Bricks"
     ID_PIECE_GROUP03        "Tiles"
@@ -1734,7 +1736,7 @@ BEGIN
     ID_PIECE_GROUP17        "Group 17"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PIECE_GROUP18        "Group 18"
     ID_PIECE_GROUP19        "Group 19"
@@ -1753,7 +1755,7 @@ BEGIN
     ID_PIECE_GROUP32        "Group 32"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_RENDER_BACKGROUND    "Fully renders the scene in the background\nBackground Render"
     ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
@@ -1766,7 +1768,7 @@ BEGIN
     ID_ANIMATOR_KEY         "Add new animation keys\nAdd Keys"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_CANNOT_GET_CLIPBOARD_DATA "Failed to get Clipboard data!"
     IDS_CANCEL_PROMPT       "Are you sure you want to stop ?"
@@ -1775,14 +1777,14 @@ BEGIN
     IDS_OPENFILE_ERROR      "Cannot open file !"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PIECE_ARRAY          "Make copies of the selected pieces\nArray"
     ID_HELP_LEOCADHOMEPAGE  "Go to the LeoCAD Home page on the internet"
     ID_HELP_CHECKFORUPDATES "Check for a newer version of the program on the internet"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_SELECTALL       "Select all objects"
     ID_EDIT_SELECTNONE      "De-select everything"
@@ -1794,17 +1796,17 @@ BEGIN
     ID_VIEW_STEP_PREVIOUS   "Go back one step or frame\nGo Back"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_PARTFRAME           "LeoCAD Piece Library Manager"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_HELP_SENDEMAIL       "Send an e-mail message to the author of the program"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_PIECES_BAR      "Show or hide the pieces toolbar\nToggle PiecesBar"
     ID_VIEW_TOOLS_BAR       "Show or hide the drawing toolbar\nToggle DrawingBar"
@@ -1812,7 +1814,7 @@ BEGIN
     ID_VIEW_MODIFY_BAR      "Show or hide the modify dialog\nToggle Modify Dialog"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_EDITPIECELIBRARY "Configure the LeoCAD Pieces Library"
     ID_VIEW_ZOOMIN          "Zoom In"
@@ -1820,7 +1822,7 @@ BEGIN
     ID_PIECE_EDITGROUPS     "Edit groups"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ACTION_PAN           "Pan\nPan"
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
@@ -1830,7 +1832,7 @@ BEGIN
     ID_ANIMATOR_STOP        "Stop playing animation\nStop"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ACTION_SELECT        "Select objects (hold CTRL down or drag the mouse to select multiple objects)\nSelect"
     ID_ACTION_INSERT        "Add pieces to the project\nInsert"
@@ -1845,12 +1847,12 @@ BEGIN
     ID_ACTION_ZOOM_REGION   "Zoom region\nZoom Region"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PIECE_COPYKEYS       "Copy position and rotation"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_CAMERAS_RESET   "Reset cameras to their original positions"
     ID_PREVIEW_ONEPAGE      "Show only one page\nOne Page"
@@ -1859,7 +1861,7 @@ BEGIN
     ID_PREVIEW_PREV         "Preview the previous page\nPrevious Page"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PREVIEW_NEXT         "Preview the next page\nNext Page"
     ID_PREVIEW_ZOOMIN       "Zoom In\nZoom In"
@@ -1877,14 +1879,14 @@ BEGIN
     ID_PIECE_MIRROR         "Mirror pieces\nMirror"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_VIEW_NEWVIEW         "Creates a new view window"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -1894,18 +1896,20 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
 #define _AFX_NO_PROPERTY_RESOURCES
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE 9, 1
-#pragma code_page(1252)
-#endif
 #include "res\LeoCAD.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
 #include "afxprint.rc"       // printing/print preview resources
+#if !defined(_AFXDLL)
+#include "afxribbon.rc"        // MFC ribbon and control bar resources
 #endif
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

@@ -25,9 +25,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction 
 ////////////////////////////////////////////////////////////////////// 
 
-IMPLEMENT_DYNAMIC(CModifyDialog, CDialogBar) 
+IMPLEMENT_DYNAMIC(CModifyDialog, CPaneDialog) 
 
-BEGIN_MESSAGE_MAP(CModifyDialog, CDialogBar) 
+BEGIN_MESSAGE_MAP(CModifyDialog, CPaneDialog) 
 	//{{AFX_MSG_MAP(CModifyDialog) 
 	ON_BN_CLICKED(IDC_MODDLG_PIECE, OnModdlgPiece)
 	ON_CBN_SELENDOK(IDC_MODDLG_LIST, OnSelendokModdlgList)
@@ -65,11 +65,11 @@ CModifyDialog::CModifyDialog()
 CModifyDialog::~CModifyDialog() 
 { 
 } 
-
+/*
 BOOL CModifyDialog::Create(CWnd * pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID) 
 { 
 	// Let MFC Create the control 
-	if(!CDialogBar::Create(pParentWnd, lpszTemplateName, nStyle, nID)) 
+	if(!CPaneDialog::Create(pParentWnd, lpszTemplateName, nStyle, nID)) 
 		return FALSE; 
 
 	// Since there is no WM_INITDIALOG message we have to call 
@@ -82,7 +82,7 @@ BOOL CModifyDialog::Create(CWnd * pParentWnd, LPCTSTR lpszTemplateName, UINT nSt
 BOOL CModifyDialog::Create(CWnd * pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID) 
 { 
 	//Let MFC Create the control 
-	if(!CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID)) 
+	if(!CPaneDialog::Create(pParentWnd, nIDTemplate, nStyle, nID)) 
 		return FALSE; 
 
 	// Since there is no WM_INITDIALOG message we have to call 
@@ -91,7 +91,7 @@ BOOL CModifyDialog::Create(CWnd * pParentWnd, UINT nIDTemplate, UINT nStyle, UIN
 		return FALSE; 
 	return TRUE; 
 }
-
+*/
 BOOL CModifyDialog::OnInitDialogBar() 
 { 
 	// Support for the MFC DDX model 
@@ -107,7 +107,7 @@ void CModifyDialog::DoDataExchange(CDataExchange* pDX)
 	//Derived Classes Overide this function 
 	ASSERT(pDX); 
 	
-	CDialogBar::DoDataExchange(pDX); 
+	CPaneDialog::DoDataExchange(pDX); 
 	//{{AFX_DATA_MAP(CModifyDialog) 
 	DDX_Control(pDX, IDC_MODDLG_LIST, m_ctlCombo);
 	DDX_Control(pDX, IDC_MODDLG_COLOR, m_ctlColor);
@@ -140,7 +140,7 @@ void CModifyDialog::OnUpdateCmdUI(CFrameWnd * pTarget, BOOL /*bDisableIfNoHndler
 
 void CModifyDialog::UpdateInfo(Object* pObject)
 {
-	if ((GetStyle() & WS_VISIBLE) == 0)
+	if (!IsVisible())
 		return;
 
 	if (pObject == NULL)

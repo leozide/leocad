@@ -18,7 +18,7 @@ static char THIS_FILE[]=__FILE__;
 
 #define ID_STATUS_PROGRESS  17234
 
-BEGIN_MESSAGE_MAP(CCADStatusBar, CStatusBar)
+BEGIN_MESSAGE_MAP(CCADStatusBar, CMFCStatusBar)
 	//{{AFX_MSG_MAP(CCADStatusBar)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
@@ -44,7 +44,7 @@ CCADStatusBar::~CCADStatusBar()
 BOOL CCADStatusBar::Create(CWnd *pParentWnd, DWORD dwStyle, UINT nID)
 {
 	// Default creation
-	BOOL bCreatedOK = CStatusBar::Create(pParentWnd,dwStyle,nID);
+	BOOL bCreatedOK = CMFCStatusBar::Create(pParentWnd,dwStyle,nID);
 
 	if (bCreatedOK)
 	{
@@ -87,7 +87,7 @@ void CCADStatusBar::OnLButtonDown(UINT nFlags, CPoint point)
 		TitleMenu.TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 	}
 
-	CStatusBar::OnLButtonDown(nFlags, point);
+	CMFCStatusBar::OnLButtonDown(nFlags, point);
 }
 
 void CCADStatusBar::OnRButtonDown(UINT nFlags, CPoint point) 
@@ -97,12 +97,12 @@ void CCADStatusBar::OnRButtonDown(UINT nFlags, CPoint point)
 	if (rect.PtInRect(point))
 		AfxGetMainWnd()->PostMessage(WM_COMMAND, ID_VIEW_STEP_CHOOSE);
 
-	CStatusBar::OnRButtonDown(nFlags, point);
+	CMFCStatusBar::OnRButtonDown(nFlags, point);
 }
 
 void CCADStatusBar::OnSize(UINT nType, int cx, int cy) 
 {
-	CStatusBar::OnSize(nType, cx, cy);
+	CMFCStatusBar::OnSize(nType, cx, cy);
 
 	if (m_bProgressVisible)
 		AdjustProgressBarPosition();

@@ -16,7 +16,7 @@ class Object;
 ///////////////////////////////////////////////////////////////////////////// 
 // CModifyDialog window 
 
-class CModifyDialog : public CDialogBar 
+class CModifyDialog : public CPaneDialog
 { 
 	DECLARE_DYNAMIC(CModifyDialog) 
 
@@ -65,8 +65,8 @@ public:
 
 	void UpdateInfo(Object* pObject);
 	void OnUpdateCmdUI(CFrameWnd * pTarget, BOOL bDisableIfNoHndler);
-	BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID); 
-	BOOL Create(CWnd* pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID); 
+//	BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID); 
+	//BOOL Create(CWnd* pParentWnd, LPCTSTR lpszTemplateName, UINT nStyle, UINT nID); 
 
 protected: 
 	virtual BOOL OnInitDialogBar(); 

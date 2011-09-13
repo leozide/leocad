@@ -129,7 +129,7 @@ static void CheckForUpdates(void* Data)
 /////////////////////////////////////////////////////////////////////////////
 // CCADApp
 
-BEGIN_MESSAGE_MAP(CCADApp, CWinApp)
+BEGIN_MESSAGE_MAP(CCADApp, CWinAppEx)
 	//{{AFX_MSG_MAP(CCADApp)
 	ON_COMMAND(ID_HELP_CHECKFORUPDATES, OnHelpUpdates)
 	ON_COMMAND(ID_HELP_LEOCADHOMEPAGE, OnHelpHomePage)
@@ -137,7 +137,7 @@ BEGIN_MESSAGE_MAP(CCADApp, CWinApp)
 	//}}AFX_MSG_MAP
 	// Standard print setup command
 	ON_UPDATE_COMMAND_UI(ID_FILE_MRU_FILE1, OnUpdateRecentFileMenu)
-	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
+	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinAppEx::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,15 @@ BOOL CCADApp::InitInstance()
 #endif
 
 	SetRegistryKey(_T("BT Software"));
-//	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
+	LoadStdProfileSettings();
+
+	InitContextMenuManager();
+	InitShellManager();
+	InitKeyboardManager();
+	InitTooltipManager();
+	CMFCToolTipInfo ttParams;
+	ttParams.m_bVislManagerTheme = TRUE;
+	theApp.GetTooltipManager()->SetTooltipParams(AFX_TOOLTIP_TYPE_ALL, RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
 
 	InitKeyboardShortcuts();
 
@@ -262,7 +270,7 @@ BOOL CCADApp::InitInstance()
 	lcGetActiveProject()->HandleNotify(LC_ACTIVATE, 1);
 	lcGetActiveProject()->UpdateInterface();
 
-  main_window->UpdateMRU ();
+	main_window->UpdateMRU ();
 
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
@@ -293,7 +301,13 @@ int CCADApp::ExitInstance()
 		FreeConsole();
 #endif
 
-	return CWinApp::ExitInstance();
+	return CWinAppEx::ExitInstance();
+}
+
+void CCADApp::UpdateMRU(char names[4][MAX_PATH])
+{
+	for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
+		m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
 }
 
 /////////////////////////////////////////////////////////////////////////////

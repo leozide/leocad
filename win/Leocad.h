@@ -19,7 +19,7 @@
 // See LeoCAD.cpp for the implementation of this class
 //
 
-class CCADApp : public CWinApp
+class CCADApp : public CWinAppEx
 {
 public:
 	CCADApp();
@@ -34,6 +34,7 @@ public:
 
 // Implementation
 	void OnUpdateRecentFileMenu(CCmdUI* /*pCmdUI*/) {};
+	void UpdateMRU(char names[4][MAX_PATH]);
 
 	//{{AFX_MSG(CCADApp)
 	afx_msg void OnHelpUpdates();
@@ -41,6 +42,7 @@ public:
 	afx_msg void OnHelpEmail();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
 protected:
 	HANDLE m_hMutex;
 };

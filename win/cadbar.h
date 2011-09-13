@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
-class CCADStatusBar : public CStatusBar  
+class CCADStatusBar : public CMFCStatusBar  
 {
 public:
 	CCADStatusBar();

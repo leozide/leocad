@@ -164,7 +164,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			PRINT_PARAMS* param = (PRINT_PARAMS*)malloc(sizeof(PRINT_PARAMS));
 			param->pParent = this;
-			param->pMainFrame = (CFrameWnd*)AfxGetMainWnd();
+			param->pMainFrame = (CFrameWndEx*)AfxGetMainWnd();
 			AfxBeginThread(PrintCatalogFunction, param);
 
 			return TRUE;

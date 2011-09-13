@@ -88,8 +88,6 @@ IDB_PIECE               BITMAP                  "res\\piece.bmp"
 IDB_CAMERA              BITMAP                  "res\\camera.bmp"
 IDB_LIGHT               BITMAP                  "res\\light.bmp"
 IDR_FULLSCREEN          BITMAP                  "res\\fullscr.bmp"
-IDR_PIECEEDITOR         BITMAP                  "res\\pieceed.bmp"
-IDB_EDITOR_ICONS        BITMAP                  "res\\editor.bmp"
 IDR_LIBRARY             BITMAP                  "res\\library.bmp"
 IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
 IDR_PREVIEW             BITMAP                  "res\\preview.bmp"
@@ -159,13 +157,6 @@ END
 IDR_FULLSCREEN TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_VIEW_FULLSCREEN
-END
-
-IDR_PIECEEDITOR TOOLBAR 16, 15
-BEGIN
-    BUTTON      ID_EDITOR_FILE_NEW
-    BUTTON      ID_EDITOR_FILE_OPEN
-    BUTTON      ID_EDITOR_FILE_SAVE
 END
 
 IDR_LIBRARY TOOLBAR 16, 15
@@ -1513,7 +1504,7 @@ IDC_MOVE                CURSOR                  "res\\Move.cur"
 IDC_PAINT               CURSOR                  "res\\Paint.cur"
 IDC_PAN                 CURSOR                  "res\\Pan.cur"
 IDC_ANGLE               CURSOR                  "res\\Angle.cur"
-IDC_ROTATE              CURSOR                  "res\\Rotate.cur"
+IDC_ROTATE              CURSOR                  "res\\rotate.cur"
 IDC_LIGHT               CURSOR                  "res\\bulb.cur"
 IDC_ZOOM_REGION         CURSOR                  "res\\Zoomrect.cur"
 IDC_SELECT_GROUP        CURSOR                  "res\\SelctGrp.cur"

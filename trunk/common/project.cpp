@@ -6095,25 +6095,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			CheckPoint("Reset Cameras");
 		} break;
 
-		case LC_VIEW_AUTOPAN:
-		{
-			if (IsDrawing())
-				break;
-
-			short x = (short)nParam;
-			short y = (short)((nParam >> 16) & 0xFFFF);
-
-			x -= x > 0 ? 5 : -5;
-			y -= y > 0 ? 5 : -5;
-
-			m_pViewCameras[m_nActiveViewport]->DoPan(x/4, y/4, 1, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			m_nDownX = x;
-			m_nDownY = y;
-			UpdateOverlayScale();
-			SystemUpdateFocus(NULL);
-			UpdateAllViews();
-		} break;
-
 		case LC_HELP_ABOUT:
 		{
 		  SystemDoDialog(LC_DLG_ABOUT, 0);

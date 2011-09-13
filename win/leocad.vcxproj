@@ -156,7 +156,6 @@
     <ClCompile Include="texdlg.cpp" />
     <ClCompile Include="Tools.cpp" />
     <ClCompile Include="transdlg.cpp" />
-    <ClCompile Include="Wheelwnd.cpp" />
     <ClCompile Include="win_gl.cpp" />
     <ClCompile Include="..\common\algebra.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -414,7 +413,7 @@
     <None Include="..\docs\CHANGES.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Leocad.rc" />
+    <ResourceCompile Include="LeoCAD.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
@@ -467,7 +466,6 @@
     <ClInclude Include="texdlg.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="transdlg.h" />
-    <ClInclude Include="WheelWnd.h" />
     <ClInclude Include="win_gl.h" />
     <ClInclude Include="..\common\array.h" />
     <ClInclude Include="..\common\basewnd.h" />

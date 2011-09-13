@@ -62,12 +62,6 @@
 #define IDD_HTML                        159
 #define IDD_PROGRESS                    161
 #define IDR_PARTFRAME                   162
-#define IDB_AUTOPAN                     164
-#define IDC_PAN_UP                      165
-#define IDC_PAN_LEFT                    166
-#define IDC_PAN_DOWN                    167
-#define IDC_PAN_RIGHT                   168
-#define IDC_PAN_ALL                     169
 #define IDD_GROUP                       170
 #define IDS_COLOR01                     176
 #define IDS_COLOR02                     177
@@ -106,12 +100,8 @@
 #define IDD_SAVEPICTUREDLG_TEMPLATE     199
 #define IDS_COLOR25                     200
 #define IDS_COLOR26                     201
-#define IDC_PAN_NE                      201
 #define IDS_COLOR27                     202
-#define IDC_PAN_NW                      202
 #define IDS_COLOR28                     203
-#define IDC_PAN_SE                      203
-#define IDC_PAN_SW                      204
 #define IDR_PIECEEDITOR                 205
 #define IDD_PIECEEDITOR                 208
 #define IDB_EDITOR_ICONS                209

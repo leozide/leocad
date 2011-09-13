@@ -179,9 +179,6 @@
     <ClCompile Include="transdlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Wheelwnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="win_gl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -583,11 +580,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Leocad.rc">
-      <Filter>Source Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="AboutDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -735,9 +727,6 @@
     <ClInclude Include="transdlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WheelWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="win_gl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -854,5 +843,10 @@
     <CustomBuild Include="hlp\LeoCAD.hpj">
       <Filter>Source Files</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LeoCAD.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

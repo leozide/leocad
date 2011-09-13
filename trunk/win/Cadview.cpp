@@ -7,7 +7,6 @@
 
 #include "CADDoc.h"
 #include "CADView.h"
-#include "WheelWnd.h"
 #include "Tools.h"
 #include "project.h"
 #include "globals.h"
@@ -49,7 +48,6 @@ BEGIN_MESSAGE_MAP(CCADView, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, CView::OnFilePrint)
 	ON_NOTIFY(TBN_DROPDOWN, AFX_IDW_TOOLBAR, OnDropDown)
 	ON_MESSAGE(WM_LC_SET_STEP, OnSetStep)
-	ON_MESSAGE(WM_LC_WHEEL_PAN, OnAutoPan)
 	ON_MESSAGE(WM_LC_SET_CURSOR, OnChangeCursor)
 END_MESSAGE_MAP()
 
@@ -58,15 +56,12 @@ END_MESSAGE_MAP()
 
 CCADView::CCADView()
 {
-	m_pPixels = NULL;
 	m_hCursor = NULL;
-  m_pView = NULL;
+	m_pView = NULL;
 }
 
 CCADView::~CCADView()
 {
-	if (m_pPixels)
-		free (m_pPixels);
 }
 
 BOOL CCADView::PreCreateWindow(CREATESTRUCT& cs)
@@ -660,28 +655,7 @@ BOOL CCADView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CCADView::OnMButtonDown(UINT nFlags, CPoint point) 
 {
-	BOOL bCtl = GetKeyState(VK_CONTROL) & 0x8000;
-	if(!bCtl && nFlags == MK_MBUTTON)
-	{
-		CWheelWnd *pwndPanWindow = new CWheelWnd(point);
-		if (!pwndPanWindow->Create(this))
-			delete pwndPanWindow;
-	}
-	else
-		CView::OnMButtonDown(nFlags, point);
-}
-
-// Notification from the auto-pan window
-LONG CCADView::OnAutoPan(UINT lParam, LONG wParam)
-{
-	CPoint pt1(lParam), pt2(wParam);
-	pt2 -= pt1;
-	pt2.y = -pt2.y;
-
-	unsigned long pt = ((short)pt2.x) | ((unsigned long)(((short)pt2.y) << 16));
-	lcGetActiveProject()->HandleCommand(LC_VIEW_AUTOPAN, pt);	
-
-	return TRUE;
+	CView::OnMButtonDown(nFlags, point);
 }
 
 void CCADView::OnTimer(UINT nIDEvent) 
@@ -799,28 +773,6 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
 {
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
-/*
-	if (IsWindowEnabled())
-	{
-		if (bActivate)
-		{
-			if (m_pPixels)
-				free (m_pPixels);
-			m_pPixels = NULL;
-		}
-		else
-		{
-			if (m_pPixels)
-				free (m_pPixels);
-
-			CCADDoc* pDoc = GetDocument();
-			m_pPixels = malloc(pDoc->m_szView.cx * pDoc->m_szView.cy * sizeof(GLubyte) * 4);
-			if (!m_pPixels)
-				return;
-			glReadPixels(0, 0, pDoc->m_szView.cx, pDoc->m_szView.cy, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
-		}
-	}
-*/
 }
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 

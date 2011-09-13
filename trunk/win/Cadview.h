@@ -48,9 +48,8 @@ public:
 // Generated message map functions
 protected:
 	HCURSOR m_hCursor;
-  View* m_pView;
+	View* m_pView;
 
-	void* m_pPixels;
 	//{{AFX_MSG(CCADView)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
@@ -65,7 +64,6 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnDropDown(NMHDR* pNotifyStruct, LRESULT* pResult);
 	afx_msg LONG OnSetStep(UINT lParam, LONG wParam);
-	afx_msg LONG OnAutoPan(UINT lParam, LONG wParam);
 	afx_msg LONG OnChangeCursor(UINT lParam, LONG wParam);
 
 	DECLARE_MESSAGE_MAP()

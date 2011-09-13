@@ -40,7 +40,6 @@
 #define WM_LC_UPDATE_STEP_RANGE	(WM_USER+213)
 #define WM_LC_SET_STEP			(WM_USER+214)
 //	#define WM_LC_FRAMECLOSED		(WM_USER+215)
-#define WM_LC_WHEEL_PAN			(WM_USER+216)
 #define WM_LC_ADD_COMBO_STRING	(WM_USER+217)
 #define WM_LC_UPDATE_INFO		(WM_USER+218) // wParam = object, lParam = type
 #define WM_LC_UPDATE_SETTINGS	(WM_USER+219) // Preferences changed

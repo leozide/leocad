@@ -1357,7 +1357,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_CAMERA_FIRST + 6,       // LC_VIEW_CAMERA_MAIN,
 		0,                         // LC_VIEW_CAMERA_MENU
 		ID_VIEW_CAMERAS_RESET,     // LC_VIEW_CAMERA_RESET
-		0,                         // LC_VIEW_AUTOPAN
 		ID_APP_ABOUT,              // LC_HELP_ABOUT
 		0,                         // LC_TOOLBAR_ANIMATION
 		0,                         // LC_TOOLBAR_ADDKEYS

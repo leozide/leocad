@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Leocad.rc
+// Used by LeoCAD.rc
 //
 #define IDAPPLY                         3
 #define IDC_HTMDLG_IMAGEOPTIONS         3
@@ -104,7 +104,6 @@
 #define IDS_COLOR28                     203
 #define IDR_PIECEEDITOR                 205
 #define IDD_PIECEEDITOR                 208
-#define IDB_EDITOR_ICONS                209
 #define IDD_LIBRARY                     211
 #define IDR_LIBRARY                     213
 #define IDD_TERRAIN                     216

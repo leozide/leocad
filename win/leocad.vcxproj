@@ -104,7 +104,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Arraydlg.cpp" />
-    <ClCompile Include="Barcmdui.cpp" />
     <ClCompile Include="basewnd.cpp" />
     <ClCompile Include="Bmpmenu.cpp" />
     <ClCompile Include="Cadbar.cpp" />
@@ -139,7 +138,6 @@
     <ClCompile Include="propertiespane.cpp" />
     <ClCompile Include="Propspgs.cpp" />
     <ClCompile Include="Propssht.cpp" />
-    <ClCompile Include="Rmodel.cpp" />
     <ClCompile Include="Seldlg.cpp" />
     <ClCompile Include="Splitter.cpp" />
     <ClCompile Include="Stdafx.cpp">
@@ -418,7 +416,6 @@
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="ArrayDlg.h" />
-    <ClInclude Include="Barcmdui.h" />
     <ClInclude Include="Bmpmenu.h" />
     <ClInclude Include="CADBar.h" />
     <ClInclude Include="CADDoc.h" />
@@ -453,7 +450,6 @@
     <ClInclude Include="PropsPgs.h" />
     <ClInclude Include="PropsSht.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="RModel.h" />
     <ClInclude Include="SelDlg.h" />
     <ClInclude Include="Splitter.h" />
     <ClInclude Include="StdAfx.h" />

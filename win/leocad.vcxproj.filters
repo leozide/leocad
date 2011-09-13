@@ -35,9 +35,6 @@
     <ClCompile Include="Arraydlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Barcmdui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="basewnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -135,9 +132,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Propssht.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rmodel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Seldlg.cpp">
@@ -586,9 +580,6 @@
     <ClInclude Include="ArrayDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Barcmdui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Bmpmenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -686,9 +677,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SelDlg.h">

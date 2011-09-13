@@ -74,7 +74,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{	LC_VIEW_CAMERA_MAIN, "Camera Main", LC_KEYMOD_VIEWONLY, LC_KEY_M, 0 },
 //	{ LC_VIEW_CAMERA_MENU, "", 0, 0, 0 },
 //	{ LC_VIEW_CAMERA_RESET, "", 0, 0, 0 },
-//	{ LC_VIEW_AUTOPAN, "", 0, 0, 0 },
 //	{ LC_HELP_ABOUT, "", 0, 0, 0 },
 //	{ LC_TOOLBAR_ANIMATION, "", 0, 0, 0 },
 //	{ LC_TOOLBAR_ADDKEYS, "", 0, 0, 0 },

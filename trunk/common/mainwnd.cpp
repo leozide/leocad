@@ -38,8 +38,8 @@ void MainWnd::UpdateMRU ()
 {
 #ifdef LC_WINDOWS
   // FIXME !!
-  void SystemUpdateRecentMenu(char names[4][LC_MAXPATH]);
-  char names[4][LC_MAXPATH];
+  void SystemUpdateRecentMenu(char names[4][MAX_PATH]);
+  char names[4][MAX_PATH];
 
   for (int i = 0; i < LC_MRU_MAX; i++)
     strcpy (names[i], m_strMRU[i]);

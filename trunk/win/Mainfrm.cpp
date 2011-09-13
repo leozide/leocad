@@ -85,9 +85,9 @@ static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, vo
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
-IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
+IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
-BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
+BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	//{{AFX_MSG_MAP(CMainFrame)
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
@@ -107,10 +107,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND_RANGE(ID_PIECEBAR_NUMBERS, ID_PIECEBAR_SUBPARTS, OnPieceBar)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_PIECEBAR_NUMBERS, ID_PIECEBAR_SUBPARTS, OnUpdatePieceBar)
 	// Global help commands
-	ON_COMMAND(ID_HELP_FINDER, CFrameWnd::OnHelpFinder)
-	ON_COMMAND(ID_HELP, CFrameWnd::OnHelp)
-	ON_COMMAND(ID_CONTEXT_HELP, CFrameWnd::OnContextHelp)
-	ON_COMMAND(ID_DEFAULT_HELP, CFrameWnd::OnHelpFinder)
+	ON_COMMAND(ID_HELP_FINDER, CFrameWndEx::OnHelpFinder)
+	ON_COMMAND(ID_HELP, CFrameWndEx::OnHelp)
+	ON_COMMAND(ID_CONTEXT_HELP, CFrameWndEx::OnContextHelp)
+	ON_COMMAND(ID_DEFAULT_HELP, CFrameWndEx::OnHelpFinder)
 	// User messages
 	ON_MESSAGE(WM_LC_UPDATE_LIST, OnUpdateList)
 	ON_MESSAGE(WM_LC_POPUP_CLOSE, OnPopupClose)
@@ -118,14 +118,17 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_MESSAGE(WM_LC_UPDATE_INFO, OnUpdateInfo)
 	ON_MESSAGE(WM_LC_UPDATE_SETTINGS, UpdateSettings)
 	// Toolbar show/hide
-	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR, OnBarCheck)
-	ON_COMMAND_EX(ID_VIEW_TOOLS_BAR, OnBarCheck)
-	ON_COMMAND_EX(ID_VIEW_PIECES_BAR, OnBarCheck)
-	ON_COMMAND_EX(ID_VIEW_MODIFY_BAR, OnBarCheck)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ANIMATION_BAR, OnUpdateControlBarMenu)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, OnUpdateControlBarMenu)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, OnUpdateControlBarMenu)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, OnUpdateControlBarMenu)
+	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR,  &CFrameWndEx::OnPaneCheck)
+	ON_COMMAND_EX(ID_VIEW_TOOLS_BAR,  &CFrameWndEx::OnPaneCheck)
+	ON_COMMAND_EX(ID_VIEW_PIECES_BAR,  &CFrameWndEx::OnPaneCheck)
+	ON_COMMAND_EX(ID_VIEW_MODIFY_BAR,  &CFrameWndEx::OnPaneCheck)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_ANIMATION_BAR, &CFrameWndEx::OnUpdatePaneMenu)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, &CFrameWndEx::OnUpdatePaneMenu)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, &CFrameWndEx::OnUpdatePaneMenu)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, &CFrameWndEx::OnUpdatePaneMenu)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTION_SELECT, ID_ACTION_ROLL, OnUpdateAction)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_SNAPX, ID_SNAP_SNAPNONE, OnUpdateSnap)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_LOCK_LOCKX, ID_LOCK_UNLOCKALL, OnUpdateLock)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -146,113 +149,122 @@ CMainFrame::~CMainFrame()
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  sizeof(indicators)/sizeof(UINT)))
+	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows7));
+
+	if (!m_wndMenuBar.Create(this))
+	{
+		TRACE0("Failed to create menubar\n");
+		return -1;      // fail to create
+	}
+
+	m_wndMenuBar.SetPaneStyle(m_wndMenuBar.GetPaneStyle() | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY);
+	m_wndMenuBar.EnableDocking(CBRS_ALIGN_ANY);
+
+	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT)))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
 	}
+
 	m_wndStatusBar.SetPaneStyle(0, SBPS_STRETCH|SBPS_NORMAL);
 
-	if (!m_wndStandardBar.Create(this) ||
+	if (!m_wndStandardBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
-	m_wndStandardBar.SetBarStyle(m_wndStandardBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndStandardBar.SetWindowText (_T("Standard"));
-	m_wndStandardBar.SendMessage(TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
-	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_LOCK_ON)) | TBSTYLE_DROPDOWN);
-	m_wndStandardBar.SetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON), m_wndStandardBar.GetButtonStyle(m_wndStandardBar.CommandToIndex(ID_SNAP_ON)) | TBSTYLE_DROPDOWN);
 	m_wndStandardBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndToolsBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_TOOLS_BAR) ||
+	CMenu PopupMenus;
+	PopupMenus.LoadMenu(IDR_POPUPS);
+	CMenu* Popup;
+
+	Popup = PopupMenus.GetSubMenu(8);
+	CMFCToolBarMenuButton NewLock(ID_LOCK_ON,Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_LOCK_ON));
+	m_wndStandardBar.ReplaceButton(ID_LOCK_ON, NewLock);
+
+	Popup = PopupMenus.GetSubMenu(2);
+	CMFCToolBarMenuButton NewSnap(ID_SNAP_ON, Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_SNAP_ON));
+	m_wndStandardBar.ReplaceButton(ID_SNAP_ON, NewSnap);
+
+	if (!m_wndToolsBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(1, 1, 1, 1), ID_VIEW_TOOLS_BAR) ||
 		!m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
-	m_wndToolsBar.SetBarStyle(m_wndToolsBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndToolsBar.SetWindowText (_T("Drawing"));
 	m_wndToolsBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndAnimationBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP, ID_VIEW_ANIMATION_BAR) ||
+	if (!m_wndAnimationBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(1, 1, 1, 1), ID_VIEW_ANIMATION_BAR) ||
 		!m_wndAnimationBar.LoadToolBar(IDR_ANIMATORBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
-	m_wndAnimationBar.SetBarStyle(m_wndAnimationBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndAnimationBar.SetWindowText (_T("Animation"));
 	m_wndAnimationBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CSize(200, 100),
-		TRUE, ID_VIEW_PIECES_BAR))
+	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PIECES_BAR, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
-		TRACE0("Failed to create pieces bar\n");
-		return -1;      // fail to create
+		TRACE0("Failed to create Pieces window\n");
+		return -1; // failed to create
 	}
 
-	if (!m_wndModifyDlg.Create(this, IDD_MODIFY,
-	    CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE,
-		ID_VIEW_MODIFY_BAR))
+	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
+
+	if (!m_wndModifyDlg.Create(_T("Modify"), this, TRUE, MAKEINTRESOURCE(IDD_MODIFY), WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT | CBRS_FLOAT_MULTI, ID_VIEW_MODIFY_BAR))
 	{
-		TRACE0("Failed to create modify dialog bar\n");
-		return -1;		// fail to create
+		TRACE0("Failed to create Dialog Bar\n");
+		return -1;      // failed to create
 	}
+
+	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_ANY);
+	EnableDocking(CBRS_ALIGN_ANY);
+//	ShowPane(&m_wndModifyDlg, FALSE, FALSE, FALSE);
+
+//	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) == TOOLBAR_VERSION)
+	//	LoadBarState("Toolbars");
+
+//	UpdateMenuAccelerators();
+
+	if (m_wndInvisibleToolBar.Create(this))
+	{
+		VERIFY(m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE));
+	}
+
+	if (!m_wndProperties.Create("Properties", this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_MODIFY_BAR+1, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create Properties window\n");
+		return FALSE; // failed to create
+	}
+
+	m_wndProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_wndProperties);
 
 	EnableDocking(CBRS_ALIGN_ANY);
-	m_wndModifyDlg.SetWindowText (_T("Modify"));
-	m_wndModifyDlg.EnableDocking(0);
-	ShowControlBar(&m_wndModifyDlg, FALSE, FALSE);
-	FloatControlBar(&m_wndModifyDlg, CPoint(10,10));
+	DockPane(&m_wndMenuBar);
+	DockPane(&m_wndStandardBar);
+	DockPane(&m_wndAnimationBar);
+	DockPaneLeftOf(&m_wndToolsBar, &m_wndAnimationBar);
+	DockPane(&m_wndPiecesBar);
 
-	// To change the resizable control bar sizes, just change the following
-	// members. If you need to change them later, don't forget to call
-	// RecalcLayout() or DelayRecalcLayout() after you set the size.
-	// You can use this technique to load/save the size of the control bar.
-//	m_wndPiecesBar.m_sizeVert = CSize(226, -1); // y size ignored (stretched)
-//	m_wndPiecesBar.m_sizeFloat = CSize(226, 270);
-	m_wndPiecesBar.SetBarStyle(m_wndPiecesBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT);
+	CDockingManager::SetDockingMode(DT_SMART);
+	EnableAutoHidePanes(CBRS_ALIGN_ANY);
 
-	DockControlBar(&m_wndStandardBar);
-	DockControlBar(&m_wndToolsBar);
-	DockControlBar(&m_wndPiecesBar, AFX_IDW_DOCKBAR_RIGHT);
-		
-	CRect rect;
-	RecalcLayout(TRUE);
-	m_wndToolsBar.GetWindowRect(&rect);
-	rect.OffsetRect(1,0);
-	DockControlBar(&m_wndAnimationBar, AFX_IDW_DOCKBAR_TOP, &rect);
+	messenger->Listen (&mainframe_listener, this);
 
-	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) == TOOLBAR_VERSION)
-		LoadBarState("Toolbars");
+	main_window->SetXID (this);
 
-	// Bitmap menus are cool !
-	CMenu* pMenu = GetMenu();
-	if (pMenu)
-		pMenu->DestroyMenu();
-	HMENU hMenu = NewMenu();
-	pMenu = CMenu::FromHandle (hMenu);
-	SetMenu (pMenu);
-	m_hMenuDefault = hMenu;
-
-	UpdateMenuAccelerators();
-
-  messenger->Listen (&mainframe_listener, this);
-
-  main_window->SetXID (this);
-
-  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
+//  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
 
 	return 0;
 }
@@ -281,7 +293,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 		cs.y = min(t, GetSystemMetrics(SM_CYSCREEN) - GetSystemMetrics(SM_CYICON));
 	}
 
-	return CFrameWnd::PreCreateWindow(cs);
+	return CFrameWndEx::PreCreateWindow(cs);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -290,18 +302,77 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 #ifdef _DEBUG
 void CMainFrame::AssertValid() const
 {
-	CFrameWnd::AssertValid();
+	CFrameWndEx::AssertValid();
 }
 
 void CMainFrame::Dump(CDumpContext& dc) const
 {
-	CFrameWnd::Dump(dc);
+	CFrameWndEx::Dump(dc);
 }
 
 #endif //_DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame message handlers
+
+void CMainFrame::OnUpdateAction(CCmdUI* pCmdUI)
+{
+	pCmdUI->SetRadio(pCmdUI->m_nID == ID_ACTION_SELECT + lcGetActiveProject()->GetAction());
+}
+
+void CMainFrame::OnUpdateSnap(CCmdUI* pCmdUI)
+{
+	Project* project = lcGetActiveProject();
+	lcuint32 Snap = project->GetSnap();
+
+	switch (pCmdUI->m_nID)
+	{
+	case ID_SNAP_SNAPX:
+		pCmdUI->SetCheck(Snap & LC_DRAW_SNAP_X ? TRUE : FALSE);
+		break;
+
+	case ID_SNAP_SNAPY:
+		pCmdUI->SetCheck(Snap & LC_DRAW_SNAP_Y ? TRUE : FALSE);
+		break;
+
+	case ID_SNAP_SNAPZ:
+		pCmdUI->SetCheck(Snap & LC_DRAW_SNAP_Z ? TRUE : FALSE);
+		break;
+
+	case ID_SNAP_SNAPNONE:
+		pCmdUI->Enable(Snap & LC_DRAW_SNAP_XYZ ? TRUE : FALSE);
+		break;
+
+	case ID_SNAP_SNAPALL:
+		pCmdUI->Enable((Snap & LC_DRAW_SNAP_XYZ) != LC_DRAW_SNAP_XYZ ? TRUE : FALSE);
+		break;
+	}
+}
+
+void CMainFrame::OnUpdateLock(CCmdUI* pCmdUI)
+{
+	Project* project = lcGetActiveProject();
+	lcuint32 Snap = project->GetSnap();
+
+	switch (pCmdUI->m_nID)
+	{
+	case ID_LOCK_LOCKX:
+		pCmdUI->SetCheck(Snap & LC_DRAW_LOCK_X ? TRUE : FALSE);
+		break;
+
+	case ID_LOCK_LOCKY:
+		pCmdUI->SetCheck(Snap & LC_DRAW_LOCK_Y ? TRUE : FALSE);
+		break;
+
+	case ID_LOCK_LOCKZ:
+		pCmdUI->SetCheck(Snap & LC_DRAW_LOCK_Z ? TRUE : FALSE);
+		break;
+
+	case ID_LOCK_UNLOCKALL:
+		pCmdUI->Enable(Snap & LC_DRAW_LOCK_XYZ ? TRUE : FALSE);
+		break;
+	}
+}
 
 // lParam = update pieces, wParam = update colors
 LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
@@ -343,40 +414,9 @@ LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 	return TRUE;
 }
 
-HMENU CMainFrame::NewMenu()
-{
-	m_bmpMenu.LoadMenu(IDR_MAINFRAME);
-	m_bmpMenu.AddFromToolBar(&m_wndStandardBar, IDR_MAINFRAME);
-
-	// The first parameter is the menu option text. If it's NULL, keep the current text
-	// The second option is the ID of the menu option, or the menu
-	// option text (use this for adding bitmaps to popup options) to change.
-	// The third option is the resource ID of the bitmap.This can also be a
-	// toolbar ID in which case the class searches the toolbar for the
-	// appropriate bitmap. Only Bitmap and Toolbar resources are supported.
-	m_bmpMenu.ModifyODMenu(NULL, ID_FILE_PROPERTIES, IDB_INFO);
-	m_bmpMenu.ModifyODMenu(NULL, ID_FILE_SAVEPICTURE, IDB_PHOTO);
-	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_DELETE, IDB_DELETE);
-	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_GROUP, IDB_GROUP);
-	m_bmpMenu.ModifyODMenu(NULL, ID_PIECE_UNGROUP, IDB_UNGROUP);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_PREFERENCES, IDB_PREFERENCES);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMOUT, IDB_ZOOMOUT);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_ZOOMIN, IDB_ZOOMIN);
-	m_bmpMenu.ModifyODMenu(NULL, ID_VIEW_FULLSCREEN, IDB_FULLSCREEN);
-	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_FINDER, IDB_HELP);
-	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_LEOCADHOMEPAGE, IDB_HOME);
-	m_bmpMenu.ModifyODMenu(NULL, ID_HELP_SENDEMAIL, IDB_MAIL);
-
-	m_bmpMenu.ModifyODMenu(NULL, _T("Cameras"), IDB_CAMERA);
-
-/*
-	m_menubar.ModifyODMenu(NULL,"Step", IDB_STEP);
-*/
-	return m_bmpMenu.Detach();
-}
-
 void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
 {
+	/*
 	if(lpMeasureItemStruct->CtlType == ODT_MENU)
 	{
 		if ((lpMeasureItemStruct->itemID == ID_SNAP_XY) || (lpMeasureItemStruct->itemID == ID_SNAP_Z))
@@ -395,45 +435,30 @@ void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStru
 			}
 		}
 	}
-
-	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
+	*/
+	CFrameWndEx::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
 }
 
 void CMainFrame::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
+	/*
 	if ((lpDrawItemStruct->itemID == ID_SNAP_XY) || (lpDrawItemStruct->itemID == ID_SNAP_Z))
 	{
 		CTitleMenu* Menu = (CTitleMenu*)lpDrawItemStruct->itemData;
 		Menu->DrawItem(lpDrawItemStruct);
 	}
-	else
+	else*/
 	{
-		CFrameWnd::OnDrawItem(nIDCtl, lpDrawItemStruct);
-	}
-}
-
-LRESULT CMainFrame::OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu) 
-{
-	if (m_bmpMenu.IsMenu(pMenu))
-		return CBMPMenu::FindKeyboardShortcut(nChar, nFlags, pMenu);
-	else
-		return CFrameWnd::OnMenuChar(nChar, nFlags, pMenu);
-}
-
-void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
-{
-	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
-
-	if(!bSysMenu)
-	{
-		if(m_bmpMenu.IsMenu(pPopupMenu))
-			CBMPMenu::UpdateMenu(pPopupMenu);
+		CFrameWndEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
 	}
 }
 
 LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
+	Object* Focus = lcGetActiveProject()->GetFocusObject();
+
 	m_wndModifyDlg.UpdateInfo((Object*)lParam);
+	m_wndProperties.Update(Focus);
 
 	char str[128];
 	Vector3 pos;
@@ -534,7 +559,7 @@ void CMainFrame::OnClose()
 
 void CMainFrame::OnSetFocus(CWnd* pOldWnd) 
 {
-	CFrameWnd::OnSetFocus(pOldWnd);
+	CFrameWndEx::OnSetFocus(pOldWnd);
 	
 	if (m_wndStatusBar.m_pPopup)
 		m_wndStatusBar.m_pPopup->DestroyWindow();
@@ -643,7 +668,7 @@ void CMainFrame::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 		lpMMI->ptMaxTrackSize.x = lpMMI->ptMaxSize.x;
 	}
 	else
-		CFrameWnd::OnGetMinMaxInfo(lpMMI);
+		CFrameWndEx::OnGetMinMaxInfo(lpMMI);
 }
 
 void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
@@ -656,7 +681,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 		rMessage += "\"";
 	}
 	else
-		CFrameWnd::GetMessageString(nID, rMessage);
+		CFrameWndEx::GetMessageString(nID, rMessage);
 }
 
 void CMainFrame::OnFilePrintPieceList() 
@@ -1050,15 +1075,15 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 		} break;
 
 		default:
-			return CFrameWnd::OnCommand(wParam, lParam);
+			return CFrameWndEx::OnCommand(wParam, lParam);
 	}
 
 	return TRUE;
 }
 
-void CMainFrame::OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask) 
+void CMainFrame::OnActivateApp(BOOL bActive, DWORD hTask) 
 {
-	CFrameWnd::OnActivateApp(bActive, hTask);
+	CFrameWndEx::OnActivateApp(bActive, hTask);
 	
 	// Don't notify if we loose focus while on print preview
 	if (m_lpfnCloseProc == NULL)
@@ -1153,6 +1178,8 @@ void CMainFrame::OnViewNewView()
 
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 {
+	return CFrameWndEx::OnCreateClient(lpcs, pContext);
+	/*
   m_wndSplitter.CreateStatic (this, 2, 1, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST);
 
   m_wndSplitter.CreateView (0, 0, RUNTIME_CLASS (CCADView), CSize (0, 1000), pContext);
@@ -1175,6 +1202,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	Edit.SetDefaultCharFormat(cf);
 
   return TRUE;
+  */
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 
@@ -1196,14 +1224,14 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 				{
 					if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(Focus))
 					{
-						return CFrameWnd::PreTranslateMessage(pMsg);
+						return CFrameWndEx::PreTranslateMessage(pMsg);
 					}
 
 					char Name[256];
 					GetClassName(Focus->m_hWnd, Name, sizeof(Name));
 					if (!strcmp(Name, "Edit"))
 					{
-						return CFrameWnd::PreTranslateMessage(pMsg);
+						return CFrameWndEx::PreTranslateMessage(pMsg);
 					}
 				}
 			}
@@ -1212,7 +1240,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			{
 				if (!Control && (((pMsg->wParam >= 'A') && (pMsg->wParam <= 'Z')) || ((pMsg->wParam >= '0') && (pMsg->wParam <= '9'))))
 				{
-					return CFrameWnd::PreTranslateMessage(pMsg);
+					return CFrameWndEx::PreTranslateMessage(pMsg);
 				}
 			}
 
@@ -1259,7 +1287,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 
-	return CFrameWnd::PreTranslateMessage(pMsg);
+	return CFrameWndEx::PreTranslateMessage(pMsg);
 }
 
 void CMainFrame::UpdateMenuAccelerators()
@@ -1371,7 +1399,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_EDIT_ACTION_ROTATE_VIEW
 		0,                         // LC_EDIT_ACTION_ROLL
 	};
-
+	/*
 	m_bmpMenu.Attach(m_hMenuDefault);
 
 	for (int i = 0; i < KeyboardShortcutsCount; i++)
@@ -1410,6 +1438,7 @@ void CMainFrame::UpdateMenuAccelerators()
 	}
 
 	m_bmpMenu.Detach();
+	*/
 }
 
 void CMainFrame::OnDropFiles(HDROP hDropInfo) 

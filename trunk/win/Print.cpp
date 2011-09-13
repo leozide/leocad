@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include "leocad.h"
+#include <WindowsX.h>
 #include "Print.h"
 #include "project.h"
 #include "pieceinf.h"
@@ -15,7 +16,7 @@
 #include "library.h"
 #include "lc_application.h"
 
-static void PrintCatalogThread (CWnd* pParent, CFrameWnd* pMainFrame)
+static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 {
 	CCADView* pView = (CCADView*)pMainFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOSELECTION|PD_ENABLEPRINTHOOK, pParent);
@@ -409,7 +410,7 @@ UINT PrintCatalogFunction (LPVOID pv)
 
 static void PrintPiecesThread(void* pv)
 {
-	CFrameWnd* pFrame = (CFrameWnd*)pv;
+	CFrameWndEx* pFrame = (CFrameWndEx*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
   PiecesLibrary *pLib = lcGetPiecesLibrary();
@@ -802,7 +803,7 @@ static void PrintPiecesThread(void* pv)
 UINT PrintPiecesFunction (LPVOID pv)
 {
 	PrintPiecesThread(pv);
-	CFrameWnd* pFrame = (CFrameWnd*)pv;
+	CFrameWndEx* pFrame = (CFrameWndEx*)pv;
 	pFrame->EnableWindow(TRUE);
 	return 0;
 }

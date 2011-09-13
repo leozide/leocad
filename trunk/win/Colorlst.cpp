@@ -124,7 +124,7 @@ void CColorsList::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 //		project->HandleCommand(LC_PIECE_INSERT, 0);
 
-		CFrameWnd* pFrame = (CFrameWnd*)AfxGetMainWnd();
+		CFrameWndEx* pFrame = (CFrameWndEx*)AfxGetMainWnd();
 		pFrame->PostMessage(WM_COMMAND, ID_PIECE_INSERT, 0);
 
 		CView* pView = pFrame->GetActiveView();

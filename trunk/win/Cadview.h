@@ -7,7 +7,6 @@
 
 class View;
 class CCADDoc;
-class CCADPreviewView;
 
 class CCADView : public CView
 {
@@ -35,7 +34,6 @@ public:
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
-	virtual void OnEndPrintPreview(CDC* pDC, CPrintInfo* pInfo, POINT point, CCADPreviewView* pView);
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
@@ -52,7 +50,6 @@ protected:
 	HCURSOR m_hCursor;
   View* m_pView;
 
-	BOOL DoPrintPreview(UINT nIDResource, CView* pPrintView, CRuntimeClass* pPreviewViewClass, CPrintPreviewState* pState);
 	void* m_pPixels;
 	//{{AFX_MSG(CCADView)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -72,8 +69,6 @@ protected:
 	afx_msg LONG OnChangeCursor(UINT lParam, LONG wParam);
 
 	DECLARE_MESSAGE_MAP()
-
-	friend class CCADPreviewView;
 };
 
 #ifndef _DEBUG  // debug version in CADView.cpp

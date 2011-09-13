@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by LeoCAD.rc
+// Microsoft Visual C++ generated include file.
+// Used by Leocad.rc
 //
 #define IDAPPLY                         3
 #define IDC_HTMDLG_IMAGEOPTIONS         3
@@ -69,10 +69,6 @@
 #define IDC_PAN_RIGHT                   168
 #define IDC_PAN_ALL                     169
 #define IDD_GROUP                       170
-#define IDB_HELP                        172
-#define IDB_HOME                        173
-#define IDB_MAIL                        174
-#define IDB_INFO                        175
 #define IDS_COLOR01                     176
 #define IDS_COLOR02                     177
 #define IDB_PARTICONS                   177
@@ -93,28 +89,20 @@
 #define IDS_COLOR12                     187
 #define IDS_COLOR13                     188
 #define IDS_COLOR14                     189
-#define IDB_ZOOMIN                      189
 #define IDS_COLOR15                     190
-#define IDB_ZOOMOUT                     190
 #define IDS_COLOR16                     191
-#define IDB_GROUP                       191
 #define IDS_COLOR17                     192
-#define IDB_UNGROUP                     192
 #define IDS_COLOR18                     193
 #define IDD_MINIFIG                     193
 #define IDR_FULLSCREEN                  193
 #define IDS_COLOR19                     194
 #define IDD_SAVEDLG_TEMPLATE            194
 #define IDS_COLOR20                     195
-#define IDB_FULLSCREEN                  195
 #define IDS_COLOR21                     196
 #define IDS_COLOR22                     197
-#define IDB_PHOTO                       197
 #define IDS_COLOR23                     198
 #define IDD_EXPORTPOV                   198
-#define IDB_DELETE                      198
 #define IDS_COLOR24                     199
-#define IDB_PREFERENCES                 199
 #define IDD_SAVEPICTUREDLG_TEMPLATE     199
 #define IDS_COLOR25                     200
 #define IDS_COLOR26                     201
@@ -140,6 +128,7 @@
 #define IDD_CATEGORY                    237
 #define IDC_ROTX                        238
 #define IDC_ROTY                        239
+#define IDR_INVISIBLE                   240
 #define IDC_SELDLG_LIST                 1000
 #define IDC_SELDLG_ALL                  1001
 #define IDC_SELDLG_NONE                 1002
@@ -690,8 +679,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        240
-#define _APS_NEXT_COMMAND_VALUE         33169
+#define _APS_NEXT_RESOURCE_VALUE        242
+#define _APS_NEXT_COMMAND_VALUE         33171
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

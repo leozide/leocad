@@ -829,7 +829,7 @@ void CColorPopup::OnKillFocus(CWnd* pNewWnd)
 }
 
 // KillFocus problem fix suggested by Paul Wilkerson.
-void CColorPopup::OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask) 
+void CColorPopup::OnActivateApp(BOOL bActive, DWORD hTask) 
 {
 	CWnd::OnActivateApp(bActive, hTask);
 

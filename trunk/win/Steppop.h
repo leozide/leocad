@@ -38,7 +38,7 @@ protected:
 	//{{AFX_MSG(CStepPopup)
 	afx_msg void OnNcDestroy();
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
-	afx_msg void OnActivateApp(BOOL bActive, ACTIVATEAPPPARAM hTask);
+	afx_msg void OnActivateApp(BOOL bActive, DWORD hTask);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	//}}AFX_MSG
 

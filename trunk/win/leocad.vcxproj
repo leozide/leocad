@@ -1,0 +1,516 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1B733132-1205-4908-8DB4-60AFFD5B2345}</ProjectGuid>
+    <RootNamespace>LeoCAD</RootNamespace>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;LC_WINDOWS;LC_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../common;../win</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>wininet.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>jpeglib\debug;libpng\debug;zlib\debug;3dsftk\debug</AdditionalLibraryDirectories>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;LC_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../common;../win</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>wininet.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>jpeglib\release;libpng\release;zlib\release;3dsftk\release</AdditionalLibraryDirectories>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Aboutdlg.cpp" />
+    <ClCompile Include="..\common\array.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Arraydlg.cpp" />
+    <ClCompile Include="Barcmdui.cpp" />
+    <ClCompile Include="basewnd.cpp" />
+    <ClCompile Include="Bmpmenu.cpp" />
+    <ClCompile Include="Cadbar.cpp" />
+    <ClCompile Include="Caddoc.cpp" />
+    <ClCompile Include="Cadview.cpp" />
+    <ClCompile Include="categdlg.cpp" />
+    <ClCompile Include="Clrpick.cpp" />
+    <ClCompile Include="Clrpopup.cpp" />
+    <ClCompile Include="Colorlst.cpp" />
+    <ClCompile Include="Disabtab.cpp" />
+    <ClCompile Include="EdGrpDlg.cpp" />
+    <ClCompile Include="Figdlg.cpp" />
+    <ClCompile Include="glwindow.cpp" />
+    <ClCompile Include="Groupdlg.cpp" />
+    <ClCompile Include="GrpTree.cpp" />
+    <ClCompile Include="Htmldlg.cpp" />
+    <ClCompile Include="Imagedlg.cpp" />
+    <ClCompile Include="Ipedit.cpp" />
+    <ClCompile Include="keyedit.cpp" />
+    <ClCompile Include="Leocad.cpp" />
+    <ClCompile Include="Libdlg.cpp" />
+    <ClCompile Include="Mainfrm.cpp" />
+    <ClCompile Include="Moddlg.cpp" />
+    <ClCompile Include="Piecebar.cpp" />
+    <ClCompile Include="Piececmb.cpp" />
+    <ClCompile Include="Pieceprv.cpp" />
+    <ClCompile Include="Povdlg.cpp" />
+    <ClCompile Include="Prefpage.cpp" />
+    <ClCompile Include="Prefsht.cpp" />
+    <ClCompile Include="Print.cpp" />
+    <ClCompile Include="Progdlg.cpp" />
+    <ClCompile Include="propertiespane.cpp" />
+    <ClCompile Include="Propspgs.cpp" />
+    <ClCompile Include="Propssht.cpp" />
+    <ClCompile Include="Rmodel.cpp" />
+    <ClCompile Include="Seldlg.cpp" />
+    <ClCompile Include="Splitter.cpp" />
+    <ClCompile Include="Stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Stepdlg.cpp" />
+    <ClCompile Include="Steppop.cpp" />
+    <ClCompile Include="system.cpp" />
+    <ClCompile Include="Teropdlg.cpp" />
+    <ClCompile Include="Terrctrl.cpp" />
+    <ClCompile Include="Terrdlg.cpp" />
+    <ClCompile Include="Terrwnd.cpp" />
+    <ClCompile Include="texdlg.cpp" />
+    <ClCompile Include="Tools.cpp" />
+    <ClCompile Include="transdlg.cpp" />
+    <ClCompile Include="Wheelwnd.cpp" />
+    <ClCompile Include="win_gl.cpp" />
+    <ClCompile Include="..\common\algebra.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\camera.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\console.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\curve.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\debug.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\file.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\globals.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\group.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\im_bmp.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\im_gif.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\im_jpg.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\im_png.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./libpng;./zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./libpng;./zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\image.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\keyboard.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\lc_application.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\library.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\light.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\mainwnd.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\matrix.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\message.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\minifig.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\object.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\opengl.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\piece.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\pieceinf.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\preview.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\project.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\quant.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\str.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\terrain.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\texfont.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\texture.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\Tr.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\vector.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\common\view.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="hlp\LeoCAD.hpj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Making help file...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call "$(ProjectDir)makehelp.bat"
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)hlp\AfxCore.rtf;$(ProjectDir)hlp\AfxPrint.rtf;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(TargetName).hlp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <None Include="res\Angle.cur" />
+    <None Include="res\animator.bmp" />
+    <None Include="res\autopan.bmp" />
+    <None Include="res\bitmap1.bmp" />
+    <None Include="res\bitmap2.bmp" />
+    <None Include="res\Brick.cur" />
+    <None Include="res\bulb.cur" />
+    <None Include="res\CADDoc.ico" />
+    <None Include="res\camera.bmp" />
+    <None Include="res\Camera.cur" />
+    <None Include="res\cur00001.cur" />
+    <None Include="res\cur00002.cur" />
+    <None Include="res\cur00003.cur" />
+    <None Include="res\cursor1.cur" />
+    <None Include="res\delete.bmp" />
+    <None Include="res\editor.bmp" />
+    <None Include="res\Eraser.cur" />
+    <None Include="res\fullscr.bmp" />
+    <None Include="res\fullscre.bmp" />
+    <None Include="res\group.bmp" />
+    <None Include="res\help.bmp" />
+    <None Include="res\home.bmp" />
+    <None Include="res\idr_main.ico" />
+    <None Include="res\idr_part.ico" />
+    <None Include="res\info.bmp" />
+    <None Include="res\invisible.bmp" />
+    <None Include="res\IToolbar.bmp" />
+    <None Include="res\LeoCAD.ico" />
+    <None Include="res\LeoCAD.rc2" />
+    <None Include="res\library.bmp" />
+    <None Include="res\light.bmp" />
+    <None Include="res\Light.cur" />
+    <None Include="res\mail.bmp" />
+    <None Include="res\Move.cur" />
+    <None Include="res\Paint.cur" />
+    <None Include="res\Pan.cur" />
+    <None Include="res\pan_ne.cur" />
+    <None Include="res\pan_nw.cur" />
+    <None Include="res\pan_se.cur" />
+    <None Include="res\pan_sw.cur" />
+    <None Include="res\panall.cur" />
+    <None Include="res\pandown.cur" />
+    <None Include="res\panleft.cur" />
+    <None Include="res\panright.cur" />
+    <None Include="res\panup.cur" />
+    <None Include="res\particon.bmp" />
+    <None Include="res\photo.bmp" />
+    <None Include="res\piece.bmp" />
+    <None Include="res\piecebar.bmp" />
+    <None Include="res\pieceed.bmp" />
+    <None Include="res\preferen.bmp" />
+    <None Include="res\preview.bmp" />
+    <None Include="Resource.hm" />
+    <None Include="res\roll.cur" />
+    <None Include="res\Rotate.cur" />
+    <None Include="res\rotx.cur" />
+    <None Include="res\roty.cur" />
+    <None Include="res\SelctGrp.cur" />
+    <None Include="res\select.cur" />
+    <None Include="res\split.cur" />
+    <None Include="res\terrain.bmp" />
+    <None Include="res\Toolbar.bmp" />
+    <None Include="res\toolsbar.bmp" />
+    <None Include="res\ungroup.bmp" />
+    <None Include="res\views.bmp" />
+    <None Include="res\Zoom.cur" />
+    <None Include="res\zoomin.bmp" />
+    <None Include="res\zoomout.bmp" />
+    <None Include="res\Zoomrect.cur" />
+    <None Include="hlp\AfxCore.rtf" />
+    <None Include="hlp\AfxPrint.rtf" />
+    <None Include="hlp\AppExit.bmp" />
+    <None Include="hlp\Bullet.bmp" />
+    <None Include="hlp\CurArw2.bmp" />
+    <None Include="hlp\CurArw4.bmp" />
+    <None Include="hlp\CurHelp.bmp" />
+    <None Include="hlp\EditCopy.bmp" />
+    <None Include="hlp\EditCut.bmp" />
+    <None Include="hlp\EditPast.bmp" />
+    <None Include="hlp\EditUndo.bmp" />
+    <None Include="hlp\FileNew.bmp" />
+    <None Include="hlp\FileOpen.bmp" />
+    <None Include="hlp\FilePrnt.bmp" />
+    <None Include="hlp\FileSave.bmp" />
+    <None Include="hlp\HlpSBar.bmp" />
+    <None Include="hlp\HlpTBar.bmp" />
+    <None Include="hlp\LeoCAD.cnt" />
+    <None Include="MakeHelp.bat" />
+    <None Include="hlp\RecFirst.bmp" />
+    <None Include="hlp\RecLast.bmp" />
+    <None Include="hlp\RecNext.bmp" />
+    <None Include="hlp\RecPrev.bmp" />
+    <None Include="hlp\Scmax.bmp" />
+    <None Include="hlp\ScMenu.bmp" />
+    <None Include="hlp\Scmin.bmp" />
+    <None Include="..\docs\CHANGES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Leocad.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutDlg.h" />
+    <ClInclude Include="ArrayDlg.h" />
+    <ClInclude Include="Barcmdui.h" />
+    <ClInclude Include="Bmpmenu.h" />
+    <ClInclude Include="CADBar.h" />
+    <ClInclude Include="CADDoc.h" />
+    <ClInclude Include="CADView.h" />
+    <ClInclude Include="categdlg.h" />
+    <ClInclude Include="Clrpick.h" />
+    <ClInclude Include="Clrpopup.h" />
+    <ClInclude Include="ColorLst.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="Disabtab.h" />
+    <ClInclude Include="EdGrpDlg.h" />
+    <ClInclude Include="Figdlg.h" />
+    <ClInclude Include="GroupDlg.h" />
+    <ClInclude Include="GrpTree.h" />
+    <ClInclude Include="HTMLDlg.h" />
+    <ClInclude Include="ImageDlg.h" />
+    <ClInclude Include="Ipedit.h" />
+    <ClInclude Include="keyedit.h" />
+    <ClInclude Include="LeoCAD.h" />
+    <ClInclude Include="LibDlg.h" />
+    <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="ModDlg.h" />
+    <ClInclude Include="Piecebar.h" />
+    <ClInclude Include="PieceCmb.h" />
+    <ClInclude Include="PiecePrv.h" />
+    <ClInclude Include="Povdlg.h" />
+    <ClInclude Include="PrefPage.h" />
+    <ClInclude Include="PrefSht.h" />
+    <ClInclude Include="Print.h" />
+    <ClInclude Include="ProgDlg.h" />
+    <ClInclude Include="propertiespane.h" />
+    <ClInclude Include="PropsPgs.h" />
+    <ClInclude Include="PropsSht.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="RModel.h" />
+    <ClInclude Include="SelDlg.h" />
+    <ClInclude Include="Splitter.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="StepDlg.h" />
+    <ClInclude Include="StepPop.h" />
+    <ClInclude Include="TerOpDlg.h" />
+    <ClInclude Include="Terrctrl.h" />
+    <ClInclude Include="TerrDlg.h" />
+    <ClInclude Include="Terrwnd.h" />
+    <ClInclude Include="texdlg.h" />
+    <ClInclude Include="Tools.h" />
+    <ClInclude Include="transdlg.h" />
+    <ClInclude Include="WheelWnd.h" />
+    <ClInclude Include="win_gl.h" />
+    <ClInclude Include="..\common\array.h" />
+    <ClInclude Include="..\common\basewnd.h" />
+    <ClInclude Include="..\Common\camera.h" />
+    <ClInclude Include="..\common\console.h" />
+    <ClInclude Include="..\common\curve.h" />
+    <ClInclude Include="..\Common\defines.h" />
+    <ClInclude Include="..\Common\file.h" />
+    <ClInclude Include="..\Common\globals.h" />
+    <ClInclude Include="..\common\glwindow.h" />
+    <ClInclude Include="..\Common\group.h" />
+    <ClInclude Include="..\Common\image.h" />
+    <ClInclude Include="..\common\keyboard.h" />
+    <ClInclude Include="..\common\lc_application.h" />
+    <ClInclude Include="..\common\library.h" />
+    <ClInclude Include="..\Common\light.h" />
+    <ClInclude Include="..\common\mainwnd.h" />
+    <ClInclude Include="..\Common\matrix.h" />
+    <ClInclude Include="..\common\message.h" />
+    <ClInclude Include="..\common\minifig.h" />
+    <ClInclude Include="..\common\object.h" />
+    <ClInclude Include="..\common\opengl.h" />
+    <ClInclude Include="..\Common\piece.h" />
+    <ClInclude Include="..\Common\pieceinf.h" />
+    <ClInclude Include="..\common\preview.h" />
+    <ClInclude Include="..\Common\project.h" />
+    <ClInclude Include="..\Common\quant.h" />
+    <ClInclude Include="..\common\str.h" />
+    <ClInclude Include="..\common\system.h" />
+    <ClInclude Include="..\Common\terrain.h" />
+    <ClInclude Include="..\common\texfont.h" />
+    <ClInclude Include="..\Common\texture.h" />
+    <ClInclude Include="..\Common\Tr.h" />
+    <ClInclude Include="..\Common\typedefs.h" />
+    <ClInclude Include="..\Common\vector.h" />
+    <ClInclude Include="..\common\view.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Leocad.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

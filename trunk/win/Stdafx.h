@@ -1,33 +1,33 @@
 // stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
-//
+// or project specific include files that are used frequently,
+// but are changed infrequently
 
-#if !defined(AFX_STDAFX_H__195E1F4C_3FF2_11D2_8202_D2B1707B2D1B__INCLUDED_)
-#define AFX_STDAFX_H__195E1F4C_3FF2_11D2_8202_D2B1707B2D1B__INCLUDED_
-
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
 
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#ifndef _SECURE_ATL
+#define _SECURE_ATL 1
+#endif
 
-#include <windowsx.h>		// GlobalFreePtr()
+#ifndef VC_EXTRALEAN
+#define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
+#endif
+
+#define _WIN32_WINNT 0x500
+#define _CRT_SECURE_NO_WARNINGS
+
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // some CString constructors will be explicit
+
+// turns off MFC's hiding of some common and often safely ignored warning messages
+#define _AFX_ALL_WARNINGS
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 
 #ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>			// MFC support for Windows Common Controls
+#include <afxcmn.h>             // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
-#if _MFC_VER >= 0x0710
-typedef DWORD ACTIVATEAPPPARAM;
-#else
-typedef HTASK ACTIVATEAPPPARAM;
-#endif
-
-//#include <afxadv.h>			// CSharedFile
+#include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
 #include "opengl.h"
 
@@ -59,8 +59,3 @@ typedef HTASK ACTIVATEAPPPARAM;
 //#define PIECEBAR_ZOOMPREVIEW  0x08 // Zoom piece preview
 //#define PIECEBAR_COMBO        0x10 // Show combobox
 #define PIECEBAR_PARTNUMBERS  0x20 // Show part numbers
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_STDAFX_H__195E1F4C_3FF2_11D2_8202_D2B1707B2D1B__INCLUDED_)

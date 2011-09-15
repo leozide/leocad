@@ -256,6 +256,8 @@ BOOL FolderBrowse(CString *strFolder, LPCSTR lpszTitle, HWND hWndOwner)
 	return FALSE;
 } 
 
+#ifdef LC_HAVE_3DSFTK
+
 #include "3dsftk\inc\3dsftk.h"
 #include "globals.h"
 #include "project.h"
@@ -802,3 +804,11 @@ void Export3DStudio()
 	CloseFile3ds(file);
 	ReleaseDatabase3ds(&db);
 }
+
+#else
+
+void Export3DStudio() 
+{
+}
+
+#endif

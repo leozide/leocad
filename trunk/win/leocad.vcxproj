@@ -114,6 +114,7 @@
     <ClCompile Include="Clrpopup.cpp" />
     <ClCompile Include="Colorlst.cpp" />
     <ClCompile Include="Disabtab.cpp" />
+    <ClCompile Include="dynsplit.cpp" />
     <ClCompile Include="EdGrpDlg.cpp" />
     <ClCompile Include="Figdlg.cpp" />
     <ClCompile Include="glwindow.cpp" />
@@ -426,6 +427,7 @@
     <ClInclude Include="ColorLst.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Disabtab.h" />
+    <ClInclude Include="dynsplit.h" />
     <ClInclude Include="EdGrpDlg.h" />
     <ClInclude Include="Figdlg.h" />
     <ClInclude Include="GroupDlg.h" />

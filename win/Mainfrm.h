@@ -15,6 +15,7 @@
 #include "propertiespane.h"
 
 class MainWnd;
+class CDynamicSplitterWnd;
 
 class CMFCToolBarNoUpdate : public CMFCToolBar
 {
@@ -45,7 +46,6 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -64,7 +64,8 @@ public:
 	CMFCToolBarNoUpdate m_wndAnimationBar;
 	CMFCToolBar m_wndInvisibleToolBar;
 	CPiecesBar m_wndPiecesBar;
-	CSplitterWnd m_wndSplitter;
+
+	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;
 
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
@@ -111,6 +112,11 @@ protected:
 	afx_msg LONG OnAddString(UINT lParam, LONG wParam);
 	afx_msg LONG OnUpdateInfo(UINT lParam, LONG wParam);
 	afx_msg LONG UpdateSettings(UINT lParam, LONG wParam);
+
+	afx_msg void OnViewSplitVertically();
+	afx_msg void OnViewSplitHorizontally();
+	afx_msg void OnViewDeleteView();
+	afx_msg void OnViewResetViews();
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -313,6 +313,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
         MENUITEM "New View",                    ID_VIEW_NEWVIEW
+        MENUITEM "ID_VIEW_SPLITVERTICALLY",     33171
+        MENUITEM "ID_VIEW_SPLITHORIZONTALLY",   33172
+        MENUITEM "ID_VIEW_DELETEVIEW",          33173
+        MENUITEM "ID_VIEW_RESETVIEWS",          33174
     END
     POPUP "&Piece"
     BEGIN

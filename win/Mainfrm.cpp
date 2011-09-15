@@ -101,7 +101,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_GETMINMAXINFO()
 	ON_COMMAND(ID_FILE_PRINTPIECELIST, OnFilePrintPieceList)
 	ON_WM_ACTIVATEAPP()
-	ON_COMMAND(ID_VIEW_NEWVIEW, OnViewNewView)
 	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
 	ON_WM_DROPFILES()
 	//}}AFX_MSG_MAP
@@ -150,6 +149,8 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
+		delete m_SplitterList[i];
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -305,6 +306,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 // CMainFrame diagnostics
 
 #ifdef _DEBUG
+
 void CMainFrame::AssertValid() const
 {
 	CFrameWndEx::AssertValid();
@@ -1142,43 +1144,6 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	m_nIDLastMessage = (UINT)wParam;    // new ID (or 0)
 	m_nIDTracking = (UINT)wParam;       // so F1 on toolbar buttons work
 	return nIDLast;
-}
-
-#include "view.h"
-LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-void CMainFrame::OnViewNewView() 
-{
-	HINSTANCE hInst = AfxGetInstanceHandle();
-	WNDCLASS wndcls;
-
-#define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
-#define FLOATING_CLASSNAME _T("LeoCADFloatingOpenGLClass")
-
-  // check if our class is registered
-	if(!(GetClassInfo (hInst, FLOATING_CLASSNAME, &wndcls)))
-	{
-  	if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
-	  {
-      // set our class name
-	  	wndcls.lpszClassName = FLOATING_CLASSNAME;
-      wndcls.lpfnWndProc = GLWindowProc;
-      wndcls.hIcon = LoadIcon (hInst, MAKEINTRESOURCE (IDR_MAINFRAME));
-
-  		// register class
-	  	if (!AfxRegisterClass (&wndcls))
-		  	AfxThrowResourceException();
-  	}
-		else
-			AfxThrowResourceException();
-  }
-
-  View *view = new View (lcGetActiveProject(), NULL);
-
-  CreateWindowEx (0, FLOATING_CLASSNAME, "LeoCAD",
-    WS_VISIBLE | WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
-    m_hWnd, (HMENU)0, hInst, view);
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 

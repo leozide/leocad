@@ -1,13 +1,5 @@
-// MainFrm.h : interface of the CMainFrame class
-//
-/////////////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_MAINFRM_H__195E1F4E_3FF2_11D2_8202_D2B1707B2D1B__INCLUDED_)
-#define AFX_MAINFRM_H__195E1F4E_3FF2_11D2_8202_D2B1707B2D1B__INCLUDED_
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
+#ifndef _MAINFRM_H_
+#define _MAINFRM_H_
 
 #include "PieceBar.h"
 #include "CADBar.h"
@@ -93,7 +85,6 @@ protected:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	afx_msg void OnFilePrintPieceList();
 	afx_msg void OnActivateApp(BOOL bActive, DWORD hTask);
-	afx_msg void OnViewNewView();
 	afx_msg LRESULT OnSetMessageString(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	//}}AFX_MSG
@@ -121,9 +112,4 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MAINFRM_H__195E1F4E_3FF2_11D2_8202_D2B1707B2D1B__INCLUDED_)
+#endif // _MAINFRM_H_

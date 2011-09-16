@@ -125,9 +125,10 @@ public:
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
-	void AddView (View* pView);
-	void RemoveView (View* pView);
-	void UpdateAllViews (View* pSender = NULL);
+	void AddView(View* view);
+	void RemoveView(View* view);
+	void UpdateAllViews();
+	void SetActiveView(View* view);
 
 // Implementation
 protected:
@@ -136,6 +137,7 @@ protected:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;    // changed since last saved
 
+	View* m_ActiveView;
 	PtrArray<View> m_ViewList;
 
 	char m_strAuthor[101];

@@ -87,6 +87,7 @@ Project::Project()
 {
 	int i;
 
+	m_ActiveView = NULL;
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
@@ -97,7 +98,7 @@ Project::Project()
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	m_nGridList = 0;
-  m_pTrackFile = NULL;
+	m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
 	m_pTerrain = new Terrain();
@@ -1551,22 +1552,46 @@ void Project::CheckPoint (const char* text)
 
 void Project::AddView (View* pView)
 {
-  m_ViewList.Add (pView);
+	m_ViewList.Add (pView);
 
-  pView->MakeCurrent ();
-  RenderInitialize ();
+	pView->MakeCurrent ();
+	RenderInitialize ();
 }
 
 void Project::RemoveView (View* pView)
 {
-  m_ViewList.RemovePointer (pView);
+	if (pView == m_ActiveView)
+		m_ActiveView = NULL;
+
+	m_ViewList.RemovePointer(pView);
 }
 
-void Project::UpdateAllViews (View* pSender)
+void Project::UpdateAllViews()
 {
-  for (int i = 0; i < m_ViewList.GetSize (); i++)
-    if (m_ViewList[i] != pSender)
-      m_ViewList[i]->Redraw ();
+	for (int i = 0; i < m_ViewList.GetSize (); i++)
+		m_ViewList[i]->Redraw ();
+}
+
+void Project::SetActiveView(View* view)
+{
+	if (view == m_ActiveView)
+		return;
+
+//	Camera* OldCamera = NULL;
+	View* OldView = m_ActiveView;
+	m_ActiveView = view;
+
+	if (OldView)
+	{
+		OldView->Redraw();
+//		OldCamera = OldView->GetCamera();
+	}
+
+	if (view)
+	{
+		view->Redraw();
+//		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

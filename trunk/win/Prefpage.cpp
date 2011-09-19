@@ -130,16 +130,11 @@ CPreferencesDetail::CPreferencesDetail() : CPropertyPage(CPreferencesDetail::IDD
 {
 	//{{AFX_DATA_INIT(CPreferencesDetail)
 	m_bAntialiasing = FALSE;
-	m_bDithering = FALSE;
 	m_bEdges = FALSE;
 	m_bLighting = FALSE;
-	m_bLinear = FALSE;
 	m_bSmooth = FALSE;
 	m_fLineWidth = 0.0f;
-	m_bBackground = FALSE;
 	m_bFast = FALSE;
-	m_bHidden = FALSE;
-	m_bSolid = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -152,49 +147,29 @@ void CPreferencesDetail::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPreferencesDetail)
 	DDX_Check(pDX, IDC_DETDLG_ANTIALIAS, m_bAntialiasing);
-	DDX_Check(pDX, IDC_DETDLG_DITHER, m_bDithering);
 	DDX_Check(pDX, IDC_DETDLG_EDGES, m_bEdges);
 	DDX_Check(pDX, IDC_DETDLG_LIGHTING, m_bLighting);
-	DDX_Check(pDX, IDC_DETDLG_LINEAR, m_bLinear);
 	DDX_Check(pDX, IDC_DETDLG_SMOOTH, m_bSmooth);
 	DDX_Text(pDX, IDC_DETDLG_LINE, m_fLineWidth);
 	DDV_MinMaxFloat(pDX, m_fLineWidth, 0.f, 10.f);
-	DDX_Check(pDX, IDC_DETDLG_BACKGROUND, m_bBackground);
 	DDX_Check(pDX, IDC_DETDLG_FAST, m_bFast);
-	DDX_Check(pDX, IDC_DETDLG_HIDDEN, m_bHidden);
-	DDX_Check(pDX, IDC_DETDLG_SOLID, m_bSolid);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CPreferencesDetail, CPropertyPage)
 	//{{AFX_MSG_MAP(CPreferencesDetail)
-	ON_BN_CLICKED(IDC_DETDLG_FAST, OnFastClick)
-	ON_BN_CLICKED(IDC_DETDLG_SOLID, OnDetdlgSolid)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
-BOOL CPreferencesDetail::OnInitDialog() 
-{
-	CPropertyPage::OnInitDialog();
-	OnFastClick();
-	OnDetdlgSolid();
-	return TRUE;
-}
-
 void CPreferencesDetail::SetOptions(DWORD dwDetail, float fLine)
 {
 	m_bAntialiasing = (dwDetail & LC_DET_ANTIALIAS) != 0;
-	m_bDithering = (dwDetail & LC_DET_DITHER) != 0;
 	m_bEdges = (dwDetail & LC_DET_BRICKEDGES) != 0;
 	m_bLighting = (dwDetail & LC_DET_LIGHTING) != 0;
-	m_bLinear =	(dwDetail & LC_DET_LINEAR) != 0;
 	m_bSmooth =	(dwDetail & LC_DET_SMOOTH) != 0;
-	m_bBackground = (dwDetail & LC_DET_BACKGROUND) != 0;
 	m_bFast = (dwDetail & LC_DET_FAST) != 0;
-	m_bHidden = (dwDetail & LC_DET_HIDDEN_LINE) != 0;
-	m_bSolid = (dwDetail & LC_DET_BOX_FILL) != 0;
 	m_fLineWidth = fLine;
 }
 
@@ -202,35 +177,11 @@ void CPreferencesDetail::GetOptions(DWORD* dwDetail, float* fLine)
 {
 	*dwDetail = 0;
 	if (m_bAntialiasing) *dwDetail |= LC_DET_ANTIALIAS;
-	if (m_bDithering) *dwDetail |= LC_DET_DITHER;
 	if (m_bEdges) *dwDetail |= LC_DET_BRICKEDGES;
 	if (m_bLighting) *dwDetail |= LC_DET_LIGHTING;
-	if (m_bLinear) *dwDetail |= LC_DET_LINEAR;
 	if (m_bSmooth) *dwDetail |= LC_DET_SMOOTH;
-	if (m_bBackground) *dwDetail |= LC_DET_BACKGROUND;
 	if (m_bFast) *dwDetail |= LC_DET_FAST;
-	if (m_bHidden) *dwDetail |= LC_DET_HIDDEN_LINE;
-	if (m_bSolid) *dwDetail |= LC_DET_BOX_FILL;
 	*fLine = m_fLineWidth;
-}
-
-void CPreferencesDetail::OnFastClick() 
-{
-	UpdateData (TRUE);
-	if (m_bFast)
-		GetDlgItem (IDC_DETDLG_BACKGROUND)->EnableWindow(TRUE);
-	else
-	{
-		m_bBackground = FALSE;
-		UpdateData(FALSE);
-		GetDlgItem (IDC_DETDLG_BACKGROUND)->EnableWindow(FALSE);
-	}
-}
-
-void CPreferencesDetail::OnDetdlgSolid() 
-{
-	UpdateData (TRUE);
-	GetDlgItem (IDC_DETDLG_HIDDEN)->EnableWindow(!m_bSolid);
 }
 
 /////////////////////////////////////////////////////////////////////////////

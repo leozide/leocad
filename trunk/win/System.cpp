@@ -441,12 +441,14 @@ void SystemInit()
 // Viewport menu.
 void SystemUpdateViewport(int nNew, int nOld)
 {
+	/*
 	CMenu* pMenu = GetMainMenu(2);
 	if (!pMenu)
 		return;
 	pMenu = pMenu->GetSubMenu(13);
 	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
 	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
+	*/
 }
 
 static void CheckToolBarButton(CMFCToolBar& ToolBar, int ID, bool Check)
@@ -497,7 +499,7 @@ void SystemUpdateColorList(int nNew)
 	pFrame->PostMessage (WM_LC_UPDATE_LIST, 0, nNew+1);
 }
 
-void SystemUpdateRenderingMode(bool bBackground, bool bFast)
+void SystemUpdateRenderingMode(bool bFast)
 {
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
 	if (!pFrame)
@@ -863,6 +865,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
+	/*
 	CMenu* Menu = GetMainMenu(2);
 	if (!Menu)
 		return;
@@ -886,6 +889,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 			SetMenuItemBitmaps(pMainMenu->m_hMenu, i + ID_CAMERA_FIRST, MF_BYCOMMAND, NULL, hbmMenuDot);
 		}
 	}
+	*/
 }
 
 // Update the list of cameras

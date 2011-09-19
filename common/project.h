@@ -232,13 +232,13 @@ protected:
 	void RemoveEmptyGroups();
 
 public:
-	// Call this functions from each OS
-	void OnLeftButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnMouseMove(int x, int y, bool bControl, bool bShift);
+	// Call these functions from each OS
+	void OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift);
+	void OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);
 	bool OnKeyDown(char nKey, bool bControl, bool bShift);
 
 	void SetAction(int nAction);

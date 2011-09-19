@@ -140,13 +140,13 @@ int stricmp(const char* str1, const char* str2);
 //	#define	DET_WIREFRAME	0x00040	// Wireframe
 #define	LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing
 #define LC_DET_BRICKEDGES	0x00100	// Draw lines
-#define LC_DET_DITHER		0x00200	// Enable dithering
-#define LC_DET_BOX_FILL		0x00400	// Filled boxes
-#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
+//#define LC_DET_DITHER		0x00200	// Enable dithering
+//#define LC_DET_BOX_FILL		0x00400	// Filled boxes
+//#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
 //	#define	DET_STUDS_BOX	0x01000	// Draw studs as boxes
-#define LC_DET_LINEAR		0x02000	// Linear filtering
+//#define LC_DET_LINEAR		0x02000	// Linear filtering
 #define LC_DET_FAST			0x04000	// Fast rendering (boxes)
-#define LC_DET_BACKGROUND	0x08000	// Background rendering
+//#define LC_DET_BACKGROUND	0x08000	// Background rendering
 //#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
 
 #define LC_DRAW_AXIS           0x0001 // Orientation icon

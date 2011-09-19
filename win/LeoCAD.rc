@@ -200,6 +200,8 @@ BEGIN
     BUTTON      ID_VIEW_PREFERENCES
     BUTTON      ID_VIEW_ZOOMIN
     BUTTON      ID_VIEW_ZOOMOUT
+    BUTTON      ID_VIEW_SPLITVERTICALLY
+    BUTTON      ID_VIEW_SPLITHORIZONTALLY
     BUTTON      ID_PIECE_DELETE
     BUTTON      ID_PIECE_GROUP
     BUTTON      ID_PIECE_UNGROUP
@@ -267,33 +269,9 @@ BEGIN
     BEGIN
         MENUITEM "P&references...",             ID_VIEW_PREFERENCES
         MENUITEM SEPARATOR
-        MENUITEM "&Standard",                   ID_VIEW_TOOLBAR
-        MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
-        MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
-        MENUITEM "Pie&ces",                     ID_VIEW_PIECES_BAR
-        MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
-        MENUITEM "S&tatus Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM SEPARATOR
         MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
         MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
         MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
-        POPUP "&Viewports"
-        BEGIN
-            MENUITEM "01",                          ID_VIEWPORT01
-            MENUITEM "02",                          ID_VIEWPORT02
-            MENUITEM "03",                          ID_VIEWPORT03
-            MENUITEM "04",                          ID_VIEWPORT04
-            MENUITEM "05",                          ID_VIEWPORT05
-            MENUITEM "06",                          ID_VIEWPORT06
-            MENUITEM "07",                          ID_VIEWPORT07
-            MENUITEM "08",                          ID_VIEWPORT08, MENUBARBREAK
-            MENUITEM "09",                          ID_VIEWPORT09
-            MENUITEM "10",                          ID_VIEWPORT10
-            MENUITEM "11",                          ID_VIEWPORT11
-            MENUITEM "12",                          ID_VIEWPORT12
-            MENUITEM "13",                          ID_VIEWPORT13
-            MENUITEM "14",                          ID_VIEWPORT14
-        END
         POPUP "C&ameras"
         BEGIN
             MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
@@ -311,12 +289,38 @@ BEGIN
             MENUITEM "&Delete",                     ID_VIEW_STEP_DELETE
         END
         MENUITEM SEPARATOR
+        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
+        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
+        MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
+        MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
+        POPUP "&Viewports"
+        BEGIN
+            MENUITEM "01",                          ID_VIEWPORT01
+            MENUITEM "02",                          ID_VIEWPORT02
+            MENUITEM "03",                          ID_VIEWPORT03
+            MENUITEM "04",                          ID_VIEWPORT04
+            MENUITEM "05",                          ID_VIEWPORT05
+            MENUITEM "06",                          ID_VIEWPORT06
+            MENUITEM "07",                          ID_VIEWPORT07
+            MENUITEM "08",                          ID_VIEWPORT08, MENUBARBREAK
+            MENUITEM "09",                          ID_VIEWPORT09
+            MENUITEM "10",                          ID_VIEWPORT10
+            MENUITEM "11",                          ID_VIEWPORT11
+            MENUITEM "12",                          ID_VIEWPORT12
+            MENUITEM "13",                          ID_VIEWPORT13
+            MENUITEM "14",                          ID_VIEWPORT14
+        END
+        MENUITEM SEPARATOR
+        POPUP "Toolbars"
+        BEGIN
+            MENUITEM "&Standard",                   ID_VIEW_TOOLBAR
+            MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
+            MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
+            MENUITEM "Pie&ces",                     ID_VIEW_PIECES_BAR
+            MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
+            MENUITEM "S&tatus Bar",                 ID_VIEW_STATUS_BAR
+        END
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
-        MENUITEM "New View",                    ID_VIEW_NEWVIEW
-        MENUITEM "ID_VIEW_SPLITVERTICALLY",     33171
-        MENUITEM "ID_VIEW_SPLITHORIZONTALLY",   33172
-        MENUITEM "ID_VIEW_DELETEVIEW",          33173
-        MENUITEM "ID_VIEW_RESETVIEWS",          33174
     END
     POPUP "&Piece"
     BEGIN
@@ -395,6 +399,11 @@ BEGIN
         BEGIN
             MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
         END
+        MENUITEM SEPARATOR
+        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
+        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
+        MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
+        MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
     END
     POPUP "2"
     BEGIN
@@ -474,28 +483,6 @@ BEGIN
         MENUITEM "Lock Y",                      ID_LOCK_LOCKY
         MENUITEM "Lock Z",                      ID_LOCK_LOCKZ
         MENUITEM "Unlock All",                  ID_LOCK_UNLOCKALL
-    END
-END
-
-IDR_PIECEEDITOR MENU
-BEGIN
-    POPUP "File"
-    BEGIN
-        MENUITEM "New",                         ID_EDITOR_FILE_NEW
-        MENUITEM "Open...",                     ID_EDITOR_FILE_OPEN
-        MENUITEM "Save",                        ID_EDITOR_FILE_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "Return",                      ID_EDITOR_FILE_RETURN
-    END
-    POPUP "View"
-    BEGIN
-        MENUITEM "Fix Backfaces",               ID_EDITOR_VIEW_BACKFACES
-        MENUITEM "Background...",               ID_EDITOR_VIEW_BACKGROUND
-        MENUITEM "Connections",                 ID_EDITOR_VIEW_CONNECTIONS
-    END
-    POPUP "Help"
-    BEGIN
-        MENUITEM SEPARATOR
     END
 END
 
@@ -879,23 +866,18 @@ BEGIN
     CONTROL         "Lock Z",IDC_AIDDLG_LOCKZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,72,111,8
 END
 
-IDD_PREFDETAIL DIALOG 0, 0, 240, 114
+IDD_PREFDETAIL DIALOG 0, 0, 245, 183
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "Details"
+CAPTION "Render"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "Draw edges",IDC_DETDLG_EDGES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,97,8
-    CONTROL         "Dithering",IDC_DETDLG_DITHER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,20,97,8
-    CONTROL         "Lighting",IDC_DETDLG_LIGHTING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,33,97,8
-    CONTROL         "Smooth shading",IDC_DETDLG_SMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,46,97,8
-    CONTROL         "Anti-aliasing",IDC_DETDLG_ANTIALIAS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,59,97,8
-    CONTROL         "Linear filtering",IDC_DETDLG_LINEAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,72,97,8
-    CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,7,96,8
-    CONTROL         "Draw solid boxes",IDC_DETDLG_SOLID,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,20,96,8
-    CONTROL         "Remove hidden lines",IDC_DETDLG_HIDDEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,33,96,8
-    CONTROL         "Background rendering",IDC_DETDLG_BACKGROUND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,46,96,8
-    LTEXT           "Line width",IDC_STATIC,119,63,34,8
-    EDITTEXT        IDC_DETDLG_LINE,157,62,20,10,ES_AUTOHSCROLL
+    CONTROL         "Draw edges",IDC_DETDLG_EDGES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,120,8
+    CONTROL         "Lighting",IDC_DETDLG_LIGHTING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,21,120,8
+    CONTROL         "Smooth shading",IDC_DETDLG_SMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,35,120,8
+    CONTROL         "Anti-aliasing",IDC_DETDLG_ANTIALIAS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,49,120,8
+    CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,63,120,8
+    LTEXT           "Line width",IDC_STATIC,7,93,34,8
+    EDITTEXT        IDC_DETDLG_LINE,49,91,26,12,ES_AUTOHSCROLL
 END
 
 IDD_PREFSCENE DIALOG 0, 0, 240, 114
@@ -1070,7 +1052,7 @@ END
 IDD_PIECEEDITOR DIALOG 0, 0, 270, 186
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Piece Editor"
-MENU IDR_PIECEEDITOR
+MENU 205
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "",IDC_EDITORSTATIC,7,7,120,148,NOT WS_VISIBLE | WS_BORDER
@@ -1742,7 +1724,6 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_RENDER_BACKGROUND    "Fully renders the scene in the background\nBackground Render"
     ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
     ID_VIEW_STEP_FIRST      "Go to the first step or frame\nGo to Start"
     ID_VIEW_STEP_LAST       "Go to the last step or frame\nGo to End"
@@ -1867,7 +1848,6 @@ END
 STRINGTABLE
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
-    ID_VIEW_NEWVIEW         "Creates a new view window"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
 END
 

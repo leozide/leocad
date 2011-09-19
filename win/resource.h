@@ -461,7 +461,6 @@
 #define ID_VIEW_PREFERENCES             32810
 #define ID_ANIMATOR_PLAY                32814
 #define ID_ANIMATOR_STOP                32815
-#define ID_RENDER_BACKGROUND            32820
 #define ID_RENDER_BOX                   32821
 #define ID_PIECE_INSERT                 32822
 #define ID_PIECE_DELETE                 32823
@@ -645,7 +644,6 @@
 #define ID_LOCK_ON                      33149
 #define ID_PIECE_MIRROR                 33150
 #define ID_FILE_IMPORTPIECE             33152
-#define ID_VIEW_NEWVIEW                 33153
 #define ID_VIEW_STEP_DELETE             33154
 #define ID_LIBDLG_FILE_TEXTURES         33157
 #define ID_PIECEBAR_NEWCATEGORY         33159
@@ -662,6 +660,8 @@
 #define ID_VIEW_SPLITHORIZONTALLY       33172
 #define ID_VIEW_DELETEVIEW              33173
 #define ID_VIEW_RESETVIEWS              33174
+#define ID_VIEW_TOOLBARS                33175
+#define ID_VIEW_SPLIT_HORIZONTALLY      33177
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -673,7 +673,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
-#define _APS_NEXT_COMMAND_VALUE         33175
+#define _APS_NEXT_COMMAND_VALUE         33178
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

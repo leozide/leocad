@@ -83,7 +83,7 @@ class PieceInfo;
 void SystemUpdateViewport(int nNew, int nOld);
 void SystemUpdateAction(int nNew, int nOld);
 void SystemUpdateColorList(int nNew);
-void SystemUpdateRenderingMode(bool bBackground, bool bFast);
+void SystemUpdateRenderingMode(bool bFast);
 void SystemUpdateUndoRedo(char* undo, char* redo);
 void SystemUpdateSnap(const unsigned long nSnap);
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera);

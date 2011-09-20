@@ -47,7 +47,7 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	m_Preview = new PiecePreview(NULL);
-	m_Preview->Create(m_hWnd);
+	m_Preview->CreateFromWindow(m_hWnd);
 	m_Preview->MakeCurrent();
 
 	return 0;

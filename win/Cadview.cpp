@@ -204,15 +204,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	int tw = pw, th = ph; // tile size
 
-	MEMORYSTATUS MemStat;
-	MemStat.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&MemStat);
-
-	if (DWORD(pw*ph*3) > MemStat.dwTotalPhys)
-	{
-		tw = 512;
-		th = 512;
-	}
+	if (tw > 1024 || th > 1024)
+		tw = th = 1024;
 
 	HDC hMemDC = CreateCompatibleDC(GetDC()->m_hDC);
 	LPBITMAPINFOHEADER lpbi;
@@ -230,23 +223,15 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	bi.bmiHeader.biXPelsPerMeter = 2925;
 	bi.bmiHeader.biYPelsPerMeter = 2925;
 	
-  HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
+	HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
 	HBITMAP hBmOld = (HBITMAP)SelectObject(hMemDC, hBm);
 
-    // Setting up a Pixel format for the DIB surface
-	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),
-			1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
-			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
-			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = OpenGLChoosePixelFormat(hMemDC, &pfd);
-	OpenGLDescribePixelFormat (hMemDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	OpenGLSetPixelFormat (hMemDC, pixelformat, &pfd);
-	
-	// Creating OpenGL context
-  HGLRC hmemrc = pfnwglCreateContext(hMemDC);
-	pfnwglMakeCurrent(hMemDC, hmemrc);
-//	if (!pfnwglShareLists(m_hglRC, hmemrc))
-//		pDoc->RebuildDisplayLists(TRUE);
+	View view(project, project->m_ActiveView);
+	view.CreateFromBitmap(hMemDC);
+	view.MakeCurrent();
+	view.OnSize(tw, th);
+	project->AddView(&view);
+
 	project->RenderInitialize();
 
 	LOGFONT lf;
@@ -294,7 +279,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
 			do 
 			{
-				project->Render(true);
+				project->Render(&view, true);
 				glFinish();
 				int tr, tc, ctw, cth;
 				pCam->GetTileInfo(&tr, &tc, &ctw, &cth);
@@ -313,7 +298,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		}
 		else
 		{
-			project->Render(true);
+			project->Render(&view, true);
 			glFinish();
 			lpbi = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 			
@@ -325,11 +310,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 			if (lpbi) GlobalFreePtr(lpbi);
 		}
-
-		// OpenGL Rendering
-//			CCamera* pOld = pDoc->GetActiveCamera();
-//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pDoc->GetCamera(CAMERA_MAIN);
-//			pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
 
 		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
 		if (dwPrint & PRINT_NUMBERS)
@@ -373,8 +353,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	project->m_nViewX = oldSizex;
 	project->m_nViewY = oldSizey;
 
-	pfnwglMakeCurrent(NULL, NULL);
-	pfnwglDeleteContext(hmemrc);
+	view.DestroyContext();
 	SelectObject(hMemDC, hBmOld);
 	DeleteObject(hBm);
 	DeleteDC(hMemDC);
@@ -383,7 +362,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(pDC->m_hDC, OldFont);
 	DeleteObject(font);
 	glFinish();
-//		pfnwglMakeCurrent(m_pDC->m_hDC, m_hglRC);
 
 	lf.lfHeight = -MulDiv(12, pDC->GetDeviceCaps(LOGPIXELSY), 72);
 	lf.lfWeight = FW_REGULAR;
@@ -538,11 +516,13 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_pView = new View (lcGetActiveProject(), NULL);
-	m_pView->Create (m_hWnd);
-	m_pView->OnInitialUpdate ();
+	Project* project = lcGetActiveProject();
 
-	SetTimer (IDT_LC_SAVETIMER, 5000, NULL);
+	m_pView = new View(project, project->m_ActiveView);
+	m_pView->CreateFromWindow(m_hWnd);
+	m_pView->OnInitialUpdate();
+
+	SetTimer(IDT_LC_SAVETIMER, 5000, NULL);
 
 	return 0;
 }

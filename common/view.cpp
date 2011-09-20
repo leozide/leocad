@@ -91,7 +91,7 @@ void View::OnDraw()
 	MakeCurrent();
 
 	m_Project->SetViewSize(m_nWidth, m_nHeight);
-	m_Project->Render(false);
+	m_Project->Render(this, false);
 
 	SwapBuffers();
 }

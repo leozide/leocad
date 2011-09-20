@@ -6,13 +6,13 @@
 #include "glwindow.h"
 #include "tools.h"
 
-typedef struct
+struct GLWindowPrivate
 {
 	HGLRC m_hrc;
-	CClientDC* m_pDC;
+	CDC* m_pDC;
 	CPalette* m_pPal;
   HWND m_hWnd;
-} GLWindowPrivate;
+};
 
 // ============================================================================
 
@@ -89,175 +89,230 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 	return TRUE;
 }
 
-LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  static CMapPtrToPtr WindowMap;
-  GLWindow *wnd;
+	static CMapPtrToPtr WindowMap;
+	GLWindow *wnd;
 
-  if (uMsg == WM_CREATE)
-  {
-    LPCREATESTRUCT cs = (LPCREATESTRUCT)lParam;
+	if (uMsg == WM_CREATE)
+	{
+		LPCREATESTRUCT cs = (LPCREATESTRUCT)lParam;
 
-    wnd = (GLWindow*)cs->lpCreateParams;
-    wnd->Create (hwnd);
-    wnd->IncRef ();
+		wnd = (GLWindow*)cs->lpCreateParams;
+		wnd->CreateFromWindow(hwnd);
 
-    WindowMap.SetAt (hwnd, wnd);
-  }
+		WindowMap.SetAt(hwnd, wnd);
+	}
 
-  wnd = (GLWindow*)WindowMap[hwnd];
+	wnd = (GLWindow*)WindowMap[hwnd];
 
-  if (wnd)
-  {
-    MSG msg;
-    msg.hwnd = hwnd;
-    msg.message = uMsg;
-    msg.wParam = wParam;
-    msg.lParam = lParam;
+	if (wnd)
+	{
+		MSG msg;
+		msg.hwnd = hwnd;
+		msg.message = uMsg;
+		msg.wParam = wParam;
+		msg.lParam = lParam;
 
-    GLWindowPreTranslateMessage (wnd, &msg);
+		GLWindowPreTranslateMessage(wnd, &msg);
 
-    if (uMsg == WM_DESTROY)
-    {
-      WindowMap.RemoveKey (hwnd);
-      wnd->DecRef ();
-    }
-  }
+		if (uMsg == WM_DESTROY)
+		{
+			WindowMap.RemoveKey(hwnd);
+		}
+	}
 
-  return DefWindowProc (hwnd, uMsg, wParam, lParam);
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 // ============================================================================
 // GLWindow class
 
-GLWindow::GLWindow (GLWindow *share)
+GLWindow::GLWindow(GLWindow *share)
 {
-  m_nRef = 0;
-  m_pShare = share;
-  m_pData = (GLWindowPrivate*) malloc (sizeof (GLWindowPrivate));
-  memset (m_pData, 0, sizeof (GLWindowPrivate));
+	m_pShare = share;
+	m_pData = (GLWindowPrivate*)malloc(sizeof(GLWindowPrivate));
+	memset(m_pData, 0, sizeof(GLWindowPrivate));
 }
 
-GLWindow::~GLWindow ()
+GLWindow::~GLWindow()
 {
-  free (m_pData);
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+
+	delete prv->m_pDC;
+
+	free(m_pData);
 }
 
-bool GLWindow::Create (void* data)
+bool GLWindow::CreateFromWindow(void* data)
 {
-  GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
 
-  prv->m_hWnd = (HWND)data;
- 	prv->m_pDC = new CClientDC (CWnd::FromHandle (prv->m_hWnd));
-  ASSERT (prv->m_pDC != NULL);
+	prv->m_hWnd = (HWND)data;
+	prv->m_pDC = new CClientDC(CWnd::FromHandle(prv->m_hWnd));
+	ASSERT(prv->m_pDC != NULL);
 
-  // Fill in the Pixel Format Descriptor
-  PIXELFORMATDESCRIPTOR pfd;
-  memset (&pfd,0, sizeof(PIXELFORMATDESCRIPTOR));
+	// Fill in the Pixel Format Descriptor
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
 
-  pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
-  pfd.nVersion = 1;
-  pfd.dwFlags  =  PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
-  pfd.iPixelType = PFD_TYPE_RGBA;
-  pfd.cColorBits = 24;
-  pfd.cDepthBits = 24;
-  pfd.iLayerType = PFD_MAIN_PLANE;
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 24;
+	pfd.iLayerType = PFD_MAIN_PLANE;
 
-  int nPixelFormat = OpenGLChoosePixelFormat (prv->m_pDC->m_hDC, &pfd);
-  if (nPixelFormat == 0)
-    return false;
+	int nPixelFormat = OpenGLChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
+	if (nPixelFormat == 0)
+		return false;
 
-  if (!OpenGLSetPixelFormat (prv->m_pDC->m_hDC, nPixelFormat, &pfd))
-    return false;
+	if (!OpenGLSetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
+		return false;
 
-  prv->m_pPal = new CPalette;
+	prv->m_pPal = new CPalette;
 
-  if (CreateRGBPalette (prv->m_pDC->m_hDC, &prv->m_pPal))
-  {
-    prv->m_pDC->SelectPalette (prv->m_pPal, FALSE);
-    prv->m_pDC->RealizePalette ();
-  }
-  else
-  {
-    delete prv->m_pPal;
-    prv->m_pPal = NULL;
-  }
+	if (CreateRGBPalette(prv->m_pDC->m_hDC, &prv->m_pPal))
+	{
+		prv->m_pDC->SelectPalette(prv->m_pPal, FALSE);
+		prv->m_pDC->RealizePalette();
+	}
+	else
+	{
+		delete prv->m_pPal;
+		prv->m_pPal = NULL;
+	}
 
-  // Create a rendering context.
-  prv->m_hrc = pfnwglCreateContext (prv->m_pDC->m_hDC);
-  if (!prv->m_hrc)
-    return false;
+	// Create a rendering context.
+	prv->m_hrc = pfnwglCreateContext(prv->m_pDC->m_hDC);
+	if (!prv->m_hrc)
+		return false;
 
-  if (m_pShare)
-  {
-    GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
-    pfnwglShareLists (share->m_hrc, prv->m_hrc);
-  }
+	if (m_pShare)
+	{
+		GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
+		pfnwglShareLists(share->m_hrc, prv->m_hrc);
+	}
 
-  return true;
+	return true;
 }
 
-void GLWindow::DestroyContext ()
+bool GLWindow::CreateFromBitmap(void* Data)
 {
-  GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
+
+	prv->m_pDC = new CDC;
+	prv->m_pDC->Attach((HDC)Data);
+	ASSERT(prv->m_pDC != NULL);
+
+	// Fill in the Pixel Format Descriptor
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 16;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+
+	int nPixelFormat = OpenGLChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
+	if (nPixelFormat == 0)
+		return false;
+
+	if (!OpenGLSetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
+		return false;
+
+	prv->m_pPal = new CPalette;
+
+	if (CreateRGBPalette(prv->m_pDC->m_hDC, &prv->m_pPal))
+	{
+		prv->m_pDC->SelectPalette(prv->m_pPal, FALSE);
+		prv->m_pDC->RealizePalette();
+	}
+	else
+	{
+		delete prv->m_pPal;
+		prv->m_pPal = NULL;
+	}
+
+	// Create a rendering context.
+	prv->m_hrc = pfnwglCreateContext(prv->m_pDC->m_hDC);
+	if (!prv->m_hrc)
+		return false;
+
+	if (m_pShare)
+	{
+		GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
+		pfnwglShareLists(share->m_hrc, prv->m_hrc);
+	}
+
+	return true;
+}
+
+void GLWindow::DestroyContext()
+{
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
 	if (prv->m_pPal)
 	{
-    CPalette palDefault;
-		palDefault.CreateStockObject (DEFAULT_PALETTE);
-		prv->m_pDC->SelectPalette (&palDefault, FALSE);
+		CPalette palDefault;
+		palDefault.CreateStockObject(DEFAULT_PALETTE);
+		prv->m_pDC->SelectPalette(&palDefault, FALSE);
 		delete prv->m_pPal;
-    prv->m_pPal = NULL;
+		prv->m_pPal = NULL;
 	}
 
 	if (prv->m_hrc)
-		pfnwglDeleteContext (prv->m_hrc);
-  prv->m_hrc = NULL;
+		pfnwglDeleteContext(prv->m_hrc);
+	prv->m_hrc = NULL;
 
-  if (prv->m_pDC)
+	if (prv->m_pDC)
 		delete prv->m_pDC;
-  prv->m_pDC = NULL;
+	prv->m_pDC = NULL;
 }
 
-void GLWindow::OnInitialUpdate ()
+void GLWindow::OnInitialUpdate()
 {
-  MakeCurrent ();
-  GL_InitializeExtensions ();
+	MakeCurrent();
+	GL_InitializeExtensions();
 }
 
-bool GLWindow::MakeCurrent ()
+bool GLWindow::MakeCurrent()
 {
-  GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
-  if (prv->m_pPal)
+	if (prv->m_pPal)
 	{
-		prv->m_pDC->SelectPalette (prv->m_pPal, FALSE);
-		prv->m_pDC->RealizePalette ();
+		prv->m_pDC->SelectPalette(prv->m_pPal, FALSE);
+		prv->m_pDC->RealizePalette();
 	}
 
-  return (pfnwglMakeCurrent (prv->m_pDC->m_hDC, prv->m_hrc) != 0);
-
-//	RECT rc;
-//	GetClientRect (&rc);
-//	m_pFig->Resize (rc.right, rc.bottom);
+	return (pfnwglMakeCurrent(prv->m_pDC->m_hDC, prv->m_hrc) != 0);
 }
 
-void GLWindow::SwapBuffers ()
+void GLWindow::SwapBuffers()
 {
-  GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
-  OpenGLSwapBuffers (prv->m_pDC->m_hDC);
+	OpenGLSwapBuffers(prv->m_pDC->m_hDC);
 }
 
-void GLWindow::Redraw ()
+void GLWindow::Redraw(bool ForceRedraw)
 {
-  GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
-  InvalidateRect (prv->m_hWnd, NULL, FALSE);
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+
+	InvalidateRect(prv->m_hWnd, NULL, FALSE);
+
+	if (ForceRedraw)
+		UpdateWindow(prv->m_hWnd);
 }
 
 void GLWindow::CaptureMouse()
 {
-  GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate* prv = (GLWindowPrivate*)m_pData;
 	SetCapture(prv->m_hWnd);
 }
 

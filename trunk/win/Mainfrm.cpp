@@ -956,10 +956,6 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_TOOLBAR_FASTRENDER, 0);
 		} break;
 
-		case ID_RENDER_BACKGROUND: {
-			project->HandleCommand(LC_TOOLBAR_BACKGROUND, 0);
-		} break;
-
 		case ID_SNAP_SNAPX: {
 			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 0);
 		} break;
@@ -1304,7 +1300,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_SNAPMENU
 		0,                         // LC_TOOLBAR_LOCKMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
-		0,                         // LC_TOOLBAR_BACKGROUND
 		0,                         // LC_EDIT_MOVE_SNAP_0
 		0,                         // LC_EDIT_MOVE_SNAP_1
 		0,                         // LC_EDIT_MOVE_SNAP_2

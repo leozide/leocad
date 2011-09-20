@@ -1572,10 +1572,11 @@ void Project::UpdateAllViews()
 		m_ViewList[i]->Redraw ();
 }
 
-void Project::SetActiveView(View* view)
+// Returns true if the active view changed.
+bool Project::SetActiveView(View* view)
 {
 	if (view == m_ActiveView)
-		return;
+		return false;
 
 //	Camera* OldCamera = NULL;
 	View* OldView = m_ActiveView;
@@ -1592,55 +1593,133 @@ void Project::SetActiveView(View* view)
 		view->Redraw();
 //		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
 	}
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Project rendering
 
 // Only this function should be called.
-void Project::Render(bool bToMemory)
+void Project::Render(View* view, bool ToMemory)
 {
-	if (bToMemory)
-	{
-//		m_bDenyRender = TRUE;
-//		m_bRendering = TRUE;
+	glViewport(0, 0, view->GetWidth(), view->GetHeight());
+
+	RenderBackground(view);
+
+	// Setup the projection and camera matrices.
+	float ratio = (float)view->GetWidth() / (float)view->GetHeight();
+	m_pViewCameras[0]->LoadProjection(ratio);
+
+	if (ToMemory)
 		RenderScene(true, false);
-//		m_bRendering = FALSE;
-//		m_bDenyRender = FALSE;
+	else
+	{
+		if ((m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
+			RenderScene(false, true);
+		else
+			RenderScene(true, true);
+	}
+}
+
+void Project::RenderBackground(View* view)
+{
+	if (m_nScene & (LC_SCENE_GRADIENT|LC_SCENE_BG) == 0)
+	{
+		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		return;
 	}
 
-//	if (m_bDenyRender)
-//		return;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#ifdef _DEBUG
-#ifdef LC_WINDOWS
-#define BENCHMARK
-#endif
-#endif
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_FOG);
 
-#ifdef BENCHMARK
-	DWORD dwMillis = GetTickCount();
-#endif
+	float ViewWidth = (float)view->GetWidth();
+	float ViewHeight = (float)view->GetHeight();
 
-	m_bStopRender = false;
-	m_bRendering = true;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(0.375f, 0.375f, 0.0f);
 
-	if ((m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
-		RenderScene(false, true);
-	else
-		RenderScene(true, true);
+	// Draw gradient quad.
+	if (m_nScene & LC_SCENE_GRADIENT)
+	{
+		glShadeModel(GL_SMOOTH);
 
-	m_bRendering = false;
+		float Verts[4][2];
+		float Colors[4][4];
 
-#ifdef BENCHMARK
-	dwMillis = GetTickCount() - dwMillis;
-	char szMsg[30];
-	static int FrameCount = 0;
-	FrameCount++;
-	sprintf(szMsg, "%d - %.4f sec", FrameCount, (float)dwMillis/1000);
-	AfxGetMainWnd()->SetWindowText(szMsg);
-#endif
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(4, GL_FLOAT, 0, Colors);
+
+		Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2]; Colors[0][3] = 1.0f;
+		Verts[0][0] = ViewWidth; Verts[0][1] = ViewHeight;
+		Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2]; Colors[1][3] = 1.0f;
+		Verts[1][0] = 0; Verts[1][1] = ViewHeight;
+		Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2]; Colors[2][3] = 1.0f;
+		Verts[2][0] = 0; Verts[2][1] = 0;
+		Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2]; Colors[3][3] = 1.0f;
+		Verts[3][0] = ViewWidth; Verts[3][1] = 0;
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+
+		glShadeModel(GL_FLAT);
+	}
+
+	// Draw the background picture.
+	if (m_nScene & LC_SCENE_BG)
+	{
+		glEnable(GL_TEXTURE_2D);
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		m_pBackground->MakeCurrent();
+
+		float Verts[4][2];
+		float Coords[4][2];
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, Coords);
+
+		float tw = 1.0f, th = 1.0f;
+		if (m_nScene & LC_SCENE_BG_TILE)
+		{
+			tw = ViewWidth / m_pBackground->m_nWidth;
+			th = ViewHeight / m_pBackground->m_nHeight;
+		}
+
+		Coords[0][0] = 0; Coords[0][1] = 0;
+		Verts[0][0] = 0; Verts[0][1] = ViewHeight;
+		Coords[1][0] = tw; Coords[1][1] = 0;
+		Verts[1][0] = ViewWidth; Verts[1][1] = ViewHeight;
+		Coords[2][0] = tw; Coords[2][1] = th; 
+		Verts[2][0] = ViewWidth; Verts[2][1] = 0;
+		Coords[3][0] = 0; Coords[3][1] = th;
+		Verts[3][0] = 0; Verts[3][1] = 0;
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glDisable(GL_TEXTURE_2D);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
 }
 
 typedef struct LC_BSPNODE
@@ -1662,8 +1741,7 @@ typedef struct LC_BSPNODE
 	}
 } LC_BSPNODE;
 
-static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel,
-	bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel, bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
 {
 	if (node->piece)
 	{
@@ -2793,83 +2871,11 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 	glLoadIdentity();
 	glTranslatef(0.375, 0.375, 0.0);
 
-	if (bBackground)
-	{
-		// Draw gradient
-		if (m_nScene & LC_SCENE_GRADIENT)
-		{
-			if ((m_nDetail & LC_DET_SMOOTH) == 0)
-				glShadeModel(GL_SMOOTH);
-			glDisable(GL_DEPTH_TEST);
-			glBegin(GL_QUADS);
-
-			for (vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-			{
-				x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
-				y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-				w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
-				h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
-
-				glColor3fv(m_fGradient1);
-				glVertex2f(x+w, y+h);
-				glVertex2f(x, y+h);
-				glColor3fv(m_fGradient2);
-				glVertex2f(x, y);
-				glVertex2f(x+w, y);
-			}
-			glEnd();
-			glEnable(GL_DEPTH_TEST);
-			if ((m_nDetail & LC_DET_SMOOTH) == 0)
-				glShadeModel(GL_FLAT);
-		}
-
-		glEnable(GL_TEXTURE_2D);
-
-		// Draw the background
-		if (m_nScene & LC_SCENE_BG)
-		{
-			glDisable (GL_DEPTH_TEST);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			m_pBackground->MakeCurrent();
-			glBegin(GL_QUADS);
-
-			for (vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-			{
-				x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
-				y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-				w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
-				h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
-
-				float tw = 1.0f, th = 1.0f;
-				if (m_nScene & LC_SCENE_BG_TILE)
-				{
-					tw = w/m_pBackground->m_nWidth;
-					th = h/m_pBackground->m_nHeight;
-				}
-
-				glTexCoord2f(0, 0);
-				glVertex2f(x, y+h);
-				glTexCoord2f(tw, 0);
-				glVertex2f(x+w, y+h);
-				glTexCoord2f(tw, th); 
-				glVertex2f(x+w, y);
-				glTexCoord2f(0, th);
-				glVertex2f(x, y);
-			}
-			glEnd();
-			glEnable(GL_DEPTH_TEST);
-		}
-
-		if (!bLines)
-			glDisable(GL_TEXTURE_2D);
-	}
-
 	if (bLines)
 	{
 		// Draw text
 		glColor3f(0, 0, 0);
-		if (!bBackground)
-			glEnable(GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		m_pScreenFont->MakeCurrent();
 		glEnable(GL_ALPHA_TEST);
@@ -2882,7 +2888,7 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
 			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
 
-      m_pScreenFont->PrintText(x + 3, y + h - 6, 0.0f, m_pViewCameras[vp]->GetName());
+			m_pScreenFont->PrintText(x + 3, y + h - 6, 0.0f, m_pViewCameras[vp]->GetName());
 		}
 		glEnd();
 	
@@ -3393,6 +3399,9 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 	m_nViewX = width;
 	m_nViewY = height;
 
+	View view(this, m_ActiveView);
+	view.OnSize(width, height);
+
 	if (!hilite)
 		SelectAndFocusNone(false);
 
@@ -3420,7 +3429,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 		}
 
 		CalculateStep();
-		Render(true);
+		Render(&view, true);
     images[i-from].FromOpenGL (width, height);
 	}
 //	pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
@@ -4649,9 +4658,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_EDIT_CUT:
 		case LC_EDIT_COPY:
 		{
-			if (IsDrawing())
-				return;
-
 			if (m_pClipboard[m_nCurClipboard] != NULL)
 				delete m_pClipboard[m_nCurClipboard];
 			m_pClipboard[m_nCurClipboard] = new FileMem;
@@ -4711,9 +4717,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_EDIT_PASTE:
 		{
-			if (IsDrawing())
-				return;
-
 			int i, j;
 			Piece* pPasted = NULL;
 			File* file = m_pClipboard[m_nCurClipboard];
@@ -5051,9 +5054,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		  MinifigWizard *wiz = new MinifigWizard (m_ViewList[0]);
 		  int i;
 
-      wiz->IncRef ();
-
-      if (SystemDoDialog (LC_DLG_MINIFIG, wiz))
+		  if (SystemDoDialog (LC_DLG_MINIFIG, wiz))
 		  {
 		    SelectAndFocusNone(false);
 
@@ -5117,8 +5118,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (i = 0; i < LC_MFW_NUMITEMS; i++)
 			  if (wiz->m_Info[i])
 			    wiz->m_Info[i]->DeRef();
-
-      wiz->DecRef ();
 		} break;
 
 		case LC_PIECE_ARRAY:
@@ -5901,9 +5900,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_STEP_SET:
 		{
-			if (IsDrawing())
-				break;
-
 			if (m_bAnimation)
 				m_nCurFrame = (nParam < m_nTotalFrames) ? (unsigned short)nParam : m_nTotalFrames;
 			else
@@ -5972,7 +5968,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SelectAndFocusNone(false);
 			UpdateSelection();
 			m_bStopRender = false;
-			m_bRendering = true;
 			SystemUpdatePlay(false, true);
 			long time = SystemGetTicks();
 			unsigned short tics;
@@ -5990,12 +5985,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					m_nCurFrame -= m_nTotalFrames;
 				CalculateStep();
 				SystemUpdateTime(true, m_nCurFrame, m_nTotalFrames);
-                                //				RenderScene((m_nDetail & LC_DET_FAST) == 0, true);
-                                //				SystemSwapBuffers();
-                                UpdateAllViews ();
+                UpdateAllViews();
 				SystemPumpMessages();
 			}
-			m_bRendering = false;
 			SystemUpdatePlay(true, false);
 			SystemUpdateFocus(NULL);
 		} break;
@@ -6800,43 +6792,6 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 /////////////////////////////////////////////////////////////////////////////
 // Mouse handling
 
-// Returns true if point is not inside the current viewport.
-bool Project::SetActiveViewport(int px, int py)
-{
-	float x, y, w, h;
-	int vp;
-
-	for (vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-	{
-		x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
-		y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-		w = viewports[m_nViewportMode].dim[vp][2] * (float)m_nViewX;
-		h = viewports[m_nViewportMode].dim[vp][3] * (float)m_nViewY;
-
-		if (px > x && px < x + w && py > y && py < y + h)
-		{
-			if (m_nActiveViewport != vp)
-			{
-				SystemUpdateCurrentCamera(m_pViewCameras[m_nActiveViewport], m_pViewCameras[vp], m_pCameras);
-				m_nActiveViewport = vp;
-				Render(false);
-//				glDrawBuffer(GL_FRONT);
-//				RenderViewports(true);
-//				glDrawBuffer(GL_BACK);
-				UpdateAllViews();
-
-				return true;
-			}
-			else
-				return false;
-		}
-	}
-
-	// We shouldn't get here...
-	m_nActiveViewport = 0;
-	return true;
-}
-
 void Project::LoadViewportProjection(int Viewport)
 {
 	int x, y, w, h;
@@ -7468,9 +7423,6 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 {
 	bool ret = false;
 
-	if (IsDrawing())
-		return false;
-
 	// FIXME: Almost all of this should go through the keyboard shortcut system.
 	switch (nKey)
 	{
@@ -7840,14 +7792,11 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	GLdouble modelMatrix[16], projMatrix[16], point[3];
 	GLint viewport[4];
 
-	if (IsDrawing())
-		return;
-
 	if (m_nTracking != LC_TRACK_NONE)
 		if (StopTracking(false))
 			return;
 
-	if (SetActiveViewport(x, y))
+	if (SetActiveView(view))
 		return;
 
 	m_bTrackCancel = false;
@@ -8177,11 +8126,8 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
   GLdouble modelMatrix[16], projMatrix[16], point[3];
   GLint viewport[4];
 
-  if (IsDrawing())
-    return;
-
-  if (SetActiveViewport(x, y))
-    return;
+	if (SetActiveView(view))
+		return;
 
   LoadViewportProjection(m_nActiveViewport);
   glGetDoublev (GL_MODELVIEW_MATRIX, modelMatrix);
@@ -8289,7 +8235,8 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 
 	if (StopTracking(false))
 		return;
-	if (SetActiveViewport(x, y))
+
+	if (SetActiveView(view))
 		return;
 
 	m_nDownX = x;
@@ -8379,9 +8326,6 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 	if (m_nTracking == LC_TRACK_START_LEFT)
 		m_nTracking = LC_TRACK_LEFT;
-
-	if (IsDrawing())
-		return;
 
 	GLdouble modelMatrix[16], projMatrix[16], tmp[3];
 	GLint viewport[4];

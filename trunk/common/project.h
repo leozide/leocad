@@ -10,8 +10,11 @@
 
 typedef enum 
 {
-	LC_TRACK_NONE, LC_TRACK_START_LEFT, LC_TRACK_LEFT,
-	LC_TRACK_START_RIGHT, LC_TRACK_RIGHT
+	LC_TRACK_NONE,
+	LC_TRACK_START_LEFT,
+	LC_TRACK_LEFT,
+	LC_TRACK_START_RIGHT,
+	LC_TRACK_RIGHT
 } LC_MOUSE_TRACK;
 
 // Mouse control overlays.
@@ -117,7 +120,7 @@ public:
 	void BeginPieceDrop(PieceInfo* Info);
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
-	void Render(bool bToMemory);
+	void Render(View* view, bool bToMemory);
 	void SetViewSize(int cx, int cy);
 	void CheckAutoSave();
 	bool GetSelectionCenter(Vector3& Center) const;
@@ -128,7 +131,7 @@ public:
 	void AddView(View* view);
 	void RemoveView(View* view);
 	void UpdateAllViews();
-	void SetActiveView(View* view);
+	bool SetActiveView(View* view);
 
 // Implementation
 protected:
@@ -188,6 +191,8 @@ protected:
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
 	// Rendering
+	void RenderBackground(View* view);
+
 	void RenderScene(bool bShaded, bool bDrawViewports);
 	void RenderViewports(bool bBackground, bool bLines);
 	void RenderOverlays(int Viewport);
@@ -195,14 +200,6 @@ protected:
 	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
-	inline bool IsDrawing()
-	{
-		if (m_bRendering)
-			m_bStopRender = true;
-		return m_bRendering;
-	}
-
-	bool m_bRendering;
 	bool m_bStopRender;
 	File* m_pTrackFile;
 	bool m_bTrackCancel;
@@ -225,7 +222,6 @@ protected:
 	void UpdateOverlayScale();
 
 	void LoadViewportProjection(int Viewport);
-	bool SetActiveViewport(int x, int y);
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
 	void UpdateSelection();

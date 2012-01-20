@@ -186,7 +186,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	m_wndStandardBar.SetWindowText (_T("Standard"));
+	m_wndStandardBar.SetWindowText(_T("Standard"));
 	m_wndStandardBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	CMenu PopupMenus;
@@ -208,7 +208,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	m_wndToolsBar.SetWindowText (_T("Drawing"));
+	m_wndToolsBar.SetWindowText(_T("Drawing"));
 	m_wndToolsBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndAnimationBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(1, 1, 1, 1), ID_VIEW_ANIMATION_BAR) ||
@@ -244,7 +244,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 //	UpdateMenuAccelerators();
 
-	if (m_wndInvisibleToolBar.Create(this))
+	if (m_wndInvisibleToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_INVISIBLE_BAR))
 	{
 		VERIFY(m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE));
 	}

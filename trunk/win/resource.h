@@ -667,7 +667,8 @@
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
 #define ID_VIEW_PROPERTIES_BAR          59428
-#define ID_VIEW_MODIFY_BAR              59429
+#define ID_VIEW_INVISIBLE_BAR           59429
+#define ID_VIEW_MODIFY_BAR              59430
 
 // Next default values for new objects
 // 

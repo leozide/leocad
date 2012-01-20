@@ -19,7 +19,7 @@ protected:
 	void InitPropList();
 	void SetPropListFont();
 
-	void SetEmpty();
+	void SetEmpty(bool Force = false);
 	void SetPiece(Object* Focus);
 	void SetCamera(Object* Focus);
 	void SetLight(Object* Focus);

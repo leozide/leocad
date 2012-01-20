@@ -316,7 +316,8 @@ BEGIN
             MENUITEM "&Standard",                   ID_VIEW_TOOLBAR
             MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
             MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
-            MENUITEM "Pie&ces",                     ID_VIEW_PIECES_BAR
+            MENUITEM "&Pieces",                     ID_VIEW_PIECES_BAR
+            MENUITEM "P&roperties",                 ID_VIEW_PROPERTIES_BAR
             MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
             MENUITEM "S&tatus Bar",                 ID_VIEW_STATUS_BAR
         END
@@ -1777,6 +1778,7 @@ BEGIN
     ID_VIEW_PIECES_BAR      "Show or hide the pieces toolbar\nToggle PiecesBar"
     ID_VIEW_TOOLS_BAR       "Show or hide the drawing toolbar\nToggle DrawingBar"
     ID_VIEW_ANIMATION_BAR   "Show or hide the animation toolbar\nToggle AnimationBar"
+    ID_VIEW_PROPERTIES_BAR  "Show or hide the properties toolbar\nToggle ToolBar"
     ID_VIEW_MODIFY_BAR      "Show or hide the modify dialog\nToggle Modify Dialog"
 END
 

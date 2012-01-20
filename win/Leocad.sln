@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeoCAD", "LeoCAD.vcxproj", 
 	ProjectSection(ProjectDependencies) = postProject
 		{03C3A022-452E-40B3-BFD3-095713E5FFA2} = {03C3A022-452E-40B3-BFD3-095713E5FFA2}
 		{A7D39990-9822-4302-9709-08D03ADF1170} = {A7D39990-9822-4302-9709-08D03ADF1170}
-		{FD1D14C6-AC21-C31D-3D2B-592043BD5ECB} = {FD1D14C6-AC21-C31D-3D2B-592043BD5ECB}
+		{E4253912-37B8-C33E-42BB-4D178F0BBE9C} = {E4253912-37B8-C33E-42BB-4D178F0BBE9C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "libpng\libpng.vcxproj", "{03C3A022-452E-40B3-BFD3-095713E5FFA2}"
@@ -17,7 +17,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "libpng\libpng.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{A7D39990-9822-4302-9709-08D03ADF1170}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpeglib", "jpeglib\jpeglib.vcxproj", "{FD1D14C6-AC21-C31D-3D2B-592043BD5ECB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpeglib", "jpeglib\jpeglib.vcxproj", "{E4253912-37B8-C33E-42BB-4D178F0BBE9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,10 @@ Global
 		{A7D39990-9822-4302-9709-08D03ADF1170}.Debug|Win32.Build.0 = Debug|Win32
 		{A7D39990-9822-4302-9709-08D03ADF1170}.Release|Win32.ActiveCfg = Release|Win32
 		{A7D39990-9822-4302-9709-08D03ADF1170}.Release|Win32.Build.0 = Release|Win32
-		{FD1D14C6-AC21-C31D-3D2B-592043BD5ECB}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FD1D14C6-AC21-C31D-3D2B-592043BD5ECB}.Debug|Win32.Build.0 = Debug|Win32
-		{FD1D14C6-AC21-C31D-3D2B-592043BD5ECB}.Release|Win32.ActiveCfg = Release|Win32
-		{FD1D14C6-AC21-C31D-3D2B-592043BD5ECB}.Release|Win32.Build.0 = Release|Win32
+		{E4253912-37B8-C33E-42BB-4D178F0BBE9C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E4253912-37B8-C33E-42BB-4D178F0BBE9C}.Debug|Win32.Build.0 = Debug|Win32
+		{E4253912-37B8-C33E-42BB-4D178F0BBE9C}.Release|Win32.ActiveCfg = Release|Win32
+		{E4253912-37B8-C33E-42BB-4D178F0BBE9C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

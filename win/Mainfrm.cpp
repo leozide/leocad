@@ -121,10 +121,12 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_COMMAND_EX(ID_VIEW_TOOLS_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_COMMAND_EX(ID_VIEW_PIECES_BAR,  &CFrameWndEx::OnPaneCheck)
+	ON_COMMAND_EX(ID_VIEW_PROPERTIES_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_COMMAND_EX(ID_VIEW_MODIFY_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_ANIMATION_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, &CFrameWndEx::OnUpdatePaneMenu)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_PROPERTIES_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTION_SELECT, ID_ACTION_ROLL, OnUpdateAction)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_SNAPX, ID_SNAP_SNAPNONE, OnUpdateSnap)
@@ -247,7 +249,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		VERIFY(m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE));
 	}
 
-	if (!m_wndProperties.Create("Properties", this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_MODIFY_BAR+1, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	if (!m_wndProperties.Create("Properties", this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIES_BAR, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create
@@ -269,6 +271,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	messenger->Listen (&mainframe_listener, this);
 
 	main_window->SetXID (this);
+
+	theApp.LoadState(this);
 
 //  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
 
@@ -525,43 +529,10 @@ LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
 
 void CMainFrame::OnClose() 
 {
-	if (m_lpfnCloseProc != NULL && !(*m_lpfnCloseProc)(this))
-		return;
-
 	if (!lcGetActiveProject()->SaveModified())
 		return;
 
-	if (GetStyle() & WS_VISIBLE)
-	{
-		// save window size and position when destroyed
-		WINDOWPLACEMENT wp;
-		char szBuf[60];
-
-		if (m_pwndFullScrnBar)
-		{
-			m_pwndFullScrnBar->DestroyWindow();
-			delete m_pwndFullScrnBar;
-			m_wndStatusBar.ShowWindow(SW_SHOWNORMAL);
-			wp = m_wpPrev;
-		}
-		else
-		{
-			wp.length = sizeof(wp);
-			GetWindowPlacement(&wp);
-		}
-
-		wsprintf(szBuf,"%d, %d, %d, %d", wp.rcNormalPosition.top, wp.rcNormalPosition.right, 
-			wp.rcNormalPosition.bottom, wp.rcNormalPosition.left);
-		theApp.WriteProfileString("Settings","Window Position", szBuf);
-		theApp.WriteProfileInt("Settings", "Window Status", wp.showCmd);
-
-		SaveBarState("Toolbars");
-		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), TOOLBAR_VERSION);
-	}
-
-	AfxGetApp()->HideApplication();
-	GetActiveDocument()->OnCloseDocument();
-	AfxPostQuitMessage(0);
+	CFrameWndEx::OnClose();
 }
 
 void CMainFrame::OnSetFocus(CWnd* pOldWnd) 

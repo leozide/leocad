@@ -113,7 +113,7 @@ void CPropertiesPane::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	SetEmpty();
+	SetEmpty(true);
 }
 
 void CPropertiesPane::Update(Object* Focus)
@@ -147,9 +147,9 @@ void CPropertiesPane::Update(Object* Focus)
 	}
 }
 
-void CPropertiesPane::SetEmpty()
+void CPropertiesPane::SetEmpty(bool Force)
 {
-	if (!mObject)
+	if (!mObject && !Force)
 		return;
 
 	m_wndPropList.RemoveAll();

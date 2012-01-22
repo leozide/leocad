@@ -1575,6 +1575,9 @@ void Project::UpdateAllViews()
 // Returns true if the active view changed.
 bool Project::SetActiveView(View* view)
 {
+	m_ActiveView = view;
+	return false;
+	/*
 	if (view == m_ActiveView)
 		return false;
 
@@ -1595,6 +1598,7 @@ bool Project::SetActiveView(View* view)
 	}
 
 	return true;
+	*/
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2860,16 +2864,12 @@ void Project::RenderOverlays(int Viewport)
 
 void Project::RenderViewports(bool bBackground, bool bLines)
 {
-	float x, y, w, h;
-	int vp;
-
-	glViewport(0, 0, m_nViewX, m_nViewY);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, m_nViewX, 0, m_nViewY, -1, 1);
+	glOrtho(0.0f, m_nViewX, 0.0f, m_nViewY, -1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glTranslatef(0.375, 0.375, 0.0);
+	glTranslatef(0.375f, 0.375f, 0.0f);
 
 	if (bLines)
 	{
@@ -2879,59 +2879,15 @@ void Project::RenderViewports(bool bBackground, bool bLines)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		m_pScreenFont->MakeCurrent();
 		glEnable(GL_ALPHA_TEST);
+
 		glBegin(GL_QUADS);
 
-		for (vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-		{
-			x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
-			y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
-			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
+		m_pScreenFont->PrintText(3.0f, (float)(m_nViewY - 1.0f) - 6.0f, 0.0f, m_pViewCameras[0]->GetName());
 
-			m_pScreenFont->PrintText(x + 3, y + h - 6, 0.0f, m_pViewCameras[vp]->GetName());
-		}
 		glEnd();
 	
 		glDisable(GL_ALPHA_TEST);
 		glDisable(GL_TEXTURE_2D);
-
-		// Borders
-		if (m_fLineWidth != 1.0f)
-			glLineWidth (1.0f);
-
-		for (vp = 0; vp < viewports[m_nViewportMode].n; vp++)
-		{
-			if (vp == m_nActiveViewport)
-				continue;
-
-			x = viewports[m_nViewportMode].dim[vp][0] * (float)m_nViewX;
-			y = viewports[m_nViewportMode].dim[vp][1] * (float)m_nViewY;
-			w = viewports[m_nViewportMode].dim[vp][2] * (float)(m_nViewX - 1);
-			h = viewports[m_nViewportMode].dim[vp][3] * (float)(m_nViewY - 1);
-
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(x, y);
-			glVertex2f(x+w, y);
-			glVertex2f(x+w, y+h);
-			glVertex2f(x, y+h);
-			glEnd();
-		}
-
-		x = viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX;
-		y = viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY;
-		w = viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)(m_nViewX - 1);
-		h = viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)(m_nViewY - 1);
-
-		glColor3f(1.0f, 0, 0);
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(x, y);
-		glVertex2f(x+w, y);
-		glVertex2f(x+w, y+h);
-		glVertex2f(x, y+h);
-		glEnd();
-
-		if (m_fLineWidth != 1.0f)
-			glLineWidth (m_fLineWidth);
 	}
 }
 

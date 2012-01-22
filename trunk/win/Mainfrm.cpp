@@ -26,8 +26,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define TOOLBAR_VERSION 1
-
 void mainframe_listener (int message, void *data, void *user)
 {
   if (message == LC_MSG_FOCUS_CHANGED)
@@ -238,9 +236,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_ANY);
 	EnableDocking(CBRS_ALIGN_ANY);
 //	ShowPane(&m_wndModifyDlg, FALSE, FALSE, FALSE);
-
-//	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) == TOOLBAR_VERSION)
-	//	LoadBarState("Toolbars");
 
 //	UpdateMenuAccelerators();
 
@@ -1349,7 +1344,8 @@ void CMainFrame::UpdateMenuAccelerators()
 
 void CMainFrame::OnDropFiles(HDROP hDropInfo) 
 {
-	SetActiveWindow();      // activate us first !
+	SetActiveWindow();
+
 	UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 
 	if (nFiles > 0)
@@ -1359,6 +1355,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 
 		lcGetActiveProject()->OpenProject(szFileName);
 	}
+
 	::DragFinish(hDropInfo);
 }
 
@@ -1403,8 +1400,12 @@ void CMainFrame::OnViewSplitVertically()
 	NewSplitter->SetColumnInfo(0, Width, 0);
 	NewSplitter->CreateView(0, 1, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
 
+	CWnd* NewView = NewSplitter->GetPane(0, 1);
+	NewView->ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+
 	RecalcLayout();
 	ParentSplitter->RecalcLayout();
+	ParentSplitter->Invalidate();
 }
 
 void CMainFrame::OnViewSplitHorizontally()
@@ -1448,8 +1449,13 @@ void CMainFrame::OnViewSplitHorizontally()
 	NewSplitter->SetRowInfo(0, Height, 0);
 	NewSplitter->CreateView(1, 0, RUNTIME_CLASS(CCADView), CSize(Width, Height), NULL);
 
+	CWnd* NewView = NewSplitter->GetPane(1, 0);
+	NewView->ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+
 	RecalcLayout();
-	ParentSplitter->RecalcLayout();}
+	ParentSplitter->RecalcLayout();
+	ParentSplitter->Invalidate();
+}
 
 void CMainFrame::OnViewDeleteView()
 {
@@ -1535,44 +1541,42 @@ void CMainFrame::OnViewDeleteView()
 
 void CMainFrame::OnViewResetViews()
 {
-	/*
-	CView* view = GetActiveView();
-	CDynamicSplitterWnd* parent = (CDynamicSplitterWnd*)view->GetParent();
+	CView* ActiveView = GetActiveView();
 
-	if (!view->IsKindOf(RUNTIME_CLASS(CCADView)))
+	if (!ActiveView->IsKindOf(RUNTIME_CLASS(CCADView)))
+		return;
+
+	CWnd* Parent = ActiveView->GetParent();
+
+	if (Parent == this)
+		return;
+
+	CDynamicSplitterWnd* ParentSplitter = (CDynamicSplitterWnd*)Parent;
+	int Row, Col;
+
+	ParentSplitter->GetViewRowCol(ActiveView, &Row, &Col);
+	ParentSplitter->DetachWindow(Row, Col);
+
+	CWnd* TopSplitter = ParentSplitter;
+	for (CWnd* NextParent = TopSplitter; NextParent != this; NextParent = NextParent->GetParent())
+		TopSplitter = NextParent;
+
+	ParentSplitter->DestroyWindow();
+
+	for (int i = 0; i < m_SplitterList.GetSize(); i++)
 	{
-		CWnd* Sibling = &m_wndSplitter;
-
-		while (!Sibling->IsKindOf(RUNTIME_CLASS(CCADView)))
-			Sibling = ((CDynamicSplitterWnd*)Sibling)->GetPane(0, 0);
-
-		view = (CView*)Sibling;
-		parent = (CDynamicSplitterWnd*)view->GetParent();
-	}
-
-	// Don't do anything if there's only one view.
-	if (parent != &m_wndSplitter)
-	{
-		// Save the active view.
-		int Row, Col;
-		parent->GetViewRowCol(view, &Row, &Col);
-		parent->DetachWindow(Row, Col);
-
-		// Delete all other views.
-		m_wndSplitter.GetPane(0, 0)->DestroyWindow();
-
-		for (int i = 0; i < m_SplitterList.GetSize(); i++)
+		if (m_SplitterList[i] == ParentSplitter)
+		{
 			delete m_SplitterList[i];
-		m_SplitterList.RemoveAll();
-
-		// Add the active view back.
-		m_wndSplitter.AttachWindow(view, 0, 0);
-		m_wndSplitter.RecalcLayout();
-		SetActiveView(view);
+			m_SplitterList.RemoveAt(i);
+			break;
+		}
 	}
 
-	// Load default view layout.
-	const char* str = main_window->GetViewLayout(false);
-	SetViewLayout(NULL, str);
-	*/
+	ActiveView->SetDlgCtrlID(AFX_IDW_PANE_FIRST);
+	ActiveView->SetParent(this);
+	ActiveView->ShowWindow(SW_SHOW);
+	ActiveView->InvalidateRect(NULL);
+
+	RecalcLayout();
 }

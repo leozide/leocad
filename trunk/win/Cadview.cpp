@@ -752,8 +752,8 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
 {
-	if (pActivateView && pActivateView->IsKindOf(RUNTIME_CLASS(CCADView)))
-		lcGetActiveProject()->SetActiveView(((CCADView*)pActivateView)->m_pView);
+//	if (pActivateView && pActivateView->IsKindOf(RUNTIME_CLASS(CCADView)))
+//		lcGetActiveProject()->SetActiveView(((CCADView*)pActivateView)->m_pView);
 
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 }

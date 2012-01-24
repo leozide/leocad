@@ -663,6 +663,7 @@
 #define ID_VIEW_TOOLBARS                33175
 #define ID_VIEW_SPLIT_HORIZONTALLY      33177
 #define ID_TOOLBARS_PROPERTIES          33178
+#define ID_FILE_IMPORTFOLDER            33179
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -676,7 +677,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
-#define _APS_NEXT_COMMAND_VALUE         33179
+#define _APS_NEXT_COMMAND_VALUE         33180
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

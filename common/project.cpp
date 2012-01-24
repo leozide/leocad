@@ -4190,7 +4190,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						unsigned short g;
 						for (g = 0; g < pInfo->m_nGroupCount; g++)
-						if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+						if (pInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 						{
 							unsigned long* info = (unsigned long*)pInfo->m_pGroups[g].drawinfo;
 							unsigned long count, curcolor, colors = *info;

@@ -479,7 +479,7 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 
 	float* verts = m_pPieceInfo->m_fVertexArray;
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 	{
 		lcuint32* info = (lcuint32*)m_pDrawInfo, colors, i;
 		colors = *info;
@@ -698,7 +698,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	float* verts = m_pPieceInfo->m_fVertexArray;
 	bool ret = false;
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 	{
 		lcuint32* info = (lcuint32*)m_pDrawInfo, colors, i;
 		colors = *info;
@@ -904,7 +904,7 @@ void Piece::BuildDrawInfo()
 
 		if (add)
 		{
-			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+			if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 			{
 				lcuint32* p, curcol, colors;
 				p = (lcuint32*)dg->drawinfo;
@@ -956,7 +956,7 @@ void Piece::BuildDrawInfo()
 	vert += (colcount*4)+1;
 
 	// Build the info
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 	{
 		m_pDrawInfo = malloc(vert*sizeof(lcuint32));
 		lcuint32* drawinfo = (lcuint32*)m_pDrawInfo;
@@ -1193,7 +1193,7 @@ void Piece::Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool*
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA)
+	if (m_pPieceInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 	{
 		lcuint32 colors, *info = (lcuint32*)m_pDrawInfo;
 		colors = *info;

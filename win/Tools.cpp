@@ -454,7 +454,7 @@ void Export3DStudio()
 		memset(facemats, 0, sizeof(facemats));
 
 		PieceInfo* pInfo = pPiece->GetPieceInfo();
-		if (pInfo->m_nFlags & LC_PIECE_LONGDATA)
+		if (pInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
 			continue; // 3DS can't handle this
 
 		// count number of faces used

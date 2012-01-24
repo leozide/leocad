@@ -1,7 +1,3 @@
-//
-//	pieceinf.h
-////////////////////////////////////////////////////
-
 #ifndef _PIECEINF_H_
 #define _PIECEINF_H_
 
@@ -11,38 +7,38 @@
 #endif
 #include "algebra.h"
 
-#define LC_PIECE_COUNT						0x01 // Count this piece in the totals ?
-#define LC_PIECE_LONGDATA					0x02 // unsigned long/short index
-#define LC_PIECE_CCW							0x04 // Use back-face culling
-#define LC_PIECE_SMALL						0x10 // scale = 10000
-#define LC_PIECE_MEDIUM						0x20 // scale = 1000 (otherwise = 100)
-#define LC_PIECE_LONGDATA_RUNTIME	0x40 // If the original data is 16 bits but we expanded to 32 bits
+#define LC_PIECE_COUNT              0x01 // Count this piece in the totals ?
+#define LC_PIECE_LONGDATA_FILE      0x02 // unsigned long/short index
+#define LC_PIECE_CCW                0x04 // Use back-face culling
+#define LC_PIECE_SMALL              0x10 // scale = 10000
+#define LC_PIECE_MEDIUM             0x20 // scale = 1000 (otherwise = 100)
+#define LC_PIECE_LONGDATA_INDICES   0x40 // unsigned long/short index
 
 #define LC_PIECE_NAME_LEN 256
 
 class File;
 class Texture;
 
-typedef struct
+struct CONNECTIONINFO
 {
 	unsigned char type;
 	float center[3];
 	float normal[3];
-} CONNECTIONINFO;
+};
 
-typedef struct
+struct DRAWGROUP
 {
 	unsigned short connections[6];
 	void* drawinfo;
-} DRAWGROUP;
+};
 
-typedef struct TEXTURE
+struct TEXTURE
 {
 	Texture* texture;
 	unsigned char color;
 	float vertex[4][3];
 	float coords[4][2];
-} TEXTURE;
+};
 
 unsigned char ConvertColor(int c);
 

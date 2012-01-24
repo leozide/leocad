@@ -181,32 +181,30 @@ typedef enum
 	LC_CURSOR_COUNT
 } LC_CURSOR_TYPE;
 
-// Piece connections (complicated and wastes memory but fast).
-
-typedef struct CONNECTION
+// Piece connections.
+struct CONNECTION
 {
 	unsigned char type;
 	float center[3];
 	float normal[3];
 	CONNECTION* link;
 	Piece* owner;
-} CONNECTION;
+};
 
-typedef struct
+struct CONNECTION_ENTRY
 {
 	Piece* owner;
 	CONNECTION** cons; // pointers to the structures in each piece
 	unsigned short numcons;
-} CONNECTION_ENTRY;
+};
 
-typedef struct
+struct CONNECTION_TYPE
 {
 	CONNECTION_ENTRY* entries;
 	unsigned short numentries;
-} CONNECTION_TYPE;
+};
 
 // Select by Name dialog data
-
 typedef enum
 {
 	LC_SELDLG_PIECE,
@@ -215,15 +213,15 @@ typedef enum
 	LC_SELDLG_GROUP
 } LC_SEL_DATA_TYPE;
 
-typedef struct
+struct LC_SEL_DATA
 {
 	const char* name;
 	unsigned char type;
 	bool selected;
 	void* pointer;
-} LC_SEL_DATA;
+};
 
-typedef struct
+struct LC_PIECE_MODIFY
 {
 	Piece* piece;
 	Vector3 Position;
@@ -233,9 +231,9 @@ typedef struct
 	int to;
 	bool hidden;
 	int color;
-} LC_PIECE_MODIFY;
+};
 
-typedef struct
+struct LC_CAMERA_MODIFY
 {
 	Camera* camera;
 	Vector3 Eye;
@@ -246,7 +244,7 @@ typedef struct
 	float znear;
 	float zfar;
 	bool hidden;
-} LC_CAMERA_MODIFY;
+};
 
 // Image
 
@@ -259,7 +257,7 @@ typedef enum
 	LC_IMAGE_AVI
 } LC_IMAGE_FORMATS;
 
-typedef struct
+struct LC_IMAGE_OPTS
 {
 	unsigned char quality;
 	bool interlaced;
@@ -268,9 +266,9 @@ typedef struct
 	unsigned char background[3];
 	float pause;
 	unsigned int format;
-} LC_IMAGE_OPTS;
+};
 
-typedef struct
+struct LC_IMAGEDLG_OPTS
 {
 	char filename[LC_MAXPATH];
 	unsigned short from;
@@ -279,7 +277,7 @@ typedef struct
 	unsigned short width;
 	unsigned short height;
 	LC_IMAGE_OPTS imopts;
-} LC_IMAGEDLG_OPTS;
+};
 
 typedef enum {
 	LC_DLG_FILE_OPEN_PROJECT,
@@ -287,6 +285,7 @@ typedef enum {
 	LC_DLG_FILE_MERGE_PROJECT,
 	LC_DLG_FILE_OPEN,
 	LC_DLG_FILE_SAVE,
+	LC_DLG_DIRECTORY_BROWSE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
 	LC_DLG_POVRAY,
@@ -312,34 +311,40 @@ typedef enum
 	LC_FILEOPENDLG_LUP
 } LC_FILEOPENDLG_TYPES;
 
-typedef struct
+struct LC_FILEOPENDLG_OPTS
 {
 	int type;
 	char path[LC_MAXPATH];
 	int numfiles;
 	char** filenames;
-} LC_FILEOPENDLG_OPTS;
+};
 
 typedef enum
 {
 	LC_FILESAVEDLG_LCF,
 } LC_FILESAVEDLG_TYPES;
 
-typedef struct
+struct LC_FILESAVEDLG_OPTS
 {
 	int type;
 	char path[LC_MAXPATH];
-} LC_FILESAVEDLG_OPTS;
+};
 
-typedef struct
+struct LC_DLG_DIRECTORY_BROWSE_OPTS
+{
+	const char* Title;
+	char Path[LC_MAXPATH];
+};
+
+struct LC_POVRAYDLG_OPTS
 {
 	bool render;
 	char povpath[LC_MAXPATH];
 	char outpath[LC_MAXPATH];
 	char libpath[LC_MAXPATH];
-} LC_POVRAYDLG_OPTS;
+};
 
-typedef struct
+struct LC_HTMLDLG_OPTS
 {
 	char path[LC_MAXPATH];
 	bool singlepage;
@@ -350,9 +355,9 @@ typedef struct
 	bool highlight;
   bool htmlext;
 	LC_IMAGEDLG_OPTS imdlg;
-} LC_HTMLDLG_OPTS;
+};
 
-typedef struct
+struct LC_ARRAYDLG_OPTS
 {
 	unsigned short n1DCount;
 	unsigned short n2DCount;
@@ -362,9 +367,9 @@ typedef struct
 	float f3D[3];
 	float fMove[3];
 	float fRotate[3];
-} LC_ARRAYDLG_OPTS;
+};
 
-typedef struct
+struct LC_PROPERTIESDLG_OPTS
 {
 	char strAuthor[101];
 	char strDescription[101];
@@ -374,9 +379,9 @@ typedef struct
 	char** names;
 	unsigned short* count;
 	int lines;
-} LC_PROPERTIESDLG_OPTS;
+};
 
-typedef struct
+struct LC_GROUPEDITDLG_OPTS
 {
 	int piececount;
 	Piece** pieces;
@@ -384,9 +389,9 @@ typedef struct
 	int groupcount;
 	Group** groups;
 	Group** groupsgroups;
-} LC_GROUPEDITDLG_OPTS;
+};
 
-typedef struct
+struct LC_PREFERENCESDLG_OPTS
 {
 	int nMouse;
 	int nSaveInterval;
@@ -407,12 +412,12 @@ typedef struct
 	float fGrad2[3];
 	char strFooter[256];
 	char strHeader[256];
-} LC_PREFERENCESDLG_OPTS;
+};
 
-typedef struct
+struct LC_CATEGORYDLG_OPTS
 {
 	String Name;
 	String Keywords;
-} LC_CATEGORYDLG_OPTS;
+};
 
 #endif

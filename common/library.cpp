@@ -736,8 +736,61 @@ void PiecesLibrary::RemoveCategory(int Index)
 // =============================================================================
 // Pieces handling stuff
 
+bool PiecesLibrary::DeleteAllPieces()
+{
+	FileDisk newbin, newidx, oldbin, oldidx;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[256];
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-b.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.bin");
+	rename(file2, file1);
+
+	if ((!oldbin.Open(file1, "rb")) ||
+		(!newbin.Open(file2, "wb")))
+		return false;
+
+	strcpy(file1, m_LibraryPath);
+	strcat(file1, "pieces-i.old");
+	remove(file1);
+	strcpy(file2, m_LibraryPath);
+	strcat(file2, "pieces.idx");
+	rename(file2, file1);
+
+	if ((!oldidx.Open(file1, "rb")) ||
+		(!newidx.Open(file2, "wb")))
+		return false;
+
+	oldidx.Seek(0, SEEK_SET);
+	oldidx.Read(tmp, 34);
+	newidx.Write(tmp, 34);
+	oldbin.Read(tmp, 32);
+	newbin.Write(tmp, 32);
+
+	// list of moved pieces
+	lcuint16 moved = 0;
+	newidx.WriteShort(&moved, 1);
+
+	// info at the end
+	lcuint32 binoff = newbin.GetPosition();
+	newidx.WriteLong(&binoff, 1);
+	lcuint16 count = 0;
+	newidx.WriteShort(&count, 1);
+
+	oldidx.Close();
+	oldbin.Close();
+	newidx.Close();
+	newbin.Close();
+
+	m_Modified = true;
+
+	return true;
+}
+
 // Remove pieces from the library
-bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
+bool PiecesLibrary::DeletePieces(PtrArray<const char>& Pieces)
 {
 	FileDisk newbin, newidx, oldbin, oldidx;
 	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[200];
@@ -793,7 +846,7 @@ bool PiecesLibrary::DeletePieces (PtrArray<PieceInfo>& Pieces)
 		oldidx.Read(&name, LC_PIECE_NAME_LEN);
 
 		for (i = 0; i < Pieces.GetSize(); i++)
-			if (strcmp(name, Pieces[i]->m_strName) == 0)
+			if (strcmp(name, Pieces[i]) == 0)
 				break;
 
 		if (i != Pieces.GetSize())
@@ -1400,7 +1453,7 @@ bool PiecesLibrary::ImportTexture (const char* Name)
 // =============================================================================
 // LDraw support
 
-bool PiecesLibrary::ImportLDrawPiece (const char* Filename)
+bool PiecesLibrary::ImportLDrawPiece(const char* Filename, File* NewIdxFile, File* NewBinFile, File* OldIdxFile, File* OldBinFile)
 {
 	LC_LDRAW_PIECE piece;
 
@@ -1408,16 +1461,112 @@ bool PiecesLibrary::ImportLDrawPiece (const char* Filename)
 
 	if (ReadLDrawPiece (Filename, &piece))
 	{
-//		if (FindPieceInfo (piece.name) != NULL)
-//			Sys_MessageBox ("Piece already exists in the library !");
+		char* Moved = strstr(piece.description, "~Moved to ");
+		if (Moved)
+		{
+			lcuint16 Count;
+			OldIdxFile->Seek(-(2+4+2), SEEK_END);
+			OldIdxFile->ReadShort(&Count, 1);
+			lcuint32 cs = Count * 2 * LC_PIECE_NAME_LEN;
+			OldIdxFile->Seek(-(long)(cs+2), SEEK_CUR);
 
-		if (SaveLDrawPiece (&piece))
-			Sys_MessageBox ("Piece successfully imported.");
-		else
+			lcuint32 Length = OldIdxFile->GetPosition();
+			void* Buffer = malloc(Length);
+			OldIdxFile->Seek(0, SEEK_SET);
+			OldIdxFile->Read(Buffer, Length);
+			NewIdxFile->Seek(0, SEEK_SET);
+			NewIdxFile->Write(Buffer, Length);
+			free(Buffer);
+
+			Buffer = malloc(cs);
+			OldIdxFile->Read(Buffer, cs);
+			char* Reference = (char*)Buffer;
+
+			// Add piece to moved list.
+			if (!strchr(Moved, '\\') && !strchr(Moved, '/'))
+			{
+				Moved += strlen("~Moved to ");
+				_strupr(Moved);
+
+				char* Dst = NULL;
+				for (int i = 0; i < Count; i++)
+				{
+					if (!strncmp(&Reference[i*2*LC_PIECE_NAME_LEN], piece.name, LC_PIECE_NAME_LEN))
+					{
+						Dst = &Reference[i*LC_PIECE_NAME_LEN+LC_PIECE_NAME_LEN];
+						memset(Dst, 0, LC_PIECE_NAME_LEN);
+						memcpy(Dst, Moved, strlen(Moved));
+					}
+				}
+
+				if (!Dst)
+				{
+					Buffer = realloc(Buffer, 2*LC_PIECE_NAME_LEN*(Count+1));
+					Reference = (char*)Buffer;
+					memset(&Reference[Count*2*LC_PIECE_NAME_LEN], 0, 2*LC_PIECE_NAME_LEN);
+					memcpy(&Reference[Count*2*LC_PIECE_NAME_LEN], piece.name, strlen(piece.name));
+					memcpy(&Reference[Count*2*LC_PIECE_NAME_LEN+LC_PIECE_NAME_LEN], Moved, strlen(Moved));
+					Count++;
+				}
+			}
+
+			NewIdxFile->Write(Reference, Count*2*LC_PIECE_NAME_LEN);
+			NewIdxFile->WriteShort(&Count, 1);
+			free(Buffer);
+
+			Buffer = malloc(4+2);
+			OldIdxFile->Seek(-(4+2), SEEK_END);
+			OldIdxFile->Read(Buffer, 4+2);
+			NewIdxFile->Write(Buffer, 4+2);
+			free(Buffer);
+
+			OldBinFile->Seek(0, SEEK_END);
+			Length = OldBinFile->GetPosition();
+			Buffer = malloc(Length);
+			OldBinFile->Seek(0, SEEK_SET);
+			OldBinFile->Read(Buffer, Length);
+			NewBinFile->Seek(0, SEEK_SET);
+			NewBinFile->Write(Buffer, Length);
+			free(Buffer);
+
+			// Delete existing piece.
+//			lcPtrArray<const char> Pieces;
+//			Pieces.Add(piece.name);
+//			DeletePieces(Pieces);
+		}
+		else if (!SaveLDrawPiece(&piece, NewIdxFile, NewBinFile, OldIdxFile, OldBinFile))
+		{
+			fprintf(stderr, "Error saving library after importing %s.\n", Filename);
 			Sys_MessageBox ("Error saving library.");
+			return false;
+		}
 	}
 	else
+	{
+		void* Buffer;
+		lcuint32 Length;
+
+		OldBinFile->Seek(0, SEEK_END);
+		Length = OldBinFile->GetPosition();
+		Buffer = malloc(Length);
+		OldBinFile->Seek(0, SEEK_SET);
+		OldBinFile->Read(Buffer, Length);
+		NewBinFile->Seek(0, SEEK_SET);
+		NewBinFile->Write(Buffer, Length);
+		free(Buffer);
+
+		OldIdxFile->Seek(0, SEEK_END);
+		Length = OldIdxFile->GetPosition();
+		Buffer = malloc(Length);
+		OldIdxFile->Seek(0, SEEK_SET);
+		OldIdxFile->Read(Buffer, Length);
+		NewIdxFile->Seek(0, SEEK_SET);
+		NewIdxFile->Write(Buffer, Length);
+		free(Buffer);
+
+		fprintf(stderr, "Error reading file %s\n", Filename);
 		Sys_MessageBox ("Error reading file.");
+	}
 
 	FreeLDrawPiece(&piece);
 
@@ -2355,64 +2504,47 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 	return true;
 }
 
-bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
+bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, File* NewIdxFile, File* NewBinFile, File* OldIdxFile, File* OldBinFile)
 {
-	FileDisk newbin, newidx, oldbin, oldidx;
-	char file1[LC_MAXPATH], file2[LC_MAXPATH];
-	unsigned short count, moved;
-	unsigned long i, j, cs, binoff = 0, delta;
+	lcuint16 count, moved;
+	lcuint32 i, j, cs, binoff = 0, delta;
 	void* membuf;
-	short scale, sb[6];
+	lcuint16 scale, sb[6];
 	PiecesLibrary *pLib = lcGetPiecesLibrary();
 
-	strcpy(file1, pLib->GetLibraryPath());
-	strcat(file1, "pieces-b.old");
-	remove(file1);
-	strcpy(file2, pLib->GetLibraryPath());
-	strcat(file2, "pieces.bin");
-	rename(file2, file1);
+	File& NewIdx = *NewIdxFile;
+	File& NewBin = *NewBinFile;
+	File& OldIdx = *OldIdxFile;
+	File& OldBin = *OldBinFile;
 
-	if ((!oldbin.Open(file1, "rb")) ||
-		(!newbin.Open(file2, "wb")))
-		return false;
+	OldIdx.Seek(0, SEEK_SET);
+	OldBin.Seek(0, SEEK_SET);
 
-	strcpy(file1, pLib->GetLibraryPath());
-	strcat(file1, "pieces-i.old");
-	remove(file1);
-	strcpy(file2, pLib->GetLibraryPath());
-	strcat(file2, "pieces.idx");
-	rename(file2, file1);
-
-	if ((!oldidx.Open(file1, "rb")) ||
-		(!newidx.Open(file2, "wb")))
-		return false;
-
-
-	oldidx.Seek(-2, SEEK_END);
-	oldidx.ReadShort(&count, 1);
-	oldidx.Seek(34, SEEK_SET);
+	OldIdx.Seek(-2, SEEK_END);
+	OldIdx.ReadShort(&count, 1);
+	OldIdx.Seek(34, SEEK_SET);
 
 	for (j = 0; j < count; j++)
 	{
 		char name[LC_PIECE_NAME_LEN];
-		oldidx.Read(name, LC_PIECE_NAME_LEN);
+		OldIdx.Read(name, LC_PIECE_NAME_LEN);
 
 		if (strcmp(name, piece->name) == 0)
 		{
-			oldidx.Seek(64+12+1+4, SEEK_CUR);
-			oldidx.ReadLong(&binoff, 1);
-			oldidx.ReadLong(&delta, 1);
-			oldidx.Seek(-(LC_PIECE_NAME_LEN+64+12+1+4+4+4), SEEK_CUR);
+			OldIdx.Seek(64+12+1+4, SEEK_CUR);
+			OldIdx.ReadLong(&binoff, 1);
+			OldIdx.ReadLong(&delta, 1);
+			OldIdx.Seek(-(LC_PIECE_NAME_LEN+64+12+1+4+4+4), SEEK_CUR);
 			delta += binoff;
 			break;
 		}
-		oldidx.Seek(64+12+1+4+4+4, SEEK_CUR);
+		OldIdx.Seek(64+12+1+4+4+4, SEEK_CUR);
 	}
 
 	if (binoff == 0)
-		binoff = oldbin.GetLength();
+		binoff = OldBin.GetLength();
 
-	cs = oldidx.GetPosition();
+	cs = OldIdx.GetPosition();
 	membuf = malloc(cs);
 	if (membuf == NULL)
 	{
@@ -2420,9 +2552,9 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 		return false;
 	}
 
-	oldidx.Seek(0, SEEK_SET);
-	oldidx.Read(membuf, cs);
-	newidx.Write(membuf, cs);
+	OldIdx.Seek(0, SEEK_SET);
+	OldIdx.Read(membuf, cs);
+	NewIdx.Write(membuf, cs);
 	free(membuf);
 
 	membuf = malloc (binoff);
@@ -2432,9 +2564,9 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 		return false;
 	}
 
-	oldbin.Seek(0, SEEK_SET);
-	oldbin.Read(membuf, binoff);
-	newbin.Write(membuf, binoff);
+	OldBin.Seek(0, SEEK_SET);
+	OldBin.Read(membuf, binoff);
+	NewBin.Write(membuf, binoff);
 	free(membuf);
 
 	// Save piece
@@ -2553,68 +2685,68 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 		scale = 100;
 
 	// Write the vertex data
-	newbin.WriteLong(&piece->verts_count, 1);
+	NewBin.WriteLong(&piece->verts_count, 1);
 	for (i = 0; i < piece->verts_count; i++)
 	{
 		float tmp[3] = { scale*piece->verts[(i*3)], scale*piece->verts[(i*3)+1], scale*piece->verts[(i*3)+2] };
 		short sh[3] = { (short)tmp[0], (short)tmp[1], (short)tmp[2] };
-		newbin.WriteShort(&sh, 3);
+		NewBin.WriteShort(&sh, 3);
 	}
 
 	// Write the connections information
 	for (s = 0, con = piece->connections; con; con = con->next)
 		s++;
-	newbin.WriteShort(&s, 1);
+	NewBin.WriteShort(&s, 1);
 
 	for (con = piece->connections; con; con = con->next)
 	{
 		float tmp[3] = { scale*con->pos[0], scale*con->pos[1], scale*con->pos[2] };
 		short sh[3] = { (short)tmp[0], (short)tmp[1], (short)tmp[2] };
 
-		newbin.WriteByte(&con->type, 1);
-		newbin.WriteShort(sh, 3);
+		NewBin.WriteByte(&con->type, 1);
+		NewBin.WriteShort(sh, 3);
 
 		sh[0] = (short)(con->up[0]*(1<<14));
 		sh[1] = (short)(con->up[1]*(1<<14));
 		sh[2] = (short)(con->up[2]*(1<<14));
-		newbin.WriteShort(sh, 3);
+		NewBin.WriteShort(sh, 3);
 	}
 
 	// Textures
 	for (bt = 0, tex = piece->textures; tex; tex = tex->next)
 		bt++;
-	newbin.WriteByte(&bt, 1);
+	NewBin.WriteByte(&bt, 1);
 
 	for (tex = piece->textures; tex; tex = tex->next)
 	{
-		newbin.WriteByte(&tex->color, 1);
-		newbin.Write(tex->name, 8);
+		NewBin.WriteByte(&tex->color, 1);
+		NewBin.Write(tex->name, 8);
 
 		for (i = 0; i < 12; i++)
 		{
 			float tmp[1] = { tex->points[i]*scale };
 			short sh[1] = { (short)tmp[0] };
-			newbin.WriteShort(sh, 1);
+			NewBin.WriteShort(sh, 1);
 		}
 
 		for (i = 12; i < 20; i++)
 		{
 			float tmp = tex->points[i];
 			short sh[1] = { (short)tmp };
-			newbin.WriteShort(sh, 1);
+			NewBin.WriteShort(sh, 1);
 		}
 	}
 
 	for (s = 0, group = piece->groups; group; group = group->next)
 		s++;
-	newbin.WriteShort(&s, 1);
+	NewBin.WriteShort(&s, 1);
 
 	for (group = piece->groups; group; group = group->next)
 	{
 		for (bt = 0; bt < 5; bt++)
 			if (!group->connections[bt])
 				break;
-		newbin.WriteByte(&bt, 1);
+		NewBin.WriteByte(&bt, 1);
 
 		for (bt = 0; bt < 5; bt++)
 		{
@@ -2624,15 +2756,15 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 			for (s = 0, con = piece->connections; con; con = con->next, s++)
 				if (con == group->connections[bt])
 					break;
-			newbin.WriteShort(&s, 1);
+			NewBin.WriteShort(&s, 1);
 		}
 // TODO: make this endian-safe
-		newbin.Write(group->drawinfo, group->infosize);
+		NewBin.Write(group->drawinfo, group->infosize);
 	}
 
 	// Now write the index
-	newidx.Write(piece->name, LC_PIECE_NAME_LEN);
-	newidx.Write(piece->description, 64);
+	NewIdx.Write(piece->name, LC_PIECE_NAME_LEN);
+	NewIdx.Write(piece->description, 64);
 
 	for (i = 0; i < 6; i++)
 	{
@@ -2642,7 +2774,7 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 //		sb[i] = scale*box[i];
 		sb[i] = (short)ff;
 	}
-	newidx.WriteShort(sb, 6);
+	NewIdx.WriteShort(sb, 6);
 
 	// Calculate flags.
 	bt = LC_PIECE_COUNT;
@@ -2653,63 +2785,58 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece)
 		bt |= LC_PIECE_MEDIUM;
 
 	if (piece->long_info)
-		bt |= LC_PIECE_LONGDATA;
+		bt |= LC_PIECE_LONGDATA_FILE;
 
-	newidx.WriteByte(&bt, 1);
+	NewIdx.WriteByte(&bt, 1);
 
 	i = 0;//PiecesLibrary::GetDefaultPieceGroup(piece->description);
-	newidx.WriteLong(&i, 1);
-	newidx.WriteLong(&binoff, 1);
+	NewIdx.WriteLong(&i, 1);
+	NewIdx.WriteLong(&binoff, 1);
 
-	i = newbin.GetLength() - binoff;
-	newidx.WriteLong(&i, 1);
+	i = NewBin.GetLength() - binoff;
+	NewIdx.WriteLong(&i, 1);
 
 	// replacing a piece
 	if (j != count)
 	{
-		unsigned long d = newbin.GetPosition() - delta;
-		oldidx.Seek (LC_PIECE_NAME_LEN+64+12+1+4+4+4, SEEK_CUR);
+		unsigned long d = NewBin.GetPosition() - delta;
+		OldIdx.Seek (LC_PIECE_NAME_LEN+64+12+1+4+4+4, SEEK_CUR);
 		for (j++; j < count; j++)
 		{
-			unsigned long dw;
+			lcuint32 dw;
 			char buf[LC_PIECE_NAME_LEN+64+12+1+4];
-			oldidx.Read(buf, LC_PIECE_NAME_LEN+64+12+1+4);
-			oldidx.ReadLong(&dw, 1);
+			OldIdx.Read(buf, LC_PIECE_NAME_LEN+64+12+1+4);
+			OldIdx.ReadLong(&dw, 1);
 			dw += d;
-			newidx.Write(buf, LC_PIECE_NAME_LEN+64+12+1+4);
-			newidx.WriteLong(&dw, 1);
-			oldidx.ReadLong(&dw, 1);
-			newidx.WriteLong(&dw, 1);
+			NewIdx.Write(buf, LC_PIECE_NAME_LEN+64+12+1+4);
+			NewIdx.WriteLong(&dw, 1);
+			OldIdx.ReadLong(&dw, 1);
+			NewIdx.WriteLong(&dw, 1);
 		}
 
-		d = oldbin.GetLength()-delta;
+		d = OldBin.GetLength()-delta;
 		membuf = malloc (d);
-		oldbin.Seek (delta, SEEK_SET);
-		oldbin.Read (membuf, d);
-		newbin.Write(membuf, d);
+		OldBin.Seek(delta, SEEK_SET);
+		OldBin.Read(membuf, d);
+		NewBin.Write(membuf, d);
 		free(membuf);
 	}
 	else
 		count++;
 
 	// Fix the end of the index
-	oldidx.Seek(-(2+4+2), SEEK_END);
-	oldidx.ReadShort(&moved, 1);
-	cs = 2+(moved*16);
-	oldidx.Seek(-(long)cs, SEEK_CUR);
+	OldIdx.Seek(-(2+4+2), SEEK_END);
+	OldIdx.ReadShort(&moved, 1);
+	cs = 2+(moved*LC_PIECE_NAME_LEN*2);
+	OldIdx.Seek(-(long)cs, SEEK_CUR);
 	membuf = malloc(cs);
-	oldidx.Read(membuf, cs);
-	newidx.Write(membuf, cs);
+	OldIdx.Read(membuf, cs);
+	NewIdx.Write(membuf, cs);
 	free(membuf);
 
-	binoff = newbin.GetPosition();
-	newidx.WriteLong(&binoff, 1);
-	newidx.WriteShort(&count, 1);
-
-	oldidx.Close();
-	oldbin.Close();
-	newidx.Close();
-	newbin.Close();
+	binoff = NewBin.GetPosition();
+	NewIdx.WriteLong(&binoff, 1);
+	NewIdx.WriteShort(&count, 1);
 
 	return true;
 }

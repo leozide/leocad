@@ -13,11 +13,11 @@ class PieceInfo;
 #define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
 #define LC_CATEGORY_FILE_VERSION  0x0100
 
-typedef struct
+struct PiecesLibraryCategory
 {
 	String Name;
 	String Keywords;
-} PiecesLibraryCategory;
+};
 
 class PiecesLibrary
 {
@@ -74,11 +74,12 @@ public:
 	Texture* GetTexture(int index) const;
 
 	// File operations.
-	bool DeletePieces(PtrArray<PieceInfo>& Pieces);
+	bool DeleteAllPieces();
+	bool DeletePieces(PtrArray<const char>& Pieces);
 	bool LoadUpdate(const char* update);
 	bool DeleteTextures(char** Names, int NumTextures);
 	bool ImportTexture(const char* Name);
-	bool ImportLDrawPiece(const char* Filename);
+	bool ImportLDrawPiece(const char* Filename, File* NewIdxFile, File* NewBinFile, File* OldIdxFile, File* OldBinFile);
 
 	// Set when pieces are added/removed from the library.
 	bool m_Modified;
@@ -117,37 +118,37 @@ protected:
 // ============================================================================
 
 // This should be cleaned and moved to the PiecesLibrary class
-typedef struct connection_s
+struct connection_t
 {
 	unsigned char type;
 	float pos[3];
 	float up[3];
-	connection_s* next;
-} connection_t;
+	connection_t* next;
+};
 
-typedef struct group_s
+struct group_t
 {
 	connection_t* connections[5];
 	void* drawinfo;
 	unsigned long infosize;
-	group_s* next;
-} group_t;
+	group_t* next;
+};
 
-typedef struct lineinfo_s
+struct lineinfo_t
 {
 	unsigned char type;
 	unsigned char color;
 	float points[12];
-	lineinfo_s* next;
-} lineinfo_t;
+	lineinfo_t* next;
+};
 
-typedef struct texture_s
+struct texture_t
 {
 	float points[20];
 	unsigned char color;
 	char name[9];
-	texture_s* next;
-} texture_t;
+	texture_t* next;
+};
 
 struct LC_LDRAW_PIECE
 {
@@ -162,7 +163,7 @@ struct LC_LDRAW_PIECE
 };
 
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
-bool SaveLDrawPiece(LC_LDRAW_PIECE* piece);
+bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, File* NewIdxFile, File* NewBinFile, File* OldIdxFile, File* OldBinFile);
 void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
 
 #endif // _LIBRARY_H_

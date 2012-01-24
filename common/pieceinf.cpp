@@ -427,9 +427,9 @@ void PieceInfo::LoadInformation()
 
 		while (*bytes)
 		{
-      if (*bytes == LC_MESH)
-      {
-				if ((fixverts > 65535) || (m_nFlags & LC_PIECE_LONGDATA))
+			if (*bytes == LC_MESH)
+			{
+				if (m_nFlags & LC_PIECE_LONGDATA_FILE)
 				{
 					lcuint32 colors, *p;
 					p = (lcuint32*)(bytes + 1);
@@ -502,15 +502,8 @@ void PieceInfo::LoadInformation()
 
 	m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
 	m_nVertexCount = verts;
-	if ((verts > 65535) || (quads > 65535) || (fixquads > 65535))
-	{
-		if ((m_nFlags & LC_PIECE_LONGDATA) == 0)
-		{
-			m_nFlags |= LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME;
-		}
-	}
-	else
-		m_nFlags &= ~(LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME);
+	if (verts > 65535 || quads > 65535)
+		m_nFlags |= LC_PIECE_LONGDATA_INDICES;
 
   // Copy the 'fixed' vertexes
   shorts = (lcint16*)(longs + 1);
@@ -540,17 +533,17 @@ void PieceInfo::LoadInformation()
       bytes += sizeof(lcuint16);
     }
 
-    // Currently there's only one type of drawinfo (mesh or stud)
-    // per group but this will change in the future.
-    switch (*bytes)
-    {
-    case LC_MESH:
-      if ((fixverts > 65535) || (fixquads > 65535))
-      {
+	// Currently there's only one type of drawinfo (mesh or stud)
+	// per group but this will change in the future.
+	switch (*bytes)
+	{
+	case LC_MESH:
+		if (m_nFlags & LC_PIECE_LONGDATA_FILE)
+		{
 				lcuint32 colors, *p;
 				bytes++;
 				p = (lcuint32*)bytes;
-        *p = LCUINT32(*p);
+				*p = LCUINT32(*p);
 				colors = *p;
 				p++;
 
@@ -608,7 +601,7 @@ void PieceInfo::LoadInformation()
 
 				i = (unsigned char*)p - bytes;
 
-				if (m_nFlags & LC_PIECE_LONGDATA)
+				if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
 				{
 					pGroup->drawinfo = malloc(i*sizeof(lcuint32)/sizeof(lcuint16));
 					longs = (lcuint32*)pGroup->drawinfo;
@@ -656,7 +649,7 @@ void PieceInfo::LoadInformation()
       // colors + 2*num_prim + sides*prims
       size = 9+SIDES*11;
 
-      if (m_nFlags & LC_PIECE_LONGDATA)
+      if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
       {
 	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
 	longs = (lcuint32*)pGroup->drawinfo;
@@ -815,7 +808,7 @@ void PieceInfo::LoadInformation()
       // colors + 2*num_prim + sides*prims
       size = 9+SIDES*20;
 
-      if (m_nFlags & LC_PIECE_LONGDATA)
+      if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
       {
 	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
 	longs = (lcuint32*)pGroup->drawinfo;
@@ -1046,7 +1039,7 @@ void PieceInfo::LoadInformation()
       // colors + 2*num_prim + sides*prims
       size = 9+SIDES*11;
 
-      if (m_nFlags & LC_PIECE_LONGDATA)
+      if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
       {
 	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
 	longs = (lcuint32*)pGroup->drawinfo;
@@ -1205,7 +1198,7 @@ void PieceInfo::LoadInformation()
       // colors + 2*num_prim + sides*prims
       size = 9+SIDES*20;
 
-      if (m_nFlags & LC_PIECE_LONGDATA)
+      if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
       {
 	pGroup->drawinfo = malloc(sizeof(lcuint32)*size);
 	longs = (lcuint32*)pGroup->drawinfo;
@@ -1452,10 +1445,8 @@ void PieceInfo::FreeInformation()
 		m_pTextures = NULL;
 	}
 
-	if (m_nFlags & LC_PIECE_LONGDATA_RUNTIME)
-	{
-		m_nFlags &= ~(LC_PIECE_LONGDATA | LC_PIECE_LONGDATA_RUNTIME);
-	}
+	if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
+		m_nFlags &= ~LC_PIECE_LONGDATA_INDICES;
 }
 
 // Zoom extents for the preview window and print catalog
@@ -1656,7 +1647,7 @@ void PieceInfo::RenderPiece(int nColor)
 	sh = m_nGroupCount;
 	for (pGroup = m_pGroups; sh--; pGroup++)
 	{
-		if (m_nFlags & LC_PIECE_LONGDATA)
+		if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
 		{
 			lcuint32* info, colors;
 
@@ -1750,7 +1741,7 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 	
 	for (group = 0; group < m_nGroupCount; group++)
 	{
-		if (m_nFlags & LC_PIECE_LONGDATA)
+		if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
 		{
 			unsigned long* info = (unsigned long*)m_pGroups[group].drawinfo;
 			unsigned long count, colors = *info;

@@ -1,6 +1,9 @@
 #ifndef _LIBDLG_H_
 #define _LIBDLG_H_
 
+#include "array.h"
+#include "str.h"
+
 class PieceInfo;
 
 class CLibraryDlg : public CDialog
@@ -32,6 +35,8 @@ public:
 	BOOL ContinueModal();
 	void UpdateTree();
 	void UpdateList();
+
+	bool ImportPieces(const ObjArray<String>& FileList);
 
 	CToolBar m_wndToolBar;
 	CImageList m_TreeImages;

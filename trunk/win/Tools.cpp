@@ -439,6 +439,7 @@ void Export3DStudio()
 		matr->wiresize = 1.0f;
 		matr->shading = Phong;
 		matr->useblur = False3ds;
+		matr->twosided = True3ds;
 		PutMaterial3ds(db, matr);
 		ReleaseMaterial3ds(&matr);
 	}

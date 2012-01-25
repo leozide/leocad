@@ -14,6 +14,7 @@
 
 #define _WIN32_WINNT 0x500
 #define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_DEPRECATE 1
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // some CString constructors will be explicit
 

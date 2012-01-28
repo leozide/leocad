@@ -118,6 +118,7 @@ public:
 	void DeleteContents(bool bUndo); // delete doc items etc
 	void LoadDefaults(bool cameras);
 	void BeginPieceDrop(PieceInfo* Info);
+	void BeginColorDrop();
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
@@ -233,6 +234,8 @@ public:
 	void OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift);
 	void OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift);
 	void OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift);
+	void OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift);
 	void OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift);
 	void OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift);
 	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);
@@ -245,6 +248,9 @@ public:
 
 protected:
 	// State variables
+	int m_nCurAction;
+	int m_PreviousAction;
+	bool m_RestoreAction;
 	unsigned char m_nViewportMode;
 	unsigned char m_nActiveViewport;
 	int m_nViewX;
@@ -252,8 +258,6 @@ protected:
 	PieceInfo* m_pCurPiece;
 	PieceInfo* m_PreviousPiece;
 	unsigned char m_nCurColor;
-	unsigned char m_nCurAction;
-	unsigned char m_PreviousAction;
 	bool m_bAnimation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
@@ -286,7 +290,7 @@ protected:
 
 protected:
 	// File load/save implementation.
-	bool DoSave(char* lpszPathName, bool bReplace);
+	bool DoSave(char* PathName, bool bReplace);
 	bool DoFileSave();
 	bool FileLoad(File* file, bool bUndo, bool bMerge);
 	void FileSave(File* file, bool bUndo);

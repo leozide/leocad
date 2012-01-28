@@ -16,6 +16,7 @@
 #define LC_MAXPATH 260 //_MAX_PATH
 #define KEY_SHIFT	VK_SHIFT
 #define KEY_CONTROL	VK_CONTROL
+#define KEY_ALT		VK_MENU
 #define KEY_ESCAPE	VK_ESCAPE
 #define KEY_TAB		VK_TAB
 #define KEY_INSERT	VK_INSERT
@@ -34,16 +35,17 @@
 #define LC_MAXPATH 1024 //FILENAME_MAX
 #define KEY_SHIFT	0x01
 #define KEY_CONTROL	0x02
-#define KEY_ESCAPE	0x03
-#define KEY_TAB	        0x04
-#define KEY_INSERT	0x05
-#define KEY_DELETE      0x06
-#define KEY_UP		0x07
-#define KEY_DOWN	0x08
-#define KEY_LEFT	0x09
-#define KEY_RIGHT	0x0A
-#define KEY_PRIOR	0x0B
-#define KEY_NEXT        0x0C
+#define KEY_ALT		0x03
+#define KEY_ESCAPE	0x04
+#define KEY_TAB	        0x05
+#define KEY_INSERT	0x06
+#define KEY_DELETE      0x07
+#define KEY_UP		0x08
+#define KEY_DOWN	0x09
+#define KEY_LEFT	0x0A
+#define KEY_RIGHT	0x0B
+#define KEY_PRIOR	0x0C
+#define KEY_NEXT        0x0D
 #define KEY_PLUS	'+'
 #define KEY_MINUS	'-'
 

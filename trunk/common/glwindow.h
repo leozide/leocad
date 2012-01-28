@@ -31,6 +31,8 @@ public:
 	virtual void OnLeftButtonDown(int x, int y, bool bControl, bool bShift) { };
 	virtual void OnLeftButtonUp(int x, int y, bool bControl, bool bShift) { };
 	virtual void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift) { };
+	virtual void OnMiddleButtonDown(int x, int y, bool bControl, bool bShift) { };
+	virtual void OnMiddleButtonUp(int x, int y, bool bControl, bool bShift) { };
 	virtual void OnRightButtonDown(int x, int y, bool bControl, bool bShift) { };
 	virtual void OnRightButtonUp(int x, int y, bool bControl, bool bShift) { };
 	virtual void OnMouseMove(int x, int y, bool bControl, bool bShift) { };

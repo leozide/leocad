@@ -6127,8 +6127,9 @@ void Project::SetAction(int nAction)
 	if (m_nCurAction == LC_ACTION_INSERT)
 		Redraw = true;
 
-	SystemUpdateAction(nAction, m_nCurAction);
+	m_PreviousAction = m_nCurAction;
 	m_nCurAction = nAction;
+	SystemUpdateAction(m_nCurAction, m_PreviousAction);
 
 	if ((m_nCurAction == LC_ACTION_MOVE) || (m_nCurAction == LC_ACTION_ROTATE) ||
 	    (m_nCurAction == LC_ACTION_ROTATE_VIEW))
@@ -6781,6 +6782,12 @@ bool Project::StopTracking(bool bAccept)
 			case LC_ACTION_ERASER:
 			case LC_ACTION_PAINT:
 				break;
+		}
+
+		if (m_RestoreAction)
+		{
+			SetAction(m_PreviousAction);
+			m_RestoreAction = false;
 		}
 	}
 	else if (m_pTrackFile != NULL)
@@ -7552,13 +7559,20 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 void Project::BeginPieceDrop(PieceInfo* Info)
 {
 	StartTracking(LC_TRACK_LEFT);
+	SetAction(LC_ACTION_INSERT);
+	m_RestoreAction = true;
 
-	m_PreviousAction = m_nCurAction;
 	m_PreviousPiece = m_pCurPiece;
 
 	m_pCurPiece = Info;
 	m_pCurPiece->AddRef();
-	SetAction(LC_ACTION_INSERT);
+}
+
+void Project::BeginColorDrop()
+{
+	StartTracking(LC_TRACK_LEFT);
+	SetAction(LC_ACTION_PAINT);
+	m_RestoreAction = true;
 }
 
 void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift)
@@ -7586,6 +7600,12 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+
+	if (Sys_KeyDown(KEY_ALT))
+	{
+		SetAction(LC_ACTION_ROTATE_VIEW);
+		m_RestoreAction = true;
+	}
 
 	switch (m_nCurAction)
 	{
@@ -7980,12 +8000,11 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				SystemUpdateFocus(pPiece);
 
 				if (m_nSnap & LC_DRAW_MOVE)
+				{
 					SetAction(LC_ACTION_MOVE);
-				else
-					SetAction(m_PreviousAction);
+					m_RestoreAction = false;
+				}
 			}
-			else
-				SetAction(m_PreviousAction);
 
 			m_pCurPiece->DeRef();
 			m_pCurPiece = m_PreviousPiece;
@@ -7993,6 +8012,49 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 		}
 	}
 
+	StopTracking(true);
+}
+
+void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift)
+{
+	GLdouble modelMatrix[16], projMatrix[16], point[3];
+	GLint viewport[4];
+
+	if (StopTracking(false))
+		return;
+
+	if (SetActiveView(view))
+		return;
+
+	m_nDownX = x;
+	m_nDownY = y;
+	m_bTrackCancel = false;
+
+	LoadViewportProjection(m_nActiveViewport);
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
+	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+
+	if (Sys_KeyDown(KEY_ALT))
+	{
+		SetAction(LC_ACTION_PAN);
+		m_RestoreAction = true;
+	}
+
+	switch (m_nCurAction)
+	{
+		case LC_ACTION_PAN:
+		{
+			StartTracking(LC_TRACK_START_RIGHT);
+		} break;
+	}
+}
+
+void Project::OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift)
+{
 	StopTracking(true);
 }
 
@@ -8018,6 +8080,12 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 
 	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
 	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+
+	if (Sys_KeyDown(KEY_ALT))
+	{
+		SetAction(LC_ACTION_ZOOM);
+		m_RestoreAction = true;
+	}
 
 	switch (m_nCurAction)
 	{
@@ -8066,6 +8134,11 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
           m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
 					break;
 				}
+		} break;
+
+		case LC_ACTION_ZOOM:
+		{
+			StartTracking(LC_TRACK_START_RIGHT);
 		} break;
 	}
 }

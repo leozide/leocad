@@ -43,6 +43,14 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 			wnd->OnLeftButtonDoubleClick((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
 				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
 			break;
+		case WM_MBUTTONDOWN:
+			wnd->OnMiddleButtonDown((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
+		case WM_MBUTTONUP:
+			wnd->OnMiddleButtonUp((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
 		case WM_RBUTTONDOWN:
 			wnd->OnRightButtonDown((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
 				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);

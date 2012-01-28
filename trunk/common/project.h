@@ -172,7 +172,7 @@ protected:
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
-	void GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
+	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
 	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
@@ -192,11 +192,12 @@ protected:
 
 	// Rendering
 	void RenderBackground(View* view);
+	void RenderScenePieces(View* view);
+	void RenderSceneBoxes(View* view);
+	void RenderSceneObjects(View* view);
+	void RenderViewports(View* view);
+	void RenderOverlays(View* view);
 
-	void RenderScene(bool bShaded, bool bDrawViewports);
-	void RenderViewports(bool bBackground, bool bLines);
-	void RenderOverlays(int Viewport);
-	void RenderBoxes(bool bHilite);
 	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 

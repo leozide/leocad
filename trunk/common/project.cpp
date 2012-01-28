@@ -1494,13 +1494,13 @@ bool Project::OnOpenDocument (const char* lpszPathName)
   return true;
 }
 
-void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
+void Project::SetPathName(const char* PathName, bool bAddToMRU)
 {
-	strcpy(m_strPathName, lpszPathName);
+	strcpy(m_strPathName, PathName);
 
 	// always capture the complete file name including extension (if present)
-	const char* lpszTemp = lpszPathName;
-	for (const char* lpsz = lpszPathName; *lpsz != '\0'; lpsz++)
+	const char* lpszTemp = PathName;
+	for (const char* lpsz = PathName; *lpsz != '\0'; lpsz++)
 	{
 		// remember last directory/drive separator
 		if (*lpsz == '\\' || *lpsz == '/' || *lpsz == ':')
@@ -1512,7 +1512,7 @@ void Project::SetPathName(const char* lpszPathName, bool bAddToMRU)
 
 	// add it to the file MRU list
 	if (bAddToMRU)
-		main_window->AddToMRU (lpszPathName);
+		main_window->AddToMRU(PathName);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1616,19 +1616,26 @@ void Project::Render(View* view, bool ToMemory)
 	m_pViewCameras[0]->LoadProjection(ratio);
 
 	if (ToMemory)
-		RenderScene(true, false);
+		RenderScenePieces(view);
 	else
 	{
 		if ((m_nDetail & LC_DET_FAST) && (m_nTracking != LC_TRACK_NONE))
-			RenderScene(false, true);
+			RenderSceneBoxes(view);
 		else
-			RenderScene(true, true);
+			RenderScenePieces(view);
+
+		RenderSceneObjects(view);
+
+		if (m_OverlayActive)
+			RenderOverlays(view);
+
+		RenderViewports(view);
 	}
 }
 
 void Project::RenderBackground(View* view)
 {
-	if (m_nScene & (LC_SCENE_GRADIENT|LC_SCENE_BG) == 0)
+	if ((m_nScene & (LC_SCENE_GRADIENT | LC_SCENE_BG)) == 0)
 	{
 		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1888,433 +1895,267 @@ static void BuildBSP(LC_BSPNODE* node, Piece* pList)
 		node->back = NULL;
 }
 
-void Project::RenderScene(bool bShaded, bool bDrawViewports)
+void Project::RenderScenePieces(View* view)
 {
-	glViewport (0, 0, m_nViewX, m_nViewY);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	float AspectRatio = (float)view->GetWidth() / (float)view->GetHeight();
+	m_pViewCameras[0]->LoadProjection(AspectRatio);
 
-	if (bDrawViewports)
+	if (m_nSnap & LC_DRAW_GRID)
 	{
-		if (bShaded)
-		{
-			if (m_nDetail & LC_DET_LIGHTING)
-				glDisable (GL_LIGHTING);
-			if (m_nScene & LC_SCENE_FOG)
-				glDisable (GL_FOG);
-			RenderViewports(true, true);
-			if (m_nDetail & LC_DET_LIGHTING)
-				glEnable(GL_LIGHTING);
-			if (m_nScene & LC_SCENE_FOG)
-				glEnable (GL_FOG);
-		}
-		else
-			RenderViewports(true, true);
+		glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
+		glCallList (m_nGridList);
 	}
-	else
-		RenderViewports(true, false);
 
-	for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
+	if (m_nDetail & LC_DET_LIGHTING)
 	{
-		int x = (int)(viewports[m_nViewportMode].dim[vp][0] * ((float)m_nViewX));
-		int y = (int)(viewports[m_nViewportMode].dim[vp][1] * ((float)m_nViewY));
-		int w = (int)(viewports[m_nViewportMode].dim[vp][2] * ((float)m_nViewX));
-		int h = (int)(viewports[m_nViewportMode].dim[vp][3] * ((float)m_nViewY));
+		int index = 0;
+		Light *pLight;
 
-		float ratio = (float)w/h;
-		glViewport(x, y, w, h);
+		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
+			pLight->Setup (index);
 
-		// Disable lighting.
-		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
-		{
-			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-				glDisable(GL_LIGHTING);
-		}
-		
-		if (m_nSnap & LC_DRAW_AXIS)
-		{
-	    Matrix Mats[3];
-		  Mats[0].CreateLookat(m_pViewCameras[vp]->GetEyePos(), m_pViewCameras[vp]->GetTargetPos(), m_pViewCameras[vp]->GetUpVec());
-			Mats[0].SetTranslation(0, 0, 0);
-
-			float m1[] = { 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
-			float m2[] = { 0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 1 };
-			Mats[1].Multiply(Mats[0], Matrix(m1));
-			Mats[2].Multiply(Mats[0], Matrix(m2));
-
-			float pts[3][3] = { { 20, 0, 0 }, { 0, 20, 0 }, { 0, 0, 20 } };
-			Mats[0].TransformPoints(&pts[0][0], 3);
-
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			glOrtho(0, w, 0, h, -50, 50);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glTranslatef(25.375f, 25.375f, 0.0f);
-
-			// Draw the arrows.
-			for (int i = 0; i < 3; i++)
-			{
-				switch (i)
-				{
-				case 0:
-					glColor3f(0.8f, 0.0f, 0.0f);
-					break;
-				case 1:
-					glColor3f(0.0f, 0.8f, 0.0f);
-					break;
-				case 2:
-					glColor3f(0.0f, 0.0f, 0.8f);
-					break;
-				}
-
-				glBegin(GL_LINES);
-				glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
-				glVertex3f(0, 0, 0);
-				glEnd();
-
-				glBegin(GL_TRIANGLE_FAN);
-				glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
-				for (int j = 0; j < 9; j++)
-				{
-					float pt[3] = { 12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f };
-					Mats[i].TransformPoints(pt, 1);
-					glVertex3f(pt[0], pt[1], pt[2]);
-				}
-				glEnd();
-			}
-
-			// Draw the text.
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			m_pScreenFont->MakeCurrent();
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_ALPHA_TEST);
-
-			glBegin(GL_QUADS);
-			glColor3f(0, 0, 0);
-			m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
-			m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
-			m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
-			glEnd();
-
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_ALPHA_TEST);
-		}
-					
-		m_pViewCameras[vp]->LoadProjection(ratio);
-
-		if ((m_nSnap & LC_DRAW_AXIS) || (m_nSnap & LC_DRAW_GRID))
-		{
-			glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
-
-			if (m_nSnap & LC_DRAW_GRID)
-				glCallList (m_nGridList);
-
-			if ((bShaded) && (m_nDetail & LC_DET_LIGHTING))
-				glEnable(GL_LIGHTING);
-		}
-
-		if ((m_nDetail & LC_DET_LIGHTING) != 0)
-		{
-			int index = 0;
-			Light *pLight;
-
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-				pLight->Setup (index);
-		}
-
-    //    glDisable (GL_COLOR_MATERIAL);
-    /*
-      {
-	for (int i = -100; i < 100; i+=5)
-	{
-	  glBegin (GL_QUAD_STRIP);
-	  glNormal3f (0,0,1);
-	  for (int j = -100; j < 100; j+=5)
-	  {
-	    glVertex3f ((float)i/10, (float)j/10,0);
-	    glVertex3f ((float)(i+5)/10, (float)j/10,0);
-	  }
-	  glEnd();
+		glEnable(GL_LIGHTING);
 	}
-      }
-    */
-    /*
-    {
-      LC_RENDER_INFO info;
-      info.lighting = (m_nDetail & LC_DET_LIGHTING) != 0;
-      info.edges = (m_nDetail & LC_DET_BRICKEDGES) != 0;
-      info.fLineWidth = m_fLineWidth;
 
-      info.lastcolor = 255;
-      info.transparent = false;
+	if (m_nScene & LC_SCENE_FOG)
+		glEnable(GL_FOG);
 
+	if (m_nScene & LC_SCENE_FLOOR)
+		m_pTerrain->Render(m_pViewCameras[0], AspectRatio);
 
-      float pos[] = { 0,0,0 };
-      Curve curve (NULL, pos, 0);
-      curve.Render (&info);
-    }
-    */
-		if (bShaded)
+	unsigned char nLastColor = 255;
+	bool bTrans = false;
+	bool bSel = false;
+	bool bCull = false;
+	Piece* pPiece;
+
+	LC_BSPNODE tree;
+	tree.front = tree.back = NULL;
+	Piece* pList = NULL;
+
+	// Draw opaque pieces first
+	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
+		if (!pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			continue;
+
+		if (!pPiece->IsTransparent())
 		{
-			if (m_nScene & LC_SCENE_FLOOR)
-				m_pTerrain->Render(m_pViewCameras[vp], ratio);
-
-			unsigned char nLastColor = 255;
-			bool bTrans = false;
-			bool bSel = false;
-			bool bCull = false;
-			Piece* pPiece;
-
-			LC_BSPNODE tree;
-			tree.front = tree.back = NULL;
-			Piece* pList = NULL;
-
-			// Draw opaque pieces first
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			if (pPiece->IsSelected())
 			{
-//				if (m_nDetail & LC_DET_BACKGROUND)
-//				{
-//					SystemPumpMessages();
-//					if (m_bStopRender)
-//						return;
-//				}
-
-				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+				if (!bSel)
 				{
-					if (!pPiece->IsTransparent())
-					{
-						if (pPiece->IsSelected())
-						{
-							if (!bSel)
-							{
-								bSel = true;
-								glLineWidth (2*m_fLineWidth);
-							}
-						}
-						else
-						{
-							if (bSel)
-							{
-								bSel = false;
-								glLineWidth(m_fLineWidth);
-							}
-						}
-/*
-						if (pPiece->m_pInfo->m_nConnectionCount == 1)
-						{
-							if (bCull)
-							{
-								bCull = false;
-								glDisable(GL_CULL_FACE);
-							}
-						}
-						else
-						{
-							if (!bCull)
-							{
-								bCull = true;
-								glEnable(GL_CULL_FACE);
-							}
-						}
-*/
-						pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
-					}
-					else
-					{
-						pPiece->m_pLink = pList;
-						pList = pPiece;
-					}
+					bSel = true;
+					glLineWidth (2*m_fLineWidth);
+				}
+			}
+			else
+			{
+				if (bSel)
+				{
+					bSel = false;
+					glLineWidth(m_fLineWidth);
 				}
 			}
 
-			if (pList)
-			{
-				float eye[3];
-				m_pViewCameras[vp]->GetEyePos (eye);
-				BuildBSP(&tree, pList);
-				RenderBSP(&tree, eye, &bSel,
-					(m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
-			}
-
-
-#if 0
-			// Draw transparent pieces
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-			{
-//				MSG msg;
-//				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-//				{
-//					TranslateMessage(&msg);
-//					DispatchMessage(&msg);  
-//					if (m_bStopRender) 
-//						return;
-//				}
-
-				if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-					(pPiece->IsTransparent()))
-				{
-					if (pPiece->IsSelected())
-					{
-						if (!bSel)
-						{
-							bSel = true;
-							glLineWidth (2*m_fLineWidth);
-						}
-					}
-					else
-					{
-						if (bSel)
-						{
-							bSel = false;
-							glLineWidth(m_fLineWidth);
-						}
-					}
-/*
-					if (pPiece->m_pInfo->m_nConnectionCount == 1)
-					{
-						if (bCull)
-						{
-							bCull = FALSE;
-							glDisable(GL_CULL_FACE);
-						}
-					}
-					else
-					{
-						if (!bCull)
-						{
-							bCull = TRUE;
-							glEnable(GL_CULL_FACE);
-						}
-					}
-*/
-					pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
-				}
-			}
-#endif
-			if (bTrans)
-			{
-				glDepthMask(GL_TRUE);
-				glDisable(GL_BLEND);
-			}
-			if (bSel)
-				glLineWidth(m_fLineWidth);
-			if (bCull)
-				glDisable(GL_CULL_FACE);
+			pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
 		}
 		else
 		{
-//			glEnable (GL_CULL_FACE);
-//			glShadeModel (GL_FLAT);
-//			glDisable (GL_LIGHTING);
-
-			// Wireframe
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			RenderBoxes(true);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			pPiece->m_pLink = pList;
+			pList = pPiece;
 		}
+	}
 
+	if (pList)
+	{
+		float eye[3];
+		m_pViewCameras[0]->GetEyePos (eye);
+		BuildBSP(&tree, pList);
+		RenderBSP(&tree, eye, &bSel, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+	}
+
+	if (bTrans)
+	{
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
+	}
+
+	if (bSel)
+		glLineWidth(m_fLineWidth);
+
+	if (bCull)
+		glDisable(GL_CULL_FACE);
+}
+
+void Project::RenderSceneBoxes(View* view)
+{
+	Piece* pPiece;
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			pPiece->RenderBox(true, m_fLineWidth);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void Project::RenderSceneObjects(View* view)
+{
 #ifdef LC_DEBUG
-		RenderDebugPrimitives();
+	RenderDebugPrimitives();
 #endif
 
-		// Draw cameras & lights
-		if (bDrawViewports)
-		{
-			if (m_nCurAction == LC_ACTION_INSERT)
-			{
-				Vector3 Pos;
-				Vector4 Rot;
-				GetPieceInsertPosition(m_nDownX, m_nDownY, Pos, Rot);
+	// Draw cameras & lights
+	if (m_nCurAction == LC_ACTION_INSERT)
+	{
+		Vector3 Pos;
+		Vector4 Rot;
+		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Pos, Rot);
 
-				glPushMatrix();
-				glTranslatef(Pos[0], Pos[1], Pos[2]);
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
-				glLineWidth(2*m_fLineWidth);
-				m_pCurPiece->RenderPiece(m_nCurColor);
-				glLineWidth(m_fLineWidth);
-				glPopMatrix();
-			}
+		glPushMatrix();
+		glTranslatef(Pos[0], Pos[1], Pos[2]);
+		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+		glLineWidth(2*m_fLineWidth);
+		m_pCurPiece->RenderPiece(m_nCurColor);
+		glLineWidth(m_fLineWidth);
+		glPopMatrix();
+	}
 
-			if (m_nDetail & LC_DET_LIGHTING)
-			{
-				glDisable (GL_LIGHTING);
-				int index = 0;
-				Light *pLight;
+	if (m_nDetail & LC_DET_LIGHTING)
+	{
+		glDisable (GL_LIGHTING);
+		int index = 0;
+		Light *pLight;
 				
-				for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-					glDisable ((GLenum)(GL_LIGHT0+index));
-			}
+		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
+			glDisable ((GLenum)(GL_LIGHT0+index));
+	}
 			
-			Camera* pCamera;
-			Light* pLight;
-			
-			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-			{
-				if ((pCamera == m_pViewCameras[vp]) || !pCamera->IsVisible())
-					continue;
-				pCamera->Render(m_fLineWidth);
-			}
+	for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+	{
+		if ((pCamera == m_pViewCameras[0]) || !pCamera->IsVisible())
+			continue;
+		pCamera->Render(m_fLineWidth);
+	}
 
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsVisible ())
-					pLight->Render(m_fLineWidth);
-				
-				if (m_nDetail & LC_DET_LIGHTING)
-					glEnable (GL_LIGHTING);
-		}
+	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+		if (pLight->IsVisible ())
+			pLight->Render(m_fLineWidth);
 
-		// Draw the selection rectangle.
-		if ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT))
+	// Draw axis icon
+	if (m_nSnap & LC_DRAW_AXIS)
+	{
+//		glClear(GL_DEPTH_BUFFER_BIT);
+
+		Matrix Mats[3];
+		Mats[0].CreateLookat(m_pViewCameras[0]->GetEyePos(), m_pViewCameras[0]->GetTargetPos(), m_pViewCameras[0]->GetUpVec());
+		Mats[0].SetTranslation(0, 0, 0);
+
+		float m1[] = { 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
+		float m2[] = { 0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 1 };
+		Mats[1].Multiply(Mats[0], Matrix(m1));
+		Mats[2].Multiply(Mats[0], Matrix(m2));
+
+		float pts[3][3] = { { 20, 0, 0 }, { 0, 20, 0 }, { 0, 0, 20 } };
+		Mats[0].TransformPoints(&pts[0][0], 3);
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -50, 50);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(25.375f, 25.375f, 0.0f);
+
+		// Draw the arrows.
+		for (int i = 0; i < 3; i++)
 		{
-			int x, y, w, h;
-
-			x = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-			y = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-			w = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-			h = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
-
-			glViewport(x, y, w, h);
-
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			glOrtho(0, w, 0, h, -1, 1);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glTranslatef(0.375, 0.375, 0.0);
-
-			glDisable(GL_DEPTH_TEST);
-			glEnable(GL_LINE_STIPPLE);
-			glLineStipple(5, 0x5555);
-			glColor3f(0, 0, 0);
-
-			float pt1x = (float)(m_nDownX - x);
-			float pt1y = (float)(m_nDownY - y);
-			float pt2x = m_fTrack[0] - x;
-			float pt2y = m_fTrack[1] - y;
+			switch (i)
+			{
+			case 0:
+				glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 1:
+				glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
+				break;
+			case 2:
+				glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
+				break;
+			}
 
 			glBegin(GL_LINES);
-			glVertex2f(pt1x, pt1y);
-			glVertex2f(pt2x, pt1y);
-			glVertex2f(pt2x, pt1y);
-			glVertex2f(pt2x, pt2y);
-			glVertex2f(pt2x, pt2y);
-			glVertex2f(pt1x, pt2y);
-			glVertex2f(pt1x, pt2y);
-			glVertex2f(pt1x, pt1y);
+			glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
+			glVertex3f(0, 0, 0);
 			glEnd();
 
-			glDisable(GL_LINE_STIPPLE);
-			glEnable(GL_DEPTH_TEST);
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
+			for (int j = 0; j < 9; j++)
+			{
+				float pt[3] = { 12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f };
+				Mats[i].TransformPoints(pt, 1);
+				glVertex3f(pt[0], pt[1], pt[2]);
+			}
+			glEnd();
 		}
 
-		if (bDrawViewports && m_OverlayActive)
-			RenderOverlays(vp);
+		// Draw the text.
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		m_pScreenFont->MakeCurrent();
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_ALPHA_TEST);
+
+		glBegin(GL_QUADS);
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
+		m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
+		m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
+		glEnd();
+
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
 	}
 }
 
-void Project::RenderOverlays(int Viewport)
+void Project::RenderOverlays(View* view)
 {
-	const float OverlayScale = m_OverlayScale[Viewport];
+	// Draw the selection rectangle.
+	if ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view))
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0.0f, view->GetWidth(), 0.0f, view->GetHeight(), -1.0f, 1.0f);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(0.375f, 0.375f, 0.0f);
+
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_LINE_STIPPLE);
+		glLineStipple(5, 0x5555);
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+
+		float pt1x = (float)m_nDownX;
+		float pt1y = (float)m_nDownY;
+		float pt2x = m_fTrack[0];
+		float pt2y = m_fTrack[1];
+
+		glBegin(GL_LINES);
+		glVertex2f(pt1x, pt1y);
+		glVertex2f(pt2x, pt1y);
+		glVertex2f(pt2x, pt1y);
+		glVertex2f(pt2x, pt2y);
+		glVertex2f(pt2x, pt2y);
+		glVertex2f(pt1x, pt2y);
+		glVertex2f(pt1x, pt2y);
+		glVertex2f(pt1x, pt1y);
+		glEnd();
+
+		glDisable(GL_LINE_STIPPLE);
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	const float OverlayScale = m_OverlayScale[0];
 
 	if (m_nCurAction == LC_ACTION_MOVE)
 	{
@@ -2376,21 +2217,21 @@ void Project::RenderOverlays(int Viewport)
 			{
 			case 0:
 				if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_XZ))
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				else
-					glColor3f(0.8f, 0.0f, 0.0f);
+					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
 				break;
 			case 1:
 				if ((m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_XY) || (m_OverlayMode == LC_OVERLAY_YZ))
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				else
-					glColor3f(0.0f, 0.8f, 0.0f);
+					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
 				break;
 			case 2:
 				if ((m_OverlayMode == LC_OVERLAY_Z) || (m_OverlayMode == LC_OVERLAY_XZ) || (m_OverlayMode == LC_OVERLAY_YZ))
-					glColor3f(0.8f, 0.8f, 0.0f);
+					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				else
-					glColor3f(0.0f, 0.0f, 0.8f);
+					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
 				break;
 			}
 
@@ -2431,7 +2272,7 @@ void Project::RenderOverlays(int Viewport)
 
 		glDisable(GL_DEPTH_TEST);
 
-		Camera* Cam = m_pViewCameras[Viewport];
+		Camera* Cam = m_pViewCameras[0];
 		Matrix44 Mat;
 		int j;
 
@@ -2580,20 +2421,20 @@ void Project::RenderOverlays(int Viewport)
 		{
 			if (m_OverlayMode == LC_OVERLAY_X + i)
 			{
-				glColor3f(0.8f, 0.8f, 0.0f);
+				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 			}
 			else
 			{
 				switch (i)
 				{
 				case 0:
-					glColor3f(0.8f, 0.0f, 0.0f);
+					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
 					break;
 				case 1:
-					glColor3f(0.0f, 0.8f, 0.0f);
+					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
 					break;
 				case 2:
-					glColor3f(0.0f, 0.0f, 0.8f);
+					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
 					break;
 				}
 			}
@@ -2699,7 +2540,7 @@ void Project::RenderOverlays(int Viewport)
 				}
 
 				// Draw text.
-				if (Viewport == m_nActiveViewport)
+//				if (Viewport == m_nActiveViewport)
 				{
 					GLdouble ScreenX, ScreenY, ScreenZ;
 					GLdouble ModelMatrix[16], ProjMatrix[16];
@@ -2753,21 +2594,20 @@ void Project::RenderOverlays(int Viewport)
 	{
 		int x, y, w, h;
 
-		x = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-		y = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-		w = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-		h = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+		x = 0;
+		y = 0;
+		w = view->GetWidth();
+		h = view->GetHeight();
 
-		glViewport(0, 0, m_nViewX, m_nViewY);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, m_nViewX, 0, m_nViewY, -1, 1);
+		glOrtho(0, w, 0, h, -1, 1);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(0.375f, 0.375f, 0.0f);
 
 		glDisable(GL_DEPTH_TEST);
-		glColor3f(0, 0, 0);
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
 		// Draw circle.
 		glBegin(GL_LINE_LOOP);
@@ -2821,17 +2661,9 @@ void Project::RenderOverlays(int Viewport)
 	}
 	else if (m_nCurAction == LC_ACTION_ZOOM_REGION)
 	{
-		int x, y, w, h;
-
-		x = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-		y = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-		w = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-		h = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
-
-		glViewport(0, 0, m_nViewX, m_nViewY);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, m_nViewX, 0, m_nViewY, -1, 1);
+		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -1, 1);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(0.375f, 0.375f, 0.0f);
@@ -2841,10 +2673,10 @@ void Project::RenderOverlays(int Viewport)
 		glLineStipple(5, 0x5555);
 		glColor3f(0, 0, 0);
 
-		float pt1x = (float)(m_nDownX - x);
-		float pt1y = (float)(m_nDownY - y);
-		float pt2x = m_OverlayTrackStart[0] - x;
-		float pt2y = m_OverlayTrackStart[1] - y;
+		float pt1x = (float)m_nDownX;
+		float pt1y = (float)m_nDownY;
+		float pt2x = m_OverlayTrackStart[0];
+		float pt2y = m_OverlayTrackStart[1];
 
 		glBegin(GL_LINES);
 		glVertex2f(pt1x, pt1y);
@@ -2862,44 +2694,36 @@ void Project::RenderOverlays(int Viewport)
 	}
 }
 
-void Project::RenderViewports(bool bBackground, bool bLines)
+void Project::RenderViewports(View* view)
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0.0f, m_nViewX, 0.0f, m_nViewY, -1.0f, 1.0f);
+	glOrtho(0.0f, view->GetWidth(), 0.0f, view->GetHeight(), -1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0.375f, 0.375f, 0.0f);
 
-	if (bLines)
-	{
-		// Draw text
-		glColor3f(0, 0, 0);
-		glEnable(GL_TEXTURE_2D);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_pScreenFont->MakeCurrent();
-		glEnable(GL_ALPHA_TEST);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_FOG);
 
-		glBegin(GL_QUADS);
+	// Draw camera name
+	glColor3f(0, 0, 0);
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	m_pScreenFont->MakeCurrent();
+	glEnable(GL_ALPHA_TEST);
 
-		m_pScreenFont->PrintText(3.0f, (float)(m_nViewY - 1.0f) - 6.0f, 0.0f, m_pViewCameras[0]->GetName());
-
-		glEnd();
+	glBegin(GL_QUADS);
+	m_pScreenFont->PrintText(3.0f, (float)(m_nViewY - 1.0f) - 6.0f, 0.0f, m_pViewCameras[0]->GetName());
+	glEnd();
 	
-		glDisable(GL_ALPHA_TEST);
-		glDisable(GL_TEXTURE_2D);
-	}
-}
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
 
-// bHilite - Draws focus/selection, not used for the 
-// first rendering pass if remove hidden lines is enabled
-void Project::RenderBoxes(bool bHilite)
-{
-	Piece* pPiece;
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-			pPiece->RenderBox(bHilite, m_fLineWidth);
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
 }
 
 // Initialize OpenGL
@@ -6574,7 +6398,7 @@ void Project::GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vect
 }
 
 // Try to find a good starting position/orientation for a new piece.
-void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, Vector4& Rotation)
+void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3& Position, Vector4& Rotation)
 {
 	// See if the mouse is over a piece.
 	LC_CLICKLINE ClickLine;
@@ -6588,13 +6412,7 @@ void Project::GetPieceInsertPosition(int MouseX, int MouseY, Vector3& Position, 
 	}
 
 	// Try to hit the base grid.
-	int Viewport[4] =
-	{
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX),
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY),
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX),
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY)
-	};
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = m_pViewCameras[m_nActiveViewport];
@@ -7576,24 +7394,24 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			{
 				switch (nKey)
 				{
-					case KEY_UP: {
+					case KEY_UP:
 						axis[1] = axis[2] = 0; axis[0] = -axis[0];
-					} break;
-					case KEY_DOWN: {
+						break;
+					case KEY_DOWN:
 						axis[1] = axis[2] = 0;
-					} break;
-					case KEY_LEFT: {
+						break;
+					case KEY_LEFT:
 						axis[0] = axis[2] = 0; axis[1] = -axis[1];
-					} break;
-					case KEY_RIGHT: {
+						break;
+					case KEY_RIGHT:
 						axis[0] = axis[2] = 0;
-					} break;
-					case KEY_NEXT: {
+						break;
+					case KEY_NEXT:
 						axis[0] = axis[1] = 0; axis[2] = -axis[2];
-					} break;
-					case KEY_PRIOR: {
+						break;
+					case KEY_PRIOR:
 						axis[0] = axis[1] = 0;
-					} break;
+						break;
 				}
 			}
 			else
@@ -7644,25 +7462,25 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
   				switch (nKey)
 	  			{
-		  			case KEY_UP: {
+					case KEY_UP:
 			  			axis[1] = axis[2] = 0; axis[0] = -axis[0];
-				  	} break;
-					  case KEY_DOWN: {
-              axis[1] = axis[2] = 0;
-            } break;
-            case KEY_LEFT: {
-              axis[0] = axis[2] = 0; axis[1] = -axis[1];
-            } break;
-            case KEY_RIGHT: {
-              axis[0] = axis[2] = 0;
-            } break;
-            case KEY_NEXT: {
-              axis[0] = axis[1] = 0; axis[2] = -axis[2];
-            } break;
-            case KEY_PRIOR: {
-              axis[0] = axis[1] = 0;
-            } break;
-          }
+						break;
+					case KEY_DOWN:
+			  			axis[1] = axis[2] = 0;
+						break;
+					case KEY_LEFT:
+			  			axis[0] = axis[2] = 0; axis[1] = -axis[1];
+						break;
+					case KEY_RIGHT:
+			  			axis[0] = axis[2] = 0;
+						break;
+					case KEY_NEXT:
+			  			axis[0] = axis[1] = 0; axis[2] = -axis[2];
+						break;
+					case KEY_PRIOR:
+			  			axis[0] = axis[1] = 0;
+						break;
+			  	}
 
   				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
 	  			float ax, ay;
@@ -7907,7 +7725,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				Vector3 Pos;
 				Vector4 Rot;
 
-				GetPieceInsertPosition(x, y, Pos, Rot);
+				GetPieceInsertPosition(view, x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(m_pCurPiece);
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
@@ -8138,18 +7956,12 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 		// Dragging a new piece from the tree.
 		if (m_nCurAction == LC_ACTION_INSERT)
 		{
-			int Viewport[4];
-			Viewport[0] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-			Viewport[1] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-			Viewport[2] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-			Viewport[3] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
-
-			if ((x > Viewport[0]) && (x < Viewport[2]) && (y > Viewport[1]) && (y < Viewport[3]))
+			if ((x > 0) && (x < view->GetWidth()) && (y > 0) && (y < view->GetHeight()))
 			{
 				Vector3 Pos;
 				Vector4 Rot;
 
-				GetPieceInsertPosition(x, y, Pos, Rot);
+				GetPieceInsertPosition(view, x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(m_pCurPiece);
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
@@ -8181,7 +7993,7 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 		}
 	}
 
-  StopTracking(true);
+	StopTracking(true);
 }
 
 void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift)

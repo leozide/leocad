@@ -251,6 +251,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndProperties.EnableDocking(CBRS_ALIGN_ANY);
+	ShowPane(&m_wndProperties, FALSE, FALSE, FALSE);
 	DockPane(&m_wndProperties);
 
 	EnableDocking(CBRS_ALIGN_ANY);

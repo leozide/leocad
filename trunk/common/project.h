@@ -174,7 +174,7 @@ protected:
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
-	void FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly = false);
+	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
@@ -191,7 +191,7 @@ protected:
 	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
 	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
 
-	// Rendering
+	// Rendering functions.
 	void RenderBackground(View* view);
 	void RenderScenePieces(View* view);
 	void RenderSceneBoxes(View* view);

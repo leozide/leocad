@@ -1626,7 +1626,7 @@ void Project::Render(View* view, bool ToMemory)
 
 		RenderSceneObjects(view);
 
-		if (m_OverlayActive)
+		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view)))
 			RenderOverlays(view);
 
 		RenderViewports(view);
@@ -3169,15 +3169,10 @@ unsigned char Project::GetLastStep()
 // Create a series of pictures
 void Project::CreateImages (Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {
-	int oldx, oldy;
 	unsigned short oldtime;
 	void* render = Sys_StartMemoryRender (width, height);
 	unsigned char* buf = (unsigned char*)malloc (width*height*3);
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
-	oldx = m_nViewX;
-	oldy = m_nViewY;
-	m_nViewX = width;
-	m_nViewY = height;
 
 	View view(this, m_ActiveView);
 	view.OnSize(width, height);
@@ -3213,8 +3208,6 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
     images[i-from].FromOpenGL (width, height);
 	}
 //	pDoc->m_ViewCameras[pDoc->m_nActiveViewport] = pOld;
-	m_nViewX = oldx;
-	m_nViewY = oldy;
 	if (m_bAnimation)
 		m_nCurFrame = oldtime;
 	else
@@ -6401,11 +6394,9 @@ void Project::GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vect
 // Try to find a good starting position/orientation for a new piece.
 void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3& Position, Vector4& Rotation)
 {
-	// See if the mouse is over a piece.
-	LC_CLICKLINE ClickLine;
-	FindObjectFromPoint(MouseX, MouseY, &ClickLine, true);
+	// Check if the mouse is over a piece.
+	Piece* HitPiece = (Piece*)FindObjectFromPoint(view, MouseX, MouseY, true);
 
-	Piece* HitPiece = (Piece*)ClickLine.pClosest;
 	if (HitPiece)
 	{
 		GetPieceInsertPosition(HitPiece, Position, Rotation);
@@ -6440,46 +6431,45 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3
 	Rotation = Vector4(0, 0, 1, 0);
 }
 
-void Project::FindObjectFromPoint(int x, int y, LC_CLICKLINE* pLine, bool PiecesOnly)
+Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 {
-	GLdouble px, py, pz, rx, ry, rz;
-	GLdouble modelMatrix[16], projMatrix[16];
-	GLint viewport[4];
-	Piece* pPiece;
-	Camera* pCamera;
-	Light* pLight;
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-	glGetIntegerv(GL_VIEWPORT,viewport);
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	// Unproject the selected point against both the front and the back clipping plane
-	gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &px, &py, &pz);
-	gluUnProject(x, y, 1, modelMatrix, projMatrix, viewport, &rx, &ry, &rz);
+	Vector3 Start = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
+	Vector3 End = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 
-	pLine->a1 = (float)px;
-	pLine->b1 = (float)py;
-	pLine->c1 = (float)pz;
-	pLine->a2 = (float)(rx-px);
-	pLine->b2 = (float)(ry-py);
-	pLine->c2 = (float)(rz-pz);
-	pLine->mindist = FLT_MAX;
-	pLine->pClosest = NULL;
+	LC_CLICKLINE ClickLine;
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	ClickLine.a1 = Start[0];
+	ClickLine.b1 = Start[1];
+	ClickLine.c1 = Start[2];
+	ClickLine.a2 = End[0] - Start[0];
+	ClickLine.b2 = End[1] - Start[1];
+	ClickLine.c2 = End[2] - Start[2];
+	ClickLine.mindist = FLT_MAX;
+	ClickLine.pClosest = NULL;
+
+	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-			pPiece->MinIntersectDist(pLine);
+			pPiece->MinIntersectDist(&ClickLine);
 
 	if (!PiecesOnly)
 	{
-		for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+		for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 			if (pCamera != m_pViewCameras[m_nActiveViewport])
-				pCamera->MinIntersectDist(pLine);
+				pCamera->MinIntersectDist(&ClickLine);
 
-		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-			pLight->MinIntersectDist(pLine);
+		for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			pLight->MinIntersectDist(&ClickLine);
 	}
+
+	return ClickLine.pClosest;
 }
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
@@ -6701,14 +6691,7 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_ZOOM_REGION:
 			{
-				int Viewport[4] =
-				{
-					(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX),
-					(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY),
-					(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX),
-					(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY)
-				};
-
+				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 				Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
@@ -7577,9 +7560,6 @@ void Project::BeginColorDrop()
 
 void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
-
 	if (m_nTracking != LC_TRACK_NONE)
 		if (StopTracking(false))
 			return;
@@ -7593,13 +7573,16 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	m_MouseTotalDelta = Vector3(0, 0, 0);
 	m_MouseSnapLeftover = Vector3(0, 0, 0);
 
-	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Sys_KeyDown(KEY_ALT))
 	{
@@ -7613,18 +7596,17 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		case LC_ACTION_ERASER:
 		case LC_ACTION_PAINT:
 		{
-			LC_CLICKLINE ClickLine;
-			FindObjectFromPoint (x, y, &ClickLine);
+			Object* Closest = FindObjectFromPoint(view, x, y);
 
 			if (m_nCurAction == LC_ACTION_SELECT) 
 			{
-				if (ClickLine.pClosest != NULL)
+				if (Closest != NULL)
 				{
-					switch (ClickLine.pClosest->GetType ())
+					switch (Closest->GetType ())
 					{
 						case LC_OBJECT_PIECE:
 						{
-							Piece* pPiece = (Piece*)ClickLine.pClosest;
+							Piece* pPiece = (Piece*)Closest;
 							Group* pGroup = pPiece->GetTopGroup();
 							bool bFocus = pPiece->IsFocused ();
 
@@ -7645,7 +7627,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 						case LC_OBJECT_LIGHT_TARGET:
 						{
 							SelectAndFocusNone (bControl);
-							ClickLine.pClosest->Select (true, true, bControl);
+							Closest->Select (true, true, bControl);
 						} break;
 					}
 				}
@@ -7654,18 +7636,18 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				UpdateSelection();
 				UpdateAllViews();
-				SystemUpdateFocus(ClickLine.pClosest);
+				SystemUpdateFocus(Closest);
 
 				StartTracking(LC_TRACK_START_LEFT);
 			}
 
-			if ((m_nCurAction == LC_ACTION_ERASER) && (ClickLine.pClosest != NULL))
+			if ((m_nCurAction == LC_ACTION_ERASER) && (Closest != NULL))
 			{
-				switch (ClickLine.pClosest->GetType ())
+				switch (Closest->GetType ())
 				{
 					case LC_OBJECT_PIECE:
 					{
-						Piece* pPiece = (Piece*)ClickLine.pClosest;
+						Piece* pPiece = (Piece*)Closest;
 						RemovePiece(pPiece);
 						delete pPiece;
 //						CalculateStep();
@@ -7676,10 +7658,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 					case LC_OBJECT_CAMERA_TARGET:
 					{
 						Camera* pCamera;
-						if (ClickLine.pClosest->GetType () == LC_OBJECT_CAMERA)
-							pCamera = (Camera*)ClickLine.pClosest;
+						if (Closest->GetType () == LC_OBJECT_CAMERA)
+							pCamera = (Camera*)Closest;
 						else
-							pCamera = ((CameraTarget*)ClickLine.pClosest)->GetParent();
+							pCamera = ((CameraTarget*)Closest)->GetParent();
 						bool bCanDelete = pCamera->IsUser();
 
 						for (int i = 0; i < 4; i++)
@@ -7717,10 +7699,9 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 			}
 
-			if ((m_nCurAction == LC_ACTION_PAINT) && (ClickLine.pClosest != NULL) && 
-				(ClickLine.pClosest->GetType() == LC_OBJECT_PIECE))
+			if ((m_nCurAction == LC_ACTION_PAINT) && (Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
 			{
-				Piece* pPiece = (Piece*)ClickLine.pClosest;
+				Piece* pPiece = (Piece*)Closest;
 
 				if (pPiece->GetColor() != m_nCurColor)
 				{
@@ -7811,11 +7792,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
       if (count == max)
         break;
 
-      double tmp[3];
-      gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+	  Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
-      pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2]);
+      pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
       pLight->GetTarget ()->Select (true, true, false);
       pLight->m_pNext = m_pLights;
       m_pLights = pLight;
@@ -7826,11 +7806,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
     case LC_ACTION_CAMERA:
     {
-      double tmp[3];
-      gluUnProject(x+1, y-1, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
+	  Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
-      Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], (float)tmp[0], (float)tmp[1], (float)tmp[2], m_pCameras);
+      Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2], m_pCameras);
       pCamera->GetTarget ()->Select (true, true, false);
       UpdateSelection();
       UpdateAllViews();
@@ -7917,34 +7896,32 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift)
 {
-  GLdouble modelMatrix[16], projMatrix[16], point[3];
-  GLint viewport[4];
-
 	if (SetActiveView(view))
 		return;
 
-  LoadViewportProjection(m_nActiveViewport);
-  glGetDoublev (GL_MODELVIEW_MATRIX, modelMatrix);
-  glGetDoublev (GL_PROJECTION_MATRIX, projMatrix);
-  glGetIntegerv (GL_VIEWPORT, viewport);
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-  // why this is here ?
-  gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-  m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-  LC_CLICKLINE ClickLine;
-  FindObjectFromPoint (x, y, &ClickLine);
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
+
+	Object* Closest = FindObjectFromPoint(view, x, y);
 
 //  if (m_nCurAction == LC_ACTION_SELECT) 
   {
     SelectAndFocusNone(bControl);
 
-    if (ClickLine.pClosest != NULL)
-      switch (ClickLine.pClosest->GetType ())
+    if (Closest != NULL)
+      switch (Closest->GetType ())
       {
         case LC_OBJECT_PIECE:
         {
-          Piece* pPiece = (Piece*)ClickLine.pClosest;
+          Piece* pPiece = (Piece*)Closest;
           pPiece->Select (true, true, false);
           Group* pGroup = pPiece->GetTopGroup();
 
@@ -7959,13 +7936,13 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
         case LC_OBJECT_LIGHT:
         case LC_OBJECT_LIGHT_TARGET:
         {
-          ClickLine.pClosest->Select (true, true, bControl);
+          Closest->Select (true, true, bControl);
         } break;
       }
 
     UpdateSelection();
     UpdateAllViews();
-    SystemUpdateFocus(ClickLine.pClosest);
+    SystemUpdateFocus(Closest);
   }
 }
 
@@ -8017,9 +7994,6 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 
 void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
-
 	if (StopTracking(false))
 		return;
 
@@ -8030,13 +8004,16 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Sys_KeyDown(KEY_ALT))
 	{
@@ -8060,9 +8037,6 @@ void Project::OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bSh
 
 void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift)
 {
-	GLdouble modelMatrix[16], projMatrix[16], point[3];
-	GLint viewport[4];
-
 	if (StopTracking(false))
 		return;
 
@@ -8073,13 +8047,16 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &point[0], &point[1], &point[2]);
-	m_fTrack[0] = (float)point[0]; m_fTrack[1] = (float)point[1]; m_fTrack[2] = (float)point[2];
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Sys_KeyDown(KEY_ALT))
 	{
@@ -8168,17 +8145,18 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	if (m_nTracking == LC_TRACK_START_LEFT)
 		m_nTracking = LC_TRACK_LEFT;
 
-	GLdouble modelMatrix[16], projMatrix[16], tmp[3];
-	GLint viewport[4];
 	float ptx, pty, ptz;
 
-	LoadViewportProjection(m_nActiveViewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-	gluUnProject(x, y, 0.9, modelMatrix, projMatrix, viewport, &tmp[0], &tmp[1], &tmp[2]);
-	ptx = (float)tmp[0]; pty = (float)tmp[1]; ptz = (float)tmp[2];
+	Matrix44 ModelView, Projection;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+	Vector3 tmp = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
 
 	switch (m_nCurAction)
 	{
@@ -8186,15 +8164,15 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		{
 			int ptx = x, pty = y;
 
-			if (ptx >= viewport[0] + viewport[2])
-				ptx = viewport[0] + viewport[2] - 1;
-			else if (ptx <= viewport[0])
-				ptx = viewport[0] + 1;
+			if (ptx >= Viewport[0] + Viewport[2])
+				ptx = Viewport[0] + Viewport[2] - 1;
+			else if (ptx <= Viewport[0])
+				ptx = Viewport[0] + 1;
 
-			if (pty >= viewport[1] + viewport[3])
-				pty = viewport[1] + viewport[3] - 1;
-			else if (pty <= viewport[1])
-				pty = viewport[1] + 1;
+			if (pty >= Viewport[1] + Viewport[3])
+				pty = Viewport[1] + Viewport[3] - 1;
+			else if (pty <= Viewport[1])
+				pty = Viewport[1] + 1;
 
 			m_fTrack[0] = (float)ptx;
 			m_fTrack[1] = (float)pty;

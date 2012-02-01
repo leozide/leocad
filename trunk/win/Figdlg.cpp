@@ -96,8 +96,7 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   }
 
 	m_pMinifigWnd = new CWnd;
-	m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD",
-    WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
+	m_pMinifigWnd->CreateEx (0, MINIFIG_CLASSNAME, "LeoCAD", WS_BORDER | WS_CHILD | WS_VISIBLE, r, this, 0, m_pMinifig);
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		((CColorPicker*)GetDlgItem (IDC_MF_HATCOLOR+i))->SetColorIndex (m_pMinifig->m_Colors[i]);
@@ -153,15 +152,15 @@ void CMinifigDlg::OnPieceSelEndOK(UINT nID)
 
 void CMinifigDlg::OnChangeAngle(UINT nID) 
 {
-  char tmp[65];
-  GetDlgItem(nID)->GetWindowText (tmp, 65);
-  if (m_pMinifigWnd)
-  {
-    int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_NECK,
-      LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND,
-      LC_MFW_RIGHT_HAND, LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL,
-      LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
-  	m_pMinifig->SetAngle (index[nID-IDC_MF_HATANGLE], (float)strtod (tmp, NULL));
-	  m_pMinifig->Redraw ();
-  }
+	int index[] = { LC_MFW_HAT, LC_MFW_HEAD, LC_MFW_LEFT_ARM, LC_MFW_RIGHT_ARM, LC_MFW_LEFT_HAND, LC_MFW_RIGHT_HAND,
+	                LC_MFW_LEFT_TOOL, LC_MFW_RIGHT_TOOL, LC_MFW_LEFT_LEG, LC_MFW_RIGHT_LEG, LC_MFW_LEFT_SHOE, LC_MFW_RIGHT_SHOE };
+
+	char tmp[65];
+	GetDlgItem(nID)->GetWindowText(tmp, 65);
+
+	if (m_pMinifigWnd)
+	{
+		m_pMinifig->SetAngle(index[nID-IDC_MF_HATANGLE], (float)strtod(tmp, NULL));
+		m_pMinifig->Redraw();
+	}
 }

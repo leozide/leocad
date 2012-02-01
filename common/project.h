@@ -177,7 +177,6 @@ protected:
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
-	void GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4]);
 	void CalculateStep();
 
 	// Movement.
@@ -223,7 +222,6 @@ protected:
 	void ActivateOverlay();
 	void UpdateOverlayScale();
 
-	void LoadViewportProjection(int Viewport);
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
 	void UpdateSelection();

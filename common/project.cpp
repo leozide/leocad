@@ -6293,21 +6293,6 @@ Camera* Project::GetCamera(int i)
 	return pCamera;
 }
 
-void Project::GetActiveViewportMatrices(Matrix44& ModelView, Matrix44& Projection, int Viewport[4])
-{
-	Viewport[0] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-	Viewport[1] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-	Viewport[2] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-	Viewport[3] = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
-
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = m_pViewCameras[m_nActiveViewport];
-
-	// Build the matrices.
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
-}
-
 void Project::ConvertToUserUnits(Vector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
@@ -6551,21 +6536,6 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 
 /////////////////////////////////////////////////////////////////////////////
 // Mouse handling
-
-void Project::LoadViewportProjection(int Viewport)
-{
-	int x, y, w, h;
-	float ratio;
-
-	x = (int)(viewports[m_nViewportMode].dim[Viewport][0] * (float)m_nViewX);
-	y = (int)(viewports[m_nViewportMode].dim[Viewport][1] * (float)m_nViewY);
-	w = (int)(viewports[m_nViewportMode].dim[Viewport][2] * (float)m_nViewX);
-	h = (int)(viewports[m_nViewportMode].dim[Viewport][3] * (float)m_nViewY);
-
-	ratio = (float)w/h;
-	glViewport(x, y, w, h);
-	m_pViewCameras[Viewport]->LoadProjection(ratio);
-}
 
 // Returns true if the mouse was being tracked.
 bool Project::StopTracking(bool bAccept)
@@ -8705,10 +8675,13 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 	{
 		const float OverlayMoveArrowSize = 1.5f;
 
-		Matrix44 ModelView, Projection;
-		int Viewport[4];
+		int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+		float Aspect = (float)Viewport[2]/(float)Viewport[3];
+		Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-		GetActiveViewportMatrices(ModelView, Projection, Viewport);
+		Matrix44 ModelView, Projection;
+		ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+		Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 		// Array of points for the arrow edges.
 		Vector3 Points[4] =

@@ -205,6 +205,8 @@ void Project::SetTitle(const char* lpszTitle)
 			*ptr = 0;
 		if (strcmp(ext, "ldr") == 0)
 			*ptr = 0;
+		if (strcmp(ext, "mpd") == 0)
+			*ptr = 0;
 	}
 
 	strcat(title, " - LeoCAD");
@@ -2542,20 +2544,20 @@ void Project::RenderOverlays(View* view)
 				// Draw text.
 //				if (Viewport == m_nActiveViewport)
 				{
-					GLdouble ScreenX, ScreenY, ScreenZ;
-					GLdouble ModelMatrix[16], ProjMatrix[16];
-					GLint Vp[4];
+					int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+					float Aspect = (float)Viewport[2]/(float)Viewport[3];
+					Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-					glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-					glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-					glGetIntegerv(GL_VIEWPORT, Vp);
+					Matrix44 ModelView, Projection;
+					ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+					Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-					gluProject(0, 0, 0, ModelMatrix, ProjMatrix, Vp, &ScreenX, &ScreenY, &ScreenZ);
+					Vector3 Screen = ProjectPoint(Vector3(0, 0, 0), ModelView, Projection, Viewport);
 
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();
 					glLoadIdentity();
-					glOrtho(0, Vp[2], 0, Vp[3], -1, 1);
+					glOrtho(0, Viewport[2], 0, Viewport[3], -1, 1);
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
 					glLoadIdentity();
@@ -2574,7 +2576,7 @@ void Project::RenderOverlays(View* view)
 
 					glBegin(GL_QUADS);
 					glColor3f(0.8f, 0.8f, 0.0f);
-					m_pScreenFont->PrintText((float)ScreenX - Vp[0] - (cx / 2), (float)ScreenY - Vp[1] + (cy / 2), 0.0f, buf);
+					m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
 					glEnd();
 
 					glDisable(GL_TEXTURE_2D);
@@ -2716,7 +2718,7 @@ void Project::RenderViewports(View* view)
 	glEnable(GL_ALPHA_TEST);
 
 	glBegin(GL_QUADS);
-	m_pScreenFont->PrintText(3.0f, (float)(m_nViewY - 1.0f) - 6.0f, 0.0f, m_pViewCameras[0]->GetName());
+	m_pScreenFont->PrintText(3.0f, (float)view->GetHeight() - 1.0f - 6.0f, 0.0f, m_pViewCameras[0]->GetName());
 	glEnd();
 	
 	glDisable(GL_ALPHA_TEST);
@@ -6474,14 +6476,7 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
 {
-	int Viewport[4] =
-	{
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX),
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY),
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX),
-		(int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY)
-	};
-
+	int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
@@ -7406,115 +7401,118 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-        Camera *camera = m_pViewCameras[m_nActiveViewport];
+				Camera *camera = m_pViewCameras[m_nActiveViewport];
 
-        if (camera->IsSide ())
-        {
-          Matrix mat;
+				if (camera->IsSide ())
+				{
+					Matrix mat;
 
-          mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
-          mat.SetTranslation (0, 0, 0);
-          mat.Invert ();
+					mat.CreateLookat (camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
+					mat.SetTranslation (0, 0, 0);
+					mat.Invert ();
 
-  				switch (nKey)
-	  			{
-		  			case KEY_UP:
-			  			axis[0] = axis[2] = 0;
-              break;
-
-            case KEY_DOWN:
-	  					axis[0] = axis[2] = 0; axis[1] = -axis[1];
-              break;
-
-            case KEY_LEFT:
-				  		axis[0] = -axis[0]; axis[1] = axis[2] = 0;
-              break;
-
-            case KEY_RIGHT:
-              axis[1] = axis[2] = 0;
-              break;
-
-            case KEY_NEXT:
-              axis[0] = axis[1] = 0; axis[2] = -axis[2];
-              break;
-
-            case KEY_PRIOR:
-              axis[0] = axis[1] = 0;
-              break;
-          }
-
-          mat.TransformPoints (axis, 1);
-        }
-        else
-        {
-
-          // TODO: rewrite this
-
-  				switch (nKey)
-	  			{
+					switch (nKey)
+					{
 					case KEY_UP:
-			  			axis[1] = axis[2] = 0; axis[0] = -axis[0];
+						axis[0] = axis[2] = 0;
+						break;
+
+					case KEY_DOWN:
+						axis[0] = axis[2] = 0; axis[1] = -axis[1];
+						break;
+
+					case KEY_LEFT:
+						axis[0] = -axis[0]; axis[1] = axis[2] = 0;
+						break;
+
+					case KEY_RIGHT:
+						axis[1] = axis[2] = 0;
+						break;
+
+					case KEY_NEXT:
+						axis[0] = axis[1] = 0; axis[2] = -axis[2];
+						break;
+
+					case KEY_PRIOR:
+						axis[0] = axis[1] = 0;
+						break;
+					}
+
+					mat.TransformPoints (axis, 1);
+				}
+				else
+				{
+
+					// TODO: rewrite this
+
+					switch (nKey)
+					{
+					case KEY_UP:
+						axis[1] = axis[2] = 0; axis[0] = -axis[0];
 						break;
 					case KEY_DOWN:
-			  			axis[1] = axis[2] = 0;
+						axis[1] = axis[2] = 0;
 						break;
 					case KEY_LEFT:
-			  			axis[0] = axis[2] = 0; axis[1] = -axis[1];
+						axis[0] = axis[2] = 0; axis[1] = -axis[1];
 						break;
 					case KEY_RIGHT:
-			  			axis[0] = axis[2] = 0;
+						axis[0] = axis[2] = 0;
 						break;
 					case KEY_NEXT:
-			  			axis[0] = axis[1] = 0; axis[2] = -axis[2];
+						axis[0] = axis[1] = 0; axis[2] = -axis[2];
 						break;
 					case KEY_PRIOR:
-			  			axis[0] = axis[1] = 0;
+						axis[0] = axis[1] = 0;
 						break;
-			  	}
+					}
 
-  				GLdouble modelMatrix[16], projMatrix[16], p1[3], p2[3], p3[3];
-	  			float ax, ay;
-		  		GLint viewport[4];
+					int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+					float Aspect = (float)Viewport[2]/(float)Viewport[3];
+					Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-          glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-          glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-          glGetIntegerv(GL_VIEWPORT, viewport);
-          gluUnProject( 5, 5, 0.1, modelMatrix,projMatrix,viewport,&p1[0],&p1[1],&p1[2]);
-          gluUnProject(10, 5, 0.1, modelMatrix,projMatrix,viewport,&p2[0],&p2[1],&p2[2]);
-          gluUnProject( 5,10, 0.1, modelMatrix,projMatrix,viewport,&p3[0],&p3[1],&p3[2]);
-				
-          Vector vx((float)(p2[0] - p1[0]), (float)(p2[1] - p1[1]), 0);//p2[2] - p1[2] };
-          Vector x(1, 0, 0);
-          ax = vx.Angle(x);
-				
-          Vector vy((float)(p3[0] - p1[0]), (float)(p3[1] - p1[1]), 0);//p2[2] - p1[2] };
-          Vector y(0, -1, 0);
-          ay = vy.Angle(y);
-				
-          if (ax > 135)
-            axis[0] = -axis[0];
-				
-          if (ay < 45)
-            axis[1] = -axis[1];
-				
-          if (ax >= 45 && ax <= 135)
-          {
-            float tmp = axis[0];
-            
-            ax = vx.Angle(y);
-            if (ax > 90)
-            {
-              axis[0] = -axis[1];
-              axis[1] = tmp;
-            }
-            else
-            {
-              axis[0] = axis[1];
-              axis[1] = -tmp;
-            }
-          }
-        }
-      }
+					Matrix44 ModelView, Projection;
+					ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+					Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+					Vector3 Pts[3] = { Vector3(5.0f, 5.0f, 0.1f), Vector3(10.0f, 5.0f, 0.1f), Vector3(5.0f, 10.0f, 0.1f) };
+					UnprojectPoints(Pts, 3, ModelView, Projection, Viewport);
+
+					float ax, ay;
+					Vector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
+					vx.Normalize();
+					Vector3 x(1, 0, 0);
+					ax = acosf(Dot3(vx, x));
+
+					Vector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
+					vy.Normalize();
+					Vector3 y(0, -1, 0);
+					ay = acosf(Dot3(vy, y));
+
+					if (ax > 135)
+						axis[0] = -axis[0];
+
+					if (ay < 45)
+						axis[1] = -axis[1];
+
+					if (ax >= 45 && ax <= 135)
+					{
+						float tmp = axis[0];
+
+						ax = acosf(Dot3(vx, y));
+						if (ax > 90)
+						{
+							axis[0] = -axis[1];
+							axis[1] = tmp;
+						}
+						else
+						{
+							axis[0] = axis[1];
+							axis[1] = -tmp;
+						}
+					}
+				}
+			}
 
 			if (bShift)
 			{
@@ -8132,9 +8130,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_ACTION_INSERT))
 	{
 		if (m_OverlayActive)
-		{
-			MouseUpdateOverlays(x, y);
-		}
+			MouseUpdateOverlays(view, x, y);
 
 		return;
 	}
@@ -8701,7 +8697,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 }
 
 // Check if the mouse is over a different area of the overlay and redraw it.
-void Project::MouseUpdateOverlays(int x, int y)
+void Project::MouseUpdateOverlays(View* view, int x, int y)
 {
 	const float OverlayScale = m_OverlayScale[m_nActiveViewport];
 
@@ -8810,21 +8806,18 @@ void Project::MouseUpdateOverlays(int x, int y)
 		const float OverlayRotateRadius = 2.0f;
 
 		// Calculate the distance from the mouse pointer to the center of the sphere.
-		GLdouble px, py, pz, rx, ry, rz;
-		GLdouble ModelMatrix[16], ProjMatrix[16];
-		GLint Viewport[4];
+		int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+		float Aspect = (float)Viewport[2]/(float)Viewport[3];
+		Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-		LoadViewportProjection(m_nActiveViewport);
-		glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-		glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-		glGetIntegerv(GL_VIEWPORT, Viewport);
+		Matrix44 ModelView, Projection;
+		ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+		Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 		// Unproject the mouse point against both the front and the back clipping planes.
-		gluUnProject(x, y, 0, ModelMatrix, ProjMatrix, Viewport, &px, &py, &pz);
-		gluUnProject(x, y, 1, ModelMatrix, ProjMatrix, Viewport, &rx, &ry, &rz);
+		Vector3 SegStart = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
+		Vector3 SegEnd = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 
-		Vector3 SegStart((float)rx, (float)ry, (float)rz);
-		Vector3 SegEnd((float)px, (float)py, (float)pz);
 		Vector3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
 
 		Vector3 Line = SegEnd - SegStart;
@@ -8860,8 +8853,8 @@ void Project::MouseUpdateOverlays(int x, int y)
 			// If it equals 0 then the line is a tangent to the sphere intersecting it at one point
 			// If it is greater then 0 the line intersects the sphere at two points. 
 
-			float x1 = (float)px, y1 = (float)py, z1 = (float)pz;
-			float x2 = (float)rx, y2 = (float)ry, z2 = (float)rz;
+			float x1 = SegStart[0], y1 = SegStart[1], z1 = SegStart[2];
+			float x2 = SegEnd[0], y2 = SegEnd[1], z2 = SegEnd[2];
 			float x3 = m_OverlayCenter[0], y3 = m_OverlayCenter[1], z3 = m_OverlayCenter[2];
 			float r = OverlayRotateRadius * OverlayScale;
 
@@ -8977,10 +8970,11 @@ void Project::MouseUpdateOverlays(int x, int y)
 	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
 	{
 		int vx, vy, vw, vh;
-		vx = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-		vy = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-		vw = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-		vh = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
+
+		vx = 0;
+		vy = 0;
+		vw = view->GetWidth();
+		vh = view->GetHeight();
 
 		int cx = vx + vw / 2;
 		int cy = vy + vh / 2;
@@ -9035,26 +9029,24 @@ void Project::ActivateOverlay()
 
 void Project::UpdateOverlayScale()
 {
+	// TODO: This is not needed, draw the overlays using an ortho matrix.
 	if (m_OverlayActive)
 	{
-		GLdouble ScreenX, ScreenY, ScreenZ, PointX, PointY, PointZ;
-		GLdouble ModelMatrix[16], ProjMatrix[16];
-		GLint Viewport[4];
+		// Calculate the scaling factor by projecting the center to the front plane then
+		// projecting a point close to it back.
+		int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+		float Aspect = (float)Viewport[2]/(float)Viewport[3];
+		Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-		for (int i = 0; i < viewports[m_nViewportMode].n; i++)
-		{
-			LoadViewportProjection(i);
-			glGetDoublev(GL_MODELVIEW_MATRIX, ModelMatrix);
-			glGetDoublev(GL_PROJECTION_MATRIX, ProjMatrix);
-			glGetIntegerv(GL_VIEWPORT, Viewport);
+		Matrix44 ModelView, Projection;
+		ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+		Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-			// Calculate the scaling factor by projecting the center to the front plane then
-			// projecting a point close to it back.
-			gluProject(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2], ModelMatrix, ProjMatrix, Viewport, &ScreenX, &ScreenY, &ScreenZ);
-			gluUnProject(ScreenX + 10.0f, ScreenY, ScreenZ, ModelMatrix, ProjMatrix, Viewport, &PointX, &PointY, &PointZ);
+		Vector3 Screen = ProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
+		Screen[0] += 10.0f;
+		Vector3 Point = UnprojectPoint(Screen, ModelView, Projection, Viewport);
 
-			Vector3 Dist((float)PointX - m_OverlayCenter[0], (float)PointY - m_OverlayCenter[1], (float)PointZ - m_OverlayCenter[2]);
-			m_OverlayScale[i] = Dist.Length() * 5.0f;
-		}
+		Vector3 Dist(Point - m_OverlayCenter);
+		m_OverlayScale[0] = Dist.Length() * 5.0f;
 	}
 }

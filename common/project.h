@@ -219,7 +219,7 @@ protected:
 	Vector3 m_OverlayCenter;
 	Vector3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
-	void MouseUpdateOverlays(int x, int y);
+	void MouseUpdateOverlays(View* view, int x, int y);
 	void ActivateOverlay();
 	void UpdateOverlayScale();
 

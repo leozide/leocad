@@ -824,16 +824,16 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
 
-	i = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
-	if (i == 1)
+	int Version = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
+	if (Version == 1)
 	{
 		char *ptr, buf[32];
 
 		m_MinifigCount = Sys_ProfileLoadInt ("MinifigWizard", "Count", 0);
-		m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
-		m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
+		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**) * (m_MinifigCount+1));
+		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**) * (m_MinifigCount+1));
 
-		for (i = 0; i < m_MinifigCount; i++)
+		for (int i = 0; i < m_MinifigCount; i++)
 		{
 			sprintf (buf, "Minifig%.2dName", i);
 			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, buf);
@@ -902,6 +902,7 @@ MinifigWizard::~MinifigWizard ()
 		free (m_MinifigNames[i]);
 		free (m_MinifigTemplates[i]);
 	}
+
 	free (m_MinifigNames);
 	free (m_MinifigTemplates);
 }
@@ -982,7 +983,7 @@ void MinifigWizard::ParseSettings(File& Settings)
 			char* Ext = strrchr(NameStart, '.');
 			if (Ext != NULL)
 			{
-				if (!stricmp(Ext, ".DAT"))
+				if (!strcmp(Ext, ".DAT"))
 					*Ext = 0;
 			}
 
@@ -1026,33 +1027,34 @@ void MinifigWizard::ParseSettings(File& Settings)
 	}
 }
 
-void MinifigWizard::OnDraw ()
+void MinifigWizard::OnDraw()
 {
 	int i;
 
-	if (!MakeCurrent ())
+	if (!MakeCurrent())
 		return;
 
 	float aspect = (float)m_nWidth/(float)m_nHeight;
-	glViewport (0, 0, m_nWidth, m_nHeight);
-	glMatrixMode (GL_PROJECTION);
-	glLoadIdentity ();
-	gluPerspective (30.0f, aspect, 1.0f, 20.0f);
-	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity ();
+	glViewport(0, 0, m_nWidth, m_nHeight);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(30.0f, aspect, 1.0f, 20.0f);
+	glMatrixMode(GL_MODELVIEW);
+	Matrix44 WorldView;
+	WorldView.CreateLookAt(Vector3(0, -9, 4), Vector3(0, 5, 1), Vector3(0, 0, 1));
+	glLoadMatrixf(WorldView);
 
-	gluLookAt (0, -9, 4, 0, 5, 1, 0, 0, 1);
-	glEnable (GL_DEPTH_TEST);
-	glDepthFunc (GL_LEQUAL);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor (bg[0], bg[1], bg[2], bg[3]);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable (GL_DITHER);
-	glShadeModel (GL_FLAT);
+	glClearColor(bg[0], bg[1], bg[2], bg[3]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DITHER);
+	glShadeModel(GL_FLAT);
 
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Calculate ();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Calculate();
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
@@ -1067,13 +1069,16 @@ void MinifigWizard::OnDraw ()
 
 	glFinish();
 
-	SwapBuffers ();
+	SwapBuffers();
 }
 
 void MinifigWizard::Calculate()
 {
 	float HeadOffset = 0.0f;
 	Matrix44 Root, Mat, Mat2;
+
+	bool DroidTorso = m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375");
+	bool SkeletonTorso = m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "6260");
 
 	Root.LoadIdentity();
 	Root.SetTranslation(Vector3(0, 0, 2.88f));
@@ -1104,14 +1109,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_RIGHT_ARM]);
 
-		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (DroidTorso || SkeletonTorso)
 			Mat2.LoadIdentity();
 		else
 			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), LC_DTOR * 9.791f);
+		Mat2.SetTranslation(Vector3(-0.62f, 0, -0.32f));
 
 		Mat = Mul(mSettings[LC_MFW_RIGHT_ARM][GetSelectionIndex(LC_MFW_RIGHT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
-		Mat.SetTranslation(Vector3(-0.62f, 0.0f, -0.32f));
 		m_Matrices[LC_MFW_RIGHT_ARM] = Mul(Mat, Root);
 	}
 
@@ -1137,14 +1142,14 @@ void MinifigWizard::Calculate()
 	{
 		Mat.CreateFromAxisAngle(Vector3(1, 0, 0), -LC_DTOR * m_Angles[LC_MFW_LEFT_ARM]);
 
-		if (m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375"))
+		if (DroidTorso || SkeletonTorso)
 			Mat2.LoadIdentity();
 		else
 			Mat2.CreateFromAxisAngle(Vector3(0, 1, 0), -LC_DTOR * 9.791f);
+		Mat2.SetTranslation(Vector3(0.62f, 0.0f, -0.32f));
 
 		Mat = Mul(mSettings[LC_MFW_LEFT_ARM][GetSelectionIndex(LC_MFW_LEFT_ARM)].Offset, Mat);
 		Mat = Mul(Mat, Mat2);
-		Mat.SetTranslation(Vector3(0.62f, 0.0f, -0.32f));
 		m_Matrices[LC_MFW_LEFT_ARM] = Mul(Mat, Root);
 	}
 
@@ -1247,123 +1252,123 @@ void MinifigWizard::SetAngle(int Type, float Angle)
 	m_Angles[Type] = Angle;
 }
 
-void MinifigWizard::GetMinifigNames (char ***names, int *count)
+void MinifigWizard::GetMinifigNames(char ***names, int *count)
 {
 	*count = m_MinifigCount;
 	*names = m_MinifigNames;
 }
 
-void MinifigWizard::SaveMinifig (const char* name)
+void MinifigWizard::SaveMinifig(const char* name)
 {
-  char tmp[LC_PIECE_NAME_LEN];
-  int i, j;
+	char tmp[LC_PIECE_NAME_LEN];
+	int i, j;
 
-  // check if the name is already being used
-  for (i = 0; i < m_MinifigCount; i++)
-    if (strcmp (m_MinifigNames[i], name) == 0)
-      break;
+	// check if the name is already being used
+	for (i = 0; i < m_MinifigCount; i++)
+		if (strcmp(m_MinifigNames[i], name) == 0)
+			break;
 
-  if (i == m_MinifigCount)
-  {
-    m_MinifigCount++;
-    m_MinifigNames = (char**)realloc (m_MinifigNames, sizeof (char**)*m_MinifigCount);
-    m_MinifigTemplates = (char**)realloc (m_MinifigTemplates, sizeof (char**)*m_MinifigCount);
-    m_MinifigNames[i] = (char*)malloc (strlen (name) + 1);
-    strcpy (m_MinifigNames[i], name);
-    m_MinifigTemplates[i] = (char*)malloc (768);
-  }
-  strcpy (m_MinifigTemplates[i], "");
+	if (i == m_MinifigCount)
+	{
+		m_MinifigCount++;
+		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**)*m_MinifigCount);
+		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**)*m_MinifigCount);
+		m_MinifigNames[i] = (char*)malloc(strlen(name) + 1);
+		strcpy(m_MinifigNames[i], name);
+		m_MinifigTemplates[i] = (char*)malloc(768);
+	}
+	strcpy(m_MinifigTemplates[i], "");
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    sprintf (tmp, "%d ", m_Colors[j]);
-    strcat (m_MinifigTemplates[i], tmp);
-  }
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		sprintf(tmp, "%d ", m_Colors[j]);
+		strcat(m_MinifigTemplates[i], tmp);
+	}
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    if (m_Info[j] != NULL)
-      sprintf (tmp, "%s ", m_Info[j]->m_strName);
-    else
-      strcpy (tmp, "None ");
-    strcat (m_MinifigTemplates[i], tmp);
-  }
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		if (m_Info[j] != NULL)
+			sprintf(tmp, "%s ", m_Info[j]->m_strName);
+		else
+			strcpy(tmp, "None ");
+		strcat(m_MinifigTemplates[i], tmp);
+	}
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    sprintf (tmp, "%f ", m_Angles[j]);
-    strcat (m_MinifigTemplates[i], tmp);
-  }
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		sprintf(tmp, "%f ", m_Angles[j]);
+		strcat(m_MinifigTemplates[i], tmp);
+	}
 }
 
-bool MinifigWizard::LoadMinifig (const char* name)
+bool MinifigWizard::LoadMinifig(const char* name)
 {
-  char *ptr;
-  int i, j;
+	char *ptr;
+	int i, j;
 
-  // check if the name is valid
-  for (i = 0; i < m_MinifigCount; i++)
-    if (strcmp (m_MinifigNames[i], name) == 0)
-      break;
+	// check if the name is valid
+	for (i = 0; i < m_MinifigCount; i++)
+		if (strcmp(m_MinifigNames[i], name) == 0)
+			break;
 
-  if (i == m_MinifigCount)
-  {
-    //    Sys_MessageBox ("Unknown Minifig");
-    return false;
-  }
-  else
-    ptr = m_MinifigTemplates[i];
+	if (i == m_MinifigCount)
+	{
+		//    Sys_MessageBox("Unknown Minifig");
+		return false;
+	}
+	else
+		ptr = m_MinifigTemplates[i];
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    if (m_Info[j] != NULL)
-      m_Info[j]->DeRef ();
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+		if (m_Info[j] != NULL)
+			m_Info[j]->DeRef();
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    m_Colors[j] = strtol (ptr, &ptr, 10);
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+		m_Colors[j] = strtol(ptr, &ptr, 10);
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-  {
-    char *endptr;
-    ptr++;
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+	{
+		char *endptr;
+		ptr++;
 
-    endptr = strchr (ptr, ' ');
-    *endptr = '\0';
-    m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo (ptr);
-    *endptr = ' ';
-    ptr = endptr;
+		endptr = strchr(ptr, ' ');
+		*endptr = '\0';
+		m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo(ptr);
+		*endptr = ' ';
+		ptr = endptr;
 
-    if (m_Info[j] != NULL)
-      m_Info[j]->AddRef();
-  }
+		if (m_Info[j] != NULL)
+			m_Info[j]->AddRef();
+	}
 
-  for (j = 0; j < LC_MFW_NUMITEMS; j++)
-    m_Angles[j] = (float)strtod (ptr, &ptr);
+	for (j = 0; j < LC_MFW_NUMITEMS; j++)
+		m_Angles[j] = (float)strtod(ptr, &ptr);
 
-  return true;
+	return true;
 }
 
-void MinifigWizard::DeleteMinifig (const char* name)
+void MinifigWizard::DeleteMinifig(const char* name)
 {
-  int i;
+	int i;
 
-  // check if the name is valid
-  for (i = 0; i < m_MinifigCount; i++)
-    if (strcmp (m_MinifigNames[i], name) == 0)
-      break;
+	// check if the name is valid
+	for (i = 0; i < m_MinifigCount; i++)
+		if (strcmp(m_MinifigNames[i], name) == 0)
+			break;
 
-  if (i == m_MinifigCount)
-  {
-    Sys_MessageBox ("Unknown Minifig");
-    return;
-  }
+	if (i == m_MinifigCount)
+	{
+		Sys_MessageBox("Unknown Minifig");
+		return;
+	}
 
-  free (m_MinifigNames[i]);
-  free (m_MinifigTemplates[i]);
-  m_MinifigCount--;
+	free(m_MinifigNames[i]);
+	free(m_MinifigTemplates[i]);
+	m_MinifigCount--;
 
-  for (; i < m_MinifigCount; i++)
-  {
-    m_MinifigNames[i] = m_MinifigNames[i+1];
-    m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
-  }
+	for (; i < m_MinifigCount; i++)
+	{
+		m_MinifigNames[i] = m_MinifigNames[i+1];
+		m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
+	}
 }

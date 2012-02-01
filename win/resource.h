@@ -384,9 +384,8 @@
 #define IDC_MF_SHOEL                    1217
 #define IDC_MF_SHOER                    1218
 #define IDC_PREVIEWSTATIC               1219
-#define IDC_MF_HATANGLE                 1220
-#define IDC_MF_HEADANGLE                1221
-#define IDC_MF_NECKANGLE                1222
+#define IDC_MF_HATANGLE                 1221
+#define IDC_MF_HEADANGLE                1222
 #define IDC_MF_ARMLANGLE                1223
 #define IDC_HTMLDLG_HTMLEXT             1223
 #define IDC_MF_ARMRANGLE                1224
@@ -403,10 +402,9 @@
 #define IDC_KEYDLG_CMDLIST              1230
 #define IDC_MF_SHOELANGLE               1231
 #define IDC_MF_SHOERANGLE               1232
-#define IDC_MF_HATSPIN                  1233
+#define IDC_MF_HATSPIN                  1234
 #define IDC_KEYDLG_REMOVE               1233
-#define IDC_MF_HEADSPIN                 1234
-#define IDC_MF_NECKSPIN                 1235
+#define IDC_MF_HEADSPIN                 1235
 #define IDC_MF_ARMLSPIN                 1236
 #define IDC_KEYDLG_RESET                1236
 #define IDC_MF_ARMRSPIN                 1237

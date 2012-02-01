@@ -29,10 +29,6 @@ GLint gluProject (GLdouble objx, GLdouble objy, GLdouble objz,
 		  const GLdouble model[16], const GLdouble proj[16],
 		  const GLint viewport[4],
 		  GLdouble *winx, GLdouble *winy, GLdouble *winz);
-GLint gluUnProject (GLdouble winx, GLdouble winy, GLdouble winz,
-		    const GLdouble model[16], const GLdouble proj[16],
-		    const GLint viewport[4],
-		    GLdouble *objx, GLdouble *objy, GLdouble *objz);
 
 bool GL_Initialize (const char* libname);
 void GL_Shutdown ();

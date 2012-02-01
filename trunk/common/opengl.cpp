@@ -1515,35 +1515,3 @@ GLint gluProject(GLdouble objx,GLdouble objy,GLdouble objz,
     *winz = (1+in[2])/2;
     return GL_TRUE;
 }
-
-
-
-/* transformation du point ecran (winx,winy,winz) en point objet */
-GLint gluUnProject(GLdouble winx,GLdouble winy,GLdouble winz,
-                            const GLdouble model[16],const GLdouble proj[16],
-                            const GLint viewport[4],
-                            GLdouble *objx,GLdouble *objy,GLdouble *objz)
-{
-    /* matrice de transformation */
-    GLdouble m[16], A[16];
-    GLdouble in[4],out[4];
-
-    /* transformation coordonnees normalisees entre -1 et 1 */
-    in[0]=(winx-viewport[0])*2/viewport[2] - 1.0;
-    in[1]=(winy-viewport[1])*2/viewport[3] - 1.0;
-    in[2]=2*winz - 1.0;
-    in[3]=1.0;
-
-    /* calcul transformation inverse */
-    matmul(A,proj,model);
-    invert_matrix(A,m);
-
-    /* d'ou les coordonnees objets */
-    transform_point(out,m,in);
-    if (out[3]==0.0)
-       return GL_FALSE;
-    *objx=out[0]/out[3];
-    *objy=out[1]/out[3];
-    *objz=out[2]/out[3];
-    return GL_TRUE;
-}

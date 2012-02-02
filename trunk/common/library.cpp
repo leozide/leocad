@@ -1486,7 +1486,7 @@ bool PiecesLibrary::ImportLDrawPiece(const char* Filename, File* NewIdxFile, Fil
 			if (!strchr(Moved, '\\') && !strchr(Moved, '/'))
 			{
 				Moved += strlen("~Moved to ");
-				_strupr(Moved);
+				strupr(Moved);
 
 				char* Dst = NULL;
 				for (int i = 0; i < Count; i++)
@@ -2510,7 +2510,6 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, File* NewIdxFile, File* NewBinFile, F
 	lcuint32 i, j, cs, binoff = 0, delta;
 	void* membuf;
 	lcuint16 scale, sb[6];
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	File& NewIdx = *NewIdxFile;
 	File& NewBin = *NewBinFile;

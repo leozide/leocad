@@ -303,7 +303,7 @@ int minifigdlg_execute (void* param)
   minifigdlg_createpair (&s, 6, LC_MFW_RIGHT_LEG, table);
   minifigdlg_createpair (&s, 7, LC_MFW_RIGHT_SHOE, table);
 
-  s.wizard->Create (&s.preview);
+  s.wizard->CreateFromWindow (&s.preview);
 
   frame = gtk_frame_new (NULL);
   gtk_widget_show (frame);

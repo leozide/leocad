@@ -314,7 +314,7 @@ void SystemUpdateColorList(int new_color)
   colorlist_set(new_color);
 }
 
-void SystemUpdateRenderingMode(bool bBackground, bool bFast)
+void SystemUpdateRenderingMode(bool bFast)
 {
   if (!main_toolbar.fast)
     return;

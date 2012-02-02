@@ -146,7 +146,7 @@ GLWindow::~GLWindow ()
   g_free (m_pData);
 }
 
-bool GLWindow::Create (void *data)
+bool GLWindow::CreateFromWindow (void *data)
 {
   int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
   GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
@@ -264,7 +264,7 @@ void GLWindow::SwapBuffers ()
     pfnglXSwapBuffers (GDK_WINDOW_XDISPLAY (prv->widget->window), GDK_WINDOW_XWINDOW (prv->widget->window));
 }
 
-void GLWindow::Redraw ()
+void GLWindow::Redraw (bool ForceRedraw)
 {
   GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 

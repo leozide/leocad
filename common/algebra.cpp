@@ -2,6 +2,7 @@
 // Math and Linear Algebra stuff.
 //
 
+#include <float.h>
 #include "defines.h"
 #include "algebra.h"
 
@@ -59,6 +60,82 @@ void Matrix44::CreatePerspective(float FoVy, float Aspect, float Near, float Far
 	m_Rows[1] = Vector4(0, y, 0,  0);
 	m_Rows[2] = Vector4(a, b, c, -1);
 	m_Rows[3] = Vector4(0, 0, d,  0);
+}
+
+void Matrix44::CreateOrtho(float Left, float Right, float Bottom, float Top, float Near, float Far)
+{
+	m_Rows[0] = Vector4(2.0f / (Right-Left), 0.0f, 0.0f, 0.0f);
+	m_Rows[1] = Vector4(0.0f, 2.0f / (Top-Bottom), 0.0f, 0.0f);
+	m_Rows[2] = Vector4(0.0f, 0.0f, -2.0f / (Far-Near), 0.0f);
+	m_Rows[3] = Vector4(-(Right+Left) / (Right-Left), -(Top+Bottom) / (Top-Bottom), -(Far+Near) / (Far-Near), 1.0f);
+}
+
+void GetFrustumPlanes(const Matrix44& WorldView, const Matrix44& Projection, Vector4 Planes[6])
+{
+	// TODO: Use vectors.
+	Matrix44 WorldProj = Mul(WorldView, Projection);
+
+	Planes[0][0] = (WorldProj[0][0] - WorldProj[0][3]) * -1;
+	Planes[0][1] = (WorldProj[1][0] - WorldProj[1][3]) * -1;
+	Planes[0][2] = (WorldProj[2][0] - WorldProj[2][3]) * -1;
+	Planes[0][3] = (WorldProj[3][0] - WorldProj[3][3]) * -1;
+	Planes[1][0] =  WorldProj[0][0] + WorldProj[0][3];
+	Planes[1][1] =  WorldProj[1][0] + WorldProj[1][3];
+	Planes[1][2] =  WorldProj[2][0] + WorldProj[2][3];
+	Planes[1][3] =  WorldProj[3][0] + WorldProj[3][3];
+	Planes[2][0] = (WorldProj[0][1] - WorldProj[0][3]) * -1;
+	Planes[2][1] = (WorldProj[1][1] - WorldProj[1][3]) * -1;
+	Planes[2][2] = (WorldProj[2][1] - WorldProj[2][3]) * -1;
+	Planes[2][3] = (WorldProj[3][1] - WorldProj[3][3]) * -1;
+	Planes[3][0] =  WorldProj[0][1] + WorldProj[0][3];
+	Planes[3][1] =  WorldProj[1][1] + WorldProj[1][3];
+	Planes[3][2] =  WorldProj[2][1] + WorldProj[2][3];
+	Planes[3][3] =  WorldProj[3][1] + WorldProj[3][3];
+	Planes[4][0] = (WorldProj[0][2] - WorldProj[0][3]) * -1;
+	Planes[4][1] = (WorldProj[1][2] - WorldProj[1][3]) * -1;
+	Planes[4][2] = (WorldProj[2][2] - WorldProj[2][3]) * -1;
+	Planes[4][3] = (WorldProj[3][2] - WorldProj[3][3]) * -1;
+	Planes[5][0] =  WorldProj[0][2] + WorldProj[0][3];
+	Planes[5][1] =  WorldProj[1][2] + WorldProj[1][3];
+	Planes[5][2] =  WorldProj[2][2] + WorldProj[2][3];
+	Planes[5][3] =  WorldProj[3][2] + WorldProj[3][3];
+
+	for (int i = 0; i < 6; i++)
+	{
+		float Len = Vector3(Planes[i]).Length();
+		Planes[i] /= -Len;
+	}
+}
+
+Vector3 ZoomExtents(const Vector3& Position, const Matrix44& WorldView, const Matrix44& Projection, const Vector3* Points, int NumPoints)
+{
+	if (!NumPoints)
+		return Position;
+
+	Vector4 Planes[6];
+	GetFrustumPlanes(WorldView, Projection, Planes);
+
+	Vector3 Front = Vector3(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
+
+	// Calculate the position that is as close as possible to the model and has all pieces visible.
+	float SmallestDistance = FLT_MAX;
+
+	for (int p = 0; p < 4; p++)
+	{
+		float ep = Dot3(Position, Planes[p]);
+		float fp = Dot3(Front, Planes[p]);
+
+		for (int j = 0; j < NumPoints; j++)
+		{
+			// Intersect the camera line with the plane that contains this point, NewEye = Eye + u * (Target - Eye)
+			float u = (ep - Dot3(Points[j], Planes[p])) / fp;
+
+			if (u < SmallestDistance)
+				SmallestDistance = u;
+		}
+	}
+
+	return Position - (Front * SmallestDistance);
 }
 
 // Inverse code from the GLU library.

@@ -528,6 +528,7 @@ public:
 	{ m_Rows[0] = Row0; m_Rows[1] = Row1; m_Rows[2] = Row2; m_Rows[3] = Row3; }
 
 	inline operator const float*() const { return (const float*)this; }
+	inline const Vector4& operator[](int i) const { return m_Rows[i]; }
 	inline Vector4& operator[](int i) { return m_Rows[i]; }
 
 	inline void LoadIdentity()
@@ -586,6 +587,7 @@ public:
 	friend Matrix44 Inverse(const Matrix44& m);
 	void CreateLookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
 	void CreatePerspective(float FoVy, float Aspect, float Near, float Far);
+	void CreateOrtho(float Left, float Right, float Bottom, float Top, float Near, float Far);
 
 	void CreateFromAxisAngle(const Vector3& Axis, float Radians)
 	{
@@ -692,7 +694,9 @@ protected:
 };
 
 // ============================================================================
-// Other Functions.
+// Linear Algebra Functions.
+
+Vector3 ZoomExtents(const Vector3& Position, const Matrix44& WorldView, const Matrix44& Projection, const Vector3* Points, int NumPoints);
 
 Vector3 ProjectPoint(const Vector3& Point, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);
 void ProjectPoints(Vector3* Points, int NumPoints, const Matrix44& ModelView, const Matrix44& Projection, const int Viewport[4]);

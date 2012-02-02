@@ -1558,6 +1558,9 @@ void Project::AddView (View* pView)
 
 	pView->MakeCurrent ();
 	RenderInitialize ();
+
+	if (!m_ActiveView)
+		m_ActiveView = pView;
 }
 
 void Project::RemoveView (View* pView)
@@ -5445,131 +5448,58 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
-			// FIXME: rewrite using the FustrumCull function
-			if (m_pPieces == 0) break;
-			bool bControl = Sys_KeyDown (KEY_CONTROL);
+			// If the control key is down then zoom all views, otherwise zoom only the active view.
+			int FirstView, LastView;
 
-			GLdouble modelMatrix[16], projMatrix[16];
-			float up[3], eye[3], target[3];
+			if (Sys_KeyDown(KEY_CONTROL))
+			{
+				FirstView = 0;
+				LastView = m_ViewList.GetSize();
+			}
+			else
+			{
+				FirstView = m_ViewList.FindIndex(m_ActiveView);
+				LastView = FirstView + 1;
+			}
+
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			GLint viewport[4], out, x, y, w, h;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 					pPiece->CompareBoundingBox(bs);
 
-			float v[24] = {
-				bs[0], bs[1], bs[5],
-				bs[3], bs[1], bs[5],
-				bs[0], bs[1], bs[2],
-				bs[3], bs[4], bs[5],
-				bs[3], bs[4], bs[2],
-				bs[0], bs[4], bs[2],
-				bs[0], bs[4], bs[5],
-				bs[3], bs[1], bs[2] };
+			Vector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
 
-			for (int vp = 0; vp < viewports[m_nViewportMode].n; vp++)
+			ObjArray<Vector3> Points;
+			Points.Add(Vector3(bs[0], bs[1], bs[5]));
+			Points.Add(Vector3(bs[3], bs[1], bs[5]));
+			Points.Add(Vector3(bs[0], bs[1], bs[2]));
+			Points.Add(Vector3(bs[3], bs[4], bs[5]));
+			Points.Add(Vector3(bs[3], bs[4], bs[2]));
+			Points.Add(Vector3(bs[0], bs[4], bs[2]));
+			Points.Add(Vector3(bs[0], bs[4], bs[5]));
+			Points.Add(Vector3(bs[3], bs[1], bs[2]));
+
+			for (int vp = FirstView; vp < LastView; vp++)
 			{
-				Camera* pCam;
-				if (bControl)
-					pCam = m_pViewCameras[vp];
-				else
-					pCam = m_pViewCameras[m_nActiveViewport];
+				View* view = m_ViewList[vp];
 
-				if (!bControl)
-					vp = m_nActiveViewport;
+				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 
-				x = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][0] * (float)m_nViewX);
-				y = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][1] * (float)m_nViewY);
-				w = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][2] * (float)m_nViewX);
-				h = (int)(viewports[m_nViewportMode].dim[m_nActiveViewport][3] * (float)m_nViewY);
-				float ratio = (float)w/h;
-	
-				glViewport(x,y,w,h);
-				pCam->LoadProjection(ratio);
+				float Aspect = (float)Viewport[2]/(float)Viewport[3];
+				Camera* Cam = m_pViewCameras[m_nActiveViewport];
 
-				if (!bControl)
-					vp = 4;
+				Vector3 Position(Cam->GetEyePosition() + Center - Cam->GetTargetPosition());
 
-				pCam->GetTargetPos (target);
-				pCam->GetEyePos (eye);
+				Matrix44 ModelView, Projection;
+				ModelView.CreateLookAt(Position, Center, Cam->GetUpVector());
+				Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-				up[0] = (bs[0] + bs[3])/2 - target[0];
-				up[1] = (bs[1] + bs[4])/2 - target[1];
-				up[2] = (bs[2] + bs[5])/2 - target[2];
+				Position = ZoomExtents(Position, ModelView, Projection, &Points[0], Points.GetSize());
 
-				if (pCam->IsSide())
-				{
-					eye[0] += up[0];
-					eye[1] += up[1];
-					eye[2] += up[2];
-				}
-				target[0] += up[0];
-				target[1] += up[1];
-				target[2] += up[2];
-
-				pCam->GetUpVec (up);
-				Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
-				frontvec.Normalize();
-				sidevec.Cross(frontvec, upvec);
-				upvec.Cross(sidevec, frontvec);
-				upvec.Normalize();
-				upvec.ToFloat(up);
-				frontvec *= 0.25f;
-
-				glMatrixMode(GL_MODELVIEW);
-				glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-				glGetIntegerv(GL_VIEWPORT,viewport);
-
-				for (out = 0; out < 10000; out++) // Zoom in
-				{
-					eye[0] -= frontvec[0];
-					eye[1] -= frontvec[1];
-					eye[2] -= frontvec[2];
-					glLoadIdentity();
-					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
-					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-
-					for (int i = 0; i < 24; i+=3)
-					{
-						double winx, winy, winz;
-						gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz);
-						if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
-							(winx > viewport[0] + viewport[2] - 1) || (winy > viewport[1] + viewport[3] - 1))
-						{
-							out = 10000;
-							continue;
-						}
-					}
-				}
-
-				bool stp = false;
-				for (out = 0; out < 10000 && !stp; out++) // zoom out
-				{
-					stp = true;
-					eye[0] += frontvec[0];
-					eye[1] += frontvec[1];
-					eye[2] += frontvec[2];
-					glLoadIdentity();
-					gluLookAt(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2]);
-					glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-
-					for (int i = 0; i < 24; i+=3)
-					{
-						double winx, winy, winz;
-						gluProject (v[i], v[i+1], v[i+2], modelMatrix, projMatrix, viewport, &winx, &winy, &winz);
-						if ((winx < viewport[0] + 1) || (winy < viewport[1] + 1) || 
-							(winx > viewport[0] + viewport[2] - 1) || (winy > viewport[1] + viewport[3] - 1))
-						{
-							stp = false;
-							continue;
-						}
-					}
-				}
-
-				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, eye, LC_CK_EYE);
-				pCam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, target, LC_CK_TARGET);
-				pCam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
+				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Center, LC_CK_TARGET);
+				Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 
 			SystemUpdateFocus(NULL);

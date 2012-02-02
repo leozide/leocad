@@ -757,7 +757,7 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
 
   GtkWidget *w;
   preview = new PiecePreview (share);
-  preview->Create (&w);
+  preview->CreateFromWindow (&w);
   gtk_widget_set_usize (w, 100, 100);
   gtk_widget_show (w);
   gtk_container_add (GTK_CONTAINER (vpan), w);

@@ -249,7 +249,7 @@ void OnCommand(GtkWidget* widget, gpointer data)
       gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
 
       View *v = new View (project, view);
-      v->Create (&w);
+      v->CreateFromWindow (&w);
 
       gtk_container_add (GTK_CONTAINER (frame), w);
       gtk_widget_show (w);
@@ -486,7 +486,7 @@ static void update_window_layout ()
   // first thing we need to create the widgets
   if (drawing_area == NULL)
   {
-    view->Create (&drawing_area);
+    view->CreateFromWindow (&drawing_area);
 
     gtk_widget_set_events (GTK_WIDGET (drawing_area), GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK |

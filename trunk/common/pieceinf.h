@@ -13,6 +13,7 @@
 #define LC_PIECE_SMALL              0x10 // scale = 10000
 #define LC_PIECE_MEDIUM             0x20 // scale = 1000 (otherwise = 100)
 #define LC_PIECE_LONGDATA_INDICES   0x40 // unsigned long/short index
+#define LC_PIECE_PLACEHOLDER        0x80 // Placeholder for a piece not in the library.
 
 #define LC_PIECE_NAME_LEN 256
 
@@ -92,6 +93,7 @@ class PieceInfo
 		return m_nBoxList;
 	};
 	void LoadIndex(File& file);
+	void CreatePlaceholder(const char* Name);
 	void AddRef();
 	void DeRef();
 

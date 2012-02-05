@@ -822,9 +822,16 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		}
 	}
 
+	if (!bMerge)
+	{
+		Camera* Cam = GetCamera(LC_CAMERA_MAIN);
+		for (i = 0; i < m_ViewList.GetSize (); i++)
+			m_ViewList[i]->m_Camera = Cam;
+	}
+
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
-		m_ViewList[i]->MakeCurrent ();
+		m_ViewList[i]->MakeCurrent();
 		RenderInitialize();
 	}
 	CalculateStep();
@@ -1037,11 +1044,11 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 {
 	char buf[1024];
 
-  // Save file offset.
-  lcuint32 Offset = file->GetPosition();
-  file->Seek(0, SEEK_SET);
+	// Save file offset.
+	lcuint32 Offset = file->GetPosition();
+	file->Seek(0, SEEK_SET);
 
-  while (file->ReadLine(buf, 1024))
+	while (file->ReadLine(buf, 1024))
 	{
 		strupr(buf);
 		if (strstr(buf, "STEP"))
@@ -1078,7 +1085,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			if (ptr != NULL)
 				*ptr = 0;
 
-      // See if it's a piece in the library
+			// See if it's a piece in the library
 			if (strlen(tmp) < LC_PIECE_NAME_LEN)
 			{
 				char name[LC_PIECE_NAME_LEN];
@@ -1103,36 +1110,56 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 				}
 			}
 
-      // Check for MPD files first.
-      if (read)
-      {
-        for (int i = 0; i < FileArray.GetSize(); i++)
-        {
-          if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
-          {
-  					FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
-  					read = false;
-            break;
-          }
-        }
-      }
+			// Check for MPD files first.
+			if (read)
+			{
+				for (int i = 0; i < FileArray.GetSize(); i++)
+				{
+					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					{
+						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+						read = false;
+						break;
+					}
+				}
+			}
 
-      // Try to read the file from disk.
+			// Try to read the file from disk.
 			if (read)
 			{
 				FileDisk tf;
 
-        if (tf.Open(pn, "rt"))
-        {
+				if (tf.Open(pn, "rt"))
+				{
 					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
 					read = false;
-        }
+				}
+			}
+
+			if (read)
+			{
+				// Create a placeholder.
+				PieceInfo* Info = lcGetPiecesLibrary()->CreatePiecePlaceholder(tmp);
+
+				float x, y, z, rot[4];
+				Piece* pPiece = new Piece(Info);
+				read = false;
+
+				tmpmat.GetTranslation(&x, &y, &z);
+				pPiece->Initialize(x, y, z, *nStep, 1, cl);
+				pPiece->CreateName(m_pPieces);
+				AddPiece(pPiece);
+				tmpmat.ToAxisAngle(rot);
+				pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
+				SystemPieceComboAdd(Info->m_strDescription);
+				(*nOk)++;
 			}
 		}
 	}
 
-  // Restore file offset.
-  file->Seek(Offset, SEEK_SET);
+	// Restore file offset.
+	file->Seek(Offset, SEEK_SET);
 }
 
 bool Project::DoFileSave()

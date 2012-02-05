@@ -122,7 +122,6 @@ public:
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
-	void SetViewSize(int cx, int cy);
 	void CheckAutoSave();
 	bool GetSelectionCenter(Vector3& Center) const;
 	bool GetFocusPosition(Vector3& Position) const;
@@ -162,7 +161,6 @@ protected:
 	Camera* m_pCameras;
 	Light* m_pLights;
 	Group* m_pGroups;
-	Camera* m_pViewCameras[4];
 	Terrain* m_pTerrain;
 	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
@@ -214,7 +212,6 @@ protected:
 
 	int m_OverlayMode;
 	bool m_OverlayActive;
-	float m_OverlayScale[4];
 	Vector3 m_OverlayCenter;
 	Vector3 m_OverlayTrackStart;
 	Vector3 m_OverlayDelta;
@@ -249,10 +246,6 @@ protected:
 	int m_nCurAction;
 	int m_PreviousAction;
 	bool m_RestoreAction;
-	unsigned char m_nViewportMode;
-	unsigned char m_nActiveViewport;
-	int m_nViewX;
-	int m_nViewY;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* m_PreviousPiece;
 	unsigned char m_nCurColor;

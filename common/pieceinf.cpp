@@ -243,6 +243,36 @@ void PieceInfo::LoadIndex (File& file)
   m_fDimensions[5] = (float)sh[5]/scale;
 }
 
+void PieceInfo::CreatePlaceholder(const char* Name)
+{
+	m_nRef = 0;
+	m_nVertexCount = 0;
+	m_fVertexArray = NULL;
+	m_nConnectionCount = 0;
+	m_pConnections = NULL;
+	m_nGroupCount = 0;
+	m_pGroups = NULL;
+	m_nTextureCount = 0;
+	m_pTextures = NULL;
+	m_nBoxList = 0;
+
+	strncpy(m_strName, Name, sizeof(m_strName));
+	m_strName[sizeof(m_strName)-1] = 0;
+	strncpy(m_strDescription, Name, sizeof(m_strDescription));
+	m_strDescription[sizeof(m_strDescription)-1] = 0;
+
+	m_nFlags = LC_PIECE_PLACEHOLDER;
+	m_nOffset = 0;
+	m_nSize = 0;
+
+	m_fDimensions[0] = 0.4f;
+	m_fDimensions[1] = 0.4f;
+	m_fDimensions[2] = 0.16f;
+	m_fDimensions[3] = -0.4f;
+	m_fDimensions[4] = -0.4f;
+	m_fDimensions[5] = -0.96f;
+}
+
 void PieceInfo::AddRef()
 {
 	if (m_nRef == 0)
@@ -311,6 +341,120 @@ void PieceInfo::CreateBoxDisplayList()
 
 void PieceInfo::LoadInformation()
 {
+	if (m_nFlags & LC_PIECE_PLACEHOLDER)
+	{
+		m_nConnectionCount = 0;
+		m_pConnections = (CONNECTIONINFO*)malloc (m_nConnectionCount * sizeof(CONNECTIONINFO));
+		m_nTextureCount = 0;
+
+		m_nGroupCount = 1;
+		m_pGroups = (DRAWGROUP*)malloc(sizeof(DRAWGROUP)*m_nGroupCount);
+		memset(m_pGroups, 0, sizeof(DRAWGROUP)*m_nGroupCount);
+
+		int verts = 8;
+		m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
+		m_nVertexCount = verts;
+
+		Vector3 Min(-0.4f, -0.4f, -0.96f);
+		Vector3 Max(0.4f, 0.4f, 0.16f);
+
+		m_fVertexArray[0*3+0] = Min[0]; m_fVertexArray[0*3+1] = Min[1]; m_fVertexArray[0*3+2] = Min[2];
+		m_fVertexArray[1*3+0] = Min[0]; m_fVertexArray[1*3+1] = Max[1]; m_fVertexArray[1*3+2] = Min[2];
+		m_fVertexArray[2*3+0] = Max[0]; m_fVertexArray[2*3+1] = Max[1]; m_fVertexArray[2*3+2] = Min[2];
+		m_fVertexArray[3*3+0] = Max[0]; m_fVertexArray[3*3+1] = Min[1]; m_fVertexArray[3*3+2] = Min[2];
+		m_fVertexArray[4*3+0] = Min[0]; m_fVertexArray[4*3+1] = Min[1]; m_fVertexArray[4*3+2] = Max[2];
+		m_fVertexArray[5*3+0] = Min[0]; m_fVertexArray[5*3+1] = Max[1]; m_fVertexArray[5*3+2] = Max[2];
+		m_fVertexArray[6*3+0] = Max[0]; m_fVertexArray[6*3+1] = Max[1]; m_fVertexArray[6*3+2] = Max[2];
+		m_fVertexArray[7*3+0] = Max[0]; m_fVertexArray[7*3+1] = Min[1]; m_fVertexArray[7*3+2] = Max[2];
+
+		m_pGroups->connections[0] = 0xFFFF;
+
+		m_pGroups->drawinfo = malloc((1 + 1 + 3 + 36 + 1 + 3 + 24) * 2);
+		lcuint16* drawinfo = (lcuint16*)m_pGroups->drawinfo;
+
+		*drawinfo++ = 2;
+		*drawinfo++ = LC_COL_DEFAULT;
+		*drawinfo++ = 0;
+		*drawinfo++ = 36;
+
+		*drawinfo++ = 0;
+		*drawinfo++ = 1;
+		*drawinfo++ = 2;
+		*drawinfo++ = 0;
+		*drawinfo++ = 2;
+		*drawinfo++ = 3;
+
+		*drawinfo++ = 7;
+		*drawinfo++ = 6;
+		*drawinfo++ = 5;
+		*drawinfo++ = 7;
+		*drawinfo++ = 5;
+		*drawinfo++ = 4;
+
+		*drawinfo++ = 0;
+		*drawinfo++ = 1;
+		*drawinfo++ = 5;
+		*drawinfo++ = 0;
+		*drawinfo++ = 5;
+		*drawinfo++ = 4;
+
+		*drawinfo++ = 2;
+		*drawinfo++ = 3;
+		*drawinfo++ = 7;
+		*drawinfo++ = 2;
+		*drawinfo++ = 7;
+		*drawinfo++ = 6;
+
+		*drawinfo++ = 0;
+		*drawinfo++ = 3;
+		*drawinfo++ = 7;
+		*drawinfo++ = 0;
+		*drawinfo++ = 7;
+		*drawinfo++ = 4;
+
+		*drawinfo++ = 1;
+		*drawinfo++ = 2;
+		*drawinfo++ = 6;
+		*drawinfo++ = 1;
+		*drawinfo++ = 6;
+		*drawinfo++ = 5;
+
+		*drawinfo++ = 0;
+		*drawinfo++ = LC_COL_EDGES;
+		*drawinfo++ = 0;
+		*drawinfo++ = 0;
+		*drawinfo++ = 24;
+
+		*drawinfo++ = 0;
+		*drawinfo++ = 1;
+		*drawinfo++ = 1;
+		*drawinfo++ = 2;
+		*drawinfo++ = 2;
+		*drawinfo++ = 3;
+		*drawinfo++ = 3;
+		*drawinfo++ = 0;
+
+		*drawinfo++ = 4;
+		*drawinfo++ = 5;
+		*drawinfo++ = 5;
+		*drawinfo++ = 6;
+		*drawinfo++ = 6;
+		*drawinfo++ = 7;
+		*drawinfo++ = 7;
+		*drawinfo++ = 4;
+
+		*drawinfo++ = 0;
+		*drawinfo++ = 4;
+		*drawinfo++ = 1;
+		*drawinfo++ = 5;
+		*drawinfo++ = 2;
+		*drawinfo++ = 6;
+		*drawinfo++ = 3;
+		*drawinfo++ = 7;
+
+		return;
+	}
+
   FileDisk bin;
   char filename[LC_MAXPATH];
   CONNECTIONINFO* pConnection;

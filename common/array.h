@@ -12,12 +12,14 @@ public:
 
 	int GetSize() const
 		{ return m_nLength; }
+	void SetSize(int Size);
 
 	T* RemoveIndex(int nIndex);
 	T* RemovePointer(T* pObj);
 	void RemoveAll();
 	void Add(T* pObj);
 	void AddSorted(T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData);
+	void SetAt(int Index, T* Ptr);
 	void InsertAt(int nIndex, T* pObj);
 	int FindIndex(T* Obj) const;
 	void Sort(LC_PTRARRAY_COMPARE_FUNC SortFunc, void* SortData);

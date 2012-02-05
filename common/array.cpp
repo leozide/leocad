@@ -23,9 +23,18 @@ PtrArray<T>::~PtrArray()
 }
 
 template <class T>
+void PtrArray<T>::SetSize(int Size)
+{
+	if (Size > m_nLength)
+		Expand(Size - m_nLength);
+
+	m_nLength = Size;
+}
+
+template <class T>
 void PtrArray<T>::Expand(int nGrow)
 {
-	if((m_nLength + nGrow) > m_nAlloc)
+	if ((m_nLength + nGrow) > m_nAlloc)
 	{
 		m_pData =(T**)realloc(m_pData,(m_nLength + nGrow) * sizeof(T*));
 		memset(m_pData + m_nLength, 0, nGrow * sizeof(T*));
@@ -93,6 +102,12 @@ void PtrArray<T>::AddSorted(T* pObj, LC_PTRARRAY_COMPARE_FUNC pFunc, void* pData
 	}
 
 		Add(pObj);
+}
+
+template <class T>
+void PtrArray<T>::SetAt(int Index, T* Ptr)
+{
+	m_pData[Index] = Ptr;
 }
 
 template <class T>

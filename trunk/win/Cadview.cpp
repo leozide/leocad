@@ -227,6 +227,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	HBITMAP hBmOld = (HBITMAP)SelectObject(hMemDC, hBm);
 
 	View view(project, project->m_ActiveView);
+	view.m_Camera = project->m_ActiveView->m_Camera;
 	view.CreateFromBitmap(hMemDC);
 	view.MakeCurrent();
 	view.OnSize(tw, th);
@@ -251,11 +252,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 
 	unsigned short nOldTime = project->m_bAnimation ? project->m_nCurFrame : project->m_nCurStep;
 	UINT nRenderTime = 1+((pInfo->m_nCurPage-1)*rows*cols);
-
-	int oldSizex = project->m_nViewX;
-	int oldSizey = project->m_nViewY;
-	project->m_nViewX = tw;
-	project->m_nViewY = th;
 
 	for (int r = 0; r < rows; r++)
 	for (int c = 0; c < cols; c++)
@@ -350,8 +346,6 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		project->m_nCurFrame = nOldTime;
 	else
 		project->m_nCurStep = (unsigned char)nOldTime;
-	project->m_nViewX = oldSizex;
-	project->m_nViewY = oldSizey;
 
 	view.DestroyContext();
 	SelectObject(hMemDC, hBmOld);
@@ -519,6 +513,10 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	Project* project = lcGetActiveProject();
 
 	m_pView = new View(project, project->m_ActiveView);
+	if (project->m_ActiveView)
+		m_pView->m_Camera = project->m_ActiveView->m_Camera;
+	else
+		m_pView->m_Camera = project->GetCamera(LC_CAMERA_MAIN);
 	m_pView->CreateFromWindow(m_hWnd);
 	m_pView->OnInitialUpdate();
 
@@ -532,12 +530,12 @@ void CCADView::OnDestroy()
 	delete m_pView;
 	m_pView = NULL;
 
-	KillTimer (IDT_LC_SAVETIMER);
+	KillTimer(IDT_LC_SAVETIMER);
 
 	CView::OnDestroy();
 }
 
-void CCADView::OnDropDown (NMHDR* pNotifyStruct, LRESULT* pResult)
+void CCADView::OnDropDown(NMHDR* pNotifyStruct, LRESULT* pResult)
 {
 	NMTOOLBAR* pNMToolBar = (NMTOOLBAR*)pNotifyStruct;
 	RECT rc;

@@ -1276,6 +1276,8 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 		strcat(buf, "\r\n");
 		file.Write(buf, strlen(buf));
 
+		const char* OldLocale = setlocale(LC_NUMERIC, "C");
+
 		for (i = 1; i <= steps; i++)
 		{
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -1297,9 +1299,12 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 				file.Write("0 STEP\r\n", 8);
 		}
 		file.Write("0\r\n", 3);
+
+		setlocale(LC_NUMERIC, OldLocale);
 	}
 	else
 		FileSave(&file, false);     // save me
+
 	file.Close();
 
 	SetModifiedFlag(false);     // back to unmodified
@@ -3955,6 +3960,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				break;
 			}
 
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			fputs("// Stuff that doesn't need to be changed\n\n", f);
 
 			if (strlen(opts.libpath))
@@ -4147,6 +4153,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (!f)
 			{
 				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				setlocale(LC_NUMERIC, OldLocale);
 				break;
 			}
 
@@ -4212,6 +4219,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			fclose (f);
 			free (conv);
 			free (flags);
+			setlocale(LC_NUMERIC, OldLocale);
 
 			if (opts.render)
 			{
@@ -4847,36 +4855,36 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_PIECE_MINIFIG:
 		{
-		  MinifigWizard *wiz = new MinifigWizard (m_ViewList[0]);
-		  int i;
+			MinifigWizard Wizard(m_ActiveView);
+			int i;
 
-		  if (SystemDoDialog (LC_DLG_MINIFIG, wiz))
-		  {
-		    SelectAndFocusNone(false);
+			if (SystemDoDialog(LC_DLG_MINIFIG, &Wizard))
+			{
+				SelectAndFocusNone(false);
 
-		    for (i = 0; i < LC_MFW_NUMITEMS; i++)
-		    {
-		      if (wiz->m_Info[i] == NULL)
-				continue;
+				for (i = 0; i < LC_MFW_NUMITEMS; i++)
+				{
+					if (Wizard.m_Info[i] == NULL)
+						continue;
 
-		      Matrix mat;
-		      Piece* pPiece = new Piece(wiz->m_Info[i]);
+					Matrix mat;
+					Piece* pPiece = new Piece(Wizard.m_Info[i]);
 
-			  Vector4& Position = wiz->m_Matrices[i][3];
-			  Vector4 Rotation = wiz->m_Matrices[i].ToAxisAngle();
-			  Rotation[3] *= LC_RTOD;
-		      pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame, wiz->m_Colors[i]);
-		      pPiece->CreateName(m_pPieces);
-		      AddPiece(pPiece);
-		      pPiece->Select(true, false, false);
+					Vector4& Position = Wizard.m_Matrices[i][3];
+					Vector4 Rotation = Wizard.m_Matrices[i].ToAxisAngle();
+					Rotation[3] *= LC_RTOD;
+					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame, Wizard.m_Colors[i]);
+					pPiece->CreateName(m_pPieces);
+					AddPiece(pPiece);
+					pPiece->Select(true, false, false);
 
-		      pPiece->ChangeKey(1, false, false, Rotation, LC_PK_ROTATION);
-		      pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
-		      pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-		      pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
+					pPiece->ChangeKey(1, false, false, Rotation, LC_PK_ROTATION);
+					pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
+					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+					pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
-		      SystemPieceComboAdd(wiz->m_Info[i]->m_strDescription);
-		    }
+					SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);
+				}
 
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 				int max = 0;
@@ -4904,16 +4912,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 
-        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+				messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 				UpdateSelection();
 				UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Minifig");
 			}
-
-			for (i = 0; i < LC_MFW_NUMITEMS; i++)
-			  if (wiz->m_Info[i])
-			    wiz->m_Info[i]->DeRef();
 		} break;
 
 		case LC_PIECE_ARRAY:
@@ -7502,6 +7506,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		SetAction(LC_ACTION_ROTATE_VIEW);
 		m_RestoreAction = true;
 	}
+	else
+		m_RestoreAction = false;
 
 	switch (m_nCurAction)
 	{

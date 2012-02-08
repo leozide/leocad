@@ -862,6 +862,27 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 		Sys_MessageBox ("Unknown Minifig Preferences.");
 }
 
+void MinifigWizard::OnInitialUpdate()
+{
+	const unsigned char colors[LC_MFW_NUMITEMS] = { 0, 6, 4, 22, 0, 0, 6, 6, 22, 22, 9, 9, 9, 22, 22 };
+	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
+	                                        "None", "None", "3815", "3817", "3816", "None", "None" };
+
+	MakeCurrent();
+
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+	{
+		m_Colors[i] = colors[i];
+		m_Angles[i] = 0;
+
+		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
+		if (m_Info[i] != NULL)
+			m_Info[i]->AddRef();
+	}
+
+	Calculate();
+}
+
 MinifigWizard::~MinifigWizard ()
 {
 	char *ptr, buf[32];
@@ -905,6 +926,10 @@ MinifigWizard::~MinifigWizard ()
 
 	free (m_MinifigNames);
 	free (m_MinifigTemplates);
+
+	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+		if (m_Info[i])
+			m_Info[i]->DeRef();
 }
 
 void MinifigWizard::ParseSettings(File& Settings)

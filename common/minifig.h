@@ -30,7 +30,7 @@ enum LC_MFW_TYPES
 
 struct lcMinifigPieceInfo
 {
-	char Description[80];
+	char Description[128];
 	PieceInfo* Info;
 	Matrix44 Offset;
 };
@@ -42,6 +42,7 @@ public:
 	~MinifigWizard ();
 
 	void OnDraw ();
+	void OnInitialUpdate();
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;

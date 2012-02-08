@@ -101,8 +101,6 @@ protected:
 
 	int m_nMovedCount;       // number of moved pieces
 	char* m_pMovedReference; // moved pieces list
-	int m_nPieceCount;       // number of pieces
-	PieceInfo* m_pPieceIdx;	 // pieces array
 	int m_nTextureCount;     // number of textures
 	Texture* m_pTextures;    // textures array
 

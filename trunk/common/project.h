@@ -132,6 +132,10 @@ public:
 	void RemoveView(View* view);
 	void UpdateAllViews();
 	bool SetActiveView(View* view);
+	View* GetActiveView() const
+	{
+		return m_ActiveView;
+	}
 
 // Implementation
 protected:

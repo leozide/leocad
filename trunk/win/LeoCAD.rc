@@ -394,11 +394,11 @@ BEGIN
             MENUITEM "Rotate View",                 ID_ACTION_ROTATE_VIEW
             MENUITEM "Roll",                        ID_ACTION_ROLL
             MENUITEM "Zoom Region",                 ID_ACTION_ZOOM_REGION
-            MENUITEM "Zoom Extents",                ID_ACTION_ZOOM_EXTENTS
+            MENUITEM "Zoom Extents",                ID_ZOOM_EXTENTS
         END
         POPUP "Cameras"
         BEGIN
-            MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
+            MENUITEM "Dummy",                       ID_CAMERA_FIRST
         END
         MENUITEM SEPARATOR
         MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY

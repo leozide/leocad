@@ -40,6 +40,8 @@ public:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
+	virtual BOOL OnShowPopupMenu(CMFCPopupMenu* pMenuPopup);
+
 // Implementation
 public:
 	virtual ~CMainFrame();
@@ -97,6 +99,7 @@ protected:
 	afx_msg void OnUpdateAction(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSnap(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateLock(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCamera(CCmdUI* pCmdUI);
 	
 	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
 	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);

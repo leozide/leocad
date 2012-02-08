@@ -1725,6 +1725,8 @@ END
 STRINGTABLE
 BEGIN
     ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
+    ID_PIECE_INSERT         "Add a piece"
+    ID_PIECE_DELETE         "Delete currently selected objects"
     ID_VIEW_STEP_FIRST      "Go to the first step or frame\nGo to Start"
     ID_VIEW_STEP_LAST       "Go to the last step or frame\nGo to End"
     ID_PIECE_HIDESELECTED   "Hide selected objects"
@@ -1745,7 +1747,12 @@ END
 
 STRINGTABLE
 BEGIN
+    ID_FILE_EXPORT_WAVEFRONT "Export the project as a .OBJ file"
+    ID_FILE_EXPORT_POVRAY   "Export the project to POV-Ray"
     ID_PIECE_ARRAY          "Make copies of the selected pieces\nArray"
+    ID_PIECE_MINIFIGWIZARD  "Display the minifig wizard"
+    ID_FILE_EXPORT_3DSTUDIO "Export the project as a .3DS file"
+    ID_FILE_EXPORT_HTML     "Create an HTML page for the project"
     ID_HELP_LEOCADHOMEPAGE  "Go to the LeoCAD Home page on the internet"
     ID_HELP_CHECKFORUPDATES "Check for a newer version of the program on the internet"
 END
@@ -1786,6 +1793,8 @@ BEGIN
     ID_FILE_EDITPIECELIBRARY "Configure the LeoCAD Pieces Library"
     ID_VIEW_ZOOMIN          "Zoom In"
     ID_VIEW_ZOOMOUT         "Zoom Out"
+    ID_PIECE_DETACH         "Remove current piece from group"
+    ID_PIECE_ATTACH         "Add current piece to group"
     ID_PIECE_EDITGROUPS     "Edit groups"
 END
 
@@ -1795,6 +1804,9 @@ BEGIN
     ID_ACTION_ROTATE_VIEW   "Rotate view\nRotate View"
     ID_ACTION_ROLL          "Roll view\nRoll"
     ID_ZOOM_EXTENTS         "Zoom extents (hold CTRL to zoom all views)\nZoom Extents"
+    ID_PIECE_GROUP          "Group selected pieces"
+    ID_PIECE_UNGROUP        "Ungroup selected pieces"
+    ID_VIEW_PREFERENCES     "Change program options"
     ID_ANIMATOR_PLAY        "Play animation sequence\nPlay"
     ID_ANIMATOR_STOP        "Stop playing animation\nStop"
 END
@@ -1850,6 +1862,14 @@ STRINGTABLE
 BEGIN
     ID_FILE_IMPORTPIECE     "Import a piece from LDraw"
     ID_PIECE_TRANSFORM      "Move or rotates the selected objects."
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_SPLITVERTICALLY "Split the current view vertically"
+    ID_VIEW_SPLITHORIZONTALLY "Split the current view horizontally"
+    ID_VIEW_DELETEVIEW      "Delete the current view"
+    ID_VIEW_RESETVIEWS      "Reset all views"
 END
 
 #endif    // English (United States) resources

@@ -402,8 +402,8 @@
 #define IDC_KEYDLG_CMDLIST              1230
 #define IDC_MF_SHOELANGLE               1231
 #define IDC_MF_SHOERANGLE               1232
-#define IDC_MF_HATSPIN                  1234
 #define IDC_KEYDLG_REMOVE               1233
+#define IDC_MF_HATSPIN                  1234
 #define IDC_MF_HEADSPIN                 1235
 #define IDC_MF_ARMLSPIN                 1236
 #define IDC_KEYDLG_RESET                1236
@@ -662,6 +662,7 @@
 #define ID_VIEW_SPLIT_HORIZONTALLY      33177
 #define ID_TOOLBARS_PROPERTIES          33178
 #define ID_FILE_IMPORTFOLDER            33179
+#define ID_C                            33180
 #define ID_VIEW_PIECES_BAR              59425
 #define ID_VIEW_TOOLS_BAR               59426
 #define ID_VIEW_ANIMATION_BAR           59427
@@ -675,7 +676,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        242
-#define _APS_NEXT_COMMAND_VALUE         33180
+#define _APS_NEXT_COMMAND_VALUE         33181
 #define _APS_NEXT_CONTROL_VALUE         1247
 #define _APS_NEXT_SYMED_VALUE           121
 #endif

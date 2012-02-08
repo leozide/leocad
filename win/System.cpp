@@ -51,8 +51,6 @@ bool lcAssert(const char* FileName, int Line, const char* Expression, const char
 	return false;
 }
 
-
-static CMenu menuPopups;
 static CStepDlg* StepModeless = NULL;
 static UINT ClipboardFormat = 0;
 
@@ -397,45 +395,6 @@ void SystemInit()
 	// initialize wait cursor state
 	g_nWaitCursorCount = 0;
 	g_hcurWaitCursorRestore = NULL;
-
-	menuPopups.LoadMenu(IDR_POPUPS);
-
-	// attempt to load special bitmap, else default to arrow
-	CSize size = GetMenuCheckMarkDimensions();
-	ASSERT(size.cx > 4 && size.cy > 5); // not too small please
-	if (size.cx > 32)
-		size.cx = 32;
-	int iwRow = (size.cx + 15) >> 4;    // # of WORDs per raster line
-	int nShift = (size.cx - DOT_WIDTH) / 2;     // # of bits to shift over
-	nShift += ((iwRow * 16) - size.cx); // padding for word alignment
-	if (nShift > 16 - DOT_WIDTH)
-		nShift = 16 - DOT_WIDTH;    // maximum shift for 1 word
-
-	if (size.cy > 32)
-		size.cy = 32;
-
-	// bitmap 2/4/4/4/2 pixels wide - centered (0 => black)
-	BYTE rgbBitmap[32 * 2 * sizeof(WORD)];
-	memset(rgbBitmap, 0xff, sizeof(rgbBitmap));
-
-	BYTE* pbOut = &rgbBitmap[iwRow * sizeof(WORD) *
-							((size.cy - (DOT_HEIGHT+1)) >> 1)];
-	const BYTE* pbIn = rgbDot;
-	for (int y = 0; y < DOT_HEIGHT; y++)
-	{
-		WORD w = (WORD)~(((DWORD)*pbIn++) << nShift);
-		// bitmaps are always hi-lo
-		pbOut[0] = HIBYTE(w);
-		pbOut[1] = LOBYTE(w);
-		pbOut += iwRow * sizeof(WORD);
-	}
-
-	hbmMenuDot = CreateBitmap(size.cx, size.cy, 1, 1, (LPVOID)&rgbBitmap);
-	if (hbmMenuDot == NULL)
-	{
-		#define OBM_MNARROW         32739
-		hbmMenuDot = LoadBitmap(NULL, MAKEINTRESOURCE(OBM_MNARROW));
-	}
 }
 
 // Viewport menu.
@@ -865,154 +824,10 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
 {
-	/*
-	CMenu* Menu = GetMainMenu(2);
-	if (!Menu)
-		return;
-	CMenu* pMainMenu = Menu->GetSubMenu(13);
-	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	int i;
-
-	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
-	{
-		if (pOld == pCamera)
-		{
-			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
-			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_UNCHECKED);
-		}
-
-		if (pNew == pCamera)
-		{
-			pPopupMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
-			pMainMenu->CheckMenuItem(i + ID_CAMERA_FIRST, MF_BYCOMMAND | MF_CHECKED);
-			SetMenuItemBitmaps(pPopupMenu->m_hMenu, i + ID_CAMERA_FIRST, MF_BYCOMMAND, NULL, hbmMenuDot);
-			SetMenuItemBitmaps(pMainMenu->m_hMenu, i + ID_CAMERA_FIRST, MF_BYCOMMAND, NULL, hbmMenuDot);
-		}
-	}
-	*/
 }
 
-// Update the list of cameras
 void SystemUpdateCameraMenu(Camera* pCamera)
 {
-	CMenu* Menu = GetMainMenu(2);
-	if (!Menu)
-		return;
-	CMenu* pMainMenu = Menu->GetSubMenu(13);
-	CMenu* pPopupMenu = menuPopups.GetSubMenu(1)->GetSubMenu(3);
-	Camera* pFirst = pCamera;
-	int i;
-
-
-
-	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-	if (!pFrame)
-		return;
-
-	CMFCMenuBar& MenuBar = pFrame->m_wndMenuBar;
-	CMFCToolBarButton* pEditButton = MenuBar.GetButton(2);
-	CMFCToolBarMenuButton* pEditMenuButton = DYNAMIC_DOWNCAST(CMFCToolBarMenuButton, pEditButton);
-
-	const CObList& editCommands = pEditMenuButton->GetCommands();
-	CMFCToolBarMenuButton* pMainMenuButton = NULL;
-
-	for (POSITION pos = editCommands.GetHeadPosition(); pos != NULL && pMainMenuButton == NULL;)
-	{
-		CMFCToolBarMenuButton* pSubButton = (CMFCToolBarMenuButton*)editCommands.GetNext(pos);
-		ASSERT_VALID(pSubButton);
-
-		const CObList& subCommands = pSubButton->GetCommands();
-
-		for (POSITION pos2 = subCommands.GetHeadPosition(); pos2 != NULL;)
-		{
-			CMFCToolBarMenuButton* pSubMenuButton = (CMFCToolBarMenuButton*)subCommands.GetNext(pos2);
-			ASSERT_VALID(pSubMenuButton);
-
-			if (pSubMenuButton->m_nID == ID_VIEW_CAMERAS_RESET)
-			{
-//				CMFCPopupMenuBar* pParentMenu = DYNAMIC_DOWNCAST(CMFCPopupMenuBar, pSubMenuButton->GetParentWnd());
-
-				pMainMenuButton = pSubButton;
-				break;
-			}
-		}
-	}
-
-	if (!pMainMenuButton)
-		return;
-
-	CObList& cameraCommands = (CObList&)pMainMenuButton->GetCommands();
-
-	for (POSITION pos = cameraCommands.GetHeadPosition(); pos != NULL && pMainMenuButton != NULL;)
-	{
-		POSITION posSave = pos;
-
-		CMFCToolBarMenuButton* pSubButton = (CMFCToolBarMenuButton*)cameraCommands.GetNext(pos);
-		ASSERT_VALID(pSubButton);
-
-		cameraCommands.RemoveAt(posSave);
-		delete pSubButton;
-	}
-
-	while (pPopupMenu->GetMenuItemCount())
-		pPopupMenu->DeleteMenu(0, MF_BYPOSITION);
-
-	POSITION posAdd = NULL;
-
-	for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
-		if (i > 6)
-		{
-			CMFCToolBarMenuButton* newButton = new CMFCToolBarMenuButton(ID_CAMERA_FIRST + i, NULL, -1, pCamera->GetName());
-			if (posAdd)
-				posAdd = cameraCommands.InsertAfter(posAdd, newButton);
-			else
-				posAdd = cameraCommands.AddHead(newButton);
-
-			pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
-		}
-
-	if (i > 7)
-	{
-		if (posAdd)
-		{
-			CMFCToolBarMenuButton* pButton = new CMFCToolBarMenuButton();
-			pButton->m_nStyle = TBBS_SEPARATOR;
-			posAdd = cameraCommands.InsertAfter(posAdd, pButton);
-		}
-
-		pPopupMenu->AppendMenu(MF_SEPARATOR);
-	}
-
-	pCamera = pFirst;
-	for (i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
-	{
-		CMFCToolBarMenuButton* newButton = new CMFCToolBarMenuButton(ID_CAMERA_FIRST + i, NULL, -1, pCamera->GetName());
-		if (posAdd)
-			posAdd = cameraCommands.InsertAfter(posAdd, newButton);
-		else
-			posAdd = cameraCommands.AddHead(newButton);
-//		pMainMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
-		pPopupMenu->AppendMenu(MF_STRING, i + ID_CAMERA_FIRST, pCamera->GetName());
-
-//		pMainMenu->ChangeMenuItemShortcut("str", i + ID_CAMERA_FIRST);
-	}
-
-	if (posAdd)
-	{
-		CMFCToolBarMenuButton* pButton = new CMFCToolBarMenuButton();
-		pButton->m_nStyle = TBBS_SEPARATOR;
-		posAdd = cameraCommands.InsertAfter(posAdd, pButton);
-	}
-
-	CMFCToolBarMenuButton* newButton = new CMFCToolBarMenuButton(ID_VIEW_CAMERAS_RESET, NULL, -1, "Reset");
-	cameraCommands.AddTail(newButton);
-
-	pPopupMenu->AppendMenu(MF_SEPARATOR);
-	pPopupMenu->AppendMenu(MF_STRING, ID_VIEW_CAMERAS_RESET, "Reset");
-//	pMainMenu->AppendODMenu("Adjust...\t", MF_ENABLED, ID_VIEW_VIEWPOINT);
-//	pPopupMenu->AppendODMenu("Adjust...\t", MF_ENABLED, ID_VIEW_VIEWPOINT);
-
-  ((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators(); 
 }
 
 void SystemUpdateCategories(bool SearchOnly)
@@ -1033,7 +848,9 @@ void SystemUpdateRecentMenu(char names[4][MAX_PATH])
 // if x = -1, get cursor pos 
 void SystemDoPopupMenu(int nMenu, int x, int y)
 {
-	CMenu* pPopup;
+	CMenu PopupMenus;
+	PopupMenus.LoadMenu(IDR_POPUPS);
+
 	POINT pt;
 
 	if (x != -1)
@@ -1044,8 +861,8 @@ void SystemDoPopupMenu(int nMenu, int x, int y)
 	else
 		GetCursorPos(&pt);
 
-	pPopup = menuPopups.GetSubMenu(nMenu);
-	pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, pt.x, pt.y, AfxGetMainWnd());
+	CMFCPopupMenu* Popup = new CMFCPopupMenu();
+	Popup->Create(AfxGetMainWnd(), pt.x, pt.y, PopupMenus.GetSubMenu(nMenu)->Detach());
 }
 
 // Private MFC function only sets the title if it's different

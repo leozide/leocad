@@ -8,6 +8,7 @@
 #include "MainFrm.h"
 #include "Camera.h"
 #include "project.h"
+#include "view.h"
 #include "message.h"
 #include "globals.h"
 #include "mainwnd.h"
@@ -129,6 +130,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTION_SELECT, ID_ACTION_ROLL, OnUpdateAction)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_SNAPX, ID_SNAP_SNAPNONE, OnUpdateSnap)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_LOCK_LOCKX, ID_LOCK_UNLOCKALL, OnUpdateLock)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_CAMERA_FIRST, ID_CAMERA_LAST, OnUpdateCamera)
 	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
 	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
 	ON_COMMAND(ID_VIEW_DELETEVIEW, OnViewDeleteView)
@@ -242,6 +244,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (m_wndInvisibleToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_INVISIBLE_BAR))
 	{
 		VERIFY(m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE));
+		m_wndInvisibleToolBar.SetMaskMode(TRUE);
 	}
 
 	if (!m_wndProperties.Create("Properties", this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIES_BAR, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
@@ -379,6 +382,16 @@ void CMainFrame::OnUpdateLock(CCmdUI* pCmdUI)
 		pCmdUI->Enable(Snap & LC_DRAW_LOCK_XYZ ? TRUE : FALSE);
 		break;
 	}
+}
+
+void CMainFrame::OnUpdateCamera(CCmdUI* pCmdUI)
+{
+	Project* project = lcGetActiveProject();
+
+	Camera* ActiveCamera = project->GetActiveView()->m_Camera;
+	Camera* MenuCamera = project->GetCamera(pCmdUI->m_nID - ID_CAMERA_FIRST);
+
+	pCmdUI->SetRadio(MenuCamera == ActiveCamera);
 }
 
 // lParam = update pieces, wParam = update colors
@@ -661,6 +674,53 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 void CMainFrame::OnFilePrintPieceList() 
 {
 	AfxBeginThread(PrintPiecesFunction, this);
+}
+
+BOOL CMainFrame::OnShowPopupMenu(CMFCPopupMenu* pMenuPopup)
+{
+	if (!CMFCToolBar::IsCustomizeMode() && pMenuPopup != NULL && pMenuPopup->GetHMenu() != NULL)
+	{
+		HMENU hMenuPop = pMenuPopup->GetHMenu();
+		BOOL bIsCamerawMenu = FALSE;
+
+		int iItemMax = ::GetMenuItemCount(hMenuPop);
+		for (int iItemPop = 0; !bIsCamerawMenu && iItemPop < iItemMax; iItemPop ++)
+		{
+			UINT nID = ::GetMenuItemID( hMenuPop, iItemPop);
+			bIsCamerawMenu = (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST);
+		}
+
+		if (bIsCamerawMenu)
+		{
+			Project* project = lcGetActiveProject();
+			Camera* camera = project->GetCamera(0);
+			int NumCameras = 0;
+
+			pMenuPopup->RemoveAllItems();
+
+			for (; camera && NumCameras < 7; camera = camera->m_pNext, NumCameras++)
+			{
+				CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + NumCameras, NULL, -1, camera->GetName());
+				pMenuPopup->InsertItem(newButton);
+			}
+
+			if (camera)
+			{
+				pMenuPopup->InsertSeparator();
+
+				for (; camera; camera = camera->m_pNext, NumCameras++)
+				{
+					CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + NumCameras, NULL, -1, camera->GetName());
+					pMenuPopup->InsertItem(newButton);
+				}
+			}
+
+			pMenuPopup->InsertSeparator();
+			pMenuPopup->InsertItem(CMFCToolBarMenuButton(ID_VIEW_CAMERAS_RESET, NULL, -1, "Reset"));
+		}
+	}
+
+	return CFrameWndEx::OnShowPopupMenu(pMenuPopup);
 }
 
 // Pass all commands to the project.

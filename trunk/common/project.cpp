@@ -168,7 +168,7 @@ void Project::UpdateInterface()
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_pCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->m_Camera : NULL, m_pCameras);
 	UpdateSelection();
 	if (m_bAnimation)
 		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);

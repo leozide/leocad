@@ -23,6 +23,7 @@
 #include "lc_application.h"
 #include "library.h"
 #include "preview.h"
+#include "camera.h"
 
 View* view;
 
@@ -598,6 +599,7 @@ int main (int argc, char* argv[])
   }
 
   view = new View (lcGetActiveProject(), NULL);
+  view->m_Camera = lcGetActiveProject()->GetCamera(LC_CAMERA_MAIN);
 
   //  main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), "LeoCAD");

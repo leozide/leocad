@@ -70,21 +70,12 @@ void CCADStatusBar::OnLButtonDown(UINT nFlags, CPoint point)
 	if (rect.PtInRect(point))
 	{
 		ClientToScreen(&point);
-		CMenu menuPopups;
-		menuPopups.LoadMenu(IDR_POPUPS);
-		CTitleMenu TitleMenu;
-		TitleMenu.Attach(menuPopups.GetSubMenu(7)->Detach());
 
-		int SXY, SZ;
-		lcGetActiveProject()->GetSnapIndex(&SXY, &SZ);
+		CMenu PopupMenus;
+		PopupMenus.LoadMenu(IDR_POPUPS);
 
-		TitleMenu.SetMenuTitle(ID_SNAP_XY, "XY Snap");
-		TitleMenu.SetMenuTitle(ID_SNAP_Z, "Z Snap");
-
-		TitleMenu.CheckMenuRadioItem(2, 11, SXY + 2, MF_BYPOSITION);
-		TitleMenu.CheckMenuRadioItem(14, 23, SZ + 14, MF_BYPOSITION);
-
-		TitleMenu.TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+		CMFCPopupMenu* Popup = new CMFCPopupMenu();
+		Popup->Create(AfxGetMainWnd(), point.x, point.y, PopupMenus.GetSubMenu(7)->Detach());
 	}
 
 	CMFCStatusBar::OnLButtonDown(nFlags, point);

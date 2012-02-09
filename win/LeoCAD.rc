@@ -453,7 +453,7 @@ BEGIN
     END
     POPUP "7"
     BEGIN
-        MENUITEM "XY Snap",                     ID_SNAP_XY, INACTIVE
+        MENUITEM "XY Snap",                     ID_SNAP_ON, INACTIVE
         MENUITEM SEPARATOR
         MENUITEM "None",                        ID_SNAP_0
         MENUITEM "1/20 Stud",                   ID_SNAP_1
@@ -465,7 +465,7 @@ BEGIN
         MENUITEM "3 Studs",                     ID_SNAP_7
         MENUITEM "4 Studs",                     ID_SNAP_8
         MENUITEM "8 Studs",                     ID_SNAP_9
-        MENUITEM "Z Snap",                      ID_SNAP_Z, INACTIVE, MENUBARBREAK
+        MENUITEM "Z Snap",                      ID_SNAP_ON, INACTIVE, MENUBREAK
         MENUITEM SEPARATOR
         MENUITEM "None",                        ID_SNAP_10
         MENUITEM "1/20 Stud",                   ID_SNAP_11
@@ -477,6 +477,18 @@ BEGIN
         MENUITEM "2 Bricks",                    ID_SNAP_17
         MENUITEM "4 Bricks",                    ID_SNAP_18
         MENUITEM "8 Bricks",                    ID_SNAP_19
+        MENUITEM "Angle Snap",                  ID_SNAP_ANGLE, INACTIVE, MENUBREAK
+        MENUITEM SEPARATOR
+        MENUITEM "None",                        ID_SNAP_20
+        MENUITEM "1 Degree",                    ID_SNAP_21
+        MENUITEM "5 Degrees",                   ID_SNAP_22
+        MENUITEM "10 Degrees",                  ID_SNAP_23
+        MENUITEM "15 Degrees",                  ID_SNAP_24
+        MENUITEM "30 Degrees",                  ID_SNAP_25
+        MENUITEM "45 Degrees",                  ID_SNAP_26
+        MENUITEM "60 Degrees",                  ID_SNAP_27
+        MENUITEM "90 Degrees",                  ID_SNAP_28
+        MENUITEM "180 Degrees",                 ID_SNAP_29
     END
     POPUP "8"
     BEGIN

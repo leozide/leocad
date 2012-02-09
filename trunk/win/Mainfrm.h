@@ -100,6 +100,9 @@ protected:
 	afx_msg void OnUpdateSnap(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateLock(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCamera(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSnapXY(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSnapZ(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSnapA(CCmdUI* pCmdUI);
 	
 	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
 	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);

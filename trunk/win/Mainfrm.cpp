@@ -131,6 +131,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_SNAPX, ID_SNAP_SNAPNONE, OnUpdateSnap)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_LOCK_LOCKX, ID_LOCK_UNLOCKALL, OnUpdateLock)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_CAMERA_FIRST, ID_CAMERA_LAST, OnUpdateCamera)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_0, ID_SNAP_9, OnUpdateSnapXY)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_10, ID_SNAP_19, OnUpdateSnapZ)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_20, ID_SNAP_29, OnUpdateSnapA)
 	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
 	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
 	ON_COMMAND(ID_VIEW_DELETEVIEW, OnViewDeleteView)
@@ -392,6 +395,27 @@ void CMainFrame::OnUpdateCamera(CCmdUI* pCmdUI)
 	Camera* MenuCamera = project->GetCamera(pCmdUI->m_nID - ID_CAMERA_FIRST);
 
 	pCmdUI->SetRadio(MenuCamera == ActiveCamera);
+}
+
+void CMainFrame::OnUpdateSnapXY(CCmdUI* pCmdUI)
+{
+	int Snap;
+	lcGetActiveProject()->GetSnapIndex(&Snap, NULL, NULL);
+	pCmdUI->SetRadio(Snap + ID_SNAP_0 == pCmdUI->m_nID);
+}
+
+void CMainFrame::OnUpdateSnapZ(CCmdUI* pCmdUI)
+{
+	int Snap;
+	lcGetActiveProject()->GetSnapIndex(NULL, &Snap, NULL);
+	pCmdUI->SetRadio(Snap + ID_SNAP_10 == pCmdUI->m_nID);
+}
+
+void CMainFrame::OnUpdateSnapA(CCmdUI* pCmdUI)
+{
+	int Snap;
+	lcGetActiveProject()->GetSnapIndex(NULL, NULL, &Snap);
+	pCmdUI->SetRadio(Snap + ID_SNAP_20 == pCmdUI->m_nID);
 }
 
 // lParam = update pieces, wParam = update colors
@@ -741,6 +765,12 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	}
 
+	if (nID >= ID_SNAP_20 && nID <= ID_SNAP_29)
+	{
+		project->HandleCommand((LC_COMMANDS)(LC_EDIT_ANGLE_SNAP_0 + nID - ID_SNAP_20), 0);
+		return TRUE;
+	}
+
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
 		project->HandleCommand(LC_VIEW_CAMERA_MENU, nID - ID_CAMERA_FIRST);
@@ -995,7 +1025,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 2);
 		} break;
 
-		case ID_SNAP_ON:
+		case ID_SNAP_ON: {
+			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 6);
+		} break;
+
 		case ID_SNAP_SNAPALL: {
 			project->HandleCommand(LC_TOOLBAR_SNAPMENU, 3);
 		} break;
@@ -1014,6 +1047,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LOCK_LOCKZ: {
 			project->HandleCommand(LC_TOOLBAR_LOCKMENU, 2);
+		} break;
+
+		case ID_LOCK_ON: {
+			project->HandleCommand(LC_TOOLBAR_LOCKMENU, 4);
 		} break;
 
 		case ID_LOCK_UNLOCKALL: {

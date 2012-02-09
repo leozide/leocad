@@ -23,6 +23,7 @@
 #include "config.h"
 #include "message.h"
 #include "project.h"
+#include "libdlg.h"
 
 // =============================================================================
 // Modal dialog helper functions
@@ -1128,6 +1129,7 @@ static void imageoptsdlg_ok(GtkWidget *widget, gpointer data)
   }
   else
   {
+
     Sys_ProfileSaveInt ("Default", "Image Options", image);
     Sys_ProfileSaveInt ("Default", "Image Width", opts->width);
     Sys_ProfileSaveInt ("Default", "Image Height", opts->height);
@@ -2788,54 +2790,100 @@ int groupdlg_execute(void* param)
 // =============================================================================
 // Piece Library Dialog
 
-#if 0
 #include "library.h"
 #include "pieceinf.h"
+#include "lc_application.h"
 
 static void librarydlg_update_list (GtkWidget *dlg)
 {
-  PiecesLibrary *lib = project->GetPiecesLibrary();
-  GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
-  GtkCList *clist = GTK_CLIST (gtk_object_get_data (GTK_OBJECT (dlg), "list"));
-  int row, sel = GTK_CLIST (ctree)->focus_row;
+	PiecesLibrary* Lib = g_App->GetPiecesLibrary();
+	GtkCTree* ctree = GTK_CTREE(gtk_object_get_data(GTK_OBJECT(dlg), "tree"));
+	GtkCList* clist = GTK_CLIST(gtk_object_get_data(GTK_OBJECT(dlg), "list"));
+	int row;
 
-  gtk_clist_freeze (clist);
-  gtk_clist_clear (clist);
+	gchar* CategoryName = GTK_CELL_TEXT(GTK_CTREE_ROW(gtk_ctree_node_nth(ctree, GTK_CLIST(ctree)->focus_row))->row.cell[0])->text;
+	int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
-  PtrArray<PieceInfo> SinglePieces, GroupedPieces;
-  lib->GetCategoryEntries(sel, false, SinglePieces, GroupedPieces);
+	gtk_clist_freeze (clist);
+	gtk_clist_clear (clist);
 
-  for (int i = 0; i < SinglePieces.GetSize(); i++)
-  {
-    PieceInfo* info = SinglePieces[i];
+	if (CategoryIndex != -1)
+	{
+		PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
-    char *text = info->m_strDescription;
-    row = gtk_clist_append (clist, &text);
-    gtk_clist_set_row_data (clist, row, info);
-  }
+		Lib->GetCategoryEntries(CategoryIndex, false, SinglePieces, GroupedPieces);
 
-  gtk_clist_thaw (clist);
-  clist->focus_row = 0;
-  gtk_clist_select_row (clist, 0, 0);
+		for (int i = 0; i < SinglePieces.GetSize(); i++)
+		{
+			PieceInfo* Info = SinglePieces[i];
+
+			char *text = Info->m_strDescription;
+			row = gtk_clist_append(clist, &text);
+			gtk_clist_set_row_data(clist, row, Info);
+		}
+	}
+	else
+	{
+		if (!strcmp(CategoryName, "Unassigned"))
+		{
+			// Test each piece against all categories.
+			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			{
+				PieceInfo* Info = Lib->GetPieceInfo(i);
+				int j;
+
+				for (j = 0; j < Lib->GetNumCategories(); j++)
+				{
+					if (Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(j)))
+						break;
+				}
+
+				if (j == Lib->GetNumCategories())
+				{
+					char *text = Info->m_strDescription;
+					row = gtk_clist_append(clist, &text);
+					gtk_clist_set_row_data(clist, row, Info);
+				}
+			}
+		}
+		else if (!strcmp(CategoryName, "Pieces"))
+		{
+			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			{
+				PieceInfo* Info = Lib->GetPieceInfo(i);
+
+				char *text = Info->m_strDescription;
+				row = gtk_clist_append(clist, &text);
+				gtk_clist_set_row_data(clist, row, Info);
+			}
+		}
+	}
+
+	gtk_clist_thaw(clist);
+	clist->focus_row = 0;
+	gtk_clist_select_row(clist, 0, 0);
 }
 
 static void librarydlg_update_tree (GtkWidget *dlg)
 {
-  PiecesLibrary *lib = project->GetPiecesLibrary();
+  PiecesLibrary *lib = g_App->GetPiecesLibrary();
   GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCTreeNode *parent;
-  char *text = "Groups";
+  const char *text = "Pieces";
 
   gtk_clist_freeze (GTK_CLIST (ctree));
   gtk_clist_clear (GTK_CLIST (ctree));
 
-  parent = gtk_ctree_insert_node (ctree, NULL, NULL, &text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
+  parent = gtk_ctree_insert_node (ctree, NULL, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
 
   for (int i = 0; i < lib->GetNumCategories(); i++)
   {
     text = lib->GetCategoryName(i);
-    gtk_ctree_insert_node (ctree, parent, NULL, &text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
+    gtk_ctree_insert_node (ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
   }
+
+  text = "Unassigned";
+  gtk_ctree_insert_node (ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
 
   gtk_clist_thaw (GTK_CLIST (ctree));
 }
@@ -2845,24 +2893,25 @@ static void librarydlg_treefocus (GtkCTree *ctree, GtkCTreeNode *row, gint colum
   librarydlg_update_list (GTK_WIDGET (data));
 }
 
+static GtkWidget *last_dlg = NULL;
+
 static void librarydlg_command (GtkWidget *widget, gpointer data)
 {
-  /*
   GtkWidget *parent = gtk_widget_get_toplevel (widget);
-  LibraryDialog *dlg = (LibraryDialog*) gtk_object_get_data (GTK_OBJECT (parent), "lib");
+  LibraryDialog *dlg = (LibraryDialog*) gtk_object_get_data (GTK_OBJECT (parent), "menu_file_import_piece");
   int id = GPOINTER_TO_INT (data);
 
+  dlg = (LibraryDialog *)last_dlg;
+
   dlg->HandleCommand (id);
-  */
 }
 
 int librarydlg_execute (void *param)
 {
-#if 0
   GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *item, *menu, *menubar, *handle;
-  GtkAccelGroup *accel, *menu_accel;
+  GtkAccelGroup *accel;
   int loop = 1, ret = LC_CANCEL;
-  LibraryManager lib;
+  PiecesLibrary *lib = g_App->GetPiecesLibrary();
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
@@ -2874,7 +2923,10 @@ int librarydlg_execute (void *param)
   gtk_object_set_data (GTK_OBJECT (dlg), "loop", &loop);
   gtk_object_set_data (GTK_OBJECT (dlg), "ret", &ret);
   gtk_window_set_default_size (GTK_WINDOW (dlg), 500, 250);
-  accel = gtk_accel_group_get_default ();
+
+  accel = gtk_accel_group_new();
+  gtk_window_add_accel_group(GTK_WINDOW(dlg), accel);
+//  accel = gtk_accel_group_get_default ();
 
   vbox = gtk_vbox_new (FALSE, 5);
   gtk_widget_show (vbox);
@@ -2889,70 +2941,73 @@ int librarydlg_execute (void *param)
   gtk_widget_show (menubar);
 
   // File menu
-  menu = create_sub_menu (menubar, "_File", accel, &menu_accel);
+  menu = create_sub_menu (menubar, "_File", accel);
   menu_tearoff (menu);
-  /*
-  create_menu_item (menu, "_Reset", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_RESET);
-  create_menu_item (menu, "_Open...", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_OPEN);
-  create_menu_item (menu, "_Save", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_SAVE);
-  create_menu_item (menu, "Save _As...", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_SAVEAS);
+/*
+  create_menu_item (menu, "_Reset", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_RESET, "menu_file_reset");
+  create_menu_item (menu, "_Open...", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_OPEN, "menu_file_open");
+  create_menu_item (menu, "_Save", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_SAVE, "menu_file_save");
+  create_menu_item (menu, "Save _As...", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_SAVEAS, "menu_file_save_as");
   menu_separator (menu);
-  item = create_menu_item (menu, "_Print Catalog...", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_PRINTCATALOG);
+  item = create_menu_item (menu, "_Print Catalog...", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_PRINTCATALOG, "menu_print_catalog");
   gtk_widget_set_sensitive (item, FALSE);
-  item = create_menu_item (menu, "Load _Update...", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_MERGEUPDATE);
-  item = create_menu_item (menu, "_Import Piece...", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_IMPORTPIECE);
+*/
+  item = create_menu_item (menu, "Load _Update...", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_MERGEUPDATE, "menu_file_merge_update");
+  item = create_menu_item (menu, "_Import Piece...", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_IMPORTPIECE, "menu_file_import_piece");
+/*
   menu_separator (menu);
-  item = create_menu_item (menu, "Re_turn", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_RETURN);
-  item = create_menu_item (menu, "_Cancel", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_FILE_CANCEL);
-  */
+  item = create_menu_item (menu, "Re_turn", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_RETURN, "menu_file_return");
+  item = create_menu_item (menu, "_Cancel", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_CANCEL, "menu_file_cancel");
   // Group menu
-  menu = create_sub_menu (menubar, "_Group", accel, &menu_accel);
+  menu = create_sub_menu (menubar, "_Group", accel);
   menu_tearoff (menu);
-  /*
-  create_menu_item (menu, "Insert...", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_INSERT);
-  create_menu_item (menu, "Delete", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_DELETE);
-  create_menu_item (menu, "Edit...", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_EDIT);
+  create_menu_item (menu, "Insert...", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_GROUP_INSERT, "menu_group_insert");
+  create_menu_item (menu, "Delete", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_GROUP_DELETE, "menu_group_delete");
+  create_menu_item (menu, "Edit...", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_GROUP_EDIT, "menu_group_edit");
   menu_separator (menu);
-  create_menu_item (menu, "Move Up", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_MOVEUP);
-  create_menu_item (menu, "Move Down", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_GROUP_MOVEDOWN);
-  */
+  create_menu_item (menu, "Move Up", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_GROUP_MOVEUP, "menu_group_moveup");
+  create_menu_item (menu, "Move Down", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_GROUP_MOVEDOWN, "menu_group_down");
   // Piece menu
-  menu = create_sub_menu (menubar, "_Piece", accel, &menu_accel);
+  menu = create_sub_menu (menubar, "_Piece", accel);
   menu_tearoff (menu);
-  /*
-  item = create_menu_item (menu, "_New", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_NEW);
+  item = create_menu_item (menu, "_New", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_PIECE_NEW, "menu_piece_new");
   gtk_widget_set_sensitive (item, FALSE);
-  item = create_menu_item (menu, "_Edit", menu_accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_EDIT);
+  item = create_menu_item (menu, "_Edit", accel,
+			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_PIECE_EDIT, "menu_piece_edit");
   gtk_widget_set_sensitive (item, FALSE);
-  create_menu_item (menu, "_Delete", menu_accel,
-		    GTK_SIGNAL_FUNC (librarydlg_command), LC_LIBDLG_PIECE_DELETE);
-  */
+  create_menu_item (menu, "_Delete", accel,
+		    GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_PIECE_DELETE, "menu_piece_delete");
+*/
   hsplit = gtk_hpaned_new ();
   gtk_paned_set_gutter_size (GTK_PANED (hsplit), 12);
   gtk_box_pack_start (GTK_BOX (vbox), hsplit, TRUE, TRUE, 0);
   gtk_widget_show (hsplit);
   gtk_container_set_border_width (GTK_CONTAINER (hsplit), 5);
 
+  scr = gtk_scrolled_window_new ((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
+  gtk_widget_show (scr);
+  gtk_paned_add1 (GTK_PANED (hsplit), scr);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
   ctree = gtk_ctree_new (1, 0);
   gtk_object_set_data (GTK_OBJECT (dlg), "ctree", ctree);
   gtk_widget_show (ctree);
-  gtk_paned_add1 (GTK_PANED (hsplit), ctree);
+  gtk_container_add (GTK_CONTAINER (scr), ctree);
   gtk_clist_column_titles_hide (GTK_CLIST (ctree));
   gtk_clist_set_selection_mode (GTK_CLIST (ctree), GTK_SELECTION_BROWSE);
   gtk_signal_connect (GTK_OBJECT (ctree), "tree_select_row",
@@ -2982,6 +3037,8 @@ int librarydlg_execute (void *param)
   gtk_grab_add (dlg);
   gtk_widget_show (dlg);
 
+  last_dlg = dlg;
+
   while (loop)
     gtk_main_iteration ();
 
@@ -2994,19 +3051,7 @@ int librarydlg_execute (void *param)
   gtk_widget_destroy (dlg);
 
   return ret;
-#endif
-  return LC_OK;
 }
-
-#else
-
-int librarydlg_execute (void *param)
-{
-  // TODO: FIXME !
-  return 0;
-}
-
-#endif
 
 // =============================================================================
 // Modify Dialog

@@ -1370,8 +1370,9 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_EDIT_ACTION_ROTATE_VIEW
 		0,                         // LC_EDIT_ACTION_ROLL
 	};
-	/*
-	m_bmpMenu.Attach(m_hMenuDefault);
+
+	LPACCEL AccelTable = new ACCEL[2 * KeyboardShortcutsCount];
+	int AccelCount = 0;
 
 	for (int i = 0; i < KeyboardShortcutsCount; i++)
 	{
@@ -1384,32 +1385,39 @@ void CMainFrame::UpdateMenuAccelerators()
 
 		if (Cmd.Key1)
 		{
+			ACCEL& Accel = AccelTable[AccelCount++];
+
+			Accel.cmd = ID;
+			Accel.key = Cmd.Key1;
+			Accel.fVirt = FVIRTKEY;
+
 			if (Cmd.Flags & LC_KEYMOD1_SHIFT)
-				str += "Shift+";
+				Accel.fVirt |= FSHIFT;
 
 			if (Cmd.Flags & LC_KEYMOD1_CONTROL)
-				str += "Ctrl+";
-
-			str += GetKeyName(Cmd.Key1);
+				Accel.fVirt |= FCONTROL;
 
 			if (Cmd.Key2)
 			{
-				str += ", ";
+				ACCEL& Accel = AccelTable[AccelCount++];
+
+				Accel.cmd = ID;
+				Accel.key = Cmd.Key2;
+				Accel.fVirt = FVIRTKEY;
+
 				if (Cmd.Flags & LC_KEYMOD2_SHIFT)
-					str += "Shift+";
+					Accel.fVirt |= FSHIFT;
 
 				if (Cmd.Flags & LC_KEYMOD2_CONTROL)
-					str += "Ctrl+";
-
-				str += GetKeyName(Cmd.Key2);
+					Accel.fVirt |= FCONTROL;
 			}
 		}
-
-		m_bmpMenu.ChangeMenuItemShortcut(str, ID);
 	}
 
-	m_bmpMenu.Detach();
-	*/
+	CKeyboardManager* KeyboardManager = theApp.GetKeyboardManager();
+	KeyboardManager->UpdateAccelTable(NULL, AccelTable, AccelCount, this);
+
+	delete[] AccelTable;
 }
 
 void CMainFrame::OnDropFiles(HDROP hDropInfo) 

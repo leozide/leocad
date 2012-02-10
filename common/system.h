@@ -27,6 +27,14 @@ do \
 
 #endif
 
+#if _MSC_VER >= 1600
+#define LC_CASSERT(x) static_assert(x, "Assertion failed: " #x)
+#else
+#define LC_CASSERT_CONCAT1(e, l) extern int LC_CASSERT_##l[(int)(e) ? 1 : -1]
+#define LC_CASSERT_CONCAT2(e, l) LC_CASSERT_CONCAT1(e, l)
+#define LC_CASSERT(e) LC_CASSERT_CONCAT2(e, __LINE__)
+#endif
+
 // Profile functions
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
 bool Sys_ProfileSaveString (const char *section, const char *key, const char *value);

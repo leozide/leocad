@@ -458,45 +458,6 @@ LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 	return TRUE;
 }
 
-void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
-{
-	/*
-	if(lpMeasureItemStruct->CtlType == ODT_MENU)
-	{
-		if ((lpMeasureItemStruct->itemID == ID_SNAP_XY) || (lpMeasureItemStruct->itemID == ID_SNAP_Z))
-		{
-			CTitleMenu* Menu = (CTitleMenu*)lpMeasureItemStruct->itemData;
-			Menu->MeasureItem(lpMeasureItemStruct);
-			return;
-		}
-		else if(IsMenu((HMENU)lpMeasureItemStruct->itemID))
-		{
-			CMenu* cmenu = CMenu::FromHandle((HMENU)lpMeasureItemStruct->itemID);
-			if(m_bmpMenu.IsMenu(cmenu))
-			{
-				m_bmpMenu.MeasureItem(lpMeasureItemStruct);
-				return;
-			}
-		}
-	}
-	*/
-	CFrameWndEx::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
-}
-
-void CMainFrame::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
-{
-	/*
-	if ((lpDrawItemStruct->itemID == ID_SNAP_XY) || (lpDrawItemStruct->itemID == ID_SNAP_Z))
-	{
-		CTitleMenu* Menu = (CTitleMenu*)lpDrawItemStruct->itemData;
-		Menu->DrawItem(lpDrawItemStruct);
-	}
-	else*/
-	{
-		CFrameWndEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
-	}
-}
-
 LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
 	Object* Focus = lcGetActiveProject()->GetFocusObject();
@@ -1364,16 +1325,26 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_SNAPMENU
 		0,                         // LC_TOOLBAR_LOCKMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
-		0,                         // LC_EDIT_MOVE_SNAP_0
-		0,                         // LC_EDIT_MOVE_SNAP_1
-		0,                         // LC_EDIT_MOVE_SNAP_2
-		0,                         // LC_EDIT_MOVE_SNAP_3
-		0,                         // LC_EDIT_MOVE_SNAP_4
-		0,                         // LC_EDIT_MOVE_SNAP_5
-		0,                         // LC_EDIT_MOVE_SNAP_6
-		0,                         // LC_EDIT_MOVE_SNAP_7
-		0,                         // LC_EDIT_MOVE_SNAP_8
-		0,                         // LC_EDIT_MOVE_SNAP_9
+		0,                         // LC_EDIT_MOVEXY_SNAP_0,
+		0,                         // LC_EDIT_MOVEXY_SNAP_1,
+		0,                         // LC_EDIT_MOVEXY_SNAP_2,
+		0,                         // LC_EDIT_MOVEXY_SNAP_3,
+		0,                         // LC_EDIT_MOVEXY_SNAP_4,
+		0,                         // LC_EDIT_MOVEXY_SNAP_5,
+		0,                         // LC_EDIT_MOVEXY_SNAP_6,
+		0,                         // LC_EDIT_MOVEXY_SNAP_7,
+		0,                         // LC_EDIT_MOVEXY_SNAP_8,
+		0,                         // LC_EDIT_MOVEXY_SNAP_9,
+		0,                         // LC_EDIT_MOVEZ_SNAP_0
+		0,                         // LC_EDIT_MOVEZ_SNAP_1
+		0,                         // LC_EDIT_MOVEZ_SNAP_2
+		0,                         // LC_EDIT_MOVEZ_SNAP_3
+		0,                         // LC_EDIT_MOVEZ_SNAP_4
+		0,                         // LC_EDIT_MOVEZ_SNAP_5
+		0,                         // LC_EDIT_MOVEZ_SNAP_6
+		0,                         // LC_EDIT_MOVEZ_SNAP_7
+		0,                         // LC_EDIT_MOVEZ_SNAP_8
+		0,                         // LC_EDIT_MOVEZ_SNAP_9
 		0,                         // LC_EDIT_ANGLE_SNAP_0
 		0,                         // LC_EDIT_ANGLE_SNAP_1
 		0,                         // LC_EDIT_ANGLE_SNAP_2
@@ -1383,6 +1354,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_EDIT_ANGLE_SNAP_6
 		0,                         // LC_EDIT_ANGLE_SNAP_7
 		0,                         // LC_EDIT_ANGLE_SNAP_8
+		0,                         // LC_EDIT_ANGLE_SNAP_9
 		0,                         // LC_EDIT_ACTION_SELECT
 		0,                         // LC_EDIT_ACTION_INSERT
 		0,                         // LC_EDIT_ACTION_LIGHT

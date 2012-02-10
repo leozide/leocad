@@ -206,12 +206,15 @@ BOOL CCADApp::InitInstance()
 		RUNTIME_CLASS(CCADView));
 	AddDocTemplate(pDocTemplate);
 
-  EnableShellOpen();
+	EnableShellOpen();
 	RegisterShellFileTypes(TRUE);
 
 	UINT cmdshow = m_nCmdShow;
 	m_nCmdShow = SW_HIDE;
 	pDocTemplate->OpenDocumentFile(NULL);
+
+	CMainFrame* MainFrame = (CMainFrame*)AfxGetMainWnd();
+	MainFrame->UpdateMenuAccelerators();
 
 	// Show something in the piece preview window.
 	PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
@@ -221,8 +224,8 @@ BOOL CCADApp::InitInstance()
 	if (Info)
 	{
 		lcGetActiveProject()->SetCurrentPiece(Info);
-		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.SetPieceInfo(Info);
-		((CMainFrame*)(AfxGetMainWnd()))->m_wndPiecesBar.m_wndPiecePreview.PostMessage(WM_PAINT);
+		MainFrame->m_wndPiecesBar.m_wndPiecePreview.SetPieceInfo(Info);
+		MainFrame->m_wndPiecesBar.m_wndPiecePreview.PostMessage(WM_PAINT);
 	}
 
 /*
@@ -280,7 +283,7 @@ BOOL CCADApp::InitInstance()
 	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
 		_beginthread(CheckForUpdates, 0, NULL);
 
-  return TRUE;
+	return TRUE;
 }
 
 int CCADApp::ExitInstance() 
@@ -325,5 +328,5 @@ void CCADApp::OnHelpHomePage()
 
 void CCADApp::OnHelpEmail() 
 {
-	ShellExecute(::GetDesktopWindow(), _T("open"), _T("mailto:leonardo@centroin.com.br?subject=LeoCAD"), NULL, NULL, SW_NORMAL);
+	ShellExecute(::GetDesktopWindow(), _T("open"), _T("mailto:leozide@gmail.com?subject=LeoCAD"), NULL, NULL, SW_NORMAL);
 }

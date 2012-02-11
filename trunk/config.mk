@@ -135,6 +135,9 @@ config-help:
 CONFTEST="\#include <stdio.h>\nint main() { FILE *f=fopen(\"conftestval\", \"w\");\n\
 	if (!f) return 1; fprintf(f, \"%%d\\\n\", (int)sizeof(%s)); return 0; }\n"
 
+$(OSDIR)/config.h $(OSDIR)/config.mk:
+	make config
+
 config:
 	@echo "Automatic configuration"
 
@@ -229,11 +232,6 @@ config:
 	  ac_cv_sizeof_void_p=0; \
 	fi; \
 	echo "#define LC_SIZEOF_VOID_P $$ac_cv_sizeof_void_p" >> $(OSDIR)/config.h; \
-	if test "$$ac_cv_sizeof_void_p" -eq "8"; then \
-	  echo "#define LC_POINTER_TO_INT(p) ((lcint32)(lcint64)(p))" >> $(OSDIR)/config.h; \
-	else \
-	  echo "#define LC_POINTER_TO_INT(p) ((lcint32)(p))" >> $(OSDIR)/config.h; \
-	fi; \
 	rm -f conftest.c conftest conftestval; \
 	\
 	echo -n "checking size of long long... "; \
@@ -260,6 +258,11 @@ config:
 	case 8 in \
 	  $$ac_cv_sizeof_long_long)	lcint64="long long";; \
 	esac; \
+	if test "$$ac_cv_sizeof_void_p" -eq "8"; then \
+	  echo "#define LC_POINTER_TO_INT(p) ((lcint32)(lcint64)(p))" >> $(OSDIR)/config.h; \
+	else \
+	  echo "#define LC_POINTER_TO_INT(p) ((lcint32)(p))" >> $(OSDIR)/config.h; \
+	fi; \
 	echo "" >> $(OSDIR)/config.h; \
 	echo "typedef signed char lcint8;" >> $(OSDIR)/config.h; \
 	echo "typedef unsigned char lcuint8;" >> $(OSDIR)/config.h; \
@@ -332,6 +335,21 @@ ifeq ($(TEST_GTK), 1)
 	  exit 1; \
 	fi
 endif
+
+## Check if the user has OpenGL installed
+	@echo -n "Checking for OpenGL support... "
+	@echo "#include <GL/gl.h>" > gltest.c
+	@echo "int main() { return 0; }" >> gltest.c
+	@if { (eval $(CC) gltest.c -o gltest $(CPPFLAGS) $(LDFLAGS)); } && \
+	  (test -s gltest); then  \
+	  echo "ok"; \
+	else \
+	  rm -f gltest.c gltest; \
+	  echo "failed"; \
+	  rm -rf $(OSDIR)/config.mk $(OSDIR)/config.h; \
+	  exit 1; \
+	fi
+	@rm -f gltest.c gltest
 
 ## Check if the user has libjpeg installed
 	@echo -n "Checking for jpeg support... "

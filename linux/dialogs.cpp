@@ -2592,60 +2592,37 @@ static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
   *cur_ret = LC_OK;
 }
 
-void groupeditdlg_addchildren(GtkWidget *tree, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
+void groupeditdlg_addchildren(GtkCTree *ctree, GtkCTreeNode *parent, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
 {
-#if 0
-  int i;
-  GtkWidget *item, *subtree;
+	GtkCTreeNode *newparent;
+	const char *text;
 
-  // Add the groups
-  for (i = 0; i < opts->groupcount; i++)
-    if (opts->groupsgroups[i] == pGroup)
-    {
-      item = gtk_tree_item_new_with_label (opts->groups[i]->m_strName);
-      /*
-      tvstruct.item.lParam = i + 0xFFFF;
-      tvstruct.item.iImage = 0;
-      tvstruct.item.iSelectedImage = 1;
-      tvstruct.item.pszText = opts->groups[i]->m_strName;
-      tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-      */
+	for (int i = 0; i < opts->groupcount; i++)
+	{
+		if (opts->groupsgroups[i] == pGroup)
+		{
+			text = opts->groups[i]->m_strName;
+			newparent = gtk_ctree_insert_node(ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
+    
+			groupeditdlg_addchildren(ctree, newparent, opts->groups[i], opts);
+		}
+	}
 
-      gtk_tree_append (GTK_TREE(tree), item);
-      gtk_widget_show (item);
-
-      subtree = gtk_tree_new();
-      gtk_tree_set_selection_mode (GTK_TREE(subtree), GTK_SELECTION_SINGLE);
-      gtk_tree_set_view_mode (GTK_TREE(subtree), GTK_TREE_VIEW_ITEM);
-      gtk_tree_item_set_subtree (GTK_TREE_ITEM(item), subtree);
-
-      groupeditdlg_addchildren(subtree, opts->groups[i], opts);
-    }
-
-  // Add the pieces
-  for (i = 0; i < opts->piececount; i++)
-    if (opts->piecesgroups[i] == pGroup)
-    {
-      /*
-      tvstruct.item.lParam = i;
-      tvstruct.item.iImage = 2;
-      tvstruct.item.iSelectedImage = 2;
-      tvstruct.item.pszText = (char*)opts->pieces[i]->GetName();
-      tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-      */
-      item = gtk_tree_item_new_with_label ((char*)opts->pieces[i]->GetName());
-      gtk_tree_append (GTK_TREE(tree), item);
-      gtk_widget_show (item);
-    }
-#endif
+	for (int i = 0; i < opts->piececount; i++)
+	{
+		if (opts->piecesgroups[i] == pGroup)
+		{
+			text = opts->pieces[i]->GetName();
+			gtk_ctree_insert_node(ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
+		}
+	}
 }
 
 int groupeditdlg_execute(void* param)
 {
-#if 0
   GtkWidget *dlg;
   GtkWidget *vbox, *hbox;
-  GtkWidget *button, *tree, *scrolled_win;
+  GtkWidget *button, *ctree, *scr;
   LC_GROUPEDITDLG_STRUCT s;
   s.data = param;
 
@@ -2657,7 +2634,6 @@ int groupeditdlg_execute(void* param)
 		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
   gtk_widget_set_usize (dlg, 450, 280);
   gtk_window_set_title (GTK_WINDOW (dlg), "Edit Groups");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
   gtk_widget_realize (dlg);
 
   vbox = gtk_vbox_new (FALSE, 0);
@@ -2665,18 +2641,19 @@ int groupeditdlg_execute(void* param)
   gtk_container_add (GTK_CONTAINER (dlg), vbox);
   gtk_container_border_width (GTK_CONTAINER (vbox), 5);
 
-  scrolled_win = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_win),
-                                  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_widget_set_usize (scrolled_win, 150, 200);
-  gtk_container_add (GTK_CONTAINER(vbox), scrolled_win);
-  gtk_widget_show (scrolled_win);
+  scr = gtk_scrolled_window_new ((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
+  gtk_widget_show (scr);
+  gtk_container_add (GTK_CONTAINER(vbox), scr);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
-  tree = gtk_tree_new ();
-  gtk_widget_show (tree);
-  gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW(scrolled_win), tree);
-  gtk_container_set_border_width (GTK_CONTAINER (tree), 5);
-  gtk_tree_set_selection_mode (GTK_TREE (tree), GTK_SELECTION_BROWSE);
+  ctree = gtk_ctree_new (1, 0);
+  gtk_object_set_data (GTK_OBJECT (dlg), "ctree", ctree);
+  gtk_widget_show (ctree);
+  gtk_container_add (GTK_CONTAINER (scr), ctree);
+  gtk_clist_column_titles_hide (GTK_CLIST (ctree));
+  gtk_clist_set_selection_mode (GTK_CLIST (ctree), GTK_SELECTION_BROWSE);
+  gtk_widget_set_usize (ctree, -1, 200);
+  gtk_object_set_data (GTK_OBJECT (dlg), "tree", ctree);
 
   hbox = gtk_hbox_new (FALSE, 10);
   gtk_widget_show (hbox);
@@ -2703,11 +2680,14 @@ int groupeditdlg_execute(void* param)
   gtk_widget_add_accelerator (button, "clicked", accel_group,
                               GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
-  groupeditdlg_addchildren(tree, NULL, (LC_GROUPEDITDLG_OPTS*)param);
+  gtk_clist_freeze (GTK_CLIST (ctree));
+  gtk_clist_clear (GTK_CLIST (ctree));
+
+  groupeditdlg_addchildren(GTK_CTREE(ctree), NULL, NULL, (LC_GROUPEDITDLG_OPTS*)param);
+
+  gtk_clist_thaw (GTK_CLIST (ctree));
 
   return dlg_domodal(dlg, LC_CANCEL);
-#endif
-  return 0;
 }
 
 // =========================================================

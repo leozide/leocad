@@ -4,62 +4,61 @@ include config.mk
 ### Module directories
 MODULES := $(OSDIR) common
 
-### look for include files in
-###   each of the modules
+### Look for include files in each of the modules
 CPPFLAGS += $(patsubst %,-I%,$(MODULES)) $(OS)
 CPPFLAGS += -g
 
-### extra libraries if required
+### Extra libraries if required
 LIBS :=
 
-### each module will add to this
+### Each module will add to this
 SRC :=
 
 BIN := bin/leocad
 
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean), )
 -include $(OSDIR)/config.mk
+endif
 
-### include the description for
-###   each module
+### Include the description for each module
 include $(patsubst %,%/module.mk,$(MODULES))
 
-### determine the object files
+### Determine the object files
 OBJ := \
   $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
   $(patsubst %.cpp,%.o,$(filter %.cpp,$(SRC)))
 
-### link the program
+### Link the program
 .PHONY: all static
 
 all: $(BIN)
 
 static: bin/leocad.static
 
-bin/leocad: $(OBJ) bin
-	$(CXX) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
+bin/leocad: $(OBJ) bin Makefile
+	@echo Linking $@
+	@$(CXX) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
-bin/leocad.static: $(OBJ) bin
+bin/leocad.static: $(OBJ) bin Makefile
 	$(CXX) -static -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
 bin:
-	mkdir bin
+	@mkdir bin
 
-### include the C/C++ include
-###   dependencies
-ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean spotless), )
+### Include the C/C++ include dependencies
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean), )
 -include $(OBJ:.o=.d)
 endif
 
-### calculate C/C++ include
-###   dependencies
-%.d: %.c
-	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
-	@$(CC) -MM -MT '$(patsubst %.d,%.o, $@)' $(CFLAGS) $(CPPFLAGS) -w $< > $@
+### Calculate C/C++ include dependencies
+%.d: %.cpp $(OSDIR)/config.h $(OSDIR)/config.mk
+	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
-%.d: %.cpp
-	@[ -s $(OSDIR)/config.h ] || $(MAKE) config
-	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
+### Main compiler rule
+%.o: %.cpp $(OSDIR)/config.h $(OSDIR)/config.mk
+	@echo $<
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o '$(patsubst %.cpp,%.o, $@)' $<
 	@[ -s $@ ] || rm -f $@
 
 ### Various cleaning functions
@@ -71,12 +70,10 @@ clean:
 veryclean: clean
 	find $(MODULES) -name \*.d | xargs rm -f
 	rm -rf bin
-
-spotless: veryclean
 	rm -rf arch $(OSDIR)/config.mk $(OSDIR)/config.h
 
 
-### dependency stuff is done automatically, so these do nothing.
+### Dependency stuff is done automatically, so these do nothing.
 .PHONY: dep depend
 
 
@@ -94,7 +91,6 @@ help:
 	@echo   '        a -zip or -tgz variants)'
 	@echo   '       clean'
 	@echo   '       veryclean'
-	@echo   '       spotless'
 	@echo
 
 ###  Rules to make various packaging

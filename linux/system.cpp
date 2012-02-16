@@ -291,17 +291,20 @@ void SystemUpdateAction(int new_action, int old_action)
   GdkColor white = {0, 0xffff, 0xffff, 0xffff};
   GdkColor black = {0, 0x0000, 0x0000, 0x0000};
 
-  if (xpm != NULL)
+  if (GDK_IS_WINDOW(drawing_area))
   {
-    create_bitmap_and_mask_from_xpm (&bitmap, &mask, xpm);
-    cursor = gdk_cursor_new_from_pixmap (bitmap, mask, &white, &black, x, y);
-    gdk_window_set_cursor (drawing_area->window, cursor);
-  }
-  else
-  {
-    cursor = gdk_cursor_new (GDK_LEFT_PTR);
-    gdk_window_set_cursor (drawing_area->window, cursor);
-    gdk_cursor_destroy (cursor);
+    if (xpm != NULL)
+    {
+      create_bitmap_and_mask_from_xpm (&bitmap, &mask, xpm);
+      cursor = gdk_cursor_new_from_pixmap (bitmap, mask, &white, &black, x, y);
+      gdk_window_set_cursor (drawing_area->window, cursor);
+    }
+    else
+    {
+      cursor = gdk_cursor_new (GDK_LEFT_PTR);
+      gdk_window_set_cursor (drawing_area->window, cursor);
+      gdk_cursor_destroy (cursor);
+    }
   }
 
   ignore_commands = true;

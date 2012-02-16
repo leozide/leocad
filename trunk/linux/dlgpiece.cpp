@@ -246,7 +246,7 @@ static void minifigdlg_createpair (LC_MINIFIGDLG_STRUCT* info, int idx, int num,
     return;
   }
 
-  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
+  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 0);
   gtk_signal_connect (adj, "value_changed", GTK_SIGNAL_FUNC (adj_changed), info);
 
   spin = info->angles[num] = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);

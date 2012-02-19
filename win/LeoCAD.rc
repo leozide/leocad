@@ -318,7 +318,6 @@ BEGIN
             MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
             MENUITEM "&Pieces",                     ID_VIEW_PIECES_BAR
             MENUITEM "P&roperties",                 ID_VIEW_PROPERTIES_BAR
-            MENUITEM "&Modify",                     ID_VIEW_MODIFY_BAR
             MENUITEM "S&tatus Bar",                 ID_VIEW_STATUS_BAR
         END
         MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
@@ -369,7 +368,6 @@ BEGIN
         MENUITEM "Drawing",                     ID_VIEW_TOOLS_BAR
         MENUITEM "Animation",                   ID_VIEW_ANIMATION_BAR
         MENUITEM "Pieces",                      ID_VIEW_PIECES_BAR
-        MENUITEM "Modify",                      ID_VIEW_MODIFY_BAR
         MENUITEM "Status Bar",                  ID_VIEW_STATUS_BAR
     END
     POPUP "1"
@@ -435,15 +433,9 @@ BEGIN
         MENUITEM "Drawing",                     ID_VIEW_TOOLS_BAR
         MENUITEM "Animation",                   ID_VIEW_ANIMATION_BAR
         MENUITEM "Pieces",                      ID_VIEW_PIECES_BAR
-        MENUITEM "Modify",                      ID_VIEW_MODIFY_BAR
         MENUITEM "Status Bar",                  ID_VIEW_STATUS_BAR
     END
-    POPUP "5"
-    BEGIN
-        MENUITEM "Pieces",                      ID_MODDLG_PIECES
-        MENUITEM "Cameras",                     ID_MODDLG_CAMERAS
-        MENUITEM "Lights",                      ID_MODDLG_LIGHTS
-    END
+    MENUITEM "5",                           65535
     POPUP "6"
     BEGIN
         MENUITEM "Add",                         ID_EDITOR_ADD
@@ -960,37 +952,6 @@ BEGIN
     CTEXT           "Preview",IDC_OPENDLG_TEXT,2,20,60,8
 END
 
-IDD_MODIFY DIALOGEX 0, 0, 106, 92
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    PUSHBUTTON      "",IDC_MODDLG_PIECE,4,4,12,12,BS_BITMAP
-    COMBOBOX        IDC_MODDLG_LIST,22,4,80,63,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Position",IDC_STATIC,4,21,24,8
-    EDITTEXT        IDC_MODDLG_POSX,34,20,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_POSY,58,20,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_POSZ,82,20,20,10,ES_AUTOHSCROLL
-    LTEXT           "Rotation",IDC_MODDLG_ROTATION,4,35,26,8
-    EDITTEXT        IDC_MODDLG_ROTX,34,34,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_ROTY,58,34,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_ROTZ,82,34,20,10,ES_AUTOHSCROLL
-    LTEXT           "Step",IDC_MODDLG_STEPFROM,4,49,26,8
-    EDITTEXT        IDC_MODDLG_UPX,34,48,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_UPY,58,48,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_UPZ,82,48,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_FROM,34,48,20,10,ES_AUTOHSCROLL
-    LTEXT           "to",IDC_MODDLG_STEPTO,59,49,20,8
-    EDITTEXT        IDC_MODDLG_TO,82,48,20,10,ES_AUTOHSCROLL
-    CONTROL         "Hidden",IDC_MODDLG_HIDDEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,64,34,8
-    LTEXT           "FOV",IDC_MODDLG_FOVSTATIC,59,63,20,8,NOT WS_VISIBLE
-    EDITTEXT        IDC_MODDLG_FOV,82,62,20,10,ES_AUTOHSCROLL | NOT WS_VISIBLE
-    PUSHBUTTON      "",IDC_MODDLG_COLOR,80,61,22,12
-    PUSHBUTTON      "Apply",IDC_MODDLG_APPLY,4,76,30,12
-    EDITTEXT        IDC_MODDLG_NEAR,58,76,20,10,ES_AUTOHSCROLL
-    EDITTEXT        IDC_MODDLG_FAR,82,76,20,10,ES_AUTOHSCROLL
-    LTEXT           "Clip",IDC_MODDLG_PLANESSTATIC,40,77,15,8
-END
-
 IDD_IMAGE DIALOG 0, 0, 212, 155
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Image Options"
@@ -1386,14 +1347,6 @@ BEGIN
         RIGHTMARGIN, 233
         TOPMARGIN, 7
         BOTTOMMARGIN, 106
-    END
-
-    IDD_MODIFY, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 102
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 88
     END
 
     IDD_IMAGE, DIALOG
@@ -1797,7 +1750,6 @@ BEGIN
     ID_VIEW_TOOLS_BAR       "Show or hide the drawing toolbar\nToggle DrawingBar"
     ID_VIEW_ANIMATION_BAR   "Show or hide the animation toolbar\nToggle AnimationBar"
     ID_VIEW_PROPERTIES_BAR  "Show or hide the properties toolbar\nToggle ToolBar"
-    ID_VIEW_MODIFY_BAR      "Show or hide the modify dialog\nToggle Modify Dialog"
 END
 
 STRINGTABLE

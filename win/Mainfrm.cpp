@@ -121,12 +121,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND_EX(ID_VIEW_TOOLS_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_COMMAND_EX(ID_VIEW_PIECES_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_COMMAND_EX(ID_VIEW_PROPERTIES_BAR,  &CFrameWndEx::OnPaneCheck)
-	ON_COMMAND_EX(ID_VIEW_MODIFY_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_ANIMATION_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLS_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PIECES_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PROPERTIES_BAR, &CFrameWndEx::OnUpdatePaneMenu)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_MODIFY_BAR, &CFrameWndEx::OnUpdatePaneMenu)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTION_SELECT, ID_ACTION_ROLL, OnUpdateAction)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_SNAPX, ID_SNAP_SNAPNONE, OnUpdateSnap)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_LOCK_LOCKX, ID_LOCK_UNLOCKALL, OnUpdateLock)
@@ -232,15 +230,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndPiecesBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndModifyDlg.Create(_T("Modify"), this, TRUE, MAKEINTRESOURCE(IDD_MODIFY), WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT | CBRS_FLOAT_MULTI, ID_VIEW_MODIFY_BAR))
-	{
-		TRACE0("Failed to create Dialog Bar\n");
-		return -1;      // failed to create
-	}
-
-	m_wndModifyDlg.EnableDocking(CBRS_ALIGN_ANY);
 	EnableDocking(CBRS_ALIGN_ANY);
-//	ShowPane(&m_wndModifyDlg, FALSE, FALSE, FALSE);
 
 //	UpdateMenuAccelerators();
 
@@ -462,7 +452,6 @@ LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 {
 	Object* Focus = lcGetActiveProject()->GetFocusObject();
 
-	m_wndModifyDlg.UpdateInfo((Object*)lParam);
 	m_wndProperties.Update(Focus);
 
 	char str[128];

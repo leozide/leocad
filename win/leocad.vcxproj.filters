@@ -101,9 +101,6 @@
     <ClCompile Include="Mainfrm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Moddlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Piecebar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -647,9 +644,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainFrm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ModDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Piecebar.h">

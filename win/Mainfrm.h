@@ -3,7 +3,6 @@
 
 #include "PieceBar.h"
 #include "CADBar.h"
-#include "ModDlg.h"
 #include "propertiespane.h"
 
 class MainWnd;
@@ -67,7 +66,6 @@ public:
 		{ m_strStatusBar = Message; }
 
 protected:
-	CModifyDialog	m_wndModifyDlg;
 	CPropertiesPane m_wndProperties;
 
 	WINDOWPLACEMENT m_wpPrev;

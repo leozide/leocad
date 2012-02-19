@@ -287,6 +287,9 @@
     <ClCompile Include="dynsplit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="propertiesgridctrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Angle.cur">
@@ -831,6 +834,9 @@
     </ClInclude>
     <ClInclude Include="dynsplit.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="propertiesgridctrl.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

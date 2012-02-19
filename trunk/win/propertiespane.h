@@ -1,5 +1,7 @@
 #pragma once
 
+#include "propertiesgridctrl.h"
+
 class Object;
 
 class CPropertiesPane : public CDockablePane
@@ -12,7 +14,7 @@ public:
 
 protected:
 	CFont m_fntPropList;
-	CMFCPropertyGridCtrl m_wndPropList;
+	CLeoCADMFCPropertyGridCtrl m_wndPropList;
 
 	void AdjustLayout();
 

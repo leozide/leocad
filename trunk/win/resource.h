@@ -68,7 +68,6 @@
 #define IDB_PARTICONS                   177
 #define IDD_OPENDLG_TEMPLATE            177
 #define IDS_COLOR03                     178
-#define IDD_MODIFY                      178
 #define IDS_COLOR04                     179
 #define IDS_COLOR05                     180
 #define IDS_COLOR06                     181
@@ -185,7 +184,6 @@
 #define IDC_PROP_PIECES_LIST            1072
 #define IDC_ABTDLG_INFO                 1073
 #define IDC_GENDLG_NUMBERS              1074
-#define IDC_MODDLG_HIDDEN               1074
 #define IDC_SAVEDLG_PREVIEW             1074
 #define IDC_GENDLG_PREVIEW              1075
 #define IDC_AIDDLG_SNAPX                1076
@@ -233,20 +231,14 @@
 #define IDC_DETDLG_ANTIALIAS            1094
 #define IDC_AIDDLG_ANGLE                1095
 #define IDC_GENDLG_SAVETIME             1095
-#define IDC_MODDLG_ROTX                 1095
 #define IDC_EDTDLG_CONNECTION           1095
 #define IDC_DETDLG_LINE                 1096
 #define IDC_PRNDLG_MARGIN_TOP           1096
 #define IDC_AIDDLG_GRIDSIZE             1096
-#define IDC_MODDLG_ROTY                 1096
 #define IDC_DETDLG_HIDDEN               1097
 #define IDC_PRNDLG_MARGIN_BOTTOM        1097
-#define IDC_MODDLG_ROTZ                 1097
 #define IDC_DETDLG_BACKGROUND           1098
 #define IDC_PRNDLG_MARGIN_RIGHT         1098
-#define IDC_MODDLG_POSX                 1098
-#define IDC_MODDLG_POSY                 1099
-#define IDC_MODDLG_POSZ                 1100
 #define IDC_OPENDLG_PREVIEW             1102
 #define IDC_OPENDLG_TEXT                1103
 #define IDC_SCNDLG_BGIMAGE_BROWSE       1104
@@ -279,35 +271,18 @@
 #define IDC_GENDLG_MOUSE                1132
 #define IDC_GENDLG_GAMMA                1133
 #define IDC_GENDLG_USER                 1133
-#define IDC_MODDLG_LIST                 1136
-#define IDC_MODDLG_COLOR                1137
-#define IDC_MODDLG_PIECE                1142
-#define IDC_MODDLG_ROTATION             1145
-#define IDC_MODDLG_FROM                 1146
 #define IDC_EDTDLG_DESCRIPTION          1146
-#define IDC_MODDLG_TO                   1147
 #define IDC_EDTDLG_NAME                 1147
-#define IDC_MODDLG_ROTATION2            1148
 #define IDC_IMGDLG_PAUSE                1148
-#define IDC_MODDLG_STEPFROM             1148
 #define IDC_POVDLG_LGEO                 1148
 #define IDC_POVDLG_POVRAY               1149
-#define IDC_MODDLG_FOV                  1149
-#define IDC_MODDLG_OK                   1150
 #define IDC_POVDLG_RENDER               1150
-#define IDC_MODDLG_UPY                  1150
-#define IDC_MODDLG_CLOSE                1151
 #define IDC_POVDLG_LGEOBROWSE           1151
-#define IDC_MODDLG_UPX                  1151
-#define IDC_MODDLG_APPLY                1152
 #define IDC_POVDLG_POVBROWSE            1152
 #define IDC_POVDLG_OUTPOV               1153
-#define IDC_MODDLG_UPZ                  1153
 #define IDC_IMGDLG_SINGLE               1154
 #define IDC_POVDLG_POVOUTBROWSE         1154
-#define IDC_MODDLG_NEAR                 1154
 #define IDC_IMGDLG_MULTIPLE             1155
-#define IDC_MODDLG_FAR                  1155
 #define IDC_IMGDLG_BMP                  1158
 #define IDC_IMGDLG_JPG                  1160
 #define IDC_IMGDLG_AVI                  1161
@@ -315,8 +290,6 @@
 #define IDC_IMGDLG_TO                   1163
 #define IDC_SAVEPICTURE_OPTIONS         1164
 #define IDC_IMGDLG_PNG                  1164
-#define IDC_MODDLG_STEPTO               1165
-#define IDC_MODDLG_FOVSTATIC            1166
 #define IDC_EDITORSTATIC                1167
 #define IDC_EDTDLG_LIST                 1168
 #define IDC_BUTTON2                     1170
@@ -379,7 +352,6 @@
 #define IDC_TREE                        1214
 #define IDC_TRANSDLG_OZ                 1214
 #define IDC_MF_LEGL                     1215
-#define IDC_MODDLG_PLANESSTATIC         1215
 #define IDC_MF_LEGR                     1216
 #define IDC_MF_SHOEL                    1217
 #define IDC_MF_SHOER                    1218
@@ -462,7 +434,6 @@
 #define ID_RENDER_BOX                   32821
 #define ID_PIECE_INSERT                 32822
 #define ID_PIECE_DELETE                 32823
-#define ID_PIECE_MODIFY                 32824
 #define ID_VIEW_STEP_FIRST              32825
 #define ID_VIEW_STEP_LAST               32826
 #define ID_PIECE_HIDESELECTED           32827
@@ -503,9 +474,6 @@
 #define ID_PRINT_RIGHTALIGN             32882
 #define ID_SNAP_ON                      32883
 #define ID_SNAP_ANGLE                   32884
-#define ID_MODDLG_PIECES                32884
-#define ID_MODDLG_CAMERAS               32885
-#define ID_MODDLG_LIGHTS                32886
 #define ID_FILE_PRINTCATALOG            32887
 #define ID_LIBDLG_FILE_PRINTCATALOG     32887
 #define ID_FILE_MERGEUPDATE             32888
@@ -677,7 +645,6 @@
 #define ID_VIEW_ANIMATION_BAR           59427
 #define ID_VIEW_PROPERTIES_BAR          59428
 #define ID_VIEW_INVISIBLE_BAR           59429
-#define ID_VIEW_MODIFY_BAR              59430
 
 // Next default values for new objects
 // 

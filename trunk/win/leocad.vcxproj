@@ -127,7 +127,6 @@
     <ClCompile Include="Leocad.cpp" />
     <ClCompile Include="Libdlg.cpp" />
     <ClCompile Include="Mainfrm.cpp" />
-    <ClCompile Include="Moddlg.cpp" />
     <ClCompile Include="Piecebar.cpp" />
     <ClCompile Include="Piececmb.cpp" />
     <ClCompile Include="Pieceprv.cpp" />
@@ -440,7 +439,6 @@
     <ClInclude Include="LeoCAD.h" />
     <ClInclude Include="LibDlg.h" />
     <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="ModDlg.h" />
     <ClInclude Include="Piecebar.h" />
     <ClInclude Include="PieceCmb.h" />
     <ClInclude Include="PiecePrv.h" />

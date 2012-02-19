@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "LeoCAD.h"
 #include "propertiespane.h"
 
 #include "project.h"
@@ -201,8 +200,7 @@ void CPropertiesPane::SetPiece(Object* Focus)
 		CMFCPropertyGridProperty* Hide = new CMFCPropertyGridProperty(_T("Hide"), (_variant_t)(lcuint32)0, _T("The time when this object is hidden"));
 		Appearence->AddSubItem(Hide);
 
-		CMFCPropertyGridColorProperty* Color = new CMFCPropertyGridColorProperty(_T("Color"), RGB(210, 192, 254), NULL, _T("The object's color")); // TODO: only use LeoCAD colors on the color picker
-		Color->EnableAutomaticButton(_T("Default"), ::GetSysColor(COLOR_3DFACE));
+		CLeoCADMFCPropertyGridColorProperty* Color = new CLeoCADMFCPropertyGridColorProperty(_T("Color"), _T("The object's color"));
 		Appearence->AddSubItem(Color);
 
 		m_wndPropList.AddProperty(Appearence);
@@ -242,6 +240,7 @@ void CPropertiesPane::SetPiece(Object* Focus)
 	CMFCPropertyGridProperty* Appearence = m_wndPropList.GetProperty(2);
 	UpdateProperty(Appearence->GetSubItem(0), From);
 	UpdateProperty(Appearence->GetSubItem(1), To);
+	((CLeoCADMFCPropertyGridColorProperty*)Appearence->GetSubItem(2))->SetColor(pPiece->GetColor(), true);
 
 	mObject = Focus;
 }
@@ -263,7 +262,7 @@ void CPropertiesPane::ModifyPiece()
 	Modify.from = Appearence->GetSubItem(0)->GetValue().ulVal;
 	Modify.to = Appearence->GetSubItem(1)->GetValue().ulVal;
 	Modify.hidden = FALSE;
-	Modify.color = Modify.piece->GetColor();
+	Modify.color = ((CLeoCADMFCPropertyGridColorProperty*)Appearence->GetSubItem(2))->GetColor();
 	strcpy(Modify.name, Modify.piece->GetName());
 
 	lcGetActiveProject()->HandleNotify(LC_PIECE_MODIFIED, (unsigned long)&Modify);

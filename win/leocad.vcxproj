@@ -136,6 +136,7 @@
     <ClCompile Include="Prefsht.cpp" />
     <ClCompile Include="Print.cpp" />
     <ClCompile Include="Progdlg.cpp" />
+    <ClCompile Include="propertiesgridctrl.cpp" />
     <ClCompile Include="propertiespane.cpp" />
     <ClCompile Include="Propspgs.cpp" />
     <ClCompile Include="Propssht.cpp" />
@@ -448,6 +449,7 @@
     <ClInclude Include="PrefSht.h" />
     <ClInclude Include="Print.h" />
     <ClInclude Include="ProgDlg.h" />
+    <ClInclude Include="propertiesgridctrl.h" />
     <ClInclude Include="propertiespane.h" />
     <ClInclude Include="PropsPgs.h" />
     <ClInclude Include="PropsSht.h" />

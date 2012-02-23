@@ -6228,13 +6228,13 @@ Camera* Project::GetCamera(int i)
 void Project::ConvertToUserUnits(Vector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-		Value /= 0.08f;
+		Value /= 0.04f;
 }
 
 void Project::ConvertFromUserUnits(Vector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-		Value *= 0.08f;
+		Value *= 0.04f;
 }
 
 bool Project::GetFocusPosition(Vector3& Position) const

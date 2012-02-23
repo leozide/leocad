@@ -261,7 +261,7 @@ void CPropertiesPane::ModifyPiece()
 	CMFCPropertyGridProperty* Appearence = m_wndPropList.GetProperty(2);
 	Modify.from = Appearence->GetSubItem(0)->GetValue().ulVal;
 	Modify.to = Appearence->GetSubItem(1)->GetValue().ulVal;
-	Modify.hidden = FALSE;
+	Modify.hidden = false;
 	Modify.color = ((CLeoCADMFCPropertyGridColorProperty*)Appearence->GetSubItem(2))->GetColor();
 	strcpy(Modify.name, Modify.piece->GetName());
 
@@ -366,6 +366,28 @@ void CPropertiesPane::SetCamera(Object* Focus)
 
 void CPropertiesPane::ModifyCamera()
 {
+	LC_CAMERA_MODIFY Modify;
+
+	Modify.camera = (Camera*)mObject;
+
+	CMFCPropertyGridProperty* PositionProp = m_wndPropList.GetProperty(0);
+	Modify.Eye = Vector3(PositionProp->GetSubItem(0)->GetValue().fltVal, PositionProp->GetSubItem(1)->GetValue().fltVal, PositionProp->GetSubItem(2)->GetValue().fltVal);
+	lcGetActiveProject()->ConvertFromUserUnits(Modify.Eye);
+
+	CMFCPropertyGridProperty* TargetProp = m_wndPropList.GetProperty(1);
+	Modify.Eye = Vector3(TargetProp->GetSubItem(0)->GetValue().fltVal, TargetProp->GetSubItem(1)->GetValue().fltVal, TargetProp->GetSubItem(2)->GetValue().fltVal);
+	lcGetActiveProject()->ConvertFromUserUnits(Modify.Target);
+
+	CMFCPropertyGridProperty* UpProp = m_wndPropList.GetProperty(2);
+	Modify.Eye = Vector3(UpProp->GetSubItem(0)->GetValue().fltVal, UpProp->GetSubItem(1)->GetValue().fltVal, UpProp->GetSubItem(2)->GetValue().fltVal);
+
+	CMFCPropertyGridProperty* SettingsProp = m_wndPropList.GetProperty(3);
+	Modify.fovy = SettingsProp->GetSubItem(0)->GetValue().fltVal;
+	Modify.znear = SettingsProp->GetSubItem(1)->GetValue().fltVal;
+	Modify.zfar = SettingsProp->GetSubItem(2)->GetValue().fltVal;
+	Modify.hidden = false;
+
+	lcGetActiveProject()->HandleNotify(LC_CAMERA_MODIFIED, (unsigned long)&Modify);
 }
 
 void CPropertiesPane::SetLight(Object* Focus)

@@ -375,11 +375,11 @@ void CPropertiesPane::ModifyCamera()
 	lcGetActiveProject()->ConvertFromUserUnits(Modify.Eye);
 
 	CMFCPropertyGridProperty* TargetProp = m_wndPropList.GetProperty(1);
-	Modify.Eye = Vector3(TargetProp->GetSubItem(0)->GetValue().fltVal, TargetProp->GetSubItem(1)->GetValue().fltVal, TargetProp->GetSubItem(2)->GetValue().fltVal);
+	Modify.Target = Vector3(TargetProp->GetSubItem(0)->GetValue().fltVal, TargetProp->GetSubItem(1)->GetValue().fltVal, TargetProp->GetSubItem(2)->GetValue().fltVal);
 	lcGetActiveProject()->ConvertFromUserUnits(Modify.Target);
 
 	CMFCPropertyGridProperty* UpProp = m_wndPropList.GetProperty(2);
-	Modify.Eye = Vector3(UpProp->GetSubItem(0)->GetValue().fltVal, UpProp->GetSubItem(1)->GetValue().fltVal, UpProp->GetSubItem(2)->GetValue().fltVal);
+	Modify.Up = Vector3(UpProp->GetSubItem(0)->GetValue().fltVal, UpProp->GetSubItem(1)->GetValue().fltVal, UpProp->GetSubItem(2)->GetValue().fltVal);
 
 	CMFCPropertyGridProperty* SettingsProp = m_wndPropList.GetProperty(3);
 	Modify.fovy = SettingsProp->GetSubItem(0)->GetValue().fltVal;

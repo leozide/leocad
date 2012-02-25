@@ -705,26 +705,9 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 // Changed current step/frame
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 {
-	// Toolbar
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
 	if (!pFrame)
 		return;
-
-	EnableToolBarButton(pFrame->m_wndAnimationBar, ID_VIEW_STEP_NEXT, nTime < nTotal ? TRUE : FALSE);
-	EnableToolBarButton(pFrame->m_wndAnimationBar, ID_VIEW_STEP_PREVIOUS, nTime > 1 ? TRUE : FALSE);
-	EnableToolBarButton(pFrame->m_wndAnimationBar, ID_VIEW_STEP_FIRST, nTime != 1 ? TRUE : FALSE);
-	EnableToolBarButton(pFrame->m_wndAnimationBar, ID_VIEW_STEP_LAST, nTime != nTotal ? TRUE : FALSE);
-
-	// Main menu
-	CMenu* pMainMenu = GetMainMenu(2)->GetSubMenu(14);
-
-	if (!pMainMenu)
-		return;
-
-	pMainMenu->EnableMenuItem(ID_VIEW_STEP_NEXT, MF_BYCOMMAND | (nTime < nTotal ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-	pMainMenu->EnableMenuItem(ID_VIEW_STEP_PREVIOUS, MF_BYCOMMAND | (nTime > 1 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-	pMainMenu->EnableMenuItem(ID_VIEW_STEP_FIRST, MF_BYCOMMAND | (nTime != 1 ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-	pMainMenu->EnableMenuItem(ID_VIEW_STEP_LAST, MF_BYCOMMAND | (nTime != nTotal ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
 
 	// Status bar
 	char szStep[11];

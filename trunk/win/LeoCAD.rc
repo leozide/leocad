@@ -279,9 +279,9 @@ BEGIN
         END
         POPUP "Ste&p"
         BEGIN
-            MENUITEM "Ne&xt",                       ID_VIEW_STEP_NEXT
-            MENUITEM "&Previous",                   ID_VIEW_STEP_PREVIOUS
             MENUITEM "Fi&rst",                      ID_VIEW_STEP_FIRST
+            MENUITEM "&Previous",                   ID_VIEW_STEP_PREVIOUS
+            MENUITEM "Ne&xt",                       ID_VIEW_STEP_NEXT
             MENUITEM "&Last",                       ID_VIEW_STEP_LAST
             MENUITEM "Ch&oose...",                  ID_VIEW_STEP_CHOOSE
             MENUITEM SEPARATOR

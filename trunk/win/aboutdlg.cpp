@@ -96,23 +96,8 @@ BOOL CAboutDlg::OnInitDialog()
 		GetDlgItem(IDC_ABTDLG_HOMEPAGE)->SetFont(&m_Font);
 	}	
 
-	// The following function appeared in Paul DiLascia's Jan 1998 MSJ articles.
-	// It loads a "hand" cursor from "winhlp32.exe" resources
-
-	// Get the windows directory
-	CString strWndDir;
-	GetWindowsDirectory(strWndDir.GetBuffer(MAX_PATH), MAX_PATH);
-	strWndDir.ReleaseBuffer();
-	strWndDir += _T("\\winhlp32.exe");
-
-	// This retrieves cursor #106 from winhlp32.exe, which is a hand pointer
-	HMODULE hModule = LoadLibrary(strWndDir);
-	if (hModule)
-	{
-		HCURSOR hHandCursor = ::LoadCursor(hModule, MAKEINTRESOURCE(106));
-		m_hLinkCursor = CopyCursor(hHandCursor);
-		FreeLibrary(hModule);
-	}
+	// Load a "hand" cursor.
+	m_hLinkCursor = LoadCursor(NULL,MAKEINTRESOURCE(IDC_HAND));
 
 	AdjustHomepageWindow();
 

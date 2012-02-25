@@ -132,6 +132,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_0, ID_SNAP_9, OnUpdateSnapXY)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_10, ID_SNAP_19, OnUpdateSnapZ)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_20, ID_SNAP_29, OnUpdateSnapA)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_NEXT, OnUpdateStepNext)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_PREVIOUS, OnUpdateStepPrevious)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_FIRST, OnUpdateStepFirst)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_LAST, OnUpdateStepLast)
 	ON_COMMAND(ID_VIEW_SPLITVERTICALLY, OnViewSplitVertically)
 	ON_COMMAND(ID_VIEW_SPLITHORIZONTALLY, OnViewSplitHorizontally)
 	ON_COMMAND(ID_VIEW_DELETEVIEW, OnViewDeleteView)
@@ -406,6 +410,38 @@ void CMainFrame::OnUpdateSnapA(CCmdUI* pCmdUI)
 	int Snap;
 	lcGetActiveProject()->GetSnapIndex(NULL, NULL, &Snap);
 	pCmdUI->SetRadio(Snap + ID_SNAP_20 == pCmdUI->m_nID);
+}
+
+void CMainFrame::OnUpdateStepNext(CCmdUI* pCmdUI)
+{
+	int Now, Last;
+
+	lcGetActiveProject()->GetTimeRange(&Now, &Last);
+	pCmdUI->Enable(Now < Last);
+}
+
+void CMainFrame::OnUpdateStepPrevious(CCmdUI* pCmdUI)
+{
+	int Now;
+
+	Now = lcGetActiveProject()->GetCurrentTime();
+	pCmdUI->Enable(Now > 1);
+}
+
+void CMainFrame::OnUpdateStepFirst(CCmdUI* pCmdUI)
+{
+	int Now;
+
+	Now = lcGetActiveProject()->GetCurrentTime();
+	pCmdUI->Enable(Now > 1);
+}
+
+void CMainFrame::OnUpdateStepLast(CCmdUI* pCmdUI)
+{
+	int Now, Last;
+
+	lcGetActiveProject()->GetTimeRange(&Now, &Last);
+	pCmdUI->Enable(Now < Last);
 }
 
 // lParam = update pieces, wParam = update colors

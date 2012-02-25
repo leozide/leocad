@@ -274,7 +274,7 @@ BEGIN
         MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
         POPUP "C&ameras"
         BEGIN
-            MENUITEM "Dummy",                       ID_VIEW_CAMERAS_DUMMY
+            MENUITEM "Dummy",                       ID_CAMERA_FIRST
             MENUITEM "Reset",                       ID_VIEW_CAMERAS_RESET
         END
         POPUP "Ste&p"

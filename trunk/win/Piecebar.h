@@ -41,7 +41,6 @@ protected:
 
 public:
 	BOOL m_bSubParts;
-	BOOL m_bNumbers;
 	int m_nPreviewHeight;
 
 	CPiecePreview m_wndPiecePreview;

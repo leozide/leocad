@@ -48,7 +48,6 @@ CPiecesBar::CPiecesBar()
 {
 	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 0);
 	m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
-	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 	m_nPreviewHeight = AfxGetApp()->GetProfileInt("Settings", "Preview Height", 93);
 }
 

@@ -536,7 +536,6 @@ LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
 {
 	int i = theApp.GetProfileInt("Settings", "Piecebar Options", 0);
 	m_wndPiecesBar.m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
-	m_wndPiecesBar.m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 
 	RECT rc;
 	m_wndPiecesBar.GetClientRect(&rc);
@@ -566,10 +565,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 {
 	switch (nID)
 	{
-		case ID_PIECEBAR_NUMBERS:
-		{
-			m_wndPiecesBar.m_bNumbers = !m_wndPiecesBar.m_bNumbers;
-		} break;
 		case ID_PIECEBAR_SUBPARTS:
 		{
 			m_wndPiecesBar.m_bSubParts = !m_wndPiecesBar.m_bSubParts;
@@ -589,7 +584,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 
 	UINT u = 0;
 	if (m_wndPiecesBar.m_bSubParts) u |= PIECEBAR_SUBPARTS;
-	if (m_wndPiecesBar.m_bNumbers) u |= PIECEBAR_PARTNUMBERS;
 	theApp.WriteProfileInt("Settings", "Piecebar Options", u);
 }
 
@@ -597,8 +591,6 @@ void CMainFrame::OnUpdatePieceBar(CCmdUI* pCmdUI)
 {
 	switch (pCmdUI->m_nID)
 	{
-		case ID_PIECEBAR_NUMBERS:
-			pCmdUI->SetCheck(m_wndPiecesBar.m_bNumbers); break;
 		case ID_PIECEBAR_SUBPARTS:
 			pCmdUI->SetCheck(m_wndPiecesBar.m_bSubParts); break;
 	}

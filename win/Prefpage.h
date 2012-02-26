@@ -26,7 +26,6 @@ public:
 	CSliderCtrl	m_ctlMouse;
 	BOOL	m_bSubparts;
 	int		m_nSaveTime;
-	BOOL	m_bNumbers;
 	CString	m_strFolder;
 	BOOL	m_bAutoSave;
 	CString	m_bUser;

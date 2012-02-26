@@ -58,4 +58,4 @@
 //#define PIECEBAR_GROUP        0x04 // Group pieces
 //#define PIECEBAR_ZOOMPREVIEW  0x08 // Zoom piece preview
 //#define PIECEBAR_COMBO        0x10 // Show combobox
-#define PIECEBAR_PARTNUMBERS  0x20 // Show part numbers
+//#define PIECEBAR_PARTNUMBERS  0x20 // Show part numbers

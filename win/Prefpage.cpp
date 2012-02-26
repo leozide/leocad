@@ -29,7 +29,6 @@ CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::
 	//{{AFX_DATA_INIT(CPreferencesGeneral)
 	m_bSubparts = FALSE;
 	m_nSaveTime = 0;
-	m_bNumbers = FALSE;
 	m_strFolder = _T("");
 	m_bAutoSave = FALSE;
 	m_strUser = _T("");
@@ -46,10 +45,8 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPreferencesGeneral)
 	DDX_Control(pDX, IDC_GENDLG_MOUSE, m_ctlMouse);
-	DDX_Check(pDX, IDC_GENDLG_SUBPARTS, m_bSubparts);
 	DDX_Text(pDX, IDC_GENDLG_SAVETIME, m_nSaveTime);
 	DDV_MinMaxInt(pDX, m_nSaveTime, 1, 60);
-	DDX_Check(pDX, IDC_GENDLG_NUMBERS, m_bNumbers);
 	DDX_Text(pDX, IDC_GENDLG_FOLDER, m_strFolder);
 	DDX_Check(pDX, IDC_GENDLG_AUTOSAVE, m_bAutoSave);
 	DDX_Text(pDX, IDC_GENDLG_USER, m_strUser);
@@ -87,7 +84,6 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_Updates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
 	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 0);
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
-	m_bNumbers = (i & PIECEBAR_PARTNUMBERS) != 0;
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
@@ -100,7 +96,6 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 
 	int i = 0;
 	if (m_bSubparts) i |= PIECEBAR_SUBPARTS;
-	if (m_bNumbers) i |= PIECEBAR_PARTNUMBERS;
 		
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
 	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);
@@ -333,6 +328,8 @@ BEGIN_MESSAGE_MAP(CPreferencesScene, CPropertyPage)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#define COLOR_BTN_WIDTH 30
+#define COLOR_BTN_HEIGHT 14
 
 void CPreferencesScene::OnBackgroundBrowse() 
 {
@@ -352,7 +349,7 @@ void CPreferencesScene::OnBackgroundColor()
 	if (dlg.DoModal() == IDOK)
 	{
 		m_crBackground = dlg.GetColor();
-		DeleteObject(m_btnBackground.SetBitmap(CreateColorBitmap (20, 10, m_crBackground)));
+		DeleteObject(m_btnBackground.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crBackground)));
 	}
 }
 
@@ -362,7 +359,7 @@ void CPreferencesScene::OnAmbientLight()
 	if (dlg.DoModal() == IDOK)
 	{
 		m_crAmbient = dlg.GetColor();
-		DeleteObject(m_btnAmbient.SetBitmap(CreateColorBitmap (20, 10, m_crAmbient)));
+		DeleteObject(m_btnAmbient.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crAmbient)));
 	}
 }
 
@@ -372,7 +369,7 @@ void CPreferencesScene::OnFogColor()
 	if (dlg.DoModal() == IDOK)
 	{
 		m_crFog = dlg.GetColor();
-		DeleteObject(m_btnFog.SetBitmap(CreateColorBitmap (20, 10, m_crFog)));
+		DeleteObject(m_btnFog.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crFog)));
 	}
 }
 
@@ -382,7 +379,7 @@ void CPreferencesScene::OnGradColor1()
 	if (dlg.DoModal() == IDOK)
 	{
 		m_crGrad1 = dlg.GetColor();
-		DeleteObject(m_btnGrad1.SetBitmap(CreateColorBitmap (20, 10, m_crGrad1)));
+		DeleteObject(m_btnGrad1.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crGrad1)));
 	}
 }
 
@@ -392,7 +389,7 @@ void CPreferencesScene::OnGradColor2()
 	if (dlg.DoModal() == IDOK)
 	{
 		m_crGrad2 = dlg.GetColor();
-		DeleteObject(m_btnGrad2.SetBitmap(CreateColorBitmap (20, 10, m_crGrad2)));
+		DeleteObject(m_btnGrad2.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crGrad2)));
 	}
 }
 
@@ -400,11 +397,11 @@ BOOL CPreferencesScene::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	m_btnAmbient.SetBitmap(CreateColorBitmap (20, 10, m_crAmbient));
-	m_btnBackground.SetBitmap(CreateColorBitmap (20, 10, m_crBackground));
-	m_btnFog.SetBitmap(CreateColorBitmap (20, 10, m_crFog));
-	m_btnGrad1.SetBitmap(CreateColorBitmap (20, 10, m_crGrad1));
-	m_btnGrad2.SetBitmap(CreateColorBitmap (20, 10, m_crGrad2));
+	m_btnAmbient.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crAmbient));
+	m_btnBackground.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crBackground));
+	m_btnFog.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crFog));
+	m_btnGrad1.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crGrad1));
+	m_btnGrad2.SetBitmap(CreateColorBitmap(COLOR_BTN_WIDTH, COLOR_BTN_HEIGHT, m_crGrad2));
 	
 	return TRUE;
 }

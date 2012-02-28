@@ -151,19 +151,19 @@ void CPropertiesPane::SetEmpty(bool Force)
 	if (!mObject && !Force)
 		return;
 
+	mObject = NULL;
 	m_wndPropList.RemoveAll();
 
 	CMFCPropertyGridProperty* Empty = new CMFCPropertyGridProperty(_T("Nothing selected"));
 
 	m_wndPropList.AddProperty(Empty);
-
-	mObject = NULL;
 }
 
 void CPropertiesPane::SetPiece(Object* Focus)
 {
 	if (!mObject || mObject->GetType() != LC_OBJECT_PIECE)
 	{
+		mObject = NULL;
 		m_wndPropList.RemoveAll();
 
 		CMFCPropertyGridProperty* Position = new CMFCPropertyGridProperty(_T("Position"));
@@ -272,6 +272,7 @@ void CPropertiesPane::SetCamera(Object* Focus)
 {
 	if (!mObject || mObject->GetType() != LC_OBJECT_CAMERA)
 	{
+		mObject = NULL;
 		m_wndPropList.RemoveAll();
 
 		CMFCPropertyGridProperty* Position = new CMFCPropertyGridProperty(_T("Position"));
@@ -452,10 +453,12 @@ LRESULT CPropertiesPane::OnPropertyChanged(WPARAM wParam, LPARAM lParam )
 	case LC_OBJECT_CAMERA:
 	case LC_OBJECT_CAMERA_TARGET:
 		ModifyCamera();
+		break;
 
 	case LC_OBJECT_LIGHT:
 	case LC_OBJECT_LIGHT_TARGET:
 		ModifyLight();
+		break;
 	}
 
 	return 0;

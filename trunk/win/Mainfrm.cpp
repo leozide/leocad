@@ -184,8 +184,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndStatusBar.SetPaneStyle(0, SBPS_STRETCH|SBPS_NORMAL);
 
-	if (!m_wndStandardBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-		!m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
+	if (!m_wndStandardBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE) || !m_wndStandardBar.LoadToolBar(IDR_MAINFRAME))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
@@ -206,8 +205,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CMFCToolBarMenuButton NewSnap(ID_SNAP_ON, Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_SNAP_ON));
 	m_wndStandardBar.ReplaceButton(ID_SNAP_ON, NewSnap);
 
-	if (!m_wndToolsBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(1, 1, 1, 1), ID_VIEW_TOOLS_BAR) ||
-		!m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
+	if (!m_wndToolsBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_TOOLS_BAR) || !m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
@@ -216,8 +214,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndToolsBar.SetWindowText(_T("Drawing"));
 	m_wndToolsBar.EnableDocking(CBRS_ALIGN_ANY);
 
-	if (!m_wndAnimationBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(1, 1, 1, 1), ID_VIEW_ANIMATION_BAR) ||
-		!m_wndAnimationBar.LoadToolBar(IDR_ANIMATORBAR))
+	if (!m_wndAnimationBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_ANIMATION_BAR) || !m_wndAnimationBar.LoadToolBar(IDR_ANIMATORBAR))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
@@ -238,11 +235,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 //	UpdateMenuAccelerators();
 
-	if (m_wndInvisibleToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_INVISIBLE_BAR))
+	if (!m_wndInvisibleToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_INVISIBLE_BAR) || !m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE))
 	{
-		VERIFY(m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE));
-		m_wndInvisibleToolBar.SetMaskMode(TRUE);
+		TRACE0("Failed to create toolbar\n");
+		return -1;      // fail to create
 	}
+
+	m_wndInvisibleToolBar.SetWindowText (_T("Invisible"));
+	m_wndInvisibleToolBar.SetMaskMode(TRUE);
+	m_wndInvisibleToolBar.ShowPane(FALSE, FALSE, FALSE);
 
 	if (!m_wndProperties.Create("Properties", this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIES_BAR, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
@@ -1186,42 +1187,20 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) 
 {
-	// Check if the user pressed any accelerator.
+	if (pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST)
+	{
+		CWnd* Focus = GetFocus();
+
+		if (Focus && m_wndPiecesBar.m_wndPiecesCombo.IsChild(Focus))
+			return FALSE;
+	}
+
 	if (pMsg->message == WM_KEYDOWN)
 	{
 		if ((HIWORD(pMsg->lParam) & KF_REPEAT) == 0)
 		{
 			bool Control = GetKeyState(VK_CONTROL) < 0;
 			bool Shift = GetKeyState(VK_SHIFT) < 0;
-
-			// Don't process key presses if the user is typing text.
-			if (!Control)
-			{
-				CWnd* Focus = GetFocus();
-
-				if (Focus != NULL)
-				{
-					if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(Focus))
-					{
-						return CFrameWndEx::PreTranslateMessage(pMsg);
-					}
-
-					char Name[256];
-					GetClassName(Focus->m_hWnd, Name, sizeof(Name));
-					if (!strcmp(Name, "Edit"))
-					{
-						return CFrameWndEx::PreTranslateMessage(pMsg);
-					}
-				}
-			}
-
-			if (m_wndPiecesBar.m_wndPiecesCombo.IsChild(GetFocus()))
-			{
-				if (!Control && (((pMsg->wParam >= 'A') && (pMsg->wParam <= 'Z')) || ((pMsg->wParam >= '0') && (pMsg->wParam <= '9'))))
-				{
-					return CFrameWndEx::PreTranslateMessage(pMsg);
-				}
-			}
 
 			for (int i = 0; i < KeyboardShortcutsCount; i++)
 			{
@@ -1230,7 +1209,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 				if (pMsg->wParam == Cmd.Key1)
 				{
 					if ((Shift == ((Cmd.Flags & LC_KEYMOD1_SHIFT) != 0)) &&
-					    (Control == ((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0)))
+						(Control == ((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0)))
 					{
 						if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
 						{
@@ -1241,14 +1220,14 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						}
 
 						lcGetActiveProject()->HandleCommand(Cmd.ID, 0);
-						return true;
+						return FALSE;
 					}
 				}
 
 				if (pMsg->wParam == Cmd.Key2)
 				{
 					if ((Shift == ((Cmd.Flags & LC_KEYMOD2_SHIFT) != 0)) &&
-					    (Control == ((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0)))
+						(Control == ((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0)))
 					{
 						if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
 						{
@@ -1259,7 +1238,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						}
 
 						lcGetActiveProject()->HandleCommand(Cmd.ID, 0);
-						return true;
+						return FALSE;
 					}
 				}
 			}

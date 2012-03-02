@@ -1209,7 +1209,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 				if (pMsg->wParam == Cmd.Key1)
 				{
 					if ((Shift == ((Cmd.Flags & LC_KEYMOD1_SHIFT) != 0)) &&
-						(Control == ((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0)))
+					    (Control == ((Cmd.Flags & LC_KEYMOD1_CONTROL) != 0)))
 					{
 						if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
 						{
@@ -1220,14 +1220,14 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						}
 
 						lcGetActiveProject()->HandleCommand(Cmd.ID, 0);
-						return FALSE;
+						return TRUE;
 					}
 				}
 
 				if (pMsg->wParam == Cmd.Key2)
 				{
 					if ((Shift == ((Cmd.Flags & LC_KEYMOD2_SHIFT) != 0)) &&
-						(Control == ((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0)))
+					    (Control == ((Cmd.Flags & LC_KEYMOD2_CONTROL) != 0)))
 					{
 						if (Cmd.Flags & LC_KEYMOD_VIEWONLY)
 						{
@@ -1238,7 +1238,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						}
 
 						lcGetActiveProject()->HandleCommand(Cmd.ID, 0);
-						return FALSE;
+						return TRUE;
 					}
 				}
 			}

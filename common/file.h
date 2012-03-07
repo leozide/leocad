@@ -51,6 +51,9 @@ public:
 	void WriteInt(lcuint32 Value)
 	{ WriteLong(&Value, 1); }
 
+	void WriteLine(const char* pBuf)
+	{ WriteByte(pBuf, strlen(pBuf)); }
+
 	virtual void Abort()=0;
 	virtual void Flush()=0;
 	virtual void Close()=0;

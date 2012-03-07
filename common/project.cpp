@@ -3849,14 +3849,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						glFinish();
 
 						Image image;
-            image.FromOpenGL (cx, cy);
+						image.FromOpenGL (cx, cy);
 
 						sprintf(fn, "%s%s%s", opts.path, pInfo->m_strName, ext);
 						image.FileSave (fn, &opts.imdlg.imopts);
 					}
 					Sys_FinishMemoryRender (render);
 				}
-        main_window->EndWait ();
+				main_window->EndWait ();
 			}
 		} break;
 
@@ -3864,377 +3864,386 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_FILE_POVRAY:
 		{
 			LC_POVRAYDLG_OPTS opts;
+
 			if (!SystemDoDialog(LC_DLG_POVRAY, &opts))
 				break;
 
-//	CWaitCursor wc;
-			char fn[LC_MAXPATH], tmp[10], *ptr;
-			unsigned long u;
-			PieceInfo* pInfo;
-			Piece* pPiece;
-			FILE* f;
-			char *conv = (char*)malloc (9*lcGetPiecesLibrary()->GetPieceCount ());
-			char *flags = (char*)malloc (lcGetPiecesLibrary()->GetPieceCount ());
-			memset (conv, 0, 9*lcGetPiecesLibrary()->GetPieceCount());
-			memset (flags, 0, lcGetPiecesLibrary()->GetPieceCount());
+			FileDisk POVFile;
+			char Line[1024];
 
-			// read LGEO conversion table
-			if (strlen (opts.libpath))
-			{
-				strcpy (fn, opts.libpath);
-				strcat (fn, "l2p_elmt.tab");
-				f = fopen(fn, "rb");
-
-				if (f == NULL)
-				{
-					free (conv);
-					free (flags);
-					SystemDoMessageBox("Could not find LGEO.", LC_MB_OK|LC_MB_ICONERROR);
-					return;
-				}
-
-				unsigned char bt[4];
-				while (fread (&bt, 4, 1, f))
-				{
-					u = (((unsigned char)(bt[3])|((unsigned short)(bt[2]) << 8))|
-						(((unsigned long)(bt[1])) << 16)) + bt[0] * 16581375;
-					sprintf(tmp, "%d", (int)u);
-					pInfo = lcGetPiecesLibrary()->FindPieceInfo(tmp);
-
-					fread(&tmp, 9, 1, f);
-					if (tmp[8] != 0)
-						fread(&tmp[9], 1, 1, f);
-
-					if (pInfo != NULL)
-					{
-						int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
-						memcpy (&conv[idx*9], &tmp[1], 9);
-						flags[idx] = tmp[0];
-					}
-				}
-				fclose (f);
-
-				strcpy(fn, opts.libpath);
-				strcat(fn, "l2p_ptrn.tab");
-				f = fopen(fn, "rb");
-
-				if (f == NULL)
-				{
-					SystemDoMessageBox("Could not find LGEO.", LC_MB_OK|LC_MB_ICONERROR);
-					free (conv);
-					free (flags);
-					return;
-				}
-
-				u = 0;
-				do 
-				{
-					if ((tmp[u] == 0) && (u != 0))
-					{
-						u = 0;
-						pInfo = lcGetPiecesLibrary()->FindPieceInfo(tmp);
-						fread(&tmp, 8, 1, f);
-
-						if (pInfo != NULL)
-						{
-							int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
-							memcpy(&conv[idx*9], tmp, 9);
-						}
-					}
-					else
-						u++;
-				}	
-				while (fread(&tmp[u], 1, 1, f));
-				fclose(f);
-			}
-
-			strcpy(fn, opts.outpath);
-			if ((ptr = strrchr (fn, '.')))
-				*ptr = 0;
-			strcat (fn, ".inc");
-			f = fopen(fn, "wt");
-
-			if (!f)
+			if (!POVFile.Open(opts.outpath, "wt"))
 			{
 				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 				break;
+			}
+
+			PiecesLibrary* Library = lcGetPiecesLibrary();
+			char* PieceTable = new char[Library->GetPieceCount() * LC_PIECE_NAME_LEN];
+			int* PieceFlags = new int[Library->GetPieceCount()];
+			char ColorTable[LC_MAXCOLORS][64];
+
+			memset(PieceTable, 0, Library->GetPieceCount() * LC_PIECE_NAME_LEN);
+			memset(PieceFlags, 0, Library->GetPieceCount() * sizeof(int));
+
+			enum
+			{
+				LGEO_PIECE_LGEO  = 0x01,
+				LGEO_PIECE_AR    = 0x02,
+				LGEO_PIECE_SLOPE = 0x04,
+			};
+
+			enum
+			{
+				LGEO_COLOR_SOLID       = 0x01,
+				LGEO_COLOR_TRANSPARENT = 0x02,
+				LGEO_COLOR_CHROME      = 0x04,
+				LGEO_COLOR_PEARL       = 0x08,
+				LGEO_COLOR_METALLIC    = 0x10,
+				LGEO_COLOR_RUBBER      = 0x20,
+				LGEO_COLOR_GLITTER     = 0x40,
+			};
+
+			// Parse LGEO tables.
+			if (opts.libpath[0])
+			{
+				FileDisk TableFile, ColorFile;
+				char Filename[LC_MAXPATH];
+
+				int Length = strlen(opts.libpath);
+
+				if ((opts.libpath[Length - 1] != '\\') && (opts.libpath[Length - 1] != '/'))
+					strcat(opts.libpath, "/");
+
+				strcpy(Filename, opts.libpath);
+				strcat(Filename, "lg_elements.lst");
+
+				if (!TableFile.Open(Filename, "rt"))
+				{
+					delete[] PieceTable;
+					delete[] PieceFlags;
+					SystemDoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
+					break;
+				}
+
+				while (TableFile.ReadLine(Line, sizeof(Line)))
+				{
+					char Src[1024], Dst[1024], Flags[1024];
+
+					if (*Line == ';')
+						continue;
+
+					if (sscanf(Line,"%s%s%s", Src, Dst, Flags) != 3)
+						continue;
+
+					strupr(Src);
+
+					PieceInfo* Info = Library->FindPieceInfo(Src);
+					if (!Info)
+						continue;
+
+					int Index = Library->GetPieceIndex(Info);
+
+					if (strchr(Flags, 'L'))
+						PieceFlags[Index] |= LGEO_PIECE_LGEO;
+
+					if (strchr(Flags, 'A'))
+						PieceFlags[Index] |= LGEO_PIECE_AR;
+
+					if (strchr(Flags, 'S'))
+						PieceFlags[Index] |= LGEO_PIECE_SLOPE;
+
+					if (PieceFlags[Index] & (LGEO_PIECE_LGEO | LGEO_PIECE_AR))
+						strcpy(PieceTable + Index * LC_PIECE_NAME_LEN, Dst);
+				}
+
+				strcpy(Filename, opts.libpath);
+				strcat(Filename, "lg_colors.lst");
+
+				if (!ColorFile.Open(Filename, "rt"))
+				{
+					delete[] PieceTable;
+					delete[] PieceFlags;
+					SystemDoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
+					break;
+				}
+
+				while (ColorFile.ReadLine(Line, sizeof(Line)))
+				{
+					char Name[1024], Flags[1024];
+					int Code;
+
+					if (*Line == ';')
+						continue;
+
+					if (sscanf(Line,"%d%s%s", &Code, Name, Flags) != 3)
+						continue;
+
+					int Color = ConvertColor(Code);
+					if (Color > LC_MAXCOLORS)
+						continue;
+
+					strcpy(ColorTable[Color], Name);
+				}
 			}
 
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
-			fputs("// Stuff that doesn't need to be changed\n\n", f);
 
-			if (strlen(opts.libpath))
-				fputs("#include \"lg_color.inc\"\n#include \"lg_defs.inc\"\n\n", f);
-
-			// Add include files
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			// Add includes.
+			if (opts.libpath[0])
 			{
-				Piece* pNext;
+				POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
 
-				for (pNext = m_pPieces; pNext; pNext = pNext->m_pNext)
+				for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 				{
-					pInfo = pNext->GetPieceInfo();
+					PieceInfo* Info = piece->GetPieceInfo();
 
-					if (pNext == pPiece)
+					for (Piece* FirstPiece = m_pPieces; FirstPiece; FirstPiece = FirstPiece->m_pNext)
 					{
-						int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
-						char pat[] = "patterns/";
-						if (conv[idx*9+1] != 'p')
-							strcpy(pat, "");
+						if (FirstPiece->GetPieceInfo() != Info)
+							continue;
 
-						if (conv[idx*9] != 0)
-							fprintf(f, "#include \"%s%s.inc\"\n", pat, &conv[idx*9]);
-						break;
-					}
+						if (FirstPiece != piece)
+							break;
 
-					if (pInfo == pPiece->GetPieceInfo())
-						break;
-				}
-			}
+						int Index = Library->GetPieceIndex(Info);
 
-			const char* lg_colors[28] = { "red", "Orange", "green", "mint", "blue", "LightBlue", "yellow", 
-				"white", "dark_grey", "black", "brown", "pink", "purple", "gold_chrome", "clear_red",
-				"clear_neon_orange", "clear_green", "clear_neon_yellow", "clear_blue", "clear_cyan", 
-				"clear_yellow", "clear", "grey", "tan", "LightBrown", "rose", "Turquoise", "chrome" };
-
-			const float mycol[4][4] = { { 1.0f, 0.5f, 0.2f, 1 }, { 0.2f, 0.4f, 0.9f, 5 }, 
-				{ 0.6f, 0.4f, 0.4f, 24 }, { 0.1f, 0.7f, 0.8f, 26 }};
-
-			if (strlen(opts.libpath))
-			{
-				for (u = 0; u < 4; u++)
-					fprintf(f, "\n#declare lg_%s = texture {\n pigment { rgb <%.2f, %.2f, %.2f> }\n finish {\n  ambient 0.1\n  phong 0.3\n  phong_size 20\n }\n}\n",
-						altcolornames[(int)mycol[u][3]], mycol[u][0], mycol[u][1], mycol[u][2]);
-			}
-			else
-			{
-				fputs("#include \"colors.inc\"\n\n", f);
-
-				for (u = 0; u < LC_MAXCOLORS; u++)
-					fprintf(f, "\n#declare lg_%s = texture {\n pigment { rgbf <%.2f, %.2f, %.2f, %.2f> }\n finish {\n  ambient 0.1\n  phong 0.3\n  phong_size 20\n }\n}\n",
-						lg_colors[u], (float)ColorArray[u][0]/255, (float)ColorArray[u][1]/255, (float)ColorArray[u][2]/255, ((ColorArray[u][3] == 255) ? 0.0f : 0.9f));
-			}
-
-			// if not in lgeo, create it
-			fputs("\n// The next objects (if any) were generated by LeoCAD.\n\n", f);
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-			{
-				pInfo = pPiece->GetPieceInfo();
-				int idx = lcGetPiecesLibrary()->GetPieceIndex (pInfo);
-				if (conv[idx*9] != 0)
-					continue;
-
-				for (Piece* pNext = m_pPieces; pNext; pNext = pNext->m_pNext)
-				{
-					if (pNext == pPiece)
-					{
-						char name[20];
-						strcpy(name, pInfo->m_strName);
-						while ((ptr = strchr(name, '-')))
-							*ptr = '_';
-						fprintf(f, "#declare lc_%s = union {\n", name);
-
-						unsigned short g;
-						for (g = 0; g < pInfo->m_nGroupCount; g++)
-						if (pInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
+						if (PieceTable[Index * LC_PIECE_NAME_LEN])
 						{
-							unsigned long* info = (unsigned long*)pInfo->m_pGroups[g].drawinfo;
-							unsigned long count, curcolor, colors = *info;
-							info++;
+							if (PieceFlags[Index] & LGEO_PIECE_LGEO)
+								sprintf(Line, "#include \"lg_%s.inc\"\n", PieceTable + Index * LC_PIECE_NAME_LEN);
+							else if (PieceFlags[Index] & LGEO_PIECE_AR)
+								sprintf(Line, "#include \"ar_%s.inc\"\n", PieceTable + Index * LC_PIECE_NAME_LEN);
 
-							while (colors--)
-							{
-								curcolor = *info;
-								info++;
-
-								// skip if color only have lines
-								if ((*info == 0) && (info[1] == 0))
-								{
-									info += 2;
-									info += *info + 1;
-									continue;
-								}
-
-								fputs(" mesh {\n", f);
-
-								for (count = *info, info++; count; count -= 4)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2],
-										-pInfo->m_fVertexArray[info[3]*3+1], -pInfo->m_fVertexArray[info[3]*3], pInfo->m_fVertexArray[info[3]*3+2],
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2]);
-									info += 4;
-								}
-
-								for (count = *info, info++; count; count -= 3)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									info += 3;
-								}
-								info += *info + 1;
-
-								if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
-									fprintf (f, "  texture { lg_%s }\n", lg_colors[curcolor]);
-								fputs(" }\n", f);
-							}
-						}
-						else
-						{
-							unsigned short* info = (unsigned short*)pInfo->m_pGroups[g].drawinfo;
-							unsigned short count, curcolor, colors = *info;
-							info++;
-
-							while (colors--)
-							{
-								curcolor = *info;
-								info++;
-
-								// skip if color only have lines
-								if ((*info == 0) && (info[1] == 0))
-								{
-									info += 2;
-									info += *info + 1;
-									continue;
-								}
-
-								fputs(" mesh {\n", f);
-
-								for (count = *info, info++; count; count -= 4)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2],
-										-pInfo->m_fVertexArray[info[3]*3+1], -pInfo->m_fVertexArray[info[3]*3], pInfo->m_fVertexArray[info[3]*3+2],
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2]);
-									info += 4;
-								}
-
-								for (count = *info, info++; count; count -= 3)
-								{
-									fprintf(f, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-										-pInfo->m_fVertexArray[info[0]*3+1], -pInfo->m_fVertexArray[info[0]*3], pInfo->m_fVertexArray[info[0]*3+2],
-										-pInfo->m_fVertexArray[info[1]*3+1], -pInfo->m_fVertexArray[info[1]*3], pInfo->m_fVertexArray[info[1]*3+2],
-										-pInfo->m_fVertexArray[info[2]*3+1], -pInfo->m_fVertexArray[info[2]*3], pInfo->m_fVertexArray[info[2]*3+2]);
-									info += 3;
-								}
-								info += *info + 1;
-
-								if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
-									fprintf (f, "  texture { lg_%s }\n", lg_colors[curcolor]);
-								fputs(" }\n", f);
-							}
+							POVFile.WriteLine(Line);
 						}
 
-						fputs("}\n\n", f);
 						break;
 					}
-
-					if (pNext->GetPieceInfo() == pInfo)
-						break;
 				}
+
+				POVFile.WriteLine("\n");
 			}
-
-			fclose(f);
-			if ((ptr = strrchr (fn, '.')))
-				*ptr = 0;
-			strcat (fn, ".pov");
-			f = fopen(fn, "wt");
-
-			if (!f)
-			{
-				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
-				setlocale(LC_NUMERIC, OldLocale);
-				break;
-			}
-
-			if ((ptr = strrchr (fn, '.')))
-				*ptr = 0;
-			ptr = strrchr (fn, '\\');
-			if (!ptr)
-				ptr = strrchr (fn, '/');
-			if (ptr)
-				ptr++;
 			else
-				ptr = fn;
+				POVFile.WriteLine("#include \"colors.inc\"\n\n");
 
-			fprintf(f, "// File created by LeoCAD\n//\n\n#include \"%s.inc\"\n", ptr);
-			float eye[3], target[3], up[3];
-			m_ActiveView->m_Camera->GetEyePos (eye);
-			m_ActiveView->m_Camera->GetTargetPos (target);
-			m_ActiveView->m_Camera->GetUpVec (up);
-
-			fprintf(f, "\ncamera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
-				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_ActiveView->m_Camera->m_fovy);
-			fprintf(f, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
-				m_fBackground[0], m_fBackground[1], m_fBackground[2]);
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			// Add color definitions.
+			for (int ColorIdx = 0; ColorIdx < LC_MAXCOLORS; ColorIdx++)
 			{
-				float fl[12], pos[3], rot[4];
-				char name[20];
-				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
-
-				if (conv[idx*9] == 0)
+				if (ColorIdx > 13 && ColorIdx < 22)
 				{
-					char* ptr;
-					sprintf(name, "lc_%s", pPiece->GetPieceInfo()->m_strName);
-					while ((ptr = strchr(name, '-')))
-						*ptr = '_';
+					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%d/255, %d/255, %d/255> filter 0.9 } finish { ambient 0.3 diffuse 0.2 reflection 0.25 phong 0.3 phong_size 60 } }\n",
+						    altcolornames[ColorIdx], ColorArray[ColorIdx][0], ColorArray[ColorIdx][1], ColorArray[ColorIdx][2]);
 				}
 				else
 				{
-					strcpy (name, &conv[idx*9]);
-					if (pPiece->IsTransparent())
-						strcat(name, "_clear");			
+					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%d/255, %d/255, %d/255> } finish { ambient 0.1 phong 0.2 phong_size 20 } }\n",
+						    altcolornames[ColorIdx], ColorArray[ColorIdx][0], ColorArray[ColorIdx][1], ColorArray[ColorIdx][2]);
 				}
 
-				pPiece->GetPosition(pos);
-				pPiece->GetRotation(rot);
+				POVFile.WriteLine(Line);
+
+				if (!ColorTable[ColorIdx][0])
+					sprintf(ColorTable[ColorIdx], "lc_%s", altcolornames[ColorIdx]);
+			}
+
+			POVFile.WriteLine("\n");
+
+			// Add pieces not included in LGEO.
+			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+			{
+				PieceInfo* Info = piece->GetPieceInfo();
+				int Index = Library->GetPieceIndex(Info);
+
+				if (PieceTable[Index * LC_PIECE_NAME_LEN])
+					continue;
+
+				char Name[LC_PIECE_NAME_LEN];
+				char* Ptr;
+
+				strcpy(Name, Info->m_strName);
+				while ((Ptr = strchr(Name, '-')))
+					*Ptr = '_';
+
+				sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "lc_%s", Name);
+				sprintf(Line, "#declare lc_%s = union {\n", Name);
+				POVFile.WriteLine(Line);
+
+				for (lcuint16 g = 0; g < Info->m_nGroupCount; g++)
+				{
+					if (Info->m_nFlags & LC_PIECE_LONGDATA_INDICES)
+					{
+						lcuint32* info = (lcuint32*)Info->m_pGroups[g].drawinfo;
+						lcuint32 count, curcolor, colors = *info;
+						info++;
+
+						while (colors--)
+						{
+							curcolor = *info;
+							info++;
+
+							// Skip if color only has lines.
+							if ((*info == 0) && (info[1] == 0))
+							{
+								info += 2;
+								info += *info + 1;
+								continue;
+							}
+
+							POVFile.WriteLine(" mesh {\n");
+
+							for (count = *info, info++; count; count -= 4)
+							{
+								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
+									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
+									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
+								POVFile.WriteLine(Line);
+								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2],
+									-Info->m_fVertexArray[info[3]*3+1], -Info->m_fVertexArray[info[3]*3], Info->m_fVertexArray[info[3]*3+2],
+									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2]);
+								POVFile.WriteLine(Line);
+								info += 4;
+							}
+
+							for (count = *info, info++; count; count -= 3)
+							{
+								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
+									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
+									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
+								POVFile.WriteLine(Line);
+								info += 3;
+							}
+							info += *info + 1;
+
+							if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
+							{
+								sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[curcolor]);
+								POVFile.WriteLine(Line);
+							}
+
+							POVFile.WriteLine(" }\n");
+						}
+					}
+					else
+					{
+						unsigned short* info = (unsigned short*)Info->m_pGroups[g].drawinfo;
+						unsigned short count, curcolor, colors = *info;
+						info++;
+
+						while (colors--)
+						{
+							curcolor = *info;
+							info++;
+
+							// Skip if color only has lines.
+							if ((*info == 0) && (info[1] == 0))
+							{
+								info += 2;
+								info += *info + 1;
+								continue;
+							}
+
+							POVFile.WriteLine(" mesh {\n");
+
+							for (count = *info, info++; count; count -= 4)
+							{
+								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
+									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
+									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
+								POVFile.WriteLine(Line);
+								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2],
+									-Info->m_fVertexArray[info[3]*3+1], -Info->m_fVertexArray[info[3]*3], Info->m_fVertexArray[info[3]*3+2],
+									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2]);
+								POVFile.WriteLine(Line);
+								info += 4;
+							}
+
+							for (count = *info, info++; count; count -= 3)
+							{
+								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
+									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
+									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
+								POVFile.WriteLine(Line);
+								info += 3;
+							}
+							info += *info + 1;
+
+							if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
+							{
+								sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[curcolor]);
+								POVFile.WriteLine(Line);
+							}
+
+							POVFile.WriteLine(" }\n");
+						}
+					}
+				}
+
+				POVFile.WriteLine("}\n\n");
+
+				sprintf(Line, "#declare lc_%s_clear = lc_%s\n\n", Name, Name);
+				POVFile.WriteLine(Line);
+			}
+
+			float eye[3], target[3], up[3];
+			m_ActiveView->m_Camera->GetEyePos(eye);
+			m_ActiveView->m_Camera->GetTargetPos(target);
+			m_ActiveView->m_Camera->GetUpVec(up);
+
+			sprintf(Line, "camera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
+				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_ActiveView->m_Camera->m_fovy);
+			POVFile.WriteLine(Line);
+			sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
+				m_fBackground[0], m_fBackground[1], m_fBackground[2]);
+			POVFile.WriteLine(Line);
+
+			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+			{
+				int Index = Library->GetPieceIndex(piece->GetPieceInfo());
+				float fl[12], pos[3], rot[4];
+				int Color;
+
+				Color = piece->GetColor();
+				const char* Suffix = (Color > 13 && Color < 22) ? "_clear" : "";
+
+				piece->GetPosition(pos);
+				piece->GetRotation(rot);
 				Matrix mat(rot, pos);
 				mat.ToLDraw(fl);
 
-				// Slope needs to be handled correctly
-				if (flags[idx] == 1)
-					fprintf (f, "merge {\n object {\n  %s\n  texture { lg_%s }\n }\n"
-						 " object {\n  %s_slope\n  texture { lg_%s normal { bumps 0.3 scale 0.02 } }\n }\n"
-						 " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-						name, lg_colors[pPiece->GetColor()], &conv[idx*9], lg_colors[pPiece->GetColor()],
-						 -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
-						 -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+				if (PieceFlags[Index] & LGEO_PIECE_SLOPE)
+				{
+					sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
+					        " object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
+					        " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, ColorTable[Color], ColorTable[Color], PieceTable + Index * LC_PIECE_NAME_LEN,
+					       -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+				}
 				else
-					fprintf(f, "object {\n %s\n texture { lg_%s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-						name, lg_colors[pPiece->GetColor()], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6],
-						-fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+				{
+					sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, ColorTable[Color], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+				}
+
+				POVFile.WriteLine(Line);
 			}
-			fclose (f);
-			free (conv);
-			free (flags);
+
+			delete[] PieceTable;
+			delete[] PieceFlags;
 			setlocale(LC_NUMERIC, OldLocale);
 
 			if (opts.render)
 			{
 #ifdef LC_WINDOWS
 				// TODO: Linux support
-				char buf[600];
-				char tmp[LC_MAXPATH], out[LC_MAXPATH];
-				sprintf(out, "%s.pov", fn);
-				GetShortPathName(out, out, LC_MAXPATH);
-				GetShortPathName(opts.libpath, tmp, LC_MAXPATH);
-				sprintf (buf, "+L%s +I%s", tmp, out);
-				ptr = strrchr (out, '\\');
-				if (ptr)
-					*(ptr+1) = 0;
-				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, buf, out, SW_SHOWNORMAL);
+				char CmdLine[LC_MAXPATH * 2 + 100];
+				sprintf(CmdLine, "+L\"%s\" +I\"%s\"", opts.libpath, opts.outpath);
+				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, CmdLine, NULL, SW_SHOWNORMAL);
 #endif
 			}
 		} break;

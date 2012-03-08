@@ -3944,16 +3944,19 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					int Index = Library->GetPieceIndex(Info);
 
 					if (strchr(Flags, 'L'))
+					{
 						PieceFlags[Index] |= LGEO_PIECE_LGEO;
+						sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "lg_%s", Dst);
+					}
 
 					if (strchr(Flags, 'A'))
+					{
 						PieceFlags[Index] |= LGEO_PIECE_AR;
+						sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "ar_%s", Dst);
+					}
 
 					if (strchr(Flags, 'S'))
 						PieceFlags[Index] |= LGEO_PIECE_SLOPE;
-
-					if (PieceFlags[Index] & (LGEO_PIECE_LGEO | LGEO_PIECE_AR))
-						strcpy(PieceTable + Index * LC_PIECE_NAME_LEN, Dst);
 				}
 
 				strcpy(Filename, opts.libpath);
@@ -4009,11 +4012,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						if (PieceTable[Index * LC_PIECE_NAME_LEN])
 						{
-							if (PieceFlags[Index] & LGEO_PIECE_LGEO)
-								sprintf(Line, "#include \"lg_%s.inc\"\n", PieceTable + Index * LC_PIECE_NAME_LEN);
-							else if (PieceFlags[Index] & LGEO_PIECE_AR)
-								sprintf(Line, "#include \"ar_%s.inc\"\n", PieceTable + Index * LC_PIECE_NAME_LEN);
-
+							sprintf(Line, "#include \"%s.inc\"\n", PieceTable + Index * LC_PIECE_NAME_LEN);
 							POVFile.WriteLine(Line);
 						}
 
@@ -4221,7 +4220,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					        " object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					        " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, ColorTable[Color], ColorTable[Color], PieceTable + Index * LC_PIECE_NAME_LEN,
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, ColorTable[Color], PieceTable + Index * LC_PIECE_NAME_LEN, ColorTable[Color],
 					       -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
 				}
 				else
@@ -4241,8 +4240,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 #ifdef LC_WINDOWS
 				// TODO: Linux support
-				char CmdLine[LC_MAXPATH * 2 + 100];
-				sprintf(CmdLine, "+L\"%s\" +I\"%s\"", opts.libpath, opts.outpath);
+				char CmdLine[LC_MAXPATH * 3 + 100];
+
+				if (opts.libpath[0])
+					sprintf(CmdLine, "+L\"%s\\lg\\\" +L\"%s\\ar\\\" +I\"%s\"", opts.libpath, opts.libpath, opts.outpath);
+				else
+					sprintf(CmdLine, "+I\"%s\"", opts.libpath, opts.outpath);
+
 				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, CmdLine, NULL, SW_SHOWNORMAL);
 #endif
 			}

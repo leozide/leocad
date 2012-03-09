@@ -4220,13 +4220,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					        " object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					        " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, ColorTable[Color], PieceTable + Index * LC_PIECE_NAME_LEN, ColorTable[Color],
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color][0], PieceTable + Index * LC_PIECE_NAME_LEN, ColorTable[Color],
 					       -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
 				}
 				else
 				{
 					sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, ColorTable[Color], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color][0], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
 				}
 
 				POVFile.WriteLine(Line);
@@ -4239,15 +4239,39 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (opts.render)
 			{
 #ifdef LC_WINDOWS
-				// TODO: Linux support
 				char CmdLine[LC_MAXPATH * 3 + 100];
 
 				if (opts.libpath[0])
-					sprintf(CmdLine, "+L\"%s\\lg\\\" +L\"%s\\ar\\\" +I\"%s\"", opts.libpath, opts.libpath, opts.outpath);
+					sprintf(CmdLine, "\"+L%slg\\\" \"+L%sar\\\" \"+I%s\"", opts.libpath, opts.libpath, opts.outpath);
 				else
-					sprintf(CmdLine, "+I\"%s\"", opts.libpath, opts.outpath);
-
+					sprintf(CmdLine, "\"+I%s\"", opts.outpath);
+					
 				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, CmdLine, NULL, SW_SHOWNORMAL);
+#endif
+
+#ifdef LC_LINUX
+				pid_t pID = fork();
+
+				if (pID == 0)
+				{
+					char InputArg[LC_MAXPATH + 16];
+
+					sprintf(InputArg, "+I%s", opts.outpath);
+
+					if (opts.libpath[0])
+					{
+						char LibArg1[LC_MAXPATH + 16], LibArg2[LC_MAXPATH + 16];
+
+						sprintf(LibArg1, "+L%slg/", opts.libpath);
+						sprintf(LibArg2, "+L%sar/", opts.libpath);
+
+						execl(opts.povpath, opts.povpath, InputArg, LibArg1, LibArg2, NULL);
+					}
+					else
+						execl(opts.povpath, opts.povpath, InputArg, NULL);
+
+					exit(0);
+				}
 #endif
 			}
 		} break;

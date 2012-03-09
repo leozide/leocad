@@ -32,6 +32,8 @@
 #endif
 
 #ifdef LC_LINUX
+#include <unistd.h>
+
 #define LC_MAXPATH 1024 //FILENAME_MAX
 #define KEY_SHIFT	0x01
 #define KEY_CONTROL	0x02

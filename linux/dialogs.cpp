@@ -1611,6 +1611,7 @@ int povraydlg_execute(void* param)
 typedef struct
 {
   void* data;
+  GtkWidget *gen_updates, *gen_mouse;
   GtkWidget *det_edges, *det_lighting, *det_smooth;
   GtkWidget *det_antialias, *det_fast, *det_width;
   GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
@@ -1627,6 +1628,8 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
 {
   LC_PREFERENCESDLG_STRUCT* s = (LC_PREFERENCESDLG_STRUCT*)data;
   LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)s->data;
+
+  opts->nMouse = (int)gtk_range_get_value(GTK_RANGE(s->gen_mouse));
 
   unsigned long detail = 0;
   float line_width;
@@ -1673,7 +1676,6 @@ static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
   opts->nScene = scene;
   opts->fDensity = (float)fog/100;
 
-  // int nMouse;
   // int nSaveInterval;
   // char strPath[LC_MAXPATH];
 
@@ -1721,6 +1723,7 @@ static void preferencesdlg_default (GtkWidget *widget, gpointer data)
   if (GTK_TOGGLE_BUTTON (s->scn_floor)->active) scene |= LC_SCENE_FLOOR;
   read_int (s->scn_density, &fog, 1, 100);
 
+  Sys_ProfileSaveInt ("Default", "Mouse", (int)gtk_range_get_value(GTK_RANGE(s->gen_mouse)));
   Sys_ProfileSaveInt ("Default", "Detail", detail);
   Sys_ProfileSaveInt ("Default", "Line", (int)(line_width*100));
   Sys_ProfileSaveInt ("Default", "Snap", snap);
@@ -1751,7 +1754,7 @@ static void preferencesdlg_color(GtkWidget *widget, gpointer data)
     set_button_pixmap (widget, (float*)data);
 }
 
-static void preferencesdlg_realize(GtkWidget *widget)
+static void preferencesdlg_colorbutton_map(GtkWidget *widget, gpointer d)
 {
   void* data = gtk_object_get_data (GTK_OBJECT (widget), "color_flt");
   set_button_pixmap (widget, (float*)data);
@@ -1760,7 +1763,7 @@ static void preferencesdlg_realize(GtkWidget *widget)
 int preferencesdlg_execute(void* param)
 {
   GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2, *hbox;
+  GtkWidget *vbox1, *hbox;
   GtkWidget *frame, *label, *button, *table, *notebook;
   GSList *table_group = NULL;
   LC_PREFERENCESDLG_STRUCT s;
@@ -1787,11 +1790,32 @@ int preferencesdlg_execute(void* param)
   gtk_widget_show (notebook);
   gtk_box_pack_start (GTK_BOX (vbox1), notebook, TRUE, TRUE, 0);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (notebook), vbox2);
+  table = gtk_table_new (6, 1, TRUE);
+  gtk_widget_show (table);
+  gtk_container_add (GTK_CONTAINER (notebook), table);
+  gtk_container_border_width (GTK_CONTAINER (table), 5);
 
-  table = gtk_table_new (7, 2, TRUE);
+  hbox = gtk_hbox_new (FALSE, 5);
+  gtk_widget_show (hbox);
+  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 0, 1,
+                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+  label = gtk_label_new ("Mouse sensitivity:");
+  gtk_widget_show (label);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
+
+  s.gen_mouse = gtk_hscale_new_with_range (1, 20, 1);
+  gtk_widget_show (s.gen_mouse);
+  gtk_box_pack_start (GTK_BOX (hbox), s.gen_mouse, TRUE, TRUE, 0);
+  gtk_scale_set_draw_value (GTK_SCALE (s.gen_mouse), FALSE);
+
+  s.gen_updates = gtk_check_button_new_with_label ("Check for updates on startup");
+//  gtk_widget_show (s.gen_updates);
+  gtk_table_attach (GTK_TABLE (table), s.gen_updates, 0, 1, 1, 2,
+                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+  table = gtk_table_new (6, 1, TRUE);
   gtk_widget_show (table);
   gtk_container_add (GTK_CONTAINER (notebook), table);
   gtk_container_border_width (GTK_CONTAINER (table), 5);
@@ -1803,27 +1827,27 @@ int preferencesdlg_execute(void* param)
 
   s.det_lighting = gtk_check_button_new_with_label ("Lighting");
   gtk_widget_show (s.det_lighting);
-  gtk_table_attach (GTK_TABLE (table), s.det_lighting, 0, 1, 2, 3,
+  gtk_table_attach (GTK_TABLE (table), s.det_lighting, 0, 1, 1, 2,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   s.det_smooth = gtk_check_button_new_with_label ("Smooth shading");
   gtk_widget_show (s.det_smooth);
-  gtk_table_attach (GTK_TABLE (table), s.det_smooth, 0, 1, 3, 4,
+  gtk_table_attach (GTK_TABLE (table), s.det_smooth, 0, 1, 2, 3,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   s.det_antialias = gtk_check_button_new_with_label ("Anti-aliasing");
   gtk_widget_show (s.det_antialias);
-  gtk_table_attach (GTK_TABLE (table), s.det_antialias, 0, 1, 4, 5,
+  gtk_table_attach (GTK_TABLE (table), s.det_antialias, 0, 1, 3, 4,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   s.det_fast = gtk_check_button_new_with_label ("Fast rendering");
   gtk_widget_show (s.det_fast);
-  gtk_table_attach (GTK_TABLE (table), s.det_fast, 1, 2, 0, 1,
+  gtk_table_attach (GTK_TABLE (table), s.det_fast, 0, 1, 4, 5,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   hbox = gtk_hbox_new (FALSE, 5);
   gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 4, 5,
+  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 5, 6,
                     (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
 
   label = gtk_label_new ("Line width");
@@ -1980,8 +2004,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_set_usize (button, 50, 30);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fBackground);
-  gtk_signal_connect (GTK_OBJECT (button), "realize",
-		      GTK_SIGNAL_FUNC(preferencesdlg_realize), NULL);
+  gtk_signal_connect (GTK_OBJECT (button), "map",
+		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
   gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fBackground);
 
   s.scn_clrgrad1 = button = gtk_button_new_with_label ("");
@@ -1991,8 +2015,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_set_usize (button, 50, 30);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fGrad1);
-  gtk_signal_connect (GTK_OBJECT (button), "realize",
-		      GTK_SIGNAL_FUNC(preferencesdlg_realize), NULL);
+  gtk_signal_connect (GTK_OBJECT (button), "map",
+		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
   gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fGrad1);
 
   s.scn_clrgrad2 = button = gtk_button_new_with_label ("");
@@ -2002,8 +2026,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_set_usize (button, 50, 30);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fGrad2);
-  gtk_signal_connect (GTK_OBJECT (button), "realize",
-		      GTK_SIGNAL_FUNC(preferencesdlg_realize), NULL);
+  gtk_signal_connect (GTK_OBJECT (button), "map",
+		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
   gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fGrad2);
 
   s.scn_tile = gtk_check_button_new_with_label ("Tile");
@@ -2059,8 +2083,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_set_usize (button, 50, 30);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fFog);
-  gtk_signal_connect (GTK_OBJECT (button), "realize",
-		      GTK_SIGNAL_FUNC(preferencesdlg_realize), NULL);
+  gtk_signal_connect (GTK_OBJECT (button), "map",
+		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
   gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fFog);
 
   s.scn_clrambient = button = gtk_button_new_with_label ("");
@@ -2070,8 +2094,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_set_usize (button, 50, 30);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fAmbient);
-  gtk_signal_connect (GTK_OBJECT (button), "realize",
-		      GTK_SIGNAL_FUNC(preferencesdlg_realize), NULL);
+  gtk_signal_connect (GTK_OBJECT (button), "map",
+		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
   gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fAmbient);
 
   s.scn_density = gtk_entry_new ();
@@ -2129,6 +2153,8 @@ int preferencesdlg_execute(void* param)
   gtk_widget_set_usize (button, -2, 25);
 
   // Set initial values
+  gtk_range_set_value (GTK_RANGE (s.gen_mouse), opts->nMouse);
+
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_edges),
 			       (opts->nDetail & LC_DET_BRICKEDGES) ? TRUE : FALSE);
   gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_lighting),

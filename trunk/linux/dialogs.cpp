@@ -55,7 +55,7 @@ gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
 // =============================================================================
 // MessageBox
 
-int msgbox_execute (const char* text, const char *caption, int flags)
+int msgbox_execute(const char* text, const char *caption, int flags)
 {
 	GtkWidget* dlg;
 	GtkMessageType Message;
@@ -77,8 +77,8 @@ int msgbox_execute (const char* text, const char *caption, int flags)
 		break;
 	}
 
-	dlg = gtk_message_dialog_new(GTK_WINDOW (((GtkWidget*)(*main_window))),
-                                 GTK_DIALOG_MODAL, Message, GTK_BUTTONS_NONE, "%s", text);
+	dlg = gtk_message_dialog_new(GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                             GTK_DIALOG_MODAL, Message, GTK_BUTTONS_NONE, "%s", text);
 	gtk_window_set_title(GTK_WINDOW(dlg), caption);
 
 	switch (flags & LC_MB_TYPEMASK)
@@ -691,204 +691,176 @@ int arraydlg_execute(void* param)
 // =============================================================================
 // About Dialog
 
-int aboutdlg_execute (void* param)
+int aboutdlg_execute(void* param)
 {
 #include "pixmaps/icon32.xpm"
-  GtkWidget *dlg, *vbox1, *vbox2, *hbox, *frame, *scr, *w;
-  GtkTextBuffer *buffer;
-  char info[512], buf[64];
-  GLboolean valueb;
-  GLint value;
+	GtkWidget *dlg, *vbox1, *vbox2, *hbox, *frame, *scr, *w;
+	GtkTextBuffer *buffer;
+	char info[512], buf[64];
+	GLboolean valueb;
+	GLint value;
 
-  dlg = gtk_dialog_new_with_buttons("About LeoCAD", GTK_WINDOW (((GtkWidget*)(*main_window))),
-                                    (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-                                    GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
-  gtk_dialog_set_has_separator(GTK_DIALOG(dlg), false);
-  gtk_widget_realize (dlg);
+	dlg = gtk_dialog_new_with_buttons("About LeoCAD", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_dialog_set_has_separator(GTK_DIALOG(dlg), false);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
+	gtk_widget_realize(dlg);
 
-  vbox1 = GTK_DIALOG(dlg)->vbox;
-  gtk_box_set_spacing(GTK_BOX(vbox1), 10);
-  gtk_container_border_width(GTK_CONTAINER(vbox1), 5);
+	vbox1 = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox1), 10);
 
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox1), hbox, FALSE, TRUE, 0);
 
-  w = new_pixmap (dlg, icon32);
-  gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, TRUE, 5);
-  gtk_widget_set_usize (w, 32, 32);
+	w = new_pixmap(dlg, icon32);
+	gtk_widget_show(w);
+	gtk_box_pack_start(GTK_BOX(hbox), w, FALSE, TRUE, 5);
+	gtk_widget_set_usize(w, 32, 32);
 
-  vbox2 = gtk_vbox_new (TRUE, 0);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 10);
+	vbox2 = gtk_vbox_new(TRUE, 0);
+	gtk_widget_show(vbox2);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 10);
 
-  w = gtk_label_new ("LeoCAD for "LC_VERSION_OSNAME" Version "LC_VERSION_TEXT);
-  gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
+	w = gtk_label_new("LeoCAD for "LC_VERSION_OSNAME" Version "LC_VERSION_TEXT);
+	gtk_widget_show(w);
+	gtk_box_pack_start(GTK_BOX(vbox2), w, FALSE, FALSE, 5);
 
-  w = gtk_label_new ("Copyright (c) 1996-2012, BT Software");
-  gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
+	w = gtk_label_new("Copyright (c) 1996-2012, BT Software");
+	gtk_widget_show(w);
+	gtk_box_pack_start(GTK_BOX(vbox2), w, FALSE, FALSE, 5);
 
-  w = gtk_label_new (NULL);
-  gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, TRUE, 5);
-  gtk_widget_set_usize (w, 32, 32);
+	w = gtk_label_new(NULL);
+	gtk_widget_show(w);
+	gtk_box_pack_start(GTK_BOX(hbox), w, FALSE, TRUE, 5);
+	gtk_widget_set_usize(w, 32, 32);
 
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox1), hbox, FALSE, TRUE, 0);
 
-  w = gtk_link_button_new_with_label("http://www.leocad.org", "http://www.leocad.org");
-  gtk_widget_show(w);
-  gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, FALSE, 0);
+	w = gtk_link_button_new_with_label("http://www.leocad.org", "http://www.leocad.org");
+	gtk_widget_show(w);
+	gtk_box_pack_start(GTK_BOX(hbox), w, TRUE, FALSE, 0);
 
-  frame = gtk_frame_new ("System Information");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox1), frame, TRUE, TRUE, 0);
-  gtk_widget_set_usize (frame, -2, 150);
+	frame = gtk_frame_new("System Information");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(vbox1), frame, TRUE, TRUE, 0);
+	gtk_widget_set_usize(frame, -2, 150);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
+	vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_widget_show(vbox2);
+	gtk_container_add(GTK_CONTAINER(frame), vbox2);
+	gtk_container_border_width(GTK_CONTAINER(vbox2), 5);
 
-  strcpy (info, "OpenGL Version ");
-  strcat (info, (const char*)glGetString (GL_VERSION));
-  strcat (info, "\n");
-  strcat (info, (const char*)glGetString (GL_RENDERER));
-  strcat (info, " - ");
-  strcat (info, (const char*)glGetString (GL_VENDOR));
+	strcpy(info, "OpenGL Version ");
+	strcat(info, (const char*)glGetString(GL_VERSION));
+	strcat(info, "\n");
+	strcat(info, (const char*)glGetString(GL_RENDERER));
+	strcat(info, " - ");
+	strcat(info, (const char*)glGetString(GL_VENDOR));
 
-  strcat (info, "\n\nDisplay info:\n");
-  glGetIntegerv (GL_INDEX_BITS, &value);
-  sprintf (buf, "Bits per pixel: %i", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_RED_BITS, &value);
-  sprintf (buf, " (%i", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_GREEN_BITS, &value);
-  sprintf (buf, "-%i", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_BLUE_BITS, &value);
-  sprintf (buf, "-%i", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_ALPHA_BITS, &value);
-  sprintf (buf, "-%i)\n", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_DEPTH_BITS, &value);
-  sprintf (buf, "Depth buffer bits: %i\n", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_STENCIL_BITS, &value);
-  sprintf (buf, "Stencil bits: %i\n", value);
-  strcat (info, buf);
-  glGetIntegerv (GL_AUX_BUFFERS, &value);
-  sprintf (buf, "Auxillary buffers: %i\n", value);
-  strcat (info, buf);
-  glGetBooleanv (GL_STEREO, &valueb);
-  strcat (info, "Stereoscopic viewing: ");
-  if (valueb == GL_TRUE)
-    strcat (info, "Yes.\n");
-  else
-    strcat (info, "No.\n");
+	strcat(info, "\n\nDisplay info:\n");
+	glGetIntegerv(GL_INDEX_BITS, &value);
+	sprintf(buf, "Bits per pixel: %i", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_RED_BITS, &value);
+	sprintf(buf, " (%i", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_GREEN_BITS, &value);
+	sprintf(buf, "-%i", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_BLUE_BITS, &value);
+	sprintf(buf, "-%i", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_ALPHA_BITS, &value);
+	sprintf(buf, "-%i)\n", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_DEPTH_BITS, &value);
+	sprintf(buf, "Depth buffer bits: %i\n", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_STENCIL_BITS, &value);
+	sprintf(buf, "Stencil bits: %i\n", value);
+	strcat(info, buf);
+	glGetIntegerv(GL_AUX_BUFFERS, &value);
+	sprintf(buf, "Auxillary buffers: %i\n", value);
+	strcat(info, buf);
+	glGetBooleanv(GL_STEREO, &valueb);
+	strcat(info, "Stereoscopic viewing: ");
+	if (valueb == GL_TRUE)
+		strcat(info, "Yes.\n");
+	else
+		strcat(info, "No.\n");
 
-  strcat (info, "Compiled Vertex Arrays: ");
-  if (GL_HasCompiledVertexArrays ())
-    strcat (info, "Supported.\n");
-  else
-    strcat (info, "Not supported.\n");
+	strcat(info, "Compiled Vertex Arrays: ");
+	if (GL_HasCompiledVertexArrays())
+		strcat(info, "Supported.\n");
+	else
+		strcat(info, "Not supported.\n");
 
-  strcat (info, "Multitexturing: ");
-  if (GL_GetMultiTextures () > 1)
-  {
-    sprintf (buf, "Supported, %i texture units.\n", GL_GetMultiTextures ());
-    strcat (info, buf);
-  }
-  else
-    strcat (info, "Not supported.\n");
-  glGetIntegerv (GL_MAX_TEXTURE_SIZE, &value);
-  sprintf (buf, "Maximum texture size: %ix%i", value, value);
-  strcat (info, buf);
+	strcat(info, "Multitexturing: ");
+	if (GL_GetMultiTextures() > 1)
+	{
+		sprintf(buf, "Supported, %i texture units.\n", GL_GetMultiTextures());
+		strcat(info, buf);
+	}
+	else
+		strcat(info, "Not supported.\n");
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+	sprintf(buf, "Maximum texture size: %ix%i", value, value);
+	strcat(info, buf);
 
-  scr = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scr);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  gtk_box_pack_start (GTK_BOX (vbox2), scr, TRUE, TRUE, 0);
+	scr = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_show(scr);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scr), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_box_pack_start(GTK_BOX(vbox2), scr, TRUE, TRUE, 0);
 
-  w = gtk_text_view_new();
-  gtk_widget_show (w);
-  gtk_container_add (GTK_CONTAINER (scr), w);
+	w = gtk_text_view_new();
+	gtk_widget_show(w);
+	gtk_container_add(GTK_CONTAINER(scr), w);
 
-  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(w));
-  gtk_text_buffer_set_text (buffer, info, -1);
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(w));
+	gtk_text_buffer_set_text(buffer, info, -1);
 
-  //  if (GTK_TEXT (w)->vadj != NULL)
-  //    gtk_adjustment_set_value (GTK_ADJUSTMENT (GTK_TEXT (w)->vadj), 0);
+	gtk_dialog_run(GTK_DIALOG(dlg));
+	gtk_widget_destroy(dlg);
 
-  gtk_dialog_run(GTK_DIALOG(dlg));
-  gtk_widget_destroy(dlg);
-
-//  return dlg_domodal(dlg, LC_OK);
-  return LC_OK;
+	return LC_OK;
 }
 
 // =============================================================================
 // HTML Dialog
 
-typedef struct
+struct LC_HTMLDLG_STRUCT
 {
-  void* data;
-  GtkWidget *dlg;
-  GtkWidget *single, *multiple, *index;
-  GtkWidget *list_end, *list_step, *images;
-  GtkWidget *highlight, *htmlext, *directory;
-} LC_HTMLDLG_STRUCT;
+	void* data;
+	GtkWidget *dlg;
+	GtkWidget *single, *multiple, *index;
+	GtkWidget *list_end, *list_step, *images;
+	GtkWidget *highlight, *htmlext, *directory;
+};
 
-static void htmldlg_ok(GtkWidget *widget, gpointer data)
+static void htmldlg_images(GtkWidget *widget, gpointer data)
 {
-  LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
-  LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)s->data;
+	LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
+	LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)s->data;
 
-  opts->singlepage = (GTK_TOGGLE_BUTTON (s->single)->active) ? true : false;
-  opts->index = (GTK_TOGGLE_BUTTON (s->index)->active) ? true : false;
-  opts->images = (GTK_TOGGLE_BUTTON (s->images)->active) ? true : false;
-  opts->listend = (GTK_TOGGLE_BUTTON (s->list_end)->active) ? true : false;
-  opts->liststep = (GTK_TOGGLE_BUTTON (s->list_step)->active) ? true : false;
-  opts->highlight = (GTK_TOGGLE_BUTTON (s->highlight)->active) ? true : false;
-  opts->htmlext = (GTK_TOGGLE_BUTTON (s->htmlext)->active) ? true : false;
-  strcpy(opts->path, gtk_entry_get_text (GTK_ENTRY (s->directory)));
-
-  *cur_ret = LC_OK;
+	imageoptsdlg_execute(s->dlg, &opts->imdlg ,true);
 }
 
-static void htmldlg_images (GtkWidget *widget, gpointer data)
+static void htmldlg_layout(GtkWidget *widget, gpointer data)
 {
-  LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
-  LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)s->data;
+	LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
 
-  imageoptsdlg_execute(&opts->imdlg ,true);
-}
-
-static void htmldlg_layout (GtkWidget *widget, gpointer data)
-{
-  LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
-
-  if (GTK_TOGGLE_BUTTON (s->single)->active)
-    gtk_widget_set_sensitive (s->index, FALSE);
-  else
-    gtk_widget_set_sensitive (s->index, TRUE);
+	gtk_widget_set_sensitive(s->index, !GTK_TOGGLE_BUTTON(s->single)->active);
 }
 
 static void htmldlg_list (GtkWidget *widget, gpointer data)
 {
-  LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
+	LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
 
-  if (GTK_TOGGLE_BUTTON (s->list_end)->active ||
-      GTK_TOGGLE_BUTTON (s->list_step)->active)
-    gtk_widget_set_sensitive (s->images, TRUE);
-  else
-    gtk_widget_set_sensitive (s->images, FALSE);
+	gtk_widget_set_sensitive(s->images, GTK_TOGGLE_BUTTON(s->list_end)->active || GTK_TOGGLE_BUTTON(s->list_step)->active);
 }
 
 static void htmldlg_browse_output(GtkWidget *widget, gpointer data)
@@ -914,482 +886,420 @@ static void htmldlg_browse_output(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(dlg);
 }
 
-int htmldlg_execute (void* param)
+int htmldlg_execute(void* param)
 {
-  GtkWidget *dlg;
-  GtkWidget *vbox, *vbox1, *vbox2, *hbox;
-  GtkWidget *frame, *label, *button;
-  GSList *radio_group = (GSList*)NULL;
-  LC_HTMLDLG_STRUCT s;
-  LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)param;
-  s.data = param;
+	GtkWidget *dlg;
+	GtkWidget *vbox, *vbox2, *hbox;
+	GtkWidget *frame, *label, *button;
+	GSList *radio_group = (GSList*)NULL;
+	LC_HTMLDLG_STRUCT s;
+	LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)param;
+	s.data = param;
+	int ret;
 
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_window_set_title (GTK_WINDOW (dlg), "HTML Options");
-  s.dlg = dlg;
+	dlg = gtk_dialog_new_with_buttons("HTML Options", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
+	s.dlg = dlg;
 
-  vbox = gtk_vbox_new (FALSE, 10);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox);
-  gtk_container_border_width (GTK_CONTAINER (vbox), 10);
+	vbox = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox), 10);
 
-  hbox = gtk_hbox_new (FALSE, 10);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+	frame = gtk_frame_new("Layout");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
 
-  vbox1 = gtk_vbox_new (FALSE, 10);
-  gtk_widget_show (vbox1);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox1, TRUE, TRUE, 0);
+	vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_widget_show(vbox2);
+	gtk_container_add(GTK_CONTAINER(frame), vbox2);
+	gtk_container_border_width(GTK_CONTAINER(vbox2), 5);
 
-  frame = gtk_frame_new ("Layout");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, TRUE, 0);
+	s.single = gtk_radio_button_new_with_label(radio_group, "Single page");
+	radio_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.single));
+	gtk_widget_show(s.single);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.single, TRUE, TRUE, 0);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
+	s.multiple = gtk_radio_button_new_with_label(radio_group, "One step per page");
+	radio_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.multiple));
+	gtk_widget_show(s.multiple);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.multiple, TRUE, TRUE, 0);
 
-  s.single = gtk_radio_button_new_with_label (radio_group, "Single page");
-  radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.single));
-  gtk_widget_show (s.single);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.single, TRUE, TRUE, 0);
+	s.index = gtk_check_button_new_with_label("Index page");
+	gtk_widget_show(s.index);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.index, TRUE, TRUE, 0);
 
-  s.multiple = gtk_radio_button_new_with_label (radio_group, "One step per page");
-  radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.multiple));
-  gtk_widget_show (s.multiple);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.multiple, TRUE, TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, TRUE, 0);
 
-  s.index = gtk_check_button_new_with_label ("Index page");
-  gtk_widget_show (s.index);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.index, TRUE, TRUE, 0);
+	button = gtk_button_new_with_label("Images...");
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(htmldlg_images), &s);
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, TRUE, 0);
 
-  vbox2 = gtk_vbox_new (FALSE, 5);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 0);
+	frame = gtk_frame_new("Pieces List");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
 
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (htmldlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 60, -2);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_widget_show(vbox2);
+	gtk_container_add(GTK_CONTAINER(frame), vbox2);
+	gtk_container_border_width(GTK_CONTAINER(vbox2), 5);
 
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 60, -2);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	s.list_step = gtk_check_button_new_with_label("After each step");
+	gtk_widget_show(s.list_step);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.list_step, TRUE, TRUE, 0);
 
-  button = gtk_button_new_with_label ("Images...");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (htmldlg_images), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 60, -2);
+	s.list_end = gtk_check_button_new_with_label("At the end");
+	gtk_widget_show(s.list_end);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.list_end, TRUE, TRUE, 0);
 
-  frame = gtk_frame_new ("Pieces List");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, TRUE, 0);
+	s.images = gtk_check_button_new_with_label("Create Images");
+	gtk_widget_show(s.images);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.images, TRUE, TRUE, 0);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
+	s.highlight = gtk_check_button_new_with_label("Highlight new pieces");
+	gtk_widget_show(s.highlight);
+	gtk_box_pack_start(GTK_BOX(vbox), s.highlight, TRUE, TRUE, 0);
 
-  s.list_step = gtk_check_button_new_with_label ("After each step");
-  gtk_widget_show (s.list_step);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.list_step, TRUE, TRUE, 0);
+	s.htmlext = gtk_check_button_new_with_label("Save files with .html extension");
+	gtk_widget_show(s.htmlext);
+	gtk_box_pack_start(GTK_BOX(vbox), s.htmlext, TRUE, TRUE, 0);
 
-  s.list_end = gtk_check_button_new_with_label ("At the end");
-  gtk_widget_show (s.list_end);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.list_end, TRUE, TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, FALSE, 0);
 
-  s.images = gtk_check_button_new_with_label ("Create Images");
-  gtk_widget_show (s.images);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.images, TRUE, TRUE, 0);
+	label = gtk_label_new("Output directory");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
 
-  s.highlight = gtk_check_button_new_with_label ("Highlight new pieces");
-  gtk_widget_show (s.highlight);
-  gtk_box_pack_start (GTK_BOX (vbox), s.highlight, FALSE, TRUE, 0);
+	s.directory = gtk_entry_new();
+	gtk_widget_show(s.directory);
+	gtk_box_pack_start(GTK_BOX(hbox), s.directory, TRUE, TRUE, 0);
 
-  s.htmlext = gtk_check_button_new_with_label ("Save files with .html extension");
-  gtk_widget_show (s.htmlext);
-  gtk_box_pack_start (GTK_BOX (vbox), s.htmlext, FALSE, TRUE, 0);
+	button = gtk_button_new_with_label("...");
+	gtk_widget_show(button);
+	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, TRUE, 0);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(htmldlg_browse_output), &s);
 
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+	gtk_signal_connect(GTK_OBJECT(s.single), "toggled", GTK_SIGNAL_FUNC(htmldlg_layout), &s);
+	gtk_signal_connect(GTK_OBJECT(s.multiple), "toggled", GTK_SIGNAL_FUNC(htmldlg_layout), &s);
+	gtk_signal_connect(GTK_OBJECT(s.list_step), "toggled", GTK_SIGNAL_FUNC(htmldlg_list), &s);
+	gtk_signal_connect(GTK_OBJECT(s.list_end), "toggled", GTK_SIGNAL_FUNC(htmldlg_list), &s);
 
-  label = gtk_label_new ("Output directory");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
+	gtk_entry_set_text(GTK_ENTRY(s.directory), opts->path);
+	if (opts->singlepage)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.single), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.multiple), TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.index), opts->index);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.images), opts->images);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.list_end), opts->listend);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.list_step), opts->liststep);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.highlight), opts->highlight);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.htmlext), opts->htmlext);
 
-  s.directory = gtk_entry_new ();
-  gtk_widget_show (s.directory);
-  gtk_box_pack_start (GTK_BOX (hbox), s.directory, TRUE, TRUE, 0);
+	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.single));
+	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.list_step));
 
-  button = gtk_button_new_with_label ("...");
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-  gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(htmldlg_browse_output), &s);
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		opts->singlepage = (GTK_TOGGLE_BUTTON(s.single)->active) ? true : false;
+		opts->index = (GTK_TOGGLE_BUTTON(s.index)->active) ? true : false;
+		opts->images = (GTK_TOGGLE_BUTTON(s.images)->active) ? true : false;
+		opts->listend = (GTK_TOGGLE_BUTTON(s.list_end)->active) ? true : false;
+		opts->liststep = (GTK_TOGGLE_BUTTON(s.list_step)->active) ? true : false;
+		opts->highlight = (GTK_TOGGLE_BUTTON(s.highlight)->active) ? true : false;
+		opts->htmlext = (GTK_TOGGLE_BUTTON(s.htmlext)->active) ? true : false;
+		strcpy(opts->path, gtk_entry_get_text(GTK_ENTRY(s.directory)));
+		ret = LC_OK;
+	}
+	else
+		ret = LC_CANCEL;
 
-  gtk_signal_connect (GTK_OBJECT (s.single), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
-  gtk_signal_connect (GTK_OBJECT (s.multiple), "toggled", GTK_SIGNAL_FUNC (htmldlg_layout), &s);
-  gtk_signal_connect (GTK_OBJECT (s.list_step), "toggled", GTK_SIGNAL_FUNC (htmldlg_list), &s);
-  gtk_signal_connect (GTK_OBJECT (s.list_end), "toggled", GTK_SIGNAL_FUNC (htmldlg_list), &s);
+	gtk_widget_destroy(dlg);
 
-  gtk_entry_set_text(GTK_ENTRY(s.directory), opts->path);
-  if (opts->singlepage)
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.single), TRUE);
-  else
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.multiple), TRUE);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.index), opts->index);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.images), opts->images);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.list_end), opts->listend);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.list_step), opts->liststep);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.highlight), opts->highlight);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (s.htmlext), opts->htmlext);
-
-  gtk_toggle_button_toggled (GTK_TOGGLE_BUTTON (s.single));
-  gtk_toggle_button_toggled (GTK_TOGGLE_BUTTON (s.list_step));
-
-  return dlg_domodal(dlg, LC_CANCEL);
+	return ret;
 }
 
+// =============================================================================
 // Image Options Dialog
 
-typedef struct
+struct LC_IMAGEOPTSDLG_STRUCT
 {
-  void* data;
-  bool from_htmldlg;
-  GtkWidget *single, *multiple, *from, *to;
-  GtkWidget *width, *height;
-  GtkWidget *bitmap, *gif, *jpg, *png;
-  GtkWidget *highcolor, *transparent, *progressive, *quality;
-} LC_IMAGEOPTSDLG_STRUCT;
+	void* data;
+	bool from_htmldlg;
+	GtkWidget *single, *multiple, *from, *to;
+	GtkWidget *width, *height;
+	GtkWidget *bitmap, *gif, *jpg, *png;
+	GtkWidget *highcolor, *transparent, *progressive, *quality;
+};
 
-static void imageoptsdlg_ok(GtkWidget *widget, gpointer data)
+int imageoptsdlg_execute(GtkWidget* parent, void* param, bool from_htmldlg)
 {
-  LC_IMAGEOPTSDLG_STRUCT* s = (LC_IMAGEOPTSDLG_STRUCT*)data;
-  LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)s->data;
-  int i;
+	GtkWidget *dlg;
+	GtkWidget *vbox, *vbox1, *vbox2;
+	GtkWidget *hbox1, *hbox2;
+	GtkWidget *frame, *label, *table;
+	GSList *radio_group1 = (GSList*)NULL, *radio_group2 = (GSList*)NULL;
+	LC_IMAGEOPTSDLG_STRUCT s;
+	LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)param;
+	s.data = param;
+	s.from_htmldlg = from_htmldlg;
+	int ret;
 
-  if ((GTK_TOGGLE_BUTTON (s->bitmap)->active))
-    opts->imopts.format = LC_IMAGE_BMP;
-  else if ((GTK_TOGGLE_BUTTON (s->gif)->active))
-    opts->imopts.format = LC_IMAGE_GIF;
-  else if ((GTK_TOGGLE_BUTTON (s->jpg)->active))
-    opts->imopts.format = LC_IMAGE_JPG;
-  else if ((GTK_TOGGLE_BUTTON (s->png)->active))
-    opts->imopts.format = LC_IMAGE_PNG;
-  opts->imopts.transparent = (GTK_TOGGLE_BUTTON (s->transparent)->active) ? true : false;
-  opts->imopts.interlaced = (GTK_TOGGLE_BUTTON (s->progressive)->active) ? true : false;
-  opts->imopts.truecolor = (GTK_TOGGLE_BUTTON (s->highcolor)->active) ? true : false;
-  if (!read_int(s->quality, &i, 1, 100)) return;
-  opts->imopts.quality = i;
-  if (!read_int(s->height, &i, 1, 5000)) return;
-  opts->height = i;
-  if (!read_int(s->width, &i, 1, 5000)) return;
-  opts->width = i;
-  if (!read_int(s->from, &i, 1, 65535)) return;
-  opts->from = i;
-  if (!read_int(s->to, &i, 1, 65535)) return;
-  opts->to = i;
-  opts->multiple = (GTK_TOGGLE_BUTTON (s->multiple)->active) ? true : false;
+	dlg = gtk_dialog_new_with_buttons("Image Options", GTK_WINDOW(parent),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 
-  unsigned long image = opts->imopts.format;
-  if (opts->imopts.interlaced)
-    image |= LC_IMAGE_PROGRESSIVE;
-  if (opts->imopts.transparent)
-    image |= LC_IMAGE_TRANSPARENT;
-  if (opts->imopts.truecolor)
-    image |= LC_IMAGE_HIGHCOLOR;
+	vbox = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox), 10);
 
-  if (s->from_htmldlg)
-  {
-    Sys_ProfileSaveInt ("Default", "HTML Options", image);
-    Sys_ProfileSaveInt ("Default", "HTML Width", opts->width);
-    Sys_ProfileSaveInt ("Default", "HTML Height", opts->height);
-  }
-  else
-  {
+	hbox1 = gtk_hbox_new(FALSE, 10);
+	gtk_widget_show(hbox1);
+	gtk_container_add(GTK_CONTAINER(vbox), hbox1);
 
-    Sys_ProfileSaveInt ("Default", "Image Options", image);
-    Sys_ProfileSaveInt ("Default", "Image Width", opts->width);
-    Sys_ProfileSaveInt ("Default", "Image Height", opts->height);
-  }
+	vbox1 = gtk_vbox_new(FALSE, 10);
+	gtk_widget_show(vbox1);
+	gtk_box_pack_start(GTK_BOX(hbox1), vbox1, TRUE, TRUE, 0);
 
-  *cur_ret = LC_OK;
+	frame = gtk_frame_new("Pictures");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(vbox1), frame, TRUE, TRUE, 0);
+
+	vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_widget_show(vbox2);
+	gtk_container_add(GTK_CONTAINER(frame), vbox2);
+	gtk_container_border_width(GTK_CONTAINER(vbox2), 5);
+
+	s.single = gtk_radio_button_new_with_label(radio_group1, "Single");
+	radio_group1 = gtk_radio_button_group(GTK_RADIO_BUTTON(s.single));
+	gtk_widget_show(s.single);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.single, TRUE, TRUE, 0);
+
+	s.multiple = gtk_radio_button_new_with_label(radio_group1, "Multiple");
+	radio_group1 = gtk_radio_button_group(GTK_RADIO_BUTTON(s.multiple));
+	gtk_widget_show(s.multiple);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.multiple, TRUE, TRUE, 0);
+
+	hbox2 = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox2), hbox2, TRUE, TRUE, 0);
+
+	label = gtk_label_new("From");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox2), label, TRUE, TRUE, 0);
+
+	s.from = gtk_entry_new();
+	gtk_widget_show(s.from);
+	gtk_box_pack_start(GTK_BOX(hbox2), s.from, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.from), 3);
+
+	label = gtk_label_new("to");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox2), label, TRUE, TRUE, 0);
+
+	s.to = gtk_entry_new();
+	gtk_widget_show(s.to);
+	gtk_box_pack_start(GTK_BOX(hbox2), s.to, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.to), 3);
+
+	frame = gtk_frame_new("Dimensions");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(vbox1), frame, TRUE, TRUE, 0);
+
+	table = gtk_table_new(2, 2, FALSE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(frame), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 10);
+
+	s.width = gtk_entry_new();
+	gtk_widget_show(s.width);
+	gtk_table_attach(GTK_TABLE(table), s.width, 1, 2, 0, 1, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.width), 5);
+
+	s.height = gtk_entry_new();
+	gtk_widget_show(s.height);
+	gtk_table_attach(GTK_TABLE(table), s.height, 1, 2, 1, 2, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.height), 5);
+
+	label = gtk_label_new("Height");
+	gtk_widget_show(label);
+	gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	label = gtk_label_new("Width");
+	gtk_widget_show(label);
+	gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	frame = gtk_frame_new("Format");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(hbox1), frame, TRUE, TRUE, 0);
+
+	vbox1 = gtk_vbox_new(FALSE, 5);
+	gtk_widget_show(vbox1);
+	gtk_container_add(GTK_CONTAINER(frame), vbox1);
+
+	s.bitmap = gtk_radio_button_new_with_label(radio_group2, "Bitmap");
+	radio_group2 = gtk_radio_button_group(GTK_RADIO_BUTTON(s.bitmap));
+	gtk_widget_show(s.bitmap);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.bitmap, TRUE, TRUE, 0);
+
+	s.highcolor = gtk_check_button_new_with_label("High color");
+	gtk_widget_show(s.highcolor);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.highcolor, TRUE, TRUE, 0);
+
+	s.gif = gtk_radio_button_new_with_label(radio_group2, "GIF");
+	radio_group2 = gtk_radio_button_group(GTK_RADIO_BUTTON(s.gif));
+	gtk_widget_show(s.gif);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.gif, TRUE, TRUE, 0);
+
+	s.transparent = gtk_check_button_new_with_label("Transparent");
+	gtk_widget_show(s.transparent);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.transparent, TRUE, TRUE, 0);
+
+	s.jpg = gtk_radio_button_new_with_label(radio_group2, "JPEG");
+	radio_group2 = gtk_radio_button_group(GTK_RADIO_BUTTON(s.jpg));
+	gtk_widget_show(s.jpg);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.jpg, TRUE, TRUE, 0);
+
+	s.progressive = gtk_check_button_new_with_label("Progressive");
+	gtk_widget_show(s.progressive);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.progressive, TRUE, TRUE, 0);
+
+	hbox2 = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(vbox1), hbox2, TRUE, TRUE, 0);
+
+	s.quality = gtk_entry_new();
+	gtk_widget_show(s.quality);
+	gtk_box_pack_end(GTK_BOX(hbox2), s.quality, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.quality), 3);
+
+	label = gtk_label_new("Quality");
+	gtk_widget_show(label);
+	gtk_box_pack_end(GTK_BOX(hbox2), label, TRUE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.png = gtk_radio_button_new_with_label(radio_group2, "PNG");
+	radio_group2 = gtk_radio_button_group(GTK_RADIO_BUTTON(s.png));
+	gtk_widget_show(s.png);
+	gtk_box_pack_start(GTK_BOX(vbox1), s.png, TRUE, TRUE, 0);
+
+	switch (opts->imopts.format)
+	{
+	case LC_IMAGE_BMP:
+		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.bitmap), TRUE);
+		break;
+
+	case LC_IMAGE_GIF:
+		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.gif), TRUE);
+		break;
+
+	case LC_IMAGE_JPG:
+		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.jpg), TRUE);
+		break;
+
+	case LC_IMAGE_PNG:
+		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.png), TRUE);
+		break;
+	}
+
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.transparent), opts->imopts.transparent);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.progressive), opts->imopts.interlaced);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.highcolor), opts->imopts.truecolor);
+
+	write_int(s.quality, opts->imopts.quality);
+	write_int(s.height, opts->height);
+	write_int(s.width, opts->width);
+	write_int(s.from, opts->from);
+	write_int(s.to, opts->to);
+
+	if (opts->multiple)
+		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.multiple), TRUE);
+	else
+		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.single), TRUE);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		int i;
+
+		ret = LC_OK;
+
+		if ((GTK_TOGGLE_BUTTON(s.bitmap)->active))
+			opts->imopts.format = LC_IMAGE_BMP;
+		else if ((GTK_TOGGLE_BUTTON(s.gif)->active))
+			opts->imopts.format = LC_IMAGE_GIF;
+		else if ((GTK_TOGGLE_BUTTON(s.jpg)->active))
+			opts->imopts.format = LC_IMAGE_JPG;
+		else if ((GTK_TOGGLE_BUTTON(s.png)->active))
+			opts->imopts.format = LC_IMAGE_PNG;
+
+		opts->imopts.transparent = (GTK_TOGGLE_BUTTON(s.transparent)->active) ? true : false;
+		opts->imopts.interlaced = (GTK_TOGGLE_BUTTON(s.progressive)->active) ? true : false;
+		opts->imopts.truecolor = (GTK_TOGGLE_BUTTON(s.highcolor)->active) ? true : false;
+
+		if (!read_int(s.quality, &i, 1, 100))
+			ret = LC_CANCEL;
+		opts->imopts.quality = i;
+		if (!read_int(s.height, &i, 1, 5000))
+			ret = LC_CANCEL;
+		opts->height = i;
+		if (!read_int(s.width, &i, 1, 5000))
+			ret = LC_CANCEL;
+		opts->width = i;
+		if (!read_int(s.from, &i, 1, 65535))
+			ret = LC_CANCEL;
+		opts->from = i;
+		if (!read_int(s.to, &i, 1, 65535))
+			ret = LC_CANCEL;
+		opts->to = i;
+		opts->multiple = (GTK_TOGGLE_BUTTON(s.multiple)->active) ? true : false;
+
+		unsigned long image = opts->imopts.format;
+		if (opts->imopts.interlaced)
+			image |= LC_IMAGE_PROGRESSIVE;
+		if (opts->imopts.transparent)
+			image |= LC_IMAGE_TRANSPARENT;
+		if (opts->imopts.truecolor)
+			image |= LC_IMAGE_HIGHCOLOR;
+
+		if (s.from_htmldlg)
+		{
+			Sys_ProfileSaveInt("Default", "HTML Options", image);
+			Sys_ProfileSaveInt("Default", "HTML Width", opts->width);
+			Sys_ProfileSaveInt("Default", "HTML Height", opts->height);
+		}
+		else
+		{
+			Sys_ProfileSaveInt("Default", "Image Options", image);
+			Sys_ProfileSaveInt("Default", "Image Width", opts->width);
+			Sys_ProfileSaveInt("Default", "Image Height", opts->height);
+		}
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
 }
 
-int imageoptsdlg_execute(void* param, bool from_htmldlg)
-{
-  GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2;
-  GtkWidget *hbox1, *hbox2;
-  GtkWidget *frame, *label, *button, *table;
-  GSList *radio_group1 = (GSList*)NULL, *radio_group2 = (GSList*)NULL;
-  LC_IMAGEOPTSDLG_STRUCT s;
-  LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)param;
-  s.data = param;
-  s.from_htmldlg = from_htmldlg;
-
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 400, 280);
-  gtk_window_set_title (GTK_WINDOW (dlg), "Image Options");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
-
-  hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), hbox1);
-
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
-
-  frame = gtk_frame_new ("Pictures");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, TRUE, 0);
-  gtk_widget_set_usize (frame, 170, 130);
-  gtk_container_border_width (GTK_CONTAINER (frame), 10);
-
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
-
-  s.single = gtk_radio_button_new_with_label (radio_group1, "Single");
-  radio_group1 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.single));
-  gtk_widget_show (s.single);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.single, TRUE, TRUE, 0);
-
-  s.multiple = gtk_radio_button_new_with_label (radio_group1, "Multiple");
-  radio_group1 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.multiple));
-  gtk_widget_show (s.multiple);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.multiple, TRUE, TRUE, 0);
-
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox2, TRUE, TRUE, 0);
-
-  label = gtk_label_new ("From");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, TRUE, TRUE, 0);
-
-  s.from = gtk_entry_new ();
-  gtk_widget_show (s.from);
-  gtk_box_pack_start (GTK_BOX (hbox2), s.from, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.from, 50, -2);
-
-  label = gtk_label_new ("to");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, TRUE, TRUE, 0);
-
-  s.to = gtk_entry_new ();
-  gtk_widget_show (s.to);
-  gtk_box_pack_start (GTK_BOX (hbox2), s.to, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.to, 50, -2);
-
-  frame = gtk_frame_new ("Dimensions");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox1), frame, FALSE, TRUE, 0);
-  gtk_widget_set_usize (frame, -2, 100);
-  gtk_container_border_width (GTK_CONTAINER (frame), 10);
-
-  table = gtk_table_new (2, 2, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 5);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 10);
-
-  s.width = gtk_entry_new ();
-  gtk_widget_show (s.width);
-  gtk_table_attach (GTK_TABLE (table), s.width, 1, 2, 0, 1,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.width, 50, -2);
-
-  s.height = gtk_entry_new ();
-  gtk_widget_show (s.height);
-  gtk_table_attach (GTK_TABLE (table), s.height, 1, 2, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.height, 50, -2);
-
-  label = gtk_label_new ("Height");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (label, 50, -2);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  label = gtk_label_new ("Width");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 0, 1,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (label, 50, -2);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  hbox2 = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_end (GTK_BOX (vbox1), hbox2, FALSE, TRUE, 10);
-  gtk_container_border_width (GTK_CONTAINER (hbox2), 5);
-
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (imageoptsdlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, TRUE, 25);
-  gtk_widget_set_usize (button, 70, 25);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 70, -2);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-  frame = gtk_frame_new ("Format");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (hbox1), frame, TRUE, TRUE, 0);
-  gtk_container_border_width (GTK_CONTAINER (frame), 10);
-
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (frame), vbox1);
-  gtk_container_border_width (GTK_CONTAINER (vbox1), 5);
-
-  s.bitmap = gtk_radio_button_new_with_label (radio_group2, "Bitmap");
-  radio_group2 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.bitmap));
-  gtk_widget_show (s.bitmap);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.bitmap, TRUE, TRUE, 0);
-
-  s.highcolor = gtk_check_button_new_with_label ("High color");
-  gtk_widget_show (s.highcolor);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.highcolor, TRUE, TRUE, 0);
-
-  s.gif = gtk_radio_button_new_with_label (radio_group2, "GIF");
-  radio_group2 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.gif));
-  gtk_widget_show (s.gif);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.gif, TRUE, TRUE, 0);
-
-  s.transparent = gtk_check_button_new_with_label ("Transparent");
-  gtk_widget_show (s.transparent);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.transparent, TRUE, TRUE, 0);
-
-  s.jpg = gtk_radio_button_new_with_label (radio_group2, "JPEG");
-  radio_group2 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.jpg));
-  gtk_widget_show (s.jpg);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.jpg, TRUE, TRUE, 0);
-
-  s.progressive = gtk_check_button_new_with_label ("Progressive");
-  gtk_widget_show (s.progressive);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.progressive, TRUE, TRUE, 0);
-
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox2, TRUE, TRUE, 0);
-
-  label = gtk_label_new ("Quality");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, TRUE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.quality = gtk_entry_new ();
-  gtk_widget_show (s.quality);
-  gtk_box_pack_start (GTK_BOX (hbox2), s.quality, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.quality, 50, -2);
-
-  s.png = gtk_radio_button_new_with_label (radio_group2, "PNG");
-  radio_group2 = gtk_radio_button_group (GTK_RADIO_BUTTON (s.png));
-  gtk_widget_show (s.png);
-  gtk_box_pack_start (GTK_BOX (vbox1), s.png, TRUE, TRUE, 0);
-
-
-  switch (opts->imopts.format)
-  {
-    case LC_IMAGE_BMP:
-      gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.bitmap), TRUE);
-    break;
-
-    case LC_IMAGE_GIF:
-      gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.gif), TRUE);
-    break;
-
-    case LC_IMAGE_JPG:
-      gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.jpg), TRUE);
-    break;
-
-    case LC_IMAGE_PNG:
-      gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.png), TRUE);
-    break;
-  }
-
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.transparent), opts->imopts.transparent);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.progressive), opts->imopts.interlaced);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.highcolor), opts->imopts.truecolor);
-
-  write_int(s.quality, opts->imopts.quality);
-  write_int(s.height, opts->height);
-  write_int(s.width, opts->width);
-  write_int(s.from, opts->from);
-  write_int(s.to, opts->to);
-
-  if (opts->multiple)
-    gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.multiple), TRUE);
-  else
-    gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.single), TRUE);
-
-  return dlg_domodal(dlg, LC_CANCEL);
-}
-
+// =============================================================================
 // POV-Ray Export Dialog
 
-typedef struct
+struct LC_POVRAYDLG_STRUCT
 {
-  void* data;
+	void* data;
 	GtkWidget* dlg;
-  GtkWidget *lgeo, *pov, *output, *render;
-} LC_POVRAYDLG_STRUCT;
-
-static void povraydlg_ok(GtkWidget *widget, gpointer data)
-{
-  LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
-  LC_POVRAYDLG_OPTS* opts = (LC_POVRAYDLG_OPTS*)s->data;
-
-  opts->render =  (GTK_TOGGLE_BUTTON (s->render)->active) ? true : false;
-  strcpy(opts->povpath, gtk_entry_get_text (GTK_ENTRY (s->pov)));
-  strcpy(opts->outpath, gtk_entry_get_text (GTK_ENTRY (s->output)));
-  strcpy(opts->libpath, gtk_entry_get_text (GTK_ENTRY (s->lgeo)));
-
-	Sys_ProfileSaveInt("Settings", "POV Render", opts->render);
-	Sys_ProfileSaveString("Settings", "POV-Ray", opts->povpath);
-	Sys_ProfileSaveString("Settings", "LGEO", opts->libpath);
-
-  *cur_ret = LC_OK;
-}
+	GtkWidget *lgeo, *pov, *output, *render;
+};
 
 static void povraydlg_browse_output(GtkWidget *widget, gpointer data)
 {
@@ -1475,46 +1385,38 @@ static void povraydlg_browse_lgeo(GtkWidget *widget, gpointer data)
 int povraydlg_execute(void* param)
 {
 	GtkWidget *dlg;
-	GtkWidget *vbox, *hbox1, *hbox2;
+	GtkWidget *vbox, *hbox2;
 	GtkWidget *label, *button;
 	LC_POVRAYDLG_STRUCT s;
 	s.data = param;
+	int ret;
 
-	dlg = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_transient_for(GTK_WINDOW(dlg), GTK_WINDOW(((GtkWidget*)(*main_window))));
-	gtk_signal_connect(GTK_OBJECT(dlg), "delete_event", GTK_SIGNAL_FUNC(dlg_delete_callback), NULL);
-	gtk_signal_connect(GTK_OBJECT(dlg), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroy), NULL);
-	gtk_window_set_title(GTK_WINDOW(dlg), "POV-Ray Export");
-	gtk_window_set_policy(GTK_WINDOW(dlg), FALSE, FALSE, FALSE);
-	gtk_widget_realize(dlg);
+	dlg = gtk_dialog_new_with_buttons("POV-Ray Export", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
 
-	hbox1 = gtk_hbox_new(FALSE, 0);
-	gtk_widget_show(hbox1);
-	gtk_container_add(GTK_CONTAINER(dlg), hbox1);
-
-	vbox = gtk_vbox_new(FALSE, 10);
-	gtk_widget_show(vbox);
-	gtk_box_pack_start(GTK_BOX(hbox1), vbox, FALSE, TRUE, 0);
-	gtk_widget_set_usize(vbox, 250, -2);
-	gtk_container_border_width(GTK_CONTAINER(vbox), 10);
+	vbox = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox), 10);
 
 	hbox2 = gtk_hbox_new(FALSE, 0);
 	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, FALSE, 0);
 
 	label = gtk_label_new("Output File");
 	gtk_widget_show(label);
 	gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-	hbox2 = gtk_hbox_new(FALSE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 5);
 	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, FALSE, 0);
 
 	s.output = gtk_entry_new();
 	gtk_widget_show(s.output);
 	gtk_box_pack_start(GTK_BOX(hbox2), s.output, TRUE, TRUE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.output), 40);
 
 	button = gtk_button_new_with_label("...");
 	gtk_widget_show(button);
@@ -1523,101 +1425,99 @@ int povraydlg_execute(void* param)
 
 	hbox2 = gtk_hbox_new(FALSE, 0);
 	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, FALSE, 0);
 
 	label = gtk_label_new("POV-Ray Executable");
 	gtk_widget_show(label);
 	gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-	hbox2 = gtk_hbox_new(FALSE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 5);
 	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, FALSE, 0);
 
 	s.pov = gtk_entry_new();
 	gtk_widget_show(s.pov);
 	gtk_box_pack_start(GTK_BOX(hbox2), s.pov, TRUE, TRUE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.pov), 40);
 
 	button = gtk_button_new_with_label("...");
 	gtk_widget_show(button);
 	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, TRUE, 0);
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_browse_povray), &s);
 
+	s.render = gtk_check_button_new_with_label("Render Scene");
+	gtk_widget_show(s.render);
+	gtk_box_pack_start(GTK_BOX(vbox), s.render, TRUE, FALSE, 0);
+
 	hbox2 = gtk_hbox_new(FALSE, 0);
 	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, FALSE, 0);
 
 	label = gtk_label_new("LGEO Path");
 	gtk_widget_show(label);
 	gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-	hbox2 = gtk_hbox_new(FALSE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 5);
 	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, FALSE, 0);
 
 	s.lgeo = gtk_entry_new();
 	gtk_widget_show(s.lgeo);
 	gtk_box_pack_start(GTK_BOX(hbox2), s.lgeo, TRUE, TRUE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.lgeo), 40);
 
 	button = gtk_button_new_with_label("...");
 	gtk_widget_show(button);
 	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, TRUE, 0);
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_browse_lgeo), &s);
 
-	vbox = gtk_vbox_new(FALSE, 0);
-	gtk_widget_show(vbox);
-	gtk_box_pack_start(GTK_BOX(hbox1), vbox, FALSE, TRUE, 0);
-	gtk_container_border_width(GTK_CONTAINER(vbox), 10);
-
-	button = gtk_button_new_with_label("OK");
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(povraydlg_ok), &s);
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, TRUE, 5);
-	gtk_widget_set_usize(button, -2, 25);
-	GtkAccelGroup *accel_group = gtk_accel_group_new();
-	gtk_window_add_accel_group(GTK_WINDOW(dlg), accel_group);
-	gtk_widget_add_accelerator(button, "clicked", accel_group,
-	                           GDK_Return,(GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-	button = gtk_button_new_with_label("Cancel");
-	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-	                   GTK_SIGNAL_FUNC(dlg_default_callback), GINT_TO_POINTER(LC_CANCEL));
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, TRUE, 5);
-	gtk_widget_set_usize(button, -2, 25);
-	gtk_widget_add_accelerator(button, "clicked", accel_group,
-	                           GDK_Escape,(GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-	s.render = gtk_check_button_new_with_label("Render Scene");
-	gtk_widget_show(s.render);
-	gtk_box_pack_start(GTK_BOX(vbox), s.render, FALSE, TRUE, 5);
-
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.render),
-	                            Sys_ProfileLoadInt("Settings", "POV Render", 1) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.render), Sys_ProfileLoadInt("Settings", "POV Render", 1) ? TRUE : FALSE);
 	gtk_entry_set_text(GTK_ENTRY(s.pov), Sys_ProfileLoadString("Settings", "POV-Ray", ""));
 	gtk_entry_set_text(GTK_ENTRY(s.lgeo), Sys_ProfileLoadString("Settings", "LGEO", ""));
 
-	return dlg_domodal(dlg, LC_CANCEL);
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		ret = LC_OK;
+
+		LC_POVRAYDLG_OPTS* opts = (LC_POVRAYDLG_OPTS*)s.data;
+
+		opts->render =  (GTK_TOGGLE_BUTTON(s.render)->active) ? true : false;
+		strcpy(opts->povpath, gtk_entry_get_text(GTK_ENTRY(s.pov)));
+		strcpy(opts->outpath, gtk_entry_get_text(GTK_ENTRY(s.output)));
+		strcpy(opts->libpath, gtk_entry_get_text(GTK_ENTRY(s.lgeo)));
+
+		Sys_ProfileSaveInt("Settings", "POV Render", opts->render);
+		Sys_ProfileSaveString("Settings", "POV-Ray", opts->povpath);
+		Sys_ProfileSaveString("Settings", "LGEO", opts->libpath);
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
 }
 
+// =============================================================================
 // Preferences Dialog
 
-typedef struct
+struct LC_PREFERENCESDLG_STRUCT
 {
-  void* data;
-  GtkWidget *gen_updates, *gen_mouse;
-  GtkWidget *det_edges, *det_lighting, *det_smooth;
-  GtkWidget *det_antialias, *det_fast, *det_width;
-  GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
-  GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
-  GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
-  GtkWidget *draw_move, *draw_fixed;
-  GtkWidget *draw_lockx, *draw_locky, *draw_lockz;
-  GtkWidget *scn_solid, *scn_gradient, *scn_image, *scn_imagename;
-  GtkWidget *scn_tile, *scn_fog, *scn_floor, *scn_density;
-  GtkWidget *scn_clrbackground, *scn_clrgrad1, *scn_clrgrad2, *scn_clrfog, *scn_clrambient;
-} LC_PREFERENCESDLG_STRUCT;
+	void* data;
+	GtkWidget *gen_updates, *gen_mouse;
+	GtkWidget *det_edges, *det_lighting, *det_smooth;
+	GtkWidget *det_antialias, *det_fast, *det_width;
+	GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
+	GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
+	GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
+	GtkWidget *draw_move, *draw_fixed;
+	GtkWidget *draw_lockx, *draw_locky, *draw_lockz;
+	GtkWidget *scn_solid, *scn_gradient, *scn_image, *scn_imagename;
+	GtkWidget *scn_tile, *scn_fog, *scn_floor, *scn_density;
+	GtkWidget *scn_clrbackground, *scn_clrgrad1, *scn_clrgrad2, *scn_clrfog, *scn_clrambient;
+};
 
 static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
 {

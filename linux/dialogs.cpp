@@ -700,20 +700,15 @@ int aboutdlg_execute (void* param)
   GLboolean valueb;
   GLint value;
 
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_window_set_title (GTK_WINDOW (dlg), "About LeoCAD");
-
+  dlg = gtk_dialog_new_with_buttons("About LeoCAD", GTK_WINDOW (((GtkWidget*)(*main_window))),
+                                    (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+                                    GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
+  gtk_dialog_set_has_separator(GTK_DIALOG(dlg), false);
   gtk_widget_realize (dlg);
 
-  vbox1 = gtk_vbox_new (FALSE, 10);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox1);
-  gtk_container_border_width (GTK_CONTAINER (vbox1), 5);
+  vbox1 = GTK_DIALOG(dlg)->vbox;
+  gtk_box_set_spacing(GTK_BOX(vbox1), 10);
+  gtk_container_border_width(GTK_CONTAINER(vbox1), 5);
 
   hbox = gtk_hbox_new (FALSE, 5);
   gtk_widget_show (hbox);
@@ -721,7 +716,7 @@ int aboutdlg_execute (void* param)
 
   w = new_pixmap (dlg, icon32);
   gtk_widget_show (w);
-  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, TRUE, 5);
   gtk_widget_set_usize (w, 32, 32);
 
   vbox2 = gtk_vbox_new (TRUE, 0);
@@ -732,26 +727,22 @@ int aboutdlg_execute (void* param)
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 
-  w = gtk_label_new ("Copyright (c) 1996-2005, BT Software");
+  w = gtk_label_new ("Copyright (c) 1996-2012, BT Software");
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
 
-  vbox2 = gtk_vbox_new (TRUE, 0);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 5);
-
-  w = gtk_button_new_with_label ("OK");
+  w = gtk_label_new (NULL);
   gtk_widget_show (w);
-  gtk_signal_connect (GTK_OBJECT (w), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_OK));
-  gtk_box_pack_start (GTK_BOX (vbox2), w, FALSE, FALSE, 5);
-  gtk_widget_set_usize (w, 60, -2);
+  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, TRUE, 5);
+  gtk_widget_set_usize (w, 32, 32);
 
-  gtk_widget_grab_focus (w);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (w, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+  hbox = gtk_hbox_new (FALSE, 5);
+  gtk_widget_show (hbox);
+  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
+
+  w = gtk_link_button_new_with_label("http://www.leocad.org", "http://www.leocad.org");
+  gtk_widget_show(w);
+  gtk_box_pack_start (GTK_BOX (hbox), w, TRUE, FALSE, 0);
 
   frame = gtk_frame_new ("System Information");
   gtk_widget_show (frame);
@@ -835,7 +826,11 @@ int aboutdlg_execute (void* param)
   //  if (GTK_TEXT (w)->vadj != NULL)
   //    gtk_adjustment_set_value (GTK_ADJUSTMENT (GTK_TEXT (w)->vadj), 0);
 
-  return dlg_domodal(dlg, LC_OK);
+  gtk_dialog_run(GTK_DIALOG(dlg));
+  gtk_widget_destroy(dlg);
+
+//  return dlg_domodal(dlg, LC_OK);
+  return LC_OK;
 }
 
 // =============================================================================

@@ -1506,1014 +1506,848 @@ int povraydlg_execute(void* param)
 struct LC_PREFERENCESDLG_STRUCT
 {
 	void* data;
+	GtkWidget *dlg;
 	GtkWidget *gen_updates, *gen_mouse;
 	GtkWidget *det_edges, *det_lighting, *det_smooth;
 	GtkWidget *det_antialias, *det_fast, *det_width;
 	GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
 	GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
 	GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
-	GtkWidget *draw_move, *draw_fixed;
-	GtkWidget *draw_lockx, *draw_locky, *draw_lockz;
+	GtkWidget *draw_move, *draw_fixed, *draw_lockx, *draw_locky, *draw_lockz;
 	GtkWidget *scn_solid, *scn_gradient, *scn_image, *scn_imagename;
 	GtkWidget *scn_tile, *scn_fog, *scn_floor, *scn_density;
 	GtkWidget *scn_clrbackground, *scn_clrgrad1, *scn_clrgrad2, *scn_clrfog, *scn_clrambient;
 };
 
-static void preferencesdlg_ok (GtkWidget *widget, gpointer data)
+bool preferencesdlg_getopts(LC_PREFERENCESDLG_STRUCT* s, LC_PREFERENCESDLG_OPTS* opts)
 {
-  LC_PREFERENCESDLG_STRUCT* s = (LC_PREFERENCESDLG_STRUCT*)data;
-  LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)s->data;
+	int Fog, GridSize, AngleSnap;
 
-  opts->nMouse = (int)gtk_range_get_value(GTK_RANGE(s->gen_mouse));
+	opts->nMouse = (int)gtk_range_get_value(GTK_RANGE(s->gen_mouse));
 
-  unsigned long detail = 0;
-  float line_width;
-  if (GTK_TOGGLE_BUTTON (s->det_edges)->active) detail |= LC_DET_BRICKEDGES;
-  if (GTK_TOGGLE_BUTTON (s->det_lighting)->active) detail |= LC_DET_LIGHTING;
-  if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
-  if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
-  if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
-  if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
+	opts->nDetail = 0;
+	if (GTK_TOGGLE_BUTTON(s->det_edges)->active) opts->nDetail |= LC_DET_BRICKEDGES;
+	if (GTK_TOGGLE_BUTTON(s->det_lighting)->active) opts->nDetail |= LC_DET_LIGHTING;
+	if (GTK_TOGGLE_BUTTON(s->det_smooth)->active) opts->nDetail |= LC_DET_SMOOTH;
+	if (GTK_TOGGLE_BUTTON(s->det_antialias)->active) opts->nDetail |= LC_DET_ANTIALIAS;
+	if (GTK_TOGGLE_BUTTON(s->det_fast)->active) opts->nDetail |= LC_DET_FAST;
+	if (!read_float(s->det_width, &opts->fLineWidth, 0.5f, 5.0f))
+		return false;
 
-  unsigned long snap = 0;
-  int grid_size, angle_snap;
-  if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
-  if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
-  if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
-  if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
-  if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
-  if (GTK_TOGGLE_BUTTON (s->draw_angle)->active) snap |= LC_DRAW_SNAP_A;
-  if (GTK_TOGGLE_BUTTON (s->draw_centimeter)->active) snap |= LC_DRAW_CM_UNITS;
-  if (GTK_TOGGLE_BUTTON (s->draw_move)->active) snap |= LC_DRAW_MOVE;
-  if (GTK_TOGGLE_BUTTON (s->draw_fixed)->active) snap |= LC_DRAW_MOVEAXIS;
-  if (GTK_TOGGLE_BUTTON (s->draw_lockx)->active) snap |= LC_DRAW_LOCK_X;
-  if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
-  if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
-  if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
-  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
-  if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
+	opts->nSnap = 0;
+	if (GTK_TOGGLE_BUTTON(s->draw_grid)->active) opts->nSnap |= LC_DRAW_GRID;
+	if (GTK_TOGGLE_BUTTON(s->draw_axis)->active) opts->nSnap |= LC_DRAW_AXIS;
+	if (GTK_TOGGLE_BUTTON(s->draw_snapx)->active) opts->nSnap |= LC_DRAW_SNAP_X;
+	if (GTK_TOGGLE_BUTTON(s->draw_snapy)->active) opts->nSnap |= LC_DRAW_SNAP_Y;
+	if (GTK_TOGGLE_BUTTON(s->draw_snapz)->active) opts->nSnap |= LC_DRAW_SNAP_Z;
+	if (GTK_TOGGLE_BUTTON(s->draw_angle)->active) opts->nSnap |= LC_DRAW_SNAP_A;
+	if (GTK_TOGGLE_BUTTON(s->draw_centimeter)->active) opts->nSnap |= LC_DRAW_CM_UNITS;
+	if (GTK_TOGGLE_BUTTON(s->draw_move)->active) opts->nSnap |= LC_DRAW_MOVE;
+	if (GTK_TOGGLE_BUTTON(s->draw_fixed)->active) opts->nSnap |= LC_DRAW_MOVEAXIS;
+	if (GTK_TOGGLE_BUTTON(s->draw_lockx)->active) opts->nSnap |= LC_DRAW_LOCK_X;
+	if (GTK_TOGGLE_BUTTON(s->draw_locky)->active) opts->nSnap |= LC_DRAW_LOCK_Y;
+	if (GTK_TOGGLE_BUTTON(s->draw_lockz)->active) opts->nSnap |= LC_DRAW_LOCK_Z;
+	if (GTK_TOGGLE_BUTTON(s->draw_relative)->active) opts->nSnap |= LC_DRAW_GLOBAL_SNAP;
+	if (!read_int(s->draw_gridunits, &GridSize, 2, 1000))
+		return false;
+	opts->nGridSize = GridSize;
+	if (!read_int(s->draw_anglesnap, &AngleSnap, 1, 180))
+		return false;
+	opts->nAngleSnap = AngleSnap;
 
-  int fog;
-  unsigned long scene = 0;
-  if (GTK_TOGGLE_BUTTON (s->scn_gradient)->active) scene |= LC_SCENE_GRADIENT;
-  if (GTK_TOGGLE_BUTTON (s->scn_image)->active) scene |= LC_SCENE_BG;
-  if (GTK_TOGGLE_BUTTON (s->scn_tile)->active) scene |= LC_SCENE_BG_TILE;
-  if (GTK_TOGGLE_BUTTON (s->scn_fog)->active) scene |= LC_SCENE_FOG;
-  if (GTK_TOGGLE_BUTTON (s->scn_floor)->active) scene |= LC_SCENE_FLOOR;
-  read_int(s->scn_density, &fog, 1, 100);
+	opts->nScene = 0;
+	if (GTK_TOGGLE_BUTTON(s->scn_gradient)->active) opts->nScene |= LC_SCENE_GRADIENT;
+	if (GTK_TOGGLE_BUTTON(s->scn_image)->active) opts->nScene |= LC_SCENE_BG;
+	if (GTK_TOGGLE_BUTTON(s->scn_tile)->active) opts->nScene |= LC_SCENE_BG_TILE;
+	if (GTK_TOGGLE_BUTTON(s->scn_fog)->active) opts->nScene |= LC_SCENE_FOG;
+	if (GTK_TOGGLE_BUTTON(s->scn_floor)->active) opts->nScene |= LC_SCENE_FLOOR;
+	read_int(s->scn_density, &Fog, 1, 100);
+	opts->fDensity = (float)Fog/100.0f;
+	strcpy(opts->strBackground, gtk_entry_get_text(GTK_ENTRY(s->scn_imagename)));
 
-  strcpy(opts->strBackground, gtk_entry_get_text (GTK_ENTRY (s->scn_imagename)));
-  opts->nDetail = detail;
-  opts->fLineWidth = line_width;
-  opts->nSnap = snap;
-  opts->nAngleSnap = angle_snap;
-  opts->nGridSize = grid_size;
-  opts->nScene = scene;
-  opts->fDensity = (float)fog/100;
+	memcpy(opts->fBackground, gtk_object_get_data(GTK_OBJECT(s->scn_clrbackground), "color_flt"), 3 * sizeof(float));
+	memcpy(opts->fFog, gtk_object_get_data(GTK_OBJECT(s->scn_clrfog), "color_flt"), 3 * sizeof(float));
+	memcpy(opts->fAmbient, gtk_object_get_data(GTK_OBJECT(s->scn_clrambient), "color_flt"), 3 * sizeof(float));
+	memcpy(opts->fGrad1, gtk_object_get_data(GTK_OBJECT(s->scn_clrgrad1), "color_flt"), 3 * sizeof(float));
+	memcpy(opts->fGrad2, gtk_object_get_data(GTK_OBJECT(s->scn_clrgrad2), "color_flt"), 3 * sizeof(float));
+	
+	// int nSaveInterval;
+	// char strPath[LC_MAXPATH];
 
-  // int nSaveInterval;
-  // char strPath[LC_MAXPATH];
-
-  *cur_ret = LC_OK;
+	return true;
 }
 
-static void preferencesdlg_default (GtkWidget *widget, gpointer data)
+static void preferencesdlg_default(GtkWidget *widget, gpointer data)
 {
-  LC_PREFERENCESDLG_STRUCT* s = (LC_PREFERENCESDLG_STRUCT*)data;
-  LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)s->data;
+	LC_PREFERENCESDLG_STRUCT* s = (LC_PREFERENCESDLG_STRUCT*)data;
+	LC_PREFERENCESDLG_OPTS Opts;
 
-  unsigned long detail = 0;
-  float line_width;
-  if (GTK_TOGGLE_BUTTON (s->det_edges)->active) detail |= LC_DET_BRICKEDGES;
-  if (GTK_TOGGLE_BUTTON (s->det_lighting)->active) detail |= LC_DET_LIGHTING;
-  if (GTK_TOGGLE_BUTTON (s->det_smooth)->active) detail |= LC_DET_SMOOTH;
-  if (GTK_TOGGLE_BUTTON (s->det_antialias)->active) detail |= LC_DET_ANTIALIAS;
-  if (GTK_TOGGLE_BUTTON (s->det_fast)->active) detail |= LC_DET_FAST;
-  if (!read_float(s->det_width, &line_width, 0.5f, 5.0f)) return;
+	if (!preferencesdlg_getopts(s, &Opts))
+		return;
 
-  unsigned long snap = 0;
-  int grid_size, angle_snap;
-  if (GTK_TOGGLE_BUTTON (s->draw_grid)->active) snap |= LC_DRAW_GRID;
-  if (GTK_TOGGLE_BUTTON (s->draw_axis)->active) snap |= LC_DRAW_AXIS;
-  if (GTK_TOGGLE_BUTTON (s->draw_snapx)->active) snap |= LC_DRAW_SNAP_X;
-  if (GTK_TOGGLE_BUTTON (s->draw_snapy)->active) snap |= LC_DRAW_SNAP_Y;
-  if (GTK_TOGGLE_BUTTON (s->draw_snapz)->active) snap |= LC_DRAW_SNAP_Z;
-  if (GTK_TOGGLE_BUTTON (s->draw_angle)->active) snap |= LC_DRAW_SNAP_A;
-  if (GTK_TOGGLE_BUTTON (s->draw_centimeter)->active) snap |= LC_DRAW_CM_UNITS;
-  if (GTK_TOGGLE_BUTTON (s->draw_move)->active) snap |= LC_DRAW_MOVE;
-  if (GTK_TOGGLE_BUTTON (s->draw_fixed)->active) snap |= LC_DRAW_MOVEAXIS;
-  if (GTK_TOGGLE_BUTTON (s->draw_lockx)->active) snap |= LC_DRAW_LOCK_X;
-  if (GTK_TOGGLE_BUTTON (s->draw_locky)->active) snap |= LC_DRAW_LOCK_Y;
-  if (GTK_TOGGLE_BUTTON (s->draw_lockz)->active) snap |= LC_DRAW_LOCK_Z;
-  if (GTK_TOGGLE_BUTTON (s->draw_relative)->active) snap |= LC_DRAW_GLOBAL_SNAP;
-  if (!read_int(s->draw_gridunits, &grid_size, 2, 1000)) return;
-  if (!read_int(s->draw_anglesnap, &angle_snap, 1, 180)) return;
-
-  int fog;
-  unsigned long scene = 0;
-  if (GTK_TOGGLE_BUTTON (s->scn_gradient)->active) scene |= LC_SCENE_GRADIENT;
-  if (GTK_TOGGLE_BUTTON (s->scn_image)->active) scene |= LC_SCENE_BG;
-  if (GTK_TOGGLE_BUTTON (s->scn_tile)->active) scene |= LC_SCENE_BG_TILE;
-  if (GTK_TOGGLE_BUTTON (s->scn_fog)->active) scene |= LC_SCENE_FOG;
-  if (GTK_TOGGLE_BUTTON (s->scn_floor)->active) scene |= LC_SCENE_FLOOR;
-  read_int (s->scn_density, &fog, 1, 100);
-
-  Sys_ProfileSaveInt ("Default", "Mouse", (int)gtk_range_get_value(GTK_RANGE(s->gen_mouse)));
-  Sys_ProfileSaveInt ("Default", "Detail", detail);
-  Sys_ProfileSaveInt ("Default", "Line", (int)(line_width*100));
-  Sys_ProfileSaveInt ("Default", "Snap", snap);
-  Sys_ProfileSaveInt ("Default", "Angle", angle_snap);
-  Sys_ProfileSaveInt ("Default", "Grid", grid_size);
-  Sys_ProfileSaveInt ("Default", "Scene", scene);
-  Sys_ProfileSaveInt ("Default", "Density", fog);
-  Sys_ProfileSaveString("Default", "BMP", gtk_entry_get_text (GTK_ENTRY (s->scn_imagename)));
-  Sys_ProfileSaveInt ("Default", "Background",
-		      RGB (opts->fBackground[0]*255, opts->fBackground[1]*255, opts->fBackground[2]*255));
-  Sys_ProfileSaveInt ("Default", "Fog",
-		      RGB (opts->fFog[0]*255, opts->fFog[1]*255, opts->fFog[2]*255));
-  Sys_ProfileSaveInt ("Default", "Ambient",
-		      RGB (opts->fAmbient[0]*255, opts->fAmbient[1]*255, opts->fAmbient[2]*255));
-  Sys_ProfileSaveInt ("Default", "Gradient1",
-		      RGB (opts->fGrad1[0]*255, opts->fGrad1[1]*255, opts->fGrad1[2]*255));
-  Sys_ProfileSaveInt ("Default", "Gradient2",
-		      RGB (opts->fGrad2[0]*255, opts->fGrad2[1]*255, opts->fGrad2[2]*255));
-
-  // int nMouse;
-  // int nSaveInterval;
-  // char strPath[LC_MAXPATH];
+	Sys_ProfileSaveInt("Default", "Mouse", (int)Opts.nMouse);
+	Sys_ProfileSaveInt("Default", "Detail", Opts.nDetail);
+	Sys_ProfileSaveInt("Default", "Line", (int)(Opts.fLineWidth * 100));
+	Sys_ProfileSaveInt("Default", "Snap", Opts.nSnap);
+	Sys_ProfileSaveInt("Default", "Angle", Opts.nAngleSnap);
+	Sys_ProfileSaveInt("Default", "Grid", Opts.nGridSize);
+	Sys_ProfileSaveInt("Default", "Scene", Opts.nScene);
+	Sys_ProfileSaveInt("Default", "Density", (int)(Opts.fDensity * 100));
+	Sys_ProfileSaveString("Default", "BMP", Opts.strBackground);
+	Sys_ProfileSaveInt("Default", "Background", RGB(Opts.fBackground[0]*255, Opts.fBackground[1]*255, Opts.fBackground[2]*255));
+	Sys_ProfileSaveInt("Default", "Fog", RGB(Opts.fFog[0]*255, Opts.fFog[1]*255, Opts.fFog[2]*255));
+	Sys_ProfileSaveInt("Default", "Ambient", RGB(Opts.fAmbient[0]*255, Opts.fAmbient[1]*255, Opts.fAmbient[2]*255));
+	Sys_ProfileSaveInt("Default", "Gradient1", RGB(Opts.fGrad1[0]*255, Opts.fGrad1[1]*255, Opts.fGrad1[2]*255));
+	Sys_ProfileSaveInt("Default", "Gradient2", RGB(Opts.fGrad2[0]*255, Opts.fGrad2[1]*255, Opts.fGrad2[2]*255));
 }
 
 static void preferencesdlg_color(GtkWidget *widget, gpointer data)
 {
-  if (colorseldlg_execute(data) == LC_OK)
-    set_button_pixmap (widget, (float*)data);
+	if (colorseldlg_execute(data) == LC_OK)
+		set_button_pixmap(widget, (float*)data);
 }
 
 static void preferencesdlg_colorbutton_map(GtkWidget *widget, gpointer d)
 {
-  void* data = gtk_object_get_data (GTK_OBJECT (widget), "color_flt");
-  set_button_pixmap (widget, (float*)data);
+	set_button_pixmap(widget, (float*)gtk_object_get_data(GTK_OBJECT(widget), "color_flt"));
 }
 
 int preferencesdlg_execute(void* param)
 {
-  GtkWidget *dlg;
-  GtkWidget *vbox1, *hbox;
-  GtkWidget *frame, *label, *button, *table, *notebook;
-  GSList *table_group = NULL;
-  LC_PREFERENCESDLG_STRUCT s;
-  LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)param;
-  s.data = param;
-
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 450, 300);
-  gtk_window_set_title (GTK_WINDOW (dlg), "Preferences");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
-
-  vbox1 = gtk_vbox_new (FALSE, 7);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox1);
-  gtk_container_border_width (GTK_CONTAINER (vbox1), 7);
-
-  notebook = gtk_notebook_new ();
-  gtk_widget_show (notebook);
-  gtk_box_pack_start (GTK_BOX (vbox1), notebook, TRUE, TRUE, 0);
-
-  table = gtk_table_new (6, 1, TRUE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (notebook), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Mouse sensitivity:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.gen_mouse = gtk_hscale_new_with_range (1, 20, 1);
-  gtk_widget_show (s.gen_mouse);
-  gtk_box_pack_start (GTK_BOX (hbox), s.gen_mouse, TRUE, TRUE, 0);
-  gtk_scale_set_draw_value (GTK_SCALE (s.gen_mouse), FALSE);
-
-  s.gen_updates = gtk_check_button_new_with_label ("Check for updates on startup");
-//  gtk_widget_show (s.gen_updates);
-  gtk_table_attach (GTK_TABLE (table), s.gen_updates, 0, 1, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  table = gtk_table_new (6, 1, TRUE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (notebook), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
-
-  s.det_edges = gtk_check_button_new_with_label ("Draw edges");
-  gtk_widget_show (s.det_edges);
-  gtk_table_attach (GTK_TABLE (table), s.det_edges, 0, 1, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_lighting = gtk_check_button_new_with_label ("Lighting");
-  gtk_widget_show (s.det_lighting);
-  gtk_table_attach (GTK_TABLE (table), s.det_lighting, 0, 1, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_smooth = gtk_check_button_new_with_label ("Smooth shading");
-  gtk_widget_show (s.det_smooth);
-  gtk_table_attach (GTK_TABLE (table), s.det_smooth, 0, 1, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_antialias = gtk_check_button_new_with_label ("Anti-aliasing");
-  gtk_widget_show (s.det_antialias);
-  gtk_table_attach (GTK_TABLE (table), s.det_antialias, 0, 1, 3, 4,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.det_fast = gtk_check_button_new_with_label ("Fast rendering");
-  gtk_widget_show (s.det_fast);
-  gtk_table_attach (GTK_TABLE (table), s.det_fast, 0, 1, 4, 5,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 5, 6,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Line width");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.det_width = gtk_entry_new ();
-  gtk_widget_show (s.det_width);
-  gtk_box_pack_start (GTK_BOX (hbox), s.det_width, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.det_width, 50, -2);
-
-  table = gtk_table_new (7, 2, TRUE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (notebook), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_grid = gtk_check_button_new_with_label ("Base grid");
-  gtk_widget_show (s.draw_grid);
-  gtk_box_pack_start (GTK_BOX (hbox), s.draw_grid, FALSE, FALSE, 0);
-
-  s.draw_gridunits = gtk_entry_new ();
-  gtk_widget_show (s.draw_gridunits);
-  gtk_box_pack_start (GTK_BOX (hbox), s.draw_gridunits, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.draw_gridunits, 50, -2);
-
-  label = gtk_label_new ("units");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.draw_axis = gtk_check_button_new_with_label ("Axis icon");
-  gtk_widget_show (s.draw_axis);
-  gtk_table_attach (GTK_TABLE (table), s.draw_axis, 0, 1, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_centimeter = gtk_check_button_new_with_label ("Centimeter units");
-  gtk_widget_show (s.draw_centimeter);
-  gtk_table_attach (GTK_TABLE (table), s.draw_centimeter, 0, 1, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_snapx = gtk_check_button_new_with_label ("Snap X");
-  gtk_widget_show (s.draw_snapx);
-  gtk_table_attach (GTK_TABLE (table), s.draw_snapx, 0, 1, 3, 4,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_snapy = gtk_check_button_new_with_label ("Snap Y");
-  gtk_widget_show (s.draw_snapy);
-  gtk_table_attach (GTK_TABLE (table), s.draw_snapy, 0, 1, 4, 5,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_snapz = gtk_check_button_new_with_label ("Snap Z");
-  gtk_widget_show (s.draw_snapz);
-  gtk_table_attach (GTK_TABLE (table), s.draw_snapz, 0, 1, 5, 6,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 6, 7,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_angle = gtk_check_button_new_with_label ("Angle snap");
-  gtk_widget_show (s.draw_angle);
-  gtk_box_pack_start (GTK_BOX (hbox), s.draw_angle, FALSE, FALSE, 0);
-
-  s.draw_anglesnap = gtk_entry_new ();
-  gtk_widget_show (s.draw_anglesnap);
-  gtk_box_pack_start (GTK_BOX (hbox), s.draw_anglesnap, FALSE, FALSE, 0);
-  gtk_widget_set_usize (s.draw_anglesnap, 50, -2);
-
-  label = gtk_label_new ("degrees");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.draw_relative = gtk_check_button_new_with_label ("Don't allow relative snap");
-  gtk_widget_show (s.draw_relative);
-  gtk_table_attach (GTK_TABLE (table), s.draw_relative, 1, 2, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_move = gtk_check_button_new_with_label ("Switch to move after insert");
-  gtk_widget_show (s.draw_move);
-  gtk_table_attach (GTK_TABLE (table), s.draw_move, 1, 2, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_fixed = gtk_check_button_new_with_label ("Fixed direction keys");
-  gtk_widget_show (s.draw_fixed);
-  gtk_table_attach (GTK_TABLE (table), s.draw_fixed, 1, 2, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_lockx = gtk_check_button_new_with_label ("Lock X");
-  gtk_widget_show (s.draw_lockx);
-  gtk_table_attach (GTK_TABLE (table), s.draw_lockx, 1, 2, 3, 4,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_locky = gtk_check_button_new_with_label ("Lock Y");
-  gtk_widget_show (s.draw_locky);
-  gtk_table_attach (GTK_TABLE (table), s.draw_locky, 1, 2, 4, 5,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.draw_lockz = gtk_check_button_new_with_label ("Lock Z");
-  gtk_widget_show (s.draw_lockz);
-  gtk_table_attach (GTK_TABLE (table), s.draw_lockz, 1, 2, 5, 6,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  hbox = gtk_hbox_new (FALSE, 8);
-  gtk_widget_show (hbox);
-  gtk_container_add (GTK_CONTAINER (notebook), hbox);
-  gtk_container_border_width (GTK_CONTAINER (hbox), 5);
-
-  frame = gtk_frame_new ("Background");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
-
-  table = gtk_table_new (4, 3, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_widget_set_usize (table, 220, -2);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-
-  s.scn_solid = gtk_radio_button_new_with_label (table_group, "Solid color");
-  table_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.scn_solid));
-  gtk_widget_show (s.scn_solid);
-  gtk_table_attach (GTK_TABLE (table), s.scn_solid, 0, 1, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)GTK_EXPAND, 0, 0);
-
-  s.scn_gradient = gtk_radio_button_new_with_label (table_group, "Gradient");
-  table_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.scn_gradient));
-  gtk_widget_show (s.scn_gradient);
-  gtk_table_attach (GTK_TABLE (table), s.scn_gradient, 0, 1, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)GTK_EXPAND, 0, 0);
-
-  s.scn_image = gtk_radio_button_new_with_label (table_group, "Image");
-  table_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.scn_image));
-  gtk_widget_show (s.scn_image);
-  gtk_table_attach (GTK_TABLE (table), s.scn_image, 0, 1, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)GTK_EXPAND, 0, 0);
-
-  s.scn_imagename = gtk_entry_new ();
-  gtk_widget_show (s.scn_imagename);
-  gtk_table_attach (GTK_TABLE (table), s.scn_imagename, 0, 3, 3, 4,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.scn_clrbackground = button = gtk_button_new_with_label ("");
-  gtk_widget_show (button);
-  gtk_table_attach (GTK_TABLE (table), button, 1, 2, 0, 1,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (button, 50, 30);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fBackground);
-  gtk_signal_connect (GTK_OBJECT (button), "map",
-		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
-  gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fBackground);
-
-  s.scn_clrgrad1 = button = gtk_button_new_with_label ("");
-  gtk_widget_show (button);
-  gtk_table_attach (GTK_TABLE (table), button, 1, 2, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (button, 50, 30);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fGrad1);
-  gtk_signal_connect (GTK_OBJECT (button), "map",
-		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
-  gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fGrad1);
-
-  s.scn_clrgrad2 = button = gtk_button_new_with_label ("");
-  gtk_widget_show (button);
-  gtk_table_attach (GTK_TABLE (table), button, 2, 3, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (button, 50, 30);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fGrad2);
-  gtk_signal_connect (GTK_OBJECT (button), "map",
-		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
-  gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fGrad2);
-
-  s.scn_tile = gtk_check_button_new_with_label ("Tile");
-  gtk_widget_show (s.scn_tile);
-  gtk_table_attach (GTK_TABLE (table), s.scn_tile, 1, 2, 2, 3,
-                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions) 0, 0, 0);
-
-  frame = gtk_frame_new ("Environment");
-  gtk_widget_show (frame);
-  gtk_box_pack_end (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
-  gtk_widget_set_usize (frame, 175, -2);
-
-  table = gtk_table_new (5, 3, TRUE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 5);
-
-  s.scn_fog = gtk_check_button_new_with_label ("Fog");
-  gtk_widget_show (s.scn_fog);
-  gtk_table_attach (GTK_TABLE (table), s.scn_fog, 0, 3, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Color");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 1, 2, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-
-  label = gtk_label_new ("Density");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 1, 2, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (label), 1.93715e-07, 0.5);
-
-  label = gtk_label_new ("Ambient light");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 2, 3, 4,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-
-  s.scn_floor = gtk_check_button_new_with_label ("Draw floor");
-  gtk_widget_show (s.scn_floor);
-  gtk_table_attach (GTK_TABLE (table), s.scn_floor, 0, 3, 4, 5,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  s.scn_clrfog = button = gtk_button_new_with_label ("");
-  gtk_widget_show (button);
-  gtk_table_attach (GTK_TABLE (table), button, 2, 3, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (button, 50, 30);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fFog);
-  gtk_signal_connect (GTK_OBJECT (button), "map",
-		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
-  gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fFog);
-
-  s.scn_clrambient = button = gtk_button_new_with_label ("");
-  gtk_widget_show (button);
-  gtk_table_attach (GTK_TABLE (table), button, 2, 3, 3, 4,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (button, 50, 30);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_color), opts->fAmbient);
-  gtk_signal_connect (GTK_OBJECT (button), "map",
-		      GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
-  gtk_object_set_data (GTK_OBJECT (button), "color_flt", opts->fAmbient);
-
-  s.scn_density = gtk_entry_new ();
-  gtk_widget_show (s.scn_density);
-  gtk_table_attach (GTK_TABLE (table), s.scn_density, 2, 3, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.scn_density, 50, -2);
-
-  label = gtk_label_new ("General");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 0, label);
-
-  label = gtk_label_new ("Details");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 1, label);
-
-  label = gtk_label_new ("Drawing Aids");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 2, label);
-
-  label = gtk_label_new ("Scene");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 3, label);
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 0);
-
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_set_usize (button, 80, 25);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_set_usize (button, 80, 25);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-  button = gtk_button_new_with_label ("Make Default");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (preferencesdlg_default), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_set_usize (button, -2, 25);
-
-  // Set initial values
-  gtk_range_set_value (GTK_RANGE (s.gen_mouse), opts->nMouse);
-
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_edges),
-			       (opts->nDetail & LC_DET_BRICKEDGES) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_lighting),
-			       (opts->nDetail & LC_DET_LIGHTING) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_smooth),
-			       (opts->nDetail & LC_DET_SMOOTH) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_antialias),
-			       (opts->nDetail & LC_DET_ANTIALIAS) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.det_fast),
-			       (opts->nDetail & LC_DET_FAST) ? TRUE : FALSE);
-  write_float(s.det_width, opts->fLineWidth);
-
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_grid),
-			       (opts->nSnap & LC_DRAW_GRID) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_axis),
-			       (opts->nSnap & LC_DRAW_AXIS) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapx),
-			       (opts->nSnap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapy),
-			       (opts->nSnap & LC_DRAW_SNAP_Y) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_snapz),
-			       (opts->nSnap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_angle),
-			       (opts->nSnap & LC_DRAW_SNAP_A) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_centimeter),
-			       (opts->nSnap & LC_DRAW_CM_UNITS) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_move),
-			       (opts->nSnap & LC_DRAW_MOVE) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_fixed),
-			       (opts->nSnap & LC_DRAW_MOVEAXIS) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_lockx),
-			       (opts->nSnap & LC_DRAW_LOCK_X) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_locky),
-			       (opts->nSnap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_lockz),
-			       (opts->nSnap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.draw_relative),
-			       (opts->nSnap & LC_DRAW_GLOBAL_SNAP) ? TRUE : FALSE);
-  write_int(s.draw_gridunits, opts->nGridSize);
-  write_int(s.draw_anglesnap, opts->nAngleSnap);
-
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_gradient),
-			       (opts->nScene & LC_SCENE_GRADIENT) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_image),
-			       (opts->nScene & LC_SCENE_BG) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_tile),
-			       (opts->nScene & LC_SCENE_BG_TILE) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_fog),
-			       (opts->nScene & LC_SCENE_FOG) ? TRUE : FALSE);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (s.scn_floor),
-			       (opts->nScene & LC_SCENE_FLOOR) ? TRUE : FALSE);
-  gtk_entry_set_text (GTK_ENTRY (s.scn_imagename), opts->strBackground);
-  write_int(s.scn_density, (int)(opts->fDensity*100));
-
-  return dlg_domodal(dlg, LC_CANCEL);
+	GtkWidget *dlg;
+	GtkWidget *vbox, *hbox;
+	GtkWidget *frame, *label, *button, *table, *notebook;
+	GSList *table_group = NULL;
+	LC_PREFERENCESDLG_STRUCT s;
+	LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)param;
+	s.data = param;
+	int ret;
+
+	dlg = gtk_dialog_new_with_buttons("Preferences", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
+	s.dlg = dlg;
+
+	vbox = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox), 10);
+
+	notebook = gtk_notebook_new();
+	gtk_widget_show(notebook);
+	gtk_box_pack_start(GTK_BOX(vbox), notebook, TRUE, TRUE, 0);
+
+	table = gtk_table_new(6, 1, TRUE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(notebook), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 0, 1);
+
+	label = gtk_label_new("Mouse sensitivity:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.gen_mouse = gtk_hscale_new_with_range(1, 20, 1);
+	gtk_widget_show(s.gen_mouse);
+	gtk_box_pack_start(GTK_BOX(hbox), s.gen_mouse, TRUE, TRUE, 0);
+	gtk_scale_set_draw_value(GTK_SCALE(s.gen_mouse), FALSE);
+
+	s.gen_updates = gtk_check_button_new_with_label("Check for updates on startup");
+//	gtk_widget_show(s.gen_updates);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.gen_updates, 0, 1, 1, 2);
+
+	table = gtk_table_new(6, 1, TRUE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(notebook), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
+
+	s.det_edges = gtk_check_button_new_with_label("Draw edges");
+	gtk_widget_show(s.det_edges);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_edges, 0, 1, 0, 1);
+
+	s.det_lighting = gtk_check_button_new_with_label("Lighting");
+	gtk_widget_show(s.det_lighting);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_lighting, 0, 1, 1, 2);
+
+	s.det_smooth = gtk_check_button_new_with_label("Smooth shading");
+	gtk_widget_show(s.det_smooth);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_smooth, 0, 1, 2, 3);
+
+	s.det_antialias = gtk_check_button_new_with_label("Anti-aliasing");
+	gtk_widget_show(s.det_antialias);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_antialias, 0, 1, 3, 4);
+
+	s.det_fast = gtk_check_button_new_with_label("Fast rendering");
+	gtk_widget_show(s.det_fast);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_fast, 0, 1, 4, 5);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 5, 6);
+
+	label = gtk_label_new("Line width");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.det_width = gtk_entry_new();
+	gtk_widget_show(s.det_width);
+	gtk_box_pack_start(GTK_BOX(hbox), s.det_width, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.det_width), 4);
+
+	table = gtk_table_new(7, 2, TRUE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(notebook), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 0, 1);
+
+	s.draw_grid = gtk_check_button_new_with_label("Base grid");
+	gtk_widget_show(s.draw_grid);
+	gtk_box_pack_start(GTK_BOX(hbox), s.draw_grid, FALSE, FALSE, 0);
+
+	s.draw_gridunits = gtk_entry_new();
+	gtk_widget_show(s.draw_gridunits);
+	gtk_box_pack_start(GTK_BOX(hbox), s.draw_gridunits, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.draw_gridunits), 4);
+
+	label = gtk_label_new("units");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.draw_axis = gtk_check_button_new_with_label("Axis icon");
+	gtk_widget_show(s.draw_axis);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_axis, 0, 1, 1, 2);
+
+	s.draw_centimeter = gtk_check_button_new_with_label("Centimeter units");
+	gtk_widget_show(s.draw_centimeter);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_centimeter, 0, 1, 2, 3);
+
+	s.draw_snapx = gtk_check_button_new_with_label("Snap X");
+	gtk_widget_show(s.draw_snapx);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_snapx, 0, 1, 3, 4);
+
+	s.draw_snapy = gtk_check_button_new_with_label("Snap Y");
+	gtk_widget_show(s.draw_snapy);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_snapy, 0, 1, 4, 5);
+
+	s.draw_snapz = gtk_check_button_new_with_label("Snap Z");
+	gtk_widget_show(s.draw_snapz);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_snapz, 0, 1, 5, 6);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 6, 7);
+
+	s.draw_angle = gtk_check_button_new_with_label("Angle snap");
+	gtk_widget_show(s.draw_angle);
+	gtk_box_pack_start(GTK_BOX(hbox), s.draw_angle, FALSE, FALSE, 0);
+
+	s.draw_anglesnap = gtk_entry_new();
+	gtk_widget_show(s.draw_anglesnap);
+	gtk_box_pack_start(GTK_BOX(hbox), s.draw_anglesnap, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.draw_anglesnap), 4);
+
+	label = gtk_label_new("degrees");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.draw_relative = gtk_check_button_new_with_label("Don't allow relative snap");
+	gtk_widget_show(s.draw_relative);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_relative, 1, 2, 0, 1);
+
+	s.draw_move = gtk_check_button_new_with_label("Switch to move after insert");
+	gtk_widget_show(s.draw_move);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_move, 1, 2, 1, 2);
+
+	s.draw_fixed = gtk_check_button_new_with_label("Fixed direction keys");
+	gtk_widget_show(s.draw_fixed);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_fixed, 1, 2, 2, 3);
+
+	s.draw_lockx = gtk_check_button_new_with_label("Lock X");
+	gtk_widget_show(s.draw_lockx);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_lockx, 1, 2, 3, 4);
+
+	s.draw_locky = gtk_check_button_new_with_label("Lock Y");
+	gtk_widget_show(s.draw_locky);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_locky, 1, 2, 4, 5);
+
+	s.draw_lockz = gtk_check_button_new_with_label("Lock Z");
+	gtk_widget_show(s.draw_lockz);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_lockz, 1, 2, 5, 6);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_container_add(GTK_CONTAINER(notebook), hbox);
+	gtk_container_border_width(GTK_CONTAINER(hbox), 5);
+
+	frame = gtk_frame_new("Background");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
+
+	table = gtk_table_new(4, 3, FALSE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(frame), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
+
+	s.scn_solid = gtk_radio_button_new_with_label(table_group, "Solid color");
+	table_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.scn_solid));
+	gtk_widget_show(s.scn_solid);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.scn_solid, 0, 1, 0, 1);
+
+	s.scn_gradient = gtk_radio_button_new_with_label(table_group, "Gradient");
+	table_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.scn_gradient));
+	gtk_widget_show(s.scn_gradient);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.scn_gradient, 0, 1, 1, 2);
+
+	s.scn_image = gtk_radio_button_new_with_label(table_group, "Image");
+	table_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.scn_image));
+	gtk_widget_show(s.scn_image);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.scn_image, 0, 1, 2, 3);
+
+	s.scn_imagename = gtk_entry_new();
+	gtk_widget_show(s.scn_imagename);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.scn_imagename, 0, 3, 3, 4);
+
+	s.scn_clrbackground = button = gtk_button_new_with_label("");
+	gtk_widget_show(button);
+	gtk_table_attach(GTK_TABLE(table), button, 1, 2, 0, 1, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_widget_set_usize(button, 50, 30);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(preferencesdlg_color), opts->fBackground);
+	gtk_signal_connect(GTK_OBJECT(button), "map", GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
+	gtk_object_set_data(GTK_OBJECT(button), "color_flt", opts->fBackground);
+
+	s.scn_clrgrad1 = button = gtk_button_new_with_label("");
+	gtk_widget_show(button);
+	gtk_table_attach(GTK_TABLE(table), button, 1, 2, 1, 2, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_widget_set_usize(button, 50, 30);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(preferencesdlg_color), opts->fGrad1);
+	gtk_signal_connect(GTK_OBJECT(button), "map", GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
+	gtk_object_set_data(GTK_OBJECT(button), "color_flt", opts->fGrad1);
+
+	s.scn_clrgrad2 = button = gtk_button_new_with_label("");
+	gtk_widget_show(button);
+	gtk_table_attach(GTK_TABLE(table), button, 2, 3, 1, 2, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+	gtk_widget_set_usize(button, 50, 30);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(preferencesdlg_color), opts->fGrad2);
+	gtk_signal_connect(GTK_OBJECT(button), "map", GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
+	gtk_object_set_data(GTK_OBJECT(button), "color_flt", opts->fGrad2);
+
+	s.scn_tile = gtk_check_button_new_with_label("Tile");
+	gtk_widget_show(s.scn_tile);
+	gtk_table_attach(GTK_TABLE(table), s.scn_tile, 1, 2, 2, 3, (GtkAttachOptions)GTK_EXPAND, (GtkAttachOptions)GTK_EXPAND, 0, 0);
+
+	frame = gtk_frame_new("Environment");
+	gtk_widget_show(frame);
+	gtk_box_pack_end(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
+
+	table = gtk_table_new(5, 3, TRUE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(frame), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
+
+	s.scn_fog = gtk_check_button_new_with_label("Fog");
+	gtk_widget_show(s.scn_fog);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.scn_fog, 0, 3, 0, 1);
+
+	label = gtk_label_new("Color");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 1, 2);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+
+	label = gtk_label_new("Density");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 2, 3);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+	gtk_misc_set_alignment(GTK_MISC(label), 1.93715e-07, 0.5);
+
+	label = gtk_label_new("Ambient light");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 2, 3, 4);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+
+	s.scn_floor = gtk_check_button_new_with_label("Draw floor");
+	gtk_widget_show(s.scn_floor);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.scn_floor, 0, 3, 4, 5);
+
+	s.scn_clrfog = button = gtk_button_new_with_label("");
+	gtk_widget_show(button);
+	gtk_table_attach(GTK_TABLE(table), button, 2, 3, 1, 2, (GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
+	gtk_widget_set_usize(button, 50, 30);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(preferencesdlg_color), opts->fFog);
+	gtk_signal_connect(GTK_OBJECT(button), "map", GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
+	gtk_object_set_data(GTK_OBJECT(button), "color_flt", opts->fFog);
+
+	s.scn_clrambient = button = gtk_button_new_with_label("");
+	gtk_widget_show(button);
+	gtk_table_attach(GTK_TABLE(table), button, 2, 3, 3, 4, (GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
+	gtk_widget_set_usize(button, 50, 30);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(preferencesdlg_color), opts->fAmbient);
+	gtk_signal_connect(GTK_OBJECT(button), "map", GTK_SIGNAL_FUNC(preferencesdlg_colorbutton_map), NULL);
+	gtk_object_set_data(GTK_OBJECT(button), "color_flt", opts->fAmbient);
+
+	s.scn_density = gtk_entry_new();
+	gtk_widget_show(s.scn_density);
+	gtk_table_attach(GTK_TABLE(table), s.scn_density, 2, 3, 2, 3, (GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.scn_density), 4);
+
+	label = gtk_label_new("General");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 0, label);
+
+	label = gtk_label_new("Details");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 1, label);
+
+	label = gtk_label_new("Drawing Aids");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 2, label);
+
+	label = gtk_label_new("Scene");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 3, label);
+
+	button = gtk_button_new_with_label("Make Default");
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(preferencesdlg_default), &s);
+	gtk_widget_show(button);
+	gtk_box_pack_end(GTK_BOX(GTK_DIALOG(dlg)->action_area), button, FALSE, FALSE, 0);
+
+	// Set initial values
+	gtk_range_set_value(GTK_RANGE(s.gen_mouse), opts->nMouse);
+
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_edges),(opts->nDetail & LC_DET_BRICKEDGES) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_lighting),(opts->nDetail & LC_DET_LIGHTING) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_smooth),(opts->nDetail & LC_DET_SMOOTH) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_antialias),(opts->nDetail & LC_DET_ANTIALIAS) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_fast),(opts->nDetail & LC_DET_FAST) ? TRUE : FALSE);
+	write_float(s.det_width, opts->fLineWidth);
+
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_grid), (opts->nSnap & LC_DRAW_GRID) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_axis), (opts->nSnap & LC_DRAW_AXIS) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_snapx), (opts->nSnap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_snapy), (opts->nSnap & LC_DRAW_SNAP_Y) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_snapz), (opts->nSnap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_angle), (opts->nSnap & LC_DRAW_SNAP_A) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_centimeter), (opts->nSnap & LC_DRAW_CM_UNITS) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_move), (opts->nSnap & LC_DRAW_MOVE) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_fixed), (opts->nSnap & LC_DRAW_MOVEAXIS) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_lockx), (opts->nSnap & LC_DRAW_LOCK_X) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_locky), (opts->nSnap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_lockz), (opts->nSnap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_relative), (opts->nSnap & LC_DRAW_GLOBAL_SNAP) ? TRUE : FALSE);
+	write_int(s.draw_gridunits, opts->nGridSize);
+	write_int(s.draw_anglesnap, opts->nAngleSnap);
+
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.scn_gradient), (opts->nScene & LC_SCENE_GRADIENT) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.scn_image), (opts->nScene & LC_SCENE_BG) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.scn_tile), (opts->nScene & LC_SCENE_BG_TILE) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.scn_fog), (opts->nScene & LC_SCENE_FOG) ? TRUE : FALSE);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.scn_floor), (opts->nScene & LC_SCENE_FLOOR) ? TRUE : FALSE);
+	gtk_entry_set_text(GTK_ENTRY(s.scn_imagename), opts->strBackground);
+	write_int(s.scn_density, (int)(opts->fDensity*100));
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		LC_PREFERENCESDLG_OPTS TempOpts;
+
+		if (preferencesdlg_getopts(&s, &TempOpts))
+		{
+			ret = LC_OK;
+
+			opts->nMouse = TempOpts.nMouse;
+			opts->nDetail = TempOpts.nDetail;
+			opts->fLineWidth = TempOpts.fLineWidth;
+			opts->nSnap = TempOpts.nSnap;
+			opts->nAngleSnap = TempOpts.nAngleSnap;
+			opts->nGridSize = TempOpts.nGridSize;
+			opts->nScene = TempOpts.nScene;
+			opts->fDensity = TempOpts.fDensity;
+			strcpy(opts->strBackground, TempOpts.strBackground);
+		}
+		else
+			ret = LC_CANCEL;
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
 }
 
+// =============================================================================
 // Properties Dialog
 
-typedef struct
+struct LC_PROPERTIESDLG_STRUCT
 {
-  void* data;
-  GtkWidget *sum_author, *sum_description, *sum_comments;
-} LC_PROPERTIESDLG_STRUCT;
-
-static void propertiesdlg_ok(GtkWidget *widget, gpointer data)
-{
-  LC_PROPERTIESDLG_STRUCT* s = (LC_PROPERTIESDLG_STRUCT*)data;
-  LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s->data;
-
-  strcpy(opts->strAuthor, gtk_entry_get_text (GTK_ENTRY (s->sum_author)));
-  strcpy(opts->strDescription, gtk_entry_get_text (GTK_ENTRY (s->sum_description)));
-
-  GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s->sum_comments));
-  GtkTextIter start;
-  GtkTextIter end;
-  gchar *text;
-
-  gtk_text_buffer_get_start_iter(buffer, &start);
-  gtk_text_buffer_get_end_iter(buffer, &end);
-  text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-  strncpy(opts->strComments, text, sizeof(opts->strComments));
-  opts->strComments[sizeof(opts->strComments)-1] = 0;
-  g_free (text);
-
-  *cur_ret = LC_OK;
-}
+	void* data;
+	GtkWidget *dlg;
+	GtkWidget *sum_author, *sum_description, *sum_comments;
+};
 
 int propertiesdlg_execute(void* param)
 {
-  GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2, *hbox;
-  GtkWidget *label, *button, *table, *notebook, *list, *scroll_win;
-  LC_PROPERTIESDLG_STRUCT s;
-  LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
-  s.data = param;
-
-  struct stat buf;
-  bool exist = (stat(opts->strFilename, &buf) != -1);
-  char* ptr = strrchr(opts->strFilename, '/');
-  char text[512];
-  strcpy(text, opts->strTitle);
-  strcat(text, " Properties");
-
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 450, 280);
-  gtk_window_set_title (GTK_WINDOW (dlg), text);
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
-
-  vbox1 = gtk_vbox_new (FALSE, 7);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox1);
-  gtk_container_border_width (GTK_CONTAINER (vbox1), 7);
-
-  notebook = gtk_notebook_new ();
-  gtk_widget_show (notebook);
-  gtk_box_pack_start (GTK_BOX (vbox1), notebook, TRUE, TRUE, 0);
-
-  table = gtk_table_new (6, 2, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (notebook), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 15);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 40);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 0, 1,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new (ptr ? ptr+1 : "(not saved)");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  if (ptr)
-  {
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_widget_show (hbox);
-    gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 1, 2,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-    *ptr = 0;
-    label = gtk_label_new (opts->strFilename);
-    *ptr = '/';
-
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  }
-
-  if (exist)
-  {
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_widget_show (hbox);
-    gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 2, 3,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-    sprintf(text, "%.1fKB (%d bytes)", (float)buf.st_size/1024, (int)buf.st_size);
-    label = gtk_label_new (text);
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_widget_show (hbox);
-    gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 3, 4,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-    struct passwd *pwd = getpwuid(buf.st_uid);
-    sprintf(text, "%s (%s)", pwd->pw_name, pwd->pw_gecos);
-  
-    label = gtk_label_new (text);
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_widget_show (hbox);
-    gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 4, 5,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-    strcpy(text, ctime(&buf.st_mtime));
-    while (text[strlen(text)-1] < '0')
-      text[strlen(text)-1] = 0;
-    label = gtk_label_new (text);
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_widget_show (hbox);
-    gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, 5, 6,
-                    (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-    strcpy(text, ctime(&buf.st_atime));
-    while (text[strlen(text)-1] < '0')
-      text[strlen(text)-1] = 0;
-    label = gtk_label_new (text);
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  }
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 0, 1,
-                    (GtkAttachOptions)GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("File name:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 1, 2,
-                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Location:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 2, 3,
-                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Size:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 3, 4,
-                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Owner:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 4, 5,
-                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Modified:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_table_attach (GTK_TABLE (table), hbox, 0, 1, 5, 6,
-                    (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
-
-  label = gtk_label_new ("Accessed:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (notebook), vbox2);
-  gtk_container_border_width (GTK_CONTAINER (vbox2), 5);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, TRUE, 0);
-
-  label = gtk_label_new ("Author");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.sum_author = gtk_entry_new ();
-  gtk_widget_show (s.sum_author);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.sum_author, FALSE, FALSE, 0);
-  gtk_entry_set_text (GTK_ENTRY (s.sum_author), opts->strAuthor);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-
-  label = gtk_label_new ("Description");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.sum_description = gtk_entry_new ();
-  gtk_widget_show (s.sum_description);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.sum_description, FALSE, FALSE, 0);
-  gtk_entry_set_text (GTK_ENTRY (s.sum_description), opts->strDescription);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-
-  label = gtk_label_new ("Comments");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-
-  s.sum_comments = gtk_text_view_new();
-  gtk_widget_show (s.sum_comments);
-  gtk_box_pack_start (GTK_BOX (vbox2), s.sum_comments, TRUE, TRUE, 0);
-  //  gtk_text_set_editable (GTK_TEXT (s.sum_comments), TRUE);
-  gtk_widget_realize (s.sum_comments);
-
-  GtkTextBuffer *buffer;
-  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
-  gtk_text_buffer_set_text(buffer, opts->strComments, -1);
-
-  int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
-  memset (&totalcount, 0, sizeof (totalcount));
-  for (i = 0; i < opts->lines; i++)
-    for (j = 0; j < LC_MAXCOLORS; j++)
-      totalcount[j] += opts->count[i*LC_MAXCOLORS+j];
-
-  int ID = 2;
-  for (i = 0; i < LC_MAXCOLORS; i++)
-    if (totalcount[i])
-      ID++;
-
-  scroll_win = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scroll_win), 
-				  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_widget_show (scroll_win);
-  gtk_container_add (GTK_CONTAINER (notebook), scroll_win);
-
-  list = gtk_clist_new (ID);
-  gtk_widget_show (list);
-  gtk_container_add (GTK_CONTAINER (scroll_win), list);
-  gtk_container_border_width (GTK_CONTAINER (list), 5);
-  gtk_clist_set_column_width (GTK_CLIST (list), 0, 80);
-  gtk_clist_column_titles_show (GTK_CLIST (list));
-
-  label = gtk_label_new ("Piece");
-  gtk_widget_show (label);
-  gtk_clist_set_column_widget (GTK_CLIST (list), 0, label);
-
-  for (ID = 0, i = 0; i < LC_MAXCOLORS; i++)
-    if (totalcount[i])
-    {
-      ID++;
-      col[i] = ID;
-
-      label = gtk_label_new (colornames[i]);
-      gtk_widget_show (label);
-      gtk_clist_set_column_widget (GTK_CLIST (list), ID, label);
-    }
-  ID++;
-  label = gtk_label_new ("Total");
-  gtk_widget_show (label);
-  gtk_clist_set_column_widget (GTK_CLIST (list), ID, label);
-
-  char* row[LC_MAXCOLORS+2];
-  for (i = 1; i <= ID; i++)
-    row[i] = (char*)malloc(65);
-
-  for (i = 0; i < opts->lines; i++)
-  {
-    int total = 0;
-
-    for (j = 0; j < LC_MAXCOLORS; j++)
-      total += opts->count[i*LC_MAXCOLORS+j];
-
-    if (total == 0)
-      continue;
-
-    row[0] = opts->names[i];
-    for (j = 1; j < ID; j++)
-      row[j][0] = 0;
-
-    for (j = 0; j < LC_MAXCOLORS; j++)
-      if (opts->count[i*LC_MAXCOLORS+j])
-	sprintf (row[col[j]], "%d", opts->count[i*LC_MAXCOLORS+j]);
-
-    sprintf (row[ID], "%d", total);
-    gtk_clist_append (GTK_CLIST(list), row);
-  }
-  gtk_clist_sort (GTK_CLIST(list));
-
-  row[0] = "Total";
-  int total = 0;
-
-  for (i = 0; i < LC_MAXCOLORS; i++)
-    if (totalcount[i])
-    {
-      sprintf (row[col[i]], "%d", totalcount[i]);
-      total += totalcount[i];
-    }
-
-  sprintf (row[ID], "%d", total);
-  gtk_clist_append (GTK_CLIST(list), row);
-
-  for (i = 1; i <= ID; i++)
-    free(row[i]);
-
-  label = gtk_label_new ("General");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 0, label);
-
-  label = gtk_label_new ("Summary");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 1, label);
-
-  label = gtk_label_new ("Pieces Used");
-  gtk_widget_show (label);
-  set_notebook_tab (notebook, 2, label);
-
-  hbox = gtk_hbox_new (FALSE, 5);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 5);
-
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_widget_show (button);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 5);
-  gtk_widget_set_usize (button, 70, 25);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (propertiesdlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_set_usize (button, 70, 25);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
-
-  return dlg_domodal(dlg, LC_CANCEL);
+	GtkWidget *dlg;
+	GtkWidget *vbox1, *vbox2, *hbox;
+	GtkWidget *label, *table, *notebook, *list, *scroll_win;
+	LC_PROPERTIESDLG_STRUCT s;
+	LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)param;
+	s.data = param;
+	int ret;
+
+	struct stat buf;
+	bool exist = (stat(opts->strFilename, &buf) != -1);
+	char* ptr = strrchr(opts->strFilename, '/');
+	char text[LC_MAXPATH + 64];
+	strcpy(text, opts->strTitle);
+	strcat(text, " Properties");
+
+	dlg = gtk_dialog_new_with_buttons(text, GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
+	s.dlg = dlg;
+
+	vbox1 = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox1), 10);
+
+	notebook = gtk_notebook_new();
+	gtk_widget_show(notebook);
+	gtk_box_pack_start(GTK_BOX(vbox1), notebook, TRUE, TRUE, 0);
+
+	table = gtk_table_new(6, 2, FALSE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(notebook), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 15);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 40);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, 0, 1);
+
+	label = gtk_label_new(ptr ? ptr+1 : "(not saved)");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	if (ptr)
+	{
+		hbox = gtk_hbox_new(FALSE, 0);
+		gtk_widget_show(hbox);
+		gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, 1, 2);
+		*ptr = 0;
+		label = gtk_label_new(opts->strFilename);
+		*ptr = '/';
+
+		gtk_widget_show(label);
+		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+		gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+	}
+
+	if (exist)
+	{
+		hbox = gtk_hbox_new(FALSE, 0);
+		gtk_widget_show(hbox);
+		gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, 2, 3);
+
+		sprintf(text, "%.1fKB (%d bytes)", (float)buf.st_size/1024, (int)buf.st_size);
+		label = gtk_label_new(text);
+		gtk_widget_show(label);
+		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+		gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+		hbox = gtk_hbox_new(FALSE, 0);
+		gtk_widget_show(hbox);
+		gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, 3, 4);
+
+		struct passwd *pwd = getpwuid(buf.st_uid);
+		sprintf(text, "%s (%s)", pwd->pw_name, pwd->pw_gecos);
+
+		label = gtk_label_new(text);
+		gtk_widget_show(label);
+		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+		gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+		hbox = gtk_hbox_new(FALSE, 0);
+		gtk_widget_show(hbox);
+		gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, 4, 5);
+
+		strcpy(text, ctime(&buf.st_mtime));
+		while (text[strlen(text)-1] < '0')
+			text[strlen(text)-1] = 0;
+		label = gtk_label_new(text);
+		gtk_widget_show(label);
+		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+		gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+		hbox = gtk_hbox_new(FALSE, 0);
+		gtk_widget_show(hbox);
+		gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, 5, 6);
+
+		strcpy(text, ctime(&buf.st_atime));
+		while (text[strlen(text)-1] < '0')
+			text[strlen(text)-1] = 0;
+		label = gtk_label_new(text);
+		gtk_widget_show(label);
+		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+		gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+	}
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1, (GtkAttachOptions)GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+	label = gtk_label_new("File name:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2, (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+	label = gtk_label_new("Location:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3, (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+	label = gtk_label_new("Size:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4, (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+	label = gtk_label_new("Owner:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 4, 5, (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+	label = gtk_label_new("Modified:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 5, 6, (GtkAttachOptions) GTK_FILL, (GtkAttachOptions)(GTK_EXPAND|GTK_FILL), 0, 0);
+
+	label = gtk_label_new("Accessed:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	vbox2 = gtk_vbox_new(FALSE, 3);
+	gtk_widget_show(vbox2);
+	gtk_container_add(GTK_CONTAINER(notebook), vbox2);
+	gtk_container_border_width(GTK_CONTAINER(vbox2), 5);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, TRUE, 0);
+
+	label = gtk_label_new("Author");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.sum_author = gtk_entry_new();
+	gtk_widget_show(s.sum_author);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.sum_author, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.sum_author), 50);
+	gtk_entry_set_text(GTK_ENTRY(s.sum_author), opts->strAuthor);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Description");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.sum_description = gtk_entry_new();
+	gtk_widget_show(s.sum_description);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.sum_description, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.sum_description), 50);
+	gtk_entry_set_text(GTK_ENTRY(s.sum_description), opts->strDescription);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Comments");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.sum_comments = gtk_text_view_new();
+	gtk_widget_show(s.sum_comments);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.sum_comments, TRUE, TRUE, 0);
+	gtk_widget_set_usize(s.sum_comments, -2, 100);
+	gtk_widget_realize(s.sum_comments);
+
+	GtkTextBuffer *buffer;
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
+	gtk_text_buffer_set_text(buffer, opts->strComments, -1);
+
+	int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
+	memset(&totalcount, 0, sizeof(totalcount));
+	for (i = 0; i < opts->lines; i++)
+		for (j = 0; j < LC_MAXCOLORS; j++)
+			totalcount[j] += opts->count[i*LC_MAXCOLORS+j];
+
+	int ID = 2;
+	for (i = 0; i < LC_MAXCOLORS; i++)
+		if (totalcount[i])
+			ID++;
+
+	scroll_win = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_win), 
+	GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_widget_show(scroll_win);
+	gtk_container_add(GTK_CONTAINER(notebook), scroll_win);
+
+	list = gtk_clist_new(ID);
+	gtk_widget_show(list);
+	gtk_container_add(GTK_CONTAINER(scroll_win), list);
+	gtk_container_border_width(GTK_CONTAINER(list), 5);
+	gtk_clist_set_column_width(GTK_CLIST(list), 0, 80);
+	gtk_clist_column_titles_show(GTK_CLIST(list));
+
+	label = gtk_label_new("Piece");
+	gtk_widget_show(label);
+	gtk_clist_set_column_widget(GTK_CLIST(list), 0, label);
+
+	for (ID = 0, i = 0; i < LC_MAXCOLORS; i++)
+		if (totalcount[i])
+		{
+			ID++;
+			col[i] = ID;
+
+			label = gtk_label_new(colornames[i]);
+			gtk_widget_show(label);
+			gtk_clist_set_column_widget(GTK_CLIST(list), ID, label);
+		}
+	ID++;
+	label = gtk_label_new("Total");
+	gtk_widget_show(label);
+	gtk_clist_set_column_widget(GTK_CLIST(list), ID, label);
+
+	char* row[LC_MAXCOLORS+2];
+	for (i = 0; i <= ID; i++)
+		row[i] = (char*)malloc(256);
+
+	for (i = 0; i < opts->lines; i++)
+	{
+		int total = 0;
+
+		for (j = 0; j < LC_MAXCOLORS; j++)
+			total += opts->count[i*LC_MAXCOLORS+j];
+
+		if (total == 0)
+			continue;
+
+		strcpy(row[0], opts->names[i]);
+		for (j = 1; j < ID; j++)
+			row[j][0] = 0;
+
+		for (j = 0; j < LC_MAXCOLORS; j++)
+			if (opts->count[i*LC_MAXCOLORS+j])
+				sprintf(row[col[j]], "%d", opts->count[i*LC_MAXCOLORS+j]);
+
+		sprintf(row[ID], "%d", total);
+		gtk_clist_append(GTK_CLIST(list), row);
+	}
+	gtk_clist_sort(GTK_CLIST(list));
+
+	strcpy(row[0], "Total");
+	int total = 0;
+
+	for (i = 0; i < LC_MAXCOLORS; i++)
+		if (totalcount[i])
+		{
+			sprintf(row[col[i]], "%d", totalcount[i]);
+			total += totalcount[i];
+		}
+
+	sprintf(row[ID], "%d", total);
+	gtk_clist_append(GTK_CLIST(list), row);
+
+	for (i = 0; i <= ID; i++)
+		free(row[i]);
+
+	label = gtk_label_new("General");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 0, label);
+
+	label = gtk_label_new("Summary");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 1, label);
+
+	label = gtk_label_new("Pieces Used");
+	gtk_widget_show(label);
+	set_notebook_tab(notebook, 2, label);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		ret = LC_OK;
+
+		LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s.data;
+
+		strcpy(opts->strAuthor, gtk_entry_get_text(GTK_ENTRY(s.sum_author)));
+		strcpy(opts->strDescription, gtk_entry_get_text(GTK_ENTRY(s.sum_description)));
+
+		GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
+		GtkTextIter start;
+		GtkTextIter end;
+		gchar *text;
+
+		gtk_text_buffer_get_start_iter(buffer, &start);
+		gtk_text_buffer_get_end_iter(buffer, &end);
+		text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+		strncpy(opts->strComments, text, sizeof(opts->strComments));
+		opts->strComments[sizeof(opts->strComments)-1] = 0;
+		g_free(text);
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
 }
 
-// =========================================================
-
+// =============================================================================
 // 'Edit Groups' dialog
 
 typedef struct
 {
-  void* data;
-
+	void* data;
+	GtkWidget *dlg;
 } LC_GROUPEDITDLG_STRUCT;
 
-static void groupeditdlg_ok(GtkWidget *widget, gpointer data)
-{
-  //  LC_GROUPEDITDLG_STRUCT* s = (LC_GROUPEDITDLG_STRUCT*)data;
-  //  LC_GROUPEDITDLG_OPTS* opts = (LC_GROUPEDITDLG_OPTS*)s->data;
-
-  *cur_ret = LC_OK;
-}
-
-void groupeditdlg_addchildren(GtkCTree *ctree, GtkCTreeNode *parent, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
+static void groupeditdlg_addchildren(GtkCTree *ctree, GtkCTreeNode *parent, Group *pGroup, LC_GROUPEDITDLG_OPTS *opts)
 {
 	GtkCTreeNode *newparent;
 	const char *text;
@@ -2541,151 +2375,101 @@ void groupeditdlg_addchildren(GtkCTree *ctree, GtkCTreeNode *parent, Group *pGro
 
 int groupeditdlg_execute(void* param)
 {
-  GtkWidget *dlg;
-  GtkWidget *vbox, *hbox;
-  GtkWidget *button, *ctree, *scr;
-  LC_GROUPEDITDLG_STRUCT s;
-  s.data = param;
+	GtkWidget *dlg;
+	GtkWidget *vbox;
+	GtkWidget *ctree, *scr;
+	LC_GROUPEDITDLG_STRUCT s;
+	s.data = param;
+	int ret;
 
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 450, 280);
-  gtk_window_set_title (GTK_WINDOW (dlg), "Edit Groups");
-  gtk_widget_realize (dlg);
+	dlg = gtk_dialog_new_with_buttons("Edit Groups", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
+	gtk_widget_set_usize(dlg, 450, 280);
+	s.dlg = dlg;
 
-  vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox);
-  gtk_container_border_width (GTK_CONTAINER (vbox), 5);
+	vbox = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox), 10);
 
-  scr = gtk_scrolled_window_new ((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
-  gtk_widget_show (scr);
-  gtk_container_add (GTK_CONTAINER(vbox), scr);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scr), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+	scr = gtk_scrolled_window_new((GtkAdjustment*)NULL, (GtkAdjustment*)NULL);
+	gtk_widget_show(scr);
+	gtk_container_add(GTK_CONTAINER(vbox), scr);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scr), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
-  ctree = gtk_ctree_new (1, 0);
-  gtk_object_set_data (GTK_OBJECT (dlg), "ctree", ctree);
-  gtk_widget_show (ctree);
-  gtk_container_add (GTK_CONTAINER (scr), ctree);
-  gtk_clist_column_titles_hide (GTK_CLIST (ctree));
-  gtk_clist_set_selection_mode (GTK_CLIST (ctree), GTK_SELECTION_BROWSE);
-  gtk_widget_set_usize (ctree, -1, 200);
-  gtk_object_set_data (GTK_OBJECT (dlg), "tree", ctree);
+	ctree = gtk_ctree_new(1, 0);
+	gtk_object_set_data(GTK_OBJECT(dlg), "ctree", ctree);
+	gtk_widget_show(ctree);
+	gtk_container_add(GTK_CONTAINER(scr), ctree);
+	gtk_clist_column_titles_hide(GTK_CLIST(ctree));
+	gtk_clist_set_selection_mode(GTK_CLIST(ctree), GTK_SELECTION_BROWSE);
+	gtk_object_set_data(GTK_OBJECT(dlg), "tree", ctree);
 
-  hbox = gtk_hbox_new (FALSE, 10);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+	gtk_clist_freeze(GTK_CLIST(ctree));
+	gtk_clist_clear(GTK_CLIST(ctree));
 
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (groupeditdlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 70, 25);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	groupeditdlg_addchildren(GTK_CTREE(ctree), NULL, NULL, (LC_GROUPEDITDLG_OPTS*)param);
 
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 70, 25);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	gtk_clist_thaw(GTK_CLIST(ctree));
 
-  gtk_clist_freeze (GTK_CLIST (ctree));
-  gtk_clist_clear (GTK_CLIST (ctree));
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		ret = LC_OK;
+	}
+	else
+		ret = LC_CANCEL;
 
-  groupeditdlg_addchildren(GTK_CTREE(ctree), NULL, NULL, (LC_GROUPEDITDLG_OPTS*)param);
+	gtk_widget_destroy(dlg);
 
-  gtk_clist_thaw (GTK_CLIST (ctree));
-
-  return dlg_domodal(dlg, LC_CANCEL);
+	return ret;
 }
 
-// =========================================================
+// =============================================================================
 // Group Dialog
 
 typedef struct
 {
-  void* data;
-  GtkWidget* entry;
+	void* data;
+	GtkWidget *dlg;
+	GtkWidget* entry;
 } LC_GROUPDLG_STRUCT;
-
-static void groupdlg_ok(GtkWidget *widget, gpointer data)
-{
-  LC_GROUPDLG_STRUCT* s = (LC_GROUPDLG_STRUCT*)data;
-  char* name = (char*)s->data;
-
-  strcpy (name, gtk_entry_get_text (GTK_ENTRY (s->entry)));
-
-  *cur_ret = LC_OK;
-}
 
 int groupdlg_execute(void* param)
 {
-  GtkWidget *dlg;
-  GtkWidget *vbox, *hbox;
-  GtkWidget *button;
-  LC_GROUPDLG_STRUCT s;
-  s.data = param;
+	GtkWidget *dlg;
+	GtkWidget *vbox;
+	LC_GROUPDLG_STRUCT s;
+	s.data = param;
+	int ret;
 
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 250, 100);
-  gtk_window_set_title (GTK_WINDOW (dlg), "Group Name");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
+	dlg = gtk_dialog_new_with_buttons("Group Name", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
+	s.dlg = dlg;
 
-  vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox);
-  gtk_container_border_width (GTK_CONTAINER (vbox), 5);
+	vbox = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox), 10);
 
-  s.entry =  gtk_entry_new_with_max_length (64);
-  gtk_widget_show (s.entry);
-  gtk_box_pack_start (GTK_BOX (vbox), s.entry, TRUE, FALSE, 0);
-  gtk_widget_set_usize (s.entry, 50, -2);
-  gtk_entry_set_text (GTK_ENTRY (s.entry), (char*)param);
+	s.entry =  gtk_entry_new_with_max_length(64);
+	gtk_widget_show(s.entry);
+	gtk_box_pack_start(GTK_BOX(vbox), s.entry, TRUE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.entry), 30);
+	gtk_entry_set_text(GTK_ENTRY(s.entry), (char*)param);
 
-  hbox = gtk_hbox_new (FALSE, 10);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	{
+		ret = LC_OK;
 
-  button = gtk_button_new_with_label ("OK");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (groupdlg_ok), &s);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 70, 25);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+		char* name = (char*)s.data;
+		strcpy(name, gtk_entry_get_text(GTK_ENTRY(s.entry)));
+	}
+	else
+		ret = LC_CANCEL;
 
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-  gtk_widget_set_usize (button, 70, 25);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	gtk_widget_destroy(dlg);
 
-  return dlg_domodal(dlg, LC_CANCEL);
+	return ret;
 }
 
 // =============================================================================

@@ -56,7 +56,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_VIEW_ZOOMIN, "Zoom In", 0, 0, 0 },
 	{ LC_VIEW_ZOOMOUT, "Zoom Out", 0, 0, 0 },
 	{ LC_VIEW_ZOOMEXTENTS, "Zoom Extents", 0, 0, 0 },
-//	{ LC_VIEW_VIEWPORTS, "", 0, 0, 0 },
 	{ LC_VIEW_STEP_NEXT, "Step Next", 0, 0, 0 },
 	{ LC_VIEW_STEP_PREVIOUS, "Step Previous", 0, 0, 0 },
 	{ LC_VIEW_STEP_FIRST, "Step First", 0, 0, 0 },

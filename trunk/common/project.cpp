@@ -44,42 +44,6 @@ static void ProjectListener(int Message, void* Data, void* User)
 	((Project*)User)->HandleMessage(Message, Data);
 }
 
-typedef struct
-{
-  unsigned char n;
-  float dim [4][4];
-} LC_VIEWPORT;
-
-static LC_VIEWPORT viewports[14] = {
-  { 1,  {{ 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f, 0.0f },
-	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 1
-  { 2,  {{ 0.0f, 0.0f, 0.5f, 1.0f }, { 0.5f, 0.0f, 0.5f, 1.0f },
-	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2V
-  { 2,  {{ 0.0f, 0.0f, 1.0f, 0.5f }, { 0.0f, 0.5f, 1.0f, 0.5f },
-	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2H
-  { 2,  {{ 0.0f, 0.0f, 1.0f, 0.7f }, { 0.0f, 0.7f, 1.0f, 0.3f },
-	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2HT
-  { 2,  {{ 0.0f, 0.0f, 1.0f, 0.3f }, { 0.0f, 0.3f, 1.0f, 0.7f },
-	 { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 2HB
-  { 3,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.0f, 0.5f, 0.5f, 0.5f },
-	 { 0.5f, 0.0f, 0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3VL
-  { 3,  {{ 0.0f, 0.0f, 0.5f, 1.0f }, { 0.5f, 0.0f, 0.5f, 0.5f },
-	 { 0.5f, 0.5f, 0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3VR
-  { 3,  {{ 0.0f, 0.0f, 1.0f, 0.5f }, { 0.0f, 0.5f, 0.5f, 0.5f },
-	 { 0.5f, 0.5f, 0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3HB
-  { 3,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.5f, 0.0f, 0.5f, 0.5f },
-	 { 0.0f, 0.5f, 1.0f, 0.5f }, { 0.0f, 0.0f, 0.0f, 0.0f } }}, // 3HT
-  { 4,  {{ 0.0f, 0.0f, 0.3f, 0.3f }, { 0.0f, 0.3f, 0.3f, 0.4f },
-	 { 0.0f, 0.7f, 0.3f, 0.3f }, { 0.3f, 0.0f, 0.7f, 1.0f } }}, // 4VL
-  { 4,  {{ 0.0f, 0.0f, 0.7f, 1.0f }, { 0.7f, 0.0f, 0.3f, 0.3f },
-	 { 0.7f, 0.3f, 0.3f, 0.4f }, { 0.7f, 0.7f, 0.3f, 0.3f } }}, // 4VR
-  { 4,  {{ 0.0f, 0.0f, 1.0f, 0.7f }, { 0.0f, 0.7f, 0.3f, 0.3f },
-	 { 0.3f, 0.7f, 0.4f, 0.3f }, { 0.7f, 0.7f, 0.3f, 0.3f } }}, // 4HT
-  { 4,  {{ 0.0f, 0.0f, 0.3f, 0.3f }, { 0.3f, 0.0f, 0.4f, 0.3f },
-	 { 0.7f, 0.0f, 0.3f, 0.3f }, { 0.0f, 0.3f, 1.0f, 0.7f } }}, // 4HB
-  { 4,  {{ 0.0f, 0.0f, 0.5f, 0.5f }, { 0.5f, 0.0f, 0.5f, 0.5f },
-	 { 0.0f, 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f, 0.5f } }}};// 4
-
 /////////////////////////////////////////////////////////////////////////////
 // Project construction/destruction
 
@@ -5564,23 +5528,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
-		} break;
-
-		case LC_VIEW_VIEWPORTS:
-		{
-			/*
-			// Safety check
-			if (m_nActiveViewport >= viewports[nParam].n)
-			{
-				SystemUpdateCurrentCamera(m_ActiveView->m_Camera, m_ActiveView->m_Camera, m_pCameras);
-				m_nActiveViewport = 0;
-			}
-
-			SystemUpdateViewport(nParam, m_nViewportMode);
-			m_nViewportMode = (unsigned char)nParam;
-			UpdateOverlayScale();
-			UpdateAllViews();
-			*/
 		} break;
 
 		case LC_VIEW_STEP_NEXT:

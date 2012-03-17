@@ -702,12 +702,6 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	}
 
-	if (nID >= ID_VIEWPORT01 && nID <= ID_VIEWPORT14)
-	{
-		project->HandleCommand(LC_VIEW_VIEWPORTS, nID - ID_VIEWPORT01);
-		return TRUE;
-	}
-
 	if (nID >= ID_ACTION_SELECT && nID <= ID_ACTION_ROLL)
 	{
 		project->SetAction(nID - ID_ACTION_SELECT);
@@ -1235,7 +1229,6 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_VIEW_ZOOMIN,            // LC_VIEW_ZOOMIN
 		ID_VIEW_ZOOMOUT,           // LC_VIEW_ZOOMOUT
 		ID_ZOOM_EXTENTS,           // LC_VIEW_ZOOMEXTENTS
-		0,                         // LC_VIEW_VIEWPORTS
 		ID_VIEW_STEP_NEXT,         // LC_VIEW_STEP_NEXT
 		ID_VIEW_STEP_PREVIOUS,     // LC_VIEW_STEP_PREVIOUS
 		ID_VIEW_STEP_FIRST,        // LC_VIEW_STEP_FIRST

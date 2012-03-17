@@ -8,7 +8,6 @@
 #include "StepPop.h"
 #include "project.h"
 #include "lc_application.h"
-#include "bmpmenu.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

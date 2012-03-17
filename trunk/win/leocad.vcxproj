@@ -105,7 +105,6 @@
     </ClCompile>
     <ClCompile Include="Arraydlg.cpp" />
     <ClCompile Include="basewnd.cpp" />
-    <ClCompile Include="Bmpmenu.cpp" />
     <ClCompile Include="Cadbar.cpp" />
     <ClCompile Include="Caddoc.cpp" />
     <ClCompile Include="Cadview.cpp" />
@@ -417,7 +416,6 @@
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="ArrayDlg.h" />
-    <ClInclude Include="Bmpmenu.h" />
     <ClInclude Include="CADBar.h" />
     <ClInclude Include="CADDoc.h" />
     <ClInclude Include="CADView.h" />

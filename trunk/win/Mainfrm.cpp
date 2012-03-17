@@ -97,7 +97,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_MENUCHAR()
 	ON_WM_INITMENUPOPUP()
 	ON_COMMAND(ID_VIEW_FULLSCREEN, OnViewFullscreen)
-	ON_WM_GETMINMAXINFO()
 	ON_COMMAND(ID_FILE_PRINTPIECELIST, OnFilePrintPieceList)
 	ON_WM_ACTIVATEAPP()
 	ON_MESSAGE(WM_SETMESSAGESTRING, OnSetMessageString)
@@ -150,7 +149,6 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
-	m_pwndFullScrnBar = NULL;
 	m_bAutoMenuEnable = FALSE;
 }
 
@@ -599,66 +597,8 @@ void CMainFrame::OnUpdatePieceBar(CCmdUI* pCmdUI)
 
 void CMainFrame::OnViewFullscreen() 
 {
-	RECT rectDesktop;
-	WINDOWPLACEMENT wpNew;
-	
-	if (m_pwndFullScrnBar == NULL)
-	{
-		m_wndStatusBar.ShowWindow(SW_HIDE);
-		GetWindowPlacement (&m_wpPrev);
-		m_wpPrev.length = sizeof m_wpPrev;
-		
-		//Adjust RECT to new size of window
-		::GetWindowRect (::GetDesktopWindow(), &rectDesktop);
-		::AdjustWindowRectEx(&rectDesktop, GetStyle(), TRUE, GetExStyle());
-
-		// Remember this for OnGetMinMaxInfo()
-		m_FullScreenWindowRect = rectDesktop;
-		
-		wpNew = m_wpPrev;
-		wpNew.showCmd =  SW_SHOWNORMAL;
-		wpNew.rcNormalPosition = rectDesktop;
-		
-		m_pwndFullScrnBar = new CToolBar;
-		
-		if(!m_pwndFullScrnBar->Create(this,CBRS_SIZE_DYNAMIC|CBRS_FLOATING)
-			|| !m_pwndFullScrnBar->LoadToolBar(IDR_FULLSCREEN))
-		{
-			TRACE0("Failed to create toolbar\n");
-			return; 	 // fail to create
-		}
-		
-		//don't allow the toolbar to dock
-		m_pwndFullScrnBar->EnableDocking(0);
-		m_pwndFullScrnBar->SetWindowPos(0,30,30,
-			0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE|SWP_SHOWWINDOW);
-		m_pwndFullScrnBar->SetWindowText(_T("Full Screen"));
-		m_pwndFullScrnBar->GetToolBarCtrl().CheckButton(ID_VIEW_FULLSCREEN, TRUE);
-		FloatControlBar(m_pwndFullScrnBar, CPoint(30,30));
-	}
-	else
-	{
-		m_pwndFullScrnBar->DestroyWindow();
-		delete m_pwndFullScrnBar;
-		m_pwndFullScrnBar = NULL;
-		m_wndStatusBar.ShowWindow(SW_SHOWNORMAL);
-		wpNew = m_wpPrev;
-	}
-
-	SetWindowPlacement (&wpNew);
-}
-
-void CMainFrame::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
-{
-	if (m_pwndFullScrnBar != NULL)
-	{
-		lpMMI->ptMaxSize.y = m_FullScreenWindowRect.Height();
-		lpMMI->ptMaxTrackSize.y = lpMMI->ptMaxSize.y;
-		lpMMI->ptMaxSize.x = m_FullScreenWindowRect.Width();
-		lpMMI->ptMaxTrackSize.x = lpMMI->ptMaxSize.x;
-	}
-	else
-		CFrameWndEx::OnGetMinMaxInfo(lpMMI);
+	EnableFullScreenMode(ID_VIEW_FULLSCREEN);
+	ShowFullScreen();
 }
 
 void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const

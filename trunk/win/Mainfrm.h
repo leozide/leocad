@@ -57,6 +57,7 @@ public:
 	CMFCToolBarNoUpdate m_wndAnimationBar;
 	CMFCToolBar m_wndInvisibleToolBar;
 	CPiecesBar m_wndPiecesBar;
+	CPropertiesPane m_wndProperties;
 
 	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;
 
@@ -66,11 +67,6 @@ public:
 		{ m_strStatusBar = Message; }
 
 protected:
-	CPropertiesPane m_wndProperties;
-
-	WINDOWPLACEMENT m_wpPrev;
-	CToolBar* m_pwndFullScrnBar;
-	CRect m_FullScreenWindowRect;
 	CString m_strStatusBar;
 
 // Generated message map functions
@@ -80,7 +76,6 @@ protected:
 	afx_msg void OnClose();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnViewFullscreen();
-	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	afx_msg void OnFilePrintPieceList();
 	afx_msg void OnActivateApp(BOOL bActive, DWORD hTask);
 	afx_msg LRESULT OnSetMessageString(WPARAM wParam, LPARAM lParam);

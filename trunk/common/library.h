@@ -149,6 +149,7 @@ struct lineinfo_t
 	unsigned char type;
 	unsigned char color;
 	float points[12];
+	int indices[4];
 	lineinfo_t* next;
 };
 

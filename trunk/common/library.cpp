@@ -1853,7 +1853,7 @@ static connection_t* AddConnection(connection_t* newcon, LC_LDRAW_PIECE* piece)
 static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 {
 	lineinfo_t *a, *b;
-	int i, j, k, v;
+	int i, j, k;
 	unsigned int count[256][3], vert = 0;
 	unsigned int quads = 0;
 	unsigned char* bytes;
@@ -1913,12 +1913,9 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 						if ((a->type == j) && (a->color == i))
 						{
 							for (k = 0; k < a->type; k++)
-							for (v = 0; v < (int)piece->verts_count; v++)
-								if (FloatPointsClose(&piece->verts[v*3], &a->points[k*3]))
 								{
-									*drawinfo = v;
+								*drawinfo = a->indices[k];
 									drawinfo++;
-									break;
 								}
 									
 							b->next = a->next;
@@ -1974,13 +1971,10 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 					if ((a->type == j) && (a->color == i))
 					{
 						for (k = 0; k < a->type; k++)
-						for (v = 0; v < (int)piece->verts_count; v++)
-							if (FloatPointsClose(&piece->verts[v*3], &a->points[k*3]))
-							{
-								*drawinfo = v;
-								drawinfo++;
-								break;
-							}
+						{
+							*drawinfo = a->indices[k];
+							drawinfo++;
+						}
 									
 						b->next = a->next;
 						free(a);
@@ -2002,7 +1996,45 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 	bytes[pGroup->infosize-1] = 0; // End
 }
 
-static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t* info, char* dir, LC_LDRAW_PIECE* piece)
+// Temp function to convert colors > 255 because the library file format doesn't support them.
+inline int FixupColor(int Color)
+{
+	if (Color < 256)
+		return Color;
+
+	switch (Color)
+	{
+	case 272: return 1; // Dark_Blue -> Blue
+	case 288: return 2; // Dark_Green -> Green
+	case 308: return 6; // Dark_Brown -> Brown
+	case 313: return 11;// Maersk_Blue -> Light_Turquoise
+	case 320: return 4; // Dark_Red -> Red
+	case 335: return 4; // Sand_Red -> Red
+	case 366: return 25; // Earth_Orange -> Orange
+	case 373: return 22; // Sand_Purple -> Purple
+	case 378: return 2; // Sand_Green -> Green
+	case 379: return 1; // Sand_Blue -> Blue
+	case 462: return 25; // Medium_Orange -> Orange
+	case 484: return 25; // Dark_Orange -> Orange
+	case 503: return 7; // Very_Light_Gray -> Light_Gray
+	case 284: return 230; // TLG_Transparent_Reddish_Lilac -> Trans_Pink
+	case 294: return 230; // Glow_In_Dark_Trans -> Trans_Pink
+	case 297: return 14; // Pearl_Gold -> Yellow
+	case 334: return 14; // Chrome_Gold -> Yellow
+	case 383: return 7; // Chrome_Silver -> Light_Gray
+	case 494: return 14; // Electric_Contact_Alloy -> Yellow
+	case 495: return 14; // Electric_Contact_Copper -> Yellow
+	case 256: return 0; // Rubber_Black -> Black
+	case 273: return 1; // Rubber_Blue -> Blue
+	case 324: return 4; // Rubber_Red -> Red
+	case 375: return 7; // Rubber_Light_Gray -> Light_Gray
+	case 511: return 15; // Rubber_White -> White
+	}
+
+	return 0;
+}
+
+static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, char* dir, LC_LDRAW_PIECE* piece)
 {
 	char buf[1024], fn[LC_MAXPATH], filename[32];
 	unsigned char val;
@@ -2068,7 +2100,14 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 			strcat (fn, "p/");
 			strcat (fn, filename);
 
-			strupr(filename);
+#if LC_WINDOWS
+			_strupr(filename);
+#else
+			_strlwr(filename);
+			for (unsigned int i = 0; i < strlen(filename); i++)
+				if (filename[i] == '\\')
+					filename[i] = '/';
+#endif
 			for (val = 0; val < numvalid; val++)
 				if (strcmp(filename, valid[val]) == 0)
 					break;
@@ -2101,7 +2140,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				m1.FromLDraw(fm);
 				m2.Multiply(*mat, m1);
 
-				decodefile(tf, &m2, (unsigned char)color, info, dir, piece);
+				decodefile(tf, &m2, color, info, dir, piece);
 				while (info->next)
 					info = info->next;
 				fclose(tf);
@@ -2114,7 +2153,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5]);
 			if (color == 16) color = defcolor;
-			if (color > 256) color -= 256;
+			color = FixupColor(color);
 			info->color = color;
 			ConvertPoints(info->points, 2);
 			mat->TransformPoints(info->points, 2);
@@ -2127,7 +2166,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				&info->points[3], &info->points[4], &info->points[5],
 				&info->points[6], &info->points[7], &info->points[8]);
 			if (color == 16) color = defcolor;
-			if (color > 256) color -= 256;
+			color = FixupColor(color);
 			info->color = color;
 			ConvertPoints(info->points, 3);
 			mat->TransformPoints(info->points, 3);
@@ -2141,7 +2180,7 @@ static void decodefile(FILE *F, Matrix *mat, unsigned char defcolor, lineinfo_t*
 				&info->points[6], &info->points[7], &info->points[8],
 				&info->points[9], &info->points[10], &info->points[11]);
 			if (color == 16) color = defcolor;
-			if (color > 256) color -= 256;
+			color = FixupColor(color);
 			info->color = color;
 			ConvertPoints(info->points, 4);
 			mat->TransformPoints(info->points, 4);
@@ -2205,6 +2244,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		strcat (fn, filename);
 
 		if (color == 16) color = defcolor;
+		color = FixupColor(color);
 
 		strupr(filename);
 		for (val = 0; val < numvalid; val++)
@@ -2494,8 +2534,11 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 				if ((unique % 500) == 0)
 					verts = (float*)realloc(verts, sizeof(float)*3*(unique+500));
 				memcpy(&verts[unique*3], &lf->points[j*3], sizeof(float)*3);
+				i = unique;
 				unique++;
 			}
+
+			lf->indices[j] = i;
 		}
 	}
 

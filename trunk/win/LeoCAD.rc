@@ -225,7 +225,6 @@ BEGIN
         MENUITEM "&Save",                       ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM "Save Picture...",             ID_FILE_SAVEPICTURE
-        MENUITEM "Sen&d...",                    ID_FILE_SEND_MAIL
         POPUP "Export"
         BEGIN
             MENUITEM "3D Studio...",                ID_FILE_EXPORT_3DSTUDIO
@@ -306,7 +305,6 @@ BEGIN
         MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
         MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
         MENUITEM "Array...",                    ID_PIECE_ARRAY
-        MENUITEM "Mirror...",                   ID_PIECE_MIRROR, GRAYED
         MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
         MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
         MENUITEM SEPARATOR

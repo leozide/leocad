@@ -1522,9 +1522,9 @@ File* SystemImportClipboard()
 	return clip;
 }
 
-bool Sys_KeyDown (int key)
+bool Sys_KeyDown(int key)
 {
-  return GetKeyState (KEY_CONTROL) < 0;
+	return GetKeyState(key) < 0;
 }
 
 
@@ -1532,7 +1532,7 @@ void SystemPumpMessages()
 {
 	MSG msg;
 
-  while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);

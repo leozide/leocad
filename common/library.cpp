@@ -2101,9 +2101,9 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 			strcat (fn, filename);
 
 #if LC_WINDOWS
-			_strupr(filename);
+			strupr(filename);
 #else
-			_strlwr(filename);
+			strlwr(filename);
 			for (unsigned int i = 0; i < strlen(filename); i++)
 				if (filename[i] == '\\')
 					filename[i] = '/';

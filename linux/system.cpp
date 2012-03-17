@@ -665,7 +665,7 @@ bool SystemDoDialog(int mode, void* param)
       return povraydlg_execute(param) == LC_OK;
 
     case LC_DLG_WAVEFRONT:
-      return filedlg_execute("Save File", (char*)param) == LC_OK;
+      return wavefrontdlg_execute(param) == LC_OK;
 
     case LC_DLG_PREFERENCES:
       return preferencesdlg_execute(param) == LC_OK;

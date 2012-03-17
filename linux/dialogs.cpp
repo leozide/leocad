@@ -1,8 +1,4 @@
-// Linux Dialogs
-//
-
 #include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -26,30 +22,56 @@
 #include "libdlg.h"
 
 // =============================================================================
-// Modal dialog helper functions
+// Helper functions
 
-void dialog_button_callback (GtkWidget *widget, gpointer data)
+static bool read_float(GtkWidget* widget, float* value, float min_value, float max_value)
 {
-  GtkWidget *parent;
-  int *loop, *ret;
+	char buf[256];
 
-  parent = gtk_widget_get_toplevel (widget);
-  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
-  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
+	strcpy(buf, gtk_entry_get_text(GTK_ENTRY(widget)));
+	if (sscanf(buf, "%f", value) == 1)
+	{
+		if (*value >= min_value && *value <= max_value)
+			return true;
+	}
 
-  *loop = 0;
-  *ret = GPOINTER_TO_INT (data);
+	sprintf(buf, "Please enter a value between %g and %g", min_value, max_value);
+	msgbox_execute(buf, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
+	gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
+
+	return false;
 }
 
-gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
+static void write_float(GtkWidget* widget, float value)
 {
-  int *loop;
+	char buf[16];
+	sprintf(buf, "%g", value);
+	gtk_entry_set_text(GTK_ENTRY(widget), buf);
+}
 
-  gtk_widget_hide (widget);
-  loop = (int*)gtk_object_get_data (GTK_OBJECT (widget), "loop");
-  *loop = 0;
+static bool read_int(GtkWidget* widget, int* value, int min_value, int max_value)
+{
+	char buf[256];
 
-  return TRUE;
+	strcpy(buf, gtk_entry_get_text(GTK_ENTRY(widget)));
+	if (sscanf(buf, "%d", value) == 1)
+	{
+		if (*value >= min_value && *value <= max_value)
+			return true;
+	}
+
+	sprintf(buf, "Please enter a value between %d and %d", min_value, max_value);
+	msgbox_execute(buf, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
+	gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
+
+	return false;
+}
+
+static void write_int(GtkWidget* widget, int value)
+{
+	char buf[16];
+	sprintf(buf, "%d", value);
+	gtk_entry_set_text(GTK_ENTRY(widget), buf);
 }
 
 // =============================================================================
@@ -123,15 +145,33 @@ int msgbox_execute(const char* text, const char *caption, int flags)
 	}
 }
 
-
-
-
 // =============================================================================
+// TODO: deprecated, delete
 
+void dialog_button_callback (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *parent;
+  int *loop, *ret;
 
+  parent = gtk_widget_get_toplevel (widget);
+  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
+  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
 
+  *loop = 0;
+  *ret = GPOINTER_TO_INT (data);
+}
 
-// TODO: remove old functions and replace with the above ones
+gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
+{
+  int *loop;
+
+  gtk_widget_hide (widget);
+  loop = (int*)gtk_object_get_data (GTK_OBJECT (widget), "loop");
+  *loop = 0;
+
+  return TRUE;
+}
+
 static int def_ret = 0;
 static int* cur_ret = NULL;
 
@@ -169,523 +209,333 @@ gint dlg_delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data)
   return TRUE;
 }
 
-static bool read_float(GtkWidget* widget, float* value, float min_value, float max_value)
-{
-  char buf[256];
-
-  strcpy (buf, gtk_entry_get_text (GTK_ENTRY (widget)));
-  if (sscanf(buf, "%f", value) == 1)
-  {
-    if (*value >= min_value && *value <= max_value)
-      return true;
-  }
-
-  sprintf (buf, "Please enter a value between %g and %g", min_value, max_value);
-  msgbox_execute (buf, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
-  gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
-
-  return false;
-}
-
-static void write_float(GtkWidget* widget, float value)
-{
-  char buf[16];
-  sprintf (buf, "%g", value);
-  gtk_entry_set_text (GTK_ENTRY (widget), buf);
-}
-
-static bool read_int(GtkWidget* widget, int* value, int min_value, int max_value)
-{
-  char buf[256];
-
-  strcpy (buf, gtk_entry_get_text (GTK_ENTRY (widget)));
-  if (sscanf(buf, "%d", value) == 1)
-  {
-    if (*value >= min_value && *value <= max_value)
-      return true;
-  }
-
-  sprintf (buf, "Please enter a value between %d and %d", min_value, max_value);
-  msgbox_execute (buf, "LeoCAD", LC_MB_OK | LC_MB_ICONERROR);
-  gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
-
-  return false;
-}
-
-static void write_int(GtkWidget* widget, int value)
-{
-  char buf[16];
-  sprintf (buf, "%d", value);
-  gtk_entry_set_text (GTK_ENTRY (widget), buf);
-}
-
-// File Open/Save/Merge dialog
-
-static char* filedlg_str;
-
-static void filedlg_callback(GtkWidget *widget, gpointer data)
-{
-  if (data != NULL)
-  {
-    *cur_ret = LC_OK;
-    strcpy(filedlg_str, gtk_file_selection_get_filename(GTK_FILE_SELECTION(data)));
-  }
-  else
-    *cur_ret = LC_CANCEL;
-}
-
-// FIXME: Deprecated, use GtkFileChooserDialog instead
-int filedlg_execute(const char* caption, char* filename)
-{
-  GtkWidget* dlg;
-  dlg = gtk_file_selection_new (caption);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  filedlg_str = filename;
-
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(dlg)->ok_button),
-     "clicked", (GtkSignalFunc)filedlg_callback, dlg);
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(dlg)->cancel_button),
-     "clicked", (GtkSignalFunc)filedlg_callback, NULL);
-
-//    gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew),"penguin.png");
-
-  return dlg_domodal(dlg, LC_CANCEL);
-}
-
-// Color Selection Dialog
-
-static void colorseldlg_callback(GtkWidget *widget, gpointer data)
-{
-  if (data != NULL)
-  {
-    GtkWidget* dlg = gtk_widget_get_toplevel (widget);
-    double dbl[3];
-    float* color = (float*)data;
-
-    gtk_color_selection_get_color (GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG (dlg)->colorsel), dbl);
-    color[0] = dbl[0];
-    color[1] = dbl[1];
-    color[2] = dbl[2];
-    *cur_ret = LC_OK;
-  }
-  else
-    *cur_ret = LC_CANCEL;
-}
-
-int colorseldlg_execute(void* param)
-{
-  float* color = (float*)param;
-  double dbl[3] = { color[0], color[1], color[2] };
-  GtkWidget* dlg;
-
-  dlg = gtk_color_selection_dialog_new ("Choose Color");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_color_selection_set_color (GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG (dlg)->colorsel), dbl);
-
-  gtk_signal_connect (GTK_OBJECT (GTK_COLOR_SELECTION_DIALOG (dlg)->ok_button),
-     "clicked", (GtkSignalFunc)colorseldlg_callback, param);
-  gtk_signal_connect (GTK_OBJECT (GTK_COLOR_SELECTION_DIALOG (dlg)->cancel_button),
-     "clicked", (GtkSignalFunc)colorseldlg_callback, NULL);
-
-  return dlg_domodal(dlg, LC_CANCEL);
-}
-
+// =============================================================================
 // Array Dialog
 
 typedef struct
 {
-  void* data;
-  GtkWidget *move_x, *move_y, *move_z;
-  GtkWidget *rotate_x, *rotate_y, *rotate_z;
-  GtkWidget *total;
-  GtkWidget *radio1, *radio2, *radio3;
-  GtkWidget *count1, *count2, *count3;
-  GtkWidget *offset_x2, *offset_y2, *offset_z2;
-  GtkWidget *offset_x3, *offset_y3, *offset_z3;
+	void* data;
+	GtkWidget *move_x, *move_y, *move_z;
+	GtkWidget *rotate_x, *rotate_y, *rotate_z;
+	GtkWidget *total;
+	GtkWidget *radio1, *radio2, *radio3;
+	GtkWidget *count1, *count2, *count3;
+	GtkWidget *offset_x2, *offset_y2, *offset_z2;
+	GtkWidget *offset_x3, *offset_y3, *offset_z3;
 } LC_ARRAYDLG_STRUCT;
 
-static void arraydlg_callback(GtkWidget *widget, gpointer data)
+static void arraydlg_adjtotal(GtkWidget *widget, gpointer data)
 {
-  LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
-  LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
+	LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
+	LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
+	char ctot[16];
 
-  if (!read_float(s->move_x, &opts->fMove[0], -1000, 1000)) return;
-  if (!read_float(s->move_y, &opts->fMove[1], -1000, 1000)) return;
-  if (!read_float(s->move_z, &opts->fMove[2], -1000, 1000)) return;
-  if (!read_float(s->rotate_x, &opts->fRotate[0], -360, 360)) return;
-  if (!read_float(s->rotate_y, &opts->fRotate[1], -360, 360)) return;
-  if (!read_float(s->rotate_z, &opts->fRotate[2], -360, 360)) return;
-  if (!read_float(s->offset_x2, &opts->f2D[0], -1000, 1000)) return;
-  if (!read_float(s->offset_y2, &opts->f2D[1], -1000, 1000)) return;
-  if (!read_float(s->offset_z2, &opts->f2D[2], -1000, 1000)) return;
-  if (!read_float(s->offset_x3, &opts->f3D[0], -1000, 1000)) return;
-  if (!read_float(s->offset_y3, &opts->f3D[1], -1000, 1000)) return;
-  if (!read_float(s->offset_z3, &opts->f3D[2], -1000, 1000)) return;
+	if (GTK_TOGGLE_BUTTON(s->radio1)->active)
+		opts->nArrayDimension = 0;
+	else if (GTK_TOGGLE_BUTTON(s->radio2)->active)
+		opts->nArrayDimension = 1;
+	else if (GTK_TOGGLE_BUTTON(s->radio3)->active)
+		opts->nArrayDimension = 2;
 
-  int i;
-  if (!read_int(s->count1, &i, 1, 1000)) return;
-  opts->n1DCount = i;
-  if (!read_int(s->count2, &i, 1, 1000)) return;
-  opts->n2DCount = i;
-  if (!read_int(s->count3, &i, 1, 1000)) return;
-  opts->n3DCount = i;
+	gint tot = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(s->count1)) *
+	           ((opts->nArrayDimension > 0) ? gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(s->count2)) : 1) *
+	           ((opts->nArrayDimension > 1) ? gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(s->count3)) : 1);
 
-  if (GTK_TOGGLE_BUTTON (s->radio1)->active)
-    opts->nArrayDimension = 0;
-  if (GTK_TOGGLE_BUTTON (s->radio2)->active)
-    opts->nArrayDimension = 1;
-  if (GTK_TOGGLE_BUTTON (s->radio3)->active)
-    opts->nArrayDimension = 2;
+	sprintf(ctot, "%i", tot);
 
-  *cur_ret = LC_OK;
+	gtk_entry_set_text(GTK_ENTRY(s->total), ctot);
 }
 
-static void arraydlg_adjtotal (GtkWidget *widget, gpointer data)
+static void arraydlg_radiotoggled(GtkWidget *widget, gpointer data)
 {
-  LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
-  LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
-  char ctot[11];
+	LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
+	LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
 
-  if (GTK_TOGGLE_BUTTON (s->radio1)->active)
-    opts->nArrayDimension = 0;
-  if (GTK_TOGGLE_BUTTON (s->radio2)->active)
-    opts->nArrayDimension = 1;
-  if (GTK_TOGGLE_BUTTON (s->radio3)->active)
-    opts->nArrayDimension = 2;
+	if (GTK_TOGGLE_BUTTON(widget)->active == FALSE)
+		return;
 
-  gint tot = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (s->count1)) *
-        ((opts->nArrayDimension > 0) ? gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(s->count2)) : 1) *
-        ((opts->nArrayDimension > 1) ? gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(s->count3)) : 1);
+	arraydlg_adjtotal(widget, data);
 
-  sprintf (ctot, "%i", tot);
+	if (opts->nArrayDimension > 0)
+	{
+		gtk_widget_set_sensitive(s->count2, TRUE);
+		gtk_widget_set_sensitive(s->offset_x2, TRUE);
+		gtk_widget_set_sensitive(s->offset_y2, TRUE);
+		gtk_widget_set_sensitive(s->offset_z2, TRUE);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(s->count2, FALSE);
+		gtk_widget_set_sensitive(s->offset_x2, FALSE);
+		gtk_widget_set_sensitive(s->offset_y2, FALSE);
+		gtk_widget_set_sensitive(s->offset_z2, FALSE);
+	}
 
-  gtk_entry_set_text (GTK_ENTRY (s->total), ctot);
-}
-
-static void arraydlg_radiotoggled (GtkWidget *widget, gpointer data)
-{
-  LC_ARRAYDLG_STRUCT* s = (LC_ARRAYDLG_STRUCT*)data;
-  LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s->data;
-
-  if (GTK_TOGGLE_BUTTON (widget)->active == FALSE)
-    return;
-
-  arraydlg_adjtotal (widget, data);
-
-  if (opts->nArrayDimension > 0)
-  {
-    gtk_widget_set_sensitive (s->count2, TRUE);
-    gtk_widget_set_sensitive (s->offset_x2, TRUE);
-    gtk_widget_set_sensitive (s->offset_y2, TRUE);
-    gtk_widget_set_sensitive (s->offset_z2, TRUE);
-  }
-  else
-  {
-    gtk_widget_set_sensitive (s->count2, FALSE);
-    gtk_widget_set_sensitive (s->offset_x2, FALSE);
-    gtk_widget_set_sensitive (s->offset_y2, FALSE);
-    gtk_widget_set_sensitive (s->offset_z2, FALSE);
-  }
-
-  if (opts->nArrayDimension > 1)
-  {
-    gtk_widget_set_sensitive (s->count3, TRUE);
-    gtk_widget_set_sensitive (s->offset_x3, TRUE);
-    gtk_widget_set_sensitive (s->offset_y3, TRUE);
-    gtk_widget_set_sensitive (s->offset_z3, TRUE);
-  }
-  else
-  {
-    gtk_widget_set_sensitive (s->count3, FALSE);
-    gtk_widget_set_sensitive (s->offset_x3, FALSE);
-    gtk_widget_set_sensitive (s->offset_y3, FALSE);
-    gtk_widget_set_sensitive (s->offset_z3, FALSE);
-  }
+	if (opts->nArrayDimension > 1)
+	{
+		gtk_widget_set_sensitive(s->count3, TRUE);
+		gtk_widget_set_sensitive(s->offset_x3, TRUE);
+		gtk_widget_set_sensitive(s->offset_y3, TRUE);
+		gtk_widget_set_sensitive(s->offset_z3, TRUE);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(s->count3, FALSE);
+		gtk_widget_set_sensitive(s->offset_x3, FALSE);
+		gtk_widget_set_sensitive(s->offset_y3, FALSE);
+		gtk_widget_set_sensitive(s->offset_z3, FALSE);
+	}
 }
 
 int arraydlg_execute(void* param)
 {
-  GtkObject *adj;
-  GtkWidget *dlg;
-  GtkWidget *vbox1, *vbox2;
-  GtkWidget *hbox1, *hbox2;
-  GtkWidget *frame, *table, *label, *button;
-  GSList *radio_group = (GSList*)NULL;
-  LC_ARRAYDLG_STRUCT s;
-  s.data = param;
+	GtkObject *adj;
+	GtkWidget *dlg;
+	GtkWidget *vbox1, *hbox1;
+	GtkWidget *frame, *table, *label;
+	GSList *radio_group = (GSList*)NULL;
+	LC_ARRAYDLG_STRUCT s;
+	s.data = param;
+	int ret;
 
-  dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-		      GTK_SIGNAL_FUNC (dlg_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_widget_set_usize (dlg, 450, 320);
-  gtk_window_set_title (GTK_WINDOW (dlg), "Array Options");
-  gtk_window_set_policy (GTK_WINDOW (dlg), FALSE, FALSE, FALSE);
-  gtk_widget_realize (dlg);
+	dlg = gtk_dialog_new_with_buttons("Array Options", GTK_WINDOW(((GtkWidget*)(*main_window))),
+	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (dlg), vbox1);
+	vbox1 = GTK_DIALOG(dlg)->vbox;
+	gtk_box_set_spacing(GTK_BOX(vbox1), 10);
 
-  hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox1);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox1, TRUE, TRUE, 0);
+	hbox1 = gtk_hbox_new(FALSE, 10);
+	gtk_widget_show(hbox1);
+	gtk_box_pack_start(GTK_BOX(vbox1), hbox1, TRUE, TRUE, 0);
 
-  frame = gtk_frame_new ("Transformation (Incremental)");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (hbox1), frame, TRUE, TRUE, 0);
-  gtk_container_border_width (GTK_CONTAINER (frame), 10);
+	frame = gtk_frame_new("Transformation (Incremental)");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(hbox1), frame, TRUE, TRUE, 0);
 
-  table = gtk_table_new (3, 4, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 20);
+	table = gtk_table_new(3, 4, FALSE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(frame), table);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 10);
+	gtk_container_border_width(GTK_CONTAINER(table), 5);
 
-  label = gtk_label_new ("X");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 1, 2, 0, 1,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	label = gtk_label_new("X");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 0, 1);
 
-  label = gtk_label_new ("Y");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 2, 3, 0, 1,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	label = gtk_label_new("Y");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 2, 3, 0, 1);
 
-  label = gtk_label_new ("Z");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 3, 4, 0, 1,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	label = gtk_label_new("Z");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 3, 4, 0, 1);
 
-  label = gtk_label_new ("Move");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	label = gtk_label_new("Move");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
-  s.move_x = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.move_x);
-  gtk_table_attach (GTK_TABLE (table), s.move_x, 1, 2, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-  gtk_widget_set_usize (s.move_x, 60, -2);
+	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
+	s.move_x = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.move_x);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.move_x, 1, 2, 1, 2);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.move_x), 4);
  
-  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
-  s.move_y = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.move_y);
-  gtk_table_attach (GTK_TABLE (table), s.move_y, 2, 3, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.move_y, 60, -2);
+	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
+	s.move_y = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.move_y);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.move_y, 2, 3, 1, 2);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.move_y), 4);
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 4, 12, 12);
-  s.move_z = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.move_z);
-  gtk_table_attach (GTK_TABLE (table), s.move_z, 3, 4, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.move_z, 60, -2);
+	adj = gtk_adjustment_new(0, -1000, 1000, 4, 12, 0);
+	s.move_z = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.move_z);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.move_z, 3, 4, 1, 2);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.move_z), 4);
 
-  label = gtk_label_new ("Rotate");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	label = gtk_label_new("Rotate");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
 
-  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
-  s.rotate_x = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (s.rotate_x), TRUE);
-  gtk_widget_show (s.rotate_x);
-  gtk_table_attach (GTK_TABLE (table), s.rotate_x, 1, 2, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-  gtk_widget_set_usize (s.rotate_x, 60, -2);
+	adj = gtk_adjustment_new(0, -180, 180, 1, 10, 0);
+	s.rotate_x = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(s.rotate_x), TRUE);
+	gtk_widget_show(s.rotate_x);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.rotate_x, 1, 2, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.rotate_x), 4);
 
-  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
-  s.rotate_y = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (s.rotate_y), TRUE);
-  gtk_widget_show (s.rotate_y);
-  gtk_table_attach (GTK_TABLE (table), s.rotate_y, 2, 3, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.rotate_y, 60, -2);
+	adj = gtk_adjustment_new(0, -180, 180, 1, 10, 0);
+	s.rotate_y = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(s.rotate_y), TRUE);
+	gtk_widget_show(s.rotate_y);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.rotate_y, 2, 3, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.rotate_y), 4);
 
-  adj = gtk_adjustment_new (0, -180, 180, 1, 10, 10);
-  s.rotate_z = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (s.rotate_z), TRUE);
-  gtk_widget_show (s.rotate_z);
-  gtk_table_attach (GTK_TABLE (table), s.rotate_z, 3, 4, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.rotate_z, 60, -2);
+	adj = gtk_adjustment_new(0, -180, 180, 1, 10, 0);
+	s.rotate_z = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(s.rotate_z), TRUE);
+	gtk_widget_show(s.rotate_z);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.rotate_z, 3, 4, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.rotate_x), 4);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox2, FALSE, FALSE, 0);
-  gtk_widget_set_usize (vbox2, 115, 142);
+	label = gtk_label_new("Total:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, TRUE, 0);
 
-  button = gtk_button_new_with_label ("OK");
-  gtk_widget_show (button);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (arraydlg_callback), &s);
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 0);
-  gtk_container_border_width (GTK_CONTAINER (button), 12);
-  GtkAccelGroup *accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (dlg), accel_group);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	s.total = gtk_entry_new();
+	gtk_widget_show(s.total);
+	gtk_box_pack_start(GTK_BOX(hbox1), s.total, FALSE, TRUE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.total), 4);
+	gtk_entry_set_editable(GTK_ENTRY(s.total), FALSE);
 
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_widget_show (button);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-		      GTK_SIGNAL_FUNC (dlg_default_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 0);
-  gtk_container_border_width (GTK_CONTAINER (button), 12);
-  gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
+	frame = gtk_frame_new("Dimensions");
+	gtk_widget_show(frame);
+	gtk_box_pack_start(GTK_BOX(vbox1), frame, TRUE, TRUE, 0);
+	gtk_container_border_width(GTK_CONTAINER(frame), 10);
 
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox2, TRUE, TRUE, 0);
+	table = gtk_table_new(4, 5, FALSE);
+	gtk_widget_show(table);
+	gtk_container_add(GTK_CONTAINER(frame), table);
+	gtk_container_border_width(GTK_CONTAINER(table), 10);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 20);
 
-  label = gtk_label_new ("Total:");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, TRUE, TRUE, 0);
+	label = gtk_label_new("Count");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 0, 1);
 
-  s.total = gtk_entry_new ();
-  gtk_widget_show (s.total);
-  gtk_box_pack_start (GTK_BOX (hbox2), s.total, TRUE, TRUE, 15);
-  gtk_widget_set_usize (s.total, 50, -2);
-  gtk_entry_set_editable (GTK_ENTRY (s.total), FALSE);
+	label = gtk_label_new("Offsets");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 3, 4, 0, 1);
 
-  frame = gtk_frame_new ("Dimensions");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox1), frame, TRUE, TRUE, 5);
-  gtk_container_border_width (GTK_CONTAINER (frame), 10);
+	s.radio1 = gtk_radio_button_new_with_label(radio_group, "1D");
+	radio_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.radio1));
+	gtk_widget_show(s.radio1);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.radio1, 0, 1, 1, 2);
+	gtk_signal_connect(GTK_OBJECT(s.radio1), "toggled", GTK_SIGNAL_FUNC(arraydlg_radiotoggled), &s);
 
-  table = gtk_table_new (4, 5, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_border_width (GTK_CONTAINER (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 20);
+	s.radio2 = gtk_radio_button_new_with_label(radio_group, "2D");
+	radio_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.radio2));
+	gtk_widget_show(s.radio2);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.radio2, 0, 1, 2, 3);
+	gtk_signal_connect(GTK_OBJECT(s.radio2), "toggled", GTK_SIGNAL_FUNC(arraydlg_radiotoggled), &s);
 
-  label = gtk_label_new ("Count");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 1, 2, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 
-		    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	s.radio3 = gtk_radio_button_new_with_label(radio_group, "3D");
+	radio_group = gtk_radio_button_group(GTK_RADIO_BUTTON(s.radio3));
+	gtk_widget_show(s.radio3);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.radio3, 0, 1, 3, 4);
+	gtk_signal_connect(GTK_OBJECT(s.radio3), "toggled", GTK_SIGNAL_FUNC(arraydlg_radiotoggled), &s);
 
-  label = gtk_label_new ("Offsets");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 3, 4, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-		    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	adj = gtk_adjustment_new(10, 1, 1000, 1, 10, 0);
+	s.count1 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.count1);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.count1, 1, 2, 1, 2);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.count1), 4);
+	gtk_signal_connect(GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC(arraydlg_adjtotal), &s);
 
-  s.radio1 = gtk_radio_button_new_with_label (radio_group, "1D");
-  radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.radio1));
-  gtk_widget_show (s.radio1);
-  gtk_table_attach (GTK_TABLE (table), s.radio1, 0, 1, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_signal_connect (GTK_OBJECT (s.radio1), "toggled",
-		      GTK_SIGNAL_FUNC (arraydlg_radiotoggled), &s);
+	adj = gtk_adjustment_new(1, 1, 1000, 1, 10, 0);
+	s.count2 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.count2);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.count2, 1, 2, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.count2), 4);
+	gtk_signal_connect(GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC(arraydlg_adjtotal), &s);
 
-  s.radio2 = gtk_radio_button_new_with_label (radio_group, "2D");
-  radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.radio2));
-  gtk_widget_show (s.radio2);
-  gtk_table_attach (GTK_TABLE (table), s.radio2, 0, 1, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_signal_connect (GTK_OBJECT (s.radio2), "toggled",
-		      GTK_SIGNAL_FUNC (arraydlg_radiotoggled), &s);
+	adj = gtk_adjustment_new(1, 1, 1000, 1, 10, 0);
+	s.count3 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.count3);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.count3, 1, 2, 3, 4);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.count3), 4);
+	gtk_signal_connect(GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC(arraydlg_adjtotal), &s);
 
-  s.radio3 = gtk_radio_button_new_with_label (radio_group, "3D");
-  radio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (s.radio3));
-  gtk_widget_show (s.radio3);
-  gtk_table_attach (GTK_TABLE (table), s.radio3, 0, 1, 3, 4,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_signal_connect (GTK_OBJECT (s.radio3), "toggled",
-		      GTK_SIGNAL_FUNC (arraydlg_radiotoggled), &s);
+	label = gtk_label_new("X");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 2, 3, 1, 2);
 
-  adj = gtk_adjustment_new (10, 1, 1000, 1, 10, 1);
-  s.count1 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.count1);
-  gtk_table_attach (GTK_TABLE (table), s.count1, 1, 2, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.count1, 60, -2);
-  gtk_signal_connect (GTK_OBJECT (adj), "value_changed",
-		      GTK_SIGNAL_FUNC (arraydlg_adjtotal), &s);
+	label = gtk_label_new("Y");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 3, 4, 1, 2);
 
-  adj = gtk_adjustment_new (1, 1, 1000, 1, 10, 1);
-  s.count2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.count2);
-  gtk_table_attach (GTK_TABLE (table), s.count2, 1, 2, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.count2, 60, -2);
-  gtk_signal_connect (GTK_OBJECT (adj), "value_changed",
-		      GTK_SIGNAL_FUNC (arraydlg_adjtotal), &s);
+	label = gtk_label_new("Z");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 4, 5, 1, 2);
 
-  adj = gtk_adjustment_new (1, 1, 1000, 1, 10, 1);
-  s.count3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.count3);
-  gtk_table_attach (GTK_TABLE (table), s.count3, 1, 2, 3, 4,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.count3, 60, -2);
-  gtk_signal_connect (GTK_OBJECT (adj), "value_changed",
-		      GTK_SIGNAL_FUNC (arraydlg_adjtotal), &s);
+	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
+	s.offset_x2 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.offset_x2);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.offset_x2, 2, 3, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.offset_x2), 4);
 
-  label = gtk_label_new ("X");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 2, 3, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
+	s.offset_y2 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.offset_y2);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.offset_y2, 3, 4, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.offset_y2), 4);
 
-  label = gtk_label_new ("Y");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 3, 4, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	adj = gtk_adjustment_new(0, -1000, 1000, 4, 12, 0);
+	s.offset_z2 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.offset_z2);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.offset_z2, 4, 5, 2, 3);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.offset_z2), 4);
 
-  label = gtk_label_new ("Z");
-  gtk_widget_show (label);
-  gtk_table_attach (GTK_TABLE (table), label, 4, 5, 1, 2,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
+	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
+	s.offset_x3 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.offset_x3);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.offset_x3, 2, 3, 3, 4);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.offset_x3), 4);
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
-  s.offset_x2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.offset_x2);
-  gtk_table_attach (GTK_TABLE (table), s.offset_x2, 2, 3, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_x2, 60, -2);
+	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
+	s.offset_y3 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.offset_y3);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.offset_y3, 3, 4, 3, 4);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.offset_y3), 4);
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
-  s.offset_y2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.offset_y2);
-  gtk_table_attach (GTK_TABLE (table), s.offset_y2, 3, 4, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_y2, 60, -2);
+	adj = gtk_adjustment_new(0, -1000, 1000, 4, 12, 0);
+	s.offset_z3 = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+	gtk_widget_show(s.offset_z3);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.offset_z3, 4, 5, 3, 4);
+	gtk_entry_set_width_chars(GTK_ENTRY(s.offset_z3), 4);
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 4, 12, 10);
-  s.offset_z2 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.offset_z2);
-  gtk_table_attach (GTK_TABLE (table), s.offset_z2, 4, 5, 2, 3,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_z2, 60, -2);
+	// Initialize dialog
+	arraydlg_radiotoggled(s.radio1, &s);
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
-  s.offset_x3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.offset_x3);
-  gtk_table_attach (GTK_TABLE (table), s.offset_x3, 2, 3, 3, 4,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_x3, 60, -2);
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		ret = LC_OK;
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 10, 10, 10);
-  s.offset_y3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.offset_y3);
-  gtk_table_attach (GTK_TABLE (table), s.offset_y3, 3, 4, 3, 4,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_y3, 60, -2);
+		LC_ARRAYDLG_OPTS* opts = (LC_ARRAYDLG_OPTS*)s.data;
 
-  adj = gtk_adjustment_new (0, -1000, 1000, 4, 12, 10);
-  s.offset_z3 = gtk_spin_button_new (GTK_ADJUSTMENT (adj), 1, 0);
-  gtk_widget_show (s.offset_z3);
-  gtk_table_attach (GTK_TABLE (table), s.offset_z3, 4, 5, 3, 4,
-                    (GtkAttachOptions) 0, (GtkAttachOptions) 0, 0, 0);
-  gtk_widget_set_usize (s.offset_z3, 60, -2);
+		if (!read_float(s.move_x, &opts->fMove[0], -1000, 1000) || !read_float(s.move_y, &opts->fMove[1], -1000, 1000) ||
+		    !read_float(s.move_z, &opts->fMove[2], -1000, 1000) || !read_float(s.rotate_x, &opts->fRotate[0], -360, 360) ||
+		    !read_float(s.rotate_y, &opts->fRotate[1], -360, 360) || !read_float(s.rotate_z, &opts->fRotate[2], -360, 360) ||
+		    !read_float(s.offset_x2, &opts->f2D[0], -1000, 1000) || !read_float(s.offset_y2, &opts->f2D[1], -1000, 1000) ||
+		    !read_float(s.offset_z2, &opts->f2D[2], -1000, 1000) || !read_float(s.offset_x3, &opts->f3D[0], -1000, 1000) ||
+		    !read_float(s.offset_y3, &opts->f3D[1], -1000, 1000) || !read_float(s.offset_z3, &opts->f3D[2], -1000, 1000))
+		    ret = LC_CANCEL;
 
-  // Initialize dialog
-  arraydlg_radiotoggled (s.radio1, &s);
+		int Count1, Count2, Count3;
 
-  return dlg_domodal(dlg, LC_CANCEL);
+		if (!read_int(s.count1, &Count1, 1, 1000) || !read_int(s.count2, &Count2, 1, 1000) ||
+		    !read_int(s.count3, &Count3, 1, 1000))
+		    ret = LC_CANCEL;
+
+		opts->n1DCount = Count1;
+		opts->n2DCount = Count2;
+		opts->n3DCount = Count3;
+
+		if (GTK_TOGGLE_BUTTON (s.radio1)->active)
+			opts->nArrayDimension = 0;
+		else if (GTK_TOGGLE_BUTTON (s.radio2)->active)
+			opts->nArrayDimension = 1;
+		else if (GTK_TOGGLE_BUTTON (s.radio3)->active)
+			opts->nArrayDimension = 2;
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
 }
 
 // =============================================================================
@@ -702,7 +552,7 @@ int aboutdlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons("About LeoCAD", GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
 	gtk_dialog_set_has_separator(GTK_DIALOG(dlg), false);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	gtk_widget_realize(dlg);
@@ -868,14 +718,12 @@ static void htmldlg_browse_output(GtkWidget *widget, gpointer data)
 	LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
 	GtkWidget* dlg;
 
-	dlg = gtk_file_chooser_dialog_new("Select output path", GTK_WINDOW(s->dlg), 
-	                                  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	dlg = gtk_file_chooser_dialog_new("Select output path", GTK_WINDOW(s->dlg), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->directory)));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -899,7 +747,7 @@ int htmldlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons("HTML Options", GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
 
@@ -1004,8 +852,10 @@ int htmldlg_execute(void* param)
 	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.single));
 	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.list_step));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
+		ret = LC_OK;
+
 		opts->singlepage = (GTK_TOGGLE_BUTTON(s.single)->active) ? true : false;
 		opts->index = (GTK_TOGGLE_BUTTON(s.index)->active) ? true : false;
 		opts->images = (GTK_TOGGLE_BUTTON(s.images)->active) ? true : false;
@@ -1014,7 +864,6 @@ int htmldlg_execute(void* param)
 		opts->highlight = (GTK_TOGGLE_BUTTON(s.highlight)->active) ? true : false;
 		opts->htmlext = (GTK_TOGGLE_BUTTON(s.htmlext)->active) ? true : false;
 		strcpy(opts->path, gtk_entry_get_text(GTK_ENTRY(s.directory)));
-		ret = LC_OK;
 	}
 	else
 		ret = LC_CANCEL;
@@ -1052,7 +901,7 @@ int imageoptsdlg_execute(GtkWidget* parent, void* param, bool from_htmldlg)
 
 	dlg = gtk_dialog_new_with_buttons("Image Options", GTK_WINDOW(parent),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 
 	vbox = GTK_DIALOG(dlg)->vbox;
@@ -1226,7 +1075,7 @@ int imageoptsdlg_execute(GtkWidget* parent, void* param, bool from_htmldlg)
 	else
 		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.single), TRUE);
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		int i;
 
@@ -1307,10 +1156,8 @@ static void povraydlg_browse_output(GtkWidget *widget, gpointer data)
 	GtkFileFilter* filter;
 	GtkWidget* dlg;
 
-	dlg = gtk_file_chooser_dialog_new("Export As", GTK_WINDOW(s->dlg), 
-	                                  GTK_FILE_CHOOSER_ACTION_SAVE,
-	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	dlg = gtk_file_chooser_dialog_new("Export As", GTK_WINDOW(s->dlg), GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->output)));
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
@@ -1325,7 +1172,7 @@ static void povraydlg_browse_output(GtkWidget *widget, gpointer data)
 	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "POV-Ray files (*.pov)");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -1341,14 +1188,12 @@ static void povraydlg_browse_povray(GtkWidget *widget, gpointer data)
 	LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
 	GtkWidget* dlg;
 
-	dlg = gtk_file_chooser_dialog_new("Select POV-Ray executable", GTK_WINDOW(s->dlg), 
-	                                  GTK_FILE_CHOOSER_ACTION_OPEN,
-	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	dlg = gtk_file_chooser_dialog_new("Select POV-Ray executable", GTK_WINDOW(s->dlg), GTK_FILE_CHOOSER_ACTION_OPEN,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->pov)));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -1364,14 +1209,12 @@ static void povraydlg_browse_lgeo(GtkWidget *widget, gpointer data)
 	LC_POVRAYDLG_STRUCT* s = (LC_POVRAYDLG_STRUCT*)data;
 	GtkWidget* dlg;
 
-	dlg = gtk_file_chooser_dialog_new("Select LGEO path", GTK_WINDOW(s->dlg), 
-	                                  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	dlg = gtk_file_chooser_dialog_new("Select LGEO path", GTK_WINDOW(s->dlg), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), gtk_entry_get_text(GTK_ENTRY(s->lgeo)));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -1393,7 +1236,7 @@ int povraydlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons("POV-Ray Export", GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
 
@@ -1477,7 +1320,7 @@ int povraydlg_execute(void* param)
 	gtk_entry_set_text(GTK_ENTRY(s.pov), Sys_ProfileLoadString("Settings", "POV-Ray", ""));
 	gtk_entry_set_text(GTK_ENTRY(s.lgeo), Sys_ProfileLoadString("Settings", "LGEO", ""));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		ret = LC_OK;
 
@@ -1491,6 +1334,49 @@ int povraydlg_execute(void* param)
 		Sys_ProfileSaveInt("Settings", "POV Render", opts->render);
 		Sys_ProfileSaveString("Settings", "POV-Ray", opts->povpath);
 		Sys_ProfileSaveString("Settings", "LGEO", opts->libpath);
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
+}
+
+// =============================================================================
+// Wavefront Dialog
+
+int wavefrontdlg_execute(void* param)
+{
+	GtkFileFilter* filter;
+	GtkWidget* dlg;
+	int ret;
+
+	dlg = gtk_file_chooser_dialog_new("Export As", GTK_WINDOW(((GtkWidget*)(*main_window))), GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_OK, NULL);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), (char*)param);
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "All Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.[oO][bB][jJ]");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "Wavefront Files (*.obj)");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		char *filename;
+
+		ret = LC_OK;
+
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		strcpy((char*)param, filename);
+		g_free(filename);
 	}
 	else
 		ret = LC_CANCEL;
@@ -1603,8 +1489,27 @@ static void preferencesdlg_default(GtkWidget *widget, gpointer data)
 
 static void preferencesdlg_color(GtkWidget *widget, gpointer data)
 {
-	if (colorseldlg_execute(data) == LC_OK)
-		set_button_pixmap(widget, (float*)data);
+	GtkWidget* dlg;
+	float* color = (float*)data;
+	double dbl[3] = { color[0], color[1], color[2] };
+
+	dlg = gtk_color_selection_dialog_new("Choose Color");
+	gtk_window_set_transient_for(GTK_WINDOW(dlg), GTK_WINDOW(gtk_widget_get_toplevel(widget)));
+	gtk_color_selection_set_color(GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(dlg)->colorsel), dbl);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		float* color = (float*)data;
+
+		gtk_color_selection_get_color(GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(dlg)->colorsel), dbl);
+		color[0] = dbl[0];
+		color[1] = dbl[1];
+		color[2] = dbl[2];
+
+		set_button_pixmap(widget, color);
+	}
+
+	gtk_widget_destroy(dlg);
 }
 
 static void preferencesdlg_colorbutton_map(GtkWidget *widget, gpointer d)
@@ -1625,7 +1530,7 @@ int preferencesdlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons("Preferences", GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
 
@@ -1956,7 +1861,7 @@ int preferencesdlg_execute(void* param)
 	gtk_entry_set_text(GTK_ENTRY(s.scn_imagename), opts->strBackground);
 	write_int(s.scn_density, (int)(opts->fDensity*100));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		LC_PREFERENCESDLG_OPTS TempOpts;
 
@@ -2014,7 +1919,7 @@ int propertiesdlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons(text, GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
 
@@ -2309,7 +2214,7 @@ int propertiesdlg_execute(void* param)
 	gtk_widget_show(label);
 	set_notebook_tab(notebook, 2, label);
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		ret = LC_OK;
 
@@ -2384,7 +2289,7 @@ int groupeditdlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons("Edit Groups", GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	gtk_widget_set_usize(dlg, 450, 280);
 	s.dlg = dlg;
@@ -2412,7 +2317,7 @@ int groupeditdlg_execute(void* param)
 
 	gtk_clist_thaw(GTK_CLIST(ctree));
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		ret = LC_OK;
 	}
@@ -2444,7 +2349,7 @@ int groupdlg_execute(void* param)
 
 	dlg = gtk_dialog_new_with_buttons("Group Name", GTK_WINDOW(((GtkWidget*)(*main_window))),
 	                                  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-	                                  GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
 
@@ -2457,7 +2362,7 @@ int groupdlg_execute(void* param)
 	gtk_entry_set_width_chars(GTK_ENTRY(s.entry), 30);
 	gtk_entry_set_text(GTK_ENTRY(s.entry), (char*)param);
 
-	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_ACCEPT)
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		ret = LC_OK;
 

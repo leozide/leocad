@@ -86,22 +86,35 @@ void Sys_FinishMemoryRender(void* param)
 // Misc stuff
 
 // FIXME: should have a table of LC_KEY_* defined
-bool Sys_KeyDown (int key)
+bool Sys_KeyDown(int Key)
 {
-  char keys[32];
-  int x;
+	char keys[32];
+	int x;
 
-  XQueryKeymap (GDK_DISPLAY (), keys);
+	XQueryKeymap(GDK_DISPLAY(), keys);
 
-  x = XKeysymToKeycode (GDK_DISPLAY (), XK_Control_L);
-  if (keys[x/8] & (1 << (x % 8)))
-    return true;
+	if (Key == KEY_CONTROL)
+	{
+		x = XKeysymToKeycode(GDK_DISPLAY(), XK_Control_L);
+		if (keys[x/8] & (1 << (x % 8)))
+			return true;
 
-  x = XKeysymToKeycode (GDK_DISPLAY (), XK_Control_R);
-  if (keys[x/8] & (1 << (x % 8)))
-    return true;
+		x = XKeysymToKeycode(GDK_DISPLAY(), XK_Control_R);
+		if (keys[x/8] & (1 << (x % 8)))
+			return true;
+	}
+	else if (Key == KEY_ALT)
+	{
+		x = XKeysymToKeycode(GDK_DISPLAY(), XK_Alt_L);
+		if (keys[x/8] & (1 << (x % 8)))
+			return true;
 
-  return false;
+		x = XKeysymToKeycode(GDK_DISPLAY(), XK_Alt_R);
+		if (keys[x/8] & (1 << (x % 8)))
+			return true;
+	}
+
+	return false;
 }
 
 

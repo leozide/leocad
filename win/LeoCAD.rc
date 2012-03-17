@@ -80,13 +80,9 @@ IDR_PARTFRAME           ICON                    "res\\idr_part.ico"
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
-IDB_VIEWPORTS           BITMAP                  "res\\views.bmp"
 IDR_TOOLSBAR            BITMAP                  "res\\toolsbar.bmp"
 IDR_ANIMATORBAR         BITMAP                  "res\\animator.bmp"
 IDB_PARTICONS           BITMAP                  "res\\particon.bmp"
-IDB_PIECE               BITMAP                  "res\\piece.bmp"
-IDB_CAMERA              BITMAP                  "res\\camera.bmp"
-IDB_LIGHT               BITMAP                  "res\\light.bmp"
 IDR_FULLSCREEN          BITMAP                  "res\\fullscr.bmp"
 IDR_LIBRARY             BITMAP                  "res\\library.bmp"
 IDR_TERRAIN             BITMAP                  "res\\terrain.bmp"
@@ -293,23 +289,6 @@ BEGIN
         MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
         MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
         MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
-        POPUP "&Viewports"
-        BEGIN
-            MENUITEM "01",                          ID_VIEWPORT01
-            MENUITEM "02",                          ID_VIEWPORT02
-            MENUITEM "03",                          ID_VIEWPORT03
-            MENUITEM "04",                          ID_VIEWPORT04
-            MENUITEM "05",                          ID_VIEWPORT05
-            MENUITEM "06",                          ID_VIEWPORT06
-            MENUITEM "07",                          ID_VIEWPORT07
-            MENUITEM "08",                          ID_VIEWPORT08, MENUBARBREAK
-            MENUITEM "09",                          ID_VIEWPORT09
-            MENUITEM "10",                          ID_VIEWPORT10
-            MENUITEM "11",                          ID_VIEWPORT11
-            MENUITEM "12",                          ID_VIEWPORT12
-            MENUITEM "13",                          ID_VIEWPORT13
-            MENUITEM "14",                          ID_VIEWPORT14
-        END
         MENUITEM SEPARATOR
         POPUP "Toolbars"
         BEGIN
@@ -1578,25 +1557,6 @@ BEGIN
     ID_SNAP_ON              "3D snap toggle\n3D Snap Toggle"
     ID_SNAP_ANGLE           "Angle snap toggle\nAngle Snap Toggle"
     ID_LIBDLG_FILE_PRINTCATALOG "Print Catalog"
-    ID_VIEWPORT01           "View"
-    ID_VIEWPORT02           "View"
-    ID_VIEWPORT03           "View"
-    ID_VIEWPORT04           "View"
-    ID_VIEWPORT05           "View"
-END
-
-STRINGTABLE
-BEGIN
-    ID_VIEWPORT06           "View"
-    ID_VIEWPORT07           "View"
-    ID_VIEWPORT08           "View"
-    ID_VIEWPORT09           "View"
-    ID_VIEWPORT10           "View"
-    ID_VIEWPORT11           "View"
-    ID_VIEWPORT12           "View"
-    ID_VIEWPORT13           "View"
-    ID_VIEWPORT14           "View"
-    ID_PIECE_GROUP01        "Plates"
 END
 
 STRINGTABLE
@@ -1643,45 +1603,6 @@ BEGIN
     IDS_COLOR26             "Light Pink"
     IDS_COLOR27             "Turquoise"
     IDS_COLOR28             "Silver"
-END
-
-STRINGTABLE
-BEGIN
-    ID_PIECE_GROUP02        "Bricks"
-    ID_PIECE_GROUP03        "Tiles"
-    ID_PIECE_GROUP04        "Slope Bricks"
-    ID_PIECE_GROUP05        "Technic"
-    ID_PIECE_GROUP06        "Space"
-    ID_PIECE_GROUP07        "Train"
-    ID_PIECE_GROUP08        "Other Bricks"
-    ID_PIECE_GROUP09        "Accessories"
-    ID_PIECE_GROUP10        "Group 10"
-    ID_PIECE_GROUP11        "Group 11"
-    ID_PIECE_GROUP12        "Group 12"
-    ID_PIECE_GROUP13        "Group 13"
-    ID_PIECE_GROUP14        "Group 14"
-    ID_PIECE_GROUP15        "Group 15"
-    ID_PIECE_GROUP16        "Group 16"
-    ID_PIECE_GROUP17        "Group 17"
-END
-
-STRINGTABLE
-BEGIN
-    ID_PIECE_GROUP18        "Group 18"
-    ID_PIECE_GROUP19        "Group 19"
-    ID_PIECE_GROUP20        "Group 20"
-    ID_PIECE_GROUP21        "Group 21"
-    ID_PIECE_GROUP22        "Group 22"
-    ID_PIECE_GROUP23        "Group 23"
-    ID_PIECE_GROUP24        "Group 24"
-    ID_PIECE_GROUP25        "Group 25"
-    ID_PIECE_GROUP26        "Group 26"
-    ID_PIECE_GROUP27        "Group 27"
-    ID_PIECE_GROUP28        "Group 28"
-    ID_PIECE_GROUP29        "Group 29"
-    ID_PIECE_GROUP30        "Group 30"
-    ID_PIECE_GROUP31        "Group 31"
-    ID_PIECE_GROUP32        "Group 32"
 END
 
 STRINGTABLE

@@ -397,19 +397,6 @@ void SystemInit()
 	g_hcurWaitCursorRestore = NULL;
 }
 
-// Viewport menu.
-void SystemUpdateViewport(int nNew, int nOld)
-{
-	/*
-	CMenu* pMenu = GetMainMenu(2);
-	if (!pMenu)
-		return;
-	pMenu = pMenu->GetSubMenu(13);
-	pMenu->CheckMenuItem(nOld + ID_VIEWPORT01, MF_BYCOMMAND | MF_UNCHECKED);
-	pMenu->CheckMenuItem(nNew + ID_VIEWPORT01, MF_BYCOMMAND | MF_CHECKED);
-	*/
-}
-
 static void CheckToolBarButton(CMFCToolBar& ToolBar, int ID, bool Check)
 {
 	int Index = ToolBar.CommandToIndex(ID);

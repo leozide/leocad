@@ -38,9 +38,6 @@
     <ClCompile Include="basewnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bmpmenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cadbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -581,9 +578,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ArrayDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Bmpmenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CADBar.h">

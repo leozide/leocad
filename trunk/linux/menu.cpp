@@ -117,6 +117,68 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   create_menu_item (menu, "_Select by Name...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_EDIT_SELECT_BYNAME, "menu_edit_select_byname");
 
+  // View menu
+  menu = create_sub_menu (menu_bar, "_View", accel);
+  menu_tearoff (menu);
+
+  create_menu_item (menu, "_Preferences...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_PREFERENCES, "menu_view_preferences");
+  menu_separator (menu);
+
+  create_menu_item (menu, "Zoom _In", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_ZOOMIN, "menu_view_zoomin");
+  create_menu_item (menu, "Zoom _Out", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_ZOOMOUT, "menu_view_zoomout");
+  create_menu_item (menu, "Zoom E_xtents", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_ZOOMEXTENTS, "menu_view_zoomextents");
+
+  menu_in_menu = create_menu_in_menu (menu, "_Cameras", accel);
+  gtk_object_set_data (window, "cameras_menu", menu_in_menu);
+
+  menu_in_menu = create_menu_in_menu (menu, "S_tep", accel);
+  create_menu_item (menu_in_menu, "Fi_rst", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_FIRST, "menu_view_step_first");
+  create_menu_item (menu_in_menu, "Pre_vious", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_PREVIOUS, "menu_view_step_previous");
+  create_menu_item (menu_in_menu, "Ne_xt", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_NEXT, "menu_view_step_next");
+  create_menu_item (menu_in_menu, "_Last", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_LAST, "menu_view_step_last");
+  menu_separator (menu_in_menu);
+  create_menu_item (menu_in_menu, "_Insert", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_INSERT, "menu_view_step_insert");
+  create_menu_item (menu_in_menu, "_Delete", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_STEP_DELETE, "menu_view_step_delete");
+
+//  create_menu_item (menu, "_Create", accel, GTK_SIGNAL_FUNC (OnCommand),
+//		    window, ID_VIEW_CREATE, "menu_view_create");
+
+  menu_separator (menu);
+
+  menu_in_menu = create_menu_in_menu (menu, "Tool_bars", accel);
+  create_check_menu_item (menu_in_menu, "S_tandard", accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_STANDARD, "menu_view_toolbar_standard");
+  create_check_menu_item (menu_in_menu, "Dra_wing", accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_DRAWING, "menu_view_toolbar_drawing");
+  create_check_menu_item (menu_in_menu, "Ani_mation", accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_ANIMATION, "menu_view_toolbar_animation");
+//  create_check_menu_item (menu_in_menu, "Mo_dify", accel, GTK_SIGNAL_FUNC (OnCommand), 
+//			  window, ID_VIEW_TOOLBAR_MODIFY, "menu_view_toolbar_modify");
+  create_check_menu_item (menu_in_menu, "_Pieces", accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_PIECES, "menu_view_toolbar_pieces");
+  menu_separator (menu_in_menu);
+  create_check_menu_item (menu_in_menu, "_Floating Pieces", accel, GTK_SIGNAL_FUNC (OnCommand), 
+			  window, ID_VIEW_TOOLBAR_FLOATING, "menu_view_toolbar_floating");
+  item = create_radio_menu_item (menu_in_menu, NULL, "Icons _and Text", accel,
+				 GTK_SIGNAL_FUNC (OnCommand), window,
+				 ID_VIEW_TOOLBAR_BOTH, "menu_view_toolbar_both");
+  item = create_radio_menu_item (menu_in_menu, item, "_Icons only", accel,
+				 GTK_SIGNAL_FUNC (OnCommand), window,
+				 ID_VIEW_TOOLBAR_ICONS, "menu_view_toolbar_icons");
+  item = create_radio_menu_item (menu_in_menu, item, "Te_xt only", accel,
+				 GTK_SIGNAL_FUNC (OnCommand), window,
+				 ID_VIEW_TOOLBAR_TEXT, "menu_view_toolbar_text");
+
   // Piece menu
   menu = create_sub_menu (menu_bar, "_Piece", accel);
   menu_tearoff (menu);
@@ -125,10 +187,10 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
 		    window, LC_PIECE_INSERT, "menu_piece_insert");
   create_menu_item (menu, "De_lete", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_PIECE_DELETE, "menu_piece_delete");
-  create_menu_item (menu, "Minifig Wi_zard...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_PIECE_MINIFIG, "menu_piece_minifig");
   create_menu_item (menu, "Ar_ray...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_PIECE_ARRAY, "menu_piece_array");
+  create_menu_item (menu, "Minifig Wi_zard...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_PIECE_MINIFIG, "menu_piece_minifig");
   create_menu_item (menu, "_Copy Keys", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_PIECE_COPYKEYS, "menu_piece_copykeys");
   menu_separator (menu);
@@ -152,115 +214,10 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   create_menu_item (menu, "Unhide _All", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_PIECE_UNHIDE_ALL, "menu_piece_unhide_all");
 
-  // View menu
-  menu = create_sub_menu (menu_bar, "_View", accel);
-  menu_tearoff (menu);
-
-  create_menu_item (menu, "_Preferences...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_PREFERENCES, "menu_view_preferences");
-  menu_separator (menu);
-
-  menu_in_menu = create_menu_in_menu (menu, "Tool_bars", accel);
-  create_check_menu_item (menu_in_menu, "S_tandard", accel, GTK_SIGNAL_FUNC (OnCommand), 
-			  window, ID_VIEW_TOOLBAR_STANDARD, "menu_view_toolbar_standard");
-  create_check_menu_item (menu_in_menu, "Dra_wing", accel, GTK_SIGNAL_FUNC (OnCommand), 
-			  window, ID_VIEW_TOOLBAR_DRAWING, "menu_view_toolbar_drawing");
-  create_check_menu_item (menu_in_menu, "Ani_mation", accel, GTK_SIGNAL_FUNC (OnCommand), 
-			  window, ID_VIEW_TOOLBAR_ANIMATION, "menu_view_toolbar_animation");
-  create_check_menu_item (menu_in_menu, "Mo_dify", accel, GTK_SIGNAL_FUNC (OnCommand), 
-			  window, ID_VIEW_TOOLBAR_MODIFY, "menu_view_toolbar_modify");
-  create_check_menu_item (menu_in_menu, "_Pieces", accel, GTK_SIGNAL_FUNC (OnCommand), 
-			  window, ID_VIEW_TOOLBAR_PIECES, "menu_view_toolbar_pieces");
-  menu_separator (menu_in_menu);
-  create_check_menu_item (menu_in_menu, "_Floating Pieces", accel, GTK_SIGNAL_FUNC (OnCommand), 
-			  window, ID_VIEW_TOOLBAR_FLOATING, "menu_view_toolbar_floating");
-  item = create_radio_menu_item (menu_in_menu, NULL, "Icons _and Text", accel,
-				 GTK_SIGNAL_FUNC (OnCommand), window,
-				 ID_VIEW_TOOLBAR_BOTH, "menu_view_toolbar_both");
-  item = create_radio_menu_item (menu_in_menu, item, "_Icons only", accel,
-				 GTK_SIGNAL_FUNC (OnCommand), window,
-				 ID_VIEW_TOOLBAR_ICONS, "menu_view_toolbar_icons");
-  item = create_radio_menu_item (menu_in_menu, item, "Te_xt only", accel,
-				 GTK_SIGNAL_FUNC (OnCommand), window,
-				 ID_VIEW_TOOLBAR_TEXT, "menu_view_toolbar_text");
-
-  create_menu_item (menu, "Zoom _In", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_ZOOMIN, "menu_view_zoomin");
-  create_menu_item (menu, "Zoom _Out", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_ZOOMOUT, "menu_view_zoomout");
-  create_menu_item (menu, "Zoom E_xtents", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_ZOOMEXTENTS, "menu_view_zoomextents");
-  menu_separator (menu);
-
-  create_menu_item (menu, "_Create", accel, GTK_SIGNAL_FUNC (OnCommand),
-		    window, ID_VIEW_CREATE, "menu_view_create");
-
-  menu_in_menu = create_menu_in_menu (menu, "Vie_wports", accel);
-  item = create_radio_menu_pixmap (menu_in_menu, NULL, "vports01.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_01, "menu_view_viewports_01");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports02.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_02, "menu_view_viewports_02");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports03.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_03, "menu_view_viewports_03");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports04.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_04, "menu_view_viewports_04");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports05.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_05, "menu_view_viewports_05");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports06.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_06, "menu_view_viewports_06");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports07.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_07, "menu_view_viewports_07");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports08.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_08, "menu_view_viewports_08");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports09.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_09, "menu_view_viewports_09");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports10.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_10, "menu_view_viewports_10");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports11.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_11, "menu_view_viewports_11");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports12.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_12, "menu_view_viewports_12");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports13.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_13, "menu_view_viewports_13");
-  item = create_radio_menu_pixmap (menu_in_menu, item, "vports14.xpm", accel,
-				   GTK_SIGNAL_FUNC (OnCommand), window,
-				   ID_VIEW_VIEWPORTS_14, "menu_view_viewports_14");
-
-  menu_in_menu = create_menu_in_menu (menu, "_Cameras", accel);
-  gtk_object_set_data (window, "cameras_menu", menu_in_menu);
-
-  menu_in_menu = create_menu_in_menu (menu, "S_tep", accel);
-  create_menu_item (menu_in_menu, "Fi_rst", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_STEP_FIRST, "menu_view_step_first");
-  create_menu_item (menu_in_menu, "Pre_vious", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_STEP_PREVIOUS, "menu_view_step_previous");
-  create_menu_item (menu_in_menu, "Ne_xt", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_STEP_NEXT, "menu_view_step_next");
-  create_menu_item (menu_in_menu, "_Last", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_STEP_LAST, "menu_view_step_last");
-  menu_separator (menu_in_menu);
-  create_menu_item (menu_in_menu, "_Insert", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_STEP_INSERT, "menu_view_step_insert");
-  create_menu_item (menu_in_menu, "_Delete", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
-		    window, LC_VIEW_STEP_DELETE, "menu_view_step_delete");
-
   menu = create_sub_menu (menu_bar, "_Help", accel);
   menu_tearoff (menu);
 
-  create_menu_item (menu, "_About", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+  create_menu_item (menu, "_About...", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_HELP_ABOUT, "menu_help_about");
 
   // TODO: read accelerators from a file

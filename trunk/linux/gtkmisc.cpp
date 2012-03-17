@@ -14,49 +14,10 @@
 // =============================================================================
 // Pixmap functions
 
-#include "pixmaps/vports01.xpm"
-#include "pixmaps/vports02.xpm"
-#include "pixmaps/vports03.xpm"
-#include "pixmaps/vports04.xpm"
-#include "pixmaps/vports05.xpm"
-#include "pixmaps/vports06.xpm"
-#include "pixmaps/vports07.xpm"
-#include "pixmaps/vports08.xpm"
-#include "pixmaps/vports09.xpm"
-#include "pixmaps/vports10.xpm"
-#include "pixmaps/vports11.xpm"
-#include "pixmaps/vports12.xpm"
-#include "pixmaps/vports13.xpm"
-#include "pixmaps/vports14.xpm"
-
 // Load a pixmap file from the disk
 void load_pixmap (const char* filename, GdkPixmap **gdkpixmap, GdkBitmap **mask)
 {
-  struct { const char* name; const char** data; } table[14] =
-  {
-    { "vports01.xpm", vports01 },
-    { "vports02.xpm", vports02 },
-    { "vports03.xpm", vports03 },
-    { "vports04.xpm", vports04 },
-    { "vports05.xpm", vports05 },
-    { "vports06.xpm", vports06 },
-    { "vports07.xpm", vports07 },
-    { "vports08.xpm", vports08 },
-    { "vports09.xpm", vports09 },
-    { "vports10.xpm", vports10 },
-    { "vports11.xpm", vports11 },
-    { "vports12.xpm", vports12 },
-    { "vports13.xpm", vports13 },
-    { "vports14.xpm", vports14 },
-  };
-
   *gdkpixmap = NULL;
-  for (int i = 0; i < 14; i++)
-    if (strcmp (table[i].name, filename) == 0)
-    {
-      *gdkpixmap = gdk_pixmap_create_from_xpm_d (GDK_ROOT_PARENT(), mask, NULL, (gchar**)table[i].data);
-      break;
-    }
 
   if (*gdkpixmap == NULL)
   {

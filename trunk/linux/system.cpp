@@ -162,20 +162,6 @@ long SystemGetTicks()
 }
 
 // User Interface
-void SystemUpdateViewport(int new_vp, int old_vp)
-{
-  char buf[64];
-  sprintf (buf, "menu_view_viewports_%02d", new_vp+1);
-  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), buf);
-
-  if (!item)
-    return;
-
-  ignore_commands = true;
-  gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
-  ignore_commands = false;
-}
-
 void SystemUpdateCategories(bool SearchOnly)
 {
 }

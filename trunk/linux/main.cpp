@@ -156,12 +156,6 @@ void OnCommand(GtkWidget* widget, gpointer data)
     return;
   }
 
-  if (id >= ID_VIEW_VIEWPORTS_01 && id <= ID_VIEW_VIEWPORTS_14)
-  {
-    project->HandleCommand(LC_VIEW_VIEWPORTS, id - ID_VIEW_VIEWPORTS_01);
-    return;
-  }
-
   if (id >= ID_CAMERA_FIRST && id <= ID_CAMERA_LAST)
   {
     project->HandleCommand(LC_VIEW_CAMERA_MENU, id - ID_CAMERA_FIRST);

@@ -207,7 +207,10 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 	}
 
 	if ((!DiskIdx.Open(file1, "wb")) || (!DiskBin.Open(file2, "wb")))
+	{
+		AfxMessageBox("Failed to open file for writing.", MB_ICONERROR | MB_OK);
 		return false;
+	}
 
 	strcpy(file1, Library->GetLibraryPath());
 	strcat(file1, "pieces-b.old");

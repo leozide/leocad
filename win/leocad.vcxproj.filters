@@ -568,7 +568,6 @@
     <None Include="hlp\Scmin.bmp">
       <Filter>Help Files</Filter>
     </None>
-    <None Include="..\docs\CHANGES.txt" />
     <None Include="res\invisible.bmp">
       <Filter>Resource Files</Filter>
     </None>

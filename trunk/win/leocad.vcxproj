@@ -85,6 +85,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>wininet.lib;vfw32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>jpeglib\release;libpng\release;zlib\release;3dsftk\release</AdditionalLibraryDirectories>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>

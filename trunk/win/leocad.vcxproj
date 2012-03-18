@@ -409,7 +409,6 @@
     <None Include="hlp\Scmax.bmp" />
     <None Include="hlp\ScMenu.bmp" />
     <None Include="hlp\Scmin.bmp" />
-    <None Include="..\docs\CHANGES.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LeoCAD.rc" />

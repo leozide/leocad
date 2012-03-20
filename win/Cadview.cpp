@@ -1,7 +1,4 @@
-// CADView.cpp : implementation of the CCADView class
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "LeoCAD.h"
 #include <WindowsX.h>
 

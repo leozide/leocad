@@ -2,6 +2,7 @@
 // Needed to work with the clipboard and undo/redo easily.
 // NOTE: Because of endianess issues, all I/O must be done from a File class.
 
+#include "lc_global.h"
 #include <stdio.h>
 #include <memory.h>
 #include <stdlib.h>

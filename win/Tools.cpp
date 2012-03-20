@@ -1,7 +1,4 @@
-// Tools.cpp : Misc. routines
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "Tools.h"
 #include "resource.h"
 #include "PrefSht.h"

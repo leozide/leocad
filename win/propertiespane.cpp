@@ -1,7 +1,4 @@
-// propertiespane.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "propertiespane.h"
 
 #include "project.h"

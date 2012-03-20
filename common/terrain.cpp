@@ -1,6 +1,7 @@
 // Terrain: a Bezier surface.
 //
 
+#include "lc_global.h"
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>

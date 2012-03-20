@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include <math.h>
 #include "vector.h"
 #include "defines.h"

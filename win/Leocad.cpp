@@ -1,7 +1,4 @@
-// LeoCAD.cpp : Defines the class behaviors for the application.
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "LeoCAD.h"
 
 #include "MainFrm.h"

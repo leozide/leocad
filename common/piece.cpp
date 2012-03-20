@@ -1,6 +1,7 @@
 // A piece object in the LeoCAD world.
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

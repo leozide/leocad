@@ -1,9 +1,4 @@
-// Print catalog and pieces list
-//
-
-// TODO: rewrite everything
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include <WindowsX.h>
 #include "Print.h"
@@ -16,11 +11,13 @@
 #include "library.h"
 #include "lc_application.h"
 
+// TODO: rewrite everything
+
 static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 {
 	CCADView* pView = (CCADView*)pMainFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOSELECTION|PD_ENABLEPRINTHOOK, pParent);
-  PiecesLibrary *pLib = lcGetPiecesLibrary();
+	PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	int bricks = 0;
 	for (int j = 0; j < pLib->GetPieceCount (); j++)

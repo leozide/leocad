@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include <setjmp.h>
 #include <stdlib.h>
 #include "config.h"

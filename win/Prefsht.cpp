@@ -1,7 +1,4 @@
-// PrefSht.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "resource.h"
 #include "PrefSht.h"
 #include "defines.h"

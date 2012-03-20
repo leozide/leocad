@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include <stdio.h>
 #include "lc_application.h"
 #include "library.h"

@@ -1,9 +1,4 @@
-// MainFrm.cpp : implementation of the CMainFrame class
-//
-
-#include "stdafx.h"
-#include <afxrich.h>
-#include <afxpriv.h>
+#include "lc_global.h"
 #include "LeoCAD.h"
 #include "MainFrm.h"
 #include "Camera.h"
@@ -35,51 +30,6 @@ void mainframe_listener (int message, void *data, void *user)
     if (pFrame != NULL)
       pFrame->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)data, 0);
   }
-}
-
-static void mainframe_console_func (LC_CONSOLE_LEVEL level, const char* text, void* user_data)
-{
-	CRichEditCtrl& ctrl = ((CRichEditView *) user_data)->GetRichEditCtrl ();
-	CHARFORMAT cf;
-
-	cf.cbSize = sizeof (cf);
-	cf.dwMask = CFM_COLOR;
-	cf.dwEffects = 0;
-
-	switch (level)
-	{
-	case LC_CONSOLE_ERROR:
-		cf.crTextColor = RGB (255, 0, 0);
-		break;
-
-	case LC_CONSOLE_WARNING:
-		cf.crTextColor = RGB (0, 0, 255);
-		break;
-
-	case LC_CONSOLE_DEBUG:
-		cf.crTextColor = RGB (0, 128, 0);
-		break;
-
-	case LC_CONSOLE_MISC:
-	default:
-		cf.crTextColor = RGB (0, 0, 0);
-		break;
-	}
-
-	ctrl.SetRedraw(FALSE);
-
-	// Go to the end of the window text.
-	int TextStart = ctrl.GetWindowTextLength();
-	ctrl.SetSel(TextStart, -1);
-
-	// Change color.
-	ctrl.SetSelectionCharFormat(cf);
-
-	// Append new text.
-	ctrl.ReplaceSel(text);
-
-	ctrl.SetRedraw(TRUE);
-	ctrl.InvalidateRect(NULL, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////

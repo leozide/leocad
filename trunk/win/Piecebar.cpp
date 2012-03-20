@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "lc_global.h"
 #include "resource.h"
 #include "piecebar.h"
 #include "library.h"

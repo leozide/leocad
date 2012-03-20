@@ -2,6 +2,7 @@
 // General purpose string class
 //
 
+#include "lc_global.h"
 #include <ctype.h>
 #include "str.h"
 

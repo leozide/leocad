@@ -1,7 +1,4 @@
-// PropsPgs.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "resource.h"
 #include "PropsPgs.h"
 #include "defines.h"

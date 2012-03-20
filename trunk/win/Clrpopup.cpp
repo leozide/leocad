@@ -1,7 +1,4 @@
-// ColorPopup.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include <math.h>
 #include "ClrPick.h"
 #include "ClrPopup.h"

@@ -1,7 +1,4 @@
-// CADDoc.cpp : implementation of the CCADDoc class
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "LeoCAD.h"
 #include "CADDoc.h"
 

@@ -1,7 +1,4 @@
-// AboutDlg.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "AboutDlg.h"
 #include "config.h"

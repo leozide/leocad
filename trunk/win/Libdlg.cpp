@@ -1,7 +1,4 @@
-// LibDlg.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "LibDlg.h"
 #include "GroupDlg.h"

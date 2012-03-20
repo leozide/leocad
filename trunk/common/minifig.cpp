@@ -2,6 +2,7 @@
 // Minifig Wizard base class, calculates position/rotation of all pieces.
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

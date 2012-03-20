@@ -1,7 +1,4 @@
-// ColorLst.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "ColorLst.h"
 #include "globals.h"

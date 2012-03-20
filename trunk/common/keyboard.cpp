@@ -2,6 +2,7 @@
 // Code to handle user-defined keyboard shortcuts.
 //
 
+#include "lc_global.h"
 #include <stdio.h>
 #include "system.h"
 #include "keyboard.h"

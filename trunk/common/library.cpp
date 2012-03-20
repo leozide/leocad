@@ -2,6 +2,7 @@
 // Pieces library management
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include "library.h"
 #include "file.h"

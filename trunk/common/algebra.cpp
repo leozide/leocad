@@ -2,6 +2,7 @@
 // Math and Linear Algebra stuff.
 //
 
+#include "lc_global.h"
 #include <float.h>
 #include "defines.h"
 #include "algebra.h"

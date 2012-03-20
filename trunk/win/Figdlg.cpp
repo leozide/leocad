@@ -1,7 +1,4 @@
-// FigDlg.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "LeoCAD.h"
 #include "FigDlg.h"
 #include "minifig.h"

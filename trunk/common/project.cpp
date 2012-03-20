@@ -1,6 +1,7 @@
 // Everything that is a part of a LeoCAD project goes here.
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

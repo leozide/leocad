@@ -1,7 +1,4 @@
-// GrpTree.cpp : implementation file
-//
-
-#include "stdafx.h"
+#include "lc_global.h"
 #include "leocad.h"
 #include "GrpTree.h"
 #include "group.h"

@@ -1,6 +1,7 @@
 // Information about how to draw a piece and some more stuff.
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

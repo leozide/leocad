@@ -1,6 +1,7 @@
 // Curve class, used to represent all flexible objects
 //
 
+#include "lc_global.h"
 #include <stdlib.h>
 #include <math.h>
 #include "globals.h"

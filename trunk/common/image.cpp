@@ -1,6 +1,7 @@
 // Image I/O routines
 //
 
+#include "lc_global.h"
 #include "opengl.h"
 #ifdef LC_WINDOWS
 #include <windows.h>

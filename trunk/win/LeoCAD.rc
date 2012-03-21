@@ -72,7 +72,6 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\idr_main.ico"
-IDR_PARTFRAME           ICON                    "res\\idr_part.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

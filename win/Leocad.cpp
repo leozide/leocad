@@ -154,18 +154,7 @@ CCADApp theApp;
 
 BOOL CCADApp::InitInstance()
 {
-	// Standard initialization
-	// If you are not using these features and wish to reduce the size
-	//  of your final executable, you should remove from the following
-	//  the specific initialization routines you do not need.
-
-#if _MFC_VER < 0x0710
-#ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
-#else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
-#endif
-#endif
+	CWinAppEx::InitInstance();
 
 	SetRegistryKey(_T("BT Software"));
 	LoadStdProfileSettings();
@@ -203,7 +192,7 @@ BOOL CCADApp::InitInstance()
 	AddDocTemplate(pDocTemplate);
 
 	EnableShellOpen();
-	RegisterShellFileTypes(TRUE);
+	RegisterShellFileTypes();
 
 	UINT cmdshow = m_nCmdShow;
 	m_nCmdShow = SW_HIDE;

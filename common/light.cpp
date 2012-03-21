@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "light.h"
-#include "defines.h"
 #include "globals.h"
 #include "vector.h"
 #include "matrix.h"

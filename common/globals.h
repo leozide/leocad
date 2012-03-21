@@ -1,7 +1,6 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-#include "defines.h"
 #include "typedefs.h"
 #include "console.h"
 

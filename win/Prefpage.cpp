@@ -3,7 +3,6 @@
 #include "PrefPage.h"
 #include "Tools.h"
 #include "MainFrm.h"
-#include "defines.h"
 #include "keyboard.h"
 
 #ifdef _DEBUG

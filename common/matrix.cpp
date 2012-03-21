@@ -7,7 +7,6 @@
 #include <math.h>
 #include <string.h>
 #include "matrix.h"
-#include "defines.h"
 
 // =============================================================================
 // static functions

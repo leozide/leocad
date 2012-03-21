@@ -9,7 +9,6 @@ class Piece;
 class PieceInfo;
 class Camera;
 
-#include "defines.h"
 #include "str.h"
 #include "algebra.h"
 

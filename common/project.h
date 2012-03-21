@@ -2,7 +2,6 @@
 #define _PROJECT_H_
 
 #include "object.h"
-#include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
 #include "array.h"
@@ -44,15 +43,15 @@ class TexFont;
 
 // Undo support
 
-#include "file.h"
+#include "lc_file.h"
 
-typedef struct LC_UNDOINFO
+struct LC_UNDOINFO
 {
 	FileMem file;
 	char strText[21];
 	LC_UNDOINFO* pNext;
 	LC_UNDOINFO() { pNext = NULL; };
-} LC_UNDOINFO;
+};
 
 class Project
 {

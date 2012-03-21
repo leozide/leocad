@@ -101,6 +101,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\lc_file.cpp" />
     <ClCompile Include="Aboutdlg.cpp" />
     <ClCompile Include="..\common\array.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -165,7 +166,6 @@
     <ClCompile Include="..\common\console.cpp" />
     <ClCompile Include="..\common\curve.cpp" />
     <ClCompile Include="..\common\debug.cpp" />
-    <ClCompile Include="..\Common\file.cpp" />
     <ClCompile Include="..\Common\globals.cpp" />
     <ClCompile Include="..\Common\group.cpp" />
     <ClCompile Include="..\common\im_bmp.cpp" />
@@ -311,6 +311,7 @@
     <ResourceCompile Include="LeoCAD.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\lc_file.h" />
     <ClInclude Include="..\common\lc_global.h" />
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="ArrayDlg.h" />
@@ -367,7 +368,6 @@
     <ClInclude Include="..\common\console.h" />
     <ClInclude Include="..\common\curve.h" />
     <ClInclude Include="..\Common\defines.h" />
-    <ClInclude Include="..\Common\file.h" />
     <ClInclude Include="..\Common\globals.h" />
     <ClInclude Include="..\common\glwindow.h" />
     <ClInclude Include="..\Common\group.h" />

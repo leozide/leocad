@@ -13,9 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "config.h"
 #include "image.h"
-#include "file.h"
+#include "lc_file.h"
 
 // =============================================================================
 // Image functions

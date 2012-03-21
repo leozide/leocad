@@ -1,7 +1,6 @@
 #ifndef _LIBRARY_H_
 #define _LIBRARY_H_
 
-#include "defines.h"
 #include "str.h"
 #include "array.h"
 

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "system.h"
 #include "keyboard.h"
-#include "file.h"
+#include "lc_file.h"
 #include "str.h"
 
 // ============================================================================

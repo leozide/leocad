@@ -3,10 +3,9 @@
 #include <direct.h>
 #include "leocad.h"
 #include "system.h"
-#include "defines.h"
 #include "camera.h"
 #include "tools.h"
-#include "file.h"
+#include "lc_file.h"
 #include "image.h"
 #include "PieceBar.h"
 #include "PropsSht.h"

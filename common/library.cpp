@@ -5,10 +5,9 @@
 #include "lc_global.h"
 #include <stdlib.h>
 #include "library.h"
-#include "file.h"
+#include "lc_file.h"
 #include "texture.h"
 #include "pieceinf.h"
-#include "config.h"
 #include "image.h"
 #include "system.h"
 #include "console.h"

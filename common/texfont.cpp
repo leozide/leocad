@@ -8,7 +8,7 @@
 #include "texfont.h"
 #include "texture.h"
 #include "library.h"
-#include "file.h"
+#include "lc_file.h"
 #include "lc_application.h"
 
 #define LC_TEXFONT_FILE_VERSION 1 // LeoCAD 0.74

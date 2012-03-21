@@ -10,7 +10,6 @@
 #include "globals.h"
 #include "system.h"
 #include "pieceinf.h" // TODO: remove
-#include "config.h"
 #include "mainwnd.h"
 #include "library.h"
 #include "keyboard.h"

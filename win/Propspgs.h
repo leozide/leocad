@@ -4,8 +4,6 @@
 #ifndef __PROPSPGS_H__
 #define __PROPSPGS_H__
 
-#include "defines.h"
-
 /////////////////////////////////////////////////////////////////////////////
 // CPropertiesGeneral dialog
 

@@ -23,7 +23,6 @@
 #include "system.h"
 #include "globals.h"
 #include "minifig.h"
-#include "config.h"
 #include "message.h"
 #include "curve.h"
 #include "mainwnd.h"

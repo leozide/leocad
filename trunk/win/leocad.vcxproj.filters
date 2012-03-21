@@ -185,9 +185,6 @@
     <ClCompile Include="..\common\debug.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\file.cpp">
-      <Filter>Common Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\globals.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
@@ -283,6 +280,9 @@
     </ClCompile>
     <ClCompile Include="propertiesgridctrl.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\lc_file.cpp">
+      <Filter>Common Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -729,9 +729,6 @@
     <ClInclude Include="..\Common\defines.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\file.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\globals.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
@@ -827,6 +824,9 @@
     </ClInclude>
     <ClInclude Include="propertiesgridctrl.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\lc_file.h">
+      <Filter>Common Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

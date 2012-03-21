@@ -5,7 +5,6 @@
 #include "lc_application.h"
 #include <math.h>
 #include <shlobj.h>
-#include "config.h"
 
 #ifdef LC_HAVE_3DSFTK
 #pragma comment(lib, "3dsftk")

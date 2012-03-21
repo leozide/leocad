@@ -1,9 +1,8 @@
 #include "lc_global.h"
 #include <setjmp.h>
 #include <stdlib.h>
-#include "config.h"
 #include "image.h"
-#include "file.h"
+#include "lc_file.h"
 
 #ifdef LC_HAVE_JPEGLIB
 

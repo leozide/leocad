@@ -10,7 +10,7 @@
 #include "object.h"
 #include "matrix.h"
 #include "vector.h"
-#include "file.h"
+#include "lc_file.h"
 #include "lc_application.h"
 
 #define LC_KEY_SAVE_VERSION 1 // LeoCAD 0.73

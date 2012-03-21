@@ -7,9 +7,8 @@
 #include <time.h>
 #include <string.h>
 #include "opengl.h"
-#include "defines.h"
 #include "terrain.h"
-#include "file.h"
+#include "lc_file.h"
 #include "camera.h"
 #include "matrix.h"
 #include "system.h"

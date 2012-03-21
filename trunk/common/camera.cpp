@@ -6,10 +6,9 @@
 #include <math.h>
 #include "opengl.h"
 #include "globals.h"
-#include "defines.h"
 #include "vector.h"
 #include "matrix.h"
-#include "file.h"
+#include "lc_file.h"
 #include "camera.h"
 #include "tr.h"
 

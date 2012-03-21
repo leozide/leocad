@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "resource.h"
 #include "PrefSht.h"
-#include "defines.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

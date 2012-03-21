@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "leocad.h"
 #include "AboutDlg.h"
-#include "config.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

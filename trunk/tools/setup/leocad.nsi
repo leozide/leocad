@@ -24,6 +24,8 @@
   !define MUI_ICON "setup.ico"
   !define MUI_UNICON "setup.ico"
 
+  SetCompressor /SOLID lzma
+
 ;--------------------------------
 ;Interface Settings
 
@@ -67,6 +69,9 @@ Section "LeoCAD" SecLeoCAD
   ;Store installation folder
   WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
   
+  ; Overwrite old Pieces Library path.
+  WriteRegStr HKCU "Software\BT Software\LeoCAD\Settings" "PiecesLibrary" $INSTDIR
+
   CreateShortCut "$SMPROGRAMS\LeoCAD.lnk" "$INSTDIR\LeoCAD.exe"
 
   ;Create uninstaller

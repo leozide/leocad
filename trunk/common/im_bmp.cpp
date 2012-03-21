@@ -1,10 +1,9 @@
 #include "lc_global.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "config.h"
 #include "quant.h"
 #include "image.h"
-#include "file.h"
+#include "lc_file.h"
 
 // ========================================================
 

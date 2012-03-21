@@ -4,7 +4,7 @@
 #include "lc_global.h"
 #include <stdlib.h>
 #include "group.h"
-#include "file.h"
+#include "lc_file.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Group construction/destruction

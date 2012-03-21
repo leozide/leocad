@@ -2,7 +2,6 @@
 #define _MINIFIG_H_
 
 #include "glwindow.h"
-#include "file.h"
 #include "algebra.h"
 #include "array.h"
 
@@ -55,7 +54,7 @@ public:
 	bool LoadMinifig (const char* name);
 	void DeleteMinifig (const char* name);
 
-	void ParseSettings(File& Settings);
+	void ParseSettings(class File& Settings);
 
 	ObjArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 

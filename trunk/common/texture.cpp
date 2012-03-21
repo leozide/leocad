@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "opengl.h"
-#include "file.h"
+#include "lc_file.h"
 #include "texture.h"
 #include "project.h"
 #include "globals.h"

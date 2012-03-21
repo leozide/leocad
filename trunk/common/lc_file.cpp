@@ -7,9 +7,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
-#include "file.h"
-#include "defines.h"
-#include "config.h"
+#include "lc_file.h"
 #include "str.h"
 
 // =============================================================================

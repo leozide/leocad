@@ -6,136 +6,427 @@
 
 class String;
 
-class File
+class lcFile
 {
 public:
-	// Constructors
-	File();
-	virtual ~File();
+	lcFile();
+	virtual ~lcFile();
 
-	// Implementation
-public:
-	virtual unsigned long GetPosition() const = 0;
-	virtual unsigned long Seek(long lOff, int nFrom) = 0;
-	virtual void SetLength(unsigned long nNewLen) = 0;
-	virtual unsigned long GetLength() const = 0;
+	virtual long GetPosition() const = 0;
+	virtual void Seek(long Offset, int From) = 0;
+	virtual void SetLength(size_t NewLength) = 0;
+	virtual long GetLength() const = 0;
 
-	virtual char* ReadLine(char* pBuf, unsigned long nMax)=0;
-	virtual unsigned long Read(void* pBuf, unsigned long nCount)=0;
-	virtual unsigned long Write(const void* pBuf, unsigned long nCount)=0;
-	virtual int GetChar()=0;
-	virtual int PutChar(int c)=0;
+	virtual void Flush() = 0;
+	virtual void Close() = 0;
 
-	unsigned long ReadByte(void* pBuf, unsigned long nCount);
-	unsigned long ReadShort(void* pBuf, unsigned long nCount);
-	unsigned long ReadLong(void* pBuf, unsigned long nCount);
-	unsigned long ReadFloat(void* pBuf, unsigned long nCount);
-	unsigned long ReadDouble(void* pBuf, unsigned long nCount);
-	unsigned long WriteByte(const void* pBuf, unsigned long nCount);
-	unsigned long WriteShort(const void* pBuf, unsigned long nCount);
-	unsigned long WriteLong(const void* pBuf, unsigned long nCount);
-	unsigned long WriteFloat(const void* pBuf, unsigned long nCount);
-	unsigned long WriteDouble(const void* pBuf, unsigned long nCount);
+	virtual char* ReadLine(char* Buffer, size_t BufferSize) = 0;
+	void WriteLine(const char* Buffer)
+	{
+		WriteBuffer(Buffer, strlen(Buffer));
+	}
 
 	void ReadString(String& Value);
-	void ReadInt(lcint32* Value)
-	{ ReadLong(Value, 1); }
-	void ReadInt(lcuint32* Value)
-	{ ReadLong(Value, 1); }
-
 	void WriteString(const String& Value);
-	void WriteInt(lcint32 Value)
-	{ WriteLong(&Value, 1); }
-	void WriteInt(lcuint32 Value)
-	{ WriteLong(&Value, 1); }
 
-	void WriteLine(const char* pBuf)
-	{ WriteByte(pBuf, strlen(pBuf)); }
+	virtual size_t ReadBuffer(void* Buffer, long Bytes) = 0;
+	virtual size_t WriteBuffer(const void* Buffer, long Bytes) = 0;
 
-	virtual void Abort()=0;
-	virtual void Flush()=0;
-	virtual void Close()=0;
-
-	const char* GetFileName() const
-	{ return FileName; }
-	
-	void SetFileName(const char* Name)
-	{ strncpy(FileName, Name, LC_MAXPATH); }
-
-protected:
-	char FileName[LC_MAXPATH];
-};
-
-class FileMem : public File
-{
-public:
-// Constructors
-	FileMem();
-	~FileMem();
-
-// Implementation
-public:
-	unsigned long GetPosition() const;
-	unsigned long Seek(long lOff, int nFrom);
-	void SetLength(unsigned long nNewLen);
-	unsigned long GetLength() const;
-
-	char* ReadLine(char* pBuf, unsigned long nMax);
-	unsigned long Read(void* pBuf, unsigned long nCount);
-	unsigned long Write(const void* pBuf, unsigned long nCount);
-	int GetChar();
-	int PutChar(int c);
-
-	void Abort();
-	void Flush();
-	void Close();
-	bool Open(const char *filename, const char *mode);
-
-	void* GetBuffer() const
+	lcuint8 ReadU8()
 	{
-		return m_pBuffer;
+		lcuint8 Value;
+		Read8(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadU8(lcuint8* Buffer, size_t Count)
+	{
+		return Read8(Buffer, Count);
+	}
+
+	lcint8 ReadS8()
+	{
+		lcint8 Value;
+		Read8(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadS8(lcint8* Buffer, size_t Count)
+	{
+		return Read8(Buffer, Count);
+	}
+
+	lcuint16 ReadU16()
+	{
+		lcuint16 Value;
+		Read16(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadU16(lcuint16* Buffer, size_t Count)
+	{
+		return Read16(Buffer, Count);
+	}
+
+	lcint16 ReadS16()
+	{
+		lcint16 Value;
+		Read16(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadS16(lcint16* Buffer, size_t Count)
+	{
+		return Read16(Buffer, Count);
+	}
+
+	lcuint32 ReadU32()
+	{
+		lcuint32 Value;
+		Read32(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadU32(lcuint32* Buffer, size_t Count)
+	{
+		return Read32(Buffer, Count);
+	}
+
+	lcint32 ReadS32()
+	{
+		lcint32 Value;
+		Read32(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadS32(lcint32* Buffer, size_t Count)
+	{
+		return Read32(Buffer, Count);
+	}
+
+	float ReadFloat()
+	{
+		float Value;
+		Read32(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadFloats(float* Buffer, size_t Count)
+	{
+		return Read32(Buffer, Count);
+	}
+
+	double ReadDouble()
+	{
+		double Value;
+		Read64(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadDoubles(double* Buffer, size_t Count)
+	{
+		return Read64(Buffer, Count);
+	}
+
+	void WriteU8(const lcuint8& Value)
+	{
+		Write8(&Value, 1);
+	}
+
+	size_t WriteU8(const lcuint8* Buffer, size_t Count)
+	{
+		return Write8(Buffer, Count);
+	}
+
+	void WriteS8(const lcint8& Value)
+	{
+		Write8(&Value, 1);
+	}
+
+	size_t WriteS8(const lcint8* Buffer, size_t Count)
+	{
+		return Write8(Buffer, Count);
+	}
+
+	void WriteU16(const lcuint16& Value)
+	{
+		Write16(&Value, 1);
+	}
+
+	size_t WriteU16(const lcuint16* Buffer, size_t Count)
+	{
+		return Write16(Buffer, Count);
+	}
+
+	void WriteS16(const lcint16& Value)
+	{
+		Write16(&Value, 1);
+	}
+
+	size_t WriteS16(const lcint16* Buffer, size_t Count)
+	{
+		return Write16(Buffer, Count);
+	}
+
+	void WriteU32(const lcuint32& Value)
+	{
+		Write32(&Value, 1);
+	}
+
+	size_t WriteU32(const lcuint32* Buffer, size_t Count)
+	{
+		return Write32(Buffer, Count);
+	}
+
+	void WriteS32(const lcint32& Value)
+	{
+		Write32(&Value, 1);
+	}
+
+	size_t WriteS32(const lcint32* Buffer, size_t Count)
+	{
+		return Write32(Buffer, Count);
+	}
+
+	void WriteFloat(const float& Value)
+	{
+		Write32(&Value, 1);
+	}
+
+	size_t WriteFloats(const float* Buffer, size_t Count)
+	{
+		return Write32(Buffer, Count);
+	}
+
+	void WriteDouble(const double& Value)
+	{
+		Write64(&Value, 1);
+	}
+
+	size_t WriteDoubles(const double* Buffer, size_t Count)
+	{
+		return Write64(Buffer, Count);
 	}
 
 protected:
-	// MemFile specific:
-	unsigned long m_nGrowBytes;
-	unsigned long m_nPosition;
-	unsigned long m_nBufferSize;
-	unsigned long m_nFileSize;
-	unsigned char* m_pBuffer;
-	bool m_bAutoDelete;
-	void GrowFile(unsigned long nNewLen);
+	size_t Read8(void* Buffer, size_t Count)
+	{
+		return ReadBuffer(Buffer, Count);
+	}
+
+	size_t Read16(void* Buffer, size_t Count)
+	{
+		size_t NumRead;
+
+		NumRead = ReadBuffer(Buffer, Count * 2) / 2;
+
+#ifdef LC_BIG_ENDIAN
+		lcuint8 Temp[2];
+		lcuint8* Bytes = (lcuint8*)Buffer;
+
+		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		{
+			Temp[0] = Bytes[0];
+			Temp[1] = Bytes[1];
+
+			*Bytes++ = Temp[1];
+			*Bytes++ = Temp[0];
+		}
+#endif
+
+		return NumRead;
+	}
+
+	size_t Read32(void* Buffer, size_t Count)
+	{
+		size_t NumRead;
+
+		NumRead = ReadBuffer(Buffer, Count * 4) / 4;
+
+#ifdef LC_BIG_ENDIAN
+		lcuint8 Temp[4];
+		lcuint8* Bytes = (lcuint8*)Buffer;
+
+		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		{
+			Temp[0] = Bytes[0];
+			Temp[1] = Bytes[1];
+			Temp[2] = Bytes[2];
+			Temp[3] = Bytes[3];
+
+			*Bytes++ = Temp[3];
+			*Bytes++ = Temp[2];
+			*Bytes++ = Temp[1];
+			*Bytes++ = Temp[0];
+		}
+#endif
+
+		return NumRead;
+	}
+
+	size_t Read64(void* Buffer, size_t Count)
+	{
+		size_t NumRead;
+
+		NumRead = ReadBuffer(Buffer, Count * 8) / 8;
+
+#ifdef LC_BIG_ENDIAN
+		lcuint8 Temp[8];
+		lcuint8* Bytes = (lcuint8*)Buffer;
+
+		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		{
+			Temp[0] = Bytes[0];
+			Temp[1] = Bytes[1];
+			Temp[2] = Bytes[2];
+			Temp[3] = Bytes[3];
+			Temp[4] = Bytes[4];
+			Temp[5] = Bytes[5];
+			Temp[6] = Bytes[6];
+			Temp[7] = Bytes[7];
+
+			*Bytes++ = Temp[7];
+			*Bytes++ = Temp[6];
+			*Bytes++ = Temp[5];
+			*Bytes++ = Temp[4];
+			*Bytes++ = Temp[3];
+			*Bytes++ = Temp[2];
+			*Bytes++ = Temp[1];
+			*Bytes++ = Temp[0];
+		}
+#endif
+
+		return NumRead;
+	}
+
+	size_t Write8(const void* Buffer, size_t Count)
+	{
+		return WriteBuffer(Buffer, Count);
+	}
+
+	size_t Write16(const void* Buffer, size_t Count)
+	{
+#ifdef LC_BIG_ENDIAN
+		size_t BytesWritten = 0;
+		lcuint8 Temp[2];
+		lcuint8* Bytes = (lcuint8*)Buffer;
+
+		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		{
+			Temp[1] = *Buffer++;
+			Temp[0] = *Buffer++;
+
+			BytesWritten += WriteBuffer(&Temp, 2);
+		}
+
+		return BytesWritten / 2;
+#else
+		return WriteBuffer(Buffer, Count * 2) / 2;
+#endif
+	}
+
+	size_t Write32(const void* Buffer, size_t Count)
+	{
+#ifdef LC_BIG_ENDIAN
+		size_t BytesWritten = 0;
+		lcuint8 Temp[4];
+		lcuint8* Bytes = (lcuint8*)Buffer;
+
+		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		{
+			Temp[3] = *Buffer++;
+			Temp[2] = *Buffer++;
+			Temp[1] = *Buffer++;
+			Temp[0] = *Buffer++;
+
+			BytesWritten += WriteBuffer(&Temp, 4);
+		}
+
+		return BytesWritten / 4;
+#else
+		return WriteBuffer(Buffer, Count * 4);
+#endif
+	}
+
+	size_t Write64(const void* Buffer, size_t Count)
+	{
+#ifdef LC_BIG_ENDIAN
+		size_t BytesWritten = 0;
+		lcuint8 Temp[8];
+		lcuint8* Bytes = (lcuint8*)Buffer;
+
+		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		{
+			Temp[7] = *Buffer++;
+			Temp[6] = *Buffer++;
+			Temp[5] = *Buffer++;
+			Temp[4] = *Buffer++;
+			Temp[3] = *Buffer++;
+			Temp[2] = *Buffer++;
+			Temp[1] = *Buffer++;
+			Temp[0] = *Buffer++;
+
+			BytesWritten += WriteBuffer(&Temp, 8);
+		}
+
+		return BytesWritten / 8;
+#else
+		return WriteBuffer(Buffer, Count * 8);
+#endif
+	}
 };
 
-class FileDisk : public File
+class lcMemFile : public lcFile
 {
 public:
-// Constructors
-	FileDisk();
-	~FileDisk();
+	lcMemFile();
+	virtual ~lcMemFile();
 
-// Implementation
-public:
-	unsigned long GetPosition() const;
-	unsigned long Seek(long lOff, int nFrom);
-	void SetLength(unsigned long nNewLen);
-	unsigned long GetLength() const;
+	long GetPosition() const;
+	void Seek(long Offset, int From);
+	void SetLength(size_t NewLength);
+	long GetLength() const;
 
-	char* ReadLine(char* pBuf, unsigned long nMax);
-	unsigned long Read(void* pBuf, unsigned long nCount);
-	unsigned long Write(const void* pBuf, unsigned long nCount);
-	int GetChar();
-	int PutChar(int c);
-
-	void Abort();
 	void Flush();
 	void Close();
-	bool Open(const char *filename, const char *mode);
 
-protected:
-	// DiscFile specific:
-	FILE* m_hFile;
-	bool m_bCloseOnDelete;
+	char* ReadLine(char* Buffer, size_t BufferSize);
+	size_t ReadBuffer(void* Buffer, long Bytes);
+	size_t WriteBuffer(const void* Buffer, long Bytes);
+
+	void CopyFrom(lcFile& Source);
+	void GrowFile(size_t NewLength);
+
+	size_t mGrowBytes;
+	size_t mPosition;
+	size_t mBufferSize;
+	size_t mFileSize;
+	unsigned char* mBuffer;
+};
+
+class lcDiskFile : public lcFile
+{
+public:
+	lcDiskFile();
+	virtual ~lcDiskFile();
+
+	long GetPosition() const;
+	void Seek(long Offset, int From);
+	void SetLength(size_t NewLength);
+	long GetLength() const;
+
+	void Flush();
+	void Close();
+
+	char* ReadLine(char* Buffer, size_t BufferSize);
+	size_t ReadBuffer(void* Buffer, long Bytes);
+	size_t WriteBuffer(const void* Buffer, long Bytes);
+
+	void CopyFrom(lcMemFile& Source);
+
+	bool Open(const char* FileName, const char* Mode);
+
+	FILE* mFile;
 };
 
 #endif // _FILE_H_

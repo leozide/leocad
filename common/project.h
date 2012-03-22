@@ -47,10 +47,16 @@ class TexFont;
 
 struct LC_UNDOINFO
 {
-	FileMem file;
+	lcMemFile file;
 	char strText[21];
 	LC_UNDOINFO* pNext;
 	LC_UNDOINFO() { pNext = NULL; };
+};
+
+struct LC_FILEENTRY
+{
+	lcMemFile File;
+	char FileName[LC_MAXPATH];
 };
 
 class Project
@@ -165,7 +171,7 @@ protected:
 	Light* m_pLights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
-	File* m_pClipboard[10];
+	lcFile* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
 
 	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
@@ -203,7 +209,7 @@ protected:
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
 	bool m_bStopRender;
-	File* m_pTrackFile;
+	lcFile* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;
@@ -256,15 +262,15 @@ protected:
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
 	unsigned char m_nCurStep;
-	unsigned short m_nCurFrame;
-	unsigned short m_nTotalFrames;
+	lcuint16 m_nCurFrame;
+	lcuint16 m_nTotalFrames;
 
-	unsigned long m_nScene;
-	unsigned long m_nDetail;
-	unsigned long m_nSnap;
-	unsigned short m_nMoveSnap;
-	unsigned short m_nAngleSnap;
-	unsigned short m_nGridSize;
+	lcuint32 m_nScene;
+	lcuint32 m_nDetail;
+	lcuint32 m_nSnap;
+	lcuint16 m_nMoveSnap;
+	lcuint16 m_nAngleSnap;
+	lcuint16 m_nGridSize;
 	float m_fLineWidth;
 	float m_fFogDensity;
 	float m_fFogColor[4];
@@ -286,10 +292,10 @@ protected:
 	// File load/save implementation.
 	bool DoSave(char* PathName, bool bReplace);
 	bool DoFileSave();
-	bool FileLoad(File* file, bool bUndo, bool bMerge);
-	void FileSave(File* file, bool bUndo);
-	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray);
-	void FileReadMPD(File& MPD, PtrArray<File>& FileArray) const;
+	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
+	void FileSave(lcFile* file, bool bUndo);
+	void FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray);
+	void FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const;
 
 public:
 	// File helpers

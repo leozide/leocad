@@ -167,13 +167,13 @@ void CurvePoint::UpdatePosition (unsigned short nTime, bool bAnimation)
   CalculateKeys (nTime, bAnimation);
 }
 
-bool CurvePoint::FileLoad (File& file)
+bool CurvePoint::FileLoad(lcFile& file)
 {
   // FIXME
   return true;
 }
 
-void CurvePoint::FileSave (File& file) const
+void CurvePoint::FileSave(lcFile& file) const
 {
   // FIXME
 }
@@ -303,13 +303,13 @@ void Curve::Initialize ()
   m_nDisplayList = glGenLists (1);
 }
 
-bool Curve::FileLoad (File& file)
+bool Curve::FileLoad(lcFile& file)
 {
   // FIXME
   return true;
 }
 
-void Curve::FileSave (File& file) const
+void Curve::FileSave(lcFile& file) const
 {
   // FIXME
 }

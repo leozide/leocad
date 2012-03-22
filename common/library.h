@@ -4,8 +4,6 @@
 #include "str.h"
 #include "array.h"
 
-class File;
-class FileDisk;
 class Texture;
 class PieceInfo;
 
@@ -88,7 +86,7 @@ public:
 	bool LoadUpdate(const char* update);
 	bool DeleteTextures(char** Names, int NumTextures);
 	bool ImportTexture(const char* Name);
-	bool ImportLDrawPiece(const char* Filename, File* NewIdxFile, File* NewBinFile, File* OldIdxFile, File* OldBinFile);
+	bool ImportLDrawPiece(const char* Filename, lcFile* NewIdxFile, lcFile* NewBinFile, lcFile* OldIdxFile, lcFile* OldBinFile);
 
 	// Set when pieces are added/removed from the library.
 	bool m_Modified;
@@ -109,8 +107,8 @@ protected:
 	bool m_CategoriesModified;
 	char m_CategoriesFile[LC_MAXPATH];
 
-	bool ValidatePiecesFile(FileDisk& IdxFile, FileDisk& BinFile) const;
-	bool ValidateTexturesFile(File& IdxFile, File& BinFile) const;
+	bool ValidatePiecesFile(lcFile& IdxFile, lcFile& BinFile) const;
+	bool ValidateTexturesFile(lcFile& IdxFile, lcFile& BinFile) const;
 
 	// File headers
 	static const char PiecesBinHeader[32];
@@ -173,7 +171,7 @@ struct LC_LDRAW_PIECE
 };
 
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);
-bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, File* NewIdxFile, File* NewBinFile, File* OldIdxFile, File* OldBinFile);
+bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFile, lcFile* OldIdxFile, lcFile* OldBinFile);
 void FreeLDrawPiece(LC_LDRAW_PIECE* piece);
 
 #endif // _LIBRARY_H_

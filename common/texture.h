@@ -1,11 +1,5 @@
-//
-//	texture.h
-////////////////////////////////////////////////////
-
-#ifndef _TEXTURE_H
-#define _TEXTURE_H
-
-class File;
+#ifndef _TEXTURE_H_
+#define _TEXTURE_H_
 
 #include "opengl.h"
 
@@ -29,7 +23,7 @@ class Texture
   bool LoadFromFile(char* strFilename, bool bFilter);
   void Unload();
 
-  void LoadIndex(File* idx);
+  void LoadIndex(lcFile* idx);
   void AddRef(bool bFilter);
   void DeRef();
 
@@ -49,4 +43,4 @@ protected:
 };
 
 
-#endif // _TEXTURE_H
+#endif // _TEXTURE_H_

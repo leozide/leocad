@@ -354,17 +354,17 @@ void Project::LoadDefaults(bool cameras)
 // Standard file menu commands
 
 // Read a .lcd file
-bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
+bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 {
-	int i, count;
+	lcint32 i, count;
 	char id[32];
-	unsigned long rgb;
+	lcuint32 rgb;
 	float fv = 0.4f;
-	unsigned char ch, action = m_nCurAction;
-	unsigned short sh;
+	lcuint8 ch, action = m_nCurAction;
+	lcuint16 sh;
 
 	file->Seek(0, SEEK_SET);
-	file->Read(id, 32);
+	file->ReadBuffer(id, 32);
 	sscanf(&id[7], "%f", &fv);
 
 	// Fix the ugly floating point reading on computers with different decimal points.
@@ -379,9 +379,9 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	}
 
 	if (fv > 0.4f)
-		file->ReadFloat (&fv, 1);
+		file->ReadFloats(&fv, 1);
 
-	file->ReadLong (&rgb, 1);
+	file->ReadU32(&rgb, 1);
 	if (!bMerge)
 	{
 		m_fBackground[0] = (float)((unsigned char) (rgb))/255;
@@ -408,8 +408,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		}
 
 		double eye[3], target[3];
-		file->ReadDouble (&eye, 3);
-		file->ReadDouble (&target, 3);
+		file->ReadDoubles(eye, 3);
+		file->ReadDoubles(target, 3);
 		float tmp[3] = { (float)eye[0], (float)eye[1], (float)eye[2] };
 		pCam->ChangeKey(1, false, false, tmp, LC_CK_EYE);
 		pCam->ChangeKey(1, true, false, tmp, LC_CK_EYE);
@@ -435,20 +435,20 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		file->Seek(32, SEEK_CUR);
 	else
 	{
-		file->ReadLong (&i, 1); m_nAngleSnap = i;
-		file->ReadLong (&m_nSnap, 1);
-		file->ReadFloat (&m_fLineWidth, 1);
-		file->ReadLong (&m_nDetail, 1);
-		file->ReadLong (&i, 1); //m_nCurGroup = i;
-		file->ReadLong (&i, 1); m_nCurColor = i;
-		file->ReadLong (&i, 1); action = i;
-		file->ReadLong (&i, 1); m_nCurStep = i;
+		file->ReadS32(&i, 1); m_nAngleSnap = i;
+		file->ReadU32(&m_nSnap, 1);
+		file->ReadFloats(&m_fLineWidth, 1);
+		file->ReadU32(&m_nDetail, 1);
+		file->ReadS32(&i, 1); //m_nCurGroup = i;
+		file->ReadS32(&i, 1); m_nCurColor = i;
+		file->ReadS32(&i, 1); action = i;
+		file->ReadS32(&i, 1); m_nCurStep = i;
 	}
 
 	if (fv > 0.8f)
-		file->ReadLong (&m_nScene, 1);
+		file->ReadU32(&m_nScene, 1);
 
-	file->ReadLong (&count, 1);
+	file->ReadS32(&count, 1);
 	SystemStartProgressBar(0, count, 1, "Loading project...");
 
 	while (count--)
@@ -485,14 +485,14 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			char name[LC_PIECE_NAME_LEN];
 			float pos[3], rot[3], param[4];
-			unsigned char color, step, group;
+			lcuint8 color, step, group;
 		
-			file->ReadFloat (pos, 3);
-			file->ReadFloat (rot, 3);
-			file->ReadByte (&color, 1);
-			file->Read(name, sizeof(name));
-			file->ReadByte (&step, 1);
-			file->ReadByte (&group, 1);
+			file->ReadFloats(pos, 3);
+			file->ReadFloats(rot, 3);
+			file->ReadU8(&color, 1);
+			file->ReadBuffer(name, sizeof(name));
+			file->ReadU8(&step, 1);
+			file->ReadU8(&group, 1);
 
 			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
@@ -522,49 +522,49 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	{
 		if (fv >= 0.4f)
 		{
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			file->ReadBuffer(&ch, 1);
+			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
 			if (sh > 100)
 				file->Seek(sh, SEEK_CUR);
 			else
-				file->Read(m_strAuthor, sh);
+				file->ReadBuffer(m_strAuthor, sh);
 
-			file->Read(&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			file->ReadBuffer(&ch, 1);
+			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
 			if (sh > 100)
 				file->Seek(sh, SEEK_CUR);
 			else
-				file->Read(m_strDescription, sh);
+				file->ReadBuffer(m_strDescription, sh);
 
-			file->Read(&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
+			file->ReadBuffer(&ch, 1);
+			if (ch == 0xFF && fv < 1.3f) file->ReadU16(&sh, 1); else sh = ch;
 			if (sh > 255)
 				file->Seek(sh, SEEK_CUR);
 			else
-				file->Read(m_strComments, sh);
+				file->ReadBuffer(m_strComments, sh);
 		}
 	}
 	else
 	{
 		if (fv >= 0.4f)
 		{
-			file->Read (&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			file->ReadBuffer(&ch, 1);
+			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
 			file->Seek (sh, SEEK_CUR);
 
-			file->Read (&ch, 1);
-			if (ch == 0xFF) file->ReadShort (&sh, 1); else sh = ch;
+			file->ReadBuffer(&ch, 1);
+			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
 			file->Seek (sh, SEEK_CUR);
 
-			file->Read (&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->ReadShort (&sh, 1); else sh = ch;
+			file->ReadBuffer(&ch, 1);
+			if (ch == 0xFF && fv < 1.3f) file->ReadU16(&sh, 1); else sh = ch;
 			file->Seek (sh, SEEK_CUR);
 		}
 	}
 
 	if (fv >= 0.5f)
 	{
-		file->ReadLong (&count, 1);
+		file->ReadS32(&count, 1);
 
 		Group* pGroup;
 		Group* pLastGroup = NULL;
@@ -588,8 +588,8 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			if (fv < 1.0f)
 			{
-				file->Read(pGroup->m_strName, 65);
-				file->Read(&ch, 1);
+				file->ReadBuffer(pGroup->m_strName, 65);
+				file->ReadBuffer(&ch, 1);
 				pGroup->m_fCenter[0] = 0;
 				pGroup->m_fCenter[1] = 0;
 				pGroup->m_fCenter[2] = 0;
@@ -650,17 +650,17 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			if (fv < 1.0f)
 			{
-				int ViewportMode;
-				file->ReadLong(&ViewportMode, 1);
+				lcuint32 ViewportMode;
+				file->ReadU32(&ViewportMode, 1);
 			}
 			else
 			{
 				lcuint8 ViewportMode, ActiveViewport;
-				file->ReadByte(&ViewportMode, 1);
-				file->ReadByte(&ActiveViewport, 1);
+				file->ReadU8(&ViewportMode, 1);
+				file->ReadU8(&ActiveViewport, 1);
 			}
 
-			file->ReadLong (&count, 1);
+			file->ReadS32(&count, 1);
 			Camera* pCam = NULL;
 			for (i = 0; i < count; i++)
 			{
@@ -688,7 +688,7 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 		{
 			for (count = 0; count < 4; count++)
 			{
-				file->ReadLong (&i, 1);
+				file->ReadS32(&i, 1);
 
 				Camera* pCam = m_pCameras;
 				while (i--)
@@ -696,69 +696,69 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 //				m_pViewCameras[count] = pCam;
 			}
 
-			file->ReadLong (&rgb, 1);
+			file->ReadU32(&rgb, 1);
 			m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
 			m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv < 1.0f)
 			{
-				file->ReadLong (&rgb, 1);
+				file->ReadU32(&rgb, 1);
 				m_fFogDensity = (float)rgb/100;
 			}
 			else
-				file->ReadFloat (&m_fFogDensity, 1);
+				file->ReadFloats(&m_fFogDensity, 1);
 
 			if (fv < 1.3f)
 			{
-				file->ReadByte (&ch, 1);
+				file->ReadU8(&ch, 1);
 				if (ch == 0xFF)
-					file->ReadShort (&sh, 1);
+					file->ReadU16(&sh, 1);
 				sh = ch;
 			}
 			else
-				file->ReadShort (&sh, 1);
+				file->ReadU16(&sh, 1);
 
 			if (sh < LC_MAXPATH)
-				file->Read (m_strBackground, sh);
+				file->ReadBuffer(m_strBackground, sh);
 			else
 				file->Seek (sh, SEEK_CUR);
 		}
 
 		if (fv >= 0.8f)
 		{
-			file->Read(&ch, 1);
-			file->Read(m_strHeader, ch);
-			file->Read(&ch, 1);
-			file->Read(m_strFooter, ch);
+			file->ReadBuffer(&ch, 1);
+			file->ReadBuffer(m_strHeader, ch);
+			file->ReadBuffer(&ch, 1);
+			file->ReadBuffer(m_strFooter, ch);
 		}
 
 		if (fv > 0.9f)
 		{
-			file->ReadLong (&rgb, 1);
+			file->ReadU32(&rgb, 1);
 			m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 			m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv < 1.3f)
 			{
-				file->ReadLong (&i, 1); m_bAnimation = (i != 0);
-				file->ReadLong (&i, 1); m_bAddKeys = (i != 0);
-				file->ReadByte (&m_nFPS, 1);
-				file->ReadLong (&i, 1); m_nCurFrame = i;
-				file->ReadShort (&m_nTotalFrames, 1);
-				file->ReadLong (&i, 1); m_nGridSize = i;
-				file->ReadLong (&i, 1); //m_nMoveSnap = i;
+				file->ReadS32(&i, 1); m_bAnimation = (i != 0);
+				file->ReadS32(&i, 1); m_bAddKeys = (i != 0);
+				file->ReadU8(&m_nFPS, 1);
+				file->ReadS32(&i, 1); m_nCurFrame = i;
+				file->ReadU16(&m_nTotalFrames, 1);
+				file->ReadS32(&i, 1); m_nGridSize = i;
+				file->ReadS32(&i, 1); //m_nMoveSnap = i;
 			}
 			else
 			{
-				file->ReadByte (&ch, 1); m_bAnimation = (ch != 0);
-				file->ReadByte (&ch, 1); m_bAddKeys = (ch != 0);
-				file->ReadByte (&m_nFPS, 1);
-				file->ReadShort (&m_nCurFrame, 1);
-				file->ReadShort (&m_nTotalFrames, 1);
-				file->ReadShort (&m_nGridSize, 1);
-				file->ReadShort (&sh, 1);
+				file->ReadU8(&ch, 1); m_bAnimation = (ch != 0);
+				file->ReadU8(&ch, 1); m_bAddKeys = (ch != 0);
+				file->ReadU8(&m_nFPS, 1);
+				file->ReadU16(&m_nCurFrame, 1);
+				file->ReadU16(&m_nTotalFrames, 1);
+				file->ReadU16(&m_nGridSize, 1);
+				file->ReadU16(&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
 			}
@@ -766,11 +766,11 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 			
 		if (fv > 1.0f)
 		{
-			file->ReadLong (&rgb, 1);
+			file->ReadU32(&rgb, 1);
 			m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
 			m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-			file->ReadLong (&rgb, 1);
+			file->ReadU32(&rgb, 1);
 			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
 			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
@@ -779,9 +779,9 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 				m_pTerrain->FileLoad (file);
 			else
 			{
-				file->Seek (4, SEEK_CUR);
-				file->Read (&ch, 1);
-				file->Seek (ch, SEEK_CUR);
+				file->Seek(4, SEEK_CUR);
+				file->ReadBuffer(&ch, 1);
+				file->Seek(ch, SEEK_CUR);
 			}
 		}
 	}
@@ -822,66 +822,66 @@ bool Project::FileLoad(File* file, bool bUndo, bool bMerge)
 	return true;
 }
 
-void Project::FileSave(File* file, bool bUndo)
+void Project::FileSave(lcFile* file, bool bUndo)
 {
 	float ver_flt = 1.4f; // LeoCAD 0.75 - (and this should have been an integer).
-	unsigned long rgb;
-	unsigned char ch;
-	unsigned short sh;
+	lcuint32 rgb;
+	lcuint8 ch;
+	lcuint16 sh;
 	int i, j;
 
-	file->Seek (0, SEEK_SET);
-	file->Write (LC_STR_VERSION, 32);
-	file->WriteFloat (&ver_flt, 1);
+	file->Seek(0, SEEK_SET);
+	file->WriteBuffer(LC_STR_VERSION, 32);
+	file->WriteFloats(&ver_flt, 1);
 
 	rgb = FLOATRGB(m_fBackground);
-	file->WriteLong (&rgb, 1);
+	file->WriteU32(&rgb, 1);
 
-	i = m_nAngleSnap; file->WriteLong (&i, 1);
-	file->WriteLong (&m_nSnap, 1);
-	file->WriteFloat (&m_fLineWidth, 1);
-	file->WriteLong (&m_nDetail, 1);
+	i = m_nAngleSnap; file->WriteS32(&i, 1);
+	file->WriteU32(&m_nSnap, 1);
+	file->WriteFloats(&m_fLineWidth, 1);
+	file->WriteU32(&m_nDetail, 1);
 	//i = m_nCurGroup;
-	file->WriteLong (&i, 1);
-	i = m_nCurColor; file->WriteLong (&i, 1);
-	i = m_nCurAction; file->WriteLong (&i, 1);
-	i = m_nCurStep; file->WriteLong (&i, 1);
-	file->WriteLong (&m_nScene, 1);
+	file->WriteS32(&i, 1);
+	i = m_nCurColor; file->WriteS32(&i, 1);
+	i = m_nCurAction; file->WriteS32(&i, 1);
+	i = m_nCurStep; file->WriteS32(&i, 1);
+	file->WriteU32(&m_nScene, 1);
 
 	Piece* pPiece;
 	for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		i++;
-	file->WriteLong (&i, 1);
+	file->WriteS32(&i, 1);
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		pPiece->FileSave (*file, m_pGroups);
 
 	ch = strlen(m_strAuthor);
-	file->Write(&ch, 1);
-	file->Write(m_strAuthor, ch);
+	file->WriteBuffer(&ch, 1);
+	file->WriteBuffer(m_strAuthor, ch);
 	ch = strlen(m_strDescription);
-	file->Write(&ch, 1);
-	file->Write(m_strDescription, ch);
+	file->WriteBuffer(&ch, 1);
+	file->WriteBuffer(m_strDescription, ch);
 	ch = strlen(m_strComments);
-	file->Write(&ch, 1);
-	file->Write(m_strComments, ch);
+	file->WriteBuffer(&ch, 1);
+	file->WriteBuffer(m_strComments, ch);
 
 	Group* pGroup;
 	for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 		i++;
-	file->WriteLong (&i, 1);
+	file->WriteS32(&i, 1);
 
 	for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 		pGroup->FileSave(file, m_pGroups);
 
 	lcuint8 ViewportMode = 0, ActiveViewport = 0;
-	file->WriteByte(&ViewportMode, 1);
-	file->WriteByte(&ActiveViewport, 1);
+	file->WriteU8(&ViewportMode, 1);
+	file->WriteU8(&ActiveViewport, 1);
 
 	Camera* pCamera;
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		i++;
-	file->WriteLong (&i, 1);
+	file->WriteS32(&i, 1);
 
 	for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		pCamera->FileSave(*file);
@@ -895,51 +895,51 @@ void Project::FileSave(File* file, bool bUndo)
 //			else
 //				i++;
 
-		file->WriteLong (&i, 1);
+		file->WriteS32(&i, 1);
 	}
 
 	rgb = FLOATRGB(m_fFogColor);
-	file->WriteLong (&rgb, 1);
-	file->WriteFloat (&m_fFogDensity, 1);
+	file->WriteU32(&rgb, 1);
+	file->WriteFloats(&m_fFogDensity, 1);
 	sh = strlen(m_strBackground);
-	file->WriteShort (&sh, 1);
-	file->Write(m_strBackground, sh);
+	file->WriteU16(&sh, 1);
+	file->WriteBuffer(m_strBackground, sh);
 	ch = strlen(m_strHeader);
-	file->Write(&ch, 1);
-	file->Write(m_strHeader, ch);
+	file->WriteBuffer(&ch, 1);
+	file->WriteBuffer(m_strHeader, ch);
 	ch = strlen(m_strFooter);
-	file->Write(&ch, 1);
-	file->Write(m_strFooter, ch);
+	file->WriteBuffer(&ch, 1);
+	file->WriteBuffer(m_strFooter, ch);
 	// 0.60 (1.0)
 	rgb = FLOATRGB(m_fAmbient);
-	file->WriteLong (&rgb, 1);
+	file->WriteU32(&rgb, 1);
 	ch = m_bAnimation;
-	file->Write(&ch, 1);
+	file->WriteBuffer(&ch, 1);
 	ch = m_bAddKeys;
-	file->WriteByte (&ch, 1);
-	file->WriteByte (&m_nFPS, 1);
-	file->WriteShort (&m_nCurFrame, 1);
-	file->WriteShort (&m_nTotalFrames, 1);
-	file->WriteShort (&m_nGridSize, 1);
-	file->WriteShort (&m_nMoveSnap, 1);
+	file->WriteU8(&ch, 1);
+	file->WriteU8 (&m_nFPS, 1);
+	file->WriteU16(&m_nCurFrame, 1);
+	file->WriteU16(&m_nTotalFrames, 1);
+	file->WriteU16(&m_nGridSize, 1);
+	file->WriteU16(&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = FLOATRGB(m_fGradient1);
-	file->WriteLong (&rgb, 1);
+	file->WriteU32(&rgb, 1);
 	rgb = FLOATRGB(m_fGradient2);
-	file->WriteLong (&rgb, 1);
+	file->WriteU32(&rgb, 1);
 	// 0.64 (1.2)
 	m_pTerrain->FileSave(file);
 
 	if (!bUndo)
 	{
-		unsigned long pos = 0;
+		lcuint32 pos = 0;
 
 		i = Sys_ProfileLoadInt ("Default", "Save Preview", 0);
 		if (i != 0) 
 		{
 			pos = file->GetPosition();
 
-      Image* image = new Image[1];
+			Image* image = new Image[1];
 			LC_IMAGE_OPTS opts;
 			opts.interlaced = false;
 			opts.transparent = false;
@@ -951,60 +951,60 @@ void Project::FileSave(File* file, bool bUndo)
 			delete []image;
 		}
 
-		file->WriteLong (&pos, 1);
+		file->WriteU32(&pos, 1);
 		m_nSaveTimer = 0;
 	}
 }
 
-void Project::FileReadMPD(File& MPD, PtrArray<File>& FileArray) const
+void Project::FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const
 {
-  FileMem* CurFile = NULL;
+	LC_FILEENTRY* CurFile = NULL;
 	char Buf[1024];
 
 	while (MPD.ReadLine(Buf, 1024))
-  {
-    String Line(Buf);
+	{
+		String Line(Buf);
 
-    Line.TrimLeft();
+		Line.TrimLeft();
 
-    if (Line[0] != '0')
-    {
-      // Copy current line.
-      if (CurFile != NULL)
-        CurFile->Write(Buf, strlen(Buf));
+		if (Line[0] != '0')
+		{
+			// Copy current line.
+			if (CurFile != NULL)
+				CurFile->File.WriteBuffer(Buf, strlen(Buf));
 
-      continue;
-    }
+			continue;
+		}
 
-    Line.TrimRight();
-    Line = Line.Right(Line.GetLength() - 1);
-    Line.TrimLeft();
+		Line.TrimRight();
+		Line = Line.Right(Line.GetLength() - 1);
+		Line.TrimLeft();
 
-    // Find where a subfile starts.
-    if (Line.CompareNoCase("FILE", 4) == 0)
-    {
-      Line = Line.Right(Line.GetLength() - 4);
-      Line.TrimLeft();
+		// Find where a subfile starts.
+		if (Line.CompareNoCase("FILE", 4) == 0)
+		{
+			Line = Line.Right(Line.GetLength() - 4);
+			Line.TrimLeft();
 
-      // Create a new file.
-      CurFile = new FileMem();
-      CurFile->SetFileName(Line);
-      FileArray.Add(CurFile);
-    }
-    else if (Line.CompareNoCase("ENDFILE", 7) == 0)
-    {
-      // File ends here.
-      CurFile = NULL;
-    }
-    else if (CurFile != NULL)
-    {
-      // Copy current line.
-      CurFile->Write(Buf, strlen(Buf));
-    }
-  }
+			// Create a new file.
+			CurFile = new LC_FILEENTRY();
+			strncpy(CurFile->FileName, Line, sizeof(CurFile->FileName));
+			FileArray.Add(CurFile);
+		}
+		else if (Line.CompareNoCase("ENDFILE", 7) == 0)
+		{
+			// File ends here.
+			CurFile = NULL;
+		}
+		else if (CurFile != NULL)
+		{
+			// Copy current line.
+			CurFile->File.WriteBuffer(Buf, strlen(Buf));
+		}
+	}
 }
 
-void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray)
+void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray)
 {
 	char buf[1024];
 
@@ -1079,9 +1079,9 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			{
 				for (int i = 0; i < FileArray.GetSize(); i++)
 				{
-					if (stricmp(FileArray[i]->GetFileName(), pn) == 0)
+					if (stricmp(FileArray[i]->FileName, pn) == 0)
 					{
-						FileReadLDraw(FileArray[i], &tmpmat, nOk, cl, nStep, FileArray);
+						FileReadLDraw(&FileArray[i]->File, &tmpmat, nOk, cl, nStep, FileArray);
 						read = false;
 						break;
 					}
@@ -1091,7 +1091,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			// Try to read the file from disk.
 			if (read)
 			{
-				FileDisk tf;
+				lcDiskFile tf;
 
 				if (tf.Open(pn, "rt"))
 				{
@@ -1152,7 +1152,7 @@ bool Project::DoFileSave()
 // if 'bReplace' is FALSE will not change path name (SaveCopyAs)
 bool Project::DoSave(char* lpszPathName, bool bReplace)
 {
-	FileDisk file;
+	lcDiskFile file;
 	char newName[LC_MAXPATH];
 	memset(newName, 0, sizeof(newName));
 	if (lpszPathName)
@@ -1238,7 +1238,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			strcat(buf, "\r\n");
 		}
 		strcat(buf, "\r\n");
-		file.Write(buf, strlen(buf));
+		file.WriteBuffer(buf, strlen(buf));
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
@@ -1255,14 +1255,14 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 					mat.ToLDraw(f);
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
 						col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
-					file.Write(buf, strlen(buf));
+					file.WriteBuffer(buf, strlen(buf));
 				}
 			}
 
 			if (i != steps)
-				file.Write("0 STEP\r\n", 8);
+				file.WriteBuffer("0 STEP\r\n", 8);
 		}
-		file.Write("0\r\n", 3);
+		file.WriteBuffer("0\r\n", 3);
 
 		setlocale(LC_NUMERIC, OldLocale);
 	}
@@ -1384,7 +1384,7 @@ bool Project::OpenProject(const char* FileName)
 
 bool Project::OnOpenDocument (const char* lpszPathName)
 {
-  FileDisk file;
+  lcDiskFile file;
   bool bSuccess = false;
 
   if (!file.Open(lpszPathName, "rb"))
@@ -1421,7 +1421,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
 
   if (file.GetLength() != 0)
   {
-    PtrArray<File> FileArray;
+    PtrArray<LC_FILEENTRY> FileArray;
 
     // Unpack the MPD file.
     if (mpdfile)
@@ -1443,7 +1443,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       Matrix mat;
 
       if (mpdfile)
-        FileReadLDraw(FileArray[0], &mat, &ok, m_nCurColor, &step, FileArray);
+        FileReadLDraw(&FileArray[0]->File, &mat, &ok, m_nCurColor, &step, FileArray);
       else
         FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
 
@@ -2782,7 +2782,7 @@ void Project::RenderInitialize()
 	if (!m_pScreenFont->IsLoaded())
 	{
 		char filename[LC_MAXPATH];
-		FileDisk file;
+		lcDiskFile file;
 
 		strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
 		strcat(filename, "sysfont.txf");
@@ -3433,7 +3433,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (SystemDoDialog(LC_DLG_FILE_MERGE_PROJECT, filename))
 			{
-				FileDisk file;
+				lcDiskFile file;
 				if (file.Open(filename, "rb"))
 				{
 //				CWaitCursor wait;
@@ -3832,7 +3832,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (!SystemDoDialog(LC_DLG_POVRAY, &opts))
 				break;
 
-			FileDisk POVFile;
+			lcDiskFile POVFile;
 			char Line[1024];
 
 			if (!POVFile.Open(opts.outpath, "wt"))
@@ -3870,7 +3870,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			// Parse LGEO tables.
 			if (opts.libpath[0])
 			{
-				FileDisk TableFile, ColorFile;
+				lcDiskFile TableFile, ColorFile;
 				char Filename[LC_MAXPATH];
 
 				int Length = strlen(opts.libpath);
@@ -4380,7 +4380,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_LIBRARY:
 		{
-			FileMem file;
+			lcMemFile file;
 			FileSave(&file, true);
 
 			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
@@ -4465,7 +4465,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			if (m_pClipboard[m_nCurClipboard] != NULL)
 				delete m_pClipboard[m_nCurClipboard];
-			m_pClipboard[m_nCurClipboard] = new FileMem;
+			m_pClipboard[m_nCurClipboard] = new lcMemFile;
 
 			int i = 0;
 			Piece* pPiece;
@@ -4476,7 +4476,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
 					i++;
-			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
+			m_pClipboard[m_nCurClipboard]->WriteBuffer(&i, sizeof(i));
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
@@ -4484,7 +4484,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				i++;
-			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
+			m_pClipboard[m_nCurClipboard]->WriteBuffer(&i, sizeof(i));
 
 			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				pGroup->FileSave(m_pClipboard[m_nCurClipboard], m_pGroups);
@@ -4492,7 +4492,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 				if (pCamera->IsSelected())
 					i++;
-			m_pClipboard[m_nCurClipboard]->Write(&i, sizeof(i));
+			m_pClipboard[m_nCurClipboard]->WriteBuffer(&i, sizeof(i));
 
 			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 				if (pCamera->IsSelected())
@@ -4524,13 +4524,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			int i, j;
 			Piece* pPasted = NULL;
-			File* file = m_pClipboard[m_nCurClipboard];
+			lcFile* file = m_pClipboard[m_nCurClipboard];
 			if (file == NULL)
 				break;
 			file->Seek(0, SEEK_SET);
 			SelectAndFocusNone(false);
 
-			file->Read(&i, sizeof(i));
+			file->ReadBuffer(&i, sizeof(i));
 			while (i--)
 			{
 				char name[LC_PIECE_NAME_LEN];
@@ -4547,7 +4547,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					delete pPiece;
 			}
 
-			file->Read(&i, sizeof(i));
+			file->ReadBuffer(&i, sizeof(i));
 			Piece* pPiece;
 			Group** groups = (Group**)malloc(i*sizeof(Group**));
 			for (j = 0; j < i; j++)
@@ -4619,7 +4619,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			Camera* pCamera = m_pCameras;
 			while (pCamera->m_pNext)
 				pCamera = pCamera->m_pNext;
-			file->Read(&i, sizeof(i));
+			file->ReadBuffer(&i, sizeof(i));
 
 			while (i--)
 			{
@@ -6680,7 +6680,7 @@ void Project::StartTracking(int mode)
   if (m_pTrackFile != NULL)
     m_pTrackFile->SetLength (0);
   else
-  	m_pTrackFile = new FileMem;
+  	m_pTrackFile = new lcMemFile;
 
 	FileSave(m_pTrackFile, true);
 }

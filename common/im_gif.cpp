@@ -45,7 +45,7 @@ typedef struct
   lcuint32 pass3_offset;	// # of pixel rows in passes 1&2
   lcuint32 pass4_offset;	// # of pixel rows in passes 1,2,3
 
-  File* input_file;
+  lcFile* input_file;
   bool first_interlace;
   unsigned char* buffer;//JSAMPARRAY buffer;
   unsigned int width, height;
@@ -65,9 +65,9 @@ typedef gif_source_struct *gif_source_ptr;
 
 static int GetDataBlock (gif_source_ptr sinfo, char *buf)
 {
-  int count = sinfo->input_file->GetChar();
+  int count = sinfo->input_file->ReadU8();
   if (count > 0) 
-    sinfo->input_file->Read(buf, count);
+    sinfo->input_file->ReadBuffer(buf, count);
   return count;
 }
 
@@ -193,7 +193,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
   return sinfo->firstcode;	// return first byte of symbol's expansion
 }
 
-bool Image::LoadGIF (File& file)
+bool Image::LoadGIF(lcFile& file)
 {
   gif_source_ptr source;
   source = (gif_source_ptr)malloc (sizeof(gif_source_struct));
@@ -206,13 +206,13 @@ bool Image::LoadGIF (File& file)
 
   FreeData ();
 
-  source->input_file->Read(hdrbuf, 6);
+  source->input_file->ReadBuffer(hdrbuf, 6);
   if ((hdrbuf[0] != 'G' || hdrbuf[1] != 'I' || hdrbuf[2] != 'F') ||
       ((hdrbuf[3] != '8' || hdrbuf[4] != '7' || hdrbuf[5] != 'a') &&
        (hdrbuf[3] != '8' || hdrbuf[4] != '9' || hdrbuf[5] != 'a')))
     return false;
 
-  source->input_file->Read(hdrbuf, 7);
+  source->input_file->ReadBuffer(hdrbuf, 7);
   width = LM_to_uint(hdrbuf[0],hdrbuf[1]);
   height = LM_to_uint(hdrbuf[2],hdrbuf[3]);
   source->height = height;
@@ -223,14 +223,14 @@ bool Image::LoadGIF (File& file)
   if (BitSet(hdrbuf[4], COLORMAPFLAG))
     for (int i = 0; i < colormaplen; i++) 
     {
-      source->colormap[0][i] = source->input_file->GetChar();
-      source->colormap[1][i] = source->input_file->GetChar();
-      source->colormap[2][i] = source->input_file->GetChar();
+      source->colormap[0][i] = source->input_file->ReadU8();
+      source->colormap[1][i] = source->input_file->ReadU8();
+      source->colormap[2][i] = source->input_file->ReadU8();
     }
 
   for (;;) 
   {
-    c = source->input_file->GetChar();
+    c = source->input_file->ReadU8();
 
 //    if (c == ';')
 //      ERREXIT(cinfo, JERR_GIF_IMAGENOTFOUND);
@@ -240,7 +240,7 @@ bool Image::LoadGIF (File& file)
       int extlabel;
       char buf[256];
 
-      extlabel = source->input_file->GetChar();
+      extlabel = source->input_file->ReadU8();
       while (GetDataBlock(source, buf) > 0)
         ; // skip
       continue;
@@ -249,7 +249,7 @@ bool Image::LoadGIF (File& file)
     if (c != ',') 
       continue;
 
-    source->input_file->Read(hdrbuf, 9);
+    source->input_file->ReadBuffer(hdrbuf, 9);
     width = LM_to_uint(hdrbuf[4],hdrbuf[5]);
     height = LM_to_uint(hdrbuf[6],hdrbuf[7]);
     source->is_interlaced = (hdrbuf[8] & INTERLACE) != 0;
@@ -259,13 +259,13 @@ bool Image::LoadGIF (File& file)
       colormaplen = 2 << (hdrbuf[8] & 0x07);
       for (int i = 0; i < colormaplen; i++) 
       {
-        source->colormap[0][i] = source->input_file->GetChar();
-        source->colormap[1][i] = source->input_file->GetChar();
-        source->colormap[2][i] = source->input_file->GetChar();
+        source->colormap[0][i] = source->input_file->ReadU8();
+        source->colormap[1][i] = source->input_file->ReadU8();
+        source->colormap[2][i] = source->input_file->ReadU8();
       }
     }
 
-    source->input_code_size = source->input_file->GetChar();
+    source->input_code_size = source->input_file->ReadU8();
 //    if (source->input_code_size < 2 || source->input_code_size >= MAX_LZW_BITS)
 //      ERREXIT1(cinfo, JERR_GIF_CODESIZE, source->input_code_size);
 
@@ -417,17 +417,17 @@ typedef struct
   hash_entry *hash_value;
   int bytesinpkt;
   char packetbuf[256];
-  File* output_file;
+  lcFile* output_file;
   void* buffer;//JSAMPARRAY buffer;
 } gif_dest_struct;
 
 typedef gif_dest_struct* gif_dest_ptr;
 
 // Emit a 16-bit word, LSB first
-static void put_word(File& output_file, unsigned int w)
+static void put_word(lcFile& output_file, unsigned int w)
 {
-  output_file.PutChar(w & 0xFF);
-  output_file.PutChar((w >> 8) & 0xFF);
+  output_file.WriteU8(w & 0xFF);
+  output_file.WriteU8((w >> 8) & 0xFF);
 }
 
 static void flush_packet(gif_dest_ptr dinfo)
@@ -435,7 +435,7 @@ static void flush_packet(gif_dest_ptr dinfo)
   if (dinfo->bytesinpkt > 0) 
   {	
     dinfo->packetbuf[0] = (char) dinfo->bytesinpkt++;
-    dinfo->output_file->Write(dinfo->packetbuf, dinfo->bytesinpkt);
+    dinfo->output_file->WriteBuffer(dinfo->packetbuf, dinfo->bytesinpkt);
     dinfo->bytesinpkt = 0;
   }
 }
@@ -528,7 +528,7 @@ static void compress_byte (gif_dest_ptr dinfo, int c)
   dinfo->waiting_code = c;
 }
 
-bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned char* background) const
+bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned char* background) const
 {
   int InitCodeSize, FlagByte, i;
   unsigned char pal[3][256];
@@ -544,27 +544,27 @@ bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned cha
 
   InitCodeSize = 8;
   // Write the GIF header.
-  file.PutChar('G');
-  file.PutChar('I');
-  file.PutChar('F');
-  file.PutChar('8');
-  file.PutChar(transparent ? '9' : '7');
-  file.PutChar('a');
+  file.WriteU8('G');
+  file.WriteU8('I');
+  file.WriteU8('F');
+  file.WriteU8('8');
+  file.WriteU8(transparent ? '9' : '7');
+  file.WriteU8('a');
   // Write the Logical Screen Descriptor
   put_word(file, (unsigned int)m_nWidth);
   put_word(file, (unsigned int)m_nHeight);
   FlagByte = 0x80;
   FlagByte |= (7) << 4; // color resolution
   FlagByte |= (7);	// size of global color table
-  file.PutChar(FlagByte);
-  file.PutChar(0); // Background color index
-  file.PutChar(0); // Reserved (aspect ratio in GIF89)
+  file.WriteU8(FlagByte);
+  file.WriteU8(0); // Background color index
+  file.WriteU8(0); // Reserved (aspect ratio in GIF89)
   // Write the Global Color Map
   for (i = 0; i < 256; i++) 
   {
-    file.PutChar(pal[0][i]);
-    file.PutChar(pal[1][i]);
-    file.PutChar(pal[2][i]);
+    file.WriteU8(pal[0][i]);
+    file.WriteU8(pal[1][i]);
+    file.WriteU8(pal[2][i]);
   }
 
   // Write out extension for transparent colour index, if necessary.
@@ -581,28 +581,28 @@ bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned cha
 	break;
       }
 
-    file.PutChar('!');
-    file.PutChar(0xf9);
-    file.PutChar(4);
-    file.PutChar(1);
-    file.PutChar(0);
-    file.PutChar(0);
-    file.PutChar(index);
-    file.PutChar(0);
+    file.WriteU8('!');
+    file.WriteU8(0xf9);
+    file.WriteU8(4);
+    file.WriteU8(1);
+    file.WriteU8(0);
+    file.WriteU8(0);
+    file.WriteU8(index);
+    file.WriteU8(0);
   }
 
   // Write image separator and Image Descriptor
-  file.PutChar(',');
+  file.WriteU8(',');
   put_word(file, 0);
   put_word(file, 0);
   put_word(file, (unsigned int)m_nWidth); 
   put_word(file, (unsigned int)m_nHeight);
   // flag byte: interlaced
   if (interlaced)
-    file.PutChar(0x40);
+    file.WriteU8(0x40);
   else
-    file.PutChar(0x00);
-  file.PutChar(InitCodeSize);// Write Initial Code Size byte
+    file.WriteU8(0x00);
+  file.WriteU8(InitCodeSize);// Write Initial Code Size byte
 
   // Initialize for LZW compression of image data
   dinfo->n_bits = dinfo->init_bits = InitCodeSize+1;
@@ -686,8 +686,8 @@ bool Image::SaveGIF (File& file, bool transparent, bool interlaced, unsigned cha
   }
 
   flush_packet(dinfo);
-  file.PutChar(0);
-  file.PutChar(';');
+  file.WriteU8(0);
+  file.WriteU8(';');
   file.Flush();
 
   free(dinfo->buffer);

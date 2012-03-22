@@ -1,7 +1,6 @@
 #ifndef _OBJECT_H_
 #define _OBJECT_H_
 
-class File;
 class Matrix;
 class Object;
 /*
@@ -158,8 +157,8 @@ public:
   //  Str m_strName;
   //  unsigned char m_nState;
 
-  virtual bool FileLoad (File& file);
-  virtual void FileSave (File& file) const;
+  virtual bool FileLoad(lcFile& file);
+  virtual void FileSave(lcFile& file) const;
 
 
   // Key handling stuff

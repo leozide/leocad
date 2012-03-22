@@ -30,9 +30,9 @@ TexFont::~TexFont ()
     m_pTexture->DeRef ();
 }
 
-bool TexFont::FileLoad (File& file)
+bool TexFont::FileLoad(lcFile& file)
 {
-  unsigned char version;
+  lcuint8 version;
   char buf[64];
 
   if (m_bLoaded)
@@ -41,14 +41,14 @@ bool TexFont::FileLoad (File& file)
     return false;
   }
 
-  file.Read (buf, 32);
+  file.ReadBuffer(buf, 32);
   if (strncmp (buf, LC_TEXFONT_FILE_HEADER, 32) != 0)
   {
     console.PrintError ("Texture font file header mismatch.\n");
     return false;
   }
 
-  file.ReadByte (&version, 1);
+  file.ReadU8(&version, 1);
   if (version > LC_TEXFONT_FILE_VERSION)
   {
     console.PrintError ("Wrong version of texture font file.\n");
@@ -56,7 +56,7 @@ bool TexFont::FileLoad (File& file)
   }
 
   memset (buf, 0, 32);
-  file.Read (buf, 8);
+  file.ReadBuffer(buf, 8);
 
   m_pTexture = lcGetPiecesLibrary()->FindTexture (buf);
   if (m_pTexture == NULL)
@@ -66,22 +66,22 @@ bool TexFont::FileLoad (File& file)
   }
   m_pTexture->AddRef (false);
  
-  file.ReadByte (&m_nFontHeight, 1);
+  file.ReadU8(&m_nFontHeight, 1);
 
   for (;;)
   {
     unsigned char glyph;
 
-    file.ReadByte (&glyph, 1);
+    file.ReadU8(&glyph, 1);
 
     if (glyph == 0)
       break;
 
-    file.ReadByte (&m_Glyphs[glyph].width, 1);
-    file.ReadFloat (&m_Glyphs[glyph].left, 1);
-    file.ReadFloat (&m_Glyphs[glyph].right, 1);
-    file.ReadFloat (&m_Glyphs[glyph].top, 1);
-    file.ReadFloat (&m_Glyphs[glyph].bottom, 1);
+    file.ReadU8(&m_Glyphs[glyph].width, 1);
+    file.ReadFloats(&m_Glyphs[glyph].left, 1);
+    file.ReadFloats(&m_Glyphs[glyph].right, 1);
+    file.ReadFloats(&m_Glyphs[glyph].top, 1);
+    file.ReadFloats(&m_Glyphs[glyph].bottom, 1);
 
     m_Glyphs[glyph].left /= m_pTexture->m_nWidth;
     m_Glyphs[glyph].right /= m_pTexture->m_nWidth;

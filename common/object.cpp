@@ -79,11 +79,10 @@ Object::~Object ()
   RemoveKeys ();
 }
 
-bool Object::FileLoad (File& file)
+bool Object::FileLoad(lcFile& file)
 {
-  lcuint8 version;
+  lcuint8 version = file.ReadU8();
 
-  file.ReadByte (&version, 1);
   if (version > LC_KEY_SAVE_VERSION)
     return false;
 
@@ -92,22 +91,22 @@ bool Object::FileLoad (File& file)
   lcuint8 type;
   lcuint32 n;
 
-  file.ReadLong (&n, 1);
+  file.ReadU32(&n, 1);
   while (n--)
   {
-    file.ReadShort (&time, 1);
-    file.ReadFloat (param, 4);
-    file.ReadByte (&type, 1);
+    file.ReadU16(&time, 1);
+    file.ReadFloats(param, 4);
+    file.ReadU8(&type, 1);
 
     ChangeKey (time, false, true, param, type);
   }
 
-  file.ReadLong (&n, 1);
+  file.ReadU32(&n, 1);
   while (n--)
   {
-    file.ReadShort (&time, 1);
-    file.ReadFloat (param, 4);
-    file.ReadByte (&type, 1);
+    file.ReadU16(&time, 1);
+    file.ReadFloats(param, 4);
+    file.ReadU8(&type, 1);
 
     ChangeKey (time, true, true, param, type);
   }
@@ -115,34 +114,33 @@ bool Object::FileLoad (File& file)
   return true;
 }
 
-void Object::FileSave (File& file) const
+void Object::FileSave(lcFile& file) const
 {
-  lcuint8 version = LC_KEY_SAVE_VERSION;
   LC_OBJECT_KEY *node;
   lcuint32 n;
 
-  file.WriteByte (&version, 1);
+  file.WriteU8(LC_KEY_SAVE_VERSION);
 
   for (n = 0, node = m_pInstructionKeys; node; node = node->next)
     n++;
-  file.WriteLong (&n, 1);
+  file.WriteU32(n);
 
   for (node = m_pInstructionKeys; node; node = node->next)
   {
-    file.WriteShort (&node->time, 1);
-    file.WriteFloat (node->param, 4);
-    file.WriteByte (&node->type, 1);
+    file.WriteU16(node->time);
+    file.WriteFloats(node->param, 4);
+    file.WriteU8(node->type);
   }
 
   for (n = 0, node = m_pAnimationKeys; node; node = node->next)
     n++;
-  file.WriteLong (&n, 1);
+  file.WriteU32(n);
 
   for (node = m_pAnimationKeys; node; node = node->next)
   {
-    file.WriteShort (&node->time, 1);
-    file.WriteFloat (node->param, 4);
-    file.WriteByte (&node->type, 1);
+    file.WriteU16(node->time);
+    file.WriteFloats(node->param, 4);
+    file.WriteU8(node->type);
   }
 }
 

@@ -34,8 +34,8 @@ class CurvePoint : public Object
   virtual ~CurvePoint ();
 
   // object functions
-  bool FileLoad (File& file);
-  void FileSave (File& file) const;
+  bool FileLoad(lcFile& file);
+  void FileSave(lcFile& file) const;
   void MinIntersectDist (LC_CLICKLINE* pLine);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
@@ -97,8 +97,8 @@ class Curve : public Object
   virtual ~Curve ();
 
   // object functions
-  bool FileLoad (File& file);
-  void FileSave (File& file) const;
+  bool FileLoad(lcFile& file);
+  void FileSave(lcFile& file) const;
   void MinIntersectDist (LC_CLICKLINE* pLine);
   void UpdatePosition (unsigned short nTime, bool bAnimation);
   void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);

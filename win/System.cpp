@@ -150,20 +150,20 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 
 				float fv;
 				char id[32];
-				FileDisk file;
+				lcDiskFile file;
 				file.Open(filename, "rb");
-				file.Read(id, 32);
+				file.ReadBuffer(id, 32);
 				sscanf(strchr(id, ' '), "%f", &fv);
 
 				if (fv > 0.4f)
 				{
-					file.Read(&fv, 4);
+					file.ReadFloats(&fv, 1);
 
 					if (fv > 0.7f)
 					{
-						unsigned long dwPosition;
+						lcuint32 dwPosition;
 						file.Seek(-4, SEEK_END);
-						file.Read(&dwPosition, 4);
+						file.ReadU32(&dwPosition, 1);
 						file.Seek(dwPosition, SEEK_SET);
 
 						if (dwPosition != 0)
@@ -171,10 +171,10 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 							if (fv < 1.0f)
 							{
 								BITMAPFILEHEADER bmfHeader;
-								file.Read((LPSTR)&bmfHeader, sizeof(bmfHeader));
+								file.ReadBuffer((LPSTR)&bmfHeader, sizeof(bmfHeader));
 								DWORD nPackedDIBLen = sizeof(BITMAPINFOHEADER) + 36000;
 								HGLOBAL hDIB = ::GlobalAlloc(GMEM_FIXED, nPackedDIBLen);
-								file.Read((LPSTR)hDIB, nPackedDIBLen);
+								file.ReadBuffer((LPSTR)hDIB, nPackedDIBLen);
 								BITMAPINFOHEADER &bmiHeader = *(LPBITMAPINFOHEADER)hDIB;
 								BITMAPINFO &bmInfo = *(LPBITMAPINFO)hDIB;
 								int nColors = bmiHeader.biClrUsed ? bmiHeader.biClrUsed : 1 << bmiHeader.biBitCount;
@@ -192,32 +192,31 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 							else
 							{
 								Image image;
-                
-                if (image.FileLoad (file))
-                {
-                  HWND hwndDesktop = GetDesktopWindow(); 
-                  HDC hdcDesktop = GetDC(hwndDesktop); 
-                  HDC hdcMem = CreateCompatibleDC(hdcDesktop); 
-                  hbm = CreateCompatibleBitmap(hdcDesktop, 120, 100);
-                  HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm); 
 
-                  for (int y = 0; y < 100; y++)
-                    for (int x = 0; x < 120; x++)
-                    {
-                      unsigned char* b = image.GetData () + (y*120+x)*3;
-                      SetPixelV(hdcMem, x, y, RGB(b[0], b[1], b[2]));
-                    }
+								if (image.FileLoad (file))
+								{
+									HWND hwndDesktop = GetDesktopWindow(); 
+									HDC hdcDesktop = GetDC(hwndDesktop); 
+									HDC hdcMem = CreateCompatibleDC(hdcDesktop); 
+									hbm = CreateCompatibleBitmap(hdcDesktop, 120, 100);
+									HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm); 
 
-                  // Clean up
-                  SelectObject(hdcMem, hbmOld); 
-                  DeleteDC(hdcMem); 
-                  ReleaseDC(hwndDesktop, hdcDesktop); 
-                }
+									for (int y = 0; y < 100; y++)
+										for (int x = 0; x < 120; x++)
+										{
+											unsigned char* b = image.GetData () + (y*120+x)*3;
+											SetPixelV(hdcMem, x, y, RGB(b[0], b[1], b[2]));
+										}
+
+										// Clean up
+										SelectObject(hdcMem, hbmOld); 
+										DeleteDC(hdcMem); 
+										ReleaseDC(hwndDesktop, hdcDesktop); 
+								}
 							}
 						}
 					}
 				}
-				file.Close();
 
 				if (!hbm)
 					hbm = CreateColorBitmap (120, 100, GetSysColor(COLOR_BTNFACE));
@@ -1471,7 +1470,7 @@ void SystemReleaseMouse()
 	ReleaseCapture();
 }
 
-void SystemExportClipboard(File* clip)
+void SystemExportClipboard(lcFile* clip)
 {
 	if (clip == NULL)
 		return;
@@ -1479,7 +1478,7 @@ void SystemExportClipboard(File* clip)
 	HGLOBAL hData = GlobalAlloc(GMEM_DDESHARE|GMEM_MOVEABLE, clip->GetLength());
 	void* lpBuffer = GlobalLock(hData);
 	clip->Seek(0, SEEK_SET);
-	clip->Read(lpBuffer, clip->GetLength());
+	clip->ReadBuffer(lpBuffer, clip->GetLength());
 	GlobalUnlock(hData);
 
 	if (OpenClipboard(NULL))
@@ -1491,9 +1490,9 @@ void SystemExportClipboard(File* clip)
 //		AfxMessageBox(IDS_CANNOT_OPEN_CLIPBOARD);
 }
 
-File* SystemImportClipboard()
+lcFile* SystemImportClipboard()
 {
-	File* clip = NULL;
+	lcFile* clip = NULL;
 
 	if (ClipboardFormat != 0)
 	if (OpenClipboard(NULL))
@@ -1501,11 +1500,11 @@ File* SystemImportClipboard()
 		HANDLE hData = ::GetClipboardData(ClipboardFormat);
 		if (hData != NULL)
 		{
-			clip = new FileMem();
+			clip = new lcMemFile();
 
 			BYTE* lpBuffer = (BYTE*)::GlobalLock(hData);
 			long nBufferSize = ::GlobalSize(hData);
-			clip->Write(lpBuffer, nBufferSize);
+			clip->WriteBuffer(lpBuffer, nBufferSize);
 			GlobalUnlock(hData);
 		}
 //		else

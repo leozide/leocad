@@ -14,4 +14,9 @@
 #include "stdafx.h"
 #endif
 
+// Forward declarations.
+class lcFile;
+class lcMemFile;
+class lcDiskFile;
+
 #endif // _LC_GLOBAL_H_

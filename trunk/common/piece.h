@@ -1,7 +1,6 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
-class File;
 class Piece;
 class Group;
 class PieceInfo;
@@ -61,8 +60,8 @@ public:
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
-	bool FileLoad(File& file, char* name);
-	void FileSave(File& file, Group* pGroups);
+	bool FileLoad(lcFile& file, char* name);
+	void FileSave(lcFile& file, Group* pGroups);
 
 	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers);
 	void UpdatePosition(unsigned short nTime, bool bAnimation);

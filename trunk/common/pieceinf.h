@@ -17,7 +17,6 @@
 
 #define LC_PIECE_NAME_LEN 256
 
-class File;
 class Texture;
 
 struct CONNECTIONINFO
@@ -92,7 +91,7 @@ class PieceInfo
 			CreateBoxDisplayList();
 		return m_nBoxList;
 	};
-	void LoadIndex(File& file);
+	void LoadIndex(lcFile& file);
 	void CreatePlaceholder(const char* Name);
 	void AddRef();
 	void DeRef();
@@ -102,8 +101,8 @@ public:
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[65];
 	float m_fDimensions[6];
-	unsigned long m_nOffset;
-	unsigned long m_nSize;
+	lcuint32 m_nOffset;
+	lcuint32 m_nSize;
 
 	// Nobody should change these
 	unsigned char	m_nFlags;

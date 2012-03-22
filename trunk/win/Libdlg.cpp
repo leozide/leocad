@@ -138,7 +138,7 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 {
 	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 	PiecesLibrary* Library = lcGetPiecesLibrary();
-	FileDisk DiskIdx, DiskBin;
+	lcDiskFile DiskIdx, DiskBin;
 
 	strcpy(file1, Library->GetLibraryPath());
 	strcat(file1, "pieces.idx");
@@ -148,23 +148,17 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 	if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
 		return false;
 
-	FileMem IdxFile1, IdxFile2, BinFile1, BinFile2;
-	long Length;
+	lcMemFile IdxFile1, IdxFile2, BinFile1, BinFile2;
 
-	Length = DiskIdx.GetLength();
-	IdxFile1.SetLength(Length);
-	DiskIdx.Read(IdxFile1.GetBuffer(), Length);
+	IdxFile1.CopyFrom(DiskIdx);
 	DiskIdx.Close();
-
-	Length = DiskBin.GetLength();
-	BinFile1.SetLength(Length);
-	DiskBin.Read(BinFile1.GetBuffer(), Length);
+	BinFile1.CopyFrom(DiskBin);
 	DiskBin.Close();
 
-	FileMem* NewIdx = &IdxFile1;
-	FileMem* NewBin = &BinFile1;
-	FileMem* OldIdx = &IdxFile2;
-	FileMem* OldBin = &BinFile2;
+	lcMemFile* NewIdx = &IdxFile1;
+	lcMemFile* NewBin = &BinFile1;
+	lcMemFile* OldIdx = &IdxFile2;
+	lcMemFile* OldBin = &BinFile2;
 
 	CProgressDlg Dlg("Importing pieces");
 	Dlg.Create(this);
@@ -184,7 +178,7 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 		Dlg.SetStatus(Name);
 		Dlg.StepIt();
 
-		FileMem* TmpFile;
+		lcMemFile* TmpFile;
 
 		TmpFile = NewBin;
 		NewBin = OldBin;
@@ -223,11 +217,8 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 
-	DiskBin.Seek(0, SEEK_SET);
-	DiskBin.Write(NewBin->GetBuffer(), NewBin->GetLength());
-
-	DiskIdx.Seek(0, SEEK_SET);
-	DiskIdx.Write(NewIdx->GetBuffer(), NewIdx->GetLength());
+	DiskBin.CopyFrom(*NewBin);
+	DiskIdx.CopyFrom(*NewIdx);
 
 	UpdateList();
 

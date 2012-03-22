@@ -82,7 +82,6 @@ bool Sys_KeyDown (int key);
 
 
 
-class File;
 class Camera;
 class PieceInfo;
 
@@ -116,8 +115,8 @@ void SystemPieceComboAdd(char* name);
 void SystemCaptureMouse();
 void SystemReleaseMouse();
 
-void SystemExportClipboard(File* clip);
-File* SystemImportClipboard();
+void SystemExportClipboard(lcFile* clip);
+lcFile* SystemImportClipboard();
 
 void SystemPumpMessages();
 long SystemGetTicks();

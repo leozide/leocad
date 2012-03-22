@@ -1,11 +1,5 @@
-//
-//	group.h
-////////////////////////////////////////////////////
-
-#ifndef _GROUP_H
-#define _GROUP_H
-
-class File;
+#ifndef _GROUP_H_
+#define _GROUP_H_
 
 class Group
 {
@@ -21,11 +15,11 @@ public:
 	Group* m_pNext;
 	Group* m_pGroup;
 
-	void FileLoad(File* file);
-	void FileSave(File* file, Group* pGroups);
+	void FileLoad(lcFile* file);
+	void FileSave(lcFile* file, Group* pGroups);
 
 	char m_strName[65];
 	float m_fCenter[3];
 };
 
-#endif // _GROUP_H
+#endif // _GROUP_H_

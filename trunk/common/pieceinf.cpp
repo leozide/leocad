@@ -189,7 +189,7 @@ PieceInfo::~PieceInfo ()
 /////////////////////////////////////////////////////////////////////////////
 // File I/O
 
-void PieceInfo::LoadIndex (File& file)
+void PieceInfo::LoadIndex(lcFile& file)
 {
   static bool init = false;
   short sh[6];
@@ -218,14 +218,14 @@ void PieceInfo::LoadIndex (File& file)
   m_pTextures = NULL;
   m_nBoxList = 0;
 
-  file.Read (m_strName, LC_PIECE_NAME_LEN);
-  file.Read (m_strDescription, 64);
+  file.ReadBuffer(m_strName, LC_PIECE_NAME_LEN);
+  file.ReadBuffer(m_strDescription, 64);
   m_strDescription[64] = '\0';
-  file.ReadShort (sh, 6);
-  file.ReadByte (&m_nFlags, 1);
-  lcuint32 Groups; file.ReadLong (&Groups, 1);
-  file.ReadLong (&m_nOffset, 1);
-  file.ReadLong (&m_nSize, 1);
+  file.ReadS16(sh, 6);
+  file.ReadU8(&m_nFlags, 1);
+  lcuint32 Groups; file.ReadU32(&Groups, 1);
+  file.ReadU32(&m_nOffset, 1);
+  file.ReadU32(&m_nSize, 1);
 
   if (m_nFlags & LC_PIECE_SMALL)
     scale = 10000;
@@ -454,7 +454,7 @@ void PieceInfo::LoadInformation()
 		return;
 	}
 
-  FileDisk bin;
+  lcDiskFile bin;
   char filename[LC_MAXPATH];
   CONNECTIONINFO* pConnection;
   DRAWGROUP* pGroup;
@@ -477,8 +477,7 @@ void PieceInfo::LoadInformation()
 
   buf = malloc(m_nSize);
   bin.Seek(m_nOffset, SEEK_SET);
-  bin.Read(buf, m_nSize);
-  bin.Close();
+  bin.ReadBuffer(buf, m_nSize);
 
   shift  = 1.0f/(1<<14);
   scale = 0.01f;

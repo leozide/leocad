@@ -792,15 +792,15 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 	strcpy(Filename, lcGetPiecesLibrary()->GetLibraryPath());
 	strcat(Filename, "mlcad.ini");
 
-	FileDisk DiskSettings;
+	lcDiskFile DiskSettings;
 	if (DiskSettings.Open(Filename, "rt"))
 	{
 		ParseSettings(DiskSettings);
 	}
 	else
 	{
-		FileMem MemSettings;
-		MemSettings.Write(DefaultSettings, strlen(DefaultSettings)+1);
+		lcMemFile MemSettings;
+		MemSettings.WriteBuffer(DefaultSettings, strlen(DefaultSettings)+1);
 		ParseSettings(MemSettings);
 	}
 
@@ -933,7 +933,7 @@ MinifigWizard::~MinifigWizard ()
 			m_Info[i]->DeRef();
 }
 
-void MinifigWizard::ParseSettings(File& Settings)
+void MinifigWizard::ParseSettings(lcFile& Settings)
 {
 	const char* SectionNames[LC_MFW_NUMITEMS] =
 	{

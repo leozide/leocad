@@ -54,7 +54,7 @@ public:
 	bool LoadMinifig (const char* name);
 	void DeleteMinifig (const char* name);
 
-	void ParseSettings(class File& Settings);
+	void ParseSettings(lcFile& Settings);
 
 	ObjArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 

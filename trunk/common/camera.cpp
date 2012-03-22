@@ -225,11 +225,11 @@ void Camera::Initialize()
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 
-bool Camera::FileLoad (File& file)
+bool Camera::FileLoad(lcFile& file)
 {
-  unsigned char version, ch;
+  lcuint8 version, ch;
 
-  file.ReadByte (&version, 1);
+  version = file.ReadU8();
 
   if (version > LC_CAMERA_SAVE_VERSION)
     return false;
@@ -240,15 +240,15 @@ bool Camera::FileLoad (File& file)
 
   if (version == 4)
   {
-    file.Read(m_strName, 80);
+    file.ReadBuffer(m_strName, 80);
     m_strName[80] = 0;
   }
   else
   {
-    file.Read(&ch, 1);
+    ch = file.ReadU8();
     if (ch == 0xFF)
       return false; // don't read CString
-    file.Read(m_strName, ch);
+    file.ReadBuffer(m_strName, ch);
     m_strName[ch] = 0;
   }
 
@@ -257,21 +257,21 @@ bool Camera::FileLoad (File& file)
     double d[3];
     float f[3];
 
-    file.ReadDouble (d, 3);
+    file.ReadDoubles(d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
     ChangeKey (1, false, true, f, LC_CK_EYE);
     ChangeKey (1, true, true, f, LC_CK_EYE);
 
-    file.ReadDouble (d, 3);
+    file.ReadDoubles(d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
     ChangeKey (1, false, true, f, LC_CK_TARGET);
     ChangeKey (1, true, true, f, LC_CK_TARGET);
 
-    file.ReadDouble (d, 3);
+    file.ReadDoubles(d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
@@ -281,21 +281,21 @@ bool Camera::FileLoad (File& file)
 
   if (version == 3)
   {
-    file.Read(&ch, 1);
+    ch = file.ReadU8();
 
     while (ch--)
     {
-      unsigned char step;
+      lcuint8 step;
       double eye[3], target[3], up[3];
       float f[3];
 
-      file.ReadDouble (eye, 3);
-      file.ReadDouble (target, 3);
-      file.ReadDouble (up, 3);
-      file.ReadByte (&step, 1);
+      file.ReadDoubles(eye, 3);
+      file.ReadDoubles(target, 3);
+      file.ReadDoubles(up, 3);
+      file.ReadU8(&step, 1);
 
       if (up[0] == 0 && up[1] == 0 && up[2] == 0)
-	up[2] = 1;
+        up[2] = 1;
 
       f[0] = (float)eye[0];
       f[1] = (float)eye[1];
@@ -315,80 +315,73 @@ bool Camera::FileLoad (File& file)
       ChangeKey (step, false, true, f, LC_CK_UP);
       ChangeKey (step, true, true, f, LC_CK_UP);
 
-      int snapshot; // BOOL under Windows
-      int cam;
-      file.ReadLong (&snapshot, 1);
-      file.ReadLong (&cam, 1);
-//			if (cam == -1)
-//				node->pCam = NULL;
-//			else
-//				node->pCam = pDoc->GetCamera(i);
+      lcint32 snapshot = file.ReadS32();
+      lcint32 cam = file.ReadS32();
     }
   }
 
   if (version < 4)
   {
-    double d;
-    file.ReadDouble (&d, 1); m_fovy = (float)d;
-    file.ReadDouble (&d, 1); m_zFar = (float)d;
-    file.ReadDouble (&d, 1); m_zNear= (float)d;
+    m_fovy = (float)file.ReadDouble();
+    m_zFar = (float)file.ReadDouble();
+    m_zNear= (float)file.ReadDouble();
   }
   else
   {
-    int n;
+    lcint32 n;
 
     if (version < 6)
     {
-      unsigned short time;
+      lcuint16 time;
       float param[4];
-      unsigned char type;
+      lcuint8 type;
 
-      file.ReadLong (&n, 1);
+      n = file.ReadS32();
       while (n--)
       {
-        file.ReadShort (&time, 1);
-        file.ReadFloat (param, 3);
-        file.ReadByte (&type, 1);
+        file.ReadU16(&time, 1);
+        file.ReadFloats(param, 3);
+        file.ReadU8(&type, 1);
 
         ChangeKey (time, false, true, param, type);
       }
 
-      file.ReadLong (&n, 1);
+      n = file.ReadS32();
       while (n--)
       {
-        file.ReadShort (&time, 1);
-        file.ReadFloat (param, 3);
-        file.ReadByte (&type, 1);
+        file.ReadU16(&time, 1);
+        file.ReadFloats(param, 3);
+        file.ReadU8(&type, 1);
 
         ChangeKey (time, true, true, param, type);
       }
     }
 
-    file.ReadFloat (&m_fovy, 1);
-    file.ReadFloat (&m_zFar, 1);
-    file.ReadFloat (&m_zNear, 1);
+    file.ReadFloats(&m_fovy, 1);
+    file.ReadFloats(&m_zFar, 1);
+    file.ReadFloats(&m_zNear, 1);
 
     if (version < 5)
     {
-      file.ReadLong (&n, 1);
+      n = file.ReadS32();
       if (n != 0)
 	m_nState |= LC_CAMERA_HIDDEN;
     }
     else
     {
-      file.ReadByte (&m_nState, 1);
-      file.ReadByte (&m_nType, 1);
+      m_nState = file.ReadU8();
+      m_nType = file.ReadU8();
     }
   }
 
   if ((version > 1) && (version < 4))
   {
-    unsigned long show;
-    int user;
+    lcuint32 show;
+    lcint32 user;
 
-    file.ReadLong (&show, 1);
+    show = file.ReadU32();
 //			if (version > 2)
-    file.ReadLong (&user, 1);
+    user = file.ReadS32();
     if (show == 0)
       m_nState |= LC_CAMERA_HIDDEN;
   }
@@ -396,24 +389,22 @@ bool Camera::FileLoad (File& file)
   return true;
 }
 
-void Camera::FileSave (File& file) const
+void Camera::FileSave(lcFile& file) const
 {
-  unsigned char ch = LC_CAMERA_SAVE_VERSION;
-
-  file.WriteByte (&ch, 1);
+  file.WriteU8(LC_CAMERA_SAVE_VERSION);
 
   Object::FileSave (file);
 
-  ch = (unsigned char)strlen(m_strName);
-  file.Write (&ch, 1);
-  file.Write (m_strName, ch);
+  lcuint8 ch = (unsigned char)strlen(m_strName);
+  file.WriteU8(ch);
+  file.WriteBuffer(m_strName, ch);
 
-  file.WriteFloat (&m_fovy, 1);
-  file.WriteFloat (&m_zFar, 1);
-  file.WriteFloat (&m_zNear, 1);
+  file.WriteFloat(m_fovy);
+  file.WriteFloat(m_zFar);
+  file.WriteFloat(m_zNear);
   // version 5
-  file.WriteByte (&m_nState, 1);
-  file.WriteByte (&m_nType, 1);
+  file.WriteU8(m_nState);
+  file.WriteU8(m_nType);
 }
 
 /////////////////////////////////////////////////////////////////////////////

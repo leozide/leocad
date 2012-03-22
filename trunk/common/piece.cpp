@@ -149,11 +149,11 @@ void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 	}
 }
 
-bool Piece::FileLoad (File& file, char* name)
+bool Piece::FileLoad(lcFile& file, char* name)
 {
-  unsigned char version, ch;
+  lcuint8 version, ch;
 
-  file.ReadByte (&version, 1);
+  version = file.ReadU8();
 
   if (version > LC_PIECE_SAVE_VERSION)
     return false;
@@ -166,28 +166,28 @@ bool Piece::FileLoad (File& file, char* name)
   {
     lcuint16 time;
     float param[4];
-    unsigned char type;
+    lcuint8 type;
 
     if (version > 5)
     {
       lcuint32 keys;
 
-      file.ReadLong (&keys, 1);
+      file.ReadU32(&keys, 1);
       while (keys--)
       {
-        file.ReadFloat (param, 4);
-        file.ReadShort (&time, 1);
-        file.ReadByte (&type, 1);
+        file.ReadFloats(param, 4);
+        file.ReadU16(&time, 1);
+        file.ReadU8(&type, 1);
 
         ChangeKey (time, false, true, param, type);
       }
 
-      file.ReadLong (&keys, 1);
+      file.ReadU32(&keys, 1);
       while (keys--)
       {
-        file.ReadFloat (param, 4);
-        file.ReadShort (&time, 1);
-        file.ReadByte (&type, 1);
+        file.ReadFloats(param, 4);
+        file.ReadU16(&time, 1);
+        file.ReadU8(&type, 1);
 
         ChangeKey (time, true, true, param, type);
       }
@@ -196,7 +196,7 @@ bool Piece::FileLoad (File& file, char* name)
     {
       if (version > 2)
       {
-        file.Read (&ch, 1);
+        file.ReadU8(&ch, 1);
 
         while (ch--)
         {
@@ -204,19 +204,19 @@ bool Piece::FileLoad (File& file, char* name)
           if (version > 3)
           {
             float m[16];
-            file.ReadFloat (m, 16);
+            file.ReadFloats(m, 16);
             mat.FromFloat (m);
           }
           else
           {
             float move[3], rotate[3];
-            file.ReadFloat (move, 3);
-            file.ReadFloat (rotate, 3);
+            file.ReadFloats(move, 3);
+            file.ReadFloats(rotate, 3);
             mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
           }
 
-          unsigned char b;
-          file.ReadByte(&b, 1);
+          lcuint8 b;
+          file.ReadU8(&b, 1);
           time = b;
 
           mat.GetTranslation(&param[0], &param[1], &param[2]);
@@ -228,16 +228,16 @@ bool Piece::FileLoad (File& file, char* name)
           ChangeKey (time, false, true, param, LC_PK_ROTATION);
           ChangeKey (time, true, true, param, LC_PK_ROTATION);
 
-          int bl;
-          file.ReadLong (&bl, 1);
+          lcint32 bl;
+          file.ReadS32(&bl, 1);
         }
       }
       else
       {
         Matrix mat;
         float move[3], rotate[3];
-        file.ReadFloat (move, 3);
-        file.ReadFloat (rotate, 3);
+        file.ReadFloats(move, 3);
+        file.ReadFloats(rotate, 3);
         mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
 
         mat.GetTranslation(&param[0], &param[1], &param[2]);
@@ -256,11 +256,11 @@ bool Piece::FileLoad (File& file, char* name)
   if (version < 10)
   {
 	  memset(name, 0, LC_PIECE_NAME_LEN);
-	  file.Read(name, 9);
+	  file.ReadBuffer(name, 9);
   }
   else
-	  file.Read(name, LC_PIECE_NAME_LEN);
-  file.ReadByte(&m_nColor, 1);
+	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
+  file.ReadU8(&m_nColor, 1);
 
   if (version < 5)
   {
@@ -268,37 +268,37 @@ bool Piece::FileLoad (File& file, char* name)
     m_nColor = conv[m_nColor];
   }
 
-  file.ReadByte(&m_nStepShow, 1);
+  file.ReadU8(&m_nStepShow, 1);
   if (version > 1)
-    file.ReadByte(&m_nStepHide, 1);
+    file.ReadU8(&m_nStepHide, 1);
   else
     m_nStepHide = 255;
 
   if (version > 5)
   {
-    file.ReadShort(&m_nFrameShow, 1);
-    file.ReadShort(&m_nFrameHide, 1);
+    file.ReadU16(&m_nFrameShow, 1);
+    file.ReadU16(&m_nFrameHide, 1);
 
     if (version > 7)
     {
-      file.ReadByte(&m_nState, 1);
+      file.ReadU8(&m_nState, 1);
       Select (false, false, false);
-      file.ReadByte(&ch, 1);
-      file.Read(m_strName, ch);
+      file.ReadU8(&ch, 1);
+      file.ReadBuffer(m_strName, ch);
     }
     else
     {
-      int hide;
-      file.ReadLong(&hide, 1);
+      lcint32 hide;
+      file.ReadS32(&hide, 1);
       if (hide != 0)
         m_nState |= LC_PIECE_HIDDEN;
-      file.Read(m_strName, 81);
+      file.ReadBuffer(m_strName, 81);
     }
 
     // 7 (0.64)
-    int i = -1;
+    lcint32 i = -1;
     if (version > 6)
-      file.ReadLong(&i, 1);
+      file.ReadS32(&i, 1);
     m_pGroup = (Group*)i;
   }
   else
@@ -306,13 +306,13 @@ bool Piece::FileLoad (File& file, char* name)
     m_nFrameShow = 1;
     m_nFrameHide = 65535;
 
-    file.ReadByte(&ch, 1);
+    file.ReadU8(&ch, 1);
     if (ch == 0)
       m_pGroup = (Group*)-1;
     else
       m_pGroup = (Group*)(lcuint32)ch;
 
-    file.ReadByte(&ch, 1);
+    file.ReadU8(&ch, 1);
     if (ch & 0x01)
       m_nState |= LC_PIECE_HIDDEN;
   }
@@ -320,41 +320,42 @@ bool Piece::FileLoad (File& file, char* name)
   return true;
 }
 
-void Piece::FileSave (File& file, Group* pGroups)
+void Piece::FileSave(lcFile& file, Group* pGroups)
 {
-  unsigned char ch = LC_PIECE_SAVE_VERSION;
+	file.WriteU8(LC_PIECE_SAVE_VERSION);
 
-  file.WriteByte (&ch, 1);
+	Object::FileSave (file);
 
-  Object::FileSave (file);
+	file.WriteBuffer(m_pPieceInfo->m_strName, LC_PIECE_NAME_LEN);
+	file.WriteU8(m_nColor);
+	file.WriteU8(m_nStepShow);
+	file.WriteU8(m_nStepHide);
+	file.WriteU16(m_nFrameShow);
+	file.WriteU16(m_nFrameHide);
 
-  file.Write(m_pPieceInfo->m_strName, LC_PIECE_NAME_LEN);
-  file.WriteByte(&m_nColor, 1);
-  file.WriteByte(&m_nStepShow, 1);
-  file.WriteByte(&m_nStepHide, 1);
-  file.WriteShort(&m_nFrameShow, 1);
-  file.WriteShort(&m_nFrameHide, 1);
+	// version 8
+	file.WriteU8(m_nState);
 
-  // version 8
-  file.WriteByte(&m_nState, 1);
-  ch = strlen(m_strName);
-  file.WriteByte(&ch, 1);
-  file.Write(m_strName, ch);
+	lcuint8 Length = strlen(m_strName);
+	file.WriteU8(Length);
+	file.WriteBuffer(m_strName, Length);
 
-  // version 7
-  int i;
-  if (m_pGroup != NULL)
-  {
-    for (i = 0; pGroups; pGroups = pGroups->m_pNext)
-    {
-      if (m_pGroup == pGroups)
-        break;
-      i++;
-    }
-  }
-  else
-    i = -1;
-  file.WriteLong(&i, 1);
+	// version 7
+	lcint32 i;
+
+	if (m_pGroup != NULL)
+	{
+		for (i = 0; pGroups; pGroups = pGroups->m_pNext)
+		{
+			if (m_pGroup == pGroups)
+				break;
+			i++;
+		}
+	}
+	else
+		i = -1;
+
+	file.WriteS32(i);
 }
 
 void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)

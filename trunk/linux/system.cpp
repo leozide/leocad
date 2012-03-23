@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -722,11 +723,11 @@ void SystemDoWaitCursor(int code)
   }
 }
 
-void SystemExportClipboard(File* clip)
+void SystemExportClipboard(lcFile* clip)
 {
 }
 
-File* SystemImportClipboard()
+lcFile* SystemImportClipboard()
 {
   return NULL;
 }

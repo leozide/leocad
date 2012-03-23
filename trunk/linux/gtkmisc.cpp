@@ -2,6 +2,7 @@
 // Small functions to help with GTK
 //
 
+#include "lc_global.h"
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <string.h>

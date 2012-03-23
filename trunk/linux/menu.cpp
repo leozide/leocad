@@ -1,6 +1,7 @@
 // Menu Creation.
 //
 
+#include "lc_global.h"
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include "typedefs.h"

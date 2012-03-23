@@ -8,13 +8,14 @@
 // - Piece Library Manager
 //
 
+#include "lc_global.h"
 #include <gtk/gtk.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include "system.h"
 #include "dialogs.h"
-#include "file.h"
+#include "lc_file.h"
 #include "image.h"
 #include "main.h"
 
@@ -35,20 +36,20 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
   {
     float fv;
     char id[32];
-    FileDisk file;
+    lcDiskFile file;
     file.Open (filename, "rb");
-    file.Read (id, 32);
+    file.ReadBuffer (id, 32);
     sscanf (strchr(id, ' '), "%f", &fv);
 
     if (fv > 0.4f)
     {
-      file.Read(&fv, 4);
+      file.ReadFloats(&fv, 1);
 
       if (fv > 0.7f)
       {
-        unsigned long dwPosition;
+        lcuint32 dwPosition;
         file.Seek (-4, SEEK_END);
-        file.Read (&dwPosition, 4);
+        file.ReadU32 (&dwPosition, 1);
         file.Seek (dwPosition, SEEK_SET);
 
         if (dwPosition != 0)
@@ -58,7 +59,7 @@ static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent
             file.Seek (54, SEEK_CUR);
 
             image.Allocate (120, 100, false);
-            file.Read (image.GetData (), 36000);
+            file.ReadBuffer (image.GetData (), 36000);
 
             for (int y = 0; y < 50; y++)
               for (int x = 0; x < 120; x++)

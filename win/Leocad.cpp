@@ -192,7 +192,7 @@ BOOL CCADApp::InitInstance()
 	AddDocTemplate(pDocTemplate);
 
 	EnableShellOpen();
-	RegisterShellFileTypes();
+	RegisterLeoCADShellFileTypes();
 
 	UINT cmdshow = m_nCmdShow;
 	m_nCmdShow = SW_HIDE;
@@ -296,6 +296,81 @@ void CCADApp::UpdateMRU(char names[4][MAX_PATH])
 {
 	for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
 		m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
+}
+
+static BOOL SetRegKey(LPCTSTR lpszKey, LPCTSTR lpszValue, LPCTSTR lpszValueName = NULL)
+{
+	if (lpszValueName == NULL)
+	{
+		if (AfxRegSetValue(HKEY_CLASSES_ROOT, lpszKey, REG_SZ, lpszValue, lstrlen(lpszValue) * sizeof(TCHAR)) != ERROR_SUCCESS)
+		{
+			TRACE(traceAppMsg, 0, _T("Warning: registration database update failed for key '%s'.\n"), lpszKey);
+			return FALSE;
+		}
+		return TRUE;
+	}
+	else
+	{
+		HKEY hKey;
+
+		if (AfxRegCreateKey(HKEY_CLASSES_ROOT, lpszKey, &hKey) == ERROR_SUCCESS)
+		{
+			LONG lResult = ::RegSetValueEx(hKey, lpszValueName, 0, REG_SZ, (CONST BYTE*)lpszValue, (lstrlen(lpszValue) + 1) * sizeof(TCHAR));
+
+			if (::RegCloseKey(hKey) == ERROR_SUCCESS && lResult == ERROR_SUCCESS)
+				return TRUE;
+		}
+		TRACE(traceAppMsg, 0, _T("Warning: registration database update failed for key '%s'.\n"), lpszKey);
+		return FALSE;
+	}
+}
+
+void CCADApp::RegisterLeoCADShellFileTypes()
+{
+	CString strPathName, strTemp;
+
+	AfxGetModuleShortFileName(AfxGetInstanceHandle(), strPathName);
+
+	// first register the type ID of our server
+	if (!SetRegKey(_T("LeoCAD.Project"), _T("LeoCAD Project")))
+		return;
+
+	// path\DefaultIcon = path,0
+	CString strDefaultIconCommandLine = strPathName;
+	strDefaultIconCommandLine += _T(",0");
+	if (!SetRegKey(_T("LeoCAD.Project\\DefaultIcon"), strDefaultIconCommandLine))
+		return;
+
+	// path\shell\open\command = path filename
+	CString strOpenCommandLine = strPathName;
+	strOpenCommandLine += _T(" \"%1\"");
+	if (!SetRegKey(_T("LeoCAD.Project\\shell\\open\\command"), strOpenCommandLine))
+		return;
+
+	// path\shell\print\command = path /p filename
+	CString strPrintCommandLine = strPathName;
+	strPrintCommandLine += _T(" /p \"%1\"");
+	if (!SetRegKey(_T("LeoCAD.Project\\shell\\print\\command"), strPrintCommandLine))
+		return;
+
+	// path\shell\printto\command = path /pt filename printer driver port
+	CString strPrintToCommandLine = strPathName;
+	strPrintToCommandLine += _T(" /pt \"%1\" \"%2\" \"%3\" \"%4\"");
+	if (!SetRegKey(_T("LeoCAD.Project\\shell\\printto\\command"), strPrintToCommandLine))
+		return;
+
+	LONG lSize = _MAX_PATH * 2;
+	LONG lResult = AfxRegQueryValue(HKEY_CLASSES_ROOT, _T(".lcd"), strTemp.GetBuffer(lSize), &lSize);
+	strTemp.ReleaseBuffer();
+
+	if (lResult != ERROR_SUCCESS || strTemp.IsEmpty() || strTemp == _T("LeoCAD.Project"))
+	{
+		// no association for that suffix
+		if (!SetRegKey(_T(".lcd"), _T("LeoCAD.Project")))
+			return;
+
+		SetRegKey(_T(".lcd\\ShellNew"), _T(""), _T("NullFile"));
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

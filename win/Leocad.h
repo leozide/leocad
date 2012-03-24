@@ -35,6 +35,7 @@ public:
 // Implementation
 	void OnUpdateRecentFileMenu(CCmdUI* /*pCmdUI*/) {};
 	void UpdateMRU(char names[4][MAX_PATH]);
+	void RegisterLeoCADShellFileTypes();
 
 	//{{AFX_MSG(CCADApp)
 	afx_msg void OnHelpUpdates();

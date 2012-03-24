@@ -101,13 +101,11 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\lc_colors.cpp" />
-    <ClCompile Include="..\common\lc_file.cpp" />
-    <ClCompile Include="Aboutdlg.cpp" />
     <ClCompile Include="..\common\array.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Aboutdlg.cpp" />
     <ClCompile Include="Arraydlg.cpp" />
     <ClCompile Include="basewnd.cpp" />
     <ClCompile Include="Cadbar.cpp" />
@@ -182,6 +180,8 @@
     <ClCompile Include="..\Common\image.cpp" />
     <ClCompile Include="..\common\keyboard.cpp" />
     <ClCompile Include="..\common\lc_application.cpp" />
+    <ClCompile Include="..\common\lc_colors.cpp" />
+    <ClCompile Include="..\common\lc_file.cpp" />
     <ClCompile Include="..\common\library.cpp" />
     <ClCompile Include="..\Common\light.cpp" />
     <ClCompile Include="..\common\mainwnd.cpp" />

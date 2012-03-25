@@ -1,6 +1,7 @@
 // Light object.
 
 #include "lc_global.h"
+#include "lc_colors.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -432,30 +433,36 @@ void Light::Render (float fLineWidth)
     if (IsEyeSelected())
     {
       glLineWidth(fLineWidth*2);
-      glColor3ubv(FlatColorArray[(m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+      if (m_nState & LC_LIGHT_FOCUSED)
+        lcSetColorFocused();
+      else
+        lcSetColorSelected();
       glCallList(m_nList);
       glLineWidth(fLineWidth);
     }
     else
     {
-      glColor3f(0.5f, 0.8f, 0.5f);
+      lcSetColorLight();
       glCallList(m_nList);
     }
 
     if (IsTargetSelected())
     {
       glLineWidth(fLineWidth*2);
-      glColor3ubv(FlatColorArray[(m_nState & LC_LIGHT_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+      if (m_nState & LC_LIGHT_TARGET_FOCUSED)
+        lcSetColorFocused();
+      else
+        lcSetColorSelected();
       glCallList(m_nTargetList);
       glLineWidth(fLineWidth);
     }
     else
     {
-      glColor3f(0.5f, 0.8f, 0.5f);
+      lcSetColorLight();
       glCallList(m_nTargetList);
     }
 
-    glColor3f(0.5f, 0.8f, 0.5f);
+    lcSetColorLight();
     glBegin(GL_LINES);
     glVertex3fv(m_fPos);
     glVertex3fv(m_fTarget);
@@ -526,13 +533,16 @@ void Light::Render (float fLineWidth)
     if (IsEyeSelected ())
     {
       glLineWidth (fLineWidth*2);
-      glColor3ubv (FlatColorArray[(m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+      if (m_nState & LC_LIGHT_FOCUSED)
+        lcSetColorFocused();
+      else
+        lcSetColorSelected();
       glCallList (m_nSphereList);
       glLineWidth (fLineWidth);
     }
     else
     {
-      glColor3f (0.5f, 0.8f, 0.5f);
+      lcSetColorLight();
       glCallList (m_nSphereList);
     }
 

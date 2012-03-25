@@ -130,8 +130,6 @@ int stricmp(const char* str1, const char* str2);
 
 #define LC_MAXCOLORS	28	// Number of colors supported
 #define LC_COL_EDGES	28	// Piece edges
-#define LC_COL_SELECTED	29	// Selected object
-#define LC_COL_FOCUSED	30	// Focused object
 #define LC_COL_DEFAULT	31	// Default piece color
 
 

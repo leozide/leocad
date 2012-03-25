@@ -1750,7 +1750,7 @@ typedef struct LC_BSPNODE
 	}
 } LC_BSPNODE;
 
-static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel, bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans)
+static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel, bool bLighting, bool bEdges)
 {
 	if (node->piece)
 	{
@@ -1771,20 +1771,20 @@ static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel, bool bLighting, 
 			}
 		}
 
-		node->piece->Render(bLighting, bEdges, nLastColor, bTrans);
+		node->piece->Render(bLighting, bEdges);
 		return;
 	}
 
 	if (eye[0]*node->plane[0] + eye[1]*node->plane[1] +
 		eye[2]*node->plane[2] + node->plane[3] > 0.0f)
 	{
-		RenderBSP(node->back, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
-		RenderBSP(node->front, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
+		RenderBSP(node->back, eye, bSel, bLighting, bEdges);
+		RenderBSP(node->front, eye, bSel, bLighting, bEdges);
 	}
 	else
 	{
-		RenderBSP(node->front, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
-		RenderBSP(node->back, eye, bSel, bLighting, bEdges, nLastColor, bTrans);
+		RenderBSP(node->front, eye, bSel, bLighting, bEdges);
+		RenderBSP(node->back, eye, bSel, bLighting, bEdges);
 	}
 }
 
@@ -1921,8 +1921,6 @@ void Project::RenderScenePieces(View* view)
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->Render(view->m_Camera, AspectRatio);
 
-	unsigned char nLastColor = 255;
-	bool bTrans = false;
 	bool bSel = false;
 	bool bCull = false;
 	Piece* pPiece;
@@ -1956,7 +1954,7 @@ void Project::RenderScenePieces(View* view)
 				}
 			}
 
-			pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+			pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
 		}
 		else
 		{
@@ -1970,14 +1968,11 @@ void Project::RenderScenePieces(View* view)
 		float eye[3];
 		view->m_Camera->GetEyePos (eye);
 		BuildBSP(&tree, pList);
-		RenderBSP(&tree, eye, &bSel, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0, &nLastColor, &bTrans);
+		RenderBSP(&tree, eye, &bSel, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
 	}
 
-	if (bTrans)
-	{
-		glDepthMask(GL_TRUE);
-		glDisable(GL_BLEND);
-	}
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 
 	if (bSel)
 		glLineWidth(m_fLineWidth);

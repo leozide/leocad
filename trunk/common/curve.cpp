@@ -2,6 +2,7 @@
 //
 
 #include "lc_global.h"
+#include "lc_colors.h"
 #include <stdlib.h>
 #include <math.h>
 #include "globals.h"
@@ -215,13 +216,11 @@ void CurvePoint::Select (bool bSelecting, bool bFocus, bool bMultiple)
 void CurvePoint::Render (LC_RENDER_INFO* pInfo)
 {
   if (m_nState & LC_CURVE_POINT_FOCUSED)
-    glColor3ubv (FlatColorArray[LC_COL_FOCUSED]);
+    lcSetColorFocused();
   else if (m_nState & LC_CURVE_POINT_SELECTED)
-    glColor3ubv (FlatColorArray[LC_COL_SELECTED]);
+    lcSetColorSelected();
   else
-    glColor3f(0.5f, 0.8f, 0.5f); // FIXME: same as camera color, add to FlatColorArray
-      //      glColor3ub (0, 0, 0); // FIXME: inverse of background
-      // FIXME: add a new color to the array and change the names from LC_COL to LC_COLOR ?
+    lcSetColorCamera(); // FIXME: same as camera color
 
   glPushMatrix ();
   glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
@@ -661,13 +660,11 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 	for (int i = 0; i < m_nNumPoints; i++)
 	{
 	if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_FOCUSED)
-	glColor3ubv (FlatColorArray[LC_COL_FOCUSED]);
+		lcSetColorFocused();
 	else if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_SELECTED)
-	glColor3ubv (FlatColorArray[LC_COL_SELECTED]);
+		lcSetColorSelected();
 	else
-	glColor3f(0.5f, 0.8f, 0.5f); // FIXME: same as camera color, add to FlatColorArray
-	//      glColor3ub (0, 0, 0); // FIXME: inverse of background
-	// FIXME: add a new color to the array and change the names from LC_COL to LC_COLOR ?
+		lcSetColorCamera(); // FIXME: same as camera color
 
 	glPushMatrix ();
 	//    RenderSegment (m_pPoints[i].m_fPos, m_pPoints[i+1].m_fPos, m_pSegments[i].m_fR1, m_pSegments[i].m_fR2);

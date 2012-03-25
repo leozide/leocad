@@ -15,6 +15,32 @@ struct lcColor
 extern lcColor* gColorList;
 extern int gNumColors;
 
+inline void lcSetColor(int ColorIndex)
+{
+	float* Color = gColorList[ColorIndex].Value;
+	glColor4f(Color[0], Color[1], Color[2], Color[3]);
+}
+
+inline void lcSetColorFocused()
+{
+	glColor4f(0.4000f, 0.2980f, 0.8980f, 1.0000f);
+}
+
+inline void lcSetColorSelected()
+{
+	glColor4f(0.8980f, 0.2980f, 0.4000f, 1.0000f);
+}
+
+inline void lcSetColorCamera()
+{
+	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
+}
+
+inline void lcSetColorLight()
+{
+	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
+}
+
 /*
 void lcColorInit(const char* FileName);
 void lcColorShutdown();
@@ -24,8 +50,6 @@ void lcColorShutdown();
 
 //#define LC_MAXCOLORS	28	// Number of colors supported
 //#define LC_COL_EDGES	28	// Piece edges
-//#define LC_COL_SELECTED	29	// Selected object
-//#define LC_COL_FOCUSED	30	// Focused object
 //#define LC_COL_DEFAULT	31	// Default piece color
 
 */

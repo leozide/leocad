@@ -109,7 +109,7 @@ public:
 	void GetRotation (float* rotation)
 		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
 
-	void Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans);
+	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
 
 	inline bool IsTransparent()

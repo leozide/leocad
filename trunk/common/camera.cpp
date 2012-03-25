@@ -1,6 +1,7 @@
 // Camera object.
 
 #include "lc_global.h"
+#include "lc_colors.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -610,37 +611,43 @@ void Camera::Render(float fLineWidth)
 	// Create the display lists if this is the first time we're rendered.
 	if (!m_nList)
 	{
-    m_nList = glGenLists(1);
+		m_nList = glGenLists(1);
 		UpdateBoundingBox();
 	}
 
   if (IsEyeSelected())
   {
     glLineWidth(fLineWidth*2);
-    glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+    if (m_nState & LC_CAMERA_FOCUSED)
+      lcSetColorFocused();
+    else
+      lcSetColorSelected();
     glCallList(m_nList);
     glLineWidth(fLineWidth);
   }
   else
   {
-    glColor3f(0.5f, 0.8f, 0.5f);
+    lcSetColorCamera();
     glCallList(m_nList);
   }
 
   if (IsTargetSelected())
   {
     glLineWidth(fLineWidth*2);
-    glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
+    if (m_nState & LC_CAMERA_TARGET_FOCUSED)
+      lcSetColorFocused();
+    else
+      lcSetColorSelected();
     glCallList(m_nTargetList);
     glLineWidth(fLineWidth);
   }
   else
   {
-    glColor3f(0.5f, 0.8f, 0.5f);
+    lcSetColorCamera();
     glCallList(m_nTargetList);
   }
 
-  glColor3f(0.5f, 0.8f, 0.5f);
+  lcSetColorCamera();
   glBegin(GL_LINES);
   glVertex3fv(m_fEye);
   glVertex3fv(m_fTarget);

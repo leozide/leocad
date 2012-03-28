@@ -544,7 +544,7 @@ void Export3DStudio()
 			if (facemats[j])
 			{
 				InitMatArrayIndex3ds (mobj, i, facemats[j]);
-				sprintf(mobj->matarray[i].name, "Material%02d", j == LC_COL_DEFAULT ? pPiece->GetColor() : j);
+				sprintf(mobj->matarray[i].name, "Material%d", j == LC_COL_DEFAULT ? pPiece->mColorCode : j);
 				mobj->matarray[i].nfaces = facemats[j];
 
 				UINT curface = 0;

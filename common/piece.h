@@ -8,6 +8,7 @@ class PieceInfo;
 #include "object.h"
 #include "globals.h"
 #include "typedefs.h"
+#include "lc_colors.h"
 
 #define LC_PIECE_HIDDEN		0x01
 #define LC_PIECE_SELECTED	0x02
@@ -54,7 +55,7 @@ public:
 
 	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
-	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
+	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame);
 	void CreateName(Piece* pPiece);
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
@@ -78,10 +79,6 @@ public:
 		{ strcpy(m_strName, name); }
 	const char* GetName()
 		{ return m_strName; }
-	const unsigned char GetColor()
-		{ return m_nColor; }
-	void SetColor(unsigned char color)
-		{ m_nColor = color; }
 	PieceInfo* GetPieceInfo()
 		{ return m_pPieceInfo; }
 	void SetStepShow(unsigned char step)
@@ -112,20 +109,26 @@ public:
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
 
-	inline bool IsTransparent()
+	void SetColorCode(lcuint32 ColorCode)
 	{
-		if (m_nColor < 14) return false;
-		if (m_nColor > 21) return false;
-		return true;
-	};
-
-/*
-	inline void UseTransform()
-	{
-		glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
-		glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
+		mColorCode = ColorCode;
+		mColorIndex = lcGetColorIndex(ColorCode);
 	}
-*/
+
+	void SetColorIndex(int ColorIndex)
+	{
+		mColorIndex = ColorIndex;
+		mColorCode = lcGetColorCode(ColorIndex);
+	}
+
+	bool IsTranslucent() const
+	{
+		return lcIsColorTranslucent(mColorIndex);
+	}
+
+	int mColorIndex;
+	lcuint32 mColorCode;
+
 protected:
 	void BuildDrawInfo();
 
@@ -138,7 +141,6 @@ protected:
 	unsigned char m_nStepShow;
 	unsigned char m_nStepHide;
 
-	unsigned char m_nColor;
 	unsigned char m_nState;
 	char m_strName[81];
 

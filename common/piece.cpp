@@ -17,7 +17,7 @@
 #include "algebra.h"
 #include "lc_application.h"
 
-#define LC_PIECE_SAVE_VERSION 10 // LeoCAD 0.75.2
+#define LC_PIECE_SAVE_VERSION 11 // LeoCAD 0.77
 
 static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 {
@@ -72,7 +72,8 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	m_pNext = NULL;
 	m_pPieceInfo = pPieceInfo;
 	m_nState = 0;
-	m_nColor = 0;
+	mColorIndex = 0;
+	mColorCode = 0;
 	m_nStepShow = 1;
 	m_nStepHide = 255;
 	m_nFrameHide = 65535;
@@ -253,13 +254,25 @@ bool Piece::FileLoad(lcFile& file, char* name)
   }
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
-  file.ReadU8(&m_nColor, 1);
 
-  if (version < 5)
-  {
-    const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
-    m_nColor = conv[m_nColor];
-  }
+	if (version < 11)
+	{
+		lcuint8 Color;
+
+		file.ReadU8(&Color, 1);
+
+		if (version < 5)
+		{
+			const int OriginalColorTable[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
+			Color = OriginalColorTable[Color];
+		}
+
+		const int ExtendedColorTable[28] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+		mColorCode = ExtendedColorTable[Color];
+	}
+	else
+		file.ReadU32(&mColorCode, 1);
+	mColorIndex = lcGetColorIndex(mColorCode);
 
   file.ReadU8(&m_nStepShow, 1);
   if (version > 1)
@@ -320,7 +333,7 @@ void Piece::FileSave(lcFile& file, Group* pGroups)
 	Object::FileSave (file);
 
 	file.WriteBuffer(m_pPieceInfo->m_strName, LC_PIECE_NAME_LEN);
-	file.WriteU8(m_nColor);
+	file.WriteU32(mColorCode);
 	file.WriteU8(m_nStepShow);
 	file.WriteU8(m_nStepHide);
 	file.WriteU16(m_nFrameShow);
@@ -351,20 +364,18 @@ void Piece::FileSave(lcFile& file, Group* pGroups)
 	file.WriteS32(i);
 }
 
-void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor)
+void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame)
 {
-  m_nFrameShow = nFrame;
-  m_nStepShow = nStep;
+	m_nFrameShow = nFrame;
+	m_nStepShow = nStep;
 
-  float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
-  ChangeKey (1, false, true, pos, LC_PK_POSITION);
-  ChangeKey (1, false, true, rot, LC_PK_ROTATION);
-  ChangeKey (1, true, true, pos, LC_PK_POSITION);
-  ChangeKey (1, true, true, rot, LC_PK_ROTATION);
+	float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
+	ChangeKey (1, false, true, pos, LC_PK_POSITION);
+	ChangeKey (1, false, true, rot, LC_PK_ROTATION);
+	ChangeKey (1, true, true, pos, LC_PK_POSITION);
+	ChangeKey (1, true, true, rot, LC_PK_ROTATION);
 
-  UpdatePosition (1, false);
-
-  m_nColor = nColor;
+	UpdatePosition (1, false);
 }
 
 void Piece::CreateName(Piece* pPiece)
@@ -886,12 +897,12 @@ void Piece::BuildDrawInfo()
 	for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
 	{
 		lcuint16* sh = dg->connections;
-		add = IsTransparent() || *sh == 0xFFFF;
+		add = IsTranslucent() || *sh == 0xFFFF;
 
 		if (!add)
 			for (; *sh != 0xFFFF; sh++)
 				if ((m_pConnections[*sh].link == NULL) ||
-					(m_pConnections[*sh].link->owner->IsTransparent()))
+					(m_pConnections[*sh].link->owner->IsTranslucent()))
 					{
 						add = true;
 						break;
@@ -977,12 +988,12 @@ void Piece::BuildDrawInfo()
 					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
 					{
 						lcuint16* sh = dg->connections;
-						add = IsTransparent() || *sh == 0xFFFF;
+						add = IsTranslucent() || *sh == 0xFFFF;
 
 						if (!add)
 							for (; *sh != 0xFFFF; sh++)
 								if ((m_pConnections[*sh].link == NULL) ||
-									(m_pConnections[*sh].link->owner->IsTransparent()))
+									(m_pConnections[*sh].link->owner->IsTranslucent()))
 									{
 										add = true;
 										break;
@@ -1066,12 +1077,12 @@ void Piece::BuildDrawInfo()
 					for (group = m_pPieceInfo->m_nGroupCount, dg = m_pPieceInfo->m_pGroups; group--; dg++)
 					{
 						lcuint16* sh = dg->connections;
-						add = IsTransparent() || *sh == 0xFFFF;
+						add = IsTranslucent() || *sh == 0xFFFF;
 
 						if (!add)
 							for (; *sh != 0xFFFF; sh++)
 								if ((m_pConnections[*sh].link == NULL) ||
-									(m_pConnections[*sh].link->owner->IsTransparent()))
+									(m_pConnections[*sh].link->owner->IsTranslucent()))
 									{
 										add = true;
 										break;
@@ -1153,7 +1164,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 	}
 	else
 	{
-		glColor3ubv(FlatColorArray[m_nColor]);
+		glColor3ubv(FlatColorArray[mColorIndex]);
 		glCallList(m_pPieceInfo->GetBoxDisplayList());
 	}
 	glPopMatrix();
@@ -1172,7 +1183,7 @@ void Piece::Render(bool bLighting, bool bEdges)
 		m_pPieceInfo->m_pTextures[sh].texture->MakeCurrent();
 
 		if (m_pPieceInfo->m_pTextures[sh].color == LC_COL_DEFAULT)
-			SetCurrentColor(m_nColor, bLighting);
+			SetCurrentColor(mColorIndex, bLighting);
 
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
@@ -1199,7 +1210,7 @@ void Piece::Render(bool bLighting, bool bEdges)
 			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
 
 			if (*info == LC_COL_DEFAULT)
-				SetCurrentColor(m_nColor, bLighting);
+				SetCurrentColor(mColorIndex, bLighting);
 			else
 				SetCurrentColor((unsigned char)*info, bLighting);
 			info++;
@@ -1264,7 +1275,7 @@ void Piece::Render(bool bLighting, bool bEdges)
 			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
 
 			if (*info == LC_COL_DEFAULT)
-				SetCurrentColor(m_nColor, bLighting);
+				SetCurrentColor(mColorIndex, bLighting);
 			else
 				SetCurrentColor((unsigned char)*info, bLighting);
 			info++;

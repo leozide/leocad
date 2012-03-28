@@ -376,3 +376,15 @@ void LoadDefaultColors()
 	File.Seek(0, SEEK_SET);
 	LoadColorFile(File);
 }
+
+int lcGetColorIndex(lcuint32 ColorCode)
+{
+	unsigned char ConvertColor(int c); // temp fix
+	return ConvertColor(ColorCode);
+}
+
+int lcGetColorCode(int ColorIndex)
+{
+	const int ExtendedColorTable[LC_MAXCOLORS] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 }; // temp fix
+	return ExtendedColorTable[ColorIndex];
+}

@@ -15,6 +15,14 @@ struct lcColor
 extern lcColor* gColorList;
 extern int gNumColors;
 
+int lcGetColorIndex(lcuint32 ColorCode);
+int lcGetColorCode(int ColorIndex);
+
+inline bool lcIsColorTranslucent(int ColorIndex)
+{
+	return (ColorIndex > 13 && ColorIndex < 22); // temp
+}
+
 inline void lcSetColor(int ColorIndex)
 {
 	float* Color = gColorList[ColorIndex].Value;

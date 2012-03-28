@@ -496,6 +496,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
 			color = conv[color];
+			const int ExtendedColorTable[LC_MAXCOLORS] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
+			lcuint32 ColorCode = ExtendedColorTable[color];
 
 			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 			if (pInfo != NULL)
@@ -503,7 +505,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				Piece* pPiece = new Piece(pInfo);
 				Matrix mat;
 
-				pPiece->Initialize(pos[0], pos[1], pos[2], step, 1, color);
+				pPiece->Initialize(pos[0], pos[1], pos[2], step, 1);
+				pPiece->SetColorCode(ColorCode);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
 				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
@@ -1040,8 +1043,6 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 			int cl = 0;
 			if (color == 16) 
 				cl = DefColor;
-			else
-				cl = ConvertColor(color);
 
 			strcpy(pn, tmp);
 			ptr = strrchr(tmp, '.');
@@ -1063,7 +1064,8 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 					read = false;
 
 					tmpmat.GetTranslation(&x, &y, &z);
-					pPiece->Initialize(x, y, z, *nStep, 1, cl);
+					pPiece->Initialize(x, y, z, *nStep, 1);
+					pPiece->SetColorCode(cl);
 					pPiece->CreateName(m_pPieces);
 					AddPiece(pPiece);
 					tmpmat.ToAxisAngle(rot);
@@ -1110,7 +1112,8 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 				read = false;
 
 				tmpmat.GetTranslation(&x, &y, &z);
-				pPiece->Initialize(x, y, z, *nStep, 1, cl);
+				pPiece->Initialize(x, y, z, *nStep, 1);
+				pPiece->SetColorCode(cl);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
 				tmpmat.ToAxisAngle(rot);
@@ -1216,7 +1219,6 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		const int col[28] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
 		Piece* pPiece;
 		int i, steps = GetLastStep();
 		char buf[256], *ptr;
@@ -1254,7 +1256,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 					Matrix mat(rotation, position);
 					mat.ToLDraw(f);
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-						col[pPiece->GetColor()], f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
+					         pPiece->mColorCode, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
 					file.WriteBuffer(buf, strlen(buf));
 				}
 			}
@@ -1935,7 +1937,7 @@ void Project::RenderScenePieces(View* view)
 		if (!pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 			continue;
 
-		if (!pPiece->IsTransparent())
+		if (!pPiece->IsTranslucent())
 		{
 			if (pPiece->IsSelected())
 			{
@@ -2846,11 +2848,11 @@ void CCADDoc::AddPiece(CPiece* pNewPiece)
 	for (pos1 = m_Pieces.GetHeadPosition(); (pos2 = pos1) != NULL;)
 	{
 		CPiece* pPiece = m_Pieces.GetNext(pos1);
-		if (pPiece->IsTransparent())
+		if (pPiece->IsTranslucent())
 			break;
 	}
 
-	if (pos2 == NULL || pNewPiece->IsTransparent())
+	if (pos2 == NULL || pNewPiece->IsTranslucent())
 		m_Pieces.AddTail(pNewPiece);
 	else
 		m_Pieces.InsertBefore(pos2, pNewPiece);
@@ -3212,7 +3214,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
 		if ((pPiece->GetStepShow() == nStep) || (nStep == 0))
-			col[pPiece->GetColor()]++;
+			col[pPiece->mColorCode]++;
 	}
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
 
@@ -3239,7 +3241,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 			if ((pPiece->GetPieceInfo() == pInfo) && 
 				((pPiece->GetStepShow() == nStep) || (nStep == 0)))
 			{
-				count [pPiece->GetColor()]++;
+				count [pPiece->mColorCode]++;
 				Add = true;
 			}
 		}
@@ -3347,7 +3349,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				pPiece->UnHide();
 
 			pPiece->SetName(mod->name);
-			pPiece->SetColor(mod->color);
+			pPiece->SetColorIndex(mod->color);
 			pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
@@ -4166,7 +4168,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				float fl[12], pos[3], rot[4];
 				int Color;
 
-				Color = piece->GetColor();
+				Color = piece->mColorIndex;
 				const char* Suffix = (Color > 13 && Color < 22) ? "_clear" : "";
 
 				piece->GetPosition(pos);
@@ -4314,7 +4316,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						buf[i] = '_';
 
 				fprintf(stream, "g %s\n", buf);
-				pPiece->GetPieceInfo()->WriteWavefront(stream, pPiece->GetColor(), &vert);
+				pPiece->GetPieceInfo()->WriteWavefront(stream, pPiece->mColorCode, &vert);
 			}
 
 			fclose(stream);
@@ -4340,7 +4342,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
 				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
-				opts.count[idx*LC_MAXCOLORS+pPiece->GetColor()]++;
+				opts.count[idx*LC_MAXCOLORS+pPiece->mColorIndex]++;
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -4810,16 +4812,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				GetPieceInsertPosition(pLast, Pos, Rot);
 
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
 				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 			else
-				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame);
 
 			SelectAndFocusNone(false);
+			pPiece->SetColorIndex(m_nCurColor);
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);
 			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
@@ -4869,7 +4872,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					Vector4& Position = Wizard.m_Matrices[i][3];
 					Vector4 Rotation = Wizard.m_Matrices[i].ToAxisAngle();
 					Rotation[3] *= LC_RTOD;
-					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame, Wizard.m_Colors[i]);
+					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame);
+					pPiece->SetColorIndex(Wizard.m_Colors[i]);
 					pPiece->CreateName(m_pPieces);
 					AddPiece(pPiece);
 					pPiece->Select(true, false, false);
@@ -5000,8 +5004,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							else
 								pLast = pFirst = new Piece(pPiece->GetPieceInfo());
 
-							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], 
-								m_nCurStep, m_nCurFrame, pPiece->GetColor());
+							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_nCurStep, m_nCurFrame);
+							pLast->SetColorIndex(pPiece->mColorIndex);
 							pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
 							pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 						}
@@ -5021,8 +5025,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								else
 									pLast = pFirst = new Piece(pPiece->GetPieceInfo());
 
-								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2],
-									m_nCurStep, m_nCurFrame, pPiece->GetColor());
+								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2], m_nCurStep, m_nCurFrame);
+								pLast->SetColorIndex(pPiece->mColorIndex);
 								pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
 								pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 							}
@@ -5040,8 +5044,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								else
 									pLast = pFirst = new Piece(pPiece->GetPieceInfo());
 
-								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2],
-									m_nCurStep, m_nCurFrame, pPiece->GetColor());
+								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_nCurStep, m_nCurFrame);
+								pLast->SetColorIndex(pPiece->mColorIndex);
 								pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
 								pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
 							}
@@ -7608,11 +7612,11 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			{
 				Piece* pPiece = (Piece*)Closest;
 
-				if (pPiece->GetColor() != m_nCurColor)
+				if (pPiece->mColorIndex != m_nCurColor)
 				{
-					bool bTrans = pPiece->IsTransparent();
-					pPiece->SetColor(m_nCurColor);
-					if (bTrans != pPiece->IsTransparent())
+					bool bTrans = pPiece->IsTranslucent();
+					pPiece->SetColorIndex(m_nCurColor);
+					if (bTrans != pPiece->IsTranslucent())
 						pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 
 					SetModifiedFlag(true);
@@ -7634,7 +7638,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				GetPieceInsertPosition(view, x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
+				pPiece->SetColorIndex(m_nCurColor);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
@@ -7866,7 +7871,8 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				GetPieceInsertPosition(view, x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame, m_nCurColor);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
+				pPiece->SetColorIndex(m_nCurColor);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);

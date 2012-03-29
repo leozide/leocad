@@ -65,7 +65,8 @@ static void CheckForUpdates(void* Data)
 		if(HttpQueryInfo(hHttpFile,HTTP_QUERY_CONTENT_LENGTH, szSizeBuffer, &dwLengthSizeBuffer, NULL))
 		{	 
 			dwFileSize = atol(szSizeBuffer);
-			LPSTR szContents = Contents.GetBuffer(dwFileSize);
+			LPSTR szContents = Contents.GetBuffer(dwFileSize+1);
+			szContents[dwFileSize] = 0;
 			
 			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
 			{
@@ -136,21 +137,11 @@ BEGIN_MESSAGE_MAP(CCADApp, CWinAppEx)
 	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinAppEx::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CCADApp construction
-
 CCADApp::CCADApp()
 {
-	m_hMutex = NULL;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// The one and only CCADApp object
-
 CCADApp theApp;
-
-/////////////////////////////////////////////////////////////////////////////
-// CCADApp initialization
 
 BOOL CCADApp::InitInstance()
 {
@@ -214,38 +205,30 @@ BOOL CCADApp::InitInstance()
 	}
 
 /*
-	m_hMutex = CreateMutex(NULL, FALSE, _T("LeoCAD_Mutex"));
-	if (GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-//		ParseCommandLine(cmdInfo);
-	}
-	else
-	{
-		char out[_MAX_PATH];
-		GetTempPath (_MAX_PATH, out);
-		strcat (out, "~LC*.lcd");
+	char out[_MAX_PATH];
+	GetTempPath (_MAX_PATH, out);
+	strcat (out, "~LC*.lcd");
 
-		WIN32_FIND_DATA fd;
-		HANDLE fh = FindFirstFile(out, &fd);
-		if (fh != INVALID_HANDLE_VALUE)
+	WIN32_FIND_DATA fd;
+	HANDLE fh = FindFirstFile(out, &fd);
+	if (fh != INVALID_HANDLE_VALUE)
+	{
+		if (char *ptr = strrchr (out, '\\')) *(ptr+1) = 0;
+		strcat (out, fd.cFileName);
+		if (AfxMessageBox (_T("LeoCAD found a file that was being edited while the program exited unexpectdly. Do you want to load it ?"), MB_YESNO) == IDNO)
 		{
-			if (char *ptr = strrchr (out, '\\')) *(ptr+1) = 0;
-			strcat (out, fd.cFileName);
-			if (AfxMessageBox (_T("LeoCAD found a file that was being edited while the program exited unexpectdly. Do you want to load it ?"), MB_YESNO) == IDNO)
-			{
-				if (AfxMessageBox (_T("Delete file ?"), MB_YESNO) == IDYES)
-					DeleteFile (out);
-			}
-			else
-			{
-				cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
-				cmdInfo.m_strFileName = out;
-			}
+			if (AfxMessageBox (_T("Delete file ?"), MB_YESNO) == IDYES)
+				DeleteFile (out);
 		}
-
-//		if (cmdInfo.m_strFileName.IsEmpty())
-//			ParseCommandLine(cmdInfo);
+		else
+		{
+			cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
+			cmdInfo.m_strFileName = out;
+		}
 	}
+
+//	if (cmdInfo.m_strFileName.IsEmpty())
+//		ParseCommandLine(cmdInfo);
 */
 
 	// The one and only window has been initialized, so show and update it.
@@ -265,17 +248,37 @@ BOOL CCADApp::InitInstance()
 
 	lcGetActiveProject()->UpdateAllViews();
 
-	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
-		_beginthread(CheckForUpdates, 0, NULL);
+	int CheckUpdates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
+	if (CheckUpdates)
+	{
+		struct tm When;
+		__time64_t Now, Next;
+
+		if (CheckUpdates == 2)
+			CheckUpdates = 7;
+
+		memset(&When, 0, sizeof(When));
+		CString LastCheck = GetProfileString("Settings", "LastUpdate", NULL);
+		sscanf(LastCheck, "%d %d %d", &When.tm_mday, &When.tm_mon, &When.tm_year);
+		When.tm_mday = When.tm_mday + CheckUpdates;
+		Next = _mktime64(&When);
+
+		_time64(&Now);
+
+		if (Next < Now)
+		{
+			When = *_localtime64(&Now);
+			_beginthread(CheckForUpdates, 0, NULL);
+			LastCheck.Format("%d %d %d", When.tm_mday, When.tm_mon, When.tm_year);
+			WriteProfileString("Settings", "LastUpdate", LastCheck);
+		}
+	}
 
 	return TRUE;
 }
 
 int CCADApp::ExitInstance() 
 {
-	if (m_hMutex != NULL)
-		ReleaseMutex(m_hMutex);
-
 	delete main_window;
 	main_window = NULL;
 

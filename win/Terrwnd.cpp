@@ -6,7 +6,6 @@
 #include "camera.h"
 #include "Tools.h"
 #include "Matrix.h"
-#include "Vector.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

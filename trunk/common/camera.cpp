@@ -1,13 +1,13 @@
 // Camera object.
 
 #include "lc_global.h"
+#include "lc_math.h"
 #include "lc_colors.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "opengl.h"
 #include "globals.h"
-#include "vector.h"
 #include "matrix.h"
 #include "lc_file.h"
 #include "camera.h"
@@ -108,20 +108,21 @@ Camera::Camera (const float *eye, const float *target, const float *up, Camera* 
   : Object (LC_OBJECT_CAMERA)
 {
   // Fix the up vector
-  Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
-  frontvec.Normalize();
-  sidevec.Cross(frontvec, upvec);
-  upvec.Cross(sidevec, frontvec);
-  upvec.Normalize();
+  lcVector3 UpVector(up[0], up[1], up[2]);
+  lcVector3 FrontVector(eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]), SideVector;
+  FrontVector.Normalize();
+  SideVector = lcCross(FrontVector, UpVector);
+  UpVector = lcCross(SideVector, FrontVector);
+  UpVector.Normalize();
 
   Initialize();
 
   ChangeKey (1, false, true, eye, LC_CK_EYE);
   ChangeKey (1, false, true, target, LC_CK_TARGET);
-  ChangeKey (1, false, true, upvec, LC_CK_UP);
+  ChangeKey (1, false, true, UpVector, LC_CK_UP);
   ChangeKey (1, true, true, eye, LC_CK_EYE);
   ChangeKey (1, true, true, target, LC_CK_TARGET);
-  ChangeKey (1, true, true, upvec, LC_CK_UP);
+  ChangeKey (1, true, true, UpVector, LC_CK_UP);
 
   int i, max = 0;
 
@@ -150,14 +151,14 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
   : Object (LC_OBJECT_CAMERA)
 {
   // Fix the up vector
-  Vector upvec(0,0,1), frontvec(ex-tx, ey-ty, ez-tz), sidevec;
-  frontvec.Normalize();
-  if (frontvec == upvec)
-    sidevec = Vector(1,0,0);
+  lcVector3 UpVector(0, 0, 1), FrontVector(ex - tx, ey - ty, ez - tz), SideVector;
+  FrontVector.Normalize();
+  if (FrontVector == UpVector)
+    SideVector = lcVector3(1, 0, 0);
   else
-    sidevec.Cross(frontvec, upvec);
-  upvec.Cross(sidevec, frontvec);
-  upvec.Normalize();
+    SideVector = lcCross(FrontVector, UpVector);
+  UpVector = lcCross(SideVector, FrontVector);
+  UpVector.Normalize();
 
   Initialize();
 
@@ -165,10 +166,10 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
 
   ChangeKey (1, false, true, eye, LC_CK_EYE);
   ChangeKey (1, false, true, target, LC_CK_TARGET);
-  ChangeKey (1, false, true, upvec, LC_CK_UP);
+  ChangeKey (1, false, true, UpVector, LC_CK_UP);
   ChangeKey (1, true, true, eye, LC_CK_EYE);
   ChangeKey (1, true, true, target, LC_CK_TARGET);
-  ChangeKey (1, true, true, upvec, LC_CK_UP);
+  ChangeKey (1, true, true, UpVector, LC_CK_UP);
 
   int i, max = 0;
 
@@ -446,12 +447,12 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
     }
 
     // Fix the up vector
-    Vector upvec(m_fUp), sidevec;
-    Vector frontvec(m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
-    sidevec.Cross(frontvec, upvec);
-    upvec.Cross(sidevec, frontvec);
-    upvec.Normalize();
-    upvec.ToFloat(m_fUp);
+    lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), SideVector;
+    lcVector3 FrontVector(m_fTarget[0] - m_fEye[0], m_fTarget[1] - m_fEye[1], m_fTarget[2] - m_fEye[2]);
+    SideVector = lcCross(FrontVector, UpVector);
+    UpVector = lcCross(SideVector, FrontVector);
+    UpVector.Normalize();
+    memcpy(m_fUp, UpVector, sizeof(m_fUp));
 
     ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
   }
@@ -519,15 +520,15 @@ void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 void Camera::UpdateBoundingBox()
 {
   // Fix the up vector
-  Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
-  Vector upvec(m_fUp), sidevec;
+  lcVector3 FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
+  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), SideVector;
 
-  sidevec.Cross(frontvec, upvec);
-  upvec.Cross(sidevec, frontvec);
-  upvec.Normalize();
-  upvec.ToFloat(m_fUp);
+  SideVector = lcCross(FrontVector, UpVector);
+  UpVector = lcCross(SideVector, FrontVector);
+  UpVector.Normalize();
+  memcpy(m_fUp, UpVector, sizeof(m_fUp));
 
-  float len = frontvec.Length();
+  float len = FrontVector.Length();
 
   Matrix mat;
   mat.CreateLookat (m_fEye, m_fTarget, m_fUp);
@@ -656,8 +657,8 @@ void Camera::Render(float fLineWidth)
   if (IsSelected())
   {
     Matrix projection, modelview;
-    Vector frontvec(m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
-    float len = frontvec.Length();
+    lcVector3 FrontVector(m_fTarget[0] - m_fEye[0], m_fTarget[1] - m_fEye[1], m_fTarget[2] - m_fEye[2]);
+    float len = FrontVector.Length();
 
     glPushMatrix ();
 
@@ -736,17 +737,17 @@ void Camera::LoadProjection(float fAspect)
 
 void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
-  frontvec.Normalize();
-  frontvec *= 2.0f*dy/(21-mouse);
+  lcVector3 FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
+  FrontVector.Normalize();
+  FrontVector *= 2.0f * dy / (21 - mouse);
 
   // TODO: option to move eye, target or both
-  m_fEye[0] += frontvec[0];
-  m_fEye[1] += frontvec[1];
-  m_fEye[2] += frontvec[2];
-  m_fTarget[0] += frontvec[0];
-  m_fTarget[1] += frontvec[1];
-  m_fTarget[2] += frontvec[2];
+  m_fEye[0] += FrontVector[0];
+  m_fEye[1] += FrontVector[1];
+  m_fEye[2] += FrontVector[2];
+  m_fTarget[0] += FrontVector[0];
+  m_fTarget[1] += FrontVector[1];
+  m_fTarget[2] += FrontVector[2];
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
@@ -755,19 +756,19 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 
 void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
-  sidevec.Cross(frontvec, upvec);
-  sidevec.Normalize();
-  sidevec *= 2.0f*dx/(21-mouse);
-  upvec.Normalize();
-  upvec *= -2.0f*dy/(21-mouse);
+  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]), SideVector;
+  SideVector = lcCross(FrontVector, UpVector);
+  SideVector.Normalize();
+  SideVector *= 2.0f*dx/(21-mouse);
+  UpVector.Normalize();
+  UpVector *= -2.0f*dy/(21-mouse);
 
-  m_fEye[0] += upvec[0] + sidevec[0];
-  m_fEye[1] += upvec[1] + sidevec[1];
-  m_fEye[2] += upvec[2] + sidevec[2];
-  m_fTarget[0] += upvec[0] + sidevec[0];
-  m_fTarget[1] += upvec[1] + sidevec[1];
-  m_fTarget[2] += upvec[2] + sidevec[2];
+  m_fEye[0] += UpVector[0] + SideVector[0];
+  m_fEye[1] += UpVector[1] + SideVector[1];
+  m_fEye[2] += UpVector[2] + SideVector[2];
+  m_fTarget[0] += UpVector[0] + SideVector[0];
+  m_fTarget[1] += UpVector[1] + SideVector[1];
+  m_fTarget[2] += UpVector[2] + SideVector[2];
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
@@ -776,28 +777,28 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 
 void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
 {
-  Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
-  sidevec.Cross(frontvec, upvec);
-  sidevec.Normalize();
-  sidevec *= 2.0f*dx/(21-mouse);
-  upvec.Normalize();
-  upvec *= -2.0f*dy/(21-mouse);
+  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]), SideVector;
+  SideVector = lcCross(FrontVector, UpVector);
+  SideVector.Normalize();
+  SideVector *= 2.0f*dx/(21-mouse);
+  UpVector.Normalize();
+  UpVector *= -2.0f*dy/(21-mouse);
 
   // TODO: option to move eye or target
-  float len = frontvec.Length();
-  frontvec += Vector(upvec[0] + sidevec[0], upvec[1] + sidevec[1], upvec[2] + sidevec[2]);
-  frontvec.Normalize();
-  frontvec *= len;
-  frontvec += Vector(m_fTarget);
-  frontvec.ToFloat(m_fEye);
+  float len = FrontVector.Length();
+  FrontVector += lcVector3(UpVector[0] + SideVector[0], UpVector[1] + SideVector[1], UpVector[2] + SideVector[2]);
+  FrontVector.Normalize();
+  FrontVector *= len;
+  FrontVector += lcVector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]);
+  memcpy(m_fEye, FrontVector, sizeof(m_fEye));
 
   // Calculate new up
-  upvec = Vector(m_fUp[0], m_fUp[1], m_fUp[2]);
-  frontvec = Vector(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
-  sidevec.Cross(frontvec, upvec);
-  upvec.Cross(sidevec, frontvec);
-  upvec.Normalize();
-  upvec.ToFloat(m_fUp);
+  UpVector = lcVector3(m_fUp[0], m_fUp[1], m_fUp[2]);
+  FrontVector = lcVector3(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
+  SideVector = lcCross(FrontVector, UpVector);
+  UpVector = lcCross(SideVector, FrontVector);
+  UpVector.Normalize();
+  memcpy(m_fUp, UpVector, sizeof(m_fUp));
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);

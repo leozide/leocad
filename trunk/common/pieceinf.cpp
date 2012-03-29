@@ -2,6 +2,7 @@
 //
 
 #include "lc_global.h"
+#include "lc_math.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -12,7 +13,6 @@
 #include "project.h"
 #include "globals.h"
 #include "matrix.h"
-#include "vector.h"
 #include "library.h"
 #include "lc_application.h"
 
@@ -1711,27 +1711,27 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 		EyePos[2] = NewEye[2];
 	}
 
-	Vector FrontVec, RightVec, UpVec;
+	lcVector3 FrontVec, RightVec, UpVec;
 
 	// Calculate view matrix.
-	UpVec = Vector(Top[0], Top[1], Top[2]);
+	UpVec = lcVector3(Top[0], Top[1], Top[2]);
 	UpVec.Normalize();
-	FrontVec = Vector(Front[0], Front[1], Front[2]);
+	FrontVec = lcVector3(Front[0], Front[1], Front[2]);
 	FrontVec.Normalize();
-	RightVec = Vector(Side[0], Side[1], Side[2]);
+	RightVec = lcVector3(Side[0], Side[1], Side[2]);
 	RightVec.Normalize();
 
-  float ViewMat[16];
-  ViewMat[0] = -RightVec[0]; ViewMat[4] = -RightVec[1]; ViewMat[8]  = -RightVec[2]; ViewMat[12] = 0.0;
-  ViewMat[1] = UpVec[0];     ViewMat[5] = UpVec[1];     ViewMat[9]  = UpVec[2];     ViewMat[13] = 0.0;
-  ViewMat[2] = -FrontVec[0]; ViewMat[6] = -FrontVec[1]; ViewMat[10] = -FrontVec[2]; ViewMat[14] = 0.0;
-  ViewMat[3] = 0.0;          ViewMat[7] = 0.0;          ViewMat[11] = 0.0;          ViewMat[15] = 1.0;
+	float ViewMat[16];
+	ViewMat[0] = -RightVec[0]; ViewMat[4] = -RightVec[1]; ViewMat[8]  = -RightVec[2]; ViewMat[12] = 0.0;
+	ViewMat[1] = UpVec[0];     ViewMat[5] = UpVec[1];     ViewMat[9]  = UpVec[2];     ViewMat[13] = 0.0;
+	ViewMat[2] = -FrontVec[0]; ViewMat[6] = -FrontVec[1]; ViewMat[10] = -FrontVec[2]; ViewMat[14] = 0.0;
+	ViewMat[3] = 0.0;          ViewMat[7] = 0.0;          ViewMat[11] = 0.0;          ViewMat[15] = 1.0;
 
-  // Load ViewMatrix
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glMultMatrixf(ViewMat);
-  glTranslatef(-NewEye[0], -NewEye[1], -NewEye[2]);
+	// Load ViewMatrix
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glMultMatrixf(ViewMat);
+	glTranslatef(-NewEye[0], -NewEye[1], -NewEye[2]);
 }
 
 // Used by the print catalog and HTML instructions functions.

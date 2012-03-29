@@ -200,7 +200,6 @@
     <ClCompile Include="..\common\texfont.cpp" />
     <ClCompile Include="..\Common\texture.cpp" />
     <ClCompile Include="..\Common\Tr.cpp" />
-    <ClCompile Include="..\Common\vector.cpp" />
     <ClCompile Include="..\common\view.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -315,6 +314,7 @@
     <ClInclude Include="..\common\lc_colors.h" />
     <ClInclude Include="..\common\lc_file.h" />
     <ClInclude Include="..\common\lc_global.h" />
+    <ClInclude Include="..\common\lc_math.h" />
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="ArrayDlg.h" />
     <ClInclude Include="CADBar.h" />
@@ -396,7 +396,6 @@
     <ClInclude Include="..\Common\texture.h" />
     <ClInclude Include="..\Common\Tr.h" />
     <ClInclude Include="..\Common\typedefs.h" />
-    <ClInclude Include="..\Common\vector.h" />
     <ClInclude Include="..\common\view.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

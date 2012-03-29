@@ -2,6 +2,7 @@
 //
 
 #include "lc_global.h"
+#include "lc_math.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +10,6 @@
 #include <math.h>
 #include <locale.h>
 #include "opengl.h"
-#include "vector.h"
 #include "matrix.h"
 #include "pieceinf.h"
 #include "texture.h"
@@ -418,17 +418,15 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		pCam->ChangeKey(1, true, false, tmp, LC_CK_TARGET);
 
 		// Create up vector
-		Vector upvec(0,0,1), frontvec((float)(eye[0]-target[0]), (float)(eye[1]-target[1]), (float)(eye[2]-target[2])), sidevec;
-		frontvec.Normalize();
-		if (frontvec == upvec)
-			sidevec = Vector(1,0,0);
+		lcVector3 UpVector(0, 0, 1), FrontVector((float)(eye[0] - target[0]), (float)(eye[1] - target[1]), (float)(eye[2] - target[2])), SideVector;
+		FrontVector.Normalize();
+		if (FrontVector == UpVector)
+			SideVector = lcVector3(1, 0, 0);
 		else
-			sidevec.Cross(frontvec, upvec);
-		upvec.Cross(sidevec, frontvec);
-		upvec.Normalize();
-		upvec.ToFloat(tmp);
-		pCam->ChangeKey(1, false, false, tmp, LC_CK_UP);
-		pCam->ChangeKey(1, true, false, tmp, LC_CK_UP);
+			SideVector = lcCross(FrontVector, UpVector);
+		UpVector = lcNormalize(lcCross(SideVector, FrontVector));
+		pCam->ChangeKey(1, false, false, UpVector, LC_CK_UP);
+		pCam->ChangeKey(1, true, false, UpVector, LC_CK_UP);
 	}
 
 	if (bMerge)

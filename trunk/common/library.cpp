@@ -62,7 +62,7 @@ bool PiecesLibrary::Load(const char *libpath)
 	char filename[LC_MAXPATH];
 	lcuint16 count, movedcount;
 	lcuint32 binsize;
-	Texture* pTexture;
+//	Texture* pTexture;
 	int i;
 
 	Unload();
@@ -131,7 +131,7 @@ bool PiecesLibrary::Load(const char *libpath)
 	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
 	if (!strlen(FileName) || !LoadCategories(FileName))
 		ResetCategories();
-
+/*
 	// Read the texture index.
 	strcpy(filename, m_LibraryPath);
 	strcat(filename, "textures.idx");
@@ -175,7 +175,7 @@ bool PiecesLibrary::Load(const char *libpath)
 
 	idx.Close();
 	bin.Close();
-
+	*/
 	SystemUpdateCategories(false);
 
 	m_CategoriesModified = false;

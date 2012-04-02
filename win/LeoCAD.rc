@@ -479,7 +479,7 @@ BEGIN
         MENUITEM "Load &Update...",             ID_LIBDLG_FILE_MERGEUPDATE
         MENUITEM "&Import Piece...",            ID_FILE_IMPORTPIECE
         MENUITEM "Import &Folder...",           ID_FILE_IMPORTFOLDER
-        MENUITEM "Te&xtures...",                ID_LIBDLG_FILE_TEXTURES
+        MENUITEM "Te&xtures...",                ID_LIBDLG_FILE_TEXTURES, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Close",                       IDOK
     END

@@ -2775,16 +2775,7 @@ void Project::RenderInitialize()
 
 	// Load font
 	if (!m_pScreenFont->IsLoaded())
-	{
-		char filename[LC_MAXPATH];
-		lcDiskFile file;
-
-		strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
-		strcat(filename, "sysfont.txf");
-
-		if (file.Open(filename, "rb"))
-			m_pScreenFont->FileLoad(file);
-	}
+		m_pScreenFont->Initialize();
 
 	glAlphaFunc(GL_GREATER, 0.0625);
 

@@ -709,8 +709,8 @@ void PiecesLibrary::RemoveCategory(int Index)
 
 bool PiecesLibrary::DeleteAllPieces()
 {
-	lcDiskFile newbin, newidx, oldbin, oldidx;
-	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[256];
+	lcDiskFile BinFile, IdxFile;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 
 	strcpy(file1, m_LibraryPath);
 	strcat(file1, "pieces-b.old");
@@ -719,8 +719,10 @@ bool PiecesLibrary::DeleteAllPieces()
 	strcat(file2, "pieces.bin");
 	rename(file2, file1);
 
-	if ((!oldbin.Open(file1, "rb")) || (!newbin.Open(file2, "wb")))
+	if (!BinFile.Open(file2, "wb"))
 		return false;
+
+	BinFile.WriteBuffer(PiecesBinHeader, 32);
 
 	strcpy(file1, m_LibraryPath);
 	strcat(file1, "pieces-i.old");
@@ -729,24 +731,23 @@ bool PiecesLibrary::DeleteAllPieces()
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 
-	if ((!oldidx.Open(file1, "rb")) || (!newidx.Open(file2, "wb")))
+	if (!IdxFile.Open(file2, "wb"))
 		return false;
 
-	oldidx.Seek(0, SEEK_SET);
-	oldidx.ReadBuffer(tmp, 34);
-	newidx.WriteBuffer(tmp, 34);
-	oldbin.ReadBuffer(tmp, 32);
-	newbin.WriteBuffer(tmp, 32);
+	lcuint8 Version = PiecesFileVersion;
+	lcuint8 Update = 0;
 
-	// list of moved pieces
-	lcuint16 moved = 0;
-	newidx.WriteU16(&moved, 1);
+	IdxFile.WriteBuffer(PiecesIdxHeader, 32);
+	IdxFile.WriteU8(&Version, 1);
+	IdxFile.WriteU8(&Update, 1);
 
-	// info at the end
-	lcuint32 binoff = newbin.GetPosition();
-	newidx.WriteU32(&binoff, 1);
-	lcuint16 count = 0;
-	newidx.WriteU16(&count, 1);
+	lcuint16 Moved = 0;
+	lcuint32 BinSize = 32;
+	lcuint16 Count = 0;
+
+	IdxFile.WriteU16(&Moved, 1);
+	IdxFile.WriteU32(&BinSize, 1);
+	IdxFile.WriteU16(&Count, 1);
 
 	m_Modified = true;
 

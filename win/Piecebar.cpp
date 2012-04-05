@@ -396,7 +396,15 @@ void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 
 		if (Item == NULL)
 		{
-			Item = m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+			TVINSERTSTRUCT Insert;
+
+			memset(&Insert, 0, sizeof(Insert));
+			Insert.hParent = TVI_ROOT;
+			Insert.hInsertAfter = TVI_LAST;
+			Insert.item.mask = TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT;
+			Insert.item.cChildren = 1;
+			Insert.item.pszText = "Search Results";
+			Item = m_PiecesTree.InsertItem(&Insert);
 		}
 
 		m_PiecesTree.Expand(Item, TVE_COLLAPSE | TVE_COLLAPSERESET);
@@ -408,15 +416,26 @@ void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 		m_PiecesTree.SetRedraw(FALSE);
 		m_PiecesTree.DeleteAllItems();
 
+		TVINSERTSTRUCT Insert;
+
+		memset(&Insert, 0, sizeof(Insert));
+		Insert.hParent = TVI_ROOT;
+		Insert.hInsertAfter = TVI_SORT;
+		Insert.item.mask = TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT;
+		Insert.item.cChildren = 1;
+
 		for (int i = 0; i < Lib->GetNumCategories(); i++)
 		{
 			if (Lib->GetCategoryName(i) == "Search Results")
 				continue;
 
-			m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 0, 0, 0, 0, TVI_ROOT, TVI_SORT);
+			Insert.item.pszText = (LPSTR)Lib->GetCategoryName(i);
+			m_PiecesTree.InsertItem(&Insert);
 		}
 
-		m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, "Search Results", 0, 0, 0, 0, 0, TVI_ROOT, TVI_LAST);
+		Insert.item.pszText = "Search Results";
+		Insert.hInsertAfter = TVI_LAST;
+		m_PiecesTree.InsertItem(&Insert);
 
 		m_PiecesTree.SetRedraw(TRUE);
 		m_PiecesTree.Invalidate();
@@ -534,7 +553,19 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							if (GroupedPieces.FindIndex(Info) == -1)
 								m_PiecesTree.InsertItem(TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
 							else
-								m_PiecesTree.InsertItem(TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT, Info->m_strDescription, 0, 0, 0, 0, (LPARAM)Info, CategoryItem, TVI_LAST);
+							{
+								TVINSERTSTRUCT Insert;
+
+								memset(&Insert, 0, sizeof(Insert));
+								Insert.hParent = CategoryItem;
+								Insert.hInsertAfter = TVI_LAST;
+								Insert.item.mask = TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT;
+								Insert.item.pszText = (LPSTR)Info->m_strDescription;
+								Insert.item.cChildren = 1;
+								Insert.item.lParam = (LPARAM)Info;
+
+								m_PiecesTree.InsertItem(&Insert);
+							}
 						}
 					}
 

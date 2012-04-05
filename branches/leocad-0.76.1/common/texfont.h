@@ -13,11 +13,16 @@ public:
 	~TexFont ();
 
 	bool IsLoaded () const
-	{ return m_bLoaded; }
-	void MakeCurrent ()
-	{ if (m_bLoaded) m_pTexture->MakeCurrent (); }
+	{
+		return mTexture != 0;
+	}
 
-	bool FileLoad(File& file);
+	void MakeCurrent ()
+	{
+		glBindTexture(GL_TEXTURE_2D, mTexture);
+	}
+
+	bool Initialize();
 	void PrintText(float left, float top, float z, const char* text) const;
 	void PrintText(float Left, float Top, float ScaleX, float ScaleY, const char* Text) const;
 	void PrintCharScaled(float scale, int ch) const;
@@ -28,11 +33,12 @@ protected:
 	{
 		unsigned char width;
 		float left, right, top, bottom;
-	} m_Glyphs[256];
+	} mGlyphs[256];
 
-	Texture* m_pTexture;
-	unsigned char m_nFontHeight;
-	bool m_bLoaded;
+	GLuint mTexture;
+	int mTextureWidth;
+	int mTextureHeight;
+	int mFontHeight;
 };
 
 #endif // _TEXFONT_H_

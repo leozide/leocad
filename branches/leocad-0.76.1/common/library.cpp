@@ -131,7 +131,7 @@ bool PiecesLibrary::Load (const char *libpath)
 	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
 	if (!strlen(FileName) || !LoadCategories(FileName))
 		ResetCategories();
-
+/*
 	// Read the texture index.
 	strcpy(filename, m_LibraryPath);
 	strcat(filename, "textures.idx");
@@ -175,7 +175,7 @@ bool PiecesLibrary::Load (const char *libpath)
 
 	idx.Close();
 	bin.Close();
-
+	*/
 	SystemUpdateCategories(false);
 
 	m_CategoriesModified = false;
@@ -208,57 +208,6 @@ bool PiecesLibrary::ValidatePiecesFile(FileDisk& IdxFile, FileDisk& BinFile) con
 	{
 		console.PrintError ("Invalid Pieces Library file.\n");
 		return false;
-	}
-
-	if (version == 3 && PiecesFileVersion == 4)
-	{
-		FileMem NewIdx;
-		char tmp[256];
-
-		version = 4;
-		NewIdx.Write(header, 32);
-		NewIdx.WriteByte(&version, 1);
-		NewIdx.WriteByte(&update, 1);
-
-		IdxFile.Seek(34, SEEK_SET);
-
-		for (int i = 0; i < count; i++)
-		{
-			char name[LC_PIECE_NAME_LEN];
-			memset(name, 0, LC_PIECE_NAME_LEN);
-
-			IdxFile.Read(name, 8);
-			IdxFile.Read(tmp, 64+12+1+4+4+4);
-
-			NewIdx.Write(name, LC_PIECE_NAME_LEN);
-			NewIdx.Write(tmp, 64+12+1+4+4+4);
-		}
-
-		for (int i = 0; i < movedcount * 2; i++)
-		{
-			char name[LC_PIECE_NAME_LEN];
-			memset(name, 0, LC_PIECE_NAME_LEN);
-
-			IdxFile.Read(name, 8);
-			NewIdx.Write(name, LC_PIECE_NAME_LEN);
-		}
-
-		NewIdx.WriteShort(&movedcount, 1);
-		NewIdx.WriteLong(&binsize, 1);
-		NewIdx.WriteShort(&count, 1);
-
-		char FileName[LC_MAXPATH];
-		strcpy(FileName, IdxFile.GetFileName());
-		IdxFile.Close();
-
-		if (!IdxFile.Open(FileName, "wb"))
-			return false;
-
-		IdxFile.Write(NewIdx.GetBuffer(), NewIdx.GetLength());
-		IdxFile.Close();
-
-		IdxFile.Open(FileName, "rb");
-		IdxFile.Seek(IdxPos, SEEK_SET);
 	}
 
 	if (version != PiecesFileVersion)
@@ -760,8 +709,8 @@ void PiecesLibrary::RemoveCategory(int Index)
 
 bool PiecesLibrary::DeleteAllPieces()
 {
-	FileDisk newbin, newidx, oldbin, oldidx;
-	char file1[LC_MAXPATH], file2[LC_MAXPATH], tmp[256];
+	FileDisk BinFile, IdxFile;
+	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 
 	strcpy(file1, m_LibraryPath);
 	strcat(file1, "pieces-b.old");
@@ -770,9 +719,10 @@ bool PiecesLibrary::DeleteAllPieces()
 	strcat(file2, "pieces.bin");
 	rename(file2, file1);
 
-	if ((!oldbin.Open(file1, "rb")) ||
-		(!newbin.Open(file2, "wb")))
+	if (!BinFile.Open(file2, "wb"))
 		return false;
+
+	BinFile.Write(PiecesBinHeader, 32);
 
 	strcpy(file1, m_LibraryPath);
 	strcat(file1, "pieces-i.old");
@@ -781,30 +731,23 @@ bool PiecesLibrary::DeleteAllPieces()
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 
-	if ((!oldidx.Open(file1, "rb")) ||
-		(!newidx.Open(file2, "wb")))
+	if (!IdxFile.Open(file2, "wb"))
 		return false;
 
-	oldidx.Seek(0, SEEK_SET);
-	oldidx.Read(tmp, 34);
-	newidx.Write(tmp, 34);
-	oldbin.Read(tmp, 32);
-	newbin.Write(tmp, 32);
+	lcuint8 Version = PiecesFileVersion;
+	lcuint8 Update = 0;
 
-	// list of moved pieces
-	lcuint16 moved = 0;
-	newidx.WriteShort(&moved, 1);
+	IdxFile.Write(PiecesIdxHeader, 32);
+	IdxFile.WriteByte(&Version, 1);
+	IdxFile.WriteByte(&Update, 1);
 
-	// info at the end
-	lcuint32 binoff = newbin.GetPosition();
-	newidx.WriteLong(&binoff, 1);
-	lcuint16 count = 0;
-	newidx.WriteShort(&count, 1);
+	lcuint16 Moved = 0;
+	lcuint32 BinSize = 32;
+	lcuint16 Count = 0;
 
-	oldidx.Close();
-	oldbin.Close();
-	newidx.Close();
-	newbin.Close();
+	IdxFile.WriteShort(&Moved, 1);
+	IdxFile.WriteLong(&BinSize, 1);
+	IdxFile.WriteShort(&Count, 1);
 
 	m_Modified = true;
 

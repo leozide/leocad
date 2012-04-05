@@ -1,15 +1,13 @@
 // Curve class, used to represent all flexible objects
 //
 
-#include "lc_global.h"
-#include "lc_math.h"
-#include "lc_colors.h"
 #include <stdlib.h>
 #include <math.h>
 #include "globals.h"
 #include "curve.h"
 #include "opengl.h"
 #include "matrix.h"
+#include "vector.h"
 
 #define LC_CURVE_SAVE_VERSION 1 // LeoCAD 0.73
 #define LC_CURVE_POINT_SAVE_VERSION 1 // LeoCAD 0.73
@@ -168,13 +166,13 @@ void CurvePoint::UpdatePosition (unsigned short nTime, bool bAnimation)
   CalculateKeys (nTime, bAnimation);
 }
 
-bool CurvePoint::FileLoad(lcFile& file)
+bool CurvePoint::FileLoad (File& file)
 {
   // FIXME
   return true;
 }
 
-void CurvePoint::FileSave(lcFile& file) const
+void CurvePoint::FileSave (File& file) const
 {
   // FIXME
 }
@@ -216,11 +214,13 @@ void CurvePoint::Select (bool bSelecting, bool bFocus, bool bMultiple)
 void CurvePoint::Render (LC_RENDER_INFO* pInfo)
 {
   if (m_nState & LC_CURVE_POINT_FOCUSED)
-    lcSetColorFocused();
+    glColor3ubv (FlatColorArray[LC_COL_FOCUSED]);
   else if (m_nState & LC_CURVE_POINT_SELECTED)
-    lcSetColorSelected();
+    glColor3ubv (FlatColorArray[LC_COL_SELECTED]);
   else
-    lcSetColorCamera(); // FIXME: same as camera color
+    glColor3f(0.5f, 0.8f, 0.5f); // FIXME: same as camera color, add to FlatColorArray
+      //      glColor3ub (0, 0, 0); // FIXME: inverse of background
+      // FIXME: add a new color to the array and change the names from LC_COL to LC_COLOR ?
 
   glPushMatrix ();
   glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
@@ -302,13 +302,13 @@ void Curve::Initialize ()
   m_nDisplayList = glGenLists (1);
 }
 
-bool Curve::FileLoad(lcFile& file)
+bool Curve::FileLoad (File& file)
 {
   // FIXME
   return true;
 }
 
-void Curve::FileSave(lcFile& file) const
+void Curve::FileSave (File& file) const
 {
   // FIXME
 }
@@ -545,29 +545,29 @@ void Curve::TesselateHose ()
       b = 3*cy[0]*t2 + 2*cy[1]*t + cy[2];
       c = 3*cz[0]*t2 + 2*cz[1]*t + cz[2];
 
-      lcVector3 SideVector, FrontVector(a, b, c);
-      lcVector3 UpVector(u[0], u[1], u[2]);
-      SideVector = lcCross(FrontVector, UpVector);
-      UpVector = lcCross(SideVector, FrontVector);
-      UpVector.Normalize();
-      FrontVector.Normalize();
-      SideVector.Normalize();
+      Vector side, front (a, b, c);
+      Vector up (u);
+      side.Cross (front, up);
+      up.Cross (side, front);
+      up.Normalize ();
+      front.Normalize ();
+      side.Normalize ();
 
       if (angle_step != 0)
       {
         Matrix rot;
-        rot.FromAxisAngle(FrontVector, angle_step);
-//        rot.TransformPoint(u, UpVector);
+        rot.FromAxisAngle (front, angle_step);
+        rot.TransformPoint (u, up);
       }
-//      else
-//        UpVector.ToFloat(u);
+      else
+        up.ToFloat (u);
 
       float f[16];
 #define M(row,col)  f[col*4+row]
-      M(0,0) = SideVector[0]; M(0,1) = UpVector[0]; M(0,2) = FrontVector[0]; M(0,3) = x;
-      M(1,0) = SideVector[1]; M(1,1) = UpVector[1]; M(1,2) = FrontVector[1]; M(1,3) = y;
-      M(2,0) = SideVector[2]; M(2,1) = UpVector[2]; M(2,2) = FrontVector[2]; M(2,3) = z;
-      M(3,0) = 0.0;           M(3,1) = 0.0;         M(3,2) = 0.0;            M(3,3) = 1.0;
+      M(0,0) = side[0]; M(0,1) = up[0]; M(0,2) = front[0]; M(0,3) = x;
+      M(1,0) = side[1]; M(1,1) = up[1]; M(1,2) = front[1]; M(1,3) = y;
+      M(2,0) = side[2]; M(2,1) = up[2]; M(2,2) = front[2]; M(2,3) = z;
+      M(3,0) = 0.0;     M(3,1) = 0.0;   M(3,2) = 0.0;      M(3,3) = 1.0;
 #undef M
 
       float v[3];
@@ -660,11 +660,13 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 	for (int i = 0; i < m_nNumPoints; i++)
 	{
 	if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_FOCUSED)
-		lcSetColorFocused();
+	glColor3ubv (FlatColorArray[LC_COL_FOCUSED]);
 	else if (m_pPoints[i].m_nFlags & LC_CURVE_POINT_SELECTED)
-		lcSetColorSelected();
+	glColor3ubv (FlatColorArray[LC_COL_SELECTED]);
 	else
-		lcSetColorCamera(); // FIXME: same as camera color
+	glColor3f(0.5f, 0.8f, 0.5f); // FIXME: same as camera color, add to FlatColorArray
+	//      glColor3ub (0, 0, 0); // FIXME: inverse of background
+	// FIXME: add a new color to the array and change the names from LC_COL to LC_COLOR ?
 
 	glPushMatrix ();
 	//    RenderSegment (m_pPoints[i].m_fPos, m_pPoints[i+1].m_fPos, m_pSegments[i].m_fR1, m_pSegments[i].m_fR2);

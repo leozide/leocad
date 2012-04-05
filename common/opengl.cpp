@@ -2,7 +2,6 @@
 // Routines to load the OpenGL libraries dynamically
 //
 
-#include "lc_global.h"
 #include <string.h>
 #include <stdio.h>
 #include "opengl.h"

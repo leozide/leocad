@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// LibDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "LibDlg.h"
 #include "GroupDlg.h"
@@ -138,7 +141,7 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 {
 	char file1[LC_MAXPATH], file2[LC_MAXPATH];
 	PiecesLibrary* Library = lcGetPiecesLibrary();
-	lcDiskFile DiskIdx, DiskBin;
+	FileDisk DiskIdx, DiskBin;
 
 	strcpy(file1, Library->GetLibraryPath());
 	strcat(file1, "pieces.idx");
@@ -148,17 +151,23 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 	if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
 		return false;
 
-	lcMemFile IdxFile1, IdxFile2, BinFile1, BinFile2;
+	FileMem IdxFile1, IdxFile2, BinFile1, BinFile2;
+	long Length;
 
-	IdxFile1.CopyFrom(DiskIdx);
+	Length = DiskIdx.GetLength();
+	IdxFile1.SetLength(Length);
+	DiskIdx.Read(IdxFile1.GetBuffer(), Length);
 	DiskIdx.Close();
-	BinFile1.CopyFrom(DiskBin);
+
+	Length = DiskBin.GetLength();
+	BinFile1.SetLength(Length);
+	DiskBin.Read(BinFile1.GetBuffer(), Length);
 	DiskBin.Close();
 
-	lcMemFile* NewIdx = &IdxFile1;
-	lcMemFile* NewBin = &BinFile1;
-	lcMemFile* OldIdx = &IdxFile2;
-	lcMemFile* OldBin = &BinFile2;
+	FileMem* NewIdx = &IdxFile1;
+	FileMem* NewBin = &BinFile1;
+	FileMem* OldIdx = &IdxFile2;
+	FileMem* OldBin = &BinFile2;
 
 	CProgressDlg Dlg("Importing pieces");
 	Dlg.Create(this);
@@ -178,7 +187,7 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 		Dlg.SetStatus(Name);
 		Dlg.StepIt();
 
-		lcMemFile* TmpFile;
+		FileMem* TmpFile;
 
 		TmpFile = NewBin;
 		NewBin = OldBin;
@@ -217,8 +226,11 @@ bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
 	strcat(file2, "pieces.idx");
 	rename(file2, file1);
 
-	DiskBin.CopyFrom(*NewBin);
-	DiskIdx.CopyFrom(*NewIdx);
+	DiskBin.Seek(0, SEEK_SET);
+	DiskBin.Write(NewBin->GetBuffer(), NewBin->GetLength());
+
+	DiskIdx.Seek(0, SEEK_SET);
+	DiskIdx.Write(NewIdx->GetBuffer(), NewIdx->GetLength());
 
 	UpdateList();
 

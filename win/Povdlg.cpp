@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// POVDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "POVDlg.h"
 #include "tools.h"

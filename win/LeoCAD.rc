@@ -72,6 +72,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\idr_main.ico"
+IDR_PARTFRAME           ICON                    "res\\idr_part.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -479,7 +480,7 @@ BEGIN
         MENUITEM "Load &Update...",             ID_LIBDLG_FILE_MERGEUPDATE
         MENUITEM "&Import Piece...",            ID_FILE_IMPORTPIECE
         MENUITEM "Import &Folder...",           ID_FILE_IMPORTFOLDER
-        MENUITEM "Te&xtures...",                ID_LIBDLG_FILE_TEXTURES, GRAYED
+        MENUITEM "Te&xtures...",                ID_LIBDLG_FILE_TEXTURES
         MENUITEM SEPARATOR
         MENUITEM "Close",                       IDOK
     END

@@ -1,14 +1,13 @@
 // Light object.
 
-#include "lc_global.h"
-#include "lc_math.h"
-#include "lc_colors.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include "light.h"
+#include "defines.h"
 #include "globals.h"
+#include "vector.h"
 #include "matrix.h"
 
 GLuint Light::m_nSphereList = 0;
@@ -268,46 +267,45 @@ void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 
 void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 {
-	CalculateKeys(nTime, bAnimation);
-	BoundingBoxCalculate(m_fPos);
+  CalculateKeys (nTime, bAnimation);
+  BoundingBoxCalculate (m_fPos);
 
-	if (m_pTarget != NULL)
-	{
-		m_pTarget->BoundingBoxCalculate(m_fTarget);
+  if (m_pTarget != NULL)
+  {
+    m_pTarget->BoundingBoxCalculate (m_fTarget);
 
-		if (m_nList == 0)
-			m_nList = glGenLists(1);
+    if (m_nList == 0)
+      m_nList = glGenLists(1);
 
-		glNewList(m_nList, GL_COMPILE);
+    glNewList (m_nList, GL_COMPILE);
 
-		glPushMatrix();
-		glTranslatef(m_fPos[0], m_fPos[1], m_fPos[2]);
+    glPushMatrix ();
+    glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
 
-		lcVector3 FrontVector(m_fTarget[0] - m_fPos[0], m_fTarget[1] - m_fPos[1], m_fTarget[2] - m_fPos[2]);
-		lcVector3 UpVector(1, 1, 1);
-		float Length = FrontVector.Length();
+    Vector frontvec (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+    float len = frontvec.Length (), up[3] = { 1, 1, 1 };
 
-		if (fabs (FrontVector[0]) < fabs (FrontVector[1]))
-		{
-			if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
-				UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
-			else
-				UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-		}
-		else
-		{
-			if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
-				UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
-			else
-				UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-		}
+    if (fabs (frontvec[0]) < fabs (frontvec[1]))
+    {
+      if (fabs (frontvec[0]) < fabs (frontvec[2]))
+	up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
+      else
+	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
+    }
+    else
+    {
+      if (fabs (frontvec[1]) < fabs (frontvec[2]))
+	up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
+      else
+	up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
+    }
 
-		Matrix mat;
-		mat.CreateLookat(m_fPos, m_fTarget, UpVector);
-		mat.Invert();
-		mat.SetTranslation(0, 0, 0);
+    Matrix mat;
+    mat.CreateLookat (m_fPos, m_fTarget, up);
+    mat.Invert ();
+    mat.SetTranslation (0, 0, 0);
 
-		glMultMatrixf(mat.m);
+    glMultMatrixf (mat.m);
 
     glEnableClientState (GL_VERTEX_ARRAY);
     float verts[16*3];
@@ -332,7 +330,7 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
     glVertex3f (-0.5f,  0.5f, -0.3f);
     glEnd ();
 
-    glTranslatef(0, 0, -Length);
+    glTranslatef(0, 0, -len);
     glEndList();
 
     if (m_nTargetList == 0)
@@ -434,36 +432,30 @@ void Light::Render (float fLineWidth)
     if (IsEyeSelected())
     {
       glLineWidth(fLineWidth*2);
-      if (m_nState & LC_LIGHT_FOCUSED)
-        lcSetColorFocused();
-      else
-        lcSetColorSelected();
+      glColor3ubv(FlatColorArray[(m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
       glCallList(m_nList);
       glLineWidth(fLineWidth);
     }
     else
     {
-      lcSetColorLight();
+      glColor3f(0.5f, 0.8f, 0.5f);
       glCallList(m_nList);
     }
 
     if (IsTargetSelected())
     {
       glLineWidth(fLineWidth*2);
-      if (m_nState & LC_LIGHT_TARGET_FOCUSED)
-        lcSetColorFocused();
-      else
-        lcSetColorSelected();
+      glColor3ubv(FlatColorArray[(m_nState & LC_LIGHT_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
       glCallList(m_nTargetList);
       glLineWidth(fLineWidth);
     }
     else
     {
-      lcSetColorLight();
+      glColor3f(0.5f, 0.8f, 0.5f);
       glCallList(m_nTargetList);
     }
 
-    lcSetColorLight();
+    glColor3f(0.5f, 0.8f, 0.5f);
     glBegin(GL_LINES);
     glVertex3fv(m_fPos);
     glVertex3fv(m_fTarget);
@@ -472,32 +464,31 @@ void Light::Render (float fLineWidth)
     if (IsSelected())
     {
       Matrix projection, modelview;
-      lcVector3 FrontVector(m_fTarget[0] - m_fPos[0], m_fTarget[1] - m_fPos[1], m_fTarget[2] - m_fPos[2]);
-	  lcVector3 UpVector(1, 1, 1);
-      float Length = FrontVector.Length();
+      Vector frontvec(m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+      float len = frontvec.Length (), up[3] = { 1, 1, 1 };
 
-      if (fabs(FrontVector[0]) < fabs(FrontVector[1]))
+      if (fabs (frontvec[0]) < fabs (frontvec[1]))
       {
-        if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
-          UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
+        if (fabs (frontvec[0]) < fabs (frontvec[2]))
+          up[0] = -(up[1]*frontvec[1] + up[2]*frontvec[2]);
         else
-          UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
+          up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
       }
       else
       {
-        if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
-          UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
+        if (fabs (frontvec[1]) < fabs (frontvec[2]))
+          up[1] = -(up[0]*frontvec[0] + up[2]*frontvec[2]);
         else
-          UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
+          up[2] = -(up[0]*frontvec[0] + up[1]*frontvec[1]);
       }
 
-      glPushMatrix();
+      glPushMatrix ();
 
-      modelview.CreateLookat (m_fPos, m_fTarget, UpVector);
+      modelview.CreateLookat (m_fPos, m_fTarget, up);
       modelview.Invert ();
       glMultMatrixf (modelview.m);
 
-      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01f, Length);
+      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01f, len);
       projection.Invert ();
       glMultMatrixf (projection.m);
 
@@ -535,16 +526,13 @@ void Light::Render (float fLineWidth)
     if (IsEyeSelected ())
     {
       glLineWidth (fLineWidth*2);
-      if (m_nState & LC_LIGHT_FOCUSED)
-        lcSetColorFocused();
-      else
-        lcSetColorSelected();
+      glColor3ubv (FlatColorArray[(m_nState & LC_LIGHT_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
       glCallList (m_nSphereList);
       glLineWidth (fLineWidth);
     }
     else
     {
-      lcSetColorLight();
+      glColor3f (0.5f, 0.8f, 0.5f);
       glCallList (m_nSphereList);
     }
 
@@ -575,11 +563,11 @@ void Light::Setup (int index)
 
   if (m_pTarget != NULL)
   {
-    lcVector3 Dir(m_fTarget[0] - m_fPos[0], m_fTarget[1] - m_fPos[1], m_fTarget[2] - m_fPos[2]);
-    Dir.Normalize();
+    Vector dir (m_fTarget[0]-m_fPos[0], m_fTarget[1]-m_fPos[1], m_fTarget[2]-m_fPos[2]);
+    dir.Normalize ();
 
-    glLightf(light, GL_SPOT_CUTOFF, m_fCutoff);
-    glLightf(light, GL_SPOT_EXPONENT, m_fExponent);
-    glLightfv(light, GL_SPOT_DIRECTION, Dir);
+    glLightf (light, GL_SPOT_CUTOFF, m_fCutoff);
+    glLightf (light, GL_SPOT_EXPONENT, m_fExponent);
+    glLightfv (light, GL_SPOT_DIRECTION, dir);
   }
 }

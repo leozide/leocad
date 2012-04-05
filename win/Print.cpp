@@ -1,4 +1,9 @@
-#include "lc_global.h"
+// Print catalog and pieces list
+//
+
+// TODO: rewrite everything
+
+#include "stdafx.h"
 #include "leocad.h"
 #include <WindowsX.h>
 #include "Print.h"
@@ -11,13 +16,11 @@
 #include "library.h"
 #include "lc_application.h"
 
-// TODO: rewrite everything
-
 static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 {
 	CCADView* pView = (CCADView*)pMainFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOSELECTION|PD_ENABLEPRINTHOOK, pParent);
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	int bricks = 0;
 	for (int j = 0; j < pLib->GetPieceCount (); j++)
@@ -410,7 +413,7 @@ static void PrintPiecesThread(void* pv)
 	CFrameWndEx* pFrame = (CFrameWndEx*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
+  PiecesLibrary *pLib = lcGetPiecesLibrary();
 	Project* project = lcGetActiveProject();
 
 	UINT *pieces = (UINT*)malloc(pLib->GetPieceCount ()*28*sizeof(UINT));
@@ -421,8 +424,8 @@ static void PrintPiecesThread(void* pv)
 	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
 	{
 		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
-		pieces[(idx*28)+tmp->mColorCode]++; // fix LC_MAXCOLORS
-		col[tmp->mColorCode]++;
+		pieces[(idx*28)+tmp->GetColor()]++;
+		col[tmp->GetColor()]++;
 	}
 
 	int rows = 0, cols = 1, i, j;

@@ -1,4 +1,8 @@
-#include "lc_global.h"
+// CADBar.cpp: implementation of the CCADStatusBar class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "CADBar.h"
 #include "StepPop.h"

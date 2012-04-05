@@ -1,7 +1,6 @@
 // Image I/O routines
 //
 
-#include "lc_global.h"
 #include "opengl.h"
 #ifdef LC_WINDOWS
 #include <windows.h>
@@ -13,8 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "config.h"
 #include "image.h"
-#include "lc_file.h"
+#include "file.h"
 
 // =============================================================================
 // Image functions
@@ -128,12 +128,12 @@ void Image::FromOpenGL (int width, int height)
   free (buf);
 }
 
-bool Image::FileLoad(lcFile& file)
+bool Image::FileLoad (File& file)
 {
   unsigned char buf[8];
 
   // Read a few bytes
-  if (file.ReadBuffer(buf, 8) != 8)
+  if (file.Read (buf, 8) != 8)
     return false;
   file.Seek (-8, SEEK_CUR);
 
@@ -184,9 +184,9 @@ bool Image::FileLoad(lcFile& file)
   return false;
 }
 
-bool Image::FileLoad(const char* filename)
+bool Image::FileLoad (const char* filename)
 {
-  lcDiskFile file;
+  FileDisk file;
   
   if (!file.Open (filename, "rb"))
     return false;
@@ -194,7 +194,7 @@ bool Image::FileLoad(const char* filename)
   return FileLoad (file);
 }
 
-bool Image::FileSave(lcFile& file, LC_IMAGE_OPTS* opts) const
+bool Image::FileSave (File& file, LC_IMAGE_OPTS* opts) const
 {
   switch (opts->format)
   {
@@ -223,10 +223,10 @@ bool Image::FileSave(lcFile& file, LC_IMAGE_OPTS* opts) const
   return false;
 }
 
-bool Image::FileSave(const char* filename, LC_IMAGE_OPTS* opts) const
+bool Image::FileSave (const char* filename, LC_IMAGE_OPTS* opts) const
 {
   char name[LC_MAXPATH], ext[5], *p;
-  lcDiskFile file;
+  FileDisk file;
   bool needext = false;
 
   strcpy (name, filename);
@@ -291,10 +291,10 @@ bool Image::FileSave(const char* filename, LC_IMAGE_OPTS* opts) const
     }
   }
 
-  if (!file.Open(name, "wb"))
+  if (!file.Open (name, "wb"))
     return false;
 
-  return FileSave(file, opts);
+  return FileSave (file, opts);
 }
 
 

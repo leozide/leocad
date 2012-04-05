@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// TerrDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "Terrain.h"
 #include "TerrWnd.h"

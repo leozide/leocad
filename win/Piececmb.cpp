@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// PieceCmb.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "PieceCmb.h"
 #include "PieceBar.h"

@@ -2,6 +2,7 @@
 #define _PROJECT_H_
 
 #include "object.h"
+#include "defines.h"
 #include "typedefs.h"
 #include "opengl.h"
 #include "array.h"
@@ -43,21 +44,15 @@ class TexFont;
 
 // Undo support
 
-#include "lc_file.h"
+#include "file.h"
 
-struct LC_UNDOINFO
+typedef struct LC_UNDOINFO
 {
-	lcMemFile file;
+	FileMem file;
 	char strText[21];
 	LC_UNDOINFO* pNext;
 	LC_UNDOINFO() { pNext = NULL; };
-};
-
-struct LC_FILEENTRY
-{
-	lcMemFile File;
-	char FileName[LC_MAXPATH];
-};
+} LC_UNDOINFO;
 
 class Project
 {
@@ -171,7 +166,7 @@ protected:
 	Light* m_pLights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
-	lcFile* m_pClipboard[10];
+	File* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
 
 	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
@@ -209,7 +204,7 @@ protected:
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 
 	bool m_bStopRender;
-	lcFile* m_pTrackFile;
+	File* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;
@@ -262,15 +257,15 @@ protected:
 	bool m_bAddKeys;
 	unsigned char m_nFPS;
 	unsigned char m_nCurStep;
-	lcuint16 m_nCurFrame;
-	lcuint16 m_nTotalFrames;
+	unsigned short m_nCurFrame;
+	unsigned short m_nTotalFrames;
 
-	lcuint32 m_nScene;
-	lcuint32 m_nDetail;
-	lcuint32 m_nSnap;
-	lcuint16 m_nMoveSnap;
-	lcuint16 m_nAngleSnap;
-	lcuint16 m_nGridSize;
+	unsigned long m_nScene;
+	unsigned long m_nDetail;
+	unsigned long m_nSnap;
+	unsigned short m_nMoveSnap;
+	unsigned short m_nAngleSnap;
+	unsigned short m_nGridSize;
 	float m_fLineWidth;
 	float m_fFogDensity;
 	float m_fFogColor[4];
@@ -292,10 +287,10 @@ protected:
 	// File load/save implementation.
 	bool DoSave(char* PathName, bool bReplace);
 	bool DoFileSave();
-	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
-	void FileSave(lcFile* file, bool bUndo);
-	void FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray);
-	void FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const;
+	bool FileLoad(File* file, bool bUndo, bool bMerge);
+	void FileSave(File* file, bool bUndo);
+	void FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<File>& FileArray);
+	void FileReadMPD(File& MPD, PtrArray<File>& FileArray) const;
 
 public:
 	// File helpers

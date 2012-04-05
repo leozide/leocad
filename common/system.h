@@ -1,6 +1,7 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
+#include "defines.h"
 #include "typedefs.h"
 
 // Assert macros.
@@ -82,6 +83,7 @@ bool Sys_KeyDown (int key);
 
 
 
+class File;
 class Camera;
 class PieceInfo;
 
@@ -115,8 +117,8 @@ void SystemPieceComboAdd(char* name);
 void SystemCaptureMouse();
 void SystemReleaseMouse();
 
-void SystemExportClipboard(lcFile* clip);
-lcFile* SystemImportClipboard();
+void SystemExportClipboard(File* clip);
+File* SystemImportClipboard();
 
 void SystemPumpMessages();
 long SystemGetTicks();

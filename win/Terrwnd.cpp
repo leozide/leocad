@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// TerrWnd.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "TerrWnd.h"
 #include "Terrain.h"
@@ -6,6 +9,7 @@
 #include "camera.h"
 #include "Tools.h"
 #include "Matrix.h"
+#include "Vector.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

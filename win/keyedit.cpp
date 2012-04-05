@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// keyedit.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "keyedit.h"
 #include "keyboard.h"

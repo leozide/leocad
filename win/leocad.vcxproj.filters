@@ -185,6 +185,9 @@
     <ClCompile Include="..\common\debug.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\file.cpp">
+      <Filter>Common Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\Common\globals.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
@@ -266,6 +269,9 @@
     <ClCompile Include="..\Common\Tr.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\vector.cpp">
+      <Filter>Common Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\common\view.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
@@ -277,12 +283,6 @@
     </ClCompile>
     <ClCompile Include="propertiesgridctrl.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\lc_file.cpp">
-      <Filter>Common Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\lc_colors.cpp">
-      <Filter>Common Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -568,6 +568,7 @@
     <None Include="hlp\Scmin.bmp">
       <Filter>Help Files</Filter>
     </None>
+    <None Include="..\docs\CHANGES.txt" />
     <None Include="res\invisible.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -729,6 +730,9 @@
     <ClInclude Include="..\Common\defines.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common\file.h">
+      <Filter>Common Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\Common\globals.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
@@ -807,29 +811,20 @@
     <ClInclude Include="..\Common\typedefs.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common\vector.h">
+      <Filter>Common Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\common\view.h">
       <Filter>Common Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="propertiespane.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="dynsplit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\lc_global.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="propertiespane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="propertiesgridctrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\lc_file.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\lc_colors.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\lc_math.h">
-      <Filter>Common Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

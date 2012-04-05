@@ -1,8 +1,6 @@
 // Base class for all drawable objects
 //
 
-#include "lc_global.h"
-#include "lc_math.h"
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
@@ -10,7 +8,8 @@
 #include "project.h"
 #include "object.h"
 #include "matrix.h"
-#include "lc_file.h"
+#include "vector.h"
+#include "file.h"
 #include "lc_application.h"
 
 #define LC_KEY_SAVE_VERSION 1 // LeoCAD 0.73
@@ -34,11 +33,11 @@ static void GetPolyCoeffs (float x1, float y1, float z1, float x2, float y2, flo
 
 double LC_CLICKLINE::PointDistance (float *point)
 {
-  lcVector3 op((float)(point[0] - a1), (float)(point[1] - b1), (float)(point[2] - c1));
-  lcVector3 d((float)a2, (float)b2, (float)c2);
-  float len = d.Length();
-  d.Normalize();
-  float t = lcDot(op, d);
+  Vector op ((float)(point[0] - a1), (float)(point[1] - b1), (float)(point[2] - c1));
+  Vector d ((float)a2, (float)b2, (float)c2);
+  float len = d.Length ();
+  d.Normalize ();
+  float t = op.Dot (d);
 
   if (t > 0)
   {
@@ -79,10 +78,11 @@ Object::~Object ()
   RemoveKeys ();
 }
 
-bool Object::FileLoad(lcFile& file)
+bool Object::FileLoad (File& file)
 {
-  lcuint8 version = file.ReadU8();
+  lcuint8 version;
 
+  file.ReadByte (&version, 1);
   if (version > LC_KEY_SAVE_VERSION)
     return false;
 
@@ -91,22 +91,22 @@ bool Object::FileLoad(lcFile& file)
   lcuint8 type;
   lcuint32 n;
 
-  file.ReadU32(&n, 1);
+  file.ReadLong (&n, 1);
   while (n--)
   {
-    file.ReadU16(&time, 1);
-    file.ReadFloats(param, 4);
-    file.ReadU8(&type, 1);
+    file.ReadShort (&time, 1);
+    file.ReadFloat (param, 4);
+    file.ReadByte (&type, 1);
 
     ChangeKey (time, false, true, param, type);
   }
 
-  file.ReadU32(&n, 1);
+  file.ReadLong (&n, 1);
   while (n--)
   {
-    file.ReadU16(&time, 1);
-    file.ReadFloats(param, 4);
-    file.ReadU8(&type, 1);
+    file.ReadShort (&time, 1);
+    file.ReadFloat (param, 4);
+    file.ReadByte (&type, 1);
 
     ChangeKey (time, true, true, param, type);
   }
@@ -114,33 +114,34 @@ bool Object::FileLoad(lcFile& file)
   return true;
 }
 
-void Object::FileSave(lcFile& file) const
+void Object::FileSave (File& file) const
 {
+  lcuint8 version = LC_KEY_SAVE_VERSION;
   LC_OBJECT_KEY *node;
   lcuint32 n;
 
-  file.WriteU8(LC_KEY_SAVE_VERSION);
+  file.WriteByte (&version, 1);
 
   for (n = 0, node = m_pInstructionKeys; node; node = node->next)
     n++;
-  file.WriteU32(n);
+  file.WriteLong (&n, 1);
 
   for (node = m_pInstructionKeys; node; node = node->next)
   {
-    file.WriteU16(node->time);
-    file.WriteFloats(node->param, 4);
-    file.WriteU8(node->type);
+    file.WriteShort (&node->time, 1);
+    file.WriteFloat (node->param, 4);
+    file.WriteByte (&node->type, 1);
   }
 
   for (n = 0, node = m_pAnimationKeys; node; node = node->next)
     n++;
-  file.WriteU32(n);
+  file.WriteLong (&n, 1);
 
   for (node = m_pAnimationKeys; node; node = node->next)
   {
-    file.WriteU16(node->time);
-    file.WriteFloats(node->param, 4);
-    file.WriteU8(node->type);
+    file.WriteShort (&node->time, 1);
+    file.WriteFloat (node->param, 4);
+    file.WriteByte (&node->type, 1);
   }
 }
 

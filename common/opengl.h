@@ -2,6 +2,7 @@
 #define _OPENGL_H_
 
 #ifdef LC_WINDOWS
+#include "stdafx.h"
 #include <GL/gl.h>
 #include "win_gl.h"
 #else

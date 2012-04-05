@@ -1,14 +1,14 @@
 // Terrain: a Bezier surface.
 //
 
-#include "lc_global.h"
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include "opengl.h"
+#include "defines.h"
 #include "terrain.h"
-#include "lc_file.h"
+#include "file.h"
 #include "camera.h"
 #include "matrix.h"
 #include "system.h"
@@ -261,59 +261,59 @@ Terrain::~Terrain()
 /////////////////////////////////////////////////////////////////////////////
 // Terrain functions
 
-void Terrain::FileLoad(lcFile* file)
+void Terrain::FileLoad(File* file)
 {
-	lcuint8 ch;
-	lcuint16 sh;
-	lcint32 i, j;
+  unsigned char ch;
+  unsigned short sh;
+  int i, j;
 
-	file->ReadU8(&ch, 1);
-	file->ReadS32(&i, 1);
-	file->ReadS32(&j, 1);
-	file->ReadFloats(&m_uSize, 1);
-	file->ReadFloats(&m_vSize, 1);
-	file->ReadU32(&m_nOptions, 1);
-	file->ReadFloats(m_fColor, 3);
+  file->ReadByte (&ch, 1);
+  file->ReadLong (&i, 1);
+  file->ReadLong (&j, 1);
+  file->ReadFloat (&m_uSize, 1);
+  file->ReadFloat (&m_vSize, 1);
+  file->ReadLong (&m_nOptions, 1);
+  file->ReadFloat (&m_fColor, 3);
 
-	if (ch == 1)
-	{
-		file->ReadU8(&ch, 1);
-		sh = ch;
-	}
-	else
-		file->ReadU16(&sh, 1);
+  if (ch == 1)
+  {
+    file->Read(&ch, 1);
+    sh = ch;
+  }
+  else
+    file->ReadShort (&sh, 1);
 
-	if (sh > LC_MAXPATH)
-		file->Seek (sh, SEEK_CUR);
-	else
-		file->ReadBuffer(&m_strTexture, sh);
+  if (sh > LC_MAXPATH)
+    file->Seek (sh, SEEK_CUR);
+  else
+    file->Read (&m_strTexture, sh);
 
-	SetPatchCount(i, j);
-	for (i = 0; i < GetCountU(); i++)
-		for (j = 0; j < GetCountV(); j++)
-			file->ReadFloats(&m_pControl[i][j*3+2], 1);
+  SetPatchCount(i, j);
+  for (i = 0; i < GetCountU(); i++)
+    for (j = 0; j < GetCountV(); j++)
+      file->ReadFloat (&m_pControl[i][j*3+2], 1);
 }
 
-void Terrain::FileSave(lcFile* file)
+void Terrain::FileSave(File* file)
 {
-  lcuint8 version = 2; // LeoCAD 0.70
-  lcuint16 sh;
+  unsigned char version = 2; // LeoCAD 0.70
+  unsigned short sh;
 
-  file->WriteU8(&version, 1);
-  file->WriteS32(&m_uPatches, 1);
-  file->WriteS32(&m_vPatches, 1);
-  file->WriteFloats(&m_uSize, 1);
-  file->WriteFloats(&m_vSize, 1);
-  file->WriteU32(&m_nOptions, 1);
-  file->WriteFloats(m_fColor, 3);
+  file->WriteByte (&version, 1);
+  file->WriteLong (&m_uPatches, 1);
+  file->WriteLong (&m_vPatches, 1);
+  file->WriteFloat (&m_uSize, 1);
+  file->WriteFloat (&m_vSize, 1);
+  file->WriteLong (&m_nOptions, 1);
+  file->WriteFloat (&m_fColor, 3);
 
   sh = strlen (m_strTexture);
-  file->WriteU16(&sh, 1);
-  file->WriteBuffer(m_strTexture, sh);
+  file->WriteShort (&sh, 1);
+  file->Write (m_strTexture, sh);
 
   for (int i = 0; i < GetCountU(); i++)
     for (int j = 0; j < GetCountV(); j++)
-      file->WriteFloats(&m_pControl[i][j*3+2], 1);
+      file->WriteFloat (&m_pControl[i][j*3+2], 1);
 }
 
 void Terrain::FreeMemory()

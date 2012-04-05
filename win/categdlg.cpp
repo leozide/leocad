@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// categdlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "categdlg.h"
 

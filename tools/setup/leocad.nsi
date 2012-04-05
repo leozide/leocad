@@ -15,7 +15,7 @@
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\LeoCAD"
-  
+
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\BT Software\LeoCAD" "InstallPath"
 
@@ -23,8 +23,6 @@
 
   !define MUI_ICON "setup.ico"
   !define MUI_UNICON "setup.ico"
-
-  SetCompressor /SOLID lzma
 
 ;--------------------------------
 ;Interface Settings
@@ -65,12 +63,22 @@ Section "LeoCAD" SecLeoCAD
   File "..\..\win\release\textures.bin"
   File "..\..\win\release\textures.idx"
   File "..\..\win\release\sysfont.txf"
-  
+
+  ;Register file extension
+  WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
+  WriteRegStr HKCR ".lcd\ShellNew" "NullFile" ""
+  WriteRegStr HKCR "LeoCAD.Project" "" "LeoCAD Project"
+  WriteRegStr HKCR "LeoCAD.Project\DefaultIcon" "" "$INSTDIR\LeoCAD.exe,0"
+  WriteRegStr HKCR "LeoCAD.Project\shell" "" "open"
+  WriteRegStr HKCR "LeoCAD.Project\shell\open\command" "" '"$INSTDIR\LeoCAD.exe" "%1"'
+  WriteRegStr HKCR "LeoCAD.Project\shell" "" "print"
+  WriteRegStr HKCR "LeoCAD.Project\shell\print\command" "" '"$INSTDIR\LeoCAD.exe" /p "%1"'
+  WriteRegStr HKCR "LeoCAD.Project\shell" "" "printto"
+  WriteRegStr HKCR "LeoCAD.Project\shell\printto\command" "" '"$INSTDIR\LeoCAD.exe" /pt "%1" "%2" "%3" "%4"'
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
+
   ;Store installation folder
   WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
-  
-  ; Overwrite old Pieces Library path.
-  WriteRegStr HKCU "Software\BT Software\LeoCAD\Settings" "PiecesLibrary" $INSTDIR
 
   CreateShortCut "$SMPROGRAMS\LeoCAD.lnk" "$INSTDIR\LeoCAD.exe"
 
@@ -104,6 +112,10 @@ Section "Uninstall"
   Delete "$INSTDIR\sysfont.txf"
 
   RMDir "$INSTDIR"
+
+  DeleteRegKey HKCR ".lcd"
+  DeleteRegKey HKCR "LeoCAD.Project"
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD"
   DeleteRegKey HKCU "Software\BT Software\LeoCAD\InstallPath"

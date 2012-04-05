@@ -1,8 +1,12 @@
-#include "lc_global.h"
+// PrefPage.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "resource.h"
 #include "PrefPage.h"
 #include "Tools.h"
 #include "MainFrm.h"
+#include "defines.h"
 #include "keyboard.h"
 
 #ifdef _DEBUG

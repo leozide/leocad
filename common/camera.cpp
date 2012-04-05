@@ -1,15 +1,14 @@
 // Camera object.
 
-#include "lc_global.h"
-#include "lc_math.h"
-#include "lc_colors.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "opengl.h"
 #include "globals.h"
+#include "defines.h"
+#include "vector.h"
 #include "matrix.h"
-#include "lc_file.h"
+#include "file.h"
 #include "camera.h"
 #include "tr.h"
 
@@ -108,21 +107,20 @@ Camera::Camera (const float *eye, const float *target, const float *up, Camera* 
   : Object (LC_OBJECT_CAMERA)
 {
   // Fix the up vector
-  lcVector3 UpVector(up[0], up[1], up[2]);
-  lcVector3 FrontVector(eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]), SideVector;
-  FrontVector.Normalize();
-  SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
+  Vector upvec(up), frontvec(eye[0]-target[0], eye[1]-target[1], eye[2]-target[2]), sidevec;
+  frontvec.Normalize();
+  sidevec.Cross(frontvec, upvec);
+  upvec.Cross(sidevec, frontvec);
+  upvec.Normalize();
 
   Initialize();
 
   ChangeKey (1, false, true, eye, LC_CK_EYE);
   ChangeKey (1, false, true, target, LC_CK_TARGET);
-  ChangeKey (1, false, true, UpVector, LC_CK_UP);
+  ChangeKey (1, false, true, upvec, LC_CK_UP);
   ChangeKey (1, true, true, eye, LC_CK_EYE);
   ChangeKey (1, true, true, target, LC_CK_TARGET);
-  ChangeKey (1, true, true, UpVector, LC_CK_UP);
+  ChangeKey (1, true, true, upvec, LC_CK_UP);
 
   int i, max = 0;
 
@@ -151,14 +149,14 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
   : Object (LC_OBJECT_CAMERA)
 {
   // Fix the up vector
-  lcVector3 UpVector(0, 0, 1), FrontVector(ex - tx, ey - ty, ez - tz), SideVector;
-  FrontVector.Normalize();
-  if (FrontVector == UpVector)
-    SideVector = lcVector3(1, 0, 0);
+  Vector upvec(0,0,1), frontvec(ex-tx, ey-ty, ez-tz), sidevec;
+  frontvec.Normalize();
+  if (frontvec == upvec)
+    sidevec = Vector(1,0,0);
   else
-    SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
+    sidevec.Cross(frontvec, upvec);
+  upvec.Cross(sidevec, frontvec);
+  upvec.Normalize();
 
   Initialize();
 
@@ -166,10 +164,10 @@ Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Came
 
   ChangeKey (1, false, true, eye, LC_CK_EYE);
   ChangeKey (1, false, true, target, LC_CK_TARGET);
-  ChangeKey (1, false, true, UpVector, LC_CK_UP);
+  ChangeKey (1, false, true, upvec, LC_CK_UP);
   ChangeKey (1, true, true, eye, LC_CK_EYE);
   ChangeKey (1, true, true, target, LC_CK_TARGET);
-  ChangeKey (1, true, true, UpVector, LC_CK_UP);
+  ChangeKey (1, true, true, upvec, LC_CK_UP);
 
   int i, max = 0;
 
@@ -227,11 +225,11 @@ void Camera::Initialize()
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 
-bool Camera::FileLoad(lcFile& file)
+bool Camera::FileLoad (File& file)
 {
-  lcuint8 version, ch;
+  unsigned char version, ch;
 
-  version = file.ReadU8();
+  file.ReadByte (&version, 1);
 
   if (version > LC_CAMERA_SAVE_VERSION)
     return false;
@@ -242,15 +240,15 @@ bool Camera::FileLoad(lcFile& file)
 
   if (version == 4)
   {
-    file.ReadBuffer(m_strName, 80);
+    file.Read(m_strName, 80);
     m_strName[80] = 0;
   }
   else
   {
-    ch = file.ReadU8();
+    file.Read(&ch, 1);
     if (ch == 0xFF)
       return false; // don't read CString
-    file.ReadBuffer(m_strName, ch);
+    file.Read(m_strName, ch);
     m_strName[ch] = 0;
   }
 
@@ -259,21 +257,21 @@ bool Camera::FileLoad(lcFile& file)
     double d[3];
     float f[3];
 
-    file.ReadDoubles(d, 3);
+    file.ReadDouble (d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
     ChangeKey (1, false, true, f, LC_CK_EYE);
     ChangeKey (1, true, true, f, LC_CK_EYE);
 
-    file.ReadDoubles(d, 3);
+    file.ReadDouble (d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
     ChangeKey (1, false, true, f, LC_CK_TARGET);
     ChangeKey (1, true, true, f, LC_CK_TARGET);
 
-    file.ReadDoubles(d, 3);
+    file.ReadDouble (d, 3);
     f[0] = (float)d[0];
     f[1] = (float)d[1];
     f[2] = (float)d[2];
@@ -283,21 +281,21 @@ bool Camera::FileLoad(lcFile& file)
 
   if (version == 3)
   {
-    ch = file.ReadU8();
+    file.Read(&ch, 1);
 
     while (ch--)
     {
-      lcuint8 step;
+      unsigned char step;
       double eye[3], target[3], up[3];
       float f[3];
 
-      file.ReadDoubles(eye, 3);
-      file.ReadDoubles(target, 3);
-      file.ReadDoubles(up, 3);
-      file.ReadU8(&step, 1);
+      file.ReadDouble (eye, 3);
+      file.ReadDouble (target, 3);
+      file.ReadDouble (up, 3);
+      file.ReadByte (&step, 1);
 
       if (up[0] == 0 && up[1] == 0 && up[2] == 0)
-        up[2] = 1;
+	up[2] = 1;
 
       f[0] = (float)eye[0];
       f[1] = (float)eye[1];
@@ -317,73 +315,80 @@ bool Camera::FileLoad(lcFile& file)
       ChangeKey (step, false, true, f, LC_CK_UP);
       ChangeKey (step, true, true, f, LC_CK_UP);
 
-      lcint32 snapshot = file.ReadS32();
-      lcint32 cam = file.ReadS32();
+      int snapshot; // BOOL under Windows
+      int cam;
+      file.ReadLong (&snapshot, 1);
+      file.ReadLong (&cam, 1);
+//			if (cam == -1)
+//				node->pCam = NULL;
+//			else
+//				node->pCam = pDoc->GetCamera(i);
     }
   }
 
   if (version < 4)
   {
-    m_fovy = (float)file.ReadDouble();
-    m_zFar = (float)file.ReadDouble();
-    m_zNear= (float)file.ReadDouble();
+    double d;
+    file.ReadDouble (&d, 1); m_fovy = (float)d;
+    file.ReadDouble (&d, 1); m_zFar = (float)d;
+    file.ReadDouble (&d, 1); m_zNear= (float)d;
   }
   else
   {
-    lcint32 n;
+    int n;
 
     if (version < 6)
     {
-      lcuint16 time;
+      unsigned short time;
       float param[4];
-      lcuint8 type;
+      unsigned char type;
 
-      n = file.ReadS32();
+      file.ReadLong (&n, 1);
       while (n--)
       {
-        file.ReadU16(&time, 1);
-        file.ReadFloats(param, 3);
-        file.ReadU8(&type, 1);
+        file.ReadShort (&time, 1);
+        file.ReadFloat (param, 3);
+        file.ReadByte (&type, 1);
 
         ChangeKey (time, false, true, param, type);
       }
 
-      n = file.ReadS32();
+      file.ReadLong (&n, 1);
       while (n--)
       {
-        file.ReadU16(&time, 1);
-        file.ReadFloats(param, 3);
-        file.ReadU8(&type, 1);
+        file.ReadShort (&time, 1);
+        file.ReadFloat (param, 3);
+        file.ReadByte (&type, 1);
 
         ChangeKey (time, true, true, param, type);
       }
     }
 
-    file.ReadFloats(&m_fovy, 1);
-    file.ReadFloats(&m_zFar, 1);
-    file.ReadFloats(&m_zNear, 1);
+    file.ReadFloat (&m_fovy, 1);
+    file.ReadFloat (&m_zFar, 1);
+    file.ReadFloat (&m_zNear, 1);
 
     if (version < 5)
     {
-      n = file.ReadS32();
+      file.ReadLong (&n, 1);
       if (n != 0)
 	m_nState |= LC_CAMERA_HIDDEN;
     }
     else
     {
-      m_nState = file.ReadU8();
-      m_nType = file.ReadU8();
+      file.ReadByte (&m_nState, 1);
+      file.ReadByte (&m_nType, 1);
     }
   }
 
   if ((version > 1) && (version < 4))
   {
-    lcuint32 show;
-    lcint32 user;
+    unsigned long show;
+    int user;
 
-    show = file.ReadU32();
+    file.ReadLong (&show, 1);
 //			if (version > 2)
-    user = file.ReadS32();
+    file.ReadLong (&user, 1);
     if (show == 0)
       m_nState |= LC_CAMERA_HIDDEN;
   }
@@ -391,22 +396,24 @@ bool Camera::FileLoad(lcFile& file)
   return true;
 }
 
-void Camera::FileSave(lcFile& file) const
+void Camera::FileSave (File& file) const
 {
-  file.WriteU8(LC_CAMERA_SAVE_VERSION);
+  unsigned char ch = LC_CAMERA_SAVE_VERSION;
+
+  file.WriteByte (&ch, 1);
 
   Object::FileSave (file);
 
-  lcuint8 ch = (unsigned char)strlen(m_strName);
-  file.WriteU8(ch);
-  file.WriteBuffer(m_strName, ch);
+  ch = (unsigned char)strlen(m_strName);
+  file.Write (&ch, 1);
+  file.Write (m_strName, ch);
 
-  file.WriteFloat(m_fovy);
-  file.WriteFloat(m_zFar);
-  file.WriteFloat(m_zNear);
+  file.WriteFloat (&m_fovy, 1);
+  file.WriteFloat (&m_zFar, 1);
+  file.WriteFloat (&m_zNear, 1);
   // version 5
-  file.WriteU8(m_nState);
-  file.WriteU8(m_nType);
+  file.WriteByte (&m_nState, 1);
+  file.WriteByte (&m_nType, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -447,12 +454,12 @@ void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx
     }
 
     // Fix the up vector
-    lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), SideVector;
-    lcVector3 FrontVector(m_fTarget[0] - m_fEye[0], m_fTarget[1] - m_fEye[1], m_fTarget[2] - m_fEye[2]);
-    SideVector = lcCross(FrontVector, UpVector);
-    UpVector = lcCross(SideVector, FrontVector);
-    UpVector.Normalize();
-    memcpy(m_fUp, UpVector, sizeof(m_fUp));
+    Vector upvec(m_fUp), sidevec;
+    Vector frontvec(m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
+    sidevec.Cross(frontvec, upvec);
+    upvec.Cross(sidevec, frontvec);
+    upvec.Normalize();
+    upvec.ToFloat(m_fUp);
 
     ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
   }
@@ -520,15 +527,15 @@ void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 void Camera::UpdateBoundingBox()
 {
   // Fix the up vector
-  lcVector3 FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
-  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), SideVector;
+  Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
+  Vector upvec(m_fUp), sidevec;
 
-  SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
-  memcpy(m_fUp, UpVector, sizeof(m_fUp));
+  sidevec.Cross(frontvec, upvec);
+  upvec.Cross(sidevec, frontvec);
+  upvec.Normalize();
+  upvec.ToFloat(m_fUp);
 
-  float len = FrontVector.Length();
+  float len = frontvec.Length();
 
   Matrix mat;
   mat.CreateLookat (m_fEye, m_fTarget, m_fUp);
@@ -612,43 +619,37 @@ void Camera::Render(float fLineWidth)
 	// Create the display lists if this is the first time we're rendered.
 	if (!m_nList)
 	{
-		m_nList = glGenLists(1);
+    m_nList = glGenLists(1);
 		UpdateBoundingBox();
 	}
 
   if (IsEyeSelected())
   {
     glLineWidth(fLineWidth*2);
-    if (m_nState & LC_CAMERA_FOCUSED)
-      lcSetColorFocused();
-    else
-      lcSetColorSelected();
+    glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
     glCallList(m_nList);
     glLineWidth(fLineWidth);
   }
   else
   {
-    lcSetColorCamera();
+    glColor3f(0.5f, 0.8f, 0.5f);
     glCallList(m_nList);
   }
 
   if (IsTargetSelected())
   {
     glLineWidth(fLineWidth*2);
-    if (m_nState & LC_CAMERA_TARGET_FOCUSED)
-      lcSetColorFocused();
-    else
-      lcSetColorSelected();
+    glColor3ubv(FlatColorArray[(m_nState & LC_CAMERA_TARGET_FOCUSED) != 0 ? LC_COL_FOCUSED : LC_COL_SELECTED]);
     glCallList(m_nTargetList);
     glLineWidth(fLineWidth);
   }
   else
   {
-    lcSetColorCamera();
+    glColor3f(0.5f, 0.8f, 0.5f);
     glCallList(m_nTargetList);
   }
 
-  lcSetColorCamera();
+  glColor3f(0.5f, 0.8f, 0.5f);
   glBegin(GL_LINES);
   glVertex3fv(m_fEye);
   glVertex3fv(m_fTarget);
@@ -657,8 +658,8 @@ void Camera::Render(float fLineWidth)
   if (IsSelected())
   {
     Matrix projection, modelview;
-    lcVector3 FrontVector(m_fTarget[0] - m_fEye[0], m_fTarget[1] - m_fEye[1], m_fTarget[2] - m_fEye[2]);
-    float len = FrontVector.Length();
+    Vector frontvec(m_fTarget[0]-m_fEye[0], m_fTarget[1]-m_fEye[1], m_fTarget[2]-m_fEye[2]);
+    float len = frontvec.Length();
 
     glPushMatrix ();
 
@@ -737,17 +738,17 @@ void Camera::LoadProjection(float fAspect)
 
 void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  lcVector3 FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
-  FrontVector.Normalize();
-  FrontVector *= 2.0f * dy / (21 - mouse);
+  Vector frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
+  frontvec.Normalize();
+  frontvec *= 2.0f*dy/(21-mouse);
 
   // TODO: option to move eye, target or both
-  m_fEye[0] += FrontVector[0];
-  m_fEye[1] += FrontVector[1];
-  m_fEye[2] += FrontVector[2];
-  m_fTarget[0] += FrontVector[0];
-  m_fTarget[1] += FrontVector[1];
-  m_fTarget[2] += FrontVector[2];
+  m_fEye[0] += frontvec[0];
+  m_fEye[1] += frontvec[1];
+  m_fEye[2] += frontvec[2];
+  m_fTarget[0] += frontvec[0];
+  m_fTarget[1] += frontvec[1];
+  m_fTarget[2] += frontvec[2];
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
@@ -756,19 +757,19 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 
 void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]), SideVector;
-  SideVector = lcCross(FrontVector, UpVector);
-  SideVector.Normalize();
-  SideVector *= 2.0f*dx/(21-mouse);
-  UpVector.Normalize();
-  UpVector *= -2.0f*dy/(21-mouse);
+  Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
+  sidevec.Cross(frontvec, upvec);
+  sidevec.Normalize();
+  sidevec *= 2.0f*dx/(21-mouse);
+  upvec.Normalize();
+  upvec *= -2.0f*dy/(21-mouse);
 
-  m_fEye[0] += UpVector[0] + SideVector[0];
-  m_fEye[1] += UpVector[1] + SideVector[1];
-  m_fEye[2] += UpVector[2] + SideVector[2];
-  m_fTarget[0] += UpVector[0] + SideVector[0];
-  m_fTarget[1] += UpVector[1] + SideVector[1];
-  m_fTarget[2] += UpVector[2] + SideVector[2];
+  m_fEye[0] += upvec[0] + sidevec[0];
+  m_fEye[1] += upvec[1] + sidevec[1];
+  m_fEye[2] += upvec[2] + sidevec[2];
+  m_fTarget[0] += upvec[0] + sidevec[0];
+  m_fTarget[1] += upvec[1] + sidevec[1];
+  m_fTarget[2] += upvec[2] + sidevec[2];
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
@@ -777,28 +778,28 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 
 void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
 {
-  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]), SideVector;
-  SideVector = lcCross(FrontVector, UpVector);
-  SideVector.Normalize();
-  SideVector *= 2.0f*dx/(21-mouse);
-  UpVector.Normalize();
-  UpVector *= -2.0f*dy/(21-mouse);
+  Vector upvec(m_fUp), frontvec(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]), sidevec;
+  sidevec.Cross(frontvec, upvec);
+  sidevec.Normalize();
+  sidevec *= 2.0f*dx/(21-mouse);
+  upvec.Normalize();
+  upvec *= -2.0f*dy/(21-mouse);
 
   // TODO: option to move eye or target
-  float len = FrontVector.Length();
-  FrontVector += lcVector3(UpVector[0] + SideVector[0], UpVector[1] + SideVector[1], UpVector[2] + SideVector[2]);
-  FrontVector.Normalize();
-  FrontVector *= len;
-  FrontVector += lcVector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]);
-  memcpy(m_fEye, FrontVector, sizeof(m_fEye));
+  float len = frontvec.Length();
+  frontvec += Vector(upvec[0] + sidevec[0], upvec[1] + sidevec[1], upvec[2] + sidevec[2]);
+  frontvec.Normalize();
+  frontvec *= len;
+  frontvec += Vector(m_fTarget);
+  frontvec.ToFloat(m_fEye);
 
   // Calculate new up
-  UpVector = lcVector3(m_fUp[0], m_fUp[1], m_fUp[2]);
-  FrontVector = lcVector3(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
-  SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
-  memcpy(m_fUp, UpVector, sizeof(m_fUp));
+  upvec = Vector(m_fUp[0], m_fUp[1], m_fUp[2]);
+  frontvec = Vector(m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2]);
+  sidevec.Cross(frontvec, upvec);
+  upvec.Cross(sidevec, frontvec);
+  upvec.Normalize();
+  upvec.ToFloat(m_fUp);
 
   ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
   ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);

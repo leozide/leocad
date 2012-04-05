@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// GroupDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "GroupDlg.h"
 

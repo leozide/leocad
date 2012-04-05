@@ -1,4 +1,4 @@
-#include "lc_global.h"
+#include "stdafx.h"
 #include "propertiesgridctrl.h"
 #include "globals.h"
 

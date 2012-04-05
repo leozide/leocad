@@ -5,7 +5,7 @@
 //
 // CTabCtrlWithDisable implements a CTabCtrl with tabs that you can disable.
 
-#include "lc_global.h"
+#include "StdAfx.h"
 #include "DisabTab.h"
 
 #ifdef _DEBUG

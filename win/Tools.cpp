@@ -1,10 +1,14 @@
-#include "lc_global.h"
+// Tools.cpp : Misc. routines
+//
+
+#include "stdafx.h"
 #include "Tools.h"
 #include "resource.h"
 #include "PrefSht.h"
 #include "lc_application.h"
 #include <math.h>
 #include <shlobj.h>
+#include "config.h"
 
 #ifdef LC_HAVE_3DSFTK
 #pragma comment(lib, "3dsftk")
@@ -544,7 +548,7 @@ void Export3DStudio()
 			if (facemats[j])
 			{
 				InitMatArrayIndex3ds (mobj, i, facemats[j]);
-				sprintf(mobj->matarray[i].name, "Material%d", j == LC_COL_DEFAULT ? pPiece->mColorCode : j);
+				sprintf(mobj->matarray[i].name, "Material%02d", j == LC_COL_DEFAULT ? pPiece->GetColor() : j);
 				mobj->matarray[i].nfaces = facemats[j];
 
 				UINT curface = 0;

@@ -1,11 +1,15 @@
-#include "lc_global.h"
+// System user interface.
+//
+
+#include "stdafx.h"
 #include <dlgs.h>
 #include <direct.h>
 #include "leocad.h"
 #include "system.h"
+#include "defines.h"
 #include "camera.h"
 #include "tools.h"
-#include "lc_file.h"
+#include "file.h"
 #include "image.h"
 #include "PieceBar.h"
 #include "PropsSht.h"
@@ -150,20 +154,20 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 
 				float fv;
 				char id[32];
-				lcDiskFile file;
+				FileDisk file;
 				file.Open(filename, "rb");
-				file.ReadBuffer(id, 32);
+				file.Read(id, 32);
 				sscanf(strchr(id, ' '), "%f", &fv);
 
 				if (fv > 0.4f)
 				{
-					file.ReadFloats(&fv, 1);
+					file.Read(&fv, 4);
 
 					if (fv > 0.7f)
 					{
-						lcuint32 dwPosition;
+						unsigned long dwPosition;
 						file.Seek(-4, SEEK_END);
-						file.ReadU32(&dwPosition, 1);
+						file.Read(&dwPosition, 4);
 						file.Seek(dwPosition, SEEK_SET);
 
 						if (dwPosition != 0)
@@ -171,10 +175,10 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 							if (fv < 1.0f)
 							{
 								BITMAPFILEHEADER bmfHeader;
-								file.ReadBuffer((LPSTR)&bmfHeader, sizeof(bmfHeader));
+								file.Read((LPSTR)&bmfHeader, sizeof(bmfHeader));
 								DWORD nPackedDIBLen = sizeof(BITMAPINFOHEADER) + 36000;
 								HGLOBAL hDIB = ::GlobalAlloc(GMEM_FIXED, nPackedDIBLen);
-								file.ReadBuffer((LPSTR)hDIB, nPackedDIBLen);
+								file.Read((LPSTR)hDIB, nPackedDIBLen);
 								BITMAPINFOHEADER &bmiHeader = *(LPBITMAPINFOHEADER)hDIB;
 								BITMAPINFO &bmInfo = *(LPBITMAPINFO)hDIB;
 								int nColors = bmiHeader.biClrUsed ? bmiHeader.biClrUsed : 1 << bmiHeader.biBitCount;
@@ -192,31 +196,32 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 							else
 							{
 								Image image;
+                
+                if (image.FileLoad (file))
+                {
+                  HWND hwndDesktop = GetDesktopWindow(); 
+                  HDC hdcDesktop = GetDC(hwndDesktop); 
+                  HDC hdcMem = CreateCompatibleDC(hdcDesktop); 
+                  hbm = CreateCompatibleBitmap(hdcDesktop, 120, 100);
+                  HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm); 
 
-								if (image.FileLoad (file))
-								{
-									HWND hwndDesktop = GetDesktopWindow(); 
-									HDC hdcDesktop = GetDC(hwndDesktop); 
-									HDC hdcMem = CreateCompatibleDC(hdcDesktop); 
-									hbm = CreateCompatibleBitmap(hdcDesktop, 120, 100);
-									HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm); 
+                  for (int y = 0; y < 100; y++)
+                    for (int x = 0; x < 120; x++)
+                    {
+                      unsigned char* b = image.GetData () + (y*120+x)*3;
+                      SetPixelV(hdcMem, x, y, RGB(b[0], b[1], b[2]));
+                    }
 
-									for (int y = 0; y < 100; y++)
-										for (int x = 0; x < 120; x++)
-										{
-											unsigned char* b = image.GetData () + (y*120+x)*3;
-											SetPixelV(hdcMem, x, y, RGB(b[0], b[1], b[2]));
-										}
-
-										// Clean up
-										SelectObject(hdcMem, hbmOld); 
-										DeleteDC(hdcMem); 
-										ReleaseDC(hwndDesktop, hdcDesktop); 
-								}
+                  // Clean up
+                  SelectObject(hdcMem, hbmOld); 
+                  DeleteDC(hdcMem); 
+                  ReleaseDC(hwndDesktop, hdcDesktop); 
+                }
 							}
 						}
 					}
 				}
+				file.Close();
 
 				if (!hbm)
 					hbm = CreateColorBitmap (120, 100, GetSysColor(COLOR_BTNFACE));
@@ -1470,7 +1475,7 @@ void SystemReleaseMouse()
 	ReleaseCapture();
 }
 
-void SystemExportClipboard(lcFile* clip)
+void SystemExportClipboard(File* clip)
 {
 	if (clip == NULL)
 		return;
@@ -1478,7 +1483,7 @@ void SystemExportClipboard(lcFile* clip)
 	HGLOBAL hData = GlobalAlloc(GMEM_DDESHARE|GMEM_MOVEABLE, clip->GetLength());
 	void* lpBuffer = GlobalLock(hData);
 	clip->Seek(0, SEEK_SET);
-	clip->ReadBuffer(lpBuffer, clip->GetLength());
+	clip->Read(lpBuffer, clip->GetLength());
 	GlobalUnlock(hData);
 
 	if (OpenClipboard(NULL))
@@ -1490,9 +1495,9 @@ void SystemExportClipboard(lcFile* clip)
 //		AfxMessageBox(IDS_CANNOT_OPEN_CLIPBOARD);
 }
 
-lcFile* SystemImportClipboard()
+File* SystemImportClipboard()
 {
-	lcFile* clip = NULL;
+	File* clip = NULL;
 
 	if (ClipboardFormat != 0)
 	if (OpenClipboard(NULL))
@@ -1500,11 +1505,11 @@ lcFile* SystemImportClipboard()
 		HANDLE hData = ::GetClipboardData(ClipboardFormat);
 		if (hData != NULL)
 		{
-			clip = new lcMemFile();
+			clip = new FileMem();
 
 			BYTE* lpBuffer = (BYTE*)::GlobalLock(hData);
 			long nBufferSize = ::GlobalSize(hData);
-			clip->WriteBuffer(lpBuffer, nBufferSize);
+			clip->Write(lpBuffer, nBufferSize);
 			GlobalUnlock(hData);
 		}
 //		else

@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// ArrayDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "ArrayDlg.h"
 

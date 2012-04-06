@@ -306,7 +306,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 				printf("Usage: leocad [options] [file]\n");
 				printf("  [options] can be:\n");
 				printf("  --libgl <path>: Searches for OpenGL libraries in path.\n");
-				printf("  --libpath <path>: Loads the Pieces library from path.\n");
+				printf("  --libpath <path>: Loads the Pieces Library from path.\n");
+				printf("  --convert <srcpath> <dstpath>: Generates Pieces Library from LDraw files.\n");
 				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
 				printf("  -w, --width <width>: Sets the picture width.\n");
 				printf("  -h, --height <height>: Sets the picture height.\n");

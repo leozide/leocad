@@ -1527,6 +1527,40 @@ bool Sys_KeyDown(int key)
 	return GetKeyState(key) < 0;
 }
 
+void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
+{
+	FileList.RemoveAll();
+
+	WIN32_FIND_DATA FindData;
+	HANDLE Find = INVALID_HANDLE_VALUE;
+	char Dir[MAX_PATH];
+
+	strcpy(Dir, Path);
+	int Len = strlen(Dir);
+
+	if (Dir[Len-1] != '\\' && Dir[Len-1] != '/')
+		strcat(Dir, "\\");
+	strcat(Dir, "*.dat");
+
+	Find = FindFirstFile(Dir, &FindData);
+
+	if (Find == INVALID_HANDLE_VALUE) 
+		return;
+
+	do
+	{
+		if (FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			continue;
+
+		char File[MAX_PATH];
+		strcpy(File, Dir);
+		strcat(File, FindData.cFileName);
+		FileList.Add(File);
+	}
+	while (FindNextFile(Find, &FindData) != 0);
+
+	FindClose(Find);
+}
 
 void SystemPumpMessages()
 {

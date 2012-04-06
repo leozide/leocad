@@ -56,6 +56,16 @@ void PiecesLibrary::Unload ()
 	m_nTextureCount = 0;
 }
 
+void PiecesLibrary::SetPath(const char* LibPath)
+{
+	strcpy(m_LibraryPath, LibPath);
+
+	// Make sure that the path ends with a '/'
+	int i = strlen(m_LibraryPath)-1;
+	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
+		strcat(m_LibraryPath, "/");
+}
+
 bool PiecesLibrary::Load (const char *libpath)
 {
 	FileDisk idx, bin;
@@ -67,12 +77,7 @@ bool PiecesLibrary::Load (const char *libpath)
 
 	Unload();
 
-	strcpy (m_LibraryPath, libpath);
-
-	// Make sure that the path ends with a '/'
-	i = strlen(m_LibraryPath)-1;
-	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
-		strcat(m_LibraryPath, "/");
+	SetPath(libpath);
 
 	// Read the piece library index.
 	strcpy (filename, m_LibraryPath);

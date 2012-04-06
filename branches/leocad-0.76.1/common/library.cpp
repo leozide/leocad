@@ -72,7 +72,7 @@ bool PiecesLibrary::Load (const char *libpath)
 	char filename[LC_MAXPATH];
 	lcuint16 count, movedcount;
 	lcuint32 binsize;
-	Texture* pTexture;
+//	Texture* pTexture;
 	int i;
 
 	Unload();
@@ -2189,14 +2189,11 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f %f %f %f %s",
 			&type, &color, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
 
-		strcpy (fn, dir);
-		strcat (fn, "P/");
-		strcat (fn, filename);
+		strlwr(filename);
 
 		if (color == 16) color = defcolor;
 		color = FixupColor(color);
 
-		strlwr(filename);
 		for (val = 0; val < numvalid; val++)
 		if (strcmp(filename, valid[val]) == 0)
 		{
@@ -2374,7 +2371,15 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 			continue;
 		}
 
-		tf = fopen (fn, "rt");
+		for (unsigned int i = 0; i < strlen(filename); i++)
+			if (filename[i] == '\\')
+				filename[i] = '/';
+					
+		strcpy(fn, dir);
+		strcat(fn, "p/");
+		strcat(fn, filename);
+
+		tf = fopen(fn, "rt");
 
 		if (!tf)
 		{
@@ -2403,6 +2408,10 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 //			while (info->next)
 //				info = info->next;
 			fclose(tf);
+		}
+		else
+		{
+			printf("Could not find file \"%s\".\n", filename);
 		}
 
 		memset (buf, 0, sizeof(buf));

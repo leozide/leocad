@@ -121,12 +121,17 @@ bool Sys_KeyDown(int Key)
 
 void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 {
-	DIR* Dir = opendir(Path);
 	struct dirent* Entry;
-	char FilePath[LC_MAXPATH];
+	char DirPath[LC_MAXPATH], FilePath[LC_MAXPATH];
+
+	strcpy(DirPath, Path);
+	int Length = strlen(DirPath);
+	if (DirPath[Length - 1] != '/')
+		strcat(DirPath, "/");
 
 	FileList.RemoveAll();
 
+	DIR* Dir = opendir(DirPath);
 	if (!Dir)
 	{
 		printf("Couldn't open directory.\n");
@@ -148,7 +153,7 @@ void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 		if (strcmp(Entry->d_name + Length - 4, ".dat"))
 			continue;
 
-		sprintf(FilePath, "%s/%s", Path, Entry->d_name);
+		sprintf(FilePath, "%s%s", DirPath, Entry->d_name);
 		FileList.Add(FilePath);
 	}
 

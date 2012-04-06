@@ -1603,7 +1603,7 @@ static const float ver_flt = 0.3f;
 #define LC_STUD4	5
 
 // stud, technic stud, stud under 1x? plate, stud under ?x? plate
-static const char* valid[12] = { "STUD.DAT", "STUD2.DAT", "STUD3.DAT", "STUD4.DAT" };
+static const char* valid[12] = { "stud.dat", "stud2.dat", "stud3.dat", "stud4.dat" };
 static const unsigned char numvalid = 4;
 
 static int FloatPointsClose(float pt1[], float pt2[])
@@ -2044,25 +2044,24 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 			sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f %f %f %f %s",
 				&type, &color, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
 
-			strcpy (fn, dir);
-			strcat (fn, "p/");
-			strcat (fn, filename);
-
-#if LC_WINDOWS
-			strupr(filename);
-#else
 			strlwr(filename);
+
 			for (unsigned int i = 0; i < strlen(filename); i++)
 				if (filename[i] == '\\')
 					filename[i] = '/';
-#endif
+
 			for (val = 0; val < numvalid; val++)
 				if (strcmp(filename, valid[val]) == 0)
 					break;
+
 			if (val != numvalid)
 				break;
 
 			if (color == 16) color = defcolor;
+
+			strcpy(fn, dir);
+			strcat(fn, "p/");
+			strcat(fn, filename);
 
 			tf = fopen (fn, "rt");
 
@@ -2093,6 +2092,9 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 					info = info->next;
 				fclose(tf);
 			}
+			else
+				printf("Could not find file \"%s\".\n", filename);
+
 		} break;
 
 		case 2:
@@ -2194,7 +2196,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 		if (color == 16) color = defcolor;
 		color = FixupColor(color);
 
-		strupr(filename);
+		strlwr(filename);
 		for (val = 0; val < numvalid; val++)
 		if (strcmp(filename, valid[val]) == 0)
 		{

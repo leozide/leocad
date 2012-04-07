@@ -1026,7 +1026,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 		int color, cmd;
 		float fmat[12];
 
-		if (sscanf(buf, "%d %d %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
+		if (sscanf(buf, "%d %i %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
 			&cmd, &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6], 
 			&fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 15)
 			continue;
@@ -1041,7 +1041,7 @@ void Project::FileReadLDraw(File* file, Matrix* prevmat, int* nOk, int DefColor,
 			if (color == 16) 
 				cl = DefColor;
 			else
-				cl = ConvertColor(color);
+				cl = ConvertColor(color); // TODO: handle colors in hex format
 
 			strcpy(pn, tmp);
 			ptr = strrchr(tmp, '.');

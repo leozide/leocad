@@ -1533,16 +1533,18 @@ void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 
 	WIN32_FIND_DATA FindData;
 	HANDLE Find = INVALID_HANDLE_VALUE;
-	char Dir[MAX_PATH];
+	char Dir[MAX_PATH], FindPath[MAX_PATH];
 
 	strcpy(Dir, Path);
 	int Len = strlen(Dir);
 
 	if (Dir[Len-1] != '\\' && Dir[Len-1] != '/')
 		strcat(Dir, "\\");
-	strcat(Dir, "*.dat");
 
-	Find = FindFirstFile(Dir, &FindData);
+	strcpy(FindPath, Dir);
+	strcat(FindPath, "*.dat");
+
+	Find = FindFirstFile(FindPath, &FindData);
 
 	if (Find == INVALID_HANDLE_VALUE) 
 		return;

@@ -9,7 +9,7 @@
 
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 76
-#define LC_VERSION_PATCH 1
+#define LC_VERSION_PATCH 2
 #define LC_VERSION_OSNAME "Windows"
 #define LC_VERSION_TEXT "0.76.2"
 #define LC_VERSION_TAG ""

@@ -242,10 +242,17 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			}
 			else if (strcmp(Param, "--convert") == 0)
 			{
-				ParseStringArgument(&i, argc, argv, &LDrawPath);
-				ParseStringArgument(&i, argc, argv, &LibPath);
+				if (argc > i + 2)
+				{
+					ParseStringArgument(&i, argc, argv, &LDrawPath);
+					ParseStringArgument(&i, argc, argv, &LibPath);
 
-				ConvertPiecesLibrary(LDrawPath, LibPath);
+					ConvertPiecesLibrary(LDrawPath, LibPath);
+				}
+				else
+				{
+					printf("Not enough command line arguments.\n");
+				}
 
 				return false;
 			}

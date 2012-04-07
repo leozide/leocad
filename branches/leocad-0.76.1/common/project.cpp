@@ -4242,6 +4242,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			unsigned long vert = 1, i;
 			Piece* pPiece;
 
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			strcpy(buf, m_strPathName);
 			ptr = strrchr(buf, '\\');
 			if (ptr)
@@ -4313,6 +4314,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->GetPieceInfo()->WriteWavefront(stream, pPiece->GetColor(), &vert);
 			}
 
+			setlocale(LC_NUMERIC, OldLocale);
 			fclose(stream);
 		} break;
 

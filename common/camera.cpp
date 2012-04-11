@@ -317,8 +317,8 @@ bool Camera::FileLoad(lcFile& file)
       ChangeKey (step, false, true, f, LC_CK_UP);
       ChangeKey (step, true, true, f, LC_CK_UP);
 
-      lcint32 snapshot = file.ReadS32();
-      lcint32 cam = file.ReadS32();
+      file.ReadS32(); // snapshot
+      file.ReadS32(); // cam
     }
   }
 

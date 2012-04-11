@@ -288,7 +288,7 @@ void LoadColorFile(lcFile& File)
 		}
 
 		// Check if the new color is valid.
-		if (Color.Code == -1 || Color.Value[0] == FLT_MAX)
+		if (Color.Code == (lcuint32)-1 || Color.Value[0] == FLT_MAX)
 			continue;
 
 		if (Color.Edge[0] == FLT_MAX)

@@ -62,10 +62,10 @@ Section "LeoCAD" SecLeoCAD
   File "..\..\readme.txt"
   File "..\..\win\release\pieces.bin"
   File "..\..\win\release\pieces.idx"
-  File "..\..\win\release\textures.bin"
-  File "..\..\win\release\textures.idx"
-  File "..\..\win\release\sysfont.txf"
-  
+  ;File "..\..\win\release\textures.bin"
+  ;File "..\..\win\release\textures.idx"
+  ;File "..\..\win\release\sysfont.txf"
+
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
   WriteRegStr HKCR ".lcd\ShellNew" "NullFile" ""
@@ -78,7 +78,7 @@ Section "LeoCAD" SecLeoCAD
   WriteRegStr HKCR "LeoCAD.Project\shell" "" "printto"
   WriteRegStr HKCR "LeoCAD.Project\shell\printto\command" "" '"$INSTDIR\LeoCAD.exe" /pt "%1" "%2" "%3" "%4"'
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
-
+  
   ;Store installation folder
   WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
   
@@ -112,9 +112,9 @@ Section "Uninstall"
   Delete "$INSTDIR\readme.txt"
   Delete "$INSTDIR\pieces.bin"
   Delete "$INSTDIR\pieces.idx"
-  Delete "$INSTDIR\textures.bin"
-  Delete "$INSTDIR\textures.idx"
-  Delete "$INSTDIR\sysfont.txf"
+  ;Delete "$INSTDIR\textures.bin"
+  ;Delete "$INSTDIR\textures.idx"
+  ;Delete "$INSTDIR\sysfont.txf"
 
   RMDir "$INSTDIR"
 

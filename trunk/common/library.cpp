@@ -56,6 +56,16 @@ void PiecesLibrary::Unload ()
 	m_nTextureCount = 0;
 }
 
+void PiecesLibrary::SetPath(const char* LibPath)
+{
+	strcpy(m_LibraryPath, LibPath);
+
+	// Make sure that the path ends with a '/'
+	int i = strlen(m_LibraryPath)-1;
+	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
+		strcat(m_LibraryPath, "/");
+}
+
 bool PiecesLibrary::Load(const char *libpath)
 {
 	lcDiskFile idx, bin;
@@ -67,12 +77,7 @@ bool PiecesLibrary::Load(const char *libpath)
 
 	Unload();
 
-	strcpy (m_LibraryPath, libpath);
-
-	// Make sure that the path ends with a '/'
-	i = strlen(m_LibraryPath)-1;
-	if ((m_LibraryPath[i] != '\\') && (m_LibraryPath[i] != '/'))
-		strcat(m_LibraryPath, "/");
+	SetPath(libpath);
 
 	// Read the piece library index.
 	strcpy (filename, m_LibraryPath);
@@ -1588,7 +1593,7 @@ static const float ver_flt = 0.3f;
 #define LC_STUD4	5
 
 // stud, technic stud, stud under 1x? plate, stud under ?x? plate
-static const char* valid[12] = { "STUD.DAT", "STUD2.DAT", "STUD3.DAT", "STUD4.DAT" };
+static const char* valid[12] = { "stud.dat", "stud2.dat", "stud3.dat", "stud4.dat" };
 static const unsigned char numvalid = 4;
 
 static int FloatPointsClose(float pt1[], float pt2[])
@@ -2004,7 +2009,7 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 			memset(tex, 0, sizeof(texture_t));
 			f = tex->points;
 
-			sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %s",
+			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %s",
 				&type, &color, &f[0], &f[1], &f[2], &f[3], &f[4], &f[5], &f[6], &f[7], &f[8], &f[9],
 				&f[10], &f[11], &f[12], &f[13], &f[14], &f[15], &f[16], &f[17], &f[18], &f[19], tex->name);
 			tex->color = color;
@@ -2026,28 +2031,27 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 		{
 		case 1:
 		{
-			sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f %f %f %f %s",
+			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s",
 				&type, &color, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
 
-			strcpy (fn, dir);
-			strcat (fn, "p/");
-			strcat (fn, filename);
-
-#if LC_WINDOWS
-			strupr(filename);
-#else
 			strlwr(filename);
+
 			for (unsigned int i = 0; i < strlen(filename); i++)
 				if (filename[i] == '\\')
 					filename[i] = '/';
-#endif
+
 			for (val = 0; val < numvalid; val++)
 				if (strcmp(filename, valid[val]) == 0)
 					break;
+
 			if (val != numvalid)
 				break;
 
 			if (color == 16) color = defcolor;
+
+			strcpy(fn, dir);
+			strcat(fn, "p/");
+			strcat(fn, filename);
 
 			tf = fopen (fn, "rt");
 
@@ -2078,15 +2082,18 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 					info = info->next;
 				fclose(tf);
 			}
+			else
+				printf("Could not find file \"%s\".\n", filename);
+
 		} break;
 
 		case 2:
 		{
-			sscanf (buf, "%d %d %f %f %f %f %f %f", &type, &color, 
+			sscanf (buf, "%d %i %f %f %f %f %f %f", &type, &color, 
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5]);
 			if (color == 16) color = defcolor;
-			color = FixupColor(color);
+			color = FixupColor(color); // TODO: handle colors in hex format, some parts are using it (3070bp09, 3626bpao, 3626bpb5, 3960ps3)
 			info->color = color;
 			ConvertPoints(info->points, 2);
 			mat->TransformPoints(info->points, 2);
@@ -2094,7 +2101,7 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 
 		case 3:
 		{
-			sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f", &type, &color, 
+			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f", &type, &color, 
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5],
 				&info->points[6], &info->points[7], &info->points[8]);
@@ -2107,7 +2114,7 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 
 		case 4:
 		{
-			sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f %f %f %f", &type, &color, 
+			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &type, &color, 
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5],
 				&info->points[6], &info->points[7], &info->points[8],
@@ -2169,17 +2176,14 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 			continue;
 		}
 
-		sscanf (buf, "%d %d %f %f %f %f %f %f %f %f %f %f %f %f %s",
+		sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s",
 			&type, &color, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
 
-		strcpy (fn, dir);
-		strcat (fn, "P/");
-		strcat (fn, filename);
+		strlwr(filename);
 
 		if (color == 16) color = defcolor;
 		color = FixupColor(color);
 
-		strupr(filename);
 		for (val = 0; val < numvalid; val++)
 		if (strcmp(filename, valid[val]) == 0)
 		{
@@ -2357,6 +2361,14 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 			continue;
 		}
 
+		for (unsigned int i = 0; i < strlen(filename); i++)
+			if (filename[i] == '\\')
+				filename[i] = '/';
+					
+		strcpy(fn, dir);
+		strcat(fn, "p/");
+		strcat(fn, filename);
+
 		tf = fopen (fn, "rt");
 
 		if (!tf)
@@ -2387,6 +2399,8 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 //				info = info->next;
 			fclose(tf);
 		}
+		else
+			printf("Could not find file \"%s\".\n", filename);
 
 		memset (buf, 0, sizeof(buf));
 	}

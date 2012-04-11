@@ -1027,7 +1027,7 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 		int color, cmd;
 		float fmat[12];
 
-		if (sscanf(buf, "%d %d %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
+		if (sscanf(buf, "%d %i %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
 			&cmd, &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6], 
 			&fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 15)
 			continue;
@@ -4237,6 +4237,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			unsigned long vert = 1, i;
 			Piece* pPiece;
 
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			strcpy(buf, m_strPathName);
 			ptr = strrchr(buf, '\\');
 			if (ptr)
@@ -4308,6 +4309,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->GetPieceInfo()->WriteWavefront(stream, pPiece->mColorCode, &vert);
 			}
 
+			setlocale(LC_NUMERIC, OldLocale);
 			fclose(stream);
 		} break;
 

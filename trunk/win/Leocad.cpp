@@ -70,19 +70,29 @@ static void CheckForUpdates(void* Data)
 			
 			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
 			{
-				float ver;
+				int MajorVersion, MinorVersion, PatchVersion;
 				int lib;
 
-				if (sscanf (szContents, "%f %d", &ver, &lib) == 2)
+				if (sscanf(szContents, "%d.%d.%d %d", &MajorVersion, &MinorVersion, &PatchVersion, &lib) == 4)
 				{
 					CString str;
 					bool Update = false;
 
-					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100 + (float)LC_VERSION_PATCH/1000)
+					if (MajorVersion > LC_VERSION_MAJOR)
+						Update = true;
+					else if (MajorVersion == LC_VERSION_MAJOR)
 					{
-						str.Format("There's a newer version of LeoCAD available for download (%0.3f).\n", ver);
+						if (MinorVersion > LC_VERSION_MINOR)
+							Update = true;
+						else if (MinorVersion == LC_VERSION_MINOR)
+					{
+							if (PatchVersion > LC_VERSION_PATCH)
 						Update = true;
 					}
+					}
+
+					if (Update)
+						str.Format("There's a newer version of LeoCAD available for download (%d.%d.%d).\n", MajorVersion, MinorVersion, PatchVersion);
 					else
 						str = "You are using the latest version of LeoCAD.\n";
 

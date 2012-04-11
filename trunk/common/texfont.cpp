@@ -115,7 +115,7 @@ bool TexFont::Initialize()
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	unsigned char ExpandedData[sizeof(TextureData) * 8];
-	for (int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
+	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
 		ExpandedData[TexelIdx] = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
 
 	mTextureWidth = 128;

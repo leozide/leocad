@@ -16,6 +16,7 @@ public:
 	void Shutdown();
 
 	// Pieces library.
+	void ConvertPiecesLibrary(const char* SrcPath, const char* DstPath);
 	bool LoadPiecesLibrary(const char* LibPath, const char* SysLibPath);
 	PiecesLibrary* GetPiecesLibrary() const
 	{

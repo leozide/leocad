@@ -82,6 +82,86 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* SysLibPat
 	return false;
 }
 
+void lcApplication::ConvertPiecesLibrary(const char* SrcPath, const char* DstPath)
+{
+	ObjArray<String> FileList;
+	PiecesLibrary Library;
+
+	Library.SetPath(DstPath);
+
+	if (!Library.DeleteAllPieces())
+	{
+		printf("Error: Couldn't open library file for writing."); // TODO: replace printfs with a callback and progress dialog, then delete the duplicate code in libdlg.cpp
+		return;
+	}
+
+	Sys_GetFileList(SrcPath, FileList);
+
+	if (!FileList.GetSize())
+	{
+		printf("Error: No files to import.");
+		return;
+	}
+
+	char file1[LC_MAXPATH], file2[LC_MAXPATH];
+	lcDiskFile DiskIdx, DiskBin;
+
+	strcpy(file1, Library.GetLibraryPath());
+	strcat(file1, "pieces.idx");
+	strcpy(file2, Library.GetLibraryPath());
+	strcat(file2, "pieces.bin");
+
+	if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
+		return;
+
+	lcMemFile IdxFile1, IdxFile2, BinFile1, BinFile2;
+
+	IdxFile1.CopyFrom(DiskIdx);
+	BinFile1.CopyFrom(DiskBin);
+
+	lcMemFile* NewIdx = &IdxFile1;
+	lcMemFile* NewBin = &BinFile1;
+	lcMemFile* OldIdx = &IdxFile2;
+	lcMemFile* OldBin = &BinFile2;
+
+	for (int i = 0; i < FileList.GetSize(); i++)
+	{
+		char* Name = FileList[i];
+		char* Slash = strrchr(Name, '\\');
+		if (Slash > Name)
+			Name = Slash+1;
+
+		Slash = strrchr(Name, '/');
+		if (Slash > Name)
+			Name = Slash+1;
+
+		printf("Importing %s\n", Name);
+
+		lcMemFile* TmpFile;
+
+		TmpFile = NewBin;
+		NewBin = OldBin;
+		OldBin = TmpFile;
+		NewBin->SetLength(0);
+
+		TmpFile = NewIdx;
+		NewIdx = OldIdx;
+		OldIdx = TmpFile;
+		NewIdx->SetLength(0);
+
+		lcGetPiecesLibrary()->ImportLDrawPiece(FileList[i], NewIdx, NewBin, OldIdx, OldBin);
+	}
+
+	if ((!DiskIdx.Open(file1, "wb")) || (!DiskBin.Open(file2, "wb")))
+	{
+		printf("Error: Couldn't open library file for writing.");
+		return;
+	}
+
+	DiskIdx.CopyFrom(*NewIdx);
+	DiskBin.CopyFrom(*NewBin);
+}
+
 void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value)
 {
 	if (argc > (*CurArg + 1))
@@ -118,6 +198,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	// System setup parameters.
 	char* LibPath = NULL;
 	char* GLPath = NULL;
+	char* LDrawPath = NULL;
 
 	// Image output options.
 	bool SaveImage = false;
@@ -147,6 +228,22 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 			else if ((strcmp(Param, "-l") == 0) || (strcmp(Param, "--libpath") == 0))
 			{
 				ParseStringArgument(&i, argc, argv, &LibPath);
+			}
+			else if (strcmp(Param, "--convert") == 0)
+			{
+				if (argc > i + 2)
+				{
+					ParseStringArgument(&i, argc, argv, &LDrawPath);
+					ParseStringArgument(&i, argc, argv, &LibPath);
+
+					ConvertPiecesLibrary(LDrawPath, LibPath);
+				}
+				else
+				{
+					printf("Not enough command line arguments.\n");
+				}
+
+				return false;
 			}
 			else if ((strcmp(Param, "-i") == 0) || (strcmp(Param, "--image") == 0))
 			{
@@ -205,7 +302,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 				printf("Usage: leocad [options] [file]\n");
 				printf("  [options] can be:\n");
 				printf("  --libgl <path>: Searches for OpenGL libraries in path.\n");
-				printf("  --libpath <path>: Loads the Pieces library from path.\n");
+				printf("  --libpath <path>: Loads the Pieces Library from path.\n");
+				printf("  --convert <srcpath> <dstpath>: Generates Pieces Library from LDraw files.\n");
 				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
 				printf("  -w, --width <width>: Sets the picture width.\n");
 				printf("  -h, --height <height>: Sets the picture height.\n");

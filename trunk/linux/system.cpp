@@ -7,6 +7,8 @@
 #include <gtk/gtk.h>
 #include <X11/keysym.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "opengl.h"
 #include "gtkmisc.h"
 #include "camera.h"
@@ -118,9 +120,46 @@ bool Sys_KeyDown(int Key)
 	return false;
 }
 
+void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
+{
+	struct dirent* Entry;
+	char DirPath[LC_MAXPATH], FilePath[LC_MAXPATH];
 
+	strcpy(DirPath, Path);
+	int Length = strlen(DirPath);
+	if (DirPath[Length - 1] != '/')
+		strcat(DirPath, "/");
 
+	FileList.RemoveAll();
 
+	DIR* Dir = opendir(DirPath);
+	if (!Dir)
+	{
+		printf("Couldn't open directory.\n");
+		return;
+	}
+
+	while ((Entry = readdir(Dir)))
+	{
+		int Length;
+
+		if (Entry->d_type != DT_REG)
+			continue;
+
+		Length = strlen(Entry->d_name);
+
+		if (Length < 5)
+			continue;
+
+		if (strcmp(Entry->d_name + Length - 4, ".dat"))
+			continue;
+
+		sprintf(FilePath, "%s%s", DirPath, Entry->d_name);
+		FileList.Add(FilePath);
+	}
+
+	closedir(Dir);
+}
 
 // String
 char* strupr(char* string)

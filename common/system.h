@@ -2,6 +2,7 @@
 #define _SYSTEM_H_
 
 #include "typedefs.h"
+#include "array.h"
 
 // Assert macros.
 #ifdef LC_DEBUG
@@ -76,6 +77,7 @@ int Sys_MessageBox (const char* text, const char* caption="LeoCAD", int type=LC_
 
 // Misc stuff
 bool Sys_KeyDown (int key);
+void Sys_GetFileList(const char* Path, ObjArray<String>& FileList);
 
 
 

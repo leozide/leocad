@@ -70,6 +70,7 @@ public:
 
 	bool Load(const char* libpath);
 	void Unload();
+	void SetPath(const char* LibPath);
 
 	// Search for pieces.
 	PieceInfo* FindPieceInfo(const char* name) const;

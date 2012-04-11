@@ -1925,9 +1925,9 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 				for (count = *info, info++; count; count -= 3)
 				{
-					int idx1 = info[0] + *start;
-					int idx2 = info[1] + *start;
-					int idx3 = info[2] + *start;
+					long int idx1 = info[0] + *start;
+					long int idx2 = info[1] + *start;
+					long int idx3 = info[2] + *start;
 
 					if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
 						fprintf(file, "f %ld %ld %ld\n", idx1, idx2, idx3);
@@ -1979,9 +1979,9 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 				for (count = *info, info++; count; count -= 3)
 				{
-					int idx1 = info[0] + *start;
-					int idx2 = info[1] + *start;
-					int idx3 = info[2] + *start;
+					long int idx1 = info[0] + *start;
+					long int idx2 = info[1] + *start;
+					long int idx3 = info[2] + *start;
 
 					if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
 						fprintf(file, "f %ld %ld %ld\n", idx1, idx2, idx3);

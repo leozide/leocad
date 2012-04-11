@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include <string.h>
 #include "texfont.h"
 
 static const unsigned char TextureData[2048] =

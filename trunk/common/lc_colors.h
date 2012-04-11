@@ -1,6 +1,8 @@
 #ifndef _LC_COLORS_H_
 #define _LC_COLORS_H_
 
+#include "opengl.h"
+
 #define LC_MAX_COLOR_NAME 64
 
 struct lcColor

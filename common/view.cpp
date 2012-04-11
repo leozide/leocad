@@ -2,7 +2,6 @@
 // View the project contents
 //
 
-#include "lc_global.h"
 #include <stdlib.h>
 #include "project.h"
 #include "view.h"

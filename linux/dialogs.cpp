@@ -1,4 +1,3 @@
-#include "lc_global.h"
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +16,7 @@
 #include "piece.h"
 #include "group.h"
 #include "main.h"
+#include "config.h"
 #include "message.h"
 #include "project.h"
 #include "libdlg.h"

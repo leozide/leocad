@@ -7,7 +7,6 @@
 // - Minifig Wizard
 //
 
-#include "lc_global.h"
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdio.h>

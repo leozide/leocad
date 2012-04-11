@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// LeoCAD.cpp : Defines the class behaviors for the application.
+//
+
+#include "stdafx.h"
 #include "LeoCAD.h"
 
 #include "MainFrm.h"
@@ -10,6 +13,7 @@
 #include "globals.h"
 #include "system.h"
 #include "pieceinf.h" // TODO: remove
+#include "config.h"
 #include "mainwnd.h"
 #include "library.h"
 #include "keyboard.h"
@@ -65,24 +69,33 @@ static void CheckForUpdates(void* Data)
 		if(HttpQueryInfo(hHttpFile,HTTP_QUERY_CONTENT_LENGTH, szSizeBuffer, &dwLengthSizeBuffer, NULL))
 		{	 
 			dwFileSize = atol(szSizeBuffer);
-			LPSTR szContents = Contents.GetBuffer(dwFileSize+1);
-			szContents[dwFileSize] = 0;
+			LPSTR szContents = Contents.GetBuffer(dwFileSize);
 			
 			if (InternetReadFile(hHttpFile, szContents, dwFileSize, &dwBytesRead))
 			{
-				float ver;
+				int MajorVersion, MinorVersion, PatchVersion;
 				int lib;
 
-				if (sscanf (szContents, "%f %d", &ver, &lib) == 2)
+				if (sscanf(szContents, "%d.%d.%d %d", &MajorVersion, &MinorVersion, &PatchVersion, &lib) == 4)
 				{
 					CString str;
 					bool Update = false;
 
-					if (ver > LC_VERSION_MAJOR + (float)LC_VERSION_MINOR/100 + (float)LC_VERSION_PATCH/1000)
-					{
-						str.Format("There's a newer version of LeoCAD available for download (%0.3f).\n", ver);
+					if (MajorVersion > LC_VERSION_MAJOR)
 						Update = true;
+					else if (MajorVersion == LC_VERSION_MAJOR)
+					{
+						if (MinorVersion > LC_VERSION_MINOR)
+							Update = true;
+						else if (MinorVersion == LC_VERSION_MINOR)
+						{
+							if (PatchVersion > LC_VERSION_PATCH)
+								Update = true;
+						}
 					}
+
+					if (Update)
+						str.Format("There's a newer version of LeoCAD available for download (%d.%d.%d).\n", MajorVersion, MinorVersion, PatchVersion);
 					else
 						str = "You are using the latest version of LeoCAD.\n";
 
@@ -137,15 +150,36 @@ BEGIN_MESSAGE_MAP(CCADApp, CWinAppEx)
 	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinAppEx::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
+/////////////////////////////////////////////////////////////////////////////
+// CCADApp construction
+
 CCADApp::CCADApp()
 {
+	m_hMutex = NULL;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// The one and only CCADApp object
 
 CCADApp theApp;
 
+/////////////////////////////////////////////////////////////////////////////
+// CCADApp initialization
+
 BOOL CCADApp::InitInstance()
 {
-	CWinAppEx::InitInstance();
+	// Standard initialization
+	// If you are not using these features and wish to reduce the size
+	//  of your final executable, you should remove from the following
+	//  the specific initialization routines you do not need.
+
+#if _MFC_VER < 0x0710
+#ifdef _AFXDLL
+	Enable3dControls();			// Call this when using MFC in a shared DLL
+#else
+	Enable3dControlsStatic();	// Call this when linking to MFC statically
+#endif
+#endif
 
 	SetRegistryKey(_T("BT Software"));
 	LoadStdProfileSettings();
@@ -183,7 +217,7 @@ BOOL CCADApp::InitInstance()
 	AddDocTemplate(pDocTemplate);
 
 	EnableShellOpen();
-	RegisterLeoCADShellFileTypes();
+	RegisterShellFileTypes(TRUE);
 
 	UINT cmdshow = m_nCmdShow;
 	m_nCmdShow = SW_HIDE;
@@ -205,30 +239,38 @@ BOOL CCADApp::InitInstance()
 	}
 
 /*
-	char out[_MAX_PATH];
-	GetTempPath (_MAX_PATH, out);
-	strcat (out, "~LC*.lcd");
-
-	WIN32_FIND_DATA fd;
-	HANDLE fh = FindFirstFile(out, &fd);
-	if (fh != INVALID_HANDLE_VALUE)
+	m_hMutex = CreateMutex(NULL, FALSE, _T("LeoCAD_Mutex"));
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
-		if (char *ptr = strrchr (out, '\\')) *(ptr+1) = 0;
-		strcat (out, fd.cFileName);
-		if (AfxMessageBox (_T("LeoCAD found a file that was being edited while the program exited unexpectdly. Do you want to load it ?"), MB_YESNO) == IDNO)
-		{
-			if (AfxMessageBox (_T("Delete file ?"), MB_YESNO) == IDYES)
-				DeleteFile (out);
-		}
-		else
-		{
-			cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
-			cmdInfo.m_strFileName = out;
-		}
-	}
-
-//	if (cmdInfo.m_strFileName.IsEmpty())
 //		ParseCommandLine(cmdInfo);
+	}
+	else
+	{
+		char out[_MAX_PATH];
+		GetTempPath (_MAX_PATH, out);
+		strcat (out, "~LC*.lcd");
+
+		WIN32_FIND_DATA fd;
+		HANDLE fh = FindFirstFile(out, &fd);
+		if (fh != INVALID_HANDLE_VALUE)
+		{
+			if (char *ptr = strrchr (out, '\\')) *(ptr+1) = 0;
+			strcat (out, fd.cFileName);
+			if (AfxMessageBox (_T("LeoCAD found a file that was being edited while the program exited unexpectdly. Do you want to load it ?"), MB_YESNO) == IDNO)
+			{
+				if (AfxMessageBox (_T("Delete file ?"), MB_YESNO) == IDYES)
+					DeleteFile (out);
+			}
+			else
+			{
+				cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
+				cmdInfo.m_strFileName = out;
+			}
+		}
+
+//		if (cmdInfo.m_strFileName.IsEmpty())
+//			ParseCommandLine(cmdInfo);
+	}
 */
 
 	// The one and only window has been initialized, so show and update it.
@@ -248,37 +290,17 @@ BOOL CCADApp::InitInstance()
 
 	lcGetActiveProject()->UpdateAllViews();
 
-	int CheckUpdates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
-	if (CheckUpdates)
-	{
-		struct tm When;
-		__time64_t Now, Next;
-
-		if (CheckUpdates == 2)
-			CheckUpdates = 7;
-
-		memset(&When, 0, sizeof(When));
-		CString LastCheck = GetProfileString("Settings", "LastUpdate", NULL);
-		sscanf(LastCheck, "%d %d %d", &When.tm_mday, &When.tm_mon, &When.tm_year);
-		When.tm_mday = When.tm_mday + CheckUpdates;
-		Next = _mktime64(&When);
-
-		_time64(&Now);
-
-		if (Next < Now)
-		{
-			When = *_localtime64(&Now);
-			_beginthread(CheckForUpdates, 0, NULL);
-			LastCheck.Format("%d %d %d", When.tm_mday, When.tm_mon, When.tm_year);
-			WriteProfileString("Settings", "LastUpdate", LastCheck);
-		}
-	}
+	if (AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1))
+		_beginthread(CheckForUpdates, 0, NULL);
 
 	return TRUE;
 }
 
 int CCADApp::ExitInstance() 
 {
+	if (m_hMutex != NULL)
+		ReleaseMutex(m_hMutex);
+
 	delete main_window;
 	main_window = NULL;
 
@@ -299,81 +321,6 @@ void CCADApp::UpdateMRU(char names[4][MAX_PATH])
 {
 	for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
 		m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
-}
-
-static BOOL SetRegKey(LPCTSTR lpszKey, LPCTSTR lpszValue, LPCTSTR lpszValueName = NULL)
-{
-	if (lpszValueName == NULL)
-	{
-		if (AfxRegSetValue(HKEY_CLASSES_ROOT, lpszKey, REG_SZ, lpszValue, lstrlen(lpszValue) * sizeof(TCHAR)) != ERROR_SUCCESS)
-		{
-			TRACE(traceAppMsg, 0, _T("Warning: registration database update failed for key '%s'.\n"), lpszKey);
-			return FALSE;
-		}
-		return TRUE;
-	}
-	else
-	{
-		HKEY hKey;
-
-		if (AfxRegCreateKey(HKEY_CLASSES_ROOT, lpszKey, &hKey) == ERROR_SUCCESS)
-		{
-			LONG lResult = ::RegSetValueEx(hKey, lpszValueName, 0, REG_SZ, (CONST BYTE*)lpszValue, (lstrlen(lpszValue) + 1) * sizeof(TCHAR));
-
-			if (::RegCloseKey(hKey) == ERROR_SUCCESS && lResult == ERROR_SUCCESS)
-				return TRUE;
-		}
-		TRACE(traceAppMsg, 0, _T("Warning: registration database update failed for key '%s'.\n"), lpszKey);
-		return FALSE;
-	}
-}
-
-void CCADApp::RegisterLeoCADShellFileTypes()
-{
-	CString strPathName, strTemp;
-
-	AfxGetModuleShortFileName(AfxGetInstanceHandle(), strPathName);
-
-	// first register the type ID of our server
-	if (!SetRegKey(_T("LeoCAD.Project"), _T("LeoCAD Project")))
-		return;
-
-	// path\DefaultIcon = path,0
-	CString strDefaultIconCommandLine = strPathName;
-	strDefaultIconCommandLine += _T(",0");
-	if (!SetRegKey(_T("LeoCAD.Project\\DefaultIcon"), strDefaultIconCommandLine))
-		return;
-
-	// path\shell\open\command = path filename
-	CString strOpenCommandLine = strPathName;
-	strOpenCommandLine += _T(" \"%1\"");
-	if (!SetRegKey(_T("LeoCAD.Project\\shell\\open\\command"), strOpenCommandLine))
-		return;
-
-	// path\shell\print\command = path /p filename
-	CString strPrintCommandLine = strPathName;
-	strPrintCommandLine += _T(" /p \"%1\"");
-	if (!SetRegKey(_T("LeoCAD.Project\\shell\\print\\command"), strPrintCommandLine))
-		return;
-
-	// path\shell\printto\command = path /pt filename printer driver port
-	CString strPrintToCommandLine = strPathName;
-	strPrintToCommandLine += _T(" /pt \"%1\" \"%2\" \"%3\" \"%4\"");
-	if (!SetRegKey(_T("LeoCAD.Project\\shell\\printto\\command"), strPrintToCommandLine))
-		return;
-
-	LONG lSize = _MAX_PATH * 2;
-	LONG lResult = AfxRegQueryValue(HKEY_CLASSES_ROOT, _T(".lcd"), strTemp.GetBuffer(lSize), &lSize);
-	strTemp.ReleaseBuffer();
-
-	if (lResult != ERROR_SUCCESS || strTemp.IsEmpty() || strTemp == _T("LeoCAD.Project"))
-	{
-		// no association for that suffix
-		if (!SetRegKey(_T(".lcd"), _T("LeoCAD.Project")))
-			return;
-
-		SetRegKey(_T(".lcd\\ShellNew"), _T(""), _T("NullFile"));
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

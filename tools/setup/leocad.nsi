@@ -15,7 +15,7 @@
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\LeoCAD"
-  
+
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\BT Software\LeoCAD" "InstallPath"
 
@@ -23,8 +23,6 @@
 
   !define MUI_ICON "setup.ico"
   !define MUI_UNICON "setup.ico"
-
-  SetCompressor /SOLID lzma
 
 ;--------------------------------
 ;Interface Settings
@@ -62,10 +60,10 @@ Section "LeoCAD" SecLeoCAD
   File "..\..\readme.txt"
   File "..\..\win\release\pieces.bin"
   File "..\..\win\release\pieces.idx"
-  File "..\..\win\release\textures.bin"
-  File "..\..\win\release\textures.idx"
-  File "..\..\win\release\sysfont.txf"
-  
+  ;File "..\..\win\release\textures.bin"
+  ;File "..\..\win\release\textures.idx"
+  ;File "..\..\win\release\sysfont.txf"
+
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
   WriteRegStr HKCR ".lcd\ShellNew" "NullFile" ""
@@ -81,9 +79,6 @@ Section "LeoCAD" SecLeoCAD
 
   ;Store installation folder
   WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
-  
-  ; Overwrite old Pieces Library path.
-  WriteRegStr HKCU "Software\BT Software\LeoCAD\Settings" "PiecesLibrary" $INSTDIR
 
   CreateShortCut "$SMPROGRAMS\LeoCAD.lnk" "$INSTDIR\LeoCAD.exe"
 
@@ -112,9 +107,9 @@ Section "Uninstall"
   Delete "$INSTDIR\readme.txt"
   Delete "$INSTDIR\pieces.bin"
   Delete "$INSTDIR\pieces.idx"
-  Delete "$INSTDIR\textures.bin"
-  Delete "$INSTDIR\textures.idx"
-  Delete "$INSTDIR\sysfont.txf"
+  ;Delete "$INSTDIR\textures.bin"
+  ;Delete "$INSTDIR\textures.idx"
+  ;Delete "$INSTDIR\sysfont.txf"
 
   RMDir "$INSTDIR"
 

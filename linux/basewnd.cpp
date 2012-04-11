@@ -2,7 +2,6 @@
 // BaseWnd class implementation for Linux
 //
 
-#include "lc_global.h"
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include "basewnd.h"

@@ -1,18 +1,23 @@
 #ifndef _TEXFONT_H_
 #define _TEXFONT_H_
 
+class File;
+class Texture;
+
+#include "texture.h"
+
 class TexFont
 {
 public:
-	TexFont();
-	~TexFont();
+	TexFont ();
+	~TexFont ();
 
-	bool IsLoaded() const
+	bool IsLoaded () const
 	{
 		return mTexture != 0;
 	}
 
-	void MakeCurrent()
+	void MakeCurrent ()
 	{
 		glBindTexture(GL_TEXTURE_2D, mTexture);
 	}

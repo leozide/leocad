@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// PiecePrv.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "PiecePrv.h"
 #include "Tools.h"

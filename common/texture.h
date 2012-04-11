@@ -1,7 +1,14 @@
-#ifndef _TEXTURE_H_
-#define _TEXTURE_H_
+//
+//	texture.h
+////////////////////////////////////////////////////
+
+#ifndef _TEXTURE_H
+#define _TEXTURE_H
+
+class File;
 
 #include "opengl.h"
+#include "config.h"
 
 typedef enum { LC_INTENSITY, LC_RGB, LC_RGBA } LC_TEXTURE_TYPES;
 
@@ -23,7 +30,7 @@ class Texture
   bool LoadFromFile(char* strFilename, bool bFilter);
   void Unload();
 
-  void LoadIndex(lcFile* idx);
+  void LoadIndex(File* idx);
   void AddRef(bool bFilter);
   void DeRef();
 
@@ -43,4 +50,4 @@ protected:
 };
 
 
-#endif // _TEXTURE_H_
+#endif // _TEXTURE_H

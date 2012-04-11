@@ -1,4 +1,8 @@
-#include "lc_global.h"
+//
+// OpenGL window
+//
+
+#include "stdafx.h"
 #include "glwindow.h"
 #include "tools.h"
 

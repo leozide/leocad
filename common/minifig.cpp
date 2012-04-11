@@ -2,7 +2,6 @@
 // Minifig Wizard base class, calculates position/rotation of all pieces.
 //
 
-#include "lc_global.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -792,15 +791,15 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 	strcpy(Filename, lcGetPiecesLibrary()->GetLibraryPath());
 	strcat(Filename, "mlcad.ini");
 
-	lcDiskFile DiskSettings;
+	FileDisk DiskSettings;
 	if (DiskSettings.Open(Filename, "rt"))
 	{
 		ParseSettings(DiskSettings);
 	}
 	else
 	{
-		lcMemFile MemSettings;
-		MemSettings.WriteBuffer(DefaultSettings, strlen(DefaultSettings)+1);
+		FileMem MemSettings;
+		MemSettings.Write(DefaultSettings, strlen(DefaultSettings)+1);
 		ParseSettings(MemSettings);
 	}
 
@@ -933,7 +932,7 @@ MinifigWizard::~MinifigWizard ()
 			m_Info[i]->DeRef();
 }
 
-void MinifigWizard::ParseSettings(lcFile& Settings)
+void MinifigWizard::ParseSettings(File& Settings)
 {
 	const char* SectionNames[LC_MFW_NUMITEMS] =
 	{

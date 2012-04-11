@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// HTMLDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "HTMLDlg.h"
 #include "ImageDlg.h"

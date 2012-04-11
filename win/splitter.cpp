@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// Splitter.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "resource.h"
 #include "Splitter.h"
 

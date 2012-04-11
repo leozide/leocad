@@ -1,6 +1,10 @@
-#include "lc_global.h"
+// AboutDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "AboutDlg.h"
+#include "config.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

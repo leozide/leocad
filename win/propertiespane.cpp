@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// propertiespane.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "propertiespane.h"
 
 #include "project.h"
@@ -237,7 +240,7 @@ void CPropertiesPane::SetPiece(Object* Focus)
 	CMFCPropertyGridProperty* Appearence = m_wndPropList.GetProperty(2);
 	UpdateProperty(Appearence->GetSubItem(0), From);
 	UpdateProperty(Appearence->GetSubItem(1), To);
-	((CLeoCADMFCPropertyGridColorProperty*)Appearence->GetSubItem(2))->SetColor(pPiece->mColorIndex, true);
+	((CLeoCADMFCPropertyGridColorProperty*)Appearence->GetSubItem(2))->SetColor(pPiece->GetColor(), true);
 
 	mObject = Focus;
 }

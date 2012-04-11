@@ -5,6 +5,9 @@
 #ifndef _TERRAIN_H_
 #define _TERRAIN_H_
 
+#include "defines.h"
+
+class File;
 class Camera;
 class Texture;
 
@@ -45,8 +48,8 @@ public:
 	void LoadDefaults(bool bLinear);
 	void SetSize(float uSize, float vSize);
 	void GetSize(float *uSize, float *vSize);
-	void FileLoad(lcFile* file);
-	void FileSave(lcFile* file);
+	void FileLoad(File* file);
+	void FileSave(File* file);
 	void Tesselate();
 	void SetControlPoints();
 	void GenerateRandom();
@@ -60,7 +63,7 @@ public:
 	float** GetControlPoints()
 		{ return m_pControl; }
 
-	lcuint32 m_nOptions;
+	unsigned long m_nOptions;
 	char m_strTexture[LC_MAXPATH];
 	float m_fColor[3];
 

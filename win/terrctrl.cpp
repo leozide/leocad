@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// TerrCtrl.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "LeoCAD.h"
 #include "TerrCtrl.h"
 #include "IPEdit.h"

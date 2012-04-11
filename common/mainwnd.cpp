@@ -2,7 +2,6 @@
 // Main LeoCAD window
 //
 
-#include "lc_global.h"
 #include <stdio.h>
 #include "mainwnd.h"
 #include "system.h"

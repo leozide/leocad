@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// EdGrpDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "EdGrpDlg.h"
 #include "globals.h"

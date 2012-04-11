@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// ProgDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "ProgDlg.h"
 

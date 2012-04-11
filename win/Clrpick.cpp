@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// ColorPicker.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "leocad.h"
 #include "ClrPopup.h"
 #include "ClrPick.h"

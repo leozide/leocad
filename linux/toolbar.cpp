@@ -1,7 +1,6 @@
 // Toolbar creation and related functions
 //
 
-#include "lc_global.h"
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <stdio.h>

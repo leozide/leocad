@@ -3,7 +3,6 @@
 // Linux specific initialization
 //
 
-#include "lc_global.h"
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
@@ -18,6 +17,7 @@
 #include "globals.h"
 #include "main.h"
 #include "system.h"
+#include "config.h"
 #include "dialogs.h"
 #include "view.h"
 #include "lc_application.h"

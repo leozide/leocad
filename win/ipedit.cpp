@@ -1,4 +1,7 @@
-#include "lc_global.h"
+// InPlaceEdit.cpp : implementation file
+//
+
+#include "stdafx.h"
 #include "IPEdit.h"
 #include "TerrCtrl.h"
 

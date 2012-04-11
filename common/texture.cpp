@@ -1,11 +1,10 @@
 // Texture object.
 //
 
-#include "lc_global.h"
 #include <string.h>
 #include <stdlib.h>
 #include "opengl.h"
-#include "lc_file.h"
+#include "file.h"
 #include "texture.h"
 #include "project.h"
 #include "globals.h"
@@ -87,18 +86,18 @@ void Texture::DeRef()
 /////////////////////////////////////////////////////////////////////////////
 // Load methods
 
-void Texture::LoadIndex(lcFile* idx)
+void Texture::LoadIndex(File* idx)
 {
-  lcuint8 bt;
+  unsigned char bt;
 
   // TODO: don't change ref. if reloading
   m_nRef = 0;
   m_nID = 0;
 
-  idx->ReadBuffer(m_strName, 8);
-  idx->ReadU16(&m_nWidth, 1);
-  idx->ReadU16(&m_nHeight, 1);
-  idx->ReadU8(&bt, 1);
+  idx->Read(m_strName, 8);
+  idx->ReadShort(&m_nWidth, 1);
+  idx->ReadShort(&m_nHeight, 1);
+  idx->ReadByte(&bt, 1);
 
   switch (bt)
   {
@@ -116,7 +115,7 @@ void Texture::LoadIndex(lcFile* idx)
     break;
   }
 
-  idx->ReadU32(&m_nOffset, 1);
+  idx->ReadLong(&m_nOffset, 1);
 }
 
 void Texture::Unload()
@@ -130,7 +129,7 @@ void Texture::Unload()
 void Texture::Load(bool bFilter)
 {
   char filename[LC_MAXPATH];
-  lcDiskFile bin;
+  FileDisk bin;
   void* bits;
 
   strcpy(filename, lcGetPiecesLibrary()->GetLibraryPath());
@@ -144,7 +143,8 @@ void Texture::Load(bool bFilter)
     bits = malloc (m_nFileSize);
 
   bin.Seek (m_nOffset, SEEK_SET);
-  bin.ReadBuffer(bits, m_nFileSize);
+  bin.Read (bits, m_nFileSize);
+  bin.Close ();
 
   FinishLoadImage (bFilter, bits);
 

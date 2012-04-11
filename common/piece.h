@@ -1,6 +1,7 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
+class File;
 class Piece;
 class Group;
 class PieceInfo;
@@ -8,7 +9,7 @@ class PieceInfo;
 #include "object.h"
 #include "globals.h"
 #include "typedefs.h"
-#include "lc_colors.h"
+#include "defines.h"
 
 #define LC_PIECE_HIDDEN		0x01
 #define LC_PIECE_SELECTED	0x02
@@ -55,14 +56,14 @@ public:
 
 	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
-	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame);
+	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame, unsigned char nColor);
 	void CreateName(Piece* pPiece);
 	void AddConnections(CONNECTION_TYPE* pConnections);
 	void RemoveConnections(CONNECTION_TYPE* pConnections);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
-	bool FileLoad(lcFile& file, char* name);
-	void FileSave(lcFile& file, Group* pGroups);
+	bool FileLoad(File& file, char* name);
+	void FileSave(File& file, Group* pGroups);
 
 	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers);
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
@@ -79,6 +80,10 @@ public:
 		{ strcpy(m_strName, name); }
 	const char* GetName()
 		{ return m_strName; }
+	const unsigned char GetColor()
+		{ return m_nColor; }
+	void SetColor(unsigned char color)
+		{ m_nColor = color; }
 	PieceInfo* GetPieceInfo()
 		{ return m_pPieceInfo; }
 	void SetStepShow(unsigned char step)
@@ -106,29 +111,23 @@ public:
 	void GetRotation (float* rotation)
 		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
 
-	void Render(bool bLighting, bool bEdges);
+	void Render(bool bLighting, bool bEdges, unsigned char* nLastColor, bool* bTrans);
 	void RenderBox(bool bHilite, float fLineWidth);
 
-	void SetColorCode(lcuint32 ColorCode)
+	inline bool IsTransparent()
 	{
-		mColorCode = ColorCode;
-		mColorIndex = lcGetColorIndex(ColorCode);
-	}
+		if (m_nColor < 14) return false;
+		if (m_nColor > 21) return false;
+		return true;
+	};
 
-	void SetColorIndex(int ColorIndex)
+/*
+	inline void UseTransform()
 	{
-		mColorIndex = ColorIndex;
-		mColorCode = lcGetColorCode(ColorIndex);
+		glTranslatef(m_fPosition[0], m_fPosition[1], m_fPosition[2]);
+		glRotatef(m_fRotation[3], m_fRotation[0], m_fRotation[1], m_fRotation[2]);
 	}
-
-	bool IsTranslucent() const
-	{
-		return lcIsColorTranslucent(mColorIndex);
-	}
-
-	int mColorIndex;
-	lcuint32 mColorCode;
-
+*/
 protected:
 	void BuildDrawInfo();
 
@@ -141,6 +140,7 @@ protected:
 	unsigned char m_nStepShow;
 	unsigned char m_nStepHide;
 
+	unsigned char m_nColor;
 	unsigned char m_nState;
 	char m_strName[81];
 

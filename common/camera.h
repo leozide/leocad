@@ -13,6 +13,7 @@
 
 class Camera;
 class CameraTarget;
+class File;
 class TiledRender;
 
 typedef enum
@@ -143,8 +144,8 @@ public:
 	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	bool FileLoad(lcFile& file);
-	void FileSave(lcFile& file) const;
+	bool FileLoad (File& file);
+	void FileSave (File& file) const;
 	void MinIntersectDist (LC_CLICKLINE* pLine);
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)

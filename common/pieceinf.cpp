@@ -1907,8 +1907,8 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 				}
 				info++;
 
-				// skip if color only have lines
-				if ((*info == 0) && (info[1] == 0))
+				// skip if color only has lines
+				if ((info[0] == 0) && (info[1] == 0))
 				{
 					info += 2;
 					info += *info + 1;
@@ -1919,15 +1919,19 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 				for (count = *info, info++; count; count -= 4)
 				{
-					fprintf(file, "f %ld %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start, info[3]+*start);
+					fprintf(file, "f %ld %ld %ld %ld\n", info[0] + *start, info[1] + *start, info[2] + *start, info[3] + *start);
 					info += 4;
 				}
 
 				for (count = *info, info++; count; count -= 3)
 				{
-					fprintf(file, "f %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start);
+					int idx1 = info[0] + *start;
+					int idx2 = info[1] + *start;
+					int idx3 = info[2] + *start;
+
+					if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
+						fprintf(file, "f %ld %ld %ld\n", idx1, idx2, idx3);
+
 					info += 3;
 				}
 				info += *info + 1;
@@ -1957,8 +1961,8 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 				}
 				info++;
 
-				// skip if color only have lines
-				if ((*info == 0) && (info[1] == 0))
+				// skip if color only has lines
+				if ((info[0] == 0) && (info[1] == 0))
 				{
 					info += 2;
 					info += *info + 1;
@@ -1969,20 +1973,23 @@ void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* s
 
 				for (count = *info, info++; count; count -= 4)
 				{
-					fprintf(file, "f %ld %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start, info[3]+*start);
+					fprintf(file, "f %ld %ld %ld %ld\n", info[0] + *start, info[1] + *start, info[2] + *start, info[3] + *start);
 					info += 4;
 				}
 
 				for (count = *info, info++; count; count -= 3)
 				{
-					fprintf(file, "f %ld %ld %ld\n", 
-						*info+*start, info[1]+*start, info[2]+*start);
+					int idx1 = info[0] + *start;
+					int idx2 = info[1] + *start;
+					int idx3 = info[2] + *start;
+
+					if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
+						fprintf(file, "f %ld %ld %ld\n", idx1, idx2, idx3);
+
 					info += 3;
 				}
 				info += *info + 1;
 			}
-
 		}
 	}
 

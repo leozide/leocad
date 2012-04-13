@@ -451,8 +451,6 @@ typedef ptrdiff_t GLsizeiptrARB;
 #endif
 
 // GL_ARB_vertex_buffer_object
-#ifndef GL_ARB_vertex_buffer_object
-#define GL_ARB_vertex_buffer_object 1
 typedef void (APIENTRY *GLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
 typedef void (APIENTRY *GLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);
 typedef void (APIENTRY *GLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
@@ -464,7 +462,6 @@ typedef GLvoid* (APIENTRY *GLMAPBUFFERARBPROC) (GLenum target, GLenum access);
 typedef GLboolean (APIENTRY *GLUNMAPBUFFERARBPROC) (GLenum target);
 typedef void (APIENTRY *GLGETBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
 typedef void (APIENTRY *GLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
-#endif
 
 // =============================================================================
 // OpenGL extern declarations

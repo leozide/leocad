@@ -96,7 +96,12 @@ class PieceInfo
 	void AddRef();
 	void DeRef();
 
+	template<typename DstType>
+	void BuildMesh(void* Data, int* SectionIndices);
+
 public:
+	lcMesh* mMesh;
+
 	// Attributes
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[65];
@@ -108,12 +113,8 @@ public:
 	unsigned char	m_nFlags;
 	unsigned long 	m_nVertexCount;
 	float*			m_fVertexArray;
-	unsigned short	m_nConnectionCount;
-	CONNECTIONINFO*	m_pConnections;
 	unsigned short	m_nGroupCount;
 	DRAWGROUP*		m_pGroups;
-	unsigned char	m_nTextureCount;
-	TEXTURE*		m_pTextures;
 
 protected:
 	int m_nRef;

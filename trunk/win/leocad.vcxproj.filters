@@ -284,6 +284,9 @@
     <ClCompile Include="..\common\lc_colors.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\lc_mesh.cpp">
+      <Filter>Common Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Angle.cur">
@@ -826,6 +829,9 @@
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\lc_math.h">
+      <Filter>Common Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\lc_mesh.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
   </ItemGroup>

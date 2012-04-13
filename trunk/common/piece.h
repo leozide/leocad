@@ -57,14 +57,11 @@ public:
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame);
 	void CreateName(Piece* pPiece);
-	void AddConnections(CONNECTION_TYPE* pConnections);
-	void RemoveConnections(CONNECTION_TYPE* pConnections);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file, char* name);
 	void FileSave(lcFile& file, Group* pGroups);
 
-	void CalculateConnections(CONNECTION_TYPE* pConnections, unsigned short nTime, bool bAnimation, bool bForceRebuild, bool bFixOthers);
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
 
@@ -130,8 +127,6 @@ public:
 	lcuint32 mColorCode;
 
 protected:
-	void BuildDrawInfo();
-
 	// Atributes
 	PieceInfo* m_pPieceInfo;
 	Group* m_pGroup;
@@ -147,8 +142,6 @@ protected:
 	// Temporary variables
 	float m_fPosition[3];
 	float m_fRotation[4];
-	CONNECTION* m_pConnections;
-	void* m_pDrawInfo;
 };
 
 

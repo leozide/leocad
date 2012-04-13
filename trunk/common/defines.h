@@ -125,7 +125,6 @@ int stricmp(const char* str1, const char* str2);
 
 #define LC_FILE_ID LC_FOURCC('L','C','D', 0)
 
-#define LC_CONNECTIONS	2		// Different piece connections
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
 
 #define LC_MAXCOLORS	28	// Number of colors supported

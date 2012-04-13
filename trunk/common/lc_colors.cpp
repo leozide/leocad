@@ -6,7 +6,7 @@
 //#include "system.h"
 
 lcColor* gColorList;
-int gNumColors;
+//int gNumColors;
 
 static const char sDefaultColors[] =
 {

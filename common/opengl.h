@@ -1,17 +1,11 @@
 #ifndef _OPENGL_H_
 #define _OPENGL_H_
 
-#ifdef LC_WINDOWS
-#include <GL/gl.h>
-#include "win_gl.h"
-#else
-#define APIENTRY
-#endif
-
 #ifdef LC_LINUX
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include "linux_gl.h"
+#define LC_OPENGL_DYNAMIC 1
 #endif 
 
 #ifdef LC_MACOSX
@@ -19,23 +13,29 @@
 #include <AGL/agl.h>
 #endif
 
-//#include <GL/glu.h> // TODO: remove all glu calls
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 void gluLookAt (GLdouble eyex, GLdouble eyey, GLdouble eyez,
 		GLdouble centerx, GLdouble centery, GLdouble centerz,
 		GLdouble upx, GLdouble upy, GLdouble upz);
 void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
-bool GL_Initialize (const char* libname);
-void GL_Shutdown ();
-bool GL_InitializeExtensions ();
+bool GL_Initialize(const char* libname);
+void GL_Shutdown();
+bool GL_InitializeExtensions();
 
-int  GL_GetMultiTextures ();
-bool GL_HasCompiledVertexArrays ();
-bool GL_HasClampToEdge ();
-bool GL_HasPointParameters ();
+inline bool GL_HasVertexBufferObject()
+{
+	extern bool GL_VertexBufferObject;
+	return GL_VertexBufferObject;
+}
 
 // =============================================================================
 // OpenGL functions typedefs
+
+#ifdef LC_OPENGL_DYNAMIC
 
 // Miscellaneous
 typedef void (APIENTRY *PFNGLCLEARINDEX) (GLfloat c);
@@ -401,111 +401,75 @@ typedef void (APIENTRY *PFNGLLOADNAME) (GLuint name);
 typedef void (APIENTRY *PFNGLPUSHNAME) (GLuint name);
 typedef void (APIENTRY *PFNGLPOPNAME) (void);
 
-// GL_ARB_multitexture
-typedef void (APIENTRY *PFNGLACTIVETEXTUREARB) (GLenum texture);
-typedef void (APIENTRY *PFNGLCLIENTACTIVETEXTUREARB) (GLenum texture);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1DARB) (GLenum target, GLdouble s);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1DVARB) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1FARB) (GLenum target, GLfloat s);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1FVARB) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1IARB) (GLenum target, GLint s);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1IVARB) (GLenum target, const GLint *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1SARB) (GLenum target, GLshort s);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD1SVARB) (GLenum target, const GLshort *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2DARB) (GLenum target, GLdouble s, GLdouble t);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2DVARB) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2FARB) (GLenum target, GLfloat s, GLfloat t);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2FVARB) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2IARB) (GLenum target, GLint s, GLint t);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2IVARB) (GLenum target, const GLint *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2SARB) (GLenum target, GLshort s, GLshort t);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2SVARB) (GLenum target, const GLshort *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3DARB) (GLenum target, GLdouble s, GLdouble t, GLdouble r);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3DVARB) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3FARB) (GLenum target, GLfloat s, GLfloat t, GLfloat r);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3FVARB) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3IARB) (GLenum target, GLint s, GLint t, GLint r);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3IVARB) (GLenum target, const GLint *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3SARB) (GLenum target, GLshort s, GLshort t, GLshort r);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD3SVARB) (GLenum target, const GLshort *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4DARB) (GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4DVARB) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4FARB) (GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4FVARB) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4IARB) (GLenum target, GLint s, GLint t, GLint r, GLint q);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4IVARB) (GLenum target, const GLint *v);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4SARB) (GLenum target, GLshort s, GLshort t, GLshort r, GLshort q);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD4SVARB) (GLenum target, const GLshort *v);
+#endif // LC_OPENGL_DYNAMIC
 
-#ifndef GL_ARB_multitexture
-#define GL_TEXTURE0_ARB                   0x84C0
-#define GL_TEXTURE1_ARB                   0x84C1
-#define GL_TEXTURE2_ARB                   0x84C2
-#define GL_TEXTURE3_ARB                   0x84C3
-#define GL_TEXTURE4_ARB                   0x84C4
-#define GL_TEXTURE5_ARB                   0x84C5
-#define GL_TEXTURE6_ARB                   0x84C6
-#define GL_TEXTURE7_ARB                   0x84C7
-#define GL_TEXTURE8_ARB                   0x84C8
-#define GL_TEXTURE9_ARB                   0x84C9
-#define GL_TEXTURE10_ARB                  0x84CA
-#define GL_TEXTURE11_ARB                  0x84CB
-#define GL_TEXTURE12_ARB                  0x84CC
-#define GL_TEXTURE13_ARB                  0x84CD
-#define GL_TEXTURE14_ARB                  0x84CE
-#define GL_TEXTURE15_ARB                  0x84CF
-#define GL_TEXTURE16_ARB                  0x84D0
-#define GL_TEXTURE17_ARB                  0x84D1
-#define GL_TEXTURE18_ARB                  0x84D2
-#define GL_TEXTURE19_ARB                  0x84D3
-#define GL_TEXTURE20_ARB                  0x84D4
-#define GL_TEXTURE21_ARB                  0x84D5
-#define GL_TEXTURE22_ARB                  0x84D6
-#define GL_TEXTURE23_ARB                  0x84D7
-#define GL_TEXTURE24_ARB                  0x84D8
-#define GL_TEXTURE25_ARB                  0x84D9
-#define GL_TEXTURE26_ARB                  0x84DA
-#define GL_TEXTURE27_ARB                  0x84DB
-#define GL_TEXTURE28_ARB                  0x84DC
-#define GL_TEXTURE29_ARB                  0x84DD
-#define GL_TEXTURE30_ARB                  0x84DE
-#define GL_TEXTURE31_ARB                  0x84DF
-#define GL_ACTIVE_TEXTURE_ARB             0x84E0
-#define GL_CLIENT_ACTIVE_TEXTURE_ARB      0x84E1
-#define GL_MAX_TEXTURE_UNITS_ARB          0x84E2
+#include <stddef.h>
+#ifndef GL_VERSION_1_5
+// GL types for handling large vertex buffer objects
+typedef ptrdiff_t GLintptr;
+typedef ptrdiff_t GLsizeiptr;
 #endif
 
-// GL_EXT_point_parameters
-typedef void (APIENTRY *PFNGLPOINTPARAMETERFEXT) (GLenum pname, GLfloat param);
-typedef void (APIENTRY *PFNGLPOINTPARAMETERFVEXT) (GLenum pname, const GLfloat *params);
-
-#ifndef GL_SGIS_point_parameters
-#define GL_POINT_SIZE_MIN_EXT             0x8126
-#define GL_POINT_SIZE_MIN_SGIS            0x8126
-#define GL_POINT_SIZE_MAX_EXT             0x8127
-#define GL_POINT_SIZE_MAX_SGIS            0x8127
-#define GL_POINT_FADE_THRESHOLD_SIZE_EXT  0x8128
-#define GL_POINT_FADE_THRESHOLD_SIZE_SGIS 0x8128
-#define GL_DISTANCE_ATTENUATION_EXT       0x8129
-#define GL_DISTANCE_ATTENUATION_SGIS      0x8129
+#ifndef GL_ARB_vertex_buffer_object
+// GL types for handling large vertex buffer objects
+typedef ptrdiff_t GLintptrARB;
+typedef ptrdiff_t GLsizeiptrARB;
 #endif
 
-// GL_EXT_compiled_vertex_array
-typedef void (APIENTRY *PFNGLLOCKARRAYSEXT) (GLint first, GLsizei count);
-typedef void (APIENTRY *PFNGLUNLOCKARRAYSEXT) (void);
-
-#ifndef GL_EXT_compiled_vertex_array
-#define GL_ARRAY_ELEMENT_LOCK_FIRST_EXT   0x81A8
-#define GL_ARRAY_ELEMENT_LOCK_COUNT_EXT   0x81A9
+#ifndef GL_ARB_vertex_buffer_object
+#define GL_BUFFER_SIZE_ARB                           0x8764
+#define GL_BUFFER_USAGE_ARB                          0x8765
+#define GL_ARRAY_BUFFER_ARB                          0x8892
+#define GL_ELEMENT_ARRAY_BUFFER_ARB                  0x8893
+#define GL_ARRAY_BUFFER_BINDING_ARB                  0x8894
+#define GL_ELEMENT_ARRAY_BUFFER_BINDING_ARB          0x8895
+#define GL_VERTEX_ARRAY_BUFFER_BINDING_ARB           0x8896
+#define GL_NORMAL_ARRAY_BUFFER_BINDING_ARB           0x8897
+#define GL_COLOR_ARRAY_BUFFER_BINDING_ARB            0x8898
+#define GL_INDEX_ARRAY_BUFFER_BINDING_ARB            0x8899
+#define GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING_ARB    0x889A
+#define GL_EDGE_FLAG_ARRAY_BUFFER_BINDING_ARB        0x889B
+#define GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING_ARB  0x889C
+#define GL_FOG_COORDINATE_ARRAY_BUFFER_BINDING_ARB   0x889D
+#define GL_WEIGHT_ARRAY_BUFFER_BINDING_ARB           0x889E
+#define GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB    0x889F
+#define GL_READ_ONLY_ARB                             0x88B8
+#define GL_WRITE_ONLY_ARB                            0x88B9
+#define GL_READ_WRITE_ARB                            0x88BA
+#define GL_BUFFER_ACCESS_ARB                         0x88BB
+#define GL_BUFFER_MAPPED_ARB                         0x88BC
+#define GL_BUFFER_MAP_POINTER_ARB                    0x88BD
+#define GL_STREAM_DRAW_ARB                           0x88E0
+#define GL_STREAM_READ_ARB                           0x88E1
+#define GL_STREAM_COPY_ARB                           0x88E2
+#define GL_STATIC_DRAW_ARB                           0x88E4
+#define GL_STATIC_READ_ARB                           0x88E5
+#define GL_STATIC_COPY_ARB                           0x88E6
+#define GL_DYNAMIC_DRAW_ARB                          0x88E8
+#define GL_DYNAMIC_READ_ARB                          0x88E9
+#define GL_DYNAMIC_COPY_ARB                          0x88EA
 #endif
 
-// GL_SGIS_texture_edge_clamp
-#ifndef GL_SGIS_texture_edge_clamp
-#define GL_CLAMP_TO_EDGE_SGIS             0x812F
+// GL_ARB_vertex_buffer_object
+#ifndef GL_ARB_vertex_buffer_object
+#define GL_ARB_vertex_buffer_object 1
+typedef void (APIENTRY *GLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
+typedef void (APIENTRY *GLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);
+typedef void (APIENTRY *GLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
+typedef GLboolean (APIENTRY *GLISBUFFERARBPROC) (GLuint buffer);
+typedef void (APIENTRY *GLBUFFERDATAARBPROC) (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
+typedef void (APIENTRY *GLBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+typedef void (APIENTRY *GLGETBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
+typedef GLvoid* (APIENTRY *GLMAPBUFFERARBPROC) (GLenum target, GLenum access);
+typedef GLboolean (APIENTRY *GLUNMAPBUFFERARBPROC) (GLenum target);
+typedef void (APIENTRY *GLGETBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
+typedef void (APIENTRY *GLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
 #endif
 
 // =============================================================================
 // OpenGL extern declarations
+
+#ifdef LC_OPENGL_DYNAMIC
 
 extern PFNGLCLEARINDEX pfnglClearIndex;
 extern PFNGLCLEARCOLOR pfnglClearColor;
@@ -844,47 +808,24 @@ extern PFNGLLOADNAME pfnglLoadName;
 extern PFNGLPUSHNAME pfnglPushName;
 extern PFNGLPOPNAME pfnglPopName;
 
-extern PFNGLACTIVETEXTUREARB pfnglActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARB pfnglClientActiveTextureARB;
-extern PFNGLMULTITEXCOORD1DARB pfnglMultiTexCoord1dARB;
-extern PFNGLMULTITEXCOORD1DVARB pfnglMultiTexCoord1dvARB;
-extern PFNGLMULTITEXCOORD1FARB pfnglMultiTexCoord1fARB;
-extern PFNGLMULTITEXCOORD1FVARB pfnglMultiTexCoord1fvARB;
-extern PFNGLMULTITEXCOORD1IARB pfnglMultiTexCoord1iARB;
-extern PFNGLMULTITEXCOORD1IVARB pfnglMultiTexCoord1ivARB;
-extern PFNGLMULTITEXCOORD1SARB pfnglMultiTexCoord1sARB;
-extern PFNGLMULTITEXCOORD1SVARB pfnglMultiTexCoord1svARB;
-extern PFNGLMULTITEXCOORD2DARB pfnglMultiTexCoord2dARB;
-extern PFNGLMULTITEXCOORD2DVARB pfnglMultiTexCoord2dvARB;
-extern PFNGLMULTITEXCOORD2FARB pfnglMultiTexCoord2fARB;
-extern PFNGLMULTITEXCOORD2FVARB pfnglMultiTexCoord2fvARB;
-extern PFNGLMULTITEXCOORD2IARB pfnglMultiTexCoord2iARB;
-extern PFNGLMULTITEXCOORD2IVARB pfnglMultiTexCoord2ivARB;
-extern PFNGLMULTITEXCOORD2SARB pfnglMultiTexCoord2sARB;
-extern PFNGLMULTITEXCOORD2SVARB pfnglMultiTexCoord2svARB;
-extern PFNGLMULTITEXCOORD3DARB pfnglMultiTexCoord3dARB;
-extern PFNGLMULTITEXCOORD3DVARB pfnglMultiTexCoord3dvARB;
-extern PFNGLMULTITEXCOORD3FARB pfnglMultiTexCoord3fARB;
-extern PFNGLMULTITEXCOORD3FVARB pfnglMultiTexCoord3fvARB;
-extern PFNGLMULTITEXCOORD3IARB pfnglMultiTexCoord3iARB;
-extern PFNGLMULTITEXCOORD3IVARB pfnglMultiTexCoord3ivARB;
-extern PFNGLMULTITEXCOORD3SARB pfnglMultiTexCoord3sARB;
-extern PFNGLMULTITEXCOORD3SVARB pfnglMultiTexCoord3svARB;
-extern PFNGLMULTITEXCOORD4DARB pfnglMultiTexCoord4dARB;
-extern PFNGLMULTITEXCOORD4DVARB pfnglMultiTexCoord4dvARB;
-extern PFNGLMULTITEXCOORD4FARB pfnglMultiTexCoord4fARB;
-extern PFNGLMULTITEXCOORD4FVARB pfnglMultiTexCoord4fvARB;
-extern PFNGLMULTITEXCOORD4IARB pfnglMultiTexCoord4iARB;
-extern PFNGLMULTITEXCOORD4IVARB pfnglMultiTexCoord4ivARB;
-extern PFNGLMULTITEXCOORD4SARB pfnglMultiTexCoord4sARB;
-extern PFNGLMULTITEXCOORD4SVARB pfnglMultiTexCoord4svARB;
-extern PFNGLPOINTPARAMETERFEXT pfnglPointParameterfEXT;
-extern PFNGLPOINTPARAMETERFVEXT pfnglPointParameterfvEXT;
-extern PFNGLLOCKARRAYSEXT pfnglLockArraysEXT;
-extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
+#endif // LC_OPENGL_DYNAMIC
+
+extern GLBINDBUFFERARBPROC glBindBufferARB;
+extern GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
+extern GLGENBUFFERSARBPROC glGenBuffersARB;
+extern GLISBUFFERARBPROC glIsBufferARB;
+extern GLBUFFERDATAARBPROC glBufferDataARB;
+extern GLBUFFERSUBDATAARBPROC glBufferSubDataARB;
+extern GLGETBUFFERSUBDATAARBPROC glGetBufferSubDataARB;
+extern GLMAPBUFFERARBPROC glMapBufferARB;
+extern GLUNMAPBUFFERARBPROC glUnmapBufferARB;
+extern GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
+extern GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
 
 // =============================================================================
 // Replace OpenGL function names with the dynamic functions
+
+#ifdef LC_OPENGL_DYNAMIC
 
 #define glClearIndex pfnglClearIndex
 #define glClearColor pfnglClearColor
@@ -1223,43 +1164,6 @@ extern PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
 #define glPushName pfnglPushName
 #define glPopName pfnglPopName
 
-#define glActiveTextureARB pfnglActiveTextureARB
-#define glClientActiveTextureARB pfnglClientActiveTextureARB
-#define glMultiTexCoord1dARB pfnglMultiTexCoord1dARB
-#define glMultiTexCoord1dvARB pfnglMultiTexCoord1dvARB
-#define glMultiTexCoord1fARB pfnglMultiTexCoord1fARB
-#define glMultiTexCoord1fvARB pfnglMultiTexCoord1fvARB
-#define glMultiTexCoord1iARB pfnglMultiTexCoord1iARB
-#define glMultiTexCoord1ivARB pfnglMultiTexCoord1ivARB
-#define glMultiTexCoord1sARB pfnglMultiTexCoord1sARB
-#define glMultiTexCoord1svARB pfnglMultiTexCoord1svARB
-#define glMultiTexCoord2dARB pfnglMultiTexCoord2dARB
-#define glMultiTexCoord2dvARB pfnglMultiTexCoord2dvARB
-#define glMultiTexCoord2fARB pfnglMultiTexCoord2fARB
-#define glMultiTexCoord2fvARB pfnglMultiTexCoord2fvARB
-#define glMultiTexCoord2iARB pfnglMultiTexCoord2iARB
-#define glMultiTexCoord2ivARB pfnglMultiTexCoord2ivARB
-#define glMultiTexCoord2sARB pfnglMultiTexCoord2sARB
-#define glMultiTexCoord2svARB pfnglMultiTexCoord2svARB
-#define glMultiTexCoord3dARB pfnglMultiTexCoord3dARB
-#define glMultiTexCoord3dvARB pfnglMultiTexCoord3dvARB
-#define glMultiTexCoord3fARB pfnglMultiTexCoord3fARB
-#define glMultiTexCoord3fvARB pfnglMultiTexCoord3fvARB
-#define glMultiTexCoord3iARB pfnglMultiTexCoord3iARB
-#define glMultiTexCoord3ivARB pfnglMultiTexCoord3ivARB
-#define glMultiTexCoord3sARB pfnglMultiTexCoord3sARB
-#define glMultiTexCoord3svARB pfnglMultiTexCoord3svARB
-#define glMultiTexCoord4dARB pfnglMultiTexCoord4dARB
-#define glMultiTexCoord4dvARB pfnglMultiTexCoord4dvARB
-#define glMultiTexCoord4fARB pfnglMultiTexCoord4fARB
-#define glMultiTexCoord4fvARB pfnglMultiTexCoord4fvARB
-#define glMultiTexCoord4iARB pfnglMultiTexCoord4iARB
-#define glMultiTexCoord4ivARB pfnglMultiTexCoord4ivARB
-#define glMultiTexCoord4sARB pfnglMultiTexCoord4sARB
-#define glMultiTexCoord4svARB pfnglMultiTexCoord4svARB
-#define glPointParameterfEXT pfnglPointParameterfEXT
-#define glPointParameterfvEXT pfnglPointParameterfvEXT
-#define glLockArraysEXT pfnglLockArraysEXT
-#define glUnlockArraysEXT pfnglUnlockArraysEXT
+#endif // LC_OPENGL_DYNAMIC
 
 #endif // _OPENGL_H_

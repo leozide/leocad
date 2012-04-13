@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "opengl.h"
 #include "glwindow.h"
 #include "tools.h"
 
@@ -7,7 +8,7 @@ struct GLWindowPrivate
 	HGLRC m_hrc;
 	CDC* m_pDC;
 	CPalette* m_pPal;
-  HWND m_hWnd;
+	HWND m_hWnd;
 };
 
 // ============================================================================
@@ -168,11 +169,11 @@ bool GLWindow::CreateFromWindow(void* data)
 	pfd.cDepthBits = 24;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
-	int nPixelFormat = OpenGLChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
+	int nPixelFormat = ChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return false;
 
-	if (!OpenGLSetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!SetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
 		return false;
 
 	prv->m_pPal = new CPalette;
@@ -189,14 +190,14 @@ bool GLWindow::CreateFromWindow(void* data)
 	}
 
 	// Create a rendering context.
-	prv->m_hrc = pfnwglCreateContext(prv->m_pDC->m_hDC);
+	prv->m_hrc = wglCreateContext(prv->m_pDC->m_hDC);
 	if (!prv->m_hrc)
 		return false;
 
 	if (m_pShare)
 	{
 		GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
-		pfnwglShareLists(share->m_hrc, prv->m_hrc);
+		wglShareLists(share->m_hrc, prv->m_hrc);
 	}
 
 	return true;
@@ -222,11 +223,11 @@ bool GLWindow::CreateFromBitmap(void* Data)
 	pfd.cDepthBits = 16;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
-	int nPixelFormat = OpenGLChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
+	int nPixelFormat = ChoosePixelFormat(prv->m_pDC->m_hDC, &pfd);
 	if (nPixelFormat == 0)
 		return false;
 
-	if (!OpenGLSetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
+	if (!SetPixelFormat(prv->m_pDC->m_hDC, nPixelFormat, &pfd))
 		return false;
 
 	prv->m_pPal = new CPalette;
@@ -243,14 +244,14 @@ bool GLWindow::CreateFromBitmap(void* Data)
 	}
 
 	// Create a rendering context.
-	prv->m_hrc = pfnwglCreateContext(prv->m_pDC->m_hDC);
+	prv->m_hrc = wglCreateContext(prv->m_pDC->m_hDC);
 	if (!prv->m_hrc)
 		return false;
 
 	if (m_pShare)
 	{
 		GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
-		pfnwglShareLists(share->m_hrc, prv->m_hrc);
+		wglShareLists(share->m_hrc, prv->m_hrc);
 	}
 
 	return true;
@@ -270,7 +271,7 @@ void GLWindow::DestroyContext()
 	}
 
 	if (prv->m_hrc)
-		pfnwglDeleteContext(prv->m_hrc);
+		wglDeleteContext(prv->m_hrc);
 	prv->m_hrc = NULL;
 
 	if (prv->m_pDC)
@@ -294,14 +295,14 @@ bool GLWindow::MakeCurrent()
 		prv->m_pDC->RealizePalette();
 	}
 
-	return (pfnwglMakeCurrent(prv->m_pDC->m_hDC, prv->m_hrc) != 0);
+	return (wglMakeCurrent(prv->m_pDC->m_hDC, prv->m_hrc) != 0);
 }
 
 void GLWindow::SwapBuffers()
 {
 	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
-	OpenGLSwapBuffers(prv->m_pDC->m_hDC);
+	::SwapBuffers(prv->m_pDC->m_hDC);
 }
 
 void GLWindow::Redraw(bool ForceRedraw)

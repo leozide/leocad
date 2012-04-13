@@ -643,20 +643,12 @@ int aboutdlg_execute(void* param)
 	else
 		strcat(info, "No.\n");
 
-	strcat(info, "Compiled Vertex Arrays: ");
-	if (GL_HasCompiledVertexArrays())
+	strcat(info, "Vertex Buffer Objects: ");
+	if (GL_HasVertexBufferObject())
 		strcat(info, "Supported.\n");
 	else
 		strcat(info, "Not supported.\n");
 
-	strcat(info, "Multitexturing: ");
-	if (GL_GetMultiTextures() > 1)
-	{
-		sprintf(buf, "Supported, %i texture units.\n", GL_GetMultiTextures());
-		strcat(info, buf);
-	}
-	else
-		strcat(info, "Not supported.\n");
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
 	sprintf(buf, "Maximum texture size: %ix%i", value, value);
 	strcat(info, buf);

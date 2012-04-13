@@ -174,8 +174,6 @@ protected:
 	lcFile* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
 
-	CONNECTION_TYPE m_pConnections[LC_CONNECTIONS];
-
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();

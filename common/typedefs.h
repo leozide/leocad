@@ -180,29 +180,6 @@ typedef enum
 	LC_CURSOR_COUNT
 } LC_CURSOR_TYPE;
 
-// Piece connections.
-struct CONNECTION
-{
-	unsigned char type;
-	float center[3];
-	float normal[3];
-	CONNECTION* link;
-	Piece* owner;
-};
-
-struct CONNECTION_ENTRY
-{
-	Piece* owner;
-	CONNECTION** cons; // pointers to the structures in each piece
-	unsigned short numcons;
-};
-
-struct CONNECTION_TYPE
-{
-	CONNECTION_ENTRY* entries;
-	unsigned short numentries;
-};
-
 // Select by Name dialog data
 typedef enum
 {

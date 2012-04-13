@@ -76,12 +76,6 @@ Project::Project()
 	messenger->AddRef();
 	messenger->Listen(&ProjectListener, this);
 
-  for (i = 0; i < LC_CONNECTIONS; i++)
-	{
-		m_pConnections[i].entries = NULL;
-		m_pConnections[i].numentries = 0;
-	}
-
 	for (i = 0; i < 10; i++)
 		m_pClipboard[i] = NULL;
 
@@ -219,16 +213,6 @@ void Project::DeleteContents(bool bUndo)
 		pPiece = m_pPieces;
 		m_pPieces = m_pPieces->m_pNext;
 		delete pPiece;
-	}
-
-	for (int i = 0; i < LC_CONNECTIONS; i++)
-	{
-		for (int j = 0; j < m_pConnections[i].numentries; j++)
-			delete (m_pConnections[i].entries[j].cons);
-
-		delete m_pConnections[i].entries;
-		m_pConnections[i].entries = NULL;
-		m_pConnections[i].numentries = 0;
 	}
 
 	while (m_pCameras)
@@ -2858,8 +2842,6 @@ void CCADDoc::AddPiece(CPiece* pNewPiece)
 		m_pPieces = pPiece;
 		pPiece->m_pNext = NULL;
 	}
-
-	pPiece->AddConnections(m_pConnections);
 }
 
 void Project::RemovePiece(Piece* pPiece)
@@ -2878,8 +2860,6 @@ void Project::RemovePiece(Piece* pPiece)
 			break;
 		}
 
-	pPiece->RemoveConnections(m_pConnections);
-
 	// TODO: remove from BSP
 }
 
@@ -2896,17 +2876,14 @@ void Project::CalculateStep()
 		PieceCount++;
 	}
 
-  SystemDoWaitCursor(1);
+	SystemDoWaitCursor(1);
 	SystemStartProgressBar(0, PieceCount, 1, "Updating pieces...");
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-	{
-		pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, false);
 		SytemStepProgressBar();
-	}
 
 	SytemEndProgressBar();
-  SystemDoWaitCursor(-1);
+	SystemDoWaitCursor(-1);
 
 	for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 		pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
@@ -3340,7 +3317,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			pPiece->SetName(mod->name);
 			pPiece->SetColorIndex(mod->color);
 			pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
 			SetModifiedFlag(true);
 			CheckPoint("Modifying");
@@ -4816,7 +4792,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			pPiece->SetColorIndex(m_nCurColor);
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);
-			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 			pPiece->Select (true, true, false);
 			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
 			UpdateSelection();
@@ -4872,7 +4847,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					pPiece->ChangeKey(1, false, false, Rotation, LC_PK_ROTATION);
 					pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
 					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-					pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
 					SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);
 				}
@@ -5050,7 +5024,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					pFirst->CreateName(m_pPieces);
 					pFirst->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 					AddPiece(pFirst);
-					pFirst->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 					pFirst = pPiece;
 				}
 
@@ -6890,10 +6863,6 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 			pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsSelected())
-			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
-
 	// TODO: move group centers
 
 	if (m_OverlayActive)
@@ -7063,10 +7032,6 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 	}
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsSelected())
-			pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 
 	if (m_OverlayActive)
 	{
@@ -7607,8 +7572,6 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				{
 					bool bTrans = pPiece->IsTranslucent();
 					pPiece->SetColorIndex(m_nCurColor);
-					if (bTrans != pPiece->IsTranslucent())
-						pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, true, true);
 
 					SetModifiedFlag(true);
 					CheckPoint("Painting");
@@ -7639,7 +7602,6 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
-				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
 				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
@@ -7872,7 +7834,6 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
-				pPiece->CalculateConnections(m_pConnections, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, false, true);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
 				SystemPieceComboAdd(m_pCurPiece->m_strDescription);

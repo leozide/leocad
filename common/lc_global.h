@@ -15,6 +15,11 @@
 #endif
 
 // Forward declarations.
+class lcVector3;
+class lcVector4;
+
+class lcMesh;
+
 class lcFile;
 class lcMemFile;
 class lcDiskFile;

@@ -105,6 +105,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\common\lc_mesh.cpp" />
     <ClCompile Include="Aboutdlg.cpp" />
     <ClCompile Include="Arraydlg.cpp" />
     <ClCompile Include="basewnd.cpp" />
@@ -315,6 +316,7 @@
     <ClInclude Include="..\common\lc_file.h" />
     <ClInclude Include="..\common\lc_global.h" />
     <ClInclude Include="..\common\lc_math.h" />
+    <ClInclude Include="..\common\lc_mesh.h" />
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="ArrayDlg.h" />
     <ClInclude Include="CADBar.h" />

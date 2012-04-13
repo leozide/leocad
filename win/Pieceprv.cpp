@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_application.h"
 #include "leocad.h"
 #include "PiecePrv.h"
 #include "Tools.h"
@@ -6,6 +7,7 @@
 #include "globals.h"
 #include "project.h"
 #include "preview.h"
+#include "view.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,7 +45,9 @@ int CPiecePreview::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_Preview = new PiecePreview(NULL);
+	Project* project = lcGetActiveProject();
+
+	m_Preview = new PiecePreview(project->GetActiveView());
 	m_Preview->CreateFromWindow(m_hWnd);
 	m_Preview->MakeCurrent();
 

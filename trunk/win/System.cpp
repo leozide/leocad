@@ -1373,7 +1373,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_ABOUT:
 		{
 			CAboutDlg dlg;
-			dlg.m_hViewDC = pfnwglGetCurrentDC();
+			dlg.m_hViewDC = wglGetCurrentDC();
 			dlg.DoModal();
 		} break;
 	}
@@ -1400,8 +1400,8 @@ void* Sys_StartMemoryRender(int width, int height)
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
 	CView* pView = pFrame->GetActiveView();
 	CDC* pDC = pView->GetDC();
-	render->oldhdc = pfnwglGetCurrentDC();
-	render->oldhrc = pfnwglGetCurrentContext();
+	render->oldhdc = wglGetCurrentDC();
+	render->oldhrc = wglGetCurrentContext();
 	render->hdc = CreateCompatibleDC(pDC->m_hDC);
 
 	// Preparing bitmap header for DIB section
@@ -1419,7 +1419,7 @@ void* Sys_StartMemoryRender(int width, int height)
 
 	// Creating a DIB surface
 	LPVOID lpBits;
-    render->hbm = CreateDIBSection(pDC->GetSafeHdc(), &bi, DIB_RGB_COLORS, (void**)&lpBits, NULL, (DWORD)0);
+	render->hbm = CreateDIBSection(pDC->GetSafeHdc(), &bi, DIB_RGB_COLORS, (void**)&lpBits, NULL, (DWORD)0);
 	render->oldhbm = (HBITMAP)::SelectObject(render->hdc, render->hbm);
 
 	PIXELFORMATDESCRIPTOR pfd = {
@@ -1427,11 +1427,11 @@ void* Sys_StartMemoryRender(int width, int height)
 		PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
 		0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 
-	int pixelformat = OpenGLChoosePixelFormat(render->hdc, &pfd);
-	OpenGLDescribePixelFormat(render->hdc, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	OpenGLSetPixelFormat(render->hdc, pixelformat, &pfd);
-  render->hrc = pfnwglCreateContext(render->hdc);
-	pfnwglMakeCurrent(render->hdc, render->hrc);
+	int pixelformat = ChoosePixelFormat(render->hdc, &pfd);
+	DescribePixelFormat(render->hdc, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	SetPixelFormat(render->hdc, pixelformat, &pfd);
+	render->hrc = wglCreateContext(render->hdc);
+	wglMakeCurrent(render->hdc, render->hrc);
 
 	return render;
 }
@@ -1440,8 +1440,8 @@ void Sys_FinishMemoryRender(void* param)
 {
 	LC_RENDER* render = (LC_RENDER*)param;
 
-	pfnwglMakeCurrent (render->oldhdc, render->oldhrc);
-	pfnwglDeleteContext(render->hrc);
+	wglMakeCurrent (render->oldhdc, render->oldhrc);
+	wglDeleteContext(render->hrc);
 	SelectObject(render->hdc, render->oldhbm);
 	DeleteObject(render->hbm);
 	DeleteDC(render->hdc);

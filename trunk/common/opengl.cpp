@@ -8,14 +8,15 @@
 #include "opengl.h"
 
 // These functions should be defined in (system)_gl.cpp
-bool Sys_GLOpenLibrary (const char* libname);
-void Sys_GLCloseLibrary ();
-void* Sys_GLGetProc (const char *symbol);
-void* Sys_GLGetExtension (const char *symbol);
+bool Sys_GLOpenLibrary(const char* libname);
+void Sys_GLCloseLibrary();
+void* Sys_GLGetProc(const char *symbol);
+void* Sys_GLGetExtension(const char *symbol);
 
 // =============================================================================
 // OpenGL Function pointers
 
+#ifdef LC_OPENGL_DYNAMIC
 PFNGLCLEARINDEX pfnglClearIndex;
 PFNGLCLEARCOLOR pfnglClearColor;
 PFNGLCLEAR pfnglClear;
@@ -352,45 +353,19 @@ PFNGLINITNAMES pfnglInitNames;
 PFNGLLOADNAME pfnglLoadName;
 PFNGLPUSHNAME pfnglPushName;
 PFNGLPOPNAME pfnglPopName;
+#endif // LC_OPENGL_DYNAMIC
 
-PFNGLACTIVETEXTUREARB pfnglActiveTextureARB;
-PFNGLCLIENTACTIVETEXTUREARB pfnglClientActiveTextureARB;
-PFNGLMULTITEXCOORD1DARB pfnglMultiTexCoord1dARB;
-PFNGLMULTITEXCOORD1DVARB pfnglMultiTexCoord1dvARB;
-PFNGLMULTITEXCOORD1FARB pfnglMultiTexCoord1fARB;
-PFNGLMULTITEXCOORD1FVARB pfnglMultiTexCoord1fvARB;
-PFNGLMULTITEXCOORD1IARB pfnglMultiTexCoord1iARB;
-PFNGLMULTITEXCOORD1IVARB pfnglMultiTexCoord1ivARB;
-PFNGLMULTITEXCOORD1SARB pfnglMultiTexCoord1sARB;
-PFNGLMULTITEXCOORD1SVARB pfnglMultiTexCoord1svARB;
-PFNGLMULTITEXCOORD2DARB pfnglMultiTexCoord2dARB;
-PFNGLMULTITEXCOORD2DVARB pfnglMultiTexCoord2dvARB;
-PFNGLMULTITEXCOORD2FARB pfnglMultiTexCoord2fARB;
-PFNGLMULTITEXCOORD2FVARB pfnglMultiTexCoord2fvARB;
-PFNGLMULTITEXCOORD2IARB pfnglMultiTexCoord2iARB;
-PFNGLMULTITEXCOORD2IVARB pfnglMultiTexCoord2ivARB;
-PFNGLMULTITEXCOORD2SARB pfnglMultiTexCoord2sARB;
-PFNGLMULTITEXCOORD2SVARB pfnglMultiTexCoord2svARB;
-PFNGLMULTITEXCOORD3DARB pfnglMultiTexCoord3dARB;
-PFNGLMULTITEXCOORD3DVARB pfnglMultiTexCoord3dvARB;
-PFNGLMULTITEXCOORD3FARB pfnglMultiTexCoord3fARB;
-PFNGLMULTITEXCOORD3FVARB pfnglMultiTexCoord3fvARB;
-PFNGLMULTITEXCOORD3IARB pfnglMultiTexCoord3iARB;
-PFNGLMULTITEXCOORD3IVARB pfnglMultiTexCoord3ivARB;
-PFNGLMULTITEXCOORD3SARB pfnglMultiTexCoord3sARB;
-PFNGLMULTITEXCOORD3SVARB pfnglMultiTexCoord3svARB;
-PFNGLMULTITEXCOORD4DARB pfnglMultiTexCoord4dARB;
-PFNGLMULTITEXCOORD4DVARB pfnglMultiTexCoord4dvARB;
-PFNGLMULTITEXCOORD4FARB pfnglMultiTexCoord4fARB;
-PFNGLMULTITEXCOORD4FVARB pfnglMultiTexCoord4fvARB;
-PFNGLMULTITEXCOORD4IARB pfnglMultiTexCoord4iARB;
-PFNGLMULTITEXCOORD4IVARB pfnglMultiTexCoord4ivARB;
-PFNGLMULTITEXCOORD4SARB pfnglMultiTexCoord4sARB;
-PFNGLMULTITEXCOORD4SVARB pfnglMultiTexCoord4svARB;
-PFNGLPOINTPARAMETERFEXT pfnglPointParameterfEXT;
-PFNGLPOINTPARAMETERFVEXT pfnglPointParameterfvEXT;
-PFNGLLOCKARRAYSEXT pfnglLockArraysEXT;
-PFNGLUNLOCKARRAYSEXT pfnglUnlockArraysEXT;
+GLBINDBUFFERARBPROC glBindBufferARB;
+GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
+GLGENBUFFERSARBPROC glGenBuffersARB;
+GLISBUFFERARBPROC glIsBufferARB;
+GLBUFFERDATAARBPROC glBufferDataARB;
+GLBUFFERSUBDATAARBPROC glBufferSubDataARB;
+GLGETBUFFERSUBDATAARBPROC glGetBufferSubDataARB;
+GLMAPBUFFERARBPROC glMapBufferARB;
+GLUNMAPBUFFERARBPROC glUnmapBufferARB;
+GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
+GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
 
 // =============================================================================
 // Initialization functions
@@ -399,6 +374,7 @@ void GL_Shutdown ()
 {
   Sys_GLCloseLibrary ();
 
+#ifdef LC_OPENGL_DYNAMIC
   pfnglClearIndex = NULL;
   pfnglClearColor = NULL;
   pfnglClear = NULL;
@@ -735,45 +711,19 @@ void GL_Shutdown ()
   pfnglLoadName = NULL;
   pfnglPushName = NULL;
   pfnglPopName = NULL;
+#endif // LC_OPENGL_DYNAMIC
 
-  pfnglActiveTextureARB = NULL;
-  pfnglClientActiveTextureARB = NULL;
-  pfnglMultiTexCoord1dARB = NULL;
-  pfnglMultiTexCoord1dvARB = NULL;
-  pfnglMultiTexCoord1fARB = NULL;
-  pfnglMultiTexCoord1fvARB = NULL;
-  pfnglMultiTexCoord1iARB = NULL;
-  pfnglMultiTexCoord1ivARB = NULL;
-  pfnglMultiTexCoord1sARB = NULL;
-  pfnglMultiTexCoord1svARB = NULL;
-  pfnglMultiTexCoord2dARB = NULL;
-  pfnglMultiTexCoord2dvARB = NULL;
-  pfnglMultiTexCoord2fARB = NULL;
-  pfnglMultiTexCoord2fvARB = NULL;
-  pfnglMultiTexCoord2iARB = NULL;
-  pfnglMultiTexCoord2ivARB = NULL;
-  pfnglMultiTexCoord2sARB = NULL;
-  pfnglMultiTexCoord2svARB = NULL;
-  pfnglMultiTexCoord3dARB = NULL;
-  pfnglMultiTexCoord3dvARB = NULL;
-  pfnglMultiTexCoord3fARB = NULL;
-  pfnglMultiTexCoord3fvARB = NULL;
-  pfnglMultiTexCoord3iARB = NULL;
-  pfnglMultiTexCoord3ivARB = NULL;
-  pfnglMultiTexCoord3sARB = NULL;
-  pfnglMultiTexCoord3svARB = NULL;
-  pfnglMultiTexCoord4dARB = NULL;
-  pfnglMultiTexCoord4dvARB = NULL;
-  pfnglMultiTexCoord4fARB = NULL;
-  pfnglMultiTexCoord4fvARB = NULL;
-  pfnglMultiTexCoord4iARB = NULL;
-  pfnglMultiTexCoord4ivARB = NULL;
-  pfnglMultiTexCoord4sARB = NULL;
-  pfnglMultiTexCoord4svARB = NULL;
-  pfnglPointParameterfEXT = NULL;
-  pfnglPointParameterfvEXT = NULL;
-  pfnglLockArraysEXT = NULL;
-  pfnglUnlockArraysEXT = NULL;
+	glBindBufferARB = NULL;
+	glDeleteBuffersARB = NULL;
+	glGenBuffersARB = NULL;
+	glIsBufferARB = NULL;
+	glBufferDataARB = NULL;
+	glBufferSubDataARB = NULL;
+	glGetBufferSubDataARB = NULL;
+	glMapBufferARB = NULL;
+	glUnmapBufferARB = NULL;
+	glGetBufferParameterivARB = NULL;
+	glGetBufferPointervARB = NULL;
 }
 
 bool GL_Initialize (const char* libname)
@@ -784,6 +734,7 @@ bool GL_Initialize (const char* libname)
     return false;
   }
 
+#ifdef LC_OPENGL_DYNAMIC
   pfnglClearIndex = (PFNGLCLEARINDEX) Sys_GLGetProc ("glClearIndex");
   pfnglClearColor = (PFNGLCLEARCOLOR) Sys_GLGetProc ("glClearColor");
   pfnglClear = (PFNGLCLEAR) Sys_GLGetProc ("glClear");
@@ -1120,6 +1071,7 @@ bool GL_Initialize (const char* libname)
   pfnglLoadName = (PFNGLLOADNAME) Sys_GLGetProc ("glLoadName");
   pfnglPushName = (PFNGLPUSHNAME) Sys_GLGetProc ("glPushName");
   pfnglPopName = (PFNGLPOPNAME) Sys_GLGetProc ("glPopName");
+#endif // LC_OPENGL_DYNAMIC
 
   return true;
 }
@@ -1127,10 +1079,7 @@ bool GL_Initialize (const char* libname)
 // =============================================================================
 // Extensions support
 
-static GLint GL_MultiTextures = 1;
-static bool  GL_CompiledVertexArrays = false;
-static bool  GL_ClampToEdge = false;
-static bool  GL_PointParameters = false;
+bool  GL_VertexBufferObject = false;
 
 static bool GL_ExtensionSupported (const char *extension)
 {
@@ -1167,88 +1116,26 @@ static bool GL_ExtensionSupported (const char *extension)
 	return false;
 }
 
-int GL_GetMultiTextures ()
-{
-  return GL_MultiTextures;
-}
-
-bool GL_HasCompiledVertexArrays ()
-{
-  return GL_CompiledVertexArrays;
-}
-
-bool GL_HasClampToEdge ()
-{
-  return GL_ClampToEdge;
-}
-
-bool GL_HasPointParameters ()
-{
-  return GL_PointParameters;
-}
-
 // Extensions can only be initialized if there's a current OpenGL context.
-bool GL_InitializeExtensions ()
+bool GL_InitializeExtensions()
 {
-  if (GL_ExtensionSupported ("GL_ARB_multitexture"))
-  {
-    pfnglActiveTextureARB = (PFNGLACTIVETEXTUREARB) Sys_GLGetExtension ("glActiveTextureARB");
-    pfnglClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARB) Sys_GLGetExtension ("glClientActiveTextureARB");
-    pfnglMultiTexCoord1dARB = (PFNGLMULTITEXCOORD1DARB) Sys_GLGetExtension ("glMultiTexCoord1dARB");
-    pfnglMultiTexCoord1dvARB = (PFNGLMULTITEXCOORD1DVARB) Sys_GLGetExtension ("glMultiTexCoord1dvARB");
-    pfnglMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARB) Sys_GLGetExtension ("glMultiTexCoord1fARB");
-    pfnglMultiTexCoord1fvARB = (PFNGLMULTITEXCOORD1FVARB) Sys_GLGetExtension ("glMultiTexCoord1fvARB");
-    pfnglMultiTexCoord1iARB = (PFNGLMULTITEXCOORD1IARB) Sys_GLGetExtension ("glMultiTexCoord1iARB");
-    pfnglMultiTexCoord1ivARB = (PFNGLMULTITEXCOORD1IVARB) Sys_GLGetExtension ("glMultiTexCoord1ivARB");
-    pfnglMultiTexCoord1sARB = (PFNGLMULTITEXCOORD1SARB) Sys_GLGetExtension ("glMultiTexCoord1sARB");
-    pfnglMultiTexCoord1svARB = (PFNGLMULTITEXCOORD1SVARB) Sys_GLGetExtension ("glMultiTexCoord1svARB");
-    pfnglMultiTexCoord2dARB = (PFNGLMULTITEXCOORD2DARB) Sys_GLGetExtension ("glMultiTexCoord2dARB");
-    pfnglMultiTexCoord2dvARB = (PFNGLMULTITEXCOORD2DVARB) Sys_GLGetExtension ("glMultiTexCoord2dvARB");
-    pfnglMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARB) Sys_GLGetExtension ("glMultiTexCoord2fARB");
-    pfnglMultiTexCoord2fvARB = (PFNGLMULTITEXCOORD2FVARB) Sys_GLGetExtension ("glMultiTexCoord2fvARB");
-    pfnglMultiTexCoord2iARB = (PFNGLMULTITEXCOORD2IARB) Sys_GLGetExtension ("glMultiTexCoord2iARB");
-    pfnglMultiTexCoord2ivARB = (PFNGLMULTITEXCOORD2IVARB) Sys_GLGetExtension ("glMultiTexCoord2ivARB");
-    pfnglMultiTexCoord2sARB = (PFNGLMULTITEXCOORD2SARB) Sys_GLGetExtension ("glMultiTexCoord2sARB");
-    pfnglMultiTexCoord2svARB = (PFNGLMULTITEXCOORD2SVARB) Sys_GLGetExtension ("glMultiTexCoord2svARB");
-    pfnglMultiTexCoord3dARB = (PFNGLMULTITEXCOORD3DARB) Sys_GLGetExtension ("glMultiTexCoord3dARB");
-    pfnglMultiTexCoord3dvARB = (PFNGLMULTITEXCOORD3DVARB) Sys_GLGetExtension ("glMultiTexCoord3dvARB");
-    pfnglMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARB) Sys_GLGetExtension ("glMultiTexCoord3fARB");
-    pfnglMultiTexCoord3fvARB = (PFNGLMULTITEXCOORD3FVARB) Sys_GLGetExtension ("glMultiTexCoord3fvARB");
-    pfnglMultiTexCoord3iARB = (PFNGLMULTITEXCOORD3IARB) Sys_GLGetExtension ("glMultiTexCoord3iARB");
-    pfnglMultiTexCoord3ivARB = (PFNGLMULTITEXCOORD3IVARB) Sys_GLGetExtension ("glMultiTexCoord3ivARB");
-    pfnglMultiTexCoord3sARB = (PFNGLMULTITEXCOORD3SARB) Sys_GLGetExtension ("glMultiTexCoord3sARB");
-    pfnglMultiTexCoord3svARB = (PFNGLMULTITEXCOORD3SVARB) Sys_GLGetExtension ("glMultiTexCoord3svARB");
-    pfnglMultiTexCoord4dARB = (PFNGLMULTITEXCOORD4DARB) Sys_GLGetExtension ("glMultiTexCoord4dARB");
-    pfnglMultiTexCoord4dvARB = (PFNGLMULTITEXCOORD4DVARB) Sys_GLGetExtension ("glMultiTexCoord4dvARB");
-    pfnglMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARB) Sys_GLGetExtension ("glMultiTexCoord4fARB");
-    pfnglMultiTexCoord4fvARB = (PFNGLMULTITEXCOORD4FVARB) Sys_GLGetExtension ("glMultiTexCoord4fvARB");
-    pfnglMultiTexCoord4iARB = (PFNGLMULTITEXCOORD4IARB) Sys_GLGetExtension ("glMultiTexCoord4iARB");
-    pfnglMultiTexCoord4ivARB = (PFNGLMULTITEXCOORD4IVARB) Sys_GLGetExtension ("glMultiTexCoord4ivARB");
-    pfnglMultiTexCoord4sARB = (PFNGLMULTITEXCOORD4SARB) Sys_GLGetExtension ("glMultiTexCoord4sARB");
-    pfnglMultiTexCoord4svARB = (PFNGLMULTITEXCOORD4SVARB) Sys_GLGetExtension ("glMultiTexCoord4svARB");
-    glGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &GL_MultiTextures);
-  }
+	if (GL_ExtensionSupported("GL_ARB_vertex_buffer_object"))
+	{
+		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB");
+		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB");
+		glGenBuffersARB = (GLGENBUFFERSARBPROC)Sys_GLGetExtension("glGenBuffersARB");
+		glIsBufferARB = (GLISBUFFERARBPROC)Sys_GLGetExtension("glIsBufferARB");
+		glBufferDataARB = (GLBUFFERDATAARBPROC)Sys_GLGetExtension("glBufferDataARB");
+		glBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glBufferSubDataARB");
+		glGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glGetBufferSubDataARB");
+		glMapBufferARB = (GLMAPBUFFERARBPROC)Sys_GLGetExtension("glMapBufferARB");
+		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Sys_GLGetExtension("glUnmapBufferARB");
+		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB");
+		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB");
+		GL_VertexBufferObject = true;
+	}
 
-  if (GL_ExtensionSupported ("GL_EXT_point_parameters"))
-  {
-    pfnglPointParameterfEXT = (PFNGLPOINTPARAMETERFEXT) Sys_GLGetExtension ("glPointParameterfEXT");
-    pfnglPointParameterfvEXT = (PFNGLPOINTPARAMETERFVEXT) Sys_GLGetExtension ("glPointParameterfvEXT");
-    GL_PointParameters = true;
-  }
-
-  if (GL_ExtensionSupported ("GL_EXT_compiled_vertex_array"))
-  {
-    pfnglLockArraysEXT = (PFNGLLOCKARRAYSEXT) Sys_GLGetExtension ("glLockArraysEXT");
-    pfnglUnlockArraysEXT = (PFNGLUNLOCKARRAYSEXT) Sys_GLGetExtension ("glUnlockArraysEXT");
-    GL_CompiledVertexArrays = true;
-  }
-
-  if (GL_ExtensionSupported ("GL_EXT_texture_edge_clamp"))
-  {
-    GL_ClampToEdge = true;
-  }
-
-  return true;
+	return true;
 }
 
 // =============================================================================

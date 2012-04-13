@@ -31,7 +31,7 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
-#include "opengl.h"
+#include <GL/gl.h>
 
 #define IDT_LC_SAVETIMER		(WM_USER+200)
 #define IDT_LC_WHEELTIMER		(WM_USER+201)

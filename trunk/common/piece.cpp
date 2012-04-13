@@ -56,19 +56,9 @@ inline static void SetCurrentColor(unsigned char nColor, bool bLighting)
 /////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
 
-static bool lockarrays = false;
-
 Piece::Piece(PieceInfo* pPieceInfo)
   : Object (LC_OBJECT_PIECE)
 {
-  static bool first_time = true;
-
-  if (first_time)
-  {
-    first_time = false;
-    lockarrays = GL_HasCompiledVertexArrays ();
-  }
-
 	m_pNext = NULL;
 	m_pPieceInfo = pPieceInfo;
 	m_nState = 0;
@@ -1207,16 +1197,11 @@ void Piece::Render(bool bLighting, bool bEdges)
 
 		while (colors--)
 		{
-			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
-
 			if (*info == LC_COL_DEFAULT)
 				SetCurrentColor(mColorIndex, bLighting);
 			else
 				SetCurrentColor((unsigned char)*info, bLighting);
 			info++;
-
-			if (lock)
-				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
 
 			if (*info)
 			{
@@ -1238,16 +1223,10 @@ void Piece::Render(bool bLighting, bool bEdges)
 			{
 				if (m_nState & LC_PIECE_SELECTED)
 				{
-					if (lock)
-						glUnlockArraysEXT();
-
 					if (m_nState & LC_PIECE_FOCUSED)
 						lcSetColorFocused();
 					else
 						lcSetColorSelected();
-
-					if (lock)
-						glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
 
 					glDrawElements(GL_LINES, *info, GL_UNSIGNED_INT, info+1);
 				}
@@ -1259,9 +1238,6 @@ void Piece::Render(bool bLighting, bool bEdges)
 			}
 			else
 				info++;
-
-			if (lock)
-				glUnlockArraysEXT();
 		}
 	}
 	else
@@ -1272,16 +1248,11 @@ void Piece::Render(bool bLighting, bool bEdges)
 
 		while (colors--)
 		{
-			bool lock = lockarrays && (*info == LC_COL_DEFAULT || *info == LC_COL_EDGES);
-
 			if (*info == LC_COL_DEFAULT)
 				SetCurrentColor(mColorIndex, bLighting);
 			else
 				SetCurrentColor((unsigned char)*info, bLighting);
 			info++;
-
-			if (lock)
-				glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
 
 			if (*info)
 			{
@@ -1303,15 +1274,10 @@ void Piece::Render(bool bLighting, bool bEdges)
 			{
 				if (m_nState & LC_PIECE_SELECTED)
 				{
-					if (lock)
-						glUnlockArraysEXT();
 					if (m_nState & LC_PIECE_FOCUSED)
 						lcSetColorFocused();
 					else
 						lcSetColorSelected();
-
-					if (lock)
-						glLockArraysEXT(0, m_pPieceInfo->m_nVertexCount);
 
 					glDrawElements(GL_LINES, *info, GL_UNSIGNED_SHORT, info+1);
 				}
@@ -1323,9 +1289,6 @@ void Piece::Render(bool bLighting, bool bEdges)
 			}
 			else
 				info++;
-
-			if (lock)
-				glUnlockArraysEXT();
 		}
 	}
 

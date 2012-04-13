@@ -55,7 +55,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>wininet.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalDependencies>wininet.lib;vfw32.lib;opengl32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>jpeglib\debug;libpng\debug;zlib\debug;3dsftk\debug</AdditionalLibraryDirectories>
     </Link>
     <Midl>
@@ -85,7 +85,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>wininet.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalDependencies>wininet.lib;vfw32.lib;opengl32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>jpeglib\release;libpng\release;zlib\release;3dsftk\release</AdditionalLibraryDirectories>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>

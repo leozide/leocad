@@ -164,31 +164,31 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 
 	// Creating a DIB surface
 	HBITMAP hBm, hBmOld;
-    hBm = CreateDIBSection(pView->GetDC()->GetSafeHdc(), &bi, DIB_RGB_COLORS, 
+	hBm = CreateDIBSection(pView->GetDC()->GetSafeHdc(), &bi, DIB_RGB_COLORS, 
 		(void **)&lpbi, NULL, (DWORD)0);
 	if (!hBm)
 		return;
-	
-    // Selecting the DIB Surface
+
+	// Selecting the DIB Surface
 	hBmOld = (HBITMAP)::SelectObject(pMemDC->GetSafeHdc(), hBm);
 	if (!hBmOld)
 		return;
-	
-    // Setting up a Pixel format for the DIB surface
+
+	// Setting up a Pixel format for the DIB surface
 	PIXELFORMATDESCRIPTOR pfd = {
 		sizeof(PIXELFORMATDESCRIPTOR),
 			1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
 			0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = OpenGLChoosePixelFormat(pMemDC->m_hDC, &pfd);
-	OpenGLDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	OpenGLSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
+	int pixelformat = ChoosePixelFormat(pMemDC->m_hDC, &pfd);
+	DescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	SetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
 	
 	// Creating a OpenGL context
-  HGLRC hmemrc = pfnwglCreateContext(pMemDC->GetSafeHdc());
+	HGLRC hmemrc = wglCreateContext(pMemDC->GetSafeHdc());
 	
 	// Setting up the current OpenGL context
-	pfnwglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
+	wglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
 	double aspect = (float)w/(float)h;
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, w, h);
@@ -373,8 +373,8 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 		free(previous);
 	}
 
-	pfnwglMakeCurrent(NULL, NULL);
-	pfnwglDeleteContext(hmemrc);
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hmemrc);
 	SelectObject(pMemDC->GetSafeHdc(), hBmOld);
 	DeleteObject(hBm);
 	delete pMemDC;
@@ -566,11 +566,11 @@ static void PrintPiecesThread(void* pv)
 
 	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
-	int pixelformat = OpenGLChoosePixelFormat(pMemDC->m_hDC, &pfd);
-	OpenGLDescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-	OpenGLSetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
-  HGLRC hmemrc = pfnwglCreateContext(pMemDC->GetSafeHdc());
-	pfnwglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
+	int pixelformat = ChoosePixelFormat(pMemDC->m_hDC, &pfd);
+	DescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	SetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
+	HGLRC hmemrc = wglCreateContext(pMemDC->GetSafeHdc());
+	wglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
 	double aspect = (float)picw/(float)h;
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, picw, h);
@@ -773,8 +773,8 @@ static void PrintPiecesThread(void* pv)
 		free(previous);
 	}
 
-	pfnwglMakeCurrent(NULL, NULL);
-	pfnwglDeleteContext(hmemrc);
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hmemrc);
 	SelectObject(pMemDC->GetSafeHdc(), hBmOld);
 	DeleteObject(hBm);
 	delete pMemDC;

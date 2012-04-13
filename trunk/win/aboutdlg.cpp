@@ -47,7 +47,7 @@ BOOL CAboutDlg::OnInitDialog()
 	// Initialize the OpenGL information box.
 	CString info, tmp;
 	PIXELFORMATDESCRIPTOR pfd;
-	OpenGLDescribePixelFormat(m_hViewDC, OpenGLGetPixelFormat(m_hViewDC), sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+	DescribePixelFormat(m_hViewDC, GetPixelFormat(m_hViewDC), sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
 	info = ("Pixel Format: ");
 	if (pfd.iPixelType == PFD_TYPE_RGBA)

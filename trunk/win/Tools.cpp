@@ -116,10 +116,10 @@ static unsigned char ComponentFromIndex(int i, UINT nbits, UINT shift)
 	unsigned char val = (unsigned char) (i >> shift);
 	switch (nbits) {
 	case 1: val &= 0x1; return oneto8[val];
-    case 2: val &= 0x3; return twoto8[val];
-    case 3: val &= 0x7; return threeto8[val];
-    default: return 0;
-    }
+	case 2: val &= 0x3; return twoto8[val];
+	case 3: val &= 0x7; return threeto8[val];
+	default: return 0;
+	}
 }
 
 BOOL CreateRGBPalette(HDC hDC, CPalette **ppCPalette)
@@ -128,8 +128,8 @@ BOOL CreateRGBPalette(HDC hDC, CPalette **ppCPalette)
 	LOGPALETTE	*pPal;
 	WORD		n, i;
 
-	n = OpenGLGetPixelFormat(hDC);
-	OpenGLDescribePixelFormat(hDC, n, sizeof(pfd), &pfd);
+	n = GetPixelFormat(hDC);
+	DescribePixelFormat(hDC, n, sizeof(pfd), &pfd);
 
 	if (!(pfd.dwFlags & PFD_NEED_PALETTE)) return FALSE;
 

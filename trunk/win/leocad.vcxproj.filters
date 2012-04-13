@@ -708,9 +708,6 @@
     <ClInclude Include="transdlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="win_gl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\array.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>

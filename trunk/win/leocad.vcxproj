@@ -363,7 +363,6 @@
     <ClInclude Include="texdlg.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="transdlg.h" />
-    <ClInclude Include="win_gl.h" />
     <ClInclude Include="..\common\array.h" />
     <ClInclude Include="..\common\basewnd.h" />
     <ClInclude Include="..\Common\camera.h" />

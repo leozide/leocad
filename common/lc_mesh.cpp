@@ -1,6 +1,8 @@
 #include "lc_global.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
+#include "lc_file.h"
+#include "globals.h"
 
 struct lcVertex
 {
@@ -35,6 +37,109 @@ void lcMesh::Create(int NumSections, int NumVertices, int NumIndices)
 		mIndexType = GL_UNSIGNED_INT;
 		mIndexBuffer.SetSize(NumIndices * sizeof(GLuint));
 	}
+}
+
+void lcMesh::CreateBox()
+{
+	Create(2, 8, 36 + 24);
+
+	Vector3 Min(-0.4f, -0.4f, -0.96f);
+	Vector3 Max(0.4f, 0.4f, 0.16f);
+
+	float* Verts = (float*)mVertexBuffer.mData;
+	lcuint16* Indices = (lcuint16*)mIndexBuffer.mData;
+
+	*Verts++ = Min[0]; *Verts++ = Min[1]; *Verts++ = Min[2];
+	*Verts++ = Min[0]; *Verts++ = Max[1]; *Verts++ = Min[2];
+	*Verts++ = Max[0]; *Verts++ = Max[1]; *Verts++ = Min[2];
+	*Verts++ = Max[0]; *Verts++ = Min[1]; *Verts++ = Min[2];
+	*Verts++ = Min[0]; *Verts++ = Min[1]; *Verts++ = Max[2];
+	*Verts++ = Min[0]; *Verts++ = Max[1]; *Verts++ = Max[2];
+	*Verts++ = Max[0]; *Verts++ = Max[1]; *Verts++ = Max[2];
+	*Verts++ = Max[0]; *Verts++ = Min[1]; *Verts++ = Max[2];
+
+	lcMeshSection* Section = &mSections[0];
+	Section->ColorIndex = gDefaultColor;
+	Section->IndexOffset = 0;
+	Section->NumIndices = 36;
+	Section->PrimitiveType = GL_TRIANGLES;
+
+	*Indices++ = 0;
+	*Indices++ = 1;
+	*Indices++ = 2;
+	*Indices++ = 0;
+	*Indices++ = 2;
+	*Indices++ = 3;
+
+	*Indices++ = 7;
+	*Indices++ = 6;
+	*Indices++ = 5;
+	*Indices++ = 7;
+	*Indices++ = 5;
+	*Indices++ = 4;
+
+	*Indices++ = 0;
+	*Indices++ = 1;
+	*Indices++ = 5;
+	*Indices++ = 0;
+	*Indices++ = 5;
+	*Indices++ = 4;
+
+	*Indices++ = 2;
+	*Indices++ = 3;
+	*Indices++ = 7;
+	*Indices++ = 2;
+	*Indices++ = 7;
+	*Indices++ = 6;
+
+	*Indices++ = 0;
+	*Indices++ = 3;
+	*Indices++ = 7;
+	*Indices++ = 0;
+	*Indices++ = 7;
+	*Indices++ = 4;
+
+	*Indices++ = 1;
+	*Indices++ = 2;
+	*Indices++ = 6;
+	*Indices++ = 1;
+	*Indices++ = 6;
+	*Indices++ = 5;
+
+	Section = &mSections[1];
+	Section->ColorIndex = gEdgeColor;
+	Section->IndexOffset = 36 * 2;
+	Section->NumIndices = 24;
+	Section->PrimitiveType = GL_LINES;
+
+	*Indices++ = 0;
+	*Indices++ = 1;
+	*Indices++ = 1;
+	*Indices++ = 2;
+	*Indices++ = 2;
+	*Indices++ = 3;
+	*Indices++ = 3;
+	*Indices++ = 0;
+
+	*Indices++ = 4;
+	*Indices++ = 5;
+	*Indices++ = 5;
+	*Indices++ = 6;
+	*Indices++ = 6;
+	*Indices++ = 7;
+	*Indices++ = 7;
+	*Indices++ = 4;
+
+	*Indices++ = 0;
+	*Indices++ = 4;
+	*Indices++ = 1;
+	*Indices++ = 5;
+	*Indices++ = 2;
+	*Indices++ = 6;
+	*Indices++ = 3;
+	*Indices++ = 7;
+
+	UpdateBuffers();
 }
 
 void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
@@ -144,6 +249,14 @@ bool lcMesh::MinIntersectDist(const Vector3& Start, const Vector3& End, float& M
 	return Hit;
 }
 
+bool lcMesh::MinIntersectDist(const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
+{
+	if (mIndexType == GL_UNSIGNED_SHORT)
+		return MinIntersectDist<GLushort>(Start, End, MinDist, Intersection);
+	else
+		return MinIntersectDist<GLuint>(Start, End, MinDist, Intersection);
+}
+
 // Return true if a polygon intersects a set of planes.
 static bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes) // TODO: move to lc_math
 {
@@ -230,4 +343,105 @@ bool lcMesh::IntersectsPlanes(const Vector4* Planes, int NumPlanes)
 	}
 
 	return false;
+}
+
+bool lcMesh::IntersectsPlanes(const Vector4* Planes, int NumPlanes)
+{
+	if (mIndexType == GL_UNSIGNED_SHORT)
+		return IntersectsPlanes<GLushort>(Planes, NumPlanes);
+	else
+		return IntersectsPlanes<GLuint>(Planes, NumPlanes);
+}
+
+template<typename IndexType>
+void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, char ColorTable[LC_MAXCOLORS][64])
+{
+	char Line[1024];
+
+	sprintf(Line, "#declare lc_%s = union {\n", MeshName);
+	File.WriteLine(Line);
+
+	float* Verts = (float*)mVertexBuffer.mData;
+
+	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	{
+		lcMeshSection* Section = &mSections[SectionIdx];
+
+		if (Section->PrimitiveType != GL_TRIANGLES)
+			continue;
+
+		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
+
+		File.WriteLine(" mesh {\n");
+
+		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+		{
+			sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+				-Verts[Indices[Idx+0]*3+1], -Verts[Indices[Idx+0]*3], Verts[Indices[Idx+0]*3+2],
+				-Verts[Indices[Idx+1]*3+1], -Verts[Indices[Idx+1]*3], Verts[Indices[Idx+1]*3+2],
+				-Verts[Indices[Idx+2]*3+1], -Verts[Indices[Idx+2]*3], Verts[Indices[Idx+2]*3+2]);
+			File.WriteLine(Line);
+		}
+
+		if (Section->ColorIndex != gDefaultColor)
+		{
+			sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[Section->ColorIndex]);
+			File.WriteLine(Line);
+		}
+
+		File.WriteLine(" }\n");
+	}
+}
+
+void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, char ColorTable[LC_MAXCOLORS][64])
+{
+	if (mIndexType == GL_UNSIGNED_SHORT)
+		ExportPOVRay<GLushort>(File, MeshName, ColorTable);
+	else
+		ExportPOVRay<GLuint>(File, MeshName, ColorTable);
+}
+
+template<typename IndexType>
+void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset)
+{
+	char Line[1024];
+
+	float* Verts = (float*)mVertexBuffer.mData;
+
+	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	{
+		lcMeshSection* Section = &mSections[SectionIdx];
+
+		if (Section->PrimitiveType != GL_TRIANGLES)
+			continue;
+
+		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
+
+		if (Section->ColorIndex == gDefaultColor)
+			sprintf(Line, "usemtl %s\n", altcolornames[DefaultColorIndex]);
+		else
+			sprintf(Line, "usemtl %s\n", altcolornames[Section->ColorIndex]);
+		File.WriteLine(Line);
+
+		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+		{
+			long int idx1 = Indices[Idx + 0] + VertexOffset;
+			long int idx2 = Indices[Idx + 1] + VertexOffset;
+			long int idx3 = Indices[Idx + 2] + VertexOffset;
+
+			if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
+				sprintf(Line, "f %ld %ld %ld\n", idx1, idx2, idx3);
+			File.WriteLine(Line);
+		}
+	}
+
+	File.WriteLine("\n");
+}
+
+void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset)
+{
+	if (mIndexType == GL_UNSIGNED_SHORT)
+		ExportWavefrontIndices<GLushort>(File, DefaultColorIndex, VertexOffset);
+	else
+		ExportWavefrontIndices<GLuint>(File, DefaultColorIndex, VertexOffset);
 }

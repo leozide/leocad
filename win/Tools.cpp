@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_mesh.h"
 #include "Tools.h"
 #include "resource.h"
 #include "PrefSht.h"
@@ -484,9 +485,11 @@ void Export3DStudio()
 		pPiece->GetPosition(pos);
 		pPiece->GetRotation(rot);
 		Matrix mat(rot, pos);
+		float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
+
 		for (c = 0; c < pInfo->m_nVertexCount; c++)
 		{
-			mat.TransformPoint(tmp, &pInfo->m_fVertexArray[c*3]);
+			mat.TransformPoint(tmp, &Verts[c*3]);
 			mobj->vertexarray[c].x = tmp[0];
 			mobj->vertexarray[c].y = tmp[1];
 			mobj->vertexarray[c].z = tmp[2];

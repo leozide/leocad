@@ -17,27 +17,9 @@
 
 #define LC_PIECE_NAME_LEN 256
 
-class Texture;
-
-struct CONNECTIONINFO
-{
-	unsigned char type;
-	float center[3];
-	float normal[3];
-};
-
 struct DRAWGROUP
 {
-	unsigned short connections[6];
 	void* drawinfo;
-};
-
-struct TEXTURE
-{
-	Texture* texture;
-	unsigned char color;
-	float vertex[4][3];
-	float coords[4][2];
 };
 
 unsigned char ConvertColor(int c);
@@ -82,7 +64,6 @@ class PieceInfo
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
-	void WriteWavefront(FILE* file, unsigned char color, unsigned long* start);
 
 	// Implementation
 	GLuint GetBoxDisplayList()
@@ -112,7 +93,6 @@ public:
 	// Nobody should change these
 	unsigned char	m_nFlags;
 	unsigned long 	m_nVertexCount;
-	float*			m_fVertexArray;
 	unsigned short	m_nGroupCount;
 	DRAWGROUP*		m_pGroups;
 

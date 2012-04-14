@@ -210,9 +210,6 @@ void PieceInfo::LoadIndex(lcFile& file)
 
   // TODO: don't change ref. if we're reloading ?
   m_nRef = 0;
-  m_nVertexCount = 0;
-  m_nGroupCount = 0;
-  m_pGroups = NULL;
   m_nBoxList = 0;
 
   file.ReadBuffer(m_strName, LC_PIECE_NAME_LEN);
@@ -242,9 +239,6 @@ void PieceInfo::LoadIndex(lcFile& file)
 void PieceInfo::CreatePlaceholder(const char* Name)
 {
 	m_nRef = 0;
-	m_nVertexCount = 0;
-	m_nGroupCount = 0;
-	m_pGroups = NULL;
 	m_nBoxList = 0;
 
 	strncpy(m_strName, Name, sizeof(m_strName));
@@ -632,14 +626,14 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 	float* OutVertex = (float*)mMesh->mVertexBuffer.mData + NumVertices * 3;
 	lcuint8* bytes = (lcuint8*)(longs + 1);
 	bytes += NumVertices * sizeof(lcint16) * 3;
-	lcuint16 sh = m_nGroupCount;
 
 	lcuint16 ConnectionCount = LCUINT16(*((lcuint16*)bytes));
 	bytes += 2 + (1 + 6 * 2) * ConnectionCount;
 	bytes++; // TextureCount 
-	bytes += sizeof(lcuint16); // GroupCount
+	lcuint16 GroupCount = LCUINT16(*((lcuint16*)bytes));
+	bytes += sizeof(lcuint16);
 
-	while (sh--)
+	while (GroupCount--)
 	{
 		bytes += 1 + 2 * *bytes;
 
@@ -711,7 +705,6 @@ void PieceInfo::LoadInformation()
 	char filename[LC_MAXPATH];
 	void* buf;
 	lcuint32 verts, *longs, fixverts;
-	lcuint16 sh;
 	lcuint8 *bytes, *tmp, bt;
 	float scale, shift;
 	lcint16* shorts;
@@ -742,14 +735,11 @@ void PieceInfo::LoadInformation()
 	bytes++; // TextureCount
 
 	// Read groups.
-	m_nGroupCount = LCUINT16(*((lcuint16*)bytes));
+	lcuint16 GroupCount = LCUINT16(*((lcuint16*)bytes));
 	bytes += sizeof(lcuint16);
-	m_pGroups = (DRAWGROUP*)malloc(sizeof(DRAWGROUP)*m_nGroupCount);
-	memset(m_pGroups, 0, sizeof(DRAWGROUP)*m_nGroupCount);
 
 	// Count sections, vertices and indices.
 	tmp = bytes;
-	sh = m_nGroupCount;
 
 	int NumSections = 0;
 	int NumVertices = fixverts;
@@ -757,7 +747,7 @@ void PieceInfo::LoadInformation()
 	int* SectionIndices = new int[gNumColors * 2];
 	memset(SectionIndices, 0, sizeof(int) * gNumColors * 2);
 
-	while (sh--)
+	while (GroupCount--)
 	{
 		bt = *bytes;
 		bytes++;
@@ -897,8 +887,6 @@ void PieceInfo::LoadInformation()
 	mMesh = new lcMesh();
 	mMesh->Create(NumSections, NumVertices, NumIndices);
 
-	m_nVertexCount = NumVertices;
-
 	float* OutVertex = (float*)mMesh->mVertexBuffer.mData;
 
 	shorts = (lcint16*)(longs + 1);
@@ -932,16 +920,6 @@ void PieceInfo::FreeInformation()
 	if (m_nBoxList != 0)
 		glDeleteLists(m_nBoxList, 1);
 	m_nBoxList = 0;
-
-	if (m_pGroups != NULL)
-	{
-		while (m_nGroupCount--)
-			if (m_pGroups[m_nGroupCount].drawinfo)
-				free(m_pGroups[m_nGroupCount].drawinfo);
-
-		free(m_pGroups);
-		m_pGroups = NULL;
-	}
 }
 
 // Zoom extents for the preview window and print catalog

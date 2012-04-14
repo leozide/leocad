@@ -447,37 +447,29 @@ void Export3DStudio()
 	{
 		// MESH OBJECT
 		mesh3ds *mobj = NULL;
-		UINT facecount = 0, i, j = 0, c, col;
+		UINT facecount = 0, i, j = 0;
 		UINT facemats[LC_COL_DEFAULT+1];
 		memset(facemats, 0, sizeof(facemats));
 
 		PieceInfo* pInfo = pPiece->GetPieceInfo();
-		if (pInfo->m_nFlags & LC_PIECE_LONGDATA_INDICES)
+		lcMesh* Mesh = pInfo->mMesh;
+
+		if (Mesh->mIndexType == GL_UNSIGNED_INT)
 			continue; // 3DS can't handle this
 
-		// count number of faces used
-		for (c = 0; c < pInfo->m_nGroupCount; c++)
+		// Count the number of triangles.
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 		{
-			WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-			col = *info;
-			info++;
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
 
-			while (col--)
-			{
-				i = *info;
-				info++;
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
 
-				facecount += (*info)*2/4;
-				facemats[i] += (*info)*2/4;
-				info += *info + 1;
-				facecount += (*info)/3;
-				facemats[i] += (*info)/3;
-				info += *info + 1;
-				info += *info + 1;
-			}
+			facecount += Section->NumIndices / 3;
+			facemats[Section->ColorIndex] += Section->NumIndices / 3;
 		}
 
-		InitMeshObj3ds(&mobj, (unsigned short)pInfo->m_nVertexCount, facecount, InitNoExtras3ds);
+		InitMeshObj3ds(&mobj, (unsigned short)pInfo->mMesh->mNumVertices, facecount, InitNoExtras3ds);
 		sprintf(mobj->name, "Piece%d", objcount);
 		objcount++;
 
@@ -487,7 +479,7 @@ void Export3DStudio()
 		Matrix mat(rot, pos);
 		float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
-		for (c = 0; c < pInfo->m_nVertexCount; c++)
+		for (int c = 0; c < pInfo->mMesh->mNumVertices; c++)
 		{
 			mat.TransformPoint(tmp, &Verts[c*3]);
 			mobj->vertexarray[c].x = tmp[0];
@@ -495,40 +487,21 @@ void Export3DStudio()
 			mobj->vertexarray[c].z = tmp[2];
 		}
 
-		for (c = 0; c < pInfo->m_nGroupCount; c++)
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 		{
-			WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-			col = *info;
-			info++;
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
 
-			while (col--)
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			lcuint16* Indices = (lcuint16*)Mesh->mIndexBuffer.mData + Section->IndexOffset / sizeof(lcuint16);
+
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 			{
-				info++;
-				
-				for (i = 0; i < *info; i+=4)
-				{
-					mobj->facearray[j].v1 = info[i+1];
-					mobj->facearray[j].v2 = info[i+2];
-					mobj->facearray[j].v3 = info[i+3];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-					mobj->facearray[j].v1 = info[i+3];
-					mobj->facearray[j].v2 = info[i+4];
-					mobj->facearray[j].v3 = info[i+1];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-				}
-				info += *info + 1;
-				for (i = 0; i < *info; i+=3)
-				{
-					mobj->facearray[j].v1 = info[i+1];
-					mobj->facearray[j].v2 = info[i+2];
-					mobj->facearray[j].v3 = info[i+3];
-					mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
-					j++;
-				}
-				info += *info + 1;
-				info += *info + 1;
+				mobj->facearray[j].v1 = Indices[Idx + 0];
+				mobj->facearray[j].v2 = Indices[Idx + 1];
+				mobj->facearray[j].v3 = Indices[Idx + 2];
+				mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
 			}
 		}
 
@@ -553,45 +526,25 @@ void Export3DStudio()
 				UINT curface = 0;
 				facecount = 0;
 
-				for (c = 0; c < pInfo->m_nGroupCount; c++)
+				for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 				{
-					WORD* info = (WORD*)pInfo->m_pGroups[c].drawinfo;
-					col = *info;
-					info++;
+					lcMeshSection* Section = &Mesh->mSections[SectionIdx];
 
-					while (col--)
+					if (Section->PrimitiveType != GL_TRIANGLES)
+						continue;
+
+					if (Section->ColorIndex == j)
 					{
-						if (j == *info)
+						for (int k = 0; k < Section->NumIndices; k += 3)
 						{
-							info++;
-							for (UINT k = 0; k < *info; k += 4)
-							{
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-							}
-						
-							info += *info + 1;
-							for (UINT k = 0; k < *info; k += 3)
-							{
-								mobj->matarray[i].faceindex[facecount] = curface;
-								facecount++;
-								curface++;
-							}
-							info += *info + 1;
+							mobj->matarray[i].faceindex[facecount] = curface;
+							facecount++;
+							curface++;
 						}
-						else
-						{
-							info++;
-							curface += (*info)*2/4;
-							info += *info + 1;
-							curface += (*info)/3;
-							info += *info + 1;
-						}
-						info += *info + 1;
+					}
+					else
+					{
+						curface += Section->NumIndices / 3;
 					}
 				}
 

@@ -25,6 +25,7 @@ void lcMesh::Create(int NumSections, int NumVertices, int NumIndices)
 	mSections = new lcMeshSection[NumSections];
 	mNumSections = NumSections;
 
+	mNumVertices = NumVertices;
 	mVertexBuffer.SetSize(NumVertices * sizeof(lcVertex));
 
 	if (NumVertices < 0x10000)
@@ -64,47 +65,23 @@ void lcMesh::CreateBox()
 	Section->NumIndices = 36;
 	Section->PrimitiveType = GL_TRIANGLES;
 
-	*Indices++ = 0;
-	*Indices++ = 1;
-	*Indices++ = 2;
-	*Indices++ = 0;
-	*Indices++ = 2;
-	*Indices++ = 3;
+	*Indices++ = 0; *Indices++ = 1; *Indices++ = 2;
+	*Indices++ = 0; *Indices++ = 2; *Indices++ = 3;
 
-	*Indices++ = 7;
-	*Indices++ = 6;
-	*Indices++ = 5;
-	*Indices++ = 7;
-	*Indices++ = 5;
-	*Indices++ = 4;
+	*Indices++ = 7; *Indices++ = 6; *Indices++ = 5;
+	*Indices++ = 7; *Indices++ = 5; *Indices++ = 4;
 
-	*Indices++ = 0;
-	*Indices++ = 1;
-	*Indices++ = 5;
-	*Indices++ = 0;
-	*Indices++ = 5;
-	*Indices++ = 4;
+	*Indices++ = 0; *Indices++ = 1; *Indices++ = 5;
+	*Indices++ = 0; *Indices++ = 5; *Indices++ = 4;
 
-	*Indices++ = 2;
-	*Indices++ = 3;
-	*Indices++ = 7;
-	*Indices++ = 2;
-	*Indices++ = 7;
-	*Indices++ = 6;
+	*Indices++ = 2; *Indices++ = 3; *Indices++ = 7;
+	*Indices++ = 2; *Indices++ = 7; *Indices++ = 6;
 
-	*Indices++ = 0;
-	*Indices++ = 3;
-	*Indices++ = 7;
-	*Indices++ = 0;
-	*Indices++ = 7;
-	*Indices++ = 4;
+	*Indices++ = 0; *Indices++ = 3; *Indices++ = 7;
+	*Indices++ = 0; *Indices++ = 7; *Indices++ = 4;
 
-	*Indices++ = 1;
-	*Indices++ = 2;
-	*Indices++ = 6;
-	*Indices++ = 1;
-	*Indices++ = 6;
-	*Indices++ = 5;
+	*Indices++ = 1; *Indices++ = 2; *Indices++ = 6;
+	*Indices++ = 1; *Indices++ = 6; *Indices++ = 5;
 
 	Section = &mSections[1];
 	Section->ColorIndex = gEdgeColor;
@@ -112,32 +89,14 @@ void lcMesh::CreateBox()
 	Section->NumIndices = 24;
 	Section->PrimitiveType = GL_LINES;
 
-	*Indices++ = 0;
-	*Indices++ = 1;
-	*Indices++ = 1;
-	*Indices++ = 2;
-	*Indices++ = 2;
-	*Indices++ = 3;
-	*Indices++ = 3;
-	*Indices++ = 0;
+	*Indices++ = 0; *Indices++ = 1; *Indices++ = 1; *Indices++ = 2;
+	*Indices++ = 2; *Indices++ = 3; *Indices++ = 3; *Indices++ = 0;
 
-	*Indices++ = 4;
-	*Indices++ = 5;
-	*Indices++ = 5;
-	*Indices++ = 6;
-	*Indices++ = 6;
-	*Indices++ = 7;
-	*Indices++ = 7;
-	*Indices++ = 4;
+	*Indices++ = 4; *Indices++ = 5; *Indices++ = 5; *Indices++ = 6;
+	*Indices++ = 6; *Indices++ = 7; *Indices++ = 7; *Indices++ = 4;
 
-	*Indices++ = 0;
-	*Indices++ = 4;
-	*Indices++ = 1;
-	*Indices++ = 5;
-	*Indices++ = 2;
-	*Indices++ = 6;
-	*Indices++ = 3;
-	*Indices++ = 7;
+	*Indices++ = 0; *Indices++ = 4; *Indices++ = 1; *Indices++ = 5;
+	*Indices++ = 2; *Indices++ = 6; *Indices++ = 3; *Indices++ = 7;
 
 	UpdateBuffers();
 }

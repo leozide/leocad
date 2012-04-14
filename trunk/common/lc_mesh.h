@@ -112,27 +112,23 @@ public:
 	~lcMesh();
 
 	void Create(int NumSections, int NumVertices, int NumIndices);
+	void CreateBox();
 	void Render(int ColorIdx, bool Selected, bool Focused);
 
-	bool MinIntersectDist(const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
-	{
-		if (mIndexType == GL_UNSIGNED_SHORT)
-			return MinIntersectDist<GLushort>(Start, End, MinDist, Intersection);
-		else
-			return MinIntersectDist<GLuint>(Start, End, MinDist, Intersection);
-	}
+	template<typename IndexType>
+	void ExportPOVRay(lcFile& File, const char* MeshName, char ColorTable[LC_MAXCOLORS][64]);
+	void ExportPOVRay(lcFile& File, const char* MeshName, char ColorTable[LC_MAXCOLORS][64]);
 
-	bool IntersectsPlanes(const Vector4* Planes, int NumPlanes)
-	{
-		if (mIndexType == GL_UNSIGNED_SHORT)
-			return IntersectsPlanes<GLushort>(Planes, NumPlanes);
-		else
-			return IntersectsPlanes<GLuint>(Planes, NumPlanes);
-	}
+	template<typename IndexType>
+	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);
+	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);
 
 	template<typename IndexType>
 	bool MinIntersectDist(const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
+	bool MinIntersectDist(const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection);
+
 	template<typename IndexType>
+	bool IntersectsPlanes(const Vector4* Planes, int NumPlanes);
 	bool IntersectsPlanes(const Vector4* Planes, int NumPlanes);
 
 	void UpdateBuffers()

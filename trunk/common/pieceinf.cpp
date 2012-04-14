@@ -211,7 +211,6 @@ void PieceInfo::LoadIndex(lcFile& file)
   // TODO: don't change ref. if we're reloading ?
   m_nRef = 0;
   m_nVertexCount = 0;
-  m_fVertexArray = NULL;
   m_nGroupCount = 0;
   m_pGroups = NULL;
   m_nBoxList = 0;
@@ -244,7 +243,6 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 {
 	m_nRef = 0;
 	m_nVertexCount = 0;
-	m_fVertexArray = NULL;
 	m_nGroupCount = 0;
 	m_pGroups = NULL;
 	m_nBoxList = 0;
@@ -639,20 +637,11 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 	lcuint16 ConnectionCount = LCUINT16(*((lcuint16*)bytes));
 	bytes += 2 + (1 + 6 * 2) * ConnectionCount;
 	bytes++; // TextureCount 
-	bytes += sizeof(lcuint16); // m_nGroupCount
+	bytes += sizeof(lcuint16); // GroupCount
 
-	for (DRAWGROUP* pGroup = m_pGroups; sh--; pGroup++)
+	while (sh--)
 	{
-		lcuint8 bt = *bytes;
-		bytes++;
-
-		pGroup->connections[bt] = 0xFFFF;
-
-		while (bt--)
-		{
-			pGroup->connections[bt] = LCUINT16(*((lcuint16*)bytes));
-			bytes += sizeof(lcuint16);
-		}
+		bytes += 1 + 2 * *bytes;
 
 		switch (*bytes)
 		{
@@ -714,144 +703,39 @@ void PieceInfo::LoadInformation()
 {
 	if (m_nFlags & LC_PIECE_PLACEHOLDER)
 	{
-		m_nGroupCount = 1;
-		m_pGroups = (DRAWGROUP*)malloc(sizeof(DRAWGROUP)*m_nGroupCount);
-		memset(m_pGroups, 0, sizeof(DRAWGROUP)*m_nGroupCount);
-
-		int verts = 8;
-		m_fVertexArray = (float*)malloc(3*sizeof(float)*verts);
-		m_nVertexCount = verts;
-
-		Vector3 Min(-0.4f, -0.4f, -0.96f);
-		Vector3 Max(0.4f, 0.4f, 0.16f);
-
-		m_fVertexArray[0*3+0] = Min[0]; m_fVertexArray[0*3+1] = Min[1]; m_fVertexArray[0*3+2] = Min[2];
-		m_fVertexArray[1*3+0] = Min[0]; m_fVertexArray[1*3+1] = Max[1]; m_fVertexArray[1*3+2] = Min[2];
-		m_fVertexArray[2*3+0] = Max[0]; m_fVertexArray[2*3+1] = Max[1]; m_fVertexArray[2*3+2] = Min[2];
-		m_fVertexArray[3*3+0] = Max[0]; m_fVertexArray[3*3+1] = Min[1]; m_fVertexArray[3*3+2] = Min[2];
-		m_fVertexArray[4*3+0] = Min[0]; m_fVertexArray[4*3+1] = Min[1]; m_fVertexArray[4*3+2] = Max[2];
-		m_fVertexArray[5*3+0] = Min[0]; m_fVertexArray[5*3+1] = Max[1]; m_fVertexArray[5*3+2] = Max[2];
-		m_fVertexArray[6*3+0] = Max[0]; m_fVertexArray[6*3+1] = Max[1]; m_fVertexArray[6*3+2] = Max[2];
-		m_fVertexArray[7*3+0] = Max[0]; m_fVertexArray[7*3+1] = Min[1]; m_fVertexArray[7*3+2] = Max[2];
-
-		m_pGroups->connections[0] = 0xFFFF;
-
-		m_pGroups->drawinfo = malloc((1 + 1 + 3 + 36 + 1 + 3 + 24) * 2);
-		lcuint16* drawinfo = (lcuint16*)m_pGroups->drawinfo;
-
-		*drawinfo++ = 2;
-		*drawinfo++ = LC_COL_DEFAULT;
-		*drawinfo++ = 0;
-		*drawinfo++ = 36;
-
-		*drawinfo++ = 0;
-		*drawinfo++ = 1;
-		*drawinfo++ = 2;
-		*drawinfo++ = 0;
-		*drawinfo++ = 2;
-		*drawinfo++ = 3;
-
-		*drawinfo++ = 7;
-		*drawinfo++ = 6;
-		*drawinfo++ = 5;
-		*drawinfo++ = 7;
-		*drawinfo++ = 5;
-		*drawinfo++ = 4;
-
-		*drawinfo++ = 0;
-		*drawinfo++ = 1;
-		*drawinfo++ = 5;
-		*drawinfo++ = 0;
-		*drawinfo++ = 5;
-		*drawinfo++ = 4;
-
-		*drawinfo++ = 2;
-		*drawinfo++ = 3;
-		*drawinfo++ = 7;
-		*drawinfo++ = 2;
-		*drawinfo++ = 7;
-		*drawinfo++ = 6;
-
-		*drawinfo++ = 0;
-		*drawinfo++ = 3;
-		*drawinfo++ = 7;
-		*drawinfo++ = 0;
-		*drawinfo++ = 7;
-		*drawinfo++ = 4;
-
-		*drawinfo++ = 1;
-		*drawinfo++ = 2;
-		*drawinfo++ = 6;
-		*drawinfo++ = 1;
-		*drawinfo++ = 6;
-		*drawinfo++ = 5;
-
-		*drawinfo++ = 0;
-		*drawinfo++ = LC_COL_EDGES;
-		*drawinfo++ = 0;
-		*drawinfo++ = 0;
-		*drawinfo++ = 24;
-
-		*drawinfo++ = 0;
-		*drawinfo++ = 1;
-		*drawinfo++ = 1;
-		*drawinfo++ = 2;
-		*drawinfo++ = 2;
-		*drawinfo++ = 3;
-		*drawinfo++ = 3;
-		*drawinfo++ = 0;
-
-		*drawinfo++ = 4;
-		*drawinfo++ = 5;
-		*drawinfo++ = 5;
-		*drawinfo++ = 6;
-		*drawinfo++ = 6;
-		*drawinfo++ = 7;
-		*drawinfo++ = 7;
-		*drawinfo++ = 4;
-
-		*drawinfo++ = 0;
-		*drawinfo++ = 4;
-		*drawinfo++ = 1;
-		*drawinfo++ = 5;
-		*drawinfo++ = 2;
-		*drawinfo++ = 6;
-		*drawinfo++ = 3;
-		*drawinfo++ = 7;
-
+		mMesh->CreateBox();
 		return;
 	}
 
-  lcDiskFile bin;
-  char filename[LC_MAXPATH];
-  void* buf;
-  lcuint32 verts, *longs, fixverts;
-  lcuint16 sh;
-  lcuint8 *bytes, *tmp, bt;
-  float scale, shift;
-  lcint16* shorts;
+	lcDiskFile bin;
+	char filename[LC_MAXPATH];
+	void* buf;
+	lcuint32 verts, *longs, fixverts;
+	lcuint16 sh;
+	lcuint8 *bytes, *tmp, bt;
+	float scale, shift;
+	lcint16* shorts;
 
-  // We don't want memory leaks.
-  FreeInformation ();
+	FreeInformation();
 
-  // Open pieces.bin and buffer the information we need.
-  strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath());
-  strcat (filename, "pieces.bin");
-  if (!bin.Open (filename, "rb"))
-    return;
+	// Open pieces.bin and buffer the information we need.
+	strcpy (filename, lcGetPiecesLibrary()->GetLibraryPath());
+	strcat (filename, "pieces.bin");
+	if (!bin.Open (filename, "rb"))
+		return;
 
-  buf = malloc(m_nSize);
-  bin.Seek(m_nOffset, SEEK_SET);
-  bin.ReadBuffer(buf, m_nSize);
+	buf = malloc(m_nSize);
+	bin.Seek(m_nOffset, SEEK_SET);
+	bin.ReadBuffer(buf, m_nSize);
 
-  shift  = 1.0f/(1<<14);
-  scale = 0.01f;
-  if (m_nFlags & LC_PIECE_MEDIUM) scale = 0.001f;
-  if (m_nFlags & LC_PIECE_SMALL)  scale = 0.0001f;
-  longs = (lcuint32*)buf;
-  fixverts = verts = LCUINT32(*longs);
-  bytes = (unsigned char*)(longs + 1);
-  bytes += verts * sizeof(lcint16) * 3;
+	shift  = 1.0f/(1<<14);
+	scale = 0.01f;
+	if (m_nFlags & LC_PIECE_MEDIUM) scale = 0.001f;
+	if (m_nFlags & LC_PIECE_SMALL)  scale = 0.0001f;
+	longs = (lcuint32*)buf;
+	fixverts = verts = LCUINT32(*longs);
+	bytes = (unsigned char*)(longs + 1);
+	bytes += verts * sizeof(lcint16) * 3;
 
 	lcuint16 ConnectionCount = LCUINT16(*((lcuint16*)bytes));
 	bytes += 2 + (1 + 6 * 2) * ConnectionCount;
@@ -1013,7 +897,7 @@ void PieceInfo::LoadInformation()
 	mMesh = new lcMesh();
 	mMesh->Create(NumSections, NumVertices, NumIndices);
 
-	m_nVertexCount = verts;
+	m_nVertexCount = NumVertices;
 
 	float* OutVertex = (float*)mMesh->mVertexBuffer.mData;
 
@@ -1058,9 +942,6 @@ void PieceInfo::FreeInformation()
 		free(m_pGroups);
 		m_pGroups = NULL;
 	}
-
-	if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
-		m_nFlags &= ~LC_PIECE_LONGDATA_INDICES;
 }
 
 // Zoom extents for the preview window and print catalog
@@ -1218,125 +1099,4 @@ void PieceInfo::RenderOnce(int nColor)
 void PieceInfo::RenderPiece(int nColor)
 {
 	mMesh->Render(nColor, false, false);
-}
-
-void PieceInfo::WriteWavefront(FILE* file, unsigned char color, unsigned long* start)
-{
-	unsigned short group;
-	const char* colname;
-	
-	for (group = 0; group < m_nGroupCount; group++)
-	{
-		if (m_nFlags & LC_PIECE_LONGDATA_INDICES)
-		{
-			unsigned long* info = (unsigned long*)m_pGroups[group].drawinfo;
-			unsigned long count, colors = *info;
-			info++;
-
-			while (colors--)
-			{
-				if (*info == LC_COL_DEFAULT)
-					colname = altcolornames[color];
-				else
-				{
-					if (*info >= LC_MAXCOLORS)
-					{
-						info++;
-						info += *info + 1;
-						info += *info + 1;
-						info += *info + 1;
-						continue;
-					}
-					colname = altcolornames[*info];
-				}
-				info++;
-
-				// skip if color only has lines
-				if ((info[0] == 0) && (info[1] == 0))
-				{
-					info += 2;
-					info += *info + 1;
-					continue;
-				}
-
-				fprintf(file, "usemtl %s\n", colname);
-
-				for (count = *info, info++; count; count -= 4)
-				{
-					fprintf(file, "f %ld %ld %ld %ld\n", info[0] + *start, info[1] + *start, info[2] + *start, info[3] + *start);
-					info += 4;
-				}
-
-				for (count = *info, info++; count; count -= 3)
-				{
-					long int idx1 = info[0] + *start;
-					long int idx2 = info[1] + *start;
-					long int idx3 = info[2] + *start;
-
-					if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
-						fprintf(file, "f %ld %ld %ld\n", idx1, idx2, idx3);
-
-					info += 3;
-				}
-				info += *info + 1;
-			}
-		}
-		else
-		{
-			unsigned short* info = (unsigned short*)m_pGroups[group].drawinfo;
-			unsigned short count, colors = *info;
-			info++;
-
-			while (colors--)
-			{
-				if (*info == LC_COL_DEFAULT)
-					colname = altcolornames[color];
-				else
-				{
-					if (*info >= LC_MAXCOLORS)
-					{
-						info++;
-						info += *info + 1;
-						info += *info + 1;
-						info += *info + 1;
-						continue;
-					}
-					colname = altcolornames[*info];
-				}
-				info++;
-
-				// skip if color only has lines
-				if ((info[0] == 0) && (info[1] == 0))
-				{
-					info += 2;
-					info += *info + 1;
-					continue;
-				}
-
-				fprintf(file, "usemtl %s\n", colname);
-
-				for (count = *info, info++; count; count -= 4)
-				{
-					fprintf(file, "f %ld %ld %ld %ld\n", info[0] + *start, info[1] + *start, info[2] + *start, info[3] + *start);
-					info += 4;
-				}
-
-				for (count = *info, info++; count; count -= 3)
-				{
-					long int idx1 = info[0] + *start;
-					long int idx2 = info[1] + *start;
-					long int idx3 = info[2] + *start;
-
-					if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
-						fprintf(file, "f %ld %ld %ld\n", idx1, idx2, idx3);
-
-					info += 3;
-				}
-				info += *info + 1;
-			}
-		}
-	}
-
-	*start += m_nVertexCount;
-	fputs("\n", file);
 }

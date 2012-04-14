@@ -3,6 +3,7 @@
 
 #include "lc_global.h"
 #include "lc_math.h"
+#include "lc_mesh.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -3990,124 +3991,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					*Ptr = '_';
 
 				sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "lc_%s", Name);
-				sprintf(Line, "#declare lc_%s = union {\n", Name);
-				POVFile.WriteLine(Line);
 
-				for (lcuint16 g = 0; g < Info->m_nGroupCount; g++)
-				{
-					if (Info->m_nFlags & LC_PIECE_LONGDATA_INDICES)
-					{
-						lcuint32* info = (lcuint32*)Info->m_pGroups[g].drawinfo;
-						lcuint32 count, curcolor, colors = *info;
-						info++;
-
-						while (colors--)
-						{
-							curcolor = *info;
-							info++;
-
-							// Skip if color only has lines.
-							if ((*info == 0) && (info[1] == 0))
-							{
-								info += 2;
-								info += *info + 1;
-								continue;
-							}
-
-							POVFile.WriteLine(" mesh {\n");
-
-							for (count = *info, info++; count; count -= 4)
-							{
-								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
-									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
-									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
-								POVFile.WriteLine(Line);
-								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2],
-									-Info->m_fVertexArray[info[3]*3+1], -Info->m_fVertexArray[info[3]*3], Info->m_fVertexArray[info[3]*3+2],
-									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2]);
-								POVFile.WriteLine(Line);
-								info += 4;
-							}
-
-							for (count = *info, info++; count; count -= 3)
-							{
-								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
-									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
-									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
-								POVFile.WriteLine(Line);
-								info += 3;
-							}
-							info += *info + 1;
-
-							if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
-							{
-								sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[curcolor]);
-								POVFile.WriteLine(Line);
-							}
-
-							POVFile.WriteLine(" }\n");
-						}
-					}
-					else
-					{
-						unsigned short* info = (unsigned short*)Info->m_pGroups[g].drawinfo;
-						unsigned short count, curcolor, colors = *info;
-						info++;
-
-						while (colors--)
-						{
-							curcolor = *info;
-							info++;
-
-							// Skip if color only has lines.
-							if ((*info == 0) && (info[1] == 0))
-							{
-								info += 2;
-								info += *info + 1;
-								continue;
-							}
-
-							POVFile.WriteLine(" mesh {\n");
-
-							for (count = *info, info++; count; count -= 4)
-							{
-								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
-									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
-									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
-								POVFile.WriteLine(Line);
-								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2],
-									-Info->m_fVertexArray[info[3]*3+1], -Info->m_fVertexArray[info[3]*3], Info->m_fVertexArray[info[3]*3+2],
-									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2]);
-								POVFile.WriteLine(Line);
-								info += 4;
-							}
-
-							for (count = *info, info++; count; count -= 3)
-							{
-								sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-									-Info->m_fVertexArray[info[0]*3+1], -Info->m_fVertexArray[info[0]*3], Info->m_fVertexArray[info[0]*3+2],
-									-Info->m_fVertexArray[info[1]*3+1], -Info->m_fVertexArray[info[1]*3], Info->m_fVertexArray[info[1]*3+2],
-									-Info->m_fVertexArray[info[2]*3+1], -Info->m_fVertexArray[info[2]*3], Info->m_fVertexArray[info[2]*3+2]);
-								POVFile.WriteLine(Line);
-								info += 3;
-							}
-							info += *info + 1;
-
-							if (curcolor != LC_COL_DEFAULT && curcolor != LC_COL_EDGES)
-							{
-								sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[curcolor]);
-								POVFile.WriteLine(Line);
-							}
-
-							POVFile.WriteLine(" }\n");
-						}
-					}
-				}
+				Info->mMesh->ExportPOVRay(POVFile, Name, ColorTable);
 
 				POVFile.WriteLine("}\n\n");
 
@@ -4208,9 +4093,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (!SystemDoDialog(LC_DLG_WAVEFRONT, filename))
 				break;
 
+			lcDiskFile OBJFile;
+			char Line[1024];
+
+			if (!OBJFile.Open(filename, "wt"))
+			{
+				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				break;
+			}
+
 			char buf[LC_MAXPATH], *ptr;
-			FILE* stream = fopen(filename, "wt");
-			unsigned long vert = 1, i;
+			lcuint32 vert = 1, i;
 			Piece* pPiece;
 
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
@@ -4226,11 +4119,20 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				else
 					ptr = buf;
 			}
-			fputs("# Model exported from LeoCAD\n", stream);
+
+			OBJFile.WriteLine("# Model exported from LeoCAD\n");
+
 			if (strlen(buf) != 0)
-				fprintf(stream,"# Original name: %s\n", ptr);
+			{
+				sprintf(Line, "# Original name: %s\n", ptr);
+				OBJFile.WriteLine(Line);
+			}
+
 			if (strlen(m_strAuthor))
-				fprintf(stream, "# Author: %s\n", m_strAuthor);
+			{
+				sprintf(Line, "# Author: %s\n", m_strAuthor);
+				OBJFile.WriteLine(Line);
+			}
 
 			strcpy(buf, filename);
 			ptr = strrchr(buf, '.');
@@ -4250,7 +4152,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					ptr = buf;
 			}
 
-			fprintf(stream, "#\n\nmtllib %s\n\n", ptr);
+			sprintf(Line, "#\n\nmtllib %s\n\n", ptr);
+			OBJFile.WriteLine(Line);
 
 			FILE* mat = fopen(buf, "wt");
 			fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
@@ -4265,28 +4168,35 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->GetRotation(rot);
 				Matrix mat(rot, pos);
 				PieceInfo* pInfo = pPiece->GetPieceInfo();
+				float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
 				for (i = 0; i < pInfo->m_nVertexCount*3; i += 3)
 				{
-					mat.TransformPoint(tmp, &pInfo->m_fVertexArray[i]);
-					fprintf(stream, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
+					mat.TransformPoint(tmp, &Verts[i]);
+					sprintf(Line, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
+					OBJFile.WriteLine(Line);
 				}
-				fputs("#\n\n", stream);
+
+				OBJFile.WriteLine("#\n\n");
 			}
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
+				PieceInfo* Info = pPiece->GetPieceInfo();
+
 				strcpy(buf, pPiece->GetName());
 				for (i = 0; i < strlen(buf); i++)
 					if ((buf[i] == '#') || (buf[i] == ' '))
 						buf[i] = '_';
 
-				fprintf(stream, "g %s\n", buf);
-				pPiece->GetPieceInfo()->WriteWavefront(stream, pPiece->mColorCode, &vert);
+				sprintf(Line, "g %s\n", buf);
+				OBJFile.WriteLine(Line);
+	
+				Info->mMesh->ExportWavefrontIndices(OBJFile, pPiece->mColorCode, vert);
+				vert += Info->m_nVertexCount;
 			}
 
 			setlocale(LC_NUMERIC, OldLocale);
-			fclose(stream);
 		} break;
 
 		case LC_FILE_PROPERTIES:

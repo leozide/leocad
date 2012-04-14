@@ -4103,7 +4103,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 
 			char buf[LC_MAXPATH], *ptr;
-			lcuint32 vert = 1, i;
+			lcuint32 vert = 1;
 			Piece* pPiece;
 
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
@@ -4157,7 +4157,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			FILE* mat = fopen(buf, "wt");
 			fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
-			for (i = 0; i < LC_MAXCOLORS; i++)
+			for (int i = 0; i < LC_MAXCOLORS; i++)
 				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", altcolornames[i], (float)FlatColorArray[i][0]/255, (float)FlatColorArray[i][1]/255, (float)FlatColorArray[i][2]/255);
 			fclose(mat);
 
@@ -4170,7 +4170,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				PieceInfo* pInfo = pPiece->GetPieceInfo();
 				float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
-				for (i = 0; i < pInfo->m_nVertexCount*3; i += 3)
+				for (int i = 0; i < pInfo->mMesh->mNumVertices * 3; i += 3)
 				{
 					mat.TransformPoint(tmp, &Verts[i]);
 					sprintf(Line, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
@@ -4185,7 +4185,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				PieceInfo* Info = pPiece->GetPieceInfo();
 
 				strcpy(buf, pPiece->GetName());
-				for (i = 0; i < strlen(buf); i++)
+				for (unsigned int i = 0; i < strlen(buf); i++)
 					if ((buf[i] == '#') || (buf[i] == ' '))
 						buf[i] = '_';
 
@@ -4193,7 +4193,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				OBJFile.WriteLine(Line);
 	
 				Info->mMesh->ExportWavefrontIndices(OBJFile, pPiece->mColorCode, vert);
-				vert += Info->m_nVertexCount;
+				vert += Info->mMesh->mNumVertices;
 			}
 
 			setlocale(LC_NUMERIC, OldLocale);

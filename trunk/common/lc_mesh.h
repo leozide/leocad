@@ -142,8 +142,8 @@ public:
 
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;
+	int mNumVertices;
 	int mIndexType;
-//	int mNumVertices;
 };
 
 #endif // _LC_MESH_H_

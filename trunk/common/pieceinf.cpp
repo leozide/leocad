@@ -326,17 +326,17 @@ inline lcuint32 EndianSwap(lcuint32 Val)
 }
 
 template<typename SrcType, typename DstType>
-static void WriteMeshDrawInfo(lcuint8*& Data, lcMesh* Mesh, float*& OutVertex, int* SectionIndices, lcMeshSection** DstSections)
+static void WriteMeshDrawInfo(lcuint32*& Data, lcMesh* Mesh, float*& OutVertex, int* SectionIndices, lcMeshSection** DstSections)
 {
-	SrcType* SrcPtr = (SrcType*)Data;
-	int NumColors = EndianSwap(*SrcPtr);
-	SrcPtr++;
+	int NumColors = EndianSwap(*Data);
+	Data++;
 
 	for (int Color = 0; Color < NumColors; Color++)
 	{
-		int ColorIdx = lcGetColorIndex(EndianSwap(*SrcPtr));
-		SrcPtr++;
+		int ColorIdx = lcGetColorIndex(EndianSwap(*Data));
+		Data++;
 
+		SrcType* SrcPtr = (SrcType*)Data;
 		int NumQuads = EndianSwap(*SrcPtr);
 		SrcPtr++;
 		int NumTris = EndianSwap(*(SrcPtr + NumQuads));
@@ -386,9 +386,9 @@ static void WriteMeshDrawInfo(lcuint8*& Data, lcMesh* Mesh, float*& OutVertex, i
 
 			Section->NumIndices += NumLines;
 		}
-	}
 
-	Data = (lcuint8*)SrcPtr;
+		Data = (lcuint32*)SrcPtr;
+	}
 }
 
 template<class DstType>
@@ -636,24 +636,27 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 	while (GroupCount--)
 	{
 		bytes += 1 + 2 * *bytes;
+		lcuint32* info = (lcuint32*)bytes;
 
-		switch (*bytes)
+		switch (*info)
 		{
 		case LC_MESH:
 			{
-				bytes++;
+				info++;
 
 				if (m_nFlags & LC_PIECE_LONGDATA_FILE)
-					WriteMeshDrawInfo<lcuint32, DstType>(bytes, mMesh, OutVertex, SectionIndices, DstSections);
+					WriteMeshDrawInfo<lcuint32, DstType>(info, mMesh, OutVertex, SectionIndices, DstSections);
 				else
-					WriteMeshDrawInfo<lcuint16, DstType>(bytes, mMesh, OutVertex, SectionIndices, DstSections);
+					WriteMeshDrawInfo<lcuint16, DstType>(info, mMesh, OutVertex, SectionIndices, DstSections);
 			} break;
 
 		case LC_STUD:
 		case LC_STUD3:
 			{
-				int ColorIdx = lcGetColorIndex(*(bytes+1));
-				float* MatFloats = (float*)(bytes+2);
+				info++;
+				int ColorIdx = lcGetColorIndex(LCUINT32(*info));
+				float* MatFloats = (float*)(info + 1);
+				info += 1 + 12;
 
 				for (int i = 0; i < 12; i++)
 					MatFloats[i] = LCFLOAT(MatFloats[i]);
@@ -664,15 +667,15 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 				             Vector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
 
 				WriteStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, LC_STUD_RADIUS, SectionIndices, DstSections);
-
-				bytes += 2 + 12*sizeof(float);
 			} break;
 
 		case LC_STUD2:
 		case LC_STUD4:
 			{
-				int ColorIdx = lcGetColorIndex(*(bytes+1));
-				float* MatFloats = (float*)(bytes+2);
+				info++;
+				int ColorIdx = lcGetColorIndex(LCUINT32(*info));
+				float* MatFloats = (float*)(info + 1);
+				info += 1 + 12;
 
 				for (int i = 0; i < 12; i++)
 					MatFloats[i] = LCFLOAT(MatFloats[i]);
@@ -683,11 +686,11 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 				             Vector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
 
 				WriteHollowStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, 0.16f, LC_STUD_RADIUS, SectionIndices, DstSections);
-
-				bytes += 2 + 12*sizeof(float);
 			} break;
 		}
-		bytes++; // should be 0
+
+		info++; // should be 0
+		bytes = (lcuint8*)info;
 	}
 
 	delete[] DstSections;
@@ -753,26 +756,28 @@ void PieceInfo::LoadInformation()
 		bytes++;
 		bytes += bt*sizeof(lcuint16);
 
-		while (*bytes)
+		lcuint32* info = (lcuint32*)bytes;
+
+		while (*info)
 		{
-			if (*bytes == LC_MESH)
+			if (*info == LC_MESH)
 			{
-				if (m_nFlags & LC_PIECE_LONGDATA_FILE)
+				info++;
+				lcuint32 NumColors = LCUINT32(*info);
+				info++;
+
+				while (NumColors--)
 				{
-					lcuint32 colors, *p;
-					p = (lcuint32*)(bytes + 1);
-					colors = LCUINT32(*p);
-					p++;
+					int ColorIndex = lcGetColorIndex(LCUINT32(*info));
+					info++;
 
-					while (colors--)
+					if (m_nFlags & LC_PIECE_LONGDATA_FILE)
 					{
-						int ColorIndex = lcGetColorIndex(*p);
-						p++;
-
-						int Triangles = LCUINT32(*p) / 4 * 6;
-						p += LCUINT32(*p) + 1;
-						Triangles += LCUINT32(*p);
-						p += LCUINT32(*p) + 1;
+						lcuint32* Indices = (lcuint32*)info;
+						int Triangles = LCUINT32(*Indices) / 4 * 6;
+						Indices += LCUINT32(*Indices) + 1;
+						Triangles += LCUINT32(*Indices);
+						Indices += LCUINT32(*Indices) + 1;
 
 						if (Triangles)
 						{
@@ -783,8 +788,8 @@ void PieceInfo::LoadInformation()
 							NumIndices += Triangles;
 						}
 
-						int Lines = LCUINT32(*p);
-						p += LCUINT32(*p) + 1;
+						int Lines = LCUINT32(*Indices);
+						Indices += LCUINT32(*Indices) + 1;
 
 						if (Lines)
 						{
@@ -794,26 +799,16 @@ void PieceInfo::LoadInformation()
 							SectionIndices[ColorIndex * 2 + 1] += Lines;
 							NumIndices += Lines;
 						}
+
+						info = (lcuint32*)Indices;
 					}
-
-					bytes = (unsigned char*)p;
-				}
-				else
-				{
-					lcuint16 colors, *p;
-					p = (lcuint16*)(bytes + 1);
-					colors = LCUINT16(*p);
-					p++;
-
-					while (colors--)
+					else
 					{
-						int ColorIndex = lcGetColorIndex(*p);
-						p++;
-
-						int Triangles = LCUINT16(*p) / 4 * 6;
-						p += LCUINT16(*p) + 1;
-						Triangles += LCUINT16(*p);
-						p += LCUINT16(*p) + 1;
+						lcuint16* Indices = (lcuint16*)info;
+						int Triangles = LCUINT16(*Indices) / 4 * 6;
+						Indices += LCUINT16(*Indices) + 1;
+						Triangles += LCUINT16(*Indices);
+						Indices += LCUINT16(*Indices) + 1;
 
 						if (Triangles)
 						{
@@ -824,8 +819,8 @@ void PieceInfo::LoadInformation()
 							NumIndices += Triangles;
 						}
 
-						int Lines = LCUINT16(*p);
-						p += LCUINT16(*p) + 1;
+						int Lines = LCUINT16(*Indices);
+						Indices += LCUINT16(*Indices) + 1;
 
 						if (Lines)
 						{
@@ -835,14 +830,16 @@ void PieceInfo::LoadInformation()
 							SectionIndices[ColorIndex * 2 + 1] += Lines;
 							NumIndices += Lines;
 						}
-					}
 
-					bytes = (unsigned char*)p;
+						info = (lcuint32*)Indices;
+					}
 				}
 			}
-			else if ((*bytes == LC_STUD) || (*bytes == LC_STUD3))
+			else if ((*info == LC_STUD) || (*info == LC_STUD3))
 			{
-				int ColorIndex = lcGetColorIndex(*(bytes + 1));
+				info++;
+				int ColorIndex = lcGetColorIndex(LCUINT32(*info));
+				info += 1 + 12;
 
 				NumVertices += (2 * SIDES) + 1;
 
@@ -857,12 +854,12 @@ void PieceInfo::LoadInformation()
 
 				SectionIndices[gEdgeColor * 2 + 1] += 4 * SIDES;
 				NumIndices += 4 * SIDES;
-
-				bytes += 2 + 12 * sizeof(float);
 			}
-			else if ((*bytes == LC_STUD2) || (*bytes == LC_STUD4))
+			else if ((*info == LC_STUD2) || (*info == LC_STUD4))
 			{
-				int ColorIndex = lcGetColorIndex(*(bytes + 1));
+				info++;
+				int ColorIndex = lcGetColorIndex(LCUINT32(*info));
+				info += 1 + 12;
 
 				NumVertices += 4 * SIDES;
 
@@ -877,11 +874,11 @@ void PieceInfo::LoadInformation()
 
 				SectionIndices[gEdgeColor * 2 + 1] += 8 * SIDES;
 				NumIndices += 8 * SIDES;
-
-				bytes += 2 + 12 * sizeof(float);
 			}
 		}
-		bytes++; // should be 0
+
+		info++; // should be 0
+		bytes = (lcuint8*)info;
 	}
 
 	mMesh = new lcMesh();

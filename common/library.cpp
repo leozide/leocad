@@ -18,7 +18,7 @@
 
 const char PiecesLibrary::PiecesBinHeader[32] = "LeoCAD piece library data file\0";
 const char PiecesLibrary::PiecesIdxHeader[32] = "LeoCAD piece library index file";
-const int PiecesLibrary::PiecesFileVersion = 4;
+const int PiecesLibrary::PiecesFileVersion = 5;
 const char PiecesLibrary::TexturesBinHeader[32] = "LeoCAD texture data file\0\0\0\0\0\0\0";
 const char PiecesLibrary::TexturesIdxHeader[32] = "LeoCAD texture index file\0\0\0\0\0\0";
 const int PiecesLibrary::TexturesFileVersion = 1;
@@ -1788,195 +1788,160 @@ static connection_t* AddConnection(connection_t* newcon, LC_LDRAW_PIECE* piece)
 	return newcon;
 }
 
+struct ColorGroup
+{
+	lcuint32 Color;
+	lineinfo_t* Prims[3];
+	lineinfo_t* LastPrims[3];
+	lcuint32 NumPrims[3];
+};
+
+int ColorGroupCompare(const ColorGroup& a, const ColorGroup& b, void* data)
+{
+	if (a.Color == b.Color)
+		return 0;
+
+	if (a.Color == 16)
+		return -1;
+
+	if (b.Color == 16)
+		return 1;
+
+	return a.Color > b.Color ? 1 : -1;
+}
+
 static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 {
-	lineinfo_t *a, *b;
-	int i, j, k;
-	unsigned int count[256][3], vert = 0;
-	unsigned int quads = 0;
-	unsigned char* bytes;
-	memset (count, 0, sizeof(count));
+	lcuint32 NumPrims[3] = { 0, 0, 0 };
+	lcuint32 NumIndices = 0;
+	ObjArray<ColorGroup> ColorGroups;
 
-	for (a = info->next; a; a = a->next)
+	lineinfo_t* Line = info->next;
+
+	while (Line)
 	{
-		// Fix the 'extended colors' that shouldn't be there in the first place.
-		if ((a->color > 16) && (a->color < 24))
-			a->color = 0;
+		ColorGroup* Group = NULL;
 
-		count[a->color][a->type-2]++;
-		vert += a->type;
+		for (int GroupIdx = 0; GroupIdx < ColorGroups.GetSize(); GroupIdx++)
+		{
+			if (ColorGroups[GroupIdx].Color != Line->color)
+				continue;
+
+			Group = &ColorGroups[GroupIdx];
+			break;
+		}
+
+		if (!Group)
+		{
+			ColorGroup NewEntry;
+
+			memset(&NewEntry, 0, sizeof(NewEntry));
+			NewEntry.Color = Line->color;
+
+			ColorGroups.AddSorted(NewEntry, ColorGroupCompare, NULL);
+			Group = &ColorGroups[ColorGroups.GetSize() - 1];
+		}
+
+		lineinfo_t* NextLine = Line->next;
+		Line->next = NULL;
+		int Type = Line->type - 2;
+
+		if (Group->Prims[Type])
+			Group->LastPrims[Type]->next = Line;
+		else
+			Group->Prims[Type] = Line;
+
+		Group->LastPrims[Type] = Line;
+		Group->NumPrims[Type] += Line->type;
+
+		NumIndices += Line->type;
+
+		Line = NextLine;
 	}
 
-	k = 0;
-	for (i = 16; i < 256; i++)
-	{
-		if (count[i][0] || count[i][1] || count[i][2])
-			k++;
-
-		quads += count[i][2] * 4;
-
-		if (i == 16) i = -1;
-		if (i == 15) i = 23;
-	}
-
-	if (piece->verts_count > 65535 || quads > 65535)
+	if (piece->verts_count > 65535 || NumPrims[0] > 65535 || NumPrims[1] > 65535 || NumPrims[2] > 65535)
 	{
 		piece->long_info = true;
-		unsigned long* drawinfo;
-		pGroup->infosize = sizeof(unsigned long)*(vert + (k*4)+1) + 2;
-		pGroup->drawinfo = malloc(pGroup->infosize);
-		bytes = (unsigned char*)pGroup->drawinfo;
-		drawinfo = (unsigned long*)(bytes + 1);
-		*bytes = LC_MESH;
-		*drawinfo = k; // number colors
-		drawinfo++;
-
-		for (i = 16; i < 256; i++)
-		{
-			if (count[i][0] || count[i][1] || count[i][2])
-			{
-				*drawinfo = i;
-				drawinfo++;
-
-				for (j = 4; j > 1; j--)
-				{
-					*drawinfo = count[i][j-2]*j;
-					drawinfo++;
-
-					if (count[i][j-2] != 0)
-					{
-						a = info->next;
-						b = info;
-						while(a)
-						if ((a->type == j) && (a->color == i))
-						{
-							for (k = 0; k < a->type; k++)
-								{
-								*drawinfo = a->indices[k];
-									drawinfo++;
-								}
-									
-							b->next = a->next;
-							free(a);
-							a = b->next;
-						}
-						else
-						{
-							b = a;
-							a = a->next;
-						}
-					}
-				}
-			}
-
-			if (i == 16) i = -1;
-			if (i == 15) i = 23;
-		}
+		pGroup->infosize = sizeof(lcuint32) * (ColorGroups.GetSize() + 2 + 1) + sizeof(lcuint32) * (NumIndices + 3 * ColorGroups.GetSize());
 	}
 	else
 	{
 		piece->long_info = false;
-		unsigned short* drawinfo;
-		pGroup->infosize = sizeof(unsigned short)*(vert + (k*4)+1) + 2;
-		pGroup->drawinfo = malloc(pGroup->infosize);
-		bytes = (unsigned char*)pGroup->drawinfo;
-		drawinfo = (unsigned short*)(bytes + 1);
-		*bytes = LC_MESH;
-		*drawinfo = k; // number colors
-		drawinfo++;
-
-		for (i = 16; i < 256; i++)
-		{
-			if (count[i][0] || count[i][1] || count[i][2])
-			{
-				*drawinfo = i;
-				drawinfo++;
-			}
-
-			for (j = 4; j > 1; j--)
-			{
-				if (count[i][0] || count[i][1] || count[i][2])
-				{
-					*drawinfo = count[i][j-2]*j;
-					drawinfo++;
-				}
-
-				if (count[i][j-2] != 0)
-				{
-					a = info->next;
-					b = info;
-					while(a)
-					if ((a->type == j) && (a->color == i))
-					{
-						for (k = 0; k < a->type; k++)
-						{
-							*drawinfo = a->indices[k];
-							drawinfo++;
-						}
-									
-						b->next = a->next;
-						free(a);
-						a = b->next;
-					}
-					else
-					{
-						b = a;
-						a = a->next;
-					}
-				}
-			}
-
-			if (i == 16) i = -1;
-			if (i == 15) i = 23;
-		}
+		pGroup->infosize = sizeof(lcuint32) * (ColorGroups.GetSize() + 2 + 1) + sizeof(lcuint16) * (NumIndices + 3 * ColorGroups.GetSize());
 	}
 
-	bytes[pGroup->infosize-1] = 0; // End
-}
+	pGroup->drawinfo = malloc(pGroup->infosize);
+	lcuint32* drawinfo = (lcuint32*)pGroup->drawinfo;
+	*drawinfo++ = LC_MESH;
+	*drawinfo++ = ColorGroups.GetSize();
 
-// Temp function to convert colors > 255 because the library file format doesn't support them.
-inline int FixupColor(int Color)
-{
-	if (Color < 256)
-		return Color;
-
-	switch (Color)
+	if (piece->long_info)
 	{
-	case 272: return 1; // Dark_Blue -> Blue
-	case 288: return 2; // Dark_Green -> Green
-	case 308: return 6; // Dark_Brown -> Brown
-	case 313: return 11;// Maersk_Blue -> Light_Turquoise
-	case 320: return 4; // Dark_Red -> Red
-	case 335: return 4; // Sand_Red -> Red
-	case 366: return 25; // Earth_Orange -> Orange
-	case 373: return 22; // Sand_Purple -> Purple
-	case 378: return 2; // Sand_Green -> Green
-	case 379: return 1; // Sand_Blue -> Blue
-	case 462: return 25; // Medium_Orange -> Orange
-	case 484: return 25; // Dark_Orange -> Orange
-	case 503: return 7; // Very_Light_Gray -> Light_Gray
-	case 284: return 230; // TLG_Transparent_Reddish_Lilac -> Trans_Pink
-	case 294: return 230; // Glow_In_Dark_Trans -> Trans_Pink
-	case 297: return 14; // Pearl_Gold -> Yellow
-	case 334: return 14; // Chrome_Gold -> Yellow
-	case 383: return 7; // Chrome_Silver -> Light_Gray
-	case 494: return 14; // Electric_Contact_Alloy -> Yellow
-	case 495: return 14; // Electric_Contact_Copper -> Yellow
-	case 256: return 0; // Rubber_Black -> Black
-	case 273: return 1; // Rubber_Blue -> Blue
-	case 324: return 4; // Rubber_Red -> Red
-	case 375: return 7; // Rubber_Light_Gray -> Light_Gray
-	case 511: return 15; // Rubber_White -> White
-	}
+		for (int EntryIdx = 0; EntryIdx < ColorGroups.GetSize(); EntryIdx++)
+		{
+			ColorGroup* Group = &ColorGroups[EntryIdx];
+			*drawinfo++ = Group->Color;
 
-	return 0;
+			for (int PrimIdx = 2; PrimIdx >= 0; PrimIdx--)
+			{
+				lcuint32* indices = (lcuint32*)drawinfo;
+				*indices++ = Group->NumPrims[PrimIdx];
+
+				lineinfo_t* Line = Group->Prims[PrimIdx];
+				while (Line)
+				{
+					for (int Idx = 0; Idx < Line->type; Idx++)
+						*indices++ = Line->indices[Idx];
+
+					lineinfo_t* NextLine = Line->next;
+					free(Line);
+					Line = NextLine;
+				}
+
+				drawinfo = (lcuint32*)indices;
+			}
+		}
+
+		*drawinfo++ = 0;
+	}
+	else
+	{
+		for (int EntryIdx = 0; EntryIdx < ColorGroups.GetSize(); EntryIdx++)
+		{
+			ColorGroup* Group = &ColorGroups[EntryIdx];
+			*drawinfo++ = Group->Color;
+
+			for (int PrimIdx = 2; PrimIdx >= 0; PrimIdx--)
+			{
+				lcuint16* indices = (lcuint16*)drawinfo;
+				*indices++ = Group->NumPrims[PrimIdx];
+
+				lineinfo_t* Line = Group->Prims[PrimIdx];
+				while (Line)
+				{
+					for (int Idx = 0; Idx < Line->type; Idx++)
+						*indices++ = Line->indices[Idx];
+
+					lineinfo_t* NextLine = Line->next;
+					free(Line);
+					Line = NextLine;
+				}
+
+				drawinfo = (lcuint32*)indices;
+			}
+		}
+
+		*drawinfo++ = 0;
+	}
 }
 
-static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, char* dir, LC_LDRAW_PIECE* piece)
+static void DecodeFile(FILE *F, Matrix *mat, lcuint32 CurColor, lineinfo_t* info, char* dir, LC_LDRAW_PIECE* piece)
 {
-	char buf[1024], fn[LC_MAXPATH], filename[32];
+	char buf[1024], fn[LC_MAXPATH], filename[LC_MAXPATH];
+	lcuint32 ColorCode, ColorCodeHex;
+	int Dummy;
 	unsigned char val;
-	int type, color;
+	int type;
 	float fm[12];
 	FILE *tf;
 
@@ -1985,45 +1950,33 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 		while (buf[strlen(buf)-1] == 10 || buf[strlen(buf)-1] == 13 || buf[strlen(buf)-1] == 32)
 			buf[strlen(buf)-1] = 0;
 
-		type = -1;
-		sscanf(buf, "%d", &type);
-
-		if (type == 6)
-		{
-			float* f;
-
-			texture_t* tex;
-			if (piece->textures)
-			{
-				tex = piece->textures;
-				while (tex->next)
-					tex = tex->next;
-				tex->next = (texture_t*)malloc(sizeof(texture_t));
-				tex = tex->next;
-			}
-			else
-			{
-				piece->textures = (texture_t*)malloc(sizeof(texture_t));
-				tex = piece->textures;
-			}
-			memset(tex, 0, sizeof(texture_t));
-			f = tex->points;
-
-			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %s",
-				&type, &color, &f[0], &f[1], &f[2], &f[3], &f[4], &f[5], &f[6], &f[7], &f[8], &f[9],
-				&f[10], &f[11], &f[12], &f[13], &f[14], &f[15], &f[16], &f[17], &f[18], &f[19], tex->name);
-			tex->color = color;
-			ConvertPoints(f, 4);
-
+		if (sscanf(buf, "%d", &type) != 1)
 			continue;
+
+		if (type < 1 || type > 4)
+			continue;
+
+		if (sscanf(buf, "%d %d", &type, &ColorCode) != 2)
+			continue;
+
+		if (ColorCode == 0)
+		{
+			sscanf(buf, "%d %i", &type, &ColorCodeHex);
+
+			if (ColorCode != ColorCodeHex)
+				ColorCode = ColorCodeHex | 0x80000000;
 		}
 
-		if (type > 1 && type < 5)
+		if (ColorCode == 16)
+			ColorCode = CurColor;
+
+		if (type >= 2 && type <= 4)
 		{
 			lineinfo_t* newinfo = (lineinfo_t*)malloc(sizeof(lineinfo_t));
 			info->next = newinfo;
 			newinfo->next = 0;
 			newinfo->type = type;
+			newinfo->color = ColorCode;
 			info = newinfo;
 		}
 
@@ -2032,7 +1985,7 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 		case 1:
 		{
 			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s",
-				&type, &color, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
+				&type, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
 
 			strlwr(filename);
 
@@ -2046,8 +1999,6 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 
 			if (val != numvalid)
 				break;
-
-			if (color == 16) color = defcolor;
 
 			strcpy(fn, dir);
 			strcat(fn, "p/");
@@ -2077,7 +2028,7 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 				m1.FromLDraw(fm);
 				m2.Multiply(*mat, m1);
 
-				decodefile(tf, &m2, color, info, dir, piece);
+				DecodeFile(tf, &m2, CurColor, info, dir, piece);
 				while (info->next)
 					info = info->next;
 				fclose(tf);
@@ -2089,39 +2040,30 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 
 		case 2:
 		{
-			sscanf (buf, "%d %i %f %f %f %f %f %f", &type, &color, 
+			sscanf (buf, "%d %i %f %f %f %f %f %f", &type, &Dummy, 
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5]);
-			if (color == 16) color = defcolor;
-			color = FixupColor(color); // TODO: handle colors in hex format, some parts are using it (3070bp09, 3626bpao, 3626bpb5, 3960ps3)
-			info->color = color;
 			ConvertPoints(info->points, 2);
 			mat->TransformPoints(info->points, 2);
 		} break;
 
 		case 3:
 		{
-			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f", &type, &color, 
+			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f", &type, &Dummy, 
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5],
 				&info->points[6], &info->points[7], &info->points[8]);
-			if (color == 16) color = defcolor;
-			color = FixupColor(color);
-			info->color = color;
 			ConvertPoints(info->points, 3);
 			mat->TransformPoints(info->points, 3);
 		} break;
 
 		case 4:
 		{
-			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &type, &color, 
+			sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &type, &Dummy, 
 				&info->points[0], &info->points[1], &info->points[2],
 				&info->points[3], &info->points[4], &info->points[5],
 				&info->points[6], &info->points[7], &info->points[8],
 				&info->points[9], &info->points[10], &info->points[11]);
-			if (color == 16) color = defcolor;
-			color = FixupColor(color);
-			info->color = color;
 			ConvertPoints(info->points, 4);
 			mat->TransformPoints(info->points, 4);
 			FixQuads(info->points);
@@ -2151,16 +2093,16 @@ static void decodefile(FILE *F, Matrix *mat, int defcolor, lineinfo_t* info, cha
 	}
 }
 
-static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char* dir, LC_LDRAW_PIECE* piece)
+static void decodeconnections(FILE *F, Matrix *mat, lcuint32 CurColor, char* dir, LC_LDRAW_PIECE* piece)
 {
 	char buf[1024], fn[LC_MAXPATH], filename[32];
-	unsigned char val, *bytes;
 	float fm[12], *floats;
-	int type, color;
+	int type, Dummy;
 	group_t* group;
 	connection_t* con;
 	Matrix m1, m2;
 	FILE *tf;
+	lcuint32 ColorCode, ColorCodeHex;
 
 	while (fgets(buf, 1024, F))
 	{
@@ -2176,16 +2118,31 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 			continue;
 		}
 
+		if (sscanf(buf, "%d %d", &type, &ColorCode) != 2)
+			continue;
+
+		if (ColorCode == 0)
+		{
+			sscanf(buf, "%d %i", &type, &ColorCodeHex);
+
+			if (ColorCode != ColorCodeHex)
+				ColorCode = ColorCodeHex | 0x80000000;
+		}
+
+		if (ColorCode == 16)
+			ColorCode = CurColor;
+
 		sscanf (buf, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s",
-			&type, &color, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
+			&type, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], filename);
 
 		strlwr(filename);
 
-		if (color == 16) color = defcolor;
-		color = FixupColor(color);
-
+		int val;
 		for (val = 0; val < numvalid; val++)
-		if (strcmp(filename, valid[val]) == 0)
+			if (!strcmp(filename, valid[val]))
+				break;
+
+		if (val != numvalid)
 		{
 			m1.LoadIdentity();
 			m2.LoadIdentity();
@@ -2198,13 +2155,13 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				con = (connection_t*)malloc(sizeof(connection_t));
 				memset(con, 0, sizeof(connection_t));
 
-				group->infosize = 3*sizeof(unsigned char) + 12*sizeof(float);
+				group->infosize = 3*sizeof(lcuint32) + 12*sizeof(float);
 				group->drawinfo = malloc(group->infosize);
-				bytes = (unsigned char*)group->drawinfo;
-				floats = (float*)(bytes+2);
+				lcuint32* info = (lcuint32*)group->drawinfo;
+				floats = (float*)(info+2);
 
-				bytes[0] = LC_STUD;
-				bytes[1] = color; // color
+				info[0] = LC_STUD;
+				info[1] = ColorCode;
 				floats[0] = m2.m[0];
 				floats[1] = m2.m[1];
 				floats[2] = m2.m[2];
@@ -2217,7 +2174,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				floats[9] = m2.m[12];
 				floats[10] = m2.m[13];
 				floats[11] = m2.m[14];
-				bytes[group->infosize-1] = 0; // end
+				info[14] = 0;
 
 				con->type = 0; // stud
 				con->pos[0] = m2.m[12];
@@ -2232,20 +2189,19 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				con = AddConnection(con, piece);
 				group->connections[0] = con;
 			}
-
-			if (val == 1) // STUD2.DAT
+			else if (val == 1) // STUD2.DAT
 			{
 				group = NewGroup(piece);
 				con = (connection_t*)malloc(sizeof(connection_t));
 				memset(con, 0, sizeof(connection_t));
 
-				group->infosize = 3*sizeof(unsigned char) + 12*sizeof(float);
+				group->infosize = 3*sizeof(lcuint32) + 12*sizeof(float);
 				group->drawinfo = malloc(group->infosize);
-				bytes = (unsigned char*)group->drawinfo;
-				floats = (float*)(bytes+2);
+				lcuint32* info = (lcuint32*)group->drawinfo;
+				floats = (float*)(info+2);
 
-				bytes[0] = LC_STUD2;
-				bytes[1] = color; // color
+				info[0] = LC_STUD2;
+				info[1] = ColorCode;
 				floats[0] = m2.m[0];
 				floats[1] = m2.m[1];
 				floats[2] = m2.m[2];
@@ -2258,7 +2214,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				floats[9] = m2.m[12];
 				floats[10] = m2.m[13];
 				floats[11] = m2.m[14];
-				bytes[group->infosize-1] = 0; // end
+				info[14] = 0;
 
 				con->type = 0; // stud
 				con->pos[0] = m2.m[12];
@@ -2273,17 +2229,16 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				con = AddConnection(con, piece);
 				group->connections[0] = con;
 			}
-
-			if (val == 2) // STUD3.DAT
+			else if (val == 2) // STUD3.DAT
 			{
 				group = NewGroup(piece);
-				group->infosize = 3*sizeof(unsigned char) + 12*sizeof(float);
+				group->infosize = 3*sizeof(lcuint32) + 12*sizeof(float);
 				group->drawinfo = malloc(group->infosize);
-				bytes = (unsigned char*)group->drawinfo;
-				floats = (float*)(bytes+2);
+				lcuint32* info = (lcuint32*)group->drawinfo;
+				floats = (float*)(info+2);
 
-				bytes[0] = LC_STUD3;
-				bytes[1] = color; // color
+				info[0] = LC_STUD3;
+				info[1] = ColorCode;
 				floats[0] = m2.m[0];
 				floats[1] = m2.m[1];
 				floats[2] = m2.m[2];
@@ -2296,22 +2251,21 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				floats[9] = m2.m[12];
 				floats[10] = m2.m[13];
 				floats[11] = m2.m[14];
-				bytes[group->infosize-1] = 0; // end
+				info[14] = 0;
 			}
-
-			if (val == 3) // STUD4.DAT
+			else if (val == 3) // STUD4.DAT
 			{
 				float t[4][3] = { {0.4f,0.4f,0}, {-0.4f,0.4f,0}, {0.4f,-0.4f,0}, {-0.4f,-0.4f,0} };
 				int c;
 
 				group = NewGroup(piece);
-				group->infosize = 3*sizeof(unsigned char) + 12*sizeof(float);
+				group->infosize = 3*sizeof(lcuint32) + 12*sizeof(float);
 				group->drawinfo = malloc(group->infosize);
-				bytes = (unsigned char*)group->drawinfo;
-				floats = (float*)(bytes+2);
+				lcuint32* info = (lcuint32*)group->drawinfo;
+				floats = (float*)(info+2);
 
-				bytes[0] = LC_STUD4;
-				bytes[1] = color; // color
+				info[0] = LC_STUD4;
+				info[1] = ColorCode;
 				floats[0] = m2.m[0];
 				floats[1] = m2.m[1];
 				floats[2] = m2.m[2];
@@ -2324,7 +2278,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				floats[9] = m2.m[12];
 				floats[10] = m2.m[13];
 				floats[11] = m2.m[14];
-				bytes[group->infosize-1] = 0; // end
+				info[14] = 0;
 
 				for (c = 0; c < 4; c++)
 				{
@@ -2357,7 +2311,7 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 				AddConnection(con, piece);
 			}
 
-			memset (buf, 0, sizeof(buf));
+			memset(buf, 0, sizeof(buf));
 			continue;
 		}
 
@@ -2394,21 +2348,19 @@ static void decodeconnections(FILE *F, Matrix *mat, unsigned char defcolor, char
 			m1.FromLDraw(fm);
 			m2.Multiply(*mat, m1);
 
-			decodeconnections (tf, &m2, (unsigned char)color, dir, piece);
-//			while (info->next)
-//				info = info->next;
+			decodeconnections(tf, &m2, ColorCode, dir, piece);
 			fclose(tf);
 		}
 		else
 			printf("Could not find file \"%s\".\n", filename);
 
-		memset (buf, 0, sizeof(buf));
+		memset(buf, 0, sizeof(buf));
 	}
 }
 
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 {
-	unsigned long j, unique;
+	lcuint32 unique;
 	char tmp[LC_MAXPATH], *ptr;
 	lineinfo_t info, *lf;
 	float* verts;
@@ -2460,7 +2412,7 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 		ptr = strrchr(tmp, '/');
 	*(ptr+1) = 0;
 
-	decodefile(f, &mat, 16, &info, tmp, piece);
+	DecodeFile(f, &mat, 16, &info, tmp, piece);
 	fclose (f);
 
 	// Create array of unique vertices
@@ -2469,7 +2421,7 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 
 	for (lf = info.next; lf; lf = lf->next)
 	{
-		for (j = 0; j < lf->type; j++)
+		for (int j = 0; j < lf->type; j++)
 		{
 			int i;
 			for (i = unique-1; i != -1; i--)
@@ -2497,15 +2449,6 @@ bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece)
 	piece->groups = (group_t*)malloc(sizeof(group_t));
 	memset(piece->groups, 0, sizeof(group_t));
 	CreateMesh(piece->groups, &info, piece);
-
-	lf = info.next;
-	while (lf)
-	{
-		lineinfo_t* b = lf->next;
-		free(lf);
-		lf = b;
-	}
-	info.next = NULL;
 
 	// Included files
 	f = fopen (filename, "rt");
@@ -2586,60 +2529,53 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 	unsigned char bt;
 	connection_t* con;
 	group_t* group;
-	texture_t* tex;
 	Matrix mat;
 
 	// First we calculate the bounding box
  	group = piece->groups;
 	while (group)
 	{
-		unsigned char* bytes = (unsigned char*)group->drawinfo;
+		lcuint32* info = (lcuint32*)group->drawinfo;
 		float* floats;
 
-		while (*bytes)
+		while (*info)
 		{
-			if (*bytes == LC_MESH)
+			if (*info == LC_MESH)
 			{
-				if (piece->long_info)
+				info++;
+				lcuint32 colors = *info;
+				info++;
+
+				while (colors--)
 				{
-					unsigned long colors, *p;
-					p = (unsigned long*)(bytes + 1);
-					colors = *p;
-					p++;
+					info++;
 
-					while (colors--)
+					if (piece->long_info)
 					{
-						p++; // color code
-						p += *p + 1;
-						p += *p + 1;
-						p += *p + 1;
+						lcuint32* indices = (lcuint32*)info;
+
+						indices += *indices + 1;
+						indices += *indices + 1;
+						indices += *indices + 1;
+
+						info = (lcuint32*)indices;
 					}
-
-					bytes = (unsigned char*)p;
-				}
-				else
-				{
-					unsigned short colors, *p;
-					p = (unsigned short*)(bytes + 1);
-					colors = *p;
-					p++;
-
-					while (colors--)
+					else
 					{
-						p++; // color code
-						p += *p + 1;
-						p += *p + 1;
-						p += *p + 1;
-					}
+						lcuint16* indices = (lcuint16*)info;
 
-					bytes = (unsigned char*)p;
+						indices += *indices + 1;
+						indices += *indices + 1;
+						indices += *indices + 1;
+
+						info = (lcuint32*)indices;
+					}
 				}
 			}
-
-			if ((*bytes == LC_STUD) || (*bytes == LC_STUD2))
+			else if ((*info == LC_STUD) || (*info == LC_STUD2))
 			{
 				float stud[6] = { 0.16f, 0.16f, 0.16f, -0.16f, -0.16f, 0 };
-				floats = (float*)(bytes+2);
+				floats = (float*)(info + 2);
 
 				mat.LoadIdentity();
 				mat.m[0] = floats[0];
@@ -2666,11 +2602,10 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 					if (stud[(3*i)+2] < box[5]) box[5] = stud[(3*i)+2];
 				}
 
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+				info += 2 + 12;
 			}
-
-			if ((*bytes == LC_STUD4) || (*bytes == LC_STUD3))
-				bytes += 2*sizeof(unsigned char) + 12*sizeof(float);
+			else if ((*info == LC_STUD4) || (*info == LC_STUD3))
+				info += 2 + 12;
 		}
 
 		group = group->next;
@@ -2724,29 +2659,8 @@ bool SaveLDrawPiece(LC_LDRAW_PIECE* piece, lcFile* NewIdxFile, lcFile* NewBinFil
 	}
 
 	// Textures
-	for (bt = 0, tex = piece->textures; tex; tex = tex->next)
-		bt++;
+	bt = 0;
 	NewBin.WriteU8(&bt, 1);
-
-	for (tex = piece->textures; tex; tex = tex->next)
-	{
-		NewBin.WriteU8(&tex->color, 1);
-		NewBin.WriteBuffer(tex->name, 8);
-
-		for (i = 0; i < 12; i++)
-		{
-			float tmp[1] = { tex->points[i]*scale };
-			short sh[1] = { (short)tmp[0] };
-			NewBin.WriteS16(sh, 1);
-		}
-
-		for (i = 12; i < 20; i++)
-		{
-			float tmp = tex->points[i];
-			short sh[1] = { (short)tmp };
-			NewBin.WriteS16(sh, 1);
-		}
-	}
 
 	for (s = 0, group = piece->groups; group; group = group->next)
 		s++;
@@ -2856,16 +2770,8 @@ void FreeLDrawPiece(LC_LDRAW_PIECE* piece)
 {
 	group_t *tmp, *pg = piece->groups;
 	connection_t *ctmp, *pc = piece->connections;
-	texture_t *ttmp, *pt = piece->textures;
 
 	free(piece->verts);
-
-	while (pt)
-	{
-		ttmp = pt->next;
-		free(pt);
-		pt = ttmp;
-	}
 
 	while (pg != NULL)
 	{

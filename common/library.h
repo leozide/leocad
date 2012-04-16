@@ -144,19 +144,11 @@ struct group_t
 
 struct lineinfo_t
 {
-	unsigned char type;
-	unsigned char color;
+	int type;
+	lcuint32 color;
 	float points[12];
 	int indices[4];
 	lineinfo_t* next;
-};
-
-struct texture_t
-{
-	float points[20];
-	unsigned char color;
-	char name[9];
-	texture_t* next;
 };
 
 struct LC_LDRAW_PIECE
@@ -166,9 +158,8 @@ struct LC_LDRAW_PIECE
 	bool long_info;
 	connection_t* connections;
 	group_t* groups;
-	texture_t* textures;
 	char name[LC_MAXPATH];
-	char description[65];
+	char description[256];
 };
 
 bool ReadLDrawPiece(const char* filename, LC_LDRAW_PIECE* piece);

@@ -1,6 +1,7 @@
 #ifndef _LC_MESH_H_
 #define _LC_MESH_H_
 
+#include <stdlib.h>
 #include "opengl.h"
 #include "algebra.h"
 

@@ -365,8 +365,6 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 {
 	char Line[1024];
 
-	float* Verts = (float*)mVertexBuffer.mData;
-
 	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
 	{
 		lcMeshSection* Section = &mSections[SectionIdx];

@@ -1840,7 +1840,7 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 			NewEntry.Color = Line->color;
 
 			ColorGroups.AddSorted(NewEntry, ColorGroupCompare, NULL);
-			Group = &ColorGroups[ColorGroups.GetSize() - 1];
+			continue;
 		}
 
 		lineinfo_t* NextLine = Line->next;

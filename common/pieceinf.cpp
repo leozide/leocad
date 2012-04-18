@@ -583,13 +583,13 @@ template<typename DstType>
 void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 {
 	// Create empty sections.
-	lcMeshSection** DstSections = new lcMeshSection*[gNumColors * 2];
-	memset(DstSections, 0, sizeof(DstSections[0]) * gNumColors * 2);
+	lcMeshSection** DstSections = new lcMeshSection*[gColorList.GetSize() * 2];
+	memset(DstSections, 0, sizeof(DstSections[0]) * gColorList.GetSize() * 2);
 
 	int IndexOffset = 0;
 	int NumSections = 0;
 
-	for (int ColorIdx = 0; ColorIdx < gNumColors; ColorIdx++)
+	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 	{
 		if (SectionIndices[ColorIdx * 2 + 0])
 		{
@@ -747,8 +747,9 @@ void PieceInfo::LoadInformation()
 	int NumSections = 0;
 	int NumVertices = fixverts;
 	int NumIndices = 0;
-	int* SectionIndices = new int[gNumColors * 2];
-	memset(SectionIndices, 0, sizeof(int) * gNumColors * 2);
+	ObjArray<int> SectionIndices(gColorList.GetSize() * 2);
+	SectionIndices.SetSize(gColorList.GetSize() * 2);
+	memset(&SectionIndices[0], 0, SectionIndices.GetSize() * sizeof(int));
 
 	while (GroupCount--)
 	{
@@ -770,6 +771,13 @@ void PieceInfo::LoadInformation()
 				{
 					int ColorIndex = lcGetColorIndex(LCUINT32(*info));
 					info++;
+
+					if (SectionIndices.GetSize() < (ColorIndex + 1) * 2)
+					{
+						int OldSize = SectionIndices.GetSize();
+						SectionIndices.SetSize((ColorIndex + 1) * 2);
+						memset(&SectionIndices[OldSize], 0, (SectionIndices.GetSize() - OldSize) * sizeof(int));
+					}
 
 					if (m_nFlags & LC_PIECE_LONGDATA_FILE)
 					{
@@ -898,13 +906,11 @@ void PieceInfo::LoadInformation()
 	}
 
 	if (NumVertices < 0x10000)
-		BuildMesh<GLushort>(buf, SectionIndices);
+		BuildMesh<GLushort>(buf, &SectionIndices[0]);
 	else
-		BuildMesh<GLuint>(buf, SectionIndices);
+		BuildMesh<GLuint>(buf, &SectionIndices[0]);
 
 	mMesh->UpdateBuffers();
-
-	delete[] SectionIndices;
 
 	free(buf);
 }

@@ -2,8 +2,10 @@
 #define _LC_COLORS_H_
 
 #include "opengl.h"
+#include "array.h"
 
 #define LC_MAX_COLOR_NAME 64
+#define LC_COLOR_DIRECT 0x80000000
 
 struct lcColor
 {
@@ -14,35 +16,32 @@ struct lcColor
 	char Name[LC_MAX_COLOR_NAME];
 };
 
-extern lcColor* gColorList;
-//extern int gNumColors;
-#define gNumColors 32 // LC_MAXCOLORS
-#define gEdgeColor 28 // LC_COL_EDGES
-#define gDefaultColor 31 // LC_COL_DEFAULT
+extern ObjArray<lcColor> gColorList;
+extern int gNumUserColors;
+extern int gEdgeColor;
+extern int gDefaultColor;
 
-
+void lcLoadDefaultColors();
 int lcGetColorIndex(lcuint32 ColorCode);
-int lcGetColorCode(int ColorIndex);
+
+inline lcuint32 lcGetColorCode(int ColorIndex)
+{
+	return gColorList[ColorIndex].Code;
+}
 
 inline bool lcIsColorTranslucent(int ColorIndex)
 {
-	return (ColorIndex > 13 && ColorIndex < 22); // temp
+	return gColorList[ColorIndex].Translucent;
 }
 
 inline void lcSetColor(int ColorIndex)
 {
-extern unsigned char FlatColorArray[31][3];
-glColor3ubv(FlatColorArray[ColorIndex]);
-//	float* Color = gColorList[ColorIndex].Value;
-//	glColor4f(Color[0], Color[1], Color[2], Color[3]);
+	glColor4fv(gColorList[ColorIndex].Value);
 }
 
 inline void lcSetEdgeColor(int ColorIndex)
 {
-extern unsigned char FlatColorArray[31][3];
-glColor3ubv(FlatColorArray[LC_COL_EDGES]);
-//	float* Color = gColorList[ColorIndex].Edge;
-//	glColor4f(Color[0], Color[1], Color[2], Color[3]);
+	glColor4fv(gColorList[ColorIndex].Edge);
 }
 
 inline void lcSetColorFocused()

@@ -1023,7 +1023,7 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 
 		if (cmd == 1)
 		{
-			int cl = 0;
+			int cl = color;
 			if (color == 16) 
 				cl = DefColor;
 

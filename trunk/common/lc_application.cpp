@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include <stdio.h>
 #include "lc_application.h"
+#include "lc_colors.h"
 #include "library.h"
 #include "system.h"
 #include "console.h"
@@ -210,6 +211,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	char* ImageName = NULL;
+
+	lcLoadDefaultColors();
 
 	// File to open.
 	char* ProjectName = NULL;

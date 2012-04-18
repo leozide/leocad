@@ -51,6 +51,7 @@ public:
 
 	void RemoveIndex(int Index);
 	void RemoveAll();
+	void SetSize(int NewSize);
 	void Add(const T& Obj);
 	void AddSorted(const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData);
 	void InsertAt(int Index, const T& Obj);

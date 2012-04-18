@@ -1,14 +1,14 @@
 #include "lc_global.h"
 #include "lc_colors.h"
 #include "lc_file.h"
-#include "array.h"
 #include <float.h>
-//#include "system.h"
 
-lcColor* gColorList;
-//int gNumColors;
+ObjArray<lcColor> gColorList;
+int gNumUserColors;
+int gEdgeColor;
+int gDefaultColor;
 
-static const char sDefaultColors[] =
+static const char sDefaultColorConfig[] =
 {
 	"0 LDraw.org Configuration File\n"
 	"0 Name: LDConfig.ldr\n"
@@ -192,23 +192,47 @@ static void GetToken(char*& Ptr, char* Token)
 	*Token = 0;
 }
 
-void LoadColorFile(lcFile& File)
+static void LoadColorFile(lcFile& File)
 {
 	char Line[1024], Token[1024];
-	ObjArray<lcColor> Colors;
-	lcColor Color;
+	ObjArray<lcColor>& Colors = gColorList;
+	lcColor Color, MainColor, EdgeColor;
+
+	MainColor.Code = 16;
+	MainColor.Translucent = false;
+	MainColor.Value[0] = 0.5f;
+	MainColor.Value[1] = 0.5f;
+	MainColor.Value[2] = 0.5f;
+	MainColor.Value[3] = 1.0f;
+	MainColor.Edge[0] = 0.2f;
+	MainColor.Edge[1] = 0.2f;
+	MainColor.Edge[2] = 0.2f;
+	MainColor.Edge[3] = 1.0f;
+	strcpy(MainColor.Name, "Main Color");
+
+	EdgeColor.Code = 24;
+	EdgeColor.Translucent = false;
+	EdgeColor.Value[0] = 0.5f;
+	EdgeColor.Value[1] = 0.5f;
+	EdgeColor.Value[2] = 0.5f;
+	EdgeColor.Value[3] = 1.0f;
+	EdgeColor.Edge[0] = 0.2f;
+	EdgeColor.Edge[1] = 0.2f;
+	EdgeColor.Edge[2] = 0.2f;
+	EdgeColor.Edge[3] = 1.0f;
+	strcpy(EdgeColor.Name, "Edge Color");
 
 	while (File.ReadLine(Line, sizeof(Line)))
 	{
 		char* Ptr = Line;
 
 		GetToken(Ptr, Token);
-		if (!strcmp(Token, "0"))
+		if (strcmp(Token, "0"))
 			continue;
 
 		GetToken(Ptr, Token);
 		strupr(Token);
-		if (!strcmp(Token, "!COLOUR"))
+		if (strcmp(Token, "!COLOUR"))
 			continue;
 
 		Color.Code = -1;
@@ -308,83 +332,60 @@ void LoadColorFile(lcFile& File)
 			}
 		}
 
+		if (Color.Code == 16)
+		{
+			MainColor = Color;
+			continue;
+		}
+
+		if (Color.Code == 24)
+		{
+			EdgeColor = Color;
+			continue;
+		}
+
 		Colors.Add(Color);
 	}
 
-	/*
-	lcColor DefaultColors[] =
-	{
-		{  16, { 0.5000f, 0.5000f, 0.5000f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Default" },
-		{  24, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Edge" },
-		{  -1, { 0.8980f, 0.2980f, 0.4000f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Selected" },
-		{  -2, { 0.4000f, 0.2980f, 0.8980f, 1.0000f }, { 0.2000f, 0.2000f, 0.2000f, 1.0000f }, false, "Focused" },
-	};
-
-	// Reorder colors.
-	lcColor Default;
-	Default.Code = -1;
-	lcColor Edge;
-	Edge.Code = -1;
-
-	for (int i = 0; i < mColors.GetSize(); i++)
-	{
-		if (mColors[i].Code != 16)
-			continue;
-
-		Default = mColors[i];
-		mColors.RemoveIndex(i);
-		break;
-	}
-
-	for (int i = 0; i < mColors.GetSize(); i++)
-	{
-		if (mColors[i].Code != 24)
-			continue;
-
-		Edge = mColors[i];
-		mColors.RemoveIndex(i);
-		break;
-	}
-
-	if (Default.Code == -1)
-		Default = DefaultColors[0];
-
-	if (Edge.Code == -1)
-		Edge = DefaultColors[1];
-
-	for (int i = 0; i < mColors.GetSize(); i++)
-	{
-		if (mColors[i].Edge[0] != FLT_MAX)
-			continue;
-
-		mColors[i].Edge[0] = Edge.Value[0];
-		mColors[i].Edge[1] = Edge.Value[1];
-		mColors[i].Edge[2] = Edge.Value[2];
-	}
-
-	mColors.Add(Default);
-	mColors.Add(Edge);
-	mColors.Add(DefaultColors[2]);
-	mColors.Add(DefaultColors[3]);
-	*/
+	gDefaultColor = Colors.GetSize();
+	Colors.Add(MainColor);
+	gNumUserColors = Colors.GetSize();
+	gEdgeColor = Colors.GetSize();
+	Colors.Add(EdgeColor);
 }
 
-void LoadDefaultColors()
+void lcLoadDefaultColors()
 {
 	lcMemFile File;
-	File.WriteBuffer(sDefaultColors, sizeof(sDefaultColors));
+	File.WriteBuffer(sDefaultColorConfig, sizeof(sDefaultColorConfig));
 	File.Seek(0, SEEK_SET);
 	LoadColorFile(File);
 }
 
 int lcGetColorIndex(lcuint32 ColorCode)
 {
-	unsigned char ConvertColor(int c); // temp fix
-	return ConvertColor(ColorCode);
-}
+	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+		if (gColorList[ColorIdx].Code == ColorCode)
+			return ColorIdx;
 
-int lcGetColorCode(int ColorIndex)
-{
-	const int ExtendedColorTable[LC_MAXCOLORS] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 }; // temp fix
-	return ExtendedColorTable[ColorIndex];
+	if (ColorCode & LC_COLOR_DIRECT)
+	{
+		lcColor Color;
+
+		Color.Code = ColorCode;
+		Color.Translucent = false;
+		Color.Value[0] = (float)((ColorCode & 0xff0000) >> 16) / 255.0f;
+		Color.Value[1] = (float)((ColorCode & 0x00ff00) >>  8) / 255.0f;
+		Color.Value[2] = (float)((ColorCode & 0x0000ff) >>  0) / 255.0f;
+		Color.Edge[0] = 0.2f;
+		Color.Edge[1] = 0.2f;
+		Color.Edge[2] = 0.2f;
+		Color.Edge[3] = 1.0f;
+		sprintf(Color.Name, "Color %06x", ColorCode & 0xffffff);
+
+		gColorList.Add(Color);
+		return gColorList.GetSize() - 1;
+	}
+
+	return 0;
 }

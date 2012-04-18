@@ -5,6 +5,7 @@
 #include "lc_global.h"
 #include <stdlib.h>
 #include "library.h"
+#include "lc_colors.h"
 #include "lc_file.h"
 #include "texture.h"
 #include "pieceinf.h"
@@ -1964,7 +1965,7 @@ static void DecodeFile(FILE *F, Matrix *mat, lcuint32 CurColor, lineinfo_t* info
 			sscanf(buf, "%d %i", &type, &ColorCodeHex);
 
 			if (ColorCode != ColorCodeHex)
-				ColorCode = ColorCodeHex | 0x80000000;
+				ColorCode = ColorCodeHex | LC_COLOR_DIRECT;
 		}
 
 		if (ColorCode == 16)
@@ -2126,7 +2127,7 @@ static void decodeconnections(FILE *F, Matrix *mat, lcuint32 CurColor, char* dir
 			sscanf(buf, "%d %i", &type, &ColorCodeHex);
 
 			if (ColorCode != ColorCodeHex)
-				ColorCode = ColorCodeHex | 0x80000000;
+				ColorCode = ColorCodeHex | LC_COLOR_DIRECT;
 		}
 
 		if (ColorCode == 16)

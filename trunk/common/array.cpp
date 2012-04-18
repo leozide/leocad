@@ -237,6 +237,15 @@ void ObjArray<T>::RemoveIndex(int Index)
 }
 
 template <class T>
+void ObjArray<T>::SetSize(int NewSize)
+{
+	if (NewSize > m_Alloc)
+		Expand(NewSize - m_Alloc);
+
+	m_Length = NewSize;
+}
+
+template <class T>
 void ObjArray<T>::Add(const T& Obj)
 {
 	Expand(1);
@@ -252,7 +261,7 @@ void ObjArray<T>::AddSorted (const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* 
 	{
 		if (Func(Obj, m_Data[i], SortData) < 0)
 		{
-			InsertAt (i, Obj);
+			InsertAt(i, Obj);
 			return;
 		}
 	}

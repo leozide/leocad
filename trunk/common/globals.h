@@ -12,7 +12,5 @@ extern MainWnd* main_window;
 
 extern unsigned char FlatColorArray[31][3];
 extern unsigned char ColorArray[31][4];
-extern const char* colornames[LC_MAXCOLORS];
-extern const char* altcolornames[LC_MAXCOLORS];
 
 #endif // _GLOBALS_H_

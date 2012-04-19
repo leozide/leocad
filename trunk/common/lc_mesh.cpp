@@ -375,9 +375,9 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
 
 		if (Section->ColorIndex == gDefaultColor)
-			sprintf(Line, "usemtl %s\n", altcolornames[DefaultColorIndex]);
+			sprintf(Line, "usemtl %s\n", gColorList[DefaultColorIndex].SafeName);
 		else
-			sprintf(Line, "usemtl %s\n", altcolornames[Section->ColorIndex]);
+			sprintf(Line, "usemtl %s\n", gColorList[Section->ColorIndex].SafeName);
 		File.WriteLine(Line);
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)

@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_colors.h"
 #include "propertiesgridctrl.h"
 #include "globals.h"
 
@@ -172,7 +173,7 @@ CString CLeoCADMFCPropertyGridColorProperty::FormatProperty()
 {
 	ASSERT_VALID(this);
 
-	return colornames[m_Color];
+	return gColorList[m_Color].Name;
 }
 
 void CLeoCADMFCPropertyGridColorProperty::SetColor(int color, bool original)

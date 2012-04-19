@@ -9,20 +9,6 @@
 Messenger* messenger;
 MainWnd* main_window;
 
-const char* colornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
-	"Light Green", "Blue", "Light Blue", "Yellow", "White",
-	"Dark Gray", "Black", "Brown", "Pink", "Purple", "Gold",
-	"Clear Red", "Clear Orange", "Clear Green", "Clear Light Green",
-	"Clear Blue", "Clear Light Blue", "Clear Yellow", "Clear White",
-	"Light Gray", "Tan", "Light Brown", "Light Pink", "Turquoise", "Silver" };
-
-const char* altcolornames[LC_MAXCOLORS] = { "Red", "Orange", "Green",
-	"LightGreen", "Blue", "LightBlue", "Yellow", "White",
-	"DarkGray", "Black", "Brown", "Pink", "Purple", "Gold",
-	"ClearRed", "ClearOrange", "ClearGreen", "ClearLightGreen",
-	"ClearBlue", "ClearLightBlue", "ClearYellow", "ClearWhite",
-	"LightGray", "Tan", "LightBrown", "LightPink", "Turquoise", "Silver" };
-
 unsigned char FlatColorArray[31][3] = {
 	{ 166,  25,  25 },  // 0 - Red
 	{ 255, 127,  51 },  // 1 - Orange

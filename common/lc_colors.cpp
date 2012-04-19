@@ -209,6 +209,7 @@ static void LoadColorFile(lcFile& File)
 	MainColor.Edge[2] = 0.2f;
 	MainColor.Edge[3] = 1.0f;
 	strcpy(MainColor.Name, "Main Color");
+	strcpy(MainColor.SafeName, "Main_Color");
 
 	EdgeColor.Code = 24;
 	EdgeColor.Translucent = false;
@@ -221,6 +222,7 @@ static void LoadColorFile(lcFile& File)
 	EdgeColor.Edge[2] = 0.2f;
 	EdgeColor.Edge[3] = 1.0f;
 	strcpy(EdgeColor.Name, "Edge Color");
+	strcpy(EdgeColor.SafeName, "Edge_Color");
 
 	while (File.ReadLine(Line, sizeof(Line)))
 	{
@@ -249,6 +251,7 @@ static void LoadColorFile(lcFile& File)
 		GetToken(Ptr, Token);
 		strncpy(Color.Name, Token, sizeof(Color.Name));
 		Color.Name[LC_MAX_COLOR_NAME - 1] = 0;
+		strncpy(Color.SafeName, Color.Name, sizeof(Color.SafeName));
 
 		for (char* Ptr = strchr((char*)Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
 			*Ptr = ' ';
@@ -381,7 +384,8 @@ int lcGetColorIndex(lcuint32 ColorCode)
 		Color.Edge[1] = 0.2f;
 		Color.Edge[2] = 0.2f;
 		Color.Edge[3] = 1.0f;
-		sprintf(Color.Name, "Color %06x", ColorCode & 0xffffff);
+		sprintf(Color.Name, "Color %06X", ColorCode & 0xffffff);
+		sprintf(Color.SafeName, "Color_%06X", ColorCode & 0xffffff);
 
 		gColorList.Add(Color);
 		return gColorList.GetSize() - 1;

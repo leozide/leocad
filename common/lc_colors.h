@@ -14,6 +14,7 @@ struct lcColor
 	float Value[4];
 	float Edge[4];
 	char Name[LC_MAX_COLOR_NAME];
+	char SafeName[LC_MAX_COLOR_NAME];
 };
 
 extern ObjArray<lcColor> gColorList;

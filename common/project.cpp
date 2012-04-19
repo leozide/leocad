@@ -3190,7 +3190,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	{
 		col[c] = ID;
 		ID++;
-		fprintf(f, "<td><center>%s</center></td>\n", colornames[c]);
+		fprintf(f, "<td><center>%s</center></td>\n", gColorList[c].Name);
 	}
 	ID++;
 	fputs("</tr>\n",f);
@@ -3953,23 +3953,25 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				POVFile.WriteLine("#include \"colors.inc\"\n\n");
 
 			// Add color definitions.
-			for (int ColorIdx = 0; ColorIdx < LC_MAXCOLORS; ColorIdx++)
+			for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 			{
-				if (ColorIdx > 13 && ColorIdx < 22)
+				lcColor* Color = &gColorList[ColorIdx];
+
+				if (lcIsColorTranslucent(ColorIdx))
 				{
 					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%d/255, %d/255, %d/255> filter 0.9 } finish { ambient 0.3 diffuse 0.2 reflection 0.25 phong 0.3 phong_size 60 } }\n",
-						    altcolornames[ColorIdx], ColorArray[ColorIdx][0], ColorArray[ColorIdx][1], ColorArray[ColorIdx][2]);
+					        Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 				}
 				else
 				{
 					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%d/255, %d/255, %d/255> } finish { ambient 0.1 phong 0.2 phong_size 20 } }\n",
-						    altcolornames[ColorIdx], ColorArray[ColorIdx][0], ColorArray[ColorIdx][1], ColorArray[ColorIdx][2]);
+					       Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 				}
 
 				POVFile.WriteLine(Line);
 
 				if (!ColorTable[ColorIdx][0])
-					sprintf(ColorTable[ColorIdx], "lc_%s", altcolornames[ColorIdx]);
+					sprintf(ColorTable[ColorIdx], "lc_%s", Color->SafeName);
 			}
 
 			POVFile.WriteLine("\n");
@@ -4157,8 +4159,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			FILE* mat = fopen(buf, "wt");
 			fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
-			for (int i = 0; i < LC_MAXCOLORS; i++)
-				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", altcolornames[i], (float)FlatColorArray[i][0]/255, (float)FlatColorArray[i][1]/255, (float)FlatColorArray[i][2]/255);
+			for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+			{
+				lcColor* Color = &gColorList[ColorIdx];
+				fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+			}
 			fclose(mat);
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)

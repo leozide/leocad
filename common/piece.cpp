@@ -27,34 +27,6 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// Static functions
-
-inline static void SetCurrentColor(unsigned char nColor, bool bLighting)
-{
-	bool Transparent = (nColor > 13 && nColor < 22);
-
-	if (bLighting || Transparent)
-		glColor4ubv(ColorArray[nColor]);
-	else
-		glColor3ubv(FlatColorArray[nColor]);
-
-	if (nColor > 27)
-		return;
-
-	if (Transparent)
-	{
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-	else
-	{
-		glDepthMask(GL_TRUE);
-		glDisable(GL_BLEND);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
 
 Piece::Piece(PieceInfo* pPieceInfo)

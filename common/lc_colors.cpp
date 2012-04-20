@@ -371,25 +371,34 @@ int lcGetColorIndex(lcuint32 ColorCode)
 		if (gColorList[ColorIdx].Code == ColorCode)
 			return ColorIdx;
 
+	lcColor Color;
+
+	Color.Code = ColorCode;
+	Color.Translucent = false;
+	Color.Edge[0] = 0.2f;
+	Color.Edge[1] = 0.2f;
+	Color.Edge[2] = 0.2f;
+	Color.Edge[3] = 1.0f;
+
 	if (ColorCode & LC_COLOR_DIRECT)
 	{
-		lcColor Color;
-
-		Color.Code = ColorCode;
-		Color.Translucent = false;
 		Color.Value[0] = (float)((ColorCode & 0xff0000) >> 16) / 255.0f;
 		Color.Value[1] = (float)((ColorCode & 0x00ff00) >>  8) / 255.0f;
 		Color.Value[2] = (float)((ColorCode & 0x0000ff) >>  0) / 255.0f;
-		Color.Edge[0] = 0.2f;
-		Color.Edge[1] = 0.2f;
-		Color.Edge[2] = 0.2f;
-		Color.Edge[3] = 1.0f;
+		Color.Value[3] = 1.0f;
 		sprintf(Color.Name, "Color %06X", ColorCode & 0xffffff);
 		sprintf(Color.SafeName, "Color_%06X", ColorCode & 0xffffff);
-
-		gColorList.Add(Color);
-		return gColorList.GetSize() - 1;
+	}
+	else
+	{
+		Color.Value[0] = 0.5f;
+		Color.Value[1] = 0.5f;
+		Color.Value[2] = 0.5f;
+		Color.Value[3] = 1.0f;
+		sprintf(Color.Name, "Color %03d", ColorCode);
+		sprintf(Color.SafeName, "Color_%03d", ColorCode);
 	}
 
-	return 0;
+	gColorList.Add(Color);
+	return gColorList.GetSize() - 1;
 }

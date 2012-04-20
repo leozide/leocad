@@ -1266,9 +1266,10 @@ bool SystemDoDialog(int nMode, void* param)
 			ps.m_PageSummary.m_strDescription = opts->strDescription;
 			ps.m_PageSummary.m_strComments = opts->strComments;
 			ps.m_PageGeneral.m_strFilename = opts->strFilename;
-			ps.m_PagePieces.names = opts->names;
-			ps.m_PagePieces.count = opts->count;
-			ps.m_PagePieces.lines = opts->lines;
+			ps.m_PagePieces.mPieceNames = opts->PieceNames;
+			ps.m_PagePieces.mNumPieces = opts->NumPieces;
+			ps.m_PagePieces.mPieceColorCount = opts->PieceColorCount;
+			ps.m_PagePieces.mNumColors = opts->NumColors;
 
 			if (ps.DoModal() == IDOK)
 			{

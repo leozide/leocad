@@ -329,7 +329,7 @@ struct LC_HTMLDLG_OPTS
 	bool listend;
 	bool liststep;
 	bool highlight;
-  bool htmlext;
+	bool htmlext;
 	LC_IMAGEDLG_OPTS imdlg;
 };
 
@@ -352,9 +352,10 @@ struct LC_PROPERTIESDLG_OPTS
 	char strComments[256];
 	char* strTitle;
 	char* strFilename;
-	char** names;
-	unsigned short* count;
-	int lines;
+	const char** PieceNames;
+	int NumPieces;
+	int* PieceColorCount;
+	int NumColors;
 };
 
 struct LC_GROUPEDITDLG_OPTS

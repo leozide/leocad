@@ -93,11 +93,11 @@ class CPropertiesPieces : public CPropertyPage
 public:
 	CPropertiesPieces();
 	~CPropertiesPieces();
-	char** names;
-	unsigned short* count;
-	int lines;
-	int col[LC_MAXCOLORS];
-	int totalcount[LC_MAXCOLORS];
+	const char** mPieceNames;
+	int mNumPieces;
+	int* mPieceColorCount;
+	int mNumColors;
+	int* mColorColumn;
 
 // Dialog Data
 	//{{AFX_DATA(CPropertiesPieces)

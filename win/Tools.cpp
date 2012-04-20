@@ -98,18 +98,18 @@ static unsigned char oneto8[2] = { 0, 255 };
 static int defaultOverride[13] = { 0, 3, 24, 27, 64, 67, 88, 173, 181, 236, 247, 164, 91 };
 
 static PALETTEENTRY defaultPalEntry[20] = {
-    { 0,   0,   0,    0 }, { 0x80,0,   0,    0 },
-    { 0,   0x80,0,    0 }, { 0x80,0x80,0,    0 },
-    { 0,   0,   0x80, 0 }, { 0x80,0,   0x80, 0 },
-    { 0,   0x80,0x80, 0 }, { 0xC0,0xC0,0xC0, 0 },
+	{ 0,   0,   0,    0 }, { 0x80,0,   0,    0 },
+	{ 0,   0x80,0,    0 }, { 0x80,0x80,0,    0 },
+	{ 0,   0,   0x80, 0 }, { 0x80,0,   0x80, 0 },
+	{ 0,   0x80,0x80, 0 }, { 0xC0,0xC0,0xC0, 0 },
 
-    { 192, 220, 192,  0 }, { 166, 202, 240,  0 },
-    { 255, 251, 240,  0 }, { 160, 160, 164,  0 },
+	{ 192, 220, 192,  0 }, { 166, 202, 240,  0 },
+	{ 255, 251, 240,  0 }, { 160, 160, 164,  0 },
 
-    { 0x80,0x80,0x80, 0 }, { 0xFF,0,   0,    0 },
-    { 0,   0xFF,0,    0 }, { 0xFF,0xFF,0,    0 },
-    { 0,   0,   0xFF, 0 }, { 0xFF,0,   0xFF, 0 },
-    { 0,   0xFF,0xFF, 0 }, { 0xFF,0xFF,0xFF, 0 }
+	{ 0x80,0x80,0x80, 0 }, { 0xFF,0,   0,    0 },
+	{ 0,   0xFF,0,    0 }, { 0xFF,0xFF,0,    0 },
+	{ 0,   0,   0xFF, 0 }, { 0xFF,0,   0xFF, 0 },
+	{ 0,   0xFF,0xFF, 0 }, { 0xFF,0xFF,0xFF, 0 }
 };
 
 static unsigned char ComponentFromIndex(int i, UINT nbits, UINT shift)
@@ -142,12 +142,9 @@ BOOL CreateRGBPalette(HDC hDC, CPalette **ppCPalette)
 
 	for (i=0; i<n; i++)
 	{
-		pPal->palPalEntry[i].peRed =
-				ComponentFromIndex(i, pfd.cRedBits, pfd.cRedShift);
-		pPal->palPalEntry[i].peGreen =
-				ComponentFromIndex(i, pfd.cGreenBits, pfd.cGreenShift);
-		pPal->palPalEntry[i].peBlue =
-				ComponentFromIndex(i, pfd.cBlueBits, pfd.cBlueShift);
+		pPal->palPalEntry[i].peRed = ComponentFromIndex(i, pfd.cRedBits, pfd.cRedShift);
+		pPal->palPalEntry[i].peGreen = ComponentFromIndex(i, pfd.cGreenBits, pfd.cGreenShift);
+		pPal->palPalEntry[i].peBlue = ComponentFromIndex(i, pfd.cBlueBits, pfd.cBlueShift);
 		pPal->palPalEntry[i].peFlags = 0;
 	}
 
@@ -283,7 +280,7 @@ void Export3DStudio()
 	mesh->ambientlight.r = project->m_fAmbient[0];
 	mesh->ambientlight.g = project->m_fAmbient[1];
 	mesh->ambientlight.b = project->m_fAmbient[2];
-	PutMeshSet3ds(db, mesh);  
+	PutMeshSet3ds(db, mesh);
 	ReleaseMeshSet3ds(&mesh);
 
 	// BACKGROUND
@@ -441,21 +438,22 @@ void Export3DStudio()
 		ReleaseMaterial3ds(&matr);
 	}
 
-	Piece* pPiece;
 	int objcount = 0;
-	for (pPiece = project->m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-	{
-		// MESH OBJECT
-		mesh3ds *mobj = NULL;
-		UINT facecount = 0, i, j = 0;
-		UINT facemats[LC_COL_DEFAULT+1];
-		memset(facemats, 0, sizeof(facemats));
+	UINT* facemats = new UINT[gColorList.GetSize()];
 
+	for (Piece* pPiece = project->m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	{
 		PieceInfo* pInfo = pPiece->GetPieceInfo();
 		lcMesh* Mesh = pInfo->mMesh;
 
 		if (Mesh->mIndexType == GL_UNSIGNED_INT)
 			continue; // 3DS can't handle this
+
+		// MESH OBJECT
+		mesh3ds *mobj = NULL;
+		UINT facecount = 0;
+		memset(facemats, 0, sizeof(facemats[0]) * gColorList.GetSize());
+		int NumColors = 0;
 
 		// Count the number of triangles.
 		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
@@ -466,6 +464,8 @@ void Export3DStudio()
 				continue;
 
 			facecount += Section->NumIndices / 3;
+			if (!facemats[Section->ColorIndex])
+				NumColors++;
 			facemats[Section->ColorIndex] += Section->NumIndices / 3;
 		}
 
@@ -487,6 +487,7 @@ void Export3DStudio()
 			mobj->vertexarray[c].z = tmp[2];
 		}
 
+		int NumFaces = 0;
 		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 		{
 			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
@@ -496,60 +497,54 @@ void Export3DStudio()
 
 			lcuint16* Indices = (lcuint16*)Mesh->mIndexBuffer.mData + Section->IndexOffset / sizeof(lcuint16);
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3, NumFaces++)
 			{
-				mobj->facearray[j].v1 = Indices[Idx + 0];
-				mobj->facearray[j].v2 = Indices[Idx + 1];
-				mobj->facearray[j].v3 = Indices[Idx + 2];
-				mobj->facearray[j].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
+				mobj->facearray[NumFaces].v1 = Indices[Idx + 0];
+				mobj->facearray[NumFaces].v2 = Indices[Idx + 1];
+				mobj->facearray[NumFaces].v3 = Indices[Idx + 2];
+				mobj->facearray[NumFaces].flag = FaceABVisable3ds|FaceBCVisable3ds|FaceCAVisable3ds;
 			}
 		}
 
-		i = 0;
-		for (j = 0; j < LC_COL_DEFAULT+1; j++)
-			if (facemats[j])
-				i++;
+		mobj->nmats = NumColors;
+		InitMeshObjField3ds(mobj, InitMatArray3ds);
 
-		mobj->nmats = i;
-		InitMeshObjField3ds (mobj, InitMatArray3ds);
-
-		i = 0;
-
-		for (j = 0; j < LC_COL_DEFAULT+1; j++)
+		int MaterialIdx = 0;
+		for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 		{
-			if (facemats[j])
+			if (!facemats[ColorIdx])
+				continue;
+
+			InitMatArrayIndex3ds(mobj, MaterialIdx, facemats[ColorIdx]);
+			sprintf(mobj->matarray[MaterialIdx].name, "Material_%s", ColorIdx == gDefaultColor ? gColorList[pPiece->mColorCode].SafeName : gColorList[ColorIdx].SafeName);
+			mobj->matarray[MaterialIdx].nfaces = facemats[ColorIdx];
+
+			UINT curface = 0;
+			facecount = 0;
+
+			for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 			{
-				InitMatArrayIndex3ds (mobj, i, facemats[j]);
-				sprintf(mobj->matarray[i].name, "Material%d", j == LC_COL_DEFAULT ? pPiece->mColorCode : j);
-				mobj->matarray[i].nfaces = facemats[j];
+				lcMeshSection* Section = &Mesh->mSections[SectionIdx];
 
-				UINT curface = 0;
-				facecount = 0;
+				if (Section->PrimitiveType != GL_TRIANGLES)
+					continue;
 
-				for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+				if (Section->ColorIndex == ColorIdx)
 				{
-					lcMeshSection* Section = &Mesh->mSections[SectionIdx];
-
-					if (Section->PrimitiveType != GL_TRIANGLES)
-						continue;
-
-					if (Section->ColorIndex == j)
+					for (int k = 0; k < Section->NumIndices; k += 3)
 					{
-						for (int k = 0; k < Section->NumIndices; k += 3)
-						{
-							mobj->matarray[i].faceindex[facecount] = curface;
-							facecount++;
-							curface++;
-						}
-					}
-					else
-					{
-						curface += Section->NumIndices / 3;
+						mobj->matarray[MaterialIdx].faceindex[facecount] = curface;
+						facecount++;
+						curface++;
 					}
 				}
-
-				i++;
+				else
+				{
+					curface += Section->NumIndices / 3;
+				}
 			}
+
+			MaterialIdx++;
 		}
 	
 		FillMatrix3ds(mobj);
@@ -559,6 +554,8 @@ void Export3DStudio()
 		PutMesh3ds(db, mobj);
 		RelMeshObj3ds(&mobj);
 	}
+
+	delete[] facemats;
 
 /*	
 	InitMeshObj3ds(&mobj, 12, 8, InitNoExtras3ds);

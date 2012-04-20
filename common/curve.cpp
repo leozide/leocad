@@ -613,7 +613,7 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 	else
 		glColor3ubv (FlatColorArray[m_nColor]);
 
-	if (m_nColor > 13 && m_nColor < 22) // FIXME: use a #define
+	if (lcIsColorTranslucent(m_nColor))
 	{
 		if (!pInfo->transparent)
 		{

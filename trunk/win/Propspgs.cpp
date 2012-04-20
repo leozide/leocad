@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_colors.h"
 #include "resource.h"
 #include "PropsPgs.h"
 
@@ -125,10 +126,13 @@ CPropertiesPieces::CPropertiesPieces() : CPropertyPage(CPropertiesPieces::IDD)
 	//{{AFX_DATA_INIT(CPropertiesPieces)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
+
+	mColorColumn = new int[gColorList.GetSize() + 1];
 }
 
 CPropertiesPieces::~CPropertiesPieces()
 {
+	delete[] mColorColumn;
 }
 
 void CPropertiesPieces::DoDataExchange(CDataExchange* pDX)
@@ -151,145 +155,104 @@ BOOL CPropertiesPieces::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	char tmp[64];
-	int i, j;
-	memset (&totalcount, 0, sizeof (totalcount));
-	for (i = 0; i < lines; i++)
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			totalcount[j] += count[i*LC_MAXCOLORS+j];
-
-	int ID = 0;
-	m_List.InsertColumn(0, "Piece", LVCFMT_LEFT, 130, 0);
-	for (i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
-		{
-			col[i] = ID;
-			ID++;
-
-			CString str;
-			str.LoadString(IDS_COLOR01 + i);
-			m_List.InsertColumn(ID, (LPCSTR)str, LVCFMT_LEFT, 80, 0);
-		}
-		else
-			col[i] = -1;
-	ID++;
-	m_List.InsertColumn(ID, "Total", LVCFMT_LEFT, 60, 0);
-
-	for (i = 0; i < lines; i++)
-	{
-		int total = 0;
-
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			total += count[i*LC_MAXCOLORS+j];
-
-		if (total == 0)
-			continue;
-
-		char name[65];
-		LV_ITEM lvi;
-		lvi.mask = LVIF_TEXT|LVIF_PARAM;
-		lvi.iItem = 0;
-		lvi.iSubItem = 0;
-		lvi.pszText = name;
-		lvi.lParam = i;
-		strcpy (name, names[i]);
-		int idx = m_List.InsertItem(&lvi);
-
-		for (j = 0; j < LC_MAXCOLORS; j++)
-//			if (totalcount[j])
-			if (count[i*LC_MAXCOLORS+j])
-			{
-				sprintf (tmp, "%d", count[i*LC_MAXCOLORS+j]);
-				lvi.iItem = idx;
-				lvi.pszText = tmp;
-				m_List.SetItemText(idx, col[j] + 1, tmp);
-			}
-
-		sprintf (tmp, "%d", total);
-		lvi.iItem = idx;
-		lvi.pszText = tmp;
-		m_List.SetItemText(idx, ID, tmp);
-	}
-
 	m_List.ModifyStyle(LVS_SORTASCENDING | LVS_SORTDESCENDING, 0L);
 
-	char name[65];
-	strcpy (name, "Total");
+	int NumColors = gColorList.GetSize();
+	char tmp[256];
+
+	int NumColumns = 0;
+	m_List.InsertColumn(0, "Piece", LVCFMT_LEFT, 130, 0);
+
+	for (int ColorIdx = 0; ColorIdx < mNumColors; ColorIdx++)
+	{
+		if (mPieceColorCount[mNumPieces * (mNumColors + 1) + ColorIdx])
+		{
+			mColorColumn[ColorIdx] = NumColumns;
+			NumColumns++;
+
+			m_List.InsertColumn(NumColumns, gColorList[ColorIdx].Name, LVCFMT_LEFT, 80, 0);
+		}
+		else
+			mColorColumn[ColorIdx] = -1;
+	}
+
+	mColorColumn[mNumColors] = NumColumns;
+	NumColumns++;
+	m_List.InsertColumn(NumColumns, "Total", LVCFMT_LEFT, 60, 0);
+
+	char name[256];
 	LV_ITEM lvi;
 	lvi.mask = LVIF_TEXT|LVIF_PARAM;
-	lvi.iItem = m_List.GetItemCount();
+	lvi.iItem = 0;
 	lvi.iSubItem = 0;
 	lvi.pszText = name;
-	lvi.lParam = -1;
-	int idx = m_List.InsertItem(&lvi), total = 0;
 
-	for (i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
+	for (int PieceIdx = 0; PieceIdx < mNumPieces + 1; PieceIdx++)
+	{
+		if (!mPieceColorCount[PieceIdx * (mNumColors + 1) + mNumColors])
+			continue;
+
+		if (PieceIdx != mNumPieces)
 		{
-			sprintf (tmp, "%d", totalcount[i]);
-			lvi.iItem = idx;
-			lvi.pszText = tmp;
-			m_List.SetItemText(idx, col[i] + 1, tmp);
-			total += totalcount[i];
+			strcpy(name, mPieceNames[PieceIdx]);
+			lvi.lParam = PieceIdx;
+		}
+		else
+		{
+			strcpy(name, "Total");
+			lvi.iItem = m_List.GetItemCount();
+			lvi.lParam = -1;
 		}
 
-	sprintf (tmp, "%d", total);
-	lvi.iItem = idx;
-	lvi.pszText = tmp;
-	m_List.SetItemText(idx, ID, tmp);
-	
+		int idx = m_List.InsertItem(&lvi);
+
+		for (int ColorIdx = 0; ColorIdx < mNumColors + 1; ColorIdx++)
+		{
+			if (!mPieceColorCount[PieceIdx * (mNumColors + 1) + ColorIdx])
+				continue;
+
+			sprintf(tmp, "%d", mPieceColorCount[PieceIdx * (mNumColors + 1) + ColorIdx]);
+			m_List.SetItemText(idx, mColorColumn[ColorIdx] + 1, tmp);
+		}
+	}
+
 	return TRUE;
 }
 
-typedef struct
+struct COMPARE_DATA
 {
-	CPropertiesPieces* page;
-	int color;
-} COMPARE_DATA;
+	CPropertiesPieces* Page;
+	int Color;
+};
 
 static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamData)
 {
-	int i, a, b;
 	COMPARE_DATA* data = (COMPARE_DATA*)lParamData;
+	CPropertiesPieces* Page = data->Page;
 
-	if (data->color == -1)
+	// First column.
+	if (data->Color == -1)
 	{
-		// check if we're comparing the "total" row
+		// Keep "Total" row at the bottom.
 		if (lP1 == -1)
 			return 1;
 		else if (lP2 == -1)
 			return -1;
 
-		return strcmpi(data->page->names[lP1], data->page->names[lP2]);
+		return strcmpi(Page->mPieceNames[lP1], Page->mPieceNames[lP2]);
 	}
 
-	// last column
-	if (data->color == LC_MAXCOLORS)
-	{
-		a = b = 0;
-		for (i = 0; i < LC_MAXCOLORS; i++)
-		{
-			a += data->page->count[lP1*LC_MAXCOLORS+i];
-			b += data->page->count[lP2*LC_MAXCOLORS+i];
-		}
-	}
-	else
-	{
-		if (lP1 == -1)
-			a = data->page->totalcount[data->color];
-		else
-			a = data->page->count[lP1*LC_MAXCOLORS+data->color];
-		
-		if (lP2 == -1)
-			b = data->page->totalcount[data->color];
-		else
-			b = data->page->count[lP2*LC_MAXCOLORS+data->color];
-	}
+	if (lP1 == -1)
+		return 1;
+	else if (lP2 == -1)
+		return -1;
+
+	int a = Page->mPieceColorCount[lP1 * (Page->mNumColors + 1) + data->Color];
+	int b = Page->mPieceColorCount[lP2 * (Page->mNumColors + 1) + data->Color];
 
 	if (a == b)
 		return 0;
-
-	if (a < b)
+	else if (a < b)
 		return -1;
 	else
 		return 1;
@@ -297,21 +260,22 @@ static int CALLBACK ListViewCompareProc(LPARAM lP1, LPARAM lP2, LPARAM lParamDat
 
 void CPropertiesPieces::OnColumnclickPropPiecesList(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	int i;
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	COMPARE_DATA data;
 
-	data.page = this;
+	data.Page = this;
+	data.Color = -1;
 
-	if (pNMListView->iSubItem == 0)
-		data.color = -1;
-	else
+	if (pNMListView->iSubItem != 0)
 	{
-		for (i = 0; i < LC_MAXCOLORS; i++)
-			if (col[i] == pNMListView->iSubItem-1)
+		for (int ColorIdx = 0; ColorIdx < mNumColors + 1; ColorIdx++)
+		{
+			if (mColorColumn[ColorIdx] == pNMListView->iSubItem - 1)
+			{
+				data.Color = ColorIdx;
 				break;
-
-		data.color = i;
+			}
+		}
 	}
 
 	m_List.SortItems((PFNLVCOMPARE)ListViewCompareProc, (LPARAM)&data);

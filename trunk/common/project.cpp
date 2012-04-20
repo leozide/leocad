@@ -1428,9 +1428,9 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       Matrix mat;
 
       if (mpdfile)
-        FileReadLDraw(&FileArray[0]->File, &mat, &ok, m_nCurColor, &step, FileArray);
+        FileReadLDraw(&FileArray[0]->File, &mat, &ok, 16, &step, FileArray);
       else
-        FileReadLDraw(&file, &mat, &ok, m_nCurColor, &step, FileArray);
+        FileReadLDraw(&file, &mat, &ok, 16, &step, FileArray);
 
       m_nCurStep = step;
       SystemUpdateTime(false, m_nCurStep, 255);
@@ -3175,40 +3175,43 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 
 void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
 {
-	Piece* pPiece;
-	int col[LC_MAXCOLORS], ID = 0, c;
-	memset (&col, 0, sizeof (col));
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	int* ColorsUsed = new int[gColorList.GetSize()];
+	memset(ColorsUsed, 0, sizeof(ColorsUsed[0]) * gColorList.GetSize());
+	int* PiecesUsed = new int[gColorList.GetSize()];
+	int NumColors = 0;
+
+	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
 		if ((pPiece->GetStepShow() == nStep) || (nStep == 0))
-			col[pPiece->mColorCode]++;
+			ColorsUsed[pPiece->mColorIndex]++;
 	}
+
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
 
-	for (c = 0; c < LC_MAXCOLORS; c++)
-	if (col[c])
+	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 	{
-		col[c] = ID;
-		ID++;
-		fprintf(f, "<td><center>%s</center></td>\n", gColorList[c].Name);
+		if (ColorsUsed[ColorIdx])
+		{
+			ColorsUsed[ColorIdx] = NumColors;
+			NumColors++;
+			fprintf(f, "<td><center>%s</center></td>\n", gColorList[ColorIdx].Name);
+		}
 	}
-	ID++;
+	NumColors++;
 	fputs("</tr>\n",f);
 
 	PieceInfo* pInfo;
 	for (int j = 0; j < lcGetPiecesLibrary()->GetPieceCount (); j++)
 	{
 		bool Add = false;
-		int count[LC_MAXCOLORS];
-		memset (&count, 0, sizeof (count));
-		pInfo = lcGetPiecesLibrary()->GetPieceInfo (j);
+		memset(PiecesUsed, 0, sizeof(PiecesUsed[0]) * gColorList.GetSize());
+		pInfo = lcGetPiecesLibrary()->GetPieceInfo(j);
 
-		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		{
-			if ((pPiece->GetPieceInfo() == pInfo) && 
-				((pPiece->GetStepShow() == nStep) || (nStep == 0)))
+			if ((pPiece->GetPieceInfo() == pInfo) && ((pPiece->GetStepShow() == nStep) || (nStep == 0)))
 			{
-				count [pPiece->mColorCode]++;
+				PiecesUsed[pPiece->mColorIndex]++;
 				Add = true;
 			}
 		}
@@ -3221,20 +3224,22 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 				fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
 
 			int curcol = 1;
-			for (c = 0; c < LC_MAXCOLORS; c++)
-				if (count[c])
+			for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+			{
+				if (PiecesUsed[ColorIdx])
 				{
-					while (curcol != col[c] + 1)
+					while (curcol != ColorsUsed[ColorIdx] + 1)
 					{
 						fputs("<td><center>-</center></td>\n", f);
 						curcol++;
 					}
 
-					fprintf(f, "<td><center>%d</center></td>\n", count[c]);
+					fprintf(f, "<td><center>%d</center></td>\n", PiecesUsed[ColorIdx]);
 					curcol++;
 				}
+			}
 
-			while (curcol != ID)
+			while (curcol != NumColors)
 			{
 				fputs("<td><center>-</center></td>\n", f);
 				curcol++;
@@ -3244,6 +3249,9 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 		}
 	}
 	fputs("</table>\n<br>", f);
+
+	delete[] PiecesUsed;
+	delete[] ColorsUsed;
 }
 
 // Special notifications.
@@ -4021,7 +4029,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				int Color;
 
 				Color = piece->mColorIndex;
-				const char* Suffix = (Color > 13 && Color < 22) ? "_clear" : "";
+				const char* Suffix = lcIsColorTranslucent(Color) ? "_clear" : "";
 
 				piece->GetPosition(pos);
 				piece->GetRotation(rot);
@@ -4206,6 +4214,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_PROPERTIES:
 		{
+			PiecesLibrary* Library = lcGetPiecesLibrary();
 			LC_PROPERTIESDLG_OPTS opts;
 
 			opts.strTitle = m_strTitle;
@@ -4214,17 +4223,22 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			strcpy(opts.strComments, m_strComments);
 			opts.strFilename = m_strPathName;
 
-			opts.lines = lcGetPiecesLibrary()->GetPieceCount();
-			opts.count = (unsigned short*)malloc(lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			memset (opts.count, 0, lcGetPiecesLibrary()->GetPieceCount()*LC_MAXCOLORS*sizeof(unsigned short));
-			opts.names = (char**)malloc(lcGetPiecesLibrary()->GetPieceCount()*sizeof(char*));
-			for (int i = 0; i < lcGetPiecesLibrary()->GetPieceCount(); i++)
-				opts.names[i] = lcGetPiecesLibrary()->GetPieceInfo (i)->m_strDescription;
+			opts.NumPieces = Library->GetPieceCount();
+			opts.NumColors = gColorList.GetSize();
+			opts.PieceColorCount = new int[(opts.NumPieces + 1) * (opts.NumColors + 1)];
+			memset(opts.PieceColorCount, 0, (opts.NumPieces + 1) * (opts.NumColors + 1) * sizeof(opts.PieceColorCount[0]));
+			opts.PieceNames = new const char*[opts.NumPieces];
+
+			for (int i = 0; i < opts.NumPieces; i++)
+				opts.PieceNames[i] = Library->GetPieceInfo(i)->m_strDescription;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				int idx = lcGetPiecesLibrary()->GetPieceIndex (pPiece->GetPieceInfo ());
-				opts.count[idx*LC_MAXCOLORS+pPiece->mColorIndex]++;
+				int idx = Library->GetPieceIndex(pPiece->GetPieceInfo());
+				opts.PieceColorCount[idx * (opts.NumColors + 1) + pPiece->mColorIndex]++;
+				opts.PieceColorCount[idx * (opts.NumColors + 1) + opts.NumColors]++;
+				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + pPiece->mColorIndex]++;
+				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + opts.NumColors]++;
 			}
 
 			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
@@ -4240,8 +4254,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 			}
 
-			free(opts.count);
-			free(opts.names);
+			delete[] opts.PieceColorCount;
+			delete[] opts.PieceNames;
 		} break;
 
 		case LC_FILE_TERRAIN:

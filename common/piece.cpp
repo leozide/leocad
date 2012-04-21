@@ -184,6 +184,7 @@ bool Piece::FileLoad(lcFile& file, char* name)
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 
+	// 11 (0.77)
 	if (version < 11)
 	{
 		lcuint8 Color;
@@ -191,13 +192,9 @@ bool Piece::FileLoad(lcFile& file, char* name)
 		file.ReadU8(&Color, 1);
 
 		if (version < 5)
-		{
-			const int OriginalColorTable[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
-			Color = OriginalColorTable[Color];
-		}
-
-		const int ExtendedColorTable[28] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
-		mColorCode = ExtendedColorTable[Color];
+			mColorCode = lcGetColorCodeFromOriginalColor(Color);
+		else
+			mColorCode = lcGetColorCodeFromExtendedColor(Color);
 	}
 	else
 		file.ReadU32(&mColorCode, 1);
@@ -601,7 +598,7 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 	}
 	else
 	{
-		glColor3ubv(FlatColorArray[mColorIndex]);
+		lcSetColor(mColorIndex);
 		glCallList(m_pPieceInfo->GetBoxDisplayList());
 	}
 	glPopMatrix();

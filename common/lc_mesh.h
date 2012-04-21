@@ -117,8 +117,8 @@ public:
 	void Render(int ColorIdx, bool Selected, bool Focused);
 
 	template<typename IndexType>
-	void ExportPOVRay(lcFile& File, const char* MeshName, char ColorTable[LC_MAXCOLORS][64]);
-	void ExportPOVRay(lcFile& File, const char* MeshName, char ColorTable[LC_MAXCOLORS][64]);
+	void ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorTable);
+	void ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorTable);
 
 	template<typename IndexType>
 	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);

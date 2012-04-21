@@ -25,6 +25,18 @@ extern int gDefaultColor;
 void lcLoadDefaultColors();
 int lcGetColorIndex(lcuint32 ColorCode);
 
+inline lcuint32 lcGetColorCodeFromExtendedColor(int Color)
+{
+	const int ConverstionTable[] = { 4, 12, 2, 10, 1, 9, 14, 15, 8, 0, 6, 13, 13, 334, 36, 44, 34, 42, 33, 41, 46, 47, 7, 382, 6, 13, 11, 383 };
+	return ConverstionTable[Color];
+}
+
+inline lcuint32 lcGetColorCodeFromOriginalColor(int Color)
+{
+	const int ConverstionTable[] = { 0, 2, 4, 9, 7, 6, 22, 8, 10, 11, 14, 16, 18, 9, 21, 20, 22, 8, 10, 11 };
+	return lcGetColorCodeFromExtendedColor(ConverstionTable[Color]);
+}
+
 inline lcuint32 lcGetColorCode(int ColorIndex)
 {
 	return gColorList[ColorIndex].Code;
@@ -64,18 +76,5 @@ inline void lcSetColorLight()
 {
 	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
 }
-
-/*
-void lcColorInit(const char* FileName);
-void lcColorShutdown();
-
-#define LC_COLOR_TRANSLUCENT(Color) g_ColorList[Color].Translucent
-#define LC_COLOR_RGB(Color) RGB(g_ColorList[Color].Value[0]*255, g_ColorList[Color].Value[1]*255, g_ColorList[Color].Value[2]*255)
-
-//#define LC_MAXCOLORS	28	// Number of colors supported
-//#define LC_COL_EDGES	28	// Piece edges
-//#define LC_COL_DEFAULT	31	// Default piece color
-
-*/
 
 #endif // _LC_COLORS_H_

@@ -403,14 +403,16 @@ void Export3DStudio()
 
 	// MATERIALS
 	material3ds *matr = NULL;
-	for (int i = 0; i < 28; i++)
+	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 	{
-		InitMaterial3ds(&matr);
-		sprintf(matr->name, "Material%02d", i);
+		lcColor* Color = &gColorList[ColorIdx];
 
-		matr->ambient.r = matr->diffuse.r = (float)FlatColorArray[i][0]/255;
-		matr->ambient.g = matr->diffuse.g = (float)FlatColorArray[i][1]/255;
-		matr->ambient.b = matr->diffuse.b = (float)FlatColorArray[i][2]/255;
+		InitMaterial3ds(&matr);
+		sprintf(matr->name, "Material_%s", Color->SafeName);
+
+		matr->ambient.r = matr->diffuse.r = Color->Value[0];
+		matr->ambient.g = matr->diffuse.g = Color->Value[1];
+		matr->ambient.b = matr->diffuse.b = Color->Value[2];
 		matr->specular.r = 0.9f;
 		matr->specular.g = 0.9f;
 		matr->specular.b = 0.9f;
@@ -419,7 +421,7 @@ void Export3DStudio()
 		matr->shinstrength = 0.05f;
 		matr->blur = 0.2f;
 
-		if (i < 14 || i > 21)
+		if (lcIsColorTranslucent(ColorIdx))
 		{
 			matr->transparency = 0.0f;
 			matr->transfalloff = 0.0f;

@@ -16,8 +16,6 @@
 
 #define LC_PIECE_NAME_LEN 256
 
-unsigned char ConvertColor(int c);
-
 class PieceInfo
 {
  public:

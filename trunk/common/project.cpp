@@ -477,11 +477,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 
-			const unsigned char conv[20] = { 0,2,4,9,7,6,22,8,10,11,14,16,18,9,21,20,22,8,10,11 };
-			color = conv[color];
-			const int ExtendedColorTable[LC_MAXCOLORS] = { 4,12,2,10,1,9,14,15,8,0,6,13,13,334,36,44,34,42,33,41,46,47,7,382,6,13,11,383 };
-			lcuint32 ColorCode = ExtendedColorTable[color];
-
 			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
 			if (pInfo != NULL)
 			{
@@ -489,7 +484,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				Matrix mat;
 
 				pPiece->Initialize(pos[0], pos[1], pos[2], step, 1);
-				pPiece->SetColorCode(ColorCode);
+				pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
 				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
@@ -3815,10 +3810,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			PiecesLibrary* Library = lcGetPiecesLibrary();
 			char* PieceTable = new char[Library->GetPieceCount() * LC_PIECE_NAME_LEN];
 			int* PieceFlags = new int[Library->GetPieceCount()];
-			char ColorTable[LC_MAXCOLORS][64];
+			int NumColors = gColorList.GetSize();
+			char* ColorTable = new char[NumColors * LC_MAX_COLOR_NAME];
 
 			memset(PieceTable, 0, Library->GetPieceCount() * LC_PIECE_NAME_LEN);
 			memset(PieceFlags, 0, Library->GetPieceCount() * sizeof(int));
+			memset(ColorTable, 0, NumColors * LC_MAX_COLOR_NAME);
 
 			enum
 			{
@@ -3916,11 +3913,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					if (sscanf(Line,"%d%s%s", &Code, Name, Flags) != 3)
 						continue;
 
-					int Color = ConvertColor(Code);
-					if (Color > LC_MAXCOLORS)
+					int Color = lcGetColorIndex(Code);
+					if (Color >= NumColors)
 						continue;
 
-					strcpy(ColorTable[Color], Name);
+					strcpy(&ColorTable[Color * LC_MAX_COLOR_NAME], Name);
 				}
 			}
 
@@ -3967,19 +3964,19 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				if (lcIsColorTranslucent(ColorIdx))
 				{
-					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%d/255, %d/255, %d/255> filter 0.9 } finish { ambient 0.3 diffuse 0.2 reflection 0.25 phong 0.3 phong_size 60 } }\n",
+					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%f, %f, %f> filter 0.9 } finish { ambient 0.3 diffuse 0.2 reflection 0.25 phong 0.3 phong_size 60 } }\n",
 					        Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 				}
 				else
 				{
-					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%d/255, %d/255, %d/255> } finish { ambient 0.1 phong 0.2 phong_size 20 } }\n",
+					sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%f, %f, %f> } finish { ambient 0.1 phong 0.2 phong_size 20 } }\n",
 					       Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 				}
 
 				POVFile.WriteLine(Line);
 
-				if (!ColorTable[ColorIdx][0])
-					sprintf(ColorTable[ColorIdx], "lc_%s", Color->SafeName);
+				if (!ColorTable[ColorIdx * LC_MAX_COLOR_NAME])
+					sprintf(&ColorTable[ColorIdx * LC_MAX_COLOR_NAME], "lc_%s", Color->SafeName);
 			}
 
 			POVFile.WriteLine("\n");
@@ -4041,13 +4038,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					        " object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					        " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color][0], PieceTable + Index * LC_PIECE_NAME_LEN, ColorTable[Color],
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], PieceTable + Index * LC_PIECE_NAME_LEN, &ColorTable[Color * LC_MAX_COLOR_NAME],
 					       -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
 				}
 				else
 				{
 					sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color][0], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
 				}
 
 				POVFile.WriteLine(Line);

@@ -607,11 +607,7 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 	if ((m_nState & LC_CURVE_HIDDEN) != 0)
 		return;
 
-	// FIXME: create a "set color" function in LC_RENDER_INFO
-	if (pInfo->lighting)
-		glColor4ubv (ColorArray[m_nColor]);
-	else
-		glColor3ubv (FlatColorArray[m_nColor]);
+	lcSetColor(m_nColor);
 
 	if (lcIsColorTranslucent(m_nColor))
 	{

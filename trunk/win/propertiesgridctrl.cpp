@@ -16,11 +16,11 @@ void CLeoCADMFCPropertyGridCtrl::UpdateColor(COLORREF color)
 	}
 
 	int ColorIdx;
-	for (ColorIdx = 0; ColorIdx < LC_MAXCOLORS; ColorIdx++)
-		if (color == RGB(FlatColorArray[ColorIdx][0], FlatColorArray[ColorIdx][1], FlatColorArray[ColorIdx][2]))
+	for (ColorIdx = 0; ColorIdx < gNumUserColors; ColorIdx++)
+		if (color == RGB(gColorList[ColorIdx].Value[0] * 255, gColorList[ColorIdx].Value[1] * 255, gColorList[ColorIdx].Value[2] * 255))
 			break;
 
-	if (ColorIdx == LC_MAXCOLORS)
+	if (ColorIdx == gNumUserColors)
 		return;
 
 	BOOL bChanged = ColorIdx != pColorProp->GetColor();
@@ -86,7 +86,7 @@ void CLeoCADMFCPropertyGridColorProperty::OnDrawValue(CDC* pDC, CRect rect)
 	rectColor.top++;
 	rectColor.left++;
 
-	CBrush br(RGB(FlatColorArray[m_Color][0], FlatColorArray[m_Color][1], FlatColorArray[m_Color][2]));
+	CBrush br(RGB(gColorList[m_Color].Value[0] * 255, gColorList[m_Color].Value[1] * 255, gColorList[m_Color].Value[2] * 255));
 	pDC->FillRect(rectColor, &br);
 	pDC->Draw3dRect(rectColor, 0, 0);
 
@@ -117,10 +117,10 @@ void CLeoCADMFCPropertyGridColorProperty::OnClickButton(CPoint /*point*/)
 	CList<COLORREF,COLORREF> lstDocColors;
 	CArray<COLORREF, COLORREF> Colors;
 
-	COLORREF Color = RGB(FlatColorArray[m_Color][0], FlatColorArray[m_Color][1], FlatColorArray[m_Color][2]);
+	COLORREF Color = RGB(gColorList[m_Color].Value[0] * 255, gColorList[m_Color].Value[1] * 255, gColorList[m_Color].Value[2] * 255);
 
-	for (int ColorIdx = 0; ColorIdx < LC_MAXCOLORS; ColorIdx++)
-		Colors.Add(RGB(FlatColorArray[ColorIdx][0], FlatColorArray[ColorIdx][1], FlatColorArray[ColorIdx][2]));
+	for (int ColorIdx = 0; ColorIdx < gNumUserColors; ColorIdx++)
+		Colors.Add(RGB(gColorList[ColorIdx].Value[0] * 255, gColorList[ColorIdx].Value[1] * 255, gColorList[ColorIdx].Value[2] * 255));
 
 	m_pPopup = new CMFCColorPopupMenu(NULL, Colors, Color, NULL, NULL, NULL, lstDocColors, 7, 0);
 	m_pPopup->SetPropList(m_pWndList);

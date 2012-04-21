@@ -1855,6 +1855,7 @@ static void CreateMesh(group_t* pGroup, lineinfo_t* info, LC_LDRAW_PIECE* piece)
 		Group->LastPrims[Type] = Line;
 		Group->NumPrims[Type] += Line->type;
 
+		NumPrims[Type] += Line->type;
 		NumIndices += Line->type;
 
 		Line = NextLine;
@@ -2029,7 +2030,7 @@ static void DecodeFile(FILE *F, Matrix *mat, lcuint32 CurColor, lineinfo_t* info
 				m1.FromLDraw(fm);
 				m2.Multiply(*mat, m1);
 
-				DecodeFile(tf, &m2, CurColor, info, dir, piece);
+				DecodeFile(tf, &m2, ColorCode, info, dir, piece);
 				while (info->next)
 					info = info->next;
 				fclose(tf);

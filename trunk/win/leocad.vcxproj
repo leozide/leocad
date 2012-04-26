@@ -188,7 +188,10 @@
     <ClCompile Include="..\common\mainwnd.cpp" />
     <ClCompile Include="..\Common\matrix.cpp" />
     <ClCompile Include="..\common\message.cpp" />
-    <ClCompile Include="..\common\minifig.cpp" />
+    <ClCompile Include="..\common\minifig.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../common;../win;../win/zlib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../common;../win;../win/zlib</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="..\common\object.cpp" />
     <ClCompile Include="..\common\opengl.cpp" />
     <ClCompile Include="..\Common\piece.cpp" />

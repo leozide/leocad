@@ -413,32 +413,35 @@ static void PrintPiecesThread(void* pv)
 	PiecesLibrary *pLib = lcGetPiecesLibrary();
 	Project* project = lcGetActiveProject();
 
-	UINT *pieces = (UINT*)malloc(pLib->GetPieceCount ()*28*sizeof(UINT));
-	int col[28];
-	memset (pieces, 0, pLib->GetPieceCount ()*28*sizeof(UINT));
-	memset (&col, 0, sizeof (col));
+	int NumColors = gColorList.GetSize();
+	int NumPieces = pLib->GetPieceCount();
+
+	lcuint32* PiecesUsed = new lcuint32[NumPieces * NumColors];
+	memset(PiecesUsed, 0, NumPieces * NumColors * sizeof(lcuint32));
+	lcuint32* ColorsUsed = new lcuint32[NumColors];
+	memset(ColorsUsed, 0, NumColors * sizeof(lcuint32));
 
 	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
 	{
 		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
-		pieces[(idx*28)+tmp->mColorCode]++; // fix LC_MAXCOLORS
-		col[tmp->mColorCode]++;
+		PiecesUsed[(idx * NumColors) + tmp->mColorIndex]++;
+		ColorsUsed[tmp->mColorIndex]++;
 	}
 
 	int rows = 0, cols = 1, i, j;
-	for (i = 0; i < pLib->GetPieceCount (); i++)
-		for (j = 0; j < 28; j++)
-			if (pieces[(i*28)+j] > 0)
+	for (i = 0; i < NumPieces; i++)
+		for (j = 0; j < NumColors; j++)
+			if (PiecesUsed[(i*NumColors)+j] > 0)
 			{
 				rows++;
-				j = 28;
+				break;
 			}
 
 	int ID = 1;
-	for (i = 0; i < 28; i++)
-		if (col[i])
+	for (i = 0; i < NumColors; i++)
+		if (ColorsUsed[i])
 		{
-			col[i] = ID;
+			ColorsUsed[i] = ID;
 			ID++;
 			cols++;
 		}
@@ -583,7 +586,7 @@ static void PrintPiecesThread(void* pv)
 	} start, *node, *previous, *news;
 	start.next = NULL;
 	
-	for (j = 0; j < pLib->GetPieceCount (); j++)
+	for (j = 0; j < NumPieces; j++)
 	{
 		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
 
@@ -591,8 +594,8 @@ static void PrintPiecesThread(void* pv)
 			continue;
 
 		BOOL bAdd = FALSE;
-		for (i = 0; i < 28; i++)
-			if (pieces[(j*28)+i])
+		for (i = 0; i < NumColors; i++)
+			if (PiecesUsed[(j*NumColors)+i])
 				bAdd = TRUE;
 		if (!bAdd) continue;
 
@@ -655,8 +658,8 @@ static void PrintPiecesThread(void* pv)
 		int printed = 0;
 		CString str;
 		CRect rc(rectDraw.left+picw, rectDraw.top, rectDraw.left+picw+w, rectDraw.top+h);
-		for (i = 0; i < 28; i++)
-			if (col[i])
+		for (i = 0; i < NumColors; i++)
+			if (ColorsUsed[i])
 			{
 				str.LoadString(IDS_COLOR01 + i);
 				DrawText(PD->m_pd.hDC, (LPCTSTR)str, str.GetLength(), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
@@ -706,13 +709,13 @@ static void PrintPiecesThread(void* pv)
 			char tmp[5];
 	
 			int idx = (pLib->GetPieceIndex (pInfo));
-			for (i = 0; i < 28; i++)
-				if (pieces[(idx*28)+i])
+			for (i = 0; i < NumColors; i++)
+				if (PiecesUsed[(idx*NumColors)+i])
 				{
-					CRect rc(rectDraw.left+picw+w*(col[i]-1), rectDraw.top+h*r, rectDraw.left+picw+w*col[i], rectDraw.top+h*(r+1));
-					sprintf (tmp, "%d", pieces[(idx*28)+i]);
+					CRect rc(rectDraw.left+picw+w*(ColorsUsed[i]-1), rectDraw.top+h*r, rectDraw.left+picw+w*ColorsUsed[i], rectDraw.top+h*(r+1));
+					sprintf (tmp, "%d", PiecesUsed[(idx*NumColors)+i]);
 					DrawText(PD->m_pd.hDC, tmp, strlen(tmp), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-					rowtotal += pieces[(idx*28)+i];
+					rowtotal += PiecesUsed[(idx*NumColors)+i];
 				}
 			sprintf (tmp, "%d", rowtotal);
 			CRect rc(rectDraw.right-w, rectDraw.top+h*r, rectDraw.right, rectDraw.top+h*(r+1));
@@ -793,7 +796,8 @@ static void PrintPiecesThread(void* pv)
         PD->m_pd.hDC = NULL;
     }
 
-	free (pieces);
+	delete[] PiecesUsed;
+	delete[] ColorsUsed;
     delete PD;
 }
 

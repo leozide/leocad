@@ -90,7 +90,7 @@ void CLeoCADMFCPropertyGridColorProperty::OnDrawValue(CDC* pDC, CRect rect)
 	pDC->FillRect(rectColor, &br);
 	pDC->Draw3dRect(rectColor, 0, 0);
 
-	if (m_Color > 13 && m_Color < 22)
+	if (lcIsColorTranslucent(m_Color))
 	{
 	    rectColor.DeflateRect(1, 1);
 		rectColor.bottom -= 1;

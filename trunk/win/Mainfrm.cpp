@@ -397,15 +397,7 @@ void CMainFrame::OnUpdateStepLast(CCmdUI* pCmdUI)
 LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 {
 	if (wParam != 0)
-	{
-		int x = wParam-1;
-		if (x < 14)
-		    x *= 2;
-		else
-			x = ((x-14)*2)+1;
-
-		m_wndPiecesBar.m_wndColorsList.SetCurSel(x);
-	}
+		m_wndPiecesBar.m_wndColorList.SetColorIndex(wParam - 1);
 
 	return TRUE;
 }

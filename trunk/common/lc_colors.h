@@ -17,7 +17,22 @@ struct lcColor
 	char SafeName[LC_MAX_COLOR_NAME];
 };
 
+enum
+{
+	LC_COLORGROUP_SOLID,
+	LC_COLORGROUP_TRANSLUCENT,
+	LC_COLORGROUP_SPECIAL,
+	LC_NUM_COLORGROUPS
+};
+
+struct lcColorGroup
+{
+	ObjArray<int> Colors;
+	char Name[LC_MAX_COLOR_NAME];
+};
+
 extern ObjArray<lcColor> gColorList;
+extern lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 extern int gNumUserColors;
 extern int gEdgeColor;
 extern int gDefaultColor;

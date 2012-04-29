@@ -4,6 +4,7 @@
 #include <float.h>
 
 ObjArray<lcColor> gColorList;
+lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 int gNumUserColors;
 int gEdgeColor;
 int gDefaultColor;
@@ -198,6 +199,10 @@ static void LoadColorFile(lcFile& File)
 	ObjArray<lcColor>& Colors = gColorList;
 	lcColor Color, MainColor, EdgeColor;
 
+	strcpy(gColorGroups[0].Name, "Solid Colors");
+	strcpy(gColorGroups[1].Name, "Translucent Colors");
+	strcpy(gColorGroups[2].Name, "Special Colors");
+
 	MainColor.Code = 16;
 	MainColor.Translucent = false;
 	MainColor.Value[0] = 0.5f;
@@ -236,6 +241,9 @@ static void LoadColorFile(lcFile& File)
 		strupr(Token);
 		if (strcmp(Token, "!COLOUR"))
 			continue;
+
+		bool GroupTranslucent = false;
+		bool GroupSpecial = false;
 
 		Color.Code = -1;
 		Color.Translucent = false;
@@ -302,14 +310,20 @@ static void LoadColorFile(lcFile& File)
 				Color.Value[3] = (float)(Value & 0xff) / 255.0f;
 				if (Value != 255)
 					Color.Translucent = true;
+
+				if (Value == 128)
+					GroupTranslucent = true;
+				else if (Value != 0)
+					GroupSpecial = true;
 			}
 			else if (!strcmp(Token, "CHROME") || !strcmp(Token, "PEARLESCENT") || !strcmp(Token, "RUBBER") ||
-			         !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL"))
+			         !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
 			{
-				// Ignored.
+				GroupSpecial = true;
 			}
 			else if (!strcmp(Token, "MATERIAL"))
 			{
+				GroupSpecial = true;
 				break; // Material is always last so ignore it and the rest of the line.
 			}
 		}
@@ -326,14 +340,20 @@ static void LoadColorFile(lcFile& File)
 		}
 
 		// Check for duplicates.
+		bool Duplicate = false;
+
 		for (int i = 0; i < Colors.GetSize(); i++)
 		{
 			if (Colors[i].Code == Color.Code)
 			{
-				Colors.RemoveIndex(i);
+				Colors[i] = Color;
+				Duplicate = true;
 				break;
 			}
 		}
+
+		if (Duplicate)
+			continue;
 
 		if (Color.Code == 16)
 		{
@@ -348,11 +368,21 @@ static void LoadColorFile(lcFile& File)
 		}
 
 		Colors.Add(Color);
+
+		if (GroupSpecial)
+			gColorGroups[LC_COLORGROUP_SPECIAL].Colors.Add(Colors.GetSize() - 1);
+		else if (GroupTranslucent)
+			gColorGroups[LC_COLORGROUP_TRANSLUCENT].Colors.Add(Colors.GetSize() - 1);
+		else
+			gColorGroups[LC_COLORGROUP_SOLID].Colors.Add(Colors.GetSize() - 1);
 	}
 
 	gDefaultColor = Colors.GetSize();
 	Colors.Add(MainColor);
+	gColorGroups[LC_COLORGROUP_SOLID].Colors.Add(gDefaultColor);
+
 	gNumUserColors = Colors.GetSize();
+
 	gEdgeColor = Colors.GetSize();
 	Colors.Add(EdgeColor);
 }

@@ -1,56 +1,107 @@
-#if !defined(AFX_COLORLST_H__533899A7_4008_11D2_8202_D2B1707B2D1B__INCLUDED_)
-#define AFX_COLORLST_H__533899A7_4008_11D2_8202_D2B1707B2D1B__INCLUDED_
+#ifndef _COLORLST_H_
+#define _COLORLST_H_
 
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-// ColorLst.h : header file
-//
-
-/////////////////////////////////////////////////////////////////////////////
-// CColorsList window
-
-class CColorsList : public CListBox
+class CColorToolTipCtrl : public CMFCToolTipCtrl
 {
-// Construction
+	DECLARE_DYNAMIC(CColorToolTipCtrl)
+
 public:
-	CColorsList();
+	CColorToolTipCtrl(CMFCToolTipInfo* pParams = NULL)
+		: CMFCToolTipCtrl(pParams)
+	{
+	}
 
-// Attributes
-public:
+	virtual ~CColorToolTipCtrl()
+	{
+	}
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CColorsList)
-	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	BOOL m_bLowRes;
-	virtual ~CColorsList();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CColorsList)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	//}}AFX_MSG
-
-	CToolTipCtrl   m_ToolTip;
+	virtual CSize GetIconSize();
+	virtual BOOL OnDrawIcon(CDC* pDC, CRect rectImage);
 
 	DECLARE_MESSAGE_MAP()
 };
 
-/////////////////////////////////////////////////////////////////////////////
+struct CColorListGroup
+{
+	CRect Rect;
+};
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+struct CColorListCell
+{
+	CRect Rect;
+	COLORREF Color;
+	int ColorIndex;
+};
 
-#endif // !defined(AFX_COLORLST_H__533899A7_4008_11D2_8202_D2B1707B2D1B__INCLUDED_)
+class CColorList : public CWnd
+{
+public:
+	CColorList();
+	virtual ~CColorList();
+
+	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
+
+	void SetColorIndex(int ColorIndex)
+	{
+		for (int CellIdx = 0; CellIdx < mCells.GetSize(); CellIdx++)
+		{
+			if (mCells[CellIdx].ColorIndex == ColorIndex)
+			{
+				SelectCell(CellIdx);
+				return;
+			}
+		}
+	}
+
+	int GetColorIndex() const
+	{
+		return mCells[mCurCell].ColorIndex;
+	}
+
+protected:
+	CArray<CColorListGroup, const CColorListGroup&> mGroups;
+	CArray<CColorListCell, const CColorListCell&> mCells;
+
+	int mColumns;
+	int mRows;
+
+	int mCurCell;
+	CPoint mMouseDown;
+	BOOL mTracking;
+
+	CColorToolTipCtrl mToolTip;
+
+	void UpdateColors();
+	void UpdateLayout();
+	void Draw(CDC& dc);
+	void SelectCell(int CellIdx);
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CColorList)
+	public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	//}}AFX_VIRTUAL
+
+	// Generated message map functions
+protected:
+	//{{AFX_MSG(CColorList)
+	afx_msg void OnPaint();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg UINT OnGetDlgCode();
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	//}}AFX_MSG
+
+	DECLARE_MESSAGE_MAP()
+};
+
+#endif // _COLORLST_H_

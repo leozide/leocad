@@ -61,7 +61,6 @@ BEGIN_MESSAGE_MAP(CPiecesBar, CDockablePane)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CONTEXTMENU()
-	ON_LBN_SELCHANGE(IDW_COLORSLIST, OnSelChangeColor)
 	ON_MESSAGE(WM_LC_SPLITTER_MOVED, OnSplitterMoved)
 END_MESSAGE_MAP()
 
@@ -71,11 +70,11 @@ END_MESSAGE_MAP()
 
 void CPiecesBar::AdjustLayout(int cx, int cy)
 {
-	if (!IsWindow(m_wndColorsList.m_hWnd))
+	if (!IsWindow(m_wndColorList.m_hWnd))
 		return;
 
-	int off = 31;
-	m_wndColorsList.SetWindowPos (NULL, (cx-210)/2, cy-off, 212, 26, SWP_NOZORDER);
+	int off = 161;
+	m_wndColorList.SetWindowPos (NULL, 5, cy-off, cx-10, 156, SWP_NOZORDER);
 
 	off += 30;
 	m_wndPiecesCombo.SetWindowPos (NULL, 5, cy-off, cx-10, 140, SWP_NOZORDER);
@@ -103,15 +102,9 @@ int CPiecesBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_PiecesTree.Create(WS_VISIBLE|WS_TABSTOP|WS_BORDER|TVS_SHOWSELALWAYS|TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT|TVS_INFOTIP, 
 	                    CRect(0,0,0,0), this, IDW_PIECESTREE);
 
-	m_wndColorsList.Create(LBS_MULTICOLUMN|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY|
-	                       LBS_OWNERDRAWFIXED|WS_VISIBLE|WS_TABSTOP|WS_CHILD|WS_BORDER,
-	                       CRect (0,0,0,0), this, IDW_COLORSLIST);
+	m_wndColorList.Create(WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_BORDER, CRect(0,0,0,0), this, IDW_COLORSLIST);
 
-	for (int i = 0; i < LC_MAXCOLORS; i++)
-		m_wndColorsList.AddString("");
-
-	m_wndPiecesCombo.Create(CBS_DROPDOWN|CBS_SORT|CBS_HASSTRINGS|WS_VISIBLE|WS_CHILD|
-	                        WS_VSCROLL|WS_TABSTOP, CRect (0,0,0,0), this, IDW_PIECESCOMBO);
+	m_wndPiecesCombo.Create(CBS_DROPDOWN|CBS_SORT|CBS_HASSTRINGS|WS_VISIBLE|WS_CHILD|WS_VSCROLL|WS_TABSTOP, CRect (0,0,0,0), this, IDW_PIECESCOMBO);
 
 	//  Create a font for the combobox
 	LOGFONT logFont;
@@ -165,12 +158,8 @@ void CPiecesBar::OnSize(UINT nType, int cx, int cy)
 
 void CPiecesBar::OnSelChangeColor()
 {
-	int i = m_wndColorsList.GetCurSel();
-	if (i == LB_ERR)
-		return;
-
-	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, (i % 2 == 0) ? (i/2) : (((i-1)/2)+14));
-	m_wndPiecePreview.PostMessage (WM_PAINT);
+	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, m_wndColorList.GetColorIndex());
+	m_wndPiecePreview.PostMessage(WM_PAINT);
 }
 
 LONG CPiecesBar::OnSplitterMoved(UINT lParam, LONG wParam)

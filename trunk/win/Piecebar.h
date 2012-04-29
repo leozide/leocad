@@ -34,7 +34,6 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
-	void OnSelChangeColor();
 	afx_msg LONG OnSplitterMoved(UINT lParam, LONG wParam);
 
 	DECLARE_MESSAGE_MAP()
@@ -47,12 +46,13 @@ public:
 	CySplitterWnd m_wndSplitter;
 	CTreeCtrl m_PiecesTree;
 	CPiecesCombo m_wndPiecesCombo;
-	CColorsList m_wndColorsList;
+	CColorList m_wndColorList;
 
 	void UpdatePiecesTree(bool SearchOnly);
 	void UpdatePiecesTree(const char* OldCategory, const char* NewCategory);
 	void SelectPiece(const char* Category, PieceInfo* Info);
 	void RefreshPiecesTree();
+	void OnSelChangeColor();
 
 protected:
 	BOOL m_bNoContext;

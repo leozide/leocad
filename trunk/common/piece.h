@@ -76,7 +76,7 @@ public:
 		{ strcpy(m_strName, name); }
 	const char* GetName()
 		{ return m_strName; }
-	PieceInfo* GetPieceInfo()
+	PieceInfo* GetPieceInfo() const
 		{ return m_pPieceInfo; }
 	void SetStepShow(unsigned char step)
 		{ m_nStepShow = step; }
@@ -98,6 +98,8 @@ public:
 		{ return m_fPosition; }
 	inline Vector3 GetPosition() const
 		{ return Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]); }
+	inline Vector4 GetRotation() const
+		{ return Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], m_fRotation[3]); }
 	void GetPosition (float* position)
 		{ memcpy(position, m_fPosition, sizeof(m_fPosition)); }
 	void GetRotation (float* rotation)

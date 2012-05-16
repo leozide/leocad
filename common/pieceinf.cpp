@@ -156,7 +156,9 @@ void PieceInfo::LoadIndex(lcFile& file)
   file.ReadBuffer(m_strDescription, 64);
   m_strDescription[64] = '\0';
   file.ReadS16(sh, 6);
-  file.ReadU8(&m_nFlags, 1);
+  lcuint8 Flags;
+  file.ReadU8(&Flags, 1);
+  m_nFlags = Flags;
   lcuint32 Groups; file.ReadU32(&Groups, 1);
   file.ReadU32(&m_nOffset, 1);
   file.ReadU32(&m_nSize, 1);
@@ -543,6 +545,16 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 
 			IndexOffset += SectionIndices[ColorIdx * 2 + 0] * sizeof(DstType);
 			NumSections++;
+
+			if (ColorIdx == gDefaultColor)
+				m_nFlags |= LC_PIECE_HAS_DEFAULT;
+			else
+			{
+				if (lcIsColorTranslucent(ColorIdx))
+					m_nFlags |= LC_PIECE_HAS_TRANSLUCENT;
+				else
+					m_nFlags |= LC_PIECE_HAS_SOLID;
+			}
 		}
 
 		if (SectionIndices[ColorIdx * 2 + 1])
@@ -557,6 +569,8 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 
 			IndexOffset += SectionIndices[ColorIdx * 2 + 1] * sizeof(DstType);
 			NumSections++;
+
+			m_nFlags |= LC_PIECE_HAS_LINES;
 		}
 	}
 

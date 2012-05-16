@@ -7,12 +7,16 @@
 #endif
 #include "algebra.h"
 
-#define LC_PIECE_COUNT              0x01 // Count this piece in the totals ?
-#define LC_PIECE_LONGDATA_FILE      0x02 // unsigned long/short index
-#define LC_PIECE_CCW                0x04 // Use back-face culling
-#define LC_PIECE_SMALL              0x10 // scale = 10000
-#define LC_PIECE_MEDIUM             0x20 // scale = 1000 (otherwise = 100)
-#define LC_PIECE_PLACEHOLDER        0x40 // Placeholder for a piece not in the library.
+#define LC_PIECE_COUNT              0x001 // Count this piece in the totals ?
+#define LC_PIECE_LONGDATA_FILE      0x002 // unsigned long/short index
+#define LC_PIECE_CCW                0x004 // Use back-face culling
+#define LC_PIECE_SMALL              0x010 // scale = 10000
+#define LC_PIECE_MEDIUM             0x020 // scale = 1000 (otherwise = 100)
+#define LC_PIECE_PLACEHOLDER        0x040 // Placeholder for a piece not in the library.
+#define LC_PIECE_HAS_DEFAULT        0x100 // Piece has triangles using the default color
+#define LC_PIECE_HAS_SOLID          0x200 // Piece has triangles using a solid color
+#define LC_PIECE_HAS_TRANSLUCENT    0x400 // Piece has triangles using a translucent color
+#define LC_PIECE_HAS_LINES          0x800 // Piece has lines
 
 #define LC_PIECE_NAME_LEN 256
 
@@ -81,7 +85,7 @@ public:
 	float m_fDimensions[6];
 	lcuint32 m_nOffset;
 	lcuint32 m_nSize;
-	unsigned char m_nFlags;
+	lcuint32 m_nFlags;
 
 protected:
 	int m_nRef;

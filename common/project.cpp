@@ -1711,166 +1711,26 @@ void Project::RenderBackground(View* view)
 	glDepthMask(GL_TRUE);
 }
 
-typedef struct LC_BSPNODE
+struct lcTranslucentRenderSection
 {
-	float plane[4];
+	float Distance;
 	Piece* piece;
-	LC_BSPNODE* front;
-	LC_BSPNODE* back;
+};
 
-	~LC_BSPNODE()
-	{
-		if (piece == NULL)
-		{
-			if (front)
-				delete front;
-			if (back)
-				delete back;
-		}
-	}
-} LC_BSPNODE;
-
-static void RenderBSP(LC_BSPNODE* node, float* eye, bool* bSel, bool bLighting, bool bEdges)
+int lcTranslucentRenderCompare(const lcTranslucentRenderSection& a, const lcTranslucentRenderSection& b, void*)
 {
-	if (node->piece)
-	{
-		if (node->piece->IsSelected())
-		{
-			if (!*bSel)
-			{
-				*bSel = true;
-				glLineWidth (2);//*m_fLineWidth);
-			}
-		}
-		else
-		{
-			if (*bSel)
-			{
-				*bSel = false;
-				glLineWidth(1);//m_fLineWidth);
-			}
-		}
-
-		node->piece->Render(bLighting, bEdges);
-		return;
-	}
-
-	if (eye[0]*node->plane[0] + eye[1]*node->plane[1] +
-		eye[2]*node->plane[2] + node->plane[3] > 0.0f)
-	{
-		RenderBSP(node->back, eye, bSel, bLighting, bEdges);
-		RenderBSP(node->front, eye, bSel, bLighting, bEdges);
-	}
+	if (a.Distance > b.Distance)
+		return 1;
 	else
-	{
-		RenderBSP(node->front, eye, bSel, bLighting, bEdges);
-		RenderBSP(node->back, eye, bSel, bLighting, bEdges);
-	}
+		return -1;
 }
 
-static void BuildBSP(LC_BSPNODE* node, Piece* pList)
+int lcOpaqueRenderCompare(const Piece* a, const Piece* b, void*)
 {
-	Piece *front_list = NULL, *back_list = NULL;
-	Piece *pPiece, *pNext;
-
-	node->piece = NULL;
-
-	if (pList->m_pLink == NULL)
-	{
-		// This is a leaf
-		node->piece = pList;
-		return;
-	}
-
-	float dx, dy, dz, bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	const float *pos;
-
-	for (pPiece = pList; pPiece; pPiece = pPiece->m_pLink)
-	{
-		pos = pPiece->GetConstPosition();
-		if (pos[0] < bs[0]) bs[0] = pos[0];
-		if (pos[1] < bs[1]) bs[1] = pos[1];
-		if (pos[2] < bs[2]) bs[2] = pos[2];
-		if (pos[0] > bs[3]) bs[3] = pos[0];
-		if (pos[1] > bs[4]) bs[4] = pos[1];
-		if (pos[2] > bs[5]) bs[5] = pos[2];
-	}
-
-	dx = ABS(bs[0]-bs[3]);
-	dy = ABS(bs[1]-bs[4]);
-	dz = ABS(bs[2]-bs[5]);
-
-	node->plane[0] = node->plane[1] = node->plane[2] = 0.0f;
-
-	if (dx > dy)
-	{
-		if (dx > dz)
-			node->plane[0] = 1.0f;
-		else
-			node->plane[2] = 1.0f;
-	}
+	if (a->GetPieceInfo() > b->GetPieceInfo())
+		return 1;
 	else
-	{
-		if (dy > dz)
-			node->plane[1] = 1.0f;
-		else
-			node->plane[2] = 1.0f;
-	}
-
-	// D = -Ax -By -Cz
-	node->plane[3] = -(node->plane[0]*(bs[0]+bs[3])/2)-(node->plane[1]*(bs[1]+bs[4])/2)-(node->plane[2]*(bs[2]+bs[5])/2);
-
-	for (pPiece = pList; pPiece;)
-	{
-		pos = pPiece->GetConstPosition();
-		pNext = pPiece->m_pLink;
-
-		if (pos[0]*node->plane[0] + pos[1]*node->plane[1] +
-			pos[2]*node->plane[2] + node->plane[3] > 0.0f)
-		{
-			pPiece->m_pLink = front_list;
-			front_list = pPiece;
-		}
-		else
-		{
-			pPiece->m_pLink = back_list;
-			back_list = pPiece;
-		}
-
-		pPiece = pNext;
-	}
-
-	if (bs[0] == bs[3] && bs[1] == bs[4] && bs[2] == bs[5])
-	{
-		if (back_list)
-		{
-			front_list = back_list;
-			back_list = back_list->m_pLink;
-			front_list->m_pLink = NULL;
-		}
-		else
-		{
-			back_list = front_list;
-			front_list = front_list->m_pLink;
-			back_list->m_pLink = NULL;
-		}
-	}
-
-	if (front_list)
-	{
-		node->front = new LC_BSPNODE;
-		BuildBSP(node->front, front_list);
-	}
-	else
-		node->front = NULL;
-
-	if (back_list)
-	{
-		node->back = new LC_BSPNODE;
-		BuildBSP(node->back, back_list);
-	}
-	else
-		node->back = NULL;
+		return -1;
 }
 
 void Project::RenderScenePieces(View* view)
@@ -1901,64 +1761,195 @@ void Project::RenderScenePieces(View* view)
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->Render(view->m_Camera, AspectRatio);
 
-	bool bSel = false;
-	bool bCull = false;
-	Piece* pPiece;
+	PtrArray<Piece> OpaquePieces(512);
+	ObjArray<lcTranslucentRenderSection> TranslucentSections(512);
 
-	LC_BSPNODE tree;
-	tree.front = tree.back = NULL;
-	Piece* pList = NULL;
+	Matrix44 ModelView;
+	Camera* Cam = view->m_Camera;
+	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
 
-	// Draw opaque pieces first
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
 		if (!pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 			continue;
 
-		if (!pPiece->IsTranslucent())
+		bool Translucent = lcIsColorTranslucent(pPiece->mColorIndex);
+		PieceInfo* Info = pPiece->GetPieceInfo();
+
+		if ((Info->m_nFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->m_nFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+			OpaquePieces.AddSorted(pPiece, lcOpaqueRenderCompare, NULL);
+
+		if ((Info->m_nFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->m_nFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
-			if (pPiece->IsSelected())
+			Vector3 Pos = Mul31(pPiece->GetPosition(), ModelView);
+
+			lcTranslucentRenderSection RenderSection;
+
+			RenderSection.Distance = Pos[2];
+			RenderSection.piece = pPiece;
+
+			TranslucentSections.AddSorted(RenderSection, lcTranslucentRenderCompare, NULL);
+		}
+	}
+
+	lcMesh* PreviousMesh = NULL;
+	bool PreviousSelected = false;
+	char* ElementsOffset;
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	for (int PieceIdx = 0; PieceIdx < OpaquePieces.GetSize(); PieceIdx++)
+	{
+		Piece* piece = OpaquePieces[PieceIdx];
+		lcMesh* Mesh = piece->GetPieceInfo()->mMesh;
+
+		const Vector3& Position = piece->GetPosition();
+		const Vector4& Rotation = piece->GetRotation();
+
+		glPushMatrix();
+		glTranslatef(Position[0], Position[1], Position[2]);
+		glRotatef(Rotation[3], Rotation[0], Rotation[1], Rotation[2]);
+
+		if (PreviousMesh != Mesh)
+		{
+			if (GL_HasVertexBufferObject())
 			{
-				if (!bSel)
-				{
-					bSel = true;
-					glLineWidth (2*m_fLineWidth);
-				}
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
+				glVertexPointer(3, GL_FLOAT, 0, NULL);
+				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
+				ElementsOffset = NULL;
 			}
 			else
 			{
-				if (bSel)
-				{
-					bSel = false;
-					glLineWidth(m_fLineWidth);
-				}
+				glVertexPointer(3, GL_FLOAT, 0, Mesh->mVertexBuffer.mData);
+				ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
 			}
 
-			pPiece->Render((m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
+			PreviousMesh = Mesh;
+		}
+
+		if (piece->IsSelected())
+		{
+			if (!PreviousSelected)
+				glLineWidth(2.0f * m_fLineWidth);
+
+			PreviousSelected = true;
 		}
 		else
 		{
-			pPiece->m_pLink = pList;
-			pList = pPiece;
+			if (PreviousSelected)
+				glLineWidth(m_fLineWidth);
+
+			PreviousSelected = false;
 		}
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			int ColorIdx = Section->ColorIndex;
+
+			if (Section->PrimitiveType == GL_TRIANGLES)
+			{
+				if (ColorIdx == gDefaultColor)
+					ColorIdx = piece->mColorIndex;
+
+				if (lcIsColorTranslucent(ColorIdx))
+					continue;
+
+				lcSetColor(ColorIdx);
+			}
+			else
+			{
+				if (piece->IsFocused())
+					lcSetColorFocused();
+				else if (piece->IsSelected())
+					lcSetColorSelected();
+				else if (ColorIdx == gEdgeColor)
+					lcSetEdgeColor(piece->mColorIndex);
+				else
+					lcSetColor(ColorIdx);
+			}
+
+			glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
+		}
+
+		glPopMatrix();
 	}
 
-	if (pList)
-	{
-		float eye[3];
-		view->m_Camera->GetEyePos (eye);
-		BuildBSP(&tree, pList);
-		RenderBSP(&tree, eye, &bSel, (m_nDetail & LC_DET_LIGHTING) != 0, (m_nDetail & LC_DET_BRICKEDGES) != 0);
-	}
-
-	glDepthMask(GL_TRUE);
-	glDisable(GL_BLEND);
-
-	if (bSel)
+	if (PreviousSelected)
 		glLineWidth(m_fLineWidth);
 
-	if (bCull)
-		glDisable(GL_CULL_FACE);
+	if (TranslucentSections.GetSize())
+	{
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glDepthMask(GL_FALSE);
+
+		for (int PieceIdx = 0; PieceIdx < TranslucentSections.GetSize(); PieceIdx++)
+		{
+			Piece* piece = TranslucentSections[PieceIdx].piece;
+			lcMesh* Mesh = piece->GetPieceInfo()->mMesh;
+
+			const Vector3& Position = piece->GetPosition();
+			const Vector4& Rotation = piece->GetRotation();
+
+			glPushMatrix();
+			glTranslatef(Position[0], Position[1], Position[2]);
+			glRotatef(Rotation[3], Rotation[0], Rotation[1], Rotation[2]);
+
+			if (PreviousMesh != Mesh)
+			{
+				if (GL_HasVertexBufferObject())
+				{
+					glBindBufferARB(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
+					glVertexPointer(3, GL_FLOAT, 0, NULL);
+					glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
+					ElementsOffset = NULL;
+				}
+				else
+				{
+					glVertexPointer(3, GL_FLOAT, 0, Mesh->mVertexBuffer.mData);
+					ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
+				}
+
+				PreviousMesh = Mesh;
+			}
+
+			for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+			{
+				lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+				int ColorIdx = Section->ColorIndex;
+
+				if (Section->PrimitiveType != GL_TRIANGLES)
+					continue;
+
+				if (ColorIdx == gDefaultColor)
+					ColorIdx = piece->mColorIndex;
+
+				if (!lcIsColorTranslucent(ColorIdx))
+					continue;
+
+				lcSetColor(ColorIdx);
+
+				glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
+			}
+
+			glPopMatrix();
+		}
+
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
+	}
+
+	if (GL_HasVertexBufferObject())
+	{
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+	}
+	else
+		glVertexPointer(3, GL_FLOAT, 0, NULL);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Project::RenderSceneBoxes(View* view)

@@ -445,7 +445,7 @@ void Export3DStudio()
 
 	for (Piece* pPiece = project->m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
-		PieceInfo* pInfo = pPiece->GetPieceInfo();
+		PieceInfo* pInfo = pPiece->mPieceInfo;
 		lcMesh* Mesh = pInfo->mMesh;
 
 		if (Mesh->mIndexType == GL_UNSIGNED_INT)

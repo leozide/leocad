@@ -1234,7 +1234,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 					Matrix mat(rotation, position);
 					mat.ToLDraw(f);
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-					         pPiece->mColorCode, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->GetPieceInfo()->m_strName);
+					         pPiece->mColorCode, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->mPieceInfo->m_strName);
 					file.WriteBuffer(buf, strlen(buf));
 				}
 			}
@@ -1727,7 +1727,7 @@ int lcTranslucentRenderCompare(const lcTranslucentRenderSection& a, const lcTran
 
 int lcOpaqueRenderCompare(const Piece* a, const Piece* b, void*)
 {
-	if (a->GetPieceInfo() > b->GetPieceInfo())
+	if (a->mPieceInfo > b->mPieceInfo)
 		return 1;
 	else
 		return -1;
@@ -1774,7 +1774,7 @@ void Project::RenderScenePieces(View* view)
 			continue;
 
 		bool Translucent = lcIsColorTranslucent(pPiece->mColorIndex);
-		PieceInfo* Info = pPiece->GetPieceInfo();
+		PieceInfo* Info = pPiece->mPieceInfo;
 
 		if ((Info->m_nFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->m_nFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
 			OpaquePieces.AddSorted(pPiece, lcOpaqueRenderCompare, NULL);
@@ -1801,14 +1801,10 @@ void Project::RenderScenePieces(View* view)
 	for (int PieceIdx = 0; PieceIdx < OpaquePieces.GetSize(); PieceIdx++)
 	{
 		Piece* piece = OpaquePieces[PieceIdx];
-		lcMesh* Mesh = piece->GetPieceInfo()->mMesh;
-
-		const Vector3& Position = piece->GetPosition();
-		const Vector4& Rotation = piece->GetRotation();
+		lcMesh* Mesh = piece->mPieceInfo->mMesh;
 
 		glPushMatrix();
-		glTranslatef(Position[0], Position[1], Position[2]);
-		glRotatef(Rotation[3], Rotation[0], Rotation[1], Rotation[2]);
+		glMultMatrixf(piece->mModelWorld);
 
 		if (PreviousMesh != Mesh)
 		{
@@ -1888,14 +1884,10 @@ void Project::RenderScenePieces(View* view)
 		for (int PieceIdx = 0; PieceIdx < TranslucentSections.GetSize(); PieceIdx++)
 		{
 			Piece* piece = TranslucentSections[PieceIdx].piece;
-			lcMesh* Mesh = piece->GetPieceInfo()->mMesh;
-
-			const Vector3& Position = piece->GetPosition();
-			const Vector4& Rotation = piece->GetRotation();
+			lcMesh* Mesh = piece->mPieceInfo->mMesh;
 
 			glPushMatrix();
-			glTranslatef(Position[0], Position[1], Position[2]);
-			glRotatef(Rotation[3], Rotation[0], Rotation[1], Rotation[2]);
+			glMultMatrixf(piece->mModelWorld);
 
 			if (PreviousMesh != Mesh)
 			{
@@ -3195,7 +3187,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 
 		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		{
-			if ((pPiece->GetPieceInfo() == pInfo) && ((pPiece->GetStepShow() == nStep) || (nStep == 0)))
+			if ((pPiece->mPieceInfo == pInfo) && ((pPiece->GetStepShow() == nStep) || (nStep == 0)))
 			{
 				PiecesUsed[pPiece->mColorIndex]++;
 				Add = true;
@@ -3730,14 +3722,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					for (p1 = m_pPieces; p1; p1 = p1->m_pNext)
 					{
 						bool bSkip = false;
-						pInfo = p1->GetPieceInfo();
+						pInfo = p1->mPieceInfo;
 
 						for (p2 = m_pPieces; p2; p2 = p2->m_pNext)
 						{
 							if (p2 == p1)
 								break;
 
-							if (p2->GetPieceInfo() == pInfo)
+							if (p2->mPieceInfo == pInfo)
 							{
 								bSkip = true;
 								break;
@@ -3921,11 +3913,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 				{
-					PieceInfo* Info = piece->GetPieceInfo();
+					PieceInfo* Info = piece->mPieceInfo;
 
 					for (Piece* FirstPiece = m_pPieces; FirstPiece; FirstPiece = FirstPiece->m_pNext)
 					{
-						if (FirstPiece->GetPieceInfo() != Info)
+						if (FirstPiece->mPieceInfo != Info)
 							continue;
 
 						if (FirstPiece != piece)
@@ -3975,7 +3967,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			// Add pieces not included in LGEO.
 			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 			{
-				PieceInfo* Info = piece->GetPieceInfo();
+				PieceInfo* Info = piece->mPieceInfo;
 				int Index = Library->GetPieceIndex(Info);
 
 				if (PieceTable[Index * LC_PIECE_NAME_LEN])
@@ -4012,7 +4004,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 			{
-				int Index = Library->GetPieceIndex(piece->GetPieceInfo());
+				int Index = Library->GetPieceIndex(piece->mPieceInfo);
 				float fl[12], pos[3], rot[4];
 				int Color;
 
@@ -4168,7 +4160,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				pPiece->GetPosition(pos);
 				pPiece->GetRotation(rot);
 				Matrix mat(rot, pos);
-				PieceInfo* pInfo = pPiece->GetPieceInfo();
+				PieceInfo* pInfo = pPiece->mPieceInfo;
 				float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
 				for (int i = 0; i < pInfo->mMesh->mNumVertices * 3; i += 3)
@@ -4183,7 +4175,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				PieceInfo* Info = pPiece->GetPieceInfo();
+				PieceInfo* Info = pPiece->mPieceInfo;
 
 				strcpy(buf, pPiece->GetName());
 				for (unsigned int i = 0; i < strlen(buf); i++)
@@ -4222,7 +4214,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				int idx = Library->GetPieceIndex(pPiece->GetPieceInfo());
+				int idx = Library->GetPieceIndex(pPiece->mPieceInfo);
 				opts.PieceColorCount[idx * (opts.NumColors + 1) + pPiece->mColorIndex]++;
 				opts.PieceColorCount[idx * (opts.NumColors + 1) + opts.NumColors]++;
 				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + pPiece->mColorIndex]++;
@@ -4880,11 +4872,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						{
 							if (pLast)
 							{
-								pLast->m_pNext = new Piece(pPiece->GetPieceInfo());
+								pLast->m_pNext = new Piece(pPiece->mPieceInfo);
 								pLast = pLast->m_pNext;
 							}
 							else
-								pLast = pFirst = new Piece(pPiece->GetPieceInfo());
+								pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
 							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_nCurStep, m_nCurFrame);
 							pLast->SetColorIndex(pPiece->mColorIndex);
@@ -4901,11 +4893,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							{
 								if (pLast)
 								{
-									pLast->m_pNext = new Piece(pPiece->GetPieceInfo());
+									pLast->m_pNext = new Piece(pPiece->mPieceInfo);
 									pLast = pLast->m_pNext;
 								}
 								else
-									pLast = pFirst = new Piece(pPiece->GetPieceInfo());
+									pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2], m_nCurStep, m_nCurFrame);
 								pLast->SetColorIndex(pPiece->mColorIndex);
@@ -4920,11 +4912,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							{
 								if (pLast)
 								{
-									pLast->m_pNext = new Piece(pPiece->GetPieceInfo());
+									pLast->m_pNext = new Piece(pPiece->mPieceInfo);
 									pLast = pLast->m_pNext;
 								}
 								else
-									pLast = pFirst = new Piece(pPiece->GetPieceInfo());
+									pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
 								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_nCurStep, m_nCurFrame);
 								pLast->SetColorIndex(pPiece->mColorIndex);
@@ -6159,7 +6151,7 @@ Object* Project::GetFocusObject() const
 // Find a good starting position/orientation relative to an existing piece.
 void Project::GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation)
 {
-	Vector3 Dist(0, 0, OffsetPiece->GetPieceInfo()->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
+	Vector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
 	SnapVector(Dist);
 
 	float pos[3], rot[4];
@@ -7487,7 +7479,6 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 				if (pPiece->mColorIndex != m_nCurColor)
 				{
-					bool bTrans = pPiece->IsTranslucent();
 					pPiece->SetColorIndex(m_nCurColor);
 
 					SetModifiedFlag(true);

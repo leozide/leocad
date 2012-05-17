@@ -163,27 +163,6 @@ Matrix::Matrix (const float *rot, const float *pos)
 	m[15] = 1.0f;
 }
 
-// Expand from the .bin file
-void Matrix::FromPacked (const float *mat)
-{
-  m[0] = mat[0];
-  m[1] = mat[1];
-  m[2] = mat[2];
-  m[3] = 0.0f;
-  m[4] = mat[3];
-  m[5] = mat[4];
-  m[6] = mat[5];
-  m[7] = 0.0f;
-  m[8] = mat[6];
-  m[9] = mat[7];
-  m[10] = mat[8];
-  m[11] = 0.0f;
-  m[12] = mat[9];
-  m[13] = mat[10];
-  m[14] = mat[11];
-  m[15] = 0.0f;
-}
-
 void Matrix::FromFloat (const float* mat)
 {
   memcpy (&m[0], mat, sizeof(float[16]));

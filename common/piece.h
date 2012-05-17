@@ -6,20 +6,19 @@ class Group;
 class PieceInfo;
 
 #include "object.h"
-#include "globals.h"
-#include "typedefs.h"
 #include "lc_colors.h"
+#include "lc_math.h"
 
 #define LC_PIECE_HIDDEN		0x01
 #define LC_PIECE_SELECTED	0x02
 #define LC_PIECE_FOCUSED	0x04
 
-typedef enum
+enum LC_PK_TYPES
 {
 	LC_PK_POSITION,
 	LC_PK_ROTATION,
 	LC_PK_COUNT
-} LC_PK_TYPES;
+};
 
 class Piece : public Object
 {
@@ -37,7 +36,6 @@ public:
 
 
 	Piece* m_pNext;
-	Piece* m_pLink;
 
 	void Hide()
 		{ m_nState = LC_PIECE_HIDDEN; }
@@ -76,8 +74,6 @@ public:
 		{ strcpy(m_strName, name); }
 	const char* GetName()
 		{ return m_strName; }
-	PieceInfo* GetPieceInfo() const
-		{ return m_pPieceInfo; }
 	void SetStepShow(unsigned char step)
 		{ m_nStepShow = step; }
 	const unsigned char GetStepShow()
@@ -94,16 +90,14 @@ public:
 		{ m_nFrameHide = frame; }
 	const unsigned short GetFrameHide()
 		{ return m_nFrameHide; }
-	const float* GetConstPosition()
-		{ return m_fPosition; }
 	inline Vector3 GetPosition() const
-		{ return Vector3(m_fPosition[0], m_fPosition[1], m_fPosition[2]); }
+		{ return Vector3(mPosition[0], mPosition[1], mPosition[2]); }
 	inline Vector4 GetRotation() const
-		{ return Vector4(m_fRotation[0], m_fRotation[1], m_fRotation[2], m_fRotation[3]); }
+		{ return Vector4(mRotation[0], mRotation[1], mRotation[2], mRotation[3]); }
 	void GetPosition (float* position)
-		{ memcpy(position, m_fPosition, sizeof(m_fPosition)); }
+		{ memcpy(position, mPosition, sizeof(mPosition)); }
 	void GetRotation (float* rotation)
-		{ memcpy(rotation, m_fRotation, sizeof(m_fRotation)); }
+		{ memcpy(rotation, mRotation, sizeof(mRotation)); }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
@@ -120,31 +114,27 @@ public:
 		mColorCode = lcGetColorCode(ColorIndex);
 	}
 
-	bool IsTranslucent() const
-	{
-		return lcIsColorTranslucent(mColorIndex);
-	}
+public:
+	PieceInfo* mPieceInfo;
 
 	int mColorIndex;
 	lcuint32 mColorCode;
 
+	lcMatrix44 mModelWorld;
+	lcVector3 mPosition;
+	lcVector4 mRotation;
+
 protected:
 	// Atributes
-	PieceInfo* m_pPieceInfo;
 	Group* m_pGroup;
 
-	unsigned short m_nFrameShow;
-	unsigned short m_nFrameHide;
-	unsigned char m_nStepShow;
-	unsigned char m_nStepHide;
+	lcuint16 m_nFrameShow;
+	lcuint16 m_nFrameHide;
+	lcuint8 m_nStepShow;
+	lcuint8 m_nStepHide;
 
-	unsigned char m_nState;
+	lcuint8 m_nState;
 	char m_strName[81];
-
-	// Temporary variables
-	float m_fPosition[3];
-	float m_fRotation[4];
 };
-
 
 #endif // _PIECE_H

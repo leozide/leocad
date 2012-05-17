@@ -664,7 +664,7 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 		char Message[256];
 
 		if (Focus->IsPiece())
-			sprintf(Message, "%s (ID: %s)", Focus->GetName(), ((Piece*)Focus)->GetPieceInfo()->m_strName);
+			sprintf(Message, "%s (ID: %s)", Focus->GetName(), ((Piece*)Focus)->mPieceInfo->m_strName);
 		else
 			strcpy(Message, Focus->GetName());
 

@@ -423,7 +423,7 @@ static void PrintPiecesThread(void* pv)
 
 	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
 	{
-		int idx = pLib->GetPieceIndex (tmp->GetPieceInfo ());
+		int idx = pLib->GetPieceIndex(tmp->mPieceInfo);
 		PiecesUsed[(idx * NumColors) + tmp->mColorIndex]++;
 		ColorsUsed[tmp->mColorIndex]++;
 	}

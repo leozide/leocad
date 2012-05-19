@@ -4744,8 +4744,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					Matrix mat;
 					Piece* pPiece = new Piece(Wizard.m_Info[i]);
 
-					Vector4& Position = Wizard.m_Matrices[i][3];
-					Vector4 Rotation = Wizard.m_Matrices[i].ToAxisAngle();
+					lcVector4& Position = Wizard.m_Matrices[i][3];
+					lcVector4 Rotation = lcMatrix44ToAxisAngle(Wizard.m_Matrices[i]);
 					Rotation[3] *= LC_RTOD;
 					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame);
 					pPiece->SetColorIndex(Wizard.m_Colors[i]);

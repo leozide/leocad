@@ -2,7 +2,7 @@
 #define _MINIFIG_H_
 
 #include "glwindow.h"
-#include "algebra.h"
+#include "lc_math.h"
 #include "array.h"
 
 class PieceInfo;
@@ -31,7 +31,7 @@ struct lcMinifigPieceInfo
 {
 	char Description[128];
 	PieceInfo* Info;
-	Matrix44 Offset;
+	lcMatrix44 Offset;
 };
 
 class MinifigWizard : public GLWindow
@@ -61,7 +61,7 @@ public:
 	PieceInfo* m_Info[LC_MFW_NUMITEMS];
 	int m_Colors[LC_MFW_NUMITEMS];
 	float m_Angles[LC_MFW_NUMITEMS];
-	Matrix44 m_Matrices[LC_MFW_NUMITEMS];
+	lcMatrix44 m_Matrices[LC_MFW_NUMITEMS];
 
 protected:
 	// saved minifig templates

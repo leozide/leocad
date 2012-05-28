@@ -283,6 +283,8 @@ public:
 		: m_Value(_v) { }
 	inline explicit Vector3(const float _x, const float _y, const float _z)
 		: m_Value(_x, _y, _z) { }
+	inline explicit Vector3(const float* xyz)
+		: m_Value(xyz[0], xyz[1], xyz[2]) { }
 
 	inline operator const float*() const { return (const float*)this; }
 	inline operator float*() { return (float*)this; }

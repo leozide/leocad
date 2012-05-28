@@ -6,6 +6,7 @@
 #include "opengl.h"
 #include "array.h"
 #include "algebra.h"
+#include "lc_math.h"
 
 typedef enum 
 {
@@ -105,8 +106,8 @@ public:
 	unsigned short GetTotalFrames () const
 		{ return m_nTotalFrames; }
 
-	void ConvertToUserUnits(Vector3& Value) const;
-	void ConvertFromUserUnits(Vector3& Value) const;
+	void ConvertToUserUnits(lcVector3& Value) const;
+	void ConvertFromUserUnits(lcVector3& Value) const;
 	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
 	{
 		*ppPiece = m_pPieces;
@@ -128,8 +129,8 @@ public:
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
-	bool GetSelectionCenter(Vector3& Center) const;
-	bool GetFocusPosition(Vector3& Position) const;
+	bool GetSelectionCenter(lcVector3& Center) const;
+	bool GetFocusPosition(lcVector3& Position) const;
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 
@@ -219,9 +220,9 @@ protected:
 
 	int m_OverlayMode;
 	bool m_OverlayActive;
-	Vector3 m_OverlayCenter;
-	Vector3 m_OverlayTrackStart;
-	Vector3 m_OverlayDelta;
+	lcVector3 m_OverlayCenter;
+	lcVector3 m_OverlayTrackStart;
+	lcVector3 m_OverlayDelta;
 	void MouseUpdateOverlays(View* view, int x, int y);
 	void ActivateOverlay();
 	void UpdateOverlayScale();

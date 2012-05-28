@@ -8,7 +8,6 @@
 #include <math.h>
 #include "opengl.h"
 #include "globals.h"
-#include "matrix.h"
 #include "lc_file.h"
 #include "camera.h"
 #include "tr.h"
@@ -218,7 +217,7 @@ void Camera::Initialize()
   for (unsigned char i = 0 ; i < sizeof(m_strName) ; i++ )
     m_strName[i] = 0;
 
-  float *values[] = { m_fEye, m_fTarget, m_fUp };
+  float *values[] = { mPosition, mTargetPosition, mUpVector };
   RegisterKeys (values, camera_key_info, LC_CK_COUNT);
 
   m_pTarget = new CameraTarget (this);
@@ -412,50 +411,41 @@ void Camera::FileSave(lcFile& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void Camera::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-  if (IsSide())
-  {
-    m_fEye[0] += dx;
-    m_fEye[1] += dy;
-    m_fEye[2] += dz;
-    m_fTarget[0] += dx;
-    m_fTarget[1] += dy;
-    m_fTarget[2] += dz;
+	lcVector3 Move(dx, dy, dz);
 
-    ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
-    ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
-  }
-  else
-  {
-    if (IsEyeSelected())
-    {
-      m_fEye[0] += dx;
-      m_fEye[1] += dy;
-      m_fEye[2] += dz;
+	if (IsSide())
+	{
+		mPosition += Move;
+		mTargetPosition += Move;
 
-      ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
-    }
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+	else
+	{
+		if (IsEyeSelected())
+		{
+			mPosition += Move;
 
-    if (IsTargetSelected())
-    {
-      m_fTarget[0] += dx;
-      m_fTarget[1] += dy;
-      m_fTarget[2] += dz;
+			ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		}
 
-      ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
-    }
+		if (IsTargetSelected())
+		{
+			mTargetPosition += Move;
 
-    // Fix the up vector
-    lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), SideVector;
-    lcVector3 FrontVector(m_fTarget[0] - m_fEye[0], m_fTarget[1] - m_fEye[1], m_fTarget[2] - m_fEye[2]);
-    SideVector = lcCross(FrontVector, UpVector);
-    UpVector = lcCross(SideVector, FrontVector);
-    UpVector.Normalize();
-    memcpy(m_fUp, UpVector, sizeof(m_fUp));
+			ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+		}
 
-    ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
-  }
+		// Fix the up vector
+		lcVector3 FrontVector(mTargetPosition - mPosition);
+		lcVector3 SideVector = lcCross(FrontVector, mUpVector);
+		mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
+
+		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+	}
 }
 
 void Camera::Select (bool bSelecting, bool bFocus, bool bMultiple)
@@ -512,99 +502,103 @@ void Camera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
 
 void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
-  CalculateKeys(nTime, bAnimation);
+	CalculateKeys(nTime, bAnimation);
+
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
+	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
+
+	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 
 	UpdateBoundingBox();
 }
 
 void Camera::UpdateBoundingBox()
 {
-  // Fix the up vector
-  lcVector3 FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
-  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), SideVector;
+	// Fix the up vector
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	float len = FrontVector.Length();
 
-  SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
-  memcpy(m_fUp, UpVector, sizeof(m_fUp));
+	lcMatrix44 Mat = lcMatrix44AffineInverse(mWorldView);
 
-  float len = FrontVector.Length();
-
-  Matrix mat;
-  mat.CreateLookat (m_fEye, m_fTarget, m_fUp);
-  mat.Invert ();
-
-  mat.SetTranslation (m_fEye[0], m_fEye[1], m_fEye[2]);
-  BoundingBoxCalculate (&mat);
-  mat.SetTranslation (m_fTarget[0], m_fTarget[1], m_fTarget[2]);
-  m_pTarget->BoundingBoxCalculate (&mat);
-  mat.SetTranslation (0, 0, 0);
+	Mat.SetTranslation(mPosition);
+	BoundingBoxCalculate((Matrix*)&Mat);
+	Mat.SetTranslation(mTargetPosition);
+	m_pTarget->BoundingBoxCalculate((Matrix*)&Mat);
+	Mat.SetTranslation(lcVector3(0, 0, 0));
 
 	if (!m_nList)
 		return;
 
-  glNewList(m_nList, GL_COMPILE);
+	glNewList(m_nList, GL_COMPILE);
 
-  glPushMatrix();
-  glTranslatef(m_fEye[0], m_fEye[1], m_fEye[2]);
-  glMultMatrixf(mat.m);
+	glPushMatrix();
+	glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
+	glMultMatrixf(Mat);
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  float verts[34][3] = {
-    {  0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f,  0.3f },
-    { -0.3f,  0.3f,  0.3f }, { -0.3f, -0.3f,  0.3f },
-    { -0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f,  0.3f },
-    {  0.3f, -0.3f,  0.3f }, {  0.3f,  0.3f,  0.3f },
-    {  0.3f,  0.3f, -0.3f }, { -0.3f,  0.3f, -0.3f },
-    { -0.3f,  0.3f, -0.3f }, { -0.3f, -0.3f, -0.3f },
-    { -0.3f, -0.3f, -0.3f }, {  0.3f, -0.3f, -0.3f },
-    {  0.3f, -0.3f, -0.3f }, {  0.3f,  0.3f, -0.3f },
-    {  0.3f,  0.3f,  0.3f }, {  0.3f,  0.3f, -0.3f },
-    { -0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f, -0.3f },
-    { -0.3f, -0.3f,  0.3f }, { -0.3f, -0.3f, -0.3f },
-    {  0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f, -0.3f },
-    { -0.3f, -0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f },
-    {  0.0f,  0.0f, -0.3f }, { -0.3f, -0.3f, -0.6f },
-    {  0.3f, -0.3f, -0.6f }, {  0.0f,  0.0f, -0.3f },
-    {  0.3f,  0.3f, -0.6f }, {  0.3f, -0.3f, -0.6f },
-    {  0.3f,  0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f } };
-  glVertexPointer (3, GL_FLOAT, 0, verts);
-  glDrawArrays(GL_LINES, 0, 24);
-  glDrawArrays(GL_LINE_STRIP, 24, 10);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	float verts[34][3] =
+	{
+		{  0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f,  0.3f },
+		{ -0.3f,  0.3f,  0.3f }, { -0.3f, -0.3f,  0.3f },
+		{ -0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f,  0.3f },
+		{  0.3f, -0.3f,  0.3f }, {  0.3f,  0.3f,  0.3f },
+		{  0.3f,  0.3f, -0.3f }, { -0.3f,  0.3f, -0.3f },
+		{ -0.3f,  0.3f, -0.3f }, { -0.3f, -0.3f, -0.3f },
+		{ -0.3f, -0.3f, -0.3f }, {  0.3f, -0.3f, -0.3f },
+		{  0.3f, -0.3f, -0.3f }, {  0.3f,  0.3f, -0.3f },
+		{  0.3f,  0.3f,  0.3f }, {  0.3f,  0.3f, -0.3f },
+		{ -0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f, -0.3f },
+		{ -0.3f, -0.3f,  0.3f }, { -0.3f, -0.3f, -0.3f },
+		{  0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f, -0.3f },
+		{ -0.3f, -0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f },
+		{  0.0f,  0.0f, -0.3f }, { -0.3f, -0.3f, -0.6f },
+		{  0.3f, -0.3f, -0.6f }, {  0.0f,  0.0f, -0.3f },
+		{  0.3f,  0.3f, -0.6f }, {  0.3f, -0.3f, -0.6f },
+		{  0.3f,  0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f }
+	};
+
+	glVertexPointer (3, GL_FLOAT, 0, verts);
+	glDrawArrays(GL_LINES, 0, 24);
+	glDrawArrays(GL_LINE_STRIP, 24, 10);
 
 //	glBegin(GL_LINES);
 //	glVertex3f(0,0,0);
 //	glVertex3f(0,0,len);
 //	glEnd();
 
-  glTranslatef(0, 0, -len);
+	glTranslatef(0, 0, -len);
 
-  glEndList();
+	glEndList();
 
-  if (m_nTargetList == 0)
-  {
-    m_nTargetList = glGenLists(1);
-    glNewList (m_nTargetList, GL_COMPILE);
+	if (m_nTargetList == 0)
+	{
+		m_nTargetList = glGenLists(1);
+		glNewList (m_nTargetList, GL_COMPILE);
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    float box[24][3] = { 
-      {  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-      { -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-      { -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-      {  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-      {  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-      { -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-      { -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-      {  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-      {  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-      { -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-      { -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-      {  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f } };
-    glVertexPointer (3, GL_FLOAT, 0, box);
-    glDrawArrays(GL_LINES, 0, 24);
-    glPopMatrix();
-    glEndList();
-  }
+		glEnableClientState(GL_VERTEX_ARRAY);
+
+		float box[24][3] =
+		{
+			{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
+			{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
+			{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
+			{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
+			{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
+			{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
+			{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
+			{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
+			{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
+			{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
+			{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
+			{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
+		};
+
+		glVertexPointer (3, GL_FLOAT, 0, box);
+		glDrawArrays(GL_LINES, 0, 24);
+		glPopMatrix();
+		glEndList();
+	}
 }
 
 void Camera::Render(float fLineWidth)
@@ -650,25 +644,22 @@ void Camera::Render(float fLineWidth)
 
   lcSetColorCamera();
   glBegin(GL_LINES);
-  glVertex3fv(m_fEye);
-  glVertex3fv(m_fTarget);
+  glVertex3fv(mPosition);
+  glVertex3fv(mTargetPosition);
   glEnd();
 
   if (IsSelected())
   {
-    Matrix projection, modelview;
-    lcVector3 FrontVector(m_fTarget[0] - m_fEye[0], m_fTarget[1] - m_fEye[1], m_fTarget[2] - m_fEye[2]);
+    lcVector3 FrontVector(mTargetPosition - mPosition);
     float len = FrontVector.Length();
 
     glPushMatrix ();
 
-    modelview.CreateLookat (m_fEye, m_fTarget, m_fUp);
-    modelview.Invert ();
-    glMultMatrixf (modelview.m);
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+    glMultMatrixf(ViewWorld);
 
-    projection.CreatePerspective (m_fovy, 1.33f, 0.01f, len);
-    projection.Invert ();
-    glMultMatrixf (projection.m);
+	lcMatrix44 InvProjection = lcMatrix44Inverse(lcMatrix44Perspective(m_fovy, 1.33f, 0.01f, len));
+    glMultMatrixf(InvProjection);
 
     // draw the viewing frustum
     glBegin(GL_LINE_LOOP);
@@ -731,90 +722,67 @@ void Camera::LoadProjection(float fAspect)
   }
 
   glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  gluLookAt(m_fEye[0], m_fEye[1], m_fEye[2], m_fTarget[0], m_fTarget[1], m_fTarget[2], m_fUp[0], m_fUp[1], m_fUp[2]);
+  glLoadMatrixf(mWorldView);
 }
 
 void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  lcVector3 FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
-  FrontVector.Normalize();
-  FrontVector *= 2.0f * dy / (21 - mouse);
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	FrontVector.Normalize();
+	FrontVector *= 2.0f * dy / (21 - mouse);
 
-  // TODO: option to move eye, target or both
-  m_fEye[0] += FrontVector[0];
-  m_fEye[1] += FrontVector[1];
-  m_fEye[2] += FrontVector[2];
-  m_fTarget[0] += FrontVector[0];
-  m_fTarget[1] += FrontVector[1];
-  m_fTarget[2] += FrontVector[2];
+	// TODO: option to move eye, target or both
+	mPosition += FrontVector;
+	mTargetPosition += FrontVector;
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
-  ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
-  UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+	ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	UpdatePosition(nTime, bAnimation);
 }
 
 void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]), SideVector;
-  SideVector = lcCross(FrontVector, UpVector);
-  SideVector.Normalize();
-  SideVector *= 2.0f*dx/(21-mouse);
-  UpVector.Normalize();
-  UpVector *= -2.0f*dy/(21-mouse);
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
 
-  m_fEye[0] += UpVector[0] + SideVector[0];
-  m_fEye[1] += UpVector[1] + SideVector[1];
-  m_fEye[2] += UpVector[2] + SideVector[2];
-  m_fTarget[0] += UpVector[0] + SideVector[0];
-  m_fTarget[1] += UpVector[1] + SideVector[1];
-  m_fTarget[2] += UpVector[2] + SideVector[2];
+	lcVector3 Move = (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
+	mPosition += Move;
+	mTargetPosition += Move;
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
-  ChangeKey(nTime, bAnimation, bAddKey, m_fTarget, LC_CK_TARGET);
-  UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+	ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	UpdatePosition(nTime, bAnimation);
 }
 
 void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
 {
-  lcVector3 UpVector(m_fUp[0], m_fUp[1], m_fUp[2]), FrontVector(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]), SideVector;
-  SideVector = lcCross(FrontVector, UpVector);
-  SideVector.Normalize();
-  SideVector *= 2.0f*dx/(21-mouse);
-  UpVector.Normalize();
-  UpVector *= -2.0f*dy/(21-mouse);
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
 
-  // TODO: option to move eye or target
-  float len = FrontVector.Length();
-  FrontVector += lcVector3(UpVector[0] + SideVector[0], UpVector[1] + SideVector[1], UpVector[2] + SideVector[2]);
-  FrontVector.Normalize();
-  FrontVector *= len;
-  FrontVector += lcVector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]);
-  memcpy(m_fEye, FrontVector, sizeof(m_fEye));
+	// TODO: option to move eye or target
+	float len = FrontVector.Length();
+	FrontVector += (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
+	FrontVector.Normalize();
+	mPosition = (FrontVector * len) + mTargetPosition;
 
-  // Calculate new up
-  UpVector = lcVector3(m_fUp[0], m_fUp[1], m_fUp[2]);
-  FrontVector = lcVector3(m_fEye[0] - m_fTarget[0], m_fEye[1] - m_fTarget[1], m_fEye[2] - m_fTarget[2]);
-  SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
-  memcpy(m_fUp, UpVector, sizeof(m_fUp));
+	// Calculate new up
+	FrontVector = mPosition - mTargetPosition;
+	SideVector = lcCross(FrontVector, mUpVector);
+	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
-  ChangeKey(nTime, bAnimation, bAddKey, m_fEye, LC_CK_EYE);
-  ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
-  UpdatePosition(nTime, bAnimation);
+	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+	ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+	UpdatePosition(nTime, bAnimation);
 }
 
 void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-  Matrix mat;
-  float front[3] = { m_fEye[0]-m_fTarget[0], m_fEye[1]-m_fTarget[1], m_fEye[2]-m_fTarget[2] };
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, 2.0f * dx / (21 - mouse) * LC_DTOR);
 
-  mat.FromAxisAngle(front, 2.0f*dx/(21-mouse));
-  mat.TransformPoints(m_fUp, 1);
-
-  ChangeKey(nTime, bAnimation, bAddKey, m_fUp, LC_CK_UP);
-  UpdatePosition(nTime, bAnimation);
+	mUpVector = lcMul30(mUpVector, Rotation);
+	ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+	UpdatePosition(nTime, bAnimation);
 }
 
 void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)

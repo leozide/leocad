@@ -3,7 +3,7 @@
 
 #include "opengl.h"
 #include "object.h"
-#include "algebra.h"
+#include "lc_math.h"
 
 #define LC_CAMERA_HIDDEN            0x01
 #define LC_CAMERA_SELECTED          0x02
@@ -69,34 +69,11 @@ public:
 	virtual ~Camera ();
 
 	// Query functions.
-	inline Vector3 GetEyePosition() const
-	{ return Vector3(m_fEye[0], m_fEye[1], m_fEye[2]); };
-	inline Vector3 GetTargetPosition() const
-	{ return Vector3(m_fTarget[0], m_fTarget[1], m_fTarget[2]); };
-	inline Vector3 GetUpVector() const
-	{ return Vector3(m_fUp[0], m_fUp[1], m_fUp[2]); };
-
 	const char* GetName() const
 	{ return m_strName; };
 
 	CameraTarget* GetTarget () const
 		{ return m_pTarget; }
-
-
-	// Deprecated functions:
-	const float* GetEyePos () const
-		{ return m_fEye; };
-	void GetEyePos (float* eye) const
-		{ memcpy(eye, m_fEye, sizeof(m_fEye)); };
-	const float* GetTargetPos () const
-		{ return m_fTarget; };
-	void GetTargetPos (float* target) const
-		{ memcpy(target, m_fTarget, sizeof(m_fTarget)); };
-	const float* GetUpVec () const
-		{ return m_fUp; };
-	void GetUpVec (float* up) const
-		{ memcpy(up, m_fUp, sizeof(m_fUp)); };
-
 
 
 
@@ -169,6 +146,11 @@ public:
 	float m_zNear;
 	float m_zFar;
 
+	lcMatrix44 mWorldView;
+	lcVector3 mPosition;
+	lcVector3 mTargetPosition;
+	lcVector3 mUpVector;
+
 protected:
 	void Initialize();
 	void UpdateBoundingBox();
@@ -182,11 +164,6 @@ protected:
 	unsigned char m_nType;
 	GLuint m_nList;
 	static GLuint m_nTargetList;
-
-	// Current position and orientation.
-	float m_fEye[3];
-	float m_fTarget[3];
-	float m_fUp[3];
 
 	TiledRender* m_pTR;
 };

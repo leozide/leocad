@@ -1764,9 +1764,7 @@ void Project::RenderScenePieces(View* view)
 	PtrArray<Piece> OpaquePieces(512);
 	ObjArray<lcTranslucentRenderSection> TranslucentSections(512);
 
-	Matrix44 ModelView;
-	Camera* Cam = view->m_Camera;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
+	const lcMatrix44& WorldView = view->m_Camera->mWorldView;
 
 	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
@@ -1781,7 +1779,7 @@ void Project::RenderScenePieces(View* view)
 
 		if ((Info->m_nFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->m_nFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
-			Vector3 Pos = Mul31(pPiece->GetPosition(), ModelView);
+			lcVector3 Pos = lcMul31(pPiece->mPosition, WorldView);
 
 			lcTranslucentRenderSection RenderSection;
 
@@ -2006,7 +2004,7 @@ void Project::RenderSceneObjects(View* view)
 //		glClear(GL_DEPTH_BUFFER_BIT);
 
 		Matrix Mats[3];
-		Mats[0].CreateLookat(view->m_Camera->GetEyePos(), view->m_Camera->GetTargetPos(), view->m_Camera->GetUpVec());
+		Mats[0].CreateLookat(view->m_Camera->mPosition, view->m_Camera->mTargetPosition, view->m_Camera->mUpVector);
 		Mats[0].SetTranslation(0, 0, 0);
 
 		float m1[] = { 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
@@ -2229,7 +2227,6 @@ void Project::RenderOverlays(View* view)
 		glDisable(GL_DEPTH_TEST);
 
 		Camera* Cam = view->m_Camera;
-		Matrix44 Mat;
 		int j;
 
 		// Find the rotation from the focused piece if relative snap is enabled.
@@ -2332,8 +2329,7 @@ void Project::RenderOverlays(View* view)
 			}
 		}
 
-		Mat.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-		Mat.Transpose3();
+		lcMatrix44 Mat = lcMatrix44AffineInverse(Cam->mWorldView);
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
@@ -2342,29 +2338,28 @@ void Project::RenderOverlays(View* view)
 
 		for (j = 0; j < 32; j++)
 		{
-			Vector3 Pt;
+			lcVector3 Pt;
 
 			Pt[0] = cosf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
 			Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
 			Pt[2] = 0.0f;
 
-			Pt = Mul31(Pt, Mat);
+			Pt = lcMul31(Pt, Mat);
 
 			glVertex3f(Pt[0], Pt[1], Pt[2]);
 		}
 
 		glEnd();
 
-		Vector3 ViewDir = Cam->GetTargetPosition() - Cam->GetEyePosition();
+		lcVector3 ViewDir = Cam->mTargetPosition - Cam->mPosition;
 		ViewDir.Normalize();
 
 		// Transform ViewDir to local space.
 		if (Focus)
 		{
-			Matrix33 RotMat;
-			RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
+			lcMatrix44 RotMat = lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
 
-			ViewDir = Mul(ViewDir, RotMat);
+			ViewDir = lcMul30(ViewDir, RotMat);
 		}
 
 		glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
@@ -2399,30 +2394,30 @@ void Project::RenderOverlays(View* view)
 
 			for (int j = 0; j < 32; j++)
 			{
-				Vector3 v1, v2;
+				lcVector3 v1, v2;
 
 				switch (i)
 				{
 				case 0:
-					v1 = Vector3(0.0f, cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32));
-					v2 = Vector3(0.0f, cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32));
+					v1 = lcVector3(0.0f, cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32));
+					v2 = lcVector3(0.0f, cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32));
 					break;
 
 				case 1:
-					v1 = Vector3(cosf(LC_2PI * j / 32), 0.0f, sinf(LC_2PI * j / 32));
-					v2 = Vector3(cosf(LC_2PI * (j + 1) / 32), 0.0f, sinf(LC_2PI * (j + 1) / 32));
+					v1 = lcVector3(cosf(LC_2PI * j / 32), 0.0f, sinf(LC_2PI * j / 32));
+					v2 = lcVector3(cosf(LC_2PI * (j + 1) / 32), 0.0f, sinf(LC_2PI * (j + 1) / 32));
 					break;
 
 				case 2:
-					v1 = Vector3(cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32), 0.0f);
-					v2 = Vector3(cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32), 0.0f);
+					v1 = lcVector3(cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32), 0.0f);
+					v2 = lcVector3(cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32), 0.0f);
 					break;
 				}
 
-				if (Dot3(ViewDir, v1+v2) <= 0.0f)
+				if (lcDot(ViewDir, v1 + v2) <= 0.0f)
 				{
-					Vector3 Pt1 = v1 * OverlayRotateRadius * OverlayScale;
-					Vector3 Pt2 = v2 * OverlayRotateRadius * OverlayScale;
+					lcVector3 Pt1 = v1 * (OverlayRotateRadius * OverlayScale);
+					lcVector3 Pt2 = v2 * (OverlayRotateRadius * OverlayScale);
 
 					glVertex3f(Pt1[0], Pt1[1], Pt1[2]);
 					glVertex3f(Pt2[0], Pt2[1], Pt2[2]);
@@ -2437,23 +2432,23 @@ void Project::RenderOverlays(View* view)
 		{
 			if ((m_OverlayMode == LC_OVERLAY_X) || (m_OverlayMode == LC_OVERLAY_Y) || (m_OverlayMode == LC_OVERLAY_Z))
 			{
-				Vector3 Tangent, Normal = m_OverlayTrackStart - m_OverlayCenter;
-				Normal.Normalize();
+				lcVector3 Normal = lcNormalize(m_OverlayTrackStart - m_OverlayCenter);
+				lcVector3 Tangent;
 				float Angle;
 
 				switch (m_OverlayMode)
 				{
 				case LC_OVERLAY_X:
 					Angle = m_MouseTotalDelta[0];
-					Tangent = Vector3(0.0f, -Normal[2], Normal[1]);
+					Tangent = lcVector3(0.0f, -Normal[2], Normal[1]);
 					break;
 				case LC_OVERLAY_Y:
 					Angle = m_MouseTotalDelta[1];
-					Tangent = Vector3(Normal[2], 0.0f, -Normal[0]);
+					Tangent = lcVector3(Normal[2], 0.0f, -Normal[0]);
 					break;
 				case LC_OVERLAY_Z:
 					Angle = m_MouseTotalDelta[2];
-					Tangent = Vector3(-Normal[1], Normal[0], 0.0f);
+					Tangent = lcVector3(-Normal[1], Normal[0], 0.0f);
 					break;
 				}
 
@@ -2469,10 +2464,10 @@ void Project::RenderOverlays(View* view)
 					const float OverlayRotateArrowSize = 1.5f;
 					const float OverlayRotateArrowCapSize = 0.25f;
 
-					Vector3 Pt = Normal * OverlayScale * OverlayRotateRadius;
-					Vector3 Tip = Pt + Tangent * OverlayScale * OverlayRotateArrowSize;
-					Vector3 Arrow;
-					Matrix33 Rot;
+					lcVector3 Pt = Normal * (OverlayScale * OverlayRotateRadius);
+					lcVector3 Tip = Pt + Tangent * (OverlayScale * OverlayRotateArrowSize);
+					lcVector3 Arrow;
+					lcMatrix44 Rot;
 
 					glBegin(GL_LINES);
 					glColor3f(0.8f, 0.8f, 0.0f);
@@ -2480,14 +2475,14 @@ void Project::RenderOverlays(View* view)
 					glVertex3f(Pt[0], Pt[1], Pt[2]);
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 
-					Rot.CreateFromAxisAngle(Normal, LC_PI * 0.15f);
-					Arrow = Mul(Tangent, Rot) * OverlayRotateArrowCapSize;
+					Rot = lcMatrix44FromAxisAngle(Normal, LC_PI * 0.15f);
+					Arrow = lcMul30(Tangent, Rot) * OverlayRotateArrowCapSize;
 
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
 
-					Rot.CreateFromAxisAngle(Normal, -LC_PI * 0.15f);
-					Arrow = Mul(Tangent, Rot) * OverlayRotateArrowCapSize;
+					Rot = lcMatrix44FromAxisAngle(Normal, -LC_PI * 0.15f);
+					Arrow = lcMul30(Tangent, Rot) * OverlayRotateArrowCapSize;
 
 					glVertex3f(Tip[0], Tip[1], Tip[2]);
 					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
@@ -2502,11 +2497,10 @@ void Project::RenderOverlays(View* view)
 					float Aspect = (float)Viewport[2]/(float)Viewport[3];
 					Camera* Cam = view->m_Camera;
 
-					Matrix44 ModelView, Projection;
-					ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-					Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+					const lcMatrix44& ModelView = Cam->mWorldView;
+					lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-					Vector3 Screen = ProjectPoint(Vector3(0, 0, 0), ModelView, Projection, Viewport);
+					lcVector3 Screen = lcProjectPoint(lcVector3(0, 0, 0), ModelView, Projection, Viewport);
 
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();
@@ -3321,13 +3315,13 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			else
 				pCamera->UnHide();
 
-			if (pCamera->GetEyePosition() != mod->Eye)
+			if (pCamera->mPosition != mod->Eye)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Eye, LC_CK_EYE);
 
-			if (pCamera->GetTargetPosition() != mod->Target)
+			if (pCamera->mTargetPosition != mod->Target)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Target, LC_CK_TARGET);
 
-			if (pCamera->GetUpVector() != mod->Up)
+			if (pCamera->mUpVector != mod->Up)
 				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Up, LC_CK_UP);
 
 			pCamera->m_fovy = mod->fovy;
@@ -3990,13 +3984,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				POVFile.WriteLine(Line);
 			}
 
-			float eye[3], target[3], up[3];
-			m_ActiveView->m_Camera->GetEyePos(eye);
-			m_ActiveView->m_Camera->GetTargetPos(target);
-			m_ActiveView->m_Camera->GetUpVec(up);
+			const lcVector3& Position = m_ActiveView->m_Camera->mPosition;
+			const lcVector3& Target = m_ActiveView->m_Camera->mTargetPosition;
+			const lcVector3& Up = m_ActiveView->m_Camera->mUpVector;
 
 			sprintf(Line, "camera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
-				up[0], up[1], up[2], eye[1], eye[0], eye[2], target[1], target[0], target[2], m_ActiveView->m_Camera->m_fovy);
+				Up[0], Up[1], Up[2], Position[1], Position[0], Position[2], Target[1], Target[0], Target[2], m_ActiveView->m_Camera->m_fovy);
 			POVFile.WriteLine(Line);
 			sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
 				m_fBackground[0], m_fBackground[1], m_fBackground[2]);
@@ -5384,10 +5377,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 				Camera* Cam = view->m_Camera;
 
-				Vector3 Position(Cam->GetEyePosition() + Center - Cam->GetTargetPosition());
+				Vector3 Position(Vector3(Cam->mPosition) + Center - Vector3(Cam->mTargetPosition));
 
 				Matrix44 ModelView, Projection;
-				ModelView.CreateLookAt(Position, Center, Cam->GetUpVector());
+				ModelView.CreateLookAt(Position, Center, Vector3(Cam->mUpVector));
 				Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 				Position = ZoomExtents(Position, ModelView, Projection, &Points[0], Points.GetSize());
@@ -6053,7 +6046,7 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 }
 
-bool Project::GetSelectionCenter(Vector3& Center) const
+bool Project::GetSelectionCenter(lcVector3& Center) const
 {
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	bool Selected = false;
@@ -6067,7 +6060,7 @@ bool Project::GetSelectionCenter(Vector3& Center) const
 		}
 	}
 
-	Center = Vector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
+	Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 
 	return Selected;
 }
@@ -6081,28 +6074,27 @@ Camera* Project::GetCamera(int i)
 	return pCamera;
 }
 
-void Project::ConvertToUserUnits(Vector3& Value) const
+void Project::ConvertToUserUnits(lcVector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 		Value /= 0.04f;
 }
 
-void Project::ConvertFromUserUnits(Vector3& Value) const
+void Project::ConvertFromUserUnits(lcVector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 		Value *= 0.04f;
 }
 
-bool Project::GetFocusPosition(Vector3& Position) const
+bool Project::GetFocusPosition(lcVector3& Position) const
 {
 	Piece* pPiece;
 	Camera* pCamera;
-	float* pos = &Position[0];
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsFocused())
 		{
-			pPiece->GetPosition(pos);
+			Position = pPiece->mPosition;
 			return true;
 		}
 
@@ -6110,20 +6102,20 @@ bool Project::GetFocusPosition(Vector3& Position) const
 	{
 		if (pCamera->IsEyeFocused())
 		{
-			pCamera->GetEyePos(pos);
+			Position = pCamera->mPosition;
 			return true;
 		}
 
 		if (pCamera->IsTargetFocused())
 		{
-			pCamera->GetTargetPos(pos);
+			Position = pCamera->mTargetPosition;
 			return true;
 		}
 	}
 
 	// TODO: light
 
-	pos[0] = pos[1] = pos[2] = 0.0f;
+	Position = lcVector3(0.0f, 0.0f, 0.0f);
 
 	return false;
 }
@@ -6184,16 +6176,14 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	// Build the matrices.
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 ClickPoints[2] = { Vector3((float)m_nDownX, (float)m_nDownY, 0.0f), Vector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
-	UnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
+	lcVector3 ClickPoints[2] = { lcVector3((float)m_nDownX, (float)m_nDownY, 0.0f), lcVector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
+	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
 	Vector3 Intersection;
-	if (LinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], Vector4(0, 0, 1, 0)))
+	if (LinePlaneIntersection(Intersection, Vector3(ClickPoints[0]), Vector3(ClickPoints[1]), Vector4(0, 0, 1, 0)))
 	{
 		SnapVector(Intersection);
 		Position = Intersection;
@@ -6202,7 +6192,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position = UnprojectPoint(Vector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+	Position = Vector3(lcUnprojectPoint(lcVector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport));
 	Rotation = Vector4(0, 0, 1, 0);
 }
 
@@ -6212,12 +6202,11 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 Start = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
-	Vector3 End = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
+	lcVector3 Start = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
+	lcVector3 End = lcUnprojectPoint(lcVector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 
 	LC_CLICKLINE ClickLine;
 
@@ -6253,10 +6242,8 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = m_ActiveView->m_Camera;
 
-	// Build the matrices.
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 	// Find out the top-left and bottom-right corners in screen coordinates.
 	float Left, Top, Bottom, Right;
@@ -6284,37 +6271,38 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 	}
 
 	// Unproject 6 points to world space.
-	Vector3 Corners[6] =
+	lcVector3 Corners[6] =
 	{
-		Vector3(Left, Top, 0), Vector3(Left, Bottom, 0), Vector3(Right, Bottom, 0),
-		Vector3(Right, Top, 0), Vector3(Left, Top, 1), Vector3(Right, Bottom, 1)
+		lcVector3(Left, Top, 0), lcVector3(Left, Bottom, 0), lcVector3(Right, Bottom, 0),
+		lcVector3(Right, Top, 0), lcVector3(Left, Top, 1), lcVector3(Right, Bottom, 1)
 	};
 
-	UnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
+	lcUnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
 
 	// Build the box planes.
-	Vector4 Planes[6];
+	lcVector3 PlaneNormals[6];
 
-	Planes[0] = Cross3(Corners[4] - Corners[0], Corners[1] - Corners[0]).Normalize(); // Left
-	Planes[1] = Cross3(Corners[5] - Corners[2], Corners[3] - Corners[2]).Normalize(); // Right
-	Planes[2] = Cross3(Corners[3] - Corners[0], Corners[4] - Corners[0]).Normalize(); // Top
-	Planes[3] = Cross3(Corners[1] - Corners[2], Corners[5] - Corners[2]).Normalize(); // Bottom
-	Planes[4] = Cross3(Corners[1] - Corners[0], Corners[3] - Corners[0]).Normalize(); // Front
-	Planes[5] = Cross3(Corners[1] - Corners[2], Corners[3] - Corners[2]).Normalize(); // Back
+	PlaneNormals[0] = lcNormalize(lcCross(Corners[4] - Corners[0], Corners[1] - Corners[0])); // Left
+	PlaneNormals[1] = lcNormalize(lcCross(Corners[5] - Corners[2], Corners[3] - Corners[2])); // Right
+	PlaneNormals[2] = lcNormalize(lcCross(Corners[3] - Corners[0], Corners[4] - Corners[0])); // Top
+	PlaneNormals[3] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[5] - Corners[2])); // Bottom
+	PlaneNormals[4] = lcNormalize(lcCross(Corners[1] - Corners[0], Corners[3] - Corners[0])); // Front
+	PlaneNormals[5] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[3] - Corners[2])); // Back
 
-	Planes[0][3] = -Dot3(Planes[0], Corners[0]);
-	Planes[1][3] = -Dot3(Planes[1], Corners[5]);
-	Planes[2][3] = -Dot3(Planes[2], Corners[0]);
-	Planes[3][3] = -Dot3(Planes[3], Corners[5]);
-	Planes[4][3] = -Dot3(Planes[4], Corners[0]);
-	Planes[5][3] = -Dot3(Planes[5], Corners[5]);
+	lcVector4 Planes[6];
+	Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
+	Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
+	Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
+	Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
+	Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
+	Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
 
 	// Check if any objects are inside the volume.
 	for (Piece* piece = m_pPieces; piece != NULL; piece = piece->m_pNext)
 	{
 		if (piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 		{
-			if (piece->IntersectsVolume(Planes, 6))
+			if (piece->IntersectsVolume((Vector4*)Planes, 6))
 				Objects.Add(piece);
 		}
 	}
@@ -6448,10 +6436,8 @@ bool Project::StopTracking(bool bAccept)
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 				Camera* Cam = m_ActiveView->m_Camera;
 
-				// Build the matrices.
-				Matrix44 ModelView, Projection;
-				ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-				Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+				const lcMatrix44& ModelView = Cam->mWorldView;
+				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 				// Find out the top-left and bottom-right corners in screen coordinates.
 				float Left, Top, Bottom, Right;
@@ -6479,20 +6465,20 @@ bool Project::StopTracking(bool bAccept)
 				}
 
 				// Unproject screen points to world space.
-				Vector3 Points[3] =
+				lcVector3 Points[3] =
 				{
-					Vector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-					Vector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
-					Vector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
+					lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
+					lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
+					lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
 				};
 
-				UnprojectPoints(Points, 3, ModelView, Projection, Viewport);
+				lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
 
 				// Center camera.
-				Vector3 Eye = Cam->GetEyePosition();
+				lcVector3 Eye = Cam->mPosition;
 				Eye = Eye + (Points[0] - Points[1]);
 
-				Vector3 Target = Cam->GetTargetPosition();
+				lcVector3 Target = Cam->mTargetPosition;
 				Target = Target + (Points[0] - Points[1]);
 
 				// Zoom in/out.
@@ -6500,14 +6486,14 @@ bool Project::StopTracking(bool bAccept)
 				float RatioY = (Top - Bottom) / Viewport[3];
 				float ZoomFactor = -max(RatioX, RatioY) + 0.75f;
 
-				Vector3 Dir = Points[1] - Points[2];
+				lcVector3 Dir = Points[1] - Points[2];
 				Eye = Eye + Dir * ZoomFactor;
 				Target = Target + Dir * ZoomFactor;
 
 				// Change the camera and redraw.
-			  Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
-			  Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
-			  Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
+				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
+				Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
 				SystemUpdateFocus(NULL);
 				UpdateAllViews();
@@ -7180,7 +7166,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				{
 					Matrix mat;
 
-					mat.CreateLookat(camera->GetEyePos (), camera->GetTargetPos (), camera->GetUpVec ());
+					mat.CreateLookat(camera->mPosition, camera->mTargetPosition, camera->mUpVector);
 					mat.SetTranslation(0, 0, 0);
 					mat.Invert();
 
@@ -7244,12 +7230,11 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					float Aspect = (float)Viewport[2]/(float)Viewport[3];
 					Camera* Cam = m_ActiveView->m_Camera;
 
-					Matrix44 ModelView, Projection;
-					ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-					Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+					const lcMatrix44& ModelView = Cam->mWorldView;
+					lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-					Vector3 Pts[3] = { Vector3(5.0f, 5.0f, 0.1f), Vector3(10.0f, 5.0f, 0.1f), Vector3(5.0f, 10.0f, 0.1f) };
-					UnprojectPoints(Pts, 3, ModelView, Projection, Viewport);
+					lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
+					lcUnprojectPoints(Pts, 3, ModelView, Projection, Viewport);
 
 					float ax, ay;
 					Vector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
@@ -7348,11 +7333,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Sys_KeyDown(KEY_ALT))
@@ -7563,7 +7547,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
       if (count == max)
         break;
 
-	  Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
+	  lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
@@ -7577,7 +7561,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
     case LC_ACTION_CAMERA:
     {
-	  Vector3 tmp = UnprojectPoint(Vector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
+	  lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
       SelectAndFocusNone(false);
       StartTracking(LC_TRACK_START_LEFT);
       Camera* pCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2], m_pCameras);
@@ -7627,7 +7611,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			if (sel)
 			{
 				StartTracking(LC_TRACK_START_LEFT);
-				m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
+				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
 				m_MouseSnapLeftover = Vector3(0.0f, 0.0f, 0.0f);
 			}
 		} break;
@@ -7641,7 +7625,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				if (pPiece->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_LEFT);
-					m_OverlayDelta = Vector3(0.0f, 0.0f, 0.0f);
+					m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
 					break;
 				}
 			}
@@ -7674,11 +7658,10 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	Object* Closest = FindObjectFromPoint(view, x, y);
@@ -7779,11 +7762,10 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Sys_KeyDown(KEY_ALT))
@@ -7822,11 +7804,10 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 point = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Sys_KeyDown(KEY_ALT))
@@ -7920,11 +7901,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->m_Camera;
 
-	Matrix44 ModelView, Projection;
-	ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-	Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+	const lcMatrix44& ModelView = Cam->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-	Vector3 tmp = UnprojectPoint(Vector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
+	lcVector3 tmp = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
 
 	switch (m_nCurAction)
@@ -8011,8 +7991,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
-				Vector3 ScreenY = Camera->GetUpVector();
+				Vector3 ScreenX = Cross3(Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition), Vector3(Camera->mUpVector));
+				Vector3 ScreenY = Vector3(Camera->mUpVector);
 				ScreenX.Normalize();
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
@@ -8148,9 +8128,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
-				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
-				Vector3 ScreenY = Camera->GetUpVector();
+				Vector3 ScreenZ = (Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition)).Normalize();
+				Vector3 ScreenX = Cross3(ScreenZ, Vector3(Camera->mUpVector));
+				Vector3 ScreenY = Vector3(Camera->mUpVector);
 
 				Vector3 TotalMove;
 
@@ -8190,8 +8170,8 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Vector3 ScreenX = Cross3(Camera->GetTargetPosition() - Camera->GetEyePosition(), Camera->GetUpVector());
-				Vector3 ScreenY = Camera->GetUpVector();
+				Vector3 ScreenX = Cross3(Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition), Vector3(Camera->mUpVector));
+				Vector3 ScreenY = Vector3(Camera->mUpVector);
 				ScreenX.Normalize();
 				Vector3 Dir1, Dir2;
 				bool SingleDir = true;
@@ -8306,9 +8286,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenZ = (Camera->GetTargetPosition() - Camera->GetEyePosition()).Normalize();
-				Vector3 ScreenX = Cross3(ScreenZ, Camera->GetUpVector());
-				Vector3 ScreenY = Camera->GetUpVector();
+				Vector3 ScreenZ = (Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition)).Normalize();
+				Vector3 ScreenX = Cross3(ScreenZ, Vector3(Camera->mUpVector));
+				Vector3 ScreenY = Vector3(Camera->mUpVector);
 
 				Vector3 Delta;
 
@@ -8383,11 +8363,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			// We can't rotate the side cameras.
 			if (m_ActiveView->m_Camera->IsSide())
 			{
-				float eye[3], target[3], up[3];
-				m_ActiveView->m_Camera->GetEyePos(eye);
-				m_ActiveView->m_Camera->GetTargetPos(target);
-				m_ActiveView->m_Camera->GetUpVec(up);
-				Camera* pCamera = new Camera(eye, target, up, m_pCameras);
+				const lcVector3& Position = m_ActiveView->m_Camera->mPosition;
+				const lcVector3& Target = m_ActiveView->m_Camera->mTargetPosition;
+				const lcVector3& Up = m_ActiveView->m_Camera->mUpVector;
+				Camera* pCamera = new Camera(Position, Target, Up, m_pCameras);
 
 				m_ActiveView->m_Camera = pCamera;
 				SystemUpdateCameraMenu(m_pCameras);
@@ -8482,17 +8461,16 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
 		Camera* Cam = view->m_Camera;
 
-		Matrix44 ModelView, Projection;
-		ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-		Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+		const lcMatrix44& ModelView = Cam->mWorldView;
+		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 		// Array of points for the arrow edges.
-		Vector3 Points[4] =
+		lcVector3 Points[4] =
 		{
-			Vector3(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]),
-			Vector3(OverlayMoveArrowSize * OverlayScale, 0, 0),
-			Vector3(0, OverlayMoveArrowSize * OverlayScale, 0),
-			Vector3(0, 0, OverlayMoveArrowSize * OverlayScale),
+			lcVector3(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]),
+			lcVector3(OverlayMoveArrowSize * OverlayScale, 0, 0),
+			lcVector3(0, OverlayMoveArrowSize * OverlayScale, 0),
+			lcVector3(0, 0, OverlayMoveArrowSize * OverlayScale),
 		};
 
 		// Find the rotation from the focused piece if relative snap is enabled.
@@ -8502,39 +8480,36 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 			if ((Focus != NULL) && Focus->IsPiece())
 			{
-				float Rot[4];
-				((Piece*)Focus)->GetRotation(Rot);
-
-				Matrix33 RotMat;
-				RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
+				const lcMatrix44& RotMat = ((Piece*)Focus)->mModelWorld;
 
 				for (int i = 1; i < 4; i++)
-					Points[i] = Mul(Points[i], RotMat);
+					Points[i] = lcMul30(Points[i], RotMat);
 			}
 		}
 
 		int i, Mode = -1;
-		Vector3 Pt((float)x, (float)y, 0);
+		lcVector3 Pt((float)x, (float)y, 0);
 
 		for (i = 1; i < 4; i++)
+		{
 			Points[i] += Points[0];
-
-		ProjectPoints(Points, 4, ModelView, Projection, Viewport);
+			Points[i] = lcProjectPoint(Points[i], ModelView, Projection, Viewport);
+		}
 
 		// Check if the mouse is over an arrow.
 		for (i = 1; i < 4; i++)
 		{
-			Vector3 Line = Points[i] - Points[0];
-			Vector3 Vec = Pt - Points[0];
+			lcVector3 Line = Points[i] - Points[0];
+			lcVector3 Vec = Pt - Points[0];
 
-			float u = Dot3(Vec, Line) / Line.LengthSquared();
+			float u = lcDot(Vec, Line) / Line.LengthSquared();
 
 			// Point is outside the line segment.
 			if (u < 0.0f || u > 1.0f)
 				continue;
 
 			// Closest point in the line segment to the mouse.
-			Vector3 Closest = Points[0] + u * Line;
+			lcVector3 Closest = Points[0] + Line * u;
 
 			if ((Closest - Pt).LengthSquared() < 100.0f)
 			{
@@ -8586,23 +8561,22 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
 		Camera* Cam = view->m_Camera;
 
-		Matrix44 ModelView, Projection;
-		ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-		Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+		const lcMatrix44& ModelView = Cam->mWorldView;
+		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
 		// Unproject the mouse point against both the front and the back clipping planes.
-		Vector3 SegStart = UnprojectPoint(Vector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
-		Vector3 SegEnd = UnprojectPoint(Vector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
+		lcVector3 SegStart = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
+		lcVector3 SegEnd = lcUnprojectPoint(lcVector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 
-		Vector3 Center(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+		lcVector3 Center(m_OverlayCenter);
 
-		Vector3 Line = SegEnd - SegStart;
-		Vector3 Vec = Center - SegStart;
+		lcVector3 Line = SegEnd - SegStart;
+		lcVector3 Vec = Center - SegStart;
 
-		float u = Dot3(Vec, Line) / Line.LengthSquared();
+		float u = lcDot(Vec, Line) / Line.LengthSquared();
 
 		// Closest point in the line to the mouse.
-		Vector3 Closest = SegStart + u * Line;
+		lcVector3 Closest = SegStart + Line * u;
 
 		int Mode = -1;
 		float Distance = (Closest - Center).Length();
@@ -8643,22 +8617,22 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			if (f >= 0.0f)
 			{
 				Camera* Cam = view->m_Camera;
-				Vector3 ViewDir = Cam->GetTargetPosition() - Cam->GetEyePosition();
+				lcVector3 ViewDir(Cam->mTargetPosition - Cam->mPosition);
 
 				float u1 = (-b + sqrtf(f)) / (2*a);
 				float u2 = (-b - sqrtf(f)) / (2*a);
 
-				Vector3 Intersections[2] =
+				lcVector3 Intersections[2] =
 				{
-					Vector3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
-					Vector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
+					lcVector3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
+					lcVector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
 				};
 
 				for (int i = 0; i < 2; i++)
 				{
-					Vector3 Dist = Intersections[i] - Center;
+					lcVector3 Dist = Intersections[i] - Center;
 
-					if (Dot3(ViewDir, Dist) > 0.0f)
+					if (lcDot(ViewDir, Dist) > 0.0f)
 						continue;
 
 					// Find the rotation from the focused piece if relative snap is enabled.
@@ -8668,13 +8642,11 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 						if ((Focus != NULL) && Focus->IsPiece())
 						{
-							float Rot[4];
-							((Piece*)Focus)->GetRotation(Rot);
+							const lcVector4& Rot = ((Piece*)Focus)->mRotation;
 
-							Matrix33 RotMat;
-							RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
+							lcMatrix44 RotMat = lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
 
-							Dist = Mul(Dist, RotMat);
+							Dist = lcMul30(Dist, RotMat);
 						}
 					}
 
@@ -8814,15 +8786,14 @@ void Project::UpdateOverlayScale()
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
 		Camera* Cam = m_ActiveView->m_Camera;
 
-		Matrix44 ModelView, Projection;
-		ModelView.CreateLookAt(Cam->GetEyePosition(), Cam->GetTargetPosition(), Cam->GetUpVector());
-		Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+		const lcMatrix44& ModelView = Cam->mWorldView;
+		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-		Vector3 Screen = ProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
+		lcVector3 Screen = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
 		Screen[0] += 10.0f;
-		Vector3 Point = UnprojectPoint(Screen, ModelView, Projection, Viewport);
+		lcVector3 Point = lcUnprojectPoint(Screen, ModelView, Projection, Viewport);
 
-		Vector3 Dist(Point - m_OverlayCenter);
+		lcVector3 Dist(Point - m_OverlayCenter);
 		m_ActiveView->m_OverlayScale = Dist.Length() * 5.0f;
 	}
 }

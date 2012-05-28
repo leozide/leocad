@@ -11,6 +11,7 @@ class Camera;
 
 #include "str.h"
 #include "algebra.h"
+#include "lc_math.h"
 
 typedef enum
 {
@@ -200,8 +201,8 @@ struct LC_SEL_DATA
 struct LC_PIECE_MODIFY
 {
 	Piece* piece;
-	Vector3 Position;
-	Vector3 Rotation;
+	lcVector3 Position;
+	lcVector3 Rotation;
 	char name[81];
 	int from;
 	int to;
@@ -212,9 +213,9 @@ struct LC_PIECE_MODIFY
 struct LC_CAMERA_MODIFY
 {
 	Camera* camera;
-	Vector3 Eye;
-	Vector3 Target;
-	Vector3 Up;
+	lcVector3 Eye;
+	lcVector3 Target;
+	lcVector3 Up;
 	char name[81];
 	float fovy;
 	float znear;

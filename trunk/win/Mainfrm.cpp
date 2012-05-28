@@ -432,7 +432,7 @@ LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
 	m_wndProperties.Update(Focus);
 
 	char str[128];
-	Vector3 pos;
+	lcVector3 pos;
 
 	lcGetActiveProject()->GetFocusPosition(pos);
 	lcGetActiveProject()->ConvertToUserUnits(pos);

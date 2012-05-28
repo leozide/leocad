@@ -205,7 +205,7 @@ void CPropertiesPane::SetPiece(Object* Focus)
 
 	float Rot[4];
 	Piece* pPiece = (Piece*)Focus;
-	Vector3 Pos = pPiece->GetPosition();
+	lcVector3 Pos = pPiece->mPosition;
 	pPiece->GetRotation(Rot);
 	Matrix mat(Rot, Pos);
 	mat.ToEulerAngles(Rot);
@@ -249,11 +249,11 @@ void CPropertiesPane::ModifyPiece()
 	Modify.piece = (Piece*)mObject;
 
 	CMFCPropertyGridProperty* Position = m_wndPropList.GetProperty(0);
-	Modify.Position = Vector3(Position->GetSubItem(0)->GetValue().fltVal, Position->GetSubItem(1)->GetValue().fltVal, Position->GetSubItem(2)->GetValue().fltVal);
+	Modify.Position = lcVector3(Position->GetSubItem(0)->GetValue().fltVal, Position->GetSubItem(1)->GetValue().fltVal, Position->GetSubItem(2)->GetValue().fltVal);
 	lcGetActiveProject()->ConvertFromUserUnits(Modify.Position);
 
 	CMFCPropertyGridProperty* Rotation = m_wndPropList.GetProperty(1);
-	Modify.Rotation = Vector3(Rotation->GetSubItem(0)->GetValue().fltVal, Rotation->GetSubItem(1)->GetValue().fltVal, Rotation->GetSubItem(2)->GetValue().fltVal);
+	Modify.Rotation = lcVector3(Rotation->GetSubItem(0)->GetValue().fltVal, Rotation->GetSubItem(1)->GetValue().fltVal, Rotation->GetSubItem(2)->GetValue().fltVal);
 
 	CMFCPropertyGridProperty* Appearence = m_wndPropList.GetProperty(2);
 	Modify.from = Appearence->GetSubItem(0)->GetValue().ulVal;
@@ -330,7 +330,7 @@ void CPropertiesPane::SetCamera(Object* Focus)
 
 	Camera* pCamera = (Camera*)Focus;
 
-	Vector3 Pos = pCamera->GetEyePosition();
+	lcVector3 Pos = pCamera->mPosition;
 	lcGetActiveProject()->ConvertToUserUnits(Pos);
 
 	CMFCPropertyGridProperty* Position = m_wndPropList.GetProperty(0);
@@ -338,7 +338,7 @@ void CPropertiesPane::SetCamera(Object* Focus)
 	UpdateProperty(Position->GetSubItem(1), Pos[1]);
 	UpdateProperty(Position->GetSubItem(2), Pos[2]);
 
-	Vector3 Target = pCamera->GetTargetPosition();
+	lcVector3 Target = pCamera->mTargetPosition;
 	lcGetActiveProject()->ConvertToUserUnits(Target);
 
 	CMFCPropertyGridProperty* TargetProp = m_wndPropList.GetProperty(1);
@@ -346,7 +346,7 @@ void CPropertiesPane::SetCamera(Object* Focus)
 	UpdateProperty(TargetProp->GetSubItem(1), Target[1]);
 	UpdateProperty(TargetProp->GetSubItem(2), Target[2]);
 
-	Vector3 Up = pCamera->GetUpVector();
+	lcVector3 Up = pCamera->mUpVector;
 
 	CMFCPropertyGridProperty* UpProp = m_wndPropList.GetProperty(2);
 	UpdateProperty(UpProp->GetSubItem(0), Up[0]);
@@ -369,15 +369,15 @@ void CPropertiesPane::ModifyCamera()
 	Modify.camera = (Camera*)mObject;
 
 	CMFCPropertyGridProperty* PositionProp = m_wndPropList.GetProperty(0);
-	Modify.Eye = Vector3(PositionProp->GetSubItem(0)->GetValue().fltVal, PositionProp->GetSubItem(1)->GetValue().fltVal, PositionProp->GetSubItem(2)->GetValue().fltVal);
+	Modify.Eye = lcVector3(PositionProp->GetSubItem(0)->GetValue().fltVal, PositionProp->GetSubItem(1)->GetValue().fltVal, PositionProp->GetSubItem(2)->GetValue().fltVal);
 	lcGetActiveProject()->ConvertFromUserUnits(Modify.Eye);
 
 	CMFCPropertyGridProperty* TargetProp = m_wndPropList.GetProperty(1);
-	Modify.Target = Vector3(TargetProp->GetSubItem(0)->GetValue().fltVal, TargetProp->GetSubItem(1)->GetValue().fltVal, TargetProp->GetSubItem(2)->GetValue().fltVal);
+	Modify.Target = lcVector3(TargetProp->GetSubItem(0)->GetValue().fltVal, TargetProp->GetSubItem(1)->GetValue().fltVal, TargetProp->GetSubItem(2)->GetValue().fltVal);
 	lcGetActiveProject()->ConvertFromUserUnits(Modify.Target);
 
 	CMFCPropertyGridProperty* UpProp = m_wndPropList.GetProperty(2);
-	Modify.Up = Vector3(UpProp->GetSubItem(0)->GetValue().fltVal, UpProp->GetSubItem(1)->GetValue().fltVal, UpProp->GetSubItem(2)->GetValue().fltVal);
+	Modify.Up = lcVector3(UpProp->GetSubItem(0)->GetValue().fltVal, UpProp->GetSubItem(1)->GetValue().fltVal, UpProp->GetSubItem(2)->GetValue().fltVal);
 
 	CMFCPropertyGridProperty* SettingsProp = m_wndPropList.GetProperty(3);
 	Modify.fovy = SettingsProp->GetSubItem(0)->GetValue().fltVal;

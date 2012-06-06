@@ -847,9 +847,7 @@ void MinifigWizard::OnDraw()
 	glLoadIdentity();
 	gluPerspective(30.0f, aspect, 1.0f, 20.0f);
 	glMatrixMode(GL_MODELVIEW);
-	Matrix44 WorldView;
-	WorldView.CreateLookAt(Vector3(0, -9, 4), Vector3(0, 5, 1), Vector3(0, 0, 1));
-	glLoadMatrixf(WorldView);
+	glLoadMatrixf(lcMatrix44LookAt(lcVector3(0, -9, 4), lcVector3(0, 5, 1), lcVector3(0, 0, 1)));
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);

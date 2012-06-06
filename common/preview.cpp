@@ -53,14 +53,10 @@ void PiecePreview::OnDraw()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	Vector3 Eye(0, 0, 1.0f);
-	Matrix33 Rot;
+	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
-	Rot.CreateFromAxisAngle(Vector3(1, 0, 0), -m_RotateX * LC_DTOR);
-	Eye = Mul(Eye, Rot);
-
-	Rot.CreateFromAxisAngle(Vector3(0, 0, 1), -m_RotateZ * LC_DTOR);
-	Eye = Mul(Eye, Rot);
+	Eye = lcMul30(Eye, lcMatrix44RotationX(-m_RotateX * LC_DTOR));
+	Eye = lcMul30(Eye, lcMatrix44RotationZ(-m_RotateZ * LC_DTOR));
 
 	if (m_AutoZoom)
 	{
@@ -68,17 +64,15 @@ void PiecePreview::OnDraw()
 		m_PieceInfo->ZoomExtents(30.0f, aspect, Eye);
 
 		// Update the new camera distance.
-		Vector3 d = Eye - m_PieceInfo->GetCenter();
+		lcVector3 d = Eye - m_PieceInfo->GetCenter();
 		m_Distance = d.Length();
 	}
 	else
 	{
-		Matrix44 WorldToView;
-		WorldToView.CreateLookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), Vector3(0, 0, 1));
-		glLoadMatrixf(WorldToView);
+		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}
 
-	float pos[4] = { 0, 0, 10, 0 }, *bg = lcGetActiveProject()->GetBackgroundColor ();
+	float pos[4] = { 0, 0, 10, 0 }, *bg = lcGetActiveProject()->GetBackgroundColor();
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

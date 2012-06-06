@@ -2,6 +2,7 @@
 #define _LC_MATH_H_
 
 #include <math.h>
+#include <float.h>
 
 class lcVector3;
 class lcVector4;
@@ -255,7 +256,7 @@ inline float lcDot(const lcVector3& a, const lcVector3& b)
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline float lcDot4(const lcVector4& a, const lcVector4& b)
+inline float lcDot(const lcVector4& a, const lcVector4& b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
@@ -341,10 +342,10 @@ inline lcMatrix44 lcMul(const lcMatrix44& a, const lcMatrix44& b)
 	lcVector4 Col2(b.r[0][2], b.r[1][2], b.r[2][2], b.r[3][2]);
 	lcVector4 Col3(b.r[0][3], b.r[1][3], b.r[2][3], b.r[3][3]);
 
-	lcVector4 Ret0(lcDot4(a.r[0], Col0), lcDot4(a.r[0], Col1), lcDot4(a.r[0], Col2), lcDot4(a.r[0], Col3));
-	lcVector4 Ret1(lcDot4(a.r[1], Col0), lcDot4(a.r[1], Col1), lcDot4(a.r[1], Col2), lcDot4(a.r[1], Col3));
-	lcVector4 Ret2(lcDot4(a.r[2], Col0), lcDot4(a.r[2], Col1), lcDot4(a.r[2], Col2), lcDot4(a.r[2], Col3));
-	lcVector4 Ret3(lcDot4(a.r[3], Col0), lcDot4(a.r[3], Col1), lcDot4(a.r[3], Col2), lcDot4(a.r[3], Col3));
+	lcVector4 Ret0(lcDot(a.r[0], Col0), lcDot(a.r[0], Col1), lcDot(a.r[0], Col2), lcDot(a.r[0], Col3));
+	lcVector4 Ret1(lcDot(a.r[1], Col0), lcDot(a.r[1], Col1), lcDot(a.r[1], Col2), lcDot(a.r[1], Col3));
+	lcVector4 Ret2(lcDot(a.r[2], Col0), lcDot(a.r[2], Col1), lcDot(a.r[2], Col2), lcDot(a.r[2], Col3));
+	lcVector4 Ret3(lcDot(a.r[3], Col0), lcDot(a.r[3], Col1), lcDot(a.r[3], Col2), lcDot(a.r[3], Col3));
 
 	return lcMatrix44(Ret0, Ret1, Ret2, Ret3);
 }
@@ -792,6 +793,75 @@ inline void lcUnprojectPoints(lcVector3* Points, int NumPoints, const lcMatrix44
 
 		Points[i] = lcVector3(Tmp[0], Tmp[1], Tmp[2]);
 	}
+}
+
+inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Projection, lcVector4 Planes[6])
+{
+	lcMatrix44 WorldProj = lcMul(WorldView, Projection);
+
+	Planes[0][0] = (WorldProj[0][0] - WorldProj[0][3]) * -1;
+	Planes[0][1] = (WorldProj[1][0] - WorldProj[1][3]) * -1;
+	Planes[0][2] = (WorldProj[2][0] - WorldProj[2][3]) * -1;
+	Planes[0][3] = (WorldProj[3][0] - WorldProj[3][3]) * -1;
+	Planes[1][0] =  WorldProj[0][0] + WorldProj[0][3];
+	Planes[1][1] =  WorldProj[1][0] + WorldProj[1][3];
+	Planes[1][2] =  WorldProj[2][0] + WorldProj[2][3];
+	Planes[1][3] =  WorldProj[3][0] + WorldProj[3][3];
+	Planes[2][0] = (WorldProj[0][1] - WorldProj[0][3]) * -1;
+	Planes[2][1] = (WorldProj[1][1] - WorldProj[1][3]) * -1;
+	Planes[2][2] = (WorldProj[2][1] - WorldProj[2][3]) * -1;
+	Planes[2][3] = (WorldProj[3][1] - WorldProj[3][3]) * -1;
+	Planes[3][0] =  WorldProj[0][1] + WorldProj[0][3];
+	Planes[3][1] =  WorldProj[1][1] + WorldProj[1][3];
+	Planes[3][2] =  WorldProj[2][1] + WorldProj[2][3];
+	Planes[3][3] =  WorldProj[3][1] + WorldProj[3][3];
+	Planes[4][0] = (WorldProj[0][2] - WorldProj[0][3]) * -1;
+	Planes[4][1] = (WorldProj[1][2] - WorldProj[1][3]) * -1;
+	Planes[4][2] = (WorldProj[2][2] - WorldProj[2][3]) * -1;
+	Planes[4][3] = (WorldProj[3][2] - WorldProj[3][3]) * -1;
+	Planes[5][0] =  WorldProj[0][2] + WorldProj[0][3];
+	Planes[5][1] =  WorldProj[1][2] + WorldProj[1][3];
+	Planes[5][2] =  WorldProj[2][2] + WorldProj[2][3];
+	Planes[5][3] =  WorldProj[3][2] + WorldProj[3][3];
+
+	for (int i = 0; i < 6; i++)
+	{
+		lcVector3 Normal(Planes[i][0], Planes[i][1], Planes[i][2]);
+		float Len = Normal.Length();
+		Planes[i] /= -Len;
+	}
+}
+
+inline lcVector3 lcZoomExtents(const lcVector3& Position, const lcMatrix44& WorldView, const lcMatrix44& Projection, const lcVector3* Points, int NumPoints)
+{
+	if (!NumPoints)
+		return Position;
+
+	lcVector4 Planes[6];
+	lcGetFrustumPlanes(WorldView, Projection, Planes);
+
+	lcVector3 Front(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
+
+	// Calculate the position that is as close as possible to the model and has all pieces visible.
+	float SmallestDistance = FLT_MAX;
+
+	for (int p = 0; p < 4; p++)
+	{
+		lcVector3 Plane(Planes[p][0], Planes[p][1], Planes[p][2]);
+		float ep = lcDot(Position, Plane);
+		float fp = lcDot(Front, Plane);
+
+		for (int j = 0; j < NumPoints; j++)
+		{
+			// Intersect the camera line with the plane that contains this point, NewEye = Eye + u * (Target - Eye)
+			float u = (ep - lcDot(Points[j], Plane)) / fp;
+
+			if (u < SmallestDistance)
+				SmallestDistance = u;
+		}
+	}
+
+	return Position - (Front * SmallestDistance);
 }
 
 #endif // _LC_MATH_H_

@@ -5356,17 +5356,19 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 					pPiece->CompareBoundingBox(bs);
 
-			Vector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
+			lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
 
-			ObjArray<Vector3> Points;
-			Points.Add(Vector3(bs[0], bs[1], bs[5]));
-			Points.Add(Vector3(bs[3], bs[1], bs[5]));
-			Points.Add(Vector3(bs[0], bs[1], bs[2]));
-			Points.Add(Vector3(bs[3], bs[4], bs[5]));
-			Points.Add(Vector3(bs[3], bs[4], bs[2]));
-			Points.Add(Vector3(bs[0], bs[4], bs[2]));
-			Points.Add(Vector3(bs[0], bs[4], bs[5]));
-			Points.Add(Vector3(bs[3], bs[1], bs[2]));
+			lcVector3 Points[8] =
+			{
+				lcVector3(bs[0], bs[1], bs[5]),
+				lcVector3(bs[3], bs[1], bs[5]),
+				lcVector3(bs[0], bs[1], bs[2]),
+				lcVector3(bs[3], bs[4], bs[5]),
+				lcVector3(bs[3], bs[4], bs[2]),
+				lcVector3(bs[0], bs[4], bs[2]),
+				lcVector3(bs[0], bs[4], bs[5]),
+				lcVector3(bs[3], bs[1], bs[2])
+			};
 
 			for (int vp = FirstView; vp < LastView; vp++)
 			{
@@ -5377,13 +5379,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 				Camera* Cam = view->m_Camera;
 
-				Vector3 Position(Vector3(Cam->mPosition) + Center - Vector3(Cam->mTargetPosition));
+				lcVector3 Position(Cam->mPosition + Center - Cam->mTargetPosition);
 
-				Matrix44 ModelView, Projection;
-				ModelView.CreateLookAt(Position, Center, Vector3(Cam->mUpVector));
-				Projection.CreatePerspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+				const lcMatrix44& ModelView = Cam->mWorldView;
+				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-				Position = ZoomExtents(Position, ModelView, Projection, &Points[0], Points.GetSize());
+				Position = lcZoomExtents(Position, ModelView, Projection, Points, 8);
 
 				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
 				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Center, LC_CK_TARGET);
@@ -7110,7 +7111,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		case KEY_RIGHT: case KEY_NEXT: case KEY_PRIOR:
 //		if (AnyObjectSelected(FALSE))
 		{
-			Vector3 axis;
+			lcVector3 axis;
 			if (bShift)
 			{
 				if (m_nSnap & LC_DRAW_SNAP_A)
@@ -7164,11 +7165,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 				if (camera->IsSide ())
 				{
-					Matrix mat;
-
-					mat.CreateLookat(camera->mPosition, camera->mTargetPosition, camera->mUpVector);
-					mat.SetTranslation(0, 0, 0);
-					mat.Invert();
+					lcMatrix44 mat = lcMatrix44AffineInverse(camera->mWorldView);
 
 					switch (nKey)
 					{
@@ -7197,7 +7194,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 						break;
 					}
 
-					mat.TransformPoints (axis, 1);
+					axis = lcMul30(axis, mat);
 				}
 				else
 				{
@@ -7275,12 +7272,12 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (bShift)
 			{
 				Vector3 tmp;
-				RotateSelectedObjects(axis, tmp);
+				RotateSelectedObjects(Vector3(axis), tmp);
 			}
 			else
 			{
 				Vector3 tmp;
-				MoveSelectedObjects(axis, tmp, false);
+				MoveSelectedObjects(Vector3(axis), tmp, false);
 			}
 
 			UpdateOverlayScale();

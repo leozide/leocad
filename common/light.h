@@ -3,6 +3,7 @@
 
 #include "opengl.h"
 #include "object.h"
+#include "lc_math.h"
 
 #define LC_LIGHT_HIDDEN			0x01
 #define LC_LIGHT_SELECTED		0x02
@@ -89,22 +90,23 @@ public:
 	{ m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED); }
 	const char* GetName()
 	{ return m_strName; }
-	void GetTargetPos (float *pos) const
-	{ memcpy (pos, m_fTarget, sizeof (float[3])); }
 	LightTarget* GetTarget () const
 	{ return m_pTarget; }
 
 	const char* GetName() const
 	{ return m_strName; };
 
-  void Render (float fLineWidth);
-  void MinIntersectDist (LC_CLICKLINE* Line);
+	void Render (float fLineWidth);
+	void MinIntersectDist (LC_CLICKLINE* Line);
 	bool IntersectsVolume(const Vector4* Planes, int NumPlanes)
 	{ return false; }
-  void UpdatePosition (unsigned short nTime, bool bAnimation);
-  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void Setup (int index);
+	void UpdatePosition (unsigned short nTime, bool bAnimation);
+	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void Setup (int index);
 	void CreateName(const Light* pLight);
+
+	lcVector3 mPosition;
+	lcVector3 mTargetPosition;
 
 protected:
   void Initialize ();
@@ -123,8 +125,6 @@ protected:
   static GLuint m_nTargetList;
 
   // Temporary parameters
-  float m_fPos[4];
-  float m_fTarget[3];
   float m_fAmbient[4];
   float m_fDiffuse[4];
   float m_fSpecular[4];

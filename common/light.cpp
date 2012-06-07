@@ -9,7 +9,6 @@
 #include <math.h>
 #include "light.h"
 #include "globals.h"
-#include "matrix.h"
 
 GLuint Light::m_nSphereList = 0;
 GLuint Light::m_nTargetList = 0;
@@ -83,8 +82,6 @@ Light::Light (float px, float py, float pz)
   ChangeKey (1, true, true, pos, LC_LK_POSITION);
   ChangeKey (1, true, true, target, LC_LK_TARGET);
 
-  m_fPos[3] = 0.0f;
-
   UpdatePosition (1, false);
 }
 
@@ -102,7 +99,6 @@ Light::Light (float px, float py, float pz, float tx, float ty, float tz)
   ChangeKey (1, true, true, target, LC_LK_TARGET);
 
   m_pTarget = new LightTarget (this);
-  m_fPos[3] = 1.0f;
 
   UpdatePosition (1, false);
 }
@@ -120,7 +116,7 @@ void Light::Initialize ()
   m_fDiffuse[3] = 1.0f;
   m_fSpecular[3] = 1.0f;
 
-  float *values[] = { m_fPos, m_fTarget, m_fAmbient, m_fDiffuse, m_fSpecular,
+  float *values[] = { mPosition, mTargetPosition, m_fAmbient, m_fDiffuse, m_fSpecular,
                       &m_fConstant, &m_fLinear, &m_fQuadratic, &m_fCutoff, &m_fExponent };
   RegisterKeys (values, light_key_info, LC_LK_COUNT);
 
@@ -247,33 +243,31 @@ void Light::MinIntersectDist (LC_CLICKLINE* pLine)
 
 void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-  if (IsEyeSelected())
-  {
-    m_fPos[0] += dx;
-    m_fPos[1] += dy;
-    m_fPos[2] += dz;
+	lcVector3 Move(dx, dy, dz);
 
-    ChangeKey (nTime, bAnimation, bAddKey, m_fPos, LC_LK_POSITION);
-  }
+	if (IsEyeSelected())
+	{
+		mPosition += Move;
 
-  if (IsTargetSelected())
-  {
-    m_fTarget[0] += dx;
-    m_fTarget[1] += dy;
-    m_fTarget[2] += dz;
+		ChangeKey (nTime, bAnimation, bAddKey, mPosition, LC_LK_POSITION);
+	}
 
-    ChangeKey (nTime, bAnimation, bAddKey, m_fTarget, LC_LK_TARGET);
-  }
+	if (IsTargetSelected())
+	{
+		mTargetPosition += Move;
+
+		ChangeKey (nTime, bAnimation, bAddKey, mTargetPosition, LC_LK_TARGET);
+	}
 }
 
 void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 {
 	CalculateKeys(nTime, bAnimation);
-	BoundingBoxCalculate(m_fPos);
+	BoundingBoxCalculate(mPosition);
 
 	if (m_pTarget != NULL)
 	{
-		m_pTarget->BoundingBoxCalculate(m_fTarget);
+		m_pTarget->BoundingBoxCalculate(mTargetPosition);
 
 		if (m_nList == 0)
 			m_nList = glGenLists(1);
@@ -281,9 +275,9 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 		glNewList(m_nList, GL_COMPILE);
 
 		glPushMatrix();
-		glTranslatef(m_fPos[0], m_fPos[1], m_fPos[2]);
+		glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
 
-		lcVector3 FrontVector(m_fTarget[0] - m_fPos[0], m_fTarget[1] - m_fPos[1], m_fTarget[2] - m_fPos[2]);
+		lcVector3 FrontVector(mTargetPosition - mPosition);
 		lcVector3 UpVector(1, 1, 1);
 		float Length = FrontVector.Length();
 
@@ -302,12 +296,11 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 				UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
 		}
 
-		Matrix mat;
-		mat.CreateLookat(m_fPos, m_fTarget, UpVector);
-		mat.Invert();
-		mat.SetTranslation(0, 0, 0);
+		lcMatrix44 mat = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
+		mat = lcMatrix44AffineInverse(mat);
+		mat.SetTranslation(lcVector3(0, 0, 0));
 
-		glMultMatrixf(mat.m);
+		glMultMatrixf(mat);
 
     glEnableClientState (GL_VERTEX_ARRAY);
     float verts[16*3];
@@ -429,157 +422,157 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 
 void Light::Render (float fLineWidth)
 {
-  if (m_pTarget != NULL)
-  {
-    if (IsEyeSelected())
-    {
-      glLineWidth(fLineWidth*2);
-      if (m_nState & LC_LIGHT_FOCUSED)
-        lcSetColorFocused();
-      else
-        lcSetColorSelected();
-      glCallList(m_nList);
-      glLineWidth(fLineWidth);
-    }
-    else
-    {
-      lcSetColorLight();
-      glCallList(m_nList);
-    }
+	if (m_pTarget != NULL)
+	{
+		if (IsEyeSelected())
+		{
+			glLineWidth(fLineWidth*2);
+			if (m_nState & LC_LIGHT_FOCUSED)
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+			glCallList(m_nList);
+			glLineWidth(fLineWidth);
+		}
+		else
+		{
+			lcSetColorLight();
+			glCallList(m_nList);
+		}
 
-    if (IsTargetSelected())
-    {
-      glLineWidth(fLineWidth*2);
-      if (m_nState & LC_LIGHT_TARGET_FOCUSED)
-        lcSetColorFocused();
-      else
-        lcSetColorSelected();
-      glCallList(m_nTargetList);
-      glLineWidth(fLineWidth);
-    }
-    else
-    {
-      lcSetColorLight();
-      glCallList(m_nTargetList);
-    }
+		if (IsTargetSelected())
+		{
+			glLineWidth(fLineWidth*2);
+			if (m_nState & LC_LIGHT_TARGET_FOCUSED)
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+			glCallList(m_nTargetList);
+			glLineWidth(fLineWidth);
+		}
+		else
+		{
+			lcSetColorLight();
+			glCallList(m_nTargetList);
+		}
 
-    lcSetColorLight();
-    glBegin(GL_LINES);
-    glVertex3fv(m_fPos);
-    glVertex3fv(m_fTarget);
-    glEnd();
+		lcSetColorLight();
+		glBegin(GL_LINES);
+		glVertex3fv(mPosition);
+		glVertex3fv(mTargetPosition);
+		glEnd();
 
-    if (IsSelected())
-    {
-      Matrix projection, modelview;
-      lcVector3 FrontVector(m_fTarget[0] - m_fPos[0], m_fTarget[1] - m_fPos[1], m_fTarget[2] - m_fPos[2]);
-	  lcVector3 UpVector(1, 1, 1);
-      float Length = FrontVector.Length();
+		if (IsSelected())
+		{
+			lcMatrix44 projection, modelview;
+			lcVector3 FrontVector(mTargetPosition - mPosition);
+			lcVector3 UpVector(1, 1, 1);
+			float Length = FrontVector.Length();
 
-      if (fabs(FrontVector[0]) < fabs(FrontVector[1]))
-      {
-        if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
-          UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
-        else
-          UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-      }
-      else
-      {
-        if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
-          UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
-        else
-          UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-      }
+			if (fabs(FrontVector[0]) < fabs(FrontVector[1]))
+			{
+				if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
+					UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
+				else
+					UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
+			}
+			else
+			{
+				if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
+					UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
+				else
+					UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
+			}
 
-      glPushMatrix();
+			glPushMatrix();
 
-      modelview.CreateLookat (m_fPos, m_fTarget, UpVector);
-      modelview.Invert ();
-      glMultMatrixf (modelview.m);
+			modelview = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
+			modelview = lcMatrix44AffineInverse(modelview);
+			glMultMatrixf(modelview);
 
-      projection.CreatePerspective (2*m_fCutoff, 1.0f, 0.01f, Length);
-      projection.Invert ();
-      glMultMatrixf (projection.m);
+			projection = lcMatrix44Perspective(2*m_fCutoff, 1.0f, 0.01f, Length);
+			projection = lcMatrix44Inverse(projection);
+			glMultMatrixf(projection);
 
-      // draw the viewing frustum
-      glBegin (GL_LINE_LOOP);
-      glVertex3f ( 0.5f,  1.0f, 1.0f);
-      glVertex3f ( 1.0f,  0.5f, 1.0f);
-      glVertex3f ( 1.0f, -0.5f, 1.0f);
-      glVertex3f ( 0.5f, -1.0f, 1.0f);
-      glVertex3f (-0.5f, -1.0f, 1.0f);
-      glVertex3f (-1.0f, -0.5f, 1.0f);
-      glVertex3f (-1.0f,  0.5f, 1.0f);
-      glVertex3f (-0.5f,  1.0f, 1.0f);
-      glEnd ();
+			// draw the viewing frustum
+			glBegin (GL_LINE_LOOP);
+			glVertex3f ( 0.5f,  1.0f, 1.0f);
+			glVertex3f ( 1.0f,  0.5f, 1.0f);
+			glVertex3f ( 1.0f, -0.5f, 1.0f);
+			glVertex3f ( 0.5f, -1.0f, 1.0f);
+			glVertex3f (-0.5f, -1.0f, 1.0f);
+			glVertex3f (-1.0f, -0.5f, 1.0f);
+			glVertex3f (-1.0f,  0.5f, 1.0f);
+			glVertex3f (-0.5f,  1.0f, 1.0f);
+			glEnd ();
 
-      glBegin (GL_LINES);
-      glVertex3f (1, 1, -1);
-      glVertex3f (0.75f, 0.75f, 1);
-      glVertex3f (-1, 1, -1);
-      glVertex3f (-0.75f, 0.75f, 1);
-      glVertex3f (-1, -1, -1);
-      glVertex3f (-0.75f, -0.75f, 1);
-      glVertex3f (1, -1, -1);
-      glVertex3f (0.75f, -0.75f, 1);
-      glEnd ();
+			glBegin (GL_LINES);
+			glVertex3f (1, 1, -1);
+			glVertex3f (0.75f, 0.75f, 1);
+			glVertex3f (-1, 1, -1);
+			glVertex3f (-0.75f, 0.75f, 1);
+			glVertex3f (-1, -1, -1);
+			glVertex3f (-0.75f, -0.75f, 1);
+			glVertex3f (1, -1, -1);
+			glVertex3f (0.75f, -0.75f, 1);
+			glEnd ();
 
-      glPopMatrix();
-    }
-  }
-  else
-  {
-    glPushMatrix ();
-    glTranslatef (m_fPos[0], m_fPos[1], m_fPos[2]);
+			glPopMatrix();
+		}
+	}
+	else
+	{
+		glPushMatrix ();
+		glTranslatef (mPosition[0], mPosition[1], mPosition[2]);
 
-    if (IsEyeSelected ())
-    {
-      glLineWidth (fLineWidth*2);
-      if (m_nState & LC_LIGHT_FOCUSED)
-        lcSetColorFocused();
-      else
-        lcSetColorSelected();
-      glCallList (m_nSphereList);
-      glLineWidth (fLineWidth);
-    }
-    else
-    {
-      lcSetColorLight();
-      glCallList (m_nSphereList);
-    }
+		if (IsEyeSelected ())
+		{
+			glLineWidth (fLineWidth*2);
+			if (m_nState & LC_LIGHT_FOCUSED)
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+			glCallList (m_nSphereList);
+			glLineWidth (fLineWidth);
+		}
+		else
+		{
+			lcSetColorLight();
+			glCallList (m_nSphereList);
+		}
 
-    glPopMatrix ();
-  }
+		glPopMatrix ();
+	}
 }
 
 void Light::Setup (int index)
 {
-  GLenum light = (GLenum)(GL_LIGHT0+index);
+	GLenum light = (GLenum)(GL_LIGHT0+index);
 
-  if (!m_bEnabled)
-  {
-    glDisable (light);
-    return;
-  }
+	if (!m_bEnabled)
+	{
+		glDisable (light);
+		return;
+	}
 
-  glEnable (light);
-  glLightfv (light, GL_POSITION, m_fPos);
+	glEnable (light);
+	glLightfv (light, GL_POSITION, lcVector4(mPosition, m_pTarget ? 1.0f : 0.0f));
 
-  glLightfv (light, GL_AMBIENT, m_fAmbient);
-  glLightfv (light, GL_DIFFUSE, m_fDiffuse);
-  glLightfv (light, GL_SPECULAR, m_fSpecular);
+	glLightfv (light, GL_AMBIENT, m_fAmbient);
+	glLightfv (light, GL_DIFFUSE, m_fDiffuse);
+	glLightfv (light, GL_SPECULAR, m_fSpecular);
 
-  glLightf (light, GL_CONSTANT_ATTENUATION, m_fConstant);
-  glLightf (light, GL_LINEAR_ATTENUATION, m_fLinear);
-  glLightf (light, GL_QUADRATIC_ATTENUATION, m_fQuadratic);
+	glLightf (light, GL_CONSTANT_ATTENUATION, m_fConstant);
+	glLightf (light, GL_LINEAR_ATTENUATION, m_fLinear);
+	glLightf (light, GL_QUADRATIC_ATTENUATION, m_fQuadratic);
 
-  if (m_pTarget != NULL)
-  {
-    lcVector3 Dir(m_fTarget[0] - m_fPos[0], m_fTarget[1] - m_fPos[1], m_fTarget[2] - m_fPos[2]);
-    Dir.Normalize();
+	if (m_pTarget != NULL)
+	{
+		lcVector3 Dir(mTargetPosition - mPosition);
+		Dir.Normalize();
 
-    glLightf(light, GL_SPOT_CUTOFF, m_fCutoff);
-    glLightf(light, GL_SPOT_EXPONENT, m_fExponent);
-    glLightfv(light, GL_SPOT_DIRECTION, Dir);
-  }
+		glLightf(light, GL_SPOT_CUTOFF, m_fCutoff);
+		glLightf(light, GL_SPOT_EXPONENT, m_fExponent);
+		glLightfv(light, GL_SPOT_DIRECTION, Dir);
+	}
 }

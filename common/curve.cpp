@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "curve.h"
 #include "opengl.h"
-#include "matrix.h"
 
 #define LC_CURVE_SAVE_VERSION 1 // LeoCAD 0.73
 #define LC_CURVE_POINT_SAVE_VERSION 1 // LeoCAD 0.73
@@ -555,32 +554,22 @@ void Curve::TesselateHose ()
 
       if (angle_step != 0)
       {
-        Matrix rot;
-        rot.FromAxisAngle(FrontVector, angle_step);
+//        Matrix rot;
+//        rot.FromAxisAngle(FrontVector, angle_step);
 //        rot.TransformPoint(u, UpVector);
       }
 //      else
 //        UpVector.ToFloat(u);
 
-      float f[16];
-#define M(row,col)  f[col*4+row]
-      M(0,0) = SideVector[0]; M(0,1) = UpVector[0]; M(0,2) = FrontVector[0]; M(0,3) = x;
-      M(1,0) = SideVector[1]; M(1,1) = UpVector[1]; M(1,2) = FrontVector[1]; M(1,3) = y;
-      M(2,0) = SideVector[2]; M(2,1) = UpVector[2]; M(2,2) = FrontVector[2]; M(2,3) = z;
-      M(3,0) = 0.0;           M(3,1) = 0.0;         M(3,2) = 0.0;            M(3,3) = 1.0;
-#undef M
-
-      float v[3];
-      Matrix m;
-      m.FromFloat (f);
+      lcMatrix44 m(lcVector4(SideVector, 0.0f), lcVector4(UpVector, 0.0f), lcVector4(FrontVector, 0.0f), lcVector4(x, y, z, 1.0f));
 
       for (int k = 0; k < steps2; k++)
       {
-	float *o = &verts[(j*steps2+k)*3];
-	v[0] = (float)(cos (2.0 * M_PI * k / steps2) * 0.15);
-	v[1] = (float)(sin (2.0 * M_PI * k / steps2) * 0.15);
-	v[2] = 0;
-	m.TransformPoint (o, v);
+			lcVector3 Pos((float)(cos (2.0 * M_PI * k / steps2) * 0.15), (float)(sin (2.0 * M_PI * k / steps2) * 0.15), 0.0f);
+			Pos = lcMul31(Pos, m);
+			verts[(j*steps2+k)*3+0] = Pos[0];
+			verts[(j*steps2+k)*3+1] = Pos[1];
+			verts[(j*steps2+k)*3+2] = Pos[2];
       }
     }
 

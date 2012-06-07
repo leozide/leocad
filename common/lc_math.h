@@ -606,6 +606,18 @@ inline lcVector4 lcMatrix44ToAxisAngle(const lcMatrix44& m)
 	return rot;
 }
 
+inline lcMatrix44 lcMatrix44Transpose(const lcMatrix44& m)
+{
+	lcMatrix44 t;
+
+	t.r[0] = lcVector4(m[0][0], m[1][0], m[2][0], m[3][0]);
+	t.r[1] = lcVector4(m[0][1], m[1][1], m[2][1], m[3][1]);
+	t.r[2] = lcVector4(m[0][2], m[1][2], m[2][2], m[3][2]);
+	t.r[3] = lcVector4(m[0][3], m[1][3], m[2][3], m[3][3]);
+
+	return t;
+}
+
 inline lcMatrix44 lcMatrix44AffineInverse(const lcMatrix44& m)
 {
 	lcMatrix44 Inv;
@@ -614,7 +626,7 @@ inline lcMatrix44 lcMatrix44AffineInverse(const lcMatrix44& m)
 	Inv.r[1] = lcVector4(m.r[0][1], m.r[1][1], m.r[2][1], m.r[1][3]);
 	Inv.r[2] = lcVector4(m.r[0][2], m.r[1][2], m.r[2][2], m.r[2][3]);
 
-	lcVector3 Trans = -lcMul30(lcVector3(Inv[3][0], Inv[3][1], Inv[3][2]), Inv);
+	lcVector3 Trans = -lcMul30(lcVector3(m[3][0], m[3][1], m[3][2]), Inv);
 	Inv.r[3] = lcVector4(Trans[0], Trans[1], Trans[2], 1.0f);
 
 	return Inv;

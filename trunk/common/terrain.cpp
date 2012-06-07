@@ -10,7 +10,6 @@
 #include "terrain.h"
 #include "lc_file.h"
 #include "camera.h"
-#include "matrix.h"
 #include "system.h"
 #include "texture.h"
 
@@ -671,45 +670,43 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 	const lcVector3& eye = pCam->mPosition;
 
 	// Get perspective information.
-	float alpha = pCam->m_fovy / 2.0f;
-	float halfFovY = pCam->m_fovy / 2.0f;
-	halfFovY = halfFovY * 3.1415f / 180.0f;
+	float alpha = pCam->m_fovy / 2.0f * LC_DTOR;
+	float halfFovY = pCam->m_fovy / 2.0f * LC_DTOR;
 	float halfFovX = (float)atan(tan(halfFovY) * aspect);
-	halfFovX = halfFovX * 180.0f / 3.1415f;
 	float beta = 2.0f * halfFovX;
 
 	// Get vector stuff from the position.
 	const lcVector3& nonOrthoTop = pCam->mUpVector;
 	const lcVector3& target = pCam->mTargetPosition;
 	float front[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]};
-	float side[3];
+	lcVector3 side;
 	side[0] = nonOrthoTop[1]*front[2] - nonOrthoTop[2]*front[1];
 	side[1] = nonOrthoTop[2]*front[0] - nonOrthoTop[0]*front[2];
 	side[2] = nonOrthoTop[0]*front[1] - nonOrthoTop[1]*front[0];
 	
 	// Make sure our up vector is orthogonal.
-	float top[3];
+	lcVector3 top;
 	top[0] = front[1]*side[2] - front[2]*side[1];
 	top[1] = front[2]*side[0] - front[0]*side[2];
 	top[2] = front[0]*side[1] - front[1]*side[0];
 	
 	// Get our plane normals.
-	Matrix mat;
-	float topNormal[3] = { -top[0], -top[1], -top[2] };
-	mat.FromAxisAngle(side, -alpha);
-	mat.TransformPoints(topNormal, 1);
+	lcMatrix44 mat;
+	lcVector3 topNormal(-top[0], -top[1], -top[2]);
+	mat = lcMatrix44FromAxisAngle(side, -alpha);
+	topNormal = lcMul30(topNormal, mat);
 
-	float bottomNormal[3] = { top[0], top[1], top[2] };
-	mat.FromAxisAngle(side, alpha);
-	mat.TransformPoints(bottomNormal, 1);
+	lcVector3 bottomNormal(top);
+	mat = lcMatrix44FromAxisAngle(side, alpha);
+	bottomNormal = lcMul30(bottomNormal, mat);
 
-	float rightNormal[3] = { side[0], side[1], side[2] };
-	mat.FromAxisAngle(top, -beta);
-	mat.TransformPoints(rightNormal, 1);
+	lcVector3 rightNormal(side);
+	mat = lcMatrix44FromAxisAngle(top, -beta);
+	rightNormal = lcMul30(rightNormal, mat);
 
-	float leftNormal[3] = { -side[0], -side[1], -side[2] };
-	mat.FromAxisAngle(top, beta);
-	mat.TransformPoints(leftNormal, 1);
+	lcVector3 leftNormal(-side[0], -side[1], -side[2]);
+	mat = lcMatrix44FromAxisAngle(top, beta);
+	leftNormal = lcMul30(leftNormal, mat);
 
 	float nearNormal[3] = { front[0], front[1], front[2] };
 

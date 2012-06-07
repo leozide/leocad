@@ -5,7 +5,7 @@
 #ifndef GLuint
 #include "opengl.h"
 #endif
-#include "algebra.h"
+#include "lc_math.h"
 
 #define LC_PIECE_COUNT              0x001 // Count this piece in the totals ?
 #define LC_PIECE_LONGDATA_FILE      0x002 // unsigned long/short index

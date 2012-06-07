@@ -257,7 +257,6 @@ BOOL FolderBrowse(CString *strFolder, LPCSTR lpszTitle, HWND hWndOwner)
 #include "project.h"
 #include "piece.h"
 #include "pieceinf.h"
-#include "matrix.h"
 
 void Export3DStudio() 
 {
@@ -475,18 +474,16 @@ void Export3DStudio()
 		sprintf(mobj->name, "Piece%d", objcount);
 		objcount++;
 
-		float tmp[3], pos[3], rot[4];
-		pPiece->GetPosition(pos);
-		pPiece->GetRotation(rot);
-		Matrix mat(rot, pos);
+		const lcMatrix44& ModelWorld = pPiece->mModelWorld;
 		float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
 		for (int c = 0; c < pInfo->mMesh->mNumVertices; c++)
 		{
-			mat.TransformPoint(tmp, &Verts[c*3]);
-			mobj->vertexarray[c].x = tmp[0];
-			mobj->vertexarray[c].y = tmp[1];
-			mobj->vertexarray[c].z = tmp[2];
+			lcVector3 Pos(Verts[c*3], Verts[c*3+1], Verts[c*3+2]);
+			Pos = lcMul31(Pos, ModelWorld);
+			mobj->vertexarray[c].x = Pos[0];
+			mobj->vertexarray[c].y = Pos[1];
+			mobj->vertexarray[c].z = Pos[2];
 		}
 
 		int NumFaces = 0;

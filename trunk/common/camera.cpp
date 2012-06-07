@@ -519,7 +519,7 @@ void Camera::UpdateBoundingBox()
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	float len = FrontVector.Length();
 
-	lcMatrix44 Mat = lcMatrix44AffineInverse(mWorldView);
+	lcMatrix44 Mat = lcMatrix44Inverse(mWorldView);
 
 	Mat.SetTranslation(mPosition);
 	BoundingBoxCalculate((Matrix*)&Mat);
@@ -655,7 +655,7 @@ void Camera::Render(float fLineWidth)
 
     glPushMatrix ();
 
-	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	lcMatrix44 ViewWorld = lcMatrix44Inverse(mWorldView);
     glMultMatrixf(ViewWorld);
 
 	lcMatrix44 InvProjection = lcMatrix44Inverse(lcMatrix44Perspective(m_fovy, 1.33f, 0.01f, len));

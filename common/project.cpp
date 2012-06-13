@@ -2329,7 +2329,7 @@ void Project::RenderOverlays(View* view)
 			}
 		}
 
-		lcMatrix44 Mat = lcMatrix44Inverse(Cam->mWorldView);
+		lcMatrix44 Mat = lcMatrix44AffineInverse(Cam->mWorldView);
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
@@ -7165,7 +7165,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 				if (camera->IsSide ())
 				{
-					lcMatrix44 mat = lcMatrix44Inverse(camera->mWorldView);
+					lcMatrix44 mat = lcMatrix44AffineInverse(camera->mWorldView);
 
 					switch (nKey)
 					{

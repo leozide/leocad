@@ -90,14 +90,6 @@ public:
 		{ m_nFrameHide = frame; }
 	const unsigned short GetFrameHide()
 		{ return m_nFrameHide; }
-	inline Vector3 GetPosition() const
-		{ return Vector3(mPosition[0], mPosition[1], mPosition[2]); }
-	inline Vector4 GetRotation() const
-		{ return Vector4(mRotation[0], mRotation[1], mRotation[2], mRotation[3]); }
-	void GetPosition (float* position)
-		{ memcpy(position, mPosition, sizeof(mPosition)); }
-	void GetRotation (float* rotation)
-		{ memcpy(rotation, mRotation, sizeof(mRotation)); }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);

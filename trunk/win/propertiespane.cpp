@@ -203,10 +203,9 @@ void CPropertiesPane::SetPiece(Object* Focus)
 		m_wndPropList.AddProperty(Appearence);
 	}
 
-	float Rot[4];
 	Piece* pPiece = (Piece*)Focus;
 	lcVector3 Pos = pPiece->mPosition;
-	pPiece->GetRotation(Rot);
+	lcVector4 Rot = pPiece->mRotation;
 	Matrix mat(Rot, Pos);
 	mat.ToEulerAngles(Rot);
 

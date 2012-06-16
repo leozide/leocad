@@ -178,23 +178,23 @@ protected:
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();
-	void GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation);
-	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3& Position, Vector4& Orientation);
+	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
+	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
 
 	// Movement.
-	bool MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap);
-	bool RotateSelectedObjects(Vector3& Delta, Vector3& Remainder);
-	void SnapVector(Vector3& Delta) const
+	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap);
+	bool RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder);
+	void SnapVector(lcVector3& Delta) const
 	{
-		Vector3 Dummy;
+		lcVector3 Dummy;
 		SnapVector(Delta, Dummy);
 	}
-	void SnapVector(Vector3& Delta, Vector3& Leftover) const;
-	void SnapRotationVector(Vector3& Delta, Vector3& Leftover) const;
+	void SnapVector(lcVector3& Delta, lcVector3& Leftover) const;
+	void SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const;
 
 	// Rendering functions.
 	void RenderBackground(View* view);
@@ -215,8 +215,8 @@ protected:
 	int m_nDownY;
 	float m_fTrack[3];
 	int m_nMouse;
-	Vector3 m_MouseSnapLeftover;
-	Vector3 m_MouseTotalDelta;
+	lcVector3 m_MouseSnapLeftover;
+	lcVector3 m_MouseTotalDelta;
 
 	int m_OverlayMode;
 	bool m_OverlayActive;

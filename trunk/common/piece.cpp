@@ -401,13 +401,12 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 	if (dist >= pLine->mindist)
 		return;
 
-	Matrix44 WorldToLocal;
-	WorldToLocal.CreateFromAxisAngle(Vector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(Mul31(Vector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
+	lcMatrix44 WorldToLocal = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
+	WorldToLocal.SetTranslation(lcMul31(lcVector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
 
-	Vector3 Start = Mul31(Vector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
-	Vector3 End = Mul31(Vector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
-	Vector3 Intersection;
+	lcVector3 Start = lcMul31(lcVector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
+	lcVector3 End = lcMul31(lcVector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
+	lcVector3 Intersection;
 
 	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, pLine->mindist, Intersection))
 		pLine->pClosest = this;

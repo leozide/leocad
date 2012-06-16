@@ -2,7 +2,7 @@
 #include "lc_mesh.h"
 #include "lc_colors.h"
 #include "lc_file.h"
-#include "globals.h"
+#include "lc_math.h"
 
 struct lcVertex
 {
@@ -44,8 +44,8 @@ void lcMesh::CreateBox()
 {
 	Create(2, 8, 36 + 24);
 
-	Vector3 Min(-0.4f, -0.4f, -0.96f);
-	Vector3 Max(0.4f, 0.4f, 0.16f);
+	lcVector3 Min(-0.4f, -0.4f, -0.96f);
+	lcVector3 Max(0.4f, 0.4f, 0.16f);
 
 	float* Verts = (float*)mVertexBuffer.mData;
 	lcuint16* Indices = (lcuint16*)mIndexBuffer.mData;
@@ -177,7 +177,7 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 }
 
 template<typename IndexType>
-bool lcMesh::MinIntersectDist(const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
 {
 	float* Verts = (float*)mVertexBuffer.mData;
 	bool Hit = false;
@@ -196,11 +196,11 @@ bool lcMesh::MinIntersectDist(const Vector3& Start, const Vector3& End, float& M
 			float* p1 = Verts + Indices[Idx + 0] * 3;
 			float* p2 = Verts + Indices[Idx + 1] * 3;
 			float* p3 = Verts + Indices[Idx + 2] * 3;
-			Vector3 v1(p1[0], p1[1], p1[2]);
-			Vector3 v2(p2[0], p2[1], p2[2]);
-			Vector3 v3(p3[0], p3[1], p3[2]);
+			lcVector3 v1(p1[0], p1[1], p1[2]);
+			lcVector3 v2(p2[0], p2[1], p2[2]);
+			lcVector3 v3(p3[0], p3[1], p3[2]);
 
-			if (LineTriangleMinIntersection(v1, v2, v3, Start, End, MinDist, Intersection))
+			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, MinDist, Intersection))
 				Hit = true;
 		}
 	}
@@ -208,7 +208,7 @@ bool lcMesh::MinIntersectDist(const Vector3& Start, const Vector3& End, float& M
 	return Hit;
 }
 
-bool lcMesh::MinIntersectDist(const Vector3& Start, const Vector3& End, float& MinDist, Vector3& Intersection)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
 		return MinIntersectDist<GLushort>(Start, End, MinDist, Intersection);

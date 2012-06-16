@@ -10,7 +10,6 @@ class PieceInfo;
 class Camera;
 
 #include "str.h"
-#include "algebra.h"
 #include "lc_math.h"
 
 typedef enum

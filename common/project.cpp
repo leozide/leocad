@@ -1228,9 +1228,9 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			{
 				if ((pPiece->IsVisible(i, false)) && (pPiece->GetStepShow() == i))
 				{
-					float f[12], position[3], rotation[4];
-					pPiece->GetPosition(position);
-					pPiece->GetRotation(rotation);
+					float f[12];
+					const lcVector3& position = pPiece->mPosition;
+					const lcVector4& rotation = pPiece->mRotation;
 					Matrix mat(rotation, position);
 					mat.ToLDraw(f);
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
@@ -1964,8 +1964,8 @@ void Project::RenderSceneObjects(View* view)
 	// Draw cameras & lights
 	if (m_nCurAction == LC_ACTION_INSERT)
 	{
-		Vector3 Pos;
-		Vector4 Rot;
+		lcVector3 Pos;
+		lcVector4 Rot;
 		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Pos, Rot);
 
 		glPushMatrix();
@@ -2003,17 +2003,18 @@ void Project::RenderSceneObjects(View* view)
 	{
 //		glClear(GL_DEPTH_BUFFER_BIT);
 
-		Matrix Mats[3];
-		Mats[0].CreateLookat(view->m_Camera->mPosition, view->m_Camera->mTargetPosition, view->m_Camera->mUpVector);
-		Mats[0].SetTranslation(0, 0, 0);
+		lcMatrix44 Mats[3];
+		Mats[0] = view->m_Camera->mWorldView;
+		Mats[0].SetTranslation(lcVector3(0, 0, 0));
+		Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
+		Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
 
-		float m1[] = { 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
-		float m2[] = { 0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 1 };
-		Mats[1].Multiply(Mats[0], Matrix(m1));
-		Mats[2].Multiply(Mats[0], Matrix(m2));
-
-		float pts[3][3] = { { 20, 0, 0 }, { 0, 20, 0 }, { 0, 0, 20 } };
-		Mats[0].TransformPoints(&pts[0][0], 3);
+		lcVector3 pts[3] = 
+		{
+			lcMul30(lcVector3(20, 0, 0), Mats[0]),
+			lcMul30(lcVector3(0, 20, 0), Mats[0]),
+			lcMul30(lcVector3(0, 0, 20), Mats[0]),
+		};
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -2047,8 +2048,7 @@ void Project::RenderSceneObjects(View* view)
 			glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
 			for (int j = 0; j < 9; j++)
 			{
-				float pt[3] = { 12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f };
-				Mats[i].TransformPoints(pt, 1);
+				lcVector3 pt = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
 				glVertex3f(pt[0], pt[1], pt[2]);
 			}
 			glEnd();
@@ -2122,14 +2122,14 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		Object* Focus = NULL;
-		float Rot[4];
+		lcVector4 Rot;
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				((Piece*)Focus)->GetRotation(Rot);
+				Rot = ((Piece*)Focus)->mRotation;
 			else
 				Focus = NULL;
 		}
@@ -2231,14 +2231,14 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		Object* Focus = NULL;
-		float Rot[4];
+		lcVector4 Rot;
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				((Piece*)Focus)->GetRotation(Rot);
+				Rot = ((Piece*)Focus)->mRotation;
 			else
 				Focus = NULL;
 		}
@@ -2246,7 +2246,7 @@ void Project::RenderOverlays(View* view)
 		// Draw a disc showing the rotation amount.
 		if (m_MouseTotalDelta.LengthSquared() != 0.0f && (m_nTracking != LC_TRACK_NONE))
 		{
-			Vector4 Rotation;
+			lcVector4 Rotation;
 			float Angle, Step;
 
 			switch (m_OverlayMode)
@@ -2254,17 +2254,17 @@ void Project::RenderOverlays(View* view)
 			case LC_OVERLAY_X:
 				glColor4f(0.8f, 0.0f, 0.0f, 0.3f);
 				Angle = m_MouseTotalDelta[0];
-				Rotation = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 				break;
 			case LC_OVERLAY_Y:
 				glColor4f(0.0f, 0.8f, 0.0f, 0.3f);
 				Angle = m_MouseTotalDelta[1];
-				Rotation = Vector4(90.0f, 0.0f, 0.0f, 1.0f);
+				Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
 				break;
 			case LC_OVERLAY_Z:
 				glColor4f(0.0f, 0.0f, 0.8f, 0.3f);
 				Angle = m_MouseTotalDelta[2];
-				Rotation = Vector4(90.0f, 0.0f, -1.0f, 0.0f);
+				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 				break;
 			default:
 				Angle = 0.0f;
@@ -3263,9 +3263,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			LC_PIECE_MODIFY* mod = (LC_PIECE_MODIFY*)param;
 			Piece* pPiece = (Piece*)mod->piece;
 
-			float rot[4];
-			Vector3 Pos = pPiece->GetPosition();
-			pPiece->GetRotation(rot);
+			const lcVector3& Pos = pPiece->mPosition;
+			lcVector4 rot = pPiece->mRotation;
 			Matrix mat(rot, Pos);
 			mat.ToEulerAngles(rot);
 
@@ -3998,14 +3997,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 			{
 				int Index = Library->GetPieceIndex(piece->mPieceInfo);
-				float fl[12], pos[3], rot[4];
+				float fl[12];
 				int Color;
 
 				Color = piece->mColorIndex;
 				const char* Suffix = lcIsColorTranslucent(Color) ? "_clear" : "";
 
-				piece->GetPosition(pos);
-				piece->GetRotation(rot);
+				const lcVector3& pos = piece->mPosition;
+				const lcVector4& rot = piece->mRotation;
 				Matrix mat(rot, pos);
 				mat.ToLDraw(fl);
 
@@ -4149,9 +4148,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				float pos[3], rot[4], tmp[3];
-				pPiece->GetPosition(pos);
-				pPiece->GetRotation(rot);
+				float tmp[3];
+				const lcVector3& pos = pPiece->mPosition;
+				const lcVector4& rot = pPiece->mRotation;
 				Matrix mat(rot, pos);
 				PieceInfo* pInfo = pPiece->mPieceInfo;
 				float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
@@ -4676,8 +4675,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (pLast != NULL)
 			{
-				Vector3 Pos;
-				Vector4 Rot;
+				lcVector3 Pos;
+				lcVector4 Rot;
 
 				GetPieceInsertPosition(pLast, Pos, Rot);
 
@@ -4839,9 +4838,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					for (i = 0; i < opts.n1DCount; i++)
 					{
-						float pos[3], param[4];
-						pPiece->GetRotation(param);
-						pPiece->GetPosition(pos);
+						lcVector3 pos = pPiece->mPosition;
+						lcVector4 param = pPiece->mRotation;
 						Matrix mat(param, pos);
 
 						if (sel == 1)
@@ -6142,25 +6140,24 @@ Object* Project::GetFocusObject() const
 }
 
 // Find a good starting position/orientation relative to an existing piece.
-void Project::GetPieceInsertPosition(Piece* OffsetPiece, Vector3& Position, Vector4& Rotation)
+void Project::GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation)
 {
-	Vector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
+	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
 	SnapVector(Dist);
 
-	float pos[3], rot[4];
-	OffsetPiece->GetPosition(pos);
-	OffsetPiece->GetRotation(rot);
+	lcVector3 pos = OffsetPiece->mPosition;
+	const lcVector4& rot = OffsetPiece->mRotation;
 
 	Matrix mat(rot, pos);
 	mat.Translate(Dist[0], Dist[1], Dist[2]);
 	mat.GetTranslation(pos);
 
-	Position = Vector3(pos[0], pos[1], pos[2]);
-	Rotation = Vector4(rot[0], rot[1], rot[2], rot[3]);
+	Position = lcVector3(pos[0], pos[1], pos[2]);
+	Rotation = lcVector4(rot[0], rot[1], rot[2], rot[3]);
 }
 
 // Try to find a good starting position/orientation for a new piece.
-void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3& Position, Vector4& Rotation)
+void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Rotation)
 {
 	// Check if the mouse is over a piece.
 	Piece* HitPiece = (Piece*)FindObjectFromPoint(view, MouseX, MouseY, true);
@@ -6183,18 +6180,18 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, Vector3
 	lcVector3 ClickPoints[2] = { lcVector3((float)m_nDownX, (float)m_nDownY, 0.0f), lcVector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
 	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
-	Vector3 Intersection;
-	if (LinePlaneIntersection(Intersection, Vector3(ClickPoints[0]), Vector3(ClickPoints[1]), Vector4(0, 0, 1, 0)))
+	lcVector3 Intersection;
+	if (lcLinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, 0)))
 	{
 		SnapVector(Intersection);
 		Position = Intersection;
-		Rotation = Vector4(0, 0, 1, 0);
+		Rotation = lcVector4(0, 0, 1, 0);
 		return;
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position = Vector3(lcUnprojectPoint(lcVector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport));
-	Rotation = Vector4(0, 0, 1, 0);
+	Position = lcUnprojectPoint(lcVector3((float)m_nDownX, (float)m_nDownY, 0.9f), ModelView, Projection, Viewport);
+	Rotation = lcVector4(0, 0, 1, 0);
 }
 
 Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
@@ -6615,7 +6612,7 @@ void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
 	}
 }
 
-void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
+void Project::SnapVector(lcVector3& Delta, lcVector3& Leftover) const
 {
 	float SnapXY, SnapZ;
 	GetSnapDistance(&SnapXY, &SnapZ);
@@ -6678,7 +6675,7 @@ void Project::SnapVector(Vector3& Delta, Vector3& Leftover) const
 	}
 }
 
-void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
+void Project::SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const
 {
 	if (m_nSnap & LC_DRAW_SNAP_A)
 	{
@@ -6689,13 +6686,13 @@ void Project::SnapRotationVector(Vector3& Delta, Vector3& Leftover) const
 			Snap[i] = (int)(Delta[i] / (float)m_nAngleSnap);
 		}
 
-		Vector3 NewDelta((float)(m_nAngleSnap * Snap[0]), (float)(m_nAngleSnap * Snap[1]), (float)(m_nAngleSnap * Snap[2]));
+		lcVector3 NewDelta((float)(m_nAngleSnap * Snap[0]), (float)(m_nAngleSnap * Snap[1]), (float)(m_nAngleSnap * Snap[2]));
 		Leftover = Delta - NewDelta;
 		Delta = NewDelta;
 	}
 }
 
-bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
+bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -6722,15 +6719,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 		Object* Focus = GetFocusObject();
 
 		if ((Focus != NULL) && Focus->IsPiece())
-		{
-			float Rot[4];
-			((Piece*)Focus)->GetRotation(Rot);
-
-			Matrix33 RotMat;
-			RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
-
-			Move = Mul(Move, RotMat);
-		}
+			Move = lcMul30(Move, ((Piece*)Focus)->mModelWorld);
 	}
 
 	Piece* pPiece;
@@ -6770,7 +6759,7 @@ bool Project::MoveSelectedObjects(Vector3& Move, Vector3& Remainder, bool Snap)
 	return true;
 }
 
-bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
+bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder)
 {
 	// Don't move along locked directions.
 	if (m_nSnap & LC_DRAW_LOCK_X)
@@ -6789,7 +6778,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		return false;
 
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	float pos[3], rot[4];
+	lcVector3 pos;
+	lcVector4 rot;
 	int nSel = 0;
 	Piece *pPiece, *pFocus = NULL;
 
@@ -6807,7 +6797,7 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 	if (pFocus != NULL)
 	{
-		pFocus->GetPosition(pos);
+		pos = pFocus->mPosition;
 		bs[0] = bs[3] = pos[0];
 		bs[1] = bs[4] = pos[1];
 		bs[2] = bs[5] = pos[2];
@@ -6846,8 +6836,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 
 	if (pFocus != NULL)
 	{
-		float Rot[4];
-		((Piece*)pFocus)->GetRotation(Rot);
+		lcVector4 Rot;
+		Rot = ((Piece*)pFocus)->mRotation;
 
 		WorldToFocus.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
 		FocusToWorld.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
@@ -6860,8 +6850,8 @@ bool Project::RotateSelectedObjects(Vector3& Delta, Vector3& Remainder)
 		if (!pPiece->IsSelected())
 			continue;
 
-		pPiece->GetPosition(pos);
-		pPiece->GetRotation(rot);
+		pos = pPiece->mPosition;
+		rot = pPiece->mRotation;
 
 		Vector4 NewRotation;
 
@@ -7271,13 +7261,13 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 			if (bShift)
 			{
-				Vector3 tmp;
-				RotateSelectedObjects(Vector3(axis), tmp);
+				lcVector3 tmp;
+				RotateSelectedObjects(axis, tmp);
 			}
 			else
 			{
-				Vector3 tmp;
-				MoveSelectedObjects(Vector3(axis), tmp, false);
+				lcVector3 tmp;
+				MoveSelectedObjects(axis, tmp, false);
 			}
 
 			UpdateOverlayScale();
@@ -7323,8 +7313,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	m_bTrackCancel = false;
 	m_nDownX = x;
 	m_nDownY = y;
-	m_MouseTotalDelta = Vector3(0, 0, 0);
-	m_MouseSnapLeftover = Vector3(0, 0, 0);
+	m_MouseTotalDelta = lcVector3(0, 0, 0);
+	m_MouseSnapLeftover = lcVector3(0, 0, 0);
 
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -7475,8 +7465,8 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		{
 			if (m_nCurAction == LC_ACTION_INSERT)
 			{
-				Vector3 Pos;
-				Vector4 Rot;
+				lcVector3 Pos;
+				lcVector4 Rot;
 
 				GetPieceInsertPosition(view, x, y, Pos, Rot);
 
@@ -7609,7 +7599,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 			{
 				StartTracking(LC_TRACK_START_LEFT);
 				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
-				m_MouseSnapLeftover = Vector3(0.0f, 0.0f, 0.0f);
+				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
 			}
 		} break;
 
@@ -7706,8 +7696,8 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 		{
 			if ((x > 0) && (x < view->GetWidth()) && (y > 0) && (y < view->GetHeight()))
 			{
-				Vector3 Pos;
-				Vector4 Rot;
+				lcVector3 Pos;
+				lcVector4 Rot;
 
 				GetPieceInsertPosition(view, x, y, Pos, Rot);
 
@@ -7988,10 +7978,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Vector3 ScreenX = Cross3(Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition), Vector3(Camera->mUpVector));
-				Vector3 ScreenY = Vector3(Camera->mUpVector);
-				ScreenX.Normalize();
-				Vector3 Dir1, Dir2;
+				lcVector3 ScreenX = lcNormalize(lcCross(Camera->mTargetPosition - Camera->mPosition, Camera->mUpVector));
+				lcVector3 ScreenY = Camera->mUpVector;
+				lcVector3 Dir1, Dir2;
 				bool SingleDir = true;
 
 				int OverlayMode;
@@ -8006,34 +7995,34 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				switch (OverlayMode)
 				{
 				case LC_OVERLAY_X:
-					Dir1 = Vector3(1, 0, 0);
+					Dir1 = lcVector3(1, 0, 0);
 					break;
 				case LC_OVERLAY_Y:
-					Dir1 = Vector3(0, 1, 0);
+					Dir1 = lcVector3(0, 1, 0);
 					break;
 				case LC_OVERLAY_Z:
-					Dir1 = Vector3(0, 0, 1);
+					Dir1 = lcVector3(0, 0, 1);
 					break;
 				case LC_OVERLAY_XY:
-					Dir1 = Vector3(1, 0, 0);
-					Dir2 = Vector3(0, 1, 0);
+					Dir1 = lcVector3(1, 0, 0);
+					Dir2 = lcVector3(0, 1, 0);
 					SingleDir = false;
 					break;
 				case LC_OVERLAY_XZ:
-					Dir1 = Vector3(1, 0, 0);
-					Dir2 = Vector3(0, 0, 1);
+					Dir1 = lcVector3(1, 0, 0);
+					Dir2 = lcVector3(0, 0, 1);
 					SingleDir = false;
 					break;
 				case LC_OVERLAY_YZ:
-					Dir1 = Vector3(0, 1, 0);
-					Dir2 = Vector3(0, 0, 1);
+					Dir1 = lcVector3(0, 1, 0);
+					Dir2 = lcVector3(0, 0, 1);
 					SingleDir = false;
 					break;
 				}
 
 				// Transform the translation axis.
-				Vector3 Axis1 = Dir1;
-				Vector3 Axis2 = Dir2;
+				lcVector3 Axis1 = Dir1;
+				lcVector3 Axis2 = Dir2;
 
 				if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 				{
@@ -8041,24 +8030,20 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 					if ((Focus != NULL) && Focus->IsPiece())
 					{
-						float Rot[4];
-						((Piece*)Focus)->GetRotation(Rot);
+						const lcMatrix44& ModelWorld = ((Piece*)Focus)->mModelWorld;
 
-						Matrix33 RotMat;
-						RotMat.CreateFromAxisAngle(Vector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR);
-
-						Axis1 = Mul(Dir1, RotMat);
-						Axis2 = Mul(Dir2, RotMat);
+						Axis1 = lcMul30(Dir1, ModelWorld);
+						Axis2 = lcMul30(Dir2, ModelWorld);
 					}
 				}
 
 				// Find out what direction the mouse is going to move stuff.
-				Vector3 MoveX, MoveY;
+				lcVector3 MoveX, MoveY;
 
 				if (SingleDir)
 				{
-					float dx1 = Dot3(ScreenX, Axis1);
-					float dy1 = Dot3(ScreenY, Axis1);
+					float dx1 = lcDot(ScreenX, Axis1);
+					float dy1 = lcDot(ScreenY, Axis1);
 
 					if (fabsf(dx1) > fabsf(dy1))
 					{
@@ -8067,11 +8052,11 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 						else
 							MoveX = -Dir1;
 
-						MoveY = Vector3(0, 0, 0);
+						MoveY = lcVector3(0, 0, 0);
 					}
 					else
 					{
-						MoveX = Vector3(0, 0, 0);
+						MoveX = lcVector3(0, 0, 0);
 
 						if (dy1 > 0.0f)
 							MoveY = Dir1;
@@ -8081,10 +8066,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				}
 				else
 				{
-					float dx1 = Dot3(ScreenX, Axis1);
-					float dy1 = Dot3(ScreenY, Axis1);
-					float dx2 = Dot3(ScreenX, Axis2);
-					float dy2 = Dot3(ScreenY, Axis2);
+					float dx1 = lcDot(ScreenX, Axis1);
+					float dy1 = lcDot(ScreenY, Axis1);
+					float dx2 = lcDot(ScreenX, Axis2);
+					float dy2 = lcDot(ScreenY, Axis2);
 
 					if (fabsf(dx1) > fabsf(dx2))
 					{
@@ -8118,22 +8103,22 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
+				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
 				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenZ = (Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition)).Normalize();
-				Vector3 ScreenX = Cross3(ScreenZ, Vector3(Camera->mUpVector));
-				Vector3 ScreenY = Vector3(Camera->mUpVector);
+				lcVector3 ScreenZ = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
+				lcVector3 ScreenX = lcCross(ScreenZ, Camera->mUpVector);
+				lcVector3 ScreenY = Camera->mUpVector;
 
-				Vector3 TotalMove;
+				lcVector3 TotalMove;
 
 				if (m_nTracking == LC_TRACK_LEFT)
 				{
-					Vector3 MoveX, MoveY;
+					lcVector3 MoveX, MoveY;
 
 					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
 					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
@@ -8142,7 +8127,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				}
 				else
 				{
-					Vector3 MoveZ;
+					lcVector3 MoveZ;
 
 					MoveZ = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
 
@@ -8167,10 +8152,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_XYZ)) || (!Camera->IsSide()))
 			{
-				Vector3 ScreenX = Cross3(Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition), Vector3(Camera->mUpVector));
-				Vector3 ScreenY = Vector3(Camera->mUpVector);
-				ScreenX.Normalize();
-				Vector3 Dir1, Dir2;
+				lcVector3 ScreenX = lcNormalize(lcCross(Camera->mTargetPosition - Camera->mPosition, Camera->mUpVector));
+				lcVector3 ScreenY = Camera->mUpVector;
+				lcVector3 Dir1, Dir2;
 				bool SingleDir = true;
 
 				int OverlayMode;
@@ -8185,38 +8169,38 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				switch (OverlayMode)
 				{
 				case LC_OVERLAY_X:
-					Dir1 = Vector3(1, 0, 0);
+					Dir1 = lcVector3(1, 0, 0);
 					break;
 				case LC_OVERLAY_Y:
-					Dir1 = Vector3(0, 1, 0);
+					Dir1 = lcVector3(0, 1, 0);
 					break;
 				case LC_OVERLAY_Z:
-					Dir1 = Vector3(0, 0, 1);
+					Dir1 = lcVector3(0, 0, 1);
 					break;
 				case LC_OVERLAY_XY:
-					Dir1 = Vector3(1, 0, 0);
-					Dir2 = Vector3(0, 1, 0);
+					Dir1 = lcVector3(1, 0, 0);
+					Dir2 = lcVector3(0, 1, 0);
 					SingleDir = false;
 					break;
 				case LC_OVERLAY_XZ:
-					Dir1 = Vector3(1, 0, 0);
-					Dir2 = Vector3(0, 0, 1);
+					Dir1 = lcVector3(1, 0, 0);
+					Dir2 = lcVector3(0, 0, 1);
 					SingleDir = false;
 					break;
 				case LC_OVERLAY_YZ:
-					Dir1 = Vector3(0, 1, 0);
-					Dir2 = Vector3(0, 0, 1);
+					Dir1 = lcVector3(0, 1, 0);
+					Dir2 = lcVector3(0, 0, 1);
 					SingleDir = false;
 					break;
 				}
 
 				// Find out what direction the mouse is going to move stuff.
-				Vector3 MoveX, MoveY;
+				lcVector3 MoveX, MoveY;
 
 				if (SingleDir)
 				{
-					float dx1 = Dot3(ScreenX, Dir1);
-					float dy1 = Dot3(ScreenY, Dir1);
+					float dx1 = lcDot(ScreenX, Dir1);
+					float dy1 = lcDot(ScreenY, Dir1);
 
 					if (fabsf(dx1) > fabsf(dy1))
 					{
@@ -8225,11 +8209,11 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 						else
 							MoveX = -Dir1;
 
-						MoveY = Vector3(0, 0, 0);
+						MoveY = lcVector3(0, 0, 0);
 					}
 					else
 					{
-						MoveX = Vector3(0, 0, 0);
+						MoveX = lcVector3(0, 0, 0);
 
 						if (dy1 > 0.0f)
 							MoveY = Dir1;
@@ -8239,10 +8223,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				}
 				else
 				{
-					float dx1 = Dot3(ScreenX, Dir1);
-					float dy1 = Dot3(ScreenY, Dir1);
-					float dx2 = Dot3(ScreenX, Dir2);
-					float dy2 = Dot3(ScreenY, Dir2);
+					float dx1 = lcDot(ScreenX, Dir1);
+					float dy1 = lcDot(ScreenY, Dir1);
+					float dx2 = lcDot(ScreenX, Dir2);
+					float dy2 = lcDot(ScreenY, Dir2);
 
 					if (fabsf(dx1) > fabsf(dx2))
 					{
@@ -8276,22 +8260,22 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Vector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
+				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
 				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
 				m_MouseTotalDelta += Delta;
 			}
 			else
 			{
 				// 3D movement.
-				Vector3 ScreenZ = (Vector3(Camera->mTargetPosition) - Vector3(Camera->mPosition)).Normalize();
-				Vector3 ScreenX = Cross3(ScreenZ, Vector3(Camera->mUpVector));
-				Vector3 ScreenY = Vector3(Camera->mUpVector);
+				lcVector3 ScreenZ = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
+				lcVector3 ScreenX = lcCross(ScreenZ, Camera->mUpVector);
+				lcVector3 ScreenY = Camera->mUpVector;
 
-				Vector3 Delta;
+				lcVector3 Delta;
 
 				if (m_nTracking == LC_TRACK_LEFT)
 				{
-					Vector3 MoveX, MoveY;
+					lcVector3 MoveX, MoveY;
 
 					MoveX = ScreenX * (float)(x - m_nDownX) * 36.0f / (float)(21 - m_nMouse);
 					MoveY = ScreenY * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
@@ -8300,7 +8284,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				}
 				else
 				{
-					Vector3 MoveZ;
+					lcVector3 MoveZ;
 
 					MoveZ = ScreenZ * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
 

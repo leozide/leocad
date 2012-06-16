@@ -166,6 +166,16 @@ inline lcVector3 operator/(const lcVector3& a, float b)
 	return lcVector3(a.x / b, a.y / b, a.z / b);
 }
 
+inline lcVector3 operator*(float a, const lcVector3& b)
+{
+	return lcVector3(b.x * a, b.y * a, b.z * a);
+}
+
+inline lcVector3 operator/(float a, const lcVector3& b)
+{
+	return lcVector3(b.x / a, b.y / a, b.z / a);
+}
+
 inline lcVector3 operator-(const lcVector3& a)
 {
 	return lcVector3(-a.x, -a.y, -a.z);
@@ -874,6 +884,79 @@ inline lcVector3 lcZoomExtents(const lcVector3& Position, const lcMatrix44& Worl
 	}
 
 	return Position - (Front * SmallestDistance);
+}
+
+// Calculate the intersection of a line segment and a plane and returns false
+// if they are parallel or the intersection is outside the line segment.
+inline bool lcLinePlaneIntersection(lcVector3& Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
+{
+	lcVector3 Dir = End - Start;
+	lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
+
+	float t1 = lcDot(PlaneNormal, Start) + Plane[3];
+	float t2 = lcDot(PlaneNormal, Dir);
+
+	if (t2 == 0.0f)
+		return false;
+
+	float t = -t1 / t2;
+
+	Intersection = Start + t * Dir;
+
+	if ((t < 0.0f) || (t > 1.0f))
+		return false;
+
+	return true;
+}
+
+inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
+{
+	// Calculate the polygon plane.
+	lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
+	float PlaneD = -lcDot(PlaneNormal, p1);
+
+	// Check if the line is parallel to the plane.
+	lcVector3 Dir = End - Start;
+
+	float t1 = lcDot(PlaneNormal, Start) + PlaneD;
+	float t2 = lcDot(PlaneNormal, Dir);
+
+	if (t2 == 0)
+		return false;
+
+	float t = -(t1 / t2);
+
+	if (t < 0)
+		return false;
+
+	// Intersection of the plane and line segment.
+	Intersection = Start - (t1 / t2) * Dir;
+
+	float Dist = (Start - Intersection).Length();
+
+	if (Dist > MinDist)
+		return false;
+
+	// Check if we're inside the triangle.
+	lcVector3 pa1, pa2, pa3;
+	pa1 = lcNormalize(p1 - Intersection);
+	pa2 = lcNormalize(p2 - Intersection);
+	pa3 = lcNormalize(p3 - Intersection);
+
+	float a1, a2, a3;
+	a1 = lcDot(pa1, pa2);
+	a2 = lcDot(pa2, pa3);
+	a3 = lcDot(pa3, pa1);
+
+	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+
+	if (fabs(total - 360) <= 0.001f)
+	{
+		MinDist = Dist;
+		return true;
+	}
+
+	return false;
 }
 
 #endif // _LC_MATH_H_

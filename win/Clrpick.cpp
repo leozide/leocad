@@ -78,7 +78,7 @@ BOOL CColorPicker::OnClicked()
 	m_bActive = TRUE;
 	CRect rect;
 	GetWindowRect(rect);
-	new CColorPopup(CPoint(rect.left, rect.bottom), m_nColor, this);
+	new CColorPopup(CPoint(rect.left, rect.bottom), m_nColor, this, false);
 
 	return TRUE;
 }

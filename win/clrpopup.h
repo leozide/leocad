@@ -23,7 +23,7 @@ class CColorPopup : public CWnd
 // Construction
 public:
 	CColorPopup();
-	CColorPopup(CPoint p, int nColor, CWnd* pParentWnd);
+	CColorPopup(CPoint p, int nColor, CWnd* pParentWnd, bool IgnoreMouse);
 	void Initialise();
 
 // Attributes
@@ -66,6 +66,7 @@ protected:
 	int            m_nInitialColor, m_nColor;
 	CToolTipCtrl   m_ToolTip;
 	CWnd*          m_pParent;
+	bool           m_IgnoreMouse;
 
 	CArray<CRect, const CRect&> mGroups;
 	CArray<CColorPopupCell, const CColorPopupCell&> mCells;

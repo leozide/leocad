@@ -1,7 +1,29 @@
 #include "lc_global.h"
 #include "lc_colors.h"
 #include "propertiesgridctrl.h"
+#include "clrpopup.h"
 #include "globals.h"
+
+void CLeoCADMFCPropertyGridCtrl::SetColor(int ColorIndex)
+{
+	ASSERT_VALID(this);
+	ASSERT_VALID(m_pSel);
+
+	CLeoCADMFCPropertyGridColorProperty* pColorProp = DYNAMIC_DOWNCAST(CLeoCADMFCPropertyGridColorProperty, m_pSel);
+	if (pColorProp == NULL)
+	{
+		ASSERT(FALSE);
+		return;
+	}
+
+	BOOL bChanged = ColorIndex != pColorProp->GetColor();
+	pColorProp->SetColor(ColorIndex, false);
+
+	if (bChanged)
+	{
+		OnPropertyChanged(pColorProp);
+	}
+}
 
 void CLeoCADMFCPropertyGridCtrl::UpdateColor(COLORREF color)
 {
@@ -114,29 +136,10 @@ void CLeoCADMFCPropertyGridColorProperty::OnClickButton(CPoint /*point*/)
 	m_bButtonIsDown = TRUE;
 	Redraw();
 
-	CList<COLORREF,COLORREF> lstDocColors;
-	CArray<COLORREF, COLORREF> Colors;
-
-	COLORREF Color = RGB(gColorList[m_Color].Value[0] * 255, gColorList[m_Color].Value[1] * 255, gColorList[m_Color].Value[2] * 255);
-
-	for (int ColorIdx = 0; ColorIdx < gNumUserColors; ColorIdx++)
-		Colors.Add(RGB(gColorList[ColorIdx].Value[0] * 255, gColorList[ColorIdx].Value[1] * 255, gColorList[ColorIdx].Value[2] * 255));
-
-	m_pPopup = new CMFCColorPopupMenu(NULL, Colors, Color, NULL, NULL, NULL, lstDocColors, 7, 0);
-	m_pPopup->SetPropList(m_pWndList);
-
 	CPoint pt(m_pWndList->GetListRect().left + m_pWndList->GetLeftColumnWidth() + 1, m_rectButton.bottom + 1);
 	m_pWndList->ClientToScreen(&pt);
 
-	if (!m_pPopup->Create(m_pWndList, pt.x, pt.y, NULL, FALSE))
-	{
-		ASSERT(FALSE);
-		m_pPopup = NULL;
-	}
-	else
-	{
-		m_pPopup->GetMenuBar()->SetFocus();
-	}
+	new CColorPopup(pt, m_Color, m_pWndList, true);
 }
 
 BOOL CLeoCADMFCPropertyGridColorProperty::OnEdit(LPPOINT /*lptClick*/)

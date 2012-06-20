@@ -2,7 +2,7 @@
 #include <math.h>
 #include "ClrPick.h"
 #include "ClrPopup.h"
-#include "resource.h"
+#include "propertiesgridctrl.h"
 #include "lc_colors.h"
 
 #ifdef _DEBUG
@@ -23,12 +23,13 @@ CColorPopup::CColorPopup()
 	Initialise();
 }
 
-CColorPopup::CColorPopup(CPoint p, int nColor, CWnd* pParentWnd)
+CColorPopup::CColorPopup(CPoint p, int nColor, CWnd* pParentWnd, bool IgnoreMouse)
 {
 	Initialise();
 
 	m_nColor = m_nInitialColor = nColor;
 	m_pParent = pParentWnd;
+	m_IgnoreMouse = IgnoreMouse;
 
 	CColorPopup::Create(p, nColor, pParentWnd);
 }
@@ -43,6 +44,7 @@ void CColorPopup::Initialise()
 	m_nChosenColorSel   = INVALID_COLOUR;
 	m_pParent           = NULL;
 	m_nColor            = m_nInitialColor = 0;
+	m_IgnoreMouse       = false;
 
 	// Idiot check: Make sure the colour square is at least 5 x 5;
 	if (m_nBoxSize - 2 * m_nMargin - 2 < 5)
@@ -86,7 +88,7 @@ CColorPopup::~CColorPopup()
 BOOL CColorPopup::Create(CPoint p, int nColor, CWnd* pParentWnd)
 {
 	ASSERT(pParentWnd && ::IsWindow(pParentWnd->GetSafeHwnd()));
-	ASSERT(pParentWnd->IsKindOf(RUNTIME_CLASS(CColorPicker)));
+	ASSERT(pParentWnd->IsKindOf(RUNTIME_CLASS(CColorPicker)) || pParentWnd->IsKindOf(RUNTIME_CLASS(CMFCPropertyGridCtrl)));
 
 	m_pParent = pParentWnd;
 	m_nColor = m_nInitialColor = nColor;
@@ -279,6 +281,8 @@ void CColorPopup::OnMouseMove(UINT nFlags, CPoint point)
 		return;
 	}
 
+	m_IgnoreMouse = false;
+
 	// Has the row/col selection changed? If yes, then redraw old and new cells.
 	if (nNewSelection != m_nCurrentSel)
 		ChangeSelection(nNewSelection);
@@ -290,6 +294,12 @@ void CColorPopup::OnMouseMove(UINT nFlags, CPoint point)
 void CColorPopup::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	CWnd::OnLButtonUp(nFlags, point);
+
+	if (m_IgnoreMouse)
+	{
+		m_IgnoreMouse = false;
+		return;
+	}
 
 	DWORD pos = GetMessagePos();
 	point = CPoint(LOWORD(pos), HIWORD(pos));
@@ -462,8 +472,15 @@ void CColorPopup::EndSelection(int nMessage)
 	if (nMessage == CPN_SELENDCANCEL)
 		m_nColor = m_nInitialColor;
 
-	int ColorIndex = m_nCurrentSel >= 0 ? mCells[m_nCurrentSel].ColorIndex : 0;
-	m_pParent->SendMessage(nMessage, 0, (LPARAM)ColorIndex);
+	int ColorIndex = m_nColor >= 0 ? mCells[m_nColor].ColorIndex : 0;
+
+	if (m_pParent->IsKindOf(RUNTIME_CLASS(CMFCPropertyGridCtrl)))
+	{
+		CLeoCADMFCPropertyGridCtrl* Ctrl = (CLeoCADMFCPropertyGridCtrl*)m_pParent;
+		Ctrl->SetColor(ColorIndex);
+	}
+	else
+		m_pParent->SendMessage(nMessage, 0, (LPARAM)ColorIndex);
 
 	DestroyWindow();
 }

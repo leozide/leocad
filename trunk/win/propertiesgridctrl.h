@@ -6,6 +6,7 @@ class CLeoCADMFCPropertyGridCtrl : public CMFCPropertyGridCtrl
 public:
 	virtual void CloseColorPopup();
 	virtual void UpdateColor(COLORREF color);
+	void SetColor(int ColorIndex);
 };
 
 class CLeoCADMFCPropertyGridColorProperty : public CMFCPropertyGridProperty

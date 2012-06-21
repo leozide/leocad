@@ -2108,24 +2108,35 @@ int propertiesdlg_execute(void* param)
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
 	gtk_text_buffer_set_text(buffer, opts->strComments, -1);
 
-	int i, j, col[LC_MAXCOLORS], totalcount[LC_MAXCOLORS];
-	memset(&totalcount, 0, sizeof(totalcount));
-	for (i = 0; i < opts->lines; i++)
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			totalcount[j] += opts->count[i*LC_MAXCOLORS+j];
-
-	int ID = 2;
-	for (i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
-			ID++;
-
 	scroll_win = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_win), 
 	GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_show(scroll_win);
 	gtk_container_add(GTK_CONTAINER(notebook), scroll_win);
 
-	list = gtk_clist_new(ID);
+	int* ColorColumn = new int[gColorList.GetSize() + 1];
+	int NumColumns = 0;
+
+	const char** PieceNames = opts->PieceNames;
+	int NumPieces = opts->NumPieces;
+	int* PieceColorCount = opts->PieceColorCount;
+	int NumColors = opts->NumColors;
+
+	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
+	{
+		if (PieceColorCount[NumPieces * (NumColors + 1) + ColorIdx])
+		{
+			ColorColumn[ColorIdx] = NumColumns;
+			NumColumns++;
+		}
+		else
+			ColorColumn[ColorIdx] = -1;
+	}
+
+	ColorColumn[NumColors] = NumColumns;
+	NumColumns++;
+
+	list = gtk_clist_new(NumColumns);
 	gtk_widget_show(list);
 	gtk_container_add(GTK_CONTAINER(scroll_win), list);
 	gtk_container_border_width(GTK_CONTAINER(list), 5);
@@ -2136,63 +2147,53 @@ int propertiesdlg_execute(void* param)
 	gtk_widget_show(label);
 	gtk_clist_set_column_widget(GTK_CLIST(list), 0, label);
 
-	for (ID = 0, i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
-		{
-			ID++;
-			col[i] = ID;
-
-			label = gtk_label_new(colornames[i]);
-			gtk_widget_show(label);
-			gtk_clist_set_column_widget(GTK_CLIST(list), ID, label);
-		}
-	ID++;
-	label = gtk_label_new("Total");
-	gtk_widget_show(label);
-	gtk_clist_set_column_widget(GTK_CLIST(list), ID, label);
-
-	char* row[LC_MAXCOLORS+2];
-	for (i = 0; i <= ID; i++)
-		row[i] = (char*)malloc(256);
-
-	for (i = 0; i < opts->lines; i++)
+	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
 	{
-		int total = 0;
-
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			total += opts->count[i*LC_MAXCOLORS+j];
-
-		if (total == 0)
+		if (ColorColumn[ColorIdx] == -1)
 			continue;
 
-		strcpy(row[0], opts->names[i]);
-		for (j = 1; j < ID; j++)
-			row[j][0] = 0;
-
-		for (j = 0; j < LC_MAXCOLORS; j++)
-			if (opts->count[i*LC_MAXCOLORS+j])
-				sprintf(row[col[j]], "%d", opts->count[i*LC_MAXCOLORS+j]);
-
-		sprintf(row[ID], "%d", total);
-		gtk_clist_append(GTK_CLIST(list), row);
+		label = gtk_label_new(gColorList[ColorIdx].Name);
+		gtk_widget_show(label);
+		gtk_clist_set_column_widget(GTK_CLIST(list), ColorColumn[ColorIdx] + 1, label);
 	}
-	gtk_clist_sort(GTK_CLIST(list));
 
-	strcpy(row[0], "Total");
-	int total = 0;
+	label = gtk_label_new("Total");
+	gtk_widget_show(label);
+	gtk_clist_set_column_widget(GTK_CLIST(list), NumColumns, label);
 
-	for (i = 0; i < LC_MAXCOLORS; i++)
-		if (totalcount[i])
+	char** Row = new char*[NumColumns];
+
+	for (int ColumnIdx = 0; ColumnIdx < NumColumns; ColumnIdx++)
+		Row[ColumnIdx] = new char[256];
+
+	for (int PieceIdx = 0; PieceIdx < NumPieces + 1; PieceIdx++)
+	{
+		if (!PieceColorCount[PieceIdx * (NumColors + 1) + NumColors])
+			continue;
+
+		for (int ColumnIdx = 0; ColumnIdx < NumColumns; ColumnIdx++)
+			Row[ColumnIdx][0] = 0;
+
+		if (PieceIdx != NumPieces)
+			strcpy(Row[0], PieceNames[PieceIdx]);
+		else
+			strcpy(Row[0], "Total");
+
+		for (int ColorIdx = 0; ColorIdx < NumColors + 1; ColorIdx++)
 		{
-			sprintf(row[col[i]], "%d", totalcount[i]);
-			total += totalcount[i];
+			if (!PieceColorCount[PieceIdx * (NumColors + 1) + ColorIdx])
+				continue;
+
+			sprintf(Row[ColorColumn[ColorIdx] + 1], "%d", PieceColorCount[PieceIdx * (NumColors + 1) + ColorIdx]);
 		}
 
-	sprintf(row[ID], "%d", total);
-	gtk_clist_append(GTK_CLIST(list), row);
+		gtk_clist_append(GTK_CLIST(list), Row);
+	}
 
-	for (i = 0; i <= ID; i++)
-		free(row[i]);
+	for (int ColumnIdx = 0; ColumnIdx < NumColumns; ColumnIdx++)
+		delete Row[ColumnIdx];
+
+	delete[] Row;
 
 	label = gtk_label_new("General");
 	gtk_widget_show(label);
@@ -2229,6 +2230,8 @@ int propertiesdlg_execute(void* param)
 	}
 	else
 		ret = LC_CANCEL;
+
+	delete[] ColorColumn;
 
 	gtk_widget_destroy(dlg);
 

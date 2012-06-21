@@ -79,7 +79,7 @@ void set_button_pixmap (GtkWidget* widget, float* color)
   gdk_gc_destroy(gc);
 }
 
-void set_button_pixmap2 (GtkWidget* widget, unsigned char* color)
+void set_button_pixmap2(GtkWidget* widget, float* color)
 {
   GdkColor c;
   GdkGC* gc;
@@ -95,9 +95,9 @@ void set_button_pixmap2 (GtkWidget* widget, unsigned char* color)
   pixmap = gdk_pixmap_new (widget->window, widget->allocation.width - 10,
 			   widget->allocation.height - 10, -1);
 
-  c.red = color[0]*256;
-  c.green = color[1]*256;
-  c.blue = color[2]*256;
+  c.red = (gushort)(color[0]*0xFFFF);
+  c.green = (gushort)(color[1]*0xFFFF);
+  c.blue = (gushort)(color[2]*0xFFFF);
   gdk_color_alloc (gtk_widget_get_colormap(widget), &c);
   gdk_gc_set_foreground(gc, &c);
 

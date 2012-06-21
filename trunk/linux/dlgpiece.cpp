@@ -8,6 +8,7 @@
 //
 
 #include "lc_global.h"
+#include "lc_colors.h"
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdio.h>
@@ -27,7 +28,7 @@
 // =========================================================
 // Minifig Wizard
 
-typedef struct
+struct LC_MINIFIGDLG_STRUCT
 {
   MinifigWizard* wizard;
   GtkWidget *pieces[LC_MFW_NUMITEMS];
@@ -35,7 +36,7 @@ typedef struct
   GtkWidget *angles[LC_MFW_NUMITEMS];
   GtkWidget *preview;
   GtkWidget *combo;
-} LC_MINIFIGDLG_STRUCT;
+};
 
 // User wants to add the minifig to the project
 static void minifigdlg_ok(GtkWidget *widget, gpointer data)
@@ -65,7 +66,7 @@ static void minifigdlg_color_response (GtkWidget *widget, gpointer data)
 
   info->wizard->SetColor (i, GPOINTER_TO_INT (data));
   info->wizard->Redraw ();
-  set_button_pixmap2 (button, FlatColorArray[GPOINTER_TO_INT(data)]);
+  set_button_pixmap2(button, gColorList[GPOINTER_TO_INT(data)].Value);
 }
 
 // A color button was clicked
@@ -76,18 +77,17 @@ static void minifigdlg_color_clicked (GtkWidget *widget, gpointer data)
 
   menu = gtk_menu_new ();
 
-  for (i = 0; i < LC_MAXCOLORS; i++)
+  for (i = 0; i < gNumUserColors; i++)
   {
-    menuitem = gtk_menu_item_new_with_label (colornames[i]);
-    gtk_widget_show (menuitem);
-    gtk_menu_append (GTK_MENU (menu), menuitem);
+    menuitem = gtk_menu_item_new_with_label(gColorList[i].Name);
+    gtk_widget_show(menuitem);
+    gtk_menu_append(GTK_MENU(menu), menuitem);
 
-    gtk_object_set_data (GTK_OBJECT (menuitem), "button", widget);
-    gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
-			GTK_SIGNAL_FUNC (minifigdlg_color_response), (void*)i);
+    gtk_object_set_data(GTK_OBJECT(menuitem), "button", widget);
+    gtk_signal_connect(GTK_OBJECT(menuitem), "activate", GTK_SIGNAL_FUNC(minifigdlg_color_response), (void*)i);
   }
 
-  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 0, 0);
+  gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, 0);
 }
 
 // New piece was selected
@@ -167,7 +167,7 @@ static void minifigdlg_load (GtkWidget *widget, gpointer data)
 
   for (int i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    set_button_pixmap2 (s->colors[i], FlatColorArray[s->wizard->m_Colors[i]]);
+    set_button_pixmap2(s->colors[i], gColorList[s->wizard->m_Colors[i]].Value);
     if (s->angles[i] != NULL)
       gtk_spin_button_set_value (GTK_SPIN_BUTTON (s->angles[i]), s->wizard->m_Angles[i]);
   }
@@ -402,7 +402,7 @@ int minifigdlg_execute (void* param)
 
   for (i = 0; i < LC_MFW_NUMITEMS; i++)
   {
-    set_button_pixmap2(s.colors[i], FlatColorArray[s.wizard->m_Colors[i]]);
+    set_button_pixmap2(s.colors[i], gColorList[s.wizard->m_Colors[i]].Value);
   }
 
   return dlg_domodal(dlg, LC_CANCEL);

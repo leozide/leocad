@@ -275,17 +275,12 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 		{
 			if (node == NULL) continue;
 			printed++;
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			gluPerspective(30.0f, aspect, 1.0f, 200.0f);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
 			glDepthFunc(GL_LEQUAL);
 			glClearColor(1,1,1,1); 
-			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE) ;
-			glEnable(GL_COLOR_MATERIAL) ;
-			glDisable (GL_DITHER);
-			glShadeModel (GL_FLAT);
+			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+			glEnable(GL_COLOR_MATERIAL);
+			glDisable(GL_DITHER);
+			glShadeModel(GL_FLAT);
 
 			lcSetColor(lcGetActiveProject()->GetCurrentColor());
 
@@ -672,17 +667,12 @@ static void PrintPiecesThread(void* pv)
 		{
 			if (node == NULL) continue;
 			printed++;
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			gluPerspective(30.0f, aspect, 1.0f, 200.0f);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
 			glDepthFunc(GL_LEQUAL);
 			glClearColor(1,1,1,1); 
-			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE) ;
-			glEnable(GL_COLOR_MATERIAL) ;
-			glDisable (GL_DITHER);
-			glShadeModel (GL_FLAT);
+			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+			glEnable(GL_COLOR_MATERIAL);
+			glDisable(GL_DITHER);
+			glShadeModel(GL_FLAT);
 
 			lcSetColor(project->m_nCurColor);
 

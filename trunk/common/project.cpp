@@ -3732,11 +3732,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						if (bSkip)
 							continue;
 
-						glMatrixMode(GL_PROJECTION);
-						glLoadIdentity();
-						gluPerspective(30.0f, aspect, 1.0f, 50.0f);
-						glMatrixMode(GL_MODELVIEW);
-						glLoadIdentity();
 						glDepthFunc(GL_LEQUAL);
 						glClearColor(1,1,1,1); 
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

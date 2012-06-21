@@ -17,11 +17,6 @@
 #define APIENTRY
 #endif
 
-void gluLookAt (GLdouble eyex, GLdouble eyey, GLdouble eyez,
-		GLdouble centerx, GLdouble centery, GLdouble centerz,
-		GLdouble upx, GLdouble upy, GLdouble upz);
-void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
-
 bool GL_Initialize(const char* libname);
 void GL_Shutdown();
 bool GL_InitializeExtensions();

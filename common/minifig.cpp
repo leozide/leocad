@@ -507,7 +507,7 @@ static const unsigned char sDefaultSettings[] =
 static int lcGetMinifigSettings(lcMemFile& File)
 {
 #ifdef LC_HAVE_ZLIB
-	const int CHUNK = 16384;
+	const size_t CHUNK = 16384;
 	int ret;
 	unsigned have;
 	z_stream strm;

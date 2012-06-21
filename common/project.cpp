@@ -1792,7 +1792,7 @@ void Project::RenderScenePieces(View* view)
 
 	lcMesh* PreviousMesh = NULL;
 	bool PreviousSelected = false;
-	char* ElementsOffset;
+	char* ElementsOffset = NULL;
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -2122,7 +2122,7 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		Object* Focus = NULL;
-		lcVector4 Rot;
+		lcVector4 Rot(0, 0, 1, 0);
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
@@ -2231,7 +2231,7 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		Object* Focus = NULL;
-		lcVector4 Rot;
+		lcVector4 Rot(0, 0, 1, 0);
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
@@ -2267,6 +2267,7 @@ void Project::RenderOverlays(View* view)
 				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 				break;
 			default:
+				Rotation = lcVector4(0.0f, 0.0f, 1.0f, 0.0f);
 				Angle = 0.0f;
 				break;
 			};
@@ -2449,6 +2450,9 @@ void Project::RenderOverlays(View* view)
 				case LC_OVERLAY_Z:
 					Angle = m_MouseTotalDelta[2];
 					Tangent = lcVector3(-Normal[1], Normal[0], 0.0f);
+					break;
+				default:
+					Angle = 0.0f;
 					break;
 				}
 
@@ -6551,7 +6555,7 @@ void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
 			int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
 			*SnapAngle = -1;
 
-			for (int i = 0; i < sizeof(Angles)/sizeof(Angles[0]); i++)
+			for (unsigned int i = 0; i < sizeof(Angles)/sizeof(Angles[0]); i++)
 			{
 				if (m_nAngleSnap == Angles[i])
 				{
@@ -8186,6 +8190,9 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 					Dir1 = lcVector3(0, 1, 0);
 					Dir2 = lcVector3(0, 0, 1);
 					SingleDir = false;
+					break;
+				default:
+					Dir1 = lcVector3(1, 0, 0);
 					break;
 				}
 

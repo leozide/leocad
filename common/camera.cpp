@@ -708,8 +708,7 @@ void Camera::LoadProjection(float fAspect)
   else
   {
     glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(m_fovy, fAspect, m_zNear, m_zFar);
+	glLoadMatrixf(lcMatrix44Perspective(m_fovy, fAspect, m_zNear, m_zFar));
 /*
 		ymax = 10;//(m_zFar-m_zNear)*tan(DTOR*m_fovy)/3;
 		ymin = -ymax;

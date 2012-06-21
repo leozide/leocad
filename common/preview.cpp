@@ -47,11 +47,6 @@ void PiecePreview::OnDraw()
 
 	float aspect = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(30.0f, aspect, 1.0f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
@@ -69,6 +64,9 @@ void PiecePreview::OnDraw()
 	}
 	else
 	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(lcMatrix44Perspective(30.0f, aspect, 1.0f, 100.0f));
+		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}
 

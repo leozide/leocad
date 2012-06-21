@@ -127,10 +127,6 @@ int stricmp(const char* str1, const char* str2);
 
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
 
-#define LC_MAXCOLORS	28	// Number of colors supported
-#define LC_COL_EDGES	28	// Piece edges
-#define LC_COL_DEFAULT	31	// Default piece color
-
 
 //	#define	DET_BACKFACES	0x00001	// Draw backfaces
 //	#define	DET_DEPTH		0x00002	// Enable depth test

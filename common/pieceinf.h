@@ -58,7 +58,6 @@ class PieceInfo
 
 	// Operations
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
-	void RenderOnce(int nColor);
 	void RenderPiece(int nColor);
 
 	// Implementation

@@ -1,19 +1,13 @@
-#if !defined(AFX_TERRDLG_H__51E24381_D9FA_11D2_8204_FB90F0F77F11__INCLUDED_)
-#define AFX_TERRDLG_H__51E24381_D9FA_11D2_8204_FB90F0F77F11__INCLUDED_
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-// TerrDlg.h : header file
-//
+#ifndef _TERRDLG_H_
+#define _TERRDLG_H_
 
 #include "TerrCtrl.h"
-class Terrain;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTerrainDlg dialog
 
-class CTerrainWnd;
+class Terrain;
+class lcTerrainView;
 
 class CTerrainDlg : public CDialog
 {
@@ -32,6 +26,7 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTerrainDlg)
 	public:
+	virtual BOOL DestroyWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -43,10 +38,12 @@ protected:
 	void CheckControl(UINT nID, BOOL bEnable);
 	CToolBar m_wndToolBar;
 	CTerrainCtrl m_Grid;
-	CTerrainWnd* m_pTerrainWnd;
+	CWnd* mTerrainWnd;
+
+	lcTerrainView* mView;
+	Terrain* mTerrain;
 
 	bool m_bLinear;
-	Terrain* m_pTerrain;
 
 	// Generated message map functions
 	//{{AFX_MSG(CTerrainDlg)
@@ -60,7 +57,4 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_TERRDLG_H__51E24381_D9FA_11D2_8204_FB90F0F77F11__INCLUDED_)
+#endif // _TERRDLG_H_

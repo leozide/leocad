@@ -21,14 +21,16 @@ CTerrainDlg::CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent /*=NULL*
 	//{{AFX_DATA_INIT(CTerrainDlg)
 	//}}AFX_DATA_INIT
 
-	m_pTerrainWnd = NULL;
-	m_pTerrain = pTerrain;
+	mView = new lcTerrainView(NULL, pTerrain);
+	mTerrainWnd = NULL;
+	mTerrain = pTerrain;
 	m_bLinear = bLinear;
 }
 
 CTerrainDlg::~CTerrainDlg()
 {
-	delete m_pTerrainWnd;
+	delete mView;
+	delete mTerrainWnd;
 }
 
 void CTerrainDlg::DoDataExchange(CDataExchange* pDX)
@@ -87,24 +89,64 @@ BOOL CTerrainDlg::OnInitDialog()
 	// And position the control bars
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
 
-	m_pTerrainWnd = new CTerrainWnd(m_pTerrain);
-	m_pTerrainWnd->Create (NULL, NULL, WS_BORDER | WS_CHILD | WS_VISIBLE, CRect (0,0,20,20), this, 501);
-	m_pTerrainWnd->LoadTexture(m_bLinear);
+	HINSTANCE hInst = AfxGetInstanceHandle();
+	WNDCLASS wndcls;
 
-	m_Grid.SetControlPoints(m_pTerrain->GetCountU(), m_pTerrain->GetCountV(), m_pTerrain->GetControlPoints());
+LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+#define OPENGL_CLASSNAME _T("LeoCADOpenGLClass")
+#define TERRAIN_CLASSNAME _T("LeoCADTerrainOpenGLClass")
+
+	// check if our class is registered
+	if(!(GetClassInfo (hInst, TERRAIN_CLASSNAME, &wndcls)))
+	{
+		if (GetClassInfo (hInst, OPENGL_CLASSNAME, &wndcls))
+		{
+			// set our class name
+			wndcls.lpszClassName = TERRAIN_CLASSNAME;
+			wndcls.lpfnWndProc = GLWindowProc;
+			wndcls.hCursor = NULL;
+
+			// register class
+			if (!AfxRegisterClass(&wndcls))
+				AfxThrowResourceException();
+		}
+		else
+			AfxThrowResourceException();
+	}
+
+	mTerrainWnd = new CWnd;
+	mTerrainWnd->CreateEx(0, TERRAIN_CLASSNAME, "LeoCAD", WS_BORDER | WS_CHILD | WS_VISIBLE, CRect(0, 0, 20, 20), this, 0, mView);
+
+	mView->LoadTexture(m_bLinear);
+
+	m_Grid.SetControlPoints(mTerrain->GetCountU(), mTerrain->GetCountV(), mTerrain->GetControlPoints());
 
 	PostMessage(WM_COMMAND, ID_TERDLG_EDIT_ZOOM);
 
 	return TRUE;
 }
 
+BOOL CTerrainDlg::DestroyWindow() 
+{
+	if (mTerrainWnd)
+	{
+		mTerrainWnd->DestroyWindow();
+		delete mTerrainWnd;
+		mTerrainWnd = NULL;
+	}
+	
+	return CDialog::DestroyWindow();
+}
+
 LRESULT CTerrainDlg::OnGridChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	m_Grid.InvalidateRect(NULL, FALSE);
-	m_pTerrain->SetControlPoints();
-	m_pTerrain->Tesselate();
 
-	m_pTerrainWnd->InvalidateRect(NULL, FALSE);
+	mTerrain->SetControlPoints();
+	mTerrain->Tesselate();
+
+	mView->Redraw();
 
 	return TRUE;
 }
@@ -147,26 +189,26 @@ BOOL CTerrainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_TERDLG_EDIT_RANDOM:
 		{
-			m_pTerrain->GenerateRandom();
-			m_pTerrain->m_nOptions &= ~LC_TERRAIN_FLAT;
-			m_Grid.SetControlPoints(m_pTerrain->GetCountU(), m_pTerrain->GetCountV(), m_pTerrain->GetControlPoints());
-			m_pTerrainWnd->InvalidateRect(NULL, FALSE);
+			mTerrain->GenerateRandom();
+			mTerrain->m_nOptions &= ~LC_TERRAIN_FLAT;
+			m_Grid.SetControlPoints(mTerrain->GetCountU(), mTerrain->GetCountV(), mTerrain->GetControlPoints());
+			mView->Redraw();
 			return TRUE;
 		}
 
 		case ID_TERDLG_EDIT_PREFERENCES:
 		{
 			CTerrainOptionsDlg dlg;
-			dlg.SetOptions(m_pTerrain);
+			dlg.SetOptions(mTerrain);
 
 			if (dlg.DoModal() == IDOK)
 			{
-				dlg.GetOptions(m_pTerrain);
-				m_Grid.SetControlPoints(m_pTerrain->GetCountU(), m_pTerrain->GetCountV(), m_pTerrain->GetControlPoints());
-				m_pTerrain->Tesselate();
-				m_pTerrainWnd->LoadTexture(m_bLinear);
+				dlg.GetOptions(mTerrain);
+				m_Grid.SetControlPoints(mTerrain->GetCountU(), mTerrain->GetCountV(), mTerrain->GetControlPoints());
+				mTerrain->Tesselate();
+				mView->LoadTexture(m_bLinear);
 
-				m_pTerrainWnd->InvalidateRect(NULL, FALSE);
+				mView->Redraw();
 			}
 
 			return TRUE;
@@ -174,8 +216,8 @@ BOOL CTerrainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		
 		case ID_TERDLG_EDIT_RESETCAMERA:
 		{
-			m_pTerrainWnd->ResetCamera();
-			m_pTerrainWnd->InvalidateRect(NULL, FALSE);
+			mView->ResetCamera();
+			mView->Redraw();
 			return TRUE;
 		}
 
@@ -183,11 +225,11 @@ BOOL CTerrainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		case ID_TERDLG_EDIT_PAN:
 		case ID_TERDLG_EDIT_ROTATE:
 		{
-			CheckControl(m_pTerrainWnd->m_nAction + ID_TERDLG_EDIT_ZOOM, FALSE);
-			m_pTerrainWnd->m_nAction = LOWORD(wParam) - ID_TERDLG_EDIT_ZOOM;
-			CheckControl(m_pTerrainWnd->m_nAction + ID_TERDLG_EDIT_ZOOM, TRUE);
+			CheckControl(mView->mAction + ID_TERDLG_EDIT_ZOOM, FALSE);
+			mView->SetAction(LOWORD(wParam) - ID_TERDLG_EDIT_ZOOM);
+			CheckControl(mView->mAction + ID_TERDLG_EDIT_ZOOM, TRUE);
 
-			GetMenu()->GetSubMenu(1)->CheckMenuRadioItem(ID_TERDLG_EDIT_ZOOM, ID_TERDLG_EDIT_ROTATE, m_pTerrainWnd->m_nAction + ID_TERDLG_EDIT_ZOOM, MF_BYCOMMAND);
+			GetMenu()->GetSubMenu(1)->CheckMenuRadioItem(ID_TERDLG_EDIT_ZOOM, ID_TERDLG_EDIT_ROTATE, mView->mAction + ID_TERDLG_EDIT_ZOOM, MF_BYCOMMAND);
 
 			return TRUE;
 		}
@@ -236,7 +278,7 @@ void CTerrainDlg::OnSize(UINT nType, int cx, int cy)
 	// Fix the toolbar and menu.
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
 
-	if (m_pTerrainWnd)
+	if (mTerrainWnd)
 	{
 		CRect rcClient;
 
@@ -244,7 +286,7 @@ void CTerrainDlg::OnSize(UINT nType, int cx, int cy)
 		RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0, reposQuery, rcClient);
 
 		m_Grid.MoveWindow (rcClient.left + 5, rcClient.top + 5, rcClient.Width()/2 - 7, rcClient.Height() - 10);
-		m_pTerrainWnd->MoveWindow (rcClient.left + rcClient.Width()/2 + 2, rcClient.top + 5, rcClient.Width()/2 - 7, rcClient.Height() - 10);
+		mTerrainWnd->MoveWindow (rcClient.left + rcClient.Width()/2 + 2, rcClient.top + 5, rcClient.Width()/2 - 7, rcClient.Height() - 10);
 	}
 }
 

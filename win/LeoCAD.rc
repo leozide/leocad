@@ -170,7 +170,6 @@ BEGIN
     BUTTON      ID_TERDLG_FILE_OPEN
     BUTTON      ID_TERDLG_FILE_SAVE
     SEPARATOR
-    BUTTON      ID_TERDLG_EDIT_SELECT
     BUTTON      ID_TERDLG_EDIT_ZOOM
     BUTTON      ID_TERDLG_EDIT_PAN
     BUTTON      ID_TERDLG_EDIT_ROTATE
@@ -516,7 +515,6 @@ BEGIN
         MENUITEM "&Random",                     ID_TERDLG_EDIT_RANDOM
         MENUITEM "Reset &Camera",               ID_TERDLG_EDIT_RESETCAMERA
         MENUITEM SEPARATOR
-        MENUITEM "&Select",                     ID_TERDLG_EDIT_SELECT
         MENUITEM "&Zoom",                       ID_TERDLG_EDIT_ZOOM
         MENUITEM "&Pan",                        ID_TERDLG_EDIT_PAN
         MENUITEM "Ro&tate",                     ID_TERDLG_EDIT_ROTATE

@@ -87,7 +87,7 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 		case LC_ACTION_CURVE:
 		default:
 			LC_ASSERT_FALSE("Unknown cursor type.");
-			return LC_CURSOR_NONE;
+			return LC_CURSOR_DEFAULT;
 	}
 }
 

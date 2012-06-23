@@ -2,6 +2,7 @@
 #include "opengl.h"
 #include "glwindow.h"
 #include "tools.h"
+#include "resource.h"
 
 struct GLWindowPrivate
 {
@@ -9,24 +10,25 @@ struct GLWindowPrivate
 	CDC* m_pDC;
 	CPalette* m_pPal;
 	HWND m_hWnd;
+	HCURSOR Cursor;
 };
 
 // ============================================================================
 
-BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
+BOOL GLWindowPreTranslateMessage(GLWindow *wnd, MSG *pMsg)
 {
 	switch (pMsg->message)
 	{
 		case WM_PAINT:
-		{
-			GLWindowPrivate* prv = (GLWindowPrivate*)wnd->GetData();
-			PAINTSTRUCT ps;
-			BeginPaint(prv->m_hWnd, &ps);
-			wnd->OnDraw ();
-			EndPaint(prv->m_hWnd, &ps);
-		} break;
+			{
+				GLWindowPrivate* prv = (GLWindowPrivate*)wnd->GetData();
+				PAINTSTRUCT ps;
+				BeginPaint(prv->m_hWnd, &ps);
+				wnd->OnDraw();
+				EndPaint(prv->m_hWnd, &ps);
+			} break;
 		case WM_SIZE:
-			wnd->OnSize (LOWORD (pMsg->lParam), HIWORD (pMsg->lParam));
+			wnd->OnSize(LOWORD(pMsg->lParam), HIWORD(pMsg->lParam));
 			break;
 		case WM_LBUTTONDOWN:
 			wnd->OnLeftButtonDown((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
@@ -63,29 +65,41 @@ BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg)
 		case WM_ERASEBKGND:
 			return TRUE;
 		case WM_CREATE:
-			wnd->OnInitialUpdate ();
+			wnd->OnInitialUpdate();
 			break;
 		case WM_DESTROY:
-			wnd->DestroyContext ();
+			wnd->DestroyContext();
 			return FALSE;
 			break;
+		case WM_SETCURSOR:
+			{
+				GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData();
+
+				if (prv->Cursor)
+				{
+					SetCursor(prv->Cursor);
+					return TRUE;
+				}
+
+				return FALSE;
+			} break;
 		case WM_PALETTECHANGED:
 			if ((HWND)pMsg->wParam == pMsg->hwnd)  // Responding to own message.
 				break;
 		case WM_QUERYNEWPALETTE:
-		{
-			GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData ();
-
-			if (prv->m_pPal)
 			{
-				prv->m_pDC->SelectPalette (prv->m_pPal, FALSE);
-					if (prv->m_pDC->RealizePalette () != 0)
+				GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData();
+
+				if (prv->m_pPal)
+				{
+					prv->m_pDC->SelectPalette(prv->m_pPal, FALSE);
+					if (prv->m_pDC->RealizePalette() != 0)
 					{
 						// Some colors changed, so we need to do a repaint.
-						InvalidateRect (prv->m_hWnd, NULL, TRUE);
+						InvalidateRect(prv->m_hWnd, NULL, TRUE);
 					}
-			}
-		} break;
+				}
+			} break;
 
 		default:
 			return FALSE;
@@ -324,4 +338,36 @@ void GLWindow::CaptureMouse()
 void GLWindow::ReleaseMouse()
 {
 	ReleaseCapture();
+}
+
+void GLWindow::SetCursor(LC_CURSOR_TYPE Cursor)
+{
+	const UINT CursorResources[LC_CURSOR_COUNT] = 
+	{
+		0,                // LC_CURSOR_DEFAULT
+		IDC_BRICK,        // LC_CURSOR_BRICK
+		IDC_LIGHT,        // LC_CURSOR_LIGHT
+		IDC_SPOTLIGHT,    // LC_CURSOR_SPOTLIGHT
+		IDC_CAMERA,       // LC_CURSOR_CAMERA
+		IDC_SELECT,       // LC_CURSOR_SELECT
+		IDC_SELECT_GROUP, // LC_CURSOR_SELECT_GROUP
+		IDC_MOVE,         // LC_CURSOR_MOVE
+		IDC_ROTATE,       // LC_CURSOR_ROTATE
+		IDC_ROTX,         // LC_CURSOR_ROTATEX
+		IDC_ROTY,         // LC_CURSOR_ROTATEY
+		IDC_ERASER,       // LC_CURSOR_DELETE
+		IDC_PAINT,        // LC_CURSOR_PAINT
+		IDC_ZOOM,         // LC_CURSOR_ZOOM
+		IDC_ZOOM_REGION,  // LC_CURSOR_ZOOM_REGION
+		IDC_PAN,          // LC_CURSOR_PAN
+		IDC_ROLL,         // LC_CURSOR_ROLL
+		IDC_ANGLE,        // LC_CURSOR_ROTATE_VIEW
+	};
+
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+
+	if (CursorResources[Cursor])
+		prv->Cursor = AfxGetApp()->LoadCursor(CursorResources[Cursor]);
+	else
+		prv->Cursor = NULL;
 }

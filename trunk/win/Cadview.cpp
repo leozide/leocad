@@ -568,7 +568,7 @@ LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 
 	switch (m_pView->GetCursor(pt.x, pt.y))
 	{
-		case LC_CURSOR_NONE: Cursor = NULL; break;
+		case LC_CURSOR_DEFAULT: Cursor = NULL; break;
 		case LC_CURSOR_BRICK: Cursor = IDC_BRICK; break;
 		case LC_CURSOR_LIGHT: Cursor = IDC_LIGHT; break;
 		case LC_CURSOR_SPOTLIGHT: Cursor = IDC_SPOTLIGHT; break;

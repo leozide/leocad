@@ -6,159 +6,24 @@
 #include "camera.h"
 #include "Tools.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-// CTerrainWnd
-
-CTerrainWnd::CTerrainWnd(Terrain* pTerrain)
+lcTerrainView::lcTerrainView(GLWindow* Share, Terrain* pTerrain)
+	: GLWindow(Share)
 {
-	m_pCamera = new Camera(20,20,20,0,0,0, NULL);
-	m_pTerrain = pTerrain;
-	m_pPalette = NULL;
-	m_pDC = NULL;
-	m_hglRC = 0;
-	m_nAction = TERRAIN_ZOOM;
+	mCamera = new Camera(20, 20, 20, 0, 0, 0, NULL);
+	mTerrain = pTerrain;
+	mAction = TERRAIN_ZOOM;
+	mMouseDown = false;
 }
 
-CTerrainWnd::~CTerrainWnd()
+lcTerrainView::~lcTerrainView()
 {
-	delete m_pCamera;
+	delete mCamera;
 }
 
-
-BEGIN_MESSAGE_MAP(CTerrainWnd, CWnd)
-	//{{AFX_MSG_MAP(CTerrainWnd)
-	ON_WM_ERASEBKGND()
-	ON_WM_PAINT()
-	ON_WM_SIZE()
-	ON_WM_DESTROY()
-	ON_WM_CREATE()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONUP()
-	ON_WM_SETCURSOR()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-/////////////////////////////////////////////////////////////////////////////
-// CTerrainWnd message handlers
-
-BOOL CTerrainWnd::OnEraseBkgnd(CDC* pDC) 
+void lcTerrainView::OnInitialUpdate()
 {
-	return TRUE;
-}
+	MakeCurrent();
 
-void CTerrainWnd::OnPaint() 
-{
-	CPaintDC dc(this); // device context for painting
-
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
-
-	if (m_pPalette)
-	{
-		m_pDC->SelectPalette(m_pPalette, FALSE);
-		m_pDC->RealizePalette();
-	}
-
-	wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	float aspect = (float)m_szView.cx/(float)m_szView.cy;
-	glViewport(0, 0, m_szView.cx, m_szView.cy);
-
-	m_pCamera->LoadProjection(aspect);
-
-	m_pTerrain->Render(m_pCamera, aspect);
-
-	SwapBuffers(dc.m_hDC);
-	wglMakeCurrent(oldDC, oldRC);
-}
-
-void CTerrainWnd::OnSize(UINT nType, int cx, int cy) 
-{
-	CWnd::OnSize(nType, cx, cy);
-	
-	if (cy < 1) cy = 1;
-	m_szView.cx = cx;
-	m_szView.cy = cy;
-}
-
-void CTerrainWnd::OnDestroy() 
-{
-	if (m_pPalette)
-	{
-		CClientDC dc(this);
-	    CPalette palDefault;
-		palDefault.CreateStockObject(DEFAULT_PALETTE);
-		dc.SelectPalette(&palDefault, FALSE);
-		delete m_pPalette;
-	}
-
-	if (m_hglRC)
-		wglDeleteContext(m_hglRC);
-	if (m_pDC)
-		delete m_pDC;
-
-	CWnd::OnDestroy();
-}
-
-int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CWnd::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	m_pDC = new CClientDC(this);
-	ASSERT(m_pDC != NULL);
-
-	// Fill in the Pixel Format Descriptor
-	PIXELFORMATDESCRIPTOR pfd;
-	memset(&pfd,0, sizeof(PIXELFORMATDESCRIPTOR));
-		
-	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);	
-	pfd.nVersion = 1;
-	pfd.dwFlags  =	PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 24;
-	pfd.cDepthBits = 32;
-	pfd.iLayerType = PFD_MAIN_PLANE;
-		
-	int nPixelFormat = ChoosePixelFormat(m_pDC->m_hDC, &pfd);
-	if (nPixelFormat == 0)
-		return -1;
-
-	if (!SetPixelFormat(m_pDC->m_hDC, nPixelFormat, &pfd))
-		return -1;
-
-	m_pPalette = new CPalette;
-	if (CreateRGBPalette(m_pDC->m_hDC, &m_pPalette))
-	{
-		m_pDC->SelectPalette(m_pPalette, FALSE);
-		m_pDC->RealizePalette();
-	}
-	else
-	{
-		delete m_pPalette;
-		m_pPalette = NULL;
-	}
-		
-	// Create a rendering context.
-	m_hglRC = wglCreateContext(m_pDC->m_hDC);
-	if (!m_hglRC)
-		return -1;
-
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
-	wglMakeCurrent (m_pDC->m_hDC, m_hglRC);
-
-	// Initialize OpenGL the way we want it.
 	float ambient [] = {0.0f, 0.0f, 0.0f, 1.0f};
 	float diffuse [] = {0.8f, 0.9f, 0.6f, 1.0f};
 	float specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -177,89 +42,98 @@ int CTerrainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_CULL_FACE);
-
-	wglMakeCurrent(oldDC, oldRC);
-
-	return 0;
 }
 
-void CTerrainWnd::LoadTexture(bool linear)
+void lcTerrainView::OnDraw()
 {
-	HDC oldDC = wglGetCurrentDC();
-	HGLRC oldRC = wglGetCurrentContext();
+	if (!MakeCurrent())
+		return;
 
-	wglMakeCurrent(m_pDC->m_hDC, m_hglRC);
-	m_pTerrain->LoadTexture(linear);
-	wglMakeCurrent(oldDC, oldRC);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	float aspect = (float)m_nWidth/(float)m_nHeight;
+	glViewport(0, 0, m_nWidth, m_nHeight);
+
+	mCamera->LoadProjection(aspect);
+
+	mTerrain->Render(mCamera, aspect);
+
+	SwapBuffers();
 }
 
-void CTerrainWnd::OnLButtonDown(UINT nFlags, CPoint point) 
+void lcTerrainView::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
 {
-	SetCapture();
-	m_ptMouse = point;
-	
-	CWnd::OnLButtonDown(nFlags, point);
+	mMouseX = x;
+	mMouseY = y;
+	mMouseDown = true;
+
+	CaptureMouse();
 }
 
-void CTerrainWnd::OnMouseMove(UINT nFlags, CPoint point) 
+void lcTerrainView::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
 {
-	if (nFlags & MK_LBUTTON)
+	mMouseDown = false;
+
+	ReleaseCapture();
+}
+
+void lcTerrainView::OnMouseMove(int x, int y, bool Control, bool Shift)
+{
+	if (!mMouseDown)
+		return;
+
+	switch (mAction)
 	{
-		switch (m_nAction)
-		{
-			case TERRAIN_ZOOM:
-			{
-				m_pCamera->DoZoom(point.y - m_ptMouse.y, 11, 1, false, false);
-				InvalidateRect (NULL, FALSE);
-			} break;
+		case TERRAIN_ZOOM:
+			mCamera->DoZoom(y - mMouseY, 11, 1, false, false);
+			Redraw();
+			break;
 
-			case TERRAIN_PAN:
-			{
-				m_pCamera->DoPan(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false, false);
-				InvalidateRect (NULL, FALSE);
-			} break;
+		case TERRAIN_PAN:
+			mCamera->DoPan(x - mMouseX, y - mMouseY, 11, 1, false, false);
+			Redraw();
+			break;
 
-			case TERRAIN_ROTATE:
+		case TERRAIN_ROTATE:
+			if (mMouseX != x || mMouseY != y)
 			{
 				float center[3] = { 0,0,0 };
-				if (point == m_ptMouse)
-					break;
-				m_pCamera->DoRotate(point.x - m_ptMouse.x, point.y - m_ptMouse.y, 11, 1, false, false, center);
-				InvalidateRect (NULL, FALSE);
-			} break;
-		}
-
-		m_ptMouse = point;
+				mCamera->DoRotate(x - mMouseX, y - mMouseY, 11, 1, false, false, center);
+				Redraw();
+			}
+		break;
 	}
 
-	CWnd::OnMouseMove(nFlags, point);
+	mMouseX = x;
+	mMouseY = y;
 }
 
-void CTerrainWnd::OnLButtonUp(UINT nFlags, CPoint point) 
+void lcTerrainView::LoadTexture(bool linear)
 {
-	ReleaseCapture();
-	CWnd::OnLButtonUp(nFlags, point);
+	MakeCurrent();
+	mTerrain->LoadTexture(linear);
 }
 
-BOOL CTerrainWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
+void lcTerrainView::ResetCamera()
 {
-	UINT c;
+	delete mCamera;
+	mCamera = new Camera(20, 20, 20, 0, 0, 0, NULL);
+}
 
-	switch (m_nAction)
+void lcTerrainView::SetAction(int Action)
+{
+	mAction = Action;
+
+	switch (mAction)
 	{
-		case TERRAIN_ZOOM:	c = IDC_ZOOM;	break;
-		case TERRAIN_PAN:	c = IDC_PAN;	break;
-		case TERRAIN_ROTATE:c = IDC_ANGLE;	break;
-		default: 
-			return CWnd::OnSetCursor(pWnd, nHitTest, message);
+	case TERRAIN_ZOOM:
+		SetCursor(LC_CURSOR_ZOOM);
+		break;
+	case TERRAIN_PAN:
+		SetCursor(LC_CURSOR_PAN);
+		break;
+	case TERRAIN_ROTATE:
+		SetCursor(LC_CURSOR_ROTATE_VIEW);
+		break;
 	}
-	
-	SetCursor(theApp.LoadCursor(c));
-	return TRUE;
-}
-
-void CTerrainWnd::ResetCamera()
-{
-	delete m_pCamera;
-	m_pCamera = new Camera(20,20,20,0,0,0, NULL);
 }

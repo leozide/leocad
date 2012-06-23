@@ -1,6 +1,29 @@
 #ifndef _GLWINDOW_H_
 #define _GLWINDOW_H_
 
+enum LC_CURSOR_TYPE
+{
+	LC_CURSOR_DEFAULT,
+	LC_CURSOR_BRICK,
+	LC_CURSOR_LIGHT,
+	LC_CURSOR_SPOTLIGHT,
+	LC_CURSOR_CAMERA,
+	LC_CURSOR_SELECT,
+	LC_CURSOR_SELECT_GROUP,
+	LC_CURSOR_MOVE,
+	LC_CURSOR_ROTATE,
+	LC_CURSOR_ROTATEX,
+	LC_CURSOR_ROTATEY,
+	LC_CURSOR_DELETE,
+	LC_CURSOR_PAINT,
+	LC_CURSOR_ZOOM,
+	LC_CURSOR_ZOOM_REGION,
+	LC_CURSOR_PAN,
+	LC_CURSOR_ROLL,
+	LC_CURSOR_ROTATE_VIEW,
+	LC_CURSOR_COUNT
+};
+
 class GLWindow
 {
 public:
@@ -16,6 +39,7 @@ public:
 	void Redraw(bool ForceRedraw = false);
 	void CaptureMouse();
 	void ReleaseMouse();
+	void SetCursor(LC_CURSOR_TYPE Cursor);
 
 	int GetWidth() const
 	{ return m_nWidth; }

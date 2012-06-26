@@ -19,12 +19,24 @@
 
 bool GL_Initialize(const char* libname);
 void GL_Shutdown();
-bool GL_InitializeExtensions();
+void GL_InitializeExtensions();
+
+extern bool GL_SupportsVertexBufferObject;
+extern bool GL_UseVertexBufferObject;
+
+inline void GL_DisableVertexBufferObject()
+{
+	GL_UseVertexBufferObject = false;
+}
+
+inline void GL_EnableVertexBufferObject()
+{
+	GL_UseVertexBufferObject = GL_SupportsVertexBufferObject;
+}
 
 inline bool GL_HasVertexBufferObject()
 {
-	extern bool GL_VertexBufferObject;
-	return GL_VertexBufferObject;
+	return GL_UseVertexBufferObject;
 }
 
 // =============================================================================

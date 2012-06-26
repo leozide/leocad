@@ -1433,6 +1433,7 @@ void* Sys_StartMemoryRender(int width, int height)
 	SetPixelFormat(render->hdc, pixelformat, &pfd);
 	render->hrc = wglCreateContext(render->hdc);
 	wglMakeCurrent(render->hdc, render->hrc);
+	GL_DisableVertexBufferObject();
 
 	return render;
 }
@@ -1441,6 +1442,7 @@ void Sys_FinishMemoryRender(void* param)
 {
 	LC_RENDER* render = (LC_RENDER*)param;
 
+	GL_EnableVertexBufferObject();
 	wglMakeCurrent (render->oldhdc, render->oldhrc);
 	wglDeleteContext(render->hrc);
 	SelectObject(render->hdc, render->oldhbm);

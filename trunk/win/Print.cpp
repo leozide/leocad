@@ -188,6 +188,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 	HGLRC hmemrc = wglCreateContext(pMemDC->GetSafeHdc());
 	
 	// Setting up the current OpenGL context
+	GL_DisableVertexBufferObject();
 	wglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
 	double aspect = (float)w/(float)h;
 	glMatrixMode(GL_MODELVIEW);
@@ -368,6 +369,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 		free(previous);
 	}
 
+	GL_EnableVertexBufferObject();
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(hmemrc);
 	SelectObject(pMemDC->GetSafeHdc(), hBmOld);
@@ -568,6 +570,7 @@ static void PrintPiecesThread(void* pv)
 	DescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 	SetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
 	HGLRC hmemrc = wglCreateContext(pMemDC->GetSafeHdc());
+	GL_DisableVertexBufferObject();
 	wglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
 	double aspect = (float)picw/(float)h;
 	glMatrixMode(GL_MODELVIEW);
@@ -766,6 +769,7 @@ static void PrintPiecesThread(void* pv)
 		free(previous);
 	}
 
+	GL_EnableVertexBufferObject();
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(hmemrc);
 	SelectObject(pMemDC->GetSafeHdc(), hBmOld);

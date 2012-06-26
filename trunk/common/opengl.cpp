@@ -1081,7 +1081,8 @@ bool GL_Initialize(const char* LibraryName)
 // =============================================================================
 // Extensions support
 
-bool GL_VertexBufferObject = false;
+bool GL_SupportsVertexBufferObject = false;
+bool GL_UseVertexBufferObject = false;
 
 static bool GL_ExtensionSupported(const char* extension)
 {
@@ -1119,7 +1120,7 @@ static bool GL_ExtensionSupported(const char* extension)
 }
 
 // Extensions can only be initialized if there's a current OpenGL context.
-bool GL_InitializeExtensions()
+void GL_InitializeExtensions()
 {
 	if (GL_ExtensionSupported("GL_ARB_vertex_buffer_object"))
 	{
@@ -1135,8 +1136,6 @@ bool GL_InitializeExtensions()
 		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB");
 		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB");
 
-		GL_VertexBufferObject = true;
+		GL_SupportsVertexBufferObject = true;
 	}
-
-	return true;
 }

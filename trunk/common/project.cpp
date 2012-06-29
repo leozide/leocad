@@ -2309,8 +2309,8 @@ void Project::RenderOverlays(View* view)
 
 				do
 				{
-					float x = cosf((Step * i - StartAngle) * DTOR) * OverlayRotateRadius * OverlayScale;
-					float y = sinf((Step * i - StartAngle) * DTOR) * OverlayRotateRadius * OverlayScale;
+					float x = cosf((Step * i - StartAngle) * LC_DTOR) * OverlayRotateRadius * OverlayScale;
+					float y = sinf((Step * i - StartAngle) * LC_DTOR) * OverlayRotateRadius * OverlayScale;
 
 					glVertex3f(0.0f, x, y);
 
@@ -3268,17 +3268,15 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			Piece* pPiece = (Piece*)mod->piece;
 
 			const lcVector3& Pos = pPiece->mPosition;
-			lcVector4 rot = pPiece->mRotation;
-			Matrix mat(rot, Pos);
-			mat.ToEulerAngles(rot);
+			lcVector3 Angles = lcMatrix44ToEulerAngles(pPiece->mModelWorld) * LC_RTOD;
 
 			if (Pos != mod->Position)
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Position, LC_PK_POSITION);
 
-			if (mod->Rotation[0] != rot[0] || mod->Rotation[1] != rot[1] || mod->Rotation[2] != rot[2])
+			if (mod->Rotation != Angles)
 			{
-				mat.FromEulerAngles(mod->Rotation[0], mod->Rotation[1], mod->Rotation[2]);
-				mat.ToAxisAngle(rot);
+				lcVector4 rot = lcMatrix44ToAxisAngle(lcMatrix44FromEulerAngles(mod->Rotation * LC_DTOR));
+				rot[3] *= LC_RTOD;
 				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
 			}
 

@@ -205,9 +205,7 @@ void CPropertiesPane::SetPiece(Object* Focus)
 
 	Piece* pPiece = (Piece*)Focus;
 	lcVector3 Pos = pPiece->mPosition;
-	lcVector4 Rot = pPiece->mRotation;
-	Matrix mat(Rot, Pos);
-	mat.ToEulerAngles(Rot);
+	lcVector3 Angles = lcMatrix44ToEulerAngles(pPiece->mModelWorld) * LC_RTOD;
 
 	lcGetActiveProject()->ConvertToUserUnits(Pos);
 
@@ -217,9 +215,9 @@ void CPropertiesPane::SetPiece(Object* Focus)
 	UpdateProperty(Position->GetSubItem(2), Pos[2]);
 
 	CMFCPropertyGridProperty* Rotation = m_wndPropList.GetProperty(1);
-	UpdateProperty(Rotation->GetSubItem(0), Rot[0]);
-	UpdateProperty(Rotation->GetSubItem(1), Rot[1]);
-	UpdateProperty(Rotation->GetSubItem(2), Rot[2]);
+	UpdateProperty(Rotation->GetSubItem(0), Angles[0]);
+	UpdateProperty(Rotation->GetSubItem(1), Angles[1]);
+	UpdateProperty(Rotation->GetSubItem(2), Angles[2]);
 
 	lcuint32 From, To;
 	if (lcGetActiveProject()->IsAnimation())

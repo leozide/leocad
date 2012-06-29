@@ -62,8 +62,8 @@ void PieceInfo::LoadIndex(lcFile& file)
   {
     for (int i = 0; i < SIDES; i++)
     {
-      sintbl[i] = (float)sin((PI2*i)/(SIDES));
-      costbl[i] = (float)cos((PI2*i)/(SIDES));
+      sintbl[i] = (float)sin((LC_2PI*i)/(SIDES));
+      costbl[i] = (float)cos((LC_2PI*i)/(SIDES));
     }
     init = true;
   }

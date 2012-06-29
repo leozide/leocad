@@ -4,6 +4,34 @@
 #include <math.h>
 #include <float.h>
 
+#define LC_DTOR 0.017453f
+#define LC_RTOD 57.29578f
+#define LC_PI   3.141592f
+#define LC_2PI  6.283185f
+
+template <typename T, typename U>
+inline T lcMin(const T& a, const U& b)
+{
+	return a < b ? a : b;
+}
+
+template <typename T, typename U>
+inline T lcMax(const T& a, const U& b)
+{
+	return a > b ? a : b;
+}
+
+template <typename T, typename U, typename V>
+inline T lcClamp(const T& Value, const U& Min, const V& Max)
+{
+	if (Value > Max)
+		return Max;
+	else if (Value < Min)
+		return Min;
+	else
+		return Value;
+}
+
 class lcVector3;
 class lcVector4;
 class lcMatrix33;
@@ -486,6 +514,18 @@ inline lcMatrix44 lcMatrix44Perspective(float FoVy, float Aspect, float Near, fl
 	return m;
 }
 
+inline lcMatrix44 lcMatrix44Ortho(float Left, float Right, float Bottom, float Top, float Near, float Far)
+{
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(2.0f / (Right-Left), 0.0f, 0.0f, 0.0f),
+	m.r[1] = lcVector4(0.0f, 2.0f / (Top-Bottom), 0.0f, 0.0f),
+	m.r[2] = lcVector4(0.0f, 0.0f, -2.0f / (Far-Near), 0.0f),
+	m.r[3] = lcVector4(-(Right+Left) / (Right-Left), -(Top+Bottom) / (Top-Bottom), -(Far+Near) / (Far-Near), 1.0f);
+
+	return m;
+}
+
 inline lcMatrix44 lcMatrix44FromAxisAngle(const lcVector3& Axis, const float Radians)
 {
 	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
@@ -539,15 +579,11 @@ inline lcVector4 lcMatrix44ToAxisAngle(const lcMatrix44& m)
 	float Cos = 0.5f * (Trace - 1.0f);
 	lcVector4 rot;
 
-	if (Cos < -1.0f)
-		Cos = -1.0f;
-	else if (Cos > 1.0f)
-		Cos = 1.0f;
-	rot[3] = acosf(Cos);  // in [0,PI]
+	rot[3] = acosf(lcClamp(Cos, -1.0f, 1.0f));  // in [0,PI]
 
 	if (rot[3] > 0.01f)
 	{
-		if (fabsf(3.141592f - rot[3]) > 0.01f)
+		if (fabsf(LC_PI - rot[3]) > 0.01f)
 		{
 			rot[0] = Rows[1][2] - Rows[2][1];
 			rot[1] = Rows[2][0] - Rows[0][2];
@@ -614,6 +650,58 @@ inline lcVector4 lcMatrix44ToAxisAngle(const lcMatrix44& m)
 	}
 
 	return rot;
+}
+
+inline lcMatrix44 lcMatrix44FromEulerAngles(const lcVector3& Radians)
+{
+	float CosYaw, SinYaw, CosPitch, SinPitch, CosRoll, SinRoll;
+
+	CosRoll = cosf(Radians[0]);
+	SinRoll = sinf(Radians[0]);
+	CosPitch = cosf(Radians[1]);
+	SinPitch = sinf(Radians[1]);
+	CosYaw = cosf(Radians[2]);
+	SinYaw = sinf(Radians[2]);
+
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(CosYaw * CosPitch, SinYaw * CosPitch, -SinPitch, 0.0f);
+	m.r[1] = lcVector4(CosYaw * SinPitch * SinRoll - SinYaw * CosRoll, CosYaw * CosRoll + SinYaw * SinPitch * SinRoll, CosPitch * SinRoll, 0.0f);
+	m.r[2] = lcVector4(CosYaw * SinPitch * CosRoll + SinYaw * SinRoll, SinYaw * SinPitch * CosRoll - CosYaw * SinRoll, CosPitch * CosRoll, 0.0f);
+	m.r[3] = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	return m;
+}
+
+inline lcVector3 lcMatrix44ToEulerAngles(const lcMatrix44& RotMat)
+{
+	float SinPitch, CosPitch, SinRoll, CosRoll, SinYaw, CosYaw;
+
+	SinPitch = -RotMat.r[0][2];
+	CosPitch = sqrtf(1 - SinPitch*SinPitch);
+
+	if (fabsf(CosPitch) > 0.0005f)
+	{
+		SinRoll = RotMat.r[1][2] / CosPitch;
+		CosRoll = RotMat.r[2][2] / CosPitch;
+		SinYaw = RotMat.r[0][1] / CosPitch;
+		CosYaw = RotMat.r[0][0] / CosPitch;
+	} 
+	else
+	{
+		SinRoll = -RotMat.r[2][1];
+		CosRoll = RotMat.r[1][1];
+		SinYaw = 0.0f;
+		CosYaw = 1.0f;
+	}
+
+	lcVector3 Rot(atan2f(SinRoll, CosRoll), atan2f(SinPitch, CosPitch), atan2f(SinYaw, CosYaw));
+
+	if (Rot[0] < 0) Rot[0] += LC_2PI;
+	if (Rot[1] < 0) Rot[1] += LC_2PI;
+	if (Rot[2] < 0) Rot[2] += LC_2PI;
+
+	return Rot;
 }
 
 inline lcMatrix44 lcMatrix44Transpose(const lcMatrix44& m)
@@ -849,8 +937,8 @@ inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Pr
 	for (int i = 0; i < 6; i++)
 	{
 		lcVector3 Normal(Planes[i][0], Planes[i][1], Planes[i][2]);
-		float Len = Normal.Length();
-		Planes[i] /= -Len;
+		float Length = Normal.Length();
+		Planes[i] /= -Length;
 	}
 }
 
@@ -948,7 +1036,7 @@ inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& 
 	a2 = lcDot(pa2, pa3);
 	a3 = lcDot(pa3, pa1);
 
-	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
 
 	if (fabs(total - 360) <= 0.001f)
 	{

@@ -86,39 +86,11 @@ int stricmp(const char* str1, const char* str2);
 /////////////////////////////////////////////////////////////////////////////
 // LeoCAD constants
 
-// Math numbers.
-#define LC_DTOR 0.017453f
-#define LC_RTOD 57.29578f
-#define LC_PI   3.141592f
-#define LC_2PI  6.283185f
-
-
-#define DTOR 0.017453f
-#define RTOD 57.29578f
-#define PI  3.14159265
-#define PI2 6.28318530
-
-#ifndef min
-#define min(a, b)  (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef max
-#define max(a, b)  (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef ABS
-#define ABS(a)	(((a) > 0) ? (a) : -(a))
-#endif
-
 #ifndef LC_WINDOWS
 #define RGB(r, g, b) ((unsigned long)(((unsigned char) (r) | ((unsigned short) (g) << 8))|(((unsigned long) (unsigned char) (b)) << 16))) 
 #endif 
 
 #define FLOATRGB(f) RGB(f[0]*255, f[1]*255, f[2]*255)
-
-#ifndef M_PI
-#define M_PI  3.14159265
-#endif
 
 #define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
                                                 ((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))

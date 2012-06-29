@@ -565,7 +565,7 @@ void Curve::TesselateHose ()
 
       for (int k = 0; k < steps2; k++)
       {
-			lcVector3 Pos((float)(cos (2.0 * M_PI * k / steps2) * 0.15), (float)(sin (2.0 * M_PI * k / steps2) * 0.15), 0.0f);
+			lcVector3 Pos((float)(cos (2.0 * LC_PI * k / steps2) * 0.15), (float)(sin (2.0 * LC_PI * k / steps2) * 0.15), 0.0f);
 			Pos = lcMul31(Pos, m);
 			verts[(j*steps2+k)*3+0] = Pos[0];
 			verts[(j*steps2+k)*3+1] = Pos[1];

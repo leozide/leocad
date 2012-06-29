@@ -306,8 +306,8 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
     float verts[16*3];
     for (int i = 0; i < 8; i++)
     {
-      verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * PI) * 0.3f;
-      verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * PI) * 0.3f;
+      verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * LC_PI) * 0.3f;
+      verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * LC_PI) * 0.3f;
       verts[i*6+2] = 0.3f;
       verts[i*6+5] = -0.3f;
     }

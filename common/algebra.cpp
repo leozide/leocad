@@ -5,6 +5,7 @@
 #include "lc_global.h"
 #include <float.h>
 #include "algebra.h"
+#include "lc_math.h"
 
 // ============================================================================
 // 4x4 Matrix class.
@@ -432,7 +433,7 @@ bool LineTriangleMinIntersection(const Vector3& p1, const Vector3& p2, const Vec
 	a2 = Dot3(pa2, pa3);
 	a3 = Dot3(pa3, pa1);
 
-	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
 
 	if (fabs(total - 360) <= 0.001f)
 	{
@@ -483,7 +484,7 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 	a2 = Dot3(pa2, pa3);
 	a3 = Dot3(pa3, pa1);
 
-	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
 
 	if (fabs(total - 360) <= 0.001f)
 	{
@@ -498,7 +499,7 @@ bool LineQuadMinIntersection(const Vector3& p1, const Vector3& p2, const Vector3
 	a2 = Dot3(pa2, pa3);
 	a3 = Dot3(pa3, pa1);
 
-	total = (acosf(a1) + acosf(a2) + acosf(a3)) * RTOD;
+	total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
 			
 	if (fabs(total - 360) <= 0.001f)
 	{

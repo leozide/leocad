@@ -290,7 +290,6 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
 
 //static bool list_subparts = false;
 static int cur_color = 0;
-static GdkPixmap* colorlist_pixmap = NULL;
 
 int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
 {
@@ -544,204 +543,409 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
   return FALSE;
 }
 
-static void piececombo_changed (GtkWidget *widget, gpointer data)
+static void piececombo_changed(GtkWidget *widget, gpointer data)
 {
   PiecesLibrary *pLib = lcGetPiecesLibrary();
   const gchar* str;
   int i;
 
-  str = gtk_entry_get_text (GTK_ENTRY (pieceentry));
+  str = gtk_entry_get_text(GTK_ENTRY(pieceentry));
 
-  for (i = 0; i < pLib->GetPieceCount (); i++)
+  for (i = 0; i < pLib->GetPieceCount(); i++)
   {
-    PieceInfo* pInfo = pLib->GetPieceInfo (i);
+    PieceInfo* pInfo = pLib->GetPieceInfo(i);
 
-    if (strcmp (str, pInfo->m_strDescription) == 0)
+    if (strcmp(str, pInfo->m_strDescription) == 0)
     {
       // Select the piece
-      //      i = gtk_clist_find_row_from_data (GTK_CLIST (piecelist), pInfo);
-      //      gtk_clist_select_row (GTK_CLIST (piecelist), i, 0);
-      //      if (gtk_clist_row_is_visible (GTK_CLIST (piecelist), i) != GTK_VISIBILITY_FULL)
-      //	gtk_clist_moveto (GTK_CLIST (piecelist), i, 0, 0.5f, 0);
+      //      i = gtk_clist_find_row_from_data(GTK_CLIST(piecelist), pInfo);
+      //      gtk_clist_select_row(GTK_CLIST(piecelist), i, 0);
+      //      if(gtk_clist_row_is_visible(GTK_CLIST(piecelist), i) != GTK_VISIBILITY_FULL)
+      //	gtk_clist_moveto(GTK_CLIST(piecelist), i, 0, 0.5f, 0);
 
       return;
     }
   }
 }
 
-// Draw a pixmap for the colorlist control
-static void colorlist_draw_pixmap(GtkWidget *widget)
+struct ColorListCell
 {
-	GdkGC* gc = gdk_gc_new(widget->window);
-	GdkRectangle rect;
-	GdkColor c;
+	GdkRectangle Rect;
+	GdkColor Color;
+	int ColorIndex;
+};
 
-	gdk_gc_set_fill(gc, GDK_SOLID);
-
-	int NumColumns = 14;
-	int NumRows = gNumUserColors / NumColumns;
-
-	for (int ColorIdx = 0; ColorIdx < gNumUserColors; ColorIdx++)
+class ColorListData
+{
+public:
+	ColorListData()
 	{
-		rect.x = (float)widget->allocation.width / NumColumns * (ColorIdx % NumColumns);
-		rect.y = (float)widget->allocation.height / NumRows * (ColorIdx / NumColumns);
-		rect.width = (float)widget->allocation.width / NumColumns * (ColorIdx % NumColumns + 1) - rect.x;
-		rect.height = (float)widget->allocation.height / NumRows * (ColorIdx / NumColumns + 1) - rect.y;
-
-		c.red = (gushort)(gColorList[ColorIdx].Value[0] * 0xFFFF);
-		c.green = (gushort)(gColorList[ColorIdx].Value[1] * 0xFFFF);
-		c.blue = (gushort)(gColorList[ColorIdx].Value[2] * 0xFFFF);
-
-		gdk_color_alloc(gtk_widget_get_colormap(widget), &c);
-		gdk_gc_set_foreground(gc, &c);
-
-	    gdk_draw_rectangle(colorlist_pixmap, gc, TRUE, rect.x, rect.y, rect.width, rect.height);
 	}
 
-	gdk_color_black(gtk_widget_get_colormap(widget), &c);
-	gdk_gc_set_foreground(gc, &c);
-	gdk_gc_set_line_attributes(gc, 1, GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_MITER);
+	~ColorListData()
+	{
+	}
 
-	for (int ColumnIdx = 0; ColumnIdx < NumColumns; ColumnIdx++)
-		gdk_draw_line(colorlist_pixmap, gc, widget->allocation.width * ColumnIdx / NumColumns, 0,
-		              widget->allocation.width * ColumnIdx / NumColumns, widget->allocation.height);
-  
-	for (int RowIdx = 0; RowIdx < NumRows; RowIdx++)
-		gdk_draw_line(colorlist_pixmap, gc, 0, (float)widget->allocation.height / NumRows * RowIdx,
-		              widget->allocation.width, (float)widget->allocation.height / NumRows * RowIdx);
+	void UpdateColors()
+	{
+		mCells.RemoveAll();
+		mGroups.RemoveAll();
+		mGroups.SetSize(LC_NUM_COLORGROUPS);
 
-	c.red = (gushort)(0.4f*0xFFFF);
-	c.green = (gushort)(0.8f*0xFFFF);
-	c.blue = (gushort)(0.4f*0xFFFF);
-	gdk_color_alloc(gtk_widget_get_colormap(widget), &c);
-	gdk_gc_set_foreground(gc, &c);
+		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		{
+			lcColorGroup* Group = &gColorGroups[GroupIdx];
 
-	int l, r, t, b;
+			for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
+			{
+				lcColor* Color = &gColorList[Group->Colors[ColorIdx]];
+				ColorListCell Cell;
 
-	l = widget->allocation.width / NumColumns * cur_color;
-	r = widget->allocation.width / NumColumns * (cur_color + 1);
-	t = widget->allocation.height / NumRows * (cur_color / NumColumns);
-	b = widget->allocation.height / NumRows * (cur_color / NumColumns + 1);
+				Cell.Color.red = (gushort)(Color->Value[0] * 0xFFFF);
+				Cell.Color.green = (gushort)(Color->Value[1] * 0xFFFF);
+				Cell.Color.blue = (gushort)(Color->Value[2] * 0xFFFF);
+				Cell.ColorIndex = Group->Colors[ColorIdx];
 
-	gdk_draw_rectangle (colorlist_pixmap, gc, FALSE, l, t, r-l, b-t);
+				mCells.Add(Cell);
+			}
+		}
 
-	gdk_gc_destroy(gc);
+		mColumns = 14;
+		mRows = 0;
+
+		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+			mRows += (gColorGroups[GroupIdx].Colors.GetSize() + mColumns - 1) / mColumns;
+	}
+
+	void UpdateLayout(GtkWidget* widget)
+	{
+		PangoRenderer *renderer;
+		PangoContext *context;
+		PangoLayout *layout;
+		int width, height;
+
+		renderer = gdk_pango_renderer_get_default(gtk_widget_get_screen(widget));
+		gdk_pango_renderer_set_drawable(GDK_PANGO_RENDERER(renderer), widget->window);
+		gdk_pango_renderer_set_gc(GDK_PANGO_RENDERER(renderer), widget->style->black_gc);
+
+		context = gtk_widget_create_pango_context(widget);
+		layout = pango_layout_new(context);
+
+		int TextHeight = 0;
+
+		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		{
+			lcColorGroup* Group = &gColorGroups[GroupIdx];
+
+			pango_layout_set_text(layout, Group->Name, -1);
+			pango_layout_get_size(layout, &width, &height);
+
+			TextHeight += height / PANGO_SCALE;
+		}
+
+		float CellWidth = (float)widget->allocation.width / (float)mColumns;
+		float CellHeight = (float)(widget->allocation.height - TextHeight) / (float)mRows;
+
+		int CurCell = 0;
+		float CurY = 0.0f;
+
+		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		{
+			lcColorGroup* Group = &gColorGroups[GroupIdx];
+			int CurColumn = 0;
+
+			pango_layout_set_text(layout, Group->Name, -1);
+			pango_layout_get_size(layout, &width, &height);
+
+			mGroups[GroupIdx].x = 0;
+			mGroups[GroupIdx].y = (int)CurY * PANGO_SCALE;
+			mGroups[GroupIdx].width = width;
+			mGroups[GroupIdx].height = height;
+			CurY += height / PANGO_SCALE;
+
+			for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
+			{
+				float Left = CurColumn * CellWidth;
+				float Right = (CurColumn + 1) * CellWidth;
+				float Top = CurY;
+				float Bottom = CurY + CellHeight;
+
+				mCells[CurCell].Rect.x = Left;
+				mCells[CurCell].Rect.y = Top;
+				mCells[CurCell].Rect.width = Right - Left;
+				mCells[CurCell].Rect.height = Bottom - Top;
+
+//				lcColor* Color = &gColorList[mCells[CurCell].ColorIndex];
+//				Text.Format("%s (%d)", Color->Name, Color->Code);
+//				mToolTip.AddTool(this, Text, CellRect, CurCell + 1);
+
+				CurColumn++;
+				if (CurColumn == mColumns)
+				{
+					CurColumn = 0;
+					CurY += CellHeight;
+				}
+
+				CurCell++;
+			}
+
+			if (CurColumn != 0)
+				CurY += CellHeight;
+		}
+
+		g_object_unref(layout);
+		g_object_unref(context);
+	}
+
+	ObjArray<GdkRectangle> mGroups;
+	ObjArray<ColorListCell> mCells;
+
+	int mColumns;
+	int mRows;
+	int mCurCell;
+};
+
+static gboolean colorlist_expose(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	PangoRenderer *renderer;
+	PangoContext *context;
+	PangoLayout *layout;
+	ColorListData* Data;
+	
+	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+
+	renderer = gdk_pango_renderer_get_default(gtk_widget_get_screen(widget));
+	gdk_pango_renderer_set_drawable(GDK_PANGO_RENDERER(renderer), widget->window);
+	gdk_pango_renderer_set_gc(GDK_PANGO_RENDERER(renderer), widget->style->black_gc);
+
+	context = gtk_widget_create_pango_context(widget);
+	layout = pango_layout_new(context);
+	pango_layout_set_width(layout, widget->allocation.width * PANGO_SCALE);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+
+	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+	{
+		lcColorGroup* Group = &gColorGroups[GroupIdx];
+
+		pango_layout_set_text(layout, Group->Name, -1);
+		pango_renderer_draw_layout(renderer, layout, Data->mGroups[GroupIdx].x, Data->mGroups[GroupIdx].y);
+	}
+
+	gdk_pango_renderer_set_drawable(GDK_PANGO_RENDERER(renderer), NULL);
+	gdk_pango_renderer_set_gc(GDK_PANGO_RENDERER(renderer), NULL);
+
+	g_object_unref(layout);
+	g_object_unref(context);
+
+	GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
+	GdkGCValues values;
+	gdk_gc_get_values(gc, &values);
+
+	for (int CellIdx = 0; CellIdx < Data->mCells.GetSize(); CellIdx++)
+	{
+		GdkRectangle& rect = Data->mCells[CellIdx].Rect;
+
+		gdk_color_alloc(gtk_widget_get_colormap(widget), &Data->mCells[CellIdx].Color);
+		gdk_gc_set_foreground(gc, &Data->mCells[CellIdx].Color);
+
+	    gdk_draw_rectangle(widget->window, gc, TRUE, rect.x, rect.y, rect.width, rect.height);
+	}
+
+	GdkColor Color;
+	Color.red = (gushort)(0.4f * 0xFFFF);
+	Color.green = (gushort)(0.8f * 0xFFFF);
+	Color.blue = (gushort)(0.4f * 0xFFFF);
+	gdk_color_alloc(gtk_widget_get_colormap(widget), &Color);
+	gdk_gc_set_foreground(gc, &Color);
+
+	GdkRectangle& rect = Data->mCells[cur_color].Rect;
+    gdk_draw_rectangle(widget->window, gc, FALSE, rect.x, rect.y, rect.width, rect.height);
+
+	gdk_gc_set_values(gc, &values, GDK_GC_FOREGROUND);
+
+	return FALSE;
 }
 
-static gint colorlist_configure(GtkWidget *widget, GdkEventConfigure *event)
+static gboolean colorlist_realize(GtkWidget* widget, gpointer user)
 {
-  if (colorlist_pixmap)
-    gdk_pixmap_unref(colorlist_pixmap);
+	ColorListData* Data;
+	
+	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+	delete Data;
 
-  colorlist_pixmap = gdk_pixmap_new(widget->window, widget->allocation.width,
-				    widget->allocation.height, -1);
-  colorlist_draw_pixmap(widget);
+	Data = new ColorListData;
+	gtk_object_set_data(GTK_OBJECT(widget), "colorlist", Data);
 
-  return TRUE;
+	Data->UpdateColors();
+	Data->UpdateLayout(widget);
+
+	return FALSE;
 }
 
-// Redraw from the backing pixmap
-static gint colorlist_expose(GtkWidget *widget, GdkEventExpose *event)
+static gboolean colorlist_unrealize(GtkWidget* widget, gpointer user)
 {
-  gdk_draw_pixmap(widget->window, widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-		  colorlist_pixmap, event->area.x, event->area.y,
-		  event->area.x, event->area.y,
-		  event->area.width, event->area.height);
+	ColorListData* Data;
+	
+	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+	delete Data;
 
-  return FALSE;
+	return FALSE;
 }
 
 static gint colorlist_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
-  int x;
+	ColorListData* Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+	int color = cur_color;
 
-  switch (event->keyval)
-  {
-    case GDK_Up: x = cur_color - 14; break;
-    case GDK_Down: x = cur_color + 14; break;
-    case GDK_Left: x = cur_color - 1; break;
-    case GDK_Right: x = cur_color + 1; break;
+	if (event->keyval == GDK_Left)
+	{
+		if (cur_color > 0)
+			color = cur_color - 1;
+	}
+	else if (event->keyval == GDK_Right)
+	{
+		if (cur_color < Data->mCells.GetSize() - 1)
+			color = cur_color + 1;
+	}
+	else if (event->keyval == GDK_Up || event->keyval == GDK_Down)
+	{
+		if (cur_color < 0 || cur_color >= Data->mCells.GetSize())
+			cur_color = 0;
 
-  default:
-    return TRUE;
-  }
+		int CurGroup = 0;
+		int NumCells = 0;
 
-  if ((x > -1) && (x < 28))
-  {
-    cur_color = x;
-    colorlist_draw_pixmap(widget);
-    lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
-    gtk_widget_draw(widget, NULL);
-    preview->Redraw ();
-  }
-  gtk_signal_emit_stop_by_name (GTK_OBJECT(widget), "key_press_event");
+		for (CurGroup = 0; CurGroup < LC_NUM_COLORGROUPS; CurGroup++)
+		{
+			int NumColors = gColorGroups[CurGroup].Colors.GetSize();
 
-  return TRUE;
+			if (cur_color < NumCells + NumColors)
+				break;
+
+			NumCells += NumColors;
+		}
+
+		int Row = (cur_color - NumCells) / Data->mColumns;
+		int Column = (cur_color - NumCells) % Data->mColumns;
+
+		if (event->keyval == GDK_Up)
+		{
+			if (Row > 0)
+				color = cur_color - Data->mColumns;
+			else if (CurGroup > 0)
+			{
+				int NumColors = gColorGroups[CurGroup - 1].Colors.GetSize();
+				int NumColumns = NumColors % Data->mColumns;
+
+				if (NumColumns <= Column + 1)
+					color = cur_color - NumColumns - Data->mColumns;
+				else
+					color = cur_color - NumColumns;
+			}
+		}
+		else if (event->keyval == GDK_Down)
+		{
+			int NumColors = gColorGroups[CurGroup].Colors.GetSize();
+
+			if (cur_color + Data->mColumns < NumCells + NumColors)
+				color = cur_color + Data->mColumns;
+			else
+			{
+				int NumColumns = NumColors % Data->mColumns;
+
+				if (NumColumns > Column)
+				{
+					if (cur_color + NumColumns < Data->mCells.GetSize())
+					color = cur_color + NumColumns;
+				}
+				else
+					color = cur_color + Data->mColumns + NumColumns;
+			}
+		}
+	}
+
+	if (color != cur_color)
+	{
+		cur_color = color;
+		lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, Data->mCells[cur_color].ColorIndex);
+		gtk_widget_draw(widget, NULL);
+		preview->Redraw();
+	}
+
+	return TRUE;
 }
 
-static gint colorlist_button_press(GtkWidget *widget, GdkEventButton *event)
+static gboolean colorlist_button_press(GtkWidget *widget, GdkEventButton *event, gpointer data)
 {
-  if (event->button == 1 && colorlist_pixmap != NULL)
-  {
-    int x = (int)(event->x * 14 / widget->allocation.width);
-    if (event->y > (widget->allocation.height/2))
-      x += 14;
+	if (event->button != 1)
+		return FALSE;
 
-    if (x != cur_color)
-    {
-      cur_color = x;
-      colorlist_draw_pixmap(widget);
-      lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, x);
-      gtk_widget_draw(widget, NULL);
-      preview->Redraw ();
-    }
-  }
-  gtk_window_set_focus(GTK_WINDOW(((GtkWidget*)(*main_window))), widget);
+	ColorListData* Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+	int NewColor = cur_color;
 
-  return TRUE;
+	for (int CellIdx = 0; CellIdx < Data->mCells.GetSize(); CellIdx++)
+	{
+		GdkRectangle& rect = Data->mCells[CellIdx].Rect;
+
+		if (event->x >= rect.x && event->y >= rect.y && event->x <= rect.x + rect.width && event->y <= rect.y + rect.height)
+		{
+			NewColor = CellIdx;
+			break;
+		}
+	}
+
+	if (NewColor != cur_color)
+	{
+		cur_color = NewColor;
+		lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, Data->mCells[cur_color].ColorIndex);
+		gtk_widget_draw(widget, NULL);
+		preview->Redraw();
+	}
+
+	gtk_window_set_focus(GTK_WINDOW(((GtkWidget*)(*main_window))), widget);
+
+	return TRUE;
 }
 
 void colorlist_set(int new_color)
 {
-  if (new_color != cur_color)
-  {
-    cur_color = new_color;
-    colorlist_draw_pixmap(colorlist);
-    gtk_widget_draw(colorlist, NULL);
-    preview->Redraw ();
-  }
+	if (new_color != cur_color)
+	{
+		cur_color = new_color;
+		gtk_widget_draw(colorlist, NULL);
+		preview->Redraw();
+	}
 }
 
 // Create the pieces toolbar
-GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
+GtkWidget* create_piecebar(GtkWidget *window, GLWindow *share)
 {
   GtkWidget *vbox1, *hbox, *vpan, *scroll_win, *frame, *button, *arrow;
 
-  frame = gtk_frame_new (NULL);
-  gtk_widget_show (frame);
-  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
+  frame = gtk_frame_new(NULL);
+  gtk_widget_show(frame);
+  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);               
 
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (frame), vbox1);
-  gtk_container_border_width(GTK_CONTAINER (vbox1), 2);
+  vbox1 = gtk_vbox_new(FALSE, 0);
+  gtk_widget_show(vbox1);
+  gtk_container_add(GTK_CONTAINER(frame), vbox1);
+  gtk_container_border_width(GTK_CONTAINER(vbox1), 2);
 
-  vpan = gtk_vpaned_new ();
-  gtk_widget_show (vpan);
-  gtk_box_pack_start (GTK_BOX (vbox1), vpan, TRUE, TRUE, 0);
+  vpan = gtk_vpaned_new();
+  gtk_widget_show(vpan);
+  gtk_box_pack_start(GTK_BOX(vbox1), vpan, TRUE, TRUE, 0);
 
   GtkWidget *w;
-  preview = new PiecePreview (share);
-  preview->CreateFromWindow (&w);
-  gtk_widget_set_usize (w, 100, 100);
-  gtk_widget_show (w);
-  gtk_container_add (GTK_CONTAINER (vpan), w);
+  preview = new PiecePreview(share);
+  preview->CreateFromWindow(&w);
+  gtk_widget_set_usize(w, 100, 100);
+  gtk_widget_show(w);
+  gtk_container_add(GTK_CONTAINER(vpan), w);
 
-  scroll_win = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scroll_win), 
-  				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-  gtk_widget_show (scroll_win);
-  gtk_container_add (GTK_CONTAINER (vpan), scroll_win);
+  scroll_win = gtk_scrolled_window_new(NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  gtk_widget_show(scroll_win);
+  gtk_container_add(GTK_CONTAINER(vpan), scroll_win);
 
   GtkTreeStore* store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
   piecetree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -761,41 +965,37 @@ GtkWidget* create_piecebar (GtkWidget *window, GLWindow *share)
   gtk_widget_show(piecetree);
 
   // Piece combo
-  hbox = gtk_hbox_new (FALSE, 1);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, TRUE, 1);
+  hbox = gtk_hbox_new(FALSE, 1);
+  gtk_widget_show(hbox);
+  gtk_box_pack_start(GTK_BOX(vbox1), hbox, FALSE, TRUE, 1);
 
-  pieceentry = gtk_entry_new ();
-  gtk_widget_show (pieceentry);
+  pieceentry = gtk_entry_new();
+  gtk_widget_show(pieceentry);
   gtk_box_pack_start(GTK_BOX(hbox), pieceentry, TRUE, TRUE, 0);
   gtk_signal_connect(GTK_OBJECT(pieceentry), "changed", GTK_SIGNAL_FUNC(piececombo_changed), NULL);
   gtk_signal_connect(GTK_OBJECT(pieceentry), "key_press_event", GTK_SIGNAL_FUNC(piececombo_key), NULL);
 
   button = gtk_button_new();
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (piececombo_popup), NULL);
+  gtk_widget_show(button);
+  gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, TRUE, 0);
+  gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(piececombo_popup), NULL);
 
-  arrow = gtk_arrow_new (GTK_ARROW_DOWN, GTK_SHADOW_OUT);
-  gtk_widget_show (arrow);
-  gtk_container_add (GTK_CONTAINER (button), arrow);
+  arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_OUT);
+  gtk_widget_show(arrow);
+  gtk_container_add(GTK_CONTAINER(button), arrow);
 
   // Color list
-  colorlist = gtk_drawing_area_new ();
-  gtk_widget_set_events (colorlist, GDK_EXPOSURE_MASK
-			 | GDK_KEY_PRESS_MASK | GDK_BUTTON_PRESS_MASK);
+  colorlist = gtk_drawing_area_new();
+  gtk_widget_set_events(colorlist, GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK | GDK_BUTTON_PRESS_MASK);
   GTK_WIDGET_SET_FLAGS(colorlist, GTK_CAN_FOCUS);
-  gtk_drawing_area_size(GTK_DRAWING_AREA(colorlist), 200, 30);
+  gtk_drawing_area_size(GTK_DRAWING_AREA(colorlist), 200, 160);
   gtk_box_pack_start(GTK_BOX(vbox1), colorlist, FALSE, TRUE, 0);
 
-  gtk_signal_connect (GTK_OBJECT(colorlist), "expose_event",
-		      (GtkSignalFunc) colorlist_expose, NULL);
-  gtk_signal_connect (GTK_OBJECT(colorlist),"configure_event",
-		      (GtkSignalFunc) colorlist_configure, NULL);
-  gtk_signal_connect (GTK_OBJECT(colorlist), "button_press_event",
-		      (GtkSignalFunc) colorlist_button_press, NULL);
-  gtk_signal_connect (GTK_OBJECT(colorlist), "key_press_event",
-		      GTK_SIGNAL_FUNC(colorlist_key_press), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "expose_event", GTK_SIGNAL_FUNC(colorlist_expose), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "button_press_event", GTK_SIGNAL_FUNC(colorlist_button_press), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "key_press_event", GTK_SIGNAL_FUNC(colorlist_key_press), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "realize", GTK_SIGNAL_FUNC(colorlist_realize), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "unrealize", GTK_SIGNAL_FUNC(colorlist_unrealize), NULL);
 
   gtk_widget_show(colorlist);
 

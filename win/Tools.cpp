@@ -253,7 +253,6 @@ BOOL FolderBrowse(CString *strFolder, LPCSTR lpszTitle, HWND hWndOwner)
 #ifdef LC_HAVE_3DSFTK
 
 #include "3dsftk\inc\3dsftk.h"
-#include "globals.h"
 #include "project.h"
 #include "piece.h"
 #include "pieceinf.h"

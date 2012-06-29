@@ -16,10 +16,8 @@ static char THIS_FILE[] = __FILE__;
 CColorPicker::CColorPicker()
 {
 	m_bActive = FALSE;
-	m_bDefaultText = FALSE;
-	m_bCustomText = FALSE;
-	m_crColor = GetSysColor(COLOR_3DFACE);
-	SetColorIndex (-1);
+	m_nColor = -1;
+	SetColorIndex(-1);
 }
 
 CColorPicker::~CColorPicker()
@@ -110,7 +108,16 @@ void CColorPicker::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// Fill remaining area with colour
 	rect.right -= m_ArrowRect.Width()-1;
 
-	CBrush brush(((state & ODS_DISABLED) || m_crColor == CLR_DEFAULT) ? ::GetSysColor(COLOR_3DFACE) : m_crColor);
+	COLORREF brushColor;
+	if ((state & ODS_DISABLED) || m_nColor == -1)
+		brushColor = ::GetSysColor(COLOR_3DFACE);
+	else
+	{
+		float* Value = gColorList[m_nColor].Value;
+		brushColor = RGB(Value[0] * 255.0f, Value[1] * 255.0f, Value[2] * 255.0f);
+	}
+
+	CBrush brush(brushColor);
 	CBrush* pOldBrush = (CBrush*) pDC->SelectObject(&brush);
 	pDC->SelectStockObject(NULL_PEN);
 	pDC->Rectangle(rect);
@@ -156,12 +163,6 @@ int CColorPicker::GetColorIndex()
 
 void CColorPicker::SetColorIndex(int nColor)
 {
-	if (nColor != -1)
-	{
-		float* Value = gColorList[nColor].Value;
-		m_crColor = RGB(Value[0] * 255.0f, Value[1] * 255.0f, Value[2] * 255.0f);
-	}
-
 	if (m_nColor != nColor)
 	{
 		m_nColor = nColor;

@@ -1,19 +1,7 @@
-#if !defined(AFX_COLOURPICKER_H__D0B75901_9830_11D1_9C0F_00A0243D1382__INCLUDED_)
-#define AFX_COLOURPICKER_H__D0B75901_9830_11D1_9C0F_00A0243D1382__INCLUDED_
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-
-// ColorPicker.h : header file
-//
+#ifndef _CLRPICK_H_
+#define _CLRPICK_H_
 
 #include "ClrPopup.h"
-
-/////////////////////////////////////////////////////////////////////////////
-// CColorPicker window
-
-//void AFXAPI DDX_ColorPicker(CDataExchange *pDX, int nIDC, COLORREF& crColor);
 
 class CColorPicker : public CButton
 {
@@ -26,8 +14,6 @@ public:
 public:
 	int GetColorIndex();
 	void SetColorIndex(int nColor); 
-	BOOL m_bDefaultText;
-	BOOL m_bCustomText;
 	
 // Operations
 public:
@@ -53,7 +39,6 @@ protected:
     BOOL m_bActive; // Is the dropdown active?
     CRect m_ArrowRect;
 	int m_nColor;
-    COLORREF m_crColor;
 
     // Generated message map functions
 protected:
@@ -67,9 +52,4 @@ protected:
     DECLARE_MESSAGE_MAP()
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_COLOURPICKER_H__D0B75901_9830_11D1_9C0F_00A0243D1382__INCLUDED_)
+#endif // _CLRPICK_H_

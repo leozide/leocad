@@ -6,12 +6,12 @@
 
 #define LC_MAX_DEBUG_LINES 100
 
-typedef struct
+struct LC_DEBUG_LINE
 {
-	Vector3 pt1;
-	Vector3 pt2;
-	Vector3 color;
-} LC_DEBUG_LINE;
+	lcVector3 pt1;
+	lcVector3 pt2;
+	lcVector3 color;
+};
 
 static LC_DEBUG_LINE DebugLines[LC_MAX_DEBUG_LINES];
 static int NumDebugLines;
@@ -21,7 +21,7 @@ void ClearDebugLines()
 	NumDebugLines = 0;
 }
 
-void AddDebugLine(const Vector3& pt1, const Vector3& pt2, const Vector3& Color)
+void AddDebugLine(const lcVector3& pt1, const lcVector3& pt2, const lcVector3& Color)
 {
 	if (NumDebugLines == LC_MAX_DEBUG_LINES-1)
 		return;
@@ -34,14 +34,14 @@ void AddDebugLine(const Vector3& pt1, const Vector3& pt2, const Vector3& Color)
 
 #define LC_MAX_DEBUG_QUADS 100
 
-typedef struct
+struct LC_DEBUG_QUAD
 {
-	Vector3 pt1;
-	Vector3 pt2;
-	Vector3 pt3;
-	Vector3 pt4;
-	Vector4 color;
-} LC_DEBUG_QUAD;
+	lcVector3 pt1;
+	lcVector3 pt2;
+	lcVector3 pt3;
+	lcVector3 pt4;
+	lcVector4 color;
+};
 
 static LC_DEBUG_QUAD DebugQuads[LC_MAX_DEBUG_QUADS];
 static int NumDebugQuads;
@@ -51,7 +51,7 @@ void ClearDebugQuads()
 	NumDebugQuads = 0;
 }
 
-void AddDebugQuad(const Vector3& pt1, const Vector3& pt2, const Vector3& pt3, const Vector3& pt4, const Vector4& Color)
+void AddDebugQuad(const lcVector3& pt1, const lcVector3& pt2, const lcVector3& pt3, const lcVector3& pt4, const lcVector4& Color)
 {
 	if (NumDebugQuads == LC_MAX_DEBUG_QUADS-1)
 		return;

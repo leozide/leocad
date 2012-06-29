@@ -1,12 +1,16 @@
+#ifndef _PRINT_H_
+#define _PRINT_H_
+
 BOOL CALLBACK _AfxAbortProc(HDC, int);
 UINT AFXAPI AfxGetFileTitle(LPCTSTR lpszPathName, LPTSTR lpszTitle, UINT nMax);
 
 #define AFX_IDD_PRINTDLG                30722
 
-typedef struct {
+struct PRINT_PARAMS
+{
 	CWnd* pParent;
 	CFrameWndEx* pMainFrame;
-} PRINT_PARAMS;
+};
 
 class CPrintingDialog : public CDialog
 {
@@ -24,3 +28,4 @@ public:
 UINT PrintCatalogFunction (LPVOID pv);
 UINT PrintPiecesFunction (LPVOID pv);
 
+#endif // _PRINT_H_

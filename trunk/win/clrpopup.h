@@ -58,9 +58,7 @@ protected:
 	int            m_nBoxSize, m_nMargin;
 	int            m_nCurrentSel;
 	int            m_nChosenColorSel;
-	BOOL m_bDefaultText;
-	BOOL m_bCustomText;
-	CRect          m_CustomTextRect, m_DefaultTextRect, m_WindowRect;
+	CRect          m_WindowRect;
 	CFont          m_Font;
 	CPalette       m_Palette;
 	int            m_nInitialColor, m_nColor;

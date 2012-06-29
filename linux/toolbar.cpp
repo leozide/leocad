@@ -580,6 +580,8 @@ class ColorListData
 public:
 	ColorListData()
 	{
+		mWidth = 0;
+		mHeight = 0;
 	}
 
 	~ColorListData()
@@ -623,6 +625,9 @@ public:
 		PangoContext *context;
 		PangoLayout *layout;
 		int width, height;
+
+		if (mWidth == widget->allocation.width && mHeight == widget->allocation.height)
+			return;
 
 		renderer = gdk_pango_renderer_get_default(gtk_widget_get_screen(widget));
 		gdk_pango_renderer_set_drawable(GDK_PANGO_RENDERER(renderer), widget->window);
@@ -672,7 +677,7 @@ public:
 
 				mCells[CurCell].Rect.x = Left;
 				mCells[CurCell].Rect.y = Top;
-				mCells[CurCell].Rect.width = Right - Left;
+				mCells[CurCell].Rect.width = (int)Right - (int)Left;
 				mCells[CurCell].Rect.height = Bottom - Top;
 
 //				lcColor* Color = &gColorList[mCells[CurCell].ColorIndex];
@@ -695,6 +700,9 @@ public:
 
 		g_object_unref(layout);
 		g_object_unref(context);
+
+		mWidth = widget->allocation.width;
+		mHeight = widget->allocation.height;
 	}
 
 	ObjArray<GdkRectangle> mGroups;
@@ -702,7 +710,8 @@ public:
 
 	int mColumns;
 	int mRows;
-	int mCurCell;
+	int mWidth;
+	int mHeight;
 };
 
 static gboolean colorlist_expose(GtkWidget *widget, GdkEventExpose *event, gpointer data)
@@ -713,6 +722,7 @@ static gboolean colorlist_expose(GtkWidget *widget, GdkEventExpose *event, gpoin
 	ColorListData* Data;
 	
 	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+	Data->UpdateLayout(widget);
 
 	renderer = gdk_pango_renderer_get_default(gtk_widget_get_screen(widget));
 	gdk_pango_renderer_set_drawable(GDK_PANGO_RENDERER(renderer), widget->window);
@@ -907,6 +917,38 @@ static gboolean colorlist_button_press(GtkWidget *widget, GdkEventButton *event,
 	return TRUE;
 }
 
+static gboolean colorlist_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip, gpointer user_data)
+{
+	if (keyboard_mode)
+		return FALSE;
+		
+	ColorListData* Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
+
+	for (int CellIdx = 0; CellIdx < Data->mCells.GetSize(); CellIdx++)
+	{
+		GdkRectangle& rect = Data->mCells[CellIdx].Rect;
+
+		if (x >= rect.x && y >= rect.y && x <= rect.x + rect.width && y <= rect.y + rect.height)
+		{
+			int ColorIndex = Data->mCells[CellIdx].ColorIndex;
+
+			gtk_tooltip_set_text(tooltip, gColorList[ColorIndex].Name);
+
+			GdkPixbuf* pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 24, 24);
+			float* Value = gColorList[ColorIndex].Value;
+			guint32 Color = ((int)(Value[0] * 255) << 24) | ((int)(Value[1] * 255) << 16) | ((int)(Value[2] * 255) << 8);
+			gdk_pixbuf_fill(pixbuf, Color);
+
+			gtk_tooltip_set_icon(tooltip, pixbuf);
+			gdk_pixbuf_unref(pixbuf);
+
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 void colorlist_set(int new_color)
 {
 	if (new_color != cur_color)
@@ -990,12 +1032,14 @@ GtkWidget* create_piecebar(GtkWidget *window, GLWindow *share)
   GTK_WIDGET_SET_FLAGS(colorlist, GTK_CAN_FOCUS);
   gtk_drawing_area_size(GTK_DRAWING_AREA(colorlist), 200, 160);
   gtk_box_pack_start(GTK_BOX(vbox1), colorlist, FALSE, TRUE, 0);
+  gtk_widget_set_has_tooltip(colorlist, TRUE);
 
   gtk_signal_connect(GTK_OBJECT(colorlist), "expose_event", GTK_SIGNAL_FUNC(colorlist_expose), NULL);
   gtk_signal_connect(GTK_OBJECT(colorlist), "button_press_event", GTK_SIGNAL_FUNC(colorlist_button_press), NULL);
   gtk_signal_connect(GTK_OBJECT(colorlist), "key_press_event", GTK_SIGNAL_FUNC(colorlist_key_press), NULL);
   gtk_signal_connect(GTK_OBJECT(colorlist), "realize", GTK_SIGNAL_FUNC(colorlist_realize), NULL);
   gtk_signal_connect(GTK_OBJECT(colorlist), "unrealize", GTK_SIGNAL_FUNC(colorlist_unrealize), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "query-tooltip", GTK_SIGNAL_FUNC(colorlist_tooltip), NULL);
 
   gtk_widget_show(colorlist);
 

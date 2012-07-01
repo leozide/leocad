@@ -473,7 +473,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			file->ReadFloats(pos, 3);
 			file->ReadFloats(rot, 3);
 			file->ReadU8(&color, 1);
-			file->ReadBuffer(name, sizeof(name));
+			file->ReadBuffer(name, 9);
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 
@@ -671,9 +671,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			{
 				file->ReadS32(&i, 1);
 
-				Camera* pCam = m_pCameras;
-				while (i--)
-					pCam = pCam->m_pNext;
+//				Camera* pCam = m_pCameras;
+//				while (i--)
+//					pCam = pCam->m_pNext;
 //				m_pViewCameras[count] = pCam;
 			}
 

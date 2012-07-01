@@ -470,7 +470,7 @@ void Export3DStudio()
 		}
 
 		InitMeshObj3ds(&mobj, (unsigned short)pInfo->mMesh->mNumVertices, facecount, InitNoExtras3ds);
-		sprintf(mobj->name, "Piece%d", objcount);
+		sprintf(mobj->name, "Piece%03d", objcount);
 		objcount++;
 
 		const lcMatrix44& ModelWorld = pPiece->mModelWorld;
@@ -514,7 +514,7 @@ void Export3DStudio()
 				continue;
 
 			InitMatArrayIndex3ds(mobj, MaterialIdx, facemats[ColorIdx]);
-			sprintf(mobj->matarray[MaterialIdx].name, "Material_%s", ColorIdx == gDefaultColor ? gColorList[pPiece->mColorCode].SafeName : gColorList[ColorIdx].SafeName);
+			sprintf(mobj->matarray[MaterialIdx].name, "Material%03d", ColorIdx == gDefaultColor ? pPiece->mColorIndex : ColorIdx);
 			mobj->matarray[MaterialIdx].nfaces = facemats[ColorIdx];
 
 			UINT curface = 0;

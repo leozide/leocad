@@ -237,7 +237,7 @@ UINT APIENTRY OFNOpenHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lPara
 		} break;
 	}
 
-    return FALSE;
+	return FALSE;
 }
 
 static UINT APIENTRY OFNSaveHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
@@ -865,7 +865,7 @@ bool SystemDoDialog(int nMode, void* param)
 		case LC_DLG_FILE_OPEN_PROJECT:
 		{
 			CFileDialog dlg(TRUE, "*.lcd", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-				"LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat;*.ldr;*.mpd)|*.dat;*.ldr;*.mpd|All Files (*.*)|*.*||", AfxGetMainWnd());
+				"Supported Formats (*.lcd;*.dat;*.ldr;*.mpd)|*.lcd;*.dat;*.ldr;*.mpd|LeoCAD Projects (*.lcd)|*.lcd|LDraw Files (*.dat;*.ldr;*.mpd)|*.dat;*.ldr;*.mpd|All Files (*.*)|*.*||", AfxGetMainWnd());
 			dlg.m_ofn.Flags |= (OFN_ENABLETEMPLATE|OFN_HIDEREADONLY|OFN_FILEMUSTEXIST|OFN_ENABLEHOOK|OFN_EXPLORER);
 			dlg.m_ofn.hInstance = AfxGetInstanceHandle();
 			dlg.m_ofn.lpfnHook = OFNOpenHookProc;
@@ -934,15 +934,15 @@ bool SystemDoDialog(int nMode, void* param)
 				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
 					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
 				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 32);
-		    dlg.m_ofn.nMaxFile = _MAX_PATH;
+				dlg.m_ofn.nMaxFile = _MAX_PATH;
 				dlg.m_ofn.lpstrInitialDir = opts->path;
 
-	      if (dlg.DoModal() == IDOK)
+				if (dlg.DoModal() == IDOK)
 				{
-		      POSITION pos = dlg.GetStartPosition ();
+					POSITION pos = dlg.GetStartPosition ();
 					int count = 0;
 
-		      while (pos != NULL)
+					while (pos != NULL)
 					{
 						dlg.GetNextPathName (pos);
 						count++;
@@ -954,9 +954,9 @@ bool SystemDoDialog(int nMode, void* param)
 					pos = dlg.GetStartPosition ();
 					count = 0;
 
-		      while (pos != NULL)
-				  {
-		        CString str = dlg.GetNextPathName (pos);
+					while (pos != NULL)
+					{
+						CString str = dlg.GetNextPathName (pos);
 						opts->filenames[count] = (char*)malloc(LC_MAXPATH);
 						strcpy (opts->filenames[count], str);
 						count++;
@@ -1143,15 +1143,15 @@ bool SystemDoDialog(int nMode, void* param)
 			LC_HTMLDLG_OPTS* opts = (LC_HTMLDLG_OPTS*)param;
 			CHTMLDlg dlg(&opts->imdlg);
 
-      dlg.m_nLayout = opts->singlepage ? 0 : 1;
-      dlg.m_bIndex = opts->index;
-      dlg.m_bImages = opts->images;
-      dlg.m_bListEnd = opts->listend;
-      dlg.m_bListStep = opts->liststep;
-      dlg.m_bHighlight = opts->highlight;
-      dlg.m_bHtmlExt = opts->htmlext;
+			dlg.m_nLayout = opts->singlepage ? 0 : 1;
+			dlg.m_bIndex = opts->index;
+			dlg.m_bImages = opts->images;
+			dlg.m_bListEnd = opts->listend;
+			dlg.m_bListStep = opts->liststep;
+			dlg.m_bHighlight = opts->highlight;
+			dlg.m_bHtmlExt = opts->htmlext;
 
-      if (dlg.DoModal() == IDOK)
+			if (dlg.DoModal() == IDOK)
 			{
 				strcpy(opts->path, dlg.m_strFolder);
 				opts->singlepage = (dlg.m_nLayout == 0);
@@ -1160,7 +1160,7 @@ bool SystemDoDialog(int nMode, void* param)
 				opts->listend = dlg.m_bListEnd == TRUE;
 				opts->liststep = dlg.m_bListStep == TRUE;
 				opts->highlight = dlg.m_bHighlight == TRUE;
-        opts->htmlext = dlg.m_bHtmlExt == TRUE;
+				opts->htmlext = dlg.m_bHtmlExt == TRUE;
 				return true;
 			}
 		} break;

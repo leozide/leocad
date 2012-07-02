@@ -20,7 +20,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-BOOL GLWindowPreTranslateMessage (GLWindow *wnd, MSG *pMsg);
+BOOL GLWindowPreTranslateMessage(GLWindow *wnd, MSG *pMsg);
 
 /////////////////////////////////////////////////////////////////////////////
 // CCADView
@@ -184,18 +184,18 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		lpy*theApp.GetProfileInt("Default","Margin Bottom", 50)/100);
 
 	int w = rc.Width()/cols, h = rc.Height()/rows; // cell size
-	float viewaspect = (float)m_pView->GetWidth ()/(float)m_pView->GetHeight ();
+	float viewaspect = (float)m_pView->GetWidth()/(float)m_pView->GetHeight();
 	int pw = w, ph = h; // picture
 	int mx = 0, my = 0; // offset
 
 	if (w < h)
 	{
-		ph = (int) (w / viewaspect);
+		ph = (int)(w / viewaspect);
 		my = (h - ph)/2;
 	}
 	else
 	{
-		pw = (int) (h * viewaspect);
+		pw = (int)(h * viewaspect);
 		mx = (w - pw)/2;
 	}
 
@@ -238,12 +238,12 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	lf.lfWeight = FW_BOLD;
 	lf.lfCharSet = DEFAULT_CHARSET;
 	lf.lfQuality = PROOF_QUALITY;
-	strcpy (lf.lfFaceName , "Arial");
+	strcpy(lf.lfFaceName , "Arial");
 	HFONT font = CreateFontIndirect(&lf);
 	HFONT OldFont = (HFONT)SelectObject(pDC->m_hDC, font);
 	pDC->SetTextAlign(TA_BASELINE|TA_CENTER|TA_NOUPDATECP);
 	float* bg = project->GetBackgroundColor();
-	pDC->SetTextColor(RGB (1.0f - bg[0], 1.0f - bg[1], 1.0f - bg[2]));
+	pDC->SetTextColor(RGB(1.0f - bg[0], 1.0f - bg[1], 1.0f - bg[2]));
 	pDC->SetBkMode(TRANSPARENT);
 	HPEN hpOld = (HPEN)SelectObject(pDC->m_hDC,(HPEN)GetStockObject(BLACK_PEN));
 
@@ -255,11 +255,13 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	{
 		if (nRenderTime > project->GetLastStep())
 			continue;
+
 		if (project->m_bAnimation)
 			project->m_nCurFrame = nRenderTime;
 		else
 			project->m_nCurStep = nRenderTime;
 		project->CalculateStep();
+
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 
 		// Tile rendering
@@ -281,24 +283,20 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	
 				BITMAPINFO bi;
 				ZeroMemory(&bi, sizeof(BITMAPINFO));
-				memcpy (&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
+				memcpy(&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
 
 				pDC->SetStretchBltMode(COLORONCOLOR);
 
 				int y = 0;
-				if (ph > th)
-				{
-					if (tr == 0)
-						y = th - cth;
-					else
-						y = tr*th;
 
-					y -= (ph % th);
-				}
+				if (ph > th && tr != 0)
+					y = tr * th - (th - ph % th);
 
 				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + y, ctw, cth, 0, 0, ctw, cth, 
 					(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
-				if (lpbi) GlobalFreePtr(lpbi);
+
+				if (lpbi)
+					GlobalFreePtr(lpbi);
 			} while (pCam->EndTile());
 		}
 		else
@@ -309,42 +307,40 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 			
 			BITMAPINFO bi;
 			ZeroMemory(&bi, sizeof(BITMAPINFO));
-			memcpy (&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
+			memcpy(&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
 			pDC->SetStretchBltMode(COLORONCOLOR);
 			StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx, rc.top+1+(h*r)+my, w-(2*mx), h-(2*my), 0, 0, pw, ph, 
 				(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
-			if (lpbi) GlobalFreePtr(lpbi);
+			if (lpbi)
+				GlobalFreePtr(lpbi);
 		}
 
 		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
+
 		if (dwPrint & PRINT_NUMBERS)
 		{
 			char tmp[4];
-			sprintf (tmp, "%d", nRenderTime);
+			sprintf(tmp, "%d", nRenderTime);
 
-			CRect rcNumber (rc);
-			rcNumber.left += (w*c)+(int)(pDC->GetDeviceCaps (LOGPIXELSX)/2);
-			rcNumber.top += (h*r)+(int)(pDC->GetDeviceCaps (LOGPIXELSY)/2);
+			CRect rcNumber(rc);
+			rcNumber.left += (w*c)+(int)(pDC->GetDeviceCaps(LOGPIXELSX)/2);
+			rcNumber.top += (h*r)+(int)(pDC->GetDeviceCaps(LOGPIXELSY)/2);
 
-			pDC->SetTextAlign (TA_TOP|TA_LEFT|TA_NOUPDATECP);
-			pDC->DrawText(tmp, strlen (tmp), rcNumber, DT_LEFT|DT_TOP|DT_SINGLELINE);
+			pDC->SetTextAlign(TA_TOP|TA_LEFT|TA_NOUPDATECP);
+			pDC->DrawText(tmp, strlen(tmp), rcNumber, DT_LEFT|DT_TOP|DT_SINGLELINE);
 		}
 
 		if (dwPrint & PRINT_BORDER)
 		{
-			if (r == 0)
-			{
-				pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
-				pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*r));
-			}
-			if (c == 0)
-			{
-				pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
-				pDC->LineTo(rc.left+(w*c), rc.top+(h*(r+1)));
-			}
+			pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
+			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*r));
+
+			pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
+			pDC->LineTo(rc.left+(w*c), rc.top+(h*(r+1)));
 			
 			pDC->MoveTo(rc.left+(w*(c+1)), rc.top+(h*r));
 			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*(r+1)));
+
 			pDC->MoveTo(rc.left+(w*c), rc.top+(h*(r+1)));
 			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*(r+1)));
 		}
@@ -370,8 +366,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	lf.lfWeight = FW_REGULAR;
 	font = CreateFontIndirect(&lf);
 	OldFont = (HFONT)SelectObject(pDC->m_hDC, font);
-	pDC->SetTextColor(RGB (0,0,0));
-	pDC->SetTextAlign (TA_TOP|TA_LEFT|TA_NOUPDATECP);
+	pDC->SetTextColor(RGB(0,0,0));
+	pDC->SetTextAlign(TA_TOP|TA_LEFT|TA_NOUPDATECP);
  	rc.top -= pDC->GetDeviceCaps(LOGPIXELSY)*theApp.GetProfileInt("Default","Margin Top", 50)/200;
 	rc.bottom += pDC->GetDeviceCaps(LOGPIXELSY)*theApp.GetProfileInt("Default","Margin Bottom", 50)/200;
 	PrintHeader(FALSE, pDC->GetSafeHdc(), rc, pInfo->m_nCurPage, pInfo->GetMaxPage(), FALSE);

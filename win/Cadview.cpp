@@ -263,7 +263,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		FillRect(hMemDC, CRect(0,th,tw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 
 		// Tile rendering
-		if (tw != pw)
+		if (pw > tw || ph > th)
 		{
 			Camera* pCam = project->m_pCameras;
 			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
@@ -284,7 +284,19 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 				memcpy (&bi.bmiHeader, lpbi, sizeof(BITMAPINFOHEADER));
 
 				pDC->SetStretchBltMode(COLORONCOLOR);
-				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + tr*th, ctw, cth, 0, 0, ctw, cth, 
+
+				int y = 0;
+				if (ph > th)
+				{
+					if (tr == 0)
+						y = th - cth;
+					else
+						y = tr*th;
+
+					y -= (ph % th);
+				}
+
+				StretchDIBits(pDC->m_hDC, rc.left+1+(w*c)+mx + tc*tw, rc.top+1+(h*r)+my + y, ctw, cth, 0, 0, ctw, cth, 
 					(LPBYTE) lpbi + lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
 				if (lpbi) GlobalFreePtr(lpbi);
 			} while (pCam->EndTile());

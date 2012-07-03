@@ -223,6 +223,8 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	HBITMAP hBm = CreateDIBSection(hMemDC, &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
 	HBITMAP hBmOld = (HBITMAP)SelectObject(hMemDC, hBm);
 
+	GL_DisableVertexBufferObject();
+
 	View view(project, project->m_ActiveView);
 	view.m_Camera = project->m_ActiveView->m_Camera;
 	view.CreateFromBitmap(hMemDC);
@@ -356,6 +358,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	SelectObject(hMemDC, hBmOld);
 	DeleteObject(hBm);
 	DeleteDC(hMemDC);
+	GL_EnableVertexBufferObject();
 
 	SelectObject(pDC->m_hDC, hpOld);
 	SelectObject(pDC->m_hDC, OldFont);

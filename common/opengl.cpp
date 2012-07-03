@@ -1136,6 +1136,7 @@ void GL_InitializeExtensions()
 		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB");
 		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB");
 
+		GL_UseVertexBufferObject = true;
 		GL_SupportsVertexBufferObject = true;
 	}
 }

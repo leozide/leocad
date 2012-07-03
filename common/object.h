@@ -81,7 +81,7 @@ public:
 	virtual void Select(bool bSelecting, bool bFocus, bool bMultiple) = 0;
 
 	// Check if the object intersects the volume specified by a given set of planes.
-	virtual bool IntersectsVolume(const class Vector4* Planes, int NumPlanes) = 0;
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]) = 0;
 
 
   /*

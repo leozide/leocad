@@ -6297,7 +6297,7 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 	{
 		if (piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 		{
-			if (piece->IntersectsVolume((Vector4*)Planes, 6))
+			if (piece->IntersectsVolume(Planes))
 				Objects.Add(piece);
 		}
 	}

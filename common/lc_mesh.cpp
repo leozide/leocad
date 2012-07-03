@@ -216,9 +216,57 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 		return MinIntersectDist<GLuint>(Start, End, MinDist, Intersection);
 }
 
-// Return true if a polygon intersects a set of planes.
-static bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const Vector4* Planes, int NumPlanes) // TODO: move to lc_math
+// Sutherland-Hodgman method of clipping a polygon to a plane.
+static void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* OutPoints, int* NumOutPoints, const lcVector4& Plane)
 {
+	lcVector3 *s, *p, i;
+
+	*NumOutPoints = 0;
+	s = &InPoints[NumInPoints-1];
+
+	for (int j = 0; j < NumInPoints; j++)
+	{
+		p = &InPoints[j];
+
+		if (lcDot3(*p, Plane) + Plane[3] <= 0)
+		{
+			if (lcDot3(*s, Plane) + Plane[3] <= 0)
+			{
+				// Both points inside.
+				OutPoints[*NumOutPoints] = *p;
+				*NumOutPoints = *NumOutPoints + 1;
+			}
+			else
+			{
+				// Outside, inside.
+				lcLinePlaneIntersection(i, *s, *p, Plane);
+
+				OutPoints[*NumOutPoints] = i;
+				*NumOutPoints = *NumOutPoints + 1;
+				OutPoints[*NumOutPoints] = *p;
+				*NumOutPoints = *NumOutPoints + 1;
+			}
+		}
+		else
+		{
+			if (lcDot3(*s, Plane) + Plane[3] <= 0)
+			{
+				// Inside, outside.
+				lcLinePlaneIntersection(i, *s, *p, Plane);
+
+				OutPoints[*NumOutPoints] = i;
+				*NumOutPoints = *NumOutPoints + 1;
+			}
+		}
+
+		s = p;
+	}
+}
+
+// Return true if a polygon intersects a set of planes.
+static bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, const lcVector4 Planes[6]) // TODO: move to lc_math
+{
+	const int NumPlanes = 6;
 	float* Points[4] = { p1, p2, p3, p4 };
 	int Outcodes[4] = { 0, 0, 0, 0 }, i;
 	int NumPoints = (p4 != NULL) ? 4 : 3;
@@ -226,11 +274,11 @@ static bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, 
 	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
 	for (i = 0; i < NumPoints; i++)
 	{
-		Vector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+		lcVector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
-			if (Dot3(Pt, Planes[j]) + Planes[j][3] > 0)
+			if (lcDot3(Pt, Planes[j]) + Planes[j][3] > 0)
 				Outcodes[i] |= 1 << j;
 		}
 	}
@@ -257,22 +305,22 @@ static bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, 
 	}
 
 	// Buffers for clipping the polygon.
-	Vector3 ClipPoints[2][8];
+	lcVector3 ClipPoints[2][8];
 	int NumClipPoints[2];
 	int ClipBuffer = 0;
 
 	NumClipPoints[0] = NumPoints;
-	ClipPoints[0][0] = Vector3(p1[0], p1[1], p1[2]);
-	ClipPoints[0][1] = Vector3(p2[0], p2[1], p2[2]);
-	ClipPoints[0][2] = Vector3(p3[0], p3[1], p3[2]);
+	ClipPoints[0][0] = lcVector3(p1[0], p1[1], p1[2]);
+	ClipPoints[0][1] = lcVector3(p2[0], p2[1], p2[2]);
+	ClipPoints[0][2] = lcVector3(p3[0], p3[1], p3[2]);
 
 	if (NumPoints == 4)
-		ClipPoints[0][3] = Vector3(p4[0], p4[1], p4[2]);
+		ClipPoints[0][3] = lcVector3(p4[0], p4[1], p4[2]);
 
 	// Now clip the polygon against the planes.
 	for (i = 0; i < NumPlanes; i++)
 	{
-		PolygonPlaneClip(ClipPoints[ClipBuffer], NumClipPoints[ClipBuffer], ClipPoints[ClipBuffer^1], &NumClipPoints[ClipBuffer^1], Planes[i]);
+		lcPolygonPlaneClip(ClipPoints[ClipBuffer], NumClipPoints[ClipBuffer], ClipPoints[ClipBuffer^1], &NumClipPoints[ClipBuffer^1], Planes[i]);
 		ClipBuffer ^= 1;
 
 		if (!NumClipPoints[ClipBuffer])
@@ -283,7 +331,7 @@ static bool PolygonIntersectsPlanes(float* p1, float* p2, float* p3, float* p4, 
 }
 
 template<typename IndexType>
-bool lcMesh::IntersectsPlanes(const Vector4* Planes, int NumPlanes)
+bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 {
 	float* Verts = (float*)mVertexBuffer.mData;
 
@@ -297,19 +345,19 @@ bool lcMesh::IntersectsPlanes(const Vector4* Planes, int NumPlanes)
 		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
-			if (PolygonIntersectsPlanes(&Verts[Indices[Idx]*3], &Verts[Indices[Idx+1]*3], &Verts[Indices[Idx+2]*3], NULL, Planes, NumPlanes))
+			if (PolygonIntersectsPlanes(&Verts[Indices[Idx]*3], &Verts[Indices[Idx+1]*3], &Verts[Indices[Idx+2]*3], NULL, Planes))
 				return true;
 	}
 
 	return false;
 }
 
-bool lcMesh::IntersectsPlanes(const Vector4* Planes, int NumPlanes)
+bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		return IntersectsPlanes<GLushort>(Planes, NumPlanes);
+		return IntersectsPlanes<GLushort>(Planes);
 	else
-		return IntersectsPlanes<GLuint>(Planes, NumPlanes);
+		return IntersectsPlanes<GLuint>(Planes);
 }
 
 template<typename IndexType>

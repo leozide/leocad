@@ -15,7 +15,6 @@
 #include "piece.h"
 #include "group.h"
 #include "project.h"
-#include "algebra.h"
 #include "lc_application.h"
 
 #define LC_PIECE_SAVE_VERSION 11 // LeoCAD 0.77
@@ -412,33 +411,33 @@ void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 		pLine->pClosest = this;
 }
 
-bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
+bool Piece::IntersectsVolume(const lcVector4 Planes[6])
 {
 	// First check the bounding box for quick rejection.
-	Vector3 Box[8] =
+	lcVector3 Box[8] =
 	{
-		Vector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
-		Vector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
-		Vector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]),
-		Vector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
-		Vector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
-		Vector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
-		Vector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
-		Vector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2])
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2])
 	};
 
 	// Transform the planes to local space.
-	Matrix44 WorldToLocal;
-	WorldToLocal.CreateFromAxisAngle(Vector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(Mul31(Vector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
+	lcMatrix44 WorldToLocal = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
+	WorldToLocal.SetTranslation(lcMul31(lcVector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
 
-	Vector4* LocalPlanes = new Vector4[NumPlanes];
+	const int NumPlanes = 6;
+	lcVector4 LocalPlanes[NumPlanes];
 	int i;
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		LocalPlanes[i] = Mul30(Vector3(Planes[i]), WorldToLocal);
-		LocalPlanes[i][3] = Planes[i][3] - Dot3(Vector3(WorldToLocal[3]), Vector3(LocalPlanes[i]));
+		lcVector3 PlaneNormal = lcMul30(lcVector3(Planes[i][0], Planes[i][1], Planes[i][2]), WorldToLocal);
+		LocalPlanes[i] = lcVector4(PlaneNormal, Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
 	}
 
 	// Start by testing trivial reject/accept cases.
@@ -450,7 +449,7 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
-			if (Dot3(Box[i], LocalPlanes[j]) + LocalPlanes[j][3] > 0)
+			if (lcDot3(Box[i], LocalPlanes[j]) + LocalPlanes[j][3] > 0)
 				Outcodes[i] |= 1 << j;
 		}
 	}
@@ -465,22 +464,14 @@ bool Piece::IntersectsVolume(const Vector4* Planes, int NumPlanes)
 
 	// All corners outside the same plane.
 	if (OutcodesAND != 0)
-	{
-		delete[] LocalPlanes;
 		return false;
-	}
 
 	// All corners inside the volume.
 	if (OutcodesOR == 0)
-	{
-		delete[] LocalPlanes;
 		return true;
-	}
 
 	// Partial intersection, so check if any triangles are inside.
-	bool Hit = mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes, NumPlanes);
-
-	delete[] LocalPlanes;
+	bool Hit = mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes);
 
 	return Hit;
 }

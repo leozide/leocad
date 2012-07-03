@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include "opengl.h"
-#include "algebra.h"
 
 class lcVertexBuffer
 {
@@ -129,8 +128,8 @@ public:
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection);
 
 	template<typename IndexType>
-	bool IntersectsPlanes(const Vector4* Planes, int NumPlanes);
-	bool IntersectsPlanes(const Vector4* Planes, int NumPlanes);
+	bool IntersectsPlanes(const lcVector4 Planes[6]);
+	bool IntersectsPlanes(const lcVector4 Planes[6]);
 
 	void UpdateBuffers()
 	{

@@ -294,6 +294,16 @@ inline float lcDot(const lcVector3& a, const lcVector3& b)
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+inline float lcDot3(const lcVector4& a, const lcVector3& b)
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline float lcDot3(const lcVector3& a, const lcVector4& b)
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
 inline float lcDot(const lcVector4& a, const lcVector4& b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;

@@ -528,7 +528,7 @@ static int lcGetMinifigSettings(lcMemFile& File)
 
 	do
 	{
-		strm.avail_in = min(sizeof(sDefaultSettings) - pos, CHUNK);
+		strm.avail_in = lcMin(sizeof(sDefaultSettings) - pos, CHUNK);
 		strm.next_in = in;
 
 		if (strm.avail_in == 0)

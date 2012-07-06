@@ -33,7 +33,6 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
 	public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
@@ -55,7 +54,6 @@ public:
 	CMFCToolBarNoUpdate m_wndStandardBar;
 	CMFCToolBarNoUpdate m_wndToolsBar;
 	CMFCToolBarNoUpdate m_wndAnimationBar;
-	CMFCToolBar m_wndInvisibleToolBar;
 	CPiecesBar m_wndPiecesBar;
 	CPropertiesPane m_wndProperties;
 

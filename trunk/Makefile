@@ -16,7 +16,7 @@ SRC :=
 
 BIN := bin/leocad
 
-ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean), )
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean source-tgz source-zip), )
 -include $(OSDIR)/config.mk
 endif
 
@@ -46,7 +46,7 @@ bin:
 	@mkdir bin
 
 ### Include the C/C++ include dependencies
-ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean), )
+ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean source-tgz source-zip), )
 -include $(OBJ:.o=.d)
 endif
 
@@ -137,12 +137,11 @@ arch/leocad-$(VERSION)-linux.tgz: package-dir
 	tar -cvzf $@ leocad-$(VERSION)
 	rm -rf leocad-$(VERSION)
 
-arch/leocad-$(VERSION)-src.tgz: arch veryclean
+arch/leocad-$(VERSION)-src.tgz: veryclean arch
 	rm -f $@
-	( cd .. ; tar --exclude=leocad/arch/\* --exclude=CVS \
-	-cvzf leocad/$@ leocad )
+	( cd .. ; tar --exclude=leocad/arch/\* --exclude=.svn -cvzf leocad/$@ leocad )
 
-arch/leocad-$(VERSION)-src.zip: arch veryclean
+arch/leocad-$(VERSION)-src.zip: veryclean arch
 	rm -f $@
-	( cd .. ; zip -r leocad/$@ leocad -x '*/arch/*' -x '*/CVS/*' -x '*~' -x '*/core' -x '*/.#*')
+	( cd .. ; zip -r leocad/$@ leocad -x '*/arch/*' -x '*/.svn/*' -x '*~' -x '*/core' -x '*/.#*')
 

@@ -2566,7 +2566,7 @@ void Project::RenderOverlays(View* view)
 		// Draw circle.
 		glBegin(GL_LINE_LOOP);
 
-		float r = min(w, h) * 0.35f;
+		float r = lcMin(w, h) * 0.35f;
 		float cx = x + w / 2.0f;
 		float cy = y + h / 2.0f;
 
@@ -2580,7 +2580,7 @@ void Project::RenderOverlays(View* view)
 
 		glEnd();
 
-		const float OverlayCameraSquareSize = max(8.0f, (w+h)/200);
+		const float OverlayCameraSquareSize = lcMax(8.0f, (w+h)/200);
 
 		// Draw squares.
 		glBegin(GL_LINE_LOOP);
@@ -3094,7 +3094,7 @@ unsigned char Project::GetLastStep()
 {
 	unsigned char last = 1;
 	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		last = max(last, pPiece->GetStepShow());
+		last = lcMax(last, pPiece->GetStepShow());
 
 	return last;
 }
@@ -3414,10 +3414,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (SystemDoDialog(LC_DLG_PICTURE_SAVE, &opts))
 			{
 				if (m_bAnimation)
-					opts.to = min(opts.to, m_nTotalFrames);
+					opts.to = lcMin(opts.to, m_nTotalFrames);
 				else
-					opts.to = min(opts.to, 255);
-				opts.from = max(1, opts.from);
+					opts.to = lcMin(opts.to, 255);
+				opts.from = lcMax(1, opts.from);
 
 				if (opts.multiple)
 				{
@@ -6479,7 +6479,7 @@ bool Project::StopTracking(bool bAccept)
 				// Zoom in/out.
 				float RatioX = (Right - Left) / Viewport[2];
 				float RatioY = (Top - Bottom) / Viewport[3];
-				float ZoomFactor = -max(RatioX, RatioY) + 0.75f;
+				float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
 
 				lcVector3 Dir = Points[1] - Points[2];
 				Eye = Eye + Dir * ZoomFactor;
@@ -6575,8 +6575,8 @@ void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 	int SXY, SZ;
 	GetSnapIndex(&SXY, &SZ, NULL);
 
-	SXY = min(SXY, 9);
-	SZ = min(SZ, 9);
+	SXY = lcMin(SXY, 9);
+	SZ = lcMin(SZ, 9);
 
 	*SnapXY = SnapXYTable[SXY];
 	*SnapZ = SnapZTable[SZ];
@@ -6601,8 +6601,8 @@ void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
 		int SXY, SZ;
 		GetSnapIndex(&SXY, &SZ, NULL);
 
-		SXY = min(SXY, 9);
-		SZ = min(SZ, 9);
+		SXY = lcMin(SXY, 9);
+		SZ = lcMin(SZ, 9);
 
 		strcpy(SnapXY, SnapXYText[SXY]);
 		strcpy(SnapZ, SnapZText[SZ]);
@@ -8709,9 +8709,9 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		int cy = vy + vh / 2;
 
 		float d = sqrtf((float)((cx - x) * (cx - x) + (cy - y) * (cy - y)));
-		float r = min(vw, vh) * 0.35f;
+		float r = lcMin(vw, vh) * 0.35f;
 
-		const float SquareSize = max(8.0f, (vw+vh)/200);
+		const float SquareSize = lcMax(8.0f, (vw+vh)/200);
 
 		if ((d < r + SquareSize) && (d > r - SquareSize))
 		{

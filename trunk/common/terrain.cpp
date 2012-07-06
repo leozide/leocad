@@ -501,12 +501,12 @@ void Terrain::SetControlPoints()
 			m_Patches[i][j].control[(a*4+b)*3+1] = m_pControl[i*(4-1)+a][(j*(4-1)+b)*3+1];
 			m_Patches[i][j].control[(a*4+b)*3+2] = m_pControl[i*(4-1)+a][(j*(4-1)+b)*3+2];
 
-			minX = min(minX, m_Patches[i][j].control[(a*4+b)*3]);
-			maxX = max(maxX, m_Patches[i][j].control[(a*4+b)*3]);
-			minY = min(minY, m_Patches[i][j].control[(a*4+b)*3+1]);
-			maxY = max(maxY, m_Patches[i][j].control[(a*4+b)*3+1]);
-			minZ = min(minZ, m_Patches[i][j].control[(a*4+b)*3+2]);
-			maxZ = max(maxZ, m_Patches[i][j].control[(a*4+b)*3+2]);
+			minX = lcMin(minX, m_Patches[i][j].control[(a*4+b)*3]);
+			maxX = lcMax(maxX, m_Patches[i][j].control[(a*4+b)*3]);
+			minY = lcMin(minY, m_Patches[i][j].control[(a*4+b)*3+1]);
+			maxY = lcMax(maxY, m_Patches[i][j].control[(a*4+b)*3+1]);
+			minZ = lcMin(minZ, m_Patches[i][j].control[(a*4+b)*3+2]);
+			maxZ = lcMax(maxZ, m_Patches[i][j].control[(a*4+b)*3+2]);
 		}
 		m_Patches[i][j].InitBox(minX, maxX, minY, maxY, minZ, maxZ);
 	}

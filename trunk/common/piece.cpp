@@ -339,10 +339,10 @@ void Piece::InsertTime (unsigned short start, bool animation, unsigned short tim
   if (animation)
   {
     if (m_nFrameShow >= start)
-      m_nFrameShow = min(m_nFrameShow + time, lcGetActiveProject()->GetTotalFrames());
+      m_nFrameShow = lcMin(m_nFrameShow + time, lcGetActiveProject()->GetTotalFrames());
 
     if (m_nFrameHide >= start)
-      m_nFrameHide = min(m_nFrameHide + time, lcGetActiveProject()->GetTotalFrames());
+      m_nFrameHide = lcMin(m_nFrameHide + time, lcGetActiveProject()->GetTotalFrames());
 
     if (m_nFrameShow > lcGetActiveProject()->GetCurrentTime())
       Select (false, false, false);
@@ -350,10 +350,10 @@ void Piece::InsertTime (unsigned short start, bool animation, unsigned short tim
   else
   {
     if (m_nStepShow >= start)
-      m_nStepShow = min(m_nStepShow + time, 255);
+      m_nStepShow = lcMin(m_nStepShow + time, 255);
 
     if (m_nStepHide >= start)
-      m_nStepHide = min(m_nStepHide + time, 255);
+      m_nStepHide = lcMin(m_nStepHide + time, 255);
 
     if (m_nStepShow > lcGetActiveProject()->GetCurrentTime ())
       Select (false, false, false);
@@ -367,12 +367,12 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
   if (animation)
   {
     if (m_nFrameShow >= start)
-      m_nFrameShow = max(m_nFrameShow - time, 1);
+      m_nFrameShow = lcMax(m_nFrameShow - time, 1);
 
     if (m_nFrameHide == lcGetActiveProject()->GetTotalFrames())
       m_nFrameHide = lcGetActiveProject()->GetTotalFrames();
     else
-      m_nFrameHide = max(m_nFrameHide - time, 1);
+      m_nFrameHide = lcMax(m_nFrameHide - time, 1);
 
     if (m_nFrameHide < lcGetActiveProject()->GetCurrentTime())
       Select (false, false, false);
@@ -380,10 +380,10 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
   else
   {
     if (m_nStepShow >= start)
-      m_nStepShow = max (m_nStepShow - time, 1);
+      m_nStepShow = lcMax(m_nStepShow - time, 1);
 
     if (m_nStepHide != 255)
-      m_nStepHide = max (m_nStepHide - time, 1);
+      m_nStepHide = lcMax(m_nStepHide - time, 1);
 
     if (m_nStepHide < lcGetActiveProject()->GetCurrentTime())
       Select (false, false, false);

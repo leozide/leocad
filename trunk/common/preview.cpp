@@ -33,17 +33,11 @@ void PiecePreview::OnDraw()
 	if (!MakeCurrent())
 		return;
 
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-	glDisable(GL_DITHER);
-	glShadeModel(GL_FLAT);
 
 	float aspect = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
@@ -70,8 +64,7 @@ void PiecePreview::OnDraw()
 		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}
 
-	float pos[4] = { 0, 0, 10, 0 }, *bg = lcGetActiveProject()->GetBackgroundColor();
-	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());

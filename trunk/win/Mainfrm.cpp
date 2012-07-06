@@ -22,7 +22,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-void mainframe_listener (int message, void *data, void *user)
+void mainframe_listener(int message, void *data, void *user)
 {
   if (message == LC_MSG_FOCUS_CHANGED)
   {
@@ -168,7 +168,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	m_wndAnimationBar.SetWindowText (_T("Animation"));
+	m_wndAnimationBar.SetWindowText(_T("Animation"));
 	m_wndAnimationBar.EnableDocking(CBRS_ALIGN_ANY);
 
 	if (!m_wndPiecesBar.Create(_T("Pieces"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PIECES_BAR, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
@@ -182,16 +182,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableDocking(CBRS_ALIGN_ANY);
 
 //	UpdateMenuAccelerators();
-
-	if (!m_wndInvisibleToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_INVISIBLE_BAR) || !m_wndInvisibleToolBar.LoadToolBar(IDR_INVISIBLE))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
-
-	m_wndInvisibleToolBar.SetWindowText (_T("Invisible"));
-	m_wndInvisibleToolBar.SetMaskMode(TRUE);
-	m_wndInvisibleToolBar.ShowPane(FALSE, FALSE, FALSE);
+	CMFCToolBar::AddToolBarForImageCollection(IDR_INVISIBLE);
 
 	if (!m_wndProperties.Create("Properties", this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIES_BAR, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
@@ -213,42 +204,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CDockingManager::SetDockingMode(DT_SMART);
 	EnableAutoHidePanes(CBRS_ALIGN_ANY);
 
-	messenger->Listen (&mainframe_listener, this);
+	messenger->Listen(&mainframe_listener, this);
 
-	main_window->SetXID (this);
+	main_window->SetXID(this);
 
 	theApp.LoadState(this);
 
-//  console.SetWindowCallback (&mainframe_console_func, m_wndSplitter.GetPane (1, 0));
+//  console.SetWindowCallback(&mainframe_console_func, m_wndSplitter.GetPane(1, 0));
 
 	return 0;
-}
-
-BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
-{
-	int status = theApp.GetProfileInt("Settings", "Window Status", -1);
-	cs.style &= ~WS_VISIBLE;
-
-	if (status != -1)
-	{
-		int r,l,b,t;
-		char szBuf[60];
-		strcpy (szBuf, theApp.GetProfileString("Settings","Window Position"));
-		sscanf(szBuf,"%d, %d, %d, %d", &t, &r, &b, &l);
-
-		cs.cx = r - l;
-		cs.cy = b - t;
-		
-		RECT workArea;
-        SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
-		l += workArea.left;
-		t += workArea.top;
-
-		cs.x = min(l, GetSystemMetrics(SM_CXSCREEN) - GetSystemMetrics(SM_CXICON));
-		cs.y = min(t, GetSystemMetrics(SM_CYSCREEN) - GetSystemMetrics(SM_CYICON));
-	}
-
-	return CFrameWndEx::PreCreateWindow(cs);
 }
 
 /////////////////////////////////////////////////////////////////////////////

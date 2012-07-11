@@ -120,7 +120,7 @@ void CPreferencesGeneral::OnOK()
 CPreferencesDetail::CPreferencesDetail() : CPropertyPage(CPreferencesDetail::IDD)
 {
 	//{{AFX_DATA_INIT(CPreferencesDetail)
-	m_bAntialiasing = FALSE;
+	m_nAntialiasing = 0;
 	m_bEdges = FALSE;
 	m_bLighting = FALSE;
 	m_bSmooth = FALSE;
@@ -137,7 +137,7 @@ void CPreferencesDetail::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPreferencesDetail)
-	DDX_Check(pDX, IDC_DETDLG_ANTIALIAS, m_bAntialiasing);
+	DDX_CBIndex(pDX, IDC_DETDLG_ANTIALIAS, m_nAntialiasing);
 	DDX_Check(pDX, IDC_DETDLG_EDGES, m_bEdges);
 	DDX_Check(pDX, IDC_DETDLG_LIGHTING, m_bLighting);
 	DDX_Check(pDX, IDC_DETDLG_SMOOTH, m_bSmooth);
@@ -154,25 +154,36 @@ BEGIN_MESSAGE_MAP(CPreferencesDetail, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-void CPreferencesDetail::SetOptions(DWORD dwDetail, float fLine)
+void CPreferencesDetail::SetOptions(DWORD dwDetail, float LineWidth, int AASamples)
 {
-	m_bAntialiasing = (dwDetail & LC_DET_ANTIALIAS) != 0;
 	m_bEdges = (dwDetail & LC_DET_BRICKEDGES) != 0;
 	m_bLighting = (dwDetail & LC_DET_LIGHTING) != 0;
 	m_bSmooth =	(dwDetail & LC_DET_SMOOTH) != 0;
 	m_bFast = (dwDetail & LC_DET_FAST) != 0;
-	m_fLineWidth = fLine;
+	m_fLineWidth = LineWidth;
+	switch (AASamples)
+	{
+	default:
+	case 1: m_nAntialiasing = 0;
+		break;
+	case 2: m_nAntialiasing = 1;
+		break;
+	case 4: m_nAntialiasing = 2;
+		break;
+	case 8: m_nAntialiasing = 3;
+		break;
+	}
 }
 
-void CPreferencesDetail::GetOptions(DWORD* dwDetail, float* fLine)
+void CPreferencesDetail::GetOptions(DWORD* dwDetail, float* LineWidth, int* AASamples)
 {
 	*dwDetail = 0;
-	if (m_bAntialiasing) *dwDetail |= LC_DET_ANTIALIAS;
 	if (m_bEdges) *dwDetail |= LC_DET_BRICKEDGES;
 	if (m_bLighting) *dwDetail |= LC_DET_LIGHTING;
 	if (m_bSmooth) *dwDetail |= LC_DET_SMOOTH;
 	if (m_bFast) *dwDetail |= LC_DET_FAST;
-	*fLine = m_fLineWidth;
+	*LineWidth = m_fLineWidth;
+	*AASamples = 1 << m_nAntialiasing;
 }
 
 /////////////////////////////////////////////////////////////////////////////

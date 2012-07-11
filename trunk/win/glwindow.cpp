@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "opengl.h"
 #include "glwindow.h"
+#include "system.h"
 #include "tools.h"
 #include "resource.h"
 
@@ -342,8 +343,9 @@ bool GLWindow::CreateFromWindow(void* data)
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
 	int PixelFormat = 0;
+	int AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
 
-	if (wglChoosePixelFormatARB)
+	if (wglChoosePixelFormatARB && AASamples > 1)
 	{
 		// Choose a Pixel Format Descriptor (PFD) with multisampling support.
 		int iAttributes[] =
@@ -356,7 +358,7 @@ bool GLWindow::CreateFromWindow(void* data)
 			WGL_STENCIL_BITS_ARB, 0,
 			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 			WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
-			WGL_SAMPLES_ARB, 4,
+			WGL_SAMPLES_ARB, AASamples,
 			0, 0
 		};
 		float fAttributes[] = {0,0};

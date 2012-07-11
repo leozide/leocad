@@ -847,12 +847,13 @@ CAPTION "Render"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Draw edge lines",IDC_DETDLG_EDGES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,11,130,8
-    CONTROL         "Enable lighting",IDC_DETDLG_LIGHTING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,27,130,8
-    CONTROL         "Smooth shading",IDC_DETDLG_SMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,43,130,8
-    CONTROL         "Anti-aliasing",IDC_DETDLG_ANTIALIAS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,59,130,8
-    CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,75,130,8
-    LTEXT           "Line width",IDC_STATIC,10,91,34,8
-    EDITTEXT        IDC_DETDLG_LINE,50,89,26,12,ES_AUTOHSCROLL
+    LTEXT           "Line width",IDC_STATIC,21,29,50,8
+    EDITTEXT        IDC_DETDLG_LINE,78,27,34,12,ES_AUTOHSCROLL
+    LTEXT           "Anti-aliasing",IDC_STATIC,21,47,50,8
+    COMBOBOX        IDC_DETDLG_ANTIALIAS,78,44,34,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Enable lighting",IDC_DETDLG_LIGHTING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,65,130,8
+    CONTROL         "Smooth shading",IDC_DETDLG_SMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,81,130,8
+    CONTROL         "Fast rendering",IDC_DETDLG_FAST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,97,130,8
 END
 
 IDD_PREFSCENE DIALOGEX 0, 0, 285, 160
@@ -1434,6 +1435,25 @@ IDC_SELECT              CURSOR                  "res\\select.cur"
 IDC_ROLL                CURSOR                  "res\\roll.cur"
 IDC_ROTX                CURSOR                  "res\\rotx.cur"
 IDC_ROTY                CURSOR                  "res\\roty.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PREFDETAIL DLGINIT
+BEGIN
+    IDC_DETDLG_ANTIALIAS, 0x403, 4, 0
+0x664f, 0x0066, 
+    IDC_DETDLG_ANTIALIAS, 0x403, 3, 0
+0x7832, "\000" 
+    IDC_DETDLG_ANTIALIAS, 0x403, 3, 0
+0x7834, "\000" 
+    IDC_DETDLG_ANTIALIAS, 0x403, 3, 0
+0x7838, "\000" 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

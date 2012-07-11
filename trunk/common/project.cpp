@@ -5257,6 +5257,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			strcpy(opts.strPath, m_strModelsPath);
 			opts.nDetail = m_nDetail;
 			opts.fLineWidth = m_fLineWidth;
+			opts.AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
 			opts.nSnap = m_nSnap;
 			opts.nAngleSnap = m_nAngleSnap;
 			opts.nGridSize = m_nGridSize;

@@ -100,19 +100,19 @@ int stricmp(const char* str1, const char* str2);
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
 
 
-//	#define	DET_BACKFACES	0x00001	// Draw backfaces
-//	#define	DET_DEPTH		0x00002	// Enable depth test
-//	#define	DET_CLEAR		0x00004	// Use clear colors
+//#define DET_BACKFACES	0x00001	// Draw backfaces
+//#define DET_DEPTH		0x00002	// Enable depth test
+//#define DET_CLEAR		0x00004	// Use clear colors
 #define	LC_DET_LIGHTING		0x00008	// Lighting
 #define	LC_DET_SMOOTH		0x00010	// Smooth shading
-//	#define	DET_STUDS		0x00020	// Draw studs
-//	#define	DET_WIREFRAME	0x00040	// Wireframe
-#define	LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing
+//#define DET_STUDS		0x00020	// Draw studs
+//#define DET_WIREFRAME	0x00040	// Wireframe
+//#define LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing
 #define LC_DET_BRICKEDGES	0x00100	// Draw lines
 //#define LC_DET_DITHER		0x00200	// Enable dithering
 //#define LC_DET_BOX_FILL		0x00400	// Filled boxes
 //#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
-//	#define	DET_STUDS_BOX	0x01000	// Draw studs as boxes
+//#define DET_STUDS_BOX	0x01000	// Draw studs as boxes
 //#define LC_DET_LINEAR		0x02000	// Linear filtering
 #define LC_DET_FAST			0x04000	// Fast rendering (boxes)
 //#define LC_DET_BACKGROUND	0x08000	// Background rendering

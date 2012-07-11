@@ -99,13 +99,18 @@ void CPreferencesSheet::OnDefault()
 	AfxGetApp()->WriteProfileInt("Default", "Mouse", j);
 	AfxGetApp()->WriteProfileString("Default", "Projects", str);
 	AfxGetApp()->WriteProfileString("Default", "User", st1);
-	m_PageDetail.GetOptions(&l, &f);
+
+	int AASamples;
+	m_PageDetail.GetOptions(&l, &f, &AASamples);
 	AfxGetApp()->WriteProfileInt("Default", "Detail", l);
 	AfxGetApp()->WriteProfileInt("Default", "Line", (int)(f*100));
+	AfxGetApp()->WriteProfileInt("Default", "AASamples", AASamples);
+
 	m_PageDrawing.GetOptions(&l, &s1, &s2);
 	AfxGetApp()->WriteProfileInt("Default", "Snap", l);
 	AfxGetApp()->WriteProfileInt("Default", "Angle", s1);
 	AfxGetApp()->WriteProfileInt("Default", "Grid", s2);
+
 	m_PageScene.GetOptions(&l, &f, str, cr1, cr2, cr3, cr4, cr5);
 	AfxGetApp()->WriteProfileInt("Default", "Scene", l);
 	AfxGetApp()->WriteProfileInt("Default", "Density", (int)(f*100));
@@ -115,6 +120,7 @@ void CPreferencesSheet::OnDefault()
 	AfxGetApp()->WriteProfileInt("Default", "Ambient", RGB(cr3[0]*255, cr3[1]*255, cr3[2]*255));
 	AfxGetApp()->WriteProfileInt("Default", "Gradient1", RGB(cr4[0]*255, cr4[1]*255, cr4[2]*255));
 	AfxGetApp()->WriteProfileInt("Default", "Gradient2", RGB(cr5[0]*255, cr5[1]*255, cr5[2]*255));
+
 	m_PagePrint.GetOptions(st1, st2);
 	AfxGetApp()->WriteProfileString("Default", "Header", st1);
 	AfxGetApp()->WriteProfileString("Default", "Footer", st2);

@@ -66,15 +66,15 @@ class CPreferencesDetail : public CPropertyPage
 
 // Construction
 public:
-	void SetOptions(DWORD dwDetail, float fLine);
-	void GetOptions(DWORD* dwDetail, float* fLine);
+	void SetOptions(DWORD dwDetail, float LineWidth, int AASamples);
+	void GetOptions(DWORD* dwDetail, float* LineWidth, int* AASamples);
 	CPreferencesDetail();
 	~CPreferencesDetail();
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesDetail)
 	enum { IDD = IDD_PREFDETAIL };
-	BOOL	m_bAntialiasing;
+	BOOL	m_nAntialiasing;
 	BOOL	m_bEdges;
 	BOOL	m_bLighting;
 	BOOL	m_bSmooth;

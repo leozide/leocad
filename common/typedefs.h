@@ -353,6 +353,7 @@ struct LC_PREFERENCESDLG_OPTS
 	char strPath[LC_MAXPATH];
 	unsigned long nDetail;
 	float fLineWidth;
+	int AASamples;
 	unsigned long nSnap;
 	unsigned short nAngleSnap;
 	unsigned short nGridSize;

@@ -1233,7 +1233,7 @@ bool SystemDoDialog(int nMode, void* param)
 			LC_PREFERENCESDLG_OPTS* opts = (LC_PREFERENCESDLG_OPTS*)param;
 
 			ps.m_PageGeneral.SetOptions(opts->nSaveInterval, opts->nMouse, opts->strPath, opts->strUser);
-			ps.m_PageDetail.SetOptions(opts->nDetail, opts->fLineWidth);
+			ps.m_PageDetail.SetOptions(opts->nDetail, opts->fLineWidth, opts->AASamples);
 			ps.m_PageDrawing.SetOptions(opts->nSnap, opts->nAngleSnap, opts->nGridSize);
 			ps.m_PageScene.SetOptions(opts->nScene, opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 			ps.m_PagePrint.SetOptions(opts->strHeader, opts->strFooter);
@@ -1242,7 +1242,7 @@ bool SystemDoDialog(int nMode, void* param)
 			if (ps.DoModal() == IDOK)
 			{
 				ps.m_PageGeneral.GetOptions(&opts->nSaveInterval, &opts->nMouse, opts->strPath, opts->strUser);
-				ps.m_PageDetail.GetOptions(&opts->nDetail, &opts->fLineWidth);
+				ps.m_PageDetail.GetOptions(&opts->nDetail, &opts->fLineWidth, &opts->AASamples);
 				ps.m_PageDrawing.GetOptions(&opts->nSnap, &opts->nAngleSnap, &opts->nGridSize);
 				ps.m_PageScene.GetOptions(&opts->nScene, &opts->fDensity, opts->strBackground, opts->fBackground, opts->fFog, opts->fAmbient, opts->fGrad1, opts->fGrad2);
 				ps.m_PagePrint.GetOptions(opts->strHeader, opts->strFooter);
@@ -1251,6 +1251,12 @@ bool SystemDoDialog(int nMode, void* param)
 				AfxGetApp()->WriteProfileInt("Settings", "Autosave", opts->nSaveInterval);
 				AfxGetApp()->WriteProfileInt("Default", "Mouse", opts->nMouse);
 				AfxGetApp()->WriteProfileString("Default", "Projects", opts->strPath);
+
+				if (opts->AASamples != Sys_ProfileLoadInt("Default", "AASamples", 1))
+				{
+					AfxGetApp()->WriteProfileInt("Default", "AASamples", opts->AASamples);
+					AfxMessageBox("Anti-aliasing changes will only take effect next time you start LeoCAD.", MB_OK);
+				}
 
 				return true;
 			}

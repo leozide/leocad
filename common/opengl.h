@@ -472,6 +472,23 @@ typedef GLboolean (APIENTRY *GLUNMAPBUFFERARBPROC) (GLenum target);
 typedef void (APIENTRY *GLGETBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
 typedef void (APIENTRY *GLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
 
+#ifndef GL_ARB_multisample
+#define GL_ARB_multisample 1
+
+#define GL_MULTISAMPLE_ARB 0x809D
+#define GL_SAMPLE_ALPHA_TO_COVERAGE_ARB 0x809E
+#define GL_SAMPLE_ALPHA_TO_ONE_ARB 0x809F
+#define GL_SAMPLE_COVERAGE_ARB 0x80A0
+#define GL_SAMPLE_BUFFERS_ARB 0x80A8
+#define GL_SAMPLES_ARB 0x80A9
+#define GL_SAMPLE_COVERAGE_VALUE_ARB 0x80AA
+#define GL_SAMPLE_COVERAGE_INVERT_ARB 0x80AB
+#define GL_MULTISAMPLE_BIT_ARB 0x20000000
+
+typedef void (APIENTRY * PFNGLSAMPLECOVERAGEARBPROC) (GLclampf value, GLboolean invert);
+
+#endif
+
 // =============================================================================
 // OpenGL extern declarations
 

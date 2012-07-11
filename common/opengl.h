@@ -20,6 +20,8 @@
 bool GL_Initialize(const char* libname);
 void GL_Shutdown();
 void GL_InitializeExtensions();
+void GL_InitializeSharedExtensions();
+bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name);
 
 extern bool GL_SupportsVertexBufferObject;
 extern bool GL_UseVertexBufferObject;

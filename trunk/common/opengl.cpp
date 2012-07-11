@@ -369,6 +369,8 @@ GLUNMAPBUFFERARBPROC glUnmapBufferARB;
 GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
 GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
 
+PFNGLSAMPLECOVERAGEARBPROC glSampleCoverageARB;
+
 // =============================================================================
 // Initialization functions
 

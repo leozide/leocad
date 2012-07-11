@@ -1075,6 +1075,8 @@ bool GL_Initialize(const char* LibraryName)
 	pfnglPopName = (PFNGLPOPNAME)Sys_GLGetProc("glPopName");
 #endif // LC_OPENGL_DYNAMIC
 
+	GL_InitializeExtensions();
+
 	return true;
 }
 
@@ -1084,31 +1086,28 @@ bool GL_Initialize(const char* LibraryName)
 bool GL_SupportsVertexBufferObject = false;
 bool GL_UseVertexBufferObject = false;
 
-static bool GL_ExtensionSupported(const char* extension)
+bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 {
-	const GLubyte *extensions = NULL;
 	const GLubyte *start;
 	GLubyte *where, *terminator;
 
 	// Extension names should not have spaces.
-	where = (GLubyte*) strchr(extension, ' ');
-	if (where || *extension == '\0')
+	where = (GLubyte*)strchr(Name, ' ');
+	if (where || *Name == '\0')
 		return false;
 
-	extensions = glGetString(GL_EXTENSIONS);
-
-	if (!extensions)
+	if (!Extensions)
 		return false;
 
 	// It takes a bit of care to be fool-proof about parsing the
 	// OpenGL extensions string. Don't be fooled by sub-strings, etc.
-	for (start = extensions; ;)
+	for (start = Extensions; ;)
 	{
-		where = (GLubyte*)strstr((const char*)start, extension);
+		where = (GLubyte*)strstr((const char*)start, Name);
 		if (!where)
 			break;
 
-		terminator = where + strlen(extension);
+		terminator = where + strlen(Name);
 		if (where == start || *(where - 1) == ' ')
 			if (*terminator == ' ' || *terminator == '\0')
 				return true;
@@ -1120,9 +1119,11 @@ static bool GL_ExtensionSupported(const char* extension)
 }
 
 // Extensions can only be initialized if there's a current OpenGL context.
-void GL_InitializeExtensions()
+void GL_InitializeSharedExtensions()
 {
-	if (GL_ExtensionSupported("GL_ARB_vertex_buffer_object"))
+	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
+
+	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
 		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB");
 		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB");

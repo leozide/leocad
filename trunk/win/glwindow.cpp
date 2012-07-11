@@ -4,6 +4,16 @@
 #include "tools.h"
 #include "resource.h"
 
+typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
+typedef BOOL (WINAPI * PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
+typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBFVARBPROC) (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int* piAttributes, FLOAT *pfValues);
+typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC) (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int* piAttributes, int *piValues);
+
+PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = NULL;
+PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = NULL;
+PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB = NULL;
+PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = NULL;
+
 struct GLWindowPrivate
 {
 	HGLRC m_hrc;
@@ -142,6 +152,86 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+static LRESULT CALLBACK TempWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg != WM_CREATE)
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
+	HDC hDC = GetDC(hWnd);
+
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);  
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 24;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+
+	int PixelFormat = ChoosePixelFormat(hDC, &pfd);
+	if (PixelFormat == 0)
+		return 0;
+
+	if (!SetPixelFormat(hDC, PixelFormat, &pfd))
+		return 0;
+
+	HGLRC hGLRC = wglCreateContext(hDC);
+	wglMakeCurrent(hDC, hGLRC);
+
+	const GLubyte* Extensions;
+
+	wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
+
+	if (wglGetExtensionsStringARB)
+		Extensions = (GLubyte*)wglGetExtensionsStringARB(wglGetCurrentDC());
+	else
+		Extensions = glGetString(GL_EXTENSIONS);
+
+	GL_InitializeSharedExtensions();
+
+	if (GL_ExtensionSupported(Extensions, "WGL_ARB_pixel_format"))
+	{
+		wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+		wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)wglGetProcAddress("wglGetPixelFormatAttribfvARB");
+		wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)wglGetProcAddress("wglGetPixelFormatAttribivARB");
+	}
+
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hGLRC);
+
+	ReleaseDC(hWnd, hDC);
+
+	return 0;
+}
+
+void GL_InitializeExtensions()
+{
+	HINSTANCE hInstance;
+	WNDCLASS wc;
+
+	hInstance = GetModuleHandle(NULL);
+
+	wc.style         = CS_OWNDC;
+	wc.lpfnWndProc   = TempWindowProc;
+	wc.cbClsExtra    = 0;
+	wc.cbWndExtra    = 0;
+	wc.hInstance     = hInstance;
+	wc.hIcon         = LoadIcon(NULL, IDI_WINLOGO);
+	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wc.lpszMenuName  = NULL;
+	wc.lpszClassName = "LeoCADGLTempWindow";
+
+    RegisterClass(&wc);
+
+	HWND hWnd = CreateWindow(wc.lpszClassName, "LeoCAD Temp Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+
+	if (hWnd)
+		DestroyWindow(hWnd);
 }
 
 // ============================================================================
@@ -296,7 +386,6 @@ void GLWindow::DestroyContext()
 void GLWindow::OnInitialUpdate()
 {
 	MakeCurrent();
-	GL_InitializeExtensions();
 }
 
 bool GLWindow::MakeCurrent()

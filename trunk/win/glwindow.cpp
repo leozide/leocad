@@ -407,9 +407,6 @@ bool GLWindow::CreateFromWindow(void* data)
 		wglShareLists(share->m_hrc, prv->m_hrc);
 	}
 
-	if (prv->Multisample)
-		glEnable(GL_MULTISAMPLE_ARB);
-
 	return true;
 }
 
@@ -491,7 +488,12 @@ void GLWindow::DestroyContext()
 
 void GLWindow::OnInitialUpdate()
 {
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+
 	MakeCurrent();
+
+	if (prv->Multisample)
+		glEnable(GL_MULTISAMPLE_ARB);
 }
 
 bool GLWindow::MakeCurrent()

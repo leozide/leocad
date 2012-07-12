@@ -1407,10 +1407,20 @@ bool preferencesdlg_getopts(LC_PREFERENCESDLG_STRUCT* s, LC_PREFERENCESDLG_OPTS*
 	if (GTK_TOGGLE_BUTTON(s->det_edges)->active) opts->nDetail |= LC_DET_BRICKEDGES;
 	if (GTK_TOGGLE_BUTTON(s->det_lighting)->active) opts->nDetail |= LC_DET_LIGHTING;
 	if (GTK_TOGGLE_BUTTON(s->det_smooth)->active) opts->nDetail |= LC_DET_SMOOTH;
-	if (GTK_TOGGLE_BUTTON(s->det_antialias)->active) opts->nDetail |= LC_DET_ANTIALIAS;
 	if (GTK_TOGGLE_BUTTON(s->det_fast)->active) opts->nDetail |= LC_DET_FAST;
 	if (!read_float(s->det_width, &opts->fLineWidth, 0.5f, 5.0f))
 		return false;
+	const gchar* AASamples = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(s->det_antialias)->entry));
+	if (!strcmp(AASamples, "Off"))
+		opts->AASamples = 1;
+	else if (!strcmp(AASamples, "2x"))
+		opts->AASamples = 2;
+	else if (!strcmp(AASamples, "4x"))
+		opts->AASamples = 4;
+	else if (!strcmp(AASamples, "8x"))
+		opts->AASamples = 8;
+	else
+		opts->AASamples = 1;
 
 	opts->nSnap = 0;
 	if (GTK_TOGGLE_BUTTON(s->draw_grid)->active) opts->nSnap |= LC_DRAW_GRID;
@@ -1466,6 +1476,7 @@ static void preferencesdlg_default(GtkWidget *widget, gpointer data)
 	Sys_ProfileSaveInt("Default", "Mouse", (int)Opts.nMouse);
 	Sys_ProfileSaveInt("Default", "Detail", Opts.nDetail);
 	Sys_ProfileSaveInt("Default", "Line", (int)(Opts.fLineWidth * 100));
+	Sys_ProfileSaveInt("Default", "AASamples", Opts.AASamples);
 	Sys_ProfileSaveInt("Default", "Snap", Opts.nSnap);
 	Sys_ProfileSaveInt("Default", "Angle", Opts.nAngleSnap);
 	Sys_ProfileSaveInt("Default", "Grid", Opts.nGridSize);
@@ -1565,25 +1576,9 @@ int preferencesdlg_execute(void* param)
 	gtk_widget_show(s.det_edges);
 	gtk_table_attach_defaults(GTK_TABLE(table), s.det_edges, 0, 1, 0, 1);
 
-	s.det_lighting = gtk_check_button_new_with_label("Lighting");
-	gtk_widget_show(s.det_lighting);
-	gtk_table_attach_defaults(GTK_TABLE(table), s.det_lighting, 0, 1, 1, 2);
-
-	s.det_smooth = gtk_check_button_new_with_label("Smooth shading");
-	gtk_widget_show(s.det_smooth);
-	gtk_table_attach_defaults(GTK_TABLE(table), s.det_smooth, 0, 1, 2, 3);
-
-	s.det_antialias = gtk_check_button_new_with_label("Anti-aliasing");
-	gtk_widget_show(s.det_antialias);
-	gtk_table_attach_defaults(GTK_TABLE(table), s.det_antialias, 0, 1, 3, 4);
-
-	s.det_fast = gtk_check_button_new_with_label("Fast rendering");
-	gtk_widget_show(s.det_fast);
-	gtk_table_attach_defaults(GTK_TABLE(table), s.det_fast, 0, 1, 4, 5);
-
 	hbox = gtk_hbox_new(FALSE, 5);
 	gtk_widget_show(hbox);
-	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 5, 6);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 1, 2);
 
 	label = gtk_label_new("Line width");
 	gtk_widget_show(label);
@@ -1594,6 +1589,40 @@ int preferencesdlg_execute(void* param)
 	gtk_widget_show(s.det_width);
 	gtk_box_pack_start(GTK_BOX(hbox), s.det_width, FALSE, FALSE, 0);
 	gtk_entry_set_width_chars(GTK_ENTRY(s.det_width), 4);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_widget_show(hbox);
+	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 2, 3);
+
+	label = gtk_label_new("Anti-aliasing");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.det_antialias = gtk_combo_new();
+	gtk_widget_show(s.det_antialias);
+	gtk_box_pack_start(GTK_BOX(hbox), s.det_antialias, FALSE, FALSE, 0);
+	gtk_entry_set_width_chars(GTK_ENTRY(GTK_COMBO(s.det_antialias)->entry), 3);
+
+	GList* Samples = NULL;
+	Samples = g_list_append(Samples, (void*)"Off");
+	Samples = g_list_append(Samples, (void*)"2x");
+	Samples = g_list_append(Samples, (void*)"4x");
+	Samples = g_list_append(Samples, (void*)"8x");
+	gtk_combo_set_popdown_strings(GTK_COMBO(s.det_antialias), Samples);
+	g_list_free(Samples);
+ 
+	s.det_lighting = gtk_check_button_new_with_label("Lighting");
+	gtk_widget_show(s.det_lighting);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_lighting, 0, 1, 3, 4);
+
+	s.det_smooth = gtk_check_button_new_with_label("Smooth shading");
+	gtk_widget_show(s.det_smooth);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_smooth, 0, 1, 4, 5);
+
+	s.det_fast = gtk_check_button_new_with_label("Fast rendering");
+	gtk_widget_show(s.det_fast);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.det_fast, 0, 1, 5, 6);
 
 	table = gtk_table_new(7, 2, TRUE);
 	gtk_widget_show(table);
@@ -1825,9 +1854,28 @@ int preferencesdlg_execute(void* param)
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_edges),(opts->nDetail & LC_DET_BRICKEDGES) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_lighting),(opts->nDetail & LC_DET_LIGHTING) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_smooth),(opts->nDetail & LC_DET_SMOOTH) ? TRUE : FALSE);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_antialias),(opts->nDetail & LC_DET_ANTIALIAS) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_fast),(opts->nDetail & LC_DET_FAST) ? TRUE : FALSE);
 	write_float(s.det_width, opts->fLineWidth);
+	switch (opts->AASamples)
+	{
+	default:
+	case 1:
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(s.det_antialias)->entry), "Off");
+		gtk_list_select_item(GTK_LIST(GTK_COMBO(s.det_antialias)->list), 0);
+		break;
+	case 2:
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(s.det_antialias)->entry), "2x");
+		gtk_list_select_item(GTK_LIST(GTK_COMBO(s.det_antialias)->list), 1);
+		break;
+	case 4:
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(s.det_antialias)->entry), "4x");
+		gtk_list_select_item(GTK_LIST(GTK_COMBO(s.det_antialias)->list), 2);
+		break;
+	case 8:
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(s.det_antialias)->entry), "8x");
+		gtk_list_select_item(GTK_LIST(GTK_COMBO(s.det_antialias)->list), 3);
+		break;
+	}
 
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_grid), (opts->nSnap & LC_DRAW_GRID) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_axis), (opts->nSnap & LC_DRAW_AXIS) ? TRUE : FALSE);
@@ -1864,12 +1912,15 @@ int preferencesdlg_execute(void* param)
 			opts->nMouse = TempOpts.nMouse;
 			opts->nDetail = TempOpts.nDetail;
 			opts->fLineWidth = TempOpts.fLineWidth;
+			opts->AASamples = TempOpts.AASamples;
 			opts->nSnap = TempOpts.nSnap;
 			opts->nAngleSnap = TempOpts.nAngleSnap;
 			opts->nGridSize = TempOpts.nGridSize;
 			opts->nScene = TempOpts.nScene;
 			opts->fDensity = TempOpts.fDensity;
 			strcpy(opts->strBackground, TempOpts.strBackground);
+
+			Sys_ProfileSaveInt("Default", "AASamples", opts->AASamples);
 		}
 		else
 			ret = LC_CANCEL;

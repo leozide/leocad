@@ -32,11 +32,6 @@ inline T lcClamp(const T& Value, const U& Min, const V& Max)
 		return Value;
 }
 
-class lcVector3;
-class lcVector4;
-class lcMatrix33;
-class lcMatrix44;
-
 class lcVector3
 {
 public:
@@ -282,6 +277,11 @@ inline float lcVector3::LengthSquared() const
 	return x * x + y * y + z * z;
 }
 
+inline float lcLength(const lcVector3& a)
+{
+	return a.Length();
+}
+
 inline lcVector3 lcNormalize(const lcVector3& a)
 {
 	lcVector3 Ret(a);
@@ -300,6 +300,11 @@ inline float lcDot3(const lcVector4& a, const lcVector3& b)
 }
 
 inline float lcDot3(const lcVector3& a, const lcVector4& b)
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline float lcDot3(const lcVector4& a, const lcVector4& b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -855,6 +860,76 @@ inline lcMatrix44 lcMatrix44Inverse(const lcMatrix44& m)
 #undef SWAP_ROWS
 }
 
+inline lcVector4 lcQuaternionRotationX(float Radians)
+{
+	return lcVector4(sinf(Radians / 2.0f), 0, 0, cosf(Radians / 2.0f));
+}
+
+inline lcVector4 lcQuaternionRotationY(float Radians)
+{
+	return lcVector4(0, sinf(Radians / 2.0f), 0, cosf(Radians / 2.0f));
+}
+
+inline lcVector4 lcQuaternionRotationZ(float Radians)
+{
+	return lcVector4(0, 0, sinf(Radians / 2.0f), cosf(Radians / 2.0f));
+}
+
+inline lcVector4 lcQuaternionFromAxisAngle(const lcVector4& a)
+{
+	float s = sinf(a[3] / 2.0f);
+	return lcVector4(a[0] * s, a[1] * s, a[2] * s, cosf(a[3] / 2.0f));
+}
+
+inline lcVector4 lcQuaternionToAxisAngle(const lcVector4& a)
+{
+	float Len = lcDot3(a, a);
+
+	if (Len > 0.00001f)
+	{
+		float f = 1.0f / sqrtf(Len);
+		return lcVector4(a[0] * f, a[1] * f, a[2] * f, acosf(a[3]) * 2.0f);
+	}
+	else
+	{
+		return lcVector4(0, 0, 1, 0);
+	}
+}
+
+inline lcVector4 lcQuaternionMultiply(const lcVector4& a, const lcVector4& b)
+{
+	float x =  a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0];
+	float y = -a[0] * b[2] + a[1] * b[3] + a[2] * b[0] + a[3] * b[1];
+	float z =  a[0] * b[1] - a[1] * b[0] + a[2] * b[3] + a[3] * b[2];
+	float w = -a[0] * b[0] - a[1] * b[1] - a[2] * b[2] + a[3] * b[3];
+
+	return lcVector4(x, y, z, w);
+}
+
+inline lcVector3 lcQuaternionMul(const lcVector3& a, const lcVector4& b)
+{
+	// Faster to transform to a matrix and multiply.
+	float Tx  = 2.0f*b[0];
+	float Ty  = 2.0f*b[1];
+	float Tz  = 2.0f*b[2];
+	float Twx = Tx*b[3];
+	float Twy = Ty*b[3];
+	float Twz = Tz*b[3];
+	float Txx = Tx*b[0];
+	float Txy = Ty*b[0];
+	float Txz = Tz*b[0];
+	float Tyy = Ty*b[1];
+	float Tyz = Tz*b[1];
+	float Tzz = Tz*b[2];
+
+	lcVector3 Rows[3];
+	Rows[0] = lcVector3(1.0f-(Tyy+Tzz), Txy+Twz, Txz-Twy);
+	Rows[1] = lcVector3(Txy-Twz, 1.0f-(Txx+Tzz), Tyz+Twx);
+	Rows[2] = lcVector3(Txz+Twy, Tyz-Twx, 1.0f-(Txx+Tyy));
+
+	return lcVector3(Rows[0]*a[0] + Rows[1]*a[1] + Rows[2]*a[2]);
+}
+
 // Convert world coordinates to screen coordinates.
 inline lcVector3 lcProjectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
 {
@@ -986,7 +1061,7 @@ inline lcVector3 lcZoomExtents(const lcVector3& Position, const lcMatrix44& Worl
 
 // Calculate the intersection of a line segment and a plane and returns false
 // if they are parallel or the intersection is outside the line segment.
-inline bool lcLinePlaneIntersection(lcVector3& Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
+inline bool lcLinePlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
 {
 	lcVector3 Dir = End - Start;
 	lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
@@ -999,7 +1074,7 @@ inline bool lcLinePlaneIntersection(lcVector3& Intersection, const lcVector3& St
 
 	float t = -t1 / t2;
 
-	Intersection = Start + t * Dir;
+	*Intersection = Start + t * Dir;
 
 	if ((t < 0.0f) || (t > 1.0f))
 		return false;
@@ -1007,7 +1082,7 @@ inline bool lcLinePlaneIntersection(lcVector3& Intersection, const lcVector3& St
 	return true;
 }
 
-inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
+inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector3& Start, const lcVector3& End, float* MinDist, lcVector3* Intersection)
 {
 	// Calculate the polygon plane.
 	lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
@@ -1028,18 +1103,18 @@ inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& 
 		return false;
 
 	// Intersection of the plane and line segment.
-	Intersection = Start - (t1 / t2) * Dir;
+	*Intersection = Start - (t1 / t2) * Dir;
 
-	float Dist = (Start - Intersection).Length();
+	float Dist = lcLength(Start - *Intersection);
 
-	if (Dist > MinDist)
+	if (Dist > *MinDist)
 		return false;
 
 	// Check if we're inside the triangle.
 	lcVector3 pa1, pa2, pa3;
-	pa1 = lcNormalize(p1 - Intersection);
-	pa2 = lcNormalize(p2 - Intersection);
-	pa3 = lcNormalize(p3 - Intersection);
+	pa1 = lcNormalize(p1 - *Intersection);
+	pa2 = lcNormalize(p2 - *Intersection);
+	pa3 = lcNormalize(p3 - *Intersection);
 
 	float a1, a2, a3;
 	a1 = lcDot(pa1, pa2);
@@ -1050,11 +1125,294 @@ inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& 
 
 	if (fabs(total - 360) <= 0.001f)
 	{
-		MinDist = Dist;
+		*MinDist = Dist;
 		return true;
 	}
 
 	return false;
 }
+
+// Sutherland-Hodgman method of clipping a polygon to a plane.
+inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* OutPoints, int* NumOutPoints, const lcVector4& Plane)
+{
+	lcVector3 *s, *p, i;
+
+	*NumOutPoints = 0;
+	s = &InPoints[NumInPoints-1];
+
+	for (int j = 0; j < NumInPoints; j++)
+	{
+		p = &InPoints[j];
+
+		if (lcDot3(*p, Plane) + Plane[3] <= 0)
+		{
+			if (lcDot3(*s, Plane) + Plane[3] <= 0)
+			{
+				// Both points inside.
+				OutPoints[*NumOutPoints] = *p;
+				*NumOutPoints = *NumOutPoints + 1;
+			}
+			else
+			{
+				// Outside, inside.
+				lcLinePlaneIntersection(&i, *s, *p, Plane);
+
+				OutPoints[*NumOutPoints] = i;
+				*NumOutPoints = *NumOutPoints + 1;
+				OutPoints[*NumOutPoints] = *p;
+				*NumOutPoints = *NumOutPoints + 1;
+			}
+		}
+		else
+		{
+			if (lcDot3(*s, Plane) + Plane[3] <= 0)
+			{
+				// Inside, outside.
+				lcLinePlaneIntersection(&i, *s, *p, Plane);
+
+				OutPoints[*NumOutPoints] = i;
+				*NumOutPoints = *NumOutPoints + 1;
+			}
+		}
+
+		s = p;
+	}
+}
+
+// Return true if a polygon intersects a set of planes.
+inline bool lcTriangleIntersectsPlanes(float* p1, float* p2, float* p3, const lcVector4 Planes[6])
+{
+	const int NumPlanes = 6;
+	float* Points[3] = { p1, p2, p3 };
+	int Outcodes[3] = { 0, 0, 0 }, i;
+	int NumPoints = 3;
+
+	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
+	for (i = 0; i < NumPoints; i++)
+	{
+		lcVector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+
+		for (int j = 0; j < NumPlanes; j++)
+		{
+			if (lcDot3(Pt, Planes[j]) + Planes[j][3] > 0)
+				Outcodes[i] |= 1 << j;
+		}
+	}
+
+	// Polygon completely outside a plane.
+	if ((Outcodes[0] & Outcodes[1] & Outcodes[2]) != 0)
+		return false;
+
+	// If any vertex has an out code of all zeros then we intersect the volume.
+	if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2])
+		return true;
+
+	// Buffers for clipping the polygon.
+	lcVector3 ClipPoints[2][8];
+	int NumClipPoints[2];
+	int ClipBuffer = 0;
+
+	NumClipPoints[0] = NumPoints;
+	ClipPoints[0][0] = lcVector3(p1[0], p1[1], p1[2]);
+	ClipPoints[0][1] = lcVector3(p2[0], p2[1], p2[2]);
+	ClipPoints[0][2] = lcVector3(p3[0], p3[1], p3[2]);
+
+	// Now clip the polygon against the planes.
+	for (i = 0; i < NumPlanes; i++)
+	{
+		lcPolygonPlaneClip(ClipPoints[ClipBuffer], NumClipPoints[ClipBuffer], ClipPoints[ClipBuffer^1], &NumClipPoints[ClipBuffer^1], Planes[i]);
+		ClipBuffer ^= 1;
+
+		if (!NumClipPoints[ClipBuffer])
+			return false;
+	}
+
+	return true;
+}
+
+/*
+float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
+{
+	Vector3 Dir = End - Start;
+
+	float t1 = Dot3(Start - Point, Dir);
+	float t2 = LengthSquared(Dir);
+
+	float t = -t1 / t2;
+
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+
+	Vector3 Closest = Start + t * Dir;
+
+	return Length(Closest - Point);
+}
+
+// Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
+bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist, Vector3* Intersection)
+{
+	bool MiddleQuadrant[3];
+	bool Inside = true;
+	float CandidatePlane[3];
+	float MaxT[3];
+	int i;
+
+	// Find candidate planes.
+	for (i = 0; i < 3; i++)
+	{
+		if (Start[i] < Box.m_Min[i])
+		{
+			MiddleQuadrant[i] = false;
+			CandidatePlane[i] = Box.m_Min[i];
+			Inside = false;
+		}
+		else if (Start[i] > Box.m_Max[i])
+		{
+			MiddleQuadrant[i] = false;
+			CandidatePlane[i] = Box.m_Max[i];
+			Inside = false;
+		}
+		else
+		{
+			MiddleQuadrant[i] = true;
+		}
+	}
+
+	// Ray origin inside box.
+	if (Inside)
+	{
+		*Dist = 0;
+
+		if (*Intersection)
+			*Intersection = Start;
+
+		return true;
+	}
+
+	// Calculate T distances to candidate planes.
+	Vector3 Dir = End - Start;
+
+	for (i = 0; i < 3; i++)
+	{
+		if (!MiddleQuadrant[i] && Dir[i] != 0.0f)
+			MaxT[i] = (CandidatePlane[i] - Start[i]) / Dir[i];
+		else
+			MaxT[i] = -1.0f;
+	}
+
+	// Get largest of the MaxT's for final choice of intersection.
+	int WhichPlane = 0;
+	for (i = 1; i < 3; i++)
+		if (MaxT[WhichPlane] < MaxT[i])
+			WhichPlane = i;
+
+	// Check final candidate actually inside box.
+	if (MaxT[WhichPlane] < 0.0f)
+		return false;
+
+	Vector3 Point;
+
+	for (i = 0; i < 3; i++)
+	{
+		if (WhichPlane != i)
+		{
+			Point[i] = Start[i] + MaxT[WhichPlane] * Dir[i];
+			if (Point[i] < Box.m_Min[i] || Point[i] > Box.m_Max[i])
+				return false;
+		}
+		else
+			Point[i] = CandidatePlane[i];
+	}
+
+	*Dist = Length(Point - Start);
+
+	if (*Intersection)
+		*Intersection = Point;
+
+	return true;
+}
+
+// Return true if Box intersects the volume defined by Planes.
+bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes)
+{
+	Vector3 Points[8];
+	Box.GetPoints(Points);
+
+	// Start by testing trivial reject/accept cases.
+	int Outcodes[8];
+	int i;
+
+	for (i = 0; i < 8; i++)
+	{
+		Outcodes[i] = 0;
+
+		for (int j = 0; j < NumPlanes; j++)
+		{
+			if (Dot3(Points[i], Planes[j]) + Planes[j][3] > 0)
+				Outcodes[i] |= 1 << j;
+		}
+	}
+
+	int OutcodesOR = 0, OutcodesAND = 0x3f;
+
+	for (i = 0; i < 8; i++)
+	{
+		OutcodesAND &= Outcodes[i];
+		OutcodesOR |= Outcodes[i];
+	}
+
+	// All corners outside the same plane.
+	if (OutcodesAND != 0)
+		return false;
+
+	// All corners inside the volume.
+	if (OutcodesOR == 0)
+		return true;
+
+	return true;
+}
+
+bool SphereRayMinIntersectDistance(const Vector3& Center, float Radius, const Vector3& Start, const Vector3& End, float* Dist)
+{
+	Vector3 Dir = Center - Start;
+	float LengthSquaredDir = LengthSquared(Dir);
+	float RadiusSquared = Radius * Radius;
+
+	if (LengthSquaredDir < RadiusSquared)
+	{
+		// Ray origin inside sphere.
+		*Dist = 0;
+		return true;
+	}
+	else
+	{
+		Vector3 RayDir = End - Start;
+		float t = Dot3(Dir, RayDir) / LengthSquared(RayDir);
+
+		// Ray points away from sphere.
+		if (t < 0)
+			return false;
+
+		float c = (RadiusSquared - LengthSquaredDir) / LengthSquared(RayDir) + (t * t);
+		if (c > 0)
+		{
+			*Dist = t - sqrtf(c);
+			return true;
+		}
+
+		return false;
+	}
+}
+
+bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes)
+{
+	for (int j = 0; j < NumPlanes; j++)
+		if (Dot3(Center, Planes[j]) + Planes[j][3] > Radius)
+			return false;
+
+	return true;
+}*/
 
 #endif // _LC_MATH_H_

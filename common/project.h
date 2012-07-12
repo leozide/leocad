@@ -5,7 +5,6 @@
 #include "typedefs.h"
 #include "opengl.h"
 #include "array.h"
-#include "algebra.h"
 #include "lc_math.h"
 
 typedef enum 

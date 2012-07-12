@@ -161,7 +161,6 @@
     <ClCompile Include="Tools.cpp" />
     <ClCompile Include="transdlg.cpp" />
     <ClCompile Include="win_gl.cpp" />
-    <ClCompile Include="..\common\algebra.cpp" />
     <ClCompile Include="..\Common\camera.cpp" />
     <ClCompile Include="..\common\console.cpp" />
     <ClCompile Include="..\common\curve.cpp" />

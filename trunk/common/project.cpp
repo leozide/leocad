@@ -30,7 +30,6 @@
 #include "view.h"
 #include "library.h"
 #include "texfont.h"
-#include "algebra.h"
 #include "debug.h"
 #include "lc_application.h"
 
@@ -6179,7 +6178,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
 	lcVector3 Intersection;
-	if (lcLinePlaneIntersection(Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, 0)))
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, 0)))
 	{
 		SnapVector(Intersection);
 		Position = Intersection;
@@ -6801,31 +6800,28 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder)
 		bs[2] = bs[5] = pos[2];
 	}
 
-	Vector3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
+	lcVector3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
 
 	// Create the rotation matrix.
-	Quaternion Rotation(0, 0, 0, 1);
-	Quaternion WorldToFocus, FocusToWorld;
+	lcVector4 RotationQuaternion(0, 0, 0, 1);
+	lcVector4 WorldToFocusQuaternion, FocusToWorldQuaternion;
 
 	if (!(m_nSnap & LC_DRAW_LOCK_X) && (Delta[0] != 0.0f))
 	{
-		Quaternion q;
-		q.CreateRotationX(Delta[0] * LC_DTOR);
-		Rotation = Mul(q, Rotation);
+		lcVector4 q = lcQuaternionRotationX(Delta[0] * LC_DTOR);
+		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
 	}
 
 	if (!(m_nSnap & LC_DRAW_LOCK_Y) && (Delta[1] != 0.0f))
 	{
-		Quaternion q;
-		q.CreateRotationY(Delta[1] * LC_DTOR);
-		Rotation = Mul(q, Rotation);
+		lcVector4 q = lcQuaternionRotationY(Delta[1] * LC_DTOR);
+		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
 	}
 
 	if (!(m_nSnap & LC_DRAW_LOCK_Z) && (Delta[2] != 0.0f))
 	{
-		Quaternion q;
-		q.CreateRotationZ(Delta[2] * LC_DTOR);
-		Rotation = Mul(q, Rotation);
+		lcVector4 q = lcQuaternionRotationZ(Delta[2] * LC_DTOR);
+		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
 	}
 
 	// Transform the rotation relative to the focused piece.
@@ -6837,10 +6833,10 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder)
 		lcVector4 Rot;
 		Rot = ((Piece*)pFocus)->mRotation;
 
-		WorldToFocus.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
-		FocusToWorld.FromAxisAngle(Vector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
+		WorldToFocusQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
+		FocusToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
 
-		Rotation = Mul(FocusToWorld, Rotation);
+		RotationQuaternion = lcQuaternionMultiply(FocusToWorldQuaternion, RotationQuaternion);
 	}
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -6851,55 +6847,53 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder)
 		pos = pPiece->mPosition;
 		rot = pPiece->mRotation;
 
-		Vector4 NewRotation;
+		lcVector4 NewRotation;
 
 		if ((nSel == 1) && (pFocus == pPiece))
 		{
-			Quaternion LocalToWorld;
-			LocalToWorld.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+			lcVector4 LocalToWorldQuaternion;
+			LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
-			Quaternion NewLocalToWorld;
+			lcVector4 NewLocalToWorldQuaternion;
 
 			if (pFocus != NULL)
 			{
-				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
-				NewLocalToWorld = Mul(LocalToFocus, Rotation);
+				lcVector4 LocalToFocusQuaternion = lcQuaternionMultiply(WorldToFocusQuaternion, LocalToWorldQuaternion);
+				NewLocalToWorldQuaternion = lcQuaternionMultiply(LocalToFocusQuaternion, RotationQuaternion);
 			}
 			else
 			{
-				NewLocalToWorld = Mul(Rotation, LocalToWorld);
+				NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToWorldQuaternion);
 			}
 
-			NewLocalToWorld.ToAxisAngle(NewRotation);
+			NewRotation = lcQuaternionToAxisAngle(NewLocalToWorldQuaternion);
 		}
 		else
 		{
-			Vector3 Distance = Vector3(pos[0], pos[1], pos[2]) - Center;
+			lcVector3 Distance = lcVector3(pos[0], pos[1], pos[2]) - Center;
 
-			Quaternion LocalToWorld;
-			LocalToWorld.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
+			lcVector4 LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
 
-			Quaternion NewLocalToWorld;
+			lcVector4 NewLocalToWorldQuaternion;
 
 			if (pFocus != NULL)
 			{
-				Quaternion LocalToFocus = Mul(WorldToFocus, LocalToWorld);
-				NewLocalToWorld = Mul(Rotation, LocalToFocus);
+				lcVector4 LocalToFocusQuaternion = lcQuaternionMultiply(WorldToFocusQuaternion, LocalToWorldQuaternion);
+				NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToFocusQuaternion);
 
-				Quaternion WorldToLocal;
-				WorldToLocal.FromAxisAngle(Vector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
+				lcVector4 WorldToLocalQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
 
-				Distance = Mul(Distance, WorldToLocal);
-				Distance = Mul(Distance, NewLocalToWorld);
+				Distance = lcQuaternionMul(Distance, WorldToLocalQuaternion);
+				Distance = lcQuaternionMul(Distance, NewLocalToWorldQuaternion);
 			}
 			else
 			{
-				NewLocalToWorld = Mul(Rotation, LocalToWorld);
+				NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToWorldQuaternion);
 
-				Distance = Mul(Distance, Rotation);
+				Distance = lcQuaternionMul(Distance, RotationQuaternion);
 			}
 
-			NewLocalToWorld.ToAxisAngle(NewRotation);
+			NewRotation = lcQuaternionToAxisAngle(NewLocalToWorldQuaternion);
 
 			pos[0] = Center[0] + Distance[0];
 			pos[1] = Center[1] + Distance[1];
@@ -7222,15 +7216,15 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					lcUnprojectPoints(Pts, 3, ModelView, Projection, Viewport);
 
 					float ax, ay;
-					Vector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
+					lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
 					vx.Normalize();
-					Vector3 x(1, 0, 0);
-					ax = acosf(Dot3(vx, x));
+					lcVector3 x(1, 0, 0);
+					ax = acosf(lcDot(vx, x));
 
-					Vector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
+					lcVector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
 					vy.Normalize();
-					Vector3 y(0, -1, 0);
-					ay = acosf(Dot3(vy, y));
+					lcVector3 y(0, -1, 0);
+					ay = acosf(lcDot(vy, y));
 
 					if (ax > 135)
 						axis[0] = -axis[0];
@@ -7242,7 +7236,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 					{
 						float tmp = axis[0];
 
-						ax = acosf(Dot3(vx, y));
+						ax = acosf(lcDot(vx, y));
 						if (ax > 90)
 						{
 							axis[0] = -axis[1];

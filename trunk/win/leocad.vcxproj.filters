@@ -170,9 +170,6 @@
     <ClCompile Include="win_gl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\algebra.cpp">
-      <Filter>Common Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\camera.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>

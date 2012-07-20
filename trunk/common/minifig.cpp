@@ -586,23 +586,6 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 		ParseSettings(MemSettings);
 	}
 
-	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 14, 1, 7, 4, 4, 14, 14, 7, 7, 0, 0, 0, 7, 7 };
-	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
-	                                        "None", "None", "3815", "3817", "3816", "None", "None" };
-	int i;
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
-	{
-		m_Colors[i] = lcGetColorIndex(ColorCodes[i]);
-		m_Angles[i] = 0;
-
-		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
-		if (m_Info[i] != NULL)
-			m_Info[i]->AddRef();
-	}
-
-	Calculate();
-
 	m_MinifigCount = 0;
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
@@ -647,18 +630,17 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 
 void MinifigWizard::OnInitialUpdate()
 {
-	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 14, 1, 7, 4, 4, 14, 14, 7, 7, 0, 0, 0, 7, 7 };
-	const char *pieces[LC_MFW_NUMITEMS] = { "3624", "3626BP01", "973", "None", "3819", "3818", "3820", "3820",
-	                                        "None", "None", "3815", "3817", "3816", "None", "None" };
-
 	MakeCurrent();
+
+	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
+	const char* Pieces[LC_MFW_NUMITEMS] = { "3624", "None", "3626BP01", "None", "973", "3815", "None", "3819", "3818", "3820", "3820", "None", "None", "3817", "3816", "None", "None" };
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		m_Colors[i] = lcGetColorIndex(ColorCodes[i]);
 		m_Angles[i] = 0;
 
-		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(pieces[i]);
+		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(Pieces[i]);
 		if (m_Info[i] != NULL)
 			m_Info[i]->AddRef();
 	}
@@ -719,21 +701,23 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 {
 	const char* SectionNames[LC_MFW_NUMITEMS] =
 	{
-		"[HATS]", // LC_MFW_HAT
-		"[HEAD]", // LC_MFW_HEAD
-		"[BODY]", // LC_MFW_TORSO
-		"[NECK]", // LC_MFW_NECK
-		"[RARM]", // LC_MFW_LEFT_ARM
-		"[LARM]", // LC_MFW_RIGHT_ARM
-		"[RHAND]", // LC_MFW_LEFT_HAND
-		"[LHAND]", // LC_MFW_RIGHT_HAND
-		"[RHANDA]", // LC_MFW_LEFT_TOOL
-		"[LHANDA]", // LC_MFW_RIGHT_TOOL
-		"[BODY2]", // LC_MFW_HIPS
-		"[RLEG]", // LC_MFW_LEFT_LEG
-		"[LLEG]", // LC_MFW_RIGHT_LEG
-		"[RLEGA]", // LC_MFW_LEFT_SHOE
-		"[LLEGA]", // LC_MFW_RIGHT_SHOE
+		"[HATS]",   // LC_MFW_HATS
+		"[HATS2]",  // LC_MFW_HATS2
+		"[HEAD]",   // LC_MFW_HEAD
+		"[NECK]",   // LC_MFW_NECK
+		"[BODY]",   // LC_MFW_BODY
+		"[BODY2]",  // LC_MFW_BODY2
+		"[BODY3]",  // LC_MFW_BODY3
+		"[RARM]",   // LC_MFW_RARM
+		"[LARM]",   // LC_MFW_LARM
+		"[RHAND]",  // LC_MFW_RHAND
+		"[LHAND]",  // LC_MFW_LHAND
+		"[RHANDA]", // LC_MFW_RHANDA
+		"[LHANDA]", // LC_MFW_LHANDA
+		"[RLEG]",   // LC_MFW_RLEG
+		"[LLEG]",   // LC_MFW_LLEG
+		"[RLEGA]",  // LC_MFW_RLEGA
+		"[LLEGA]",  // LC_MFW_LLEGA
 	};
 
 	for (int SectionIndex = 0; SectionIndex < LC_MFW_NUMITEMS; SectionIndex++)
@@ -881,11 +865,14 @@ void MinifigWizard::Calculate()
 	float HeadOffset = 0.0f;
 	lcMatrix44 Root, Mat, Mat2;
 
-	bool DroidTorso = m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "30375");
-	bool SkeletonTorso = m_Info[LC_MFW_TORSO] && !strcmp(m_Info[LC_MFW_TORSO]->m_strName, "6260");
+	bool DroidTorso = m_Info[LC_MFW_BODY] && !strcmp(m_Info[LC_MFW_BODY]->m_strName, "30375");
+	bool SkeletonTorso = m_Info[LC_MFW_BODY] && !strcmp(m_Info[LC_MFW_BODY]->m_strName, "6260");
 
-	Root = lcMatrix44Translation(lcVector3(0, 0, 2.88f));
-	m_Matrices[LC_MFW_TORSO] = lcMul(mSettings[LC_MFW_TORSO][GetSelectionIndex(LC_MFW_TORSO)].Offset, Root);
+	if (m_Info[LC_MFW_BODY3])
+		Root = lcMatrix44Translation(lcVector3(0, 0, 2.96f));
+	else
+		Root = lcMatrix44Translation(lcVector3(0, 0, 2.88f));
+	m_Matrices[LC_MFW_BODY] = lcMul(mSettings[LC_MFW_BODY][GetSelectionIndex(LC_MFW_BODY)].Offset, Root);
 
 	if (m_Info[LC_MFW_NECK])
 	{
@@ -901,123 +888,138 @@ void MinifigWizard::Calculate()
 		m_Matrices[LC_MFW_HEAD] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_HAT])
+	if (m_Info[LC_MFW_HATS])
 	{
-		Mat = lcMatrix44RotationZ(-LC_DTOR * m_Angles[LC_MFW_HAT]);
-		Mat = lcMul(mSettings[LC_MFW_HAT][GetSelectionIndex(LC_MFW_HAT)].Offset, Mat);
-		m_Matrices[LC_MFW_HAT] = lcMul(Mat, m_Matrices[LC_MFW_HEAD]);
+		Mat = lcMatrix44RotationZ(-LC_DTOR * m_Angles[LC_MFW_HATS]);
+		Mat = lcMul(mSettings[LC_MFW_HATS][GetSelectionIndex(LC_MFW_HATS)].Offset, Mat);
+		m_Matrices[LC_MFW_HATS] = lcMul(Mat, m_Matrices[LC_MFW_HEAD]);
 	}
 
-	if (m_Info[LC_MFW_RIGHT_ARM])
+	if (m_Info[LC_MFW_HATS2])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_RIGHT_ARM]);
-
-		if (DroidTorso || SkeletonTorso)
-			Mat2 = lcMatrix44Identity();
-		else
-			Mat2 = lcMatrix44RotationY(LC_DTOR * 9.791f);
-		Mat2.SetTranslation(lcVector3(-0.62f, 0, -0.32f));
-
-		Mat = lcMul(mSettings[LC_MFW_RIGHT_ARM][GetSelectionIndex(LC_MFW_RIGHT_ARM)].Offset, Mat);
-		Mat = lcMul(Mat, Mat2);
-		m_Matrices[LC_MFW_RIGHT_ARM] = lcMul(Mat, Root);
+		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_HATS2]);
+		Mat = lcMul(mSettings[LC_MFW_HATS2][GetSelectionIndex(LC_MFW_HATS2)].Offset, Mat);
+		m_Matrices[LC_MFW_HATS2] = lcMul(Mat, m_Matrices[LC_MFW_HATS]);
 	}
 
-	if (m_Info[LC_MFW_RIGHT_HAND])
+	if (m_Info[LC_MFW_RARM])
 	{
-		Mat = lcMatrix44RotationY(-LC_DTOR * m_Angles[LC_MFW_RIGHT_HAND]);
-		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
-		Mat = lcMul(mSettings[LC_MFW_RIGHT_HAND][GetSelectionIndex(LC_MFW_RIGHT_HAND)].Offset, Mat);
-		Mat = lcMul(Mat, Mat2);
-		Mat.SetTranslation(lcVector3(-0.2f, -0.4f, -0.76f));
-		m_Matrices[LC_MFW_RIGHT_HAND] = lcMul(Mat, m_Matrices[LC_MFW_RIGHT_ARM]);
-	}
-
-	if (m_Info[LC_MFW_RIGHT_TOOL])
-	{
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_RIGHT_TOOL]);
-		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
-		Mat = lcMul(mSettings[LC_MFW_RIGHT_TOOL][GetSelectionIndex(LC_MFW_RIGHT_TOOL)].Offset, Mat);
-		m_Matrices[LC_MFW_RIGHT_TOOL] = lcMul(Mat, m_Matrices[LC_MFW_RIGHT_HAND]);
-	}
-
-	if (m_Info[LC_MFW_LEFT_ARM])
-	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_LEFT_ARM]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_RARM]);
 
 		if (DroidTorso || SkeletonTorso)
 			Mat2 = lcMatrix44Identity();
 		else
 			Mat2 = lcMatrix44RotationY(-LC_DTOR * 9.791f);
-		Mat2.SetTranslation(lcVector3(0.62f, 0.0f, -0.32f));
+		Mat2.SetTranslation(lcVector3(0.62f, 0, -0.32f));
 
-		Mat = lcMul(mSettings[LC_MFW_LEFT_ARM][GetSelectionIndex(LC_MFW_LEFT_ARM)].Offset, Mat);
+		Mat = lcMul(mSettings[LC_MFW_RARM][GetSelectionIndex(LC_MFW_RARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
-		m_Matrices[LC_MFW_LEFT_ARM] = lcMul(Mat, Root);
+		m_Matrices[LC_MFW_RARM] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_LEFT_HAND])
+	if (m_Info[LC_MFW_RHAND])
 	{
-		Mat = lcMatrix44RotationY(-LC_DTOR * m_Angles[LC_MFW_LEFT_HAND]);
+		Mat = lcMatrix44RotationY(-LC_DTOR * m_Angles[LC_MFW_RHAND]);
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
-		Mat = lcMul(mSettings[LC_MFW_LEFT_HAND][GetSelectionIndex(LC_MFW_LEFT_HAND)].Offset, Mat);
+		Mat = lcMul(mSettings[LC_MFW_RHAND][GetSelectionIndex(LC_MFW_RHAND)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
 		Mat.SetTranslation(lcVector3(0.2f, -0.4f, -0.76f));
-		m_Matrices[LC_MFW_LEFT_HAND] = lcMul(Mat, m_Matrices[LC_MFW_LEFT_ARM]);
+		m_Matrices[LC_MFW_RHAND] = lcMul(Mat, m_Matrices[LC_MFW_RARM]);
 	}
 
-	if (m_Info[LC_MFW_LEFT_TOOL])
+	if (m_Info[LC_MFW_RHANDA])
 	{
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_LEFT_TOOL]);
+		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_RHANDA]);
 		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
-		Mat = lcMul(mSettings[LC_MFW_LEFT_TOOL][GetSelectionIndex(LC_MFW_LEFT_TOOL)].Offset, Mat);
-		m_Matrices[LC_MFW_LEFT_TOOL] = lcMul(Mat, m_Matrices[LC_MFW_LEFT_HAND]);
+		Mat = lcMul(mSettings[LC_MFW_RHANDA][GetSelectionIndex(LC_MFW_RHANDA)].Offset, Mat);
+		m_Matrices[LC_MFW_RHANDA] = lcMul(Mat, m_Matrices[LC_MFW_RHAND]);
 	}
 
-	if (m_Info[LC_MFW_HIPS])
+	if (m_Info[LC_MFW_LARM])
+	{
+		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_LARM]);
+
+		if (DroidTorso || SkeletonTorso)
+			Mat2 = lcMatrix44Identity();
+		else
+			Mat2 = lcMatrix44RotationY(LC_DTOR * 9.791f);
+		Mat2.SetTranslation(lcVector3(-0.62f, 0.0f, -0.32f));
+
+		Mat = lcMul(mSettings[LC_MFW_LARM][GetSelectionIndex(LC_MFW_LARM)].Offset, Mat);
+		Mat = lcMul(Mat, Mat2);
+		m_Matrices[LC_MFW_LARM] = lcMul(Mat, Root);
+	}
+
+	if (m_Info[LC_MFW_LHAND])
+	{
+		Mat = lcMatrix44RotationY(-LC_DTOR * m_Angles[LC_MFW_LHAND]);
+		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
+		Mat = lcMul(mSettings[LC_MFW_LHAND][GetSelectionIndex(LC_MFW_LHAND)].Offset, Mat);
+		Mat = lcMul(Mat, Mat2);
+		Mat.SetTranslation(lcVector3(-0.2f, -0.4f, -0.76f));
+		m_Matrices[LC_MFW_LHAND] = lcMul(Mat, m_Matrices[LC_MFW_LARM]);
+	}
+
+	if (m_Info[LC_MFW_LHANDA])
+	{
+		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_LHANDA]);
+		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
+		Mat = lcMul(mSettings[LC_MFW_LHANDA][GetSelectionIndex(LC_MFW_LHANDA)].Offset, Mat);
+		m_Matrices[LC_MFW_LHANDA] = lcMul(Mat, m_Matrices[LC_MFW_LHAND]);
+	}
+
+	if (m_Info[LC_MFW_BODY2])
 	{
 		Mat = lcMatrix44Identity();
 		Mat.SetTranslation(lcVector3(0, 0, -1.28f));
-		Mat = lcMul(mSettings[LC_MFW_HIPS][GetSelectionIndex(LC_MFW_HIPS)].Offset, Mat);
-		m_Matrices[LC_MFW_HIPS] = lcMul(Mat, Root);
+		Mat = lcMul(mSettings[LC_MFW_BODY2][GetSelectionIndex(LC_MFW_BODY2)].Offset, Mat);
+		m_Matrices[LC_MFW_BODY2] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_RIGHT_LEG])
+	if (m_Info[LC_MFW_BODY3])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_RIGHT_LEG]);
-		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
-		Mat = lcMul(mSettings[LC_MFW_RIGHT_LEG][GetSelectionIndex(LC_MFW_RIGHT_LEG)].Offset, Mat);
-		m_Matrices[LC_MFW_RIGHT_LEG] = lcMul(Mat, Root);
+		Mat = lcMatrix44Identity();
+		Mat.SetTranslation(lcVector3(0, 0, -1.28f));
+		Mat = lcMul(mSettings[LC_MFW_BODY3][GetSelectionIndex(LC_MFW_BODY3)].Offset, Mat);
+		m_Matrices[LC_MFW_BODY3] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_RIGHT_SHOE])
+	if (m_Info[LC_MFW_RLEG])
+	{
+		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_RLEG]);
+		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
+		Mat = lcMul(mSettings[LC_MFW_RLEG][GetSelectionIndex(LC_MFW_RLEG)].Offset, Mat);
+		m_Matrices[LC_MFW_RLEG] = lcMul(Mat, Root);
+	}
+
+	if (m_Info[LC_MFW_RLEGA])
 	{
 		lcVector3 Center(-0.4f, -0.04f, -1.12f);
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_RIGHT_SHOE]);
-		Mat2 = mSettings[LC_MFW_RIGHT_SHOE][GetSelectionIndex(LC_MFW_RIGHT_SHOE)].Offset;
+		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_RLEGA]);
+		Mat2 = mSettings[LC_MFW_RLEGA][GetSelectionIndex(LC_MFW_RLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
 		Mat = lcMul(Mat2, Mat);
 		Mat.SetTranslation(lcMul31(Center, Mat2));
-		m_Matrices[LC_MFW_RIGHT_SHOE] = lcMul(Mat, m_Matrices[LC_MFW_RIGHT_LEG]);
+		m_Matrices[LC_MFW_RLEGA] = lcMul(Mat, m_Matrices[LC_MFW_RLEG]);
 	}
 
-	if (m_Info[LC_MFW_LEFT_LEG])
+	if (m_Info[LC_MFW_LLEG])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_LEFT_LEG]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_LLEG]);
 		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
-		Mat = lcMul(mSettings[LC_MFW_LEFT_LEG][GetSelectionIndex(LC_MFW_LEFT_LEG)].Offset, Mat);
-		m_Matrices[LC_MFW_LEFT_LEG] = lcMul(Mat, Root);
+		Mat = lcMul(mSettings[LC_MFW_LLEG][GetSelectionIndex(LC_MFW_LLEG)].Offset, Mat);
+		m_Matrices[LC_MFW_LLEG] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_LEFT_SHOE])
+	if (m_Info[LC_MFW_LLEGA])
 	{
 		lcVector3 Center(0.4f, -0.04f, -1.12f);
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_LEFT_SHOE]);
-		Mat2 = mSettings[LC_MFW_LEFT_SHOE][GetSelectionIndex(LC_MFW_LEFT_SHOE)].Offset;
+		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_LLEGA]);
+		Mat2 = mSettings[LC_MFW_LLEGA][GetSelectionIndex(LC_MFW_LLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
 		Mat = lcMul(Mat2, Mat);
 		Mat.SetTranslation(lcMul31(Center, Mat2));
-		m_Matrices[LC_MFW_LEFT_SHOE] = lcMul(Mat, m_Matrices[LC_MFW_LEFT_LEG]);
+		m_Matrices[LC_MFW_LLEGA] = lcMul(Mat, m_Matrices[LC_MFW_LLEG]);
 	}
 }
 

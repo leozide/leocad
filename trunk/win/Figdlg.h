@@ -23,21 +23,23 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CMinifigDlg)
 	enum { IDD = IDD_MINIFIG };
-	CColorPicker	m_clrHandLeft;
-	CColorPicker	m_clrTorso;
-	CColorPicker	m_clrToolLeft;
-	CColorPicker	m_clrShoeLeft;
-	CColorPicker	m_clrLegLeft;
+	CColorPicker	m_clrHats;
+	CColorPicker	m_clrHats2;
 	CColorPicker	m_clrHead;
-	CColorPicker	m_clrArmLeft;
-	CColorPicker	m_clrToolRight;
-	CColorPicker	m_clrShoeRight;
-	CColorPicker	m_clrLegRight;
-	CColorPicker	m_clrHips;
-	CColorPicker	m_clrHandRight;
-	CColorPicker	m_clrArmRight;
 	CColorPicker	m_clrNeck;
-	CColorPicker	m_clrHat;
+	CColorPicker	m_clrBody;
+	CColorPicker	m_clrBody2;
+	CColorPicker	m_clrBody3;
+	CColorPicker	m_clrArmLeft;
+	CColorPicker	m_clrArmRight;
+	CColorPicker	m_clrHandLeft;
+	CColorPicker	m_clrHandRight;
+	CColorPicker	m_clrToolLeft;
+	CColorPicker	m_clrToolRight;
+	CColorPicker	m_clrLegLeft;
+	CColorPicker	m_clrLegRight;
+	CColorPicker	m_clrShoeLeft;
+	CColorPicker	m_clrShoeRight;
 	//}}AFX_DATA
 
 // Overrides

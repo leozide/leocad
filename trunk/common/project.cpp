@@ -8472,6 +8472,8 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			Points[i] = lcProjectPoint(Points[i], ModelView, Projection, Viewport);
 		}
 
+		Points[0] = lcProjectPoint(Points[0], ModelView, Projection, Viewport);
+
 		// Check if the mouse is over an arrow.
 		for (i = 1; i < 4; i++)
 		{
@@ -8487,7 +8489,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			// Closest point in the line segment to the mouse.
 			lcVector3 Closest = Points[0] + Line * u;
 
-			if ((Closest - Pt).LengthSquared() < 100.0f)
+			if ((Closest - Pt).LengthSquared() < 400.0f)
 			{
 				// If we already know the mouse is close to another axis, select a plane.
 				if (Mode != -1)

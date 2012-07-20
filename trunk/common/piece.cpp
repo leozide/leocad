@@ -528,7 +528,7 @@ void Piece::CompareBoundingBox(float box[6])
 		if (Point[0] < box[0]) box[0] = Point[0];
 		if (Point[1] < box[1]) box[1] = Point[1];
 		if (Point[2] < box[2]) box[2] = Point[2];
-		if (Point[0] > box[3]) box[3] = Point[i];
+		if (Point[0] > box[3]) box[3] = Point[0];
 		if (Point[1] > box[4]) box[4] = Point[1];
 		if (Point[2] > box[5]) box[5] = Point[2];
 	}

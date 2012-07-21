@@ -589,6 +589,7 @@ MinifigWizard::MinifigWizard (GLWindow *share)
 	m_MinifigCount = 0;
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
+	memset(m_Info, 0, sizeof(m_Info));
 
 	int Version = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
 	if (Version == 1)
@@ -743,7 +744,17 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 		}
 
 		if (!FoundSection)
+		{
+
+			lcMinifigPieceInfo MinifigInfo;
+			strncpy(MinifigInfo.Description, "None", sizeof(MinifigInfo.Description));
+			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
+			MinifigInfo.Offset = lcMatrix44Identity();
+			MinifigInfo.Info = NULL;
+
+			InfoArray.Add(MinifigInfo);
 			continue;
+		}
 
 		// Parse section.
 		while (Settings.ReadLine(Line, sizeof(Line)))

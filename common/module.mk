@@ -1,4 +1,4 @@
-SRC += common/algebra.cpp common/camera.cpp common/console.cpp common/curve.cpp common/lc_colors.cpp common/lc_file.cpp \
+SRC += common/camera.cpp common/console.cpp common/curve.cpp common/lc_colors.cpp common/lc_file.cpp \
        common/lc_mesh.cpp common/globals.cpp common/group.cpp common/image.cpp common/im_bmp.cpp common/im_gif.cpp \
        common/lc_application.cpp common/library.cpp common/light.cpp common/mainwnd.cpp \
        common/matrix.cpp common/message.cpp common/minifig.cpp common/object.cpp common/opengl.cpp \

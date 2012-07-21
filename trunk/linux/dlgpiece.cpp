@@ -228,7 +228,7 @@ static void minifigdlg_createpair(LC_MINIFIGDLG_STRUCT* info, int idx, int num, 
 	gtk_signal_connect(GTK_OBJECT(color), "clicked", GTK_SIGNAL_FUNC(minifigdlg_color_clicked), info);
 	gtk_table_attach(GTK_TABLE(table), color, 1, 2, idx, idx+1, (GtkAttachOptions) GTK_FILL, (GtkAttachOptions) GTK_EXPAND, 0, 0);
 
-	if ((num == LC_MFW_TORSO) || (num == LC_MFW_HIPS))
+	if ((num == LC_MFW_BODY) || (num == LC_MFW_BODY2) || (num == LC_MFW_BODY3))
 	{
 		info->angles[num] = NULL;
 		return;
@@ -271,20 +271,21 @@ int minifigdlg_execute(void* param)
 	gtk_widget_show(hbox);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 
-	table = gtk_table_new(8, 3, FALSE);
+	table = gtk_table_new(9, 3, FALSE);
 	gtk_widget_show(table);
 	gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
 	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
 	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
 
-	minifigdlg_createpair(&s, 0, LC_MFW_HAT, table);
-	minifigdlg_createpair(&s, 1, LC_MFW_NECK, table);
-	minifigdlg_createpair(&s, 2, LC_MFW_RIGHT_ARM, table);
-	minifigdlg_createpair(&s, 3, LC_MFW_RIGHT_HAND, table);
-	minifigdlg_createpair(&s, 4, LC_MFW_RIGHT_TOOL, table);
-	minifigdlg_createpair(&s, 5, LC_MFW_HIPS, table);
-	minifigdlg_createpair(&s, 6, LC_MFW_RIGHT_LEG, table);
-	minifigdlg_createpair(&s, 7, LC_MFW_RIGHT_SHOE, table);
+	minifigdlg_createpair(&s, 0, LC_MFW_HATS, table);
+	minifigdlg_createpair(&s, 1, LC_MFW_HATS2, table);
+	minifigdlg_createpair(&s, 2, LC_MFW_NECK, table);
+	minifigdlg_createpair(&s, 3, LC_MFW_LARM, table);
+	minifigdlg_createpair(&s, 4, LC_MFW_LHAND, table);
+	minifigdlg_createpair(&s, 5, LC_MFW_LHANDA, table);
+	minifigdlg_createpair(&s, 6, LC_MFW_BODY2, table);
+	minifigdlg_createpair(&s, 7, LC_MFW_LLEG, table);
+	minifigdlg_createpair(&s, 8, LC_MFW_LLEGA, table);
 
 	s.wizard->CreateFromWindow(&s.preview);
 
@@ -298,19 +299,20 @@ int minifigdlg_execute(void* param)
 	gtk_widget_show(GTK_WIDGET(s.preview));
 	gtk_object_set_data(GTK_OBJECT(s.preview), "minifig", &s);
 
-	table = gtk_table_new(7, 3, FALSE);
+	table = gtk_table_new(8, 3, FALSE);
 	gtk_widget_show(table);
 	gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
 	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
 	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
 
 	minifigdlg_createpair(&s, 0, LC_MFW_HEAD, table);
-	minifigdlg_createpair(&s, 1, LC_MFW_TORSO, table);
-	minifigdlg_createpair(&s, 2, LC_MFW_LEFT_ARM, table);
-	minifigdlg_createpair(&s, 3, LC_MFW_LEFT_HAND, table);
-	minifigdlg_createpair(&s, 4, LC_MFW_LEFT_TOOL, table);
-	minifigdlg_createpair(&s, 5, LC_MFW_LEFT_LEG, table);
-	minifigdlg_createpair(&s, 6, LC_MFW_LEFT_SHOE, table);
+	minifigdlg_createpair(&s, 1, LC_MFW_BODY, table);
+	minifigdlg_createpair(&s, 2, LC_MFW_RARM, table);
+	minifigdlg_createpair(&s, 3, LC_MFW_RHAND, table);
+	minifigdlg_createpair(&s, 4, LC_MFW_RHANDA, table);
+	minifigdlg_createpair(&s, 5, LC_MFW_BODY3, table);
+	minifigdlg_createpair(&s, 6, LC_MFW_RLEG, table);
+	minifigdlg_createpair(&s, 7, LC_MFW_RLEGA, table);
 
 	hbox = gtk_hbox_new(FALSE, 10);
 	gtk_widget_show(hbox);
@@ -350,10 +352,10 @@ int minifigdlg_execute(void* param)
 		}
 	}
 
+	gtk_widget_show(dlg);
+
 	minifigdlg_updatecombo(&s);
 	minifigdlg_updateselection(&s);
-
-	gtk_widget_show(dlg);
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 		set_button_pixmap2(s.colors[i], gColorList[s.wizard->m_Colors[i]].Value);

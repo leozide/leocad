@@ -406,7 +406,7 @@ void Export3DStudio()
 		lcColor* Color = &gColorList[ColorIdx];
 
 		InitMaterial3ds(&matr);
-		sprintf(matr->name, "Material_%s", Color->SafeName);
+		sprintf(matr->name, "Material%03d", ColorIdx);
 
 		matr->ambient.r = matr->diffuse.r = Color->Value[0];
 		matr->ambient.g = matr->diffuse.g = Color->Value[1];

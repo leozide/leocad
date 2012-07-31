@@ -567,4 +567,6 @@ void GLWindow::SetCursor(LC_CURSOR_TYPE Cursor)
 		prv->Cursor = AfxGetApp()->LoadCursor(CursorResources[Cursor]);
 	else
 		prv->Cursor = NULL;
+
+	::SetCursor(prv->Cursor);
 }

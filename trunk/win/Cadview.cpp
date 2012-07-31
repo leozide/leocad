@@ -573,11 +573,7 @@ LONG CCADView::OnChangeCursor(UINT lParam, LONG /*wParam*/)
 {
 	UINT Cursor;
 
-	POINT pt;
-	GetCursorPos(&pt);
-	ScreenToClient(&pt);
-
-	switch (m_pView->GetCursor(pt.x, pt.y))
+	switch (m_pView->GetCursor())
 	{
 		case LC_CURSOR_DEFAULT: Cursor = NULL; break;
 		case LC_CURSOR_BRICK: Cursor = IDC_BRICK; break;
@@ -681,7 +677,7 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	// Update cursor for multiple selection.
 	if (nChar == VK_CONTROL)
 	{
-		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
+		if (lcGetActiveProject()->GetCurAction() == LC_ACTION_SELECT)
 		{
 			POINT pt;
 
@@ -704,7 +700,7 @@ void CCADView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	// Update cursor for multiple selection.
 	if (nChar == VK_CONTROL)
 	{
-		if (lcGetActiveProject()->GetAction() == LC_ACTION_SELECT)
+		if (lcGetActiveProject()->GetCurAction() == LC_ACTION_SELECT)
 		{
 			POINT pt;
 

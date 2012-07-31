@@ -23,7 +23,7 @@ public:
 	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
 	void OnMouseMove(int x, int y, bool bControl, bool bShift);
 
-	LC_CURSOR_TYPE GetCursor(int x, int y) const;
+	LC_CURSOR_TYPE GetCursor() const;
 
 	Project* m_Project;
 	Camera* m_Camera;

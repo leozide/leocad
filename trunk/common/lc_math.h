@@ -282,6 +282,11 @@ inline float lcLength(const lcVector3& a)
 	return a.Length();
 }
 
+inline float lcLengthSquared(const lcVector3& a)
+{
+	return a.LengthSquared();
+}
+
 inline lcVector3 lcNormalize(const lcVector3& a)
 {
 	lcVector3 Ret(a);

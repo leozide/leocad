@@ -17,16 +17,30 @@ typedef enum
 } LC_MOUSE_TRACK;
 
 // Mouse control overlays.
-typedef enum
+enum LC_OVERLAY_MODES
 {
-	LC_OVERLAY_XYZ,
-	LC_OVERLAY_X,
-	LC_OVERLAY_Y,
-	LC_OVERLAY_Z,
-	LC_OVERLAY_XY,
-	LC_OVERLAY_XZ,
-	LC_OVERLAY_YZ
-} LC_OVERLAY_MODES;
+	LC_OVERLAY_NONE,
+	LC_OVERLAY_MOVE_X,
+	LC_OVERLAY_MOVE_Y,
+	LC_OVERLAY_MOVE_Z,
+	LC_OVERLAY_MOVE_XY,
+	LC_OVERLAY_MOVE_XZ,
+	LC_OVERLAY_MOVE_YZ,
+	LC_OVERLAY_MOVE_XYZ,
+	LC_OVERLAY_ROTATE_X,
+	LC_OVERLAY_ROTATE_Y,
+	LC_OVERLAY_ROTATE_Z,
+	LC_OVERLAY_ROTATE_XY,
+	LC_OVERLAY_ROTATE_XZ,
+	LC_OVERLAY_ROTATE_YZ,
+	LC_OVERLAY_ROTATE_XYZ,
+	LC_OVERLAY_ZOOM,
+	LC_OVERLAY_PAN,
+	LC_OVERLAY_ROTATE_VIEW_X,
+	LC_OVERLAY_ROTATE_VIEW_Y,
+	LC_OVERLAY_ROTATE_VIEW_Z,
+	LC_OVERLAY_ROTATE_VIEW_XYZ,
+};
 
 class Piece;
 class Camera;
@@ -87,8 +101,6 @@ public:
 		{ return m_nCurColor; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
-	unsigned char GetAction() const
-		{ return m_nCurAction; }
 	unsigned long GetSnap() const
 		{ return m_nSnap; }
 	int GetOverlayMode() const
@@ -223,7 +235,7 @@ protected:
 	lcVector3 m_OverlayTrackStart;
 	lcVector3 m_OverlayDelta;
 	void MouseUpdateOverlays(View* view, int x, int y);
-	void ActivateOverlay();
+	void ActivateOverlay(View* view, int Action, int OverlayMode);
 	void UpdateOverlayScale();
 
 	bool StopTracking(bool bAccept);
@@ -243,7 +255,13 @@ public:
 	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);
 	bool OnKeyDown(char nKey, bool bControl, bool bShift);
 
-	void SetAction(int nAction);
+	void SetAction(int Action);
+	int GetCurAction() const
+	{
+		return m_nCurAction;
+	}
+	int GetAction() const;
+
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id, unsigned long nParam);
 	void HandleMessage(int Message, void* Data);

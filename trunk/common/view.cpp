@@ -22,7 +22,7 @@ View::~View()
 		m_Project->RemoveView(this);
 }
 
-LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
+LC_CURSOR_TYPE View::GetCursor() const
 {
 	// TODO: check if we're the focused window and return just the default arrow if we aren't.
 
@@ -70,13 +70,13 @@ LC_CURSOR_TYPE View::GetCursor(int Ptx, int Pty) const
 		case LC_ACTION_ROTATE_VIEW:
 			switch (m_Project->GetOverlayMode())
 			{
-				case LC_OVERLAY_X:
+				case LC_OVERLAY_ROTATE_X:
 					return LC_CURSOR_ROTATEX;
-				case LC_OVERLAY_Y:
+				case LC_OVERLAY_ROTATE_Y:
 					return LC_CURSOR_ROTATEY;
-				case LC_OVERLAY_Z:
+				case LC_OVERLAY_ROTATE_Z:
 					return LC_CURSOR_ROLL;
-				case LC_OVERLAY_XYZ:
+				case LC_OVERLAY_ROTATE_XYZ:
 				default:
 					return LC_CURSOR_ROTATE_VIEW;
 			}

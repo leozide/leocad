@@ -237,7 +237,7 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 void CMainFrame::OnUpdateAction(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetRadio(pCmdUI->m_nID == ID_ACTION_SELECT + lcGetActiveProject()->GetAction());
+	pCmdUI->SetRadio(pCmdUI->m_nID == ID_ACTION_SELECT + lcGetActiveProject()->GetCurAction());
 }
 
 void CMainFrame::OnUpdateSnap(CCmdUI* pCmdUI)

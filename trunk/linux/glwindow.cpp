@@ -305,3 +305,7 @@ void GLWindow::ReleaseMouse()
 {
 }
 
+void GLWindow::SetCursor(LC_CURSOR_TYPE Type)
+{
+}
+

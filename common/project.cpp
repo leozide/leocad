@@ -2119,6 +2119,7 @@ void Project::RenderOverlays(View* view)
 		const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
 		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
+		const float OverlayRotateArrowCenter = 1.2f * OverlayScale;
 
 		glDisable(GL_DEPTH_TEST);
 
@@ -2241,11 +2242,42 @@ void Project::RenderOverlays(View* view)
 					break;
 				}
 
-				glBegin(GL_QUADS);
-				glVertex3f(0.0f, OverlayRotateArrowStart, OverlayRotateArrowStart);
-				glVertex3f(0.0f, OverlayRotateArrowEnd, OverlayRotateArrowStart);
-				glVertex3f(0.0f, OverlayRotateArrowEnd, OverlayRotateArrowEnd);
-				glVertex3f(0.0f, OverlayRotateArrowStart, OverlayRotateArrowEnd);
+				glBegin(GL_LINE_STRIP);
+
+				for (int j = 0; j < 9; j++)
+				{
+					const float Radius = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter;
+					float x = cosf(LC_2PI / 4 * j / 8) * Radius;
+					float y = sinf(LC_2PI / 4 * j / 8) * Radius;
+					glVertex3f(0.0f, OverlayRotateArrowCenter + x, OverlayRotateArrowCenter + y);
+				}
+
+				glEnd();
+
+				glBegin(GL_TRIANGLE_FAN);
+
+				glVertex3f(0.0f, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius, OverlayRotateArrowStart);
+
+				for (int j = 0; j < 9; j++)
+				{
+					float x = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+					float y = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+					glVertex3f(x, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y, OverlayRotateArrowCenter);
+				}
+
+				glEnd();
+
+				glBegin(GL_TRIANGLE_FAN);
+
+				glVertex3f(0.0f, OverlayRotateArrowStart, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius);
+
+				for (int j = 0; j < 9; j++)
+				{
+					float x = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+					float y = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+					glVertex3f(x, OverlayRotateArrowCenter, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y);
+				}
+
 				glEnd();
 			}
 

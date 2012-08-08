@@ -2203,22 +2203,27 @@ void Project::RenderOverlays(View* view)
 			else if (i == 2)
 				glMultMatrixf(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)));
 
-			glBegin(GL_LINES);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(OverlayMoveArrowSize, 0.0f, 0.0f);
-			glEnd();
-
-			glBegin(GL_TRIANGLE_FAN);
-			glVertex3f(OverlayMoveArrowSize, 0.0f, 0.0f);
-			for (int j = 0; j < 9; j++)
+			// Translation arrows.
+			if (m_nTracking == LC_TRACK_NONE || (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_MOVE_XYZ))
 			{
-				float y = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-				float z = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-				glVertex3f(OverlayMoveArrowCapSize, y, z);
-			}
-			glEnd();
+				glBegin(GL_LINES);
+				glVertex3f(0.0f, 0.0f, 0.0f);
+				glVertex3f(OverlayMoveArrowSize, 0.0f, 0.0f);
+				glEnd();
 
-			if (m_nCurAction == LC_ACTION_SELECT)
+				glBegin(GL_TRIANGLE_FAN);
+				glVertex3f(OverlayMoveArrowSize, 0.0f, 0.0f);
+				for (int j = 0; j < 9; j++)
+				{
+					float y = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+					float z = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+					glVertex3f(OverlayMoveArrowCapSize, y, z);
+				}
+				glEnd();
+			}
+
+			// Rotation arrows.
+			if (m_nCurAction == LC_ACTION_SELECT && m_nTracking == LC_TRACK_NONE)
 			{
 				switch (i)
 				{
@@ -2287,7 +2292,7 @@ void Project::RenderOverlays(View* view)
 		glEnable(GL_DEPTH_TEST);
 	}
 	
-	if (m_nCurAction == LC_ACTION_ROTATE)
+	if (m_nCurAction == LC_ACTION_ROTATE || (m_nCurAction == LC_ACTION_SELECT && m_nTracking != LC_TRACK_NONE && m_OverlayMode >= LC_OVERLAY_ROTATE_X && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
 	{
 		const float OverlayRotateRadius = 2.0f;
 
@@ -2310,18 +2315,22 @@ void Project::RenderOverlays(View* view)
 				Focus = NULL;
 		}
 
+		bool HasAngle = false;
+
 		// Draw a disc showing the rotation amount.
 		if (m_MouseTotalDelta.LengthSquared() != 0.0f && (m_nTracking != LC_TRACK_NONE))
 		{
 			lcVector4 Rotation;
 			float Angle, Step;
 
+			HasAngle = true;
+
 			switch (m_OverlayMode)
 			{
 			case LC_OVERLAY_ROTATE_X:
 				glColor4f(0.8f, 0.0f, 0.0f, 0.3f);
 				Angle = m_MouseTotalDelta[0];
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 				break;
 			case LC_OVERLAY_ROTATE_Y:
 				glColor4f(0.0f, 0.8f, 0.0f, 0.3f);
@@ -2334,7 +2343,7 @@ void Project::RenderOverlays(View* view)
 				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 				break;
 			default:
-				Rotation = lcVector4(0.0f, 0.0f, 1.0f, 0.0f);
+				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 				Angle = 0.0f;
 				break;
 			};
@@ -2397,27 +2406,32 @@ void Project::RenderOverlays(View* view)
 			}
 		}
 
+		glPushMatrix();
+
 		lcMatrix44 Mat = lcMatrix44AffineInverse(Cam->mWorldView);
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
-		glBegin(GL_LINE_LOOP);
-		glColor3f(0.1f, 0.1f, 0.1f);
-
-		for (j = 0; j < 32; j++)
+		if (m_nCurAction == LC_ACTION_ROTATE && !HasAngle && m_nTracking == LC_TRACK_NONE)
 		{
-			lcVector3 Pt;
+			glBegin(GL_LINE_LOOP);
+			glColor3f(0.1f, 0.1f, 0.1f);
 
-			Pt[0] = cosf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
-			Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
-			Pt[2] = 0.0f;
+			for (j = 0; j < 32; j++)
+			{
+				lcVector3 Pt;
 
-			Pt = lcMul31(Pt, Mat);
+				Pt[0] = cosf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
+				Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
+				Pt[2] = 0.0f;
 
-			glVertex3f(Pt[0], Pt[1], Pt[2]);
+				Pt = lcMul31(Pt, Mat);
+
+				glVertex3f(Pt[0], Pt[1], Pt[2]);
+			}
+
+			glEnd();
 		}
-
-		glEnd();
 
 		lcVector3 ViewDir = Cam->mTargetPosition - Cam->mPosition;
 		ViewDir.Normalize();
@@ -2444,6 +2458,9 @@ void Project::RenderOverlays(View* view)
 			}
 			else
 			{
+				if (m_nCurAction != LC_ACTION_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE)
+					continue;
+
 				switch (i)
 				{
 				case 0:
@@ -2482,7 +2499,7 @@ void Project::RenderOverlays(View* view)
 					break;
 				}
 
-				if (lcDot(ViewDir, v1 + v2) <= 0.0f)
+				if (m_nCurAction != LC_ACTION_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
 				{
 					lcVector3 Pt1 = v1 * (OverlayRotateRadius * OverlayScale);
 					lcVector3 Pt2 = v2 * (OverlayRotateRadius * OverlayScale);
@@ -2495,117 +2512,113 @@ void Project::RenderOverlays(View* view)
 			glEnd();
 		}
 
+		glPopMatrix();
+
 		// Draw tangent vector.
 		if (m_nTracking != LC_TRACK_NONE)
 		{
 			if ((m_OverlayMode == LC_OVERLAY_ROTATE_X) || (m_OverlayMode == LC_OVERLAY_ROTATE_Y) || (m_OverlayMode == LC_OVERLAY_ROTATE_Z))
 			{
-				lcVector3 Normal = lcNormalize(m_OverlayTrackStart - m_OverlayCenter);
-				lcVector3 Tangent;
+				const float OverlayRotateArrowSize = 1.5f;
+				const float OverlayRotateArrowCapSize = 0.25f;
+
+				lcVector3 Normal, Tangent;
+				lcVector4 Rotation;
 				float Angle;
 
 				switch (m_OverlayMode)
 				{
 				case LC_OVERLAY_ROTATE_X:
 					Angle = m_MouseTotalDelta[0];
-					Tangent = lcVector3(0.0f, -Normal[2], Normal[1]);
+					Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 					break;
 				case LC_OVERLAY_ROTATE_Y:
 					Angle = m_MouseTotalDelta[1];
-					Tangent = lcVector3(Normal[2], 0.0f, -Normal[0]);
+					Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
 					break;
 				case LC_OVERLAY_ROTATE_Z:
 					Angle = m_MouseTotalDelta[2];
-					Tangent = lcVector3(-Normal[1], Normal[0], 0.0f);
+					Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 					break;
 				default:
-					Angle = 0.0f;
+					Rotation = lcVector4(0.0f, 0.0f, 1.0f, 0.0f);
 					break;
-				}
+				};
 
-				if (Angle < 0.0f)
+				glPushMatrix();
+				glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+
+				if (Focus)
+					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+
+				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
+
+				glColor3f(0.8f, 0.8f, 0.0f);
+
+				if (HasAngle)
 				{
-					Tangent = -Tangent;
-					Angle = -Angle;
-				}
-
-				// Draw tangent arrow.
-				if (Angle > 0.0f)
-				{
-					const float OverlayRotateArrowSize = 1.5f;
-					const float OverlayRotateArrowCapSize = 0.25f;
-
-					lcVector3 Pt = Normal * (OverlayScale * OverlayRotateRadius);
-					lcVector3 Tip = Pt + Tangent * (OverlayScale * OverlayRotateArrowSize);
-					lcVector3 Arrow;
-					lcMatrix44 Rot;
-
 					glBegin(GL_LINES);
-					glColor3f(0.8f, 0.8f, 0.0f);
 
-					glVertex3f(Pt[0], Pt[1], Pt[2]);
-					glVertex3f(Tip[0], Tip[1], Tip[2]);
+					float StartY = OverlayScale * OverlayRotateRadius;
+					float EndZ = (Angle > 0.0f) ? OverlayScale * OverlayRotateArrowSize : -OverlayScale * OverlayRotateArrowSize;
+					float TipZ = (Angle > 0.0f) ? -OverlayScale * OverlayRotateArrowCapSize : OverlayScale * OverlayRotateArrowCapSize;
 
-					Rot = lcMatrix44FromAxisAngle(Normal, LC_PI * 0.15f);
-					Arrow = lcMul30(Tangent, Rot) * OverlayRotateArrowCapSize;
+					glVertex3f(0.0f, StartY, 0.0f);
+					glVertex3f(0.0f, StartY, EndZ);
 
-					glVertex3f(Tip[0], Tip[1], Tip[2]);
-					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
+					glVertex3f(0.0f, StartY, EndZ);
+					glVertex3f(0.0f, StartY + OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
-					Rot = lcMatrix44FromAxisAngle(Normal, -LC_PI * 0.15f);
-					Arrow = lcMul30(Tangent, Rot) * OverlayRotateArrowCapSize;
-
-					glVertex3f(Tip[0], Tip[1], Tip[2]);
-					glVertex3f(Tip[0] - Arrow[0], Tip[1] - Arrow[1], Tip[2] - Arrow[2]);
+					glVertex3f(0.0f, StartY, EndZ);
+					glVertex3f(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
 					glEnd();
+
+					glPopMatrix();
 				}
 
 				// Draw text.
-//				if (Viewport == m_nActiveViewport)
-				{
-					int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
-					float Aspect = (float)Viewport[2]/(float)Viewport[3];
-					Camera* Cam = view->m_Camera;
+				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+				float Aspect = (float)Viewport[2]/(float)Viewport[3];
+				Camera* Cam = view->m_Camera;
 
-					const lcMatrix44& ModelView = Cam->mWorldView;
-					lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+				const lcMatrix44& ModelView = Cam->mWorldView;
+				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-					lcVector3 Screen = lcProjectPoint(lcVector3(0, 0, 0), ModelView, Projection, Viewport);
+				lcVector3 Screen = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
 
-					glMatrixMode(GL_PROJECTION);
-					glPushMatrix();
-					glLoadIdentity();
-					glOrtho(0, Viewport[2], 0, Viewport[3], -1, 1);
-					glMatrixMode(GL_MODELVIEW);
-					glPushMatrix();
-					glLoadIdentity();
-					glTranslatef(0.375, 0.375, 0.0);
+				glMatrixMode(GL_PROJECTION);
+				glPushMatrix();
+				glLoadIdentity();
+				glOrtho(0, Viewport[2], 0, Viewport[3], -1, 1);
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
+				glLoadIdentity();
+				glTranslatef(0.375, 0.375, 0.0);
 
-					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-					m_pScreenFont->MakeCurrent();
-					glEnable(GL_TEXTURE_2D);
-					glEnable(GL_ALPHA_TEST);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				m_pScreenFont->MakeCurrent();
+				glEnable(GL_TEXTURE_2D);
+				glEnable(GL_ALPHA_TEST);
 
-					char buf[32];
-					sprintf(buf, "[%.2f]", Angle);
+				char buf[32];
+				sprintf(buf, "[%.2f]", fabsf(Angle));
 
-					int cx, cy;
-					m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
+				int cx, cy;
+				m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
-					glBegin(GL_QUADS);
-					glColor3f(0.8f, 0.8f, 0.0f);
-					m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
-					glEnd();
+				glBegin(GL_QUADS);
+				glColor3f(0.8f, 0.8f, 0.0f);
+				m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
+				glEnd();
 
-					glDisable(GL_TEXTURE_2D);
-					glDisable(GL_ALPHA_TEST);
+				glDisable(GL_TEXTURE_2D);
+				glDisable(GL_ALPHA_TEST);
 
-					glMatrixMode(GL_PROJECTION);
-					glPopMatrix();
-					glMatrixMode(GL_MODELVIEW);
-					glPopMatrix();
-				}
+				glMatrixMode(GL_PROJECTION);
+				glPopMatrix();
+				glMatrixMode(GL_MODELVIEW);
+				glPopMatrix();
 			}
 		}
 

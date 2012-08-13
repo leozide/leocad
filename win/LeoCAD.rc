@@ -856,8 +856,7 @@ BEGIN
     EDITTEXT        IDC_AIDDLG_ANGLE,63,105,24,12,ES_AUTOHSCROLL
     LTEXT           "degrees",IDC_STATIC,91,107,27,8
     CONTROL         "Don't allow relative snap",IDC_AIDDLG_GLOBAL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,11,130,8
-    CONTROL         "Switch to move after inserting",IDC_AIDDLG_MOVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,27,130,8
-    CONTROL         "Fixed direction keys",IDC_AIDDLG_FIXEDKEYS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,43,130,8
+    CONTROL         "Fixed direction keys",IDC_AIDDLG_FIXEDKEYS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,27,130,8
     CONTROL         "Lock X",IDC_AIDDLG_LOCKX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,59,130,8
     CONTROL         "Lock Y",IDC_AIDDLG_LOCKY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,75,130,8
     CONTROL         "Lock Z",IDC_AIDDLG_LOCKZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,91,130,8
@@ -1733,7 +1732,7 @@ END
 STRINGTABLE
 BEGIN
     ID_ACTION_SELECT        "Select objects (hold CTRL down or drag the mouse to select multiple objects)\nSelect"
-    ID_ACTION_INSERT        "Add pieces to the project\nInsert"
+    ID_ACTION_INSERT        "Add pieces to the project (hold CTRL down to keep adding pieces)\nInsert"
     ID_ACTION_LIGHT         "Add a positional light source\nPositional Light"
     ID_ACTION_SPOTLIGHT     "Add a spotlight\nSpotlight"
     ID_ACTION_CAMERA        "Create a camera\nCamera"

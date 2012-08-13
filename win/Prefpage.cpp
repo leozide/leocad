@@ -201,7 +201,6 @@ CPreferencesDrawing::CPreferencesDrawing() : CPropertyPage(CPreferencesDrawing::
 	m_bLockX = FALSE;
 	m_bLockY = FALSE;
 	m_bLockZ = FALSE;
-	m_bMove = FALSE;
 	m_bSnapA = FALSE;
 	m_bSnapX = FALSE;
 	m_bSnapY = FALSE;
@@ -228,7 +227,6 @@ void CPreferencesDrawing::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AIDDLG_LOCKX, m_bLockX);
 	DDX_Check(pDX, IDC_AIDDLG_LOCKY, m_bLockY);
 	DDX_Check(pDX, IDC_AIDDLG_LOCKZ, m_bLockZ);
-	DDX_Check(pDX, IDC_AIDDLG_MOVE, m_bMove);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPA, m_bSnapA);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPX, m_bSnapX);
 	DDX_Check(pDX, IDC_AIDDLG_SNAPY, m_bSnapY);
@@ -256,7 +254,6 @@ void CPreferencesDrawing::SetOptions(unsigned long dwSnap, unsigned short nAngle
 	m_bLockX = (dwSnap & LC_DRAW_LOCK_X) != 0;
 	m_bLockY = (dwSnap & LC_DRAW_LOCK_Y) != 0;
 	m_bLockZ = (dwSnap & LC_DRAW_LOCK_Z) != 0;
-	m_bMove = (dwSnap & LC_DRAW_MOVE) != 0;
 	m_bSnapA = (dwSnap & LC_DRAW_SNAP_A) != 0;
 	m_bSnapX = (dwSnap & LC_DRAW_SNAP_X) != 0;
 	m_bSnapY = (dwSnap & LC_DRAW_SNAP_Y) != 0;
@@ -277,7 +274,6 @@ void CPreferencesDrawing::GetOptions(unsigned long* dwSnap, unsigned short* nAng
 	if (m_bLockX) *dwSnap |= LC_DRAW_LOCK_X;
 	if (m_bLockY) *dwSnap |= LC_DRAW_LOCK_Y;
 	if (m_bLockZ) *dwSnap |= LC_DRAW_LOCK_Z;
-	if (m_bMove) *dwSnap |= LC_DRAW_MOVE;
 	if (m_bSnapA) *dwSnap |= LC_DRAW_SNAP_A;
 	if (m_bSnapX) *dwSnap |= LC_DRAW_SNAP_X;
 	if (m_bSnapY) *dwSnap |= LC_DRAW_SNAP_Y;

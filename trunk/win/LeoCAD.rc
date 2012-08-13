@@ -111,6 +111,11 @@ BEGIN
     BUTTON      ID_SNAP_ON
     BUTTON      ID_SNAP_ANGLE
     BUTTON      ID_RENDER_BOX
+    SEPARATOR
+    BUTTON      ID_TRANSFORM_TYPE
+    BUTTON      ID_TRANSFORM_X
+    BUTTON      ID_TRANSFORM_Y
+    BUTTON      ID_TRANSFORM_Z
 END
 
 IDR_TOOLSBAR TOOLBAR 16, 15
@@ -204,6 +209,10 @@ BEGIN
     BUTTON      ID_HELP_LEOCADHOMEPAGE
     BUTTON      ID_HELP_SENDEMAIL
     BUTTON      ID_APP_ABOUT
+    BUTTON      ID_BUTTON_ABSOLUTE_TRANSLATION
+    BUTTON      ID_BUTTON_RELATIVE_TRANSLATION
+    BUTTON      ID_BUTTON_ABSOLUTE_ROTATION
+    BUTTON      ID_BUTTON_RELATIVE_ROTATION
 END
 
 
@@ -410,7 +419,7 @@ BEGIN
         MENUITEM "Pieces",                      ID_VIEW_PIECES_BAR
         MENUITEM "Status Bar",                  ID_VIEW_STATUS_BAR
     END
-    MENUITEM "5",                           65535
+    MENUITEM "5",                           ID_5
     POPUP "6"
     BEGIN
         MENUITEM "Add",                         ID_EDITOR_ADD
@@ -463,6 +472,13 @@ BEGIN
         MENUITEM "Lock Y",                      ID_LOCK_LOCKY
         MENUITEM "Lock Z",                      ID_LOCK_LOCKZ
         MENUITEM "Unlock All",                  ID_LOCK_UNLOCKALL
+    END
+    POPUP "9"
+    BEGIN
+        MENUITEM "Absolute Translation",        33185
+        MENUITEM "Relative Translation",        33186
+        MENUITEM "Absolute Rotation",           33187
+        MENUITEM "Relative Rotation",           33188
     END
 END
 

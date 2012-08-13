@@ -59,6 +59,8 @@ public:
 
 	CTypedPtrArray<CPtrArray, CDynamicSplitterWnd*> m_SplitterList;
 
+	int mTransformMode;
+
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
 	void SetStatusBarMessage(const char* Message)
@@ -92,16 +94,18 @@ protected:
 	afx_msg void OnUpdateSnapXY(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSnapZ(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSnapA(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateTransform(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateStepNext(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateStepPrevious(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateStepFirst(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateStepLast(CCmdUI* pCmdUI);
 	
-	afx_msg LONG OnUpdateList(UINT lParam, LONG wParam);
-	afx_msg LONG OnPopupClose(UINT lParam, LONG wParam);
-	afx_msg LONG OnAddString(UINT lParam, LONG wParam);
-	afx_msg LONG OnUpdateInfo(UINT lParam, LONG wParam);
-	afx_msg LONG UpdateSettings(UINT lParam, LONG wParam);
+	afx_msg LRESULT OnUpdateList(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPopupClose(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnAddString(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUpdateInfo(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT UpdateSettings(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToolbarReset(WPARAM wParam, LPARAM lParam);
 
 	afx_msg void OnViewSplitVertically();
 	afx_msg void OnViewSplitHorizontally();

@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(WM_LC_ADD_COMBO_STRING, OnAddString)
 	ON_MESSAGE(WM_LC_UPDATE_INFO, OnUpdateInfo)
 	ON_MESSAGE(WM_LC_UPDATE_SETTINGS, UpdateSettings)
+	ON_REGISTERED_MESSAGE(AFX_WM_RESETTOOLBAR, OnToolbarReset)
 	// Toolbar show/hide
 	ON_COMMAND_EX(ID_VIEW_ANIMATION_BAR,  &CFrameWndEx::OnPaneCheck)
 	ON_COMMAND_EX(ID_VIEW_TOOLS_BAR,  &CFrameWndEx::OnPaneCheck)
@@ -81,6 +82,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_0, ID_SNAP_9, OnUpdateSnapXY)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_10, ID_SNAP_19, OnUpdateSnapZ)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SNAP_20, ID_SNAP_29, OnUpdateSnapA)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_TRANSFORM_ABSOLUTE_TRANSLATION, ID_TRANSFORM_RELATIVE_ROTATION, OnUpdateTransform)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_NEXT, OnUpdateStepNext)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_PREVIOUS, OnUpdateStepPrevious)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_STEP_FIRST, OnUpdateStepFirst)
@@ -100,6 +102,7 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	m_bAutoMenuEnable = FALSE;
+	mTransformMode = 0;
 }
 
 CMainFrame::~CMainFrame()
@@ -140,18 +143,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndStandardBar.SetWindowText(_T("Standard"));
 	m_wndStandardBar.EnableDocking(CBRS_ALIGN_ANY);
-
-	CMenu PopupMenus;
-	PopupMenus.LoadMenu(IDR_POPUPS);
-	CMenu* Popup;
-
-	Popup = PopupMenus.GetSubMenu(8);
-	CMFCToolBarMenuButton NewLock(ID_LOCK_ON,Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_LOCK_ON));
-	m_wndStandardBar.ReplaceButton(ID_LOCK_ON, NewLock);
-
-	Popup = PopupMenus.GetSubMenu(2);
-	CMFCToolBarMenuButton NewSnap(ID_SNAP_ON, Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_SNAP_ON));
-	m_wndStandardBar.ReplaceButton(ID_SNAP_ON, NewSnap);
 
 	if (!m_wndToolsBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, ID_VIEW_TOOLS_BAR) || !m_wndToolsBar.LoadToolBar(IDR_TOOLSBAR))
 	{
@@ -208,7 +199,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	main_window->SetXID(this);
 
-	theApp.LoadState(this);
+	const int ToolBarVersion = 3;
+	if (theApp.GetProfileInt(_T("Settings"), _T("ToolBarVersion"), 0) != ToolBarVersion)
+	{
+		theApp.CleanState();
+		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), ToolBarVersion);
+	}
 
 //  console.SetWindowCallback(&mainframe_console_func, m_wndSplitter.GetPane(1, 0));
 
@@ -234,6 +230,110 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame message handlers
+
+class CTransformEditCtrl : public CMFCToolBarEditCtrl
+{
+public:
+	CTransformEditCtrl(CMFCToolBarEditBoxButton& edit)
+		: CMFCToolBarEditCtrl(edit)
+	{
+	}
+
+public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg)
+	{
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+		{
+			CMainFrame* MainFrame = (CMainFrame*)GetTopLevelFrame();
+
+			lcVector3 Transform(0.0f, 0.0f, 0.0f);
+
+			for (int Axis = 0; Axis < 3; Axis++)
+			{
+				CString Text = CMFCToolBarEditBoxButton::GetContentsAll(ID_TRANSFORM_X + Axis);
+				sscanf(Text, "%f", &Transform[Axis]);
+			}
+
+			if (MainFrame->mTransformMode == LC_TRANSFORM_ABSOLUTE_TRANSLATION || MainFrame->mTransformMode == LC_TRANSFORM_RELATIVE_TRANSLATION)
+				lcGetActiveProject()->ConvertFromUserUnits(Transform);
+			lcGetActiveProject()->TransformSelectedObjects((LC_TRANSFORM_TYPE)MainFrame->mTransformMode, Transform);
+
+			return TRUE;
+		}
+
+		return CMFCToolBarEditCtrl::PreTranslateMessage(pMsg);
+	}
+};
+
+class CTransformEditButton : public CMFCToolBarEditBoxButton
+{
+	DECLARE_SERIAL(CTransformEditButton)
+
+public:
+	CTransformEditButton()
+	{
+	}
+
+	CTransformEditButton(UINT uiID, int iImage, DWORD dwStyle = ES_AUTOHSCROLL, int iWidth = 0)
+		: CMFCToolBarEditBoxButton(uiID, iImage, dwStyle, iWidth)
+	{
+	}
+
+	virtual void Serialize(CArchive& ar)
+	{
+		CMFCToolBarEditBoxButton::Serialize(ar);
+
+		if (ar.IsLoading())
+			m_strContents.Empty();
+	}
+
+	virtual CEdit* CreateEdit(CWnd* pWndParent, const CRect& rect)
+	{
+		CTransformEditCtrl* pWndEdit = new CTransformEditCtrl(*this);
+		if (!pWndEdit->Create(m_dwStyle, rect, pWndParent, m_nID))
+		{
+			delete pWndEdit;
+			return NULL;
+		}
+
+		return pWndEdit;
+	}
+};
+
+IMPLEMENT_SERIAL(CTransformEditButton, CMFCToolBarEditBoxButton, 1)
+
+LRESULT CMainFrame::OnToolbarReset(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == IDR_MAINFRAME)
+	{
+		CMenu PopupMenus;
+		PopupMenus.LoadMenu(IDR_POPUPS);
+		CMenu* Popup;
+
+		Popup = PopupMenus.GetSubMenu(8);
+		CMFCToolBarMenuButton NewLock(ID_LOCK_ON,Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_LOCK_ON));
+		m_wndStandardBar.ReplaceButton(ID_LOCK_ON, NewLock);
+
+		Popup = PopupMenus.GetSubMenu(2);
+		CMFCToolBarMenuButton NewSnap(ID_SNAP_ON, Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_SNAP_ON));
+		m_wndStandardBar.ReplaceButton(ID_SNAP_ON, NewSnap);
+
+		Popup = PopupMenus.GetSubMenu(9);
+		CMFCToolBarMenuButton Transform(ID_TRANSFORM_TYPE, Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_TRANSFORM_TYPE));
+		m_wndStandardBar.ReplaceButton(ID_TRANSFORM_TYPE, Transform);
+
+		CTransformEditButton TransformX(ID_TRANSFORM_X, 0, ES_AUTOHSCROLL, 50);
+		m_wndStandardBar.ReplaceButton(ID_TRANSFORM_X, TransformX);
+
+		CTransformEditButton TransformY(ID_TRANSFORM_Y, 0, ES_AUTOHSCROLL, 50);
+		m_wndStandardBar.ReplaceButton(ID_TRANSFORM_Y, TransformY);
+
+		CTransformEditButton TransformZ(ID_TRANSFORM_Z, 0, ES_AUTOHSCROLL, 50);
+		m_wndStandardBar.ReplaceButton(ID_TRANSFORM_Z, TransformZ);
+	}
+
+	return 0;
+}
 
 void CMainFrame::OnUpdateAction(CCmdUI* pCmdUI)
 {
@@ -325,6 +425,11 @@ void CMainFrame::OnUpdateSnapA(CCmdUI* pCmdUI)
 	pCmdUI->SetRadio(Snap + ID_SNAP_20 == pCmdUI->m_nID);
 }
 
+void CMainFrame::OnUpdateTransform(CCmdUI* pCmdUI)
+{
+	pCmdUI->SetRadio(mTransformMode + ID_TRANSFORM_ABSOLUTE_TRANSLATION == pCmdUI->m_nID);
+}
+
 void CMainFrame::OnUpdateStepNext(CCmdUI* pCmdUI)
 {
 	int Now, Last;
@@ -358,7 +463,7 @@ void CMainFrame::OnUpdateStepLast(CCmdUI* pCmdUI)
 }
 
 // lParam = update pieces, wParam = update colors
-LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
+LRESULT CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 {
 	if (wParam != 0)
 		m_wndPiecesBar.m_wndColorList.SetColorIndex(wParam - 1);
@@ -367,7 +472,7 @@ LONG CMainFrame::OnUpdateList(UINT lParam, LONG wParam)
 }
 
 // Add a string to the pieces combo
-LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
+LRESULT CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 {
 	if (lParam == NULL)
 	{
@@ -389,7 +494,7 @@ LONG CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 	return TRUE;
 }
 
-LONG CMainFrame::OnUpdateInfo(UINT lParam, LONG wParam)
+LRESULT CMainFrame::OnUpdateInfo(WPARAM wParam, LPARAM lParam)
 {
 	Object* Focus = lcGetActiveProject()->GetFocusObject();
 
@@ -431,13 +536,13 @@ void CMainFrame::SetStatusBarPane(UINT ID, const char* Text)
 		dcScreen.SelectObject(hOldFont);
 }
 
-LONG CMainFrame::OnPopupClose(UINT /*lParam*/, LONG /*wParam*/)
+LRESULT CMainFrame::OnPopupClose(WPARAM wParam, LPARAM lParam)
 {
 	m_wndStatusBar.m_pPopup = NULL;
 	return TRUE;
 }
 
-LONG CMainFrame::UpdateSettings(UINT /*lParam*/, LONG /*wParam*/)
+LRESULT CMainFrame::UpdateSettings(WPARAM wParam, LPARAM lParam)
 {
 	int i = theApp.GetProfileInt("Settings", "Piecebar Options", 0);
 	m_wndPiecesBar.m_bSubParts = (i & PIECEBAR_SUBPARTS) != 0;
@@ -454,6 +559,8 @@ void CMainFrame::OnClose()
 {
 	if (!lcGetActiveProject()->SaveModified())
 		return;
+
+	m_wndStandardBar.ResetImages();
 
 	CFrameWndEx::OnClose();
 }
@@ -482,9 +589,6 @@ void CMainFrame::OnPieceBar(UINT nID)
 		RECT rc;
 		m_wndPiecesBar.GetClientRect(&rc);
 		m_wndPiecesBar.PostMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right, rc.bottom));
-		
-		if (nID == ID_PIECEBAR_NUMBERS)
-			PostMessage(WM_LC_UPDATE_LIST, 1, 0);
 	}
 
 	UINT u = 0;
@@ -611,6 +715,35 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 	if (nID >= ID_ACTION_SELECT && nID <= ID_ACTION_ROLL)
 	{
 		project->SetAction(nID - ID_ACTION_SELECT);
+		return TRUE;
+	}
+
+	if (nID >= ID_TRANSFORM_ABSOLUTE_TRANSLATION && nID <= ID_TRANSFORM_RELATIVE_ROTATION)
+	{
+		mTransformMode = nID - ID_TRANSFORM_ABSOLUTE_TRANSLATION;
+		/*
+		CMenu PopupMenus;
+		PopupMenus.LoadMenu(IDR_POPUPS);
+		CMenu* Popup;
+		Popup = PopupMenus.GetSubMenu(9);
+
+		CMFCToolBarMenuButton Transform(ID_TRANSFORM_TYPE, Popup->GetSafeHmenu(), GetCmdMgr()->GetCmdImage(ID_BUTTON_ABSOLUTE_TRANSLATION + mTransformMode));
+		m_wndStandardBar.ReplaceButton(ID_TRANSFORM_TYPE, Transform);
+		m_wndStandardBar.AdjustLayout();
+		*/
+
+		CObList listButtons;
+		if (CMFCToolBar::GetCommandButtons(ID_TRANSFORM_TYPE, listButtons) > 0)
+		{
+			for (POSITION pos = listButtons.GetHeadPosition(); pos != NULL;)
+			{
+				CMFCToolBarButton* Button = DYNAMIC_DOWNCAST(CMFCToolBarButton, listButtons.GetNext(pos));
+				Button->SetImage(GetCmdMgr()->GetCmdImage(ID_BUTTON_ABSOLUTE_TRANSLATION + mTransformMode));
+			}
+		}
+
+		m_wndStandardBar.AdjustLayout();
+
 		return TRUE;
 	}
 

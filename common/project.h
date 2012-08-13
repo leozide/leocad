@@ -144,6 +144,7 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
+	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
 
 	void AddView(View* view);
 	void RemoveView(View* view);
@@ -197,8 +198,8 @@ protected:
 	void CalculateStep();
 
 	// Movement.
-	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap);
-	bool RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder);
+	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock);
+	bool RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool Snap, bool Lock);
 	void SnapVector(lcVector3& Delta) const
 	{
 		lcVector3 Dummy;

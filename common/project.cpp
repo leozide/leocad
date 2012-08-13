@@ -6817,17 +6817,20 @@ void Project::SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const
 	}
 }
 
-bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap)
+bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock)
 {
 	// Don't move along locked directions.
-	if (m_nSnap & LC_DRAW_LOCK_X)
-		Move[0] = 0;
+	if (Lock)
+	{
+		if (m_nSnap & LC_DRAW_LOCK_X)
+			Move[0] = 0;
 
-	if (m_nSnap & LC_DRAW_LOCK_Y)
-		Move[1] = 0;
+		if (m_nSnap & LC_DRAW_LOCK_Y)
+			Move[1] = 0;
 
-	if (m_nSnap & LC_DRAW_LOCK_Z)
-		Move[2] = 0;
+		if (m_nSnap & LC_DRAW_LOCK_Z)
+			Move[2] = 0;
+	}
 
 	// Snap.
 	if (Snap)
@@ -6884,20 +6887,24 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 	return true;
 }
 
-bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder)
+bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool Snap, bool Lock)
 {
 	// Don't move along locked directions.
-	if (m_nSnap & LC_DRAW_LOCK_X)
-		Delta[0] = 0;
+	if (Lock)
+	{
+		if (m_nSnap & LC_DRAW_LOCK_X)
+			Delta[0] = 0;
 
-	if (m_nSnap & LC_DRAW_LOCK_Y)
-		Delta[1] = 0;
+		if (m_nSnap & LC_DRAW_LOCK_Y)
+			Delta[1] = 0;
 
-	if (m_nSnap & LC_DRAW_LOCK_Z)
-		Delta[2] = 0;
+		if (m_nSnap & LC_DRAW_LOCK_Z)
+			Delta[2] = 0;
+	}
 
 	// Snap.
-	SnapRotationVector(Delta, Remainder);
+	if (Snap)
+		SnapRotationVector(Delta, Remainder);
 
 	if (Delta.LengthSquared() < 0.001f)
 		return false;
@@ -7046,6 +7053,167 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder)
 	}
 
 	return true;
+}
+
+void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform)
+{
+	switch (Type)
+	{
+	case LC_TRANSFORM_ABSOLUTE_TRANSLATION:
+		{
+			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+			lcVector3 Center;
+			int nSel = 0;
+			Piece *pPiece, *pFocus = NULL;
+
+			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
+				if (pPiece->IsSelected())
+				{
+					if (pPiece->IsFocused())
+						pFocus = pPiece;
+
+					pPiece->CompareBoundingBox(bs);
+					nSel++;
+				}
+			}
+
+			if (pFocus != NULL)
+				Center = pFocus->mPosition;
+			else
+				Center = lcVector3((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
+
+			lcVector3 Offset = Transform - Center;
+
+			Camera* pCamera;
+			Light* pLight;
+
+			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
+			{
+				if (pCamera->IsSelected())
+				{
+					pCamera->Move(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				}
+			}
+
+			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			{
+				if (pLight->IsSelected())
+				{
+					pLight->Move(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					pLight->UpdatePosition (m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				}
+			}
+
+			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
+				if (pPiece->IsSelected())
+				{
+					pPiece->Move(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				}
+			}
+
+			if (m_OverlayActive)
+			{
+				if (!GetFocusPosition(m_OverlayCenter))
+					GetSelectionCenter(m_OverlayCenter);
+			}
+
+			if (nSel)
+			{
+				UpdateOverlayScale();
+				UpdateAllViews();
+				SetModifiedFlag(true);
+				CheckPoint("Moving");
+				SystemUpdateFocus(NULL);
+			}
+		} break;
+
+	case LC_TRANSFORM_RELATIVE_TRANSLATION:
+		{
+			lcVector3 Move(Transform), Remainder;
+
+			if (MoveSelectedObjects(Move, Remainder, false, false))
+			{
+				UpdateOverlayScale();
+				UpdateAllViews();
+				SetModifiedFlag(true);
+				CheckPoint("Moving");
+				SystemUpdateFocus(NULL);
+			}
+		} break;
+
+	case LC_TRANSFORM_ABSOLUTE_ROTATION:
+		{
+			// Create the rotation matrix.
+			lcVector4 RotationQuaternion(0, 0, 0, 1);
+
+			if (Transform[0] != 0.0f)
+			{
+				lcVector4 q = lcQuaternionRotationX(Transform[0] * LC_DTOR);
+				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+			}
+
+			if (Transform[1] != 0.0f)
+			{
+				lcVector4 q = lcQuaternionRotationY(Transform[1] * LC_DTOR);
+				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+			}
+
+			if (Transform[2] != 0.0f)
+			{
+				lcVector4 q = lcQuaternionRotationZ(Transform[2] * LC_DTOR);
+				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+			}
+
+			lcVector4 NewRotation = lcQuaternionToAxisAngle(RotationQuaternion);
+			NewRotation[3] *= LC_RTOD;
+
+			Piece *pPiece;
+			int nSel = 0;
+
+			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
+				if (pPiece->IsSelected())
+				{
+					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, NewRotation, LC_PK_ROTATION);
+					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+					nSel++;
+				}
+			}
+
+			if (m_OverlayActive)
+			{
+				if (!GetFocusPosition(m_OverlayCenter))
+					GetSelectionCenter(m_OverlayCenter);
+			}
+
+			if (nSel)
+			{
+				UpdateOverlayScale();
+				UpdateAllViews();
+				SetModifiedFlag(true);
+				CheckPoint("Rotating");
+				SystemUpdateFocus(NULL);
+			}
+		} break;
+
+	case LC_TRANSFORM_RELATIVE_ROTATION:
+		{
+			lcVector3 Rotate(Transform), Remainder;
+
+			if (RotateSelectedObjects(Rotate, Remainder, false, false))
+			{
+				UpdateOverlayScale();
+				UpdateAllViews();
+				SetModifiedFlag(true);
+				CheckPoint("Rotating");
+				SystemUpdateFocus(NULL);
+			}
+		} break;
+	}
 }
 
 bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
@@ -7382,12 +7550,12 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (bShift)
 			{
 				lcVector3 tmp;
-				RotateSelectedObjects(axis, tmp);
+				RotateSelectedObjects(axis, tmp, true, true);
 			}
 			else
 			{
 				lcVector3 tmp;
-				MoveSelectedObjects(axis, tmp, false);
+				MoveSelectedObjects(axis, tmp, false, true);
 			}
 
 			UpdateOverlayScale();
@@ -8214,7 +8382,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true);
+				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8247,7 +8415,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true);
+				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true, true);
 			}
 
 			SystemUpdateFocus(NULL);
@@ -8378,7 +8546,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownY = y;
 
 				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
 				m_MouseTotalDelta += Delta;
 			}
 			else
@@ -8411,7 +8579,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover);
+				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
 				m_MouseTotalDelta += Delta;
 			}
 

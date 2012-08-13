@@ -126,7 +126,7 @@ int stricmp(const char* str1, const char* str2);
 #define LC_DRAW_SNAP_Z         0x0020 // Snap Z
 #define LC_DRAW_SNAP_XYZ       (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
 #define LC_DRAW_GLOBAL_SNAP    0x0040 // Don't allow relative snap. 
-#define LC_DRAW_MOVE           0x0080 // Switch to move after insert
+//#define LC_DRAW_MOVE           0x0080 // Switch to move after insert
 #define LC_DRAW_LOCK_X         0x0100 // Lock X
 #define LC_DRAW_LOCK_Y         0x0200 // Lock Y
 #define LC_DRAW_LOCK_Z         0x0400 // Lock Z

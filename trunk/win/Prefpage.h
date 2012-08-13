@@ -125,7 +125,6 @@ public:
 	BOOL	m_bLockX;
 	BOOL	m_bLockY;
 	BOOL	m_bLockZ;
-	BOOL	m_bMove;
 	BOOL	m_bSnapA;
 	BOOL	m_bSnapX;
 	BOOL	m_bSnapY;

@@ -16,6 +16,7 @@ struct GLWindowPrivate
 	GtkWidget  *widget;
 	Display*   xdisplay;
 	GLXContext context;
+	LC_CURSOR_TYPE Cursor;
 	bool Multisample;
 };
 
@@ -305,7 +306,137 @@ void GLWindow::ReleaseMouse()
 {
 }
 
+static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, const char **xpm)
+{
+  int height, width, colors;
+  char pixmap_buffer [(32 * 32)/8];
+  char mask_buffer [(32 * 32)/8];
+  int x, y, pix;
+  int transparent_color, black_color;
+
+  sscanf (xpm [0], "%d %d %d %d", &height, &width, &colors, &pix);
+
+  g_assert (height == 32);
+  g_assert (width  == 32);
+  g_assert (colors == 3);
+
+  transparent_color = ' ';
+  black_color = '.';
+
+  for (y = 0; y < 32; y++)
+    for (x = 0; x < 32;)
+    {
+      char value = 0, maskv = 0;
+
+      for (pix = 0; pix < 8; pix++, x++)
+	if (xpm [4+y][x] != transparent_color)
+	{
+	  maskv |= 1 << pix;
+
+	  if (xpm [4+y][x] != black_color)
+	    value |= 1 << pix;
+	}
+
+      pixmap_buffer [(y * 4 + x/8)-1] = value;
+      mask_buffer [(y * 4 + x/8)-1] = maskv;
+    }
+
+  *bitmap = gdk_bitmap_create_from_data (NULL, pixmap_buffer, 32, 32);
+  *mask   = gdk_bitmap_create_from_data (NULL, mask_buffer, 32, 32);
+}
+
 void GLWindow::SetCursor(LC_CURSOR_TYPE Type)
 {
+#include "pixmaps/cr_brick.xpm"
+#include "pixmaps/cr_light.xpm"
+#include "pixmaps/cr_spot.xpm"
+#include "pixmaps/cr_cam.xpm"
+#include "pixmaps/cr_sel.xpm"
+#include "pixmaps/cr_selm.xpm"
+#include "pixmaps/cr_move.xpm"
+#include "pixmaps/cr_rot.xpm"
+#include "pixmaps/cr_paint.xpm"
+#include "pixmaps/cr_erase.xpm"
+#include "pixmaps/cr_pan.xpm"
+#include "pixmaps/cr_rotv.xpm"
+#include "pixmaps/cr_roll.xpm"
+#include "pixmaps/cr_zoom.xpm"
+#include "pixmaps/cr_zoomr.xpm"
+
+	// TODO: Missing LC_CURSOR_ROTATEX and LC_CURSOR_ROTATEY.
+	// TODO: Auto-generate xpms from bmps in the Makefile.
+	const char** Cursors[LC_CURSOR_COUNT] =
+	{
+		NULL,     // LC_CURSOR_DEFAULT
+		cr_brick, // LC_CURSOR_BRICK
+		cr_light, // LC_CURSOR_LIGHT
+		cr_spot,  // LC_CURSOR_SPOTLIGHT
+		cr_cam,   // LC_CURSOR_CAMERA
+		cr_sel,   // LC_CURSOR_SELECT
+		cr_selm,  // LC_CURSOR_SELECT_GROUP
+		cr_move,  // LC_CURSOR_MOVE
+		cr_rot,   // LC_CURSOR_ROTATE
+		cr_rot,   // LC_CURSOR_ROTATEX
+		cr_rot,   // LC_CURSOR_ROTATEY
+		cr_erase, // LC_CURSOR_DELETE
+		cr_paint, // LC_CURSOR_PAINT
+		cr_zoom,  // LC_CURSOR_ZOOM
+		cr_zoomr, // LC_CURSOR_ZOOM_REGION
+		cr_pan,   // LC_CURSOR_PAN
+		cr_roll,  // LC_CURSOR_ROLL
+		cr_rotv,  // LC_CURSOR_ROTATE_VIEW
+	};
+
+	int Offsets[LC_CURSOR_COUNT][2] =
+	{
+		{  0,  0 }, // LC_CURSOR_DEFAULT
+		{  8,  3 }, // LC_CURSOR_BRICK
+		{ 15, 15 }, // LC_CURSOR_LIGHT
+		{  7, 10 }, // LC_CURSOR_SPOTLIGHT
+		{ 15,  9 }, // LC_CURSOR_CAMERA
+		{  0,  2 }, // LC_CURSOR_SELECT
+		{  0,  2 }, // LC_CURSOR_SELECT_GROUP
+		{ 15, 15 }, // LC_CURSOR_MOVE
+		{ 15, 15 }, // LC_CURSOR_ROTATE
+		{ 15, 15 }, // LC_CURSOR_ROTATEX
+		{ 15, 15 }, // LC_CURSOR_ROTATEY
+		{  0, 10 }, // LC_CURSOR_DELETE
+		{ 14, 14 }, // LC_CURSOR_PAINT
+		{ 15, 15 }, // LC_CURSOR_ZOOM
+		{  9,  9 }, // LC_CURSOR_ZOOM_REGION
+		{ 15, 15 }, // LC_CURSOR_PAN
+		{ 15, 15 }, // LC_CURSOR_ROLL
+		{ 15, 15 }, // LC_CURSOR_ROTATE_VIEW
+	};
+
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+
+	if (prv->Cursor == Type)
+		return;
+
+	const char** xpm = Cursors[Type];
+	int x = Offsets[Type][0];
+	int y = Offsets[Type][1];
+
+	GdkBitmap *bitmap;
+	GdkBitmap *mask;
+	GdkCursor *cursor;
+	GdkColor white = {0, 0xffff, 0xffff, 0xffff};
+	GdkColor black = {0, 0x0000, 0x0000, 0x0000};
+
+	if (xpm != NULL)
+	{
+		create_bitmap_and_mask_from_xpm(&bitmap, &mask, xpm);
+		cursor = gdk_cursor_new_from_pixmap(bitmap, mask, &white, &black, x, y);
+		gdk_window_set_cursor(prv->widget->window, cursor);
+	}
+	else
+	{
+		cursor = gdk_cursor_new(GDK_LEFT_PTR);
+		gdk_window_set_cursor(prv->widget->window, cursor);
+		gdk_cursor_destroy(cursor);
+	}
+
+	prv->Cursor = Type;
 }
 

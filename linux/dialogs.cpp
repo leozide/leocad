@@ -1391,7 +1391,7 @@ struct LC_PREFERENCESDLG_STRUCT
 	GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
 	GtkWidget *draw_snapx, *draw_snapy, *draw_snapz, *draw_angle;
 	GtkWidget *draw_anglesnap, *draw_centimeter, *draw_relative;
-	GtkWidget *draw_move, *draw_fixed, *draw_lockx, *draw_locky, *draw_lockz;
+	GtkWidget *draw_fixed, *draw_lockx, *draw_locky, *draw_lockz;
 	GtkWidget *scn_solid, *scn_gradient, *scn_image, *scn_imagename;
 	GtkWidget *scn_tile, *scn_fog, *scn_floor, *scn_density;
 	GtkWidget *scn_clrbackground, *scn_clrgrad1, *scn_clrgrad2, *scn_clrfog, *scn_clrambient;
@@ -1430,7 +1430,6 @@ bool preferencesdlg_getopts(LC_PREFERENCESDLG_STRUCT* s, LC_PREFERENCESDLG_OPTS*
 	if (GTK_TOGGLE_BUTTON(s->draw_snapz)->active) opts->nSnap |= LC_DRAW_SNAP_Z;
 	if (GTK_TOGGLE_BUTTON(s->draw_angle)->active) opts->nSnap |= LC_DRAW_SNAP_A;
 	if (GTK_TOGGLE_BUTTON(s->draw_centimeter)->active) opts->nSnap |= LC_DRAW_CM_UNITS;
-	if (GTK_TOGGLE_BUTTON(s->draw_move)->active) opts->nSnap |= LC_DRAW_MOVE;
 	if (GTK_TOGGLE_BUTTON(s->draw_fixed)->active) opts->nSnap |= LC_DRAW_MOVEAXIS;
 	if (GTK_TOGGLE_BUTTON(s->draw_lockx)->active) opts->nSnap |= LC_DRAW_LOCK_X;
 	if (GTK_TOGGLE_BUTTON(s->draw_locky)->active) opts->nSnap |= LC_DRAW_LOCK_Y;
@@ -1689,10 +1688,6 @@ int preferencesdlg_execute(void* param)
 	gtk_widget_show(s.draw_relative);
 	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_relative, 1, 2, 0, 1);
 
-	s.draw_move = gtk_check_button_new_with_label("Switch to move after insert");
-	gtk_widget_show(s.draw_move);
-	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_move, 1, 2, 1, 2);
-
 	s.draw_fixed = gtk_check_button_new_with_label("Fixed direction keys");
 	gtk_widget_show(s.draw_fixed);
 	gtk_table_attach_defaults(GTK_TABLE(table), s.draw_fixed, 1, 2, 2, 3);
@@ -1884,7 +1879,6 @@ int preferencesdlg_execute(void* param)
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_snapz), (opts->nSnap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_angle), (opts->nSnap & LC_DRAW_SNAP_A) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_centimeter), (opts->nSnap & LC_DRAW_CM_UNITS) ? TRUE : FALSE);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_move), (opts->nSnap & LC_DRAW_MOVE) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_fixed), (opts->nSnap & LC_DRAW_MOVEAXIS) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_lockx), (opts->nSnap & LC_DRAW_LOCK_X) ? TRUE : FALSE);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.draw_locky), (opts->nSnap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);

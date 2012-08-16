@@ -146,20 +146,22 @@ CurvePoint::~CurvePoint ()
 {
 }
 
-void CurvePoint::MinIntersectDist (LC_CLICKLINE* pLine)
+void CurvePoint::MinIntersectDist(lcClickLine* ClickLine)
 {
-  float dist = (float)BoundingBoxIntersectDist (pLine);
+	/*
+	float dist = (float)BoundingBoxIntersectDist(ClickLine);
 
-  if (dist < pLine->mindist)
-  {
-    pLine->mindist = dist;
-    pLine->pClosest = this;
+	if (dist < ClickLine->MinDist)
+	{
+		ClickLine->MinDist = dist;
+		ClickLine->Closest = this;
 
-    m_nLastHit = 1;
-  }
+		m_nLastHit = 1;
+	}
 
-  m_nLastHit = 0;
-  // FIXME: check arrows
+	m_nLastHit = 0;
+	// FIXME: check arrows
+	*/
 }
 
 void CurvePoint::UpdatePosition (unsigned short nTime, bool bAnimation)
@@ -212,7 +214,7 @@ void CurvePoint::Select (bool bSelecting, bool bFocus, bool bMultiple)
   }
 }
 
-void CurvePoint::Render (LC_RENDER_INFO* pInfo)
+void CurvePoint::Render()
 {
   if (m_nState & LC_CURVE_POINT_FOCUSED)
     lcSetColorFocused();
@@ -312,7 +314,7 @@ void Curve::FileSave(lcFile& file) const
   // FIXME
 }
 
-void Curve::MinIntersectDist (LC_CLICKLINE* pLine)
+void Curve::MinIntersectDist(lcClickLine* ClickLine)
 {
   // FIXME
 }
@@ -591,8 +593,9 @@ void Curve::TesselateHose ()
   free (verts);
 }
 
-void Curve::Render (LC_RENDER_INFO* pInfo)
+void Curve::Render()
 {
+	/*
 	if ((m_nState & LC_CURVE_HIDDEN) != 0)
 		return;
 
@@ -637,7 +640,7 @@ void Curve::Render (LC_RENDER_INFO* pInfo)
 		for (int i = 0; i < m_Points.GetSize (); i++)
 			m_Points[i]->Render (pInfo);
 	}
-
+	*/
 	/*
 	if (IsSelected ())
 	{

@@ -38,7 +38,7 @@ public:
 	virtual ~CameraTarget ();
 
 public:
-	void MinIntersectDist (LC_CLICKLINE* pLine);
+	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IntersectsVolume(const lcVector4 Planes[6])
 	{ return false; }
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
@@ -122,7 +122,7 @@ public:
 public:
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
-	void MinIntersectDist (LC_CLICKLINE* pLine);
+	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	bool IntersectsVolume(const lcVector4 Planes[6])
 	{ return false; }

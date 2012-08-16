@@ -6329,16 +6329,12 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	lcVector3 Start = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
 	lcVector3 End = lcUnprojectPoint(lcVector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 
-	LC_CLICKLINE ClickLine;
+	lcClickLine ClickLine;
 
-	ClickLine.a1 = Start[0];
-	ClickLine.b1 = Start[1];
-	ClickLine.c1 = Start[2];
-	ClickLine.a2 = End[0] - Start[0];
-	ClickLine.b2 = End[1] - Start[1];
-	ClickLine.c2 = End[2] - Start[2];
-	ClickLine.mindist = FLT_MAX;
-	ClickLine.pClosest = NULL;
+	ClickLine.Start = Start;
+	ClickLine.End = End;
+	ClickLine.MinDist = FLT_MAX;
+	ClickLine.Closest = NULL;
 
 	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
@@ -6347,14 +6343,15 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	if (!PiecesOnly)
 	{
 		for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-			if (pCamera != view->m_Camera)
+			if (pCamera != view->m_Camera && pCamera->IsVisible())
 				pCamera->MinIntersectDist(&ClickLine);
 
 		for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-			pLight->MinIntersectDist(&ClickLine);
+			if (pLight->IsVisible())
+				pLight->MinIntersectDist(&ClickLine);
 	}
 
-	return ClickLine.pClosest;
+	return ClickLine.Closest;
 }
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)

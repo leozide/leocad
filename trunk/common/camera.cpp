@@ -41,20 +41,28 @@ CameraTarget::~CameraTarget ()
 {
 }
 
-void CameraTarget::MinIntersectDist (LC_CLICKLINE* pLine)
+void CameraTarget::MinIntersectDist(lcClickLine* ClickLine)
 {
-  float dist = (float)BoundingBoxIntersectDist (pLine);
+	lcVector3 Min = lcVector3(-0.2f, -0.2f, -0.2f);
+	lcVector3 Max = lcVector3(0.2f, 0.2f, 0.2f);
 
-  if (dist < pLine->mindist)
-  {
-    pLine->mindist = dist;
-    pLine->pClosest = this;
-  }
+	lcMatrix44 WorldView = ((Camera*)m_pParent)->mWorldView;
+	WorldView.SetTranslation(lcMul30(-((Camera*)m_pParent)->mTargetPosition, WorldView));
+
+	lcVector3 Start = lcMul31(ClickLine->Start, WorldView);
+	lcVector3 End = lcMul31(ClickLine->End, WorldView);
+
+	float Dist;
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) && (Dist < ClickLine->MinDist))
+	{
+		ClickLine->Closest = this;
+		ClickLine->MinDist = Dist;
+	}
 }
 
-void CameraTarget::Select (bool bSelecting, bool bFocus, bool bMultiple)
+void CameraTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
 {
-  m_pParent->SelectTarget (bSelecting, bFocus, bMultiple);
+	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
 }
 
 const char* CameraTarget::GetName() const
@@ -520,11 +528,6 @@ void Camera::UpdateBoundingBox()
 	float len = FrontVector.Length();
 
 	lcMatrix44 Mat = lcMatrix44AffineInverse(mWorldView);
-
-	Mat.SetTranslation(mPosition);
-	BoundingBoxCalculate((Matrix*)&Mat);
-	Mat.SetTranslation(mTargetPosition);
-	m_pTarget->BoundingBoxCalculate((Matrix*)&Mat);
 	Mat.SetTranslation(lcVector3(0, 0, 0));
 
 	if (!m_nList)
@@ -684,21 +687,22 @@ void Camera::Render(float fLineWidth)
   }
 }
 
-void Camera::MinIntersectDist(LC_CLICKLINE* pLine)
+void Camera::MinIntersectDist(lcClickLine* ClickLine)
 {
-  float dist;
+	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
+	lcVector3 Max = lcVector3(0.3f, 0.3f, 0.3f);
 
-  if (m_nState & LC_CAMERA_HIDDEN)
-    return;
+	lcVector3 Start = lcMul31(ClickLine->Start, mWorldView);
+	lcVector3 End = lcMul31(ClickLine->End, mWorldView);
 
-  dist = (float)BoundingBoxIntersectDist (pLine);
-  if (dist < pLine->mindist)
-  {
-    pLine->mindist = dist;
-    pLine->pClosest = this;
-  }
+	float Dist;
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) && (Dist < ClickLine->MinDist))
+	{
+		ClickLine->Closest = this;
+		ClickLine->MinDist = Dist;
+	}
 
-  m_pTarget->MinIntersectDist (pLine);
+	m_pTarget->MinIntersectDist(ClickLine);
 }
 
 void Camera::LoadProjection(float fAspect)

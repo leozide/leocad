@@ -15,23 +15,29 @@
 class Light;
 class LightTarget;
 
-typedef enum
+enum LC_LK_TYPES
 {
-  LC_LK_POSITION, LC_LK_TARGET, // position
-  LC_LK_AMBIENT, LC_LK_DIFFUSE, LC_LK_SPECULAR, // color
-  LC_LK_CONSTANT, LC_LK_LINEAR, LC_LK_QUADRATIC, // attenuation
-  LC_LK_CUTOFF, LC_LK_EXPONENT, // spot
-  LC_LK_COUNT
-} LC_LK_TYPES;
+	LC_LK_POSITION,
+	LC_LK_TARGET,
+	LC_LK_AMBIENT_COLOR,
+	LC_LK_DIFFUSE_COLOR,
+	LC_LK_SPECULAR_COLOR,
+	LC_LK_CONSTANT_ATTENUATION,
+	LC_LK_LINEAR_ATTENUATION,
+	LC_LK_QUADRATIC_ATTENUATION,
+	LC_LK_SPOT_CUTOFF,
+	LC_LK_SPOT_EXPONENT,
+	LC_LK_COUNT
+};
 
 class LightTarget : public Object
 {
 public:
-	LightTarget (Light *pParent);
-	~LightTarget ();
+	LightTarget(Light *pParent);
+	~LightTarget();
 
 public:
-	void MinIntersectDist (LC_CLICKLINE* pLine);
+	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IntersectsVolume(const lcVector4 Planes[6])
 	{ return false; }
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
@@ -96,43 +102,43 @@ public:
 	const char* GetName() const
 	{ return m_strName; };
 
-	void Render (float fLineWidth);
-	void MinIntersectDist (LC_CLICKLINE* Line);
+	void Render(float fLineWidth);
+	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IntersectsVolume(const lcVector4 Planes[6])
 	{ return false; }
-	void UpdatePosition (unsigned short nTime, bool bAnimation);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-	void Setup (int index);
+	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void Setup(int index);
 	void CreateName(const Light* pLight);
 
+	// Temporary parameters
+	lcMatrix44 mWorldLight;
 	lcVector3 mPosition;
 	lcVector3 mTargetPosition;
+	lcVector4 mAmbientColor;
+	lcVector4 mDiffuseColor;
+	lcVector4 mSpecularColor;
+	float mConstantAttenuation;
+	float mLinearAttenuation;
+	float mQuadraticAttenuation;
+	float mSpotCutoff;
+	float mSpotExponent;
 
 protected:
-  void Initialize ();
+	void Initialize();
 
-  // Camera target
-  LightTarget* m_pTarget;
+	// Camera target
+	LightTarget* m_pTarget;
 
-  // Attributes
-  float m_fCone;
-  unsigned char m_nState;
-  char m_strName[81];
-  bool m_bEnabled;
+	// Attributes
+	float m_fCone;
+	unsigned char m_nState;
+	char m_strName[81];
+	bool m_bEnabled;
 
-  GLuint m_nList;
-  static GLuint m_nSphereList;
-  static GLuint m_nTargetList;
-
-  // Temporary parameters
-  float m_fAmbient[4];
-  float m_fDiffuse[4];
-  float m_fSpecular[4];
-  float m_fConstant;
-  float m_fLinear;
-  float m_fQuadratic;
-  float m_fCutoff;
-  float m_fExponent;
+	GLuint m_nList;
+	static GLuint m_nSphereList;
+	static GLuint m_nTargetList;
 };
 
 #endif // _LIGHT_H_

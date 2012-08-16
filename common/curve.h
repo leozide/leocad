@@ -29,29 +29,29 @@ class CurvePoint : public Object
 {
  public:
   // constructors / destructor
-  CurvePoint (Curve *pParent);
-  CurvePoint (Curve *pParent, const float *pos, const float *dir);
-  virtual ~CurvePoint ();
+  CurvePoint(Curve *pParent);
+  CurvePoint(Curve *pParent, const float *pos, const float *dir);
+  virtual ~CurvePoint();
 
   // object functions
   bool FileLoad(lcFile& file);
   void FileSave(lcFile& file) const;
-  void MinIntersectDist (LC_CLICKLINE* pLine);
+  void MinIntersectDist(lcClickLine* ClickLine);
   bool IntersectsVolume(const lcVector4 Planes[6])
   { return false; }
-  void UpdatePosition (unsigned short nTime, bool bAnimation);
-  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void Render (LC_RENDER_INFO* pInfo);
-  void Select (bool bSelecting, bool bFocus, bool bMultiple);
+  void UpdatePosition(unsigned short nTime, bool bAnimation);
+  void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+  void Render();
+  void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
   // query functions
-  Curve* GetParent () const
+  Curve* GetParent() const
     { return m_pParent; }
-  const float* GetPosition () const
+  const float* GetPosition() const
     { return m_fPos; }
-  const float* GetDirection1 () const
+  const float* GetDirection1() const
     { return m_fDir1; }
-  const float* GetDirection2 () const
+  const float* GetDirection2() const
     { return m_fDir2; }
   float GetAngle () const
     { return m_fAngle; }
@@ -99,14 +99,14 @@ class Curve : public Object
   // object functions
   bool FileLoad(lcFile& file);
   void FileSave(lcFile& file) const;
-  void MinIntersectDist (LC_CLICKLINE* pLine);
-  void UpdatePosition (unsigned short nTime, bool bAnimation);
-  void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
-  void Render (LC_RENDER_INFO* pInfo);
-  void Select (bool bSelecting, bool bFocus, bool bMultiple);
+  void MinIntersectDist(lcClickLine* ClickLine);
+  void UpdatePosition(unsigned short nTime, bool bAnimation);
+  void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+  void Render();
+  void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
   // implementation
-  void DeselectOtherPoints (CurvePoint *pSender, bool bFocusOnly);
+  void DeselectOtherPoints(CurvePoint *pSender, bool bFocusOnly);
 
  protected:
   void Initialize ();

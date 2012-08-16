@@ -51,7 +51,7 @@ public:
 	const char* GetName() const
 	{ return m_strName; };
 
-	void MinIntersectDist(LC_CLICKLINE* pLine);
+	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame);
 	void CreateName(Piece* pPiece);

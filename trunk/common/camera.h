@@ -10,10 +10,23 @@
 #define LC_CAMERA_FOCUSED           0x04
 #define LC_CAMERA_TARGET_SELECTED   0x08
 #define LC_CAMERA_TARGET_FOCUSED    0x10
+#define LC_CAMERA_SIMPLE            0x20
 
 class Camera;
 class CameraTarget;
 class TiledRender;
+class View;
+
+enum LC_VIEWPOINT
+{
+	LC_VIEWPOINT_FRONT,
+	LC_VIEWPOINT_BACK,
+	LC_VIEWPOINT_TOP,
+	LC_VIEWPOINT_UNDER,
+	LC_VIEWPOINT_LEFT,
+	LC_VIEWPOINT_RIGHT,
+	LC_VIEWPOINT_HOME
+};
 
 typedef enum
 {
@@ -23,13 +36,13 @@ typedef enum
 	LC_CAMERA_MAIN, LC_CAMERA_USER
 } LC_CAMERA_TYPES;
 
-typedef enum
+enum LC_CK_TYPES
 {
 	LC_CK_EYE,
 	LC_CK_TARGET,
 	LC_CK_UP,
 	LC_CK_COUNT
-} LC_CK_TYPES;
+};
 
 class CameraTarget : public Object
 {
@@ -62,19 +75,27 @@ protected:
 class Camera : public Object
 {
 public:
-	Camera ();
-	Camera (unsigned char nType, Camera* pPrev);
-	Camera (float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
-	Camera (const float *eye, const float *target, const float *up, Camera* pCamera);
-	virtual ~Camera ();
+	Camera(bool Simple);
+	Camera(unsigned char nType, Camera* pPrev);
+	Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
+//	Camera(const float *eye, const float *target, const float *up, Camera* pCamera);
+	virtual ~Camera();
 
 	// Query functions.
 	const char* GetName() const
-	{ return m_strName; };
+	{
+		return m_strName;
+	}
 
-	CameraTarget* GetTarget () const
-		{ return m_pTarget; }
+	CameraTarget* GetTarget() const
+	{
+		return m_pTarget;
+	}
 
+	bool IsSimple() const
+	{
+		return (m_nState & LC_CAMERA_SIMPLE) != 0;
+	}
 
 
 
@@ -89,8 +110,6 @@ public:
 		{ return m_strName; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }
-	bool IsUser()
-		{ return m_nType == LC_CAMERA_USER; }
 	bool IsVisible()
 		{ return (m_nState & LC_CAMERA_HIDDEN) == 0; }
 	bool IsSelected()
@@ -129,14 +148,17 @@ public:
 
 
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void CopyPosition(const Camera* camera);
 	void Render(float fLineWidth);
 	void LoadProjection(float fAspect);
 
+	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
 	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
+	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);

@@ -1,10 +1,7 @@
-//
-// View the project contents
-//
-
 #include "lc_global.h"
 #include <stdlib.h>
 #include "project.h"
+#include "camera.h"
 #include "view.h"
 #include "system.h"
 
@@ -12,7 +9,7 @@ View::View(Project *pProject, GLWindow *share)
 	: GLWindow(share)
 {
 	m_Project = pProject;
-	m_Camera = NULL;
+	mCamera = NULL;
 	m_OverlayScale = 1.0f;
 }
 
@@ -20,6 +17,32 @@ View::~View()
 {
 	if (m_Project != NULL)
 		m_Project->RemoveView(this);
+}
+
+void View::SetCamera(Camera* camera)
+{
+	if (camera->IsSimple())
+	{
+		if (!mCamera || !mCamera->IsSimple())
+			mCamera = new Camera(true);
+
+		mCamera->CopyPosition(camera);
+	}
+	else
+	{
+		if (mCamera && mCamera->IsSimple())
+			delete mCamera;
+
+		mCamera = camera;
+	}
+}
+
+void View::SetDefaultCamera()
+{
+	if (!mCamera || !mCamera->IsSimple())
+		mCamera = new Camera(true);
+
+	mCamera->SetViewpoint(LC_VIEWPOINT_HOME, 1, false, false);
 }
 
 LC_CURSOR_TYPE View::GetCursor() const

@@ -23,10 +23,13 @@ public:
 	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
 	void OnMouseMove(int x, int y, bool bControl, bool bShift);
 
+	void SetCamera(Camera* camera);
+	void SetDefaultCamera();
+
 	LC_CURSOR_TYPE GetCursor() const;
 
 	Project* m_Project;
-	Camera* m_Camera;
+	Camera* mCamera;
 	float m_OverlayScale;
 };
 

@@ -126,7 +126,7 @@ void Project::UpdateInterface()
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_pCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->m_Camera : NULL, m_pCameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->mCamera : NULL, m_pCameras);
 	UpdateSelection();
 	if (m_bAnimation)
 		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -312,24 +312,17 @@ void Project::LoadDefaults(bool cameras)
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
-		m_ViewList[i]->MakeCurrent ();
+		m_ViewList[i]->MakeCurrent();
 		RenderInitialize();
 	}
 
 	if (cameras)
 	{
-		Camera* pCam;
-		for (pCam = NULL, i = 0; i < 7; i++)
-		{
-			pCam = new Camera(i, pCam);
-			if (m_pCameras == NULL)
-				m_pCameras = pCam;
-		}
-		for (i = 0; i < m_ViewList.GetSize (); i++)
-			m_ViewList[i]->m_Camera = pCam;
+		for (i = 0; i < m_ViewList.GetSize(); i++)
+			m_ViewList[i]->SetDefaultCamera();
 		SystemUpdateCameraMenu(m_pCameras);
 		if (m_ActiveView)
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, m_pCameras);
 	}
 	SystemPieceComboAdd(NULL);
 	UpdateSelection();
@@ -769,9 +762,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	if (!bMerge)
 	{
-		Camera* Cam = GetCamera(LC_CAMERA_MAIN);
-		for (i = 0; i < m_ViewList.GetSize (); i++)
-			m_ViewList[i]->m_Camera = Cam;
+		for (i = 0; i < m_ViewList.GetSize(); i++)
+			m_ViewList[i]->SetDefaultCamera();
 	}
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
@@ -792,7 +784,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(m_pCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, m_pCameras);
 	UpdateSelection();
 	if (m_bAnimation)
 		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -1591,7 +1583,7 @@ void Project::Render(View* view, bool ToMemory)
 
 	// Setup the projection and camera matrices.
 	float ratio = (float)view->GetWidth() / (float)view->GetHeight();
-	view->m_Camera->LoadProjection(ratio);
+	view->mCamera->LoadProjection(ratio);
 
 	if (ToMemory)
 		RenderScenePieces(view);
@@ -1736,7 +1728,7 @@ int lcOpaqueRenderCompare(const Piece* a, const Piece* b, void*)
 void Project::RenderScenePieces(View* view)
 {
 	float AspectRatio = (float)view->GetWidth() / (float)view->GetHeight();
-	view->m_Camera->LoadProjection(AspectRatio);
+	view->mCamera->LoadProjection(AspectRatio);
 
 	if (m_nSnap & LC_DRAW_GRID)
 	{
@@ -1759,12 +1751,12 @@ void Project::RenderScenePieces(View* view)
 		glEnable(GL_FOG);
 
 	if (m_nScene & LC_SCENE_FLOOR)
-		m_pTerrain->Render(view->m_Camera, AspectRatio);
+		m_pTerrain->Render(view->mCamera, AspectRatio);
 
 	PtrArray<Piece> OpaquePieces(512);
 	ObjArray<lcTranslucentRenderSection> TranslucentSections(512);
 
-	const lcMatrix44& WorldView = view->m_Camera->mWorldView;
+	const lcMatrix44& WorldView = view->mCamera->mWorldView;
 
 	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
@@ -1989,8 +1981,9 @@ void Project::RenderSceneObjects(View* view)
 			
 	for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
 	{
-		if ((pCamera == view->m_Camera) || !pCamera->IsVisible())
+		if ((pCamera == view->mCamera) || !pCamera->IsVisible())
 			continue;
+
 		pCamera->Render(m_fLineWidth);
 	}
 
@@ -2004,7 +1997,7 @@ void Project::RenderSceneObjects(View* view)
 //		glClear(GL_DEPTH_BUFFER_BIT);
 
 		lcMatrix44 Mats[3];
-		Mats[0] = view->m_Camera->mWorldView;
+		Mats[0] = view->mCamera->mWorldView;
 		Mats[0].SetTranslation(lcVector3(0, 0, 0));
 		Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
 		Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
@@ -2316,7 +2309,7 @@ void Project::RenderOverlays(View* view)
 
 		glDisable(GL_DEPTH_TEST);
 
-		Camera* Cam = view->m_Camera;
+		Camera* Cam = view->mCamera;
 		int j;
 
 		// Find the rotation from the focused piece if relative snap is enabled.
@@ -2598,7 +2591,7 @@ void Project::RenderOverlays(View* view)
 				// Draw text.
 				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = view->m_Camera;
+				Camera* Cam = view->mCamera;
 
 				const lcMatrix44& ModelView = Cam->mWorldView;
 				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -2768,7 +2761,7 @@ void Project::RenderViewports(View* view)
 	glEnable(GL_ALPHA_TEST);
 
 	glBegin(GL_QUADS);
-	m_pScreenFont->PrintText(3.0f, (float)view->GetHeight() - 1.0f - 6.0f, 0.0f, view->m_Camera->GetName());
+	m_pScreenFont->PrintText(3.0f, (float)view->GetHeight() - 1.0f - 6.0f, 0.0f, view->mCamera->GetName());
 	glEnd();
 	
 	glDisable(GL_ALPHA_TEST);
@@ -3000,14 +2993,14 @@ bool Project::RemoveSelectedObjects()
 
 		for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
 		{
-			if (pCamera == m_ViewList[ViewIdx]->m_Camera)
+			if (pCamera == m_ViewList[ViewIdx]->mCamera)
 			{
 				bCanDelete = false;
 				break;
 			}
 		}
 
-		if (bCanDelete && pCamera->IsSelected() && pCamera->IsUser())
+		if (bCanDelete && pCamera->IsSelected())
 		{
 			if (pPrev)
 			{
@@ -3025,7 +3018,7 @@ bool Project::RemoveSelectedObjects()
 			removed = true;
 
 			SystemUpdateCameraMenu(m_pCameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, m_pCameras);
 		}
 		else
 		{
@@ -3198,7 +3191,7 @@ unsigned char Project::GetLastStep()
 }
 
 // Create a series of pictures
-void Project::CreateImages (Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
+void Project::CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {
 	unsigned short oldtime;
 	void* render = Sys_StartMemoryRender (width, height);
@@ -3206,7 +3199,7 @@ void Project::CreateImages (Image* images, int width, int height, unsigned short
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 
 	View view(this, m_ActiveView);
-	view.m_Camera = m_ActiveView->m_Camera;
+	view.SetCamera(m_ActiveView->mCamera);
 	view.OnSize(width, height);
 
 	if (!hilite)
@@ -4078,12 +4071,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				POVFile.WriteLine(Line);
 			}
 
-			const lcVector3& Position = m_ActiveView->m_Camera->mPosition;
-			const lcVector3& Target = m_ActiveView->m_Camera->mTargetPosition;
-			const lcVector3& Up = m_ActiveView->m_Camera->mUpVector;
+			const lcVector3& Position = m_ActiveView->mCamera->mPosition;
+			const lcVector3& Target = m_ActiveView->mCamera->mTargetPosition;
+			const lcVector3& Up = m_ActiveView->mCamera->mUpVector;
 
 			sprintf(Line, "camera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
-				Up[0], Up[1], Up[2], Position[1], Position[0], Position[2], Target[1], Target[0], Target[2], m_ActiveView->m_Camera->m_fovy);
+				Up[0], Up[1], Up[2], Position[1], Position[0], Position[2], Target[1], Target[0], Target[2], m_ActiveView->mCamera->m_fovy);
 			POVFile.WriteLine(Line);
 			sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
 				m_fBackground[0], m_fBackground[1], m_fBackground[2]);
@@ -4648,7 +4641,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					i++;
 
 			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-				if (pCamera != m_ActiveView->m_Camera)
+				if (pCamera != m_ActiveView->mCamera)
 					if (pCamera->IsVisible())
 						i++;
 
@@ -4680,7 +4673,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 
 			for (pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-				if (pCamera != m_ActiveView->m_Camera)
+				if (pCamera != m_ActiveView->mCamera)
 					if (pCamera->IsVisible())
 					{
 						opts[i].name = pCamera->GetName();
@@ -5403,7 +5396,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOM:
 		{
-			m_ActiveView->m_Camera->DoZoom(nParam, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->mCamera->DoZoom(nParam, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5411,7 +5404,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMIN:
 		{
-			m_ActiveView->m_Camera->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->mCamera->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5419,7 +5412,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMOUT:
 		{
-			m_ActiveView->m_Camera->DoZoom(1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->mCamera->DoZoom(1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -5465,21 +5458,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			{
 				View* view = m_ViewList[vp];
 
-				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
-
-				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = view->m_Camera;
-
-				lcVector3 Position(Cam->mPosition + Center - Cam->mTargetPosition);
-
-				const lcMatrix44& ModelView = Cam->mWorldView;
-				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
-
-				Position = lcZoomExtents(Position, ModelView, Projection, Points, 8);
-
-				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
-				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Center, LC_CK_TARGET);
-				Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				view->mCamera->ZoomExtents(view, Center, Points, 8, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			}
 
 			SystemUpdateFocus(NULL);
@@ -5662,50 +5641,54 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SystemUpdateFocus(NULL);
 		} break;
 
-		case LC_VIEW_CAMERA_FRONT:
+		case LC_VIEW_VIEWPOINT_FRONT:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_FRONT);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
-		case LC_VIEW_CAMERA_BACK:
+		case LC_VIEW_VIEWPOINT_BACK:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_BACK);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
-		case LC_VIEW_CAMERA_TOP:
+		case LC_VIEW_VIEWPOINT_TOP:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_TOP);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
-		case LC_VIEW_CAMERA_BOTTOM:
+		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_UNDER);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_UNDER, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
-		case LC_VIEW_CAMERA_LEFT:
+		case LC_VIEW_VIEWPOINT_LEFT:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_LEFT);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
-		case LC_VIEW_CAMERA_RIGHT:
+		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_RIGHT);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
-		case LC_VIEW_CAMERA_MAIN:
+		case LC_VIEW_VIEWPOINT_HOME:
 		{
-			HandleCommand(LC_VIEW_CAMERA_MENU, LC_CAMERA_MAIN);
+			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
 		} break;
 
 		case LC_VIEW_CAMERA_MENU:
 		{
-			Camera* pCamera = m_pCameras;
+			Camera* pCamera = GetCamera(nParam);
 
-			while (nParam--)
-				pCamera = pCamera->m_pNext;
-
-			SystemUpdateCurrentCamera(m_ActiveView->m_Camera, pCamera, m_pCameras);
-			m_ActiveView->m_Camera = pCamera;
+			SystemUpdateCurrentCamera(m_ActiveView->mCamera, pCamera, m_pCameras);
+			m_ActiveView->SetCamera(pCamera);
 			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
@@ -5713,7 +5696,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_VIEW_CAMERA_RESET:
 		{
 			Camera* pCamera;
-			int i;
 
 			while (m_pCameras)
 			{
@@ -5722,18 +5704,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				delete pCamera;
 			}
 
-			for (m_pCameras = pCamera = NULL, i = 0; i < 7; i++)
-			{
-				pCamera = new Camera(i, pCamera);
-				if (m_pCameras == NULL)
-					m_pCameras = pCamera;
-			}
-
 			for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
-				m_ViewList[ViewIdx]->m_Camera = pCamera;
+				m_ViewList[ViewIdx]->SetDefaultCamera();
 
 			SystemUpdateCameraMenu(m_pCameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+			SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, m_pCameras);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -6295,7 +6270,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -6321,7 +6296,7 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 {
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -6343,7 +6318,7 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	if (!PiecesOnly)
 	{
 		for (Camera* pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-			if (pCamera != view->m_Camera && pCamera->IsVisible())
+			if (pCamera != view->mCamera && pCamera->IsVisible())
 				pCamera->MinIntersectDist(&ClickLine);
 
 		for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
@@ -6358,7 +6333,7 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 {
 	int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = m_ActiveView->m_Camera;
+	Camera* Cam = m_ActiveView->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -6522,7 +6497,7 @@ bool Project::StopTracking(bool bAccept)
 			case LC_ACTION_CAMERA:
 			{
 				SystemUpdateCameraMenu(m_pCameras);
-				SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+				SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, m_pCameras);
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
@@ -6554,7 +6529,7 @@ bool Project::StopTracking(bool bAccept)
 			{
 				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = m_ActiveView->m_Camera;
+				Camera* Cam = m_ActiveView->mCamera;
 
 				const lcMatrix44& ModelView = Cam->mWorldView;
 				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -7436,7 +7411,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			}
 			else
 			{
-				Camera *camera = m_ActiveView->m_Camera;
+				Camera *camera = m_ActiveView->mCamera;
 
 				if (camera->IsSide ())
 				{
@@ -7500,7 +7475,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 					int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 					float Aspect = (float)Viewport[2]/(float)Viewport[3];
-					Camera* Cam = m_ActiveView->m_Camera;
+					Camera* Cam = m_ActiveView->mCamera;
 
 					const lcMatrix44& ModelView = Cam->mWorldView;
 					lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -7603,7 +7578,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -7689,10 +7664,10 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 						else
 							pCamera = ((CameraTarget*)Closest)->GetParent();
 
-						bool bCanDelete = pCamera->IsUser();
+						bool bCanDelete = true;
 
 						for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
-							if (pCamera == m_ViewList[ViewIdx]->m_Camera)
+							if (pCamera == m_ViewList[ViewIdx]->mCamera)
 								bCanDelete = false;
 
 						if (bCanDelete)
@@ -7704,7 +7679,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 									pPrev->m_pNext = pCamera->m_pNext;
 									delete pCamera;
 									SystemUpdateCameraMenu(m_pCameras);
-									SystemUpdateCurrentCamera(NULL, m_ActiveView->m_Camera, m_pCameras);
+									SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, m_pCameras);
 									break;
 								}
 						}
@@ -7925,7 +7900,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -8026,7 +8001,7 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -8065,7 +8040,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -8159,7 +8134,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = view->m_Camera;
+	Camera* Cam = view->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -8249,7 +8224,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((x == m_nDownX) && (y == m_nDownY))
 				break;
 
-			Camera* Camera = view->m_Camera;
+			Camera* Camera = view->mCamera;
 			bool Redraw;
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_MOVE_XYZ)) || (!Camera->IsSide()))
@@ -8427,7 +8402,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		
 		case LC_ACTION_ROTATE:
 		{
-			Camera* Camera = m_ActiveView->m_Camera;
+			Camera* Camera = m_ActiveView->mCamera;
 			bool Redraw;
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_ROTATE_XYZ)) || (!Camera->IsSide()))
@@ -8591,7 +8566,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownY == y)
 				break;
 
-			m_ActiveView->m_Camera->DoZoom(y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->mCamera->DoZoom(y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8612,7 +8587,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			m_ActiveView->m_Camera->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->mCamera->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			m_nDownY = y;
 			SystemUpdateFocus(NULL);
@@ -8623,19 +8598,6 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
-
-			// We can't rotate the side cameras.
-			if (m_ActiveView->m_Camera->IsSide())
-			{
-				const lcVector3& Position = m_ActiveView->m_Camera->mPosition;
-				const lcVector3& Target = m_ActiveView->m_Camera->mTargetPosition;
-				const lcVector3& Up = m_ActiveView->m_Camera->mUpVector;
-				Camera* pCamera = new Camera(Position, Target, Up, m_pCameras);
-
-				m_ActiveView->m_Camera = pCamera;
-				SystemUpdateCameraMenu(m_pCameras);
-				SystemUpdateCurrentCamera(NULL, pCamera, m_pCameras);
-			}
 
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -8648,19 +8610,19 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_ROTATE_VIEW_XYZ:
-					m_ActiveView->m_Camera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_ActiveView->mCamera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_ROTATE_VIEW_X:
-					m_ActiveView->m_Camera->DoRotate(x - m_nDownX, 0, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_ActiveView->mCamera->DoRotate(x - m_nDownX, 0, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_ROTATE_VIEW_Y:
-					m_ActiveView->m_Camera->DoRotate(0, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					m_ActiveView->mCamera->DoRotate(0, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_ROTATE_VIEW_Z:
-					m_ActiveView->m_Camera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+					m_ActiveView->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 					break;
 			}
 
@@ -8675,7 +8637,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->m_Camera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			m_ActiveView->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
@@ -8728,7 +8690,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 		int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
-		Camera* Cam = view->m_Camera;
+		Camera* Cam = view->mCamera;
 
 		const lcMatrix44& ModelView = Cam->mWorldView;
 		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -8828,7 +8790,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		// Calculate the distance from the mouse pointer to the center of the sphere.
 		int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
-		Camera* Cam = view->m_Camera;
+		Camera* Cam = view->mCamera;
 
 		const lcMatrix44& ModelView = Cam->mWorldView;
 		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -8885,7 +8847,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 			if (f >= 0.0f)
 			{
-				Camera* Cam = view->m_Camera;
+				Camera* Cam = view->mCamera;
 				lcVector3 ViewDir(Cam->mTargetPosition - Cam->mPosition);
 
 				float u1 = (-b + sqrtf(f)) / (2*a);
@@ -9058,7 +9020,7 @@ void Project::UpdateOverlayScale()
 		// projecting a point close to it back.
 		int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
-		Camera* Cam = m_ActiveView->m_Camera;
+		Camera* Cam = m_ActiveView->mCamera;
 
 		const lcMatrix44& ModelView = Cam->mWorldView;
 		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);

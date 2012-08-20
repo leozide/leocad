@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "lc_file.h"
 #include "camera.h"
+#include "view.h"
 #include "tr.h"
 
 #define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
@@ -73,10 +74,13 @@ const char* CameraTarget::GetName() const
 /////////////////////////////////////////////////////////////////////////////
 // Camera construction/destruction
 
-Camera::Camera ()
-  : Object (LC_OBJECT_CAMERA)
+Camera::Camera(bool Simple)
+	: Object(LC_OBJECT_CAMERA)
 {
-  Initialize();
+	Initialize();
+
+	if (Simple)
+		m_nState |= LC_CAMERA_SIMPLE;
 }
 
 // Start with a standard camera.
@@ -108,49 +112,6 @@ Camera::Camera (unsigned char nType, Camera* pPrev)
     pPrev->m_pNext = this;
 
   UpdatePosition(1, false);
-}
-
-// From OnMouseMove(), case LC_ACTION_ROTATE_VIEW
-Camera::Camera (const float *eye, const float *target, const float *up, Camera* pCamera)
-  : Object (LC_OBJECT_CAMERA)
-{
-  // Fix the up vector
-  lcVector3 UpVector(up[0], up[1], up[2]);
-  lcVector3 FrontVector(eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]), SideVector;
-  FrontVector.Normalize();
-  SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
-
-  Initialize();
-
-  ChangeKey (1, false, true, eye, LC_CK_EYE);
-  ChangeKey (1, false, true, target, LC_CK_TARGET);
-  ChangeKey (1, false, true, UpVector, LC_CK_UP);
-  ChangeKey (1, true, true, eye, LC_CK_EYE);
-  ChangeKey (1, true, true, target, LC_CK_TARGET);
-  ChangeKey (1, true, true, UpVector, LC_CK_UP);
-
-  int i, max = 0;
-
-  for (;;)
-  {
-    if (strncmp (pCamera->m_strName, "Camera ", 7) == 0)
-      if (sscanf(pCamera->m_strName, "Camera %d", &i) == 1)
-	if (i > max) 
-	  max = i;
-
-    if (pCamera->m_pNext == NULL)
-    {
-      sprintf(m_strName, "Camera %d", max+1);
-      pCamera->m_pNext = this;
-      break;
-    }
-    else
-      pCamera = pCamera->m_pNext;
-  }
-
-  UpdatePosition (1, false);
 }
 
 // From LC_ACTION_CAMERA
@@ -222,8 +183,7 @@ void Camera::Initialize()
   m_nList = 0;
 
   m_pTR = NULL;
-  for (unsigned char i = 0 ; i < sizeof(m_strName) ; i++ )
-    m_strName[i] = 0;
+  memset(m_strName, 0, sizeof(m_strName));
 
   float *values[] = { mPosition, mTargetPosition, mUpVector };
   RegisterKeys (values, camera_key_info, LC_CK_COUNT);
@@ -423,37 +383,29 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 {
 	lcVector3 Move(dx, dy, dz);
 
-	if (IsSide())
+	if (IsEyeSelected())
 	{
 		mPosition += Move;
+
+		if (!IsSimple())
+			ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+	}
+
+	if (IsTargetSelected())
+	{
 		mTargetPosition += Move;
 
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-	}
-	else
-	{
-		if (IsEyeSelected())
-		{
-			mPosition += Move;
-
-			ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		}
-
-		if (IsTargetSelected())
-		{
-			mTargetPosition += Move;
-
+		if (!IsSimple())
 			ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-		}
-
-		// Fix the up vector
-		lcVector3 FrontVector(mTargetPosition - mPosition);
-		lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-		mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
-
-		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
 	}
+
+	// Fix the up vector
+	lcVector3 FrontVector(mTargetPosition - mPosition);
+	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
+	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
+
+	if (!IsSimple())
+		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
 }
 
 void Camera::Select (bool bSelecting, bool bFocus, bool bMultiple)
@@ -510,13 +462,28 @@ void Camera::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
 
 void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
-	CalculateKeys(nTime, bAnimation);
+	if (!IsSimple())
+		CalculateKeys(nTime, bAnimation);
 
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
 	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
+
+	UpdateBoundingBox();
+}
+
+void Camera::CopyPosition(const Camera* camera)
+{
+	m_fovy = camera->m_fovy;
+	m_zNear = camera->m_zNear;
+	m_zFar = camera->m_zFar;
+
+	mWorldView = camera->mWorldView;
+	mPosition = camera->mPosition;
+	mTargetPosition = camera->mTargetPosition;
+	mUpVector = camera->mUpVector;
 
 	UpdateBoundingBox();
 }
@@ -728,6 +695,28 @@ void Camera::LoadProjection(float fAspect)
   glLoadMatrixf(mWorldView);
 }
 
+void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey)
+{
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+
+	lcVector3 Position(mPosition + Center - mTargetPosition);
+
+	lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, Aspect, m_zNear, m_zFar);
+
+	mPosition = lcZoomExtents(Position, mWorldView, Projection, Points, NumPoints);
+	mTargetPosition = Center;
+
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+
+	UpdatePosition(nTime, bAnimation);
+}
+
 void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
@@ -738,8 +727,12 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 	mPosition += FrontVector;
 	mTargetPosition += FrontVector;
 
-	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+
 	UpdatePosition(nTime, bAnimation);
 }
 
@@ -752,8 +745,12 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 	mPosition += Move;
 	mTargetPosition += Move;
 
-	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+
 	UpdatePosition(nTime, bAnimation);
 }
 
@@ -773,8 +770,12 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 	SideVector = lcCross(FrontVector, mUpVector);
 	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
-	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+	}
+
 	UpdatePosition(nTime, bAnimation);
 }
 
@@ -784,7 +785,34 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
 	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, 2.0f * dx / (21 - mouse) * LC_DTOR);
 
 	mUpVector = lcMul30(mUpVector, Rotation);
-	ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+
+	if (!IsSimple())
+		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+
+	UpdatePosition(nTime, bAnimation);
+}
+
+void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey)
+{
+	lcVector3 Positions[] =
+	{
+		lcVector3(50,0,0), lcVector3(-50,0,0), lcVector3(0,0,50), lcVector3(0,0,-50),
+		lcVector3(0,50,0), lcVector3(0,-50,0), lcVector3(-10,-10,5)
+	};
+
+	lcVector3 Ups[] = { lcVector3(0,0,1), lcVector3(0,0,1), lcVector3(1,0,0), lcVector3(-1,0,0), lcVector3(0,0,1), lcVector3(0,0,1), lcVector3(-0.2357f, -0.2357f, 0.94281f) };
+
+	mPosition = Positions[Viewpoint];
+	mTargetPosition = lcVector3(0, 0, 0);
+	mUpVector = Ups[Viewpoint];
+
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
+	}
+
 	UpdatePosition(nTime, bAnimation);
 }
 

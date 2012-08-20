@@ -398,7 +398,7 @@ void CMainFrame::OnUpdateCamera(CCmdUI* pCmdUI)
 {
 	Project* project = lcGetActiveProject();
 
-	Camera* ActiveCamera = project->GetActiveView()->m_Camera;
+	Camera* ActiveCamera = project->GetActiveView()->mCamera;
 	Camera* MenuCamera = project->GetCamera(pCmdUI->m_nID - ID_CAMERA_FIRST);
 
 	pCmdUI->SetRadio(MenuCamera == ActiveCamera);

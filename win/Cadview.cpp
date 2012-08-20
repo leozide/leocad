@@ -226,7 +226,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	GL_DisableVertexBufferObject();
 
 	View view(project, project->m_ActiveView);
-	view.m_Camera = project->m_ActiveView->m_Camera;
+	view.SetCamera(project->m_ActiveView->mCamera);
 	view.CreateFromBitmap(hMemDC);
 	view.MakeCurrent();
 	view.OnSize(tw, th);
@@ -522,9 +522,9 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_pView = new View(project, project->m_ActiveView);
 	if (project->m_ActiveView)
-		m_pView->m_Camera = project->m_ActiveView->m_Camera;
+		m_pView->SetCamera(project->m_ActiveView->mCamera);
 	else
-		m_pView->m_Camera = project->GetCamera(LC_CAMERA_MAIN);
+		m_pView->SetDefaultCamera();
 	m_pView->CreateFromWindow(m_hWnd);
 	m_pView->OnInitialUpdate();
 

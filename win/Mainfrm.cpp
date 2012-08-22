@@ -398,10 +398,13 @@ void CMainFrame::OnUpdateCamera(CCmdUI* pCmdUI)
 {
 	Project* project = lcGetActiveProject();
 
-	Camera* ActiveCamera = project->GetActiveView()->mCamera;
-	Camera* MenuCamera = project->GetCamera(pCmdUI->m_nID - ID_CAMERA_FIRST);
+	if (project->mCameras.GetSize())
+	{
+		Camera* ActiveCamera = project->GetActiveView()->mCamera;
+		Camera* MenuCamera = project->mCameras[pCmdUI->m_nID - ID_CAMERA_FIRST];
 
-	pCmdUI->SetRadio(MenuCamera == ActiveCamera);
+		pCmdUI->SetRadio(MenuCamera == ActiveCamera);
+	}
 }
 
 void CMainFrame::OnUpdateSnapXY(CCmdUI* pCmdUI)
@@ -615,7 +618,7 @@ void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
 	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		Camera* pCamera = lcGetActiveProject()->GetCamera(nID-ID_CAMERA_FIRST);
+		Camera* pCamera = lcGetActiveProject()->mCameras[nID - ID_CAMERA_FIRST];
 		rMessage = "Use the camera \"";
 		rMessage += pCamera->GetName();
 		rMessage += "\"";
@@ -646,29 +649,18 @@ BOOL CMainFrame::OnShowPopupMenu(CMFCPopupMenu* pMenuPopup)
 		if (bIsCamerawMenu)
 		{
 			Project* project = lcGetActiveProject();
-			Camera* camera = project->GetCamera(0);
-			int NumCameras = 0;
 
 			pMenuPopup->RemoveAllItems();
 
-			for (; camera && NumCameras < 7; camera = camera->m_pNext, NumCameras++)
+			for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
 			{
-				CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + NumCameras, NULL, -1, camera->GetName());
+				CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + CameraIdx, NULL, -1, project->mCameras[CameraIdx]->GetName());
 				pMenuPopup->InsertItem(newButton);
 			}
 
-			if (camera)
-			{
+			if (project->mCameras.GetSize())
 				pMenuPopup->InsertSeparator();
 
-				for (; camera; camera = camera->m_pNext, NumCameras++)
-				{
-					CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + NumCameras, NULL, -1, camera->GetName());
-					pMenuPopup->InsertItem(newButton);
-				}
-			}
-
-			pMenuPopup->InsertSeparator();
 			pMenuPopup->InsertItem(CMFCToolBarMenuButton(ID_VIEW_CAMERAS_RESET, NULL, -1, "Reset"));
 		}
 	}
@@ -933,11 +925,11 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_VIEW_STEP_CHOOSE, 0);
 		} break;
 
-    case ID_VIEW_STEP_INSERT: {
+		case ID_VIEW_STEP_INSERT: {
 			project->HandleCommand(LC_VIEW_STEP_INSERT, 0);
 		} break;
 
-    case ID_VIEW_STEP_DELETE: {
+		case ID_VIEW_STEP_DELETE: {
 			project->HandleCommand(LC_VIEW_STEP_DELETE, 0);
 		} break;
 
@@ -947,6 +939,34 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_ANIMATOR_PLAY: {
 			project->HandleCommand(LC_VIEW_PLAY, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_FRONT: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_FRONT, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_BACK: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_BACK, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_TOP: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_TOP, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_BOTTOM: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_BOTTOM, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_LEFT: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_LEFT, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_RIGHT: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_RIGHT, 0);
+		} break;
+
+		case ID_VIEW_VIEWPOINT_HOME: {
+			project->HandleCommand(LC_VIEW_VIEWPOINT_HOME, 0);
 		} break;
 
 		case ID_VIEW_CAMERAS_RESET: {
@@ -1278,13 +1298,13 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_VIEW_STEP_DELETE,       // LC_VIEW_STEP_DELETE
 		ID_ANIMATOR_STOP,          // LC_VIEW_STOP
 		ID_ANIMATOR_PLAY,          // LC_VIEW_PLAY
-		ID_CAMERA_FIRST + 0,       // LC_VIEW_CAMERA_FRONT,
-		ID_CAMERA_FIRST + 1,       // LC_VIEW_CAMERA_BACK,
-		ID_CAMERA_FIRST + 2,       // LC_VIEW_CAMERA_TOP,
-		ID_CAMERA_FIRST + 3,       // LC_VIEW_CAMERA_BOTTOM,
-		ID_CAMERA_FIRST + 4,       // LC_VIEW_CAMERA_LEFT,
-		ID_CAMERA_FIRST + 5,       // LC_VIEW_CAMERA_RIGHT,
-		ID_CAMERA_FIRST + 6,       // LC_VIEW_CAMERA_MAIN,
+		ID_VIEW_VIEWPOINT_FRONT,   // LC_VIEW_VIEWPOINT_FRONT
+		ID_VIEW_VIEWPOINT_BACK,    // LC_VIEW_VIEWPOINT_BACK
+		ID_VIEW_VIEWPOINT_TOP,     // LC_VIEW_VIEWPOINT_TOP
+		ID_VIEW_VIEWPOINT_BOTTOM,  // LC_VIEW_VIEWPOINT_BOTTOM
+		ID_VIEW_VIEWPOINT_LEFT,    // LC_VIEW_VIEWPOINT_LEFT
+		ID_VIEW_VIEWPOINT_RIGHT,   // LC_VIEW_VIEWPOINT_RIGHT
+		ID_VIEW_VIEWPOINT_HOME,    // LC_VIEW_VIEWPOINT_HOME
 		0,                         // LC_VIEW_CAMERA_MENU
 		ID_VIEW_CAMERAS_RESET,     // LC_VIEW_CAMERA_RESET
 		ID_APP_ABOUT,              // LC_HELP_ABOUT
@@ -1293,16 +1313,16 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_TOOLBAR_SNAPMENU
 		0,                         // LC_TOOLBAR_LOCKMENU
 		0,                         // LC_TOOLBAR_FASTRENDER
-		0,                         // LC_EDIT_MOVEXY_SNAP_0,
-		0,                         // LC_EDIT_MOVEXY_SNAP_1,
-		0,                         // LC_EDIT_MOVEXY_SNAP_2,
-		0,                         // LC_EDIT_MOVEXY_SNAP_3,
-		0,                         // LC_EDIT_MOVEXY_SNAP_4,
-		0,                         // LC_EDIT_MOVEXY_SNAP_5,
-		0,                         // LC_EDIT_MOVEXY_SNAP_6,
-		0,                         // LC_EDIT_MOVEXY_SNAP_7,
-		0,                         // LC_EDIT_MOVEXY_SNAP_8,
-		0,                         // LC_EDIT_MOVEXY_SNAP_9,
+		0,                         // LC_EDIT_MOVEXY_SNAP_0
+		0,                         // LC_EDIT_MOVEXY_SNAP_1
+		0,                         // LC_EDIT_MOVEXY_SNAP_2
+		0,                         // LC_EDIT_MOVEXY_SNAP_3
+		0,                         // LC_EDIT_MOVEXY_SNAP_4
+		0,                         // LC_EDIT_MOVEXY_SNAP_5
+		0,                         // LC_EDIT_MOVEXY_SNAP_6
+		0,                         // LC_EDIT_MOVEXY_SNAP_7
+		0,                         // LC_EDIT_MOVEXY_SNAP_8
+		0,                         // LC_EDIT_MOVEXY_SNAP_9
 		0,                         // LC_EDIT_MOVEZ_SNAP_0
 		0,                         // LC_EDIT_MOVEZ_SNAP_1
 		0,                         // LC_EDIT_MOVEZ_SNAP_2

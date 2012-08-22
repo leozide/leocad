@@ -787,11 +787,11 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 	pMenu->ModifyMenu(ID_PIECE_COPYKEYS, MF_BYCOMMAND | MF_STRING | nState, ID_PIECE_COPYKEYS, txt);
 }
 
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
+void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras)
 {
 }
 
-void SystemUpdateCameraMenu(Camera* pCamera)
+void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 {
 }
 

@@ -17,6 +17,9 @@ View::~View()
 {
 	if (m_Project != NULL)
 		m_Project->RemoveView(this);
+
+	if (mCamera && mCamera->IsSimple())
+		delete mCamera;
 }
 
 void View::SetCamera(Camera* camera)

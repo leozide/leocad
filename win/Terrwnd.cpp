@@ -9,7 +9,7 @@
 lcTerrainView::lcTerrainView(GLWindow* Share, Terrain* pTerrain)
 	: GLWindow(Share)
 {
-	mCamera = new Camera(20, 20, 20, 0, 0, 0, NULL);
+	mCamera = new Camera(20, 20, 20, 0, 0, 0);
 	mTerrain = pTerrain;
 	mAction = TERRAIN_ZOOM;
 	mMouseDown = false;
@@ -117,7 +117,7 @@ void lcTerrainView::LoadTexture(bool linear)
 void lcTerrainView::ResetCamera()
 {
 	delete mCamera;
-	mCamera = new Camera(20, 20, 20, 0, 0, 0, NULL);
+	mCamera = new Camera(20, 20, 20, 0, 0, 0);
 }
 
 void lcTerrainView::SetAction(int Action)

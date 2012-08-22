@@ -84,82 +84,56 @@ Camera::Camera(bool Simple)
 }
 
 // Start with a standard camera.
-Camera::Camera (unsigned char nType, Camera* pPrev)
-  : Object (LC_OBJECT_CAMERA)
+Camera::Camera()
+  : Object(LC_OBJECT_CAMERA)
 {
-  if (nType > 7)
-    nType = 8;
+	unsigned char nType = 7;
 
-  char names[8][7] = { "Front", "Back",  "Top",  "Under", "Left", "Right", "Main", "User" };
-  float eyes[8][3] = { { 50,0,0 }, { -50,0,0 }, { 0,0,50 }, { 0,0,-50 },
-		       { 0,50,0 }, { 0,-50,0 }, { -10,-10,5}, { 0,5,0 } };
-  float ups [8][3] = {  { 0,0,1 }, { 0,0,1 }, { 1,0,0 }, { -1,0,0 }, { 0,0,1 },
-			{ 0,0,1 }, {-0.2357f, -0.2357f, 0.94281f }, { 0,0,1 } };
+	mPosition = lcVector3(-10.0f, -10.0f, 5.0f);
+	mTargetPosition = lcVector3(0.0f, 0.0f, 0.0f);
+	mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
 
-  Initialize();
+	Initialize();
 
-  ChangeKey (1, false, true, eyes[nType], LC_CK_EYE);
-  ChangeKey (1, false, true, ups[nType], LC_CK_UP);
-  ChangeKey (1, true, true, eyes[nType], LC_CK_EYE);
-  ChangeKey (1, true, true, ups[nType], LC_CK_UP);
+	ChangeKey(1, false, true, mPosition, LC_CK_EYE);
+	ChangeKey(1, false, true, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(1, false, true, mUpVector, LC_CK_UP);
+	ChangeKey(1, true, true, mPosition, LC_CK_EYE);
+	ChangeKey(1, true, true, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(1, true, true, mUpVector, LC_CK_UP);
 
-  strcpy (m_strName, names[nType]);
-  if (nType != 8)
-    m_nState = LC_CAMERA_HIDDEN;
-  m_nType = nType;
+	if (nType != 8)
+		m_nState = LC_CAMERA_HIDDEN;
+	m_nType = nType;
 
-  if (pPrev)
-    pPrev->m_pNext = this;
-
-  UpdatePosition(1, false);
+	UpdatePosition(1, false);
 }
 
-// From LC_ACTION_CAMERA
-Camera::Camera (float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera)
-  : Object (LC_OBJECT_CAMERA)
+Camera::Camera(float ex, float ey, float ez, float tx, float ty, float tz)
+	: Object(LC_OBJECT_CAMERA)
 {
-  // Fix the up vector
-  lcVector3 UpVector(0, 0, 1), FrontVector(ex - tx, ey - ty, ez - tz), SideVector;
-  FrontVector.Normalize();
-  if (FrontVector == UpVector)
-    SideVector = lcVector3(1, 0, 0);
-  else
-    SideVector = lcCross(FrontVector, UpVector);
-  UpVector = lcCross(SideVector, FrontVector);
-  UpVector.Normalize();
+	// Fix the up vector
+	lcVector3 UpVector(0, 0, 1), FrontVector(ex - tx, ey - ty, ez - tz), SideVector;
+	FrontVector.Normalize();
+	if (FrontVector == UpVector)
+		SideVector = lcVector3(1, 0, 0);
+	else
+		SideVector = lcCross(FrontVector, UpVector);
+	UpVector = lcCross(SideVector, FrontVector);
+	UpVector.Normalize();
 
-  Initialize();
+	Initialize();
 
-  float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
+	float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
 
-  ChangeKey (1, false, true, eye, LC_CK_EYE);
-  ChangeKey (1, false, true, target, LC_CK_TARGET);
-  ChangeKey (1, false, true, UpVector, LC_CK_UP);
-  ChangeKey (1, true, true, eye, LC_CK_EYE);
-  ChangeKey (1, true, true, target, LC_CK_TARGET);
-  ChangeKey (1, true, true, UpVector, LC_CK_UP);
+	ChangeKey(1, false, true, eye, LC_CK_EYE);
+	ChangeKey(1, false, true, target, LC_CK_TARGET);
+	ChangeKey(1, false, true, UpVector, LC_CK_UP);
+	ChangeKey(1, true, true, eye, LC_CK_EYE);
+	ChangeKey(1, true, true, target, LC_CK_TARGET);
+	ChangeKey(1, true, true, UpVector, LC_CK_UP);
 
-  int i, max = 0;
-
-  if (pCamera)
-    for (;;)
-    {
-      if (strncmp (pCamera->m_strName, "Camera ", 7) == 0)
-	if (sscanf(pCamera->m_strName, "Camera %d", &i) == 1)
-	  if (i > max) 
-	    max = i;
-
-      if (pCamera->m_pNext == NULL)
-      {
-	sprintf(m_strName, "Camera %d", max+1);
-	pCamera->m_pNext = this;
-	break;
-      }
-      else
-	pCamera = pCamera->m_pNext;
-    }
-
-  UpdatePosition (1, false);
+	UpdatePosition(1, false);
 }
 
 Camera::~Camera()
@@ -176,7 +150,6 @@ void Camera::Initialize()
   m_zNear = 1;
   m_zFar = 500;
 
-  m_pNext = NULL;
   m_nState = 0;
   m_nList = 0;
   m_nType = LC_CAMERA_USER;
@@ -189,6 +162,20 @@ void Camera::Initialize()
   RegisterKeys (values, camera_key_info, LC_CK_COUNT);
 
   m_pTarget = new CameraTarget (this);
+}
+
+void Camera::CreateName(const PtrArray<Camera>& Cameras)
+{
+	int i, max = 0;
+	const char* Prefix = "Camera ";
+
+	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+		if (strncmp(Cameras[CameraIdx]->m_strName, Prefix, strlen(Prefix)) == 0)
+			if (sscanf(Cameras[CameraIdx]->m_strName + strlen(Prefix), " %d", &i) == 1)
+				if (i > max) 
+					max = i;
+
+	sprintf(m_strName, "%s %d", Prefix, max+1);
 }
 
 /////////////////////////////////////////////////////////////////////////////

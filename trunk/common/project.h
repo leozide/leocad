@@ -108,7 +108,6 @@ public:
 	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
-	Camera* GetCamera(int i);
 	void GetTimeRange(int* from, int* to)
 	{
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
@@ -119,12 +118,6 @@ public:
 
 	void ConvertToUserUnits(lcVector3& Value) const;
 	void ConvertFromUserUnits(lcVector3& Value) const;
-	void GetArrays(Piece** ppPiece, Camera** ppCamera, Light** ppLight)
-	{
-		*ppPiece = m_pPieces;
-		*ppCamera = m_pCameras;
-		*ppLight = m_pLights;
-	}
 
 	void UpdateInterface();
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
@@ -155,6 +148,13 @@ public:
 		return m_ActiveView;
 	}
 
+	// Objects
+	Piece* m_pPieces;
+	PtrArray<Camera> mCameras;
+	Light* m_pLights;
+	Group* m_pGroups;
+	Terrain* m_pTerrain;
+
 // Implementation
 protected:
 	// default implementation
@@ -178,12 +178,6 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	// Objects
-	Piece* m_pPieces;
-	Camera* m_pCameras;
-	Light* m_pLights;
-	Group* m_pGroups;
-	Terrain* m_pTerrain;
 	lcFile* m_pClipboard[10];
 	unsigned char m_nCurClipboard;
 

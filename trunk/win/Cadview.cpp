@@ -269,10 +269,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (pw > tw || ph > th)
 		{
-			Camera* pCam = project->m_pCameras;
-			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
-				if (i-- == 0)
-					break;
+			Camera* pCam = view.mCamera;
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
 			do 
 			{

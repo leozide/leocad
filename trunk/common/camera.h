@@ -4,6 +4,7 @@
 #include "opengl.h"
 #include "object.h"
 #include "lc_math.h"
+#include "array.h"
 
 #define LC_CAMERA_HIDDEN            0x01
 #define LC_CAMERA_SELECTED          0x02
@@ -22,7 +23,7 @@ enum LC_VIEWPOINT
 	LC_VIEWPOINT_FRONT,
 	LC_VIEWPOINT_BACK,
 	LC_VIEWPOINT_TOP,
-	LC_VIEWPOINT_UNDER,
+	LC_VIEWPOINT_BOTTOM,
 	LC_VIEWPOINT_LEFT,
 	LC_VIEWPOINT_RIGHT,
 	LC_VIEWPOINT_HOME
@@ -76,16 +77,16 @@ class Camera : public Object
 {
 public:
 	Camera(bool Simple);
-	Camera(unsigned char nType, Camera* pPrev);
-	Camera(float ex, float ey, float ez, float tx, float ty, float tz, Camera* pCamera);
-//	Camera(const float *eye, const float *target, const float *up, Camera* pCamera);
+	Camera();
+	Camera(float ex, float ey, float ez, float tx, float ty, float tz);
 	virtual ~Camera();
 
-	// Query functions.
 	const char* GetName() const
 	{
 		return m_strName;
 	}
+
+	void CreateName(const PtrArray<Camera>& Cameras);
 
 	CameraTarget* GetTarget() const
 	{
@@ -101,7 +102,6 @@ public:
 
 
 public:
-	Camera* m_pNext;
 	void Hide()
 		{ m_nState = LC_CAMERA_HIDDEN; }
 	void UnHide()

@@ -274,9 +274,18 @@ BEGIN
         MENUITEM "Zoom &In",                    ID_VIEW_ZOOMIN
         MENUITEM "Zoom &Out",                   ID_VIEW_ZOOMOUT
         MENUITEM "Zoom &Extents",               ID_ZOOM_EXTENTS
+        POPUP "Viewpoints"
+        BEGIN
+            MENUITEM "Front",                       ID_VIEW_VIEWPOINT_FRONT
+            MENUITEM "Back",                        ID_VIEW_VIEWPOINT_BACK
+            MENUITEM "Top",                         ID_VIEW_VIEWPOINT_TOP
+            MENUITEM "Bottom",                      ID_VIEW_VIEWPOINT_BOTTOM
+            MENUITEM "Left",                        ID_VIEW_VIEWPOINT_LEFT
+            MENUITEM "Right",                       ID_VIEW_VIEWPOINT_RIGHT
+            MENUITEM "Home",                        ID_VIEW_VIEWPOINT_HOME
+        END
         POPUP "C&ameras"
         BEGIN
-            MENUITEM "Dummy",                       ID_CAMERA_FIRST
             MENUITEM "Reset",                       ID_VIEW_CAMERAS_RESET
         END
         POPUP "Ste&p"
@@ -1788,6 +1797,21 @@ BEGIN
     ID_VIEW_SPLITHORIZONTALLY "Split the current view horizontally"
     ID_VIEW_DELETEVIEW      "Delete the current view"
     ID_VIEW_RESETVIEWS      "Reset all views"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_VIEWPOINT_FRONT "View model from the front."
+    ID_VIEW_VIEWPOINT_BACK  "View model from the back."
+    ID_VIEW_VIEWPOINT_TOP   "View model from the top."
+    ID_VIEW_VIEWPOINT_BOTTOM "View model from the bottom."
+    ID_VIEW_VIEWPOINT_LEFT  "View model from the left."
+    ID_VIEW_VIEWPOINT_RIGHT "View model from the right."
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_VIEWPOINT_HOME  "View model from the default position."
 END
 
 #endif    // English (United States) resources

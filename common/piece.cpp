@@ -412,7 +412,7 @@ void Piece::MinIntersectDist(lcClickLine* ClickLine)
 		ClickLine->Closest = this;
 }
 
-bool Piece::IntersectsVolume(const lcVector4 Planes[6])
+bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
 {
 	// First check the bounding box for quick rejection.
 	lcVector3 Box[8] =
@@ -437,7 +437,7 @@ bool Piece::IntersectsVolume(const lcVector4 Planes[6])
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		lcVector3 PlaneNormal = lcMul30(lcVector3(Planes[i][0], Planes[i][1], Planes[i][2]), WorldToLocal);
+		lcVector3 PlaneNormal = lcMul30(Planes[i], WorldToLocal);
 		LocalPlanes[i] = lcVector4(PlaneNormal, Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
 	}
 

@@ -1,7 +1,6 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-#include "opengl.h"
 #include "object.h"
 #include "lc_math.h"
 #include "array.h"
@@ -48,36 +47,31 @@ enum LC_CK_TYPES
 class CameraTarget : public Object
 {
 public:
-	CameraTarget (Camera *pParent);
-	virtual ~CameraTarget ();
+	CameraTarget(Camera *pParent);
+	virtual ~CameraTarget();
 
 public:
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	bool IntersectsVolume(const lcVector4 Planes[6])
-	{ return false; }
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the camera target
 	}
 
 	const char* GetName() const;
 
-	Camera* GetParent () const
+	Camera* GetParent() const
 	{ return m_pParent; }
 
 protected:
 	Camera* m_pParent;
-
-	friend class Camera; // FIXME: needed for BoundingBoxCalculate ()
-	// remove and use UpdatePosition instead
 };
 
 class Camera : public Object
 {
 public:
 	Camera(bool Simple);
-	Camera();
 	Camera(float ex, float ey, float ez, float tx, float ty, float tz);
 	virtual ~Camera();
 
@@ -113,7 +107,7 @@ public:
 	bool IsVisible()
 		{ return (m_nState & LC_CAMERA_HIDDEN) == 0; }
 	bool IsSelected()
-		{ return (m_nState & (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED)) != 0; } 
+		{ return (m_nState & (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED)) != 0; }
 	bool IsEyeSelected()
 		{ return (m_nState & LC_CAMERA_SELECTED) != 0; } 
 	bool IsTargetSelected()
@@ -127,7 +121,7 @@ public:
 	void Select()
 		{ m_nState |= (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED); } 
 	void UnSelect()
-		{ m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED); } 
+		{ m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED); }
 	void UnFocus()
 		{ m_nState &= ~(LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_FOCUSED); } 
 	void FocusEye()
@@ -136,15 +130,14 @@ public:
 		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
 	*/
 
-	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
+	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	bool IntersectsVolume(const lcVector4 Planes[6])
-	{ return false; }
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
@@ -175,7 +168,6 @@ public:
 
 protected:
 	void Initialize();
-	void UpdateBoundingBox();
 
 	// Camera target
 	CameraTarget* m_pTarget;
@@ -184,8 +176,6 @@ protected:
 	char m_strName[81];
 	unsigned char m_nState;
 	unsigned char m_nType;
-	GLuint m_nList;
-	static GLuint m_nTargetList;
 
 	TiledRender* m_pTR;
 };

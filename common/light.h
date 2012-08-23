@@ -38,7 +38,7 @@ public:
 
 public:
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	bool IntersectsVolume(const lcVector4 Planes[6])
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const
 	{ return false; }
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
@@ -104,7 +104,7 @@ public:
 
 	void Render(float fLineWidth);
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	bool IntersectsVolume(const lcVector4 Planes[6])
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const
 	{ return false; }
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);

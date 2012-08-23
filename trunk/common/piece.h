@@ -29,7 +29,7 @@ public:
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
 	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
-	virtual bool IntersectsVolume(const lcVector4 Planes[6]);
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
 
 
 

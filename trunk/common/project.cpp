@@ -364,7 +364,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	if (fv < 0.6f) // old view
 	{
-		Camera* pCam = new Camera();
+		Camera* pCam = new Camera(false);
 		pCam->CreateName(mCameras);
 		mCameras.Add(pCam);
 
@@ -619,11 +619,11 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 			file->ReadS32(&count, 1);
 			for (i = 0; i < count; i++)
-				mCameras.Add(new Camera());
+				mCameras.Add(new Camera(false));
 
 			if (count < 7)
 			{
-				Camera* pCam = new Camera();
+				Camera* pCam = new Camera(false);
 				for (i = 0; i < count; i++)
 					pCam->FileLoad(*file);
 				delete pCam;
@@ -4546,7 +4546,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			while (i--)
 			{
-				Camera* pCamera = new Camera();
+				Camera* pCamera = new Camera(false);
 				pCamera->FileLoad(*file);
 				pCamera->CreateName(mCameras);
 				pCamera->Select(true, false, false);
@@ -6373,6 +6373,20 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<
 		}
 	}
 
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+	{
+		Camera* pCamera = mCameras[CameraIdx];
+
+		if (!pCamera->IsVisible() || pCamera == Cam)
+			continue;
+
+		if (pCamera->IntersectsVolume(Planes))
+			Objects.Add(pCamera);
+
+		if (pCamera->GetTarget()->IntersectsVolume(Planes))
+			Objects.Add(pCamera->GetTarget());
+	}
+
 	// TODO: lights and cameras.
 }
 
@@ -6441,10 +6455,10 @@ bool Project::StopTracking(bool bAccept)
 										pPiece->Select (true, false, false);
 							}
 							else
-								Objects[i]->Select(true, false, Control);
+								Objects[i]->Select(true, false, true);
 						}
 						else
-							Objects[i]->Select(true, false, Control);
+							Objects[i]->Select(true, false, true);
 					}
 				}
 

@@ -381,7 +381,21 @@ inline lcVector3 lcMul31(const lcVector3& a, const lcMatrix44& b)
 	return lcVector3(v[0], v[1], v[2]);
 }
 
+inline lcVector3 lcMul31(const lcVector4& a, const lcMatrix44& b)
+{
+	lcVector4 v = b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2] + b.r[3];
+
+	return lcVector3(v[0], v[1], v[2]);
+}
+
 inline lcVector3 lcMul30(const lcVector3& a, const lcMatrix44& b)
+{
+	lcVector4 v = b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2];
+
+	return lcVector3(v[0], v[1], v[2]);
+}
+
+inline lcVector3 lcMul30(const lcVector4& a, const lcMatrix44& b)
 {
 	lcVector4 v = b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2];
 
@@ -744,7 +758,7 @@ inline lcMatrix44 lcMatrix44AffineInverse(const lcMatrix44& m)
 	Inv.r[1] = lcVector4(m.r[0][1], m.r[1][1], m.r[2][1], m.r[1][3]);
 	Inv.r[2] = lcVector4(m.r[0][2], m.r[1][2], m.r[2][2], m.r[2][3]);
 
-	lcVector3 Trans = -lcMul30(lcVector3(m[3][0], m[3][1], m[3][2]), Inv);
+	lcVector3 Trans = -lcMul30(m.r[3], Inv);
 	Inv.r[3] = lcVector4(Trans[0], Trans[1], Trans[2], 1.0f);
 
 	return Inv;
@@ -1370,12 +1384,22 @@ float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vec
 
 	return Length(Closest - Point);
 }
-
-// Return true if Box intersects the volume defined by Planes.
-bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes)
+*/
+// Returns true if the axis aligned box intersects the volume defined by planes.
+inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
 {
-	Vector3 Points[8];
-	Box.GetPoints(Points);
+	const int NumPlanes = 6;
+	lcVector3 Points[8] =
+	{
+		Points[0] = lcVector3(Min[0], Min[1], Min[2]),
+		Points[1] = lcVector3(Min[0], Max[1], Min[2]),
+		Points[2] = lcVector3(Max[0], Max[1], Min[2]),
+		Points[3] = lcVector3(Max[0], Min[1], Min[2]),
+		Points[4] = lcVector3(Min[0], Min[1], Max[2]),
+		Points[5] = lcVector3(Min[0], Max[1], Max[2]),
+		Points[6] = lcVector3(Max[0], Max[1], Max[2]),
+		Points[7] = lcVector3(Max[0], Min[1], Max[2])
+	};
 
 	// Start by testing trivial reject/accept cases.
 	int Outcodes[8];
@@ -1387,7 +1411,7 @@ bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, 
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
-			if (Dot3(Points[i], Planes[j]) + Planes[j][3] > 0)
+			if (lcDot3(Points[i], Planes[j]) + Planes[j][3] > 0)
 				Outcodes[i] |= 1 << j;
 		}
 	}
@@ -1408,9 +1432,29 @@ bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, 
 	if (OutcodesOR == 0)
 		return true;
 
-	return true;
-}
+	int Indices[36] = 
+	{
+		0, 1, 2,
+		0, 2, 3,
+		7, 6, 5,
+		7, 5, 4,
+		0, 1, 5,
+		0, 5, 4,
+		2, 3, 7,
+		2, 7, 6,
+		0, 3, 7,
+		0, 7, 4,
+		1, 2, 6,
+		1, 6, 5
+	};
 
+	for (int Idx = 0; Idx < 36; Idx += 3)
+		if (lcTriangleIntersectsPlanes(Points[Indices[Idx]*3], Points[Indices[Idx+1]*3], Points[Indices[Idx+2]*3], Planes))
+			return true;
+
+	return false;
+}
+/*
 bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes)
 {
 	for (int j = 0; j < NumPlanes; j++)

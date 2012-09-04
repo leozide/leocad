@@ -574,6 +574,7 @@ void PieceInfo::LoadInformation()
 {
 	if (m_nFlags & LC_PIECE_PLACEHOLDER)
 	{
+		mMesh = new lcMesh();
 		mMesh->CreateBox();
 		return;
 	}

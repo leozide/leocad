@@ -1366,7 +1366,6 @@ void CMainFrame::UpdateMenuAccelerators()
 	{
 		LC_KEYBOARD_COMMAND& Cmd = KeyboardShortcuts[i];
 		WORD ID = CmdToID[Cmd.ID];
-		String str;
 
 		if (ID == 0)
 			continue;

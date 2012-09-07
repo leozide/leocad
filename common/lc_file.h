@@ -104,6 +104,30 @@ public:
 		return Read32(Buffer, Count);
 	}
 
+	lcuint64 ReadU64()
+	{
+		lcuint64 Value;
+		Read64(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadU64(lcuint64* Buffer, size_t Count)
+	{
+		return Read64(Buffer, Count);
+	}
+
+	lcint64 ReadS64()
+	{
+		lcint64 Value;
+		Read64(&Value, 1);
+		return Value;
+	}
+
+	size_t ReadS64(lcint64* Buffer, size_t Count)
+	{
+		return Read64(Buffer, Count);
+	}
+
 	float ReadFloat()
 	{
 		float Value;
@@ -186,6 +210,26 @@ public:
 	size_t WriteS32(const lcint32* Buffer, size_t Count)
 	{
 		return Write32(Buffer, Count);
+	}
+
+	void WriteU64(const lcuint64& Value)
+	{
+		Write64(&Value, 1);
+	}
+
+	size_t WriteU64(const lcuint64* Buffer, size_t Count)
+	{
+		return Write64(Buffer, Count);
+	}
+
+	void WriteS64(const lcint64& Value)
+	{
+		Write64(&Value, 1);
+	}
+
+	size_t WriteS64(const lcint64* Buffer, size_t Count)
+	{
+		return Write64(Buffer, Count);
 	}
 
 	void WriteFloat(const float& Value)

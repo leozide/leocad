@@ -1,7 +1,6 @@
 #ifndef _LIGHT_H_
 #define _LIGHT_H_
 
-#include "opengl.h"
 #include "object.h"
 #include "lc_math.h"
 
@@ -33,7 +32,7 @@ enum LC_LK_TYPES
 class LightTarget : public Object
 {
 public:
-	LightTarget(Light *pParent);
+	LightTarget(Light *Parent);
 	~LightTarget();
 
 public:
@@ -53,9 +52,6 @@ public:
 
 protected:
 	Light* m_pParent;
-
-	friend class Light; // FIXME: needed for BoundingBoxCalculate ()
-	// remove and use UpdatePosition instead
 };
 
 class Light : public Object
@@ -103,6 +99,10 @@ public:
 	{ return m_strName; };
 
 	void Render(float fLineWidth);
+	void RenderCone();
+	void RenderTarget();
+	void RenderSphere();
+
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const
 	{ return false; }
@@ -135,10 +135,6 @@ protected:
 	unsigned char m_nState;
 	char m_strName[81];
 	bool m_bEnabled;
-
-	GLuint m_nList;
-	static GLuint m_nSphereList;
-	static GLuint m_nTargetList;
 };
 
 #endif // _LIGHT_H_

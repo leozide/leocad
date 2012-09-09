@@ -8,9 +8,6 @@
 #include "light.h"
 #include "globals.h"
 
-GLuint Light::m_nSphereList = 0;
-GLuint Light::m_nTargetList = 0;
-
 static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 {
 	{ "Light Position", 3, LC_LK_POSITION },
@@ -28,18 +25,18 @@ static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 // =============================================================================
 // LightTarget class
 
-LightTarget::LightTarget (Light *pParent)
-  : Object (LC_OBJECT_LIGHT_TARGET)
+LightTarget::LightTarget(Light *pParent)
+	: Object(LC_OBJECT_LIGHT_TARGET)
 {
-  m_pParent = pParent;
-  /*
-  strcpy (m_strName, pParent->GetName ());
-  m_strName[LC_OBJECT_NAME_LEN-8] = '\0';
-  strcat (m_strName, ".Target");
-  */
+	m_pParent = pParent;
+	/*
+	strcpy(m_strName, pParent->GetName());
+	m_strName[LC_OBJECT_NAME_LEN-8] = '\0';
+	strcat(m_strName, ".Target");
+	*/
 }
 
-LightTarget::~LightTarget ()
+LightTarget::~LightTarget()
 {
 }
 
@@ -62,7 +59,7 @@ void LightTarget::MinIntersectDist(lcClickLine* ClickLine)
 	}
 }
 
-void LightTarget::Select (bool bSelecting, bool bFocus, bool bMultiple)
+void LightTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
 {
 	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
 }
@@ -75,48 +72,47 @@ const char* LightTarget::GetName() const
 // =============================================================================
 // Light class
 
-// New positional light
-Light::Light (float px, float py, float pz)
-  : Object (LC_OBJECT_LIGHT)
+// New omni light.
+Light::Light(float px, float py, float pz)
+	: Object(LC_OBJECT_LIGHT)
 {
-  Initialize ();
+	Initialize();
 
-  float pos[] = { px, py, pz }, target[] = { 0, 0, 0 };
+	float pos[] = { px, py, pz }, target[] = { 0, 0, 0 };
 
-  ChangeKey (1, false, true, pos, LC_LK_POSITION);
-  ChangeKey (1, false, true, target, LC_LK_TARGET);
-  ChangeKey (1, true, true, pos, LC_LK_POSITION);
-  ChangeKey (1, true, true, target, LC_LK_TARGET);
+	ChangeKey(1, false, true, pos, LC_LK_POSITION);
+	ChangeKey(1, false, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, true, target, LC_LK_TARGET);
 
-  UpdatePosition (1, false);
+	UpdatePosition(1, false);
 }
 
-// New directional light
-Light::Light (float px, float py, float pz, float tx, float ty, float tz)
-  : Object (LC_OBJECT_LIGHT)
+// New directional or spot light.
+Light::Light(float px, float py, float pz, float tx, float ty, float tz)
+	: Object(LC_OBJECT_LIGHT)
 {
-  Initialize ();
+	Initialize();
 
-  float pos[] = { px, py, pz }, target[] = { tx, ty, tz };
+	float pos[] = { px, py, pz }, target[] = { tx, ty, tz };
 
-  ChangeKey (1, false, true, pos, LC_LK_POSITION);
-  ChangeKey (1, false, true, target, LC_LK_TARGET);
-  ChangeKey (1, true, true, pos, LC_LK_POSITION);
-  ChangeKey (1, true, true, target, LC_LK_TARGET);
+	ChangeKey(1, false, true, pos, LC_LK_POSITION);
+	ChangeKey(1, false, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, true, target, LC_LK_TARGET);
 
-  m_pTarget = new LightTarget (this);
+	m_pTarget = new LightTarget(this);
 
-  UpdatePosition (1, false);
+	UpdatePosition(1, false);
 }
 
-void Light::Initialize ()
+void Light::Initialize()
 {
 	m_bEnabled = true;
 	m_pNext = NULL;
 	m_nState = 0;
 	m_pTarget = NULL;
-	m_nList = 0;
-	memset(m_strName, 0, sizeof (m_strName));
+	memset(m_strName, 0, sizeof(m_strName));
 
 	mAmbientColor[3] = 1.0f;
 	mDiffuseColor[3] = 1.0f;
@@ -148,12 +144,9 @@ void Light::Initialize ()
 	ChangeKey(1, true, true, &exponent, LC_LK_SPOT_EXPONENT);
 }
 
-Light::~Light ()
+Light::~Light()
 {
-  if (m_nList != 0)
-    glDeleteLists (m_nList, 1);
-
-  delete m_pTarget;
+	delete m_pTarget;
 }
 
 void Light::CreateName(const Light* pLight)
@@ -162,7 +155,7 @@ void Light::CreateName(const Light* pLight)
 
 	for (; pLight; pLight = pLight->m_pNext)
 	{
-		if (strncmp (pLight->m_strName, "Light ", 6) == 0)
+		if (strncmp(pLight->m_strName, "Light ", 6) == 0)
 		{
 			if (sscanf(pLight->m_strName + 6, " #%d", &i) == 1)
 			{
@@ -172,61 +165,61 @@ void Light::CreateName(const Light* pLight)
 		}
 	}
 
-	sprintf (m_strName, "Light #%.2d", max+1);
+	sprintf(m_strName, "Light #%.2d", max+1);
 }
 
-void Light::Select (bool bSelecting, bool bFocus, bool bMultiple)
+void Light::Select(bool bSelecting, bool bFocus, bool bMultiple)
 {
-  if (bSelecting == true)
-  {
-    if (bFocus == true)
-    {
-      m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED);
+	if (bSelecting == true)
+	{
+		if (bFocus == true)
+		{
+			m_nState |= (LC_LIGHT_FOCUSED|LC_LIGHT_SELECTED);
 
-      if (m_pTarget != NULL)
-        m_pTarget->Select (false, true, bMultiple);
-    }
-    else
-      m_nState |= LC_LIGHT_SELECTED;
+			if (m_pTarget != NULL)
+				m_pTarget->Select(false, true, bMultiple);
+		}
+		else
+			m_nState |= LC_LIGHT_SELECTED;
 
-    if (bMultiple == false)
-      if (m_pTarget != NULL)
-        m_pTarget->Select (false, false, bMultiple);
-  }
-  else
-  {
-    if (bFocus == true)
-      m_nState &= ~(LC_LIGHT_FOCUSED);
-    else
-      m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED);
-  } 
+		if (bMultiple == false)
+			if (m_pTarget != NULL)
+				m_pTarget->Select(false, false, bMultiple);
+	}
+	else
+	{
+		if (bFocus == true)
+			m_nState &= ~(LC_LIGHT_FOCUSED);
+		else
+			m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED);
+	} 
 }
 
-void Light::SelectTarget (bool bSelecting, bool bFocus, bool bMultiple)
+void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 {
-  // FIXME: the target should handle this
+	// TODO: the target should handle this
 
-  if (bSelecting == true)
-  {
-    if (bFocus == true)
-    {
-      m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED);
+	if (bSelecting == true)
+	{
+		if (bFocus == true)
+		{
+			m_nState |= (LC_LIGHT_TARGET_FOCUSED|LC_LIGHT_TARGET_SELECTED);
 
-      Select (false, true, bMultiple);
-    }
-    else
-      m_nState |= LC_LIGHT_TARGET_SELECTED;
+			Select(false, true, bMultiple);
+		}
+		else
+			m_nState |= LC_LIGHT_TARGET_SELECTED;
 
-    if (bMultiple == false)
-      Select (false, false, bMultiple);
-  }
-  else
-  {
-    if (bFocus == true)
-      m_nState &= ~(LC_LIGHT_TARGET_FOCUSED);
-    else
-      m_nState &= ~(LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED);
-  } 
+		if (bMultiple == false)
+			Select(false, false, bMultiple);
+	}
+	else
+	{
+		if (bFocus == true)
+			m_nState &= ~(LC_LIGHT_TARGET_FOCUSED);
+		else
+			m_nState &= ~(LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED);
+	} 
 }
 
 void Light::MinIntersectDist(lcClickLine* ClickLine)
@@ -259,7 +252,7 @@ void Light::MinIntersectDist(lcClickLine* ClickLine)
 	}
 }
 
-void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
 	lcVector3 Move(dx, dy, dz);
 
@@ -267,18 +260,18 @@ void Light::Move (unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 	{
 		mPosition += Move;
 
-		ChangeKey (nTime, bAnimation, bAddKey, mPosition, LC_LK_POSITION);
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_LK_POSITION);
 	}
 
 	if (IsTargetSelected())
 	{
 		mTargetPosition += Move;
 
-		ChangeKey (nTime, bAnimation, bAddKey, mTargetPosition, LC_LK_TARGET);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_LK_TARGET);
 	}
 }
 
-void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
+void Light::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
 	CalculateKeys(nTime, bAnimation);
 
@@ -286,7 +279,6 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 	{
 		lcVector3 frontvec = mTargetPosition - mPosition;
 		lcVector3 up(1, 1, 1);
-//		float len = Length(frontvec);
 
 		if (fabs(frontvec[0]) < fabs(frontvec[1]))
 		{
@@ -310,164 +302,16 @@ void Light::UpdatePosition (unsigned short nTime, bool bAnimation)
 		mWorldLight = lcMatrix44Identity();
 		mWorldLight.SetTranslation(-mPosition);
 	}
-
-	if (m_pTarget != NULL)
-	{
-		if (m_nList == 0)
-			m_nList = glGenLists(1);
-
-		glNewList(m_nList, GL_COMPILE);
-
-		glPushMatrix();
-		glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
-
-		lcVector3 FrontVector(mTargetPosition - mPosition);
-		lcVector3 UpVector(1, 1, 1);
-		float Length = FrontVector.Length();
-
-		if (fabs (FrontVector[0]) < fabs (FrontVector[1]))
-		{
-			if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
-				UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
-			else
-				UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-		}
-		else
-		{
-			if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
-				UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
-			else
-				UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-		}
-
-		lcMatrix44 mat = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
-		mat = lcMatrix44AffineInverse(mat);
-		mat.SetTranslation(lcVector3(0, 0, 0));
-
-		glMultMatrixf(mat);
-
-    glEnableClientState (GL_VERTEX_ARRAY);
-    float verts[16*3];
-    for (int i = 0; i < 8; i++)
-    {
-      verts[i*6] = verts[i*6+3] = (float)cos ((float)i/4 * LC_PI) * 0.3f;
-      verts[i*6+1] = verts[i*6+4] = (float)sin ((float)i/4 * LC_PI) * 0.3f;
-      verts[i*6+2] = 0.3f;
-      verts[i*6+5] = -0.3f;
-    }
-    glVertexPointer (3, GL_FLOAT, 0, verts);
-    glDrawArrays (GL_LINES, 0, 16);
-    glVertexPointer (3, GL_FLOAT, 6*sizeof(float), verts);
-    glDrawArrays (GL_LINE_LOOP, 0, 8);
-    glVertexPointer (3, GL_FLOAT, 6*sizeof(float), &verts[3]);
-    glDrawArrays (GL_LINE_LOOP, 0, 8);
-
-    glBegin (GL_LINE_LOOP);
-    glVertex3f (-0.5f, -0.5f, -0.3f);
-    glVertex3f ( 0.5f, -0.5f, -0.3f);
-    glVertex3f ( 0.5f,  0.5f, -0.3f);
-    glVertex3f (-0.5f,  0.5f, -0.3f);
-    glEnd ();
-
-    glTranslatef(0, 0, -Length);
-    glEndList();
-
-    if (m_nTargetList == 0)
-    {
-      m_nTargetList = glGenLists (1);
-      glNewList (m_nTargetList, GL_COMPILE);
-
-      glEnableClientState (GL_VERTEX_ARRAY);
-      float box[24][3] = {
-	{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-	{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-	{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-	{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-	{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-	{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-	{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-	{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-	{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-	{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-	{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-	{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f } };
-      glVertexPointer (3, GL_FLOAT, 0, box);
-      glDrawArrays (GL_LINES, 0, 24);
-      glPopMatrix ();
-      glEndList ();
-    }
-  }
-  else
-  {
-    if (m_nSphereList == 0)
-      m_nSphereList = glGenLists (1);
-    glNewList (m_nSphereList, GL_COMPILE);
-
-    const float radius = 0.2f;
-    const int slices = 6, stacks = 6;
-    float rho, drho, theta, dtheta;
-    float x, y, z;
-    int i, j, imin, imax;
-    drho = 3.1415926536f/(float)stacks;
-    dtheta = 2.0f*3.1415926536f/(float)slices;
-
-    // draw +Z end as a triangle fan
-    glBegin (GL_TRIANGLE_FAN);
-    glVertex3f (0.0, 0.0, radius);
-    for (j = 0; j <= slices; j++) 
-    {
-      theta = (j == slices) ? 0.0f : j * dtheta;
-      x = (float)(-sin(theta) * sin(drho));
-      y = (float)(cos(theta) * sin(drho));
-      z = (float)(cos(drho));
-      glVertex3f (x*radius, y*radius, z*radius);
-    }
-    glEnd ();
-
-    imin = 1;
-    imax = stacks-1;
-
-    for (i = imin; i < imax; i++)
-    {
-      rho = i * drho;
-      glBegin (GL_QUAD_STRIP);
-      for (j = 0; j <= slices; j++)
-      {
-	theta = (j == slices) ? 0.0f : j * dtheta;
-	x = (float)(-sin(theta) * sin(rho));
-	y = (float)(cos(theta) * sin(rho));
-	z = (float)(cos(rho));
-	glVertex3f (x*radius, y*radius, z*radius);
-	x = (float)(-sin(theta) * sin(rho+drho));
-	y = (float)(cos(theta) * sin(rho+drho));
-	z = (float)(cos(rho+drho));
-	glVertex3f (x*radius, y*radius, z*radius);
-      }
-      glEnd ();
-    }
-
-    // draw -Z end as a triangle fan
-    glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(0.0, 0.0, -radius);
-    rho = 3.1415926536f - drho;
-    for (j = slices; j >= 0; j--)
-    {
-      theta = (j==slices) ? 0.0f : j * dtheta;
-      x = (float)(-sin(theta) * sin(rho));
-      y = (float)(cos(theta) * sin(rho));
-      z = (float)(cos(rho));
-      glVertex3f (x*radius, y*radius, z*radius);
-    }
-    glEnd ();
-
-    glEndList ();
-  }
 }
 
-void Light::Render (float fLineWidth)
+void Light::Render(float fLineWidth)
 {
+	glEnableClientState(GL_VERTEX_ARRAY);
+
 	if (m_pTarget != NULL)
 	{
+		glPushMatrix();
+
 		if (IsEyeSelected())
 		{
 			glLineWidth(fLineWidth*2);
@@ -475,13 +319,13 @@ void Light::Render (float fLineWidth)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
-			glCallList(m_nList);
+			RenderCone();
 			glLineWidth(fLineWidth);
 		}
 		else
 		{
 			lcSetColorLight();
-			glCallList(m_nList);
+			RenderCone();
 		}
 
 		if (IsTargetSelected())
@@ -491,20 +335,23 @@ void Light::Render (float fLineWidth)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
-			glCallList(m_nTargetList);
+			RenderTarget();
 			glLineWidth(fLineWidth);
 		}
 		else
 		{
 			lcSetColorLight();
-			glCallList(m_nTargetList);
+			RenderTarget();
 		}
 
+		glPopMatrix();
+
 		lcSetColorLight();
-		glBegin(GL_LINES);
-		glVertex3fv(mPosition);
-		glVertex3fv(mTargetPosition);
-		glEnd();
+
+		lcVector3 Line[2] = { mPosition, mTargetPosition };
+		glVertexPointer(3, GL_FLOAT, 0, Line);
+
+		glDrawArrays(GL_LINES, 0, 2);
 
 		if (IsSelected())
 		{
@@ -538,64 +385,226 @@ void Light::Render (float fLineWidth)
 			projection = lcMatrix44Inverse(projection);
 			glMultMatrixf(projection);
 
-			// draw the viewing frustum
-			glBegin(GL_LINE_LOOP);
-			glVertex3f( 0.5f,  1.0f, 1.0f);
-			glVertex3f( 1.0f,  0.5f, 1.0f);
-			glVertex3f( 1.0f, -0.5f, 1.0f);
-			glVertex3f( 0.5f, -1.0f, 1.0f);
-			glVertex3f(-0.5f, -1.0f, 1.0f);
-			glVertex3f(-1.0f, -0.5f, 1.0f);
-			glVertex3f(-1.0f,  0.5f, 1.0f);
-			glVertex3f(-0.5f,  1.0f, 1.0f);
-			glEnd();
+			// Draw the light cone.
+			float Verts[16][3] =
+			{
+				{  0.5f,   1.0f,  1.0f },
+				{  1.0f,   0.5f,  1.0f },
+				{  1.0f,  -0.5f,  1.0f },
+				{  0.5f,  -1.0f,  1.0f },
+				{ -0.5f,  -1.0f,  1.0f },
+				{ -1.0f,  -0.5f,  1.0f },
+				{ -1.0f,   0.5f,  1.0f },
+				{ -0.5f,   1.0f,  1.0f },
+				{  1.0f,   1.0f, -1.0f },
+				{  0.75f,  0.75f, 1.0f },
+				{ -1.0f,   1.0f, -1.0f },
+				{ -0.75f,  0.75f, 1.0f },
+				{ -1.0f,  -1.0f, -1.0f },
+				{ -0.75f, -0.75f, 1.0f },
+				{  1.0f,  -1.0f, -1.0f },
+				{  0.75f, -0.75f, 1.0f }
+			};
 
-			glBegin(GL_LINES);
-			glVertex3f(1, 1, -1);
-			glVertex3f(0.75f, 0.75f, 1);
-			glVertex3f(-1, 1, -1);
-			glVertex3f(-0.75f, 0.75f, 1);
-			glVertex3f(-1, -1, -1);
-			glVertex3f(-0.75f, -0.75f, 1);
-			glVertex3f(1, -1, -1);
-			glVertex3f(0.75f, -0.75f, 1);
-			glEnd();
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINE_LOOP, 0, 8);
+			glDrawArrays(GL_LINES, 8, 8);
 
 			glPopMatrix();
 		}
 	}
 	else
 	{
-		glPushMatrix ();
-		glTranslatef (mPosition[0], mPosition[1], mPosition[2]);
+		glPushMatrix();
+		glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
 
-		if (IsEyeSelected ())
+		if (IsEyeSelected())
 		{
-			glLineWidth (fLineWidth*2);
 			if (m_nState & LC_LIGHT_FOCUSED)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
-			glCallList (m_nSphereList);
-			glLineWidth (fLineWidth);
 		}
 		else
-		{
 			lcSetColorLight();
-			glCallList (m_nSphereList);
-		}
 
-		glPopMatrix ();
+		RenderSphere();
+
+		glPopMatrix();
 	}
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void Light::Setup (int index)
+void Light::RenderCone()
+{
+	glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
+
+	lcVector3 FrontVector(mTargetPosition - mPosition);
+	lcVector3 UpVector(1, 1, 1);
+	float Length = FrontVector.Length();
+
+	if (fabs(FrontVector[0]) < fabs(FrontVector[1]))
+	{
+		if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
+			UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
+		else
+			UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
+	}
+	else
+	{
+		if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
+			UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
+		else
+			UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
+	}
+
+	lcMatrix44 mat = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
+	mat = lcMatrix44AffineInverse(mat);
+	mat.SetTranslation(lcVector3(0, 0, 0));
+
+	glMultMatrixf(mat);
+
+	float verts[16*3];
+	for (int i = 0; i < 8; i++)
+	{
+		verts[i*6] = verts[i*6+3] = (float)cos((float)i/4 * LC_PI) * 0.3f;
+		verts[i*6+1] = verts[i*6+4] = (float)sin((float)i/4 * LC_PI) * 0.3f;
+		verts[i*6+2] = 0.3f;
+		verts[i*6+5] = -0.3f;
+	}
+
+	glVertexPointer(3, GL_FLOAT, 0, verts);
+	glDrawArrays(GL_LINES, 0, 16);
+	glVertexPointer(3, GL_FLOAT, 6*sizeof(float), verts);
+	glDrawArrays(GL_LINE_LOOP, 0, 8);
+	glVertexPointer(3, GL_FLOAT, 6*sizeof(float), &verts[3]);
+	glDrawArrays(GL_LINE_LOOP, 0, 8);
+
+	float Lines[4][3] =
+	{
+		{ -0.5f, -0.5f, -0.3f },
+		{  0.5f, -0.5f, -0.3f },
+		{  0.5f,  0.5f, -0.3f },
+		{ -0.5f,  0.5f, -0.3f }
+	};
+
+	glVertexPointer(3, GL_FLOAT, 0, Lines);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+	glTranslatef(0, 0, -Length);
+}
+
+void Light::RenderTarget()
+{
+	float box[24][3] =
+	{
+		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
+		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
+		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
+		{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
+		{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
+		{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
+		{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
+		{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
+		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
+		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
+		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
+		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
+	};
+
+	glVertexPointer(3, GL_FLOAT, 0, box);
+	glDrawArrays(GL_LINES, 0, 24);
+}
+
+void Light::RenderSphere()
+{
+	const int Slices = 6;
+	const int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
+	const int NumVertices = (Slices - 1) * Slices + 2;
+	const float Radius = 0.2f;
+	lcVector3 Vertices[NumVertices];
+	lcuint16 Indices[NumIndices];
+
+	lcVector3* Vertex = Vertices;
+	lcuint16* Index = Indices;
+
+	*Vertex++ = lcVector3(0, 0, Radius);
+
+	for (int i = 1; i < Slices; i++ )
+	{
+		float r0 = Radius * sinf(i * (LC_PI / Slices));
+		float z0 = Radius * cosf(i * (LC_PI / Slices));
+
+		for (int j = 0; j < Slices; j++)
+		{
+			float x0 = r0 * sinf(j * (LC_2PI / Slices));
+			float y0 = r0 * cosf(j * (LC_2PI / Slices));
+
+			*Vertex++ = lcVector3(x0, y0, z0);
+		}
+	}
+
+	*Vertex++ = lcVector3(0, 0, -Radius);
+
+	for (int i = 0; i < Slices - 1; i++ )
+	{
+		*Index++ = 0;
+		*Index++ = 1 + i;
+		*Index++ = 1 + i + 1;
+	}
+
+	*Index++ = 0;
+	*Index++ = 1;
+	*Index++ = 1 + Slices - 1;
+
+	for (int i = 0; i < Slices - 2; i++ )
+	{
+		int Row1 = 1 + i * Slices;
+		int Row2 = 1 + (i + 1) * Slices;
+
+		for (int j = 0; j < Slices - 1; j++ )
+		{
+			*Index++ = Row1 + j;
+			*Index++ = Row2 + j + 1;
+			*Index++ = Row2 + j;
+
+			*Index++ = Row1 + j;
+			*Index++ = Row1 + j + 1;
+			*Index++ = Row2 + j + 1;
+		}
+
+		*Index++ = Row1 + Slices - 1;
+		*Index++ = Row2 + 0;
+		*Index++ = Row2 + Slices - 1;
+
+		*Index++ = Row1 + Slices - 1;
+		*Index++ = Row2 + 0;
+		*Index++ = Row1 + 0;
+	}
+
+	for (int i = 0; i < Slices - 1; i++ )
+	{
+		*Index++ = (Slices - 1) * Slices + 1;
+		*Index++ = (Slices - 1) * (Slices - 1) + i;
+		*Index++ = (Slices - 1) * (Slices - 1) + i + 1;
+	}
+
+	*Index++ = (Slices - 1) * Slices + 1;
+	*Index++ = (Slices - 1) * (Slices - 1) + (Slices - 2) + 1;
+	*Index++ = (Slices - 1) * (Slices - 1);
+
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glDrawElements(GL_TRIANGLES, NumIndices, GL_UNSIGNED_SHORT, Indices);
+}
+
+void Light::Setup(int index)
 {
 	GLenum light = (GLenum)(GL_LIGHT0+index);
 
 	if (!m_bEnabled)
 	{
-		glDisable (light);
+		glDisable(light);
 		return;
 	}
 

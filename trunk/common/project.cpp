@@ -1707,7 +1707,7 @@ void Project::RenderScenePieces(View* view)
 
 	if (m_nSnap & LC_DRAW_GRID)
 	{
-		glColor3f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2]);
+		glColor4f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2], 1.0f);
 		glCallList (m_nGridList);
 	}
 
@@ -1994,6 +1994,12 @@ void Project::RenderSceneObjects(View* view)
 		glTranslatef(25.375f, 25.375f, 0.0f);
 
 		// Draw the arrows.
+		lcVector3 Verts[11];
+		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, Verts);
+
 		for (int i = 0; i < 3; i++)
 		{
 			switch (i)
@@ -2009,20 +2015,16 @@ void Project::RenderSceneObjects(View* view)
 				break;
 			}
 
-			glBegin(GL_LINES);
-			glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
-			glVertex3f(0, 0, 0);
-			glEnd();
+			Verts[1] = pts[i];
 
-			glBegin(GL_TRIANGLE_FAN);
-			glVertex3f(pts[i][0], pts[i][1], pts[i][2]);
 			for (int j = 0; j < 9; j++)
-			{
-				lcVector3 pt = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
-				glVertex3f(pt[0], pt[1], pt[2]);
-			}
-			glEnd();
+				Verts[j+2] = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
+
+			glDrawArrays(GL_LINES, 0, 2);
+			glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
 		}
+
+		glDisableClientState(GL_VERTEX_ARRAY);
 
 		// Draw the text.
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -2064,16 +2066,18 @@ void Project::RenderOverlays(View* view)
 		float pt2x = m_fTrack[0];
 		float pt2y = m_fTrack[1];
 
-		glBegin(GL_LINES);
-		glVertex2f(pt1x, pt1y);
-		glVertex2f(pt2x, pt1y);
-		glVertex2f(pt2x, pt1y);
-		glVertex2f(pt2x, pt2y);
-		glVertex2f(pt2x, pt2y);
-		glVertex2f(pt1x, pt2y);
-		glVertex2f(pt1x, pt2y);
-		glVertex2f(pt1x, pt1y);
-		glEnd();
+		float verts[8][2] =
+		{
+			{ pt1x, pt1y }, { pt2x, pt1y },
+			{ pt2x, pt1y }, { pt2x, pt2y },
+			{ pt2x, pt2y }, { pt1x, pt2y },
+			{ pt1x, pt2y }, { pt1x, pt1y }
+		};
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, verts);
+		glDrawArrays(GL_LINES, 0, 8);
+		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glDisable(GL_LINE_STIPPLE);
 		glEnable(GL_DEPTH_TEST);
@@ -2125,13 +2129,20 @@ void Project::RenderOverlays(View* view)
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 
-			glBegin(GL_QUADS);
 			glColor4f(0.8f, 0.8f, 0.0f, 0.3f);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(0.0f, OverlayMovePlaneSize, 0.0f);
-			glVertex3f(0.0f, OverlayMovePlaneSize, OverlayMovePlaneSize);
-			glVertex3f(0.0f, 0.0f, OverlayMovePlaneSize);
-			glEnd();
+
+			float Verts[4][3] =
+			{
+				{ 0.0f, 0.0f, 0.0f },
+				{ 0.0f, OverlayMovePlaneSize, 0.0f },
+				{ 0.0f, OverlayMovePlaneSize, OverlayMovePlaneSize },
+				{ 0.0f, 0.0f, OverlayMovePlaneSize }
+			};
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableClientState(GL_VERTEX_ARRAY);
 
 			glDisable(GL_BLEND);
 
@@ -2403,7 +2414,7 @@ void Project::RenderOverlays(View* view)
 		if (m_nCurAction == LC_ACTION_ROTATE && !HasAngle && m_nTracking == LC_TRACK_NONE)
 		{
 			glBegin(GL_LINE_LOOP);
-			glColor3f(0.1f, 0.1f, 0.1f);
+			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
 
 			for (j = 0; j < 32; j++)
 			{
@@ -2541,7 +2552,7 @@ void Project::RenderOverlays(View* view)
 
 				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
 
-				glColor3f(0.8f, 0.8f, 0.0f);
+				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 
 				if (HasAngle)
 				{
@@ -2596,7 +2607,7 @@ void Project::RenderOverlays(View* view)
 				m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
 				glBegin(GL_QUADS);
-				glColor3f(0.8f, 0.8f, 0.0f);
+				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
 				glEnd();
 
@@ -2632,7 +2643,7 @@ void Project::RenderOverlays(View* view)
 		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
 		// Draw circle.
-		glBegin(GL_LINE_LOOP);
+		float verts[32][2];
 
 		float r = lcMin(w, h) * 0.35f;
 		float cx = x + w / 2.0f;
@@ -2640,45 +2651,44 @@ void Project::RenderOverlays(View* view)
 
 		for (int i = 0; i < 32; i++)
 		{
-			float x = cosf((float)i / 32.0f * (2.0f * LC_PI)) * r + cx;
-			float y = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
-
-			glVertex2f(x, y);
+			verts[i][0] = cosf((float)i / 32.0f * (2.0f * LC_PI)) * r + cx;
+			verts[i][1] = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
 		}
 
-		glEnd();
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, verts);
+		glDrawArrays(GL_LINE_LOOP, 0, 32);
 
 		const float OverlayCameraSquareSize = lcMax(8.0f, (w+h)/200);
 
 		// Draw squares.
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(cx + OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize);
-		glVertex2f(cx - OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize);
-		glVertex2f(cx - OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize);
-		glVertex2f(cx + OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize);
-		glEnd();
+		float Squares[16][2] =
+		{
+			{ cx + OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize },
+			{ cx - OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize },
+			{ cx - OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize },
+			{ cx + OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize },
+			{ cx + OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize },
+			{ cx - OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize },
+			{ cx - OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize },
+			{ cx + OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize },
+			{ cx + r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
+			{ cx + r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
+			{ cx + r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
+			{ cx + r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
+			{ cx - r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
+			{ cx - r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
+			{ cx - r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
+			{ cx - r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize }
+		};
 
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(cx + OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize);
-		glVertex2f(cx - OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize);
-		glVertex2f(cx - OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize);
-		glVertex2f(cx + OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize);
-		glEnd();
+		glVertexPointer(2, GL_FLOAT, 0, Squares);
+		glDrawArrays(GL_LINE_LOOP, 0, 4);
+		glDrawArrays(GL_LINE_LOOP, 4, 4);
+		glDrawArrays(GL_LINE_LOOP, 8, 4);
+		glDrawArrays(GL_LINE_LOOP, 12, 4);
 
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(cx + r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
-		glVertex2f(cx + r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
-		glVertex2f(cx + r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
-		glVertex2f(cx + r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
-		glEnd();
-
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(cx - r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
-		glVertex2f(cx - r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize);
-		glVertex2f(cx - r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
-		glVertex2f(cx - r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize);
-		glEnd();
-
+		glDisableClientState(GL_VERTEX_ARRAY);
 		glEnable(GL_DEPTH_TEST);
 	}
 	else if (m_nCurAction == LC_ACTION_ZOOM_REGION)
@@ -2693,23 +2703,25 @@ void Project::RenderOverlays(View* view)
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_LINE_STIPPLE);
 		glLineStipple(5, 0x5555);
-		glColor3f(0, 0, 0);
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
 		float pt1x = (float)m_nDownX;
 		float pt1y = (float)m_nDownY;
 		float pt2x = m_OverlayTrackStart[0];
 		float pt2y = m_OverlayTrackStart[1];
 
-		glBegin(GL_LINES);
-		glVertex2f(pt1x, pt1y);
-		glVertex2f(pt2x, pt1y);
-		glVertex2f(pt2x, pt1y);
-		glVertex2f(pt2x, pt2y);
-		glVertex2f(pt2x, pt2y);
-		glVertex2f(pt1x, pt2y);
-		glVertex2f(pt1x, pt2y);
-		glVertex2f(pt1x, pt1y);
-		glEnd();
+		float Verts[8][2] =
+		{
+			{ pt1x, pt1y }, { pt2x, pt1y },
+			{ pt2x, pt1y }, { pt2x, pt2y },
+			{ pt2x, pt2y }, { pt1x, pt2y },
+			{ pt1x, pt2y }, { pt1x, pt1y }
+		};
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		glDrawArrays(GL_LINES, 0, 8);
+		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glDisable(GL_LINE_STIPPLE);
 		glEnable(GL_DEPTH_TEST);
@@ -2731,7 +2743,7 @@ void Project::RenderViewports(View* view)
 	glDisable(GL_FOG);
 
 	// Draw camera name
-	glColor3f(0, 0, 0);
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	m_pScreenFont->MakeCurrent();

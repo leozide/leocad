@@ -593,28 +593,45 @@ float tx, ty;
 tx = (tw*eye[0])/(2*pCam->m_zFar);
 ty = (th*eye[1])/(2*pCam->m_zFar);
 
-			glBegin(GL_QUADS);
-				glTexCoord2f(tx, ty);
-				glVertex2f(-1, -1);
-				glTexCoord2f(tx+tw, ty);
-				glVertex2f(1, -1);
-				glTexCoord2f(tx+tw, ty+th);
-				glVertex2f(1, 1);
-				glTexCoord2f(tx, ty+th);
-				glVertex2f(-1, 1);
-			glEnd();
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			float Quad[20] =
+			{
+				-1.0f, -1.0f, 0.0f, tx, ty,
+				 1.0f, -1.0f, 0.0f, tx + tw, ty,
+				 1.0f,  1.0f, 0.0f, tx + tw, ty + th,
+				-1.0f,  1.0f, 0.0f, tx, ty + th
+			};
+
+			glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Quad);
+			glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Quad + 3);
+
+			glDrawArrays(GL_QUADS, 0, 4);
+
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glDisableClientState(GL_VERTEX_ARRAY);
 
 			glDisable(GL_TEXTURE_2D);
 		}
 		else
 		{
-			glColor3fv(m_fColor);
-			glBegin(GL_QUADS);
-				glVertex2f(-1, -1);
-				glVertex2f(1, -1);
-				glVertex2f(1, 1);
-				glVertex2f(-1, 1);
-			glEnd();
+			float Quad[12] =
+			{
+				-1.0f, -1.0f, 0.0f,
+				 1.0f, -1.0f, 0.0f,
+				 1.0f,  1.0f, 0.0f,
+				-1.0f,  1.0f, 0.0f,
+			};
+
+			glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], 1.0f);
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 0, Quad);
+
+			glDrawArrays(GL_QUADS, 0, 4);
+
+			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		glPopMatrix();
@@ -624,7 +641,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 		FindVisiblePatches(pCam, aspect);
 
 		int i, j;
-		glColor3fv(m_fColor);
+		glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], 1.0f);
 		glEnableClientState(GL_VERTEX_ARRAY);
 
 		if (m_nOptions & LC_TERRAIN_TEXTURE)
@@ -661,6 +678,8 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 			glDisable(GL_TEXTURE_2D);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		}
+
+		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 }
 

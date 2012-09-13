@@ -511,8 +511,9 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 	{
 		bytes += 1 + 2 * *bytes;
 		lcuint32* info = (lcuint32*)bytes;
+		lcuint32 type = *info;
 
-		switch (*info)
+		switch (type)
 		{
 		case LC_MESH:
 			{
@@ -540,7 +541,10 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 				               lcVector4(MatFloats[6], MatFloats[7], MatFloats[8], 0.0f),
 				               lcVector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
 
-				WriteStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, LC_STUD_RADIUS, SectionIndices, DstSections);
+				if (type == LC_STUD)
+					WriteStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, LC_STUD_RADIUS, SectionIndices, DstSections);
+				else
+					WriteStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, 0.16f, SectionIndices, DstSections);
 			} break;
 
 		case LC_STUD2:
@@ -559,7 +563,10 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 				               lcVector4(MatFloats[6], MatFloats[7], MatFloats[8], 0.0f),
 				               lcVector4(MatFloats[9], MatFloats[10], MatFloats[11], 1.0f));
 
-				WriteHollowStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, 0.16f, LC_STUD_RADIUS, SectionIndices, DstSections);
+				if (type == LC_STUD2)
+					WriteHollowStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, 0.16f, LC_STUD_RADIUS, SectionIndices, DstSections);
+				else
+					WriteHollowStudDrawInfo<DstType>(ColorIdx, Mat, mMesh, OutVertex, LC_STUD_RADIUS, 0.32f, SectionIndices, DstSections);
 			} break;
 		}
 

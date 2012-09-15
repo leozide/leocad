@@ -49,7 +49,7 @@ BOOL CPreferencesSheet::PreTranslateMessage(MSG* pMsg)
 
 BOOL CPreferencesSheet::OnCommand(WPARAM wParam, LPARAM lParam) 
 {
-	if (LOWORD(wParam) == IDOK)
+	if (LOWORD(wParam) == IDOK && m_PageKeyboard.m_Modified)
 	{
 		if (MessageBox("You have unsaved keyboard shortcuts changes. Would you like to save them now?", "", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 		{

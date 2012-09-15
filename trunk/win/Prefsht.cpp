@@ -44,11 +44,23 @@ END_MESSAGE_MAP()
 
 BOOL CPreferencesSheet::PreTranslateMessage(MSG* pMsg) 
 {
-	if (LOWORD(pMsg->wParam) == IDOK)
-		AfxGetApp()->WriteProfileInt("Settings", "Page", GetActiveIndex());
-	
-	return m_tabCtrl.TranslatePropSheetMsg(pMsg) ? TRUE :
-		CPropertySheet::PreTranslateMessage(pMsg);
+	return m_tabCtrl.TranslatePropSheetMsg(pMsg) ? TRUE : CPropertySheet::PreTranslateMessage(pMsg);
+}
+
+BOOL CPreferencesSheet::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	if (LOWORD(wParam) == IDOK)
+	{
+		if (MessageBox("You have unsaved keyboard shortcuts changes. Would you like to save them now?", "", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+		{
+			SetActivePage(5);
+			return TRUE;
+		}
+	}
+
+	AfxGetApp()->WriteProfileInt("Settings", "Page", GetActiveIndex());
+
+	return CPropertySheet::OnCommand(wParam, lParam);
 }
 
 BOOL CPreferencesSheet::OnInitDialog() 

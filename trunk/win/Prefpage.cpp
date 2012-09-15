@@ -625,6 +625,8 @@ CPreferencesKeyboard::CPreferencesKeyboard() : CPropertyPage(CPreferencesKeyboar
 	//{{AFX_DATA_INIT(CPreferencesKeyboard)
 	m_strFileName = _T("");
 	//}}AFX_DATA_INIT
+
+	m_Modified = false;
 }
 
 CPreferencesKeyboard::~CPreferencesKeyboard()
@@ -676,7 +678,7 @@ void CPreferencesKeyboard::GetOptions()
 
 	AfxGetApp()->WriteProfileString("Settings", "Keyboard", m_strFileName);
 
-  ((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators();
+	((CMainFrame*)AfxGetMainWnd())->UpdateMenuAccelerators();
 }
 
 BOOL CPreferencesKeyboard::OnInitDialog() 
@@ -722,6 +724,7 @@ void CPreferencesKeyboard::OnKeydlgRemove()
 		Cmd.Flags &= ~LC_KEYMOD2_MASK;
 	}
 
+	m_Modified = true;
 	OnSelchangeKeydlgCmdlist();
 }
 
@@ -760,8 +763,7 @@ void CPreferencesKeyboard::OnKeydlgAssign()
 		{
 			CString Msg;
 
-			Msg.Format("This shortcut is currently assigned to \"%s\", do you want to reassign it?",
-			           Cmd.Description);
+			Msg.Format("This shortcut is currently assigned to \"%s\", do you want to reassign it?", Cmd.Description);
 
 			if (AfxMessageBox(Msg, MB_YESNO | MB_ICONQUESTION) == IDNO)
 			{
@@ -809,6 +811,7 @@ void CPreferencesKeyboard::OnKeydlgAssign()
 			Cmd.Flags |= LC_KEYMOD2_CONTROL;
 	}
 
+	m_Modified = true;
 	m_Edit.ResetKey();
 	OnSelchangeKeydlgCmdlist();
 }
@@ -859,6 +862,7 @@ void CPreferencesKeyboard::OnSelchangeKeydlgCmdlist()
 		}
 	}
 
+	m_Edit.EnableWindow(Cmd.Key2 == 0);
 	m_Assign.EnableWindow((Cmd.Key2 == 0) && m_Edit.m_Key);
 }
 
@@ -893,6 +897,7 @@ void CPreferencesKeyboard::OnKeydlgReset()
 		ResetKeyboardShortcuts();
 		OnSelchangeKeydlgCmdlist();
 		m_strFileName = "";
+		m_Modified = false;
 		UpdateData(FALSE);
 	}
 }
@@ -908,6 +913,7 @@ void CPreferencesKeyboard::OnKeydlgSave()
 		if (SaveKeyboardShortcuts(dlg.GetPathName()))
 		{
 			m_strFileName = dlg.GetPathName();
+			m_Modified = false;
 			UpdateData(FALSE);
 		}
 		else
@@ -927,6 +933,7 @@ void CPreferencesKeyboard::OnKeydlgLoad()
 		{
 			UpdateData(TRUE);
 			m_strFileName = dlg.GetPathName();
+			m_Modified = false;
 			UpdateData(FALSE);
 		}
 		else

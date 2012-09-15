@@ -274,6 +274,8 @@ public:
 	CPreferencesKeyboard();
 	~CPreferencesKeyboard();
 
+	bool m_Modified;
+
 // Dialog Data
 	//{{AFX_DATA(CPreferencesKeyboard)
 	enum { IDD = IDD_PREFKEYBOARD };

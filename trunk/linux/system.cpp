@@ -423,81 +423,61 @@ void SystemUpdateSnap(const unsigned long snap)
   ignore_commands = false;
 }
 
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, Camera* pCamera)
+void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras)
 {
-  gpointer item = NULL;
-  gpointer menu = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu");
+	gpointer item = NULL;
+	gpointer menu = gtk_object_get_data(GTK_OBJECT(((GtkWidget*)(*main_window))), "cameras_menu");
 
-  if (!menu)
-    return;
+	if (!menu)
+		return;
 
-  GList *lst = gtk_container_children (GTK_CONTAINER (menu));
+	GList *lst = gtk_container_children(GTK_CONTAINER(menu));
+	Project* project = lcGetActiveProject();
 
-  for (int i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
-    if (pNew == pCamera)
-    {
-      if (i >= 7)
-	item = g_list_nth_data (lst, i-7);
-      else
-      {
-	guint len = g_list_length (lst);
+	for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
+	{
+		if (pNew != project->mCameras[CameraIdx])
+			continue;
 
-	if (len > 7)
-	  item = g_list_nth_data (lst, len - 7 + i);
-	else
-	  item = g_list_nth_data (lst, i);
-      }
-      break;
-    }
+		item = g_list_nth_data(lst, CameraIdx);
+		break;
+	}
 
-  if (item)
-  {
-    ignore_commands = true;
-    gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
-    ignore_commands = false;
-  }
+	if (item)
+	{
+		ignore_commands = true;
+		gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
+		ignore_commands = false;
+	}
 }
 
-void SystemUpdateCameraMenu(Camera* pCamera)
+void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 {
-  GtkWidget *menu = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu"));
-  GtkWidget *item = NULL;
-  Camera* pFirst = pCamera;
-  GList *lst;
-  int i;
+	GtkWidget *menu = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu"));
+	GtkWidget *item = NULL;
+	GList *lst;
 
-  if (!menu)
-    return;
+	if (!menu)
+		return;
 
-  // empty the menu
-  while ((lst = gtk_container_children (GTK_CONTAINER (menu))) != NULL)
-    gtk_container_remove (GTK_CONTAINER (menu), GTK_WIDGET (lst->data));
+	while ((lst = gtk_container_children(GTK_CONTAINER(menu))) != NULL)
+		gtk_container_remove(GTK_CONTAINER(menu), GTK_WIDGET(lst->data));
 
-  // add user cameras
-  for (i = 0; pCamera; i++, pCamera = pCamera->m_pNext)
-    if (i > 6)
-    {
-      GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
-      item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
-      gtk_menu_append (GTK_MENU (menu), item);
-      gtk_widget_show (item);
-      gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
-			  GINT_TO_POINTER (i + ID_CAMERA_FIRST));
-    }
+	Project* project = lcGetActiveProject();
 
-  if (i > 7)
-    menu_separator (menu);
+	for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
+	{
+		GSList* grp = item ? gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item)) : NULL;
+		item = gtk_radio_menu_item_new_with_label(grp, project->mCameras[CameraIdx]->GetName());
+		gtk_menu_append(GTK_MENU(menu), item);
+		gtk_widget_show(item);
+		gtk_signal_connect(GTK_OBJECT(item), "activate", GTK_SIGNAL_FUNC(OnCommand), GINT_TO_POINTER(CameraIdx + ID_CAMERA_FIRST));
+	}
 
-  // add standard cameras
-  for (pCamera = pFirst, i = 0; pCamera && (i < 7); i++, pCamera = pCamera->m_pNext)
-  {
-    GSList* grp = item ? gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (item)) : NULL;
-    item = gtk_radio_menu_item_new_with_label (grp, pCamera->GetName());
-    gtk_menu_append (GTK_MENU (menu), item);
-    gtk_widget_show (item);
-    gtk_signal_connect (GTK_OBJECT (item), "activate", GTK_SIGNAL_FUNC (OnCommand),
-			GINT_TO_POINTER (i + ID_CAMERA_FIRST));
-  }
+	if (project->mCameras.GetSize())
+		menu_separator(menu);
+
+//	create_menu_item(menu, "_Reset", accel, GTK_SIGNAL_FUNC(OnCommandDirect), window, LC_VIEW_CAMERA_RESET, "menu_cameras_reset");
 }
 
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)

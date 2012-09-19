@@ -2179,13 +2179,13 @@ int propertiesdlg_execute(void* param)
 	}
 
 	ColorColumn[NumColors] = NumColumns;
-	NumColumns++;
+	NumColumns += 2;
 
 	list = gtk_clist_new(NumColumns);
 	gtk_widget_show(list);
 	gtk_container_add(GTK_CONTAINER(scroll_win), list);
 	gtk_container_border_width(GTK_CONTAINER(list), 5);
-	gtk_clist_set_column_width(GTK_CLIST(list), 0, 80);
+	gtk_clist_set_column_auto_resize(GTK_CLIST(list), 0, TRUE);
 	gtk_clist_column_titles_show(GTK_CLIST(list));
 
 	label = gtk_label_new("Piece");
@@ -2204,7 +2204,7 @@ int propertiesdlg_execute(void* param)
 
 	label = gtk_label_new("Total");
 	gtk_widget_show(label);
-	gtk_clist_set_column_widget(GTK_CLIST(list), NumColumns, label);
+	gtk_clist_set_column_widget(GTK_CLIST(list), NumColumns - 1, label);
 
 	char** Row = new char*[NumColumns];
 

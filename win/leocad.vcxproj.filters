@@ -284,6 +284,12 @@
     <ClCompile Include="..\common\lc_mesh.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\lc_library.cpp">
+      <Filter>Common Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\lc_zipfile.cpp">
+      <Filter>Common Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Angle.cur">
@@ -829,6 +835,12 @@
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\lc_mesh.h">
+      <Filter>Common Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\lc_library.h">
+      <Filter>Common Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\lc_zipfile.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -381,21 +381,7 @@ inline lcVector3 lcMul31(const lcVector3& a, const lcMatrix44& b)
 	return lcVector3(v[0], v[1], v[2]);
 }
 
-inline lcVector3 lcMul31(const lcVector4& a, const lcMatrix44& b)
-{
-	lcVector4 v = b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2] + b.r[3];
-
-	return lcVector3(v[0], v[1], v[2]);
-}
-
 inline lcVector3 lcMul30(const lcVector3& a, const lcMatrix44& b)
-{
-	lcVector4 v = b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2];
-
-	return lcVector3(v[0], v[1], v[2]);
-}
-
-inline lcVector3 lcMul30(const lcVector4& a, const lcMatrix44& b)
 {
 	lcVector4 v = b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2];
 
@@ -758,7 +744,7 @@ inline lcMatrix44 lcMatrix44AffineInverse(const lcMatrix44& m)
 	Inv.r[1] = lcVector4(m.r[0][1], m.r[1][1], m.r[2][1], m.r[1][3]);
 	Inv.r[2] = lcVector4(m.r[0][2], m.r[1][2], m.r[2][2], m.r[2][3]);
 
-	lcVector3 Trans = -lcMul30(m.r[3], Inv);
+	lcVector3 Trans = -lcMul30(lcVector3(m[3][0], m[3][1], m[3][2]), Inv);
 	Inv.r[3] = lcVector4(Trans[0], Trans[1], Trans[2], 1.0f);
 
 	return Inv;
@@ -1249,8 +1235,28 @@ inline bool lcTriangleIntersectsPlanes(float* p1, float* p2, float* p3, const lc
 	return true;
 }
 
+/*
+float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
+{
+	Vector3 Dir = End - Start;
+
+	float t1 = Dot3(Start - Point, Dir);
+	float t2 = LengthSquared(Dir);
+
+	float t = -t1 / t2;
+
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+
+	Vector3 Closest = Start + t * Dir;
+
+	return Length(Closest - Point);
+}
+
 // Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
-inline bool lcBoundingBoxRayMinIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection)
+bool BoundingBoxRayMinIntersectDistance(const BoundingBox& Box, const Vector3& Start, const Vector3& End, float* Dist, Vector3* Intersection)
 {
 	bool MiddleQuadrant[3];
 	bool Inside = true;
@@ -1261,16 +1267,16 @@ inline bool lcBoundingBoxRayMinIntersectDistance(const lcVector3& Min, const lcV
 	// Find candidate planes.
 	for (i = 0; i < 3; i++)
 	{
-		if (Start[i] < Min[i])
+		if (Start[i] < Box.m_Min[i])
 		{
 			MiddleQuadrant[i] = false;
-			CandidatePlane[i] = Min[i];
+			CandidatePlane[i] = Box.m_Min[i];
 			Inside = false;
 		}
-		else if (Start[i] > Max[i])
+		else if (Start[i] > Box.m_Max[i])
 		{
 			MiddleQuadrant[i] = false;
-			CandidatePlane[i] = Max[i];
+			CandidatePlane[i] = Box.m_Max[i];
 			Inside = false;
 		}
 		else
@@ -1291,7 +1297,7 @@ inline bool lcBoundingBoxRayMinIntersectDistance(const lcVector3& Min, const lcV
 	}
 
 	// Calculate T distances to candidate planes.
-	lcVector3 Dir = End - Start;
+	Vector3 Dir = End - Start;
 
 	for (i = 0; i < 3; i++)
 	{
@@ -1311,21 +1317,21 @@ inline bool lcBoundingBoxRayMinIntersectDistance(const lcVector3& Min, const lcV
 	if (MaxT[WhichPlane] < 0.0f)
 		return false;
 
-	lcVector3 Point;
+	Vector3 Point;
 
 	for (i = 0; i < 3; i++)
 	{
 		if (WhichPlane != i)
 		{
 			Point[i] = Start[i] + MaxT[WhichPlane] * Dir[i];
-			if (Point[i] < Min[i] || Point[i] > Max[i])
+			if (Point[i] < Box.m_Min[i] || Point[i] > Box.m_Max[i])
 				return false;
 		}
 		else
 			Point[i] = CandidatePlane[i];
 	}
 
-	*Dist = lcLength(Point - Start);
+	*Dist = Length(Point - Start);
 
 	if (*Intersection)
 		*Intersection = Point;
@@ -1333,73 +1339,11 @@ inline bool lcBoundingBoxRayMinIntersectDistance(const lcVector3& Min, const lcV
 	return true;
 }
 
-inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, float* Dist)
+// Return true if Box intersects the volume defined by Planes.
+bool BoundingBoxIntersectsVolume(const BoundingBox& Box, const Vector4* Planes, int NumPlanes)
 {
-	lcVector3 Dir = Center - Start;
-	float LengthSquaredDir = lcLengthSquared(Dir);
-	float RadiusSquared = Radius * Radius;
-
-	if (LengthSquaredDir < RadiusSquared)
-	{
-		// Ray origin inside sphere.
-		*Dist = 0;
-		return true;
-	}
-	else
-	{
-		lcVector3 RayDir = End - Start;
-		float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
-
-		// Ray points away from sphere.
-		if (t < 0)
-			return false;
-
-		float c = (RadiusSquared - LengthSquaredDir) / lcLengthSquared(RayDir) + (t * t);
-		if (c > 0)
-		{
-			*Dist = t - sqrtf(c);
-			return true;
-		}
-
-		return false;
-	}
-}
-
-/*
-float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
-{
-	Vector3 Dir = End - Start;
-
-	float t1 = Dot3(Start - Point, Dir);
-	float t2 = LengthSquared(Dir);
-
-	float t = -t1 / t2;
-
-	if (t < 0.0f)
-		t = 0.0f;
-	else if (t > 1.0f)
-		t = 1.0f;
-
-	Vector3 Closest = Start + t * Dir;
-
-	return Length(Closest - Point);
-}
-*/
-// Returns true if the axis aligned box intersects the volume defined by planes.
-inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
-{
-	const int NumPlanes = 6;
-	lcVector3 Points[8] =
-	{
-		Points[0] = lcVector3(Min[0], Min[1], Min[2]),
-		Points[1] = lcVector3(Min[0], Max[1], Min[2]),
-		Points[2] = lcVector3(Max[0], Max[1], Min[2]),
-		Points[3] = lcVector3(Max[0], Min[1], Min[2]),
-		Points[4] = lcVector3(Min[0], Min[1], Max[2]),
-		Points[5] = lcVector3(Min[0], Max[1], Max[2]),
-		Points[6] = lcVector3(Max[0], Max[1], Max[2]),
-		Points[7] = lcVector3(Max[0], Min[1], Max[2])
-	};
+	Vector3 Points[8];
+	Box.GetPoints(Points);
 
 	// Start by testing trivial reject/accept cases.
 	int Outcodes[8];
@@ -1411,7 +1355,7 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
-			if (lcDot3(Points[i], Planes[j]) + Planes[j][3] > 0)
+			if (Dot3(Points[i], Planes[j]) + Planes[j][3] > 0)
 				Outcodes[i] |= 1 << j;
 		}
 	}
@@ -1432,29 +1376,41 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 	if (OutcodesOR == 0)
 		return true;
 
-	int Indices[36] = 
-	{
-		0, 1, 2,
-		0, 2, 3,
-		7, 6, 5,
-		7, 5, 4,
-		0, 1, 5,
-		0, 5, 4,
-		2, 3, 7,
-		2, 7, 6,
-		0, 3, 7,
-		0, 7, 4,
-		1, 2, 6,
-		1, 6, 5
-	};
-
-	for (int Idx = 0; Idx < 36; Idx += 3)
-		if (lcTriangleIntersectsPlanes(Points[Indices[Idx]*3], Points[Indices[Idx+1]*3], Points[Indices[Idx+2]*3], Planes))
-			return true;
-
-	return false;
+	return true;
 }
-/*
+
+bool SphereRayMinIntersectDistance(const Vector3& Center, float Radius, const Vector3& Start, const Vector3& End, float* Dist)
+{
+	Vector3 Dir = Center - Start;
+	float LengthSquaredDir = LengthSquared(Dir);
+	float RadiusSquared = Radius * Radius;
+
+	if (LengthSquaredDir < RadiusSquared)
+	{
+		// Ray origin inside sphere.
+		*Dist = 0;
+		return true;
+	}
+	else
+	{
+		Vector3 RayDir = End - Start;
+		float t = Dot3(Dir, RayDir) / LengthSquared(RayDir);
+
+		// Ray points away from sphere.
+		if (t < 0)
+			return false;
+
+		float c = (RadiusSquared - LengthSquaredDir) / LengthSquared(RayDir) + (t * t);
+		if (c > 0)
+		{
+			*Dist = t - sqrtf(c);
+			return true;
+		}
+
+		return false;
+	}
+}
+
 bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes)
 {
 	for (int j = 0; j < NumPlanes; j++)

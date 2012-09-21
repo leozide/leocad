@@ -392,27 +392,26 @@ void Piece::RemoveTime (unsigned short start, bool animation, unsigned short tim
   Object::RemoveTime (start, animation, time);
 }
 
-void Piece::MinIntersectDist(lcClickLine* ClickLine)
+void Piece::MinIntersectDist(LC_CLICKLINE* pLine)
 {
-	lcMatrix44 WorldModel = lcMatrix44AffineInverse(mModelWorld);
+	double dist;
 
-	lcVector3 Start = lcMul31(ClickLine->Start, WorldModel);
-	lcVector3 End = lcMul31(ClickLine->End, WorldModel);
-
-	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
-	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
-	float Dist;
-
-	if (!lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) || (Dist >= ClickLine->MinDist))
+	dist = BoundingBoxIntersectDist(pLine);
+	if (dist >= pLine->mindist)
 		return;
 
+	lcMatrix44 WorldToLocal = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
+	WorldToLocal.SetTranslation(lcMul31(lcVector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
+
+	lcVector3 Start = lcMul31(lcVector3(pLine->a1, pLine->b1, pLine->c1), WorldToLocal);
+	lcVector3 End = lcMul31(lcVector3(pLine->a1 + pLine->a2, pLine->b1 + pLine->b2, pLine->c1 + pLine->c2), WorldToLocal);
 	lcVector3 Intersection;
 
-	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, ClickLine->MinDist, Intersection))
-		ClickLine->Closest = this;
+	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, pLine->mindist, Intersection))
+		pLine->pClosest = this;
 }
 
-bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
+bool Piece::IntersectsVolume(const lcVector4 Planes[6])
 {
 	// First check the bounding box for quick rejection.
 	lcVector3 Box[8] =
@@ -437,7 +436,7 @@ bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		lcVector3 PlaneNormal = lcMul30(Planes[i], WorldToLocal);
+		lcVector3 PlaneNormal = lcMul30(lcVector3(Planes[i][0], Planes[i][1], Planes[i][2]), WorldToLocal);
 		LocalPlanes[i] = lcVector4(PlaneNormal, Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
 	}
 
@@ -565,7 +564,10 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 
 	CalculateKeys (nTime, bAnimation);
 //	if (CalculatePositionRotation(nTime, bAnimation, mPosition, mRotation))
+	{
 		Matrix mat(mRotation, mPosition);
+		BoundingBoxCalculate(&mat, mPieceInfo->m_fDimensions);
+	}
 
 	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);
 	mModelWorld.SetTranslation(mPosition);

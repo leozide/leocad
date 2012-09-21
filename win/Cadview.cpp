@@ -226,7 +226,7 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 	GL_DisableVertexBufferObject();
 
 	View view(project, project->m_ActiveView);
-	view.SetCamera(project->m_ActiveView->mCamera);
+	view.m_Camera = project->m_ActiveView->m_Camera;
 	view.CreateFromBitmap(hMemDC);
 	view.MakeCurrent();
 	view.OnSize(tw, th);
@@ -269,7 +269,10 @@ void CCADView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
 		// Tile rendering
 		if (pw > tw || ph > th)
 		{
-			Camera* pCam = view.mCamera;
+			Camera* pCam = project->m_pCameras;
+			for (int i = LC_CAMERA_MAIN; pCam; pCam = pCam->m_pNext)
+				if (i-- == 0)
+					break;
 			pCam->StartTiledRendering(tw, th, pw, ph, viewaspect);
 			do 
 			{
@@ -519,9 +522,9 @@ int CCADView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_pView = new View(project, project->m_ActiveView);
 	if (project->m_ActiveView)
-		m_pView->SetCamera(project->m_ActiveView->mCamera);
+		m_pView->m_Camera = project->m_ActiveView->m_Camera;
 	else
-		m_pView->SetDefaultCamera();
+		m_pView->m_Camera = project->GetCamera(LC_CAMERA_MAIN);
 	m_pView->CreateFromWindow(m_hWnd);
 	m_pView->OnInitialUpdate();
 

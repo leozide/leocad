@@ -29,7 +29,7 @@ public:
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
 	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
 	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
-	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
+	virtual bool IntersectsVolume(const lcVector4 Planes[6]);
 
 
 
@@ -51,7 +51,7 @@ public:
 	const char* GetName() const
 	{ return m_strName; };
 
-	virtual void MinIntersectDist(lcClickLine* ClickLine);
+	void MinIntersectDist(LC_CLICKLINE* pLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
 	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame);
 	void CreateName(Piece* pPiece);

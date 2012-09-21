@@ -39,6 +39,7 @@ public:
 	//{{AFX_VIRTUAL(CPreferencesSheet)
 	public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 

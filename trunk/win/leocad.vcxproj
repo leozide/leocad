@@ -162,7 +162,6 @@
     <ClCompile Include="Terrctrl.cpp" />
     <ClCompile Include="Terrdlg.cpp" />
     <ClCompile Include="Terrwnd.cpp" />
-    <ClCompile Include="texdlg.cpp" />
     <ClCompile Include="Tools.cpp" />
     <ClCompile Include="transdlg.cpp" />
     <ClCompile Include="win_gl.cpp" />
@@ -371,7 +370,6 @@
     <ClInclude Include="Terrctrl.h" />
     <ClInclude Include="TerrDlg.h" />
     <ClInclude Include="Terrwnd.h" />
-    <ClInclude Include="texdlg.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="transdlg.h" />
     <ClInclude Include="..\common\array.h" />

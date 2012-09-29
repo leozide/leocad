@@ -158,9 +158,6 @@
     <ClCompile Include="Terrwnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="texdlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -703,9 +700,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Terrwnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="texdlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tools.h">

@@ -4,7 +4,6 @@
 #include "GroupDlg.h"
 #include "Print.h"
 #include "Tools.h"
-#include "texdlg.h"
 #include "ProgDlg.h"
 #include "project.h"
 #include "pieceinf.h"
@@ -134,97 +133,6 @@ BOOL CLibraryDlg::OnInitDialog()
 	return TRUE;
 }
 
-bool CLibraryDlg::ImportPieces(const ObjArray<String>& FileList)
-{
-	char file1[LC_MAXPATH], file2[LC_MAXPATH];
-	PiecesLibrary* Library = lcGetPiecesLibrary();
-	lcDiskFile DiskIdx, DiskBin;
-
-	strcpy(file1, Library->GetLibraryPath());
-	strcat(file1, "pieces.idx");
-	strcpy(file2, Library->GetLibraryPath());
-	strcat(file2, "pieces.bin");
-
-	if ((!DiskIdx.Open(file1, "rb")) || (!DiskBin.Open(file2, "rb")))
-		return false;
-
-	lcMemFile IdxFile1, IdxFile2, BinFile1, BinFile2;
-
-	IdxFile1.CopyFrom(DiskIdx);
-	DiskIdx.Close();
-	BinFile1.CopyFrom(DiskBin);
-	DiskBin.Close();
-
-	lcMemFile* NewIdx = &IdxFile1;
-	lcMemFile* NewBin = &BinFile1;
-	lcMemFile* OldIdx = &IdxFile2;
-	lcMemFile* OldBin = &BinFile2;
-
-	CProgressDlg Dlg("Importing pieces");
-	Dlg.Create(this);
-	Dlg.SetRange(0, FileList.GetSize());
-
-	for (int i = 0; i < FileList.GetSize(); i++)
-	{
-		char* Name = FileList[i];
-		char* Slash = strrchr(Name, '\\');
-		if (Slash > Name)
-			Name = Slash+1;
-
-		Slash = strrchr(Name, '/');
-		if (Slash > Name)
-			Name = Slash+1;
-
-		Dlg.SetStatus(Name);
-		Dlg.StepIt();
-
-		lcMemFile* TmpFile;
-
-		TmpFile = NewBin;
-		NewBin = OldBin;
-		OldBin = TmpFile;
-		NewBin->SetLength(0);
-
-		TmpFile = NewIdx;
-		NewIdx = OldIdx;
-		OldIdx = TmpFile;
-		NewIdx->SetLength(0);
-
-		lcGetPiecesLibrary()->ImportLDrawPiece(FileList[i], NewIdx, NewBin, OldIdx, OldBin);
-
-		if (Dlg.CheckCancelButton())
-			if (AfxMessageBox(IDS_CANCEL_PROMPT, MB_YESNO) == IDYES)
-				break;
-	}
-
-	if ((!DiskIdx.Open(file1, "wb")) || (!DiskBin.Open(file2, "wb")))
-	{
-		AfxMessageBox("Failed to open file for writing.", MB_ICONERROR | MB_OK);
-		return false;
-	}
-
-	strcpy(file1, Library->GetLibraryPath());
-	strcat(file1, "pieces-b.old");
-	remove(file1);
-	strcpy(file2, Library->GetLibraryPath());
-	strcat(file2, "pieces.bin");
-	rename(file2, file1);
-
-	strcpy(file1, Library->GetLibraryPath());
-	strcat(file1, "pieces-i.old");
-	remove(file1);
-	strcpy(file2, Library->GetLibraryPath());
-	strcat(file2, "pieces.idx");
-	rename(file2, file1);
-
-	DiskBin.CopyFrom(*NewBin);
-	DiskIdx.CopyFrom(*NewIdx);
-
-	UpdateList();
-
-	return true;
-}
-
 BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
 {
 	switch (LOWORD(wParam))
@@ -258,113 +166,8 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 
-		case ID_LIBDLG_FILE_MERGEUPDATE:
-		{
-			LC_FILEOPENDLG_OPTS opts;
-
-			strcpy(opts.path, "");
-			opts.type = LC_FILEOPENDLG_LUP;
-
-			if (SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
-			{
-				lcGetPiecesLibrary()->LoadUpdate((char*)opts.filenames);
-
-				free(opts.filenames);
-
-				UpdateTree();
-			}
-
-			return TRUE;
-		}
-
-		case ID_FILE_IMPORTPIECE:
-		{
-			LC_FILEOPENDLG_OPTS opts;
-
-			strcpy(opts.path, Sys_ProfileLoadString ("Default", "LDraw Pieces Path", ""));
-			opts.type = LC_FILEOPENDLG_DAT;
-
-			if (SystemDoDialog (LC_DLG_FILE_OPEN, &opts))
-			{
-				ObjArray<String> FileList;
-
-				for (int i = 0; i < opts.numfiles; i++)
-				{
-					FileList.Add(opts.filenames[i]);
-					free (opts.filenames[i]);
-				}
-
-				free (opts.filenames);
-
-				ImportPieces(FileList);
-
-				Sys_ProfileSaveString ("Default", "LDraw Pieces Path", opts.path);
-
-				UpdateList();
-			}
-
-			return TRUE;
-		}
-
-
-		case ID_FILE_IMPORTFOLDER:
-		{
-			LC_DLG_DIRECTORY_BROWSE_OPTS Opts;
-
-			Opts.Title = "Select Folder";
-			strcpy(Opts.Path, Sys_ProfileLoadString ("Default", "LDraw Pieces Path", ""));
-
-			if (!SystemDoDialog(LC_DLG_DIRECTORY_BROWSE, &Opts))
-				return TRUE;
-
-			ObjArray<String> FileList;
-
-			WIN32_FIND_DATA FindData;
-			HANDLE Find = INVALID_HANDLE_VALUE;
-
-			int Len = strlen(Opts.Path);
-
-			if (Opts.Path[Len-1] != '\\' && Opts.Path[Len-1] != '/')
-				strcat(Opts.Path, "\\");
-
-			char Dir[MAX_PATH];
-			strcpy(Dir, Opts.Path);
-			strcat(Dir, "*.dat");
-
-			Find = FindFirstFile(Dir, &FindData);
-
-			if (Find == INVALID_HANDLE_VALUE) 
-			{
-				SystemDoMessageBox("No files found.", LC_MB_OK | LC_MB_ICONERROR);
-				return TRUE;
-			}
-
-			do
-			{
-				if (FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-					continue;
-
-				char File[MAX_PATH];
-				strcpy(File, Opts.Path);
-				strcat(File, FindData.cFileName);
-				FileList.Add(File);
-			}
-			while (FindNextFile(Find, &FindData) != 0);
-
-			FindClose(Find);
-
-			lcGetPiecesLibrary()->DeleteAllPieces();
-			ImportPieces(FileList);
-
-			Sys_ProfileSaveString("Default", "LDraw Pieces Path", Opts.Path);
-
-			return TRUE;
-		}
-
 		case ID_LIBDLG_FILE_TEXTURES:
 		{
-			CTexturesDlg dlg;
-			dlg.DoModal();
 		} break;
 
 		case ID_LIBDLG_CATEGORY_RESET:
@@ -460,32 +263,6 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case ID_LIBDLG_PIECE_EDIT:
 		{
-			return TRUE;
-		}
-
-		case ID_LIBDLG_PIECE_DELETE:
-		{
-			PtrArray<const char> Pieces;
-
-			for (int i = 0; i < m_List.GetItemCount(); i++)
-			{
-				if (m_List.GetItemState(i, LVIS_SELECTED))
-				{
-					PieceInfo* Info = (PieceInfo*)m_List.GetItemData(i);
-					Pieces.Add(Info->m_strName);
-				}
-			}
-
-			if (Pieces.GetSize() == 0)
-				return TRUE;
-
-			if (SystemDoMessageBox ("Are you sure you want to permanently delete the selected pieces?", LC_MB_YESNO|LC_MB_ICONQUESTION) != LC_YES)
-				return TRUE;
-
-			lcGetPiecesLibrary()->DeletePieces(Pieces);
-
-			UpdateList();
-
 			return TRUE;
 		}
 	}

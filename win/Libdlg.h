@@ -36,8 +36,6 @@ public:
 	void UpdateTree();
 	void UpdateList();
 
-	bool ImportPieces(const ObjArray<String>& FileList);
-
 	CToolBar m_wndToolBar;
 	CImageList m_TreeImages;
 	int m_SortColumn;

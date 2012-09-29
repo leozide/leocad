@@ -80,7 +80,7 @@ public:
 
 	// Attributes
 	char m_strName[LC_PIECE_NAME_LEN];
-	char m_strDescription[65];
+	char m_strDescription[128];
 	float m_fDimensions[6];
 	lcuint32 m_nOffset;
 	lcuint32 m_nSize;

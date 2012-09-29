@@ -13,6 +13,7 @@ public:
 	int GetSize() const
 		{ return m_nLength; }
 	void SetSize(int Size);
+	void Expand(int nGrow);
 
 	T* RemoveIndex(int nIndex);
 	T* RemovePointer(T* pObj);
@@ -30,8 +31,6 @@ public:
 		{ return m_pData[nIndex]; }
 
 protected:
-	void Expand(int nGrow);
-
 	T** m_pData;
 	int m_nLength;
 	int m_nAlloc;
@@ -52,7 +51,9 @@ public:
 	void RemoveIndex(int Index);
 	void RemoveAll();
 	void SetSize(int NewSize);
+	void Expand(int Grow);
 	void Add(const T& Obj);
+	T& Add();
 	void AddSorted(const T& Obj, LC_OBJARRAY_COMPARE_FUNC Func, void* SortData);
 	void InsertAt(int Index, const T& Obj);
 
@@ -60,8 +61,6 @@ public:
 		{ return m_Data[Index]; }
 
 protected:
-	void Expand(int Grow);
-
 	T* m_Data;
 	int m_Length;
 	int m_Alloc;

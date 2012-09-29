@@ -312,9 +312,6 @@ bool lcZipFile::Open()
 	mBytesBeforeZipFile = CentralPos - (mCentralDirOffset + mCentralDirSize);
 	mCentralPos = CentralPos;
 
-//	us.pfile_in_zip_read = NULL;
-//	us.encrypted = 0;
-
 	return ReadCentralDir();
 }
 
@@ -538,148 +535,101 @@ bool lcZipFile::ReadCentralDir()
 	return true;
 }
 
-bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File)
+bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 {
 	lcuint32 SizeVar;
 	lcuint64 OffsetLocalExtraField;
 	lcuint32 SizeLocalExtraField;
 	const lcZipFileInfo& FileInfo = mFiles[FileIndex];
-	const int BufferSize = 16384;
 
 	if (!CheckFileCoherencyHeader(FileIndex, &SizeVar, &OffsetLocalExtraField, &SizeLocalExtraField))
 		return false;
 
-	// file_in_zip_read_info_s contain internal information about a file in zipfile, when reading and decompress it
-	struct file_in_zip64_read_info
-	{
-		char  read_buffer[BufferSize];     // internal buffer for compressed data
-		z_stream stream;                   // zLib stream structure for inflate
+	const int BufferSize = 16384;
+	char ReadBuffer[BufferSize];
+	z_stream Stream;
+	lcuint32 Crc32;
+	lcuint64 PosInZipfile;
+	lcuint64 RestReadCompressed;
+	lcuint64 RestReadUncompressed;
 
-		lcuint64 pos_in_zipfile;           // position in byte on the zipfile, for fseek
-		lcuint32 stream_initialised;       // flag set if stream structure is initialised
-
-		lcuint64 offset_local_extrafield;  // offset of the local extra field
-		lcuint32 size_local_extrafield;    // size of the local extra field
-		lcuint64 pos_local_extrafield;     // position in the local extra field in read
-		lcuint64 total_out_64;
-
-		lcuint32 crc32;                    // crc32 of all data uncompressed
-		lcuint32 crc32_wait;               // crc32 we must obtain after decompress all
-		lcuint64 rest_read_compressed;     // number of byte to be decompressed
-		lcuint64 rest_read_uncompressed;   //number of byte to be obtained after decomp
-//		zlib_filefunc64_32_def z_filefunc;
-//		voidpf filestream;                 // io structore of the zipfile
-		lcuint32 compression_method;       // compression method (0==store)
-		lcuint64 byte_before_the_zipfile;  // byte before the zipfile, (>0 for sfx)
-		int   raw;
-	};
-
-	file_in_zip64_read_info ReadInfo;
-
-	ReadInfo.offset_local_extrafield = OffsetLocalExtraField;
-	ReadInfo.size_local_extrafield = SizeLocalExtraField;
-	ReadInfo.pos_local_extrafield = 0;
-	ReadInfo.raw = 0;
-
-	ReadInfo.stream_initialised=0;
-
-	ReadInfo.crc32_wait = FileInfo.crc;
-	ReadInfo.crc32 = 0;
-	ReadInfo.total_out_64 = 0;
-	ReadInfo.compression_method = FileInfo.compression_method;
-//	ReadInfo.filestream = s->filestream;
-//	ReadInfo.z_filefunc = s->z_filefunc;
-	ReadInfo.byte_before_the_zipfile = mBytesBeforeZipFile;
-
-	ReadInfo.stream.total_out = 0;
+	Crc32 = 0;
+	Stream.total_out = 0;
 
 	if (FileInfo.compression_method == Z_DEFLATED)
 	{
-		ReadInfo.stream.zalloc = (alloc_func)0;
-		ReadInfo.stream.zfree = (free_func)0;
-		ReadInfo.stream.opaque = (voidpf)0;
-		ReadInfo.stream.next_in = 0;
-		ReadInfo.stream.avail_in = 0;
+		Stream.zalloc = (alloc_func)0;
+		Stream.zfree = (free_func)0;
+		Stream.opaque = (voidpf)0;
+		Stream.next_in = 0;
+		Stream.avail_in = 0;
 
-		int err=inflateInit2(&ReadInfo.stream, -MAX_WBITS);
-		if (err == Z_OK)
-			ReadInfo.stream_initialised = Z_DEFLATED;
-		else
+		int err = inflateInit2(&Stream, -MAX_WBITS);
+		if (err != Z_OK)
 			return false;
 	}
 
-	ReadInfo.rest_read_compressed = FileInfo.compressed_size;
-	ReadInfo.rest_read_uncompressed = FileInfo.uncompressed_size;
-	ReadInfo.pos_in_zipfile = FileInfo.offset_curfile + 0x1e + SizeVar;
+	RestReadCompressed = FileInfo.compressed_size;
+	RestReadUncompressed = FileInfo.uncompressed_size;
+	PosInZipfile = FileInfo.offset_curfile + 0x1e + SizeVar;
 
-	ReadInfo.stream.avail_in = (uInt)0;
+	Stream.avail_in = (uInt)0;
 
-//	s->pfile_in_zip_read = pfile_in_zip_read_info;
-//	s->encrypted = 0;
-
-	File.SetLength((long)FileInfo.uncompressed_size);
+	lcuint32 Length = lcMin((lcuint32)FileInfo.uncompressed_size, MaxLength);
+	File.SetLength(Length);
 	File.Seek(0, SEEK_SET);
 
-	ReadInfo.stream.next_out = (Bytef*)File.mBuffer;
-	ReadInfo.stream.avail_out = File.mBufferSize;
-
-//	if ((len>pfile_in_zip_read_info->rest_read_uncompressed) && (!(pfile_in_zip_read_info->raw)))
-//		pfile_in_zip_read_info->stream.avail_out = (uInt)pfile_in_zip_read_info->rest_read_uncompressed;
-
-//	if ((len>pfile_in_zip_read_info->rest_read_compressed+pfile_in_zip_read_info->stream.avail_in) && (pfile_in_zip_read_info->raw))
-//		pfile_in_zip_read_info->stream.avail_out = (uInt)pfile_in_zip_read_info->rest_read_compressed+pfile_in_zip_read_info->stream.avail_in;
+	Stream.next_out = (Bytef*)File.mBuffer;
+	Stream.avail_out = Length;
 
 	lcuint32 Read = 0;
 
-	while (ReadInfo.stream.avail_out > 0)
+	while (Stream.avail_out > 0)
 	{
-		if ((ReadInfo.stream.avail_in == 0) && (ReadInfo.rest_read_compressed > 0))
+		if ((Stream.avail_in == 0) && (RestReadCompressed > 0))
 		{
 			lcuint32 ReadThis = BufferSize;
 
-			if (ReadInfo.rest_read_compressed < ReadThis)
-				ReadThis = (lcuint32)ReadInfo.rest_read_compressed;
+			if (RestReadCompressed < ReadThis)
+				ReadThis = (lcuint32)RestReadCompressed;
 
 			if (ReadThis == 0)
 				return false;
 
-			mFile->Seek((long)(ReadInfo.pos_in_zipfile + ReadInfo.byte_before_the_zipfile), SEEK_SET);
-			if (mFile->ReadBuffer(ReadInfo.read_buffer, ReadThis) != ReadThis)
+			mFile->Seek((long)(PosInZipfile + mBytesBeforeZipFile), SEEK_SET);
+			if (mFile->ReadBuffer(ReadBuffer, ReadThis) != ReadThis)
 				return false;
 
-			ReadInfo.pos_in_zipfile += ReadThis;
+			PosInZipfile += ReadThis;
 
-			ReadInfo.rest_read_compressed -= ReadThis;
+			RestReadCompressed -= ReadThis;
 
-			ReadInfo.stream.next_in = (Bytef*)ReadInfo.read_buffer;
-			ReadInfo.stream.avail_in = (uInt)ReadThis;
+			Stream.next_in = (Bytef*)ReadBuffer;
+			Stream.avail_in = (uInt)ReadThis;
 		}
 
-		if (ReadInfo.compression_method == 0)
+		if (FileInfo.compression_method == 0)
 		{
 			lcuint32 DoCopy, i;
 
-			if ((ReadInfo.stream.avail_in == 0) && (ReadInfo.rest_read_compressed == 0))
+			if ((Stream.avail_in == 0) && (RestReadCompressed == 0))
 				return (Read == 0) ? false : true;
 
-			if (ReadInfo.stream.avail_out <
-				ReadInfo.stream.avail_in)
-				DoCopy = ReadInfo.stream.avail_out;
+			if (Stream.avail_out < Stream.avail_in)
+				DoCopy = Stream.avail_out;
 			else
-				DoCopy = ReadInfo.stream.avail_in;
+				DoCopy = Stream.avail_in;
 
 			for (i = 0; i < DoCopy; i++)
-				*(ReadInfo.stream.next_out+i) = *(ReadInfo.stream.next_in+i);
+				*(Stream.next_out+i) = *(Stream.next_in+i);
 
-			ReadInfo.total_out_64 = ReadInfo.total_out_64 + DoCopy;
-
-			ReadInfo.crc32 = crc32(ReadInfo.crc32, ReadInfo.stream.next_out, DoCopy);
-			ReadInfo.rest_read_uncompressed -= DoCopy;
-			ReadInfo.stream.avail_in -= DoCopy;
-			ReadInfo.stream.avail_out -= DoCopy;
-			ReadInfo.stream.next_out += DoCopy;
-			ReadInfo.stream.next_in += DoCopy;
-			ReadInfo.stream.total_out += DoCopy;
+			Crc32 = crc32(Crc32, Stream.next_out, DoCopy);
+			RestReadUncompressed -= DoCopy;
+			Stream.avail_in -= DoCopy;
+			Stream.avail_out -= DoCopy;
+			Stream.next_out += DoCopy;
+			Stream.next_in += DoCopy;
+			Stream.total_out += DoCopy;
 			Read += DoCopy;
 		}
 		else
@@ -689,32 +639,30 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File)
 			lcuint64 OutThis;
 			int flush = Z_SYNC_FLUSH;
 
-			TotalOutBefore = ReadInfo.stream.total_out;
-			bufBefore = ReadInfo.stream.next_out;
+			TotalOutBefore = Stream.total_out;
+			bufBefore = Stream.next_out;
 
-			int err = inflate(&ReadInfo.stream,flush);
+			int err = inflate(&Stream,flush);
 
-			if ((err >= 0) && (ReadInfo.stream.msg != NULL))
+			if ((err >= 0) && (Stream.msg != NULL))
 				err = Z_DATA_ERROR;
 
-			TotalOutAfter = ReadInfo.stream.total_out;
+			TotalOutAfter = Stream.total_out;
 			OutThis = TotalOutAfter - TotalOutBefore;
 
-			ReadInfo.total_out_64 = ReadInfo.total_out_64 + OutThis;
+			Crc32 = crc32(Crc32, bufBefore, (uInt)(OutThis));
 
-			ReadInfo.crc32 = crc32(ReadInfo.crc32,bufBefore, (uInt)(OutThis));
-
-			ReadInfo.rest_read_uncompressed -= OutThis;
+			RestReadUncompressed -= OutThis;
 
 			Read += (uInt)(TotalOutAfter - TotalOutBefore);
 
 			if (err != Z_OK)
 			{
-				inflateEnd(&ReadInfo.stream);
+				inflateEnd(&Stream);
 
-				if (ReadInfo.rest_read_uncompressed == 0)
+				if (RestReadUncompressed == 0)
 				{
-					if (ReadInfo.crc32 != ReadInfo.crc32_wait)
+					if (Crc32 != FileInfo.crc)
 						return false;
 				}
 

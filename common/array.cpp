@@ -208,7 +208,7 @@ void ObjArray<T>::Expand(int Grow)
 {
 	if ((m_Length + Grow) > m_Alloc)
 	{
-		int NewSize = ((m_Length + Grow) / m_Grow + 1) * m_Grow;
+		int NewSize = ((m_Length + Grow + m_Grow - 1) / m_Grow) * m_Grow;
 
 		T* NewData = new T[NewSize];
 
@@ -250,6 +250,13 @@ void ObjArray<T>::Add(const T& Obj)
 {
 	Expand(1);
 	m_Data[m_Length++] = Obj;
+}
+
+template <class T>
+T& ObjArray<T>::Add()
+{
+	Expand(1);
+	return m_Data[m_Length++];
 }
 
 template <class T>

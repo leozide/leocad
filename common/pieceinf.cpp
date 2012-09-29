@@ -40,6 +40,8 @@ static float costbl[SIDES];
 
 PieceInfo::PieceInfo()
 {
+	m_nRef = 0;
+	m_nBoxList = 0;
 	mMesh = NULL;
 }
 
@@ -67,10 +69,6 @@ void PieceInfo::LoadIndex(lcFile& file)
     }
     init = true;
   }
-
-  // TODO: don't change ref. if we're reloading ?
-  m_nRef = 0;
-  m_nBoxList = 0;
 
   file.ReadBuffer(m_strName, LC_PIECE_NAME_LEN);
   file.ReadBuffer(m_strDescription, 64);
@@ -100,9 +98,6 @@ void PieceInfo::LoadIndex(lcFile& file)
 
 void PieceInfo::CreatePlaceholder(const char* Name)
 {
-	m_nRef = 0;
-	m_nBoxList = 0;
-
 	strncpy(m_strName, Name, sizeof(m_strName));
 	m_strName[sizeof(m_strName)-1] = 0;
 	strncpy(m_strDescription, Name, sizeof(m_strDescription));

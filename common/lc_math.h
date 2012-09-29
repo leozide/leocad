@@ -258,6 +258,11 @@ inline lcVector3& operator/=(lcVector3& a, float b)
 	return a;
 }
 
+inline bool operator==(const lcVector3& a, const lcVector3& b)
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
 inline void lcVector3::Normalize()
 {
 	float InvLength = 1.0f / Length();

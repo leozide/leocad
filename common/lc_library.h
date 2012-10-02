@@ -53,6 +53,17 @@ public:
 class lcLibraryPrimitive
 {
 public:
+	lcLibraryPrimitive(const char* Name, lcuint32 ZipFileIndex, bool Stud, bool SubFile)
+	{
+		strncpy(mName, Name, sizeof(mName));
+		mName[sizeof(mName) - 1] = 0;
+
+		mZipFileIndex = ZipFileIndex;
+		mLoaded = false;
+		mStud = Stud;
+		mSubFile = SubFile;
+	}
+
 	char mName[LC_MAXPATH];
 	lcuint32 mZipFileIndex;
 	bool mLoaded;
@@ -77,6 +88,7 @@ public:
 
 	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
 	PieceInfo* CreatePlaceholder(const char* PieceName);
+	bool LoadPiece(PieceInfo* Info);
 
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	int GetFirstPieceCategory(PieceInfo* Info) const;
@@ -91,15 +103,6 @@ public:
 	bool SaveCategories();
 	bool DoSaveCategories(bool AskName);
 
-
-
-	bool OpenArchive(const char* FileName);
-	bool LoadPiece(const char* PieceName);
-	bool LoadPiece(int PieceIndex);
-	int FindPrimitiveIndex(const char* Name);
-	bool LoadPrimitive(int PrimitiveIndex);
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcLibraryMeshData& MeshData);
-
 	PtrArray<PieceInfo> mPieces;
 	PtrArray<lcLibraryPrimitive> mPrimitives;
 	ObjArray<lcLibraryCategory> mCategories;
@@ -107,6 +110,12 @@ public:
 	char mLibraryPath[LC_MAXPATH];
 
 protected:
+	bool OpenArchive(const char* FileName);
+	bool OpenDirectory(const char* Path);
+	int FindPrimitiveIndex(const char* Name);
+	bool LoadPrimitive(int PrimitiveIndex);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcLibraryMeshData& MeshData);
+
 	bool mCategoriesModified;
 	char mCategoriesFile[LC_MAXPATH];
 

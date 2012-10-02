@@ -33,7 +33,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlacehol
 
 PieceInfo* lcPiecesLibrary::CreatePlaceholder(const char* PieceName)
 {
-	PieceInfo* Info = new PieceInfo();
+	PieceInfo* Info = new PieceInfo(-1);
 
 	Info->CreatePlaceholder(PieceName);
 	mPieces.Add(Info);
@@ -55,15 +55,14 @@ bool lcPiecesLibrary::Load(const char* SearchPath)
 	strcat(LibraryPath, "complete.zip");
 
 	if (!OpenArchive(LibraryPath))
-		return false;
+		if (!OpenDirectory(mLibraryPath))
+			return false;
 
 	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
-	if (!strlen(FileName) || !LoadCategories(FileName))
+	if (!FileName[0] || !LoadCategories(FileName))
 		ResetCategories();
 
 	SystemUpdateCategories(false);
-
-	mCategoriesModified = false;
 
 	Sys_ProfileSaveString("Settings", "PiecesLibrary", mLibraryPath);
 
@@ -117,37 +116,22 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName)
 		{
 			if (memcmp(Name + 12, "S/", 2))
 			{
-				PieceInfo* Info = new PieceInfo();
+				PieceInfo* Info = new PieceInfo(FileIdx);
 				mPieces.Add(Info);
 
 				strncpy(Info->m_strName, Name + 12, sizeof(Info->m_strName));
 				Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
-
-				Info->m_nFlags = 0;
-				Info->m_nOffset = FileIdx;
 			}
 			else
 			{
-				lcLibraryPrimitive* Prim = new lcLibraryPrimitive();
+				lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name + 12, FileIdx, false, true);
 				mPrimitives.Add(Prim);
-				strncpy(Prim->mName, Name + 12, sizeof(Prim->mName));
-				Prim->mName[sizeof(Prim->mName) - 1] = 0;
-				Prim->mZipFileIndex = FileIdx;
-				Prim->mLoaded = false;
-				Prim->mStud = false;
-				Prim->mSubFile = true;
 			}
 		}
 		else if (!memcmp(Name + 6, "P/", 2))
 		{
-			lcLibraryPrimitive* Prim = new lcLibraryPrimitive();
+			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name + 8, FileIdx, (memcmp(Prim->mName, "STU", 3) == 0), false);
 			mPrimitives.Add(Prim);
-			strncpy(Prim->mName, Name + 8, sizeof(Prim->mName));
-			Prim->mName[sizeof(Prim->mName) - 1] = 0;
-			Prim->mZipFileIndex = FileIdx;
-			Prim->mLoaded = false;
-			Prim->mStud = (memcmp(Prim->mName, "STU", 3) == 0);
-			Prim->mSubFile = false;
 		}
 	}
 
@@ -157,7 +141,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName)
 	{
 		PieceInfo* Info = mPieces[PieceInfoIndex];
 
-		mZipFile->ExtractFile(Info->m_nOffset, PieceFile, 256);
+		mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
 		PieceFile.Seek(0, SEEK_END);
 		PieceFile.WriteU8(0);
 
@@ -180,30 +164,156 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName)
 	return true;
 }
 
-bool lcPiecesLibrary::LoadPiece(const char* PieceName)
+bool lcPiecesLibrary::OpenDirectory(const char* Path)
 {
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
-	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+	char FileName[LC_MAXPATH];
+	ObjArray<String> FileList;
 
-		if (!strcmp(Info->m_strName, PieceName))
-			return LoadPiece(PieceInfoIndex);
+	strcpy(FileName, Path);
+	strcat(FileName, "parts/");
+	int PathLength = strlen(FileName);
+
+	Sys_GetFileList(FileName, FileList);
+
+	mPieces.RemoveAll();
+	mPieces.Expand(FileList.GetSize());
+
+	for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+	{
+		char Name[LC_PIECE_NAME_LEN];
+		const char* Src = (const char*)FileList[FileIdx] + PathLength;
+		char* Dst = Name;
+
+		while (*Src && Dst - Name < LC_PIECE_NAME_LEN)
+		{
+			if (*Src >= 'a' && *Src <= 'z')
+				*Dst = *Src + 'A' - 'a';
+			else if (*Src == '\\')
+				*Dst = '/';
+			else
+				*Dst = *Src;
+
+			Src++;
+			Dst++;
+		}
+
+		if (Dst - Name <= 4)
+			continue;
+
+		Dst -= 4;
+		if (memcmp(Dst, ".DAT", 4))
+			continue;
+		*Dst = 0;
+
+		lcDiskFile PieceFile;
+		if (!PieceFile.Open(FileList[FileIdx], "rt"))
+			continue;
+
+		char Line[1024];
+		if (!PieceFile.ReadLine(Line, sizeof(Line)))
+			continue;
+
+		PieceInfo* Info = new PieceInfo(-1);
+		mPieces.Add(Info);
+
+		Src = (char*)Line + 2;
+		Dst = Info->m_strDescription;
+
+		for (;;)
+		{
+			if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < sizeof(Info->m_strDescription) - 1)
+			{
+				*Dst++ = *Src++;
+				continue;
+			}
+
+			*Dst = 0;
+			break;
+		}
+
+		strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
+		Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
 	}
 
-	return false;
+	if (!mPieces.GetSize())
+		return false;
+
+	const char* PrimitiveDirectories[] = { "p/", "p/48/", "parts/s/" };
+	bool SubFileDirectories[] = { false, false, true };
+
+	for (int DirectoryIdx = 0; DirectoryIdx < sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0]); DirectoryIdx++)
+	{
+		strcpy(FileName, Path);
+		PathLength = strlen(FileName);
+
+		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
+		PathLength += strchr(PrimitiveDirectories[DirectoryIdx], '/') - PrimitiveDirectories[DirectoryIdx] + 1;
+
+		Sys_GetFileList(FileName, FileList);
+
+		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+		{
+			char Name[LC_PIECE_NAME_LEN];
+			const char* Src = (const char*)FileList[FileIdx] + PathLength;
+			char* Dst = Name;
+
+			while (*Src && Dst - Name < LC_PIECE_NAME_LEN)
+			{
+				if (*Src >= 'a' && *Src <= 'z')
+					*Dst = *Src + 'A' - 'a';
+				else if (*Src == '\\')
+					*Dst = '/';
+				else
+					*Dst = *Src;
+
+				Src++;
+				Dst++;
+			}
+
+			if (Dst - Name <= 4)
+				continue;
+
+			Dst -= 4;
+			if (memcmp(Dst, ".DAT", 4))
+				continue;
+			*Dst = 0;
+
+			bool SubFile = SubFileDirectories[DirectoryIdx];
+			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+			mPrimitives.Add(Prim);
+		}
+	}
+
+	return true;
 }
 
-bool lcPiecesLibrary::LoadPiece(int PieceIndex)
+bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 {
-	PieceInfo* Info = mPieces[PieceIndex];
-	lcMemFile PieceFile;
 	lcLibraryMeshData MeshData;
 
-	if (!mZipFile->ExtractFile(Info->m_nOffset, PieceFile))
-		return false;
+	if (mZipFile)
+	{
+		lcMemFile PieceFile;
 
-	if (!ReadMeshData(PieceFile, lcMatrix44Identity(), 16, MeshData))
-		return false;
+		if (!mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile))
+			return false;
+
+		if (!ReadMeshData(PieceFile, lcMatrix44Identity(), 16, MeshData))
+			return false;
+	}
+	else
+	{
+		char FileName[LC_MAXPATH];
+		lcDiskFile PieceFile;
+
+		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Info->m_strName);
+
+		if (!PieceFile.Open(FileName, "rt"))
+			return false;
+
+		if (!ReadMeshData(PieceFile, lcMatrix44Identity(), 16, MeshData))
+			return false;
+	}
 
 	lcMesh* Mesh = new lcMesh();
 
@@ -271,17 +381,17 @@ bool lcPiecesLibrary::LoadPiece(int PieceIndex)
 		if (SrcSection->mTriangles)
 		{
 			if (SrcSection->mColorCode == 16)
-				Info->m_nFlags |= LC_PIECE_HAS_DEFAULT;
+				Info->mFlags |= LC_PIECE_HAS_DEFAULT;
 			else
 			{
 				if (lcIsColorTranslucent(DstSection.ColorIndex))
-					Info->m_nFlags |= LC_PIECE_HAS_TRANSLUCENT;
+					Info->mFlags |= LC_PIECE_HAS_TRANSLUCENT;
 				else
-					Info->m_nFlags |= LC_PIECE_HAS_SOLID;
+					Info->mFlags |= LC_PIECE_HAS_SOLID;
 			}
 		}
 		else
-			Info->m_nFlags |= LC_PIECE_HAS_LINES;
+			Info->mFlags |= LC_PIECE_HAS_LINES;
 
 		NumIndices += DstSection.NumIndices;
 	}
@@ -304,13 +414,33 @@ int lcPiecesLibrary::FindPrimitiveIndex(const char* Name)
 bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 {
 	lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
-	lcMemFile File;
 
-	if (!mZipFile->ExtractFile(Primitive->mZipFileIndex, File))
-		return false;
+	if (mZipFile)
+	{
+		lcMemFile PrimFile;
 
-	if (!ReadMeshData(File, lcMatrix44Identity(), 16, Primitive->mMeshData))
-		return false;
+		if (!mZipFile->ExtractFile(Primitive->mZipFileIndex, PrimFile))
+			return false;
+
+		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, Primitive->mMeshData))
+			return false;
+	}
+	else
+	{
+		char FileName[LC_MAXPATH];
+		lcDiskFile PrimFile;
+
+		if (Primitive->mSubFile)
+			sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Primitive->mName);
+		else
+			sprintf(FileName, "%sp/%s.dat", mLibraryPath, Primitive->mName);
+
+		if (!PrimFile.Open(FileName, "rt"))
+			return false;
+
+		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, Primitive->mMeshData))
+			return false;
+	}
 
 	Primitive->mLoaded = true;
 
@@ -391,13 +521,32 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						MeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode);
 					else
 					{
-						lcMemFile IncludeFile;
+						if (mZipFile)
+						{
+							lcMemFile IncludeFile;
 
-						if (!mZipFile->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
-							continue;
+							if (!mZipFile->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
+								continue;
 
-						if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, MeshData))
-							continue;
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, MeshData))
+								continue;
+						}
+						else
+						{
+							char FileName[LC_MAXPATH];
+							lcDiskFile IncludeFile;
+
+							if (Primitive->mSubFile)
+								sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Primitive->mName);
+							else
+								sprintf(FileName, "%sp/%s.dat", mLibraryPath, Primitive->mName);
+
+							if (!IncludeFile.Open(FileName, "rt"))
+								continue;
+
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, MeshData))
+								continue;
+						}
 					}
 				}
 				else
@@ -409,13 +558,29 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						if (strcmp(Info->m_strName, FileName))
 							continue;
 
-						lcMemFile IncludeFile;
+						if (mZipFile)
+						{
+							lcMemFile IncludeFile;
 
-						if (!mZipFile->ExtractFile(Info->m_nOffset, IncludeFile))
-							break;
+							if (!mZipFile->ExtractFile(Info->mZipFileIndex, IncludeFile))
+								break;
 
-						if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, MeshData))
-							break;
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, MeshData))
+								break;
+						}
+						else
+						{
+							char FileName[LC_MAXPATH];
+							lcDiskFile IncludeFile;
+
+							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Info->m_strName);
+
+							if (!IncludeFile.Open(FileName, "rt"))
+								break;
+
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, MeshData))
+								break;
+						}
 
 						break;
 					}
@@ -511,17 +676,26 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 	switch (LineType)
 	{
 	case 4:
-		Section->mIndices.Add(Indices[2]);
-		Section->mIndices.Add(Indices[3]);
-		Section->mIndices.Add(Indices[0]);
+		if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
+		{
+			Section->mIndices.Add(Indices[2]);
+			Section->mIndices.Add(Indices[3]);
+			Section->mIndices.Add(Indices[0]);
+		}
 	case 3:
-		Section->mIndices.Add(Indices[0]);
-		Section->mIndices.Add(Indices[1]);
-		Section->mIndices.Add(Indices[2]);
+		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
+		{
+			Section->mIndices.Add(Indices[0]);
+			Section->mIndices.Add(Indices[1]);
+			Section->mIndices.Add(Indices[2]);
+		}
 		break;
 	case 2:
-		Section->mIndices.Add(Indices[0]);
-		Section->mIndices.Add(Indices[1]);
+		if (Indices[0] != Indices[1])
+		{
+			Section->mIndices.Add(Indices[0]);
+			Section->mIndices.Add(Indices[1]);
+		}
 		break;
 	}
 }
@@ -903,7 +1077,7 @@ bool lcPiecesLibrary::SaveCategories()
 bool lcPiecesLibrary::DoSaveCategories(bool AskName)
 {
 	// Get the file name.
-	if (AskName || (strlen(mCategoriesFile) == 0))
+	if (AskName || !mCategoriesFile[0])
 	{
 		LC_FILESAVEDLG_OPTS opts;
 

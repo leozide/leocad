@@ -1741,10 +1741,10 @@ void Project::RenderScenePieces(View* view)
 		bool Translucent = lcIsColorTranslucent(pPiece->mColorIndex);
 		PieceInfo* Info = pPiece->mPieceInfo;
 
-		if ((Info->m_nFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->m_nFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+		if ((Info->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
 			OpaquePieces.AddSorted(pPiece, lcOpaqueRenderCompare, NULL);
 
-		if ((Info->m_nFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->m_nFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+		if ((Info->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
 			lcVector3 Pos = lcMul31(pPiece->mPosition, WorldView);
 

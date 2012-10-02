@@ -28,7 +28,7 @@
 #include "curve.h"
 #include "mainwnd.h"
 #include "view.h"
-#include "library.h"
+#include "lc_library.h"
 #include "texfont.h"
 #include "debug.h"
 #include "lc_application.h"
@@ -417,7 +417,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			char name[LC_PIECE_NAME_LEN];
 			Piece* pPiece = new Piece(NULL);
 			pPiece->FileLoad(*file, name);
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
+			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
 			if (pInfo)
 			{
 				pPiece->SetPieceInfo(pInfo);
@@ -453,7 +453,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
+			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
 			if (pInfo != NULL)
 			{
 				Piece* pPiece = new Piece(pInfo);
@@ -1001,7 +1001,7 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 				char name[LC_PIECE_NAME_LEN];
 				strcpy(name, tmp);
 
-				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
+				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, false);
 				if (pInfo != NULL)
 				{
 					float x, y, z, rot[4];
@@ -1050,7 +1050,7 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 			if (read)
 			{
 				// Create a placeholder.
-				PieceInfo* Info = lcGetPiecesLibrary()->CreatePiecePlaceholder(tmp);
+				PieceInfo* Info = lcGetPiecesLibrary()->CreatePlaceholder(tmp);
 
 				float x, y, z, rot[4];
 				Piece* pPiece = new Piece(Info);
@@ -3250,11 +3250,11 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	fputs("</tr>\n",f);
 
 	PieceInfo* pInfo;
-	for (int j = 0; j < lcGetPiecesLibrary()->GetPieceCount (); j++)
+	for (int j = 0; j < lcGetPiecesLibrary()->mPieces.GetSize(); j++)
 	{
 		bool Add = false;
 		memset(PiecesUsed, 0, sizeof(PiecesUsed[0]) * gColorList.GetSize());
-		pInfo = lcGetPiecesLibrary()->GetPieceInfo(j);
+		pInfo = lcGetPiecesLibrary()->mPieces[j];
 
 		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		{
@@ -3853,14 +3853,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				break;
 			}
 
-			PiecesLibrary* Library = lcGetPiecesLibrary();
-			char* PieceTable = new char[Library->GetPieceCount() * LC_PIECE_NAME_LEN];
-			int* PieceFlags = new int[Library->GetPieceCount()];
+			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			char* PieceTable = new char[Library->mPieces.GetSize() * LC_PIECE_NAME_LEN];
+			int* PieceFlags = new int[Library->mPieces.GetSize()];
 			int NumColors = gColorList.GetSize();
 			char* ColorTable = new char[NumColors * LC_MAX_COLOR_NAME];
 
-			memset(PieceTable, 0, Library->GetPieceCount() * LC_PIECE_NAME_LEN);
-			memset(PieceFlags, 0, Library->GetPieceCount() * sizeof(int));
+			memset(PieceTable, 0, Library->mPieces.GetSize() * LC_PIECE_NAME_LEN);
+			memset(PieceFlags, 0, Library->mPieces.GetSize() * sizeof(int));
 			memset(ColorTable, 0, NumColors * LC_MAX_COLOR_NAME);
 
 			enum
@@ -3915,11 +3915,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					strupr(Src);
 
-					PieceInfo* Info = Library->FindPieceInfo(Src);
+					PieceInfo* Info = Library->FindPiece(Src, false);
 					if (!Info)
 						continue;
 
-					int Index = Library->GetPieceIndex(Info);
+					int Index = Library->mPieces.FindIndex(Info);
 
 					if (strchr(Flags, 'L'))
 					{
@@ -3986,7 +3986,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						if (FirstPiece != piece)
 							break;
 
-						int Index = Library->GetPieceIndex(Info);
+						int Index = Library->mPieces.FindIndex(Info);
 
 						if (PieceTable[Index * LC_PIECE_NAME_LEN])
 						{
@@ -4031,7 +4031,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 			{
 				PieceInfo* Info = piece->mPieceInfo;
-				int Index = Library->GetPieceIndex(Info);
+				int Index = Library->mPieces.FindIndex(Info);
 
 				if (PieceTable[Index * LC_PIECE_NAME_LEN])
 					continue;
@@ -4066,7 +4066,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 			{
-				int Index = Library->GetPieceIndex(piece->mPieceInfo);
+				int Index = Library->mPieces.FindIndex(piece->mPieceInfo);
 				float fl[12];
 				int Color;
 
@@ -4256,7 +4256,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_PROPERTIES:
 		{
-			PiecesLibrary* Library = lcGetPiecesLibrary();
+			lcPiecesLibrary* Library = lcGetPiecesLibrary();
 			LC_PROPERTIESDLG_OPTS opts;
 
 			opts.strTitle = m_strTitle;
@@ -4265,18 +4265,18 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			strcpy(opts.strComments, m_strComments);
 			opts.strFilename = m_strPathName;
 
-			opts.NumPieces = Library->GetPieceCount();
+			opts.NumPieces = Library->mPieces.GetSize();
 			opts.NumColors = gColorList.GetSize();
 			opts.PieceColorCount = new int[(opts.NumPieces + 1) * (opts.NumColors + 1)];
 			memset(opts.PieceColorCount, 0, (opts.NumPieces + 1) * (opts.NumColors + 1) * sizeof(opts.PieceColorCount[0]));
 			opts.PieceNames = new const char*[opts.NumPieces];
 
 			for (int i = 0; i < opts.NumPieces; i++)
-				opts.PieceNames[i] = Library->GetPieceInfo(i)->m_strDescription;
+				opts.PieceNames[i] = Library->mPieces[i]->m_strDescription;
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				int idx = Library->GetPieceIndex(pPiece->mPieceInfo);
+				int idx = Library->mPieces.FindIndex(pPiece->mPieceInfo);
 				opts.PieceColorCount[idx * (opts.NumColors + 1) + pPiece->mColorIndex]++;
 				opts.PieceColorCount[idx * (opts.NumColors + 1) + opts.NumColors]++;
 				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + pPiece->mColorIndex]++;
@@ -4315,17 +4315,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_FILE_LIBRARY:
 		{
-			lcMemFile file;
-			FileSave(&file, true);
-
-			if (SystemDoDialog(LC_DLG_LIBRARY, NULL))
-			{
-				if (lcGetPiecesLibrary()->m_Modified)
-				{
-					DeleteContents(true);
-					FileLoad(&file, true, false);
-				}
-			}
+			SystemDoDialog(LC_DLG_LIBRARY, NULL);
 		} break;
 
 		case LC_FILE_RECENT:
@@ -4474,7 +4464,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				char name[LC_PIECE_NAME_LEN];
 				Piece* pPiece = new Piece(NULL);
 				pPiece->FileLoad(*file, name);
-				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPieceInfo(name);
+				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
 				if (pInfo)
 				{
 					pPiece->SetPieceInfo(pInfo);

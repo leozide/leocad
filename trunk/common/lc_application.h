@@ -4,7 +4,7 @@
 #include "array.h"
 
 class Project;
-class PiecesLibrary;
+class lcPiecesLibrary;
 
 class lcApplication
 {
@@ -16,9 +16,8 @@ public:
 	void Shutdown();
 
 	// Pieces library.
-	void ConvertPiecesLibrary(const char* SrcPath, const char* DstPath);
 	bool LoadPiecesLibrary(const char* LibPath, const char* SysLibPath);
-	PiecesLibrary* GetPiecesLibrary() const
+	lcPiecesLibrary* GetPiecesLibrary() const
 	{
 		return m_Library;
 	}
@@ -42,11 +41,11 @@ protected:
 
 	Project* m_ActiveProject;
 	PtrArray<Project> m_Projects;
-	PiecesLibrary* m_Library;
+	lcPiecesLibrary* m_Library;
 };
 
 extern lcApplication* g_App;
-PiecesLibrary* lcGetPiecesLibrary();
+lcPiecesLibrary* lcGetPiecesLibrary();
 Project* lcGetActiveProject();
 
 #endif // _LC_APPLICATION_H_

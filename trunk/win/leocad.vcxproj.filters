@@ -206,9 +206,6 @@
     <ClCompile Include="..\common\lc_application.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\library.cpp">
-      <Filter>Common Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\light.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
@@ -742,9 +739,6 @@
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\lc_application.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\library.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\light.h">

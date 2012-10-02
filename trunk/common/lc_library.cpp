@@ -4,6 +4,7 @@
 #include "lc_file.h"
 #include "pieceinf.h"
 #include "lc_colors.h"
+#include "system.h"
 
 lcPiecesLibrary::lcPiecesLibrary()
 {
@@ -16,6 +17,57 @@ lcPiecesLibrary::~lcPiecesLibrary()
 		delete mPieces[PieceIdx];
 
 	delete mZipFile;
+}
+
+PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing)
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		if (!strcmp(PieceName, mPieces[PieceIdx]->m_strName))
+			return mPieces[PieceIdx];
+
+	if (CreatePlaceholderIfMissing)
+		return CreatePlaceholder(PieceName);
+
+	return NULL;
+}
+
+PieceInfo* lcPiecesLibrary::CreatePlaceholder(const char* PieceName)
+{
+	PieceInfo* Info = new PieceInfo();
+
+	Info->CreatePlaceholder(PieceName);
+	mPieces.Add(Info);
+
+	return Info;
+}
+
+bool lcPiecesLibrary::Load(const char* SearchPath)
+{
+	char LibraryPath[LC_MAXPATH];
+
+	strcpy(LibraryPath, SearchPath);
+
+	int i = strlen(LibraryPath) - 1;
+	if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
+		strcat(LibraryPath, "/");
+
+	strcpy(mLibraryPath, LibraryPath);
+	strcat(LibraryPath, "complete.zip");
+
+	if (!OpenArchive(LibraryPath))
+		return false;
+
+	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
+	if (!strlen(FileName) || !LoadCategories(FileName))
+		ResetCategories();
+
+	SystemUpdateCategories(false);
+
+	mCategoriesModified = false;
+
+	Sys_ProfileSaveString("Settings", "PiecesLibrary", mLibraryPath);
+
+	return true;
 }
 
 bool lcPiecesLibrary::OpenArchive(const char* FileName)
@@ -578,4 +630,364 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 			DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx]);
 	}
+}
+
+bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const
+{
+	String PieceName = Info->m_strDescription;
+	PieceName.MakeLower();
+
+	String Keywords = CategoryKeywords;
+	Keywords.MakeLower();
+
+	return PieceName.Match(Keywords);
+}
+
+int lcPiecesLibrary::GetFirstPieceCategory(PieceInfo* Info) const
+{
+	for (int i = 0; i < mCategories.GetSize(); i++)
+		if (PieceInCategory(Info, mCategories[i].Keywords))
+			return i;
+
+	return -1;
+}
+
+void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+{
+	SinglePieces.RemoveAll();
+	GroupedPieces.RemoveAll();
+
+	// Don't group entries in the search results category.
+	if (mCategories[CategoryIndex].Name == "Search Results")
+		GroupPieces = false;
+
+	for (int i = 0; i < mPieces.GetSize(); i++)
+	{
+		PieceInfo* Info = mPieces[i];
+
+		if (!PieceInCategory(Info, mCategories[CategoryIndex].Keywords))
+			continue;
+
+		if (!GroupPieces)
+		{
+			SinglePieces.Add(Info);
+			continue;
+		}
+
+		// Check if it's a patterned piece.
+		if (Info->IsPatterned())
+		{
+			PieceInfo* Parent;
+
+			// Find the parent of this patterned piece.
+			char ParentName[LC_PIECE_NAME_LEN];
+			strcpy(ParentName, Info->m_strName);
+			*strchr(ParentName, 'P') = '\0';
+
+			Parent = FindPiece(ParentName, false);
+
+			if (Parent)
+			{
+				// Check if the parent was added as a single piece.
+				int Index = SinglePieces.FindIndex(Parent);
+
+				if (Index != -1)
+					SinglePieces.RemoveIndex(Index);
+
+				Index = GroupedPieces.FindIndex(Parent);
+
+				if (Index == -1)
+					GroupedPieces.Add(Parent);
+			}
+			else
+			{
+				// Patterned pieces should have a parent but in case they don't just add them anyway.
+				SinglePieces.Add(Info);
+			}
+		}
+		else
+		{
+			// Check if this piece has already been added to this category by one of its children.
+			int Index = GroupedPieces.FindIndex(Info);
+
+			if (Index == -1)
+				SinglePieces.Add(Info);
+		}
+	}
+}
+
+void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const
+{
+	char Name[LC_PIECE_NAME_LEN];
+	strcpy(Name, Parent->m_strName);
+	strcat(Name, "P");
+
+	Pieces.RemoveAll();
+
+	for (int i = 0; i < mPieces.GetSize(); i++)
+	{
+		PieceInfo* Info = mPieces[i];
+
+		if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
+			Pieces.Add(Info);
+	}
+
+	// Sometimes pieces with A and B versions don't follow the same convention (for example, 3040Pxx instead of 3040BPxx).
+	if (Pieces.GetSize() == 0)
+	{
+		strcpy(Name, Parent->m_strName);
+		int Len = strlen(Name);
+		if (Name[Len-1] < '0' || Name[Len-1] > '9')
+			Name[Len-1] = 'P';
+
+		for (int i = 0; i < mPieces.GetSize(); i++)
+		{
+			PieceInfo* Info = mPieces[i];
+
+			if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
+				Pieces.Add(Info);
+		}
+	}
+}
+
+void lcPiecesLibrary::ResetCategories()
+{
+	struct CategoryEntry
+	{
+		const char* Name;
+		const char* Keywords;
+	};
+
+	// Animal, Antenna, Arch, Arm, Bar, Baseplate, Belville, Boat, Bracket, Brick,
+	// Car, Cone, Container, Conveyor, Crane, Cylinder, Door, Electric, Exhaust,
+	// Fence, Flag, Forklift, Freestyle, Garage, Gate, Glass, Grab, Hinge, Homemaker,
+	// Hose, Jack, Ladder, Lever, Magnet, Minifig, Minifig Accessory, Panel, Plane,
+	// Plant, Plate, Platform, Propellor, Rack, Roadsign, Rock, Scala, Slope, Staircase,
+	// Support, Tail, Tap, Technic, Tile, Tipper, Tractor, Trailer, Train, Turntable,
+	// Tyre, Wedge, Wheel, Winch, Window, Windscreen, Wing
+	CategoryEntry DefaultCategories[] =
+	{
+		{ "Animal", "^%Animal" },
+		{ "Antenna", "^%Antenna" },
+		{ "Arch", "^%Arch" },
+		{ "Bar", "^%Bar" },
+		{ "Baseplate", "^%Baseplate | ^%Platform" },
+		{ "Boat", "^%Boat" },
+		{ "Brick", "^%Brick" },
+		{ "Container", "^%Container | ^%Box | ^Chest | ^%Storage | ^Mailbox" },
+		{ "Door and Window", "^%Door | ^%Window | ^%Glass | ^%Freestyle | ^%Gate | ^%Garage | ^%Roller" },
+		{ "Duplo", "^%Duplo | ^%Scala | ^%Belville" },
+		{ "Electric", "^%Electric | ^%Light | ^%Excavator | ^%Exhaust" },
+		{ "Hinge and Bracket", "^%Hinge | ^%Bracket | ^%Turntable" },
+		{ "Hose", "^%Hose" },
+		{ "Minifig", "^%Minifig" },
+		{ "Miscellaneous", "^%Arm | ^%Barrel | ^%Brush | ^%Cockpit | ^%Conveyor | ^%Crane | ^%Cupboard | ^%Fabuland | ^%Fence | ^%Homemaker | ^%Jack | ^%Ladder | ^%Rock | ^%Staircase | ^%Stretcher | ^%Tap | ^%Tipper | ^%Trailer | ^%Winch" },
+		{ "Panel", "^%Panel | ^%Castle Wall | ^%Castle Turret" },
+		{ "Plant", "^%Plant" },
+		{ "Plate", "^%Plate" },
+		{ "Round", "^%Cylinder | ^%Cone | ^%Dish | ^%Round" },
+		{ "Sign and Flag", "^%Flag | ^%Roadsign | ^%Streetlight | ^%Flagpost | ^%Lamppost | ^%Signpost" },
+		{ "Slope", "^%Slope" },
+		{ "Space", "^%Space" },
+		{ "Sticker", "^%Sticker" },
+		{ "Support", "^%Support" },
+		{ "Technic", "^%Technic | ^%Rack" },
+		{ "Tile", "^%Tile" },
+		{ "Train", "^%Train | ^%Monorail | ^%Magnet" },
+		{ "Tyre and Wheel", "^%Tyre | %^Wheel | ^%Castle Wagon" },
+		{ "Vehicle", "^%Car | ^%Tractor | ^%Bike | ^%Plane | ^%Propellor | ^%Tail | ^%Landing | ^%Forklift | ^%Grab Jaw" },
+		{ "Windscreen", "^%Windscreen" },
+		{ "Wedge", "^%Wedge" },
+		{ "Wing", "^%Wing" },
+	};
+	const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
+
+	mCategories.RemoveAll();
+	for (int i = 0; i < NumCategories; i++)
+	{
+		lcLibraryCategory& Category = mCategories.Add();
+
+		Category.Name = DefaultCategories[i].Name;
+		Category.Keywords = DefaultCategories[i].Keywords;
+	}
+
+	strcpy(mCategoriesFile, "");
+	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
+	mCategoriesModified = false;
+}
+
+bool lcPiecesLibrary::LoadCategories(const char* FileName)
+{
+	char Path[LC_MAXPATH];
+
+	if (FileName)
+	{
+		strcpy(Path, FileName);
+	}
+	else
+	{
+		LC_FILEOPENDLG_OPTS opts;
+
+		opts.type = LC_FILEOPENDLG_LCF;
+		strcpy(opts.path, mCategoriesFile);
+
+		if (!SystemDoDialog(LC_DLG_FILE_OPEN, &opts)) 
+			return false;
+
+		strcpy(Path, (char*)opts.filenames);
+
+		free(opts.filenames);
+	}
+
+	// Load the file.
+	lcDiskFile File;
+
+	if (!File.Open(Path, "rb"))
+		return false;
+
+	lcuint32 i;
+
+	File.ReadU32(&i, 1);
+	if (i != LC_FILE_ID)
+		return false;
+
+	File.ReadU32(&i, 1);
+	if (i != LC_CATEGORY_FILE_ID)
+		return false;
+
+	File.ReadU32(&i, 1);
+	if (i != LC_CATEGORY_FILE_VERSION)
+		return false;
+
+	mCategories.RemoveAll();
+
+	File.ReadU32(&i, 1);
+	while (i--)
+	{
+		lcLibraryCategory& Category = mCategories.Add();
+
+		File.ReadString(Category.Name);
+		File.ReadString(Category.Keywords);
+	}
+
+	strcpy(mCategoriesFile, Path);
+	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
+	mCategoriesModified = false;
+
+	return true;
+}
+
+bool lcPiecesLibrary::SaveCategories()
+{
+	if (mCategoriesModified)
+	{
+		switch (SystemDoMessageBox("Save changes to categories?", LC_MB_YESNOCANCEL | LC_MB_ICONQUESTION))
+		{
+			case LC_CANCEL:
+				return false;
+
+			case LC_YES:
+				if (!DoSaveCategories(false))
+					return false;
+				break;
+
+			case LC_NO:
+				return true;
+				break;
+		}
+	}
+
+	return true;
+}
+
+bool lcPiecesLibrary::DoSaveCategories(bool AskName)
+{
+	// Get the file name.
+	if (AskName || (strlen(mCategoriesFile) == 0))
+	{
+		LC_FILESAVEDLG_OPTS opts;
+
+		opts.type = LC_FILESAVEDLG_LCF;
+		strcpy(opts.path, mCategoriesFile);
+
+		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &opts)) 
+			return false; 
+
+		strcpy(mCategoriesFile, opts.path);
+	}
+
+	// Save the file.
+	lcDiskFile File;
+
+	if (!File.Open(mCategoriesFile, "wb"))
+		return false;
+
+	File.WriteU32(LC_FILE_ID);
+	File.WriteU32(LC_CATEGORY_FILE_ID);
+	File.WriteU32(LC_CATEGORY_FILE_VERSION);
+
+	int NumCategories = mCategories.GetSize();
+	int i;
+
+	for (i = 0; i < mCategories.GetSize(); i++)
+	{
+		if (mCategories[i].Name == "Search Results")
+		{
+			NumCategories--;
+			break;
+		}
+	}
+
+	File.WriteU32(NumCategories);
+	for (i = 0; i < mCategories.GetSize(); i++)
+	{
+		if (mCategories[i].Name == "Search Results")
+			continue;
+
+		File.WriteString(mCategories[i].Name);
+		File.WriteString(mCategories[i].Keywords);
+	}
+
+	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
+	mCategoriesModified = false;
+
+	return true;
+}
+
+int lcPiecesLibrary::FindCategoryIndex(const String& CategoryName) const
+{
+	for (int i = 0; i < mCategories.GetSize(); i++)
+		if (mCategories[i].Name == CategoryName)
+			return i;
+
+	return -1;
+}
+
+void lcPiecesLibrary::SetCategory(int Index, const String& Name, const String& Keywords)
+{
+	mCategories[Index].Name = Name;
+	mCategories[Index].Keywords = Keywords;
+
+	SystemUpdateCategories(true);
+
+	mCategoriesModified = true;
+}
+
+void lcPiecesLibrary::AddCategory(const String& Name, const String& Keywords)
+{
+	lcLibraryCategory& Category = mCategories.Add();
+
+	Category.Name = Name;
+	Category.Keywords = Keywords;
+
+	SystemUpdateCategories(true);
+
+	mCategoriesModified = true;
+}
+
+void lcPiecesLibrary::RemoveCategory(int Index)
+{
+	mCategories.RemoveIndex(Index);
+
+	mCategoriesModified = true;
 }

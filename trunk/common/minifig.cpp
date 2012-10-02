@@ -15,7 +15,7 @@
 #include "globals.h"
 #include "project.h"
 #include "system.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 
 // =============================================================================
@@ -858,11 +858,11 @@ static int lcGetMinifigSettings(lcMemFile& File)
 // =============================================================================
 // MinifigWizard class
 
-MinifigWizard::MinifigWizard (GLWindow *share)
+MinifigWizard::MinifigWizard(GLWindow *share)
 	: GLWindow (share)
 {
 	char Filename[LC_MAXPATH];
-	strcpy(Filename, lcGetPiecesLibrary()->GetLibraryPath());
+	strcpy(Filename, lcGetPiecesLibrary()->mLibraryPath);
 	strcat(Filename, "mlcad.ini");
 
 	lcDiskFile DiskSettings;
@@ -932,7 +932,7 @@ void MinifigWizard::OnInitialUpdate()
 		m_Colors[i] = lcGetColorIndex(ColorCodes[i]);
 		m_Angles[i] = 0;
 
-		m_Info[i] = lcGetPiecesLibrary()->FindPieceInfo(Pieces[i]);
+		m_Info[i] = lcGetPiecesLibrary()->FindPiece(Pieces[i], false);
 		if (m_Info[i] != NULL)
 			m_Info[i]->AddRef();
 	}
@@ -1081,7 +1081,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 					*Ext = 0;
 			}
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo(NameStart);
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, false);
 			if (!Info && *NameStart)
 				continue;
 
@@ -1440,7 +1440,7 @@ bool MinifigWizard::LoadMinifig(const char* name)
 
 		endptr = strchr(ptr, ' ');
 		*endptr = '\0';
-		m_Info[j] = lcGetPiecesLibrary()->FindPieceInfo(ptr);
+		m_Info[j] = lcGetPiecesLibrary()->FindPiece(ptr, false);
 		*endptr = ' ';
 		ptr = endptr;
 

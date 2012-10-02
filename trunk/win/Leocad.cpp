@@ -11,7 +11,7 @@
 #include "system.h"
 #include "pieceinf.h" // TODO: remove
 #include "mainwnd.h"
-#include "library.h"
+#include "lc_library.h"
 #include "keyboard.h"
 #include "lc_application.h"
 
@@ -96,7 +96,7 @@ static void CheckForUpdates(void* Data)
 					else
 						str = "You are using the latest version of LeoCAD.\n";
 
-					if (lib > lcGetPiecesLibrary()->GetPieceCount ())
+					if (lib > lcGetPiecesLibrary()->mPieces.GetSize())
 					{
 						str += "There are new pieces available.\n\n";
 						Update = true;
@@ -213,9 +213,9 @@ BOOL CCADApp::InitInstance()
 	MainFrame->UpdateMenuAccelerators();
 
 	// Show something in the piece preview window.
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
-	if (!Info)
-		Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("3005", false);
+	if (!Info && lcGetPiecesLibrary()->mPieces.GetSize())
+		Info = lcGetPiecesLibrary()->mPieces[0];
 
 	if (Info)
 	{

@@ -3,9 +3,13 @@
 
 #include "lc_mesh.h"
 #include "array.h"
+#include "str.h"
 
 class PieceInfo;
 class lcZipFile;
+
+#define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
+#define LC_CATEGORY_FILE_VERSION  0x0100
 
 class lcLibraryMeshSection
 {
@@ -57,15 +61,39 @@ public:
 	lcLibraryMeshData mMeshData;
 };
 
+struct lcLibraryCategory
+{
+	String Name;
+	String Keywords;
+};
+
 class lcPiecesLibrary
 {
 public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
 
+	bool Load(const char* SearchPath);
+
+	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
+	PieceInfo* CreatePlaceholder(const char* PieceName);
+
+	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
+	int GetFirstPieceCategory(PieceInfo* Info) const;
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
+	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
+	int FindCategoryIndex(const String& CategoryName) const;
+	void SetCategory(int Index, const String& Name, const String& Keywords);
+	void AddCategory(const String& Name, const String& Keywords);
+	void RemoveCategory(int Index);
+	void ResetCategories();
+	bool LoadCategories(const char* FileName);
+	bool SaveCategories();
+	bool DoSaveCategories(bool AskName);
+
+
+
 	bool OpenArchive(const char* FileName);
-
-
 	bool LoadPiece(const char* PieceName);
 	bool LoadPiece(int PieceIndex);
 	int FindPrimitiveIndex(const char* Name);
@@ -74,8 +102,14 @@ public:
 
 	PtrArray<PieceInfo> mPieces;
 	PtrArray<lcLibraryPrimitive> mPrimitives;
+	ObjArray<lcLibraryCategory> mCategories;
+
+	char mLibraryPath[LC_MAXPATH];
 
 protected:
+	bool mCategoriesModified;
+	char mCategoriesFile[LC_MAXPATH];
+
 	lcZipFile* mZipFile;
 };
 

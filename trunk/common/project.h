@@ -52,7 +52,6 @@ class PieceInfo;
 class Matrix;
 class View;
 class Image;
-class PiecesLibrary;
 class TexFont;
 
 // Undo support

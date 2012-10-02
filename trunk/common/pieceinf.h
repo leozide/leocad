@@ -72,9 +72,6 @@ class PieceInfo
 	void AddRef();
 	void DeRef();
 
-	template<typename DstType>
-	void BuildMesh(void* Data, int* SectionIndices);
-
 public:
 	lcMesh* mMesh;
 

@@ -8,7 +8,7 @@
 #include "CADView.h"
 #include "Tools.h"
 #include "Piece.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 
 // TODO: rewrite everything
@@ -17,11 +17,11 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 {
 	CCADView* pView = (CCADView*)pMainFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOSELECTION|PD_ENABLEPRINTHOOK, pParent);
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
+	lcPiecesLibrary *pLib = lcGetPiecesLibrary();
 
 	int bricks = 0;
-	for (int j = 0; j < pLib->GetPieceCount (); j++)
-		if (pLib->GetPieceInfo(j)->m_strDescription[0] != '~')
+	for (int j = 0; j < pLib->mPieces.GetSize(); j++)
+		if (pLib->mPieces[j]->m_strDescription[0] != '~')
 			bricks++;
 	int rows = theApp.GetProfileInt("Default", "Catalog Rows", 10);
 	int cols = theApp.GetProfileInt("Default", "Catalog Columns", 3);
@@ -203,9 +203,9 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 
 	start.next = NULL;
 	
-	for (int j = 0; j < pLib->GetPieceCount (); j++)
+	for (int j = 0; j < pLib->mPieces.GetSize(); j++)
 	{
-		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
+		char* desc = pLib->mPieces[j]->m_strDescription;
 
 		if (desc[0] != '~')
 			continue;
@@ -287,7 +287,7 @@ static void PrintCatalogThread (CWnd* pParent, CFrameWndEx* pMainFrame)
 
 //			dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, node->name);
 			node = node->next;
-			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
+			PieceInfo* pInfo = pLib->mPieces[node->actual];
 			pInfo->ZoomExtents(30.0f, (float)aspect);
 
 			float pos[4] = { 0, 0, 10, 0 };
@@ -407,11 +407,11 @@ static void PrintPiecesThread(void* pv)
 	CFrameWndEx* pFrame = (CFrameWndEx*)pv;
 	CView* pView = pFrame->GetActiveView();
 	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
+	lcPiecesLibrary *pLib = lcGetPiecesLibrary();
 	Project* project = lcGetActiveProject();
 
 	int NumColors = gColorList.GetSize();
-	int NumPieces = pLib->GetPieceCount();
+	int NumPieces = pLib->mPieces.GetSize();
 
 	lcuint32* PiecesUsed = new lcuint32[NumPieces * NumColors];
 	memset(PiecesUsed, 0, NumPieces * NumColors * sizeof(lcuint32));
@@ -420,7 +420,7 @@ static void PrintPiecesThread(void* pv)
 
 	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
 	{
-		int idx = pLib->GetPieceIndex(tmp->mPieceInfo);
+		int idx = pLib->mPieces.FindIndex(tmp->mPieceInfo);
 		PiecesUsed[(idx * NumColors) + tmp->mColorIndex]++;
 		ColorsUsed[tmp->mColorIndex]++;
 	}
@@ -586,7 +586,7 @@ static void PrintPiecesThread(void* pv)
 	
 	for (j = 0; j < NumPieces; j++)
 	{
-		char* desc = pLib->GetPieceInfo(j)->m_strDescription;
+		char* desc = pLib->mPieces[j]->m_strDescription;
 
 		if (desc[0] == '~')
 			continue;
@@ -679,7 +679,7 @@ static void PrintPiecesThread(void* pv)
 
 			lcSetColor(project->m_nCurColor);
 
-			PieceInfo* pInfo = pLib->GetPieceInfo(node->actual);
+			PieceInfo* pInfo = pLib->mPieces[node->actual];
 			node = node->next;
 			pInfo->ZoomExtents(30.0f, (float)aspect);
 
@@ -701,7 +701,7 @@ static void PrintPiecesThread(void* pv)
 			int rowtotal = 0;
 			char tmp[5];
 	
-			int idx = (pLib->GetPieceIndex (pInfo));
+			int idx = (pLib->mPieces.FindIndex(pInfo));
 			for (i = 0; i < NumColors; i++)
 				if (PiecesUsed[(idx*NumColors)+i])
 				{

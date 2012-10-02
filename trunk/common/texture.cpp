@@ -10,7 +10,7 @@
 #include "project.h"
 #include "globals.h"
 #include "image.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 
 // =============================================================================
@@ -129,6 +129,7 @@ void Texture::Unload()
 // Load from textures.bin file
 void Texture::Load(bool bFilter)
 {
+	/*
   char filename[LC_MAXPATH];
   lcDiskFile bin;
   void* bits;
@@ -149,6 +150,7 @@ void Texture::Load(bool bFilter)
   FinishLoadImage (bFilter, bits);
 
   free(bits);
+  */
 }
 
 bool Texture::LoadFromFile (char* strFilename, bool bFilter)

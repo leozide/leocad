@@ -11,7 +11,7 @@
 #include "console.h"
 #include "keyboard.h"
 #include "system.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 #include "Print.h"
 #include "dynsplit.h"
@@ -1052,7 +1052,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = lcGetPiecesLibrary();
+			lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_wndPiecesBar.m_PiecesTree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -1060,12 +1060,12 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 
 			LC_CATEGORYDLG_OPTS Opts;
-			Opts.Name = Lib->GetCategoryName(Index);
-			Opts.Keywords = Lib->GetCategoryKeywords(Index);
+			Opts.Name = Lib->mCategories[Index].Name;
+			Opts.Keywords = Lib->mCategories[Index].Keywords;
 
 			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
 			{
-				String OldName = Lib->GetCategoryName(Index);
+				String OldName = Lib->mCategories[Index].Name;
 				Lib->SetCategory(Index, Opts.Name, Opts.Keywords);
 				m_wndPiecesBar.UpdatePiecesTree(OldName, Opts.Name);
 			}
@@ -1080,7 +1080,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
 			{
-				PiecesLibrary* Lib = lcGetPiecesLibrary();
+				lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 				Lib->AddCategory(Opts.Name, Opts.Keywords);
 				m_wndPiecesBar.UpdatePiecesTree(NULL, Opts.Name);
 			}
@@ -1094,7 +1094,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = lcGetPiecesLibrary();
+			lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_wndPiecesBar.m_PiecesTree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -1102,8 +1102,8 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 
 			char Msg[1024];
-			String Name = Lib->GetCategoryName(Index);
-			sprintf(Msg, "Are you sure you want to remove the %s category?", Name);
+			const String& Name = Lib->mCategories[Index].Name;
+			sprintf(Msg, "Are you sure you want to remove the '%s' category?", Name);
 
 			if (SystemDoMessageBox(Msg, LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES)
 			{

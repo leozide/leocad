@@ -9,7 +9,7 @@
 #include "pieceinf.h"
 #include "globals.h"
 #include "system.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 
 #ifdef _DEBUG
@@ -206,7 +206,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = lcGetPiecesLibrary();
+			lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_Tree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -214,8 +214,8 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 
 			char Msg[1024];
-			String Name = Lib->GetCategoryName(Index);
-			sprintf(Msg, "Are you sure you want to remove the %s category?", Name);
+			const String& Name = Lib->mCategories[Index].Name;
+			sprintf(Msg, "Are you sure you want to remove the '%s' category?", Name);
 
 			if (SystemDoMessageBox(Msg, LC_MB_YESNO | LC_MB_ICONQUESTION) == LC_YES)
 			{
@@ -234,7 +234,7 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (Item == NULL)
 				break;
 
-			PiecesLibrary* Lib = lcGetPiecesLibrary();
+			lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString CategoryName = m_Tree.GetItemText(Item);
 			int Index = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -242,12 +242,12 @@ BOOL CLibraryDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 
 			LC_CATEGORYDLG_OPTS Opts;
-			Opts.Name = Lib->GetCategoryName(Index);
-			Opts.Keywords = Lib->GetCategoryKeywords(Index);
+			Opts.Name = Lib->mCategories[Index].Name;
+			Opts.Keywords = Lib->mCategories[Index].Keywords;
 
 			if (SystemDoDialog(LC_DLG_EDITCATEGORY, &Opts))
 			{
-				String OldName = Lib->GetCategoryName(Index);
+				String OldName = Lib->mCategories[Index].Name;
 				Lib->SetCategory(Index, Opts.Name, Opts.Keywords);
 			}
 
@@ -275,7 +275,7 @@ void CLibraryDlg::UpdateList()
 	m_List.DeleteAllItems();
 	m_List.SetRedraw(FALSE);
 
-	PiecesLibrary *Lib = lcGetPiecesLibrary();
+	lcPiecesLibrary *Lib = lcGetPiecesLibrary();
 
 	HTREEITEM CategoryItem = m_Tree.GetSelectedItem();
 	CString CategoryName = m_Tree.GetItemText(CategoryItem);
@@ -307,18 +307,18 @@ void CLibraryDlg::UpdateList()
 		if (CategoryName == "Unassigned")
 		{
 			// Test each piece against all categories.
-			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			for (int i = 0; i < Lib->mPieces.GetSize(); i++)
 			{
-				PieceInfo* Info = Lib->GetPieceInfo(i);
+				PieceInfo* Info = Lib->mPieces[i];
 				int j;
 
-				for (j = 0; j < Lib->GetNumCategories(); j++)
+				for (j = 0; j < Lib->mCategories.GetSize(); j++)
 				{
-					if (Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(j)))
+					if (Lib->PieceInCategory(Info, Lib->mCategories[j].Keywords))
 						break;
 				}
 
-				if (j == Lib->GetNumCategories())
+				if (j == Lib->mCategories.GetSize())
 				{
 					LVITEM lvi;
 					lvi.mask = LVIF_TEXT | LVIF_PARAM;
@@ -334,9 +334,9 @@ void CLibraryDlg::UpdateList()
 		}
 		else if (CategoryName == "Pieces")
 		{
-			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			for (int i = 0; i < Lib->mPieces.GetSize(); i++)
 			{
-				PieceInfo* Info = Lib->GetPieceInfo(i);
+				PieceInfo* Info = Lib->mPieces[i];
 
 				LVITEM lvi;
 				lvi.mask = LVIF_TEXT | LVIF_PARAM;
@@ -362,9 +362,9 @@ void CLibraryDlg::UpdateTree()
 
 	HTREEITEM Root = m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_TEXT, "Pieces", 0, 1, 0, 0, 0, TVI_ROOT, TVI_SORT);
 
-	PiecesLibrary *Lib = lcGetPiecesLibrary();
-	for (int i = 0; i < Lib->GetNumCategories(); i++)
-		m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, Lib->GetCategoryName(i), 0, 1, 0, 0, 0, Root, TVI_SORT);
+	lcPiecesLibrary *Lib = lcGetPiecesLibrary();
+	for (int i = 0; i < Lib->mCategories.GetSize(); i++)
+		m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, Lib->mCategories[i].Name, 0, 1, 0, 0, 0, Root, TVI_SORT);
 
 	m_Tree.InsertItem(TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_TEXT, "Unassigned", 0, 1, 0, 0, 0, Root, TVI_LAST);
 

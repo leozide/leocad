@@ -5,7 +5,7 @@
 #include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 
 #ifdef _DEBUG
@@ -43,7 +43,7 @@ void CPiecesCombo::OnEditupdate()
 		return;
 
 	char str[66];
-	PiecesLibrary *pLib = lcGetPiecesLibrary();
+	lcPiecesLibrary *pLib = lcGetPiecesLibrary();
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
 	PieceInfo* pInfo;
 
@@ -52,9 +52,9 @@ void CPiecesCombo::OnEditupdate()
 		char newstr[66];
 		int sel = -1;
 		strcpy (newstr, "Z");
-		for (int i = 0; i < pLib->GetPieceCount(); i++)
+		for (int i = 0; i < pLib->mPieces.GetSize(); i++)
 		{
-			pInfo = pLib->GetPieceInfo(i);
+			pInfo = pLib->mPieces[i];
 
 			if ((pInfo->m_strDescription[0] == '~') && !pBar->m_bSubParts)
 				continue;
@@ -79,9 +79,9 @@ void CPiecesCombo::OnEditupdate()
 		}
 
 		if (sel >= 0)
-			SelectPiece(pLib->GetPieceInfo(sel));
+			SelectPiece(pLib->mPieces[sel]);
 
-		if (strlen (newstr) > 1)
+		if (strlen(newstr) > 1)
 		{
 			SetWindowText(newstr);
 			SetEditSel(n, -1);
@@ -103,7 +103,7 @@ BOOL CPiecesCombo::PreTranslateMessage(MSG* pMsg)
 		}
 		else if (nVirtKey == VK_RETURN)
 		{
-		  PiecesLibrary* Lib = lcGetPiecesLibrary();
+			lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 			CString str;
 
 			GetWindowText(str);
@@ -124,14 +124,14 @@ void CPiecesCombo::OnSelchange()
 {
 	char str[66];
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
-  PiecesLibrary *pLib = lcGetPiecesLibrary();
+	lcPiecesLibrary* pLib = lcGetPiecesLibrary();
 
 	if (!GetLBText (GetCurSel(), str))
 		return;
 
-	for (int i = 0; i < pLib->GetPieceCount(); i++)
+	for (int i = 0; i < pLib->mPieces.GetSize(); i++)
 	{
-		PieceInfo* pInfo = pLib->GetPieceInfo(i);
+		PieceInfo* pInfo = pLib->mPieces[i];
 
 		if (strcmp(str, pInfo->m_strDescription) == 0)
 			SelectPiece(pInfo);
@@ -140,11 +140,11 @@ void CPiecesCombo::OnSelchange()
 
 void CPiecesCombo::SelectPiece(PieceInfo* Info)
 {
-  PiecesLibrary *Lib = lcGetPiecesLibrary();
+	lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 	CPiecesBar* Bar = (CPiecesBar*)GetParent();
 
-	int Index = Lib->GetFirstCategory(Info);
+	int Index = Lib->GetFirstPieceCategory(Info);
 
 	if (Index != -1)
-		Bar->SelectPiece(Lib->GetCategoryName(Index), Info);
+		Bar->SelectPiece(Lib->mCategories[Index].Name, Info);
 }

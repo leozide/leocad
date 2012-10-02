@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "resource.h"
 #include "piecebar.h"
-#include "library.h"
+#include "lc_library.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "globals.h"
@@ -204,7 +204,7 @@ void CPiecesBar::OnContextMenu(CWnd* pWnd, CPoint point)
 
 				if (Item != NULL)
 				{
-					PiecesLibrary *Lib = lcGetPiecesLibrary();
+					lcPiecesLibrary *Lib = lcGetPiecesLibrary();
 					CString CategoryName = m_PiecesTree.GetItemText(Item);
 					int CategoryIndex = Lib->FindCategoryIndex((const char*)CategoryName);
 
@@ -259,7 +259,7 @@ void CPiecesBar::SelectPiece(const char* Category, PieceInfo* Info)
 		strcpy(ParentName, Info->m_strName);
 		*strchr(ParentName, 'P') = '\0';
 
-		Parent = lcGetPiecesLibrary()->FindPieceInfo(ParentName);
+		Parent = lcGetPiecesLibrary()->FindPiece(ParentName, false);
 
 		if (Parent)
 		{
@@ -367,7 +367,7 @@ void CPiecesBar::UpdatePiecesTree(const char* OldCategory, const char* NewCatego
 
 void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 {
-	PiecesLibrary *Lib = lcGetPiecesLibrary();
+	lcPiecesLibrary *Lib = lcGetPiecesLibrary();
 
 	if (SearchOnly)
 	{
@@ -413,12 +413,12 @@ void CPiecesBar::UpdatePiecesTree(bool SearchOnly)
 		Insert.item.mask = TVIF_CHILDREN|TVIF_PARAM|TVIF_TEXT;
 		Insert.item.cChildren = 1;
 
-		for (int i = 0; i < Lib->GetNumCategories(); i++)
+		for (int i = 0; i < Lib->mCategories.GetSize(); i++)
 		{
-			if (Lib->GetCategoryName(i) == "Search Results")
+			if (Lib->mCategories[i].Name == "Search Results")
 				continue;
 
-			Insert.item.pszText = (LPSTR)Lib->GetCategoryName(i);
+			Insert.item.pszText = (LPSTR)Lib->mCategories[i].Name;
 			m_PiecesTree.InsertItem(&Insert);
 		}
 
@@ -495,7 +495,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 			{
 				m_PiecesTree.SetRedraw(FALSE);
 
-				PiecesLibrary *Lib = lcGetPiecesLibrary();
+				lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 
 				// Remove all children.
 				HTREEITEM Item = Notify->itemNew.hItem;
@@ -590,7 +590,7 @@ BOOL CPiecesBar::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 						if (CategoryIndex != -1)
 						{
-							if (!Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(CategoryIndex)))
+							if (!Lib->PieceInCategory(Info, Lib->mCategories[CategoryIndex].Keywords))
 								continue;
 						}
 

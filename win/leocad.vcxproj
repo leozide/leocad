@@ -186,7 +186,6 @@
     <ClCompile Include="..\common\lc_application.cpp" />
     <ClCompile Include="..\common\lc_colors.cpp" />
     <ClCompile Include="..\common\lc_file.cpp" />
-    <ClCompile Include="..\common\library.cpp" />
     <ClCompile Include="..\Common\light.cpp" />
     <ClCompile Include="..\common\mainwnd.cpp" />
     <ClCompile Include="..\Common\matrix.cpp" />
@@ -384,7 +383,6 @@
     <ClInclude Include="..\Common\image.h" />
     <ClInclude Include="..\common\keyboard.h" />
     <ClInclude Include="..\common\lc_application.h" />
-    <ClInclude Include="..\common\library.h" />
     <ClInclude Include="..\Common\light.h" />
     <ClInclude Include="..\common\mainwnd.h" />
     <ClInclude Include="..\Common\matrix.h" />

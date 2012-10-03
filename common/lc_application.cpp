@@ -70,6 +70,8 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* SysLibPat
 		if (m_Library->Load(SysLibPath))
 			return true;
 
+	lcLoadDefaultColors();
+
 #ifdef LC_WINDOWS
 	SystemDoMessageBox("Cannot load pieces library.\n"
 	                   "Make sure that you have the PIECES.IDX file in the same "
@@ -129,8 +131,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	char* ImageName = NULL;
-
-	lcLoadDefaultColors();
 
 	// File to open.
 	char* ProjectName = NULL;

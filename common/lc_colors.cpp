@@ -195,11 +195,13 @@ static void GetToken(char*& Ptr, char* Token)
 	*Token = 0;
 }
 
-static void LoadColorFile(lcFile& File)
+bool lcLoadColorFile(lcFile& File)
 {
 	char Line[1024], Token[1024];
 	ObjArray<lcColor>& Colors = gColorList;
 	lcColor Color, MainColor, EdgeColor;
+
+	Colors.RemoveAll();
 
 	strcpy(gColorGroups[0].Name, "Solid Colors");
 	strcpy(gColorGroups[1].Name, "Translucent Colors");
@@ -387,6 +389,8 @@ static void LoadColorFile(lcFile& File)
 
 	gEdgeColor = Colors.GetSize();
 	Colors.Add(EdgeColor);
+
+	return Colors.GetSize() > 2;
 }
 
 void lcLoadDefaultColors()
@@ -394,7 +398,7 @@ void lcLoadDefaultColors()
 	lcMemFile File;
 	File.WriteBuffer(sDefaultColorConfig, sizeof(sDefaultColorConfig));
 	File.Seek(0, SEEK_SET);
-	LoadColorFile(File);
+	lcLoadColorFile(File);
 }
 
 int lcGetColorIndex(lcuint32 ColorCode)

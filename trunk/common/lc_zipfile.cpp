@@ -535,6 +535,19 @@ bool lcZipFile::ReadCentralDir()
 	return true;
 }
 
+bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength)
+{
+	for (int FileIdx = 0; FileIdx < mFiles.GetSize(); FileIdx++)
+	{
+		lcZipFileInfo& FileInfo = mFiles[FileIdx];
+
+		if (!strcmp(FileInfo.file_name, FileName))
+			return ExtractFile(FileIdx, File, MaxLength);
+	}
+
+	return false;
+}
+
 bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 {
 	lcuint32 SizeVar;

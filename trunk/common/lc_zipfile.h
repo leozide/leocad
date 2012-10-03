@@ -48,6 +48,7 @@ public:
 
 	bool Open(const char* FilePath);
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
+	bool ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
 
 	ObjArray<lcZipFileInfo> mFiles;
 

@@ -54,9 +54,25 @@ bool lcPiecesLibrary::Load(const char* SearchPath)
 	strcpy(mLibraryPath, LibraryPath);
 	strcat(LibraryPath, "complete.zip");
 
-	if (!OpenArchive(LibraryPath))
-		if (!OpenDirectory(mLibraryPath))
-			return false;
+	if (OpenArchive(LibraryPath))
+	{
+		lcMemFile ColorFile;
+
+		if (!mZipFile->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
+			lcLoadDefaultColors();
+	}
+	else if (OpenDirectory(mLibraryPath))
+	{
+		char FileName[LC_MAXPATH];
+		lcDiskFile ColorFile;
+
+		sprintf(FileName, "%sldconfig.ldr", mLibraryPath);
+
+		if (!ColorFile.Open(FileName, "rt") || !lcLoadColorFile(ColorFile))
+			lcLoadDefaultColors();
+	}
+	else
+		return false;
 
 	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
 	if (!FileName[0] || !LoadCategories(FileName))

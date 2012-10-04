@@ -319,10 +319,14 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	}
 	else
 	{
+		char Name[LC_PIECE_NAME_LEN];
+		strcpy(Name, Info->m_strName);
+		strlwr(Name);
+
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
-		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Info->m_strName);
+		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
 		if (!PieceFile.Open(FileName, "rt"))
 			return false;
@@ -443,13 +447,17 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	}
 	else
 	{
+		char Name[LC_PIECE_NAME_LEN];
+		strcpy(Name, Primitive->mName);
+		strlwr(Name);
+
 		char FileName[LC_MAXPATH];
 		lcDiskFile PrimFile;
 
 		if (Primitive->mSubFile)
-			sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Primitive->mName);
+			sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 		else
-			sprintf(FileName, "%sp/%s.dat", mLibraryPath, Primitive->mName);
+			sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
 
 		if (!PrimFile.Open(FileName, "rt"))
 			return false;
@@ -549,13 +557,17 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						}
 						else
 						{
+							char Name[LC_PIECE_NAME_LEN];
+							strcpy(Name, Primitive->mName);
+							strlwr(Name);
+
 							char FileName[LC_MAXPATH];
 							lcDiskFile IncludeFile;
 
 							if (Primitive->mSubFile)
-								sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Primitive->mName);
+								sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 							else
-								sprintf(FileName, "%sp/%s.dat", mLibraryPath, Primitive->mName);
+								sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
 
 							if (!IncludeFile.Open(FileName, "rt"))
 								continue;
@@ -586,10 +598,14 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						}
 						else
 						{
+							char Name[LC_PIECE_NAME_LEN];
+							strcpy(Name, Info->m_strName);
+							strlwr(Name);
+
 							char FileName[LC_MAXPATH];
 							lcDiskFile IncludeFile;
 
-							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Info->m_strName);
+							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
 							if (!IncludeFile.Open(FileName, "rt"))
 								break;

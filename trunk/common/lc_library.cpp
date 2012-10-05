@@ -5,6 +5,12 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 #include "system.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#define LC_LIBRARY_CACHE_VERSION   0x0100
+#define LC_LIBRARY_CACHE_ARCHIVE   0x0001
+#define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
 lcPiecesLibrary::lcPiecesLibrary()
 {
@@ -41,7 +47,7 @@ PieceInfo* lcPiecesLibrary::CreatePlaceholder(const char* PieceName)
 	return Info;
 }
 
-bool lcPiecesLibrary::Load(const char* SearchPath)
+bool lcPiecesLibrary::Load(const char* SearchPath, const char* CacheFilePath)
 {
 	char LibraryPath[LC_MAXPATH];
 
@@ -54,7 +60,7 @@ bool lcPiecesLibrary::Load(const char* SearchPath)
 	strcpy(mLibraryPath, LibraryPath);
 	strcat(LibraryPath, "complete.zip");
 
-	if (OpenArchive(LibraryPath))
+	if (OpenArchive(LibraryPath, CacheFilePath))
 	{
 		lcMemFile ColorFile;
 
@@ -85,7 +91,7 @@ bool lcPiecesLibrary::Load(const char* SearchPath)
 	return true;
 }
 
-bool lcPiecesLibrary::OpenArchive(const char* FileName)
+bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePath)
 {
 	mZipFile = new lcZipFile();
 
@@ -151,29 +157,122 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName)
 		}
 	}
 
-	lcMemFile PieceFile;
+	bool CacheValid = false;
+	struct stat LibraryStat;
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	strcpy(mCacheFileName, CacheFilePath);
+	if (CacheFilePath[0])
+		strcat(mCacheFileName, "library.cache");
+
+	if (stat(FileName, &LibraryStat) == 0)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		lcZipFile CacheFile;
 
-		mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
-		PieceFile.Seek(0, SEEK_END);
-		PieceFile.WriteU8(0);
-
-		char* Src = (char*)PieceFile.mBuffer + 2;
-		char* Dst = Info->m_strDescription;
-
-		for (;;)
+		if (CacheFile.OpenRead(mCacheFileName))
 		{
-			if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < sizeof(Info->m_strDescription) - 1)
+			lcMemFile VersionFile;
+
+			if (CacheFile.ExtractFile("version", VersionFile))
 			{
-				*Dst++ = *Src++;
-				continue;
+				lcuint32 CacheVersion;
+				lcuint32 CacheFlags;
+				lcuint64 LibrarySize;
+				lcuint64 LibraryModified;
+
+				if (VersionFile.ReadU32(&CacheVersion, 1) && VersionFile.ReadU32(&CacheFlags, 1) &&
+				    VersionFile.ReadU64(&LibrarySize, 1) && VersionFile.ReadU64(&LibraryModified, 1))
+				{
+					if (CacheVersion == LC_LIBRARY_CACHE_VERSION && CacheFlags == LC_LIBRARY_CACHE_ARCHIVE &&
+					    LibrarySize == LibraryStat.st_size && LibraryModified == LibraryStat.st_mtime)
+						CacheValid = true;
+				}
+			}
+		}
+
+		if (CacheValid)
+		{
+			lcMemFile IndexFile;
+
+			if (CacheFile.ExtractFile("index", IndexFile))
+			{
+				lcuint32 NumFiles;
+
+				if (IndexFile.ReadU32(&NumFiles, 1) && NumFiles == mPieces.GetSize())
+				{
+					for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+					{
+						PieceInfo* Info = mPieces[PieceInfoIndex];
+
+						LC_CASSERT(sizeof(Info->m_strDescription) == 128);
+
+						if (!IndexFile.ReadBuffer(Info->m_strDescription, sizeof(Info->m_strDescription)))
+						{
+							CacheValid = false;
+							break;
+						}
+					}
+				}
+				else
+					CacheValid = false;
+			}
+			else
+				CacheValid = false;
+		}
+	}
+
+	if (!CacheValid)
+	{
+		lcMemFile PieceFile;
+
+		for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+		{
+			PieceInfo* Info = mPieces[PieceInfoIndex];
+
+			mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
+			PieceFile.Seek(0, SEEK_END);
+			PieceFile.WriteU8(0);
+
+			char* Src = (char*)PieceFile.mBuffer + 2;
+			char* Dst = Info->m_strDescription;
+
+			for (;;)
+			{
+				if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < sizeof(Info->m_strDescription) - 1)
+				{
+					*Dst++ = *Src++;
+					continue;
+				}
+
+				*Dst = 0;
+				break;
+			}
+		}
+
+		lcZipFile CacheFile;
+
+		if (CacheFile.OpenWrite(mCacheFileName, false))
+		{
+			lcMemFile VersionFile;
+
+			VersionFile.WriteU32(LC_LIBRARY_CACHE_VERSION);
+			VersionFile.WriteU32(LC_LIBRARY_CACHE_ARCHIVE);
+			VersionFile.WriteU64(LibraryStat.st_size);
+			VersionFile.WriteU64(LibraryStat.st_mtime);
+
+			CacheFile.AddFile("version", VersionFile);
+
+			lcMemFile IndexFile;
+
+			IndexFile.WriteU32(mPieces.GetSize());
+
+			for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+			{
+				PieceInfo* Info = mPieces[PieceInfoIndex];
+
+				IndexFile.WriteBuffer(Info->m_strDescription, sizeof(Info->m_strDescription));
 			}
 
-			*Dst = 0;
-			break;
+			CacheFile.AddFile("index", IndexFile);
 		}
 	}
 

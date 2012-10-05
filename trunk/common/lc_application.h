@@ -12,11 +12,11 @@ public:
 	lcApplication();
 	~lcApplication();
 
-	bool Initialize(int argc, char *argv[], const char* SysLibPath);
+	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
 	void Shutdown();
 
 	// Pieces library.
-	bool LoadPiecesLibrary(const char* LibPath, const char* SysLibPath);
+	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
 	lcPiecesLibrary* GetPiecesLibrary() const
 	{
 		return m_Library;

@@ -49,7 +49,7 @@ public:
 	~lcZipFile();
 
 	bool OpenRead(const char* FilePath);
-	bool OpenWrite(const char* FilePath);
+	bool OpenWrite(const char* FilePath, bool Append);
 	void Flush();
 
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);

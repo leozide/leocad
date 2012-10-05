@@ -47,7 +47,7 @@ void lcApplication::AddProject(Project* project)
 		m_ActiveProject = project;
 }
 
-bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* SysLibPath)
+bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath)
 {
 	// Create an empty library.
 	if (m_Library == NULL)
@@ -55,19 +55,19 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* SysLibPat
 
 	// Check if the user specified a library path in the command line.
 	if (LibPath != NULL)
-		if (m_Library->Load(LibPath))
+		if (m_Library->Load(LibPath, LibraryCachePath))
 			return true;
 
 	// Check for the LEOCAD_LIB environment variable.
 	char* EnvPath = getenv("LEOCAD_LIB");
 
 	if (EnvPath != NULL)
-		if (m_Library->Load(EnvPath))
+		if (m_Library->Load(EnvPath, LibraryCachePath))
 			return true;
 
 	// Try the executable install path last.
-	if (SysLibPath != NULL)
-		if (m_Library->Load(SysLibPath))
+	if (LibraryInstallPath != NULL)
+		if (m_Library->Load(LibraryInstallPath, LibraryCachePath))
 			return true;
 
 	lcLoadDefaultColors();
@@ -114,12 +114,11 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 }
 
-bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
+bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LibraryCachePath)
 {
 	// System setup parameters.
 	char* LibPath = NULL;
 	char* GLPath = NULL;
-	char* LDrawPath = NULL;
 
 	// Image output options.
 	bool SaveImage = false;
@@ -208,7 +207,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 				printf("  [options] can be:\n");
 				printf("  --libgl <path>: Searches for OpenGL libraries in path.\n");
 				printf("  --libpath <path>: Loads the Pieces Library from path.\n");
-				printf("  --convert <srcpath> <dstpath>: Generates Pieces Library from LDraw files.\n");
 				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
 				printf("  -w, --width <width>: Sets the picture width.\n");
 				printf("  -h, --height <height>: Sets the picture height.\n");
@@ -232,7 +230,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* SysLibPath)
 	if (!GL_Initialize(GLPath))
 		return false;
 
-	if (!LoadPiecesLibrary(LibPath, SysLibPath))
+	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LibraryCachePath))
 		return false;
 
 	SystemInit();

@@ -5,6 +5,7 @@
 #include "CADDoc.h"
 #include "CADView.h"
 #include <wininet.h>
+#include <direct.h>
 #include <process.h>
 #include "project.h"
 #include "globals.h"
@@ -180,16 +181,25 @@ BOOL CCADApp::InitInstance()
 
 	InitKeyboardShortcuts();
 
-	char app[LC_MAXPATH], *ptr;
-	GetModuleFileName (NULL, app, LC_MAXPATH);
-	ptr = strrchr(app,'\\');
+	char ApplicationPath[LC_MAXPATH], *ptr;
+	GetModuleFileName (NULL, ApplicationPath, LC_MAXPATH);
+	ptr = strrchr(ApplicationPath,'\\');
 	if (ptr)
 		*(++ptr) = 0;
+
+	char CacheFilePath[LC_MAXPATH];
+	if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, CacheFilePath) == S_OK)
+	{
+		PathAppend(CacheFilePath, "LeoCAD\\");
+		_mkdir(CacheFilePath);
+	}
+	else
+		CacheFilePath[0] = 0;
 
 	g_App = new lcApplication();
 	main_window = new MainWnd();
 
-	if (!g_App->Initialize(__argc, __targv, app))
+	if (!g_App->Initialize(__argc, __targv, ApplicationPath, CacheFilePath))
 		return false;
 
 	// Register the application's document templates.  Document templates

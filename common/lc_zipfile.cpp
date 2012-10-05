@@ -31,15 +31,22 @@ bool lcZipFile::OpenRead(const char* FilePath)
 	return true;
 }
 
-bool lcZipFile::OpenWrite(const char* FilePath)
+bool lcZipFile::OpenWrite(const char* FilePath, bool Append)
 {
 	lcDiskFile* File = new lcDiskFile();
 	mFile = File;
-	bool Exists = true;
 
-	if (!File->Open(FilePath, "r+b") || !Open())
+	if (Append)
 	{
-		Exists = false;
+		if (!File->Open(FilePath, "r+b") || !Open())
+		{
+			delete File;
+			mFile = NULL;
+			return false;
+		}
+	}
+	else
+	{
 		mNumEntries = 0;
 		mCentralDirSize = 0;
 		mCentralDirOffset = 0;

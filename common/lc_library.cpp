@@ -89,7 +89,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName)
 {
 	mZipFile = new lcZipFile();
 
-	if (!mZipFile->Open(FileName))
+	if (!mZipFile->OpenRead(FileName))
 	{
 		delete mZipFile;
 		mZipFile = NULL;
@@ -146,7 +146,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName)
 		}
 		else if (!memcmp(Name + 6, "P/", 2))
 		{
-			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name + 8, FileIdx, (memcmp(Prim->mName, "STU", 3) == 0), false);
+			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name + 8, FileIdx, (memcmp(Name + 8, "STU", 3) == 0), false);
 			mPrimitives.Add(Prim);
 		}
 	}

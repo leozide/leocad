@@ -38,6 +38,8 @@ struct lcZipFileInfo
 	lcuint64 offset_curfile;       // relative offset of local header 8 bytes
 	char file_name[256];
 	tm_unz tmu_date;
+
+	lcMemFile* write_buffer;
 };
 
 class lcZipFile
@@ -46,9 +48,13 @@ public:
 	lcZipFile();
 	~lcZipFile();
 
-	bool Open(const char* FilePath);
+	bool OpenRead(const char* FilePath);
+	bool OpenWrite(const char* FilePath);
+	void Flush();
+
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
 	bool ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
+	bool AddFile(const char* FileName, lcMemFile& File);
 
 	ObjArray<lcZipFileInfo> mFiles;
 

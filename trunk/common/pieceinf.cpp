@@ -2,6 +2,7 @@
 #include "lc_math.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
+#include "lc_texture.h"
 #include "opengl.h"
 #include "pieceinf.h"
 #include "lc_library.h"
@@ -12,13 +13,13 @@ PieceInfo::PieceInfo(int ZipFileIndex)
 	mZipFileIndex = ZipFileIndex;
 	mFlags = 0;
 	mMesh = NULL;
-	m_nRef = 0;
+	mRefCount = 0;
 	m_nBoxList = 0;
 }
 
 PieceInfo::~PieceInfo()
 {
-	FreeInformation();
+	Unload();
 }
 
 void PieceInfo::CreatePlaceholder(const char* Name)
@@ -29,20 +30,6 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
 	mFlags = LC_PIECE_PLACEHOLDER;
-}
-
-void PieceInfo::AddRef()
-{
-	if (m_nRef == 0)
-		LoadInformation();
-	m_nRef++;
-}
-
-void PieceInfo::DeRef()
-{
-	m_nRef--;
-	if (m_nRef == 0)
-		FreeInformation();
 }
 
 void PieceInfo::CreateBoxDisplayList()
@@ -88,10 +75,8 @@ void PieceInfo::CreateBoxDisplayList()
 	glEndList();
 }
 
-void PieceInfo::LoadInformation()
+void PieceInfo::Load()
 {
-	FreeInformation();
-
 	if (mFlags & LC_PIECE_PLACEHOLDER)
 	{
 		mMesh = new lcMesh();
@@ -112,8 +97,16 @@ void PieceInfo::LoadInformation()
 	}
 }
 
-void PieceInfo::FreeInformation()
+void PieceInfo::Unload()
 {
+	for (int SectionIdx = 0; SectionIdx < mMesh->mNumSections; SectionIdx++)
+	{
+		lcMeshSection& Section = mMesh->mSections[SectionIdx];
+
+		if (Section.Texture)
+			Section.Texture->Release();
+	}
+
 	delete mMesh;
 	mMesh = NULL;
 

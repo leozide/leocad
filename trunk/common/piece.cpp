@@ -11,7 +11,6 @@
 #include "opengl.h"
 #include "matrix.h"
 #include "pieceinf.h"
-#include "texture.h"
 #include "piece.h"
 #include "group.h"
 #include "project.h"
@@ -58,7 +57,7 @@ Piece::Piece(PieceInfo* pPieceInfo)
 Piece::~Piece()
 {
 	if (mPieceInfo != NULL)
-		mPieceInfo->DeRef();
+		mPieceInfo->Release();
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -1546,7 +1546,7 @@ void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 		strcat(Dir, "\\");
 
 	strcpy(FindPath, Dir);
-	strcat(FindPath, "*.dat");
+	strcat(FindPath, "*");
 
 	Find = FindFirstFile(FindPath, &FindData);
 

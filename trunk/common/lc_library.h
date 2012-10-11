@@ -2,30 +2,52 @@
 #define _LC_LIBRARY_H_
 
 #include "lc_mesh.h"
+#include "lc_math.h"
 #include "array.h"
 #include "str.h"
 
 class PieceInfo;
+class lcTexture;
 class lcZipFile;
 
 #define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
 #define LC_CATEGORY_FILE_VERSION  0x0100
 
+enum LC_MESH_PRIMITIVE_TYPE
+{
+	LC_MESH_LINES,
+	LC_MESH_TRIANGLES,
+	LC_MESH_TEXTURED_LINES,
+	LC_MESH_TEXTURED_TRIANGLES
+};
+
 class lcLibraryMeshSection
 {
 public:
-	lcLibraryMeshSection()
+	lcLibraryMeshSection(LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture)
 		: mIndices(1024, 1024)
 	{
+		mPrimitiveType = PrimitiveType;
+		mColorCode = ColorCode;
+		mTexture = Texture;
 	}
 
 	~lcLibraryMeshSection()
 	{
 	}
 
+	LC_MESH_PRIMITIVE_TYPE mPrimitiveType;
 	lcuint32 mColorCode;
-	bool mTriangles;
+	lcTexture* mTexture;
 	ObjArray<lcuint32> mIndices;
+};
+
+struct lcLibraryTextureMap
+{
+	lcVector4 Params[2];
+	lcTexture* Texture;
+	bool Fallback;
+	bool Next;
 };
 
 class lcLibraryMeshData
@@ -43,11 +65,13 @@ public:
 	}
 
 	void AddLine(int LineType, lcuint32 ColorCode, const lcVector3* Vertices);
-	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode);
-	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode);
+	void AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices);
+	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap);
+	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap);
 
 	PtrArray<lcLibraryMeshSection> mSections;
-	ObjArray<lcVector3> mVertices;
+	ObjArray<lcVertex> mVertices;
+	ObjArray<lcVertexTextured> mTexturedVertices;
 };
 
 class lcLibraryPrimitive
@@ -85,10 +109,14 @@ public:
 	~lcPiecesLibrary();
 
 	bool Load(const char* SearchPath, const char* CacheFilePath);
+	void Unload();
 
 	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
 	PieceInfo* CreatePlaceholder(const char* PieceName);
 	bool LoadPiece(PieceInfo* Info);
+
+	lcTexture* FindTexture(const char* TextureName);
+	bool LoadTexture(lcTexture* Texture);
 
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	int GetFirstPieceCategory(PieceInfo* Info) const;
@@ -107,6 +135,8 @@ public:
 	PtrArray<lcLibraryPrimitive> mPrimitives;
 	ObjArray<lcLibraryCategory> mCategories;
 
+	PtrArray<lcTexture> mTextures;
+
 	char mLibraryPath[LC_MAXPATH];
 
 protected:
@@ -114,7 +144,7 @@ protected:
 	bool OpenDirectory(const char* Path);
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcLibraryMeshData& MeshData);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, ObjArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
 
 	bool mCategoriesModified;
 	char mCategoriesFile[LC_MAXPATH];

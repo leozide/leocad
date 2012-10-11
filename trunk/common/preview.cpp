@@ -78,7 +78,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	MakeCurrent();
 
 	if (m_PieceInfo != NULL)
-		m_PieceInfo->DeRef();
+		m_PieceInfo->Release();
 
 	m_PieceInfo = pInfo;
 

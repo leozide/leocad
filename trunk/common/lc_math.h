@@ -32,6 +32,46 @@ inline T lcClamp(const T& Value, const U& Min, const V& Max)
 		return Value;
 }
 
+class lcVector2
+{
+public:
+	lcVector2()
+	{
+	}
+
+	lcVector2(const float _x, const float _y)
+		: x(_x), y(_y)
+	{
+	}
+
+	lcVector2(const lcVector2& a)
+		: x(a.x), y(a.y)
+	{
+	}
+
+	operator const float*() const
+	{
+		return (const float*)this;
+	}
+	
+	operator float*()
+	{
+		return (float*)this;
+	}
+	
+	const float& operator[](int i) const
+	{
+		return ((float*)this)[i];
+	}
+
+	float& operator[](int i)
+	{
+		return ((float*)this)[i];
+	}
+
+	float x, y;
+};
+
 class lcVector3
 {
 public:

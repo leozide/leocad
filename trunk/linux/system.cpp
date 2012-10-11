@@ -141,17 +141,7 @@ void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 
 	while ((Entry = readdir(Dir)))
 	{
-		int Length;
-
 		if (Entry->d_type != DT_REG)
-			continue;
-
-		Length = strlen(Entry->d_name);
-
-		if (Length < 5)
-			continue;
-
-		if (strcmp(Entry->d_name + Length - 4, ".dat"))
 			continue;
 
 		sprintf(FilePath, "%s%s", DirPath, Entry->d_name);

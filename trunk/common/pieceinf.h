@@ -21,6 +21,26 @@ public:
 	PieceInfo(int ZipFileIndex);
 	~PieceInfo();
 
+	int AddRef()
+	{
+		mRefCount++;
+
+		if (mRefCount == 1)
+			Load();
+
+		return mRefCount;
+	}
+
+	int Release()
+	{
+		mRefCount--;
+
+		if (!mRefCount)
+			Unload();
+
+		return mRefCount;
+	}
+
 	bool IsPatterned() const
 	{
 		const char* Name = m_strName;
@@ -63,8 +83,6 @@ public:
 		return m_nBoxList;
 	};
 	void CreatePlaceholder(const char* Name);
-	void AddRef();
-	void DeRef();
 
 public:
 	lcMesh* mMesh;
@@ -77,11 +95,11 @@ public:
 	lcuint32 mFlags;
 
 protected:
-	int m_nRef;
+	int mRefCount;
 	GLuint m_nBoxList;
 
-	void LoadInformation();
-	void FreeInformation();
+	void Load();
+	void Unload();
 	void CreateBoxDisplayList();
 };
 

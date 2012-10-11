@@ -3,6 +3,20 @@
 
 #include <stdlib.h>
 #include "opengl.h"
+#include "lc_math.h"
+
+class lcTexture;
+
+struct lcVertex
+{
+	lcVector3 Position;
+};
+
+struct lcVertexTextured
+{
+	lcVector3 Position;
+	lcVector2 TexCoord;
+};
 
 class lcVertexBuffer
 {
@@ -102,6 +116,7 @@ struct lcMeshSection
 	int IndexOffset;
 	int NumIndices;
 	int PrimitiveType;
+	lcTexture* Texture;
 //	BoundingBox Box;
 };
 
@@ -111,7 +126,7 @@ public:
 	lcMesh();
 	~lcMesh();
 
-	void Create(int NumSections, int NumVertices, int NumIndices);
+	void Create(int NumSections, int NumVertices, int NumTexturedVertices, int NumIndices);
 	void CreateBox();
 	void Render(int ColorIdx, bool Selected, bool Focused);
 
@@ -143,6 +158,7 @@ public:
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;
 	int mNumVertices;
+	int mNumTexturedVertices;
 	int mIndexType;
 };
 

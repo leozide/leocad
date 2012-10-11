@@ -986,7 +986,7 @@ MinifigWizard::~MinifigWizard ()
 
 	for (i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (m_Info[i])
-			m_Info[i]->DeRef();
+			m_Info[i]->Release();
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
@@ -1339,7 +1339,7 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
 	if (m_Info[Type])
-		m_Info[Type]->DeRef();
+		m_Info[Type]->Release();
 
 	m_Info[Type] = mSettings[Type][Index].Info;
 
@@ -1428,7 +1428,7 @@ bool MinifigWizard::LoadMinifig(const char* name)
 
 	for (j = 0; j < LC_MFW_NUMITEMS; j++)
 		if (m_Info[j] != NULL)
-			m_Info[j]->DeRef();
+			m_Info[j]->Release();
 
 	for (j = 0; j < LC_MFW_NUMITEMS; j++)
 		m_Colors[j] = strtol(ptr, &ptr, 10);

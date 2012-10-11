@@ -1,13 +1,9 @@
 #include "lc_global.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
+#include "lc_texture.h"
 #include "lc_file.h"
 #include "lc_math.h"
-
-struct lcVertex
-{
-	float x, y, z;
-};
 
 lcMesh::lcMesh()
 {
@@ -20,13 +16,14 @@ lcMesh::~lcMesh()
 	delete[] mSections;
 }
 
-void lcMesh::Create(int NumSections, int NumVertices, int NumIndices)
+void lcMesh::Create(int NumSections, int NumVertices, int NumTexturedVertices, int NumIndices)
 {
 	mSections = new lcMeshSection[NumSections];
 	mNumSections = NumSections;
 
 	mNumVertices = NumVertices;
-	mVertexBuffer.SetSize(NumVertices * sizeof(lcVertex));
+	mNumTexturedVertices = NumTexturedVertices;
+	mVertexBuffer.SetSize(NumVertices * sizeof(lcVertex) + NumTexturedVertices * sizeof(lcVertexTextured));
 
 	if (NumVertices < 0x10000)
 	{
@@ -42,7 +39,7 @@ void lcMesh::Create(int NumSections, int NumVertices, int NumIndices)
 
 void lcMesh::CreateBox()
 {
-	Create(2, 8, 36 + 24);
+	Create(2, 8, 0, 36 + 24);
 
 	lcVector3 Min(-0.4f, -0.4f, -0.96f);
 	lcVector3 Max(0.4f, 0.4f, 0.16f);
@@ -64,6 +61,7 @@ void lcMesh::CreateBox()
 	Section->IndexOffset = 0;
 	Section->NumIndices = 36;
 	Section->PrimitiveType = GL_TRIANGLES;
+	Section->Texture = NULL;
 
 	*Indices++ = 0; *Indices++ = 1; *Indices++ = 2;
 	*Indices++ = 0; *Indices++ = 2; *Indices++ = 3;
@@ -88,6 +86,7 @@ void lcMesh::CreateBox()
 	Section->IndexOffset = 36 * 2;
 	Section->NumIndices = 24;
 	Section->PrimitiveType = GL_LINES;
+	Section->Texture = NULL;
 
 	*Indices++ = 0; *Indices++ = 1; *Indices++ = 1; *Indices++ = 2;
 	*Indices++ = 2; *Indices++ = 3; *Indices++ = 3; *Indices++ = 0;
@@ -104,21 +103,24 @@ void lcMesh::CreateBox()
 void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 {
 	char* ElementsOffset;
+	char* BufferOffset;
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	if (GL_HasVertexBufferObject())
 	{
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVertexBuffer.mBuffer);
-		glVertexPointer(3, GL_FLOAT, 0, NULL);
+		BufferOffset = NULL;
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mIndexBuffer.mBuffer);
 		ElementsOffset = NULL;
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, mVertexBuffer.mData);
+		BufferOffset = (char*)mVertexBuffer.mData;
 		ElementsOffset = (char*)mIndexBuffer.mData;
 	}
+
+	glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
 
 	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
 	{
@@ -159,6 +161,27 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 				lcSetColor(ColorIdx);
 		}
 
+		if (mNumTexturedVertices)
+		{
+			if (Section->Texture) // TODO: cache states
+			{
+				glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + (mNumVertices * sizeof(lcVertex)));
+				glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + ((mNumVertices + 1) * sizeof(lcVertex)));
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+				glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
+				glEnable(GL_TEXTURE_2D);
+			}
+			else
+			{
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
+				glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+
+				glDisable(GL_TEXTURE_2D);
+			}
+		}
+
 		glDrawElements(Section->PrimitiveType, Section->NumIndices, mIndexType, ElementsOffset + Section->IndexOffset);
 	}
 
@@ -172,6 +195,13 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 	}
 	else
 		glVertexPointer(3, GL_FLOAT, 0, NULL);
+
+	if (mNumTexturedVertices)
+	{
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+		glDisable(GL_TEXTURE_2D);
+	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }

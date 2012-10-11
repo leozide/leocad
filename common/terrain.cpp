@@ -11,7 +11,7 @@
 #include "lc_file.h"
 #include "camera.h"
 #include "system.h"
-#include "texture.h"
+#include "lc_texture.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Static functions

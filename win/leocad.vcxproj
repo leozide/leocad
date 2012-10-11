@@ -204,7 +204,7 @@
     <ClCompile Include="..\common\str.cpp" />
     <ClCompile Include="..\Common\terrain.cpp" />
     <ClCompile Include="..\common\texfont.cpp" />
-    <ClCompile Include="..\Common\texture.cpp" />
+    <ClCompile Include="..\Common\lc_texture.cpp" />
     <ClCompile Include="..\Common\Tr.cpp" />
     <ClCompile Include="..\common\view.cpp" />
   </ItemGroup>
@@ -399,7 +399,7 @@
     <ClInclude Include="..\common\system.h" />
     <ClInclude Include="..\Common\terrain.h" />
     <ClInclude Include="..\common\texfont.h" />
-    <ClInclude Include="..\Common\texture.h" />
+    <ClInclude Include="..\Common\lc_texture.h" />
     <ClInclude Include="..\Common\Tr.h" />
     <ClInclude Include="..\Common\typedefs.h" />
     <ClInclude Include="..\common\view.h" />

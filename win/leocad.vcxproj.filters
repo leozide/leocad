@@ -251,9 +251,6 @@
     <ClCompile Include="..\common\texfont.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\texture.cpp">
-      <Filter>Common Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\Tr.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
@@ -282,6 +279,9 @@
       <Filter>Common Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\common\lc_zipfile.cpp">
+      <Filter>Common Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\lc_texture.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -789,9 +789,6 @@
     <ClInclude Include="..\common\texfont.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\texture.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\Tr.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
@@ -829,6 +826,9 @@
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\lc_zipfile.h">
+      <Filter>Common Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\lc_texture.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
   </ItemGroup>

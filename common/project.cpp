@@ -13,7 +13,7 @@
 #include "opengl.h"
 #include "matrix.h"
 #include "pieceinf.h"
-#include "texture.h"
+#include "lc_texture.h"
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
@@ -1759,7 +1759,10 @@ void Project::RenderScenePieces(View* view)
 
 	lcMesh* PreviousMesh = NULL;
 	bool PreviousSelected = false;
+	lcTexture* PreviousTexture = NULL;
 	char* ElementsOffset = NULL;
+	char* BaseBufferOffset = NULL;
+	char* PreviousOffset = (char*)(~NULL);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -1776,13 +1779,13 @@ void Project::RenderScenePieces(View* view)
 			if (GL_HasVertexBufferObject())
 			{
 				glBindBufferARB(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
-				glVertexPointer(3, GL_FLOAT, 0, NULL);
+				BaseBufferOffset = NULL;
 				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
 				ElementsOffset = NULL;
 			}
 			else
 			{
-				glVertexPointer(3, GL_FLOAT, 0, Mesh->mVertexBuffer.mData);
+				BaseBufferOffset = (char*)Mesh->mVertexBuffer.mData;
 				ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
 			}
 
@@ -1831,6 +1834,49 @@ void Project::RenderScenePieces(View* view)
 					lcSetColor(ColorIdx);
 			}
 
+			char* BufferOffset = BaseBufferOffset;
+			lcTexture* Texture = Section->Texture;
+
+			if (!Texture)
+			{
+				if (PreviousTexture)
+				{
+					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+					glDisable(GL_TEXTURE_2D);
+				}
+			}
+			else
+			{
+				BufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
+
+				if (Texture != PreviousTexture)
+				{
+					glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
+
+					if (!PreviousTexture)
+					{
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+						glEnable(GL_TEXTURE_2D);
+					}
+				}
+			}
+
+			PreviousTexture = Texture;
+
+			if (PreviousOffset != BufferOffset)
+			{
+				if (!Texture)
+					glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
+				else
+				{
+					glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset);
+					glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + sizeof(lcVector3));
+				}
+
+				PreviousOffset = BufferOffset;
+			}
+
 			glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
 		}
 
@@ -1859,13 +1905,13 @@ void Project::RenderScenePieces(View* view)
 				if (GL_HasVertexBufferObject())
 				{
 					glBindBufferARB(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
-					glVertexPointer(3, GL_FLOAT, 0, NULL);
+					BaseBufferOffset = NULL;
 					glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
 					ElementsOffset = NULL;
 				}
 				else
 				{
-					glVertexPointer(3, GL_FLOAT, 0, Mesh->mVertexBuffer.mData);
+					BaseBufferOffset = (char*)Mesh->mVertexBuffer.mData;
 					ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
 				}
 
@@ -1888,6 +1934,49 @@ void Project::RenderScenePieces(View* view)
 
 				lcSetColor(ColorIdx);
 
+				char* BufferOffset = BaseBufferOffset;
+				lcTexture* Texture = Section->Texture;
+
+				if (!Texture)
+				{
+					if (PreviousTexture)
+					{
+						glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+						glDisable(GL_TEXTURE_2D);
+					}
+				}
+				else
+				{
+					BufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
+
+					if (Texture != PreviousTexture)
+					{
+						glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
+
+						if (!PreviousTexture)
+						{
+							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+							glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+							glEnable(GL_TEXTURE_2D);
+						}
+					}
+				}
+
+				PreviousTexture = Texture;
+
+				if (PreviousOffset != BufferOffset)
+				{
+					if (!Texture)
+						glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
+					else
+					{
+						glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset);
+						glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + sizeof(lcVector3));
+					}
+
+					PreviousOffset = BufferOffset;
+				}
+
 				glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
 			}
 
@@ -1898,15 +1987,22 @@ void Project::RenderScenePieces(View* view)
 		glDisable(GL_BLEND);
 	}
 
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	if (PreviousTexture)
+	{
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisable(GL_TEXTURE_2D);
+	}
+
 	if (GL_HasVertexBufferObject())
 	{
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
-	else
-		glVertexPointer(3, GL_FLOAT, 0, NULL);
 
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, NULL);
+	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 }
 
 void Project::RenderSceneBoxes(View* view)
@@ -7960,7 +8056,7 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 				m_RestoreAction = false;
 			}
 
-			m_pCurPiece->DeRef();
+			m_pCurPiece->Release();
 			m_pCurPiece = m_PreviousPiece;
 			m_PreviousPiece = NULL;
 		}

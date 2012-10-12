@@ -223,7 +223,7 @@ BOOL CCADApp::InitInstance()
 	MainFrame->UpdateMenuAccelerators();
 
 	// Show something in the piece preview window.
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("45729PX3", false);
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("3005", false);
 	if (!Info && lcGetPiecesLibrary()->mPieces.GetSize())
 		Info = lcGetPiecesLibrary()->mPieces[0];
 

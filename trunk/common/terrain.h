@@ -1,12 +1,8 @@
-//
-//	terrain.h
-////////////////////////////////////////////////////
-
 #ifndef _TERRAIN_H_
 #define _TERRAIN_H_
 
 class Camera;
-class Texture;
+class lcTexture;
 
 class TerrainPatch
 {
@@ -40,7 +36,7 @@ public:
 	~Terrain();
 	Terrain& operator=(const Terrain& source);
 
-	void LoadTexture(bool bLinear);
+	void LoadTexture();
 	void Render(Camera* pCam, float aspect);
 	void LoadDefaults(bool bLinear);
 	void SetSize(float uSize, float vSize);
@@ -74,7 +70,7 @@ protected:
 	int m_vPatches;
 	float m_uSize;
 	float m_vSize;
-	Texture* m_pTexture;
+	lcTexture* m_pTexture;
 };
 
 #endif // _TERRAIN_H_

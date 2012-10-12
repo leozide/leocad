@@ -169,6 +169,7 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 				glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + ((mNumVertices + 1) * sizeof(lcVertex)));
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 				glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
 				glEnable(GL_TEXTURE_2D);
 			}

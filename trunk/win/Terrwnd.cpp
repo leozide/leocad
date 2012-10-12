@@ -108,10 +108,10 @@ void lcTerrainView::OnMouseMove(int x, int y, bool Control, bool Shift)
 	mMouseY = y;
 }
 
-void lcTerrainView::LoadTexture(bool linear)
+void lcTerrainView::LoadTexture()
 {
 	MakeCurrent();
-	mTerrain->LoadTexture(linear);
+	mTerrain->LoadTexture();
 }
 
 void lcTerrainView::ResetCamera()

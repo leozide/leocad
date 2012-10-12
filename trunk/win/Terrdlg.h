@@ -13,7 +13,7 @@ class CTerrainDlg : public CDialog
 {
 // Construction
 public:
-	CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent = NULL);   // standard constructor
+	CTerrainDlg(Terrain* pTerrain, CWnd* pParent = NULL);   // standard constructor
 	virtual ~CTerrainDlg();
 
 // Dialog Data
@@ -42,8 +42,6 @@ protected:
 
 	lcTerrainView* mView;
 	Terrain* mTerrain;
-
-	bool m_bLinear;
 
 	// Generated message map functions
 	//{{AFX_MSG(CTerrainDlg)

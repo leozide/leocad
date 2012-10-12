@@ -15,7 +15,7 @@ static char THIS_FILE[] = __FILE__;
 // CTerrainDlg dialog
 
 
-CTerrainDlg::CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent /*=NULL*/)
+CTerrainDlg::CTerrainDlg(Terrain* pTerrain, CWnd* pParent /*=NULL*/)
 	: CDialog(CTerrainDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CTerrainDlg)
@@ -24,7 +24,6 @@ CTerrainDlg::CTerrainDlg(Terrain* pTerrain, bool bLinear, CWnd* pParent /*=NULL*
 	mView = new lcTerrainView(NULL, pTerrain);
 	mTerrainWnd = NULL;
 	mTerrain = pTerrain;
-	m_bLinear = bLinear;
 }
 
 CTerrainDlg::~CTerrainDlg()
@@ -118,7 +117,7 @@ LRESULT CALLBACK GLWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	mTerrainWnd = new CWnd;
 	mTerrainWnd->CreateEx(0, TERRAIN_CLASSNAME, "LeoCAD", WS_BORDER | WS_CHILD | WS_VISIBLE, CRect(0, 0, 20, 20), this, 0, mView);
 
-	mView->LoadTexture(m_bLinear);
+	mView->LoadTexture();
 
 	m_Grid.SetControlPoints(mTerrain->GetCountU(), mTerrain->GetCountV(), mTerrain->GetControlPoints());
 
@@ -206,7 +205,7 @@ BOOL CTerrainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				dlg.GetOptions(mTerrain);
 				m_Grid.SetControlPoints(mTerrain->GetCountU(), mTerrain->GetCountV(), mTerrain->GetControlPoints());
 				mTerrain->Tesselate();
-				mView->LoadTexture(m_bLinear);
+				mView->LoadTexture();
 
 				mView->Redraw();
 			}

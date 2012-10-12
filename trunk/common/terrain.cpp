@@ -248,7 +248,7 @@ Terrain::Terrain()
 	m_Patches = NULL;
 	m_pControl = NULL;
 	m_nOptions = 0;
-	m_pTexture = new Texture();
+	m_pTexture = new lcTexture();
 }
 
 Terrain::~Terrain()
@@ -582,7 +582,7 @@ void Terrain::Render(Camera* pCam, float aspect)
 		if (m_nOptions & LC_TERRAIN_TEXTURE)
 		{
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			m_pTexture->MakeCurrent();
+			glBindTexture(GL_TEXTURE_2D, m_pTexture->mTexture);
 			glEnable(GL_TEXTURE_2D);
 
 float tw = 15.0f, th = 15.0f;
@@ -648,7 +648,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 		{
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			m_pTexture->MakeCurrent();
+			glBindTexture(GL_TEXTURE_2D, m_pTexture->mTexture);
 			glEnable(GL_TEXTURE_2D);
 		}
 
@@ -824,7 +824,7 @@ void Terrain::LoadDefaults(bool bLinear)
 	if (strlen(m_strTexture))
 	{
 		m_nOptions |= LC_TERRAIN_TEXTURE;
-		LoadTexture(bLinear);
+		LoadTexture();
 	}
 
 	SetPatchCount(4, 4);
@@ -841,14 +841,14 @@ void Terrain::LoadDefaults(bool bLinear)
 	Tesselate();
 }
 
-void Terrain::LoadTexture(bool bLinear)
+void Terrain::LoadTexture()
 {
 	m_pTexture->Unload();
 
 	if ((m_nOptions & LC_TERRAIN_TEXTURE) == 0)
 		return;
 
-	if (m_pTexture->LoadFromFile(m_strTexture, bLinear) == false)
+	if (m_pTexture->Load(m_strTexture, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS) == false)
 	{
 //		AfxMessageBox("Could not load terrain texture.", MB_OK|MB_ICONEXCLAMATION);
 		m_nOptions &= ~LC_TERRAIN_TEXTURE;

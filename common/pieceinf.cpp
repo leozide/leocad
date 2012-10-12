@@ -19,7 +19,8 @@ PieceInfo::PieceInfo(int ZipFileIndex)
 
 PieceInfo::~PieceInfo()
 {
-	Unload();
+	if (mRefCount)
+		Unload();
 }
 
 void PieceInfo::CreatePlaceholder(const char* Name)

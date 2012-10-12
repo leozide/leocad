@@ -65,7 +65,7 @@ Project::Project()
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
 	m_pTerrain = new Terrain();
-	m_pBackground = new Texture();
+	m_pBackground = new lcTexture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
@@ -1640,7 +1640,7 @@ void Project::RenderBackground(View* view)
 		glEnable(GL_TEXTURE_2D);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		m_pBackground->MakeCurrent();
+		glBindTexture(GL_TEXTURE_2D, m_pBackground->mTexture);
 
 		float Verts[4][2];
 		float Coords[4][2];
@@ -1653,8 +1653,8 @@ void Project::RenderBackground(View* view)
 		float tw = 1.0f, th = 1.0f;
 		if (m_nScene & LC_SCENE_BG_TILE)
 		{
-			tw = ViewWidth / m_pBackground->m_nWidth;
-			th = ViewHeight / m_pBackground->m_nHeight;
+			tw = ViewWidth / m_pBackground->mWidth;
+			th = ViewHeight / m_pBackground->mHeight;
 		}
 
 		Coords[0][0] = 0; Coords[0][1] = 0;
@@ -1856,7 +1856,7 @@ void Project::RenderScenePieces(View* view)
 					if (!PreviousTexture)
 					{
 						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-						glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 						glEnable(GL_TEXTURE_2D);
 					}
 				}
@@ -1956,7 +1956,7 @@ void Project::RenderScenePieces(View* view)
 						if (!PreviousTexture)
 						{
 							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-							glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+							glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 							glEnable(GL_TEXTURE_2D);
 						}
 					}
@@ -2917,10 +2917,10 @@ void Project::RenderInitialize()
 	glAlphaFunc(GL_GREATER, 0.0625);
 
 	if (m_nScene & LC_SCENE_FLOOR)
-		m_pTerrain->LoadTexture(true);
+		m_pTerrain->LoadTexture();
 
 	if (m_nScene & LC_SCENE_BG)
-		if (!m_pBackground->LoadFromFile(m_strBackground, true))
+		if (!m_pBackground->Load(m_strBackground, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV))
 		{
 			m_nScene &= ~LC_SCENE_BG;
 //			AfxMessageBox ("Could not load background");
@@ -4404,7 +4404,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (SystemDoDialog(LC_DLG_TERRAIN, temp))
 			{
 				*m_pTerrain = *temp;
-				m_pTerrain->LoadTexture(true);
+				m_pTerrain->LoadTexture();
 			}
 			delete temp;
 		} break;

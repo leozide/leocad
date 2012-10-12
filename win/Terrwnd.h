@@ -19,7 +19,7 @@ public:
 	virtual void OnMouseMove(int x, int y, bool Control, bool Shift);
 
 	void ResetCamera();
-	void LoadTexture(bool linear);
+	void LoadTexture();
 	void SetAction(int Action);
 
 	Terrain* mTerrain;

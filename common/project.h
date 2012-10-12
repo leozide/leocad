@@ -46,7 +46,7 @@ class Piece;
 class Camera;
 class Light;
 class Group;
-class Texture;
+class lcTexture;
 class Terrain;
 class PieceInfo;
 class Matrix;
@@ -296,7 +296,7 @@ protected:
 	unsigned long m_nSaveTimer;
 	char m_strModelsPath[LC_MAXPATH];
 	char m_strBackground[LC_MAXPATH];
-	Texture* m_pBackground;
+	lcTexture* m_pBackground;
 
 protected:
 	// File load/save implementation.

@@ -5,8 +5,6 @@
 #include "opengl.h"
 #include "lc_math.h"
 
-class lcTexture;
-
 struct lcVertex
 {
 	lcVector3 Position;

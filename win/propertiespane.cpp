@@ -5,7 +5,6 @@
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
-#include "matrix.h"
 #include "lc_application.h"
 
 BEGIN_MESSAGE_MAP(CPropertiesPane, CDockablePane)

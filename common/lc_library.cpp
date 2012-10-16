@@ -482,6 +482,39 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	return true;
 }
 
+int LibraryMeshSectionCompare(const lcLibraryMeshSection* a, const lcLibraryMeshSection* b, void* Data)
+{
+	if (a->mPrimitiveType != b->mPrimitiveType)
+	{
+		int PrimitiveOrder[LC_MESH_NUM_PRIMITIVE_TYPES] =
+		{
+			LC_MESH_TRIANGLES,
+			LC_MESH_TEXTURED_TRIANGLES,
+			LC_MESH_LINES,
+			LC_MESH_TEXTURED_LINES,
+		};
+
+		for (int PrimitiveType = 0; PrimitiveType < LC_MESH_NUM_PRIMITIVE_TYPES; PrimitiveType++)
+		{
+			int Primitive = PrimitiveOrder[PrimitiveType];
+
+			if (a->mPrimitiveType == Primitive)
+				return -1;
+
+			if (b->mPrimitiveType == Primitive)
+				return 1;
+		}
+	}
+
+	bool TranslucentA = lcIsColorTranslucent(a->mColor);
+	bool TranslucentB = lcIsColorTranslucent(b->mColor);
+
+	if (TranslucentA != TranslucentB)
+		return TranslucentA ? 1 : -1;
+
+	return a->mColor > b->mColor ? -1 : 1;
+}
+
 bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 {
 	lcLibraryMeshData MeshData;
@@ -520,7 +553,14 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	int NumIndices = 0;
 
 	for (int SectionIdx = 0; SectionIdx < MeshData.mSections.GetSize(); SectionIdx++)
-		NumIndices += MeshData.mSections[SectionIdx]->mIndices.GetSize();
+	{
+		lcLibraryMeshSection* Section = MeshData.mSections[SectionIdx];
+
+		Section->mColor = lcGetColorIndex(Section->mColor);
+		NumIndices += Section->mIndices.GetSize();
+	}
+
+	MeshData.mSections.Sort(LibraryMeshSectionCompare, NULL);
 
 	Mesh->Create(MeshData.mSections.GetSize(), MeshData.mVertices.GetSize(), MeshData.mTexturedVertices.GetSize(), NumIndices);
 
@@ -579,7 +619,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		lcMeshSection& DstSection = Mesh->mSections[SectionIdx];
 		lcLibraryMeshSection* SrcSection = MeshData.mSections[SectionIdx];
 
-		DstSection.ColorIndex = lcGetColorIndex(SrcSection->mColorCode);
+		DstSection.ColorIndex = SrcSection->mColor;
 		DstSection.PrimitiveType = (SrcSection->mPrimitiveType == LC_MESH_TRIANGLES || SrcSection->mPrimitiveType == LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
 		DstSection.NumIndices = SrcSection->mIndices.GetSize();
 		DstSection.Texture = SrcSection->mTexture;
@@ -608,7 +648,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 		if (DstSection.PrimitiveType == GL_TRIANGLES)
 		{
-			if (SrcSection->mColorCode == 16)
+			if (SrcSection->mColor == 16)
 				Info->mFlags |= LC_PIECE_HAS_DEFAULT;
 			else
 			{
@@ -1072,7 +1112,7 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 	{
 		Section = mSections[SectionIdx];
 
-		if (Section->mColorCode == ColorCode && Section->mPrimitiveType == PrimitiveType)
+		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType)
 			break;
 	}
 
@@ -1145,7 +1185,7 @@ void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const 
 	{
 		Section = mSections[SectionIdx];
 
-		if (Section->mColorCode == ColorCode && Section->mPrimitiveType == PrimitiveType)
+		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType)
 			break;
 	}
 
@@ -1326,7 +1366,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 	{
 		lcLibraryMeshSection* SrcSection = Data.mSections[SrcSectionIdx];
 		lcLibraryMeshSection* DstSection = NULL;
-		lcuint32 ColorCode = SrcSection->mColorCode == 16 ? CurrentColorCode : SrcSection->mColorCode;
+		lcuint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 		lcTexture* Texture;
 
 		if (SrcSection->mTexture)
@@ -1340,7 +1380,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 		{
 			lcLibraryMeshSection* Section = mSections[DstSectionIdx];
 
-			if (Section->mColorCode == ColorCode && Section->mPrimitiveType == SrcSection->mPrimitiveType && Section->mTexture == Texture)
+			if (Section->mColor == ColorCode && Section->mPrimitiveType == SrcSection->mPrimitiveType && Section->mTexture == Texture)
 			{
 				DstSection = Section;
 				break;
@@ -1425,7 +1465,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 	{
 		lcLibraryMeshSection* SrcSection = Data.mSections[SrcSectionIdx];
 		lcLibraryMeshSection* DstSection = NULL;
-		lcuint32 ColorCode = SrcSection->mColorCode == 16 ? CurrentColorCode : SrcSection->mColorCode;
+		lcuint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 		lcTexture* Texture;
 
 		if (SrcSection->mTexture)
@@ -1439,7 +1479,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		{
 			lcLibraryMeshSection* Section = mSections[DstSectionIdx];
 
-			if (Section->mColorCode == ColorCode && Section->mPrimitiveType == SrcSection->mPrimitiveType && Section->mTexture == Texture)
+			if (Section->mColor == ColorCode && Section->mPrimitiveType == SrcSection->mPrimitiveType && Section->mTexture == Texture)
 			{
 				DstSection = Section;
 				break;

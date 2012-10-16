@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "project.h"
 #include "object.h"
-#include "matrix.h"
 #include "lc_file.h"
 #include "lc_application.h"
 

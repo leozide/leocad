@@ -7,7 +7,6 @@
 #include "str.h"
 
 class PieceInfo;
-class lcTexture;
 class lcZipFile;
 
 #define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
@@ -18,17 +17,18 @@ enum LC_MESH_PRIMITIVE_TYPE
 	LC_MESH_LINES,
 	LC_MESH_TRIANGLES,
 	LC_MESH_TEXTURED_LINES,
-	LC_MESH_TEXTURED_TRIANGLES
+	LC_MESH_TEXTURED_TRIANGLES,
+	LC_MESH_NUM_PRIMITIVE_TYPES
 };
 
 class lcLibraryMeshSection
 {
 public:
-	lcLibraryMeshSection(LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture)
+	lcLibraryMeshSection(LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 Color, lcTexture* Texture)
 		: mIndices(1024, 1024)
 	{
 		mPrimitiveType = PrimitiveType;
-		mColorCode = ColorCode;
+		mColor = Color;
 		mTexture = Texture;
 	}
 
@@ -37,7 +37,7 @@ public:
 	}
 
 	LC_MESH_PRIMITIVE_TYPE mPrimitiveType;
-	lcuint32 mColorCode;
+	lcuint32 mColor;
 	lcTexture* mTexture;
 	ObjArray<lcuint32> mIndices;
 };

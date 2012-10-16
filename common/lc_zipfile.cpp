@@ -3,7 +3,13 @@
 #include "lc_file.h"
 #include "lc_math.h"
 #include <zlib.h>
-#include <zutil.h>
+#include <time.h>
+
+#if MAX_MEM_LEVEL >= 8
+#  define DEF_MEM_LEVEL 8
+#else
+#  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
+#endif
 
 lcZipFile::lcZipFile()
 {
@@ -71,7 +77,7 @@ lcuint64 lcZipFile::SearchCentralDir()
 	lcuint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();
-	MaxBack = lcMin(SizeFile, 0xffff);
+	MaxBack = lcMin(SizeFile, 0xffffU);
 	BackRead = 4;
 	PosFound = 0;
 
@@ -114,7 +120,7 @@ lcuint64 lcZipFile::SearchCentralDir64()
 	lcuint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();
-	MaxBack = lcMin(SizeFile, 0xffff);
+	MaxBack = lcMin(SizeFile, 0xffffU);
 	BackRead = 4;
 	PosFound = 0;
 

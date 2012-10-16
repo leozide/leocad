@@ -16,7 +16,7 @@
 #include "toolbar.h"
 #include "message.h"
 #include "preview.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 #include "gtkmisc.h"
 
@@ -321,14 +321,14 @@ int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
 
 void fill_piecetree()
 {
-  PiecesLibrary* Lib = lcGetPiecesLibrary();
+  lcPiecesLibrary* Lib = lcGetPiecesLibrary();
   GtkTreeStore* model = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(piecetree)));
 
-  for (int i = 0; i < Lib->GetNumCategories(); i++)
+  for (int i = 0; i < Lib->mCategories.GetSize(); i++)
   {
     GtkTreeIter iter;
     gtk_tree_store_append(model, &iter, NULL);
-    gtk_tree_store_set(model, &iter, 0, (const char*)Lib->GetCategoryName(i), 1, NULL, -1);
+    gtk_tree_store_set(model, &iter, 0, (const char*)Lib->mCategories[i].Name, 1, NULL, -1);
 
     PtrArray<PieceInfo> SinglePieces, GroupedPieces;
 
@@ -356,7 +356,7 @@ void fill_piecetree()
 	  GtkTreeIter pat;
 	  PieceInfo* child = Patterns[k];
 
-	  if (!Lib->PieceInCategory(child, Lib->GetCategoryKeywords(i)))
+	  if (!Lib->PieceInCategory(child, Lib->mCategories[i].Keywords))
 	    continue;
 
 	  const char* desc = child->m_strDescription;
@@ -472,7 +472,7 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
   if (event->keyval == GDK_Return)
   {
     const gchar* str = gtk_entry_get_text(GTK_ENTRY(pieceentry));
-    PiecesLibrary* Lib = lcGetPiecesLibrary();
+    lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 
     // Save search.
     int Index = Lib->FindCategoryIndex("Search Results");
@@ -480,7 +480,7 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
     if (Index == -1)
     {
       Lib->AddCategory("Search Results", (const char*)str);
-      Index = Lib->GetNumCategories() - 1;
+      Index = Lib->mCategories.GetSize() - 1;
     }
     else
       Lib->SetCategory(Index, "Search Results", (const char*)str);
@@ -545,15 +545,15 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
 
 static void piececombo_changed(GtkWidget *widget, gpointer data)
 {
-  PiecesLibrary *pLib = lcGetPiecesLibrary();
+  lcPiecesLibrary *pLib = lcGetPiecesLibrary();
   const gchar* str;
   int i;
 
   str = gtk_entry_get_text(GTK_ENTRY(pieceentry));
 
-  for (i = 0; i < pLib->GetPieceCount(); i++)
+  for (i = 0; i < pLib->mPieces.GetSize(); i++)
   {
-    PieceInfo* pInfo = pLib->GetPieceInfo(i);
+    PieceInfo* pInfo = pLib->mPieces[i];
 
     if (strcmp(str, pInfo->m_strDescription) == 0)
     {
@@ -1045,9 +1045,9 @@ GtkWidget* create_piecebar(GtkWidget *window, GLWindow *share)
 
   fill_piecetree();
 
-  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
+  PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("3005", false);
   if (!Info)
-    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+    Info = lcGetPiecesLibrary()->mPieces[0];
   if (Info)
   {
     lcGetActiveProject()->SetCurrentPiece(Info);

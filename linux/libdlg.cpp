@@ -11,7 +11,7 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "system.h"
-#include "library.h"
+#include "lc_library.h"
 #include "lc_application.h"
 
 bool LibraryDialog::HandleCommand(int id) 
@@ -47,83 +47,6 @@ bool LibraryDialog::HandleCommand(int id)
 
 			return true;
 		}
-*/
-
-		case LC_LIBDLG_FILE_MERGEUPDATE:
-		{
-                        char filename[PATH_MAX];
-			LC_FILEOPENDLG_OPTS opts;
-
-			strcpy(opts.path, "");
-			opts.type = LC_FILEOPENDLG_LUP;
-
-			if (SystemDoDialog(LC_DLG_FILE_OPEN, filename))
-			{
-				lcGetPiecesLibrary()->LoadUpdate(filename);
-//				UpdateTree();
-			}
-
-			return true;
-		}
-
-		case LC_LIBDLG_FILE_IMPORTPIECE:
-		{
-                        char filename[PATH_MAX];
-			LC_FILEOPENDLG_OPTS opts;
-
-			strcpy(opts.path, Sys_ProfileLoadString ("Default", "LDraw Pieces Path", ""));
-			opts.type = LC_FILEOPENDLG_DAT;
-
-			if (SystemDoDialog (LC_DLG_FILE_OPEN, filename))
-			{
-/*
-				for (int i = 0; i < opts.numfiles; i++)
-				{
-					lcGetPiecesLibrary ()->ImportLDrawPiece (opts.filenames[i]);
-					free (opts.filenames[i]);
-				}
-				free (opts.filenames);
-*/
-				lcDiskFile newbin, newidx, oldbin, oldidx;
-				char file1[LC_MAXPATH], file2[LC_MAXPATH];
-
-				strcpy(file1, lcGetPiecesLibrary()->GetLibraryPath());
-				strcat(file1, "pieces-b.old");
-				remove(file1);
-				strcpy(file2, lcGetPiecesLibrary()->GetLibraryPath());
-				strcat(file2, "pieces.bin");
-				rename(file2, file1);
-
-				if ((!oldbin.Open(file1, "rb")) || (!newbin.Open(file2, "wb")))
-					break;
-
-				strcpy(file1, lcGetPiecesLibrary()->GetLibraryPath());
-				strcat(file1, "pieces-i.old");
-				remove(file1);
-				strcpy(file2, lcGetPiecesLibrary()->GetLibraryPath());
-				strcat(file2, "pieces.idx");
-				rename(file2, file1);
-
-				if ((!oldidx.Open(file1, "rb")) || (!newidx.Open(file2, "wb")))
-					break;
-
-				if (!lcGetPiecesLibrary()->ImportLDrawPiece(filename, &newidx, &newbin, &oldidx, &oldbin))
-					break;
-
-//				Sys_ProfileSaveString ("Default", "LDraw Pieces Path", filename);
-
-//				UpdateList();
-			}
-
-			return true;
-		}
-
-/*
-		case LC_LIBDLG_FILE_TEXTURES:
-		{
-			CTexturesDlg dlg;
-			dlg.DoModal();
-		} break;
 */
 
 		case LC_LIBDLG_CATEGORY_RESET:
@@ -211,40 +134,6 @@ bool LibraryDialog::HandleCommand(int id)
 
 			UpdateTree();
 
-*/
-			return true;
-		}
-
-		case LC_LIBDLG_PIECE_NEW:
-		{
-			return true;
-		}
-
-		case LC_LIBDLG_PIECE_EDIT:
-		{
-			return true;
-		}
-
-		case LC_LIBDLG_PIECE_DELETE:
-		{
-/*
-			PtrArray<PieceInfo> Pieces;
-
-			for (int i = 0; i < m_List.GetItemCount(); i++)
-			{
-				if (m_List.GetItemState(i, LVIS_SELECTED))
-					Pieces.Add((PieceInfo*)m_List.GetItemData(i));
-			}
-
-			if (Pieces.GetSize() == 0)
-				return true;
-
-			if (SystemDoMessageBox ("Are you sure you want to permanently delete the selected pieces?", LC_MB_YESNO|LC_MB_ICONQUESTION) != LC_YES)
-				return true;
-
-			lcGetPiecesLibrary()->DeletePieces(Pieces);
-
-			UpdateList();
 */
 			return true;
 		}

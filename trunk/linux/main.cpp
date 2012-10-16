@@ -21,7 +21,7 @@
 #include "dialogs.h"
 #include "view.h"
 #include "lc_application.h"
-#include "library.h"
+#include "lc_library.h"
 #include "preview.h"
 #include "camera.h"
 
@@ -583,7 +583,10 @@ int main (int argc, char* argv[])
   g_App = new lcApplication();
   main_window = new MainWnd();
 
-  if (!g_App->Initialize(argc, argv, lib_path))
+  char cache_path[LC_MAXPATH];
+  sprintf(cache_path, "%s/leocad/", g_get_user_cache_dir());
+
+  if (!g_App->Initialize(argc, argv, lib_path, cache_path))
     return 1;
 
   if (pfnglXQueryExtension (GDK_DISPLAY (), NULL, NULL) != True)
@@ -741,9 +744,9 @@ int main (int argc, char* argv[])
 			    pieces_width);
 
 
-  PieceInfo* Info = lcGetPiecesLibrary()->FindPieceInfo("3005");
+  PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("3005", false);
   if (!Info)
-    Info = lcGetPiecesLibrary()->GetPieceInfo(0);
+    Info = lcGetPiecesLibrary()->mPieces[0];
   if (Info)
   {
     lcGetActiveProject()->SetCurrentPiece(Info);

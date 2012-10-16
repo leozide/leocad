@@ -118,6 +118,8 @@ bool lcPiecesLibrary::Load(const char* SearchPath, const char* CacheFilePath)
 
 bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePath)
 {
+	Unload();
+
 	mZipFile = new lcZipFile();
 
 	if (!mZipFile->OpenRead(FileName))
@@ -126,8 +128,6 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePat
 		mZipFile = NULL;
 		return false;
 	}
-
-	Unload();
 
 	for (int FileIdx = 0; FileIdx < mZipFile->mFiles.GetSize(); FileIdx++)
 	{
@@ -221,7 +221,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePat
 				    VersionFile.ReadU64(&LibrarySize, 1) && VersionFile.ReadU64(&LibraryModified, 1))
 				{
 					if (CacheVersion == LC_LIBRARY_CACHE_VERSION && CacheFlags == LC_LIBRARY_CACHE_ARCHIVE &&
-					    LibrarySize == LibraryStat.st_size && LibraryModified == LibraryStat.st_mtime)
+					    LibrarySize == (lcuint64)LibraryStat.st_size && LibraryModified == (lcuint64)LibraryStat.st_mtime)
 						CacheValid = true;
 				}
 			}
@@ -235,7 +235,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePat
 			{
 				lcuint32 NumFiles;
 
-				if (IndexFile.ReadU32(&NumFiles, 1) && NumFiles == mPieces.GetSize())
+				if (IndexFile.ReadU32(&NumFiles, 1) && NumFiles == (lcuint32)mPieces.GetSize())
 				{
 					for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 					{
@@ -275,7 +275,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePat
 
 			for (;;)
 			{
-				if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < sizeof(Info->m_strDescription) - 1)
+				if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
 				{
 					*Dst++ = *Src++;
 					continue;
@@ -319,6 +319,8 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePat
 
 bool lcPiecesLibrary::OpenDirectory(const char* Path)
 {
+	Unload();
+
 	char FileName[LC_MAXPATH];
 	ObjArray<String> FileList;
 
@@ -328,7 +330,6 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	Sys_GetFileList(FileName, FileList);
 
-	Unload();
 	mPieces.Expand(FileList.GetSize());
 
 	for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
@@ -337,7 +338,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		const char* Src = (const char*)FileList[FileIdx] + PathLength;
 		char* Dst = Name;
 
-		while (*Src && Dst - Name < sizeof(Name))
+		while (*Src && Dst - Name < (int)sizeof(Name))
 		{
 			if (*Src >= 'a' && *Src <= 'z')
 				*Dst = *Src + 'A' - 'a';
@@ -374,7 +375,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 		for (;;)
 		{
-			if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < sizeof(Info->m_strDescription) - 1)
+			if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
 			{
 				*Dst++ = *Src++;
 				continue;
@@ -394,7 +395,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	const char* PrimitiveDirectories[] = { "p/", "p/48/", "parts/s/" };
 	bool SubFileDirectories[] = { false, false, true };
 
-	for (int DirectoryIdx = 0; DirectoryIdx < sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0]); DirectoryIdx++)
+	for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
 	{
 		strcpy(FileName, Path);
 		PathLength = strlen(FileName);
@@ -410,7 +411,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 			const char* Src = (const char*)FileList[FileIdx] + PathLength;
 			char* Dst = Name;
 
-			while (*Src && Dst - Name < sizeof(Name))
+			while (*Src && Dst - Name < (int)sizeof(Name))
 			{
 				if (*Src >= 'a' && *Src <= 'z')
 					*Dst = *Src + 'A' - 'a';
@@ -451,7 +452,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		const char* Src = (const char*)FileList[FileIdx] + PathLength;
 		char* Dst = Name;
 
-		while (*Src && Dst - Name < sizeof(Name))
+		while (*Src && Dst - Name < (int)sizeof(Name))
 		{
 			if (*Src >= 'a' && *Src <= 'z')
 				*Dst = *Src + 'A' - 'a';
@@ -1104,7 +1105,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector3* Vertices)
 {
-	lcLibraryMeshSection* Section;
+	lcLibraryMeshSection* Section = NULL;
 	int SectionIdx;
 	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_LINES : LC_MESH_TRIANGLES;
 
@@ -1177,7 +1178,7 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 
 void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices)
 {
-	lcLibraryMeshSection* Section;
+	lcLibraryMeshSection* Section = NULL;
 	int SectionIdx;
 	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
 

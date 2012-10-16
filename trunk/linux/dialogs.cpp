@@ -2420,13 +2420,13 @@ int groupdlg_execute(void* param)
 // =============================================================================
 // Piece Library Dialog
 
-#include "library.h"
+#include "lc_library.h"
 #include "pieceinf.h"
 #include "lc_application.h"
 
 static void librarydlg_update_list (GtkWidget *dlg)
 {
-	PiecesLibrary* Lib = g_App->GetPiecesLibrary();
+	lcPiecesLibrary* Lib = g_App->GetPiecesLibrary();
 	GtkCTree* ctree = GTK_CTREE(gtk_object_get_data(GTK_OBJECT(dlg), "tree"));
 	GtkCList* clist = GTK_CLIST(gtk_object_get_data(GTK_OBJECT(dlg), "list"));
 	int row;
@@ -2457,18 +2457,18 @@ static void librarydlg_update_list (GtkWidget *dlg)
 		if (!strcmp(CategoryName, "Unassigned"))
 		{
 			// Test each piece against all categories.
-			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			for (int i = 0; i < Lib->mPieces.GetSize(); i++)
 			{
-				PieceInfo* Info = Lib->GetPieceInfo(i);
+				PieceInfo* Info = Lib->mPieces[i];
 				int j;
 
-				for (j = 0; j < Lib->GetNumCategories(); j++)
+				for (j = 0; j < Lib->mCategories.GetSize(); j++)
 				{
-					if (Lib->PieceInCategory(Info, Lib->GetCategoryKeywords(j)))
+					if (Lib->PieceInCategory(Info, Lib->mCategories[j].Keywords))
 						break;
 				}
 
-				if (j == Lib->GetNumCategories())
+				if (j == Lib->mCategories.GetSize())
 				{
 					char *text = Info->m_strDescription;
 					row = gtk_clist_append(clist, &text);
@@ -2478,9 +2478,9 @@ static void librarydlg_update_list (GtkWidget *dlg)
 		}
 		else if (!strcmp(CategoryName, "Pieces"))
 		{
-			for (int i = 0; i < Lib->GetPieceCount(); i++)
+			for (int i = 0; i < Lib->mPieces.GetSize(); i++)
 			{
-				PieceInfo* Info = Lib->GetPieceInfo(i);
+				PieceInfo* Info = Lib->mPieces[i];
 
 				char *text = Info->m_strDescription;
 				row = gtk_clist_append(clist, &text);
@@ -2496,7 +2496,7 @@ static void librarydlg_update_list (GtkWidget *dlg)
 
 static void librarydlg_update_tree (GtkWidget *dlg)
 {
-  PiecesLibrary *lib = g_App->GetPiecesLibrary();
+  lcPiecesLibrary *lib = g_App->GetPiecesLibrary();
   GtkCTree *ctree = GTK_CTREE (gtk_object_get_data (GTK_OBJECT (dlg), "tree"));
   GtkCTreeNode *parent;
   const char *text = "Pieces";
@@ -2506,9 +2506,9 @@ static void librarydlg_update_tree (GtkWidget *dlg)
 
   parent = gtk_ctree_insert_node (ctree, NULL, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
 
-  for (int i = 0; i < lib->GetNumCategories(); i++)
+  for (int i = 0; i < lib->mCategories.GetSize(); i++)
   {
-    text = lib->GetCategoryName(i);
+    text = lib->mCategories[i].Name;
     gtk_ctree_insert_node (ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, TRUE, TRUE);
   }
 
@@ -2541,7 +2541,7 @@ int librarydlg_execute (void *param)
   GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *item, *menu, *menubar, *handle;
   GtkAccelGroup *accel;
   int loop = 1, ret = LC_CANCEL;
-  PiecesLibrary *lib = g_App->GetPiecesLibrary();
+  lcPiecesLibrary *lib = g_App->GetPiecesLibrary();
 
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
@@ -2586,12 +2586,6 @@ int librarydlg_execute (void *param)
   item = create_menu_item (menu, "_Print Catalog...", accel,
 			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_PRINTCATALOG, "menu_print_catalog");
   gtk_widget_set_sensitive (item, FALSE);
-*/
-  item = create_menu_item (menu, "Load _Update...", accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_MERGEUPDATE, "menu_file_merge_update");
-  item = create_menu_item (menu, "_Import Piece...", accel,
-			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_IMPORTPIECE, "menu_file_import_piece");
-/*
   menu_separator (menu);
   item = create_menu_item (menu, "Re_turn", accel,
 			   GTK_SIGNAL_FUNC (librarydlg_command), GTK_OBJECT (dlg), LC_LIBDLG_FILE_RETURN, "menu_file_return");

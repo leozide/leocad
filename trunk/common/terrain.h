@@ -2,7 +2,6 @@
 #define _TERRAIN_H_
 
 class Camera;
-class lcTexture;
 
 class TerrainPatch
 {

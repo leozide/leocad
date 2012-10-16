@@ -46,7 +46,6 @@ class Piece;
 class Camera;
 class Light;
 class Group;
-class lcTexture;
 class Terrain;
 class PieceInfo;
 class Matrix;

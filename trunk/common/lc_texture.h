@@ -13,7 +13,6 @@ public:
 	lcTexture();
 	~lcTexture();
 
-	bool Load();
 	bool Load(const char* FileName, int Flags = 0);
 	bool Load(lcFile& File, int Flags = 0);
 	void Unload();
@@ -42,6 +41,10 @@ public:
 	int mHeight;
 	char mName[LC_MAXPATH];
 	GLuint mTexture;
+
+protected:
+	bool Load();
+
 	int mRefCount;
 };
 

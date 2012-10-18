@@ -212,9 +212,6 @@
     <ClCompile Include="..\common\mainwnd.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\matrix.cpp">
-      <Filter>Common Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\message.cpp">
       <Filter>Common Source Files</Filter>
     </ClCompile>
@@ -745,9 +742,6 @@
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mainwnd.h">
-      <Filter>Common Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\matrix.h">
       <Filter>Common Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\message.h">

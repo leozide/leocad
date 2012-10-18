@@ -7,14 +7,14 @@
 #include "array.h"
 #include "lc_math.h"
 
-typedef enum 
+enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,
 	LC_TRACK_START_LEFT,
 	LC_TRACK_LEFT,
 	LC_TRACK_START_RIGHT,
 	LC_TRACK_RIGHT
-} LC_MOUSE_TRACK;
+};
 
 // Mouse control overlays.
 enum LC_OVERLAY_MODES
@@ -48,7 +48,6 @@ class Light;
 class Group;
 class Terrain;
 class PieceInfo;
-class Matrix;
 class View;
 class Image;
 class TexFont;
@@ -303,7 +302,7 @@ protected:
 	bool DoFileSave();
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileSave(lcFile* file, bool bUndo);
-	void FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray);
+	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray);
 	void FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const;
 
 public:

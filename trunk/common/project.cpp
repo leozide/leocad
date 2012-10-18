@@ -11,7 +11,6 @@
 #include <math.h>
 #include <locale.h>
 #include "opengl.h"
-#include "matrix.h"
 #include "pieceinf.h"
 #include "lc_texture.h"
 #include "piece.h"
@@ -443,7 +442,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		else
 		{
 			char name[LC_PIECE_NAME_LEN];
-			float pos[3], rot[3], param[4];
+			float pos[3], rot[3];
 			lcuint8 color, step, group;
 		
 			file->ReadFloats(pos, 3);
@@ -457,16 +456,18 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			if (pInfo != NULL)
 			{
 				Piece* pPiece = new Piece(pInfo);
-				Matrix mat;
 
 				pPiece->Initialize(pos[0], pos[1], pos[2], step, 1);
 				pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
-				mat.CreateOld(0,0,0, rot[0],rot[1],rot[2]);
-				mat.ToAxisAngle(param);
-				pPiece->ChangeKey(1, false, false, param, LC_PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, param, LC_PK_ROTATION);
+			
+				lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
+				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+				AxisAngle[3] *= LC_RTOD;
+
+				pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 //				pPiece->SetGroup((Group*)group);
 				SystemPieceComboAdd(pInfo->m_strDescription);
 			}
@@ -952,7 +953,7 @@ void Project::FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const
 	}
 }
 
-void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray)
+void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray)
 {
 	char buf[1024];
 
@@ -979,9 +980,10 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 			&fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 15)
 			continue;
 
-		Matrix incmat, tmpmat;
-		incmat.FromLDraw(fmat);
-		tmpmat.Multiply(*prevmat, incmat);
+		lcMatrix44 IncludeTransform(lcVector4(fmat[3], fmat[9], -fmat[6], 0.0f), lcVector4(fmat[5], fmat[11], -fmat[8], 0.0f),
+		                            lcVector4(-fmat[4], -fmat[10], fmat[7], 0.0f), lcVector4(fmat[0], fmat[2], -fmat[1], 0.0f));
+
+		IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 
 		if (cmd == 1)
 		{
@@ -1004,18 +1006,18 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, false);
 				if (pInfo != NULL)
 				{
-					float x, y, z, rot[4];
 					Piece* pPiece = new Piece(pInfo);
 					read = false;
 
-					tmpmat.GetTranslation(&x, &y, &z);
-					pPiece->Initialize(x, y, z, *nStep, 1);
+					lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
+					AxisAngle[3] *= LC_RTOD;
+
+					pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].y, IncludeTransform[3].z, *nStep, 1);
 					pPiece->SetColorCode(cl);
 					pPiece->CreateName(m_pPieces);
 					AddPiece(pPiece);
-					tmpmat.ToAxisAngle(rot);
-					pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
-					pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
+					pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+					pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 					SystemPieceComboAdd(pInfo->m_strDescription);
 					(*nOk)++;
 				}
@@ -1028,7 +1030,7 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 				{
 					if (stricmp(FileArray[i]->FileName, pn) == 0)
 					{
-						FileReadLDraw(&FileArray[i]->File, &tmpmat, nOk, cl, nStep, FileArray);
+						FileReadLDraw(&FileArray[i]->File, IncludeTransform, nOk, cl, nStep, FileArray);
 						read = false;
 						break;
 					}
@@ -1042,7 +1044,7 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 
 				if (tf.Open(pn, "rt"))
 				{
-					FileReadLDraw(&tf, &tmpmat, nOk, cl, nStep, FileArray);
+					FileReadLDraw(&tf, IncludeTransform, nOk, cl, nStep, FileArray);
 					read = false;
 				}
 			}
@@ -1052,18 +1054,18 @@ void Project::FileReadLDraw(lcFile* file, Matrix* prevmat, int* nOk, int DefColo
 				// Create a placeholder.
 				PieceInfo* Info = lcGetPiecesLibrary()->CreatePlaceholder(tmp);
 
-				float x, y, z, rot[4];
 				Piece* pPiece = new Piece(Info);
 				read = false;
 
-				tmpmat.GetTranslation(&x, &y, &z);
-				pPiece->Initialize(x, y, z, *nStep, 1);
+				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
+				AxisAngle[3] *= LC_RTOD;
+
+				pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].y, IncludeTransform[3].z, *nStep, 1);
 				pPiece->SetColorCode(cl);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
-				tmpmat.ToAxisAngle(rot);
-				pPiece->ChangeKey(1, false, false, rot, LC_PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 				SystemPieceComboAdd(Info->m_strDescription);
 				(*nOk)++;
 			}
@@ -1195,13 +1197,9 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			{
 				if ((pPiece->IsVisible(i, false)) && (pPiece->GetStepShow() == i))
 				{
-					float f[12];
-					const lcVector3& position = pPiece->mPosition;
-					const lcVector4& rotation = pPiece->mRotation;
-					Matrix mat(rotation, position);
-					mat.ToLDraw(f);
+					const float* f = pPiece->mModelWorld;
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-					         pPiece->mColorCode, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11], pPiece->mPieceInfo->m_strName);
+					         pPiece->mColorCode, f[12] * 25.0f, -f[14] * 25.0f, f[13] *25.0f, f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], pPiece->mPieceInfo->m_strName);
 					file.WriteBuffer(buf, strlen(buf));
 				}
 			}
@@ -1387,12 +1385,12 @@ bool Project::OnOpenDocument (const char* lpszPathName)
     if (datfile || mpdfile)
     {
       int ok = 0, step = 1;
-      Matrix mat;
+      lcMatrix44 mat = lcMatrix44Identity();
 
       if (mpdfile)
-        FileReadLDraw(&FileArray[0]->File, &mat, &ok, 16, &step, FileArray);
+        FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
       else
-        FileReadLDraw(&file, &mat, &ok, 16, &step, FileArray);
+        FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
 
       m_nCurStep = step;
       SystemUpdateTime(false, m_nCurStep, 255);
@@ -4163,16 +4161,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 			{
 				int Index = Library->mPieces.FindIndex(piece->mPieceInfo);
-				float fl[12];
 				int Color;
 
 				Color = piece->mColorIndex;
 				const char* Suffix = lcIsColorTranslucent(Color) ? "_clear" : "";
 
-				const lcVector3& pos = piece->mPosition;
-				const lcVector4& rot = piece->mRotation;
-				Matrix mat(rot, pos);
-				mat.ToLDraw(fl);
+				const float* f = piece->mModelWorld;
 
 				if (PieceFlags[Index] & LGEO_PIECE_SLOPE)
 				{
@@ -4180,12 +4174,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					        " object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					        " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
 					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], PieceTable + Index * LC_PIECE_NAME_LEN, &ColorTable[Color * LC_MAX_COLOR_NAME],
-					       -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+					       -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13], f[12], f[14]);
 				}
 				else
 				{
 					sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], -fl[11], -fl[5], fl[8], -fl[9], -fl[3], fl[6], -fl[10], -fl[4], fl[7], pos[1], pos[0], pos[2]);
+					        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13], f[12], f[14]);
 				}
 
 				POVFile.WriteLine(Line);
@@ -4314,17 +4308,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				float tmp[3];
-				const lcVector3& pos = pPiece->mPosition;
-				const lcVector4& rot = pPiece->mRotation;
-				Matrix mat(rot, pos);
+				const lcMatrix44& ModelWorld = pPiece->mModelWorld;
 				PieceInfo* pInfo = pPiece->mPieceInfo;
 				float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
 				for (int i = 0; i < pInfo->mMesh->mNumVertices * 3; i += 3)
 				{
-					mat.TransformPoint(tmp, &Verts[i]);
-					sprintf(Line, "v %.2f %.2f %.2f\n", tmp[0], tmp[1], tmp[2]);
+					lcVector3 Vertex = lcMul31(lcVector3(Verts[i], Verts[i+1], Verts[i+2]), ModelWorld);
+					sprintf(Line, "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
 					OBJFile.WriteLine(Line);
 				}
 
@@ -4895,7 +4886,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					if (Wizard.m_Info[i] == NULL)
 						continue;
 
-					Matrix mat;
 					Piece* pPiece = new Piece(Wizard.m_Info[i]);
 
 					lcVector4& Position = Wizard.m_Matrices[i][3];
@@ -5000,26 +4990,33 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					for (i = 0; i < opts.n1DCount; i++)
 					{
-						lcVector3 pos = pPiece->mPosition;
-						lcVector4 param = pPiece->mRotation;
-						Matrix mat(param, pos);
+						lcMatrix44 ModelWorld;
+						lcVector3 Position;
 
 						if (sel == 1)
 						{
-							mat.GetTranslation(pos);
-							mat.Rotate(i*opts.fRotate[0], 1, 0, 0);
-							mat.Rotate(i*opts.fRotate[1], 0, 1, 0);
-							mat.Rotate(i*opts.fRotate[2], 0, 0, 1);
-							mat.SetTranslation(pos);
+							ModelWorld = lcMul(pPiece->mModelWorld, lcMatrix44RotationX(i * opts.fRotate[0] * LC_DTOR));
+							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(i * opts.fRotate[1] * LC_DTOR));
+							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(i * opts.fRotate[2] * LC_DTOR));
+
+							Position = pPiece->mPosition;
 						}
 						else
 						{
-							mat.RotateCenter(i*opts.fRotate[0],1,0,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-							mat.RotateCenter(i*opts.fRotate[1],0,1,0,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
-							mat.RotateCenter(i*opts.fRotate[2],0,0,1,(bs[0]+bs[3])/2,(bs[1]+bs[4])/2,(bs[2]+bs[5])/2);
+							lcVector4 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2, 0.0f);
+							ModelWorld = pPiece->mModelWorld;
+
+							ModelWorld.r[3] -= Center;
+							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationX(i * opts.fRotate[0] * LC_DTOR));
+							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(i * opts.fRotate[1] * LC_DTOR));
+							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(i * opts.fRotate[2] * LC_DTOR));
+							ModelWorld.r[3] += Center;
+
+							Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
 						}
-						mat.ToAxisAngle(param);
-						mat.GetTranslation(pos);
+
+						lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+						AxisAngle[3] *= LC_RTOD;
 
 						if (i != 0)
 						{
@@ -5031,10 +5028,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							else
 								pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
-							pLast->Initialize(pos[0]+i*opts.fMove[0], pos[1]+i*opts.fMove[1], pos[2]+i*opts.fMove[2], m_nCurStep, m_nCurFrame);
+							pLast->Initialize(Position[0]+i*opts.fMove[0], Position[1]+i*opts.fMove[1], Position[2]+i*opts.fMove[2], m_nCurStep, m_nCurFrame);
 							pLast->SetColorIndex(pPiece->mColorIndex);
-							pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
-							pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
+							pLast->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+							pLast->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 						}
 
 						if (opts.nArrayDimension == 0)
@@ -5052,10 +5049,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								else
 									pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
-								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2], m_nCurStep, m_nCurFrame);
+								pLast->Initialize(Position[0]+i*opts.fMove[0]+j*opts.f2D[0], Position[1]+i*opts.fMove[1]+j*opts.f2D[1], Position[2]+i*opts.fMove[2]+j*opts.f2D[2], m_nCurStep, m_nCurFrame);
 								pLast->SetColorIndex(pPiece->mColorIndex);
-								pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
-								pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
+								pLast->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+								pLast->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 							}
 
 							if (opts.nArrayDimension == 1)
@@ -5071,10 +5068,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 								else
 									pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
-								pLast->Initialize(pos[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], pos[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], pos[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_nCurStep, m_nCurFrame);
+								pLast->Initialize(Position[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], Position[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], Position[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_nCurStep, m_nCurFrame);
 								pLast->SetColorIndex(pPiece->mColorIndex);
-								pLast->ChangeKey(1, false, false, param, LC_PK_ROTATION);
-								pLast->ChangeKey(1, true, false, param, LC_PK_ROTATION);
+								pLast->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+								pLast->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 							}
 						}
 					}
@@ -6310,15 +6307,8 @@ void Project::GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lc
 	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
 	SnapVector(Dist);
 
-	lcVector3 pos = OffsetPiece->mPosition;
-	const lcVector4& rot = OffsetPiece->mRotation;
-
-	Matrix mat(rot, pos);
-	mat.Translate(Dist[0], Dist[1], Dist[2]);
-	mat.GetTranslation(pos);
-
-	Position = lcVector3(pos[0], pos[1], pos[2]);
-	Rotation = lcVector4(rot[0], rot[1], rot[2], rot[3]);
+	Position = lcMul31(Dist, OffsetPiece->mModelWorld);
+	Rotation = OffsetPiece->mRotation;
 }
 
 // Try to find a good starting position/orientation for a new piece.

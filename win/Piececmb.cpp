@@ -42,50 +42,47 @@ void CPiecesCombo::OnEditupdate()
 	if (!m_bAutoComplete)
 		return;
 
-	char str[66];
+	char str[128];
+	int Length = GetWindowText(str, 128);
+
+	if (!Length)
+		return;
+
 	lcPiecesLibrary *pLib = lcGetPiecesLibrary();
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
-	PieceInfo* pInfo;
+	PieceInfo* NewPiece = NULL;
+	bool DescriptionMatch = false;
 
-	if (int n = GetWindowText(str, 65))
+	for (int i = 0; i < pLib->mPieces.GetSize(); i++)
 	{
-		char newstr[66];
-		int sel = -1;
-		strcpy (newstr, "Z");
-		for (int i = 0; i < pLib->mPieces.GetSize(); i++)
+		PieceInfo* Info = pLib->mPieces[i];
+
+		if ((Info->m_strDescription[0] == '~') && !pBar->m_bSubParts)
+			continue;
+
+		if (_strnicmp(str, Info->m_strDescription, Length) == 0)
 		{
-			pInfo = pLib->mPieces[i];
-
-			if ((pInfo->m_strDescription[0] == '~') && !pBar->m_bSubParts)
-				continue;
-
-			if (_strnicmp (str, pInfo->m_strDescription, n) == 0)
+			if (!NewPiece || _stricmp(NewPiece->m_strDescription, Info->m_strDescription) > 0)
 			{
-				if (_stricmp (newstr, pInfo->m_strDescription) > 0)
-				{
-					strcpy (newstr, pInfo->m_strDescription);
-					sel = i;
-				}
+				NewPiece = Info;
+				DescriptionMatch = true;
 			}
-			else
-				if (_strnicmp (str, pInfo->m_strName, n) == 0)
-				{
-					if (_stricmp (newstr, pInfo->m_strName) > 0)
-					{
-						strcpy (newstr, pInfo->m_strName);
-						sel = i;
-					}
-				}
 		}
-
-		if (sel >= 0)
-			SelectPiece(pLib->mPieces[sel]);
-
-		if (strlen(newstr) > 1)
+		else if (_strnicmp(str, Info->m_strName, Length) == 0)
 		{
-			SetWindowText(newstr);
-			SetEditSel(n, -1);
+			if (!NewPiece || _stricmp(NewPiece->m_strName, Info->m_strName) > 0)
+			{
+				NewPiece = Info;
+				DescriptionMatch = false;
+			}
 		}
+	}
+
+	if (NewPiece)
+	{
+		SelectPiece(NewPiece);
+		SetWindowText(DescriptionMatch ? NewPiece->m_strDescription : NewPiece->m_strName);
+		SetEditSel(Length, -1);
 	}
 }
 
@@ -122,11 +119,14 @@ BOOL CPiecesCombo::PreTranslateMessage(MSG* pMsg)
 
 void CPiecesCombo::OnSelchange() 
 {
-	char str[66];
+	char str[128];
 	CPiecesBar* pBar = (CPiecesBar*)GetParent();
 	lcPiecesLibrary* pLib = lcGetPiecesLibrary();
 
-	if (!GetLBText (GetCurSel(), str))
+	if (GetLBTextLen(GetCurSel()) >= sizeof(str))
+		return;
+
+	if (!GetLBText(GetCurSel(), str))
 		return;
 
 	for (int i = 0; i < pLib->mPieces.GetSize(); i++)
@@ -134,6 +134,8 @@ void CPiecesCombo::OnSelchange()
 		PieceInfo* pInfo = pLib->mPieces[i];
 
 		if (strcmp(str, pInfo->m_strDescription) == 0)
+			SelectPiece(pInfo);
+		else if (strcmp(str, pInfo->m_strName) == 0)
 			SelectPiece(pInfo);
 	}
 }

@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "opengl.h"
-#include "matrix.h"
 #include "pieceinf.h"
 #include "piece.h"
 #include "group.h"
@@ -86,12 +85,12 @@ bool Piece::FileLoad(lcFile& file, char* name)
   if (version < 9)
   {
     lcuint16 time;
-    float param[4];
     lcuint8 type;
 
     if (version > 5)
     {
       lcuint32 keys;
+      float param[4];
 
       file.ReadU32(&keys, 1);
       while (keys--)
@@ -121,54 +120,55 @@ bool Piece::FileLoad(lcFile& file, char* name)
 
         while (ch--)
         {
-          Matrix mat;
-          if (version > 3)
-          {
-            float m[16];
-            file.ReadFloats(m, 16);
-            mat.FromFloat (m);
-          }
-          else
-          {
-            float move[3], rotate[3];
-            file.ReadFloats(move, 3);
-            file.ReadFloats(rotate, 3);
-            mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
-          }
+			lcMatrix44 ModelWorld;
 
-          lcuint8 b;
-          file.ReadU8(&b, 1);
-          time = b;
+			if (version > 3)
+			{
+				file.ReadFloats(ModelWorld, 16);
+			}
+			else
+			{
+				lcVector3 Translation;
+				float Rotation[3];
+				file.ReadFloats(Translation, 3);
+				file.ReadFloats(Rotation, 3);
+				ModelWorld = lcMatrix44Translation(Translation);
+				ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
+			}
 
-          mat.GetTranslation(&param[0], &param[1], &param[2]);
-          param[3] = 0;
-          ChangeKey (time, false, true, param, LC_PK_POSITION);
-          ChangeKey (time, true, true, param, LC_PK_POSITION);
+			lcuint8 b;
+			file.ReadU8(&b, 1);
+			time = b;
 
-          mat.ToAxisAngle (param);
-          ChangeKey (time, false, true, param, LC_PK_ROTATION);
-          ChangeKey (time, true, true, param, LC_PK_ROTATION);
+			ChangeKey(1, false, true, ModelWorld.r[3], LC_PK_POSITION);
+			ChangeKey(1, true, true, ModelWorld.r[3], LC_PK_POSITION);
 
-          lcint32 bl;
-          file.ReadS32(&bl, 1);
+			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+			AxisAngle[3] *= LC_RTOD;
+
+			ChangeKey(time, false, true, AxisAngle, LC_PK_ROTATION);
+			ChangeKey(time, true, true, AxisAngle, LC_PK_ROTATION);
+
+			lcint32 bl;
+			file.ReadS32(&bl, 1);
         }
       }
       else
       {
-        Matrix mat;
-        float move[3], rotate[3];
-        file.ReadFloats(move, 3);
-        file.ReadFloats(rotate, 3);
-        mat.CreateOld (move[0], move[1], move[2], rotate[0], rotate[1], rotate[2]);
+			lcVector3 Translation;
+			float Rotation[3];
+			file.ReadFloats(Translation, 3);
+			file.ReadFloats(Rotation, 3);
+			lcMatrix44 ModelWorld = lcMatrix44Translation(Translation);
+			ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
 
-        mat.GetTranslation(&param[0], &param[1], &param[2]);
-        param[3] = 0;
-        ChangeKey (1, false, true, param, LC_PK_POSITION);
-        ChangeKey (1, true, true, param, LC_PK_POSITION);
+			ChangeKey(1, false, true, ModelWorld.r[3], LC_PK_POSITION);
+			ChangeKey(1, true, true, ModelWorld.r[3], LC_PK_POSITION);
 
-        mat.ToAxisAngle (param);
-        ChangeKey (1, false, true, param, LC_PK_ROTATION);
-        ChangeKey (1, true, true, param, LC_PK_ROTATION);
+			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+			AxisAngle[3] *= LC_RTOD;
+			ChangeKey(1, false, true, AxisAngle, LC_PK_ROTATION);
+			ChangeKey(1, true, true, AxisAngle, LC_PK_ROTATION);
       }
     }
   }
@@ -563,8 +563,6 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
 	CalculateKeys (nTime, bAnimation);
-//	if (CalculatePositionRotation(nTime, bAnimation, mPosition, mRotation))
-		Matrix mat(mRotation, mPosition);
 
 	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);
 	mModelWorld.SetTranslation(mPosition);

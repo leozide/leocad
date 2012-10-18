@@ -399,6 +399,26 @@ inline lcVector4 operator/(const lcVector4& a, const lcVector4& b)
 	return lcVector4(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
 }
 
+inline lcVector4& operator+=(lcVector4& a, const lcVector4& b)
+{
+	a.x += b.x;
+	a.y += b.y;
+	a.z += b.z;
+	a.w += b.w;
+
+	return a;
+}
+
+inline lcVector4& operator-=(lcVector4& a, const lcVector4& b)
+{
+	a.x -= b.x;
+	a.y -= b.y;
+	a.z -= b.z;
+	a.w -= b.w;
+
+	return a;
+}
+
 inline lcVector4& operator*=(lcVector4& a, float b)
 {
 	a.x *= b;

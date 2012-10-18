@@ -188,7 +188,6 @@
     <ClCompile Include="..\common\lc_file.cpp" />
     <ClCompile Include="..\Common\light.cpp" />
     <ClCompile Include="..\common\mainwnd.cpp" />
-    <ClCompile Include="..\Common\matrix.cpp" />
     <ClCompile Include="..\common\message.cpp" />
     <ClCompile Include="..\common\minifig.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../common;../win;../win/zlib</AdditionalIncludeDirectories>
@@ -385,7 +384,6 @@
     <ClInclude Include="..\common\lc_application.h" />
     <ClInclude Include="..\Common\light.h" />
     <ClInclude Include="..\common\mainwnd.h" />
-    <ClInclude Include="..\Common\matrix.h" />
     <ClInclude Include="..\common\message.h" />
     <ClInclude Include="..\common\minifig.h" />
     <ClInclude Include="..\common\object.h" />

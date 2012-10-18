@@ -3,7 +3,6 @@
 
 #include "lc_math.h"
 
-class Matrix;
 class Object;
 /*
 #define LC_OBJECT_NAME_LEN         80

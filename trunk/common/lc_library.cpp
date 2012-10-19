@@ -1511,7 +1511,11 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const
 {
-	String PieceName = Info->m_strDescription;
+	String PieceName;
+	if (Info->m_strDescription[0] == '~' || Info->m_strDescription[0] == '_')
+		PieceName = Info->m_strDescription + 1;
+	else
+		PieceName = Info->m_strDescription;
 	PieceName.MakeLower();
 
 	String Keywords = CategoryKeywords;
@@ -1644,7 +1648,7 @@ void lcPiecesLibrary::ResetCategories()
 	// Tyre, Wedge, Wheel, Winch, Window, Windscreen, Wing
 	CategoryEntry DefaultCategories[] =
 	{
-		{ "Animal", "^%Animal" },
+		{ "Animal", "^%Animal | ^%Bone" },
 		{ "Antenna", "^%Antenna" },
 		{ "Arch", "^%Arch" },
 		{ "Bar", "^%Bar" },
@@ -1653,26 +1657,26 @@ void lcPiecesLibrary::ResetCategories()
 		{ "Brick", "^%Brick" },
 		{ "Container", "^%Container | ^%Box | ^Chest | ^%Storage | ^Mailbox" },
 		{ "Door and Window", "^%Door | ^%Window | ^%Glass | ^%Freestyle | ^%Gate | ^%Garage | ^%Roller" },
-		{ "Duplo", "^%Duplo | ^%Scala | ^%Belville" },
-		{ "Electric", "^%Electric | ^%Light | ^%Excavator | ^%Exhaust" },
+		{ "Electric", "^%Electric" },
 		{ "Hinge and Bracket", "^%Hinge | ^%Bracket | ^%Turntable" },
-		{ "Hose", "^%Hose" },
+		{ "Hose", "^%Hose | ^%String" },
 		{ "Minifig", "^%Minifig" },
-		{ "Miscellaneous", "^%Arm | ^%Barrel | ^%Brush | ^%Cockpit | ^%Conveyor | ^%Crane | ^%Cupboard | ^%Fabuland | ^%Fence | ^%Homemaker | ^%Jack | ^%Ladder | ^%Rock | ^%Staircase | ^%Stretcher | ^%Tap | ^%Tipper | ^%Trailer | ^%Winch" },
+		{ "Miscellaneous", "^%Arm | ^%Barrel | ^%Brush | ^%Claw | ^%Cockpit | ^%Conveyor | ^%Crane | ^%Cupboard | ^%Fence | ^%Jack | ^%Ladder | ^%Motor | ^%Rock | ^%Rope | ^%Sheet | ^%Sports | ^%Staircase | ^%Stretcher | ^%Tap | ^%Tipper | ^%Trailer | ^%Umbrella | ^%Winch" },
+		{ "Other", "^%Ball | ^%Belville | ^%Die | ^%Duplo | ^%Fabuland | ^%Figure | ^%Homemaker | ^%Maxifig | ^%Microfig | ^%Mursten | ^%Scala | ^%Znap" },
 		{ "Panel", "^%Panel | ^%Castle Wall | ^%Castle Turret" },
 		{ "Plant", "^%Plant" },
 		{ "Plate", "^%Plate" },
-		{ "Round", "^%Cylinder | ^%Cone | ^%Dish | ^%Round" },
+		{ "Round", "^%Cylinder | ^%Cone | ^%Dish | ^%Dome | ^%Hemisphere | ^%Round" },
 		{ "Sign and Flag", "^%Flag | ^%Roadsign | ^%Streetlight | ^%Flagpost | ^%Lamppost | ^%Signpost" },
-		{ "Slope", "^%Slope" },
+		{ "Slope", "^%Slope | ^%Roof" },
 		{ "Space", "^%Space" },
 		{ "Sticker", "^%Sticker" },
 		{ "Support", "^%Support" },
 		{ "Technic", "^%Technic | ^%Rack" },
 		{ "Tile", "^%Tile" },
 		{ "Train", "^%Train | ^%Monorail | ^%Magnet" },
-		{ "Tyre and Wheel", "^%Tyre | %^Wheel | ^%Castle Wagon" },
-		{ "Vehicle", "^%Car | ^%Tractor | ^%Bike | ^%Plane | ^%Propellor | ^%Tail | ^%Landing | ^%Forklift | ^%Grab Jaw" },
+		{ "Tyre and Wheel", "^%Tyre | %^Wheel | %^Wheels | ^%Castle Wagon" },
+		{ "Vehicle", "^%Bike | ^%Canvas | ^%Car | ^%Excavator | ^%Exhaust | ^%Forklift | ^%Grab Jaw | ^%Landing | ^%Motorcycle | ^%Plane | ^%Propellor | ^%Tail | ^%Tractor | ^%Vehicle | ^%Wheelbarrow" },
 		{ "Windscreen", "^%Windscreen" },
 		{ "Wedge", "^%Wedge" },
 		{ "Wing", "^%Wing" },

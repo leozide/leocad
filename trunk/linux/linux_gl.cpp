@@ -4,6 +4,7 @@
 
 #include <dlfcn.h>
 #include <stdio.h>
+#include "lc_global.h"
 #include "opengl.h"
 
 static void* gl_module;

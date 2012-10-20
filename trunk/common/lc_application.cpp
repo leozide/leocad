@@ -183,7 +183,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				ImageHighlight = true;
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
-				printf("LeoCAD version " LC_VERSION_TEXT LC_VERSION_TAG " for "LC_VERSION_OSNAME"\n");
+				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
 				printf("Copyright (c) 1996-2006, BT Software\n");
 				printf("Compiled "__DATE__"\n");
 

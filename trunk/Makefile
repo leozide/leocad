@@ -5,7 +5,7 @@ include config.mk
 MODULES := $(OSDIR) common
 
 ### Look for include files in each of the modules
-CPPFLAGS += $(patsubst %,-I%,$(MODULES)) $(OS)
+CPPFLAGS += $(patsubst %,-I%,$(MODULES))
 CPPFLAGS += -g
 
 ### Extra libraries if required
@@ -51,12 +51,12 @@ ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean sour
 endif
 
 ### Calculate C/C++ include dependencies
-%.d: %.cpp $(OSDIR)/config.h $(OSDIR)/config.mk
+%.d: %.cpp $(OSDIR)/config.mk
 	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
 ### Main compiler rule
-%.o: %.cpp $(OSDIR)/config.h $(OSDIR)/config.mk
+%.o: %.cpp $(OSDIR)/config.mk
 	@echo $<
 	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o '$(patsubst %.cpp,%.o, $@)' $<
 	@[ -s $@ ] || rm -f $@
@@ -70,7 +70,7 @@ clean:
 veryclean: clean
 	find $(MODULES) -name \*.d | xargs rm -f
 	rm -rf bin
-	rm -rf arch $(OSDIR)/config.mk $(OSDIR)/config.h
+	rm -rf arch $(OSDIR)/config.mk
 
 
 ### Dependency stuff is done automatically, so these do nothing.

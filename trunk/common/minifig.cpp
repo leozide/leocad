@@ -797,7 +797,6 @@ static const unsigned char sDefaultSettings[] =
 
 static int lcGetMinifigSettings(lcMemFile& File)
 {
-#ifdef LC_HAVE_ZLIB
 	const size_t CHUNK = 16384;
 	int ret;
 	unsigned have;
@@ -852,7 +851,6 @@ static int lcGetMinifigSettings(lcMemFile& File)
 	(void)inflateEnd(&strm);
 
 	return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
-#endif // LC_HAVE_ZLIB
 }
 
 // =============================================================================

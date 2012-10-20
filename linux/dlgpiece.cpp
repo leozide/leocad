@@ -20,7 +20,6 @@
 #include "typedefs.h"
 #include "globals.h"
 #include "dialogs.h"
-#include "matrix.h"
 #include "pieceinf.h"
 #include "main.h"
 #include "minifig.h"

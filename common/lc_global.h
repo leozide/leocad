@@ -1,8 +1,14 @@
 #ifndef _LC_GLOBAL_H_
 #define _LC_GLOBAL_H_
 
-#include "config.h"
+#include "lc_config.h"
 #include "defines.h"
+
+// Version number.
+#define LC_VERSION_MAJOR 0
+#define LC_VERSION_MINOR 79
+#define LC_VERSION_PATCH 0
+#define LC_VERSION_TEXT "0.79.0"
 
 // Check for supported platforms.
 #if !defined(LC_WINDOWS) && !defined(LC_LINUX)

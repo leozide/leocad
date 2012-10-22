@@ -98,7 +98,7 @@ BOOL CAboutDlg::OnInitDialog()
 	AdjustHomepageWindow();
 
 	// Fix the version number.
-	SetDlgItemText(IDC_ABTDLG_VERSION, "LeoCAD Version " LC_VERSION_TEXT LC_VERSION_TAG);
+	SetDlgItemText(IDC_ABTDLG_VERSION, "LeoCAD Version " LC_VERSION_TEXT);
 
 	return TRUE;
 }

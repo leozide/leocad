@@ -15,11 +15,6 @@
 #error No OS defined.
 #endif
 
-// Precompiled headers.
-#if LC_WINDOWS
-#include "stdafx.h"
-#endif
-
 // Forward declarations.
 class lcVector2;
 class lcVector3;

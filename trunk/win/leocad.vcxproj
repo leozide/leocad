@@ -48,7 +48,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;LC_WINDOWS;LC_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;LC_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../common;../win</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>lc_global.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -76,7 +76,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;LC_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../common;../win</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>lc_global.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -332,7 +332,7 @@
     <ClInclude Include="Clrpick.h" />
     <ClInclude Include="Clrpopup.h" />
     <ClInclude Include="ColorLst.h" />
-    <ClInclude Include="Config.h" />
+    <ClInclude Include="lc_config.h" />
     <ClInclude Include="Disabtab.h" />
     <ClInclude Include="dynsplit.h" />
     <ClInclude Include="EdGrpDlg.h" />

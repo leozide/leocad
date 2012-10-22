@@ -597,9 +597,6 @@
     <ClInclude Include="ColorLst.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Disabtab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -824,6 +821,9 @@
     </ClInclude>
     <ClInclude Include="..\Common\lc_texture.h">
       <Filter>Common Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lc_config.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

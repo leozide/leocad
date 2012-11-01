@@ -72,38 +72,41 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
 	return NULL;
 }
 
-bool lcPiecesLibrary::Load(const char* SearchPath, const char* CacheFilePath)
+bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 {
-	char LibraryPath[LC_MAXPATH];
-
-	strcpy(LibraryPath, SearchPath);
-
-	int i = strlen(LibraryPath) - 1;
-	if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
-		strcat(LibraryPath, "/");
-
-	strcpy(mLibraryPath, LibraryPath);
-	strcat(LibraryPath, "complete.zip");
-
-	if (OpenArchive(LibraryPath, CacheFilePath))
+	if (OpenArchive(LibraryPath, CachePath))
 	{
 		lcMemFile ColorFile;
 
 		if (!mZipFile->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
 			lcLoadDefaultColors();
-	}
-	else if (OpenDirectory(mLibraryPath))
-	{
-		char FileName[LC_MAXPATH];
-		lcDiskFile ColorFile;
 
-		sprintf(FileName, "%sldconfig.ldr", mLibraryPath);
-
-		if (!ColorFile.Open(FileName, "rt") || !lcLoadColorFile(ColorFile))
-			lcLoadDefaultColors();
+		strcpy(mLibraryPath, LibraryPath);
+		char* Slash = lcMax(strrchr(mLibraryPath, '/'), strrchr(mLibraryPath, '\\'));
+		if (*Slash)
+			*(Slash + 1) = 0;
 	}
 	else
-		return false;
+	{
+		strcpy(mLibraryPath, LibraryPath);
+
+		int i = strlen(mLibraryPath) - 1;
+		if ((mLibraryPath[i] != '\\') && (mLibraryPath[i] != '/'))
+			strcat(mLibraryPath, "/");
+
+		if (OpenDirectory(mLibraryPath))
+		{
+			char FileName[LC_MAXPATH];
+			lcDiskFile ColorFile;
+
+			sprintf(FileName, "%sldconfig.ldr", mLibraryPath);
+
+			if (!ColorFile.Open(FileName, "rt") || !lcLoadColorFile(ColorFile))
+				lcLoadDefaultColors();
+		}
+		else
+			return false;
+	}
 
 	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
 	if (!FileName[0] || !LoadCategories(FileName))
@@ -116,7 +119,7 @@ bool lcPiecesLibrary::Load(const char* SearchPath, const char* CacheFilePath)
 	return true;
 }
 
-bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePath)
+bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 {
 	Unload();
 
@@ -198,8 +201,8 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CacheFilePat
 	bool CacheValid = false;
 	struct stat LibraryStat;
 
-	strcpy(mCacheFileName, CacheFilePath);
-	if (CacheFilePath[0])
+	strcpy(mCacheFileName, CachePath);
+	if (CachePath[0])
 		strcat(mCacheFileName, "library.cache");
 
 	if (stat(FileName, &LibraryStat) == 0)

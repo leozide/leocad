@@ -108,7 +108,7 @@ public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
 
-	bool Load(const char* SearchPath, const char* CacheFilePath);
+	bool Load(const char* LibraryPath, const char* CachePath);
 	void Unload();
 
 	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
@@ -140,7 +140,7 @@ public:
 	char mLibraryPath[LC_MAXPATH];
 
 protected:
-	bool OpenArchive(const char* FileName, const char* CacheFileName);
+	bool OpenArchive(const char* FileName, const char* CachePath);
 	bool OpenDirectory(const char* Path);
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);

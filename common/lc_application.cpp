@@ -54,31 +54,45 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		m_Library = new lcPiecesLibrary();
 
 	// Check if the user specified a library path in the command line.
-	if (LibPath != NULL)
+	if (LibPath && LibPath[0])
+	{
 		if (m_Library->Load(LibPath, LibraryCachePath))
 			return true;
+	}
+	else
+	{
+		// Check for the LEOCAD_LIB environment variable.
+		char* EnvPath = getenv("LEOCAD_LIB");
 
-	// Check for the LEOCAD_LIB environment variable.
-	char* EnvPath = getenv("LEOCAD_LIB");
+		if (EnvPath && EnvPath[0])
+		{
+			if (m_Library->Load(EnvPath, LibraryCachePath))
+				return true;
+		}
+		else
+		{
+			// Try the executable install path last.
+			if (LibraryInstallPath && LibraryInstallPath[0])
+			{
+				char LibraryPath[LC_MAXPATH];
 
-	if (EnvPath != NULL)
-		if (m_Library->Load(EnvPath, LibraryCachePath))
-			return true;
+				strcpy(LibraryPath, LibraryInstallPath);
 
-	// Try the executable install path last.
-	if (LibraryInstallPath != NULL)
-		if (m_Library->Load(LibraryInstallPath, LibraryCachePath))
-			return true;
+				int i = strlen(LibraryPath) - 1;
+				if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
+					strcat(LibraryPath, "/");
+
+				strcat(LibraryPath, "library.bin");
+
+				if (m_Library->Load(LibraryPath, LibraryCachePath))
+					return true;
+			}
+		}
+	}
 
 	lcLoadDefaultColors();
 
-#ifdef LC_WINDOWS
-	SystemDoMessageBox("Cannot load pieces library.\n"
-	                   "Make sure that you have the PIECES.IDX file in the same "
-	                   "folder where you installed the program.", LC_MB_OK|LC_MB_ICONERROR);
-#else
-	printf("Error: Cannot load pieces library.\n");
-#endif
+	SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK|LC_MB_ICONERROR);
 
 	return false;
 }

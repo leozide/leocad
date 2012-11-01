@@ -584,7 +584,7 @@ bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxL
 	{
 		lcZipFileInfo& FileInfo = mFiles[FileIdx];
 
-		if (!strcmp(FileInfo.file_name, FileName))
+		if (!stricmp(FileInfo.file_name, FileName))
 			return ExtractFile(FileIdx, File, MaxLength);
 	}
 

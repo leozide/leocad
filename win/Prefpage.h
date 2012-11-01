@@ -31,6 +31,7 @@ public:
 	CString	m_bUser;
 	CString	m_strUser;
 	BOOL	m_Updates;
+	CString m_strLibrary;
 	//}}AFX_DATA
 
 
@@ -53,7 +54,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
 
 

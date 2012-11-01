@@ -401,6 +401,7 @@
 #define IDC_MF_SHOERSPIN                1246
 #define IDC_TRANSDLG_OX                 1246
 #define IDC_CATDLG_NAME                 1246
+#define IDC_GENDLG_LIBRARY              1247
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -630,7 +631,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        246
 #define _APS_NEXT_COMMAND_VALUE         33201
-#define _APS_NEXT_CONTROL_VALUE         1247
+#define _APS_NEXT_CONTROL_VALUE         1248
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

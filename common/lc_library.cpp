@@ -114,8 +114,6 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 
 	SystemUpdateCategories(false);
 
-	Sys_ProfileSaveString("Settings", "PiecesLibrary", mLibraryPath);
-
 	return true;
 }
 

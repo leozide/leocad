@@ -29,6 +29,7 @@ CPreferencesGeneral::CPreferencesGeneral() : CPropertyPage(CPreferencesGeneral::
 	m_bAutoSave = FALSE;
 	m_strUser = _T("");
 	m_Updates = FALSE;
+	m_strLibrary = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -48,6 +49,7 @@ void CPreferencesGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_GENDLG_USER, m_strUser);
 	DDV_MaxChars(pDX, m_strUser, 100);
 	DDX_Check(pDX, IDC_GENDLG_UPDATES, m_Updates);
+	DDX_Text(pDX, IDC_GENDLG_LIBRARY, m_strLibrary);
 	//}}AFX_DATA_MAP
 }
 
@@ -80,6 +82,7 @@ void CPreferencesGeneral::SetOptions(int nSaveInterval, int nMouse, const char* 
 	m_Updates = AfxGetApp()->GetProfileInt("Settings", "CheckUpdates", 1);
 	int i = AfxGetApp()->GetProfileInt("Settings", "Piecebar Options", 0);
 	m_bSubparts = (i & PIECEBAR_SUBPARTS) != 0;
+	m_strLibrary = AfxGetApp()->GetProfileString("Settings", "CustomPiecesLibrary", "");
 }
 
 void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolder, char* strUser)
@@ -95,6 +98,7 @@ void CPreferencesGeneral::GetOptions(int* nSaveTime, int* nMouse, char* strFolde
 		
 	AfxGetApp()->WriteProfileInt("Settings", "Piecebar Options", i);
 	AfxGetApp()->WriteProfileInt("Settings", "CheckUpdates", m_Updates);
+	AfxGetApp()->WriteProfileString("Settings", "CustomPiecesLibrary", m_strLibrary);
 }
 
 BOOL CPreferencesGeneral::OnInitDialog() 

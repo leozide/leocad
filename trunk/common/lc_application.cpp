@@ -49,11 +49,9 @@ void lcApplication::AddProject(Project* project)
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath)
 {
-	// Create an empty library.
 	if (m_Library == NULL)
 		m_Library = new lcPiecesLibrary();
 
-	// Check if the user specified a library path in the command line.
 	if (LibPath && LibPath[0])
 	{
 		if (m_Library->Load(LibPath, LibraryCachePath))
@@ -61,7 +59,6 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 	}
 	else
 	{
-		// Check for the LEOCAD_LIB environment variable.
 		char* EnvPath = getenv("LEOCAD_LIB");
 
 		if (EnvPath && EnvPath[0])
@@ -71,8 +68,14 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		}
 		else
 		{
-			// Try the executable install path last.
-			if (LibraryInstallPath && LibraryInstallPath[0])
+			const char* CustomPath = Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", "");
+
+			if (CustomPath[0])
+			{
+				if (m_Library->Load(CustomPath, LibraryCachePath))
+					return true;
+			}
+			else if (LibraryInstallPath && LibraryInstallPath[0])
 			{
 				char LibraryPath[LC_MAXPATH];
 
@@ -92,7 +95,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 	lcLoadDefaultColors();
 
-	SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK|LC_MB_ICONERROR);
+	SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK | LC_MB_ICONERROR);
 
 	return false;
 }

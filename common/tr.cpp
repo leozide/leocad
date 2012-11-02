@@ -141,7 +141,7 @@ void TiledRender::Perspective(double fovy, double aspect, double zNear, double z
 void TiledRender::BeginTile()
 {
 	GLint matrixMode;
-	int tileWidth, tileHeight, tileWidthNB, tileHeightNB, border;
+	int tileWidth, tileHeight, border;
 	double left, right, bottom, top;
 	
 	if (m_CurrentTile <= 0)
@@ -178,10 +178,6 @@ void TiledRender::BeginTile()
 		tileWidth = m_TileWidth;
 	else
 		tileWidth = m_ImageWidth - (m_Columns-1) * (m_TileWidthNB) + 2 * border;
-	
-	// tile size with No Border
-	tileWidthNB = tileWidth - 2 * border;
-	tileHeightNB = tileHeight - 2 * border;
 	
 	// Save tile size, with border
 	m_CurrentTileWidth = tileWidth;

@@ -1760,7 +1760,7 @@ void Project::RenderScenePieces(View* view)
 	lcTexture* PreviousTexture = NULL;
 	char* ElementsOffset = NULL;
 	char* BaseBufferOffset = NULL;
-	char* PreviousOffset = (char*)(~NULL);
+	char* PreviousOffset = (char*)(~0);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -3228,8 +3228,8 @@ void Project::CheckAutoSave()
 	m_nSaveTimer += 5;
 	if (m_nAutosave & LC_AUTOSAVE_FLAG)
 	{
-		int nInterval;
-		nInterval = m_nAutosave & ~LC_AUTOSAVE_FLAG;
+//		int nInterval;
+//		nInterval = m_nAutosave & ~LC_AUTOSAVE_FLAG;
 
 		if (m_nSaveTimer >= (m_nAutosave*60))
 		{
@@ -8292,7 +8292,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			{
 				lcVector3 ScreenX = lcNormalize(lcCross(Camera->mTargetPosition - Camera->mPosition, Camera->mUpVector));
 				lcVector3 ScreenY = Camera->mUpVector;
-				lcVector3 Dir1, Dir2;
+				lcVector3 Dir1(0.0f, 0.0f, 0.0f), Dir2(0.0f, 0.0f, 0.0f);
 				bool SingleDir = true;
 
 				int OverlayMode;
@@ -8744,7 +8744,6 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 	{
 		const float OverlayMovePlaneSize = 0.5f * OverlayScale;
 		const float OverlayMoveArrowSize = 1.5f * OverlayScale;
-		const float OverlayMoveArrowCapSize = 0.9f * OverlayScale;
 		const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
 		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;

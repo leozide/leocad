@@ -201,7 +201,7 @@ bool Image::LoadGIF(lcFile& file)
 
   char hdrbuf[10];
   unsigned int width, height;
-  int colormaplen, aspectRatio;
+  int colormaplen;
   int c;
 
   FreeData ();
@@ -218,7 +218,6 @@ bool Image::LoadGIF(lcFile& file)
   source->height = height;
   source->width = width;
   colormaplen = 2 << (hdrbuf[4] & 0x07);
-  aspectRatio = hdrbuf[6] & 0xFF;
 
   if (BitSet(hdrbuf[4], COLORMAPFLAG))
     for (int i = 0; i < colormaplen; i++) 
@@ -237,10 +236,9 @@ bool Image::LoadGIF(lcFile& file)
 
     if (c == '!') 
     {
-      int extlabel;
       char buf[256];
 
-      extlabel = source->input_file->ReadU8();
+      source->input_file->ReadU8();
       while (GetDataBlock(source, buf) > 0)
         ; // skip
       continue;

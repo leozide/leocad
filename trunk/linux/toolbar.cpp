@@ -940,7 +940,7 @@ static gboolean colorlist_tooltip(GtkWidget *widget, gint x, gint y, gboolean ke
 			gdk_pixbuf_fill(pixbuf, Color);
 
 			gtk_tooltip_set_icon(tooltip, pixbuf);
-			gdk_pixbuf_unref(pixbuf);
+			g_object_unref(pixbuf);
 
 			return TRUE;
 		}

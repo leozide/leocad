@@ -13,6 +13,7 @@
 
 lcZipFile::lcZipFile()
 {
+	mModified = false;
 	mFile = NULL;
 }
 
@@ -370,6 +371,7 @@ bool lcZipFile::ReadCentralDir()
 		long Seek = 0;
 
 		FileInfo.write_buffer = NULL;
+		FileInfo.deleted = false;
 
 		if (mFile->ReadU32(&Magic, 1) != 1 || Magic != 0x02014b50)
 			return false;
@@ -812,31 +814,184 @@ bool lcZipFile::AddFile(const char* FileName, lcMemFile& File)
 	Info.dosDate = (((timeinfo->tm_mday) + (32 * (timeinfo->tm_mon + 1)) + (512 * timeinfo->tm_year)) << 16) | ((timeinfo->tm_sec / 2) + (32 * timeinfo->tm_min) + (2048 * (uLong)timeinfo->tm_hour));
 
 	Info.write_buffer = OutFile;
+	Info.deleted = false;
+
+	mModified = true;
 
 	return true;
 }
 
+bool lcZipFile::DeleteFile(const char* FileName)
+{
+	for (int FileIdx = 0; FileIdx < mFiles.GetSize(); FileIdx++)
+	{
+		lcZipFileInfo& FileInfo = mFiles[FileIdx];
+
+		if (!stricmp(FileInfo.file_name, FileName))
+		{
+			FileInfo.deleted = true;
+			mModified = true;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void lcZipFile::Flush()
 {
-	int FirstFileAdded = -1;
-
-	if (!mFile)
+	if (!mFile || !mModified)
 		return;
+
+	lcMemFile MemFile;
+	lcuint64 NumFiles = 0;
+
+	mFile->Seek(0, SEEK_SET);
+
+	if (mBytesBeforeZipFile)
+	{
+		MemFile.GrowFile((size_t)mBytesBeforeZipFile);
+		mFile->ReadBuffer(MemFile.mBuffer, (long)mBytesBeforeZipFile);
+		MemFile.Seek((long)mBytesBeforeZipFile, SEEK_CUR);
+	}
 
 	for (int FileIdx = 0; FileIdx < mFiles.GetSize(); FileIdx++)
 	{
 		lcZipFileInfo& FileInfo = mFiles[FileIdx];
 
+		if (FileInfo.deleted)
+			continue;
+
+		lcuint32 SizeVar;
+		lcuint64 OffsetLocalExtraField;
+		lcuint32 SizeLocalExtraField;
+		CheckFileCoherencyHeader(FileIdx, &SizeVar, &OffsetLocalExtraField, &SizeLocalExtraField);
+		NumFiles++;
+
+		lcuint64 PosInZipfile = FileInfo.offset_curfile + 0x1e + SizeVar;
+		mFile->Seek((long)(PosInZipfile + mBytesBeforeZipFile), SEEK_SET);
+
+		FileInfo.offset_curfile = MemFile.GetPosition();
+
+		if (FileInfo.offset_curfile >= 0xffffffff)
+			FileInfo.version_needed = 45;
+
+		MemFile.WriteU32(0x04034b50);
+		MemFile.WriteU16(FileInfo.version_needed);
+		MemFile.WriteU16(FileInfo.flag);
+		MemFile.WriteU16(FileInfo.compression_method);
+		MemFile.WriteU32(FileInfo.dosDate);
+		MemFile.WriteU32(FileInfo.crc);
+		if (FileInfo.compressed_size >= 0xffffffff)
+			MemFile.WriteU32(0xffffffff);
+		else
+			MemFile.WriteU32((lcuint32)FileInfo.compressed_size);
+		if (FileInfo.uncompressed_size >= 0xffffffff)
+			MemFile.WriteU32(0xffffffff);
+		else
+			MemFile.WriteU32((lcuint32)FileInfo.uncompressed_size);
+		MemFile.WriteU16(FileInfo.size_filename);
+		MemFile.WriteU16(FileInfo.size_file_extra);
+		MemFile.WriteBuffer(FileInfo.file_name, FileInfo.size_filename);
+
 		if (FileInfo.write_buffer)
 		{
-			FirstFileAdded = FileIdx;
-			break;
+			MemFile.WriteBuffer(FileInfo.write_buffer->mBuffer, FileInfo.write_buffer->GetLength());
+			delete FileInfo.write_buffer;
+			FileInfo.write_buffer = NULL;
+		}
+		else
+		{
+			MemFile.GrowFile((size_t)FileInfo.compressed_size);
+			mFile->ReadBuffer(MemFile.mBuffer + MemFile.GetPosition(), (long)FileInfo.compressed_size);
+			MemFile.Seek((long)FileInfo.compressed_size, SEEK_CUR);
 		}
 	}
 
-	if (FirstFileAdded == -1)
-		return;
+	lcuint64 CentralDirPos = MemFile.GetPosition();
 
+	for (int FileIdx = 0; FileIdx < mFiles.GetSize(); FileIdx++)
+	{
+		lcZipFileInfo& FileInfo = mFiles[FileIdx];
+
+		if (FileInfo.deleted)
+			continue;
+
+		MemFile.WriteU32(0x02014b50);
+		MemFile.WriteU16(FileInfo.version);
+		MemFile.WriteU16(FileInfo.version_needed);
+		MemFile.WriteU16(FileInfo.flag);
+		MemFile.WriteU16(FileInfo.compression_method);
+		MemFile.WriteU32(FileInfo.dosDate);
+		MemFile.WriteU32(FileInfo.crc);
+		if (FileInfo.compressed_size >= 0xffffffff)
+			MemFile.WriteU32(0xffffffff);
+		else
+			MemFile.WriteU32((lcuint32)FileInfo.compressed_size);
+		if (FileInfo.uncompressed_size >= 0xffffffff)
+			MemFile.WriteU32(0xffffffff);
+		else
+			MemFile.WriteU32((lcuint32)FileInfo.uncompressed_size);
+		MemFile.WriteU16(FileInfo.size_filename);
+		MemFile.WriteU16(FileInfo.size_file_extra);
+		MemFile.WriteU16(FileInfo.size_file_comment);
+		MemFile.WriteU16(FileInfo.disk_num_start);
+		MemFile.WriteU16(FileInfo.internal_fa);
+		MemFile.WriteU32(FileInfo.external_fa);
+
+		if (FileInfo.offset_curfile >= 0xffffffff)
+			MemFile.WriteU32(0xffffffff);
+		else
+			MemFile.WriteU32((lcuint32)(FileInfo.offset_curfile - mBytesBeforeZipFile));
+
+		MemFile.WriteBuffer(FileInfo.file_name, FileInfo.size_filename);
+	}
+
+	lcuint64 CentralDirEnd = MemFile.GetPosition();
+
+	if (CentralDirPos - mBytesBeforeZipFile >= 0xffffffff)
+	{
+		MemFile.WriteU32(0x6064b50);
+		MemFile.WriteU64(44);
+		MemFile.WriteU16(45);
+		MemFile.WriteU16(45);
+		MemFile.WriteU32(0);
+		MemFile.WriteU32(0);
+		MemFile.WriteU64(NumFiles);
+		MemFile.WriteU64(NumFiles);
+		MemFile.WriteU64(CentralDirEnd - CentralDirPos);
+		MemFile.WriteU64(CentralDirPos - mBytesBeforeZipFile);
+
+		MemFile.WriteU32(0x7064b50);
+		MemFile.WriteU32(0);
+		MemFile.WriteU64(CentralDirEnd - mBytesBeforeZipFile);
+		MemFile.WriteU32(1);
+	}
+
+	MemFile.WriteU32(0x06054b50);
+	MemFile.WriteU16(0);
+	MemFile.WriteU16(0);
+
+	if (NumFiles >= 0xffff)
+		MemFile.WriteU16(0xffff);
+	else
+		MemFile.WriteU16((lcuint16)NumFiles);
+
+	if (NumFiles >= 0xffff)
+		MemFile.WriteU16(0xffff);
+	else
+		MemFile.WriteU16((lcuint16)NumFiles);
+
+	MemFile.WriteU32((lcuint32)(CentralDirEnd - CentralDirPos));
+	if (CentralDirPos - mBytesBeforeZipFile >= 0xffffffff)
+		MemFile.WriteU32(0xffffffff);
+	else
+		MemFile.WriteU32((lcuint32)(CentralDirPos - mBytesBeforeZipFile));
+
+	MemFile.WriteU16(0);
+
+	mFile->CopyFrom(MemFile);
+/*
 	lcuint64 CurrentOffset = mCentralDirOffset + mBytesBeforeZipFile;
 	mFile->Seek((long)CurrentOffset, SEEK_SET);
 
@@ -958,4 +1113,5 @@ void lcZipFile::Flush()
 		mFile->WriteU32((lcuint32)(CentralDirPos - mBytesBeforeZipFile));
 
 	mFile->WriteU16(0);
+	*/
 }

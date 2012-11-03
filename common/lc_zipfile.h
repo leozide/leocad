@@ -40,6 +40,7 @@ struct lcZipFileInfo
 	tm_unz tmu_date;
 
 	lcMemFile* write_buffer;
+	bool deleted;
 };
 
 class lcZipFile
@@ -50,23 +51,25 @@ public:
 
 	bool OpenRead(const char* FilePath);
 	bool OpenWrite(const char* FilePath, bool Append);
-	void Flush();
 
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
 	bool ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
 	bool AddFile(const char* FileName, lcMemFile& File);
+	bool DeleteFile(const char* FileName);
 
 	ObjArray<lcZipFileInfo> mFiles;
 
 protected:
 	bool Open();
+	void Flush();
 	bool ReadCentralDir();
 	lcuint64 SearchCentralDir();
 	lcuint64 SearchCentralDir64();
 	bool CheckFileCoherencyHeader(int FileIndex, lcuint32* SizeVar, lcuint64* OffsetLocalExtraField, lcuint32* SizeLocalExtraField);
 
-	lcFile* mFile;
+	lcDiskFile* mFile;
 
+	bool mModified;
 	bool mZip64;
 	lcuint64 mNumEntries;
 	lcuint64 mCentralDirSize;

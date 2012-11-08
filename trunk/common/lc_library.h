@@ -142,6 +142,11 @@ public:
 protected:
 	bool OpenArchive(const char* FileName, const char* CachePath);
 	bool OpenDirectory(const char* Path);
+
+	bool LoadCacheIndex(lcZipFile& CacheFile);
+	bool LoadCachePiece(PieceInfo* Info);
+	void SaveCacheFile();
+
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, ObjArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
@@ -150,7 +155,10 @@ protected:
 	char mCategoriesFile[LC_MAXPATH];
 
 	char mCacheFileName[LC_MAXPATH];
+	lcuint64 mCacheFileModifiedTime;
+	bool mSaveCache;
 
+	char mLibraryFileName[LC_MAXPATH];
 	lcZipFile* mZipFile;
 };
 

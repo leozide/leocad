@@ -5,6 +5,9 @@
 #include "opengl.h"
 #include "lc_math.h"
 
+#define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
+#define LC_MESH_FILE_VERSION 0x0100
+
 struct lcVertex
 {
 	lcVector3 Position;
@@ -127,6 +130,9 @@ public:
 	void Create(int NumSections, int NumVertices, int NumTexturedVertices, int NumIndices);
 	void CreateBox();
 	void Render(int ColorIdx, bool Selected, bool Focused);
+
+	bool FileLoad(lcFile& File);
+	void FileSave(lcFile& File);
 
 	template<typename IndexType>
 	void ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorTable);

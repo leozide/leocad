@@ -7,6 +7,8 @@
 #define LC_TEXTURE_WRAPV   0x02
 #define LC_TEXTURE_MIPMAPS 0x04
 
+#define LC_TEXTURE_NAME_LEN 256
+
 class lcTexture
 {
 public:
@@ -39,7 +41,7 @@ public:
 
 	int mWidth;
 	int mHeight;
-	char mName[LC_MAXPATH];
+	char mName[LC_TEXTURE_NAME_LEN];
 	GLuint mTexture;
 
 protected:

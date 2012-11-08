@@ -4,6 +4,8 @@
 #include "lc_texture.h"
 #include "lc_file.h"
 #include "lc_math.h"
+#include "lc_application.h"
+#include "lc_library.h"
 
 lcMesh::lcMesh()
 {
@@ -25,7 +27,7 @@ void lcMesh::Create(int NumSections, int NumVertices, int NumTexturedVertices, i
 	mNumTexturedVertices = NumTexturedVertices;
 	mVertexBuffer.SetSize(NumVertices * sizeof(lcVertex) + NumTexturedVertices * sizeof(lcVertexTextured));
 
-	if (NumVertices < 0x10000)
+	if (NumVertices < 0x10000 && NumTexturedVertices < 0x10000)
 	{
 		mIndexType = GL_UNSIGNED_SHORT;
 		mIndexBuffer.SetSize(NumIndices * sizeof(GLushort));
@@ -366,4 +368,100 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		ExportWavefrontIndices<GLushort>(File, DefaultColorIndex, VertexOffset);
 	else
 		ExportWavefrontIndices<GLuint>(File, DefaultColorIndex, VertexOffset);
+}
+
+bool lcMesh::FileLoad(lcFile& File)
+{
+	if (File.ReadU32() != LC_FILE_ID || File.ReadU32() != LC_MESH_FILE_ID || File.ReadU32() != LC_MESH_FILE_VERSION)
+		return false;
+
+	lcuint32 NumVertices, NumTexturedVertices, NumIndices;
+	lcuint16 NumSections;
+
+	if (!File.ReadU16(&NumSections, 1) || !File.ReadU32(&NumVertices, 1) || !File.ReadU32(&NumTexturedVertices, 1) || !File.ReadU32(&NumIndices, 1))
+		return false;
+
+	Create(NumSections, NumVertices, NumTexturedVertices, NumIndices);
+
+	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	{
+		lcMeshSection& Section = mSections[SectionIdx];
+
+		lcuint32 ColorCode, IndexOffset, NumIndices;
+		lcuint16 Triangles, Length;
+
+		if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&IndexOffset, 1) || !File.ReadU32(&NumIndices, 1) || !File.ReadU16(&Triangles, 1))
+			return false;
+
+		Section.ColorIndex = lcGetColorIndex(ColorCode);
+		Section.IndexOffset = IndexOffset;
+		Section.NumIndices = NumIndices;
+		Section.PrimitiveType = Triangles ? GL_TRIANGLES : GL_LINES;
+
+		if (!File.ReadU16(&Length, 1))
+			return false;
+
+		if (Length)
+		{
+			if (Length >= LC_TEXTURE_NAME_LEN)
+				return false;
+
+			char FileName[LC_TEXTURE_NAME_LEN];
+
+			File.ReadBuffer(FileName, Length);
+			FileName[Length] = 0;
+
+			Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName);
+		}
+		else
+			Section.Texture = NULL;
+	}
+
+	File.ReadFloats((float*)mVertexBuffer.mData, 3 * mNumVertices + 5 * mNumTexturedVertices);
+	if (mIndexType == GL_UNSIGNED_SHORT)
+		File.ReadU16((lcuint16*)mIndexBuffer.mData, mIndexBuffer.mSize / 2);
+	else
+		File.ReadU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
+
+	mVertexBuffer.UpdateBuffer();
+	mIndexBuffer.UpdateBuffer();
+
+	return true;
+}
+
+void lcMesh::FileSave(lcFile& File)
+{
+	File.WriteU32(LC_FILE_ID);
+	File.WriteU32(LC_MESH_FILE_ID);
+	File.WriteU32(LC_MESH_FILE_VERSION);
+
+	File.WriteU16(mNumSections);
+	File.WriteU32(mNumVertices);
+	File.WriteU32(mNumTexturedVertices);
+	File.WriteU32(mIndexBuffer.mSize / (mIndexType == GL_UNSIGNED_SHORT ? 2 : 4));
+
+	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	{
+		lcMeshSection& Section = mSections[SectionIdx];
+
+		File.WriteU32(lcGetColorCode(Section.ColorIndex));
+		File.WriteU32(Section.IndexOffset);
+		File.WriteU32(Section.NumIndices);
+		File.WriteU16(Section.PrimitiveType == GL_TRIANGLES ? 1 : 0);
+
+		if (Section.Texture)
+		{
+			int Length = strlen(Section.Texture->mName);
+			File.WriteU16(Length);
+			File.WriteBuffer(Section.Texture->mName, Length);
+		}
+		else
+			File.WriteU16(0);
+	}
+
+	File.WriteFloats((float*)mVertexBuffer.mData, 3 * mNumVertices + 5 * mNumTexturedVertices);
+	if (mIndexType == GL_UNSIGNED_SHORT)
+		File.WriteU16((lcuint16*)mIndexBuffer.mData, mIndexBuffer.mSize / 2);
+	else
+		File.WriteU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
 }

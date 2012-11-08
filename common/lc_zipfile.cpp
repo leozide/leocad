@@ -732,6 +732,8 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 		}
 	}
 
+	inflateEnd(&Stream);
+
 	return true;
 }
 
@@ -902,7 +904,7 @@ void lcZipFile::Flush()
 		}
 		else
 		{
-			MemFile.GrowFile((size_t)FileInfo.compressed_size);
+			MemFile.GrowFile((size_t)(MemFile.GetPosition() + FileInfo.compressed_size));
 			mFile->ReadBuffer(MemFile.mBuffer + MemFile.GetPosition(), (long)FileInfo.compressed_size);
 			MemFile.Seek((long)FileInfo.compressed_size, SEEK_CUR);
 		}

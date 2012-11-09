@@ -408,6 +408,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	file->ReadS32(&count, 1);
 	SystemStartProgressBar(0, count, 1, "Loading project...");
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	Library->OpenCache();
 
 	while (count--)
 	{	
@@ -416,28 +418,23 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			char name[LC_PIECE_NAME_LEN];
 			Piece* pPiece = new Piece(NULL);
 			pPiece->FileLoad(*file, name);
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
-			if (pInfo)
-			{
-				pPiece->SetPieceInfo(pInfo);
+			PieceInfo* pInfo = Library->FindPiece(name, true);
+			pPiece->SetPieceInfo(pInfo);
 
-				if (bMerge)
-					for (Piece* p = m_pPieces; p; p = p->m_pNext)
-						if (strcmp(p->GetName(), pPiece->GetName()) == 0)
-						{
-							pPiece->CreateName(m_pPieces);
-							break;
-						}
+			if (bMerge)
+				for (Piece* p = m_pPieces; p; p = p->m_pNext)
+					if (strcmp(p->GetName(), pPiece->GetName()) == 0)
+					{
+						pPiece->CreateName(m_pPieces);
+						break;
+					}
 
-				if (strlen(pPiece->GetName()) == 0)
-					pPiece->CreateName(m_pPieces);
+			if (strlen(pPiece->GetName()) == 0)
+				pPiece->CreateName(m_pPieces);
 
-				AddPiece(pPiece);
-				if (!bUndo)
-					SystemPieceComboAdd(pInfo->m_strDescription);
-			}
-			else 
-				delete pPiece;
+			AddPiece(pPiece);
+			if (!bUndo)
+				SystemPieceComboAdd(pInfo->m_strDescription);
 		}
 		else
 		{
@@ -452,28 +449,28 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
-			if (pInfo != NULL)
-			{
-				Piece* pPiece = new Piece(pInfo);
+			PieceInfo* pInfo = Library->FindPiece(name, true);
+			Piece* pPiece = new Piece(pInfo);
 
-				pPiece->Initialize(pos[0], pos[1], pos[2], step, 1);
-				pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
-				pPiece->CreateName(m_pPieces);
-				AddPiece(pPiece);
+			pPiece->Initialize(pos[0], pos[1], pos[2], step, 1);
+			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
+			pPiece->CreateName(m_pPieces);
+			AddPiece(pPiece);
 			
-				lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
-				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-				AxisAngle[3] *= LC_RTOD;
+			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
+			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+			AxisAngle[3] *= LC_RTOD;
 
-				pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
-				pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
-//				pPiece->SetGroup((Group*)group);
-				SystemPieceComboAdd(pInfo->m_strDescription);
-			}
+			pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+			pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
+//			pPiece->SetGroup((Group*)group);
+			SystemPieceComboAdd(pInfo->m_strDescription);
 		}
+
 		SytemStepProgressBar();
 	}
+
+	Library->CloseCache();
 	SytemEndProgressBar();
 
 	if (!bMerge)
@@ -762,7 +759,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(mCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
+	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->mCamera : NULL, mCameras);
 	UpdateSelection();
 	if (m_bAnimation)
 		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -1788,6 +1785,7 @@ void Project::RenderScenePieces(View* view)
 			}
 
 			PreviousMesh = Mesh;
+			PreviousOffset = (char*)(~0);
 		}
 
 		if (piece->IsSelected())

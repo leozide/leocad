@@ -16,6 +16,7 @@
 lcPiecesLibrary::lcPiecesLibrary()
 {
 	mZipFile = NULL;
+	mCacheFile = NULL;
 	mSaveCache = false;
 }
 
@@ -26,8 +27,7 @@ lcPiecesLibrary::~lcPiecesLibrary()
 
 void lcPiecesLibrary::Unload()
 {
-	if (mSaveCache)
-		SaveCacheFile();
+	SaveCacheFile();
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		delete mPieces[PieceIdx];
@@ -447,6 +447,32 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	return true;
 }
 
+bool lcPiecesLibrary::OpenCache()
+{
+	struct stat CacheStat;
+
+	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
+		return false;
+
+	mCacheFile = new lcZipFile;
+
+	if (!mCacheFile->OpenRead(mCacheFileName))
+	{
+		delete mCacheFile;
+		return false;
+	}
+
+	return true;
+}
+
+void lcPiecesLibrary::CloseCache()
+{
+	delete mCacheFile;
+	mCacheFile = NULL;
+
+	SaveCacheFile();
+}
+
 bool lcPiecesLibrary::LoadCacheIndex(lcZipFile& CacheFile)
 {
 	lcMemFile IndexFile;
@@ -484,30 +510,47 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if ((Info->mFlags & LC_PIECE_CACHED) == 0)
 		return false;
 
-	struct stat CacheStat;
+	if (mCacheFile)
+	{
+		lcMemFile PieceFile;
 
-	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
-		return false;
+		if (!mCacheFile->ExtractFile(Info->m_strName, PieceFile))
+			return false;
 
-	lcZipFile CacheFile;
+		Info->mMesh = new lcMesh;
 
-	if (!CacheFile.OpenRead(mCacheFileName))
-		return false;
+		return Info->mMesh->FileLoad(PieceFile);
+	}
+	else
+	{
+		struct stat CacheStat;
 
-	lcMemFile PieceFile;
+		if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
+			return false;
 
-	if (!CacheFile.ExtractFile(Info->m_strName, PieceFile))
-		return false;
+		lcZipFile CacheFile;
 
-	Info->mMesh = new lcMesh;
+		if (!CacheFile.OpenRead(mCacheFileName))
+			return false;
 
-	return Info->mMesh->FileLoad(PieceFile);
+		lcMemFile PieceFile;
+
+		if (!CacheFile.ExtractFile(Info->m_strName, PieceFile))
+			return false;
+
+		Info->mMesh = new lcMesh;
+
+		return Info->mMesh->FileLoad(PieceFile);
+	}
 }
 
 void lcPiecesLibrary::SaveCacheFile()
 {
 	struct stat CacheStat;
 	lcZipFile CacheFile;
+
+	if (!mSaveCache)
+		return;
 
 	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
 	{
@@ -578,6 +621,8 @@ void lcPiecesLibrary::SaveCacheFile()
 	IndexFile.WriteU32(mPieces.GetSize());
 
 	CacheFile.AddFile("index", IndexFile);
+
+	mSaveCache = false;
 }
 
 int LibraryMeshSectionCompare(const lcLibraryMeshSection* a, const lcLibraryMeshSection* b, void* Data)

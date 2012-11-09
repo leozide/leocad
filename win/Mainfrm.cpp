@@ -479,20 +479,12 @@ LRESULT CMainFrame::OnAddString(UINT lParam, LONG /*wParam*/)
 {
 	if (lParam == NULL)
 	{
-		// Clear list
 		m_wndPiecesBar.m_wndPiecesCombo.ResetContent();
 		return TRUE;
 	}
 
-	// Search if the string is already there
-	for (int i = 0; i < m_wndPiecesBar.m_wndPiecesCombo.GetCount();i++)
-	{
-		char tmp[100];
-		m_wndPiecesBar.m_wndPiecesCombo.GetLBText (i, tmp);
-		if (strcmp ((char*)lParam, tmp) == 0)
-			return TRUE;
-	}
-	m_wndPiecesBar.m_wndPiecesCombo.AddString ((char*)lParam);
+	if (m_wndPiecesBar.m_wndPiecesCombo.FindString(-1, (char*)lParam) == -1)
+		m_wndPiecesBar.m_wndPiecesCombo.AddString ((char*)lParam);
 
 	return TRUE;
 }

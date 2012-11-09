@@ -423,8 +423,7 @@ bool lcMesh::FileLoad(lcFile& File)
 	else
 		File.ReadU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
 
-	mVertexBuffer.UpdateBuffer();
-	mIndexBuffer.UpdateBuffer();
+	UpdateBuffers();
 
 	return true;
 }

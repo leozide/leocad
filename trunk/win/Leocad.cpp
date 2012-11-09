@@ -219,13 +219,27 @@ BOOL CCADApp::InitInstance()
 	m_nCmdShow = SW_HIDE;
 	pDocTemplate->OpenDocumentFile(NULL);
 
+	GL_EnableVertexBufferObject();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	if (lcGetActiveProject()->m_pPieces)
+	{
+		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
+		{
+			lcMesh* Mesh = Library->mPieces[PieceIdx]->mMesh;
+
+			if (Mesh)
+				Mesh->UpdateBuffers();
+		}
+	}
+
 	CMainFrame* MainFrame = (CMainFrame*)AfxGetMainWnd();
 	MainFrame->UpdateMenuAccelerators();
 
 	// Show something in the piece preview window.
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("3005", false);
-	if (!Info && lcGetPiecesLibrary()->mPieces.GetSize())
-		Info = lcGetPiecesLibrary()->mPieces[0];
+	PieceInfo* Info = Library->FindPiece("3005", false);
+	if (!Info && Library->mPieces.GetSize())
+		Info = Library->mPieces[0];
 
 	if (Info)
 	{
@@ -262,11 +276,7 @@ BOOL CCADApp::InitInstance()
 */
 
 	// The one and only window has been initialized, so show and update it.
-	int status = theApp.GetProfileInt("Settings", "Window Status", -1);
-	if (status != -1)
-		m_pMainWnd->ShowWindow(status);
-	else
-		m_pMainWnd->ShowWindow(cmdshow);
+	m_pMainWnd->ShowWindow(cmdshow);
 	m_pMainWnd->UpdateWindow();
 	lcGetActiveProject()->HandleNotify(LC_ACTIVATE, 1);
 	lcGetActiveProject()->UpdateInterface();

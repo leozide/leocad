@@ -607,6 +607,20 @@ int main (int argc, char* argv[])
   gtk_container_border_width (GTK_CONTAINER (((GtkWidget*)(*main_window))), 0);
   gtk_widget_realize (((GtkWidget*)(*main_window)));
 
+	GL_EnableVertexBufferObject();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	if (lcGetActiveProject()->m_pPieces)
+	{
+		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
+		{
+			lcMesh* Mesh = Library->mPieces[PieceIdx]->mMesh;
+
+			if (Mesh)
+				Mesh->UpdateBuffers();
+		}
+	}
+
   // Read window position and size
   x = Sys_ProfileLoadInt ("Window", "Width", 600);
   y = Sys_ProfileLoadInt ("Window", "Height", 400);
@@ -744,9 +758,9 @@ int main (int argc, char* argv[])
 			    pieces_width);
 
 
-  PieceInfo* Info = lcGetPiecesLibrary()->FindPiece("3005", false);
+  PieceInfo* Info = Library->FindPiece("3005", false);
   if (!Info)
-    Info = lcGetPiecesLibrary()->mPieces[0];
+    Info = Library->mPieces[0];
   if (Info)
   {
     lcGetActiveProject()->SetCurrentPiece(Info);

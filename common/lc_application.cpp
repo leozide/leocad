@@ -204,18 +204,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("Copyright (c) 1996-2006, BT Software\n");
 				printf("Compiled "__DATE__"\n");
 
-#ifdef LC_HAVE_JPEGLIB
-				printf("With JPEG support\n");
-#else
-				printf("Without JPEG support\n");
-#endif
-
-#ifdef LC_HAVE_PNGLIB
-				printf("With PNG support\n");
-#else
-				printf("Without PNG support\n");
-#endif
-
 				return false;
 			}
 			else if ((strcmp(Param, "-?") == 0) || (strcmp(Param, "--help") == 0))
@@ -223,7 +211,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("Usage: leocad [options] [file]\n");
 				printf("  [options] can be:\n");
 				printf("  --libgl <path>: Searches for OpenGL libraries in path.\n");
-				printf("  --libpath <path>: Loads the Pieces Library from path.\n");
+				printf("  -l, --libpath <path>: Loads the Pieces Library from path.\n");
 				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
 				printf("  -w, --width <width>: Sets the picture width.\n");
 				printf("  -h, --height <height>: Sets the picture height.\n");
@@ -233,6 +221,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  --instructions: Saves instructions steps.\n");
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  \n");
+
+				return false;
 			}
 			else
 				console.PrintWarning("Unknown parameter: %s\n", Param);
@@ -255,6 +245,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	// Create a new project.
 	Project* project = new Project();
 	AddProject(project);
+
+	GL_DisableVertexBufferObject();
 
 	// Load project.
 	if (ProjectName && project->OpenProject(ProjectName))

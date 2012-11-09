@@ -118,6 +118,9 @@ public:
 	lcTexture* FindTexture(const char* TextureName);
 	bool LoadTexture(lcTexture* Texture);
 
+	bool OpenCache();
+	void CloseCache();
+
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	int GetFirstPieceCategory(PieceInfo* Info) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
@@ -156,6 +159,7 @@ protected:
 
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;
+	lcZipFile* mCacheFile;
 	bool mSaveCache;
 
 	char mLibraryFileName[LC_MAXPATH];

@@ -635,7 +635,7 @@ BOOL CMainFrame::OnShowPopupMenu(CMFCPopupMenu* pMenuPopup)
 		for (int iItemPop = 0; !bIsCamerawMenu && iItemPop < iItemMax; iItemPop ++)
 		{
 			UINT nID = ::GetMenuItemID( hMenuPop, iItemPop);
-			bIsCamerawMenu = (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST);
+			bIsCamerawMenu = (nID == ID_VIEW_CAMERAS_RESET) || (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST);
 		}
 
 		if (bIsCamerawMenu)

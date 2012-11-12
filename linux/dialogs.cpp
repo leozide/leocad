@@ -1385,7 +1385,7 @@ struct LC_PREFERENCESDLG_STRUCT
 {
 	void* data;
 	GtkWidget *dlg;
-	GtkWidget *gen_updates, *gen_mouse;
+	GtkWidget *gen_library, *gen_updates, *gen_mouse;
 	GtkWidget *det_edges, *det_lighting, *det_smooth;
 	GtkWidget *det_antialias, *det_fast, *det_width;
 	GtkWidget *draw_grid, *draw_gridunits, *draw_axis;
@@ -1548,23 +1548,28 @@ int preferencesdlg_execute(void* param)
 	gtk_container_add(GTK_CONTAINER(notebook), table);
 	gtk_container_border_width(GTK_CONTAINER(table), 5);
 
-	hbox = gtk_hbox_new(FALSE, 5);
-	gtk_widget_show(hbox);
-	gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 1, 0, 1);
+	label = gtk_label_new("Custom Library Path:");
+	gtk_widget_show(label);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 0, 1);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+	s.gen_library = gtk_entry_new();
+	gtk_widget_show(s.gen_library);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.gen_library, 1, 2, 0, 1);
 
 	label = gtk_label_new("Mouse sensitivity:");
 	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
 	s.gen_mouse = gtk_hscale_new_with_range(1, 20, 1);
 	gtk_widget_show(s.gen_mouse);
-	gtk_box_pack_start(GTK_BOX(hbox), s.gen_mouse, TRUE, TRUE, 0);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.gen_mouse, 1, 2, 1, 2);
 	gtk_scale_set_draw_value(GTK_SCALE(s.gen_mouse), FALSE);
 
 	s.gen_updates = gtk_check_button_new_with_label("Check for updates on startup");
 //	gtk_widget_show(s.gen_updates);
-	gtk_table_attach_defaults(GTK_TABLE(table), s.gen_updates, 0, 1, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(table), s.gen_updates, 0, 1, 2, 3);
 
 	table = gtk_table_new(6, 1, TRUE);
 	gtk_widget_show(table);
@@ -1844,6 +1849,7 @@ int preferencesdlg_execute(void* param)
 	gtk_box_pack_end(GTK_BOX(GTK_DIALOG(dlg)->action_area), button, FALSE, FALSE, 0);
 
 	// Set initial values
+	gtk_entry_set_text(GTK_ENTRY(s.gen_library), Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", ""));
 	gtk_range_set_value(GTK_RANGE(s.gen_mouse), opts->nMouse);
 
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(s.det_edges),(opts->nDetail & LC_DET_BRICKEDGES) ? TRUE : FALSE);
@@ -1914,6 +1920,7 @@ int preferencesdlg_execute(void* param)
 			opts->fDensity = TempOpts.fDensity;
 			strcpy(opts->strBackground, TempOpts.strBackground);
 
+			Sys_ProfileSaveString("Settings", "CustomPiecesLibrary", gtk_entry_get_text(GTK_ENTRY(s.gen_library)));
 			Sys_ProfileSaveInt("Default", "AASamples", opts->AASamples);
 		}
 		else

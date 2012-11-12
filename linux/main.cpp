@@ -24,6 +24,7 @@
 #include "lc_library.h"
 #include "preview.h"
 #include "camera.h"
+#include "pieceinf.h"
 
 View* view;
 

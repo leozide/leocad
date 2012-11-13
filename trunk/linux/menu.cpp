@@ -133,8 +133,27 @@ void create_main_menu (GtkObject *window, GtkWidget *vbox)
   create_menu_item (menu, "Zoom E_xtents", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
 		    window, LC_VIEW_ZOOMEXTENTS, "menu_view_zoomextents");
 
+  menu_in_menu = create_menu_in_menu (menu, "_Viewpoints", accel);
+
+  create_menu_item (menu_in_menu, "Front", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_FRONT, "menu_view_viewpoint_front");
+  create_menu_item (menu_in_menu, "Back", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_BACK, "menu_view_viewpoint_back");
+  create_menu_item (menu_in_menu, "Top", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_TOP, "menu_view_viewpoint_top");
+  create_menu_item (menu_in_menu, "Bottom", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_BOTTOM, "menu_view_viewpoint_bottom");
+  create_menu_item (menu_in_menu, "Left", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_LEFT, "menu_view_viewpoint_left");
+  create_menu_item (menu_in_menu, "Right", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_RIGHT, "menu_view_viewpoint_right");
+  create_menu_item (menu_in_menu, "Home", accel, GTK_SIGNAL_FUNC (OnCommandDirect),
+		    window, LC_VIEW_VIEWPOINT_HOME, "menu_view_viewpoint_home");
+
   menu_in_menu = create_menu_in_menu (menu, "_Cameras", accel);
   gtk_object_set_data (window, "cameras_menu", menu_in_menu);
+
+  create_menu_item(menu_in_menu, "_Reset", accel, GTK_SIGNAL_FUNC(OnCommandDirect), window, LC_VIEW_CAMERA_RESET, "menu_cameras_reset");
 
   menu_in_menu = create_menu_in_menu (menu, "S_tep", accel);
   create_menu_item (menu_in_menu, "Fi_rst", accel, GTK_SIGNAL_FUNC (OnCommandDirect),

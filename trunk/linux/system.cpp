@@ -421,7 +421,6 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera
 	if (!menu)
 		return;
 
-	GList *lst = gtk_container_children(GTK_CONTAINER(menu));
 	Project* project = lcGetActiveProject();
 
 	for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
@@ -429,7 +428,9 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera
 		if (pNew != project->mCameras[CameraIdx])
 			continue;
 
+		GList *lst = gtk_container_children(GTK_CONTAINER(menu));
 		item = g_list_nth_data(lst, CameraIdx);
+		g_list_free(lst);
 		break;
 	}
 
@@ -450,8 +451,13 @@ void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 	if (!menu)
 		return;
 
-	while ((lst = gtk_container_children(GTK_CONTAINER(menu))) != NULL)
-		gtk_container_remove(GTK_CONTAINER(menu), GTK_WIDGET(lst->data));
+	lst = gtk_container_children(GTK_CONTAINER(menu));
+	GtkWidget* reset = GTK_WIDGET(g_list_last(lst)->data);
+	g_object_ref(reset);
+	
+	for (GList* i = g_list_first(lst); i; i = g_list_next(i))
+		gtk_container_remove(GTK_CONTAINER(menu), GTK_WIDGET(i->data));
+	g_list_free(lst);
 
 	Project* project = lcGetActiveProject();
 
@@ -467,7 +473,7 @@ void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 	if (project->mCameras.GetSize())
 		menu_separator(menu);
 
-//	create_menu_item(menu, "_Reset", accel, GTK_SIGNAL_FUNC(OnCommandDirect), window, LC_VIEW_CAMERA_RESET, "menu_cameras_reset");
+	gtk_menu_append(GTK_MENU(menu), reset);
 }
 
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)

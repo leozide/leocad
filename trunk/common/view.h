@@ -23,7 +23,7 @@ public:
 	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
 	void OnMouseMove(int x, int y, bool bControl, bool bShift);
 
-	void SetCamera(Camera* camera);
+	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();
 
 	LC_CURSOR_TYPE GetCursor() const;

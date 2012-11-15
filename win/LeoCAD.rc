@@ -286,7 +286,7 @@ BEGIN
         END
         POPUP "C&ameras"
         BEGIN
-            MENUITEM "Reset",                       ID_VIEW_CAMERAS_RESET
+            MENUITEM "Dummy",                       ID_CAMERA_FIRST
         END
         POPUP "Ste&p"
         BEGIN
@@ -1784,6 +1784,11 @@ END
 STRINGTABLE
 BEGIN
     ID_VIEW_VIEWPOINT_HOME  "View model from the default position."
+END
+
+STRINGTABLE
+BEGIN
+    ID_CAMERA_FIRST         "Do not use a camera"
 END
 
 #endif    // English (United States) resources

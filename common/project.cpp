@@ -3273,7 +3273,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 
 	View view(this, m_ActiveView);
-	view.SetCamera(m_ActiveView->mCamera);
+	view.SetCamera(m_ActiveView->mCamera, false);
 	view.OnSize(width, height);
 
 	if (!hilite)
@@ -5757,10 +5757,25 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_CAMERA_MENU:
 		{
-			Camera* pCamera = mCameras[nParam];
+			Camera* pCamera = NULL;
+
+			if (nParam == 0)
+			{
+				pCamera = m_ActiveView->mCamera;
+
+				if (!pCamera->IsSimple())
+				{
+					m_ActiveView->SetCamera(pCamera, true);
+					pCamera = m_ActiveView->mCamera;
+				}
+			}
+			else
+			{
+				pCamera = mCameras[nParam - 1];
+			}
 
 			SystemUpdateCurrentCamera(m_ActiveView->mCamera, pCamera, mCameras);
-			m_ActiveView->SetCamera(pCamera);
+			m_ActiveView->SetCamera(pCamera, false);
 			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;

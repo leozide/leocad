@@ -22,9 +22,9 @@ View::~View()
 		delete mCamera;
 }
 
-void View::SetCamera(Camera* camera)
+void View::SetCamera(Camera* camera, bool ForceCopy)
 {
-	if (camera->IsSimple())
+	if (camera->IsSimple() || ForceCopy)
 	{
 		if (!mCamera || !mCamera->IsSimple())
 			mCamera = new Camera(true);

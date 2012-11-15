@@ -397,14 +397,18 @@ void CMainFrame::OnUpdateLock(CCmdUI* pCmdUI)
 void CMainFrame::OnUpdateCamera(CCmdUI* pCmdUI)
 {
 	Project* project = lcGetActiveProject();
+	Camera* ActiveCamera = project->GetActiveView()->mCamera;
+	int CameraIndex = pCmdUI->m_nID - ID_CAMERA_FIRST;
 
-	if (project->mCameras.GetSize())
+	if (!CameraIndex)
+		pCmdUI->SetRadio(ActiveCamera->IsSimple());
+	else if (project->mCameras.GetSize() > CameraIndex - 1)
 	{
-		Camera* ActiveCamera = project->GetActiveView()->mCamera;
-		Camera* MenuCamera = project->mCameras[pCmdUI->m_nID - ID_CAMERA_FIRST];
-
+		Camera* MenuCamera = project->mCameras[CameraIndex - 1];
 		pCmdUI->SetRadio(MenuCamera == ActiveCamera);
 	}
+	else
+		pCmdUI->SetRadio(FALSE);
 }
 
 void CMainFrame::OnUpdateSnapXY(CCmdUI* pCmdUI)
@@ -608,9 +612,9 @@ void CMainFrame::OnViewFullscreen()
 
 void CMainFrame::GetMessageString(UINT nID, CString& rMessage) const
 {
-	if (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
+	if (nID > ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST)
 	{
-		Camera* pCamera = lcGetActiveProject()->mCameras[nID - ID_CAMERA_FIRST];
+		Camera* pCamera = lcGetActiveProject()->mCameras[nID - ID_CAMERA_FIRST - 1];
 		rMessage = "Use the camera \"";
 		rMessage += pCamera->GetName();
 		rMessage += "\"";
@@ -629,30 +633,23 @@ BOOL CMainFrame::OnShowPopupMenu(CMFCPopupMenu* pMenuPopup)
 	if (!CMFCToolBar::IsCustomizeMode() && pMenuPopup != NULL && pMenuPopup->GetHMenu() != NULL)
 	{
 		HMENU hMenuPop = pMenuPopup->GetHMenu();
-		BOOL bIsCamerawMenu = FALSE;
+		UINT nID = ::GetMenuItemID(hMenuPop, 0);
 
-		int iItemMax = ::GetMenuItemCount(hMenuPop);
-		for (int iItemPop = 0; !bIsCamerawMenu && iItemPop < iItemMax; iItemPop ++)
-		{
-			UINT nID = ::GetMenuItemID( hMenuPop, iItemPop);
-			bIsCamerawMenu = (nID == ID_VIEW_CAMERAS_RESET) || (nID >= ID_CAMERA_FIRST && nID <= ID_CAMERA_LAST);
-		}
-
-		if (bIsCamerawMenu)
+		if (nID == ID_CAMERA_FIRST)
 		{
 			Project* project = lcGetActiveProject();
 
 			pMenuPopup->RemoveAllItems();
 
+			pMenuPopup->InsertItem(CMFCToolBarMenuButton(ID_CAMERA_FIRST, NULL, -1, "No Camera"));
+
 			for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
 			{
-				CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + CameraIdx, NULL, -1, project->mCameras[CameraIdx]->GetName());
+				CMFCToolBarMenuButton newButton(ID_CAMERA_FIRST + CameraIdx + 1, NULL, -1, project->mCameras[CameraIdx]->GetName());
 				pMenuPopup->InsertItem(newButton);
 			}
 
-			if (project->mCameras.GetSize())
-				pMenuPopup->InsertSeparator();
-
+			pMenuPopup->InsertSeparator();
 			pMenuPopup->InsertItem(CMFCToolBarMenuButton(ID_VIEW_CAMERAS_RESET, NULL, -1, "Reset"));
 		}
 	}

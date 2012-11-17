@@ -5492,6 +5492,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
+			if (!m_pPieces)
+				break;
+
 			// If the control key is down then zoom all views, otherwise zoom only the active view.
 			int FirstView, LastView;
 

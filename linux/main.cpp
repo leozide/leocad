@@ -599,7 +599,7 @@ int main (int argc, char* argv[])
   Project* project = lcGetActiveProject();
   view = new View(lcGetActiveProject(), NULL);
   if (project->GetActiveView())
-    view->SetCamera(project->GetActiveView()->mCamera);
+    view->SetCamera(project->GetActiveView()->mCamera, false);
   else
     view->SetDefaultCamera();
 

@@ -1066,7 +1066,7 @@ static void statusbar_listener (int message, void *data, void *user)
 {
   if (message == LC_MSG_FOCUS_CHANGED)
   {
-    char text[32];
+    char text[64];
     lcVector3 pos;
 
     lcGetActiveProject()->GetFocusPosition(pos);

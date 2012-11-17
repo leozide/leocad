@@ -421,30 +421,39 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera
 	if (!menu)
 		return;
 
-	Project* project = lcGetActiveProject();
-
-	for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
+	if (!pNew || pNew->IsSimple())
 	{
-		if (pNew != project->mCameras[CameraIdx])
-			continue;
-
 		GList *lst = gtk_container_children(GTK_CONTAINER(menu));
-		item = g_list_nth_data(lst, CameraIdx);
+		item = g_list_first(lst)->data;
 		g_list_free(lst);
-		break;
+	}
+	else
+	{
+		Project* project = lcGetActiveProject();
+
+		for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
+		{
+			if (pNew != project->mCameras[CameraIdx])
+				continue;
+
+			GList *lst = gtk_container_children(GTK_CONTAINER(menu));
+			item = g_list_nth_data(lst, CameraIdx + 1);
+			g_list_free(lst);
+			break;
+		}
 	}
 
 	if (item)
 	{
 		ignore_commands = true;
-		gtk_check_menu_item_set_state (GTK_CHECK_MENU_ITEM (item), TRUE);  
+		gtk_check_menu_item_set_state(GTK_CHECK_MENU_ITEM(item), TRUE);  
 		ignore_commands = false;
 	}
 }
 
 void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 {
-	GtkWidget *menu = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT (((GtkWidget*)(*main_window))), "cameras_menu"));
+	GtkWidget *menu = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(((GtkWidget*)(*main_window))), "cameras_menu"));
 	GtkWidget *item = NULL;
 	GList *lst;
 
@@ -461,19 +470,24 @@ void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 
 	Project* project = lcGetActiveProject();
 
+	item = gtk_radio_menu_item_new_with_label(NULL, "No Camera");
+	gtk_menu_append(GTK_MENU(menu), item);
+	gtk_widget_show(item);
+	gtk_signal_connect(GTK_OBJECT(item), "activate", GTK_SIGNAL_FUNC(OnCommand), GINT_TO_POINTER(ID_CAMERA_FIRST));
+		
 	for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
 	{
-		GSList* grp = item ? gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item)) : NULL;
+		GSList* grp = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
 		item = gtk_radio_menu_item_new_with_label(grp, project->mCameras[CameraIdx]->GetName());
 		gtk_menu_append(GTK_MENU(menu), item);
 		gtk_widget_show(item);
-		gtk_signal_connect(GTK_OBJECT(item), "activate", GTK_SIGNAL_FUNC(OnCommand), GINT_TO_POINTER(CameraIdx + ID_CAMERA_FIRST));
+		gtk_signal_connect(GTK_OBJECT(item), "activate", GTK_SIGNAL_FUNC(OnCommand), GINT_TO_POINTER(CameraIdx + ID_CAMERA_FIRST + 1));
 	}
 
-	if (project->mCameras.GetSize())
-		menu_separator(menu);
+	menu_separator(menu);
 
 	gtk_menu_append(GTK_MENU(menu), reset);
+	g_object_unref(reset);
 }
 
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)

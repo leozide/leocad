@@ -93,10 +93,6 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		}
 	}
 
-	lcLoadDefaultColors();
-
-	SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK | LC_MB_ICONERROR);
-
 	return false;
 }
 
@@ -238,7 +234,18 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		return false;
 
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LibraryCachePath))
-		return false;
+	{
+		if (SaveImage)
+		{
+			fprintf(stderr, "Cannot load pieces library.");
+			return false;
+		}
+
+		lcLoadDefaultColors();
+		m_Library->CreatePlaceholder("EMPTY");
+
+		SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK | LC_MB_ICONERROR);
+	}
 
 	SystemInit();
 

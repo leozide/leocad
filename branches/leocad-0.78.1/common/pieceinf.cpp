@@ -511,7 +511,7 @@ void PieceInfo::BuildMesh(void* Data, int* SectionIndices)
 	{
 		bytes += 1 + 2 * *bytes;
 		lcuint32* info = (lcuint32*)bytes;
-		lcuint32 type = *info;
+		lcuint32 type = LCUINT32(*info);
 
 		switch (type)
 		{
@@ -643,7 +643,8 @@ void PieceInfo::LoadInformation()
 
 		while (*info)
 		{
-			if (*info == LC_MESH)
+			lcuint32 type = LCUINT32(*info);
+			if (type == LC_MESH)
 			{
 				info++;
 				lcuint32 NumColors = LCUINT32(*info);
@@ -725,7 +726,7 @@ void PieceInfo::LoadInformation()
 					}
 				}
 			}
-			else if ((*info == LC_STUD) || (*info == LC_STUD3))
+			else if ((type == LC_STUD) || (type == LC_STUD3))
 			{
 				info++;
 				int ColorIndex = lcGetColorIndex(LCUINT32(*info));
@@ -745,7 +746,7 @@ void PieceInfo::LoadInformation()
 				SectionIndices[gEdgeColor * 2 + 1] += 4 * SIDES;
 				NumIndices += 4 * SIDES;
 			}
-			else if ((*info == LC_STUD2) || (*info == LC_STUD4))
+			else if ((type == LC_STUD2) || (type == LC_STUD4))
 			{
 				info++;
 				int ColorIndex = lcGetColorIndex(LCUINT32(*info));

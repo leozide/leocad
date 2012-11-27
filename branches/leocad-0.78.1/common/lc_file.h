@@ -311,10 +311,10 @@ protected:
 		lcuint8 Temp[2];
 		lcuint8* Bytes = (lcuint8*)Buffer;
 
-		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		for (size_t Idx = 0; Idx < Count; Idx++)
 		{
-			Temp[1] = *Buffer++;
-			Temp[0] = *Buffer++;
+			Temp[1] = *Bytes++;
+			Temp[0] = *Bytes++;
 
 			BytesWritten += WriteBuffer(&Temp, 2);
 		}
@@ -332,12 +332,12 @@ protected:
 		lcuint8 Temp[4];
 		lcuint8* Bytes = (lcuint8*)Buffer;
 
-		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		for (size_t Idx = 0; Idx < Count; Idx++)
 		{
-			Temp[3] = *Buffer++;
-			Temp[2] = *Buffer++;
-			Temp[1] = *Buffer++;
-			Temp[0] = *Buffer++;
+			Temp[3] = *Bytes++;
+			Temp[2] = *Bytes++;
+			Temp[1] = *Bytes++;
+			Temp[0] = *Bytes++;
 
 			BytesWritten += WriteBuffer(&Temp, 4);
 		}
@@ -355,16 +355,16 @@ protected:
 		lcuint8 Temp[8];
 		lcuint8* Bytes = (lcuint8*)Buffer;
 
-		for (size_t Idx = 0; Idx < NumRead; Idx++)
+		for (size_t Idx = 0; Idx < Count; Idx++)
 		{
-			Temp[7] = *Buffer++;
-			Temp[6] = *Buffer++;
-			Temp[5] = *Buffer++;
-			Temp[4] = *Buffer++;
-			Temp[3] = *Buffer++;
-			Temp[2] = *Buffer++;
-			Temp[1] = *Buffer++;
-			Temp[0] = *Buffer++;
+			Temp[7] = *Bytes++;
+			Temp[6] = *Bytes++;
+			Temp[5] = *Bytes++;
+			Temp[4] = *Bytes++;
+			Temp[3] = *Bytes++;
+			Temp[2] = *Bytes++;
+			Temp[1] = *Bytes++;
+			Temp[0] = *Bytes++;
 
 			BytesWritten += WriteBuffer(&Temp, 8);
 		}

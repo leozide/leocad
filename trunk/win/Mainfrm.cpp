@@ -1332,20 +1332,20 @@ void CMainFrame::UpdateMenuAccelerators()
 		0,                         // LC_EDIT_ANGLE_SNAP_7
 		0,                         // LC_EDIT_ANGLE_SNAP_8
 		0,                         // LC_EDIT_ANGLE_SNAP_9
-		0,                         // LC_EDIT_ACTION_SELECT
-		0,                         // LC_EDIT_ACTION_INSERT
-		0,                         // LC_EDIT_ACTION_LIGHT
-		0,                         // LC_EDIT_ACTION_SPOTLIGHT
-		0,                         // LC_EDIT_ACTION_CAMERA
-		0,                         // LC_EDIT_ACTION_MOVE
-		0,                         // LC_EDIT_ACTION_ROTATE
-		0,                         // LC_EDIT_ACTION_ERASER
-		0,                         // LC_EDIT_ACTION_PAINT
-		0,                         // LC_EDIT_ACTION_ZOOM
-		0,                         // LC_EDIT_ACTION_ZOOM_REGION
-		0,                         // LC_EDIT_ACTION_PAN
-		0,                         // LC_EDIT_ACTION_ROTATE_VIEW
-		0,                         // LC_EDIT_ACTION_ROLL
+		ID_ACTION_SELECT,          // LC_EDIT_ACTION_SELECT
+		ID_ACTION_INSERT,          // LC_EDIT_ACTION_INSERT
+		ID_ACTION_LIGHT,           // LC_EDIT_ACTION_LIGHT
+		ID_ACTION_SPOTLIGHT,       // LC_EDIT_ACTION_SPOTLIGHT
+		ID_ACTION_CAMERA,          // LC_EDIT_ACTION_CAMERA
+		ID_ACTION_MOVE,            // LC_EDIT_ACTION_MOVE
+		ID_ACTION_ROTATE,          // LC_EDIT_ACTION_ROTATE
+		ID_ACTION_REMOVE,          // LC_EDIT_ACTION_ERASER
+		ID_ACTION_PAINT,           // LC_EDIT_ACTION_PAINT
+		ID_ACTION_ZOOM,            // LC_EDIT_ACTION_ZOOM
+		ID_ACTION_ZOOM_REGION,     // LC_EDIT_ACTION_ZOOM_REGION
+		ID_ACTION_PAN,             // LC_EDIT_ACTION_PAN
+		ID_ACTION_ROTATE_VIEW,     // LC_EDIT_ACTION_ROTATE_VIEW
+		ID_ACTION_ROLL,            // LC_EDIT_ACTION_ROLL
 	};
 
 	LPACCEL AccelTable = new ACCEL[2 * KeyboardShortcutsCount];

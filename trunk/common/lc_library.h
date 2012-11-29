@@ -137,6 +137,7 @@ public:
 	PtrArray<PieceInfo> mPieces;
 	PtrArray<lcLibraryPrimitive> mPrimitives;
 	ObjArray<lcLibraryCategory> mCategories;
+	int mNumOfficialPieces;
 
 	PtrArray<lcTexture> mTextures;
 

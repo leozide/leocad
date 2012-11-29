@@ -10,7 +10,7 @@
 #include "project.h"
 #include "globals.h"
 #include "system.h"
-#include "pieceinf.h" // TODO: remove
+#include "pieceinf.h"
 #include "mainwnd.h"
 #include "lc_library.h"
 #include "keyboard.h"
@@ -97,13 +97,17 @@ static void CheckForUpdates(void* Data)
 					else
 						str = "You are using the latest version of LeoCAD.\n";
 
-					if (lib > lcGetPiecesLibrary()->mPieces.GetSize())
+					lcPiecesLibrary* Library = lcGetPiecesLibrary();
+					if (Library->mNumOfficialPieces)
 					{
-						str += "There are new pieces available.\n\n";
-						Update = true;
+						if (lib > Library->mNumOfficialPieces)
+						{
+							str += "There are new pieces available.\n\n";
+							Update = true;
+						}
+						else
+							str += "There are no new pieces available at this time.\n";
 					}
-					else
-						str += "There are no new pieces available at this time.\n";
 
 					if (Data || Update)
 					{

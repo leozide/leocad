@@ -15,6 +15,7 @@
 
 lcPiecesLibrary::lcPiecesLibrary()
 {
+	mNumOfficialPieces = 0;
 	mZipFile = NULL;
 	mCacheFile = NULL;
 	mSaveCache = false;
@@ -41,6 +42,7 @@ void lcPiecesLibrary::Unload()
 		delete mTextures[TextureIdx];
 	mTextures.RemoveAll();
 
+	mNumOfficialPieces = 0;
 	delete mZipFile;
 	mZipFile = NULL;
 }

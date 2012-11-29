@@ -88,7 +88,10 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 				strcat(LibraryPath, "library.bin");
 
 				if (m_Library->Load(LibraryPath, LibraryCachePath))
+				{
+					m_Library->mNumOfficialPieces = m_Library->mPieces.GetSize();
 					return true;
+				}
 			}
 		}
 	}

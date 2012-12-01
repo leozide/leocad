@@ -1,13 +1,3 @@
-//
-// This file holds all the dialogs that are called
-// from the 'File' submenu:
-//
-// - File Open Dialog
-// - File Save Dialog
-// - Save Picture Dialog
-// - Piece Library Manager
-//
-
 #include "lc_global.h"
 #include <gtk/gtk.h>
 #include <unistd.h>
@@ -22,170 +12,206 @@
 // =============================================================================
 // Open Project Dialog
 
-static void openprojectdlg_select (GtkCList *clist, gint row, gint col, GdkEvent *event, GtkPreview *preview)
+static void openprojectdlg_preview(GtkFileChooser* dlg, GtkPreview* preview)
 {
-  GtkWidget *parent = gtk_widget_get_toplevel (GTK_WIDGET (clist));
-  const char *filename, *p;
-  bool loaded = false;
-  Image image;
+	char *filename, *p;
+	bool loaded = false;
+	Image image;
 
-  filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION (parent));
+	filename = gtk_file_chooser_get_preview_filename(dlg);
 
-  p = strrchr (filename, '.');
-  if ((p != NULL) && (g_strcasecmp (p+1, "lcd") == 0))
-  {
-    float fv;
-    char id[32];
-    lcDiskFile file;
-    file.Open (filename, "rb");
-    file.ReadBuffer (id, 32);
-    sscanf (strchr(id, ' '), "%f", &fv);
+	p = strrchr (filename, '.');
+	if ((p != NULL) && (g_strcasecmp (p+1, "lcd") == 0))
+	{
+		float fv;
+		char id[32];
+		lcDiskFile file;
+		file.Open (filename, "rb");
+		file.ReadBuffer (id, 32);
+		sscanf (strchr(id, ' '), "%f", &fv);
 
-    if (fv > 0.4f)
-    {
-      file.ReadFloats(&fv, 1);
+		if (fv > 0.4f)
+		{
+			file.ReadFloats(&fv, 1);
 
-      if (fv > 0.7f)
-      {
-        lcuint32 dwPosition;
-        file.Seek (-4, SEEK_END);
-        file.ReadU32 (&dwPosition, 1);
-        file.Seek (dwPosition, SEEK_SET);
+			if (fv > 0.7f)
+			{
+				lcuint32 dwPosition;
+				file.Seek (-4, SEEK_END);
+				file.ReadU32 (&dwPosition, 1);
+				file.Seek (dwPosition, SEEK_SET);
 
-        if (dwPosition != 0)
-        {
-          if (fv < 1.0f)
-          {
-            file.Seek (54, SEEK_CUR);
+				if (dwPosition != 0)
+				{
+					if (fv < 1.0f)
+					{
+						file.Seek (54, SEEK_CUR);
 
-            image.Allocate (120, 100, false);
-            file.ReadBuffer (image.GetData (), 36000);
+						image.Allocate (120, 100, false);
+						file.ReadBuffer (image.GetData (), 36000);
 
-            for (int y = 0; y < 50; y++)
-              for (int x = 0; x < 120; x++)
-              {
-                unsigned char *from = image.GetData() + x*3 + y*360;
-                unsigned char *to = image.GetData() + x*3 + (100-y-1)*360;
-                unsigned char tmp[3] = { from[0], from[1], from[2] };
+						for (int y = 0; y < 50; y++)
+							for (int x = 0; x < 120; x++)
+							{
+								unsigned char *from = image.GetData() + x*3 + y*360;
+								unsigned char *to = image.GetData() + x*3 + (100-y-1)*360;
+								unsigned char tmp[3] = { from[0], from[1], from[2] };
 
-                from[0] = to[2];
-                from[1] = to[1];
-                from[2] = to[0];
-                to[0] = tmp[2];
-                to[1] = tmp[1];
-                to[2] = tmp[0];
-              }
-            loaded = true;
-          }
-          else
-          {
-            loaded = image.FileLoad (file);
-          }
-        }
-      }
-    }
-    file.Close();
-  }
+								from[0] = to[2];
+								from[1] = to[1];
+								from[2] = to[0];
+								to[0] = tmp[2];
+								to[1] = tmp[1];
+								to[2] = tmp[0];
+							}
+						loaded = true;
+					}
+					else
+					{
+						loaded = image.FileLoad (file);
+					}
+				}
+			}
+		}
+		file.Close();
+	}
 
-  if (loaded == false)
-  {
-    GtkWidget *w = GTK_WIDGET (preview);
-    guchar row[360];
+	g_free(filename);
 
-    for (int x = 0; x < 120; x++)
-    {
-      row[x*3] = w->style->bg[0].red/0xFF;
-      row[x*3+1] = w->style->bg[0].green/0xFF;
-      row[x*3+2] = w->style->bg[0].blue/0xFF;
-    }
+	if (loaded == false)
+	{
+		GtkWidget *w = GTK_WIDGET(preview);
+		guchar row[360];
 
-    for (int y = 0; y < 100; y++)
-      gtk_preview_draw_row (preview, row, 0, y, 120);
-    gtk_widget_draw (w, NULL);
-  }
-  else
-  {
-    for (int y = 0; y < 100; y++)
-      gtk_preview_draw_row (preview, image.GetData ()+y*360, 0, y, 120);
-    gtk_widget_draw (GTK_WIDGET (preview), NULL);
-  }
+		for (int x = 0; x < 120; x++)
+		{
+			row[x*3] = w->style->bg[0].red/0xFF;
+			row[x*3+1] = w->style->bg[0].green/0xFF;
+			row[x*3+2] = w->style->bg[0].blue/0xFF;
+		}
+
+		for (int y = 0; y < 100; y++)
+			gtk_preview_draw_row(preview, row, 0, y, 120);
+		gtk_widget_draw(w, NULL);
+	}
+	else
+	{
+		for (int y = 0; y < 100; y++)
+			gtk_preview_draw_row (preview, image.GetData ()+y*360, 0, y, 120);
+		gtk_widget_draw (GTK_WIDGET (preview), NULL);
+	}
+
+	gtk_file_chooser_set_preview_widget_active(dlg, loaded);
 }
 
 int openprojectdlg_execute (char* filename)
 {
-  GtkWidget *dlg, *preview, *vbox, *frame, *frame2, *hbox;
-  int ret = LC_CANCEL, loop = 1, len;
+	GtkWidget* dlg;
+	int ret;
 
-  dlg = gtk_file_selection_new ("Open Project");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->ok_button), "clicked",
-                      GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_OK));
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->cancel_button), "clicked",
-                      GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_object_set_data (GTK_OBJECT (dlg), "loop", &loop);
-  gtk_object_set_data (GTK_OBJECT (dlg), "ret", &ret);
+	dlg = gtk_file_chooser_dialog_new("Open Project", GTK_WINDOW(((GtkWidget*)*main_window)), GTK_FILE_CHOOSER_ACTION_OPEN,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
 
-  // add preview support
-  hbox = GTK_FILE_SELECTION (dlg)->file_list->parent->parent;
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), filename);
 
-  vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, TRUE, 0);
+	GtkFileFilter* filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.lcd");
+	gtk_file_filter_set_name(filter, "LeoCAD Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dlg), filter);
 
-  frame = gtk_frame_new ("Preview");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, TRUE, FALSE, 0);
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.dat");
+	gtk_file_filter_add_pattern(filter, "*.ldr");
+	gtk_file_filter_set_name(filter, "LDraw Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
 
-  frame2 = gtk_frame_new (NULL);
-  gtk_widget_show (frame2);
-  gtk_container_add (GTK_CONTAINER (frame), frame2);
-  gtk_container_border_width (GTK_CONTAINER (frame2), 5);
-  gtk_frame_set_shadow_type (GTK_FRAME (frame2), GTK_SHADOW_NONE);
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_filter_set_name(filter, "All Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
 
-  preview = gtk_preview_new (GTK_PREVIEW_COLOR);
-  gtk_container_add (GTK_CONTAINER (frame2), preview);
-  gtk_preview_size (GTK_PREVIEW (preview), 120, 100);
-  gtk_widget_show (preview);
+	GtkWidget* preview = gtk_preview_new(GTK_PREVIEW_COLOR);
+	gtk_preview_size(GTK_PREVIEW(preview), 120, 100);
+	gtk_widget_show(preview);
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dlg), preview);
+	g_signal_connect(dlg, "update-preview", G_CALLBACK(openprojectdlg_preview), preview);
 
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->file_list), "select_row",
-                      GTK_SIGNAL_FUNC (openprojectdlg_select), preview);
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		char* dlgfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		strcpy(filename, dlgfilename);
+		g_free(dlgfilename);
 
-  len = strlen (filename);
-  if (len != 0)
-  {
-    if (filename[len-1] != '/')
-      strcat (filename, "/");
-    gtk_file_selection_set_filename (GTK_FILE_SELECTION (dlg), filename);
-  }
+		ret = LC_OK;
+	}
+	else
+		ret = LC_CANCEL;
 
-  gtk_widget_show (dlg);
-  gtk_grab_add (dlg);
+	gtk_widget_destroy(dlg);
 
-  while (loop)
-    gtk_main_iteration ();
-
-  if (ret == LC_OK)
-    strcpy (filename, gtk_file_selection_get_filename (GTK_FILE_SELECTION (dlg)));
-
-  gtk_grab_remove (dlg);
-  gtk_widget_destroy (dlg);
-
-  return ret;
+	return ret;
 }
 
 // =============================================================================
 // Save Project Dialog
 
-static void saveprojectdlg_preview (GtkToggleButton *button, gpointer data)
+int saveprojectdlg_execute(char* filename)
 {
-  Sys_ProfileSaveInt ("Default", "Save Preview", gtk_toggle_button_get_active (button));
+	GtkWidget* dlg;
+	int ret;
+
+	dlg = gtk_file_chooser_dialog_new("Save Project", GTK_WINDOW(((GtkWidget*)*main_window)), GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_OK, NULL);
+
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), filename);
+
+	GtkFileFilter* filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.lcd");
+	gtk_file_filter_set_name(filter, "LeoCAD Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.dat");
+	gtk_file_filter_add_pattern(filter, "*.ldr");
+	gtk_file_filter_set_name(filter, "LDraw Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_filter_set_name(filter, "All Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	GtkWidget* check = gtk_check_button_new_with_label("Save Preview");
+	gtk_widget_show(check);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dlg), check);
+
+	if (Sys_ProfileLoadInt("Default", "Save Preview", 0))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), TRUE);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		Sys_ProfileSaveInt("Default", "Save Preview", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check)));
+
+		char* dlgfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		strcpy(filename, dlgfilename);
+		g_free(dlgfilename);
+
+		ret = LC_OK;
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
 }
 
-// used by the save project and save picture dialogs
+// =============================================================================
+// Save Picture Dialog
+
 static void savefiledlg_ok (GtkWidget *widget, gpointer data)
 {
   GtkWidget *parent;
@@ -203,54 +229,6 @@ static void savefiledlg_ok (GtkWidget *widget, gpointer data)
   *loop = 0;
   *ret = GPOINTER_TO_INT (data);
 }
-
-int saveprojectdlg_execute (char* filename)
-{
-  GtkWidget *dlg, *check;
-  int ret = LC_CANCEL, loop = 1;
-
-  dlg = gtk_file_selection_new ("Save Project");
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->ok_button), "clicked",
-                      GTK_SIGNAL_FUNC (savefiledlg_ok), GINT_TO_POINTER (LC_OK));
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->cancel_button), "clicked",
-                      GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_object_set_data (GTK_OBJECT (dlg), "loop", &loop);
-  gtk_object_set_data (GTK_OBJECT (dlg), "ret", &ret);
-
-  // add preview checkbox
-  check = gtk_check_button_new_with_label ("Save Preview");
-  gtk_widget_show (check);
-  gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (dlg)->main_vbox), check, FALSE, FALSE, 0);
-
-  int i = Sys_ProfileLoadInt ("Default", "Save Preview", 0);
-  if (i != 0) 
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check), TRUE);
-  gtk_signal_connect (GTK_OBJECT (check), "toggled", GTK_SIGNAL_FUNC (saveprojectdlg_preview), NULL);
-
-  gtk_file_selection_set_filename (GTK_FILE_SELECTION (dlg), filename);
-
-  gtk_widget_show (dlg);
-  gtk_grab_add (dlg);
-
-  while (loop)
-    gtk_main_iteration ();
-
-  if (ret == LC_OK)
-    strcpy (filename, gtk_file_selection_get_filename (GTK_FILE_SELECTION (dlg)));
-
-  gtk_grab_remove (dlg);
-  gtk_widget_destroy (dlg);
-
-  return ret;
-}
-
-// =============================================================================
-// Save Picture Dialog
 
 static void savepicturedlg_options (GtkWidget *widget, gpointer data)
 {
@@ -340,7 +318,3 @@ int savepicturedlg_execute (void* param)
 
   return ret;
 }
-
-// =============================================================================
-// Piece Library Manager
-

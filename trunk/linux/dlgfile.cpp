@@ -212,109 +212,83 @@ int saveprojectdlg_execute(char* filename)
 // =============================================================================
 // Save Picture Dialog
 
-static void savefiledlg_ok (GtkWidget *widget, gpointer data)
+static void savepicturedlg_options(GtkWidget *widget, gpointer data)
 {
-  GtkWidget *parent;
-  int *loop, *ret;
-
-  parent = gtk_widget_get_toplevel (widget);
-  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
-  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
-
-  if ((GPOINTER_TO_INT (data) == LC_OK) &&
-      (access (gtk_file_selection_get_filename (GTK_FILE_SELECTION (parent)), R_OK) == 0))
-    if (Sys_MessageBox ("File already exists, overwrite ?", "LeoCAD", LC_MB_YESNO) == LC_NO)
-      return;
-
-  *loop = 0;
-  *ret = GPOINTER_TO_INT (data);
+	imageoptsdlg_execute(gtk_widget_get_toplevel(widget), data, false);
 }
 
-static void savepicturedlg_options (GtkWidget *widget, gpointer data)
+int savepicturedlg_execute(void* param)
 {
-  imageoptsdlg_execute (gtk_widget_get_toplevel(widget), data, false);
-}
+	GtkWidget* dlg;
+	int ret;
 
-int savepicturedlg_execute (void* param)
-{
-  GtkWidget *dlg, *button;
-  int ret = LC_CANCEL, loop = 1;
+	dlg = gtk_file_chooser_dialog_new("Save Picture", GTK_WINDOW(((GtkWidget*)*main_window)), GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_OK, NULL);
 
-  unsigned long image = Sys_ProfileLoadInt ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
-  LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)param;
-  opts->width = Sys_ProfileLoadInt ("Default", "Image Width", gdk_screen_width ());
-  opts->height = Sys_ProfileLoadInt ("Default", "Image Height", gdk_screen_height ());
-  opts->imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-  opts->imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-  opts->imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-  opts->imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
-  opts->imopts.pause = (float)Sys_ProfileLoadInt ("Default", "AVI Pause", 100)/100;
-  opts->imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
+//	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), filename);
 
-  dlg = gtk_file_selection_new ("Save Picture"); // FIXME: use GtkFileChooserDialog
-  gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (((GtkWidget*)(*main_window))));
-  gtk_signal_connect (GTK_OBJECT (dlg), "delete_event",
-                      GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
-  gtk_signal_connect (GTK_OBJECT (dlg), "destroy",
-                      GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->ok_button), "clicked",
-                      GTK_SIGNAL_FUNC (savefiledlg_ok), GINT_TO_POINTER (LC_OK));
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (dlg)->cancel_button), "clicked",
-                      GTK_SIGNAL_FUNC (dialog_button_callback), GINT_TO_POINTER (LC_CANCEL));
-  gtk_object_set_data (GTK_OBJECT (dlg), "loop", &loop);
-  gtk_object_set_data (GTK_OBJECT (dlg), "ret", &ret);
+	GtkWidget* hbox = gtk_hbox_new(FALSE, 10);
+	gtk_widget_show(hbox);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dlg), hbox);
 
-  // add the options button
-  button = gtk_button_new_with_label ("Options");
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (GTK_FILE_SELECTION (dlg)->ok_button->parent), button, TRUE, TRUE, 0);
-  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked", GTK_SIGNAL_FUNC (savepicturedlg_options), param);
+	GtkWidget* button = gtk_button_new_with_label ("Image Options");
+	gtk_widget_show(button);
+//	GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(savepicturedlg_options), param);
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
-  /*
-  gtk_file_selection_set_filename (GTK_FILE_SELECTION (dlg), filename);
-  */
-  gtk_widget_show (dlg);
-  gtk_grab_add (dlg);
+	unsigned long image = Sys_ProfileLoadInt ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
+	LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)param;
+	opts->width = Sys_ProfileLoadInt ("Default", "Image Width", gdk_screen_width ());
+	opts->height = Sys_ProfileLoadInt ("Default", "Image Height", gdk_screen_height ());
+	opts->imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
+	opts->imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
+	opts->imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
+	opts->imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
+	opts->imopts.pause = (float)Sys_ProfileLoadInt ("Default", "AVI Pause", 100)/100;
+	opts->imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
-  while (loop)
-    gtk_main_iteration ();
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		char* dlgfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		strcpy(opts->filename, dlgfilename);
+		g_free(dlgfilename);
 
-  if (ret == LC_OK)
-  {
-    char ext[5], *p;
+		char ext[5], *p;
 
-    strcpy (opts->filename, gtk_file_selection_get_filename (GTK_FILE_SELECTION (dlg)));
+		if (strlen (opts->filename) == 0)
+			ret = LC_CANCEL;
 
-    if (strlen (opts->filename) == 0)
-      ret = LC_CANCEL;
+		p = strrchr(opts->filename, '.');
+		if (p != NULL)
+		{
+			strcpy (ext, p+1);
+			strlwr (ext);
+		}
+		else
+			ext[0] = '\0';
 
-    p = strrchr (opts->filename, '.');
-    if (p != NULL)
-    {
-      strcpy (ext, p+1);
-      strlwr (ext);
-    }
-    else
-      ext[0] = '\0';
+		if ((strcmp (ext, "jpg") != 0) && (strcmp (ext, "jpeg") != 0) &&
+		    (strcmp (ext, "bmp") != 0) && (strcmp (ext, "gif") != 0) &&
+		    (strcmp (ext, "png") != 0) && (strcmp (ext, "avi") != 0))
+		{
+			switch (opts->imopts.format)
+			{
+			case LC_IMAGE_BMP: strcat(opts->filename, ".bmp"); break;
+			case LC_IMAGE_GIF: strcat(opts->filename, ".gif"); break;
+			case LC_IMAGE_JPG: strcat(opts->filename, ".jpg"); break;
+			case LC_IMAGE_PNG: strcat(opts->filename, ".png"); break;
+			case LC_IMAGE_AVI: strcat(opts->filename, ".avi"); break;
+			}
+		}
 
-    if ((strcmp (ext, "jpg") != 0) && (strcmp (ext, "jpeg") != 0) &&
-        (strcmp (ext, "bmp") != 0) && (strcmp (ext, "gif") != 0) &&
-        (strcmp (ext, "png") != 0) && (strcmp (ext, "avi") != 0))
-    {
-      switch (opts->imopts.format)
-      {
-        case LC_IMAGE_BMP: strcat(opts->filename, ".bmp"); break;
-        case LC_IMAGE_GIF: strcat(opts->filename, ".gif"); break;
-        case LC_IMAGE_JPG: strcat(opts->filename, ".jpg"); break;
-        case LC_IMAGE_PNG: strcat(opts->filename, ".png"); break;
-        case LC_IMAGE_AVI: strcat(opts->filename, ".avi"); break;
-      }
-    }
-  }
+		ret = LC_OK;
+	}
+	else
+		ret = LC_CANCEL;
 
-  gtk_grab_remove (dlg);
-  gtk_widget_destroy (dlg);
+	gtk_widget_destroy(dlg);
 
-  return ret;
+	return ret;
 }

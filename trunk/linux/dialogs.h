@@ -2,12 +2,7 @@
 #define _DIALOGS_H_
 
 // TODO: obsolete, delete
-void dialog_button_callback(GtkWidget *widget, gpointer data);
 gint dialog_delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data);
-int dlg_domodal(GtkWidget* dlg, int def);
-void dlg_end(int ret);
-gint dlg_delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data);
-void dlg_default_callback(GtkWidget *widget, gpointer data);
 
 void modifydlg_toggle();
 

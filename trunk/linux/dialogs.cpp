@@ -148,19 +148,6 @@ int msgbox_execute(const char* text, const char *caption, int flags)
 // =============================================================================
 // TODO: deprecated, delete
 
-void dialog_button_callback (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *parent;
-  int *loop, *ret;
-
-  parent = gtk_widget_get_toplevel (widget);
-  loop = (int*)gtk_object_get_data (GTK_OBJECT (parent), "loop");
-  ret = (int*)gtk_object_get_data (GTK_OBJECT (parent), "ret");
-
-  *loop = 0;
-  *ret = GPOINTER_TO_INT (data);
-}
-
 gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
 {
   int *loop;
@@ -172,47 +159,10 @@ gint dialog_delete_callback (GtkWidget *widget, GdkEvent* event, gpointer data)
   return TRUE;
 }
 
-static int def_ret = 0;
-static int* cur_ret = NULL;
-
-void dlg_end (int ret)
-{
-  *cur_ret = ret;
-}
-
-int dlg_domodal(GtkWidget* dlg, int def)
-{
-  int ret = -1, old_def = def_ret, *old_ret = cur_ret;
-  def_ret = def;
-  cur_ret = &ret;
-
-  gtk_widget_show(dlg);
-  gtk_grab_add(dlg);
-  while (ret == -1)
-    gtk_main_iteration ();
-  gtk_grab_remove(dlg);
-  gtk_widget_destroy(dlg);
-
-  cur_ret = old_ret;
-  def_ret = old_def;
-  return ret;
-}
-
-void dlg_default_callback(GtkWidget *widget, gpointer data)
-{
-  *cur_ret = GPOINTER_TO_INT(data);
-}
-
-gint dlg_delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data)
-{
-  *cur_ret = def_ret;
-  return TRUE;
-}
-
 // =============================================================================
 // Array Dialog
 
-typedef struct
+struct LC_ARRAYDLG_STRUCT
 {
 	void* data;
 	GtkWidget *move_x, *move_y, *move_z;
@@ -222,7 +172,7 @@ typedef struct
 	GtkWidget *count1, *count2, *count3;
 	GtkWidget *offset_x2, *offset_y2, *offset_z2;
 	GtkWidget *offset_x3, *offset_y3, *offset_z3;
-} LC_ARRAYDLG_STRUCT;
+};
 
 static void arraydlg_adjtotal(GtkWidget *widget, gpointer data)
 {
@@ -342,7 +292,7 @@ int arraydlg_execute(void* param)
 	gtk_widget_show(s.move_x);
 	gtk_table_attach_defaults(GTK_TABLE(table), s.move_x, 1, 2, 1, 2);
 	gtk_entry_set_width_chars(GTK_ENTRY(s.move_x), 4);
- 
+
 	adj = gtk_adjustment_new(0, -1000, 1000, 10, 10, 0);
 	s.move_y = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
 	gtk_widget_show(s.move_y);
@@ -1457,7 +1407,7 @@ bool preferencesdlg_getopts(LC_PREFERENCESDLG_STRUCT* s, LC_PREFERENCESDLG_OPTS*
 	memcpy(opts->fAmbient, gtk_object_get_data(GTK_OBJECT(s->scn_clrambient), "color_flt"), 3 * sizeof(float));
 	memcpy(opts->fGrad1, gtk_object_get_data(GTK_OBJECT(s->scn_clrgrad1), "color_flt"), 3 * sizeof(float));
 	memcpy(opts->fGrad2, gtk_object_get_data(GTK_OBJECT(s->scn_clrgrad2), "color_flt"), 3 * sizeof(float));
-	
+
 	// int nSaveInterval;
 	// char strPath[LC_MAXPATH];
 
@@ -1615,7 +1565,7 @@ int preferencesdlg_execute(void* param)
 	Samples = g_list_append(Samples, (void*)"8x");
 	gtk_combo_set_popdown_strings(GTK_COMBO(s.det_antialias), Samples);
 	g_list_free(Samples);
- 
+
 	s.det_lighting = gtk_check_button_new_with_label("Lighting");
 	gtk_widget_show(s.det_lighting);
 	gtk_table_attach_defaults(GTK_TABLE(table), s.det_lighting, 0, 1, 3, 4);
@@ -2161,7 +2111,7 @@ int propertiesdlg_execute(void* param)
 	gtk_text_buffer_set_text(buffer, opts->strComments, -1);
 
 	scroll_win = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_win), 
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_win),
 	GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_show(scroll_win);
 	gtk_container_add(GTK_CONTAINER(notebook), scroll_win);
@@ -2310,7 +2260,7 @@ static void groupeditdlg_addchildren(GtkCTree *ctree, GtkCTreeNode *parent, Grou
 		{
 			text = opts->groups[i]->m_strName;
 			newparent = gtk_ctree_insert_node(ctree, parent, NULL, (gchar**)&text, 0, NULL, NULL, NULL, NULL, FALSE, TRUE);
-    
+
 			groupeditdlg_addchildren(ctree, newparent, opts->groups[i], opts);
 		}
 	}

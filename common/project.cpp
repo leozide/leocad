@@ -978,7 +978,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 			continue;
 
 		lcMatrix44 IncludeTransform(lcVector4(fmat[3], fmat[9], -fmat[6], 0.0f), lcVector4(fmat[5], fmat[11], -fmat[8], 0.0f),
-		                            lcVector4(-fmat[4], -fmat[10], fmat[7], 0.0f), lcVector4(fmat[0], fmat[2], -fmat[1], 0.0f));
+		                            lcVector4(-fmat[4], -fmat[10], fmat[7], 0.0f), lcVector4(fmat[0], fmat[2], -fmat[1], 1.0f));
 
 		IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 
@@ -1009,7 +1009,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 					lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
 					AxisAngle[3] *= LC_RTOD;
 
-					pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].y, IncludeTransform[3].z, *nStep, 1);
+					pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].y / 25.0f, IncludeTransform[3].z / 25.0f, *nStep, 1);
 					pPiece->SetColorCode(cl);
 					pPiece->CreateName(m_pPieces);
 					AddPiece(pPiece);
@@ -1394,7 +1394,9 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       SystemUpdateFocus(NULL);
       UpdateSelection();
       CalculateStep();
-      UpdateAllViews ();
+
+      HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+      UpdateAllViews();
 
       console.PrintMisc("%d objects imported.\n", ok);
       bSuccess = true;

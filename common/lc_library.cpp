@@ -796,7 +796,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 		if (DstSection.PrimitiveType == GL_TRIANGLES)
 		{
-			if (SrcSection->mColor == 16)
+			if (DstSection.ColorIndex == gDefaultColor)
 				Info->mFlags |= LC_PIECE_HAS_DEFAULT;
 			else
 			{

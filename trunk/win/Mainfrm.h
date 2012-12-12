@@ -61,6 +61,9 @@ public:
 
 	int mTransformMode;
 
+	void GetViewLayout(CWnd* Window, CString& Layout) const;
+	void SetViewLayout(CWnd* Window, const char*& Layout);
+
 	void UpdateMenuAccelerators();
 	void SetStatusBarPane(UINT ID, const char* Text);
 	void SetStatusBarMessage(const char* Message)

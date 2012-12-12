@@ -206,7 +206,21 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		theApp.WriteProfileInt(_T("Settings"), _T("ToolBarVersion"), ToolBarVersion);
 	}
 
-//  console.SetWindowCallback(&mainframe_console_func, m_wndSplitter.GetPane(1, 0));
+	CCreateContext* Context = (CCreateContext*)lpCreateStruct->lpCreateParams;
+	POSITION pos = Context->m_pCurrentDoc->GetFirstViewPosition();
+	CWnd* View = NULL;
+
+	while (pos != NULL)
+		View = Context->m_pCurrentDoc->GetNextView(pos);
+
+	if (View)
+	{
+		CString Layout = theApp.GetProfileString(_T("Settings"), _T("ViewLayout"), _T(""));
+		const char* LayoutPtr = (const char*)Layout;
+
+		if (*LayoutPtr)
+			SetViewLayout(View, LayoutPtr);
+	}
 
 	return 0;
 }
@@ -558,6 +572,27 @@ void CMainFrame::OnClose()
 {
 	if (!lcGetActiveProject()->SaveModified())
 		return;
+
+	CWnd* Window = GetActiveView();
+
+	if (Window)
+	{
+		CWnd* Parent = Window->GetParent();
+		CString Layout;
+
+		if (Parent != this)
+		{
+			while (Parent != this)
+			{
+				Window = Parent;
+				Parent = Parent->GetParent();
+			}
+
+			GetViewLayout(Window, Layout);
+		}
+
+		theApp.WriteProfileString(_T("Settings"), _T("ViewLayout"), Layout);
+	}
 
 	m_wndStandardBar.ResetImages();
 
@@ -1611,21 +1646,18 @@ void CMainFrame::OnViewResetViews()
 	ParentSplitter->GetViewRowCol(ActiveView, &Row, &Col);
 	ParentSplitter->DetachWindow(Row, Col);
 
-	CWnd* TopSplitter = ParentSplitter;
-	for (CWnd* NextParent = TopSplitter; NextParent != this; NextParent = NextParent->GetParent())
-		TopSplitter = NextParent;
+	CWnd* TopSplitter = Parent;
+	while (Parent != this)
+	{
+		TopSplitter = Parent;
+		Parent = Parent->GetParent();
+	}
 
-	ParentSplitter->DestroyWindow();
+	TopSplitter->DestroyWindow();
 
 	for (int i = 0; i < m_SplitterList.GetSize(); i++)
-	{
-		if (m_SplitterList[i] == ParentSplitter)
-		{
-			delete m_SplitterList[i];
-			m_SplitterList.RemoveAt(i);
-			break;
-		}
-	}
+		delete m_SplitterList[i];
+	m_SplitterList.RemoveAll();
 
 	ActiveView->SetDlgCtrlID(AFX_IDW_PANE_FIRST);
 	ActiveView->SetParent(this);
@@ -1633,4 +1665,108 @@ void CMainFrame::OnViewResetViews()
 	ActiveView->InvalidateRect(NULL);
 
 	RecalcLayout();
+}
+
+void CMainFrame::GetViewLayout(CWnd* Window, CString& Layout) const
+{
+	if (Window->IsKindOf(RUNTIME_CLASS(CCADView)))
+	{
+		Layout += "V";
+		// TODO: camera
+	}
+	else
+	{
+		ASSERT(Window->IsKindOf(RUNTIME_CLASS(CSplitterWnd)));
+
+		CSplitterWnd* Splitter = (CSplitterWnd*)Window;
+		CWnd* SecondWindow;
+		int Pos, Dummy;
+		RECT rc;
+
+		Splitter->GetClientRect(&rc);
+
+		if (Splitter->GetRowCount() > Splitter->GetColumnCount())
+		{
+			Layout += "SH";
+			Splitter->GetRowInfo(0, Pos, Dummy);
+			Pos = 100 * Pos / rc.bottom;
+			SecondWindow = Splitter->GetPane(1, 0);
+		}
+		else
+		{
+			Layout += "SV";
+			Splitter->GetColumnInfo(0, Pos, Dummy);
+			Pos = 100 * Pos / rc.right;
+			SecondWindow = Splitter->GetPane(0, 1);
+		}
+
+		char buf[16];
+		sprintf(buf, "%d", Pos);
+		Layout += buf;
+
+		GetViewLayout(Splitter->GetPane(0, 0), Layout);
+		GetViewLayout(SecondWindow, Layout);
+	}
+}
+
+// Creates views based on a string describing the layout.
+void CMainFrame::SetViewLayout(CWnd* Window, const char*& Layout)
+{
+	if (!*Layout || *Layout == 'V')
+	{
+		Layout++;
+		// TODO: camera
+		return;
+	}
+	else if (*Layout == 'S')
+	{
+		Layout++;
+		SetActiveView((CView*)Window);
+
+		// Save splitter direction.
+		char dir = *Layout;
+		Layout++;
+
+		// Get view size.
+		int count = 0;
+		char buf[16];
+
+		while (*Layout && isdigit(*Layout) && count < 15)
+			buf[count++] = *Layout++;
+		buf[count] = 0;
+
+		int pos = atoi(buf);
+
+		RECT rc;
+		Window->GetClientRect(&rc);
+
+		// Split view.
+		if (dir == 'H')
+		{
+			OnViewSplitHorizontally();
+
+			CSplitterWnd* splitter = (CSplitterWnd*)Window->GetParent();
+			splitter->SetRowInfo(0, pos * rc.bottom / 100, 0);
+			splitter->RecalcLayout();
+
+			SetViewLayout(splitter->GetPane(0, 0), Layout);
+			SetViewLayout(splitter->GetPane(1, 0), Layout);
+		}
+		else
+		{
+			OnViewSplitVertically();
+
+			CSplitterWnd* splitter = (CSplitterWnd*)Window->GetParent();
+			splitter->SetColumnInfo(0, pos * rc.right / 100, 0);
+			splitter->RecalcLayout();
+
+			SetViewLayout(splitter->GetPane(0, 0), Layout);
+			SetViewLayout(splitter->GetPane(0, 1), Layout);
+		}
+	}
+	else
+	{
+		Layout++;
+		return;
+	}
 }

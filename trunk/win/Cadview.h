@@ -21,6 +21,10 @@ public:
 
 // Operations
 public:
+	View* GetView() const
+	{
+		return m_pView;
+	}
 
 // Overrides
 	// ClassWizard generated virtual function overrides

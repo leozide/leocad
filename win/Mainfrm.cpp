@@ -1671,8 +1671,28 @@ void CMainFrame::GetViewLayout(CWnd* Window, CString& Layout) const
 {
 	if (Window->IsKindOf(RUNTIME_CLASS(CCADView)))
 	{
-		Layout += "V";
-		// TODO: camera
+		Camera* camera = ((CCADView*)Window)->GetView()->mCamera;
+		lcVector3 Front = lcNormalize(camera->mTargetPosition - camera->mPosition);
+		int Viewpoint;
+
+		if (Front.x < -0.99f)
+			Viewpoint = LC_VIEWPOINT_FRONT;
+		else if (Front.x > 0.99f)
+			Viewpoint = LC_VIEWPOINT_BACK;
+		else if (Front.z < -0.99f)
+			Viewpoint = LC_VIEWPOINT_TOP;
+		else if (Front.z > 0.99f)
+			Viewpoint = LC_VIEWPOINT_BOTTOM;
+		else if (Front.y < -0.99f)
+			Viewpoint = LC_VIEWPOINT_LEFT;
+		else if (Front.y > 0.99f)
+			Viewpoint = LC_VIEWPOINT_RIGHT;
+		else
+			Viewpoint = LC_VIEWPOINT_HOME;
+
+		char ViewStr[3] = "V0";
+		ViewStr[1] += Viewpoint;
+		Layout += ViewStr;
 	}
 	else
 	{
@@ -1709,13 +1729,16 @@ void CMainFrame::GetViewLayout(CWnd* Window, CString& Layout) const
 	}
 }
 
-// Creates views based on a string describing the layout.
 void CMainFrame::SetViewLayout(CWnd* Window, const char*& Layout)
 {
 	if (!*Layout || *Layout == 'V')
 	{
 		Layout++;
-		// TODO: camera
+
+		int Viewpoint = *Layout++ - '0';
+		Camera* camera = ((CCADView*)Window)->GetView()->mCamera;
+		camera->SetViewpoint((LC_VIEWPOINT)Viewpoint, 1, false, false);
+
 		return;
 	}
 	else if (*Layout == 'S')
@@ -1723,11 +1746,9 @@ void CMainFrame::SetViewLayout(CWnd* Window, const char*& Layout)
 		Layout++;
 		SetActiveView((CView*)Window);
 
-		// Save splitter direction.
 		char dir = *Layout;
 		Layout++;
 
-		// Get view size.
 		int count = 0;
 		char buf[16];
 
@@ -1740,7 +1761,6 @@ void CMainFrame::SetViewLayout(CWnd* Window, const char*& Layout)
 		RECT rc;
 		Window->GetClientRect(&rc);
 
-		// Split view.
 		if (dir == 'H')
 		{
 			OnViewSplitHorizontally();

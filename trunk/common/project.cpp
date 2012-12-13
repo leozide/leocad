@@ -774,7 +774,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				view->SetDefaultCamera();
 		}
 
-		ZoomExtents(0, m_ViewList.GetSize());
+		if (!bUndo)
+			ZoomExtents(0, m_ViewList.GetSize());
 	}
 
 	SetAction(action);

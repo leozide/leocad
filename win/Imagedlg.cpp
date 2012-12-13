@@ -30,6 +30,7 @@ CImageDlg::CImageDlg(BOOL bHTML, void* param, CWnd* pParent /*=NULL*/)
 	m_nFrom = opts->from;
 	m_nTo = opts->to;
 	m_nSingle = opts->multiple ? 1 : 0;
+	m_strFilename = bHTML ? _T("") : opts->filename;
 	//}}AFX_DATA_INIT
 }
 
@@ -49,6 +50,7 @@ void CImageDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_IMGDLG_PAUSE, m_fPause);
 	DDX_Radio(pDX, IDC_IMGDLG_SINGLE, m_nSingle);
 	DDX_Text(pDX, IDC_IMGDLG_TO, m_nTo);
+	DDX_Text(pDX, IDC_IMGDLG_FILENAME, m_strFilename);
 	//}}AFX_DATA_MAP
 }
 
@@ -56,6 +58,7 @@ void CImageDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CImageDlg, CDialog)
 	//{{AFX_MSG_MAP(CImageDlg)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_IMGDLG_BROWSE, &CImageDlg::OnBnClickedImgdlgBrowse)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,10 +68,9 @@ BOOL CImageDlg::OnInitDialog()
 {
 	if (m_bHTML)
 	{
-		UINT u[6] = { IDC_IMGDLG_SINGLE, IDC_IMGDLG_MULTIPLE, IDC_IMGDLG_FROM,
-						IDC_IMGDLG_TO, IDC_IMGDLG_AVI, IDC_IMGDLG_PAUSE };
+		UINT u[8] = { IDC_IMGDLG_SINGLE, IDC_IMGDLG_MULTIPLE, IDC_IMGDLG_FROM, IDC_IMGDLG_TO, IDC_IMGDLG_AVI, IDC_IMGDLG_PAUSE, IDC_IMGDLG_FILENAME, IDC_IMGDLG_BROWSE };
 
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 8; i++)
 			GetDlgItem(u[i])->EnableWindow(FALSE);
 	}
 
@@ -92,24 +94,19 @@ void CImageDlg::OnOK()
 	opts->from = m_nFrom;
 	opts->to = m_nTo;
 	opts->multiple = m_nSingle != 0;
-
-	if (!m_bHTML)
-	{
-    DWORD dwImage = m_nFormat;
-    if (m_bProgressive)
-      dwImage |= LC_IMAGE_PROGRESSIVE;
-    if (m_bTransparent)
-      dwImage |= LC_IMAGE_TRANSPARENT;
-    if (m_bHighcolor)
-      dwImage |= LC_IMAGE_HIGHCOLOR;
-
-		theApp.WriteProfileInt("Default", "Image Options", dwImage);
-		theApp.WriteProfileInt("Default", "Image Width", m_nWidth);
-		theApp.WriteProfileInt("Default", "Image Height", m_nHeight);
-		theApp.WriteProfileInt("Default", "AVI Pause", (int)(m_fPause*100));
-	}
-
-	theApp.WriteProfileInt("Default", "JPEG Quality", m_nQuality);
 	
 	CDialog::OnOK();
+}
+
+void CImageDlg::OnBnClickedImgdlgBrowse()
+{
+	CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
+	                "All Images|*.gif;*.jpg;*.jpeg;*.bmp;*.png;*.avi|GIF Files (*.gif)|*.gif|JPEG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|Bitmap Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png|AVI Files (*.avi)|*.avi|All Files (*.*)|*.*||");
+
+	if (dlg.DoModal() == IDOK)
+	{
+		UpdateData (TRUE);
+		m_strFilename = dlg.GetPathName();
+		UpdateData (FALSE);
+	}
 }

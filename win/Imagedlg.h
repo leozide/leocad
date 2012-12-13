@@ -34,6 +34,7 @@ public:
 	float	m_fPause;
 	int		m_nSingle;
 	UINT	m_nTo;
+	CString m_strFilename;
 	//}}AFX_DATA
 
 
@@ -53,6 +54,9 @@ protected:
 	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+public:
+	afx_msg void OnBnClickedImgdlgBrowse();
 };
 
 //{{AFX_INSERT_LOCATION}}

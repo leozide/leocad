@@ -27,7 +27,6 @@ CHTMLDlg::CHTMLDlg(void* param, CWnd* pParent /*=NULL*/)
 	m_bListEnd = FALSE;
 	m_bListStep = FALSE;
 	m_bHighlight = FALSE;
-	m_bHtmlExt = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -43,7 +42,6 @@ void CHTMLDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_HTMDLG_LIST_END, m_bListEnd);
 	DDX_Check(pDX, IDC_HTMDLG_LIST_STEP, m_bListStep);
 	DDX_Check(pDX, IDC_HTMDLG_HIGHLIGHT, m_bHighlight);
-	DDX_Check(pDX, IDC_HTMLDLG_HTMLEXT, m_bHtmlExt);
 	//}}AFX_DATA_MAP
 }
 

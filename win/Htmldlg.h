@@ -26,7 +26,6 @@ public:
 	BOOL	m_bListEnd;
 	BOOL	m_bListStep;
 	BOOL	m_bHighlight;
-	BOOL	m_bHtmlExt;
 	//}}AFX_DATA
 
 

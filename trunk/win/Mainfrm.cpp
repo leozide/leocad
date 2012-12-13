@@ -1701,22 +1701,17 @@ void CMainFrame::GetViewLayout(CWnd* Window, CString& Layout) const
 		CSplitterWnd* Splitter = (CSplitterWnd*)Window;
 		CWnd* SecondWindow;
 		int Pos, Dummy;
-		RECT rc;
-
-		Splitter->GetClientRect(&rc);
 
 		if (Splitter->GetRowCount() > Splitter->GetColumnCount())
 		{
 			Layout += "SH";
 			Splitter->GetRowInfo(0, Pos, Dummy);
-			Pos = 100 * Pos / rc.bottom;
 			SecondWindow = Splitter->GetPane(1, 0);
 		}
 		else
 		{
 			Layout += "SV";
 			Splitter->GetColumnInfo(0, Pos, Dummy);
-			Pos = 100 * Pos / rc.right;
 			SecondWindow = Splitter->GetPane(0, 1);
 		}
 
@@ -1758,15 +1753,12 @@ void CMainFrame::SetViewLayout(CWnd* Window, const char*& Layout)
 
 		int pos = atoi(buf);
 
-		RECT rc;
-		Window->GetClientRect(&rc);
-
 		if (dir == 'H')
 		{
 			OnViewSplitHorizontally();
 
 			CSplitterWnd* splitter = (CSplitterWnd*)Window->GetParent();
-			splitter->SetRowInfo(0, pos * rc.bottom / 100, 0);
+			splitter->SetRowInfo(0, pos, 0);
 			splitter->RecalcLayout();
 
 			SetViewLayout(splitter->GetPane(0, 0), Layout);
@@ -1777,7 +1769,7 @@ void CMainFrame::SetViewLayout(CWnd* Window, const char*& Layout)
 			OnViewSplitVertically();
 
 			CSplitterWnd* splitter = (CSplitterWnd*)Window->GetParent();
-			splitter->SetColumnInfo(0, pos * rc.right / 100, 0);
+			splitter->SetColumnInfo(0, pos, 0);
 			splitter->RecalcLayout();
 
 			SetViewLayout(splitter->GetPane(0, 0), Layout);

@@ -212,6 +212,17 @@ void Project::DeleteContents(bool bUndo)
 		delete pPiece;
 	}
 
+	if (!bUndo)
+	{
+		for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
+		{
+			View* view = m_ViewList[ViewIdx];
+
+			if (!view->mCamera->IsSimple())
+				view->SetDefaultCamera();
+		}
+	}
+
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		delete mCameras[CameraIdx];
 	mCameras.RemoveAll();
@@ -313,11 +324,15 @@ void Project::LoadDefaults(bool cameras)
 	if (cameras)
 	{
 		for (i = 0; i < m_ViewList.GetSize(); i++)
-			m_ViewList[i]->SetDefaultCamera();
+			if (!m_ViewList[i]->mCamera->IsSimple())
+				m_ViewList[i]->SetDefaultCamera();
+
 		SystemUpdateCameraMenu(mCameras);
+
 		if (m_ActiveView)
 			SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
 	}
+
 	SystemPieceComboAdd(NULL);
 	UpdateSelection();
 }
@@ -735,22 +750,33 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		}
 	}
 
-	if (!bMerge)
-	{
-		for (i = 0; i < m_ViewList.GetSize(); i++)
-			m_ViewList[i]->SetDefaultCamera();
-	}
-
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
 		m_ViewList[i]->MakeCurrent();
 		RenderInitialize();
 	}
+
 	CalculateStep();
+
 	if (!bUndo)
 		SelectAndFocusNone(false);
+
 	if (!bMerge)
 		SystemUpdateFocus(NULL);
+
+	if (!bMerge)
+	{
+		for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
+		{
+			View* view = m_ViewList[ViewIdx];
+
+			if (!view->mCamera->IsSimple())
+				view->SetDefaultCamera();
+		}
+
+		ZoomExtents(0, m_ViewList.GetSize());
+	}
+
 	SetAction(action);
 //	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
@@ -1395,7 +1421,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       UpdateSelection();
       CalculateStep();
 
-      HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+      ZoomExtents(0, m_ViewList.GetSize());
       UpdateAllViews();
 
       console.PrintMisc("%d objects imported.\n", ok);
@@ -3264,6 +3290,43 @@ unsigned char Project::GetLastStep()
 		last = lcMax(last, pPiece->GetStepShow());
 
 	return last;
+}
+
+void Project::ZoomExtents(int FirstView, int LastView)
+{
+	if (!m_pPieces)
+		return;
+
+	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+
+	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			pPiece->CompareBoundingBox(bs);
+
+	lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
+
+	lcVector3 Points[8] =
+	{
+		lcVector3(bs[0], bs[1], bs[5]),
+		lcVector3(bs[3], bs[1], bs[5]),
+		lcVector3(bs[0], bs[1], bs[2]),
+		lcVector3(bs[3], bs[4], bs[5]),
+		lcVector3(bs[3], bs[4], bs[2]),
+		lcVector3(bs[0], bs[4], bs[2]),
+		lcVector3(bs[0], bs[4], bs[5]),
+		lcVector3(bs[3], bs[1], bs[2])
+	};
+
+	for (int vp = FirstView; vp < LastView; vp++)
+	{
+		View* view = m_ViewList[vp];
+
+		view->mCamera->ZoomExtents(view, Center, Points, 8, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+	}
+
+	SystemUpdateFocus(NULL);
+	UpdateOverlayScale();
+	UpdateAllViews();
 }
 
 // Create a series of pictures
@@ -5494,10 +5557,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_VIEW_ZOOMEXTENTS:
 		{
-			if (!m_pPieces)
-				break;
-
-			// If the control key is down then zoom all views, otherwise zoom only the active view.
 			int FirstView, LastView;
 
 			if (Sys_KeyDown(KEY_CONTROL))
@@ -5511,36 +5570,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				LastView = FirstView + 1;
 			}
 
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-					pPiece->CompareBoundingBox(bs);
-
-			lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
-
-			lcVector3 Points[8] =
-			{
-				lcVector3(bs[0], bs[1], bs[5]),
-				lcVector3(bs[3], bs[1], bs[5]),
-				lcVector3(bs[0], bs[1], bs[2]),
-				lcVector3(bs[3], bs[4], bs[5]),
-				lcVector3(bs[3], bs[4], bs[2]),
-				lcVector3(bs[0], bs[4], bs[2]),
-				lcVector3(bs[0], bs[4], bs[5]),
-				lcVector3(bs[3], bs[1], bs[2])
-			};
-
-			for (int vp = FirstView; vp < LastView; vp++)
-			{
-				View* view = m_ViewList[vp];
-
-				view->mCamera->ZoomExtents(view, Center, Points, 8, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			}
-
-			SystemUpdateFocus(NULL);
-			UpdateOverlayScale();
-			UpdateAllViews();
+			ZoomExtents(FirstView, LastView);
 		} break;
 
 		case LC_VIEW_STEP_NEXT:

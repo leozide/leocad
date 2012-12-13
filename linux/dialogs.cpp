@@ -630,7 +630,7 @@ struct LC_HTMLDLG_STRUCT
 	GtkWidget *dlg;
 	GtkWidget *single, *multiple, *index;
 	GtkWidget *list_end, *list_step, *images;
-	GtkWidget *highlight, *htmlext, *directory;
+	GtkWidget *highlight, *directory;
 };
 
 static void htmldlg_images(GtkWidget *widget, gpointer data)
@@ -753,10 +753,6 @@ int htmldlg_execute(void* param)
 	gtk_widget_show(s.highlight);
 	gtk_box_pack_start(GTK_BOX(vbox), s.highlight, TRUE, TRUE, 0);
 
-	s.htmlext = gtk_check_button_new_with_label("Save files with .html extension");
-	gtk_widget_show(s.htmlext);
-	gtk_box_pack_start(GTK_BOX(vbox), s.htmlext, TRUE, TRUE, 0);
-
 	hbox = gtk_hbox_new(FALSE, 5);
 	gtk_widget_show(hbox);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, FALSE, 0);
@@ -789,7 +785,6 @@ int htmldlg_execute(void* param)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.list_end), opts->listend);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.list_step), opts->liststep);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.highlight), opts->highlight);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s.htmlext), opts->htmlext);
 
 	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.single));
 	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.list_step));
@@ -804,7 +799,6 @@ int htmldlg_execute(void* param)
 		opts->listend = (GTK_TOGGLE_BUTTON(s.list_end)->active) ? true : false;
 		opts->liststep = (GTK_TOGGLE_BUTTON(s.list_step)->active) ? true : false;
 		opts->highlight = (GTK_TOGGLE_BUTTON(s.highlight)->active) ? true : false;
-		opts->htmlext = (GTK_TOGGLE_BUTTON(s.htmlext)->active) ? true : false;
 		strcpy(opts->path, gtk_entry_get_text(GTK_ENTRY(s.directory)));
 	}
 	else
@@ -897,6 +891,14 @@ int imageoptsdlg_execute(GtkWidget* parent, void* param, bool from_htmldlg)
 	gtk_widget_show(s.to);
 	gtk_box_pack_start(GTK_BOX(hbox2), s.to, FALSE, FALSE, 0);
 	gtk_entry_set_width_chars(GTK_ENTRY(s.to), 3);
+
+	if (from_htmldlg)
+	{
+		gtk_widget_set_sensitive(s.from, FALSE);
+		gtk_widget_set_sensitive(s.to, FALSE);
+		gtk_widget_set_sensitive(s.single, FALSE);
+		gtk_widget_set_sensitive(s.multiple, FALSE);
+	}
 
 	frame = gtk_frame_new("Dimensions");
 	gtk_widget_show(frame);
@@ -1061,7 +1063,7 @@ int imageoptsdlg_execute(GtkWidget* parent, void* param, bool from_htmldlg)
 		if (opts->imopts.truecolor)
 			image |= LC_IMAGE_HIGHCOLOR;
 
-		if (s.from_htmldlg)
+		if (from_htmldlg)
 		{
 			Sys_ProfileSaveInt("Default", "HTML Options", image);
 			Sys_ProfileSaveInt("Default", "HTML Width", opts->width);

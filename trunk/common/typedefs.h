@@ -260,9 +260,7 @@ enum LC_DIALOGS
 
 enum LC_FILEOPENDLG_TYPES
 {
-	LC_FILEOPENDLG_DAT,
-	LC_FILEOPENDLG_LCF,
-	LC_FILEOPENDLG_LUP
+	LC_FILEOPENDLG_LCF
 };
 
 struct LC_FILEOPENDLG_OPTS
@@ -307,7 +305,6 @@ struct LC_HTMLDLG_OPTS
 	bool listend;
 	bool liststep;
 	bool highlight;
-	bool htmlext;
 	LC_IMAGEDLG_OPTS imdlg;
 };
 

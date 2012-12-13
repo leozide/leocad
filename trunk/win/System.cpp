@@ -272,41 +272,6 @@ static UINT APIENTRY OFNSaveHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARA
 	return 0;
 }
 
-static UINT APIENTRY OFNSavePictureHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uiMsg)
-	{
-		case WM_INITDIALOG:
-		{
-			OPENFILENAME* ofn = (OPENFILENAME*)lParam;
-			SetWindowLong(hdlg, GWL_USERDATA, ofn->lCustData);
-		} break;
-
-		case WM_COMMAND:
-		{
-			if (wParam == IDC_SAVEPICTURE_OPTIONS)
-			{
-				LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)GetWindowLong(hdlg, GWL_USERDATA);
-				CImageDlg dlg(FALSE, opts);
-				dlg.DoModal();
-			}
-		} break;
-
-		case WM_NOTIFY: 
-		{
-			LPNMHDR pnmh = (LPNMHDR) lParam;
-			if (pnmh->code == CDN_FILEOK)
-			{
-				// This avoids an assert
-				_AFX_THREAD_STATE* pThreadState = AfxGetThreadState();
-				pThreadState->m_pAlternateWndInit = NULL;
-				return FALSE;
-			}
-		}
-	}
-	return FALSE;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Wait cursor
 
@@ -927,74 +892,12 @@ bool SystemDoDialog(int nMode, void* param)
 		{
 			LC_FILEOPENDLG_OPTS* opts = (LC_FILEOPENDLG_OPTS*)param;
 
-			if (opts->type == LC_FILEOPENDLG_DAT)
-			{
-				CString filename;
-
-				CFileDialog dlg(TRUE, ".dat\0", NULL,OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST,
-					"LDraw Files (*.dat)|*.dat|All Files (*.*)|*.*||",NULL);
-				dlg.m_ofn.lpstrFile = filename.GetBuffer(_MAX_PATH * 32);
-				dlg.m_ofn.nMaxFile = _MAX_PATH;
-				dlg.m_ofn.lpstrInitialDir = opts->path;
-
-				if (dlg.DoModal() == IDOK)
-				{
-					POSITION pos = dlg.GetStartPosition ();
-					int count = 0;
-
-					while (pos != NULL)
-					{
-						dlg.GetNextPathName (pos);
-						count++;
-					}
-
-					opts->filenames = (char**)malloc(count*sizeof(char*));
-					opts->numfiles = count;
-
-					pos = dlg.GetStartPosition ();
-					count = 0;
-
-					while (pos != NULL)
-					{
-						CString str = dlg.GetNextPathName (pos);
-						opts->filenames[count] = (char*)malloc(LC_MAXPATH);
-						strcpy (opts->filenames[count], str);
-						count++;
-					}
-
-					// Get the file path.
-					strcpy (opts->path, opts->filenames[0]);
-					if (strlen (opts->path) > 0)
-					{
-						char* ptr = strrchr(opts->path, '/');
-						if (ptr == NULL)
-							ptr = strrchr(opts->path, '\\');
-						if (ptr)
-						{
-							ptr++;
-							*ptr = 0;
-						}
-					}
-
-					return true;
-				}
-
-				return false;
-			}
-			else
+			if (opts->type == LC_FILEOPENDLG_LCF)
 			{
 				const char *ext, *filter;
 
-				if (opts->type == LC_FILEOPENDLG_LCF)
-				{
-					ext = ".lcf\0";
-					filter = "LeoCAD Category Files (*.lcf)|*.lcf|All Files (*.*)|*.*||";
-				}
-				else
-				{
-					ext = ".lup\0";
-					filter = "LeoCAD Library Updates (*.lup)|*.lup|All Files (*.*)|*.*||";
-				}
+				ext = ".lcf";
+				filter = "LeoCAD Category Files (*.lcf)|*.lcf|All Files (*.*)|*.*||";
 
 				CFileDialog dlg(TRUE, ext, NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, NULL);
 
@@ -1047,54 +950,11 @@ bool SystemDoDialog(int nMode, void* param)
 
 		case LC_DLG_PICTURE_SAVE:
 		{
-			CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE|OFN_EXPLORER,
-				"GIF Files (*.gif)|*.gif|JPEG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|Bitmap Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png|AVI Files (*.avi)|*.avi|All Files (*.*)|*.*||");
-
-			DWORD dwImage = theApp.GetProfileInt ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
 			LC_IMAGEDLG_OPTS* opts = (LC_IMAGEDLG_OPTS*)param;
-			opts->width = theApp.GetProfileInt("Default", "Image Width", GetSystemMetrics(SM_CXSCREEN));
-			opts->height = theApp.GetProfileInt("Default", "Image Height", GetSystemMetrics(SM_CYSCREEN));
-			opts->imopts.quality = theApp.GetProfileInt("Default", "JPEG Quality", 70);
-			opts->imopts.interlaced = (dwImage & LC_IMAGE_PROGRESSIVE) != 0;
-			opts->imopts.transparent = (dwImage & LC_IMAGE_TRANSPARENT) != 0;
-			opts->imopts.truecolor = (dwImage & LC_IMAGE_HIGHCOLOR) != 0;
-			opts->imopts.pause = (float)theApp.GetProfileInt("Default", "AVI Pause", 100)/100;
-			opts->imopts.format = (unsigned char)(dwImage & ~(LC_IMAGE_MASK));
-
-			dlg.m_ofn.hInstance = AfxGetInstanceHandle();
-			dlg.m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_SAVEPICTUREDLG_TEMPLATE);
-			dlg.m_ofn.lpfnHook = OFNSavePictureHookProc;
-			dlg.m_ofn.lCustData= (LONG)opts;
+			CImageDlg dlg(FALSE, param);
 
 			if (dlg.DoModal() == IDOK)
-			{
-				strcpy(opts->filename, (LPCSTR)dlg.GetPathName());
-				char ext[5];
-				if (strlen(opts->filename) == 0)
-					return false;
-				char *p = strrchr(opts->filename, '.');
-				if (p != NULL)
-				{
-					strcpy(ext, p+1);
-					strlwr(ext);
-
-					if ((strcmp(ext, "jpg") == 0) || (strcmp(ext, "jpeg") == 0) ||
-						(strcmp(ext, "bmp") == 0) || (strcmp(ext, "gif") == 0) ||
-						(strcmp(ext, "png") == 0) || (strcmp(ext, "avi") == 0))
-						return true;
-				}
-
-				switch (opts->imopts.format)
-				{
-				case LC_IMAGE_BMP: strcat(opts->filename, ".bmp"); break;
-				case LC_IMAGE_GIF: strcat(opts->filename, ".gif"); break;
-				case LC_IMAGE_JPG: strcat(opts->filename, ".jpg"); break;
-				case LC_IMAGE_PNG: strcat(opts->filename, ".png"); break;
-				case LC_IMAGE_AVI: strcat(opts->filename, ".avi"); break;
-				}
-
 				return true;
-			}
 		} break;
 
 		case LC_DLG_DIRECTORY_BROWSE:
@@ -1149,7 +1009,6 @@ bool SystemDoDialog(int nMode, void* param)
 			dlg.m_bListEnd = opts->listend;
 			dlg.m_bListStep = opts->liststep;
 			dlg.m_bHighlight = opts->highlight;
-			dlg.m_bHtmlExt = opts->htmlext;
 
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1160,7 +1019,6 @@ bool SystemDoDialog(int nMode, void* param)
 				opts->listend = dlg.m_bListEnd == TRUE;
 				opts->liststep = dlg.m_bListStep == TRUE;
 				opts->highlight = dlg.m_bHighlight == TRUE;
-				opts->htmlext = dlg.m_bHtmlExt == TRUE;
 				return true;
 			}
 		} break;

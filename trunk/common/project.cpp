@@ -3634,6 +3634,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_FILE_PICTURE:
 		{
 			LC_IMAGEDLG_OPTS opts;
+
+			int ImageFlags = Sys_ProfileLoadInt("Default", "Image Options", LC_IMAGE_PNG);
+			opts.width = Sys_ProfileLoadInt("Default", "Image Width", 1280);
+			opts.height = Sys_ProfileLoadInt("Default", "Image Height", 720);
+			opts.imopts.quality = Sys_ProfileLoadInt("Default", "JPEG Quality", 70);
+			opts.imopts.interlaced = (ImageFlags & LC_IMAGE_PROGRESSIVE) != 0;
+			opts.imopts.transparent = (ImageFlags & LC_IMAGE_TRANSPARENT) != 0;
+			opts.imopts.truecolor = (ImageFlags & LC_IMAGE_HIGHCOLOR) != 0;
+			opts.imopts.pause = (float)Sys_ProfileLoadInt("Default", "AVI Pause", 100) / 100;
+			opts.imopts.format = (unsigned char)(ImageFlags & ~(LC_IMAGE_MASK));
 			opts.from = 1;
 			opts.to = m_bAnimation ? m_nTotalFrames : GetLastStep();
 			opts.multiple = m_bAnimation;
@@ -3641,8 +3651,66 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
 
+			if (m_strPathName[0])
+				strcpy(opts.filename, m_strPathName);
+			else if (m_strTitle[0])
+				strcpy(opts.filename, m_strTitle);
+			else
+				strcpy(opts.filename, "Image");
+
+			if (opts.filename[0])
+			{
+				char* ext = strrchr(opts.filename, '.');
+
+				if (ext && (!stricmp(ext, ".lcd") || !stricmp(ext, ".dat") || !stricmp(ext, ".ldr")))
+					*ext = 0;
+
+				switch (opts.imopts.format)
+				{
+				case LC_IMAGE_BMP: strcat(opts.filename, ".bmp"); break;
+				case LC_IMAGE_GIF: strcat(opts.filename, ".gif"); break;
+				case LC_IMAGE_JPG: strcat(opts.filename, ".jpg"); break;
+				case LC_IMAGE_PNG: strcat(opts.filename, ".png"); break;
+				case LC_IMAGE_AVI: strcat(opts.filename, ".avi"); break;
+				}
+			}
+
 			if (SystemDoDialog(LC_DLG_PICTURE_SAVE, &opts))
 			{
+				ImageFlags = opts.imopts.format;
+
+				if (opts.imopts.interlaced)
+					ImageFlags |= LC_IMAGE_PROGRESSIVE;
+				if (opts.imopts.transparent)
+					ImageFlags |= LC_IMAGE_TRANSPARENT;
+				if (opts.imopts.truecolor)
+					ImageFlags |= LC_IMAGE_HIGHCOLOR;
+
+				Sys_ProfileSaveInt("Default", "Image Options", ImageFlags);
+				Sys_ProfileSaveInt("Default", "Image Width", opts.width);
+				Sys_ProfileSaveInt("Default", "Image Height", opts.height);
+				Sys_ProfileSaveInt("Default", "AVI Pause", (int)(opts.imopts.pause * 100));
+				Sys_ProfileSaveInt("Default", "JPEG Quality", opts.imopts.quality);
+
+				if (!opts.filename[0])
+					strcpy(opts.filename, "Image");
+
+				char* ext = strrchr(opts.filename, '.');
+				if (ext)
+				{
+					if (!strcmp(ext, ".jpg") || !strcmp(ext, ".jpeg") || !strcmp(ext, ".bmp") || !strcmp(ext, ".gif") || !strcmp(ext, ".png") || !strcmp(ext, ".avi"))
+						*ext = 0;
+				}
+
+				switch (opts.imopts.format)
+				{
+				case LC_IMAGE_BMP: ext = ".bmp"; break;
+				case LC_IMAGE_GIF: ext = ".gif"; break;
+				case LC_IMAGE_JPG: ext = ".jpg"; break;
+				case LC_IMAGE_PNG: ext = ".png"; break;
+				case LC_IMAGE_AVI: ext = ".avi"; break;
+				}
+
 				if (m_bAnimation)
 					opts.to = lcMin(opts.to, m_nTotalFrames);
 				else
@@ -3664,34 +3732,28 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				Image* images = new Image[opts.to-opts.from+1];
 				CreateImages (images, opts.width, opts.height, opts.from, opts.to, false);
 
-				char *ptr, ext[4];
-				ptr = strrchr(opts.filename, '.');
-				if (ptr != NULL)
+				if (opts.imopts.format == LC_IMAGE_AVI)
 				{
-					strncpy(ext, ptr+1, 3);
-					strlwr(ext);
-				}
-
-				if (strcmp(ext, "avi") == 0)
-				{
+					strcat(opts.filename, ext);
 					SaveVideo(opts.filename, images, opts.to-opts.from+1, m_bAnimation ? m_nFPS : 60.0f/opts.imopts.pause);
-        }
+				}
 				else
 				{
 					for (int i = 0; i <= opts.to-opts.from; i++)
 					{
 						char filename[LC_MAXPATH];
+
 						if (opts.multiple)
 						{
-							char* ext = strrchr(opts.filename, '.');
-							*ext = 0;
-							sprintf(filename, "%s%02d.%s", opts.filename, i+1, ext+1);
-              *ext = '.';
+							sprintf(filename, "%s%02d%s", opts.filename, i+1, ext);
 						}
 						else
+						{
+							strcat(opts.filename, ext);
 							strcpy(filename, opts.filename);
+						}
 
-						images[i].FileSave (filename, &opts.imopts);
+						images[i].FileSave(filename, &opts.imopts);
 					}
 				}
 				delete []images;
@@ -3705,28 +3767,28 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 #endif
 		} break;
 
-    case LC_FILE_HTML:
-    {
-      LC_HTMLDLG_OPTS opts;
+		case LC_FILE_HTML:
+		{
+			LC_HTMLDLG_OPTS opts;
 
-      strcpy (opts.path, Sys_ProfileLoadString ("Default", "HTML Path", ""));
-      if (strlen (opts.path) == 0)
-      {
-        strcpy (opts.path, m_strPathName);
-        if (strlen(opts.path) > 0)
-		  	{
-			  	char* ptr = strrchr(opts.path, '/');
-				  if (ptr == NULL)
-					  ptr = strrchr(opts.path, '\\');
-				  if (ptr)
-          {
-            ptr++;
-            *ptr = 0;
-          }
-  			}
-      }
+			strcpy (opts.path, Sys_ProfileLoadString ("Default", "HTML Path", ""));
+			if (strlen (opts.path) == 0)
+			{
+				strcpy (opts.path, m_strPathName);
+				if (strlen(opts.path) > 0)
+				{
+					char* ptr = strrchr(opts.path, '/');
+					if (ptr == NULL)
+						ptr = strrchr(opts.path, '\\');
+					if (ptr)
+					{
+						ptr++;
+						*ptr = 0;
+					}
+				}
+			}
 
-      unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
+			unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
 			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
@@ -3742,14 +3804,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.imdlg.imopts.pause = 1;
 			opts.imdlg.imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
 
-      unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
-      opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
-      opts.index = (ul & LC_HTML_INDEX) != 0;
-      opts.images = (ul & LC_HTML_IMAGES) != 0;
-      opts.listend = (ul & LC_HTML_LISTEND) != 0;
-      opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
-      opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
-      opts.htmlext = (ul & LC_HTML_HTMLEXT) != 0;
+			unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
+			opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
+			opts.index = (ul & LC_HTML_INDEX) != 0;
+			opts.images = (ul & LC_HTML_IMAGES) != 0;
+			opts.listend = (ul & LC_HTML_LISTEND) != 0;
+			opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
+			opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
 
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
@@ -3759,56 +3820,52 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				int i;
 				unsigned short last = GetLastStep();
 
-        // Save HTML options
-        ul = 0;
-        if (opts.singlepage) ul |= LC_HTML_SINGLEPAGE;
-        if (opts.index) ul |= LC_HTML_INDEX;
-        if (opts.images) ul |= LC_HTML_IMAGES;
-        if (opts.listend) ul |= LC_HTML_LISTEND;
-        if (opts.liststep) ul |= LC_HTML_LISTSTEP;
-        if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
-        if (opts.htmlext) ul |= LC_HTML_HTMLEXT;
-        Sys_ProfileSaveInt ("Default", "HTML Options", ul);
+				// Save HTML options
+				ul = 0;
+				if (opts.singlepage) ul |= LC_HTML_SINGLEPAGE;
+				if (opts.index) ul |= LC_HTML_INDEX;
+				if (opts.images) ul |= LC_HTML_IMAGES;
+				if (opts.listend) ul |= LC_HTML_LISTEND;
+				if (opts.liststep) ul |= LC_HTML_LISTSTEP;
+				if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
+				Sys_ProfileSaveInt ("Default", "HTML Options", ul);
 
-        // Save image options
-        ul = opts.imdlg.imopts.format;
-        if (opts.imdlg.imopts.interlaced)
-          ul |= LC_IMAGE_PROGRESSIVE;
-        if (opts.imdlg.imopts.transparent)
-          ul |= LC_IMAGE_TRANSPARENT;
-        if (opts.imdlg.imopts.truecolor)
-          ul |= LC_IMAGE_HIGHCOLOR;
-        Sys_ProfileSaveInt ("Default", "HTML Image Options", ul);
-			  Sys_ProfileSaveInt ("Default", "HTML Image Width", opts.imdlg.width);
-			  Sys_ProfileSaveInt ("Default", "HTML Image Height", opts.imdlg.height);
+				// Save image options
+				ul = opts.imdlg.imopts.format;
+				if (opts.imdlg.imopts.interlaced)
+					ul |= LC_IMAGE_PROGRESSIVE;
+				if (opts.imdlg.imopts.transparent)
+					ul |= LC_IMAGE_TRANSPARENT;
+				if (opts.imdlg.imopts.truecolor)
+					ul |= LC_IMAGE_HIGHCOLOR;
+				Sys_ProfileSaveInt ("Default", "HTML Image Options", ul);
+				Sys_ProfileSaveInt ("Default", "HTML Image Width", opts.imdlg.width);
+				Sys_ProfileSaveInt ("Default", "HTML Image Height", opts.imdlg.height);
 
 				switch (opts.imdlg.imopts.format)
 				{
 				case LC_IMAGE_BMP: ext = ".bmp"; break;
-        default:
+				default:
 				case LC_IMAGE_GIF: ext = ".gif"; break;
 				case LC_IMAGE_JPG: ext = ".jpg"; break;
 				case LC_IMAGE_PNG: ext = ".png"; break;
 				}
 
-        if (opts.htmlext)
-          htmlext = ".html";
-        else
-          htmlext = ".htm";
+				htmlext = ".html";
 
-        i = strlen (opts.path);
-        if (i && opts.path[i] != '/' && opts.path[i] != '\\')
-          strcat (opts.path, "/");
-        Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
+				i = strlen (opts.path);
+				if (i && opts.path[i] != '/' && opts.path[i] != '\\')
+					strcat (opts.path, "/");
+				Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
 
 /*
 				// Create destination folder
-        char *MyPath = strdup(dlg.m_strFolder);
-        char *p = MyPath;
-        int psave;
-        while(*p)
-        {
-          while(*p && *p != '\\')
+				char *MyPath = strdup(dlg.m_strFolder);
+				char *p = MyPath;
+				int psave;
+				while(*p)
+				{
+					while(*p && *p != '\\')
 						++p;
 
 					psave = *p;
@@ -3824,13 +3881,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 				free(MyPath);
 */
-        main_window->BeginWait ();
+				main_window->BeginWait();
 
 				if (opts.singlepage)
 				{
-					strcpy (fn, opts.path);
-					strcat (fn, m_strTitle);
-          strcat (fn, htmlext);
+					strcpy(fn, opts.path);
+					strcat(fn, m_strTitle);
+					strcat(fn, htmlext);
 					f = fopen (fn, "wt");
 					fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
@@ -3856,7 +3913,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcpy (fn, opts.path);
 						strcat (fn, m_strTitle);
 						strcat (fn, "-index");
-            strcat (fn, htmlext);
+						strcat (fn, htmlext);
 						f = fopen (fn, "wt");
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
@@ -3906,7 +3963,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcpy (fn, opts.path);
 						strcat (fn, m_strTitle);
 						strcat (fn, "-pieces");
-            strcat (fn, htmlext);
+						strcat (fn, htmlext);
 						f = fopen (fn, "wt");
 						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 				

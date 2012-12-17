@@ -14,21 +14,23 @@
 
 static void openprojectdlg_preview(GtkFileChooser* dlg, GtkPreview* preview)
 {
-	char *filename, *p;
+	char *filename, *p = NULL;
 	bool loaded = false;
 	Image image;
 
 	filename = gtk_file_chooser_get_preview_filename(dlg);
 
-	p = strrchr (filename, '.');
-	if ((p != NULL) && (g_strcasecmp (p+1, "lcd") == 0))
+    if (filename)
+        p = strrchr(filename, '.');
+
+	if ((p != NULL) && (g_strcasecmp(p+1, "lcd") == 0))
 	{
 		float fv;
 		char id[32];
 		lcDiskFile file;
-		file.Open (filename, "rb");
-		file.ReadBuffer (id, 32);
-		sscanf (strchr(id, ' '), "%f", &fv);
+		file.Open(filename, "rb");
+		file.ReadBuffer(id, 32);
+		sscanf(strchr(id, ' '), "%f", &fv);
 
 		if (fv > 0.4f)
 		{
@@ -37,18 +39,18 @@ static void openprojectdlg_preview(GtkFileChooser* dlg, GtkPreview* preview)
 			if (fv > 0.7f)
 			{
 				lcuint32 dwPosition;
-				file.Seek (-4, SEEK_END);
-				file.ReadU32 (&dwPosition, 1);
-				file.Seek (dwPosition, SEEK_SET);
+				file.Seek(-4, SEEK_END);
+				file.ReadU32(&dwPosition, 1);
+				file.Seek(dwPosition, SEEK_SET);
 
 				if (dwPosition != 0)
 				{
 					if (fv < 1.0f)
 					{
-						file.Seek (54, SEEK_CUR);
+						file.Seek(54, SEEK_CUR);
 
-						image.Allocate (120, 100, false);
-						file.ReadBuffer (image.GetData (), 36000);
+						image.Allocate(120, 100, false);
+						file.ReadBuffer(image.GetData(), 36000);
 
 						for (int y = 0; y < 50; y++)
 							for (int x = 0; x < 120; x++)
@@ -68,7 +70,7 @@ static void openprojectdlg_preview(GtkFileChooser* dlg, GtkPreview* preview)
 					}
 					else
 					{
-						loaded = image.FileLoad (file);
+						loaded = image.FileLoad(file);
 					}
 				}
 			}
@@ -97,14 +99,14 @@ static void openprojectdlg_preview(GtkFileChooser* dlg, GtkPreview* preview)
 	else
 	{
 		for (int y = 0; y < 100; y++)
-			gtk_preview_draw_row (preview, image.GetData ()+y*360, 0, y, 120);
-		gtk_widget_draw (GTK_WIDGET (preview), NULL);
+			gtk_preview_draw_row(preview, image.GetData()+y*360, 0, y, 120);
+		gtk_widget_draw(GTK_WIDGET(preview), NULL);
 	}
 
 	gtk_file_chooser_set_preview_widget_active(dlg, loaded);
 }
 
-int openprojectdlg_execute (char* filename)
+int openprojectdlg_execute(char* filename)
 {
 	GtkWidget* dlg;
 	int ret;

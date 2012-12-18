@@ -170,6 +170,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 				lcTexture* Texture = new lcTexture();
 				mTextures.Add(Texture);
 
+				*Dst = 0;
 				strncpy(Texture->mName, Name + 21, sizeof(Texture->mName));
 				Texture->mName[sizeof(Texture->mName) - 1] = 0;
 			}
@@ -833,7 +834,7 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	{
 		lcMemFile TextureFile;
 
-		sprintf(FileName, "parts/textures/%s.png", Name);
+		sprintf(FileName, "ldraw/parts/textures/%s.png", Name);
 
 		if (!mZipFile->ExtractFile(FileName, TextureFile))
 			return false;
@@ -1264,7 +1265,7 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 	{
 		Section = mSections[SectionIdx];
 
-		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType)
+		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == NULL)
 			break;
 	}
 
@@ -1337,7 +1338,7 @@ void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const 
 	{
 		Section = mSections[SectionIdx];
 
-		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType)
+		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == Map.Texture)
 			break;
 	}
 

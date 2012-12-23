@@ -1941,6 +1941,7 @@ void Project::RenderScenePieces(View* view)
 				}
 
 				PreviousMesh = Mesh;
+				PreviousOffset = (char*)(~0);
 			}
 
 			for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)

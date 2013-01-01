@@ -290,70 +290,136 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	char FileName[LC_MAXPATH];
 	ObjArray<String> FileList;
+	int PathLength;
 
 	strcpy(FileName, Path);
-	strcat(FileName, "parts/");
-	int PathLength = strlen(FileName);
+	strcat(FileName, "parts.lst");
 
-	Sys_GetFileList(FileName, FileList);
+	lcDiskFile PartsList;
 
-	mPieces.Expand(FileList.GetSize());
-
-	for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+	if (PartsList.Open(FileName, "rt"))
 	{
-		char Name[LC_PIECE_NAME_LEN];
-		const char* Src = (const char*)FileList[FileIdx] + PathLength;
-		char* Dst = Name;
-
-		while (*Src && Dst - Name < (int)sizeof(Name))
-		{
-			if (*Src >= 'a' && *Src <= 'z')
-				*Dst = *Src + 'A' - 'a';
-			else if (*Src == '\\')
-				*Dst = '/';
-			else
-				*Dst = *Src;
-
-			Src++;
-			Dst++;
-		}
-
-		if (Dst - Name <= 4)
-			continue;
-
-		Dst -= 4;
-		if (memcmp(Dst, ".DAT", 4))
-			continue;
-		*Dst = 0;
-
-		lcDiskFile PieceFile;
-		if (!PieceFile.Open(FileList[FileIdx], "rt"))
-			continue;
-
 		char Line[1024];
-		if (!PieceFile.ReadLine(Line, sizeof(Line)))
-			continue;
 
-		PieceInfo* Info = new PieceInfo(-1);
-		mPieces.Add(Info);
-
-		Src = (char*)Line + 2;
-		Dst = Info->m_strDescription;
-
-		for (;;)
+		while (PartsList.ReadLine(Line, sizeof(Line)))
 		{
-			if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
+			char* Chr = Line;
+			char* Ext = NULL;
+
+			while (*Chr)
 			{
-				*Dst++ = *Src++;
-				continue;
+				if (*Chr >= 'a' && *Chr <= 'z')
+					*Chr = *Chr + 'A' - 'a';
+				else if (*Chr == '.')
+					Ext = Chr;
+				else if (isspace(*Chr))
+				{
+					*Chr++ = 0;
+					break;
+				}
+
+				Chr++;
 			}
 
-			*Dst = 0;
-			break;
-		}
+			if (Ext && !strcmp(Ext, ".DAT"))
+				*Ext = 0;
 
-		strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
-		Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+			while (*Chr && isspace(*Chr))
+				Chr++;
+
+			char* Description = Chr;
+
+			while (*Chr)
+			{
+				if (*Chr == '\r' || *Chr == '\n')
+				{
+					*Chr = 0;
+					break;
+				}
+
+				Chr++;
+			}
+
+			if (!*Line || !*Description)
+				continue;
+
+			PieceInfo* Info = new PieceInfo(-1);
+			mPieces.Add(Info);
+
+			strncpy(Info->m_strName, Line, sizeof(Info->m_strName));
+			Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+
+			strncpy(Info->m_strDescription, Description, sizeof(Info->m_strDescription));
+			Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
+		}
+	}
+
+	if (!mPieces.GetSize())
+	{
+		strcpy(FileName, Path);
+		strcat(FileName, "parts/");
+		int PathLength = strlen(FileName);
+
+		Sys_GetFileList(FileName, FileList);
+
+		mPieces.Expand(FileList.GetSize());
+
+		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+		{
+			char Name[LC_PIECE_NAME_LEN];
+			const char* Src = (const char*)FileList[FileIdx] + PathLength;
+			char* Dst = Name;
+
+			while (*Src && Dst - Name < (int)sizeof(Name))
+			{
+				if (*Src >= 'a' && *Src <= 'z')
+					*Dst = *Src + 'A' - 'a';
+				else if (*Src == '\\')
+					*Dst = '/';
+				else
+					*Dst = *Src;
+
+				Src++;
+				Dst++;
+			}
+
+			if (Dst - Name <= 4)
+				continue;
+
+			Dst -= 4;
+			if (memcmp(Dst, ".DAT", 4))
+				continue;
+			*Dst = 0;
+
+			lcDiskFile PieceFile;
+			if (!PieceFile.Open(FileList[FileIdx], "rt"))
+				continue;
+
+			char Line[1024];
+			if (!PieceFile.ReadLine(Line, sizeof(Line)))
+				continue;
+
+			PieceInfo* Info = new PieceInfo(-1);
+			mPieces.Add(Info);
+
+			Src = (char*)Line + 2;
+			Dst = Info->m_strDescription;
+
+			for (;;)
+			{
+				if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
+				{
+					*Dst++ = *Src++;
+					continue;
+				}
+
+				*Dst = 0;
+				break;
+			}
+
+			strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
+			Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+		}
 	}
 
 	if (!mPieces.GetSize())
@@ -462,6 +528,8 @@ bool lcPiecesLibrary::OpenCache()
 	if (!mCacheFile->OpenRead(mCacheFileName))
 	{
 		delete mCacheFile;
+		mCacheFile = NULL;
+
 		return false;
 	}
 

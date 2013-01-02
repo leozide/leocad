@@ -8,6 +8,7 @@
 #include "system.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 #define LC_LIBRARY_CACHE_VERSION   0x0100
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
@@ -520,7 +521,7 @@ bool lcPiecesLibrary::OpenCache()
 {
 	struct stat CacheStat;
 
-	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
+	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
 		return false;
 
 	mCacheFile = new lcZipFile;
@@ -596,7 +597,7 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	{
 		struct stat CacheStat;
 
-		if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
+		if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
 			return false;
 
 		lcZipFile CacheFile;
@@ -623,7 +624,7 @@ void lcPiecesLibrary::SaveCacheFile()
 	if (!mSaveCache)
 		return;
 
-	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != CacheStat.st_mtime)
+	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
 	{
 		if (!CacheFile.OpenWrite(mCacheFileName, false))
 			return;
@@ -1932,7 +1933,7 @@ bool lcPiecesLibrary::LoadCategories(const char* FileName)
 		opts.type = LC_FILEOPENDLG_LCF;
 		strcpy(opts.path, mCategoriesFile);
 
-		if (!SystemDoDialog(LC_DLG_FILE_OPEN, &opts)) 
+		if (!SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
 			return false;
 
 		strcpy(Path, (char*)opts.filenames);
@@ -2011,8 +2012,8 @@ bool lcPiecesLibrary::DoSaveCategories(bool AskName)
 		opts.type = LC_FILESAVEDLG_LCF;
 		strcpy(opts.path, mCategoriesFile);
 
-		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &opts)) 
-			return false; 
+		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &opts))
+			return false;
 
 		strcpy(mCategoriesFile, opts.path);
 	}

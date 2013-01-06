@@ -6,7 +6,7 @@ MODULES := $(OSDIR) common
 
 ### Look for include files in each of the modules
 CPPFLAGS += $(patsubst %,-I%,$(MODULES))
-CPPFLAGS += -g
+CPPFLAGS += -g -W -Wall -Wno-unused-parameter
 
 ### Extra libraries if required
 LIBS :=
@@ -62,7 +62,7 @@ endif
 	@[ -s $@ ] || rm -f $@
 
 ### Various cleaning functions
-.PHONY: clean veryclean spotless all
+.PHONY: clean distclean veryclean spotless all
 
 clean:
 	find $(MODULES) -name \*.o | xargs rm -f
@@ -72,6 +72,7 @@ veryclean: clean
 	rm -rf bin
 	rm -rf arch $(OSDIR)/config.mk
 
+distclean: veryclean
 
 ### Dependency stuff is done automatically, so these do nothing.
 .PHONY: dep depend

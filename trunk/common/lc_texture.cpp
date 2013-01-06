@@ -91,6 +91,7 @@ bool lcTexture::Load(lcFile& File, int Flags)
 
 void lcTexture::Unload()
 {
-	glDeleteTextures(1, &mTexture);
+	if (mTexture)
+		glDeleteTextures(1, &mTexture);
 	mTexture = 0;
 }

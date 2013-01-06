@@ -135,7 +135,7 @@ void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 	DIR* Dir = opendir(DirPath);
 	if (!Dir)
 	{
-		printf("Couldn't open directory.\n");
+		printf("Couldn't open directory %s.\n", DirPath);
 		return;
 	}
 

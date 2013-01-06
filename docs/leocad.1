@@ -4,7 +4,7 @@
 .SH NAME
 LeoCAD \- CAD program using plastic bricks.
 .SH SYNOPSIS
-\fIleocad \fR[\fI infile \fR[ -i \fR[\fI outfile.ext \fR]\fI \fR[\fI-w x\fR]\fI \fR[\fI-h y\fR] ] \fR] [\fI\-l path\fR] 
+\fIleocad \fR[\fI infile \fR[ \-i \fR[\fI outfile.ext \fR]\fI \fR[\fI\-w x\fR]\fI \fR[\fI\-h y\fR] ] \fR] [\fI\-l path\fR]
 .SH "DESCRIPTION"
 This manual page documents briefly the \fILeoCAD \fRprogram.
 It was written for the Debian GNU/Linux distribution
@@ -100,7 +100,7 @@ The default library names searched are libGL.so and libMesaGL.so.
 
 .SH EXAMPLES
 .PP
- $ leocad car.lcd -i car.png -w 640 -h 480
+ $ leocad car.lcd \-i car.png \-w 640 \-h 480
 .PP
 This will start LeoCAD, load the file "car.lcd," create a png called
 "car.png" with a resolution of 640x480 and exit when done.

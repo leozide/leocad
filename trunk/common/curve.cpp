@@ -1,7 +1,6 @@
-// Curve class, used to represent all flexible objects
-//
-
 #include "lc_global.h"
+
+#if 0
 #include "lc_math.h"
 #include "lc_colors.h"
 #include <stdlib.h>
@@ -88,7 +87,7 @@ void CurvePoint::Initialize ()
     // draw +Z end as a triangle fan
     glBegin(GL_TRIANGLE_FAN);
     glVertex3f(0.0, 0.0, radius);
-    for (j = 0; j <= slices; j++) 
+    for (j = 0; j <= slices; j++)
     {
       theta = (j == slices) ? 0.0f : j * dtheta;
       x = (float)(-sin(theta) * sin(drho));
@@ -856,3 +855,5 @@ void Curve::SetFocus (bool bFocus, void *pParam)
 
 
 #endif
+
+#endif // 0

@@ -198,7 +198,7 @@ bool String::Match(const String& Expression) const
 		}
 		else if (*p == '(')
 		{
-			const char* Start = p;
+//			const char* Start = p;
 			int c = 0;
 
 			// Skip what's inside the parenthesis.
@@ -339,7 +339,7 @@ int String::CompareNoCase(const char *string, int count) const
   {
     c1 = tolower (*ch);
     c2 = tolower (*string);
- 
+
     if (c1 != c2)
       return (c1 - c2);
 

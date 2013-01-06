@@ -23,7 +23,7 @@ static void openprojectdlg_preview(GtkFileChooser* dlg, GtkPreview* preview)
     if (filename)
         p = strrchr(filename, '.');
 
-	if ((p != NULL) && (g_strcasecmp(p+1, "lcd") == 0))
+	if ((p != NULL) && (g_ascii_strcasecmp(p+1, "lcd") == 0))
 	{
 		float fv;
 		char id[32];

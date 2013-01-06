@@ -76,19 +76,19 @@ public:
 		{ return m_strName; }
 	void SetStepShow(unsigned char step)
 		{ m_nStepShow = step; }
-	const unsigned char GetStepShow()
+	unsigned char GetStepShow()
 		{ return m_nStepShow; }
 	void SetStepHide(unsigned char step)
 		{ m_nStepHide = step; }
-	const unsigned char GetStepHide()
-		{ return m_nStepHide; }
+	unsigned char GetStepHide()
+		{ return (unsigned char)m_nStepHide; }
 	void SetFrameShow(unsigned short frame)
 		{ m_nFrameShow = frame; }
-	const unsigned short GetFrameShow()
+	unsigned short GetFrameShow()
 		{ return m_nFrameShow; }
 	void SetFrameHide(unsigned short frame)
 		{ m_nFrameHide = frame; }
-	const unsigned short GetFrameHide()
+	unsigned short GetFrameHide()
 		{ return m_nFrameHide; }
 
 	void Render(bool bLighting, bool bEdges);

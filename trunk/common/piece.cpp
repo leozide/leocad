@@ -229,7 +229,7 @@ bool Piece::FileLoad(lcFile& file, char* name)
     lcint32 i = -1;
     if (version > 6)
       file.ReadS32(&i, 1);
-    m_pGroup = (Group*)i;
+    m_pGroup = (Group*)(long)i;
   }
   else
   {
@@ -240,7 +240,7 @@ bool Piece::FileLoad(lcFile& file, char* name)
     if (ch == 0)
       m_pGroup = (Group*)-1;
     else
-      m_pGroup = (Group*)(lcuint32)ch;
+      m_pGroup = (Group*)(long)ch;
 
     file.ReadU8(&ch, 1);
     if (ch & 0x01)
@@ -309,7 +309,7 @@ void Piece::CreateName(Piece* pPiece)
 	for (; pPiece; pPiece = pPiece->m_pNext)
 		if (strncmp (pPiece->m_strName, mPieceInfo->m_strDescription, strlen(mPieceInfo->m_strDescription)) == 0)
 			if (sscanf(pPiece->m_strName + strlen(mPieceInfo->m_strDescription), " #%d", &i) == 1)
-				if (i > max) 
+				if (i > max)
 					max = i;
 
 	sprintf (m_strName, "%s #%.2d", mPieceInfo->m_strDescription, max+1);
@@ -330,7 +330,7 @@ void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
       m_nState &= ~(LC_PIECE_FOCUSED);
     else
       m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
-  } 
+  }
 }
 
 void Piece::InsertTime (unsigned short start, bool animation, unsigned short time)

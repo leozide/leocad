@@ -54,7 +54,7 @@ void Group::FileLoad(lcFile* file)
 	file->ReadBuffer(m_strName, 65);
 	file->ReadFloats(m_fCenter, 3);
 	file->ReadS32(&i, 1);
-	m_pGroup = (Group*)i;
+	m_pGroup = (Group*)(long)i;
 }
 
 void Group::FileSave(lcFile* file, Group* pGroups)

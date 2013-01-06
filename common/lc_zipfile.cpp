@@ -521,20 +521,19 @@ bool lcZipFile::ReadCentralDir()
 							return false;
 					}
 
-					if (FileInfo.offset_curfile == (lcuint64)(unsigned long)-1)
+					if (FileInfo.offset_curfile == (lcuint64)-1)
 					{
 						// Relative Header offset.
 						if (mFile->ReadU64(&FileInfo.offset_curfile, 1) != 1)
 							return false;
 					}
 
-					if (FileInfo.disk_num_start == (unsigned long)-1)
+					if (FileInfo.disk_num_start == (lcuint16)-1)
 					{
 						// Disk Start Number.
 						if (mFile->ReadU32(&Number32, 1) != 1)
 							return false;
 					}
-
 				}
 				else
 				{

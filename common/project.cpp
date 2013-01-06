@@ -427,7 +427,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	Library->OpenCache();
 
 	while (count--)
-	{	
+	{
 		if (fv > 0.4f)
 		{
 			char name[LC_PIECE_NAME_LEN];
@@ -456,7 +456,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			char name[LC_PIECE_NAME_LEN];
 			float pos[3], rot[3];
 			lcuint8 color, step, group;
-		
+
 			file->ReadFloats(pos, 3);
 			file->ReadFloats(rot, 3);
 			file->ReadU8(&color, 1);
@@ -471,7 +471,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);
-			
+
 			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
 			AxisAngle[3] *= LC_RTOD;
@@ -727,7 +727,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 					m_nMoveSnap = sh;
 			}
 		}
-			
+
 		if (fv > 1.0f)
 		{
 			file->ReadU32(&rgb, 1);
@@ -738,7 +738,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
 			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-			
+
 			if (fv > 1.1f)
 				m_pTerrain->FileLoad (file);
 			else
@@ -908,7 +908,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 		lcuint32 pos = 0;
 
 		i = Sys_ProfileLoadInt ("Default", "Save Preview", 0);
-		if (i != 0) 
+		if (i != 0)
 		{
 			pos = file->GetPosition();
 
@@ -1000,7 +1000,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 		float fmat[12];
 
 		if (sscanf(buf, "%d %i %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
-			&cmd, &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6], 
+			&cmd, &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6],
 			&fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 15)
 			continue;
 
@@ -1012,7 +1012,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 		if (cmd == 1)
 		{
 			int cl = color;
-			if (color == 16) 
+			if (color == 16)
 				cl = DefColor;
 
 			strcpy(pn, tmp);
@@ -1322,7 +1322,7 @@ bool Project::OnNewDocument()
 //	if (pFrame != NULL)
 //		pFrame->PostMessage (WM_LC_UPDATE_LIST, 1, m_nCurColor+1);
 // set cur group to 0
- 
+
 	return true;
 }
 
@@ -1685,7 +1685,7 @@ void Project::RenderBackground(View* view)
 		Verts[0][0] = 0; Verts[0][1] = ViewHeight;
 		Coords[1][0] = tw; Coords[1][1] = 0;
 		Verts[1][0] = ViewWidth; Verts[1][1] = ViewHeight;
-		Coords[2][0] = tw; Coords[2][1] = th; 
+		Coords[2][0] = tw; Coords[2][1] = th;
 		Verts[2][0] = ViewWidth; Verts[2][1] = 0;
 		Coords[3][0] = 0; Coords[3][1] = th;
 		Verts[3][0] = 0; Verts[3][1] = 0;
@@ -2071,11 +2071,11 @@ void Project::RenderSceneObjects(View* view)
 		glDisable (GL_LIGHTING);
 		int index = 0;
 		Light *pLight;
-				
+
 		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
 			glDisable ((GLenum)(GL_LIGHT0+index));
 	}
-			
+
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
 		Camera* pCamera = mCameras[CameraIdx];
@@ -2101,7 +2101,7 @@ void Project::RenderSceneObjects(View* view)
 		Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
 		Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
 
-		lcVector3 pts[3] = 
+		lcVector3 pts[3] =
 		{
 			lcMul30(lcVector3(20, 0, 0), Mats[0]),
 			lcMul30(lcVector3(0, 20, 0), Mats[0]),
@@ -2412,7 +2412,7 @@ void Project::RenderOverlays(View* view)
 
 		glEnable(GL_DEPTH_TEST);
 	}
-	
+
 	if (m_nCurAction == LC_ACTION_ROTATE || (m_nCurAction == LC_ACTION_SELECT && m_nTracking != LC_TRACK_NONE && m_OverlayMode >= LC_OVERLAY_ROTATE_X && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
 	{
 		const float OverlayRotateRadius = 2.0f;
@@ -2874,7 +2874,7 @@ void Project::RenderViewports(View* view)
 	glBegin(GL_QUADS);
 	m_pScreenFont->PrintText(3.0f, (float)view->GetHeight() - 1.0f - 6.0f, 0.0f, view->mCamera->GetName());
 	glEnd();
-	
+
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
 
@@ -3120,7 +3120,7 @@ bool Project::RemoveSelectedObjects()
 		mCameras.RemoveIndex(CameraIdx);
 		CameraIdx--;
 		delete pCamera;
-			
+
 		removed = true;
 
 		SystemUpdateCameraMenu(mCameras);
@@ -3278,7 +3278,7 @@ void Project::CheckAutoSave()
 			m_bUndo = TRUE;
 			file.SeekToBegin();
 			CArchive ar(&file, CArchive::store);
-			Serialize(ar); 
+			Serialize(ar);
 			ar.Close();
 			m_bUndo = FALSE;
 */		}
@@ -3590,7 +3590,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			OnNewDocument();
 			UpdateAllViews ();
 		} break;
-		
+
 		case LC_FILE_OPEN:
 		{
 			char filename[LC_MAXPATH];
@@ -3601,7 +3601,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				OpenProject(filename);
 			}
 		} break;
-		
+
 		case LC_FILE_MERGE:
 		{
 			char filename[LC_MAXPATH];
@@ -3697,15 +3697,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (!opts.filename[0])
 					strcpy(opts.filename, "Image");
 
-				char* ext = strrchr(opts.filename, '.');
-				if (ext)
+				char* Ext = strrchr(opts.filename, '.');
+				if (Ext)
 				{
-					if (!strcmp(ext, ".jpg") || !strcmp(ext, ".jpeg") || !strcmp(ext, ".bmp") || !strcmp(ext, ".gif") || !strcmp(ext, ".png") || !strcmp(ext, ".avi"))
-						*ext = 0;
+					if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".gif") || !strcmp(Ext, ".png") || !strcmp(Ext, ".avi"))
+						*Ext = 0;
 				}
 
+				const char* ext;
 				switch (opts.imopts.format)
 				{
+				default:
 				case LC_IMAGE_BMP: ext = ".bmp"; break;
 				case LC_IMAGE_GIF: ext = ".gif"; break;
 				case LC_IMAGE_JPG: ext = ".jpg"; break;
@@ -3895,9 +3897,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					for (i = 1; i <= last; i++)
 					{
-						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n", 
+						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
 							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
-	
+
 						if (opts.liststep)
 							CreateHTMLPieceList(f, i, opts.images, ext);
 					}
@@ -3937,9 +3939,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						f = fopen(fn, "wt");
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, i);
-						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n", 
+						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
 							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
-	
+
 						if (opts.liststep)
 							CreateHTMLPieceList(f, i, opts.images, ext);
 
@@ -3968,7 +3970,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcat (fn, htmlext);
 						f = fopen (fn, "wt");
 						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
-				
+
 						CreateHTMLPieceList(f, 0, opts.images, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
@@ -4024,7 +4026,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							continue;
 
 						glDepthFunc(GL_LEQUAL);
-						glClearColor(1,1,1,1); 
+						glClearColor(1,1,1,1);
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 						glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 						glEnable(GL_COLOR_MATERIAL);
@@ -4320,7 +4322,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					sprintf(CmdLine, "\"+L%slg\\\" \"+L%sar\\\" \"+I%s\"", opts.libpath, opts.libpath, opts.outpath);
 				else
 					sprintf(CmdLine, "\"+I%s\"", opts.outpath);
-					
+
 				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, CmdLine, NULL, SW_SHOWNORMAL);
 #endif
 
@@ -4455,7 +4457,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 				sprintf(Line, "g %s\n", buf);
 				OBJFile.WriteLine(Line);
-	
+
 				Info->mMesh->ExportWavefrontIndices(OBJFile, pPiece->mColorCode, vert);
 				vert += Info->mMesh->mNumVertices;
 			}
@@ -4556,12 +4558,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 					pUndo->pNext = m_pRedoList;
 					m_pRedoList = pUndo;
-						
+
 					pUndo = m_pUndoList;
 					DeleteContents(true);
 					FileLoad(&pUndo->file, true, false);
 				}
-				
+
 				if (m_bUndoOriginal && (m_pUndoList != NULL) && (m_pUndoList->pNext == NULL))
 					SetModifiedFlag(false);
 			}
@@ -4572,7 +4574,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					// Remove the first element from the redo list.
 					pUndo = m_pRedoList;
 					m_pRedoList = pUndo->pNext;
-					
+
 					// Check if we can delete the last undo info.
 					for (pTmp = m_pUndoList, i = 0; pTmp; pTmp = pTmp->pNext, i++)
 						if ((i == 30) && (pTmp->pNext != NULL))
@@ -4680,7 +4682,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					pPiece->m_pNext = pPasted;
 					pPasted = pPiece;
 				}
-				else 
+				else
 					delete pPiece;
 			}
 
@@ -4740,7 +4742,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 						if (strncmp("Pasted Group #", pGroup->m_strName, 14) == 0)
 							if (sscanf(pGroup->m_strName + 14, "%d", &a) == 1)
-								if (a > max) 
+								if (a > max)
 									max = a;
 
 					sprintf(groups[j]->m_strName, "Pasted Group #%.2d", max+1);
@@ -4750,7 +4752,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				else
 					delete groups[j];
 			}
-			
+
 			free(groups);
 
 			file->ReadBuffer(&i, sizeof(i));
@@ -4785,7 +4787,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateSelection();
 			UpdateAllViews ();
 		} break;
-		
+
 		case LC_EDIT_SELECT_NONE:
 		{
 			SelectAndFocusNone(false);
@@ -4793,7 +4795,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
-		
+
 		case LC_EDIT_SELECT_INVERT:
 		{
 			Piece* pPiece;
@@ -5067,7 +5069,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			if (SystemDoDialog(LC_DLG_ARRAY, &opts))
 			{
 				int total;
-				
+
 				total = opts.n1DCount;
 				if (opts.nArrayDimension > 0)
 					total *= opts.n2DCount;
@@ -5158,7 +5160,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						if (opts.nArrayDimension == 0)
 							continue;
-						
+
 						for (j = 0; j < opts.n2DCount; j++)
 						{
 							if (j != 0)
@@ -5264,7 +5266,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						pPiece->DoGroup(pGroup);
 						pPiece->CompareBoundingBox(bs);
 					}
-	
+
 				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
@@ -5649,7 +5651,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			else
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
-		
+
 		case LC_VIEW_STEP_PREVIOUS:
 		{
 			if (m_bAnimation)
@@ -5667,7 +5669,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			else
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
-		
+
 		case LC_VIEW_STEP_FIRST:
 		{
 			if (m_bAnimation)
@@ -5779,7 +5781,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		} break;
 
 		case LC_VIEW_PLAY:
-		{ 
+		{
 			SelectAndFocusNone(false);
 			UpdateSelection();
 			m_bStopRender = false;
@@ -5911,7 +5913,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			else
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
-		
+
 		case LC_TOOLBAR_ADDKEYS:
 		{
 			m_bAddKeys = !m_bAddKeys;
@@ -6000,10 +6002,10 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 		case LC_TOOLBAR_FASTRENDER:
 		{
-			if (m_nDetail & LC_DET_FAST) 
-				m_nDetail &= ~LC_DET_FAST; 
+			if (m_nDetail & LC_DET_FAST)
+				m_nDetail &= ~LC_DET_FAST;
 			else
-				m_nDetail |= LC_DET_FAST; 
+				m_nDetail |= LC_DET_FAST;
 			UpdateAllViews();
 
 			SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
@@ -7421,7 +7423,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 			ret = true;
 		} break;
-			
+
 		case KEY_MINUS: // case '-': case '_':
 		{
 			if (bShift)
@@ -7543,7 +7545,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			ret = true;
 		} break;
 
-		case KEY_UP:    case KEY_DOWN: case KEY_LEFT: 
+		case KEY_UP:    case KEY_DOWN: case KEY_LEFT:
 		case KEY_RIGHT: case KEY_NEXT: case KEY_PRIOR:
 //		if (AnyObjectSelected(FALSE))
 		{
@@ -7785,7 +7787,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 		{
 			Object* Closest = FindObjectFromPoint(view, x, y);
 
-			if (Action == LC_ACTION_SELECT) 
+			if (Action == LC_ACTION_SELECT)
 			{
 				if (Closest != NULL)
 				{
@@ -8085,7 +8087,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 
 	Object* Closest = FindObjectFromPoint(view, x, y);
 
-//  if (m_nCurAction == LC_ACTION_SELECT) 
+//  if (m_nCurAction == LC_ACTION_SELECT)
   {
     SelectAndFocusNone(bControl);
 
@@ -8357,7 +8359,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			m_fTrack[0] = ptx;
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
-			
+
 			Light* pLight = m_pLights;
 
 			pLight->Move (1, m_bAnimation, false, delta[0], delta[1], delta[2]);
@@ -8376,7 +8378,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			m_fTrack[0] = ptx;
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
-			
+
 			Camera* pCamera = mCameras[mCameras.GetSize() - 1];
 
 			pCamera->Move(1, m_bAnimation, false, delta[0], delta[1], delta[2]);
@@ -8567,7 +8569,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			if (Redraw)
 				UpdateAllViews();
 		} break;
-		
+
 		case LC_ACTION_ROTATE:
 		{
 			Camera* Camera = m_ActiveView->mCamera;
@@ -8761,7 +8763,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 		} break;
-		
+
 		case LC_ACTION_ROTATE_VIEW:
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
@@ -8799,7 +8801,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 		} break;
-		
+
 		case LC_ACTION_ROLL:
 		{
 			if (m_nDownX == x)
@@ -8990,16 +8992,16 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			Mode = LC_OVERLAY_ROTATE_XYZ;
 
 			// Point P on a line defined by two points P1 and P2 is described by P = P1 + u (P2 - P1)
-			// A sphere centered at P3 with radius r is described by (x - x3)^2 + (y - y3)^2 + (z - z3)^2 = r^2 
+			// A sphere centered at P3 with radius r is described by (x - x3)^2 + (y - y3)^2 + (z - z3)^2 = r^2
 			// Substituting the equation of the line into the sphere gives a quadratic equation where:
-			// a = (x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2 
-			// b = 2[ (x2 - x1) (x1 - x3) + (y2 - y1) (y1 - y3) + (z2 - z1) (z1 - z3) ] 
-			// c = x32 + y32 + z32 + x12 + y12 + z12 - 2[x3 x1 + y3 y1 + z3 z1] - r2 
+			// a = (x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2
+			// b = 2[ (x2 - x1) (x1 - x3) + (y2 - y1) (y1 - y3) + (z2 - z1) (z1 - z3) ]
+			// c = x32 + y32 + z32 + x12 + y12 + z12 - 2[x3 x1 + y3 y1 + z3 z1] - r2
 			// The solutions to this quadratic are described by: (-b +- sqrt(b^2 - 4 a c) / 2 a
 			// The exact behavior is determined by b^2 - 4 a c:
-			// If this is less than 0 then the line does not intersect the sphere. 
+			// If this is less than 0 then the line does not intersect the sphere.
 			// If it equals 0 then the line is a tangent to the sphere intersecting it at one point
-			// If it is greater then 0 the line intersects the sphere at two points. 
+			// If it is greater then 0 the line intersects the sphere at two points.
 
 			float x1 = SegStart[0], y1 = SegStart[1], z1 = SegStart[2];
 			float x2 = SegEnd[0], y2 = SegEnd[1], z2 = SegEnd[2];

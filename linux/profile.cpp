@@ -53,10 +53,10 @@ static bool read_var (const char *section, const char *key, char *value)
           strcpy (value, ptr+1);
 	  fclose (rc);
 
-	  while (value[strlen (value)-1] == 10 || 
+	  while (value[strlen (value)-1] == 10 ||
 		 value[strlen (value)-1] == 13 ||
 		 value[strlen (value)-1] == 32)
-	    value[strlen (value)-1] = 0; 
+	    value[strlen (value)-1] = 0;
 	  return true;
         }
       }
@@ -86,7 +86,7 @@ static bool save_var (const char *section, const char *key, const char *value)
     len = ftell (rc);
     rewind (rc);
     buf = g_malloc (len);
-    fread (buf, len, 1, rc);
+    len = fread (buf, len, 1, rc);
     old_rc.WriteBuffer (buf, len);
     g_free (buf);
     fclose (rc);
@@ -114,7 +114,7 @@ static bool save_var (const char *section, const char *key, const char *value)
 	break;
       }
     }
-  } 
+  }
 
   if (!found)
   {

@@ -75,7 +75,7 @@ static void minifigdlg_color_clicked(GtkWidget *widget, gpointer data)
 		gtk_menu_append(GTK_MENU(menu), menuitem);
 
 		gtk_object_set_data(GTK_OBJECT(menuitem), "button", widget);
-		gtk_signal_connect(GTK_OBJECT(menuitem), "activate", GTK_SIGNAL_FUNC(minifigdlg_color_response), (void*)i);
+		gtk_signal_connect(GTK_OBJECT(menuitem), "activate", GTK_SIGNAL_FUNC(minifigdlg_color_response), GINT_TO_POINTER(i));
 	}
 
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, 0);

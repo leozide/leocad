@@ -2282,8 +2282,8 @@ int groupeditdlg_execute(void* param)
 	GtkWidget *dlg;
 	GtkWidget *vbox;
 	GtkWidget *ctree, *scr;
-	LC_GROUPEDITDLG_STRUCT s;
-	s.data = param;
+//	LC_GROUPEDITDLG_STRUCT s;
+//	s.data = param;
 	int ret;
 
 	dlg = gtk_dialog_new_with_buttons("Edit Groups", GTK_WINDOW(((GtkWidget*)(*main_window))),
@@ -2291,7 +2291,7 @@ int groupeditdlg_execute(void* param)
 	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	gtk_widget_set_usize(dlg, 450, 280);
-	s.dlg = dlg;
+//	s.dlg = dlg;
 
 	vbox = GTK_DIALOG(dlg)->vbox;
 	gtk_box_set_spacing(GTK_BOX(vbox), 10);
@@ -2482,22 +2482,9 @@ static void librarydlg_treefocus (GtkCTree *ctree, GtkCTreeNode *row, gint colum
   librarydlg_update_list (GTK_WIDGET (data));
 }
 
-static GtkWidget *last_dlg = NULL;
-
-static void librarydlg_command (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *parent = gtk_widget_get_toplevel (widget);
-  LibraryDialog *dlg = (LibraryDialog*) gtk_object_get_data (GTK_OBJECT (parent), "menu_file_import_piece");
-  int id = GPOINTER_TO_INT (data);
-
-  dlg = (LibraryDialog *)last_dlg;
-
-  dlg->HandleCommand (id);
-}
-
 int librarydlg_execute (void *param)
 {
-  GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *item, *menu, *menubar, *handle;
+  GtkWidget *dlg, *vbox, *clist, *scr, *ctree, *hsplit, *menu, *menubar, *handle;
   GtkAccelGroup *accel;
   int loop = 1, ret = LC_CANCEL;
   lcPiecesLibrary *lib = g_App->GetPiecesLibrary();
@@ -2619,8 +2606,6 @@ int librarydlg_execute (void *param)
 
   gtk_grab_add (dlg);
   gtk_widget_show (dlg);
-
-  last_dlg = dlg;
 
   while (loop)
     gtk_main_iteration ();

@@ -18,8 +18,8 @@ enum LC_OBJECT_TYPE
 	LC_OBJECT_CAMERA_TARGET,
 	LC_OBJECT_LIGHT,
 	LC_OBJECT_LIGHT_TARGET,
-	LC_OBJECT_CURVE,
-	LC_OBJECT_CURVE_POINT,
+//	LC_OBJECT_CURVE,
+//	LC_OBJECT_CURVE_POINT,
 //	LC_OBJECT_GROUP,
 //	LC_OBJECT_GROUP_PIVOT,
 };
@@ -121,8 +121,8 @@ public:
     { return m_nObjectType == LC_OBJECT_CAMERA; }
   bool IsLight() const
     { return m_nObjectType == LC_OBJECT_LIGHT; }
-  bool IsCurve() const
-    { return m_nObjectType == LC_OBJECT_CURVE; }
+//  bool IsCurve() const
+//    { return m_nObjectType == LC_OBJECT_CURVE; }
 
   LC_OBJECT_TYPE GetType() const
     { return m_nObjectType; }

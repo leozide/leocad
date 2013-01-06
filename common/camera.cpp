@@ -172,7 +172,7 @@ void Camera::CreateName(const PtrArray<Camera>& Cameras)
 	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
 		if (strncmp(Cameras[CameraIdx]->m_strName, Prefix, strlen(Prefix)) == 0)
 			if (sscanf(Cameras[CameraIdx]->m_strName + strlen(Prefix), " %d", &i) == 1)
-				if (i > max) 
+				if (i > max)
 					max = i;
 
 	sprintf(m_strName, "%s %d", Prefix, max+1);
@@ -335,9 +335,9 @@ bool Camera::FileLoad(lcFile& file)
 		lcuint32 show;
 		lcint32 user;
 
-		show = file.ReadU32();
+		file.ReadU32(&show, 1);
 //		if (version > 2)
-		user = file.ReadS32();
+		file.ReadS32(&user, 1);
 		if (show == 0)
 			m_nState |= LC_CAMERA_HIDDEN;
 	}
@@ -543,7 +543,7 @@ void Camera::Render(float fLineWidth)
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	float box[24][3] =
-	{ 
+	{
 		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
 		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
 		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },

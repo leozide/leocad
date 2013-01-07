@@ -27,6 +27,7 @@ static gint realize_event(GtkWidget *widget, gpointer data)
 {
 	GLWindow *wnd = (GLWindow*)data;
 
+	wnd->MakeCurrent();
 	wnd->OnInitialUpdate();
 
 	return TRUE;
@@ -55,15 +56,15 @@ static gint button_press_event(GtkWidget *widget, GdkEventButton *event, gpointe
   if (event->type == GDK_BUTTON_PRESS)
   {
     if (event->button == 1)
-      wnd->OnLeftButtonDown (x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+      wnd->OnLeftButtonDown (x, y, (event->state & GDK_CONTROL_MASK) != 0,
                              (event->state & GDK_SHIFT_MASK) != 0);
     else if (event->button == 3)
-      wnd->OnRightButtonDown (x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+      wnd->OnRightButtonDown (x, y, (event->state & GDK_CONTROL_MASK) != 0,
                               (event->state & GDK_SHIFT_MASK) != 0);
   }
   else if (event->type == GDK_2BUTTON_PRESS)
   {
-    wnd->OnLeftButtonDoubleClick (x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+    wnd->OnLeftButtonDoubleClick (x, y, (event->state & GDK_CONTROL_MASK) != 0,
                                   (event->state & GDK_SHIFT_MASK) != 0);
   }
 
@@ -86,10 +87,10 @@ static gint button_release_event (GtkWidget *widget, GdkEventButton *event, gpoi
   gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
   if (event->button == 1)
-    wnd->OnLeftButtonUp (x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+    wnd->OnLeftButtonUp (x, y, (event->state & GDK_CONTROL_MASK) != 0,
                          (event->state & GDK_SHIFT_MASK) != 0);
   else if (event->button == 3)
-    wnd->OnRightButtonUp (x, y, (event->state & GDK_CONTROL_MASK) != 0, 
+    wnd->OnRightButtonUp (x, y, (event->state & GDK_CONTROL_MASK) != 0,
                           (event->state & GDK_SHIFT_MASK) != 0);
 
   return TRUE;

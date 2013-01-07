@@ -150,7 +150,7 @@ void OnCommand(GtkWidget* widget, gpointer data)
     project->HandleCommand(LC_FILE_RECENT, id - ID_FILE_RECENT1);
     return;
   }
-  
+
   if (id >= ID_ACTION_SELECT && id <= ID_ACTION_ROLL)
   {
     project->SetAction(id - ID_ACTION_SELECT);
@@ -242,7 +242,7 @@ void OnCommand(GtkWidget* widget, gpointer data)
       frame = gtk_frame_new (NULL);
       gtk_widget_show (frame);
       gtk_container_add (GTK_CONTAINER (wnd), frame);
-      gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);               
+      gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
 
       View *v = new View (project, view);
       v->CreateFromWindow (&w);
@@ -390,7 +390,7 @@ static gint key_press_event(GtkWidget* widget, GdkEventKey* event, gpointer data
 
   if (code != 0)
   {
-    if (lcGetActiveProject()->OnKeyDown(code, (event->state & GDK_CONTROL_MASK) != 0, 
+    if (lcGetActiveProject()->OnKeyDown(code, (event->state & GDK_CONTROL_MASK) != 0,
 			   (event->state & GDK_SHIFT_MASK) != 0))
 	gtk_signal_emit_stop_by_name (GTK_OBJECT(widget), "key_press_event");
   }
@@ -490,14 +490,14 @@ static void update_window_layout ()
 
     gtk_signal_connect (GTK_OBJECT (drawing_area), "key_press_event",
 			GTK_SIGNAL_FUNC (key_press_event), NULL);
- 
+
     // set minimum size
     gtk_widget_set_usize (GTK_WIDGET (drawing_area), 100, 100);
 
     drawing_frame = gtk_frame_new (NULL);
     gtk_widget_show (drawing_frame);
     //    gtk_container_add (GTK_CONTAINER (hbox), drawing_frame);
-    gtk_frame_set_shadow_type (GTK_FRAME (drawing_frame), GTK_SHADOW_IN);               
+    gtk_frame_set_shadow_type (GTK_FRAME (drawing_frame), GTK_SHADOW_IN);
 
     gtk_container_add (GTK_CONTAINER (drawing_frame), GTK_WIDGET (drawing_area));
     gtk_widget_show (GTK_WIDGET (drawing_area));
@@ -607,20 +607,6 @@ int main (int argc, char* argv[])
   gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), "LeoCAD");
   gtk_container_border_width (GTK_CONTAINER (((GtkWidget*)(*main_window))), 0);
   gtk_widget_realize (((GtkWidget*)(*main_window)));
-
-	GL_EnableVertexBufferObject();
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	if (lcGetActiveProject()->m_pPieces)
-	{
-		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
-		{
-			lcMesh* Mesh = Library->mPieces[PieceIdx]->mMesh;
-
-			if (Mesh)
-				Mesh->UpdateBuffers();
-		}
-	}
 
   // Read window position and size
   x = Sys_ProfileLoadInt ("Window", "Width", 600);
@@ -737,12 +723,12 @@ int main (int argc, char* argv[])
 //  gtk_box_pack_start (GTK_BOX (vbox), create_status_bar (), FALSE, TRUE, 2);
   //  GtkWidget* statusbar = gtk_statusbar_new ();
   //gtk_widget_show (statusbar);
-  //gtk_box_pack_start (GTK_BOX (vbox), statusbar, FALSE, TRUE, 0);   
+  //gtk_box_pack_start (GTK_BOX (vbox), statusbar, FALSE, TRUE, 0);
 
 #include "pixmaps/icon32.xpm"
 
 	lcGetActiveProject()->UpdateInterface();
-  main_window->UpdateMRU ();
+	main_window->UpdateMRU ();
 
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
@@ -758,6 +744,20 @@ int main (int argc, char* argv[])
     gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
 			    pieces_width);
 
+	GL_EnableVertexBufferObject();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	view->MakeCurrent();
+
+	if (lcGetActiveProject()->m_pPieces)
+	{
+		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
+		{
+			lcMesh* Mesh = Library->mPieces[PieceIdx]->mMesh;
+
+			if (Mesh)
+				Mesh->UpdateBuffers();
+		}
+	}
 
   PieceInfo* Info = Library->FindPiece("3005", false);
   if (!Info)

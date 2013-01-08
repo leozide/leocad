@@ -19,6 +19,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mNumOfficialPieces = 0;
 	mZipFile = NULL;
 	mCacheFile = NULL;
+	mCacheFileName[0] = 0;
 	mSaveCache = false;
 }
 
@@ -520,6 +521,9 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 bool lcPiecesLibrary::OpenCache()
 {
 	struct stat CacheStat;
+
+	if (!mCacheFileName[0])
+		return false;
 
 	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
 		return false;

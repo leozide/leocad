@@ -66,36 +66,30 @@ void AddDebugQuad(const lcVector3& pt1, const lcVector3& pt2, const lcVector3& p
 
 void RenderDebugPrimitives()
 {
-	glBegin(GL_LINES);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
 	for (int i = 0; i < NumDebugLines; i++)
 	{
+		glVertexPointer(3, GL_FLOAT, 0, &DebugLines[i].pt1);
 		glColor3fv((float*)&DebugLines[i].color);
-		glVertex3fv((float*)&DebugLines[i].pt1);
-		glVertex3fv((float*)&DebugLines[i].pt2);
+		glDrawArrays(GL_LINES, 0, 2);
 	}
-
-	glEnd();
 
 	glDepthMask(GL_FALSE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
-	glBegin(GL_QUADS);
-
 	for (int i = 0; i < NumDebugQuads; i++)
 	{
+		glVertexPointer(3, GL_FLOAT, 0, &DebugQuads[i].pt1);
 		glColor4fv((float*)&DebugQuads[i].color);
-		glVertex3fv((float*)&DebugQuads[i].pt1);
-		glVertex3fv((float*)&DebugQuads[i].pt2);
-		glVertex3fv((float*)&DebugQuads[i].pt3);
-		glVertex3fv((float*)&DebugQuads[i].pt4);
+		glDrawArrays(GL_QUADS, 0, 4);
 	}
-
-	glEnd();
 
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 #endif // LC_DEBUG

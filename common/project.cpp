@@ -2154,12 +2154,10 @@ void Project::RenderSceneObjects(View* view)
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_ALPHA_TEST);
 
-		glBegin(GL_QUADS);
 		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
 		m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
 		m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
-		glEnd();
 
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_ALPHA_TEST);
@@ -2310,20 +2308,23 @@ void Project::RenderOverlays(View* view)
 			// Translation arrows.
 			if (m_nTracking == LC_TRACK_NONE || (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_MOVE_XYZ))
 			{
-				glBegin(GL_LINES);
-				glVertex3f(0.0f, 0.0f, 0.0f);
-				glVertex3f(OverlayMoveArrowSize, 0.0f, 0.0f);
-				glEnd();
+				lcVector3 Verts[11];
 
-				glBegin(GL_TRIANGLE_FAN);
-				glVertex3f(OverlayMoveArrowSize, 0.0f, 0.0f);
+				Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+				Verts[1] = lcVector3(OverlayMoveArrowSize, 0.0f, 0.0f);
+
 				for (int j = 0; j < 9; j++)
 				{
 					float y = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
 					float z = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					glVertex3f(OverlayMoveArrowCapSize, y, z);
+					Verts[j + 2] = lcVector3(OverlayMoveArrowCapSize, y, z);
 				}
-				glEnd();
+
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glVertexPointer(3, GL_FLOAT, 0, Verts);
+				glDrawArrays(GL_LINES, 0, 2);
+				glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
+				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 
 			// Rotation arrows.
@@ -2351,7 +2352,9 @@ void Project::RenderOverlays(View* view)
 					break;
 				}
 
-				glBegin(GL_TRIANGLE_STRIP);
+				lcVector3 Verts[18];
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 				for (int j = 0; j < 9; j++)
 				{
@@ -2360,13 +2363,11 @@ void Project::RenderOverlays(View* view)
 					float x = cosf(LC_2PI / 4 * j / 8);
 					float y = sinf(LC_2PI / 4 * j / 8);
 
-					glVertex3f(0.0f, OverlayRotateArrowCenter + x * Radius1, OverlayRotateArrowCenter + y * Radius1);
-					glVertex3f(0.0f, OverlayRotateArrowCenter + x * Radius2, OverlayRotateArrowCenter + y * Radius2);
+					Verts[j * 2 + 0] = lcVector3(0.0f, OverlayRotateArrowCenter + x * Radius1, OverlayRotateArrowCenter + y * Radius1);
+					Verts[j * 2 + 1] = lcVector3(0.0f, OverlayRotateArrowCenter + x * Radius2, OverlayRotateArrowCenter + y * Radius2);
 				}
 
-				glEnd();
-
-				glBegin(GL_TRIANGLE_STRIP);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
 				for (int j = 0; j < 9; j++)
 				{
@@ -2374,37 +2375,35 @@ void Project::RenderOverlays(View* view)
 					float x = cosf(LC_2PI / 4 * j / 8);
 					float y = sinf(LC_2PI / 4 * j / 8);
 
-					glVertex3f(-OverlayMoveArrowBodyRadius, OverlayRotateArrowCenter + x * Radius, OverlayRotateArrowCenter + y * Radius);
-					glVertex3f( OverlayMoveArrowBodyRadius, OverlayRotateArrowCenter + x * Radius, OverlayRotateArrowCenter + y * Radius);
+					Verts[j * 2 + 0] = lcVector3(-OverlayMoveArrowBodyRadius, OverlayRotateArrowCenter + x * Radius, OverlayRotateArrowCenter + y * Radius);
+					Verts[j * 2 + 1] = lcVector3( OverlayMoveArrowBodyRadius, OverlayRotateArrowCenter + x * Radius, OverlayRotateArrowCenter + y * Radius);
 				}
 
-				glEnd();
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
-				glBegin(GL_TRIANGLE_FAN);
-
-				glVertex3f(0.0f, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius, OverlayRotateArrowStart);
+				Verts[0] = lcVector3(0.0f, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius, OverlayRotateArrowStart);
 
 				for (int j = 0; j < 9; j++)
 				{
 					float x = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
 					float y = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					glVertex3f(x, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y, OverlayRotateArrowCenter);
+					Verts[j + 1] = lcVector3(x, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y, OverlayRotateArrowCenter);
 				}
 
-				glEnd();
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
 
-				glBegin(GL_TRIANGLE_FAN);
-
-				glVertex3f(0.0f, OverlayRotateArrowStart, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius);
+				Verts[0] = lcVector3(0.0f, OverlayRotateArrowStart, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius);
 
 				for (int j = 0; j < 9; j++)
 				{
 					float x = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
 					float y = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					glVertex3f(x, OverlayRotateArrowCenter, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y);
+					Verts[j + 1] = lcVector3(x, OverlayRotateArrowCenter, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y);
 				}
 
-				glEnd();
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
+
+				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 
 			glPopMatrix();
@@ -2492,9 +2491,12 @@ void Project::RenderOverlays(View* view)
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glEnable(GL_BLEND);
 
-				glBegin(GL_TRIANGLE_FAN);
+				lcVector3 Verts[33];
+				Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+				int NumVerts = 1;
 
-				glVertex3f(0.0f, 0.0f, 0.0f);
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 				float StartAngle;
 				int i = 0;
@@ -2509,7 +2511,14 @@ void Project::RenderOverlays(View* view)
 					float x = cosf((Step * i - StartAngle) * LC_DTOR) * OverlayRotateRadius * OverlayScale;
 					float y = sinf((Step * i - StartAngle) * LC_DTOR) * OverlayRotateRadius * OverlayScale;
 
-					glVertex3f(0.0f, x, y);
+					Verts[NumVerts++] = lcVector3(0.0f, x, y);
+
+					if (NumVerts == 33)
+					{
+						glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
+						Verts[1] = Verts[32];
+						NumVerts = 2;
+					}
 
 					i++;
 					if (Step > 0)
@@ -2519,8 +2528,10 @@ void Project::RenderOverlays(View* view)
 
 				} while (Angle >= 0.0f);
 
-				glEnd();
+				if (NumVerts > 2)
+					glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
 
+				glDisableClientState(GL_VERTEX_ARRAY);
 				glDisable(GL_BLEND);
 
 				glPopMatrix();
@@ -2535,8 +2546,7 @@ void Project::RenderOverlays(View* view)
 		// Draw the circles.
 		if (m_nCurAction == LC_ACTION_ROTATE && !HasAngle && m_nTracking == LC_TRACK_NONE)
 		{
-			glBegin(GL_LINE_LOOP);
-			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
+			lcVector3 Verts[32];
 
 			for (j = 0; j < 32; j++)
 			{
@@ -2546,12 +2556,15 @@ void Project::RenderOverlays(View* view)
 				Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
 				Pt[2] = 0.0f;
 
-				Pt = lcMul31(Pt, Mat);
-
-				glVertex3f(Pt[0], Pt[1], Pt[2]);
+				Verts[j] = lcMul31(Pt, Mat);
 			}
 
-			glEnd();
+			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINE_LOOP, 0, 32);
+			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		lcVector3 ViewDir = Cam->mTargetPosition - Cam->mPosition;
@@ -2596,7 +2609,8 @@ void Project::RenderOverlays(View* view)
 				}
 			}
 
-			glBegin(GL_LINES);
+			lcVector3 Verts[64];
+			int NumVerts = 0;
 
 			for (int j = 0; j < 32; j++)
 			{
@@ -2622,15 +2636,15 @@ void Project::RenderOverlays(View* view)
 
 				if (m_nCurAction != LC_ACTION_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
 				{
-					lcVector3 Pt1 = v1 * (OverlayRotateRadius * OverlayScale);
-					lcVector3 Pt2 = v2 * (OverlayRotateRadius * OverlayScale);
-
-					glVertex3f(Pt1[0], Pt1[1], Pt1[2]);
-					glVertex3f(Pt2[0], Pt2[1], Pt2[2]);
+					Verts[NumVerts++] = v1 * (OverlayRotateRadius * OverlayScale);
+					Verts[NumVerts++] = v2 * (OverlayRotateRadius * OverlayScale);
 				}
 			}
 
-			glEnd();
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINES, 0, NumVerts);
+			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		glPopMatrix();
@@ -2678,25 +2692,28 @@ void Project::RenderOverlays(View* view)
 
 				if (HasAngle)
 				{
-					glBegin(GL_LINES);
-
 					float StartY = OverlayScale * OverlayRotateRadius;
 					float EndZ = (Angle > 0.0f) ? OverlayScale * OverlayRotateArrowSize : -OverlayScale * OverlayRotateArrowSize;
 					float TipZ = (Angle > 0.0f) ? -OverlayScale * OverlayRotateArrowCapSize : OverlayScale * OverlayRotateArrowCapSize;
 
-					glVertex3f(0.0f, StartY, 0.0f);
-					glVertex3f(0.0f, StartY, EndZ);
+					lcVector3 Verts[6];
 
-					glVertex3f(0.0f, StartY, EndZ);
-					glVertex3f(0.0f, StartY + OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
+					Verts[0] = lcVector3(0.0f, StartY, 0.0f);
+					Verts[1] = lcVector3(0.0f, StartY, EndZ);
 
-					glVertex3f(0.0f, StartY, EndZ);
-					glVertex3f(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
+					Verts[2] = lcVector3(0.0f, StartY, EndZ);
+					Verts[3] = lcVector3(0.0f, StartY + OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
-					glEnd();
+					Verts[4] = lcVector3(0.0f, StartY, EndZ);
+					Verts[5] = lcVector3(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
-					glPopMatrix();
+					glEnableClientState(GL_VERTEX_ARRAY);
+					glVertexPointer(3, GL_FLOAT, 0, Verts);
+					glDrawArrays(GL_LINES, 0, 6);
+					glDisableClientState(GL_VERTEX_ARRAY);
 				}
+
+				glPopMatrix();
 
 				// Draw text.
 				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
@@ -2728,10 +2745,8 @@ void Project::RenderOverlays(View* view)
 				int cx, cy;
 				m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
-				glBegin(GL_QUADS);
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
-				glEnd();
 
 				glDisable(GL_TEXTURE_2D);
 				glDisable(GL_ALPHA_TEST);
@@ -2871,9 +2886,7 @@ void Project::RenderViewports(View* view)
 	m_pScreenFont->MakeCurrent();
 	glEnable(GL_ALPHA_TEST);
 
-	glBegin(GL_QUADS);
 	m_pScreenFont->PrintText(3.0f, (float)view->GetHeight() - 1.0f - 6.0f, 0.0f, view->mCamera->GetName());
-	glEnd();
 
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
@@ -2952,9 +2965,6 @@ void Project::RenderInitialize()
 //			AfxMessageBox ("Could not load background");
 		}
 
-	// Set the perspective correction hint to fastest or nicest...
-//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-
 	// Grid display list
 	if (m_nGridList == 0)
 		m_nGridList = glGenLists(1);
@@ -2991,30 +3001,10 @@ void Project::RenderInitialize()
 
 void Project::AddPiece(Piece* pPiece)
 {
-/*
-// Sort piece array to avoid OpenGL state changes (needs work)
-void CCADDoc::AddPiece(CPiece* pNewPiece)
-{
-	POSITION pos1, pos2;
-
-	for (pos1 = m_Pieces.GetHeadPosition(); (pos2 = pos1) != NULL;)
-	{
-		CPiece* pPiece = m_Pieces.GetNext(pos1);
-		if (pPiece->IsTranslucent())
-			break;
-	}
-
-	if (pos2 == NULL || pNewPiece->IsTranslucent())
-		m_Pieces.AddTail(pNewPiece);
-	else
-		m_Pieces.InsertBefore(pos2, pNewPiece);
-}
-*/
 	if (m_pPieces != NULL)
 	{
 		pPiece->m_pNext = m_pPieces;
 		m_pPieces = pPiece;
-	// TODO: sorting and BSP
 	}
 	else
 	{
@@ -3038,8 +3028,6 @@ void Project::RemovePiece(Piece* pPiece)
 
 			break;
 		}
-
-	// TODO: remove from BSP
 }
 
 void Project::CalculateStep()

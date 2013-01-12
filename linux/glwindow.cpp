@@ -11,7 +11,6 @@ struct GLWindowPrivate
 {
 	GtkWidget  *widget;
 	LC_CURSOR_TYPE Cursor;
-//	bool Multisample;
 };
 
 static Display* WindowDisplay = NULL;
@@ -218,6 +217,8 @@ bool GLWindow::CreateFromWindow(void *data)
 			printf("OpenGL fatal error: Cannot create context.\n");
 			return false;
 		}
+
+		WindowContextCount = 1;
     }
 
 	gtk_widget_push_colormap(gdk_colormap_new(WindowGdkVisual, TRUE));

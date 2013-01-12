@@ -720,29 +720,32 @@ int main (int argc, char* argv[])
   gtk_widget_ref (pieces_frame);
 
   create_statusbar (((GtkWidget*)(*main_window)), vbox);
-//  gtk_box_pack_start (GTK_BOX (vbox), create_status_bar (), FALSE, TRUE, 2);
-  //  GtkWidget* statusbar = gtk_statusbar_new ();
-  //gtk_widget_show (statusbar);
-  //gtk_box_pack_start (GTK_BOX (vbox), statusbar, FALSE, TRUE, 0);
-
-#include "pixmaps/icon32.xpm"
 
 	lcGetActiveProject()->UpdateInterface();
 	main_window->UpdateMRU ();
 
-  GdkPixmap *gdkpixmap;
-  GdkBitmap *mask;
+	GdkPixbuf* Pixbuf = gdk_pixbuf_new_from_file(LC_INSTALL_PREFIX"/share/leocad/icon256.png", NULL);
 
-  gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask,
-                                           &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], (gchar**)icon32);
-  gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
+	if (Pixbuf)
+	{
+		gtk_window_set_icon(GTK_WINDOW (((GtkWidget*)(*main_window))), Pixbuf);
+	}
+	else
+	{
+#include "pixmaps/icon32.xpm"
 
-  gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));
+		GdkPixmap *gdkpixmap;
+		GdkBitmap *mask;
 
-  // get the splitter in the correct size, must be done after the widget has been realized
-  if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
-    gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width -
-			    pieces_width);
+		gdkpixmap = gdk_pixmap_create_from_xpm_d (((GtkWidget*)(*main_window))->window, &mask, &((GtkWidget*)(*main_window))->style->bg[GTK_STATE_NORMAL], (gchar**)icon32);
+		gdk_window_set_icon (((GtkWidget*)(*main_window))->window, NULL, gdkpixmap, mask);
+	}
+
+	gtk_widget_show (GTK_WIDGET (((GtkWidget*)(*main_window))));
+
+	// get the splitter in the correct size, must be done after the widget has been realized
+	if ((pieces_floating == FALSE) && (pieces_visible == TRUE))
+		gtk_paned_set_position (GTK_PANED (pieces_parent), ((GtkWidget*)(*main_window))->allocation.width - pieces_width);
 
 	GL_EnableVertexBufferObject();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();

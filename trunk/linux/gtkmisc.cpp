@@ -33,14 +33,14 @@ GtkWidget* create_pixmap (const char* filename)
   GdkPixmap *gdkpixmap;
   GdkBitmap *mask;
   GtkWidget *pixmap;
- 
+
   load_pixmap (filename, &gdkpixmap, &mask);
   pixmap = gtk_pixmap_new (gdkpixmap, mask);
   gtk_widget_show (pixmap);
- 
+
   gdk_pixmap_unref (gdkpixmap);
   gdk_pixmap_unref (mask);
- 
+
   return pixmap;
 }
 
@@ -64,7 +64,7 @@ GtkWidget* menu_tearoff (GtkWidget *menu)
   gtk_widget_show (menu_item);
   return menu_item;
 }
- 
+
 GtkWidget* create_sub_menu(GtkWidget* bar, const char* label, GtkAccelGroup* accel)
 {
   GtkWidget *item, *menu;

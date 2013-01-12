@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <locale.h>
 
 #define LC_LIBRARY_CACHE_VERSION   0x0100
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
@@ -749,7 +750,11 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		if (!mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile))
 			return false;
 
-		if (!ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData))
+		const char* OldLocale = setlocale(LC_NUMERIC, "C");
+		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData);
+		setlocale(LC_NUMERIC, OldLocale);
+
+        if (!Ret)
 			return false;
 	}
 	else
@@ -766,7 +771,11 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		if (!PieceFile.Open(FileName, "rt"))
 			return false;
 
-		if (!ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData))
+		const char* OldLocale = setlocale(LC_NUMERIC, "C");
+		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData);
+		setlocale(LC_NUMERIC, OldLocale);
+
+        if (!Ret)
 			return false;
 	}
 

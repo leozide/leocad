@@ -29,7 +29,7 @@ OBJ := \
   $(patsubst %.cpp,%.o,$(filter %.cpp,$(SRC)))
 
 ### Link the program
-.PHONY: all static
+.PHONY: all static install
 
 all: $(BIN)
 
@@ -102,9 +102,11 @@ arch:
 
 install: $(BIN)
 	install -d $(DESTDIR)$(PREFIX)/bin
-	install -d $(DESTDIR)$(PREFIX)/share/man/man1
 	install -c -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin/
+	install -d $(DESTDIR)$(PREFIX)/share/man/man1
 	install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
+	install -d $(DESTDIR)$(PREFIX)/share/leocad
+	install -c -m 0644 tools/icon/icon256.png $(DESTDIR)$(PREFIX)/share/leocad/
 
 binary: binary-zip binary-tgz
 

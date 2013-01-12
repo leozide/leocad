@@ -86,7 +86,7 @@ static bool save_var (const char *section, const char *key, const char *value)
     len = ftell (rc);
     rewind (rc);
     buf = g_malloc (len);
-    len = fread (buf, len, 1, rc);
+    len = fread (buf, 1, len, rc);
     old_rc.WriteBuffer (buf, len);
     g_free (buf);
     fclose (rc);

@@ -11,7 +11,7 @@
 #include <ctype.h>
 #include <locale.h>
 
-#define LC_LIBRARY_CACHE_VERSION   0x0100
+#define LC_LIBRARY_CACHE_VERSION   0x0101
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 

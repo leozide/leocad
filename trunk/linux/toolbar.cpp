@@ -10,7 +10,7 @@
 #include "opengl.h"
 #include "gtktools.h"
 #include "main.h"
-#include "globals.h" 
+#include "globals.h"
 #include "project.h"
 #include "pieceinf.h"
 #include "toolbar.h"
@@ -199,46 +199,46 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   gtk_container_add (GTK_CONTAINER (tool_toolbar.handle_box), tool_toolbar.toolbar);
   gtk_widget_show (tool_toolbar.toolbar);
 
-  tool_toolbar.brick = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.brick = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, "Piece", "Insert Piece", "",
      new_pixmap (window, ac_brick), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_INSERT);
-  tool_toolbar.light = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
-     GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Light", "Insert Light", "", 
+  tool_toolbar.light = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
+     GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Light", "Insert Light", "",
      new_pixmap (window, ac_light), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_LIGHT);
-  tool_toolbar.spot = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.spot = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Spot", "Insert Spotlight", "",
      new_pixmap (window, ac_spot), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_SPOTLIGHT);
-  tool_toolbar.camera = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.camera = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Camera", "Insert Camera", "",
      new_pixmap (window, ac_cam),  GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_CAMERA);
-  tool_toolbar.select = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.select = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Select", "Select Objects", "",
      new_pixmap (window, ac_sel), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_SELECT);
-  tool_toolbar.move = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.move = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Move", "Move Objects", "",
      new_pixmap (window, ac_move), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_MOVE);
-  tool_toolbar.rotate = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.rotate = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Rotate", "Rotate Pieces", "",
      new_pixmap (window, ac_rot), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_ROTATE);
-  tool_toolbar.erase = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.erase = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Delete", "Remove Objects", "",
      new_pixmap (window, ac_erase), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_ERASER);
-  tool_toolbar.paint = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.paint = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Paint", "Paint Bricks", "",
      new_pixmap (window, ac_paint), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_PAINT);
-  tool_toolbar.zoom = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.zoom = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Zoom", "Zoom", "",
      new_pixmap (window, ac_zoom), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_ZOOM);
-  tool_toolbar.pan = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.pan = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Pan", "Pan", "",
      new_pixmap (window, ac_pan), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_PAN);
-  tool_toolbar.rotview = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.rotview = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Rot. View", "Rotate View", "",
      new_pixmap (window, ac_rotv), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_ROTATE_VIEW);
-  tool_toolbar.roll = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.roll = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Roll", "Roll", "",
      new_pixmap (window, ac_roll), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_ROLL);
-  tool_toolbar.zoomreg = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar), 
+  tool_toolbar.zoomreg = button = gtk_toolbar_append_element (GTK_TOOLBAR (tool_toolbar.toolbar),
      GTK_TOOLBAR_CHILD_RADIOBUTTON, button, "Zoom Box", "Zoom Region", "",
      new_pixmap (window, ac_zoomr), GTK_SIGNAL_FUNC (OnCommand), (void*)ID_ACTION_ZOOM_REGION);
   gtk_toolbar_append_item (GTK_TOOLBAR (tool_toolbar.toolbar), "Zoom Ext.", "Zoom Extents", "",
@@ -260,7 +260,7 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
   gtk_widget_show (anim_toolbar.toolbar);
 
   anim_toolbar.first = gtk_toolbar_append_item (GTK_TOOLBAR (anim_toolbar.toolbar),
-     "First", "Go to the Start", "", new_pixmap (window, an_first), 
+     "First", "Go to the Start", "", new_pixmap (window, an_first),
      GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_VIEW_STEP_FIRST);
   anim_toolbar.prev = gtk_toolbar_append_item (GTK_TOOLBAR (anim_toolbar.toolbar),
      "Previous", "Go Back", "", new_pixmap (window, an_prev),
@@ -367,7 +367,7 @@ void fill_piecetree()
 
 	  gtk_tree_store_append(model, &pat, &entry);
 	  gtk_tree_store_set(model, &pat, 0, desc, 1, child, -1);
-	}	
+	}
       }
     }
   }
@@ -504,7 +504,7 @@ static gint piececombo_key(GtkWidget* widget, GdkEventKey* event)
 
       // Remove all children.
       while (gtk_tree_model_iter_children(model, &child, &iter))
-	gtk_tree_store_remove(GTK_TREE_STORE(model), &child);	
+	gtk_tree_store_remove(GTK_TREE_STORE(model), &child);
 
       // Perform search.
       PtrArray<PieceInfo> SinglePieces, GroupedPieces;
@@ -720,7 +720,7 @@ static gboolean colorlist_expose(GtkWidget *widget, GdkEventExpose *event, gpoin
 	PangoContext *context;
 	PangoLayout *layout;
 	ColorListData* Data;
-	
+
 	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
 	Data->UpdateLayout(widget);
 
@@ -779,7 +779,7 @@ static gboolean colorlist_expose(GtkWidget *widget, GdkEventExpose *event, gpoin
 static gboolean colorlist_realize(GtkWidget* widget, gpointer user)
 {
 	ColorListData* Data;
-	
+
 	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
 	delete Data;
 
@@ -795,7 +795,7 @@ static gboolean colorlist_realize(GtkWidget* widget, gpointer user)
 static gboolean colorlist_unrealize(GtkWidget* widget, gpointer user)
 {
 	ColorListData* Data;
-	
+
 	Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
 	delete Data;
 
@@ -921,7 +921,7 @@ static gboolean colorlist_tooltip(GtkWidget *widget, gint x, gint y, gboolean ke
 {
 	if (keyboard_mode)
 		return FALSE;
-		
+
 	ColorListData* Data = (ColorListData*)gtk_object_get_data(GTK_OBJECT(widget), "colorlist");
 
 	for (int CellIdx = 0; CellIdx < Data->mCells.GetSize(); CellIdx++)
@@ -954,8 +954,12 @@ void colorlist_set(int new_color)
 	if (new_color != cur_color)
 	{
 		cur_color = new_color;
-		gtk_widget_draw(colorlist, NULL);
-		preview->Redraw();
+
+		if (colorlist)
+			gtk_widget_draw(colorlist, NULL);
+
+		if (preview)
+			preview->Redraw();
 	}
 }
 
@@ -966,7 +970,7 @@ GtkWidget* create_piecebar(GtkWidget *window, GLWindow *share)
 
   frame = gtk_frame_new(NULL);
   gtk_widget_show(frame);
-  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);               
+  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
 
   vbox1 = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(vbox1);

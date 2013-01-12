@@ -1,7 +1,3 @@
-//
-// OpenGL window
-//
-
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
@@ -14,11 +10,16 @@
 struct GLWindowPrivate
 {
 	GtkWidget  *widget;
-	Display*   xdisplay;
-	GLXContext context;
 	LC_CURSOR_TYPE Cursor;
-	bool Multisample;
+//	bool Multisample;
 };
+
+static Display* WindowDisplay = NULL;
+static GdkVisual* WindowGdkVisual = NULL;
+static XVisualInfo* WindowXVisualInfo = NULL;
+static bool WindowMultisample = false;
+static GLXContext WindowContext;
+int WindowContextCount;
 
 // =============================================================================
 // static functions
@@ -158,75 +159,75 @@ GLWindow::~GLWindow()
 	g_free(m_pData);
 }
 
-bool GLWindow::CreateFromWindow (void *data)
+bool GLWindow::CreateFromWindow(void *data)
 {
-	int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
 	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
-	Display *dpy = GDK_DISPLAY();
-	GdkVisual *visual;
-	XVisualInfo *vi = NULL;
 
-	// choose visual
-	visual = gdk_visual_get_system();
-	if (visual->depth < 16)
-		printf("OpenGL fatal error: LeoCAD needs a display with at least 16 bit colors.\n");
-
-	if (dpy == NULL)
+	if (WindowContext)
+		WindowContextCount++;
+	else
 	{
-		printf("OpenGL fatal error: Cannot get display.\n");
-		return false;
-	}
-	prv->xdisplay = dpy;
+		int attrlist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, 0 };
 
-	int AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
+		WindowDisplay = GDK_DISPLAY();
 
-	if (AASamples > 1)
-	{
-		int attrlistAA[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, GLX_SAMPLE_BUFFERS_ARB, 1, GLX_SAMPLES_ARB, AASamples, 0 };
-		vi = pfnglXChooseVisual(dpy, DefaultScreen(dpy), attrlistAA);
+        if (!WindowDisplay)
+        {
+            printf("OpenGL fatal error: Cannot get display.\n");
+            return false;
+        }
 
-		if (vi)
-			prv->Multisample = true;
-		else
-			printf("OpenGL error: Could not find multisample visual.\n");
-	}
+        WindowGdkVisual = gdk_visual_get_system();
+        if (WindowGdkVisual->depth < 16)
+            printf("OpenGL fatal error: LeoCAD needs a display with at least 16 bit colors.\n");
 
-	if (!vi)
-	{
-		vi = pfnglXChooseVisual(dpy, DefaultScreen(dpy), attrlist);
-		if (vi == NULL)
+        int AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
+
+        if (AASamples > 1)
+        {
+            int attrlistAA[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, GLX_SAMPLE_BUFFERS_ARB, 1, GLX_SAMPLES_ARB, AASamples, 0 };
+            WindowXVisualInfo = pfnglXChooseVisual(WindowDisplay, DefaultScreen(WindowDisplay), attrlistAA);
+
+            if (WindowXVisualInfo)
+                WindowMultisample = true;
+            else
+                printf("OpenGL error: Could not find multisample visual.\n");
+        }
+
+        if (!WindowXVisualInfo)
+        {
+            WindowXVisualInfo = pfnglXChooseVisual(WindowDisplay, DefaultScreen(WindowDisplay), attrlist);
+            if (!WindowXVisualInfo)
+            {
+                printf("OpenGL fatal error: glXChooseVisual failed.\n");
+                return false;
+            }
+        }
+
+        WindowGdkVisual = gdkx_visual_get(WindowXVisualInfo->visualid);
+        if (WindowGdkVisual == NULL)
+        {
+            printf("OpenGL fatal error: Cannot get visual.\n");
+            return false;
+        }
+
+		WindowContext = pfnglXCreateContext(WindowDisplay, WindowXVisualInfo, NULL, True);
+
+		if (!WindowContext)
 		{
-			printf("OpenGL fatal error: glXChooseVisual failed.\n");
+			printf("OpenGL fatal error: Cannot create context.\n");
 			return false;
 		}
-	}
+    }
 
-	visual = gdkx_visual_get(vi->visualid);
-	if (visual == NULL)
-	{
-		printf("OpenGL fatal error: Cannot get visual.\n");
-		return false;
-	}
-
-	gtk_widget_push_colormap(gdk_colormap_new(visual, TRUE));
-	gtk_widget_push_visual(visual);
+	gtk_widget_push_colormap(gdk_colormap_new(WindowGdkVisual, TRUE));
+	gtk_widget_push_visual(WindowGdkVisual);
 
 	prv->widget = gtk_drawing_area_new();
 	gtk_widget_set_double_buffered(GTK_WIDGET(prv->widget), FALSE);
 
-	if (m_pShare == NULL)
-		prv->context = pfnglXCreateContext(dpy, vi, NULL, True);
-	else
-	{
-		GLWindowPrivate *share = (GLWindowPrivate*)m_pShare->m_pData;
-
-		prv->context = pfnglXCreateContext(dpy, vi, share->context, True);
-	}
-
 	gtk_widget_pop_visual();
 	gtk_widget_pop_colormap();
-
-	XFree(vi);
 
 	GTK_WIDGET_SET_FLAGS(prv->widget, GTK_CAN_FOCUS);
 
@@ -249,46 +250,50 @@ bool GLWindow::CreateFromWindow (void *data)
 
 void GLWindow::DestroyContext()
 {
-	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	if (!WindowContext)
+		return;
 
-	if (prv->context == pfnglXGetCurrentContext())
-		pfnglXMakeCurrent(prv->xdisplay, None, NULL);
+	WindowContextCount--;
 
-	if (prv->context)
-		pfnglXDestroyContext(prv->xdisplay, prv->context);
+	if (WindowContextCount)
+		return;
 
-	prv->context = NULL;
+	if (WindowContext == pfnglXGetCurrentContext())
+		pfnglXMakeCurrent(WindowDisplay, None, NULL);
+
+	pfnglXDestroyContext(WindowDisplay, WindowContext);
+	WindowContext = NULL;
+
+	XFree(WindowXVisualInfo);
+	WindowXVisualInfo = NULL;
 }
 
 void GLWindow::OnInitialUpdate()
 {
-	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
-
 	MakeCurrent();
 
 	GL_InitializeSharedExtensions();
 //  GL_InitializeExtensions();
 
-	if (prv->Multisample)
+	if (WindowMultisample)
 		glEnable(GL_MULTISAMPLE_ARB);
 }
 
 bool GLWindow::MakeCurrent()
 {
 	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
-	gboolean ret = false;
 
-	if (prv->context)
-		ret = pfnglXMakeCurrent(prv->xdisplay, GDK_WINDOW_XWINDOW(prv->widget->window), prv->context);
+	if (!WindowContext)
+        return false;
 
-	return ret;
+	return pfnglXMakeCurrent(WindowDisplay, GDK_WINDOW_XWINDOW(prv->widget->window), WindowContext);
 }
 
 void GLWindow::SwapBuffers()
 {
 	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
-	if (prv->context)
+	if (WindowContext)
 		pfnglXSwapBuffers(GDK_WINDOW_XDISPLAY(prv->widget->window), GDK_WINDOW_XWINDOW(prv->widget->window));
 }
 

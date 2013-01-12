@@ -12,6 +12,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "opengl.h"
 #include "project.h"
 #include "toolbar.h"
@@ -586,6 +587,7 @@ int main (int argc, char* argv[])
 
   char cache_path[LC_MAXPATH];
   sprintf(cache_path, "%s/leocad/", g_get_user_cache_dir());
+  mkdir(cache_path, S_IRWXU | S_IRWXG);
 
   if (!g_App->Initialize(argc, argv, lib_path, cache_path))
     return 1;

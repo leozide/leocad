@@ -102,13 +102,28 @@ help:
 arch:
 	mkdir arch
 
-install: $(BIN)
+desktop: obj
+	@echo "[Desktop Entry]" > $(OBJDIR)/leocad.desktop
+	@echo "Encoding=UTF-8" >> $(OBJDIR)/leocad.desktop
+	@echo "Name=LeoCAD" >> $(OBJDIR)/leocad.desktop
+	@echo "Comment=Create virtual LEGO models" >> $(OBJDIR)/leocad.desktop
+	@echo "Comment[nb]=Lag virtuelle LEGO-modeller" >> $(OBJDIR)/leocad.desktop
+	@echo "Comment[pt_BR]=Criar modelos virtuais de LEGO" >> $(OBJDIR)/leocad.desktop
+	@echo "Exec=$(DESTDIR)$(PREFIX)/bin/leocad" >> $(OBJDIR)/leocad.desktop
+	@echo "Terminal=false" >> $(OBJDIR)/leocad.desktop
+	@echo "Type=Application" >> $(OBJDIR)/leocad.desktop
+	@echo "Icon=$(DESTDIR)$(PREFIX)/share/leocad/icon256.png" >> $(OBJDIR)/leocad.desktop
+	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw" >> $(OBJDIR)/leocad.desktop
+	@echo "Categories=Development;GUIDesigner;Education;" >> $(OBJDIR)/leocad.desktop
+
+install: $(BIN) desktop
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -c -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin/
 	install -d $(DESTDIR)$(PREFIX)/share/man/man1
 	install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
 	install -d $(DESTDIR)$(PREFIX)/share/leocad
 	install -c -m 0644 tools/icon/icon256.png $(DESTDIR)$(PREFIX)/share/leocad/
+	install -c -m 0644 $(OBJDIR)/leocad.desktop $(DESTDIR)$(PREFIX)/share/applications/
 
 binary: binary-zip binary-tgz
 

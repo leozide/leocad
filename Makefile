@@ -15,6 +15,7 @@ LIBS :=
 SRC :=
 
 BIN := bin/leocad
+OBJDIR := obj
 
 ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean source-tgz source-zip), )
 -include $(OSDIR)/config.mk
@@ -24,9 +25,7 @@ endif
 include $(patsubst %,%/module.mk,$(MODULES))
 
 ### Determine the object files
-OBJ := \
-  $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
-  $(patsubst %.cpp,%.o,$(filter %.cpp,$(SRC)))
+OBJ := $(patsubst %.cpp,$(OBJDIR)/%.o,$(filter %.cpp,$(SRC)))
 
 ### Link the program
 .PHONY: all static install
@@ -45,18 +44,21 @@ bin/leocad.static: $(OBJ) bin Makefile
 bin:
 	@mkdir bin
 
+obj:
+	@mkdir $(OBJDIR) $(addprefix $(OBJDIR)/,$(MODULES))
+
 ### Include the C/C++ include dependencies
 ifeq ($(findstring $(MAKECMDGOALS), help config-help config clean veryclean source-tgz source-zip), )
 -include $(OBJ:.o=.d)
 endif
 
 ### Calculate C/C++ include dependencies
-%.d: %.cpp $(OSDIR)/config.mk
+$(OBJDIR)/%.d: %.cpp obj $(OSDIR)/config.mk
 	@$(CXX) -MM -MT '$(patsubst %.d,%.o, $@)' $(CXXFLAGS) $(CPPFLAGS) -w $< > $@
 	@[ -s $@ ] || rm -f $@
 
 ### Main compiler rule
-%.o: %.cpp $(OSDIR)/config.mk
+$(OBJDIR)/%.o: %.cpp obj $(OSDIR)/config.mk
 	@echo $<
 	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o '$(patsubst %.cpp,%.o, $@)' $<
 	@[ -s $@ ] || rm -f $@
@@ -65,12 +67,12 @@ endif
 .PHONY: clean distclean veryclean spotless all
 
 clean:
-	find $(MODULES) -name \*.o | xargs rm -f
+	@[ ! -d $(OBJDIR) ] || find $(OBJDIR) -name \*.o | xargs rm -f
 
 veryclean: clean
-	find $(MODULES) -name \*.d | xargs rm -f
-	rm -rf bin
-	rm -rf arch $(OSDIR)/config.mk
+	@rm -rf $(OBJDIR)
+	@rm -rf bin
+	@rm -rf arch $(OSDIR)/config.mk
 
 distclean: veryclean
 

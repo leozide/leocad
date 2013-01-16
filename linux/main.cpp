@@ -1,8 +1,3 @@
-// LeoCAD
-//
-// Linux specific initialization
-//
-
 #include "lc_global.h"
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
@@ -726,7 +721,7 @@ int main (int argc, char* argv[])
 	lcGetActiveProject()->UpdateInterface();
 	main_window->UpdateMRU ();
 
-	GdkPixbuf* Pixbuf = gdk_pixbuf_new_from_file(LC_INSTALL_PREFIX"/share/leocad/icon256.png", NULL);
+	GdkPixbuf* Pixbuf = gdk_pixbuf_new_from_file(LC_INSTALL_PREFIX"/share/leocad/icon.png", NULL);
 
 	if (Pixbuf)
 	{

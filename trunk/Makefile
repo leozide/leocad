@@ -112,9 +112,9 @@ desktop: obj
 	@echo "Exec=$(DESTDIR)$(PREFIX)/bin/leocad" >> $(OBJDIR)/leocad.desktop
 	@echo "Terminal=false" >> $(OBJDIR)/leocad.desktop
 	@echo "Type=Application" >> $(OBJDIR)/leocad.desktop
-	@echo "Icon=$(DESTDIR)$(PREFIX)/share/leocad/icon256.png" >> $(OBJDIR)/leocad.desktop
+	@echo "Icon=$(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg" >> $(OBJDIR)/leocad.desktop
 	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw" >> $(OBJDIR)/leocad.desktop
-	@echo "Categories=Development;GUIDesigner;Education;" >> $(OBJDIR)/leocad.desktop
+	@echo "Categories=Graphics;3DGraphics;Education;" >> $(OBJDIR)/leocad.desktop
 
 install: $(BIN) desktop
 	install -d $(DESTDIR)$(PREFIX)/bin
@@ -122,8 +122,10 @@ install: $(BIN) desktop
 	install -d $(DESTDIR)$(PREFIX)/share/man/man1
 	install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
 	install -d $(DESTDIR)$(PREFIX)/share/leocad
-	install -c -m 0644 tools/icon/icon256.png $(DESTDIR)$(PREFIX)/share/leocad/
+	install -c -m 0644 tools/icon/icon128.png $(DESTDIR)$(PREFIX)/share/leocad/icon.png
 	install -c -m 0644 $(OBJDIR)/leocad.desktop $(DESTDIR)$(PREFIX)/share/applications/
+	install -d $(DESTDIR)$(PREFIX)/share/pixmaps
+	install -c -m 0644 tools/icon/icon.svg $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
 
 binary: binary-zip binary-tgz
 

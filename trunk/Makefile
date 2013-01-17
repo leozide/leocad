@@ -104,16 +104,16 @@ arch:
 
 desktop: obj
 	@echo "[Desktop Entry]" > $(OBJDIR)/leocad.desktop
-	@echo "Encoding=UTF-8" >> $(OBJDIR)/leocad.desktop
+	@echo "Version=1.0" >> $(OBJDIR)/leocad.desktop
 	@echo "Name=LeoCAD" >> $(OBJDIR)/leocad.desktop
 	@echo "Comment=Create virtual LEGO models" >> $(OBJDIR)/leocad.desktop
 	@echo "Comment[nb]=Lag virtuelle LEGO-modeller" >> $(OBJDIR)/leocad.desktop
 	@echo "Comment[pt_BR]=Criar modelos virtuais de LEGO" >> $(OBJDIR)/leocad.desktop
-	@echo "Exec=$(DESTDIR)$(PREFIX)/bin/leocad" >> $(OBJDIR)/leocad.desktop
+	@echo "Exec=$(DESTDIR)$(PREFIX)/bin/leocad %f" >> $(OBJDIR)/leocad.desktop
 	@echo "Terminal=false" >> $(OBJDIR)/leocad.desktop
 	@echo "Type=Application" >> $(OBJDIR)/leocad.desktop
 	@echo "Icon=$(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg" >> $(OBJDIR)/leocad.desktop
-	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw" >> $(OBJDIR)/leocad.desktop
+	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;" >> $(OBJDIR)/leocad.desktop
 	@echo "Categories=Graphics;3DGraphics;Education;" >> $(OBJDIR)/leocad.desktop
 
 install: $(BIN) desktop
@@ -123,9 +123,14 @@ install: $(BIN) desktop
 	install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
 	install -d $(DESTDIR)$(PREFIX)/share/leocad
 	install -c -m 0644 tools/icon/icon128.png $(DESTDIR)$(PREFIX)/share/leocad/icon.png
+	install -d $(DESTDIR)$(PREFIX)/share/applications
 	install -c -m 0644 $(OBJDIR)/leocad.desktop $(DESTDIR)$(PREFIX)/share/applications/
 	install -d $(DESTDIR)$(PREFIX)/share/pixmaps
 	install -c -m 0644 tools/icon/icon.svg $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
+	install -d $(DESTDIR)$(PREFIX)/share/mime/packages
+	install -c -m 0644 linux/leocad-mime.xml $(DESTDIR)$(PREFIX)/share/mime/packages/
+	update-mime-database $(DESTDIR)$(PREFIX)/share/mime/
+	update-desktop-database
 
 binary: binary-zip binary-tgz
 

@@ -127,6 +127,12 @@ install: $(BIN) desktop
 	install -c -m 0644 $(OBJDIR)/leocad.desktop $(DESTDIR)$(PREFIX)/share/applications/
 	install -d $(DESTDIR)$(PREFIX)/share/pixmaps
 	install -c -m 0644 tools/icon/icon.svg $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
+	install -d $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/
+	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
+	ln -s $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
+	@-if test -z "$(DESTDIR)"; then \
+		gtk-update-icon-cache -f -t $(DESTDIR)$(PREFIX)/share/icons/hicolor; \
+	fi
 	install -d $(DESTDIR)$(PREFIX)/share/mime/packages
 	install -c -m 0644 linux/leocad-mime.xml $(DESTDIR)$(PREFIX)/share/mime/packages/
 	update-mime-database $(DESTDIR)$(PREFIX)/share/mime/

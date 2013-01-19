@@ -28,7 +28,7 @@ include $(patsubst %,%/module.mk,$(MODULES))
 OBJ := $(patsubst %.cpp,$(OBJDIR)/%.o,$(filter %.cpp,$(SRC)))
 
 ### Link the program
-.PHONY: all static install
+.PHONY: all static
 
 all: $(BIN)
 
@@ -88,6 +88,7 @@ help:
 	@echo   '       help (this is it)'
 	@echo   '       all'
 	@echo   '       install'
+	@echo   '       uninstall'
 	@echo   '       binary'
 	@echo   '       source'
 	@echo   '       (binary and source can be called as'
@@ -97,7 +98,7 @@ help:
 	@echo
 
 ###  Rules to make various packaging
-.PHONY: binary binary-tgz source-zip source-tgz source install
+.PHONY: binary binary-tgz source-zip source-tgz source install uninstall
 
 arch:
 	mkdir arch
@@ -116,27 +117,47 @@ desktop: obj
 	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;" >> $(OBJDIR)/leocad.desktop
 	@echo "Categories=Graphics;3DGraphics;Education;" >> $(OBJDIR)/leocad.desktop
 
-install: $(BIN) desktop
-	install -d $(DESTDIR)$(PREFIX)/bin
-	install -c -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin/
-	install -d $(DESTDIR)$(PREFIX)/share/man/man1
-	install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
-	install -d $(DESTDIR)$(PREFIX)/share/leocad
-	install -c -m 0644 tools/icon/icon128.png $(DESTDIR)$(PREFIX)/share/leocad/icon.png
-	install -d $(DESTDIR)$(PREFIX)/share/applications
-	install -c -m 0644 $(OBJDIR)/leocad.desktop $(DESTDIR)$(PREFIX)/share/applications/
-	install -d $(DESTDIR)$(PREFIX)/share/pixmaps
-	install -c -m 0644 tools/icon/icon.svg $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
-	install -d $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/
-	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
-	ln -s $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
-	@-if test -z "$(DESTDIR)"; then \
-		gtk-update-icon-cache -f -t $(DESTDIR)$(PREFIX)/share/icons/hicolor; \
+install: $(BIN) install-data install-update
+uninstall: uninstall-data install-update
+
+install-data: desktop
+	@install -d $(DESTDIR)$(PREFIX)/bin
+	@install -c -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin/
+	@install -d $(DESTDIR)$(PREFIX)/share/man/man1
+	@install -c -m 0644 docs/leocad.1 $(DESTDIR)$(PREFIX)/share/man/man1/
+	@install -d $(DESTDIR)$(PREFIX)/share/leocad
+	@install -c -m 0644 tools/icon/icon128.png $(DESTDIR)$(PREFIX)/share/leocad/icon.png
+	@install -d $(DESTDIR)$(PREFIX)/share/applications
+	@install -c -m 0644 $(OBJDIR)/leocad.desktop $(DESTDIR)$(PREFIX)/share/applications/
+	@install -d $(DESTDIR)$(PREFIX)/share/pixmaps
+	@install -c -m 0644 tools/icon/icon.svg $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
+	@install -d $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/
+	@rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
+	@ln -s $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
+	@install -d $(DESTDIR)$(PREFIX)/share/mime/packages
+	@install -c -m 0644 linux/leocad-mime.xml $(DESTDIR)$(PREFIX)/share/mime/packages/
+
+uninstall-data:
+	@rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	@rm -f $(DESTDIR)$(PREFIX)/share/man/man1/leocad.1
+	@rm -f $(DESTDIR)$(PREFIX)/share/leocad/icon.png
+	@rm -f $(DESTDIR)$(PREFIX)/share/applications/leocad.desktop
+	@rm -f $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
+	@rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
+	@rm -f $(DESTDIR)$(PREFIX)/share/mime/packages/leocad-mime.xml
+
+install-update:
+	@if test -z "$(DESTDIR)"; then \
+		if which gtk-update-icon-cache>/dev/null 2>&1; then \
+			gtk-update-icon-cache -q -f -t $(DESTDIR)$(PREFIX)/share/icons/hicolor; \
+		fi; \
+		if which update-mime-database>/dev/null 2>&1; then \
+			update-mime-database $(DESTDIR)$(PREFIX)/share/mime/; \
+		fi; \
+		if which update-desktop-database>/dev/null 2>&1; then \
+			update-desktop-database; \
+		fi; \
 	fi
-	install -d $(DESTDIR)$(PREFIX)/share/mime/packages
-	install -c -m 0644 linux/leocad-mime.xml $(DESTDIR)$(PREFIX)/share/mime/packages/
-	update-mime-database $(DESTDIR)$(PREFIX)/share/mime/
-	update-desktop-database
 
 binary: binary-zip binary-tgz
 

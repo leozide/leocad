@@ -8141,6 +8141,10 @@ void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShif
 
 				SetAction(LC_ACTION_SELECT);
 				m_RestoreAction = false;
+				StopTracking(false);
+
+				SetModifiedFlag(true);
+				CheckPoint("Inserting");
 			}
 
 			m_pCurPiece->Release();

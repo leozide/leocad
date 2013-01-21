@@ -1,6 +1,5 @@
 # LeoCAD configuration file
 #
-include version.mk
 
 ERROR_SETTING=2> /dev/null
 
@@ -39,7 +38,7 @@ config-help:
 CONFTEST="\#include <stdio.h>\nint main() { FILE *f=fopen(\"conftestval\", \"w\");\n\
 	if (!f) return 1; fprintf(f, \"%%d\\\n\", (int)sizeof(%s)); return 0; }\n"
 
-$(OSDIR)/config.mk: config.mk version.mk
+$(OSDIR)/config.mk: config.mk
 	make config
 
 config:

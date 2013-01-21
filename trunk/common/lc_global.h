@@ -7,8 +7,8 @@
 // Version number.
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 79
-#define LC_VERSION_PATCH 1
-#define LC_VERSION_TEXT "0.79.1"
+#define LC_VERSION_PATCH 2
+#define LC_VERSION_TEXT "0.79.2"
 
 // Check for supported platforms.
 #if !defined(LC_WINDOWS) && !defined(LC_LINUX)

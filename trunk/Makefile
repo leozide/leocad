@@ -161,41 +161,41 @@ install-update:
 
 binary: binary-zip binary-tgz
 
-binary-zip: arch/leocad-$(VERSION)-linux.zip
+binary-zip: arch/leocad-linux.zip
 
-binary-tgz: arch/leocad-$(VERSION)-linux.tgz
+binary-tgz: arch/leocad-linux.tgz
 
 source: source-tgz source-zip
 
-source-tgz: arch/leocad-$(VERSION)-src.tgz
+source-tgz: arch/leocad-src.tgz
 
-source-zip: arch/leocad-$(VERSION)-src.zip
+source-zip: arch/leocad-src.zip
 
 ### Create a directory with the files needed for a binary package
 package-dir: arch all
-	mkdir leocad-$(VERSION)
-	cp bin/leocad leocad-$(VERSION)
-	cp CREDITS.txt leocad-$(VERSION)/CREDITS
-	cp README.txt leocad-$(VERSION)/README
-	cp docs/INSTALL.txt leocad-$(VERSION)/INSTALL
-	cp docs/LINUX.txt leocad-$(VERSION)/LINUX
-	cp docs/leocad.1 leocad-$(VERSION)
+	mkdir leocad
+	cp bin/leocad leocad
+	cp CREDITS.txt leocad/CREDITS
+	cp README.txt leocad/README
+	cp docs/INSTALL.txt leocad/INSTALL
+	cp docs/LINUX.txt leocad/LINUX
+	cp docs/leocad.1 leocad
 
-arch/leocad-$(VERSION)-linux.zip: package-dir
+arch/leocad-linux.zip: package-dir
 	rm -f $@
-	zip -r $@ leocad-$(VERSION)
-	rm -rf leocad-$(VERSION)
+	zip -r $@ leocad
+	rm -rf leocad
 
-arch/leocad-$(VERSION)-linux.tgz: package-dir
+arch/leocad-linux.tgz: package-dir
 	rm -f $@
-	tar -cvzf $@ leocad-$(VERSION)
-	rm -rf leocad-$(VERSION)
+	tar -cvzf $@ leocad
+	rm -rf leocad
 
-arch/leocad-$(VERSION)-src.tgz: veryclean arch
+arch/leocad-src.tgz: veryclean arch
 	rm -f $@
 	( cd .. ; tar --exclude=leocad/arch/\* --exclude=.svn -cvzf leocad/$@ leocad )
 
-arch/leocad-$(VERSION)-src.zip: veryclean arch
+arch/leocad-src.zip: veryclean arch
 	rm -f $@
 	( cd .. ; zip -r leocad/$@ leocad -x '*/arch/*' -x '*/.svn/*' -x '*~' -x '*/core' -x '*/.#*')
 

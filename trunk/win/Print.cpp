@@ -402,53 +402,138 @@ UINT PrintCatalogFunction (LPVOID pv)
 	return 0;
 }
 
+int PiecesUsedSortFunc(const lcPiecesUsedEntry& a, const lcPiecesUsedEntry& b, void* Data)
+{
+	if (a.ColorIndex == b.ColorIndex)
+	{
+		if (a.Info < b.Info)
+			return -1;
+		else
+			return 1;
+	}
+	else
+	{
+		if (a.ColorIndex < b.ColorIndex)
+			return -1;
+		else
+			return 1;
+	}
+
+	return 0;
+}
+
+void FormatHeader(CString& Result, UINT& Align, const char* Format, const char* Title, const char* Author, const char* Description, int CurPage, int TotalPages)
+{
+	char Buffer[128];
+	const char* Ptr = Format;
+
+	Result.Empty();
+	Align = DT_CENTER;
+
+	while (*Ptr)
+	{
+		if (*Ptr != '&')
+		{
+			Result.AppendChar(*Ptr);
+			Ptr++;
+			continue;
+		}
+
+		if (Ptr[1] == '&')
+		{
+			Result.AppendChar(*Ptr);
+			Ptr++;
+			Ptr++;
+			continue;
+		}
+
+		switch (Ptr[1])
+		{
+		case 'L':
+			Align = DT_LEFT;
+			Ptr++;
+			break;
+
+		case 'C':
+			Align = DT_CENTER;
+			Ptr++;
+			break;
+
+		case 'R':
+			Align = DT_RIGHT;
+			Ptr++;
+			break;
+
+		case 'F':
+			Result.Append(Title);
+			Ptr++;
+			break;
+
+		case 'A':
+			Result.Append(Author);
+			Ptr++;
+			break;
+
+		case 'N':
+			Result.Append(Description);
+			Ptr++;
+			break;
+
+		case 'D':
+			_strdate(Buffer);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 'T':
+			_strtime(Buffer);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 'P':
+			sprintf(Buffer, "%d", CurPage);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 'O':
+			sprintf(Buffer, "%d", TotalPages);
+			Result.Append(Buffer);
+			Ptr++;
+			break;
+
+		case 0:
+		default:
+			Result.AppendChar(*Ptr);
+			break;
+		}
+
+		Ptr++;
+	}
+}
+
 static void PrintPiecesThread(void* pv)
 {
 	CFrameWndEx* pFrame = (CFrameWndEx*)pv;
 	CView* pView = pFrame->GetActiveView();
-	CPrintDialog* PD = new CPrintDialog(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
-	lcPiecesLibrary *pLib = lcGetPiecesLibrary();
+	CPrintDialog PD(FALSE, PD_ALLPAGES|PD_USEDEVMODECOPIES|PD_NOPAGENUMS|PD_NOSELECTION, pFrame);
+
+	if (theApp.DoPrintDialog(&PD) != IDOK)
+		return; 
+
+	if (PD.m_pd.hDC == NULL)
+		return;
+
 	Project* project = lcGetActiveProject();
+	ObjArray<lcPiecesUsedEntry> PiecesUsed;
 
-	int NumColors = gColorList.GetSize();
-	int NumPieces = pLib->mPieces.GetSize();
-
-	lcuint32* PiecesUsed = new lcuint32[NumPieces * NumColors];
-	memset(PiecesUsed, 0, NumPieces * NumColors * sizeof(lcuint32));
-	lcuint32* ColorsUsed = new lcuint32[NumColors];
-	memset(ColorsUsed, 0, NumColors * sizeof(lcuint32));
-
-	for (Piece* tmp = project->m_pPieces; tmp; tmp = tmp->m_pNext)
-	{
-		int idx = pLib->mPieces.FindIndex(tmp->mPieceInfo);
-		PiecesUsed[(idx * NumColors) + tmp->mColorIndex]++;
-		ColorsUsed[tmp->mColorIndex]++;
-	}
-
-	int rows = 0, cols = 1, i, j;
-	for (i = 0; i < NumPieces; i++)
-		for (j = 0; j < NumColors; j++)
-			if (PiecesUsed[(i*NumColors)+j] > 0)
-			{
-				rows++;
-				break;
-			}
-
-	int ID = 1;
-	for (i = 0; i < NumColors; i++)
-		if (ColorsUsed[i])
-		{
-			ColorsUsed[i] = ID;
-			ID++;
-			cols++;
-		}
-
-	if (theApp.DoPrintDialog(PD) != IDOK) return; 
-	if (PD->m_pd.hDC == NULL) return;
+	project->GetPiecesUsed(PiecesUsed);
+	PiecesUsed.Sort(PiecesUsedSortFunc, NULL);
 
 	// gather file to print to if print-to-file selected
 	CString strOutput;
-	if (PD->m_pd.Flags & PD_PRINTTOFILE)
+	if (PD.m_pd.Flags & PD_PRINTTOFILE)
 	{
 		CString strDef(MAKEINTRESOURCE(AFX_IDS_PRINTDEFAULTEXT));
 		CString strPrintDef(MAKEINTRESOURCE(AFX_IDS_PRINTDEFAULT));
@@ -456,22 +541,25 @@ static void PrintPiecesThread(void* pv)
 		CString strCaption(MAKEINTRESOURCE(AFX_IDS_PRINTCAPTION));
 		CFileDialog dlg(FALSE, strDef, strPrintDef,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, strFilter);
 		dlg.m_ofn.lpstrTitle = strCaption;
-		if (dlg.DoModal() != IDOK) return;
+		if (dlg.DoModal() != IDOK)
+			return;
 		strOutput = dlg.GetPathName();
 	}
 
-	CString strDocName = "LeoCAD - Pieces used in ";
-	strDocName += project->m_strTitle;
+	CString DocName;
+	char* Ext = strrchr(project->m_strTitle, '.');
+	DocName.Format("LeoCAD - %.*s BOM", Ext ? Ext - project->m_strTitle : strlen(project->m_strTitle), project->m_strTitle);
 	DOCINFO docInfo;
 	memset(&docInfo, 0, sizeof(DOCINFO));
 	docInfo.cbSize = sizeof(DOCINFO);
-	docInfo.lpszDocName = strDocName;
+	docInfo.lpszDocName = DocName;
 	CString strPortName;
+
 	int nFormatID;
 	if (strOutput.IsEmpty())
 	{
 		docInfo.lpszOutput = NULL;
-		strPortName = PD->GetPortName();
+		strPortName = PD.GetPortName();
 		nFormatID = AFX_IDS_PRINTONPORT;
 	}
 	else
@@ -481,19 +569,19 @@ static void PrintPiecesThread(void* pv)
 		nFormatID = AFX_IDS_PRINTTOFILE;
 	}
 
-	SetAbortProc(PD->m_pd.hDC, _AfxAbortProc);
+	SetAbortProc(PD.m_pd.hDC, _AfxAbortProc);
 	pFrame->EnableWindow(FALSE);
 	CPrintingDialog dlgPrintStatus(NULL);
 
 	CString strTemp;
-	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, strDocName);
-	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_PRINTERNAME, PD->GetDeviceName());
+	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_DOCNAME, DocName);
+	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_PRINTERNAME, PD.GetDeviceName());
 	AfxFormatString1(strTemp, nFormatID, strPortName);
 	dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_PORTNAME, strTemp);
 	dlgPrintStatus.ShowWindow(SW_SHOW);
 	dlgPrintStatus.UpdateWindow();
 
-	if (StartDoc(PD->m_pd.hDC, &docInfo) == SP_ERROR)
+	if (StartDoc(PD.m_pd.hDC, &docInfo) == SP_ERROR)
 	{
 		pFrame->EnableWindow(TRUE);
 		dlgPrintStatus.DestroyWindow();
@@ -501,41 +589,48 @@ static void PrintPiecesThread(void* pv)
 		return;
 	}
 
-	int resx = GetDeviceCaps(PD->m_pd.hDC, LOGPIXELSX);
-	int resy = GetDeviceCaps(PD->m_pd.hDC, LOGPIXELSY);
+	int ResX = GetDeviceCaps(PD.m_pd.hDC, LOGPIXELSX);
+	int ResY = GetDeviceCaps(PD.m_pd.hDC, LOGPIXELSY);
 
-	CRect rectDraw (0, 0, GetDeviceCaps(PD->m_pd.hDC, HORZRES), GetDeviceCaps(PD->m_pd.hDC, VERTRES));
-	DPtoLP(PD->m_pd.hDC, (LPPOINT)(RECT*)&rectDraw, 2);
-	rectDraw.DeflateRect(resx*theApp.GetProfileInt("Default","Margin Left", 50)/100, resy*theApp.GetProfileInt("Default","Margin Top", 50)/100,
-						 resx*theApp.GetProfileInt("Default","Margin Right", 50)/100, resy*theApp.GetProfileInt("Default","Margin Bottom", 50)/100);
+	CRect RectDraw(0, 0, GetDeviceCaps(PD.m_pd.hDC, HORZRES), GetDeviceCaps(PD.m_pd.hDC, VERTRES));
+	DPtoLP(PD.m_pd.hDC, (LPPOINT)(RECT*)&RectDraw, 2);
+	RectDraw.DeflateRect((int)(ResX*(float)theApp.GetProfileInt("Default","Margin Left", 50)/100.0f),
+	                     (int)(ResY*(float)theApp.GetProfileInt("Default","Margin Top", 50)/100.0f),
+	                     (int)(ResX*(float)theApp.GetProfileInt("Default","Margin Right", 50)/100.0f),
+	                     (int)(ResY*(float)theApp.GetProfileInt("Default","Margin Bottom", 50)/100.0f));
 
-	int rowspp = rectDraw.Height()/(int)(resy*0.75); 
+	CRect HeaderRect = RectDraw;
+ 	HeaderRect.top -= (int)(ResY*theApp.GetProfileInt("Default", "Margin Top", 50) / 200.0f);
+	HeaderRect.bottom += (int)(ResY*theApp.GetProfileInt("Default", "Margin Bottom", 50) / 200.0f);
 
-	PD->m_pd.nMaxPage = rows/(rowspp+1);
-	if (rows%(rowspp+1) > 0) PD->m_pd.nMaxPage++;
+	int RowsPerPage = AfxGetApp()->GetProfileInt("Default", "Catalog Rows", 10);
+	int ColsPerPage = AfxGetApp()->GetProfileInt("Default", "Catalog Columns", 3);
+	int PicHeight = RectDraw.Height() / RowsPerPage;
+	int PicWidth = RectDraw.Width() / ColsPerPage;
+	int TotalRows = (PiecesUsed.GetSize() + ColsPerPage - 1) / ColsPerPage;
+	int TotalPages = (TotalRows + RowsPerPage - 1) / RowsPerPage;
+	int RowHeight = RectDraw.Height() / RowsPerPage;
+	int ColWidth = RectDraw.Width() / ColsPerPage;
 
-	UINT nEndPage = PD->m_pd.nToPage;
-	UINT nStartPage = PD->m_pd.nFromPage;
-	if (PD->PrintAll())
+	PD.m_pd.nMinPage = 1;
+	PD.m_pd.nMaxPage = TotalPages + 1;
+
+	UINT EndPage = PD.m_pd.nToPage;
+	UINT StartPage = PD.m_pd.nFromPage;
+	if (PD.PrintAll())
 	{
-		nEndPage = PD->m_pd.nMaxPage;
-		nStartPage = PD->m_pd.nMinPage;
+		EndPage = PD.m_pd.nMaxPage;
+		StartPage = PD.m_pd.nMinPage;
 	}
-	if (nEndPage < PD->m_pd.nMinPage) nEndPage = PD->m_pd.nMinPage;
-	if (nEndPage > PD->m_pd.nMaxPage) nEndPage = PD->m_pd.nMaxPage;
-	if (nStartPage < PD->m_pd.nMinPage) nStartPage = PD->m_pd.nMinPage;
-	if (nStartPage > PD->m_pd.nMaxPage) nStartPage = PD->m_pd.nMaxPage;
-	int nStep = (nEndPage >= nStartPage) ? 1 : -1;
-	nEndPage = nEndPage + nStep;
+
+	lcClamp(EndPage, PD.m_pd.nMinPage, PD.m_pd.nMaxPage);
+	lcClamp(StartPage, PD.m_pd.nMinPage, PD.m_pd.nMaxPage);
+	int StepPage = (EndPage >= StartPage) ? 1 : -1;
 
 	VERIFY(strTemp.LoadString(AFX_IDS_PRINTPAGENUM));
 
 	// begin page printing loop
 	BOOL bError = FALSE;
-
-	int picw = resx;
-	int w = (rectDraw.Width()-picw)/cols;
-	int h = rectDraw.Height()/(rowspp+1);
 
 	// Creating Compatible Memory Device Context
 	CDC *pMemDC = new CDC;
@@ -545,12 +640,12 @@ static void PrintPiecesThread(void* pv)
 	BITMAPINFO bi;
 	ZeroMemory(&bi, sizeof(BITMAPINFO));
 	bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bi.bmiHeader.biWidth = picw;
-	bi.bmiHeader.biHeight = h;
+	bi.bmiHeader.biWidth = PicWidth;
+	bi.bmiHeader.biHeight = PicHeight;
 	bi.bmiHeader.biPlanes = 1;
 	bi.bmiHeader.biBitCount = 24;
 	bi.bmiHeader.biCompression = BI_RGB;
-	bi.bmiHeader.biSizeImage = picw * h * 3;
+	bi.bmiHeader.biSizeImage = PicWidth * PicHeight * 3;
 	bi.bmiHeader.biXPelsPerMeter = 2925;
 	bi.bmiHeader.biYPelsPerMeter = 2925;
 	bi.bmiHeader.biClrUsed = 0;
@@ -560,194 +655,149 @@ static void PrintPiecesThread(void* pv)
 
 	HBITMAP hBm, hBmOld;
     hBm = CreateDIBSection(pView->GetDC()->GetSafeHdc(), &bi, DIB_RGB_COLORS, (void **)&lpbi, NULL, (DWORD)0);
-	if (!hBm) return;
+	if (!hBm)
+		return;
 	hBmOld = (HBITMAP)::SelectObject(pMemDC->GetSafeHdc(), hBm);
-	if (!hBmOld) return;
 
-	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),1,PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
+	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_SUPPORT_GDI,
 			PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 	int pixelformat = ChoosePixelFormat(pMemDC->m_hDC, &pfd);
 	DescribePixelFormat(pMemDC->m_hDC, pixelformat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 	SetPixelFormat(pMemDC->m_hDC, pixelformat, &pfd);
 	HGLRC hmemrc = wglCreateContext(pMemDC->GetSafeHdc());
-	GL_DisableVertexBufferObject();
 	wglMakeCurrent(pMemDC->GetSafeHdc(), hmemrc);
-	double aspect = (float)picw/(float)h;
-	glMatrixMode(GL_MODELVIEW);
-	glViewport(0, 0, picw, h);
 
-	// Sort pieces by description
-	struct BRICKSORT {
-		char name[64];
-		int actual;
-		struct BRICKSORT *next;
-	} start, *node, *previous, *news;
-	start.next = NULL;
-	
-	for (j = 0; j < NumPieces; j++)
-	{
-		char* desc = pLib->mPieces[j]->m_strDescription;
+	GL_DisableVertexBufferObject();
+	float Aspect = (float)PicWidth/(float)PicHeight;
 
-		if (desc[0] == '~')
-			continue;
-
-		BOOL bAdd = FALSE;
-		for (i = 0; i < NumColors; i++)
-			if (PiecesUsed[(j*NumColors)+i])
-				bAdd = TRUE;
-		if (!bAdd) continue;
-
-		// Find the correct location
-		previous = &start;
-		node = start.next;
-		while ((node) && (strcmp(desc, node->name) > 0))
-		{
-			node = node->next;
-			previous = previous->next;
-		}
-		
-		news = (struct BRICKSORT*) malloc(sizeof(struct BRICKSORT));
-		news->next = node;
-		previous->next = news;
-		strcpy(news->name, desc);
-		news->actual = j;
-	}
-	node = start.next;
-
-	if (PD->PrintRange())
-	{
-		for (j = 0; j < (int)(nStartPage - 1)*rows*cols; j++)
-			if (node)
-				node = node->next;
-	}
+	glViewport(0, 0, PicWidth, PicHeight);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(0.5f, 0.1f);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(1, 1, 1, 1); 
 
 	LOGFONT lf;
 	memset(&lf, 0, sizeof(LOGFONT));
-	lf.lfHeight = -MulDiv(10, resy, 72);
-	lf.lfWeight = FW_BOLD;
+	lf.lfHeight = -MulDiv(12, ResY, 72);
+	lf.lfWeight = FW_REGULAR;
 	lf.lfCharSet = DEFAULT_CHARSET;
 	lf.lfQuality = PROOF_QUALITY;
 	strcpy (lf.lfFaceName , "Arial");
 
 	HFONT HeaderFont = CreateFontIndirect(&lf);
-	HFONT OldFont = (HFONT)SelectObject(PD->m_pd.hDC, HeaderFont);
-	SetBkMode(PD->m_pd.hDC, TRANSPARENT);
-	SetTextColor(PD->m_pd.hDC, 0x000000);
-	SetTextAlign (PD->m_pd.hDC, TA_CENTER|TA_NOUPDATECP);
+	HFONT OldFont = (HFONT)SelectObject(PD.m_pd.hDC, HeaderFont);
+	SetBkMode(PD.m_pd.hDC, TRANSPARENT);
+	SetTextColor(PD.m_pd.hDC, 0x000000);
+	SetTextAlign(PD.m_pd.hDC, TA_CENTER|TA_NOUPDATECP);
 
-	SetTextColor (pMemDC->m_hDC, 0x000000);
-	lf.lfHeight = -MulDiv(10, GetDeviceCaps(pMemDC->m_hDC, LOGPIXELSY), 72);
-	lf.lfWeight = FW_BOLD;
+	DWORD PrintOptions = AfxGetApp()->GetProfileInt("Settings", "Print", PRINT_NUMBERS | PRINT_BORDER/*|PRINT_NAMES*/);
+	bool DrawNames = 1;//(PrintOptions & PRINT_NAMES) != 0;
+	bool Horizontal = 1;//(PrintOptions & PRINT_HORIZONTAL) != 0;
+
+	pMemDC->SetTextColor(0x000000);
+	pMemDC->SetBkMode(TRANSPARENT);
+//	lf.lfHeight = -MulDiv(40, GetDeviceCaps(pMemDC->m_hDC, LOGPIXELSY), 72);
+//	lf.lfWeight = FW_BOLD;
 	HFONT CatalogFont = CreateFontIndirect(&lf);
+	lf.lfHeight = -MulDiv(80, GetDeviceCaps(pMemDC->m_hDC, LOGPIXELSY), 72);
+	HFONT CountFont = CreateFontIndirect(&lf);
 	HFONT OldMemFont = (HFONT)SelectObject(pMemDC->m_hDC, CatalogFont);
-	HPEN hpOld = (HPEN)SelectObject(pMemDC->m_hDC,(HPEN)GetStockObject(BLACK_PEN));
+	HPEN hpOld = (HPEN)SelectObject(pMemDC->m_hDC, GetStockObject(BLACK_PEN));
 
-	for (UINT nCurPage = nStartPage; nCurPage != nEndPage; nCurPage += nStep)
+	for (UINT CurPage = StartPage; CurPage != EndPage; CurPage += StepPage)
 	{
 		TCHAR szBuf[80];
-		wsprintf(szBuf, strTemp, nCurPage);
+		wsprintf(szBuf, strTemp, CurPage);
 		dlgPrintStatus.SetDlgItemText(AFX_IDC_PRINT_PAGENUM, szBuf);
-		if (StartPage(PD->m_pd.hDC) < 0)
+		if (::StartPage(PD.m_pd.hDC) < 0)
 		{
 			bError = TRUE;
 			break;
 		}
 
-		int printed = 0;
-		CString str;
-		CRect rc(rectDraw.left+picw, rectDraw.top, rectDraw.left+picw+w, rectDraw.top+h);
-		for (i = 0; i < NumColors; i++)
-			if (ColorsUsed[i])
-			{
-				DrawText(PD->m_pd.hDC, gColorList[i].Name, strlen(gColorList[i].Name), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-				rc.OffsetRect (w, 0);
-			}
-		str = "Total";
-		DrawText(PD->m_pd.hDC, (LPCTSTR)str, str.GetLength(), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+		// Draw header and footer.
+		SelectObject(PD.m_pd.hDC, HeaderFont);
 
-		for (int r = 1; r < rowspp+1; r++)
+		CString Header;
+		UINT Align;
+
+		FormatHeader(Header, Align, AfxGetApp()->GetProfileString("Default", "Catalog Header", ""), project->m_strTitle, project->m_strAuthor, project->m_strDescription, CurPage, TotalPages);
+		Align |= DT_TOP|DT_SINGLELINE;
+
+		DrawText(PD.m_pd.hDC, (LPCTSTR)Header, Header.GetLength(), HeaderRect, Align);
+
+		FormatHeader(Header, Align, AfxGetApp()->GetProfileString("Default", "Catalog Footer", "Page &P"), project->m_strTitle, project->m_strAuthor, project->m_strDescription, CurPage, TotalPages);
+		Align |= DT_BOTTOM|DT_SINGLELINE;
+
+		DrawText(PD.m_pd.hDC, (LPCTSTR)Header, Header.GetLength(), HeaderRect, Align);
+
+		int StartPiece = (CurPage - 1) * RowsPerPage * ColsPerPage;
+		int EndPiece = lcMin(StartPiece + RowsPerPage * ColsPerPage, PiecesUsed.GetSize());
+
+		for (int CurPiece = StartPiece; CurPiece < EndPiece; CurPiece++)
 		{
-			if (node == NULL) continue;
-			printed++;
-			glDepthFunc(GL_LEQUAL);
-			glClearColor(1,1,1,1); 
-			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-			glEnable(GL_COLOR_MATERIAL);
-			glDisable(GL_DITHER);
-			glShadeModel(GL_FLAT);
-
-			lcSetColor(project->m_nCurColor);
-
-			PieceInfo* pInfo = pLib->mPieces[node->actual];
-			node = node->next;
-			pInfo->ZoomExtents(30.0f, (float)aspect);
-
-			float pos[4] = { 0, 0, 10, 0 };
-			glLightfv(GL_LIGHT0, GL_POSITION, pos);
-
-			glEnable(GL_LIGHTING);
-			glEnable(GL_LIGHT0);
-			glEnable(GL_DEPTH_TEST);
-
-			FillRect(pMemDC->m_hDC, CRect(0,h,picw,0), (HBRUSH)GetStockObject(WHITE_BRUSH));
+			FillRect(pMemDC->m_hDC, CRect(0, PicHeight, PicWidth, 0), (HBRUSH)GetStockObject(WHITE_BRUSH));
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pInfo->RenderPiece(project->m_nCurColor);
-			glFlush();
+			PieceInfo* pInfo = PiecesUsed[CurPiece].Info;
+			pInfo->ZoomExtents(30.0f, Aspect);
 
-			TextOut (pMemDC->m_hDC, 5, 5, pInfo->m_strDescription, strlen(pInfo->m_strDescription));
+			pInfo->RenderPiece(PiecesUsed[CurPiece].ColorIndex);
+			glFinish();
 
-			int rowtotal = 0;
-			char tmp[5];
+			// Draw description text at the bottom.
+			CRect TextRect(0, 0, PicWidth, PicHeight);
 	
-			int idx = (pLib->mPieces.FindIndex(pInfo));
-			for (i = 0; i < NumColors; i++)
-				if (PiecesUsed[(idx*NumColors)+i])
-				{
-					CRect rc(rectDraw.left+picw+w*(ColorsUsed[i]-1), rectDraw.top+h*r, rectDraw.left+picw+w*ColorsUsed[i], rectDraw.top+h*(r+1));
-					sprintf (tmp, "%d", PiecesUsed[(idx*NumColors)+i]);
-					DrawText(PD->m_pd.hDC, tmp, strlen(tmp), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-					rowtotal += PiecesUsed[(idx*NumColors)+i];
-				}
-			sprintf (tmp, "%d", rowtotal);
-			CRect rc(rectDraw.right-w, rectDraw.top+h*r, rectDraw.right, rectDraw.top+h*(r+1));
-			DrawText(PD->m_pd.hDC, tmp, strlen(tmp), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+			if (DrawNames)
+			{
+				SelectObject(pMemDC->m_hDC, CatalogFont);
+				pMemDC->DrawText(pInfo->m_strDescription, strlen(pInfo->m_strDescription), TextRect, DT_CALCRECT | DT_WORDBREAK);
+
+				TextRect.OffsetRect(0, PicHeight - TextRect.Height() - 5);
+				pMemDC->DrawText(pInfo->m_strDescription, strlen(pInfo->m_strDescription), TextRect, DT_WORDBREAK);
+			}
+
+			// Draw count.
+			SelectObject(pMemDC->m_hDC, CountFont);
+			TextRect = CRect(0, 0, PicWidth, TextRect.top);
+			TextRect.DeflateRect(5, 5);
+
+			char CountStr[16];
+			sprintf(CountStr, "%dx", PiecesUsed[CurPiece].Count);
+			pMemDC->DrawText(CountStr, strlen(CountStr), TextRect, DT_BOTTOM | DT_LEFT | DT_SINGLELINE);
 
 			LPBITMAPINFOHEADER lpbi[1];
 			lpbi[0] = (LPBITMAPINFOHEADER)GlobalLock(MakeDib(hBm, 24));
 			BITMAPINFO bi;
 			ZeroMemory(&bi, sizeof(BITMAPINFO));
 			memcpy (&bi.bmiHeader, lpbi[0], sizeof(BITMAPINFOHEADER));
-			SetStretchBltMode(PD->m_pd.hDC, COLORONCOLOR);
-			StretchDIBits(PD->m_pd.hDC, rectDraw.left, rectDraw.top+(h*r), picw, h, 0, 0, picw, h, 
-				(LPBYTE) lpbi[0] + lpbi[0]->biSize + lpbi[0]->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
-			if (lpbi[0]) GlobalFreePtr(lpbi[0]);
-		}
-/*
-		if (pFrame->m_dwPrint & PRINT_BORDER)
-		for (int r = 0; r < rows; r++)
-		for (int c = 0; c < cols; c++)
-		{
-			if (printed == 0) continue;
-			printed--;
-			if (r == 0)
+			SetStretchBltMode(PD.m_pd.hDC, COLORONCOLOR);
+
+			int CurRow, CurCol;
+
+			if (Horizontal)
 			{
-				MoveToEx(PD->m_pd.hDC, rectDraw.left+(w*c), rectDraw.top+(h*r), NULL);
-				LineTo(PD->m_pd.hDC, rectDraw.left+(w*(c+1)), rectDraw.top+(h*r));
+				CurRow = (CurPiece - StartPiece) / ColsPerPage;
+				CurCol = (CurPiece - StartPiece) % ColsPerPage;
 			}
-			if (c == 0)
+			else
 			{
-				MoveToEx(PD->m_pd.hDC, rectDraw.left+(w*c), rectDraw.top+(h*r), NULL);
-				LineTo(PD->m_pd.hDC, rectDraw.left+(w*c), rectDraw.top+(h*(r+1)));
+				CurRow = (CurPiece - StartPiece) % RowsPerPage;
+				CurCol = (CurPiece - StartPiece) / RowsPerPage;
 			}
 			
-			MoveToEx(PD->m_pd.hDC, rectDraw.left+(w*(c+1)), rectDraw.top+(h*r), NULL);
-			LineTo(PD->m_pd.hDC, rectDraw.left+(w*(c+1)), rectDraw.top+(h*(r+1)));
-			MoveToEx(PD->m_pd.hDC, rectDraw.left+(w*c), rectDraw.top+(h*(r+1)), NULL);
-			LineTo(PD->m_pd.hDC, rectDraw.left+(w*(c+1)), rectDraw.top+(h*(r+1)));
+			int Left = RectDraw.left + ColWidth * CurCol + (ColWidth - PicWidth) / 2;
+			int Top = RectDraw.top + RowHeight * CurRow + (RowHeight - PicHeight) / 2;
+
+			StretchDIBits(PD.m_pd.hDC, Left, Top, PicWidth, PicHeight, 0, 0, PicWidth, PicHeight, 
+			              (LPBYTE)lpbi[0] + lpbi[0]->biSize + lpbi[0]->biClrUsed * sizeof(RGBQUAD), &bi, DIB_RGB_COLORS, SRCCOPY);
+			if (lpbi[0])
+				GlobalFreePtr(lpbi[0]);
 		}
-*/
-		if (EndPage(PD->m_pd.hDC) < 0 || !_AfxAbortProc(PD->m_pd.hDC, 0))
+
+		if (::EndPage(PD.m_pd.hDC) < 0 || !_AfxAbortProc(PD.m_pd.hDC, 0))
 		{
 			bError = TRUE;
 			break;
@@ -755,18 +805,11 @@ static void PrintPiecesThread(void* pv)
 	}
 
 	SelectObject(pMemDC->m_hDC, hpOld);
-	SelectObject(PD->m_pd.hDC, OldFont);
+	SelectObject(PD.m_pd.hDC, OldFont);
 	DeleteObject(HeaderFont);
 	SelectObject(pMemDC->m_hDC, OldMemFont);
 	DeleteObject(CatalogFont);
-
-	node = start.next;
-	while (node)
-	{
-		previous = node;
-		node = node->next;
-		free(previous);
-	}
+	DeleteObject(CountFont);
 
 	GL_EnableVertexBufferObject();
 	wglMakeCurrent(NULL, NULL);
@@ -776,22 +819,18 @@ static void PrintPiecesThread(void* pv)
 	delete pMemDC;
 
 	if (!bError)
-		EndDoc(PD->m_pd.hDC);
+		EndDoc(PD.m_pd.hDC);
 	else
-		AbortDoc(PD->m_pd.hDC);
+		AbortDoc(PD.m_pd.hDC);
 
 	pFrame->EnableWindow();
 	dlgPrintStatus.DestroyWindow();
 
-    if (PD != NULL && PD->m_pd.hDC != NULL)
+	if (PD.m_pd.hDC != NULL)
     {
-        ::DeleteDC(PD->m_pd.hDC);
-        PD->m_pd.hDC = NULL;
+		::DeleteDC(PD.m_pd.hDC);
+		PD.m_pd.hDC = NULL;
     }
-
-	delete[] PiecesUsed;
-	delete[] ColorsUsed;
-    delete PD;
 }
 
 UINT PrintPiecesFunction (LPVOID pv)

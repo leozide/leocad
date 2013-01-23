@@ -291,6 +291,36 @@ void ObjArray<T>::InsertAt(int Index, const T& Obj)
 	m_Data[Index] = Obj;
 }
 
+template <class T>
+void ObjArray<T>::Sort(LC_OBJARRAY_COMPARE_FUNC SortFunc, void* SortData)
+{
+	int Count = GetSize();
+
+	if (Count <= 1)
+		return;
+
+	int i = 1;
+	bool Flipped;
+
+	do
+	{
+		Flipped = false;
+
+		for (int j = Count - 1; j >= i; --j)
+		{
+			T& a = m_Data[j];
+			T& b = m_Data[j-1];
+
+			if (SortFunc(b, a, SortData) > 0)
+			{
+				T Tmp = b;
+				m_Data[j - 1] = a;
+				m_Data[j] = Tmp;
+				Flipped = true;
+			}
+		}
+	} while ((++i < Count) && Flipped);
+}
 
 
 

@@ -3319,6 +3319,35 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	UpdateAllViews();
 }
 
+void Project::GetPiecesUsed(ObjArray<lcPiecesUsedEntry>& PiecesUsed) const
+{
+	for (Piece* Piece = m_pPieces; Piece; Piece = Piece->m_pNext)
+	{
+		if (Piece->mPieceInfo->m_strDescription[0] == '~')
+			continue;
+
+		int PieceIdx;
+
+		for (PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
+		{
+			if (PiecesUsed[PieceIdx].Info != Piece->mPieceInfo || PiecesUsed[PieceIdx].ColorIndex != Piece->mColorIndex)
+				continue;
+
+			PiecesUsed[PieceIdx].Count++;
+			break;
+		}
+
+		if (PieceIdx == PiecesUsed.GetSize())
+		{
+			lcPiecesUsedEntry& Entry = PiecesUsed.Add();
+
+			Entry.Info = Piece->mPieceInfo;
+			Entry.ColorIndex = Piece->mColorIndex;
+			Entry.Count = 1;
+		}
+	}
+}
+
 // Create a series of pictures
 void Project::CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {

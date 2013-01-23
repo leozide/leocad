@@ -70,6 +70,13 @@ struct LC_FILEENTRY
 	char FileName[LC_MAXPATH];
 };
 
+struct lcPiecesUsedEntry
+{
+	PieceInfo* Info;
+	int ColorIndex;
+	int Count;
+};
+
 class Project
 {
 public:
@@ -127,6 +134,7 @@ public:
 	void BeginPieceDrop(PieceInfo* Info);
 	void BeginColorDrop();
 
+	void GetPiecesUsed(ObjArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();

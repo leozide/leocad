@@ -245,7 +245,7 @@ BEGIN
         MENUITEM "Terrain &Editor...",          ID_FILE_TERRAINEDITOR
         MENUITEM SEPARATOR
         MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
-        MENUITEM "Print Piece Lis&t...",        ID_FILE_PRINTPIECELIST
+        MENUITEM "Print &Bill of Materials...", ID_FILE_PRINTPIECELIST
         MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
         MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR

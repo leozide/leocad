@@ -659,8 +659,7 @@ static void PrintPiecesThread(void* pv)
 		for (i = 0; i < NumColors; i++)
 			if (ColorsUsed[i])
 			{
-				str.LoadString(IDS_COLOR01 + i);
-				DrawText(PD->m_pd.hDC, (LPCTSTR)str, str.GetLength(), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+				DrawText(PD->m_pd.hDC, gColorList[i].Name, strlen(gColorList[i].Name), rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 				rc.OffsetRect (w, 0);
 			}
 		str = "Total";

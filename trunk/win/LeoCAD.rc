@@ -1589,42 +1589,6 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_COLOR01             "Red"
-    IDS_COLOR02             "Orange"
-    IDS_COLOR03             "Green"
-    IDS_COLOR04             "Light Green"
-    IDS_COLOR05             "Blue"
-    IDS_COLOR06             "Light Blue"
-    IDS_COLOR07             "Yellow"
-    IDS_COLOR08             "White"
-    IDS_COLOR09             "Dark Gray"
-    IDS_COLOR10             "Black"
-    IDS_COLOR11             "Brown"
-    IDS_COLOR12             "Pink"
-    IDS_COLOR13             "Purple"
-    IDS_COLOR14             "Gold"
-    IDS_COLOR15             "Clear Red"
-    IDS_COLOR16             "Clear Orange"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_COLOR17             "Clear Green"
-    IDS_COLOR18             "Clear Light Green"
-    IDS_COLOR19             "Clear Blue"
-    IDS_COLOR20             "Clear Light Blue"
-    IDS_COLOR21             "Clear Yellow"
-    IDS_COLOR22             "Clear White"
-    IDS_COLOR23             "Light Gray"
-    IDS_COLOR24             "Tan"
-    IDS_COLOR25             "Light Brown"
-    IDS_COLOR26             "Light Pink"
-    IDS_COLOR27             "Turquoise"
-    IDS_COLOR28             "Silver"
-END
-
-STRINGTABLE
-BEGIN
     ID_RENDER_BOX           "Render pieces as boxes\nFast Rendering"
     ID_PIECE_INSERT         "Add a piece"
     ID_PIECE_DELETE         "Delete currently selected objects"

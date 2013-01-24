@@ -22,6 +22,7 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_FILE_PICTURE, "Save Picture", 0, 0, 0 },
 	{ LC_FILE_3DS, "Export 3D Studio", 0, 0, 0 },
 	{ LC_FILE_HTML, "Export HTML", 0, 0, 0 },
+	{ LC_FILE_BRICKLINK, "Export BrickLink", 0, 0, 0 },
 	{ LC_FILE_POVRAY, "Export POV-Ray", 0, 0, 0 },
 	{ LC_FILE_WAVEFRONT, "Export Wavefront", 0, 0, 0 },
 	{ LC_FILE_PROPERTIES, "Project Properties", 0, 0, 0 },

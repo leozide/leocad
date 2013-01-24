@@ -40,6 +40,7 @@ extern int gDefaultColor;
 void lcLoadDefaultColors();
 bool lcLoadColorFile(lcFile& File);
 int lcGetColorIndex(lcuint32 ColorCode);
+int lcGetBrickLinkColor(int ColorIndex);
 
 inline lcuint32 lcGetColorCodeFromExtendedColor(int Color)
 {

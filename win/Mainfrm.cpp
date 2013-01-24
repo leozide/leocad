@@ -797,6 +797,10 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 			project->HandleCommand(LC_FILE_HTML, 0);
 		} break;
 
+		case ID_FILE_EXPORT_BRICKLINK: {
+			project->HandleCommand(LC_FILE_BRICKLINK, 0);
+		} break;
+
 		case ID_FILE_EXPORT_POVRAY: {
 			project->HandleCommand(LC_FILE_POVRAY, 0);
 		} break;
@@ -1277,6 +1281,7 @@ void CMainFrame::UpdateMenuAccelerators()
 		ID_FILE_SAVEPICTURE,       // LC_FILE_PICTURE
 		ID_FILE_EXPORT_3DSTUDIO,   // LC_FILE_3DS
 		ID_FILE_EXPORT_HTML,       // LC_FILE_HTML
+		ID_FILE_EXPORT_BRICKLINK,  // LC_FILE_BRICKLINK
 		ID_FILE_EXPORT_POVRAY,     // LC_FILE_POVRAY
 		ID_FILE_EXPORT_WAVEFRONT,  // LC_FILE_WAVEFRONT
 		ID_FILE_PROPERTIES,        // LC_FILE_PROPERTIES

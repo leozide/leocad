@@ -4071,6 +4071,60 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
+		case LC_FILE_BRICKLINK:
+		{
+			if (!m_pPieces)
+				return;
+
+			char FileName[LC_MAXPATH];
+			if (!SystemDoDialog(LC_DLG_BRICKLINK, FileName))
+				break;
+
+			lcDiskFile BrickLinkFile;
+			char Line[1024];
+
+			if (!BrickLinkFile.Open(FileName, "wt"))
+			{
+				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				break;
+			}
+
+			ObjArray<lcPiecesUsedEntry> PiecesUsed;
+			GetPiecesUsed(PiecesUsed);
+
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
+			BrickLinkFile.WriteLine("<INVENTORY>\n");
+
+			for (int PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
+			{
+				BrickLinkFile.WriteLine("  <ITEM>\n");
+				BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
+
+				sprintf(Line, "    <ITEMID>%s</ITEMID>\n", PiecesUsed[PieceIdx].Info->m_strName);
+				BrickLinkFile.WriteLine(Line);
+
+				int Count = PiecesUsed[PieceIdx].Count;
+				if (Count > 1)
+				{
+					sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
+					BrickLinkFile.WriteLine(Line);
+				}
+
+				int Color = lcGetBrickLinkColor(PiecesUsed[PieceIdx].ColorIndex);
+				if (Color)
+				{
+					sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
+					BrickLinkFile.WriteLine(Line);
+				}
+
+				BrickLinkFile.WriteLine("  </ITEM>\n");
+			}
+
+			BrickLinkFile.WriteLine("</INVENTORY>\n");
+
+			setlocale(LC_NUMERIC, OldLocale);
+		} break;
+
 		// Export to POV-Ray, swap X & Y from our cs to work with LGEO.
 		case LC_FILE_POVRAY:
 		{

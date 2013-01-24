@@ -195,6 +195,153 @@ static void GetToken(char*& Ptr, char* Token)
 	*Token = 0;
 }
 
+int lcGetBrickLinkColor(int ColorIndex)
+{
+	struct lcBrickLinkEntry
+	{
+		int Code;
+		const char* Name;
+	};
+
+	lcBrickLinkEntry BrickLinkColors[] =
+	{
+		{  41, "Aqua" },
+		{  11, "Black" },
+		{   7, "Blue" },
+		{  97, "Blue Violet" },                     // Blue-Violet
+		{  36, "Bright Green" },
+		{ 105, "Bright Light Blue" },
+		{ 110, "Bright Light Orange" },
+		{ 103, "Bright Light Yellow" },
+		{ 104, "Bright Pink" },
+		{   8, "Brown" },
+		{ 153, "Dark Azure" },
+		{  63, "Dark Blue" },
+		{ 109, "Dark Blue Violet" },                // Dark Blue-Violet
+		{  85, "Dark Bluish Gray" },
+		{ 120, "Dark Brown" },
+		{  91, "Dark Flesh" },
+		{  10, "Dark Gray" },
+		{  80, "Dark Green" },
+		{  68, "Dark Orange" },
+		{  47, "Dark Pink" },
+		{  89, "Dark Purple" },
+		{  59, "Dark Red" },
+		{  69, "Dark Tan" },
+		{  39, "Dark Turquoise" },
+		{  29, "Earth Orange" },
+		{ 106, "Fabuland Brown" },
+		{ 160, "Fabuland Orange" },                 // No match
+		{  28, "Flesh" },
+		{   6, "Green" },
+		{ 154, "Lavender" },
+		{ 152, "Light Aqua" },
+		{  62, "Light Blue" },
+		{  86, "Light Bluish Gray" },
+		{  90, "Light Flesh" },
+		{   9, "Light Gray" },
+		{  38, "Light Green" },
+		{  35, "Light Lime" },
+		{  32, "Light Orange" },
+		{  56, "Light Pink" },
+		{  93, "Light Purple" },
+		{  26, "Light Salmon" },
+		{  40, "Light Turquoise" },
+		{  44, "Light Violet" },
+		{  33, "Light Yellow" },
+		{  34, "Lime" },
+		{  72, "Maersk Blue" },
+		{  71, "Magenta" },
+		{ 156, "Medium Azure" },
+		{  42, "Medium Blue" },
+		{ 150, "Medium Dark Flesh" },
+		{  94, "Medium Dark Pink" },
+		{  37, "Medium Green" },
+		{ 157, "Medium Lavender" },
+		{  76, "Medium Lime" },
+		{  31, "Medium Orange" },
+		{  73, "Medium Violet" },
+		{ 155, "Olive Green" },
+		{   4, "Orange" },
+		{  23, "Pink" },
+		{  24, "Purple" },
+		{   5, "Red" },
+		{  88, "Reddish Brown" },
+		{  27, "Rust" },
+		{  25, "Salmon" },
+		{  55, "Sand Blue" },
+		{  48, "Sand Green" },
+		{  54, "Sand Purple" },
+		{  58, "Sand Red" },
+		{  87, "Sky Blue" },
+		{   2, "Tan" },
+		{  99, "Very Light Bluish Gray" },
+		{  49, "Very Light Gray" },
+		{  96, "Very Light Orange" },
+		{  43, "Violet" },
+		{   1, "White" },
+		{   3, "Yellow" },
+		{ 158, "Yellowish Green" },
+		{  13, "Trans Black" },                     // Trans-Black
+		{ 108, "Trans Bright Green" },              // Trans-Bright Green
+		{  12, "Trans Clear" },                     // Trans-Clear
+		{  14, "Trans Dark Blue" },                 // Trans-Dark Blue
+		{  50, "Trans Dark Pink" },                 // Trans-Dark Pink
+		{  20, "Trans Green" },                     // Trans-Green
+		{  15, "Trans Light Blue" },                // Trans-Light Blue
+		{ 114, "Trans Light Purple" },              // Trans-Light Purple
+		{  74, "Trans Medium Blue" },               // Trans-Medium Blue
+		{  16, "Trans Neon Green" },                // Trans-Neon Green
+		{  18, "Trans Neon Orange" },               // Trans-Neon Orange
+		{ 121, "Trans Neon Yellow" },               // Trans-Neon Yellow
+		{  98, "Trans Orange" },                    // Trans-Orange
+		{ 107, "Trans Pink" },                      // Trans-Pink
+		{  51, "Trans Purple" },                    // Trans-Purple
+		{  17, "Trans Red" },                       // Trans-Red
+		{ 113, "Trans Very Light Blue" },           // Trans-Very Lt Blue
+		{  19, "Trans Yellow" },                    // Trans-Yellow
+		{  57, "Chrome Antique Brass" },
+		{ 122, "Chrome Black" },
+		{  52, "Chrome Blue" },
+		{  21, "Chrome Gold" },
+		{  64, "Chrome Green" },
+		{  82, "Chrome Pink" },
+		{  22, "Chrome Silver" },
+		{  84, "Copper" },
+		{  81, "Flat Dark Gold" },
+		{  95, "Flat Silver" },
+		{  78, "Metal Blue" },
+		{  77, "Pearl Dark Gray" },
+		{ 115, "Pearl Gold" },
+		{  61, "Pearl Light Gold" },
+		{  66, "Pearl Light Gray" },
+		{ 119, "Pearl Very Light Grey" },           // Pearl Very Light Gray
+		{  83, "Pearl White" },
+		{  65, "Metallic Gold" },
+		{  70, "Metallic Green" },
+		{  67, "Metallic Silver" },
+		{  46, "Glow In Dark Opaque" },
+		{ 118, "Glow In Dark Trans" },
+		{ 159, "Glow in Dark White" },              // No match
+		{  60, "Milky White" },
+		{ 101, "Glitter Trans Clear" },             // Glitter Trans-Clear
+		{ 100, "Glitter Trans Dark Pink" },         // Glitter Trans-Dark Pink
+		{ 102, "Glitter Trans Purple" },            // Glitter Trans-Purple
+		{ 116, "Speckle Black Copper" },            // Speckle Black-Copper
+		{ 151, "Speckle Black Gold" },              // Speckle Black-Gold
+		{ 111, "Speckle Black Silver" },            // Speckle Black-Silver
+		{ 117, "Speckle Dark Bluish Gray Silver" }, // Speckle DBGray-Silver
+	};
+
+	const char* Name = gColorList[ColorIndex].Name;
+
+	for (int Color = 0; Color < sizeof(BrickLinkColors) / sizeof(BrickLinkColors[0]); Color++)
+		if (!strcmp(Name, BrickLinkColors[Color].Name))
+			return BrickLinkColors[Color].Code;
+
+	return 0;
+}
+
 bool lcLoadColorFile(lcFile& File)
 {
 	char Line[1024], Token[1024];

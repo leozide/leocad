@@ -1023,6 +1023,17 @@ bool SystemDoDialog(int nMode, void* param)
 			}
 		} break;
 
+		case LC_DLG_BRICKLINK:
+		{
+			CFileDialog dlg(FALSE, "*.xml", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				"XML Files (*.xml)|*.xml|All Files (*.*)|*.*||", AfxGetMainWnd());
+			if (dlg.DoModal() == IDOK)
+			{
+				strcpy((char*)param, dlg.GetPathName());
+				return true;
+			}
+		} break;
+
 		case LC_DLG_POVRAY:
 		{
 			CPOVDlg dlg;

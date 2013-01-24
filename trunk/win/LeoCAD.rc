@@ -235,6 +235,7 @@ BEGIN
         POPUP "Export"
         BEGIN
             MENUITEM "3D Studio...",                ID_FILE_EXPORT_3DSTUDIO
+            MENUITEM "BrickLink...",                33201
             MENUITEM "HTML...",                     ID_FILE_EXPORT_HTML
             MENUITEM "POV-Ray...",                  ID_FILE_EXPORT_POVRAY
             MENUITEM "Wavefront...",                ID_FILE_EXPORT_WAVEFRONT
@@ -1749,6 +1750,8 @@ END
 STRINGTABLE
 BEGIN
     ID_VIEW_VIEWPOINT_HOME  "View model from the default position."
+    ID_FILE_EXPORT_BRICKLINK 
+                            "Export a list of pieces that can be imported into the BrickLink website"
 END
 
 STRINGTABLE

@@ -16,5 +16,5 @@ ifeq ($(HAVE_PNGLIB), yes)
 	SRC += common/im_png.cpp
 endif
 
-LIBS += -lm -lz -lX11
+LIBS += -lm -lz -lX11 -ldl
 

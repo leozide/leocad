@@ -446,7 +446,7 @@ void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera
 	if (item)
 	{
 		ignore_commands = true;
-		gtk_check_menu_item_set_state(GTK_CHECK_MENU_ITEM(item), TRUE);  
+		gtk_check_menu_item_set_state(GTK_CHECK_MENU_ITEM(item), TRUE);
 		ignore_commands = false;
 	}
 }
@@ -463,7 +463,7 @@ void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 	lst = gtk_container_children(GTK_CONTAINER(menu));
 	GtkWidget* reset = GTK_WIDGET(g_list_last(lst)->data);
 	g_object_ref(reset);
-	
+
 	for (GList* i = g_list_first(lst); i; i = g_list_next(i))
 		gtk_container_remove(GTK_CONTAINER(menu), GTK_WIDGET(i->data));
 	g_list_free(lst);
@@ -474,7 +474,7 @@ void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 	gtk_menu_append(GTK_MENU(menu), item);
 	gtk_widget_show(item);
 	gtk_signal_connect(GTK_OBJECT(item), "activate", GTK_SIGNAL_FUNC(OnCommand), GINT_TO_POINTER(ID_CAMERA_FIRST));
-		
+
 	for (int CameraIdx = 0; CameraIdx < project->mCameras.GetSize(); CameraIdx++)
 	{
 		GSList* grp = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
@@ -531,7 +531,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
   gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
-  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), 
+  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child),
       bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
   ignore_commands = false;
 }
@@ -659,7 +659,7 @@ void SystemFinish()
 {
 }
 
-// FIXME: remove 
+// FIXME: remove
 int SystemDoMessageBox(const char* prompt, int mode)
 {
   return msgbox_execute (prompt, "LeoCAD", mode);
@@ -689,6 +689,9 @@ bool SystemDoDialog(int mode, void* param)
 
     case LC_DLG_HTML:
       return htmldlg_execute(param) == LC_OK;
+
+    case LC_DLG_BRICKLINK:
+      return bricklinkdlg_execute(param) == LC_OK;
 
     case LC_DLG_POVRAY:
       return povraydlg_execute(param) == LC_OK;
@@ -743,7 +746,7 @@ void SystemDoWaitCursor(int code)
     GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
     gdk_window_set_cursor(window, cursor);
     gdk_cursor_destroy (cursor);
-  } 
+  }
   else
   {
     GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);

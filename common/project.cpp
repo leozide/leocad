@@ -4074,9 +4074,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_FILE_BRICKLINK:
 		{
 			if (!m_pPieces)
-				return;
+			{
+				SystemDoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONERROR);
+				break;
+			}
 
 			char FileName[LC_MAXPATH];
+			memset(FileName, 0, sizeof(FileName));
+
 			if (!SystemDoDialog(LC_DLG_BRICKLINK, FileName))
 				break;
 
@@ -4085,7 +4090,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 			if (!BrickLinkFile.Open(FileName, "wt"))
 			{
-				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
 				break;
 			}
 
@@ -4427,6 +4432,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_FILE_WAVEFRONT:
 		{
 			char filename[LC_MAXPATH];
+			memset(filename, 0, sizeof(filename));
+
 			if (!SystemDoDialog(LC_DLG_WAVEFRONT, filename))
 				break;
 

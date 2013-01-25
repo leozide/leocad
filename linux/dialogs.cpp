@@ -622,6 +622,49 @@ int aboutdlg_execute(void* param)
 }
 
 // =============================================================================
+// BrickLink Dialog
+
+int bricklinkdlg_execute(void* param)
+{
+	GtkFileFilter* filter;
+	GtkWidget* dlg;
+	int ret;
+
+	dlg = gtk_file_chooser_dialog_new("Export As", GTK_WINDOW(((GtkWidget*)(*main_window))), GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_OK, NULL);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), (char*)param);
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*.[xX][mM][lL]");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "XML Files (*.xml)");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "All Files");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
+
+	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+	{
+		char *filename;
+
+		ret = LC_OK;
+
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+		strcpy((char*)param, filename);
+		g_free(filename);
+	}
+	else
+		ret = LC_CANCEL;
+
+	gtk_widget_destroy(dlg);
+
+	return ret;
+}
+
+// =============================================================================
 // HTML Dialog
 
 struct LC_HTMLDLG_STRUCT
@@ -1107,13 +1150,13 @@ static void povraydlg_browse_output(GtkWidget *widget, gpointer data)
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), TRUE);
 
 	filter = gtk_file_filter_new();
-	gtk_file_filter_add_pattern(filter, "*");
-	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "All Files");
+	gtk_file_filter_add_pattern(filter, "*.[pP][oO][vV]");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "POV-Ray files (*.pov)");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
 
 	filter = gtk_file_filter_new();
-	gtk_file_filter_add_pattern(filter, "*.[pP][oO][vV]");
-	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "POV-Ray files (*.pov)");
+	gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(filter), "All Files");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dlg), filter);
 
 	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)

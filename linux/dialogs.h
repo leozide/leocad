@@ -13,6 +13,7 @@ int savepicturedlg_execute(void* param);
 int msgbox_execute(const char* text, const char *caption, int flags);
 int arraydlg_execute(void* param);
 int aboutdlg_execute(void* param);
+int bricklinkdlg_execute(void* param);
 int htmldlg_execute(void* param);
 int imageoptsdlg_execute(GtkWidget* parent, void* param, bool from_htmldlg);
 int povraydlg_execute(void* param);

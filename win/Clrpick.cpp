@@ -73,6 +73,9 @@ int CColorPicker::OnCreate(LPCREATESTRUCT lpCreateStruct)
 // On mouse click, create and show a CColorPopup window for colour selection
 BOOL CColorPicker::OnClicked()
 {
+	if (!IsWindowEnabled())
+		return TRUE;
+
 	m_bActive = TRUE;
 	CRect rect;
 	GetWindowRect(rect);

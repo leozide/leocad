@@ -7,6 +7,8 @@
 // HTMLDlg.h : header file
 //
 
+#include "ClrPick.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CHTMLDlg dialog
 
@@ -23,11 +25,14 @@ public:
 	BOOL	m_bIndex;
 	CString	m_strFolder;
 	BOOL	m_bImages;
+	BOOL	m_bID;
 	BOOL	m_bListEnd;
 	BOOL	m_bListStep;
+	CColorPicker	m_clrList;
 	BOOL	m_bHighlight;
 	//}}AFX_DATA
 
+	int mColorIndex;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -39,6 +44,8 @@ public:
 // Implementation
 protected:
 	void* imopts;
+
+	afx_msg LONG OnColorSelEndOK(UINT lParam, LONG wParam);
 
 	// Generated message map functions
 	//{{AFX_MSG(CHTMLDlg)

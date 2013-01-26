@@ -143,6 +143,8 @@
 #define IDC_IMGDLG_GIF                  1058
 #define IDC_HTMDLG_OUTPUT               1058
 #define IDC_HTMDLG_LISTIMAGES           1062
+#define IDC_HTMDLG_LIST_IMAGES          1062
+#define IDC_HTMDLG_LIST_ID              1063
 #define IDC_HTMDLG_INDEX                1064
 #define IDC_HTMDLG_BROWSEFOLDER         1067
 #define IDC_PRGDLG_PROGRESS             1068
@@ -376,6 +378,8 @@
 #define IDC_GENDLG_LIBRARY              1247
 #define IDC_IMGDLG_BROWSE               1248
 #define IDC_IMGDLG_FILENAME             1249
+#define IDC_HTMLDLG_LIST_COLOR          1250
+#define IDC_HTMDLG_LIST_COLOR           1250
 #define ID_EDIT_SELECTALL               32772
 #define ID_EDIT_SELECTNONE              32773
 #define ID_EDIT_SELECTINVERT            32774
@@ -606,7 +610,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        246
 #define _APS_NEXT_COMMAND_VALUE         33202
-#define _APS_NEXT_CONTROL_VALUE         1250
+#define _APS_NEXT_CONTROL_VALUE         1251
 #define _APS_NEXT_SYMED_VALUE           121
 #endif
 #endif

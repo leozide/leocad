@@ -3910,6 +3910,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					strcat(fn, m_strTitle);
 					strcat(fn, htmlext);
 					f = fopen (fn, "wt");
+
+					if (!f)
+					{
+						main_window->EndWait();
+						SystemDoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+						break;
+					}
+
 					fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 					for (i = 1; i <= last; i++)
@@ -3937,6 +3945,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcat (fn, htmlext);
 						f = fopen (fn, "wt");
 
+						if (!f)
+						{
+							main_window->EndWait();
+							SystemDoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+							break;
+						}
+
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 						for (i = 1; i <= last; i++)
@@ -3954,6 +3969,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					{
 						sprintf(fn, "%s%s-%02d%s", opts.path, m_strTitle, i, htmlext);
 						f = fopen(fn, "wt");
+
+						if (!f)
+						{
+							main_window->EndWait();
+							SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+							break;
+						}
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, i);
 						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
@@ -3986,6 +4008,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 						strcat (fn, "-pieces");
 						strcat (fn, htmlext);
 						f = fopen (fn, "wt");
+
+						if (!f)
+						{
+							main_window->EndWait();
+							SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+							break;
+						}
+
 						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
 						CreateHTMLPieceList(f, 0, opts.images, ext);
@@ -4075,7 +4105,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		{
 			if (!m_pPieces)
 			{
-				SystemDoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONERROR);
+				SystemDoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
 				break;
 			}
 

@@ -9,7 +9,7 @@
 
 struct GLWindowPrivate
 {
-	GtkWidget  *widget;
+	GtkWidget *widget;
 	LC_CURSOR_TYPE Cursor;
 };
 
@@ -18,7 +18,7 @@ static GdkVisual* WindowGdkVisual = NULL;
 static XVisualInfo* WindowXVisualInfo = NULL;
 static bool WindowMultisample = false;
 static GLXContext WindowContext;
-int WindowContextCount;
+static int WindowContextCount;
 
 // =============================================================================
 // static functions
@@ -47,94 +47,92 @@ static gint expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data
 
 static gint button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data)
 {
-  GLWindow *wnd = (GLWindow*)data;
-  int x, y;
+	GLWindow *wnd = (GLWindow*)data;
+	int x, y;
 
-  x = (int)event->x;
-  y = widget->allocation.height - (int)event->y - 1;
+	x = (int)event->x;
+	y = widget->allocation.height - (int)event->y - 1;
 
-  if (event->type == GDK_BUTTON_PRESS)
-  {
-    if (event->button == 1)
-      wnd->OnLeftButtonDown (x, y, (event->state & GDK_CONTROL_MASK) != 0,
-                             (event->state & GDK_SHIFT_MASK) != 0);
-    else if (event->button == 3)
-      wnd->OnRightButtonDown (x, y, (event->state & GDK_CONTROL_MASK) != 0,
-                              (event->state & GDK_SHIFT_MASK) != 0);
-  }
-  else if (event->type == GDK_2BUTTON_PRESS)
-  {
-    wnd->OnLeftButtonDoubleClick (x, y, (event->state & GDK_CONTROL_MASK) != 0,
-                                  (event->state & GDK_SHIFT_MASK) != 0);
-  }
+	if (event->type == GDK_BUTTON_PRESS)
+	{
+		if (event->button == 1)
+			wnd->OnLeftButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+		else if (event->button == 2)
+			wnd->OnMiddleButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+		else if (event->button == 3)
+			wnd->OnRightButtonDown(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+	}
+	else if (event->type == GDK_2BUTTON_PRESS)
+	{
+		wnd->OnLeftButtonDoubleClick(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+	}
 
-  gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)), widget);
-  gdk_pointer_grab (widget->window, FALSE, (GdkEventMask)(GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|
-                    GDK_POINTER_MOTION_MASK|GDK_POINTER_MOTION_HINT_MASK),
-                    NULL, NULL, GDK_CURRENT_TIME);
+	gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
+	gdk_pointer_grab(widget->window, FALSE, (GdkEventMask)(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK),
+	                 NULL, NULL, GDK_CURRENT_TIME);
 
-  return TRUE;
+	return TRUE;
 }
 
-static gint button_release_event (GtkWidget *widget, GdkEventButton *event, gpointer data)
+static gint button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data)
 {
-  GLWindow *wnd = (GLWindow*)data;
-  int x, y;
+	GLWindow *wnd = (GLWindow*)data;
+	int x, y;
 
-  x = (int)event->x;
-  y = widget->allocation.height - (int)event->y - 1;
+	x = (int)event->x;
+	y = widget->allocation.height - (int)event->y - 1;
 
-  gdk_pointer_ungrab (GDK_CURRENT_TIME);
+	gdk_pointer_ungrab(GDK_CURRENT_TIME);
 
-  if (event->button == 1)
-    wnd->OnLeftButtonUp (x, y, (event->state & GDK_CONTROL_MASK) != 0,
-                         (event->state & GDK_SHIFT_MASK) != 0);
-  else if (event->button == 3)
-    wnd->OnRightButtonUp (x, y, (event->state & GDK_CONTROL_MASK) != 0,
-                          (event->state & GDK_SHIFT_MASK) != 0);
+	if (event->button == 1)
+		wnd->OnLeftButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+	else if (event->button == 2)
+		wnd->OnMiddleButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+	else if (event->button == 3)
+		wnd->OnRightButtonUp(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
 
-  return TRUE;
+	return TRUE;
 }
 
-static gint pointer_motion_event (GtkWidget *widget, GdkEventMotion *event, gpointer data)
+static gint pointer_motion_event(GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
-  GLWindow *wnd = (GLWindow*)data;
-  GdkModifierType state;
-  int x, y;
+	GLWindow *wnd = (GLWindow*)data;
+	GdkModifierType state;
+	int x, y;
 
-  if (event->is_hint)
-  {
-    gdk_window_get_pointer (event->window, &x, &y, &state);
-    state = (GdkModifierType)0;
-  }
-  else
-  {
-    x = (int)event->x;
-    y = (int)event->y;
-    state = (GdkModifierType)event->state;
-  }
+	if (event->is_hint)
+	{
+		gdk_window_get_pointer(event->window, &x, &y, &state);
+		state = (GdkModifierType)0;
+	}
+	else
+	{
+		x = (int)event->x;
+		y = (int)event->y;
+		state = (GdkModifierType)event->state;
+	}
 
-  y = widget->allocation.height - y - 1;
+	y = widget->allocation.height - y - 1;
 
-  wnd->OnMouseMove (x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+	wnd->OnMouseMove(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
 
-  return TRUE;
+	return TRUE;
 }
 
-static gint size_allocate_event (GtkWidget *widget, GtkAllocation *allocation, gpointer data)
+static gint size_allocate_event(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 {
-  GLWindow *wnd = (GLWindow*)data;
+	GLWindow *wnd = (GLWindow*)data;
 
-  wnd->OnSize (allocation->width, allocation->height);
+	wnd->OnSize(allocation->width, allocation->height);
 
-  return TRUE;
+	return TRUE;
 }
 /*
-static void destroy_event (GtkWidget *widget, gpointer data)
+static void destroy_event(GtkWidget *widget, gpointer data)
 {
-  GLWindow *wnd = (GLWindow*)data;
+	GLWindow *wnd = (GLWindow*)data;
 
-  wnd->DestroyContext ();
+	wnd->DestroyContext();
 }
 */
 
@@ -170,45 +168,45 @@ bool GLWindow::CreateFromWindow(void *data)
 
 		WindowDisplay = GDK_DISPLAY();
 
-        if (!WindowDisplay)
-        {
-            printf("OpenGL fatal error: Cannot get display.\n");
-            return false;
-        }
+		if (!WindowDisplay)
+		{
+			printf("OpenGL fatal error: Cannot get display.\n");
+			return false;
+		}
 
-        WindowGdkVisual = gdk_visual_get_system();
-        if (WindowGdkVisual->depth < 16)
-            printf("OpenGL fatal error: LeoCAD needs a display with at least 16 bit colors.\n");
+		WindowGdkVisual = gdk_visual_get_system();
+		if (WindowGdkVisual->depth < 16)
+			printf("OpenGL fatal error: LeoCAD needs a display with at least 16 bit colors.\n");
 
-        int AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
+		int AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
 
-        if (AASamples > 1)
-        {
-            int attrlistAA[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, GLX_SAMPLE_BUFFERS_ARB, 1, GLX_SAMPLES_ARB, AASamples, 0 };
-            WindowXVisualInfo = pfnglXChooseVisual(WindowDisplay, DefaultScreen(WindowDisplay), attrlistAA);
+		if (AASamples > 1)
+		{
+			int attrlistAA[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 16, GLX_SAMPLE_BUFFERS_ARB, 1, GLX_SAMPLES_ARB, AASamples, 0 };
+			WindowXVisualInfo = pfnglXChooseVisual(WindowDisplay, DefaultScreen(WindowDisplay), attrlistAA);
 
-            if (WindowXVisualInfo)
-                WindowMultisample = true;
-            else
-                printf("OpenGL error: Could not find multisample visual.\n");
-        }
+			if (WindowXVisualInfo)
+				WindowMultisample = true;
+			else
+				printf("OpenGL error: Could not find multisample visual.\n");
+		}
 
-        if (!WindowXVisualInfo)
-        {
-            WindowXVisualInfo = pfnglXChooseVisual(WindowDisplay, DefaultScreen(WindowDisplay), attrlist);
-            if (!WindowXVisualInfo)
-            {
-                printf("OpenGL fatal error: glXChooseVisual failed.\n");
-                return false;
-            }
-        }
+		if (!WindowXVisualInfo)
+		{
+			WindowXVisualInfo = pfnglXChooseVisual(WindowDisplay, DefaultScreen(WindowDisplay), attrlist);
+			if (!WindowXVisualInfo)
+			{
+				printf("OpenGL fatal error: glXChooseVisual failed.\n");
+				return false;
+			}
+		}
 
-        WindowGdkVisual = gdkx_visual_get(WindowXVisualInfo->visualid);
-        if (WindowGdkVisual == NULL)
-        {
-            printf("OpenGL fatal error: Cannot get visual.\n");
-            return false;
-        }
+		WindowGdkVisual = gdkx_visual_get(WindowXVisualInfo->visualid);
+		if (WindowGdkVisual == NULL)
+		{
+			printf("OpenGL fatal error: Cannot get visual.\n");
+			return false;
+		}
 
 		WindowContext = pfnglXCreateContext(WindowDisplay, WindowXVisualInfo, NULL, True);
 
@@ -219,7 +217,7 @@ bool GLWindow::CreateFromWindow(void *data)
 		}
 
 		WindowContextCount = 1;
-    }
+	}
 
 	gtk_widget_push_colormap(gdk_colormap_new(WindowGdkVisual, TRUE));
 	gtk_widget_push_visual(WindowGdkVisual);
@@ -232,8 +230,7 @@ bool GLWindow::CreateFromWindow(void *data)
 
 	GTK_WIDGET_SET_FLAGS(prv->widget, GTK_CAN_FOCUS);
 
-	gtk_widget_set_events(GTK_WIDGET(prv->widget), GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK |
-	                      GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK);
+	gtk_widget_set_events(GTK_WIDGET(prv->widget), GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK);
 
 	// Connect signal handlers
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "expose_event", GTK_SIGNAL_FUNC(expose_event), this);
@@ -274,7 +271,7 @@ void GLWindow::OnInitialUpdate()
 	MakeCurrent();
 
 	GL_InitializeSharedExtensions();
-//  GL_InitializeExtensions();
+//	GL_InitializeExtensions();
 
 	if (WindowMultisample)
 		glEnable(GL_MULTISAMPLE_ARB);
@@ -285,7 +282,7 @@ bool GLWindow::MakeCurrent()
 	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
 	if (!WindowContext)
-        return false;
+		return false;
 
 	return pfnglXMakeCurrent(WindowDisplay, GDK_WINDOW_XWINDOW(prv->widget->window), WindowContext);
 }
@@ -300,9 +297,9 @@ void GLWindow::SwapBuffers()
 
 void GLWindow::Redraw(bool ForceRedraw)
 {
-  GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
+	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
 
-  gtk_widget_draw(prv->widget, (GdkRectangle*)NULL);
+	gtk_widget_draw(prv->widget, (GdkRectangle*)NULL);
 }
 
 void GLWindow::CaptureMouse()
@@ -313,43 +310,45 @@ void GLWindow::ReleaseMouse()
 {
 }
 
-static void create_bitmap_and_mask_from_xpm (GdkBitmap **bitmap, GdkBitmap **mask, const char **xpm)
+static void create_bitmap_and_mask_from_xpm(GdkBitmap **bitmap, GdkBitmap **mask, const char **xpm)
 {
-  int height, width, colors;
-  char pixmap_buffer [(32 * 32)/8];
-  char mask_buffer [(32 * 32)/8];
-  int x, y, pix;
-  int transparent_color, black_color;
+	int height, width, colors;
+	char pixmap_buffer [(32 * 32)/8];
+	char mask_buffer [(32 * 32)/8];
+	int x, y, pix;
+	int transparent_color, black_color;
 
-  sscanf (xpm [0], "%d %d %d %d", &height, &width, &colors, &pix);
+	sscanf(xpm [0], "%d %d %d %d", &height, &width, &colors, &pix);
 
-  g_assert (height == 32);
-  g_assert (width  == 32);
-  g_assert (colors == 3);
+	g_assert(height == 32);
+	g_assert(width == 32);
+	g_assert(colors == 3);
 
-  transparent_color = ' ';
-  black_color = '.';
+	transparent_color = ' ';
+	black_color = '.';
 
-  for (y = 0; y < 32; y++)
-    for (x = 0; x < 32;)
-    {
-      char value = 0, maskv = 0;
-
-      for (pix = 0; pix < 8; pix++, x++)
-	if (xpm [4+y][x] != transparent_color)
+	for (y = 0; y < 32; y++)
 	{
-	  maskv |= 1 << pix;
+		for (x = 0; x < 32;)
+		{
+			char value = 0, maskv = 0;
 
-	  if (xpm [4+y][x] != black_color)
-	    value |= 1 << pix;
+			for (pix = 0; pix < 8; pix++, x++)
+			if (xpm [4+y][x] != transparent_color)
+			{
+				maskv |= 1 << pix;
+
+				if (xpm [4+y][x] != black_color)
+					value |= 1 << pix;
+			}
+
+			pixmap_buffer [(y * 4 + x/8)-1] = value;
+			mask_buffer [(y * 4 + x/8)-1] = maskv;
+		}
 	}
 
-      pixmap_buffer [(y * 4 + x/8)-1] = value;
-      mask_buffer [(y * 4 + x/8)-1] = maskv;
-    }
-
-  *bitmap = gdk_bitmap_create_from_data (NULL, pixmap_buffer, 32, 32);
-  *mask   = gdk_bitmap_create_from_data (NULL, mask_buffer, 32, 32);
+	*bitmap = gdk_bitmap_create_from_data(NULL, pixmap_buffer, 32, 32);
+	*mask = gdk_bitmap_create_from_data(NULL, mask_buffer, 32, 32);
 }
 
 void GLWindow::SetCursor(LC_CURSOR_TYPE Type)

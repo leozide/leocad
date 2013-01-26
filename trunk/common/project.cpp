@@ -3398,7 +3398,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	Sys_FinishMemoryRender (render);
 }
 
-void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
+void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, bool ShowID, const char* ext)
 {
 	int* ColorsUsed = new int[gColorList.GetSize()];
 	memset(ColorsUsed, 0, sizeof(ColorsUsed[0]) * gColorList.GetSize());
@@ -3446,7 +3446,12 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 			if (bImages)
 				fprintf(f, "<tr><td><IMG SRC=\"%s%s\" ALT=\"%s\"></td>\n", pInfo->m_strName, ext, pInfo->m_strDescription);
 			else
-				fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
+			{
+				if (ShowID)
+					fprintf(f, "<tr><td>%s (%s)</td>\n", pInfo->m_strDescription, pInfo->m_strName);
+				else
+					fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
+			}
 
 			int curcol = 1;
 			for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
@@ -3832,6 +3837,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.listend = (ul & LC_HTML_LISTEND) != 0;
 			opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
 			opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
+			opts.id = (ul & LC_HTML_LISTID) != 0;
+			opts.color = lcGetColorIndex(Sys_ProfileLoadInt("Default", "HTML Piece Color", 16));
 
 			if (SystemDoDialog(LC_DLG_HTML, &opts))
 			{
@@ -3849,7 +3856,9 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				if (opts.listend) ul |= LC_HTML_LISTEND;
 				if (opts.liststep) ul |= LC_HTML_LISTSTEP;
 				if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
-				Sys_ProfileSaveInt ("Default", "HTML Options", ul);
+				if (opts.id) ul |= LC_HTML_LISTID;
+				Sys_ProfileSaveInt("Default", "HTML Options", ul);
+				Sys_ProfileSaveInt("Default", "HTML Piece Color", lcGetColorCode(opts.color));
 
 				// Save image options
 				ul = opts.imdlg.imopts.format;
@@ -3879,29 +3888,6 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 					strcat (opts.path, "/");
 				Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
 
-/*
-				// Create destination folder
-				char *MyPath = strdup(dlg.m_strFolder);
-				char *p = MyPath;
-				int psave;
-				while(*p)
-				{
-					while(*p && *p != '\\')
-						++p;
-
-					psave = *p;
-					if (*p == '\\')
-						*p = 0;
-
-					if (strlen(MyPath) > 3)
-						CreateDirectory(MyPath, NULL);
-
-					*p = psave;
-					if (*p)
-						++p;
-				}
-				free(MyPath);
-*/
 				main_window->BeginWait();
 
 				if (opts.singlepage)
@@ -3926,11 +3912,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
 
 						if (opts.liststep)
-							CreateHTMLPieceList(f, i, opts.images, ext);
+							CreateHTMLPieceList(f, i, opts.images, opts.id, ext);
 					}
 
 					if (opts.listend)
-						CreateHTMLPieceList(f, 0, opts.images, ext);
+						CreateHTMLPieceList(f, 0, opts.images, opts.id, ext);
 
 					fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\n", f);
 					fclose(f);
@@ -3982,7 +3968,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
 
 						if (opts.liststep)
-							CreateHTMLPieceList(f, i, opts.images, ext);
+							CreateHTMLPieceList(f, i, opts.images, opts.id, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
 						if (i != 1)
@@ -4018,7 +4004,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 
 						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
-						CreateHTMLPieceList(f, 0, opts.images, ext);
+						CreateHTMLPieceList(f, 0, opts.images, opts.id, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
 						fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
@@ -4073,20 +4059,13 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 							continue;
 
 						glDepthFunc(GL_LEQUAL);
+						glEnable(GL_DEPTH_TEST);
+						glEnable(GL_POLYGON_OFFSET_FILL);
+						glPolygonOffset(0.5f, 0.1f);
 						glClearColor(1,1,1,1);
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-						glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-						glEnable(GL_COLOR_MATERIAL);
-						glDisable (GL_DITHER);
-						glShadeModel(GL_FLAT);
 						pInfo->ZoomExtents(30.0f, aspect);
-
-						float pos[4] = { 0, 0, 10, 0 };
-						glLightfv(GL_LIGHT0, GL_POSITION, pos);
-						glEnable(GL_LIGHTING);
-						glEnable(GL_LIGHT0);
-						glEnable(GL_DEPTH_TEST);
-						pInfo->RenderPiece(m_nCurColor);
+						pInfo->RenderPiece(opts.color);
 						glFinish();
 
 						Image image;

@@ -1006,6 +1006,8 @@ bool SystemDoDialog(int nMode, void* param)
 			dlg.m_nLayout = opts->singlepage ? 0 : 1;
 			dlg.m_bIndex = opts->index;
 			dlg.m_bImages = opts->images;
+			dlg.m_bID = opts->id;
+			dlg.mColorIndex = opts->color;
 			dlg.m_bListEnd = opts->listend;
 			dlg.m_bListStep = opts->liststep;
 			dlg.m_bHighlight = opts->highlight;
@@ -1016,6 +1018,8 @@ bool SystemDoDialog(int nMode, void* param)
 				opts->singlepage = (dlg.m_nLayout == 0);
 				opts->index = dlg.m_bIndex == TRUE;
 				opts->images = dlg.m_bImages == TRUE;
+				opts->id = dlg.m_bID == TRUE;
+				opts->color = dlg.mColorIndex;
 				opts->listend = dlg.m_bListEnd == TRUE;
 				opts->liststep = dlg.m_bListStep == TRUE;
 				opts->highlight = dlg.m_bHighlight == TRUE;

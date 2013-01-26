@@ -216,7 +216,7 @@ protected:
 	void RenderOverlays(View* view);
 
 	void RenderInitialize();
-	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
+	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, bool ShowID, const char* ext);
 	void ZoomExtents(int FirstView, int LastView);
 
 	bool m_bStopRender;

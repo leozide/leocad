@@ -304,6 +304,8 @@ struct LC_HTMLDLG_OPTS
 	bool singlepage;
 	bool index;
 	bool images;
+	bool id;
+	int color;
 	bool listend;
 	bool liststep;
 	bool highlight;

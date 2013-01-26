@@ -177,6 +177,7 @@ int stricmp(const char* str1, const char* str2);
 #define LC_HTML_LISTSTEP        0x10
 #define LC_HTML_HIGHLIGHT       0x20
 //#define LC_HTML_HTMLEXT         0x40
+#define LC_HTML_LISTID          0x80
 
 // Piece library update
 #define LC_UPDATE_DELETE       0x00

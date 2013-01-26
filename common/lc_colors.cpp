@@ -335,7 +335,7 @@ int lcGetBrickLinkColor(int ColorIndex)
 
 	const char* Name = gColorList[ColorIndex].Name;
 
-	for (int Color = 0; Color < sizeof(BrickLinkColors) / sizeof(BrickLinkColors[0]); Color++)
+	for (unsigned int Color = 0; Color < sizeof(BrickLinkColors) / sizeof(BrickLinkColors[0]); Color++)
 		if (!strcmp(Name, BrickLinkColors[Color].Name))
 			return BrickLinkColors[Color].Code;
 

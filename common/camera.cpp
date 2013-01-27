@@ -689,7 +689,7 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	FrontVector.Normalize();
-	FrontVector *= 2.0f * dy / (21 - mouse);
+	FrontVector *= -2.0f * dy / (21 - mouse);
 
 	// TODO: option to move eye, target or both
 	mPosition += FrontVector;

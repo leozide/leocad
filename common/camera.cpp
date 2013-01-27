@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "opengl.h"
 #include "globals.h"
 #include "lc_file.h"
@@ -721,21 +722,28 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 	UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* /*center*/)
+void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
+	lcVector3 CenterPosition(center[0], center[1], center[2]);
 
-	// TODO: option to move eye or target
-	float len = FrontVector.Length();
-	FrontVector += (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
-	FrontVector.Normalize();
-	mPosition = (FrontVector * len) + mTargetPosition;
+	lcVector3 Z(lcNormalize(lcVector3(FrontVector[0], FrontVector[1], 0)));
+	if (isnan(Z[0]) || isnan(Z[1]))
+		Z = lcNormalize(lcVector3(mUpVector[0], mUpVector[1], 0));
 
-	// Calculate new up
-	FrontVector = mPosition - mTargetPosition;
-	SideVector = lcCross(FrontVector, mUpVector);
-	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
+	if (mUpVector[2] < 0)
+	{
+		Z[0] = -Z[0];
+		Z[1] = -Z[1];
+		dx = -dx;
+	}
+ 
+	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(0.1f * dy / (21 - mouse))), YRot), lcMatrix44RotationZ(-0.1f * dx / (21 - mouse)));
+
+	mPosition = lcMul31(mPosition - CenterPosition, transform) + CenterPosition;
+	mTargetPosition = lcMul31(mTargetPosition - CenterPosition, transform) + CenterPosition;
+	mUpVector = lcMul31(mUpVector, transform);
 
 	if (!IsSimple())
 	{

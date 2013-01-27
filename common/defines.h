@@ -29,6 +29,8 @@
 #define KEY_NEXT	VK_NEXT
 #define KEY_PLUS	VK_ADD
 #define KEY_MINUS	VK_SUBTRACT
+
+#define isnan _isnan
 #endif
 
 #ifdef LC_LINUX

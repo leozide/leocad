@@ -771,11 +771,25 @@ void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAn
 {
 	lcVector3 Positions[] =
 	{
-		lcVector3(50,0,0), lcVector3(-50,0,0), lcVector3(0,0,50), lcVector3(0,0,-50),
-		lcVector3(0,50,0), lcVector3(0,-50,0), lcVector3(-10,-10,5)
+		lcVector3(  0.0f, -50.0f,   0.0f), // LC_VIEWPOINT_FRONT
+		lcVector3(  0.0f,  50.0f,   0.0f), // LC_VIEWPOINT_BACK
+		lcVector3(  0.0f,   0.0f,  50.0f), // LC_VIEWPOINT_TOP
+		lcVector3(  0.0f,   0.0f, -50.0f), // LC_VIEWPOINT_BOTTOM
+		lcVector3( 50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_LEFT
+		lcVector3(-50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_RIGHT
+		lcVector3(-10.0f, -10.0f,   5.0f)  // LC_VIEWPOINT_HOME
 	};
 
-	lcVector3 Ups[] = { lcVector3(0,0,1), lcVector3(0,0,1), lcVector3(1,0,0), lcVector3(-1,0,0), lcVector3(0,0,1), lcVector3(0,0,1), lcVector3(-0.2357f, -0.2357f, 0.94281f) };
+	lcVector3 Ups[] =
+	{
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3( 0.0f, 1.0f, 0.0f),
+		lcVector3( 0.0f,-1.0f, 0.0f),
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3(-0.2357f, -0.2357f, 0.94281f)
+	};
 
 	mPosition = Positions[Viewpoint];
 	mTargetPosition = lcVector3(0, 0, 0);

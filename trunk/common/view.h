@@ -14,14 +14,15 @@ public:
 
 	void OnDraw();
 	void OnInitialUpdate();
-	void OnLeftButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift);
-	void OnMiddleButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnMiddleButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonDown(int x, int y, bool bControl, bool bShift);
-	void OnRightButtonUp(int x, int y, bool bControl, bool bShift);
-	void OnMouseMove(int x, int y, bool bControl, bool bShift);
+	void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
+	void OnMiddleButtonDown(int x, int y, bool Control, bool Shift);
+	void OnMiddleButtonUp(int x, int y, bool Control, bool Shift);
+	void OnRightButtonDown(int x, int y, bool Control, bool Shift);
+	void OnRightButtonUp(int x, int y, bool Control, bool Shift);
+	void OnMouseMove(int x, int y, bool Control, bool Shift);
+	void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift);
 
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();

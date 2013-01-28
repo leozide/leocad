@@ -246,15 +246,16 @@ protected:
 
 public:
 	// Call these functions from each OS
-	void OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift);
-	void OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift);
-	void OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift);
-	void OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift);
-	void OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift);
-	void OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift);
-	void OnMouseMove(View* view, int x, int y, bool bControl, bool bShift);
-	bool OnKeyDown(char nKey, bool bControl, bool bShift);
+	void OnLeftButtonDown(View* view, int x, int y, bool Control, bool Shift);
+	void OnLeftButtonUp(View* view, int x, int y, bool Control, bool Shift);
+	void OnLeftButtonDoubleClick(View* view, int x, int y, bool Control, bool Shift);
+	void OnMiddleButtonDown(View* view, int x, int y, bool Control, bool Shift);
+	void OnMiddleButtonUp(View* view, int x, int y, bool Control, bool Shift);
+	void OnRightButtonDown(View* view, int x, int y, bool Control, bool Shift);
+	void OnRightButtonUp(View* view, int x, int y, bool Control, bool Shift);
+	void OnMouseMove(View* view, int x, int y, bool Control, bool Shift);
+	void OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift);
+	bool OnKeyDown(char nKey, bool Control, bool Shift);
 
 	void SetAction(int Action);
 	int GetCurAction() const

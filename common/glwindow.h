@@ -52,14 +52,15 @@ public:
 	virtual void OnSize(int cx, int cy)
 	{ m_nWidth = cx; m_nHeight = cy; };
 	virtual void OnInitialUpdate();
-	virtual void OnLeftButtonDown(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnLeftButtonUp(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnLeftButtonDoubleClick(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnMiddleButtonDown(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnMiddleButtonUp(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnRightButtonDown(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnRightButtonUp(int x, int y, bool bControl, bool bShift) { };
-	virtual void OnMouseMove(int x, int y, bool bControl, bool bShift) { };
+	virtual void OnLeftButtonDown(int x, int y, bool Control, bool Shift) { };
+	virtual void OnLeftButtonUp(int x, int y, bool Control, bool Shift) { };
+	virtual void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift) { };
+	virtual void OnMiddleButtonDown(int x, int y, bool Control, bool Shift) { };
+	virtual void OnMiddleButtonUp(int x, int y, bool Control, bool Shift) { };
+	virtual void OnRightButtonDown(int x, int y, bool Control, bool Shift) { };
+	virtual void OnRightButtonUp(int x, int y, bool Control, bool Shift) { };
+	virtual void OnMouseMove(int x, int y, bool Control, bool Shift) { };
+	virtual void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift) { };
 
 protected:
 	int m_nWidth;

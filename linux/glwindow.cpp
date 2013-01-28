@@ -119,6 +119,32 @@ static gint pointer_motion_event(GtkWidget *widget, GdkEventMotion *event, gpoin
 	return TRUE;
 }
 
+static gboolean scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer data)
+{
+	GLWindow *wnd = (GLWindow*)data;
+	float Direction;
+	int x, y;
+
+	switch (event->direction)
+	{
+		case GDK_SCROLL_UP:
+			Direction = 1.0f;
+			break;
+		case GDK_SCROLL_DOWN:
+			Direction = -1.0f;
+			break;
+		default:
+			return FALSE;
+	}
+
+	x = (int)event->x;
+	y = widget->allocation.height - (int)event->y - 1;
+
+	wnd->OnMouseWheel(x, y, Direction, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
+
+	return TRUE;
+}
+
 static gint size_allocate_event(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 {
 	GLWindow *wnd = (GLWindow*)data;
@@ -239,6 +265,7 @@ bool GLWindow::CreateFromWindow(void *data)
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "motion_notify_event", GTK_SIGNAL_FUNC(pointer_motion_event), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), this);
+	gtk_signal_connect(GTK_OBJECT(prv->widget), "scroll_event", GTK_SIGNAL_FUNC(scroll_event), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "realize", GTK_SIGNAL_FUNC(realize_event), this);
 
 	*((GtkWidget**)data) = prv->widget;

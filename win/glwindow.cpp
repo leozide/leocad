@@ -141,6 +141,10 @@ BOOL GLWindowPreTranslateMessage(GLWindow *wnd, MSG *pMsg)
 			wnd->OnMouseMove((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1,
 				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
 			break;
+		case WM_MOUSEWHEEL:
+			wnd->OnMouseWheel((SHORT)LOWORD(pMsg->lParam), wnd->GetHeight() - (SHORT)HIWORD(pMsg->lParam) - 1, (float)(short)HIWORD(pMsg->wParam) / (float)WHEEL_DELTA,
+				(pMsg->wParam & MK_CONTROL) != 0, (pMsg->wParam & MK_SHIFT) != 0);
+			break;
 		case WM_ERASEBKGND:
 			return TRUE;
 		case WM_CREATE:

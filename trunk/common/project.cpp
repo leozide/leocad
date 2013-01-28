@@ -8937,10 +8937,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 void Project::OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift)
 {
-	if (Direction > 0.0f)
-		HandleCommand(LC_VIEW_ZOOM, 10);
-	else
-		HandleCommand(LC_VIEW_ZOOM, -10);
+	HandleCommand(LC_VIEW_ZOOM, (unsigned long)(10 * Direction));
 }
 
 // Check if the mouse is over a different area of the overlay and redraw it.

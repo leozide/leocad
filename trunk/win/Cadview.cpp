@@ -35,8 +35,6 @@ BEGIN_MESSAGE_MAP(CCADView, CView)
 	ON_WM_CAPTURECHANGED()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
-	ON_WM_MOUSEWHEEL()
-	ON_WM_MBUTTONDOWN()
 	ON_WM_TIMER()
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, OnFilePrintPreview)
 	//}}AFX_MSG_MAP
@@ -393,27 +391,27 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		while ((r = str.Find("&L")) != -1)
 		{
 			nFormat = DT_LEFT;
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
 		while ((r = str.Find("&C")) != -1)
 		{
 			nFormat = DT_CENTER;
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
 		while ((r = str.Find("&R")) != -1)
 		{
 			nFormat = DT_RIGHT;
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
 		while ((r = str.Find("&F")) != -1)
 		{
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			if (bCatalog)
 				tmp += "LeoCAD Pieces Catalog";
 			else
@@ -423,14 +421,14 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		}
 		while ((r = str.Find("&A")) != -1)
 		{
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += project->m_strAuthor;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
 		}
 		while ((r = str.Find("&N")) != -1)
 		{
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += project->m_strDescription;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
@@ -439,7 +437,7 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		{
 			char dbuffer [9];
 			_strdate( dbuffer );
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += dbuffer;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
@@ -448,7 +446,7 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		{
 			char tbuffer [9];
 			_strtime( tbuffer );
-			tmp = str.Left (r);
+			tmp = str.Left(r);
 			tmp += tbuffer;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
@@ -456,8 +454,8 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		while ((r = str.Find("&P")) != -1)
 		{
 			char buf[5];
-			sprintf (buf, "%d", nCurPage);
-			tmp = str.Left (r);
+			sprintf(buf, "%d", nCurPage);
+			tmp = str.Left(r);
 			tmp += buf;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
@@ -465,8 +463,8 @@ void CCADView::PrintHeader(BOOL bFooter, HDC hDC, CRect rc, UINT nCurPage, UINT 
 		while ((r = str.Find("&O")) != -1)
 		{
 			char buf[5];
-			sprintf (buf, "%d", nMaxPage);
-			tmp = str.Left (r);
+			sprintf(buf, "%d", nMaxPage);
+			tmp = str.Left(r);
 			tmp += buf;
 			tmp += str.Right(str.GetLength()-r-2);
 			str = tmp;
@@ -622,21 +620,6 @@ BOOL CCADView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return FALSE;
 }
 
-BOOL CCADView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
-{
-	if (zDelta > 0)
-		lcGetActiveProject()->HandleCommand(LC_VIEW_ZOOMOUT, 0);
-	else
-		lcGetActiveProject()->HandleCommand(LC_VIEW_ZOOMIN, 0);
-
-	return CView::OnMouseWheel(nFlags, zDelta, pt);
-}
-
-void CCADView::OnMButtonDown(UINT nFlags, CPoint point) 
-{
-	CView::OnMButtonDown(nFlags, point);
-}
-
 void CCADView::OnTimer(UINT nIDEvent) 
 {
 	if (nIDEvent == IDT_LC_SAVETIMER)
@@ -667,7 +650,7 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	char nKey = nChar;
 
 	if (nChar >= VK_NUMPAD0 && nChar <= VK_NUMPAD9)
-    {
+	{
 		nKey = nChar - VK_NUMPAD0 + '0';
 	}
 
@@ -687,7 +670,7 @@ void CCADView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		}
 	}
 
-	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState (VK_CONTROL) < 0, GetKeyState (VK_SHIFT) < 0);
+	lcGetActiveProject()->OnKeyDown(nKey, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_SHIFT) < 0);
 
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
@@ -723,17 +706,17 @@ void CCADView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 
 LRESULT CCADView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
 {
-  if (m_pView)
-  {
-    MSG msg;
+	if (m_pView)
+	{
+		MSG msg;
 
 		msg.message = message;
-    msg.wParam = wParam;
-    msg.lParam = lParam;
+		msg.wParam = wParam;
+		msg.lParam = lParam;
 
 		if (GLWindowPreTranslateMessage(m_pView, &msg))
 			return TRUE;
-  }
-	
+	}
+
 	return CView::WindowProc(message, wParam, lParam);
 }

@@ -157,7 +157,7 @@ void PiecePreview::OnMouseMove(int x, int y, bool Control, bool Shift)
 	else if (m_Tracking == LC_TRACK_RIGHT)
 	{
 		// Zoom.
-		m_Distance += (float)(y - m_DownY) * 0.2f;
+		m_Distance += (float)(m_DownY - y) * 0.2f;
 		m_AutoZoom = false;
 
 		if (m_Distance < 0.5f)

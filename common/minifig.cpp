@@ -875,6 +875,12 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 		ParseSettings(MemSettings);
 	}
 
+	m_RotateX = 75.0f;
+	m_RotateZ = 180.0f;
+	m_Distance = 10.0f;
+	m_AutoZoom = true;
+	m_Tracking = LC_TRACK_NONE;
+
 	m_MinifigCount = 0;
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
@@ -1120,44 +1126,193 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 void MinifigWizard::OnDraw()
 {
-	int i;
-
 	if (!MakeCurrent())
 		return;
 
-	float aspect = (float)m_nWidth/(float)m_nHeight;
+	float Aspect = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
+
+	float Box[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+
+	for (int InfoIdx = 0; InfoIdx < LC_MFW_NUMITEMS; InfoIdx++)
+	{
+		PieceInfo* Info = m_Info[InfoIdx];
+
+		if (!Info)
+			continue;
+
+		lcVector3 Points[8] =
+		{
+			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[1], Info->m_fDimensions[5]),
+			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[1], Info->m_fDimensions[5]),
+			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[1], Info->m_fDimensions[2]),
+			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[4], Info->m_fDimensions[5]),
+			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[4], Info->m_fDimensions[2]),
+			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[4], Info->m_fDimensions[2]),
+			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[4], Info->m_fDimensions[5]),
+			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[1], Info->m_fDimensions[2])
+		};
+
+		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
+		{
+			lcVector3 Point = lcMul31(Points[PointIdx], m_Matrices[InfoIdx]);
+
+			if (Point[0] < Box[0]) Box[0] = Point[0];
+			if (Point[1] < Box[1]) Box[1] = Point[1];
+			if (Point[2] < Box[2]) Box[2] = Point[2];
+			if (Point[0] > Box[3]) Box[3] = Point[0];
+			if (Point[1] > Box[4]) Box[4] = Point[1];
+			if (Point[2] > Box[5]) Box[5] = Point[2];
+		}
+	}
+
+	lcVector3 Center((Box[0] + Box[3]) / 2, (Box[1] + Box[4]) / 2, (Box[2] + Box[5]) / 2);
+
+	lcVector3 Eye(0.0f, 0.0f, 1.0f);
+
+	Eye = lcMul30(Eye, lcMatrix44RotationX(-m_RotateX * LC_DTOR));
+	Eye = lcMul30(Eye, lcMatrix44RotationZ(-m_RotateZ * LC_DTOR));
+
+	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 100.0f);
 	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(lcMatrix44Perspective(30.0f, aspect, 1.0f, 20.0f));
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(lcMatrix44LookAt(lcVector3(0, -9, 4), lcVector3(0, 5, 1), lcVector3(0, 0, 1)));
+	glLoadMatrixf(Projection);
+
+	if (m_AutoZoom)
+	{
+		lcVector3 Points[8] =
+		{
+			lcVector3(Box[0], Box[1], Box[5]),
+			lcVector3(Box[3], Box[1], Box[5]),
+			lcVector3(Box[0], Box[1], Box[2]),
+			lcVector3(Box[3], Box[4], Box[5]),
+			lcVector3(Box[3], Box[4], Box[2]),
+			lcVector3(Box[0], Box[4], Box[2]),
+			lcVector3(Box[0], Box[4], Box[5]),
+			lcVector3(Box[3], Box[1], Box[2])
+		};
+
+		Eye += Center;
+
+		lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
+		Eye = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf(lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1)));
+
+		// Update the new camera distance.
+		lcVector3 d = Eye - Center;
+		m_Distance = d.Length();
+	}
+	else
+	{
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, Center, lcVector3(0, 0, 1)));
+	}
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_DITHER);
-	glShadeModel(GL_FLAT);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	Calculate();
 
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
 	{
-		if (m_Info[i] == NULL)
+		if (!m_Info[PieceIdx])
 			continue;
 
 		glPushMatrix();
-		glMultMatrixf(m_Matrices[i]);
-		m_Info[i]->RenderPiece(m_Colors[i]);
+		glMultMatrixf(m_Matrices[PieceIdx]);
+		m_Info[PieceIdx]->RenderPiece(m_Colors[PieceIdx]);
 		glPopMatrix();
 	}
 
-	glFinish();
-
 	SwapBuffers();
+}
+
+void MinifigWizard::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
+{
+	if (m_Tracking == LC_TRACK_NONE)
+	{
+		m_DownX = x;
+		m_DownY = y;
+		m_Tracking = LC_TRACK_LEFT;
+		CaptureMouse();
+	}
+}
+
+void MinifigWizard::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
+{
+	if (m_Tracking == LC_TRACK_LEFT)
+	{
+		m_Tracking = LC_TRACK_NONE;
+		ReleaseMouse();
+	}
+}
+
+void MinifigWizard::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift)
+{
+	m_AutoZoom = true;
+	Redraw();
+}
+
+void MinifigWizard::OnRightButtonDown(int x, int y, bool Control, bool Shift)
+{
+	if (m_Tracking == LC_TRACK_NONE)
+	{
+		m_DownX = x;
+		m_DownY = y;
+		m_Tracking = LC_TRACK_RIGHT;
+		CaptureMouse();
+	}
+}
+
+void MinifigWizard::OnRightButtonUp(int x, int y, bool Control, bool Shift)
+{
+	if (m_Tracking == LC_TRACK_RIGHT)
+	{
+		m_Tracking = LC_TRACK_NONE;
+		ReleaseMouse();
+	}
+}
+
+void MinifigWizard::OnMouseMove(int x, int y, bool Control, bool Shift)
+{
+	if (m_Tracking == LC_TRACK_LEFT)
+	{
+		// Rotate.
+		m_RotateZ += x - m_DownX;
+		m_RotateX += y - m_DownY;
+
+		if (m_RotateX > 179.5f)
+			m_RotateX = 179.5f;
+		else if (m_RotateX < 0.5f)
+			m_RotateX = 0.5f;
+
+		m_DownX = x;
+		m_DownY = y;
+
+		Redraw();
+	}
+	else if (m_Tracking == LC_TRACK_RIGHT)
+	{
+		// Zoom.
+		m_Distance += (float)(m_DownY - y) * 0.2f;
+		m_AutoZoom = false;
+
+		if (m_Distance < 0.5f)
+			m_Distance = 0.5f;
+
+		m_DownX = x;
+		m_DownY = y;
+
+		Redraw();
+	}
 }
 
 void MinifigWizard::Calculate()

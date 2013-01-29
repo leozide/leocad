@@ -672,8 +672,9 @@ struct LC_HTMLDLG_STRUCT
 	void* data;
 	GtkWidget *dlg;
 	GtkWidget *single, *multiple, *index;
-	GtkWidget *list_end, *list_step, *images;
+	GtkWidget *list_end, *list_step, *images, *list_id, *list_color;
 	GtkWidget *highlight, *directory;
+	int color;
 };
 
 static void htmldlg_images(GtkWidget *widget, gpointer data)
@@ -695,7 +696,51 @@ static void htmldlg_list (GtkWidget *widget, gpointer data)
 {
 	LC_HTMLDLG_STRUCT* s = (LC_HTMLDLG_STRUCT*)data;
 
-	gtk_widget_set_sensitive(s->images, GTK_TOGGLE_BUTTON(s->list_end)->active || GTK_TOGGLE_BUTTON(s->list_step)->active);
+	bool List = GTK_TOGGLE_BUTTON(s->list_end)->active || GTK_TOGGLE_BUTTON(s->list_step)->active;
+	bool Images = GTK_TOGGLE_BUTTON(s->images)->active;
+
+	if (!List && Images)
+	{
+		Images = false;
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s->images), false);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(s->list_id), false);
+	}
+
+	gtk_widget_set_sensitive(s->images, List);
+	gtk_widget_set_sensitive(s->list_color, List && Images);
+	gtk_widget_set_sensitive(s->list_id, List);
+}
+
+static void htmldlg_color_response(GtkWidget *widget, gpointer data)
+{
+	GtkWidget* button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(widget), "button");
+	int* Color = (int*)gtk_object_get_data(GTK_OBJECT(button), "color");
+	int NewColor = GPOINTER_TO_INT(data);
+
+	if (*Color != NewColor)
+	{
+		*Color = NewColor;
+		set_button_pixmap2(button, gColorList[NewColor].Value);
+	}
+}
+
+static void htmldlg_color_clicked(GtkWidget *widget, gpointer data)
+{
+	GtkWidget *menu, *menuitem;
+
+	menu = gtk_menu_new();
+
+	for (int i = 0; i < gNumUserColors; i++)
+	{
+		menuitem = gtk_menu_item_new_with_label(gColorList[i].Name);
+		gtk_widget_show(menuitem);
+		gtk_menu_append(GTK_MENU(menu), menuitem);
+
+		gtk_object_set_data(GTK_OBJECT(menuitem), "button", widget);
+		gtk_signal_connect(GTK_OBJECT(menuitem), "activate", GTK_SIGNAL_FUNC(htmldlg_color_response), GINT_TO_POINTER(i));
+	}
+
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, 0);
 }
 
 static void htmldlg_browse_output(GtkWidget *widget, gpointer data)
@@ -735,6 +780,7 @@ int htmldlg_execute(void* param)
 	                                  GTK_STOCK_OK, GTK_RESPONSE_OK, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(dlg), 5);
 	s.dlg = dlg;
+	s.color = opts->color;
 
 	vbox = GTK_DIALOG(dlg)->vbox;
 	gtk_box_set_spacing(GTK_BOX(vbox), 10);
@@ -788,9 +834,25 @@ int htmldlg_execute(void* param)
 	gtk_widget_show(s.list_end);
 	gtk_box_pack_start(GTK_BOX(vbox2), s.list_end, TRUE, TRUE, 0);
 
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(vbox2), hbox, TRUE, TRUE, 0);
+
 	s.images = gtk_check_button_new_with_label("Create Images");
 	gtk_widget_show(s.images);
-	gtk_box_pack_start(GTK_BOX(vbox2), s.images, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), s.images, TRUE, TRUE, 0);
+
+	s.list_color = gtk_button_new_with_label("");
+	gtk_widget_set_events(s.list_color, GDK_EXPOSURE_MASK);
+	gtk_widget_show(s.list_color);
+	gtk_object_set_data(GTK_OBJECT(s.list_color), "color", &s.color);
+	gtk_widget_set_usize(s.list_color, 40, 25);
+	gtk_signal_connect(GTK_OBJECT(s.list_color), "clicked", GTK_SIGNAL_FUNC(htmldlg_color_clicked), NULL);
+	gtk_box_pack_start(GTK_BOX(hbox), s.list_color, FALSE, TRUE, 0);
+
+	s.list_id = gtk_check_button_new_with_label("Include piece ID");
+	gtk_widget_show(s.list_id);
+	gtk_box_pack_start(GTK_BOX(vbox2), s.list_id, TRUE, TRUE, 0);
 
 	s.highlight = gtk_check_button_new_with_label("Highlight new pieces");
 	gtk_widget_show(s.highlight);
@@ -817,6 +879,7 @@ int htmldlg_execute(void* param)
 	gtk_signal_connect(GTK_OBJECT(s.multiple), "toggled", GTK_SIGNAL_FUNC(htmldlg_layout), &s);
 	gtk_signal_connect(GTK_OBJECT(s.list_step), "toggled", GTK_SIGNAL_FUNC(htmldlg_list), &s);
 	gtk_signal_connect(GTK_OBJECT(s.list_end), "toggled", GTK_SIGNAL_FUNC(htmldlg_list), &s);
+	gtk_signal_connect(GTK_OBJECT(s.images), "toggled", GTK_SIGNAL_FUNC(htmldlg_list), &s);
 
 	gtk_entry_set_text(GTK_ENTRY(s.directory), opts->path);
 	if (opts->singlepage)
@@ -832,6 +895,9 @@ int htmldlg_execute(void* param)
 	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.single));
 	gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(s.list_step));
 
+	gtk_widget_show(dlg);
+	set_button_pixmap2(s.list_color, gColorList[opts->color].Value);
+
 	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
 		ret = LC_OK;
@@ -842,6 +908,7 @@ int htmldlg_execute(void* param)
 		opts->listend = (GTK_TOGGLE_BUTTON(s.list_end)->active) ? true : false;
 		opts->liststep = (GTK_TOGGLE_BUTTON(s.list_step)->active) ? true : false;
 		opts->highlight = (GTK_TOGGLE_BUTTON(s.highlight)->active) ? true : false;
+		opts->color = s.color;
 		strcpy(opts->path, gtk_entry_get_text(GTK_ENTRY(s.directory)));
 	}
 	else

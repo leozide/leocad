@@ -43,6 +43,12 @@ public:
 	~MinifigWizard ();
 
 	void OnDraw ();
+	void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
+	void OnRightButtonDown(int x, int y, bool Control, bool Shift);
+	void OnRightButtonUp(int x, int y, bool Control, bool Shift);
+	void OnMouseMove(int x, int y, bool Control, bool Shift);
 	void OnInitialUpdate();
 
 	void Calculate();
@@ -70,6 +76,17 @@ protected:
 	int  m_MinifigCount;
 	char **m_MinifigNames;
 	char **m_MinifigTemplates;
+
+	// Mouse tracking.
+	int m_Tracking;
+	int m_DownX;
+	int m_DownY;
+
+	// Current camera settings.
+	float m_Distance;
+	float m_RotateX;
+	float m_RotateZ;
+	bool m_AutoZoom;
 };
 
 #endif // _MINIFIG_H_

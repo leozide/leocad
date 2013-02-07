@@ -1,7 +1,0 @@
-// Microsoft Developer Studio generated Help ID include file.
-// Used by LeoCAD.rc
-//
-#define HIDC_POVDLG_LGEO                0x80c6047c    // IDD_EXPORTPOV
-#define HIDC_POVDLG_OUTPOV              0x80c60481    // IDD_EXPORTPOV
-#define HIDC_POVDLG_POVRAY              0x80c6047d    // IDD_EXPORTPOV
-#define HIDC_POVDLG_RENDER              0x80c6047e    // IDD_EXPORTPOV

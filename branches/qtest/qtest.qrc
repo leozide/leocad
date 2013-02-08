@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/linux/pixmaps">
+        <file>linux/pixmaps/ac-brick.xpm</file>
+        <file>linux/pixmaps/ac-cam.xpm</file>
+        <file>linux/pixmaps/ac-light.xpm</file>
+        <file>linux/pixmaps/ac-next.xpm</file>
+        <file>linux/pixmaps/ac-pan.xpm</file>
+        <file>linux/pixmaps/ac-prev.xpm</file>
+        <file>linux/pixmaps/ac-roll.xpm</file>
+        <file>linux/pixmaps/ac-rot.xpm</file>
+        <file>linux/pixmaps/ac-rotv.xpm</file>
+        <file>linux/pixmaps/ac-sel.xpm</file>
+        <file>linux/pixmaps/ac-spot.xpm</file>
+        <file>linux/pixmaps/ac-erase.xpm</file>
+        <file>linux/pixmaps/ac-move.xpm</file>
+        <file>linux/pixmaps/ac-paint.xpm</file>
+        <file>linux/pixmaps/ac-zoom.xpm</file>
+        <file>linux/pixmaps/ac-zoome.xpm</file>
+        <file>linux/pixmaps/ac-zoomr.xpm</file>
+    </qresource>
+</RCC>

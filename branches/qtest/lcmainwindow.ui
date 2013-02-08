@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>lcMainWindow</class>
+ <widget class="QMainWindow" name="lcMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>543</width>
+    <height>381</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>1</horstretch>
+    <verstretch>1</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>lcMainWindow</string>
+  </property>
+  <widget class="lcViewWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>543</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionMerge"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_As"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+   </widget>
+   <widget class="QMenu" name="menuPiece">
+    <property name="title">
+     <string>Piece</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuStep">
+     <property name="title">
+      <string>Step</string>
+     </property>
+     <addaction name="actionFirst"/>
+     <addaction name="actionPrevious"/>
+     <addaction name="actionNext"/>
+     <addaction name="actionLast"/>
+    </widget>
+    <addaction name="menuStep"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuPiece"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="separator"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="separator"/>
+   <addaction name="actionCut"/>
+   <addaction name="actionCopy"/>
+   <addaction name="actionPaste"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="dockWidget_2">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>200</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Pieces</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>1</horstretch>
+      <verstretch>1</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QSplitter" name="splitter">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>1</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="lcPreviewWidget" name="widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>2</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+       <widget class="QTreeWidget" name="treeWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>2</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="headerHidden">
+         <bool>true</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QComboBox" name="comboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QWidget" name="widget_2" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionFirst"/>
+   <addaction name="actionPrevious"/>
+   <addaction name="actionPlay"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionNext"/>
+   <addaction name="actionLast"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar_2">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionInsert"/>
+   <addaction name="actionLight"/>
+   <addaction name="actionSpotLight"/>
+   <addaction name="actionCamera"/>
+   <addaction name="separator"/>
+   <addaction name="actionSelect"/>
+   <addaction name="actionMove"/>
+   <addaction name="actionRotate"/>
+   <addaction name="actionDelete"/>
+   <addaction name="actionPaint"/>
+   <addaction name="actionZoom"/>
+   <addaction name="actionPan"/>
+   <addaction name="actionRotateView"/>
+   <addaction name="actionRoll"/>
+   <addaction name="actionZoomRegion"/>
+   <addaction name="actionZoomExtents"/>
+   <addaction name="actionShowPrevious"/>
+   <addaction name="actionShowNext"/>
+  </widget>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset theme="document-new">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset theme="document-open">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionMerge">
+   <property name="text">
+    <string>Merge</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset theme="document-save">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset theme="edit-undo">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset theme="edit-redo">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset theme="edit-cut">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset theme="edit-copy">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset theme="edit-paste">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionFirst">
+   <property name="icon">
+    <iconset theme="media-skip-backward">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>First</string>
+   </property>
+  </action>
+  <action name="actionPrevious">
+   <property name="icon">
+    <iconset theme="media-seek-backward">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Previous</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="icon">
+    <iconset theme="media-playback-start">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Play</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset theme="media-playback-stop">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="icon">
+    <iconset theme="media-seek-forward">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Next</string>
+   </property>
+  </action>
+  <action name="actionLast">
+   <property name="icon">
+    <iconset theme="media-skip-forward">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Last</string>
+   </property>
+  </action>
+  <action name="actionInsert">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-brick.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-brick.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Insert</string>
+   </property>
+  </action>
+  <action name="actionLight">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-light.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-light.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Light</string>
+   </property>
+  </action>
+  <action name="actionSpotLight">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-spot.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-spot.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>SpotLight</string>
+   </property>
+  </action>
+  <action name="actionCamera">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-cam.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-cam.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Camera</string>
+   </property>
+  </action>
+  <action name="actionSelect">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-sel.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-sel.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Select</string>
+   </property>
+  </action>
+  <action name="actionMove">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-move.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-move.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Move</string>
+   </property>
+  </action>
+  <action name="actionRotate">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-rot.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-rot.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-erase.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-erase.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionPaint">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-paint.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-paint.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Paint</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoom.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoom.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionPan">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-pan.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-pan.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Pan</string>
+   </property>
+  </action>
+  <action name="actionRotateView">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-rotv.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-rotv.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>RotateView</string>
+   </property>
+  </action>
+  <action name="actionRoll">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-roll.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-roll.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>Roll</string>
+   </property>
+  </action>
+  <action name="actionZoomRegion">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoomr.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoomr.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>ZoomRegion</string>
+   </property>
+  </action>
+  <action name="actionZoomExtents">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoome.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoome.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>ZoomExtents</string>
+   </property>
+  </action>
+  <action name="actionShowPrevious">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-prev.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-prev.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>ShowPrevious</string>
+   </property>
+  </action>
+  <action name="actionShowNext">
+   <property name="icon">
+    <iconset resource="qtest.qrc">
+     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-next.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-next.xpm</iconset>
+   </property>
+   <property name="text">
+    <string>ShowNext</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>lcViewWidget</class>
+   <extends>QWidget</extends>
+   <header>lc_viewwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>lcPreviewWidget</class>
+   <extends>QWidget</extends>
+   <header>lc_previewwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="qtest.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -25,14 +25,24 @@ PiecePreview::~PiecePreview()
 {
 }
 
+int qtest;
+
 void PiecePreview::OnDraw()
 {
 	if (m_PieceInfo == NULL)
 		return;
-
+int ow = m_nWidth, oh = m_nHeight;
+if (!qtest)
+{
 	if (!MakeCurrent())
 		return;
-
+}
+else
+{
+    extern int qpw, qph;
+    m_nWidth = qpw;
+    m_nHeight = qph;
+}
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_POLYGON_OFFSET_FILL);
@@ -69,8 +79,16 @@ void PiecePreview::OnDraw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
 
+if (!qtest)
+{
 	glFinish();
 	SwapBuffers();
+}
+else
+{
+    m_nWidth = ow;
+    m_nHeight = oh;
+}
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)

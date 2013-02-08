@@ -769,7 +769,10 @@ int main (int argc, char* argv[])
     preview->SetCurrentPiece(Info);
   }
 
-  gtk_main();
+//  gtk_main();
+  int qt_main (int argc, char* argv[]);
+  qt_main(argc, argv);
+
 
   gtk_widget_unref (drawing_frame);
   gtk_widget_unref (pieces_frame);

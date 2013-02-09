@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_mainwindow.h"
 #include "ui_lcmainwindow.h"
 #include "lc_global.h"

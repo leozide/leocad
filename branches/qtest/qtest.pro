@@ -68,7 +68,8 @@ SOURCES +=\
     linux/dialogs.cpp \
     linux/basewnd.cpp \
     linux/system.cpp \
-    qtmain.cpp
+    qtmain.cpp \
+    lc_colorlistwidget.cpp
 
 HEADERS  += lc_mainwindow.h \
     lc_previewwidget.h \
@@ -112,7 +113,8 @@ HEADERS  += lc_mainwindow.h \
     common/console.h \
     common/camera.h \
     common/basewnd.h \
-    linux/*.h
+    linux/*.h \
+    lc_colorlistwidget.h
 
 FORMS    += lcmainwindow.ui
 

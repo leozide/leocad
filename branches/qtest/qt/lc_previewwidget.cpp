@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_previewwidget.h"
 #include <QtGui>
 #include <QtOpenGL>
@@ -7,26 +8,20 @@
 lcPreviewWidget::lcPreviewWidget(QWidget *parent) :
 	QGLWidget(parent)
 {
+	mPreview = new PiecePreview(NULL);
+	mPreview->CreateFromWindow(this);
 }
 
 void lcPreviewWidget::initializeGL()
 {
 }
-int qpw,qph;
 
 void lcPreviewWidget::resizeGL(int width, int height)
 {
-	glViewport(0,0,width,height);
-	qpw = width;
-	qph = height;
+	mPreview->OnSize(width, height);
 }
 
 void lcPreviewWidget::paintGL()
 {
-	extern PiecePreview* preview;
-	extern int qtest;
-	qtest = 1;
-	GL_DisableVertexBufferObject();
-	preview->OnDraw();
-	qtest = 0;
+	mPreview->OnDraw();
 }

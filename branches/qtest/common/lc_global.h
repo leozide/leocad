@@ -11,7 +11,7 @@
 #define LC_VERSION_TEXT "0.79.2"
 
 // Check for supported platforms.
-#if !defined(LC_WINDOWS) && !defined(LC_LINUX)
+#if !defined(LC_WINDOWS) && !defined(LC_LINUX) && !defined(LC_QT)
 #error No OS defined.
 #endif
 

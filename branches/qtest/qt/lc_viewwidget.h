@@ -2,11 +2,14 @@
 #define LC_VIEWWIDGET_H
 
 #include <QGLWidget>
+class View;
 
 class lcViewWidget : public QGLWidget
 {
 public:
 	lcViewWidget(QWidget *parent);
+
+	View* mView;
 
 protected:
 	void initializeGL();

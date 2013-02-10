@@ -2,11 +2,14 @@
 #define LC_PREVIEWWIDGET_H
 
 #include <QGLWidget>
+class PiecePreview;
 
 class lcPreviewWidget : public QGLWidget
 {
 public:
 	lcPreviewWidget(QWidget *parent = 0);
+
+	PiecePreview* mPreview;
 
 protected:
 	void initializeGL();

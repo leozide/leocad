@@ -17,6 +17,10 @@
 #define APIENTRY
 #endif
 
+#ifdef LC_QT
+#include <QtOpenGL>
+#endif
+
 bool GL_Initialize(const char* libname);
 void GL_Shutdown();
 void GL_InitializeExtensions();
@@ -833,6 +837,8 @@ extern PFNGLPOPNAME pfnglPopName;
 
 #endif // LC_OPENGL_DYNAMIC
 
+#ifndef LC_QT
+
 extern GLBINDBUFFERARBPROC glBindBufferARB;
 extern GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 extern GLGENBUFFERSARBPROC glGenBuffersARB;
@@ -844,6 +850,8 @@ extern GLMAPBUFFERARBPROC glMapBufferARB;
 extern GLUNMAPBUFFERARBPROC glUnmapBufferARB;
 extern GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
 extern GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
+
+#endif
 
 // =============================================================================
 // Replace OpenGL function names with the dynamic functions

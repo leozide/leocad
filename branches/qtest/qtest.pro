@@ -9,15 +9,16 @@ QT       += core gui opengl
 TARGET = qtest
 TEMPLATE = app
 
-DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\" LC_HAVE_PNGLIB
-INCLUDEPATH += linux common /usr/include/gtk-2.0 /usr/lib/x86_64-linux-gnu/gtk-2.0/include /usr/include/atk-1.0 /usr/include/cairo /usr/include/gdk-pixbuf-2.0 /usr/include/pango-1.0 /usr/include/gio-unix-2.0/ /usr/include/glib-2.0 /usr/lib/x86_64-linux-gnu/glib-2.0/include /usr/include/pixman-1 /usr/include/freetype2 /usr/include/libpng12
+DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
+INCLUDEPATH += qt common /usr/include/gtk-2.0 /usr/lib/x86_64-linux-gnu/gtk-2.0/include /usr/include/atk-1.0 /usr/include/cairo /usr/include/gdk-pixbuf-2.0 /usr/include/pango-1.0 /usr/include/gio-unix-2.0/ /usr/include/glib-2.0 /usr/lib/x86_64-linux-gnu/glib-2.0/include /usr/include/pixman-1 /usr/include/freetype2 /usr/include/libpng12
+linux {
 LIBS += -lX11 -lpng -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lglib-2.0   -lpng -lm -lz -lX11 -ldl
+}
+LIBS += -lz
 
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 
-SOURCES +=\
-        lc_mainwindow.cpp \
-    lc_previewwidget.cpp \
-    lc_viewwidget.cpp \
+SOURCES += \
     common/view.cpp \
     common/tr.cpp \
     common/texfont.cpp \
@@ -54,26 +55,25 @@ SOURCES +=\
     common/console.cpp \
     common/camera.cpp \
     common/array.cpp \
-    linux/toolbar.cpp \
-    linux/profile.cpp \
-    linux/menu.cpp \
-    linux/main.cpp \
-    linux/linux_gl.cpp \
-    linux/libdlg.cpp \
-    linux/gtktools.cpp \
-    linux/gtkmisc.cpp \
-    linux/glwindow.cpp \
-    linux/dlgpiece.cpp \
-    linux/dlgfile.cpp \
-    linux/dialogs.cpp \
-    linux/basewnd.cpp \
-    linux/system.cpp \
-    qtmain.cpp \
-    lc_colorlistwidget.cpp
+    qt/lc_mainwindow.cpp \
+    qt/lc_previewwidget.cpp \
+    qt/lc_viewwidget.cpp \
+    qt/toolbar.cpp \
+    qt/profile.cpp \
+    qt/menu.cpp \
+    qt/main.cpp \
+    qt/linux_gl.cpp \
+    qt/libdlg.cpp \
+    qt/glwindow.cpp \
+    qt/dlgpiece.cpp \
+    qt/dlgfile.cpp \
+    qt/dialogs.cpp \
+    qt/basewnd.cpp \
+    qt/system.cpp \
+    qt/qtmain.cpp \
+    qt/lc_colorlistwidget.cpp
 
-HEADERS  += lc_mainwindow.h \
-    lc_previewwidget.h \
-    lc_viewwidget.h \
+HEADERS  += \
     common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -113,12 +113,14 @@ HEADERS  += lc_mainwindow.h \
     common/console.h \
     common/camera.h \
     common/basewnd.h \
-    linux/*.h \
-    lc_colorlistwidget.h
+    qt/lc_colorlistwidget.h \
+    qt/lc_mainwindow.h \
+    qt/lc_previewwidget.h \
+    qt/lc_viewwidget.h
 
-FORMS    += lcmainwindow.ui
+FORMS    += qt/lc_mainwindow.ui
 
 OTHER_FILES +=
 
 RESOURCES += \
-    qtest.qrc
+    qt/leocad.qrc

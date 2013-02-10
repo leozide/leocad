@@ -10,31 +10,27 @@
 lcViewWidget::lcViewWidget(QWidget *parent)
 	: QGLWidget(parent)
 {
+	Project* project = lcGetActiveProject();
+
+	mView = new View(project, NULL);
+	mView->CreateFromWindow(this);
+
+	if (project->GetActiveView())
+		mView->SetCamera(project->GetActiveView()->mCamera, false);
+	else
+		mView->SetDefaultCamera();
 }
 
 void lcViewWidget::initializeGL()
 {
 }
 
-int vw, vh;
-
 void lcViewWidget::resizeGL(int width, int height)
 {
-	vw = width;
-	vh = height;
+	mView->OnSize(width, height);
 }
 
 void lcViewWidget::paintGL()
 {
-	Project* p = lcGetActiveProject();
-	if (!p)
-		return;
-
-	View* av = p->GetActiveView();
-	if (!av)
-		return;
-	static View v(p,NULL);
-	v.OnSize(vw, vh);
-	v.mCamera = av->mCamera;
-	p->Render(&v, false);
+	mView->OnDraw();
 }

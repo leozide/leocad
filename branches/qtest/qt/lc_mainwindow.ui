@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>543</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -144,7 +144,7 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="lcPreviewWidget" name="widget" native="true">
+       <widget class="lcPreviewWidget" name="piecePreview" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>2</horstretch>
@@ -152,7 +152,7 @@
          </sizepolicy>
         </property>
        </widget>
-       <widget class="QTreeWidget" name="treeWidget">
+       <widget class="QTreeWidget" name="pieceList">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>2</horstretch>
@@ -168,7 +168,7 @@
          </property>
         </column>
        </widget>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="pieceCombo">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>1</horstretch>
@@ -179,7 +179,7 @@
          <bool>true</bool>
         </property>
        </widget>
-       <widget class="lcColorListWidget" name="widget_2" native="true">
+       <widget class="lcColorListWidget" name="colorList" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -390,8 +390,8 @@
   </action>
   <action name="actionInsert">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-brick.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-brick.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-brick.xpm</normaloff>:/pixmaps/ac-brick.xpm</iconset>
    </property>
    <property name="text">
     <string>Insert</string>
@@ -399,8 +399,8 @@
   </action>
   <action name="actionLight">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-light.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-light.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-light.xpm</normaloff>:/pixmaps/ac-light.xpm</iconset>
    </property>
    <property name="text">
     <string>Light</string>
@@ -408,8 +408,8 @@
   </action>
   <action name="actionSpotLight">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-spot.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-spot.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-spot.xpm</normaloff>:/pixmaps/ac-spot.xpm</iconset>
    </property>
    <property name="text">
     <string>SpotLight</string>
@@ -417,8 +417,8 @@
   </action>
   <action name="actionCamera">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-cam.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-cam.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-cam.xpm</normaloff>:/pixmaps/ac-cam.xpm</iconset>
    </property>
    <property name="text">
     <string>Camera</string>
@@ -426,8 +426,8 @@
   </action>
   <action name="actionSelect">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-sel.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-sel.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-sel.xpm</normaloff>:/pixmaps/ac-sel.xpm</iconset>
    </property>
    <property name="text">
     <string>Select</string>
@@ -435,8 +435,8 @@
   </action>
   <action name="actionMove">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-move.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-move.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-move.xpm</normaloff>:/pixmaps/ac-move.xpm</iconset>
    </property>
    <property name="text">
     <string>Move</string>
@@ -444,8 +444,8 @@
   </action>
   <action name="actionRotate">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-rot.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-rot.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-rot.xpm</normaloff>:/pixmaps/ac-rot.xpm</iconset>
    </property>
    <property name="text">
     <string>Rotate</string>
@@ -453,8 +453,8 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-erase.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-erase.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-erase.xpm</normaloff>:/pixmaps/ac-erase.xpm</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -462,8 +462,8 @@
   </action>
   <action name="actionPaint">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-paint.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-paint.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-paint.xpm</normaloff>:/pixmaps/ac-paint.xpm</iconset>
    </property>
    <property name="text">
     <string>Paint</string>
@@ -471,8 +471,8 @@
   </action>
   <action name="actionZoom">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoom.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoom.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-zoom.xpm</normaloff>:/pixmaps/ac-zoom.xpm</iconset>
    </property>
    <property name="text">
     <string>Zoom</string>
@@ -480,8 +480,8 @@
   </action>
   <action name="actionPan">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-pan.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-pan.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-pan.xpm</normaloff>:/pixmaps/ac-pan.xpm</iconset>
    </property>
    <property name="text">
     <string>Pan</string>
@@ -489,8 +489,8 @@
   </action>
   <action name="actionRotateView">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-rotv.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-rotv.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-rotv.xpm</normaloff>:/pixmaps/ac-rotv.xpm</iconset>
    </property>
    <property name="text">
     <string>RotateView</string>
@@ -498,8 +498,8 @@
   </action>
   <action name="actionRoll">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-roll.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-roll.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-roll.xpm</normaloff>:/pixmaps/ac-roll.xpm</iconset>
    </property>
    <property name="text">
     <string>Roll</string>
@@ -507,8 +507,8 @@
   </action>
   <action name="actionZoomRegion">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoomr.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoomr.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-zoomr.xpm</normaloff>:/pixmaps/ac-zoomr.xpm</iconset>
    </property>
    <property name="text">
     <string>ZoomRegion</string>
@@ -516,8 +516,8 @@
   </action>
   <action name="actionZoomExtents">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoome.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-zoome.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-zoome.xpm</normaloff>:/pixmaps/ac-zoome.xpm</iconset>
    </property>
    <property name="text">
     <string>ZoomExtents</string>
@@ -525,8 +525,8 @@
   </action>
   <action name="actionShowPrevious">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-prev.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-prev.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-prev.xpm</normaloff>:/pixmaps/ac-prev.xpm</iconset>
    </property>
    <property name="text">
     <string>ShowPrevious</string>
@@ -534,8 +534,8 @@
   </action>
   <action name="actionShowNext">
    <property name="icon">
-    <iconset resource="qtest.qrc">
-     <normaloff>:/linux/pixmaps/linux/pixmaps/ac-next.xpm</normaloff>:/linux/pixmaps/linux/pixmaps/ac-next.xpm</iconset>
+    <iconset>
+	 <normaloff>:/pixmaps/ac-next.xpm</normaloff>:/pixmaps/ac-next.xpm</iconset>
    </property>
    <property name="text">
     <string>ShowNext</string>
@@ -563,8 +563,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="qtest.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

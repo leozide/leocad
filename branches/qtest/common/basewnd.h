@@ -25,7 +25,7 @@ typedef struct
 } BaseMenuItem;
 #endif
 
-#ifdef LC_MACOSX
+#ifdef LC_QT
 typedef void* BaseWndXID;
 typedef struct
 {

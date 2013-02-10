@@ -1,10 +1,12 @@
 #include "lc_global.h"
 #include "lc_mainwindow.h"
-#include "ui_lcmainwindow.h"
 #include "lc_global.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"
+#include "project.h"
+#include "preview.h"
+#include "ui_lc_mainwindow.h"
 
 static int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
 {
@@ -85,7 +87,20 @@ lcMainWindow::lcMainWindow(QWidget *parent) :
 		}
 */
 	}
-	ui->treeWidget->insertTopLevelItems(0, items);
+	ui->pieceList->insertTopLevelItems(0, items);
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	PieceInfo* Info = Library->FindPiece("3005", false);
+
+	if (!Info)
+		Info = Library->mPieces[0];
+
+	if (Info)
+	{
+		lcGetActiveProject()->SetCurrentPiece(Info);
+		ui->piecePreview->mPreview->SetCurrentPiece(Info);
+	}
+
 }
 
 lcMainWindow::~lcMainWindow()

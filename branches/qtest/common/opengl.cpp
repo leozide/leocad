@@ -357,6 +357,8 @@ PFNGLPUSHNAME pfnglPushName;
 PFNGLPOPNAME pfnglPopName;
 #endif // LC_OPENGL_DYNAMIC
 
+#ifndef LC_QT
+
 GLBINDBUFFERARBPROC glBindBufferARB;
 GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 GLGENBUFFERSARBPROC glGenBuffersARB;
@@ -370,6 +372,8 @@ GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
 GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
 
 PFNGLSAMPLECOVERAGEARBPROC glSampleCoverageARB;
+
+#endif
 
 // =============================================================================
 // Initialization functions
@@ -717,6 +721,7 @@ void GL_Shutdown ()
 	pfnglPopName = NULL;
 #endif // LC_OPENGL_DYNAMIC
 
+#ifndef LC_QT
 	glBindBufferARB = NULL;
 	glDeleteBuffersARB = NULL;
 	glGenBuffersARB = NULL;
@@ -728,6 +733,7 @@ void GL_Shutdown ()
 	glUnmapBufferARB = NULL;
 	glGetBufferParameterivARB = NULL;
 	glGetBufferPointervARB = NULL;
+#endif
 }
 
 bool GL_Initialize(const char* LibraryName)
@@ -1127,6 +1133,7 @@ void GL_InitializeSharedExtensions()
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
+#ifndef LC_QT
 		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB");
 		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB");
 		glGenBuffersARB = (GLGENBUFFERSARBPROC)Sys_GLGetExtension("glGenBuffersARB");
@@ -1138,6 +1145,7 @@ void GL_InitializeSharedExtensions()
 		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Sys_GLGetExtension("glUnmapBufferARB");
 		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB");
 		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB");
+#endif
 
 		GL_UseVertexBufferObject = true;
 		GL_SupportsVertexBufferObject = true;

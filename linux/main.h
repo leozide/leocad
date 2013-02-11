@@ -12,6 +12,11 @@ extern bool ignore_commands;
 void OnCommand(GtkWidget *w, gpointer data);
 void OnCommandDirect(GtkWidget *w, gpointer data);
 
+class PieceInfo;
+extern PieceInfo *dragged_piece;
+extern bool dragging_color;
+extern const GtkTargetEntry drag_target_list[];
+
 #define ID_FILE_RECENT1            1
 #define ID_FILE_RECENT2            2
 #define ID_FILE_RECENT3            3

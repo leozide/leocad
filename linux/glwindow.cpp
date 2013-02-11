@@ -2,9 +2,12 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include "lc_global.h"
+#include "lc_application.h"
 #include "opengl.h"
 #include "glwindow.h"
 #include "defines.h"
+#include "main.h"
+#include "project.h"
 #include "system.h"
 
 struct GLWindowPrivate
@@ -19,6 +22,7 @@ static XVisualInfo* WindowXVisualInfo = NULL;
 static bool WindowMultisample = false;
 static GLXContext WindowContext;
 static int WindowContextCount;
+static bool dragging;
 
 // =============================================================================
 // static functions
@@ -116,6 +120,52 @@ static gint pointer_motion_event(GtkWidget *widget, GdkEventMotion *event, gpoin
 
 	wnd->OnMouseMove(x, y, (event->state & GDK_CONTROL_MASK) != 0, (event->state & GDK_SHIFT_MASK) != 0);
 
+	return TRUE;
+}
+
+static gboolean drag_drop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, gpointer data)
+{
+	if (!dragged_piece)
+	{
+		return FALSE;
+	}
+
+	GLWindow *wnd = (GLWindow*)data;
+	y = widget->allocation.height - y - 1;
+	lcGetActiveProject()->BeginPieceDrop(dragged_piece);
+	wnd->OnLeftButtonUp(x, y, FALSE, FALSE);
+	gtk_drag_finish(context, TRUE, FALSE, time);
+	return TRUE;
+}
+
+static void drag_leave(GtkWidget *widget, GdkDragContext *context, guint time, gpointer data)
+{
+	if (dragging)
+	{
+		dragging = false;
+		lcGetActiveProject()->HandleNotify(LC_CAPTURE_LOST, 0);
+	}
+}
+
+static gboolean drag_motion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, gpointer data)
+{
+	if (!dragged_piece)
+	{
+		return FALSE;
+	}
+
+	GLWindow *wnd = (GLWindow*)data;
+	y = widget->allocation.height - y - 1;
+
+	if (!dragging)
+	{
+		dragging = true;
+		lcGetActiveProject()->BeginPieceDrop(dragged_piece);
+	}
+
+	wnd->OnMouseMove(x, y, FALSE, FALSE);
+
+	gdk_drag_status(context, GDK_ACTION_COPY, time);
 	return TRUE;
 }
 
@@ -258,6 +308,8 @@ bool GLWindow::CreateFromWindow(void *data)
 
 	gtk_widget_set_events(GTK_WIDGET(prv->widget), GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK);
 
+	gtk_drag_dest_set(prv->widget, GTK_DEST_DEFAULT_MOTION, drag_target_list, 1, GDK_ACTION_COPY);
+
 	// Connect signal handlers
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "expose_event", GTK_SIGNAL_FUNC(expose_event), this);
 //	gtk_signal_connect(GTK_OBJECT(prv->widget), "destroy", GTK_SIGNAL_FUNC(destroy_event), this);
@@ -265,6 +317,9 @@ bool GLWindow::CreateFromWindow(void *data)
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "motion_notify_event", GTK_SIGNAL_FUNC(pointer_motion_event), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), this);
+	gtk_signal_connect(GTK_OBJECT(prv->widget), "drag_drop", GTK_SIGNAL_FUNC(drag_drop), this);
+	gtk_signal_connect(GTK_OBJECT(prv->widget), "drag_leave", GTK_SIGNAL_FUNC(drag_leave), this);
+	gtk_signal_connect(GTK_OBJECT(prv->widget), "drag_motion", GTK_SIGNAL_FUNC(drag_motion), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "scroll_event", GTK_SIGNAL_FUNC(scroll_event), this);
 	gtk_signal_connect(GTK_OBJECT(prv->widget), "realize", GTK_SIGNAL_FUNC(realize_event), this);
 

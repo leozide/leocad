@@ -44,6 +44,9 @@ static char app_path[PATH_MAX];
 static char lib_path[] = LC_INSTALL_PREFIX"/share/leocad/";
 bool ignore_commands = false;
 
+PieceInfo *dragged_piece;
+const GtkTargetEntry drag_target_list[] = {{ (gchar*)"application/x-leocat", GTK_TARGET_SAME_APP, 0}};
+
 static void update_window_layout ();
 static gint main_quit (GtkWidget *widget, GdkEvent* event, gpointer data);
 

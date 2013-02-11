@@ -6886,6 +6886,19 @@ bool Project::StopTracking(bool bAccept)
 		}
 		else
 		{
+			if (m_nCurAction == LC_ACTION_INSERT)
+			{
+				m_pCurPiece->Release();
+				m_pCurPiece = m_PreviousPiece;
+				m_PreviousPiece = NULL;
+
+				if (m_RestoreAction)
+				{
+					SetAction(m_PreviousAction);
+					m_RestoreAction = false;
+				}
+			}
+
 			DeleteContents (true);
 			FileLoad (m_pTrackFile, true, false);
 			delete m_pTrackFile;

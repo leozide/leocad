@@ -108,13 +108,15 @@ desktop: obj
 	@echo "Version=1.0" >> $(OBJDIR)/leocad.desktop
 	@echo "Name=LeoCAD" >> $(OBJDIR)/leocad.desktop
 	@echo "Comment=Create virtual LEGO models" >> $(OBJDIR)/leocad.desktop
+	@echo "Comment[eo]=Kreu virtualajn LEGO-ajn modelojn" >> $(OBJDIR)/leocad.desktop
+	@echo "Comment[it]=Crea modelli LEGO virtuali" >> $(OBJDIR)/leocad.desktop
 	@echo "Comment[nb]=Lag virtuelle LEGO-modeller" >> $(OBJDIR)/leocad.desktop
 	@echo "Comment[pt_BR]=Criar modelos virtuais de LEGO" >> $(OBJDIR)/leocad.desktop
-	@echo "Exec=$(DESTDIR)$(PREFIX)/bin/leocad %f" >> $(OBJDIR)/leocad.desktop
+	@echo "Exec=$(PREFIX)/bin/leocad %f" >> $(OBJDIR)/leocad.desktop
 	@echo "Terminal=false" >> $(OBJDIR)/leocad.desktop
 	@echo "Type=Application" >> $(OBJDIR)/leocad.desktop
-	@echo "Icon=$(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg" >> $(OBJDIR)/leocad.desktop
-	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;" >> $(OBJDIR)/leocad.desktop
+	@echo "Icon=$(PREFIX)/share/pixmaps/leocad.svg" >> $(OBJDIR)/leocad.desktop
+	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;application/x-ldlite;" >> $(OBJDIR)/leocad.desktop
 	@echo "Categories=Graphics;3DGraphics;Education;" >> $(OBJDIR)/leocad.desktop
 
 install: $(BIN) install-data install-update
@@ -133,7 +135,7 @@ install-data: desktop
 	@install -c -m 0644 tools/icon/icon.svg $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg
 	@install -d $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/
 	@rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
-	@ln -s $(DESTDIR)$(PREFIX)/share/pixmaps/leocad.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
+	@ln -s $(PREFIX)/share/pixmaps/leocad.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
 	@install -d $(DESTDIR)$(PREFIX)/share/mime/packages
 	@install -c -m 0644 linux/leocad-mime.xml $(DESTDIR)$(PREFIX)/share/mime/packages/
 

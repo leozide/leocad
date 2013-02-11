@@ -18,7 +18,13 @@
 lcPiecesLibrary::lcPiecesLibrary()
 {
 	mNumOfficialPieces = 0;
-	mZipFile = NULL;
+	mLibraryPath[0] = 0;
+	mCacheFileName[0] = 0;
+	mCategoriesFile[0] = 0;
+	mCacheFileModifiedTime = 0;
+	mLibraryFileName[0] = 0;
+	mCategoriesModified = false;
+  	mZipFile = NULL;
 	mCacheFile = NULL;
 	mCacheFileName[0] = 0;
 	mSaveCache = false;

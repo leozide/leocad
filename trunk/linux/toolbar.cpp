@@ -285,6 +285,11 @@ void create_toolbars(GtkWidget *window, GtkWidget *vbox)
      new_pixmap (window, an_key), GTK_SIGNAL_FUNC (OnCommandDirect), (void*)LC_TOOLBAR_ADDKEYS);
 }
 
+static void drag_end(GtkWidget *widget, GdkDragContext *context, gpointer data)
+{
+	dragged_piece = NULL;
+}
+
 // =========================================================
 // Pieces toolbar
 
@@ -396,6 +401,18 @@ static void piecetree_changed(GtkTreeSelection* selection, gpointer data)
     if (sel)
       preview->SetCurrentPiece((PieceInfo*)sel);
   }
+}
+
+static void piecetree_drag_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+
+	dragged_piece = NULL;
+	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(widget)), &model, &iter))
+	{
+		gtk_tree_model_get(model, &iter, 1, &dragged_piece, -1);
+	}
 }
 
 static void piececombo_popup_position (GtkMenu *menu, gint *x, gint *y, gboolean* push, gpointer data)
@@ -1007,6 +1024,10 @@ GtkWidget* create_piecebar(GtkWidget *window, GLWindow *share)
   gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
   g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(piecetree_changed), NULL);
 
+  gtk_drag_source_set(GTK_WIDGET(piecetree), GDK_BUTTON1_MASK, drag_target_list, 1, GDK_ACTION_COPY);
+  g_signal_connect(G_OBJECT(piecetree), "drag_begin", G_CALLBACK(piecetree_drag_begin), NULL);
+  g_signal_connect(G_OBJECT(piecetree), "drag_end", G_CALLBACK(drag_end), NULL);
+
   gtk_container_add(GTK_CONTAINER(scroll_win), piecetree);
   gtk_widget_show(piecetree);
 
@@ -1044,6 +1065,7 @@ GtkWidget* create_piecebar(GtkWidget *window, GLWindow *share)
   gtk_signal_connect(GTK_OBJECT(colorlist), "realize", GTK_SIGNAL_FUNC(colorlist_realize), NULL);
   gtk_signal_connect(GTK_OBJECT(colorlist), "unrealize", GTK_SIGNAL_FUNC(colorlist_unrealize), NULL);
   gtk_signal_connect(GTK_OBJECT(colorlist), "query-tooltip", GTK_SIGNAL_FUNC(colorlist_tooltip), NULL);
+  gtk_signal_connect(GTK_OBJECT(colorlist), "drag_end", G_CALLBACK(drag_end), NULL);
 
   gtk_widget_show(colorlist);
 

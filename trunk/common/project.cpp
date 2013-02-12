@@ -4716,7 +4716,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				pGroup->FileSave(m_pClipboard[m_nCurClipboard], m_pGroups);
 
-			for (int CameraIdx = 0, i = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+			i = 0;
+			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				if (mCameras[CameraIdx]->IsSelected())
 					i++;
 			m_pClipboard[m_nCurClipboard]->WriteBuffer(&i, sizeof(i));

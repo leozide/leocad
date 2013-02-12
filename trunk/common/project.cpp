@@ -1192,7 +1192,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	{
 		Piece* pPiece;
 		int i, steps = GetLastStep();
-		char buf[256], *ptr;
+		char buf[256];
 
 		ptr = strrchr(m_strPathName, '\\');
 		if (ptr == NULL)
@@ -2612,7 +2612,7 @@ void Project::RenderOverlays(View* view)
 			lcVector3 Verts[64];
 			int NumVerts = 0;
 
-			for (int j = 0; j < 32; j++)
+			for (j = 0; j < 32; j++)
 			{
 				lcVector3 v1, v2;
 
@@ -2718,7 +2718,6 @@ void Project::RenderOverlays(View* view)
 				// Draw text.
 				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = view->mCamera;
 
 				const lcMatrix44& ModelView = Cam->mWorldView;
 				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -3819,7 +3818,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				}
 			}
 
-			unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
+			unsigned long ImageOptions = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
 			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
@@ -3829,11 +3828,11 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			opts.imdlg.width = Sys_ProfileLoadInt ("Default", "HTML Image Width", 256);
 			opts.imdlg.height = Sys_ProfileLoadInt ("Default", "HTML Image Height", 160);
 			opts.imdlg.imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-			opts.imdlg.imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-			opts.imdlg.imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-			opts.imdlg.imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
+			opts.imdlg.imopts.interlaced = (ImageOptions & LC_IMAGE_PROGRESSIVE) != 0;
+			opts.imdlg.imopts.transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+			opts.imdlg.imopts.truecolor = (ImageOptions & LC_IMAGE_HIGHCOLOR) != 0;
 			opts.imdlg.imopts.pause = 1;
-			opts.imdlg.imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
+			opts.imdlg.imopts.format = (unsigned char)(ImageOptions & ~(LC_IMAGE_MASK));
 
 			unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
 			opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
@@ -8428,20 +8427,20 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	{
 		case LC_ACTION_SELECT:
 		{
-			int ptx = x, pty = y;
+			int ClampX = x, ClampY = y;
 
-			if (ptx >= Viewport[0] + Viewport[2])
-				ptx = Viewport[0] + Viewport[2] - 1;
-			else if (ptx <= Viewport[0])
-				ptx = Viewport[0] + 1;
+			if (ClampX >= Viewport[0] + Viewport[2])
+				ClampX = Viewport[0] + Viewport[2] - 1;
+			else if (ClampX <= Viewport[0])
+				ClampX = Viewport[0] + 1;
 
-			if (pty >= Viewport[1] + Viewport[3])
-				pty = Viewport[1] + Viewport[3] - 1;
-			else if (pty <= Viewport[1])
-				pty = Viewport[1] + 1;
+			if (ClampY >= Viewport[1] + Viewport[3])
+				ClampY = Viewport[1] + Viewport[3] - 1;
+			else if (ClampY <= Viewport[1])
+				ClampY = Viewport[1] + 1;
 
-			m_fTrack[0] = (float)ptx;
-			m_fTrack[1] = (float)pty;
+			m_fTrack[0] = (float)ClampX;
+			m_fTrack[1] = (float)ClampY;
 
 			if (m_nTracking != LC_TRACK_NONE)
 				UpdateOverlayScale();
@@ -9131,7 +9130,6 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 			if (f >= 0.0f)
 			{
-				Camera* Cam = view->mCamera;
 				lcVector3 ViewDir(Cam->mTargetPosition - Cam->mPosition);
 
 				float u1 = (-b + sqrtf(f)) / (2*a);

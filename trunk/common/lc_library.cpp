@@ -299,7 +299,6 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	char FileName[LC_MAXPATH];
 	ObjArray<String> FileList;
-	int PathLength;
 
 	strcpy(FileName, Path);
 	strcat(FileName, "parts.lst");
@@ -440,7 +439,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
 	{
 		strcpy(FileName, Path);
-		PathLength = strlen(FileName);
+		int PathLength = strlen(FileName);
 
 		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
 		PathLength += strchr(PrimitiveDirectories[DirectoryIdx], '/') - PrimitiveDirectories[DirectoryIdx] + 1;
@@ -482,7 +481,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	strcpy(FileName, Path);
 	strcat(FileName, "parts/textures/");
-	PathLength = strlen(FileName);
+	int PathLength = strlen(FileName);
 
 	Sys_GetFileList(FileName, FileList);
 
@@ -1221,7 +1220,6 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							strcpy(Name, Primitive->mName);
 							strlwr(Name);
 
-							char FileName[LC_MAXPATH];
 							lcDiskFile IncludeFile;
 
 							if (Primitive->mSubFile)
@@ -1262,7 +1260,6 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							strcpy(Name, Info->m_strName);
 							strlwr(Name);
 
-							char FileName[LC_MAXPATH];
 							lcDiskFile IncludeFile;
 
 							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);

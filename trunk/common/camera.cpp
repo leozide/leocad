@@ -369,11 +369,11 @@ void Camera::FileSave(lcFile& file) const
 
 void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-	lcVector3 Move(dx, dy, dz);
+	lcVector3 MoveVec(dx, dy, dz);
 
 	if (IsEyeSelected())
 	{
-		mPosition += Move;
+		mPosition += MoveVec;
 
 		if (!IsSimple())
 			ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
@@ -381,7 +381,7 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 
 	if (IsTargetSelected())
 	{
-		mTargetPosition += Move;
+		mTargetPosition += MoveVec;
 
 		if (!IsSimple())
 			ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
@@ -584,7 +584,7 @@ void Camera::Render(float fLineWidth)
 		glMultMatrixf(Projection);
 
 		// Draw the view frustum.
-		float verts[16][3] =
+		float ProjVerts[16][3] =
 		{
 			{  1,  1,  1 }, { -1,  1, 1 },
 			{ -1,  1,  1 }, { -1, -1, 1 },
@@ -596,7 +596,7 @@ void Camera::Render(float fLineWidth)
 			{  1, -1, -1 }, {  1, -1, 1 },
 		};
 
-		glVertexPointer(3, GL_FLOAT, 0, verts);
+		glVertexPointer(3, GL_FLOAT, 0, ProjVerts);
 		glDrawArrays(GL_LINES, 0, 16);
 
 		glPopMatrix();
@@ -709,9 +709,9 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
 
-	lcVector3 Move = (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
-	mPosition += Move;
-	mTargetPosition += Move;
+	lcVector3 MoveVec = (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
+	mPosition += MoveVec;
+	mTargetPosition += MoveVec;
 
 	if (!IsSimple())
 	{
@@ -737,7 +737,7 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 		Z[1] = -Z[1];
 		dx = -dx;
 	}
- 
+
 	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
 	lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(0.1f * dy / (21 - mouse))), YRot), lcMatrix44RotationZ(-0.1f * dx / (21 - mouse)));
 

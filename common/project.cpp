@@ -3064,7 +3064,9 @@ bool Project::RemoveSelectedObjects()
 	Piece* pPiece;
 	Light* pLight;
 	void* pPrev;
-	bool removed = false;
+	bool RemovedPiece = false;
+	bool RemovedCamera = false;
+	bool RemovedLight = false;
 
 	pPiece = m_pPieces;
 	while (pPiece)
@@ -3074,7 +3076,7 @@ bool Project::RemoveSelectedObjects()
 			Piece* pTemp;
 			pTemp = pPiece->m_pNext;
 
-			removed = true;
+			RemovedPiece = true;
 			RemovePiece(pPiece);
 			delete pPiece;
 			pPiece = pTemp;
@@ -3109,8 +3111,11 @@ bool Project::RemoveSelectedObjects()
 		CameraIdx--;
 		delete pCamera;
 
-		removed = true;
+		RemovedCamera = true;
+	}
 
+	if (RemovedCamera)
+	{
 		SystemUpdateCameraMenu(mCameras);
 		SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
 	}
@@ -3132,7 +3137,7 @@ bool Project::RemoveSelectedObjects()
 				pLight = m_pLights;
 			}
 
-			removed = true;
+			RemovedLight = true;
 		}
 		else
 		{
@@ -3145,7 +3150,7 @@ bool Project::RemoveSelectedObjects()
 //	CalculateStep();
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 
-	return removed;
+	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
 void Project::UpdateSelection()

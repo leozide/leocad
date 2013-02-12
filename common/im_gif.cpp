@@ -66,7 +66,7 @@ typedef gif_source_struct *gif_source_ptr;
 static int GetDataBlock (gif_source_ptr sinfo, char *buf)
 {
   int count = sinfo->input_file->ReadU8();
-  if (count > 0) 
+  if (count > 0)
     sinfo->input_file->ReadBuffer(buf, count);
   return count;
 }
@@ -78,7 +78,7 @@ static int GetCode (gif_source_ptr sinfo)
 
   while ((sinfo->cur_bit + sinfo->code_size) > sinfo->last_bit)
   {
-    if (sinfo->out_of_blocks) 
+    if (sinfo->out_of_blocks)
       return sinfo->end_code;	// fake something useful
     sinfo->code_buf[0] = sinfo->code_buf[sinfo->last_byte-2];
     sinfo->code_buf[1] = sinfo->code_buf[sinfo->last_byte-1];
@@ -109,7 +109,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
 {
   register int code;	// current working code
   int incode;			// saves actual input code
-	
+
   // First time, just eat the expected Clear code(s) and return next code,
   // which is expected to be a raw byte.
   if (sinfo->first_time)
@@ -127,7 +127,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
     code = GetCode(sinfo);
   }
 
-  if (code == sinfo->clear_code) 
+  if (code == sinfo->clear_code)
   {
     sinfo->code_size = sinfo->input_code_size + 1;
     sinfo->limit_code = sinfo->clear_code << 1;	// 2^code_size
@@ -138,13 +138,13 @@ static int LZWReadByte (gif_source_ptr sinfo)
       code = GetCode(sinfo);
     } while (code == sinfo->clear_code);
 
-    if (code > sinfo->clear_code) 
+    if (code > sinfo->clear_code)
       code = 0;	// use something valid
     sinfo->firstcode = sinfo->oldcode = code;
     return code;
   }
 
-  if (code == sinfo->end_code) 
+  if (code == sinfo->end_code)
   {
     if (!sinfo->out_of_blocks)
     {
@@ -159,7 +159,7 @@ static int LZWReadByte (gif_source_ptr sinfo)
   incode = code;	// save for a moment
 
   if (code >= sinfo->max_code)
-  {	
+  {
     // special case for not-yet-defined symbol
     // code == max_code is OK; anything bigger is bad data
     if (code > sinfo->max_code)
@@ -220,21 +220,21 @@ bool Image::LoadGIF(lcFile& file)
   colormaplen = 2 << (hdrbuf[4] & 0x07);
 
   if (BitSet(hdrbuf[4], COLORMAPFLAG))
-    for (int i = 0; i < colormaplen; i++) 
+    for (int i = 0; i < colormaplen; i++)
     {
       source->colormap[0][i] = source->input_file->ReadU8();
       source->colormap[1][i] = source->input_file->ReadU8();
       source->colormap[2][i] = source->input_file->ReadU8();
     }
 
-  for (;;) 
+  for (;;)
   {
     c = source->input_file->ReadU8();
 
 //    if (c == ';')
 //      ERREXIT(cinfo, JERR_GIF_IMAGENOTFOUND);
 
-    if (c == '!') 
+    if (c == '!')
     {
       char buf[256];
 
@@ -244,7 +244,7 @@ bool Image::LoadGIF(lcFile& file)
       continue;
     }
 
-    if (c != ',') 
+    if (c != ',')
       continue;
 
     source->input_file->ReadBuffer(hdrbuf, 9);
@@ -252,10 +252,10 @@ bool Image::LoadGIF(lcFile& file)
     height = LM_to_uint(hdrbuf[6],hdrbuf[7]);
     source->is_interlaced = (hdrbuf[8] & INTERLACE) != 0;
 
-    if (BitSet(hdrbuf[8], COLORMAPFLAG)) 
+    if (BitSet(hdrbuf[8], COLORMAPFLAG))
     {
       colormaplen = 2 << (hdrbuf[8] & 0x07);
-      for (int i = 0; i < colormaplen; i++) 
+      for (int i = 0; i < colormaplen; i++)
       {
         source->colormap[0][i] = source->input_file->ReadU8();
         source->colormap[1][i] = source->input_file->ReadU8();
@@ -285,11 +285,11 @@ bool Image::LoadGIF(lcFile& file)
   source->max_code = source->clear_code + 2;	// first unused code value
   source->sp = source->symbol_stack;	        // init stack to empty
 
-  if (source->is_interlaced) 
+  if (source->is_interlaced)
   {
     source->first_interlace = true;
     source->interlaced_image = (unsigned char*)malloc(width*height);
-  } 
+  }
   else
     source->first_interlace = false;
 
@@ -300,9 +300,9 @@ bool Image::LoadGIF(lcFile& file)
   m_bAlpha = false; // FIXME: create the alpha channel for transparent files
   unsigned char* buf = m_pData;
 
-  for (unsigned long scanline = 0; scanline < height; scanline++) 
+  for (unsigned long scanline = 0; scanline < height; scanline++)
   {
-    if (source->is_interlaced) 
+    if (source->is_interlaced)
     {
       if (source->first_interlace)
       {
@@ -310,10 +310,10 @@ bool Image::LoadGIF(lcFile& file)
         register lcuint32 col;
         lcuint32 row;
 
-        for (row = 0; row < source->height; row++) 
+        for (row = 0; row < source->height; row++)
         {
           sptr = &source->interlaced_image[row*source->width];
-          for (col = source->width; col > 0; col--) 
+          for (col = source->width; col > 0; col--)
             *sptr++ = (lcuint8) LZWReadByte(source);
         }
 
@@ -324,9 +324,8 @@ bool Image::LoadGIF(lcFile& file)
         source->pass4_offset = source->pass3_offset + (source->height + 1) / 4;
       }
 
-      register int c;
-      register lcuint8 *sptr, *ptr;
-      register lcuint32 col;
+      lcuint8 *sptr, *ptr;
+      lcuint32 col;
       lcuint32 irow;
 
       // Figure out which row of interlaced image is needed, and access it.
@@ -348,7 +347,7 @@ bool Image::LoadGIF(lcFile& file)
       }
       sptr = &source->interlaced_image[irow*source->width];
       ptr = source->buffer;
-      for (col = source->width; col > 0; col--) 
+      for (col = source->width; col > 0; col--)
       {
         c = *sptr++;
         *ptr++ = source->colormap[0][c];
@@ -359,9 +358,8 @@ bool Image::LoadGIF(lcFile& file)
     }
     else
     {
-      register int c;
-      register lcuint8 *ptr;
-      register lcuint32 col;
+      lcuint8 *ptr;
+      lcuint32 col;
 
       ptr = source->buffer;
       for (col = source->width; col > 0; col--)
@@ -430,8 +428,8 @@ static void put_word(lcFile& output_file, unsigned int w)
 
 static void flush_packet(gif_dest_ptr dinfo)
 {
-  if (dinfo->bytesinpkt > 0) 
-  {	
+  if (dinfo->bytesinpkt > 0)
+  {
     dinfo->packetbuf[0] = (char) dinfo->bytesinpkt++;
     dinfo->output_file->WriteBuffer(dinfo->packetbuf, dinfo->bytesinpkt);
     dinfo->bytesinpkt = 0;
@@ -558,7 +556,7 @@ bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned ch
   file.WriteU8(0); // Background color index
   file.WriteU8(0); // Reserved (aspect ratio in GIF89)
   // Write the Global Color Map
-  for (i = 0; i < 256; i++) 
+  for (i = 0; i < 256; i++)
   {
     file.WriteU8(pal[0][i]);
     file.WriteU8(pal[1][i]);
@@ -566,11 +564,11 @@ bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned ch
   }
 
   // Write out extension for transparent colour index, if necessary.
-  if (transparent) 
+  if (transparent)
   {
     unsigned char index = 0;
 
-    for (i = 0; i < 256; i++) 
+    for (i = 0; i < 256; i++)
       if (background[0] == pal[0][i] &&
 	  background[1] == pal[1][i] &&
 	  background[2] == pal[2][i])
@@ -593,7 +591,7 @@ bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned ch
   file.WriteU8(',');
   put_word(file, 0);
   put_word(file, 0);
-  put_word(file, (unsigned int)m_nWidth); 
+  put_word(file, (unsigned int)m_nWidth);
   put_word(file, (unsigned int)m_nHeight);
   // flag byte: interlaced
   if (interlaced)
@@ -608,7 +606,7 @@ bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned ch
   dinfo->ClearCode = ((code_int) 1 << (InitCodeSize));
   dinfo->EOFCode = dinfo->ClearCode + 1;
   dinfo->free_code = dinfo->ClearCode + 2;
-  dinfo->first_byte = true;	
+  dinfo->first_byte = true;
   dinfo->bytesinpkt = 0;
   dinfo->cur_accum = 0;
   dinfo->cur_bits = 0;
@@ -625,7 +623,7 @@ bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned ch
     register lcuint32 col;
 
     ptr = (unsigned char*)dinfo->buffer;
-    for (col = m_nWidth; col > 0; col--) 
+    for (col = m_nWidth; col > 0; col--)
       compress_byte(dinfo, *ptr++);
 
     if (interlaced)
@@ -676,7 +674,7 @@ bool Image::SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned ch
   if (!dinfo->first_byte)
     output(dinfo, dinfo->waiting_code);
   output(dinfo, dinfo->EOFCode);
-  if (dinfo->cur_bits > 0) 
+  if (dinfo->cur_bits > 0)
   {
     (dinfo)->packetbuf[++(dinfo)->bytesinpkt] = (char) (dinfo->cur_accum & 0xFF);
     if ((dinfo)->bytesinpkt >= 255)

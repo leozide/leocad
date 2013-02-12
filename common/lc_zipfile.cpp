@@ -507,8 +507,6 @@ bool lcZipFile::ReadCentralDir()
 				// ZIP64 extra fields.
 				if (HeaderId == 0x0001)
 				{
-					lcuint32 Number32;
-
 					if (FileInfo.uncompressed_size == (lcuint64)(unsigned long)-1)
 					{
 						if (mFile->ReadU64(&FileInfo.uncompressed_size, 1) != 1)
@@ -756,7 +754,7 @@ bool lcZipFile::AddFile(const char* FileName, lcMemFile& File)
 	lcMemFile& CompressedFile = *OutFile;
 
 	Bytef* BufferIn = File.mBuffer;
-	int Flush;
+	int FlushMode;
 
 	do
 	{
@@ -766,16 +764,16 @@ bool lcZipFile::AddFile(const char* FileName, lcMemFile& File)
 		Crc32 = crc32(Crc32, BufferIn, Read);
 		BufferIn += Read;
 
-		Flush = (BufferIn >= File.mBuffer + File.GetLength()) ? Z_FINISH : Z_NO_FLUSH;
+		FlushMode = (BufferIn >= File.mBuffer + File.GetLength()) ? Z_FINISH : Z_NO_FLUSH;
 
 		do
 		{
 			Stream.avail_out = BufferSize;
 			Stream.next_out = (Bytef*)WriteBuffer;
-			deflate(&Stream, Flush);
+			deflate(&Stream, FlushMode);
 			CompressedFile.WriteBuffer(WriteBuffer, BufferSize - Stream.avail_out);
 		} while (Stream.avail_out == 0);
-	} while (Flush != Z_FINISH);
+	} while (FlushMode != Z_FINISH);
 
     deflateEnd(&Stream);
 

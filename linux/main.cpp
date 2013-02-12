@@ -284,17 +284,17 @@ void OnCommand(GtkWidget* widget, gpointer data)
 
     case ID_VIEW_TOOLBAR_PIECES:
     {
-      gpointer widget = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_floating");
+      gpointer floating = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_toolbar_floating");
 
       if (pieces_visible)
       {
 	pieces_visible = FALSE;
-	gtk_widget_set_sensitive (GTK_WIDGET (widget), FALSE);
+	gtk_widget_set_sensitive (GTK_WIDGET (floating), FALSE);
       }
       else
       {
 	pieces_visible = TRUE;
-	gtk_widget_set_sensitive (GTK_WIDGET (widget), TRUE);
+	gtk_widget_set_sensitive (GTK_WIDGET (floating), TRUE);
       }
       update_window_layout ();
     } break;

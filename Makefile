@@ -6,7 +6,7 @@ MODULES := $(OSDIR) common
 
 ### Look for include files in each of the modules
 CPPFLAGS += $(patsubst %,-I%,$(MODULES))
-CPPFLAGS += -g -Wextra -Wall -Wno-unused-parameter
+CPPFLAGS += -g -Wextra -Wall -Wno-unused-parameter -Wshadow
 
 ### Extra libraries if required
 LIBS :=

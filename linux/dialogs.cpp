@@ -1523,8 +1523,6 @@ static void preferencesdlg_color(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
 	{
-		float* color = (float*)data;
-
 		gtk_color_selection_get_color(GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(dlg)->colorsel), dbl);
 		color[0] = dbl[0];
 		color[1] = dbl[1];
@@ -2296,22 +2294,20 @@ int propertiesdlg_execute(void* param)
 	{
 		ret = LC_OK;
 
-		LC_PROPERTIESDLG_OPTS* opts = (LC_PROPERTIESDLG_OPTS*)s.data;
-
 		strcpy(opts->strAuthor, gtk_entry_get_text(GTK_ENTRY(s.sum_author)));
 		strcpy(opts->strDescription, gtk_entry_get_text(GTK_ENTRY(s.sum_description)));
 
-		GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(s.sum_comments));
 		GtkTextIter start;
 		GtkTextIter end;
-		gchar *text;
+		gchar* Comments;
 
 		gtk_text_buffer_get_start_iter(buffer, &start);
 		gtk_text_buffer_get_end_iter(buffer, &end);
-		text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-		strncpy(opts->strComments, text, sizeof(opts->strComments));
+		Comments = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+		strncpy(opts->strComments, Comments, sizeof(opts->strComments));
 		opts->strComments[sizeof(opts->strComments)-1] = 0;
-		g_free(text);
+		g_free(Comments);
 	}
 	else
 		ret = LC_CANCEL;

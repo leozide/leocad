@@ -192,7 +192,7 @@ void Light::Select(bool bSelecting, bool bFocus, bool bMultiple)
 			m_nState &= ~(LC_LIGHT_FOCUSED);
 		else
 			m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED);
-	} 
+	}
 }
 
 void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
@@ -219,7 +219,7 @@ void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 			m_nState &= ~(LC_LIGHT_TARGET_FOCUSED);
 		else
 			m_nState &= ~(LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED);
-	} 
+	}
 }
 
 void Light::MinIntersectDist(lcClickLine* ClickLine)
@@ -254,18 +254,18 @@ void Light::MinIntersectDist(lcClickLine* ClickLine)
 
 void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-	lcVector3 Move(dx, dy, dz);
+	lcVector3 MoveVec(dx, dy, dz);
 
 	if (IsEyeSelected())
 	{
-		mPosition += Move;
+		mPosition += MoveVec;
 
 		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_LK_POSITION);
 	}
 
 	if (IsTargetSelected())
 	{
-		mTargetPosition += Move;
+		mTargetPosition += MoveVec;
 
 		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_LK_TARGET);
 	}

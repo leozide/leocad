@@ -387,7 +387,7 @@ bool lcMesh::FileLoad(lcFile& File)
 	{
 		lcMeshSection& Section = mSections[SectionIdx];
 
-		lcuint32 ColorCode, IndexOffset, NumIndices;
+		lcuint32 ColorCode, IndexOffset;
 		lcuint16 Triangles, Length;
 
 		if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&IndexOffset, 1) || !File.ReadU32(&NumIndices, 1) || !File.ReadU16(&Triangles, 1))

@@ -13,7 +13,7 @@ bool Sys_GLOpenLibrary(const char* LibraryName);
 void Sys_GLCloseLibrary();
 void* Sys_GLGetProc(const char* Symbol);
 #endif
-void* Sys_GLGetExtension(const char* Symbol);
+void* Sys_GLGetExtension(const char* Symbol, void* Data);
 
 // =============================================================================
 // OpenGL Function pointers
@@ -357,8 +357,6 @@ PFNGLPUSHNAME pfnglPushName;
 PFNGLPOPNAME pfnglPopName;
 #endif // LC_OPENGL_DYNAMIC
 
-#ifndef LC_QT
-
 GLBINDBUFFERARBPROC glBindBufferARB;
 GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 GLGENBUFFERSARBPROC glGenBuffersARB;
@@ -372,8 +370,6 @@ GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
 GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
 
 PFNGLSAMPLECOVERAGEARBPROC glSampleCoverageARB;
-
-#endif
 
 // =============================================================================
 // Initialization functions
@@ -721,7 +717,6 @@ void GL_Shutdown ()
 	pfnglPopName = NULL;
 #endif // LC_OPENGL_DYNAMIC
 
-#ifndef LC_QT
 	glBindBufferARB = NULL;
 	glDeleteBuffersARB = NULL;
 	glGenBuffersARB = NULL;
@@ -733,7 +728,6 @@ void GL_Shutdown ()
 	glUnmapBufferARB = NULL;
 	glGetBufferParameterivARB = NULL;
 	glGetBufferPointervARB = NULL;
-#endif
 }
 
 bool GL_Initialize(const char* LibraryName)
@@ -1127,25 +1121,23 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 }
 
 // Extensions can only be initialized if there's a current OpenGL context.
-void GL_InitializeSharedExtensions()
+void GL_InitializeSharedExtensions(void* Data)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
-#ifndef LC_QT
-		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB");
-		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB");
-		glGenBuffersARB = (GLGENBUFFERSARBPROC)Sys_GLGetExtension("glGenBuffersARB");
-		glIsBufferARB = (GLISBUFFERARBPROC)Sys_GLGetExtension("glIsBufferARB");
-		glBufferDataARB = (GLBUFFERDATAARBPROC)Sys_GLGetExtension("glBufferDataARB");
-		glBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glBufferSubDataARB");
-		glGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glGetBufferSubDataARB");
-		glMapBufferARB = (GLMAPBUFFERARBPROC)Sys_GLGetExtension("glMapBufferARB");
-		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Sys_GLGetExtension("glUnmapBufferARB");
-		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB");
-		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB");
-#endif
+		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB", Data);
+		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB", Data);
+		glGenBuffersARB = (GLGENBUFFERSARBPROC)Sys_GLGetExtension("glGenBuffersARB", Data);
+		glIsBufferARB = (GLISBUFFERARBPROC)Sys_GLGetExtension("glIsBufferARB", Data);
+		glBufferDataARB = (GLBUFFERDATAARBPROC)Sys_GLGetExtension("glBufferDataARB", Data);
+		glBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glBufferSubDataARB", Data);
+		glGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glGetBufferSubDataARB", Data);
+		glMapBufferARB = (GLMAPBUFFERARBPROC)Sys_GLGetExtension("glMapBufferARB", Data);
+		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Sys_GLGetExtension("glUnmapBufferARB", Data);
+		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB", Data);
+		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB", Data);
 
 		GL_UseVertexBufferObject = true;
 		GL_SupportsVertexBufferObject = true;

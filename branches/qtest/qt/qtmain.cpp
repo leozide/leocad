@@ -5,11 +5,16 @@
 
 int main(int argc, char *argv[])
 {
+	QCoreApplication::setOrganizationDomain("leocad.org");
+	QCoreApplication::setOrganizationName("LeoCAD");
+	QCoreApplication::setApplicationName("LeoCAD");
+	QCoreApplication::setApplicationVersion(LC_VERSION_TEXT);
+
 	g_App = new lcApplication();
 //    main_window = new MainWnd();
 
 	if (!g_App->Initialize(argc, argv, "", ""))
-	  return 1;
+		return 1;
 
 	QApplication a(argc, argv);
 	lcMainWindow w;

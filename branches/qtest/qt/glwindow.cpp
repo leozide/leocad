@@ -32,7 +32,7 @@ void GLWindow::OnInitialUpdate()
 {
 	MakeCurrent();
 
-	GL_InitializeSharedExtensions();
+	GL_InitializeSharedExtensions(this);
 //	GL_InitializeExtensions();
 
 //	if (WindowMultisample)

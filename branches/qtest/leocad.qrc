@@ -1,0 +1,38 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/edit_copy.png</file>
+        <file>resources/edit_cut.png</file>
+        <file>resources/edit_paste.png</file>
+        <file>resources/edit_redo.png</file>
+        <file>resources/edit_undo.png</file>
+        <file>resources/file_new.png</file>
+        <file>resources/file_open.png</file>
+        <file>resources/file_print.png</file>
+        <file>resources/file_print_preview.png</file>
+        <file>resources/file_save.png</file>
+        <file>resources/step_first.png</file>
+        <file>resources/step_last.png</file>
+        <file>resources/step_next.png</file>
+        <file>resources/step_pause.png</file>
+        <file>resources/step_play.png</file>
+        <file>resources/step_previous.png</file>
+        <file>resources/step_stop.png</file>
+        <file>resources/action_camera.xpm</file>
+        <file>resources/action_delete.xpm</file>
+        <file>resources/action_insert.xpm</file>
+        <file>resources/action_light.xpm</file>
+        <file>resources/action_move.xpm</file>
+        <file>resources/action_next.xpm</file>
+        <file>resources/action_paint.xpm</file>
+        <file>resources/action_pan.xpm</file>
+        <file>resources/action_previous.xpm</file>
+        <file>resources/action_roll.xpm</file>
+        <file>resources/action_rotate.xpm</file>
+        <file>resources/action_rotate_view.xpm</file>
+        <file>resources/action_select.xpm</file>
+        <file>resources/action_spotlight.xpm</file>
+        <file>resources/action_zoom.xpm</file>
+        <file>resources/action_zoom_extents.xpm</file>
+        <file>resources/action_zoom_region.xpm</file>
+    </qresource>
+</RCC>

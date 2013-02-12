@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>381</height>
+    <width>886</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,8 +32,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>543</width>
-     <height>22</height>
+     <width>886</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -87,7 +87,10 @@
    <addaction name="menuPiece"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
+  <widget class="QToolBar" name="standardToolBar">
+   <property name="windowTitle">
+    <string>Standard</string>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -106,7 +109,7 @@
    <addaction name="actionPaste"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidget_2">
+  <widget class="QDockWidget" name="piecesToolBar">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>1</horstretch>
@@ -192,9 +195,9 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="QToolBar" name="timeToolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Time</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -209,9 +212,9 @@
    <addaction name="actionNext"/>
    <addaction name="actionLast"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_2">
+  <widget class="QToolBar" name="toolsToolBar">
    <property name="windowTitle">
-    <string>toolBar_2</string>
+    <string>Tools</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -235,14 +238,11 @@
    <addaction name="actionRoll"/>
    <addaction name="actionZoomRegion"/>
    <addaction name="actionZoomExtents"/>
-   <addaction name="actionShowPrevious"/>
-   <addaction name="actionShowNext"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset theme="document-new">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/file_new.png</normaloff>:/resources/file_new.png</iconset>
    </property>
    <property name="text">
     <string>New</string>
@@ -250,9 +250,8 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/file_open.png</normaloff>:/resources/file_open.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -265,9 +264,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/file_save.png</normaloff>:/resources/file_save.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -280,9 +278,8 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset theme="edit-undo">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/edit_undo.png</normaloff>:/resources/edit_undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -290,9 +287,8 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset theme="edit-redo">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/edit_redo.png</normaloff>:/resources/edit_redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -300,9 +296,8 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset theme="edit-cut">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/edit_cut.png</normaloff>:/resources/edit_cut.png</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -310,9 +305,8 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset theme="edit-copy">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/edit_copy.png</normaloff>:/resources/edit_copy.png</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -320,9 +314,8 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="edit-paste">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/edit_paste.png</normaloff>:/resources/edit_paste.png</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -330,9 +323,8 @@
   </action>
   <action name="actionFirst">
    <property name="icon">
-    <iconset theme="media-skip-backward">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/step_first.png</normaloff>:/resources/step_first.png</iconset>
    </property>
    <property name="text">
     <string>First</string>
@@ -340,9 +332,8 @@
   </action>
   <action name="actionPrevious">
    <property name="icon">
-    <iconset theme="media-seek-backward">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/step_previous.png</normaloff>:/resources/step_previous.png</iconset>
    </property>
    <property name="text">
     <string>Previous</string>
@@ -350,9 +341,8 @@
   </action>
   <action name="actionPlay">
    <property name="icon">
-    <iconset theme="media-playback-start">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/step_play.png</normaloff>:/resources/step_play.png</iconset>
    </property>
    <property name="text">
     <string>Play</string>
@@ -360,9 +350,8 @@
   </action>
   <action name="actionStop">
    <property name="icon">
-    <iconset theme="media-playback-stop">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/step_stop.png</normaloff>:/resources/step_stop.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -370,9 +359,8 @@
   </action>
   <action name="actionNext">
    <property name="icon">
-    <iconset theme="media-seek-forward">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/step_next.png</normaloff>:/resources/step_next.png</iconset>
    </property>
    <property name="text">
     <string>Next</string>
@@ -380,9 +368,8 @@
   </action>
   <action name="actionLast">
    <property name="icon">
-    <iconset theme="media-skip-forward">
-     <normaloff/>
-    </iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/step_last.png</normaloff>:/resources/step_last.png</iconset>
    </property>
    <property name="text">
     <string>Last</string>
@@ -390,8 +377,8 @@
   </action>
   <action name="actionInsert">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-brick.xpm</normaloff>:/pixmaps/ac-brick.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_insert.xpm</normaloff>:/resources/action_insert.xpm</iconset>
    </property>
    <property name="text">
     <string>Insert</string>
@@ -399,8 +386,8 @@
   </action>
   <action name="actionLight">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-light.xpm</normaloff>:/pixmaps/ac-light.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_light.xpm</normaloff>:/resources/action_light.xpm</iconset>
    </property>
    <property name="text">
     <string>Light</string>
@@ -408,8 +395,8 @@
   </action>
   <action name="actionSpotLight">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-spot.xpm</normaloff>:/pixmaps/ac-spot.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_spotlight.xpm</normaloff>:/resources/action_spotlight.xpm</iconset>
    </property>
    <property name="text">
     <string>SpotLight</string>
@@ -417,8 +404,8 @@
   </action>
   <action name="actionCamera">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-cam.xpm</normaloff>:/pixmaps/ac-cam.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_camera.xpm</normaloff>:/resources/action_camera.xpm</iconset>
    </property>
    <property name="text">
     <string>Camera</string>
@@ -426,8 +413,8 @@
   </action>
   <action name="actionSelect">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-sel.xpm</normaloff>:/pixmaps/ac-sel.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_select.xpm</normaloff>:/resources/action_select.xpm</iconset>
    </property>
    <property name="text">
     <string>Select</string>
@@ -435,8 +422,8 @@
   </action>
   <action name="actionMove">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-move.xpm</normaloff>:/pixmaps/ac-move.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_move.xpm</normaloff>:/resources/action_move.xpm</iconset>
    </property>
    <property name="text">
     <string>Move</string>
@@ -444,8 +431,8 @@
   </action>
   <action name="actionRotate">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-rot.xpm</normaloff>:/pixmaps/ac-rot.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_rotate.xpm</normaloff>:/resources/action_rotate.xpm</iconset>
    </property>
    <property name="text">
     <string>Rotate</string>
@@ -453,8 +440,8 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-erase.xpm</normaloff>:/pixmaps/ac-erase.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_delete.xpm</normaloff>:/resources/action_delete.xpm</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -462,8 +449,8 @@
   </action>
   <action name="actionPaint">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-paint.xpm</normaloff>:/pixmaps/ac-paint.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_paint.xpm</normaloff>:/resources/action_paint.xpm</iconset>
    </property>
    <property name="text">
     <string>Paint</string>
@@ -471,8 +458,8 @@
   </action>
   <action name="actionZoom">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-zoom.xpm</normaloff>:/pixmaps/ac-zoom.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_zoom.xpm</normaloff>:/resources/action_zoom.xpm</iconset>
    </property>
    <property name="text">
     <string>Zoom</string>
@@ -480,8 +467,8 @@
   </action>
   <action name="actionPan">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-pan.xpm</normaloff>:/pixmaps/ac-pan.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_pan.xpm</normaloff>:/resources/action_pan.xpm</iconset>
    </property>
    <property name="text">
     <string>Pan</string>
@@ -489,8 +476,8 @@
   </action>
   <action name="actionRotateView">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-rotv.xpm</normaloff>:/pixmaps/ac-rotv.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_rotate_view.xpm</normaloff>:/resources/action_rotate_view.xpm</iconset>
    </property>
    <property name="text">
     <string>RotateView</string>
@@ -498,8 +485,8 @@
   </action>
   <action name="actionRoll">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-roll.xpm</normaloff>:/pixmaps/ac-roll.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_roll.xpm</normaloff>:/resources/action_roll.xpm</iconset>
    </property>
    <property name="text">
     <string>Roll</string>
@@ -507,8 +494,8 @@
   </action>
   <action name="actionZoomRegion">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-zoomr.xpm</normaloff>:/pixmaps/ac-zoomr.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_zoom_region.xpm</normaloff>:/resources/action_zoom_region.xpm</iconset>
    </property>
    <property name="text">
     <string>ZoomRegion</string>
@@ -516,29 +503,11 @@
   </action>
   <action name="actionZoomExtents">
    <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-zoome.xpm</normaloff>:/pixmaps/ac-zoome.xpm</iconset>
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/action_zoom_extents.xpm</normaloff>:/resources/action_zoom_extents.xpm</iconset>
    </property>
    <property name="text">
     <string>ZoomExtents</string>
-   </property>
-  </action>
-  <action name="actionShowPrevious">
-   <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-prev.xpm</normaloff>:/pixmaps/ac-prev.xpm</iconset>
-   </property>
-   <property name="text">
-    <string>ShowPrevious</string>
-   </property>
-  </action>
-  <action name="actionShowNext">
-   <property name="icon">
-    <iconset>
-	 <normaloff>:/pixmaps/ac-next.xpm</normaloff>:/pixmaps/ac-next.xpm</iconset>
-   </property>
-   <property name="text">
-    <string>ShowNext</string>
    </property>
   </action>
  </widget>
@@ -563,6 +532,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../leocad.qrc"/>
+ </resources>
  <connections/>
 </ui>

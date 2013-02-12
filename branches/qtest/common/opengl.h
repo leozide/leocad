@@ -24,7 +24,7 @@
 bool GL_Initialize(const char* libname);
 void GL_Shutdown();
 void GL_InitializeExtensions();
-void GL_InitializeSharedExtensions();
+void GL_InitializeSharedExtensions(void* Data);
 bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name);
 
 extern bool GL_SupportsVertexBufferObject;
@@ -837,8 +837,6 @@ extern PFNGLPOPNAME pfnglPopName;
 
 #endif // LC_OPENGL_DYNAMIC
 
-#ifndef LC_QT
-
 extern GLBINDBUFFERARBPROC glBindBufferARB;
 extern GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 extern GLGENBUFFERSARBPROC glGenBuffersARB;
@@ -850,8 +848,6 @@ extern GLMAPBUFFERARBPROC glMapBufferARB;
 extern GLUNMAPBUFFERARBPROC glUnmapBufferARB;
 extern GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
 extern GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
-
-#endif
 
 // =============================================================================
 // Replace OpenGL function names with the dynamic functions

@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include <string.h>
 
 bool Sys_ProfileSaveInt (const char *section, const char *key, int value)
 {

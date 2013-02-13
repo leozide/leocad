@@ -40,11 +40,16 @@ static gint realize_event(GtkWidget *widget, gpointer data)
 static gint expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	GLWindow *wnd = (GLWindow*)data;
+	GLWindowPrivate *prv = (GLWindowPrivate*)wnd->GetData();
 
 	if (event->count > 0)
 		return TRUE;
 
+	wnd->MakeCurrent();
 	wnd->OnDraw();
+
+	if (WindowContext)
+		pfnglXSwapBuffers(GDK_WINDOW_XDISPLAY(prv->widget->window), GDK_WINDOW_XWINDOW(prv->widget->window));
 
 	return TRUE;
 }
@@ -367,14 +372,6 @@ bool GLWindow::MakeCurrent()
 		return false;
 
 	return pfnglXMakeCurrent(WindowDisplay, GDK_WINDOW_XWINDOW(prv->widget->window), WindowContext);
-}
-
-void GLWindow::SwapBuffers()
-{
-	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
-
-	if (WindowContext)
-		pfnglXSwapBuffers(GDK_WINDOW_XDISPLAY(prv->widget->window), GDK_WINDOW_XWINDOW(prv->widget->window));
 }
 
 void GLWindow::Redraw(bool ForceRedraw)

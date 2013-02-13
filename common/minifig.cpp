@@ -1126,9 +1126,6 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 void MinifigWizard::OnDraw()
 {
-	if (!MakeCurrent())
-		return;
-
 	float Aspect = (float)m_nWidth/(float)m_nHeight;
 	glViewport(0, 0, m_nWidth, m_nHeight);
 
@@ -1231,8 +1228,6 @@ void MinifigWizard::OnDraw()
 		m_Info[PieceIdx]->RenderPiece(m_Colors[PieceIdx]);
 		glPopMatrix();
 	}
-
-	SwapBuffers();
 }
 
 void MinifigWizard::OnLeftButtonDown(int x, int y, bool Control, bool Shift)

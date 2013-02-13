@@ -46,9 +46,6 @@ void lcTerrainView::OnInitialUpdate()
 
 void lcTerrainView::OnDraw()
 {
-	if (!MakeCurrent())
-		return;
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	float aspect = (float)m_nWidth/(float)m_nHeight;
@@ -57,8 +54,6 @@ void lcTerrainView::OnDraw()
 	mCamera->LoadProjection(aspect);
 
 	mTerrain->Render(mCamera, aspect);
-
-	SwapBuffers();
 }
 
 void lcTerrainView::OnLeftButtonDown(int x, int y, bool Control, bool Shift)

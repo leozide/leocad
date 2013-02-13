@@ -119,11 +119,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 
 void View::OnDraw()
 {
-	MakeCurrent();
-
 	m_Project->Render(this, false);
-
-	SwapBuffers();
 }
 
 void View::OnInitialUpdate()

@@ -35,7 +35,6 @@ public:
 	void DestroyContext();
 
 	bool MakeCurrent();
-	void SwapBuffers();
 	void Redraw(bool ForceRedraw = false);
 	void CaptureMouse();
 	void ReleaseMouse();

@@ -30,9 +30,6 @@ void PiecePreview::OnDraw()
 	if (m_PieceInfo == NULL)
 		return;
 
-	if (!MakeCurrent())
-		return;
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_POLYGON_OFFSET_FILL);
@@ -68,9 +65,6 @@ void PiecePreview::OnDraw()
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
-
-	glFinish();
-	SwapBuffers();
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)

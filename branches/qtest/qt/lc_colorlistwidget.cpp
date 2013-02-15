@@ -24,12 +24,58 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 
 	mWidth = 0;
 	mHeight = 0;
+
+	QFontMetrics Metrics(font());
+	int TextHeight = 0;
+
+	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+	{
+		lcColorGroup* Group = &gColorGroups[GroupIdx];
+
+		mGroupRects[GroupIdx] = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group->Name);
+
+		TextHeight += mGroupRects[GroupIdx].height();
+	}
+
+	mPreferredHeight = TextHeight + 8 * mRows;
 }
 
 lcColorListWidget::~lcColorListWidget()
 {
 	delete[] mCellRects;
 	delete[] mCellColors;
+}
+
+QSize lcColorListWidget::sizeHint() const
+{
+	return QSize(100, mPreferredHeight);
+}
+
+bool lcColorListWidget::event(QEvent *event)
+{
+	if (event->type() == QEvent::ToolTip)
+	{
+		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+
+		for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+		{
+//			lcColor* Color = &gColorList[mCellColors[CellIdx]];
+//			QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
+
+			if (mCellRects[CellIdx].contains(helpEvent->pos()))
+			{
+				QToolTip::showText(helpEvent->globalPos(), gColorList[mCellColors[CellIdx]].Name);
+				return true;
+			}
+		}
+
+		QToolTip::hideText();
+		event->ignore();
+
+		return true;
+	}
+
+	return QWidget::event(event);
 }
 
 void lcColorListWidget::resizeEvent(QResizeEvent *event)
@@ -51,6 +97,8 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 		TextHeight += mGroupRects[GroupIdx].height();
 	}
 
+	mPreferredHeight = TextHeight + 10 * mRows;
+
 	float CellWidth = (float)width() / (float)mColumns;
 	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
 
@@ -67,16 +115,12 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 
 		for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
 		{
-			float Left = CurColumn * CellWidth;
-			float Right = (CurColumn + 1) * CellWidth; // TODO: wrong size
+			int Left = CurColumn * CellWidth;
+			int Right = (CurColumn + 1) * CellWidth;
 			float Top = CurY;
 			float Bottom = CurY + CellHeight;
 
 			mCellRects[CurCell] = QRect(Left, Top, Right - Left, Bottom - Top);
-
-//				lcColor* Color = &gColorList[mCells[CurCell].ColorIndex];
-//				Text.Format("%s (%d)", Color->Name, Color->Code);
-//				mToolTip.AddTool(this, Text, CellRect, CurCell + 1);
 
 			CurColumn++;
 			if (CurColumn == mColumns)

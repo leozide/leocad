@@ -9,6 +9,8 @@ class lcPreviewWidget : public QGLWidget
 public:
 	lcPreviewWidget(QWidget *parent = 0);
 
+	QSize sizeHint() const;
+
 	PiecePreview* mPreview;
 
 protected:

@@ -36,25 +36,21 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionMerge"/>
-    <addaction name="actionSave"/>
-    <addaction name="actionSave_As"/>
-   </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
+    <addaction name="separator"/>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionSelect_None"/>
+    <addaction name="actionSelect_Invert"/>
+    <addaction name="actionSelect_By_Name"/>
    </widget>
    <widget class="QMenu" name="menuPiece">
     <property name="title">
@@ -65,6 +61,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -79,7 +76,54 @@
      <addaction name="actionNext"/>
      <addaction name="actionLast"/>
     </widget>
+    <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionZoom_In"/>
+    <addaction name="actionZoom_Out"/>
+    <addaction name="actionZoom_Extents"/>
+    <addaction name="actionViewpoints"/>
+    <addaction name="actionCameras"/>
     <addaction name="menuStep"/>
+    <addaction name="separator"/>
+    <addaction name="actionSplit_Horizontally"/>
+    <addaction name="actionSplit_Vertically"/>
+    <addaction name="actionDelete_View"/>
+    <addaction name="actionReset_All_Views"/>
+    <addaction name="separator"/>
+    <addaction name="actionToolbars"/>
+    <addaction name="actionFullscreen"/>
+   </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>Export</string>
+     </property>
+     <addaction name="action3D_Studio"/>
+     <addaction name="actionHTML"/>
+     <addaction name="actionPOV_Ray"/>
+     <addaction name="actionWavefront"/>
+    </widget>
+    <addaction name="actionFileNew"/>
+    <addaction name="actionFileOpen"/>
+    <addaction name="actionFileMerge"/>
+    <addaction name="separator"/>
+    <addaction name="actionFileSave"/>
+    <addaction name="actionFileSaveAs"/>
+    <addaction name="actionFileSaveImage"/>
+    <addaction name="menuExport"/>
+    <addaction name="separator"/>
+    <addaction name="actionProperties"/>
+    <addaction name="actionPieces_Library_Manager"/>
+    <addaction name="actionTerrain_Editor"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrint"/>
+    <addaction name="actionPrint_Bill_of_Materials"/>
+    <addaction name="actionPrintPreview"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -97,9 +141,11 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew"/>
-   <addaction name="actionOpen"/>
-   <addaction name="actionSave"/>
+   <addaction name="actionFileNew"/>
+   <addaction name="actionFileOpen"/>
+   <addaction name="actionFileSave"/>
+   <addaction name="actionPrint"/>
+   <addaction name="actionPrintPreview"/>
    <addaction name="separator"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
@@ -239,7 +285,7 @@
    <addaction name="actionZoomRegion"/>
    <addaction name="actionZoomExtents"/>
   </widget>
-  <action name="actionNew">
+  <action name="actionFileNew">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/file_new.png</normaloff>:/resources/file_new.png</iconset>
@@ -247,22 +293,46 @@
    <property name="text">
     <string>New</string>
    </property>
+   <property name="toolTip">
+    <string>New Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Create a new project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
-  <action name="actionOpen">
+  <action name="actionFileOpen">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/file_open.png</normaloff>:/resources/file_open.png</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open...</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Open an existing project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionMerge">
+  <action name="actionFileMerge">
    <property name="text">
-    <string>Merge</string>
+    <string>Merge...</string>
+   </property>
+   <property name="toolTip">
+    <string>Merge Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Merge the contents of an existing project with the current one</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="actionFileSave">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/file_save.png</normaloff>:/resources/file_save.png</iconset>
@@ -270,10 +340,22 @@
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="toolTip">
+    <string>Save Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Save the current project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
-  <action name="actionSave_As">
+  <action name="actionFileSaveAs">
    <property name="text">
-    <string>Save As</string>
+    <string>Save As...</string>
+   </property>
+   <property name="statusTip">
+    <string>Save the current project with a new name</string>
    </property>
   </action>
   <action name="actionUndo">
@@ -508,6 +590,159 @@
    </property>
    <property name="text">
     <string>ZoomExtents</string>
+   </property>
+  </action>
+  <action name="actionFileSaveImage">
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+  </action>
+  <action name="actionProperties">
+   <property name="text">
+    <string>Properties</string>
+   </property>
+  </action>
+  <action name="actionPieces_Library_Manager">
+   <property name="text">
+    <string>Pieces Library Manager</string>
+   </property>
+  </action>
+  <action name="actionTerrain_Editor">
+   <property name="text">
+    <string>Terrain Editor</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/file_print.png</normaloff>:/resources/file_print.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print</string>
+   </property>
+  </action>
+  <action name="actionPrint_Bill_of_Materials">
+   <property name="text">
+    <string>Print Bill of Materials</string>
+   </property>
+  </action>
+  <action name="actionPrintPreview">
+   <property name="icon">
+    <iconset resource="../leocad.qrc">
+     <normaloff>:/resources/file_print_preview.png</normaloff>:/resources/file_print_preview.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print Preview</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionSelect_None">
+   <property name="text">
+    <string>Select None</string>
+   </property>
+  </action>
+  <action name="actionSelect_Invert">
+   <property name="text">
+    <string>Select Invert</string>
+   </property>
+  </action>
+  <action name="actionSelect_By_Name">
+   <property name="text">
+    <string>Select By Name</string>
+   </property>
+  </action>
+  <action name="action3D_Studio">
+   <property name="text">
+    <string>3D Studio</string>
+   </property>
+  </action>
+  <action name="actionHTML">
+   <property name="text">
+    <string>HTML</string>
+   </property>
+  </action>
+  <action name="actionPOV_Ray">
+   <property name="text">
+    <string>POV-Ray</string>
+   </property>
+  </action>
+  <action name="actionWavefront">
+   <property name="text">
+    <string>Wavefront</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+  </action>
+  <action name="actionZoom_Extents">
+   <property name="text">
+    <string>Zoom Extents</string>
+   </property>
+  </action>
+  <action name="actionViewpoints">
+   <property name="text">
+    <string>Viewpoints</string>
+   </property>
+  </action>
+  <action name="actionCameras">
+   <property name="text">
+    <string>Cameras</string>
+   </property>
+  </action>
+  <action name="actionSplit_Horizontally">
+   <property name="text">
+    <string>Split Horizontally</string>
+   </property>
+  </action>
+  <action name="actionSplit_Vertically">
+   <property name="text">
+    <string>Split Vertically</string>
+   </property>
+  </action>
+  <action name="actionDelete_View">
+   <property name="text">
+    <string>Delete View</string>
+   </property>
+  </action>
+  <action name="actionReset_All_Views">
+   <property name="text">
+    <string>Reset Views</string>
+   </property>
+  </action>
+  <action name="actionToolbars">
+   <property name="text">
+    <string>Toolbars</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
    </property>
   </action>
  </widget>

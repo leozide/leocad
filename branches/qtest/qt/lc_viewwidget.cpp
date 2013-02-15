@@ -34,3 +34,53 @@ void lcViewWidget::paintGL()
 {
 	mView->OnDraw();
 }
+
+void lcViewWidget::mousePressEvent(QMouseEvent *event)
+{
+	bool Control = event->modifiers() & Qt::ControlModifier;
+	bool Shift = event->modifiers() & Qt::ShiftModifier;
+
+	switch (event->button())
+	{
+	case Qt::LeftButton:
+		mView->OnLeftButtonDown(event->x(), event->y(), Control, Shift);
+		break;
+	case Qt::MidButton:
+		mView->OnMiddleButtonDown(event->x(), event->y(), Control, Shift);
+		break;
+	case Qt::RightButton:
+		mView->OnRightButtonDown(event->x(), event->y(), Control, Shift);
+		break;
+	default:
+		break;
+	}
+}
+
+void lcViewWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	bool Control = event->modifiers() & Qt::ControlModifier;
+	bool Shift = event->modifiers() & Qt::ShiftModifier;
+
+	switch (event->button())
+	{
+	case Qt::LeftButton:
+		mView->OnLeftButtonUp(event->x(), event->y(), Control, Shift);
+		break;
+	case Qt::MidButton:
+		mView->OnMiddleButtonUp(event->x(), event->y(), Control, Shift);
+		break;
+	case Qt::RightButton:
+		mView->OnRightButtonUp(event->x(), event->y(), Control, Shift);
+		break;
+	default:
+		break;
+	}
+}
+
+void lcViewWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	bool Control = event->modifiers() & Qt::ControlModifier;
+	bool Shift = event->modifiers() & Qt::ShiftModifier;
+
+	mView->OnMouseMove(event->x(), event->y(), Control, Shift);
+}

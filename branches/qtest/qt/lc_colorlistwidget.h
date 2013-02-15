@@ -13,7 +13,10 @@ public:
 	lcColorListWidget(QWidget *parent = 0);
 	~lcColorListWidget();
 
+	QSize sizeHint() const;
+
 protected:
+	bool event(QEvent *event);
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 
@@ -26,6 +29,7 @@ protected:
 	int mRows;
 	int mWidth;
 	int mHeight;
+	int mPreferredHeight;
 };
 
 #endif // LC_COLORLISTWIDGET_H

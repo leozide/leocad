@@ -12,6 +12,11 @@ lcPreviewWidget::lcPreviewWidget(QWidget *parent) :
 	mPreview->CreateFromWindow(this);
 }
 
+ QSize lcPreviewWidget::sizeHint() const
+ {
+	 return QSize(100, 100);
+ }
+
 void lcPreviewWidget::initializeGL()
 {
 }

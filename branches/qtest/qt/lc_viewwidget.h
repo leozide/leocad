@@ -15,6 +15,9 @@ protected:
 	void initializeGL();
 	void resizeGL(int x, int h);
 	void paintGL();
+	void mousePressEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
 };
 
 #endif // LC_VIEWWIDGET_H

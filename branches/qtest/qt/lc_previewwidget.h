@@ -1,22 +1,14 @@
 #ifndef LC_PREVIEWWIDGET_H
 #define LC_PREVIEWWIDGET_H
 
-#include <QGLWidget>
-class PiecePreview;
+#include "lc_glwidget.h"
 
-class lcPreviewWidget : public QGLWidget
+class lcPreviewWidget : public lcGLWidget
 {
 public:
 	lcPreviewWidget(QWidget *parent = 0);
 
 	QSize sizeHint() const;
-
-	PiecePreview* mPreview;
-
-protected:
-	void initializeGL();
-	void resizeGL(int x, int h);
-	void paintGL();
 };
 
 #endif // LC_PREVIEWWIDGET_H

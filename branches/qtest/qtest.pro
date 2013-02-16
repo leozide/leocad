@@ -63,7 +63,8 @@ SOURCES += common/view.cpp \
     qt/basewnd.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
-    qt/lc_colorlistwidget.cpp
+    qt/lc_colorlistwidget.cpp \
+    qt/lc_glwidget.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -106,7 +107,8 @@ HEADERS += common/glwindow.h \
     qt/lc_colorlistwidget.h \
     qt/lc_mainwindow.h \
     qt/lc_previewwidget.h \
-    qt/lc_viewwidget.h
+    qt/lc_viewwidget.h \
+    qt/lc_glwidget.h
 FORMS += qt/lc_mainwindow.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc

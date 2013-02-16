@@ -20,6 +20,8 @@ protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 
+	void initStyleOption(QStyleOptionFrame *option) const;
+
 	QRect mGroupRects[LC_NUM_COLORGROUPS];
 	QRect* mCellRects;
 	int* mCellColors;

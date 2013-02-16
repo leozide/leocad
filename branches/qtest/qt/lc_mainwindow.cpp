@@ -42,7 +42,6 @@ lcMainWindow::lcMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-
 	lcPiecesLibrary* Lib = lcGetPiecesLibrary();
 
 	QList<QTreeWidgetItem *> items;
@@ -98,7 +97,8 @@ lcMainWindow::lcMainWindow(QWidget *parent) :
 	if (Info)
 	{
 		lcGetActiveProject()->SetCurrentPiece(Info);
-		ui->piecePreview->mPreview->SetCurrentPiece(Info);
+		PiecePreview* Preview = (PiecePreview*)ui->piecePreview->mWindow;
+		Preview->SetCurrentPiece(Info);
 	}
 
 }

@@ -25,6 +25,9 @@
 #define KEY_PLUS	VK_ADD
 #define KEY_MINUS	VK_SUBTRACT
 
+#endif
+
+#ifdef WIN32
 #define isnan _isnan
 #endif
 
@@ -74,9 +77,11 @@ int stricmp(const char* str1, const char* str2);
 #define KEY_PLUS	'+'
 #define KEY_MINUS	'-'
 
+#ifndef WIN32
 char* strupr(char* string);
 char* strlwr(char* string);
 int stricmp(const char* str1, const char* str2);
+#endif
 
 #endif
 
@@ -84,7 +89,7 @@ int stricmp(const char* str1, const char* str2);
 /////////////////////////////////////////////////////////////////////////////
 // LeoCAD constants
 
-#ifndef LC_WINDOWS
+#ifndef WIN32
 #define RGB(r, g, b) ((unsigned long)(((unsigned char) (r) | ((unsigned short) (g) << 8))|(((unsigned long) (unsigned char) (b)) << 16))) 
 #endif 
 

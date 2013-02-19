@@ -14,7 +14,7 @@
 #endif
 
 #ifndef APIENTRY
-#define APIENTRY
+//#define APIENTRY
 #endif
 
 #ifdef LC_QT

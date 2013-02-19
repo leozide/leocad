@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>lcMainWindow</class>
- <widget class="QMainWindow" name="lcMainWindow">
+ <class>mainWindow</class>
+ <widget class="QMainWindow" name="mainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>lcMainWindow</string>
+   <string>LeoCAD</string>
   </property>
   <widget class="lcViewWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -40,12 +40,12 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
+    <addaction name="actionEditUndo"/>
+    <addaction name="actionEditRedo"/>
     <addaction name="separator"/>
-    <addaction name="actionCut"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
+    <addaction name="actionEditCut"/>
+    <addaction name="actionEditCopy"/>
+    <addaction name="actionEditPaste"/>
     <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
     <addaction name="actionSelect_None"/>
@@ -147,12 +147,12 @@
    <addaction name="actionPrint"/>
    <addaction name="actionPrintPreview"/>
    <addaction name="separator"/>
-   <addaction name="actionUndo"/>
-   <addaction name="actionRedo"/>
+   <addaction name="actionEditUndo"/>
+   <addaction name="actionEditRedo"/>
    <addaction name="separator"/>
-   <addaction name="actionCut"/>
-   <addaction name="actionCopy"/>
-   <addaction name="actionPaste"/>
+   <addaction name="actionEditCut"/>
+   <addaction name="actionEditCopy"/>
+   <addaction name="actionEditPaste"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="piecesToolBar">
@@ -271,21 +271,21 @@
    <attribute name="toolBarBreak">
     <bool>true</bool>
    </attribute>
-   <addaction name="actionInsert"/>
-   <addaction name="actionLight"/>
-   <addaction name="actionSpotLight"/>
-   <addaction name="actionCamera"/>
+   <addaction name="actionToolInsert"/>
+   <addaction name="actionToolLight"/>
+   <addaction name="actionToolSpotLight"/>
+   <addaction name="actionToolCamera"/>
    <addaction name="separator"/>
-   <addaction name="actionSelect"/>
-   <addaction name="actionMove"/>
-   <addaction name="actionRotate"/>
-   <addaction name="actionDelete"/>
-   <addaction name="actionPaint"/>
-   <addaction name="actionZoom"/>
-   <addaction name="actionPan"/>
-   <addaction name="actionRotateView"/>
-   <addaction name="actionRoll"/>
-   <addaction name="actionZoomRegion"/>
+   <addaction name="actionToolSelect"/>
+   <addaction name="actionToolMove"/>
+   <addaction name="actionToolRotate"/>
+   <addaction name="actionToolDelete"/>
+   <addaction name="actionToolPaint"/>
+   <addaction name="actionToolZoom"/>
+   <addaction name="actionToolPan"/>
+   <addaction name="actionToolRotateView"/>
+   <addaction name="actionToolRoll"/>
+   <addaction name="actionToolZoomRegion"/>
    <addaction name="actionZoomExtents"/>
   </widget>
   <action name="actionFileNew">
@@ -361,7 +361,7 @@
     <string>Save the current project with a new name</string>
    </property>
   </action>
-  <action name="actionUndo">
+  <action name="actionEditUndo">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/edit_undo.png</normaloff>:/resources/edit_undo.png</iconset>
@@ -370,7 +370,7 @@
     <string>Undo</string>
    </property>
   </action>
-  <action name="actionRedo">
+  <action name="actionEditRedo">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/edit_redo.png</normaloff>:/resources/edit_redo.png</iconset>
@@ -379,7 +379,7 @@
     <string>Redo</string>
    </property>
   </action>
-  <action name="actionCut">
+  <action name="actionEditCut">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/edit_cut.png</normaloff>:/resources/edit_cut.png</iconset>
@@ -388,7 +388,7 @@
     <string>Cut</string>
    </property>
   </action>
-  <action name="actionCopy">
+  <action name="actionEditCopy">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/edit_copy.png</normaloff>:/resources/edit_copy.png</iconset>
@@ -397,7 +397,7 @@
     <string>Copy</string>
    </property>
   </action>
-  <action name="actionPaste">
+  <action name="actionEditPaste">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/edit_paste.png</normaloff>:/resources/edit_paste.png</iconset>
@@ -460,7 +460,7 @@
     <string>Last</string>
    </property>
   </action>
-  <action name="actionInsert">
+  <action name="actionToolInsert">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_insert.xpm</normaloff>:/resources/action_insert.xpm</iconset>
@@ -469,7 +469,7 @@
     <string>Insert</string>
    </property>
   </action>
-  <action name="actionLight">
+  <action name="actionToolLight">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_light.xpm</normaloff>:/resources/action_light.xpm</iconset>
@@ -478,7 +478,7 @@
     <string>Light</string>
    </property>
   </action>
-  <action name="actionSpotLight">
+  <action name="actionToolSpotLight">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_spotlight.xpm</normaloff>:/resources/action_spotlight.xpm</iconset>
@@ -487,7 +487,7 @@
     <string>SpotLight</string>
    </property>
   </action>
-  <action name="actionCamera">
+  <action name="actionToolCamera">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_camera.xpm</normaloff>:/resources/action_camera.xpm</iconset>
@@ -496,7 +496,7 @@
     <string>Camera</string>
    </property>
   </action>
-  <action name="actionSelect">
+  <action name="actionToolSelect">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_select.xpm</normaloff>:/resources/action_select.xpm</iconset>
@@ -505,7 +505,7 @@
     <string>Select</string>
    </property>
   </action>
-  <action name="actionMove">
+  <action name="actionToolMove">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_move.xpm</normaloff>:/resources/action_move.xpm</iconset>
@@ -514,7 +514,7 @@
     <string>Move</string>
    </property>
   </action>
-  <action name="actionRotate">
+  <action name="actionToolRotate">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_rotate.xpm</normaloff>:/resources/action_rotate.xpm</iconset>
@@ -523,7 +523,7 @@
     <string>Rotate</string>
    </property>
   </action>
-  <action name="actionDelete">
+  <action name="actionToolDelete">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_delete.xpm</normaloff>:/resources/action_delete.xpm</iconset>
@@ -532,7 +532,7 @@
     <string>Delete</string>
    </property>
   </action>
-  <action name="actionPaint">
+  <action name="actionToolPaint">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_paint.xpm</normaloff>:/resources/action_paint.xpm</iconset>
@@ -541,7 +541,7 @@
     <string>Paint</string>
    </property>
   </action>
-  <action name="actionZoom">
+  <action name="actionToolZoom">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_zoom.xpm</normaloff>:/resources/action_zoom.xpm</iconset>
@@ -550,7 +550,7 @@
     <string>Zoom</string>
    </property>
   </action>
-  <action name="actionPan">
+  <action name="actionToolPan">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_pan.xpm</normaloff>:/resources/action_pan.xpm</iconset>
@@ -559,7 +559,7 @@
     <string>Pan</string>
    </property>
   </action>
-  <action name="actionRotateView">
+  <action name="actionToolRotateView">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_rotate_view.xpm</normaloff>:/resources/action_rotate_view.xpm</iconset>
@@ -568,7 +568,7 @@
     <string>RotateView</string>
    </property>
   </action>
-  <action name="actionRoll">
+  <action name="actionToolRoll">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_roll.xpm</normaloff>:/resources/action_roll.xpm</iconset>
@@ -577,7 +577,7 @@
     <string>Roll</string>
    </property>
   </action>
-  <action name="actionZoomRegion">
+  <action name="actionToolZoomRegion">
    <property name="icon">
     <iconset resource="../leocad.qrc">
      <normaloff>:/resources/action_zoom_region.xpm</normaloff>:/resources/action_zoom_region.xpm</iconset>
@@ -774,4 +774,7 @@
   <include location="../leocad.qrc"/>
  </resources>
  <connections/>
+ <slots>
+  <slot>toolTriggered()</slot>
+ </slots>
 </ui>

@@ -7,7 +7,7 @@ class GLWindow;
 class lcGLWidget : public QGLWidget
 {
 public:
-	lcGLWidget(QWidget *parent);
+	lcGLWidget(QWidget *parent, lcGLWidget *share);
 
 	GLWindow* mWindow;
 

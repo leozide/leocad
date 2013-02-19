@@ -4,8 +4,8 @@
 #include "project.h"
 #include "lc_application.h"
 
-lcViewWidget::lcViewWidget(QWidget *parent)
-	: lcGLWidget(parent)
+lcViewWidget::lcViewWidget(QWidget *parent, lcGLWidget *share)
+	: lcGLWidget(parent, share)
 {
 	Project* project = lcGetActiveProject();
 

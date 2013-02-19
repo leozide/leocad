@@ -24,7 +24,7 @@ bool Sys_KeyDown(int Key)
 void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
 {
 }
-
+#ifndef WIN32
 // String
 char* strupr(char* string)
 {
@@ -54,7 +54,7 @@ int stricmp(const char* str1, const char* str2)
 {
   return strcasecmp(str1, str2);
 }
-
+#endif
 void SystemPumpMessages()
 {
 }

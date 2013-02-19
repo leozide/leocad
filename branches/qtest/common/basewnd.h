@@ -4,7 +4,7 @@
 #include <string.h>
 
 // FIXME: move this to another place
-#ifdef WIN32
+#ifdef LC_WINDOWS
 #include "stdafx.h"
 typedef CWnd* BaseWndXID;
 typedef struct

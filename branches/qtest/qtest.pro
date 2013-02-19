@@ -8,9 +8,15 @@ TARGET = qtest
 TEMPLATE = app
 DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
 INCLUDEPATH += qt \
-    common
+    common C:/qt/src/3rdparty/zlib
+
+!win32 {
 LIBS += -lz
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+}
+
+win32: QMAKE_CXXFLAGS_WARN_ON += -wd4100
+
 SOURCES += common/view.cpp \
     common/tr.cpp \
     common/texfont.cpp \

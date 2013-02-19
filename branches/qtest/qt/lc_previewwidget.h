@@ -6,7 +6,7 @@
 class lcPreviewWidget : public lcGLWidget
 {
 public:
-	lcPreviewWidget(QWidget *parent = 0);
+	lcPreviewWidget(QWidget *parent, lcGLWidget *share);
 
 	QSize sizeHint() const;
 };

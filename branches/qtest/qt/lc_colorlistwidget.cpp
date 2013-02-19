@@ -9,6 +9,9 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 	mCellColors = new int[gNumUserColors];
 	mNumCells = 0;
 
+	mCurCell = 0;
+	mTracking = false;
+
 	mColumns = 14;
 	mRows = 0;
 
@@ -78,10 +81,30 @@ bool lcColorListWidget::event(QEvent *event)
 	return QWidget::event(event);
 }
 
+void lcColorListWidget::mousePressEvent(QMouseEvent *event)
+{
+	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+	{
+		if (!mCellRects[CellIdx].contains(event->pos()))
+			continue;
+
+		SelectCell(CellIdx);
+
+		grabMouse();
+		mMouseDown = event->pos();
+		mTracking = TRUE;
+		break;
+	}
+}
+
+void lcColorListWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	mTracking = FALSE;
+	releaseMouse();
+}
+
 void lcColorListWidget::resizeEvent(QResizeEvent *event)
 {
-	int Width, Height;
-
 	if (mWidth == width() && mHeight == height())
 		return;
 
@@ -117,8 +140,8 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 		{
 			int Left = CurColumn * CellWidth;
 			int Right = (CurColumn + 1) * CellWidth;
-			float Top = CurY;
-			float Bottom = CurY + CellHeight;
+			int Top = CurY;
+			int Bottom = CurY + CellHeight;
 
 			mCellRects[CurCell] = QRect(Left, Top, Right - Left, Bottom - Top);
 
@@ -170,4 +193,42 @@ void lcColorListWidget::paintEvent(QPaintEvent *event)
 		painter.setBrush(CellColor);
 		painter.drawRect(mCellRects[CellIdx]);
 	}
+
+	if (mCurCell < mNumCells)
+	{
+		lcColor* Color = &gColorList[mCellColors[mCurCell]];
+		QColor EdgeColor(255 - Color->Value[0] * 255, 255 - Color->Value[1] * 255, 255 - Color->Value[2] * 255);
+		QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
+
+		painter.setPen(EdgeColor);
+		painter.setBrush(CellColor);
+
+		QRect CellRect = mCellRects[mCurCell];
+		CellRect.adjust(1, 1, -1, -1);
+		painter.drawRect(CellRect);
+
+		/*
+		if (GetFocus() == this)
+		{
+			rc.DeflateRect(2, 2);
+			dc.DrawFocusRect(rc);
+		}
+		*/
+	}
+}
+
+void lcColorListWidget::SelectCell(int CellIdx)
+{
+	if (CellIdx < 0 || CellIdx >= mNumCells)
+		return;
+
+	if (CellIdx == mCurCell)
+		return;
+
+	update(mCellRects[mCurCell]);
+	update(mCellRects[CellIdx]);
+	mCurCell = CellIdx;
+
+//	CPiecesBar* Bar = (CPiecesBar*)GetParent();
+//	Bar->OnSelChangeColor();
 }

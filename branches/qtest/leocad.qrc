@@ -34,5 +34,20 @@
         <file>resources/action_zoom.xpm</file>
         <file>resources/action_zoom_extents.xpm</file>
         <file>resources/action_zoom_region.xpm</file>
+        <file>resources/cursor_camera.xpm</file>
+        <file>resources/cursor_delete.xpm</file>
+        <file>resources/cursor_insert.xpm</file>
+        <file>resources/cursor_light.xpm</file>
+        <file>resources/cursor_move.xpm</file>
+        <file>resources/cursor_paint.xpm</file>
+        <file>resources/cursor_pan.xpm</file>
+        <file>resources/cursor_roll.xpm</file>
+        <file>resources/cursor_rotate.xpm</file>
+        <file>resources/cursor_rotate_view.xpm</file>
+        <file>resources/cursor_select.xpm</file>
+        <file>resources/cursor_select_multiple.xpm</file>
+        <file>resources/cursor_spotlight.xpm</file>
+        <file>resources/cursor_zoom.xpm</file>
+        <file>resources/cursor_zoom_region.xpm</file>
     </qresource>
 </RCC>

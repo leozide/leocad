@@ -19,8 +19,10 @@ protected:
 	bool event(QEvent *event);
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
 
-	void initStyleOption(QStyleOptionFrame *option) const;
+	void SelectCell(int CellIdx);
 
 	QRect mGroupRects[LC_NUM_COLORGROUPS];
 	QRect* mCellRects;
@@ -32,6 +34,10 @@ protected:
 	int mWidth;
 	int mHeight;
 	int mPreferredHeight;
+
+	int mCurCell;
+	QPoint mMouseDown;
+	bool mTracking;
 };
 
 #endif // LC_COLORLISTWIDGET_H

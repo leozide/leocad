@@ -6,7 +6,7 @@
 class lcViewWidget : public lcGLWidget
 {
 public:
-	lcViewWidget(QWidget *parent);
+	lcViewWidget(QWidget *parent, lcGLWidget *share);
 };
 
 #endif // LC_VIEWWIDGET_H

@@ -1,6 +1,3 @@
-# -------------------------------------------------
-# Project created by QtCreator 2013-02-06T12:31:25
-# -------------------------------------------------
 QT += core \
     gui \
     opengl
@@ -13,6 +10,9 @@ INCLUDEPATH += qt \
 !win32 {
 LIBS += -lz
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+
+OBJECTS_DIR = obj
+MOC_DIR = moc
 }
 
 win32: QMAKE_CXXFLAGS_WARN_ON += -wd4100

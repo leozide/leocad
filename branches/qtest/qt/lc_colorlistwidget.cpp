@@ -41,6 +41,8 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 	}
 
 	mPreferredHeight = TextHeight + 8 * mRows;
+
+	setFocusPolicy(Qt::ClickFocus);
 }
 
 lcColorListWidget::~lcColorListWidget()
@@ -101,6 +103,83 @@ void lcColorListWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	mTracking = FALSE;
 	releaseMouse();
+}
+
+void lcColorListWidget::keyPressEvent(QKeyEvent *event)
+{
+	int NewCell = mCurCell;
+
+	if (event->key() == Qt::Key_Left)
+	{
+		if (mCurCell > 0)
+			NewCell = mCurCell - 1;
+	}
+	else if (event->key() == Qt::Key_Right)
+	{
+		if (mCurCell < mNumCells - 1)
+			NewCell = mCurCell + 1;
+	}
+	else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
+	{
+		if (mCurCell < 0 || mCurCell >= mNumCells)
+			mCurCell = 0;
+
+		int CurGroup = 0;
+		int NumCells = 0;
+
+		for (CurGroup = 0; CurGroup < LC_NUM_COLORGROUPS; CurGroup++)
+		{
+			int NumColors = gColorGroups[CurGroup].Colors.GetSize();
+
+			if (mCurCell < NumCells + NumColors)
+				break;
+
+			NumCells += NumColors;
+		}
+
+		int Row = (mCurCell - NumCells) / mColumns;
+		int Column = (mCurCell - NumCells) % mColumns;
+
+		if (event->key() == Qt::Key_Up)
+		{
+			if (Row > 0)
+				NewCell = mCurCell - mColumns;
+			else if (CurGroup > 0)
+			{
+				int NumColors = gColorGroups[CurGroup - 1].Colors.GetSize();
+				int NumColumns = NumColors % mColumns;
+
+				if (NumColumns <= Column + 1)
+					NewCell = mCurCell - NumColumns - mColumns;
+				else
+					NewCell = mCurCell - NumColumns;
+			}
+		}
+		else if (event->key() == Qt::Key_Down)
+		{
+			int NumColors = gColorGroups[CurGroup].Colors.GetSize();
+
+			if (mCurCell + mColumns < NumCells + NumColors)
+				NewCell = mCurCell + mColumns;
+			else
+			{
+				int NumColumns = NumColors % mColumns;
+
+				if (NumColumns > Column)
+				{
+					if (mCurCell + NumColumns < mNumCells)
+						NewCell = mCurCell + NumColumns;
+				}
+				else
+					NewCell = mCurCell + mColumns + NumColumns;
+			}
+		}
+	}
+
+	if (NewCell != mCurCell)
+		SelectCell(NewCell);
+	else
+		QWidget::keyPressEvent(event);
 }
 
 void lcColorListWidget::resizeEvent(QResizeEvent *event)

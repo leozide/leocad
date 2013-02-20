@@ -13,7 +13,17 @@ int main(int argc, char *argv[])
 	g_App = new lcApplication();
 //    main_window = new MainWnd();
 
-	if (!g_App->Initialize(argc, argv, "", ""))
+#ifdef WIN32
+	char libPath[LC_MAXPATH], *ptr;
+	GetModuleFileName (NULL, libPath, LC_MAXPATH);
+	ptr = strrchr(libPath,'\\');
+	if (ptr)
+		*(++ptr) = 0;
+#else
+	const char* libPath = LC_INSTALL_PREFIX"/share/leocad/";
+#endif
+
+	if (!g_App->Initialize(argc, argv, libPath, ""))
 		return 1;
 
 	QApplication a(argc, argv);

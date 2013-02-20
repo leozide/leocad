@@ -34,9 +34,20 @@ lcMainWindow::lcMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	resize(800, 600);
-	centralWidget = new lcViewWidget(this, NULL);
+//	centralWidget = new lcViewWidget(this, NULL);
+//	centralWidget->mWindow->OnInitialUpdate();
+//	setCentralWidget(centralWidget);
+
+	QFrame *previewFrame = new QFrame;
+	previewFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	setCentralWidget(previewFrame);
+
+	QGridLayout *previewLayout = new QGridLayout(previewFrame);
+	previewLayout->setContentsMargins(0, 0, 0, 0);
+
+	centralWidget = new lcViewWidget(previewFrame, NULL);
 	centralWidget->mWindow->OnInitialUpdate();
-	setCentralWidget(centralWidget);
+	previewLayout->addWidget(centralWidget, 0, 0, 1, 1);
 
 	createActions();
 	createMenus();
@@ -403,10 +414,19 @@ void lcMainWindow::createToolBars()
 	QWidget *piecesContents = new QWidget();
 	QGridLayout *piecesLayout = new QGridLayout(piecesContents);
 	piecesLayout->setSpacing(6);
-	piecesLayout->setContentsMargins(11, 11, 11, 11);
+	piecesLayout->setContentsMargins(6, 6, 6, 6);
 	QSplitter *piecesSplitter = new QSplitter(Qt::Vertical, piecesContents);
-	piecePreview = new lcPreviewWidget(piecesSplitter, centralWidget);
-	piecesSplitter->addWidget(piecePreview);
+
+	QFrame *previewFrame = new QFrame;
+	previewFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	piecesSplitter->addWidget(previewFrame);
+
+	QGridLayout *previewLayout = new QGridLayout(previewFrame);
+	previewLayout->setContentsMargins(0, 0, 0, 0);
+
+	piecePreview = new lcPreviewWidget(previewFrame, centralWidget);
+	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
+
 	pieceList = new QTreeWidget(piecesSplitter);
 	pieceList->setHeaderHidden(true);
 	piecesSplitter->addWidget(pieceList);

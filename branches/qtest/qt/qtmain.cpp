@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
 #ifdef WIN32
 	char libPath[LC_MAXPATH], *ptr;
-	GetModuleFileName (NULL, libPath, LC_MAXPATH);
+	strcpy(libPath, argv[0]);
 	ptr = strrchr(libPath,'\\');
 	if (ptr)
 		*(++ptr) = 0;

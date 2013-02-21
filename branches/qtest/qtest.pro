@@ -7,15 +7,22 @@ DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
 INCLUDEPATH += qt \
     common \
     C:/qt/src/3rdparty/zlib
-CONFIG += precompile_header
+CONFIG += precompile_header incremental
 PRECOMPILED_HEADER = common/lc_global.h
 !win32 { 
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-    OBJECTS_DIR = obj
-    MOC_DIR = moc
 }
 win32:QMAKE_CXXFLAGS_WARN_ON += -wd4100
+
+release: DESTDIR = build/release
+debug:   DESTDIR = build/debug
+
+OBJECTS_DIR = $$DESTDIR/.obj
+MOC_DIR = $$DESTDIR/.moc
+RCC_DIR = $$DESTDIR/.qrc
+UI_DIR = $$DESTDIR/.ui
+
 SOURCES += common/view.cpp \
     common/tr.cpp \
     common/texfont.cpp \

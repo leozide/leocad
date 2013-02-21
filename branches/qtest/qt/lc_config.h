@@ -2,6 +2,10 @@
 #define _LC_CONFIG_H_
 
 #include <QtGlobal>
+#include <QWidget>
+#include <QtOpenGL>
+#include <QGLWidget>
+#include <QtGui>
 
 #define LC_QT
 

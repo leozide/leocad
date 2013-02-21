@@ -3,10 +3,6 @@
 #include "opengl.h"
 #include <QtOpenGL>
 
-void GL_InitializeExtensions()
-{
-}
-
 GLWindow::GLWindow(GLWindow *share)
 {
 	m_pShare = share;
@@ -33,7 +29,6 @@ void GLWindow::OnInitialUpdate()
 	MakeCurrent();
 
 	GL_InitializeSharedExtensions(m_pData);
-//	GL_InitializeExtensions();
 
 //	if (WindowMultisample)
 //		glEnable(GL_MULTISAMPLE_ARB);

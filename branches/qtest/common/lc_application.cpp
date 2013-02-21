@@ -232,10 +232,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 	}
 
-	// Initialize other systems.
-	if (!GL_Initialize(GLPath))
-		return false;
-
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LibraryCachePath))
 	{
 		if (SaveImage)
@@ -422,6 +418,4 @@ void lcApplication::Shutdown()
 
 	delete m_Library;
 	m_Library = NULL;
-
-	GL_Shutdown();
 }

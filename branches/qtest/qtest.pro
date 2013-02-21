@@ -5,18 +5,17 @@ TARGET = qtest
 TEMPLATE = app
 DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
 INCLUDEPATH += qt \
-    common C:/qt/src/3rdparty/zlib
-
-!win32 {
-LIBS += -lz
-QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-
-OBJECTS_DIR = obj
-MOC_DIR = moc
+    common \
+    C:/qt/src/3rdparty/zlib
+CONFIG += precompile_header
+PRECOMPILED_HEADER = common/lc_global.h
+!win32 { 
+    LIBS += -lz
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+    OBJECTS_DIR = obj
+    MOC_DIR = moc
 }
-
-win32: QMAKE_CXXFLAGS_WARN_ON += -wd4100
-
+win32:QMAKE_CXXFLAGS_WARN_ON += -wd4100
 SOURCES += common/view.cpp \
     common/tr.cpp \
     common/texfont.cpp \
@@ -114,7 +113,8 @@ HEADERS += common/glwindow.h \
     qt/lc_mainwindow.h \
     qt/lc_previewwidget.h \
     qt/lc_viewwidget.h \
-    qt/lc_glwidget.h
+    qt/lc_glwidget.h \
+    qt/lc_config.h
 FORMS += qt/lc_mainwindow.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc

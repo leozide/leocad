@@ -2,6 +2,7 @@
 #define _LC_MAINWINDOW_H_
 
 #include <QMainWindow>
+#include "typedefs.h"
 
 class QComboBox;
 class QTreeWidget;
@@ -18,7 +19,7 @@ public:
 	~lcMainWindow();
 
 private slots:
-	void toolTriggered(QAction *action);
+	void actionTriggered();
 
 private:
 	void createActions();
@@ -27,82 +28,9 @@ private:
 	void createStatusBar();
 
 	lcViewWidget *centralWidget;
+	QAction *actions[LC_NUM_COMMANDS];
 
-	QAction *actionFileNew;
-	QAction *actionFileOpen;
-	QAction *actionFileMerge;
-	QAction *actionFileSave;
-	QAction *actionFileSaveAs;
-	QAction *actionFileSaveImage;
-	QAction *actionFileExport3DS;
-	QAction *actionFileExportBrickLink;
-	QAction *actionFileExportHTML;
-	QAction *actionFileExportPOVRay;
-	QAction *actionFileExportWavefront;
-	QAction *actionFileProperties;
-	QAction *actionFilePiecesLibrary;
-	QAction *actionFileTerrainEditor;
-	QAction *actionFilePrint;
-	QAction *actionFilePrintPreview;
-	QAction *actionFilePrintBOM;
-	QAction *actionFileRecent1;
-	QAction *actionFileRecent2;
-	QAction *actionFileRecent3;
-	QAction *actionFileRecent4;
 	QAction *actionFileRecentSeparator;
-	QAction *actionFileExit;
-	QAction *actionEditUndo;
-	QAction *actionEditRedo;
-	QAction *actionEditCut;
-	QAction *actionEditCopy;
-	QAction *actionEditPaste;
-	QAction *actionEditSelectAll;
-	QAction *actionEditSelectNone;
-	QAction *actionEditSelectInvert;
-	QAction *actionEditSelectByName;
-	QAction *actionEditLockMove;
-	QAction *actionEditLockMoveX;
-	QAction *actionEditLockMoveY;
-	QAction *actionEditLockMoveZ;
-	QAction *actionEditLockMoveUnlockAll;
-	QAction *actionEditSnapMove;
-	QAction *actionEditSnapMoveX;
-	QAction *actionEditSnapMoveY;
-	QAction *actionEditSnapMoveZ;
-	QAction *actionEditSnapMoveNone;
-	QAction *actionEditSnapMoveAll;
-	QAction *actionEditSnapAngle;
-	QAction *actionEditTransform;
-	QAction *actionEditTransformAbsoluteTranslation;
-	QAction *actionEditTransformRelativeTranslation;
-	QAction *actionEditTransformAbsoluteRotation;
-	QAction *actionEditTransformRelativeRotation;
-	QAction *actionViewPreferences;
-	QAction *actionViewZoomIn;
-	QAction *actionViewZoomOut;
-	QAction *actionViewZoomExtents;
-	QAction *actionViewViewpointFront;
-	QAction *actionViewViewpointBack;
-	QAction *actionViewViewpointLeft;
-	QAction *actionViewViewpointRight;
-	QAction *actionViewViewpointTop;
-	QAction *actionViewViewpointBottom;
-	QAction *actionViewViewpointHome;
-	QAction *actionToolInsert;
-	QAction *actionToolLight;
-	QAction *actionToolSpotLight;
-	QAction *actionToolCamera;
-	QAction *actionToolSelect;
-	QAction *actionToolMove;
-	QAction *actionToolRotate;
-	QAction *actionToolDelete;
-	QAction *actionToolPaint;
-	QAction *actionToolZoom;
-	QAction *actionToolPan;
-	QAction *actionToolRotateView;
-	QAction *actionToolRoll;
-	QAction *actionToolZoomRegion;
-
 	QMenu *menuFile;
 	QMenu *menuEdit;
 	QMenu *menuView;

@@ -143,6 +143,7 @@ public:
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
+	void ZoomActiveView(int Amount);
 
 	void AddView(View* view);
 	void RemoveView(View* view);
@@ -265,7 +266,7 @@ public:
 	int GetAction() const;
 
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
-	void HandleCommand(LC_COMMANDS id, unsigned long nParam);
+	void HandleCommand(LC_COMMANDS id);
 	void HandleMessage(int Message, void* Data);
 
 protected:

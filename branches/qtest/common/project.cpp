@@ -3600,7 +3600,7 @@ void Project::HandleMessage(int Message, void* Data)
 }
 
 // Handle (almost) all menu/toolbar commands here.
-void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
+void Project::HandleCommand(LC_COMMANDS id)
 {
 	switch (id)
 	{
@@ -3655,7 +3655,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			DoSave(NULL, true);
 		} break;
 
-		case LC_FILE_PICTURE:
+		case LC_FILE_SAVE_IMAGE:
 		{
 			LC_IMAGEDLG_OPTS opts;
 
@@ -3786,14 +3786,14 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_FILE_3DS:
+		case LC_FILE_EXPORT_3DS:
 		{
 #ifdef LC_WINDOWS
 			Export3DStudio();
 #endif
 		} break;
 
-		case LC_FILE_HTML:
+		case LC_FILE_EXPORT_HTML:
 		{
 			LC_HTMLDLG_OPTS opts;
 
@@ -4080,7 +4080,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_FILE_BRICKLINK:
+		case LC_FILE_EXPORT_BRICKLINK:
 		{
 			if (!m_pPieces)
 			{
@@ -4140,7 +4140,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		} break;
 
 		// Export to POV-Ray, swap X & Y from our cs to work with LGEO.
-		case LC_FILE_POVRAY:
+		case LC_FILE_EXPORT_POVRAY:
 		{
 			LC_POVRAYDLG_OPTS opts;
 
@@ -4438,7 +4438,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_FILE_WAVEFRONT:
+		case LC_FILE_EXPORT_WAVEFRONT:
 		{
 			char filename[LC_MAXPATH];
 			memset(filename, 0, sizeof(filename));
@@ -4598,7 +4598,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			delete[] opts.PieceNames;
 		} break;
 
-		case LC_FILE_TERRAIN:
+		case LC_FILE_TERRAIN_EDITOR:
 		{
 			Terrain* temp = new Terrain();
 			*temp = *m_pTerrain;
@@ -4611,14 +4611,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			delete temp;
 		} break;
 
-		case LC_FILE_LIBRARY:
+		case LC_FILE_PIECES_LIBRARY:
 		{
 			SystemDoDialog(LC_DLG_LIBRARY, NULL);
 		} break;
 
-		case LC_FILE_RECENT:
+		case LC_FILE_RECENT1:
+		case LC_FILE_RECENT2:
+		case LC_FILE_RECENT3:
+		case LC_FILE_RECENT4:
 		{
-			OpenProject(main_window->GetMRU(nParam));
+			OpenProject(main_window->GetMRU(id - LC_FILE_RECENT1));
 		} break;
 
 		case LC_EDIT_UNDO:
@@ -4900,7 +4903,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateAllViews();
 		} break;
 
-		case LC_EDIT_SELECT_BYNAME:
+		case LC_EDIT_SELECT_BY_NAME:
 		{
 			Piece* pPiece;
 			Light* pLight;
@@ -5083,7 +5086,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_PIECE_MINIFIG:
+		case LC_PIECE_MINIFIG_WIZARD:
 		{
 			MinifigWizard Wizard(m_ActiveView);
 			int i;
@@ -5306,7 +5309,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_PIECE_COPYKEYS:
+		case LC_PIECE_COPY_KEYS:
 		{
 			float move[3], rot[4];
 			Piece* pPiece;
@@ -5544,7 +5547,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateAllViews();
 		} break;
 
-		case LC_PIECE_PREVIOUS:
+		case LC_PIECE_SHOW_EARLIER:
 		{
 			bool redraw = false;
 
@@ -5579,7 +5582,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_PIECE_NEXT:
+		case LC_PIECE_SHOW_LATER:
 		{
 			bool redraw = false;
 
@@ -5679,31 +5682,17 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 		} break;
 
-		case LC_VIEW_ZOOM:
+		case LC_VIEW_ZOOM_IN:
 		{
-			m_ActiveView->mCamera->DoZoom(nParam, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			SystemUpdateFocus(NULL);
-			UpdateOverlayScale();
-			UpdateAllViews();
+			ZoomActiveView(-1);
 		} break;
 
-		case LC_VIEW_ZOOMIN:
+		case LC_VIEW_ZOOM_OUT:
 		{
-			m_ActiveView->mCamera->DoZoom(-1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			SystemUpdateFocus(NULL);
-			UpdateOverlayScale();
-			UpdateAllViews();
+			ZoomActiveView(1);
 		} break;
 
-		case LC_VIEW_ZOOMOUT:
-		{
-			m_ActiveView->mCamera->DoZoom(1, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			SystemUpdateFocus(NULL);
-			UpdateOverlayScale();
-			UpdateAllViews();
-		} break;
-
-		case LC_VIEW_ZOOMEXTENTS:
+		case LC_VIEW_ZOOM_EXTENTS:
 		{
 			int FirstView, LastView;
 
@@ -5721,7 +5710,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			ZoomExtents(FirstView, LastView);
 		} break;
 
-		case LC_VIEW_STEP_NEXT:
+		case LC_VIEW_TIME_NEXT:
 		{
 			if (m_bAnimation)
 				m_nCurFrame++;
@@ -5739,7 +5728,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
-		case LC_VIEW_STEP_PREVIOUS:
+		case LC_VIEW_TIME_PREVIOUS:
 		{
 			if (m_bAnimation)
 				m_nCurFrame--;
@@ -5757,7 +5746,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
-		case LC_VIEW_STEP_FIRST:
+		case LC_VIEW_TIME_FIRST:
 		{
 			if (m_bAnimation)
 				m_nCurFrame = 1;
@@ -5775,7 +5764,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
-		case LC_VIEW_STEP_LAST:
+		case LC_VIEW_TIME_LAST:
 		{
 			if (m_bAnimation)
 				m_nCurFrame = m_nTotalFrames;
@@ -5792,7 +5781,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			else
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
-
+/*
 		case LC_VIEW_STEP_CHOOSE:
 		{
 			SystemDoDialog(LC_DLG_STEPCHOOSE, NULL);
@@ -5819,8 +5808,8 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			else
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
-
-		case LC_VIEW_STEP_INSERT:
+*/
+		case LC_VIEW_TIME_INSERT:
 		{
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				pPiece->InsertTime(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
@@ -5841,7 +5830,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateSelection();
 		} break;
 
-		case LC_VIEW_STEP_DELETE:
+		case LC_VIEW_TIME_DELETE:
 		{
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				pPiece->RemoveTime(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, 1);
@@ -5862,12 +5851,12 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			UpdateSelection();
 		} break;
 
-		case LC_VIEW_STOP:
+		case LC_VIEW_TIME_STOP:
 		{
 			m_bStopRender = true;
 		} break;
 
-		case LC_VIEW_PLAY:
+		case LC_VIEW_TIME_PLAY:
 		{
 			SelectAndFocusNone(false);
 			UpdateSelection();
@@ -5899,50 +5888,66 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		case LC_VIEW_VIEWPOINT_FRONT:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BACK:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_TOP:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_LEFT:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_HOME:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
-			HandleCommand(LC_VIEW_ZOOMEXTENTS, 0);
+			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
-		case LC_VIEW_CAMERA_MENU:
+		case LC_VIEW_CAMERA_NONE:
+		case LC_VIEW_CAMERA1:
+		case LC_VIEW_CAMERA2:
+		case LC_VIEW_CAMERA3:
+		case LC_VIEW_CAMERA4:
+		case LC_VIEW_CAMERA5:
+		case LC_VIEW_CAMERA6:
+		case LC_VIEW_CAMERA7:
+		case LC_VIEW_CAMERA8:
+		case LC_VIEW_CAMERA9:
+		case LC_VIEW_CAMERA10:
+		case LC_VIEW_CAMERA11:
+		case LC_VIEW_CAMERA12:
+		case LC_VIEW_CAMERA13:
+		case LC_VIEW_CAMERA14:
+		case LC_VIEW_CAMERA15:
+		case LC_VIEW_CAMERA16:
 		{
 			Camera* pCamera = NULL;
 
-			if (nParam == 0)
+			if (id == LC_VIEW_CAMERA_NONE)
 			{
 				pCamera = m_ActiveView->mCamera;
 
@@ -5954,11 +5959,16 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			}
 			else
 			{
-				pCamera = mCameras[nParam - 1];
+				if (id - LC_VIEW_CAMERA1 < mCameras.GetSize())
+				{
+					pCamera = mCameras[id - LC_VIEW_CAMERA1];
+					m_ActiveView->SetCamera(pCamera, false);
+				}
+				else
+					break;
 			}
 
 			SystemUpdateCurrentCamera(m_ActiveView->mCamera, pCamera, mCameras);
-			m_ActiveView->SetCamera(pCamera, false);
 			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
@@ -5986,7 +5996,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 		  SystemDoDialog(LC_DLG_ABOUT, 0);
 		} break;
 
-		case LC_TOOLBAR_ANIMATION:
+		case LC_VIEW_TIME_ANIMATION:
 		{
 			m_bAnimation = !m_bAnimation;
 
@@ -6001,154 +6011,150 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
-		case LC_TOOLBAR_ADDKEYS:
+		case LC_VIEW_TIME_ADD_KEYS:
 		{
 			m_bAddKeys = !m_bAddKeys;
 			SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 		} break;
 
-		// Change snap X, Y, Z, All, None or Angle.
-		case LC_TOOLBAR_SNAPMENU:
-		{
-			switch (nParam)
-			{
-			case 0:
-				if (m_nSnap & LC_DRAW_SNAP_X)
-					m_nSnap &= ~LC_DRAW_SNAP_X;
-				else
-					m_nSnap |= LC_DRAW_SNAP_X;
-				break;
-			case 1:
-				if (m_nSnap & LC_DRAW_SNAP_Y)
-					m_nSnap &= ~LC_DRAW_SNAP_Y;
-				else
-					m_nSnap |= LC_DRAW_SNAP_Y;
-				break;
-			case 2:
-				if (m_nSnap & LC_DRAW_SNAP_Z)
-					m_nSnap &= ~LC_DRAW_SNAP_Z;
-				else
-					m_nSnap |= LC_DRAW_SNAP_Z;
-				break;
-			case 3:
-				m_nSnap |= LC_DRAW_SNAP_XYZ;
-				break;
-			case 4:
-				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-				break;
-			case 5:
-				if (m_nSnap & LC_DRAW_SNAP_A)
-					m_nSnap &= ~LC_DRAW_SNAP_A;
-				else
-					m_nSnap |= LC_DRAW_SNAP_A;
-				break;
-			case 6:
-				if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
-					m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-				else
-					m_nSnap |= LC_DRAW_SNAP_XYZ;
-				break;
-			}
-			SystemUpdateSnap(m_nSnap);
-		} break;
-
-		case LC_TOOLBAR_LOCKMENU:
-		{
-			switch (nParam)
-			{
-			case 0:
-				if (m_nSnap & LC_DRAW_LOCK_X)
-					m_nSnap &= ~LC_DRAW_LOCK_X;
-				else
-					m_nSnap |= LC_DRAW_LOCK_X;
-				break;
-			case 1:
-				if (m_nSnap & LC_DRAW_LOCK_Y)
-					m_nSnap &= ~LC_DRAW_LOCK_Y;
-				else
-					m_nSnap |= LC_DRAW_LOCK_Y;
-				break;
-			case 2:
-				if (m_nSnap & LC_DRAW_LOCK_Z)
-					m_nSnap &= ~LC_DRAW_LOCK_Z;
-				else
-					m_nSnap |= LC_DRAW_LOCK_Z;
-				break;
-			case 3:
-				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-				break;
-			case 4:
-				if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
-					m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-				else
-					m_nSnap |= LC_DRAW_LOCK_XYZ;
-				break;
-			}
-			SystemUpdateSnap(m_nSnap);
-		} break;
-
-		case LC_TOOLBAR_FASTRENDER:
-		{
-			if (m_nDetail & LC_DET_FAST)
-				m_nDetail &= ~LC_DET_FAST;
+		case LC_EDIT_SNAP_X:
+			if (m_nSnap & LC_DRAW_SNAP_X)
+				m_nSnap &= ~LC_DRAW_SNAP_X;
 			else
-				m_nDetail |= LC_DET_FAST;
-			UpdateAllViews();
+				m_nSnap |= LC_DRAW_SNAP_X;
+			SystemUpdateSnap(m_nSnap);
+			break;
 
-			SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
-		} break;
+		case LC_EDIT_SNAP_Y:
+			if (m_nSnap & LC_DRAW_SNAP_Y)
+				m_nSnap &= ~LC_DRAW_SNAP_Y;
+			else
+				m_nSnap |= LC_DRAW_SNAP_Y;
+			SystemUpdateSnap(m_nSnap);
+			break;
 
-		case LC_EDIT_MOVEXY_SNAP_0:
-		case LC_EDIT_MOVEXY_SNAP_1:
-		case LC_EDIT_MOVEXY_SNAP_2:
-		case LC_EDIT_MOVEXY_SNAP_3:
-		case LC_EDIT_MOVEXY_SNAP_4:
-		case LC_EDIT_MOVEXY_SNAP_5:
-		case LC_EDIT_MOVEXY_SNAP_6:
-		case LC_EDIT_MOVEXY_SNAP_7:
-		case LC_EDIT_MOVEXY_SNAP_8:
-		case LC_EDIT_MOVEXY_SNAP_9:
+		case LC_EDIT_SNAP_Z:
+			if (m_nSnap & LC_DRAW_SNAP_Z)
+				m_nSnap &= ~LC_DRAW_SNAP_Z;
+			else
+				m_nSnap |= LC_DRAW_SNAP_Z;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_SNAP_ALL:
+			m_nSnap |= LC_DRAW_SNAP_XYZ;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_SNAP_NONE:
+			m_nSnap &= ~LC_DRAW_SNAP_XYZ;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_SNAP_TOGGLE:
+			if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
+				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
+			else
+				m_nSnap |= LC_DRAW_SNAP_XYZ;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_SNAP_ANGLE:
+			if (m_nSnap & LC_DRAW_SNAP_A)
+				m_nSnap &= ~LC_DRAW_SNAP_A;
+			else
+				m_nSnap |= LC_DRAW_SNAP_A;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_LOCK_X:
+			if (m_nSnap & LC_DRAW_LOCK_X)
+				m_nSnap &= ~LC_DRAW_LOCK_X;
+			else
+				m_nSnap |= LC_DRAW_LOCK_X;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_LOCK_Y:
+			if (m_nSnap & LC_DRAW_LOCK_Y)
+				m_nSnap &= ~LC_DRAW_LOCK_Y;
+			else
+				m_nSnap |= LC_DRAW_LOCK_Y;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_LOCK_Z:
+			if (m_nSnap & LC_DRAW_LOCK_Z)
+				m_nSnap &= ~LC_DRAW_LOCK_Z;
+			else
+				m_nSnap |= LC_DRAW_LOCK_Z;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_LOCK_NONE:
+			m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_LOCK_TOGGLE:
+			if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
+				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+			else
+				m_nSnap |= LC_DRAW_LOCK_XYZ;
+			SystemUpdateSnap(m_nSnap);
+			break;
+
+		case LC_EDIT_SNAP_MOVE_XY0:
+		case LC_EDIT_SNAP_MOVE_XY1:
+		case LC_EDIT_SNAP_MOVE_XY2:
+		case LC_EDIT_SNAP_MOVE_XY3:
+		case LC_EDIT_SNAP_MOVE_XY4:
+		case LC_EDIT_SNAP_MOVE_XY5:
+		case LC_EDIT_SNAP_MOVE_XY6:
+		case LC_EDIT_SNAP_MOVE_XY7:
+		case LC_EDIT_SNAP_MOVE_XY8:
+		case LC_EDIT_SNAP_MOVE_XY9:
 		{
-			m_nMoveSnap = (id - LC_EDIT_MOVEXY_SNAP_0) | (m_nMoveSnap & ~0xff);
-			if (id != LC_EDIT_MOVEXY_SNAP_0)
+			m_nMoveSnap = (id - LC_EDIT_SNAP_MOVE_XY0) | (m_nMoveSnap & ~0xff);
+			if (id != LC_EDIT_SNAP_MOVE_XY0)
 				m_nSnap |= LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y;
 			else
 				m_nSnap &= ~(LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y);
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
-		case LC_EDIT_MOVEZ_SNAP_0:
-		case LC_EDIT_MOVEZ_SNAP_1:
-		case LC_EDIT_MOVEZ_SNAP_2:
-		case LC_EDIT_MOVEZ_SNAP_3:
-		case LC_EDIT_MOVEZ_SNAP_4:
-		case LC_EDIT_MOVEZ_SNAP_5:
-		case LC_EDIT_MOVEZ_SNAP_6:
-		case LC_EDIT_MOVEZ_SNAP_7:
-		case LC_EDIT_MOVEZ_SNAP_8:
-		case LC_EDIT_MOVEZ_SNAP_9:
+		case LC_EDIT_SNAP_MOVE_Z0:
+		case LC_EDIT_SNAP_MOVE_Z1:
+		case LC_EDIT_SNAP_MOVE_Z2:
+		case LC_EDIT_SNAP_MOVE_Z3:
+		case LC_EDIT_SNAP_MOVE_Z4:
+		case LC_EDIT_SNAP_MOVE_Z5:
+		case LC_EDIT_SNAP_MOVE_Z6:
+		case LC_EDIT_SNAP_MOVE_Z7:
+		case LC_EDIT_SNAP_MOVE_Z8:
+		case LC_EDIT_SNAP_MOVE_Z9:
 		{
-			m_nMoveSnap = (((id - LC_EDIT_MOVEZ_SNAP_0) << 8) | (m_nMoveSnap & ~0xff00));
-			if (id != LC_EDIT_MOVEZ_SNAP_0)
+			m_nMoveSnap = (((id - LC_EDIT_SNAP_MOVE_Z0) << 8) | (m_nMoveSnap & ~0xff00));
+			if (id != LC_EDIT_SNAP_MOVE_Z0)
 				m_nSnap |= LC_DRAW_SNAP_Z;
 			else
 				m_nSnap &= ~LC_DRAW_SNAP_Z;
 			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
-		case LC_EDIT_ANGLE_SNAP_0:
-		case LC_EDIT_ANGLE_SNAP_1:
-		case LC_EDIT_ANGLE_SNAP_2:
-		case LC_EDIT_ANGLE_SNAP_3:
-		case LC_EDIT_ANGLE_SNAP_4:
-		case LC_EDIT_ANGLE_SNAP_5:
-		case LC_EDIT_ANGLE_SNAP_6:
-		case LC_EDIT_ANGLE_SNAP_7:
-		case LC_EDIT_ANGLE_SNAP_8:
-		case LC_EDIT_ANGLE_SNAP_9:
+		case LC_EDIT_SNAP_ANGLE0:
+		case LC_EDIT_SNAP_ANGLE1:
+		case LC_EDIT_SNAP_ANGLE2:
+		case LC_EDIT_SNAP_ANGLE3:
+		case LC_EDIT_SNAP_ANGLE4:
+		case LC_EDIT_SNAP_ANGLE5:
+		case LC_EDIT_SNAP_ANGLE6:
+		case LC_EDIT_SNAP_ANGLE7:
+		case LC_EDIT_SNAP_ANGLE8:
+		case LC_EDIT_SNAP_ANGLE9:
 		{
 			int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
-			m_nAngleSnap = Angles[id - LC_EDIT_ANGLE_SNAP_0];
+			m_nAngleSnap = Angles[id - LC_EDIT_SNAP_ANGLE0];
 			if (m_nAngleSnap)
 				m_nSnap |= LC_DRAW_SNAP_A;
 			else
@@ -6191,7 +6197,7 @@ void Project::HandleCommand(LC_COMMANDS id, unsigned long nParam)
 			SetAction(LC_ACTION_ROTATE);
 		} break;
 
-		case LC_EDIT_ACTION_ERASER:
+		case LC_EDIT_ACTION_DELETE:
 		{
 			SetAction(LC_ACTION_ERASER);
 		} break;
@@ -7463,6 +7469,15 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 	}
 }
 
+
+void Project::ZoomActiveView(int Amount)
+{
+	m_ActiveView->mCamera->DoZoom(Amount, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+	SystemUpdateFocus(NULL);
+	UpdateOverlayScale();
+	UpdateAllViews();
+}
+
 bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 {
 	bool ret = false;
@@ -7479,13 +7494,13 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 		case KEY_INSERT:
 		{
-			HandleCommand(LC_PIECE_INSERT, 0);
+			HandleCommand(LC_PIECE_INSERT);
 			ret = true;
 		} break;
 
 		case KEY_DELETE:
 		{
-			HandleCommand(LC_PIECE_DELETE, 0);
+			HandleCommand(LC_PIECE_DELETE);
 			ret = true;
 		} break;
 
@@ -7504,9 +7519,9 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		case KEY_PLUS: // case '+': case '=':
 		{
 			if (bShift)
-				HandleCommand(LC_VIEW_ZOOM, -10);
+				ZoomActiveView(-10);
 			else
-				HandleCommand(LC_VIEW_ZOOM, -1);
+				ZoomActiveView(-1);
 
 			ret = true;
 		} break;
@@ -7514,9 +7529,9 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 		case KEY_MINUS: // case '-': case '_':
 		{
 			if (bShift)
-				HandleCommand(LC_VIEW_ZOOM, 10);
+				ZoomActiveView(10);
 			else
-				HandleCommand(LC_VIEW_ZOOM, 1);
+				ZoomActiveView(1);
 
 			ret = true;
 		} break;
@@ -8937,7 +8952,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 void Project::OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift)
 {
-	HandleCommand(LC_VIEW_ZOOM, (unsigned long)(10 * Direction));
+	ZoomActiveView((int)(10 * Direction));
 }
 
 // Check if the mouse is over a different area of the overlay and redraw it.

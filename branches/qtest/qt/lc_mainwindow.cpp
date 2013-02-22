@@ -122,326 +122,336 @@ lcMainWindow::~lcMainWindow()
 
 void lcMainWindow::createActions()
 {
-	actionFileNew = new QAction(QIcon(":/resources/file_new.png"), tr("&New"), this);
-	actionFileNew->setToolTip(tr("New Project"));
-	actionFileNew->setStatusTip(tr("Create a new project"));
-	actionFileNew->setShortcuts(QKeySequence::New);
+	QAction *action;
+	memset(actions, 0, sizeof(actions));
 
-	actionFileOpen = new QAction(QIcon(":/resources/file_open.png"), tr("&Open..."), this);
-	actionFileOpen->setToolTip(tr("Open Project"));
-	actionFileOpen->setStatusTip(tr("Open an existing project"));
-	actionFileOpen->setShortcuts(QKeySequence::Open);
+	action = new QAction(QIcon(":/resources/file_new.png"), tr("&New"), this);
+	action->setToolTip(tr("New Project"));
+	action->setStatusTip(tr("Create a new project"));
+	action->setShortcuts(QKeySequence::New);
+	actions[LC_FILE_NEW] = action;
 
-	actionFileMerge = new QAction(tr("Merge..."), this);
-	actionFileMerge->setStatusTip(tr("Merge the contents of another project with the current one"));
+	action = new QAction(QIcon(":/resources/file_open.png"), tr("&Open..."), this);
+	action->setToolTip(tr("Open Project"));
+	action->setStatusTip(tr("Open an existing project"));
+	action->setShortcuts(QKeySequence::Open);
+	actions[LC_FILE_OPEN] = action;
+
+	action = new QAction(tr("Merge..."), this);
+	action->setStatusTip(tr("Merge the contents of another project with the current one"));
+	actions[LC_FILE_MERGE] = action;
 	
-	actionFileSave = new QAction(QIcon(":/resources/file_save.png"), tr("Save"), this);
-	actionFileSave->setToolTip(tr("Save Project"));
-	actionFileSave->setStatusTip(tr("Save the active project"));
-	actionFileSave->setShortcuts(QKeySequence::Save);
+	action = new QAction(QIcon(":/resources/file_save.png"), tr("Save"), this);
+	action->setToolTip(tr("Save Project"));
+	action->setStatusTip(tr("Save the active project"));
+	action->setShortcuts(QKeySequence::Save);
+	actions[LC_FILE_SAVE] = action;
 
-	actionFileSaveAs = new QAction(tr("Save As..."), this);
-	actionFileSaveAs->setStatusTip(tr("Save the active project with a new name"));
-	actionFileSaveAs->setShortcuts(QKeySequence::SaveAs);
+	action = new QAction(tr("Save As..."), this);
+	action->setStatusTip(tr("Save the active project with a new name"));
+	action->setShortcuts(QKeySequence::SaveAs);
+	actions[LC_FILE_SAVEAS] = action;
 
-	actionFileSaveImage = new QAction(tr("Save Image..."), this);
-	actionFileExport3DS = new QAction(tr("3D Studio..."), this);
-	actionFileExportBrickLink = new QAction(tr("BrickLink..."), this);
-	actionFileExportHTML = new QAction(tr("HTML..."), this);
-	actionFileExportPOVRay = new QAction(tr("POV-Ray..."), this);
-	actionFileExportWavefront = new QAction(tr("Wavefront..."), this);
-	actionFileProperties = new QAction(tr("Properties..."), this);
-	actionFilePiecesLibrary = new QAction(tr("Pieces Library..."), this);
-	actionFileTerrainEditor = new QAction(tr("Terrain Editor..."), this);
-	actionFilePrint = new QAction(QIcon(":/resources/file_print.png"), tr("Print..."), this);
-	actionFilePrintPreview = new QAction(QIcon(":/resources/file_print_preview.png"), tr("Print Preview"), this);
-	actionFilePrintBOM = new QAction(tr("Bill Of Materials..."), this);
-	actionFileRecent1 = new QAction(tr("1"), this);
-	actionFileRecent2 = new QAction(tr("2"), this);
-	actionFileRecent3 = new QAction(tr("3"), this);
-	actionFileRecent4 = new QAction(tr("4"), this);
-	actionFileExit = new QAction(tr("Exit"), this);
+	actions[LC_FILE_SAVE_IMAGE] = new QAction(tr("Save Image..."), this);
+	actions[LC_FILE_EXPORT_3DS] = new QAction(tr("3D Studio..."), this);
+	actions[LC_FILE_EXPORT_BRICKLINK] = new QAction(tr("BrickLink..."), this);
+	actions[LC_FILE_EXPORT_HTML] = new QAction(tr("HTML..."), this);
+	actions[LC_FILE_EXPORT_POVRAY] = new QAction(tr("POV-Ray..."), this);
+	actions[LC_FILE_EXPORT_WAVEFRONT] = new QAction(tr("Wavefront..."), this);
+	actions[LC_FILE_PROPERTIES] = new QAction(tr("Properties..."), this);
+	actions[LC_FILE_PIECES_LIBRARY] = new QAction(tr("Pieces Library..."), this);
+	actions[LC_FILE_TERRAIN_EDITOR] = new QAction(tr("Terrain Editor..."), this);
+	actions[LC_FILE_PRINT] = new QAction(QIcon(":/resources/file_print.png"), tr("Print..."), this);
+	actions[LC_FILE_PRINT_PREVIEW] = new QAction(QIcon(":/resources/file_print_preview.png"), tr("Print Preview"), this);
+	actions[LC_FILE_PRINT_BOM] = new QAction(tr("Bill Of Materials..."), this);
+	actions[LC_FILE_RECENT1] = new QAction(tr("1"), this);
+	actions[LC_FILE_RECENT2] = new QAction(tr("2"), this);
+	actions[LC_FILE_RECENT3] = new QAction(tr("3"), this);
+	actions[LC_FILE_RECENT4] = new QAction(tr("4"), this);
+	actions[LC_FILE_EXIT] = new QAction(tr("Exit"), this);
 
-	actionEditUndo = new QAction(QIcon(":/resources/edit_undo.png"), tr("Undo"), this);
-	actionEditUndo->setStatusTip(tr("Undo the last action"));
-	actionEditUndo->setShortcuts(QKeySequence::Undo);
+	action = new QAction(QIcon(":/resources/edit_undo.png"), tr("Undo"), this);
+	action->setStatusTip(tr("Undo the last action"));
+	action->setShortcuts(QKeySequence::Undo);
+	actions[LC_EDIT_UNDO] = action;
 
-	actionEditRedo = new QAction(QIcon(":/resources/edit_redo.png"), tr("Redo"), this);
-	actionEditRedo->setStatusTip(tr("Redo the previously undone action"));
-	actionEditRedo->setShortcuts(QKeySequence::Redo);
+	action = new QAction(QIcon(":/resources/edit_redo.png"), tr("Redo"), this);
+	action->setStatusTip(tr("Redo the previously undone action"));
+	action->setShortcuts(QKeySequence::Redo);
+	actions[LC_EDIT_REDO] = action;
 
-	actionEditCut = new QAction(QIcon(":/resources/edit_cut.png"), tr("Cut"), this);
-	actionEditCut->setStatusTip(tr("Cut the selection and put it on the Clipboard"));
-	actionEditCut->setShortcuts(QKeySequence::Cut);
+	action = new QAction(QIcon(":/resources/edit_cut.png"), tr("Cut"), this);
+	action->setStatusTip(tr("Cut the selection and put it on the Clipboard"));
+	action->setShortcuts(QKeySequence::Cut);
+	actions[LC_EDIT_CUT] = action;
 
-	actionEditCopy = new QAction(QIcon(":/resources/edit_copy.png"), tr("Copy"), this);
-	actionEditCopy->setStatusTip(tr("Copy the selection and put it on the Clipboard"));
-	actionEditCopy->setShortcuts(QKeySequence::Copy);
+	action = new QAction(QIcon(":/resources/edit_copy.png"), tr("Copy"), this);
+	action->setStatusTip(tr("Copy the selection and put it on the Clipboard"));
+	action->setShortcuts(QKeySequence::Copy);
+	actions[LC_EDIT_COPY] = action;
 
-	actionEditPaste = new QAction(QIcon(":/resources/edit_paste.png"), tr("Paste"), this);
-	actionEditPaste->setStatusTip(tr("Insert Clipboard contents"));
-	actionEditPaste->setShortcuts(QKeySequence::Paste);
+	action = new QAction(QIcon(":/resources/edit_paste.png"), tr("Paste"), this);
+	action->setStatusTip(tr("Insert Clipboard contents"));
+	action->setShortcuts(QKeySequence::Paste);
+	actions[LC_EDIT_PASTE] = action;
 
-	actionEditSelectAll = new QAction(tr("Select All"), this);
-	actionEditSelectAll->setStatusTip(tr("Select all objects"));
+	action = new QAction(tr("Select All"), this);
+	action->setStatusTip(tr("Select all objects"));
+	actions[LC_EDIT_SELECT_ALL] = action;
 
-	actionEditSelectNone = new QAction(tr("Select None"), this);
-	actionEditSelectNone->setStatusTip(tr("De-select everything"));
+	action = new QAction(tr("Select None"), this);
+	action->setStatusTip(tr("De-select everything"));
+	actions[LC_EDIT_SELECT_NONE] = action;
 
-	actionEditSelectInvert = new QAction(tr("Select Invert"), this);
-	actionEditSelectInvert->setStatusTip(tr("Invert the current selection set"));
+	action = new QAction(tr("Select Invert"), this);
+	action->setStatusTip(tr("Invert the current selection set"));
+	actions[LC_EDIT_SELECT_INVERT] = action;
 
-	actionEditSelectByName = new QAction(tr("Select By Name..."), this);
-	actionEditSelectByName->setStatusTip(tr("Select objects by name"));
+	action = new QAction(tr("Select By Name..."), this);
+	action->setStatusTip(tr("Select objects by name"));
+	actions[LC_EDIT_SELECT_BY_NAME] = action;
 
-	actionEditLockMove = new QAction(QIcon(":/resources/edit_lock.png"), tr("Lock"), this);
-	actionEditLockMoveX = new QAction(tr("Lock X"), this);
-	actionEditLockMoveY = new QAction(tr("Lock Y"), this);
-	actionEditLockMoveZ = new QAction(tr("Lock Z"), this);
-	actionEditLockMoveUnlockAll = new QAction(tr("Unlock All"), this);
+	actions[LC_EDIT_LOCK_TOGGLE] = new QAction(QIcon(":/resources/edit_lock.png"), tr("Lock"), this);
+	actions[LC_EDIT_LOCK_X] = new QAction(tr("Lock X"), this);
+	actions[LC_EDIT_LOCK_Y] = new QAction(tr("Lock Y"), this);
+	actions[LC_EDIT_LOCK_Z] = new QAction(tr("Lock Z"), this);
+	actions[LC_EDIT_LOCK_NONE]= new QAction(tr("Unlock All"), this);
 	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
-	lockMenu->addAction(actionEditLockMoveX);
-	lockMenu->addAction(actionEditLockMoveY);
-	lockMenu->addAction(actionEditLockMoveZ);
-	lockMenu->addAction(actionEditLockMoveUnlockAll);
-	actionEditLockMove->setMenu(lockMenu);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_X]);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_Y]);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_Z]);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_NONE]);
+	actions[LC_EDIT_LOCK_TOGGLE]->setMenu(lockMenu);
 
-	actionEditSnapMove = new QAction(QIcon(":/resources/edit_snap_move.png"), tr("Snap"), this);
-	actionEditSnapMoveX = new QAction(tr("Snap X"), this);
-	actionEditSnapMoveY = new QAction(tr("Snap Y"), this);
-	actionEditSnapMoveZ = new QAction(tr("Snap Z"), this);
-	actionEditSnapMoveNone = new QAction(tr("Snap None"), this);
-	actionEditSnapMoveAll = new QAction(tr("Snap All"), this);
+	actions[LC_EDIT_SNAP_TOGGLE] = new QAction(QIcon(":/resources/edit_snap_move.png"), tr("Snap"), this);
+	actions[LC_EDIT_SNAP_X] = new QAction(tr("Snap X"), this);
+	actions[LC_EDIT_SNAP_Y] = new QAction(tr("Snap Y"), this);
+	actions[LC_EDIT_SNAP_Z] = new QAction(tr("Snap Z"), this);
+	actions[LC_EDIT_SNAP_NONE] = new QAction(tr("Snap None"), this);
+	actions[LC_EDIT_SNAP_ALL] = new QAction(tr("Snap All"), this);
 	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
-	snapMenu->addAction(actionEditSnapMoveX);
-	snapMenu->addAction(actionEditSnapMoveY);
-	snapMenu->addAction(actionEditSnapMoveZ);
-	snapMenu->addAction(actionEditSnapMoveNone);
-	snapMenu->addAction(actionEditSnapMoveAll);
-	actionEditSnapMove->setMenu(snapMenu);
+	snapMenu->addAction(actions[LC_EDIT_SNAP_X]);
+	snapMenu->addAction(actions[LC_EDIT_SNAP_Y]);
+	snapMenu->addAction(actions[LC_EDIT_SNAP_Z]);
+	snapMenu->addAction(actions[LC_EDIT_SNAP_NONE]);
+	snapMenu->addAction(actions[LC_EDIT_SNAP_ALL]);
+	actions[LC_EDIT_SNAP_TOGGLE]->setMenu(snapMenu);
 
-	actionEditSnapAngle = new QAction(QIcon(":/resources/edit_snap_angle.png"), tr("Snap Angle"), this);
+	actions[LC_EDIT_SNAP_ANGLE] = new QAction(QIcon(":/resources/edit_snap_angle.png"), tr("Snap Angle"), this);
 
-	actionEditTransform = new QAction(QIcon(":/resources/edit_transform.png"), tr("Transform"), this);
-	actionEditTransformAbsoluteTranslation = new QAction(tr("Absolute Translation"), this);
-	actionEditTransformRelativeTranslation = new QAction(tr("Relative Translation"), this);
-	actionEditTransformAbsoluteRotation = new QAction(tr("Absolute Rotation"), this);
-	actionEditTransformRelativeRotation = new QAction(tr("Relative Rotation"), this);
+	actions[LC_EDIT_TRANSFORM] = new QAction(QIcon(":/resources/edit_transform.png"), tr("Transform"), this);
+	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION] = new QAction(tr("Absolute Translation"), this);
+	actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION] = new QAction(tr("Relative Translation"), this);
+	actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION] = new QAction(tr("Absolute Rotation"), this);
+	actions[LC_EDIT_TRANSFORM_RELATIVE_ROTATION] = new QAction(tr("Relative Rotation"), this);
 	QMenu* transformMenu = new QMenu(tr("Transform"));
-	transformMenu->addAction(actionEditTransformAbsoluteTranslation);
-	transformMenu->addAction(actionEditTransformRelativeTranslation);
-	transformMenu->addAction(actionEditTransformAbsoluteRotation);
-	transformMenu->addAction(actionEditTransformRelativeRotation);
-	actionEditTransform->setMenu(transformMenu);
+	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
+	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION]);
+	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION]);
+	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_ROTATION]);
+	actions[LC_EDIT_TRANSFORM]->setMenu(transformMenu);
 
-	actionViewPreferences = new QAction(tr("Preferences..."), this);
-	actionViewZoomIn = new QAction(tr("Zoom In"), this);
-	actionViewZoomOut = new QAction(tr("Zoom Out"), this);
-	actionViewZoomExtents = new QAction(tr("Zoom Extents"), this);
-	actionViewViewpointFront = new QAction(tr("Front"), this);
-	actionViewViewpointBack = new QAction(tr("Back"), this);
-	actionViewViewpointLeft = new QAction(tr("Left"), this);
-	actionViewViewpointRight = new QAction(tr("Right"), this);
-	actionViewViewpointTop = new QAction(tr("Top"), this);
-	actionViewViewpointBottom = new QAction(tr("Bottom"), this);
-	actionViewViewpointHome = new QAction(tr("Home"), this);
+	action = new QAction(QIcon(":/resources/action_insert.png"), tr("Insert"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_INSERT] = action;
 
-	actionToolInsert = new QAction(QIcon(":/resources/action_insert.png"), tr("Insert"), this);
-	actionToolInsert->setCheckable(true);
-	actionToolLight = new QAction(QIcon(":/resources/action_light.png"), tr("Light"), this);
-	actionToolLight->setCheckable(true);
-	actionToolSpotLight = new QAction(QIcon(":/resources/action_spotlight.png"), tr("Spot Light"), this);
-	actionToolSpotLight->setCheckable(true);
-	actionToolCamera = new QAction(QIcon(":/resources/action_camera.png"), tr("Camera"), this);
-	actionToolCamera->setCheckable(true);
-	actionToolSelect = new QAction(QIcon(":/resources/action_select.png"), tr("Select"), this);
-	actionToolSelect->setCheckable(true);
-	actionToolMove = new QAction(QIcon(":/resources/action_move.png"), tr("Move"), this);
-	actionToolMove->setCheckable(true);
-	actionToolRotate = new QAction(QIcon(":/resources/action_rotate.png"), tr("Rotate"), this);
-	actionToolRotate->setCheckable(true);
-	actionToolDelete = new QAction(QIcon(":/resources/action_delete.png"), tr("Delete"), this);
-	actionToolDelete->setCheckable(true);
-	actionToolPaint = new QAction(QIcon(":/resources/action_paint.png"), tr("Paint"), this);
-	actionToolPaint->setCheckable(true);
-	actionToolZoom = new QAction(QIcon(":/resources/action_zoom.png"), tr("Zoom"), this);
-	actionToolZoom->setCheckable(true);
-	actionToolPan = new QAction(QIcon(":/resources/action_pan.png"), tr("Pan"), this);
-	actionToolPan->setCheckable(true);
-	actionToolRotateView = new QAction(QIcon(":/resources/action_rotate_view.png"), tr("Rotate View"), this);
-	actionToolRotateView->setCheckable(true);
-	actionToolRoll = new QAction(QIcon(":/resources/action_roll.png"), tr("Roll"), this);
-	actionToolRoll->setCheckable(true);
-	actionToolZoomRegion = new QAction(QIcon(":/resources/action_zoom_region.png"), tr("Zoom Region"), this);
-	actionToolZoomRegion->setCheckable(true);
+	action = new QAction(QIcon(":/resources/action_light.png"), tr("Light"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_LIGHT] = action;
+
+	action = new QAction(QIcon(":/resources/action_spotlight.png"), tr("Spot Light"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_SPOTLIGHT] = action;
+
+	action = new QAction(QIcon(":/resources/action_camera.png"), tr("Camera"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_CAMERA] = action;
+
+	action = new QAction(QIcon(":/resources/action_select.png"), tr("Select"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_SELECT] = action;
+
+	action = new QAction(QIcon(":/resources/action_move.png"), tr("Move"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_MOVE] = action;
+
+	action = new QAction(QIcon(":/resources/action_rotate.png"), tr("Rotate"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_ROTATE] = action;
+
+	action = new QAction(QIcon(":/resources/action_delete.png"), tr("Delete"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_DELETE] = action;
+
+	action = new QAction(QIcon(":/resources/action_paint.png"), tr("Paint"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_PAINT] = action;
+
+	action = new QAction(QIcon(":/resources/action_zoom.png"), tr("Zoom"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_ZOOM] = action;
+
+	action = new QAction(QIcon(":/resources/action_pan.png"), tr("Pan"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_PAN] = action;
+
+	action = new QAction(QIcon(":/resources/action_rotate_view.png"), tr("Rotate View"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_ROTATE_VIEW] = action;
+
+	action = new QAction(QIcon(":/resources/action_roll.png"), tr("Roll"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_ROLL] = action;
+
+	action = new QAction(QIcon(":/resources/action_zoom_region.png"), tr("Zoom Region"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_ACTION_ZOOM_REGION] = action;
 
 	QActionGroup *actionToolGroup = new QActionGroup(this);
-	actionToolGroup->addAction(actionToolInsert);
-	actionToolGroup->addAction(actionToolLight);
-	actionToolGroup->addAction(actionToolSpotLight);
-	actionToolGroup->addAction(actionToolCamera);
-	actionToolGroup->addAction(actionToolSelect);
-	actionToolGroup->addAction(actionToolMove);
-	actionToolGroup->addAction(actionToolRotate);
-	actionToolGroup->addAction(actionToolDelete);
-	actionToolGroup->addAction(actionToolPaint);
-	actionToolGroup->addAction(actionToolZoom);
-	actionToolGroup->addAction(actionToolPan);
-	actionToolGroup->addAction(actionToolRotateView);
-	actionToolGroup->addAction(actionToolRoll);
-	actionToolGroup->addAction(actionToolZoomRegion);
-	connect(actionToolGroup, SIGNAL(triggered(QAction*)), this, SLOT(toolTriggered(QAction*)));
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_INSERT]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_LIGHT]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_SPOTLIGHT]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_CAMERA]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_SELECT]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_MOVE]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ROTATE]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_DELETE]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_PAINT]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ZOOM]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_PAN]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ROTATE_VIEW]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ROLL]);
+	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ZOOM_REGION]);
+
+	actions[LC_VIEW_PREFERENCES] = new QAction(tr("Preferences..."), this);
+	actions[LC_VIEW_ZOOM_IN] = new QAction(tr("Zoom In"), this);
+	actions[LC_VIEW_ZOOM_OUT] = new QAction(tr("Zoom Out"), this);
+	actions[LC_VIEW_ZOOM_EXTENTS]= new QAction(tr("Zoom Extents"), this);
+	actions[LC_VIEW_VIEWPOINT_FRONT] = new QAction(tr("Front"), this);
+	actions[LC_VIEW_VIEWPOINT_BACK] = new QAction(tr("Back"), this);
+	actions[LC_VIEW_VIEWPOINT_LEFT] = new QAction(tr("Left"), this);
+	actions[LC_VIEW_VIEWPOINT_RIGHT] = new QAction(tr("Right"), this);
+	actions[LC_VIEW_VIEWPOINT_TOP] = new QAction(tr("Top"), this);
+	actions[LC_VIEW_VIEWPOINT_BOTTOM] = new QAction(tr("Bottom"), this);
+	actions[LC_VIEW_VIEWPOINT_HOME] = new QAction(tr("Home"), this);
+
+	actions[LC_VIEW_TIME_FIRST] = new QAction(QIcon(":/resources/time_first.png"), tr("First"), this);
+	actions[LC_VIEW_TIME_PREVIOUS] = new QAction(QIcon(":/resources/time_previous.png"), tr("Previous"), this);
+	actions[LC_VIEW_TIME_NEXT] = new QAction(QIcon(":/resources/time_next.png"), tr("Next"), this);
+	actions[LC_VIEW_TIME_LAST] = new QAction(QIcon(":/resources/time_last.png"), tr("Last"), this);
+	actions[LC_VIEW_TIME_STOP] = new QAction(tr("Stop"), this);
+	actions[LC_VIEW_TIME_PLAY] = new QAction(tr("Play"), this);
+	actions[LC_VIEW_TIME_INSERT] = new QAction(tr("Insert"), this);
+	actions[LC_VIEW_TIME_DELETE] = new QAction(tr("Delete"), this);
+
+	actions[LC_PIECE_INSERT] = new QAction(tr("Insert"), this);
+	actions[LC_PIECE_DELETE] = new QAction(tr("Delete"), this);
+	actions[LC_PIECE_MINIFIG_WIZARD] = new QAction(tr("Minifig Wizard"), this);
+	actions[LC_PIECE_ARRAY] = new QAction(tr("Array"), this);
+	actions[LC_PIECE_COPY_KEYS] = new QAction(tr("Copy Keys"), this);
+	actions[LC_PIECE_GROUP] = new QAction(tr("Group"), this);
+	actions[LC_PIECE_UNGROUP] = new QAction(tr("Ungroup"), this);
+	actions[LC_PIECE_GROUP_ADD] = new QAction(tr("Add To Group"), this);
+	actions[LC_PIECE_GROUP_REMOVE] = new QAction(tr("Remove From Group"), this);
+	actions[LC_PIECE_GROUP_EDIT] = new QAction(tr("Edit Groups"), this);
+	actions[LC_PIECE_HIDE_SELECTED] = new QAction(tr("Hide Selected"), this);
+	actions[LC_PIECE_HIDE_UNSELECTED] = new QAction(tr("Hide Unselected"), this);
+	actions[LC_PIECE_UNHIDE_ALL] = new QAction(tr("Unhide All"), this);
+	actions[LC_PIECE_SHOW_EARLIER] = new QAction(tr("Show Earlier"), this);
+	actions[LC_PIECE_SHOW_LATER] = new QAction(tr("Show Later"), this);
+
+	actions[LC_HELP_ABOUT] = new QAction(tr("About"), this);
+
+	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
+		if (actions[Command])
+			connect(actions[Command], SIGNAL(triggered()), this, SLOT(actionTriggered()));
 }
 
 void lcMainWindow::createMenus()
 {
 	menuFile = menuBar()->addMenu(tr("&File"));
-	menuFile->addAction(actionFileNew);
-	menuFile->addAction(actionFileOpen);
-	menuFile->addAction(actionFileMerge);
+	menuFile->addAction(actions[LC_FILE_NEW]);
+	menuFile->addAction(actions[LC_FILE_OPEN]);
+	menuFile->addAction(actions[LC_FILE_MERGE]);
 	menuFile->addSeparator();
-	menuFile->addAction(actionFileSave);
-	menuFile->addAction(actionFileSaveAs);
-	menuFile->addAction(actionFileSaveImage);
+	menuFile->addAction(actions[LC_FILE_SAVE]);
+	menuFile->addAction(actions[LC_FILE_SAVEAS]);
+	menuFile->addAction(actions[LC_FILE_SAVE_IMAGE]);
 	QMenu* exportMenu = menuFile->addMenu(tr("Export"));
-	exportMenu->addAction(actionFileExport3DS);
-	exportMenu->addAction(actionFileExportBrickLink);
-	exportMenu->addAction(actionFileExportHTML);
-	exportMenu->addAction(actionFileExportPOVRay);
-	exportMenu->addAction(actionFileExportWavefront);
+	exportMenu->addAction(actions[LC_FILE_EXPORT_3DS]);
+	exportMenu->addAction(actions[LC_FILE_EXPORT_BRICKLINK]);
+	exportMenu->addAction(actions[LC_FILE_EXPORT_HTML]);
+	exportMenu->addAction(actions[LC_FILE_EXPORT_POVRAY]);
+	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);
 	menuFile->addSeparator();
-	menuFile->addAction(actionFileProperties);
-	menuFile->addAction(actionFilePiecesLibrary);
-	menuFile->addAction(actionFileTerrainEditor);
+	menuFile->addAction(actions[LC_FILE_PROPERTIES]);
+	menuFile->addAction(actions[LC_FILE_PIECES_LIBRARY]);
+	menuFile->addAction(actions[LC_FILE_TERRAIN_EDITOR]);
 	menuFile->addSeparator();
-	menuFile->addAction(actionFilePrint);
-	menuFile->addAction(actionFilePrintPreview);
-	menuFile->addAction(actionFilePrintBOM);
+	menuFile->addAction(actions[LC_FILE_PRINT]);
+	menuFile->addAction(actions[LC_FILE_PRINT_PREVIEW]);
+	menuFile->addAction(actions[LC_FILE_PRINT_BOM]);
 	menuFile->addSeparator();
-	menuFile->addAction(actionFileRecent1);
-	menuFile->addAction(actionFileRecent2);
-	menuFile->addAction(actionFileRecent3);
-	menuFile->addAction(actionFileRecent4);
+	menuFile->addAction(actions[LC_FILE_RECENT1]);
+	menuFile->addAction(actions[LC_FILE_RECENT2]);
+	menuFile->addAction(actions[LC_FILE_RECENT3]);
+	menuFile->addAction(actions[LC_FILE_RECENT4]);
 	actionFileRecentSeparator = menuFile->addSeparator();
-	menuFile->addAction(actionFileExit);
+	menuFile->addAction(actions[LC_FILE_EXIT]);
 
 	menuEdit = menuBar()->addMenu(tr("&Edit"));
-	menuEdit->addAction(actionEditUndo);
-	menuEdit->addAction(actionEditRedo);
+	menuEdit->addAction(actions[LC_EDIT_UNDO]);
+	menuEdit->addAction(actions[LC_EDIT_REDO]);
 	menuEdit->addSeparator();
-	menuEdit->addAction(actionEditCut);
-	menuEdit->addAction(actionEditCopy);
-	menuEdit->addAction(actionEditPaste);
+	menuEdit->addAction(actions[LC_EDIT_CUT]);
+	menuEdit->addAction(actions[LC_EDIT_COPY]);
+	menuEdit->addAction(actions[LC_EDIT_PASTE]);
 	menuEdit->addSeparator();
-	menuEdit->addAction(actionEditSelectAll);
-	menuEdit->addAction(actionEditSelectNone);
-	menuEdit->addAction(actionEditSelectInvert);
-	menuEdit->addAction(actionEditSelectByName);
+	menuEdit->addAction(actions[LC_EDIT_SELECT_ALL]);
+	menuEdit->addAction(actions[LC_EDIT_SELECT_NONE]);
+	menuEdit->addAction(actions[LC_EDIT_SELECT_INVERT]);
+	menuEdit->addAction(actions[LC_EDIT_SELECT_BY_NAME]);
 
 	menuView = menuBar()->addMenu(tr("&View"));
-	menuView->addAction(actionViewPreferences);
+	menuView->addAction(actions[LC_VIEW_PREFERENCES]);
 	menuView->addSeparator();
-	menuView->addAction(actionViewZoomIn);
-	menuView->addAction(actionViewZoomOut);
-	menuView->addAction(actionViewZoomExtents);
+	menuView->addAction(actions[LC_VIEW_ZOOM_IN]);
+	menuView->addAction(actions[LC_VIEW_ZOOM_OUT]);
+	menuView->addAction(actions[LC_VIEW_ZOOM_EXTENTS]);
 	QMenu* menuViewpoints = menuView->addMenu(tr("Viewpoints"));
-	menuViewpoints->addAction(actionViewViewpointFront);
-	menuViewpoints->addAction(actionViewViewpointBack);
-	menuViewpoints->addAction(actionViewViewpointLeft);
-	menuViewpoints->addAction(actionViewViewpointRight);
-	menuViewpoints->addAction(actionViewViewpointTop);
-	menuViewpoints->addAction(actionViewViewpointBottom);
-	menuViewpoints->addAction(actionViewViewpointHome);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_FRONT]);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BACK]);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_LEFT]);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_RIGHT]);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_TOP]);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BOTTOM]);
+	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_HOME]);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
-
-/*
-        POPUP "C&ameras"
-        BEGIN
-            MENUITEM "Dummy",                       ID_CAMERA_FIRST
-        END
-        POPUP "Ste&p"
-        BEGIN
-            MENUITEM "Fi&rst",                      ID_VIEW_STEP_FIRST
-            MENUITEM "&Previous",                   ID_VIEW_STEP_PREVIOUS
-            MENUITEM "Ne&xt",                       ID_VIEW_STEP_NEXT
-            MENUITEM "&Last",                       ID_VIEW_STEP_LAST
-            MENUITEM "Ch&oose...",                  ID_VIEW_STEP_CHOOSE
-            MENUITEM SEPARATOR
-            MENUITEM "&Insert",                     ID_VIEW_STEP_INSERT
-            MENUITEM "&Delete",                     ID_VIEW_STEP_DELETE
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "Split Horizontally",          ID_VIEW_SPLITHORIZONTALLY
-        MENUITEM "Split Vertically",            ID_VIEW_SPLITVERTICALLY
-        MENUITEM "Delete View",                 ID_VIEW_DELETEVIEW
-        MENUITEM "Reset Views",                 ID_VIEW_RESETVIEWS
-        MENUITEM SEPARATOR
-        POPUP "Toolbars"
-        BEGIN
-            MENUITEM "&Standard",                   ID_VIEW_TOOLBAR
-            MENUITEM "&Drawing",                    ID_VIEW_TOOLS_BAR
-            MENUITEM "&Animation",                  ID_VIEW_ANIMATION_BAR
-            MENUITEM "&Pieces",                     ID_VIEW_PIECES_BAR
-            MENUITEM "P&roperties",                 ID_VIEW_PROPERTIES_BAR
-            MENUITEM "S&tatus Bar",                 ID_VIEW_STATUS_BAR
-        END
-        MENUITEM "&Full Screen\tCtrl+F",        ID_VIEW_FULLSCREEN
-    END
-    POPUP "&Piece"
-    BEGIN
-        MENUITEM "Insert\tIns",                 ID_PIECE_INSERT
-        MENUITEM "Delete\tDel",                 ID_PIECE_DELETE
-        MENUITEM "Array...",                    ID_PIECE_ARRAY
-        MENUITEM "Minifig Wizard...",           ID_PIECE_MINIFIGWIZARD
-        MENUITEM "Copy Keys",                   ID_PIECE_COPYKEYS
-        MENUITEM SEPARATOR
-        MENUITEM "Group...",                    ID_PIECE_GROUP
-        MENUITEM "Ungroup",                     ID_PIECE_UNGROUP
-        MENUITEM "Remove From Group",           ID_PIECE_DETACH
-        MENUITEM "Add To Group",                ID_PIECE_ATTACH
-        MENUITEM "Edit Groups...",              ID_PIECE_EDITGROUPS
-        MENUITEM SEPARATOR
-        MENUITEM "Hide Selected",               ID_PIECE_HIDESELECTED
-        MENUITEM "Hide Unselected",             ID_PIECE_HIDEUNSELECTED
-        MENUITEM "Unhide All",                  ID_PIECE_UNHIDEALL
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&Help Topics",                ID_HELP_FINDER
-        MENUITEM SEPARATOR
-        MENUITEM "LeoCAD Home page",            ID_HELP_LEOCADHOMEPAGE
-        MENUITEM "Send E-Mail",                 ID_HELP_SENDEMAIL
-        MENUITEM "Check for Updates",           ID_HELP_CHECKFORUPDATES
-        MENUITEM SEPARATOR
-        MENUITEM "&About LeoCAD...",            ID_APP_ABOUT
-    END
-END
-*/
 }
 
 void lcMainWindow::createToolBars()
 {
 	standardToolBar = addToolBar(tr("Standard"));
-	standardToolBar->addAction(actionFileNew);
-	standardToolBar->addAction(actionFileOpen);
-	standardToolBar->addAction(actionFileSave);
-	standardToolBar->addAction(actionFilePrint);
-	standardToolBar->addAction(actionFilePrintPreview);
+	standardToolBar->addAction(actions[LC_FILE_NEW]);
+	standardToolBar->addAction(actions[LC_FILE_OPEN]);
+	standardToolBar->addAction(actions[LC_FILE_SAVE]);
+	standardToolBar->addAction(actions[LC_FILE_PRINT]);
+	standardToolBar->addAction(actions[LC_FILE_PRINT_PREVIEW]);
 	standardToolBar->addSeparator();
-	standardToolBar->addAction(actionEditUndo);
-	standardToolBar->addAction(actionEditRedo);
-	standardToolBar->addAction(actionEditCut);
-	standardToolBar->addAction(actionEditCopy);
-	standardToolBar->addAction(actionEditPaste);
+	standardToolBar->addAction(actions[LC_EDIT_UNDO]);
+	standardToolBar->addAction(actions[LC_EDIT_REDO]);
+	standardToolBar->addAction(actions[LC_EDIT_CUT]);
+	standardToolBar->addAction(actions[LC_EDIT_COPY]);
+	standardToolBar->addAction(actions[LC_EDIT_PASTE]);
 	standardToolBar->addSeparator();
-	standardToolBar->addAction(actionEditLockMove);
-	standardToolBar->addAction(actionEditSnapMove);
-	standardToolBar->addAction(actionEditSnapAngle);
+	standardToolBar->addAction(actions[LC_EDIT_LOCK_TOGGLE]);
+	standardToolBar->addAction(actions[LC_EDIT_SNAP_TOGGLE]);
+	standardToolBar->addAction(actions[LC_EDIT_SNAP_ANGLE]);
 	standardToolBar->addSeparator();
-	standardToolBar->addAction(actionEditTransform);
+	standardToolBar->addAction(actions[LC_EDIT_TRANSFORM]);
 	transformX = new QLineEdit();
 	transformX->setMaximumWidth(75);
 	standardToolBar->addWidget(transformX);
@@ -454,25 +464,28 @@ void lcMainWindow::createToolBars()
 
 	toolsToolBar = addToolBar(tr("Tools"));
 	insertToolBarBreak(toolsToolBar);
-	toolsToolBar->addAction(actionToolInsert);
-	toolsToolBar->addAction(actionToolLight);
-	toolsToolBar->addAction(actionToolSpotLight);
-	toolsToolBar->addAction(actionToolCamera);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_INSERT]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_LIGHT]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_SPOTLIGHT]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_CAMERA]);
 	toolsToolBar->addSeparator();
-	toolsToolBar->addAction(actionToolSelect);
-	toolsToolBar->addAction(actionToolMove);
-	toolsToolBar->addAction(actionToolRotate);
-	toolsToolBar->addAction(actionToolDelete);
-	toolsToolBar->addAction(actionToolPaint);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_SELECT]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_MOVE]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_ROTATE]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_DELETE]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_PAINT]);
 	toolsToolBar->addSeparator();
-	toolsToolBar->addAction(actionToolZoom);
-	toolsToolBar->addAction(actionToolPan);
-	toolsToolBar->addAction(actionToolRotateView);
-	toolsToolBar->addAction(actionToolRoll);
-	toolsToolBar->addAction(actionToolZoomRegion);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_ZOOM]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_PAN]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_ROTATE_VIEW]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_ROLL]);
+	toolsToolBar->addAction(actions[LC_EDIT_ACTION_ZOOM_REGION]);
 
 	timeToolBar = addToolBar(tr("Time"));
-//	timeToolBar->addAction(actionTime);
+	timeToolBar->addAction(actions[LC_VIEW_TIME_FIRST]);
+	timeToolBar->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
+	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
+	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
 
 	piecesToolBar = new QDockWidget(tr("Pieces"), this);
 	QWidget *piecesContents = new QWidget();
@@ -521,36 +534,16 @@ void lcMainWindow::createStatusBar()
 	statusBar->addPermanentWidget(statusTimeLabel);
 }
 
-void lcMainWindow::toolTriggered(QAction *action)
+void lcMainWindow::actionTriggered()
 {
-	Project* project = lcGetActiveProject();
+	QObject *action = sender();
 
-	if (action == actionToolInsert)
-		project->SetAction(LC_ACTION_INSERT);
-	else if (action == actionToolLight)
-		project->SetAction(LC_ACTION_LIGHT);
-	else if (action == actionToolSpotLight)
-		project->SetAction(LC_ACTION_SPOTLIGHT);
-	else if (action == actionToolCamera)
-		project->SetAction(LC_ACTION_CAMERA);
-	else if (action == actionToolSelect)
-		project->SetAction(LC_ACTION_SELECT);
-	else if (action == actionToolMove)
-		project->SetAction(LC_ACTION_MOVE);
-	else if (action == actionToolRotate)
-		project->SetAction(LC_ACTION_ROTATE);
-	else if (action == actionToolDelete)
-		project->SetAction(LC_ACTION_ERASER);
-	else if (action == actionToolPaint)
-		project->SetAction(LC_ACTION_PAINT);
-	else if (action == actionToolZoom)
-		project->SetAction(LC_ACTION_ZOOM);
-	else if (action == actionToolPan)
-		project->SetAction(LC_ACTION_PAN);
-	else if (action == actionToolRotateView)
-		project->SetAction(LC_ACTION_ROTATE_VIEW);
-	else if (action == actionToolRoll)
-		project->SetAction(LC_ACTION_ROLL);
-	else if (action == actionToolZoomRegion)
-		project->SetAction(LC_ACTION_ZOOM_REGION);
+	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
+	{
+		if (action == actions[Command])
+		{
+			lcGetActiveProject()->HandleCommand((LC_COMMANDS)Command);
+			break;
+		}
+	}
 }

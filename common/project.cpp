@@ -2722,7 +2722,7 @@ void Project::RenderOverlays(View* view)
 				const lcMatrix44& ModelView = Cam->mWorldView;
 				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-				lcVector3 Screen = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
+				lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
 
 				glMatrixMode(GL_PROJECTION);
 				glPushMatrix();
@@ -2745,7 +2745,7 @@ void Project::RenderOverlays(View* view)
 				m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
+				m_pScreenFont->PrintText(ScreenPos[0] - Viewport[0] - (cx / 2), ScreenPos[1] - Viewport[1] + (cy / 2), 0.0f, buf);
 
 				glDisable(GL_TEXTURE_2D);
 				glDisable(GL_ALPHA_TEST);
@@ -9307,9 +9307,9 @@ void Project::UpdateOverlayScale()
 		const lcMatrix44& ModelView = Cam->mWorldView;
 		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-		lcVector3 Screen = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
-		Screen[0] += 10.0f;
-		lcVector3 Point = lcUnprojectPoint(Screen, ModelView, Projection, Viewport);
+		lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
+		ScreenPos[0] += 10.0f;
+		lcVector3 Point = lcUnprojectPoint(ScreenPos, ModelView, Projection, Viewport);
 
 		lcVector3 Dist(Point - m_OverlayCenter);
 		m_ActiveView->m_OverlayScale = Dist.Length() * 5.0f;

@@ -120,7 +120,6 @@ void Project::UpdateInterface()
 //	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
-	SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(mCameras);
@@ -260,7 +259,7 @@ void Project::LoadDefaults(bool cameras)
 	// Default values
 //	SystemUpdateViewport(0, m_nViewportMode);
 //	m_nViewportMode = 0;
-	SetAction(0);
+	SetAction(LC_ACTION_SELECT);
 	m_nCurColor = 0;
 	SystemUpdateColorList(m_nCurColor);
 	m_bAnimation = false;
@@ -269,7 +268,6 @@ void Project::LoadDefaults(bool cameras)
 	m_bUndoOriginal = true;
 	SystemUpdateUndoRedo(NULL, NULL);
 	m_nDetail = Sys_ProfileLoadInt ("Default", "Detail", LC_DET_BRICKEDGES);
-	SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z);
 	SystemUpdateSnap(m_nSnap);
@@ -782,7 +780,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 //	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
-	SystemUpdateRenderingMode((m_nDetail & LC_DET_FAST) != 0);
 	SystemUpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(mCameras);
@@ -6238,7 +6235,9 @@ void Project::SetAction(int nAction)
 {
 	m_PreviousAction = m_nCurAction;
 	m_nCurAction = nAction;
-	SystemUpdateAction(m_nCurAction, m_PreviousAction);
+
+	if (gMainWindow)
+		gMainWindow->UpdateAction(m_nCurAction);
 
 	ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
 
@@ -6775,12 +6774,6 @@ bool Project::StopTracking(bool bAccept)
 			{
 				SystemUpdateCameraMenu(mCameras);
 				SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			} break;
-
-			case LC_ACTION_CURVE:
-			{
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;

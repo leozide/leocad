@@ -337,15 +337,8 @@ bool Sys_ProfileSaveString(const char* section, const char* entry, const char* v
 /////////////////////////////////////////////////////////////////////////////
 // User Interface
 
-static HBITMAP hbmMenuDot;
-static const BYTE rgbDot[] =
-	{ 0x6, 0xF, 0xF, 0xF, 0x6 }; // simple byte bitmap, 1=> bit on
-#define DOT_WIDTH   4
-#define DOT_HEIGHT  5
-
 void SystemFinish()
 {
-	DeleteObject(hbmMenuDot);
 }
 
 void SystemInit()
@@ -403,15 +396,6 @@ void SystemUpdateColorList(int nNew)
 		return;
 
 	pFrame->PostMessage (WM_LC_UPDATE_LIST, 0, nNew+1);
-}
-
-void SystemUpdateRenderingMode(bool bFast)
-{
-	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-	if (!pFrame)
-		return;
-
-	CheckToolBarButton(pFrame->m_wndStandardBar, ID_RENDER_BOX, bFast);
 }
 
 void SystemUpdateUndoRedo(char* undo, char* redo)

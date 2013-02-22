@@ -1,8 +1,36 @@
 #ifndef _MAINWND_H_
 #define _MAINWND_H_
 
-#include "str.h"
 #include "basewnd.h"
+
+extern class lcMainWindow* gMainWindow;
+
+class lcMainWindow : public lcBaseWindow
+{
+public:
+	lcMainWindow()
+	{
+		gMainWindow = this;
+	}
+
+	~lcMainWindow()
+	{
+		gMainWindow = NULL;
+	}
+
+	virtual void UpdateAction(int NewAction) = 0;
+//	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
+//	void UpdateSnap(unsigned long snap);
+};
+
+
+
+
+
+
+
+
+#include "str.h"
 
 #define LC_MRU_MAX 4
 

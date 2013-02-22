@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_application.h"
 #include <QApplication>
-#include "lc_mainwindow.h"
+#include "lc_qmainwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 		return 1;
 
 	QApplication a(argc, argv);
-	lcMainWindow w;
+	lcQMainWindow w;
 	w.show();
 
 	return a.exec();

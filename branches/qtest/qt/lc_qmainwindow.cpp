@@ -1,5 +1,5 @@
 #include "lc_global.h"
-#include "lc_mainwindow.h"
+#include "lc_qmainwindow.h"
 #include "lc_global.h"
 #include "lc_library.h"
 #include "lc_application.h"
@@ -30,7 +30,7 @@ static int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData
 	return 0;
 }
 
-lcMainWindow::lcMainWindow(QWidget *parent)
+lcQMainWindow::lcQMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	resize(800, 600);
@@ -116,11 +116,11 @@ lcMainWindow::lcMainWindow(QWidget *parent)
 	}
 }
 
-lcMainWindow::~lcMainWindow()
+lcQMainWindow::~lcQMainWindow()
 {
 }
 
-void lcMainWindow::createActions()
+void lcQMainWindow::createActions()
 {
 	QAction *action;
 	memset(actions, 0, sizeof(actions));
@@ -367,7 +367,7 @@ void lcMainWindow::createActions()
 			connect(actions[Command], SIGNAL(triggered()), this, SLOT(actionTriggered()));
 }
 
-void lcMainWindow::createMenus()
+void lcQMainWindow::createMenus()
 {
 	menuFile = menuBar()->addMenu(tr("&File"));
 	menuFile->addAction(actions[LC_FILE_NEW]);
@@ -432,7 +432,7 @@ void lcMainWindow::createMenus()
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 }
 
-void lcMainWindow::createToolBars()
+void lcQMainWindow::createToolBars()
 {
 	standardToolBar = addToolBar(tr("Standard"));
 	standardToolBar->addAction(actions[LC_FILE_NEW]);
@@ -519,7 +519,7 @@ void lcMainWindow::createToolBars()
 	addDockWidget(static_cast<Qt::DockWidgetArea>(2), piecesToolBar);
 }
 
-void lcMainWindow::createStatusBar()
+void lcQMainWindow::createStatusBar()
 {
 	statusBar = new QStatusBar(this);
 	setStatusBar(statusBar);
@@ -534,7 +534,7 @@ void lcMainWindow::createStatusBar()
 	statusBar->addPermanentWidget(statusTimeLabel);
 }
 
-void lcMainWindow::actionTriggered()
+void lcQMainWindow::actionTriggered()
 {
 	QObject *action = sender();
 
@@ -546,4 +546,12 @@ void lcMainWindow::actionTriggered()
 			break;
 		}
 	}
+}
+
+void lcQMainWindow::UpdateAction(int NewAction)
+{
+	QAction* action = actions[LC_EDIT_ACTION_FIRST + NewAction];
+
+	if (action)
+		action->setChecked(true);
 }

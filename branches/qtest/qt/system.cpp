@@ -69,15 +69,7 @@ void SystemUpdateCategories(bool SearchOnly)
 {
 }
 
-void SystemUpdateAction(int new_action, int old_action)
-{
-}
-
 void SystemUpdateColorList(int new_color)
-{
-}
-
-void SystemUpdateRenderingMode(bool bFast)
 {
 }
 
@@ -168,7 +160,6 @@ void SystemSetWindowCaption(char* caption)
 void SystemPieceComboAdd(char* name)
 {
 }
-
 
 void SystemCaptureMouse()
 {

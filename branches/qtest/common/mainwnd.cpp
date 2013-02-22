@@ -7,6 +7,8 @@
 #include "mainwnd.h"
 #include "system.h"
 
+lcMainWindow* gMainWindow;
+
 MainWnd::MainWnd ()
   : BaseWnd (NULL, LC_MAINWND_NUM_COMMANDS)
 {

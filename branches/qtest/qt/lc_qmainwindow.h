@@ -1,8 +1,9 @@
-#ifndef _LC_MAINWINDOW_H_
-#define _LC_MAINWINDOW_H_
+#ifndef _LC_QMAINWINDOW_H_
+#define _LC_QMAINWINDOW_H_
 
 #include <QMainWindow>
 #include "typedefs.h"
+#include "mainwnd.h"
 
 class QComboBox;
 class QTreeWidget;
@@ -10,13 +11,15 @@ class lcViewWidget;
 class lcPreviewWidget;
 class lcColorListWidget;
 
-class lcMainWindow : public QMainWindow
+class lcQMainWindow : public QMainWindow, public lcMainWindow
 {
 	Q_OBJECT
 
 public:
-	explicit lcMainWindow(QWidget *parent = 0);
-	~lcMainWindow();
+	explicit lcQMainWindow(QWidget *parent = 0);
+	~lcQMainWindow();
+
+	void UpdateAction(int NewAction);
 
 private slots:
 	void actionTriggered();
@@ -53,4 +56,4 @@ private:
 	QStatusBar *statusBar;
 };
 
-#endif // _LC_MAINWINDOW_H_
+#endif // _LC_QMAINWINDOW_H_

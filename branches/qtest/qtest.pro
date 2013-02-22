@@ -14,6 +14,7 @@ PRECOMPILED_HEADER = common/lc_global.h
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 win32:QMAKE_CXXFLAGS_WARN_ON += -wd4100
+win32:DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
 
 release: DESTDIR = build/release
 debug:   DESTDIR = build/debug
@@ -59,7 +60,7 @@ SOURCES += common/view.cpp \
     common/console.cpp \
     common/camera.cpp \
     common/array.cpp \
-    qt/lc_mainwindow.cpp \
+    qt/lc_qmainwindow.cpp \
     qt/lc_previewwidget.cpp \
     qt/lc_viewwidget.cpp \
     qt/toolbar.cpp \
@@ -117,11 +118,11 @@ HEADERS += common/glwindow.h \
     common/camera.h \
     common/basewnd.h \
     qt/lc_colorlistwidget.h \
-    qt/lc_mainwindow.h \
+    qt/lc_qmainwindow.h \
     qt/lc_previewwidget.h \
     qt/lc_viewwidget.h \
     qt/lc_glwidget.h \
     qt/lc_config.h
-FORMS += qt/lc_mainwindow.ui
+FORMS += 
 OTHER_FILES += 
 RESOURCES += leocad.qrc

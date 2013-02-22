@@ -109,7 +109,8 @@ Project::~Project()
 void Project::UpdateInterface()
 {
 	// Update all user interface elements.
-	SystemUpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
+	if (gMainWindow)
+		gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 	SystemUpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 	SystemUpdatePlay(true, false);
 	SystemUpdateCategories(false);
@@ -120,7 +121,8 @@ void Project::UpdateInterface()
 //	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
-	SystemUpdateSnap(m_nSnap);
+	if (gMainWindow)
+		gMainWindow->UpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(mCameras);
 	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->mCamera : NULL, mCameras);
@@ -266,11 +268,13 @@ void Project::LoadDefaults(bool cameras)
 	m_bAddKeys = false;
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
 	m_bUndoOriginal = true;
-	SystemUpdateUndoRedo(NULL, NULL);
+	if (gMainWindow)
+		gMainWindow->UpdateUndoRedo(NULL, NULL);
 	m_nDetail = Sys_ProfileLoadInt ("Default", "Detail", LC_DET_BRICKEDGES);
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z);
-	SystemUpdateSnap(m_nSnap);
+	if (gMainWindow)
+		gMainWindow->UpdateSnap(m_nSnap);
 	m_nMoveSnap = 0x0304;
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
@@ -780,7 +784,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 //	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
 	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
-	SystemUpdateSnap(m_nSnap);
+	if (gMainWindow)
+		gMainWindow->UpdateSnap(m_nSnap);
 	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	SystemUpdateCameraMenu(mCameras);
 	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->mCamera : NULL, mCameras);
@@ -1510,7 +1515,8 @@ void Project::CheckPoint (const char* text)
 	}
 	m_pRedoList = NULL;
 
-	SystemUpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
+	if (gMainWindow)
+		gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 }
 
 void Project::AddView (View* pView)
@@ -4680,7 +4686,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 			}
 
-			SystemUpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
+			if (gMainWindow)
+				gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 		} break;
 
 		case LC_EDIT_CUT:
@@ -5666,7 +5673,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				memcpy(m_fGradient2, opts.fGrad2, sizeof(m_fGradient2));
 				strcpy(m_strFooter, opts.strFooter);
 				strcpy(m_strHeader, opts.strHeader);
-				SystemUpdateSnap(m_nSnap);
+				if (gMainWindow)
+					gMainWindow->UpdateSnap(m_nSnap);
 				SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
 
 				for (int i = 0; i < m_ViewList.GetSize (); i++)
@@ -6019,7 +6027,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_SNAP_X;
 			else
 				m_nSnap |= LC_DRAW_SNAP_X;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_Y:
@@ -6027,7 +6036,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_SNAP_Y;
 			else
 				m_nSnap |= LC_DRAW_SNAP_Y;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_Z:
@@ -6035,17 +6045,20 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_SNAP_Z;
 			else
 				m_nSnap |= LC_DRAW_SNAP_Z;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_ALL:
 			m_nSnap |= LC_DRAW_SNAP_XYZ;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_NONE:
 			m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_TOGGLE:
@@ -6053,7 +6066,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
 			else
 				m_nSnap |= LC_DRAW_SNAP_XYZ;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_ANGLE:
@@ -6061,7 +6075,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_SNAP_A;
 			else
 				m_nSnap |= LC_DRAW_SNAP_A;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_LOCK_X:
@@ -6069,7 +6084,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_LOCK_X;
 			else
 				m_nSnap |= LC_DRAW_LOCK_X;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_LOCK_Y:
@@ -6077,7 +6093,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_LOCK_Y;
 			else
 				m_nSnap |= LC_DRAW_LOCK_Y;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_LOCK_Z:
@@ -6085,12 +6102,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_LOCK_Z;
 			else
 				m_nSnap |= LC_DRAW_LOCK_Z;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_LOCK_NONE:
 			m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_LOCK_TOGGLE:
@@ -6098,7 +6117,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
 			else
 				m_nSnap |= LC_DRAW_LOCK_XYZ;
-			SystemUpdateSnap(m_nSnap);
+			if (gMainWindow)
+				gMainWindow->UpdateSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_MOVE_XY0:

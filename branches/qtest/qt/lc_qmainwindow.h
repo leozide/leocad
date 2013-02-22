@@ -20,6 +20,8 @@ public:
 	~lcQMainWindow();
 
 	void UpdateAction(int NewAction);
+	void UpdateSnap(lcuint32 Snap);
+	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 
 private slots:
 	void actionTriggered();

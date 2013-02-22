@@ -89,11 +89,8 @@ class PieceInfo;
 
 // User Interface
 void SystemUpdateViewport(int nNew, int nOld);
-void SystemUpdateAction(int nNew, int nOld);
 void SystemUpdateColorList(int nNew);
 void SystemUpdateRenderingMode(bool bFast);
-void SystemUpdateUndoRedo(char* undo, char* redo);
-void SystemUpdateSnap(const unsigned long nSnap);
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras);
 void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras);
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);

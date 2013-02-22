@@ -73,14 +73,6 @@ void SystemUpdateColorList(int new_color)
 {
 }
 
-void SystemUpdateUndoRedo(char* undo, char* redo)
-{
-}
-
-void SystemUpdateSnap(const unsigned long snap)
-{
-}
-
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras)
 {
 }

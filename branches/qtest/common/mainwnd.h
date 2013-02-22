@@ -19,7 +19,8 @@ public:
 	}
 
 	virtual void UpdateAction(int NewAction) = 0;
-//	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
+	virtual void UpdateSnap(lcuint32 Snap) = 0;
+	virtual void UpdateUndoRedo(const char* UndoText, const char* RedoText) = 0;
 //	void UpdateSnap(unsigned long snap);
 };
 

@@ -212,9 +212,19 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_SELECT_BY_NAME] = action;
 
 	actions[LC_EDIT_LOCK_TOGGLE] = new QAction(QIcon(":/resources/edit_lock.png"), tr("Lock"), this);
-	actions[LC_EDIT_LOCK_X] = new QAction(tr("Lock X"), this);
-	actions[LC_EDIT_LOCK_Y] = new QAction(tr("Lock Y"), this);
-	actions[LC_EDIT_LOCK_Z] = new QAction(tr("Lock Z"), this);
+
+	action = new QAction(tr("Lock X"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_LOCK_X] = action;
+
+	action = new QAction(tr("Lock Y"), this);
+	actions[LC_EDIT_LOCK_Y] = action;
+	action->setCheckable(true);
+
+	action = new QAction(tr("Lock Z"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_LOCK_Z] = action;
+
 	actions[LC_EDIT_LOCK_NONE]= new QAction(tr("Unlock All"), this);
 	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
 	lockMenu->addAction(actions[LC_EDIT_LOCK_X]);
@@ -224,9 +234,19 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_LOCK_TOGGLE]->setMenu(lockMenu);
 
 	actions[LC_EDIT_SNAP_TOGGLE] = new QAction(QIcon(":/resources/edit_snap_move.png"), tr("Snap"), this);
-	actions[LC_EDIT_SNAP_X] = new QAction(tr("Snap X"), this);
-	actions[LC_EDIT_SNAP_Y] = new QAction(tr("Snap Y"), this);
-	actions[LC_EDIT_SNAP_Z] = new QAction(tr("Snap Z"), this);
+
+	action = new QAction(tr("Snap X"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_SNAP_X] = action;
+
+	action = new QAction(tr("Snap Y"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_SNAP_Y] = action;
+
+	action = new QAction(tr("Snap Z"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_SNAP_Z] = action;
+
 	actions[LC_EDIT_SNAP_NONE] = new QAction(tr("Snap None"), this);
 	actions[LC_EDIT_SNAP_ALL] = new QAction(tr("Snap All"), this);
 	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
@@ -237,7 +257,9 @@ void lcQMainWindow::createActions()
 	snapMenu->addAction(actions[LC_EDIT_SNAP_ALL]);
 	actions[LC_EDIT_SNAP_TOGGLE]->setMenu(snapMenu);
 
-	actions[LC_EDIT_SNAP_ANGLE] = new QAction(QIcon(":/resources/edit_snap_angle.png"), tr("Snap Angle"), this);
+	action = new QAction(QIcon(":/resources/edit_snap_angle.png"), tr("Snap Angle"), this);
+	action->setCheckable(true);
+	actions[LC_EDIT_SNAP_ANGLE] = action;
 
 	actions[LC_EDIT_TRANSFORM] = new QAction(QIcon(":/resources/edit_transform.png"), tr("Transform"), this);
 	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION] = new QAction(tr("Absolute Translation"), this);
@@ -550,8 +572,49 @@ void lcQMainWindow::actionTriggered()
 
 void lcQMainWindow::UpdateAction(int NewAction)
 {
-	QAction* action = actions[LC_EDIT_ACTION_FIRST + NewAction];
+	QAction *action = actions[LC_EDIT_ACTION_FIRST + NewAction];
 
 	if (action)
 		action->setChecked(true);
+}
+
+void lcQMainWindow::UpdateSnap(lcuint32 Snap)
+{
+	actions[LC_EDIT_SNAP_ANGLE]->setChecked((Snap & LC_DRAW_SNAP_A) != 0);
+
+	actions[LC_EDIT_SNAP_X]->setChecked((Snap & LC_DRAW_SNAP_X) != 0);
+	actions[LC_EDIT_SNAP_Y]->setChecked((Snap & LC_DRAW_SNAP_Y) != 0);
+	actions[LC_EDIT_SNAP_Z]->setChecked((Snap & LC_DRAW_SNAP_Z) != 0);
+
+	actions[LC_EDIT_LOCK_X]->setChecked((Snap & LC_DRAW_LOCK_X) != 0);
+	actions[LC_EDIT_LOCK_Y]->setChecked((Snap & LC_DRAW_LOCK_Y) != 0);
+	actions[LC_EDIT_LOCK_Z]->setChecked((Snap & LC_DRAW_LOCK_Z) != 0);
+}
+
+void lcQMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
+{
+	QAction *undoAction = actions[LC_EDIT_UNDO];
+	QAction *redoAction = actions[LC_EDIT_REDO];
+
+	if (UndoText)
+	{
+		undoAction->setEnabled(true);
+		undoAction->setText(QString("%1 %2").arg(tr("Undo"), UndoText));
+	}
+	else
+	{
+		undoAction->setEnabled(false);
+		undoAction->setText(tr("Undo"));
+	}
+
+	if (RedoText)
+	{
+		redoAction->setEnabled(true);
+		redoAction->setText(QString("%1 %2").arg(tr("Redo"), RedoText));
+	}
+	else
+	{
+		redoAction->setEnabled(false);
+		redoAction->setText(tr("Redo"));
+	}
 }

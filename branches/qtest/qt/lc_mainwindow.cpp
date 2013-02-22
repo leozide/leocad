@@ -194,33 +194,85 @@ void lcMainWindow::createActions()
 	actionEditSelectByName = new QAction(tr("Select By Name..."), this);
 	actionEditSelectByName->setStatusTip(tr("Select objects by name"));
 
-	actionToolInsert = new QAction(QIcon(":/resources/action_insert.xpm"), tr("Insert"), this);
+	actionEditLockMove = new QAction(QIcon(":/resources/edit_lock.png"), tr("Lock"), this);
+	actionEditLockMoveX = new QAction(tr("Lock X"), this);
+	actionEditLockMoveY = new QAction(tr("Lock Y"), this);
+	actionEditLockMoveZ = new QAction(tr("Lock Z"), this);
+	actionEditLockMoveUnlockAll = new QAction(tr("Unlock All"), this);
+	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
+	lockMenu->addAction(actionEditLockMoveX);
+	lockMenu->addAction(actionEditLockMoveY);
+	lockMenu->addAction(actionEditLockMoveZ);
+	lockMenu->addAction(actionEditLockMoveUnlockAll);
+	actionEditLockMove->setMenu(lockMenu);
+
+	actionEditSnapMove = new QAction(QIcon(":/resources/edit_snap_move.png"), tr("Snap"), this);
+	actionEditSnapMoveX = new QAction(tr("Snap X"), this);
+	actionEditSnapMoveY = new QAction(tr("Snap Y"), this);
+	actionEditSnapMoveZ = new QAction(tr("Snap Z"), this);
+	actionEditSnapMoveNone = new QAction(tr("Snap None"), this);
+	actionEditSnapMoveAll = new QAction(tr("Snap All"), this);
+	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
+	snapMenu->addAction(actionEditSnapMoveX);
+	snapMenu->addAction(actionEditSnapMoveY);
+	snapMenu->addAction(actionEditSnapMoveZ);
+	snapMenu->addAction(actionEditSnapMoveNone);
+	snapMenu->addAction(actionEditSnapMoveAll);
+	actionEditSnapMove->setMenu(snapMenu);
+
+	actionEditSnapAngle = new QAction(QIcon(":/resources/edit_snap_angle.png"), tr("Snap Angle"), this);
+
+	actionEditTransform = new QAction(QIcon(":/resources/edit_transform.png"), tr("Transform"), this);
+	actionEditTransformAbsoluteTranslation = new QAction(tr("Absolute Translation"), this);
+	actionEditTransformRelativeTranslation = new QAction(tr("Relative Translation"), this);
+	actionEditTransformAbsoluteRotation = new QAction(tr("Absolute Rotation"), this);
+	actionEditTransformRelativeRotation = new QAction(tr("Relative Rotation"), this);
+	QMenu* transformMenu = new QMenu(tr("Transform"));
+	transformMenu->addAction(actionEditTransformAbsoluteTranslation);
+	transformMenu->addAction(actionEditTransformRelativeTranslation);
+	transformMenu->addAction(actionEditTransformAbsoluteRotation);
+	transformMenu->addAction(actionEditTransformRelativeRotation);
+	actionEditTransform->setMenu(transformMenu);
+
+	actionViewPreferences = new QAction(tr("Preferences..."), this);
+	actionViewZoomIn = new QAction(tr("Zoom In"), this);
+	actionViewZoomOut = new QAction(tr("Zoom Out"), this);
+	actionViewZoomExtents = new QAction(tr("Zoom Extents"), this);
+	actionViewViewpointFront = new QAction(tr("Front"), this);
+	actionViewViewpointBack = new QAction(tr("Back"), this);
+	actionViewViewpointLeft = new QAction(tr("Left"), this);
+	actionViewViewpointRight = new QAction(tr("Right"), this);
+	actionViewViewpointTop = new QAction(tr("Top"), this);
+	actionViewViewpointBottom = new QAction(tr("Bottom"), this);
+	actionViewViewpointHome = new QAction(tr("Home"), this);
+
+	actionToolInsert = new QAction(QIcon(":/resources/action_insert.png"), tr("Insert"), this);
 	actionToolInsert->setCheckable(true);
-	actionToolLight = new QAction(QIcon(":/resources/action_light.xpm"), tr("Light"), this);
+	actionToolLight = new QAction(QIcon(":/resources/action_light.png"), tr("Light"), this);
 	actionToolLight->setCheckable(true);
-	actionToolSpotLight = new QAction(QIcon(":/resources/action_spotlight.xpm"), tr("Spot Light"), this);
+	actionToolSpotLight = new QAction(QIcon(":/resources/action_spotlight.png"), tr("Spot Light"), this);
 	actionToolSpotLight->setCheckable(true);
-	actionToolCamera = new QAction(QIcon(":/resources/action_camera.xpm"), tr("Camera"), this);
+	actionToolCamera = new QAction(QIcon(":/resources/action_camera.png"), tr("Camera"), this);
 	actionToolCamera->setCheckable(true);
-	actionToolSelect = new QAction(QIcon(":/resources/action_select.xpm"), tr("Select"), this);
+	actionToolSelect = new QAction(QIcon(":/resources/action_select.png"), tr("Select"), this);
 	actionToolSelect->setCheckable(true);
-	actionToolMove = new QAction(QIcon(":/resources/action_move.xpm"), tr("Move"), this);
+	actionToolMove = new QAction(QIcon(":/resources/action_move.png"), tr("Move"), this);
 	actionToolMove->setCheckable(true);
-	actionToolRotate = new QAction(QIcon(":/resources/action_rotate.xpm"), tr("Rotate"), this);
+	actionToolRotate = new QAction(QIcon(":/resources/action_rotate.png"), tr("Rotate"), this);
 	actionToolRotate->setCheckable(true);
-	actionToolDelete = new QAction(QIcon(":/resources/action_delete.xpm"), tr("Delete"), this);
+	actionToolDelete = new QAction(QIcon(":/resources/action_delete.png"), tr("Delete"), this);
 	actionToolDelete->setCheckable(true);
-	actionToolPaint = new QAction(QIcon(":/resources/action_paint.xpm"), tr("Paint"), this);
+	actionToolPaint = new QAction(QIcon(":/resources/action_paint.png"), tr("Paint"), this);
 	actionToolPaint->setCheckable(true);
-	actionToolZoom = new QAction(QIcon(":/resources/action_zoom.xpm"), tr("Zoom"), this);
+	actionToolZoom = new QAction(QIcon(":/resources/action_zoom.png"), tr("Zoom"), this);
 	actionToolZoom->setCheckable(true);
-	actionToolPan = new QAction(QIcon(":/resources/action_pan.xpm"), tr("Pan"), this);
+	actionToolPan = new QAction(QIcon(":/resources/action_pan.png"), tr("Pan"), this);
 	actionToolPan->setCheckable(true);
-	actionToolRotateView = new QAction(QIcon(":/resources/action_rotate_view.xpm"), tr("Rotate View"), this);
+	actionToolRotateView = new QAction(QIcon(":/resources/action_rotate_view.png"), tr("Rotate View"), this);
 	actionToolRotateView->setCheckable(true);
-	actionToolRoll = new QAction(QIcon(":/resources/action_roll.xpm"), tr("Roll"), this);
+	actionToolRoll = new QAction(QIcon(":/resources/action_roll.png"), tr("Roll"), this);
 	actionToolRoll->setCheckable(true);
-	actionToolZoomRegion = new QAction(QIcon(":/resources/action_zoom_region.xpm"), tr("Zoom Region"), this);
+	actionToolZoomRegion = new QAction(QIcon(":/resources/action_zoom_region.png"), tr("Zoom Region"), this);
 	actionToolZoomRegion->setCheckable(true);
 
 	QActionGroup *actionToolGroup = new QActionGroup(this);
@@ -287,21 +339,19 @@ void lcMainWindow::createMenus()
 	menuEdit->addAction(actionEditSelectByName);
 
 	menuView = menuBar()->addMenu(tr("&View"));
-	/*
 	menuView->addAction(actionViewPreferences);
-	menuEdit->addSeparator();
+	menuView->addSeparator();
 	menuView->addAction(actionViewZoomIn);
 	menuView->addAction(actionViewZoomOut);
 	menuView->addAction(actionViewZoomExtents);
 	QMenu* menuViewpoints = menuView->addMenu(tr("Viewpoints"));
-	menuViewpoints->addAction(actionViewpointFront);
-	menuViewpoints->addAction(actionViewpointBack);
-	menuViewpoints->addAction(actionViewpointLeft);
-	menuViewpoints->addAction(actionViewpointRight);
-	menuViewpoints->addAction(actionViewpointTop);
-	menuViewpoints->addAction(actionViewpointBottom);
-	menuViewpoints->addAction(actionViewpointHome);
-	*/
+	menuViewpoints->addAction(actionViewViewpointFront);
+	menuViewpoints->addAction(actionViewViewpointBack);
+	menuViewpoints->addAction(actionViewViewpointLeft);
+	menuViewpoints->addAction(actionViewViewpointRight);
+	menuViewpoints->addAction(actionViewViewpointTop);
+	menuViewpoints->addAction(actionViewViewpointBottom);
+	menuViewpoints->addAction(actionViewViewpointHome);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 
@@ -386,7 +436,21 @@ void lcMainWindow::createToolBars()
 	standardToolBar->addAction(actionEditCut);
 	standardToolBar->addAction(actionEditCopy);
 	standardToolBar->addAction(actionEditPaste);
-//	standardToolBar->addSeparator();
+	standardToolBar->addSeparator();
+	standardToolBar->addAction(actionEditLockMove);
+	standardToolBar->addAction(actionEditSnapMove);
+	standardToolBar->addAction(actionEditSnapAngle);
+	standardToolBar->addSeparator();
+	standardToolBar->addAction(actionEditTransform);
+	transformX = new QLineEdit();
+	transformX->setMaximumWidth(75);
+	standardToolBar->addWidget(transformX);
+	transformY = new QLineEdit();
+	transformY->setMaximumWidth(75);
+	standardToolBar->addWidget(transformY);
+	transformZ = new QLineEdit();
+	transformZ->setMaximumWidth(75);
+	standardToolBar->addWidget(transformZ);
 
 	toolsToolBar = addToolBar(tr("Tools"));
 	insertToolBarBreak(toolsToolBar);

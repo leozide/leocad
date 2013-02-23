@@ -240,14 +240,15 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	{
 		if (SaveImage)
 		{
-			fprintf(stderr, "Cannot load pieces library.");
+			fprintf(stderr, "ERROR: Cannot load pieces library.");
 			return false;
 		}
 
 		lcLoadDefaultColors();
 		m_Library->CreateBuiltinPieces();
 
-		SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK | LC_MB_ICONERROR);
+		SystemDoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
+		                   "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
 
 	SystemInit();

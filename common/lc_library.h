@@ -114,6 +114,8 @@ public:
 	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
 	PieceInfo* CreatePlaceholder(const char* PieceName);
 	bool LoadPiece(PieceInfo* Info);
+	bool GeneratePiece(PieceInfo* Info);
+	void CreateBuiltinPieces();
 
 	lcTexture* FindTexture(const char* TextureName);
 	bool LoadTexture(lcTexture* Texture);

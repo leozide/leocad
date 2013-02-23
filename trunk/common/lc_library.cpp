@@ -2109,3 +2109,312 @@ void lcPiecesLibrary::RemoveCategory(int Index)
 
 	mCategoriesModified = true;
 }
+
+void lcPiecesLibrary::CreateBuiltinPieces()
+{
+	const char* Pieces[][2] =
+	{
+		{ "3005",  "Brick  1 x  1" },
+		{ "3004",  "Brick  1 x  2" },
+		{ "3622",  "Brick  1 x  3" },
+		{ "3010",  "Brick  1 x  4" },
+		{ "3009",  "Brick  1 x  6" },
+		{ "3008",  "Brick  1 x  8" },
+		{ "6111",  "Brick  1 x 10" },
+		{ "6112",  "Brick  1 x 12" },
+		{ "2465",  "Brick  1 x 16" },
+		{ "3003",  "Brick  2 x  2" },
+		{ "3002",  "Brick  2 x  3" },
+		{ "3001",  "Brick  2 x  4" },
+		{ "2456",  "Brick  2 x  6" },
+		{ "3007",  "Brick  2 x  8" },
+		{ "3006",  "Brick  2 x 10" },
+		{ "2356",  "Brick  4 x  6" },
+		{ "6212",  "Brick  4 x 10" },
+		{ "4202",  "Brick  4 x 12" },
+		{ "30400", "Brick  4 x 18" },
+		{ "4201",  "Brick  8 x  8" },
+		{ "4204",  "Brick  8 x 16" },
+		{ "733",   "Brick 10 x 10" },
+		{ "3024",  "Plate  1 x  1" },
+		{ "3023",  "Plate  1 x  2" },
+		{ "3623",  "Plate  1 x  3" },
+		{ "3710",  "Plate  1 x  4" },
+		{ "3666",  "Plate  1 x  6" },
+		{ "3460",  "Plate  1 x  8" },
+		{ "4477",  "Plate  1 x 10" },
+		{ "60479", "Plate  1 x 12" },
+		{ "3022",  "Plate  2 x  2" },
+		{ "3021",  "Plate  2 x  3" },
+		{ "3020",  "Plate  2 x  4" },
+		{ "3795",  "Plate  2 x  6" },
+		{ "3034",  "Plate  2 x  8" },
+		{ "3832",  "Plate  2 x 10" },
+		{ "2445",  "Plate  2 x 12" },
+		{ "91988", "Plate  2 x 14" },
+		{ "4282",  "Plate  2 x 16" },
+		{ "3031",  "Plate  4 x  4" },
+		{ "3032",  "Plate  4 x  6" },
+		{ "3035",  "Plate  4 x  8" },
+		{ "3030",  "Plate  4 x 10" },
+		{ "3029",  "Plate  4 x 12" },
+		{ "3958",  "Plate  6 x  6" },
+		{ "3036",  "Plate  6 x  8" },
+		{ "3033",  "Plate  6 x 10" },
+		{ "3028",  "Plate  6 x 12" },
+		{ "3456",  "Plate  6 x 14" },
+		{ "3027",  "Plate  6 x 16" },
+		{ "3026",  "Plate  6 x 24" },
+		{ "41539", "Plate  8 x  8" },
+		{ "728",   "Plate  8 x 11" },
+		{ "92438", "Plate  8 x 16" },
+	};
+
+	for (int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
+	{
+		PieceInfo* Info = new PieceInfo(-1);
+		mPieces.Add(Info);
+
+		strncpy(Info->m_strName, Pieces[PieceIdx][0], sizeof(Info->m_strName));
+		Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+
+		strncpy(Info->m_strDescription, Pieces[PieceIdx][1], sizeof(Info->m_strDescription));
+		Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
+
+		Info->mFlags = LC_PIECE_GENERATED;
+	}
+
+	lcLoadDefaultColors();
+
+	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
+	if (!FileName[0] || !LoadCategories(FileName))
+	{
+		struct CategoryEntry
+		{
+			const char* Name;
+			const char* Keywords;
+		};
+
+		CategoryEntry DefaultCategories[] =
+		{
+//			{ "Baseplate", "^%Baseplate" },
+			{ "Brick", "^%Brick" },
+			{ "Plate", "^%Plate" },
+//			{ "Slope", "^%Slope" },
+//			{ "Tile", "^%Tile" },
+		};
+		const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
+
+		mCategories.RemoveAll();
+		for (int i = 0; i < NumCategories; i++)
+		{
+			lcLibraryCategory& Category = mCategories.Add();
+
+			Category.Name = DefaultCategories[i].Name;
+			Category.Keywords = DefaultCategories[i].Keywords;
+		}
+
+		strcpy(mCategoriesFile, "");
+		Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
+		mCategoriesModified = false;
+	}
+
+	SystemUpdateCategories(false);
+}
+
+bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
+{
+	const int StudSides = 16;
+
+	bool Brick = !strncmp(Info->m_strDescription, "Brick ", 6);
+	bool Plate = !strncmp(Info->m_strDescription, "Plate ", 6);
+
+	if (Brick || Plate)
+	{
+		int StudsX, StudsY;
+		float MinZ = Brick ? -0.96f : -0.32f;
+
+		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsX, &StudsY);
+
+		int NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 16;
+		int NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;
+
+		Info->mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
+
+		Info->m_fDimensions[0] = 0.4f * StudsX;
+		Info->m_fDimensions[1] = 0.4f * StudsY;
+		Info->m_fDimensions[2] = 0.16f;
+		Info->m_fDimensions[3] = -0.4f * StudsX;
+		Info->m_fDimensions[4] = -0.4f * StudsY;
+		Info->m_fDimensions[5] = MinZ;
+
+		lcMesh* Mesh = new lcMesh();
+		Mesh->Create(2, NumVertices, 0, NumIndices);
+
+		float* Verts = (float*)Mesh->mVertexBuffer.mData;
+		lcuint16* Indices = (lcuint16*)Mesh->mIndexBuffer.mData;
+
+		const lcVector3 OutBoxMin(-0.4f * StudsX, -0.4f * StudsY, MinZ);
+		const lcVector3 OutBoxMax(0.4f * StudsX, 0.4f * StudsY, 0.0f);
+
+		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMin[2];
+		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMin[2];
+		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMin[2];
+		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMin[2];
+		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMax[2];
+		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMax[2];
+		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMax[2];
+		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMax[2];
+
+		const lcVector3 InBoxMin(-0.4f * StudsX + 0.16f, -0.4f * StudsY + 0.16f, MinZ);
+		const lcVector3 InBoxMax(0.4f * StudsX - 0.16f, 0.4f * StudsY - 0.16f, -0.16f);
+
+		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMin[1]; *Verts++ = InBoxMin[2];
+		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMin[2];
+		*Verts++ = InBoxMax[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMin[2];
+		*Verts++ = InBoxMax[0]; *Verts++ = InBoxMin[1]; *Verts++ = InBoxMin[2];
+		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMin[1]; *Verts++ = InBoxMax[2];
+		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMax[2];
+		*Verts++ = InBoxMax[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMax[2];
+		*Verts++ = InBoxMax[0]; *Verts++ = InBoxMin[1]; *Verts++ = InBoxMax[2];
+
+		for (int x = 0; x < StudsX; x++)
+		{
+			for (int y = 0; y < StudsY; y++)
+			{
+				const lcVector3 Center(((float)StudsX / 2.0f - x) * 0.8f - 0.4f, ((float)StudsY / 2.0f - y) * 0.8f - 0.4f, 0.0f);
+
+				*Verts++ = Center[0]; *Verts++ = Center[1]; *Verts++ = 0.16f;
+
+				for (int Step = 0; Step < StudSides; Step++)
+				{
+					float s = Center[0] + sinf((float)Step / (float)StudSides * LC_2PI) * 0.24f;
+					float c = Center[1] + cosf((float)Step / (float)StudSides * LC_2PI) * 0.24f;
+
+					*Verts++ = s; *Verts++ = c; *Verts++ = 0.16f;
+					*Verts++ = s; *Verts++ = c; *Verts++ = 0.0f;
+				}
+			}
+		}
+
+		lcMeshSection* Section = &Mesh->mSections[0];
+		Section->ColorIndex = gDefaultColor;
+		Section->IndexOffset = 0;
+		Section->NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3;
+		Section->PrimitiveType = GL_TRIANGLES;
+		Section->Texture = NULL;
+
+		*Indices++ = 0; *Indices++ = 1; *Indices++ = 8;
+		*Indices++ = 1; *Indices++ = 8; *Indices++ = 9;
+
+		*Indices++ = 2; *Indices++ = 3; *Indices++ = 10;
+		*Indices++ = 3; *Indices++ = 10; *Indices++ = 11;
+
+		*Indices++ = 0; *Indices++ = 8; *Indices++ = 11;
+		*Indices++ = 0; *Indices++ = 11; *Indices++ = 3;
+
+		*Indices++ = 1; *Indices++ = 9; *Indices++ = 10;
+		*Indices++ = 1; *Indices++ = 10; *Indices++ = 2;
+
+		*Indices++ = 7; *Indices++ = 6; *Indices++ = 5;
+		*Indices++ = 7; *Indices++ = 5; *Indices++ = 4;
+
+		*Indices++ = 0; *Indices++ = 1; *Indices++ = 5;
+		*Indices++ = 0; *Indices++ = 5; *Indices++ = 4;
+
+		*Indices++ = 2; *Indices++ = 3; *Indices++ = 7;
+		*Indices++ = 2; *Indices++ = 7; *Indices++ = 6;
+
+		*Indices++ = 0; *Indices++ = 3; *Indices++ = 7;
+		*Indices++ = 0; *Indices++ = 7; *Indices++ = 4;
+
+		*Indices++ = 1; *Indices++ = 2; *Indices++ = 6;
+		*Indices++ = 1; *Indices++ = 6; *Indices++ = 5;
+
+		*Indices++ = 15; *Indices++ = 14; *Indices++ = 13;
+		*Indices++ = 15; *Indices++ = 13; *Indices++ = 12;
+
+		*Indices++ = 8; *Indices++ = 9; *Indices++ = 13;
+		*Indices++ = 8; *Indices++ = 13; *Indices++ = 12;
+
+		*Indices++ = 10; *Indices++ = 11; *Indices++ = 15;
+		*Indices++ = 10; *Indices++ = 15; *Indices++ = 14;
+
+		*Indices++ = 8; *Indices++ = 11; *Indices++ = 15;
+		*Indices++ = 8; *Indices++ = 15; *Indices++ = 12;
+
+		*Indices++ = 9; *Indices++ = 10; *Indices++ = 14;
+		*Indices++ = 9; *Indices++ = 14; *Indices++ = 13;
+
+		for (int x = 0; x < StudsX; x++)
+		{
+			for (int y = 0; y < StudsY; y++)
+			{
+				int CenterIndex = 16 + (StudSides * 2 + 1) * (x + StudsX * y);
+				int BaseIndex = CenterIndex + 1;
+
+				for (int Step = 0; Step < StudSides; Step++)
+				{
+					*Indices++ = CenterIndex;
+					*Indices++ = BaseIndex + Step * 2;
+					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2;
+
+					*Indices++ = BaseIndex + Step * 2;
+					*Indices++ = BaseIndex + Step * 2 + 1;
+					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2;
+
+					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2;
+					*Indices++ = BaseIndex + Step * 2 + 1;
+					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2 + 1;
+				}
+			}
+		}
+
+		Section = &Mesh->mSections[1];
+		Section->ColorIndex = gEdgeColor;
+		Section->IndexOffset = (char*)Indices - (char*)Mesh->mIndexBuffer.mData;
+		Section->NumIndices = ((StudSides * 2) * StudsX * StudsY + 24) * 2;
+		Section->PrimitiveType = GL_LINES;
+		Section->Texture = NULL;
+
+		*Indices++ = 0; *Indices++ = 1; *Indices++ = 1; *Indices++ = 2;
+		*Indices++ = 2; *Indices++ = 3; *Indices++ = 3; *Indices++ = 0;
+
+		*Indices++ = 4; *Indices++ = 5; *Indices++ = 5; *Indices++ = 6;
+		*Indices++ = 6; *Indices++ = 7; *Indices++ = 7; *Indices++ = 4;
+
+		*Indices++ = 0; *Indices++ = 4; *Indices++ = 1; *Indices++ = 5;
+		*Indices++ = 2; *Indices++ = 6; *Indices++ = 3; *Indices++ = 7;
+
+		*Indices++ = 8; *Indices++ = 9; *Indices++ = 9; *Indices++ = 10;
+		*Indices++ = 10; *Indices++ = 11; *Indices++ = 11; *Indices++ = 8;
+
+		*Indices++ = 12; *Indices++ = 13; *Indices++ = 13; *Indices++ = 14;
+		*Indices++ = 14; *Indices++ = 15; *Indices++ = 15; *Indices++ = 12;
+
+		*Indices++ = 8; *Indices++ = 12; *Indices++ = 9; *Indices++ = 13;
+		*Indices++ = 10; *Indices++ = 14; *Indices++ = 11; *Indices++ = 15;
+
+		for (int x = 0; x < StudsX; x++)
+		{
+			for (int y = 0; y < StudsY; y++)
+			{
+				int BaseIndex = 16 + (StudSides * 2 + 1) * (x + StudsX * y) + 1;
+
+				for (int Step = 0; Step < StudSides; Step++)
+				{
+					*Indices++ = BaseIndex + Step * 2;
+					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2;
+
+					*Indices++ = BaseIndex + Step * 2 + 1;
+					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2 + 1;
+				}
+			}
+		}
+
+		Mesh->UpdateBuffers();
+		Info->mMesh = Mesh;
+	}
+
+	return false;
+}

@@ -245,7 +245,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		lcLoadDefaultColors();
-		m_Library->CreatePlaceholder("EMPTY");
+		m_Library->CreateBuiltinPieces();
 
 		SystemDoMessageBox("Cannot load pieces library.", LC_MB_OK | LC_MB_ICONERROR);
 	}

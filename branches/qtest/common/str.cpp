@@ -220,15 +220,15 @@ bool String::Match(const String& Expression) const
 		}
 		else if ((*p == '|') || (*p == '&'))
 		{
-			String Left, Right;
+			String LeftStr, RightStr;
 
-			Left = Expression.Left((p - Expression) - 1);
-			Right = Expression.Right(Expression.GetLength() - (p - Expression) - 1);
+			LeftStr = Expression.Left((p - Expression) - 1);
+			RightStr = Expression.Right(Expression.GetLength() - (p - Expression) - 1);
 
 			if (*p == '|')
-				return Match(Left) || Match(Right);
+				return Match(LeftStr) || Match(RightStr);
 			else
-				return Match(Left) && Match(Right);
+				return Match(LeftStr) && Match(RightStr);
 		}
 
 		p++;

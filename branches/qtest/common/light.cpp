@@ -254,18 +254,18 @@ void Light::MinIntersectDist(lcClickLine* ClickLine)
 
 void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
 {
-	lcVector3 Move(dx, dy, dz);
+	lcVector3 MoveVec(dx, dy, dz);
 
 	if (IsEyeSelected())
 	{
-		mPosition += Move;
+		mPosition += MoveVec;
 
 		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_LK_POSITION);
 	}
 
 	if (IsTargetSelected())
 	{
-		mTargetPosition += Move;
+		mTargetPosition += MoveVec;
 
 		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_LK_TARGET);
 	}

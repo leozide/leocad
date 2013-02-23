@@ -1194,7 +1194,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	{
 		Piece* pPiece;
 		int i, steps = GetLastStep();
-		char buf[256], *ptr;
+		char buf[256];
 
 		ptr = strrchr(m_strPathName, '\\');
 		if (ptr == NULL)
@@ -2615,7 +2615,7 @@ void Project::RenderOverlays(View* view)
 			lcVector3 Verts[64];
 			int NumVerts = 0;
 
-			for (int j = 0; j < 32; j++)
+			for (j = 0; j < 32; j++)
 			{
 				lcVector3 v1, v2;
 
@@ -2721,12 +2721,11 @@ void Project::RenderOverlays(View* view)
 				// Draw text.
 				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = view->mCamera;
 
 				const lcMatrix44& ModelView = Cam->mWorldView;
 				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-				lcVector3 Screen = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
+				lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
 
 				glMatrixMode(GL_PROJECTION);
 				glPushMatrix();
@@ -2749,7 +2748,7 @@ void Project::RenderOverlays(View* view)
 				m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
 
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				m_pScreenFont->PrintText(Screen[0] - Viewport[0] - (cx / 2), Screen[1] - Viewport[1] + (cy / 2), 0.0f, buf);
+				m_pScreenFont->PrintText(ScreenPos[0] - Viewport[0] - (cx / 2), ScreenPos[1] - Viewport[1] + (cy / 2), 0.0f, buf);
 
 				glDisable(GL_TEXTURE_2D);
 				glDisable(GL_ALPHA_TEST);
@@ -3067,7 +3066,9 @@ bool Project::RemoveSelectedObjects()
 	Piece* pPiece;
 	Light* pLight;
 	void* pPrev;
-	bool removed = false;
+	bool RemovedPiece = false;
+	bool RemovedCamera = false;
+	bool RemovedLight = false;
 
 	pPiece = m_pPieces;
 	while (pPiece)
@@ -3077,7 +3078,7 @@ bool Project::RemoveSelectedObjects()
 			Piece* pTemp;
 			pTemp = pPiece->m_pNext;
 
-			removed = true;
+			RemovedPiece = true;
 			RemovePiece(pPiece);
 			delete pPiece;
 			pPiece = pTemp;
@@ -3112,8 +3113,11 @@ bool Project::RemoveSelectedObjects()
 		CameraIdx--;
 		delete pCamera;
 
-		removed = true;
+		RemovedCamera = true;
+	}
 
+	if (RemovedCamera)
+	{
 		SystemUpdateCameraMenu(mCameras);
 		SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
 	}
@@ -3135,7 +3139,7 @@ bool Project::RemoveSelectedObjects()
 				pLight = m_pLights;
 			}
 
-			removed = true;
+			RemovedLight = true;
 		}
 		else
 		{
@@ -3148,7 +3152,7 @@ bool Project::RemoveSelectedObjects()
 //	CalculateStep();
 //	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 
-	return removed;
+	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
 void Project::UpdateSelection()
@@ -3817,7 +3821,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 			}
 
-			unsigned long image = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
+			unsigned long ImageOptions = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
 			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
 			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
 			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
@@ -3827,11 +3831,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			opts.imdlg.width = Sys_ProfileLoadInt ("Default", "HTML Image Width", 256);
 			opts.imdlg.height = Sys_ProfileLoadInt ("Default", "HTML Image Height", 160);
 			opts.imdlg.imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-			opts.imdlg.imopts.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-			opts.imdlg.imopts.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-			opts.imdlg.imopts.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
+			opts.imdlg.imopts.interlaced = (ImageOptions & LC_IMAGE_PROGRESSIVE) != 0;
+			opts.imdlg.imopts.transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+			opts.imdlg.imopts.truecolor = (ImageOptions & LC_IMAGE_HIGHCOLOR) != 0;
 			opts.imdlg.imopts.pause = 1;
-			opts.imdlg.imopts.format = (unsigned char)(image & ~(LC_IMAGE_MASK));
+			opts.imdlg.imopts.format = (unsigned char)(ImageOptions & ~(LC_IMAGE_MASK));
 
 			unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
 			opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
@@ -4718,7 +4722,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				pGroup->FileSave(m_pClipboard[m_nCurClipboard], m_pGroups);
 
-			for (int CameraIdx = 0, i = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+			i = 0;
+			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				if (mCameras[CameraIdx]->IsSelected())
 					i++;
 			m_pClipboard[m_nCurClipboard]->WriteBuffer(&i, sizeof(i));
@@ -6023,43 +6028,43 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 		case LC_EDIT_SNAP_X:
-			if (m_nSnap & LC_DRAW_SNAP_X)
-				m_nSnap &= ~LC_DRAW_SNAP_X;
-			else
-				m_nSnap |= LC_DRAW_SNAP_X;
+				if (m_nSnap & LC_DRAW_SNAP_X)
+					m_nSnap &= ~LC_DRAW_SNAP_X;
+				else
+					m_nSnap |= LC_DRAW_SNAP_X;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_SNAP_Y:
-			if (m_nSnap & LC_DRAW_SNAP_Y)
-				m_nSnap &= ~LC_DRAW_SNAP_Y;
-			else
-				m_nSnap |= LC_DRAW_SNAP_Y;
+				if (m_nSnap & LC_DRAW_SNAP_Y)
+					m_nSnap &= ~LC_DRAW_SNAP_Y;
+				else
+					m_nSnap |= LC_DRAW_SNAP_Y;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_SNAP_Z:
-			if (m_nSnap & LC_DRAW_SNAP_Z)
-				m_nSnap &= ~LC_DRAW_SNAP_Z;
-			else
-				m_nSnap |= LC_DRAW_SNAP_Z;
+				if (m_nSnap & LC_DRAW_SNAP_Z)
+					m_nSnap &= ~LC_DRAW_SNAP_Z;
+				else
+					m_nSnap |= LC_DRAW_SNAP_Z;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_SNAP_ALL:
-			m_nSnap |= LC_DRAW_SNAP_XYZ;
+				m_nSnap |= LC_DRAW_SNAP_XYZ;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_SNAP_NONE:
-			m_nSnap &= ~LC_DRAW_SNAP_XYZ;
+				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_SNAP_TOGGLE:
 			if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
@@ -6071,55 +6076,55 @@ void Project::HandleCommand(LC_COMMANDS id)
 			break;
 
 		case LC_EDIT_SNAP_ANGLE:
-			if (m_nSnap & LC_DRAW_SNAP_A)
-				m_nSnap &= ~LC_DRAW_SNAP_A;
-			else
-				m_nSnap |= LC_DRAW_SNAP_A;
+				if (m_nSnap & LC_DRAW_SNAP_A)
+					m_nSnap &= ~LC_DRAW_SNAP_A;
+				else
+					m_nSnap |= LC_DRAW_SNAP_A;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_LOCK_X:
-			if (m_nSnap & LC_DRAW_LOCK_X)
-				m_nSnap &= ~LC_DRAW_LOCK_X;
-			else
-				m_nSnap |= LC_DRAW_LOCK_X;
+				if (m_nSnap & LC_DRAW_LOCK_X)
+					m_nSnap &= ~LC_DRAW_LOCK_X;
+				else
+					m_nSnap |= LC_DRAW_LOCK_X;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_LOCK_Y:
-			if (m_nSnap & LC_DRAW_LOCK_Y)
-				m_nSnap &= ~LC_DRAW_LOCK_Y;
-			else
-				m_nSnap |= LC_DRAW_LOCK_Y;
+				if (m_nSnap & LC_DRAW_LOCK_Y)
+					m_nSnap &= ~LC_DRAW_LOCK_Y;
+				else
+					m_nSnap |= LC_DRAW_LOCK_Y;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_LOCK_Z:
-			if (m_nSnap & LC_DRAW_LOCK_Z)
-				m_nSnap &= ~LC_DRAW_LOCK_Z;
-			else
-				m_nSnap |= LC_DRAW_LOCK_Z;
+				if (m_nSnap & LC_DRAW_LOCK_Z)
+					m_nSnap &= ~LC_DRAW_LOCK_Z;
+				else
+					m_nSnap |= LC_DRAW_LOCK_Z;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_LOCK_NONE:
-			m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_LOCK_TOGGLE:
-			if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
-				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-			else
-				m_nSnap |= LC_DRAW_LOCK_XYZ;
+				if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
+					m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+				else
+					m_nSnap |= LC_DRAW_LOCK_XYZ;
 			if (gMainWindow)
 				gMainWindow->UpdateSnap(m_nSnap);
-			break;
+				break;
 
 		case LC_EDIT_SNAP_MOVE_XY0:
 		case LC_EDIT_SNAP_MOVE_XY1:
@@ -6905,6 +6910,19 @@ bool Project::StopTracking(bool bAccept)
 		}
 		else
 		{
+			if (m_nCurAction == LC_ACTION_INSERT)
+			{
+				m_pCurPiece->Release();
+				m_pCurPiece = m_PreviousPiece;
+				m_PreviousPiece = NULL;
+
+				if (m_RestoreAction)
+				{
+					SetAction(m_PreviousAction);
+					m_RestoreAction = false;
+				}
+			}
+
 			DeleteContents (true);
 			FileLoad (m_pTrackFile, true, false);
 			delete m_pTrackFile;
@@ -8437,20 +8455,20 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	{
 		case LC_ACTION_SELECT:
 		{
-			int ptx = x, pty = y;
+			int ClampX = x, ClampY = y;
 
-			if (ptx >= Viewport[0] + Viewport[2])
-				ptx = Viewport[0] + Viewport[2] - 1;
-			else if (ptx <= Viewport[0])
-				ptx = Viewport[0] + 1;
+			if (ClampX >= Viewport[0] + Viewport[2])
+				ClampX = Viewport[0] + Viewport[2] - 1;
+			else if (ClampX <= Viewport[0])
+				ClampX = Viewport[0] + 1;
 
-			if (pty >= Viewport[1] + Viewport[3])
-				pty = Viewport[1] + Viewport[3] - 1;
-			else if (pty <= Viewport[1])
-				pty = Viewport[1] + 1;
+			if (ClampY >= Viewport[1] + Viewport[3])
+				ClampY = Viewport[1] + Viewport[3] - 1;
+			else if (ClampY <= Viewport[1])
+				ClampY = Viewport[1] + 1;
 
-			m_fTrack[0] = (float)ptx;
-			m_fTrack[1] = (float)pty;
+			m_fTrack[0] = (float)ClampX;
+			m_fTrack[1] = (float)ClampY;
 
 			if (m_nTracking != LC_TRACK_NONE)
 				UpdateOverlayScale();
@@ -9140,7 +9158,6 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 			if (f >= 0.0f)
 			{
-				Camera* Cam = view->mCamera;
 				lcVector3 ViewDir(Cam->mTargetPosition - Cam->mPosition);
 
 				float u1 = (-b + sqrtf(f)) / (2*a);
@@ -9318,9 +9335,9 @@ void Project::UpdateOverlayScale()
 		const lcMatrix44& ModelView = Cam->mWorldView;
 		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-		lcVector3 Screen = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
-		Screen[0] += 10.0f;
-		lcVector3 Point = lcUnprojectPoint(Screen, ModelView, Projection, Viewport);
+		lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
+		ScreenPos[0] += 10.0f;
+		lcVector3 Point = lcUnprojectPoint(ScreenPos, ModelView, Projection, Viewport);
 
 		lcVector3 Dist(Point - m_OverlayCenter);
 		m_ActiveView->m_OverlayScale = Dist.Length() * 5.0f;

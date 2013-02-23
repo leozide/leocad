@@ -412,8 +412,8 @@ bool lcLoadColorFile(lcFile& File)
 		Color.Name[LC_MAX_COLOR_NAME - 1] = 0;
 		strncpy(Color.SafeName, Color.Name, sizeof(Color.SafeName));
 
-		for (char* Ptr = strchr((char*)Color.Name, '_'); Ptr; Ptr = strchr(Ptr, '_'))
-			*Ptr = ' ';
+		for (char* Underscore = strchr((char*)Color.Name, '_'); Underscore; Underscore = strchr(Underscore, '_'))
+			*Underscore = ' ';
 
 		for (GetToken(Ptr, Token); Token[0]; GetToken(Ptr, Token))
 		{

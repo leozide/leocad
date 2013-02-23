@@ -43,10 +43,6 @@ bool GLWindow::MakeCurrent()
 	return true;
 }
 
-void GLWindow::SwapBuffers()
-{
-}
-
 void GLWindow::Redraw(bool ForceRedraw)
 {
 	QGLWidget* widget = (QGLWidget*)m_pData;

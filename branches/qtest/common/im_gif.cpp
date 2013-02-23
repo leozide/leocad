@@ -324,9 +324,8 @@ bool Image::LoadGIF(lcFile& file)
         source->pass4_offset = source->pass3_offset + (source->height + 1) / 4;
       }
 
-      register int c;
-      register lcuint8 *sptr, *ptr;
-      register lcuint32 col;
+      lcuint8 *sptr, *ptr;
+      lcuint32 col;
       lcuint32 irow;
 
       // Figure out which row of interlaced image is needed, and access it.
@@ -359,9 +358,8 @@ bool Image::LoadGIF(lcFile& file)
     }
     else
     {
-      register int c;
-      register lcuint8 *ptr;
-      register lcuint32 col;
+      lcuint8 *ptr;
+      lcuint32 col;
 
       ptr = source->buffer;
       for (col = source->width; col > 0; col--)

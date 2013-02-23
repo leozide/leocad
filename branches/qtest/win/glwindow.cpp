@@ -103,7 +103,9 @@ BOOL GLWindowPreTranslateMessage(GLWindow *wnd, MSG *pMsg)
 				GLWindowPrivate* prv = (GLWindowPrivate*)wnd->GetData();
 				PAINTSTRUCT ps;
 				BeginPaint(prv->m_hWnd, &ps);
+				wnd->MakeCurrent();
 				wnd->OnDraw();
+				SwapBuffers(prv->m_pDC->m_hDC);
 				EndPaint(prv->m_hWnd, &ps);
 			} break;
 		case WM_SIZE:
@@ -511,13 +513,6 @@ bool GLWindow::MakeCurrent()
 	}
 
 	return (wglMakeCurrent(prv->m_pDC->m_hDC, prv->m_hrc) != 0);
-}
-
-void GLWindow::SwapBuffers()
-{
-	GLWindowPrivate *prv = (GLWindowPrivate*)m_pData;
-
-	::SwapBuffers(prv->m_pDC->m_hDC);
 }
 
 void GLWindow::Redraw(bool ForceRedraw)

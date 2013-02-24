@@ -1,6 +1,9 @@
 #ifndef _BASEWND_H_
 #define _BASEWND_H_
 
+#include "defines.h"
+#include "lc_math.h"
+
 #define LC_OK           1
 #define LC_CANCEL       2
 #define LC_ABORT        3
@@ -26,11 +29,13 @@
 
 enum LC_DIALOG_TYPE
 {
-	LC_DIALOG_FILE_OPEN_PROJECT,
-	LC_DIALOG_FILE_SAVE_PROJECT,
-	LC_DIALOG_FILE_MERGE_PROJECT,
-	LC_DIALOG_FILE_EXPORT_BRICKLINK,
-	LC_DIALOG_FILE_EXPORT_WAVEFRONT,
+	LC_DIALOG_OPEN_PROJECT,
+	LC_DIALOG_SAVE_PROJECT,
+	LC_DIALOG_MERGE_PROJECT,
+	LC_DIALOG_EXPORT_BRICKLINK,
+	LC_DIALOG_EXPORT_POVRAY,
+	LC_DIALOG_EXPORT_WAVEFRONT,
+	LC_DIALOG_PIECE_ARRAY,
 
 	// TODO: update dialogs
 	LC_DLG_FILE_OPEN,
@@ -38,9 +43,7 @@ enum LC_DIALOG_TYPE
 	LC_DLG_DIRECTORY_BROWSE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
-	LC_DLG_POVRAY,
 	LC_DLG_MINIFIG,
-	LC_DLG_ARRAY,
 	LC_DLG_PREFERENCES,
 	LC_DLG_PROPERTIES,
 	LC_DLG_TERRAIN,
@@ -51,6 +54,21 @@ enum LC_DIALOG_TYPE
 	LC_DLG_GROUP,
 	LC_DLG_EDITCATEGORY,
 	LC_DLG_ABOUT
+};
+
+struct lcPOVRayDialogOptions
+{
+	char FileName[LC_MAXPATH];
+	char POVRayPath[LC_MAXPATH];
+	char LGEOPath[LC_MAXPATH];
+	bool Render;
+};
+
+struct lcArrayDialogOptions
+{
+	int Counts[3];
+	lcVector3 Offsets[3];
+	lcVector3 Rotations[3];
 };
 
 class lcBaseWindow

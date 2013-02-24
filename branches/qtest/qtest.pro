@@ -78,7 +78,9 @@ SOURCES += common/view.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
     qt/lc_colorlistwidget.cpp \
-    qt/lc_glwidget.cpp
+    qt/lc_glwidget.cpp \
+    qt/lc_qpovraydialog.cpp \
+    qt/lc_qarraydialog.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -123,7 +125,11 @@ HEADERS += common/glwindow.h \
     qt/lc_previewwidget.h \
     qt/lc_viewwidget.h \
     qt/lc_glwidget.h \
-    qt/lc_config.h
-FORMS += 
+    qt/lc_config.h \
+    qt/lc_qpovraydialog.h \
+    qt/lc_qarraydialog.h
+FORMS += \ 
+    qt/lc_qpovraydialog.ui \
+    qt/lc_qarraydialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc

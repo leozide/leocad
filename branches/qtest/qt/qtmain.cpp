@@ -101,40 +101,43 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 	}
 }
 
+#include "lc_qpovraydialog.h"
+#include "lc_qarraydialog.h"
+
 bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 {
 	QWidget* parent = (QWidget*)mHandle;
 
 	switch (Type)
 	{
-	case LC_DIALOG_FILE_OPEN_PROJECT:
-	case LC_DIALOG_FILE_SAVE_PROJECT:
-	case LC_DIALOG_FILE_MERGE_PROJECT:
-	case LC_DIALOG_FILE_EXPORT_BRICKLINK:
-	case LC_DIALOG_FILE_EXPORT_WAVEFRONT:
+	case LC_DIALOG_OPEN_PROJECT:
+	case LC_DIALOG_SAVE_PROJECT:
+	case LC_DIALOG_MERGE_PROJECT:
+	case LC_DIALOG_EXPORT_BRICKLINK:
+	case LC_DIALOG_EXPORT_WAVEFRONT:
 		{
 			char* FileName = (char*)Data;
 			QString result;
 
 			switch (Type)
 			{
-			case LC_DIALOG_FILE_OPEN_PROJECT:
+			case LC_DIALOG_OPEN_PROJECT:
 				result = QFileDialog::getOpenFileName(parent, parent->tr("Open Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 				break;
 
-			case LC_DIALOG_FILE_SAVE_PROJECT:
+			case LC_DIALOG_SAVE_PROJECT:
 				result = QFileDialog::getSaveFileName(parent, parent->tr("Save Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat);;All Files (*.*)"));
 				break;
 
-			case LC_DIALOG_FILE_MERGE_PROJECT:
+			case LC_DIALOG_MERGE_PROJECT:
 				result = QFileDialog::getOpenFileName(parent, parent->tr("Merge Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 				break;
 
-			case LC_DIALOG_FILE_EXPORT_BRICKLINK:
+			case LC_DIALOG_EXPORT_BRICKLINK:
 				result = QFileDialog::getSaveFileName(parent, parent->tr("Export BrickLink"), FileName, parent->tr("XML Files (*.xml);;All Files (*.*)"));
 				break;
 
-			case LC_DIALOG_FILE_EXPORT_WAVEFRONT:
+			case LC_DIALOG_EXPORT_WAVEFRONT:
 				result = QFileDialog::getSaveFileName(parent, parent->tr("Export Wavefront"), FileName, parent->tr("Wavefront Files (*.obj);;All Files (*.*)"));
 				break;
 			}
@@ -144,6 +147,18 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 				strcpy(FileName, result.toLocal8Bit().data());
 				return true;
 			}
+		} break;
+
+	case LC_DIALOG_EXPORT_POVRAY:
+		{
+			lcQPOVRayDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PIECE_ARRAY:
+		{
+			lcQArrayDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
 		} break;
 	}
 

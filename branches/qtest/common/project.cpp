@@ -1128,7 +1128,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			strcat(newName, ".lcd");
 		}
 
-		if (!gMainWindow->DoDialog(LC_DIALOG_FILE_SAVE_PROJECT, newName))
+		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_PROJECT, newName))
 			return false;
 	}
 
@@ -3573,7 +3573,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			char FileName[LC_MAXPATH];
 			strcpy(FileName, m_strModelsPath);
 
-			if (gMainWindow->DoDialog(LC_DIALOG_FILE_OPEN_PROJECT, FileName))
+			if (gMainWindow->DoDialog(LC_DIALOG_OPEN_PROJECT, FileName))
 				OpenProject(FileName);
 		} break;
 
@@ -3582,7 +3582,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			char FileName[LC_MAXPATH];
 			strcpy(FileName, m_strModelsPath);
 
-			if (gMainWindow->DoDialog(LC_DIALOG_FILE_MERGE_PROJECT, FileName))
+			if (gMainWindow->DoDialog(LC_DIALOG_MERGE_PROJECT, FileName))
 			{
 				lcDiskFile file;
 				if (file.Open(FileName, "rb"))
@@ -4036,7 +4036,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			char FileName[LC_MAXPATH];
 			memset(FileName, 0, sizeof(FileName));
 
-			if (!gMainWindow->DoDialog(LC_DIALOG_FILE_EXPORT_BRICKLINK, FileName))
+			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_BRICKLINK, FileName))
 				break;
 
 			lcDiskFile BrickLinkFile;
@@ -4087,15 +4087,24 @@ void Project::HandleCommand(LC_COMMANDS id)
 		// Export to POV-Ray, swap X & Y from our cs to work with LGEO.
 		case LC_FILE_EXPORT_POVRAY:
 		{
-			LC_POVRAYDLG_OPTS opts;
+			lcPOVRayDialogOptions Options;
 
-			if (!SystemDoDialog(LC_DLG_POVRAY, &opts))
+			memset(Options.FileName, 0, sizeof(Options.FileName));
+			strcpy(Options.POVRayPath, Sys_ProfileLoadString("Settings", "POV-Ray", ""));
+			strcpy(Options.LGEOPath, Sys_ProfileLoadString("Settings", "LGEO", ""));
+			Options.Render = Sys_ProfileLoadInt("Settings", "POV Render", 1);
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_POVRAY, &Options))
 				break;
+
+			Sys_ProfileSaveString("Settings", "POV-Ray", Options.POVRayPath);
+			Sys_ProfileSaveString("Settings", "LGEO", Options.LGEOPath);
+			Sys_ProfileSaveInt("Settings", "POV Render", Options.Render);
 
 			lcDiskFile POVFile;
 			char Line[1024];
 
-			if (!POVFile.Open(opts.outpath, "wt"))
+			if (!POVFile.Open(Options.FileName, "wt"))
 			{
 				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 				break;
@@ -4130,17 +4139,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 			};
 
 			// Parse LGEO tables.
-			if (opts.libpath[0])
+			if (Options.LGEOPath[0])
 			{
 				lcDiskFile TableFile, ColorFile;
 				char Filename[LC_MAXPATH];
 
-				int Length = strlen(opts.libpath);
+				int Length = strlen(Options.LGEOPath);
 
-				if ((opts.libpath[Length - 1] != '\\') && (opts.libpath[Length - 1] != '/'))
-					strcat(opts.libpath, "/");
+				if ((Options.LGEOPath[Length - 1] != '\\') && (Options.LGEOPath[Length - 1] != '/'))
+					strcat(Options.LGEOPath, "/");
 
-				strcpy(Filename, opts.libpath);
+				strcpy(Filename, Options.LGEOPath);
 				strcat(Filename, "lg_elements.lst");
 
 				if (!TableFile.Open(Filename, "rt"))
@@ -4185,7 +4194,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						PieceFlags[Index] |= LGEO_PIECE_SLOPE;
 				}
 
-				strcpy(Filename, opts.libpath);
+				strcpy(Filename, Options.LGEOPath);
 				strcat(Filename, "lg_colors.lst");
 
 				if (!ColorFile.Open(Filename, "rt"))
@@ -4218,7 +4227,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
 			// Add includes.
-			if (opts.libpath[0])
+			if (Options.LGEOPath[0])
 			{
 				POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
 
@@ -4343,8 +4352,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 			delete[] PieceFlags;
 			setlocale(LC_NUMERIC, OldLocale);
 
-			if (opts.render)
+			if (Options.Render)
 			{
+				// TODO: Move this somewhere else
+#ifdef LC_QT
+#endif
+
 #ifdef LC_WINDOWS
 				char CmdLine[LC_MAXPATH * 3 + 100];
 
@@ -4388,7 +4401,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			char FileName[LC_MAXPATH];
 			memset(FileName, 0, sizeof(FileName));
 
-			if (!gMainWindow->DoDialog(LC_DIALOG_FILE_EXPORT_WAVEFRONT, FileName))
+			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_WAVEFRONT, FileName))
 				break;
 
 			lcDiskFile OBJFile;
@@ -5101,86 +5114,90 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_ARRAY:
 		{
-			LC_ARRAYDLG_OPTS opts;
+			Piece *pPiece, *pFirst = NULL, *pLast = NULL;
+			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+			int sel = 0;
 
-			if (SystemDoDialog(LC_DLG_ARRAY, &opts))
+			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 			{
-				int total;
-
-				total = opts.n1DCount;
-				if (opts.nArrayDimension > 0)
-					total *= opts.n2DCount;
-				if (opts.nArrayDimension > 1)
-					total *= opts.n3DCount;
-
-				if (total < 2)
+				if (pPiece->IsSelected())
 				{
-					gMainWindow->DoMessageBox("Array only has 1 element.", LC_MB_OK|LC_MB_ICONWARNING);
-					break;
+					pPiece->CompareBoundingBox(bs);
+					sel++;
 				}
+			}
 
-				if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
+			if (!sel)
+			{
+				gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
+				break;
+			}
+
+			lcArrayDialogOptions Options;
+
+			memset(&Options, 0, sizeof(Options));
+			Options.Counts[0] = 10;
+			Options.Counts[1] = 1;
+			Options.Counts[2] = 1;
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_ARRAY, &Options))
+				break;
+
+			if (Options.Counts[0] * Options.Counts[1] * Options.Counts[2] < 2)
+			{
+				gMainWindow->DoMessageBox("Array only has 1 element or less, no pieces added.", LC_MB_OK | LC_MB_ICONINFORMATION);
+				break;
+			}
+
+			ConvertFromUserUnits(Options.Offsets[0]);
+			ConvertFromUserUnits(Options.Offsets[1]);
+			ConvertFromUserUnits(Options.Offsets[2]);
+
+			for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
+			{
+				for (int Step2 = 0; Step2 < Options.Counts[1]; Step2++)
 				{
-					opts.f2D[0] *= 0.08f;
-					opts.f2D[1] *= 0.08f;
-					opts.f2D[2] *= 0.08f;
-					opts.f3D[0] *= 0.08f;
-					opts.f3D[1] *= 0.08f;
-					opts.f3D[2] *= 0.08f;
-					opts.fMove[0] *= 0.08f;
-					opts.fMove[1] *= 0.08f;
-					opts.fMove[2] *= 0.08f;
-				}
-
-				Piece *pPiece, *pFirst = NULL, *pLast = NULL;
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-				int sel = 0;
-				unsigned long i, j, k;
-
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsSelected())
+					for (int Step3 = 0; Step3 < Options.Counts[2]; Step3++)
 					{
-						pPiece->CompareBoundingBox(bs);
-						sel++;
-					}
+						if (Step1 == 0 && Step2 == 0 && Step3 == 0)
+							continue;
 
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				{
-					if (!pPiece->IsSelected())
-						continue;
-
-					for (i = 0; i < opts.n1DCount; i++)
-					{
 						lcMatrix44 ModelWorld;
 						lcVector3 Position;
 
-						if (sel == 1)
+						lcVector3 RotationAngles = Options.Rotations[0] * Step1 + Options.Rotations[1] * Step2 + Options.Rotations[2] * Step3;
+						lcVector3 Offset = Options.Offsets[0] * Step1 + Options.Offsets[1] * Step2 + Options.Offsets[2] * Step3;
+
+						for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 						{
-							ModelWorld = lcMul(pPiece->mModelWorld, lcMatrix44RotationX(i * opts.fRotate[0] * LC_DTOR));
-							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(i * opts.fRotate[1] * LC_DTOR));
-							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(i * opts.fRotate[2] * LC_DTOR));
+							if (!pPiece->IsSelected())
+								continue;
 
-							Position = pPiece->mPosition;
-						}
-						else
-						{
-							lcVector4 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2, 0.0f);
-							ModelWorld = pPiece->mModelWorld;
+							if (sel == 1)
+							{
+								ModelWorld = lcMul(pPiece->mModelWorld, lcMatrix44RotationX(RotationAngles[0] * LC_DTOR));
+								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(RotationAngles[1] * LC_DTOR));
+								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(RotationAngles[2] * LC_DTOR));
 
-							ModelWorld.r[3] -= Center;
-							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationX(i * opts.fRotate[0] * LC_DTOR));
-							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(i * opts.fRotate[1] * LC_DTOR));
-							ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(i * opts.fRotate[2] * LC_DTOR));
-							ModelWorld.r[3] += Center;
+								Position = pPiece->mPosition;
+							}
+							else
+							{
+								lcVector4 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2, 0.0f);
+								ModelWorld = pPiece->mModelWorld;
 
-							Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
-						}
+								ModelWorld.r[3] -= Center;
+								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationX(RotationAngles[0] * LC_DTOR));
+								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(RotationAngles[1] * LC_DTOR));
+								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(RotationAngles[2] * LC_DTOR));
+								ModelWorld.r[3] += Center;
 
-						lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-						AxisAngle[3] *= LC_RTOD;
+								Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
+							}
 
-						if (i != 0)
-						{
+							lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+							AxisAngle[3] *= LC_RTOD;
+
 							if (pLast)
 							{
 								pLast->m_pNext = new Piece(pPiece->mPieceInfo);
@@ -5189,71 +5206,30 @@ void Project::HandleCommand(LC_COMMANDS id)
 							else
 								pLast = pFirst = new Piece(pPiece->mPieceInfo);
 
-							pLast->Initialize(Position[0]+i*opts.fMove[0], Position[1]+i*opts.fMove[1], Position[2]+i*opts.fMove[2], m_nCurStep, m_nCurFrame);
+							pLast->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], m_nCurStep, m_nCurFrame);
 							pLast->SetColorIndex(pPiece->mColorIndex);
 							pLast->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
 							pLast->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
 						}
-
-						if (opts.nArrayDimension == 0)
-							continue;
-
-						for (j = 0; j < opts.n2DCount; j++)
-						{
-							if (j != 0)
-							{
-								if (pLast)
-								{
-									pLast->m_pNext = new Piece(pPiece->mPieceInfo);
-									pLast = pLast->m_pNext;
-								}
-								else
-									pLast = pFirst = new Piece(pPiece->mPieceInfo);
-
-								pLast->Initialize(Position[0]+i*opts.fMove[0]+j*opts.f2D[0], Position[1]+i*opts.fMove[1]+j*opts.f2D[1], Position[2]+i*opts.fMove[2]+j*opts.f2D[2], m_nCurStep, m_nCurFrame);
-								pLast->SetColorIndex(pPiece->mColorIndex);
-								pLast->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
-								pLast->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
-							}
-
-							if (opts.nArrayDimension == 1)
-								continue;
-
-							for (k = 1; k < opts.n3DCount; k++)
-							{
-								if (pLast)
-								{
-									pLast->m_pNext = new Piece(pPiece->mPieceInfo);
-									pLast = pLast->m_pNext;
-								}
-								else
-									pLast = pFirst = new Piece(pPiece->mPieceInfo);
-
-								pLast->Initialize(Position[0]+i*opts.fMove[0]+j*opts.f2D[0]+k*opts.f3D[0], Position[1]+i*opts.fMove[1]+j*opts.f2D[1]+k*opts.f3D[1], Position[2]+i*opts.fMove[2]+j*opts.f2D[2]+k*opts.f3D[2], m_nCurStep, m_nCurFrame);
-								pLast->SetColorIndex(pPiece->mColorIndex);
-								pLast->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
-								pLast->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
-							}
-						}
 					}
 				}
-
-				while (pFirst)
-				{
-					pPiece = pFirst->m_pNext;
-					pFirst->CreateName(m_pPieces);
-					pFirst->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-					AddPiece(pFirst);
-					pFirst = pPiece;
-				}
-
-				SelectAndFocusNone(true);
-//				SystemUpdateFocus(NULL);
-				UpdateSelection();
-				UpdateAllViews();
-				SetModifiedFlag(true);
-				CheckPoint("Array");
 			}
+
+			while (pFirst)
+			{
+				pPiece = pFirst->m_pNext;
+				pFirst->CreateName(m_pPieces);
+				pFirst->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				AddPiece(pFirst);
+				pFirst = pPiece;
+			}
+
+			SelectAndFocusNone(true);
+//				SystemUpdateFocus(NULL);
+			UpdateSelection();
+			UpdateAllViews();
+			SetModifiedFlag(true);
+			CheckPoint("Array");
 		} break;
 
 		case LC_PIECE_COPY_KEYS:

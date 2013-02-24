@@ -478,6 +478,7 @@ void lcQMainWindow::createMenus()
 	menuView->addMenu(menuCamera);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
+	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 }

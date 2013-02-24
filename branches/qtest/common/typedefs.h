@@ -303,14 +303,6 @@ struct LC_DLG_DIRECTORY_BROWSE_OPTS
 	char Path[LC_MAXPATH];
 };
 
-struct LC_POVRAYDLG_OPTS
-{
-	bool render;
-	char povpath[LC_MAXPATH];
-	char outpath[LC_MAXPATH];
-	char libpath[LC_MAXPATH];
-};
-
 struct LC_HTMLDLG_OPTS
 {
 	char path[LC_MAXPATH];
@@ -323,18 +315,6 @@ struct LC_HTMLDLG_OPTS
 	bool liststep;
 	bool highlight;
 	LC_IMAGEDLG_OPTS imdlg;
-};
-
-struct LC_ARRAYDLG_OPTS
-{
-	unsigned short n1DCount;
-	unsigned short n2DCount;
-	unsigned short n3DCount;
-	unsigned char nArrayDimension;
-	float f2D[3];
-	float f3D[3];
-	float fMove[3];
-	float fRotate[3];
 };
 
 struct LC_PROPERTIESDLG_OPTS

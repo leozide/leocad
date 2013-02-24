@@ -2000,7 +2000,7 @@ bool lcPiecesLibrary::SaveCategories()
 {
 	if (mCategoriesModified)
 	{
-		switch (SystemDoMessageBox("Save changes to categories?", LC_MB_YESNOCANCEL | LC_MB_ICONQUESTION))
+		switch (gMainWindow->DoMessageBox("Save changes to categories?", LC_MB_YESNOCANCEL | LC_MB_ICONQUESTION))
 		{
 			case LC_CANCEL:
 				return false;

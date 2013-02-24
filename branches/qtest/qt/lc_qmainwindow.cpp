@@ -6,6 +6,7 @@
 #include "pieceinf.h"
 #include "project.h"
 #include "preview.h"
+#include "camera.h"
 #include "lc_colorlistwidget.h"
 #include "lc_previewwidget.h"
 #include "lc_viewwidget.h"
@@ -33,6 +34,10 @@ static int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData
 lcQMainWindow::lcQMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
+	memset(actions, 0, sizeof(actions));
+
+	setWindowFilePath(QString());
+
 	resize(800, 600);
 //	centralWidget = new lcViewWidget(this, NULL);
 //	centralWidget->mWindow->OnInitialUpdate();
@@ -123,7 +128,6 @@ lcQMainWindow::~lcQMainWindow()
 void lcQMainWindow::createActions()
 {
 	QAction *action;
-	memset(actions, 0, sizeof(actions));
 
 	action = new QAction(QIcon(":/resources/file_new.png"), tr("&New"), this);
 	action->setToolTip(tr("New Project"));
@@ -357,6 +361,29 @@ void lcQMainWindow::createActions()
 	actions[LC_VIEW_VIEWPOINT_BOTTOM] = new QAction(tr("Bottom"), this);
 	actions[LC_VIEW_VIEWPOINT_HOME] = new QAction(tr("Home"), this);
 
+	menuCamera = new QMenu(tr("Cameras"));
+	QActionGroup *actionCameraGroup = new QActionGroup(this);
+
+	action = new QAction(tr("No Camera"), this);
+	action->setCheckable(true);
+	menuCamera->addAction(action);
+	actionCameraGroup->addAction(action);
+	actions[LC_VIEW_CAMERA_NONE] = action;
+
+	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+	{
+		action = new QAction(this);
+		action->setCheckable(true);
+		actionCameraGroup->addAction(action);
+		actions[actionIdx] = action;
+		menuCamera->addAction(action);
+	}
+
+	menuCamera->addSeparator();
+	action = new QAction(tr("Reset"), this);
+	menuCamera->addAction(action);
+	actions[LC_VIEW_CAMERA_RESET] = action;
+
 	actions[LC_VIEW_TIME_FIRST] = new QAction(QIcon(":/resources/time_first.png"), tr("First"), this);
 	actions[LC_VIEW_TIME_PREVIOUS] = new QAction(QIcon(":/resources/time_previous.png"), tr("Previous"), this);
 	actions[LC_VIEW_TIME_NEXT] = new QAction(QIcon(":/resources/time_next.png"), tr("Next"), this);
@@ -448,6 +475,7 @@ void lcQMainWindow::createMenus()
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_TOP]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_HOME]);
+	menuView->addMenu(menuCamera);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 
@@ -546,13 +574,13 @@ void lcQMainWindow::createStatusBar()
 	statusBar = new QStatusBar(this);
 	setStatusBar(statusBar);
 
-	QLabel* statusPositionLabel = new QLabel("XYZ");
+	statusPositionLabel = new QLabel("XYZ");
 	statusBar->addPermanentWidget(statusPositionLabel);
 
-	QLabel* statusSnapLabel = new QLabel("XYZ");
+	statusSnapLabel = new QLabel();
 	statusBar->addPermanentWidget(statusSnapLabel);
 
-	QLabel* statusTimeLabel = new QLabel("XYZ");
+	statusTimeLabel = new QLabel();
 	statusBar->addPermanentWidget(statusTimeLabel);
 }
 
@@ -570,36 +598,78 @@ void lcQMainWindow::actionTriggered()
 	}
 }
 
-void lcQMainWindow::UpdateAction(int NewAction)
+void lcQMainWindow::updateAction(int newAction)
 {
-	QAction *action = actions[LC_EDIT_ACTION_FIRST + NewAction];
+	QAction *action = actions[LC_EDIT_ACTION_FIRST + newAction];
 
 	if (action)
 		action->setChecked(true);
 }
 
-void lcQMainWindow::UpdateSnap(lcuint32 Snap)
+void lcQMainWindow::updatePaste(bool enabled)
 {
-	actions[LC_EDIT_SNAP_ANGLE]->setChecked((Snap & LC_DRAW_SNAP_A) != 0);
+	QAction *action = actions[LC_EDIT_PASTE];
 
-	actions[LC_EDIT_SNAP_X]->setChecked((Snap & LC_DRAW_SNAP_X) != 0);
-	actions[LC_EDIT_SNAP_Y]->setChecked((Snap & LC_DRAW_SNAP_Y) != 0);
-	actions[LC_EDIT_SNAP_Z]->setChecked((Snap & LC_DRAW_SNAP_Z) != 0);
-
-	actions[LC_EDIT_LOCK_X]->setChecked((Snap & LC_DRAW_LOCK_X) != 0);
-	actions[LC_EDIT_LOCK_Y]->setChecked((Snap & LC_DRAW_LOCK_Y) != 0);
-	actions[LC_EDIT_LOCK_Z]->setChecked((Snap & LC_DRAW_LOCK_Z) != 0);
+	if (action)
+		action->setEnabled(enabled);
 }
 
-void lcQMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
+void lcQMainWindow::updateTime(bool animation, int currentTime, int totalTime)
+{
+	actions[LC_VIEW_TIME_FIRST]->setEnabled(currentTime != 1);
+	actions[LC_VIEW_TIME_PREVIOUS]->setEnabled(currentTime > 1);
+	actions[LC_VIEW_TIME_NEXT]->setEnabled(currentTime < totalTime);
+	actions[LC_VIEW_TIME_LAST]->setEnabled(currentTime != totalTime);
+
+	if (animation)
+		statusTimeLabel->setText(QString(tr(" %1 / %2 ")).arg(QString::number(currentTime), QString::number(totalTime)));
+	else
+		statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
+}
+
+void lcQMainWindow::updateAnimation(bool animation, bool addKeys)
+{
+	/*
+	gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
+	gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
+	gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
+	gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
+	*/
+}
+
+void lcQMainWindow::updateLockSnap(lcuint32 snap)
+{
+	actions[LC_EDIT_SNAP_ANGLE]->setChecked((snap & LC_DRAW_SNAP_A) != 0);
+
+	actions[LC_EDIT_SNAP_X]->setChecked((snap & LC_DRAW_SNAP_X) != 0);
+	actions[LC_EDIT_SNAP_Y]->setChecked((snap & LC_DRAW_SNAP_Y) != 0);
+	actions[LC_EDIT_SNAP_Z]->setChecked((snap & LC_DRAW_SNAP_Z) != 0);
+
+	actions[LC_EDIT_LOCK_X]->setChecked((snap & LC_DRAW_LOCK_X) != 0);
+	actions[LC_EDIT_LOCK_Y]->setChecked((snap & LC_DRAW_LOCK_Y) != 0);
+	actions[LC_EDIT_LOCK_Z]->setChecked((snap & LC_DRAW_LOCK_Z) != 0);
+}
+
+void lcQMainWindow::updateSnap(lcuint16 moveSnap, lcuint16 rotateSnap)
+{
+	char xy[32], z[32];
+
+	lcGetActiveProject()->GetSnapDistanceText(xy, z);
+
+	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(xy, z, QString::number(rotateSnap)));
+}
+
+void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 {
 	QAction *undoAction = actions[LC_EDIT_UNDO];
 	QAction *redoAction = actions[LC_EDIT_REDO];
 
-	if (UndoText)
+	if (undoText)
 	{
 		undoAction->setEnabled(true);
-		undoAction->setText(QString("%1 %2").arg(tr("Undo"), UndoText));
+		undoAction->setText(QString(tr("Undo %1")).arg(undoText));
 	}
 	else
 	{
@@ -607,14 +677,78 @@ void lcQMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
 		undoAction->setText(tr("Undo"));
 	}
 
-	if (RedoText)
+	if (redoText)
 	{
 		redoAction->setEnabled(true);
-		redoAction->setText(QString("%1 %2").arg(tr("Redo"), RedoText));
+		redoAction->setText(QString(tr("Redo %1")).arg(redoText));
 	}
 	else
 	{
 		redoAction->setEnabled(false);
 		redoAction->setText(tr("Redo"));
 	}
+}
+
+void lcQMainWindow::updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera)
+{
+	int actionIdx, currentIndex = -1;
+
+	for (actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+	{
+		QAction* action = actions[actionIdx];
+		int cameraIdx = actionIdx - LC_VIEW_CAMERA_FIRST;
+
+		if (cameraIdx < cameras.GetSize())
+		{
+			if (currentCamera == cameras[cameraIdx])
+				currentIndex = cameraIdx;
+
+			action->setText(cameras[cameraIdx]->GetName());
+			action->setVisible(true);
+		}
+		else
+			action->setVisible(false);
+	}
+
+	updateCurrentCamera(currentIndex);
+}
+
+void lcQMainWindow::updateCurrentCamera(int cameraIndex)
+{
+	int actionIndex = LC_VIEW_CAMERA_FIRST + cameraIndex;
+
+	if (actionIndex < LC_VIEW_CAMERA_FIRST || actionIndex > LC_VIEW_CAMERA_LAST)
+		actionIndex = LC_VIEW_CAMERA_NONE;
+
+	actions[actionIndex]->setChecked(true);
+}
+
+void lcQMainWindow::updateTitle(const char* title, bool modified)
+{
+	setWindowModified(modified);
+	setWindowFilePath(title);
+}
+
+void lcQMainWindow::updateModified(bool modified)
+{
+	setWindowModified(modified);
+}
+
+void lcQMainWindow::updateRecentFiles(const char** fileNames)
+{
+	for (int actionIdx = LC_FILE_RECENT_FIRST; actionIdx <= LC_FILE_RECENT_LAST; actionIdx++)
+	{
+		int fileIdx = actionIdx - LC_FILE_RECENT_FIRST;
+		QAction *action = actions[actionIdx];
+
+		if (fileNames[fileIdx][0])
+		{
+			action->setText(fileNames[fileIdx]);
+			action->setVisible(true);
+		}
+		else
+			action->setVisible(false);
+	}
+
+	actionFileRecentSeparator->setVisible(fileNames[0][0] != 0);
 }

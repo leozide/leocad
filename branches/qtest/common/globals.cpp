@@ -7,4 +7,3 @@
 #include "globals.h"
 
 Messenger* messenger;
-MainWnd* main_window;

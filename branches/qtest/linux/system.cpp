@@ -346,16 +346,6 @@ void SystemUpdateColorList(int new_color)
   colorlist_set(new_color);
 }
 
-void SystemUpdateRenderingMode(bool bFast)
-{
-  if (!main_toolbar.fast)
-    return;
-
-  ignore_commands = true;
-  gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(main_toolbar.fast), bFast);
-  ignore_commands = false;
-}
-
 void SystemUpdateUndoRedo(char* undo, char* redo)
 {
   gpointer item;
@@ -381,36 +371,6 @@ void SystemUpdateUndoRedo(char* undo, char* redo)
 
   gtk_widget_set_sensitive (main_toolbar.undo, undo != NULL);
   gtk_widget_set_sensitive (main_toolbar.redo, redo != NULL);
-}
-
-void SystemUpdateSnap(const unsigned long snap)
-{
-  if (!main_toolbar.angle)
-    return;
-
-  ignore_commands = true;
-  gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(main_toolbar.angle), (snap & LC_DRAW_SNAP_A) != 0);
-  ignore_commands = false;
-
-  void* item;
-
-  ignore_commands = true;
-
-  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_x");
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_X) ? TRUE : FALSE);
-  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_y");
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Y) ? TRUE : FALSE);
-  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.snap_menu), "snap_z");
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_SNAP_Z) ? TRUE : FALSE);
-
-  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_x");
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_X) ? TRUE : FALSE);
-  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_y");
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_Y) ? TRUE : FALSE);
-  item = gtk_object_get_data(GTK_OBJECT(main_toolbar.lock_menu), "lock_z");
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (snap & LC_DRAW_LOCK_Z) ? TRUE : FALSE);
-
-  ignore_commands = false;
 }
 
 void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras)
@@ -488,66 +448,6 @@ void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
 
 	gtk_menu_append(GTK_MENU(menu), reset);
 	g_object_unref(reset);
-}
-
-void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
-{
-  GtkWidget *item;
-
-  if (!anim_toolbar.first)
-    return;
-
-  gtk_widget_set_sensitive (anim_toolbar.first, nTime != 1);
-  gtk_widget_set_sensitive (anim_toolbar.prev, nTime > 1);
-  gtk_widget_set_sensitive (anim_toolbar.next, nTime < nTotal);
-  gtk_widget_set_sensitive (anim_toolbar.last, nTime != nTotal);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_first"));
-  gtk_widget_set_sensitive (item, nTime != 1);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_previous"));
-  gtk_widget_set_sensitive (item, nTime > 1);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_next"));
-  gtk_widget_set_sensitive (item, nTime < nTotal);
-  item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_view_step_last"));
-  gtk_widget_set_sensitive (item, nTime != nTotal);
-
-  char text[11];
-  if (bAnimation)
-    sprintf(text, "%i/%i", nTime, nTotal);
-  else
-    sprintf(text, " Step %i ", nTime);
-  gtk_label_set (GTK_LABEL (label_step), text);
-
-  // step dlg
-}
-
-void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
-{
-  if (!anim_toolbar.play)
-    return;
-
-  ignore_commands = true;
-  gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
-  gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-  gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
-  gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child),
-      bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
-  ignore_commands = false;
-}
-
-void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
-{
-	if (!label_snap)
-		return;
-
-	char Text[256], xy[32], z[32];
-
-	lcGetActiveProject()->GetSnapDistanceText(xy, z);
-
-	sprintf(Text, " M: %s %s R: %d ", xy, z, RotateSnap);
-
-	gtk_label_set (GTK_LABEL (label_snap), Text);
 }
 
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
@@ -636,13 +536,6 @@ void SystemUpdateRecentMenu (String names[4])
       gtk_widget_set_sensitive(item, TRUE);
     }
   }
-}
-
-void SystemUpdatePaste(bool enable)
-{
-  gtk_widget_set_sensitive (main_toolbar.paste, enable);
-  GtkWidget *item = GTK_WIDGET (gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_edit_paste"));
-  gtk_widget_set_sensitive (item, enable);
 }
 
 void SystemUpdatePlay(bool play, bool stop)
@@ -734,27 +627,6 @@ void SystemDoPopupMenu(int nMenu, int x, int y)
 {
 }
 
-void SystemDoWaitCursor(int code)
-{
-  GdkWindow* window = ((GtkWidget*)(*main_window))->window;
-
-  if (!GDK_IS_WINDOW(window))
-    return;
-
-  if (code == 1)
-  {
-    GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-    gdk_window_set_cursor(window, cursor);
-    gdk_cursor_destroy (cursor);
-  }
-  else
-  {
-    GdkCursor *cursor = gdk_cursor_new (GDK_LEFT_PTR);
-    gdk_window_set_cursor(window, cursor);
-    gdk_cursor_destroy (cursor);
-  }
-}
-
 void SystemExportClipboard(lcFile* clip)
 {
 }
@@ -764,24 +636,11 @@ lcFile* SystemImportClipboard()
   return NULL;
 }
 
-void SystemSetWindowCaption(char* caption)
-{
-  gtk_window_set_title (GTK_WINDOW (((GtkWidget*)(*main_window))), caption);
-}
-
 void SystemPieceComboAdd(char* name)
 {
   piececombo_add(name);
 }
 
-
-void SystemCaptureMouse()
-{
-}
-
-void SystemReleaseMouse()
-{
-}
 
 void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
 {

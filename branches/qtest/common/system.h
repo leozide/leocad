@@ -58,10 +58,8 @@ void Sys_FinishMemoryRender (void* param);
  
 #define LC_MB_OK                 0x000
 #define LC_MB_OKCANCEL           0x001
-//#define LC_MB_ABORTRETRYIGNORE 0x002
 #define LC_MB_YESNOCANCEL        0x003
 #define LC_MB_YESNO              0x004
-//#define LC_MB_RETRYCANCEL      0x005
 
 #define LC_MB_ICONERROR          0x010
 #define LC_MB_ICONQUESTION       0x020
@@ -73,46 +71,22 @@ void Sys_FinishMemoryRender (void* param);
 
 int Sys_MessageBox (const char* text, const char* caption="LeoCAD", int type=LC_MB_OK|LC_MB_ICONINFORMATION);
 
-// FIXME end
-
 // Misc stuff
 bool Sys_KeyDown (int key);
 void Sys_GetFileList(const char* Path, ObjArray<String>& FileList);
 
-
-
-
-
-
-class Camera;
-class PieceInfo;
-
 // User Interface
-void SystemUpdateViewport(int nNew, int nOld);
 void SystemUpdateColorList(int nNew);
-void SystemUpdateRenderingMode(bool bFast);
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras);
-void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras);
-void SystemUpdateTime(bool bAnimation, int nTime, int nTotal);
-void SystemUpdateAnimation(bool bAnimation, bool bAddKeys);
-void SystemUpdateSnap(unsigned short MoveSnap, unsigned short RotateSnap);
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);
-void SystemUpdatePaste(bool enable);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemUpdateCategories(bool SearchOnly);
 
 void SystemInit();
 void SystemFinish();
-int SystemDoMessageBox(const char* prompt, int nMode);
 bool SystemDoDialog(int nMode, void* param);
 void SystemDoPopupMenu(int nMenu, int x, int y);
-void SystemDoWaitCursor(int nCode);
 
-void SystemSetWindowCaption(char* caption);
 void SystemPieceComboAdd(char* name);
-
-void SystemCaptureMouse();
-void SystemReleaseMouse();
 
 void SystemExportClipboard(lcFile* clip);
 lcFile* SystemImportClipboard();

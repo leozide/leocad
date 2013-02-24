@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include "typedefs.h"
-#include "mainwnd.h"
+#include "array.h"
 
 class QComboBox;
 class QTreeWidget;
@@ -11,7 +11,7 @@ class lcViewWidget;
 class lcPreviewWidget;
 class lcColorListWidget;
 
-class lcQMainWindow : public QMainWindow, public lcMainWindow
+class lcQMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
@@ -19,9 +19,18 @@ public:
 	explicit lcQMainWindow(QWidget *parent = 0);
 	~lcQMainWindow();
 
-	void UpdateAction(int NewAction);
-	void UpdateSnap(lcuint32 Snap);
-	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
+	void updateAction(int newAction);
+	void updatePaste(bool enabled);
+	void updateTime(bool animation, int currentTime, int totalTime);
+	void updateAnimation(bool animation, bool addKeys);
+	void updateLockSnap(lcuint32 snap);
+	void updateSnap(lcuint16 moveSnap, lcuint16 rotateSnap);
+	void updateUndoRedo(const char* undoText, const char* redoText);
+	void updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera);
+	void updateCurrentCamera(int cameraIndex);
+	void updateTitle(const char* title, bool modified);
+	void updateModified(bool modified);
+	void updateRecentFiles(const char** fileNames);
 
 private slots:
 	void actionTriggered();
@@ -36,6 +45,8 @@ private:
 	QAction *actions[LC_NUM_COMMANDS];
 
 	QAction *actionFileRecentSeparator;
+	QMenu *menuCamera;
+
 	QMenu *menuFile;
 	QMenu *menuEdit;
 	QMenu *menuView;
@@ -56,6 +67,9 @@ private:
 	QLineEdit *transformZ;
 
 	QStatusBar *statusBar;
+	QLabel* statusPositionLabel;
+	QLabel* statusSnapLabel;
+	QLabel* statusTimeLabel;
 };
 
 #endif // _LC_QMAINWINDOW_H_

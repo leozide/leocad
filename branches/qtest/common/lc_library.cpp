@@ -6,6 +6,7 @@
 #include "lc_colors.h"
 #include "lc_texture.h"
 #include "system.h"
+#include "mainwnd.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>

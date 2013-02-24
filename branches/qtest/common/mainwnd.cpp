@@ -8,7 +8,7 @@
 #include "system.h"
 
 lcMainWindow* gMainWindow;
-
+/*
 MainWnd::MainWnd ()
   : BaseWnd (NULL, LC_MAINWND_NUM_COMMANDS)
 {
@@ -102,3 +102,4 @@ void MainWnd::RemoveFromMRU(int index)
 
   UpdateMRU ();
 }
+*/

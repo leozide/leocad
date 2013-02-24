@@ -88,8 +88,6 @@ public:
 public:
 	bool IsModified()
 		{ return m_bModified; }
-	void SetModifiedFlag(bool bModified)
-		{ m_bModified = bModified; }
 
 	// Access to protected members
 	unsigned char GetLastStep();
@@ -322,6 +320,7 @@ public:
 	bool OnOpenDocument(const char* FileName);
 	bool OpenProject(const char* FileName);
 	bool SaveModified();
+	void SetModifiedFlag(bool Modified);
 
 protected:
 	// mail enabling

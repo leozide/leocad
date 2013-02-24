@@ -8,6 +8,7 @@
 #include "opengl.h"
 #include "project.h"
 #include "image.h"
+#include "mainwnd.h"
 
 // ----------------------------------------------------------------------------
 // Global functions.
@@ -243,8 +244,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		lcLoadDefaultColors();
 		m_Library->CreateBuiltinPieces();
 
-		SystemDoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
-		                   "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
+		gMainWindow->DoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
+		                          "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
 
 	SystemInit();

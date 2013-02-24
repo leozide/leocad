@@ -273,41 +273,6 @@ static UINT APIENTRY OFNSaveHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARA
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Wait cursor
-
-static int g_nWaitCursorCount;          // for wait cursor (>0 => waiting)
-static HCURSOR g_hcurWaitCursorRestore; // old cursor to restore after wait cursor
-
-// 0 => restore, 1=> begin, -1=> end
-void SystemDoWaitCursor(int nCode)
-{
-	g_nWaitCursorCount += nCode;
-	if (g_nWaitCursorCount > 0)
-	{
-		HCURSOR hcurWait = ::LoadCursor(NULL, IDC_WAIT);
-		HCURSOR hcurPrev = ::SetCursor(hcurWait);
-		if (nCode > 0 && g_nWaitCursorCount == 1)
-			g_hcurWaitCursorRestore = hcurPrev;
-	}
-	else
-	{
-		// turn everything off
-		g_nWaitCursorCount = 0;     // prevent underflow
-		::SetCursor(g_hcurWaitCursorRestore);
-	}
-}
-
-void Sys_BeginWait ()
-{
-	SystemDoWaitCursor (1);
-}
-
-void Sys_EndWait ()
-{
-	SystemDoWaitCursor (-1);
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // Profile Access
 
 // returns the store value or default
@@ -344,10 +309,6 @@ void SystemFinish()
 void SystemInit()
 {
 	ClipboardFormat = RegisterClipboardFormat(_T("LeoCAD_Data"));
-
-	// initialize wait cursor state
-	g_nWaitCursorCount = 0;
-	g_hcurWaitCursorRestore = NULL;
 }
 
 static void CheckToolBarButton(CMFCToolBar& ToolBar, int ID, bool Check)

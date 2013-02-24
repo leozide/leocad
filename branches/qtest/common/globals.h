@@ -6,7 +6,4 @@
 class Messenger;
 extern Messenger* messenger;
 
-class MainWnd;
-extern MainWnd* main_window;
-
 #endif // _GLOBALS_H_

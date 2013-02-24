@@ -73,14 +73,6 @@ void SystemUpdateColorList(int new_color)
 {
 }
 
-void SystemUpdateCurrentCamera(Camera* pOld, Camera* pNew, const PtrArray<Camera>& Cameras)
-{
-}
-
-void SystemUpdateCameraMenu(const PtrArray<Camera>& Cameras)
-{
-}
-
 void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 {
 }
@@ -101,10 +93,6 @@ void SystemUpdateRecentMenu (String names[4])
 {
 }
 
-void SystemUpdatePaste(bool enable)
-{
-}
-
 void SystemUpdatePlay(bool play, bool stop)
 {
 }
@@ -117,22 +105,12 @@ void SystemFinish()
 {
 }
 
-// FIXME: remove
-int SystemDoMessageBox(const char* prompt, int mode)
-{
-  return LC_MB_OK;
-}
-
 bool SystemDoDialog(int mode, void* param)
 {
   return false;
 }
 
 void SystemDoPopupMenu(int nMenu, int x, int y)
-{
-}
-
-void SystemDoWaitCursor(int code)
 {
 }
 
@@ -145,19 +123,7 @@ lcFile* SystemImportClipboard()
   return NULL;
 }
 
-void SystemSetWindowCaption(char* caption)
-{
-}
-
 void SystemPieceComboAdd(char* name)
-{
-}
-
-void SystemCaptureMouse()
-{
-}
-
-void SystemReleaseMouse()
 {
 }
 

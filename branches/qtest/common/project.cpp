@@ -109,28 +109,24 @@ Project::~Project()
 void Project::UpdateInterface()
 {
 	// Update all user interface elements.
-	if (gMainWindow)
-		gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
-	SystemUpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
+	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
+	gMainWindow->UpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 	SystemUpdatePlay(true, false);
 	SystemUpdateCategories(false);
 	SetTitle(m_strTitle);
 
 	SystemUpdateFocus(NULL);
 	SetAction(m_nCurAction);
-//	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
-	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
-	if (gMainWindow)
-		gMainWindow->UpdateSnap(m_nSnap);
-	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-	SystemUpdateCameraMenu(mCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->mCamera : NULL, mCameras);
+	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
+	gMainWindow->UpdateLockSnap(m_nSnap);
+	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 	UpdateSelection();
 	if (m_bAnimation)
-		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+		gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 	else
-		SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+		gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 
 	for (int i = 0; i < m_ViewList.GetSize(); i++)
 	{
@@ -141,34 +137,11 @@ void Project::UpdateInterface()
 	UpdateSelection();
 }
 
-void Project::SetTitle(const char* lpszTitle)
+void Project::SetTitle(const char* Title)
 {
-	if (lpszTitle != m_strTitle)
-		strcpy(m_strTitle, lpszTitle);
+	strcpy(m_strTitle, Title);
 
-	char title[LC_MAXPATH], *ptr, ext[4];
-	strcpy(title, m_strTitle);
-
-	ptr = strrchr(title, '.');
-	if (ptr != NULL)
-	{
-		strncpy(ext, ptr+1, 3);
-		ext[3] = 0;
-		strlwr(ext);
-
-		if (strcmp(ext, "lcd") == 0)
-			*ptr = 0;
-		if (strcmp(ext, "dat") == 0)
-			*ptr = 0;
-		if (strcmp(ext, "ldr") == 0)
-			*ptr = 0;
-		if (strcmp(ext, "mpd") == 0)
-			*ptr = 0;
-	}
-
-	strcat(title, " - LeoCAD");
-
-	SystemSetWindowCaption(title);
+	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
 }
 
 void Project::DeleteContents(bool bUndo)
@@ -259,24 +232,20 @@ void Project::LoadDefaults(bool cameras)
 	unsigned long rgb;
 
 	// Default values
-//	SystemUpdateViewport(0, m_nViewportMode);
-//	m_nViewportMode = 0;
 	SetAction(LC_ACTION_SELECT);
 	m_nCurColor = 0;
 	SystemUpdateColorList(m_nCurColor);
 	m_bAnimation = false;
 	m_bAddKeys = false;
-	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
+	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	m_bUndoOriginal = true;
-	if (gMainWindow)
-		gMainWindow->UpdateUndoRedo(NULL, NULL);
+	gMainWindow->UpdateUndoRedo(NULL, NULL);
 	m_nDetail = Sys_ProfileLoadInt ("Default", "Detail", LC_DET_BRICKEDGES);
 	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
 	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z);
-	if (gMainWindow)
-		gMainWindow->UpdateSnap(m_nSnap);
+	gMainWindow->UpdateLockSnap(m_nSnap);
 	m_nMoveSnap = 0x0304;
-	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
 	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
 	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
 	rgb = Sys_ProfileLoadInt ("Default", "Fog", 0xFFFFFF);
@@ -307,7 +276,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nCurStep = 1;
 	m_nCurFrame = 1;
 	m_nTotalFrames = 100;
-	SystemUpdateTime(false, 1, 255);
+	gMainWindow->UpdateTime(false, 1, 255);
 	m_nScene = Sys_ProfileLoadInt ("Default", "Scene", 0);
 	m_nSaveTimer = 0;
 	strcpy(m_strHeader, Sys_ProfileLoadString ("Default", "Header", ""));
@@ -329,10 +298,7 @@ void Project::LoadDefaults(bool cameras)
 			if (!m_ViewList[i]->mCamera->IsSimple())
 				m_ViewList[i]->SetDefaultCamera();
 
-		SystemUpdateCameraMenu(mCameras);
-
-		if (m_ActiveView)
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
+		gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 	}
 
 	SystemPieceComboAdd(NULL);
@@ -781,19 +747,16 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	}
 
 	SetAction(action);
-//	SystemUpdateViewport(m_nViewportMode, 0);
 	SystemUpdateColorList(m_nCurColor);
-	SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
-	if (gMainWindow)
-		gMainWindow->UpdateSnap(m_nSnap);
-	SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
-	SystemUpdateCameraMenu(mCameras);
-	SystemUpdateCurrentCamera(NULL, m_ActiveView ? m_ActiveView->mCamera : NULL, mCameras);
+	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
+	gMainWindow->UpdateLockSnap(m_nSnap);
+	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 	UpdateSelection();
 	if (m_bAnimation)
-		SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+		gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 	else
-		SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+		gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 	UpdateAllViews ();
 
 	return true;
@@ -1165,11 +1128,9 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 			strcat(newName, ".lcd");
 		}
 
-		if (!SystemDoDialog(LC_DLG_FILE_SAVE_PROJECT, &newName))
-			return false; // don't even attempt to save
+		if (!gMainWindow->DoDialog(LC_DIALOG_FILE_SAVE_PROJECT, newName))
+			return false;
 	}
-
-//	CWaitCursor wait;
 
 	if (!file.Open(newName, "wb"))
 	{
@@ -1284,7 +1245,7 @@ bool Project::SaveModified()
 	char prompt[512];
 	sprintf(prompt, "Save changes to %s ?", name);
 
-	switch (SystemDoMessageBox(prompt, LC_MB_YESNOCANCEL))
+	switch (gMainWindow->DoMessageBox(prompt, LC_MB_YESNOCANCEL))
 	{
 	case LC_CANCEL:
 		return false;       // don't continue
@@ -1303,6 +1264,14 @@ bool Project::SaveModified()
 	return true;    // keep going
 }
 
+void Project::SetModifiedFlag(bool Modified)
+{
+	if (m_bModified != Modified)
+	{
+		m_bModified = Modified;
+		gMainWindow->UpdateModified(m_bModified);
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // File operations
@@ -1333,7 +1302,6 @@ bool Project::OpenProject(const char* FileName)
 	if (!SaveModified())
 		return false;  // Leave the original one
 
-//	CWaitCursor wait;
 	bool WasModified = IsModified();
 	SetModifiedFlag(false);  // Not dirty for open
 
@@ -1388,8 +1356,6 @@ bool Project::OnOpenDocument (const char* lpszPathName)
   LoadDefaults(datfile || mpdfile);
   SetModifiedFlag(true);  // dirty during loading
 
-  SystemDoWaitCursor(1);
-
   if (file.GetLength() != 0)
   {
     PtrArray<LC_FILEENTRY> FileArray;
@@ -1419,7 +1385,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
         FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
 
       m_nCurStep = step;
-      SystemUpdateTime(false, m_nCurStep, 255);
+      gMainWindow->UpdateTime(false, m_nCurStep, 255);
       SystemUpdateFocus(NULL);
       UpdateSelection();
       CalculateStep();
@@ -1445,7 +1411,6 @@ bool Project::OnOpenDocument (const char* lpszPathName)
   }
 
   file.Close();
-  SystemDoWaitCursor(-1);
 
   if (bSuccess == false)
   {
@@ -1480,7 +1445,7 @@ void Project::SetPathName(const char* PathName, bool bAddToMRU)
 
 	// add it to the file MRU list
 	if (bAddToMRU)
-		main_window->AddToMRU(PathName);
+		gMainWindow->AddToRecentFiles(m_strPathName);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1515,8 +1480,7 @@ void Project::CheckPoint (const char* text)
 	}
 	m_pRedoList = NULL;
 
-	if (gMainWindow)
-		gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
+	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 }
 
 void Project::AddView (View* pView)
@@ -3034,24 +2998,11 @@ void Project::RemovePiece(Piece* pPiece)
 
 void Project::CalculateStep()
 {
-	int PieceCount = 0;
 	Piece* pPiece;
 	Light* pLight;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-	{
 		pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-		PieceCount++;
-	}
-
-	SystemDoWaitCursor(1);
-	SystemStartProgressBar(0, PieceCount, 1, "Updating pieces...");
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		SytemStepProgressBar();
-
-	SytemEndProgressBar();
-	SystemDoWaitCursor(-1);
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		mCameras[CameraIdx]->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
@@ -3117,10 +3068,7 @@ bool Project::RemoveSelectedObjects()
 	}
 
 	if (RemovedCamera)
-	{
-		SystemUpdateCameraMenu(mCameras);
-		SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
-	}
+		gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 
 	for (pPrev = NULL, pLight = m_pLights; pLight; )
 	{
@@ -3516,7 +3464,7 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			{
 				free(m_pClipboard[m_nCurClipboard]);
 				m_pClipboard[m_nCurClipboard] = SystemImportClipboard();
-				SystemUpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
+				gMainWindow->UpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 			}
 		} break;
 
@@ -3622,26 +3570,23 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_OPEN:
 		{
-			char filename[LC_MAXPATH];
-			strcpy(filename, m_strModelsPath);
+			char FileName[LC_MAXPATH];
+			strcpy(FileName, m_strModelsPath);
 
-			if (SystemDoDialog(LC_DLG_FILE_OPEN_PROJECT, filename))
-			{
-				OpenProject(filename);
-			}
+			if (gMainWindow->DoDialog(LC_DIALOG_FILE_OPEN_PROJECT, FileName))
+				OpenProject(FileName);
 		} break;
 
 		case LC_FILE_MERGE:
 		{
-			char filename[LC_MAXPATH];
-			strcpy(filename, m_strModelsPath);
+			char FileName[LC_MAXPATH];
+			strcpy(FileName, m_strModelsPath);
 
-			if (SystemDoDialog(LC_DLG_FILE_MERGE_PROJECT, filename))
+			if (gMainWindow->DoDialog(LC_DIALOG_FILE_MERGE_PROJECT, FileName))
 			{
 				lcDiskFile file;
-				if (file.Open(filename, "rb"))
+				if (file.Open(FileName, "rb"))
 				{
-//				CWaitCursor wait;
 					if (file.GetLength() != 0)
 					{
 						FileLoad(&file, false, true);
@@ -3895,8 +3840,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 					strcat (opts.path, "/");
 				Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
 
-				main_window->BeginWait();
-
 				if (opts.singlepage)
 				{
 					strcpy(fn, opts.path);
@@ -3906,8 +3849,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 					if (!f)
 					{
-						main_window->EndWait();
-						SystemDoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+						gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
 						break;
 					}
 
@@ -3940,8 +3882,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 						if (!f)
 						{
-							main_window->EndWait();
-							SystemDoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
 							break;
 						}
 
@@ -3965,8 +3906,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 						if (!f)
 						{
-							main_window->EndWait();
-							SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 							break;
 						}
 
@@ -4004,8 +3944,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 						if (!f)
 						{
-							main_window->EndWait();
-							SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 							break;
 						}
 
@@ -4083,7 +4022,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 					}
 					Sys_FinishMemoryRender (render);
 				}
-				main_window->EndWait ();
 			}
 		} break;
 
@@ -4091,14 +4029,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			if (!m_pPieces)
 			{
-				SystemDoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+				gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
 				break;
 			}
 
 			char FileName[LC_MAXPATH];
 			memset(FileName, 0, sizeof(FileName));
 
-			if (!SystemDoDialog(LC_DLG_BRICKLINK, FileName))
+			if (!gMainWindow->DoDialog(LC_DIALOG_FILE_EXPORT_BRICKLINK, FileName))
 				break;
 
 			lcDiskFile BrickLinkFile;
@@ -4106,7 +4044,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (!BrickLinkFile.Open(FileName, "wt"))
 			{
-				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
 				break;
 			}
 
@@ -4159,7 +4097,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (!POVFile.Open(opts.outpath, "wt"))
 			{
-				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 				break;
 			}
 
@@ -4209,7 +4147,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				{
 					delete[] PieceTable;
 					delete[] PieceFlags;
-					SystemDoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
+					gMainWindow->DoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
 					break;
 				}
 
@@ -4254,7 +4192,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				{
 					delete[] PieceTable;
 					delete[] PieceFlags;
-					SystemDoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
+					gMainWindow->DoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
 					break;
 				}
 
@@ -4447,18 +4385,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_EXPORT_WAVEFRONT:
 		{
-			char filename[LC_MAXPATH];
-			memset(filename, 0, sizeof(filename));
+			char FileName[LC_MAXPATH];
+			memset(FileName, 0, sizeof(FileName));
 
-			if (!SystemDoDialog(LC_DLG_WAVEFRONT, filename))
+			if (!gMainWindow->DoDialog(LC_DIALOG_FILE_EXPORT_WAVEFRONT, FileName))
 				break;
 
 			lcDiskFile OBJFile;
 			char Line[1024];
 
-			if (!OBJFile.Open(filename, "wt"))
+			if (!OBJFile.Open(FileName, "wt"))
 			{
-				SystemDoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 				break;
 			}
 
@@ -4494,7 +4432,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				OBJFile.WriteLine(Line);
 			}
 
-			strcpy(buf, filename);
+			strcpy(buf, FileName);
 			ptr = strrchr(buf, '.');
 			if (ptr)
 				*ptr = 0;
@@ -4628,7 +4566,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_FILE_RECENT3:
 		case LC_FILE_RECENT4:
 		{
-			OpenProject(main_window->GetMRU(id - LC_FILE_RECENT1));
+			if (!OpenProject(gMainWindow->mRecentFiles[id - LC_FILE_RECENT1]))
+				gMainWindow->RemoveRecentFile(id - LC_FILE_RECENT1);
 		} break;
 
 		case LC_EDIT_UNDO:
@@ -4690,8 +4629,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 			}
 
-			if (gMainWindow)
-				gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
+			gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 		} break;
 
 		case LC_EDIT_CUT:
@@ -4755,7 +4693,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				CheckPoint("Cutting");
 			}
 			SystemExportClipboard(m_pClipboard[m_nCurClipboard]);
-			SystemUpdatePaste(true);
+			gMainWindow->UpdatePaste(true);
 		} break;
 
 		case LC_EDIT_PASTE:
@@ -5177,7 +5115,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				if (total < 2)
 				{
-					SystemDoMessageBox("Array only have 1 element.", LC_MB_OK|LC_MB_ICONWARNING);
+					gMainWindow->DoMessageBox("Array only has 1 element.", LC_MB_OK|LC_MB_ICONWARNING);
 					break;
 				}
 
@@ -5678,9 +5616,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				memcpy(m_fGradient2, opts.fGrad2, sizeof(m_fGradient2));
 				strcpy(m_strFooter, opts.strFooter);
 				strcpy(m_strHeader, opts.strHeader);
-				if (gMainWindow)
-					gMainWindow->UpdateSnap(m_nSnap);
-				SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+				gMainWindow->UpdateLockSnap(m_nSnap);
+				gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
 
 				for (int i = 0; i < m_ViewList.GetSize (); i++)
 				{
@@ -5733,9 +5670,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateAllViews();
 
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
 		case LC_VIEW_TIME_PREVIOUS:
@@ -5751,9 +5688,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateAllViews();
 
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
 		case LC_VIEW_TIME_FIRST:
@@ -5769,9 +5706,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateAllViews();
 
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
 		case LC_VIEW_TIME_LAST:
@@ -5787,18 +5724,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateAllViews();
 
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 /*
 		case LC_VIEW_STEP_CHOOSE:
 		{
 			SystemDoDialog(LC_DLG_STEPCHOOSE, NULL);
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
 		case LC_VIEW_STEP_SET:
@@ -5814,9 +5751,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateAllViews();
 
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 */
 		case LC_VIEW_TIME_INSERT:
@@ -5887,7 +5824,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				while (m_nCurFrame > m_nTotalFrames)
 					m_nCurFrame -= m_nTotalFrames;
 				CalculateStep();
-				SystemUpdateTime(true, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(true, m_nCurFrame, m_nTotalFrames);
                 UpdateAllViews();
 				SystemPumpMessages();
 			}
@@ -5978,7 +5915,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					break;
 			}
 
-			SystemUpdateCurrentCamera(m_ActiveView->mCamera, pCamera, mCameras);
+			gMainWindow->UpdateCurrentCamera(mCameras.FindIndex(m_ActiveView->mCamera));
 			UpdateOverlayScale();
 			UpdateAllViews();
 		} break;
@@ -5992,8 +5929,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				delete mCameras[CameraIdx];
 			mCameras.RemoveAll();
 
-			SystemUpdateCameraMenu(mCameras);
-			SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
+			gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 			SystemUpdateFocus(NULL);
 			UpdateOverlayScale();
 			UpdateAllViews();
@@ -6014,117 +5950,105 @@ void Project::HandleCommand(LC_COMMANDS id)
 			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 
-			SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
+			gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 			if (m_bAnimation)
-				SystemUpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 			else
-				SystemUpdateTime(m_bAnimation, m_nCurStep, 255);
+				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 
 		case LC_VIEW_TIME_ADD_KEYS:
 		{
 			m_bAddKeys = !m_bAddKeys;
-			SystemUpdateAnimation(m_bAnimation, m_bAddKeys);
+			gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 		} break;
 
 		case LC_EDIT_SNAP_X:
-				if (m_nSnap & LC_DRAW_SNAP_X)
-					m_nSnap &= ~LC_DRAW_SNAP_X;
-				else
-					m_nSnap |= LC_DRAW_SNAP_X;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_SNAP_X)
+				m_nSnap &= ~LC_DRAW_SNAP_X;
+			else
+				m_nSnap |= LC_DRAW_SNAP_X;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_SNAP_Y:
-				if (m_nSnap & LC_DRAW_SNAP_Y)
-					m_nSnap &= ~LC_DRAW_SNAP_Y;
-				else
-					m_nSnap |= LC_DRAW_SNAP_Y;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_SNAP_Y)
+				m_nSnap &= ~LC_DRAW_SNAP_Y;
+			else
+				m_nSnap |= LC_DRAW_SNAP_Y;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_SNAP_Z:
-				if (m_nSnap & LC_DRAW_SNAP_Z)
-					m_nSnap &= ~LC_DRAW_SNAP_Z;
-				else
-					m_nSnap |= LC_DRAW_SNAP_Z;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_SNAP_Z)
+				m_nSnap &= ~LC_DRAW_SNAP_Z;
+			else
+				m_nSnap |= LC_DRAW_SNAP_Z;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_SNAP_ALL:
-				m_nSnap |= LC_DRAW_SNAP_XYZ;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			m_nSnap |= LC_DRAW_SNAP_XYZ;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_SNAP_NONE:
-				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			m_nSnap &= ~LC_DRAW_SNAP_XYZ;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_SNAP_TOGGLE:
 			if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
 				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
 			else
 				m_nSnap |= LC_DRAW_SNAP_XYZ;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
+			gMainWindow->UpdateLockSnap(m_nSnap);
 			break;
 
 		case LC_EDIT_SNAP_ANGLE:
-				if (m_nSnap & LC_DRAW_SNAP_A)
-					m_nSnap &= ~LC_DRAW_SNAP_A;
-				else
-					m_nSnap |= LC_DRAW_SNAP_A;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_SNAP_A)
+				m_nSnap &= ~LC_DRAW_SNAP_A;
+			else
+				m_nSnap |= LC_DRAW_SNAP_A;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_LOCK_X:
-				if (m_nSnap & LC_DRAW_LOCK_X)
-					m_nSnap &= ~LC_DRAW_LOCK_X;
-				else
-					m_nSnap |= LC_DRAW_LOCK_X;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_LOCK_X)
+				m_nSnap &= ~LC_DRAW_LOCK_X;
+			else
+				m_nSnap |= LC_DRAW_LOCK_X;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_LOCK_Y:
-				if (m_nSnap & LC_DRAW_LOCK_Y)
-					m_nSnap &= ~LC_DRAW_LOCK_Y;
-				else
-					m_nSnap |= LC_DRAW_LOCK_Y;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_LOCK_Y)
+				m_nSnap &= ~LC_DRAW_LOCK_Y;
+			else
+				m_nSnap |= LC_DRAW_LOCK_Y;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_LOCK_Z:
-				if (m_nSnap & LC_DRAW_LOCK_Z)
-					m_nSnap &= ~LC_DRAW_LOCK_Z;
-				else
-					m_nSnap |= LC_DRAW_LOCK_Z;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if (m_nSnap & LC_DRAW_LOCK_Z)
+				m_nSnap &= ~LC_DRAW_LOCK_Z;
+			else
+				m_nSnap |= LC_DRAW_LOCK_Z;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_LOCK_NONE:
-				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_LOCK_TOGGLE:
-				if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
-					m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-				else
-					m_nSnap |= LC_DRAW_LOCK_XYZ;
-			if (gMainWindow)
-				gMainWindow->UpdateSnap(m_nSnap);
-				break;
+			if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
+				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
+			else
+				m_nSnap |= LC_DRAW_LOCK_XYZ;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			break;
 
 		case LC_EDIT_SNAP_MOVE_XY0:
 		case LC_EDIT_SNAP_MOVE_XY1:
@@ -6142,7 +6066,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap |= LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y;
 			else
 				m_nSnap &= ~(LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y);
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+			gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
 		case LC_EDIT_SNAP_MOVE_Z0:
@@ -6161,7 +6085,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap |= LC_DRAW_SNAP_Z;
 			else
 				m_nSnap &= ~LC_DRAW_SNAP_Z;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+			gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
 		case LC_EDIT_SNAP_ANGLE0:
@@ -6181,7 +6105,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap |= LC_DRAW_SNAP_A;
 			else
 				m_nSnap &= ~LC_DRAW_SNAP_A;
-			SystemUpdateSnap(m_nMoveSnap, m_nAngleSnap);
+			gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
 		} break;
 
 		case LC_EDIT_ACTION_SELECT:
@@ -6261,8 +6185,7 @@ void Project::SetAction(int nAction)
 	m_PreviousAction = m_nCurAction;
 	m_nCurAction = nAction;
 
-	if (gMainWindow)
-		gMainWindow->UpdateAction(m_nCurAction);
+	gMainWindow->UpdateAction(m_nCurAction);
 
 	ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
 
@@ -6724,13 +6647,13 @@ bool Project::StopTracking(bool bAccept)
 		}
 
 		m_nTracking = LC_TRACK_NONE;
-		SystemReleaseMouse();
+		m_ActiveView->ReleaseMouse();
 		return false;
 	}
 
 	m_bTrackCancel = true;
 	m_nTracking = LC_TRACK_NONE;
-	SystemReleaseMouse();
+	m_ActiveView->ReleaseMouse();
 
 	// Reset the mouse overlay.
 	if (m_OverlayActive)
@@ -6797,8 +6720,7 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_CAMERA:
 			{
-				SystemUpdateCameraMenu(mCameras);
-				SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
+				gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
@@ -6935,13 +6857,13 @@ bool Project::StopTracking(bool bAccept)
 
 void Project::StartTracking(int mode)
 {
-	SystemCaptureMouse();
+	m_ActiveView->CaptureMouse();
 	m_nTracking = mode;
 
-  if (m_pTrackFile != NULL)
-    m_pTrackFile->SetLength (0);
-  else
-  	m_pTrackFile = new lcMemFile;
+	if (m_pTrackFile != NULL)
+		m_pTrackFile->SetLength (0);
+	else
+		m_pTrackFile = new lcMemFile;
 
 	FileSave(m_pTrackFile, true);
 }
@@ -7541,7 +7463,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			if (bControl)
 			{
 				m_nCurClipboard = nKey - 0x30;
-				SystemUpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
+				gMainWindow->UpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 				ret = true;
 			}
 		} break;
@@ -7995,8 +7917,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 							mCameras.RemovePointer(pCamera);
 							delete pCamera;
 
-							SystemUpdateCameraMenu(mCameras);
-							SystemUpdateCurrentCamera(NULL, m_ActiveView->mCamera, mCameras);
+							gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 						}
 					} break;
 

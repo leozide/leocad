@@ -24,100 +24,57 @@
 #define LC_MB_TYPEMASK           0x00F
 #define LC_MB_ICONMASK           0x0F0
 
+enum LC_DIALOG_TYPE
+{
+	LC_DIALOG_FILE_OPEN_PROJECT,
+	LC_DIALOG_FILE_SAVE_PROJECT,
+	LC_DIALOG_FILE_MERGE_PROJECT,
+	LC_DIALOG_FILE_EXPORT_BRICKLINK,
+	LC_DIALOG_FILE_EXPORT_WAVEFRONT,
+
+	// TODO: update dialogs
+	LC_DLG_FILE_OPEN,
+	LC_DLG_FILE_SAVE,
+	LC_DLG_DIRECTORY_BROWSE,
+	LC_DLG_PICTURE_SAVE,
+	LC_DLG_HTML,
+	LC_DLG_POVRAY,
+	LC_DLG_MINIFIG,
+	LC_DLG_ARRAY,
+	LC_DLG_PREFERENCES,
+	LC_DLG_PROPERTIES,
+	LC_DLG_TERRAIN,
+	LC_DLG_LIBRARY,
+	LC_DLG_SELECTBYNAME,
+	LC_DLG_STEPCHOOSE,
+	LC_DLG_EDITGROUPS,
+	LC_DLG_GROUP,
+	LC_DLG_EDITCATEGORY,
+	LC_DLG_ABOUT
+};
+
 class lcBaseWindow
 {
 public:
 	lcBaseWindow()
 	{
+		mHandle = NULL;
 	}
 
 	~lcBaseWindow()
 	{
 	}
 
-	int ShowMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
-	void BeginWaitCursor();
-	void EndWaitCursor();
-};
+	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
 
+	int DoMessageBox(const char* Text, int Flags = LC_MB_OK | LC_MB_ICONINFORMATION)
+	{
+		return DoMessageBox(Text, "LeoCAD", Flags);
+	}
 
+	int DoMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
 
-
-
-
-#include <string.h>
-
-// FIXME: move this to another place
-#ifdef LC_WINDOWS
-#include "stdafx.h"
-typedef CWnd* BaseWndXID;
-typedef struct
-{
-  CWnd* wnd;
-  int index;
-  UINT command;
-} BaseMenuItem;
-#endif
-
-#ifdef LC_LINUX
-#include <gtk/gtk.h>
-typedef GtkWidget* BaseWndXID;
-typedef struct
-{
-  GtkWidget* widget;
-  GtkAccelGroup* accel;
-} BaseMenuItem;
-#endif
-
-#ifdef LC_QT
-typedef void* BaseWndXID;
-typedef struct
-{
-	void* Dummy;
-} BaseMenuItem;
-#endif
-
-// =============================================================================
-// Message Box constants
-
-// =============================================================================
-
-class BaseWnd
-{
- public:
-  BaseWnd (BaseWnd *parent, int menu_count);
-  virtual ~BaseWnd ();
-
-  int MessageBox (const char* text, const char* caption="LeoCAD", int flags=LC_MB_OK|LC_MB_ICONINFORMATION);
-  void BeginWait ();
-  void EndWait ();
-  void SetTitle (const char *title);
-
-  void ShowMenuItem (int id, bool show);
-  void EnableMenuItem (int id, bool enable);
-  void CheckMenuItem (int id, bool check);
-  void SetMenuItemText (int id, const char *text);
-
-  BaseWndXID GetXID () const
-    { return m_pXID; }
-  void SetXID (BaseWndXID id)
-    { m_pXID = id; }
-
-#ifdef LC_LINUX 
-  // FIXME: remove
-  operator GtkWidget* () const
-    { return m_pXID; }
-#endif
-
-  BaseMenuItem* GetMenuItem (int id) const
-    { return &m_pMenuItems[id]; }
-  void SetMenuItem (int id, BaseMenuItem* item)
-    { memcpy (&m_pMenuItems[id], item, sizeof (BaseMenuItem)); }
-
- protected:
-  BaseWnd* m_pParent;
-  BaseWndXID m_pXID;
-  BaseMenuItem* m_pMenuItems;
+	void* mHandle;
 };
 
 #endif // _BASEWND_H_

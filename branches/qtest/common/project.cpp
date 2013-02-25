@@ -5257,6 +5257,24 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Group* pGroup;
 			int i, max = 0;
 			char name[65];
+			int Selected = 0;
+
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			{
+				if (pPiece->IsSelected())
+				{
+					Selected++;
+
+					if (Selected > 1)
+						break;
+				}
+			}
+
+			if (!Selected)
+			{
+				gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
+				break;
+			}
 
 			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
@@ -5265,29 +5283,29 @@ void Project::HandleCommand(LC_COMMANDS id)
 							max = i;
 			sprintf(name, "Group #%.2d", max+1);
 
-			if (SystemDoDialog(LC_DLG_GROUP, name))
-			{
-				pGroup = new Group();
-				strcpy(pGroup->m_strName, name);
-				pGroup->m_pNext = m_pGroups;
-				m_pGroups = pGroup;
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+			if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_GROUP, name))
+				break;
 
-				for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsSelected())
-					{
-						pPiece->DoGroup(pGroup);
-						pPiece->CompareBoundingBox(bs);
-					}
+			pGroup = new Group();
+			strcpy(pGroup->m_strName, name);
+			pGroup->m_pNext = m_pGroups;
+			m_pGroups = pGroup;
+			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
-				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				if (pPiece->IsSelected())
+				{
+					pPiece->DoGroup(pGroup);
+					pPiece->CompareBoundingBox(bs);
+				}
 
-				RemoveEmptyGroups();
-				SetModifiedFlag(true);
-				CheckPoint("Grouping");
-			}
+			pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
+			pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
+			pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
+
+			RemoveEmptyGroups();
+			SetModifiedFlag(true);
+			CheckPoint("Grouping");
 		} break;
 
 		case LC_PIECE_UNGROUP:
@@ -5915,7 +5933,39 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_HELP_ABOUT:
 		{
-		  SystemDoDialog(LC_DLG_ABOUT, 0);
+			String Info;
+			char Text[256];
+
+			m_ActiveView->MakeCurrent();
+
+			GLint Red, Green, Blue, Alpha, Depth, Stencil;
+			GLboolean DoubleBuffer, RGBA;
+
+			glGetIntegerv(GL_RED_BITS, &Red);
+			glGetIntegerv(GL_GREEN_BITS, &Green);
+			glGetIntegerv(GL_BLUE_BITS, &Blue);
+			glGetIntegerv(GL_ALPHA_BITS, &Alpha);
+			glGetIntegerv(GL_DEPTH_BITS, &Depth);
+			glGetIntegerv(GL_STENCIL_BITS, &Stencil);
+			glGetBooleanv(GL_DOUBLEBUFFER, &DoubleBuffer);
+			glGetBooleanv(GL_RGBA_MODE, &RGBA);
+
+			Info = "OpenGL Version ";
+			Info += (const char*)glGetString(GL_VERSION);
+			Info += "\n";
+			Info += (const char*)glGetString(GL_RENDERER);
+			Info += " - ";
+			Info += (const char*)glGetString(GL_VENDOR);
+			sprintf(Text, "\n\nColor Buffer: %d bits %s %s", Red + Green + Blue + Alpha, RGBA ? "RGBA" : "indexed", DoubleBuffer ? "double buffered" : "");
+			Info += Text;
+			sprintf(Text, "\nDepth Buffer: %d bits", Depth);
+			Info += Text;
+			sprintf(Text, "\nStencil Buffer: %d bits", Stencil);
+			Info += Text;
+			Info += "\nGL_ARB_vertex_buffer_object extension ";
+			Info += GL_HasVertexBufferObject() ? "supported\n" : "not supported\n";
+
+			gMainWindow->DoDialog(LC_DIALOG_ABOUT, (char*)Info);
 		} break;
 
 		case LC_VIEW_TIME_ANIMATION:

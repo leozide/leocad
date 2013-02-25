@@ -53,5 +53,6 @@
         <file>resources/time_play.png</file>
         <file>resources/time_previous.png</file>
         <file>resources/time_stop.png</file>
+        <file>resources/icon64.png</file>
     </qresource>
 </RCC>

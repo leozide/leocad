@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_qarraydialog.h"
 #include "ui_lc_qarraydialog.h"
 #include "basewnd.h"
@@ -17,15 +18,15 @@ lcQArrayDialog::lcQArrayDialog(QWidget *parent, void *data) :
 	ui->offset3x->setValidator(new QDoubleValidator());
 	ui->offset3y->setValidator(new QDoubleValidator());
 	ui->offset3z->setValidator(new QDoubleValidator());
-	ui->rotation1x->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation1y->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation1z->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation2x->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation2y->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation2z->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation3x->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation3y->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
-	ui->rotation3z->setValidator(new QDoubleValidator(-360.0, 360.0, 1000));
+	ui->rotation1x->setValidator(new QDoubleValidator());
+	ui->rotation1y->setValidator(new QDoubleValidator());
+	ui->rotation1z->setValidator(new QDoubleValidator());
+	ui->rotation2x->setValidator(new QDoubleValidator());
+	ui->rotation2y->setValidator(new QDoubleValidator());
+	ui->rotation2z->setValidator(new QDoubleValidator());
+	ui->rotation3x->setValidator(new QDoubleValidator());
+	ui->rotation3y->setValidator(new QDoubleValidator());
+	ui->rotation3z->setValidator(new QDoubleValidator());
 
 	options = (lcArrayDialogOptions*)data;
 

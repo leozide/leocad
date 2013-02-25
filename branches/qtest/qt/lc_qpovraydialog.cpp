@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_qpovraydialog.h"
 #include "ui_lc_qpovraydialog.h"
 #include "basewnd.h"

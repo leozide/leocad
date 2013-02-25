@@ -103,6 +103,8 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 
 #include "lc_qpovraydialog.h"
 #include "lc_qarraydialog.h"
+#include "lc_qgroupdialog.h"
+#include "lc_qaboutdialog.h"
 
 bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 {
@@ -158,6 +160,18 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_PIECE_ARRAY:
 		{
 			lcQArrayDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PIECE_GROUP:
+		{
+			lcQGroupDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_ABOUT:
+		{
+			lcQAboutDialog dialog(parent, Data);
 			return dialog.exec() == QDialog::Accepted;
 		} break;
 	}

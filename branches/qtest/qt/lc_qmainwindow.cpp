@@ -479,8 +479,10 @@ void lcQMainWindow::createMenus()
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
+	menuPiece->addAction(actions[LC_PIECE_GROUP]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
+	menuHelp->addAction(actions[LC_HELP_ABOUT]);
 }
 
 void lcQMainWindow::createToolBars()

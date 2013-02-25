@@ -10,6 +10,7 @@
 #include "lc_colorlistwidget.h"
 #include "lc_previewwidget.h"
 #include "lc_viewwidget.h"
+#include "system.h"
 
 static int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
 {
@@ -127,109 +128,270 @@ lcQMainWindow::~lcQMainWindow()
 
 void lcQMainWindow::createActions()
 {
+	const char* actionStrings[LC_NUM_COMMANDS][2] =
+	{
+		{ "New",                              "Create a new project" },                                                                 // LC_FILE_NEW
+		{ "Open...",                          "Open an existing project" },                                                             // LC_FILE_OPEN
+		{ "Merge...",                         "Merge the contents of another project with the current one" },                           // LC_FILE_MERGE
+		{ "Save",                             "Save the active project" },                                                              // LC_FILE_SAVE
+		{ "Save As...",                       "Save the active project with a new name" },                                              // LC_FILE_SAVEAS
+		{ "Save Image...",                    "Save a picture of the current view" },                                                   // LC_FILE_SAVE_IMAGE
+		{ "3D Studio...",                     "Export the project in 3D Studio 3DS format" },                                           // LC_FILE_EXPORT_3DS
+		{ "HTML...",                          "Create an HTML page for this project" },                                                 // LC_FILE_EXPORT_HTML
+		{ "BrickLink...",                     "Export a list of pieces used in BrickLink XML format" },                                 // LC_FILE_EXPORT_BRICKLINK
+		{ "POV-Ray...",                       "Export the project in POV-Ray format" },                                                 // LC_FILE_EXPORT_POVRAY
+		{ "Wavefront...",                     "Export the project in Wavefront OBJ format" },                                           // LC_FILE_EXPORT_WAVEFRONT
+		{ "Properties...",                    "Display project properties" },                                                           // LC_FILE_PROPERTIES
+		{ "Terrain Editor...",                "Edit terrain" },                                                                         // LC_FILE_TERRAIN_EDITOR
+		{ "Pieces Library...",                "Configure pieces library" },                                                             // LC_FILE_PIECES_LIBRARY
+		{ "Print...",                         "Print the active project" },                                                             // LC_FILE_PRINT
+		{ "Print Preview",                    "Display how the project would look if printed" },                                        // LC_FILE_PRINT_PREVIEW
+		{ "Print Bill of Materials...",       "Print a list of pieces used" },                                                          // LC_FILE_PRINT_BOM
+		{ "1",                                "Open this document" },                                                                   // LC_FILE_RECENT1
+		{ "2",                                "Open this document" },                                                                   // LC_FILE_RECENT2
+		{ "3",                                "Open this document" },                                                                   // LC_FILE_RECENT3
+		{ "4",                                "Open this document" },                                                                   // LC_FILE_RECENT4
+		{ "Exit",                             "Quit the application; prompts to save project" },                                        // LC_FILE_EXIT
+		{ "Undo",                             "Undo the last action" },                                                                 // LC_EDIT_UNDO
+		{ "Redo",                             "Redo the previously undone action" },                                                    // LC_EDIT_REDO
+		{ "Cut",                              "Cut the selection and put it on the Clipboard" },                                        // LC_EDIT_CUT
+		{ "Copy",                             "Copy the selection and put it on the Clipboard" },                                       // LC_EDIT_COPY
+		{ "Paste",                            "Insert Clipboard contents" },                                                            // LC_EDIT_PASTE
+		{ "Select All",                       "Select all pieces in the project" },                                                     // LC_EDIT_SELECT_ALL
+		{ "Select None",                      "De-select everything" },                                                                 // LC_EDIT_SELECT_NONE
+		{ "Select Invert",                    "Invert the current selection set" },                                                     // LC_EDIT_SELECT_INVERT
+		{ "Select by Name...",                "Select objects by name" },                                                               // LC_EDIT_SELECT_BY_NAME
+		{ "Lock X",                           "Prevents movement and rotation along the X axis" },                                      // LC_EDIT_LOCK_X
+		{ "Lock Y",                           "Prevents movement and rotation along the Y axis" },                                      // LC_EDIT_LOCK_Y
+		{ "Lock Z",                           "Prevents movement and rotation along the Z axis" },                                      // LC_EDIT_LOCK_Z
+		{ "Lock Toggle",                      "Toggle locked axes" },                                                                   // LC_EDIT_LOCK_TOGGLE
+		{ "Unlock All",                       "Allows movement and rotation in all directions" },                                       // LC_EDIT_LOCK_NONE
+		{ "Snap X",                           "Snap movement along the X axis to fixed intervals" },                                    // LC_EDIT_SNAP_X
+		{ "Snap Y",                           "Snap movement along the Y axis to fixed intervals" },                                    // LC_EDIT_SNAP_Y
+		{ "Snap Z",                           "Snap movement along the Z axis to fixed intervals" },                                    // LC_EDIT_SNAP_Z
+		{ "Snap Toggle",                      "Toggle snap axes" },                                                                     // LC_EDIT_SNAP_TOGGLE
+		{ "Snap None",                        "Disable snapping along all axes" },                                                      // LC_EDIT_SNAP_NONE
+		{ "Snap All",                         "Snap movement along all axes to fixed intervals" },                                      // LC_EDIT_SNAP_ALL
+		{ "Snap Angle Toggle",                "Snap rotations to fixed intervals" },                                                    // LC_EDIT_SNAP_ANGLE
+		{ "None",                             "Do not snap movement along the XY plane" },                                              // LC_EDIT_SNAP_MOVE_XY0
+		{ "1/20 Stud",                        "Snap movement along the XY plane to 1/20 stud" },                                        // LC_EDIT_SNAP_MOVE_XY1
+		{ "1/4 Stud",                         "Snap movement along the XY plane to 1/4 stud" },                                         // LC_EDIT_SNAP_MOVE_XY2
+		{ "1 Flat",                           "Snap movement along the XY plane to 1 flat" },                                           // LC_EDIT_SNAP_MOVE_XY3
+		{ "1/2 Stud",                         "Snap movement along the XY plane to 1/2 stud" },                                         // LC_EDIT_SNAP_MOVE_XY4
+		{ "1 Stud",                           "Snap movement along the XY plane to 1 stud" },                                           // LC_EDIT_SNAP_MOVE_XY5
+		{ "2 Stud",                           "Snap movement along the XY plane to 2 stud" },                                           // LC_EDIT_SNAP_MOVE_XY6
+		{ "3 Stud",                           "Snap movement along the XY plane to 3 stud" },                                           // LC_EDIT_SNAP_MOVE_XY7
+		{ "4 Stud",                           "Snap movement along the XY plane to 4 stud" },                                           // LC_EDIT_SNAP_MOVE_XY8
+		{ "8 Stud",                           "Snap movement along the XY plane to 8 stud" },                                           // LC_EDIT_SNAP_MOVE_XY9
+		{ "None",                             "Do not snap movement along the Z axis" },                                                // LC_EDIT_SNAP_MOVE_Z0
+		{ "1/20 Stud",                        "Snap movement along the Z axis to 1/20 stud" },                                          // LC_EDIT_SNAP_MOVE_Z1
+		{ "1/4 Stud",                         "Snap movement along the Z axis to 1/4 stud" },                                           // LC_EDIT_SNAP_MOVE_Z2
+		{ "1 Flat",                           "Snap movement along the Z axis to 1 flat" },                                             // LC_EDIT_SNAP_MOVE_Z3
+		{ "1/2 Stud",                         "Snap movement along the Z axis to 1/2 stud" },                                           // LC_EDIT_SNAP_MOVE_Z4
+		{ "1 Stud",                           "Snap movement along the Z axis to 1 stud" },                                             // LC_EDIT_SNAP_MOVE_Z5
+		{ "2 Stud",                           "Snap movement along the Z axis to 2 stud" },                                             // LC_EDIT_SNAP_MOVE_Z6
+		{ "3 Stud",                           "Snap movement along the Z axis to 3 stud" },                                             // LC_EDIT_SNAP_MOVE_Z7
+		{ "4 Stud",                           "Snap movement along the Z axis to 4 stud" },                                             // LC_EDIT_SNAP_MOVE_Z8
+		{ "8 Stud",                           "Snap movement along the Z axis to 8 stud" },                                             // LC_EDIT_SNAP_MOVE_Z9
+		{ "None",                             "Do not snap rotations" },                                                                // LC_EDIT_SNAP_ANGLE0
+		{ "1 Degree",                         "Snap rotations to 1 degree" },                                                           // LC_EDIT_SNAP_ANGLE1
+		{ "5 Degree",                         "Snap rotations to 5 degrees" },                                                          // LC_EDIT_SNAP_ANGLE2
+		{ "10 Degree",                        "Snap rotations to 10 degrees" },                                                         // LC_EDIT_SNAP_ANGLE3
+		{ "15 Degree",                        "Snap rotations to 15 degrees" },                                                         // LC_EDIT_SNAP_ANGLE4
+		{ "30 Degree",                        "Snap rotations to 30 degrees" },                                                         // LC_EDIT_SNAP_ANGLE5
+		{ "45 Degree",                        "Snap rotations to 45 degrees" },                                                         // LC_EDIT_SNAP_ANGLE6
+		{ "60 Degree",                        "Snap rotations to 60 degrees" },                                                         // LC_EDIT_SNAP_ANGLE7
+		{ "90 Degree",                        "Snap rotations to 90 degrees" },                                                         // LC_EDIT_SNAP_ANGLE8
+		{ "180 Degree",                       "Snap rotations to 180 degrees" },                                                        // LC_EDIT_SNAP_ANGLE9
+		{ "Transform",                        "Apply transform to selected objects" },                                                  // LC_EDIT_TRANSFORM
+		{ "Absolute Translation",             "Switch to absolute translation mode when applying transforms" },                         // LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION
+		{ "Relative Translation",             "Switch to relative translation mode when applying transforms" },                         // LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION
+		{ "Absolute Rotation",                "Switch to absolute rotation mode when applying transforms" },                            // LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION
+		{ "Relative Rotation",                "Switch to relative rotation mode when applying transforms" },                            // LC_EDIT_TRANSFORM_RELATIVE_ROTATION
+		{ "Insert",                           "Add new pieces to the model" },                                                          // LC_EDIT_ACTION_INSERT
+		{ "Light",                            "Add new omni light sources to the model" },                                              // LC_EDIT_ACTION_LIGHT
+		{ "Spotlight",                        "Add new spotlights to the model" },                                                      // LC_EDIT_ACTION_SPOTLIGHT
+		{ "Camera",                           "Create a new camera" },                                                                  // LC_EDIT_ACTION_CAMERA
+		{ "Select",                           "Select objects (hold the CTRL key down or drag the mouse to select multiple objects)" }, // LC_EDIT_ACTION_SELECT
+		{ "Move",                             "Move selected objects" },                                                                // LC_EDIT_ACTION_MOVE
+		{ "Rotate",                           "Rotate selected pieces" },                                                               // LC_EDIT_ACTION_ROTATE
+		{ "Delete",                           "Delete objects" },                                                                       // LC_EDIT_ACTION_DELETE
+		{ "Paint",                            "Change piece color" },                                                                   // LC_EDIT_ACTION_PAINT
+		{ "Zoom",                             "Zoom in or out" },                                                                       // LC_EDIT_ACTION_ZOOM
+		{ "Pan",                              "Pan the current view" },                                                                 // LC_EDIT_ACTION_PAN
+		{ "Rotate View",                      "Rotate the current view" },                                                              // LC_EDIT_ACTION_ROTATE_VIEW
+		{ "Roll",                             "Roll the current view" },                                                                // LC_EDIT_ACTION_ROLL
+		{ "Zoom Region",                      "Zoom into a region of the screen" },                                                     // LC_EDIT_ACTION_ZOOM_REGION
+		{ "Preferences...",                   "Change program settings" },                                                              // LC_VIEW_PREFERENCES
+		{ "Zoom In",                          "Zoom in" },                                                                              // LC_VIEW_ZOOM_IN
+		{ "Zoom Out",                         "Zoom out" },                                                                             // LC_VIEW_ZOOM_OUT
+		{ "Zoom Extents",                     "Fit all pieces in current the view (hold the CTRL key down to zoom all views)" },        // LC_VIEW_ZOOM_EXTENTS
+		{ "Front",                            "View model from the front" },                                                            // LC_VIEW_VIEWPOINT_FRONT
+		{ "Back",                             "View model from the back" },                                                             // LC_VIEW_VIEWPOINT_BACK
+		{ "Top",                              "View model from the top" },                                                              // LC_VIEW_VIEWPOINT_TOP
+		{ "Bottom",                           "View model from the bottom" },                                                           // LC_VIEW_VIEWPOINT_BOTTOM
+		{ "Left",                             "View model from the left" },                                                             // LC_VIEW_VIEWPOINT_LEFT
+		{ "Right",                            "View model from the right" },                                                            // LC_VIEW_VIEWPOINT_RIGHT
+		{ "Home",                             "View model from the default position" },                                                 // LC_VIEW_VIEWPOINT_HOME
+		{ "None",                             "Do not use a camera" },                                                                  // LC_VIEW_CAMERA_NONE
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA1
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA2
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA3
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA4
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA5
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA6
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA7
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA8
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA9
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA10
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA11
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA12
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA13
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA14
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA15
+		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA16
+		{ "Reset",                            "Reset views to their default positions" },                                               // LC_VIEW_CAMERA_RESET
+		{ "First",                            "Go to the first step of the model" },                                                    // LC_VIEW_TIME_FIRST
+		{ "Previous",                         "Go to the previous step" },                                                              // LC_VIEW_TIME_PREVIOUS
+		{ "Next",                             "Go to the next step" },                                                                  // LC_VIEW_TIME_NEXT
+		{ "Last",                             "Go to the last step of the model" },                                                     // LC_VIEW_TIME_LAST
+		{ "Stop",                             "Stop playing animation" },                                                               // LC_VIEW_TIME_STOP
+		{ "Play",                             "Play animation" },                                                                       // LC_VIEW_TIME_PLAY
+		{ "Insert",                           "Insert new step" },                                                                      // LC_VIEW_TIME_INSERT
+		{ "Delete",                           "Delete current step" },                                                                  // LC_VIEW_TIME_DELETE
+		{ "Animation",                        "Toggle between animation and instruction mode" },                                        // LC_VIEW_TIME_ANIMATION
+		{ "Add Keys",                         "Toggle adding new animation keys" },                                                     // LC_VIEW_TIME_ADD_KEYS
+		{ "Insert",                           "Add a new piece to the model" },                                                         // LC_PIECE_INSERT
+		{ "Delete",                           "Delete selected objects" },                                                              // LC_PIECE_DELETE
+		{ "Minifig Wizard...",                "Add a new minifig to the model" },                                                       // LC_PIECE_MINIFIG_WIZARD
+		{ "Array...",                         "Make copies of the selected pieces" },                                                   // LC_PIECE_ARRAY
+		{ "Copy Keys",                        "Copy keys between animation and instruction modes" },                                    // LC_PIECE_COPY_KEYS
+		{ "Group...",                         "Group selected pieces together" },                                                       // LC_PIECE_GROUP
+		{ "Ungroup",                          "Ungroup selected group" },                                                               // LC_PIECE_UNGROUP
+		{ "Add to Group",                     "Add focused piece to selected group" },                                                  // LC_PIECE_GROUP_ADD
+		{ "Remove from Group",                "Remove focused piece from group" },                                                      // LC_PIECE_GROUP_REMOVE
+		{ "Edit Groups...",                   "Edit groups" },                                                                          // LC_PIECE_GROUP_EDIT
+		{ "Hide Selected",                    "Hide selected objects" },                                                                // LC_PIECE_HIDE_SELECTED
+		{ "Hide Unselected",                  "Hide objects that are not selected" },                                                   // LC_PIECE_HIDE_UNSELECTED
+		{ "Unhide All",                       "Show all hidden objects" },                                                              // LC_PIECE_UNHIDE_ALL
+		{ "Show Earlier",                     "Show selected pieces one step earlier" },                                                // LC_PIECE_SHOW_EARLIER
+		{ "Show Later",                       "Show selected pieces one step later" },                                                  // LC_PIECE_SHOW_LATER
+		{ "About...",                         "Display program version number and system information" },                                // LC_HELP_ABOUT
+	};
+
+	LC_CASSERT(sizeof(actionStrings)/sizeof(actionStrings[0]) == LC_NUM_COMMANDS);
+
 	QAction *action;
 
-	action = new QAction(QIcon(":/resources/file_new.png"), tr("&New"), this);
+	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
+	{
+		action = new QAction(tr(actionStrings[Command][0]), this);
+		action->setStatusTip(tr(actionStrings[Command][1]));
+		connect(action, SIGNAL(triggered()), this, SLOT(actionTriggered()));
+		actions[Command] = action;
+	}
+
+	action = actions[LC_FILE_NEW];
+	action->setIcon(QIcon(":/resources/file_new.png"));
 	action->setToolTip(tr("New Project"));
-	action->setStatusTip(tr("Create a new project"));
 	action->setShortcuts(QKeySequence::New);
-	actions[LC_FILE_NEW] = action;
 
-	action = new QAction(QIcon(":/resources/file_open.png"), tr("&Open..."), this);
+	action = actions[LC_FILE_OPEN];
+	action->setIcon(QIcon(":/resources/file_open.png"));
 	action->setToolTip(tr("Open Project"));
-	action->setStatusTip(tr("Open an existing project"));
 	action->setShortcuts(QKeySequence::Open);
-	actions[LC_FILE_OPEN] = action;
 
-	action = new QAction(tr("Merge..."), this);
-	action->setStatusTip(tr("Merge the contents of another project with the current one"));
-	actions[LC_FILE_MERGE] = action;
+	actions[LC_FILE_MERGE]->setStatusTip(tr("Merge the contents of another project with the current one"));
 	
-	action = new QAction(QIcon(":/resources/file_save.png"), tr("Save"), this);
+	action = actions[LC_FILE_SAVE];
+	action->setIcon(QIcon(":/resources/file_save.png"));
 	action->setToolTip(tr("Save Project"));
-	action->setStatusTip(tr("Save the active project"));
 	action->setShortcuts(QKeySequence::Save);
-	actions[LC_FILE_SAVE] = action;
 
-	action = new QAction(tr("Save As..."), this);
-	action->setStatusTip(tr("Save the active project with a new name"));
-	action->setShortcuts(QKeySequence::SaveAs);
-	actions[LC_FILE_SAVEAS] = action;
+	actions[LC_FILE_SAVEAS]->setShortcuts(QKeySequence::SaveAs);
 
-	actions[LC_FILE_SAVE_IMAGE] = new QAction(tr("Save Image..."), this);
-	actions[LC_FILE_EXPORT_3DS] = new QAction(tr("3D Studio..."), this);
-	actions[LC_FILE_EXPORT_BRICKLINK] = new QAction(tr("BrickLink..."), this);
-	actions[LC_FILE_EXPORT_HTML] = new QAction(tr("HTML..."), this);
-	actions[LC_FILE_EXPORT_POVRAY] = new QAction(tr("POV-Ray..."), this);
-	actions[LC_FILE_EXPORT_WAVEFRONT] = new QAction(tr("Wavefront..."), this);
-	actions[LC_FILE_PROPERTIES] = new QAction(tr("Properties..."), this);
-	actions[LC_FILE_PIECES_LIBRARY] = new QAction(tr("Pieces Library..."), this);
-	actions[LC_FILE_TERRAIN_EDITOR] = new QAction(tr("Terrain Editor..."), this);
-	actions[LC_FILE_PRINT] = new QAction(QIcon(":/resources/file_print.png"), tr("Print..."), this);
-	actions[LC_FILE_PRINT_PREVIEW] = new QAction(QIcon(":/resources/file_print_preview.png"), tr("Print Preview"), this);
-	actions[LC_FILE_PRINT_BOM] = new QAction(tr("Bill Of Materials..."), this);
-	actions[LC_FILE_RECENT1] = new QAction(tr("1"), this);
-	actions[LC_FILE_RECENT2] = new QAction(tr("2"), this);
-	actions[LC_FILE_RECENT3] = new QAction(tr("3"), this);
-	actions[LC_FILE_RECENT4] = new QAction(tr("4"), this);
-	actions[LC_FILE_EXIT] = new QAction(tr("Exit"), this);
+	actions[LC_FILE_PRINT]->setIcon(QIcon(":/resources/file_print.png"));
+	actions[LC_FILE_PRINT_PREVIEW]->setIcon(QIcon(":/resources/file_print_preview.png"));
 
-	action = new QAction(QIcon(":/resources/edit_undo.png"), tr("Undo"), this);
-	action->setStatusTip(tr("Undo the last action"));
+	action = actions[LC_EDIT_UNDO];
+	action->setIcon(QIcon(":/resources/edit_undo.png"));
 	action->setShortcuts(QKeySequence::Undo);
-	actions[LC_EDIT_UNDO] = action;
 
-	action = new QAction(QIcon(":/resources/edit_redo.png"), tr("Redo"), this);
-	action->setStatusTip(tr("Redo the previously undone action"));
+	action = actions[LC_EDIT_REDO];
+	action->setIcon(QIcon(":/resources/edit_redo.png"));
 	action->setShortcuts(QKeySequence::Redo);
-	actions[LC_EDIT_REDO] = action;
 
-	action = new QAction(QIcon(":/resources/edit_cut.png"), tr("Cut"), this);
-	action->setStatusTip(tr("Cut the selection and put it on the Clipboard"));
+	action = actions[LC_EDIT_CUT];
+	action->setIcon(QIcon(":/resources/edit_cut.png"));
 	action->setShortcuts(QKeySequence::Cut);
-	actions[LC_EDIT_CUT] = action;
 
-	action = new QAction(QIcon(":/resources/edit_copy.png"), tr("Copy"), this);
-	action->setStatusTip(tr("Copy the selection and put it on the Clipboard"));
+	action = actions[LC_EDIT_COPY];
+	action->setIcon(QIcon(":/resources/edit_copy.png"));
 	action->setShortcuts(QKeySequence::Copy);
-	actions[LC_EDIT_COPY] = action;
 
-	action = new QAction(QIcon(":/resources/edit_paste.png"), tr("Paste"), this);
-	action->setStatusTip(tr("Insert Clipboard contents"));
+	action = actions[LC_EDIT_PASTE];
+	action->setIcon(QIcon(":/resources/edit_paste.png"));
 	action->setShortcuts(QKeySequence::Paste);
-	actions[LC_EDIT_PASTE] = action;
 
-	action = new QAction(tr("Select All"), this);
-	action->setStatusTip(tr("Select all objects"));
-	actions[LC_EDIT_SELECT_ALL] = action;
+	actions[LC_EDIT_LOCK_TOGGLE]->setIcon(QIcon(":/resources/edit_lock.png"));
+	actions[LC_EDIT_LOCK_X]->setCheckable(true);
+	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
+	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
 
-	action = new QAction(tr("Select None"), this);
-	action->setStatusTip(tr("De-select everything"));
-	actions[LC_EDIT_SELECT_NONE] = action;
+	actions[LC_EDIT_SNAP_TOGGLE]->setIcon(QIcon(":/resources/edit_snap_move.png"));
+	actions[LC_EDIT_SNAP_X]->setCheckable(true);
+	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
+	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
 
-	action = new QAction(tr("Select Invert"), this);
-	action->setStatusTip(tr("Invert the current selection set"));
-	actions[LC_EDIT_SELECT_INVERT] = action;
-
-	action = new QAction(tr("Select By Name..."), this);
-	action->setStatusTip(tr("Select objects by name"));
-	actions[LC_EDIT_SELECT_BY_NAME] = action;
-
-	actions[LC_EDIT_LOCK_TOGGLE] = new QAction(QIcon(":/resources/edit_lock.png"), tr("Lock"), this);
-
-	action = new QAction(tr("Lock X"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_LOCK_X] = action;
-
-	action = new QAction(tr("Lock Y"), this);
-	actions[LC_EDIT_LOCK_Y] = action;
+	action = actions[LC_EDIT_SNAP_ANGLE];
+	action->setIcon(QIcon(":/resources/edit_snap_angle.png"));
 	action->setCheckable(true);
 
-	action = new QAction(tr("Lock Z"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_LOCK_Z] = action;
+	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(":/resources/edit_transform.png"));
+	actions[LC_EDIT_ACTION_INSERT]->setIcon(QIcon(":/resources/action_insert.png"));
+	actions[LC_EDIT_ACTION_LIGHT]->setIcon(QIcon(":/resources/action_light.png"));
+	actions[LC_EDIT_ACTION_SPOTLIGHT]->setIcon(QIcon(":/resources/action_spotlight.png"));
+	actions[LC_EDIT_ACTION_CAMERA]->setIcon(QIcon(":/resources/action_camera.png"));
+	actions[LC_EDIT_ACTION_SELECT]->setIcon(QIcon(":/resources/action_select.png"));
+	actions[LC_EDIT_ACTION_MOVE]->setIcon(QIcon(":/resources/action_move.png"));
+	actions[LC_EDIT_ACTION_ROTATE]->setIcon(QIcon(":/resources/action_rotate.png"));
+	actions[LC_EDIT_ACTION_DELETE]->setIcon(QIcon(":/resources/action_delete.png"));
+	actions[LC_EDIT_ACTION_PAINT]->setIcon(QIcon(":/resources/action_paint.png"));
+	actions[LC_EDIT_ACTION_ZOOM]->setIcon(QIcon(":/resources/action_zoom.png"));
+	actions[LC_EDIT_ACTION_PAN]->setIcon(QIcon(":/resources/action_pan.png"));
+	actions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
+	actions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
+	actions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
 
-	actions[LC_EDIT_LOCK_NONE]= new QAction(tr("Unlock All"), this);
+	QActionGroup *actionToolGroup = new QActionGroup(this);
+	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
+	{
+		action = actions[actionIdx];
+		action->setCheckable(true);
+		actionToolGroup->addAction(action);
+	}
+
+	QActionGroup *actionCameraGroup = new QActionGroup(this);
+
+	action = actions[LC_VIEW_CAMERA_NONE];
+	action->setCheckable(true);
+	actionCameraGroup->addAction(action);
+
+	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+	{
+		action = actions[actionIdx];
+		action->setCheckable(true);
+		actionCameraGroup->addAction(action);
+	}
+
+	actions[LC_VIEW_TIME_FIRST]->setIcon(QIcon(":/resources/time_first.png"));
+	actions[LC_VIEW_TIME_PREVIOUS]->setIcon(QIcon(":/resources/time_previous.png"));
+	actions[LC_VIEW_TIME_NEXT]->setIcon(QIcon(":/resources/time_next.png"));
+	actions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
+}
+
+void lcQMainWindow::createMenus()
+{
 	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
 	lockMenu->addAction(actions[LC_EDIT_LOCK_X]);
 	lockMenu->addAction(actions[LC_EDIT_LOCK_Y]);
@@ -237,22 +399,6 @@ void lcQMainWindow::createActions()
 	lockMenu->addAction(actions[LC_EDIT_LOCK_NONE]);
 	actions[LC_EDIT_LOCK_TOGGLE]->setMenu(lockMenu);
 
-	actions[LC_EDIT_SNAP_TOGGLE] = new QAction(QIcon(":/resources/edit_snap_move.png"), tr("Snap"), this);
-
-	action = new QAction(tr("Snap X"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_SNAP_X] = action;
-
-	action = new QAction(tr("Snap Y"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_SNAP_Y] = action;
-
-	action = new QAction(tr("Snap Z"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_SNAP_Z] = action;
-
-	actions[LC_EDIT_SNAP_NONE] = new QAction(tr("Snap None"), this);
-	actions[LC_EDIT_SNAP_ALL] = new QAction(tr("Snap All"), this);
 	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
 	snapMenu->addAction(actions[LC_EDIT_SNAP_X]);
 	snapMenu->addAction(actions[LC_EDIT_SNAP_Y]);
@@ -261,15 +407,6 @@ void lcQMainWindow::createActions()
 	snapMenu->addAction(actions[LC_EDIT_SNAP_ALL]);
 	actions[LC_EDIT_SNAP_TOGGLE]->setMenu(snapMenu);
 
-	action = new QAction(QIcon(":/resources/edit_snap_angle.png"), tr("Snap Angle"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_SNAP_ANGLE] = action;
-
-	actions[LC_EDIT_TRANSFORM] = new QAction(QIcon(":/resources/edit_transform.png"), tr("Transform"), this);
-	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION] = new QAction(tr("Absolute Translation"), this);
-	actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION] = new QAction(tr("Relative Translation"), this);
-	actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION] = new QAction(tr("Absolute Rotation"), this);
-	actions[LC_EDIT_TRANSFORM_RELATIVE_ROTATION] = new QAction(tr("Relative Rotation"), this);
 	QMenu* transformMenu = new QMenu(tr("Transform"));
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION]);
@@ -277,147 +414,15 @@ void lcQMainWindow::createActions()
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_ROTATION]);
 	actions[LC_EDIT_TRANSFORM]->setMenu(transformMenu);
 
-	action = new QAction(QIcon(":/resources/action_insert.png"), tr("Insert"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_INSERT] = action;
-
-	action = new QAction(QIcon(":/resources/action_light.png"), tr("Light"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_LIGHT] = action;
-
-	action = new QAction(QIcon(":/resources/action_spotlight.png"), tr("Spot Light"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_SPOTLIGHT] = action;
-
-	action = new QAction(QIcon(":/resources/action_camera.png"), tr("Camera"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_CAMERA] = action;
-
-	action = new QAction(QIcon(":/resources/action_select.png"), tr("Select"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_SELECT] = action;
-
-	action = new QAction(QIcon(":/resources/action_move.png"), tr("Move"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_MOVE] = action;
-
-	action = new QAction(QIcon(":/resources/action_rotate.png"), tr("Rotate"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_ROTATE] = action;
-
-	action = new QAction(QIcon(":/resources/action_delete.png"), tr("Delete"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_DELETE] = action;
-
-	action = new QAction(QIcon(":/resources/action_paint.png"), tr("Paint"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_PAINT] = action;
-
-	action = new QAction(QIcon(":/resources/action_zoom.png"), tr("Zoom"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_ZOOM] = action;
-
-	action = new QAction(QIcon(":/resources/action_pan.png"), tr("Pan"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_PAN] = action;
-
-	action = new QAction(QIcon(":/resources/action_rotate_view.png"), tr("Rotate View"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_ROTATE_VIEW] = action;
-
-	action = new QAction(QIcon(":/resources/action_roll.png"), tr("Roll"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_ROLL] = action;
-
-	action = new QAction(QIcon(":/resources/action_zoom_region.png"), tr("Zoom Region"), this);
-	action->setCheckable(true);
-	actions[LC_EDIT_ACTION_ZOOM_REGION] = action;
-
-	QActionGroup *actionToolGroup = new QActionGroup(this);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_INSERT]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_LIGHT]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_SPOTLIGHT]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_CAMERA]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_SELECT]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_MOVE]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ROTATE]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_DELETE]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_PAINT]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ZOOM]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_PAN]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ROTATE_VIEW]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ROLL]);
-	actionToolGroup->addAction(actions[LC_EDIT_ACTION_ZOOM_REGION]);
-
-	actions[LC_VIEW_PREFERENCES] = new QAction(tr("Preferences..."), this);
-	actions[LC_VIEW_ZOOM_IN] = new QAction(tr("Zoom In"), this);
-	actions[LC_VIEW_ZOOM_OUT] = new QAction(tr("Zoom Out"), this);
-	actions[LC_VIEW_ZOOM_EXTENTS]= new QAction(tr("Zoom Extents"), this);
-	actions[LC_VIEW_VIEWPOINT_FRONT] = new QAction(tr("Front"), this);
-	actions[LC_VIEW_VIEWPOINT_BACK] = new QAction(tr("Back"), this);
-	actions[LC_VIEW_VIEWPOINT_LEFT] = new QAction(tr("Left"), this);
-	actions[LC_VIEW_VIEWPOINT_RIGHT] = new QAction(tr("Right"), this);
-	actions[LC_VIEW_VIEWPOINT_TOP] = new QAction(tr("Top"), this);
-	actions[LC_VIEW_VIEWPOINT_BOTTOM] = new QAction(tr("Bottom"), this);
-	actions[LC_VIEW_VIEWPOINT_HOME] = new QAction(tr("Home"), this);
-
 	menuCamera = new QMenu(tr("Cameras"));
-	QActionGroup *actionCameraGroup = new QActionGroup(this);
-
-	action = new QAction(tr("No Camera"), this);
-	action->setCheckable(true);
-	menuCamera->addAction(action);
-	actionCameraGroup->addAction(action);
-	actions[LC_VIEW_CAMERA_NONE] = action;
+	menuCamera->addAction(actions[LC_VIEW_CAMERA_NONE]);
 
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
-	{
-		action = new QAction(this);
-		action->setCheckable(true);
-		actionCameraGroup->addAction(action);
-		actions[actionIdx] = action;
-		menuCamera->addAction(action);
-	}
+		menuCamera->addAction(actions[actionIdx]);
 
 	menuCamera->addSeparator();
-	action = new QAction(tr("Reset"), this);
-	menuCamera->addAction(action);
-	actions[LC_VIEW_CAMERA_RESET] = action;
+	menuCamera->addAction(actions[LC_VIEW_CAMERA_RESET]);
 
-	actions[LC_VIEW_TIME_FIRST] = new QAction(QIcon(":/resources/time_first.png"), tr("First"), this);
-	actions[LC_VIEW_TIME_PREVIOUS] = new QAction(QIcon(":/resources/time_previous.png"), tr("Previous"), this);
-	actions[LC_VIEW_TIME_NEXT] = new QAction(QIcon(":/resources/time_next.png"), tr("Next"), this);
-	actions[LC_VIEW_TIME_LAST] = new QAction(QIcon(":/resources/time_last.png"), tr("Last"), this);
-	actions[LC_VIEW_TIME_STOP] = new QAction(tr("Stop"), this);
-	actions[LC_VIEW_TIME_PLAY] = new QAction(tr("Play"), this);
-	actions[LC_VIEW_TIME_INSERT] = new QAction(tr("Insert"), this);
-	actions[LC_VIEW_TIME_DELETE] = new QAction(tr("Delete"), this);
-
-	actions[LC_PIECE_INSERT] = new QAction(tr("Insert"), this);
-	actions[LC_PIECE_DELETE] = new QAction(tr("Delete"), this);
-	actions[LC_PIECE_MINIFIG_WIZARD] = new QAction(tr("Minifig Wizard"), this);
-	actions[LC_PIECE_ARRAY] = new QAction(tr("Array"), this);
-	actions[LC_PIECE_COPY_KEYS] = new QAction(tr("Copy Keys"), this);
-	actions[LC_PIECE_GROUP] = new QAction(tr("Group"), this);
-	actions[LC_PIECE_UNGROUP] = new QAction(tr("Ungroup"), this);
-	actions[LC_PIECE_GROUP_ADD] = new QAction(tr("Add To Group"), this);
-	actions[LC_PIECE_GROUP_REMOVE] = new QAction(tr("Remove From Group"), this);
-	actions[LC_PIECE_GROUP_EDIT] = new QAction(tr("Edit Groups"), this);
-	actions[LC_PIECE_HIDE_SELECTED] = new QAction(tr("Hide Selected"), this);
-	actions[LC_PIECE_HIDE_UNSELECTED] = new QAction(tr("Hide Unselected"), this);
-	actions[LC_PIECE_UNHIDE_ALL] = new QAction(tr("Unhide All"), this);
-	actions[LC_PIECE_SHOW_EARLIER] = new QAction(tr("Show Earlier"), this);
-	actions[LC_PIECE_SHOW_LATER] = new QAction(tr("Show Later"), this);
-
-	actions[LC_HELP_ABOUT] = new QAction(tr("About"), this);
-
-	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
-		if (actions[Command])
-			connect(actions[Command], SIGNAL(triggered()), this, SLOT(actionTriggered()));
-}
-
-void lcQMainWindow::createMenus()
-{
 	menuFile = menuBar()->addMenu(tr("&File"));
 	menuFile->addAction(actions[LC_FILE_NEW]);
 	menuFile->addAction(actions[LC_FILE_OPEN]);

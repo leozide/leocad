@@ -130,28 +130,28 @@ void lcQMainWindow::createActions()
 {
 	const char* actionStrings[LC_NUM_COMMANDS][2] =
 	{
-		{ "New",                              "Create a new project" },                                                                 // LC_FILE_NEW
-		{ "Open...",                          "Open an existing project" },                                                             // LC_FILE_OPEN
-		{ "Merge...",                         "Merge the contents of another project with the current one" },                           // LC_FILE_MERGE
-		{ "Save",                             "Save the active project" },                                                              // LC_FILE_SAVE
-		{ "Save As...",                       "Save the active project with a new name" },                                              // LC_FILE_SAVEAS
-		{ "Save Image...",                    "Save a picture of the current view" },                                                   // LC_FILE_SAVE_IMAGE
-		{ "3D Studio...",                     "Export the project in 3D Studio 3DS format" },                                           // LC_FILE_EXPORT_3DS
-		{ "HTML...",                          "Create an HTML page for this project" },                                                 // LC_FILE_EXPORT_HTML
-		{ "BrickLink...",                     "Export a list of pieces used in BrickLink XML format" },                                 // LC_FILE_EXPORT_BRICKLINK
-		{ "POV-Ray...",                       "Export the project in POV-Ray format" },                                                 // LC_FILE_EXPORT_POVRAY
-		{ "Wavefront...",                     "Export the project in Wavefront OBJ format" },                                           // LC_FILE_EXPORT_WAVEFRONT
-		{ "Properties...",                    "Display project properties" },                                                           // LC_FILE_PROPERTIES
-		{ "Terrain Editor...",                "Edit terrain" },                                                                         // LC_FILE_TERRAIN_EDITOR
-		{ "Pieces Library...",                "Configure pieces library" },                                                             // LC_FILE_PIECES_LIBRARY
-		{ "Print...",                         "Print the active project" },                                                             // LC_FILE_PRINT
-		{ "Print Preview",                    "Display how the project would look if printed" },                                        // LC_FILE_PRINT_PREVIEW
-		{ "Print Bill of Materials...",       "Print a list of pieces used" },                                                          // LC_FILE_PRINT_BOM
-		{ "1",                                "Open this document" },                                                                   // LC_FILE_RECENT1
-		{ "2",                                "Open this document" },                                                                   // LC_FILE_RECENT2
-		{ "3",                                "Open this document" },                                                                   // LC_FILE_RECENT3
-		{ "4",                                "Open this document" },                                                                   // LC_FILE_RECENT4
-		{ "Exit",                             "Quit the application; prompts to save project" },                                        // LC_FILE_EXIT
+		{ "&New",                             "Create a new project" },                                                                 // LC_FILE_NEW
+		{ "&Open...",                         "Open an existing project" },                                                             // LC_FILE_OPEN
+		{ "&Merge...",                        "Merge the contents of another project with the current one" },                           // LC_FILE_MERGE
+		{ "&Save",                            "Save the active project" },                                                              // LC_FILE_SAVE
+		{ "Save &As...",                      "Save the active project with a new name" },                                              // LC_FILE_SAVEAS
+		{ "Save &Image...",                   "Save a picture of the current view" },                                                   // LC_FILE_SAVE_IMAGE
+		{ "3D &Studio...",                    "Export the project in 3D Studio 3DS format" },                                           // LC_FILE_EXPORT_3DS
+		{ "&HTML...",                         "Create an HTML page for this project" },                                                 // LC_FILE_EXPORT_HTML
+		{ "&BrickLink...",                    "Export a list of pieces used in BrickLink XML format" },                                 // LC_FILE_EXPORT_BRICKLINK
+		{ "&POV-Ray...",                      "Export the project in POV-Ray format" },                                                 // LC_FILE_EXPORT_POVRAY
+		{ "&Wavefront...",                    "Export the project in Wavefront OBJ format" },                                           // LC_FILE_EXPORT_WAVEFRONT
+		{ "Prope&rties...",                   "Display project properties" },                                                           // LC_FILE_PROPERTIES
+		{ "&Terrain Editor...",               "Edit terrain" },                                                                         // LC_FILE_TERRAIN_EDITOR
+		{ "Pieces &Library...",               "Configure pieces library" },                                                             // LC_FILE_PIECES_LIBRARY
+		{ "&Print...",                        "Print the active project" },                                                             // LC_FILE_PRINT
+		{ "Print Pre&view",                   "Display how the project would look if printed" },                                        // LC_FILE_PRINT_PREVIEW
+		{ "Print &Bill of Materials...",      "Print a list of pieces used" },                                                          // LC_FILE_PRINT_BOM
+		{ "&1",                               "Open this document" },                                                                   // LC_FILE_RECENT1
+		{ "&2",                               "Open this document" },                                                                   // LC_FILE_RECENT2
+		{ "&3",                               "Open this document" },                                                                   // LC_FILE_RECENT3
+		{ "&4",                               "Open this document" },                                                                   // LC_FILE_RECENT4
+		{ "E&xit",                            "Quit the application; prompts to save project" },                                        // LC_FILE_EXIT
 		{ "Undo",                             "Undo the last action" },                                                                 // LC_EDIT_UNDO
 		{ "Redo",                             "Redo the previously undone action" },                                                    // LC_EDIT_REDO
 		{ "Cut",                              "Cut the selection and put it on the Clipboard" },                                        // LC_EDIT_CUT
@@ -281,72 +281,31 @@ void lcQMainWindow::createActions()
 
 	LC_CASSERT(sizeof(actionStrings)/sizeof(actionStrings[0]) == LC_NUM_COMMANDS);
 
-	QAction *action;
-
 	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
 	{
-		action = new QAction(tr(actionStrings[Command][0]), this);
+		QAction *action = new QAction(tr(actionStrings[Command][0]), this);
 		action->setStatusTip(tr(actionStrings[Command][1]));
 		connect(action, SIGNAL(triggered()), this, SLOT(actionTriggered()));
 		actions[Command] = action;
 	}
 
-	action = actions[LC_FILE_NEW];
-	action->setIcon(QIcon(":/resources/file_new.png"));
-	action->setToolTip(tr("New Project"));
-	action->setShortcuts(QKeySequence::New);
+	actions[LC_FILE_NEW]->setToolTip(tr("New Project"));
+	actions[LC_FILE_OPEN]->setToolTip(tr("Open Project"));
+	actions[LC_FILE_SAVE]->setToolTip(tr("Save Project"));
 
-	action = actions[LC_FILE_OPEN];
-	action->setIcon(QIcon(":/resources/file_open.png"));
-	action->setToolTip(tr("Open Project"));
-	action->setShortcuts(QKeySequence::Open);
-
-	actions[LC_FILE_MERGE]->setStatusTip(tr("Merge the contents of another project with the current one"));
-	
-	action = actions[LC_FILE_SAVE];
-	action->setIcon(QIcon(":/resources/file_save.png"));
-	action->setToolTip(tr("Save Project"));
-	action->setShortcuts(QKeySequence::Save);
-
-	actions[LC_FILE_SAVEAS]->setShortcuts(QKeySequence::SaveAs);
-
+	actions[LC_FILE_NEW]->setIcon(QIcon(":/resources/file_new.png"));
+	actions[LC_FILE_OPEN]->setIcon(QIcon(":/resources/file_open.png"));
+	actions[LC_FILE_SAVE]->setIcon(QIcon(":/resources/file_save.png"));
 	actions[LC_FILE_PRINT]->setIcon(QIcon(":/resources/file_print.png"));
 	actions[LC_FILE_PRINT_PREVIEW]->setIcon(QIcon(":/resources/file_print_preview.png"));
-
-	action = actions[LC_EDIT_UNDO];
-	action->setIcon(QIcon(":/resources/edit_undo.png"));
-	action->setShortcuts(QKeySequence::Undo);
-
-	action = actions[LC_EDIT_REDO];
-	action->setIcon(QIcon(":/resources/edit_redo.png"));
-	action->setShortcuts(QKeySequence::Redo);
-
-	action = actions[LC_EDIT_CUT];
-	action->setIcon(QIcon(":/resources/edit_cut.png"));
-	action->setShortcuts(QKeySequence::Cut);
-
-	action = actions[LC_EDIT_COPY];
-	action->setIcon(QIcon(":/resources/edit_copy.png"));
-	action->setShortcuts(QKeySequence::Copy);
-
-	action = actions[LC_EDIT_PASTE];
-	action->setIcon(QIcon(":/resources/edit_paste.png"));
-	action->setShortcuts(QKeySequence::Paste);
-
+	actions[LC_EDIT_UNDO]->setIcon(QIcon(":/resources/edit_undo.png"));
+	actions[LC_EDIT_REDO]->setIcon(QIcon(":/resources/edit_redo.png"));
+	actions[LC_EDIT_CUT]->setIcon(QIcon(":/resources/edit_cut.png"));
+	actions[LC_EDIT_COPY]->setIcon(QIcon(":/resources/edit_copy.png"));
+	actions[LC_EDIT_PASTE]->setIcon(QIcon(":/resources/edit_paste.png"));
 	actions[LC_EDIT_LOCK_TOGGLE]->setIcon(QIcon(":/resources/edit_lock.png"));
-	actions[LC_EDIT_LOCK_X]->setCheckable(true);
-	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
-	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
-
 	actions[LC_EDIT_SNAP_TOGGLE]->setIcon(QIcon(":/resources/edit_snap_move.png"));
-	actions[LC_EDIT_SNAP_X]->setCheckable(true);
-	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
-	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
-
-	action = actions[LC_EDIT_SNAP_ANGLE];
-	action->setIcon(QIcon(":/resources/edit_snap_angle.png"));
-	action->setCheckable(true);
-
+	actions[LC_EDIT_SNAP_ANGLE]->setIcon(QIcon(":/resources/edit_snap_angle.png"));
 	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(":/resources/edit_transform.png"));
 	actions[LC_EDIT_ACTION_INSERT]->setIcon(QIcon(":/resources/action_insert.png"));
 	actions[LC_EDIT_ACTION_LIGHT]->setIcon(QIcon(":/resources/action_light.png"));
@@ -362,32 +321,44 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	actions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	actions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
-
-	QActionGroup *actionToolGroup = new QActionGroup(this);
-	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
-	{
-		action = actions[actionIdx];
-		action->setCheckable(true);
-		actionToolGroup->addAction(action);
-	}
-
-	QActionGroup *actionCameraGroup = new QActionGroup(this);
-
-	action = actions[LC_VIEW_CAMERA_NONE];
-	action->setCheckable(true);
-	actionCameraGroup->addAction(action);
-
-	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
-	{
-		action = actions[actionIdx];
-		action->setCheckable(true);
-		actionCameraGroup->addAction(action);
-	}
-
 	actions[LC_VIEW_TIME_FIRST]->setIcon(QIcon(":/resources/time_first.png"));
 	actions[LC_VIEW_TIME_PREVIOUS]->setIcon(QIcon(":/resources/time_previous.png"));
 	actions[LC_VIEW_TIME_NEXT]->setIcon(QIcon(":/resources/time_next.png"));
 	actions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
+
+	actions[LC_FILE_NEW]->setShortcuts(QKeySequence::New);
+	actions[LC_FILE_OPEN]->setShortcuts(QKeySequence::Open);
+	actions[LC_FILE_SAVE]->setShortcuts(QKeySequence::Save);
+	actions[LC_FILE_SAVEAS]->setShortcuts(QKeySequence::SaveAs);
+	actions[LC_EDIT_UNDO]->setShortcuts(QKeySequence::Undo);
+	actions[LC_EDIT_REDO]->setShortcuts(QKeySequence::Redo);
+	actions[LC_EDIT_CUT]->setShortcuts(QKeySequence::Cut);
+	actions[LC_EDIT_COPY]->setShortcuts(QKeySequence::Copy);
+	actions[LC_EDIT_PASTE]->setShortcuts(QKeySequence::Paste);
+
+	actions[LC_EDIT_LOCK_X]->setCheckable(true);
+	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
+	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
+	actions[LC_EDIT_SNAP_X]->setCheckable(true);
+	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
+	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
+	actions[LC_EDIT_SNAP_ANGLE]->setCheckable(true);
+	actions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
+
+	QActionGroup *actionToolGroup = new QActionGroup(this);
+	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionToolGroup->addAction(actions[actionIdx]);
+	}
+
+	QActionGroup *actionCameraGroup = new QActionGroup(this);
+	actionCameraGroup->addAction(actions[LC_VIEW_CAMERA_NONE]);
+	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionCameraGroup->addAction(actions[actionIdx]);
+	}
 }
 
 void lcQMainWindow::createMenus()
@@ -431,7 +402,7 @@ void lcQMainWindow::createMenus()
 	menuFile->addAction(actions[LC_FILE_SAVE]);
 	menuFile->addAction(actions[LC_FILE_SAVEAS]);
 	menuFile->addAction(actions[LC_FILE_SAVE_IMAGE]);
-	QMenu* exportMenu = menuFile->addMenu(tr("Export"));
+	QMenu* exportMenu = menuFile->addMenu(tr("&Export"));
 	exportMenu->addAction(actions[LC_FILE_EXPORT_3DS]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_BRICKLINK]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_HTML]);
@@ -751,7 +722,7 @@ void lcQMainWindow::updateRecentFiles(const char** fileNames)
 
 		if (fileNames[fileIdx][0])
 		{
-			action->setText(fileNames[fileIdx]);
+			action->setText(QString("&%1 %2").arg(QString::number(fileIdx + 1), QDir::toNativeSeparators(fileNames[fileIdx])));
 			action->setVisible(true);
 		}
 		else

@@ -221,8 +221,14 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 	strcpy(mCacheFileName, CachePath);
 	mCacheFileModifiedTime = 0;
 
-	if (CachePath[0])
+	if (mCacheFileName[0])
+	{
+		int Length = strlen(mCacheFileName);
+		if (mCacheFileName[Length] != '/' && mCacheFileName[Length] != '\\')
+			strcat(mCacheFileName, "/");
+
 		strcat(mCacheFileName, "library.cache");
+	}
 
 	if (stat(FileName, &LibraryStat) == 0)
 	{

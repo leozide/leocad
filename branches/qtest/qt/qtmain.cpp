@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	g_App = new lcApplication();
 	gMainWindow = new lcMainWindow();
 
-#ifdef WIN32
+#ifdef Q_OS_WIN
 	char libPath[LC_MAXPATH], *ptr;
 	strcpy(libPath, argv[0]);
 	ptr = strrchr(libPath,'\\');
@@ -24,7 +24,12 @@ int main(int argc, char *argv[])
 	const char* libPath = LC_INSTALL_PREFIX"/share/leocad/";
 #endif
 
-	if (!g_App->Initialize(argc, argv, libPath, ""))
+	QString cachePath = QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
+
+	QDir dir;
+	dir.mkdir(cachePath);
+
+	if (!g_App->Initialize(argc, argv, libPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
 	QApplication a(argc, argv);
@@ -41,7 +46,7 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 {
 	QWidget* parent = (QWidget*)mHandle;
 
-	QMessageBox::StandardButton	result;// = QMessageBox::StandardButton::NoButton;
+	QMessageBox::StandardButton	result;
 	QMessageBox::StandardButtons buttons;
 
 	switch (Flags & LC_MB_TYPEMASK)

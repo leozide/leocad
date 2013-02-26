@@ -58,7 +58,7 @@ void lcQPOVRayDialog::on_povrayBrowse_clicked()
 #ifdef Q_OS_WIN
 	QString filter(tr("Executable Files (*.exe);;All Files (*.*)"));
 #else
-	QString filter(tr("All Files (*.*)");
+	QString filter(tr("All Files (*.*)"));
 #endif
 
 	QString result = QFileDialog::getOpenFileName(this, tr("Open POV-Ray Executable"), ui->povrayEdit->text(), filter);

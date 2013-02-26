@@ -2170,7 +2170,7 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 		{ "92438", "Plate  8 x 16" },
 	};
 
-	for (int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
+	for (unsigned int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
 	{
 		PieceInfo* Info = new PieceInfo(-1);
 		mPieces.Add(Info);

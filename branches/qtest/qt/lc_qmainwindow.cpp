@@ -1,36 +1,16 @@
 #include "lc_global.h"
 #include "lc_qmainwindow.h"
-#include "lc_global.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "preview.h"
 #include "camera.h"
-#include "lc_colorlistwidget.h"
 #include "lc_previewwidget.h"
+#include "lc_qpartstree.h"
+#include "lc_colorlistwidget.h"
 #include "lc_viewwidget.h"
 #include "system.h"
-
-static int PiecesSortFunc(const PieceInfo* a, const PieceInfo* b, void* SortData)
-{
-	if (a->IsSubPiece())
-	{
-		if (b->IsSubPiece())
-			return strcmp(a->m_strDescription, b->m_strDescription);
-		else
-			return 1;
-	}
-	else
-	{
-		if (b->IsSubPiece())
-			return -1;
-		else
-			return strcmp(a->m_strDescription, b->m_strDescription);
-	}
-
-	return 0;
-}
 
 lcQMainWindow::lcQMainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -59,53 +39,6 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	createMenus();
 	createToolBars();
 	createStatusBar();
-
-	lcPiecesLibrary* Lib = lcGetPiecesLibrary();
-
-	QList<QTreeWidgetItem *> items;
-	for (int i = 0; i < Lib->mCategories.GetSize(); i++)
-	{
-		QTreeWidgetItem* Category = new QTreeWidgetItem((QTreeWidget*)0, QStringList((const char*)Lib->mCategories[i].Name));
-		items.append(Category);
-		/*
-		PtrArray<PieceInfo> SinglePieces, GroupedPieces;
-
-		Lib->GetCategoryEntries(i, true, SinglePieces, GroupedPieces);
-
-		SinglePieces += GroupedPieces;
-		SinglePieces.Sort(PiecesSortFunc, NULL);
-
-		for (int j = 0; j < SinglePieces.GetSize(); j++)
-		{
-			PieceInfo* Info = SinglePieces[j];
-			QTreeWidgetItem* Item = new QTreeWidgetItem(Category, QStringList(Info->m_strDescription));
-
-			if (GroupedPieces.FindIndex(Info) != -1)
-			{
-				PtrArray<PieceInfo> Patterns;
-				Lib->GetPatternedPieces(Info, Patterns);
-
-				for (int k = 0; k < Patterns.GetSize(); k++)
-				{
-					PieceInfo* child = Patterns[k];
-
-					if (!Lib->PieceInCategory(child, Lib->mCategories[i].Keywords))
-					continue;
-
-					const char* desc = child->m_strDescription;
-					int len = strlen(Info->m_strDescription);
-
-					if (!strncmp(child->m_strDescription, Info->m_strDescription, len))
-						desc += len;
-
-					QTreeWidgetItem* Pattern = new QTreeWidgetItem(Item, QStringList(desc));
-				}
-			}
-		}
-*/
-	}
-
-	pieceList->insertTopLevelItems(0, items);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = Library->FindPiece("3005", false);
@@ -533,9 +466,9 @@ void lcQMainWindow::createToolBars()
 	piecePreview = new lcPreviewWidget(previewFrame, centralWidget);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
-	pieceList = new QTreeWidget(piecesSplitter);
-	pieceList->setHeaderHidden(true);
-	piecesSplitter->addWidget(pieceList);
+	partsTree = new lcQPartsTree(piecesSplitter);
+	connect(partsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(partsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
+	piecesSplitter->addWidget(partsTree);
 	pieceCombo = new QComboBox(piecesSplitter);
 	pieceCombo->setEditable(true);
 	piecesSplitter->addWidget(pieceCombo);
@@ -574,6 +507,19 @@ void lcQMainWindow::actionTriggered()
 			lcGetActiveProject()->HandleCommand((LC_COMMANDS)Command);
 			break;
 		}
+	}
+}
+
+void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+{
+	PieceInfo *info = (PieceInfo*)current->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+
+	if (info)
+	{
+		lcGetActiveProject()->SetCurrentPiece(info);
+		PiecePreview* Preview = (PiecePreview*)piecePreview->mWindow;
+		Preview->OnInitialUpdate();
+		Preview->SetCurrentPiece(info);
 	}
 }
 

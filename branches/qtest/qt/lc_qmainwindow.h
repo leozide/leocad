@@ -6,9 +6,9 @@
 #include "array.h"
 
 class QComboBox;
-class QTreeWidget;
 class lcViewWidget;
 class lcPreviewWidget;
+class lcQPartsTree;
 class lcColorListWidget;
 
 class lcQMainWindow : public QMainWindow
@@ -34,6 +34,7 @@ public:
 
 private slots:
 	void actionTriggered();
+	void partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 
 private:
 	void createActions();
@@ -59,7 +60,7 @@ private:
 	QDockWidget *piecesToolBar;
 
 	lcPreviewWidget *piecePreview;
-	QTreeWidget *pieceList;
+	lcQPartsTree *partsTree;
 	QComboBox *pieceCombo;
 	lcColorListWidget *colorList;
 	QLineEdit *transformX;

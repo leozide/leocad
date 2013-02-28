@@ -1,15 +1,15 @@
 #include "lc_global.h"
 #include "lc_qmainwindow.h"
+#include "lc_glwidget.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "preview.h"
 #include "camera.h"
-#include "lc_previewwidget.h"
+#include "view.h"
 #include "lc_qpartstree.h"
 #include "lc_colorlistwidget.h"
-#include "lc_viewwidget.h"
 #include "system.h"
 
 lcQMainWindow::lcQMainWindow(QWidget *parent)
@@ -31,8 +31,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	centralWidget = new lcViewWidget(previewFrame, NULL);
-	centralWidget->mWindow->OnInitialUpdate();
+	centralWidget = new lcGLWidget(previewFrame, NULL, new View(lcGetActiveProject(), NULL));
 	previewLayout->addWidget(centralWidget, 0, 0, 1, 1);
 
 	createActions();
@@ -50,7 +49,6 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	{
 		lcGetActiveProject()->SetCurrentPiece(Info);
 		PiecePreview* Preview = (PiecePreview*)piecePreview->mWindow;
-		Preview->OnInitialUpdate();
 		Preview->SetCurrentPiece(Info);
 	}
 }
@@ -463,7 +461,8 @@ void lcQMainWindow::createToolBars()
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	piecePreview = new lcPreviewWidget(previewFrame, centralWidget);
+	piecePreview = new lcGLWidget(previewFrame, centralWidget, new PiecePreview(NULL));
+	piecePreview->preferredSize = QSize(100, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
 	partsTree = new lcQPartsTree(piecesSplitter);

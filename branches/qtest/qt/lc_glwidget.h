@@ -7,9 +7,12 @@ class GLWindow;
 class lcGLWidget : public QGLWidget
 {
 public:
-	lcGLWidget(QWidget *parent, lcGLWidget *share);
+	lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window);
+
+	QSize sizeHint() const;
 
 	GLWindow* mWindow;
+	QSize preferredSize;
 
 protected:
 	void initializeGL();

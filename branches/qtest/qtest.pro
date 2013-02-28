@@ -62,18 +62,10 @@ SOURCES += common/view.cpp \
     common/camera.cpp \
     common/array.cpp \
     qt/lc_qmainwindow.cpp \
-    qt/lc_previewwidget.cpp \
-    qt/lc_viewwidget.cpp \
-    qt/toolbar.cpp \
     qt/profile.cpp \
-    qt/menu.cpp \
     qt/main.cpp \
     qt/linux_gl.cpp \
-    qt/libdlg.cpp \
     qt/glwindow.cpp \
-    qt/dlgpiece.cpp \
-    qt/dlgfile.cpp \
-    qt/dialogs.cpp \
     qt/basewnd.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
@@ -125,8 +117,6 @@ HEADERS += common/glwindow.h \
     common/basewnd.h \
     qt/lc_colorlistwidget.h \
     qt/lc_qmainwindow.h \
-    qt/lc_previewwidget.h \
-    qt/lc_viewwidget.h \
     qt/lc_glwidget.h \
     qt/lc_config.h \
     qt/lc_qpovraydialog.h \

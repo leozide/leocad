@@ -11,6 +11,11 @@ View::View(Project *pProject, GLWindow *share)
 	m_Project = pProject;
 	mCamera = NULL;
 	m_OverlayScale = 1.0f;
+
+	if (pProject->GetActiveView())
+		SetCamera(pProject->GetActiveView()->mCamera, false);
+	else
+		SetDefaultCamera();
 }
 
 View::~View()

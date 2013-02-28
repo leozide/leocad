@@ -6,8 +6,7 @@
 #include "array.h"
 
 class QComboBox;
-class lcViewWidget;
-class lcPreviewWidget;
+class lcGLWidget;
 class lcQPartsTree;
 class lcColorListWidget;
 
@@ -42,7 +41,7 @@ private:
 	void createToolBars();
 	void createStatusBar();
 
-	lcViewWidget *centralWidget;
+	lcGLWidget *centralWidget;
 	QAction *actions[LC_NUM_COMMANDS];
 
 	QAction *actionFileRecentSeparator;
@@ -59,7 +58,7 @@ private:
 	QToolBar *timeToolBar;
 	QDockWidget *piecesToolBar;
 
-	lcPreviewWidget *piecePreview;
+	lcGLWidget *piecePreview;
 	lcQPartsTree *partsTree;
 	QComboBox *pieceCombo;
 	lcColorListWidget *colorList;

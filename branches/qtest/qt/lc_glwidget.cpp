@@ -3,10 +3,25 @@
 #include "glwindow.h"
 #include <QtGui>
 
-lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share)
+lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window)
 	: QGLWidget(parent, share)
 {
+	mWindow = window;
+	mWindow->CreateFromWindow(this);
+
+	mWindow->MakeCurrent();
+	mWindow->OnInitialUpdate();
+
+	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
+}
+
+QSize lcGLWidget::sizeHint() const
+{
+	if (preferredSize.isEmpty())
+		return QGLWidget::sizeHint();
+	else
+		return preferredSize;
 }
 
 void lcGLWidget::initializeGL()

@@ -5406,56 +5406,32 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_GROUP_EDIT:
 		{
-			int i;
-			Group* pGroup;
-			Piece* pPiece;
-			LC_GROUPEDITDLG_OPTS opts;
+			lcEditGroupsDialogOptions Options;
 
-			for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				i++;
-			opts.piececount = i;
-			opts.pieces = (Piece**)malloc(i*sizeof(Piece*));
-			opts.piecesgroups = (Group**)malloc(i*sizeof(Group*));
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				Options.PieceParents.Add(pPiece->GetGroup());
 
-			for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext, i++)
-			{
-				opts.pieces[i] = pPiece;
-				opts.piecesgroups[i] = pPiece->GetGroup();
-			}
+			for (Group* pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+				Options.GroupParents.Add(pGroup->m_pGroup);
 
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				i++;
-			opts.groupcount = i;
-			opts.groups = (Group**)malloc(i*sizeof(Group*));
-			opts.groupsgroups = (Group**)malloc(i*sizeof(Group*));
+			if (!gMainWindow->DoDialog(LC_DIALOG_EDIT_GROUPS, &Options))
+				break;
 
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext, i++)
-			{
-				opts.groups[i] = pGroup;
-				opts.groupsgroups[i] = pGroup->m_pGroup;
-			}
+			int PieceIdx = 0;
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				pPiece->SetGroup(Options.PieceParents[PieceIdx++]);
 
-			if (SystemDoDialog(LC_DLG_EDITGROUPS, &opts))
-			{
-				for (i = 0; i < opts.piececount; i++)
-					opts.pieces[i]->SetGroup(opts.piecesgroups[i]);
+			int GroupIdx = 0;
+			for (Group* pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+				pGroup->m_pGroup = Options.GroupParents[GroupIdx++];
 
-				for (i = 0; i < opts.groupcount; i++)
-					opts.groups[i]->m_pGroup = opts.groupsgroups[i];
-
-				RemoveEmptyGroups();
-				SelectAndFocusNone(false);
-				SystemUpdateFocus(NULL);
-				UpdateSelection();
-				UpdateAllViews();
-				SetModifiedFlag(true);
-				CheckPoint("Editing");
-			}
-
-			free(opts.pieces);
-			free(opts.piecesgroups);
-			free(opts.groups);
-			free(opts.groupsgroups);
+			RemoveEmptyGroups();
+			SelectAndFocusNone(false);
+			SystemUpdateFocus(NULL);
+			UpdateSelection();
+			UpdateAllViews();
+			SetModifiedFlag(true);
+			CheckPoint("Editing");
 		} break;
 
 		case LC_PIECE_HIDE_SELECTED:

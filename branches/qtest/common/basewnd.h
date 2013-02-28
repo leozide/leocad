@@ -3,6 +3,9 @@
 
 #include "defines.h"
 #include "lc_math.h"
+#include "array.h"
+
+class Group;
 
 #define LC_OK           1
 #define LC_CANCEL       2
@@ -37,6 +40,7 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_EXPORT_WAVEFRONT,
 	LC_DIALOG_PIECE_ARRAY,
 	LC_DIALOG_PIECE_GROUP,
+	LC_DIALOG_EDIT_GROUPS,
 	LC_DIALOG_ABOUT,
 
 	// TODO: update dialogs
@@ -52,7 +56,6 @@ enum LC_DIALOG_TYPE
 	LC_DLG_LIBRARY,
 	LC_DLG_SELECTBYNAME,
 	LC_DLG_STEPCHOOSE,
-	LC_DLG_EDITGROUPS,
 	LC_DLG_EDITCATEGORY,
 };
 
@@ -69,6 +72,12 @@ struct lcArrayDialogOptions
 	int Counts[3];
 	lcVector3 Offsets[3];
 	lcVector3 Rotations[3];
+};
+
+struct lcEditGroupsDialogOptions
+{
+	PtrArray<Group> PieceParents;
+	PtrArray<Group> GroupParents;
 };
 
 class lcBaseWindow

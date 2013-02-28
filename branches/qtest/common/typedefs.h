@@ -330,16 +330,6 @@ struct LC_PROPERTIESDLG_OPTS
 	int NumColors;
 };
 
-struct LC_GROUPEDITDLG_OPTS
-{
-	int piececount;
-	Piece** pieces;
-	Group** piecesgroups;
-	int groupcount;
-	Group** groups;
-	Group** groupsgroups;
-};
-
 struct LC_PREFERENCESDLG_OPTS
 {
 	int nMouse;

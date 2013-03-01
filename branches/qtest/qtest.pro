@@ -5,17 +5,19 @@ TARGET = qtest
 TEMPLATE = app
 DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
 INCLUDEPATH += qt \
-    common \
-    C:/qt/src/3rdparty/zlib
+    common
 CONFIG += precompile_header incremental
 PRECOMPILED_HEADER = common/lc_global.h
-!win32 { 
+win32 { 
+	QMAKE_CXXFLAGS_WARN_ON += -wd4100
+	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
+	INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib 
+	QMAKE_LFLAGS += /INCREMENTAL
+	PRECOMPILED_SOURCE = common/lc_global.cpp
+} else {
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
-win32:QMAKE_CXXFLAGS_WARN_ON += -wd4100
-win32:DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
-win32:QMAKE_LFLAGS += /INCREMENTAL
 
 release: DESTDIR = build/release
 debug:   DESTDIR = build/debug

@@ -1951,17 +1951,10 @@ bool lcPiecesLibrary::LoadCategories(const char* FileName)
 	}
 	else
 	{
-		LC_FILEOPENDLG_OPTS opts;
+		Path[0] = 0;
 
-		opts.type = LC_FILEOPENDLG_LCF;
-		strcpy(opts.path, mCategoriesFile);
-
-		if (!SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
+		if (!gMainWindow->DoDialog(LC_DIALOG_OPEN_CATEGORIES, Path))
 			return false;
-
-		strcpy(Path, (char*)opts.filenames);
-
-		free(opts.filenames);
 	}
 
 	// Load the file.
@@ -2030,15 +2023,8 @@ bool lcPiecesLibrary::DoSaveCategories(bool AskName)
 	// Get the file name.
 	if (AskName || !mCategoriesFile[0])
 	{
-		LC_FILESAVEDLG_OPTS opts;
-
-		opts.type = LC_FILESAVEDLG_LCF;
-		strcpy(opts.path, mCategoriesFile);
-
-		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &opts))
+		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_CATEGORIES, mCategoriesFile))
 			return false;
-
-		strcpy(mCategoriesFile, opts.path);
 	}
 
 	// Save the file.

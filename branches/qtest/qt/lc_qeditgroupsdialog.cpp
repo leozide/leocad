@@ -13,6 +13,9 @@ lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget *parent, void *data) :
 {
 	ui->setupUi(this);
 
+	QPushButton *newGroup = ui->buttonBox->addButton(tr("New Group"), QDialogButtonBox::ActionRole);
+	connect(newGroup, SIGNAL(clicked()), this, SLOT(on_newGroup_clicked()));
+
 	options = (lcEditGroupsDialogOptions*)data;
 
 	addChildren(ui->treeWidget->invisibleRootItem(), NULL);
@@ -30,6 +33,25 @@ void lcQEditGroupsDialog::accept()
 	QDialog::accept();
 }
 
+void lcQEditGroupsDialog::on_newGroup_clicked()
+{
+	QTreeWidgetItem *currentItem = ui->treeWidget->currentItem();
+
+	if (currentItem && currentItem->data(0, PieceRole).value<uintptr_t>())
+		currentItem = currentItem->parent();
+
+	if (!currentItem)
+		currentItem = ui->treeWidget->invisibleRootItem();
+
+	Group *parentGroup = (Group*)currentItem->data(0, GroupRole).value<uintptr_t>();
+	Group *newGroup = lcGetActiveProject()->AddGroup(NULL, parentGroup, 0, 0, 0);
+	options->GroupParents.Add(NULL);
+
+	QTreeWidgetItem *groupItem = new QTreeWidgetItem(currentItem, QStringList(newGroup->m_strName));
+	groupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+	groupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)newGroup));
+}
+
 void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *parentGroup)
 {
 	Project *project = lcGetActiveProject();
@@ -38,7 +60,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 	{
 		QTreeWidgetItem *childItem = parentItem->child(childIndex);
 
-		Piece *itemPiece = (Piece*)childItem->data(0, PieceRole).value<void*>();
+		Piece *itemPiece = (Piece*)childItem->data(0, PieceRole).value<uintptr_t>();
 
 		if (itemPiece)
 		{
@@ -54,7 +76,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 		}
 		else
 		{
-			Group *itemGroup = (Group*)childItem->data(0, GroupRole).value<void*>();
+			Group *itemGroup = (Group*)childItem->data(0, GroupRole).value<uintptr_t>();
 
 			int groupIndex = 0;
 			for (Group *group = project->m_pGroups; group; group = group->m_pNext, groupIndex++)
@@ -81,8 +103,8 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 			continue;
 
 		QTreeWidgetItem *groupItem = new QTreeWidgetItem(parentItem, QStringList(group->m_strName));
-		groupItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-		groupItem->setData(0, GroupRole, qVariantFromValue((void*)group));
+		groupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+		groupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)group));
 
 		addChildren(groupItem, group);
 	}
@@ -94,53 +116,6 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 
 		QTreeWidgetItem *pieceItem = new QTreeWidgetItem(parentItem, QStringList(piece->GetName()));
 		pieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-		pieceItem->setData(0, PieceRole, qVariantFromValue((void*)piece));
+		pieceItem->setData(0, PieceRole, qVariantFromValue<uintptr_t>((uintptr_t)piece));
 	}
 }
-
-/*
-
-void CEditGroupsDlg::OnEditgrpNewgroup()
-{
-  HTREEITEM hItem, hParent = NULL;
-  Group *pGroup, *pParent = NULL;
-  TVITEM item;
-
-  hItem = m_Tree.GetSelectedItem ();
-
-  if (hItem != NULL)
-  {
-	item.hItem = hItem;
-	item.mask = TVIF_HANDLE | TVIF_PARAM;
-
-	if (m_Tree.GetItem (&item))
-	{
-	  if (item.lParam < 0xFFFF)
-		hParent = m_Tree.GetParentItem (hItem);
-	  else
-		hParent = hItem;
-	}
-  }
-
-  if (hParent)
-  {
-	item.hItem = hParent;
-	item.mask = TVIF_HANDLE | TVIF_PARAM;
-
-	if (m_Tree.GetItem (&item))
-	  pParent = m_Tree.opts->groups[item.lParam - 0xFFFF];
-  }
-
-  pGroup = lcGetActiveProject()->AddGroup (NULL, pParent, 0, 0, 0);
-
-  m_Tree.opts->groupcount++;
-  m_Tree.opts->groups = (Group**)realloc(m_Tree.opts->groups, m_Tree.opts->groupcount*sizeof(Group*));
-  m_Tree.opts->groupsgroups = (Group**)realloc(m_Tree.opts->groupsgroups, m_Tree.opts->groupcount*sizeof(Group*));
-
-  m_Tree.opts->groups[m_Tree.opts->groupcount-1] = pGroup;
-  m_Tree.opts->groupsgroups[m_Tree.opts->groupcount-1] = pParent;
-
-  m_Tree.DeleteAllItems();
-	m_Tree.AddChildren(NULL, NULL);
-}
-  */

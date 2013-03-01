@@ -27,6 +27,7 @@ public:
 
 public slots:
 	void accept();
+	void on_newGroup_clicked();
 
 private:
 	Ui::lcQEditGroupsDialog *ui;

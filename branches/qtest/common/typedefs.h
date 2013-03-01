@@ -273,30 +273,6 @@ struct LC_IMAGEDLG_OPTS
 	LC_IMAGE_OPTS imopts;
 };
 
-enum LC_FILEOPENDLG_TYPES
-{
-	LC_FILEOPENDLG_LCF
-};
-
-struct LC_FILEOPENDLG_OPTS
-{
-	int type;
-	char path[LC_MAXPATH];
-	int numfiles;
-	char** filenames;
-};
-
-enum LC_FILESAVEDLG_TYPES
-{
-	LC_FILESAVEDLG_LCF,
-};
-
-struct LC_FILESAVEDLG_OPTS
-{
-	int type;
-	char path[LC_MAXPATH];
-};
-
 struct LC_DLG_DIRECTORY_BROWSE_OPTS
 {
 	const char* Title;

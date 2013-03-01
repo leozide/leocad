@@ -5,6 +5,7 @@
 #include "project.h"
 #include "piece.h"
 #include "group.h"
+#include "basewnd.h"
 
 lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget *parent, void *data) :
     QDialog(parent),
@@ -24,7 +25,50 @@ lcQEditGroupsDialog::~lcQEditGroupsDialog()
 
 void lcQEditGroupsDialog::accept()
 {
+	updateParents(ui->treeWidget->invisibleRootItem(), NULL);
+
 	QDialog::accept();
+}
+
+void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *parentGroup)
+{
+	Project *project = lcGetActiveProject();
+
+	for (int childIndex = 0; childIndex < parentItem->childCount(); childIndex++)
+	{
+		QTreeWidgetItem *childItem = parentItem->child(childIndex);
+
+		Piece *itemPiece = (Piece*)childItem->data(0, PieceRole).value<void*>();
+
+		if (itemPiece)
+		{
+			int pieceIndex = 0;
+			for (Piece *piece = project->m_pPieces; piece; piece = piece->m_pNext, pieceIndex++)
+			{
+				if (itemPiece == piece)
+				{
+					options->PieceParents.SetAt(pieceIndex, parentGroup);
+					break;
+				}
+			}
+		}
+		else
+		{
+			Group *itemGroup = (Group*)childItem->data(0, GroupRole).value<void*>();
+
+			int groupIndex = 0;
+			for (Group *group = project->m_pGroups; group; group = group->m_pNext, groupIndex++)
+			{
+				if (itemGroup == group)
+				{
+					options->GroupParents.SetAt(groupIndex, parentGroup);
+					break;
+				}
+			}
+
+			updateParents(childItem, itemGroup);
+		}
+	}
 }
 
 void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGroup)
@@ -37,6 +81,9 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 			continue;
 
 		QTreeWidgetItem *groupItem = new QTreeWidgetItem(parentItem, QStringList(group->m_strName));
+		groupItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+		groupItem->setData(0, GroupRole, qVariantFromValue((void*)group));
+
 		addChildren(groupItem, group);
 	}
 
@@ -45,51 +92,13 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 		if (piece->GetGroup() != parentGroup)
 			continue;
 
-		new QTreeWidgetItem(parentItem, QStringList(piece->GetName()));
+		QTreeWidgetItem *pieceItem = new QTreeWidgetItem(parentItem, QStringList(piece->GetName()));
+		pieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+		pieceItem->setData(0, PieceRole, qVariantFromValue((void*)piece));
 	}
-	/*
-	int i;
-	TV_INSERTSTRUCT tvstruct;
-	tvstruct.hParent = hParent;
-	tvstruct.hInsertAfter = TVI_SORT;
-
-	for (int GroupIdx = 0; GroupIdx < options->->groupcount; i++)
-		if (opts->groupsgroups[i] == pGroup)
-		{
-			tvstruct.item.lParam = i + 0xFFFF;
-			tvstruct.item.iImage = 0;
-			tvstruct.item.iSelectedImage = 1;
-			tvstruct.item.pszText = opts->groups[i]->m_strName;
-			tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-
-			HTREEITEM hti = InsertItem(&tvstruct);
-			AddChildren(hti, opts->groups[i]);
-		}
-
-	for (i = 0; i < opts->piececount; i++)
-		if (opts->piecesgroups[i] == pGroup)
-		{
-			tvstruct.item.lParam = i;
-			tvstruct.item.iImage = 2;
-			tvstruct.item.iSelectedImage = 2;
-			tvstruct.item.pszText = (char*)opts->pieces[i]->GetName();
-			tvstruct.item.mask = TVIF_PARAM | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-			InsertItem(&tvstruct);
-		}
-		*/
 }
 
 /*
-
-BOOL CEditGroupsDlg::OnInitDialog()
-{
-	CDialog::OnInitDialog();
-
-	m_TreeImages.Create(IDB_PARTICONS, 16, 0, RGB (0,128,128));
-	m_Tree.SetImageList(&m_TreeImages, TVSIL_NORMAL);
-
-  return TRUE;
-}
 
 void CEditGroupsDlg::OnEditgrpNewgroup()
 {

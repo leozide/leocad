@@ -19,12 +19,19 @@ public:
 	
 	lcEditGroupsDialogOptions *options;
 
+	enum
+	{
+		PieceRole = Qt::UserRole,
+		GroupRole,
+	};
+
 public slots:
 	void accept();
 
 private:
 	Ui::lcQEditGroupsDialog *ui;
 
+	void updateParents(QTreeWidgetItem *parentItem, Group *parentGroup);
 	void addChildren(QTreeWidgetItem *parentItem, Group *parentGroup);
 };
 

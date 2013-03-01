@@ -40,6 +40,7 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_EXPORT_BRICKLINK,
 	LC_DIALOG_EXPORT_POVRAY,
 	LC_DIALOG_EXPORT_WAVEFRONT,
+	LC_DIALOG_SELECT_BY_NAME,
 	LC_DIALOG_PIECE_ARRAY,
 	LC_DIALOG_PIECE_GROUP,
 	LC_DIALOG_EDIT_GROUPS,
@@ -78,6 +79,11 @@ struct lcEditGroupsDialogOptions
 {
 	PtrArray<Group> PieceParents;
 	PtrArray<Group> GroupParents;
+};
+
+struct lcSelectDialogOptions
+{
+	ObjArray<bool> Selection;
 };
 
 class lcBaseWindow

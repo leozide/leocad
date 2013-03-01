@@ -78,7 +78,8 @@ SOURCES += common/view.cpp \
     qt/lc_qgroupdialog.cpp \
     qt/lc_qaboutdialog.cpp \
     qt/lc_qpartstree.cpp \
-    qt/lc_qeditgroupsdialog.cpp
+    qt/lc_qeditgroupsdialog.cpp \
+    qt/lc_qselectdialog.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -127,12 +128,14 @@ HEADERS += common/glwindow.h \
     qt/lc_qgroupdialog.h \
     qt/lc_qaboutdialog.h \
     qt/lc_qpartstree.h \
-    qt/lc_qeditgroupsdialog.h
+    qt/lc_qeditgroupsdialog.h \
+    qt/lc_qselectdialog.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \
     qt/lc_qgroupdialog.ui \
     qt/lc_qaboutdialog.ui \
-    qt/lc_qeditgroupsdialog.ui
+    qt/lc_qeditgroupsdialog.ui \
+    qt/lc_qselectdialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc

@@ -4865,131 +4865,46 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_SELECT_BY_NAME:
 		{
-			Piece* pPiece;
-			Light* pLight;
-			Group* pGroup;
-			int i = 0;
+			lcSelectDialogOptions Options;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-					i++;
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				Options.Selection.Add(pPiece->IsSelected());
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			{
-				Camera* pCamera = mCameras[CameraIdx];
+				if (mCameras[CameraIdx]->IsVisible())
+					Options.Selection.Add(mCameras[CameraIdx]->IsSelected());
 
-				if (pCamera != m_ActiveView->mCamera)
-					if (pCamera->IsVisible())
-						i++;
-			}
-
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 				if (pLight->IsVisible())
-					i++;
+					Options.Selection.Add(pLight->IsSelected());
 
-			// TODO: add only groups with visible pieces
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				i++;
-
-			if (i == 0)
+			if (Options.Selection.GetSize() == 0)
 			{
-				// TODO: say 'Nothing to select'
+				gMainWindow->DoMessageBox("Nothing to select.", LC_MB_OK | LC_MB_ICONINFORMATION);
 				break;
 			}
 
-			LC_SEL_DATA* opts = (LC_SEL_DATA*)malloc((i+1)*sizeof(LC_SEL_DATA));
-			i = 0;
+			if (!gMainWindow->DoDialog(LC_DIALOG_SELECT_BY_NAME, &Options))
+				break;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-				{
-					opts[i].name = pPiece->GetName();
-					opts[i].type = LC_SELDLG_PIECE;
-					opts[i].selected = pPiece->IsSelected();
-					opts[i].pointer = pPiece;
-					i++;
-				}
+			SelectAndFocusNone(false);
 
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			{
-				Camera* pCamera = mCameras[CameraIdx];
+			int ObjectIndex = 0;
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext, ObjectIndex++)
+				if (Options.Selection[ObjectIndex])
+					pPiece->Select(true, false, false);
 
-				if (pCamera != m_ActiveView->mCamera)
-					if (pCamera->IsVisible())
-					{
-						opts[i].name = pCamera->GetName();
-						opts[i].type = LC_SELDLG_CAMERA;
-						opts[i].selected = pCamera->IsSelected();
-						opts[i].pointer = pCamera;
-						i++;
-					}
-			}
+			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++, ObjectIndex++)
+				if (Options.Selection[ObjectIndex])
+					mCameras[CameraIdx]->Select(true, false, false);
 
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsVisible())
-				{
-					opts[i].name = pLight->GetName();
-					opts[i].type = LC_SELDLG_LIGHT;
-					opts[i].selected = pLight->IsSelected();
-					opts[i].pointer = pLight;
-					i++;
-				}
+			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext, ObjectIndex++)
+				if (Options.Selection[ObjectIndex])
+					pLight->Select(true, false, false);
 
-			// TODO: add only groups with visible pieces
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-			{
-				opts[i].name = pGroup->m_strName;
-				opts[i].type = LC_SELDLG_GROUP;
-				// TODO: check if selected
-				opts[i].selected = false;
-				opts[i].pointer = pGroup;
-				i++;
-			}
-			opts[i].pointer = NULL;
-
-			if (SystemDoDialog(LC_DLG_SELECTBYNAME, opts))
-			{
-				SelectAndFocusNone(false);
-
-				for (i = 0; opts[i].pointer != NULL; i++)
-				{
-					if (!opts[i].selected)
-						continue;
-
-					switch (opts[i].type)
-					{
-						case LC_SELDLG_PIECE:
-						{
-							((Piece*)opts[i].pointer)->Select(true, false, false);
-						} break;
-
-						case LC_SELDLG_CAMERA:
-						{
-							((Camera*)opts[i].pointer)->Select(true, false, false);
-						} break;
-
-						case LC_SELDLG_LIGHT:
-						{
-							((Light*)opts[i].pointer)->Select(true, false, false);
-						} break;
-
-						case LC_SELDLG_GROUP:
-						{
-							pGroup = (Group*)opts[i].pointer;
-							pGroup = pGroup->GetTopGroup();
-							for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-								if (pPiece->GetTopGroup() == pGroup)
-									pPiece->Select(true, false, false);
-						} break;
-					}
-				}
-
-				UpdateSelection();
-				UpdateAllViews();
+			UpdateSelection();
+			UpdateAllViews();
 //	pFrame->UpdateInfo();
-			}
-
-			free(opts);
 		} break;
 
 		case LC_PIECE_INSERT:

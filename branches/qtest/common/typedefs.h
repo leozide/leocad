@@ -198,23 +198,6 @@ enum LC_ACTIONS
 	LC_ACTION_ZOOM_REGION
 };
 
-// Select by Name dialog data
-enum LC_SEL_DATA_TYPE
-{
-	LC_SELDLG_PIECE,
-	LC_SELDLG_CAMERA,
-	LC_SELDLG_LIGHT,
-	LC_SELDLG_GROUP
-};
-
-struct LC_SEL_DATA
-{
-	const char* name;
-	unsigned char type;
-	bool selected;
-	void* pointer;
-};
-
 struct LC_PIECE_MODIFY
 {
 	Piece* piece;

@@ -1,5 +1,5 @@
-#ifndef LC_QSELECTDIALOG_H
-#define LC_QSELECTDIALOG_H
+#ifndef _LC_QSELECTDIALOG_H_
+#define _LC_QSELECTDIALOG_H_
 
 #include <QDialog>
 struct lcSelectDialogOptions;
@@ -18,7 +18,7 @@ public:
 	~lcQSelectDialog();
 
 	lcSelectDialogOptions *options;
-	
+
 	enum
 	{
 		IndexRole = Qt::UserRole
@@ -29,13 +29,15 @@ public slots:
 	void on_selectAll_clicked();
 	void on_selectNone_clicked();
 	void on_selectInvert_clicked();
+	void itemChanged(QTreeWidgetItem *item, int column);
 
 private:
 	Ui::lcQSelectDialog *ui;
 
-	void setSelection(QTreeWidgetItem *parentItem);
-	void updateSelection(QTreeWidgetItem *parentItem);
+	void setSelection(QTreeWidgetItem *parentItem, bool selected);
+	void loadSelection(QTreeWidgetItem *parentItem);
+	void saveSelection(QTreeWidgetItem *parentItem);
 	void addChildren(QTreeWidgetItem *parentItem, Group *parentGroup);
 };
 
-#endif // LC_QSELECTDIALOG_H
+#endif // _LC_QSELECTDIALOG_H_

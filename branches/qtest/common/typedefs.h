@@ -276,19 +276,6 @@ struct LC_HTMLDLG_OPTS
 	LC_IMAGEDLG_OPTS imdlg;
 };
 
-struct LC_PROPERTIESDLG_OPTS
-{
-	char strAuthor[101];
-	char strDescription[101];
-	char strComments[256];
-	char* strTitle;
-	char* strFilename;
-	const char** PieceNames;
-	int NumPieces;
-	int* PieceColorCount;
-	int NumColors;
-};
-
 struct LC_PREFERENCESDLG_OPTS
 {
 	int nMouse;

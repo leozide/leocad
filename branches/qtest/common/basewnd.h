@@ -40,6 +40,7 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_EXPORT_BRICKLINK,
 	LC_DIALOG_EXPORT_POVRAY,
 	LC_DIALOG_EXPORT_WAVEFRONT,
+	LC_DIALOG_PROPERTIES,
 	LC_DIALOG_SELECT_BY_NAME,
 	LC_DIALOG_PIECE_ARRAY,
 	LC_DIALOG_PIECE_GROUP,
@@ -52,10 +53,9 @@ enum LC_DIALOG_TYPE
 	LC_DLG_HTML,
 	LC_DLG_MINIFIG,
 	LC_DLG_PREFERENCES,
-	LC_DLG_PROPERTIES,
+//	LC_DLG_PROPERTIES,
 	LC_DLG_TERRAIN,
 	LC_DLG_LIBRARY,
-	LC_DLG_SELECTBYNAME,
 	LC_DLG_STEPCHOOSE,
 	LC_DLG_EDITCATEGORY,
 };
@@ -66,6 +66,32 @@ struct lcPOVRayDialogOptions
 	char POVRayPath[LC_MAXPATH];
 	char LGEOPath[LC_MAXPATH];
 	bool Render;
+};
+
+struct lcPropertiesDialogOptions
+{
+//	const char* Title;
+//	const char* FileName;
+
+	char Author[101];
+	char Description[101];
+	char Comments[256];
+
+	/*
+	const char** PieceNames;
+	int NumPieces;
+	int* PieceColorCount;
+	int NumColors;
+
+	unsigned long nScene;
+	float fDensity;
+	char strBackground[LC_MAXPATH];
+	float fBackground[4];
+	float fFog[4];
+	float fAmbient[4];
+	float fGrad1[3];
+	float fGrad2[3];
+	*/
 };
 
 struct lcArrayDialogOptions

@@ -4512,6 +4512,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_PROPERTIES:
 		{
+			lcPropertiesDialogOptions Options;
+
+			gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options);
+			/*
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
 			LC_PROPERTIESDLG_OPTS opts;
 
@@ -4539,7 +4543,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + opts.NumColors]++;
 			}
 
-			if (SystemDoDialog(LC_DLG_PROPERTIES, &opts))
+			if (SystemDoDialog(LC_DIALOG_PROPERTIES, &opts))
 			{
 				if (strcmp(m_strAuthor, opts.strAuthor) ||
 					strcmp(m_strDescription, opts.strDescription) ||
@@ -4554,6 +4558,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			delete[] opts.PieceColorCount;
 			delete[] opts.PieceNames;
+			*/
 		} break;
 
 		case LC_FILE_TERRAIN_EDITOR:

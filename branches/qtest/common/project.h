@@ -159,13 +159,12 @@ public:
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
 
-// Implementation
-protected:
-	// default implementation
 	char m_strTitle[LC_MAXPATH];
 	char m_strPathName[LC_MAXPATH];
-	bool m_bModified;    // changed since last saved
+	bool m_bModified;
 
+// Implementation
+protected:
 	View* m_ActiveView;
 	PtrArray<View> m_ViewList;
 

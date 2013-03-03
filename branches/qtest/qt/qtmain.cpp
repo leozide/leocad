@@ -107,6 +107,7 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 }
 
 #include "lc_qpovraydialog.h"
+#include "lc_qpropertiesdialog.h"
 #include "lc_qselectdialog.h"
 #include "lc_qarraydialog.h"
 #include "lc_qgroupdialog.h"
@@ -174,6 +175,12 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_EXPORT_POVRAY:
 		{
 			lcQPOVRayDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PROPERTIES:
+		{
+			lcQPropertiesDialog dialog(parent, Data);
 			return dialog.exec() == QDialog::Accepted;
 		} break;
 

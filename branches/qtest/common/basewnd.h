@@ -4,6 +4,7 @@
 #include "defines.h"
 #include "lc_math.h"
 #include "array.h"
+#include "project.h"
 
 class Group;
 
@@ -80,22 +81,16 @@ struct lcPropertiesDialogOptions
 	lcVector3 SolidColor;
 	lcVector3 GradientColor1;
 	lcVector3 GradientColor2;
-	char BackgroundFile[LC_MAXPATH];
+	char BackgroundFileName[LC_MAXPATH];
 	bool BackgroundTile;
 	bool FogEnabled;
 	float FogDensity;
 	lcVector3 FogColor;
 	lcVector3 AmbientColor;
 	bool DrawFloor;
-
 	bool SetDefault;
 
-	/*
-	const char** PieceNames;
-	int NumPieces;
-	int* PieceColorCount;
-	int NumColors;
-	*/
+	ObjArray<lcPiecesUsedEntry> PartsUsed;
 };
 
 struct lcArrayDialogOptions

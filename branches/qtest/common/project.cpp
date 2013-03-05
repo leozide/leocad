@@ -4530,52 +4530,109 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Options.SolidColor = lcVector3(m_fBackground[0], m_fBackground[1], m_fBackground[2]);
 			Options.GradientColor1 = lcVector3(m_fGradient1[0], m_fGradient1[1], m_fGradient1[2]);
 			Options.GradientColor2 = lcVector3(m_fGradient2[0], m_fGradient2[1], m_fGradient2[2]);
-			strcpy(Options.BackgroundFile, m_strBackground);
+			strcpy(Options.BackgroundFileName, m_strBackground);
 			Options.BackgroundTile = (m_nScene & LC_SCENE_BG_TILE) != 0;
 			Options.FogEnabled = (m_nScene & LC_SCENE_FOG) != 0;
 			Options.FogDensity = m_fFogDensity * 100.0f;
 			Options.FogColor = lcVector3(m_fFogColor[0], m_fFogColor[1], m_fFogColor[2]);
 			Options.AmbientColor = lcVector3(m_fAmbient[0], m_fAmbient[1], m_fAmbient[2]);
 			Options.DrawFloor = (m_nScene & LC_SCENE_FLOOR) != 0;
+			Options.SetDefault = false;
 
-			gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options);
-			/*
-			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			GetPiecesUsed(Options.PartsUsed);
 
-			opts.NumPieces = Library->mPieces.GetSize();
-			opts.NumColors = gColorList.GetSize();
-			opts.PieceColorCount = new int[(opts.NumPieces + 1) * (opts.NumColors + 1)];
-			memset(opts.PieceColorCount, 0, (opts.NumPieces + 1) * (opts.NumColors + 1) * sizeof(opts.PieceColorCount[0]));
-			opts.PieceNames = new const char*[opts.NumPieces];
+			if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
+				break;
 
-			for (int i = 0; i < opts.NumPieces; i++)
-				opts.PieceNames[i] = Library->mPieces[i]->m_strDescription;
-
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			bool Modified = false;
+			
+			if (strcmp(m_strAuthor, Options.Author))
 			{
-				int idx = Library->mPieces.FindIndex(pPiece->mPieceInfo);
-				opts.PieceColorCount[idx * (opts.NumColors + 1) + pPiece->mColorIndex]++;
-				opts.PieceColorCount[idx * (opts.NumColors + 1) + opts.NumColors]++;
-				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + pPiece->mColorIndex]++;
-				opts.PieceColorCount[opts.NumPieces * (opts.NumColors + 1) + opts.NumColors]++;
+				strcpy(m_strAuthor, Options.Author);
+				Modified = true;
 			}
 
-			if (SystemDoDialog(LC_DIALOG_PROPERTIES, &opts))
+			if (strcmp(m_strDescription, Options.Description))
 			{
-				if (strcmp(m_strAuthor, opts.strAuthor) ||
-					strcmp(m_strDescription, opts.strDescription) ||
-					strcmp(m_strComments, opts.strComments))
-				{
-					strcpy(m_strAuthor, opts.strAuthor);
-					strcpy(m_strDescription, opts.strDescription);
-					strcpy(m_strComments, opts.strComments);
-					SetModifiedFlag(true);
-				}
+				strcpy(m_strDescription, Options.Description);
+				Modified = true;
 			}
 
-			delete[] opts.PieceColorCount;
-			delete[] opts.PieceNames;
-			*/
+			if (strcmp(m_strComments, Options.Comments))
+			{
+				strcpy(m_strComments, Options.Comments);
+				Modified = true;
+			}
+
+			lcuint32 Scene = 0;
+
+			if (Options.BackgroundType == 2)
+				Scene |= LC_SCENE_BG;
+			else if (Options.BackgroundType == 1)
+				m_nScene |= LC_SCENE_GRADIENT;
+
+			if (Options.BackgroundTile)
+				Scene |= LC_SCENE_BG_TILE;
+
+			if (Options.FogEnabled)
+				Scene |= LC_SCENE_FOG;
+
+			if (Options.DrawFloor)
+				Scene |= LC_SCENE_FLOOR;
+
+			if (m_nScene != Scene)
+			{
+				m_nScene = Scene;
+				Modified = true;
+			}
+
+			if (strcmp(m_strBackground, Options.BackgroundFileName))
+			{
+				strcpy(m_strBackground, Options.BackgroundFileName);
+				Modified = true;
+			}
+
+			if (m_fFogDensity * 100.0f != Options.FogDensity)
+			{
+				m_fFogDensity = Options.FogDensity / 100.0f;
+				Modified = true;
+			}
+
+			if (memcmp(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor)))
+			{
+				memcpy(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor));
+				Modified = true;
+			}
+
+			if (memcmp(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1)))
+			{
+				memcpy(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1));
+				Modified = true;
+			}
+
+			if (memcmp(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2)))
+			{
+				memcpy(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2));
+				Modified = true;
+			}
+
+			if (memcmp(m_fFogColor, Options.FogColor, sizeof(Options.FogColor)))
+			{
+				memcpy(m_fFogColor, Options.FogColor, sizeof(Options.FogColor));
+				Modified = true;
+			}
+
+			if (memcmp(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor)))
+			{
+				memcpy(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor));
+				Modified = true;
+			}
+
+			if (Modified)
+			{
+				SetModifiedFlag(true);
+				CheckPoint("Properties");
+			}
 		} break;
 
 		case LC_FILE_TERRAIN_EDITOR:

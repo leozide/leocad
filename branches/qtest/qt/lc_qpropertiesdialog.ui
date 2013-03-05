@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabSummary">
       <attribute name="title">
@@ -32,7 +32,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="author"/>
+        <widget class="QLineEdit" name="authorEdit"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
@@ -42,7 +42,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="description"/>
+        <widget class="QLineEdit" name="descriptionEdit"/>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_2">
@@ -52,7 +52,11 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QTextEdit" name="comments"/>
+        <widget class="QTextEdit" name="commentsEdit">
+         <property name="acceptRichText">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -70,14 +74,14 @@
           <item row="1" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QToolButton" name="gradient1">
+             <widget class="QToolButton" name="gradient1ColorButton">
               <property name="text">
                <string/>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="gradient2">
+             <widget class="QToolButton" name="gradient2ColorButton">
               <property name="text">
                <string/>
               </property>
@@ -99,21 +103,21 @@
            </layout>
           </item>
           <item row="0" column="0">
-           <widget class="QRadioButton" name="solid">
+           <widget class="QRadioButton" name="solidRadio">
             <property name="text">
              <string>Solid Color</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QRadioButton" name="image">
+           <widget class="QRadioButton" name="imageRadio">
             <property name="text">
              <string>Image</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QRadioButton" name="gradient">
+           <widget class="QRadioButton" name="gradientRadio">
             <property name="text">
              <string>Gradient</string>
             </property>
@@ -122,10 +126,10 @@
           <item row="2" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLineEdit" name="imageName"/>
+             <widget class="QLineEdit" name="imageNameEdit"/>
             </item>
             <item>
-             <widget class="QToolButton" name="imageBrowse">
+             <widget class="QToolButton" name="imageNameButton">
               <property name="text">
                <string>...</string>
               </property>
@@ -134,7 +138,7 @@
            </layout>
           </item>
           <item row="3" column="1">
-           <widget class="QCheckBox" name="tile">
+           <widget class="QCheckBox" name="imageTileCheckBox">
             <property name="text">
              <string>Tile</string>
             </property>
@@ -143,7 +147,7 @@
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QToolButton" name="color">
+             <widget class="QToolButton" name="solidColorButton">
               <property name="text">
                <string/>
               </property>
@@ -174,7 +178,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <widget class="QCheckBox" name="fog">
+           <widget class="QCheckBox" name="fogCheckBox">
             <property name="text">
              <string>Fog</string>
             </property>
@@ -183,7 +187,7 @@
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QToolButton" name="fogColor">
+             <widget class="QToolButton" name="fogColorButton">
               <property name="text">
                <string/>
               </property>
@@ -197,7 +201,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="fogDensity"/>
+             <widget class="QLineEdit" name="fogDensityEdit">
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="horizontalSpacer_3">
@@ -224,7 +235,7 @@
           <item row="1" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QToolButton" name="ambient">
+             <widget class="QToolButton" name="ambientColorButton">
               <property name="text">
                <string/>
               </property>
@@ -246,20 +257,20 @@
            </layout>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="floor">
+           <widget class="QCheckBox" name="floorCheckBox">
             <property name="text">
              <string>Draw Floor</string>
             </property>
            </widget>
           </item>
          </layout>
-         <zorder>floor</zorder>
+         <zorder>floorCheckBox</zorder>
          <zorder>label_20</zorder>
-         <zorder>fog</zorder>
+         <zorder>fogCheckBox</zorder>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="setDefault">
+        <widget class="QCheckBox" name="setDefaultCheckBox">
          <property name="text">
           <string>Set default options for new projects</string>
          </property>
@@ -273,7 +284,20 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QTableWidget" name="table"/>
+        <widget class="QTableWidget" name="partsTable">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>75</number>
+         </attribute>
+         <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+          <bool>true</bool>
+         </attribute>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -304,24 +328,24 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>buttonBox</tabstop>
-  <tabstop>author</tabstop>
-  <tabstop>description</tabstop>
-  <tabstop>comments</tabstop>
-  <tabstop>solid</tabstop>
-  <tabstop>color</tabstop>
-  <tabstop>gradient</tabstop>
-  <tabstop>gradient1</tabstop>
-  <tabstop>gradient2</tabstop>
-  <tabstop>image</tabstop>
-  <tabstop>imageName</tabstop>
-  <tabstop>imageBrowse</tabstop>
-  <tabstop>tile</tabstop>
-  <tabstop>fog</tabstop>
-  <tabstop>fogColor</tabstop>
-  <tabstop>fogDensity</tabstop>
-  <tabstop>ambient</tabstop>
-  <tabstop>floor</tabstop>
-  <tabstop>table</tabstop>
+  <tabstop>authorEdit</tabstop>
+  <tabstop>descriptionEdit</tabstop>
+  <tabstop>commentsEdit</tabstop>
+  <tabstop>solidRadio</tabstop>
+  <tabstop>solidColorButton</tabstop>
+  <tabstop>gradientRadio</tabstop>
+  <tabstop>gradient1ColorButton</tabstop>
+  <tabstop>gradient2ColorButton</tabstop>
+  <tabstop>imageRadio</tabstop>
+  <tabstop>imageNameEdit</tabstop>
+  <tabstop>imageNameButton</tabstop>
+  <tabstop>imageTileCheckBox</tabstop>
+  <tabstop>fogCheckBox</tabstop>
+  <tabstop>fogColorButton</tabstop>
+  <tabstop>fogDensityEdit</tabstop>
+  <tabstop>ambientColorButton</tabstop>
+  <tabstop>floorCheckBox</tabstop>
+  <tabstop>partsTable</tabstop>
  </tabstops>
  <resources/>
  <connections>

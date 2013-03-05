@@ -21,6 +21,7 @@ public:
 public slots:
 	void accept();
 	void colorClicked();
+	void on_imageNameButton_clicked();
 
 private:
 	Ui::lcQPropertiesDialog *ui;

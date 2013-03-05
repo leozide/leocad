@@ -4514,16 +4514,33 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcPropertiesDialogOptions Options;
 
+			Options.Title = m_strTitle;
+
+			strcpy(Options.Author, m_strAuthor);
+			strcpy(Options.Description, m_strDescription);
+			strcpy(Options.Comments, m_strComments);
+
+			if (m_nScene & LC_SCENE_BG)
+				Options.BackgroundType = 2;
+			else if (m_nScene & LC_SCENE_GRADIENT)
+				Options.BackgroundType = 1;
+			else
+				Options.BackgroundType = 0;
+
+			Options.SolidColor = lcVector3(m_fBackground[0], m_fBackground[1], m_fBackground[2]);
+			Options.GradientColor1 = lcVector3(m_fGradient1[0], m_fGradient1[1], m_fGradient1[2]);
+			Options.GradientColor2 = lcVector3(m_fGradient2[0], m_fGradient2[1], m_fGradient2[2]);
+			strcpy(Options.BackgroundFile, m_strBackground);
+			Options.BackgroundTile = (m_nScene & LC_SCENE_BG_TILE) != 0;
+			Options.FogEnabled = (m_nScene & LC_SCENE_FOG) != 0;
+			Options.FogDensity = m_fFogDensity * 100.0f;
+			Options.FogColor = lcVector3(m_fFogColor[0], m_fFogColor[1], m_fFogColor[2]);
+			Options.AmbientColor = lcVector3(m_fAmbient[0], m_fAmbient[1], m_fAmbient[2]);
+			Options.DrawFloor = (m_nScene & LC_SCENE_FLOOR) != 0;
+
 			gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options);
 			/*
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
-			LC_PROPERTIESDLG_OPTS opts;
-
-			opts.strTitle = m_strTitle;
-			strcpy(opts.strAuthor, m_strAuthor);
-			strcpy(opts.strDescription, m_strDescription);
-			strcpy(opts.strComments, m_strComments);
-			opts.strFilename = m_strPathName;
 
 			opts.NumPieces = Library->mPieces.GetSize();
 			opts.NumColors = gColorList.GetSize();

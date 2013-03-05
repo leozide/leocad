@@ -70,27 +70,31 @@ struct lcPOVRayDialogOptions
 
 struct lcPropertiesDialogOptions
 {
-//	const char* Title;
-//	const char* FileName;
+	const char* Title;
 
 	char Author[101];
 	char Description[101];
 	char Comments[256];
+
+	int BackgroundType;
+	lcVector3 SolidColor;
+	lcVector3 GradientColor1;
+	lcVector3 GradientColor2;
+	char BackgroundFile[LC_MAXPATH];
+	bool BackgroundTile;
+	bool FogEnabled;
+	float FogDensity;
+	lcVector3 FogColor;
+	lcVector3 AmbientColor;
+	bool DrawFloor;
+
+	bool SetDefault;
 
 	/*
 	const char** PieceNames;
 	int NumPieces;
 	int* PieceColorCount;
 	int NumColors;
-
-	unsigned long nScene;
-	float fDensity;
-	char strBackground[LC_MAXPATH];
-	float fBackground[4];
-	float fFog[4];
-	float fAmbient[4];
-	float fGrad1[3];
-	float fGrad2[3];
 	*/
 };
 

@@ -18,6 +18,10 @@ public:
 
 	lcPropertiesDialogOptions *options;
 
+public slots:
+	void accept();
+	void colorClicked();
+
 private:
 	Ui::lcQPropertiesDialog *ui;
 };

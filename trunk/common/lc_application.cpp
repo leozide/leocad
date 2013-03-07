@@ -244,7 +244,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			return false;
 		}
 
-		lcLoadDefaultColors();
 		m_Library->CreateBuiltinPieces();
 
 		SystemDoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"

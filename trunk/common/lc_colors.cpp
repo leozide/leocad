@@ -350,6 +350,9 @@ bool lcLoadColorFile(lcFile& File)
 
 	Colors.RemoveAll();
 
+	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		gColorGroups[GroupIdx].Colors.RemoveAll();
+
 	strcpy(gColorGroups[0].Name, "Solid Colors");
 	strcpy(gColorGroups[1].Name, "Translucent Colors");
 	strcpy(gColorGroups[2].Name, "Special Colors");

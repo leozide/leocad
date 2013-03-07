@@ -31,7 +31,6 @@ lcQPartsTree::lcQPartsTree(QWidget *parent) :
 	connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(itemExpanded(QTreeWidgetItem*)));
 
 	lcPiecesLibrary* library = lcGetPiecesLibrary();
-	QList<QTreeWidgetItem *> categories;
 
 	for (int categoryIndex = 0; categoryIndex < library->mCategories.GetSize(); categoryIndex++)
 	{
@@ -39,10 +38,7 @@ lcQPartsTree::lcQPartsTree(QWidget *parent) :
 		categoryItem->setData(0, ExpandedOnceRole, QVariant(false));
 		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
 		new QTreeWidgetItem(categoryItem);
-		categories.append(categoryItem);
 	}
-
-	insertTopLevelItems(0, categories);
 }
 
 void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)

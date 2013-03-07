@@ -4628,6 +4628,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 				Modified = true;
 			}
 
+			if (Options.SetDefault)
+			{
+				Sys_ProfileSaveInt("Default", "Scene", Scene);
+				Sys_ProfileSaveInt("Default", "Density", (int)(Options.FogDensity * 100));
+				Sys_ProfileSaveString("Default", "BMP", Options.BackgroundFileName);
+				Sys_ProfileSaveInt("Default", "Background", RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
+				Sys_ProfileSaveInt("Default", "Fog", RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
+				Sys_ProfileSaveInt("Default", "Ambient", RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
+				Sys_ProfileSaveInt("Default", "Gradient1", RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+				Sys_ProfileSaveInt("Default", "Gradient2", RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+			}
+
 			if (Modified)
 			{
 				SetModifiedFlag(true);
@@ -5537,6 +5549,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_PREFERENCES:
 		{
+			int Options;
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
+				break;
+		/*
 			LC_PREFERENCESDLG_OPTS opts;
 			opts.nMouse = m_nMouse;
 			opts.nSaveInterval = m_nAutosave;
@@ -5591,6 +5608,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				UpdateAllViews();
 			}
+			*/
 		} break;
 
 		case LC_VIEW_ZOOM_IN:

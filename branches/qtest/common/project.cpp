@@ -4660,11 +4660,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			delete temp;
 		} break;
 
-		case LC_FILE_PIECES_LIBRARY:
-		{
-			SystemDoDialog(LC_DLG_LIBRARY, NULL);
-		} break;
-
 		case LC_FILE_RECENT1:
 		case LC_FILE_RECENT2:
 		case LC_FILE_RECENT3:
@@ -5549,7 +5544,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_PREFERENCES:
 		{
-			int Options;
+			lcPreferencesDialogOptions Options;
+			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+			strcpy(Options.CategoriesFileName, Library->mCategoriesFile);
+			Options.Categories = Library->mCategories;
+			Options.CategoriesModified = false;
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 				break;

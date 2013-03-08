@@ -24,7 +24,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mCategoriesFile[0] = 0;
 	mCacheFileModifiedTime = 0;
 	mLibraryFileName[0] = 0;
-	mCategoriesModified = false;
 	mZipFile = NULL;
 	mCacheFile = NULL;
 	mCacheFileName[0] = 0;
@@ -124,8 +123,7 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 			return false;
 	}
 
-	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
-	if (!FileName[0] || !LoadCategories(FileName))
+	if (!LoadCategories())
 		ResetCategories();
 
 	SystemUpdateCategories(false);
@@ -1779,18 +1777,22 @@ int lcPiecesLibrary::GetFirstPieceCategory(PieceInfo* Info) const
 
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
 {
-	SinglePieces.RemoveAll();
-	GroupedPieces.RemoveAll();
-
-	// Don't group entries in the search results category.
 	if (mCategories[CategoryIndex].Name == "Search Results")
 		GroupPieces = false;
+
+	SearchPieces(mCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
+}
+
+void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+{
+	SinglePieces.RemoveAll();
+	GroupedPieces.RemoveAll();
 
 	for (int i = 0; i < mPieces.GetSize(); i++)
 	{
 		PieceInfo* Info = mPieces[i];
 
-		if (!PieceInCategory(Info, mCategories[CategoryIndex].Keywords))
+		if (!PieceInCategory(Info, CategoryKeywords))
 			continue;
 
 		if (!GroupPieces)
@@ -1875,7 +1877,7 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>&
 	}
 }
 
-void lcPiecesLibrary::ResetCategories()
+void lcPiecesLibrary::ResetCategories(ObjArray<lcLibraryCategory>& Categories)
 {
 	struct CategoryEntry
 	{
@@ -1927,40 +1929,21 @@ void lcPiecesLibrary::ResetCategories()
 	};
 	const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
 
-	mCategories.RemoveAll();
+	Categories.RemoveAll();
 	for (int i = 0; i < NumCategories; i++)
 	{
-		lcLibraryCategory& Category = mCategories.Add();
+		lcLibraryCategory& Category = Categories.Add();
 
 		Category.Name = DefaultCategories[i].Name;
 		Category.Keywords = DefaultCategories[i].Keywords;
 	}
-
-	strcpy(mCategoriesFile, "");
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-	mCategoriesModified = false;
 }
 
-bool lcPiecesLibrary::LoadCategories(const char* FileName)
+bool lcPiecesLibrary::LoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories)
 {
-	char Path[LC_MAXPATH];
-
-	if (FileName)
-	{
-		strcpy(Path, FileName);
-	}
-	else
-	{
-		Path[0] = 0;
-
-		if (!gMainWindow->DoDialog(LC_DIALOG_OPEN_CATEGORIES, Path))
-			return false;
-	}
-
-	// Load the file.
 	lcDiskFile File;
 
-	if (!File.Open(Path, "rb"))
+	if (!File.Open(FileName, "rb"))
 		return false;
 
 	lcuint32 i;
@@ -1977,72 +1960,37 @@ bool lcPiecesLibrary::LoadCategories(const char* FileName)
 	if (i != LC_CATEGORY_FILE_VERSION)
 		return false;
 
-	mCategories.RemoveAll();
+	Categories.RemoveAll();
 
 	File.ReadU32(&i, 1);
 	while (i--)
 	{
-		lcLibraryCategory& Category = mCategories.Add();
+		lcLibraryCategory& Category = Categories.Add();
 
 		File.ReadString(Category.Name);
 		File.ReadString(Category.Keywords);
 	}
 
-	strcpy(mCategoriesFile, Path);
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-	mCategoriesModified = false;
-
 	return true;
 }
 
-bool lcPiecesLibrary::SaveCategories()
+bool lcPiecesLibrary::SaveCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories)
 {
-	if (mCategoriesModified)
-	{
-		switch (gMainWindow->DoMessageBox("Save changes to categories?", LC_MB_YESNOCANCEL | LC_MB_ICONQUESTION))
-		{
-			case LC_CANCEL:
-				return false;
-
-			case LC_YES:
-				if (!DoSaveCategories(false))
-					return false;
-				break;
-
-			case LC_NO:
-				return true;
-				break;
-		}
-	}
-
-	return true;
-}
-
-bool lcPiecesLibrary::DoSaveCategories(bool AskName)
-{
-	// Get the file name.
-	if (AskName || !mCategoriesFile[0])
-	{
-		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_CATEGORIES, mCategoriesFile))
-			return false;
-	}
-
-	// Save the file.
 	lcDiskFile File;
 
-	if (!File.Open(mCategoriesFile, "wb"))
+	if (!File.Open(FileName, "wb"))
 		return false;
 
 	File.WriteU32(LC_FILE_ID);
 	File.WriteU32(LC_CATEGORY_FILE_ID);
 	File.WriteU32(LC_CATEGORY_FILE_VERSION);
 
-	int NumCategories = mCategories.GetSize();
+	int NumCategories = Categories.GetSize();
 	int i;
 
-	for (i = 0; i < mCategories.GetSize(); i++)
+	for (i = 0; i < Categories.GetSize(); i++)
 	{
-		if (mCategories[i].Name == "Search Results")
+		if (Categories[i].Name == "Search Results")
 		{
 			NumCategories--;
 			break;
@@ -2050,17 +1998,40 @@ bool lcPiecesLibrary::DoSaveCategories(bool AskName)
 	}
 
 	File.WriteU32(NumCategories);
-	for (i = 0; i < mCategories.GetSize(); i++)
+	for (i = 0; i < Categories.GetSize(); i++)
 	{
-		if (mCategories[i].Name == "Search Results")
+		if (Categories[i].Name == "Search Results")
 			continue;
 
-		File.WriteString(mCategories[i].Name);
-		File.WriteString(mCategories[i].Keywords);
+		File.WriteString(Categories[i].Name);
+		File.WriteString(Categories[i].Keywords);
 	}
 
+	return true;
+}
+
+void lcPiecesLibrary::ResetCategories()
+{
+	ResetCategories(mCategories);
+
+	strcpy(mCategoriesFile, "");
 	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-	mCategoriesModified = false;
+}
+
+bool lcPiecesLibrary::LoadCategories()
+{
+	char FileName[LC_MAXPATH];
+
+	strcpy(FileName, Sys_ProfileLoadString("Settings", "Categories", ""));
+
+	if (!FileName[0])
+		return false;
+
+	if (!LoadCategories(FileName, mCategories))
+		return false;
+
+	strcpy(mCategoriesFile, FileName);
+	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
 
 	return true;
 }
@@ -2072,35 +2043,6 @@ int lcPiecesLibrary::FindCategoryIndex(const String& CategoryName) const
 			return i;
 
 	return -1;
-}
-
-void lcPiecesLibrary::SetCategory(int Index, const String& Name, const String& Keywords)
-{
-	mCategories[Index].Name = Name;
-	mCategories[Index].Keywords = Keywords;
-
-	SystemUpdateCategories(true);
-
-	mCategoriesModified = true;
-}
-
-void lcPiecesLibrary::AddCategory(const String& Name, const String& Keywords)
-{
-	lcLibraryCategory& Category = mCategories.Add();
-
-	Category.Name = Name;
-	Category.Keywords = Keywords;
-
-	SystemUpdateCategories(true);
-
-	mCategoriesModified = true;
-}
-
-void lcPiecesLibrary::RemoveCategory(int Index)
-{
-	mCategories.RemoveIndex(Index);
-
-	mCategoriesModified = true;
 }
 
 void lcPiecesLibrary::CreateBuiltinPieces()
@@ -2163,7 +2105,7 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 		{ "92438", "Plate  8 x 16" },
 	};
 
-	for (int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
+	for (unsigned int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
 	{
 		PieceInfo* Info = new PieceInfo(-1);
 		mPieces.Add(Info);
@@ -2179,8 +2121,7 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 
 	lcLoadDefaultColors();
 
-	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
-	if (!FileName[0] || !LoadCategories(FileName))
+	if (!LoadCategories())
 	{
 		struct CategoryEntry
 		{
@@ -2209,7 +2150,6 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 
 		strcpy(mCategoriesFile, "");
 		Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-		mCategoriesModified = false;
 	}
 
 	SystemUpdateCategories(false);

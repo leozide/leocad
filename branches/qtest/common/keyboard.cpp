@@ -27,7 +27,6 @@ LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] =
 	{ LC_FILE_EXPORT_WAVEFRONT, "Export Wavefront", 0, 0, 0 },
 	{ LC_FILE_PROPERTIES, "Project Properties", 0, 0, 0 },
 //	{ LC_FILE_TERRAIN, "Terrain Editor", 0, 0, 0 },
-	{ LC_FILE_PIECES_LIBRARY, "Piece Library Manager", 0, 0, 0 },
 //	{ LC_FILE_RECENT, "Open Recent File", 0, 0, 0 },
 	{ LC_EDIT_UNDO, "Undo", LC_KEYMOD1_CONTROL, LC_KEY_Z, 0 },
 	{ LC_EDIT_REDO, "Redo", LC_KEYMOD1_CONTROL, LC_KEY_Y, 0 },

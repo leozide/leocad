@@ -74,7 +74,6 @@ void lcQMainWindow::createActions()
 		{ "&Wavefront...",                    "Export the project in Wavefront OBJ format" },                                           // LC_FILE_EXPORT_WAVEFRONT
 		{ "Prope&rties...",                   "Display project properties" },                                                           // LC_FILE_PROPERTIES
 		{ "&Terrain Editor...",               "Edit terrain" },                                                                         // LC_FILE_TERRAIN_EDITOR
-		{ "Pieces &Library...",               "Configure pieces library" },                                                             // LC_FILE_PIECES_LIBRARY
 		{ "&Print...",                        "Print the active project" },                                                             // LC_FILE_PRINT
 		{ "Print Pre&view",                   "Display how the project would look if printed" },                                        // LC_FILE_PRINT_PREVIEW
 		{ "Print &Bill of Materials...",      "Print a list of pieces used" },                                                          // LC_FILE_PRINT_BOM
@@ -341,7 +340,6 @@ void lcQMainWindow::createMenus()
 	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PROPERTIES]);
-	menuFile->addAction(actions[LC_FILE_PIECES_LIBRARY]);
 	menuFile->addAction(actions[LC_FILE_TERRAIN_EDITOR]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PRINT]);

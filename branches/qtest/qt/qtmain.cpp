@@ -124,8 +124,6 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_OPEN_PROJECT:
 	case LC_DIALOG_SAVE_PROJECT:
 	case LC_DIALOG_MERGE_PROJECT:
-	case LC_DIALOG_OPEN_CATEGORIES:
-	case LC_DIALOG_SAVE_CATEGORIES:
 	case LC_DIALOG_EXPORT_BRICKLINK:
 	case LC_DIALOG_EXPORT_WAVEFRONT:
 		{
@@ -144,14 +142,6 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 			case LC_DIALOG_MERGE_PROJECT:
 				result = QFileDialog::getOpenFileName(parent, parent->tr("Merge Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_OPEN_CATEGORIES:
-				result = QFileDialog::getOpenFileName(parent, parent->tr("Open Categories"), FileName, parent->tr("LeoCAD Categories Files (*.lcf);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_SAVE_CATEGORIES:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Save Categories"), FileName, parent->tr("LeoCAD Categories Files (*.lcf);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_BRICKLINK:

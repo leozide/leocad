@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>400</height>
+    <width>550</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,13 +29,19 @@
        <string>Rendering</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tabLibrary">
+     <widget class="QWidget" name="tabCategories">
       <attribute name="title">
-       <string>Parts Library</string>
+       <string>Categories</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QSplitter" name="splitter">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -105,6 +111,65 @@
          </widget>
         </widget>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="newCategory">
+           <property name="text">
+            <string>New...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="editCategory">
+           <property name="text">
+            <string>Edit...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="deleteCategory">
+           <property name="text">
+            <string>Delete...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="loadCategories">
+           <property name="text">
+            <string>Load...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveCategories">
+           <property name="text">
+            <string>Save...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="resetCategories">
+           <property name="text">
+            <string>Reset...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabKeyboard">
@@ -113,6 +178,16 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2"/>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -127,6 +202,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>categoriesTree</tabstop>
+  <tabstop>partsTree</tabstop>
+  <tabstop>newCategory</tabstop>
+  <tabstop>editCategory</tabstop>
+  <tabstop>deleteCategory</tabstop>
+  <tabstop>loadCategories</tabstop>
+  <tabstop>saveCategories</tabstop>
+  <tabstop>resetCategories</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

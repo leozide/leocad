@@ -123,18 +123,16 @@ public:
 	bool OpenCache();
 	void CloseCache();
 
+	static void ResetCategories(ObjArray<lcLibraryCategory>& Categories);
+	static bool LoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories);
+	static bool SaveCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories);
+
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
+	void SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
 	int GetFirstPieceCategory(PieceInfo* Info) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
 	int FindCategoryIndex(const String& CategoryName) const;
-	void SetCategory(int Index, const String& Name, const String& Keywords);
-	void AddCategory(const String& Name, const String& Keywords);
-	void RemoveCategory(int Index);
-	void ResetCategories();
-	bool LoadCategories(const char* FileName);
-	bool SaveCategories();
-	bool DoSaveCategories(bool AskName);
 
 	PtrArray<PieceInfo> mPieces;
 	PtrArray<lcLibraryPrimitive> mPrimitives;
@@ -144,10 +142,15 @@ public:
 	PtrArray<lcTexture> mTextures;
 
 	char mLibraryPath[LC_MAXPATH];
+	char mCategoriesFile[LC_MAXPATH];
 
 protected:
 	bool OpenArchive(const char* FileName, const char* CachePath);
 	bool OpenDirectory(const char* Path);
+
+	bool LoadCategories();
+	bool SaveCategories();
+	void ResetCategories();
 
 	bool LoadCacheIndex(lcZipFile& CacheFile);
 	bool LoadCachePiece(PieceInfo* Info);
@@ -156,9 +159,6 @@ protected:
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, ObjArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
-
-	bool mCategoriesModified;
-	char mCategoriesFile[LC_MAXPATH];
 
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;

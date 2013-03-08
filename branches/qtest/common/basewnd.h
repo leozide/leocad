@@ -5,6 +5,7 @@
 #include "lc_math.h"
 #include "array.h"
 #include "project.h"
+#include "lc_library.h"
 
 class Group;
 
@@ -36,8 +37,6 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_OPEN_PROJECT,
 	LC_DIALOG_SAVE_PROJECT,
 	LC_DIALOG_MERGE_PROJECT,
-	LC_DIALOG_OPEN_CATEGORIES,
-	LC_DIALOG_SAVE_CATEGORIES,
 	LC_DIALOG_EXPORT_BRICKLINK,
 	LC_DIALOG_EXPORT_POVRAY,
 	LC_DIALOG_EXPORT_WAVEFRONT,
@@ -47,18 +46,17 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_PIECE_GROUP,
 	LC_DIALOG_EDIT_GROUPS,
 	LC_DIALOG_PREFERENCES,
-	LC_DIALOG_ABOUT,
+	LC_DIALOG_ABOUT
 
 	// TODO: update dialogs
+	,
 	LC_DLG_DIRECTORY_BROWSE,
 	LC_DLG_PICTURE_SAVE,
 	LC_DLG_HTML,
 	LC_DLG_MINIFIG,
-	LC_DLG_PREFERENCES,
 	LC_DLG_TERRAIN,
-	LC_DLG_LIBRARY,
 	LC_DLG_STEPCHOOSE,
-	LC_DLG_EDITCATEGORY,
+	LC_DLG_EDITCATEGORY
 };
 
 struct lcPOVRayDialogOptions
@@ -109,6 +107,13 @@ struct lcEditGroupsDialogOptions
 struct lcSelectDialogOptions
 {
 	ObjArray<bool> Selection;
+};
+
+struct lcPreferencesDialogOptions
+{
+	char CategoriesFileName[LC_MAXPATH];
+	ObjArray<lcLibraryCategory> Categories;
+	bool CategoriesModified;
 };
 
 class lcBaseWindow

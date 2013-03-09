@@ -299,12 +299,6 @@ struct LC_PREFERENCESDLG_OPTS
 	char strHeader[256];
 };
 
-struct LC_CATEGORYDLG_OPTS
-{
-	String Name;
-	String Keywords;
-};
-
 enum LC_TRANSFORM_TYPE
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,

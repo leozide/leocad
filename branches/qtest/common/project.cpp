@@ -376,10 +376,11 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->Seek(32, SEEK_CUR);
 	else
 	{
+		lcuint32 u;
 		file->ReadS32(&i, 1); m_nAngleSnap = i;
-		file->ReadU32(&m_nSnap, 1);
+		file->ReadU32(&u, 1); //m_nSnap
 		file->ReadFloats(&m_fLineWidth, 1);
-		file->ReadU32(&m_nDetail, 1);
+		file->ReadU32(&u, 1); //m_nDetail
 		file->ReadS32(&i, 1); //m_nCurGroup = i;
 		file->ReadS32(&i, 1); m_nCurColor = i;
 		file->ReadS32(&i, 1); action = i;
@@ -1583,7 +1584,6 @@ void Project::RenderBackground(View* view)
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_FOG);
 
 	float ViewWidth = (float)view->GetWidth();
 	float ViewHeight = (float)view->GetHeight();
@@ -1704,17 +1704,42 @@ void Project::RenderScenePieces(View* view)
 
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+		glEnable(GL_COLOR_MATERIAL);
+		glShadeModel(GL_SMOOTH);
+
+		GLfloat mat_translucent[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
+		GLfloat mat_opaque[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
+		GLfloat medium_shininess[] = { (GLfloat)64.0 };
+
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, medium_shininess);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_opaque);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_translucent);
+
+		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, m_fAmbient);
+
 		int index = 0;
 		Light *pLight;
 
 		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-			pLight->Setup (index);
+			pLight->Setup(index);
 
 		glEnable(GL_LIGHTING);
 	}
+	else
+	{
+		glDisable(GL_LIGHTING);
+		glDisable(GL_COLOR_MATERIAL);
+		glShadeModel(GL_FLAT);
+	}
 
 	if (m_nScene & LC_SCENE_FOG)
+	{
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogf(GL_FOG_DENSITY, m_fFogDensity);
+		glFogfv(GL_FOG_COLOR, m_fFogColor);
 		glEnable(GL_FOG);
+	}
 
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->Render(view->mCamera, AspectRatio);
@@ -1981,6 +2006,16 @@ void Project::RenderScenePieces(View* view)
 	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+
+	if (m_nDetail & LC_DET_LIGHTING)
+	{
+		glDisable(GL_LIGHTING);
+		glDisable(GL_COLOR_MATERIAL);
+		glShadeModel(GL_FLAT);
+	}
+
+	if (m_nScene & LC_SCENE_FOG)
+		glDisable(GL_FOG);
 
 	if (PreviousTexture)
 	{
@@ -2843,7 +2878,6 @@ void Project::RenderViewports(View* view)
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_FOG);
 
 	// Draw camera name
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
@@ -2865,55 +2899,13 @@ void Project::RenderViewports(View* view)
 void Project::RenderInitialize()
 {
 	int i;
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 
-	glCullFace(GL_BACK);
-	glDisable (GL_CULL_FACE);
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_TRUE);
-
-	if (m_nDetail & LC_DET_SMOOTH)
-		glShadeModel(GL_SMOOTH);
-	else
-		glShadeModel(GL_FLAT);
-
-	if (m_nDetail & LC_DET_LIGHTING)
-	{
-		glEnable(GL_LIGHTING);
-		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
-		glEnable(GL_COLOR_MATERIAL);
-
-		GLfloat mat_translucent[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
-		GLfloat mat_opaque[] = { (GLfloat)0.8, (GLfloat)0.8, (GLfloat)0.8, (GLfloat)1.0 };
-		GLfloat medium_shininess[] = { (GLfloat)64.0 };
-
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, medium_shininess);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_opaque);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_translucent);
-	}
-	else
-	{
-		glDisable(GL_LIGHTING);
-		glDisable(GL_COLOR_MATERIAL);
-	}
-
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, m_fAmbient);
-	glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 1.0f);
-
-	if (m_nScene & LC_SCENE_FOG)
-	{
-		glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogf(GL_FOG_DENSITY, m_fFogDensity);
-		glFogfv(GL_FOG_COLOR, m_fFogColor);
-	}
-	else
-		glDisable (GL_FOG);
 
 	// Load font
 	if (!m_pScreenFont->IsLoaded())
@@ -4642,6 +4634,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Modified)
 			{
+				for (int i = 0; i < m_ViewList.GetSize (); i++)
+				{
+					m_ViewList[i]->MakeCurrent();
+					RenderInitialize();
+				}
+
 				SetModifiedFlag(true);
 				CheckPoint("Properties");
 			}
@@ -5546,69 +5544,75 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcPreferencesDialogOptions Options;
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			int CurrentAASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
 
-			strcpy(Options.CategoriesFileName, Library->mCategoriesFile);
+			strcpy(Options.DefaultAuthor, Sys_ProfileLoadString("Default", "User", ""));
+			strcpy(Options.ProjectsPath, m_strModelsPath);
+			strcpy(Options.LibraryPath, Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", ""));
+			Options.MouseSensitivity = m_nMouse;
+			Options.CheckForUpdates = Sys_ProfileLoadInt("Settings", "CheckUpdates", 1);
+
+			Options.Detail = m_nDetail;
+			Options.Snap = m_nSnap;
+			Options.LineWidth = m_fLineWidth;
+			Options.AASamples = CurrentAASamples;
+			Options.GridSize = m_nGridSize;
+
+			strcpy(Options.CategoriesFileName, Sys_ProfileLoadString("Settings", "Categories", ""));
 			Options.Categories = Library->mCategories;
 			Options.CategoriesModified = false;
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 				break;
-		/*
-			LC_PREFERENCESDLG_OPTS opts;
-			opts.nMouse = m_nMouse;
-			opts.nSaveInterval = m_nAutosave;
-			strcpy(opts.strUser, Sys_ProfileLoadString ("Default", "User", ""));
-			strcpy(opts.strPath, m_strModelsPath);
-			opts.nDetail = m_nDetail;
-			opts.fLineWidth = m_fLineWidth;
-			opts.AASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
-			opts.nSnap = m_nSnap;
-			opts.nAngleSnap = m_nAngleSnap;
-			opts.nGridSize = m_nGridSize;
-			opts.nScene = m_nScene;
-			opts.fDensity = m_fFogDensity;
-			strcpy(opts.strBackground, m_strBackground);
-			memcpy(opts.fBackground, m_fBackground, sizeof(m_fBackground));
-			memcpy(opts.fFog, m_fFogColor, sizeof(m_fFogColor));
-			memcpy(opts.fAmbient, m_fAmbient, sizeof(m_fAmbient));
-			memcpy(opts.fGrad1, m_fGradient1, sizeof(m_fGradient1));
-			memcpy(opts.fGrad2, m_fGradient2, sizeof(m_fGradient2));
+
+			bool LibraryChanged = strcmp(Options.LibraryPath, Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", ""));
+			bool AAChanged = CurrentAASamples != Options.AASamples;
+
+			m_nMouse = Options.MouseSensitivity;
+			strcpy(m_strModelsPath, Options.ProjectsPath); // TODO: clean up m_strModelsPath and its usage, it should only be used if the model is unsaved
+			m_nSnap = Options.Snap;
+			m_nDetail = Options.Detail;
+			m_fLineWidth = Options.LineWidth;
+			m_nGridSize = Options.GridSize;
+
+			Sys_ProfileSaveString("Default", "User", Options.DefaultAuthor);
+			Sys_ProfileSaveString("Default", "Projects", Options.ProjectsPath);
+			Sys_ProfileSaveString("Settings", "CustomPiecesLibrary", Options.LibraryPath);
+			Sys_ProfileSaveInt("Default", "Mouse", m_nMouse);
+			Sys_ProfileSaveInt("Settings", "CheckUpdates", Options.CheckForUpdates);
+			Sys_ProfileSaveInt("Default", "Snap", Options.Snap);
+			Sys_ProfileSaveInt("Default", "Detail", Options.Detail);
+			Sys_ProfileSaveInt("Default", "Grid", Options.GridSize);
+			Sys_ProfileSaveInt("Default", "Line", (int)(Options.LineWidth * 100));
+			Sys_ProfileSaveInt("Default", "AASamples", Options.AASamples);
+			Sys_ProfileSaveString("Settings", "Categories", Options.CategoriesFileName);
+
+			if (LibraryChanged && AAChanged)
+				gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect next time you start LeoCAD.", LC_MB_OK);
+			else if (LibraryChanged)
+				gMainWindow->DoMessageBox("Parts library changes will only take effect next time you start LeoCAD.", LC_MB_OK);
+			else if (AAChanged)
+				gMainWindow->DoMessageBox("Anti-aliasing changes will only take effect next time you start LeoCAD.", LC_MB_OK);
+
+			if (Options.CategoriesModified)
+			{
+				Library->mCategories = Options.Categories;
+				SystemUpdateCategories(false);
+			}
+
+			// TODO: keyboard and printing preferences
+			/*
 			strcpy(opts.strFooter, m_strFooter);
 			strcpy(opts.strHeader, m_strHeader);
-
-			if (SystemDoDialog(LC_DLG_PREFERENCES, &opts))
-			{
-				m_nMouse = opts.nMouse;
-				m_nAutosave = opts.nSaveInterval;
-				strcpy(m_strModelsPath, opts.strPath);
-				Sys_ProfileSaveString ("Default", "User", opts.strUser);
-				m_nDetail = opts.nDetail;
-				m_fLineWidth = opts.fLineWidth;
-				m_nSnap = opts.nSnap;
-				m_nAngleSnap = opts.nAngleSnap;
-				m_nGridSize = opts.nGridSize;
-				m_nScene = opts.nScene;
-				m_fFogDensity = opts.fDensity;
-				strcpy(m_strBackground, opts.strBackground);
-				memcpy(m_fBackground, opts.fBackground, sizeof(m_fBackground));
-				memcpy(m_fFogColor, opts.fFog, sizeof(m_fFogColor));
-				memcpy(m_fAmbient, opts.fAmbient, sizeof(m_fAmbient));
-				memcpy(m_fGradient1, opts.fGrad1, sizeof(m_fGradient1));
-				memcpy(m_fGradient2, opts.fGrad2, sizeof(m_fGradient2));
-				strcpy(m_strFooter, opts.strFooter);
-				strcpy(m_strHeader, opts.strHeader);
-				gMainWindow->UpdateLockSnap(m_nSnap);
-				gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
-
-				for (int i = 0; i < m_ViewList.GetSize (); i++)
-				{
-					m_ViewList[i]->MakeCurrent ();
-					RenderInitialize();
-				}
-
-				UpdateAllViews();
-			}
 			*/
+
+			for (int i = 0; i < m_ViewList.GetSize (); i++)
+			{
+				m_ViewList[i]->MakeCurrent();
+				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
+			}
+
+			UpdateAllViews();
 		} break;
 
 		case LC_VIEW_ZOOM_IN:

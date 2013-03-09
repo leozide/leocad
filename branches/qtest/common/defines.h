@@ -107,7 +107,7 @@ int stricmp(const char* str1, const char* str2);
 //#define DET_DEPTH		0x00002	// Enable depth test
 //#define DET_CLEAR		0x00004	// Use clear colors
 #define	LC_DET_LIGHTING		0x00008	// Lighting
-#define	LC_DET_SMOOTH		0x00010	// Smooth shading
+//#define	LC_DET_SMOOTH		0x00010	// Smooth shading
 //#define DET_STUDS		0x00020	// Draw studs
 //#define DET_WIREFRAME	0x00040	// Wireframe
 //#define LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing

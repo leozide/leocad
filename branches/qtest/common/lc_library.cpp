@@ -21,7 +21,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mNumOfficialPieces = 0;
 	mLibraryPath[0] = 0;
 	mCacheFileName[0] = 0;
-	mCategoriesFile[0] = 0;
 	mCacheFileModifiedTime = 0;
 	mLibraryFileName[0] = 0;
 	mZipFile = NULL;
@@ -2013,9 +2012,6 @@ bool lcPiecesLibrary::SaveCategories(const char* FileName, ObjArray<lcLibraryCat
 void lcPiecesLibrary::ResetCategories()
 {
 	ResetCategories(mCategories);
-
-	strcpy(mCategoriesFile, "");
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
 }
 
 bool lcPiecesLibrary::LoadCategories()
@@ -2029,9 +2025,6 @@ bool lcPiecesLibrary::LoadCategories()
 
 	if (!LoadCategories(FileName, mCategories))
 		return false;
-
-	strcpy(mCategoriesFile, FileName);
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
 
 	return true;
 }
@@ -2147,9 +2140,6 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 			Category.Name = DefaultCategories[i].Name;
 			Category.Keywords = DefaultCategories[i].Keywords;
 		}
-
-		strcpy(mCategoriesFile, "");
-		Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
 	}
 
 	SystemUpdateCategories(false);

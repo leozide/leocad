@@ -111,6 +111,18 @@ struct lcSelectDialogOptions
 
 struct lcPreferencesDialogOptions
 {
+	char DefaultAuthor[101];
+	char ProjectsPath[LC_MAXPATH];
+	char LibraryPath[LC_MAXPATH];
+	int MouseSensitivity;
+	int CheckForUpdates;
+
+	lcuint32 Snap;
+	lcuint32 Detail;
+	float LineWidth;
+	int AASamples;
+	int GridSize;
+
 	char CategoriesFileName[LC_MAXPATH];
 	ObjArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;

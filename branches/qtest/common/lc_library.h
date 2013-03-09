@@ -142,7 +142,6 @@ public:
 	PtrArray<lcTexture> mTextures;
 
 	char mLibraryPath[LC_MAXPATH];
-	char mCategoriesFile[LC_MAXPATH];
 
 protected:
 	bool OpenArchive(const char* FileName, const char* CachePath);

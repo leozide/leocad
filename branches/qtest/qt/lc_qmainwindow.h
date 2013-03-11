@@ -56,7 +56,7 @@ private:
 	QToolBar *standardToolBar;
 	QToolBar *toolsToolBar;
 	QToolBar *timeToolBar;
-	QDockWidget *piecesToolBar;
+	QDockWidget *partsToolBar;
 
 	lcGLWidget *piecePreview;
 	lcQPartsTree *partsTree;

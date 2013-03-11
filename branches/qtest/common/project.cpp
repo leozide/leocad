@@ -67,7 +67,6 @@ Project::Project()
 	m_pBackground = new lcTexture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
-	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
 	if (messenger == NULL)
 		messenger = new Messenger ();
@@ -113,7 +112,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 	SystemUpdatePlay(true, false);
 	SystemUpdateCategories(false);
-	SetTitle(m_strTitle);
+	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
 
 	SystemUpdateFocus(NULL);
 	SetAction(m_nCurAction);
@@ -1066,86 +1065,48 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 	file->Seek(Offset, SEEK_SET);
 }
 
-bool Project::DoFileSave()
+bool Project::DoSave(const char* FileName)
 {
-/*
-	DWORD dwAttrib = GetFileAttributes(m_strPathName);
-	if (dwAttrib & FILE_ATTRIBUTE_READONLY)
-	{
-		// we do not have read-write access or the file does not (now) exist
-		if (!DoSave(NULL, true))
-			return false;
-	}
+	char SaveFileName[LC_MAXPATH];
+
+	if (FileName)
+		strcpy(SaveFileName, FileName);
 	else
-*/	{
-		if (!DoSave(m_strPathName, true))
-			return false;
-	}
-	return true;
-}
-
-// Save the document data to a file
-// lpszPathName = path name where to save document file
-// if lpszPathName is NULL then the user will be prompted (SaveAs)
-// note: lpszPathName can be different than 'm_strPathName'
-// if 'bReplace' is TRUE will change file name if successful (SaveAs)
-// if 'bReplace' is FALSE will not change path name (SaveCopyAs)
-bool Project::DoSave(char* lpszPathName, bool bReplace)
-{
-	lcDiskFile file;
-	char newName[LC_MAXPATH];
-	memset(newName, 0, sizeof(newName));
-	if (lpszPathName)
-		strcpy(newName, lpszPathName);
-
-	char ext[4], *ptr;
-	memset(ext, 0, 4);
-	ptr = strrchr(newName, '.');
-	if (ptr != NULL)
 	{
-		ptr++;
-		strncpy(ext, ptr, 3);
-		strlwr(ext);
-
-		if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+		if (m_strPathName[0])
+			strcpy(SaveFileName, m_strPathName);
+		else
 		{
-			*ptr = 0;
-			strcat(newName, "lcd");
-		}
-	}
+			strcpy(SaveFileName, Sys_ProfileLoadString("Default", "Projects", ""));
 
-	if (strlen(newName) == 0)
-	{
-		strcpy(newName, m_strPathName);
-		if (bReplace && strlen(newName) == 0)
-		{
-			strcpy(newName, m_strTitle);
+			int Length = strlen(SaveFileName);
+			if (Length && (SaveFileName[Length - 1] != '/' && SaveFileName[Length - 1] != '\\'))
+				strcat(SaveFileName, "/");
+
+			strcat(SaveFileName, m_strTitle);
 
 			// check for dubious filename
-			int iBad = strcspn(newName, " #%;/\\");
+			int iBad = strcspn(SaveFileName, " #%;/\\");
 			if (iBad != -1)
-				newName[iBad] = 0;
+				SaveFileName[iBad] = 0;
 
-			strcat(newName, ".lcd");
+			strcat(SaveFileName, ".lcd");
 		}
 
-		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_PROJECT, newName))
+		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_PROJECT, SaveFileName))
 			return false;
 	}
 
-	if (!file.Open(newName, "wb"))
+	lcDiskFile file;
+	if (!file.Open(SaveFileName, "wb"))
 	{
 //		MessageBox("Failed to save.");
-
-		// be sure to delete the file
-		if (lpszPathName == NULL)
-			remove(newName);
-
 		return false;
 	}
 
+	char ext[4];
 	memset(ext, 0, 4);
-	ptr = strrchr(newName, '.');
+	const char* ptr = strrchr(SaveFileName, '.');
 	if (ptr != NULL)
 	{
 		strncpy(ext, ptr+1, 3);
@@ -1207,8 +1168,7 @@ bool Project::DoSave(char* lpszPathName, bool bReplace)
 	SetModifiedFlag(false);     // back to unmodified
 
 	// reset the title and change the document name
-	if (bReplace)
-		SetPathName(newName, true);
+	SetPathName(SaveFileName, true);
 
 	return true; // success
 }
@@ -1253,8 +1213,8 @@ bool Project::SaveModified()
 
 	case LC_YES:
 		// If so, either Save or Update, as appropriate
-		if (!DoFileSave())
-			return false;       // don't continue
+		if (!DoSave(m_strPathName))
+			return false;
 		break;
 
 	case LC_NO:
@@ -3563,7 +3523,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_FILE_OPEN:
 		{
 			char FileName[LC_MAXPATH];
-			strcpy(FileName, m_strModelsPath);
+
+			if (m_strPathName[0])
+				strcpy(FileName, m_strPathName);
+			else
+				strcpy(FileName, Sys_ProfileLoadString("Default", "Projects", ""));
 
 			if (gMainWindow->DoDialog(LC_DIALOG_OPEN_PROJECT, FileName))
 				OpenProject(FileName);
@@ -3572,7 +3536,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_FILE_MERGE:
 		{
 			char FileName[LC_MAXPATH];
-			strcpy(FileName, m_strModelsPath);
+
+			if (m_strPathName[0])
+				strcpy(FileName, m_strPathName);
+			else
+				strcpy(FileName, Sys_ProfileLoadString("Default", "Projects", ""));
 
 			if (gMainWindow->DoDialog(LC_DIALOG_MERGE_PROJECT, FileName))
 			{
@@ -3591,12 +3559,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_SAVE:
 		{
-			DoFileSave();
+			DoSave(m_strPathName);
 		} break;
 
 		case LC_FILE_SAVEAS:
 		{
-			DoSave(NULL, true);
+			DoSave(NULL);
 		} break;
 
 		case LC_FILE_SAVE_IMAGE:
@@ -5547,7 +5515,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			int CurrentAASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
 
 			strcpy(Options.DefaultAuthor, Sys_ProfileLoadString("Default", "User", ""));
-			strcpy(Options.ProjectsPath, m_strModelsPath);
+			strcpy(Options.ProjectsPath, Sys_ProfileLoadString("Default", "Projects", ""));
 			strcpy(Options.LibraryPath, Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", ""));
 			Options.MouseSensitivity = m_nMouse;
 			Options.CheckForUpdates = Sys_ProfileLoadInt("Settings", "CheckUpdates", 1);
@@ -5569,7 +5537,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			bool AAChanged = CurrentAASamples != Options.AASamples;
 
 			m_nMouse = Options.MouseSensitivity;
-			strcpy(m_strModelsPath, Options.ProjectsPath); // TODO: clean up m_strModelsPath and its usage, it should only be used if the model is unsaved
 			m_nSnap = Options.Snap;
 			m_nDetail = Options.Detail;
 			m_fLineWidth = Options.LineWidth;
@@ -5588,11 +5555,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Sys_ProfileSaveString("Settings", "Categories", Options.CategoriesFileName);
 
 			if (LibraryChanged && AAChanged)
-				gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect next time you start LeoCAD.", LC_MB_OK);
+				gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
 			else if (LibraryChanged)
-				gMainWindow->DoMessageBox("Parts library changes will only take effect next time you start LeoCAD.", LC_MB_OK);
+				gMainWindow->DoMessageBox("Parts library changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
 			else if (AAChanged)
-				gMainWindow->DoMessageBox("Anti-aliasing changes will only take effect next time you start LeoCAD.", LC_MB_OK);
+				gMainWindow->DoMessageBox("Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
 
 			if (Options.CategoriesModified)
 			{

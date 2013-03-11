@@ -411,15 +411,21 @@ void lcQMainWindow::createToolBars()
 	standardToolBar->addAction(actions[LC_EDIT_SNAP_ANGLE]);
 	standardToolBar->addSeparator();
 	standardToolBar->addAction(actions[LC_EDIT_TRANSFORM]);
+
+	QHBoxLayout *transformLayout = new QHBoxLayout;
+	QWidget *transformWidget = new QWidget();
+	transformWidget->setLayout(transformLayout);
 	transformX = new QLineEdit();
 	transformX->setMaximumWidth(75);
-	standardToolBar->addWidget(transformX);
+	transformLayout->addWidget(transformX);
 	transformY = new QLineEdit();
 	transformY->setMaximumWidth(75);
-	standardToolBar->addWidget(transformY);
+	transformLayout->addWidget(transformY);
 	transformZ = new QLineEdit();
 	transformZ->setMaximumWidth(75);
-	standardToolBar->addWidget(transformZ);
+	transformLayout->addWidget(transformZ);
+	transformLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	standardToolBar->addWidget(transformWidget);
 
 	toolsToolBar = addToolBar(tr("Tools"));
 	insertToolBarBreak(toolsToolBar);
@@ -446,16 +452,16 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
 
-	piecesToolBar = new QDockWidget(tr("Pieces"), this);
-	QWidget *piecesContents = new QWidget();
-	QGridLayout *piecesLayout = new QGridLayout(piecesContents);
-	piecesLayout->setSpacing(6);
-	piecesLayout->setContentsMargins(6, 6, 6, 6);
-	QSplitter *piecesSplitter = new QSplitter(Qt::Vertical, piecesContents);
+	partsToolBar = new QDockWidget(tr("Parts"), this);
+	QWidget *partsContents = new QWidget();
+	QGridLayout *partsLayout = new QGridLayout(partsContents);
+	partsLayout->setSpacing(6);
+	partsLayout->setContentsMargins(6, 6, 6, 6);
+	QSplitter *partsSplitter = new QSplitter(Qt::Vertical, partsContents);
 
 	QFrame *previewFrame = new QFrame;
 	previewFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-	piecesSplitter->addWidget(previewFrame);
+	partsSplitter->addWidget(previewFrame);
 
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
@@ -464,19 +470,19 @@ void lcQMainWindow::createToolBars()
 	piecePreview->preferredSize = QSize(100, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
-	partsTree = new lcQPartsTree(piecesSplitter);
+	partsTree = new lcQPartsTree(partsSplitter);
 	connect(partsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(partsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
-	piecesSplitter->addWidget(partsTree);
-	pieceCombo = new QComboBox(piecesSplitter);
+	partsSplitter->addWidget(partsTree);
+	pieceCombo = new QComboBox(partsSplitter);
 	pieceCombo->setEditable(true);
-	piecesSplitter->addWidget(pieceCombo);
-	colorList = new lcColorListWidget(piecesSplitter);
-	piecesSplitter->addWidget(colorList);
+	partsSplitter->addWidget(pieceCombo);
+	colorList = new lcColorListWidget(partsSplitter);
+	partsSplitter->addWidget(colorList);
 
-	piecesLayout->addWidget(piecesSplitter, 0, 0, 1, 1);
+	partsLayout->addWidget(partsSplitter, 0, 0, 1, 1);
 
-	piecesToolBar->setWidget(piecesContents);
-	addDockWidget(static_cast<Qt::DockWidgetArea>(2), piecesToolBar);
+	partsToolBar->setWidget(partsContents);
+	addDockWidget(static_cast<Qt::DockWidgetArea>(2), partsToolBar);
 }
 
 void lcQMainWindow::createStatusBar()

@@ -64,6 +64,8 @@ bool lcColorListWidget::event(QEvent *event)
 
 		for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
 		{
+			// TODO: add color preview to tooltips
+
 //			lcColor* Color = &gColorList[mCellColors[CellIdx]];
 //			QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
 

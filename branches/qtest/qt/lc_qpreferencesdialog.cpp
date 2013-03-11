@@ -117,10 +117,18 @@ void lcQPreferencesDialog::accept()
 
 void lcQPreferencesDialog::on_projectsFolderBrowse_clicked()
 {
+	QString result = QFileDialog::getExistingDirectory(this, tr("Open Projects Folder"), ui->projectsFolder->text());
+
+	if (!result.isEmpty())
+		ui->projectsFolder->setText(QDir::toNativeSeparators(result));
 }
 
 void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
 {
+	QString result = QFileDialog::getExistingDirectory(this, tr("Open Parts Library Folder"), ui->partsLibrary->text());
+
+	if (!result.isEmpty())
+		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()

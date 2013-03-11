@@ -300,14 +300,12 @@ protected:
 	GLuint m_nGridList;
 	unsigned long m_nAutosave;
 	unsigned long m_nSaveTimer;
-	char m_strModelsPath[LC_MAXPATH];
 	char m_strBackground[LC_MAXPATH];
 	lcTexture* m_pBackground;
 
 protected:
 	// File load/save implementation.
-	bool DoSave(char* PathName, bool bReplace);
-	bool DoFileSave();
+	bool DoSave(const char* FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileSave(lcFile* file, bool bUndo);
 	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray);
@@ -322,10 +320,6 @@ public:
 	void SetModifiedFlag(bool Modified);
 
 protected:
-	// mail enabling
-//	void OnFileSendMail();
-//	void OnUpdateFileSendMail(CCmdUI* pCmdUI);
-
 	// TODO: Fix ! This is a hack to make things work now
 	friend class CCADView;
 	friend void PrintPiecesThread(void* pv);

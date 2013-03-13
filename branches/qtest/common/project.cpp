@@ -5018,65 +5018,65 @@ void Project::HandleCommand(LC_COMMANDS id)
 			MinifigWizard Wizard(m_ActiveView);
 			int i;
 
-			if (SystemDoDialog(LC_DLG_MINIFIG, &Wizard))
+			if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Wizard))
+				break;
+
+			SelectAndFocusNone(false);
+
+			for (i = 0; i < LC_MFW_NUMITEMS; i++)
 			{
-				SelectAndFocusNone(false);
+				if (Wizard.m_Info[i] == NULL)
+					continue;
 
-				for (i = 0; i < LC_MFW_NUMITEMS; i++)
+				Piece* pPiece = new Piece(Wizard.m_Info[i]);
+
+				lcVector4& Position = Wizard.m_Matrices[i][3];
+				lcVector4 Rotation = lcMatrix44ToAxisAngle(Wizard.m_Matrices[i]);
+				Rotation[3] *= LC_RTOD;
+				pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame);
+				pPiece->SetColorIndex(Wizard.m_Colors[i]);
+				pPiece->CreateName(m_pPieces);
+				AddPiece(pPiece);
+				pPiece->Select(true, false, false);
+
+				pPiece->ChangeKey(1, false, false, Rotation, LC_PK_ROTATION);
+				pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);
+			}
+
+			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+			int max = 0;
+
+			Group* pGroup;
+			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
+				if (strncmp (pGroup->m_strName, "Minifig #", 9) == 0)
+					if (sscanf(pGroup->m_strName, "Minifig #%d", &i) == 1)
+						if (i > max)
+							max = i;
+			pGroup = new Group;
+			sprintf(pGroup->m_strName, "Minifig #%.2d", max+1);
+
+			pGroup->m_pNext = m_pGroups;
+			m_pGroups = pGroup;
+
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				if (pPiece->IsSelected())
 				{
-					if (Wizard.m_Info[i] == NULL)
-						continue;
-
-					Piece* pPiece = new Piece(Wizard.m_Info[i]);
-
-					lcVector4& Position = Wizard.m_Matrices[i][3];
-					lcVector4 Rotation = lcMatrix44ToAxisAngle(Wizard.m_Matrices[i]);
-					Rotation[3] *= LC_RTOD;
-					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame);
-					pPiece->SetColorIndex(Wizard.m_Colors[i]);
-					pPiece->CreateName(m_pPieces);
-					AddPiece(pPiece);
-					pPiece->Select(true, false, false);
-
-					pPiece->ChangeKey(1, false, false, Rotation, LC_PK_ROTATION);
-					pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
-					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-
-					SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);
+					pPiece->SetGroup(pGroup);
+					pPiece->CompareBoundingBox(bs);
 				}
 
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-				int max = 0;
+			pGroup->m_fCenter[0] = (bs[0] + bs[3]) / 2;
+			pGroup->m_fCenter[1] = (bs[1] + bs[4]) / 2;
+			pGroup->m_fCenter[2] = (bs[2] + bs[5]) / 2;
 
-				Group* pGroup;
-				for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-					if (strncmp (pGroup->m_strName, "Minifig #", 9) == 0)
-						if (sscanf(pGroup->m_strName, "Minifig #%d", &i) == 1)
-							if (i > max)
-								max = i;
-				pGroup = new Group;
-				sprintf(pGroup->m_strName, "Minifig #%.2d", max+1);
-
-				pGroup->m_pNext = m_pGroups;
-				m_pGroups = pGroup;
-
-				for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsSelected())
-					{
-						pPiece->SetGroup(pGroup);
-						pPiece->CompareBoundingBox(bs);
-					}
-
-				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
-
-				messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
-				UpdateSelection();
-				UpdateAllViews();
-				SetModifiedFlag(true);
-				CheckPoint("Minifig");
-			}
+			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			UpdateSelection();
+			UpdateAllViews();
+			SetModifiedFlag(true);
+			CheckPoint("Minifig");
 		} break;
 
 		case LC_PIECE_ARRAY:

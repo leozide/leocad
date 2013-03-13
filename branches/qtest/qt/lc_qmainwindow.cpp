@@ -25,7 +25,8 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 //	setCentralWidget(centralWidget);
 
 	QFrame *previewFrame = new QFrame;
-	previewFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	previewFrame->setFrameShape(QFrame::Panel);
+	previewFrame->setFrameShadow(QFrame::Plain);
 	setCentralWidget(previewFrame);
 
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
@@ -383,6 +384,7 @@ void lcQMainWindow::createMenus()
 	menuView->addMenu(menuCamera);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
+	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
 	menuPiece->addAction(actions[LC_PIECE_GROUP]);
 	menuPiece->addAction(actions[LC_PIECE_GROUP_EDIT]);
@@ -460,7 +462,8 @@ void lcQMainWindow::createToolBars()
 	QSplitter *partsSplitter = new QSplitter(Qt::Vertical, partsContents);
 
 	QFrame *previewFrame = new QFrame;
-	previewFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	previewFrame->setFrameShape(QFrame::Panel);
+	previewFrame->setFrameShadow(QFrame::Plain);
 	partsSplitter->addWidget(previewFrame);
 
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);

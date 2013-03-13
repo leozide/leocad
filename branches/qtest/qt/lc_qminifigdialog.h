@@ -12,7 +12,7 @@ class lcQMinifigDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit lcQMinifigDialog(QWidget *parent = 0);
+	explicit lcQMinifigDialog(QWidget *parent, void *data);
     ~lcQMinifigDialog();
     
 private:

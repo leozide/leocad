@@ -109,6 +109,7 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 #include "lc_qpovraydialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qselectdialog.h"
+#include "lc_qminifigdialog.h"
 #include "lc_qarraydialog.h"
 #include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
@@ -178,6 +179,12 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_SELECT_BY_NAME:
 		{
 			lcQSelectDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_MINIFIG:
+		{
+			lcQMinifigDialog dialog(parent, Data);
 			return dialog.exec() == QDialog::Accepted;
 		} break;
 

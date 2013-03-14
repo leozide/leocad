@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
+    <width>840</width>
     <height>316</height>
    </rect>
   </property>
@@ -18,17 +18,24 @@
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QComboBox" name="comboBox"/>
+       <widget class="QComboBox" name="hatsType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QToolButton" name="toolButton">
+       <widget class="QToolButton" name="hatsColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox">
+       <widget class="QDoubleSpinBox" name="hatsAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -57,7 +64,7 @@
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
+       <widget class="QDoubleSpinBox" name="headAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -76,27 +83,41 @@
        </widget>
       </item>
       <item row="0" column="5">
-       <widget class="QToolButton" name="toolButton_10">
+       <widget class="QToolButton" name="headColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="0" column="6">
-       <widget class="QComboBox" name="comboBox_10"/>
+       <widget class="QComboBox" name="headType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QComboBox" name="comboBox_2"/>
+       <widget class="QComboBox" name="hats2Type">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QToolButton" name="toolButton_2">
+       <widget class="QToolButton" name="hats2Color">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+       <widget class="QDoubleSpinBox" name="hats2Angle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -115,37 +136,58 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QComboBox" name="comboBox_3"/>
+       <widget class="QComboBox" name="neckType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QToolButton" name="toolButton_3">
+       <widget class="QToolButton" name="neckColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="2" column="5">
-       <widget class="QToolButton" name="toolButton_17">
+       <widget class="QToolButton" name="bodyColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="2" column="6">
-       <widget class="QComboBox" name="comboBox_11"/>
+       <widget class="QComboBox" name="bodyType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QComboBox" name="comboBox_4"/>
+       <widget class="QComboBox" name="larmType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QToolButton" name="toolButton_4">
+       <widget class="QToolButton" name="larmColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+       <widget class="QDoubleSpinBox" name="larmAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -164,7 +206,7 @@
        </widget>
       </item>
       <item row="3" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
+       <widget class="QDoubleSpinBox" name="rarmAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -183,27 +225,41 @@
        </widget>
       </item>
       <item row="3" column="5">
-       <widget class="QToolButton" name="toolButton_11">
+       <widget class="QToolButton" name="rarmColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="3" column="6">
-       <widget class="QComboBox" name="comboBox_12"/>
+       <widget class="QComboBox" name="rarmType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QComboBox" name="comboBox_5"/>
+       <widget class="QComboBox" name="lhandType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QToolButton" name="toolButton_5">
+       <widget class="QToolButton" name="lhandColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="4" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+       <widget class="QDoubleSpinBox" name="lhandAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -222,7 +278,7 @@
        </widget>
       </item>
       <item row="4" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
+       <widget class="QDoubleSpinBox" name="rhandAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -241,27 +297,41 @@
        </widget>
       </item>
       <item row="4" column="5">
-       <widget class="QToolButton" name="toolButton_12">
+       <widget class="QToolButton" name="rhandColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="4" column="6">
-       <widget class="QComboBox" name="comboBox_13"/>
+       <widget class="QComboBox" name="rhandType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QComboBox" name="comboBox_6"/>
+       <widget class="QComboBox" name="lhandaType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QToolButton" name="toolButton_6">
+       <widget class="QToolButton" name="lhandaColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="5" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+       <widget class="QDoubleSpinBox" name="lhandaAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -280,7 +350,7 @@
        </widget>
       </item>
       <item row="5" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_11">
+       <widget class="QDoubleSpinBox" name="rhandaAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -299,47 +369,75 @@
        </widget>
       </item>
       <item row="5" column="5">
-       <widget class="QToolButton" name="toolButton_13">
+       <widget class="QToolButton" name="rhandaColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="5" column="6">
-       <widget class="QComboBox" name="comboBox_14"/>
+       <widget class="QComboBox" name="rhandaType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QComboBox" name="comboBox_7"/>
+       <widget class="QComboBox" name="body2Type">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QToolButton" name="toolButton_7">
+       <widget class="QToolButton" name="body2Color">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="6" column="5">
-       <widget class="QToolButton" name="toolButton_16">
+       <widget class="QToolButton" name="body3Color">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="6" column="6">
-       <widget class="QComboBox" name="comboBox_15"/>
+       <widget class="QComboBox" name="body3Type">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QComboBox" name="comboBox_8"/>
+       <widget class="QComboBox" name="llegType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="7" column="1">
-       <widget class="QToolButton" name="toolButton_8">
+       <widget class="QToolButton" name="llegColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="7" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+       <widget class="QDoubleSpinBox" name="llegAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -358,7 +456,7 @@
        </widget>
       </item>
       <item row="7" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_12">
+       <widget class="QDoubleSpinBox" name="rlegAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -377,27 +475,41 @@
        </widget>
       </item>
       <item row="7" column="5">
-       <widget class="QToolButton" name="toolButton_14">
+       <widget class="QToolButton" name="rlegColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="7" column="6">
-       <widget class="QComboBox" name="comboBox_16"/>
+       <widget class="QComboBox" name="rlegType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="8" column="0">
-       <widget class="QComboBox" name="comboBox_9"/>
+       <widget class="QComboBox" name="llegaType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
       <item row="8" column="1">
-       <widget class="QToolButton" name="toolButton_9">
+       <widget class="QToolButton" name="llegaColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="8" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+       <widget class="QDoubleSpinBox" name="llegaAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -416,7 +528,7 @@
        </widget>
       </item>
       <item row="8" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_13">
+       <widget class="QDoubleSpinBox" name="rlegaAngle">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -435,14 +547,21 @@
        </widget>
       </item>
       <item row="8" column="5">
-       <widget class="QToolButton" name="toolButton_15">
+       <widget class="QToolButton" name="rlegaColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="8" column="6">
-       <widget class="QComboBox" name="comboBox_17"/>
+       <widget class="QComboBox" name="rlegaType">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>24</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

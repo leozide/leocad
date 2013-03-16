@@ -106,6 +106,7 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 	}
 }
 
+#include "lc_qhtmldialog.h"
 #include "lc_qpovraydialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qselectdialog.h"
@@ -167,6 +168,12 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 				strcpy(FileName, result.toLocal8Bit().data());
 				return true;
 			}
+		} break;
+
+	case LC_DIALOG_EXPORT_HTML:
+		{
+			lcQHTMLDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
 		} break;
 
 	case LC_DIALOG_EXPORT_POVRAY:

@@ -3305,7 +3305,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	Sys_FinishMemoryRender (render);
 }
 
-void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, bool ShowID, const char* ext)
+void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
 {
 	int* ColorsUsed = new int[gColorList.GetSize()];
 	memset(ColorsUsed, 0, sizeof(ColorsUsed[0]) * gColorList.GetSize());
@@ -3353,12 +3353,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, bool ShowID,
 			if (bImages)
 				fprintf(f, "<tr><td><IMG SRC=\"%s%s\" ALT=\"%s\"></td>\n", pInfo->m_strName, ext, pInfo->m_strDescription);
 			else
-			{
-				if (ShowID)
-					fprintf(f, "<tr><td>%s (%s)</td>\n", pInfo->m_strDescription, pInfo->m_strName);
-				else
-					fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
-			}
+				fprintf(f, "<tr><td>%s</td>\n", pInfo->m_strDescription);
 
 			int curcol = 1;
 			for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
@@ -3707,52 +3702,94 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_EXPORT_HTML:
 		{
-			LC_HTMLDLG_OPTS opts;
+			lcHTMLDialogOptions Options;
 
-			strcpy (opts.path, Sys_ProfileLoadString ("Default", "HTML Path", ""));
-			if (strlen (opts.path) == 0)
+			strcpy(Options.PathName, Sys_ProfileLoadString("Default", "HTML Path", ""));
+
+			if (Options.PathName[0] == 0)
 			{
-				strcpy (opts.path, m_strPathName);
-				if (strlen(opts.path) > 0)
+				strcpy(Options.PathName, m_strPathName);
+
+				if (Options.PathName[0] != 0)
 				{
-					char* ptr = strrchr(opts.path, '/');
-					if (ptr == NULL)
-						ptr = strrchr(opts.path, '\\');
-					if (ptr)
+					char* Slash = strrchr(Options.PathName, '/');
+
+					if (Slash == NULL)
+						Slash = strrchr(Options.PathName, '\\');
+
+					if (Slash)
 					{
-						ptr++;
-						*ptr = 0;
+						Slash++;
+						*Slash = 0;
 					}
 				}
 			}
 
-			unsigned long ImageOptions = Sys_ProfileLoadInt ("Default", "HTML Image Options", 1|LC_IMAGE_TRANSPARENT);
-			opts.imdlg.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
-			opts.imdlg.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
-			opts.imdlg.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
-			opts.imdlg.from = 1;
-			opts.imdlg.to = 1;
-			opts.imdlg.multiple = false;
-			opts.imdlg.width = Sys_ProfileLoadInt ("Default", "HTML Image Width", 256);
-			opts.imdlg.height = Sys_ProfileLoadInt ("Default", "HTML Image Height", 160);
-			opts.imdlg.imopts.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-			opts.imdlg.imopts.interlaced = (ImageOptions & LC_IMAGE_PROGRESSIVE) != 0;
-			opts.imdlg.imopts.transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
-			opts.imdlg.imopts.truecolor = (ImageOptions & LC_IMAGE_HIGHCOLOR) != 0;
-			opts.imdlg.imopts.pause = 1;
-			opts.imdlg.imopts.format = (unsigned char)(ImageOptions & ~(LC_IMAGE_MASK));
+			int ImageOptions = Sys_ProfileLoadInt("Default", "HTML Image Options", LC_IMAGE_PNG | LC_IMAGE_TRANSPARENT);
+			int HTMLOptions = Sys_ProfileLoadInt("Default", "HTML Options", LC_HTML_SINGLEPAGE);
 
-			unsigned long ul = Sys_ProfileLoadInt ("Default", "HTML Options", LC_HTML_SINGLEPAGE);
-			opts.singlepage = (ul & LC_HTML_SINGLEPAGE) != 0;
-			opts.index = (ul & LC_HTML_INDEX) != 0;
-			opts.images = (ul & LC_HTML_IMAGES) != 0;
-			opts.listend = (ul & LC_HTML_LISTEND) != 0;
-			opts.liststep = (ul & LC_HTML_LISTSTEP) != 0;
-			opts.highlight = (ul & LC_HTML_HIGHLIGHT) != 0;
-			opts.id = (ul & LC_HTML_LISTID) != 0;
-			opts.color = lcGetColorIndex(Sys_ProfileLoadInt("Default", "HTML Piece Color", 16));
+			Options.ImageFormat = (LC_IMAGE_FORMATS)(ImageOptions & ~(LC_IMAGE_MASK));
+			Options.TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+			Options.SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
+			Options.IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
+			Options.StepImagesWidth = Sys_ProfileLoadInt("Default", "HTML Image Width", 640);
+			Options.StepImagesHeight = Sys_ProfileLoadInt("Default", "HTML Image Height", 480);
+			Options.HighlightNewParts = (HTMLOptions & LC_HTML_HIGHLIGHT) != 0;
+			Options.PartsListStep = (HTMLOptions & LC_HTML_LISTSTEP) != 0;
+			Options.PartsListEnd = (HTMLOptions & LC_HTML_LISTEND) != 0;
+			Options.PartsListImages = (HTMLOptions & LC_HTML_IMAGES) != 0;
+			Options.PartImagesColor = lcGetColorIndex(Sys_ProfileLoadInt("Default", "HTML Piece Color", 16));
+			Options.PartImagesWidth = Sys_ProfileLoadInt("Default", "HTML Parts Width", 128);
+			Options.PartImagesHeight = Sys_ProfileLoadInt("Default", "HTML Parts Height", 128);
 
-			if (SystemDoDialog(LC_DLG_HTML, &opts))
+			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_HTML, &Options))
+				break;
+
+			HTMLOptions = 0;
+
+			if (Options.SinglePage)
+				HTMLOptions |= LC_HTML_SINGLEPAGE;
+			if (Options.IndexPage)
+				HTMLOptions |= LC_HTML_INDEX;
+			if (Options.HighlightNewParts)
+				HTMLOptions |= LC_HTML_HIGHLIGHT;
+			if (Options.PartsListStep)
+				HTMLOptions |= LC_HTML_LISTSTEP;
+			if (Options.PartsListEnd)
+				HTMLOptions |= LC_HTML_LISTEND;
+			if (Options.PartsListImages)
+				HTMLOptions |= LC_HTML_IMAGES;
+
+			ImageOptions = Options.ImageFormat;
+
+			if (Options.TransparentImages)
+				ImageOptions |= LC_IMAGE_TRANSPARENT;
+
+			Sys_ProfileSaveInt("Default", "HTML Image Options", ImageOptions);
+			Sys_ProfileSaveInt("Default", "HTML Options", HTMLOptions);
+			Sys_ProfileSaveInt("Default", "HTML Image Width", lcGetColorCode(Options.StepImagesWidth));
+			Sys_ProfileSaveInt("Default", "HTML Image Height", lcGetColorCode(Options.StepImagesHeight));
+			Sys_ProfileSaveInt("Default", "HTML Piece Color", lcGetColorCode(Options.PartImagesColor));
+			Sys_ProfileSaveInt("Default", "HTML Parts Width", lcGetColorCode(Options.PartImagesWidth));
+			Sys_ProfileSaveInt("Default", "HTML Parts Height", lcGetColorCode(Options.PartImagesHeight));
+
+			int PathLength = strlen(Options.PathName);
+			if (PathLength && Options.PathName[PathLength] != '/' && Options.PathName[PathLength] != '\\')
+				strcat(Options.PathName, "/");
+			Sys_ProfileSaveString("Default", "HTML Path", Options.PathName);
+
+			LC_IMAGE_OPTS ImageOpts;
+			ImageOpts.quality = 70;
+			ImageOpts.interlaced = false;
+			ImageOpts.transparent = Options.TransparentImages;
+			ImageOpts.truecolor = true;
+			ImageOpts.background[0] = (unsigned char)(m_fBackground[0]*255);
+			ImageOpts.background[1] = (unsigned char)(m_fBackground[1]*255);
+			ImageOpts.background[2] = (unsigned char)(m_fBackground[2]*255);
+			ImageOpts.pause = 1.0f;
+			ImageOpts.format = Options.ImageFormat;
+
+			// TODO: Move to its own function
 			{
 				FILE* f;
 				const char *ext, *htmlext;
@@ -3760,31 +3797,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				int i;
 				unsigned short last = GetLastStep();
 
-				// Save HTML options
-				ul = 0;
-				if (opts.singlepage) ul |= LC_HTML_SINGLEPAGE;
-				if (opts.index) ul |= LC_HTML_INDEX;
-				if (opts.images) ul |= LC_HTML_IMAGES;
-				if (opts.listend) ul |= LC_HTML_LISTEND;
-				if (opts.liststep) ul |= LC_HTML_LISTSTEP;
-				if (opts.highlight) ul |= LC_HTML_HIGHLIGHT;
-				if (opts.id) ul |= LC_HTML_LISTID;
-				Sys_ProfileSaveInt("Default", "HTML Options", ul);
-				Sys_ProfileSaveInt("Default", "HTML Piece Color", lcGetColorCode(opts.color));
-
-				// Save image options
-				ul = opts.imdlg.imopts.format;
-				if (opts.imdlg.imopts.interlaced)
-					ul |= LC_IMAGE_PROGRESSIVE;
-				if (opts.imdlg.imopts.transparent)
-					ul |= LC_IMAGE_TRANSPARENT;
-				if (opts.imdlg.imopts.truecolor)
-					ul |= LC_IMAGE_HIGHCOLOR;
-				Sys_ProfileSaveInt ("Default", "HTML Image Options", ul);
-				Sys_ProfileSaveInt ("Default", "HTML Image Width", opts.imdlg.width);
-				Sys_ProfileSaveInt ("Default", "HTML Image Height", opts.imdlg.height);
-
-				switch (opts.imdlg.imopts.format)
+				switch (Options.ImageFormat)
 				{
 				case LC_IMAGE_BMP: ext = ".bmp"; break;
 				default:
@@ -3795,14 +3808,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				htmlext = ".html";
 
-				i = strlen (opts.path);
-				if (i && opts.path[i] != '/' && opts.path[i] != '\\')
-					strcat (opts.path, "/");
-				Sys_ProfileSaveString ("Default", "HTML Path", opts.path);
-
-				if (opts.singlepage)
+				if (Options.SinglePage)
 				{
-					strcpy(fn, opts.path);
+					strcpy(fn, Options.PathName);
 					strcat(fn, m_strTitle);
 					strcat(fn, htmlext);
 					f = fopen (fn, "wt");
@@ -3818,27 +3826,27 @@ void Project::HandleCommand(LC_COMMANDS id)
 					for (i = 1; i <= last; i++)
 					{
 						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
-							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
+							m_strTitle, i, ext, i, Options.StepImagesWidth, Options.StepImagesHeight);
 
-						if (opts.liststep)
-							CreateHTMLPieceList(f, i, opts.images, opts.id, ext);
+						if (Options.PartsListStep)
+							CreateHTMLPieceList(f, i, Options.PartsListImages, ext);
 					}
 
-					if (opts.listend)
-						CreateHTMLPieceList(f, 0, opts.images, opts.id, ext);
+					if (Options.PartsListEnd)
+						CreateHTMLPieceList(f, 0, Options.PartsListImages, ext);
 
 					fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\n", f);
 					fclose(f);
 				}
 				else
 				{
-					if (opts.index)
+					if (Options.IndexPage)
 					{
-						strcpy (fn, opts.path);
-						strcat (fn, m_strTitle);
-						strcat (fn, "-index");
-						strcat (fn, htmlext);
-						f = fopen (fn, "wt");
+						strcpy(fn, Options.PathName);
+						strcat(fn, m_strTitle);
+						strcat(fn, "-index");
+						strcat(fn, htmlext);
+						f = fopen(fn, "wt");
 
 						if (!f)
 						{
@@ -3851,7 +3859,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						for (i = 1; i <= last; i++)
 							fprintf(f, "<A HREF=\"%s-%02d%s\">Step %d<BR>\n</A>", m_strTitle, i, htmlext, i);
 
-						if (opts.listend)
+						if (Options.PartsListEnd)
 							fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A><BR>\n", m_strTitle, htmlext);
 
 						fputs("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\n", f);
@@ -3861,61 +3869,60 @@ void Project::HandleCommand(LC_COMMANDS id)
 					// Create each step
 					for (i = 1; i <= last; i++)
 					{
-						sprintf(fn, "%s%s-%02d%s", opts.path, m_strTitle, i, htmlext);
+						sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, i, htmlext);
 						f = fopen(fn, "wt");
 
 						if (!f)
 						{
-							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
 							break;
 						}
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, i);
 						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
-							m_strTitle, i, ext, i, opts.imdlg.width, opts.imdlg.height);
+							m_strTitle, i, ext, i, Options.StepImagesWidth, Options.StepImagesHeight);
 
-						if (opts.liststep)
-							CreateHTMLPieceList(f, i, opts.images, opts.id, ext);
+						if (Options.PartsListStep)
+							CreateHTMLPieceList(f, i, Options.PartsListImages, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
 						if (i != 1)
 							fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
 
-						if (opts.index)
+						if (Options.IndexPage)
 							fprintf(f, "<A HREF=\"%s-index%s\">Index</A> ", m_strTitle, htmlext);
 
 						if (i != last)
 							fprintf(f, "<A HREF=\"%s-%02d%s\">Next</A>", m_strTitle, i+1, htmlext);
-						else
-							if (opts.listend)
-								fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A>", m_strTitle, htmlext);
+						else if (Options.PartsListEnd)
+							fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A>", m_strTitle, htmlext);
 
 						fputs("<BR></HTML>\n",f);
 						fclose(f);
 					}
 
-					if (opts.listend)
+					if (Options.PartsListEnd)
 					{
-						strcpy (fn, opts.path);
-						strcat (fn, m_strTitle);
-						strcat (fn, "-pieces");
-						strcat (fn, htmlext);
-						f = fopen (fn, "wt");
+						strcpy(fn, Options.PathName);
+						strcat(fn, m_strTitle);
+						strcat(fn, "-pieces");
+						strcat(fn, htmlext);
+						f = fopen(fn, "wt");
 
 						if (!f)
 						{
-							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+							gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
 							break;
 						}
 
-						fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
+						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Pieces used by %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
-						CreateHTMLPieceList(f, 0, opts.images, opts.id, ext);
+						CreateHTMLPieceList(f, 0, Options.PartsListImages, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
 						fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
 
-						if (opts.index)
+						if (Options.IndexPage)
 							fprintf(f, "<A HREF=\"%s-index%s\">Index</A> ", m_strTitle, htmlext);
 
 						fputs("<BR></HTML>\n",f);
@@ -3925,19 +3932,19 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				// Save step pictures
 				Image* images = new Image[last];
-				CreateImages (images, opts.imdlg.width, opts.imdlg.height, 1, last, opts.highlight);
+				CreateImages(images, Options.StepImagesWidth, Options.StepImagesHeight, 1, last, Options.HighlightNewParts);
 
 				for (i = 0; i < last; i++)
 				{
-					sprintf(fn, "%s%s-%02d%s", opts.path, m_strTitle, i+1, ext);
-					images[i].FileSave (fn, &opts.imdlg.imopts);
+					sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, i+1, ext);
+					images[i].FileSave(fn, &ImageOpts);
 				}
 				delete []images;
 
-				if (opts.images)
+				if (Options.PartsListImages)
 				{
-					int cx = 120, cy = 100;
-					void* render = Sys_StartMemoryRender (cx, cy);
+					int cx = Options.PartImagesWidth, cy = Options.PartImagesHeight;
+					void* render = Sys_StartMemoryRender(cx, cy);
 
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
@@ -3971,14 +3978,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 						glClearColor(1,1,1,1);
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 						pInfo->ZoomExtents(30.0f, aspect);
-						pInfo->RenderPiece(opts.color);
+						pInfo->RenderPiece(Options.PartImagesColor);
 						glFinish();
 
 						Image image;
 						image.FromOpenGL (cx, cy);
 
-						sprintf(fn, "%s%s%s", opts.path, pInfo->m_strName, ext);
-						image.FileSave (fn, &opts.imdlg.imopts);
+						sprintf(fn, "%s%s%s", Options.PathName, pInfo->m_strName, ext);
+						image.FileSave(fn, &ImageOpts);
 					}
 					Sys_FinishMemoryRender (render);
 				}

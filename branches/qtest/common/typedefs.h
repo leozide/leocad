@@ -256,50 +256,6 @@ struct LC_IMAGEDLG_OPTS
 	LC_IMAGE_OPTS imopts;
 };
 
-struct LC_DLG_DIRECTORY_BROWSE_OPTS
-{
-	const char* Title;
-	char Path[LC_MAXPATH];
-};
-
-struct LC_HTMLDLG_OPTS
-{
-	char path[LC_MAXPATH];
-	bool singlepage;
-	bool index;
-	bool images;
-	bool id;
-	int color;
-	bool listend;
-	bool liststep;
-	bool highlight;
-	LC_IMAGEDLG_OPTS imdlg;
-};
-
-struct LC_PREFERENCESDLG_OPTS
-{
-	int nMouse;
-	int nSaveInterval;
-	char strUser[101];
-	char strPath[LC_MAXPATH];
-	unsigned long nDetail;
-	float fLineWidth;
-	int AASamples;
-	unsigned long nSnap;
-	unsigned short nAngleSnap;
-	unsigned short nGridSize;
-	unsigned long nScene;
-	float fDensity;
-	char strBackground[LC_MAXPATH];
-	float fBackground[4];
-	float fFog[4];
-	float fAmbient[4];
-	float fGrad1[3];
-	float fGrad2[3];
-	char strFooter[256];
-	char strHeader[256];
-};
-
 enum LC_TRANSFORM_TYPE
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,

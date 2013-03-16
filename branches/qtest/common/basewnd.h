@@ -39,6 +39,7 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_MERGE_PROJECT,
 	LC_DIALOG_EXPORT_BRICKLINK,
 	LC_DIALOG_EXPORT_CSV,
+	LC_DIALOG_EXPORT_HTML,
 	LC_DIALOG_EXPORT_POVRAY,
 	LC_DIALOG_EXPORT_WAVEFRONT,
 	LC_DIALOG_PROPERTIES,
@@ -53,8 +54,25 @@ enum LC_DIALOG_TYPE
 	// TODO: update dialogs
 	,
 	LC_DLG_PICTURE_SAVE,
-	LC_DLG_HTML,
 	LC_DLG_TERRAIN
+};
+
+struct lcHTMLDialogOptions
+{
+	char PathName[LC_MAXPATH];
+	LC_IMAGE_FORMATS ImageFormat;
+	bool TransparentImages;
+	bool SinglePage;
+	bool IndexPage;
+	int StepImagesWidth;
+	int StepImagesHeight;
+	bool HighlightNewParts;
+	bool PartsListStep;
+	bool PartsListEnd;
+	bool PartsListImages;
+	int PartImagesColor;
+	int PartImagesWidth;
+	int PartImagesHeight;
 };
 
 struct lcPOVRayDialogOptions

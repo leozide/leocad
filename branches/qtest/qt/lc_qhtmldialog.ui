@@ -7,162 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>573</height>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>HTML Options</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Layout</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0" colspan="2">
-       <widget class="QRadioButton" name="radioButton">
-        <property name="text">
-         <string>Single page</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QRadioButton" name="radioButton_2">
-        <property name="text">
-         <string>One step per page</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Width:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Height:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="lineEdit">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEdit_2">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox">
-        <property name="text">
-         <string>Index page</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox_4">
-        <property name="text">
-         <string>Highlight new parts</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Parts List</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEdit_4">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QLineEdit" name="lineEdit_3">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox_3">
-        <property name="text">
-         <string>At the end</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox_2">
-        <property name="text">
-         <string>After each step</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Width:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Height:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Color:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox_5">
-        <property name="text">
-         <string>Create images</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QToolButton" name="toolButton">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
@@ -174,15 +25,18 @@
         <property name="text">
          <string>Output folder:</string>
         </property>
+        <property name="buddy">
+         <cstring>outputFolder</cstring>
+        </property>
        </widget>
       </item>
       <item row="2" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLineEdit" name="lineEdit_5"/>
+         <widget class="QLineEdit" name="outputFolder"/>
         </item>
         <item>
-         <widget class="QToolButton" name="toolButton_2">
+         <widget class="QToolButton" name="outputFolderBrowse">
           <property name="text">
            <string>...</string>
           </property>
@@ -198,12 +52,197 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="comboBox"/>
+       <widget class="QComboBox" name="imageFormat">
+        <item>
+         <property name="text">
+          <string>BMP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>GIF</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>JPEG</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>PNG</string>
+         </property>
+        </item>
+       </widget>
       </item>
       <item row="4" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox_6">
+       <widget class="QCheckBox" name="transparentImages">
         <property name="text">
-         <string>Transparent background</string>
+         <string>Transparent image background</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Layout</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0" colspan="2">
+       <widget class="QRadioButton" name="singlePage">
+        <property name="text">
+         <string>Single page</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QRadioButton" name="oneStepPerPage">
+        <property name="text">
+         <string>One step per page</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Width:</string>
+        </property>
+        <property name="buddy">
+         <cstring>stepWidth</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Height:</string>
+        </property>
+        <property name="buddy">
+         <cstring>stepHeight</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="stepWidth">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="stepHeight">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QCheckBox" name="indexPage">
+        <property name="text">
+         <string>Index page</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QCheckBox" name="highlightNewParts">
+        <property name="text">
+         <string>Highlight new parts</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Parts List</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="partImagesWidth">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="partImagesHeight">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QCheckBox" name="partsAtTheEnd">
+        <property name="text">
+         <string>At the end</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="partsAfterEachStep">
+        <property name="text">
+         <string>After each step</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Width:</string>
+        </property>
+        <property name="buddy">
+         <cstring>partImagesWidth</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Height:</string>
+        </property>
+        <property name="buddy">
+         <cstring>partImagesHeight</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Color:</string>
+        </property>
+        <property name="buddy">
+         <cstring>toolButton</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QCheckBox" name="partImages">
+        <property name="text">
+         <string>Create images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QToolButton" name="toolButton">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -232,6 +271,25 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>outputFolder</tabstop>
+  <tabstop>outputFolderBrowse</tabstop>
+  <tabstop>imageFormat</tabstop>
+  <tabstop>transparentImages</tabstop>
+  <tabstop>singlePage</tabstop>
+  <tabstop>oneStepPerPage</tabstop>
+  <tabstop>indexPage</tabstop>
+  <tabstop>stepWidth</tabstop>
+  <tabstop>stepHeight</tabstop>
+  <tabstop>highlightNewParts</tabstop>
+  <tabstop>partsAfterEachStep</tabstop>
+  <tabstop>partsAtTheEnd</tabstop>
+  <tabstop>partImages</tabstop>
+  <tabstop>toolButton</tabstop>
+  <tabstop>partImagesWidth</tabstop>
+  <tabstop>partImagesHeight</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -241,8 +299,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>252</x>
+     <y>564</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -257,8 +315,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>320</x>
+     <y>564</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

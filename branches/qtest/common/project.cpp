@@ -4044,6 +4044,45 @@ void Project::HandleCommand(LC_COMMANDS id)
 			setlocale(LC_NUMERIC, OldLocale);
 		} break;
 
+		case LC_FILE_EXPORT_CSV:
+		{
+			if (!m_pPieces)
+			{
+				gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+				break;
+			}
+
+			char FileName[LC_MAXPATH];
+			memset(FileName, 0, sizeof(FileName));
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_CSV, FileName))
+				break;
+
+			lcDiskFile CSVFile;
+			char Line[1024];
+
+			if (!CSVFile.Open(FileName, "wt"))
+			{
+				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+				break;
+			}
+
+			ObjArray<lcPiecesUsedEntry> PiecesUsed;
+			GetPiecesUsed(PiecesUsed);
+
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
+			CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
+
+			for (int PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
+			{
+				sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", PiecesUsed[PieceIdx].Info->m_strDescription, gColorList[PiecesUsed[PieceIdx].ColorIndex].Name,
+						PiecesUsed[PieceIdx].Count, PiecesUsed[PieceIdx].Info->m_strName, gColorList[PiecesUsed[PieceIdx].ColorIndex].Code);
+				CSVFile.WriteLine(Line);
+			}
+
+			setlocale(LC_NUMERIC, OldLocale);
+		} break;
+
 		// Export to POV-Ray, swap X & Y from our cs to work with LGEO.
 		case LC_FILE_EXPORT_POVRAY:
 		{

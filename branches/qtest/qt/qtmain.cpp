@@ -126,6 +126,7 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_SAVE_PROJECT:
 	case LC_DIALOG_MERGE_PROJECT:
 	case LC_DIALOG_EXPORT_BRICKLINK:
+	case LC_DIALOG_EXPORT_CSV:
 	case LC_DIALOG_EXPORT_WAVEFRONT:
 		{
 			char* FileName = (char*)Data;
@@ -147,6 +148,10 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 			case LC_DIALOG_EXPORT_BRICKLINK:
 				result = QFileDialog::getSaveFileName(parent, parent->tr("Export BrickLink"), FileName, parent->tr("XML Files (*.xml);;All Files (*.*)"));
+				break;
+
+			case LC_DIALOG_EXPORT_CSV:
+				result = QFileDialog::getSaveFileName(parent, parent->tr("Export CSV"), FileName, parent->tr("CSV Files (*.csv);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_WAVEFRONT:

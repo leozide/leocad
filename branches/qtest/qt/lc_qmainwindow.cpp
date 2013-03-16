@@ -71,6 +71,7 @@ void lcQMainWindow::createActions()
 		{ "3D &Studio...",                    "Export the project in 3D Studio 3DS format" },                                           // LC_FILE_EXPORT_3DS
 		{ "&HTML...",                         "Create an HTML page for this project" },                                                 // LC_FILE_EXPORT_HTML
 		{ "&BrickLink...",                    "Export a list of pieces used in BrickLink XML format" },                                 // LC_FILE_EXPORT_BRICKLINK
+		{ "&CSV...",                          "Export a list of pieces used in comma delimited file format" },                          // LC_FILE_EXPORT_CSV
 		{ "&POV-Ray...",                      "Export the project in POV-Ray format" },                                                 // LC_FILE_EXPORT_POVRAY
 		{ "&Wavefront...",                    "Export the project in Wavefront OBJ format" },                                           // LC_FILE_EXPORT_WAVEFRONT
 		{ "Prope&rties...",                   "Display project properties" },                                                           // LC_FILE_PROPERTIES
@@ -336,6 +337,7 @@ void lcQMainWindow::createMenus()
 	QMenu* exportMenu = menuFile->addMenu(tr("&Export"));
 	exportMenu->addAction(actions[LC_FILE_EXPORT_3DS]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_BRICKLINK]);
+	exportMenu->addAction(actions[LC_FILE_EXPORT_CSV]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_HTML]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_POVRAY]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);

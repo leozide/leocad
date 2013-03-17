@@ -41,6 +41,15 @@ lcQPartsTree::lcQPartsTree(QWidget *parent) :
 	}
 }
 
+QSize lcQPartsTree::sizeHint() const
+{
+	QSize sizeHint = QTreeWidget::sizeHint();
+
+	sizeHint.setWidth(200);
+
+	return sizeHint;
+}
+
 void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 {
 	QTreeWidgetItem *parent = expandedItem->parent();

@@ -25,8 +25,8 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 //	setCentralWidget(centralWidget);
 
 	QFrame *previewFrame = new QFrame;
-	previewFrame->setFrameShape(QFrame::Panel);
-	previewFrame->setFrameShadow(QFrame::Plain);
+	previewFrame->setFrameShape(QFrame::StyledPanel);
+	previewFrame->setFrameShadow(QFrame::Sunken);
 	setCentralWidget(previewFrame);
 
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
@@ -386,10 +386,20 @@ void lcQMainWindow::createMenus()
 	menuView->addMenu(menuCamera);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
-	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
+	menuPiece->addAction(actions[LC_PIECE_INSERT]);
+	menuPiece->addAction(actions[LC_PIECE_DELETE]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
+	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
+	menuPiece->addSeparator();
 	menuPiece->addAction(actions[LC_PIECE_GROUP]);
+	menuPiece->addAction(actions[LC_PIECE_UNGROUP]);
+	menuPiece->addAction(actions[LC_PIECE_GROUP_REMOVE]);
+	menuPiece->addAction(actions[LC_PIECE_GROUP_ADD]);
 	menuPiece->addAction(actions[LC_PIECE_GROUP_EDIT]);
+	menuPiece->addSeparator();
+	menuPiece->addAction(actions[LC_PIECE_HIDE_SELECTED]);
+	menuPiece->addAction(actions[LC_PIECE_HIDE_UNSELECTED]);
+	menuPiece->addAction(actions[LC_PIECE_UNHIDE_ALL]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 	menuHelp->addAction(actions[LC_HELP_ABOUT]);
@@ -457,32 +467,40 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
 
 	partsToolBar = new QDockWidget(tr("Parts"), this);
+	partsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	QWidget *partsContents = new QWidget();
 	QGridLayout *partsLayout = new QGridLayout(partsContents);
 	partsLayout->setSpacing(6);
 	partsLayout->setContentsMargins(6, 6, 6, 6);
 	QSplitter *partsSplitter = new QSplitter(Qt::Vertical, partsContents);
 
-	QFrame *previewFrame = new QFrame;
-	previewFrame->setFrameShape(QFrame::Panel);
-	previewFrame->setFrameShadow(QFrame::Plain);
-	partsSplitter->addWidget(previewFrame);
+	QFrame *previewFrame = new QFrame(partsSplitter);
+	previewFrame->setFrameShape(QFrame::StyledPanel);
+	previewFrame->setFrameShadow(QFrame::Sunken);
 
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
 	piecePreview = new lcGLWidget(previewFrame, centralWidget, new PiecePreview(NULL));
-	piecePreview->preferredSize = QSize(100, 100);
+	piecePreview->preferredSize = QSize(200, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
 	partsTree = new lcQPartsTree(partsSplitter);
+	partsTree->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	connect(partsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(partsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
-	partsSplitter->addWidget(partsTree);
+
 	pieceCombo = new QComboBox(partsSplitter);
 	pieceCombo->setEditable(true);
-	partsSplitter->addWidget(pieceCombo);
+
+	QFrame *colorFrame = new QFrame(partsSplitter);
+	colorFrame->setFrameShape(QFrame::StyledPanel);
+	colorFrame->setFrameShadow(QFrame::Sunken);
+
+	QGridLayout *colorLayout = new QGridLayout(colorFrame);
+	colorLayout->setContentsMargins(0, 0, 0, 0);
+
 	colorList = new lcColorListWidget(partsSplitter);
-	partsSplitter->addWidget(colorList);
+	colorLayout->addWidget(colorList);
 
 	partsLayout->addWidget(partsSplitter, 0, 0, 1, 1);
 

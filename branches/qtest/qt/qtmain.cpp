@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	lcQMainWindow w;
 	gMainWindow->mHandle = &w;
+	lcGetActiveProject()->UpdateInterface();
 	w.show();
 
 	return a.exec();

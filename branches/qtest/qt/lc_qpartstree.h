@@ -10,6 +10,8 @@ class lcQPartsTree : public QTreeWidget
 public:
 	explicit lcQPartsTree(QWidget *parent = 0);
 	
+	QSize sizeHint() const;
+
 	enum
 	{
 		PartInfoRole = Qt::UserRole,

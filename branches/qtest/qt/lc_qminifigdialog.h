@@ -2,7 +2,7 @@
 #define LC_QMINIFIGDIALOG_H
 
 #include <QDialog>
-struct MinifigWizard;
+class MinifigWizard;
 
 namespace Ui {
 class lcQMinifigDialog;

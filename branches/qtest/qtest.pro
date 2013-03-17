@@ -18,6 +18,7 @@ win32 {
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
+RC_FILE = qt/leocad.rc
 
 release: DESTDIR = build/release
 debug:   DESTDIR = build/debug

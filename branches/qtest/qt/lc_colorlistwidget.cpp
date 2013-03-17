@@ -40,7 +40,7 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 		TextHeight += mGroupRects[GroupIdx].height();
 	}
 
-	mPreferredHeight = TextHeight + 8 * mRows;
+	mPreferredHeight = TextHeight + 10 * mRows;
 
 	setFocusPolicy(Qt::ClickFocus);
 }
@@ -53,7 +53,7 @@ lcColorListWidget::~lcColorListWidget()
 
 QSize lcColorListWidget::sizeHint() const
 {
-	return QSize(100, mPreferredHeight);
+	return QSize(200, mPreferredHeight);
 }
 
 bool lcColorListWidget::event(QEvent *event)
@@ -203,7 +203,7 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 
 	mPreferredHeight = TextHeight + 10 * mRows;
 
-	float CellWidth = (float)width() / (float)mColumns;
+	float CellWidth = (float)(width() + 1) / (float)mColumns;
 	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
 
 	int CurCell = 0;
@@ -219,10 +219,10 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 
 		for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
 		{
-			int Left = CurColumn * CellWidth;
-			int Right = (CurColumn + 1) * CellWidth;
-			int Top = CurY;
-			int Bottom = CurY + CellHeight;
+			const int Left = CurColumn * CellWidth - 1;
+			const int Right = (CurColumn + 1) * CellWidth;
+			const int Top = CurY;
+			const int Bottom = CurY + CellHeight;
 
 			mCellRects[CurCell] = QRect(Left, Top, Right - Left, Bottom - Top);
 
@@ -249,12 +249,10 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 void lcColorListWidget::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this);
+
+	painter.fillRect(rect(), palette().brush(QPalette::Base));
+
 	painter.setFont(font());
-
-	painter.setBrush(palette().brush(QPalette::Base));
-	painter.setPen(palette().color(QPalette::Shadow)); // TODO: correct border
-	painter.drawRect(rect());
-
 	painter.setPen(palette().color(QPalette::Text));
 
 	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)

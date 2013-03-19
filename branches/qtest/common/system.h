@@ -21,7 +21,7 @@ do \
 
 #else
 
-#define LC_ASSERT(expr, desc) do { } while(0)
+#define LC_ASSERT(...) do { } while(0)
 
 #define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
 
@@ -34,12 +34,6 @@ do \
 #define LC_CASSERT_CONCAT2(e, l) LC_CASSERT_CONCAT1(e, l)
 #define LC_CASSERT(e) LC_CASSERT_CONCAT2(e, __LINE__)
 #endif
-
-// Profile functions
-bool Sys_ProfileSaveInt (const char *section, const char *key, int value);
-bool Sys_ProfileSaveString (const char *section, const char *key, const char *value);
-int Sys_ProfileLoadInt (const char *section, const char *key, int default_value);
-char* Sys_ProfileLoadString (const char *section, const char *key, const char *default_value);
 
 // Memory render
 void* Sys_StartMemoryRender (int width, int height);

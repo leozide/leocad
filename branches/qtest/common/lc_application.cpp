@@ -3,6 +3,7 @@
 #include "lc_application.h"
 #include "lc_colors.h"
 #include "lc_library.h"
+#include "lc_profile.h"
 #include "system.h"
 #include "console.h"
 #include "opengl.h"
@@ -69,7 +70,9 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		}
 		else
 		{
-			const char* CustomPath = Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", "");
+			char CustomPath[LC_MAXPATH];
+
+			strcpy(CustomPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
 
 			if (CustomPath[0])
 			{
@@ -142,8 +145,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	bool ImageAnimation = false;
 	bool ImageInstructions = false;
 	bool ImageHighlight = false;
-	int ImageWidth = Sys_ProfileLoadInt("Default", "Image Width", 640);
-	int ImageHeight = Sys_ProfileLoadInt("Default", "Image Height", 480);
+	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	char* ImageName = NULL;
@@ -301,8 +304,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		// Setup default options.
 		LC_IMAGE_OPTS ImageOptions;
-		unsigned long image = Sys_ProfileLoadInt  ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
-		ImageOptions.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
+		unsigned long image = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
+		ImageOptions.quality = 80;
 		ImageOptions.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
 		ImageOptions.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
 		ImageOptions.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;

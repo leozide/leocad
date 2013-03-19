@@ -5,6 +5,7 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 #include "lc_texture.h"
+#include "lc_profile.h"
 #include "system.h"
 #include "mainwnd.h"
 #include <sys/types.h>
@@ -2018,7 +2019,7 @@ bool lcPiecesLibrary::LoadCategories()
 {
 	char FileName[LC_MAXPATH];
 
-	strcpy(FileName, Sys_ProfileLoadString("Settings", "Categories", ""));
+	strcpy(FileName, lcGetProfileString(LC_PROFILE_CATEGORIES_FILE));
 
 	if (!FileName[0])
 		return false;

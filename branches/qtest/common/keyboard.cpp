@@ -1,8 +1,5 @@
-//
-// Code to handle user-defined keyboard shortcuts.
-//
-
 #include "lc_global.h"
+#include "lc_profile.h"
 #include <stdio.h>
 #include "system.h"
 #include "keyboard.h"
@@ -291,7 +288,9 @@ void ResetKeyboardShortcuts()
 
 void InitKeyboardShortcuts()
 {
-	const char* FileName = Sys_ProfileLoadString("Settings", "Keyboard", "");
+	char FileName[LC_MAXPATH];
+
+	strcpy(FileName, lcGetProfileString(LC_PROFILE_SHORTCUTS_FILE));
 
 	ResetKeyboardShortcuts();
 	LoadKeyboardShortcuts(FileName);

@@ -65,7 +65,6 @@ SOURCES += common/view.cpp \
     common/camera.cpp \
     common/array.cpp \
     qt/lc_qmainwindow.cpp \
-    qt/profile.cpp \
     qt/main.cpp \
     qt/linux_gl.cpp \
     qt/glwindow.cpp \
@@ -85,7 +84,9 @@ SOURCES += common/view.cpp \
     qt/lc_qhtmldialog.cpp \
     qt/lc_qminifigdialog.cpp \
     qt/lc_qpreferencesdialog.cpp \
-    qt/lc_qcategorydialog.cpp
+    qt/lc_qcategorydialog.cpp \
+    qt/lc_qprofile.cpp \
+    common/lc_profile.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -140,7 +141,8 @@ HEADERS += common/glwindow.h \
     qt/lc_qhtmldialog.h \
     qt/lc_qminifigdialog.h \
     qt/lc_qpreferencesdialog.h \
-    qt/lc_qcategorydialog.h
+    qt/lc_qcategorydialog.h \
+    common/lc_profile.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

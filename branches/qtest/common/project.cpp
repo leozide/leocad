@@ -31,6 +31,7 @@
 #include "texfont.h"
 #include "debug.h"
 #include "lc_application.h"
+#include "lc_profile.h"
 
 // FIXME: temporary function, replace the code !!!
 void SystemUpdateFocus (void* p)
@@ -65,8 +66,8 @@ Project::Project()
 	m_nCurAction = 0;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
-	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
-	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
+	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
+	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 
 	if (messenger == NULL)
 		messenger = new Messenger ();
@@ -239,48 +240,48 @@ void Project::LoadDefaults(bool cameras)
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	m_bUndoOriginal = true;
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
-	m_nDetail = Sys_ProfileLoadInt ("Default", "Detail", LC_DET_BRICKEDGES);
-	m_nAngleSnap = (unsigned short)Sys_ProfileLoadInt ("Default", "Angle", 30);
-	m_nSnap = Sys_ProfileLoadInt ("Default", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z);
+	m_nDetail = lcGetProfileInt(LC_PROFILE_DETAIL);
+	m_nAngleSnap = (unsigned short)lcGetProfileInt(LC_PROFILE_ANGLE_SNAP);
+	m_nSnap = lcGetProfileInt(LC_PROFILE_SNAP);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	m_nMoveSnap = 0x0304;
 	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
-	m_fLineWidth = (float)Sys_ProfileLoadInt ("Default", "Line", 100)/100;
-	m_fFogDensity = (float)Sys_ProfileLoadInt ("Default", "Density", 10)/100;
-	rgb = Sys_ProfileLoadInt ("Default", "Fog", 0xFFFFFF);
+	m_fLineWidth = (float)lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
+	m_fFogDensity = (float)lcGetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY);
+	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR);
 	m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
 	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fFogColor[3] = 1.0f;
-	m_nGridSize = (unsigned short)Sys_ProfileLoadInt ("Default", "Grid", 20);
-	rgb = Sys_ProfileLoadInt ("Default", "Ambient", 0x4B4B4B);
+	m_nGridSize = (unsigned short)lcGetProfileInt(LC_PROFILE_GRID_SIZE);
+	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR);
 	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fAmbient[3] = 1.0f;
-	rgb = Sys_ProfileLoadInt ("Default", "Background", 0xFFFFFF);
+	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR);
 	m_fBackground[0] = (float)((unsigned char) (rgb))/255;
 	m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fBackground[3] = 1.0f;
-	rgb = Sys_ProfileLoadInt ("Default", "Gradient1", 0xBF0000);
+	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1);
 	m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
 	m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	rgb = Sys_ProfileLoadInt ("Default", "Gradient2", 0xFFFFFF);
+	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2);
 	m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
 	m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	m_nFPS = Sys_ProfileLoadInt ("Default", "FPS", 24);
+	m_nFPS = 24;
 	m_nCurStep = 1;
 	m_nCurFrame = 1;
 	m_nTotalFrames = 100;
 	gMainWindow->UpdateTime(false, 1, 255);
-	m_nScene = Sys_ProfileLoadInt ("Default", "Scene", 0);
+	m_nScene = lcGetProfileInt(LC_PROFILE_DEFAULT_SCENE);
 	m_nSaveTimer = 0;
-	strcpy(m_strHeader, Sys_ProfileLoadString ("Default", "Header", ""));
-	strcpy(m_strFooter, Sys_ProfileLoadString ("Default", "Footer", "Page &P"));
-	strcpy(m_strBackground, Sys_ProfileLoadString ("Default", "BMP", ""));
+	strcpy(m_strHeader, "");
+	strcpy(m_strFooter, "Page &P");
+	strcpy(m_strBackground, lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE));
 	m_pTerrain->LoadDefaults(true);
 	m_OverlayActive = false;
 	m_RestoreAction = false;
@@ -871,8 +872,9 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	if (!bUndo)
 	{
 		lcuint32 pos = 0;
-
-		i = Sys_ProfileLoadInt ("Default", "Save Preview", 0);
+/*
+		// TODO: add file preview
+		i = lcGetProfileValue("Default", "Save Preview", 0);
 		if (i != 0)
 		{
 			pos = file->GetPosition();
@@ -888,7 +890,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 			image[0].FileSave (*file, &opts);
 			delete []image;
 		}
-
+*/
 		file->WriteU32(&pos, 1);
 		m_nSaveTimer = 0;
 	}
@@ -1077,7 +1079,7 @@ bool Project::DoSave(const char* FileName)
 			strcpy(SaveFileName, m_strPathName);
 		else
 		{
-			strcpy(SaveFileName, Sys_ProfileLoadString("Default", "Projects", ""));
+			strcpy(SaveFileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
 
 			int Length = strlen(SaveFileName);
 			if (Length && (SaveFileName[Length - 1] != '/' && SaveFileName[Length - 1] != '\\'))
@@ -1242,7 +1244,7 @@ bool Project::OnNewDocument()
 	SetTitle("Untitled");
 	DeleteContents(false);
 	memset(m_strPathName, 0, sizeof(m_strPathName)); // no path name yet
-	strcpy(m_strAuthor, Sys_ProfileLoadString ("Default", "User", ""));
+	strcpy(m_strAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
 	SetModifiedFlag(false); // make clean
 	LoadDefaults(true);
 	CheckPoint("");
@@ -1406,7 +1408,7 @@ void Project::SetPathName(const char* PathName, bool bAddToMRU)
 
 	// add it to the file MRU list
 	if (bAddToMRU)
-		gMainWindow->AddToRecentFiles(m_strPathName);
+		gMainWindow->AddRecentFile(m_strPathName);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3522,7 +3524,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (m_strPathName[0])
 				strcpy(FileName, m_strPathName);
 			else
-				strcpy(FileName, Sys_ProfileLoadString("Default", "Projects", ""));
+				strcpy(FileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
 
 			if (gMainWindow->DoDialog(LC_DIALOG_OPEN_PROJECT, FileName))
 				OpenProject(FileName);
@@ -3535,7 +3537,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (m_strPathName[0])
 				strcpy(FileName, m_strPathName);
 			else
-				strcpy(FileName, Sys_ProfileLoadString("Default", "Projects", ""));
+				strcpy(FileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
 
 			if (gMainWindow->DoDialog(LC_DIALOG_MERGE_PROJECT, FileName))
 			{
@@ -3566,14 +3568,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			LC_IMAGEDLG_OPTS opts;
 
-			int ImageFlags = Sys_ProfileLoadInt("Default", "Image Options", LC_IMAGE_PNG);
-			opts.width = Sys_ProfileLoadInt("Default", "Image Width", 1280);
-			opts.height = Sys_ProfileLoadInt("Default", "Image Height", 720);
-			opts.imopts.quality = Sys_ProfileLoadInt("Default", "JPEG Quality", 70);
+			int ImageFlags = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
+			opts.width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+			opts.height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+			opts.imopts.quality = 80;
 			opts.imopts.interlaced = (ImageFlags & LC_IMAGE_PROGRESSIVE) != 0;
 			opts.imopts.transparent = (ImageFlags & LC_IMAGE_TRANSPARENT) != 0;
 			opts.imopts.truecolor = (ImageFlags & LC_IMAGE_HIGHCOLOR) != 0;
-			opts.imopts.pause = (float)Sys_ProfileLoadInt("Default", "AVI Pause", 100) / 100;
+			opts.imopts.pause = 1.0f;
 			opts.imopts.format = (unsigned char)(ImageFlags & ~(LC_IMAGE_MASK));
 			opts.from = 1;
 			opts.to = m_bAnimation ? m_nTotalFrames : GetLastStep();
@@ -3617,11 +3619,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (opts.imopts.truecolor)
 					ImageFlags |= LC_IMAGE_HIGHCOLOR;
 
-				Sys_ProfileSaveInt("Default", "Image Options", ImageFlags);
-				Sys_ProfileSaveInt("Default", "Image Width", opts.width);
-				Sys_ProfileSaveInt("Default", "Image Height", opts.height);
-				Sys_ProfileSaveInt("Default", "AVI Pause", (int)(opts.imopts.pause * 100));
-				Sys_ProfileSaveInt("Default", "JPEG Quality", opts.imopts.quality);
+				lcSetProfileInt(LC_PROFILE_IMAGE_OPTIONS, ImageFlags);
+				lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, opts.width);
+				lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, opts.height);
 
 				if (!opts.filename[0])
 					strcpy(opts.filename, "Image");
@@ -3704,43 +3704,38 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcHTMLDialogOptions Options;
 
-			strcpy(Options.PathName, Sys_ProfileLoadString("Default", "HTML Path", ""));
+			strcpy(Options.PathName, m_strPathName);
 
-			if (Options.PathName[0] == 0)
+			if (Options.PathName[0] != 0)
 			{
-				strcpy(Options.PathName, m_strPathName);
+				char* Slash = strrchr(Options.PathName, '/');
 
-				if (Options.PathName[0] != 0)
+				if (Slash == NULL)
+					Slash = strrchr(Options.PathName, '\\');
+
+				if (Slash)
 				{
-					char* Slash = strrchr(Options.PathName, '/');
-
-					if (Slash == NULL)
-						Slash = strrchr(Options.PathName, '\\');
-
-					if (Slash)
-					{
-						Slash++;
-						*Slash = 0;
-					}
+					Slash++;
+					*Slash = 0;
 				}
 			}
 
-			int ImageOptions = Sys_ProfileLoadInt("Default", "HTML Image Options", LC_IMAGE_PNG | LC_IMAGE_TRANSPARENT);
-			int HTMLOptions = Sys_ProfileLoadInt("Default", "HTML Options", LC_HTML_SINGLEPAGE);
+			int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
+			int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
 
 			Options.ImageFormat = (LC_IMAGE_FORMATS)(ImageOptions & ~(LC_IMAGE_MASK));
 			Options.TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
 			Options.SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
 			Options.IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
-			Options.StepImagesWidth = Sys_ProfileLoadInt("Default", "HTML Image Width", 640);
-			Options.StepImagesHeight = Sys_ProfileLoadInt("Default", "HTML Image Height", 480);
+			Options.StepImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH);
+			Options.StepImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT);
 			Options.HighlightNewParts = (HTMLOptions & LC_HTML_HIGHLIGHT) != 0;
 			Options.PartsListStep = (HTMLOptions & LC_HTML_LISTSTEP) != 0;
 			Options.PartsListEnd = (HTMLOptions & LC_HTML_LISTEND) != 0;
 			Options.PartsListImages = (HTMLOptions & LC_HTML_IMAGES) != 0;
-			Options.PartImagesColor = lcGetColorIndex(Sys_ProfileLoadInt("Default", "HTML Piece Color", 16));
-			Options.PartImagesWidth = Sys_ProfileLoadInt("Default", "HTML Parts Width", 128);
-			Options.PartImagesHeight = Sys_ProfileLoadInt("Default", "HTML Parts Height", 128);
+			Options.PartImagesColor = lcGetColorIndex(lcGetProfileInt(LC_PROFILE_HTML_PARTS_COLOR));
+			Options.PartImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH);
+			Options.PartImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT);
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_HTML, &Options))
 				break;
@@ -3765,18 +3760,19 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (Options.TransparentImages)
 				ImageOptions |= LC_IMAGE_TRANSPARENT;
 
-			Sys_ProfileSaveInt("Default", "HTML Image Options", ImageOptions);
-			Sys_ProfileSaveInt("Default", "HTML Options", HTMLOptions);
-			Sys_ProfileSaveInt("Default", "HTML Image Width", lcGetColorCode(Options.StepImagesWidth));
-			Sys_ProfileSaveInt("Default", "HTML Image Height", lcGetColorCode(Options.StepImagesHeight));
-			Sys_ProfileSaveInt("Default", "HTML Piece Color", lcGetColorCode(Options.PartImagesColor));
-			Sys_ProfileSaveInt("Default", "HTML Parts Width", lcGetColorCode(Options.PartImagesWidth));
-			Sys_ProfileSaveInt("Default", "HTML Parts Height", lcGetColorCode(Options.PartImagesHeight));
+			lcSetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS, ImageOptions);
+			lcSetProfileInt(LC_PROFILE_HTML_OPTIONS, HTMLOptions);
+			lcSetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH, Options.StepImagesWidth);
+			lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, Options.StepImagesHeight);
+			lcSetProfileInt(LC_PROFILE_HTML_PARTS_COLOR, lcGetColorCode(Options.PartImagesColor));
+			lcSetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH, Options.PartImagesWidth);
+			lcSetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT, Options.PartImagesHeight);
 
 			int PathLength = strlen(Options.PathName);
 			if (PathLength && Options.PathName[PathLength] != '/' && Options.PathName[PathLength] != '\\')
 				strcat(Options.PathName, "/");
-			Sys_ProfileSaveString("Default", "HTML Path", Options.PathName);
+
+			// TODO: create directory
 
 			LC_IMAGE_OPTS ImageOpts;
 			ImageOpts.quality = 70;
@@ -4096,16 +4092,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcPOVRayDialogOptions Options;
 
 			memset(Options.FileName, 0, sizeof(Options.FileName));
-			strcpy(Options.POVRayPath, Sys_ProfileLoadString("Settings", "POV-Ray", ""));
-			strcpy(Options.LGEOPath, Sys_ProfileLoadString("Settings", "LGEO", ""));
-			Options.Render = Sys_ProfileLoadInt("Settings", "POV Render", 1);
+			strcpy(Options.POVRayPath, lcGetProfileString(LC_PROFILE_POVRAY_PATH));
+			strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
+			Options.Render = lcGetProfileInt(LC_PROFILE_POVRAY_RENDER);
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_POVRAY, &Options))
 				break;
 
-			Sys_ProfileSaveString("Settings", "POV-Ray", Options.POVRayPath);
-			Sys_ProfileSaveString("Settings", "LGEO", Options.LGEOPath);
-			Sys_ProfileSaveInt("Settings", "POV Render", Options.Render);
+			lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
+			lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
+			lcSetProfileInt(LC_PROFILE_POVRAY_RENDER, Options.Render);
 
 			lcDiskFile POVFile;
 			char Line[1024];
@@ -4636,14 +4632,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Options.SetDefault)
 			{
-				Sys_ProfileSaveInt("Default", "Scene", Scene);
-				Sys_ProfileSaveInt("Default", "Density", (int)(Options.FogDensity * 100));
-				Sys_ProfileSaveString("Default", "BMP", Options.BackgroundFileName);
-				Sys_ProfileSaveInt("Default", "Background", RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
-				Sys_ProfileSaveInt("Default", "Fog", RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
-				Sys_ProfileSaveInt("Default", "Ambient", RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
-				Sys_ProfileSaveInt("Default", "Gradient1", RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-				Sys_ProfileSaveInt("Default", "Gradient2", RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_SCENE, Scene);
+				lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, Options.FogDensity);
+				lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, Options.BackgroundFileName);
+				lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
 			}
 
 			if (Modified)
@@ -5558,13 +5554,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcPreferencesDialogOptions Options;
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
-			int CurrentAASamples = Sys_ProfileLoadInt("Default", "AASamples", 1);
+			int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
 
-			strcpy(Options.DefaultAuthor, Sys_ProfileLoadString("Default", "User", ""));
-			strcpy(Options.ProjectsPath, Sys_ProfileLoadString("Default", "Projects", ""));
-			strcpy(Options.LibraryPath, Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", ""));
+			strcpy(Options.DefaultAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
+			strcpy(Options.ProjectsPath, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
+			strcpy(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
 			Options.MouseSensitivity = m_nMouse;
-			Options.CheckForUpdates = Sys_ProfileLoadInt("Settings", "CheckUpdates", 1);
+			Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 			Options.Detail = m_nDetail;
 			Options.Snap = m_nSnap;
@@ -5572,14 +5568,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Options.AASamples = CurrentAASamples;
 			Options.GridSize = m_nGridSize;
 
-			strcpy(Options.CategoriesFileName, Sys_ProfileLoadString("Settings", "Categories", ""));
+			strcpy(Options.CategoriesFileName, lcGetProfileString(LC_PROFILE_CATEGORIES_FILE));
 			Options.Categories = Library->mCategories;
 			Options.CategoriesModified = false;
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 				break;
 
-			bool LibraryChanged = strcmp(Options.LibraryPath, Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", ""));
+			bool LibraryChanged = strcmp(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
 			bool AAChanged = CurrentAASamples != Options.AASamples;
 
 			m_nMouse = Options.MouseSensitivity;
@@ -5588,17 +5584,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 			m_fLineWidth = Options.LineWidth;
 			m_nGridSize = Options.GridSize;
 
-			Sys_ProfileSaveString("Default", "User", Options.DefaultAuthor);
-			Sys_ProfileSaveString("Default", "Projects", Options.ProjectsPath);
-			Sys_ProfileSaveString("Settings", "CustomPiecesLibrary", Options.LibraryPath);
-			Sys_ProfileSaveInt("Default", "Mouse", m_nMouse);
-			Sys_ProfileSaveInt("Settings", "CheckUpdates", Options.CheckForUpdates);
-			Sys_ProfileSaveInt("Default", "Snap", Options.Snap);
-			Sys_ProfileSaveInt("Default", "Detail", Options.Detail);
-			Sys_ProfileSaveInt("Default", "Grid", Options.GridSize);
-			Sys_ProfileSaveInt("Default", "Line", (int)(Options.LineWidth * 100));
-			Sys_ProfileSaveInt("Default", "AASamples", Options.AASamples);
-			Sys_ProfileSaveString("Settings", "Categories", Options.CategoriesFileName);
+			lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
+			lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
+			lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
+			lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, m_nMouse);
+			lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
+			lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);
+			lcSetProfileInt(LC_PROFILE_DETAIL, Options.Detail);
+			lcSetProfileInt(LC_PROFILE_GRID_SIZE, Options.GridSize);
+			lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, Options.LineWidth);
+			lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
+			lcSetProfileString(LC_PROFILE_CATEGORIES_FILE, Options.CategoriesFileName);
 
 			if (LibraryChanged && AAChanged)
 				gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);

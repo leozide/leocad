@@ -12,6 +12,7 @@
 #include "camera.h"
 #include "system.h"
 #include "lc_texture.h"
+#include "lc_profile.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Static functions
@@ -809,15 +810,15 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 
 void Terrain::LoadDefaults(bool bLinear)
 {
-	unsigned long rgb = Sys_ProfileLoadInt ("Default", "Floor", RGB (0,191,0));
-	m_fColor[0] = (float)((unsigned char) (rgb))/255;
-	m_fColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	m_fColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+	unsigned long rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_FLOOR_COLOR);
+	m_fColor[0] = (float)((unsigned char)(rgb))/255;
+	m_fColor[1] = (float)((unsigned char)(((unsigned short)(rgb)) >> 8))/255;
+	m_fColor[2] = (float)((unsigned char)((rgb) >> 16))/255;
 
 	m_uSize = 50;
 	m_vSize = 50;
 
-	strcpy (m_strTexture, Sys_ProfileLoadString ("Default", "FloorBMP", ""));
+	strcpy(m_strTexture, lcGetProfileString(LC_PROFILE_DEFAULT_FLOOR_TEXTURE));
 	m_pTexture->Unload();
 
 	m_nOptions = LC_TERRAIN_FLAT;

@@ -885,43 +885,45 @@ MinifigWizard::MinifigWizard(GLWindow *share)
 	m_MinifigNames = NULL;
 	m_MinifigTemplates = NULL;
 	memset(m_Info, 0, sizeof(m_Info));
-
-	int Version = Sys_ProfileLoadInt("MinifigWizard", "Version", 1);
+/*
+	int Version = lcGetProfileValue("MinifigWizard", "Version", 1);
 	if (Version == 1)
 	{
-		char *ptr, buf[32];
+		char buf[32];
+		const char* Value;
 
-		m_MinifigCount = Sys_ProfileLoadInt ("MinifigWizard", "Count", 0);
+		m_MinifigCount = lcGetProfileValue("MinifigWizard", "Count", 0);
 		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**) * (m_MinifigCount+1));
 		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**) * (m_MinifigCount+1));
 
 		for (int i = 0; i < m_MinifigCount; i++)
 		{
-			sprintf (buf, "Minifig%.2dName", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, buf);
-			m_MinifigNames[i] = (char*)malloc (strlen (ptr) + 1);
-			strcpy (m_MinifigNames[i], ptr);
+			sprintf(buf, "Minifig%.2dName", i);
+			Value = lcGetProfileValue("MinifigWizard", buf, buf);
+			m_MinifigNames[i] = (char*)malloc(strlen(Value) + 1);
+			strcpy(m_MinifigNames[i], Value);
 
-			m_MinifigTemplates[i] = (char*)malloc (768);
-			sprintf (buf, "Minifig%.2dColors", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
-			if (ptr[strlen (ptr) - 1] != ' ')
-				strcat (ptr, " ");
-			strcpy (m_MinifigTemplates[i], ptr);
+			m_MinifigTemplates[i] = (char*)malloc(768);
+			sprintf(buf, "Minifig%.2dColors", i);
+			Value = lcGetProfileValue("MinifigWizard", buf, "");
+			if (Value[strlen(Value) - 1] != ' ')
+				strcat(Value, " ");
+			strcpy(m_MinifigTemplates[i], Value);
 
-			sprintf (buf, "Minifig%.2dPieces", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
-			if (ptr[strlen (ptr) - 1] != ' ')
-				strcat (ptr, " ");
-			strcat (m_MinifigTemplates[i], ptr);
+			sprintf(buf, "Minifig%.2dPieces", i);
+			Value = lcGetProfileValue("MinifigWizard", buf, "");
+			if (Value[strlen(Value) - 1] != ' ')
+				strcat(Value, " ");
+			strcat(m_MinifigTemplates[i], Value);
 
-			sprintf (buf, "Minifig%.2dAngles", i);
-			ptr = Sys_ProfileLoadString ("MinifigWizard", buf, "");
-			strcat (m_MinifigTemplates[i], ptr);
+			sprintf(buf, "Minifig%.2dAngles", i);
+			ptr = lcGetProfileValue("MinifigWizard", buf, "");
+			strcat(m_MinifigTemplates[i], Value);
 		}
 	}
 	else
-		Sys_MessageBox ("Unknown Minifig Preferences.");
+		Sys_MessageBox("Unknown Minifig Preferences.");
+	*/
 }
 
 void MinifigWizard::OnInitialUpdate()
@@ -946,11 +948,12 @@ void MinifigWizard::OnInitialUpdate()
 
 MinifigWizard::~MinifigWizard ()
 {
+	/*
 	char *ptr, buf[32];
 	int i, j;
 
-	Sys_ProfileSaveInt ("MinifigWizard", "Version", 1);
-	Sys_ProfileSaveInt ("MinifigWizard", "Count", m_MinifigCount);
+	lcSetProfileValue("MinifigWizard", "Version", 1);
+	lcSetProfileValue("MinifigWizard", "Count", m_MinifigCount);
 
 	for (i = 0; i < m_MinifigCount; i++)
 	{
@@ -958,7 +961,7 @@ MinifigWizard::~MinifigWizard ()
 		ptr = m_MinifigTemplates[i];
 
 		sprintf (buf, "Minifig%.2dName", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, m_MinifigNames[i]);
+		lcSetProfileValue("MinifigWizard", buf, m_MinifigNames[i]);
 
 		value = ptr;
 		for (j = 0; j < LC_MFW_NUMITEMS; j++)
@@ -966,7 +969,7 @@ MinifigWizard::~MinifigWizard ()
 		*(--ptr) = '\0';
 
 		sprintf (buf, "Minifig%.2dColors", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, value);
+		lcSetProfileValue("MinifigWizard", buf, value);
 		ptr++;
 
 		value = ptr;
@@ -975,11 +978,11 @@ MinifigWizard::~MinifigWizard ()
 		*(--ptr) = '\0';
 
 		sprintf (buf, "Minifig%.2dPieces", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, value);
+		lcSetProfileValue("MinifigWizard", buf, value);
 		ptr++;
 
 		sprintf (buf, "Minifig%.2dAngles", i);
-		Sys_ProfileSaveString ("MinifigWizard", buf, ptr);
+		lcSetProfileValue("MinifigWizard", buf, ptr);
 
 		free (m_MinifigNames[i]);
 		free (m_MinifigTemplates[i]);
@@ -987,8 +990,8 @@ MinifigWizard::~MinifigWizard ()
 
 	free (m_MinifigNames);
 	free (m_MinifigTemplates);
-
-	for (i = 0; i < LC_MFW_NUMITEMS; i++)
+*/
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (m_Info[i])
 			m_Info[i]->Release();
 }

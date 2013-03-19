@@ -3,53 +3,19 @@
 
 #include "basewnd.h"
 #include "array.h"
-#include "lc_math.h"
 
 class Camera;
-
-extern class lcMainWindow* gMainWindow;
 
 #define LC_MAX_RECENT_FILES 4
 
 class lcMainWindow : public lcBaseWindow
 {
 public:
-	lcMainWindow()
-	{
-		for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-			mRecentFiles[FileIdx][0] = 0;
-	}
+	lcMainWindow();
+	~lcMainWindow();
 
-	~lcMainWindow()
-	{
-		gMainWindow = NULL;
-	}
-
-	void AddToRecentFiles(const char* FileName)
-	{
-		int FileIdx;
-
-		for (FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-			if (!strcmp(mRecentFiles[FileIdx], FileName))
-				break;
-
-		for (FileIdx = lcMin(FileIdx, LC_MAX_RECENT_FILES - 1); FileIdx > 0; FileIdx--)
-			strcpy(mRecentFiles[FileIdx], mRecentFiles[FileIdx - 1]);
-
-		strcpy(mRecentFiles[0], FileName);
-
-		UpdateRecentFiles();
-	}
-
-	void RemoveRecentFile(int FileIndex)
-	{
-		for (int FileIdx = FileIndex; FileIdx < LC_MAX_RECENT_FILES - 1; FileIdx++)
-			strcpy(mRecentFiles[FileIdx], mRecentFiles[FileIdx + 1]);
-
-		mRecentFiles[LC_MAX_RECENT_FILES - 1][0] = 0;
-
-		UpdateRecentFiles();
-	}
+	void AddRecentFile(const char* FileName);
+	void RemoveRecentFile(int FileIndex);
 
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
@@ -66,5 +32,7 @@ public:
 
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
 };
+
+extern class lcMainWindow* gMainWindow;
 
 #endif // _MAINWND_H_

@@ -123,6 +123,7 @@ void lcQPropertiesDialog::accept()
 	options->FogEnabled = ui->fogCheckBox->isChecked();
 	options->FogDensity = ui->fogDensityEdit->text().toFloat();
 	options->DrawFloor = ui->floorCheckBox->isChecked();
+	options->SetDefault = ui->setDefaultCheckBox->isChecked();
 
 	QDialog::accept();
 }

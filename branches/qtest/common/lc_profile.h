@@ -53,6 +53,34 @@ enum LC_PROFILE_KEY
 	LC_NUM_PROFILE_KEYS
 };
 
+enum LC_PROFILE_ENTRY_TYPE
+{
+	LC_PROFILE_ENTRY_INT,
+	LC_PROFILE_ENTRY_FLOAT,
+	LC_PROFILE_ENTRY_STRING
+};
+
+class lcProfileEntry
+{
+public:
+	template<typename T>
+	lcProfileEntry(const char* Section, const char* Key, T DefaultValue);
+
+	LC_PROFILE_ENTRY_TYPE mType;
+
+	const char* mSection;
+	const char* mKey;
+
+	union
+	{
+		int IntValue;
+		float FloatValue;
+		const char* StringValue;
+	} mDefault;
+};
+
+extern lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS];
+
 int lcGetProfileInt(LC_PROFILE_KEY Key);
 float lcGetProfileFloat(LC_PROFILE_KEY Key);
 const char* lcGetProfileString(LC_PROFILE_KEY Key);

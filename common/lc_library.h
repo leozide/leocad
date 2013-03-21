@@ -64,10 +64,12 @@ public:
 			delete mSections[SectionIdx];
 	}
 
-	void AddLine(int LineType, lcuint32 ColorCode, const lcVector3* Vertices);
-	void AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices);
+	void AddLine(int LineType, lcuint32 ColorCode, lcVector3* Vertices);
+	void AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, lcVector3* Vertices);
 	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap);
 	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap);
+	void TestQuad(lcVector3* Vertices);
+	void ResequenceQuad(lcVector3* Vertices, int a, int b, int c, int d);
 
 	PtrArray<lcLibraryMeshSection> mSections;
 	ObjArray<lcVertex> mVertices;

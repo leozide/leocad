@@ -1340,7 +1340,50 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 	return true;
 }
 
-void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector3* Vertices)
+void lcLibraryMeshData::ResequenceQuad(lcVector3* Vertices, int a, int b, int c, int d)
+{
+	lcVector3 TempVertices[4];
+
+	memcpy(TempVertices, Vertices, sizeof(TempVertices));
+
+	Vertices[0] = TempVertices[a];
+	Vertices[1] = TempVertices[b];
+	Vertices[2] = TempVertices[c];
+	Vertices[3] = TempVertices[d];
+}
+
+void lcLibraryMeshData::TestQuad(lcVector3* Vertices)
+{
+	lcVector3 v01 = Vertices[1] - Vertices[0];
+	lcVector3 v02 = Vertices[2] - Vertices[0];
+	lcVector3 v03 = Vertices[3] - Vertices[0];
+	lcVector3 cp1 = lcCross(v01, v02);
+	lcVector3 cp2 = lcCross(v02, v03);
+
+	if (lcDot(cp1, cp2) > 0.0f)
+		return;
+
+	lcVector3 v12 = Vertices[2] - Vertices[1];
+	lcVector3 v13 = Vertices[3] - Vertices[1];
+	lcVector3 v23 = Vertices[3] - Vertices[2];
+
+	if (lcDot(lcCross(v12, v01), lcCross(v01, v13)) > 0.0f)
+	{
+		if (-lcDot(lcCross(v02, v12), lcCross(v12, v23)) > 0.0f)
+			ResequenceQuad(Vertices, 1, 2, 3, 0);
+		else
+			ResequenceQuad(Vertices, 0, 3, 1, 2);
+	}
+	else
+	{
+		if (-lcDot(lcCross(v02, v12), lcCross(v12, v23)) > 0.0f)
+			ResequenceQuad(Vertices, 0, 1, 3, 2);
+		else
+			ResequenceQuad(Vertices, 1, 2, 3, 0);
+	}
+}
+
+void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, lcVector3* Vertices)
 {
 	lcLibraryMeshSection* Section = NULL;
 	int SectionIdx;
@@ -1360,6 +1403,9 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 
 		mSections.Add(Section);
 	}
+
+	if (LineType == 4)
+		TestQuad(Vertices);
 
 	int Indices[4] = { -1, -1, -1, -1 };
 
@@ -1395,6 +1441,7 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 			Section->mIndices.Add(Indices[3]);
 			Section->mIndices.Add(Indices[0]);
 		}
+
 	case 3:
 		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
 		{
@@ -1413,7 +1460,7 @@ void lcLibraryMeshData::AddLine(int LineType, lcuint32 ColorCode, const lcVector
 	}
 }
 
-void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices)
+void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, lcVector3* Vertices)
 {
 	lcLibraryMeshSection* Section = NULL;
 	int SectionIdx;
@@ -1433,6 +1480,9 @@ void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const 
 
 		mSections.Add(Section);
 	}
+
+	if (LineType == 4)
+		TestQuad(Vertices);
 
 	int Indices[4] = { -1, -1, -1, -1 };
 

@@ -523,6 +523,14 @@ void lcQMainWindow::createStatusBar()
 	statusBar->addPermanentWidget(statusTimeLabel);
 }
 
+void lcQMainWindow::closeEvent(QCloseEvent *event)
+{
+	if (!lcGetActiveProject()->SaveModified())
+		event->ignore();
+	else
+		event->accept();
+}
+
 void lcQMainWindow::actionTriggered()
 {
 	QObject *action = sender();
@@ -673,6 +681,11 @@ void lcQMainWindow::updateCurrentCamera(int cameraIndex)
 		actionIndex = LC_VIEW_CAMERA_NONE;
 
 	actions[actionIndex]->setChecked(true);
+}
+
+void lcQMainWindow::updateCategories()
+{
+	partsTree->updateCategories();
 }
 
 void lcQMainWindow::updateTitle(const char* title, bool modified)

@@ -194,43 +194,43 @@ bool Image::FileLoad(const char* filename)
   return FileLoad (file);
 }
 
-bool Image::FileSave(lcFile& file, LC_IMAGE_OPTS* opts) const
+bool Image::FileSave(lcFile& File, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const
 {
-  switch (opts->format)
-  {
+	switch (Format)
+	{
 #ifdef LC_HAVE_JPEGLIB
-  case LC_IMAGE_JPG:
-    return SaveJPG (file, opts->quality, opts->interlaced);
+	case LC_IMAGE_JPG:
+		return SaveJPG(File, 80, false);
 #endif
 
-  case LC_IMAGE_GIF:
-    return SaveGIF (file, opts->transparent, opts->interlaced, opts->background);
+	case LC_IMAGE_GIF:
+		return SaveGIF(File, Transparent, false, BackgroundColor);
 
-  case LC_IMAGE_BMP:
-    return SaveBMP (file, opts->truecolor == false);
+	case LC_IMAGE_BMP:
+		return SaveBMP(File, false);
 
-#ifdef LC_HAVE_PNGLIB
-  case LC_IMAGE_PNG:
-    return SavePNG (file, opts->transparent, opts->interlaced, opts->background);
-#endif
+	#ifdef LC_HAVE_PNGLIB
+	case LC_IMAGE_PNG:
+		return SavePNG(File, Transparent, false, BackgroundColor);
+	#endif
 
-  default:
-    break;
-  }
+	default:
+		break;
+	}
 
 //	MessageBox (NULL, "Could not save file", "Error", MB_ICONSTOP);
 
-  return false;
+	return false;
 }
 
-bool Image::FileSave(const char* filename, LC_IMAGE_OPTS* opts) const
+bool Image::FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const
 {
   char name[LC_MAXPATH], ext[5], *p;
   lcDiskFile file;
   bool needext = false;
 
-  strcpy (name, filename);
-  p = name + strlen (name) - 1;
+  strcpy(name, FileName);
+  p = name + strlen(name) - 1;
 
   while ((p > name) && (*p != '/') && (*p != '\\') && (*p != '.'))
     p--;
@@ -247,18 +247,18 @@ bool Image::FileSave(const char* filename, LC_IMAGE_OPTS* opts) const
       strlwr (ext);
 
       if (strcmp (ext, "bmp") == 0)
-        opts->format = LC_IMAGE_BMP;
+		Format = LC_IMAGE_BMP;
       else if (strcmp (ext, "gif") == 0)
-        opts->format = LC_IMAGE_GIF;
+		Format = LC_IMAGE_GIF;
 #ifdef LC_HAVE_JPEGLIB
       else if (strcmp (ext, "jpg") == 0)
-        opts->format = LC_IMAGE_JPG;
+		Format = LC_IMAGE_JPG;
       else if (strcmp (ext, "jpeg") == 0)
-        opts->format = LC_IMAGE_JPG;
+		Format = LC_IMAGE_JPG;
 #endif
 #ifdef LC_HAVE_PNGLIB
       else if (strcmp (ext, "png") == 0)
-        opts->format = LC_IMAGE_PNG;
+		Format = LC_IMAGE_PNG;
 #endif
       else
         needext = true;
@@ -268,7 +268,7 @@ bool Image::FileSave(const char* filename, LC_IMAGE_OPTS* opts) const
   if (needext)
   {
     // no extension, add from the options
-    switch (opts->format)
+	switch (Format)
     {
     case LC_IMAGE_BMP:
       strcat (name, ".bmp");
@@ -294,7 +294,7 @@ bool Image::FileSave(const char* filename, LC_IMAGE_OPTS* opts) const
   if (!file.Open(name, "wb"))
     return false;
 
-  return FileSave(file, opts);
+  return FileSave(file, Format, Transparent, BackgroundColor);
 }
 
 

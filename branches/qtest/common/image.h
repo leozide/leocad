@@ -1,7 +1,20 @@
 #ifndef _IMAGE_H_
 #define _IMAGE_H_
 
-#include "typedefs.h"
+// Image Options
+//#define LC_IMAGE_PROGRESSIVE	0x1000
+#define LC_IMAGE_TRANSPARENT	0x2000
+//#define LC_IMAGE_HIGHCOLOR	0x4000
+#define LC_IMAGE_MASK		0x7000
+
+enum LC_IMAGE_FORMAT
+{
+	LC_IMAGE_BMP,
+	LC_IMAGE_GIF,
+	LC_IMAGE_JPG,
+	LC_IMAGE_PNG,
+	LC_IMAGE_AVI
+};
 
 class Image
 {
@@ -9,8 +22,8 @@ public:
 	Image();
 	virtual ~Image();
 
-	bool FileSave(lcFile& file, LC_IMAGE_OPTS* opts) const;
-	bool FileSave(const char* filename, LC_IMAGE_OPTS* opts) const;
+	bool FileSave(lcFile& File, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
+	bool FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
 	bool FileLoad(lcFile& file);
 	bool FileLoad(const char* filename);
 

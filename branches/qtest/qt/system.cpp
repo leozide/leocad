@@ -2,11 +2,6 @@
 #include "system.h"
 #include "basewnd.h"
 
-int Sys_MessageBox(const char* text, const char* caption, int type)
-{
-    return LC_MB_OK;
-}
-
 void* Sys_StartMemoryRender(int width, int height)
 {
   return NULL;
@@ -65,15 +60,7 @@ long SystemGetTicks()
 }
 
 // User Interface
-void SystemUpdateCategories(bool SearchOnly)
-{
-}
-
 void SystemUpdateColorList(int new_color)
-{
-}
-
-void SystemUpdateTime(bool bAnimation, int nTime, int nTotal)
 {
 }
 
@@ -81,15 +68,7 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 {
 }
 
-void SystemUpdateSnap(unsigned short move_snap, unsigned short RotateSnap)
-{
-}
-
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
-{
-}
-
-void SystemUpdateRecentMenu (String names[4])
 {
 }
 
@@ -124,17 +103,5 @@ lcFile* SystemImportClipboard()
 }
 
 void SystemPieceComboAdd(char* name)
-{
-}
-
-void SystemStartProgressBar(int nLower, int nUpper, int nStep, const char* Text)
-{
-}
-
-void SytemEndProgressBar()
-{
-}
-
-void SytemStepProgressBar()
 {
 }

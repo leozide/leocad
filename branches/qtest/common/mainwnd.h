@@ -26,6 +26,7 @@ public:
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera);
+	void UpdateCategories();
 	void UpdateTitle(const char* Title, bool Modified);
 	void UpdateModified(bool Modified);
 	void UpdateRecentFiles();

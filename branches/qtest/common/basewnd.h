@@ -6,6 +6,7 @@
 #include "array.h"
 #include "project.h"
 #include "lc_library.h"
+#include "image.h"
 
 class Group;
 
@@ -37,6 +38,7 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_OPEN_PROJECT,
 	LC_DIALOG_SAVE_PROJECT,
 	LC_DIALOG_MERGE_PROJECT,
+	LC_DIALOG_SAVE_IMAGE,
 	LC_DIALOG_EXPORT_BRICKLINK,
 	LC_DIALOG_EXPORT_CSV,
 	LC_DIALOG_EXPORT_HTML,
@@ -53,14 +55,24 @@ enum LC_DIALOG_TYPE
 
 	// TODO: update dialogs
 	,
-	LC_DLG_PICTURE_SAVE,
 	LC_DLG_TERRAIN
+};
+
+struct lcImageDialogOptions
+{
+	char FileName[LC_MAXPATH];
+	LC_IMAGE_FORMAT Format;
+	bool Transparent;
+	int Width;
+	int Height;
+	int Start;
+	int End;
 };
 
 struct lcHTMLDialogOptions
 {
 	char PathName[LC_MAXPATH];
-	LC_IMAGE_FORMATS ImageFormat;
+	LC_IMAGE_FORMAT ImageFormat;
 	bool TransparentImages;
 	bool SinglePage;
 	bool IndexPage;

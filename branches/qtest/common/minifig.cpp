@@ -1509,7 +1509,7 @@ void MinifigWizard::SetAngle(int Type, float Angle)
 {
 	m_Angles[Type] = Angle;
 }
-
+/*
 void MinifigWizard::GetMinifigNames(char ***names, int *count)
 {
 	*count = m_MinifigCount;
@@ -1630,3 +1630,4 @@ void MinifigWizard::DeleteMinifig(const char* name)
 		m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
 	}
 }
+*/

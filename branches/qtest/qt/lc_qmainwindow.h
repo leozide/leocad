@@ -27,6 +27,7 @@ public:
 	void updateUndoRedo(const char* undoText, const char* redoText);
 	void updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera);
 	void updateCurrentCamera(int cameraIndex);
+	void updateCategories();
 	void updateTitle(const char* title, bool modified);
 	void updateModified(bool modified);
 	void updateRecentFiles(const char** fileNames);
@@ -40,6 +41,8 @@ private:
 	void createMenus();
 	void createToolBars();
 	void createStatusBar();
+
+	void closeEvent(QCloseEvent *event);
 
 	lcGLWidget *centralWidget;
 	QAction *actions[LC_NUM_COMMANDS];

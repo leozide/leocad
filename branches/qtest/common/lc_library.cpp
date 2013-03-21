@@ -126,7 +126,7 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 	if (!LoadCategories())
 		ResetCategories();
 
-	SystemUpdateCategories(false);
+	gMainWindow->UpdateCategories();
 
 	return true;
 }
@@ -2143,7 +2143,7 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 		}
 	}
 
-	SystemUpdateCategories(false);
+	gMainWindow->UpdateCategories();
 }
 
 bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)

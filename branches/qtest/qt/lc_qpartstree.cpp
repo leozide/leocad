@@ -30,15 +30,7 @@ lcQPartsTree::lcQPartsTree(QWidget *parent) :
 	setHeaderHidden(true);
 	connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(itemExpanded(QTreeWidgetItem*)));
 
-	lcPiecesLibrary* library = lcGetPiecesLibrary();
-
-	for (int categoryIndex = 0; categoryIndex < library->mCategories.GetSize(); categoryIndex++)
-	{
-		QTreeWidgetItem* categoryItem = new QTreeWidgetItem(this, QStringList((const char*)library->mCategories[categoryIndex].Name));
-		categoryItem->setData(0, ExpandedOnceRole, QVariant(false));
-		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
-		new QTreeWidgetItem(categoryItem);
-	}
+	updateCategories();
 }
 
 QSize lcQPartsTree::sizeHint() const
@@ -48,6 +40,21 @@ QSize lcQPartsTree::sizeHint() const
 	sizeHint.setWidth(200);
 
 	return sizeHint;
+}
+
+void lcQPartsTree::updateCategories()
+{
+	clear();
+
+	lcPiecesLibrary* library = lcGetPiecesLibrary();
+
+	for (int categoryIndex = 0; categoryIndex < library->mCategories.GetSize(); categoryIndex++)
+	{
+		QTreeWidgetItem* categoryItem = new QTreeWidgetItem(this, QStringList((const char*)library->mCategories[categoryIndex].Name));
+		categoryItem->setData(0, ExpandedOnceRole, QVariant(false));
+		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
+		new QTreeWidgetItem(categoryItem);
+	}
 }
 
 void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)

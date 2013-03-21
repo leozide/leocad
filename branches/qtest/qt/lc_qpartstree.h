@@ -11,6 +11,7 @@ public:
 	explicit lcQPartsTree(QWidget *parent = 0);
 	
 	QSize sizeHint() const;
+	void updateCategories();
 
 	enum
 	{

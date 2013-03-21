@@ -50,7 +50,7 @@ void lcQHTMLDialog::accept()
 
 	strcpy(options->PathName, pathName.toLocal8Bit().data());
 
-	options->ImageFormat = (LC_IMAGE_FORMATS)ui->imageFormat->currentIndex();
+	options->ImageFormat = (LC_IMAGE_FORMAT)ui->imageFormat->currentIndex();
 	options->TransparentImages = ui->transparentImages->isChecked();
 	options->SinglePage = ui->singlePage->isChecked();
 	options->IndexPage = ui->indexPage->isChecked();

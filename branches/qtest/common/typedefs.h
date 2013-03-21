@@ -223,39 +223,6 @@ struct LC_CAMERA_MODIFY
 	bool hidden;
 };
 
-// Image
-
-enum LC_IMAGE_FORMATS
-{
-	LC_IMAGE_BMP,
-	LC_IMAGE_GIF,
-	LC_IMAGE_JPG,
-	LC_IMAGE_PNG,
-	LC_IMAGE_AVI
-};
-
-struct LC_IMAGE_OPTS
-{
-	unsigned char quality;
-	bool interlaced;
-	bool transparent;
-	bool truecolor;
-	unsigned char background[3];
-	float pause;
-	unsigned int format;
-};
-
-struct LC_IMAGEDLG_OPTS
-{
-	char filename[LC_MAXPATH];
-	unsigned short from;
-	unsigned short to;
-	bool multiple;
-	unsigned short width;
-	unsigned short height;
-	LC_IMAGE_OPTS imopts;
-};
-
 enum LC_TRANSFORM_TYPE
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,

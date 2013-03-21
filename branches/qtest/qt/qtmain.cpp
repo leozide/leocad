@@ -6,6 +6,8 @@
 
 int main(int argc, char *argv[])
 {
+	QApplication a(argc, argv);
+
 	QCoreApplication::setOrganizationDomain("leocad.org");
 	QCoreApplication::setOrganizationName("LeoCAD");
 	QCoreApplication::setApplicationName("LeoCAD");
@@ -32,13 +34,20 @@ int main(int argc, char *argv[])
 	if (!g_App->Initialize(argc, argv, libPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
-	QApplication a(argc, argv);
 	lcQMainWindow w;
 	gMainWindow->mHandle = &w;
 	lcGetActiveProject()->UpdateInterface();
+	gMainWindow->UpdateRecentFiles();
 	w.show();
 
-	return a.exec();
+	int execReturn = a.exec();
+
+	delete gMainWindow;
+	gMainWindow = NULL;
+	delete g_App;
+	g_App = NULL;
+
+	return execReturn;
 }
 
 // TODO: move somewhere else
@@ -107,6 +116,7 @@ int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 	}
 }
 
+#include "lc_qimagedialog.h"
 #include "lc_qhtmldialog.h"
 #include "lc_qpovraydialog.h"
 #include "lc_qpropertiesdialog.h"
@@ -169,6 +179,12 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 				strcpy(FileName, result.toLocal8Bit().data());
 				return true;
 			}
+		} break;
+
+	case LC_DIALOG_SAVE_IMAGE:
+		{
+			lcQImageDialog dialog(parent, Data);
+			return dialog.exec() == QDialog::Accepted;
 		} break;
 
 	case LC_DIALOG_EXPORT_HTML:
@@ -305,6 +321,14 @@ void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
 
 	if (window)
 		window->updateCurrentCamera(CameraIndex);
+}
+
+void lcMainWindow::UpdateCategories()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateCategories();
 }
 
 void lcMainWindow::UpdateTitle(const char* Title, bool Modified)

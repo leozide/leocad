@@ -112,7 +112,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 	gMainWindow->UpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 	SystemUpdatePlay(true, false);
-	SystemUpdateCategories(false);
+	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
 
 	SystemUpdateFocus(NULL);
@@ -391,7 +391,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->ReadU32(&m_nScene, 1);
 
 	file->ReadS32(&count, 1);
-	SystemStartProgressBar(0, count, 1, "Loading project...");
+//	SystemStartProgressBar(0, count, 1, "Loading project...");
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	Library->OpenCache();
 
@@ -451,11 +451,11 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			SystemPieceComboAdd(pInfo->m_strDescription);
 		}
 
-		SytemStepProgressBar();
+//		SytemStepProgressBar();
 	}
 
 	Library->CloseCache();
-	SytemEndProgressBar();
+//	SytemEndProgressBar();
 
 	if (!bMerge)
 	{
@@ -1071,7 +1071,7 @@ bool Project::DoSave(const char* FileName)
 {
 	char SaveFileName[LC_MAXPATH];
 
-	if (FileName)
+	if (FileName && FileName[0])
 		strcpy(SaveFileName, FileName);
 	else
 	{
@@ -1249,13 +1249,7 @@ bool Project::OnNewDocument()
 	LoadDefaults(true);
 	CheckPoint("");
 
-        //	SystemUpdateRecentMenu(m_strRecentFiles);
-        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
-
-//	CWnd* pFrame = AfxGetMainWnd();
-//	if (pFrame != NULL)
-//		pFrame->PostMessage (WM_LC_UPDATE_LIST, 1, m_nCurColor+1);
-// set cur group to 0
+	messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
 
 	return true;
 }
@@ -3566,131 +3560,134 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_SAVE_IMAGE:
 		{
-			LC_IMAGEDLG_OPTS opts;
-
-			int ImageFlags = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
-			opts.width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-			opts.height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-			opts.imopts.quality = 80;
-			opts.imopts.interlaced = (ImageFlags & LC_IMAGE_PROGRESSIVE) != 0;
-			opts.imopts.transparent = (ImageFlags & LC_IMAGE_TRANSPARENT) != 0;
-			opts.imopts.truecolor = (ImageFlags & LC_IMAGE_HIGHCOLOR) != 0;
-			opts.imopts.pause = 1.0f;
-			opts.imopts.format = (unsigned char)(ImageFlags & ~(LC_IMAGE_MASK));
-			opts.from = 1;
-			opts.to = m_bAnimation ? m_nTotalFrames : GetLastStep();
-			opts.multiple = m_bAnimation;
-			opts.imopts.background[0] = (unsigned char)(m_fBackground[0]*255);
-			opts.imopts.background[1] = (unsigned char)(m_fBackground[1]*255);
-			opts.imopts.background[2] = (unsigned char)(m_fBackground[2]*255);
+			lcImageDialogOptions Options;
 
 			if (m_strPathName[0])
-				strcpy(opts.filename, m_strPathName);
+				strcpy(Options.FileName, m_strPathName);
 			else if (m_strTitle[0])
-				strcpy(opts.filename, m_strTitle);
+				strcpy(Options.FileName, m_strTitle);
 			else
-				strcpy(opts.filename, "Image");
+				strcpy(Options.FileName, "Image");
 
-			if (opts.filename[0])
+			if (Options.FileName[0])
 			{
-				char* ext = strrchr(opts.filename, '.');
+				char* ext = strrchr(Options.FileName, '.');
 
 				if (ext && (!stricmp(ext, ".lcd") || !stricmp(ext, ".dat") || !stricmp(ext, ".ldr")))
 					*ext = 0;
 
-				switch (opts.imopts.format)
+				switch (Options.Format)
 				{
-				case LC_IMAGE_BMP: strcat(opts.filename, ".bmp"); break;
-				case LC_IMAGE_GIF: strcat(opts.filename, ".gif"); break;
-				case LC_IMAGE_JPG: strcat(opts.filename, ".jpg"); break;
-				case LC_IMAGE_PNG: strcat(opts.filename, ".png"); break;
-				case LC_IMAGE_AVI: strcat(opts.filename, ".avi"); break;
+				case LC_IMAGE_BMP: strcat(Options.FileName, ".bmp"); break;
+				case LC_IMAGE_GIF: strcat(Options.FileName, ".gif"); break;
+				case LC_IMAGE_JPG: strcat(Options.FileName, ".jpg"); break;
+				case LC_IMAGE_PNG: strcat(Options.FileName, ".png"); break;
+				case LC_IMAGE_AVI: strcat(Options.FileName, ".avi"); break;
 				}
 			}
 
-			if (SystemDoDialog(LC_DLG_PICTURE_SAVE, &opts))
+			int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
+
+			Options.Format = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
+			Options.Transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+			Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+			Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+
+			if (m_bAnimation)
 			{
-				ImageFlags = opts.imopts.format;
-
-				if (opts.imopts.interlaced)
-					ImageFlags |= LC_IMAGE_PROGRESSIVE;
-				if (opts.imopts.transparent)
-					ImageFlags |= LC_IMAGE_TRANSPARENT;
-				if (opts.imopts.truecolor)
-					ImageFlags |= LC_IMAGE_HIGHCOLOR;
-
-				lcSetProfileInt(LC_PROFILE_IMAGE_OPTIONS, ImageFlags);
-				lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, opts.width);
-				lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, opts.height);
-
-				if (!opts.filename[0])
-					strcpy(opts.filename, "Image");
-
-				char* Ext = strrchr(opts.filename, '.');
-				if (Ext)
-				{
-					if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".gif") || !strcmp(Ext, ".png") || !strcmp(Ext, ".avi"))
-						*Ext = 0;
-				}
-
-				const char* ext;
-				switch (opts.imopts.format)
-				{
-				default:
-				case LC_IMAGE_BMP: ext = ".bmp"; break;
-				case LC_IMAGE_GIF: ext = ".gif"; break;
-				case LC_IMAGE_JPG: ext = ".jpg"; break;
-				case LC_IMAGE_PNG: ext = ".png"; break;
-				case LC_IMAGE_AVI: ext = ".avi"; break;
-				}
-
-				if (m_bAnimation)
-					opts.to = lcMin(opts.to, m_nTotalFrames);
-				else
-					opts.to = lcMin(opts.to, 255);
-				opts.from = lcMax(1, opts.from);
-
-				if (opts.multiple)
-				{
-					if (opts.from > opts.to)
-					{
-						unsigned short t = opts.from;
-						opts.from = opts.to;
-						opts.to = t;
-					}
-				}
-				else
-					opts.from = opts.to = m_bAnimation ? m_nCurFrame : m_nCurStep;
-
-				Image* images = new Image[opts.to-opts.from+1];
-				CreateImages (images, opts.width, opts.height, opts.from, opts.to, false);
-
-				if (opts.imopts.format == LC_IMAGE_AVI)
-				{
-					strcat(opts.filename, ext);
-					SaveVideo(opts.filename, images, opts.to-opts.from+1, m_bAnimation ? m_nFPS : 60.0f/opts.imopts.pause);
-				}
-				else
-				{
-					for (int i = 0; i <= opts.to-opts.from; i++)
-					{
-						char filename[LC_MAXPATH];
-
-						if (opts.multiple)
-						{
-							sprintf(filename, "%s%02d%s", opts.filename, i+1, ext);
-						}
-						else
-						{
-							strcat(opts.filename, ext);
-							strcpy(filename, opts.filename);
-						}
-
-						images[i].FileSave(filename, &opts.imopts);
-					}
-				}
-				delete []images;
+				Options.Start = 1;
+				Options.End = m_nTotalFrames;
 			}
+			else
+			{
+				Options.Start = m_nCurStep;
+				Options.End = m_nCurStep;
+			}
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_IMAGE, &Options))
+				break;
+
+			ImageOptions = Options.Format;
+
+			if (Options.Transparent)
+				ImageOptions |= LC_IMAGE_TRANSPARENT;
+
+			lcSetProfileInt(LC_PROFILE_IMAGE_OPTIONS, ImageOptions);
+			lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
+			lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
+
+			if (!Options.FileName[0])
+				strcpy(Options.FileName, "Image");
+
+			char* Ext = strrchr(Options.FileName, '.');
+			if (Ext)
+			{
+				if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".gif") || !strcmp(Ext, ".png") || !strcmp(Ext, ".avi"))
+					*Ext = 0;
+			}
+
+			const char* ext;
+			switch (Options.Format)
+			{
+			default:
+			case LC_IMAGE_BMP: ext = ".bmp"; break;
+			case LC_IMAGE_GIF: ext = ".gif"; break;
+			case LC_IMAGE_JPG: ext = ".jpg"; break;
+			case LC_IMAGE_PNG: ext = ".png"; break;
+			case LC_IMAGE_AVI: ext = ".avi"; break;
+			}
+
+			if (m_bAnimation)
+				Options.End = lcMin(Options.End, m_nTotalFrames);
+			else
+				Options.End = lcMin(Options.End, 255);
+			Options.Start = lcMax(1, Options.Start);
+
+			if (Options.Start > Options.End)
+			{
+				if (Options.Start > Options.End)
+				{
+					int Temp = Options.Start;
+					Options.Start = Options.End;
+					Options.End = Temp;
+				}
+			}
+
+			unsigned char BackgroundColor[3] =
+			{
+				(unsigned char)(m_fBackground[0]*255),
+				(unsigned char)(m_fBackground[1]*255),
+				(unsigned char)(m_fBackground[2]*255)
+			};
+
+			Image* images = new Image[Options.End - Options.Start + 1];
+			CreateImages(images, Options.Width, Options.Height, Options.Start, Options.End, false);
+
+			if (Options.Format == LC_IMAGE_AVI)
+			{
+				strcat(Options.FileName, ext);
+				SaveVideo(Options.FileName, images, Options.End - Options.Start + 1, m_bAnimation ? m_nFPS : 60.0f);
+			}
+			else
+			{
+				for (int i = 0; i <= Options.End - Options.Start; i++)
+				{
+					char filename[LC_MAXPATH];
+
+					if (Options.Start != Options.End)
+					{
+						sprintf(filename, "%s%02d%s", Options.FileName, i+1, ext);
+					}
+					else
+					{
+						strcat(Options.FileName, ext);
+						strcpy(filename, Options.FileName);
+					}
+
+					images[i].FileSave(filename, Options.Format, Options.Transparent, BackgroundColor);
+				}
+			}
+			delete []images;
 		} break;
 
 		case LC_FILE_EXPORT_3DS:
@@ -3723,7 +3720,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
 			int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
 
-			Options.ImageFormat = (LC_IMAGE_FORMATS)(ImageOptions & ~(LC_IMAGE_MASK));
+			Options.ImageFormat = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
 			Options.TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
 			Options.SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
 			Options.IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
@@ -3773,17 +3770,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				strcat(Options.PathName, "/");
 
 			// TODO: create directory
-
-			LC_IMAGE_OPTS ImageOpts;
-			ImageOpts.quality = 70;
-			ImageOpts.interlaced = false;
-			ImageOpts.transparent = Options.TransparentImages;
-			ImageOpts.truecolor = true;
-			ImageOpts.background[0] = (unsigned char)(m_fBackground[0]*255);
-			ImageOpts.background[1] = (unsigned char)(m_fBackground[1]*255);
-			ImageOpts.background[2] = (unsigned char)(m_fBackground[2]*255);
-			ImageOpts.pause = 1.0f;
-			ImageOpts.format = Options.ImageFormat;
 
 			// TODO: Move to its own function
 			{
@@ -3930,10 +3916,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 				Image* images = new Image[last];
 				CreateImages(images, Options.StepImagesWidth, Options.StepImagesHeight, 1, last, Options.HighlightNewParts);
 
+				unsigned char BackgroundColor[3] =
+				{
+					(unsigned char)(m_fBackground[0]*255),
+					(unsigned char)(m_fBackground[1]*255),
+					(unsigned char)(m_fBackground[2]*255)
+				};
+
 				for (i = 0; i < last; i++)
 				{
 					sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, i+1, ext);
-					images[i].FileSave(fn, &ImageOpts);
+					images[i].FileSave(fn, Options.ImageFormat, Options.TransparentImages, BackgroundColor);
 				}
 				delete []images;
 
@@ -3981,7 +3974,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						image.FromOpenGL (cx, cy);
 
 						sprintf(fn, "%s%s%s", Options.PathName, pInfo->m_strName, ext);
-						image.FileSave(fn, &ImageOpts);
+						image.FileSave(fn, Options.ImageFormat, Options.TransparentImages, BackgroundColor);
 					}
 					Sys_FinishMemoryRender (render);
 				}
@@ -5606,7 +5599,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (Options.CategoriesModified)
 			{
 				Library->mCategories = Options.Categories;
-				SystemUpdateCategories(false);
+				gMainWindow->UpdateCategories();
 			}
 
 			// TODO: keyboard and printing preferences

@@ -166,12 +166,6 @@ int stricmp(const char* str1, const char* str2);
 #define LC_SEL_FOCUSGROUP	0x200 // focused piece is grouped
 #define LC_SEL_CANGROUP		0x400 // can make a new group
 
-// Image Options
-#define LC_IMAGE_PROGRESSIVE	0x1000
-#define LC_IMAGE_TRANSPARENT	0x2000
-#define LC_IMAGE_HIGHCOLOR	0x4000
-#define LC_IMAGE_MASK		0x7000
-
 // HTML export options
 #define LC_HTML_SINGLEPAGE      0x01
 #define LC_HTML_INDEX           0x02

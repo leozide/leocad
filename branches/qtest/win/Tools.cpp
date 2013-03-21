@@ -421,12 +421,12 @@ void Export3DStudio()
 
 		if (lcIsColorTranslucent(ColorIdx))
 		{
-			matr->transparency = 0.0f;
+			matr->transparency = 0.5f;
 			matr->transfalloff = 0.0f;
 		}
 		else
 		{
-			matr->transparency = 0.5f;
+			matr->transparency = 0.0f;
 			matr->transfalloff = 0.0f;
 		}
 		matr->selfillumpct = 0.0f;

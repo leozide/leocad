@@ -244,7 +244,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			return false;
 		}
 
-		lcLoadDefaultColors();
 		m_Library->CreateBuiltinPieces();
 
 		gMainWindow->DoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
@@ -303,21 +302,21 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		// Setup default options.
-		LC_IMAGE_OPTS ImageOptions;
-		unsigned long image = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
-		ImageOptions.quality = 80;
-		ImageOptions.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-		ImageOptions.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-		ImageOptions.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
-		ImageOptions.format = image & ~(LC_IMAGE_MASK);
-		ImageOptions.background[0] = (unsigned char)(project->GetBackgroundColor()[0]*255);
-		ImageOptions.background[1] = (unsigned char)(project->GetBackgroundColor()[1]*255);
-		ImageOptions.background[2] = (unsigned char)(project->GetBackgroundColor()[2]*255);
+		int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
+		bool ImageTransparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+		LC_IMAGE_FORMAT ImageFormat = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
+
+		unsigned char BackgroundColor[3] =
+		{
+			(unsigned char)(project->GetBackgroundColor()[0]*255),
+			(unsigned char)(project->GetBackgroundColor()[1]*255),
+			(unsigned char)(project->GetBackgroundColor()[2]*255)
+		};
 
 		// Append file extension if needed.
 		if (NeedExt)
 		{
-			switch (ImageOptions.format)
+			switch (ImageFormat)
 			{
 			default:
 			case LC_IMAGE_BMP:
@@ -393,7 +392,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else
 				Frame = FileName;
 
-			images[i].FileSave(Frame, &ImageOptions);
+			images[i].FileSave(Frame, ImageFormat, ImageTransparent, BackgroundColor);
 		}
 
 		delete []images;

@@ -5,6 +5,7 @@
 
 GLWindow::GLWindow(GLWindow *share)
 {
+	mCursorType = LC_CURSOR_DEFAULT;
 	m_pShare = share;
 	m_pData = NULL;
 }
@@ -64,9 +65,11 @@ void GLWindow::ReleaseMouse()
 	widget->releaseMouse();
 }
 
-void GLWindow::SetCursor(LC_CURSOR_TYPE Type)
+void GLWindow::SetCursor(LC_CURSOR_TYPE CursorType)
 {
-	// TODO: Missing LC_CURSOR_ROTATEX and LC_CURSOR_ROTATEY.
+	if (mCursorType == CursorType)
+		return;
+
 	const char* Cursors[LC_CURSOR_COUNT] =
 	{
 		"",                                   // LC_CURSOR_DEFAULT
@@ -78,8 +81,8 @@ void GLWindow::SetCursor(LC_CURSOR_TYPE Type)
 		":/resources/cursor_select_multiple", // LC_CURSOR_SELECT_GROUP
 		":/resources/cursor_move",            // LC_CURSOR_MOVE
 		":/resources/cursor_rotate",          // LC_CURSOR_ROTATE
-		":/resources/cursor_rotate",          // LC_CURSOR_ROTATEX
-		":/resources/cursor_rotate",          // LC_CURSOR_ROTATEY
+		":/resources/cursor_rotatex",         // LC_CURSOR_ROTATEX
+		":/resources/cursor_rotatey",         // LC_CURSOR_ROTATEY
 		":/resources/cursor_delete",          // LC_CURSOR_DELETE
 		":/resources/cursor_paint",           // LC_CURSOR_PAINT
 		":/resources/cursor_zoom",            // LC_CURSOR_ZOOM
@@ -113,8 +116,14 @@ void GLWindow::SetCursor(LC_CURSOR_TYPE Type)
 
 	QGLWidget* widget = (QGLWidget*)m_pData;
 
-	if (Type != LC_CURSOR_DEFAULT && Type < LC_CURSOR_COUNT)
-		widget->setCursor(QCursor(QPixmap(Cursors[Type]), Offsets[Type][0], Offsets[Type][1]));
+	if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT)
+	{
+		widget->setCursor(QCursor(QPixmap(Cursors[CursorType]), Offsets[CursorType][0], Offsets[CursorType][1]));
+		mCursorType = CursorType;
+	}
 	else
+	{
 		widget->unsetCursor();
+		mCursorType = LC_CURSOR_DEFAULT;
+	}
 }

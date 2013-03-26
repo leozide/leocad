@@ -64,6 +64,7 @@ public:
 protected:
 	int m_nWidth;
 	int m_nHeight;
+	int mCursorType;
 
 private:
 	void *m_pData;

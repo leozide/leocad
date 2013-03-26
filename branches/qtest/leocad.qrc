@@ -26,7 +26,9 @@
         <file>resources/cursor_pan.png</file>
         <file>resources/cursor_roll.png</file>
         <file>resources/cursor_rotate.png</file>
-        <file>resources/cursor_rotate_view.png</file>
+		<file>resources/cursor_rotatex.png</file>
+		<file>resources/cursor_rotatey.png</file>
+		<file>resources/cursor_rotate_view.png</file>
         <file>resources/cursor_select.png</file>
         <file>resources/cursor_select_multiple.png</file>
         <file>resources/cursor_spotlight.png</file>

@@ -7,6 +7,7 @@
 #include <wininet.h>
 #include <direct.h>
 #include <process.h>
+#include <dbghelp.h>
 #include "project.h"
 #include "globals.h"
 #include "system.h"
@@ -138,6 +139,50 @@ static void CheckForUpdates(void* Data)
 	InternetCloseHandle(session);
 }
 
+static char MinidumpPath[MAX_PATH];
+
+LONG WINAPI SehHandler(PEXCEPTION_POINTERS pExceptionPtrs)
+{ 
+	if (IsDebuggerPresent())
+		return EXCEPTION_CONTINUE_SEARCH;
+
+	HMODULE hDbgHelp = LoadLibrary("dbghelp.dll");    
+
+	if (hDbgHelp == NULL)
+		return EXCEPTION_EXECUTE_HANDLER;
+
+	HANDLE hFile = CreateFile(MinidumpPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (hFile == INVALID_HANDLE_VALUE)
+		return EXCEPTION_EXECUTE_HANDLER;
+
+	typedef BOOL (WINAPI *LPMINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD ProcessId, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserEncoderParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+	LPMINIDUMPWRITEDUMP pfnMiniDumpWriteDump = (LPMINIDUMPWRITEDUMP)GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
+	if (!pfnMiniDumpWriteDump)
+		return EXCEPTION_EXECUTE_HANDLER;
+
+	MINIDUMP_EXCEPTION_INFORMATION mei;
+
+    mei.ThreadId = GetCurrentThreadId();
+    mei.ExceptionPointers = pExceptionPtrs;
+    mei.ClientPointers = TRUE;
+
+	BOOL bWriteDump = pfnMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, pExceptionPtrs ? &mei : NULL, NULL, NULL);
+
+	CloseHandle(hFile);
+	FreeLibrary(hDbgHelp);
+
+	if (bWriteDump)
+	{
+		char Message[256];
+		sprintf(Message, "LeoCAD just crashed. Crash information was saved to the file '%s', please send it to the developers for debugging.", MinidumpPath);
+
+		MessageBox(NULL, Message, "LeoCAD", MB_OK);
+	}
+
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CCADApp
 
@@ -160,6 +205,15 @@ CCADApp theApp;
 
 BOOL CCADApp::InitInstance()
 {
+	if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, MinidumpPath) == S_OK)
+	{
+		PathAppend(MinidumpPath, "LeoCAD\\");
+		_mkdir(MinidumpPath);
+		_snprintf(MinidumpPath + strlen(MinidumpPath), MAX_PATH, "%s", "minidump.dmp");
+	}
+
+	SetUnhandledExceptionFilter(SehHandler);    
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -341,8 +395,11 @@ int CCADApp::ExitInstance()
 
 void CCADApp::UpdateMRU(char names[4][MAX_PATH])
 {
-	for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
-		m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
+	if (m_pRecentFileList)
+	{
+		for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
+			m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
+	}
 }
 
 static BOOL SetRegKey(LPCTSTR lpszKey, LPCTSTR lpszValue, LPCTSTR lpszValueName = NULL)

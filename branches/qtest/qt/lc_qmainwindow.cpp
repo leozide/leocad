@@ -208,6 +208,9 @@ void lcQMainWindow::createActions()
 		{ "Unhide All",                       "Show all hidden objects" },                                                              // LC_PIECE_UNHIDE_ALL
 		{ "Show Earlier",                     "Show selected pieces one step earlier" },                                                // LC_PIECE_SHOW_EARLIER
 		{ "Show Later",                       "Show selected pieces one step later" },                                                  // LC_PIECE_SHOW_LATER
+		{ "LeoCAD Home page",                 "Open LeoCAD's Home page on the internet using your default web browser" },               // LC_HELP_HOMEPAGE
+		{ "Send E-Mail",                      "Send an e-mail message for help or support using your default e-mail client" },          // LC_HELP_EMAIL
+		{ "Check for Updates...",             "Check if a newer LeoCAD version or parts library has been released" },                   // LC_HELP_UPDATES
 		{ "About...",                         "Display program version number and system information" },                                // LC_HELP_ABOUT
 	};
 
@@ -402,6 +405,10 @@ void lcQMainWindow::createMenus()
 	menuPiece->addAction(actions[LC_PIECE_UNHIDE_ALL]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
+	menuHelp->addAction(actions[LC_HELP_HOMEPAGE]);
+	menuHelp->addAction(actions[LC_HELP_EMAIL]);
+	menuHelp->addAction(actions[LC_HELP_UPDATES]);
+	menuHelp->addSeparator();
 	menuHelp->addAction(actions[LC_HELP_ABOUT]);
 }
 

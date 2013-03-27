@@ -5925,6 +5925,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CheckPoint("Reset Cameras");
 		} break;
 
+		case LC_HELP_HOMEPAGE:
+			g_App->OpenURL("http://www.leocad.org/");
+			break;
+
+		case LC_HELP_EMAIL:
+			g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
+			break;
+
+		case LC_HELP_UPDATES:
+			gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
+			break;
+
 		case LC_HELP_ABOUT:
 		{
 			String Info;

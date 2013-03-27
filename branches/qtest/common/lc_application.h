@@ -14,6 +14,7 @@ public:
 
 	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
 	void Shutdown();
+	void OpenURL(const char* URL);
 
 	// Pieces library.
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);

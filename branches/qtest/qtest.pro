@@ -1,6 +1,7 @@
 QT += core \
     gui \
-    opengl
+	opengl \
+	network
 TARGET = qtest
 TEMPLATE = app
 DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
@@ -87,7 +88,9 @@ SOURCES += common/view.cpp \
     qt/lc_qcategorydialog.cpp \
     qt/lc_qprofile.cpp \
     common/lc_profile.cpp \
-    qt/lc_qimagedialog.cpp
+    qt/lc_qimagedialog.cpp \
+    qt/lc_qapplication.cpp \
+    qt/lc_qupdatedialog.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -144,7 +147,8 @@ HEADERS += common/glwindow.h \
     qt/lc_qpreferencesdialog.h \
     qt/lc_qcategorydialog.h \
     common/lc_profile.h \
-    qt/lc_qimagedialog.h
+    qt/lc_qimagedialog.h \
+    qt/lc_qupdatedialog.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \
@@ -157,6 +161,7 @@ FORMS += \
     qt/lc_qminifigdialog.ui \
     qt/lc_qpreferencesdialog.ui \
     qt/lc_qcategorydialog.ui \
-    qt/lc_qimagedialog.ui
+    qt/lc_qimagedialog.ui \
+    qt/lc_qupdatedialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc

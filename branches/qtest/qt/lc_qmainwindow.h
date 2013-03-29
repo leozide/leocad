@@ -18,6 +18,7 @@ public:
 	explicit lcQMainWindow(QWidget *parent = 0);
 	~lcQMainWindow();
 
+	void updateShortcuts();
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateTime(bool animation, int currentTime, int totalTime);
@@ -60,6 +61,7 @@ private:
 	QToolBar *toolsToolBar;
 	QToolBar *timeToolBar;
 	QDockWidget *partsToolBar;
+	QDockWidget *propertiesToolBar;
 
 	lcGLWidget *piecePreview;
 	lcQPartsTree *partsTree;

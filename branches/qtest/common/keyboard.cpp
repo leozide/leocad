@@ -6,132 +6,35 @@
 #include "lc_file.h"
 #include "str.h"
 
-// ============================================================================
-// Globals.
+char gKeyboardShortcuts[LC_NUM_COMMANDS][LC_SHORTCUT_LENGTH];
 
-LC_KEYBOARD_COMMAND DefaultKeyboardShortcuts[] = 
+void ResetKeyboardShortcuts()
 {
-	{ LC_FILE_NEW, "New Project", LC_KEYMOD1_CONTROL, LC_KEY_N, 0 },
-	{ LC_FILE_OPEN, "Open Project", LC_KEYMOD1_CONTROL, LC_KEY_O, 0 },
-	{ LC_FILE_MERGE, "Merge Project", 0, 0, 0 },
-	{ LC_FILE_SAVE, "Save Project", LC_KEYMOD1_CONTROL, LC_KEY_S, 0 },
-	{ LC_FILE_SAVEAS, "Save Project As", 0, 0, 0 },
-	{ LC_FILE_SAVE_IMAGE, "Save Picture", 0, 0, 0 },
-	{ LC_FILE_EXPORT_3DS, "Export 3D Studio", 0, 0, 0 },
-	{ LC_FILE_EXPORT_HTML, "Export HTML", 0, 0, 0 },
-	{ LC_FILE_EXPORT_BRICKLINK, "Export BrickLink", 0, 0, 0 },
-	{ LC_FILE_EXPORT_POVRAY, "Export POV-Ray", 0, 0, 0 },
-	{ LC_FILE_EXPORT_WAVEFRONT, "Export Wavefront", 0, 0, 0 },
-	{ LC_FILE_PROPERTIES, "Project Properties", 0, 0, 0 },
-//	{ LC_FILE_TERRAIN, "Terrain Editor", 0, 0, 0 },
-//	{ LC_FILE_RECENT, "Open Recent File", 0, 0, 0 },
-	{ LC_EDIT_UNDO, "Undo", LC_KEYMOD1_CONTROL, LC_KEY_Z, 0 },
-	{ LC_EDIT_REDO, "Redo", LC_KEYMOD1_CONTROL, LC_KEY_Y, 0 },
-	{ LC_EDIT_CUT, "Cut", LC_KEYMOD1_CONTROL, LC_KEY_X, 0 },
-	{ LC_EDIT_COPY, "Copy", LC_KEYMOD1_CONTROL, LC_KEY_C, 0 },
-	{ LC_EDIT_PASTE, "Paste", LC_KEYMOD1_CONTROL, LC_KEY_V, 0 },
-	{ LC_EDIT_SELECT_ALL, "Select All", LC_KEYMOD1_CONTROL, LC_KEY_A, 0 },
-	{ LC_EDIT_SELECT_NONE, "Select None", 0, 0, 0 },
-	{ LC_EDIT_SELECT_INVERT, "Select Invert", LC_KEYMOD1_CONTROL, LC_KEY_I, 0 },
-	{ LC_EDIT_SELECT_BY_NAME, "Select By Name", 0, 0, 0 },
-	{ LC_PIECE_INSERT, "Piece Insert", 0, LC_KEY_INSERT, 0 },
-	{ LC_PIECE_DELETE, "Piece Delete", 0, LC_KEY_DELETE, 0 },
-//	{ LC_PIECE_MINIFIG, "Minifig Wizard", 0, 0, 0 },
-	{ LC_PIECE_ARRAY, "Piece Array", 0, 0, 0 },
-//	{ LC_PIECE_COPYKEYS, "", 0, 0, 0 },
-	{ LC_PIECE_GROUP, "Piece Group", LC_KEYMOD1_CONTROL, LC_KEY_G, 0 },
-	{ LC_PIECE_UNGROUP, "Piece Ungroup", LC_KEYMOD1_CONTROL, LC_KEY_U, 0 },
-	{ LC_PIECE_GROUP_ADD, "Group Add Piece", 0, 0, 0 },
-	{ LC_PIECE_GROUP_REMOVE, "Group Remove Piece", 0, 0, 0 },
-	{ LC_PIECE_GROUP_EDIT, "Group Edit", 0, 0, 0 },
-	{ LC_PIECE_HIDE_SELECTED, "Hide Selection", LC_KEYMOD1_CONTROL, LC_KEY_H, 0 },
-	{ LC_PIECE_HIDE_UNSELECTED, "Unhide Selection", 0, 0, 0 },
-	{ LC_PIECE_UNHIDE_ALL, "Unhide All", 0, 0, 0 },
-	{ LC_PIECE_SHOW_EARLIER, "Piece Previous Step", 0, 0, 0 },
-	{ LC_PIECE_SHOW_LATER, "Piece Next Step", 0, 0, 0 },
-	{ LC_VIEW_PREFERENCES, "Preferences", 0, 0, 0 },
-//	{ LC_VIEW_ZOOM, "", 0, 0, 0 },
-	{ LC_VIEW_ZOOM_IN, "Zoom In", 0, 0, 0 },
-	{ LC_VIEW_ZOOM_OUT, "Zoom Out", 0, 0, 0 },
-	{ LC_VIEW_ZOOM_EXTENTS, "Zoom Extents", 0, 0, 0 },
-	{ LC_VIEW_TIME_NEXT, "Step Next", 0, 0, 0 },
-	{ LC_VIEW_TIME_PREVIOUS, "Step Previous", 0, 0, 0 },
-	{ LC_VIEW_TIME_FIRST, "Step First", 0, 0, 0 },
-	{ LC_VIEW_TIME_LAST, "Step Last", 0, 0, 0 },
-//	{ LC_VIEW_STEP_CHOOSE, "", 0, 0, 0 },
-//	{ LC_VIEW_STEP_SET, "", 0, 0, 0 },
-//	{ LC_VIEW_STOP, "", 0, 0, 0 },
-//	{ LC_VIEW_PLAY, "", 0, 0, 0 },
-	{ LC_VIEW_VIEWPOINT_FRONT, "Viewpoint Front", LC_KEYMOD_VIEWONLY, LC_KEY_F, 0 },
-	{ LC_VIEW_VIEWPOINT_BACK, "Viewpoint Back", LC_KEYMOD_VIEWONLY, LC_KEY_B, 0 },
-	{ LC_VIEW_VIEWPOINT_TOP, "Viewpoint Top", LC_KEYMOD_VIEWONLY, LC_KEY_T, 0 },
-	{ LC_VIEW_VIEWPOINT_BOTTOM, "Viewpoint Bottom", LC_KEYMOD_VIEWONLY, LC_KEY_O, 0 },
-	{ LC_VIEW_VIEWPOINT_LEFT, "Viewpoint Left", LC_KEYMOD_VIEWONLY, LC_KEY_L, 0 },
-	{ LC_VIEW_VIEWPOINT_RIGHT, "Viewpoint Right", LC_KEYMOD_VIEWONLY, LC_KEY_R, 0 },
-	{ LC_VIEW_VIEWPOINT_HOME, "Viewpoint Home", LC_KEYMOD_VIEWONLY, LC_KEY_M, 0 },
-//	{ LC_VIEW_CAMERA_MENU, "", 0, 0, 0 },
-//	{ LC_VIEW_CAMERA_RESET, "", 0, 0, 0 },
-//	{ LC_HELP_ABOUT, "", 0, 0, 0 },
-//	{ LC_TOOLBAR_ANIMATION, "", 0, 0, 0 },
-//	{ LC_TOOLBAR_ADDKEYS, "", 0, 0, 0 },
-//	{ LC_TOOLBAR_SNAPMENU, "", 0, 0, 0 },
-//	{ LC_TOOLBAR_LOCKMENU, "", 0, 0, 0 },
-//	{ LC_TOOLBAR_FASTRENDER, "", 0, 0, 0 },
-	{ LC_VIEW_TIME_INSERT, "Step Insert", 0, 0, 0 },
-	{ LC_VIEW_TIME_DELETE, "Step Delete", 0, 0, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY0, "Move XY Snap 0", LC_KEYMOD_VIEWONLY, LC_KEY_0, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY1, "Move XY Snap 1", LC_KEYMOD_VIEWONLY, LC_KEY_1, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY2, "Move XY Snap 2", LC_KEYMOD_VIEWONLY, LC_KEY_2, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY3, "Move XY Snap 3", LC_KEYMOD_VIEWONLY, LC_KEY_3, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY4, "Move XY Snap 4", LC_KEYMOD_VIEWONLY, LC_KEY_4, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY5, "Move XY Snap 5", LC_KEYMOD_VIEWONLY, LC_KEY_5, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY6, "Move XY Snap 6", LC_KEYMOD_VIEWONLY, LC_KEY_6, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY7, "Move XY Snap 7", LC_KEYMOD_VIEWONLY, LC_KEY_7, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY8, "Move XY Snap 8", LC_KEYMOD_VIEWONLY, LC_KEY_8, 0 },
-	{ LC_EDIT_SNAP_MOVE_XY9, "Move XY Snap 9", LC_KEYMOD_VIEWONLY, LC_KEY_9, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z0, "Move Z Snap 0", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_0, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z1, "Move Z Snap 1", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_1, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z2, "Move Z Snap 2", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_2, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z3, "Move Z Snap 3", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_3, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z4, "Move Z Snap 4", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_4, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z5, "Move Z Snap 5", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_5, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z6, "Move Z Snap 6", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_6, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z7, "Move Z Snap 7", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_7, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z8, "Move Z Snap 8", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_8, 0 },
-	{ LC_EDIT_SNAP_MOVE_Z9, "Move Z Snap 9", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT|LC_KEYMOD1_CONTROL, LC_KEY_9, 0 },
-	{ LC_EDIT_SNAP_ANGLE0, "Angle Snap 0", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_0, 0 },
-	{ LC_EDIT_SNAP_ANGLE1, "Angle Snap 1", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_1, 0 },
-	{ LC_EDIT_SNAP_ANGLE2, "Angle Snap 5", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_2, 0 },
-	{ LC_EDIT_SNAP_ANGLE3, "Angle Snap 10", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_3, 0 },
-	{ LC_EDIT_SNAP_ANGLE4, "Angle Snap 15", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_4, 0 },
-	{ LC_EDIT_SNAP_ANGLE5, "Angle Snap 30", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_5, 0 },
-	{ LC_EDIT_SNAP_ANGLE6, "Angle Snap 45", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_6, 0 },
-	{ LC_EDIT_SNAP_ANGLE7, "Angle Snap 60", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_7, 0 },
-	{ LC_EDIT_SNAP_ANGLE8, "Angle Snap 90", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_8, 0 },
-	{ LC_EDIT_SNAP_ANGLE9, "Angle Snap 180", LC_KEYMOD_VIEWONLY|LC_KEYMOD1_SHIFT, LC_KEY_9, 0 },
-	{ LC_EDIT_ACTION_SELECT, "Select Mode", 0, 0, 0 },
-	{ LC_EDIT_ACTION_INSERT, "Insert Mode", 0, 0, 0 },
-	{ LC_EDIT_ACTION_LIGHT, "Light Mode", 0, 0, 0 },
-	{ LC_EDIT_ACTION_SPOTLIGHT, "Spotlight Mode", 0, 0, 0 },
-	{ LC_EDIT_ACTION_CAMERA, "Camera Mode", 0, 0, 0 },
-	{ LC_EDIT_ACTION_MOVE, "Move Mode", LC_KEYMOD1_SHIFT, LC_KEY_M, 0 },
-	{ LC_EDIT_ACTION_ROTATE, "Rotate Mode", LC_KEYMOD1_SHIFT, LC_KEY_R, 0 },
-	{ LC_EDIT_ACTION_DELETE, "Delete Mode", LC_KEYMOD1_SHIFT, LC_KEY_E, 0 },
-	{ LC_EDIT_ACTION_PAINT, "Paint Mode", LC_KEYMOD1_SHIFT, LC_KEY_N, 0 },
-	{ LC_EDIT_ACTION_ZOOM, "Zoom Mode", LC_KEYMOD1_SHIFT, LC_KEY_Z, 0 },
-	{ LC_EDIT_ACTION_ZOOM_REGION, "Zoom Region Mode", 0, 0, 0 },
-	{ LC_EDIT_ACTION_PAN, "Pan Mode", LC_KEYMOD1_SHIFT, LC_KEY_P, 0 },
-	{ LC_EDIT_ACTION_ROTATE_VIEW, "Rotate View Mode", LC_KEYMOD1_SHIFT, LC_KEY_T, 0 },
-	{ LC_EDIT_ACTION_ROLL, "Roll Camera Mode", LC_KEYMOD1_SHIFT, LC_KEY_L, 0 },
-};
+	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
+		strcpy(gKeyboardShortcuts[ActionIdx], gActions[ActionIdx].DefaultShortcut);
+}
 
-const int KeyboardShortcutsCount = sizeof(DefaultKeyboardShortcuts)/sizeof(KeyboardShortcuts[0]);
+void InitKeyboardShortcuts()
+{
+	char FileName[LC_MAXPATH];
 
-LC_KEYBOARD_COMMAND KeyboardShortcuts[KeyboardShortcutsCount];
+	strcpy(FileName, lcGetProfileString(LC_PROFILE_SHORTCUTS_FILE));
 
-// ============================================================================
-// Functions
+	if (!LoadKeyboardShortcuts(FileName))
+		ResetKeyboardShortcuts();
+}
 
+bool SaveKeyboardShortcuts(const char* FileName)
+{
+	return false;
+}
+
+bool LoadKeyboardShortcuts(const char* FileName)
+{
+	return false; // TODO: shortcuts
+}
+
+/*
 bool SaveKeyboardShortcuts(const char* FileName)
 {
 	lcDiskFile f;
@@ -281,21 +184,6 @@ bool LoadKeyboardShortcuts(const char* FileName)
 	return true;
 }
 
-void ResetKeyboardShortcuts()
-{
-	memcpy(KeyboardShortcuts, DefaultKeyboardShortcuts, sizeof(KeyboardShortcuts));
-}
-
-void InitKeyboardShortcuts()
-{
-	char FileName[LC_MAXPATH];
-
-	strcpy(FileName, lcGetProfileString(LC_PROFILE_SHORTCUTS_FILE));
-
-	ResetKeyboardShortcuts();
-	LoadKeyboardShortcuts(FileName);
-}
-
 struct LC_KEYNAME_ENTRY
 {
 	int Key;
@@ -428,3 +316,4 @@ char GetKeyFromName(const char* Name)
 
 	return 0;
 }
+*/

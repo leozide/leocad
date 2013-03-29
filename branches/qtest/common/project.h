@@ -7,6 +7,61 @@
 #include "array.h"
 #include "lc_math.h"
 
+//#define DET_BACKFACES	0x00001	// Draw backfaces
+//#define DET_DEPTH		0x00002	// Enable depth test
+//#define DET_CLEAR		0x00004	// Use clear colors
+#define	LC_DET_LIGHTING		0x00008	// Lighting
+//#define	LC_DET_SMOOTH		0x00010	// Smooth shading
+//#define DET_STUDS		0x00020	// Draw studs
+//#define DET_WIREFRAME	0x00040	// Wireframe
+//#define LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing
+#define LC_DET_BRICKEDGES	0x00100	// Draw lines
+//#define LC_DET_DITHER		0x00200	// Enable dithering
+//#define LC_DET_BOX_FILL		0x00400	// Filled boxes
+//#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
+//#define DET_STUDS_BOX	0x01000	// Draw studs as boxes
+//#define LC_DET_LINEAR		0x02000	// Linear filtering
+#define LC_DET_FAST			0x04000	// Fast rendering (boxes)
+//#define LC_DET_BACKGROUND	0x08000	// Background rendering
+//#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
+
+#define LC_DRAW_AXIS           0x0001 // Orientation icon
+#define LC_DRAW_GRID           0x0002 // Grid
+#define LC_DRAW_SNAP_A         0x0004 // Snap Angle
+#define LC_DRAW_SNAP_X         0x0008 // Snap X
+#define LC_DRAW_SNAP_Y         0x0010 // Snap Y
+#define LC_DRAW_SNAP_Z         0x0020 // Snap Z
+#define LC_DRAW_SNAP_XYZ       (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
+#define LC_DRAW_GLOBAL_SNAP    0x0040 // Don't allow relative snap.
+//#define LC_DRAW_MOVE           0x0080 // Switch to move after insert
+#define LC_DRAW_LOCK_X         0x0100 // Lock X
+#define LC_DRAW_LOCK_Y         0x0200 // Lock Y
+#define LC_DRAW_LOCK_Z         0x0400 // Lock Z
+#define LC_DRAW_LOCK_XYZ       (LC_DRAW_LOCK_X | LC_DRAW_LOCK_Y | LC_DRAW_LOCK_Z)
+#define LC_DRAW_MOVEAXIS       0x0800 // Move on fixed axis
+//#define LC_DRAW_PREVIEW        0x1000 // Show piece position
+#define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
+//#define LC_DRAW_3DMOUSE        0x4000 // Mouse moves in all directions
+
+//	#define RENDER_FAST			0x001
+//	#define RENDER_BACKGROUND	0x002
+#define LC_SCENE_FOG			0x004	// Enable fog
+//	#define RENDER_FOG_BG		0x008	// Use bg color for fog
+#define LC_SCENE_BG				0x010	// Draw bg image
+//	#define RENDER_BG_FAST	0x020
+#define LC_SCENE_BG_TILE		0x040	// Tile bg image
+#define LC_SCENE_FLOOR			0x080	// Render floor
+#define LC_SCENE_GRADIENT		0x100	// Draw gradient
+
+#define LC_HTML_SINGLEPAGE      0x01
+#define LC_HTML_INDEX           0x02
+#define LC_HTML_IMAGES          0x04
+#define LC_HTML_LISTEND         0x08
+#define LC_HTML_LISTSTEP        0x10
+#define LC_HTML_HIGHLIGHT       0x20
+//#define LC_HTML_HTMLEXT         0x40
+//#define LC_HTML_LISTID          0x80
+
 enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,

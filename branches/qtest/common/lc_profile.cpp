@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_profile.h"
 #include "image.h"
+#include "project.h"
 
 template<typename T>
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, T DefaultValue)

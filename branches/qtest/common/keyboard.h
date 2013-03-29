@@ -3,6 +3,11 @@
 
 #include "typedefs.h"
 
+#define LC_SHORTCUT_LENGTH 32
+
+extern char gKeyboardShortcuts[LC_NUM_COMMANDS][LC_SHORTCUT_LENGTH];
+
+/*
 // ============================================================================
 // Keyboard keys.
 
@@ -132,9 +137,8 @@ struct LC_KEYBOARD_COMMAND
 {
 	LC_COMMANDS ID;
 	const char* Description;
-	unsigned char Flags;
-	unsigned char Key1;
-	unsigned char Key2;
+	char Shortcut1[32];
+	char Shortcut2[32];
 };
 
 extern LC_KEYBOARD_COMMAND KeyboardShortcuts[];
@@ -142,7 +146,7 @@ extern const int KeyboardShortcutsCount;
 
 const char* GetKeyName(char Key);
 char GetKeyFromName(const char* Name);
-
+*/
 void InitKeyboardShortcuts();
 void ResetKeyboardShortcuts();
 bool SaveKeyboardShortcuts(const char* FileName);

@@ -10,6 +10,7 @@
 #include "view.h"
 #include "lc_qpartstree.h"
 #include "lc_colorlistwidget.h"
+#include "keyboard.h"
 #include "system.h"
 
 lcQMainWindow::lcQMainWindow(QWidget *parent)
@@ -33,6 +34,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
 	centralWidget = new lcGLWidget(previewFrame, NULL, new View(lcGetActiveProject(), NULL));
+	centralWidget->setFocusPolicy(Qt::StrongFocus);
 	previewLayout->addWidget(centralWidget, 0, 0, 1, 1);
 
 	createActions();
@@ -60,166 +62,10 @@ lcQMainWindow::~lcQMainWindow()
 
 void lcQMainWindow::createActions()
 {
-	const char* actionStrings[LC_NUM_COMMANDS][2] =
-	{
-		{ "&New",                             "Create a new project" },                                                                 // LC_FILE_NEW
-		{ "&Open...",                         "Open an existing project" },                                                             // LC_FILE_OPEN
-		{ "&Merge...",                        "Merge the contents of another project with the current one" },                           // LC_FILE_MERGE
-		{ "&Save",                            "Save the active project" },                                                              // LC_FILE_SAVE
-		{ "Save &As...",                      "Save the active project with a new name" },                                              // LC_FILE_SAVEAS
-		{ "Save &Image...",                   "Save a picture of the current view" },                                                   // LC_FILE_SAVE_IMAGE
-		{ "3D &Studio...",                    "Export the project in 3D Studio 3DS format" },                                           // LC_FILE_EXPORT_3DS
-		{ "&HTML...",                         "Create an HTML page for this project" },                                                 // LC_FILE_EXPORT_HTML
-		{ "&BrickLink...",                    "Export a list of pieces used in BrickLink XML format" },                                 // LC_FILE_EXPORT_BRICKLINK
-		{ "&CSV...",                          "Export a list of pieces used in comma delimited file format" },                          // LC_FILE_EXPORT_CSV
-		{ "&POV-Ray...",                      "Export the project in POV-Ray format" },                                                 // LC_FILE_EXPORT_POVRAY
-		{ "&Wavefront...",                    "Export the project in Wavefront OBJ format" },                                           // LC_FILE_EXPORT_WAVEFRONT
-		{ "Prope&rties...",                   "Display project properties" },                                                           // LC_FILE_PROPERTIES
-		{ "&Terrain Editor...",               "Edit terrain" },                                                                         // LC_FILE_TERRAIN_EDITOR
-		{ "&Print...",                        "Print the active project" },                                                             // LC_FILE_PRINT
-		{ "Print Pre&view",                   "Display how the project would look if printed" },                                        // LC_FILE_PRINT_PREVIEW
-		{ "Print &Bill of Materials...",      "Print a list of pieces used" },                                                          // LC_FILE_PRINT_BOM
-		{ "&1",                               "Open this document" },                                                                   // LC_FILE_RECENT1
-		{ "&2",                               "Open this document" },                                                                   // LC_FILE_RECENT2
-		{ "&3",                               "Open this document" },                                                                   // LC_FILE_RECENT3
-		{ "&4",                               "Open this document" },                                                                   // LC_FILE_RECENT4
-		{ "E&xit",                            "Quit the application; prompts to save project" },                                        // LC_FILE_EXIT
-		{ "Undo",                             "Undo the last action" },                                                                 // LC_EDIT_UNDO
-		{ "Redo",                             "Redo the previously undone action" },                                                    // LC_EDIT_REDO
-		{ "Cut",                              "Cut the selection and put it on the Clipboard" },                                        // LC_EDIT_CUT
-		{ "Copy",                             "Copy the selection and put it on the Clipboard" },                                       // LC_EDIT_COPY
-		{ "Paste",                            "Insert Clipboard contents" },                                                            // LC_EDIT_PASTE
-		{ "Select All",                       "Select all pieces in the project" },                                                     // LC_EDIT_SELECT_ALL
-		{ "Select None",                      "De-select everything" },                                                                 // LC_EDIT_SELECT_NONE
-		{ "Select Invert",                    "Invert the current selection set" },                                                     // LC_EDIT_SELECT_INVERT
-		{ "Select by Name...",                "Select objects by name" },                                                               // LC_EDIT_SELECT_BY_NAME
-		{ "Lock X",                           "Prevents movement and rotation along the X axis" },                                      // LC_EDIT_LOCK_X
-		{ "Lock Y",                           "Prevents movement and rotation along the Y axis" },                                      // LC_EDIT_LOCK_Y
-		{ "Lock Z",                           "Prevents movement and rotation along the Z axis" },                                      // LC_EDIT_LOCK_Z
-		{ "Lock Toggle",                      "Toggle locked axes" },                                                                   // LC_EDIT_LOCK_TOGGLE
-		{ "Unlock All",                       "Allows movement and rotation in all directions" },                                       // LC_EDIT_LOCK_NONE
-		{ "Snap X",                           "Snap movement along the X axis to fixed intervals" },                                    // LC_EDIT_SNAP_X
-		{ "Snap Y",                           "Snap movement along the Y axis to fixed intervals" },                                    // LC_EDIT_SNAP_Y
-		{ "Snap Z",                           "Snap movement along the Z axis to fixed intervals" },                                    // LC_EDIT_SNAP_Z
-		{ "Snap Toggle",                      "Toggle snap axes" },                                                                     // LC_EDIT_SNAP_TOGGLE
-		{ "Snap None",                        "Disable snapping along all axes" },                                                      // LC_EDIT_SNAP_NONE
-		{ "Snap All",                         "Snap movement along all axes to fixed intervals" },                                      // LC_EDIT_SNAP_ALL
-		{ "Snap Angle Toggle",                "Snap rotations to fixed intervals" },                                                    // LC_EDIT_SNAP_ANGLE
-		{ "None",                             "Do not snap movement along the XY plane" },                                              // LC_EDIT_SNAP_MOVE_XY0
-		{ "1/20 Stud",                        "Snap movement along the XY plane to 1/20 stud" },                                        // LC_EDIT_SNAP_MOVE_XY1
-		{ "1/4 Stud",                         "Snap movement along the XY plane to 1/4 stud" },                                         // LC_EDIT_SNAP_MOVE_XY2
-		{ "1 Flat",                           "Snap movement along the XY plane to 1 flat" },                                           // LC_EDIT_SNAP_MOVE_XY3
-		{ "1/2 Stud",                         "Snap movement along the XY plane to 1/2 stud" },                                         // LC_EDIT_SNAP_MOVE_XY4
-		{ "1 Stud",                           "Snap movement along the XY plane to 1 stud" },                                           // LC_EDIT_SNAP_MOVE_XY5
-		{ "2 Stud",                           "Snap movement along the XY plane to 2 stud" },                                           // LC_EDIT_SNAP_MOVE_XY6
-		{ "3 Stud",                           "Snap movement along the XY plane to 3 stud" },                                           // LC_EDIT_SNAP_MOVE_XY7
-		{ "4 Stud",                           "Snap movement along the XY plane to 4 stud" },                                           // LC_EDIT_SNAP_MOVE_XY8
-		{ "8 Stud",                           "Snap movement along the XY plane to 8 stud" },                                           // LC_EDIT_SNAP_MOVE_XY9
-		{ "None",                             "Do not snap movement along the Z axis" },                                                // LC_EDIT_SNAP_MOVE_Z0
-		{ "1/20 Stud",                        "Snap movement along the Z axis to 1/20 stud" },                                          // LC_EDIT_SNAP_MOVE_Z1
-		{ "1/4 Stud",                         "Snap movement along the Z axis to 1/4 stud" },                                           // LC_EDIT_SNAP_MOVE_Z2
-		{ "1 Flat",                           "Snap movement along the Z axis to 1 flat" },                                             // LC_EDIT_SNAP_MOVE_Z3
-		{ "1/2 Stud",                         "Snap movement along the Z axis to 1/2 stud" },                                           // LC_EDIT_SNAP_MOVE_Z4
-		{ "1 Stud",                           "Snap movement along the Z axis to 1 stud" },                                             // LC_EDIT_SNAP_MOVE_Z5
-		{ "2 Stud",                           "Snap movement along the Z axis to 2 stud" },                                             // LC_EDIT_SNAP_MOVE_Z6
-		{ "3 Stud",                           "Snap movement along the Z axis to 3 stud" },                                             // LC_EDIT_SNAP_MOVE_Z7
-		{ "4 Stud",                           "Snap movement along the Z axis to 4 stud" },                                             // LC_EDIT_SNAP_MOVE_Z8
-		{ "8 Stud",                           "Snap movement along the Z axis to 8 stud" },                                             // LC_EDIT_SNAP_MOVE_Z9
-		{ "None",                             "Do not snap rotations" },                                                                // LC_EDIT_SNAP_ANGLE0
-		{ "1 Degree",                         "Snap rotations to 1 degree" },                                                           // LC_EDIT_SNAP_ANGLE1
-		{ "5 Degree",                         "Snap rotations to 5 degrees" },                                                          // LC_EDIT_SNAP_ANGLE2
-		{ "10 Degree",                        "Snap rotations to 10 degrees" },                                                         // LC_EDIT_SNAP_ANGLE3
-		{ "15 Degree",                        "Snap rotations to 15 degrees" },                                                         // LC_EDIT_SNAP_ANGLE4
-		{ "30 Degree",                        "Snap rotations to 30 degrees" },                                                         // LC_EDIT_SNAP_ANGLE5
-		{ "45 Degree",                        "Snap rotations to 45 degrees" },                                                         // LC_EDIT_SNAP_ANGLE6
-		{ "60 Degree",                        "Snap rotations to 60 degrees" },                                                         // LC_EDIT_SNAP_ANGLE7
-		{ "90 Degree",                        "Snap rotations to 90 degrees" },                                                         // LC_EDIT_SNAP_ANGLE8
-		{ "180 Degree",                       "Snap rotations to 180 degrees" },                                                        // LC_EDIT_SNAP_ANGLE9
-		{ "Transform",                        "Apply transform to selected objects" },                                                  // LC_EDIT_TRANSFORM
-		{ "Absolute Translation",             "Switch to absolute translation mode when applying transforms" },                         // LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION
-		{ "Relative Translation",             "Switch to relative translation mode when applying transforms" },                         // LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION
-		{ "Absolute Rotation",                "Switch to absolute rotation mode when applying transforms" },                            // LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION
-		{ "Relative Rotation",                "Switch to relative rotation mode when applying transforms" },                            // LC_EDIT_TRANSFORM_RELATIVE_ROTATION
-		{ "Insert",                           "Add new pieces to the model" },                                                          // LC_EDIT_ACTION_INSERT
-		{ "Light",                            "Add new omni light sources to the model" },                                              // LC_EDIT_ACTION_LIGHT
-		{ "Spotlight",                        "Add new spotlights to the model" },                                                      // LC_EDIT_ACTION_SPOTLIGHT
-		{ "Camera",                           "Create a new camera" },                                                                  // LC_EDIT_ACTION_CAMERA
-		{ "Select",                           "Select objects (hold the CTRL key down or drag the mouse to select multiple objects)" }, // LC_EDIT_ACTION_SELECT
-		{ "Move",                             "Move selected objects" },                                                                // LC_EDIT_ACTION_MOVE
-		{ "Rotate",                           "Rotate selected pieces" },                                                               // LC_EDIT_ACTION_ROTATE
-		{ "Delete",                           "Delete objects" },                                                                       // LC_EDIT_ACTION_DELETE
-		{ "Paint",                            "Change piece color" },                                                                   // LC_EDIT_ACTION_PAINT
-		{ "Zoom",                             "Zoom in or out" },                                                                       // LC_EDIT_ACTION_ZOOM
-		{ "Pan",                              "Pan the current view" },                                                                 // LC_EDIT_ACTION_PAN
-		{ "Rotate View",                      "Rotate the current view" },                                                              // LC_EDIT_ACTION_ROTATE_VIEW
-		{ "Roll",                             "Roll the current view" },                                                                // LC_EDIT_ACTION_ROLL
-		{ "Zoom Region",                      "Zoom into a region of the screen" },                                                     // LC_EDIT_ACTION_ZOOM_REGION
-		{ "Preferences...",                   "Change program settings" },                                                              // LC_VIEW_PREFERENCES
-		{ "Zoom In",                          "Zoom in" },                                                                              // LC_VIEW_ZOOM_IN
-		{ "Zoom Out",                         "Zoom out" },                                                                             // LC_VIEW_ZOOM_OUT
-		{ "Zoom Extents",                     "Fit all pieces in current the view (hold the CTRL key down to zoom all views)" },        // LC_VIEW_ZOOM_EXTENTS
-		{ "Front",                            "View model from the front" },                                                            // LC_VIEW_VIEWPOINT_FRONT
-		{ "Back",                             "View model from the back" },                                                             // LC_VIEW_VIEWPOINT_BACK
-		{ "Top",                              "View model from the top" },                                                              // LC_VIEW_VIEWPOINT_TOP
-		{ "Bottom",                           "View model from the bottom" },                                                           // LC_VIEW_VIEWPOINT_BOTTOM
-		{ "Left",                             "View model from the left" },                                                             // LC_VIEW_VIEWPOINT_LEFT
-		{ "Right",                            "View model from the right" },                                                            // LC_VIEW_VIEWPOINT_RIGHT
-		{ "Home",                             "View model from the default position" },                                                 // LC_VIEW_VIEWPOINT_HOME
-		{ "None",                             "Do not use a camera" },                                                                  // LC_VIEW_CAMERA_NONE
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA1
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA2
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA3
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA4
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA5
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA6
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA7
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA8
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA9
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA10
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA11
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA12
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA13
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA14
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA15
-		{ "Camera",                           "Use this camera" },                                                                      // LC_VIEW_CAMERA16
-		{ "Reset",                            "Reset views to their default positions" },                                               // LC_VIEW_CAMERA_RESET
-		{ "First",                            "Go to the first step of the model" },                                                    // LC_VIEW_TIME_FIRST
-		{ "Previous",                         "Go to the previous step" },                                                              // LC_VIEW_TIME_PREVIOUS
-		{ "Next",                             "Go to the next step" },                                                                  // LC_VIEW_TIME_NEXT
-		{ "Last",                             "Go to the last step of the model" },                                                     // LC_VIEW_TIME_LAST
-		{ "Stop",                             "Stop playing animation" },                                                               // LC_VIEW_TIME_STOP
-		{ "Play",                             "Play animation" },                                                                       // LC_VIEW_TIME_PLAY
-		{ "Insert",                           "Insert new step" },                                                                      // LC_VIEW_TIME_INSERT
-		{ "Delete",                           "Delete current step" },                                                                  // LC_VIEW_TIME_DELETE
-		{ "Animation",                        "Toggle between animation and instruction mode" },                                        // LC_VIEW_TIME_ANIMATION
-		{ "Add Keys",                         "Toggle adding new animation keys" },                                                     // LC_VIEW_TIME_ADD_KEYS
-		{ "Insert",                           "Add a new piece to the model" },                                                         // LC_PIECE_INSERT
-		{ "Delete",                           "Delete selected objects" },                                                              // LC_PIECE_DELETE
-		{ "Minifig Wizard...",                "Add a new minifig to the model" },                                                       // LC_PIECE_MINIFIG_WIZARD
-		{ "Array...",                         "Make copies of the selected pieces" },                                                   // LC_PIECE_ARRAY
-		{ "Copy Keys",                        "Copy keys between animation and instruction modes" },                                    // LC_PIECE_COPY_KEYS
-		{ "Group...",                         "Group selected pieces together" },                                                       // LC_PIECE_GROUP
-		{ "Ungroup",                          "Ungroup selected group" },                                                               // LC_PIECE_UNGROUP
-		{ "Add to Group",                     "Add focused piece to selected group" },                                                  // LC_PIECE_GROUP_ADD
-		{ "Remove from Group",                "Remove focused piece from group" },                                                      // LC_PIECE_GROUP_REMOVE
-		{ "Edit Groups...",                   "Edit groups" },                                                                          // LC_PIECE_GROUP_EDIT
-		{ "Hide Selected",                    "Hide selected objects" },                                                                // LC_PIECE_HIDE_SELECTED
-		{ "Hide Unselected",                  "Hide objects that are not selected" },                                                   // LC_PIECE_HIDE_UNSELECTED
-		{ "Unhide All",                       "Show all hidden objects" },                                                              // LC_PIECE_UNHIDE_ALL
-		{ "Show Earlier",                     "Show selected pieces one step earlier" },                                                // LC_PIECE_SHOW_EARLIER
-		{ "Show Later",                       "Show selected pieces one step later" },                                                  // LC_PIECE_SHOW_LATER
-		{ "LeoCAD Home page",                 "Open LeoCAD's Home page on the internet using your default web browser" },               // LC_HELP_HOMEPAGE
-		{ "Send E-Mail",                      "Send an e-mail message for help or support using your default e-mail client" },          // LC_HELP_EMAIL
-		{ "Check for Updates...",             "Check if a newer LeoCAD version or parts library has been released" },                   // LC_HELP_UPDATES
-		{ "About...",                         "Display program version number and system information" },                                // LC_HELP_ABOUT
-	};
-
-	LC_CASSERT(sizeof(actionStrings)/sizeof(actionStrings[0]) == LC_NUM_COMMANDS);
-
 	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
 	{
-		QAction *action = new QAction(tr(actionStrings[Command][0]), this);
-		action->setStatusTip(tr(actionStrings[Command][1]));
+		QAction *action = new QAction(tr(gActions[Command].MenuName), this);
+		action->setStatusTip(tr(gActions[Command].StatusText));
 		connect(action, SIGNAL(triggered()), this, SLOT(actionTriggered()));
 		actions[Command] = action;
 	}
@@ -261,16 +107,6 @@ void lcQMainWindow::createActions()
 	actions[LC_VIEW_TIME_NEXT]->setIcon(QIcon(":/resources/time_next.png"));
 	actions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
 
-	actions[LC_FILE_NEW]->setShortcuts(QKeySequence::New);
-	actions[LC_FILE_OPEN]->setShortcuts(QKeySequence::Open);
-	actions[LC_FILE_SAVE]->setShortcuts(QKeySequence::Save);
-	actions[LC_FILE_SAVEAS]->setShortcuts(QKeySequence::SaveAs);
-	actions[LC_EDIT_UNDO]->setShortcuts(QKeySequence::Undo);
-	actions[LC_EDIT_REDO]->setShortcuts(QKeySequence::Redo);
-	actions[LC_EDIT_CUT]->setShortcuts(QKeySequence::Cut);
-	actions[LC_EDIT_COPY]->setShortcuts(QKeySequence::Copy);
-	actions[LC_EDIT_PASTE]->setShortcuts(QKeySequence::Paste);
-
 	actions[LC_EDIT_LOCK_X]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
@@ -279,6 +115,13 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
 	actions[LC_EDIT_SNAP_ANGLE]->setCheckable(true);
 	actions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
+
+	QActionGroup *actionSnapAngleGroup = new QActionGroup(this);
+	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionSnapAngleGroup->addAction(actions[actionIdx]);
+	}
 
 	QActionGroup *actionToolGroup = new QActionGroup(this);
 	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
@@ -294,6 +137,8 @@ void lcQMainWindow::createActions()
 		actions[actionIdx]->setCheckable(true);
 		actionCameraGroup->addAction(actions[actionIdx]);
 	}
+
+	updateShortcuts();
 }
 
 void lcQMainWindow::createMenus()
@@ -312,6 +157,11 @@ void lcQMainWindow::createMenus()
 	snapMenu->addAction(actions[LC_EDIT_SNAP_NONE]);
 	snapMenu->addAction(actions[LC_EDIT_SNAP_ALL]);
 	actions[LC_EDIT_SNAP_TOGGLE]->setMenu(snapMenu);
+
+	QMenu* snapAngleMenu = new QMenu(tr("Snap Angle Menu"));
+	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
+		snapAngleMenu->addAction(actions[actionIdx]);
+	actions[LC_EDIT_SNAP_ANGLE]->setMenu(snapAngleMenu);
 
 	QMenu* transformMenu = new QMenu(tr("Transform"));
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
@@ -513,6 +363,21 @@ void lcQMainWindow::createToolBars()
 
 	partsToolBar->setWidget(partsContents);
 	addDockWidget(static_cast<Qt::DockWidgetArea>(2), partsToolBar);
+
+	propertiesToolBar = new QDockWidget(tr("Properties"), this);
+	propertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+	QWidget *propertiesContents = new QWidget();
+	QFormLayout *propertiesLayout = new QFormLayout(propertiesContents);
+	propertiesLayout->setSpacing(6);
+	propertiesLayout->setContentsMargins(6, 6, 6, 6);
+
+	QLabel *label = new QLabel(tr("Nothing selected"), propertiesContents);
+	propertiesLayout->addWidget(label);
+
+	propertiesToolBar->setWidget(propertiesContents);
+	tabifyDockWidget(partsToolBar, propertiesToolBar);
+	partsToolBar->raise();
 }
 
 void lcQMainWindow::createStatusBar()
@@ -563,6 +428,12 @@ void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetIt
 		Preview->OnInitialUpdate();
 		Preview->SetCurrentPiece(info);
 	}
+}
+
+void lcQMainWindow::updateShortcuts()
+{
+	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
+		actions[actionIdx]->setShortcut(QKeySequence(gKeyboardShortcuts[actionIdx]));
 }
 
 void lcQMainWindow::updateAction(int newAction)

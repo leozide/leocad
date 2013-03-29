@@ -10,6 +10,7 @@
 #include "project.h"
 #include "image.h"
 #include "mainwnd.h"
+#include "keyboard.h"
 
 // ----------------------------------------------------------------------------
 // Global functions.
@@ -406,6 +407,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		else
 			project->OnNewDocument();
 	}
+
+	InitKeyboardShortcuts();
 
 	return true;
 }

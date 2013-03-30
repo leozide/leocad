@@ -1,6 +1,8 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
+#define LC_RGB(r,g,b) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8))|(((lcuint32) (lcuint8) (b)) << 16))) 
+
 // ============================================================================
 // Old defines (mostly deprecated).
 

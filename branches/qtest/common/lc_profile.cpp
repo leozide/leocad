@@ -3,8 +3,7 @@
 #include "image.h"
 #include "project.h"
 
-template<typename T>
-lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, T DefaultValue)
+lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, int DefaultValue)
 {
 	mType = LC_PROFILE_ENTRY_INT;
 	mSection = Section;
@@ -12,8 +11,15 @@ lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, T DefaultVa
 	mDefault.IntValue = DefaultValue;
 }
 
-template<>
-lcProfileEntry::lcProfileEntry<float>(const char* Section, const char* Key, float DefaultValue)
+lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, unsigned int DefaultValue)
+{
+	mType = LC_PROFILE_ENTRY_INT;
+	mSection = Section;
+	mKey = Key;
+	mDefault.IntValue = DefaultValue;
+}
+
+lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, float DefaultValue)
 {
 	mType = LC_PROFILE_ENTRY_FLOAT;
 	mSection = Section;
@@ -21,8 +27,7 @@ lcProfileEntry::lcProfileEntry<float>(const char* Section, const char* Key, floa
 	mDefault.FloatValue = DefaultValue;
 }
 
-template<>
-lcProfileEntry::lcProfileEntry<const char*>(const char* Section, const char* Key, const char* DefaultValue)
+lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, const char* DefaultValue)
 {
 	mType = LC_PROFILE_ENTRY_STRING;
 	mSection = Section;
@@ -55,14 +60,14 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 
 	lcProfileEntry("Defaults", "Author", ""),                                        // LC_PROFILE_DEFAULT_AUTHOR_NAME
 	lcProfileEntry("Defaults", "Scene", 0),                                          // LC_PROFILE_DEFAULT_SCENE
-	lcProfileEntry("Defaults", "FloorColor", RGB(0, 191, 0)),                        // LC_PROFILE_DEFAULT_FLOOR_COLOR
+	lcProfileEntry("Defaults", "FloorColor", LC_RGB(0, 191, 0)),                        // LC_PROFILE_DEFAULT_FLOOR_COLOR
 	lcProfileEntry("Defaults", "FloorTexture", ""),                                  // LC_PROFILE_DEFAULT_FLOOR_TEXTURE
 	lcProfileEntry("Defaults", "FogDensity", 0.1f),                                  // LC_PROFILE_DEFAULT_FOG_DENSITY
-	lcProfileEntry("Defaults", "FogColor", RGB(255, 255, 255)),                      // LC_PROFILE_DEFAULT_FOG_COLOR
-	lcProfileEntry("Defaults", "AmbientColor", RGB(75, 75, 75)),                     // LC_PROFILE_DEFAULT_AMBIENT_COLOR
-	lcProfileEntry("Defaults", "BackgroundColor", RGB(255, 255, 255)),               // LC_PROFILE_DEFAULT_BACKGROUND_COLOR
-	lcProfileEntry("Defaults", "GradientColor1", RGB(191, 0, 0)),                    // LC_PROFILE_DEFAULT_GRADIENT_COLOR1
-	lcProfileEntry("Defaults", "GradientColor2", RGB(255, 255, 255)),                // LC_PROFILE_DEFAULT_GRADIENT_COLOR2
+	lcProfileEntry("Defaults", "FogColor", LC_RGB(255, 255, 255)),                      // LC_PROFILE_DEFAULT_FOG_COLOR
+	lcProfileEntry("Defaults", "AmbientColor", LC_RGB(75, 75, 75)),                     // LC_PROFILE_DEFAULT_AMBIENT_COLOR
+	lcProfileEntry("Defaults", "BackgroundColor", LC_RGB(255, 255, 255)),               // LC_PROFILE_DEFAULT_BACKGROUND_COLOR
+	lcProfileEntry("Defaults", "GradientColor1", LC_RGB(191, 0, 0)),                    // LC_PROFILE_DEFAULT_GRADIENT_COLOR1
+	lcProfileEntry("Defaults", "GradientColor2", LC_RGB(255, 255, 255)),                // LC_PROFILE_DEFAULT_GRADIENT_COLOR2
 	lcProfileEntry("Defaults", "BackgroundTeture", ""),                              // LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE
 
 	lcProfileEntry("HTML", "Options", LC_HTML_SINGLEPAGE),                           // LC_PROFILE_HTML_OPTIONS

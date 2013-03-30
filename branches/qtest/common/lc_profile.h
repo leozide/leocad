@@ -63,8 +63,10 @@ enum LC_PROFILE_ENTRY_TYPE
 class lcProfileEntry
 {
 public:
-	template<typename T>
-	lcProfileEntry(const char* Section, const char* Key, T DefaultValue);
+	lcProfileEntry(const char* Section, const char* Key, int DefaultValue);
+	lcProfileEntry(const char* Section, const char* Key, unsigned int DefaultValue);
+	lcProfileEntry(const char* Section, const char* Key, float DefaultValue);
+	lcProfileEntry(const char* Section, const char* Key, const char* DefaultValue);
 
 	LC_PROFILE_ENTRY_TYPE mType;
 

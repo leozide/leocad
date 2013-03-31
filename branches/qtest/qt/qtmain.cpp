@@ -298,12 +298,12 @@ void lcMainWindow::UpdateLockSnap(lcuint32 Snap)
 		window->updateLockSnap(Snap);
 }
 
-void lcMainWindow::UpdateSnap(lcuint16 MoveSnap, lcuint16 RotateSnap)
+void lcMainWindow::UpdateSnap()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateSnap(MoveSnap, RotateSnap);
+		window->updateSnap();
 }
 
 void lcMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)

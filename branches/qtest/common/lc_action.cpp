@@ -300,26 +300,26 @@ lcAction gActions[LC_NUM_COMMANDS] =
 	},
 	// LC_EDIT_SNAP_MOVE_XY6
 	{
-		"2 Stud",
-		"Snap movement along the XY plane to 2 stud",
+		"2 Studs",
+		"Snap movement along the XY plane to 2 studs",
 		"6"
 	},
 	// LC_EDIT_SNAP_MOVE_XY7
 	{
-		"3 Stud",
-		"Snap movement along the XY plane to 3 stud",
+		"3 Studs",
+		"Snap movement along the XY plane to 3 studs",
 		"7"
 	},
 	// LC_EDIT_SNAP_MOVE_XY8
 	{
-		"4 Stud",
-		"Snap movement along the XY plane to 4 stud",
+		"4 Studs",
+		"Snap movement along the XY plane to 4 studs",
 		"8"
 	},
 	// LC_EDIT_SNAP_MOVE_XY9
 	{
-		"8 Stud",
-		"Snap movement along the XY plane to 8 stud",
+		"8 Studs",
+		"Snap movement along the XY plane to 8 studs",
 		"9"
 	},
 	// LC_EDIT_SNAP_MOVE_Z0
@@ -360,87 +360,87 @@ lcAction gActions[LC_NUM_COMMANDS] =
 	},
 	// LC_EDIT_SNAP_MOVE_Z6
 	{
-		"2 Stud",
-		"Snap movement along the Z axis to 2 stud",
+		"1 Brick",
+		"Snap movement along the Z axis to 1 brick",
 		"Ctrl+Shift+6"
 	},
 	// LC_EDIT_SNAP_MOVE_Z7
 	{
-		"3 Stud",
-		"Snap movement along the Z axis to 3 stud",
+		"2 Bricks",
+		"Snap movement along the Z axis to 2 bricks",
 		"Ctrl+Shift+7"
 	},
 	// LC_EDIT_SNAP_MOVE_Z8
 	{
-		"4 Stud",
-		"Snap movement along the Z axis to 4 stud",
+		"4 Bricks",
+		"Snap movement along the Z axis to 4 bricks",
 		"Ctrl+Shift+8"
 	},
 	// LC_EDIT_SNAP_MOVE_Z9
 	{
-		"8 Stud",
-		"Snap movement along the Z axis to 8 stud",
+		"8 Bricks",
+		"Snap movement along the Z axis to 8 bricks",
 		"Ctrl+Shift+9"
 	},
 	// LC_EDIT_SNAP_ANGLE0
 	{
 		"None",
 		"Do not snap rotations",
-		""
+		"Shift+0"
 	},
 	// LC_EDIT_SNAP_ANGLE1
 	{
 		"1 Degree",
 		"Snap rotations to 1 degree",
-		""
+		"Shift+1"
 	},
 	// LC_EDIT_SNAP_ANGLE2
 	{
-		"5 Degree",
+		"5 Degrees",
 		"Snap rotations to 5 degrees",
-		""
+		"Shift+2"
 	},
 	// LC_EDIT_SNAP_ANGLE3
 	{
-		"10 Degree",
+		"10 Degrees",
 		"Snap rotations to 10 degrees",
-		""
+		"Shift+3"
 	},
 	// LC_EDIT_SNAP_ANGLE4
 	{
-		"15 Degree",
+		"15 Degrees",
 		"Snap rotations to 15 degrees",
-		""
+		"Shift+4"
 	},
 	// LC_EDIT_SNAP_ANGLE5
 	{
-		"30 Degree",
+		"30 Degrees",
 		"Snap rotations to 30 degrees",
-		""
+		"Shift+5"
 	},
 	// LC_EDIT_SNAP_ANGLE6
 	{
-		"45 Degree",
+		"45 Degrees",
 		"Snap rotations to 45 degrees",
-		""
+		"Shift+6"
 	},
 	// LC_EDIT_SNAP_ANGLE7
 	{
-		"60 Degree",
+		"60 Degrees",
 		"Snap rotations to 60 degrees",
-		""
+		"Shift+7"
 	},
 	// LC_EDIT_SNAP_ANGLE8
 	{
-		"90 Degree",
+		"90 Degrees",
 		"Snap rotations to 90 degrees",
-		""
+		"Shift+8"
 	},
 	// LC_EDIT_SNAP_ANGLE9
 	{
-		"180 Degree",
+		"180 Degrees",
 		"Snap rotations to 180 degrees",
-		""
+		"Shift+9"
 	},
 	// LC_EDIT_TRANSFORM
 	{

@@ -120,7 +120,7 @@ void Project::UpdateInterface()
 	SystemUpdateColorList(m_nCurColor);
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
-	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 	UpdateSelection();
 	if (m_bAnimation)
@@ -245,7 +245,7 @@ void Project::LoadDefaults(bool cameras)
 	m_nSnap = lcGetProfileInt(LC_PROFILE_SNAP);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	m_nMoveSnap = 0x0304;
-	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	gMainWindow->UpdateSnap();
 	m_fLineWidth = (float)lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	m_fFogDensity = (float)lcGetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY);
 	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR);
@@ -751,7 +751,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	SystemUpdateColorList(m_nCurColor);
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
-	gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 	UpdateSelection();
 	if (m_bAnimation)
@@ -775,7 +775,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteBuffer(LC_STR_VERSION, 32);
 	file->WriteFloats(&ver_flt, 1);
 
-	rgb = FLOATRGB(m_fBackground);
+	rgb = LC_FLOATRGB(m_fBackground);
 	file->WriteU32(&rgb, 1);
 
 	i = m_nAngleSnap; file->WriteS32(&i, 1);
@@ -837,7 +837,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 		file->WriteS32(&i, 1);
 	}
 
-	rgb = FLOATRGB(m_fFogColor);
+	rgb = LC_FLOATRGB(m_fFogColor);
 	file->WriteU32(&rgb, 1);
 	file->WriteFloats(&m_fFogDensity, 1);
 	sh = strlen(m_strBackground);
@@ -850,7 +850,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(m_strFooter, ch);
 	// 0.60 (1.0)
-	rgb = FLOATRGB(m_fAmbient);
+	rgb = LC_FLOATRGB(m_fAmbient);
 	file->WriteU32(&rgb, 1);
 	ch = m_bAnimation;
 	file->WriteBuffer(&ch, 1);
@@ -862,9 +862,9 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU16(&m_nGridSize, 1);
 	file->WriteU16(&m_nMoveSnap, 1);
 	// 0.62 (1.1)
-	rgb = FLOATRGB(m_fGradient1);
+	rgb = LC_FLOATRGB(m_fGradient1);
 	file->WriteU32(&rgb, 1);
-	rgb = FLOATRGB(m_fGradient2);
+	rgb = LC_FLOATRGB(m_fGradient2);
 	file->WriteU32(&rgb, 1);
 	// 0.64 (1.2)
 	m_pTerrain->FileSave(file);
@@ -4628,11 +4628,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 				lcSetProfileInt(LC_PROFILE_DEFAULT_SCENE, Scene);
 				lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, Options.FogDensity);
 				lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, Options.BackgroundFileName);
-				lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, LC_RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, LC_RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, LC_RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, LC_RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, LC_RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
 			}
 
 			if (Modified)
@@ -6037,14 +6037,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateLockSnap(m_nSnap);
 			break;
 
-		case LC_EDIT_SNAP_ANGLE:
-			if (m_nSnap & LC_DRAW_SNAP_A)
-				m_nSnap &= ~LC_DRAW_SNAP_A;
-			else
-				m_nSnap |= LC_DRAW_SNAP_A;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
 		case LC_EDIT_LOCK_X:
 			if (m_nSnap & LC_DRAW_LOCK_X)
 				m_nSnap &= ~LC_DRAW_LOCK_X;
@@ -6098,7 +6090,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap |= LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y;
 			else
 				m_nSnap &= ~(LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y);
-			gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+			gMainWindow->UpdateSnap();
 		} break;
 
 		case LC_EDIT_SNAP_MOVE_Z0:
@@ -6117,8 +6109,19 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_nSnap |= LC_DRAW_SNAP_Z;
 			else
 				m_nSnap &= ~LC_DRAW_SNAP_Z;
-			gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+			gMainWindow->UpdateSnap();
 		} break;
+
+		case LC_EDIT_SNAP_ANGLE:
+			if (m_nSnap & LC_DRAW_SNAP_A)
+				m_nSnap &= ~LC_DRAW_SNAP_A;
+			else
+			{
+				m_nSnap |= LC_DRAW_SNAP_A;
+				m_nAngleSnap = lcMax(1, m_nAngleSnap);
+			}
+			gMainWindow->UpdateSnap();
+			break;
 
 		case LC_EDIT_SNAP_ANGLE0:
 		case LC_EDIT_SNAP_ANGLE1:
@@ -6131,13 +6134,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_EDIT_SNAP_ANGLE8:
 		case LC_EDIT_SNAP_ANGLE9:
 		{
-			int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
-			m_nAngleSnap = Angles[id - LC_EDIT_SNAP_ANGLE0];
-			if (m_nAngleSnap)
-				m_nSnap |= LC_DRAW_SNAP_A;
-			else
+			const int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+
+			if (id == LC_EDIT_SNAP_ANGLE0)
 				m_nSnap &= ~LC_DRAW_SNAP_A;
-			gMainWindow->UpdateSnap(m_nMoveSnap, m_nAngleSnap);
+			else
+			{
+				m_nSnap |= LC_DRAW_SNAP_A;
+				m_nAngleSnap = Angles[id - LC_EDIT_SNAP_ANGLE0];
+			}
+			gMainWindow->UpdateSnap();
 		} break;
 
 		case LC_EDIT_ACTION_SELECT:
@@ -6925,7 +6931,7 @@ void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
 			}
 		}
 		else
-			SnapAngle = 0;
+			*SnapAngle = 0;
 	}
 }
 
@@ -6944,7 +6950,7 @@ void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 	*SnapZ = SnapZTable[SZ];
 }
 
-void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
+void Project::GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const
 {
 	if (m_nSnap & LC_DRAW_CM_UNITS)
 	{
@@ -6959,15 +6965,17 @@ void Project::GetSnapDistanceText(char* SnapXY, char* SnapZ) const
 	{
 		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
 		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
+		const char* SnapAngleText[] = { "0", "1", "5", "10", "15", "30", "45", "60", "90", "180" };
 
-		int SXY, SZ;
-		GetSnapIndex(&SXY, &SZ, NULL);
+		int SXY, SZ, SA;
+		GetSnapIndex(&SXY, &SZ, &SA);
 
 		SXY = lcMin(SXY, 9);
 		SZ = lcMin(SZ, 9);
 
 		strcpy(SnapXY, SnapXYText[SXY]);
 		strcpy(SnapZ, SnapZText[SZ]);
+		strcpy(SnapAngle, SnapAngleText[SA]);
 	}
 }
 

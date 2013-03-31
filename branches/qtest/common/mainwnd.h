@@ -22,7 +22,7 @@ public:
 	void UpdateTime(bool Animation, int CurrentTime, int TotalTime);
 	void UpdateAnimation(bool Animation, bool AddKeys);
 	void UpdateLockSnap(lcuint32 Snap);
-	void UpdateSnap(lcuint16 MoveSnap, lcuint16 RotateSnap);
+	void UpdateSnap();
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera);

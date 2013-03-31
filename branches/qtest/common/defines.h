@@ -1,18 +1,11 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
-#define LC_RGB(r,g,b) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8))|(((lcuint32) (lcuint8) (b)) << 16))) 
-
-// ============================================================================
-// Old defines (mostly deprecated).
-
 // TODO: cleanup defines and remove this file
 
 #ifdef WIN32
 #define isnan _isnan
 #endif
-
-#ifndef LC_QT
 
 #ifdef LC_WINDOWS
 #define LC_MAXPATH 260 //_MAX_PATH
@@ -59,8 +52,6 @@ int stricmp(const char* str1, const char* str2);
 
 #endif
 
-#endif
-
 #ifdef LC_QT
 #define LC_MAXPATH 1024//MAXPATHLEN //FILENAME_MAX
 
@@ -88,15 +79,8 @@ int stricmp(const char* str1, const char* str2);
 
 #endif
 
-
 /////////////////////////////////////////////////////////////////////////////
 // LeoCAD constants
-
-#ifndef WIN32
-#define RGB(r, g, b) ((unsigned long)(((unsigned char) (r) | ((unsigned short) (g) << 8))|(((unsigned long) (unsigned char) (b)) << 16))) 
-#endif 
-
-#define FLOATRGB(f) RGB(f[0]*255, f[1]*255, f[2]*255)
 
 #define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
                                                 ((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))
@@ -104,10 +88,6 @@ int stricmp(const char* str1, const char* str2);
 #define LC_FILE_ID LC_FOURCC('L','C','D', 0)
 
 #define LC_STR_VERSION	"LeoCAD 0.7 Project\0\0" // char[20]
-
-#define LC_TERRAIN_FLAT			0x01	// Flat terrain
-#define LC_TERRAIN_TEXTURE		0x02	// Use texture
-#define LC_TERRAIN_SMOOTH		0x04	// Smooth shading
 
 #define LC_AUTOSAVE_FLAG		0x100000 // Enable auto-saving
 

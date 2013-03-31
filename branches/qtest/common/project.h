@@ -163,8 +163,8 @@ public:
 	int GetOverlayMode() const
 		{ return m_OverlayMode; }
 	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
+	void GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
-	void GetSnapDistanceText(char* SnapXY, char* SnapZ) const;
 	void GetTimeRange(int* from, int* to)
 	{
 		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;

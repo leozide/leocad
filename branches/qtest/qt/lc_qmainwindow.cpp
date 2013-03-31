@@ -113,8 +113,21 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_SNAP_X]->setCheckable(true);
 	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
 	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
-	actions[LC_EDIT_SNAP_ANGLE]->setCheckable(true);
 	actions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
+
+	QActionGroup *actionSnapXYGroup = new QActionGroup(this);
+	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionSnapXYGroup->addAction(actions[actionIdx]);
+	}
+
+	QActionGroup *actionSnapZGroup = new QActionGroup(this);
+	for (int actionIdx = LC_EDIT_SNAP_MOVE_Z0; actionIdx <= LC_EDIT_SNAP_MOVE_Z9; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionSnapZGroup->addAction(actions[actionIdx]);
+	}
 
 	QActionGroup *actionSnapAngleGroup = new QActionGroup(this);
 	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
@@ -150,7 +163,18 @@ void lcQMainWindow::createMenus()
 	lockMenu->addAction(actions[LC_EDIT_LOCK_NONE]);
 	actions[LC_EDIT_LOCK_TOGGLE]->setMenu(lockMenu);
 
+	QMenu* snapXYMenu = new QMenu(tr("Snap XY"));
+	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
+		snapXYMenu->addAction(actions[actionIdx]);
+
+	QMenu* snapZMenu = new QMenu(tr("Snap Z"));
+	for (int actionIdx = LC_EDIT_SNAP_MOVE_Z0; actionIdx <= LC_EDIT_SNAP_MOVE_Z9; actionIdx++)
+		snapZMenu->addAction(actions[actionIdx]);
+
 	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
+	snapMenu->addMenu(snapXYMenu);
+	snapMenu->addMenu(snapZMenu);
+	snapMenu->addSeparator();
 	snapMenu->addAction(actions[LC_EDIT_SNAP_X]);
 	snapMenu->addAction(actions[LC_EDIT_SNAP_Y]);
 	snapMenu->addAction(actions[LC_EDIT_SNAP_Z]);
@@ -479,8 +503,6 @@ void lcQMainWindow::updateAnimation(bool animation, bool addKeys)
 
 void lcQMainWindow::updateLockSnap(lcuint32 snap)
 {
-	actions[LC_EDIT_SNAP_ANGLE]->setChecked((snap & LC_DRAW_SNAP_A) != 0);
-
 	actions[LC_EDIT_SNAP_X]->setChecked((snap & LC_DRAW_SNAP_X) != 0);
 	actions[LC_EDIT_SNAP_Y]->setChecked((snap & LC_DRAW_SNAP_Y) != 0);
 	actions[LC_EDIT_SNAP_Z]->setChecked((snap & LC_DRAW_SNAP_Z) != 0);
@@ -490,13 +512,20 @@ void lcQMainWindow::updateLockSnap(lcuint32 snap)
 	actions[LC_EDIT_LOCK_Z]->setChecked((snap & LC_DRAW_LOCK_Z) != 0);
 }
 
-void lcQMainWindow::updateSnap(lcuint16 moveSnap, lcuint16 rotateSnap)
+void lcQMainWindow::updateSnap()
 {
-	char xy[32], z[32];
+	char xy[32], z[32], angle[32];
+	int moveXYSnapIndex, moveZSnapIndex, angleSnapIndex;
+	Project *project = lcGetActiveProject();
 
-	lcGetActiveProject()->GetSnapDistanceText(xy, z);
+	project->GetSnapText(xy, z, angle);
+	project->GetSnapIndex(&moveXYSnapIndex, &moveZSnapIndex, &angleSnapIndex);
 
-	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(xy, z, QString::number(rotateSnap)));
+	actions[LC_EDIT_SNAP_MOVE_XY0 + moveXYSnapIndex]->setChecked(true);
+	actions[LC_EDIT_SNAP_MOVE_Z0 + moveZSnapIndex]->setChecked(true);
+	actions[LC_EDIT_SNAP_ANGLE0 + angleSnapIndex]->setChecked(true);
+
+	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(xy, z, angle));
 }
 
 void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)

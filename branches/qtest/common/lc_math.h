@@ -9,6 +9,9 @@
 #define LC_PI   3.141592f
 #define LC_2PI  6.283185f
 
+#define LC_RGB(r,g,b) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8))|(((lcuint32) (lcuint8) (b)) << 16))) 
+#define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
+
 template <typename T, typename U>
 inline T lcMin(const T& a, const U& b)
 {

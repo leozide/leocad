@@ -5968,8 +5968,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Info += Text;
 			sprintf(Text, "\nStencil Buffer: %d bits", Stencil);
 			Info += Text;
-			Info += "\nGL_ARB_vertex_buffer_object extension ";
-			Info += GL_HasVertexBufferObject() ? "supported\n" : "not supported\n";
+			Info += "\nGL_ARB_vertex_buffer_object extension: ";
+			Info += GL_HasVertexBufferObject() ? "supported" : "not supported";
+			Info += "\nGL_ARB_framebuffer_object extension: ";
+			Info += GL_HasFramebufferObject() ? "supported" : "not supported";
 
 			gMainWindow->DoDialog(LC_DIALOG_ABOUT, (char*)Info);
 		} break;

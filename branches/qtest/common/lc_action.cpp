@@ -660,14 +660,14 @@ lcAction gActions[LC_NUM_COMMANDS] =
 		"View.ZoomIn",
 		"Zoom In",
 		"Zoom in",
-		""
+		"+"
 	},
 	// LC_VIEW_ZOOM_OUT
 	{
 		"View.ZoomOut",
 		"Zoom Out",
 		"Zoom out",
-		""
+		"-"
 	},
 	// LC_VIEW_ZOOM_EXTENTS
 	{
@@ -934,6 +934,90 @@ lcAction gActions[LC_NUM_COMMANDS] =
 		"Delete",
 		"Delete selected objects",
 		"Delete"
+	},
+	// LC_PIECE_MOVE_PLUSX
+	{
+		"Piece.Move.PlusX",
+		"Move +X",
+		"Move selected objects along the X axis",
+		"Down"
+	},
+	// LC_PIECE_MOVE_MINUSX
+	{
+		"Piece.Move.MinusX",
+		"Move -X",
+		"Move selected objects along the X axis",
+		"Up"
+	},
+	// LC_PIECE_MOVE_PLUSY
+	{
+		"Piece.Move.PlusY",
+		"Move +Y",
+		"Move selected objects along the Y axis",
+		"Right"
+	},
+	// LC_PIECE_MOVE_MINUSY
+	{
+		"Piece.Move.MinusY",
+		"Move -Y",
+		"Move selected objects along the Y axis",
+		"Left"
+	},
+	// LC_PIECE_MOVE_PLUSZ
+	{
+		"Piece.Move.PlusZ",
+		"Move +Z",
+		"Move selected objects along the Z axis",
+		"PgUp"
+	},
+	// LC_PIECE_MOVE_MINUSZ
+	{
+		"Piece.Move.MinusZ",
+		"Move -Z",
+		"Move selected objects along the Z axis",
+		"PgDown"
+	},
+	// LC_PIECE_ROTATE_PLUSX
+	{
+		"Piece.Rotate.PlusX",
+		"Rotate +X",
+		"Rotate selected objects along the X axis",
+		"Shift+Down"
+	},
+	// LC_PIECE_ROTATE_MINUSX
+	{
+		"Piece.Rotate.MinusX",
+		"Rotate -X",
+		"Rotate selected objects along the X axis",
+		"Shift+Up"
+	},
+	// LC_PIECE_ROTATE_PLUSY
+	{
+		"Piece.Rotate.PlusY",
+		"Rotate +Y",
+		"Rotate selected objects along the Y axis",
+		"Shift+Right"
+	},
+	// LC_PIECE_ROTATE_MINUSY
+	{
+		"Piece.Rotate.MinusY",
+		"Rotate -Y",
+		"Rotate selected objects along the Y axis",
+		"Shift+Left"
+	},
+	// LC_PIECE_ROTATE_PLUSZ
+	{
+		"Piece.Rotate.PlusZ",
+		"Rotate +Z",
+		"Rotate selected objects along the Z axis",
+		"Shift+PgUp"
+	},
+	// LC_PIECE_ROTATE_MINUSZ
+	{
+		"Piece.Rotate.MinusZ",
+		"Rotate -Z",
+		"Rotate selected objects along the Z axis",
+		"Shift+PgDown"
 	},
 	// LC_PIECE_MINIFIG_WIZARD
 	{

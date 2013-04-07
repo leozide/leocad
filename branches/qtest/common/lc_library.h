@@ -9,9 +9,6 @@
 class PieceInfo;
 class lcZipFile;
 
-#define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
-#define LC_CATEGORY_FILE_VERSION  0x0100
-
 enum LC_MESH_PRIMITIVE_TYPE
 {
 	LC_MESH_LINES,

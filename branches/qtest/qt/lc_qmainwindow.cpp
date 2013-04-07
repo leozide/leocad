@@ -265,6 +265,18 @@ void lcQMainWindow::createMenus()
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 	menuPiece->addAction(actions[LC_PIECE_INSERT]);
 	menuPiece->addAction(actions[LC_PIECE_DELETE]);
+	menuPiece->addAction(actions[LC_PIECE_MOVE_PLUSX]);
+	menuPiece->addAction(actions[LC_PIECE_MOVE_MINUSX]);
+	menuPiece->addAction(actions[LC_PIECE_MOVE_PLUSY]);
+	menuPiece->addAction(actions[LC_PIECE_MOVE_MINUSY]);
+	menuPiece->addAction(actions[LC_PIECE_MOVE_PLUSZ]);
+	menuPiece->addAction(actions[LC_PIECE_MOVE_MINUSZ]);
+	menuPiece->addAction(actions[LC_PIECE_ROTATE_PLUSX]);
+	menuPiece->addAction(actions[LC_PIECE_ROTATE_MINUSX]);
+	menuPiece->addAction(actions[LC_PIECE_ROTATE_PLUSY]);
+	menuPiece->addAction(actions[LC_PIECE_ROTATE_MINUSY]);
+	menuPiece->addAction(actions[LC_PIECE_ROTATE_PLUSZ]);
+	menuPiece->addAction(actions[LC_PIECE_ROTATE_MINUSZ]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
 	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
 	menuPiece->addSeparator();

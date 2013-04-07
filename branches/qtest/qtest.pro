@@ -65,6 +65,9 @@ SOURCES += common/view.cpp \
     common/console.cpp \
     common/camera.cpp \
     common/array.cpp \
+    common/lc_action.cpp \
+    common/lc_profile.cpp \
+    common/lc_category.cpp \
     qt/lc_qmainwindow.cpp \
     qt/main.cpp \
     qt/linux_gl.cpp \
@@ -87,11 +90,9 @@ SOURCES += common/view.cpp \
     qt/lc_qpreferencesdialog.cpp \
     qt/lc_qcategorydialog.cpp \
     qt/lc_qprofile.cpp \
-    common/lc_profile.cpp \
     qt/lc_qimagedialog.cpp \
     qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
-    common/lc_action.cpp \
 	qt/lc_qutils.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
@@ -132,6 +133,9 @@ HEADERS += common/glwindow.h \
     common/console.h \
     common/camera.h \
     common/basewnd.h \
+    common/lc_profile.h \
+    common/lc_action.h \
+    common/lc_category.h \
     qt/lc_colorlistwidget.h \
     qt/lc_qmainwindow.h \
     qt/lc_glwidget.h \
@@ -148,10 +152,8 @@ HEADERS += common/glwindow.h \
     qt/lc_qminifigdialog.h \
     qt/lc_qpreferencesdialog.h \
     qt/lc_qcategorydialog.h \
-    common/lc_profile.h \
     qt/lc_qimagedialog.h \
     qt/lc_qupdatedialog.h \
-    common/lc_action.h \
 	qt/lc_qutils.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \

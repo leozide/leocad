@@ -5048,6 +5048,125 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
+		case LC_PIECE_MOVE_PLUSX:
+		case LC_PIECE_MOVE_MINUSX:
+		case LC_PIECE_MOVE_PLUSY:
+		case LC_PIECE_MOVE_MINUSY:
+		case LC_PIECE_MOVE_PLUSZ:
+		case LC_PIECE_MOVE_MINUSZ:
+		case LC_PIECE_ROTATE_PLUSX:
+		case LC_PIECE_ROTATE_MINUSX:
+		case LC_PIECE_ROTATE_PLUSY:
+		case LC_PIECE_ROTATE_MINUSY:
+		case LC_PIECE_ROTATE_PLUSZ:
+		case LC_PIECE_ROTATE_MINUSZ:
+		{
+			lcVector3 axis;
+			bool Rotate = id >= LC_PIECE_ROTATE_PLUSX && id <= LC_PIECE_ROTATE_MINUSZ;
+
+			if (Rotate)
+			{
+				if (m_nSnap & LC_DRAW_SNAP_A)
+					axis[0] = axis[1] = axis[2] = m_nAngleSnap;
+				else
+					axis[0] = axis[1] = axis[2] = 1;
+			}
+			else
+			{
+				float xy, z;
+				GetSnapDistance(&xy, &z);
+
+				axis[0] = axis[1] = xy;
+				axis[2] = z;
+
+				if ((m_nSnap & LC_DRAW_SNAP_X) == 0)// || bControl)
+					axis[0] = 0.01f;
+				if ((m_nSnap & LC_DRAW_SNAP_Y) == 0)// || bControl)
+					axis[1] = 0.01f;
+				if ((m_nSnap & LC_DRAW_SNAP_Z) == 0)// || bControl)
+					axis[2] = 0.01f;
+			}
+
+			if (id == LC_PIECE_MOVE_PLUSX || id ==  LC_PIECE_ROTATE_PLUSX)
+				axis = lcVector3(axis[0], 0, 0);
+			else if (id == LC_PIECE_MOVE_MINUSX || id == LC_PIECE_ROTATE_MINUSX)
+				axis = lcVector3(-axis[0], 0, 0);
+			else if (id == LC_PIECE_MOVE_PLUSY || id == LC_PIECE_ROTATE_PLUSY)
+				axis = lcVector3(0, axis[1], 0);
+			else if (id == LC_PIECE_MOVE_MINUSY || id == LC_PIECE_ROTATE_MINUSY)
+				axis = lcVector3(0, -axis[1], 0);
+			else if (id == LC_PIECE_MOVE_PLUSZ || id == LC_PIECE_ROTATE_PLUSZ)
+				axis = lcVector3(0, 0, axis[2]);
+			else if (id == LC_PIECE_MOVE_MINUSZ || id == LC_PIECE_ROTATE_MINUSZ)
+				axis = lcVector3(0, 0, -axis[2]);
+
+			if ((m_nSnap & LC_DRAW_MOVEAXIS) == 0)
+			{
+				// TODO: rewrite this
+
+				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+				float Aspect = (float)Viewport[2]/(float)Viewport[3];
+				Camera* Cam = m_ActiveView->mCamera;
+
+				const lcMatrix44& ModelView = Cam->mWorldView;
+				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
+
+				lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
+				lcUnprojectPoints(Pts, 3, ModelView, Projection, Viewport);
+
+				float ax, ay;
+				lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
+				vx.Normalize();
+				lcVector3 x(1, 0, 0);
+				ax = acosf(lcDot(vx, x));
+
+				lcVector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
+				vy.Normalize();
+				lcVector3 y(0, -1, 0);
+				ay = acosf(lcDot(vy, y));
+
+				if (ax > 135)
+					axis[0] = -axis[0];
+
+				if (ay < 45)
+					axis[1] = -axis[1];
+
+				if (ax >= 45 && ax <= 135)
+				{
+					float tmp = axis[0];
+
+					ax = acosf(lcDot(vx, y));
+					if (ax > 90)
+					{
+						axis[0] = -axis[1];
+						axis[1] = tmp;
+					}
+					else
+					{
+						axis[0] = axis[1];
+						axis[1] = -tmp;
+					}
+				}
+			}
+
+			if (Rotate)
+			{
+				lcVector3 tmp;
+				RotateSelectedObjects(axis, tmp, true, true);
+			}
+			else
+			{
+				lcVector3 tmp;
+				MoveSelectedObjects(axis, tmp, false, true);
+			}
+
+			UpdateOverlayScale();
+			UpdateAllViews();
+			SetModifiedFlag(true);
+			CheckPoint(Rotate ? "Rotating" : "Moving");
+			SystemUpdateFocus(NULL);
+		} break;
+
 		case LC_PIECE_MINIFIG_WIZARD:
 		{
 			MinifigWizard Wizard(m_ActiveView);
@@ -7509,18 +7628,6 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			ret = true;
 		} break;
 
-		case KEY_INSERT:
-		{
-			HandleCommand(LC_PIECE_INSERT);
-			ret = true;
-		} break;
-
-		case KEY_DELETE:
-		{
-			HandleCommand(LC_PIECE_DELETE);
-			ret = true;
-		} break;
-
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
 		{
@@ -7530,27 +7637,6 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 				gMainWindow->UpdatePaste(m_pClipboard[m_nCurClipboard] != NULL);
 				ret = true;
 			}
-		} break;
-
-
-		case KEY_PLUS: // case '+': case '=':
-		{
-			if (bShift)
-				ZoomActiveView(-10);
-			else
-				ZoomActiveView(-1);
-
-			ret = true;
-		} break;
-
-		case KEY_MINUS: // case '-': case '_':
-		{
-			if (bShift)
-				ZoomActiveView(10);
-			else
-				ZoomActiveView(1);
-
-			ret = true;
 		} break;
 
 		case KEY_TAB:
@@ -7647,201 +7733,20 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 			if (pFocus != NULL)
 			{
-        pFocus->Select (true, true, false);
-        Group* pGroup = pFocus->GetTopGroup();
-        if (pGroup != NULL)
-        {
-          for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-            if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-                (pPiece->GetTopGroup() == pGroup))
-              pPiece->Select (true, false, false);
-        }
+				pFocus->Select (true, true, false);
+				Group* pGroup = pFocus->GetTopGroup();
+				if (pGroup != NULL)
+				{
+					for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+						if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+							(pPiece->GetTopGroup() == pGroup))
+							pPiece->Select (true, false, false);
+				}
 			}
 
 			UpdateSelection();
 			UpdateAllViews();
 			SystemUpdateFocus(pFocus);
-			ret = true;
-		} break;
-
-		case KEY_UP:    case KEY_DOWN: case KEY_LEFT:
-		case KEY_RIGHT: case KEY_NEXT: case KEY_PRIOR:
-//		if (AnyObjectSelected(FALSE))
-		{
-			lcVector3 axis;
-			if (bShift)
-			{
-				if (m_nSnap & LC_DRAW_SNAP_A)
-					axis[0] = axis[1] = axis[2] = m_nAngleSnap;
-				else
-					axis[0] = axis[1] = axis[2] = 1;
-			}
-			else
-			{
-				float xy, z;
-				GetSnapDistance(&xy, &z);
-
-				axis[0] = axis[1] = xy;
-				axis[2] = z;
-
-				if (((m_nSnap & LC_DRAW_SNAP_X) == 0) || bControl)
-					axis[0] = 0.01f;
-				if (((m_nSnap & LC_DRAW_SNAP_Y) == 0) || bControl)
-					axis[1] = 0.01f;
-				if (((m_nSnap & LC_DRAW_SNAP_Z) == 0) || bControl)
-					axis[2] = 0.01f;
-			}
-
-			if (m_nSnap & LC_DRAW_MOVEAXIS)
-			{
-				switch (nKey)
-				{
-					case KEY_UP:
-						axis[1] = axis[2] = 0; axis[0] = -axis[0];
-						break;
-					case KEY_DOWN:
-						axis[1] = axis[2] = 0;
-						break;
-					case KEY_LEFT:
-						axis[0] = axis[2] = 0; axis[1] = -axis[1];
-						break;
-					case KEY_RIGHT:
-						axis[0] = axis[2] = 0;
-						break;
-					case KEY_NEXT:
-						axis[0] = axis[1] = 0; axis[2] = -axis[2];
-						break;
-					case KEY_PRIOR:
-						axis[0] = axis[1] = 0;
-						break;
-				}
-			}
-			else
-			{
-				Camera *camera = m_ActiveView->mCamera;
-
-				if (camera->IsSide ())
-				{
-					lcMatrix44 mat = lcMatrix44AffineInverse(camera->mWorldView);
-
-					switch (nKey)
-					{
-					case KEY_UP:
-						axis[0] = axis[2] = 0;
-						break;
-
-					case KEY_DOWN:
-						axis[0] = axis[2] = 0; axis[1] = -axis[1];
-						break;
-
-					case KEY_LEFT:
-						axis[0] = -axis[0]; axis[1] = axis[2] = 0;
-						break;
-
-					case KEY_RIGHT:
-						axis[1] = axis[2] = 0;
-						break;
-
-					case KEY_NEXT:
-						axis[0] = axis[1] = 0; axis[2] = -axis[2];
-						break;
-
-					case KEY_PRIOR:
-						axis[0] = axis[1] = 0;
-						break;
-					}
-
-					axis = lcMul30(axis, mat);
-				}
-				else
-				{
-
-					// TODO: rewrite this
-
-					switch (nKey)
-					{
-					case KEY_UP:
-						axis[1] = axis[2] = 0; axis[0] = -axis[0];
-						break;
-					case KEY_DOWN:
-						axis[1] = axis[2] = 0;
-						break;
-					case KEY_LEFT:
-						axis[0] = axis[2] = 0; axis[1] = -axis[1];
-						break;
-					case KEY_RIGHT:
-						axis[0] = axis[2] = 0;
-						break;
-					case KEY_NEXT:
-						axis[0] = axis[1] = 0; axis[2] = -axis[2];
-						break;
-					case KEY_PRIOR:
-						axis[0] = axis[1] = 0;
-						break;
-					}
-
-					int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
-					float Aspect = (float)Viewport[2]/(float)Viewport[3];
-					Camera* Cam = m_ActiveView->mCamera;
-
-					const lcMatrix44& ModelView = Cam->mWorldView;
-					lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
-
-					lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
-					lcUnprojectPoints(Pts, 3, ModelView, Projection, Viewport);
-
-					float ax, ay;
-					lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
-					vx.Normalize();
-					lcVector3 x(1, 0, 0);
-					ax = acosf(lcDot(vx, x));
-
-					lcVector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
-					vy.Normalize();
-					lcVector3 y(0, -1, 0);
-					ay = acosf(lcDot(vy, y));
-
-					if (ax > 135)
-						axis[0] = -axis[0];
-
-					if (ay < 45)
-						axis[1] = -axis[1];
-
-					if (ax >= 45 && ax <= 135)
-					{
-						float tmp = axis[0];
-
-						ax = acosf(lcDot(vx, y));
-						if (ax > 90)
-						{
-							axis[0] = -axis[1];
-							axis[1] = tmp;
-						}
-						else
-						{
-							axis[0] = axis[1];
-							axis[1] = -tmp;
-						}
-					}
-				}
-			}
-
-			if (bShift)
-			{
-				lcVector3 tmp;
-				RotateSelectedObjects(axis, tmp, true, true);
-			}
-			else
-			{
-				lcVector3 tmp;
-				MoveSelectedObjects(axis, tmp, false, true);
-			}
-
-			UpdateOverlayScale();
-			UpdateAllViews();
-			SetModifiedFlag(true);
-			CheckPoint((bShift) ? "Rotating" : "Moving");
-			SystemUpdateFocus(NULL);
 			ret = true;
 		} break;
 	}

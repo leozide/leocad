@@ -14,16 +14,6 @@
 #define KEY_ALT		VK_MENU
 #define KEY_ESCAPE	VK_ESCAPE
 #define KEY_TAB		VK_TAB
-#define KEY_INSERT	VK_INSERT
-#define KEY_DELETE	VK_DELETE
-#define KEY_UP		VK_UP
-#define KEY_DOWN	VK_DOWN
-#define KEY_LEFT	VK_LEFT
-#define KEY_RIGHT	VK_RIGHT
-#define KEY_PRIOR	VK_PRIOR
-#define KEY_NEXT	VK_NEXT
-#define KEY_PLUS	VK_ADD
-#define KEY_MINUS	VK_SUBTRACT
 #endif
 
 #ifdef LC_LINUX
@@ -35,16 +25,6 @@
 #define KEY_ALT		0x03
 #define KEY_ESCAPE	0x04
 #define KEY_TAB	        0x05
-#define KEY_INSERT	0x06
-#define KEY_DELETE      0x07
-#define KEY_UP		0x08
-#define KEY_DOWN	0x09
-#define KEY_LEFT	0x0A
-#define KEY_RIGHT	0x0B
-#define KEY_PRIOR	0x0C
-#define KEY_NEXT        0x0D
-#define KEY_PLUS	'+'
-#define KEY_MINUS	'-'
 
 char* strupr(char* string);
 char* strlwr(char* string);
@@ -60,16 +40,6 @@ int stricmp(const char* str1, const char* str2);
 #define KEY_ALT		Qt::ALT
 #define KEY_ESCAPE	Qt::Key_Escape
 #define KEY_TAB	    Qt::Key_Tab
-#define KEY_INSERT	Qt::Key_Insert
-#define KEY_DELETE  Qt::Key_Delete
-#define KEY_UP		Qt::Key_Up
-#define KEY_DOWN	Qt::Key_Down
-#define KEY_LEFT	Qt::Key_Left
-#define KEY_RIGHT	Qt::Key_Right
-#define KEY_PRIOR	Qt::Key_PageUp
-#define KEY_NEXT    Qt::Key_PageDown
-#define KEY_PLUS	Qt::Key_Plus
-#define KEY_MINUS	Qt::Key_Minus
 
 #ifndef WIN32
 char* strupr(char* string);

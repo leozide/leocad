@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qcategorydialog.h"
 #include "ui_lc_qcategorydialog.h"
-#include "lc_library.h"
+#include "lc_category.h"
 
 lcQCategoryDialog::lcQCategoryDialog(QWidget *parent, void *data) :
     QDialog(parent),

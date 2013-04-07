@@ -408,7 +408,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			project->OnNewDocument();
 	}
 
-	LoadDefaultKeyboardShortcuts();
+	lcLoadDefaultKeyboardShortcuts();
 
 	return true;
 }

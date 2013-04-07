@@ -20,7 +20,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
 
 	options = (lcPreferencesDialogOptions*)data;
-	needsToSaveCategories = false;
 
 	ui->authorName->setText(options->DefaultAuthor);
 	ui->projectsFolder->setText(options->ProjectsPath);
@@ -66,12 +65,6 @@ lcQPreferencesDialog::~lcQPreferencesDialog()
 
 void lcQPreferencesDialog::accept()
 {
-	if (needsToSaveCategories)
-	{
-		if (QMessageBox::question(this, "LeoCAD", tr("You have unsaved categories chages that will be lost the next time you restart LeoCAD. Do you want to continue without saving your changes?")) != QMessageBox::Yes)
-			return;
-	}
-
 	options->Detail &= ~(LC_DET_BRICKEDGES | LC_DET_LIGHTING | LC_DET_FAST);
 	options->Snap &= ~(LC_DRAW_CM_UNITS | LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS | LC_DRAW_GRID | LC_DRAW_AXIS);
 
@@ -236,8 +229,8 @@ void lcQPreferencesDialog::on_newCategory_clicked()
 	if (dialog.exec() != QDialog::Accepted)
 		return;
 
-	needsToSaveCategories = true;
 	options->CategoriesModified = true;
+	options->CategoriesDefault = false;
 	options->Categories.Add(category);
 
 	updateCategories();
@@ -261,8 +254,8 @@ void lcQPreferencesDialog::on_editCategory_clicked()
 	if (dialog.exec() != QDialog::Accepted)
 		return;
 
-	needsToSaveCategories = true;
 	options->CategoriesModified = true;
+	options->CategoriesDefault = false;
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(categoryIndex));
@@ -285,16 +278,16 @@ void lcQPreferencesDialog::on_deleteCategory_clicked()
 	if (QMessageBox::question(this, "LeoCAD", question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 
-	needsToSaveCategories = true;
 	options->CategoriesModified = true;
+	options->CategoriesDefault = false;
 	options->Categories.RemoveIndex(categoryIndex);
 
 	updateCategories();
 }
 
-void lcQPreferencesDialog::on_loadCategories_clicked()
+void lcQPreferencesDialog::on_importCategories_clicked()
 {
-	QString result = QFileDialog::getOpenFileName(this, tr("Open Categories"), options->CategoriesFileName, tr("LeoCAD Categories Files (*.lcf);;All Files (*.*)"));
+	QString result = QFileDialog::getOpenFileName(this, tr("Import Categories"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
 	if (result.isEmpty())
 		return;
@@ -303,21 +296,20 @@ void lcQPreferencesDialog::on_loadCategories_clicked()
 	strcpy(fileName, result.toLocal8Bit().data());
 
 	ObjArray<lcLibraryCategory> categories;
-	if (!lcPiecesLibrary::LoadCategories(fileName, categories))
+	if (!lcLoadCategories(fileName, categories))
 	{
 		QMessageBox::warning(this, "LeoCAD", tr("Error loading categories file."));
 		return;
 	}
 
-	needsToSaveCategories = false;
-	strcpy(options->CategoriesFileName, fileName);
 	options->Categories = categories;
 	options->CategoriesModified = true;
+	options->CategoriesDefault = false;
 }
 
-void lcQPreferencesDialog::on_saveCategories_clicked()
+void lcQPreferencesDialog::on_exportCategories_clicked()
 {
-	QString result = QFileDialog::getSaveFileName(this, tr("Save Categories"), options->CategoriesFileName, tr("LeoCAD Categories Files (*.lcf);;All Files (*.*)"));
+	QString result = QFileDialog::getSaveFileName(this, tr("Export Categories"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
 	if (result.isEmpty())
 		return;
@@ -325,14 +317,11 @@ void lcQPreferencesDialog::on_saveCategories_clicked()
 	char fileName[LC_MAXPATH];
 	strcpy(fileName, result.toLocal8Bit().data());
 
-	if (!lcPiecesLibrary::SaveCategories(fileName, options->Categories))
+	if (!lcSaveCategories(fileName, options->Categories))
 	{
 		QMessageBox::warning(this, "LeoCAD", tr("Error saving categories file."));
 		return;
 	}
-
-	needsToSaveCategories = false;
-	strcpy(options->CategoriesFileName, fileName);
 }
 
 void lcQPreferencesDialog::on_resetCategories_clicked()
@@ -340,11 +329,10 @@ void lcQPreferencesDialog::on_resetCategories_clicked()
 	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default categories?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 
-	lcPiecesLibrary::ResetCategories(options->Categories);
+	lcResetCategories(options->Categories);
 
-	needsToSaveCategories = false;
-	strcpy(options->CategoriesFileName, ""); // TODO: categories should be saved automatically, change this to how the keyboard system works (save to registry and use import/export text files)
 	options->CategoriesModified = true;
+	options->CategoriesDefault = true;
 
 	updateCategories();
 }
@@ -478,7 +466,7 @@ void lcQPreferencesDialog::on_shortcutsImport_clicked()
 	strcpy(fileName, result.toLocal8Bit().data());
 
 	lcKeyboardShortcuts shortcuts;
-	if (!LoadKeyboardShortcuts(fileName, shortcuts))
+	if (!lcLoadKeyboardShortcuts(fileName, shortcuts))
 	{
 		QMessageBox::warning(this, "LeoCAD", tr("Error loading keyboard shortcuts file."));
 		return;
@@ -500,7 +488,7 @@ void lcQPreferencesDialog::on_shortcutsExport_clicked()
 	char fileName[LC_MAXPATH];
 	strcpy(fileName, result.toLocal8Bit().data());
 
-	if (!SaveKeyboardShortcuts(fileName, options->KeyboardShortcuts))
+	if (!lcSaveKeyboardShortcuts(fileName, options->KeyboardShortcuts))
 	{
 		QMessageBox::warning(this, "LeoCAD", tr("Error saving keyboard shortcuts file."));
 		return;
@@ -512,7 +500,7 @@ void lcQPreferencesDialog::on_shortcutsReset_clicked()
 	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default keyboard shortcuts?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 
-	ResetKeyboardShortcuts(options->KeyboardShortcuts);
+	lcResetKeyboardShortcuts(options->KeyboardShortcuts);
 	updateCommandList();
 
 	options->ShortcutsModified = true;

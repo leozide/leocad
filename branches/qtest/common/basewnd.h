@@ -5,7 +5,7 @@
 #include "lc_math.h"
 #include "array.h"
 #include "project.h"
-#include "lc_library.h"
+#include "lc_category.h"
 #include "image.h"
 #include "keyboard.h"
 
@@ -153,9 +153,9 @@ struct lcPreferencesDialogOptions
 	int AASamples;
 	int GridSize;
 
-	char CategoriesFileName[LC_MAXPATH];
 	ObjArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;
+	bool CategoriesDefault;
 
 	lcKeyboardShortcuts KeyboardShortcuts;
 	bool ShortcutsModified;

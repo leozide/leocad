@@ -5,49 +5,49 @@
 
 lcKeyboardShortcuts gKeyboardShortcuts;
 
-void LoadDefaultKeyboardShortcuts()
+void lcLoadDefaultKeyboardShortcuts()
 {
 	lcMemFile File;
 
 	lcGetProfileBuffer(LC_PROFILE_SHORTCUTS, File);
 
-	if (!File.GetLength() || !LoadKeyboardShortcuts(File, gKeyboardShortcuts))
-		ResetKeyboardShortcuts(gKeyboardShortcuts);
+	if (!File.GetLength() || !lcLoadKeyboardShortcuts(File, gKeyboardShortcuts))
+		lcResetKeyboardShortcuts(gKeyboardShortcuts);
 }
 
-void SaveDefaultKeyboardShortcuts()
+void lcSaveDefaultKeyboardShortcuts()
 {
 	lcMemFile File;
 
-	SaveKeyboardShortcuts(File, gKeyboardShortcuts);
+	lcSaveKeyboardShortcuts(File, gKeyboardShortcuts);
 
 	lcSetProfileBuffer(LC_PROFILE_SHORTCUTS, File);
 }
 
-void ResetDefaultKeyboardShortcuts()
+void lcResetDefaultKeyboardShortcuts()
 {
-	ResetKeyboardShortcuts(gKeyboardShortcuts);
+	lcResetKeyboardShortcuts(gKeyboardShortcuts);
 
 	lcRemoveProfileKey(LC_PROFILE_SHORTCUTS);
 }
 
-void ResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts)
+void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts)
 {
 	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
 		strcpy(Shortcuts.Shortcuts[ActionIdx], gActions[ActionIdx].DefaultShortcut);
 }
 
-bool SaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts)
+bool lcSaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts)
 {
 	lcDiskFile File;
 
 	if (!File.Open(FileName, "wt"))
 		return false;
 
-	return SaveKeyboardShortcuts(File, Shortcuts);
+	return lcSaveKeyboardShortcuts(File, Shortcuts);
 }
 
-bool SaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
+bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 {
 	char Line[1024];
 
@@ -64,17 +64,17 @@ bool SaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 	return true;
 }
 
-bool LoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts)
+bool lcLoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts)
 {
 	lcDiskFile File;
 
 	if (!File.Open(FileName, "rt"))
 		return false;
 
-	return LoadKeyboardShortcuts(File, Shortcuts);
+	return lcLoadKeyboardShortcuts(File, Shortcuts);
 }
 
-bool LoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts)
+bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts)
 {
 	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
 		Shortcuts.Shortcuts[ActionIdx][0] = 0;

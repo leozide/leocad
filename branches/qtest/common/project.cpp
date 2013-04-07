@@ -5546,7 +5546,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_VIEW_PREFERENCES:
 		{
 			lcPreferencesDialogOptions Options;
-			lcPiecesLibrary* Library = lcGetPiecesLibrary();
 			int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
 
 			strcpy(Options.DefaultAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
@@ -5561,9 +5560,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Options.AASamples = CurrentAASamples;
 			Options.GridSize = m_nGridSize;
 
-			strcpy(Options.CategoriesFileName, lcGetProfileString(LC_PROFILE_CATEGORIES_FILE));
-			Options.Categories = Library->mCategories;
+			Options.Categories = gCategories;
 			Options.CategoriesModified = false;
+			Options.CategoriesDefault = false;
 
 			Options.KeyboardShortcuts = gKeyboardShortcuts;
 			Options.ShortcutsModified = false;
@@ -5591,7 +5590,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcSetProfileInt(LC_PROFILE_GRID_SIZE, Options.GridSize);
 			lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, Options.LineWidth);
 			lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
-			lcSetProfileString(LC_PROFILE_CATEGORIES_FILE, Options.CategoriesFileName);
 
 			if (LibraryChanged && AAChanged)
 				gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
@@ -5602,18 +5600,25 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Options.CategoriesModified)
 			{
-				Library->mCategories = Options.Categories;
+				if (Options.CategoriesDefault)
+					lcResetDefaultCategories();
+				else
+				{
+					gCategories = Options.Categories;
+					lcSaveDefaultCategories();
+				}
+
 				gMainWindow->UpdateCategories();
 			}
 
 			if (Options.ShortcutsModified)
 			{
 				if (Options.ShortcutsDefault)
-					ResetDefaultKeyboardShortcuts();
+					lcResetDefaultKeyboardShortcuts();
 				else
 				{
 					gKeyboardShortcuts = Options.KeyboardShortcuts;
-					SaveDefaultKeyboardShortcuts();
+					lcSaveDefaultKeyboardShortcuts();
 				}
 
 				gMainWindow->UpdateShortcuts();

@@ -12,14 +12,14 @@ struct lcKeyboardShortcuts
 
 extern lcKeyboardShortcuts gKeyboardShortcuts;
 
-void LoadDefaultKeyboardShortcuts();
-void SaveDefaultKeyboardShortcuts();
-void ResetDefaultKeyboardShortcuts();
+void lcLoadDefaultKeyboardShortcuts();
+void lcSaveDefaultKeyboardShortcuts();
+void lcResetDefaultKeyboardShortcuts();
 
-void ResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts);
-bool SaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts);
-bool SaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts);
-bool LoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts);
-bool LoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts);
+void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts);
+bool lcSaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts);
+bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts);
+bool lcLoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts);
+bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts);
 
 #endif // _KEYBOARD_H_

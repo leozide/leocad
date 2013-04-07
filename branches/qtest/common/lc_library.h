@@ -96,12 +96,6 @@ public:
 	lcLibraryMeshData mMeshData;
 };
 
-struct lcLibraryCategory
-{
-	String Name;
-	String Keywords;
-};
-
 class lcPiecesLibrary
 {
 public:
@@ -123,20 +117,13 @@ public:
 	bool OpenCache();
 	void CloseCache();
 
-	static void ResetCategories(ObjArray<lcLibraryCategory>& Categories);
-	static bool LoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories);
-	static bool SaveCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories);
-
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	void SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
-	int GetFirstPieceCategory(PieceInfo* Info) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
-	int FindCategoryIndex(const String& CategoryName) const;
 
 	PtrArray<PieceInfo> mPieces;
 	PtrArray<lcLibraryPrimitive> mPrimitives;
-	ObjArray<lcLibraryCategory> mCategories;
 	int mNumOfficialPieces;
 
 	PtrArray<lcTexture> mTextures;
@@ -146,10 +133,6 @@ public:
 protected:
 	bool OpenArchive(const char* FileName, const char* CachePath);
 	bool OpenDirectory(const char* Path);
-
-	bool LoadCategories();
-	bool SaveCategories();
-	void ResetCategories();
 
 	bool LoadCacheIndex(lcZipFile& CacheFile);
 	bool LoadCachePiece(PieceInfo* Info);

@@ -5,7 +5,7 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 #include "lc_texture.h"
-#include "lc_profile.h"
+#include "lc_category.h"
 #include "system.h"
 #include "mainwnd.h"
 #include <sys/types.h>
@@ -123,9 +123,7 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 			return false;
 	}
 
-	if (!LoadCategories())
-		ResetCategories();
-
+	lcLoadDefaultCategories();
 	gMainWindow->UpdateCategories();
 
 	return true;
@@ -1766,21 +1764,12 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKey
 	return PieceName.Match(Keywords);
 }
 
-int lcPiecesLibrary::GetFirstPieceCategory(PieceInfo* Info) const
-{
-	for (int i = 0; i < mCategories.GetSize(); i++)
-		if (PieceInCategory(Info, mCategories[i].Keywords))
-			return i;
-
-	return -1;
-}
-
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
 {
-	if (mCategories[CategoryIndex].Name == "Search Results")
+	if (gCategories[CategoryIndex].Name == "Search Results")
 		GroupPieces = false;
 
-	SearchPieces(mCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
+	SearchPieces(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
 }
 
 void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
@@ -1877,168 +1866,6 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>&
 	}
 }
 
-void lcPiecesLibrary::ResetCategories(ObjArray<lcLibraryCategory>& Categories)
-{
-	struct CategoryEntry
-	{
-		const char* Name;
-		const char* Keywords;
-	};
-
-	// Animal, Antenna, Arch, Arm, Bar, Baseplate, Belville, Boat, Bracket, Brick,
-	// Car, Cone, Container, Conveyor, Crane, Cylinder, Door, Electric, Exhaust,
-	// Fence, Flag, Forklift, Freestyle, Garage, Gate, Glass, Grab, Hinge, Homemaker,
-	// Hose, Jack, Ladder, Lever, Magnet, Minifig, Minifig Accessory, Panel, Plane,
-	// Plant, Plate, Platform, Propellor, Rack, Roadsign, Rock, Scala, Slope, Staircase,
-	// Support, Tail, Tap, Technic, Tile, Tipper, Tractor, Trailer, Train, Turntable,
-	// Tyre, Wedge, Wheel, Winch, Window, Windscreen, Wing
-	CategoryEntry DefaultCategories[] =
-	{
-		{ "Animal", "^%Animal | ^%Bone" },
-		{ "Antenna", "^%Antenna" },
-		{ "Arch", "^%Arch" },
-		{ "Bar", "^%Bar" },
-		{ "Baseplate", "^%Baseplate | ^%Platform" },
-		{ "Boat", "^%Boat" },
-		{ "Brick", "^%Brick" },
-		{ "Container", "^%Container | ^%Box | ^Chest | ^%Storage | ^Mailbox" },
-		{ "Door and Window", "^%Door | ^%Window | ^%Glass | ^%Freestyle | ^%Gate | ^%Garage | ^%Roller" },
-		{ "Electric", "^%Electric" },
-		{ "Hinge and Bracket", "^%Hinge | ^%Bracket | ^%Turntable" },
-		{ "Hose", "^%Hose | ^%String" },
-		{ "Minifig", "^%Minifig" },
-		{ "Miscellaneous", "^%Arm | ^%Barrel | ^%Brush | ^%Claw | ^%Cockpit | ^%Conveyor | ^%Crane | ^%Cupboard | ^%Fence | ^%Jack | ^%Ladder | ^%Motor | ^%Rock | ^%Rope | ^%Sheet | ^%Sports | ^%Staircase | ^%Stretcher | ^%Tap | ^%Tipper | ^%Trailer | ^%Umbrella | ^%Winch" },
-		{ "Other", "^%Ball | ^%Belville | ^%Die | ^%Duplo | ^%Fabuland | ^%Figure | ^%Homemaker | ^%Maxifig | ^%Microfig | ^%Mursten | ^%Scala | ^%Znap" },
-		{ "Panel", "^%Panel | ^%Castle Wall | ^%Castle Turret" },
-		{ "Plant", "^%Plant" },
-		{ "Plate", "^%Plate" },
-		{ "Round", "^%Cylinder | ^%Cone | ^%Dish | ^%Dome | ^%Hemisphere | ^%Round" },
-		{ "Sign and Flag", "^%Flag | ^%Roadsign | ^%Streetlight | ^%Flagpost | ^%Lamppost | ^%Signpost" },
-		{ "Slope", "^%Slope | ^%Roof" },
-		{ "Space", "^%Space" },
-		{ "Sticker", "^%Sticker" },
-		{ "Support", "^%Support" },
-		{ "Technic", "^%Technic | ^%Rack" },
-		{ "Tile", "^%Tile" },
-		{ "Train", "^%Train | ^%Monorail | ^%Magnet" },
-		{ "Tyre and Wheel", "^%Tyre | %^Wheel | %^Wheels | ^%Castle Wagon" },
-		{ "Vehicle", "^%Bike | ^%Canvas | ^%Car | ^%Excavator | ^%Exhaust | ^%Forklift | ^%Grab Jaw | ^%Landing | ^%Motorcycle | ^%Plane | ^%Propellor | ^%Tail | ^%Tractor | ^%Vehicle | ^%Wheelbarrow" },
-		{ "Windscreen", "^%Windscreen" },
-		{ "Wedge", "^%Wedge" },
-		{ "Wing", "^%Wing" },
-	};
-	const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
-
-	Categories.RemoveAll();
-	for (int i = 0; i < NumCategories; i++)
-	{
-		lcLibraryCategory& Category = Categories.Add();
-
-		Category.Name = DefaultCategories[i].Name;
-		Category.Keywords = DefaultCategories[i].Keywords;
-	}
-}
-
-bool lcPiecesLibrary::LoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories)
-{
-	lcDiskFile File;
-
-	if (!File.Open(FileName, "rb"))
-		return false;
-
-	lcuint32 i;
-
-	File.ReadU32(&i, 1);
-	if (i != LC_FILE_ID)
-		return false;
-
-	File.ReadU32(&i, 1);
-	if (i != LC_CATEGORY_FILE_ID)
-		return false;
-
-	File.ReadU32(&i, 1);
-	if (i != LC_CATEGORY_FILE_VERSION)
-		return false;
-
-	Categories.RemoveAll();
-
-	File.ReadU32(&i, 1);
-	while (i--)
-	{
-		lcLibraryCategory& Category = Categories.Add();
-
-		File.ReadString(Category.Name);
-		File.ReadString(Category.Keywords);
-	}
-
-	return true;
-}
-
-bool lcPiecesLibrary::SaveCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories)
-{
-	lcDiskFile File;
-
-	if (!File.Open(FileName, "wb"))
-		return false;
-
-	File.WriteU32(LC_FILE_ID);
-	File.WriteU32(LC_CATEGORY_FILE_ID);
-	File.WriteU32(LC_CATEGORY_FILE_VERSION);
-
-	int NumCategories = Categories.GetSize();
-	int i;
-
-	for (i = 0; i < Categories.GetSize(); i++)
-	{
-		if (Categories[i].Name == "Search Results")
-		{
-			NumCategories--;
-			break;
-		}
-	}
-
-	File.WriteU32(NumCategories);
-	for (i = 0; i < Categories.GetSize(); i++)
-	{
-		if (Categories[i].Name == "Search Results")
-			continue;
-
-		File.WriteString(Categories[i].Name);
-		File.WriteString(Categories[i].Keywords);
-	}
-
-	return true;
-}
-
-void lcPiecesLibrary::ResetCategories()
-{
-	ResetCategories(mCategories);
-}
-
-bool lcPiecesLibrary::LoadCategories()
-{
-	char FileName[LC_MAXPATH];
-
-	strcpy(FileName, lcGetProfileString(LC_PROFILE_CATEGORIES_FILE));
-
-	if (!FileName[0])
-		return false;
-
-	if (!LoadCategories(FileName, mCategories))
-		return false;
-
-	return true;
-}
-
-int lcPiecesLibrary::FindCategoryIndex(const String& CategoryName) const
-{
-	for (int i = 0; i < mCategories.GetSize(); i++)
-		if (mCategories[i].Name == CategoryName)
-			return i;
-
-	return -1;
-}
-
 void lcPiecesLibrary::CreateBuiltinPieces()
 {
 	const char* Pieces[][2] =
@@ -2115,34 +1942,7 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 
 	lcLoadDefaultColors();
 
-	if (!LoadCategories())
-	{
-		struct CategoryEntry
-		{
-			const char* Name;
-			const char* Keywords;
-		};
-
-		CategoryEntry DefaultCategories[] =
-		{
-//			{ "Baseplate", "^%Baseplate" },
-			{ "Brick", "^%Brick" },
-			{ "Plate", "^%Plate" },
-//			{ "Slope", "^%Slope" },
-//			{ "Tile", "^%Tile" },
-		};
-		const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
-
-		mCategories.RemoveAll();
-		for (int i = 0; i < NumCategories; i++)
-		{
-			lcLibraryCategory& Category = mCategories.Add();
-
-			Category.Name = DefaultCategories[i].Name;
-			Category.Keywords = DefaultCategories[i].Keywords;
-		}
-	}
-
+	lcLoadDefaultCategories(true);
 	gMainWindow->UpdateCategories();
 }
 

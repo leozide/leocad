@@ -36,8 +36,8 @@ public slots:
 	void on_newCategory_clicked();
 	void on_editCategory_clicked();
 	void on_deleteCategory_clicked();
-	void on_loadCategories_clicked();
-	void on_saveCategories_clicked();
+	void on_importCategories_clicked();
+	void on_exportCategories_clicked();
 	void on_resetCategories_clicked();
 	void on_shortcutAssign_clicked();
 	void on_shortcutsImport_clicked();
@@ -51,8 +51,6 @@ private:
 	void updateCategories();
 	void updateCommandList();
 	void setShortcutModified(QTreeWidgetItem *treeItem, bool modified);
-
-	bool needsToSaveCategories;
 };
 
 #endif // LC_QPREFERENCESDIALOG_H

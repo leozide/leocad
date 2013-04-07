@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_qpartstree.h"
 #include "lc_application.h"
+#include "lc_category.h"
 #include "lc_library.h"
 #include "pieceinf.h"
 
@@ -46,11 +47,9 @@ void lcQPartsTree::updateCategories()
 {
 	clear();
 
-	lcPiecesLibrary* library = lcGetPiecesLibrary();
-
-	for (int categoryIndex = 0; categoryIndex < library->mCategories.GetSize(); categoryIndex++)
+	for (int categoryIndex = 0; categoryIndex < gCategories.GetSize(); categoryIndex++)
 	{
-		QTreeWidgetItem* categoryItem = new QTreeWidgetItem(this, QStringList((const char*)library->mCategories[categoryIndex].Name));
+		QTreeWidgetItem* categoryItem = new QTreeWidgetItem(this, QStringList((const char*)gCategories[categoryIndex].Name));
 		categoryItem->setData(0, ExpandedOnceRole, QVariant(false));
 		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
 		new QTreeWidgetItem(categoryItem);
@@ -98,7 +97,7 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 			{
 				PieceInfo* patternedInfo = patterns[patternIndex];
 
-				if (!library->PieceInCategory(patternedInfo, library->mCategories[categoryIndex].Keywords))
+				if (!library->PieceInCategory(patternedInfo, gCategories[categoryIndex].Keywords))
 					continue;
 
 				const char* desc = patternedInfo->m_strDescription;

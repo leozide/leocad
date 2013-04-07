@@ -55,7 +55,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                  // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                  // LC_PROFILE_PARTS_LIBRARY
 	lcProfileEntry("Settings", "Shortcuts"),                                         // LC_PROFILE_SHORTCUTS
-	lcProfileEntry("Settings", "CategoriesFile", ""),                                // LC_PROFILE_CATEGORIES_FILE
+	lcProfileEntry("Settings", "Categories"),                                        // LC_PROFILE_CATEGORIES
 	lcProfileEntry("Settings", "RecentFile1", ""),                                   // LC_PROFILE_RECENT_FILE1
 	lcProfileEntry("Settings", "RecentFile2", ""),                                   // LC_PROFILE_RECENT_FILE2
 	lcProfileEntry("Settings", "RecentFile3", ""),                                   // LC_PROFILE_RECENT_FILE3

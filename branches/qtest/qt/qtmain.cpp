@@ -366,3 +366,11 @@ void lcMainWindow::UpdateRecentFiles()
 	if (window)
 		window->updateRecentFiles(fileNames);
 }
+
+void lcMainWindow::UpdateShortcuts()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateShortcuts();
+}

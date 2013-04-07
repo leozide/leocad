@@ -1,6 +1,15 @@
 #include "lc_global.h"
 #include "lc_profile.h"
+#include "lc_file.h"
 #include "system.h"
+
+void lcRemoveProfileKey(LC_PROFILE_KEY Key)
+{
+	lcProfileEntry& entry = gProfileEntries[Key];
+	QSettings settings;
+
+	settings.remove(QString("%1/%2").arg(entry.mSection, entry.mKey));
+}
 
 int lcGetProfileInt(LC_PROFILE_KEY Key)
 {
@@ -35,6 +44,22 @@ const char* lcGetProfileString(LC_PROFILE_KEY Key)
 	return value.data();
 }
 
+void lcGetProfileBuffer(LC_PROFILE_KEY Key, lcMemFile& Buffer)
+{
+	lcProfileEntry& entry = gProfileEntries[Key];
+	QSettings settings;
+	QByteArray value;
+
+	LC_ASSERT(entry.mType == LC_PROFILE_ENTRY_BUFFER);
+
+	value = settings.value(QString("%1/%2").arg(entry.mSection, entry.mKey)).toByteArray();
+
+	Buffer.Seek(0, SEEK_SET);
+	Buffer.SetLength(value.size());
+	Buffer.WriteBuffer(value.constData(), value.size());
+	Buffer.Seek(0, SEEK_SET);
+}
+
 void lcSetProfileInt(LC_PROFILE_KEY Key, int Value)
 {
 	lcProfileEntry& entry = gProfileEntries[Key];
@@ -63,4 +88,15 @@ void lcSetProfileString(LC_PROFILE_KEY Key, const char* Value)
 	LC_ASSERT(entry.mType == LC_PROFILE_ENTRY_STRING);
 
 	settings.setValue(QString("%1/%2").arg(entry.mSection, entry.mKey), Value);
+}
+
+void lcSetProfileBuffer(LC_PROFILE_KEY Key, const lcMemFile& Buffer)
+{
+	lcProfileEntry& entry = gProfileEntries[Key];
+	QSettings settings;
+	QByteArray value = QByteArray::fromRawData((const char*)Buffer.mBuffer, Buffer.GetLength());
+
+	LC_ASSERT(entry.mType == LC_PROFILE_ENTRY_BUFFER);
+
+	settings.setValue(QString("%1/%2").arg(entry.mSection, entry.mKey), value);
 }

@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_qpreferencesdialog.h"
 #include "ui_lc_qpreferencesdialog.h"
+#include "lc_qutils.h"
 #include "lc_qcategorydialog.h"
 #include "basewnd.h"
 #include "lc_library.h"
@@ -15,6 +16,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 
 	ui->lineWidth->setValidator(new QDoubleValidator());
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
+	ui->shortcutEdit->installEventFilter(this);
+	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
 
 	options = (lcPreferencesDialogOptions*)data;
 	needsToSaveCategories = false;
@@ -49,6 +52,11 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
+
+	updateCommandList();
+
+	new lcQTreeWidgetColumnStretcher(ui->commandList, 0);
+	commandChanged(NULL);
 }
 
 lcQPreferencesDialog::~lcQPreferencesDialog()
@@ -335,8 +343,178 @@ void lcQPreferencesDialog::on_resetCategories_clicked()
 	lcPiecesLibrary::ResetCategories(options->Categories);
 
 	needsToSaveCategories = false;
-	strcpy(options->CategoriesFileName, "");
+	strcpy(options->CategoriesFileName, ""); // TODO: categories should be saved automatically, change this to how the keyboard system works (save to registry and use import/export text files)
 	options->CategoriesModified = true;
 
 	updateCategories();
+}
+
+bool lcQPreferencesDialog::eventFilter(QObject *object, QEvent *event)
+{
+	if (event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+		int nextKey = keyEvent->key();
+		if (nextKey == Qt::Key_Control || nextKey == Qt::Key_Shift || nextKey == Qt::Key_Meta || nextKey == Qt::Key_Alt)
+			return true;
+
+		Qt::KeyboardModifiers state = keyEvent->modifiers();
+		if (state & Qt::ShiftModifier)
+			nextKey |= Qt::SHIFT;
+		if (state & Qt::ControlModifier)
+			nextKey |= Qt::CTRL;
+		if (state & Qt::MetaModifier)
+			nextKey |= Qt::META;
+		if (state & Qt::AltModifier)
+			nextKey |= Qt::ALT;
+
+		QKeySequence ks(nextKey);
+		ui->shortcutEdit->setText(ks.toString(QKeySequence::NativeText));
+		keyEvent->accept();
+
+		return true;
+	}
+
+	if (event->type() == QEvent::Shortcut || event->type() == QEvent::KeyRelease)
+		return true;
+
+	if (event->type() == QEvent::ShortcutOverride)
+	{
+		event->accept();
+		return true;
+	}
+
+	return false;
+}
+
+void lcQPreferencesDialog::updateCommandList()
+{
+	ui->commandList->clear();
+	QMap<QString, QTreeWidgetItem*> sections;
+
+	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
+	{
+		const QString identifier = gActions[actionIdx].ID;
+
+		int pos = identifier.indexOf(QLatin1Char('.'));
+		const QString section = identifier.left(pos);
+		const QString subId = identifier.mid(pos + 1);
+
+		if (!sections.contains(section))
+		{
+			QTreeWidgetItem *categoryItem = new QTreeWidgetItem(ui->commandList, QStringList() << section);
+			QFont f = categoryItem->font(0);
+			f.setBold(true);
+			categoryItem->setFont(0, f);
+			sections.insert(section, categoryItem);
+			ui->commandList->expandItem(categoryItem);
+		}
+
+		QTreeWidgetItem *item = new QTreeWidgetItem;
+		QKeySequence sequence(options->KeyboardShortcuts.Shortcuts[actionIdx]);
+		item->setText(0, subId);
+		item->setText(1, sequence.toString(QKeySequence::NativeText));
+		item->setData(0, Qt::UserRole, qVariantFromValue(actionIdx));
+
+		if (strcmp(options->KeyboardShortcuts.Shortcuts[actionIdx], gActions[actionIdx].DefaultShortcut))
+			setShortcutModified(item, true);
+
+		sections[section]->addChild(item);
+	}
+}
+
+void lcQPreferencesDialog::setShortcutModified(QTreeWidgetItem *treeItem, bool modified)
+{
+	QFont font = treeItem->font(0);
+	font.setItalic(modified);
+	treeItem->setFont(0, font);
+	font.setBold(modified);
+	treeItem->setFont(1, font);
+}
+
+void lcQPreferencesDialog::commandChanged(QTreeWidgetItem *current)
+{
+	if (!current || !current->data(0, Qt::UserRole).isValid())
+	{
+		ui->shortcutEdit->setText(QString());
+		ui->shortcutGroup->setEnabled(false);
+		return;
+	}
+
+	ui->shortcutGroup->setEnabled(true);
+
+	int shortcutIndex = qvariant_cast<int>(current->data(0, Qt::UserRole));
+	QKeySequence key(options->KeyboardShortcuts.Shortcuts[shortcutIndex]);
+	ui->shortcutEdit->setText(key.toString(QKeySequence::NativeText));
+}
+
+void lcQPreferencesDialog::on_shortcutAssign_clicked()
+{
+    QTreeWidgetItem *current = ui->commandList->currentItem();
+
+	if (!current || !current->data(0, Qt::UserRole).isValid())
+		return;
+
+	int shortcutIndex = qvariant_cast<int>(current->data(0, Qt::UserRole));
+	strcpy(options->KeyboardShortcuts.Shortcuts[shortcutIndex], ui->shortcutEdit->text().toLocal8Bit().data());
+
+	current->setText(1, ui->shortcutEdit->text());
+
+	setShortcutModified(current, strcmp(options->KeyboardShortcuts.Shortcuts[shortcutIndex], gActions[shortcutIndex].DefaultShortcut) != 0);
+
+	options->ShortcutsModified = true;
+	options->ShortcutsDefault = false;
+}
+
+void lcQPreferencesDialog::on_shortcutsImport_clicked()
+{
+	QString result = QFileDialog::getOpenFileName(this, tr("Import shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+
+	if (result.isEmpty())
+		return;
+
+	char fileName[LC_MAXPATH];
+	strcpy(fileName, result.toLocal8Bit().data());
+
+	lcKeyboardShortcuts shortcuts;
+	if (!LoadKeyboardShortcuts(fileName, shortcuts))
+	{
+		QMessageBox::warning(this, "LeoCAD", tr("Error loading keyboard shortcuts file."));
+		return;
+	}
+
+	options->KeyboardShortcuts = shortcuts;
+
+	options->ShortcutsModified = true;
+	options->ShortcutsDefault = false;
+}
+
+void lcQPreferencesDialog::on_shortcutsExport_clicked()
+{
+	QString result = QFileDialog::getSaveFileName(this, tr("Export shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+
+	if (result.isEmpty())
+		return;
+
+	char fileName[LC_MAXPATH];
+	strcpy(fileName, result.toLocal8Bit().data());
+
+	if (!SaveKeyboardShortcuts(fileName, options->KeyboardShortcuts))
+	{
+		QMessageBox::warning(this, "LeoCAD", tr("Error saving keyboard shortcuts file."));
+		return;
+	}
+}
+
+void lcQPreferencesDialog::on_shortcutsReset_clicked()
+{
+	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default keyboard shortcuts?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+		return;
+
+	ResetKeyboardShortcuts(options->KeyboardShortcuts);
+	updateCommandList();
+
+	options->ShortcutsModified = true;
+	options->ShortcutsDefault = true;
 }

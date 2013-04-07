@@ -58,6 +58,21 @@ public:
 	void InsertAt(int Index, const T& Obj);
 	void Sort(LC_OBJARRAY_COMPARE_FUNC SortFunc, void* SortData);
 
+	ObjArray<T>& operator=(const ObjArray<T>& Array)
+	{
+		m_Length = Array.m_Length;
+		m_Alloc = Array.m_Alloc;
+		m_Grow = Array.m_Grow;
+
+		delete[] m_Data;
+		m_Data = new T[m_Alloc];
+
+		for (int i = 0; i < m_Length; i++)
+			m_Data[i] = Array.m_Data[i];
+
+		return *this;
+	}
+
 	T& operator [](int Index) const
 		{ return m_Data[Index]; }
 

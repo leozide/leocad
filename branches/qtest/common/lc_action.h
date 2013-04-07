@@ -164,6 +164,7 @@ enum LC_COMMANDS
 
 struct lcAction
 {
+	const char* ID;
 	const char* MenuName;
 	const char* StatusText;
 	const char* DefaultShortcut;

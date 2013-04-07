@@ -7,6 +7,7 @@
 #include "project.h"
 #include "lc_library.h"
 #include "image.h"
+#include "keyboard.h"
 
 class Group;
 
@@ -155,6 +156,10 @@ struct lcPreferencesDialogOptions
 	char CategoriesFileName[LC_MAXPATH];
 	ObjArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;
+
+	lcKeyboardShortcuts KeyboardShortcuts;
+	bool ShortcutsModified;
+	bool ShortcutsDefault;
 };
 
 class lcBaseWindow

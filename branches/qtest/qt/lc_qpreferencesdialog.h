@@ -23,6 +23,8 @@ public:
 		CategoryRole = Qt::UserRole
 	};
 
+	bool eventFilter(QObject *object, QEvent *event);
+
 public slots:
 	void accept();
 	void on_projectsFolderBrowse_clicked();
@@ -37,11 +39,18 @@ public slots:
 	void on_loadCategories_clicked();
 	void on_saveCategories_clicked();
 	void on_resetCategories_clicked();
+	void on_shortcutAssign_clicked();
+	void on_shortcutsImport_clicked();
+	void on_shortcutsExport_clicked();
+	void on_shortcutsReset_clicked();
+	void commandChanged(QTreeWidgetItem *current);
 
 private:
 	Ui::lcQPreferencesDialog *ui;
 
 	void updateCategories();
+	void updateCommandList();
+	void setShortcutModified(QTreeWidgetItem *treeItem, bool modified);
 
 	bool needsToSaveCategories;
 };

@@ -454,12 +454,6 @@ void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetIt
 	}
 }
 
-void lcQMainWindow::updateShortcuts()
-{
-	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
-		actions[actionIdx]->setShortcut(QKeySequence(gKeyboardShortcuts[actionIdx]));
-}
-
 void lcQMainWindow::updateAction(int newAction)
 {
 	QAction *action = actions[LC_EDIT_ACTION_FIRST + newAction];
@@ -623,4 +617,10 @@ void lcQMainWindow::updateRecentFiles(const char** fileNames)
 	}
 
 	actionFileRecentSeparator->setVisible(fileNames[0][0] != 0);
+}
+
+void lcQMainWindow::updateShortcuts()
+{
+	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
+		actions[actionIdx]->setShortcut(QKeySequence(gKeyboardShortcuts.Shortcuts[actionIdx]));
 }

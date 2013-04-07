@@ -91,7 +91,8 @@ SOURCES += common/view.cpp \
     qt/lc_qimagedialog.cpp \
     qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
-    common/lc_action.cpp
+    common/lc_action.cpp \
+	qt/lc_qutils.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -150,7 +151,8 @@ HEADERS += common/glwindow.h \
     common/lc_profile.h \
     qt/lc_qimagedialog.h \
     qt/lc_qupdatedialog.h \
-    common/lc_action.h
+    common/lc_action.h \
+	qt/lc_qutils.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

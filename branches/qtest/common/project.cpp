@@ -5565,6 +5565,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Options.Categories = Library->mCategories;
 			Options.CategoriesModified = false;
 
+			Options.KeyboardShortcuts = gKeyboardShortcuts;
+			Options.ShortcutsModified = false;
+			Options.ShortcutsDefault = false;
+
 			if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 				break;
 
@@ -5602,7 +5606,20 @@ void Project::HandleCommand(LC_COMMANDS id)
 				gMainWindow->UpdateCategories();
 			}
 
-			// TODO: keyboard and printing preferences
+			if (Options.ShortcutsModified)
+			{
+				if (Options.ShortcutsDefault)
+					ResetDefaultKeyboardShortcuts();
+				else
+				{
+					gKeyboardShortcuts = Options.KeyboardShortcuts;
+					SaveDefaultKeyboardShortcuts();
+				}
+
+				gMainWindow->UpdateShortcuts();
+			}
+
+			// TODO: printing preferences
 			/*
 			strcpy(opts.strFooter, m_strFooter);
 			strcpy(opts.strHeader, m_strHeader);

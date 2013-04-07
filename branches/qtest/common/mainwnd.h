@@ -30,6 +30,7 @@ public:
 	void UpdateTitle(const char* Title, bool Modified);
 	void UpdateModified(bool Modified);
 	void UpdateRecentFiles();
+	void UpdateShortcuts();
 
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
 };

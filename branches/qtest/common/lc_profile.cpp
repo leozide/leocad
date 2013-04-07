@@ -35,6 +35,14 @@ lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, const char*
 	mDefault.StringValue = DefaultValue;
 }
 
+lcProfileEntry::lcProfileEntry(const char* Section, const char* Key)
+{
+	mType = LC_PROFILE_ENTRY_BUFFER;
+	mSection = Section;
+	mKey = Key;
+	mDefault.IntValue = 0;
+}
+
 lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 {
 	lcProfileEntry("Settings", "Detail", LC_DET_BRICKEDGES),                         // LC_PROFILE_DETAIL
@@ -46,7 +54,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                   // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                  // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                  // LC_PROFILE_PARTS_LIBRARY
-	lcProfileEntry("Settings", "ShortcutsFile", ""),                                 // LC_PROFILE_SHORTCUTS_FILE
+	lcProfileEntry("Settings", "Shortcuts"),                                         // LC_PROFILE_SHORTCUTS
 	lcProfileEntry("Settings", "CategoriesFile", ""),                                // LC_PROFILE_CATEGORIES_FILE
 	lcProfileEntry("Settings", "RecentFile1", ""),                                   // LC_PROFILE_RECENT_FILE1
 	lcProfileEntry("Settings", "RecentFile2", ""),                                   // LC_PROFILE_RECENT_FILE2

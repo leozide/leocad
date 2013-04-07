@@ -18,7 +18,6 @@ public:
 	explicit lcQMainWindow(QWidget *parent = 0);
 	~lcQMainWindow();
 
-	void updateShortcuts();
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateTime(bool animation, int currentTime, int totalTime);
@@ -32,6 +31,7 @@ public:
 	void updateTitle(const char* title, bool modified);
 	void updateModified(bool modified);
 	void updateRecentFiles(const char** fileNames);
+	void updateShortcuts();
 
 private slots:
 	void actionTriggered();

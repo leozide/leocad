@@ -136,6 +136,13 @@ void lcQMainWindow::createActions()
 		actionSnapAngleGroup->addAction(actions[actionIdx]);
 	}
 
+	QActionGroup *actionTransformTypeGroup = new QActionGroup(this);
+	for (int actionIdx = LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION; actionIdx <= LC_EDIT_TRANSFORM_RELATIVE_ROTATION; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionTransformTypeGroup->addAction(actions[actionIdx]);
+	}
+
 	QActionGroup *actionToolGroup = new QActionGroup(this);
 	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
 	{
@@ -188,10 +195,10 @@ void lcQMainWindow::createMenus()
 	actions[LC_EDIT_SNAP_ANGLE]->setMenu(snapAngleMenu);
 
 	QMenu* transformMenu = new QMenu(tr("Transform"));
-	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION]);
-	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION]);
+	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_ROTATION]);
+	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION]);
 	actions[LC_EDIT_TRANSFORM]->setMenu(transformMenu);
 
 	menuCamera = new QMenu(tr("Cameras"));
@@ -333,6 +340,9 @@ void lcQMainWindow::createToolBars()
 	transformLayout->addWidget(transformZ);
 	transformLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	standardToolBar->addWidget(transformWidget);
+	connect(transformX, SIGNAL(returnPressed()), actions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+	connect(transformY, SIGNAL(returnPressed()), actions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+	connect(transformZ, SIGNAL(returnPressed()), actions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
 
 	toolsToolBar = addToolBar(tr("Tools"));
 	insertToolBarBreak(toolsToolBar);
@@ -562,6 +572,11 @@ void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 	}
 }
 
+void lcQMainWindow::updateTransformType(int newType)
+{
+	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + newType]->setChecked(true);
+}
+
 void lcQMainWindow::updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera)
 {
 	int actionIdx, currentIndex = -1;
@@ -635,4 +650,15 @@ void lcQMainWindow::updateShortcuts()
 {
 	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
 		actions[actionIdx]->setShortcut(QKeySequence(gKeyboardShortcuts.Shortcuts[actionIdx]));
+}
+
+lcVector3 lcQMainWindow::getTransformAmount()
+{
+	lcVector3 transform;
+
+	transform.x = transformX->text().toFloat();
+	transform.y = transformY->text().toFloat();
+	transform.z = transformZ->text().toFloat();
+
+	return transform;
 }

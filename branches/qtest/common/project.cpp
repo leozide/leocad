@@ -64,6 +64,7 @@ Project::Project()
 	m_pTrackFile = NULL;
 	m_nCurClipboard = 0;
 	m_nCurAction = 0;
+	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
 	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
@@ -118,6 +119,7 @@ void Project::UpdateInterface()
 	SystemUpdateFocus(NULL);
 	SetAction(m_nCurAction);
 	SystemUpdateColorList(m_nCurColor);
+	gMainWindow->UpdateTransformType(mTransformType);
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
@@ -6288,6 +6290,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 			gMainWindow->UpdateSnap();
 		} break;
+
+		case LC_EDIT_TRANSFORM:
+			TransformSelectedObjects((LC_TRANSFORM_TYPE)mTransformType, gMainWindow->GetTransformAmount());
+			break;
+
+		case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
+		case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
+		case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
+		case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
+			mTransformType = id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION;
+			gMainWindow->UpdateTransformType(mTransformType);
+			break;
 
 		case LC_EDIT_ACTION_SELECT:
 		{

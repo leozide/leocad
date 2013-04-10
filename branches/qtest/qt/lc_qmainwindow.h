@@ -25,6 +25,7 @@ public:
 	void updateLockSnap(lcuint32 snap);
 	void updateSnap();
 	void updateUndoRedo(const char* undoText, const char* redoText);
+	void updateTransformType(int newType);
 	void updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera);
 	void updateCurrentCamera(int cameraIndex);
 	void updateCategories();
@@ -32,6 +33,8 @@ public:
 	void updateModified(bool modified);
 	void updateRecentFiles(const char** fileNames);
 	void updateShortcuts();
+
+	lcVector3 getTransformAmount();
 
 private slots:
 	void actionTriggered();

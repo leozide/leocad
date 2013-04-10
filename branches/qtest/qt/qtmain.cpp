@@ -314,6 +314,14 @@ void lcMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
 		window->updateUndoRedo(UndoText, RedoText);
 }
 
+void lcMainWindow::UpdateTransformType(int NewType)
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateTransformType(NewType);
+}
+
 void lcMainWindow::UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
@@ -373,4 +381,14 @@ void lcMainWindow::UpdateShortcuts()
 
 	if (window)
 		window->updateShortcuts();
+}
+
+lcVector3 lcMainWindow::GetTransformAmount()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		return window->getTransformAmount();
+
+	return lcVector3(0.0f, 0.0f, 0.0f);
 }

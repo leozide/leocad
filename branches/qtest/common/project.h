@@ -62,6 +62,14 @@
 //#define LC_HTML_HTMLEXT         0x40
 //#define LC_HTML_LISTID          0x80
 
+enum LC_TRANSFORM_TYPE
+{
+	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
+	LC_TRANSFORM_RELATIVE_TRANSLATION,
+	LC_TRANSFORM_ABSOLUTE_ROTATION,
+	LC_TRANSFORM_RELATIVE_ROTATION
+};
+
 enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,
@@ -94,7 +102,7 @@ enum LC_OVERLAY_MODES
 	LC_OVERLAY_ROTATE_VIEW_X,
 	LC_OVERLAY_ROTATE_VIEW_Y,
 	LC_OVERLAY_ROTATE_VIEW_Z,
-	LC_OVERLAY_ROTATE_VIEW_XYZ,
+	LC_OVERLAY_ROTATE_VIEW_XYZ
 };
 
 class Piece;
@@ -116,7 +124,7 @@ struct LC_UNDOINFO
 	lcMemFile file;
 	char strText[21];
 	LC_UNDOINFO* pNext;
-	LC_UNDOINFO() { pNext = NULL; };
+	LC_UNDOINFO() { pNext = NULL; }
 };
 
 struct LC_FILEENTRY
@@ -323,6 +331,7 @@ public:
 
 protected:
 	// State variables
+	int mTransformType;
 	int m_nCurAction;
 	int m_PreviousAction;
 	bool m_RestoreAction;

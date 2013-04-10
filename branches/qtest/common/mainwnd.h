@@ -24,6 +24,7 @@ public:
 	void UpdateLockSnap(lcuint32 Snap);
 	void UpdateSnap();
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
+	void UpdateTransformType(int NewType);
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera);
 	void UpdateCategories();
@@ -31,6 +32,8 @@ public:
 	void UpdateModified(bool Modified);
 	void UpdateRecentFiles();
 	void UpdateShortcuts();
+
+	lcVector3 GetTransformAmount();
 
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
 };

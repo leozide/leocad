@@ -2166,8 +2166,8 @@ void Project::RenderSceneObjects(View* view)
 
 void Project::RenderOverlays(View* view)
 {
-	// Draw the selection rectangle.
-	if ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE))
+	if (((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
+	    (m_nCurAction == LC_ACTION_ZOOM_REGION))
 	{
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -2177,29 +2177,82 @@ void Project::RenderOverlays(View* view)
 		glTranslatef(0.375f, 0.375f, 0.0f);
 
 		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_LINE_STIPPLE);
-		glLineStipple(5, 0x5555);
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
 		float pt1x = (float)m_nDownX;
 		float pt1y = (float)m_nDownY;
-		float pt2x = m_fTrack[0];
-		float pt2y = m_fTrack[1];
+		float pt2x, pt2y;
 
-		float verts[8][2] =
+		if (m_nCurAction == LC_ACTION_ZOOM_REGION)
 		{
-			{ pt1x, pt1y }, { pt2x, pt1y },
-			{ pt2x, pt1y }, { pt2x, pt2y },
-			{ pt2x, pt2y }, { pt1x, pt2y },
-			{ pt1x, pt2y }, { pt1x, pt1y }
+			pt2x = m_OverlayTrackStart[0];
+			pt2y = m_OverlayTrackStart[1];
+		}
+		else
+		{
+			pt2x = m_fTrack[0];
+			pt2y = m_fTrack[1];
+		}
+
+		float Left, Right, Bottom, Top;
+
+		if (pt1x < pt2x)
+		{
+			Left = pt1x;
+			Right = pt2x;
+		}
+		else
+		{
+			Left = pt2x;
+			Right = pt1x;
+		}
+
+		if (pt1y < pt2y)
+		{
+			Bottom = pt1y;
+			Top = pt2y;
+		}
+		else
+		{
+			Bottom = pt2y;
+			Top = pt1y;
+		}
+
+		float BorderX = lcMin(2.0f, Right - Left);
+		float BorderY = lcMin(2.0f, Top - Bottom);
+
+		float Verts[14][2] =
+		{
+			{ Left, Bottom },
+			{ Left + BorderX, Bottom + BorderY },
+			{ Right, Bottom },
+			{ Right - BorderX, Bottom + BorderY },
+			{ Right, Top },
+			{ Right - BorderX, Top - BorderY },
+			{ Left, Top },
+			{ Left + BorderX, Top - BorderY },
+			{ Left, Bottom },
+			{ Left + BorderX, Bottom + BorderY },
+			{ Left + BorderX, Bottom + BorderY },
+			{ Right - BorderX, Bottom + BorderY },
+			{ Left + BorderX, Top - BorderY },
+			{ Right - BorderX, Top - BorderY },
 		};
 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, verts);
-		glDrawArrays(GL_LINES, 0, 8);
+		glVertexPointer(2, GL_FLOAT, 0, Verts);
+
+		glColor4f(0.25f, 0.25f, 1.0f, 1.0f);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
+
+		glColor4f(0.25f, 0.25f, 1.0f, 0.25f);
+		glDrawArrays(GL_TRIANGLE_STRIP, 10, 4);
+
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		glDisable(GL_LINE_STIPPLE);
+		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -2825,41 +2878,6 @@ void Project::RenderOverlays(View* view)
 		glDrawArrays(GL_LINE_LOOP, 12, 4);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
-		glEnable(GL_DEPTH_TEST);
-	}
-	else if (m_nCurAction == LC_ACTION_ZOOM_REGION)
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -1, 1);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(0.375f, 0.375f, 0.0f);
-
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_LINE_STIPPLE);
-		glLineStipple(5, 0x5555);
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-
-		float pt1x = (float)m_nDownX;
-		float pt1y = (float)m_nDownY;
-		float pt2x = m_OverlayTrackStart[0];
-		float pt2y = m_OverlayTrackStart[1];
-
-		float Verts[8][2] =
-		{
-			{ pt1x, pt1y }, { pt2x, pt1y },
-			{ pt2x, pt1y }, { pt2x, pt2y },
-			{ pt2x, pt2y }, { pt1x, pt2y },
-			{ pt1x, pt2y }, { pt1x, pt1y }
-		};
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINES, 0, 8);
-		glDisableClientState(GL_VERTEX_ARRAY);
-
-		glDisable(GL_LINE_STIPPLE);
 		glEnable(GL_DEPTH_TEST);
 	}
 }
@@ -6803,14 +6821,7 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_ZOOM_REGION:
 			{
-				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
-				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = m_ActiveView->mCamera;
-
-				const lcMatrix44& ModelView = Cam->mWorldView;
-				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
-
-				// Find out the top-left and bottom-right corners in screen coordinates.
+				// Find the top-left and bottom-right corners in screen coordinates.
 				float Left, Top, Bottom, Right;
 
 				if (m_OverlayTrackStart[0] < m_nDownX)
@@ -6835,36 +6846,7 @@ bool Project::StopTracking(bool bAccept)
 					Bottom = m_OverlayTrackStart[1];
 				}
 
-				// Unproject screen points to world space.
-				lcVector3 Points[3] =
-				{
-					lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-					lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
-					lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
-				};
-
-				lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
-
-				// Center camera.
-				lcVector3 Eye = Cam->mPosition;
-				Eye = Eye + (Points[0] - Points[1]);
-
-				lcVector3 Target = Cam->mTargetPosition;
-				Target = Target + (Points[0] - Points[1]);
-
-				// Zoom in/out.
-				float RatioX = (Right - Left) / Viewport[2];
-				float RatioY = (Top - Bottom) / Viewport[3];
-				float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
-
-				lcVector3 Dir = Points[1] - Points[2];
-				Eye = Eye + Dir * ZoomFactor;
-				Target = Target + Dir * ZoomFactor;
-
-				// Change the camera and redraw.
-				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
-				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
-				Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				m_ActiveView->mCamera->ZoomRegion(m_ActiveView, Left, Right, Bottom, Top, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 
 				SystemUpdateFocus(NULL);
 				UpdateAllViews();

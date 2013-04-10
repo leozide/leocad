@@ -685,6 +685,50 @@ void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* P
 	UpdatePosition(nTime, bAnimation);
 }
 
+void Camera::ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAnimation, bool bAddKey)
+{
+	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+
+	const lcMatrix44& ModelView = mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, Aspect, m_zNear, m_zFar);
+
+	// Unproject screen points to world space.
+	lcVector3 Points[3] =
+	{
+		lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
+		lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
+		lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
+	};
+
+	lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
+
+	// Center camera.
+	lcVector3 Eye = mPosition;
+	Eye = Eye + (Points[0] - Points[1]);
+
+	lcVector3 Target = mTargetPosition;
+	Target = Target + (Points[0] - Points[1]);
+
+	// Zoom in/out.
+	float RatioX = (Right - Left) / Viewport[2];
+	float RatioY = (Top - Bottom) / Viewport[3];
+	float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
+
+	lcVector3 Dir = Points[1] - Points[2];
+	mPosition = Eye + Dir * ZoomFactor;
+	mTargetPosition = Target + Dir * ZoomFactor;
+
+	// Change the camera and redraw.
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+
+	UpdatePosition(nTime, bAnimation);
+}
+
 void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);

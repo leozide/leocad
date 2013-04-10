@@ -54,6 +54,7 @@ Project::Project()
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
+	m_OverlayMode = LC_OVERLAY_NONE;
 	m_pPieces = NULL;
 	m_pLights = NULL;
 	m_pGroups = NULL;
@@ -8425,7 +8426,10 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 			m_fTrack[1] = (float)ClampY;
 
 			if (m_nTracking != LC_TRACK_NONE)
+			{
+				ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
 				UpdateOverlayScale();
+			}
 
 			UpdateAllViews();
 		} break;

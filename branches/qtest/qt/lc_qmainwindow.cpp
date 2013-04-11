@@ -67,6 +67,7 @@ void lcQMainWindow::createActions()
 		QAction *action = new QAction(tr(gActions[Command].MenuName), this);
 		action->setStatusTip(tr(gActions[Command].StatusText));
 		connect(action, SIGNAL(triggered()), this, SLOT(actionTriggered()));
+		addAction(action);
 		actions[Command] = action;
 	}
 
@@ -102,10 +103,15 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	actions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	actions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
+	actions[LC_VIEW_ZOOM_IN]->setIcon(QIcon(":/resources/view_zoomin.png"));
+	actions[LC_VIEW_ZOOM_OUT]->setIcon(QIcon(":/resources/view_zoomout.png"));
+	actions[LC_VIEW_ZOOM_EXTENTS]->setIcon(QIcon(":/resources/view_zoomextents.png"));
 	actions[LC_VIEW_TIME_FIRST]->setIcon(QIcon(":/resources/time_first.png"));
 	actions[LC_VIEW_TIME_PREVIOUS]->setIcon(QIcon(":/resources/time_previous.png"));
 	actions[LC_VIEW_TIME_NEXT]->setIcon(QIcon(":/resources/time_next.png"));
 	actions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
+	actions[LC_HELP_HOMEPAGE]->setIcon(QIcon(":/resources/help_homepage.png"));
+	actions[LC_HELP_EMAIL]->setIcon(QIcon(":/resources/help_email.png"));
 
 	actions[LC_EDIT_LOCK_X]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
@@ -268,22 +274,18 @@ void lcQMainWindow::createMenus()
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_HOME]);
 	menuView->addMenu(menuCamera);
+	QMenu* menuStep = menuView->addMenu(tr("Step"));
+	menuStep->addAction(actions[LC_VIEW_TIME_FIRST]);
+	menuStep->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
+	menuStep->addAction(actions[LC_VIEW_TIME_NEXT]);
+	menuStep->addAction(actions[LC_VIEW_TIME_LAST]);
+	menuStep->addSeparator();
+	menuStep->addAction(actions[LC_VIEW_TIME_INSERT]);
+	menuStep->addAction(actions[LC_VIEW_TIME_DELETE]);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 	menuPiece->addAction(actions[LC_PIECE_INSERT]);
 	menuPiece->addAction(actions[LC_PIECE_DELETE]);
-	menuPiece->addAction(actions[LC_PIECE_MOVE_PLUSX]);
-	menuPiece->addAction(actions[LC_PIECE_MOVE_MINUSX]);
-	menuPiece->addAction(actions[LC_PIECE_MOVE_PLUSY]);
-	menuPiece->addAction(actions[LC_PIECE_MOVE_MINUSY]);
-	menuPiece->addAction(actions[LC_PIECE_MOVE_PLUSZ]);
-	menuPiece->addAction(actions[LC_PIECE_MOVE_MINUSZ]);
-	menuPiece->addAction(actions[LC_PIECE_ROTATE_PLUSX]);
-	menuPiece->addAction(actions[LC_PIECE_ROTATE_MINUSX]);
-	menuPiece->addAction(actions[LC_PIECE_ROTATE_PLUSY]);
-	menuPiece->addAction(actions[LC_PIECE_ROTATE_MINUSY]);
-	menuPiece->addAction(actions[LC_PIECE_ROTATE_PLUSZ]);
-	menuPiece->addAction(actions[LC_PIECE_ROTATE_MINUSZ]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
 	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
 	menuPiece->addSeparator();

@@ -386,12 +386,44 @@ void lcQPreferencesDialog::updateCommandList()
 		const QString identifier = gActions[actionIdx].ID;
 
 		int pos = identifier.indexOf(QLatin1Char('.'));
-		const QString section = identifier.left(pos);
-		const QString subId = identifier.mid(pos + 1);
+		int subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
+		if (subPos == -1)
+			subPos = pos;
+
+		const QString parentSection = identifier.left(pos);
+
+		if (subPos != pos)
+		{
+			if (!sections.contains(parentSection))
+			{
+				QTreeWidgetItem *categoryItem = new QTreeWidgetItem(ui->commandList, QStringList(parentSection));
+				QFont f = categoryItem->font(0);
+				f.setBold(true);
+				categoryItem->setFont(0, f);
+				sections.insert(parentSection, categoryItem);
+				ui->commandList->expandItem(categoryItem);
+			}
+		}
+
+		const QString section = identifier.left(subPos);
+		const QString subId = identifier.mid(subPos + 1);
 
 		if (!sections.contains(section))
 		{
-			QTreeWidgetItem *categoryItem = new QTreeWidgetItem(ui->commandList, QStringList() << section);
+			QTreeWidgetItem *parent = sections[parentSection];
+			QTreeWidgetItem *categoryItem;
+			QString subSection;
+
+			if (pos != subPos)
+				subSection = identifier.mid(pos + 1, subPos - pos - 1);
+			else
+				subSection = section;
+
+			if (parent)
+				categoryItem = new QTreeWidgetItem(parent, QStringList(subSection));
+			else
+				categoryItem = new QTreeWidgetItem(ui->commandList, QStringList(subSection));
+
 			QFont f = categoryItem->font(0);
 			f.setBold(true);
 			categoryItem->setFont(0, f);

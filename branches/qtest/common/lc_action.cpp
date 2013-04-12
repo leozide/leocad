@@ -223,294 +223,294 @@ lcAction gActions[LC_NUM_COMMANDS] =
 	},
 	// LC_EDIT_LOCK_X
 	{
-		"Edit.LockX",
+		"Edit.Lock.LockX",
 		"Lock X",
 		"Prevents movement and rotation along the X axis",
 		""
 	},
 	// LC_EDIT_LOCK_Y
 	{
-		"Edit.LockY",
+		"Edit.Lock.LockY",
 		"Lock Y",
 		"Prevents movement and rotation along the Y axis",
 		""
 	},
 	// LC_EDIT_LOCK_Z
 	{
-		"Edit.LockZ",
+		"Edit.Lock.LockZ",
 		"Lock Z",
 		"Prevents movement and rotation along the Z axis",
 		""
 	},
 	// LC_EDIT_LOCK_TOGGLE
 	{
-		"Edit.LockToggle",
+		"Edit.Lock.Toggle",
 		"Lock Toggle",
 		"Toggle locked axes",
 		""
 	},
 	// LC_EDIT_LOCK_NONE
 	{
-		"Edit.LockNone",
+		"Edit.Lock.None",
 		"Unlock All",
 		"Allows movement and rotation in all directions",
 		""
 	},
 	// LC_EDIT_SNAP_X
 	{
-		"Edit.SnapX",
+		"Edit.Snap.SnapX",
 		"Snap X",
 		"Snap movement along the X axis to fixed intervals",
 		""
 	},
 	// LC_EDIT_SNAP_Y
 	{
-		"Edit.SnapY",
+		"Edit.Snap.SnapY",
 		"Snap Y",
 		"Snap movement along the Y axis to fixed intervals",
 		""
 	},
 	// LC_EDIT_SNAP_Z
 	{
-		"Edit.SnapZ",
+		"Edit.Snap.SnapZ",
 		"Snap Z",
 		"Snap movement along the Z axis to fixed intervals",
 		""
 	},
 	// LC_EDIT_SNAP_TOGGLE
 	{
-		"Edit.SnapToggle",
+		"Edit.Snap.Toggle",
 		"Snap Toggle",
 		"Toggle snap axes",
 		""
 	},
 	// LC_EDIT_SNAP_NONE
 	{
-		"Edit.SnapNone",
+		"Edit.Snap.None",
 		"Snap None",
 		"Disable snapping along all axes",
 		""
 	},
 	// LC_EDIT_SNAP_ALL
 	{
-		"Edit.SnapAll",
+		"Edit.Snap.All",
 		"Snap All",
 		"Snap movement along all axes to fixed intervals",
 		""
 	},
 	// LC_EDIT_SNAP_ANGLE
 	{
-		"Edit.SnapAngle",
+		"Edit.SnapAngle.Toggle",
 		"Snap Angle Toggle",
 		"Snap rotations to fixed intervals",
 		""
 	},
 	// LC_EDIT_SNAP_MOVE_XY0
 	{
-		"Edit.SnapMoveXY0",
+		"Edit.SnapMove.XY0",
 		"None",
 		"Do not snap movement along the XY plane",
 		"0"
 	},
 	// LC_EDIT_SNAP_MOVE_XY1
 	{
-		"Edit.SnapMoveXY1",
+		"Edit.SnapMove.XY1",
 		"1/20 Stud",
 		"Snap movement along the XY plane to 1/20 stud",
 		"1"
 	},
 	// LC_EDIT_SNAP_MOVE_XY2
 	{
-		"Edit.SnapMoveXY2",
+		"Edit.SnapMove.XY2",
 		"1/4 Stud",
 		"Snap movement along the XY plane to 1/4 stud",
 		"2"
 	},
 	// LC_EDIT_SNAP_MOVE_XY3
 	{
-		"Edit.SnapMoveXY3",
+		"Edit.SnapMove.XY3",
 		"1 Flat",
 		"Snap movement along the XY plane to 1 flat",
 		"3"
 	},
 	// LC_EDIT_SNAP_MOVE_XY4
 	{
-		"Edit.SnapMoveXY4",
+		"Edit.SnapMove.XY4",
 		"1/2 Stud",
 		"Snap movement along the XY plane to 1/2 stud",
 		"4"
 	},
 	// LC_EDIT_SNAP_MOVE_XY5
 	{
-		"Edit.SnapMoveXY5",
+		"Edit.SnapMove.XY5",
 		"1 Stud",
 		"Snap movement along the XY plane to 1 stud",
 		"5"
 	},
 	// LC_EDIT_SNAP_MOVE_XY6
 	{
-		"Edit.SnapMoveXY6",
+		"Edit.SnapMove.XY6",
 		"2 Studs",
 		"Snap movement along the XY plane to 2 studs",
 		"6"
 	},
 	// LC_EDIT_SNAP_MOVE_XY7
 	{
-		"Edit.SnapMoveXY7",
+		"Edit.SnapMove.XY7",
 		"3 Studs",
 		"Snap movement along the XY plane to 3 studs",
 		"7"
 	},
 	// LC_EDIT_SNAP_MOVE_XY8
 	{
-		"Edit.SnapMoveXY8",
+		"Edit.SnapMove.XY8",
 		"4 Studs",
 		"Snap movement along the XY plane to 4 studs",
 		"8"
 	},
 	// LC_EDIT_SNAP_MOVE_XY9
 	{
-		"Edit.SnapMoveXY9",
+		"Edit.SnapMove.XY9",
 		"8 Studs",
 		"Snap movement along the XY plane to 8 studs",
 		"9"
 	},
 	// LC_EDIT_SNAP_MOVE_Z0
 	{
-		"Edit.SnapMoveZ0",
+		"Edit.SnapMove.Z0",
 		"None",
 		"Do not snap movement along the Z axis",
 		"Ctrl+Shift+0"
 	},
 	// LC_EDIT_SNAP_MOVE_Z1
 	{
-		"Edit.SnapMoveZ1",
+		"Edit.SnapMove.Z1",
 		"1/20 Stud",
 		"Snap movement along the Z axis to 1/20 stud",
 		"Ctrl+Shift+1"
 	},
 	// LC_EDIT_SNAP_MOVE_Z2
 	{
-		"Edit.SnapMoveZ2",
+		"Edit.SnapMove.Z2",
 		"1/4 Stud",
 		"Snap movement along the Z axis to 1/4 stud",
 		"Ctrl+Shift+2"
 	},
 	// LC_EDIT_SNAP_MOVE_Z3
 	{
-		"Edit.SnapMoveZ3",
+		"Edit.SnapMove.Z3",
 		"1 Flat",
 		"Snap movement along the Z axis to 1 flat",
 		"Ctrl+Shift+3"
 	},
 	// LC_EDIT_SNAP_MOVE_Z4
 	{
-		"Edit.SnapMoveZ4",
+		"Edit.SnapMove.Z4",
 		"1/2 Stud",
 		"Snap movement along the Z axis to 1/2 stud",
 		"Ctrl+Shift+4"
 	},
 	// LC_EDIT_SNAP_MOVE_Z5
 	{
-		"Edit.SnapMoveZ5",
+		"Edit.SnapMove.Z5",
 		"1 Stud",
 		"Snap movement along the Z axis to 1 stud",
 		"Ctrl+Shift+5"
 	},
 	// LC_EDIT_SNAP_MOVE_Z6
 	{
-		"Edit.SnapMoveZ6",
+		"Edit.SnapMove.Z6",
 		"1 Brick",
 		"Snap movement along the Z axis to 1 brick",
 		"Ctrl+Shift+6"
 	},
 	// LC_EDIT_SNAP_MOVE_Z7
 	{
-		"Edit.SnapMoveZ7",
+		"Edit.SnapMove.Z7",
 		"2 Bricks",
 		"Snap movement along the Z axis to 2 bricks",
 		"Ctrl+Shift+7"
 	},
 	// LC_EDIT_SNAP_MOVE_Z8
 	{
-		"Edit.SnapMoveZ8",
+		"Edit.SnapMove.Z8",
 		"4 Bricks",
 		"Snap movement along the Z axis to 4 bricks",
 		"Ctrl+Shift+8"
 	},
 	// LC_EDIT_SNAP_MOVE_Z9
 	{
-		"Edit.SnapMoveZ9",
+		"Edit.SnapMove.Z9",
 		"8 Bricks",
 		"Snap movement along the Z axis to 8 bricks",
 		"Ctrl+Shift+9"
 	},
 	// LC_EDIT_SNAP_ANGLE0
 	{
-		"Edit.SnapAngle0",
+		"Edit.SnapAngle.Angle0",
 		"None",
 		"Do not snap rotations",
 		"Shift+0"
 	},
 	// LC_EDIT_SNAP_ANGLE1
 	{
-		"Edit.SnapAngle1",
+		"Edit.SnapAngle.Angle1",
 		"1 Degree",
 		"Snap rotations to 1 degree",
 		"Shift+1"
 	},
 	// LC_EDIT_SNAP_ANGLE2
 	{
-		"Edit.SnapAngle2",
+		"Edit.SnapAngle.Angle2",
 		"5 Degrees",
 		"Snap rotations to 5 degrees",
 		"Shift+2"
 	},
 	// LC_EDIT_SNAP_ANGLE3
 	{
-		"Edit.SnapAngle3",
+		"Edit.SnapAngle.Angle3",
 		"10 Degrees",
 		"Snap rotations to 10 degrees",
 		"Shift+3"
 	},
 	// LC_EDIT_SNAP_ANGLE4
 	{
-		"Edit.SnapAngle4",
+		"Edit.SnapAngle.Angle4",
 		"15 Degrees",
 		"Snap rotations to 15 degrees",
 		"Shift+4"
 	},
 	// LC_EDIT_SNAP_ANGLE5
 	{
-		"Edit.SnapAngle5",
+		"Edit.SnapAngle.Angle5",
 		"30 Degrees",
 		"Snap rotations to 30 degrees",
 		"Shift+5"
 	},
 	// LC_EDIT_SNAP_ANGLE6
 	{
-		"Edit.SnapAngle6",
+		"Edit.SnapAngle.Angle6",
 		"45 Degrees",
 		"Snap rotations to 45 degrees",
 		"Shift+6"
 	},
 	// LC_EDIT_SNAP_ANGLE7
 	{
-		"Edit.SnapAngle7",
+		"Edit.SnapAngle.Angle7",
 		"60 Degrees",
 		"Snap rotations to 60 degrees",
 		"Shift+7"
 	},
 	// LC_EDIT_SNAP_ANGLE8
 	{
-		"Edit.SnapAngle8",
+		"Edit.SnapAngle.Angle8",
 		"90 Degrees",
 		"Snap rotations to 90 degrees",
 		"Shift+8"
 	},
 	// LC_EDIT_SNAP_ANGLE9
 	{
-		"Edit.SnapAngle9",
+		"Edit.SnapAngle.Angle9",
 		"180 Degrees",
 		"Snap rotations to 180 degrees",
 		"Shift+9"
@@ -727,126 +727,126 @@ lcAction gActions[LC_NUM_COMMANDS] =
 	},
 	// LC_VIEW_CAMERA_NONE
 	{
-		"View.Camera.None",
+		"View.Cameras.None",
 		"None",
 		"Do not use a camera",
 		""
 	},
 	// LC_VIEW_CAMERA1
 	{
-		"View.Camera.01",
+		"View.Cameras.Camera01",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA2
 	{
-		"View.Camera.02",
+		"View.Cameras.Camera02",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA3
 	{
-		"View.Camera.03",
+		"View.Cameras.Camera03",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA4
 	{
-		"View.Camera.04",
+		"View.Cameras.Camera04",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA5
 	{
-		"View.Camera.05",
+		"View.Cameras.Camera05",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA6
 	{
-		"View.Camera.06",
+		"View.Cameras.Camera06",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA7
 	{
-		"View.Camera.07",
+		"View.Cameras.Camera07",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA8
 	{
-		"View.Camera.08",
+		"View.Cameras.Camera08",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA9
 	{
-		"View.Camera.09",
+		"View.Cameras.Camera09",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA10
 	{
-		"View.Camera.10",
+		"View.Cameras.Camera10",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA11
 	{
-		"View.Camera.11",
+		"View.Cameras.Camera11",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA12
 	{
-		"View.Camera.12",
+		"View.Cameras.Camera12",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA13
 	{
-		"View.Camera.13",
+		"View.Cameras.Camera13",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA14
 	{
-		"View.Camera.14",
+		"View.Cameras.Camera14",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA15
 	{
-		"View.Camera.15",
+		"View.Cameras.Camera15",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA16
 	{
-		"View.Camera.16",
+		"View.Cameras.Camera16",
 		"Camera",
 		"Use this camera",
 		""
 	},
 	// LC_VIEW_CAMERA_RESET
 	{
-		"View.Camera.Reset",
+		"View.Cameras.Reset",
 		"Reset",
 		"Reset views to their default positions",
 		""

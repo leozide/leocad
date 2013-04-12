@@ -40,6 +40,7 @@ public slots:
 	void on_exportCategories_clicked();
 	void on_resetCategories_clicked();
 	void on_shortcutAssign_clicked();
+	void on_shortcutRemove_clicked();
 	void on_shortcutsImport_clicked();
 	void on_shortcutsExport_clicked();
 	void on_shortcutsReset_clicked();

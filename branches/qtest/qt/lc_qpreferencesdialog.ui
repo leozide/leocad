@@ -548,10 +548,18 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="shortcutRemove">
+                <property name="text">
+                 <string>Remove</string>
+                </property>
+               </widget>
+              </item>
              </layout>
              <zorder>shortcutEdit</zorder>
              <zorder>label_7</zorder>
              <zorder>shortcutAssign</zorder>
+             <zorder>shortcutRemove</zorder>
             </widget>
            </item>
           </layout>

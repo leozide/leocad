@@ -487,6 +487,13 @@ void lcQPreferencesDialog::on_shortcutAssign_clicked()
 	options->ShortcutsDefault = false;
 }
 
+void lcQPreferencesDialog::on_shortcutRemove_clicked()
+{
+	ui->shortcutEdit->setText(QString());
+
+	on_shortcutAssign_clicked();
+}
+
 void lcQPreferencesDialog::on_shortcutsImport_clicked()
 {
 	QString result = QFileDialog::getOpenFileName(this, tr("Import shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));

@@ -28,6 +28,9 @@ inline bool GL_HasFramebufferObject()
 	return GL_SupportsFramebufferObject;
 }
 
+bool GL_BeginRenderToTexture(int Width, int Height);
+void GL_EndRenderToTexture();
+
 #include <stddef.h>
 #ifndef GL_VERSION_1_5
 // GL types for handling large vertex buffer objects

@@ -2,15 +2,6 @@
 #include "system.h"
 #include "basewnd.h"
 
-void* Sys_StartMemoryRender(int width, int height)
-{
-  return NULL;
-}
-
-void Sys_FinishMemoryRender(void* param)
-{
-}
-
 bool Sys_KeyDown(int Key)
 {
 	return false;

@@ -5,6 +5,7 @@
 #include "array.h"
 
 class Camera;
+class PiecePreview;
 
 #define LC_MAX_RECENT_FILES 4
 
@@ -36,6 +37,7 @@ public:
 	lcVector3 GetTransformAmount();
 
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
+	PiecePreview* mPreviewWidget;
 };
 
 extern class lcMainWindow* gMainWindow;

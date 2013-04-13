@@ -3256,8 +3256,13 @@ void Project::GetPiecesUsed(ObjArray<lcPiecesUsedEntry>& PiecesUsed) const
 // Create a series of pictures
 void Project::CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {
+	if (!GL_BeginRenderToTexture(width, height))
+	{
+		gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
+		return;
+	}
+
 	unsigned short oldtime;
-	void* render = Sys_StartMemoryRender (width, height);
 	unsigned char* buf = (unsigned char*)malloc (width*height*3);
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 
@@ -3300,7 +3305,8 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 		m_nCurStep = (unsigned char)oldtime;
 	CalculateStep();
 	free (buf);
-	Sys_FinishMemoryRender (render);
+
+	GL_EndRenderToTexture();
 }
 
 void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
@@ -3935,7 +3941,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (Options.PartsListImages)
 				{
 					int cx = Options.PartImagesWidth, cy = Options.PartImagesHeight;
-					void* render = Sys_StartMemoryRender(cx, cy);
+					if (!GL_BeginRenderToTexture(cx, cy))
+					{
+						gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
+						break;
+					}
 
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
@@ -3978,7 +3988,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						sprintf(fn, "%s%s%s", Options.PathName, pInfo->m_strName, ext);
 						image.FileSave(fn, Options.ImageFormat, Options.TransparentImages, BackgroundColor);
 					}
-					Sys_FinishMemoryRender (render);
+					GL_EndRenderToTexture();
 				}
 			}
 		} break;

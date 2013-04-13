@@ -45,10 +45,6 @@ template<> struct lcStaticAssert<true> { };
 template<int i> struct lcStaticAssertTest { };
 #endif
 
-// Memory render
-void* Sys_StartMemoryRender (int width, int height);
-void Sys_FinishMemoryRender (void* param);
-
 // Misc stuff
 bool Sys_KeyDown (int key);
 void Sys_GetFileList(const char* Path, ObjArray<String>& FileList);

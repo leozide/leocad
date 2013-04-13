@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "opengl.h"
+#include "mainwnd.h"
+#include "preview.h"
 
 void* Sys_GLGetExtension(const char* Symbol, void* Data);
 
@@ -118,4 +120,52 @@ void GL_InitializeSharedExtensions(void* Data)
 
 		GL_SupportsFramebufferObject = true;
 	}
+}
+
+static GLuint gFramebufferObject;
+static GLuint gFramebufferTexture;
+static GLuint gDepthRenderbufferObject;
+
+bool GL_BeginRenderToTexture(int Width, int Height)
+{
+	if (!GL_SupportsFramebufferObject)
+		return false;
+
+	gMainWindow->mPreviewWidget->MakeCurrent();
+
+	glGenFramebuffersARB(1, &gFramebufferObject);
+	glGenTextures(1, &gFramebufferTexture);
+	glGenRenderbuffersARB(1, &gDepthRenderbufferObject);
+
+	glBindFramebufferARB(GL_DRAW_FRAMEBUFFER, gFramebufferObject);
+
+	glBindTexture(GL_TEXTURE_2D, gFramebufferTexture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glFramebufferTexture2DARB(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gFramebufferTexture, 0);
+
+	glBindRenderbufferARB(GL_RENDERBUFFER, gDepthRenderbufferObject);
+	glRenderbufferStorageARB(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
+	glFramebufferRenderbufferARB(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepthRenderbufferObject);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebufferARB(GL_FRAMEBUFFER, gFramebufferObject);
+
+	if (glCheckFramebufferStatusARB(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		GL_EndRenderToTexture();
+		return false;
+	}
+
+	return true;
+}
+
+void GL_EndRenderToTexture()
+{
+	glDeleteFramebuffersARB(1, &gFramebufferObject);
+	gFramebufferObject = 0;
+	glDeleteTextures(1, &gFramebufferTexture);
+	gFramebufferTexture = 0;
+	glDeleteRenderbuffersARB(1, &gDepthRenderbufferObject);
+	gDepthRenderbufferObject = 0;
 }

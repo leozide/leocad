@@ -12,6 +12,7 @@
 #include "lc_colorlistwidget.h"
 #include "keyboard.h"
 #include "system.h"
+#include "mainwnd.h"
 
 lcQMainWindow::lcQMainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -52,6 +53,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	{
 		lcGetActiveProject()->SetCurrentPiece(Info);
 		PiecePreview* Preview = (PiecePreview*)piecePreview->mWindow;
+		gMainWindow->mPreviewWidget = Preview;
 		Preview->SetCurrentPiece(Info);
 	}
 }

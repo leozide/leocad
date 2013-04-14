@@ -408,6 +408,7 @@ void lcQMainWindow::createToolBars()
 
 	colorList = new lcColorListWidget(partsSplitter);
 	colorLayout->addWidget(colorList);
+	connect(colorList, SIGNAL(colorChanged(int)), this, SLOT(colorChanged(int)));
 
 	partsLayout->addWidget(partsSplitter, 0, 0, 1, 1);
 
@@ -474,10 +475,18 @@ void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetIt
 	if (info)
 	{
 		lcGetActiveProject()->SetCurrentPiece(info);
-		PiecePreview* Preview = (PiecePreview*)piecePreview->mWindow;
-		Preview->OnInitialUpdate();
-		Preview->SetCurrentPiece(info);
+		PiecePreview* preview = (PiecePreview*)piecePreview->mWindow;
+		preview->OnInitialUpdate();
+		preview->SetCurrentPiece(info);
 	}
+}
+
+void lcQMainWindow::colorChanged(int colorIndex)
+{
+	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, colorIndex);
+
+	PiecePreview* preview = (PiecePreview*)piecePreview->mWindow;
+	preview->Redraw();
 }
 
 void lcQMainWindow::updateAction(int newAction)

@@ -39,6 +39,7 @@ public:
 private slots:
 	void actionTriggered();
 	void partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+	void colorChanged(int colorIndex);
 
 private:
 	void createActions();

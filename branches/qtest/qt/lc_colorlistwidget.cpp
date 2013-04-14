@@ -10,7 +10,6 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 	mNumCells = 0;
 
 	mCurCell = 0;
-	mTracking = false;
 
 	mColumns = 14;
 	mRows = 0;
@@ -42,7 +41,7 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 
 	mPreferredHeight = TextHeight + 10 * mRows;
 
-	setFocusPolicy(Qt::ClickFocus);
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 lcColorListWidget::~lcColorListWidget()
@@ -81,6 +80,24 @@ bool lcColorListWidget::event(QEvent *event)
 
 		return true;
 	}
+	else if (event->type() == QEvent::ShortcutOverride)
+	{
+		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+
+		if (keyEvent->modifiers() == Qt::NoModifier || keyEvent->modifiers() == Qt::KeypadModifier)
+		{
+			switch (keyEvent->key())
+			{
+			case Qt::Key_Left:
+			case Qt::Key_Right:
+			case Qt::Key_Up:
+			case Qt::Key_Down:
+				keyEvent->accept();
+			default:
+				break;
+			}
+		}
+	}
 
 	return QWidget::event(event);
 }
@@ -93,18 +110,8 @@ void lcColorListWidget::mousePressEvent(QMouseEvent *event)
 			continue;
 
 		SelectCell(CellIdx);
-
-		grabMouse();
-		mMouseDown = event->pos();
-		mTracking = TRUE;
 		break;
 	}
-}
-
-void lcColorListWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-	mTracking = FALSE;
-	releaseMouse();
 }
 
 void lcColorListWidget::keyPressEvent(QKeyEvent *event)
@@ -207,22 +214,24 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
 
 	int CurCell = 0;
-	float CurY = 0.0f;
+	float GroupY = 0.0f;
+	int TotalRows = 1;
 
 	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
 	{
 		lcColorGroup* Group = &gColorGroups[GroupIdx];
 		int CurColumn = 0;
+		int NumRows = 0;
 
-		mGroupRects[GroupIdx] = QRect(0, (int)CurY, width(), mGroupRects[GroupIdx].height());
-		CurY += mGroupRects[GroupIdx].height();
+		mGroupRects[GroupIdx] = QRect(0, (int)GroupY, width(), mGroupRects[GroupIdx].height());
+		GroupY += mGroupRects[GroupIdx].height();
 
 		for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
 		{
-			const int Left = CurColumn * CellWidth - 1;
-			const int Right = (CurColumn + 1) * CellWidth;
-			const int Top = CurY;
-			const int Bottom = CurY + CellHeight;
+			const int Left = CellWidth * CurColumn - 1;
+			const int Right = (CurColumn + 1) * CellWidth - 1;
+			const int Top = GroupY + CellHeight * NumRows;
+			const int Bottom = (TotalRows != mRows) ? GroupY + CellHeight * (NumRows + 1) : height();
 
 			mCellRects[CurCell] = QRect(Left, Top, Right - Left, Bottom - Top);
 
@@ -230,14 +239,20 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 			if (CurColumn == mColumns)
 			{
 				CurColumn = 0;
-				CurY += CellHeight;
+				NumRows++;
+				TotalRows++;
 			}
 
 			CurCell++;
 		}
 
 		if (CurColumn != 0)
-			CurY += CellHeight;
+		{
+			NumRows++;
+			TotalRows++;
+		}
+
+		GroupY += NumRows * CellHeight;
 	}
 
 	mWidth = width();
@@ -308,6 +323,5 @@ void lcColorListWidget::SelectCell(int CellIdx)
 	update(mCellRects[CellIdx]);
 	mCurCell = CellIdx;
 
-//	CPiecesBar* Bar = (CPiecesBar*)GetParent();
-//	Bar->OnSelChangeColor();
+	emit colorChanged(mCellColors[mCurCell]);
 }

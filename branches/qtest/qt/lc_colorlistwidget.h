@@ -2,7 +2,6 @@
 #define LC_COLORLISTWIDGET_H
 
 #include <QWidget>
-#include "lc_global.h" // TODO: wrong include
 #include "lc_colors.h"
 
 class lcColorListWidget : public QWidget
@@ -15,12 +14,14 @@ public:
 
 	QSize sizeHint() const;
 
+signals:
+	void colorChanged(int colorIndex);
+
 protected:
 	bool event(QEvent *event);
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
 	void keyPressEvent(QKeyEvent *event);
 
 	void SelectCell(int CellIdx);
@@ -37,8 +38,6 @@ protected:
 	int mPreferredHeight;
 
 	int mCurCell;
-	QPoint mMouseDown;
-	bool mTracking;
 };
 
 #endif // LC_COLORLISTWIDGET_H

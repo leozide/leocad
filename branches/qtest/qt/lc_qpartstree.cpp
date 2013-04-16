@@ -28,6 +28,7 @@ static int lcQPartsTreeSortFunc(const PieceInfo* a, const PieceInfo* b, void* so
 lcQPartsTree::lcQPartsTree(QWidget *parent) :
     QTreeWidget(parent)
 {
+	setDragEnabled(true);
 	setHeaderHidden(true);
 	connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(itemExpanded(QTreeWidgetItem*)));
 
@@ -114,4 +115,24 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 	}
 
 	expandedItem->setData(0, ExpandedOnceRole, QVariant(true));
+}
+
+void lcQPartsTree::startDrag(Qt::DropActions supportedActions)
+{
+	PieceInfo *info = (PieceInfo*)currentItem()->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+
+	if (!info)
+		return;
+
+	QByteArray itemData;
+	QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+	dataStream << QString(info->m_strName);
+
+	QMimeData *mimeData = new QMimeData;
+	mimeData->setData("application/vnd.leocad-part", itemData);
+
+	QDrag *drag = new QDrag(this);
+	drag->setMimeData(mimeData);
+
+	drag->exec(Qt::CopyAction);
 }

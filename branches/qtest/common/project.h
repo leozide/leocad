@@ -193,6 +193,8 @@ public:
 	void DeleteContents(bool bUndo); // delete doc items etc
 	void LoadDefaults(bool cameras);
 	void BeginPieceDrop(PieceInfo* Info);
+	void OnPieceDropMove(int x, int y);
+	void EndPieceDrop(bool Accept);
 	void BeginColorDrop();
 
 	void GetPiecesUsed(ObjArray<lcPiecesUsedEntry>& PiecesUsed) const;
@@ -333,10 +335,8 @@ protected:
 	// State variables
 	int mTransformType;
 	int m_nCurAction;
-	int m_PreviousAction;
-	bool m_RestoreAction;
 	PieceInfo* m_pCurPiece;
-	PieceInfo* m_PreviousPiece;
+	PieceInfo* mDropPiece;
 	unsigned char m_nCurColor;
 	bool m_bAnimation;
 	bool m_bAddKeys;

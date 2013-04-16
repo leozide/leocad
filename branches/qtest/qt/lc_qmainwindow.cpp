@@ -34,8 +34,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	centralWidget = new lcGLWidget(previewFrame, NULL, new View(lcGetActiveProject(), NULL));
-	centralWidget->setFocusPolicy(Qt::StrongFocus);
+	centralWidget = new lcGLWidget(previewFrame, NULL, new View(lcGetActiveProject(), NULL), true);
 	previewLayout->addWidget(centralWidget, 0, 0, 1, 1);
 
 	createActions();
@@ -388,7 +387,7 @@ void lcQMainWindow::createToolBars()
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	piecePreview = new lcGLWidget(previewFrame, centralWidget, new PiecePreview(NULL));
+	piecePreview = new lcGLWidget(previewFrame, centralWidget, new PiecePreview(NULL), false);
 	piecePreview->preferredSize = QSize(200, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 

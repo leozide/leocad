@@ -13,7 +13,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	QGridLayout *previewLayout = new QGridLayout(ui->minifigFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	lcGLWidget *minifigWidget = new lcGLWidget(NULL, NULL, (GLWindow*)data); // TODO: share lists
+	lcGLWidget *minifigWidget = new lcGLWidget(NULL, NULL, (GLWindow*)data, false); // TODO: share lists
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 

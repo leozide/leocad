@@ -3,7 +3,7 @@
 #include "glwindow.h"
 #include <QtGui>
 
-lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window)
+lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, bool view)
 	: QGLWidget(parent, share)
 {
 	mWindow = window;
@@ -14,6 +14,13 @@ lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window)
 
 	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
+
+	isView = view;
+	if (isView)
+	{
+		setFocusPolicy(Qt::StrongFocus);
+		setAcceptDrops(true);
+	}
 }
 
 QSize lcGLWidget::sizeHint() const
@@ -86,4 +93,56 @@ void lcGLWidget::mouseMoveEvent(QMouseEvent *event)
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
 
 	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift);
+}
+
+#include "project.h"
+#include "lc_library.h"
+#include "lc_application.h"
+
+void lcGLWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (isView && event->mimeData()->hasFormat("application/vnd.leocad-part"))
+	{
+		event->acceptProposedAction();
+
+		QByteArray pieceData = event->mimeData()->data("application/vnd.leocad-part");
+		QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
+		QString id;
+
+		dataStream >> id;
+
+		lcGetActiveProject()->BeginPieceDrop(lcGetPiecesLibrary()->FindPiece(id.toLocal8Bit().data(), false));
+	}
+	else
+		event->ignore();
+}
+
+void lcGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
+{
+	if (!isView)
+		return;
+
+	lcGetActiveProject()->EndPieceDrop(false);
+
+	event->accept();
+}
+
+void lcGLWidget::dragMoveEvent(QDragMoveEvent *event)
+{
+	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
+		return;
+
+	lcGetActiveProject()->OnPieceDropMove(event->pos().x(), height() - event->pos().y() - 1);
+
+	event->accept();
+}
+
+void lcGLWidget::dropEvent(QDropEvent *event)
+{
+	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
+		return;
+
+	lcGetActiveProject()->EndPieceDrop(true);
+
+	event->accept();
 }

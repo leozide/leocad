@@ -55,6 +55,7 @@ Project::Project()
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
+	mDropPiece = NULL;
 	m_pPieces = NULL;
 	m_pLights = NULL;
 	m_pGroups = NULL;
@@ -286,7 +287,6 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strBackground, lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE));
 	m_pTerrain->LoadDefaults(true);
 	m_OverlayActive = false;
-	m_RestoreAction = false;
 
 	for (i = 0; i < m_ViewList.GetSize (); i++)
 	{
@@ -2011,17 +2011,18 @@ void Project::RenderSceneObjects(View* view)
 #endif
 
 	// Draw cameras & lights
-	if (m_nCurAction == LC_ACTION_INSERT)
+	if (m_nCurAction == LC_ACTION_INSERT || mDropPiece)
 	{
 		lcVector3 Pos;
 		lcVector4 Rot;
 		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Pos, Rot);
+		PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
 
 		glPushMatrix();
 		glTranslatef(Pos[0], Pos[1], Pos[2]);
 		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
 		glLineWidth(2*m_fLineWidth);
-		m_pCurPiece->RenderPiece(m_nCurColor);
+		PreviewPiece->RenderPiece(m_nCurColor);
 		glLineWidth(m_fLineWidth);
 		glPopMatrix();
 	}
@@ -2126,6 +2127,9 @@ void Project::RenderSceneObjects(View* view)
 
 void Project::RenderOverlays(View* view)
 {
+	if (mDropPiece)
+		return;
+
 	// Draw the selection rectangle.
 	if ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE))
 	{
@@ -6387,7 +6391,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 void Project::SetAction(int nAction)
 {
-	m_PreviousAction = m_nCurAction;
 	m_nCurAction = nAction;
 
 	gMainWindow->UpdateAction(m_nCurAction);
@@ -6869,164 +6872,201 @@ bool Project::StopTracking(bool bAccept)
 
 	if (bAccept)
 	{
-		switch (Action)
+		if (mDropPiece)
 		{
-			case LC_ACTION_SELECT:
+			int x = m_nDownX;
+			int y = m_nDownY;
+
+			if ((x > 0) && (x < m_ActiveView->GetWidth()) && (y > 0) && (y < m_ActiveView->GetHeight()))
 			{
-				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
+				lcVector3 Pos;
+				lcVector4 Rot;
+
+				GetPieceInsertPosition(m_ActiveView, x, y, Pos, Rot);
+
+				Piece* pPiece = new Piece(mDropPiece);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
+				pPiece->SetColorIndex(m_nCurColor);
+
+				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				SelectAndFocusNone(false);
+				pPiece->CreateName(m_pPieces);
+				AddPiece(pPiece);
+				SystemPieceComboAdd(mDropPiece->m_strDescription);
+				pPiece->Select (true, true, false);
+
+				if (mDropPiece)
 				{
-					// Find objects inside the rectangle.
-					PtrArray<Object> Objects;
-					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
+					mDropPiece->Release();
+					mDropPiece = NULL;
+				}
 
-					// Deselect old pieces.
-					bool Control = Sys_KeyDown(KEY_CONTROL);
-					SelectAndFocusNone(Control);
+				UpdateSelection();
+				UpdateAllViews();
+				SystemUpdateFocus(pPiece);
 
-					// Select new pieces.
-					for (int i = 0; i < Objects.GetSize(); i++)
+				SetModifiedFlag(true);
+				CheckPoint("Inserting");
+			}
+		}
+		else
+		{
+			switch (Action)
+			{
+				case LC_ACTION_SELECT:
+				{
+					if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 					{
-						if (Objects[i]->GetType() == LC_OBJECT_PIECE)
+						// Find objects inside the rectangle.
+						PtrArray<Object> Objects;
+						FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
+
+						// Deselect old pieces.
+						bool Control = Sys_KeyDown(KEY_CONTROL);
+						SelectAndFocusNone(Control);
+
+						// Select new pieces.
+						for (int i = 0; i < Objects.GetSize(); i++)
 						{
-							Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
-							if (pGroup != NULL)
+							if (Objects[i]->GetType() == LC_OBJECT_PIECE)
 							{
-								for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-									if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-											(pPiece->GetTopGroup() == pGroup))
-										pPiece->Select (true, false, false);
+								Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
+								if (pGroup != NULL)
+								{
+									for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+										if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+												(pPiece->GetTopGroup() == pGroup))
+											pPiece->Select (true, false, false);
+								}
+								else
+									Objects[i]->Select(true, false, true);
 							}
 							else
 								Objects[i]->Select(true, false, true);
 						}
-						else
-							Objects[i]->Select(true, false, true);
 					}
-				}
 
-				// Update screen and UI.
-				UpdateSelection();
-				UpdateAllViews();
-				SystemUpdateFocus(NULL);
-
-			} break;
-
-			case LC_ACTION_MOVE:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Moving");
-			} break;
-
-			case LC_ACTION_ROTATE:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Rotating");
-			} break;
-
-			case LC_ACTION_CAMERA:
-			{
-				gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			} break;
-
-			case LC_ACTION_SPOTLIGHT:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			} break;
-
-			case LC_ACTION_ZOOM:
-			case LC_ACTION_PAN:
-			case LC_ACTION_ROTATE_VIEW:
-			case LC_ACTION_ROLL:
-			{
-				// For some reason the scene doesn't get redrawn when changing a camera but it does
-				// when moving things around, so manually get the full scene rendered again.
-				if (m_nDetail & LC_DET_FAST)
+					// Update screen and UI.
+					UpdateSelection();
 					UpdateAllViews();
-			} break;
+					SystemUpdateFocus(NULL);
 
-			case LC_ACTION_ZOOM_REGION:
-			{
-				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
-				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = m_ActiveView->mCamera;
+				} break;
 
-				const lcMatrix44& ModelView = Cam->mWorldView;
-				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
-
-				// Find out the top-left and bottom-right corners in screen coordinates.
-				float Left, Top, Bottom, Right;
-
-				if (m_OverlayTrackStart[0] < m_nDownX)
+				case LC_ACTION_MOVE:
 				{
-					Left = m_OverlayTrackStart[0];
-					Right = (float)m_nDownX;
-				}
-				else
+					SetModifiedFlag(true);
+					CheckPoint("Moving");
+				} break;
+
+				case LC_ACTION_ROTATE:
 				{
-					Left = (float)m_nDownX;
-					Right = m_OverlayTrackStart[0];
-				}
+					SetModifiedFlag(true);
+					CheckPoint("Rotating");
+				} break;
 
-				if (m_OverlayTrackStart[1] > m_nDownY)
+				case LC_ACTION_CAMERA:
 				{
-					Top = m_OverlayTrackStart[1];
-					Bottom = (float)m_nDownY;
-				}
-				else
+					gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+					SetModifiedFlag(true);
+					CheckPoint("Inserting");
+				} break;
+
+				case LC_ACTION_SPOTLIGHT:
 				{
-					Top = (float)m_nDownY;
-					Bottom = m_OverlayTrackStart[1];
-				}
+					SetModifiedFlag(true);
+					CheckPoint("Inserting");
+				} break;
 
-				// Unproject screen points to world space.
-				lcVector3 Points[3] =
+				case LC_ACTION_ZOOM:
+				case LC_ACTION_PAN:
+				case LC_ACTION_ROTATE_VIEW:
+				case LC_ACTION_ROLL:
 				{
-					lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-					lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
-					lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
-				};
+					// For some reason the scene doesn't get redrawn when changing a camera but it does
+					// when moving things around, so manually get the full scene rendered again.
+					if (m_nDetail & LC_DET_FAST)
+						UpdateAllViews();
+				} break;
 
-				lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
+				case LC_ACTION_ZOOM_REGION:
+				{
+					int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+					float Aspect = (float)Viewport[2]/(float)Viewport[3];
+					Camera* Cam = m_ActiveView->mCamera;
 
-				// Center camera.
-				lcVector3 Eye = Cam->mPosition;
-				Eye = Eye + (Points[0] - Points[1]);
+					const lcMatrix44& ModelView = Cam->mWorldView;
+					lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
 
-				lcVector3 Target = Cam->mTargetPosition;
-				Target = Target + (Points[0] - Points[1]);
+					// Find out the top-left and bottom-right corners in screen coordinates.
+					float Left, Top, Bottom, Right;
 
-				// Zoom in/out.
-				float RatioX = (Right - Left) / Viewport[2];
-				float RatioY = (Top - Bottom) / Viewport[3];
-				float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
+					if (m_OverlayTrackStart[0] < m_nDownX)
+					{
+						Left = m_OverlayTrackStart[0];
+						Right = (float)m_nDownX;
+					}
+					else
+					{
+						Left = (float)m_nDownX;
+						Right = m_OverlayTrackStart[0];
+					}
 
-				lcVector3 Dir = Points[1] - Points[2];
-				Eye = Eye + Dir * ZoomFactor;
-				Target = Target + Dir * ZoomFactor;
+					if (m_OverlayTrackStart[1] > m_nDownY)
+					{
+						Top = m_OverlayTrackStart[1];
+						Bottom = (float)m_nDownY;
+					}
+					else
+					{
+						Top = (float)m_nDownY;
+						Bottom = m_OverlayTrackStart[1];
+					}
 
-				// Change the camera and redraw.
-				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
-				Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
-				Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+					// Unproject screen points to world space.
+					lcVector3 Points[3] =
+					{
+						lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
+						lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
+						lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
+					};
 
-				SystemUpdateFocus(NULL);
-				UpdateAllViews();
-			} break;
+					lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
 
-			case LC_ACTION_INSERT:
-			case LC_ACTION_LIGHT:
-			case LC_ACTION_ERASER:
-			case LC_ACTION_PAINT:
-				break;
-		}
+					// Center camera.
+					lcVector3 Eye = Cam->mPosition;
+					Eye = Eye + (Points[0] - Points[1]);
 
-		if (m_RestoreAction)
-		{
-			SetAction(m_PreviousAction);
-			m_RestoreAction = false;
+					lcVector3 Target = Cam->mTargetPosition;
+					Target = Target + (Points[0] - Points[1]);
+
+					// Zoom in/out.
+					float RatioX = (Right - Left) / Viewport[2];
+					float RatioY = (Top - Bottom) / Viewport[3];
+					float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
+
+					lcVector3 Dir = Points[1] - Points[2];
+					Eye = Eye + Dir * ZoomFactor;
+					Target = Target + Dir * ZoomFactor;
+
+					// Change the camera and redraw.
+					Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Eye, LC_CK_EYE);
+					Cam->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Target, LC_CK_TARGET);
+					Cam->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+					SystemUpdateFocus(NULL);
+					UpdateAllViews();
+				} break;
+
+				case LC_ACTION_INSERT:
+				case LC_ACTION_LIGHT:
+				case LC_ACTION_ERASER:
+				case LC_ACTION_PAINT:
+					break;
+			}
 		}
 	}
 	else if (m_pTrackFile != NULL)
@@ -7037,24 +7077,17 @@ bool Project::StopTracking(bool bAccept)
 		}
 		else
 		{
-			if (m_nCurAction == LC_ACTION_INSERT)
-			{
-				m_pCurPiece->Release();
-				m_pCurPiece = m_PreviousPiece;
-				m_PreviousPiece = NULL;
-
-				if (m_RestoreAction)
-				{
-					SetAction(m_PreviousAction);
-					m_RestoreAction = false;
-				}
-			}
-
 			DeleteContents (true);
 			FileLoad (m_pTrackFile, true, false);
 			delete m_pTrackFile;
 			m_pTrackFile = NULL;
 		}
+	}
+
+	if (mDropPiece)
+	{
+		mDropPiece->Release();
+		mDropPiece = NULL;
 	}
 
 	return true;
@@ -7781,20 +7814,38 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 void Project::BeginPieceDrop(PieceInfo* Info)
 {
 	StartTracking(LC_TRACK_LEFT);
-	SetAction(LC_ACTION_INSERT);
-	m_RestoreAction = true;
 
-	m_PreviousPiece = m_pCurPiece;
+	mDropPiece = Info;
+	mDropPiece->AddRef();
+}
 
-	m_pCurPiece = Info;
-	m_pCurPiece->AddRef();
+void Project::OnPieceDropMove(int x, int y)
+{
+	if (!mDropPiece)
+		return;
+
+	if (m_nDownX != x || m_nDownY != y)
+	{
+		m_nDownX = x;
+		m_nDownY = y;
+
+		UpdateAllViews();
+	}
+}
+
+void Project::EndPieceDrop(bool Accept)
+{
+	StopTracking(Accept);
+
+	if (!Accept)
+		UpdateAllViews();
 }
 
 void Project::BeginColorDrop()
 {
 	StartTracking(LC_TRACK_LEFT);
 	SetAction(LC_ACTION_PAINT);
-	m_RestoreAction = true;
+//	m_RestoreAction = true;
 }
 
 void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift)
@@ -8170,48 +8221,6 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 
 void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift)
 {
-	if (m_nTracking == LC_TRACK_LEFT)
-	{
-		// Dragging a new piece from the tree.
-		if (m_nCurAction == LC_ACTION_INSERT)
-		{
-			if ((x > 0) && (x < view->GetWidth()) && (y > 0) && (y < view->GetHeight()))
-			{
-				lcVector3 Pos;
-				lcVector4 Rot;
-
-				GetPieceInsertPosition(view, x, y, Pos, Rot);
-
-				Piece* pPiece = new Piece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
-				pPiece->SetColorIndex(m_nCurColor);
-
-				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
-				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-
-				SelectAndFocusNone(false);
-				pPiece->CreateName(m_pPieces);
-				AddPiece(pPiece);
-				pPiece->Select (true, true, false);
-				UpdateSelection();
-				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
-				SystemUpdateFocus(pPiece);
-
-				SetAction(LC_ACTION_SELECT);
-				m_RestoreAction = false;
-				StopTracking(false);
-
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			}
-
-			m_pCurPiece->Release();
-			m_pCurPiece = m_PreviousPiece;
-			m_PreviousPiece = NULL;
-		}
-	}
-
 	StopTracking(true);
 }
 

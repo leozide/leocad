@@ -76,7 +76,7 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 void GL_InitializeSharedExtensions(void* Data)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
-
+return;
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
 		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB", Data);

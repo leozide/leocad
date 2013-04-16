@@ -12,6 +12,7 @@ public:
 	
 	QSize sizeHint() const;
 	void updateCategories();
+	void startDrag(Qt::DropActions supportedActions);
 
 	enum
 	{

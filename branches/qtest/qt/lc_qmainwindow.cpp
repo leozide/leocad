@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_qmainwindow.h"
+#include "lc_qutils.h"
 #include "lc_glwidget.h"
 #include "lc_library.h"
 #include "lc_application.h"
@@ -395,8 +396,13 @@ void lcQMainWindow::createToolBars()
 	partsTree->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	connect(partsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(partsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
-	pieceCombo = new QComboBox(partsSplitter);
-	pieceCombo->setEditable(true);
+	partSearch = new QLineEdit(partsSplitter);
+	connect(partSearch, SIGNAL(returnPressed()), this, SLOT(partSearchReturn()));
+	connect(partSearch, SIGNAL(textChanged(QString)), this, SLOT(partSearchChanged(QString)));
+
+	QCompleter *completer = new QCompleter(new lcQPartsListModel(), this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	partSearch->setCompleter(completer);
 
 	QFrame *colorFrame = new QFrame(partsSplitter);
 	colorFrame->setFrameShape(QFrame::StyledPanel);
@@ -486,6 +492,42 @@ void lcQMainWindow::colorChanged(int colorIndex)
 
 	PiecePreview* preview = (PiecePreview*)piecePreview->mWindow;
 	preview->Redraw();
+}
+
+void lcQMainWindow::partSearchReturn()
+{
+	partsTree->searchParts(partSearch->text());
+}
+
+void lcQMainWindow::partSearchChanged(const QString& text)
+{
+	const char *searchString = text.toLocal8Bit().data();
+	int length = strlen(searchString);
+
+	if (!length)
+		return;
+
+	lcPiecesLibrary *library = lcGetPiecesLibrary();
+	PieceInfo* bestMatch = NULL;
+
+	for (int partIndex = 0; partIndex < library->mPieces.GetSize(); partIndex++)
+	{
+		PieceInfo *info = library->mPieces[partIndex];
+
+		if (strncasecmp(searchString, info->m_strDescription, length) == 0)
+		{
+			if (!bestMatch || strcasecmp(bestMatch->m_strDescription, info->m_strDescription) > 0)
+				bestMatch = info;
+		}
+		else if (strncasecmp(searchString, info->m_strName, length) == 0)
+		{
+			if (!bestMatch || strcasecmp(bestMatch->m_strName, info->m_strName) > 0)
+				bestMatch = info;
+		}
+	}
+
+	if (bestMatch)
+		partsTree->setCurrentPart(bestMatch);
 }
 
 void lcQMainWindow::updateAction(int newAction)

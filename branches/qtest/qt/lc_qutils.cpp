@@ -1,5 +1,8 @@
 #include "lc_global.h"
 #include "lc_qutils.h"
+#include "lc_application.h"
+#include "lc_library.h"
+#include "pieceinf.h"
 
 // Resize all columns to content except for one stretching column. (taken from QT creator)
 lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
@@ -38,4 +41,35 @@ bool lcQTreeWidgetColumnStretcher::eventFilter(QObject *obj, QEvent *ev)
 		}
 	}
 	return false;
+}
+
+lcQPartsListModel::lcQPartsListModel(QObject *parent)
+	: QAbstractListModel(parent)
+{
+}
+
+int lcQPartsListModel::rowCount(const QModelIndex &parent) const
+{
+	if (parent.isValid())
+		return 0;
+
+	return lcGetPiecesLibrary()->mPieces.GetSize() * 2;
+}
+
+QVariant lcQPartsListModel::data(const QModelIndex &index, int role) const
+{
+	int partIndex = index.row() / 2;
+
+	if (partIndex < 0 || partIndex >= lcGetPiecesLibrary()->mPieces.GetSize())
+		return QVariant();
+
+	if (role == Qt::DisplayRole || role == Qt::EditRole)
+	{
+		if (index.row() & 1)
+			return QString(lcGetPiecesLibrary()->mPieces[partIndex]->m_strName);
+		else
+			return QString(lcGetPiecesLibrary()->mPieces[partIndex]->m_strDescription);
+	}
+
+	return QVariant();
 }

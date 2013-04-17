@@ -13,4 +13,15 @@ public:
 	const int m_columnToStretch;
 };
 
+class lcQPartsListModel : public QAbstractListModel
+{
+	Q_OBJECT
+
+public:
+	lcQPartsListModel(QObject *parent = 0);
+
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	QVariant data(const QModelIndex &index, int role) const;
+};
+
 #endif // _LC_QUTILS_H_

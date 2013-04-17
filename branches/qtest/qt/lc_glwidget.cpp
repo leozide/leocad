@@ -1,7 +1,9 @@
 #include "lc_global.h"
 #include "lc_glwidget.h"
 #include "glwindow.h"
-#include <QtGui>
+#include "project.h"
+#include "lc_library.h"
+#include "lc_application.h"
 
 lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, bool view)
 	: QGLWidget(parent, share)
@@ -94,10 +96,6 @@ void lcGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift);
 }
-
-#include "project.h"
-#include "lc_library.h"
-#include "lc_application.h"
 
 void lcGLWidget::dragEnterEvent(QDragEnterEvent *event)
 {

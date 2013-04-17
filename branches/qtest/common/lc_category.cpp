@@ -76,12 +76,14 @@ void lcResetCategories(ObjArray<lcLibraryCategory>& Categories, bool BuiltInLibr
 	};
 
 	lcMemFile File;
+
 	if (BuiltInLibrary)
 		File.WriteBuffer(BuiltInCategories, sizeof(BuiltInCategories));
 	else
 		File.WriteBuffer(DefaultCategories, sizeof(DefaultCategories));
 	File.Seek(0, SEEK_SET);
-	lcLoadCategories(File, gCategories);
+
+	lcLoadCategories(File, Categories);
 }
 
 bool lcLoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories)

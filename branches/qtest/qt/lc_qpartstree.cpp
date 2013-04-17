@@ -55,13 +55,40 @@ void lcQPartsTree::updateCategories()
 		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
 		new QTreeWidgetItem(categoryItem);
 	}
+
+	searchResultsItem = new QTreeWidgetItem(this, QStringList(tr("Search Results")));
+}
+
+void lcQPartsTree::searchParts(const QString& searchString)
+{
+	while (QTreeWidgetItem *item = searchResultsItem->child(0))
+		delete item;
+
+	lcPiecesLibrary* library = lcGetPiecesLibrary();
+	PtrArray<PieceInfo> singleParts, groupedParts;
+
+	library->SearchPieces(searchString.toLocal8Bit().data(), false, singleParts, groupedParts);
+	singleParts.Sort(lcQPartsTreeSortFunc, NULL);
+
+	for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
+	{
+		PieceInfo* partInfo = singleParts[partIndex];
+
+		QTreeWidgetItem* partItem = new QTreeWidgetItem(searchResultsItem, QStringList(partInfo->m_strDescription));
+		partItem->setData(0, PartInfoRole, qVariantFromValue((void*)partInfo));
+		partItem->setToolTip(0, QString("%1 (%2)").arg(partInfo->m_strDescription, partInfo->m_strName));
+	}
+
+	setCurrentItem(searchResultsItem);
+	expandItem(searchResultsItem);
+	scrollToItem(searchResultsItem, PositionAtTop);
 }
 
 void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 {
 	QTreeWidgetItem *parent = expandedItem->parent();
 
-	if (parent)
+	if (parent || expandedItem == searchResultsItem)
 		return;
 
 	if (expandedItem->data(0, ExpandedOnceRole).toBool())
@@ -115,6 +142,61 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 	}
 
 	expandedItem->setData(0, ExpandedOnceRole, QVariant(true));
+}
+
+void lcQPartsTree::setCurrentPart(PieceInfo *part)
+{
+	lcPiecesLibrary* library = lcGetPiecesLibrary();
+	int categoryIndex;
+
+	for (categoryIndex = 0; categoryIndex < gCategories.GetSize(); categoryIndex++)
+		if (library->PieceInCategory(part, gCategories[categoryIndex].Keywords))
+			break;
+
+	if (categoryIndex == gCategories.GetSize())
+		return;
+
+	QTreeWidgetItem *categoryItem = topLevelItem(categoryIndex);
+
+	expandItem(categoryItem);
+
+	if (part->IsPatterned())
+	{
+		char parentName[LC_PIECE_NAME_LEN];
+		strcpy(parentName, part->m_strName);
+		*strchr(parentName, 'P') = '\0';
+
+		PieceInfo *parentPart = library->FindPiece(parentName, false);
+
+		if (parentPart)
+		{
+			for (int itemIndex = 0; itemIndex < categoryItem->childCount(); itemIndex++)
+			{
+				QTreeWidgetItem *item = categoryItem->child(itemIndex);
+				PieceInfo *info = (PieceInfo*)item->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+
+				if (info == parentPart)
+				{
+					expandItem(item);
+					categoryItem = item;
+					break;
+				}
+			}
+		}
+	}
+
+	for (int itemIndex = 0; itemIndex < categoryItem->childCount(); itemIndex++)
+	{
+		QTreeWidgetItem *item = categoryItem->child(itemIndex);
+		PieceInfo *info = (PieceInfo*)item->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+
+		if (info == part)
+		{
+			setCurrentItem(item);
+			scrollToItem(item);
+			break;
+		}
+	}
 }
 
 void lcQPartsTree::startDrag(Qt::DropActions supportedActions)

@@ -40,6 +40,8 @@ private slots:
 	void actionTriggered();
 	void partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void colorChanged(int colorIndex);
+	void partSearchReturn();
+	void partSearchChanged(const QString& text);
 
 private:
 	void createActions();
@@ -69,7 +71,7 @@ private:
 
 	lcGLWidget *piecePreview;
 	lcQPartsTree *partsTree;
-	QComboBox *pieceCombo;
+	QLineEdit *partSearch;
 	lcColorListWidget *colorList;
 	QLineEdit *transformX;
 	QLineEdit *transformY;

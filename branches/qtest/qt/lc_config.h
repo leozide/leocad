@@ -26,5 +26,9 @@ typedef quint64 lcuint64;
 #define LC_BIG_ENDIAN
 #endif
 
-#endif // _LC_CONFIG_H_
+#ifdef Q_OS_WIN
+#define strcasecmp stricmp
+#define strncasecmp strnicmp
+#endif
 
+#endif // _LC_CONFIG_H_

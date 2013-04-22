@@ -39,8 +39,8 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	previewLayout->addWidget(centralWidget, 0, 0, 1, 1);
 
 	createActions();
-	createMenus();
 	createToolBars();
+	createMenus();
 	createStatusBar();
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -264,8 +264,6 @@ void lcQMainWindow::createMenus()
 	menuView = menuBar()->addMenu(tr("&View"));
 	menuView->addAction(actions[LC_VIEW_PREFERENCES]);
 	menuView->addSeparator();
-	menuView->addAction(actions[LC_VIEW_ZOOM_IN]);
-	menuView->addAction(actions[LC_VIEW_ZOOM_OUT]);
 	menuView->addAction(actions[LC_VIEW_ZOOM_EXTENTS]);
 	QMenu* menuViewpoints = menuView->addMenu(tr("Viewpoints"));
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_FRONT]);
@@ -281,21 +279,38 @@ void lcQMainWindow::createMenus()
 	menuStep->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	menuStep->addAction(actions[LC_VIEW_TIME_NEXT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_LAST]);
+	//LC_VIEW_TIME_STOP
+	//LC_VIEW_TIME_PLAY
 	menuStep->addSeparator();
 	menuStep->addAction(actions[LC_VIEW_TIME_INSERT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_DELETE]);
+	// TODO: split horizontal/vertical, delete view, reset views
+	menuView->addSeparator();
+	QMenu *menuToolBars = menuView->addMenu(tr("Toolbars"));
+	menuToolBars->addAction(partsToolBar->toggleViewAction());
+	menuToolBars->addAction(propertiesToolBar->toggleViewAction());
+	menuToolBars->addSeparator();
+	menuToolBars->addAction(standardToolBar->toggleViewAction());
+	menuToolBars->addAction(toolsToolBar->toggleViewAction());
+	menuToolBars->addAction(timeToolBar->toggleViewAction());
+	QAction *fullScreenAction = new QAction(tr("Full Screen"), this);
+	menuView->addAction(fullScreenAction);
+	connect(fullScreenAction, SIGNAL(triggered()), this, SLOT(toggleFullScreen()));
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 	menuPiece->addAction(actions[LC_PIECE_INSERT]);
 	menuPiece->addAction(actions[LC_PIECE_DELETE]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
 	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
+	//	LC_PIECE_COPY_KEYS
 	menuPiece->addSeparator();
 	menuPiece->addAction(actions[LC_PIECE_GROUP]);
 	menuPiece->addAction(actions[LC_PIECE_UNGROUP]);
 	menuPiece->addAction(actions[LC_PIECE_GROUP_REMOVE]);
 	menuPiece->addAction(actions[LC_PIECE_GROUP_ADD]);
 	menuPiece->addAction(actions[LC_PIECE_GROUP_EDIT]);
+//	LC_PIECE_SHOW_EARLIER,
+//	LC_PIECE_SHOW_LATER,
 	menuPiece->addSeparator();
 	menuPiece->addAction(actions[LC_PIECE_HIDE_SELECTED]);
 	menuPiece->addAction(actions[LC_PIECE_HIDE_UNSELECTED]);
@@ -372,6 +387,10 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
+	//LC_VIEW_TIME_STOP
+	//LC_VIEW_TIME_PLAY
+	//LC_VIEW_TIME_ANIMATION
+	//LC_VIEW_TIME_ADD_KEYS
 
 	partsToolBar = new QDockWidget(tr("Parts"), this);
 	partsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -418,7 +437,7 @@ void lcQMainWindow::createToolBars()
 	partsLayout->addWidget(partsSplitter, 0, 0, 1, 1);
 
 	partsToolBar->setWidget(partsContents);
-	addDockWidget(static_cast<Qt::DockWidgetArea>(2), partsToolBar);
+	addDockWidget(Qt::RightDockWidgetArea, partsToolBar);
 
 	propertiesToolBar = new QDockWidget(tr("Properties"), this);
 	propertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -432,6 +451,8 @@ void lcQMainWindow::createToolBars()
 	propertiesLayout->addWidget(label);
 
 	propertiesToolBar->setWidget(propertiesContents);
+	addDockWidget(Qt::RightDockWidgetArea, propertiesToolBar);
+
 	tabifyDockWidget(partsToolBar, propertiesToolBar);
 	partsToolBar->raise();
 }
@@ -457,6 +478,20 @@ void lcQMainWindow::closeEvent(QCloseEvent *event)
 		event->ignore();
 	else
 		event->accept();
+}
+
+QMenu *lcQMainWindow::createPopupMenu()
+{
+    QMenu *menuToolBars = new QMenu(this);
+
+	menuToolBars->addAction(partsToolBar->toggleViewAction());
+	menuToolBars->addAction(propertiesToolBar->toggleViewAction());
+	menuToolBars->addSeparator();
+	menuToolBars->addAction(standardToolBar->toggleViewAction());
+	menuToolBars->addAction(toolsToolBar->toggleViewAction());
+	menuToolBars->addAction(timeToolBar->toggleViewAction());
+
+	return menuToolBars;
 }
 
 void lcQMainWindow::actionTriggered()
@@ -528,6 +563,16 @@ void lcQMainWindow::partSearchChanged(const QString& text)
 
 	if (bestMatch)
 		partsTree->setCurrentPart(bestMatch);
+}
+
+void lcQMainWindow::toggleFullScreen()
+{
+	// todo: hide toolbars and menu
+	if (isFullScreen())
+		showNormal();
+	else
+		showFullScreen();
+
 }
 
 void lcQMainWindow::updateAction(int newAction)

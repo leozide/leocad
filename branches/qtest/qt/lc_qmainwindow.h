@@ -42,6 +42,7 @@ private slots:
 	void colorChanged(int colorIndex);
 	void partSearchReturn();
 	void partSearchChanged(const QString& text);
+	void toggleFullScreen();
 
 private:
 	void createActions();
@@ -50,6 +51,7 @@ private:
 	void createStatusBar();
 
 	void closeEvent(QCloseEvent *event);
+	QMenu *createPopupMenu();
 
 	lcGLWidget *centralWidget;
 	QAction *actions[LC_NUM_COMMANDS];

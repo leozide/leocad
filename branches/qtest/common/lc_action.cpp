@@ -856,28 +856,28 @@ lcAction gActions[LC_NUM_COMMANDS] =
 		"View.Time.First",
 		"First",
 		"Go to the first step of the model",
-		""
+		"Alt+Up"
 	},
 	// LC_VIEW_TIME_PREVIOUS
 	{
 		"View.Time.Previous",
 		"Previous",
 		"Go to the previous step",
-		""
+		"Alt+Left"
 	},
 	// LC_VIEW_TIME_NEXT
 	{
 		"View.Time.Next",
 		"Next",
 		"Go to the next step",
-		""
+		"Alt+Right"
 	},
 	// LC_VIEW_TIME_LAST
 	{
 		"View.Time.Last",
 		"Last",
 		"Go to the last step of the model",
-		""
+		"Alt+Down"
 	},
 	// LC_VIEW_TIME_STOP
 	{

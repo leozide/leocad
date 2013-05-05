@@ -20,6 +20,9 @@ typedef quint32 lcuint32;
 typedef qint64 lcint64;
 typedef quint64 lcuint64;
 
+#define LC_HAVE_JPEGLIB
+#define LC_HAVE_PNGLIB
+
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
 #define LC_LITTLE_ENDIAN
 #else

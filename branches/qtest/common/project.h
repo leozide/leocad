@@ -280,6 +280,7 @@ protected:
 
 	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
+	void Export3DStudio();
 	void ZoomExtents(int FirstView, int LastView);
 
 	bool m_bStopRender;

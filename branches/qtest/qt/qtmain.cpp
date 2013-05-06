@@ -138,6 +138,7 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_OPEN_PROJECT:
 	case LC_DIALOG_SAVE_PROJECT:
 	case LC_DIALOG_MERGE_PROJECT:
+	case LC_DIALOG_EXPORT_3DSTUDIO:
 	case LC_DIALOG_EXPORT_BRICKLINK:
 	case LC_DIALOG_EXPORT_CSV:
 	case LC_DIALOG_EXPORT_WAVEFRONT:
@@ -157,6 +158,10 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 			case LC_DIALOG_MERGE_PROJECT:
 				result = QFileDialog::getOpenFileName(parent, parent->tr("Merge Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+				break;
+
+			case LC_DIALOG_EXPORT_3DSTUDIO:
+				result = QFileDialog::getSaveFileName(parent, parent->tr("Export 3D Studio"), FileName, parent->tr("3DS Files (*.3ds);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_BRICKLINK:

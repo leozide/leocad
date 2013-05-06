@@ -3394,6 +3394,532 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	delete[] ColorsUsed;
 }
 
+void Project::Export3DStudio()
+{
+	if (!m_pPieces)
+	{
+		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	char FileName[LC_MAXPATH];
+	memset(FileName, 0, sizeof(FileName));
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_3DSTUDIO, FileName))
+		return;
+
+	lcDiskFile File;
+
+	if (!File.Open(FileName, "wb"))
+	{
+		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+		return;
+	}
+
+	long M3DStart = File.GetPosition();
+	File.WriteU16(0x4D4D); // CHK_M3DMAGIC
+	File.WriteU32(0);
+
+	File.WriteU16(0x0002); // CHK_M3D_VERSION
+	File.WriteU32(10);
+	File.WriteU32(3);
+
+	long MDataStart = File.GetPosition();
+	File.WriteU16(0x3D3D); // CHK_MDATA
+	File.WriteU32(0);
+
+	File.WriteU16(0x3D3E); // CHK_MESH_VERSION
+	File.WriteU32(10);
+	File.WriteU32(3);
+
+	File.WriteU16(0x0100); // CHK_MASTER_SCALE
+	File.WriteU32(10);
+	File.WriteFloat(1.0f);
+
+	const int MaterialNameLength = 11;
+	char MaterialName[32];
+
+	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	{
+		lcColor* Color = &gColorList[ColorIdx];
+
+		sprintf(MaterialName, "Material%03d", ColorIdx);
+
+		long MaterialStart = File.GetPosition();
+		File.WriteU16(0xAFFF); // CHK_MAT_ENTRY
+		File.WriteU32(0);
+
+		File.WriteU16(0xA000); // CHK_MAT_NAME
+		File.WriteU32(6 + MaterialNameLength + 1);
+		File.WriteBuffer(MaterialName, MaterialNameLength + 1);
+
+		File.WriteU16(0xA010); // CHK_MAT_AMBIENT
+		File.WriteU32(24);
+
+		File.WriteU16(0x0011); // CHK_COLOR_24
+		File.WriteU32(9);
+
+		File.WriteU8(floor(255.0 * Color->Value[0] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[1] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[2] + 0.5));
+
+		File.WriteU16(0x0012); // CHK_LIN_COLOR_24
+		File.WriteU32(9);
+
+		File.WriteU8(floor(255.0 * Color->Value[0] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[1] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[2] + 0.5));
+
+		File.WriteU16(0xA020); // CHK_MAT_AMBIENT
+		File.WriteU32(24);
+
+		File.WriteU16(0x0011); // CHK_COLOR_24
+		File.WriteU32(9);
+
+		File.WriteU8(floor(255.0 * Color->Value[0] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[1] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[2] + 0.5));
+
+		File.WriteU16(0x0012); // CHK_LIN_COLOR_24
+		File.WriteU32(9);
+
+		File.WriteU8(floor(255.0 * Color->Value[0] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[1] + 0.5));
+		File.WriteU8(floor(255.0 * Color->Value[2] + 0.5));
+
+		File.WriteU16(0xA030); // CHK_MAT_SPECULAR
+		File.WriteU32(24);
+
+		File.WriteU16(0x0011); // CHK_COLOR_24
+		File.WriteU32(9);
+
+		File.WriteU8(floor(255.0 * 0.9f + 0.5));
+		File.WriteU8(floor(255.0 * 0.9f + 0.5));
+		File.WriteU8(floor(255.0 * 0.9f + 0.5));
+
+		File.WriteU16(0x0012); // CHK_LIN_COLOR_24
+		File.WriteU32(9);
+
+		File.WriteU8(floor(255.0 * 0.9f + 0.5));
+		File.WriteU8(floor(255.0 * 0.9f + 0.5));
+		File.WriteU8(floor(255.0 * 0.9f + 0.5));
+
+		File.WriteU16(0xA040); // CHK_MAT_SHININESS
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * 0.25 + 0.5));
+
+		File.WriteU16(0xA041); // CHK_MAT_SHIN2PCT
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * 0.05 + 0.5));
+
+		File.WriteU16(0xA050); // CHK_MAT_TRANSPARENCY
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * (1.0f - Color->Value[3]) + 0.5));
+
+		File.WriteU16(0xA052); // CHK_MAT_XPFALL
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
+
+		File.WriteU16(0xA100); // CHK_MAT_SHADING
+		File.WriteU32(8);
+
+		File.WriteS16(3);
+
+		File.WriteU16(0xA053); // CHK_MAT_REFBLUR
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * 0.2 + 0.5));
+
+		File.WriteU16(0xA081); // CHK_MAT_TWO_SIDE
+		File.WriteU32(6);
+
+		File.WriteU16(0xA087); // CHK_MAT_WIRE_SIZE
+		File.WriteU32(10);
+
+		File.WriteFloat(1.0f);
+
+		File.WriteU16(0xA310); // CHK_MAT_ACUBIC
+		File.WriteU32(18);
+
+		File.WriteS8(0);
+		File.WriteS8(0);
+		File.WriteS16(0);
+		File.WriteS32(0);
+		File.WriteS32(0);
+
+		long MaterialEnd = File.GetPosition();
+		File.Seek(MaterialStart + 2, SEEK_SET);
+		File.WriteU32(MaterialEnd - MaterialStart);
+		File.Seek(MaterialEnd, SEEK_SET);
+	}
+
+	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+	{
+		PieceInfo* Info = piece->mPieceInfo;
+		lcMesh* Mesh = Info->mMesh;
+
+		if (Mesh->mIndexType == GL_UNSIGNED_INT)
+			continue;
+
+		long NamedObjectStart = File.GetPosition();
+		File.WriteU16(0x4000); // CHK_NAMED_OBJECT
+		File.WriteU32(0);
+
+		File.WriteBuffer(Info->m_strName, strlen(Info->m_strName) + 1);
+
+		long TriObjectStart = File.GetPosition();
+		File.WriteU16(0x4100); // CHK_N_TRI_OBJECT
+		File.WriteU32(0);
+
+		File.WriteU16(0x4110); // CHK_POINT_ARRAY
+		File.WriteU32(8 + 12 * Mesh->mNumVertices);
+
+		File.WriteU16(Mesh->mNumVertices);
+
+		float* Verts = (float*)Mesh->mVertexBuffer.mData;
+		const lcMatrix44& ModelWorld = piece->mModelWorld;
+
+		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+		{
+			lcVector3 Pos(Verts[VertexIdx * 3], Verts[VertexIdx * 3 + 1], Verts[VertexIdx * 3 + 2]);
+			Pos = lcMul31(Pos, ModelWorld);
+			File.WriteFloat(Pos[0]);
+			File.WriteFloat(Pos[1]);
+			File.WriteFloat(Pos[2]);
+		}
+
+		File.WriteU16(0x4160); // CHK_MESH_MATRIX
+		File.WriteU32(54);
+
+		lcMatrix44 Matrix = lcMatrix44Identity();
+		File.WriteFloats(Matrix[0], 3);
+		File.WriteFloats(Matrix[1], 3);
+		File.WriteFloats(Matrix[2], 3);
+		File.WriteFloats(Matrix[3], 3);
+
+		long FaceArrayStart = File.GetPosition();
+		File.WriteU16(0x4120); // CHK_FACE_ARRAY
+		File.WriteU32(0);
+
+		int NumTriangles = 0;
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			NumTriangles += Section->NumIndices / 3;
+		}
+
+		File.WriteU16(NumTriangles);
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			lcuint16* Indices = (lcuint16*)Mesh->mIndexBuffer.mData + Section->IndexOffset / sizeof(lcuint16);
+
+			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
+			{
+				File.WriteU16(Indices[IndexIdx + 0]);
+				File.WriteU16(Indices[IndexIdx + 1]);
+				File.WriteU16(Indices[IndexIdx + 2]);
+				File.WriteU16(7);
+			}
+		}
+
+		NumTriangles = 0;
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			int MaterialIndex = Section->ColorIndex == gDefaultColor ? piece->mColorIndex : Section->ColorIndex;
+
+			File.WriteU16(0x4130); // CHK_MSH_MAT_GROUP
+			File.WriteU32(6 + MaterialNameLength + 1 + 2 + 2 * Section->NumIndices / 3);
+
+			sprintf(MaterialName, "Material%03d", MaterialIndex);
+			File.WriteBuffer(MaterialName, MaterialNameLength + 1);
+
+			File.WriteU16(Section->NumIndices / 3);
+
+			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
+				File.WriteU16(NumTriangles++);
+
+			File.WriteU16(0x4150); // CHK_SMOOTH_GROUP
+			File.WriteU32(6 + 4 * Section->NumIndices / 3);
+
+			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
+				File.WriteU32(0);
+		}
+
+		long FaceArrayEnd = File.GetPosition();
+		File.Seek(FaceArrayStart + 2, SEEK_SET);
+		File.WriteU32(FaceArrayEnd - FaceArrayStart);
+		File.Seek(FaceArrayEnd, SEEK_SET);
+
+		long TriObjectEnd = File.GetPosition();
+		File.Seek(TriObjectStart + 2, SEEK_SET);
+		File.WriteU32(TriObjectEnd - TriObjectStart);
+		File.Seek(TriObjectEnd, SEEK_SET);
+
+		long NamedObjectEnd = File.GetPosition();
+		File.Seek(NamedObjectStart + 2, SEEK_SET);
+		File.WriteU32(NamedObjectEnd - NamedObjectStart);
+		File.Seek(NamedObjectEnd, SEEK_SET);
+	}
+
+	long MDataEnd = File.GetPosition();
+	File.Seek(MDataStart + 2, SEEK_SET);
+	File.WriteU32(MDataEnd - MDataStart);
+	File.Seek(MDataEnd, SEEK_SET);
+
+	long KFDataStart = File.GetPosition();
+	File.WriteU16(0xB000); // CHK_KFDATA
+	File.WriteU32(0);
+
+	const char* Name = "LEOCAD";
+	const int NameLength = 6;
+
+	File.WriteU16(0xB00A); // LIB3DS_KFHDR
+	File.WriteU32(6 + 2 + NameLength + 1 + 4);
+
+	File.WriteS16(5);
+	File.WriteBuffer(Name, NameLength + 1);
+	File.WriteS32(100);
+
+	File.WriteU16(0xB008); // CHK_KFSEG
+	File.WriteU32(14);
+
+	File.WriteU32(0);
+	File.WriteU32(100);
+
+	File.WriteU16(0xB009); // CHK_KFCURTIME
+	File.WriteU32(10);
+
+	File.WriteU32(0);
+
+	int NodeIdx = 0;
+
+	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+	{
+		PieceInfo* Info = piece->mPieceInfo;
+		lcMesh* Mesh = Info->mMesh;
+
+		if (Mesh->mIndexType == GL_UNSIGNED_INT)
+			continue;
+
+		long NodeStart = File.GetPosition();
+		File.WriteU16(0xB002); // CHK_OBJECT_NODE_TAG
+		File.WriteU32(0);
+
+		File.WriteU16(0xB030); // CHK_NODE_ID
+		File.WriteU32(8);
+
+		File.WriteS16(NodeIdx++);
+
+		File.WriteU16(0xB010); // CHK_NODE_HDR
+		File.WriteU32(6 + 1 + strlen(Info->m_strName) + 2 + 2 + 2);
+
+		File.WriteBuffer(Info->m_strName, strlen(Info->m_strName) + 1);
+		File.WriteU16(0);
+		File.WriteU16(0);
+		File.WriteU16(65535);
+
+		File.WriteU16(0xB013); // CHK_PIVOT
+		File.WriteU32(18);
+
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+
+		File.WriteU16(0xB020); // CHK_POS_TRACK_TAG
+		File.WriteU32(38);
+
+		File.WriteU16(0);
+		File.WriteU32(0);
+		File.WriteU32(0);
+		File.WriteU32(1);
+
+		File.WriteS32(0);
+		File.WriteU16(0);
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+
+		File.WriteU16(0xB021); // CHK_ROT_TRACK_TAG
+		File.WriteU32(42);
+
+		File.WriteU16(0);
+		File.WriteU32(0);
+		File.WriteU32(0);
+		File.WriteU32(1);
+
+		File.WriteS32(0);
+		File.WriteU16(0);
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+		File.WriteFloat(0.0f);
+
+		File.WriteU16(0xB022); // CHK_SCL_TRACK_TAG
+		File.WriteU32(38);
+
+		File.WriteU16(0);
+		File.WriteU32(0);
+		File.WriteU32(0);
+		File.WriteU32(1);
+
+		File.WriteS32(0);
+		File.WriteU16(0);
+		File.WriteFloat(1.0f);
+		File.WriteFloat(1.0f);
+		File.WriteFloat(1.0f);
+
+		long NodeEnd = File.GetPosition();
+		File.Seek(NodeStart + 2, SEEK_SET);
+		File.WriteU32(NodeEnd - NodeStart);
+		File.Seek(NodeEnd, SEEK_SET);
+	}
+
+	long KFDataEnd = File.GetPosition();
+	File.Seek(KFDataStart + 2, SEEK_SET);
+	File.WriteU32(KFDataEnd - KFDataStart);
+	File.Seek(KFDataEnd, SEEK_SET);
+
+	long M3DEnd = File.GetPosition();
+	File.Seek(M3DStart + 2, SEEK_SET);
+	File.WriteU32(M3DEnd - M3DStart);
+	File.Seek(M3DEnd, SEEK_SET);
+
+/*
+	Lib3dsFile* File = lib3ds_file_new();
+
+	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	{
+		lcColor* Color = &gColorList[ColorIdx];
+
+		Lib3dsMaterial* Material = lib3ds_material_new(NULL);
+		lib3ds_file_insert_material(File, Material, -1);
+
+		sprintf(Material->name, "Material%03d", ColorIdx);
+
+		Material->ambient[0] = Material->diffuse[0] = Color->Value[0];
+		Material->ambient[1] = Material->diffuse[1] = Color->Value[1];
+		Material->ambient[2] = Material->diffuse[2] = Color->Value[2];
+		Material->specular[0] = 0.9f;
+		Material->specular[1] = 0.9f;
+		Material->specular[2] = 0.9f;
+
+		Material->shininess = 0.25f;
+		Material->shin_strength = 0.05f;
+		Material->blur = 0.2f;
+
+		Material->transparency = 1.0f - Color->Value[3];
+
+		Material->shading = LIB3DS_SHADING_PHONG;
+		Material->two_sided = 1;
+	}
+
+	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+	{
+		PieceInfo* Info = piece->mPieceInfo;
+		lcMesh* SrcMesh = Info->mMesh;
+
+		if (SrcMesh->mIndexType == GL_UNSIGNED_INT)
+			continue;
+
+		Lib3dsMesh* DstMesh = lib3ds_mesh_new(Info->m_strName);
+		lib3ds_file_insert_mesh(File, DstMesh, -1);
+
+		lib3ds_mesh_resize_vertices(DstMesh, SrcMesh->mNumVertices, 0, 0);
+		float* Verts = (float*)SrcMesh->mVertexBuffer.mData;
+		const lcMatrix44& ModelWorld = piece->mModelWorld;
+
+		for (int VertexIdx = 0; VertexIdx < SrcMesh->mNumVertices; VertexIdx++)
+		{
+			lcVector3 Pos(Verts[VertexIdx * 3], Verts[VertexIdx * 3 + 1], Verts[VertexIdx * 3 + 2]);
+			Pos = lcMul31(Pos, ModelWorld);
+			lib3ds_vector_copy(DstMesh->vertices[VertexIdx], Pos);
+		}
+
+		int NumTriangles = 0;
+
+		for (int SectionIdx = 0; SectionIdx < SrcMesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &SrcMesh->mSections[SectionIdx];
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			NumTriangles += Section->NumIndices / 3;
+		}
+
+		lib3ds_mesh_resize_faces(DstMesh, NumTriangles);
+
+		NumTriangles = 0;
+
+		for (int SectionIdx = 0; SectionIdx < SrcMesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &SrcMesh->mSections[SectionIdx];
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			lcuint16* Indices = (lcuint16*)SrcMesh->mIndexBuffer.mData + Section->IndexOffset / sizeof(lcuint16);
+			int MaterialIndex = Section->ColorIndex == gDefaultColor ? piece->mColorIndex : Section->ColorIndex;
+
+			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
+			{
+				DstMesh->faces[NumTriangles].index[0] = Indices[IndexIdx + 0];
+				DstMesh->faces[NumTriangles].index[1] = Indices[IndexIdx + 1];
+				DstMesh->faces[NumTriangles].index[2] = Indices[IndexIdx + 2];
+				DstMesh->faces[NumTriangles].flags = LIB3DS_FACE_VIS_AC | LIB3DS_FACE_VIS_BC | LIB3DS_FACE_VIS_AB;
+				DstMesh->faces[NumTriangles].material = MaterialIndex;
+
+				NumTriangles++;
+			}
+		}
+
+		Lib3dsMeshInstanceNode* MeshInstance = lib3ds_node_new_mesh_instance(DstMesh, NULL, NULL, NULL, NULL);
+		lib3ds_file_append_node(File, (Lib3dsNode*)MeshInstance, NULL);
+	}
+
+	if (!lib3ds_file_save(File, FileName))
+		gMainWindow->DoMessageBox("Error saving file.", LC_MB_OK | LC_MB_ICONERROR);
+
+	lib3ds_file_free(File);
+*/
+}
+
 // Special notifications.
 void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 {
@@ -3703,11 +4229,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 		case LC_FILE_EXPORT_3DS:
-		{
-#ifdef LC_WINDOWS
 			Export3DStudio();
-#endif
-		} break;
+			break;
 
 		case LC_FILE_EXPORT_HTML:
 		{

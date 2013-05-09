@@ -246,8 +246,7 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	lcFile* m_pClipboard[10];
-	unsigned char m_nCurClipboard;
+	lcFile* mClipboard;
 
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);

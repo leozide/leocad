@@ -1129,8 +1129,8 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 void MinifigWizard::OnDraw()
 {
-	float Aspect = (float)m_nWidth/(float)m_nHeight;
-	glViewport(0, 0, m_nWidth, m_nHeight);
+	float Aspect = (float)mWidth/(float)mHeight;
+	glViewport(0, 0, mWidth, mHeight);
 
 	float Box[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 

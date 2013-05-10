@@ -6,8 +6,7 @@
 GLWindow::GLWindow(GLWindow *share)
 {
 	mCursorType = LC_CURSOR_DEFAULT;
-	m_pShare = share;
-	m_pData = NULL;
+	mWidget = NULL;
 }
 
 GLWindow::~GLWindow()
@@ -16,7 +15,7 @@ GLWindow::~GLWindow()
 
 bool GLWindow::CreateFromWindow(void *data)
 {
-	m_pData = data;
+	mWidget = data;
 
 	return true;
 }
@@ -29,7 +28,7 @@ void GLWindow::OnInitialUpdate()
 {
 	MakeCurrent();
 
-	GL_InitializeSharedExtensions(m_pData);
+	GL_InitializeSharedExtensions(mWidget);
 
 //	if (WindowMultisample)
 //		glEnable(GL_MULTISAMPLE_ARB);
@@ -37,7 +36,7 @@ void GLWindow::OnInitialUpdate()
 
 bool GLWindow::MakeCurrent()
 {
-	QGLWidget* Widget = (QGLWidget*)m_pData;
+	QGLWidget* Widget = (QGLWidget*)mWidget;
 
 	Widget->makeCurrent();
 
@@ -46,21 +45,21 @@ bool GLWindow::MakeCurrent()
 
 void GLWindow::Redraw(bool ForceRedraw)
 {
-	QGLWidget* widget = (QGLWidget*)m_pData;
+	QGLWidget* widget = (QGLWidget*)mWidget;
 
 	widget->updateGL();
 }
 
 void GLWindow::CaptureMouse()
 {
-	QGLWidget* widget = (QGLWidget*)m_pData;
+	QGLWidget* widget = (QGLWidget*)mWidget;
 
 	widget->grabMouse();
 }
 
 void GLWindow::ReleaseMouse()
 {
-	QGLWidget* widget = (QGLWidget*)m_pData;
+	QGLWidget* widget = (QGLWidget*)mWidget;
 
 	widget->releaseMouse();
 }
@@ -114,7 +113,7 @@ void GLWindow::SetCursor(LC_CURSOR_TYPE CursorType)
 		{ 15, 15 }, // LC_CURSOR_ROTATE_VIEW
 	};
 
-	QGLWidget* widget = (QGLWidget*)m_pData;
+	QGLWidget* widget = (QGLWidget*)mWidget;
 
 	if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT)
 	{

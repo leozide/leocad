@@ -36,8 +36,8 @@ void PiecePreview::OnDraw()
 	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	float aspect = (float)m_nWidth/(float)m_nHeight;
-	glViewport(0, 0, m_nWidth, m_nHeight);
+	float aspect = (float)mWidth/(float)mHeight;
+	glViewport(0, 0, mWidth, mHeight);
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 

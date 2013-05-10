@@ -1491,12 +1491,12 @@ bool Project::SetActiveView(View* view)
 // Only this function should be called.
 void Project::Render(View* view, bool ToMemory)
 {
-	glViewport(0, 0, view->GetWidth(), view->GetHeight());
+	glViewport(0, 0, view->mWidth, view->mHeight);
 
 	RenderBackground(view);
 
 	// Setup the projection and camera matrices.
-	float ratio = (float)view->GetWidth() / (float)view->GetHeight();
+	float ratio = (float)view->mWidth / (float)view->mHeight;
 	view->mCamera->LoadProjection(ratio);
 
 	if (ToMemory)
@@ -1532,8 +1532,8 @@ void Project::RenderBackground(View* view)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	float ViewWidth = (float)view->GetWidth();
-	float ViewHeight = (float)view->GetHeight();
+	float ViewWidth = (float)view->mWidth;
+	float ViewHeight = (float)view->mHeight;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -1640,7 +1640,7 @@ int lcOpaqueRenderCompare(const Piece* a, const Piece* b, void*)
 
 void Project::RenderScenePieces(View* view)
 {
-	float AspectRatio = (float)view->GetWidth() / (float)view->GetHeight();
+	float AspectRatio = (float)view->mWidth / (float)view->mHeight;
 	view->mCamera->LoadProjection(AspectRatio);
 
 	if (m_nSnap & LC_DRAW_GRID)
@@ -2060,7 +2060,7 @@ void Project::RenderSceneObjects(View* view)
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -50, 50);
+		glOrtho(0, view->mWidth, 0, view->mHeight, -50, 50);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(25.375f, 25.375f, 0.0f);
@@ -2124,7 +2124,7 @@ void Project::RenderOverlays(View* view)
 	{
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0.0f, view->GetWidth(), 0.0f, view->GetHeight(), -1.0f, 1.0f);
+		glOrtho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(0.375f, 0.375f, 0.0f);
@@ -2669,7 +2669,7 @@ void Project::RenderOverlays(View* view)
 				glPopMatrix();
 
 				// Draw text.
-				int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+				int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 
 				const lcMatrix44& ModelView = Cam->mWorldView;
@@ -2718,8 +2718,8 @@ void Project::RenderOverlays(View* view)
 
 		x = 0;
 		y = 0;
-		w = view->GetWidth();
-		h = view->GetHeight();
+		w = view->mWidth;
+		h = view->mHeight;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -2784,7 +2784,7 @@ void Project::RenderOverlays(View* view)
 	{
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, view->GetWidth(), 0, view->GetHeight(), -1, 1);
+		glOrtho(0, view->mWidth, 0, view->mHeight, -1, 1);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(0.375f, 0.375f, 0.0f);
@@ -2821,7 +2821,7 @@ void Project::RenderViewports(View* view)
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0.0f, view->GetWidth(), 0.0f, view->GetHeight(), -1.0f, 1.0f);
+	glOrtho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0.375f, 0.375f, 0.0f);
@@ -2837,7 +2837,7 @@ void Project::RenderViewports(View* view)
 	m_pScreenFont->MakeCurrent();
 	glEnable(GL_ALPHA_TEST);
 
-	m_pScreenFont->PrintText(3.0f, (float)view->GetHeight() - 1.0f - 6.0f, 0.0f, view->mCamera->GetName());
+	m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, view->mCamera->GetName());
 
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
@@ -5626,7 +5626,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				// TODO: rewrite this
 
-				int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+				int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
 				Camera* Cam = m_ActiveView->mCamera;
 
@@ -7187,7 +7187,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	}
 
 	// Try to hit the base grid.
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
@@ -7214,7 +7214,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 
 Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 {
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
 
@@ -7255,7 +7255,7 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
 {
-	int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+	int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = m_ActiveView->mCamera;
 
@@ -7383,7 +7383,7 @@ bool Project::StopTracking(bool bAccept)
 			int x = m_nDownX;
 			int y = m_nDownY;
 
-			if ((x > 0) && (x < m_ActiveView->GetWidth()) && (y > 0) && (y < m_ActiveView->GetHeight()))
+			if ((x > 0) && (x < m_ActiveView->mWidth) && (y > 0) && (y < m_ActiveView->mHeight))
 			{
 				lcVector3 Pos;
 				lcVector4 Rot;
@@ -7500,7 +7500,7 @@ bool Project::StopTracking(bool bAccept)
 
 				case LC_ACTION_ZOOM_REGION:
 				{
-					int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+					int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
 					float Aspect = (float)Viewport[2]/(float)Viewport[3];
 					Camera* Cam = m_ActiveView->mCamera;
 
@@ -8358,7 +8358,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	m_MouseTotalDelta = lcVector3(0, 0, 0);
 	m_MouseSnapLeftover = lcVector3(0, 0, 0);
 
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
 
@@ -8668,7 +8668,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 	if (SetActiveView(view))
 		return;
 
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
 
@@ -8731,7 +8731,7 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
 
@@ -8770,7 +8770,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
 
@@ -8859,7 +8859,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 
 	float ptx, pty, ptz;
 
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 	Camera* Cam = view->mCamera;
 
@@ -9417,7 +9417,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 
-		int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+		int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
 		Camera* Cam = view->mCamera;
 
@@ -9517,7 +9517,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		const float OverlayRotateRadius = 2.0f;
 
 		// Calculate the distance from the mouse pointer to the center of the sphere.
-		int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+		int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
 		Camera* Cam = view->mCamera;
 
@@ -9680,8 +9680,8 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 		vx = 0;
 		vy = 0;
-		vw = view->GetWidth();
-		vh = view->GetHeight();
+		vw = view->mWidth;
+		vh = view->mHeight;
 
 		int cx = vx + vw / 2;
 		int cy = vy + vh / 2;
@@ -9746,7 +9746,7 @@ void Project::UpdateOverlayScale()
 	{
 		// Calculate the scaling factor by projecting the center to the front plane then
 		// projecting a point close to it back.
-		int Viewport[4] = { 0, 0, m_ActiveView->GetWidth(), m_ActiveView->GetHeight() };
+		int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
 		Camera* Cam = m_ActiveView->mCamera;
 

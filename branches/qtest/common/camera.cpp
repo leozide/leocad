@@ -665,7 +665,7 @@ void Camera::LoadProjection(float fAspect)
 
 void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 

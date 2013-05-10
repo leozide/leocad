@@ -3,6 +3,8 @@
 #include "ui_lc_qminifigdialog.h"
 #include "lc_glwidget.h"
 #include "minifig.h"
+#include "mainwnd.h"
+#include "preview.h"
 
 lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
     QDialog(parent),
@@ -13,7 +15,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	QGridLayout *previewLayout = new QGridLayout(ui->minifigFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	lcGLWidget *minifigWidget = new lcGLWidget(NULL, NULL, (GLWindow*)data, false); // TODO: share lists
+	lcGLWidget *minifigWidget = new lcGLWidget(NULL, (lcGLWidget*)gMainWindow->mPreviewWidget->mWidget, (GLWindow*)data, false);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 

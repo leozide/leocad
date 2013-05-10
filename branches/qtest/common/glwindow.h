@@ -40,16 +40,9 @@ public:
 	void ReleaseMouse();
 	void SetCursor(LC_CURSOR_TYPE Cursor);
 
-	int GetWidth() const
-	{ return m_nWidth; }
-	int GetHeight() const
-	{ return m_nHeight; }
-	void* GetData() const
-	{ return m_pData; }
-
 	virtual void OnDraw() { };
 	virtual void OnSize(int cx, int cy)
-	{ m_nWidth = cx; m_nHeight = cy; };
+	{ mWidth = cx; mHeight = cy; };
 	virtual void OnInitialUpdate();
 	virtual void OnLeftButtonDown(int x, int y, bool Control, bool Shift) { };
 	virtual void OnLeftButtonUp(int x, int y, bool Control, bool Shift) { };
@@ -61,14 +54,11 @@ public:
 	virtual void OnMouseMove(int x, int y, bool Control, bool Shift) { };
 	virtual void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift) { };
 
-protected:
-	int m_nWidth;
-	int m_nHeight;
-	int mCursorType;
 
-private:
-	void *m_pData;
-	GLWindow *m_pShare;
+	void* mWidget;
+	int mWidth;
+	int mHeight;
+	int mCursorType;
 };
 
 #endif // _GLWINDOW_H_

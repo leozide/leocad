@@ -5,15 +5,14 @@
 #include "view.h"
 #include "system.h"
 
-View::View(Project *pProject, GLWindow *share)
-	: GLWindow(share)
+View::View(Project *project)
 {
-	m_Project = pProject;
+	m_Project = project;
 	mCamera = NULL;
 	m_OverlayScale = 1.0f;
 
-	if (pProject->GetActiveView())
-		SetCamera(pProject->GetActiveView()->mCamera, false);
+	if (project->GetActiveView())
+		SetCamera(project->GetActiveView()->mCamera, false);
 	else
 		SetDefaultCamera();
 }

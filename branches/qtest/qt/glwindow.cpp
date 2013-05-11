@@ -3,7 +3,7 @@
 #include "opengl.h"
 #include <QtOpenGL>
 
-GLWindow::GLWindow(GLWindow *share)
+GLWindow::GLWindow()
 {
 	mCursorType = LC_CURSOR_DEFAULT;
 	mWidget = NULL;

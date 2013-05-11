@@ -10,8 +10,7 @@
 #include "system.h"
 #include "lc_application.h"
 
-PiecePreview::PiecePreview(GLWindow *share)
-	: GLWindow(share)
+PiecePreview::PiecePreview()
 {
 	m_PieceInfo = NULL;
 	m_RotateX = 60.0f;

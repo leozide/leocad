@@ -27,7 +27,7 @@ enum LC_CURSOR_TYPE
 class GLWindow
 {
 public:
-	GLWindow(GLWindow* Share);
+	GLWindow();
 	virtual ~GLWindow();
 
 	bool CreateFromWindow(void* Data);

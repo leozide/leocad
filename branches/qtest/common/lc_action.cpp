@@ -921,6 +921,41 @@ lcAction gActions[LC_NUM_COMMANDS] =
 		"Toggle adding new animation keys",
 		""
 	},
+	// LC_VIEW_SPLIT_HORIZONTAL
+	{
+		"View.SplitHorizontal",
+		"Split Horizontal",
+		"Split the current view horizontally",
+		""
+	},
+	// LC_VIEW_SPLIT_VERTICAL
+	{
+		"View.SplitVertical",
+		"Split Vertical",
+		"Split the current view vertically",
+		""
+	},
+	// LC_VIEW_REMOVE_VIEW
+	{
+		"View.RemoveView",
+		"Remove View",
+		"Remove the current view",
+		""
+	},
+	// LC_VIEW_RESET_VIEWS
+	{
+		"View.ResetViews",
+		"Reset Views",
+		"Reset all views",
+		""
+	},
+	// LC_VIEW_FULLSCREEN
+	{
+		"View.FullScreen",
+		"Full Screen",
+		"Toggle fullscreen mode",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		"Piece.Insert",

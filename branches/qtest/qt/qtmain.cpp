@@ -263,6 +263,46 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	return false;
 }
 
+void lcMainWindow::SplitHorizontal()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->splitHorizontal();
+}
+
+void lcMainWindow::SplitVertical()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->splitVertical();
+}
+
+void lcMainWindow::RemoveView()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->removeView();
+}
+
+void lcMainWindow::ResetViews()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->resetViews();
+}
+
+void lcMainWindow::ToggleFullScreen()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->toggleFullScreen();
+}
+
 void lcMainWindow::UpdateAction(int NewAction)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

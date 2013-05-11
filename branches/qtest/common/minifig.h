@@ -39,10 +39,10 @@ struct lcMinifigPieceInfo
 class MinifigWizard : public GLWindow
 {
 public:
-	MinifigWizard (GLWindow *share);
-	~MinifigWizard ();
+	MinifigWizard();
+	~MinifigWizard();
 
-	void OnDraw ();
+	void OnDraw();
 	void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
 	void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
 	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);

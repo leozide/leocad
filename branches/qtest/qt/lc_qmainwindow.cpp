@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include <typeinfo>
 #include "lc_qmainwindow.h"
 #include "lc_qutils.h"
 #include "lc_glwidget.h"
@@ -27,6 +28,11 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 //	centralWidget->mWindow->OnInitialUpdate();
 //	setCentralWidget(centralWidget);
 
+	createActions();
+	createToolBars();
+	createMenus();
+	createStatusBar();
+
 	QFrame *previewFrame = new QFrame;
 	previewFrame->setFrameShape(QFrame::StyledPanel);
 	previewFrame->setFrameShadow(QFrame::Sunken);
@@ -35,13 +41,8 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	centralWidget = new lcGLWidget(previewFrame, NULL, new View(lcGetActiveProject(), NULL), true);
-	previewLayout->addWidget(centralWidget, 0, 0, 1, 1);
-
-	createActions();
-	createToolBars();
-	createMenus();
-	createStatusBar();
+	QWidget *viewWidget = new lcGLWidget(previewFrame, piecePreview, new View(lcGetActiveProject()), true);
+	previewLayout->addWidget(viewWidget, 0, 0, 1, 1);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = Library->FindPiece("3005", false);
@@ -284,7 +285,11 @@ void lcQMainWindow::createMenus()
 	menuStep->addSeparator();
 	menuStep->addAction(actions[LC_VIEW_TIME_INSERT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_DELETE]);
-	// TODO: split horizontal/vertical, delete view, reset views
+	menuView->addSeparator();
+	menuView->addAction(actions[LC_VIEW_SPLIT_HORIZONTAL]);
+	menuView->addAction(actions[LC_VIEW_SPLIT_VERTICAL]);
+	menuView->addAction(actions[LC_VIEW_REMOVE_VIEW]);
+	menuView->addAction(actions[LC_VIEW_RESET_VIEWS]);
 	menuView->addSeparator();
 	QMenu *menuToolBars = menuView->addMenu(tr("Toolbars"));
 	menuToolBars->addAction(partsToolBar->toggleViewAction());
@@ -293,9 +298,7 @@ void lcQMainWindow::createMenus()
 	menuToolBars->addAction(standardToolBar->toggleViewAction());
 	menuToolBars->addAction(toolsToolBar->toggleViewAction());
 	menuToolBars->addAction(timeToolBar->toggleViewAction());
-	QAction *fullScreenAction = new QAction(tr("Full Screen"), this);
-	menuView->addAction(fullScreenAction);
-	connect(fullScreenAction, SIGNAL(triggered()), this, SLOT(toggleFullScreen()));
+	menuView->addAction(actions[LC_VIEW_FULLSCREEN]);
 
 	menuPiece = menuBar()->addMenu(tr("&Piece"));
 	menuPiece->addAction(actions[LC_PIECE_INSERT]);
@@ -407,7 +410,7 @@ void lcQMainWindow::createToolBars()
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	piecePreview = new lcGLWidget(previewFrame, centralWidget, new PiecePreview(NULL), false);
+	piecePreview = new lcGLWidget(previewFrame, NULL, new PiecePreview(), false);
 	piecePreview->preferredSize = QSize(200, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
@@ -565,9 +568,53 @@ void lcQMainWindow::partSearchChanged(const QString& text)
 		partsTree->setCurrentPart(bestMatch);
 }
 
+void lcQMainWindow::splitHorizontal()
+{
+	QWidget *focus = focusWidget();
+
+	if (typeid(*focus) != typeid(lcGLWidget))
+		return;
+
+	QWidget *parent = focus->parentWidget();
+
+	QSplitter *splitter = new QSplitter(Qt::Vertical, parent);
+
+	if (parent == centralWidget())
+		parent->layout()->addWidget(splitter);
+	else
+		((QSplitter*)parent)->addWidget(splitter);
+
+	splitter->addWidget(focus);
+	new lcGLWidget(splitter, piecePreview, new View(lcGetActiveProject()), true);
+//	new QLabel("asd", splitter);
+
+	QList<int> sizes;
+	sizes.append(10);
+	sizes.append(10);
+	splitter->setSizes(sizes);
+
+	// todo: split views
+}
+
+void lcQMainWindow::splitVertical()
+{
+
+}
+
+void lcQMainWindow::removeView()
+{
+
+}
+
+void lcQMainWindow::resetViews()
+{
+
+}
+
 void lcQMainWindow::toggleFullScreen()
 {
 	// todo: hide toolbars and menu
+	// todo: create fullscreen toolbar or support esc key to go back
 	if (isFullScreen())
 		showNormal();
 	else

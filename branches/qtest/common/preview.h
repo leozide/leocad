@@ -8,7 +8,7 @@ class PieceInfo;
 class PiecePreview : public GLWindow
 {
 public:
-	PiecePreview(GLWindow *share);
+	PiecePreview();
 	virtual ~PiecePreview();
 
 	void OnDraw();

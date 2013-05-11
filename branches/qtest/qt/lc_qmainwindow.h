@@ -18,6 +18,12 @@ public:
 	explicit lcQMainWindow(QWidget *parent = 0);
 	~lcQMainWindow();
 
+	void splitHorizontal();
+	void splitVertical();
+	void removeView();
+	void resetViews();
+	void toggleFullScreen();
+
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateTime(bool animation, int currentTime, int totalTime);
@@ -42,7 +48,6 @@ private slots:
 	void colorChanged(int colorIndex);
 	void partSearchReturn();
 	void partSearchChanged(const QString& text);
-	void toggleFullScreen();
 
 private:
 	void createActions();
@@ -53,7 +58,6 @@ private:
 	void closeEvent(QCloseEvent *event);
 	QMenu *createPopupMenu();
 
-	lcGLWidget *centralWidget;
 	QAction *actions[LC_NUM_COMMANDS];
 
 	QAction *actionFileRecentSeparator;

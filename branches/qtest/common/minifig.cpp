@@ -856,8 +856,7 @@ static int lcGetMinifigSettings(lcMemFile& File)
 // =============================================================================
 // MinifigWizard class
 
-MinifigWizard::MinifigWizard(GLWindow *share)
-	: GLWindow (share)
+MinifigWizard::MinifigWizard()
 {
 	char Filename[LC_MAXPATH];
 	strcpy(Filename, lcGetPiecesLibrary()->mLibraryPath);

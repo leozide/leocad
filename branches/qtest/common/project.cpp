@@ -3259,7 +3259,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	unsigned char* buf = (unsigned char*)malloc (width*height*3);
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 
-	View view(this, m_ActiveView);
+	View view(this);
 	view.SetCamera(m_ActiveView->mCamera, false);
 	view.OnSize(width, height);
 
@@ -5516,6 +5516,26 @@ void Project::HandleCommand(LC_COMMANDS id)
 //	pFrame->UpdateInfo();
 		} break;
 
+		case LC_VIEW_SPLIT_HORIZONTAL:
+			gMainWindow->SplitHorizontal();
+			break;
+
+		case LC_VIEW_SPLIT_VERTICAL:
+			gMainWindow->SplitVertical();
+			break;
+
+		case LC_VIEW_REMOVE_VIEW:
+			gMainWindow->RemoveView();
+			break;
+
+		case LC_VIEW_RESET_VIEWS:
+			gMainWindow->ResetViews();
+			break;
+
+		case LC_VIEW_FULLSCREEN:
+			gMainWindow->ToggleFullScreen();
+			break;
+
 		case LC_PIECE_INSERT:
 		{
 			if (m_pCurPiece == NULL)
@@ -5691,7 +5711,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_MINIFIG_WIZARD:
 		{
-			MinifigWizard Wizard(m_ActiveView);
+			MinifigWizard Wizard;
 			int i;
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Wizard))

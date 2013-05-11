@@ -18,6 +18,12 @@ public:
 	void AddRecentFile(const char* FileName);
 	void RemoveRecentFile(int FileIndex);
 
+	void SplitHorizontal();
+	void SplitVertical();
+	void RemoveView();
+	void ResetViews();
+	void ToggleFullScreen();
+
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
 	void UpdateTime(bool Animation, int CurrentTime, int TotalTime);

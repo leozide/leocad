@@ -9,7 +9,7 @@ class Project;
 class View : public GLWindow
 {
 public:
-	View(Project *pProject, GLWindow *share);
+	View(Project *project);
 	virtual ~View();
 
 	void OnDraw();

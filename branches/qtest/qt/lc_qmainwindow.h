@@ -54,6 +54,7 @@ private:
 	void createMenus();
 	void createToolBars();
 	void createStatusBar();
+	void splitView(Qt::Orientation orientation);
 
 	void closeEvent(QCloseEvent *event);
 	QMenu *createPopupMenu();

@@ -8,6 +8,7 @@ class lcGLWidget : public QGLWidget
 {
 public:
 	lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, bool view);
+	~lcGLWidget();
 
 	QSize sizeHint() const;
 

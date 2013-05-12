@@ -330,6 +330,7 @@ void lcQMainWindow::createMenus()
 void lcQMainWindow::createToolBars()
 {
 	standardToolBar = addToolBar(tr("Standard"));
+	standardToolBar->setObjectName("StandardToolbar");
 	standardToolBar->addAction(actions[LC_FILE_NEW]);
 	standardToolBar->addAction(actions[LC_FILE_OPEN]);
 	standardToolBar->addAction(actions[LC_FILE_SAVE]);
@@ -367,6 +368,7 @@ void lcQMainWindow::createToolBars()
 	connect(transformZ, SIGNAL(returnPressed()), actions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
 
 	toolsToolBar = addToolBar(tr("Tools"));
+	toolsToolBar->setObjectName("ToolsToolbar");
 	insertToolBarBreak(toolsToolBar);
 	toolsToolBar->addAction(actions[LC_EDIT_ACTION_INSERT]);
 	toolsToolBar->addAction(actions[LC_EDIT_ACTION_LIGHT]);
@@ -386,6 +388,7 @@ void lcQMainWindow::createToolBars()
 	toolsToolBar->addAction(actions[LC_EDIT_ACTION_ZOOM_REGION]);
 
 	timeToolBar = addToolBar(tr("Time"));
+	timeToolBar->setObjectName("TimeToolbar");
 	timeToolBar->addAction(actions[LC_VIEW_TIME_FIRST]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
@@ -396,6 +399,7 @@ void lcQMainWindow::createToolBars()
 	//LC_VIEW_TIME_ADD_KEYS
 
 	partsToolBar = new QDockWidget(tr("Parts"), this);
+	partsToolBar->setObjectName("PartsToolbar");
 	partsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	QWidget *partsContents = new QWidget();
 	QGridLayout *partsLayout = new QGridLayout(partsContents);
@@ -443,6 +447,7 @@ void lcQMainWindow::createToolBars()
 	addDockWidget(Qt::RightDockWidgetArea, partsToolBar);
 
 	propertiesToolBar = new QDockWidget(tr("Properties"), this);
+	propertiesToolBar->setObjectName("PropertiesToolbar");
 	propertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
 	QWidget *propertiesContents = new QWidget();
@@ -568,7 +573,56 @@ void lcQMainWindow::partSearchChanged(const QString& text)
 		partsTree->setCurrentPart(bestMatch);
 }
 
+void lcQMainWindow::splitView(Qt::Orientation orientation)
+{
+	QWidget *focus = focusWidget();
+
+	if (typeid(*focus) != typeid(lcGLWidget))
+		return;
+
+	QWidget *parent = focus->parentWidget();
+	QSplitter *splitter;
+	QList<int> sizes;
+
+	if (parent == centralWidget())
+	{
+		splitter = new QSplitter(orientation, parent);
+		parent->layout()->addWidget(splitter);
+		splitter->addWidget(focus);
+		new lcGLWidget(splitter, piecePreview, new View(lcGetActiveProject()), true);
+	}
+	else
+	{
+		QSplitter *parentSplitter = (QSplitter*)parent;	
+		sizes = parentSplitter->sizes();
+		int focusIndex = parentSplitter->indexOf(focus);
+
+		splitter = new QSplitter(orientation, parent);
+		parentSplitter->insertWidget(focusIndex, splitter);
+		splitter->addWidget(focus);
+		new lcGLWidget(splitter, piecePreview, new View(lcGetActiveProject()), true);
+
+		parentSplitter->setSizes(sizes);
+
+	}
+
+	sizes.clear();
+	sizes.append(10);
+	sizes.append(10);
+	splitter->setSizes(sizes);
+}
+
 void lcQMainWindow::splitHorizontal()
+{
+	splitView(Qt::Vertical);
+}
+
+void lcQMainWindow::splitVertical()
+{
+	splitView(Qt::Horizontal);
+}
+
+void lcQMainWindow::removeView()
 {
 	QWidget *focus = focusWidget();
 
@@ -577,38 +631,39 @@ void lcQMainWindow::splitHorizontal()
 
 	QWidget *parent = focus->parentWidget();
 
-	QSplitter *splitter = new QSplitter(Qt::Vertical, parent);
-
 	if (parent == centralWidget())
-		parent->layout()->addWidget(splitter);
-	else
-		((QSplitter*)parent)->addWidget(splitter);
+		return;
 
-	splitter->addWidget(focus);
-	new lcGLWidget(splitter, piecePreview, new View(lcGetActiveProject()), true);
-//	new QLabel("asd", splitter);
+	QWidget *parentParentWidget = parent->parentWidget();
+	QSplitter *parentSplitter = (QSplitter*)parent;
+	int focusIndex = parentSplitter->indexOf(focus);
 
-	QList<int> sizes;
-	sizes.append(10);
-	sizes.append(10);
-	splitter->setSizes(sizes);
+	if (parentParentWidget == centralWidget())
+	{
+		QLayout* centralLayout = parentParentWidget->layout();
 
-	// todo: split views
-}
+		centralLayout->addWidget(parentSplitter->widget(!focusIndex));
+		centralLayout->removeWidget(parent);
 
-void lcQMainWindow::splitVertical()
-{
+		return;
+	}
 
-}
+	QSplitter* parentParentSplitter = (QSplitter*)parentParentWidget;
+	QList<int> sizes = parentParentSplitter->sizes();
 
-void lcQMainWindow::removeView()
-{
+	int parentIndex = parentParentSplitter->indexOf(parent);
+	parentParentSplitter->insertWidget(!parentIndex, focus);
 
+	delete parent;
+
+	parentParentSplitter->setSizes(sizes);
 }
 
 void lcQMainWindow::resetViews()
 {
-
+	QLayout* centralLayout = centralWidget()->layout();
+	delete centralLayout->itemAt(0)->widget();
+	centralLayout->addWidget(new lcGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 }
 
 void lcQMainWindow::toggleFullScreen()

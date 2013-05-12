@@ -25,6 +25,12 @@ lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, boo
 	}
 }
 
+lcGLWidget::~lcGLWidget()
+{
+	if (isView)
+		delete mWindow;
+}
+
 QSize lcGLWidget::sizeHint() const
 {
 	if (preferredSize.isEmpty())

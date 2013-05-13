@@ -589,7 +589,7 @@ void lcQMainWindow::splitView(Qt::Orientation orientation)
 		splitter = new QSplitter(orientation, parent);
 		parent->layout()->addWidget(splitter);
 		splitter->addWidget(focus);
-		new lcGLWidget(splitter, piecePreview, new View(lcGetActiveProject()), true);
+		splitter->addWidget(new lcGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 	}
 	else
 	{
@@ -600,10 +600,9 @@ void lcQMainWindow::splitView(Qt::Orientation orientation)
 		splitter = new QSplitter(orientation, parent);
 		parentSplitter->insertWidget(focusIndex, splitter);
 		splitter->addWidget(focus);
-		new lcGLWidget(splitter, piecePreview, new View(lcGetActiveProject()), true);
+		splitter->addWidget(new lcGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 
 		parentSplitter->setSizes(sizes);
-
 	}
 
 	sizes.clear();

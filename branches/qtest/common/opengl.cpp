@@ -2,10 +2,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "opengl.h"
+#include "glwindow.h"
 #include "mainwnd.h"
 #include "preview.h"
-
-void* Sys_GLGetExtension(const char* Symbol, void* Data);
 
 GLBINDBUFFERARBPROC glBindBufferARB;
 GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
@@ -73,23 +72,23 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 	return false;
 }
 
-void GL_InitializeSharedExtensions(void* Data)
+void GL_InitializeSharedExtensions(GLWindow* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
-		glBindBufferARB = (GLBINDBUFFERARBPROC)Sys_GLGetExtension("glBindBufferARB", Data);
-		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Sys_GLGetExtension("glDeleteBuffersARB", Data);
-		glGenBuffersARB = (GLGENBUFFERSARBPROC)Sys_GLGetExtension("glGenBuffersARB", Data);
-		glIsBufferARB = (GLISBUFFERARBPROC)Sys_GLGetExtension("glIsBufferARB", Data);
-		glBufferDataARB = (GLBUFFERDATAARBPROC)Sys_GLGetExtension("glBufferDataARB", Data);
-		glBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glBufferSubDataARB", Data);
-		glGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Sys_GLGetExtension("glGetBufferSubDataARB", Data);
-		glMapBufferARB = (GLMAPBUFFERARBPROC)Sys_GLGetExtension("glMapBufferARB", Data);
-		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Sys_GLGetExtension("glUnmapBufferARB", Data);
-		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Sys_GLGetExtension("glGetBufferParameterivARB", Data);
-		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Sys_GLGetExtension("glGetBufferPointervARB", Data);
+		glBindBufferARB = (GLBINDBUFFERARBPROC)Window->GetExtensionAddress("glBindBufferARB");
+		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Window->GetExtensionAddress("glDeleteBuffersARB");
+		glGenBuffersARB = (GLGENBUFFERSARBPROC)Window->GetExtensionAddress("glGenBuffersARB");
+		glIsBufferARB = (GLISBUFFERARBPROC)Window->GetExtensionAddress("glIsBufferARB");
+		glBufferDataARB = (GLBUFFERDATAARBPROC)Window->GetExtensionAddress("glBufferDataARB");
+		glBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Window->GetExtensionAddress("glBufferSubDataARB");
+		glGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Window->GetExtensionAddress("glGetBufferSubDataARB");
+		glMapBufferARB = (GLMAPBUFFERARBPROC)Window->GetExtensionAddress("glMapBufferARB");
+		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Window->GetExtensionAddress("glUnmapBufferARB");
+		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Window->GetExtensionAddress("glGetBufferParameterivARB");
+		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Window->GetExtensionAddress("glGetBufferPointervARB");
 
 		GL_UseVertexBufferObject = true;
 		GL_SupportsVertexBufferObject = true;
@@ -97,26 +96,26 @@ void GL_InitializeSharedExtensions(void* Data)
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_framebuffer_object"))
 	{
-		glIsRenderbufferARB = (GLISRENDERBUFFERPROC)Sys_GLGetExtension("glIsRenderbuffer", Data);
-		glBindRenderbufferARB = (GLBINDRENDERBUFFERPROC)Sys_GLGetExtension("glBindRenderbuffer", Data);
-		glDeleteRenderbuffersARB = (GLDELETERENDERBUFFERSPROC)Sys_GLGetExtension("glDeleteRenderbuffers", Data);
-		glGenRenderbuffersARB = (GLGENRENDERBUFFERSPROC)Sys_GLGetExtension("glGenRenderbuffers", Data);
-		glRenderbufferStorageARB = (GLRENDERBUFFERSTORAGEPROC)Sys_GLGetExtension("glRenderbufferStorage", Data);
-		glGetRenderbufferParameterivARB = (GLGETRENDERBUFFERPARAMETERIVPROC)Sys_GLGetExtension("glGetRenderbufferParameteriv", Data);
-		glIsFramebufferARB = (GLISFRAMEBUFFERPROC)Sys_GLGetExtension("glIsFramebuffer", Data);
-		glBindFramebufferARB = (GLBINDFRAMEBUFFERPROC)Sys_GLGetExtension("glBindFramebuffer", Data);
-		glDeleteFramebuffersARB = (GLDELETEFRAMEBUFFERSPROC)Sys_GLGetExtension("glDeleteFramebuffers", Data);
-		glGenFramebuffersARB = (GLGENFRAMEBUFFERSPROC)Sys_GLGetExtension("glGenFramebuffers", Data);
-		glCheckFramebufferStatusARB = (GLCHECKFRAMEBUFFERSTATUSPROC)Sys_GLGetExtension("glCheckFramebufferStatus", Data);
-		glFramebufferTexture1DARB = (GLFRAMEBUFFERTEXTURE1DPROC)Sys_GLGetExtension("glFramebufferTexture1D", Data);
-		glFramebufferTexture2DARB = (GLFRAMEBUFFERTEXTURE2DPROC)Sys_GLGetExtension("glFramebufferTexture2D", Data);
-		glFramebufferTexture3DARB = (GLFRAMEBUFFERTEXTURE3DPROC)Sys_GLGetExtension("glFramebufferTexture3D", Data);
-		glFramebufferRenderbufferARB = (GLFRAMEBUFFERRENDERBUFFERPROC)Sys_GLGetExtension("glFramebufferRenderbuffer", Data);
-		glGetFramebufferAttachmentParameterivARB = (GLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)Sys_GLGetExtension("glGetFramebufferAttachmentParameteriv", Data);
-		glGenerateMipmapARB = (GLGENERATEMIPMAPPROC)Sys_GLGetExtension("glGenerateMipmap", Data);
-		glBlitFramebufferARB = (GLBLITFRAMEBUFFERPROC)Sys_GLGetExtension("glBlitFramebuffer", Data);
-		glRenderbufferStorageMultisampleARB = (GLRENDERBUFFERSTORAGEMULTISAMPLEPROC)Sys_GLGetExtension("glRenderbufferStorageMultisample", Data);
-		glFramebufferTextureLayerARB = (GLFRAMEBUFFERTEXTURELAYERPROC)Sys_GLGetExtension("glFramebufferTextureLayer", Data);
+		glIsRenderbufferARB = (GLISRENDERBUFFERPROC)Window->GetExtensionAddress("glIsRenderbuffer");
+		glBindRenderbufferARB = (GLBINDRENDERBUFFERPROC)Window->GetExtensionAddress("glBindRenderbuffer");
+		glDeleteRenderbuffersARB = (GLDELETERENDERBUFFERSPROC)Window->GetExtensionAddress("glDeleteRenderbuffers");
+		glGenRenderbuffersARB = (GLGENRENDERBUFFERSPROC)Window->GetExtensionAddress("glGenRenderbuffers");
+		glRenderbufferStorageARB = (GLRENDERBUFFERSTORAGEPROC)Window->GetExtensionAddress("glRenderbufferStorage");
+		glGetRenderbufferParameterivARB = (GLGETRENDERBUFFERPARAMETERIVPROC)Window->GetExtensionAddress("glGetRenderbufferParameteriv");
+		glIsFramebufferARB = (GLISFRAMEBUFFERPROC)Window->GetExtensionAddress("glIsFramebuffer");
+		glBindFramebufferARB = (GLBINDFRAMEBUFFERPROC)Window->GetExtensionAddress("glBindFramebuffer");
+		glDeleteFramebuffersARB = (GLDELETEFRAMEBUFFERSPROC)Window->GetExtensionAddress("glDeleteFramebuffers");
+		glGenFramebuffersARB = (GLGENFRAMEBUFFERSPROC)Window->GetExtensionAddress("glGenFramebuffers");
+		glCheckFramebufferStatusARB = (GLCHECKFRAMEBUFFERSTATUSPROC)Window->GetExtensionAddress("glCheckFramebufferStatus");
+		glFramebufferTexture1DARB = (GLFRAMEBUFFERTEXTURE1DPROC)Window->GetExtensionAddress("glFramebufferTexture1D");
+		glFramebufferTexture2DARB = (GLFRAMEBUFFERTEXTURE2DPROC)Window->GetExtensionAddress("glFramebufferTexture2D");
+		glFramebufferTexture3DARB = (GLFRAMEBUFFERTEXTURE3DPROC)Window->GetExtensionAddress("glFramebufferTexture3D");
+		glFramebufferRenderbufferARB = (GLFRAMEBUFFERRENDERBUFFERPROC)Window->GetExtensionAddress("glFramebufferRenderbuffer");
+		glGetFramebufferAttachmentParameterivARB = (GLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)Window->GetExtensionAddress("glGetFramebufferAttachmentParameteriv");
+		glGenerateMipmapARB = (GLGENERATEMIPMAPPROC)Window->GetExtensionAddress("glGenerateMipmap");
+		glBlitFramebufferARB = (GLBLITFRAMEBUFFERPROC)Window->GetExtensionAddress("glBlitFramebuffer");
+		glRenderbufferStorageMultisampleARB = (GLRENDERBUFFERSTORAGEMULTISAMPLEPROC)Window->GetExtensionAddress("glRenderbufferStorageMultisample");
+		glFramebufferTextureLayerARB = (GLFRAMEBUFFERTEXTURELAYERPROC)Window->GetExtensionAddress("glFramebufferTextureLayer");
 
 		GL_SupportsFramebufferObject = true;
 	}

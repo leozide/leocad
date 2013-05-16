@@ -20,16 +20,20 @@ bool GLWindow::CreateFromWindow(void *data)
 	return true;
 }
 
-void GLWindow::DestroyContext()
+void* GLWindow::GetExtensionAddress(const char* FunctionName)
 {
+	QGLWidget* Widget = (QGLWidget*)mWidget;
+
+	return Widget->context()->getProcAddress(FunctionName);
 }
 
 void GLWindow::OnInitialUpdate()
 {
 	MakeCurrent();
 
-	GL_InitializeSharedExtensions(mWidget);
+	GL_InitializeSharedExtensions(this);
 
+	// TODO: MSAA
 //	if (WindowMultisample)
 //		glEnable(GL_MULTISAMPLE_ARB);
 }
@@ -43,7 +47,7 @@ bool GLWindow::MakeCurrent()
 	return true;
 }
 
-void GLWindow::Redraw(bool ForceRedraw)
+void GLWindow::Redraw()
 {
 	QGLWidget* widget = (QGLWidget*)mWidget;
 

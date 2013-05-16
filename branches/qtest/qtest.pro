@@ -70,9 +70,7 @@ SOURCES += common/view.cpp \
     common/lc_category.cpp \
     qt/lc_qmainwindow.cpp \
     qt/main.cpp \
-    qt/linux_gl.cpp \
     qt/glwindow.cpp \
-    qt/basewnd.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
     qt/lc_colorlistwidget.cpp \

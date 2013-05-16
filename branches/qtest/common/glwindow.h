@@ -32,28 +32,27 @@ public:
 
 	bool CreateFromWindow(void* Data);
 	bool CreateFromBitmap(void* Data);
-	void DestroyContext();
+	void* GetExtensionAddress(const char* FunctionName);
 
 	bool MakeCurrent();
-	void Redraw(bool ForceRedraw = false);
+	void Redraw();
 	void CaptureMouse();
 	void ReleaseMouse();
 	void SetCursor(LC_CURSOR_TYPE Cursor);
 
-	virtual void OnDraw() { };
+	virtual void OnDraw() { }
 	virtual void OnSize(int cx, int cy)
-	{ mWidth = cx; mHeight = cy; };
+	{ mWidth = cx; mHeight = cy; }
 	virtual void OnInitialUpdate();
-	virtual void OnLeftButtonDown(int x, int y, bool Control, bool Shift) { };
-	virtual void OnLeftButtonUp(int x, int y, bool Control, bool Shift) { };
-	virtual void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift) { };
-	virtual void OnMiddleButtonDown(int x, int y, bool Control, bool Shift) { };
-	virtual void OnMiddleButtonUp(int x, int y, bool Control, bool Shift) { };
-	virtual void OnRightButtonDown(int x, int y, bool Control, bool Shift) { };
-	virtual void OnRightButtonUp(int x, int y, bool Control, bool Shift) { };
-	virtual void OnMouseMove(int x, int y, bool Control, bool Shift) { };
-	virtual void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift) { };
-
+	virtual void OnLeftButtonDown(int x, int y, bool Control, bool Shift) { }
+	virtual void OnLeftButtonUp(int x, int y, bool Control, bool Shift) { }
+	virtual void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift) { }
+	virtual void OnMiddleButtonDown(int x, int y, bool Control, bool Shift) { }
+	virtual void OnMiddleButtonUp(int x, int y, bool Control, bool Shift) { }
+	virtual void OnRightButtonDown(int x, int y, bool Control, bool Shift) { }
+	virtual void OnRightButtonUp(int x, int y, bool Control, bool Shift) { }
+	virtual void OnMouseMove(int x, int y, bool Control, bool Shift) { }
+	virtual void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift) { }
 
 	void* mWidget;
 	int mWidth;

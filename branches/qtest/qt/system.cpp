@@ -84,15 +84,6 @@ void SystemDoPopupMenu(int nMenu, int x, int y)
 {
 }
 
-void SystemExportClipboard(lcFile* clip)
-{
-}
-
-lcFile* SystemImportClipboard()
-{
-  return NULL;
-}
-
 void SystemPieceComboAdd(char* name)
 {
 }

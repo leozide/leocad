@@ -246,8 +246,6 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	lcFile* mClipboard;
-
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();

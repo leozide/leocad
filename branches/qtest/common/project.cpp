@@ -73,8 +73,6 @@ Project::Project()
 	messenger->AddRef();
 	messenger->Listen(&ProjectListener, this);
 
-	mClipboard = NULL;
-
 	m_pScreenFont = new TexFont();
 }
 
@@ -84,7 +82,6 @@ Project::~Project()
 	SystemFinish();
 
 	delete m_pTrackFile;
-	delete mClipboard;
 
 	messenger->DecRef();
 
@@ -101,7 +98,7 @@ void Project::UpdateInterface()
 {
 	// Update all user interface elements.
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
-	gMainWindow->UpdatePaste(mClipboard != NULL);
+	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
 	SystemUpdatePlay(true, false);
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
@@ -3925,12 +3922,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				StopTracking(false);
 		} break;
 
-		// Application is (de)activated
 		case LC_ACTIVATE:
 		{
-			delete mClipboard;
-			mClipboard = SystemImportClipboard();
-			gMainWindow->UpdatePaste(mClipboard != NULL);
 		} break;
 
 		// FIXME: don't change the keys with ChangeKey()
@@ -5258,8 +5251,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_EDIT_CUT:
 		case LC_EDIT_COPY:
 		{
-			delete mClipboard;
-			mClipboard = new lcMemFile;
+			lcMemFile* Clipboard = new lcMemFile();
 
 			int i = 0;
 			Piece* pPiece;
@@ -5269,41 +5261,41 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
 					i++;
-			mClipboard->WriteBuffer(&i, sizeof(i));
+			Clipboard->WriteBuffer(&i, sizeof(i));
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
-					pPiece->FileSave(*mClipboard, m_pGroups);
+					pPiece->FileSave(*Clipboard, m_pGroups);
 
 			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				i++;
-			mClipboard->WriteBuffer(&i, sizeof(i));
+			Clipboard->WriteBuffer(&i, sizeof(i));
 
 			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				pGroup->FileSave(mClipboard, m_pGroups);
+				pGroup->FileSave(Clipboard, m_pGroups);
 
 			i = 0;
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				if (mCameras[CameraIdx]->IsSelected())
 					i++;
-			mClipboard->WriteBuffer(&i, sizeof(i));
+			Clipboard->WriteBuffer(&i, sizeof(i));
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 			{
 				Camera* pCamera = mCameras[CameraIdx];
 
 				if (pCamera->IsSelected())
-					pCamera->FileSave(*mClipboard);
+					pCamera->FileSave(*Clipboard);
 			}
 /*
 			for (i = 0, pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 				if (pLight->IsSelected())
 					i++;
-			mClipboard->Write(&i, sizeof(i));
+			Clipboard->Write(&i, sizeof(i));
 
 			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 				if (pLight->IsSelected())
-					pLight->FileSave(mClipboard);
+					pLight->FileSave(Clipboard);
 */
 			if (id == LC_EDIT_CUT)
 			{
@@ -5314,15 +5306,15 @@ void Project::HandleCommand(LC_COMMANDS id)
 				SetModifiedFlag(true);
 				CheckPoint("Cutting");
 			}
-			SystemExportClipboard(mClipboard);
-			gMainWindow->UpdatePaste(true);
+
+			g_App->ExportClipboard(Clipboard);
 		} break;
 
 		case LC_EDIT_PASTE:
 		{
 			int i, j;
 			Piece* pPasted = NULL;
-			lcFile* file = mClipboard;
+			lcFile* file = g_App->mClipboard;
 			if (file == NULL)
 				break;
 			file->Seek(0, SEEK_SET);

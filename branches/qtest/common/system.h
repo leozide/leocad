@@ -61,9 +61,6 @@ void SystemDoPopupMenu(int nMenu, int x, int y);
 
 void SystemPieceComboAdd(char* name);
 
-void SystemExportClipboard(lcFile* clip);
-lcFile* SystemImportClipboard();
-
 void SystemPumpMessages();
 long SystemGetTicks();
 

@@ -36,10 +36,12 @@ lcApplication::lcApplication()
 {
 	m_ActiveProject = NULL;
 	m_Library = NULL;
+	mClipboard = NULL;
 }
 
 lcApplication::~lcApplication()
 {
+	delete mClipboard;
 }
 
 void lcApplication::AddProject(Project* project)
@@ -48,6 +50,14 @@ void lcApplication::AddProject(Project* project)
 
 	if (m_ActiveProject == NULL)
 		m_ActiveProject = project;
+}
+
+void lcApplication::SetClipboard(lcFile* Clipboard)
+{
+	delete mClipboard;
+	mClipboard = Clipboard;
+
+	gMainWindow->UpdatePaste(mClipboard != NULL);
 }
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath)

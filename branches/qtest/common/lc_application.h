@@ -15,6 +15,8 @@ public:
 	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
 	void Shutdown();
 	void OpenURL(const char* URL);
+	void SetClipboard(lcFile* Clipboard);
+	void ExportClipboard(lcMemFile* Clipboard);
 
 	// Pieces library.
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
@@ -36,13 +38,14 @@ public:
 		m_ActiveProject = project;
 	}
 
-protected:
-	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);
-	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
-
 	Project* m_ActiveProject;
 	PtrArray<Project> m_Projects;
 	lcPiecesLibrary* m_Library;
+	lcFile* mClipboard;
+
+protected:
+	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);
+	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
 };
 
 extern lcApplication* g_App;

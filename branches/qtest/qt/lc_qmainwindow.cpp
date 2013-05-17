@@ -44,6 +44,9 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QWidget *viewWidget = new lcGLWidget(previewFrame, piecePreview, new View(lcGetActiveProject()), true);
 	previewLayout->addWidget(viewWidget, 0, 0, 1, 1);
 
+	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()));
+	clipboardChanged();
+
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = Library->FindPiece("3005", false);
 
@@ -571,6 +574,23 @@ void lcQMainWindow::partSearchChanged(const QString& text)
 
 	if (bestMatch)
 		partsTree->setCurrentPart(bestMatch);
+}
+
+void lcQMainWindow::clipboardChanged()
+{
+	const QString mimeType("application/vnd.leocad-clipboard");
+	const QMimeData *mimeData = QApplication::clipboard()->mimeData();
+	lcMemFile *clipboard = NULL;
+
+	if (mimeData->hasFormat(mimeType))
+	{
+		QByteArray clipboardData = mimeData->data(mimeType);
+
+		clipboard = new lcMemFile();
+		clipboard->WriteBuffer(clipboardData.constData(), clipboardData.size());
+	}
+
+	g_App->SetClipboard(clipboard);
 }
 
 void lcQMainWindow::splitView(Qt::Orientation orientation)

@@ -48,6 +48,7 @@ private slots:
 	void colorChanged(int colorIndex);
 	void partSearchReturn();
 	void partSearchChanged(const QString& text);
+	void clipboardChanged();
 
 private:
 	void createActions();

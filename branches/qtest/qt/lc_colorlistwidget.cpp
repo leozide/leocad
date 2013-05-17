@@ -63,16 +63,25 @@ bool lcColorListWidget::event(QEvent *event)
 
 		for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
 		{
-			// TODO: add color preview to tooltips
+			if (!mCellRects[CellIdx].contains(helpEvent->pos()))
+				continue;
 
-//			lcColor* Color = &gColorList[mCellColors[CellIdx]];
-//			QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
+			lcColor* color = &gColorList[mCellColors[CellIdx]];
+			QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
 
-			if (mCellRects[CellIdx].contains(helpEvent->pos()))
-			{
-				QToolTip::showText(helpEvent->globalPos(), gColorList[mCellColors[CellIdx]].Name);
-				return true;
-			}
+			QImage image(1, 1, QImage::Format_RGB888);
+			image.setPixel(0, 0, rgb);
+
+			QByteArray ba;
+			QBuffer buffer(&ba);
+			buffer.open(QIODevice::WriteOnly);
+			image.save(&buffer, "PNG");
+
+			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img height=16 src=\"data:image/png;base64,%1\"></td><td>%2</td></tr></table>";
+			QString text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[mCellColors[CellIdx]].Name);
+
+			QToolTip::showText(helpEvent->globalPos(), text);
+			return true;
 		}
 
 		QToolTip::hideText();

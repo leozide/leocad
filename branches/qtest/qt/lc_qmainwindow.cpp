@@ -15,6 +15,7 @@
 #include "keyboard.h"
 #include "system.h"
 #include "mainwnd.h"
+#include "lc_profile.h"
 
 lcQMainWindow::lcQMainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -416,6 +417,15 @@ void lcQMainWindow::createToolBars()
 
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
+
+	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	if (AASamples > 1)
+	{
+		QGLFormat format;
+		format.setSampleBuffers(true);
+		format.setSamples(AASamples);
+		QGLFormat::setDefaultFormat(format);
+	}
 
 	piecePreview = new lcGLWidget(previewFrame, NULL, new PiecePreview(), false);
 	piecePreview->preferredSize = QSize(200, 100);

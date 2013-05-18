@@ -32,10 +32,6 @@ void GLWindow::OnInitialUpdate()
 	MakeCurrent();
 
 	GL_InitializeSharedExtensions(this);
-
-	// TODO: MSAA
-//	if (WindowMultisample)
-//		glEnable(GL_MULTISAMPLE_ARB);
 }
 
 bool GLWindow::MakeCurrent()

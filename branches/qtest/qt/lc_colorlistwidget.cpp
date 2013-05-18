@@ -55,6 +55,18 @@ QSize lcColorListWidget::sizeHint() const
 	return QSize(200, mPreferredHeight);
 }
 
+void lcColorListWidget::setCurrentColor(int colorIndex)
+{
+	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+	{
+		if (mCellColors[CellIdx] != colorIndex)
+			continue;
+
+		SelectCell(CellIdx);
+		break;
+	}
+}
+
 bool lcColorListWidget::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
@@ -119,6 +131,8 @@ void lcColorListWidget::mousePressEvent(QMouseEvent *event)
 			continue;
 
 		SelectCell(CellIdx);
+		emit colorSelected(mCellColors[CellIdx]);
+
 		break;
 	}
 }
@@ -192,6 +206,10 @@ void lcColorListWidget::keyPressEvent(QKeyEvent *event)
 					NewCell = mCurCell + mColumns + NumColumns;
 			}
 		}
+	}
+	else if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+	{
+		emit colorSelected(mCellColors[mCurCell]);
 	}
 
 	if (NewCell != mCurCell)
@@ -334,3 +352,22 @@ void lcColorListWidget::SelectCell(int CellIdx)
 
 	emit colorChanged(mCellColors[mCurCell]);
 }
+
+#if 0
+
+*/
+void ColorPickerButton::focusInEvent(QFocusEvent *e)
+{
+    setFrameShadow(Raised);
+    update();
+    QFrame::focusOutEvent(e);
+}
+
+void ColorPickerButton::focusOutEvent(QFocusEvent *e)
+{
+    setFrameShadow(Raised);
+    update();
+    QFrame::focusOutEvent(e);
+}
+
+#endif

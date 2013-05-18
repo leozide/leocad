@@ -14,8 +14,11 @@ public:
 
 	QSize sizeHint() const;
 
+	void setCurrentColor(int colorIndex);
+
 signals:
 	void colorChanged(int colorIndex);
+	void colorSelected(int colorIndex);
 
 protected:
 	bool event(QEvent *event);

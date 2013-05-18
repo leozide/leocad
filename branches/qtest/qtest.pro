@@ -91,7 +91,8 @@ SOURCES += common/view.cpp \
     qt/lc_qimagedialog.cpp \
     qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
-	qt/lc_qutils.cpp
+    qt/lc_qutils.cpp \
+    qt/lc_qcolorpicker.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -152,7 +153,8 @@ HEADERS += common/glwindow.h \
     qt/lc_qcategorydialog.h \
     qt/lc_qimagedialog.h \
     qt/lc_qupdatedialog.h \
-	qt/lc_qutils.h
+    qt/lc_qutils.h \
+    qt/lc_qcolorpicker.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

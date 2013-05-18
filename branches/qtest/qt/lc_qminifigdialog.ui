@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>840</width>
-    <height>316</height>
+    <height>327</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,6 +19,12 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QComboBox" name="hatsType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -28,7 +34,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QToolButton" name="hatsColor">
+       <widget class="lcQColorPicker" name="hatsColor">
         <property name="text">
          <string/>
         </property>
@@ -55,6 +61,12 @@
       </item>
       <item row="0" column="3" rowspan="9">
        <widget class="QFrame" name="minifigFrame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Panel</enum>
         </property>
@@ -83,7 +95,7 @@
        </widget>
       </item>
       <item row="0" column="5">
-       <widget class="QToolButton" name="headColor">
+       <widget class="lcQColorPicker" name="headColor">
         <property name="text">
          <string/>
         </property>
@@ -91,6 +103,12 @@
       </item>
       <item row="0" column="6">
        <widget class="QComboBox" name="headType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -101,6 +119,12 @@
       </item>
       <item row="1" column="0">
        <widget class="QComboBox" name="hats2Type">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -110,7 +134,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QToolButton" name="hats2Color">
+       <widget class="lcQColorPicker" name="hats2Color">
         <property name="text">
          <string/>
         </property>
@@ -137,6 +161,12 @@
       </item>
       <item row="2" column="0">
        <widget class="QComboBox" name="neckType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -146,14 +176,14 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QToolButton" name="neckColor">
+       <widget class="lcQColorPicker" name="neckColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="2" column="5">
-       <widget class="QToolButton" name="bodyColor">
+       <widget class="lcQColorPicker" name="bodyColor">
         <property name="text">
          <string/>
         </property>
@@ -161,6 +191,12 @@
       </item>
       <item row="2" column="6">
        <widget class="QComboBox" name="bodyType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -171,6 +207,12 @@
       </item>
       <item row="3" column="0">
        <widget class="QComboBox" name="larmType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -180,7 +222,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QToolButton" name="larmColor">
+       <widget class="lcQColorPicker" name="larmColor">
         <property name="text">
          <string/>
         </property>
@@ -225,7 +267,7 @@
        </widget>
       </item>
       <item row="3" column="5">
-       <widget class="QToolButton" name="rarmColor">
+       <widget class="lcQColorPicker" name="rarmColor">
         <property name="text">
          <string/>
         </property>
@@ -233,6 +275,12 @@
       </item>
       <item row="3" column="6">
        <widget class="QComboBox" name="rarmType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -243,6 +291,12 @@
       </item>
       <item row="4" column="0">
        <widget class="QComboBox" name="lhandType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -252,7 +306,7 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QToolButton" name="lhandColor">
+       <widget class="lcQColorPicker" name="lhandColor">
         <property name="text">
          <string/>
         </property>
@@ -297,7 +351,7 @@
        </widget>
       </item>
       <item row="4" column="5">
-       <widget class="QToolButton" name="rhandColor">
+       <widget class="lcQColorPicker" name="rhandColor">
         <property name="text">
          <string/>
         </property>
@@ -305,6 +359,12 @@
       </item>
       <item row="4" column="6">
        <widget class="QComboBox" name="rhandType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -315,6 +375,12 @@
       </item>
       <item row="5" column="0">
        <widget class="QComboBox" name="lhandaType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -324,7 +390,7 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QToolButton" name="lhandaColor">
+       <widget class="lcQColorPicker" name="lhandaColor">
         <property name="text">
          <string/>
         </property>
@@ -369,7 +435,7 @@
        </widget>
       </item>
       <item row="5" column="5">
-       <widget class="QToolButton" name="rhandaColor">
+       <widget class="lcQColorPicker" name="rhandaColor">
         <property name="text">
          <string/>
         </property>
@@ -377,6 +443,12 @@
       </item>
       <item row="5" column="6">
        <widget class="QComboBox" name="rhandaType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -387,6 +459,12 @@
       </item>
       <item row="6" column="0">
        <widget class="QComboBox" name="body2Type">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -396,14 +474,14 @@
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QToolButton" name="body2Color">
+       <widget class="lcQColorPicker" name="body2Color">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="6" column="5">
-       <widget class="QToolButton" name="body3Color">
+       <widget class="lcQColorPicker" name="body3Color">
         <property name="text">
          <string/>
         </property>
@@ -411,6 +489,12 @@
       </item>
       <item row="6" column="6">
        <widget class="QComboBox" name="body3Type">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -421,6 +505,12 @@
       </item>
       <item row="7" column="0">
        <widget class="QComboBox" name="llegType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -430,7 +520,7 @@
        </widget>
       </item>
       <item row="7" column="1">
-       <widget class="QToolButton" name="llegColor">
+       <widget class="lcQColorPicker" name="llegColor">
         <property name="text">
          <string/>
         </property>
@@ -475,7 +565,7 @@
        </widget>
       </item>
       <item row="7" column="5">
-       <widget class="QToolButton" name="rlegColor">
+       <widget class="lcQColorPicker" name="rlegColor">
         <property name="text">
          <string/>
         </property>
@@ -483,6 +573,12 @@
       </item>
       <item row="7" column="6">
        <widget class="QComboBox" name="rlegType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -493,6 +589,12 @@
       </item>
       <item row="8" column="0">
        <widget class="QComboBox" name="llegaType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -502,7 +604,7 @@
        </widget>
       </item>
       <item row="8" column="1">
-       <widget class="QToolButton" name="llegaColor">
+       <widget class="lcQColorPicker" name="llegaColor">
         <property name="text">
          <string/>
         </property>
@@ -547,7 +649,7 @@
        </widget>
       </item>
       <item row="8" column="5">
-       <widget class="QToolButton" name="rlegaColor">
+       <widget class="lcQColorPicker" name="rlegaColor">
         <property name="text">
          <string/>
         </property>
@@ -555,6 +657,12 @@
       </item>
       <item row="8" column="6">
        <widget class="QComboBox" name="rlegaType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
         </property>
@@ -588,6 +696,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>lcQColorPicker</class>
+   <extends>QToolButton</extends>
+   <header>lc_qcolorpicker.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

@@ -28,7 +28,7 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget *parent, void *data) :
 	ui->partsAfterEachStep->setChecked(options->PartsListStep);
 	ui->partsAtTheEnd->setChecked(options->PartsListEnd);
 	ui->partImages->setChecked(options->PartsListImages);
-	// TODO: color picker for PartImagesColor
+	ui->partColor->setCurrentColor(options->PartImagesColor);
 	ui->partImagesWidth->setText(QString::number(options->PartImagesWidth));
 	ui->partImagesHeight->setText(QString::number(options->PartImagesHeight));
 }
@@ -60,6 +60,7 @@ void lcQHTMLDialog::accept()
 	options->PartsListStep = ui->partsAfterEachStep->isChecked();
 	options->PartsListEnd = ui->partsAtTheEnd->isChecked();
 	options->PartsListImages = ui->partImages->isChecked();
+	options->PartImagesColor = ui->partColor->currentColor();
 	options->PartImagesWidth = ui->partImagesWidth->text().toInt();
 	options->PartImagesHeight = ui->partImagesHeight->text().toInt();
 

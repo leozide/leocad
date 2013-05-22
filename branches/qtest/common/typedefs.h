@@ -11,7 +11,7 @@ class Camera;
 
 #include "str.h"
 #include "lc_math.h"
-#include "lc_action.h"
+#include "lc_commands.h"
 
 enum LC_NOTIFY
 {

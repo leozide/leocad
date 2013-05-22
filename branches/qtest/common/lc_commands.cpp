@@ -1,8 +1,8 @@
 #include "lc_global.h"
-#include "lc_action.h"
+#include "lc_commands.h"
 #include "system.h"
 
-lcAction gActions[LC_NUM_COMMANDS] =
+lcCommand gCommands[LC_NUM_COMMANDS] =
 {
 	// LC_FILE_NEW
 	{
@@ -1175,4 +1175,4 @@ lcAction gActions[LC_NUM_COMMANDS] =
 	}
 };
 
-LC_CASSERT(sizeof(gActions)/sizeof(gActions[0]) == LC_NUM_COMMANDS);
+LC_CASSERT(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS);

@@ -16,7 +16,7 @@ win32 {
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 } else {
-    LIBS += -lz
+	LIBS += -lz -lpng -ljpeg
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 RC_FILE = qt/leocad.rc
@@ -52,7 +52,6 @@ SOURCES += common/view.cpp \
     common/lc_file.cpp \
     common/lc_colors.cpp \
     common/lc_application.cpp \
-    common/keyboard.cpp \
     common/image.cpp \
     common/im_png.cpp \
     common/im_jpg.cpp \
@@ -65,7 +64,6 @@ SOURCES += common/view.cpp \
     common/console.cpp \
     common/camera.cpp \
     common/array.cpp \
-    common/lc_action.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
     qt/lc_qmainwindow.cpp \
@@ -92,7 +90,9 @@ SOURCES += common/view.cpp \
     qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
     qt/lc_qutils.cpp \
-    qt/lc_qcolorpicker.cpp
+    qt/lc_qcolorpicker.cpp \
+    common/lc_commands.cpp \
+    common/lc_shortcuts.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -122,7 +122,6 @@ HEADERS += common/glwindow.h \
     common/lc_file.h \
     common/lc_colors.h \
     common/lc_application.h \
-    common/keyboard.h \
     common/image.h \
     common/group.h \
     common/globals.h \
@@ -133,7 +132,6 @@ HEADERS += common/glwindow.h \
     common/camera.h \
     common/basewnd.h \
     common/lc_profile.h \
-    common/lc_action.h \
     common/lc_category.h \
     qt/lc_colorlistwidget.h \
     qt/lc_qmainwindow.h \
@@ -154,7 +152,9 @@ HEADERS += common/glwindow.h \
     qt/lc_qimagedialog.h \
     qt/lc_qupdatedialog.h \
     qt/lc_qutils.h \
-    qt/lc_qcolorpicker.h
+    qt/lc_qcolorpicker.h \
+    common/lc_commands.h \
+    common/lc_shortcuts.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

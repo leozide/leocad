@@ -1,7 +1,7 @@
-#ifndef _KEYBOARD_H_
-#define _KEYBOARD_H_
+#ifndef _LC_SHORTCUTS_H_
+#define _LC_SHORTCUTS_H_
 
-#include "lc_action.h"
+#include "lc_commands.h"
 
 #define LC_SHORTCUT_LENGTH 32
 
@@ -22,4 +22,4 @@ bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 bool lcLoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts);
 bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts);
 
-#endif // _KEYBOARD_H_
+#endif // _LC_SHORTCUTS_H_

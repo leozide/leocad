@@ -383,7 +383,7 @@ void lcQPreferencesDialog::updateCommandList()
 
 	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
 	{
-		const QString identifier = gActions[actionIdx].ID;
+		const QString identifier = gCommands[actionIdx].ID;
 
 		int pos = identifier.indexOf(QLatin1Char('.'));
 		int subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
@@ -437,7 +437,7 @@ void lcQPreferencesDialog::updateCommandList()
 		item->setText(1, sequence.toString(QKeySequence::NativeText));
 		item->setData(0, Qt::UserRole, qVariantFromValue(actionIdx));
 
-		if (strcmp(options->KeyboardShortcuts.Shortcuts[actionIdx], gActions[actionIdx].DefaultShortcut))
+		if (strcmp(options->KeyboardShortcuts.Shortcuts[actionIdx], gCommands[actionIdx].DefaultShortcut))
 			setShortcutModified(item, true);
 
 		sections[section]->addChild(item);
@@ -481,7 +481,7 @@ void lcQPreferencesDialog::on_shortcutAssign_clicked()
 
 	current->setText(1, ui->shortcutEdit->text());
 
-	setShortcutModified(current, strcmp(options->KeyboardShortcuts.Shortcuts[shortcutIndex], gActions[shortcutIndex].DefaultShortcut) != 0);
+	setShortcutModified(current, strcmp(options->KeyboardShortcuts.Shortcuts[shortcutIndex], gCommands[shortcutIndex].DefaultShortcut) != 0);
 
 	options->ShortcutsModified = true;
 	options->ShortcutsDefault = false;

@@ -1,5 +1,5 @@
 #include "lc_global.h"
-#include "keyboard.h"
+#include "lc_shortcuts.h"
 #include "lc_profile.h"
 #include "lc_file.h"
 
@@ -33,8 +33,8 @@ void lcResetDefaultKeyboardShortcuts()
 
 void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts)
 {
-	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
-		strcpy(Shortcuts.Shortcuts[ActionIdx], gActions[ActionIdx].DefaultShortcut);
+	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
+		strcpy(Shortcuts.Shortcuts[CommandIdx], gCommands[CommandIdx].DefaultShortcut);
 }
 
 bool lcSaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts)
@@ -51,12 +51,12 @@ bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 {
 	char Line[1024];
 
-	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
+	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
 	{
-		if (!Shortcuts.Shortcuts[ActionIdx][0])
+		if (!Shortcuts.Shortcuts[CommandIdx][0])
 			continue;
 
-		sprintf(Line, "%s=%s\n", gActions[ActionIdx].ID, Shortcuts.Shortcuts[ActionIdx]);
+		sprintf(Line, "%s=%s\n", gCommands[CommandIdx].ID, Shortcuts.Shortcuts[CommandIdx]);
 
 		File.WriteLine(Line);
 	}
@@ -76,8 +76,8 @@ bool lcLoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcut
 
 bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts)
 {
-	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
-		Shortcuts.Shortcuts[ActionIdx][0] = 0;
+	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
+		Shortcuts.Shortcuts[CommandIdx][0] = 0;
 
 	char Line[1024];
 
@@ -91,19 +91,19 @@ bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts)
 		*Key = 0;
 		Key++;
 
-		int ActionIdx;
-		for (ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
-			if (!strcmp(gActions[ActionIdx].ID, Line))
+		int CommandIdx;
+		for (CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
+			if (!strcmp(gCommands[CommandIdx].ID, Line))
 				break;
 
-		if (ActionIdx == LC_NUM_COMMANDS)
+		if (CommandIdx == LC_NUM_COMMANDS)
 			continue;
 
 		char* NewLine = strchr(Key, '\n');
 		if (NewLine)
 			*NewLine = 0;
 
-		strncpy(Shortcuts.Shortcuts[ActionIdx], Key, LC_SHORTCUT_LENGTH);
+		strncpy(Shortcuts.Shortcuts[CommandIdx], Key, LC_SHORTCUT_LENGTH);
 	}
 
 	return true;

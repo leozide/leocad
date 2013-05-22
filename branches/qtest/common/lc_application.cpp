@@ -10,7 +10,7 @@
 #include "project.h"
 #include "image.h"
 #include "mainwnd.h"
-#include "keyboard.h"
+#include "lc_shortcuts.h"
 
 // ----------------------------------------------------------------------------
 // Global functions.

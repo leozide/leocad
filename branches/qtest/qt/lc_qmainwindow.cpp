@@ -12,7 +12,7 @@
 #include "view.h"
 #include "lc_qpartstree.h"
 #include "lc_colorlistwidget.h"
-#include "keyboard.h"
+#include "lc_shortcuts.h"
 #include "system.h"
 #include "mainwnd.h"
 #include "lc_profile.h"
@@ -71,8 +71,8 @@ void lcQMainWindow::createActions()
 {
 	for (int Command = 0; Command < LC_NUM_COMMANDS; Command++)
 	{
-		QAction *action = new QAction(tr(gActions[Command].MenuName), this);
-		action->setStatusTip(tr(gActions[Command].StatusText));
+		QAction *action = new QAction(tr(gCommands[Command].MenuName), this);
+		action->setStatusTip(tr(gCommands[Command].StatusText));
 		connect(action, SIGNAL(triggered()), this, SLOT(actionTriggered()));
 		addAction(action);
 		actions[Command] = action;

@@ -7,7 +7,7 @@
 #include "project.h"
 #include "lc_category.h"
 #include "image.h"
-#include "keyboard.h"
+#include "lc_shortcuts.h"
 
 class Group;
 

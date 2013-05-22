@@ -1,5 +1,5 @@
-#ifndef _LC_ACTION_H_
-#define _LC_ACTION_H_
+#ifndef _LC_COMMANDS_H_
+#define _LC_COMMANDS_H_
 
 enum LC_COMMANDS
 {
@@ -179,7 +179,7 @@ enum LC_COMMANDS
 	LC_NUM_COMMANDS
 };
 
-struct lcAction
+struct lcCommand
 {
 	const char* ID;
 	const char* MenuName;
@@ -187,6 +187,6 @@ struct lcAction
 	const char* DefaultShortcut;
 };
 
-extern lcAction gActions[LC_NUM_COMMANDS];
+extern lcCommand gCommands[LC_NUM_COMMANDS];
 
-#endif // _LC_ACTION_H_
+#endif // _LC_COMMANDS_H_

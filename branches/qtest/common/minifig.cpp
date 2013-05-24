@@ -1,7 +1,3 @@
-//
-// Minifig Wizard base class, calculates position/rotation of all pieces.
-//
-
 #include "lc_global.h"
 #include "lc_colors.h"
 #include "lc_math.h"
@@ -12,7 +8,6 @@
 #include "minifig.h"
 #include "opengl.h"
 #include "pieceinf.h"
-#include "globals.h"
 #include "project.h"
 #include "system.h"
 #include "lc_library.h"

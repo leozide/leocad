@@ -41,7 +41,6 @@ SOURCES += common/view.cpp \
     common/opengl.cpp \
     common/object.cpp \
     common/minifig.cpp \
-    common/message.cpp \
     common/mainwnd.cpp \
     common/light.cpp \
     common/lc_zipfile.cpp \
@@ -53,7 +52,6 @@ SOURCES += common/view.cpp \
     common/lc_application.cpp \
     common/image.cpp \
     common/group.cpp \
-    common/globals.cpp \
     common/debug.cpp \
     common/curve.cpp \
     common/console.cpp \
@@ -105,7 +103,6 @@ HEADERS += common/glwindow.h \
     common/opengl.h \
     common/object.h \
     common/minifig.h \
-    common/message.h \
     common/mainwnd.h \
     common/light.h \
     common/lc_zipfile.h \
@@ -119,7 +116,6 @@ HEADERS += common/glwindow.h \
     common/lc_application.h \
     common/image.h \
     common/group.h \
-    common/globals.h \
     common/defines.h \
     common/debug.h \
     common/curve.h \

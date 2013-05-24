@@ -67,6 +67,10 @@ void SystemUpdatePlay(bool play, bool stop)
 {
 }
 
+void SystemUpdateFocus(void* p)
+{
+}
+
 void SystemInit()
 {
 }

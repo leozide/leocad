@@ -327,7 +327,6 @@ public:
 
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id);
-	void HandleMessage(int Message, void* Data);
 
 protected:
 	// State variables

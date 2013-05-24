@@ -1,10 +1,5 @@
-//
-// Piece Preview window
-//
-
 #include "lc_global.h"
 #include "preview.h"
-#include "globals.h"
 #include "project.h"
 #include "pieceinf.h"
 #include "system.h"

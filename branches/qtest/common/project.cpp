@@ -21,9 +21,8 @@
 #include "project.h"
 #include "image.h"
 #include "system.h"
-#include "globals.h"
+#include "console.h"
 #include "minifig.h"
-#include "message.h"
 #include "curve.h"
 #include "mainwnd.h"
 #include "view.h"
@@ -32,17 +31,6 @@
 #include "debug.h"
 #include "lc_application.h"
 #include "lc_profile.h"
-
-// FIXME: temporary function, replace the code !!!
-void SystemUpdateFocus (void* p)
-{
-  messenger->Dispatch (LC_MSG_FOCUS_CHANGED, p);
-}
-
-static void ProjectListener(int Message, void* Data, void* User)
-{
-	((Project*)User)->HandleMessage(Message, Data);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // Project construction/destruction
@@ -68,11 +56,6 @@ Project::Project()
 	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
 	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 
-	if (messenger == NULL)
-		messenger = new Messenger ();
-	messenger->AddRef();
-	messenger->Listen(&ProjectListener, this);
-
 	m_pScreenFont = new TexFont();
 }
 
@@ -82,9 +65,6 @@ Project::~Project()
 	SystemFinish();
 
 	delete m_pTrackFile;
-
-	messenger->DecRef();
-
 	delete m_pTerrain;
 	delete m_pBackground;
 	delete m_pScreenFont;
@@ -1237,7 +1217,7 @@ bool Project::OnNewDocument()
 	LoadDefaults(true);
 	CheckPoint("");
 
-	messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+	SystemUpdateFocus(NULL);
 
 	return true;
 }
@@ -4005,14 +3985,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 	}
 }
 
-void Project::HandleMessage(int Message, void* Data)
-{
-	if (Message == LC_MSG_FOCUS_CHANGED)
-	{
-	}
-}
-
-// Handle (almost) all menu/toolbar commands here.
 void Project::HandleCommand(LC_COMMANDS id)
 {
 	switch (id)
@@ -5425,7 +5397,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_EDIT_SELECT_NONE:
 		{
 			SelectAndFocusNone(false);
-                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			SystemUpdateFocus(NULL);
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
@@ -5442,7 +5414,7 @@ void Project::HandleCommand(LC_COMMANDS id)
                                     pPiece->Select(true, false, false);
 				}
 
-                        messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			SystemUpdateFocus(NULL);
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
@@ -5543,7 +5515,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);
 			pPiece->Select (true, true, false);
-			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, pPiece);
+			SystemUpdateFocus(pPiece);
 			UpdateSelection();
 			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
@@ -5557,7 +5529,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			if (RemoveSelectedObjects())
 			{
-                          messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+				SystemUpdateFocus(NULL);
 				UpdateSelection();
 				UpdateAllViews();
 				SetModifiedFlag(true);
@@ -5743,7 +5715,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			pGroup->m_fCenter[1] = (bs[1] + bs[4]) / 2;
 			pGroup->m_fCenter[2] = (bs[2] + bs[5]) / 2;
 
-			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			SystemUpdateFocus(NULL);
 			UpdateSelection();
 			UpdateAllViews();
 			SetModifiedFlag(true);
@@ -6079,7 +6051,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (pPiece->IsSelected())
 					pPiece->Hide();
 			UpdateSelection();
-			messenger->Dispatch (LC_MSG_FOCUS_CHANGED, NULL);
+			SystemUpdateFocus(NULL);
 			UpdateAllViews();
 		} break;
 
@@ -6887,6 +6859,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			SetAction(LC_ACTION_ROLL);
 		} break;
+
+		case LC_NUM_COMMANDS:
+			break;
 	}
 }
 

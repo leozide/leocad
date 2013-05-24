@@ -23,21 +23,26 @@ bool lcTexture::Load()
 
 bool lcTexture::Load(const char* FileName, int Flags)
 {
-	lcDiskFile File;
+	Image image;
 
-	if (!File.Open(FileName, "rb"))
+	if (!image.FileLoad(FileName))
 		return false;
 
-	return Load(File, Flags);
+	return Load(image, Flags);
 }
 
-bool lcTexture::Load(lcFile& File, int Flags)
+bool lcTexture::Load(lcMemFile& File, int Flags)
 {
 	Image image;
 
 	if (!image.FileLoad(File))
 		return false;
 
+	return Load(image, Flags);
+}
+
+bool lcTexture::Load(Image& image, int Flags)
+{
 	image.ResizePow2();
 
 	mWidth = image.Width();

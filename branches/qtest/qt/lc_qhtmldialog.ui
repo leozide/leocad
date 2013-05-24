@@ -60,11 +60,6 @@
         </item>
         <item>
          <property name="text">
-          <string>GIF</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>JPEG</string>
          </property>
         </item>

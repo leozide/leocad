@@ -4093,11 +4093,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				switch (Options.Format)
 				{
-				case LC_IMAGE_BMP: strcat(Options.FileName, ".bmp"); break;
-				case LC_IMAGE_GIF: strcat(Options.FileName, ".gif"); break;
-				case LC_IMAGE_JPG: strcat(Options.FileName, ".jpg"); break;
-				case LC_IMAGE_PNG: strcat(Options.FileName, ".png"); break;
-				case LC_IMAGE_AVI: strcat(Options.FileName, ".avi"); break;
+				case LC_IMAGE_BMP: strcat(Options.FileName, ".bmp");
+					break;
+				case LC_IMAGE_JPG: strcat(Options.FileName, ".jpg");
+					break;
+				default:
+				case LC_IMAGE_PNG: strcat(Options.FileName, ".png");
+					break;
 				}
 			}
 
@@ -4137,19 +4139,20 @@ void Project::HandleCommand(LC_COMMANDS id)
 			char* Ext = strrchr(Options.FileName, '.');
 			if (Ext)
 			{
-				if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".gif") || !strcmp(Ext, ".png") || !strcmp(Ext, ".avi"))
+				if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".png"))
 					*Ext = 0;
 			}
 
 			const char* ext;
 			switch (Options.Format)
 			{
+			case LC_IMAGE_BMP: ext = ".bmp";
+				break;
+			case LC_IMAGE_JPG: ext = ".jpg";
+				break;
 			default:
-			case LC_IMAGE_BMP: ext = ".bmp"; break;
-			case LC_IMAGE_GIF: ext = ".gif"; break;
-			case LC_IMAGE_JPG: ext = ".jpg"; break;
-			case LC_IMAGE_PNG: ext = ".png"; break;
-			case LC_IMAGE_AVI: ext = ".avi"; break;
+			case LC_IMAGE_PNG: ext = ".png";
+				break;
 			}
 
 			if (m_bAnimation)
@@ -4178,29 +4181,21 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Image* images = new Image[Options.End - Options.Start + 1];
 			CreateImages(images, Options.Width, Options.Height, Options.Start, Options.End, false);
 
-			if (Options.Format == LC_IMAGE_AVI)
+			for (int i = 0; i <= Options.End - Options.Start; i++)
 			{
-				strcat(Options.FileName, ext);
-				SaveVideo(Options.FileName, images, Options.End - Options.Start + 1, m_bAnimation ? m_nFPS : 60.0f);
-			}
-			else
-			{
-				for (int i = 0; i <= Options.End - Options.Start; i++)
+				char filename[LC_MAXPATH];
+
+				if (Options.Start != Options.End)
 				{
-					char filename[LC_MAXPATH];
-
-					if (Options.Start != Options.End)
-					{
-						sprintf(filename, "%s%02d%s", Options.FileName, i+1, ext);
-					}
-					else
-					{
-						strcat(Options.FileName, ext);
-						strcpy(filename, Options.FileName);
-					}
-
-					images[i].FileSave(filename, Options.Format, Options.Transparent, BackgroundColor);
+					sprintf(filename, "%s%02d%s", Options.FileName, i+1, ext);
 				}
+				else
+				{
+					strcat(Options.FileName, ext);
+					strcpy(filename, Options.FileName);
+				}
+
+				images[i].FileSave(filename, Options.Format, Options.Transparent, BackgroundColor);
 			}
 			delete []images;
 		} break;
@@ -4293,11 +4288,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				switch (Options.ImageFormat)
 				{
-				case LC_IMAGE_BMP: ext = ".bmp"; break;
+				case LC_IMAGE_BMP: ext = ".bmp";
+					break;
+				case LC_IMAGE_JPG: ext = ".jpg";
+					break;
 				default:
-				case LC_IMAGE_GIF: ext = ".gif"; break;
-				case LC_IMAGE_JPG: ext = ".jpg"; break;
-				case LC_IMAGE_PNG: ext = ".png"; break;
+				case LC_IMAGE_PNG: ext = ".png";
+					break;
 				}
 
 				htmlext = ".html";

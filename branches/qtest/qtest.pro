@@ -12,11 +12,11 @@ PRECOMPILED_HEADER = common/lc_global.h
 win32 { 
 	QMAKE_CXXFLAGS_WARN_ON += -wd4100
 	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
-	INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib $$[QT_INSTALL_PREFIX]/src/3rdparty/libpng $$[QT_INSTALL_PREFIX]/src/3rdparty/libjpeg
+	INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 } else {
-	LIBS += -lz -lpng -ljpeg
+	LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 RC_FILE = qt/leocad.rc
@@ -53,10 +53,6 @@ SOURCES += common/view.cpp \
     common/lc_colors.cpp \
     common/lc_application.cpp \
     common/image.cpp \
-    common/im_png.cpp \
-    common/im_jpg.cpp \
-    common/im_gif.cpp \
-    common/im_bmp.cpp \
     common/group.cpp \
     common/globals.cpp \
     common/debug.cpp \
@@ -92,7 +88,8 @@ SOURCES += common/view.cpp \
     qt/lc_qutils.cpp \
     qt/lc_qcolorpicker.cpp \
     common/lc_commands.cpp \
-    common/lc_shortcuts.cpp
+    common/lc_shortcuts.cpp \
+    qt/lc_qimage.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \

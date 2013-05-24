@@ -934,14 +934,9 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	}
 	else
 	{
-		lcDiskFile TextureFile;
-
 		sprintf(FileName, "%sparts/textures/%s.png", mLibraryPath, Name);
 
-		if (!TextureFile.Open(FileName, "rb"))
-			return false;
-
-		if (!Texture->Load(TextureFile))
+		if (!Texture->Load(FileName))
 			return false;
 	}
 

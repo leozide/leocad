@@ -9,6 +9,8 @@
 
 #define LC_TEXTURE_NAME_LEN 256
 
+class Image;
+
 class lcTexture
 {
 public:
@@ -16,7 +18,8 @@ public:
 	~lcTexture();
 
 	bool Load(const char* FileName, int Flags = 0);
-	bool Load(lcFile& File, int Flags = 0);
+	bool Load(lcMemFile& File, int Flags = 0);
+	bool Load(Image& image, int Flags);
 	void Unload();
 
 	int AddRef()

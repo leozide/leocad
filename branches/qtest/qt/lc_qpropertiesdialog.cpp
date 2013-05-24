@@ -178,7 +178,7 @@ void lcQPropertiesDialog::colorClicked()
 
 void lcQPropertiesDialog::on_imageNameButton_clicked()
 {
-	QString result = QFileDialog::getOpenFileName(this, tr("Select Background Image"), ui->imageNameEdit->text(), tr("All Image Files (*.png;*.jpg;*.gif;*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;GIF Files (*.gif);;BMP Files (*.bmp);;All Files (*.*)"));
+	QString result = QFileDialog::getOpenFileName(this, tr("Select Background Image"), ui->imageNameEdit->text(), tr("All Image Files (*.png *.jpg *.gif *.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;GIF Files (*.gif);;BMP Files (*.bmp);;All Files (*.*)"));
 
 	if (!result.isEmpty())
 		ui->imageNameEdit->setText(QDir::toNativeSeparators(result));

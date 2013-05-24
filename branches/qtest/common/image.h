@@ -10,10 +10,8 @@
 enum LC_IMAGE_FORMAT
 {
 	LC_IMAGE_BMP,
-	LC_IMAGE_GIF,
 	LC_IMAGE_JPG,
-	LC_IMAGE_PNG,
-	LC_IMAGE_AVI
+	LC_IMAGE_PNG
 };
 
 class Image
@@ -22,9 +20,9 @@ public:
 	Image();
 	virtual ~Image();
 
-	bool FileSave(lcFile& File, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
+	bool FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
 	bool FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
-	bool FileLoad(lcFile& file);
+	bool FileLoad(lcMemFile& file);
 	bool FileLoad(const char* filename);
 
 	void Resize(int width, int height);
@@ -41,23 +39,13 @@ public:
 	unsigned char* GetData() const
 		{ return m_pData; }
 
-protected:
-	void FreeData();
-
-	bool LoadJPG(lcFile& file);
-	bool LoadBMP(lcFile& file);
-	bool LoadPNG(lcFile& file);
-	bool LoadGIF(lcFile& file);
-
-	bool SaveJPG(lcFile& file, int quality, bool progressive) const;
-	bool SaveBMP(lcFile& file, bool quantize) const;
-	bool SavePNG(lcFile& file, bool transparent, bool interlaced, unsigned char* background) const;
-	bool SaveGIF(lcFile& file, bool transparent, bool interlaced, unsigned char* background) const;
-
 	int m_nWidth;
 	int m_nHeight;
 	bool m_bAlpha;
 	unsigned char* m_pData;
+
+protected:
+	void FreeData();
 };
 
 void SaveVideo(char* filename, Image *images, int count, float fps);

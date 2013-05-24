@@ -300,16 +300,12 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				Ext.MakeLower();
 			}
 
-			if ((Ext == "bmp") || (Ext == "gif"))
+			if (Ext == "bmp")
 				NeedExt = false;
-#ifdef LC_HAVE_JPEGLIB
 			else if ((Ext == "jpg") || (Ext == "jpeg"))
 				NeedExt = false;
-#endif
-#ifdef LC_HAVE_PNGLIB
 			else if (Ext == "png")
 				NeedExt = false;
-#endif
 		}
 
 		// Setup default options.
@@ -329,16 +325,13 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		{
 			switch (ImageFormat)
 			{
-			default:
 			case LC_IMAGE_BMP:
 				FileName += ".bmp";
-				break;
-			case LC_IMAGE_GIF:
-				FileName += ".gif";
 				break;
 			case LC_IMAGE_JPG:
 				FileName += ".jpg";
 				break;
+			default:
 			case LC_IMAGE_PNG:
 				FileName += ".png";
 				break;

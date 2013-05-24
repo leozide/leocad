@@ -20,34 +20,21 @@ public:
 	Image();
 	virtual ~Image();
 
-	bool FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
-	bool FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const;
-	bool FileLoad(lcMemFile& file);
-	bool FileLoad(const char* filename);
+	bool FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent) const;
+	bool FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent) const;
+	bool FileLoad(lcMemFile& File);
+	bool FileLoad(const char* FileName);
 
-	void Resize(int width, int height);
+	void Resize(int Width, int Height);
 	void ResizePow2();
-	void FromOpenGL(int width, int height);
-	void Allocate(int width, int height, bool alpha);
-
-	int Width() const
-		{ return m_nWidth; }
-	int Height() const
-		{ return m_nHeight; }
-	int Alpha() const
-		{ return m_bAlpha; }
-	unsigned char* GetData() const
-		{ return m_pData; }
-
-	int m_nWidth;
-	int m_nHeight;
-	bool m_bAlpha;
-	unsigned char* m_pData;
-
-protected:
+	void FromOpenGL(int Width, int Height);
+	void Allocate(int Width, int Height, bool Alpha);
 	void FreeData();
-};
 
-void SaveVideo(char* filename, Image *images, int count, float fps);
+	int mWidth;
+	int mHeight;
+	bool mAlpha;
+	unsigned char* mData;
+};
 
 #endif // _IMAGE_H_

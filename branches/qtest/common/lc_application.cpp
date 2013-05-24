@@ -313,13 +313,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		bool ImageTransparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
 		LC_IMAGE_FORMAT ImageFormat = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
 
-		unsigned char BackgroundColor[3] =
-		{
-			(unsigned char)(project->GetBackgroundColor()[0]*255),
-			(unsigned char)(project->GetBackgroundColor()[1]*255),
-			(unsigned char)(project->GetBackgroundColor()[2]*255)
-		};
-
 		// Append file extension if needed.
 		if (NeedExt)
 		{
@@ -396,7 +389,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else
 				Frame = FileName;
 
-			images[i].FileSave(Frame, ImageFormat, ImageTransparent, BackgroundColor);
+			images[i].FileSave(Frame, ImageFormat, ImageTransparent);
 		}
 
 		delete []images;

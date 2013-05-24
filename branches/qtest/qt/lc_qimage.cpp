@@ -2,17 +2,17 @@
 #include "image.h"
 #include "lc_file.h"
 
-static void copyToQImage(const Image& src, QImage& dest)
+static void copyToQImage(const Image& src, QImage& dest, bool transparent)
 {
-	dest = QImage(src.m_nWidth, src.m_nHeight, src.m_bAlpha ? QImage::Format_ARGB32 : QImage::Format_RGB32);
+	dest = QImage(src.mWidth, src.mWidth, src.mAlpha ? QImage::Format_ARGB32 : QImage::Format_RGB32);
 
-	lcuint8* bytes = (lcuint8*)src.m_pData;
+	lcuint8* bytes = (lcuint8*)src.mData;
 
-	if (src.m_bAlpha)
+	if (transparent && src.mAlpha)
 	{
-		for (int y = 0; y < src.m_nHeight; y++)
+		for (int y = 0; y < src.mWidth; y++)
 		{
-			for (int x = 0; x < src.m_nWidth; x++)
+			for (int x = 0; x < src.mWidth; x++)
 			{
 				dest.setPixel(x, y, qRgba(bytes[0], bytes[1], bytes[2], bytes[3]));
 				bytes += 4;
@@ -21,12 +21,14 @@ static void copyToQImage(const Image& src, QImage& dest)
 	}
 	else
 	{
-		for (int y = 0; y < src.m_nHeight; y++)
+		int pixelSize = src.mAlpha ? 4 : 3;
+
+		for (int y = 0; y < src.mHeight; y++)
 		{
-			for (int x = 0; x < src.m_nWidth; x++)
+			for (int x = 0; x < src.mWidth; x++)
 			{
 				dest.setPixel(x, y, qRgb(bytes[0], bytes[1], bytes[2]));
-				bytes += 3;
+				bytes += pixelSize;
 			}
 		}
 	}
@@ -36,11 +38,11 @@ static void copyFromQImage(const QImage& src, Image& dest)
 {
 	dest.Allocate(src.width(), src.height(), src.hasAlphaChannel());
 
-	lcuint8* bytes = (lcuint8*)dest.m_pData;
+	lcuint8* bytes = (lcuint8*)dest.mData;
 
-	for (int y = 0; y < dest.m_nHeight; y++)
+	for (int y = 0; y < dest.mWidth; y++)
 	{
-		for (int x = 0; x < dest.m_nWidth; x++)
+		for (int x = 0; x < dest.mWidth; x++)
 		{
 			QRgb pixel = src.pixel(x, y);
 
@@ -48,7 +50,7 @@ static void copyFromQImage(const QImage& src, Image& dest)
 			*bytes++ = qGreen(pixel);
 			*bytes++ = qBlue(pixel);
 
-			if (dest.m_bAlpha)
+			if (dest.mAlpha)
 				*bytes++ = qAlpha(pixel);
 		}
 	}
@@ -81,12 +83,11 @@ bool Image::FileLoad(const char* FileName)
 	return true;
 }
 
-// TODO: transparency
-bool Image::FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const
+bool Image::FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent) const
 {
 	QImage image;
 
-	copyToQImage(*this, image);
+	copyToQImage(*this, image, Transparent);
 
 	QByteArray byteArray;
 	QBuffer buffer(&byteArray);
@@ -116,11 +117,11 @@ bool Image::FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent, 
 	return true;
 }
 
-bool Image::FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent, unsigned char* BackgroundColor) const
+bool Image::FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent) const
 {
 	QImage image;
 
-	copyToQImage(*this, image);
+	copyToQImage(*this, image, Transparent);
 
 	const char* formatString;
 

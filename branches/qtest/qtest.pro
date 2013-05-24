@@ -34,7 +34,6 @@ SOURCES += common/view.cpp \
     common/texfont.cpp \
     common/terrain.cpp \
     common/str.cpp \
-    common/quant.cpp \
     common/project.cpp \
     common/preview.cpp \
     common/pieceinf.cpp \
@@ -99,7 +98,6 @@ HEADERS += common/glwindow.h \
     common/terrain.h \
     common/system.h \
     common/str.h \
-    common/quant.h \
     common/project.h \
     common/preview.h \
     common/pieceinf.h \

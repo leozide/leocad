@@ -1518,7 +1518,7 @@ void Project::RenderBackground(View* view)
 {
 	if ((m_nScene & (LC_SCENE_GRADIENT | LC_SCENE_BG)) == 0)
 	{
-		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 1.0f);
+		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		return;
 	}
@@ -4171,13 +4171,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 			}
 
-			unsigned char BackgroundColor[3] =
-			{
-				(unsigned char)(m_fBackground[0]*255),
-				(unsigned char)(m_fBackground[1]*255),
-				(unsigned char)(m_fBackground[2]*255)
-			};
-
 			Image* images = new Image[Options.End - Options.Start + 1];
 			CreateImages(images, Options.Width, Options.Height, Options.Start, Options.End, false);
 
@@ -4195,7 +4188,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					strcpy(filename, Options.FileName);
 				}
 
-				images[i].FileSave(filename, Options.Format, Options.Transparent, BackgroundColor);
+				images[i].FileSave(filename, Options.Format, Options.Transparent);
 			}
 			delete []images;
 		} break;
@@ -4425,17 +4418,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 				Image* images = new Image[last];
 				CreateImages(images, Options.StepImagesWidth, Options.StepImagesHeight, 1, last, Options.HighlightNewParts);
 
-				unsigned char BackgroundColor[3] =
-				{
-					(unsigned char)(m_fBackground[0]*255),
-					(unsigned char)(m_fBackground[1]*255),
-					(unsigned char)(m_fBackground[2]*255)
-				};
-
 				for (i = 0; i < last; i++)
 				{
 					sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, i+1, ext);
-					images[i].FileSave(fn, Options.ImageFormat, Options.TransparentImages, BackgroundColor);
+					images[i].FileSave(fn, Options.ImageFormat, Options.TransparentImages);
 				}
 				delete []images;
 
@@ -4477,7 +4463,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						glEnable(GL_DEPTH_TEST);
 						glEnable(GL_POLYGON_OFFSET_FILL);
 						glPolygonOffset(0.5f, 0.1f);
-						glClearColor(1,1,1,1);
+						glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 						pInfo->ZoomExtents(30.0f, aspect);
 						pInfo->RenderPiece(Options.PartImagesColor);
@@ -4487,7 +4473,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						image.FromOpenGL (cx, cy);
 
 						sprintf(fn, "%s%s%s", Options.PathName, pInfo->m_strName, ext);
-						image.FileSave(fn, Options.ImageFormat, Options.TransparentImages, BackgroundColor);
+						image.FileSave(fn, Options.ImageFormat, Options.TransparentImages);
 					}
 					GL_EndRenderToTexture();
 				}

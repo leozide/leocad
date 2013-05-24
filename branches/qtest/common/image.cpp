@@ -1,129 +1,106 @@
-// Image I/O routines
-//
-
 #include "lc_global.h"
-#include "opengl.h"
-#ifdef LC_WINDOWS
-#include <windows.h>
-#include <windowsx.h>
-//#include <mmsystem.h>
-#include <vfw.h>
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "image.h"
-#include "lc_file.h"
+#include "opengl.h"
 
-// =============================================================================
-// Image functions
-
-Image::Image ()
+Image::Image()
 {
-  m_nWidth = 0;
-  m_nHeight = 0;
-  m_bAlpha = false;
-  m_pData = NULL;
+	mData = NULL;
+	mWidth = 0;
+	mHeight = 0;
+	mAlpha = false;
 }
 
-Image::~Image ()
+Image::~Image()
 {
-  free (m_pData);
+	FreeData();
 }
 
-void Image::FreeData ()
+void Image::FreeData()
 {
-  m_nWidth = 0;
-  m_nHeight = 0;
-  m_bAlpha = false;
-  free (m_pData);
-  m_pData = NULL;
+	free(mData);
+	mData = NULL;
+	mWidth = 0;
+	mHeight = 0;
+	mAlpha = false;
 }
 
-void Image::Allocate (int width, int height, bool alpha)
+void Image::Allocate(int Width, int Height, bool Alpha)
 {
-  FreeData ();
+	FreeData();
 
-  m_nWidth = width;
-  m_nHeight = height;
-  m_bAlpha = alpha;
+	mWidth = Width;
+	mHeight = Height;
+	mAlpha = Alpha;
 
-  if (m_bAlpha)
-    m_pData = (unsigned char*)malloc (width * height * 4);
-  else
-    m_pData = (unsigned char*)malloc (width * height * 3);
+	if (mAlpha)
+		mData = (unsigned char*)malloc(mWidth * mHeight * 4);
+	else
+		mData = (unsigned char*)malloc(mWidth * mHeight * 3);
 }
 
-void Image::ResizePow2 ()
+void Image::ResizePow2()
 {
-  int i, shifted_x, shifted_y;
+	int i, shifted_x, shifted_y;
 
-  shifted_x = m_nWidth;
-  for (i = 0; ((i < 16) && (shifted_x != 0)); i++)
-    shifted_x = shifted_x >> 1;
-  shifted_x = (i != 0) ? 1 << (i-1) : 1;
+	shifted_x = mWidth;
+	for (i = 0; ((i < 16) && (shifted_x != 0)); i++)
+		shifted_x = shifted_x >> 1;
+	shifted_x = (i != 0) ? 1 << (i-1) : 1;
 
-  shifted_y = m_nHeight;
-  for (i = 0; ((i < 16) && (shifted_y != 0)); i++)
-    shifted_y = shifted_y >> 1;
-  shifted_y = (i != 0) ? 1 << (i-1) : 1;
+	shifted_y = mHeight;
+	for (i = 0; ((i < 16) && (shifted_y != 0)); i++)
+		shifted_y = shifted_y >> 1;
+	shifted_y = (i != 0) ? 1 << (i-1) : 1;
 
-  if ((shifted_x != m_nWidth) || (shifted_y != m_nHeight))
-    Resize (shifted_x, shifted_y);
+	if ((shifted_x != mWidth) || (shifted_y != mHeight))
+		Resize(shifted_x, shifted_y);
 }
 
-void Image::Resize (int width, int height)
+void Image::Resize(int width, int height)
 {
-  int i, j, k, components, stx, sty;
-  float accumx, accumy;
-  unsigned char* bits;
+	int i, j, k, components, stx, sty;
+	float accumx, accumy;
+	unsigned char* bits;
 
-  if (m_bAlpha)
-    components = 4;
-  else
-    components = 3;
+	if (mAlpha)
+		components = 4;
+	else
+		components = 3;
 
-  bits = (unsigned char*)malloc (width * height * components);
+	bits = (unsigned char*)malloc(width * height * components);
 
-  for (j = 0; j < m_nHeight; j++)
-  {
-    accumy = (float)height*j/(float)m_nHeight;
-    sty = (int)floor(accumy);
+	for (j = 0; j < mHeight; j++)
+	{
+		accumy = (float)height*j/(float)mHeight;
+		sty = (int)floor(accumy);
 
-    for (i = 0; i < m_nWidth; i++)
-    {
-      accumx = (float)width*i/(float)m_nWidth;
-      stx = (int)floor(accumx);
+		for (i = 0; i < mWidth; i++)
+		{
+			accumx = (float)width*i/(float)mWidth;
+			stx = (int)floor(accumx);
 
-      for (k = 0; k < components; k++)
-        bits[(stx+sty*width)*components+k] = m_pData[(i+j*m_nWidth)*components+k];
-    }
-  }
+			for (k = 0; k < components; k++)
+				bits[(stx+sty*width)*components+k] = mData[(i+j*mWidth)*components+k];
+		}
+	}
 
-  free (m_pData);
-  m_pData = bits;
-  m_nWidth = width;
-  m_nHeight = height;
+	free (mData);
+	mData = bits;
+	mWidth = width;
+	mHeight = height;
 }
 
-void Image::FromOpenGL (int width, int height)
+void Image::FromOpenGL(int Width, int Height)
 {
-  unsigned char *buf;
-  buf = (unsigned char*)malloc (width*height*3);
+	Allocate(Width, Height, true);
 
-  FreeData ();
+	lcuint8* Buffer = (lcuint8*)malloc(Width * Height * 4);
 
-  m_pData = (unsigned char*)malloc (width*height*3);
-  m_nWidth = width;
-  m_nHeight = height;
-  m_bAlpha = false;
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
 
-  glPixelStorei (GL_PACK_ALIGNMENT, 1);
-  glReadPixels (0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
+	for (int Row = 0; Row < Height; Row++)
+		memcpy(mData + (Row * Width * 4), Buffer + ((Height - Row - 1) * Width * 4), Width * 4);
 
-  for (int row = 0; row < height; row++)
-    memcpy (m_pData + (row*width*3), buf + ((height-row-1)*width*3), width*3);
-
-  free (buf);
+	free(Buffer);
 }

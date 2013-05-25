@@ -306,16 +306,15 @@ protected:
 	void RemoveEmptyGroups();
 
 public:
-	// Call these functions from each OS
-	void OnLeftButtonDown(View* view, int x, int y, bool Control, bool Shift);
-	void OnLeftButtonUp(View* view, int x, int y, bool Control, bool Shift);
-	void OnLeftButtonDoubleClick(View* view, int x, int y, bool Control, bool Shift);
-	void OnMiddleButtonDown(View* view, int x, int y, bool Control, bool Shift);
-	void OnMiddleButtonUp(View* view, int x, int y, bool Control, bool Shift);
-	void OnRightButtonDown(View* view, int x, int y, bool Control, bool Shift);
-	void OnRightButtonUp(View* view, int x, int y, bool Control, bool Shift);
-	void OnMouseMove(View* view, int x, int y, bool Control, bool Shift);
-	void OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift);
+	void OnLeftButtonDown(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnLeftButtonUp(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnLeftButtonDoubleClick(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnMiddleButtonDown(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnMiddleButtonUp(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnRightButtonDown(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnRightButtonUp(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnMouseMove(View* view, int x, int y, bool Control, bool Shift, bool Alt);
+	void OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift, bool Alt);
 	bool OnKeyDown(char nKey, bool Control, bool Shift);
 
 	void SetAction(int Action);

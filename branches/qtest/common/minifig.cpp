@@ -1227,7 +1227,7 @@ void MinifigWizard::OnDraw()
 	}
 }
 
-void MinifigWizard::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
+void MinifigWizard::OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_NONE)
 	{
@@ -1238,7 +1238,7 @@ void MinifigWizard::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void MinifigWizard::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
+void MinifigWizard::OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_LEFT)
 	{
@@ -1247,13 +1247,13 @@ void MinifigWizard::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void MinifigWizard::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift)
+void MinifigWizard::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	m_AutoZoom = true;
 	Redraw();
 }
 
-void MinifigWizard::OnRightButtonDown(int x, int y, bool Control, bool Shift)
+void MinifigWizard::OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_NONE)
 	{
@@ -1264,7 +1264,7 @@ void MinifigWizard::OnRightButtonDown(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void MinifigWizard::OnRightButtonUp(int x, int y, bool Control, bool Shift)
+void MinifigWizard::OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_RIGHT)
 	{
@@ -1273,7 +1273,7 @@ void MinifigWizard::OnRightButtonUp(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void MinifigWizard::OnMouseMove(int x, int y, bool Control, bool Shift)
+void MinifigWizard::OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_LEFT)
 	{

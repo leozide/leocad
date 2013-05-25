@@ -57,17 +57,18 @@ void lcGLWidget::mousePressEvent(QMouseEvent *event)
 {
 	bool Control = event->modifiers() & Qt::ControlModifier;
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
+	bool Alt = event->modifiers() & Qt::AltModifier;
 
 	switch (event->button())
 	{
 	case Qt::LeftButton:
-		mWindow->OnLeftButtonDown(event->x(), height() - event->y() - 1, Control, Shift);
+		mWindow->OnLeftButtonDown(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 		break;
 	case Qt::MidButton:
-		mWindow->OnMiddleButtonDown(event->x(), height() - event->y() - 1, Control, Shift);
+		mWindow->OnMiddleButtonDown(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 		break;
 	case Qt::RightButton:
-		mWindow->OnRightButtonDown(event->x(), height() - event->y() - 1, Control, Shift);
+		mWindow->OnRightButtonDown(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 		break;
 	default:
 		break;
@@ -78,17 +79,18 @@ void lcGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool Control = event->modifiers() & Qt::ControlModifier;
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
+	bool Alt = event->modifiers() & Qt::AltModifier;
 
 	switch (event->button())
 	{
 	case Qt::LeftButton:
-		mWindow->OnLeftButtonUp(event->x(), height() - event->y() - 1, Control, Shift);
+		mWindow->OnLeftButtonUp(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 		break;
 	case Qt::MidButton:
-		mWindow->OnMiddleButtonUp(event->x(), height() - event->y() - 1, Control, Shift);
+		mWindow->OnMiddleButtonUp(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 		break;
 	case Qt::RightButton:
-		mWindow->OnRightButtonUp(event->x(), height() - event->y() - 1, Control, Shift);
+		mWindow->OnRightButtonUp(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 		break;
 	default:
 		break;
@@ -99,8 +101,9 @@ void lcGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	bool Control = event->modifiers() & Qt::ControlModifier;
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
+	bool Alt = event->modifiers() & Qt::AltModifier;
 
-	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift);
+	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 }
 
 void lcGLWidget::dragEnterEvent(QDragEnterEvent *event)

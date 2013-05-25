@@ -78,7 +78,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	}
 }
 
-void PiecePreview::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_NONE)
 	{
@@ -89,7 +89,7 @@ void PiecePreview::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void PiecePreview::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_LEFT)
 	{
@@ -98,13 +98,13 @@ void PiecePreview::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void PiecePreview::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	m_AutoZoom = true;
 	Redraw();
 }
 
-void PiecePreview::OnRightButtonDown(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_NONE)
 	{
@@ -115,7 +115,7 @@ void PiecePreview::OnRightButtonDown(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void PiecePreview::OnRightButtonUp(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_RIGHT)
 	{
@@ -124,7 +124,7 @@ void PiecePreview::OnRightButtonUp(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void PiecePreview::OnMouseMove(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt)
 {
 	if (m_Tracking == LC_TRACK_LEFT)
 	{

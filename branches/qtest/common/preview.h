@@ -12,12 +12,12 @@ public:
 	virtual ~PiecePreview();
 
 	void OnDraw();
-  void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
-  void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
-  void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
-  void OnRightButtonDown(int x, int y, bool Control, bool Shift);
-  void OnRightButtonUp(int x, int y, bool Control, bool Shift);
-  void OnMouseMove(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
+	void OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
+	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt);
+	void OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
+	void OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
+	void OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt);
 
 	PieceInfo* GetCurrentPiece() const
 	{ return m_PieceInfo; }

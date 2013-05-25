@@ -8151,7 +8151,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 {
 	bool ret = false;
 
-	// FIXME: Almost all of this should go through the keyboard shortcut system.
+	// TODO: move to the keyboard shortcut system
 	switch (nKey)
 	{
 		case KEY_ESCAPE:
@@ -8313,7 +8313,7 @@ void Project::BeginColorDrop()
 //	m_RestoreAction = true;
 }
 
-void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	if (m_nTracking != LC_TRACK_NONE)
 		if (StopTracking(false))
@@ -8338,7 +8338,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
-	if (Sys_KeyDown(KEY_ALT))
+	if (Alt)
 		ActivateOverlay(view, LC_ACTION_ROTATE_VIEW, LC_OVERLAY_ROTATE_VIEW_XYZ);
 
 	int Action = GetAction();
@@ -8633,7 +8633,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	}
 }
 
-void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	if (SetActiveView(view))
 		return;
@@ -8684,12 +8684,12 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
   }
 }
 
-void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	StopTracking(true);
 }
 
-void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	if (StopTracking(false))
 		return;
@@ -8711,7 +8711,7 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
-	if (Sys_KeyDown(KEY_ALT))
+	if (Alt)
 		ActivateOverlay(view, LC_ACTION_PAN, LC_OVERLAY_PAN);
 
 	switch (GetAction())
@@ -8723,12 +8723,12 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 	}
 }
 
-void Project::OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	StopTracking(true);
 }
 
-void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	if (StopTracking(false))
 		return;
@@ -8750,7 +8750,7 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
-	if (Sys_KeyDown(KEY_ALT))
+	if (Alt)
 		ActivateOverlay(view, LC_ACTION_ZOOM, LC_OVERLAY_ZOOM);
 
 	switch (GetAction())
@@ -8804,14 +8804,14 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	}
 }
 
-void Project::OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	if (!StopTracking(true) && !m_bTrackCancel)
 		SystemDoPopupMenu(1, -1, -1);
 	m_bTrackCancel = false;
 }
 
-void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
+void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
 {
 	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_ACTION_INSERT))
 	{
@@ -9369,7 +9369,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift)
 	}
 }
 
-void Project::OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift)
+void Project::OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift, bool Alt)
 {
 	ZoomActiveView((int)(10 * Direction));
 }

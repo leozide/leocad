@@ -3,41 +3,17 @@
 
 // TODO: cleanup defines and remove this file
 
-#ifdef WIN32
-#define isnan _isnan
-#endif
-
 #ifdef LC_WINDOWS
 #define LC_MAXPATH 260 //_MAX_PATH
-#define KEY_SHIFT	VK_SHIFT
 #define KEY_CONTROL	VK_CONTROL
-#define KEY_ALT		VK_MENU
 #define KEY_ESCAPE	VK_ESCAPE
 #define KEY_TAB		VK_TAB
-#endif
-
-#ifdef LC_LINUX
-#include <unistd.h>
-
-#define LC_MAXPATH 1024 //FILENAME_MAX
-#define KEY_SHIFT	0x01
-#define KEY_CONTROL	0x02
-#define KEY_ALT		0x03
-#define KEY_ESCAPE	0x04
-#define KEY_TAB	        0x05
-
-char* strupr(char* string);
-char* strlwr(char* string);
-int stricmp(const char* str1, const char* str2);
-
 #endif
 
 #ifdef LC_QT
 #define LC_MAXPATH 1024//MAXPATHLEN //FILENAME_MAX
 
-#define KEY_SHIFT	Qt::SHIFT
 #define KEY_CONTROL	Qt::CTRL
-#define KEY_ALT		Qt::ALT
 #define KEY_ESCAPE	Qt::Key_Escape
 #define KEY_TAB	    Qt::Key_Tab
 

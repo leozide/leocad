@@ -131,47 +131,47 @@ void View::OnInitialUpdate()
 	m_Project->AddView(this);
 }
 
-void View::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
+void View::OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnLeftButtonDown(this, x, y, Control, Shift);
+	m_Project->OnLeftButtonDown(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
+void View::OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnLeftButtonUp(this, x, y, Control, Shift);
+	m_Project->OnLeftButtonUp(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift)
+void View::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnLeftButtonDoubleClick(this, x, y, Control, Shift);
+	m_Project->OnLeftButtonDoubleClick(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnMiddleButtonDown(int x, int y, bool Control, bool Shift)
+void View::OnMiddleButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnMiddleButtonDown(this, x, y, Control, Shift);
+	m_Project->OnMiddleButtonDown(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnMiddleButtonUp(int x, int y, bool Control, bool Shift)
+void View::OnMiddleButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnMiddleButtonUp(this, x, y, Control, Shift);
+	m_Project->OnMiddleButtonUp(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnRightButtonDown(int x, int y, bool Control, bool Shift)
+void View::OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnRightButtonDown(this, x, y, Control, Shift);
+	m_Project->OnRightButtonDown(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnRightButtonUp(int x, int y, bool Control, bool Shift)
+void View::OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnRightButtonUp(this, x, y, Control, Shift);
+	m_Project->OnRightButtonUp(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnMouseMove(int x, int y, bool Control, bool Shift)
+void View::OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnMouseMove(this, x, y, Control, Shift);
+	m_Project->OnMouseMove(this, x, y, Control, Shift, Alt);
 }
 
-void View::OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift)
+void View::OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift, bool Alt)
 {
-	m_Project->OnMouseWheel(this, x, y, Direction, Control, Shift);
+	m_Project->OnMouseWheel(this, x, y, Direction, Control, Shift, Alt);
 }

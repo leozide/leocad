@@ -27,6 +27,7 @@ typedef quint64 lcuint64;
 #endif
 
 #ifdef Q_OS_WIN
+#define isnan _isnan
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
 #endif

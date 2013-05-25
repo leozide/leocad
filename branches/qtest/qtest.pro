@@ -60,7 +60,6 @@ SOURCES += common/view.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
     qt/lc_qmainwindow.cpp \
-    qt/main.cpp \
     qt/glwindow.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \

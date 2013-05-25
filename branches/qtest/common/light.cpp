@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "light.h"
-#include "globals.h"
 
 static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 {

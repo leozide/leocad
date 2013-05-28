@@ -303,6 +303,14 @@ void lcMainWindow::ToggleFullScreen()
 		window->toggleFullScreen();
 }
 
+void lcMainWindow::UpdateFocusObject(Object* Focus)
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateFocusObject(Focus);
+}
+
 void lcMainWindow::UpdateAction(int NewAction)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

@@ -3,35 +3,6 @@
 #include "lc_colorlistwidget.h"
 #include "lc_colors.h"
 
-class lcQColorPickerPopup : public QFrame
-{
-	Q_OBJECT
-
-public:
-	lcQColorPickerPopup(QWidget *parent = 0, int colorIndex = 0);
-	~lcQColorPickerPopup();
-
-	void exec();
-
-signals:
-	void changed(int colorIndex);
-	void selected(int colorIndex);
-	void hid();
-
-public slots:
-	void colorChanged(int colorIndex);
-	void colorSelected(int colorIndex);
-
-protected:
-	void showEvent(QShowEvent *e);
-	void hideEvent(QHideEvent *e);
-	void mouseReleaseEvent(QMouseEvent *e);
-
-private:
-	QEventLoop *eventLoop;
-	lcColorListWidget *colorList;
-};
-
 lcQColorPickerPopup::lcQColorPickerPopup(QWidget *parent, int colorIndex)
 	: QFrame(parent, Qt::Popup)
 {
@@ -206,5 +177,3 @@ void lcQColorPicker::selected(int colorIndex)
 	initialColorIndex = colorIndex;
 	changed(colorIndex);
 }
-
-#include "lc_qcolorpicker.moc"

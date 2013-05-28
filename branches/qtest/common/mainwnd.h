@@ -4,6 +4,7 @@
 #include "basewnd.h"
 #include "array.h"
 
+class Object;
 class Camera;
 class PiecePreview;
 
@@ -24,6 +25,7 @@ public:
 	void ResetViews();
 	void ToggleFullScreen();
 
+	void UpdateFocusObject(Object* Focus);
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
 	void UpdateTime(bool Animation, int CurrentTime, int TotalTime);

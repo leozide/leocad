@@ -9,6 +9,8 @@ class QComboBox;
 class lcGLWidget;
 class lcQPartsTree;
 class lcColorListWidget;
+class lcQPropertiesTree;
+class Object;
 
 class lcQMainWindow : public QMainWindow
 {
@@ -24,6 +26,7 @@ public:
 	void resetViews();
 	void toggleFullScreen();
 
+	void updateFocusObject(Object *focus);
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateTime(bool animation, int currentTime, int totalTime);
@@ -81,6 +84,7 @@ private:
 	lcQPartsTree *partsTree;
 	QLineEdit *partSearch;
 	lcColorListWidget *colorList;
+	lcQPropertiesTree *propertiesWidget;
 	QLineEdit *transformX;
 	QLineEdit *transformY;
 	QLineEdit *transformZ;

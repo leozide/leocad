@@ -16,7 +16,7 @@ win32 {
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 } else {
-	LIBS += -lz
+    LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 RC_FILE = qt/leocad.rc
@@ -82,6 +82,7 @@ SOURCES += common/view.cpp \
     qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
     qt/lc_qutils.cpp \
+    qt/lc_qpropertiestree.cpp \
     qt/lc_qcolorpicker.cpp \
     common/lc_commands.cpp \
     common/lc_shortcuts.cpp \
@@ -142,6 +143,7 @@ HEADERS += common/glwindow.h \
     qt/lc_qimagedialog.h \
     qt/lc_qupdatedialog.h \
     qt/lc_qutils.h \
+    qt/lc_qpropertiestree.h \
     qt/lc_qcolorpicker.h \
     common/lc_commands.h \
     common/lc_shortcuts.h

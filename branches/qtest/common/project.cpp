@@ -3902,57 +3902,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 				StopTracking(false);
 		} break;
 
-		case LC_ACTIVATE:
-		{
-		} break;
-
-		// FIXME: don't change the keys with ChangeKey()
-		// FIXME: even if pos == prevpos, the user might want to add a key
-
-		case LC_PIECE_MODIFIED:
-		{
-			LC_PIECE_MODIFY* mod = (LC_PIECE_MODIFY*)param;
-			Piece* pPiece = (Piece*)mod->piece;
-
-			const lcVector3& Pos = pPiece->mPosition;
-			lcVector3 Angles = lcMatrix44ToEulerAngles(pPiece->mModelWorld) * LC_RTOD;
-
-			if (Pos != mod->Position)
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Position, LC_PK_POSITION);
-
-			if (mod->Rotation != Angles)
-			{
-				lcVector4 rot = lcMatrix44ToAxisAngle(lcMatrix44FromEulerAngles(mod->Rotation * LC_DTOR));
-				rot[3] *= LC_RTOD;
-				pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
-			}
-
-			if (m_bAnimation)
-			{
-				pPiece->SetFrameShow(mod->from);
-				pPiece->SetFrameHide(mod->to);
-			}
-			else
-			{
-				pPiece->SetStepShow(mod->from);
-				pPiece->SetStepHide(mod->to);
-			}
-
-			if (mod->hidden)
-				pPiece->Hide();
-			else
-				pPiece->UnHide();
-
-			pPiece->SetName(mod->name);
-			pPiece->SetColorIndex(mod->color);
-			pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-
-			SetModifiedFlag(true);
-			CheckPoint("Modifying");
-			ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
-			UpdateAllViews();
-		} break;
-
 		case LC_CAMERA_MODIFIED:
 		{
 			LC_CAMERA_MODIFY* mod = (LC_CAMERA_MODIFY*)param;
@@ -8138,6 +8087,127 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 	}
 }
 
+void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Value)
+{
+	const char* CheckPointString = NULL;
+
+	switch (Property)
+	{
+	case LC_PART_POSITION:
+		{
+			const lcVector3& Position = *(lcVector3*)Value;
+			Piece* Part = (Piece*)Object;
+
+			if (Part->mPosition != Position)
+			{
+				Part->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_PK_POSITION);
+				Part->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Moving";
+			}
+		} break;
+
+	case LC_PART_ROTATION:
+		{
+			const lcVector4& Rotation = *(lcVector4*)Value;
+			Piece* Part = (Piece*)Object;
+
+			if (Rotation != Part->mRotation)
+			{
+				Part->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Rotation, LC_PK_ROTATION);
+				Part->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Rotating";
+			}
+		} break;
+
+	case LC_PART_SHOW:
+		{
+			lcuint32 Show = *(lcuint32*)Value;
+			Piece* Part = (Piece*)Object;
+
+			if (m_bAnimation)
+			{
+				if (Show != Part->GetFrameShow())
+				{
+					Part->SetFrameShow(Show);
+
+					CheckPointString = "Show";
+				}
+			}
+			else
+			{
+				if (Show != Part->GetStepShow())
+				{
+					Part->SetStepShow(Show);
+
+					CheckPointString = "Show";
+				}
+			}
+		} break;
+
+	case LC_PART_HIDE:
+		{
+			lcuint32 Hide = *(lcuint32*)Value;
+			Piece* Part = (Piece*)Object;
+
+			if (m_bAnimation)
+			{
+				if (Hide != Part->GetFrameHide())
+				{
+					Part->SetFrameHide(Hide);
+
+					CheckPointString = "Hide";
+				}
+			}
+			else
+			{
+				if (Hide != Part->GetStepHide())
+				{
+					Part->SetStepHide(Hide);
+
+					CheckPointString = "Hide";
+				}
+			}
+		} break;
+
+	case LC_PART_COLOR:
+		{
+			int ColorIndex = *(int*)Value;
+			Piece* Part = (Piece*)Object;
+
+			if (ColorIndex != Part->mColorIndex)
+			{
+				Part->SetColorIndex(ColorIndex);
+
+				CheckPointString = "Color";
+			}
+		} break;
+
+	case LC_PART_ID:
+		{
+			Piece* Part = (Piece*)Object;
+			PieceInfo* Info = (PieceInfo*)Value;
+
+			if (Info != Part->mPieceInfo)
+			{
+				Part->mPieceInfo->Release();
+				Part->mPieceInfo = Info;
+				Part->mPieceInfo->AddRef();
+
+				CheckPointString = "Part";
+			}
+		} break;
+	}
+
+	if (CheckPointString)
+	{
+		SetModifiedFlag(true);
+		CheckPoint(CheckPointString);
+		ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
+		UpdateAllViews();
+	}
+}
 
 void Project::ZoomActiveView(int Amount)
 {

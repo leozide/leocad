@@ -140,6 +140,16 @@ struct lcPiecesUsedEntry
 	int Count;
 };
 
+enum lcObjectProperty
+{
+	LC_PART_POSITION,
+	LC_PART_ROTATION,
+	LC_PART_SHOW,
+	LC_PART_HIDE,
+	LC_PART_COLOR,
+	LC_PART_ID
+};
+
 class Project
 {
 public:
@@ -206,6 +216,7 @@ public:
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
+	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 
 	void AddView(View* view);

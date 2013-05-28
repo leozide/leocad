@@ -2,6 +2,36 @@
 #define _LC_QCOLORPICKER_H_
 
 #include <QObject>
+class lcColorListWidget;
+
+class lcQColorPickerPopup : public QFrame
+{
+	Q_OBJECT
+
+public:
+	lcQColorPickerPopup(QWidget *parent = 0, int colorIndex = 0);
+	~lcQColorPickerPopup();
+
+	void exec();
+
+signals:
+	void changed(int colorIndex);
+	void selected(int colorIndex);
+	void hid();
+
+public slots:
+	void colorChanged(int colorIndex);
+	void colorSelected(int colorIndex);
+
+protected:
+	void showEvent(QShowEvent *e);
+	void hideEvent(QHideEvent *e);
+	void mouseReleaseEvent(QMouseEvent *e);
+
+private:
+	QEventLoop *eventLoop;
+	lcColorListWidget *colorList;
+};
 
 class lcQColorPicker : public QPushButton
 {

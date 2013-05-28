@@ -12,6 +12,7 @@
 #include "view.h"
 #include "lc_qpartstree.h"
 #include "lc_colorlistwidget.h"
+#include "lc_qpropertiestree.h"
 #include "lc_shortcuts.h"
 #include "system.h"
 #include "mainwnd.h"
@@ -24,10 +25,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 	setWindowFilePath(QString());
 
-	resize(800, 600);
-//	centralWidget = new lcViewWidget(this, NULL);
-//	centralWidget->mWindow->OnInitialUpdate();
-//	setCentralWidget(centralWidget);
+	resize(800, 600); // TODO: remember size and toolbars
 
 	createActions();
 	createToolBars();
@@ -401,6 +399,7 @@ void lcQMainWindow::createToolBars()
 	//LC_VIEW_TIME_PLAY
 	//LC_VIEW_TIME_ANIMATION
 	//LC_VIEW_TIME_ADD_KEYS
+	// TODO: add missing menu items
 
 	partsToolBar = new QDockWidget(tr("Parts"), this);
 	partsToolBar->setObjectName("PartsToolbar");
@@ -463,15 +462,9 @@ void lcQMainWindow::createToolBars()
 	propertiesToolBar->setObjectName("PropertiesToolbar");
 	propertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
-	QWidget *propertiesContents = new QWidget();
-	QFormLayout *propertiesLayout = new QFormLayout(propertiesContents);
-	propertiesLayout->setSpacing(6);
-	propertiesLayout->setContentsMargins(6, 6, 6, 6);
+	propertiesWidget = new lcQPropertiesTree(propertiesToolBar);
 
-	QLabel *label = new QLabel(tr("Nothing selected"), propertiesContents);
-	propertiesLayout->addWidget(label);
-
-	propertiesToolBar->setWidget(propertiesContents);
+	propertiesToolBar->setWidget(propertiesWidget);
 	addDockWidget(Qt::RightDockWidgetArea, propertiesToolBar);
 
 	tabifyDockWidget(partsToolBar, propertiesToolBar);
@@ -706,6 +699,11 @@ void lcQMainWindow::toggleFullScreen()
 
 }
 
+void lcQMainWindow::updateFocusObject(Object *focus)
+{
+	propertiesWidget->updateFocusObject(focus);
+}
+
 void lcQMainWindow::updateAction(int newAction)
 {
 	QAction *action = actions[LC_EDIT_ACTION_FIRST + newAction];
@@ -737,6 +735,7 @@ void lcQMainWindow::updateTime(bool animation, int currentTime, int totalTime)
 
 void lcQMainWindow::updateAnimation(bool animation, bool addKeys)
 {
+	// TODO: update animation
 	/*
 	gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
 	gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);

@@ -35,7 +35,6 @@ public:
 		PropertyGroup,
 		PropertyFloat,
 		PropertyInt,
-		PropertyBool,
 		PropertyString,
 		PropertyColor,
 		PropertyPart
@@ -98,7 +97,6 @@ protected:
 	QTreeWidgetItem *cameraFOV;
 	QTreeWidgetItem *cameraNear;
 	QTreeWidgetItem *cameraFar;
-	QTreeWidgetItem *cameraVisible;
 	QTreeWidgetItem *cameraName;
 };
 

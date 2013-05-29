@@ -3901,36 +3901,6 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 			if (m_nTracking != LC_TRACK_NONE)
 				StopTracking(false);
 		} break;
-
-		case LC_CAMERA_MODIFIED:
-		{
-			LC_CAMERA_MODIFY* mod = (LC_CAMERA_MODIFY*)param;
-			Camera* pCamera = (Camera*)mod->camera;
-
-			if (mod->hidden)
-				pCamera->Hide();
-			else
-				pCamera->UnHide();
-
-			if (pCamera->mPosition != mod->Eye)
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Eye, LC_CK_EYE);
-
-			if (pCamera->mTargetPosition != mod->Target)
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Target, LC_CK_TARGET);
-
-			if (pCamera->mUpVector != mod->Up)
-				pCamera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, mod->Up, LC_CK_UP);
-
-			pCamera->m_fovy = mod->fovy;
-			pCamera->m_zNear = mod->znear;
-			pCamera->m_zFar = mod->zfar;
-			pCamera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
-			UpdateAllViews ();
-		} break;
-
-		case LC_LIGHT_MODIFIED:
-		{
-		} break;
 	}
 }
 
@@ -8196,6 +8166,90 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 				Part->mPieceInfo->AddRef();
 
 				CheckPointString = "Part";
+			}
+		} break;
+
+	case LC_CAMERA_POSITION:
+		{
+			const lcVector3& Position = *(lcVector3*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->mPosition != Position)
+			{
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Camera";
+			}
+		} break;
+
+	case LC_CAMERA_TARGET:
+		{
+			const lcVector3& TargetPosition = *(lcVector3*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->mTargetPosition != TargetPosition)
+			{
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, TargetPosition, LC_CK_TARGET);
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Camera";
+			}
+		} break;
+
+	case LC_CAMERA_UP:
+		{
+			const lcVector3& Up = *(lcVector3*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->mUpVector != Up)
+			{
+				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Up, LC_CK_UP);
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Camera";
+			}
+		} break;
+
+	case LC_CAMERA_FOV:
+		{
+			float FOV = *(float*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->m_fovy != FOV)
+			{
+				camera->m_fovy = FOV;
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Camera";
+			}
+		} break;
+
+	case LC_CAMERA_NEAR:
+		{
+			float Near = *(float*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->m_zNear != Near)
+			{
+				camera->m_zNear= Near;
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Camera";
+			}
+		} break;
+
+	case LC_CAMERA_FAR:
+		{
+			float Far = *(float*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->m_zFar != Far)
+			{
+				camera->m_zFar = Far;
+				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				CheckPointString = "Camera";
 			}
 		} break;
 	}

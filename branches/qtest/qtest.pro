@@ -90,7 +90,6 @@ SOURCES += common/view.cpp \
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
-    common/typedefs.h \
     common/tr.h \
     common/texfont.h \
     common/terrain.h \

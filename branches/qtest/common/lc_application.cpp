@@ -412,12 +412,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 void lcApplication::Shutdown()
 {
 	for (int i = 0; i < m_Projects.GetSize(); i++)
-	{
-		Project* project = m_Projects[i];
-
-		project->HandleNotify(LC_ACTIVATE, 0);
-		delete project;
-	}
+		delete m_Projects[i];
 
 	delete m_Library;
 	m_Library = NULL;

@@ -2,8 +2,8 @@
 #define _LC_QMAINWINDOW_H_
 
 #include <QMainWindow>
-#include "typedefs.h"
 #include "array.h"
+#include "lc_commands.h"
 
 class QComboBox;
 class lcGLWidget;
@@ -11,6 +11,7 @@ class lcQPartsTree;
 class lcColorListWidget;
 class lcQPropertiesTree;
 class Object;
+class Camera;
 
 class lcQMainWindow : public QMainWindow
 {

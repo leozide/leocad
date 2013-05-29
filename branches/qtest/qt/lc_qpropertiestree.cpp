@@ -410,28 +410,6 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			return editor;
 		}
 
-	case PropertyBool:
-		{
-			QWidget *editor = new QWidget(parent);
-			QCheckBox *checkBox = new QCheckBox(editor);
-
-			QHBoxLayout *lt = new QHBoxLayout;
-			if (QApplication::layoutDirection() == Qt::LeftToRight)
-				lt->setContentsMargins(4, 0, 0, 0);
-			else
-				lt->setContentsMargins(0, 0, 4, 0);
-			lt->addWidget(checkBox);
-			editor->setLayout(lt);
-//	connect(m_checkBox, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
-			editor->setFocusProxy(checkBox);
-//			checkBox->setText(tr("True"));
-
-//			editor->setValue(0);
-// connect(editor, SIGNAL(toggled(bool)), this, SLOT(slotSetValue(bool)));
-
-			return editor;
-		}
-
 	case PropertyString:
 		{
 			QLineEdit *editor = new QLineEdit(parent);
@@ -514,7 +492,7 @@ void lcQPropertiesTree::slotReturnPressed()
 				position[0] = value;
 			else if (item == partPositionY)
 				position[1] = value;
-			else if (item == partPositionY)
+			else if (item == partPositionZ)
 				position[2] = value;
 
 			project->ConvertFromUserUnits(position);
@@ -551,6 +529,83 @@ void lcQPropertiesTree::slotReturnPressed()
 		}
 
 		setPart(focusObject);
+	}
+	else if (focusObject->GetType() == LC_OBJECT_PIECE)
+	{
+		Camera *camera = (Camera*)focusObject;
+
+		if (item == cameraPositionX || item == cameraPositionY || item == cameraPositionZ)
+		{
+			lcVector3 position = camera->mPosition;
+			project->ConvertToUserUnits(position);
+			float value = editor->text().toFloat();
+
+			if (item == cameraPositionX)
+				position[0] = value;
+			else if (item == cameraPositionY)
+				position[1] = value;
+			else if (item == cameraPositionZ)
+				position[2] = value;
+
+			project->ConvertFromUserUnits(position);
+			project->ModifyObject(focusObject, LC_CAMERA_POSITION, &position);
+		}
+		else if (item == cameraTargetX || item == cameraTargetY || item == cameraTargetZ)
+		{
+			lcVector3 target = camera->mTargetPosition;
+			project->ConvertToUserUnits(target);
+			float value = editor->text().toFloat();
+
+			if (item == cameraTargetX)
+				target[0] = value;
+			else if (item == cameraTargetY)
+				target[1] = value;
+			else if (item == cameraTargetZ)
+				target[2] = value;
+
+			project->ConvertFromUserUnits(target);
+			project->ModifyObject(focusObject, LC_CAMERA_TARGET, &target);
+		}
+		else if (item == cameraUpX || item == cameraUpY || item == cameraUpZ)
+		{
+			lcVector3 up = camera->mUpVector;
+			float value = editor->text().toFloat();
+
+			if (item == cameraUpX)
+				up[0] = value;
+			else if (item == cameraUpY)
+				up[1] = value;
+			else if (item == cameraUpZ)
+				up[2] = value;
+
+			project->ModifyObject(focusObject, LC_CAMERA_UP, &up);
+		}
+		else if (item == cameraFOV)
+		{
+			float value = editor->text().toFloat();
+
+			project->ModifyObject(focusObject, LC_CAMERA_FOV, &value);
+		}
+		else if (item == cameraNear)
+		{
+			float value = editor->text().toFloat();
+
+			project->ModifyObject(focusObject, LC_CAMERA_NEAR, &value);
+		}
+		else if (item == cameraFar)
+		{
+			float value = editor->text().toFloat();
+
+			project->ModifyObject(focusObject, LC_CAMERA_FAR, &value);
+		}
+		else if (item == cameraName)
+		{
+			QString value = editor->text();
+
+			project->ModifyObject(focusObject, LC_CAMERA_NAME, value.toLocal8Bit().data());
+		}
+
+		setCamera(focusObject);
 	}
 }
 
@@ -662,7 +717,6 @@ void lcQPropertiesTree::setEmpty()
 	cameraFOV = NULL;
 	cameraNear = NULL;
 	cameraFar = NULL;
-	cameraVisible = NULL;
 	cameraName = NULL;
 }
 
@@ -774,7 +828,6 @@ void lcQPropertiesTree::setCamera(Object *newFocusObject)
 		cameraFOV = addProperty(cameraSettings, tr("FOV"), PropertyFloat);
 		cameraNear = addProperty(cameraSettings, tr("Near"), PropertyFloat);
 		cameraFar = addProperty(cameraSettings, tr("Far"), PropertyFloat);
-		cameraVisible = addProperty(cameraSettings, tr("Visible"), PropertyBool);
 		cameraName = addProperty(cameraSettings, tr("Name"), PropertyString);
 	}
 
@@ -785,39 +838,41 @@ void lcQPropertiesTree::setCamera(Object *newFocusObject)
 	lcGetActiveProject()->ConvertToUserUnits(position);
 
 	cameraPositionX->setText(1, QString::number(position[0]));
+	cameraPositionX->setData(0, PropertyValueRole, position[0]);
 	cameraPositionY->setText(1, QString::number(position[1]));
+	cameraPositionY->setData(0, PropertyValueRole, position[1]);
 	cameraPositionZ->setText(1, QString::number(position[2]));
+	cameraPositionZ->setData(0, PropertyValueRole, position[2]);
 
 	lcVector3 target = camera->mTargetPosition;
 	lcGetActiveProject()->ConvertToUserUnits(target);
 
 	cameraTargetX->setText(1, QString::number(target[0]));
+	cameraTargetX->setData(0, PropertyValueRole, target[0]);
 	cameraTargetY->setText(1, QString::number(target[1]));
+	cameraTargetY->setData(0, PropertyValueRole, target[1]);
 	cameraTargetZ->setText(1, QString::number(target[2]));
+	cameraTargetZ->setData(0, PropertyValueRole, target[2]);
 
 	lcVector3 up = camera->mUpVector;
 	lcGetActiveProject()->ConvertToUserUnits(up);
 
 	cameraUpX->setText(1, QString::number(up[0]));
+	cameraUpX->setData(0, PropertyValueRole, up[0]);
 	cameraUpY->setText(1, QString::number(up[1]));
+	cameraUpY->setData(0, PropertyValueRole, up[1]);
 	cameraUpZ->setText(1, QString::number(up[2]));
+	cameraUpZ->setData(0, PropertyValueRole, up[2]);
 
 	cameraFOV->setText(1, QString::number(camera->m_fovy));
+	cameraFOV->setData(0, PropertyValueRole, camera->m_fovy);
 	cameraNear->setText(1, QString::number(camera->m_zNear));
+	cameraNear->setData(0, PropertyValueRole, camera->m_zNear);
 	cameraFar->setText(1, QString::number(camera->m_zFar));
-
-	if (camera->IsVisible())
-	{
-		cameraVisible->setIcon(1, m_checkedIcon);
-		cameraVisible->setText(1, tr("True"));
-	}
-	else
-	{
-		cameraVisible->setIcon(1, m_uncheckedIcon);
-		cameraVisible->setText(1, tr("False"));
-	}
+	cameraFar->setData(0, PropertyValueRole, camera->m_zFar);
 
 	cameraName->setText(1, camera->GetName());
+	cameraName->setData(0, PropertyValueRole, camera->GetName());
 }
 
 void lcQPropertiesTree::setLight(Object *newFocusObject)

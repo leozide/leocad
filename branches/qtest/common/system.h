@@ -1,7 +1,6 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
-#include "typedefs.h"
 #include "array.h"
 
 // Assert macros.
@@ -44,6 +43,8 @@ template<bool> struct lcStaticAssert;
 template<> struct lcStaticAssert<true> { };
 template<int i> struct lcStaticAssertTest { };
 #endif
+
+#include "str.h"
 
 // Misc stuff
 bool Sys_KeyDown (int key);

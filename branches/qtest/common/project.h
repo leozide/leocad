@@ -2,10 +2,10 @@
 #define _PROJECT_H_
 
 #include "object.h"
-#include "typedefs.h"
 #include "opengl.h"
 #include "array.h"
 #include "lc_math.h"
+#include "lc_commands.h"
 
 //#define DET_BACKFACES	0x00001	// Draw backfaces
 //#define DET_DEPTH		0x00002	// Enable depth test
@@ -61,6 +61,12 @@
 #define LC_HTML_HIGHLIGHT       0x20
 //#define LC_HTML_HTMLEXT         0x40
 //#define LC_HTML_LISTID          0x80
+
+enum LC_NOTIFY
+{
+	LC_COLOR_CHANGED,
+	LC_CAPTURE_LOST
+};
 
 enum LC_TRANSFORM_TYPE
 {
@@ -147,7 +153,32 @@ enum lcObjectProperty
 	LC_PART_SHOW,
 	LC_PART_HIDE,
 	LC_PART_COLOR,
-	LC_PART_ID
+	LC_PART_ID,
+	LC_CAMERA_POSITION,
+	LC_CAMERA_TARGET,
+	LC_CAMERA_UP,
+	LC_CAMERA_FOV,
+	LC_CAMERA_NEAR,
+	LC_CAMERA_FAR,
+	LC_CAMERA_NAME
+};
+
+enum LC_ACTIONS
+{
+	LC_ACTION_INSERT,
+	LC_ACTION_LIGHT,
+	LC_ACTION_SPOTLIGHT,
+	LC_ACTION_CAMERA,
+	LC_ACTION_SELECT,
+	LC_ACTION_MOVE,
+	LC_ACTION_ROTATE,
+	LC_ACTION_ERASER,
+	LC_ACTION_PAINT,
+	LC_ACTION_ZOOM,
+	LC_ACTION_PAN,
+	LC_ACTION_ROTATE_VIEW,
+	LC_ACTION_ROLL,
+	LC_ACTION_ZOOM_REGION
 };
 
 class Project

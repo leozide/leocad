@@ -157,6 +157,8 @@ public:
 	void GetTileInfo(int* row, int* col, int* width, int* height);
 	bool EndTile();
 
+	char m_strName[81];
+
 	float m_fovy;
 	float m_zNear;
 	float m_zFar;
@@ -173,7 +175,6 @@ protected:
 	CameraTarget* m_pTarget;
 
 	// Attributes
-	char m_strName[81];
 	unsigned char m_nState;
 	unsigned char m_nType;
 

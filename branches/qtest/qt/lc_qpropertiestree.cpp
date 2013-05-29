@@ -413,9 +413,11 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 	case PropertyString:
 		{
 			QLineEdit *editor = new QLineEdit(parent);
+			const char *value = (const char*)item->data(0, PropertyValueRole).value<void*>();
 
-// setText
-//    connect(editor, SIGNAL(textChanged(const QString &)), this, SLOT(slotSetValue(const QString &)));
+			editor->setText(value);
+
+			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
 
 			return editor;
 		}
@@ -530,7 +532,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 		setPart(focusObject);
 	}
-	else if (focusObject->GetType() == LC_OBJECT_PIECE)
+	else if (focusObject->GetType() == LC_OBJECT_CAMERA)
 	{
 		Camera *camera = (Camera*)focusObject;
 
@@ -872,7 +874,7 @@ void lcQPropertiesTree::setCamera(Object *newFocusObject)
 	cameraFar->setData(0, PropertyValueRole, camera->m_zFar);
 
 	cameraName->setText(1, camera->GetName());
-	cameraName->setData(0, PropertyValueRole, camera->GetName());
+	cameraName->setData(0, PropertyValueRole, qVariantFromValue((void*)camera->GetName()));
 }
 
 void lcQPropertiesTree::setLight(Object *newFocusObject)

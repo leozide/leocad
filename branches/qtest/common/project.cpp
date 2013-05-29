@@ -8252,6 +8252,22 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 				CheckPointString = "Camera";
 			}
 		} break;
+
+	case LC_CAMERA_NAME:
+		{
+			const char* Name = (const char*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (strcmp(camera->m_strName, Name))
+			{
+				strncpy(camera->m_strName, Name, sizeof(camera->m_strName));
+				camera->m_strName[sizeof(camera->m_strName) - 1] = 0;
+
+				gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+
+				CheckPointString = "Camera";
+			}
+		}
 	}
 
 	if (CheckPointString)

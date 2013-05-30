@@ -67,18 +67,6 @@ void SystemUpdatePlay(bool play, bool stop)
 {
 }
 
-#include "mainwnd.h"
-#include "lc_application.h"
-#include "project.h"
-
-void SystemUpdateFocus(void* p)
-{
-	Object* Focus = lcGetActiveProject()->GetFocusObject();
-	gMainWindow->UpdateFocusObject(Focus);
-
-	// todo: status bar
-}
-
 void SystemInit()
 {
 }

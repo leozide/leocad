@@ -54,7 +54,6 @@ void Sys_GetFileList(const char* Path, ObjArray<String>& FileList);
 void SystemUpdateColorList(int nNew);
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);
 void SystemUpdatePlay(bool play, bool stop);
-void SystemUpdateFocus(void* p);
 
 void SystemInit();
 void SystemFinish();

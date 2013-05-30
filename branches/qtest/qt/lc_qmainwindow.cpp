@@ -476,7 +476,7 @@ void lcQMainWindow::createStatusBar()
 	statusBar = new QStatusBar(this);
 	setStatusBar(statusBar);
 
-	statusPositionLabel = new QLabel("XYZ");
+	statusPositionLabel = new QLabel();
 	statusBar->addPermanentWidget(statusPositionLabel);
 
 	statusSnapLabel = new QLabel();
@@ -496,7 +496,7 @@ void lcQMainWindow::closeEvent(QCloseEvent *event)
 
 QMenu *lcQMainWindow::createPopupMenu()
 {
-    QMenu *menuToolBars = new QMenu(this);
+	QMenu *menuToolBars = new QMenu(this);
 
 	menuToolBars->addAction(partsToolBar->toggleViewAction());
 	menuToolBars->addAction(propertiesToolBar->toggleViewAction());
@@ -702,6 +702,15 @@ void lcQMainWindow::toggleFullScreen()
 void lcQMainWindow::updateFocusObject(Object *focus)
 {
 	propertiesWidget->updateFocusObject(focus);
+
+	lcVector3 position;
+
+	lcGetActiveProject()->GetFocusPosition(position);
+	lcGetActiveProject()->ConvertToUserUnits(position);
+
+	QString label("X: %1 Y: %2 Z: %3");
+	label = label.arg(QString::number(position[0], 'f', 2), QString::number(position[1], 'f', 2), QString::number(position[2], 'f', 2));
+	statusPositionLabel->setText(label);
 }
 
 void lcQMainWindow::updateAction(int newAction)

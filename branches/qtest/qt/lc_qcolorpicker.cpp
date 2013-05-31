@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_qcolorpicker.h"
-#include "lc_colorlistwidget.h"
+#include "lc_qcolorlist.h"
 #include "lc_colors.h"
 
 lcQColorPickerPopup::lcQColorPickerPopup(QWidget *parent, int colorIndex)
@@ -16,7 +16,7 @@ lcQColorPickerPopup::lcQColorPickerPopup(QWidget *parent, int colorIndex)
 	layout->setContentsMargins(0, 0, 0, 0);
 	setLayout(layout);
 
-	colorList = new lcColorListWidget(this);
+	colorList = new lcQColorList(this);
 	connect(colorList, SIGNAL(colorChanged(int)), this, SLOT(colorChanged(int)));
 	connect(colorList, SIGNAL(colorSelected(int)), this, SLOT(colorSelected(int)));
 	layout->addWidget(colorList);

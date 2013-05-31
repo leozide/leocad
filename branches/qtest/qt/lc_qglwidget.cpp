@@ -1,11 +1,11 @@
 #include "lc_global.h"
-#include "lc_glwidget.h"
+#include "lc_qglwidget.h"
 #include "glwindow.h"
 #include "project.h"
 #include "lc_library.h"
 #include "lc_application.h"
 
-lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, bool view)
+lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, GLWindow *window, bool view)
 	: QGLWidget(parent, share)
 {
 	mWindow = window;
@@ -25,13 +25,13 @@ lcGLWidget::lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, boo
 	}
 }
 
-lcGLWidget::~lcGLWidget()
+lcQGLWidget::~lcQGLWidget()
 {
 	if (isView)
 		delete mWindow;
 }
 
-QSize lcGLWidget::sizeHint() const
+QSize lcQGLWidget::sizeHint() const
 {
 	if (preferredSize.isEmpty())
 		return QGLWidget::sizeHint();
@@ -39,21 +39,21 @@ QSize lcGLWidget::sizeHint() const
 		return preferredSize;
 }
 
-void lcGLWidget::initializeGL()
+void lcQGLWidget::initializeGL()
 {
 }
 
-void lcGLWidget::resizeGL(int width, int height)
+void lcQGLWidget::resizeGL(int width, int height)
 {
 	mWindow->OnSize(width, height);
 }
 
-void lcGLWidget::paintGL()
+void lcQGLWidget::paintGL()
 {
 	mWindow->OnDraw();
 }
 
-void lcGLWidget::mousePressEvent(QMouseEvent *event)
+void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 {
 	bool Control = event->modifiers() & Qt::ControlModifier;
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
@@ -75,7 +75,7 @@ void lcGLWidget::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void lcGLWidget::mouseReleaseEvent(QMouseEvent *event)
+void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool Control = event->modifiers() & Qt::ControlModifier;
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
@@ -97,7 +97,7 @@ void lcGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void lcGLWidget::mouseMoveEvent(QMouseEvent *event)
+void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	bool Control = event->modifiers() & Qt::ControlModifier;
 	bool Shift = event->modifiers() & Qt::ShiftModifier;
@@ -106,7 +106,7 @@ void lcGLWidget::mouseMoveEvent(QMouseEvent *event)
 	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 }
 
-void lcGLWidget::dragEnterEvent(QDragEnterEvent *event)
+void lcQGLWidget::dragEnterEvent(QDragEnterEvent *event)
 {
 	if (isView && event->mimeData()->hasFormat("application/vnd.leocad-part"))
 	{
@@ -124,7 +124,7 @@ void lcGLWidget::dragEnterEvent(QDragEnterEvent *event)
 		event->ignore();
 }
 
-void lcGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
+void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	if (!isView)
 		return;
@@ -134,7 +134,7 @@ void lcGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 	event->accept();
 }
 
-void lcGLWidget::dragMoveEvent(QDragMoveEvent *event)
+void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
 {
 	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
 		return;
@@ -144,7 +144,7 @@ void lcGLWidget::dragMoveEvent(QDragMoveEvent *event)
 	event->accept();
 }
 
-void lcGLWidget::dropEvent(QDropEvent *event)
+void lcQGLWidget::dropEvent(QDropEvent *event)
 {
 	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
 		return;

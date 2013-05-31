@@ -1,14 +1,14 @@
-#ifndef _LC_GLWIDGET_H_
-#define _LC_GLWIDGET_H_
+#ifndef _LC_QGLWIDGET_H_
+#define _LC_QGLWIDGET_H_
 
 #include <QGLWidget>
 class GLWindow;
 
-class lcGLWidget : public QGLWidget
+class lcQGLWidget : public QGLWidget
 {
 public:
-	lcGLWidget(QWidget *parent, lcGLWidget *share, GLWindow *window, bool view);
-	~lcGLWidget();
+	lcQGLWidget(QWidget *parent, lcQGLWidget *share, GLWindow *window, bool view);
+	~lcQGLWidget();
 
 	QSize sizeHint() const;
 

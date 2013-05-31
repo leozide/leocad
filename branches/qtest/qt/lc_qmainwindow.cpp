@@ -2,7 +2,7 @@
 #include <typeinfo>
 #include "lc_qmainwindow.h"
 #include "lc_qutils.h"
-#include "lc_glwidget.h"
+#include "lc_qglwidget.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"
@@ -11,7 +11,7 @@
 #include "camera.h"
 #include "view.h"
 #include "lc_qpartstree.h"
-#include "lc_colorlistwidget.h"
+#include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_shortcuts.h"
 #include "system.h"
@@ -40,7 +40,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	QWidget *viewWidget = new lcGLWidget(previewFrame, piecePreview, new View(lcGetActiveProject()), true);
+	QWidget *viewWidget = new lcQGLWidget(previewFrame, piecePreview, new View(lcGetActiveProject()), true);
 	previewLayout->addWidget(viewWidget, 0, 0, 1, 1);
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()));
@@ -426,7 +426,7 @@ void lcQMainWindow::createToolBars()
 		QGLFormat::setDefaultFormat(format);
 	}
 
-	piecePreview = new lcGLWidget(previewFrame, NULL, new PiecePreview(), false);
+	piecePreview = new lcQGLWidget(previewFrame, NULL, new PiecePreview(), false);
 	piecePreview->preferredSize = QSize(200, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
@@ -449,7 +449,7 @@ void lcQMainWindow::createToolBars()
 	QGridLayout *colorLayout = new QGridLayout(colorFrame);
 	colorLayout->setContentsMargins(0, 0, 0, 0);
 
-	colorList = new lcColorListWidget(partsSplitter);
+	colorList = new lcQColorList(partsSplitter);
 	colorLayout->addWidget(colorList);
 	connect(colorList, SIGNAL(colorChanged(int)), this, SLOT(colorChanged(int)));
 
@@ -600,7 +600,7 @@ void lcQMainWindow::splitView(Qt::Orientation orientation)
 {
 	QWidget *focus = focusWidget();
 
-	if (typeid(*focus) != typeid(lcGLWidget))
+	if (typeid(*focus) != typeid(lcQGLWidget))
 		return;
 
 	QWidget *parent = focus->parentWidget();
@@ -612,7 +612,7 @@ void lcQMainWindow::splitView(Qt::Orientation orientation)
 		splitter = new QSplitter(orientation, parent);
 		parent->layout()->addWidget(splitter);
 		splitter->addWidget(focus);
-		splitter->addWidget(new lcGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
+		splitter->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 	}
 	else
 	{
@@ -623,7 +623,7 @@ void lcQMainWindow::splitView(Qt::Orientation orientation)
 		splitter = new QSplitter(orientation, parent);
 		parentSplitter->insertWidget(focusIndex, splitter);
 		splitter->addWidget(focus);
-		splitter->addWidget(new lcGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
+		splitter->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 
 		parentSplitter->setSizes(sizes);
 	}
@@ -648,7 +648,7 @@ void lcQMainWindow::removeView()
 {
 	QWidget *focus = focusWidget();
 
-	if (typeid(*focus) != typeid(lcGLWidget))
+	if (typeid(*focus) != typeid(lcQGLWidget))
 		return;
 
 	QWidget *parent = focus->parentWidget();
@@ -685,7 +685,7 @@ void lcQMainWindow::resetViews()
 {
 	QLayout* centralLayout = centralWidget()->layout();
 	delete centralLayout->itemAt(0)->widget();
-	centralLayout->addWidget(new lcGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
+	centralLayout->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 }
 
 void lcQMainWindow::toggleFullScreen()

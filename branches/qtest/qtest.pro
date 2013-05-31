@@ -63,8 +63,6 @@ SOURCES += common/view.cpp \
     qt/glwindow.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
-    qt/lc_colorlistwidget.cpp \
-    qt/lc_glwidget.cpp \
     qt/lc_qpovraydialog.cpp \
     qt/lc_qarraydialog.cpp \
     qt/lc_qgroupdialog.cpp \
@@ -86,7 +84,9 @@ SOURCES += common/view.cpp \
     qt/lc_qcolorpicker.cpp \
     common/lc_commands.cpp \
     common/lc_shortcuts.cpp \
-    qt/lc_qimage.cpp
+    qt/lc_qimage.cpp \
+    qt/lc_qglwidget.cpp \
+    qt/lc_qcolorlist.cpp
 HEADERS += common/glwindow.h \
     common/array.h \
     common/view.h \
@@ -123,9 +123,7 @@ HEADERS += common/glwindow.h \
     common/basewnd.h \
     common/lc_profile.h \
     common/lc_category.h \
-    qt/lc_colorlistwidget.h \
     qt/lc_qmainwindow.h \
-    qt/lc_glwidget.h \
     qt/lc_config.h \
     qt/lc_qpovraydialog.h \
     qt/lc_qarraydialog.h \
@@ -145,7 +143,9 @@ HEADERS += common/glwindow.h \
     qt/lc_qpropertiestree.h \
     qt/lc_qcolorpicker.h \
     common/lc_commands.h \
-    common/lc_shortcuts.h
+    common/lc_shortcuts.h \
+    qt/lc_qglwidget.h \
+    qt/lc_qcolorlist.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

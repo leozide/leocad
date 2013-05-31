@@ -1,16 +1,16 @@
-#ifndef LC_COLORLISTWIDGET_H
-#define LC_COLORLISTWIDGET_H
+#ifndef _LC_QCOLORLIST_H_
+#define _LC_QCOLORLIST_H_
 
 #include <QWidget>
 #include "lc_colors.h"
 
-class lcColorListWidget : public QWidget
+class lcQColorList : public QWidget
 {
 	Q_OBJECT
 
 public:
-	lcColorListWidget(QWidget *parent = 0);
-	~lcColorListWidget();
+	lcQColorList(QWidget *parent = 0);
+	~lcQColorList();
 
 	QSize sizeHint() const;
 
@@ -43,4 +43,4 @@ protected:
 	int mCurCell;
 };
 
-#endif // LC_COLORLISTWIDGET_H
+#endif // _LC_QCOLORLIST_H_

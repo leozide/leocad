@@ -6,9 +6,9 @@
 #include "lc_commands.h"
 
 class QComboBox;
-class lcGLWidget;
+class lcQGLWidget;
 class lcQPartsTree;
-class lcColorListWidget;
+class lcQColorList;
 class lcQPropertiesTree;
 class Object;
 class Camera;
@@ -81,10 +81,10 @@ private:
 	QDockWidget *partsToolBar;
 	QDockWidget *propertiesToolBar;
 
-	lcGLWidget *piecePreview;
+	lcQGLWidget *piecePreview;
 	lcQPartsTree *partsTree;
 	QLineEdit *partSearch;
-	lcColorListWidget *colorList;
+	lcQColorList *colorList;
 	lcQPropertiesTree *propertiesWidget;
 	QLineEdit *transformX;
 	QLineEdit *transformY;

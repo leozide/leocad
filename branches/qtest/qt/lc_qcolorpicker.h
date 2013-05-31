@@ -2,7 +2,7 @@
 #define _LC_QCOLORPICKER_H_
 
 #include <QObject>
-class lcColorListWidget;
+class lcQColorList;
 
 class lcQColorPickerPopup : public QFrame
 {
@@ -30,7 +30,7 @@ protected:
 
 private:
 	QEventLoop *eventLoop;
-	lcColorListWidget *colorList;
+	lcQColorList *colorList;
 };
 
 class lcQColorPicker : public QPushButton

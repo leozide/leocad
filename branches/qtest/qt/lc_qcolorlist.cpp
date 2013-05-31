@@ -1,8 +1,8 @@
 #include <QtGui>
 #include "lc_global.h"
-#include "lc_colorlistwidget.h"
+#include "lc_qcolorlist.h"
 
-lcColorListWidget::lcColorListWidget(QWidget *parent)
+lcQColorList::lcQColorList(QWidget *parent)
 	: QWidget(parent)
 {
 	mCellRects = new QRect[gNumUserColors];
@@ -44,18 +44,18 @@ lcColorListWidget::lcColorListWidget(QWidget *parent)
 	setFocusPolicy(Qt::StrongFocus);
 }
 
-lcColorListWidget::~lcColorListWidget()
+lcQColorList::~lcQColorList()
 {
 	delete[] mCellRects;
 	delete[] mCellColors;
 }
 
-QSize lcColorListWidget::sizeHint() const
+QSize lcQColorList::sizeHint() const
 {
 	return QSize(200, mPreferredHeight);
 }
 
-void lcColorListWidget::setCurrentColor(int colorIndex)
+void lcQColorList::setCurrentColor(int colorIndex)
 {
 	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
 	{
@@ -67,7 +67,7 @@ void lcColorListWidget::setCurrentColor(int colorIndex)
 	}
 }
 
-bool lcColorListWidget::event(QEvent *event)
+bool lcQColorList::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
@@ -123,7 +123,7 @@ bool lcColorListWidget::event(QEvent *event)
 	return QWidget::event(event);
 }
 
-void lcColorListWidget::mousePressEvent(QMouseEvent *event)
+void lcQColorList::mousePressEvent(QMouseEvent *event)
 {
 	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
 	{
@@ -137,7 +137,7 @@ void lcColorListWidget::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void lcColorListWidget::keyPressEvent(QKeyEvent *event)
+void lcQColorList::keyPressEvent(QKeyEvent *event)
 {
 	int NewCell = mCurCell;
 
@@ -218,7 +218,7 @@ void lcColorListWidget::keyPressEvent(QKeyEvent *event)
 		QWidget::keyPressEvent(event);
 }
 
-void lcColorListWidget::resizeEvent(QResizeEvent *event)
+void lcQColorList::resizeEvent(QResizeEvent *event)
 {
 	if (mWidth == width() && mHeight == height())
 		return;
@@ -288,7 +288,7 @@ void lcColorListWidget::resizeEvent(QResizeEvent *event)
 	QWidget::resizeEvent(event);
 }
 
-void lcColorListWidget::paintEvent(QPaintEvent *event)
+void lcQColorList::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this);
 
@@ -338,7 +338,7 @@ void lcColorListWidget::paintEvent(QPaintEvent *event)
 	}
 }
 
-void lcColorListWidget::SelectCell(int CellIdx)
+void lcQColorList::SelectCell(int CellIdx)
 {
 	if (CellIdx < 0 || CellIdx >= mNumCells)
 		return;

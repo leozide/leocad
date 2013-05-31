@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qminifigdialog.h"
 #include "ui_lc_qminifigdialog.h"
-#include "lc_glwidget.h"
+#include "lc_qglwidget.h"
 #include "lc_qcolorpicker.h"
 #include "minifig.h"
 #include "mainwnd.h"
@@ -16,7 +16,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	QGridLayout *previewLayout = new QGridLayout(ui->minifigFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	lcGLWidget *minifigWidget = new lcGLWidget(NULL, (lcGLWidget*)gMainWindow->mPreviewWidget->mWidget, (GLWindow*)data, false);
+	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, (lcQGLWidget*)gMainWindow->mPreviewWidget->mWidget, (GLWindow*)data, false);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 

@@ -12,29 +12,11 @@
 #include "mainwnd.h"
 #include "lc_shortcuts.h"
 
-// ----------------------------------------------------------------------------
-// Global functions.
-
 lcApplication* g_App;
-
-lcPiecesLibrary* lcGetPiecesLibrary()
-{
-	LC_ASSERT(g_App, "g_App not initialized.");
-	return g_App->GetPiecesLibrary();
-}
-
-Project* lcGetActiveProject()
-{
-	LC_ASSERT(g_App, "g_App not initialized.");
-	return g_App->GetActiveProject();
-}
-
-// ----------------------------------------------------------------------------
-// lcApplication class.
 
 lcApplication::lcApplication()
 {
-	m_ActiveProject = NULL;
+	mProject = NULL;
 	m_Library = NULL;
 	mClipboard = NULL;
 }
@@ -42,14 +24,6 @@ lcApplication::lcApplication()
 lcApplication::~lcApplication()
 {
 	delete mClipboard;
-}
-
-void lcApplication::AddProject(Project* project)
-{
-	m_Projects.Add(project);
-
-	if (m_ActiveProject == NULL)
-		m_ActiveProject = project;
 }
 
 void lcApplication::SetClipboard(lcFile* Clipboard)
@@ -215,7 +189,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
-				printf("Copyright (c) 1996-2006, BT Software\n");
 				printf("Compiled "__DATE__"\n");
 
 				return false;
@@ -224,7 +197,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			{
 				printf("Usage: leocad [options] [file]\n");
 				printf("  [options] can be:\n");
-				printf("  --libgl <path>: Searches for OpenGL libraries in path.\n");
 				printf("  -l, --libpath <path>: Loads the Pieces Library from path.\n");
 				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
 				printf("  -w, --width <width>: Sets the picture width.\n");
@@ -264,13 +236,12 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	SystemInit();
 
 	// Create a new project.
-	Project* project = new Project();
-	AddProject(project);
+	mProject = new Project();
 
 	GL_DisableVertexBufferObject();
 
 	// Load project.
-	if (ProjectName && project->OpenProject(ProjectName))
+	if (ProjectName && mProject->OpenProject(ProjectName))
 	{
 		if (!SaveImage)
 			return true;
@@ -332,9 +303,9 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		if (ImageInstructions)
-			project->SetAnimation(false);
+			mProject->SetAnimation(false);
 		else if (ImageAnimation)
-			project->SetAnimation(true);
+			mProject->SetAnimation(true);
 
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
@@ -343,7 +314,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		if ((ImageStart == 0) && (ImageEnd == 0))
 		{
-			ImageStart = ImageEnd = project->GetCurrentTime();
+			ImageStart = ImageEnd = mProject->GetCurrentTime();
 		}
 		else if ((ImageStart == 0) && (ImageEnd != 0))
 		{
@@ -354,13 +325,13 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			ImageEnd = ImageStart;
 		}
 
-		if (project->IsAnimation())
+		if (mProject->IsAnimation())
 		{
-			if (ImageStart > project->GetTotalFrames())
-				ImageStart = project->GetTotalFrames();
+			if (ImageStart > mProject->GetTotalFrames())
+				ImageStart = mProject->GetTotalFrames();
 
-			if (ImageEnd > project->GetTotalFrames())
-				ImageEnd = project->GetTotalFrames();
+			if (ImageEnd > mProject->GetTotalFrames())
+				ImageEnd = mProject->GetTotalFrames();
 		}
 		else
 		{
@@ -372,7 +343,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		Image* images = new Image[ImageEnd - ImageStart + 1];
-		project->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
+		mProject->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
 
 		for (int i = 0; i <= ImageEnd - ImageStart; i++)
 		{
@@ -401,7 +372,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		if (SaveImage)
 			return false;
 		else
-			project->OnNewDocument();
+			mProject->OnNewDocument();
 	}
 
 	lcLoadDefaultKeyboardShortcuts();
@@ -411,9 +382,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 void lcApplication::Shutdown()
 {
-	for (int i = 0; i < m_Projects.GetSize(); i++)
-		delete m_Projects[i];
-
 	delete m_Library;
 	m_Library = NULL;
 }

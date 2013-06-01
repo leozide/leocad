@@ -16,33 +16,14 @@ public:
 	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
 	void Shutdown();
 
+	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
+
 	void GetFileList(const char* Path, ObjArray<String>& FileList);
 	void OpenURL(const char* URL);
 	void SetClipboard(lcFile* Clipboard);
 	void ExportClipboard(lcMemFile* Clipboard);
 
-	// Pieces library.
-	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
-	lcPiecesLibrary* GetPiecesLibrary() const
-	{
-		return m_Library;
-	}
-
-	// Projects.
-	void AddProject(Project* project);
-
-	Project* GetActiveProject() const
-	{
-		return m_ActiveProject;
-	}
-
-	void SetActiveProject(Project* project)
-	{
-		m_ActiveProject = project;
-	}
-
-	Project* m_ActiveProject;
-	PtrArray<Project> m_Projects;
+	Project* mProject;
 	lcPiecesLibrary* m_Library;
 	lcFile* mClipboard;
 
@@ -52,7 +33,15 @@ protected:
 };
 
 extern lcApplication* g_App;
-lcPiecesLibrary* lcGetPiecesLibrary();
-Project* lcGetActiveProject();
+
+inline lcPiecesLibrary* lcGetPiecesLibrary()
+{
+	return g_App->m_Library;
+}
+
+inline Project* lcGetActiveProject()
+{
+	return g_App->mProject;
+}
 
 #endif // _LC_APPLICATION_H_

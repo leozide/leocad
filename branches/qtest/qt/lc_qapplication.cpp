@@ -17,3 +17,19 @@ void lcApplication::ExportClipboard(lcMemFile* Clipboard)
 
 	SetClipboard(Clipboard);
 }
+
+void lcApplication::GetFileList(const char* Path, ObjArray<String>& FileList)
+{
+	QDir dir(Path);
+	dir.setFilter(QDir::Files | QDir::Hidden | QDir::Readable);
+
+	FileList.RemoveAll();
+	QStringList files = dir.entryList();
+
+	for (int fileIdx = 0; fileIdx < files.size(); fileIdx++)
+	{
+		QString absolutePath = dir.absoluteFilePath(files[fileIdx]);
+
+		FileList.Add(absolutePath.toLocal8Bit().data());
+	}
+}

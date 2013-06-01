@@ -1,46 +1,36 @@
 #include "lc_global.h"
 #include "system.h"
-#include "basewnd.h"
 
 bool Sys_KeyDown(int Key)
 {
 	return false;
 }
 
-void Sys_GetFileList(const char* Path, ObjArray<String>& FileList)
-{
-}
 #ifndef WIN32
-// String
-char* strupr(char* string)
-{
-  char *cp;
-  for (cp=string; *cp; ++cp)
-  {
-    if ('a' <= *cp && *cp <= 'z')
-      *cp += 'A' - 'a';
-  }
 
-  return string;
+char* strupr(char *string)
+{
+	for (char *c = string; *c; c++)
+		*c = toupper(*c);
+
+	return string;
 }
 
-char* strlwr(char* string)
+char* strlwr(char *string)
 {
-  char *cp;
-  for (cp = string; *cp; ++cp)
-  {
-    if ('A' <= *cp && *cp <= 'Z')
-      *cp += 'a' - 'A';
-  }
+	for (char *c = string; *c; c++)
+		*c = tolower(*c);
 
-  return string;
+	return string;
 }
 
-int stricmp(const char* str1, const char* str2)
+int stricmp(const char *str1, const char *str2)
 {
-  return strcasecmp(str1, str2);
+	return strcasecmp(str1, str2);
 }
+
 #endif
+
 void SystemPumpMessages()
 {
 }

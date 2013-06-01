@@ -6,7 +6,7 @@
 #include "lc_colors.h"
 #include "lc_texture.h"
 #include "lc_category.h"
-#include "system.h"
+#include "lc_application.h"
 #include "mainwnd.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -371,7 +371,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		strcat(FileName, "parts/");
 		int PathLength = strlen(FileName);
 
-		Sys_GetFileList(FileName, FileList);
+		g_App->GetFileList(FileName, FileList);
 
 		mPieces.Expand(FileList.GetSize());
 
@@ -447,7 +447,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
 		PathLength += strchr(PrimitiveDirectories[DirectoryIdx], '/') - PrimitiveDirectories[DirectoryIdx] + 1;
 
-		Sys_GetFileList(FileName, FileList);
+		g_App->GetFileList(FileName, FileList);
 
 		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 		{
@@ -486,7 +486,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	strcat(FileName, "parts/textures/");
 	int PathLength = strlen(FileName);
 
-	Sys_GetFileList(FileName, FileList);
+	g_App->GetFileList(FileName, FileList);
 
 	mTextures.Expand(FileList.GetSize());
 

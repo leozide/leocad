@@ -25,6 +25,7 @@ public:
 	void splitVertical();
 	void removeView();
 	void resetViews();
+	void togglePrintPreview();
 	void toggleFullScreen();
 
 	void updateFocusObject(Object *focus);
@@ -47,6 +48,7 @@ public:
 	lcVector3 getTransformAmount();
 
 private slots:
+	void printPreview(QPrinter *printer);
 	void actionTriggered();
 	void partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void colorChanged(int colorIndex);

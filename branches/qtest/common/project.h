@@ -199,8 +199,16 @@ public:
 		{ return m_bAnimation; }
 	void SetAnimation(bool Anim)
 	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
-	unsigned short GetCurrentTime ()
+	unsigned short GetCurrentTime()
 		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+	void SetCurrentTime(unsigned short Time)
+	{
+		if (m_bAnimation)
+			m_nCurFrame = Time;
+		else
+			m_nCurStep = (unsigned char)Time;
+		CalculateStep();
+	}
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	int GetCurrentColor () const
@@ -420,12 +428,6 @@ public:
 	bool OpenProject(const char* FileName);
 	bool SaveModified();
 	void SetModifiedFlag(bool Modified);
-
-protected:
-	// TODO: Fix ! This is a hack to make things work now
-	friend class CCADView;
-	friend void PrintPiecesThread(void* pv);
-	friend void Export3DStudio();
 };
 
 #endif // _PROJECT_H_

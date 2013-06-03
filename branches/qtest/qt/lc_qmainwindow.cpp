@@ -688,6 +688,280 @@ void lcQMainWindow::resetViews()
 	centralLayout->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 }
 
+void lcQMainWindow::printPreview(QPrinter *printer)
+{
+	Project *project = lcGetActiveProject();
+	int docCopies;
+	int pageCopies;
+
+	int rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
+	int columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
+	int stepsPerPage = rows * columns;
+	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
+
+	if (printer->collateCopies())
+	{
+		docCopies = 1;
+		pageCopies = printer->supportsMultipleCopies() ? 1 : printer->copyCount();
+	}
+	else
+	{
+		docCopies = printer->supportsMultipleCopies() ? 1 : printer->copyCount();
+		pageCopies = 1;
+	}
+
+	int fromPage = printer->fromPage();
+	int toPage = printer->toPage();
+	bool ascending = true;
+
+	if (fromPage == 0 && toPage == 0)
+	{
+		fromPage = 1;
+		toPage = pageCount;
+	}
+
+	fromPage = qMax(1, fromPage);
+	toPage = qMin(pageCount, toPage);
+
+	if (toPage < fromPage)
+		return;
+
+	if (printer->pageOrder() == QPrinter::LastPageFirst)
+	{
+		int tmp = fromPage;
+		fromPage = toPage;
+		toPage = tmp;
+		ascending = false;
+	}
+
+	piecePreview->makeCurrent();
+
+	QRect pageRect = printer->pageRect();
+
+	int stepWidth = pageRect.width() / columns;
+	int stepHeight = pageRect.height() / rows;
+
+	GLint maxTexture;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexture);
+
+	int tileWidth = qMin(stepWidth, maxTexture);
+	int tileHeight = qMin(stepHeight, maxTexture);
+	float aspectRatio = (float)stepWidth / (float)stepHeight;
+
+	View view(project);
+	view.SetCamera(project->GetActiveView()->mCamera, false);
+	view.OnSize(tileWidth, tileHeight);
+
+	GL_BeginRenderToTexture(tileWidth, tileHeight);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	unsigned short previousTime = project->GetCurrentTime();
+	bool wasAnimation = project->IsAnimation();
+	project->SetAnimation(false);
+
+	QPainter painter(printer);
+	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4); // TODO: option to print background
+
+	for (int docCopy = 0; docCopy < docCopies; docCopy++)
+	{
+		int page = fromPage;
+
+		for (;;)
+		{
+			for (int pageCopy = 0; pageCopy < pageCopies; pageCopy++)
+			{
+				if (printer->printerState() == QPrinter::Aborted || printer->printerState() == QPrinter::Error)
+					return;
+
+				int currentStep = 1 + ((page - 1) * rows * columns);
+
+				for (int row = 0; row < rows; row++)
+				{
+					for (int column = 0; column < columns; column++)
+					{
+						if (currentStep > project->GetLastStep())
+							break;
+
+						project->SetCurrentTime(currentStep);
+
+						if (stepWidth > tileWidth || stepHeight > tileHeight)
+						{
+							Camera* camera = view.mCamera;
+							camera->StartTiledRendering(tileWidth, tileHeight, stepWidth, stepHeight, aspectRatio);
+							do 
+							{
+								project->Render(&view, true);
+
+								int tileRow, tileColumn, currentTileWidth, currentTileHeight;
+								camera->GetTileInfo(&tileRow, &tileColumn, &currentTileWidth, &currentTileHeight);
+
+								glFinish();
+								glReadPixels(0, 0, currentTileWidth, currentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+								for (int y = 0; y < (currentTileHeight + 1) / 2; y++)
+								{
+									lcuint8* top = (lcuint8*)buffer + ((currentTileHeight - y - 1) * currentTileWidth * 4);
+									lcuint8* bottom = (lcuint8*)buffer + y * currentTileWidth * 4;
+
+									for (int x = 0; x < currentTileWidth; x++)
+									{
+										lcuint8 red = top[0];
+										lcuint8 green = top[1];
+										lcuint8 blue = top[2];
+										lcuint8 alpha = 255;//top[3];
+
+										top[0] = bottom[2];
+										top[1] = bottom[1];
+										top[2] = bottom[0];
+										top[3] = 255;//bottom[3];
+
+										bottom[0] = blue;
+										bottom[1] = green;
+										bottom[2] = red;
+										bottom[3] = alpha;
+
+										top += 4;
+										bottom +=4;
+									}
+								}
+
+								QImage image = QImage((const lcuint8*)buffer, currentTileWidth, currentTileHeight, QImage::Format_ARGB32);
+
+								int y = 0;
+
+								if (stepHeight > tileHeight && tileRow != 0)
+									y = tileRow * tileHeight - (tileHeight - stepHeight % tileHeight);
+
+								QRect rect = painter.viewport();
+								int left = rect.x() + 1 + (stepWidth * column) + tileColumn * tileWidth;
+								int bottom = rect.y() + 1 + (stepHeight * row) + y;
+
+								painter.drawImage(left, bottom, image);
+							} while (camera->EndTile());
+						}
+						else
+						{
+							project->Render(&view, true);
+
+							glFinish();
+							glReadPixels(0, 0, tileWidth, tileHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+							for (int y = 0; y < (tileHeight + 1) / 2; y++)
+							{
+								lcuint8* top = (lcuint8*)buffer + ((tileHeight - y - 1) * tileWidth * 4);
+								lcuint8* bottom = (lcuint8*)buffer + y * tileWidth * 4;
+
+								for (int x = 0; x < tileWidth; x++)
+								{
+									lcuint8 red = top[0];
+									lcuint8 green = top[1];
+									lcuint8 blue = top[2];
+									lcuint8 alpha = 255;//top[3];
+
+									top[0] = bottom[2];
+									top[1] = bottom[1];
+									top[2] = bottom[0];
+									top[3] = 255;//bottom[3];
+
+									bottom[0] = blue;
+									bottom[1] = green;
+									bottom[2] = red;
+									bottom[3] = alpha;
+
+									top += 4;
+									bottom +=4;
+								}
+							}
+
+							QImage image = QImage((const lcuint8*)buffer, tileWidth, tileHeight, QImage::Format_ARGB32);
+
+							QRect rect = painter.viewport();
+							int left = rect.x() + 1 + (stepWidth * column);
+							int bottom = rect.y() + 1 + (stepHeight * row);
+
+							painter.drawImage(left, bottom, image);
+						}
+/*
+		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
+
+		if (dwPrint & PRINT_NUMBERS)
+		{
+			char tmp[4];
+			sprintf(tmp, "%d", nRenderTime);
+
+			CRect rcNumber(rc);
+			rcNumber.left += (w*c)+(int)(pDC->GetDeviceCaps(LOGPIXELSX)/2);
+			rcNumber.top += (h*r)+(int)(pDC->GetDeviceCaps(LOGPIXELSY)/2);
+
+			pDC->SetTextAlign(TA_TOP|TA_LEFT|TA_NOUPDATECP);
+			pDC->DrawText(tmp, strlen(tmp), rcNumber, DT_LEFT|DT_TOP|DT_SINGLELINE);
+		}
+
+		if (dwPrint & PRINT_BORDER)
+		{
+			pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
+			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*r));
+
+			pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
+			pDC->LineTo(rc.left+(w*c), rc.top+(h*(r+1)));
+			
+			pDC->MoveTo(rc.left+(w*(c+1)), rc.top+(h*r));
+			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*(r+1)));
+
+			pDC->MoveTo(rc.left+(w*c), rc.top+(h*(r+1)));
+			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*(r+1)));
+		}
+		*/
+						currentStep++;
+					}
+				}
+
+				if (pageCopy < pageCopies - 1)
+					printer->newPage();
+			}
+
+			if (page == toPage)
+				break;
+
+			if (ascending)
+				page++;
+			else
+				page--;
+
+			printer->newPage();
+		}
+
+		if (docCopy < docCopies - 1)
+			printer->newPage();
+	}
+
+	free(buffer);
+
+	if (wasAnimation)
+		project->SetAnimation(true);
+	project->SetCurrentTime(previousTime);
+
+	GL_EndRenderToTexture();
+}
+
+void lcQMainWindow::togglePrintPreview()
+{
+	// todo: print preview inside main window
+
+	Project *project = lcGetActiveProject();
+	int rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
+	int columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
+	int stepsPerPage = rows * columns;
+	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
+
+	QPrinter printer(QPrinter::HighResolution);
+	printer.setFromTo(1, pageCount + 1);
+
+	QPrintPreviewDialog preview(&printer, this);
+	connect(&preview, SIGNAL(paintRequested(QPrinter*)), SLOT(printPreview(QPrinter*)));
+	preview.exec();
+}
+
 void lcQMainWindow::toggleFullScreen()
 {
 	// todo: hide toolbars and menu

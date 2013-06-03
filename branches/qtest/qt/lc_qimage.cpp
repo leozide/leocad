@@ -10,7 +10,7 @@ static void copyToQImage(const Image& src, QImage& dest, bool transparent)
 
 	if (transparent && src.mAlpha)
 	{
-		for (int y = 0; y < src.mWidth; y++)
+		for (int y = 0; y < src.mHeight; y++)
 		{
 			for (int x = 0; x < src.mWidth; x++)
 			{
@@ -40,7 +40,7 @@ static void copyFromQImage(const QImage& src, Image& dest)
 
 	lcuint8* bytes = (lcuint8*)dest.mData;
 
-	for (int y = 0; y < dest.mWidth; y++)
+	for (int y = 0; y < dest.mHeight; y++)
 	{
 		for (int x = 0; x < dest.mWidth; x++)
 		{

@@ -23,6 +23,7 @@ public:
 	void SplitVertical();
 	void RemoveView();
 	void ResetViews();
+	void TogglePrintPreview();
 	void ToggleFullScreen();
 
 	void UpdateFocusObject(Object* Focus);

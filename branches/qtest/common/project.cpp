@@ -5037,6 +5037,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
+		case LC_FILE_PRINT_PREVIEW:
+			gMainWindow->TogglePrintPreview();
+			break;
+
 		case LC_FILE_TERRAIN_EDITOR:
 		{
 			Terrain* temp = new Terrain();

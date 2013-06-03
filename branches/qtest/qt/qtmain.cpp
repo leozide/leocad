@@ -295,6 +295,14 @@ void lcMainWindow::ResetViews()
 		window->resetViews();
 }
 
+void lcMainWindow::TogglePrintPreview()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->togglePrintPreview();
+}
+
 void lcMainWindow::ToggleFullScreen()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

@@ -118,6 +118,7 @@ desktop: obj
 	@echo "Icon=$(PREFIX)/share/pixmaps/leocad.svg" >> $(OBJDIR)/leocad.desktop
 	@echo "MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;application/x-ldlite;" >> $(OBJDIR)/leocad.desktop
 	@echo "Categories=Graphics;3DGraphics;Education;" >> $(OBJDIR)/leocad.desktop
+	@echo "Keywords=CAD;LEGO;LDraw;" >> $(OBJDIR)/leocad.desktop
 
 install: $(BIN) install-data install-update
 uninstall: uninstall-data install-update

@@ -13,7 +13,7 @@ extern "C" {
 typedef struct bt_jpeg_error_mgr
 {
   struct jpeg_error_mgr pub;  // "public" fields
-  jmp_buf setjmp_buffer;      // for return to caller 
+  jmp_buf setjmp_buffer;      // for return to caller
 } bt_jpeg_error_mgr;
 
 static void bt_jpeg_error_exit (j_common_ptr cinfo)
@@ -30,7 +30,7 @@ static void j_putRGBScanline(unsigned char* jpegline, int widthPix, unsigned cha
 {
   int offset = row * widthPix * 3;
   int count;
-  for (count = 0; count < widthPix; count++) 
+  for (count = 0; count < widthPix; count++)
   {
     unsigned char iRed, iBlu, iGrn;
     unsigned char *oRed, *oBlu, *oGrn;
@@ -54,7 +54,7 @@ static void j_putGrayScanlineToRGB(unsigned char* jpegline, int widthPix, unsign
 {
   int offset = row * widthPix * 3;
   int count;
-  for (count = 0; count < widthPix; count++) 
+  for (count = 0; count < widthPix; count++)
   {
     unsigned char iGray;
     unsigned char *oRed, *oBlu, *oGrn;
@@ -207,7 +207,7 @@ bool Image::LoadJPG(lcFile& file)
   cinfo.err = jpeg_std_error(&jerr.pub);
   jerr.pub.error_exit = bt_jpeg_error_exit;
 
-  if (setjmp(jerr.setjmp_buffer)) 
+  if (setjmp(jerr.setjmp_buffer))
   {
     jpeg_destroy_decompress(&cinfo);
     return false;
@@ -235,7 +235,7 @@ bool Image::LoadJPG(lcFile& file)
   row_stride = cinfo.output_width * cinfo.output_components;
   buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
-  while (cinfo.output_scanline < cinfo.output_height) 
+  while (cinfo.output_scanline < cinfo.output_height)
   {
     jpeg_read_scanlines(&cinfo, buffer, 1);
 
@@ -354,13 +354,12 @@ bool Image::SaveJPG(lcFile& file, int quality, bool progressive) const
 {
   struct jpeg_compress_struct cinfo;
   struct bt_jpeg_error_mgr jerr;
-  int row_stride;	// physical row widthPix in image buffer
 
   // allocate and initialize JPEG compression object
   cinfo.err = jpeg_std_error(&jerr.pub);
   jerr.pub.error_exit = bt_jpeg_error_exit;
 
-  if (setjmp(jerr.setjmp_buffer)) 
+  if (setjmp(jerr.setjmp_buffer))
   {
     //    jpeg_destroy_compress(&cinfo);
     //    if (outfile != NULL)
@@ -374,19 +373,18 @@ bool Image::SaveJPG(lcFile& file, int quality, bool progressive) const
 
   cinfo.image_width = m_nWidth;
   cinfo.image_height = m_nHeight;
-  cinfo.input_components = 3;		
+  cinfo.input_components = 3;
   cinfo.in_color_space = JCS_RGB;
 
   jpeg_set_defaults (&cinfo);
   jpeg_set_quality (&cinfo, quality, TRUE);
 
-  if (progressive) 
+  if (progressive)
     jpeg_simple_progression(&cinfo);
 
   jpeg_start_compress (&cinfo, TRUE);
-  row_stride = m_nWidth * 3;
 
-  while (cinfo.next_scanline < cinfo.image_height) 
+  while (cinfo.next_scanline < cinfo.image_height)
   {
     unsigned char* outRow = m_pData + (cinfo.next_scanline * m_nWidth * 3);
     jpeg_write_scanlines(&cinfo, &outRow, 1);

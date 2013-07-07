@@ -9,7 +9,7 @@ CPPFLAGS += $(patsubst %,-I%,$(MODULES))
 CPPFLAGS += -g -Wextra -Wall -Wno-unused-parameter -Wshadow
 
 ### Extra libraries if required
-LIBS :=
+LIBS := -lX11 -ldl
 
 ### Each module will add to this
 SRC :=

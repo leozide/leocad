@@ -68,6 +68,8 @@ Project::Project()
 	m_pBackground = new lcTexture();
 	m_nAutosave = Sys_ProfileLoadInt ("Settings", "Autosave", 10);
 	m_nMouse = Sys_ProfileLoadInt ("Default", "Mouse", 11);
+	m_nDownX = 0;
+	m_nDownY = 0;
 	strcpy(m_strModelsPath, Sys_ProfileLoadString ("Default", "Projects", ""));
 
 	if (messenger == NULL)

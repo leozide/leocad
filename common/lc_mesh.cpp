@@ -11,6 +11,9 @@ lcMesh::lcMesh()
 {
 	mSections = NULL;
 	mNumSections = 0;
+	mNumVertices = 0;
+	mNumTexturedVertices = 0;
+	mIndexType = 0;
 }
 
 lcMesh::~lcMesh()

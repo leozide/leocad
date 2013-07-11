@@ -23,6 +23,7 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
+	void wheelEvent(QWheelEvent *event);
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dragLeaveEvent(QDragLeaveEvent *event);
 	void dragMoveEvent(QDragMoveEvent *event);

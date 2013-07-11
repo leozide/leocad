@@ -106,6 +106,26 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift, Alt);
 }
 
+void lcQGLWidget::wheelEvent(QWheelEvent *event)
+{
+	if (event->orientation() != Qt::Vertical)
+	{
+		event->ignore();
+		return;
+	}
+
+	int numDegrees = event->delta() / 8;
+	int numSteps = numDegrees / 15;
+
+	bool Control = event->modifiers() & Qt::ControlModifier;
+	bool Shift = event->modifiers() & Qt::ShiftModifier;
+	bool Alt = event->modifiers() & Qt::AltModifier;
+
+	mWindow->OnMouseWheel(event->x(), height() - event->y() - 1, numSteps, Control, Shift, Alt);
+
+	event->accept();
+}
+
 void lcQGLWidget::dragEnterEvent(QDragEnterEvent *event)
 {
 	if (isView && event->mimeData()->hasFormat("application/vnd.leocad-part"))

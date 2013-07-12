@@ -12,15 +12,22 @@ OSDIR := linux
 # (Add a -g for debugging)
 CPPFLAGS += -O2 -Wall
 
+UNAME_S := $(shell uname -s)
+
 ### FreeBSD configuration
 
-ifeq ($(shell uname), FreeBSD)
-CPPFLAGS += -L/usr/local/lib
+ifeq ($(UNAME_S), FreeBSD)
+CPPFLAGS += -L /usr/local/lib
+LDFLAGS += -I /usr/local/include
+endif
+
+ifeq ($(UNAME_S),Linux)
+EXTRALIBS += -ldl
 endif
 
 ### Default directory
 
-ifeq ($(PREFIX), )
+ifeq ($(PREFIX),)
 PREFIX := /usr/local
 endif
 
@@ -39,7 +46,7 @@ CONFTEST="\#include <stdio.h>\nint main() { FILE *f=fopen(\"conftestval\", \"w\"
 	if (!f) return 1; fprintf(f, \"%%d\\\n\", (int)sizeof(%s)); return 0; }\n"
 
 $(OSDIR)/config.mk: config.mk
-	make config
+	$(MAKE) config
 
 config:
 	@echo "Automatic configuration"

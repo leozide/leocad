@@ -302,7 +302,7 @@ void lcQMainWindow::createMenus()
 	menuToolBars->addAction(timeToolBar->toggleViewAction());
 	menuView->addAction(actions[LC_VIEW_FULLSCREEN]);
 
-	menuPiece = menuBar()->addMenu(tr("&Piece"));
+	menuPiece = menuBar()->addMenu(tr("&Part"));
 	menuPiece->addAction(actions[LC_PIECE_INSERT]);
 	menuPiece->addAction(actions[LC_PIECE_DELETE]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);

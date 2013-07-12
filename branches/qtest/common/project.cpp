@@ -8277,6 +8277,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 	{
 		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
+		gMainWindow->UpdateFocusObject(GetFocusObject());
 		ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
 		UpdateAllViews();
 	}

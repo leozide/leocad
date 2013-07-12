@@ -64,14 +64,14 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"File.Export.BrickLink",
 		"&BrickLink...",
-		"Export a list of pieces used in BrickLink XML format",
+		"Export a list of parts used in BrickLink XML format",
 		""
 	},
 	// LC_FILE_EXPORT_CSV
 	{
 		"File.Export.CSV",
 		"&CSV...",
-		"Export a list of pieces used in comma delimited file format",
+		"Export a list of parts used in comma delimited file format",
 		""
 	},
 	// LC_FILE_EXPORT_POVRAY
@@ -120,7 +120,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"File.PrintBOM",
 		"Print &Bill of Materials...",
-		"Print a list of pieces used",
+		"Print a list of parts used",
 		""
 	},
 	// LC_FILE_RECENT1
@@ -197,7 +197,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.SelectAll",
 		"Select All",
-		"Select all pieces in the project",
+		"Select all parts in the project",
 		"Ctrl+A"
 	},
 	// LC_EDIT_SELECT_NONE
@@ -554,7 +554,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Insert",
 		"Insert",
-		"Add new pieces to the model",
+		"Add new parts to the model",
 		""
 	},
 	// LC_EDIT_ACTION_LIGHT
@@ -596,7 +596,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Rotate",
 		"Rotate",
-		"Rotate selected pieces",
+		"Rotate selected parts",
 		"Shift+R"
 	},
 	// LC_EDIT_ACTION_DELETE
@@ -610,7 +610,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Paint",
 		"Paint",
-		"Change piece color",
+		"Change part color",
 		"Shift+N"
 	},
 	// LC_EDIT_ACTION_ZOOM
@@ -673,7 +673,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"View.ZoomExtents",
 		"Zoom Extents",
-		"Fit all pieces in current the view (hold the CTRL key down to zoom all views)",
+		"Fit all parts in current the view (hold the CTRL key down to zoom all views)",
 		""
 	},
 	// LC_VIEW_VIEWPOINT_FRONT
@@ -958,191 +958,191 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	},
 	// LC_PIECE_INSERT
 	{
-		"Piece.Insert",
+		"Part.Insert",
 		"Insert",
-		"Add a new piece to the model",
+		"Add a new part to the model",
 		"Insert"
 	},
 	// LC_PIECE_DELETE
 	{
-		"Piece.Delete",
+		"Part.Delete",
 		"Delete",
 		"Delete selected objects",
 		"Delete"
 	},
 	// LC_PIECE_MOVE_PLUSX
 	{
-		"Piece.Move.PlusX",
+		"Part.Move.PlusX",
 		"Move +X",
 		"Move selected objects along the X axis",
 		"Down"
 	},
 	// LC_PIECE_MOVE_MINUSX
 	{
-		"Piece.Move.MinusX",
+		"Part.Move.MinusX",
 		"Move -X",
 		"Move selected objects along the X axis",
 		"Up"
 	},
 	// LC_PIECE_MOVE_PLUSY
 	{
-		"Piece.Move.PlusY",
+		"Part.Move.PlusY",
 		"Move +Y",
 		"Move selected objects along the Y axis",
 		"Right"
 	},
 	// LC_PIECE_MOVE_MINUSY
 	{
-		"Piece.Move.MinusY",
+		"Part.Move.MinusY",
 		"Move -Y",
 		"Move selected objects along the Y axis",
 		"Left"
 	},
 	// LC_PIECE_MOVE_PLUSZ
 	{
-		"Piece.Move.PlusZ",
+		"Part.Move.PlusZ",
 		"Move +Z",
 		"Move selected objects along the Z axis",
 		"PgUp"
 	},
 	// LC_PIECE_MOVE_MINUSZ
 	{
-		"Piece.Move.MinusZ",
+		"Part.Move.MinusZ",
 		"Move -Z",
 		"Move selected objects along the Z axis",
 		"PgDown"
 	},
 	// LC_PIECE_ROTATE_PLUSX
 	{
-		"Piece.Rotate.PlusX",
+		"Part.Rotate.PlusX",
 		"Rotate +X",
 		"Rotate selected objects along the X axis",
 		"Shift+Down"
 	},
 	// LC_PIECE_ROTATE_MINUSX
 	{
-		"Piece.Rotate.MinusX",
+		"Part.Rotate.MinusX",
 		"Rotate -X",
 		"Rotate selected objects along the X axis",
 		"Shift+Up"
 	},
 	// LC_PIECE_ROTATE_PLUSY
 	{
-		"Piece.Rotate.PlusY",
+		"Part.Rotate.PlusY",
 		"Rotate +Y",
 		"Rotate selected objects along the Y axis",
 		"Shift+Right"
 	},
 	// LC_PIECE_ROTATE_MINUSY
 	{
-		"Piece.Rotate.MinusY",
+		"Part.Rotate.MinusY",
 		"Rotate -Y",
 		"Rotate selected objects along the Y axis",
 		"Shift+Left"
 	},
 	// LC_PIECE_ROTATE_PLUSZ
 	{
-		"Piece.Rotate.PlusZ",
+		"Part.Rotate.PlusZ",
 		"Rotate +Z",
 		"Rotate selected objects along the Z axis",
 		"Shift+PgUp"
 	},
 	// LC_PIECE_ROTATE_MINUSZ
 	{
-		"Piece.Rotate.MinusZ",
+		"Part.Rotate.MinusZ",
 		"Rotate -Z",
 		"Rotate selected objects along the Z axis",
 		"Shift+PgDown"
 	},
 	// LC_PIECE_MINIFIG_WIZARD
 	{
-		"Piece.MinifigWizard",
+		"Part.MinifigWizard",
 		"Minifig Wizard...",
 		"Add a new minifig to the model",
 		""
 	},
 	// LC_PIECE_ARRAY
 	{
-		"Piece.Array",
+		"Part.Array",
 		"Array...",
-		"Make copies of the selected pieces",
+		"Make copies of the selected parts",
 		""
 	},
 	// LC_PIECE_COPY_KEYS
 	{
-		"Piece.CopyKeys",
+		"Part.CopyKeys",
 		"Copy Keys",
 		"Copy keys between animation and instruction modes",
 		""
 	},
 	// LC_PIECE_GROUP
 	{
-		"Piece.Group",
+		"Part.Group",
 		"Group...",
-		"Group selected pieces together",
+		"Group selected parts together",
 		"Ctrl+G"
 	},
 	// LC_PIECE_UNGROUP
 	{
-		"Piece.Ungroup",
+		"Part.Ungroup",
 		"Ungroup",
 		"Ungroup selected group",
 		"Ctrl+U"
 	},
 	// LC_PIECE_GROUP_ADD
 	{
-		"Piece.GroupAdd",
+		"Part.GroupAdd",
 		"Add to Group",
-		"Add focused piece to selected group",
+		"Add focused part to selected group",
 		""
 	},
 	// LC_PIECE_GROUP_REMOVE
 	{
-		"Piece.GroupRemove",
+		"Part.GroupRemove",
 		"Remove from Group",
-		"Remove focused piece from group",
+		"Remove focused part from group",
 		""
 	},
 	// LC_PIECE_GROUP_EDIT
 	{
-		"Piece.GroupEdit",
+		"Part.GroupEdit",
 		"Edit Groups...",
 		"Edit groups",
 		""
 	},
 	// LC_PIECE_HIDE_SELECTED
 	{
-		"Piece.HideSelected",
+		"Part.HideSelected",
 		"Hide Selected",
 		"Hide selected objects",
 		"Ctrl+H"
 	},
 	// LC_PIECE_HIDE_UNSELECTED
 	{
-		"Piece.HideUnselected",
+		"Part.HideUnselected",
 		"Hide Unselected",
 		"Hide objects that are not selected",
 		""
 	},
 	// LC_PIECE_UNHIDE_ALL
 	{
-		"Piece.UnhideAll",
+		"Part.UnhideAll",
 		"Unhide All",
 		"Show all hidden objects",
 		""
 	},
 	// LC_PIECE_SHOW_EARLIER
 	{
-		"Piece.ShowEarlier",
+		"Part.ShowEarlier",
 		"Show Earlier",
-		"Show selected pieces one step earlier",
+		"Show selected parts one step earlier",
 		""
 	},
 	// LC_PIECE_SHOW_LATER
 	{
-		"Piece.ShowLater",
+		"Part.ShowLater",
 		"Show Later",
-		"Show selected pieces one step later",
+		"Show selected parts one step later",
 		""
 	},
 	// LC_HELP_HOMEPAGE

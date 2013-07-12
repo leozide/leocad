@@ -539,8 +539,6 @@ void lcQPropertiesTree::slotReturnPressed()
 
 			project->ModifyObject(focusObject, LC_PART_HIDE, &value);
 		}
-
-		setPart(focusObject);
 	}
 	else if (focusObject->GetType() == LC_OBJECT_CAMERA)
 	{
@@ -616,8 +614,6 @@ void lcQPropertiesTree::slotReturnPressed()
 
 			project->ModifyObject(focusObject, LC_CAMERA_NAME, value.toLocal8Bit().data());
 		}
-
-		setCamera(focusObject);
 	}
 }
 
@@ -637,16 +633,12 @@ void lcQPropertiesTree::slotSetValue(int value)
 
 			QPushButton *editor = (QPushButton*)m_delegate->editor();
 			updateColorEditor(editor, value);
-
-			setPart(focusObject);
 		}
 		else if (item == partID)
 		{
 			QComboBox *editor = (QComboBox*)sender();
 
 			project->ModifyObject(focusObject, LC_PART_ID, editor->itemData(value).value<void*>());
-
-			setPart(focusObject);
 		}
 	}
 }

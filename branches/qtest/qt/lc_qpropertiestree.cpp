@@ -95,6 +95,11 @@ public:
 		return m_editedItem;
 	}
 
+	QWidget *editor() const
+	{
+		return m_editedWidget;
+	}
+
 protected:
 	void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const;
 	void drawDisplay(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QString &text) const;
@@ -427,20 +432,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			QPushButton *editor = new QPushButton(parent);
 			int value = item->data(0, PropertyValueRole).toInt();
 
-			QImage img(12, 12, QImage::Format_ARGB32);
-			img.fill(0);
-
-			lcColor* color = &gColorList[value];
-			QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
-			QBrush b(rgb);
-			QPainter painter(&img);
-			painter.setCompositionMode(QPainter::CompositionMode_Source);
-			painter.fillRect(0, 0, img.width(), img.height(), b);
-			painter.end();
-
-			editor->setStyleSheet("Text-align:left");
-			editor->setIcon(QPixmap::fromImage(img));
-			editor->setText(color->Name);
+			updateColorEditor(editor, value);
 
 			connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
 
@@ -469,6 +461,24 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 	}
 
 	return NULL;
+}
+
+void lcQPropertiesTree::updateColorEditor(QPushButton *editor, int value) const
+{
+	QImage img(12, 12, QImage::Format_ARGB32);
+	img.fill(0);
+
+	lcColor* color = &gColorList[value];
+	QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
+	QBrush b(rgb);
+	QPainter painter(&img);
+	painter.setCompositionMode(QPainter::CompositionMode_Source);
+	painter.fillRect(0, 0, img.width(), img.height(), b);
+	painter.end();
+
+	editor->setStyleSheet("Text-align:left");
+	editor->setIcon(QPixmap::fromImage(img));
+	editor->setText(color->Name);
 }
 
 void lcQPropertiesTree::slotReturnPressed()
@@ -624,12 +634,19 @@ void lcQPropertiesTree::slotSetValue(int value)
 		if (item == partColor)
 		{
 			project->ModifyObject(focusObject, LC_PART_COLOR, &value);
+
+			QPushButton *editor = (QPushButton*)m_delegate->editor();
+			updateColorEditor(editor, value);
+
+			setPart(focusObject);
 		}
 		else if (item == partID)
 		{
 			QComboBox *editor = (QComboBox*)sender();
 
 			project->ModifyObject(focusObject, LC_PART_ID, editor->itemData(value).value<void*>());
+
+			setPart(focusObject);
 		}
 	}
 }

@@ -49,6 +49,7 @@ protected:
 	void keyPressEvent(QKeyEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void updateColorEditor(QPushButton *editor, int value) const;
 
 	QTreeWidgetItem *addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType);
 

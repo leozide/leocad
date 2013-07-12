@@ -75,7 +75,7 @@ void lcMemFile::SetLength(size_t NewLength)
 	mFileSize = NewLength;
 }
 
-long lcMemFile::GetLength() const
+size_t lcMemFile::GetLength() const
 {
 	return mFileSize;
 }
@@ -214,7 +214,7 @@ void lcDiskFile::SetLength(size_t NewLength)
 	fseek(mFile, NewLength, SEEK_SET);
 }
 
-long lcDiskFile::GetLength() const
+size_t lcDiskFile::GetLength() const
 {
 	long Length, Current;
 

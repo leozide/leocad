@@ -15,7 +15,7 @@ public:
 	virtual long GetPosition() const = 0;
 	virtual void Seek(long Offset, int From) = 0;
 	virtual void SetLength(size_t NewLength) = 0;
-	virtual long GetLength() const = 0;
+	virtual size_t GetLength() const = 0;
 
 	virtual void Flush() = 0;
 	virtual void Close() = 0;
@@ -429,7 +429,7 @@ public:
 	long GetPosition() const;
 	void Seek(long Offset, int From);
 	void SetLength(size_t NewLength);
-	long GetLength() const;
+	size_t GetLength() const;
 
 	void Flush();
 	void Close();
@@ -457,7 +457,7 @@ public:
 	long GetPosition() const;
 	void Seek(long Offset, int From);
 	void SetLength(size_t NewLength);
-	long GetLength() const;
+	size_t GetLength() const;
 
 	void Flush();
 	void Close();

@@ -4953,7 +4953,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (Options.BackgroundType == 2)
 				Scene |= LC_SCENE_BG;
 			else if (Options.BackgroundType == 1)
-				m_nScene |= LC_SCENE_GRADIENT;
+				Scene |= LC_SCENE_GRADIENT;
 
 			if (Options.BackgroundTile)
 				Scene |= LC_SCENE_BG_TILE;

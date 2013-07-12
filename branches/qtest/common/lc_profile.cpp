@@ -77,7 +77,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Defaults", "FogColor", LC_RGB(255, 255, 255)),                   // LC_PROFILE_DEFAULT_FOG_COLOR
 	lcProfileEntry("Defaults", "AmbientColor", LC_RGB(75, 75, 75)),                  // LC_PROFILE_DEFAULT_AMBIENT_COLOR
 	lcProfileEntry("Defaults", "BackgroundColor", LC_RGB(255, 255, 255)),            // LC_PROFILE_DEFAULT_BACKGROUND_COLOR
-	lcProfileEntry("Defaults", "GradientColor1", LC_RGB(191, 0, 0)),                 // LC_PROFILE_DEFAULT_GRADIENT_COLOR1
+	lcProfileEntry("Defaults", "GradientColor1", LC_RGB(0, 0, 191)),                 // LC_PROFILE_DEFAULT_GRADIENT_COLOR1
 	lcProfileEntry("Defaults", "GradientColor2", LC_RGB(255, 255, 255)),             // LC_PROFILE_DEFAULT_GRADIENT_COLOR2
 	lcProfileEntry("Defaults", "BackgroundTeture", ""),                              // LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE
 

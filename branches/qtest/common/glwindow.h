@@ -24,6 +24,15 @@ enum LC_CURSOR_TYPE
 	LC_CURSOR_COUNT
 };
 
+struct lcInputState
+{
+	int x;
+	int y;
+	bool Control;
+	bool Shift;
+	bool Alt;
+};
+
 class GLWindow
 {
 public:
@@ -44,20 +53,22 @@ public:
 	virtual void OnSize(int cx, int cy)
 	{ mWidth = cx; mHeight = cy; }
 	virtual void OnInitialUpdate();
-	virtual void OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnMiddleButtonDown(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnMiddleButtonUp(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt) { }
-	virtual void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift, bool Alt) { }
+	virtual void OnUpdateCursor() { }
+	virtual void OnLeftButtonDown() { }
+	virtual void OnLeftButtonUp() { }
+	virtual void OnLeftButtonDoubleClick() { }
+	virtual void OnMiddleButtonDown() { }
+	virtual void OnMiddleButtonUp() { }
+	virtual void OnRightButtonDown() { }
+	virtual void OnRightButtonUp() { }
+	virtual void OnMouseMove() { }
+	virtual void OnMouseWheel(float Direction) { }
 
-	void* mWidget;
+	lcInputState mInputState;
 	int mWidth;
 	int mHeight;
 	int mCursorType;
+	void* mWidget;
 };
 
 #endif // _GLWINDOW_H_

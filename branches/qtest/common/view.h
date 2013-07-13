@@ -14,15 +14,16 @@ public:
 
 	void OnDraw();
 	void OnInitialUpdate();
-	void OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMiddleButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMiddleButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift, bool Alt);
+	void OnUpdateCursor();
+	void OnLeftButtonDown();
+	void OnLeftButtonUp();
+	void OnLeftButtonDoubleClick();
+	void OnMiddleButtonDown();
+	void OnMiddleButtonUp();
+	void OnRightButtonDown();
+	void OnRightButtonUp();
+	void OnMouseMove();
+	void OnMouseWheel(float Direction);
 
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();

@@ -7,6 +7,11 @@ GLWindow::GLWindow()
 {
 	mCursorType = LC_CURSOR_DEFAULT;
 	mWidget = NULL;
+	mInputState.x = 0;
+	mInputState.y = 0;
+	mInputState.Control = false;
+	mInputState.Shift = false;
+	mInputState.Alt = false;
 }
 
 GLWindow::~GLWindow()

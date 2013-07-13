@@ -42,9 +42,6 @@ template<> struct lcStaticAssert<true> { };
 template<int i> struct lcStaticAssertTest { };
 #endif
 
-// Misc stuff
-bool Sys_KeyDown (int key);
-
 // User Interface
 void SystemUpdateColorList(int nNew);
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);

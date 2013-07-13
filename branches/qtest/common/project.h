@@ -356,15 +356,15 @@ protected:
 	void RemoveEmptyGroups();
 
 public:
-	void OnLeftButtonDown(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnLeftButtonUp(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnLeftButtonDoubleClick(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMiddleButtonDown(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMiddleButtonUp(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnRightButtonDown(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnRightButtonUp(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMouseMove(View* view, int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift, bool Alt);
+	void OnLeftButtonDown(View* view);
+	void OnLeftButtonUp(View* view);
+	void OnLeftButtonDoubleClick(View* view);
+	void OnMiddleButtonDown(View* view);
+	void OnMiddleButtonUp(View* view);
+	void OnRightButtonDown(View* view);
+	void OnRightButtonUp(View* view);
+	void OnMouseMove(View* view);
+	void OnMouseWheel(View* view, float Direction);
 	bool OnKeyDown(char nKey, bool Control, bool Shift);
 
 	void SetAction(int Action);

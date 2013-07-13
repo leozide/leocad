@@ -1,11 +1,6 @@
 #include "lc_global.h"
 #include "system.h"
 
-bool Sys_KeyDown(int Key)
-{
-	return false;
-}
-
 #ifndef WIN32
 
 char* strupr(char *string)

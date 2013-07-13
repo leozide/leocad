@@ -53,22 +53,46 @@ void lcQGLWidget::paintGL()
 	mWindow->OnDraw();
 }
 
+void lcQGLWidget::keyPressEvent(QKeyEvent *event)
+{
+	if (isView && event->key() == Qt::Key_Control)
+	{
+		mWindow->mInputState.Control = true;
+		mWindow->OnUpdateCursor();
+	}
+
+	QGLWidget::keyPressEvent(event);
+}
+
+void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	if (isView && event->key() == Qt::Key_Control)
+	{
+		mWindow->mInputState.Control = false;
+		mWindow->OnUpdateCursor();
+	}
+
+	QGLWidget::keyReleaseEvent(event);
+}
+
 void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 {
-	bool Control = event->modifiers() & Qt::ControlModifier;
-	bool Shift = event->modifiers() & Qt::ShiftModifier;
-	bool Alt = event->modifiers() & Qt::AltModifier;
+	mWindow->mInputState.x = event->x();
+	mWindow->mInputState.y = height() - event->y() - 1;
+	mWindow->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
+	mWindow->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
+	mWindow->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
 
 	switch (event->button())
 	{
 	case Qt::LeftButton:
-		mWindow->OnLeftButtonDown(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+		mWindow->OnLeftButtonDown();
 		break;
 	case Qt::MidButton:
-		mWindow->OnMiddleButtonDown(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+		mWindow->OnMiddleButtonDown();
 		break;
 	case Qt::RightButton:
-		mWindow->OnRightButtonDown(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+		mWindow->OnRightButtonDown();
 		break;
 	default:
 		break;
@@ -77,20 +101,22 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 
 void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-	bool Control = event->modifiers() & Qt::ControlModifier;
-	bool Shift = event->modifiers() & Qt::ShiftModifier;
-	bool Alt = event->modifiers() & Qt::AltModifier;
+	mWindow->mInputState.x = event->x();
+	mWindow->mInputState.y = height() - event->y() - 1;
+	mWindow->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
+	mWindow->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
+	mWindow->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
 
 	switch (event->button())
 	{
 	case Qt::LeftButton:
-		mWindow->OnLeftButtonUp(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+		mWindow->OnLeftButtonUp();
 		break;
 	case Qt::MidButton:
-		mWindow->OnMiddleButtonUp(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+		mWindow->OnMiddleButtonUp();
 		break;
 	case Qt::RightButton:
-		mWindow->OnRightButtonUp(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+		mWindow->OnRightButtonUp();
 		break;
 	default:
 		break;
@@ -99,11 +125,13 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-	bool Control = event->modifiers() & Qt::ControlModifier;
-	bool Shift = event->modifiers() & Qt::ShiftModifier;
-	bool Alt = event->modifiers() & Qt::AltModifier;
+	mWindow->mInputState.x = event->x();
+	mWindow->mInputState.y = height() - event->y() - 1;
+	mWindow->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
+	mWindow->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
+	mWindow->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
 
-	mWindow->OnMouseMove(event->x(), height() - event->y() - 1, Control, Shift, Alt);
+	mWindow->OnMouseMove();
 }
 
 void lcQGLWidget::wheelEvent(QWheelEvent *event)
@@ -114,14 +142,16 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 		return;
 	}
 
+	mWindow->mInputState.x = event->x();
+	mWindow->mInputState.y = height() - event->y() - 1;
+	mWindow->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
+	mWindow->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
+	mWindow->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+
 	int numDegrees = event->delta() / 8;
 	int numSteps = numDegrees / 15;
 
-	bool Control = event->modifiers() & Qt::ControlModifier;
-	bool Shift = event->modifiers() & Qt::ShiftModifier;
-	bool Alt = event->modifiers() & Qt::AltModifier;
-
-	mWindow->OnMouseWheel(event->x(), height() - event->y() - 1, numSteps, Control, Shift, Alt);
+	mWindow->OnMouseWheel(numSteps);
 
 	event->accept();
 }

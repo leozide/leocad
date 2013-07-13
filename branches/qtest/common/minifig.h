@@ -43,12 +43,12 @@ public:
 	~MinifigWizard();
 
 	void OnDraw();
-	void OnLeftButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnLeftButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnRightButtonDown(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnRightButtonUp(int x, int y, bool Control, bool Shift, bool Alt);
-	void OnMouseMove(int x, int y, bool Control, bool Shift, bool Alt);
+	void OnLeftButtonDown();
+	void OnLeftButtonUp();
+	void OnLeftButtonDoubleClick();
+	void OnRightButtonDown();
+	void OnRightButtonUp();
+	void OnMouseMove();
 	void OnInitialUpdate();
 
 	void Calculate();

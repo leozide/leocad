@@ -6204,12 +6204,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			int FirstView, LastView;
 
-			if (Sys_KeyDown(KEY_CONTROL))
-			{
-				FirstView = 0;
-				LastView = m_ViewList.GetSize();
-			}
-			else
+			// TODO: Find a way to let users zoom extents all views
+//			if (Sys_KeyDown(KEY_CONTROL))
+//			{
+//				FirstView = 0;
+//				LastView = m_ViewList.GetSize();
+//			}
+//			else
 			{
 				FirstView = m_ViewList.FindIndex(m_ActiveView);
 				LastView = FirstView + 1;
@@ -7344,7 +7345,7 @@ bool Project::StopTracking(bool bAccept)
 					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
 
 					// Deselect old pieces.
-					bool Control = Sys_KeyDown(KEY_CONTROL);
+					bool Control = m_ActiveView->mInputState.Control;
 					SelectAndFocusNone(Control);
 
 					// Select new pieces.
@@ -8442,7 +8443,7 @@ void Project::BeginColorDrop()
 //	m_RestoreAction = true;
 }
 
-void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnLeftButtonDown(View* view)
 {
 	if (m_nTracking != LC_TRACK_NONE)
 		if (StopTracking(false))
@@ -8450,6 +8451,11 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 
 	if (SetActiveView(view))
 		return;
+
+	int x = view->mInputState.x;
+	int y = view->mInputState.y;
+	bool Control = view->mInputState.Control;
+	bool Alt = view->mInputState.Alt;
 
 	m_bTrackCancel = false;
 	m_nDownX = x;
@@ -8492,7 +8498,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 							Group* pGroup = pPiece->GetTopGroup();
 							bool bFocus = pPiece->IsFocused ();
 
-							SelectAndFocusNone (bControl);
+							SelectAndFocusNone(Control);
 
 							// if a piece has focus deselect it, otherwise set the focus
 							pPiece->Select (!bFocus, !bFocus, false);
@@ -8508,13 +8514,13 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 						case LC_OBJECT_LIGHT:
 						case LC_OBJECT_LIGHT_TARGET:
 						{
-							SelectAndFocusNone (bControl);
-							Closest->Select (true, true, bControl);
+							SelectAndFocusNone(Control);
+							Closest->Select(true, true, Control);
 						} break;
 					}
 				}
 				else
-					SelectAndFocusNone (bControl);
+					SelectAndFocusNone(Control);
 
 				UpdateSelection();
 				UpdateAllViews();
@@ -8617,7 +8623,7 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 				gMainWindow->UpdateFocusObject(pPiece);
 
-				if (!bControl)
+				if (!Control)
 					SetAction(LC_ACTION_SELECT);
 			}
 			else if (Action == LC_ACTION_LIGHT)
@@ -8762,10 +8768,14 @@ void Project::OnLeftButtonDown(View* view, int x, int y, bool bControl, bool bSh
 	}
 }
 
-void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnLeftButtonDoubleClick(View* view)
 {
 	if (SetActiveView(view))
 		return;
+
+	int x = view->mInputState.x;
+	int y = view->mInputState.y;
+	bool Control = view->mInputState.Control;
 
 	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -8781,7 +8791,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
 
 //  if (m_nCurAction == LC_ACTION_SELECT)
   {
-    SelectAndFocusNone(bControl);
+	SelectAndFocusNone(Control);
 
     if (Closest != NULL)
       switch (Closest->GetType ())
@@ -8803,7 +8813,7 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
         case LC_OBJECT_LIGHT:
         case LC_OBJECT_LIGHT_TARGET:
         {
-          Closest->Select (true, true, bControl);
+		  Closest->Select (true, true, Control);
         } break;
       }
 
@@ -8813,18 +8823,22 @@ void Project::OnLeftButtonDoubleClick(View* view, int x, int y, bool bControl, b
   }
 }
 
-void Project::OnLeftButtonUp(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
-			{
+void Project::OnLeftButtonUp(View* view)
+{
 	StopTracking(true);
 }
 
-void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnMiddleButtonDown(View* view)
 {
 	if (StopTracking(false))
 		return;
 
 	if (SetActiveView(view))
 		return;
+
+	int x = view->mInputState.x;
+	int y = view->mInputState.y;
+	bool Alt = view->mInputState.Alt;
 
 	m_nDownX = x;
 	m_nDownY = y;
@@ -8852,18 +8866,22 @@ void Project::OnMiddleButtonDown(View* view, int x, int y, bool bControl, bool b
 	}
 }
 
-void Project::OnMiddleButtonUp(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnMiddleButtonUp(View* view)
 {
 	StopTracking(true);
 }
 
-void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnRightButtonDown(View* view)
 {
 	if (StopTracking(false))
 		return;
 
 	if (SetActiveView(view))
 		return;
+
+	int x = view->mInputState.x;
+	int y = view->mInputState.y;
+	bool Alt = view->mInputState.Alt;
 
 	m_nDownX = x;
 	m_nDownY = y;
@@ -8933,15 +8951,18 @@ void Project::OnRightButtonDown(View* view, int x, int y, bool bControl, bool bS
 	}
 }
 
-void Project::OnRightButtonUp(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnRightButtonUp(View* view)
 {
 	if (!StopTracking(true) && !m_bTrackCancel)
 		SystemDoPopupMenu(1, -1, -1);
 	m_bTrackCancel = false;
 }
 
-void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift, bool Alt)
+void Project::OnMouseMove(View* view)
 {
+	int x = view->mInputState.x;
+	int y = view->mInputState.y;
+
 	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_ACTION_INSERT))
 	{
 		if (m_OverlayActive)
@@ -9501,7 +9522,7 @@ void Project::OnMouseMove(View* view, int x, int y, bool bControl, bool bShift, 
 	}
 }
 
-void Project::OnMouseWheel(View* view, int x, int y, float Direction, bool Control, bool Shift, bool Alt)
+void Project::OnMouseWheel(View* view, float Direction)
 {
 	ZoomActiveView((int)(10 * Direction));
 }

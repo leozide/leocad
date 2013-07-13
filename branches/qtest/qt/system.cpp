@@ -26,16 +26,6 @@ int stricmp(const char *str1, const char *str2)
 
 #endif
 
-void SystemPumpMessages()
-{
-}
-
-long SystemGetTicks()
-{
-    return 0;
-}
-
-// User Interface
 void SystemUpdateColorList(int new_color)
 {
 }
@@ -50,19 +40,6 @@ void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
 
 void SystemUpdatePlay(bool play, bool stop)
 {
-}
-
-void SystemInit()
-{
-}
-
-void SystemFinish()
-{
-}
-
-bool SystemDoDialog(int mode, void* param)
-{
-  return false;
 }
 
 void SystemDoPopupMenu(int nMenu, int x, int y)

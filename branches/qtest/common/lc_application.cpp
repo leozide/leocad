@@ -233,8 +233,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		                          "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
 
-	SystemInit();
-
 	// Create a new project.
 	mProject = new Project();
 

@@ -42,19 +42,10 @@ template<> struct lcStaticAssert<true> { };
 template<int i> struct lcStaticAssertTest { };
 #endif
 
-// User Interface
 void SystemUpdateColorList(int nNew);
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);
 void SystemUpdatePlay(bool play, bool stop);
-
-void SystemInit();
-void SystemFinish();
-bool SystemDoDialog(int nMode, void* param);
 void SystemDoPopupMenu(int nMenu, int x, int y);
-
 void SystemPieceComboAdd(char* name);
-
-void SystemPumpMessages();
-long SystemGetTicks();
 
 #endif // _SYSTEM_H_

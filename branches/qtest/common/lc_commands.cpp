@@ -648,6 +648,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Zoom into a region of the screen",
 		""
 	},
+	// LC_EDIT_CANCEL
+	{
+		"Edit.Cancel",
+		"Cancel Action",
+		"Cancel current mouse action",
+		"Esc"
+	},
 	// LC_VIEW_PREFERENCES
 	{
 		"View.Preferences",

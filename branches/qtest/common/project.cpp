@@ -65,7 +65,6 @@ Project::Project()
 Project::~Project()
 {
 	DeleteContents(false);
-	SystemFinish();
 
     delete m_pTrackFile;
 	delete m_pTerrain;
@@ -5064,15 +5063,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_TERRAIN_EDITOR:
 		{
-			Terrain* temp = new Terrain();
-			*temp = *m_pTerrain;
+			// TODO: decide what to do with the terrain editor
+//			Terrain temp = *m_pTerrain;
 
-			if (SystemDoDialog(LC_DLG_TERRAIN, temp))
-			{
-				*m_pTerrain = *temp;
-				m_pTerrain->LoadTexture();
-			}
-			delete temp;
+//			if (SystemDoDialog(LC_DLG_TERRAIN, temp))
+//			{
+//				*m_pTerrain = temp;
+//				m_pTerrain->LoadTexture();
+//			}
 		} break;
 
 		case LC_FILE_RECENT1:
@@ -6291,15 +6289,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 		} break;
 /*
-		case LC_VIEW_STEP_CHOOSE:
-		{
-			SystemDoDialog(LC_DLG_STEPCHOOSE, NULL);
-			if (m_bAnimation)
-				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
-			else
-				gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
-		} break;
-
 		case LC_VIEW_STEP_SET:
 		{
 			if (m_bAnimation)
@@ -6367,6 +6356,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_TIME_PLAY:
 		{
+			// TODO: Rewrite animation playback by posting events, not looping here
+		/*
 			SelectAndFocusNone(false);
 			UpdateSelection();
 			m_bStopRender = false;
@@ -6388,10 +6379,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 				CalculateStep();
 				gMainWindow->UpdateTime(true, m_nCurFrame, m_nTotalFrames);
                 UpdateAllViews();
-				SystemPumpMessages();
 			}
 			SystemUpdatePlay(true, false);
 			gMainWindow->UpdateFocusObject(GetFocusObject());
+			*/
 		} break;
 
 		case LC_VIEW_VIEWPOINT_FRONT:
@@ -6802,6 +6793,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_EDIT_ACTION_ROLL:
 		{
 			SetAction(LC_ACTION_ROLL);
+		} break;
+
+		case LC_EDIT_CANCEL:
+		{
+			if (m_nTracking != LC_TRACK_NONE)
+				StopTracking(false);
 		} break;
 
 		case LC_NUM_COMMANDS:
@@ -7455,7 +7452,7 @@ bool Project::StopTracking(bool bAccept)
 	}
 	else if (m_pTrackFile != NULL)
 	{
-		if ((m_nCurAction == LC_ACTION_SELECT) || (m_nCurAction == LC_ACTION_ZOOM_REGION))
+		if ((Action == LC_ACTION_SELECT) || (Action == LC_ACTION_ZOOM_REGION))
 		{
 			UpdateAllViews();
 		}
@@ -8270,7 +8267,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 }
 
 void Project::ZoomActiveView(int Amount)
-		{
+{
 	m_ActiveView->mCamera->DoZoom(Amount, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateOverlayScale();
@@ -8284,13 +8281,6 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 	// TODO: move to the keyboard shortcut system
 	switch (nKey)
 	{
-		case KEY_ESCAPE:
-		{
-			if (m_nTracking != LC_TRACK_NONE)
-				StopTracking(false);
-			ret = true;
-		} break;
-
 		case KEY_TAB:
 		{
 			if (m_pPieces == NULL)
@@ -8385,15 +8375,15 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 
 			if (pFocus != NULL)
 			{
-        pFocus->Select (true, true, false);
-        Group* pGroup = pFocus->GetTopGroup();
-        if (pGroup != NULL)
-        {
-          for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-            if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-                (pPiece->GetTopGroup() == pGroup))
-              pPiece->Select (true, false, false);
-        }
+				pFocus->Select (true, true, false);
+				Group* pGroup = pFocus->GetTopGroup();
+				if (pGroup != NULL)
+				{
+				  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+					if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+						(pPiece->GetTopGroup() == pGroup))
+					  pPiece->Select (true, false, false);
+				}
 			}
 
 			UpdateSelection();
@@ -8401,35 +8391,35 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			gMainWindow->UpdateFocusObject(pFocus);
 			ret = true;
 		} break;
-			}
+	}
 
 	return ret;
-			}
+}
 
 void Project::BeginPieceDrop(PieceInfo* Info)
-			{
+{
 	StartTracking(LC_TRACK_LEFT);
 
 	mDropPiece = Info;
 	mDropPiece->AddRef();
-					}
+}
 
 void Project::OnPieceDropMove(int x, int y)
-				{
+{
 	if (!mDropPiece)
 		return;
 
 	if (m_nDownX != x || m_nDownY != y)
-					{
+	{
 		m_nDownX = x;
 		m_nDownY = y;
 
 		UpdateAllViews();
-				}
-			}
+	}
+}
 
 void Project::EndPieceDrop(bool Accept)
-			{
+{
 	StopTracking(Accept);
 
 	if (!Accept)

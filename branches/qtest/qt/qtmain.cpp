@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	QApplication app(argc, argv);
 
 	QCoreApplication::setOrganizationDomain("leocad.org");
 	QCoreApplication::setOrganizationName("LeoCAD");
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	gMainWindow->UpdateRecentFiles();
 	w.show();
 
-	int execReturn = a.exec();
+	int execReturn = app.exec();
 
 	delete gMainWindow;
 	gMainWindow = NULL;
@@ -261,6 +261,13 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	}
 
 	return false;
+}
+
+void lcMainWindow::Close()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	window->close();
 }
 
 void lcMainWindow::SplitHorizontal()

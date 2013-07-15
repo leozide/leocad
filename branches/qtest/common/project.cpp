@@ -2641,7 +2641,6 @@ void Project::RenderOverlays(View* view)
 				const float OverlayRotateArrowSize = 1.5f;
 				const float OverlayRotateArrowCapSize = 0.25f;
 
-				lcVector3 Normal, Tangent;
 				lcVector4 Rotation;
 				float Angle;
 
@@ -2660,6 +2659,7 @@ void Project::RenderOverlays(View* view)
 					Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 					break;
 				default:
+					Angle = 0.0f;
 					Rotation = lcVector4(0.0f, 0.0f, 1.0f, 0.0f);
 					break;
 				};
@@ -5033,7 +5033,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			if (Options.SetDefault)
-				{
+			{
 				lcSetProfileInt(LC_PROFILE_DEFAULT_SCENE, Scene);
 				lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, Options.FogDensity);
 				lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, Options.BackgroundFileName);
@@ -5042,7 +5042,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, LC_RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
 				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, LC_RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
 				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, LC_RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-				}
+			}
 
 			if (Modified)
 			{
@@ -5050,7 +5050,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				{
 					m_ViewList[i]->MakeCurrent();
 					RenderInitialize();
-			}
+				}
 
 				SetModifiedFlag(true);
 				CheckPoint("Properties");
@@ -5059,6 +5059,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_PRINT_PREVIEW:
 			gMainWindow->TogglePrintPreview();
+			break;
+
+			// TODO: printing
+		case LC_FILE_PRINT:
+		case LC_FILE_PRINT_BOM:
 			break;
 
 		case LC_FILE_TERRAIN_EDITOR:
@@ -5080,6 +5085,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			if (!OpenProject(gMainWindow->mRecentFiles[id - LC_FILE_RECENT1]))
 				gMainWindow->RemoveRecentFile(id - LC_FILE_RECENT1);
+		} break;
+
+		case LC_FILE_EXIT:
+		{
+			gMainWindow->Close();
 		} break;
 
 		case LC_EDIT_UNDO:
@@ -8278,7 +8288,8 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 {
 	bool ret = false;
 
-	// TODO: move to the keyboard shortcut system
+/*
+	// TODO: add a find dialog/function
 	switch (nKey)
 	{
 		case KEY_TAB:
@@ -8392,7 +8403,7 @@ bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
 			ret = true;
 		} break;
 	}
-
+*/
 	return ret;
 }
 

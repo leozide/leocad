@@ -16,6 +16,8 @@ public:
 	lcMainWindow();
 	~lcMainWindow();
 
+	void Close();
+
 	void AddRecentFile(const char* FileName);
 	void RemoveRecentFile(int FileIndex);
 
@@ -23,6 +25,7 @@ public:
 	void SplitVertical();
 	void RemoveView();
 	void ResetViews();
+
 	void TogglePrintPreview();
 	void ToggleFullScreen();
 

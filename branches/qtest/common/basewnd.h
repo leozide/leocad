@@ -55,10 +55,6 @@ enum LC_DIALOG_TYPE
 	LC_DIALOG_PREFERENCES,
 	LC_DIALOG_CHECK_UPDATES,
 	LC_DIALOG_ABOUT
-
-	// TODO: update dialogs
-	,
-	LC_DLG_TERRAIN
 };
 
 struct lcImageDialogOptions

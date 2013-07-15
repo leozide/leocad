@@ -7,6 +7,7 @@ Contributions (in alphabetical order):
 Christian Höltje <docwhat@gerf.org>
 David Paleino <dapal@debian.org>
 Joerg Scheurich <rusmufti@helpdesk.bera.rus.uni-stuttgart.de>
+Nicolas Guilbert <nicolas@ange.dk>
 Nicolas Schodet <nico-leocad@ni.fr.eu.org>
 Pat Mahoney <pat7@gmx.net>
 Petter Reinholdtsen <pere@hungry.com>

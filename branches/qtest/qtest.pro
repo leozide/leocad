@@ -2,7 +2,7 @@ QT += core \
     gui \
 	opengl \
 	network
-TARGET = qtest
+TARGET = leocad
 TEMPLATE = app
 DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
 INCLUDEPATH += qt \
@@ -162,3 +162,9 @@ FORMS += \
     qt/lc_qupdatedialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
+
+target.path = /usr/bin
+desktop.path = /usr/share/applications
+desktop.files += qt/leocad.desktop
+
+INSTALLS += target desktop

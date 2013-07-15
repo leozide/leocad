@@ -78,7 +78,7 @@ protected:
 	QTreeWidgetItem *partVisibility;
 	QTreeWidgetItem *partShow;
 	QTreeWidgetItem *partHide;
-	QTreeWidgetItem *partAppearence;
+	QTreeWidgetItem *partAppearance;
 	QTreeWidgetItem *partColor;
 	QTreeWidgetItem *partID;
 

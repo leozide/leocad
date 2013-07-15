@@ -708,7 +708,7 @@ void lcQPropertiesTree::setEmpty()
 	partVisibility = NULL;
 	partShow = NULL;
 	partHide = NULL;
-	partAppearence = NULL;
+	partAppearance = NULL;
 	partColor = NULL;
 	partID = NULL;
 
@@ -751,9 +751,9 @@ void lcQPropertiesTree::setPart(Object *newFocusObject)
 		partShow = addProperty(partVisibility, tr("Show"), PropertyInt);
 		partHide = addProperty(partVisibility, tr("Hide"), PropertyInt);
 
-		partAppearence = addProperty(NULL, tr("Appearence"), PropertyGroup);
-		partColor = addProperty(partAppearence, tr("Color"), PropertyColor);
-		partID = addProperty(partAppearence, tr("Part"), PropertyPart);
+		partAppearance = addProperty(NULL, tr("Appearence"), PropertyGroup);
+		partColor = addProperty(partAppearance, tr("Color"), PropertyColor);
+		partID = addProperty(partAppearance, tr("Part"), PropertyPart);
 	}
 
 	focusObject = newFocusObject;

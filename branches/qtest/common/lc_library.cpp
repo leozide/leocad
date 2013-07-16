@@ -2003,7 +2003,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		int StudsX, StudsY;
 		float MinZ = Brick ? -0.96f : -0.32f;
 
-		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsX, &StudsY);
+		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsY, &StudsX);
 
 		int NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 16;
 		int NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;

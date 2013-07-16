@@ -13,6 +13,7 @@ void GeneratePart(const char* ID, const char* Description)
 
 	FILE* output = fopen(FileName, "wt");
 	fprintf(output, "0 %s\n", Description);
+	fprintf(output, "0 This file is part of LeoCAD's built-in fallback library and released under GPL2\n", Description);
 
 	bool Brick = !strncmp(Description, "Brick ", 6);
 	bool Plate = !strncmp(Description, "Plate ", 6);
@@ -22,7 +23,7 @@ void GeneratePart(const char* ID, const char* Description)
 		int StudsX, StudsY;
 		float MinZ = Brick ? -0.96f : -0.32f;
 
-		sscanf(Description + 6, "%d x %d", &StudsX, &StudsY);
+		sscanf(Description + 6, "%d x %d", &StudsY, &StudsX);
 
 		int NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 16;
 		int NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;

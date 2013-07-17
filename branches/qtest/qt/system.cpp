@@ -26,10 +26,6 @@ int stricmp(const char *str1, const char *str2)
 
 #endif
 
-void SystemUpdateColorList(int new_color)
-{
-}
-
 void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 {
 }

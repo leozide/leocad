@@ -16,6 +16,7 @@ public:
 	lcMainWindow();
 	~lcMainWindow();
 
+	void SetColorIndex(int ColorIndex);
 	void Close();
 
 	void AddRecentFile(const char* FileName);
@@ -50,6 +51,7 @@ public:
 
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
 	PiecePreview* mPreviewWidget;
+	int mColorIndex;
 };
 
 extern class lcMainWindow* gMainWindow;

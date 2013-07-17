@@ -64,7 +64,6 @@
 
 enum LC_NOTIFY
 {
-	LC_COLOR_CHANGED,
 	LC_CAPTURE_LOST
 };
 
@@ -211,8 +210,6 @@ public:
 	}
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
-	int GetCurrentColor () const
-		{ return m_nCurColor; }
 	float* GetBackgroundColor()
 		{ return m_fBackground; }
 	unsigned long GetSnap() const
@@ -383,7 +380,6 @@ protected:
 	int m_nCurAction;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
-	unsigned char m_nCurColor;
 	bool m_bAnimation;
 	bool m_bAddKeys;
 	unsigned char m_nFPS;

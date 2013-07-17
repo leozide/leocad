@@ -42,7 +42,6 @@ template<> struct lcStaticAssert<true> { };
 template<int i> struct lcStaticAssertTest { };
 #endif
 
-void SystemUpdateColorList(int nNew);
 void SystemUpdateSelected(unsigned long flags, int SelectedCount, class Object* Focus);
 void SystemUpdatePlay(bool play, bool stop);
 void SystemDoPopupMenu(int nMenu, int x, int y);

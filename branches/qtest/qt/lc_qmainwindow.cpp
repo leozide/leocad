@@ -537,10 +537,7 @@ void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetIt
 
 void lcQMainWindow::colorChanged(int colorIndex)
 {
-	lcGetActiveProject()->HandleNotify(LC_COLOR_CHANGED, colorIndex);
-
-	PiecePreview* preview = (PiecePreview*)piecePreview->mWindow;
-	preview->Redraw();
+	gMainWindow->SetColorIndex(colorIndex);
 }
 
 void lcQMainWindow::partSearchReturn()

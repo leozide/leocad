@@ -1,11 +1,13 @@
 #include "lc_global.h"
 #include "mainwnd.h"
 #include "lc_profile.h"
+#include "preview.h"
 
 lcMainWindow* gMainWindow;
 
 lcMainWindow::lcMainWindow()
 {
+	mColorIndex = 0;
 	mPreviewWidget = NULL;
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
@@ -20,6 +22,14 @@ lcMainWindow::~lcMainWindow()
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 
 	gMainWindow = NULL;
+}
+
+void lcMainWindow::SetColorIndex(int ColorIndex)
+{
+	mColorIndex = ColorIndex;
+
+	if (mPreviewWidget)
+		mPreviewWidget->Redraw();
 }
 
 void lcMainWindow::AddRecentFile(const char* FileName)

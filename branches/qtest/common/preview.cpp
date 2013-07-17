@@ -4,6 +4,7 @@
 #include "pieceinf.h"
 #include "system.h"
 #include "lc_application.h"
+#include "mainwnd.h"
 
 PiecePreview::PiecePreview()
 {
@@ -58,7 +59,7 @@ void PiecePreview::OnDraw()
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
+	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)

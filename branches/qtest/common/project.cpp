@@ -87,7 +87,6 @@ void Project::UpdateInterface()
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	SetAction(m_nCurAction);
-	SystemUpdateColorList(m_nCurColor);
 	gMainWindow->UpdateTransformType(mTransformType);
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
@@ -203,9 +202,8 @@ void Project::LoadDefaults(bool cameras)
 	unsigned long rgb;
 
 	// Default values
+	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	SetAction(LC_ACTION_SELECT);
-	m_nCurColor = 0;
-	SystemUpdateColorList(m_nCurColor);
 	m_bAnimation = false;
 	m_bAddKeys = false;
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
@@ -353,7 +351,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->ReadFloats(&m_fLineWidth, 1);
 		file->ReadU32(&u, 1); //m_nDetail
 		file->ReadS32(&i, 1); //m_nCurGroup = i;
-		file->ReadS32(&i, 1); m_nCurColor = i;
+		file->ReadS32(&i, 1); //m_nCurColor = i;
 		file->ReadS32(&i, 1); action = i;
 		file->ReadS32(&i, 1); m_nCurStep = i;
 	}
@@ -719,7 +717,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	}
 
 	SetAction(action);
-	SystemUpdateColorList(m_nCurColor);
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
@@ -753,9 +750,10 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU32(&m_nSnap, 1);
 	file->WriteFloats(&m_fLineWidth, 1);
 	file->WriteU32(&m_nDetail, 1);
-	//i = m_nCurGroup;
+	i = 0;//i = m_nCurGroup;
 	file->WriteS32(&i, 1);
-	i = m_nCurColor; file->WriteS32(&i, 1);
+	i = 0;//i = m_nCurColor;
+	file->WriteS32(&i, 1);
 	i = m_nCurAction; file->WriteS32(&i, 1);
 	i = m_nCurStep; file->WriteS32(&i, 1);
 	file->WriteU32(&m_nScene, 1);
@@ -1989,7 +1987,7 @@ void Project::RenderSceneObjects(View* view)
 		glTranslatef(Pos[0], Pos[1], Pos[2]);
 		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
 		glLineWidth(2*m_fLineWidth);
-		PreviewPiece->RenderPiece(m_nCurColor);
+		PreviewPiece->RenderPiece(gMainWindow->mColorIndex);
 		glLineWidth(m_fLineWidth);
 		glPopMatrix();
 	}
@@ -3910,13 +3908,8 @@ void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
 {
 	switch (id)
 	{
-		case LC_COLOR_CHANGED:
-		{
-			m_nCurColor = (unsigned char)param;
-		} break;
-
 		case LC_CAPTURE_LOST:
-	{
+		{
 			if (m_nTracking != LC_TRACK_NONE)
 				StopTracking(false);
 		} break;
@@ -5462,7 +5455,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				pPiece->Initialize(0, 0, 0, m_nCurStep, m_nCurFrame);
 
 			SelectAndFocusNone(false);
-			pPiece->SetColorIndex(m_nCurColor);
+			pPiece->SetColorIndex(gMainWindow->mColorIndex);
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);
 			pPiece->Select (true, true, false);
@@ -7313,7 +7306,7 @@ bool Project::StopTracking(bool bAccept)
 
 				Piece* pPiece = new Piece(mDropPiece);
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
-				pPiece->SetColorIndex(m_nCurColor);
+				pPiece->SetColorIndex(gMainWindow->mColorIndex);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
@@ -8586,9 +8579,9 @@ void Project::OnLeftButtonDown(View* view)
 			{
 				Piece* pPiece = (Piece*)Closest;
 
-				if (pPiece->mColorIndex != m_nCurColor)
+				if (pPiece->mColorIndex != gMainWindow->mColorIndex)
 				{
-					pPiece->SetColorIndex(m_nCurColor);
+					pPiece->SetColorIndex(gMainWindow->mColorIndex);
 
 					SetModifiedFlag(true);
 					CheckPoint("Painting");
@@ -8610,7 +8603,7 @@ void Project::OnLeftButtonDown(View* view)
 
 				Piece* pPiece = new Piece(m_pCurPiece);
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
-				pPiece->SetColorIndex(m_nCurColor);
+				pPiece->SetColorIndex(gMainWindow->mColorIndex);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
 				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);

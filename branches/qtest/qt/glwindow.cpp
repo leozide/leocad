@@ -1,5 +1,7 @@
 #include "lc_global.h"
 #include "glwindow.h"
+#include "lc_qmainwindow.h"
+#include "mainwnd.h"
 #include "opengl.h"
 #include <QtOpenGL>
 
@@ -18,18 +20,44 @@ GLWindow::~GLWindow()
 {
 }
 
-bool GLWindow::CreateFromWindow(void *data)
-{
-	mWidget = data;
-
-	return true;
-}
-
 void* GLWindow::GetExtensionAddress(const char* FunctionName)
 {
 	QGLWidget* Widget = (QGLWidget*)mWidget;
 
 	return Widget->context()->getProcAddress(FunctionName);
+}
+
+void GLWindow::ShowPopupMenu()
+{
+	QGLWidget* Widget = (QGLWidget*)mWidget;
+
+	lcQMainWindow *mainWindow = (lcQMainWindow*)gMainWindow->mHandle;
+	QAction **actions = mainWindow->actions;
+
+	QMenu *popup = new QMenu(Widget);
+
+	QMenu *tools = new QMenu("Tools");
+	popup->addMenu(tools);
+	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
+		tools->addAction(actions[actionIdx]);
+
+	QMenu *cameras = new QMenu("Cameras");
+	popup->addMenu(cameras);
+	cameras->addAction(actions[LC_VIEW_CAMERA_NONE]);
+
+	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+		cameras->addAction(actions[actionIdx]);
+
+	cameras->addSeparator();
+	cameras->addAction(actions[LC_VIEW_CAMERA_RESET]);
+
+	popup->addSeparator();
+	popup->addAction(actions[LC_VIEW_SPLIT_HORIZONTAL]);
+	popup->addAction(actions[LC_VIEW_SPLIT_VERTICAL]);
+	popup->addAction(actions[LC_VIEW_REMOVE_VIEW]);
+	popup->addAction(actions[LC_VIEW_RESET_VIEWS]);
+
+	popup->exec(QCursor::pos());
 }
 
 void GLWindow::OnInitialUpdate()

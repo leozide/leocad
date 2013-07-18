@@ -9,7 +9,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, GLWindow *window, 
 	: QGLWidget(parent, share)
 {
 	mWindow = window;
-	mWindow->CreateFromWindow(this);
+	mWindow->mWidget = this;
 
 	mWindow->MakeCurrent();
 	mWindow->OnInitialUpdate();
@@ -45,7 +45,8 @@ void lcQGLWidget::initializeGL()
 
 void lcQGLWidget::resizeGL(int width, int height)
 {
-	mWindow->OnSize(width, height);
+	mWindow->mWidth = width;
+	mWindow->mHeight = height;
 }
 
 void lcQGLWidget::paintGL()

@@ -3255,7 +3255,8 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 
 	View view(this);
 	view.SetCamera(m_ActiveView->mCamera, false);
-	view.OnSize(width, height);
+	view.mWidth = width;
+	view.mHeight = height;
 
 	if (!hilite)
 		SelectAndFocusNone(false);
@@ -8948,7 +8949,7 @@ void Project::OnRightButtonDown(View* view)
 void Project::OnRightButtonUp(View* view)
 {
 	if (!StopTracking(true) && !m_bTrackCancel)
-		SystemDoPopupMenu(1, -1, -1);
+		view->ShowPopupMenu();
 	m_bTrackCancel = false;
 }
 

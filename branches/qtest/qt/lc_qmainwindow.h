@@ -47,6 +47,8 @@ public:
 
 	lcVector3 getTransformAmount();
 
+	QAction *actions[LC_NUM_COMMANDS];
+
 private slots:
 	void printPreview(QPrinter *printer);
 	void actionTriggered();
@@ -65,8 +67,6 @@ private:
 
 	void closeEvent(QCloseEvent *event);
 	QMenu *createPopupMenu();
-
-	QAction *actions[LC_NUM_COMMANDS];
 
 	QAction *actionFileRecentSeparator;
 	QMenu *menuCamera;

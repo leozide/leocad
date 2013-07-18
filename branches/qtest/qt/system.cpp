@@ -38,10 +38,6 @@ void SystemUpdatePlay(bool play, bool stop)
 {
 }
 
-void SystemDoPopupMenu(int nMenu, int x, int y)
-{
-}
-
 void SystemPieceComboAdd(char* name)
 {
 }

@@ -39,9 +39,8 @@ public:
 	GLWindow();
 	virtual ~GLWindow();
 
-	bool CreateFromWindow(void* Data);
-	bool CreateFromBitmap(void* Data);
 	void* GetExtensionAddress(const char* FunctionName);
+	void ShowPopupMenu();
 
 	bool MakeCurrent();
 	void Redraw();
@@ -50,8 +49,6 @@ public:
 	void SetCursor(LC_CURSOR_TYPE Cursor);
 
 	virtual void OnDraw() { }
-	virtual void OnSize(int cx, int cy)
-	{ mWidth = cx; mHeight = cy; }
 	virtual void OnInitialUpdate();
 	virtual void OnUpdateCursor() { }
 	virtual void OnLeftButtonDown() { }

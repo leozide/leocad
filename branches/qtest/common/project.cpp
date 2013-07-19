@@ -3128,7 +3128,7 @@ void Project::UpdateSelection()
 		ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
 	}
 
-	SystemUpdateSelected(flags, SelectedCount, Focus);
+	gMainWindow->UpdateSelectedObjects(flags, SelectedCount, Focus);
 }
 
 void Project::CheckAutoSave()

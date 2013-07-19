@@ -30,10 +30,6 @@ void SystemUpdateAnimation(bool bAnimation, bool bAddKeys)
 {
 }
 
-void SystemUpdateSelected(unsigned long flags, int SelectedCount, Object* Focus)
-{
-}
-
 void SystemUpdatePlay(bool play, bool stop)
 {
 }

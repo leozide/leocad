@@ -29,6 +29,7 @@ public:
 	void toggleFullScreen();
 
 	void updateFocusObject(Object *focus);
+	void updateSelectedObjects(int flags, int selectedCount, Object* focus);
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateTime(bool animation, int currentTime, int totalTime);
@@ -93,9 +94,10 @@ private:
 	QLineEdit *transformZ;
 
 	QStatusBar *statusBar;
-	QLabel* statusPositionLabel;
-	QLabel* statusSnapLabel;
-	QLabel* statusTimeLabel;
+	QLabel *statusBarLabel;
+	QLabel *statusPositionLabel;
+	QLabel *statusSnapLabel;
+	QLabel *statusTimeLabel;
 };
 
 #endif // _LC_QMAINWINDOW_H_

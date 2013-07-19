@@ -8,6 +8,7 @@
 #include "pieceinf.h"
 #include "project.h"
 #include "preview.h"
+#include "piece.h"
 #include "camera.h"
 #include "view.h"
 #include "lc_qpartstree.h"
@@ -475,6 +476,9 @@ void lcQMainWindow::createStatusBar()
 {
 	statusBar = new QStatusBar(this);
 	setStatusBar(statusBar);
+
+	statusBarLabel = new QLabel();
+	statusBar->addWidget(statusBarLabel);
 
 	statusPositionLabel = new QLabel();
 	statusBar->addPermanentWidget(statusPositionLabel);
@@ -983,6 +987,49 @@ void lcQMainWindow::updateFocusObject(Object *focus)
 	QString label("X: %1 Y: %2 Z: %3");
 	label = label.arg(QString::number(position[0], 'f', 2), QString::number(position[1], 'f', 2), QString::number(position[2], 'f', 2));
 	statusPositionLabel->setText(label);
+}
+
+void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* focus)
+{
+	actions[LC_EDIT_CUT]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_EDIT_COPY]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_EDIT_SELECT_INVERT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
+	actions[LC_EDIT_SELECT_BY_NAME]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
+	actions[LC_EDIT_SELECT_NONE]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_EDIT_SELECT_ALL]->setEnabled(flags & LC_SEL_UNSELECTED);
+
+	actions[LC_PIECE_DELETE]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_PIECE_COPY_KEYS]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_PIECE_ARRAY]->setEnabled(flags & LC_SEL_PIECE);
+	actions[LC_PIECE_HIDE_SELECTED]->setEnabled(flags & LC_SEL_PIECE);
+	actions[LC_PIECE_UNHIDE_ALL]->setEnabled(flags & LC_SEL_HIDDEN);
+	actions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(flags & LC_SEL_UNSELECTED);
+	actions[LC_PIECE_GROUP]->setEnabled(flags & LC_SEL_CANGROUP);
+	actions[LC_PIECE_UNGROUP]->setEnabled(flags & LC_SEL_GROUP);
+	actions[LC_PIECE_GROUP_ADD]->setEnabled((flags & (LC_SEL_GROUP | LC_SEL_FOCUSGROUP)) == LC_SEL_GROUP);
+	actions[LC_PIECE_GROUP_REMOVE]->setEnabled(flags & LC_SEL_FOCUSGROUP);
+	actions[LC_PIECE_GROUP_EDIT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
+	actions[LC_PIECE_SHOW_EARLIER]->setEnabled(flags & LC_SEL_PIECE); // FIXME: disable if current step is 1
+	actions[LC_PIECE_SHOW_LATER]->setEnabled(flags & LC_SEL_PIECE);
+
+	QString message;
+
+	if ((selectedCount == 1) && (focus != NULL))
+	{
+		if (focus->IsPiece())
+			message = QString("%1 (ID: %2)").arg(focus->GetName(), ((Piece*)focus)->mPieceInfo->m_strName);
+		else
+			message = focus->GetName();
+	}
+	else if (selectedCount > 0)
+	{
+		if (selectedCount == 1)
+			message = "1 Object selected";
+		else
+			message = QString("%1 Objects selected").arg(QString::number(selectedCount));
+	}
+
+	statusBarLabel->setText(message);
 }
 
 void lcQMainWindow::updateAction(int newAction)

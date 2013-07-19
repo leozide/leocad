@@ -31,6 +31,7 @@ public:
 	void ToggleFullScreen();
 
 	void UpdateFocusObject(Object* Focus);
+	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
 	void UpdateTime(bool Animation, int CurrentTime, int TotalTime);

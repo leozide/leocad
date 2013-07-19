@@ -326,6 +326,14 @@ void lcMainWindow::UpdateFocusObject(Object* Focus)
 		window->updateFocusObject(Focus);
 }
 
+void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus)
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateSelectedObjects(Flags, SelectedCount, Focus);
+}
+
 void lcMainWindow::UpdateAction(int NewAction)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

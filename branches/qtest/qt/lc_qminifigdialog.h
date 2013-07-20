@@ -2,6 +2,7 @@
 #define LC_QMINIFIGDIALOG_H
 
 #include <QDialog>
+struct lcMinifig;
 class MinifigWizard;
 class lcQColorPicker;
 
@@ -17,7 +18,8 @@ public:
 	explicit lcQMinifigDialog(QWidget *parent, void *data);
 	~lcQMinifigDialog();
 
-	MinifigWizard *options;
+	lcMinifig *options;
+	MinifigWizard *wizard;
 
 public slots:
 	void accept();

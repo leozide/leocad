@@ -16,7 +16,9 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	QGridLayout *previewLayout = new QGridLayout(ui->minifigFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, (lcQGLWidget*)gMainWindow->mPreviewWidget->mWidget, (GLWindow*)data, false);
+	wizard = new MinifigWizard((lcMinifig*)data);
+
+	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, (lcQGLWidget*)gMainWindow->mPreviewWidget->mWidget, wizard, false);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 
@@ -70,11 +72,11 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	connect(ui->rlegaAngle, SIGNAL(valueChanged(double)), this, SLOT(angleChanged(double)));
 	connect(ui->llegaAngle, SIGNAL(valueChanged(double)), this, SLOT(angleChanged(double)));
 
-	options = (MinifigWizard*)data;
+	options = (lcMinifig*)data;
 
 	for (int itemIndex = 0; itemIndex < LC_MFW_NUMITEMS; itemIndex++)
 	{
-		ObjArray<lcMinifigPieceInfo>& parts = options->mSettings[itemIndex];
+		ObjArray<lcMinifigPieceInfo>& parts = wizard->mSettings[itemIndex];
 		QStringList typeList;
 
 		for (int partIndex = 0; partIndex < parts.GetSize(); partIndex++)
@@ -84,18 +86,19 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 
 		itemType->blockSignals(true);
 		itemType->addItems(typeList);
-		itemType->setCurrentIndex(options->GetSelectionIndex(itemIndex));
+		itemType->setCurrentIndex(wizard->GetSelectionIndex(itemIndex));
 		itemType->blockSignals(false);
 
 		lcQColorPicker *colorPicker = getColorPicker(itemIndex);
 		colorPicker->blockSignals(true);
-		colorPicker->setCurrentColor(options->m_Colors[itemIndex]);
+		colorPicker->setCurrentColor(options->Colors[itemIndex]);
 		colorPicker->blockSignals(false);
 	}
 }
 
 lcQMinifigDialog::~lcQMinifigDialog()
 {
+	delete wizard;
 	delete ui;
 }
 
@@ -106,20 +109,20 @@ void lcQMinifigDialog::accept()
 
 void lcQMinifigDialog::typeChanged(int index)
 {
-	options->SetSelectionIndex(getTypeIndex(sender()), index);
-	options->Redraw();
+	wizard->SetSelectionIndex(getTypeIndex(sender()), index);
+	wizard->Redraw();
 }
 
 void lcQMinifigDialog::colorChanged(int index)
 {
-	options->SetColor(getColorIndex(sender()), index);
-	options->Redraw();
+	wizard->SetColor(getColorIndex(sender()), index);
+	wizard->Redraw();
 }
 
 void lcQMinifigDialog::angleChanged(double value)
 {
-	options->SetAngle(getAngleIndex(sender()), value);
-	options->Redraw();
+	wizard->SetAngle(getAngleIndex(sender()), value);
+	wizard->Redraw();
 }
 
 QComboBox *lcQMinifigDialog::getTypeComboBox(int type)

@@ -36,10 +36,18 @@ struct lcMinifigPieceInfo
 	lcMatrix44 Offset;
 };
 
+struct lcMinifig
+{
+	PieceInfo* Parts[LC_MFW_NUMITEMS];
+	int Colors[LC_MFW_NUMITEMS];
+	float Angles[LC_MFW_NUMITEMS];
+	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
+};
+
 class MinifigWizard : public GLWindow
 {
 public:
-	MinifigWizard();
+	MinifigWizard(lcMinifig* Minifig);
 	~MinifigWizard();
 
 	void OnDraw();
@@ -57,32 +65,16 @@ public:
 	void SetColor(int Type, int Color);
 	void SetAngle(int Type, float Angle);
 
-	void GetMinifigNames (char ***names, int *count);
-	void SaveMinifig (const char* name);
-	bool LoadMinifig (const char* name);
-	void DeleteMinifig (const char* name);
-
 	void ParseSettings(lcFile& Settings);
 
 	ObjArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
-	PieceInfo* m_Info[LC_MFW_NUMITEMS];
-	int m_Colors[LC_MFW_NUMITEMS];
-	float m_Angles[LC_MFW_NUMITEMS];
-	lcMatrix44 m_Matrices[LC_MFW_NUMITEMS];
+	lcMinifig* mMinifig;
 
-protected:
-	// saved minifig templates
-	int  m_MinifigCount;
-	char **m_MinifigNames;
-	char **m_MinifigTemplates;
-
-	// Mouse tracking.
 	int m_Tracking;
 	int m_DownX;
 	int m_DownY;
 
-	// Current camera settings.
 	float m_Distance;
 	float m_RotateX;
 	float m_RotateZ;

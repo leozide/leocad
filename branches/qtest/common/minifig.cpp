@@ -851,7 +851,7 @@ static int lcGetMinifigSettings(lcMemFile& File)
 // =============================================================================
 // MinifigWizard class
 
-MinifigWizard::MinifigWizard()
+MinifigWizard::MinifigWizard(lcMinifig* Minifig)
 {
 	char Filename[LC_MAXPATH];
 	strcpy(Filename, lcGetPiecesLibrary()->mLibraryPath);
@@ -869,72 +869,34 @@ MinifigWizard::MinifigWizard()
 		ParseSettings(MemSettings);
 	}
 
+	mMinifig = Minifig;
+
 	m_RotateX = 75.0f;
 	m_RotateZ = 180.0f;
 	m_Distance = 10.0f;
 	m_AutoZoom = true;
 	m_Tracking = LC_TRACK_NONE;
-
-	m_MinifigCount = 0;
-	m_MinifigNames = NULL;
-	m_MinifigTemplates = NULL;
-	memset(m_Info, 0, sizeof(m_Info));
-/*
-	int Version = lcGetProfileValue("MinifigWizard", "Version", 1);
-	if (Version == 1)
-	{
-		char buf[32];
-		const char* Value;
-
-		m_MinifigCount = lcGetProfileValue("MinifigWizard", "Count", 0);
-		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**) * (m_MinifigCount+1));
-		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**) * (m_MinifigCount+1));
-
-		for (int i = 0; i < m_MinifigCount; i++)
-		{
-			sprintf(buf, "Minifig%.2dName", i);
-			Value = lcGetProfileValue("MinifigWizard", buf, buf);
-			m_MinifigNames[i] = (char*)malloc(strlen(Value) + 1);
-			strcpy(m_MinifigNames[i], Value);
-
-			m_MinifigTemplates[i] = (char*)malloc(768);
-			sprintf(buf, "Minifig%.2dColors", i);
-			Value = lcGetProfileValue("MinifigWizard", buf, "");
-			if (Value[strlen(Value) - 1] != ' ')
-				strcat(Value, " ");
-			strcpy(m_MinifigTemplates[i], Value);
-
-			sprintf(buf, "Minifig%.2dPieces", i);
-			Value = lcGetProfileValue("MinifigWizard", buf, "");
-			if (Value[strlen(Value) - 1] != ' ')
-				strcat(Value, " ");
-			strcat(m_MinifigTemplates[i], Value);
-
-			sprintf(buf, "Minifig%.2dAngles", i);
-			ptr = lcGetProfileValue("MinifigWizard", buf, "");
-			strcat(m_MinifigTemplates[i], Value);
-		}
-	}
-	else
-		Sys_MessageBox("Unknown Minifig Preferences.");
-	*/
 }
 
 void MinifigWizard::OnInitialUpdate()
 {
 	MakeCurrent();
 
+	memset(mMinifig, 0, sizeof(lcMinifig));
+
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
 	const char* Pieces[LC_MFW_NUMITEMS] = { "3624", "None", "3626BP01", "None", "973", "3815", "None", "3819", "3818", "3820", "3820", "None", "None", "3817", "3816", "None", "None" };
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
-		m_Colors[i] = lcGetColorIndex(ColorCodes[i]);
-		m_Angles[i] = 0;
+		mMinifig->Colors[i] = lcGetColorIndex(ColorCodes[i]);
 
-		m_Info[i] = lcGetPiecesLibrary()->FindPiece(Pieces[i], false);
-		if (m_Info[i] != NULL)
-			m_Info[i]->AddRef();
+		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Pieces[i], false);
+		if (Info)
+		{
+			mMinifig->Parts[i] = Info;
+			Info->AddRef();
+		}
 	}
 
 	Calculate();
@@ -942,52 +904,9 @@ void MinifigWizard::OnInitialUpdate()
 
 MinifigWizard::~MinifigWizard ()
 {
-	/*
-	char *ptr, buf[32];
-	int i, j;
-
-	lcSetProfileValue("MinifigWizard", "Version", 1);
-	lcSetProfileValue("MinifigWizard", "Count", m_MinifigCount);
-
-	for (i = 0; i < m_MinifigCount; i++)
-	{
-		char *value;
-		ptr = m_MinifigTemplates[i];
-
-		sprintf (buf, "Minifig%.2dName", i);
-		lcSetProfileValue("MinifigWizard", buf, m_MinifigNames[i]);
-
-		value = ptr;
-		for (j = 0; j < LC_MFW_NUMITEMS; j++)
-			ptr = strchr (ptr, ' ') + 1;
-		*(--ptr) = '\0';
-
-		sprintf (buf, "Minifig%.2dColors", i);
-		lcSetProfileValue("MinifigWizard", buf, value);
-		ptr++;
-
-		value = ptr;
-		for (j = 0; j < LC_MFW_NUMITEMS; j++)
-			ptr = strchr (ptr, ' ') + 1;
-		*(--ptr) = '\0';
-
-		sprintf (buf, "Minifig%.2dPieces", i);
-		lcSetProfileValue("MinifigWizard", buf, value);
-		ptr++;
-
-		sprintf (buf, "Minifig%.2dAngles", i);
-		lcSetProfileValue("MinifigWizard", buf, ptr);
-
-		free (m_MinifigNames[i]);
-		free (m_MinifigTemplates[i]);
-	}
-
-	free (m_MinifigNames);
-	free (m_MinifigTemplates);
-*/
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
-		if (m_Info[i])
-			m_Info[i]->Release();
+		if (mMinifig->Parts[i])
+			mMinifig->Parts[i]->Release();
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
@@ -1130,7 +1049,7 @@ void MinifigWizard::OnDraw()
 
 	for (int InfoIdx = 0; InfoIdx < LC_MFW_NUMITEMS; InfoIdx++)
 	{
-		PieceInfo* Info = m_Info[InfoIdx];
+		PieceInfo* Info = mMinifig->Parts[InfoIdx];
 
 		if (!Info)
 			continue;
@@ -1149,7 +1068,7 @@ void MinifigWizard::OnDraw()
 
 		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
 		{
-			lcVector3 Point = lcMul31(Points[PointIdx], m_Matrices[InfoIdx]);
+			lcVector3 Point = lcMul31(Points[PointIdx], mMinifig->Matrices[InfoIdx]);
 
 			if (Point[0] < Box[0]) Box[0] = Point[0];
 			if (Point[1] < Box[1]) Box[1] = Point[1];
@@ -1217,12 +1136,12 @@ void MinifigWizard::OnDraw()
 
 	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
 	{
-		if (!m_Info[PieceIdx])
+		if (!mMinifig->Parts[PieceIdx])
 			continue;
 
 		glPushMatrix();
-		glMultMatrixf(m_Matrices[PieceIdx]);
-		m_Info[PieceIdx]->RenderPiece(m_Colors[PieceIdx]);
+		glMultMatrixf(mMinifig->Matrices[PieceIdx]);
+		mMinifig->Parts[PieceIdx]->RenderPiece(mMinifig->Colors[PieceIdx]);
 		glPopMatrix();
 	}
 }
@@ -1312,46 +1231,50 @@ void MinifigWizard::Calculate()
 	float HeadOffset = 0.0f;
 	lcMatrix44 Root, Mat, Mat2;
 
-	bool DroidTorso = m_Info[LC_MFW_BODY] && !strcmp(m_Info[LC_MFW_BODY]->m_strName, "30375");
-	bool SkeletonTorso = m_Info[LC_MFW_BODY] && !strcmp(m_Info[LC_MFW_BODY]->m_strName, "6260");
+	PieceInfo** Parts = mMinifig->Parts;
+	float* Angles = mMinifig->Angles;
+	lcMatrix44* Matrices = mMinifig->Matrices;
 
-	if (m_Info[LC_MFW_BODY3])
+	bool DroidTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "30375");
+	bool SkeletonTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "6260");
+
+	if (Parts[LC_MFW_BODY3])
 		Root = lcMatrix44Translation(lcVector3(0, 0, 2.96f));
 	else
 		Root = lcMatrix44Translation(lcVector3(0, 0, 2.88f));
-	m_Matrices[LC_MFW_BODY] = lcMul(mSettings[LC_MFW_BODY][GetSelectionIndex(LC_MFW_BODY)].Offset, Root);
+	Matrices[LC_MFW_BODY] = lcMul(mSettings[LC_MFW_BODY][GetSelectionIndex(LC_MFW_BODY)].Offset, Root);
 
-	if (m_Info[LC_MFW_NECK])
+	if (Parts[LC_MFW_NECK])
 	{
-		m_Matrices[LC_MFW_NECK] = lcMul(mSettings[LC_MFW_NECK][GetSelectionIndex(LC_MFW_NECK)].Offset, Root);
+		Matrices[LC_MFW_NECK] = lcMul(mSettings[LC_MFW_NECK][GetSelectionIndex(LC_MFW_NECK)].Offset, Root);
 		HeadOffset = 0.08f;
 	}
 
-	if (m_Info[LC_MFW_HEAD])
+	if (Parts[LC_MFW_HEAD])
 	{
-		Mat = lcMatrix44RotationZ(-LC_DTOR * m_Angles[LC_MFW_HEAD]);
+		Mat = lcMatrix44RotationZ(-LC_DTOR * Angles[LC_MFW_HEAD]);
 		Mat.SetTranslation(lcVector3(0.0f, 0.0f, 0.96f + HeadOffset));
 		Mat = lcMul(mSettings[LC_MFW_HEAD][GetSelectionIndex(LC_MFW_HEAD)].Offset, Mat);
-		m_Matrices[LC_MFW_HEAD] = lcMul(Mat, Root);
+		Matrices[LC_MFW_HEAD] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_HATS])
+	if (Parts[LC_MFW_HATS])
 	{
-		Mat = lcMatrix44RotationZ(-LC_DTOR * m_Angles[LC_MFW_HATS]);
+		Mat = lcMatrix44RotationZ(-LC_DTOR * Angles[LC_MFW_HATS]);
 		Mat = lcMul(mSettings[LC_MFW_HATS][GetSelectionIndex(LC_MFW_HATS)].Offset, Mat);
-		m_Matrices[LC_MFW_HATS] = lcMul(Mat, m_Matrices[LC_MFW_HEAD]);
+		Matrices[LC_MFW_HATS] = lcMul(Mat, Matrices[LC_MFW_HEAD]);
 	}
 
-	if (m_Info[LC_MFW_HATS2])
+	if (Parts[LC_MFW_HATS2])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_HATS2]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_HATS2]);
 		Mat = lcMul(mSettings[LC_MFW_HATS2][GetSelectionIndex(LC_MFW_HATS2)].Offset, Mat);
-		m_Matrices[LC_MFW_HATS2] = lcMul(Mat, m_Matrices[LC_MFW_HATS]);
+		Matrices[LC_MFW_HATS2] = lcMul(Mat, Matrices[LC_MFW_HATS]);
 	}
 
-	if (m_Info[LC_MFW_RARM])
+	if (Parts[LC_MFW_RARM])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_RARM]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_RARM]);
 
 		if (DroidTorso || SkeletonTorso)
 			Mat2 = lcMatrix44Identity();
@@ -1361,30 +1284,30 @@ void MinifigWizard::Calculate()
 
 		Mat = lcMul(mSettings[LC_MFW_RARM][GetSelectionIndex(LC_MFW_RARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
-		m_Matrices[LC_MFW_RARM] = lcMul(Mat, Root);
+		Matrices[LC_MFW_RARM] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_RHAND])
+	if (Parts[LC_MFW_RHAND])
 	{
-		Mat = lcMatrix44RotationY(-LC_DTOR * m_Angles[LC_MFW_RHAND]);
+		Mat = lcMatrix44RotationY(-LC_DTOR * Angles[LC_MFW_RHAND]);
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
 		Mat = lcMul(mSettings[LC_MFW_RHAND][GetSelectionIndex(LC_MFW_RHAND)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
 		Mat.SetTranslation(lcVector3(0.2f, -0.4f, -0.76f));
-		m_Matrices[LC_MFW_RHAND] = lcMul(Mat, m_Matrices[LC_MFW_RARM]);
+		Matrices[LC_MFW_RHAND] = lcMul(Mat, Matrices[LC_MFW_RARM]);
 	}
 
-	if (m_Info[LC_MFW_RHANDA])
+	if (Parts[LC_MFW_RHANDA])
 	{
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_RHANDA]);
+		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RHANDA]);
 		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
 		Mat = lcMul(mSettings[LC_MFW_RHANDA][GetSelectionIndex(LC_MFW_RHANDA)].Offset, Mat);
-		m_Matrices[LC_MFW_RHANDA] = lcMul(Mat, m_Matrices[LC_MFW_RHAND]);
+		Matrices[LC_MFW_RHANDA] = lcMul(Mat, Matrices[LC_MFW_RHAND]);
 	}
 
-	if (m_Info[LC_MFW_LARM])
+	if (Parts[LC_MFW_LARM])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_LARM]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_LARM]);
 
 		if (DroidTorso || SkeletonTorso)
 			Mat2 = lcMatrix44Identity();
@@ -1394,79 +1317,79 @@ void MinifigWizard::Calculate()
 
 		Mat = lcMul(mSettings[LC_MFW_LARM][GetSelectionIndex(LC_MFW_LARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
-		m_Matrices[LC_MFW_LARM] = lcMul(Mat, Root);
+		Matrices[LC_MFW_LARM] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_LHAND])
+	if (Parts[LC_MFW_LHAND])
 	{
-		Mat = lcMatrix44RotationY(-LC_DTOR * m_Angles[LC_MFW_LHAND]);
+		Mat = lcMatrix44RotationY(-LC_DTOR * Angles[LC_MFW_LHAND]);
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
 		Mat = lcMul(mSettings[LC_MFW_LHAND][GetSelectionIndex(LC_MFW_LHAND)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
 		Mat.SetTranslation(lcVector3(-0.2f, -0.4f, -0.76f));
-		m_Matrices[LC_MFW_LHAND] = lcMul(Mat, m_Matrices[LC_MFW_LARM]);
+		Matrices[LC_MFW_LHAND] = lcMul(Mat, Matrices[LC_MFW_LARM]);
 	}
 
-	if (m_Info[LC_MFW_LHANDA])
+	if (Parts[LC_MFW_LHANDA])
 	{
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_LHANDA]);
+		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LHANDA]);
 		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
 		Mat = lcMul(mSettings[LC_MFW_LHANDA][GetSelectionIndex(LC_MFW_LHANDA)].Offset, Mat);
-		m_Matrices[LC_MFW_LHANDA] = lcMul(Mat, m_Matrices[LC_MFW_LHAND]);
+		Matrices[LC_MFW_LHANDA] = lcMul(Mat, Matrices[LC_MFW_LHAND]);
 	}
 
-	if (m_Info[LC_MFW_BODY2])
+	if (Parts[LC_MFW_BODY2])
 	{
 		Mat = lcMatrix44Identity();
 		Mat.SetTranslation(lcVector3(0, 0, -1.28f));
 		Mat = lcMul(mSettings[LC_MFW_BODY2][GetSelectionIndex(LC_MFW_BODY2)].Offset, Mat);
-		m_Matrices[LC_MFW_BODY2] = lcMul(Mat, Root);
+		Matrices[LC_MFW_BODY2] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_BODY3])
+	if (Parts[LC_MFW_BODY3])
 	{
 		Mat = lcMatrix44Identity();
 		Mat.SetTranslation(lcVector3(0, 0, -1.28f));
 		Mat = lcMul(mSettings[LC_MFW_BODY3][GetSelectionIndex(LC_MFW_BODY3)].Offset, Mat);
-		m_Matrices[LC_MFW_BODY3] = lcMul(Mat, Root);
+		Matrices[LC_MFW_BODY3] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_RLEG])
+	if (Parts[LC_MFW_RLEG])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_RLEG]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_RLEG]);
 		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
 		Mat = lcMul(mSettings[LC_MFW_RLEG][GetSelectionIndex(LC_MFW_RLEG)].Offset, Mat);
-		m_Matrices[LC_MFW_RLEG] = lcMul(Mat, Root);
+		Matrices[LC_MFW_RLEG] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_RLEGA])
+	if (Parts[LC_MFW_RLEGA])
 	{
 		lcVector3 Center(-0.4f, -0.04f, -1.12f);
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_RLEGA]);
+		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RLEGA]);
 		Mat2 = mSettings[LC_MFW_RLEGA][GetSelectionIndex(LC_MFW_RLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
 		Mat = lcMul(Mat2, Mat);
 		Mat.SetTranslation(lcMul31(Center, Mat2));
-		m_Matrices[LC_MFW_RLEGA] = lcMul(Mat, m_Matrices[LC_MFW_RLEG]);
+		Matrices[LC_MFW_RLEGA] = lcMul(Mat, Matrices[LC_MFW_RLEG]);
 	}
 
-	if (m_Info[LC_MFW_LLEG])
+	if (Parts[LC_MFW_LLEG])
 	{
-		Mat = lcMatrix44RotationX(-LC_DTOR * m_Angles[LC_MFW_LLEG]);
+		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_LLEG]);
 		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
 		Mat = lcMul(mSettings[LC_MFW_LLEG][GetSelectionIndex(LC_MFW_LLEG)].Offset, Mat);
-		m_Matrices[LC_MFW_LLEG] = lcMul(Mat, Root);
+		Matrices[LC_MFW_LLEG] = lcMul(Mat, Root);
 	}
 
-	if (m_Info[LC_MFW_LLEGA])
+	if (Parts[LC_MFW_LLEGA])
 	{
 		lcVector3 Center(0.4f, -0.04f, -1.12f);
-		Mat = lcMatrix44RotationZ(LC_DTOR * m_Angles[LC_MFW_LLEGA]);
+		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LLEGA]);
 		Mat2 = mSettings[LC_MFW_LLEGA][GetSelectionIndex(LC_MFW_LLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
 		Mat = lcMul(Mat2, Mat);
 		Mat.SetTranslation(lcMul31(Center, Mat2));
-		m_Matrices[LC_MFW_LLEGA] = lcMul(Mat, m_Matrices[LC_MFW_LLEG]);
+		Matrices[LC_MFW_LLEGA] = lcMul(Mat, Matrices[LC_MFW_LLEG]);
 	}
 }
 
@@ -1475,7 +1398,7 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 	const ObjArray<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
 	for (int Index = 0; Index < InfoArray.GetSize(); Index++)
-		if (InfoArray[Index].Info == m_Info[Type])
+		if (InfoArray[Index].Info == mMinifig->Parts[Type])
 			return Index;
 
 	return 0;
@@ -1483,145 +1406,23 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 
 void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
-	if (m_Info[Type])
-		m_Info[Type]->Release();
+	if (mMinifig->Parts[Type])
+		mMinifig->Parts[Type]->Release();
 
-	m_Info[Type] = mSettings[Type][Index].Info;
+	mMinifig->Parts[Type] = mSettings[Type][Index].Info;
 
-	if (m_Info[Type])
-		m_Info[Type]->AddRef();
+	if (mMinifig->Parts[Type])
+		mMinifig->Parts[Type]->AddRef();
 
 	Calculate();
 }
 
 void MinifigWizard::SetColor(int Type, int Color)
 {
-	m_Colors[Type] = Color;
+	mMinifig->Colors[Type] = Color;
 }
 
 void MinifigWizard::SetAngle(int Type, float Angle)
 {
-	m_Angles[Type] = Angle;
+	mMinifig->Angles[Type] = Angle;
 }
-/*
-void MinifigWizard::GetMinifigNames(char ***names, int *count)
-{
-	*count = m_MinifigCount;
-	*names = m_MinifigNames;
-}
-
-void MinifigWizard::SaveMinifig(const char* name)
-{
-	char tmp[LC_PIECE_NAME_LEN];
-	int i, j;
-
-	// check if the name is already being used
-	for (i = 0; i < m_MinifigCount; i++)
-		if (strcmp(m_MinifigNames[i], name) == 0)
-			break;
-
-	if (i == m_MinifigCount)
-	{
-		m_MinifigCount++;
-		m_MinifigNames = (char**)realloc(m_MinifigNames, sizeof(char**)*m_MinifigCount);
-		m_MinifigTemplates = (char**)realloc(m_MinifigTemplates, sizeof(char**)*m_MinifigCount);
-		m_MinifigNames[i] = (char*)malloc(strlen(name) + 1);
-		strcpy(m_MinifigNames[i], name);
-		m_MinifigTemplates[i] = (char*)malloc(768);
-	}
-	strcpy(m_MinifigTemplates[i], "");
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		sprintf(tmp, "%d ", m_Colors[j]);
-		strcat(m_MinifigTemplates[i], tmp);
-	}
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		if (m_Info[j] != NULL)
-			sprintf(tmp, "%s ", m_Info[j]->m_strName);
-		else
-			strcpy(tmp, "None ");
-		strcat(m_MinifigTemplates[i], tmp);
-	}
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		sprintf(tmp, "%f ", m_Angles[j]);
-		strcat(m_MinifigTemplates[i], tmp);
-	}
-}
-
-bool MinifigWizard::LoadMinifig(const char* name)
-{
-	char *ptr;
-	int i, j;
-
-	// check if the name is valid
-	for (i = 0; i < m_MinifigCount; i++)
-		if (strcmp(m_MinifigNames[i], name) == 0)
-			break;
-
-	if (i == m_MinifigCount)
-	{
-		//    Sys_MessageBox("Unknown Minifig");
-		return false;
-	}
-	else
-		ptr = m_MinifigTemplates[i];
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-		if (m_Info[j] != NULL)
-			m_Info[j]->Release();
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-		m_Colors[j] = strtol(ptr, &ptr, 10);
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-	{
-		char *endptr;
-		ptr++;
-
-		endptr = strchr(ptr, ' ');
-		*endptr = '\0';
-		m_Info[j] = lcGetPiecesLibrary()->FindPiece(ptr, false);
-		*endptr = ' ';
-		ptr = endptr;
-
-		if (m_Info[j] != NULL)
-			m_Info[j]->AddRef();
-	}
-
-	for (j = 0; j < LC_MFW_NUMITEMS; j++)
-		m_Angles[j] = (float)strtod(ptr, &ptr);
-
-	return true;
-}
-
-void MinifigWizard::DeleteMinifig(const char* name)
-{
-	int i;
-
-	// check if the name is valid
-	for (i = 0; i < m_MinifigCount; i++)
-		if (strcmp(m_MinifigNames[i], name) == 0)
-			break;
-
-	if (i == m_MinifigCount)
-	{
-		Sys_MessageBox("Unknown Minifig");
-		return;
-	}
-
-	free(m_MinifigNames[i]);
-	free(m_MinifigTemplates[i]);
-	m_MinifigCount--;
-
-	for (; i < m_MinifigCount; i++)
-	{
-		m_MinifigNames[i] = m_MinifigNames[i+1];
-		m_MinifigTemplates[i] = m_MinifigTemplates[i+1];
-	}
-}
-*/

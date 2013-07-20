@@ -5603,26 +5603,26 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_MINIFIG_WIZARD:
 		{
-			MinifigWizard Wizard;
+			lcMinifig Minifig;
 			int i;
 
-			if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Wizard))
+			if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
 				break;
 
 				SelectAndFocusNone(false);
 
 				for (i = 0; i < LC_MFW_NUMITEMS; i++)
 				{
-					if (Wizard.m_Info[i] == NULL)
+					if (Minifig.Parts[i] == NULL)
 						continue;
 
-					Piece* pPiece = new Piece(Wizard.m_Info[i]);
+					Piece* pPiece = new Piece(Minifig.Parts[i]);
 
-					lcVector4& Position = Wizard.m_Matrices[i][3];
-					lcVector4 Rotation = lcMatrix44ToAxisAngle(Wizard.m_Matrices[i]);
+					lcVector4& Position = Minifig.Matrices[i][3];
+					lcVector4 Rotation = lcMatrix44ToAxisAngle(Minifig.Matrices[i]);
 					Rotation[3] *= LC_RTOD;
 					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep, m_nCurFrame);
-					pPiece->SetColorIndex(Wizard.m_Colors[i]);
+					pPiece->SetColorIndex(Minifig.Colors[i]);
 					pPiece->CreateName(m_pPieces);
 					AddPiece(pPiece);
 					pPiece->Select(true, false, false);
@@ -5631,7 +5631,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					pPiece->ChangeKey(1, true, false, Rotation, LC_PK_ROTATION);
 					pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
-					SystemPieceComboAdd(Wizard.m_Info[i]->m_strDescription);
+					SystemPieceComboAdd(Minifig.Parts[i]->m_strDescription);
 				}
 
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };

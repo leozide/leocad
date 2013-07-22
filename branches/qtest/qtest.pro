@@ -60,7 +60,6 @@ SOURCES += common/view.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
     qt/lc_qmainwindow.cpp \
-    qt/glwindow.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
     qt/lc_qpovraydialog.cpp \
@@ -87,7 +86,7 @@ SOURCES += common/view.cpp \
     qt/lc_qimage.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp
-HEADERS += common/glwindow.h \
+HEADERS += \
     common/array.h \
     common/view.h \
     common/tr.h \
@@ -145,7 +144,8 @@ HEADERS += common/glwindow.h \
     common/lc_commands.h \
     common/lc_shortcuts.h \
     qt/lc_qglwidget.h \
-    qt/lc_qcolorlist.h
+    qt/lc_qcolorlist.h \
+    common/lc_glwidget.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

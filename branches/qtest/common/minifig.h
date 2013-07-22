@@ -1,7 +1,7 @@
 #ifndef _MINIFIG_H_
 #define _MINIFIG_H_
 
-#include "glwindow.h"
+#include "lc_glwidget.h"
 #include "lc_math.h"
 #include "array.h"
 
@@ -44,7 +44,7 @@ struct lcMinifig
 	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
 };
 
-class MinifigWizard : public GLWindow
+class MinifigWizard : public lcGLWidget
 {
 public:
 	MinifigWizard(lcMinifig* Minifig);

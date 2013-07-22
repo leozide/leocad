@@ -1,9 +1,9 @@
 #ifndef _OPENGL_H_
 #define _OPENGL_H_
 
-class GLWindow;
+class lcGLWidget;
 
-void GL_InitializeSharedExtensions(GLWindow* Window);
+void GL_InitializeSharedExtensions(lcGLWidget* Window);
 bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name);
 
 extern bool GL_SupportsVertexBufferObject;

@@ -56,7 +56,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	if (Info)
 	{
 		lcGetActiveProject()->SetCurrentPiece(Info);
-		PiecePreview* Preview = (PiecePreview*)piecePreview->mWindow;
+		PiecePreview* Preview = (PiecePreview*)piecePreview->widget;
 		gMainWindow->mPreviewWidget = Preview;
 		Preview->SetCurrentPiece(Info);
 	}
@@ -533,8 +533,7 @@ void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetIt
 	if (info)
 	{
 		lcGetActiveProject()->SetCurrentPiece(info);
-		PiecePreview* preview = (PiecePreview*)piecePreview->mWindow;
-		preview->OnInitialUpdate();
+		PiecePreview* preview = (PiecePreview*)piecePreview->widget;
 		preview->SetCurrentPiece(info);
 	}
 }

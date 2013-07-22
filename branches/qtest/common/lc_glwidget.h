@@ -1,5 +1,5 @@
-#ifndef _GLWINDOW_H_
-#define _GLWINDOW_H_
+#ifndef _LC_GLWIDGET_H_
+#define _LC_GLWIDGET_H_
 
 enum LC_CURSOR_TYPE
 {
@@ -33,23 +33,35 @@ struct lcInputState
 	bool Alt;
 };
 
-class GLWindow
+class lcGLWidget
 {
 public:
-	GLWindow();
-	virtual ~GLWindow();
+	lcGLWidget()
+	{
+		mCursorType = LC_CURSOR_DEFAULT;
+		mWidget = NULL;
+		mInputState.x = 0;
+		mInputState.y = 0;
+		mInputState.Control = false;
+		mInputState.Shift = false;
+		mInputState.Alt = false;
+	}
+
+	virtual ~lcGLWidget()
+	{
+	}
 
 	void* GetExtensionAddress(const char* FunctionName);
 	void ShowPopupMenu();
 
-	bool MakeCurrent();
+	void MakeCurrent();
 	void Redraw();
 	void CaptureMouse();
 	void ReleaseMouse();
 	void SetCursor(LC_CURSOR_TYPE Cursor);
 
 	virtual void OnDraw() { }
-	virtual void OnInitialUpdate();
+	virtual void OnInitialUpdate() { }
 	virtual void OnUpdateCursor() { }
 	virtual void OnLeftButtonDown() { }
 	virtual void OnLeftButtonUp() { }
@@ -68,4 +80,4 @@ public:
 	void* mWidget;
 };
 
-#endif // _GLWINDOW_H_
+#endif // _LC_GLWIDGET_H_

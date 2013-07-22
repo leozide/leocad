@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "opengl.h"
-#include "glwindow.h"
+#include "lc_glwidget.h"
 #include "mainwnd.h"
 #include "preview.h"
 
@@ -72,7 +72,7 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 	return false;
 }
 
-void GL_InitializeSharedExtensions(GLWindow* Window)
+void GL_InitializeSharedExtensions(lcGLWidget* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
 

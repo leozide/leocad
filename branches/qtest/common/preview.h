@@ -1,11 +1,11 @@
 #ifndef _PREVIEW_H_
 #define _PREVIEW_H_
 
-#include "glwindow.h"
+#include "lc_glwidget.h"
 
 class PieceInfo;
 
-class PiecePreview : public GLWindow
+class PiecePreview : public lcGLWidget
 {
 public:
 	PiecePreview();

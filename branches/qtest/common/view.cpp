@@ -127,7 +127,6 @@ void View::OnDraw()
 
 void View::OnInitialUpdate()
 {
-	GLWindow::OnInitialUpdate();
 	m_Project->AddView(this);
 }
 

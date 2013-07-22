@@ -1,12 +1,12 @@
 #ifndef _VIEW_H_
 #define _VIEW_H_
 
-#include "glwindow.h"
+#include "lc_glwidget.h"
 
 class Camera;
 class Project;
 
-class View : public GLWindow
+class View : public lcGLWidget
 {
 public:
 	View(Project *project);

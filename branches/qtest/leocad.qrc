@@ -59,5 +59,8 @@
         <file>resources/help_email.png</file>
         <file>resources/help_homepage.png</file>
         <file>resources/view_zoomextents.png</file>
+        <file>resources/view_split_horizontal.png</file>
+        <file>resources/view_split_vertical.png</file>
+        <file>resources/file_picture.png</file>
     </qresource>
 </RCC>

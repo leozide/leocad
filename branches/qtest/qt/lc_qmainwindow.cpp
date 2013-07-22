@@ -84,6 +84,7 @@ void lcQMainWindow::createActions()
 	actions[LC_FILE_NEW]->setIcon(QIcon(":/resources/file_new.png"));
 	actions[LC_FILE_OPEN]->setIcon(QIcon(":/resources/file_open.png"));
 	actions[LC_FILE_SAVE]->setIcon(QIcon(":/resources/file_save.png"));
+	actions[LC_FILE_SAVE_IMAGE]->setIcon(QIcon(":/resources/file_picture.png"));
 	actions[LC_FILE_PRINT]->setIcon(QIcon(":/resources/file_print.png"));
 	actions[LC_FILE_PRINT_PREVIEW]->setIcon(QIcon(":/resources/file_print_preview.png"));
 	actions[LC_EDIT_UNDO]->setIcon(QIcon(":/resources/edit_undo.png"));
@@ -109,6 +110,8 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	actions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	actions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
+	actions[LC_VIEW_SPLIT_HORIZONTAL]->setIcon(QIcon(":/resources/view_split_horizontal.png"));
+	actions[LC_VIEW_SPLIT_VERTICAL]->setIcon(QIcon(":/resources/view_split_vertical.png"));
 	actions[LC_VIEW_ZOOM_IN]->setIcon(QIcon(":/resources/view_zoomin.png"));
 	actions[LC_VIEW_ZOOM_OUT]->setIcon(QIcon(":/resources/view_zoomout.png"));
 	actions[LC_VIEW_ZOOM_EXTENTS]->setIcon(QIcon(":/resources/view_zoomextents.png"));
@@ -1108,23 +1111,23 @@ void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 	if (undoText)
 	{
 		undoAction->setEnabled(true);
-		undoAction->setText(QString(tr("Undo %1")).arg(undoText));
+		undoAction->setText(QString(tr("&Undo %1")).arg(undoText));
 	}
 	else
 	{
 		undoAction->setEnabled(false);
-		undoAction->setText(tr("Undo"));
+		undoAction->setText(tr("&Undo"));
 	}
 
 	if (redoText)
 	{
 		redoAction->setEnabled(true);
-		redoAction->setText(QString(tr("Redo %1")).arg(redoText));
+		redoAction->setText(QString(tr("&Redo %1")).arg(redoText));
 	}
 	else
 	{
 		redoAction->setEnabled(false);
-		redoAction->setText(tr("Redo"));
+		redoAction->setText(tr("&Redo"));
 	}
 }
 

@@ -161,63 +161,63 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_EDIT_UNDO
 	{
 		"Edit.Undo",
-		"Undo",
+		"&Undo",
 		"Undo the last action",
 		"Ctrl+Z"
 	},
 	// LC_EDIT_REDO
 	{
 		"Edit.Redo",
-		"Redo",
+		"&Redo",
 		"Redo the previously undone action",
 		"Ctrl+Y"
 	},
 	// LC_EDIT_CUT
 	{
 		"Edit.Cut",
-		"Cut",
+		"Cu&t",
 		"Cut the selection and put it on the Clipboard",
 		"Ctrl+X"
 	},
 	// LC_EDIT_COPY
 	{
 		"Edit.Copy",
-		"Copy",
+		"&Copy",
 		"Copy the selection and put it on the Clipboard",
 		"Ctrl+C"
 	},
 	// LC_EDIT_PASTE
 	{
 		"Edit.Paste",
-		"Paste",
+		"&Paste",
 		"Insert Clipboard contents",
 		"Ctrl+V"
 	},
 	// LC_EDIT_SELECT_ALL
 	{
 		"Edit.SelectAll",
-		"Select All",
+		"Select &All",
 		"Select all parts in the project",
 		"Ctrl+A"
 	},
 	// LC_EDIT_SELECT_NONE
 	{
 		"Edit.SelectNone",
-		"Select None",
+		"Select &None",
 		"De-select everything",
 		""
 	},
 	// LC_EDIT_SELECT_INVERT
 	{
 		"Edit.SelectInvert",
-		"Select Invert",
+		"Select &Invert",
 		"Invert the current selection set",
 		"Ctrl+I"
 	},
 	// LC_EDIT_SELECT_BY_NAME
 	{
 		"Edit.SelectByName",
-		"Select by Name...",
+		"Select by Na&me...",
 		"Select objects by name",
 		""
 	},
@@ -658,7 +658,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_PREFERENCES
 	{
 		"View.Preferences",
-		"Preferences...",
+		"P&references...",
 		"Change program settings",
 		""
 	},
@@ -686,49 +686,49 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_VIEWPOINT_FRONT
 	{
 		"View.Viewpoint.Front",
-		"Front",
+		"&Front",
 		"View model from the front",
 		"F"
 	},
 	// LC_VIEW_VIEWPOINT_BACK
 	{
 		"View.Viewpoint.Back",
-		"Back",
+		"&Back",
 		"View model from the back",
 		"B"
 	},
 	// LC_VIEW_VIEWPOINT_TOP
 	{
 		"View.Viewpoint.Top",
-		"Top",
+		"&Top",
 		"View model from the top",
 		"T"
 	},
 	// LC_VIEW_VIEWPOINT_BOTTOM
 	{
 		"View.Viewpoint.Bottom",
-		"Bottom",
+		"B&ottom",
 		"View model from the bottom",
-		"B"
+		"O"
 	},
 	// LC_VIEW_VIEWPOINT_LEFT
 	{
 		"View.Viewpoint.Left",
-		"Left",
+		"&Left",
 		"View model from the left",
 		"L"
 	},
 	// LC_VIEW_VIEWPOINT_RIGHT
 	{
 		"View.Viewpoint.Right",
-		"Right",
+		"&Right",
 		"View model from the right",
 		"R"
 	},
 	// LC_VIEW_VIEWPOINT_HOME
 	{
 		"View.Viewpoint.Home",
-		"Home",
+		"&Home",
 		"View model from the default position",
 		"H"
 	},

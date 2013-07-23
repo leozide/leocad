@@ -58,6 +58,7 @@ Project::Project()
 	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	m_nDownX = 0;
 	m_nDownY = 0;
+	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
 	m_pScreenFont = new TexFont();
 }
@@ -3174,6 +3175,79 @@ unsigned char Project::GetLastStep()
 	return last;
 }
 
+void Project::FindPiece(bool FindFirst, bool SearchForward)
+{
+	if (!m_pPieces)
+		return;
+
+	Piece* Start = NULL;
+	if (!FindFirst)
+	{
+		for (Start = m_pPieces; Start; Start = Start->m_pNext)
+			if (Start->IsFocused())
+				break;
+
+		if (Start && !Start->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			Start = NULL;
+	}
+
+	SelectAndFocusNone(false);
+
+	Piece* Current = Start;
+
+	for (;;)
+	{
+		if (SearchForward)
+		{
+			Current = Current ? Current->m_pNext : m_pPieces;
+		}
+		else
+		{
+			if (Current == m_pPieces)
+				Current = NULL;
+
+			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+			{
+				if (piece->m_pNext == Current)
+				{
+					Current = piece;
+					break;
+				}
+			}
+		}
+
+		if (Current == Start)
+			break;
+
+		if (!Current)
+			continue;
+
+		if (!Current->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			continue;
+
+		if ((!mSearchOptions.MatchInfo || Current->mPieceInfo == mSearchOptions.Info) &&
+			(!mSearchOptions.MatchColor || Current->mColorIndex == mSearchOptions.ColorIndex) &&
+			(!mSearchOptions.MatchName || strcasestr(Current->GetName(), mSearchOptions.Name)))
+		{
+			Current->Select(true, true, false);
+			Group* TopGroup = Current->GetTopGroup();
+			if (TopGroup)
+			{
+				for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+					if ((piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
+						(piece->GetTopGroup() == TopGroup))
+						piece->Select (true, false, false);
+			}
+
+			UpdateSelection();
+			UpdateAllViews();
+			gMainWindow->UpdateFocusObject(Current);
+
+			break;
+		}
+	}
+}
+
 void Project::ZoomExtents(int FirstView, int LastView)
 {
 	if (!m_pPieces)
@@ -5326,6 +5400,19 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateSelection();
 			UpdateAllViews ();
 		} break;
+
+		case LC_EDIT_FIND:
+			if (gMainWindow->DoDialog(LC_DIALOG_FIND, &mSearchOptions))
+				FindPiece(true, true);
+			break;
+
+		case LC_EDIT_FIND_NEXT:
+			FindPiece(false, true);
+			break;
+
+		case LC_EDIT_FIND_PREVIOUS:
+			FindPiece(false, false);
+			break;
 
 		case LC_EDIT_SELECT_ALL:
 		{
@@ -8276,129 +8363,6 @@ void Project::ZoomActiveView(int Amount)
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateOverlayScale();
 	UpdateAllViews();
-}
-
-bool Project::OnKeyDown(char nKey, bool bControl, bool bShift)
-{
-	bool ret = false;
-
-/*
-	// TODO: add a find dialog/function
-	switch (nKey)
-	{
-		case KEY_TAB:
-		{
-			if (m_pPieces == NULL)
-				break;
-
-			Piece* pFocus = NULL, *pPiece;
-			for (pFocus = m_pPieces; pFocus; pFocus = pFocus->m_pNext)
-				if (pFocus->IsFocused())
-					break;
-
-			SelectAndFocusNone(false);
-
-			if (pFocus == NULL)
-			{
-				if (bShift)
-				{
-					// Focus the last visible piece.
-					for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-						if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-							pFocus = pPiece;
-				}
-				else
-				{
-					// Focus the first visible piece.
-					for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-						if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-						{
-							pFocus = pPiece;
-							break;
-						}
-				}
-			}
-			else
-			{
-				if (bShift)
-				{
-					// Focus the previous visible piece.
-					Piece* pBest = pPiece = pFocus;
-					for (;;)
-					{
-						if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-							pBest = pPiece;
-
-						if (pPiece->m_pNext != NULL)
-						{
-							if (pPiece->m_pNext == pFocus)
-								break;
-							else
-								pPiece = pPiece->m_pNext;
-						}
-						else
-						{
-							if (pFocus == m_pPieces)
-								break;
-							else
-								pPiece = m_pPieces;
-						}
-					}
-
-					pFocus = pBest;
-				}
-				else
-				{
-					// Focus the next visible piece.
-					pPiece = pFocus;
-					for (;;)
-					{
-						if (pPiece != pFocus)
-							if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-							{
-								pFocus = pPiece;
-								break;
-							}
-
-						if (pPiece->m_pNext != NULL)
-						{
-							if (pPiece->m_pNext == pFocus)
-								break;
-							else
-								pPiece = pPiece->m_pNext;
-						}
-						else
-						{
-							if (pFocus == m_pPieces)
-								break;
-							else
-								pPiece = m_pPieces;
-						}
-					}
-				}
-			}
-
-			if (pFocus != NULL)
-			{
-				pFocus->Select (true, true, false);
-				Group* pGroup = pFocus->GetTopGroup();
-				if (pGroup != NULL)
-				{
-				  for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-						(pPiece->GetTopGroup() == pGroup))
-					  pPiece->Select (true, false, false);
-				}
-			}
-
-			UpdateSelection();
-			UpdateAllViews();
-			gMainWindow->UpdateFocusObject(pFocus);
-			ret = true;
-		} break;
-	}
-*/
-	return ret;
 }
 
 void Project::BeginPieceDrop(PieceInfo* Info)

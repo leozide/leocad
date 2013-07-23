@@ -193,6 +193,27 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Insert Clipboard contents",
 		"Ctrl+V"
 	},
+	// LC_EDIT_FIND
+	{
+		"Edit.Find",
+		"&Find...",
+		"Find object",
+		"Ctrl+F",
+	},
+	// LC_EDIT_FIND_NEXT
+	{
+		"Edit.FindNext",
+		"Find Ne&xt",
+		"Find next object",
+		"F3",
+	},
+	// LC_EDIT_FIND_PREVIOUS
+	{
+		"Edit.FindPrevious",
+		"Find Pre&vious",
+		"Find object",
+		"Shift+F3",
+	},
 	// LC_EDIT_SELECT_ALL
 	{
 		"Edit.SelectAll",

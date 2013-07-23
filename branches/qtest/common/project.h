@@ -145,6 +145,16 @@ struct lcPiecesUsedEntry
 	int Count;
 };
 
+struct lcSearchOptions
+{
+	bool MatchInfo;
+	bool MatchColor;
+	bool MatchName;
+	PieceInfo* Info;
+	int ColorIndex;
+	char Name[256];
+};
+
 enum lcObjectProperty
 {
 	LC_PART_POSITION,
@@ -303,6 +313,9 @@ protected:
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
 
+	void FindPiece(bool FindFirst, bool SearchForward);
+	lcSearchOptions mSearchOptions;
+
 	// Movement.
 	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock);
 	bool RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool Snap, bool Lock);
@@ -362,7 +375,6 @@ public:
 	void OnRightButtonUp(View* view);
 	void OnMouseMove(View* view);
 	void OnMouseWheel(View* view, float Direction);
-	bool OnKeyDown(char nKey, bool Control, bool Shift);
 
 	void SetAction(int Action);
 	int GetCurAction() const

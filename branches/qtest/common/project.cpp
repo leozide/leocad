@@ -369,11 +369,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	{
 		if (fv > 0.4f)
 		{
-			char name[LC_PIECE_NAME_LEN];
 			Piece* pPiece = new Piece(NULL);
-			pPiece->FileLoad(*file, name);
-			PieceInfo* pInfo = Library->FindPiece(name, true);
-			pPiece->SetPieceInfo(pInfo);
+			pPiece->FileLoad(*file);
 
 			if (bMerge)
 				for (Piece* p = m_pPieces; p; p = p->m_pNext)
@@ -388,7 +385,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 			AddPiece(pPiece);
 			if (!bUndo)
-				SystemPieceComboAdd(pInfo->m_strDescription);
+				SystemPieceComboAdd(pPiece->mPieceInfo->m_strDescription);
 		}
 		else
 		{
@@ -765,7 +762,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteS32(&i, 1);
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		pPiece->FileSave (*file, m_pGroups);
+		pPiece->FileSave(*file);
 
 	ch = strlen(m_strAuthor);
 	file->WriteBuffer(&ch, 1);
@@ -5239,7 +5236,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsSelected())
-					pPiece->FileSave(*Clipboard, m_pGroups);
+					pPiece->FileSave(*Clipboard);
 
 			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				i++;
@@ -5297,18 +5294,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 			file->ReadBuffer(&i, sizeof(i));
 			while (i--)
 			{
-				char name[LC_PIECE_NAME_LEN];
 				Piece* pPiece = new Piece(NULL);
-				pPiece->FileLoad(*file, name);
-				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
-				if (pInfo)
-				{
-					pPiece->SetPieceInfo(pInfo);
-					pPiece->m_pNext = pPasted;
-					pPasted = pPiece;
-				}
-				else
-					delete pPiece;
+				pPiece->FileLoad(*file);
+				pPiece->m_pNext = pPasted;
+				pPasted = pPiece;
 			}
 
 			file->ReadBuffer(&i, sizeof(i));

@@ -169,5 +169,7 @@ RESOURCES += leocad.qrc
 target.path = /usr/bin
 desktop.path = /usr/share/applications
 desktop.files += qt/leocad.desktop
+mime.path = /usr/share/mime/packages/
+mime.files += qt/leocad.xml
 
-INSTALLS += target desktop
+INSTALLS += target desktop mime

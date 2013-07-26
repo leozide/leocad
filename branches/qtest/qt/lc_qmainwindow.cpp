@@ -796,6 +796,8 @@ void lcQMainWindow::print(QPrinter *printer)
 
 						if (stepWidth > tileWidth || stepHeight > tileHeight)
 						{
+							lcuint8* imageBuffer = (lcuint8*)malloc(stepWidth * stepHeight * 4);
+
 							Camera* camera = view.mCamera;
 							camera->StartTiledRendering(tileWidth, tileHeight, stepWidth, stepHeight, aspectRatio);
 							do 
@@ -808,46 +810,38 @@ void lcQMainWindow::print(QPrinter *printer)
 								glFinish();
 								glReadPixels(0, 0, currentTileWidth, currentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
-								for (int y = 0; y < (currentTileHeight + 1) / 2; y++)
+								lcuint32 tileY = 0;
+								if (tileRow != 0)
+									tileY = tileRow * tileHeight - (tileHeight - stepHeight % tileHeight);
+
+								lcuint32 tileStart = ((tileColumn * tileWidth) + (tileY * stepWidth)) * 4;
+
+								for (int y = 0; y < currentTileHeight; y++)
 								{
-									lcuint8* top = (lcuint8*)buffer + ((currentTileHeight - y - 1) * currentTileWidth * 4);
-									lcuint8* bottom = (lcuint8*)buffer + y * currentTileWidth * 4;
+									lcuint8* src = buffer + (currentTileHeight - y - 1) * currentTileWidth * 4;
+									lcuint8* dst = imageBuffer + tileStart + y * stepWidth * 4;
 
 									for (int x = 0; x < currentTileWidth; x++)
 									{
-										lcuint8 red = top[0];
-										lcuint8 green = top[1];
-										lcuint8 blue = top[2];
-										lcuint8 alpha = 255;//top[3];
+										*dst++ = src[2];
+										*dst++ = src[1];
+										*dst++ = src[0];
+										*dst++ = 255;
 
-										top[0] = bottom[2];
-										top[1] = bottom[1];
-										top[2] = bottom[0];
-										top[3] = 255;//bottom[3];
-
-										bottom[0] = blue;
-										bottom[1] = green;
-										bottom[2] = red;
-										bottom[3] = alpha;
-
-										top += 4;
-										bottom +=4;
+										src += 4;
 									}
 								}
-
-								QImage image = QImage((const lcuint8*)buffer, currentTileWidth, currentTileHeight, QImage::Format_ARGB32);
-
-								int y = 0;
-
-								if (stepHeight > tileHeight && tileRow != 0)
-									y = tileRow * tileHeight - (tileHeight - stepHeight % tileHeight);
-
-								QRect rect = painter.viewport();
-								int left = rect.x() + 1 + (stepWidth * column) + tileColumn * tileWidth;
-								int bottom = rect.y() + 1 + (stepHeight * row) + y;
-
-								painter.drawImage(left, bottom, image);
 							} while (camera->EndTile());
+
+							QImage image = QImage((const lcuint8*)imageBuffer, stepWidth, stepHeight, QImage::Format_ARGB32_Premultiplied);
+
+							QRect rect = painter.viewport();
+							int left = rect.x() + 1 + (stepWidth * column);
+							int bottom = rect.y() + 1 + (stepHeight * row);
+
+							painter.drawImage(left, bottom, image);
+
+							free(imageBuffer);
 						}
 						else
 						{
@@ -983,7 +977,7 @@ void lcQMainWindow::togglePrintPreview()
 	int stepsPerPage = rows * columns;
 	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
 
-	QPrinter printer(QPrinter::HighResolution);
+	QPrinter printer(QPrinter::ScreenResolution);
 	printer.setFromTo(1, pageCount + 1);
 
 	QPrintPreviewDialog preview(&printer, this);

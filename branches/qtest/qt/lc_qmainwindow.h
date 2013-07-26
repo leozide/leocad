@@ -21,6 +21,8 @@ public:
 	explicit lcQMainWindow(QWidget *parent = 0);
 	~lcQMainWindow();
 
+	void showPrintDialog();
+
 	void splitHorizontal();
 	void splitVertical();
 	void removeView();
@@ -51,7 +53,7 @@ public:
 	QAction *actions[LC_NUM_COMMANDS];
 
 private slots:
-	void printPreview(QPrinter *printer);
+	void print(QPrinter *printer);
 	void actionTriggered();
 	void partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void colorChanged(int colorIndex);

@@ -695,7 +695,7 @@ void lcQMainWindow::resetViews()
 	centralLayout->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
 }
 
-void lcQMainWindow::printPreview(QPrinter *printer)
+void lcQMainWindow::print(QPrinter *printer)
 {
 	Project *project = lcGetActiveProject();
 	int docCopies;
@@ -750,6 +750,8 @@ void lcQMainWindow::printPreview(QPrinter *printer)
 
 	GLint maxTexture;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexture);
+
+	maxTexture = qMin(maxTexture, 2048);
 
 	int tileWidth = qMin(stepWidth, maxTexture);
 	int tileHeight = qMin(stepHeight, maxTexture);
@@ -890,6 +892,8 @@ void lcQMainWindow::printPreview(QPrinter *printer)
 							painter.drawImage(left, bottom, image);
 						}
 /*
+  TODO: print text and lines
+
 		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
 
 		if (dwPrint & PRINT_NUMBERS)
@@ -952,6 +956,23 @@ void lcQMainWindow::printPreview(QPrinter *printer)
 	GL_EndRenderToTexture();
 }
 
+void lcQMainWindow::showPrintDialog()
+{
+	Project *project = lcGetActiveProject();
+	int rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
+	int columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
+	int stepsPerPage = rows * columns;
+	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
+
+	QPrinter printer(QPrinter::HighResolution);
+	printer.setFromTo(1, pageCount + 1);
+
+	QPrintDialog printDialog(&printer, this);
+
+	if (printDialog.exec() == QDialog::Accepted)
+		print(&printer);
+}
+
 void lcQMainWindow::togglePrintPreview()
 {
 	// todo: print preview inside main window
@@ -966,7 +987,7 @@ void lcQMainWindow::togglePrintPreview()
 	printer.setFromTo(1, pageCount + 1);
 
 	QPrintPreviewDialog preview(&printer, this);
-	connect(&preview, SIGNAL(paintRequested(QPrinter*)), SLOT(printPreview(QPrinter*)));
+	connect(&preview, SIGNAL(paintRequested(QPrinter*)), SLOT(print(QPrinter*)));
 	preview.exec();
 }
 

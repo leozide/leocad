@@ -212,6 +212,13 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 			return dialog.exec() == QDialog::Accepted;
 		} break;
 
+	case LC_DIALOG_PRINT:
+		{
+			lcQMainWindow *mainWindow = (lcQMainWindow*)parent;
+			mainWindow->showPrintDialog();
+			return true;
+		} break;
+
 	case LC_DIALOG_FIND:
 		{
 			lcQFindDialog dialog(parent, Data);

@@ -5126,8 +5126,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->TogglePrintPreview();
 			break;
 
-			// TODO: printing
 		case LC_FILE_PRINT:
+			gMainWindow->DoDialog(LC_DIALOG_PRINT, NULL);
+			break;
+
+		// TODO: printing
 		case LC_FILE_PRINT_BOM:
 			break;
 

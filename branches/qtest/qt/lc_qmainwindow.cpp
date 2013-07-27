@@ -216,7 +216,7 @@ void lcQMainWindow::createMenus()
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION]);
 	actions[LC_EDIT_TRANSFORM]->setMenu(transformMenu);
 
-	menuCamera = new QMenu(tr("Cameras"));
+	menuCamera = new QMenu(tr("C&ameras"));
 	menuCamera->addAction(actions[LC_VIEW_CAMERA_NONE]);
 
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
@@ -276,7 +276,7 @@ void lcQMainWindow::createMenus()
 	menuView->addAction(actions[LC_VIEW_PREFERENCES]);
 	menuView->addSeparator();
 	menuView->addAction(actions[LC_VIEW_ZOOM_EXTENTS]);
-	QMenu* menuViewpoints = menuView->addMenu(tr("Viewpoints"));
+	QMenu* menuViewpoints = menuView->addMenu(tr("&Viewpoints"));
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_FRONT]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BACK]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_LEFT]);
@@ -285,7 +285,7 @@ void lcQMainWindow::createMenus()
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_HOME]);
 	menuView->addMenu(menuCamera);
-	QMenu* menuStep = menuView->addMenu(tr("Step"));
+	QMenu* menuStep = menuView->addMenu(tr("Ste&p"));
 	menuStep->addAction(actions[LC_VIEW_TIME_FIRST]);
 	menuStep->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	menuStep->addAction(actions[LC_VIEW_TIME_NEXT]);
@@ -301,7 +301,7 @@ void lcQMainWindow::createMenus()
 	menuView->addAction(actions[LC_VIEW_REMOVE_VIEW]);
 	menuView->addAction(actions[LC_VIEW_RESET_VIEWS]);
 	menuView->addSeparator();
-	QMenu *menuToolBars = menuView->addMenu(tr("Toolbars"));
+	QMenu *menuToolBars = menuView->addMenu(tr("T&oolbars"));
 	menuToolBars->addAction(partsToolBar->toggleViewAction());
 	menuToolBars->addAction(propertiesToolBar->toggleViewAction());
 	menuToolBars->addSeparator();

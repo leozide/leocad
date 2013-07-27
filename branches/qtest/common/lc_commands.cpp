@@ -700,7 +700,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_ZOOM_EXTENTS
 	{
 		"View.ZoomExtents",
-		"Zoom Extents",
+		"Zoom E&xtents",
 		"Fit all parts in current the view (hold the CTRL key down to zoom all views)",
 		""
 	},
@@ -952,49 +952,49 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_SPLIT_HORIZONTAL
 	{
 		"View.SplitHorizontal",
-		"Split Horizontal",
+		"Split &Horizontal",
 		"Split the current view horizontally",
 		""
 	},
 	// LC_VIEW_SPLIT_VERTICAL
 	{
 		"View.SplitVertical",
-		"Split Vertical",
+		"Split &Vertical",
 		"Split the current view vertically",
 		""
 	},
 	// LC_VIEW_REMOVE_VIEW
 	{
 		"View.RemoveView",
-		"Remove View",
+		"Re&move View",
 		"Remove the current view",
 		""
 	},
 	// LC_VIEW_RESET_VIEWS
 	{
 		"View.ResetViews",
-		"Reset Views",
+		"Rese&t Views",
 		"Reset all views",
 		""
 	},
 	// LC_VIEW_FULLSCREEN
 	{
 		"View.FullScreen",
-		"Full Screen",
+		"&Full Screen",
 		"Toggle fullscreen mode",
 		""
 	},
 	// LC_PIECE_INSERT
 	{
 		"Part.Insert",
-		"Insert",
+		"&Insert",
 		"Add a new part to the model",
 		"Insert"
 	},
 	// LC_PIECE_DELETE
 	{
 		"Part.Delete",
-		"Delete",
+		"&Delete",
 		"Delete selected objects",
 		"Delete"
 	},
@@ -1085,14 +1085,14 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_PIECE_MINIFIG_WIZARD
 	{
 		"Part.MinifigWizard",
-		"Minifig Wizard...",
+		"Minifig &Wizard...",
 		"Add a new minifig to the model",
 		""
 	},
 	// LC_PIECE_ARRAY
 	{
 		"Part.Array",
-		"Array...",
+		"A&rray...",
 		"Make copies of the selected parts",
 		""
 	},
@@ -1106,56 +1106,56 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_PIECE_GROUP
 	{
 		"Part.Group",
-		"Group...",
+		"&Group...",
 		"Group selected parts together",
 		"Ctrl+G"
 	},
 	// LC_PIECE_UNGROUP
 	{
 		"Part.Ungroup",
-		"Ungroup",
+		"&Ungroup",
 		"Ungroup selected group",
 		"Ctrl+U"
 	},
 	// LC_PIECE_GROUP_ADD
 	{
 		"Part.GroupAdd",
-		"Add to Group",
+		"&Add to Group",
 		"Add focused part to selected group",
 		""
 	},
 	// LC_PIECE_GROUP_REMOVE
 	{
 		"Part.GroupRemove",
-		"Remove from Group",
+		"Re&move from Group",
 		"Remove focused part from group",
 		""
 	},
 	// LC_PIECE_GROUP_EDIT
 	{
 		"Part.GroupEdit",
-		"Edit Groups...",
+		"&Edit Groups...",
 		"Edit groups",
 		""
 	},
 	// LC_PIECE_HIDE_SELECTED
 	{
 		"Part.HideSelected",
-		"Hide Selected",
+		"&Hide Selected",
 		"Hide selected objects",
 		"Ctrl+H"
 	},
 	// LC_PIECE_HIDE_UNSELECTED
 	{
 		"Part.HideUnselected",
-		"Hide Unselected",
+		"Hide &Unselected",
 		"Hide objects that are not selected",
 		""
 	},
 	// LC_PIECE_UNHIDE_ALL
 	{
 		"Part.UnhideAll",
-		"Unhide All",
+		"U&nhide All",
 		"Show all hidden objects",
 		""
 	},

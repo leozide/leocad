@@ -6882,6 +6882,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			if (m_nTracking != LC_TRACK_NONE)
 				StopTracking(false);
+			else
+			{
+				SelectAndFocusNone(false);
+				UpdateSelection();
+				UpdateAllViews();
+				gMainWindow->UpdateFocusObject(NULL);
+			}
 		} break;
 
 		case LC_NUM_COMMANDS:

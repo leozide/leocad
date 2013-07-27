@@ -26,8 +26,6 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 	setWindowFilePath(QString());
 
-	resize(800, 600); // TODO: remember size and toolbars
-
 	createActions();
 	createToolBars();
 	createMenus();
@@ -60,6 +58,15 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 		gMainWindow->mPreviewWidget = Preview;
 		Preview->SetCurrentPiece(Info);
 	}
+
+	QSettings settings;
+	settings.beginGroup("MainWindow");
+	QPoint pos = settings.value("Position", QPoint(200, 200)).toPoint();
+	QSize size = settings.value("Size", QSize(800, 600)).toSize();
+	resize(size);
+	move(pos);
+	restoreState(settings.value("State").toByteArray());
+	settings.endGroup();
 }
 
 lcQMainWindow::~lcQMainWindow()
@@ -499,10 +506,19 @@ void lcQMainWindow::createStatusBar()
 
 void lcQMainWindow::closeEvent(QCloseEvent *event)
 {
-	if (!lcGetActiveProject()->SaveModified())
-		event->ignore();
-	else
+	if (lcGetActiveProject()->SaveModified())
+	{
 		event->accept();
+
+		QSettings settings;
+		settings.beginGroup("MainWindow");
+		settings.setValue("Position", pos());
+		settings.setValue("Size", size());
+		settings.setValue("State", saveState());
+		settings.endGroup();
+	}
+	else
+		event->ignore();
 }
 
 QMenu *lcQMainWindow::createPopupMenu()

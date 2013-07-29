@@ -30,6 +30,7 @@ typedef quint64 lcuint64;
 #define isnan _isnan
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
+char* strcasestr(const char *s, const char *find);
 #endif
 
 #endif // _LC_CONFIG_H_

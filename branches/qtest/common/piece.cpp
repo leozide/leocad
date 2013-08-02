@@ -255,7 +255,7 @@ bool Piece::FileLoad(lcFile& file)
   return true;
 }
 
-void Piece::FileSave(lcFile& file)
+void Piece::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_PIECE_SAVE_VERSION);
 

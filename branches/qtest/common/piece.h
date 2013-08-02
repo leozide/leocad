@@ -58,7 +58,7 @@ public:
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);
-	void FileSave(lcFile& file);
+	void FileSave(lcFile& file) const;
 
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);

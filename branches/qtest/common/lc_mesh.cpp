@@ -114,9 +114,9 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 
 	if (GL_HasVertexBufferObject())
 	{
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVertexBuffer.mBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, mVertexBuffer.mBuffer);
 		BufferOffset = NULL;
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mIndexBuffer.mBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, mIndexBuffer.mBuffer);
 		ElementsOffset = NULL;
 	}
 	else
@@ -196,8 +196,8 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 
 	if (GL_HasVertexBufferObject())
 	{
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
 	else
 		glVertexPointer(3, GL_FLOAT, 0, NULL);

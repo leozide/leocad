@@ -1715,9 +1715,9 @@ void Project::RenderScenePieces(View* view)
 		{
 			if (GL_HasVertexBufferObject())
 			{
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
+				glBindBuffer(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
 				BaseBufferOffset = NULL;
-				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
 				ElementsOffset = NULL;
 			}
 			else
@@ -1842,9 +1842,9 @@ void Project::RenderScenePieces(View* view)
 			{
 				if (GL_HasVertexBufferObject())
 				{
-					glBindBufferARB(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
+					glBindBuffer(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
 					BaseBufferOffset = NULL;
-					glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
 					ElementsOffset = NULL;
 				}
 				else
@@ -1946,8 +1946,8 @@ void Project::RenderScenePieces(View* view)
 
 	if (GL_HasVertexBufferObject())
 	{
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
 
 	glVertexPointer(3, GL_FLOAT, 0, NULL);

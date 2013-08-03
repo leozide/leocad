@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>CFBundleIconFile</key>
+	<string>leocad.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Created by Qt/QMake</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleExecutable</key>
+	<string>leocad</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.leozide.leocad</string>
+	<key>CFBundleDisplayName</key>
+	<string>LeoCAD</string>
+	<key>CFBundleName</key>
+	<string>LeoCAD</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>leocad.icns</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>lcd</string>
+				<string>leocad</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/vnd.leocad</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>LeoCAD Project</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+	</array>
+</dict>
+</plist>

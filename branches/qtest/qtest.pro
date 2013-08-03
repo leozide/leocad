@@ -19,11 +19,11 @@ win32 {
 	INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
+	RC_FILE = qt/leocad.rc
 } else {
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
-RC_FILE = qt/leocad.rc
 
 release: DESTDIR = build/release
 debug:   DESTDIR = build/debug
@@ -177,3 +177,13 @@ mime.path = /usr/share/mime/packages/
 mime.files += qt/leocad.xml
 
 INSTALLS += target desktop mime
+
+macx {
+ICON = resources/leocad.icns
+QMAKE_INFO_PLIST = qt/Info.plist
+
+library.files += library.bin
+library.path = Contents/Resources
+
+QMAKE_BUNDLE_DATA += library
+}

@@ -122,18 +122,24 @@ typedef ptrdiff_t GLsizeiptrARB;
 #define GL_DYNAMIC_COPY_ARB                          0x88EA
 #endif
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 // GL_ARB_vertex_buffer_object
-typedef void (APIENTRY *GLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
-typedef void (APIENTRY *GLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);
-typedef void (APIENTRY *GLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
-typedef GLboolean (APIENTRY *GLISBUFFERARBPROC) (GLuint buffer);
-typedef void (APIENTRY *GLBUFFERDATAARBPROC) (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
-typedef void (APIENTRY *GLBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
-typedef void (APIENTRY *GLGETBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
-typedef GLvoid* (APIENTRY *GLMAPBUFFERARBPROC) (GLenum target, GLenum access);
-typedef GLboolean (APIENTRY *GLUNMAPBUFFERARBPROC) (GLenum target);
-typedef void (APIENTRY *GLGETBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
-typedef void (APIENTRY *GLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
+#ifndef GL_VERSION_1_5
+typedef void (APIENTRY *GLBINDBUFFERPROC) (GLenum target, GLuint buffer);
+typedef void (APIENTRY *GLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
+typedef void (APIENTRY *GLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
+typedef GLboolean (APIENTRY *GLISBUFFERPROC) (GLuint buffer);
+typedef void (APIENTRY *GLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
+typedef void (APIENTRY *GLBUFFERSUBDATAPROC) (GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data);
+typedef void (APIENTRY *GLGETBUFFERSUBDATAPROC) (GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data);
+typedef GLvoid* (APIENTRY *GLMAPBUFFERPROC) (GLenum target, GLenum access);
+typedef GLboolean (APIENTRY *GLUNMAPBUFFERPROC) (GLenum target);
+typedef void (APIENTRY *GLGETBUFFERPARAMETERIVPROC) (GLenum target, GLenum pname, GLint *params);
+typedef void (APIENTRY *GLGETBUFFERPOINTERVPROC) (GLenum target, GLenum pname, GLvoid* *params);
+#endif
 
 #ifndef GL_ARB_multisample
 #define GL_ARB_multisample 1
@@ -244,17 +250,19 @@ typedef void (APIENTRY *GLBLITFRAMEBUFFERPROC) (GLint srcX0, GLint srcY0, GLint 
 typedef void (APIENTRY *GLRENDERBUFFERSTORAGEMULTISAMPLEPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 typedef void (APIENTRY *GLFRAMEBUFFERTEXTURELAYERPROC) (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer);
 
-extern GLBINDBUFFERARBPROC glBindBufferARB;
-extern GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
-extern GLGENBUFFERSARBPROC glGenBuffersARB;
-extern GLISBUFFERARBPROC glIsBufferARB;
-extern GLBUFFERDATAARBPROC glBufferDataARB;
-extern GLBUFFERSUBDATAARBPROC glBufferSubDataARB;
-extern GLGETBUFFERSUBDATAARBPROC glGetBufferSubDataARB;
-extern GLMAPBUFFERARBPROC glMapBufferARB;
-extern GLUNMAPBUFFERARBPROC glUnmapBufferARB;
-extern GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
-extern GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
+#ifndef GL_VERSION_1_5
+extern GLBINDBUFFERPROC glBindBuffer;
+extern GLDELETEBUFFERSPROC glDeleteBuffers;
+extern GLGENBUFFERSPROC glGenBuffers;
+extern GLISBUFFERPROC glIsBuffer;
+extern GLBUFFERDATAPROC glBufferData;
+extern GLBUFFERSUBDATAPROC glBufferSubData;
+extern GLGETBUFFERSUBDATAPROC glGetBufferSubData;
+extern GLMAPBUFFERPROC glMapBuffer;
+extern GLUNMAPBUFFERPROC glUnmapBuffer;
+extern GLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
+extern GLGETBUFFERPOINTERVPROC glGetBufferPointerv;
+#endif
 
 extern GLISRENDERBUFFERPROC glIsRenderbufferARB;
 extern GLBINDRENDERBUFFERPROC glBindRenderbufferARB;

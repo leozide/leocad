@@ -39,7 +39,7 @@ void* lcGLWidget::GetExtensionAddress(const char* FunctionName)
 {
 	QGLWidget* Widget = (QGLWidget*)mWidget;
 
-	return Widget->context()->getProcAddress(FunctionName);
+	return (void*)Widget->context()->getProcAddress(FunctionName);
 }
 
 void lcGLWidget::ShowPopupMenu()

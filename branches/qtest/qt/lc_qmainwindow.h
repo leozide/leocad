@@ -2,6 +2,7 @@
 #define _LC_QMAINWINDOW_H_
 
 #include <QMainWindow>
+#include <QPrinter>
 #include "array.h"
 #include "lc_commands.h"
 

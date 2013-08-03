@@ -5,6 +5,10 @@ QT += core \
 TARGET = leocad
 TEMPLATE = app
 DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
+greaterThan(QT_MAJOR_VERSION, 4) {
+	QT *= printsupport
+}
 INCLUDEPATH += qt \
     common
 CONFIG += precompile_header incremental

@@ -6,17 +6,19 @@
 #include "mainwnd.h"
 #include "preview.h"
 
-GLBINDBUFFERARBPROC glBindBufferARB;
-GLDELETEBUFFERSARBPROC glDeleteBuffersARB;
-GLGENBUFFERSARBPROC glGenBuffersARB;
-GLISBUFFERARBPROC glIsBufferARB;
-GLBUFFERDATAARBPROC glBufferDataARB;
-GLBUFFERSUBDATAARBPROC glBufferSubDataARB;
-GLGETBUFFERSUBDATAARBPROC glGetBufferSubDataARB;
-GLMAPBUFFERARBPROC glMapBufferARB;
-GLUNMAPBUFFERARBPROC glUnmapBufferARB;
-GLGETBUFFERPARAMETERIVARBPROC glGetBufferParameterivARB;
-GLGETBUFFERPOINTERVARBPROC glGetBufferPointervARB;
+#ifndef GL_VERSION_1_5
+GLBINDBUFFERPROC glBindBuffer;
+GLDELETEBUFFERSPROC glDeleteBuffers;
+GLGENBUFFERSPROC glGenBuffers;
+GLISBUFFERPROC glIsBuffer;
+GLBUFFERDATAPROC glBufferData;
+GLBUFFERSUBDATAPROC glBufferSubData;
+GLGETBUFFERSUBDATAPROC glGetBufferSubData;
+GLMAPBUFFERPROC glMapBuffer;
+GLUNMAPBUFFERPROC glUnmapBuffer;
+GLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
+GLGETBUFFERPOINTERVPROC glGetBufferPointerv;
+#endif
 
 GLISRENDERBUFFERPROC glIsRenderbufferARB;
 GLBINDRENDERBUFFERPROC glBindRenderbufferARB;
@@ -76,23 +78,28 @@ void GL_InitializeSharedExtensions(lcGLWidget* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
 
+#ifndef GL_VERSION_1_5
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
-		glBindBufferARB = (GLBINDBUFFERARBPROC)Window->GetExtensionAddress("glBindBufferARB");
-		glDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Window->GetExtensionAddress("glDeleteBuffersARB");
-		glGenBuffersARB = (GLGENBUFFERSARBPROC)Window->GetExtensionAddress("glGenBuffersARB");
-		glIsBufferARB = (GLISBUFFERARBPROC)Window->GetExtensionAddress("glIsBufferARB");
-		glBufferDataARB = (GLBUFFERDATAARBPROC)Window->GetExtensionAddress("glBufferDataARB");
-		glBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Window->GetExtensionAddress("glBufferSubDataARB");
-		glGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Window->GetExtensionAddress("glGetBufferSubDataARB");
-		glMapBufferARB = (GLMAPBUFFERARBPROC)Window->GetExtensionAddress("glMapBufferARB");
-		glUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Window->GetExtensionAddress("glUnmapBufferARB");
-		glGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Window->GetExtensionAddress("glGetBufferParameterivARB");
-		glGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Window->GetExtensionAddress("glGetBufferPointervARB");
+		glBindBuffer = (GLBINDBUFFERPROC)Window->GetExtensionAddress("glBindBufferARB");
+		glDeleteBuffers = (GLDELETEBUFFERSPROC)Window->GetExtensionAddress("glDeleteBuffersARB");
+		glGenBuffers = (GLGENBUFFERSPROC)Window->GetExtensionAddress("glGenBuffersARB");
+		glIsBuffer = (GLISBUFFERPROC)Window->GetExtensionAddress("glIsBufferARB");
+		glBufferData = (GLBUFFERDATAPROC)Window->GetExtensionAddress("glBufferDataARB");
+		glBufferSubData = (GLBUFFERSUBDATAPROC)Window->GetExtensionAddress("glBufferSubDataARB");
+		glGetBufferSubData = (GLGETBUFFERSUBDATAPROC)Window->GetExtensionAddress("glGetBufferSubDataARB");
+		glMapBuffer = (GLMAPBUFFERPROC)Window->GetExtensionAddress("glMapBufferARB");
+		glUnmapBuffer = (GLUNMAPBUFFERPROC)Window->GetExtensionAddress("glUnmapBufferARB");
+		glGetBufferParameteriv = (GLGETBUFFERPARAMETERIVPROC)Window->GetExtensionAddress("glGetBufferParameterivARB");
+		glGetBufferPointerv = (GLGETBUFFERPOINTERVPROC)Window->GetExtensionAddress("glGetBufferPointervARB");
 
-		GL_UseVertexBufferObject = true;
+        GL_UseVertexBufferObject = true;
 		GL_SupportsVertexBufferObject = true;
 	}
+#else
+	GL_UseVertexBufferObject = true;
+	GL_SupportsVertexBufferObject = true;
+#endif
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_framebuffer_object"))
 	{

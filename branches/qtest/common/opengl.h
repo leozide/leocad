@@ -122,24 +122,18 @@ typedef ptrdiff_t GLsizeiptrARB;
 #define GL_DYNAMIC_COPY_ARB                          0x88EA
 #endif
 
-#ifndef APIENTRY
-#define APIENTRY
-#endif
-
 // GL_ARB_vertex_buffer_object
-#ifndef GL_VERSION_1_5
-typedef void (APIENTRY *GLBINDBUFFERPROC) (GLenum target, GLuint buffer);
-typedef void (APIENTRY *GLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
-typedef void (APIENTRY *GLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
-typedef GLboolean (APIENTRY *GLISBUFFERPROC) (GLuint buffer);
-typedef void (APIENTRY *GLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
-typedef void (APIENTRY *GLBUFFERSUBDATAPROC) (GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data);
-typedef void (APIENTRY *GLGETBUFFERSUBDATAPROC) (GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data);
-typedef GLvoid* (APIENTRY *GLMAPBUFFERPROC) (GLenum target, GLenum access);
-typedef GLboolean (APIENTRY *GLUNMAPBUFFERPROC) (GLenum target);
-typedef void (APIENTRY *GLGETBUFFERPARAMETERIVPROC) (GLenum target, GLenum pname, GLint *params);
-typedef void (APIENTRY *GLGETBUFFERPOINTERVPROC) (GLenum target, GLenum pname, GLvoid* *params);
-#endif
+typedef void (APIENTRY *GLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
+typedef void (APIENTRY *GLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);
+typedef void (APIENTRY *GLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
+typedef GLboolean (APIENTRY *GLISBUFFERARBPROC) (GLuint buffer);
+typedef void (APIENTRY *GLBUFFERDATAARBPROC) (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
+typedef void (APIENTRY *GLBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+typedef void (APIENTRY *GLGETBUFFERSUBDATAARBPROC) (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
+typedef GLvoid* (APIENTRY *GLMAPBUFFERARBPROC) (GLenum target, GLenum access);
+typedef GLboolean (APIENTRY *GLUNMAPBUFFERARBPROC) (GLenum target);
+typedef void (APIENTRY *GLGETBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
+typedef void (APIENTRY *GLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
 
 #ifndef GL_ARB_multisample
 #define GL_ARB_multisample 1
@@ -229,60 +223,91 @@ typedef void (APIENTRY *GLGETBUFFERPOINTERVPROC) (GLenum target, GLenum pname, G
 #endif
 
 // GL_ARB_framebuffer_object
-typedef GLboolean (APIENTRY *GLISRENDERBUFFERPROC) (GLuint renderbuffer);
-typedef void (APIENTRY *GLBINDRENDERBUFFERPROC) (GLenum target, GLuint renderbuffer);
-typedef void (APIENTRY *GLDELETERENDERBUFFERSPROC) (GLsizei n, const GLuint *renderbuffers);
-typedef void (APIENTRY *GLGENRENDERBUFFERSPROC) (GLsizei n, GLuint *renderbuffers);
-typedef void (APIENTRY *GLRENDERBUFFERSTORAGEPROC) (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
-typedef void (APIENTRY *GLGETRENDERBUFFERPARAMETERIVPROC) (GLenum target, GLenum pname, GLint *params);
-typedef GLboolean (APIENTRY *GLISFRAMEBUFFERPROC) (GLuint framebuffer);
-typedef void (APIENTRY *GLBINDFRAMEBUFFERPROC) (GLenum target, GLuint framebuffer);
-typedef void (APIENTRY *GLDELETEFRAMEBUFFERSPROC) (GLsizei n, const GLuint *framebuffers);
-typedef void (APIENTRY *GLGENFRAMEBUFFERSPROC) (GLsizei n, GLuint *framebuffers);
-typedef GLenum (APIENTRY *GLCHECKFRAMEBUFFERSTATUSPROC) (GLenum target);
-typedef void (APIENTRY *GLFRAMEBUFFERTEXTURE1DPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
-typedef void (APIENTRY *GLFRAMEBUFFERTEXTURE2DPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
-typedef void (APIENTRY *GLFRAMEBUFFERTEXTURE3DPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset);
-typedef void (APIENTRY *GLFRAMEBUFFERRENDERBUFFERPROC) (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
-typedef void (APIENTRY *GLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC) (GLenum target, GLenum attachment, GLenum pname, GLint *params);
-typedef void (APIENTRY *GLGENERATEMIPMAPPROC) (GLenum target);
-typedef void (APIENTRY *GLBLITFRAMEBUFFERPROC) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
-typedef void (APIENTRY *GLRENDERBUFFERSTORAGEMULTISAMPLEPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
-typedef void (APIENTRY *GLFRAMEBUFFERTEXTURELAYERPROC) (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer);
+typedef GLboolean (APIENTRY *GLISRENDERBUFFERARBPROC) (GLuint renderbuffer);
+typedef void (APIENTRY *GLBINDRENDERBUFFERARBPROC) (GLenum target, GLuint renderbuffer);
+typedef void (APIENTRY *GLDELETERENDERBUFFERSARBPROC) (GLsizei n, const GLuint *renderbuffers);
+typedef void (APIENTRY *GLGENRENDERBUFFERSARBPROC) (GLsizei n, GLuint *renderbuffers);
+typedef void (APIENTRY *GLRENDERBUFFERSTORAGEARBPROC) (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (APIENTRY *GLGETRENDERBUFFERPARAMETERIVARBPROC) (GLenum target, GLenum pname, GLint *params);
+typedef GLboolean (APIENTRY *GLISFRAMEBUFFERARBPROC) (GLuint framebuffer);
+typedef void (APIENTRY *GLBINDFRAMEBUFFERARBPROC) (GLenum target, GLuint framebuffer);
+typedef void (APIENTRY *GLDELETEFRAMEBUFFERSARBPROC) (GLsizei n, const GLuint *framebuffers);
+typedef void (APIENTRY *GLGENFRAMEBUFFERSARBPROC) (GLsizei n, GLuint *framebuffers);
+typedef GLenum (APIENTRY *GLCHECKFRAMEBUFFERSTATUSARBPROC) (GLenum target);
+typedef void (APIENTRY *GLFRAMEBUFFERTEXTURE1DARBPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+typedef void (APIENTRY *GLFRAMEBUFFERTEXTURE2DARBPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+typedef void (APIENTRY *GLFRAMEBUFFERTEXTURE3DARBPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset);
+typedef void (APIENTRY *GLFRAMEBUFFERRENDERBUFFERARBPROC) (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+typedef void (APIENTRY *GLGETFRAMEBUFFERATTACHMENTPARAMETERIVARBPROC) (GLenum target, GLenum attachment, GLenum pname, GLint *params);
+typedef void (APIENTRY *GLGENERATEMIPMAPARBPROC) (GLenum target);
+typedef void (APIENTRY *GLBLITFRAMEBUFFERARBPROC) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+typedef void (APIENTRY *GLRENDERBUFFERSTORAGEMULTISAMPLEARBPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (APIENTRY *GLFRAMEBUFFERTEXTURELAYERARBPROC) (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer);
 
-#ifndef GL_VERSION_1_5
-extern GLBINDBUFFERPROC glBindBuffer;
-extern GLDELETEBUFFERSPROC glDeleteBuffers;
-extern GLGENBUFFERSPROC glGenBuffers;
-extern GLISBUFFERPROC glIsBuffer;
-extern GLBUFFERDATAPROC glBufferData;
-extern GLBUFFERSUBDATAPROC glBufferSubData;
-extern GLGETBUFFERSUBDATAPROC glGetBufferSubData;
-extern GLMAPBUFFERPROC glMapBuffer;
-extern GLUNMAPBUFFERPROC glUnmapBuffer;
-extern GLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
-extern GLGETBUFFERPOINTERVPROC glGetBufferPointerv;
-#endif
+extern GLBINDBUFFERARBPROC lcBindBufferARB;
+extern GLDELETEBUFFERSARBPROC lcDeleteBuffersARB;
+extern GLGENBUFFERSARBPROC lcGenBuffersARB;
+extern GLISBUFFERARBPROC lcIsBufferARB;
+extern GLBUFFERDATAARBPROC lcBufferDataARB;
+extern GLBUFFERSUBDATAARBPROC lcBufferSubDataARB;
+extern GLGETBUFFERSUBDATAARBPROC lcGetBufferSubDataARB;
+extern GLMAPBUFFERARBPROC lcMapBufferARB;
+extern GLUNMAPBUFFERARBPROC lcUnmapBufferARB;
+extern GLGETBUFFERPARAMETERIVARBPROC lcGetBufferParameterivARB;
+extern GLGETBUFFERPOINTERVARBPROC lcGetBufferPointervARB;
 
-extern GLISRENDERBUFFERPROC glIsRenderbufferARB;
-extern GLBINDRENDERBUFFERPROC glBindRenderbufferARB;
-extern GLDELETERENDERBUFFERSPROC glDeleteRenderbuffersARB;
-extern GLGENRENDERBUFFERSPROC glGenRenderbuffersARB;
-extern GLRENDERBUFFERSTORAGEPROC glRenderbufferStorageARB;
-extern GLGETRENDERBUFFERPARAMETERIVPROC glGetRenderbufferParameterivARB;
-extern GLISFRAMEBUFFERPROC glIsFramebufferARB;
-extern GLBINDFRAMEBUFFERPROC glBindFramebufferARB;
-extern GLDELETEFRAMEBUFFERSPROC glDeleteFramebuffersARB;
-extern GLGENFRAMEBUFFERSPROC glGenFramebuffersARB;
-extern GLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatusARB;
-extern GLFRAMEBUFFERTEXTURE1DPROC glFramebufferTexture1DARB;
-extern GLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2DARB;
-extern GLFRAMEBUFFERTEXTURE3DPROC glFramebufferTexture3DARB;
-extern GLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbufferARB;
-extern GLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC glGetFramebufferAttachmentParameterivARB;
-extern GLGENERATEMIPMAPPROC glGenerateMipmapARB;
-extern GLBLITFRAMEBUFFERPROC glBlitFramebufferARB;
-extern GLRENDERBUFFERSTORAGEMULTISAMPLEPROC glRenderbufferStorageMultisampleARB;
-extern GLFRAMEBUFFERTEXTURELAYERPROC glFramebufferTextureLayerARB;
+extern GLISRENDERBUFFERARBPROC lcIsRenderbufferARB;
+extern GLBINDRENDERBUFFERARBPROC lcBindRenderbufferARB;
+extern GLDELETERENDERBUFFERSARBPROC lcDeleteRenderbuffersARB;
+extern GLGENRENDERBUFFERSARBPROC lcGenRenderbuffersARB;
+extern GLRENDERBUFFERSTORAGEARBPROC lcRenderbufferStorageARB;
+extern GLGETRENDERBUFFERPARAMETERIVARBPROC lcGetRenderbufferParameterivARB;
+extern GLISFRAMEBUFFERARBPROC lcIsFramebufferARB;
+extern GLBINDFRAMEBUFFERARBPROC lcBindFramebufferARB;
+extern GLDELETEFRAMEBUFFERSARBPROC lcDeleteFramebuffersARB;
+extern GLGENFRAMEBUFFERSARBPROC lcGenFramebuffersARB;
+extern GLCHECKFRAMEBUFFERSTATUSARBPROC lcCheckFramebufferStatusARB;
+extern GLFRAMEBUFFERTEXTURE1DARBPROC lcFramebufferTexture1DARB;
+extern GLFRAMEBUFFERTEXTURE2DARBPROC lcFramebufferTexture2DARB;
+extern GLFRAMEBUFFERTEXTURE3DARBPROC lcFramebufferTexture3DARB;
+extern GLFRAMEBUFFERRENDERBUFFERARBPROC lcFramebufferRenderbufferARB;
+extern GLGETFRAMEBUFFERATTACHMENTPARAMETERIVARBPROC lcGetFramebufferAttachmentParameterivARB;
+extern GLGENERATEMIPMAPARBPROC lcGenerateMipmapARB;
+extern GLBLITFRAMEBUFFERARBPROC lcBlitFramebufferARB;
+extern GLRENDERBUFFERSTORAGEMULTISAMPLEARBPROC lcRenderbufferStorageMultisampleARB;
+extern GLFRAMEBUFFERTEXTURELAYERARBPROC lcFramebufferTextureLayerARB;
+
+#define glBindBuffer lcBindBufferARB
+#define glDeleteBuffers lcDeleteBuffersARB
+#define glGenBuffers lcGenBuffersARB
+#define glIsBuffer lcIsBufferARB
+#define glBufferData lcBufferDataARB
+#define glBufferSubData lcBufferSubDataARB
+#define glGetBufferSubData lcGetBufferSubDataARB
+#define glMapBuffer lcMapBufferARB
+#define glUnmapBuffer lcUnmapBufferARB
+#define glGetBufferParameteriv lcGetBufferParameterivARB
+#define glGetBufferPointerv lcGetBufferPointervARB
+
+#define glIsRenderbuffer lcIsRenderbufferARB
+#define glBindRenderbuffer lcBindRenderbufferARB
+#define glDeleteRenderbuffers lcDeleteRenderbuffersARB
+#define glGenRenderbuffers lcGenRenderbuffersARB
+#define glRenderbufferStorage lcRenderbufferStorageARB
+#define glGetRenderbufferParameteriv lcGetRenderbufferParameterivARB
+#define glIsFramebuffer lcIsFramebufferARB
+#define glBindFramebuffer lcBindFramebufferARB
+#define glDeleteFramebuffers lcDeleteFramebuffersARB
+#define glGenFramebuffers lcGenFramebuffersARB
+#define glCheckFramebufferStatus lcCheckFramebufferStatusARB
+#define glFramebufferTexture1D lcFramebufferTexture1DARB
+#define glFramebufferTexture2D lcFramebufferTexture2DARB
+#define glFramebufferTexture3D lcFramebufferTexture3DARB
+#define glFramebufferRenderbuffer lcFramebufferRenderbufferARB
+#define glGetFramebufferAttachmentParameteriv lcGetFramebufferAttachmentParameterivARB
+#define glGenerateMipmap lcGenerateMipmapARB
+#define glBlitFramebuffer lcBlitFramebufferARB
+#define glRenderbufferStorageMultisample lcRenderbufferStorageMultisampleARB
+#define glFramebufferTextureLayer lcFramebufferTextureLayerARB
 
 #endif // _OPENGL_H_

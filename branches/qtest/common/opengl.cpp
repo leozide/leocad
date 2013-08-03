@@ -6,40 +6,38 @@
 #include "mainwnd.h"
 #include "preview.h"
 
-#ifndef GL_VERSION_1_5
-GLBINDBUFFERPROC glBindBuffer;
-GLDELETEBUFFERSPROC glDeleteBuffers;
-GLGENBUFFERSPROC glGenBuffers;
-GLISBUFFERPROC glIsBuffer;
-GLBUFFERDATAPROC glBufferData;
-GLBUFFERSUBDATAPROC glBufferSubData;
-GLGETBUFFERSUBDATAPROC glGetBufferSubData;
-GLMAPBUFFERPROC glMapBuffer;
-GLUNMAPBUFFERPROC glUnmapBuffer;
-GLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
-GLGETBUFFERPOINTERVPROC glGetBufferPointerv;
-#endif
+GLBINDBUFFERARBPROC lcBindBufferARB;
+GLDELETEBUFFERSARBPROC lcDeleteBuffersARB;
+GLGENBUFFERSARBPROC lcGenBuffersARB;
+GLISBUFFERARBPROC lcIsBufferARB;
+GLBUFFERDATAARBPROC lcBufferDataARB;
+GLBUFFERSUBDATAARBPROC lcBufferSubDataARB;
+GLGETBUFFERSUBDATAARBPROC lcGetBufferSubDataARB;
+GLMAPBUFFERARBPROC lcMapBufferARB;
+GLUNMAPBUFFERARBPROC lcUnmapBufferARB;
+GLGETBUFFERPARAMETERIVARBPROC lcGetBufferParameterivARB;
+GLGETBUFFERPOINTERVARBPROC lcGetBufferPointervARB;
 
-GLISRENDERBUFFERPROC glIsRenderbufferARB;
-GLBINDRENDERBUFFERPROC glBindRenderbufferARB;
-GLDELETERENDERBUFFERSPROC glDeleteRenderbuffersARB;
-GLGENRENDERBUFFERSPROC glGenRenderbuffersARB;
-GLRENDERBUFFERSTORAGEPROC glRenderbufferStorageARB;
-GLGETRENDERBUFFERPARAMETERIVPROC glGetRenderbufferParameterivARB;
-GLISFRAMEBUFFERPROC glIsFramebufferARB;
-GLBINDFRAMEBUFFERPROC glBindFramebufferARB;
-GLDELETEFRAMEBUFFERSPROC glDeleteFramebuffersARB;
-GLGENFRAMEBUFFERSPROC glGenFramebuffersARB;
-GLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatusARB;
-GLFRAMEBUFFERTEXTURE1DPROC glFramebufferTexture1DARB;
-GLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2DARB;
-GLFRAMEBUFFERTEXTURE3DPROC glFramebufferTexture3DARB;
-GLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbufferARB;
-GLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC glGetFramebufferAttachmentParameterivARB;
-GLGENERATEMIPMAPPROC glGenerateMipmapARB;
-GLBLITFRAMEBUFFERPROC glBlitFramebufferARB;
-GLRENDERBUFFERSTORAGEMULTISAMPLEPROC glRenderbufferStorageMultisampleARB;
-GLFRAMEBUFFERTEXTURELAYERPROC glFramebufferTextureLayerARB;
+GLISRENDERBUFFERARBPROC lcIsRenderbufferARB;
+GLBINDRENDERBUFFERARBPROC lcBindRenderbufferARB;
+GLDELETERENDERBUFFERSARBPROC lcDeleteRenderbuffersARB;
+GLGENRENDERBUFFERSARBPROC lcGenRenderbuffersARB;
+GLRENDERBUFFERSTORAGEARBPROC lcRenderbufferStorageARB;
+GLGETRENDERBUFFERPARAMETERIVARBPROC lcGetRenderbufferParameterivARB;
+GLISFRAMEBUFFERARBPROC lcIsFramebufferARB;
+GLBINDFRAMEBUFFERARBPROC lcBindFramebufferARB;
+GLDELETEFRAMEBUFFERSARBPROC lcDeleteFramebuffersARB;
+GLGENFRAMEBUFFERSARBPROC lcGenFramebuffersARB;
+GLCHECKFRAMEBUFFERSTATUSARBPROC lcCheckFramebufferStatusARB;
+GLFRAMEBUFFERTEXTURE1DARBPROC lcFramebufferTexture1DARB;
+GLFRAMEBUFFERTEXTURE2DARBPROC lcFramebufferTexture2DARB;
+GLFRAMEBUFFERTEXTURE3DARBPROC lcFramebufferTexture3DARB;
+GLFRAMEBUFFERRENDERBUFFERARBPROC lcFramebufferRenderbufferARB;
+GLGETFRAMEBUFFERATTACHMENTPARAMETERIVARBPROC lcGetFramebufferAttachmentParameterivARB;
+GLGENERATEMIPMAPARBPROC lcGenerateMipmapARB;
+GLBLITFRAMEBUFFERARBPROC lcBlitFramebufferARB;
+GLRENDERBUFFERSTORAGEMULTISAMPLEARBPROC lcRenderbufferStorageMultisampleARB;
+GLFRAMEBUFFERTEXTURELAYERARBPROC lcFramebufferTextureLayerARB;
 
 bool GL_SupportsVertexBufferObject;
 bool GL_UseVertexBufferObject;
@@ -78,51 +76,46 @@ void GL_InitializeSharedExtensions(lcGLWidget* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
 
-#ifndef GL_VERSION_1_5
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
-		glBindBuffer = (GLBINDBUFFERPROC)Window->GetExtensionAddress("glBindBufferARB");
-		glDeleteBuffers = (GLDELETEBUFFERSPROC)Window->GetExtensionAddress("glDeleteBuffersARB");
-		glGenBuffers = (GLGENBUFFERSPROC)Window->GetExtensionAddress("glGenBuffersARB");
-		glIsBuffer = (GLISBUFFERPROC)Window->GetExtensionAddress("glIsBufferARB");
-		glBufferData = (GLBUFFERDATAPROC)Window->GetExtensionAddress("glBufferDataARB");
-		glBufferSubData = (GLBUFFERSUBDATAPROC)Window->GetExtensionAddress("glBufferSubDataARB");
-		glGetBufferSubData = (GLGETBUFFERSUBDATAPROC)Window->GetExtensionAddress("glGetBufferSubDataARB");
-		glMapBuffer = (GLMAPBUFFERPROC)Window->GetExtensionAddress("glMapBufferARB");
-		glUnmapBuffer = (GLUNMAPBUFFERPROC)Window->GetExtensionAddress("glUnmapBufferARB");
-		glGetBufferParameteriv = (GLGETBUFFERPARAMETERIVPROC)Window->GetExtensionAddress("glGetBufferParameterivARB");
-		glGetBufferPointerv = (GLGETBUFFERPOINTERVPROC)Window->GetExtensionAddress("glGetBufferPointervARB");
+		lcBindBufferARB = (GLBINDBUFFERARBPROC)Window->GetExtensionAddress("glBindBufferARB");
+		lcDeleteBuffersARB = (GLDELETEBUFFERSARBPROC)Window->GetExtensionAddress("glDeleteBuffersARB");
+		lcGenBuffersARB = (GLGENBUFFERSARBPROC)Window->GetExtensionAddress("glGenBuffersARB");
+		lcIsBufferARB = (GLISBUFFERARBPROC)Window->GetExtensionAddress("glIsBufferARB");
+		lcBufferDataARB = (GLBUFFERDATAARBPROC)Window->GetExtensionAddress("glBufferDataARB");
+		lcBufferSubDataARB = (GLBUFFERSUBDATAARBPROC)Window->GetExtensionAddress("glBufferSubDataARB");
+		lcGetBufferSubDataARB = (GLGETBUFFERSUBDATAARBPROC)Window->GetExtensionAddress("glGetBufferSubDataARB");
+		lcMapBufferARB = (GLMAPBUFFERARBPROC)Window->GetExtensionAddress("glMapBufferARB");
+		lcUnmapBufferARB = (GLUNMAPBUFFERARBPROC)Window->GetExtensionAddress("glUnmapBufferARB");
+		lcGetBufferParameterivARB = (GLGETBUFFERPARAMETERIVARBPROC)Window->GetExtensionAddress("glGetBufferParameterivARB");
+		lcGetBufferPointervARB = (GLGETBUFFERPOINTERVARBPROC)Window->GetExtensionAddress("glGetBufferPointervARB");
 
-        GL_UseVertexBufferObject = true;
+		GL_UseVertexBufferObject = true;
 		GL_SupportsVertexBufferObject = true;
 	}
-#else
-	GL_UseVertexBufferObject = true;
-	GL_SupportsVertexBufferObject = true;
-#endif
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_framebuffer_object"))
 	{
-		glIsRenderbufferARB = (GLISRENDERBUFFERPROC)Window->GetExtensionAddress("glIsRenderbuffer");
-		glBindRenderbufferARB = (GLBINDRENDERBUFFERPROC)Window->GetExtensionAddress("glBindRenderbuffer");
-		glDeleteRenderbuffersARB = (GLDELETERENDERBUFFERSPROC)Window->GetExtensionAddress("glDeleteRenderbuffers");
-		glGenRenderbuffersARB = (GLGENRENDERBUFFERSPROC)Window->GetExtensionAddress("glGenRenderbuffers");
-		glRenderbufferStorageARB = (GLRENDERBUFFERSTORAGEPROC)Window->GetExtensionAddress("glRenderbufferStorage");
-		glGetRenderbufferParameterivARB = (GLGETRENDERBUFFERPARAMETERIVPROC)Window->GetExtensionAddress("glGetRenderbufferParameteriv");
-		glIsFramebufferARB = (GLISFRAMEBUFFERPROC)Window->GetExtensionAddress("glIsFramebuffer");
-		glBindFramebufferARB = (GLBINDFRAMEBUFFERPROC)Window->GetExtensionAddress("glBindFramebuffer");
-		glDeleteFramebuffersARB = (GLDELETEFRAMEBUFFERSPROC)Window->GetExtensionAddress("glDeleteFramebuffers");
-		glGenFramebuffersARB = (GLGENFRAMEBUFFERSPROC)Window->GetExtensionAddress("glGenFramebuffers");
-		glCheckFramebufferStatusARB = (GLCHECKFRAMEBUFFERSTATUSPROC)Window->GetExtensionAddress("glCheckFramebufferStatus");
-		glFramebufferTexture1DARB = (GLFRAMEBUFFERTEXTURE1DPROC)Window->GetExtensionAddress("glFramebufferTexture1D");
-		glFramebufferTexture2DARB = (GLFRAMEBUFFERTEXTURE2DPROC)Window->GetExtensionAddress("glFramebufferTexture2D");
-		glFramebufferTexture3DARB = (GLFRAMEBUFFERTEXTURE3DPROC)Window->GetExtensionAddress("glFramebufferTexture3D");
-		glFramebufferRenderbufferARB = (GLFRAMEBUFFERRENDERBUFFERPROC)Window->GetExtensionAddress("glFramebufferRenderbuffer");
-		glGetFramebufferAttachmentParameterivARB = (GLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)Window->GetExtensionAddress("glGetFramebufferAttachmentParameteriv");
-		glGenerateMipmapARB = (GLGENERATEMIPMAPPROC)Window->GetExtensionAddress("glGenerateMipmap");
-		glBlitFramebufferARB = (GLBLITFRAMEBUFFERPROC)Window->GetExtensionAddress("glBlitFramebuffer");
-		glRenderbufferStorageMultisampleARB = (GLRENDERBUFFERSTORAGEMULTISAMPLEPROC)Window->GetExtensionAddress("glRenderbufferStorageMultisample");
-		glFramebufferTextureLayerARB = (GLFRAMEBUFFERTEXTURELAYERPROC)Window->GetExtensionAddress("glFramebufferTextureLayer");
+		lcIsRenderbufferARB = (GLISRENDERBUFFERARBPROC)Window->GetExtensionAddress("glIsRenderbuffer");
+		lcBindRenderbufferARB = (GLBINDRENDERBUFFERARBPROC)Window->GetExtensionAddress("glBindRenderbuffer");
+		lcDeleteRenderbuffersARB = (GLDELETERENDERBUFFERSARBPROC)Window->GetExtensionAddress("glDeleteRenderbuffers");
+		lcGenRenderbuffersARB = (GLGENRENDERBUFFERSARBPROC)Window->GetExtensionAddress("glGenRenderbuffers");
+		lcRenderbufferStorageARB = (GLRENDERBUFFERSTORAGEARBPROC)Window->GetExtensionAddress("glRenderbufferStorage");
+		lcGetRenderbufferParameterivARB = (GLGETRENDERBUFFERPARAMETERIVARBPROC)Window->GetExtensionAddress("glGetRenderbufferParameteriv");
+		lcIsFramebufferARB = (GLISFRAMEBUFFERARBPROC)Window->GetExtensionAddress("glIsFramebuffer");
+		lcBindFramebufferARB = (GLBINDFRAMEBUFFERARBPROC)Window->GetExtensionAddress("glBindFramebuffer");
+		lcDeleteFramebuffersARB = (GLDELETEFRAMEBUFFERSARBPROC)Window->GetExtensionAddress("glDeleteFramebuffers");
+		lcGenFramebuffersARB = (GLGENFRAMEBUFFERSARBPROC)Window->GetExtensionAddress("glGenFramebuffers");
+		lcCheckFramebufferStatusARB = (GLCHECKFRAMEBUFFERSTATUSARBPROC)Window->GetExtensionAddress("glCheckFramebufferStatus");
+		lcFramebufferTexture1DARB = (GLFRAMEBUFFERTEXTURE1DARBPROC)Window->GetExtensionAddress("glFramebufferTexture1D");
+		lcFramebufferTexture2DARB = (GLFRAMEBUFFERTEXTURE2DARBPROC)Window->GetExtensionAddress("glFramebufferTexture2D");
+		lcFramebufferTexture3DARB = (GLFRAMEBUFFERTEXTURE3DARBPROC)Window->GetExtensionAddress("glFramebufferTexture3D");
+		lcFramebufferRenderbufferARB = (GLFRAMEBUFFERRENDERBUFFERARBPROC)Window->GetExtensionAddress("glFramebufferRenderbuffer");
+		lcGetFramebufferAttachmentParameterivARB = (GLGETFRAMEBUFFERATTACHMENTPARAMETERIVARBPROC)Window->GetExtensionAddress("glGetFramebufferAttachmentParameteriv");
+		lcGenerateMipmapARB = (GLGENERATEMIPMAPARBPROC)Window->GetExtensionAddress("glGenerateMipmap");
+		lcBlitFramebufferARB = (GLBLITFRAMEBUFFERARBPROC)Window->GetExtensionAddress("glBlitFramebuffer");
+		lcRenderbufferStorageMultisampleARB = (GLRENDERBUFFERSTORAGEMULTISAMPLEARBPROC)Window->GetExtensionAddress("glRenderbufferStorageMultisample");
+		lcFramebufferTextureLayerARB = (GLFRAMEBUFFERTEXTURELAYERARBPROC)Window->GetExtensionAddress("glFramebufferTextureLayer");
 
 		GL_SupportsFramebufferObject = true;
 	}
@@ -139,25 +132,25 @@ bool GL_BeginRenderToTexture(int Width, int Height)
 
 	gMainWindow->mPreviewWidget->MakeCurrent();
 
-	glGenFramebuffersARB(1, &gFramebufferObject);
+	glGenFramebuffers(1, &gFramebufferObject);
 	glGenTextures(1, &gFramebufferTexture);
-	glGenRenderbuffersARB(1, &gDepthRenderbufferObject);
+	glGenRenderbuffers(1, &gDepthRenderbufferObject);
 
-	glBindFramebufferARB(GL_DRAW_FRAMEBUFFER, gFramebufferObject);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gFramebufferObject);
 
 	glBindTexture(GL_TEXTURE_2D, gFramebufferTexture);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glFramebufferTexture2DARB(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gFramebufferTexture, 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gFramebufferTexture, 0);
 
-	glBindRenderbufferARB(GL_RENDERBUFFER, gDepthRenderbufferObject);
-	glRenderbufferStorageARB(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
-	glFramebufferRenderbufferARB(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepthRenderbufferObject);
+	glBindRenderbuffer(GL_RENDERBUFFER, gDepthRenderbufferObject);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepthRenderbufferObject);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebufferARB(GL_FRAMEBUFFER, gFramebufferObject);
+	glBindFramebuffer(GL_FRAMEBUFFER, gFramebufferObject);
 
-	if (glCheckFramebufferStatusARB(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		GL_EndRenderToTexture();
 		return false;
@@ -168,10 +161,10 @@ bool GL_BeginRenderToTexture(int Width, int Height)
 
 void GL_EndRenderToTexture()
 {
-	glDeleteFramebuffersARB(1, &gFramebufferObject);
+	glDeleteFramebuffers(1, &gFramebufferObject);
 	gFramebufferObject = 0;
 	glDeleteTextures(1, &gFramebufferTexture);
 	gFramebufferTexture = 0;
-	glDeleteRenderbuffersARB(1, &gDepthRenderbufferObject);
+	glDeleteRenderbuffers(1, &gDepthRenderbufferObject);
 	gDepthRenderbufferObject = 0;
 }

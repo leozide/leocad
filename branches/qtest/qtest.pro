@@ -4,7 +4,10 @@ QT += core \
 	network
 TARGET = leocad
 TEMPLATE = app
-DEFINES += LC_INSTALL_PREFIX=\\\"/usr/local\\\"
+isEmpty(PREFIX) {
+    PREFIX = /usr
+}
+DEFINES += LC_INSTALL_PREFIX=\\\"$$PREFIX\\\"
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 greaterThan(QT_MAJOR_VERSION, 4) {
 	QT *= printsupport
@@ -170,13 +173,15 @@ FORMS += \
 OTHER_FILES += 
 RESOURCES += leocad.qrc
 
-target.path = /usr/bin
-desktop.path = /usr/share/applications
+unix {
+target.path = $$PREFIX/bin
+desktop.path = $$PREFIX/share/applications
 desktop.files += qt/leocad.desktop
-mime.path = /usr/share/mime/packages/
+mime.path = $$PREFIX/share/mime/packages/
 mime.files += qt/leocad.xml
 
 INSTALLS += target desktop mime
+}
 
 macx {
 ICON = resources/leocad.icns

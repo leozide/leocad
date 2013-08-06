@@ -1,19 +1,13 @@
-QT += core \
-    gui \
-	opengl \
-	network
+QT += core gui opengl network
 TARGET = leocad
 TEMPLATE = app
-isEmpty(PREFIX) {
-    PREFIX = /usr
-}
-DEFINES += LC_INSTALL_PREFIX=\\\"$$PREFIX\\\"
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
+
 greaterThan(QT_MAJOR_VERSION, 4) {
+	DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 	QT *= printsupport
 }
-INCLUDEPATH += qt \
-    common
+
+INCLUDEPATH += qt common
 CONFIG += precompile_header incremental
 PRECOMPILED_HEADER = common/lc_global.h
 win32 { 
@@ -35,6 +29,45 @@ OBJECTS_DIR = $$DESTDIR/.obj
 MOC_DIR = $$DESTDIR/.moc
 RCC_DIR = $$DESTDIR/.qrc
 UI_DIR = $$DESTDIR/.ui
+
+unix:!macx {
+	isEmpty(INSTALL_PREFIX):INSTALL_PREFIX = /usr
+	isEmpty(BIN_DIR):BIN_DIR = $$INSTALL_PREFIX/bin
+	isEmpty(DOCS_DIR):DOCS_DIR = $$INSTALL_PREFIX/share/doc/leocad
+	isEmpty(ICON_DIR):ICON_DIR = $$INSTALL_PREFIX/share/pixmaps
+	isEmpty(MAN_DIR):MAN_DIR = $$INSTALL_PREFIX/share/man/man1
+	isEmpty(DESKTOP_DIR):DESKTOP_DIR = $$INSTALL_PREFIX/share/applications
+	isEmpty(MIME_DIR):MIME_DIR = $$INSTALL_PREFIX/share/mime/packages
+	isEmpty(MIME_ICON_DIR):MIME_ICON_DIR = $$INSTALL_PREFIX/share/icons/hicolor/scalable/mimetypes
+
+	target.path = $$BIN_DIR
+	docs.path = $$DOCS_DIR
+	docs.files = docs/README.txt docs/CREDITS.txt docs/COPYING.txt
+	man.path = $$MAN_DIR
+	man.files = leocad.1
+	desktop.path = $$DESKTOP_DIR
+	desktop.files = qt/leocad.desktop
+	icon.path = $$ICON_DIR
+	icon.files = leocad.png
+	mime.path = $$MIME_DIR
+	mime.files = qt/leocad.xml
+	mime_icon.path = $$MIME_ICON_DIR
+	mime_icon.files = resources/application-vnd.leocad.svg
+
+	INSTALLS += target docs man desktop icon mime mime_icon
+
+	DEFINES += LC_INSTALL_PREFIX=\\\"$$INSTALL_PREFIX\\\"
+}
+
+macx {
+	ICON = resources/leocad.icns
+	QMAKE_INFO_PLIST = qt/Info.plist
+
+	library.files += library.bin
+	library.path = Contents/Resources
+
+	QMAKE_BUNDLE_DATA += library
+}
 
 SOURCES += common/view.cpp \
     common/tr.cpp \
@@ -172,23 +205,3 @@ FORMS += \
     qt/lc_qfinddialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
-
-unix {
-target.path = $$PREFIX/bin
-desktop.path = $$PREFIX/share/applications
-desktop.files += qt/leocad.desktop
-mime.path = $$PREFIX/share/mime/packages/
-mime.files += qt/leocad.xml
-
-INSTALLS += target desktop mime
-}
-
-macx {
-ICON = resources/leocad.icns
-QMAKE_INFO_PLIST = qt/Info.plist
-
-library.files += library.bin
-library.path = Contents/Resources
-
-QMAKE_BUNDLE_DATA += library
-}

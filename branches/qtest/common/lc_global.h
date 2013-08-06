@@ -6,12 +6,12 @@
 
 // Version number.
 #define LC_VERSION_MAJOR 0
-#define LC_VERSION_MINOR 79
-#define LC_VERSION_PATCH 3
-#define LC_VERSION_TEXT "0.79.3"
+#define LC_VERSION_MINOR 80
+#define LC_VERSION_PATCH 0
+#define LC_VERSION_TEXT "0.80.0"
 
 // Check for supported platforms.
-#if !defined(LC_WINDOWS) && !defined(LC_LINUX) && !defined(LC_QT)
+#ifndef LC_QT
 #error No OS defined.
 #endif
 

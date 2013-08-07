@@ -251,11 +251,11 @@ void lcQMainWindow::createMenus()
 	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PROPERTIES]);
-	menuFile->addAction(actions[LC_FILE_TERRAIN_EDITOR]);
+//	menuFile->addAction(actions[LC_FILE_TERRAIN_EDITOR]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PRINT]);
 	menuFile->addAction(actions[LC_FILE_PRINT_PREVIEW]);
-	menuFile->addAction(actions[LC_FILE_PRINT_BOM]);
+//	menuFile->addAction(actions[LC_FILE_PRINT_BOM]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_RECENT1]);
 	menuFile->addAction(actions[LC_FILE_RECENT2]);
@@ -788,7 +788,8 @@ void lcQMainWindow::print(QPrinter *printer)
 	project->SetAnimation(false);
 
 	QPainter painter(printer);
-	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4); // TODO: option to print background
+	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4);
+	// TODO: option to print background
 
 	for (int docCopy = 0; docCopy < docCopies; docCopy++)
 	{
@@ -854,8 +855,8 @@ void lcQMainWindow::print(QPrinter *printer)
 							QImage image = QImage((const lcuint8*)imageBuffer, stepWidth, stepHeight, QImage::Format_ARGB32_Premultiplied);
 
 							QRect rect = painter.viewport();
-							int left = rect.x() + 1 + (stepWidth * column);
-							int bottom = rect.y() + 1 + (stepHeight * row);
+							int left = rect.x() + (stepWidth * column);
+							int bottom = rect.y() + (stepHeight * row);
 
 							painter.drawImage(left, bottom, image);
 
@@ -898,47 +899,52 @@ void lcQMainWindow::print(QPrinter *printer)
 							QImage image = QImage((const lcuint8*)buffer, tileWidth, tileHeight, QImage::Format_ARGB32);
 
 							QRect rect = painter.viewport();
-							int left = rect.x() + 1 + (stepWidth * column);
-							int bottom = rect.y() + 1 + (stepHeight * row);
+							int left = rect.x() + (stepWidth * column);
+							int bottom = rect.y() + (stepHeight * row);
 
 							painter.drawImage(left, bottom, image);
 						}
-/*
-  TODO: print text and lines
 
-		DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
+						// TODO: add print options somewhere but Qt doesn't allow changes to the page setup dialog
+//						DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
 
-		if (dwPrint & PRINT_NUMBERS)
-		{
-			char tmp[4];
-			sprintf(tmp, "%d", nRenderTime);
+						QRect rect = painter.viewport();
+						int left = rect.x() + (stepWidth * column);
+						int right = rect.x() + (stepWidth * (column + 1));
+						int top = rect.y() + (stepHeight * row);
+						int bottom = rect.y() + (stepHeight * (row + 1));
 
-			CRect rcNumber(rc);
-			rcNumber.left += (w*c)+(int)(pDC->GetDeviceCaps(LOGPIXELSX)/2);
-			rcNumber.top += (h*r)+(int)(pDC->GetDeviceCaps(LOGPIXELSY)/2);
+//						if (print text)
+						{
+							QFont font("Helvetica", printer->resolution());
+							painter.setFont(font);
 
-			pDC->SetTextAlign(TA_TOP|TA_LEFT|TA_NOUPDATECP);
-			pDC->DrawText(tmp, strlen(tmp), rcNumber, DT_LEFT|DT_TOP|DT_SINGLELINE);
-		}
+							QFontMetrics fontMetrics(font);
 
-		if (dwPrint & PRINT_BORDER)
-		{
-			pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
-			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*r));
+							int textTop = top + printer->resolution() / 2 + fontMetrics.ascent();
+							int textLeft = left + printer->resolution() / 2;
 
-			pDC->MoveTo(rc.left+(w*c), rc.top+(h*r));
-			pDC->LineTo(rc.left+(w*c), rc.top+(h*(r+1)));
-			
-			pDC->MoveTo(rc.left+(w*(c+1)), rc.top+(h*r));
-			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*(r+1)));
+							painter.drawText(textLeft, textTop, QString::number(currentStep));
+						}
 
-			pDC->MoveTo(rc.left+(w*c), rc.top+(h*(r+1)));
-			pDC->LineTo(rc.left+(w*(c+1)), rc.top+(h*(r+1)));
-		}
-		*/
+//						if (print border)
+						{
+							QPen blackPen(Qt::black, 2);
+							painter.setPen(blackPen);
+
+							if (row == 0)
+								painter.drawLine(left, top, right, top);
+							if (column == 0)
+								painter.drawLine(left, top, left, bottom);
+							painter.drawLine(left, bottom, right, bottom);
+							painter.drawLine(right, top, right, bottom);
+						}
+
 						currentStep++;
 					}
 				}
+
+				// TODO: print header and footer
 
 				if (pageCopy < pageCopies - 1)
 					printer->newPage();
@@ -1011,7 +1017,6 @@ void lcQMainWindow::toggleFullScreen()
 		showNormal();
 	else
 		showFullScreen();
-
 }
 
 void lcQMainWindow::updateFocusObject(Object *focus)

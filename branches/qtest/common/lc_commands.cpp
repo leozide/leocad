@@ -112,7 +112,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_FILE_PRINT_PREVIEW
 	{
 		"File.PrintPreview",
-		"Print Pre&view",
+		"Print Pre&view...",
 		"Display how the project would look if printed",
 		""
 	},

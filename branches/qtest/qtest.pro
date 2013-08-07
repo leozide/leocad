@@ -1,5 +1,4 @@
 QT += core gui opengl network
-TARGET = leocad
 TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
@@ -21,6 +20,13 @@ win32 {
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
+
+unix:!macx {
+	TARGET = leocad
+} else {
+	TARGET = LeoCAD
+}
+
 
 release: DESTDIR = build/release
 debug:   DESTDIR = build/debug

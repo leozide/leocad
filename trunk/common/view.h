@@ -1,28 +1,29 @@
 #ifndef _VIEW_H_
 #define _VIEW_H_
 
-#include "glwindow.h"
+#include "lc_glwidget.h"
 
 class Camera;
 class Project;
 
-class View : public GLWindow
+class View : public lcGLWidget
 {
 public:
-	View(Project *pProject, GLWindow *share);
+	View(Project *project);
 	virtual ~View();
 
 	void OnDraw();
 	void OnInitialUpdate();
-	void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
-	void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
-	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
-	void OnMiddleButtonDown(int x, int y, bool Control, bool Shift);
-	void OnMiddleButtonUp(int x, int y, bool Control, bool Shift);
-	void OnRightButtonDown(int x, int y, bool Control, bool Shift);
-	void OnRightButtonUp(int x, int y, bool Control, bool Shift);
-	void OnMouseMove(int x, int y, bool Control, bool Shift);
-	void OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift);
+	void OnUpdateCursor();
+	void OnLeftButtonDown();
+	void OnLeftButtonUp();
+	void OnLeftButtonDoubleClick();
+	void OnMiddleButtonDown();
+	void OnMiddleButtonUp();
+	void OnRightButtonDown();
+	void OnRightButtonUp();
+	void OnMouseMove();
+	void OnMouseWheel(float Direction);
 
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();

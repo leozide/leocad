@@ -2,6 +2,7 @@
 #define _LC_APPLICATION_H_
 
 #include "array.h"
+#include "str.h"
 
 class Project;
 class lcPiecesLibrary;
@@ -15,37 +16,32 @@ public:
 	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
 	void Shutdown();
 
-	// Pieces library.
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
-	lcPiecesLibrary* GetPiecesLibrary() const
-	{
-		return m_Library;
-	}
 
-	// Projects.
-	void AddProject(Project* project);
+	void GetFileList(const char* Path, ObjArray<String>& FileList);
+	void OpenURL(const char* URL);
+	void SetClipboard(lcFile* Clipboard);
+	void ExportClipboard(lcMemFile* Clipboard);
 
-	Project* GetActiveProject() const
-	{
-		return m_ActiveProject;
-	}
-
-	void SetActiveProject(Project* project)
-	{
-		m_ActiveProject = project;
-	}
+	Project* mProject;
+	lcPiecesLibrary* m_Library;
+	lcFile* mClipboard;
 
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);
 	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
-
-	Project* m_ActiveProject;
-	PtrArray<Project> m_Projects;
-	lcPiecesLibrary* m_Library;
 };
 
 extern lcApplication* g_App;
-lcPiecesLibrary* lcGetPiecesLibrary();
-Project* lcGetActiveProject();
+
+inline lcPiecesLibrary* lcGetPiecesLibrary()
+{
+	return g_App->m_Library;
+}
+
+inline Project* lcGetActiveProject()
+{
+	return g_App->mProject;
+}
 
 #endif // _LC_APPLICATION_H_

@@ -49,7 +49,7 @@ public:
 		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
 
 	const char* GetName() const
-	{ return m_strName; };
+	{ return m_strName; }
 
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IsVisible(unsigned short nTime, bool bAnimation);
@@ -57,8 +57,8 @@ public:
 	void CreateName(Piece* pPiece);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
-	bool FileLoad(lcFile& file, char* name);
-	void FileSave(lcFile& file, Group* pGroups);
+	bool FileLoad(lcFile& file);
+	void FileSave(lcFile& file) const;
 
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);

@@ -1,7 +1,7 @@
 #ifndef _MINIFIG_H_
 #define _MINIFIG_H_
 
-#include "glwindow.h"
+#include "lc_glwidget.h"
 #include "lc_math.h"
 #include "array.h"
 
@@ -36,19 +36,27 @@ struct lcMinifigPieceInfo
 	lcMatrix44 Offset;
 };
 
-class MinifigWizard : public GLWindow
+struct lcMinifig
+{
+	PieceInfo* Parts[LC_MFW_NUMITEMS];
+	int Colors[LC_MFW_NUMITEMS];
+	float Angles[LC_MFW_NUMITEMS];
+	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
+};
+
+class MinifigWizard : public lcGLWidget
 {
 public:
-	MinifigWizard (GLWindow *share);
+	MinifigWizard(lcMinifig* Minifig);
 	~MinifigWizard ();
 
 	void OnDraw ();
-	void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
-	void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
-	void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
-	void OnRightButtonDown(int x, int y, bool Control, bool Shift);
-	void OnRightButtonUp(int x, int y, bool Control, bool Shift);
-	void OnMouseMove(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonDown();
+	void OnLeftButtonUp();
+	void OnLeftButtonDoubleClick();
+	void OnRightButtonDown();
+	void OnRightButtonUp();
+	void OnMouseMove();
 	void OnInitialUpdate();
 
 	void Calculate();
@@ -57,32 +65,16 @@ public:
 	void SetColor(int Type, int Color);
 	void SetAngle(int Type, float Angle);
 
-	void GetMinifigNames (char ***names, int *count);
-	void SaveMinifig (const char* name);
-	bool LoadMinifig (const char* name);
-	void DeleteMinifig (const char* name);
-
 	void ParseSettings(lcFile& Settings);
 
 	ObjArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
-	PieceInfo* m_Info[LC_MFW_NUMITEMS];
-	int m_Colors[LC_MFW_NUMITEMS];
-	float m_Angles[LC_MFW_NUMITEMS];
-	lcMatrix44 m_Matrices[LC_MFW_NUMITEMS];
+	lcMinifig* mMinifig;
 
-protected:
-	// saved minifig templates
-	int  m_MinifigCount;
-	char **m_MinifigNames;
-	char **m_MinifigTemplates;
-
-	// Mouse tracking.
 	int m_Tracking;
 	int m_DownX;
 	int m_DownY;
 
-	// Current camera settings.
 	float m_Distance;
 	float m_RotateX;
 	float m_RotateZ;

@@ -3,6 +3,10 @@
 
 #include "array.h"
 
+#ifdef DeleteFile
+#undef DeleteFile
+#endif
+
 class lcFile;
 
 // Date/time info.

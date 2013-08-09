@@ -1,17 +1,12 @@
-//
-// Piece Preview window
-//
-
 #include "lc_global.h"
 #include "preview.h"
-#include "globals.h"
 #include "project.h"
 #include "pieceinf.h"
 #include "system.h"
 #include "lc_application.h"
+#include "mainwnd.h"
 
-PiecePreview::PiecePreview(GLWindow *share)
-	: GLWindow(share)
+PiecePreview::PiecePreview()
 {
 	m_PieceInfo = NULL;
 	m_RotateX = 60.0f;
@@ -36,8 +31,8 @@ void PiecePreview::OnDraw()
 	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	float aspect = (float)m_nWidth/(float)m_nHeight;
-	glViewport(0, 0, m_nWidth, m_nHeight);
+	float aspect = (float)mWidth/(float)mHeight;
+	glViewport(0, 0, mWidth, mHeight);
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
@@ -64,7 +59,7 @@ void PiecePreview::OnDraw()
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_PieceInfo->RenderPiece(lcGetActiveProject()->GetCurrentColor());
+	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
@@ -84,18 +79,18 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	}
 }
 
-void PiecePreview::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnLeftButtonDown()
 {
 	if (m_Tracking == LC_TRACK_NONE)
 	{
-		m_DownX = x;
-		m_DownY = y;
+		m_DownX = mInputState.x;
+		m_DownY = mInputState.y;
 		m_Tracking = LC_TRACK_LEFT;
 		CaptureMouse();
 	}
 }
 
-void PiecePreview::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnLeftButtonUp()
 {
 	if (m_Tracking == LC_TRACK_LEFT)
 	{
@@ -104,24 +99,24 @@ void PiecePreview::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void PiecePreview::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnLeftButtonDoubleClick()
 {
 	m_AutoZoom = true;
 	Redraw();
 }
 
-void PiecePreview::OnRightButtonDown(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnRightButtonDown()
 {
 	if (m_Tracking == LC_TRACK_NONE)
 	{
-		m_DownX = x;
-		m_DownY = y;
+		m_DownX = mInputState.x;
+		m_DownY = mInputState.y;
 		m_Tracking = LC_TRACK_RIGHT;
 		CaptureMouse();
 	}
 }
 
-void PiecePreview::OnRightButtonUp(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnRightButtonUp()
 {
 	if (m_Tracking == LC_TRACK_RIGHT)
 	{
@@ -130,35 +125,35 @@ void PiecePreview::OnRightButtonUp(int x, int y, bool Control, bool Shift)
 	}
 }
 
-void PiecePreview::OnMouseMove(int x, int y, bool Control, bool Shift)
+void PiecePreview::OnMouseMove()
 {
 	if (m_Tracking == LC_TRACK_LEFT)
 	{
 		// Rotate.
-		m_RotateZ += x - m_DownX;
-		m_RotateX += y - m_DownY;
+		m_RotateZ += mInputState.x - m_DownX;
+		m_RotateX += mInputState.y - m_DownY;
 
 		if (m_RotateX > 179.5f)
 			m_RotateX = 179.5f;
 		else if (m_RotateX < 0.5f)
 			m_RotateX = 0.5f;
 
-		m_DownX = x;
-		m_DownY = y;
+		m_DownX = mInputState.x;
+		m_DownY = mInputState.y;
 
 		Redraw();
 	}
 	else if (m_Tracking == LC_TRACK_RIGHT)
 	{
 		// Zoom.
-		m_Distance += (float)(m_DownY - y) * 0.2f;
+		m_Distance += (float)(m_DownY - mInputState.y) * 0.2f;
 		m_AutoZoom = false;
 
 		if (m_Distance < 0.5f)
 			m_Distance = 0.5f;
 
-		m_DownX = x;
-		m_DownY = y;
+		m_DownX = mInputState.x;
+		m_DownY = mInputState.y;
 
 		Redraw();
 	}

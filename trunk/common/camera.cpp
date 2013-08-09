@@ -6,7 +6,6 @@
 #include <math.h>
 #include <float.h>
 #include "opengl.h"
-#include "globals.h"
 #include "lc_file.h"
 #include "camera.h"
 #include "view.h"
@@ -665,7 +664,7 @@ void Camera::LoadProjection(float fAspect)
 
 void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 
@@ -687,7 +686,7 @@ void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* P
 
 void Camera::ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
-	int Viewport[4] = { 0, 0, view->GetWidth(), view->GetHeight() };
+	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
 
 	const lcMatrix44& ModelView = mWorldView;
@@ -781,7 +780,7 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 		Z[1] = -Z[1];
 		dx = -dx;
 	}
-
+ 
 	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
 	lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(0.1f * dy / (21 - mouse))), YRot), lcMatrix44RotationZ(-0.1f * dx / (21 - mouse)));
 

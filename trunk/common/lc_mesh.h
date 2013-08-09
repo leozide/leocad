@@ -33,8 +33,8 @@ public:
 	{
 		if (mBuffer)
 		{
-			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-			glDeleteBuffersARB(1, &mBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+			glDeleteBuffers(1, &mBuffer);
 		}
 
 		free(mData);
@@ -53,11 +53,11 @@ public:
 			return;
 
 		if (!mBuffer)
-			glGenBuffersARB(1, &mBuffer);
+			glGenBuffers(1, &mBuffer);
 
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, mBuffer);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, mSize, mData, GL_STATIC_DRAW_ARB);
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, mBuffer);
+		glBufferData(GL_ARRAY_BUFFER_ARB, mSize, mData, GL_STATIC_DRAW_ARB);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 	}
 
 	void* mData;
@@ -79,8 +79,8 @@ public:
 	{
 		if (mBuffer)
 		{
-			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-			glDeleteBuffersARB(1, &mBuffer);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+			glDeleteBuffers(1, &mBuffer);
 		}
 
 		free(mData);
@@ -99,11 +99,11 @@ public:
 			return;
 
 		if (!mBuffer)
-			glGenBuffersARB(1, &mBuffer);
+			glGenBuffers(1, &mBuffer);
 
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mBuffer);
-		glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mSize, mData, GL_STATIC_DRAW_ARB);
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, mBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB, mSize, mData, GL_STATIC_DRAW_ARB);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
 
 	void* mData;

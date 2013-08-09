@@ -1,6 +1,8 @@
 #ifndef _GROUP_H_
 #define _GROUP_H_
 
+#define LC_MAX_GROUP_NAME 64
+
 class Group
 {
 public:
@@ -18,7 +20,7 @@ public:
 	void FileLoad(lcFile* file);
 	void FileSave(lcFile* file, Group* pGroups);
 
-	char m_strName[65];
+	char m_strName[LC_MAX_GROUP_NAME + 1];
 	float m_fCenter[3];
 };
 

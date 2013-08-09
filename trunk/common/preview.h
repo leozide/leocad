@@ -1,23 +1,23 @@
 #ifndef _PREVIEW_H_
 #define _PREVIEW_H_
 
-#include "glwindow.h"
+#include "lc_glwidget.h"
 
 class PieceInfo;
 
-class PiecePreview : public GLWindow
+class PiecePreview : public lcGLWidget
 {
 public:
-	PiecePreview(GLWindow *share);
+	PiecePreview();
 	virtual ~PiecePreview();
 
 	void OnDraw();
-  void OnLeftButtonDown(int x, int y, bool Control, bool Shift);
-  void OnLeftButtonUp(int x, int y, bool Control, bool Shift);
-  void OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift);
-  void OnRightButtonDown(int x, int y, bool Control, bool Shift);
-  void OnRightButtonUp(int x, int y, bool Control, bool Shift);
-  void OnMouseMove(int x, int y, bool Control, bool Shift);
+	void OnLeftButtonDown();
+	void OnLeftButtonUp();
+	void OnLeftButtonDoubleClick();
+	void OnRightButtonDown();
+	void OnRightButtonUp();
+	void OnMouseMove();
 
 	PieceInfo* GetCurrentPiece() const
 	{ return m_PieceInfo; }

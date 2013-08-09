@@ -1,40 +1,15 @@
 #ifndef _BASEWND_H_
 #define _BASEWND_H_
 
-#include <string.h>
+#include "defines.h"
+#include "lc_math.h"
+#include "array.h"
+#include "project.h"
+#include "lc_category.h"
+#include "image.h"
+#include "lc_shortcuts.h"
 
-// FIXME: move this to another place
-#ifdef WIN32
-#include "stdafx.h"
-typedef CWnd* BaseWndXID;
-typedef struct
-{
-  CWnd* wnd;
-  int index;
-  UINT command;
-} BaseMenuItem;
-#endif
-
-#ifdef LC_LINUX
-#include <gtk/gtk.h>
-typedef GtkWidget* BaseWndXID;
-typedef struct
-{
-  GtkWidget* widget;
-  GtkAccelGroup* accel;
-} BaseMenuItem;
-#endif
-
-#ifdef LC_MACOSX
-typedef void* BaseWndXID;
-typedef struct
-{
-	void* Dummy;
-} BaseMenuItem;
-#endif
-
-// =============================================================================
-// Message Box constants
+class Group;
 
 #define LC_OK           1
 #define LC_CANCEL       2
@@ -59,44 +34,155 @@ typedef struct
 #define LC_MB_TYPEMASK           0x00F
 #define LC_MB_ICONMASK           0x0F0
 
-// =============================================================================
+enum LC_DIALOG_TYPE
+{
+	LC_DIALOG_OPEN_PROJECT,
+	LC_DIALOG_SAVE_PROJECT,
+	LC_DIALOG_MERGE_PROJECT,
+	LC_DIALOG_SAVE_IMAGE,
+	LC_DIALOG_EXPORT_3DSTUDIO,
+	LC_DIALOG_EXPORT_BRICKLINK,
+	LC_DIALOG_EXPORT_CSV,
+	LC_DIALOG_EXPORT_HTML,
+	LC_DIALOG_EXPORT_POVRAY,
+	LC_DIALOG_EXPORT_WAVEFRONT,
+	LC_DIALOG_PROPERTIES,
+	LC_DIALOG_PRINT,
+	LC_DIALOG_FIND,
+	LC_DIALOG_SELECT_BY_NAME,
+	LC_DIALOG_MINIFIG,
+	LC_DIALOG_PIECE_ARRAY,
+	LC_DIALOG_PIECE_GROUP,
+	LC_DIALOG_EDIT_GROUPS,
+	LC_DIALOG_PREFERENCES,
+	LC_DIALOG_CHECK_UPDATES,
+	LC_DIALOG_ABOUT
+};
 
-class BaseWnd
+struct lcImageDialogOptions
+{
+	char FileName[LC_MAXPATH];
+	LC_IMAGE_FORMAT Format;
+	bool Transparent;
+	int Width;
+	int Height;
+	int Start;
+	int End;
+};
+
+struct lcHTMLDialogOptions
+{
+	char PathName[LC_MAXPATH];
+	LC_IMAGE_FORMAT ImageFormat;
+	bool TransparentImages;
+	bool SinglePage;
+	bool IndexPage;
+	int StepImagesWidth;
+	int StepImagesHeight;
+	bool HighlightNewParts;
+	bool PartsListStep;
+	bool PartsListEnd;
+	bool PartsListImages;
+	int PartImagesColor;
+	int PartImagesWidth;
+	int PartImagesHeight;
+};
+
+struct lcPOVRayDialogOptions
+{
+	char FileName[LC_MAXPATH];
+	char POVRayPath[LC_MAXPATH];
+	char LGEOPath[LC_MAXPATH];
+	bool Render;
+};
+
+struct lcPropertiesDialogOptions
+{
+	const char* Title;
+
+	char Author[101];
+	char Description[101];
+	char Comments[256];
+
+	int BackgroundType;
+	lcVector3 SolidColor;
+	lcVector3 GradientColor1;
+	lcVector3 GradientColor2;
+	char BackgroundFileName[LC_MAXPATH];
+	bool BackgroundTile;
+	bool FogEnabled;
+	float FogDensity;
+	lcVector3 FogColor;
+	lcVector3 AmbientColor;
+	bool DrawFloor;
+	bool SetDefault;
+
+	ObjArray<lcPiecesUsedEntry> PartsUsed;
+};
+
+struct lcArrayDialogOptions
+{
+	int Counts[3];
+	lcVector3 Offsets[3];
+	lcVector3 Rotations[3];
+};
+
+struct lcEditGroupsDialogOptions
+{
+	PtrArray<Group> PieceParents;
+	PtrArray<Group> GroupParents;
+};
+
+struct lcSelectDialogOptions
+{
+	ObjArray<bool> Selection;
+};
+
+struct lcPreferencesDialogOptions
+{
+	char DefaultAuthor[101];
+	char ProjectsPath[LC_MAXPATH];
+	char LibraryPath[LC_MAXPATH];
+	int MouseSensitivity;
+	int CheckForUpdates;
+
+	lcuint32 Snap;
+	lcuint32 Detail;
+	float LineWidth;
+	int AASamples;
+	int GridSize;
+
+	ObjArray<lcLibraryCategory> Categories;
+	bool CategoriesModified;
+	bool CategoriesDefault;
+
+	lcKeyboardShortcuts KeyboardShortcuts;
+	bool ShortcutsModified;
+	bool ShortcutsDefault;
+};
+
+class lcBaseWindow
 {
  public:
-  BaseWnd (BaseWnd *parent, int menu_count);
-  virtual ~BaseWnd ();
+	lcBaseWindow()
+	{
+		mHandle = NULL;
+	}
 
-  int MessageBox (const char* text, const char* caption="LeoCAD", int flags=LC_MB_OK|LC_MB_ICONINFORMATION);
-  void BeginWait ();
-  void EndWait ();
-  void SetTitle (const char *title);
+	~lcBaseWindow()
+	{
+	}
 
-  void ShowMenuItem (int id, bool show);
-  void EnableMenuItem (int id, bool enable);
-  void CheckMenuItem (int id, bool check);
-  void SetMenuItemText (int id, const char *text);
+	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
 
-  BaseWndXID GetXID () const
-    { return m_pXID; }
-  void SetXID (BaseWndXID id)
-    { m_pXID = id; }
+	int DoMessageBox(const char* Text, int Flags = LC_MB_OK | LC_MB_ICONINFORMATION)
+	{
+		return DoMessageBox(Text, "LeoCAD", Flags);
+	}
 
-#ifdef LC_LINUX 
-  // FIXME: remove
-  operator GtkWidget* () const
-    { return m_pXID; }
-#endif
+	int DoMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
 
-  BaseMenuItem* GetMenuItem (int id) const
-    { return &m_pMenuItems[id]; }
-  void SetMenuItem (int id, BaseMenuItem* item)
-    { memcpy (&m_pMenuItems[id], item, sizeof (BaseMenuItem)); }
-
- protected:
-  BaseWnd* m_pParent;
-  BaseWndXID m_pXID;
-  BaseMenuItem* m_pMenuItems;
+	void* mHandle;
 };
 
 #endif // _BASEWND_H_

@@ -3,48 +3,35 @@
 #include "lc_application.h"
 #include "lc_colors.h"
 #include "lc_library.h"
+#include "lc_profile.h"
 #include "system.h"
 #include "console.h"
 #include "opengl.h"
 #include "project.h"
 #include "image.h"
-
-// ----------------------------------------------------------------------------
-// Global functions.
+#include "mainwnd.h"
+#include "lc_shortcuts.h"
 
 lcApplication* g_App;
 
-lcPiecesLibrary* lcGetPiecesLibrary()
-{
-	LC_ASSERT(g_App, "g_App not initialized.");
-	return g_App->GetPiecesLibrary();
-}
-
-Project* lcGetActiveProject()
-{
-	LC_ASSERT(g_App, "g_App not initialized.");
-	return g_App->GetActiveProject();
-}
-
-// ----------------------------------------------------------------------------
-// lcApplication class.
-
 lcApplication::lcApplication()
 {
-	m_ActiveProject = NULL;
+	mProject = NULL;
 	m_Library = NULL;
+	mClipboard = NULL;
 }
 
 lcApplication::~lcApplication()
 {
+	delete mClipboard;
 }
 
-void lcApplication::AddProject(Project* project)
+void lcApplication::SetClipboard(lcFile* Clipboard)
 {
-	m_Projects.Add(project);
+	delete mClipboard;
+	mClipboard = Clipboard;
 
-	if (m_ActiveProject == NULL)
-		m_ActiveProject = project;
+	gMainWindow->UpdatePaste(mClipboard != NULL);
 }
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath)
@@ -68,7 +55,9 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		}
 		else
 		{
-			const char* CustomPath = Sys_ProfileLoadString("Settings", "CustomPiecesLibrary", "");
+			char CustomPath[LC_MAXPATH];
+
+			strcpy(CustomPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
 
 			if (CustomPath[0])
 			{
@@ -141,8 +130,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	bool ImageAnimation = false;
 	bool ImageInstructions = false;
 	bool ImageHighlight = false;
-	int ImageWidth = Sys_ProfileLoadInt("Default", "Image Width", 640);
-	int ImageHeight = Sys_ProfileLoadInt("Default", "Image Height", 480);
+	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	char* ImageName = NULL;
@@ -200,7 +189,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
-				printf("Copyright (c) 1996-2006, BT Software\n");
 				printf("Compiled "__DATE__"\n");
 
 				return false;
@@ -209,7 +197,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			{
 				printf("Usage: leocad [options] [file]\n");
 				printf("  [options] can be:\n");
-				printf("  --libgl <path>: Searches for OpenGL libraries in path.\n");
 				printf("  -l, --libpath <path>: Loads the Pieces Library from path.\n");
 				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
 				printf("  -w, --width <width>: Sets the picture width.\n");
@@ -232,10 +219,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 	}
 
-	// Initialize other systems.
-	if (!GL_Initialize(GLPath))
-		return false;
-
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LibraryCachePath))
 	{
 		if (SaveImage)
@@ -246,20 +229,17 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		m_Library->CreateBuiltinPieces();
 
-		SystemDoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
-		                   "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
+		gMainWindow->DoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
+		                          "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
 
-	SystemInit();
-
 	// Create a new project.
-	Project* project = new Project();
-	AddProject(project);
+	mProject = new Project();
 
 	GL_DisableVertexBufferObject();
 
 	// Load project.
-	if (ProjectName && project->OpenProject(ProjectName))
+	if (ProjectName && mProject->OpenProject(ProjectName))
 	{
 		if (!SaveImage)
 			return true;
@@ -289,45 +269,31 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				Ext.MakeLower();
 			}
 
-			if ((Ext == "bmp") || (Ext == "gif"))
+			if (Ext == "bmp")
 				NeedExt = false;
-#ifdef LC_HAVE_JPEGLIB
 			else if ((Ext == "jpg") || (Ext == "jpeg"))
 				NeedExt = false;
-#endif
-#ifdef LC_HAVE_PNGLIB
 			else if (Ext == "png")
 				NeedExt = false;
-#endif
 		}
 
 		// Setup default options.
-		LC_IMAGE_OPTS ImageOptions;
-		unsigned long image = Sys_ProfileLoadInt  ("Default", "Image Options", 1|LC_IMAGE_TRANSPARENT);
-		ImageOptions.quality = Sys_ProfileLoadInt ("Default", "JPEG Quality", 70);
-		ImageOptions.interlaced = (image & LC_IMAGE_PROGRESSIVE) != 0;
-		ImageOptions.transparent = (image & LC_IMAGE_TRANSPARENT) != 0;
-		ImageOptions.truecolor = (image & LC_IMAGE_HIGHCOLOR) != 0;
-		ImageOptions.format = image & ~(LC_IMAGE_MASK);
-		ImageOptions.background[0] = (unsigned char)(project->GetBackgroundColor()[0]*255);
-		ImageOptions.background[1] = (unsigned char)(project->GetBackgroundColor()[1]*255);
-		ImageOptions.background[2] = (unsigned char)(project->GetBackgroundColor()[2]*255);
+		int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
+		bool ImageTransparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+		LC_IMAGE_FORMAT ImageFormat = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
 
 		// Append file extension if needed.
 		if (NeedExt)
 		{
-			switch (ImageOptions.format)
+			switch (ImageFormat)
 			{
-			default:
 			case LC_IMAGE_BMP:
 				FileName += ".bmp";
-				break;
-			case LC_IMAGE_GIF:
-				FileName += ".gif";
 				break;
 			case LC_IMAGE_JPG:
 				FileName += ".jpg";
 				break;
+			default:
 			case LC_IMAGE_PNG:
 				FileName += ".png";
 				break;
@@ -335,9 +301,9 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		if (ImageInstructions)
-			project->SetAnimation(false);
+			mProject->SetAnimation(false);
 		else if (ImageAnimation)
-			project->SetAnimation(true);
+			mProject->SetAnimation(true);
 
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
@@ -346,7 +312,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		if ((ImageStart == 0) && (ImageEnd == 0))
 		{
-			ImageStart = ImageEnd = project->GetCurrentTime();
+			ImageStart = ImageEnd = mProject->GetCurrentTime();
 		}
 		else if ((ImageStart == 0) && (ImageEnd != 0))
 		{
@@ -357,13 +323,13 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			ImageEnd = ImageStart;
 		}
 
-		if (project->IsAnimation())
+		if (mProject->IsAnimation())
 		{
-			if (ImageStart > project->GetTotalFrames())
-				ImageStart = project->GetTotalFrames();
+			if (ImageStart > mProject->GetTotalFrames())
+				ImageStart = mProject->GetTotalFrames();
 
-			if (ImageEnd > project->GetTotalFrames())
-				ImageEnd = project->GetTotalFrames();
+			if (ImageEnd > mProject->GetTotalFrames())
+				ImageEnd = mProject->GetTotalFrames();
 		}
 		else
 		{
@@ -375,7 +341,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		Image* images = new Image[ImageEnd - ImageStart + 1];
-		project->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
+		mProject->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
 
 		for (int i = 0; i <= ImageEnd - ImageStart; i++)
 		{
@@ -392,7 +358,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else
 				Frame = FileName;
 
-			images[i].FileSave(Frame, &ImageOptions);
+			images[i].FileSave(Frame, ImageFormat, ImageTransparent);
 		}
 
 		delete []images;
@@ -404,24 +370,16 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		if (SaveImage)
 			return false;
 		else
-			project->OnNewDocument();
+			mProject->OnNewDocument();
 	}
+
+	lcLoadDefaultKeyboardShortcuts();
 
 	return true;
 }
 
 void lcApplication::Shutdown()
 {
-	for (int i = 0; i < m_Projects.GetSize(); i++)
-	{
-		Project* project = m_Projects[i];
-
-		project->HandleNotify(LC_ACTIVATE, 0);
-		delete project;
-	}
-
 	delete m_Library;
 	m_Library = NULL;
-
-	GL_Shutdown();
 }

@@ -163,9 +163,9 @@ LONG WINAPI SehHandler(PEXCEPTION_POINTERS pExceptionPtrs)
 
 	MINIDUMP_EXCEPTION_INFORMATION mei;
 
-    mei.ThreadId = GetCurrentThreadId();
-    mei.ExceptionPointers = pExceptionPtrs;
-    mei.ClientPointers = TRUE;
+	mei.ThreadId = GetCurrentThreadId();
+	mei.ExceptionPointers = pExceptionPtrs;
+	mei.ClientPointers = TRUE;
 
 	BOOL bWriteDump = pfnMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, pExceptionPtrs ? &mei : NULL, NULL, NULL);
 
@@ -397,9 +397,9 @@ void CCADApp::UpdateMRU(char names[4][MAX_PATH])
 {
 	if (m_pRecentFileList)
 	{
-		for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
-			m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
-	}
+	for (int iMRU = 0; iMRU < m_pRecentFileList->m_nSize; iMRU++)
+		m_pRecentFileList->m_arrNames[iMRU] = names[iMRU];
+}
 }
 
 static BOOL SetRegKey(LPCTSTR lpszKey, LPCTSTR lpszValue, LPCTSTR lpszValueName = NULL)

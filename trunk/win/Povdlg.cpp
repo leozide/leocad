@@ -57,31 +57,12 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CPOVDlg message handlers
 
-BOOL CPOVDlg::OnInitDialog() 
-{
-	m_bRender = theApp.GetProfileInt ("Settings", "POV Render", 1);
-	m_strPOV = theApp.GetProfileString ("Settings", "POV-Ray", "");
-	m_strLGEO = theApp.GetProfileString ("Settings", "LGEO", "");
-
-	CDialog::OnInitDialog();
-	
-	return TRUE;
-}
-
 void CPOVDlg::OnOK() 
 {
 	UpdateData (TRUE);
 
 	if (m_strOut.GetLength() == 0)
 		return;
-
-	if (m_strLGEO.GetLength() > 0)
-		if (m_strLGEO[m_strLGEO.GetLength()-1] != '\\') 
-			m_strLGEO += "\\";
-
-	theApp.WriteProfileInt ("Settings", "POV Render", m_bRender);
-	theApp.WriteProfileString ("Settings", "POV-Ray", m_strPOV);
-	theApp.WriteProfileString ("Settings", "LGEO", m_strLGEO);
 
 	CDialog::OnOK();
 }

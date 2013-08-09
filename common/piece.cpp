@@ -14,6 +14,7 @@
 #include "group.h"
 #include "project.h"
 #include "lc_application.h"
+#include "lc_library.h"
 
 #define LC_PIECE_SAVE_VERSION 11 // LeoCAD 0.77
 
@@ -69,7 +70,7 @@ void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
 	mPieceInfo->AddRef();
 }
 
-bool Piece::FileLoad(lcFile& file, char* name)
+bool Piece::FileLoad(lcFile& file)
 {
   lcuint8 version, ch;
 
@@ -174,6 +175,7 @@ bool Piece::FileLoad(lcFile& file, char* name)
   }
 
   // Common to all versions.
+	char name[LC_PIECE_NAME_LEN];
   if (version < 10)
   {
 	  memset(name, 0, LC_PIECE_NAME_LEN);
@@ -181,6 +183,9 @@ bool Piece::FileLoad(lcFile& file, char* name)
   }
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
+
+	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
+	SetPieceInfo(pInfo);
 
 	// 11 (0.77)
 	if (version < 11)
@@ -250,7 +255,7 @@ bool Piece::FileLoad(lcFile& file, char* name)
   return true;
 }
 
-void Piece::FileSave(lcFile& file, Group* pGroups)
+void Piece::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_PIECE_SAVE_VERSION);
 
@@ -275,6 +280,7 @@ void Piece::FileSave(lcFile& file, Group* pGroups)
 
 	if (m_pGroup != NULL)
 	{
+		Group* pGroups = lcGetActiveProject()->m_pGroups;
 		for (i = 0; pGroups; pGroups = pGroups->m_pNext)
 		{
 			if (m_pGroup == pGroups)

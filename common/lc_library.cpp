@@ -5,7 +5,9 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 #include "lc_texture.h"
-#include "system.h"
+#include "lc_category.h"
+#include "lc_application.h"
+#include "mainwnd.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -20,11 +22,9 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mNumOfficialPieces = 0;
 	mLibraryPath[0] = 0;
 	mCacheFileName[0] = 0;
-	mCategoriesFile[0] = 0;
 	mCacheFileModifiedTime = 0;
 	mLibraryFileName[0] = 0;
-	mCategoriesModified = false;
-  	mZipFile = NULL;
+	mZipFile = NULL;
 	mCacheFile = NULL;
 	mCacheFileName[0] = 0;
 	mSaveCache = false;
@@ -123,11 +123,8 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 			return false;
 	}
 
-	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
-	if (!FileName[0] || !LoadCategories(FileName))
-		ResetCategories();
-
-	SystemUpdateCategories(false);
+	lcLoadDefaultCategories();
+	gMainWindow->UpdateCategories();
 
 	return true;
 }
@@ -220,8 +217,14 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 	strcpy(mCacheFileName, CachePath);
 	mCacheFileModifiedTime = 0;
 
-	if (CachePath[0])
+	if (mCacheFileName[0])
+	{
+		int Length = strlen(mCacheFileName);
+		if (mCacheFileName[Length] != '/' && mCacheFileName[Length] != '\\')
+			strcat(mCacheFileName, "/");
+
 		strcat(mCacheFileName, "library.cache");
+	}
 
 	if (stat(FileName, &LibraryStat) == 0)
 	{
@@ -368,7 +371,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		strcat(FileName, "parts/");
 		int PathLength = strlen(FileName);
 
-		Sys_GetFileList(FileName, FileList);
+		g_App->GetFileList(FileName, FileList);
 
 		mPieces.Expand(FileList.GetSize());
 
@@ -444,7 +447,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
 		PathLength += strchr(PrimitiveDirectories[DirectoryIdx], '/') - PrimitiveDirectories[DirectoryIdx] + 1;
 
-		Sys_GetFileList(FileName, FileList);
+		g_App->GetFileList(FileName, FileList);
 
 		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 		{
@@ -483,7 +486,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	strcat(FileName, "parts/textures/");
 	int PathLength = strlen(FileName);
 
-	Sys_GetFileList(FileName, FileList);
+	g_App->GetFileList(FileName, FileList);
 
 	mTextures.Expand(FileList.GetSize());
 
@@ -931,14 +934,9 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	}
 	else
 	{
-		lcDiskFile TextureFile;
-
 		sprintf(FileName, "%sparts/textures/%s.png", mLibraryPath, Name);
 
-		if (!TextureFile.Open(FileName, "rb"))
-			return false;
-
-		if (!Texture->Load(TextureFile))
+		if (!Texture->Load(FileName))
 			return false;
 	}
 
@@ -1811,29 +1809,24 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKey
 	return PieceName.Match(Keywords);
 }
 
-int lcPiecesLibrary::GetFirstPieceCategory(PieceInfo* Info) const
+void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
 {
-	for (int i = 0; i < mCategories.GetSize(); i++)
-		if (PieceInCategory(Info, mCategories[i].Keywords))
-			return i;
+	if (gCategories[CategoryIndex].Name == "Search Results")
+		GroupPieces = false;
 
-	return -1;
+	SearchPieces(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
 }
 
-void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
 {
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
-
-	// Don't group entries in the search results category.
-	if (mCategories[CategoryIndex].Name == "Search Results")
-		GroupPieces = false;
 
 	for (int i = 0; i < mPieces.GetSize(); i++)
 	{
 		PieceInfo* Info = mPieces[i];
 
-		if (!PieceInCategory(Info, mCategories[CategoryIndex].Keywords))
+		if (!PieceInCategory(Info, CategoryKeywords))
 			continue;
 
 		if (!GroupPieces)
@@ -1918,248 +1911,6 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>&
 	}
 }
 
-void lcPiecesLibrary::ResetCategories()
-{
-	struct CategoryEntry
-	{
-		const char* Name;
-		const char* Keywords;
-	};
-
-	// Animal, Antenna, Arch, Arm, Bar, Baseplate, Belville, Boat, Bracket, Brick,
-	// Car, Cone, Container, Conveyor, Crane, Cylinder, Door, Electric, Exhaust,
-	// Fence, Flag, Forklift, Freestyle, Garage, Gate, Glass, Grab, Hinge, Homemaker,
-	// Hose, Jack, Ladder, Lever, Magnet, Minifig, Minifig Accessory, Panel, Plane,
-	// Plant, Plate, Platform, Propellor, Rack, Roadsign, Rock, Scala, Slope, Staircase,
-	// Support, Tail, Tap, Technic, Tile, Tipper, Tractor, Trailer, Train, Turntable,
-	// Tyre, Wedge, Wheel, Winch, Window, Windscreen, Wing
-	CategoryEntry DefaultCategories[] =
-	{
-		{ "Animal", "^%Animal | ^%Bone" },
-		{ "Antenna", "^%Antenna" },
-		{ "Arch", "^%Arch" },
-		{ "Bar", "^%Bar" },
-		{ "Baseplate", "^%Baseplate | ^%Platform" },
-		{ "Boat", "^%Boat" },
-		{ "Brick", "^%Brick" },
-		{ "Container", "^%Container | ^%Box | ^Chest | ^%Storage | ^Mailbox" },
-		{ "Door and Window", "^%Door | ^%Window | ^%Glass | ^%Freestyle | ^%Gate | ^%Garage | ^%Roller" },
-		{ "Electric", "^%Electric" },
-		{ "Hinge and Bracket", "^%Hinge | ^%Bracket | ^%Turntable" },
-		{ "Hose", "^%Hose | ^%String" },
-		{ "Minifig", "^%Minifig" },
-		{ "Miscellaneous", "^%Arm | ^%Barrel | ^%Brush | ^%Claw | ^%Cockpit | ^%Conveyor | ^%Crane | ^%Cupboard | ^%Fence | ^%Jack | ^%Ladder | ^%Motor | ^%Rock | ^%Rope | ^%Sheet | ^%Sports | ^%Staircase | ^%Stretcher | ^%Tap | ^%Tipper | ^%Trailer | ^%Umbrella | ^%Winch" },
-		{ "Other", "^%Ball | ^%Belville | ^%Die | ^%Duplo | ^%Fabuland | ^%Figure | ^%Homemaker | ^%Maxifig | ^%Microfig | ^%Mursten | ^%Scala | ^%Znap" },
-		{ "Panel", "^%Panel | ^%Castle Wall | ^%Castle Turret" },
-		{ "Plant", "^%Plant" },
-		{ "Plate", "^%Plate" },
-		{ "Round", "^%Cylinder | ^%Cone | ^%Dish | ^%Dome | ^%Hemisphere | ^%Round" },
-		{ "Sign and Flag", "^%Flag | ^%Roadsign | ^%Streetlight | ^%Flagpost | ^%Lamppost | ^%Signpost" },
-		{ "Slope", "^%Slope | ^%Roof" },
-		{ "Space", "^%Space" },
-		{ "Sticker", "^%Sticker" },
-		{ "Support", "^%Support" },
-		{ "Technic", "^%Technic | ^%Rack" },
-		{ "Tile", "^%Tile" },
-		{ "Train", "^%Train | ^%Monorail | ^%Magnet" },
-		{ "Tyre and Wheel", "^%Tyre | %^Wheel | %^Wheels | ^%Castle Wagon" },
-		{ "Vehicle", "^%Bike | ^%Canvas | ^%Car | ^%Excavator | ^%Exhaust | ^%Forklift | ^%Grab Jaw | ^%Landing | ^%Motorcycle | ^%Plane | ^%Propellor | ^%Tail | ^%Tractor | ^%Vehicle | ^%Wheelbarrow" },
-		{ "Windscreen", "^%Windscreen" },
-		{ "Wedge", "^%Wedge" },
-		{ "Wing", "^%Wing" },
-	};
-	const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
-
-	mCategories.RemoveAll();
-	for (int i = 0; i < NumCategories; i++)
-	{
-		lcLibraryCategory& Category = mCategories.Add();
-
-		Category.Name = DefaultCategories[i].Name;
-		Category.Keywords = DefaultCategories[i].Keywords;
-	}
-
-	strcpy(mCategoriesFile, "");
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-	mCategoriesModified = false;
-}
-
-bool lcPiecesLibrary::LoadCategories(const char* FileName)
-{
-	char Path[LC_MAXPATH];
-
-	if (FileName)
-	{
-		strcpy(Path, FileName);
-	}
-	else
-	{
-		LC_FILEOPENDLG_OPTS opts;
-
-		opts.type = LC_FILEOPENDLG_LCF;
-		strcpy(opts.path, mCategoriesFile);
-
-		if (!SystemDoDialog(LC_DLG_FILE_OPEN, &opts))
-			return false;
-
-		strcpy(Path, (char*)opts.filenames);
-
-		free(opts.filenames);
-	}
-
-	// Load the file.
-	lcDiskFile File;
-
-	if (!File.Open(Path, "rb"))
-		return false;
-
-	lcuint32 i;
-
-	File.ReadU32(&i, 1);
-	if (i != LC_FILE_ID)
-		return false;
-
-	File.ReadU32(&i, 1);
-	if (i != LC_CATEGORY_FILE_ID)
-		return false;
-
-	File.ReadU32(&i, 1);
-	if (i != LC_CATEGORY_FILE_VERSION)
-		return false;
-
-	mCategories.RemoveAll();
-
-	File.ReadU32(&i, 1);
-	while (i--)
-	{
-		lcLibraryCategory& Category = mCategories.Add();
-
-		File.ReadString(Category.Name);
-		File.ReadString(Category.Keywords);
-	}
-
-	strcpy(mCategoriesFile, Path);
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-	mCategoriesModified = false;
-
-	return true;
-}
-
-bool lcPiecesLibrary::SaveCategories()
-{
-	if (mCategoriesModified)
-	{
-		switch (SystemDoMessageBox("Save changes to categories?", LC_MB_YESNOCANCEL | LC_MB_ICONQUESTION))
-		{
-			case LC_CANCEL:
-				return false;
-
-			case LC_YES:
-				if (!DoSaveCategories(false))
-					return false;
-				break;
-
-			case LC_NO:
-				return true;
-				break;
-		}
-	}
-
-	return true;
-}
-
-bool lcPiecesLibrary::DoSaveCategories(bool AskName)
-{
-	// Get the file name.
-	if (AskName || !mCategoriesFile[0])
-	{
-		LC_FILESAVEDLG_OPTS opts;
-
-		opts.type = LC_FILESAVEDLG_LCF;
-		strcpy(opts.path, mCategoriesFile);
-
-		if (!SystemDoDialog(LC_DLG_FILE_SAVE, &opts))
-			return false;
-
-		strcpy(mCategoriesFile, opts.path);
-	}
-
-	// Save the file.
-	lcDiskFile File;
-
-	if (!File.Open(mCategoriesFile, "wb"))
-		return false;
-
-	File.WriteU32(LC_FILE_ID);
-	File.WriteU32(LC_CATEGORY_FILE_ID);
-	File.WriteU32(LC_CATEGORY_FILE_VERSION);
-
-	int NumCategories = mCategories.GetSize();
-	int i;
-
-	for (i = 0; i < mCategories.GetSize(); i++)
-	{
-		if (mCategories[i].Name == "Search Results")
-		{
-			NumCategories--;
-			break;
-		}
-	}
-
-	File.WriteU32(NumCategories);
-	for (i = 0; i < mCategories.GetSize(); i++)
-	{
-		if (mCategories[i].Name == "Search Results")
-			continue;
-
-		File.WriteString(mCategories[i].Name);
-		File.WriteString(mCategories[i].Keywords);
-	}
-
-	Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-	mCategoriesModified = false;
-
-	return true;
-}
-
-int lcPiecesLibrary::FindCategoryIndex(const String& CategoryName) const
-{
-	for (int i = 0; i < mCategories.GetSize(); i++)
-		if (mCategories[i].Name == CategoryName)
-			return i;
-
-	return -1;
-}
-
-void lcPiecesLibrary::SetCategory(int Index, const String& Name, const String& Keywords)
-{
-	mCategories[Index].Name = Name;
-	mCategories[Index].Keywords = Keywords;
-
-	SystemUpdateCategories(true);
-
-	mCategoriesModified = true;
-}
-
-void lcPiecesLibrary::AddCategory(const String& Name, const String& Keywords)
-{
-	lcLibraryCategory& Category = mCategories.Add();
-
-	Category.Name = Name;
-	Category.Keywords = Keywords;
-
-	SystemUpdateCategories(true);
-
-	mCategoriesModified = true;
-}
-
-void lcPiecesLibrary::RemoveCategory(int Index)
-{
-	mCategories.RemoveIndex(Index);
-
-	mCategoriesModified = true;
-}
-
 void lcPiecesLibrary::CreateBuiltinPieces()
 {
 	const char* Pieces[][2] =
@@ -2236,40 +1987,8 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 
 	lcLoadDefaultColors();
 
-	const char* FileName = Sys_ProfileLoadString("Settings", "Categories", "");
-	if (!FileName[0] || !LoadCategories(FileName))
-	{
-		struct CategoryEntry
-		{
-			const char* Name;
-			const char* Keywords;
-		};
-
-		CategoryEntry DefaultCategories[] =
-		{
-//			{ "Baseplate", "^%Baseplate" },
-			{ "Brick", "^%Brick" },
-			{ "Plate", "^%Plate" },
-//			{ "Slope", "^%Slope" },
-//			{ "Tile", "^%Tile" },
-		};
-		const int NumCategories = sizeof(DefaultCategories)/sizeof(DefaultCategories[0]);
-
-		mCategories.RemoveAll();
-		for (int i = 0; i < NumCategories; i++)
-		{
-			lcLibraryCategory& Category = mCategories.Add();
-
-			Category.Name = DefaultCategories[i].Name;
-			Category.Keywords = DefaultCategories[i].Keywords;
-		}
-
-		strcpy(mCategoriesFile, "");
-		Sys_ProfileSaveString("Settings", "Categories", mCategoriesFile);
-		mCategoriesModified = false;
-	}
-
-	SystemUpdateCategories(false);
+	lcLoadDefaultCategories(true);
+	gMainWindow->UpdateCategories();
 }
 
 bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
@@ -2284,7 +2003,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		int StudsX, StudsY;
 		float MinZ = Brick ? -0.96f : -0.32f;
 
-		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsX, &StudsY);
+		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsY, &StudsX);
 
 		int NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 16;
 		int NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;
@@ -2337,7 +2056,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 				*Verts++ = Center[0]; *Verts++ = Center[1]; *Verts++ = 0.16f;
 
 				for (int Step = 0; Step < StudSides; Step++)
-				{
+	{
 					float s = Center[0] + sinf((float)Step / (float)StudSides * LC_2PI) * 0.24f;
 					float c = Center[1] + cosf((float)Step / (float)StudSides * LC_2PI) * 0.24f;
 
@@ -2345,7 +2064,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 					*Verts++ = s; *Verts++ = c; *Verts++ = 0.0f;
 				}
 			}
-		}
+	}
 
 		lcMeshSection* Section = &Mesh->mSections[0];
 		Section->ColorIndex = gDefaultColor;
@@ -2397,14 +2116,14 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		*Indices++ = 9; *Indices++ = 14; *Indices++ = 13;
 
 		for (int x = 0; x < StudsX; x++)
-		{
+	{
 			for (int y = 0; y < StudsY; y++)
-			{
+		{
 				int CenterIndex = 16 + (StudSides * 2 + 1) * (x + StudsX * y);
 				int BaseIndex = CenterIndex + 1;
 
 				for (int Step = 0; Step < StudSides; Step++)
-				{
+	{
 					*Indices++ = CenterIndex;
 					*Indices++ = BaseIndex + Step * 2;
 					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2;
@@ -2418,7 +2137,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2 + 1;
 				}
 			}
-		}
+	}
 
 		Section = &Mesh->mSections[1];
 		Section->ColorIndex = gEdgeColor;

@@ -1,6 +1,6 @@
 #ifndef _CURVE_H_
 #define _CURVE_H_
-
+#if 0
 #include "object.h"
 #include "opengl.h"
 #include "array.h"
@@ -123,5 +123,5 @@ class Curve : public Object
 
   PtrArray<CurvePoint> m_Points;
 };
-
+#endif
 #endif // _CURVE_H_

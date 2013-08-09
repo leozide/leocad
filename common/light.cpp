@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "light.h"
-#include "globals.h"
 
 static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 {
@@ -192,7 +191,7 @@ void Light::Select(bool bSelecting, bool bFocus, bool bMultiple)
 			m_nState &= ~(LC_LIGHT_FOCUSED);
 		else
 			m_nState &= ~(LC_LIGHT_SELECTED|LC_LIGHT_FOCUSED);
-	}
+	} 
 }
 
 void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
@@ -219,7 +218,7 @@ void Light::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
 			m_nState &= ~(LC_LIGHT_TARGET_FOCUSED);
 		else
 			m_nState &= ~(LC_LIGHT_TARGET_SELECTED|LC_LIGHT_TARGET_FOCUSED);
-	}
+	} 
 }
 
 void Light::MinIntersectDist(lcClickLine* ClickLine)

@@ -5,12 +5,16 @@
 #include "view.h"
 #include "system.h"
 
-View::View(Project *pProject, GLWindow *share)
-	: GLWindow(share)
+View::View(Project *project)
 {
-	m_Project = pProject;
+	m_Project = project;
 	mCamera = NULL;
 	m_OverlayScale = 1.0f;
+
+	if (project->GetActiveView())
+		SetCamera(project->GetActiveView()->mCamera, false);
+	else
+		SetDefaultCamera();
 }
 
 View::~View()
@@ -55,7 +59,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 	switch (m_Project->GetAction())
 	{
 		case LC_ACTION_SELECT:
-			if (Sys_KeyDown(KEY_CONTROL))
+			if (mInputState.Control)
 				return LC_CURSOR_SELECT_GROUP;
 			else
 				return LC_CURSOR_SELECT;
@@ -110,7 +114,6 @@ LC_CURSOR_TYPE View::GetCursor() const
 		case LC_ACTION_ROLL:
 			return LC_CURSOR_ROLL;
 
-		case LC_ACTION_CURVE:
 		default:
 			LC_ASSERT_FALSE("Unknown cursor type.");
 			return LC_CURSOR_DEFAULT;
@@ -124,51 +127,55 @@ void View::OnDraw()
 
 void View::OnInitialUpdate()
 {
-	GLWindow::OnInitialUpdate();
 	m_Project->AddView(this);
 }
 
-void View::OnLeftButtonDown(int x, int y, bool Control, bool Shift)
+void View::OnUpdateCursor()
 {
-	m_Project->OnLeftButtonDown(this, x, y, Control, Shift);
+	SetCursor(GetCursor());
 }
 
-void View::OnLeftButtonUp(int x, int y, bool Control, bool Shift)
+void View::OnLeftButtonDown()
 {
-	m_Project->OnLeftButtonUp(this, x, y, Control, Shift);
+	m_Project->OnLeftButtonDown(this);
 }
 
-void View::OnLeftButtonDoubleClick(int x, int y, bool Control, bool Shift)
+void View::OnLeftButtonUp()
 {
-	m_Project->OnLeftButtonDoubleClick(this, x, y, Control, Shift);
+	m_Project->OnLeftButtonUp(this);
 }
 
-void View::OnMiddleButtonDown(int x, int y, bool Control, bool Shift)
+void View::OnLeftButtonDoubleClick()
 {
-	m_Project->OnMiddleButtonDown(this, x, y, Control, Shift);
+	m_Project->OnLeftButtonDoubleClick(this);
 }
 
-void View::OnMiddleButtonUp(int x, int y, bool Control, bool Shift)
+void View::OnMiddleButtonDown()
 {
-	m_Project->OnMiddleButtonUp(this, x, y, Control, Shift);
+	m_Project->OnMiddleButtonDown(this);
 }
 
-void View::OnRightButtonDown(int x, int y, bool Control, bool Shift)
+void View::OnMiddleButtonUp()
 {
-	m_Project->OnRightButtonDown(this, x, y, Control, Shift);
+	m_Project->OnMiddleButtonUp(this);
 }
 
-void View::OnRightButtonUp(int x, int y, bool Control, bool Shift)
+void View::OnRightButtonDown()
 {
-	m_Project->OnRightButtonUp(this, x, y, Control, Shift);
+	m_Project->OnRightButtonDown(this);
 }
 
-void View::OnMouseMove(int x, int y, bool Control, bool Shift)
+void View::OnRightButtonUp()
 {
-	m_Project->OnMouseMove(this, x, y, Control, Shift);
+	m_Project->OnRightButtonUp(this);
 }
 
-void View::OnMouseWheel(int x, int y, float Direction, bool Control, bool Shift)
+void View::OnMouseMove()
 {
-	m_Project->OnMouseWheel(this, x, y, Direction, Control, Shift);
+	m_Project->OnMouseMove(this);
+}
+
+void View::OnMouseWheel(float Direction)
+{
+	m_Project->OnMouseWheel(this, Direction);
 }

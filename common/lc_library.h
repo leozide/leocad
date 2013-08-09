@@ -9,9 +9,6 @@
 class PieceInfo;
 class lcZipFile;
 
-#define LC_CATEGORY_FILE_ID       LC_FOURCC('C', 'A', 'T', 0)
-#define LC_CATEGORY_FILE_VERSION  0x0100
-
 enum LC_MESH_PRIMITIVE_TYPE
 {
 	LC_MESH_LINES,
@@ -98,12 +95,6 @@ public:
 	lcLibraryMeshData mMeshData;
 };
 
-struct lcLibraryCategory
-{
-	String Name;
-	String Keywords;
-};
-
 class lcPiecesLibrary
 {
 public:
@@ -126,21 +117,12 @@ public:
 	void CloseCache();
 
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
-	int GetFirstPieceCategory(PieceInfo* Info) const;
+	void SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
-	int FindCategoryIndex(const String& CategoryName) const;
-	void SetCategory(int Index, const String& Name, const String& Keywords);
-	void AddCategory(const String& Name, const String& Keywords);
-	void RemoveCategory(int Index);
-	void ResetCategories();
-	bool LoadCategories(const char* FileName);
-	bool SaveCategories();
-	bool DoSaveCategories(bool AskName);
 
 	PtrArray<PieceInfo> mPieces;
 	PtrArray<lcLibraryPrimitive> mPrimitives;
-	ObjArray<lcLibraryCategory> mCategories;
 	int mNumOfficialPieces;
 
 	PtrArray<lcTexture> mTextures;
@@ -158,9 +140,6 @@ protected:
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, ObjArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
-
-	bool mCategoriesModified;
-	char mCategoriesFile[LC_MAXPATH];
 
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;

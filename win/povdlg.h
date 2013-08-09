@@ -39,7 +39,6 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CPOVDlg)
-	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	afx_msg void OnPovbrowse();
 	afx_msg void OnPovoutbrowse();

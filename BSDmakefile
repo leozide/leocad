@@ -1,2 +1,0 @@
-all:
-	gmake ${.MAKEFLAGS} ${.TARGETS}

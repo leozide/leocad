@@ -1,102 +1,60 @@
-//
-// Main LeoCAD window
-//
-
 #include "lc_global.h"
-#include <stdio.h>
 #include "mainwnd.h"
-#include "system.h"
+#include "lc_profile.h"
+#include "preview.h"
 
-MainWnd::MainWnd ()
-  : BaseWnd (NULL, LC_MAINWND_NUM_COMMANDS)
-{
-  char entry[8];
-  int i;
+lcMainWindow* gMainWindow;
 
-  for (i = 0; i < LC_MRU_MAX; i++)
+lcMainWindow::lcMainWindow()
   {
-    sprintf (entry, "File%d", i+1);
-    m_strMRU[i] = Sys_ProfileLoadString ("RecentFiles", entry, "");
-  }
+	mColorIndex = 0;
+	mPreviewWidget = NULL;
+
+	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
+		strcpy(mRecentFiles[FileIdx], lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx)));
+
+	gMainWindow = this;
 }
 
-MainWnd::~MainWnd ()
+lcMainWindow::~lcMainWindow()
 {
-  char entry[8];
-  int i;
+	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
+		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 
-  for (i = 0; i < LC_MRU_MAX; i++)
-  {
-    sprintf (entry, "File%d", i+1);
-    Sys_ProfileSaveString ("RecentFiles", entry, m_strMRU[i]);
-  }
+	gMainWindow = NULL;
 }
 
-// =============================================================================
-// recently used files
-
-void MainWnd::UpdateMRU ()
-{
-#ifdef LC_WINDOWS
-  // FIXME !!
-  void SystemUpdateRecentMenu(char names[4][MAX_PATH]);
-  char names[4][MAX_PATH];
-
-  for (int i = 0; i < LC_MRU_MAX; i++)
-    strcpy (names[i], m_strMRU[i]);
-
-  SystemUpdateRecentMenu(names);
-#else
-  for (int i = 0; i < LC_MRU_MAX; i++)
+void lcMainWindow::SetColorIndex(int ColorIndex)
   {
-    if (m_strMRU[i].IsEmpty ())
-    {
-      if (i == 0)
-      {
-        SetMenuItemText (LC_MAINWND_RECENT1, "Recent Files");
-        EnableMenuItem (LC_MAINWND_RECENT1, false);
-      }
-      else
-        ShowMenuItem (LC_MAINWND_RECENT1+i, false);
-    }
-    else
-    {
-      char text[LC_MAXPATH+8];
-      sprintf (text, "&%d- %s", i+1, (char*)m_strMRU[i]);
+	mColorIndex = ColorIndex;
 
-      ShowMenuItem (LC_MAINWND_RECENT1+i, true);
-      EnableMenuItem (LC_MAINWND_RECENT1+i, true);
-      SetMenuItemText (LC_MAINWND_RECENT1+i, text);
-    }
-  }
-#endif
+	if (mPreviewWidget)
+		mPreviewWidget->Redraw();
 }
 
-void MainWnd::AddToMRU(const char* Filename)
+void lcMainWindow::AddRecentFile(const char* FileName)
 {
-	// Make a copy of the string in case we're loading a file from the MRU menu.
-	String str = Filename;
-	int i;
+	int FileIdx;
 
-	// Search for Filename in the MRU list.
-	for (i = 0; i < (LC_MRU_MAX - 1); i++)
-		if (m_strMRU[i] == Filename)
+	for (FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
+		if (!strcmp(mRecentFiles[FileIdx], FileName))
 			break;
 
-	// Move MRU strings before this one down.
-	for (; i > 0; i--)
-		m_strMRU[i] = m_strMRU[i-1];
+	for (FileIdx = lcMin(FileIdx, LC_MAX_RECENT_FILES - 1); FileIdx > 0; FileIdx--)
+		strcpy(mRecentFiles[FileIdx], mRecentFiles[FileIdx - 1]);
 
-	m_strMRU[0] = str;
+	strcpy(mRecentFiles[0], FileName);
 
-	UpdateMRU();
+	UpdateRecentFiles();
 }
 
-void MainWnd::RemoveFromMRU(int index)
+void lcMainWindow::RemoveRecentFile(int FileIndex)
 {
-  for (int i = index; i < (LC_MRU_MAX - 1); i++)
-    m_strMRU[i] = m_strMRU[i+1];
-  m_strMRU[LC_MRU_MAX - 1].Empty ();
+	for (int FileIdx = FileIndex; FileIdx < LC_MAX_RECENT_FILES - 1; FileIdx++)
+		strcpy(mRecentFiles[FileIdx], mRecentFiles[FileIdx + 1]);
 
-  UpdateMRU ();
+	mRecentFiles[LC_MAX_RECENT_FILES - 1][0] = 0;
+
+	UpdateRecentFiles();
 }
+

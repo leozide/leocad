@@ -96,7 +96,7 @@ void PieceInfo::Load()
 		lcGetPiecesLibrary()->GeneratePiece(this);
 	else
 		lcGetPiecesLibrary()->LoadPiece(this);
-}
+	}
 
 void PieceInfo::Unload()
 {

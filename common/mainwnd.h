@@ -1,34 +1,60 @@
 #ifndef _MAINWND_H_
 #define _MAINWND_H_
 
-#include "str.h"
 #include "basewnd.h"
+#include "array.h"
 
-#define LC_MRU_MAX 4
+class Object;
+class Camera;
+class PiecePreview;
 
-typedef enum
-{
-  LC_MAINWND_RECENT1,
-  LC_MAINWND_RECENT2,
-  LC_MAINWND_RECENT3,
-  LC_MAINWND_RECENT4,
-  LC_MAINWND_NUM_COMMANDS
-} LC_MAINWND_COMMANDS;
+#define LC_MAX_RECENT_FILES 4
 
-class MainWnd : public BaseWnd
+class lcMainWindow : public lcBaseWindow
 {
  public:
-  MainWnd ();
-  virtual ~MainWnd ();
+	lcMainWindow();
+	~lcMainWindow();
 
-  void UpdateMRU ();
-  void AddToMRU (const char *filename);
-  void RemoveFromMRU (int index);
-  const char* GetMRU (int index) const
-    { return m_strMRU[index]; }
+	void SetColorIndex(int ColorIndex);
+	void Close();
 
- protected:
-  String m_strMRU[LC_MRU_MAX];
+	void AddRecentFile(const char* FileName);
+	void RemoveRecentFile(int FileIndex);
+
+	void SplitHorizontal();
+	void SplitVertical();
+	void RemoveView();
+	void ResetViews();
+
+	void TogglePrintPreview();
+	void ToggleFullScreen();
+
+	void UpdateFocusObject(Object* Focus);
+	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);
+	void UpdateAction(int NewAction);
+	void UpdatePaste(bool Enabled);
+	void UpdateTime(bool Animation, int CurrentTime, int TotalTime);
+	void UpdateAnimation(bool Animation, bool AddKeys);
+	void UpdateLockSnap(lcuint32 Snap);
+	void UpdateSnap();
+	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
+	void UpdateTransformType(int NewType);
+	void UpdateCurrentCamera(int CameraIndex);
+	void UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera);
+	void UpdateCategories();
+	void UpdateTitle(const char* Title, bool Modified);
+	void UpdateModified(bool Modified);
+	void UpdateRecentFiles();
+	void UpdateShortcuts();
+
+	lcVector3 GetTransformAmount();
+
+	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
+	PiecePreview* mPreviewWidget;
+	int mColorIndex;
 };
+
+extern class lcMainWindow* gMainWindow;
 
 #endif // _MAINWND_H_

@@ -273,41 +273,6 @@ static UINT APIENTRY OFNSaveHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARA
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Wait cursor
-
-static int g_nWaitCursorCount;          // for wait cursor (>0 => waiting)
-static HCURSOR g_hcurWaitCursorRestore; // old cursor to restore after wait cursor
-
-// 0 => restore, 1=> begin, -1=> end
-void SystemDoWaitCursor(int nCode)
-{
-	g_nWaitCursorCount += nCode;
-	if (g_nWaitCursorCount > 0)
-	{
-		HCURSOR hcurWait = ::LoadCursor(NULL, IDC_WAIT);
-		HCURSOR hcurPrev = ::SetCursor(hcurWait);
-		if (nCode > 0 && g_nWaitCursorCount == 1)
-			g_hcurWaitCursorRestore = hcurPrev;
-	}
-	else
-	{
-		// turn everything off
-		g_nWaitCursorCount = 0;     // prevent underflow
-		::SetCursor(g_hcurWaitCursorRestore);
-	}
-}
-
-void Sys_BeginWait ()
-{
-	SystemDoWaitCursor (1);
-}
-
-void Sys_EndWait ()
-{
-	SystemDoWaitCursor (-1);
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // Profile Access
 
 // returns the store value or default
@@ -337,24 +302,13 @@ bool Sys_ProfileSaveString(const char* section, const char* entry, const char* v
 /////////////////////////////////////////////////////////////////////////////
 // User Interface
 
-static HBITMAP hbmMenuDot;
-static const BYTE rgbDot[] =
-	{ 0x6, 0xF, 0xF, 0xF, 0x6 }; // simple byte bitmap, 1=> bit on
-#define DOT_WIDTH   4
-#define DOT_HEIGHT  5
-
 void SystemFinish()
 {
-	DeleteObject(hbmMenuDot);
 }
 
 void SystemInit()
 {
 	ClipboardFormat = RegisterClipboardFormat(_T("LeoCAD_Data"));
-
-	// initialize wait cursor state
-	g_nWaitCursorCount = 0;
-	g_hcurWaitCursorRestore = NULL;
 }
 
 static void CheckToolBarButton(CMFCToolBar& ToolBar, int ID, bool Check)
@@ -403,15 +357,6 @@ void SystemUpdateColorList(int nNew)
 		return;
 
 	pFrame->PostMessage (WM_LC_UPDATE_LIST, 0, nNew+1);
-}
-
-void SystemUpdateRenderingMode(bool bFast)
-{
-	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-	if (!pFrame)
-		return;
-
-	CheckToolBarButton(pFrame->m_wndStandardBar, ID_RENDER_BOX, bFast);
 }
 
 void SystemUpdateUndoRedo(char* undo, char* redo)

@@ -23,25 +23,30 @@ bool lcTexture::Load()
 
 bool lcTexture::Load(const char* FileName, int Flags)
 {
-	lcDiskFile File;
+	Image image;
 
-	if (!File.Open(FileName, "rb"))
+	if (!image.FileLoad(FileName))
 		return false;
 
-	return Load(File, Flags);
+	return Load(image, Flags);
 }
 
-bool lcTexture::Load(lcFile& File, int Flags)
+bool lcTexture::Load(lcMemFile& File, int Flags)
 {
 	Image image;
 
 	if (!image.FileLoad(File))
 		return false;
 
+	return Load(image, Flags);
+}
+
+bool lcTexture::Load(Image& image, int Flags)
+{
 	image.ResizePow2();
 
-	mWidth = image.Width();
-	mHeight = image.Height();
+	mWidth = image.mWidth;
+	mHeight = image.mHeight;
 
 	glGenTextures(1, &mTexture);
 
@@ -54,10 +59,10 @@ bool lcTexture::Load(lcFile& File, int Flags)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	int Format = image.Alpha() ? GL_RGBA : GL_RGB;
-	void* Data = image.GetData();
+	int Format = image.mAlpha ? GL_RGBA : GL_RGB;
+	void* Data = image.mData;
 
-	glTexImage2D(GL_TEXTURE_2D, 0, image.Alpha() ? GL_RGBA : GL_RGB, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
+	glTexImage2D(GL_TEXTURE_2D, 0, image.mAlpha ? GL_RGBA : GL_RGB, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
 
 	if (Flags & LC_TEXTURE_MIPMAPS)
 	{

@@ -71,7 +71,7 @@ macx {
 	ICON = resources/leocad.icns
 	QMAKE_INFO_PLIST = qt/Info.plist
 
-	library.files += library.bin
+	library.files += $$_PRO_FILE_PWD_/library.bin
 	library.path = Contents/Resources
 
 	QMAKE_BUNDLE_DATA += library

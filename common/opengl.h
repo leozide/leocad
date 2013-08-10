@@ -122,6 +122,10 @@ typedef ptrdiff_t GLsizeiptrARB;
 #define GL_DYNAMIC_COPY_ARB                          0x88EA
 #endif
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 // GL_ARB_vertex_buffer_object
 typedef void (APIENTRY *GLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
 typedef void (APIENTRY *GLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);

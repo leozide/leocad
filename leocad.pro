@@ -71,10 +71,12 @@ macx {
 	ICON = resources/leocad.icns
 	QMAKE_INFO_PLIST = qt/Info.plist
 
+	document_icon.files += $$_PRO_FILE_PWD_/resources/leocad_document.icns
+	document_icon.path = Contents/Resources
 	library.files += $$_PRO_FILE_PWD_/library.bin
 	library.path = Contents/Resources
 
-	QMAKE_BUNDLE_DATA += library
+	QMAKE_BUNDLE_DATA += document_icon library
 }
 
 SOURCES += common/view.cpp \

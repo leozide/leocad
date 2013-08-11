@@ -13,7 +13,7 @@
 				<string>leocad</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string>leocad.icns</string>
+			<string>leocad_document.icns</string>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
 				<string>application/vnd.leocad</string>
@@ -35,7 +35,7 @@
 				<string>mpd</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string>LDraw Document</string>
+			<string>leocad_document.icns</string>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
 				<string>application/x-ldraw</string>

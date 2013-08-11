@@ -121,9 +121,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 
 bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LibraryCachePath)
 {
-	// System setup parameters.
 	char* LibPath = NULL;
-	char* GLPath = NULL;
 
 	// Image output options.
 	bool SaveImage = false;
@@ -146,11 +144,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		if (Param[0] == '-')
 		{
-			if (strcmp(Param, "--libgl") == 0)
-			{
-				ParseStringArgument(&i, argc, argv, &GLPath);
-			}
-			else if ((strcmp(Param, "-l") == 0) || (strcmp(Param, "--libpath") == 0))
+			if ((strcmp(Param, "-l") == 0) || (strcmp(Param, "--libpath") == 0))
 			{
 				ParseStringArgument(&i, argc, argv, &LibPath);
 			}
@@ -211,7 +205,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				return false;
 			}
 			else
-				console.PrintWarning("Unknown parameter: %s\n", Param);
+				printf("Unknown parameter: %s\n", Param);
 		}
 		else
 		{

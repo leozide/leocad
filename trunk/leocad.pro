@@ -16,9 +16,6 @@ win32 {
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 	RC_FILE = qt/leocad.rc
-	QMAKE_CFLAGS_DEBUG += /O0
-	QMAKE_CFLAGS_RELEASE += /Zi
-	QMAKE_LFLAGS_RELEASE += /map /debug /opt:ref
 } else {
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter

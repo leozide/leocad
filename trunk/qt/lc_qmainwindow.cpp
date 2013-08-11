@@ -50,6 +50,19 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = Library->FindPiece("3005", false);
 
+	GL_EnableVertexBufferObject();
+
+	if (lcGetActiveProject()->m_pPieces)
+	{
+		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
+		{
+			lcMesh* Mesh = Library->mPieces[PieceIdx]->mMesh;
+
+			if (Mesh)
+				Mesh->UpdateBuffers();
+		}
+	}
+
 	if (!Info)
 		Info = Library->mPieces[0];
 

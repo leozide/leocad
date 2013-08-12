@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_application.h"
 #include "lc_qmainwindow.h"
+#include "lc_qupdatedialog.h"
 #include "mainwnd.h"
 #include <QApplication>
 
@@ -9,7 +10,7 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 
 	QCoreApplication::setOrganizationDomain("leocad.org");
-	QCoreApplication::setOrganizationName("LeoCAD");
+	QCoreApplication::setOrganizationName("LeoCAD Software");
 	QCoreApplication::setApplicationName("LeoCAD");
 	QCoreApplication::setApplicationVersion(LC_VERSION_TEXT);
 
@@ -50,6 +51,8 @@ int main(int argc, char *argv[])
 	lcGetActiveProject()->UpdateInterface();
 	gMainWindow->UpdateRecentFiles();
 	w.show();
+
+	lcDoInitialUpdateCheck();
 
 	int execReturn = app.exec();
 

@@ -117,7 +117,6 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_LOCK_TOGGLE]->setIcon(QIcon(":/resources/edit_lock.png"));
 	actions[LC_EDIT_SNAP_TOGGLE]->setIcon(QIcon(":/resources/edit_snap_move.png"));
 	actions[LC_EDIT_SNAP_ANGLE]->setIcon(QIcon(":/resources/edit_snap_angle.png"));
-	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(":/resources/edit_transform.png"));
 	actions[LC_EDIT_ACTION_INSERT]->setIcon(QIcon(":/resources/action_insert.png"));
 	actions[LC_EDIT_ACTION_LIGHT]->setIcon(QIcon(":/resources/action_light.png"));
 	actions[LC_EDIT_ACTION_SPOTLIGHT]->setIcon(QIcon(":/resources/action_spotlight.png"));
@@ -1191,7 +1190,17 @@ void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 
 void lcQMainWindow::updateTransformType(int newType)
 {
+	const char* iconNames[] =
+	{
+		":/resources/edit_transform_absolute_translation.png",
+		":/resources/edit_transform_relative_translation.png",
+		":/resources/edit_transform_absolute_rotation.png",
+		":/resources/edit_transform_relative_rotation.png"
+	};
+
+	LC_ASSERT(newType >= 0 && newType <= 3);
 	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + newType]->setChecked(true);
+	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[newType]));
 }
 
 void lcQMainWindow::updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera)

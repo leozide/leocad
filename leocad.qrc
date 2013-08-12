@@ -41,7 +41,6 @@
         <file>resources/edit_redo.png</file>
         <file>resources/edit_snap_angle.png</file>
         <file>resources/edit_snap_move.png</file>
-        <file>resources/edit_transform.png</file>
         <file>resources/edit_undo.png</file>
         <file>resources/file_new.png</file>
         <file>resources/file_open.png</file>
@@ -62,5 +61,9 @@
         <file>resources/view_split_horizontal.png</file>
         <file>resources/view_split_vertical.png</file>
         <file>resources/file_picture.png</file>
+        <file>resources/edit_transform_absolute_rotation.png</file>
+        <file>resources/edit_transform_absolute_translation.png</file>
+        <file>resources/edit_transform_relative_rotation.png</file>
+        <file>resources/edit_transform_relative_translation.png</file>
     </qresource>
 </RCC>

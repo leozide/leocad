@@ -8,6 +8,8 @@ namespace Ui {
 class lcQUpdateDialog;
 }
 
+void lcDoInitialUpdateCheck();
+
 class lcQUpdateDialog : public QDialog
 {
 	Q_OBJECT
@@ -21,12 +23,14 @@ public:
 public slots:
 	void replyFinished(QNetworkReply *reply);
 	void cancel();
-	
+	void finished(int result);
+
 private:
 	Ui::lcQUpdateDialog *ui;
 
 	QNetworkReply *updateReply;
 	QNetworkAccessManager *manager;
+	bool initialUpdate;
 };
 
 #endif // LC_QUPDATEDIALOG_H

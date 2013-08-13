@@ -5,6 +5,53 @@
 #include "mainwnd.h"
 #include <QApplication>
 
+#ifdef Q_OS_WIN
+
+static void lcRegisterShellFileTypes()
+{
+	TCHAR modulePath[_MAX_PATH], longModulePath[_MAX_PATH];
+	TCHAR temp[2*_MAX_PATH];
+
+	GetModuleFileName(NULL, longModulePath, _MAX_PATH);
+	if (GetShortPathName(longModulePath, modulePath, _MAX_PATH) == 0)
+		lstrcpy(modulePath, longModulePath);
+
+	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project"), REG_SZ, TEXT("LeoCAD Project"), lstrlen(TEXT("LeoCAD Project")) * sizeof(TCHAR)) != ERROR_SUCCESS)
+		return;
+
+	lstrcpy(temp, modulePath);
+	lstrcat(temp, TEXT(",0"));
+	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\DefaultIcon"), REG_SZ, temp, lstrlen(temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
+		return;
+
+	lstrcpy(temp, modulePath);
+	lstrcat(temp, TEXT(" \"%1\""));
+	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\shell\\open\\command"), REG_SZ, temp, lstrlen(temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
+		return;
+
+	LONG size = 2 * _MAX_PATH;
+	LONG result = RegQueryValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), temp, &size);
+
+	if (result != ERROR_SUCCESS || !lstrlen(temp) || lstrcmp(temp, TEXT("LeoCAD.Project")))
+	{
+		if (RegSetValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), REG_SZ, TEXT("LeoCAD.Project"), lstrlen(TEXT("LeoCAD.Project")) * sizeof(TCHAR)) != ERROR_SUCCESS)
+			return;
+
+		HKEY key;
+		DWORD disposition = 0;
+
+		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, NULL, &key, &disposition) != ERROR_SUCCESS)
+			return;
+
+		LONG result = RegSetValueEx(key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
+
+		if (RegCloseKey(key) != ERROR_SUCCESS || result != ERROR_SUCCESS)
+			return;
+	}
+}
+
+#endif
+
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
@@ -23,6 +70,8 @@ int main(int argc, char *argv[])
 	ptr = strrchr(libPath,'\\');
 	if (ptr)
 		*(++ptr) = 0;
+
+	lcRegisterShellFileTypes();
 #endif
 
 #ifdef Q_OS_LINUX

@@ -4052,6 +4052,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcImageDialogOptions Options;
 
+			int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
+
+			Options.Format = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
+			Options.Transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+			Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+			Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+
 			if (m_strPathName[0])
 				strcpy(Options.FileName, m_strPathName);
 			else if (m_strTitle[0])
@@ -4077,13 +4084,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 					break;
 				}
 			}
-
-			int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
-
-			Options.Format = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
-			Options.Transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
-			Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-			Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 
 			if (m_bAnimation)
 			{
@@ -4112,60 +4112,60 @@ void Project::HandleCommand(LC_COMMANDS id)
 				strcpy(Options.FileName, "Image");
 
 			char* Ext = strrchr(Options.FileName, '.');
-				if (Ext)
-				{
+			if (Ext)
+			{
 				if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".png"))
-						*Ext = 0;
-				}
+					*Ext = 0;
+			}
 
-				const char* ext;
+			const char* ext;
 			switch (Options.Format)
-				{
+			{
 			case LC_IMAGE_BMP: ext = ".bmp";
 				break;
 			case LC_IMAGE_JPG: ext = ".jpg";
 				break;
-				default:
+			default:
 			case LC_IMAGE_PNG: ext = ".png";
 				break;
-				}
+			}
 
-				if (m_bAnimation)
+			if (m_bAnimation)
 				Options.End = lcMin(Options.End, m_nTotalFrames);
-				else
+			else
 				Options.End = lcMin(Options.End, 255);
 			Options.Start = lcMax(1, Options.Start);
 
 			if (Options.Start > Options.End)
-				{
+			{
 				if (Options.Start > Options.End)
-					{
+				{
 					int Temp = Options.Start;
 					Options.Start = Options.End;
 					Options.End = Temp;
-					}
 				}
+			}
 
 			Image* images = new Image[Options.End - Options.Start + 1];
 			CreateImages(images, Options.Width, Options.Height, Options.Start, Options.End, false);
 
 			for (int i = 0; i <= Options.End - Options.Start; i++)
-					{
-						char filename[LC_MAXPATH];
+			{
+				char filename[LC_MAXPATH];
 
 				if (Options.Start != Options.End)
-						{
+				{
 					sprintf(filename, "%s%02d%s", Options.FileName, i+1, ext);
-						}
-						else
-						{
+				}
+				else
+				{
 					strcat(Options.FileName, ext);
 					strcpy(filename, Options.FileName);
-						}
+				}
 
 				images[i].FileSave(filename, Options.Format, Options.Transparent);
-				}
-				delete []images;
+			}
+			delete []images;
 		} break;
 
 		case LC_FILE_EXPORT_3DS:

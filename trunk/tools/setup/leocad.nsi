@@ -56,16 +56,11 @@ Section "LeoCAD" SecLeoCAD
 
   SetOutPath "$INSTDIR"
 
-  File "..\..\win\release\LeoCAD.exe"
-  File "..\..\win\release\LeoCAD.hlp"
-  File "..\..\win\release\LeoCAD.cnt"
-  File "..\..\readme.txt"
-  File "..\..\win\release\library.bin"
-  ;File "..\..\win\release\pieces.bin"
-  ;File "..\..\win\release\pieces.idx"
-  ;File "..\..\win\release\textures.bin"
-  ;File "..\..\win\release\textures.idx"
-  ;File "..\..\win\release\sysfont.txf"
+  File "LeoCAD.exe"
+  File "LeoCAD.hlp"
+  File "LeoCAD.cnt"
+  File "ReadMe.txt"
+  File "library.bin"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
@@ -74,10 +69,10 @@ Section "LeoCAD" SecLeoCAD
   WriteRegStr HKCR "LeoCAD.Project\DefaultIcon" "" "$INSTDIR\LeoCAD.exe,0"
   WriteRegStr HKCR "LeoCAD.Project\shell" "" "open"
   WriteRegStr HKCR "LeoCAD.Project\shell\open\command" "" '"$INSTDIR\LeoCAD.exe" "%1"'
-  WriteRegStr HKCR "LeoCAD.Project\shell" "" "print"
-  WriteRegStr HKCR "LeoCAD.Project\shell\print\command" "" '"$INSTDIR\LeoCAD.exe" /p "%1"'
-  WriteRegStr HKCR "LeoCAD.Project\shell" "" "printto"
-  WriteRegStr HKCR "LeoCAD.Project\shell\printto\command" "" '"$INSTDIR\LeoCAD.exe" /pt "%1" "%2" "%3" "%4"'
+  ;WriteRegStr HKCR "LeoCAD.Project\shell" "" "print"
+  ;WriteRegStr HKCR "LeoCAD.Project\shell\print\command" "" '"$INSTDIR\LeoCAD.exe" /p "%1"'
+  ;WriteRegStr HKCR "LeoCAD.Project\shell" "" "printto"
+  ;WriteRegStr HKCR "LeoCAD.Project\shell\printto\command" "" '"$INSTDIR\LeoCAD.exe" /pt "%1" "%2" "%3" "%4"'
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
   
   ;Store installation folder

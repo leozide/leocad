@@ -7,6 +7,76 @@
 
 #ifdef Q_OS_WIN
 
+#include <dbghelp.h>
+#include <direct.h>
+#include <shlobj.h>
+
+#ifdef UNICODE
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+#endif
+
+#include <tchar.h>
+
+static TCHAR minidumpPath[_MAX_PATH];
+
+static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
+{ 
+	if (IsDebuggerPresent())
+		return EXCEPTION_CONTINUE_SEARCH;
+
+	HMODULE dbgHelp = LoadLibrary(TEXT("dbghelp.dll"));
+
+	if (dbgHelp == NULL)
+		return EXCEPTION_EXECUTE_HANDLER;
+
+	HANDLE file = CreateFile(minidumpPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (file == INVALID_HANDLE_VALUE)
+		return EXCEPTION_EXECUTE_HANDLER;
+
+	typedef BOOL (WINAPI *LPMINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD ProcessId, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserEncoderParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+	LPMINIDUMPWRITEDUMP miniDumpWriteDump = (LPMINIDUMPWRITEDUMP)GetProcAddress(dbgHelp, "MiniDumpWriteDump");
+	if (!miniDumpWriteDump)
+		return EXCEPTION_EXECUTE_HANDLER;
+
+	MINIDUMP_EXCEPTION_INFORMATION mei;
+
+	mei.ThreadId = GetCurrentThreadId();
+	mei.ExceptionPointers = exceptionPointers;
+	mei.ClientPointers = TRUE;
+
+	BOOL writeDump = miniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, exceptionPointers ? &mei : NULL, NULL, NULL);
+
+	CloseHandle(file);
+	FreeLibrary(dbgHelp);
+
+	if (writeDump)
+	{
+		TCHAR message[_MAX_PATH + 256];
+		lstrcpy(message, TEXT("LeoCAD just crashed. Crash information was saved to the file '"));
+		lstrcat(message, minidumpPath);
+		lstrcat(message, TEXT("', please send it to the developers for debugging."));
+
+		MessageBox(NULL, message, TEXT("LeoCAD"), MB_OK);
+	}
+
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+static void lcSehInit()
+{
+	if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, minidumpPath) == S_OK)
+	{
+		lstrcat(minidumpPath, TEXT("\\LeoCAD\\"));
+		_tmkdir(minidumpPath);
+		lstrcat(minidumpPath, TEXT("minidump.dmp"));
+	}
+
+	SetUnhandledExceptionFilter(lcSehHandler);
+}
+
 static void lcRegisterShellFileTypes()
 {
 	TCHAR modulePath[_MAX_PATH], longModulePath[_MAX_PATH];
@@ -72,6 +142,7 @@ int main(int argc, char *argv[])
 		*(++ptr) = 0;
 
 	lcRegisterShellFileTypes();
+	lcSehInit();
 #endif
 
 #ifdef Q_OS_LINUX

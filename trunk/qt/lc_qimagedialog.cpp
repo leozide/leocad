@@ -96,3 +96,29 @@ void lcQImageDialog::on_fileNameBrowse_clicked()
 	if (!result.isEmpty())
 		ui->fileName->setText(QDir::toNativeSeparators(result));
 }
+
+void lcQImageDialog::on_format_currentIndexChanged(int index)
+{
+	QString fileName = ui->fileName->text();
+	QString extension = QFileInfo(fileName).suffix().toLower();
+
+	QString newExtension;
+	switch (index)
+	{
+	case LC_IMAGE_BMP: newExtension = "bmp";
+		break;
+	case LC_IMAGE_JPG: newExtension = "jpg";
+		break;
+	default:
+	case LC_IMAGE_PNG: newExtension = "png";
+		break;
+	}
+
+	if (extension == newExtension)
+		return;
+
+	if (extension == "bmp" || extension == "png" || extension == "jpg" || extension == "jpeg")
+		fileName = fileName.left(fileName.length() - extension.length()) + newExtension;
+
+	ui->fileName->setText(fileName);
+}

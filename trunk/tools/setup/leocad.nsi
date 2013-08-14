@@ -57,10 +57,10 @@ Section "LeoCAD" SecLeoCAD
   SetOutPath "$INSTDIR"
 
   File "LeoCAD.exe"
-  File "LeoCAD.hlp"
-  File "LeoCAD.cnt"
-  File "ReadMe.txt"
-  File "library.bin"
+  ;File "LeoCAD.hlp"
+  ;File "LeoCAD.cnt"
+  File "..\..\docs\ReadMe.txt"
+  File "..\..\library.bin"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
@@ -76,7 +76,7 @@ Section "LeoCAD" SecLeoCAD
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
   
   ;Store installation folder
-  WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
+  ;WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
   
   ; Overwrite old Pieces Library path.
   ;WriteRegStr HKCU "Software\BT Software\LeoCAD\Settings" "PiecesLibrary" $INSTDIR

@@ -19,7 +19,7 @@ using OpenGL.
 
 - LeoCAD for Windows:
 
-  Download LeoCAD-0.75.2-4351.exe to your computer, double click on the 
+  Download LeoCAD-0.80.0-7439.exe to your computer, double click on the 
   icon to launch the installer and follow the intructions.
 
 - LeoCAD for Linux:
@@ -29,6 +29,11 @@ using OpenGL.
   download the Pieces Library separately, extract it to any directory of 
   your choice and point the LEOCAD_LIB environment variable to it. More 
   information is available at http://www.leocad.org
+
+- LeoCAD for Mac OSX:
+
+  Download LeoCAD-0.80.0-7439.dmg to your computer, double click on the 
+  icon to open the archive and copy LeoCAD.app to your Applications folder.
 
 New users should take a look at the online tutorial located at
 http://www.leocad.org/trac/wiki/BasicTutorial/ to learn how to use LeoCAD.

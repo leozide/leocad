@@ -181,7 +181,7 @@ void lcQPreferencesDialog::updateParts()
 
 	if (categoryIndex != -1)
 	{
-		PtrArray<PieceInfo> singleParts, groupedParts;
+		lcArray<PieceInfo*> singleParts, groupedParts;
 
 		library->SearchPieces(options->Categories[categoryIndex].Keywords, false, singleParts, groupedParts);
 
@@ -295,7 +295,7 @@ void lcQPreferencesDialog::on_importCategories_clicked()
 	char fileName[LC_MAXPATH];
 	strcpy(fileName, result.toLocal8Bit().data());
 
-	ObjArray<lcLibraryCategory> categories;
+	lcArray<lcLibraryCategory> categories;
 	if (!lcLoadCategories(fileName, categories))
 	{
 		QMessageBox::warning(this, "LeoCAD", tr("Error loading categories file."));

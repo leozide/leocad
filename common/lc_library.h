@@ -3,7 +3,7 @@
 
 #include "lc_mesh.h"
 #include "lc_math.h"
-#include "array.h"
+#include "lc_array.h"
 #include "str.h"
 
 class PieceInfo;
@@ -36,7 +36,7 @@ public:
 	LC_MESH_PRIMITIVE_TYPE mPrimitiveType;
 	lcuint32 mColor;
 	lcTexture* mTexture;
-	ObjArray<lcuint32> mIndices;
+	lcArray<lcuint32> mIndices;
 };
 
 struct lcLibraryTextureMap
@@ -68,9 +68,9 @@ public:
 	void TestQuad(lcVector3* Vertices);
 	void ResequenceQuad(lcVector3* Vertices, int a, int b, int c, int d);
 
-	PtrArray<lcLibraryMeshSection> mSections;
-	ObjArray<lcVertex> mVertices;
-	ObjArray<lcVertexTextured> mTexturedVertices;
+	lcArray<lcLibraryMeshSection*> mSections;
+	lcArray<lcVertex> mVertices;
+	lcArray<lcVertexTextured> mTexturedVertices;
 };
 
 class lcLibraryPrimitive
@@ -117,15 +117,15 @@ public:
 	void CloseCache();
 
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
-	void SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
-	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces);
-	void GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const;
+	void SearchPieces(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
+	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
 
-	PtrArray<PieceInfo> mPieces;
-	PtrArray<lcLibraryPrimitive> mPrimitives;
+	lcArray<PieceInfo*> mPieces;
+	lcArray<lcLibraryPrimitive*> mPrimitives;
 	int mNumOfficialPieces;
 
-	PtrArray<lcTexture> mTextures;
+	lcArray<lcTexture*> mTextures;
 
 	char mLibraryPath[LC_MAXPATH];
 
@@ -139,7 +139,7 @@ protected:
 
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, ObjArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
 
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;

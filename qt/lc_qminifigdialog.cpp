@@ -76,7 +76,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 
 	for (int itemIndex = 0; itemIndex < LC_MFW_NUMITEMS; itemIndex++)
 	{
-		ObjArray<lcMinifigPieceInfo>& parts = wizard->mSettings[itemIndex];
+		lcArray<lcMinifigPieceInfo>& parts = wizard->mSettings[itemIndex];
 		QStringList typeList;
 
 		for (int partIndex = 0; partIndex < parts.GetSize(); partIndex++)

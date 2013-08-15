@@ -5,7 +5,7 @@
 #include "lc_library.h"
 #include "pieceinf.h"
 
-static int lcQPartsTreeSortFunc(const PieceInfo* a, const PieceInfo* b, void* sortData)
+static int lcQPartsTreeSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 {
 	if (a->IsSubPiece())
 	{
@@ -65,10 +65,10 @@ void lcQPartsTree::searchParts(const QString& searchString)
 		delete item;
 
 	lcPiecesLibrary* library = lcGetPiecesLibrary();
-	PtrArray<PieceInfo> singleParts, groupedParts;
+	lcArray<PieceInfo*> singleParts, groupedParts;
 
 	library->SearchPieces(searchString.toLocal8Bit().data(), false, singleParts, groupedParts);
-	singleParts.Sort(lcQPartsTreeSortFunc, NULL);
+	singleParts.Sort(lcQPartsTreeSortFunc);
 
 	for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
 	{
@@ -101,12 +101,12 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 	int categoryIndex = expandedItem->data(0, CategoryRole).toInt();
 
 	lcPiecesLibrary* library = lcGetPiecesLibrary();
-	PtrArray<PieceInfo> singleParts, groupedParts;
+	lcArray<PieceInfo*> singleParts, groupedParts;
 
 	library->GetCategoryEntries(categoryIndex, true, singleParts, groupedParts);
 
 	singleParts += groupedParts;
-	singleParts.Sort(lcQPartsTreeSortFunc, NULL);
+	singleParts.Sort(lcQPartsTreeSortFunc);
 
 	for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
 	{
@@ -118,7 +118,7 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 
 		if (groupedParts.FindIndex(partInfo) != -1)
 		{
-			PtrArray<PieceInfo> patterns;
+			lcArray<PieceInfo*> patterns;
 			library->GetPatternedPieces(partInfo, patterns);
 
 			for (int patternIndex = 0; patternIndex < patterns.GetSize(); patternIndex++)

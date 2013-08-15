@@ -1203,7 +1203,7 @@ void lcQMainWindow::updateTransformType(int newType)
 	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[newType]));
 }
 
-void lcQMainWindow::updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera)
+void lcQMainWindow::updateCameraMenu(const lcArray<Camera*>& cameras, Camera* currentCamera)
 {
 	int actionIdx, currentIndex = -1;
 

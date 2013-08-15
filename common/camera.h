@@ -3,7 +3,7 @@
 
 #include "object.h"
 #include "lc_math.h"
-#include "array.h"
+#include "lc_array.h"
 
 #define LC_CAMERA_HIDDEN            0x01
 #define LC_CAMERA_SELECTED          0x02
@@ -80,7 +80,7 @@ public:
 		return m_strName;
 	}
 
-	void CreateName(const PtrArray<Camera>& Cameras);
+	void CreateName(const lcArray<Camera*>& Cameras);
 
 	CameraTarget* GetTarget() const
 	{

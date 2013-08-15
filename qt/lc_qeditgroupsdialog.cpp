@@ -69,7 +69,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 			{
 				if (itemPiece == piece)
 				{
-					options->PieceParents.SetAt(pieceIndex, parentGroup);
+					options->PieceParents[pieceIndex] = parentGroup;
 					break;
 				}
 			}
@@ -83,7 +83,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 			{
 				if (itemGroup == group)
 				{
-					options->GroupParents.SetAt(groupIndex, parentGroup);
+					options->GroupParents[groupIndex] = parentGroup;
 					break;
 				}
 			}

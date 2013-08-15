@@ -934,7 +934,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 	for (int SectionIndex = 0; SectionIndex < LC_MFW_NUMITEMS; SectionIndex++)
 	{
-		ObjArray<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
+		lcArray<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
 
 		InfoArray.RemoveAll();
 		Settings.Seek(0, SEEK_SET);
@@ -1395,7 +1395,7 @@ void MinifigWizard::Calculate()
 
 int MinifigWizard::GetSelectionIndex(int Type) const
 {
-	const ObjArray<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
+	const lcArray<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
 	for (int Index = 0; Index < InfoArray.GetSize(); Index++)
 		if (InfoArray[Index].Info == mMinifig->Parts[Type])

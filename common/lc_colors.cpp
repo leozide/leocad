@@ -3,7 +3,7 @@
 #include "lc_file.h"
 #include <float.h>
 
-ObjArray<lcColor> gColorList;
+lcArray<lcColor> gColorList;
 lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 int gNumUserColors;
 int gEdgeColor;
@@ -345,7 +345,7 @@ int lcGetBrickLinkColor(int ColorIndex)
 bool lcLoadColorFile(lcFile& File)
 {
 	char Line[1024], Token[1024];
-	ObjArray<lcColor>& Colors = gColorList;
+	lcArray<lcColor>& Colors = gColorList;
 	lcColor Color, MainColor, EdgeColor;
 
 	Colors.RemoveAll();

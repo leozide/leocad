@@ -18,7 +18,7 @@ void lcApplication::ExportClipboard(lcMemFile* Clipboard)
 	SetClipboard(Clipboard);
 }
 
-void lcApplication::GetFileList(const char* Path, ObjArray<String>& FileList)
+void lcApplication::GetFileList(const char* Path, lcArray<String>& FileList)
 {
 	QDir dir(Path);
 	dir.setFilter(QDir::Files | QDir::Hidden | QDir::Readable);

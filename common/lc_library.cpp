@@ -301,7 +301,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	Unload();
 
 	char FileName[LC_MAXPATH];
-	ObjArray<String> FileList;
+	lcArray<String> FileList;
 
 	strcpy(FileName, Path);
 	strcat(FileName, "parts.lst");
@@ -373,7 +373,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 		g_App->GetFileList(FileName, FileList);
 
-		mPieces.Expand(FileList.GetSize());
+		mPieces.AllocGrow(FileList.GetSize());
 
 		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 		{
@@ -488,7 +488,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	g_App->GetFileList(FileName, FileList);
 
-	mTextures.Expand(FileList.GetSize());
+	mTextures.AllocGrow(FileList.GetSize());
 
 	for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 	{
@@ -710,7 +710,7 @@ void lcPiecesLibrary::SaveCacheFile()
 	mSaveCache = false;
 }
 
-int LibraryMeshSectionCompare(const lcLibraryMeshSection* a, const lcLibraryMeshSection* b, void* Data)
+int LibraryMeshSectionCompare(lcLibraryMeshSection* const& a, lcLibraryMeshSection* const& b)
 {
 	if (a->mPrimitiveType != b->mPrimitiveType)
 	{
@@ -746,7 +746,7 @@ int LibraryMeshSectionCompare(const lcLibraryMeshSection* a, const lcLibraryMesh
 bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 {
 	lcLibraryMeshData MeshData;
-	ObjArray<lcLibraryTextureMap> TextureStack;
+	lcArray<lcLibraryTextureMap> TextureStack;
 
 	if (mZipFile)
 	{
@@ -799,7 +799,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		NumIndices += Section->mIndices.GetSize();
 	}
 
-	MeshData.mSections.Sort(LibraryMeshSectionCompare, NULL);
+	MeshData.mSections.Sort(LibraryMeshSectionCompare);
 
 	Mesh->Create(MeshData.mSections.GetSize(), MeshData.mVertices.GetSize(), MeshData.mTexturedVertices.GetSize(), NumIndices);
 
@@ -955,7 +955,7 @@ int lcPiecesLibrary::FindPrimitiveIndex(const char* Name)
 bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 {
 	lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
-	ObjArray<lcLibraryTextureMap> TextureStack;
+	lcArray<lcLibraryTextureMap> TextureStack;
 
 	if (mZipFile)
 	{
@@ -993,7 +993,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	return true;
 }
 
-bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, ObjArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData)
+bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData)
 {
 	char Buffer[1024];
 	char* Line;
@@ -1540,11 +1540,11 @@ void lcLibraryMeshData::AddTexturedLine(int LineType, lcuint32 ColorCode, const 
 void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap)
 {
 	int VertexCount = Data.mVertices.GetSize();
-	ObjArray<lcuint32> IndexRemap(VertexCount);
+	lcArray<lcuint32> IndexRemap(VertexCount);
 
 	if (!TextureMap)
 	{
-		mVertices.Expand(VertexCount);
+		mVertices.AllocGrow(VertexCount);
 
 		for (int SrcVertexIdx = 0; SrcVertexIdx < VertexCount; SrcVertexIdx++)
 		{
@@ -1575,7 +1575,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 	}
 	else
 	{
-		mTexturedVertices.Expand(VertexCount);
+		mTexturedVertices.AllocGrow(VertexCount);
 
 		for (int SrcVertexIdx = 0; SrcVertexIdx < VertexCount; SrcVertexIdx++)
 		{
@@ -1611,11 +1611,11 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 	}
 
 	int TexturedVertexCount = Data.mTexturedVertices.GetSize();
-	ObjArray<lcuint32> TexturedIndexRemap(TexturedVertexCount);
+	lcArray<lcuint32> TexturedIndexRemap(TexturedVertexCount);
 
 	if (TexturedVertexCount)
 	{
-		mTexturedVertices.Expand(TexturedVertexCount);
+		mTexturedVertices.AllocGrow(TexturedVertexCount);
 
 		for (int SrcVertexIdx = 0; SrcVertexIdx < TexturedVertexCount; SrcVertexIdx++)
 		{
@@ -1680,7 +1680,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			mSections.Add(DstSection);
 		}
 
-		DstSection->mIndices.Expand(SrcSection->mIndices.GetSize());
+		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
 		if (!SrcSection->mTexture)
 		{
@@ -1703,7 +1703,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 	{
 		BaseIndex = mVertices.GetSize();
 
-		mVertices.Expand(Data.mVertices.GetSize());
+		mVertices.AllocGrow(Data.mVertices.GetSize());
 
 		for (int SrcVertexIdx = 0; SrcVertexIdx < Data.mVertices.GetSize(); SrcVertexIdx++)
 		{
@@ -1715,7 +1715,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 	{
 		BaseIndex = mTexturedVertices.GetSize();
 
-		mTexturedVertices.Expand(Data.mVertices.GetSize());
+		mTexturedVertices.AllocGrow(Data.mVertices.GetSize());
 
 		for (int SrcVertexIdx = 0; SrcVertexIdx < Data.mVertices.GetSize(); SrcVertexIdx++)
 		{
@@ -1736,7 +1736,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 	if (TexturedVertexCount)
 	{
-		mTexturedVertices.Expand(TexturedVertexCount);
+		mTexturedVertices.AllocGrow(TexturedVertexCount);
 
 		for (int SrcVertexIdx = 0; SrcVertexIdx < TexturedVertexCount; SrcVertexIdx++)
 		{
@@ -1779,7 +1779,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 			mSections.Add(DstSection);
 		}
 
-		DstSection->mIndices.Expand(SrcSection->mIndices.GetSize());
+		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
 		if (!SrcSection->mTexture)
 		{
@@ -1809,7 +1809,7 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKey
 	return PieceName.Match(Keywords);
 }
 
-void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
 	if (gCategories[CategoryIndex].Name == "Search Results")
 		GroupPieces = false;
@@ -1817,7 +1817,7 @@ void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, Pt
 	SearchPieces(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
 }
 
-void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPieces, PtrArray<PieceInfo>& SinglePieces, PtrArray<PieceInfo>& GroupedPieces)
+void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
@@ -1877,7 +1877,7 @@ void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPie
 	}
 }
 
-void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, PtrArray<PieceInfo>& Pieces) const
+void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const
 {
 	char Name[LC_PIECE_NAME_LEN];
 	strcpy(Name, Parent->m_strName);

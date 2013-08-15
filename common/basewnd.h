@@ -3,7 +3,7 @@
 
 #include "defines.h"
 #include "lc_math.h"
-#include "array.h"
+#include "lc_array.h"
 #include "project.h"
 #include "lc_category.h"
 #include "image.h"
@@ -117,7 +117,7 @@ struct lcPropertiesDialogOptions
 	bool DrawFloor;
 	bool SetDefault;
 
-	ObjArray<lcPiecesUsedEntry> PartsUsed;
+	lcArray<lcPiecesUsedEntry> PartsUsed;
 };
 
 struct lcArrayDialogOptions
@@ -129,13 +129,13 @@ struct lcArrayDialogOptions
 
 struct lcEditGroupsDialogOptions
 {
-	PtrArray<Group> PieceParents;
-	PtrArray<Group> GroupParents;
+	lcArray<Group*> PieceParents;
+	lcArray<Group*> GroupParents;
 };
 
 struct lcSelectDialogOptions
 {
-	ObjArray<bool> Selection;
+	lcArray<bool> Selection;
 };
 
 struct lcPreferencesDialogOptions
@@ -152,7 +152,7 @@ struct lcPreferencesDialogOptions
 	int AASamples;
 	int GridSize;
 
-	ObjArray<lcLibraryCategory> Categories;
+	lcArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;
 	bool CategoriesDefault;
 

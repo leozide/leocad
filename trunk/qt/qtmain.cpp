@@ -546,7 +546,7 @@ void lcMainWindow::UpdateTransformType(int NewType)
 		window->updateTransformType(NewType);
 }
 
-void lcMainWindow::UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera)
+void lcMainWindow::UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 

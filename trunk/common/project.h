@@ -3,7 +3,7 @@
 
 #include "object.h"
 #include "opengl.h"
-#include "array.h"
+#include "lc_array.h"
 #include "lc_math.h"
 #include "lc_commands.h"
 
@@ -253,7 +253,7 @@ public:
 	void EndPieceDrop(bool Accept);
 	void BeginColorDrop();
 
-	void GetPiecesUsed(ObjArray<lcPiecesUsedEntry>& PiecesUsed) const;
+	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
@@ -276,7 +276,7 @@ public:
 
 	// Objects
 	Piece* m_pPieces;
-	PtrArray<Camera> mCameras;
+	lcArray<Camera*> mCameras;
 	Light* m_pLights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
@@ -288,7 +288,7 @@ public:
 // Implementation
 protected:
 	View* m_ActiveView;
-	PtrArray<View> m_ViewList;
+	lcArray<View*> m_ViewList;
 
 	char m_strAuthor[101];
 	char m_strDescription[101];
@@ -309,7 +309,7 @@ protected:
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects);
+	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
 
@@ -426,8 +426,8 @@ protected:
 	bool DoSave(const char* FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileSave(lcFile* file, bool bUndo);
-	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray);
-	void FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const;
+	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray);
+	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
 
 public:
 	// File helpers

@@ -2,7 +2,7 @@
 #define _MAINWND_H_
 
 #include "basewnd.h"
-#include "array.h"
+#include "lc_array.h"
 
 class Object;
 class Camera;
@@ -41,7 +41,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 	void UpdateTransformType(int NewType);
 	void UpdateCurrentCamera(int CameraIndex);
-	void UpdateCameraMenu(const PtrArray<Camera>& Cameras, Camera* CurrentCamera);
+	void UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera);
 	void UpdateCategories();
 	void UpdateTitle(const char* Title, bool Modified);
 	void UpdateModified(bool Modified);

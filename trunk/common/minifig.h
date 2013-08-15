@@ -3,7 +3,7 @@
 
 #include "lc_glwidget.h"
 #include "lc_math.h"
-#include "array.h"
+#include "lc_array.h"
 
 class PieceInfo;
 
@@ -67,7 +67,7 @@ public:
 
 	void ParseSettings(lcFile& Settings);
 
-	ObjArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
+	lcArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
 	lcMinifig* mMinifig;
 

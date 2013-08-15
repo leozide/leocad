@@ -1,7 +1,7 @@
 #ifndef _LC_APPLICATION_H_
 #define _LC_APPLICATION_H_
 
-#include "array.h"
+#include "lc_array.h"
 #include "str.h"
 
 class Project;
@@ -18,7 +18,7 @@ public:
 
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
 
-	void GetFileList(const char* Path, ObjArray<String>& FileList);
+	void GetFileList(const char* Path, lcArray<String>& FileList);
 	void OpenURL(const char* URL);
 	void SetClipboard(lcFile* Clipboard);
 	void ExportClipboard(lcMemFile* Clipboard);

@@ -56,7 +56,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	ui->ambientColorButton->setIcon(pix);
 
 	lcPiecesLibrary *library = lcGetPiecesLibrary();
-	ObjArray<lcPiecesUsedEntry>& partsUsed = options->PartsUsed;
+	lcArray<lcPiecesUsedEntry>& partsUsed = options->PartsUsed;
 	QStringList horizontalLabels, verticalLabels;
 
 	int *colorColumns = new int[gNumUserColors], numColors = 0;

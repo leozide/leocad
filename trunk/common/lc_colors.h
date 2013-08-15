@@ -2,7 +2,7 @@
 #define _LC_COLORS_H_
 
 #include "opengl.h"
-#include "array.h"
+#include "lc_array.h"
 
 #define LC_MAX_COLOR_NAME 64
 #define LC_COLOR_DIRECT 0x80000000
@@ -27,11 +27,11 @@ enum
 
 struct lcColorGroup
 {
-	ObjArray<int> Colors;
+	lcArray<int> Colors;
 	char Name[LC_MAX_COLOR_NAME];
 };
 
-extern ObjArray<lcColor> gColorList;
+extern lcArray<lcColor> gColorList;
 extern lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 extern int gNumUserColors;
 extern int gEdgeColor;

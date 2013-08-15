@@ -362,7 +362,7 @@ bool lcZipFile::ReadCentralDir()
 	lcuint64 PosInCentralDir = mCentralDirOffset;
 
 	mFile->Seek((long)(PosInCentralDir + mBytesBeforeZipFile), SEEK_SET);
-	mFiles.Expand((int)mNumEntries);
+	mFiles.AllocGrow((int)mNumEntries);
 
 	for (lcuint64 FileNum = 0; FileNum < mNumEntries; FileNum++)
 	{

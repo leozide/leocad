@@ -164,7 +164,7 @@ void Camera::Initialize()
 	m_pTarget = new CameraTarget(this);
 }
 
-void Camera::CreateName(const PtrArray<Camera>& Cameras)
+void Camera::CreateName(const lcArray<Camera*>& Cameras)
 {
 	int i, max = 0;
 	const char* Prefix = "Camera ";

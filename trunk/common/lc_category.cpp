@@ -3,7 +3,7 @@
 #include "lc_file.h"
 #include "lc_profile.h"
 
-ObjArray<lcLibraryCategory> gCategories;
+lcArray<lcLibraryCategory> gCategories;
 
 void lcResetDefaultCategories()
 {
@@ -31,7 +31,7 @@ void lcSaveDefaultCategories()
 	lcSetProfileBuffer(LC_PROFILE_CATEGORIES, File);
 }
 
-void lcResetCategories(ObjArray<lcLibraryCategory>& Categories, bool BuiltInLibrary)
+void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibrary)
 {
 	const char DefaultCategories[] =
 	{
@@ -86,7 +86,7 @@ void lcResetCategories(ObjArray<lcLibraryCategory>& Categories, bool BuiltInLibr
 	lcLoadCategories(File, Categories);
 }
 
-bool lcLoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categories)
+bool lcLoadCategories(const char* FileName, lcArray<lcLibraryCategory>& Categories)
 {
 	lcDiskFile File;
 
@@ -96,7 +96,7 @@ bool lcLoadCategories(const char* FileName, ObjArray<lcLibraryCategory>& Categor
 	return lcLoadCategories(File, Categories);
 }
 
-bool lcLoadCategories(lcFile& File, ObjArray<lcLibraryCategory>& Categories)
+bool lcLoadCategories(lcFile& File, lcArray<lcLibraryCategory>& Categories)
 {
 	Categories.RemoveAll();
 
@@ -125,7 +125,7 @@ bool lcLoadCategories(lcFile& File, ObjArray<lcLibraryCategory>& Categories)
 	return true;
 }
 
-bool lcSaveCategories(const char* FileName, const ObjArray<lcLibraryCategory>& Categories)
+bool lcSaveCategories(const char* FileName, const lcArray<lcLibraryCategory>& Categories)
 {
 	lcDiskFile File;
 
@@ -135,7 +135,7 @@ bool lcSaveCategories(const char* FileName, const ObjArray<lcLibraryCategory>& C
 	return lcSaveCategories(File, Categories);
 }
 
-bool lcSaveCategories(lcFile& File, const ObjArray<lcLibraryCategory>& Categories)
+bool lcSaveCategories(lcFile& File, const lcArray<lcLibraryCategory>& Categories)
 {
 	char Line[1024];
 

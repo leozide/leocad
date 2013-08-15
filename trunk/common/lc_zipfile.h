@@ -1,7 +1,7 @@
 #ifndef _LC_ZIPFILE_H_
 #define _LC_ZIPFILE_H_
 
-#include "array.h"
+#include "lc_array.h"
 
 #ifdef DeleteFile
 #undef DeleteFile
@@ -61,7 +61,7 @@ public:
 	bool AddFile(const char* FileName, lcMemFile& File);
 	bool DeleteFile(const char* FileName);
 
-	ObjArray<lcZipFileInfo> mFiles;
+	lcArray<lcZipFileInfo> mFiles;
 
 protected:
 	bool Open();

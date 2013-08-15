@@ -863,7 +863,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	}
 }
 
-void Project::FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const
+void Project::FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const
 {
 	LC_FILEENTRY* CurFile = NULL;
 	char Buf[1024];
@@ -911,7 +911,7 @@ void Project::FileReadMPD(lcFile& MPD, PtrArray<LC_FILEENTRY>& FileArray) const
 	}
 }
 
-void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, PtrArray<LC_FILEENTRY>& FileArray)
+void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray)
 {
 	char buf[1024];
 
@@ -1280,7 +1280,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
 
   if (file.GetLength() != 0)
   {
-    PtrArray<LC_FILEENTRY> FileArray;
+	lcArray<LC_FILEENTRY*> FileArray;
 
     // Unpack the MPD file.
     if (mpdfile)
@@ -1405,7 +1405,7 @@ void Project::CheckPoint (const char* text)
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 }
 
-void Project::AddView (View* pView)
+void Project::AddView(View* pView)
 {
 	m_ViewList.Add (pView);
 
@@ -1416,12 +1416,12 @@ void Project::AddView (View* pView)
 		m_ActiveView = pView;
 }
 
-void Project::RemoveView (View* pView)
+void Project::RemoveView(View* pView)
 {
 	if (pView == m_ActiveView)
 		m_ActiveView = NULL;
 
-	m_ViewList.RemovePointer(pView);
+	m_ViewList.Remove(pView);
 }
 
 void Project::UpdateAllViews()
@@ -1596,7 +1596,7 @@ struct lcTranslucentRenderSection
 	Piece* piece;
 };
 
-int lcTranslucentRenderCompare(const lcTranslucentRenderSection& a, const lcTranslucentRenderSection& b, void*)
+int lcTranslucentRenderCompare(const lcTranslucentRenderSection& a, const lcTranslucentRenderSection& b)
 {
 	if (a.Distance > b.Distance)
 		return 1;
@@ -1604,7 +1604,7 @@ int lcTranslucentRenderCompare(const lcTranslucentRenderSection& a, const lcTran
 		return -1;
 }
 
-int lcOpaqueRenderCompare(const Piece* a, const Piece* b, void*)
+int lcOpaqueRenderCompare(Piece* const& a, Piece* const& b)
 {
 	if (a->mPieceInfo > b->mPieceInfo)
 		return 1;
@@ -1665,8 +1665,8 @@ void Project::RenderScenePieces(View* view)
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->Render(view->mCamera, AspectRatio);
 
-	PtrArray<Piece> OpaquePieces(512);
-	ObjArray<lcTranslucentRenderSection> TranslucentSections(512);
+	lcArray<Piece*> OpaquePieces(512);
+	lcArray<lcTranslucentRenderSection> TranslucentSections(512);
 
 	const lcMatrix44& WorldView = view->mCamera->mWorldView;
 
@@ -1679,7 +1679,7 @@ void Project::RenderScenePieces(View* view)
 		PieceInfo* Info = pPiece->mPieceInfo;
 
 		if ((Info->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			OpaquePieces.AddSorted(pPiece, lcOpaqueRenderCompare, NULL);
+			OpaquePieces.AddSorted(pPiece, lcOpaqueRenderCompare);
 
 		if ((Info->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
@@ -1690,7 +1690,7 @@ void Project::RenderScenePieces(View* view)
 			RenderSection.Distance = Pos[2];
 			RenderSection.piece = pPiece;
 
-			TranslucentSections.AddSorted(RenderSection, lcTranslucentRenderCompare, NULL);
+			TranslucentSections.AddSorted(RenderSection, lcTranslucentRenderCompare);
 		}
 	}
 
@@ -3282,7 +3282,7 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	UpdateAllViews();
 }
 
-void Project::GetPiecesUsed(ObjArray<lcPiecesUsedEntry>& PiecesUsed) const
+void Project::GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const
 {
 	for (Piece* Piece = m_pPieces; Piece; Piece = Piece->m_pNext)
 	{
@@ -4478,7 +4478,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				break;
 			}
 
-			ObjArray<lcPiecesUsedEntry> PiecesUsed;
+			lcArray<lcPiecesUsedEntry> PiecesUsed;
 			GetPiecesUsed(PiecesUsed);
 
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
@@ -4537,7 +4537,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				break;
 			}
 
-			ObjArray<lcPiecesUsedEntry> PiecesUsed;
+			lcArray<lcPiecesUsedEntry> PiecesUsed;
 			GetPiecesUsed(PiecesUsed);
 
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
@@ -7254,7 +7254,7 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	return ClickLine.Closest;
 }
 
-void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, PtrArray<Object>& Objects)
+void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects)
 {
 	int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -7428,7 +7428,7 @@ bool Project::StopTracking(bool bAccept)
 				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
 					// Find objects inside the rectangle.
-					PtrArray<Object> Objects;
+					lcArray<Object*> Objects;
 					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
 
 					// Deselect old pieces.
@@ -8516,7 +8516,7 @@ void Project::OnLeftButtonDown(View* view)
 
 						if (CanDelete)
 						{
-							mCameras.RemovePointer(pCamera);
+							mCameras.Remove(pCamera);
 							delete pCamera;
 
 							gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);

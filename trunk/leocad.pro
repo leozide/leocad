@@ -106,7 +106,6 @@ SOURCES += common/view.cpp \
     common/curve.cpp \
     common/console.cpp \
     common/camera.cpp \
-    common/array.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
     qt/lc_qmainwindow.cpp \
@@ -138,7 +137,6 @@ SOURCES += common/view.cpp \
     qt/lc_qcolorlist.cpp \
     qt/lc_qfinddialog.cpp
 HEADERS += \
-    common/array.h \
     common/view.h \
     common/tr.h \
     common/texfont.h \
@@ -197,7 +195,8 @@ HEADERS += \
     qt/lc_qglwidget.h \
     qt/lc_qcolorlist.h \
     common/lc_glwidget.h \
-    qt/lc_qfinddialog.h
+    qt/lc_qfinddialog.h \
+    common/lc_array.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

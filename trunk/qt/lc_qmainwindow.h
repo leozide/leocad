@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QPrinter>
-#include "array.h"
+#include "lc_array.h"
 #include "lc_commands.h"
 
 class QComboBox;
@@ -41,7 +41,7 @@ public:
 	void updateSnap();
 	void updateUndoRedo(const char* undoText, const char* redoText);
 	void updateTransformType(int newType);
-	void updateCameraMenu(const PtrArray<Camera>& cameras, Camera* currentCamera);
+	void updateCameraMenu(const lcArray<Camera*>& cameras, Camera* currentCamera);
 	void updateCurrentCamera(int cameraIndex);
 	void updateCategories();
 	void updateTitle(const char* title, bool modified);

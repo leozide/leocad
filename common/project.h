@@ -62,6 +62,17 @@
 //#define LC_HTML_HTMLEXT         0x40
 //#define LC_HTML_LISTID          0x80
 
+#define LC_SEL_NO_PIECES	0x001 // No pieces in the project
+#define LC_SEL_PIECE		0x002 // piece selected
+#define LC_SEL_CAMERA		0x004 // camera selected
+#define LC_SEL_LIGHT		0x010 // light selected
+#define LC_SEL_MULTIPLE		0x020 // multiple pieces selected
+#define LC_SEL_UNSELECTED	0x040 // at least 1 piece unselected
+#define LC_SEL_HIDDEN		0x080 // at least one piece hidden
+#define LC_SEL_GROUP		0x100 // at least one piece selected is grouped
+#define LC_SEL_FOCUSGROUP	0x200 // focused piece is grouped
+#define LC_SEL_CANGROUP		0x400 // can make a new group
+
 enum LC_NOTIFY
 {
 	LC_CAPTURE_LOST

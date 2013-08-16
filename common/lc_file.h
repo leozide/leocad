@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
+												((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))
+
+#define LC_FILE_ID LC_FOURCC('L','C','D', 0)
+
 class String;
 
 class lcFile

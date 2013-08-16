@@ -1,5 +1,5 @@
-#ifndef _LC_BASEWND_H_
-#define _LC_BASEWND_H_
+#ifndef _LC_BASEWINDOW_H_
+#define _LC_BASEWINDOW_H_
 
 #include "defines.h"
 #include "lc_math.h"
@@ -185,4 +185,4 @@ class lcBaseWindow
 	void* mHandle;
 };
 
-#endif // _LC_BASEWND_H_
+#endif // _LC_BASEWINDOW_H_

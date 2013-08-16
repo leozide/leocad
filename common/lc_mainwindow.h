@@ -1,7 +1,7 @@
-#ifndef _LC_MAINWND_H_
-#define _LC_MAINWND_H_
+#ifndef _LC_MAINWINDOW_H_
+#define _LC_MAINWINDOW_H_
 
-#include "lc_basewnd.h"
+#include "lc_basewindow.h"
 #include "lc_array.h"
 
 class Object;

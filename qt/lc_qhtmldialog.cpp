@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qhtmldialog.h"
 #include "ui_lc_qhtmldialog.h"
-#include "lc_basewnd.h"
+#include "lc_basewindow.h"
 
 lcQHTMLDialog::lcQHTMLDialog(QWidget *parent, void *data) :
     QDialog(parent),

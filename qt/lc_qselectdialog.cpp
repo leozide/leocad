@@ -7,7 +7,7 @@
 #include "camera.h"
 #include "light.h"
 #include "group.h"
-#include "lc_basewnd.h"
+#include "lc_basewindow.h"
 
 lcQSelectDialog::lcQSelectDialog(QWidget *parent, void *data) :
 	QDialog(parent),

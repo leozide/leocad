@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qarraydialog.h"
 #include "ui_lc_qarraydialog.h"
-#include "lc_basewnd.h"
+#include "lc_basewindow.h"
 
 lcQArrayDialog::lcQArrayDialog(QWidget *parent, void *data) :
 	QDialog(parent),

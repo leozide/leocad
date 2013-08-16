@@ -7,7 +7,7 @@
 #include "lc_texture.h"
 #include "lc_category.h"
 #include "lc_application.h"
-#include "lc_mainwnd.h"
+#include "lc_mainwindow.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>

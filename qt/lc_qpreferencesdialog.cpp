@@ -3,7 +3,7 @@
 #include "ui_lc_qpreferencesdialog.h"
 #include "lc_qutils.h"
 #include "lc_qcategorydialog.h"
-#include "basewnd.h"
+#include "lc_basewnd.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"

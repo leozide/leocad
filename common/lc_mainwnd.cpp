@@ -1,5 +1,5 @@
 #include "lc_global.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 #include "lc_profile.h"
 #include "preview.h"
 

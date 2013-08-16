@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "opengl.h"
 #include "lc_glwidget.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 #include "preview.h"
 
 GLBINDBUFFERARBPROC lcBindBufferARB;

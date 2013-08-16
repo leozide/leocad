@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qpovraydialog.h"
 #include "ui_lc_qpovraydialog.h"
-#include "basewnd.h"
+#include "lc_basewnd.h"
 
 lcQPOVRayDialog::lcQPOVRayDialog(QWidget *parent, void *data) :
 	QDialog(parent),

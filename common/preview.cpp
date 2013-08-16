@@ -4,7 +4,7 @@
 #include "pieceinf.h"
 #include "system.h"
 #include "lc_application.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 
 PiecePreview::PiecePreview()
 {

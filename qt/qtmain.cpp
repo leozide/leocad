@@ -2,7 +2,7 @@
 #include "lc_application.h"
 #include "lc_qmainwindow.h"
 #include "lc_qupdatedialog.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 #include <QApplication>
 
 #ifdef Q_OS_WIN

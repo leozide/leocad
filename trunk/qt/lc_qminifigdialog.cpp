@@ -4,7 +4,7 @@
 #include "lc_qglwidget.h"
 #include "lc_qcolorpicker.h"
 #include "minifig.h"
-#include "lc_mainwnd.h"
+#include "lc_mainwindow.h"
 #include "preview.h"
 
 lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :

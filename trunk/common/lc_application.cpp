@@ -9,7 +9,7 @@
 #include "opengl.h"
 #include "project.h"
 #include "image.h"
-#include "lc_mainwnd.h"
+#include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
 
 lcApplication* g_App;

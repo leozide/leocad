@@ -135,7 +135,7 @@ SOURCES += common/view.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
     qt/lc_qfinddialog.cpp \
-    common/lc_mainwnd.cpp
+    common/lc_mainwindow.cpp
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -195,8 +195,8 @@ HEADERS += \
     common/lc_glwidget.h \
     qt/lc_qfinddialog.h \
     common/lc_array.h \
-    common/lc_mainwnd.h \
-    common/lc_basewnd.h
+    common/lc_basewindow.h \
+    common/lc_mainwindow.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

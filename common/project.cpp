@@ -21,7 +21,6 @@
 #include "project.h"
 #include "image.h"
 #include "system.h"
-#include "console.h"
 #include "minifig.h"
 #include "curve.h"
 #include "lc_mainwindow.h"
@@ -1292,7 +1291,6 @@ bool Project::OnOpenDocument (const char* lpszPathName)
         file.Seek(0, SEEK_SET);
         mpdfile = false;
         datfile = true;
-        console.PrintWarning("No files found inside the MPD, trying to load it as a .DAT file.\n");
       }
     }
 
@@ -1315,7 +1313,6 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       ZoomExtents(0, m_ViewList.GetSize());
       UpdateAllViews();
 
-      console.PrintMisc("%d objects imported.\n", ok);
       bSuccess = true;
     }
     else

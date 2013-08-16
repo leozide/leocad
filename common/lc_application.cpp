@@ -5,7 +5,6 @@
 #include "lc_library.h"
 #include "lc_profile.h"
 #include "system.h"
-#include "console.h"
 #include "opengl.h"
 #include "project.h"
 #include "image.h"
@@ -98,11 +97,11 @@ void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], in
 		if ((sscanf(argv[(*CurArg)], "%d", &val) == 1) && (val > 0))
 			*Value = val;
 		else
-			console.PrintWarning("Invalid value specified for the %s argument.", argv[(*CurArg) - 1]);
+			printf("Invalid value specified for the %s argument.", argv[(*CurArg) - 1]);
 	}
 	else
 	{
-		console.PrintWarning("Not enough parameters for the %s argument.", argv[(*CurArg) - 1]);
+		printf("Not enough parameters for the %s argument.", argv[(*CurArg) - 1]);
 	}
 }
 
@@ -115,7 +114,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 	else
 	{
-		console.PrintWarning("No path specified after the %s argument.", argv[(*CurArg) - 1]);
+		printf("No path specified after the %s argument.", argv[(*CurArg) - 1]);
 	}
 }
 

@@ -161,7 +161,6 @@ HEADERS += \
     common/lc_application.h \
     common/image.h \
     common/group.h \
-    common/defines.h \
     common/debug.h \
     common/curve.h \
     common/camera.h \

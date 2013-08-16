@@ -1,7 +1,6 @@
 #ifndef _LC_BASEWINDOW_H_
 #define _LC_BASEWINDOW_H_
 
-#include "defines.h"
 #include "lc_math.h"
 #include "lc_array.h"
 #include "project.h"

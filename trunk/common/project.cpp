@@ -736,6 +736,8 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	lcuint16 sh;
 	int i, j;
 
+	const char LC_STR_VERSION[32] = "LeoCAD 0.7 Project\0\0";
+
 	file->Seek(0, SEEK_SET);
 	file->WriteBuffer(LC_STR_VERSION, 32);
 	file->WriteFloats(&ver_flt, 1);
@@ -3179,6 +3181,7 @@ void Project::UpdateSelection()
 
 void Project::CheckAutoSave()
 {
+	/*
 	m_nSaveTimer += 5;
 	if (m_nAutosave & LC_AUTOSAVE_FLAG)
 	{
@@ -3188,7 +3191,7 @@ void Project::CheckAutoSave()
 		if (m_nSaveTimer >= (m_nAutosave*60))
 		{
 			m_nSaveTimer = 0;
-/*
+
 			if (m_strTempFile.IsEmpty())
 			{
 				char tmpFile[_MAX_PATH], out[_MAX_PATH];
@@ -3207,8 +3210,9 @@ void Project::CheckAutoSave()
 			Serialize(ar);
 			ar.Close();
 			m_bUndo = FALSE;
-*/		}
+		}
 	}
+	*/
 }
 
 unsigned char Project::GetLastStep()
@@ -4871,9 +4875,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Options.Render)
 			{
-				// TODO: Move this somewhere else
-#ifdef LC_QT
-#endif
+				// TODO: run pov-ray
 
 #ifdef LC_WINDOWS
 				char CmdLine[LC_MAXPATH * 3 + 100];

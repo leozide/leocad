@@ -912,120 +912,171 @@ void Project::FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const
 
 void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray)
 {
-	char buf[1024];
+	char Line[1024];
 
 	// Save file offset.
 	lcuint32 Offset = file->GetPosition();
 	file->Seek(0, SEEK_SET);
 
-	while (file->ReadLine(buf, 1024))
+	while (file->ReadLine(Line, 1024))
 	{
-		strupr(buf);
-		if (strstr(buf, "STEP"))
+		bool read = true;
+		char* Ptr = Line;
+		char* Tokens[15];
+
+		for (int TokenIdx = 0; TokenIdx < 15; TokenIdx++)
 		{
-			(*nStep)++;
+			Tokens[TokenIdx] = 0;
+
+			while (*Ptr && *Ptr <= 32)
+			{
+				*Ptr = 0;
+				Ptr++;
+			}
+
+			Tokens[TokenIdx] = Ptr;
+
+			while (*Ptr > 32)
+				Ptr++;
+		}
+
+		if (!Tokens[0])
+			continue;
+
+		int LineType = atoi(Tokens[0]);
+
+		if (LineType == 0)
+		{
+			if (Tokens[1])
+			{
+				strupr(Tokens[1]);
+
+				if (!strcmp(Tokens[1], "STEP"))
+					(*nStep)++;
+			}
+
 			continue;
 		}
 
-		bool read = true;
-		char *ptr, tmp[LC_MAXPATH], pn[LC_MAXPATH];
-		int color, cmd;
-		float fmat[12];
-
-		if (sscanf(buf, "%d %i %g %g %g %g %g %g %g %g %g %g %g %g %s[12]",
-			&cmd, &color, &fmat[0], &fmat[1], &fmat[2], &fmat[3], &fmat[4], &fmat[5], &fmat[6],
-			&fmat[7], &fmat[8], &fmat[9], &fmat[10], &fmat[11], &tmp[0]) != 15)
+		if (LineType != 1)
 			continue;
 
-		lcMatrix44 IncludeTransform(lcVector4(fmat[3], fmat[9], -fmat[6], 0.0f), lcVector4(fmat[5], fmat[11], -fmat[8], 0.0f),
-		                            lcVector4(-fmat[4], -fmat[10], fmat[7], 0.0f), lcVector4(fmat[0], fmat[2], -fmat[1], 1.0f));
+		bool Error = false;
+		for (int TokenIdx = 1; TokenIdx < 15; TokenIdx++)
+		{
+			if (!Tokens[TokenIdx])
+			{
+				Error = true;
+				break;
+			}
+		}
+
+		if (Error)
+			continue;
+
+		int ColorCode = atoi(Tokens[1]);
+
+		float Matrix[12];
+		for (int TokenIdx = 2; TokenIdx < 14; TokenIdx++)
+			Matrix[TokenIdx - 2] = atof(Tokens[TokenIdx]);
+
+		lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[9], -Matrix[6], 0.0f), lcVector4(Matrix[5], Matrix[11], -Matrix[8], 0.0f),
+			lcVector4(-Matrix[4], -Matrix[10], Matrix[7], 0.0f), lcVector4(Matrix[0], Matrix[2], -Matrix[1], 1.0f));
 
 		IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 
-		if (cmd == 1)
+		if (ColorCode == 16)
+			ColorCode = DefColor;
+
+		char* IncludeName = Tokens[14];
+		for (Ptr = IncludeName; *Ptr; Ptr++)
+			if (*Ptr == '\r' || *Ptr == '\n')
+				*Ptr = 0;
+
+		// See if it's a piece in the library
+		if (strlen(IncludeName) < LC_PIECE_NAME_LEN)
 		{
-			int cl = color;
-			if (color == 16)
-				cl = DefColor;
+			char name[LC_PIECE_NAME_LEN];
+			strcpy(name, IncludeName);
+			strupr(name);
 
-			strcpy(pn, tmp);
-			ptr = strrchr(tmp, '.');
+			Ptr = strrchr(name, '.');
+			if (Ptr != NULL)
+				*Ptr = 0;
 
-			if (ptr != NULL)
-				*ptr = 0;
-
-			// See if it's a piece in the library
-			if (strlen(tmp) < LC_PIECE_NAME_LEN)
+			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, false);
+			if (pInfo != NULL)
 			{
-				char name[LC_PIECE_NAME_LEN];
-				strcpy(name, tmp);
-
-				PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, false);
-				if (pInfo != NULL)
-				{
-					Piece* pPiece = new Piece(pInfo);
-					read = false;
-
-					lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
-					AxisAngle[3] *= LC_RTOD;
-
-					pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].y / 25.0f, IncludeTransform[3].z / 25.0f, *nStep, 1);
-					pPiece->SetColorCode(cl);
-					pPiece->CreateName(m_pPieces);
-					AddPiece(pPiece);
-					pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
-					pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
-					SystemPieceComboAdd(pInfo->m_strDescription);
-					(*nOk)++;
-				}
-			}
-
-			// Check for MPD files first.
-			if (read)
-			{
-				for (int i = 0; i < FileArray.GetSize(); i++)
-				{
-					if (stricmp(FileArray[i]->FileName, pn) == 0)
-					{
-						FileReadLDraw(&FileArray[i]->File, IncludeTransform, nOk, cl, nStep, FileArray);
-						read = false;
-						break;
-					}
-				}
-			}
-
-			// Try to read the file from disk.
-			if (read)
-			{
-				lcDiskFile tf;
-
-				if (tf.Open(pn, "rt"))
-				{
-					FileReadLDraw(&tf, IncludeTransform, nOk, cl, nStep, FileArray);
-					read = false;
-				}
-			}
-
-			if (read)
-			{
-				// Create a placeholder.
-				PieceInfo* Info = lcGetPiecesLibrary()->CreatePlaceholder(tmp);
-
-				Piece* pPiece = new Piece(Info);
+				Piece* pPiece = new Piece(pInfo);
 				read = false;
 
 				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
 				AxisAngle[3] *= LC_RTOD;
 
-				pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].y, IncludeTransform[3].z, *nStep, 1);
-				pPiece->SetColorCode(cl);
+				pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].y / 25.0f, IncludeTransform[3].z / 25.0f, *nStep, 1);
+				pPiece->SetColorCode(ColorCode);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
 				pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
 				pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
-				SystemPieceComboAdd(Info->m_strDescription);
+				SystemPieceComboAdd(pInfo->m_strDescription);
 				(*nOk)++;
 			}
+		}
+
+		// Check for MPD files first.
+		if (read)
+		{
+			for (int i = 0; i < FileArray.GetSize(); i++)
+			{
+				if (stricmp(FileArray[i]->FileName, IncludeName) == 0)
+				{
+					FileReadLDraw(&FileArray[i]->File, IncludeTransform, nOk, ColorCode, nStep, FileArray);
+					read = false;
+					break;
+				}
+			}
+		}
+
+		// Try to read the file from disk.
+		if (read)
+		{
+			lcDiskFile tf;
+
+			if (tf.Open(IncludeName, "rt"))
+			{
+				FileReadLDraw(&tf, IncludeTransform, nOk, ColorCode, nStep, FileArray);
+				read = false;
+			}
+		}
+
+		if (read)
+		{
+			// Create a placeholder.
+			char name[LC_PIECE_NAME_LEN];
+			strcpy(name, IncludeName);
+			strupr(name);
+
+			Ptr = strrchr(name, '.');
+			if (Ptr != NULL)
+				*Ptr = 0;
+
+			PieceInfo* Info = lcGetPiecesLibrary()->CreatePlaceholder(name);
+
+			Piece* pPiece = new Piece(Info);
+			read = false;
+
+			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
+			AxisAngle[3] *= LC_RTOD;
+
+			pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].y, IncludeTransform[3].z, *nStep, 1);
+			pPiece->SetColorCode(ColorCode);
+			pPiece->CreateName(m_pPieces);
+			AddPiece(pPiece);
+			pPiece->ChangeKey(1, false, false, AxisAngle, LC_PK_ROTATION);
+			pPiece->ChangeKey(1, true, false, AxisAngle, LC_PK_ROTATION);
+			SystemPieceComboAdd(Info->m_strDescription);
+			(*nOk)++;
 		}
 	}
 
@@ -1402,7 +1453,7 @@ void Project::CheckPoint (const char* text)
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 }
 
-void Project::AddView(View* pView)
+void Project::AddView (View* pView)
 {
 	m_ViewList.Add (pView);
 
@@ -1413,7 +1464,7 @@ void Project::AddView(View* pView)
 		m_ActiveView = pView;
 }
 
-void Project::RemoveView(View* pView)
+void Project::RemoveView (View* pView)
 {
 	if (pView == m_ActiveView)
 		m_ActiveView = NULL;

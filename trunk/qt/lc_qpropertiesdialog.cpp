@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qpropertiesdialog.h"
 #include "ui_lc_qpropertiesdialog.h"
-#include "basewnd.h"
+#include "lc_basewnd.h"
 #include "lc_colors.h"
 #include "lc_library.h"
 #include "lc_application.h"

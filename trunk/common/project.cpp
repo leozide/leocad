@@ -24,7 +24,7 @@
 #include "console.h"
 #include "minifig.h"
 #include "curve.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 #include "view.h"
 #include "lc_library.h"
 #include "texfont.h"

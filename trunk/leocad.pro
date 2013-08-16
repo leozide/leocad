@@ -91,7 +91,6 @@ SOURCES += common/view.cpp \
     common/opengl.cpp \
     common/object.cpp \
     common/minifig.cpp \
-    common/mainwnd.cpp \
     common/light.cpp \
     common/lc_zipfile.cpp \
     common/lc_texture.cpp \
@@ -135,7 +134,8 @@ SOURCES += common/view.cpp \
     qt/lc_qimage.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
-    qt/lc_qfinddialog.cpp
+    qt/lc_qfinddialog.cpp \
+    common/lc_mainwnd.cpp
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -150,7 +150,6 @@ HEADERS += \
     common/opengl.h \
     common/object.h \
     common/minifig.h \
-    common/mainwnd.h \
     common/light.h \
     common/lc_zipfile.h \
     common/lc_texture.h \
@@ -168,7 +167,6 @@ HEADERS += \
     common/curve.h \
     common/console.h \
     common/camera.h \
-    common/basewnd.h \
     common/lc_profile.h \
     common/lc_category.h \
     qt/lc_qmainwindow.h \
@@ -196,7 +194,9 @@ HEADERS += \
     qt/lc_qcolorlist.h \
     common/lc_glwidget.h \
     qt/lc_qfinddialog.h \
-    common/lc_array.h
+    common/lc_array.h \
+    common/lc_mainwnd.h \
+    common/lc_basewnd.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

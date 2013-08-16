@@ -18,7 +18,7 @@
 #include "lc_qpropertiestree.h"
 #include "lc_shortcuts.h"
 #include "system.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 #include "lc_profile.h"
 
 lcQMainWindow::lcQMainWindow(QWidget *parent)

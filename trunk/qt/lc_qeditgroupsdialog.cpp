@@ -5,7 +5,7 @@
 #include "project.h"
 #include "piece.h"
 #include "group.h"
-#include "basewnd.h"
+#include "lc_basewnd.h"
 
 lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget *parent, void *data) :
     QDialog(parent),

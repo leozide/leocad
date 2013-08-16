@@ -5,7 +5,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_qmainwindow.h"
-#include "mainwnd.h"
+#include "lc_mainwnd.h"
 
 void lcGLWidget::MakeCurrent()
 {

@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_qimagedialog.h"
 #include "ui_lc_qimagedialog.h"
-#include "basewnd.h"
+#include "lc_basewnd.h"
 
 lcQImageDialog::lcQImageDialog(QWidget *parent, void *data) :
     QDialog(parent),

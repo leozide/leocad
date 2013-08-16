@@ -1,7 +1,7 @@
-#ifndef _MAINWND_H_
-#define _MAINWND_H_
+#ifndef _LC_MAINWND_H_
+#define _LC_MAINWND_H_
 
-#include "basewnd.h"
+#include "lc_basewnd.h"
 #include "lc_array.h"
 
 class Object;
@@ -57,4 +57,4 @@ class lcMainWindow : public lcBaseWindow
 
 extern class lcMainWindow* gMainWindow;
 
-#endif // _MAINWND_H_
+#endif // _LC_MAINWND_H_

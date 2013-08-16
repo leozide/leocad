@@ -4645,7 +4645,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				LGEO_PIECE_LGEO  = 0x01,
 				LGEO_PIECE_AR    = 0x02,
-				LGEO_PIECE_SLOPE = 0x04,
+				LGEO_PIECE_SLOPE = 0x04
 			};
 
 			enum
@@ -4656,7 +4656,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				LGEO_COLOR_PEARL       = 0x08,
 				LGEO_COLOR_METALLIC    = 0x10,
 				LGEO_COLOR_RUBBER      = 0x20,
-				LGEO_COLOR_GLITTER     = 0x40,
+				LGEO_COLOR_GLITTER     = 0x40
 			};
 
 			// Parse LGEO tables.
@@ -4872,46 +4872,38 @@ void Project::HandleCommand(LC_COMMANDS id)
 			delete[] PieceTable;
 			delete[] PieceFlags;
 			setlocale(LC_NUMERIC, OldLocale);
+			POVFile.Close();
 
 			if (Options.Render)
 			{
-				// TODO: run pov-ray
+				lcArray<String> Arguments;
+				char Argument[LC_MAXPATH + 32];
 
-#ifdef LC_WINDOWS
-				char CmdLine[LC_MAXPATH * 3 + 100];
+				sprintf(Argument, "+I%s", Options.FileName);
+				Arguments.Add(Argument);
 
-				if (opts.libpath[0])
-					sprintf(CmdLine, "\"+L%slg\\\" \"+L%sar\\\" \"+I%s\"", opts.libpath, opts.libpath, opts.outpath);
-				else
-					sprintf(CmdLine, "\"+I%s\"", opts.outpath);
-
-				ShellExecute(::GetDesktopWindow(), "open", opts.povpath, CmdLine, NULL, SW_SHOWNORMAL);
-#endif
-
-#ifdef LC_LINUX
-				pid_t pID = fork();
-
-				if (pID == 0)
+				if (Options.LGEOPath[0])
 				{
-					char InputArg[LC_MAXPATH + 16];
-
-					sprintf(InputArg, "+I%s", opts.outpath);
-
-					if (opts.libpath[0])
-					{
-						char LibArg1[LC_MAXPATH + 16], LibArg2[LC_MAXPATH + 16];
-
-						sprintf(LibArg1, "+L%slg/", opts.libpath);
-						sprintf(LibArg2, "+L%sar/", opts.libpath);
-
-						execl(opts.povpath, opts.povpath, InputArg, LibArg1, LibArg2, NULL);
-					}
-					else
-						execl(opts.povpath, opts.povpath, InputArg, NULL);
-
-					exit(0);
+					sprintf(Argument, "+L%slg/", Options.LGEOPath);
+					Arguments.Add(Argument);
+					sprintf(Argument, "+L%sar/", Options.LGEOPath);
+					Arguments.Add(Argument);
 				}
-#endif
+
+				sprintf(Argument, "+o%s", Options.FileName);
+				char* Slash1 = strrchr(Argument, '\\');
+				char* Slash2 = strrchr(Argument, '/');
+				if (Slash1 || Slash2)
+				{
+					if (Slash1 > Slash2)
+						*(Slash1 + 1) = 0;
+					else
+						*(Slash2 + 1) = 0;
+
+					Arguments.Add(Argument);
+				}
+
+				g_App->RunProcess(Options.POVRayPath, Arguments);
 			}
 		} break;
 

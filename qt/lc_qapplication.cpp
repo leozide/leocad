@@ -7,6 +7,16 @@ void lcApplication::OpenURL(const char* URL)
 	QDesktopServices::openUrl(QUrl(URL));
 }
 
+void lcApplication::RunProcess(const char* ExecutablePath, const lcArray<String>& Arguments)
+{
+	QStringList argumentList;
+
+	for (int argIdx = 0; argIdx < Arguments.GetSize(); argIdx++)
+		argumentList << (const char*)Arguments[argIdx];
+
+	QProcess::execute(ExecutablePath, argumentList);
+}
+
 void lcApplication::ExportClipboard(lcMemFile* Clipboard)
 {
 	QByteArray clipboardData = QByteArray::fromRawData((const char*)Clipboard->mBuffer, Clipboard->GetLength());

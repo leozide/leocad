@@ -18,8 +18,9 @@ public:
 
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
 
-	void GetFileList(const char* Path, lcArray<String>& FileList);
 	void OpenURL(const char* URL);
+	void RunProcess(const char* ExecutablePath, const lcArray<String>& Arguments);
+	void GetFileList(const char* Path, lcArray<String>& FileList);
 	void SetClipboard(lcFile* Clipboard);
 	void ExportClipboard(lcMemFile* Clipboard);
 

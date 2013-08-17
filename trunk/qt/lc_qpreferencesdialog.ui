@@ -159,7 +159,7 @@
           <widget class="QLineEdit" name="povrayExecutable"/>
          </item>
          <item>
-          <widget class="QToolButton" name="povRayExecutableBrowse">
+          <widget class="QToolButton" name="povrayExecutableBrowse">
            <property name="text">
             <string>...</string>
            </property>
@@ -646,7 +646,7 @@
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
   <tabstop>povrayExecutable</tabstop>
-  <tabstop>povRayExecutableBrowse</tabstop>
+  <tabstop>povrayExecutableBrowse</tabstop>
   <tabstop>lgeoPath</tabstop>
   <tabstop>lgeoPathBrowse</tabstop>
   <tabstop>mouseSensitivity</tabstop>

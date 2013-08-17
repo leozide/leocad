@@ -136,7 +136,7 @@ void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_povrayBrowse_clicked()
+void lcQPreferencesDialog::on_povrayExecutableBrowse_clicked()
 {
 #ifdef Q_OS_WIN
 	QString filter(tr("Executable Files (*.exe);;All Files (*.*)"));
@@ -150,7 +150,7 @@ void lcQPreferencesDialog::on_povrayBrowse_clicked()
 		ui->povrayExecutable->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_lgeoBrowse_clicked()
+void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 {
 	QString result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPathBrowse->text());
 

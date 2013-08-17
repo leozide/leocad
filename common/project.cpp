@@ -6225,6 +6225,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			strcpy(Options.DefaultAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
 			strcpy(Options.ProjectsPath, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
 			strcpy(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+			strcpy(Options.POVRayPath, lcGetProfileString(LC_PROFILE_POVRAY_PATH));
+			strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
 			Options.MouseSensitivity = m_nMouse;
 			Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
@@ -6257,6 +6259,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 			lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
 			lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
+			lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
+			lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
 			lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, m_nMouse);
 			lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 			lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);

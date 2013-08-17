@@ -142,6 +142,8 @@ struct lcPreferencesDialogOptions
 	char DefaultAuthor[101];
 	char ProjectsPath[LC_MAXPATH];
 	char LibraryPath[LC_MAXPATH];
+	char POVRayPath[LC_MAXPATH];
+	char LGEOPath[LC_MAXPATH];
 	int MouseSensitivity;
 	int CheckForUpdates;
 

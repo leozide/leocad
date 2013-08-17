@@ -24,6 +24,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->authorName->setText(options->DefaultAuthor);
 	ui->projectsFolder->setText(options->ProjectsPath);
 	ui->partsLibrary->setText(options->LibraryPath);
+	ui->povrayExecutable->setText(options->POVRayPath);
+	ui->lgeoPath->setText(options->LGEOPath);
 	ui->mouseSensitivity->setValue(options->MouseSensitivity);
 	ui->checkForUpdates->setChecked(options->CheckForUpdates != 0);
 	ui->centimeterUnits->setChecked((options->Snap & LC_DRAW_CM_UNITS) != 0);
@@ -71,6 +73,8 @@ void lcQPreferencesDialog::accept()
 	strcpy(options->DefaultAuthor, ui->authorName->text().toLocal8Bit().data());
 	strcpy(options->ProjectsPath, ui->projectsFolder->text().toLocal8Bit().data());
 	strcpy(options->LibraryPath, ui->partsLibrary->text().toLocal8Bit().data());
+	strcpy(options->POVRayPath, ui->povrayExecutable->text().toLocal8Bit().data());
+	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
 	options->MouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->isChecked() ? 1 : 0;
 
@@ -130,6 +134,28 @@ void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
 
 	if (!result.isEmpty())
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
+}
+
+void lcQPreferencesDialog::on_povrayBrowse_clicked()
+{
+#ifdef Q_OS_WIN
+	QString filter(tr("Executable Files (*.exe);;All Files (*.*)"));
+#else
+	QString filter(tr("All Files (*.*)"));
+#endif
+
+	QString result = QFileDialog::getOpenFileName(this, tr("Open POV-Ray Executable"), ui->povrayExecutable->text(), filter);
+
+	if (!result.isEmpty())
+		ui->povrayExecutable->setText(QDir::toNativeSeparators(result));
+}
+
+void lcQPreferencesDialog::on_lgeoBrowse_clicked()
+{
+	QString result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPathBrowse->text());
+
+	if (!result.isEmpty())
+		ui->lgeoPathBrowse->setText(QDir::toNativeSeparators(result));
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()

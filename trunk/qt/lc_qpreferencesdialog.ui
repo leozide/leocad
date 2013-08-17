@@ -44,7 +44,7 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string>Mouse sensitivity:</string>
@@ -54,7 +54,7 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="7" column="1">
         <widget class="QSlider" name="mouseSensitivity">
          <property name="minimum">
           <number>1</number>
@@ -70,28 +70,28 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="0" colspan="2">
+       <item row="9" column="0" colspan="2">
         <widget class="QCheckBox" name="checkForUpdates">
          <property name="text">
           <string>Check for updates on startup</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0" colspan="2">
+       <item row="10" column="0" colspan="2">
         <widget class="QCheckBox" name="centimeterUnits">
          <property name="text">
           <string>Centimeter units</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="0" colspan="2">
+       <item row="11" column="0" colspan="2">
         <widget class="QCheckBox" name="noRelativeSnap">
          <property name="text">
           <string>Don't allow relative snap</string>
          </property>
         </widget>
        </item>
-       <item row="10" column="0" colspan="2">
+       <item row="12" column="0" colspan="2">
         <widget class="QCheckBox" name="fixedDirectionKeys">
          <property name="text">
           <string>Fixed direction keys</string>
@@ -138,6 +138,48 @@
        </item>
        <item row="0" column="1">
         <widget class="QLineEdit" name="authorName"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>POV-Ray Executable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>LGEO Path</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QLineEdit" name="povrayExecutable"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="povRayExecutableBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QLineEdit" name="lgeoPath"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="lgeoPathBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -603,6 +645,10 @@
   <tabstop>projectsFolderBrowse</tabstop>
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
+  <tabstop>povrayExecutable</tabstop>
+  <tabstop>povRayExecutableBrowse</tabstop>
+  <tabstop>lgeoPath</tabstop>
+  <tabstop>lgeoPathBrowse</tabstop>
   <tabstop>mouseSensitivity</tabstop>
   <tabstop>checkForUpdates</tabstop>
   <tabstop>centimeterUnits</tabstop>
@@ -631,6 +677,7 @@
   <tabstop>shortcutsReset</tabstop>
   <tabstop>shortcutEdit</tabstop>
   <tabstop>shortcutAssign</tabstop>
+  <tabstop>shortcutRemove</tabstop>
  </tabstops>
  <resources/>
  <connections>

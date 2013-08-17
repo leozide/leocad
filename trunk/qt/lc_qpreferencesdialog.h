@@ -29,6 +29,8 @@ public slots:
 	void accept();
 	void on_projectsFolderBrowse_clicked();
 	void on_partsLibraryBrowse_clicked();
+	void on_povrayBrowse_clicked();
+	void on_lgeoBrowse_clicked();
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();
 	void on_baseGrid_toggled();

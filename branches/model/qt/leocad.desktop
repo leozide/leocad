@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Name=LeoCAD
+Comment=Create virtual LEGO models
+Comment[eo]=Kreu virtualajn LEGO-ajn modelojn
+Comment[it]=Crea modelli LEGO virtuali
+Comment[nb]=Lag virtuelle LEGO-modeller
+Comment[pt_BR]=Criar modelos virtuais de LEGO
+Exec=leocad %f
+Terminal=false
+Type=Application
+Icon=leocad.svg
+MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;application/x-ldlite;
+Categories=Graphics;3DGraphics;Education;
+Keywords=CAD;LEGO;LDraw;
+

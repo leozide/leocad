@@ -27,7 +27,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->povrayExecutable->setText(options->POVRayPath);
 	ui->lgeoPath->setText(options->LGEOPath);
 	ui->mouseSensitivity->setValue(options->MouseSensitivity);
-	ui->checkForUpdates->setChecked(options->CheckForUpdates != 0);
+	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
 	ui->centimeterUnits->setChecked((options->Snap & LC_DRAW_CM_UNITS) != 0);
 	ui->noRelativeSnap->setChecked((options->Snap & LC_DRAW_GLOBAL_SNAP) != 0);
 	ui->fixedDirectionKeys->setChecked((options->Snap & LC_DRAW_MOVEAXIS) != 0);
@@ -76,7 +76,7 @@ void lcQPreferencesDialog::accept()
 	strcpy(options->POVRayPath, ui->povrayExecutable->text().toLocal8Bit().data());
 	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
 	options->MouseSensitivity = ui->mouseSensitivity->value();
-	options->CheckForUpdates = ui->checkForUpdates->isChecked() ? 1 : 0;
+	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
 
 	if (ui->centimeterUnits->isChecked())
 		options->Snap |= LC_DRAW_CM_UNITS;

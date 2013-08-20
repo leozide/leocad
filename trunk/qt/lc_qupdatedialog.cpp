@@ -13,11 +13,11 @@ void lcDoInitialUpdateCheck()
 		return;
 
 	QSettings settings;
-	QDateTime checkTime = settings.value("LastUpdateCheck", QDateTime()).toDateTime();
+	QDateTime checkTime = settings.value("Updates/LastCheck", QDateTime()).toDateTime();
 
 	if (!checkTime.isNull())
 	{
-		checkTime.addDays(1); // TODO: add option for weekly checks
+		checkTime.addDays(updateFrequency == 1 ? 1 : 7);
 
 		if (checkTime > QDateTime::currentDateTimeUtc())
 			return;
@@ -57,7 +57,15 @@ lcQUpdateDialog::~lcQUpdateDialog()
 	delete ui;
 }
 
-void lcQUpdateDialog::cancel()
+void lcQUpdateDialog::accept()
+{
+	QSettings settings;
+	settings.setValue("Updates/IgnoreVersion", versionData);
+
+	QDialog::accept();
+}
+
+void lcQUpdateDialog::reject()
 {
 	if (updateReply)
 	{
@@ -66,7 +74,7 @@ void lcQUpdateDialog::cancel()
 		updateReply = NULL;
 	}
 
-	QDialog::accept();
+	QDialog::reject();
 }
 
 void lcQUpdateDialog::finished(int result)
@@ -84,10 +92,17 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		int majorVersion, minorVersion, patchVersion;
 		int parts;
 
-		QByteArray replyBytes = reply->readAll();
-		const char *update = replyBytes;
+		versionData = reply->readAll();
+		const char *update = versionData;
 
-		if (sscanf(update, "%d.%d.%d %d", &majorVersion, &minorVersion, &patchVersion, &parts) == 4)
+		QSettings settings;
+		QByteArray ignoreUpdate = settings.value("Updates/IgnoreVersion", QByteArray()).toByteArray();
+
+		if (initialUpdate && ignoreUpdate == versionData)
+		{
+			updateAvailable = false;
+		}
+		else if (sscanf(update, "%d.%d.%d %d", &majorVersion, &minorVersion, &patchVersion, &parts) == 4)
 		{
 			QString status;
 
@@ -132,10 +147,7 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		else
 			ui->status->setText(tr("Error parsing update information."));
 
-		// TODO: option to ignore a version
-
-		QSettings settings;
-		settings.setValue("LastUpdateCheck", QDateTime::currentDateTimeUtc());
+		settings.setValue("Updates/LastCheck", QDateTime::currentDateTimeUtc());
 
 		updateReply = NULL;
 		reply->deleteLater();
@@ -151,5 +163,8 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 			deleteLater();
 	}
 
-	ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
+	if (updateAvailable)
+		ui->buttonBox->setStandardButtons(QDialogButtonBox::Close | QDialogButtonBox::Ignore);
+	else
+		ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
 }

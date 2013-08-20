@@ -22,7 +22,8 @@ public:
 
 public slots:
 	void replyFinished(QNetworkReply *reply);
-	void cancel();
+	void accept();
+	void reject();
 	void finished(int result);
 
 private:
@@ -30,6 +31,7 @@ private:
 
 	QNetworkReply *updateReply;
 	QNetworkAccessManager *manager;
+	QByteArray versionData;
 	bool initialUpdate;
 };
 

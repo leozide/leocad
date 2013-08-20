@@ -24,6 +24,22 @@
        <string>General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Default author name:</string>
+         </property>
+         <property name="buddy">
+          <cstring>authorName</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="authorName"/>
+       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
@@ -34,6 +50,20 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLineEdit" name="projectsFolder"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="projectsFolderBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
@@ -43,6 +73,68 @@
           <cstring>partsLibrary</cstring>
          </property>
         </widget>
+       </item>
+       <item row="4" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLineEdit" name="partsLibrary"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="partsLibraryBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>POV-Ray Executable:</string>
+         </property>
+         <property name="buddy">
+          <cstring>povrayExecutable</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QLineEdit" name="povrayExecutable"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="povrayExecutableBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>LGEO Path:</string>
+         </property>
+         <property name="buddy">
+          <cstring>lgeoPath</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QLineEdit" name="lgeoPath"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="lgeoPathBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item row="7" column="0">
         <widget class="QLabel" name="label_6">
@@ -70,116 +162,55 @@
          </property>
         </widget>
        </item>
-       <item row="9" column="0" colspan="2">
-        <widget class="QCheckBox" name="checkForUpdates">
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_10">
          <property name="text">
-          <string>Check for updates on startup</string>
+          <string>Check for updates:</string>
+         </property>
+         <property name="buddy">
+          <cstring>checkForUpdates</cstring>
          </property>
         </widget>
        </item>
-       <item row="10" column="0" colspan="2">
+       <item row="8" column="1">
+        <widget class="QComboBox" name="checkForUpdates">
+         <item>
+          <property name="text">
+           <string>Never</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Once a day</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Once a week</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="2">
         <widget class="QCheckBox" name="centimeterUnits">
          <property name="text">
           <string>Centimeter units</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="0" colspan="2">
+       <item row="10" column="0" colspan="2">
         <widget class="QCheckBox" name="noRelativeSnap">
          <property name="text">
           <string>Don't allow relative snap</string>
          </property>
         </widget>
        </item>
-       <item row="12" column="0" colspan="2">
+       <item row="11" column="0" colspan="2">
         <widget class="QCheckBox" name="fixedDirectionKeys">
          <property name="text">
           <string>Fixed direction keys</string>
          </property>
         </widget>
-       </item>
-       <item row="1" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QLineEdit" name="projectsFolder"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="projectsFolderBrowse">
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="4" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLineEdit" name="partsLibrary"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="partsLibraryBrowse">
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Default author name:</string>
-         </property>
-         <property name="buddy">
-          <cstring>authorName</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="authorName"/>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>POV-Ray Executable</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>LGEO Path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
-         <item>
-          <widget class="QLineEdit" name="povrayExecutable"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="povrayExecutableBrowse">
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="6" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_10">
-         <item>
-          <widget class="QLineEdit" name="lgeoPath"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="lgeoPathBrowse">
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>

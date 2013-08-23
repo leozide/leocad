@@ -186,6 +186,8 @@ int main(int argc, char *argv[])
 
 // TODO: move somewhere else
 
+#include "view.h"
+
 int lcBaseWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
 {
 	QWidget* parent = (QWidget*)mHandle;
@@ -546,9 +548,11 @@ void lcMainWindow::UpdateTransformType(int NewType)
 		window->updateTransformType(NewType);
 }
 
-void lcMainWindow::UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera)
+void lcMainWindow::UpdateCameraMenu(const lcArray<Camera*>& Cameras)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	Camera* CurrentCamera = mActiveView ? mActiveView->mCamera : NULL;
 
 	if (window)
 		window->updateCameraMenu(Cameras, CurrentCamera);

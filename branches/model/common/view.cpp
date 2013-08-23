@@ -1,8 +1,8 @@
 #include "lc_global.h"
-#include <stdlib.h>
+#include "view.h"
+#include "lc_mainwindow.h"
 #include "project.h"
 #include "camera.h"
-#include "view.h"
 #include "system.h"
 
 View::View(Project *project)
@@ -11,16 +11,21 @@ View::View(Project *project)
 	mCamera = NULL;
 	m_OverlayScale = 1.0f;
 
-	if (project->GetActiveView())
-		SetCamera(project->GetActiveView()->mCamera, false);
+	if (gMainWindow->mActiveView)
+		SetCamera(gMainWindow->mActiveView->mCamera, false);
 	else
 		SetDefaultCamera();
 }
 
 View::~View()
 {
-	if (m_Project != NULL)
-		m_Project->RemoveView(this);
+	gMainWindow->mViews.Remove(this);
+
+	if (gMainWindow->mActiveView == this)
+	{
+		if (gMainWindow->mViews.GetSize() > 0)
+			gMainWindow->SetActiveView(gMainWindow->mViews[0]);
+	}
 
 	if (mCamera && mCamera->IsSimple())
 		delete mCamera;
@@ -127,7 +132,14 @@ void View::OnDraw()
 
 void View::OnInitialUpdate()
 {
-	m_Project->AddView(this);
+	MakeCurrent();
+
+	gMainWindow->mViews.Add(this);
+
+	if (!gMainWindow->mActiveView)
+		gMainWindow->SetActiveView(this);
+
+	m_Project->RenderInitialize();
 }
 
 void View::OnUpdateCursor()

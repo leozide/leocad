@@ -134,7 +134,12 @@ SOURCES += common/view.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
     qt/lc_qfinddialog.cpp \
-    common/lc_mainwindow.cpp
+    common/lc_mainwindow.cpp \
+    common/lc_part.cpp \
+    common/lc_model.cpp \
+    common/lc_object.cpp \
+    common/lc_camera.cpp \
+    common/lc_light.cpp
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -193,7 +198,12 @@ HEADERS += \
     qt/lc_qfinddialog.h \
     common/lc_array.h \
     common/lc_basewindow.h \
-    common/lc_mainwindow.h
+    common/lc_mainwindow.h \
+    common/lc_part.h \
+    common/lc_model.h \
+    common/lc_object.h \
+    common/lc_camera.h \
+    common/lc_light.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

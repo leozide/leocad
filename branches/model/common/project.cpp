@@ -30,13 +30,15 @@
 #include "debug.h"
 #include "lc_application.h"
 #include "lc_profile.h"
+#include "lc_model.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Project construction/destruction
 
 Project::Project()
 {
-	m_ActiveView = NULL;
+	mActiveModel = new lcModel;
+
 	m_bModified = false;
 	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
@@ -91,16 +93,16 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+	gMainWindow->UpdateCameraMenu(mCameras);
 	UpdateSelection();
 	if (m_bAnimation)
 		gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 	else
 		gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
 
-	for (int i = 0; i < m_ViewList.GetSize(); i++)
+	for (int i = 0; i < gMainWindow->mViews.GetSize(); i++)
 	{
-		m_ViewList[i]->MakeCurrent();
+		gMainWindow->mViews[i]->MakeCurrent();
 		RenderInitialize();
 	}
 
@@ -158,9 +160,9 @@ void Project::DeleteContents(bool bUndo)
 
 	if (!bUndo)
 	{
-		for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
+		for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize(); ViewIdx++)
 		{
-			View* view = m_ViewList[ViewIdx];
+			View* view = gMainWindow->mViews[ViewIdx];
 
 			if (!view->mCamera->IsSimple())
 				view->SetDefaultCamera();
@@ -254,19 +256,19 @@ void Project::LoadDefaults(bool cameras)
 	m_pTerrain->LoadDefaults(true);
 	m_OverlayActive = false;
 
-	for (i = 0; i < m_ViewList.GetSize (); i++)
+	for (i = 0; i < gMainWindow->mViews.GetSize (); i++)
 	{
-		m_ViewList[i]->MakeCurrent();
+		gMainWindow->mViews[i]->MakeCurrent();
 		RenderInitialize();
 	}
 
 	if (cameras)
 	{
-		for (i = 0; i < m_ViewList.GetSize(); i++)
-			if (!m_ViewList[i]->mCamera->IsSimple())
-				m_ViewList[i]->SetDefaultCamera();
+		for (i = 0; i < gMainWindow->mViews.GetSize(); i++)
+			if (!gMainWindow->mViews[i]->mCamera->IsSimple())
+				gMainWindow->mViews[i]->SetDefaultCamera();
 
-		gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+		gMainWindow->UpdateCameraMenu(mCameras);
 	}
 
 	SystemPieceComboAdd(NULL);
@@ -685,9 +687,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		}
 	}
 
-	for (i = 0; i < m_ViewList.GetSize (); i++)
+	for (i = 0; i < gMainWindow->mViews.GetSize (); i++)
 	{
-		m_ViewList[i]->MakeCurrent();
+		gMainWindow->mViews[i]->MakeCurrent();
 		RenderInitialize();
 	}
 
@@ -701,29 +703,29 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	if (!bMerge)
 	{
-		for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
+		for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize(); ViewIdx++)
 		{
-			View* view = m_ViewList[ViewIdx];
+			View* view = gMainWindow->mViews[ViewIdx];
 
 			if (!view->mCamera->IsSimple())
 				view->SetDefaultCamera();
 		}
 
 		if (!bUndo)
-			ZoomExtents(0, m_ViewList.GetSize());
+			ZoomExtents(0, gMainWindow->mViews.GetSize());
 	}
 
 	SetAction(action);
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+	gMainWindow->UpdateCameraMenu(mCameras);
 	UpdateSelection();
 	if (m_bAnimation)
 		gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
 	else
 		gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
-	UpdateAllViews ();
+	gMainWindow->UpdateAllViews();
 
 	return true;
 }
@@ -1363,8 +1365,8 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       UpdateSelection();
       CalculateStep();
 
-      ZoomExtents(0, m_ViewList.GetSize());
-      UpdateAllViews();
+	  ZoomExtents(0, gMainWindow->mViews.GetSize());
+	  gMainWindow->UpdateAllViews();
 
       bSuccess = true;
     }
@@ -1455,60 +1457,6 @@ void Project::CheckPoint (const char* text)
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 }
 
-void Project::AddView (View* pView)
-{
-	m_ViewList.Add (pView);
-
-	pView->MakeCurrent ();
-	RenderInitialize ();
-
-	if (!m_ActiveView)
-		m_ActiveView = pView;
-}
-
-void Project::RemoveView (View* pView)
-{
-	if (pView == m_ActiveView)
-		m_ActiveView = NULL;
-
-	m_ViewList.Remove(pView);
-}
-
-void Project::UpdateAllViews()
-{
-	for (int i = 0; i < m_ViewList.GetSize (); i++)
-		m_ViewList[i]->Redraw ();
-}
-
-// Returns true if the active view changed.
-bool Project::SetActiveView(View* view)
-{
-	m_ActiveView = view;
-	return false;
-	/*
-	if (view == m_ActiveView)
-		return false;
-
-//	Camera* OldCamera = NULL;
-	View* OldView = m_ActiveView;
-	m_ActiveView = view;
-
-	if (OldView)
-	{
-		OldView->Redraw();
-//		OldCamera = OldView->GetCamera();
-	}
-
-	if (view)
-	{
-		view->Redraw();
-//		SystemUpdateCurrentCamera(OldCamera, m_ActiveView->GetCamera(), m_ActiveModel->m_Cameras);
-	}
-
-	return true;
-	*/
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Project rendering
 
@@ -1534,7 +1482,7 @@ void Project::Render(View* view, bool ToMemory)
 
 		RenderSceneObjects(view);
 
-		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view)))
+		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view)))
 			RenderOverlays(view);
 
 		RenderViewports(view);
@@ -2143,7 +2091,7 @@ void Project::RenderOverlays(View* view)
 	if (mDropPiece)
 		return;
 
-	if (((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
+	if (((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
 	    (m_nCurAction == LC_ACTION_ZOOM_REGION))
 	{
 		glMatrixMode(GL_PROJECTION);
@@ -3033,9 +2981,9 @@ bool Project::RemoveSelectedObjects()
 
 		bool CanDelete = true;
 
-		for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
+		for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize(); ViewIdx++)
 		{
-			if (pCamera == m_ViewList[ViewIdx]->mCamera)
+			if (pCamera == gMainWindow->mViews[ViewIdx]->mCamera)
 			{
 				CanDelete = false;
 				break;
@@ -3053,7 +3001,7 @@ bool Project::RemoveSelectedObjects()
 	}
 
 	if (RemovedCamera)
-		gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+		gMainWindow->UpdateCameraMenu(mCameras);
 
 	for (pPrev = NULL, pLight = m_pLights; pLight; )
 	{
@@ -3173,7 +3121,7 @@ void Project::UpdateSelection()
 
 	if (m_nTracking == LC_TRACK_NONE)
 	{
-		ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
+		ActivateOverlay(gMainWindow->mActiveView, m_nCurAction, LC_OVERLAY_NONE);
 	}
 
 	gMainWindow->UpdateSelectedObjects(flags, SelectedCount, Focus);
@@ -3289,7 +3237,7 @@ void Project::FindPiece(bool FindFirst, bool SearchForward)
 			}
 
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			gMainWindow->UpdateFocusObject(Current);
 
 			break;
@@ -3324,14 +3272,14 @@ void Project::ZoomExtents(int FirstView, int LastView)
 
 	for (int vp = FirstView; vp < LastView; vp++)
 	{
-		View* view = m_ViewList[vp];
+		View* view = gMainWindow->mViews[vp];
 
 		view->mCamera->ZoomExtents(view, Center, Points, 8, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 	}
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateOverlayScale();
-	UpdateAllViews();
+	gMainWindow->UpdateAllViews();
 }
 
 void Project::GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const
@@ -3377,7 +3325,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	oldtime = m_bAnimation ? m_nCurFrame : m_nCurStep;
 
 	View view(this);
-	view.SetCamera(m_ActiveView->mCamera, false);
+	view.SetCamera(gMainWindow->mActiveView->mCamera, false);
 	view.mWidth = width;
 	view.mHeight = height;
 
@@ -4135,12 +4083,13 @@ void Project::ExportPOVRay(lcFile& POVFile)
 		POVFile.WriteLine(Line);
 	}
 
-	const lcVector3& Position = m_ActiveView->mCamera->mPosition;
-	const lcVector3& Target = m_ActiveView->mCamera->mTargetPosition;
-	const lcVector3& Up = m_ActiveView->mCamera->mUpVector;
+	Camera* camera = gMainWindow->mActiveView->mCamera;
+	const lcVector3& Position = camera->mPosition;
+	const lcVector3& Target = camera->mTargetPosition;
+	const lcVector3& Up = camera->mUpVector;
 
 	sprintf(Line, "camera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
-			Up[0], Up[1], Up[2], Position[1], Position[0], Position[2], Target[1], Target[0], Target[2], m_ActiveView->mCamera->m_fovy);
+			Up[0], Up[1], Up[2], Position[1], Position[0], Position[2], Target[1], Target[0], Target[2], camera->m_fovy);
 	POVFile.WriteLine(Line);
 	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
 			m_fBackground[0], m_fBackground[1], m_fBackground[2]);
@@ -4202,7 +4151,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				return;  // leave the original one
 
 			OnNewDocument();
-			UpdateAllViews ();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_FILE_OPEN:
@@ -5062,9 +5011,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Modified)
 			{
-				for (int i = 0; i < m_ViewList.GetSize (); i++)
-			{
-					m_ViewList[i]->MakeCurrent();
+				for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
+				{
+					gMainWindow->mViews[i]->MakeCurrent();
 					RenderInitialize();
 				}
 
@@ -5227,7 +5176,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				RemoveSelectedObjects();
 				gMainWindow->UpdateFocusObject(GetFocusObject());
 				UpdateSelection();
-				UpdateAllViews ();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Cutting");
 			}
@@ -5341,7 +5290,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CheckPoint("Pasting");
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
-			UpdateAllViews ();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_EDIT_FIND:
@@ -5366,7 +5315,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 //	pFrame->UpdateInfo();
 			UpdateSelection();
-			UpdateAllViews ();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_EDIT_SELECT_NONE:
@@ -5374,7 +5323,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			SelectAndFocusNone(false);
 			gMainWindow->UpdateFocusObject(NULL);
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_EDIT_SELECT_INVERT:
@@ -5391,7 +5340,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_EDIT_SELECT_BY_NAME:
@@ -5434,7 +5383,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					pLight->Select(true, false, false);
 
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 //	pFrame->UpdateInfo();
 						} break;
 
@@ -5495,7 +5444,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
 		} break;
@@ -5506,7 +5455,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				gMainWindow->UpdateFocusObject(NULL);
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Deleting");
 			}
@@ -5565,12 +5514,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 				axis = lcVector3(0, 0, -axis[2]);
 
 			if ((m_nSnap & LC_DRAW_MOVEAXIS) == 0)
-		{
+			{
 				// TODO: rewrite this
 
-				int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
+				View* ActiveView = gMainWindow->mActiveView;
+				int Viewport[4] = { 0, 0, ActiveView->mWidth, ActiveView->mHeight };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-				Camera* Cam = m_ActiveView->mCamera;
+				Camera* Cam = ActiveView->mCamera;
 
 				const lcMatrix44& ModelView = Cam->mWorldView;
 				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -5625,7 +5575,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			UpdateOverlayScale();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint(Rotate ? "Rotating" : "Moving");
 			gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -5692,7 +5642,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Minifig");
 		} break;
@@ -5812,7 +5762,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				SelectAndFocusNone(true);
 //			gMainWindow->UpdateFocusObject(GetFocusObject());
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Array");
 		} break;
@@ -5834,7 +5784,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			// TODO: cameras and lights
 
 			CalculateStep();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_PIECE_GROUP:
@@ -6014,7 +5964,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				SelectAndFocusNone(false);
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Editing");
 		} break;
@@ -6027,7 +5977,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					pPiece->Hide();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(NULL);
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_PIECE_HIDE_UNSELECTED:
@@ -6037,7 +5987,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (!pPiece->IsSelected())
 					pPiece->Hide();
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_PIECE_UNHIDE_ALL:
@@ -6046,7 +5996,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				pPiece->UnHide();
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_PIECE_SHOW_EARLIER:
@@ -6080,7 +6030,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 			}
 		} break;
 
@@ -6121,7 +6071,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Modifying");
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				UpdateSelection ();
 			}
 		} break;
@@ -6217,13 +6167,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 			strcpy(opts.strHeader, m_strHeader);
 			*/
 
-			for (int i = 0; i < m_ViewList.GetSize (); i++)
+			for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
 		{
-				m_ViewList[i]->MakeCurrent();
+				gMainWindow->mViews[i]->MakeCurrent();
 				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
 			}
 
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_ZOOM_IN:
@@ -6244,11 +6194,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 //			if (Sys_KeyDown(KEY_CONTROL))
 //			{
 //				FirstView = 0;
-//				LastView = m_ViewList.GetSize();
+//				LastView = gMainWindow->mViews.GetSize();
 //			}
 //			else
 			{
-				FirstView = m_ViewList.FindIndex(m_ActiveView);
+				FirstView = gMainWindow->mViews.FindIndex(gMainWindow->mActiveView);
 				LastView = FirstView + 1;
 			}
 
@@ -6265,7 +6215,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 
 			if (m_bAnimation)
 				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -6283,7 +6233,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 
 			if (m_bAnimation)
 				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -6301,7 +6251,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 
 			if (m_bAnimation)
 				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -6319,7 +6269,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 
 			if (m_bAnimation)
 				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -6337,7 +6287,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 
 			if (m_bAnimation)
 				gMainWindow->UpdateTime(m_bAnimation, m_nCurFrame, m_nTotalFrames);
@@ -6362,7 +6312,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			else
 				CheckPoint("Adding Step");
 			CalculateStep();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			UpdateSelection();
 		} break;
 
@@ -6383,7 +6333,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			else
 				CheckPoint("Removing Step");
 			CalculateStep();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			UpdateSelection();
 		} break;
 
@@ -6416,7 +6366,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					m_nCurFrame -= m_nTotalFrames;
 				CalculateStep();
 				gMainWindow->UpdateTime(true, m_nCurFrame, m_nTotalFrames);
-                UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 			}
 			SystemUpdatePlay(true, false);
 			gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -6425,43 +6375,43 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_VIEWPOINT_FRONT:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BACK:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_TOP:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_LEFT:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
 		case LC_VIEW_VIEWPOINT_HOME:
 		{
-			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 		} break;
 
@@ -6483,16 +6433,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_VIEW_CAMERA15:
 		case LC_VIEW_CAMERA16:
 		{
+			View* ActiveView = gMainWindow->mActiveView;
 			Camera* pCamera = NULL;
 
 			if (id == LC_VIEW_CAMERA_NONE)
 			{
-				pCamera = m_ActiveView->mCamera;
+				pCamera = ActiveView->mCamera;
 
 				if (!pCamera->IsSimple())
 				{
-					m_ActiveView->SetCamera(pCamera, true);
-					pCamera = m_ActiveView->mCamera;
+					ActiveView->SetCamera(pCamera, true);
+					pCamera = ActiveView->mCamera;
 				}
 			}
 			else
@@ -6500,30 +6451,30 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (id - LC_VIEW_CAMERA1 < mCameras.GetSize())
 				{
 					pCamera = mCameras[id - LC_VIEW_CAMERA1];
-					m_ActiveView->SetCamera(pCamera, false);
+					ActiveView->SetCamera(pCamera, false);
 				}
 				else
 					break;
 			}
 
-			gMainWindow->UpdateCurrentCamera(mCameras.FindIndex(m_ActiveView->mCamera));
+			gMainWindow->UpdateCurrentCamera(mCameras.FindIndex(ActiveView->mCamera));
 			UpdateOverlayScale();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_CAMERA_RESET:
 		{
-			for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize(); ViewIdx++)
-				m_ViewList[ViewIdx]->SetDefaultCamera();
+			for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize(); ViewIdx++)
+				gMainWindow->mViews[ViewIdx]->SetDefaultCamera();
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				delete mCameras[CameraIdx];
 			mCameras.RemoveAll();
 
-			gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+			gMainWindow->UpdateCameraMenu(mCameras);
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateOverlayScale();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Reset Cameras");
 		} break;
@@ -6545,7 +6496,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			String Info;
 			char Text[256];
 
-			m_ActiveView->MakeCurrent();
+			gMainWindow->mActiveView->MakeCurrent();
 
 			GLint Red, Green, Blue, Alpha, Depth, Stencil;
 			GLboolean DoubleBuffer, RGBA;
@@ -6585,7 +6536,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			CalculateStep();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 
 			gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 			if (m_bAnimation)
@@ -6841,7 +6792,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				SelectAndFocusNone(false);
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				gMainWindow->UpdateFocusObject(NULL);
 			}
 		} break;
@@ -6857,9 +6808,9 @@ void Project::SetAction(int nAction)
 
 	gMainWindow->UpdateAction(m_nCurAction);
 
-	ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
+	ActivateOverlay(gMainWindow->mActiveView, m_nCurAction, LC_OVERLAY_NONE);
 
-	UpdateAllViews();
+	gMainWindow->UpdateAllViews();
 }
 
 int Project::GetAction() const
@@ -7211,9 +7162,10 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 
 void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects)
 {
-	int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
+	View* ActiveView = gMainWindow->mActiveView;
+	int Viewport[4] = { 0, 0, ActiveView->mWidth, ActiveView->mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	Camera* Cam = m_ActiveView->mCamera;
+	Camera* Cam = ActiveView->mCamera;
 
 	const lcMatrix44& ModelView = Cam->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -7307,6 +7259,7 @@ bool Project::StopTracking(bool bAccept)
 		return false;
 
 	int Action = GetAction();
+	View* ActiveView = gMainWindow->mActiveView;
 
 	if ((m_nTracking == LC_TRACK_START_LEFT) || (m_nTracking == LC_TRACK_START_RIGHT))
 	{
@@ -7317,19 +7270,19 @@ bool Project::StopTracking(bool bAccept)
 		}
 
 		m_nTracking = LC_TRACK_NONE;
-		m_ActiveView->ReleaseMouse();
+		ActiveView->ReleaseMouse();
 		return false;
 	}
 
 	m_bTrackCancel = true;
 	m_nTracking = LC_TRACK_NONE;
-	m_ActiveView->ReleaseMouse();
+	ActiveView->ReleaseMouse();
 
 	// Reset the mouse overlay.
 	if (m_OverlayActive)
 	{
-		ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
-		UpdateAllViews();
+		ActivateOverlay(ActiveView, m_nCurAction, LC_OVERLAY_NONE);
+		gMainWindow->UpdateAllViews();
 	}
 
 	if (bAccept)
@@ -7339,12 +7292,12 @@ bool Project::StopTracking(bool bAccept)
 			int x = m_nDownX;
 			int y = m_nDownY;
 
-			if ((x > 0) && (x < m_ActiveView->mWidth) && (y > 0) && (y < m_ActiveView->mHeight))
+			if ((x > 0) && (x < ActiveView->mWidth) && (y > 0) && (y < ActiveView->mHeight))
 			{
 				lcVector3 Pos;
 				lcVector4 Rot;
 
-				GetPieceInsertPosition(m_ActiveView, x, y, Pos, Rot);
+				GetPieceInsertPosition(ActiveView, x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(mDropPiece);
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
@@ -7367,7 +7320,7 @@ bool Project::StopTracking(bool bAccept)
 				}
 
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				gMainWindow->UpdateFocusObject(pPiece);
 
 				SetModifiedFlag(true);
@@ -7387,7 +7340,7 @@ bool Project::StopTracking(bool bAccept)
 					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
 
 					// Deselect old pieces.
-					bool Control = m_ActiveView->mInputState.Control;
+					bool Control = ActiveView->mInputState.Control;
 					SelectAndFocusNone(Control);
 
 					// Select new pieces.
@@ -7413,7 +7366,7 @@ bool Project::StopTracking(bool bAccept)
 
 				// Update screen and UI.
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 					gMainWindow->UpdateFocusObject(GetFocusObject());
 
 			} break;
@@ -7432,7 +7385,7 @@ bool Project::StopTracking(bool bAccept)
 
 			case LC_ACTION_CAMERA:
 			{
-					gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+				gMainWindow->UpdateCameraMenu(mCameras);
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
@@ -7451,7 +7404,7 @@ bool Project::StopTracking(bool bAccept)
 				// For some reason the scene doesn't get redrawn when changing a camera but it does
 				// when moving things around, so manually get the full scene rendered again.
 				if (m_nDetail & LC_DET_FAST)
-					UpdateAllViews();
+					gMainWindow->UpdateAllViews();
 			} break;
 
 			case LC_ACTION_ZOOM_REGION:
@@ -7481,10 +7434,10 @@ bool Project::StopTracking(bool bAccept)
 					Bottom = m_OverlayTrackStart[1];
 				}
 
-				m_ActiveView->mCamera->ZoomRegion(m_ActiveView, Left, Right, Bottom, Top, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+				gMainWindow->mActiveView->mCamera->ZoomRegion(gMainWindow->mActiveView, Left, Right, Bottom, Top, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 
-					gMainWindow->UpdateFocusObject(GetFocusObject());
-				UpdateAllViews();
+				gMainWindow->UpdateFocusObject(GetFocusObject());
+				gMainWindow->UpdateAllViews();
 			} break;
 
 			case LC_ACTION_INSERT:
@@ -7499,7 +7452,7 @@ bool Project::StopTracking(bool bAccept)
 	{
 		if ((Action == LC_ACTION_SELECT) || (Action == LC_ACTION_ZOOM_REGION))
 		{
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		}
 		else
 		{
@@ -7521,7 +7474,7 @@ bool Project::StopTracking(bool bAccept)
 
 void Project::StartTracking(int mode)
 {
-	m_ActiveView->CaptureMouse();
+	gMainWindow->mActiveView->CaptureMouse();
 	m_nTracking = mode;
 
   if (m_pTrackFile != NULL)
@@ -7996,7 +7949,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (nSel)
 			{
 				UpdateOverlayScale();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Moving");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -8010,7 +7963,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (MoveSelectedObjects(Move, Remainder, false, false))
 			{
 				UpdateOverlayScale();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Moving");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -8065,7 +8018,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (nSel)
 			{
 				UpdateOverlayScale();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -8079,7 +8032,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (RotateSelectedObjects(Rotate, Remainder, false, false))
 			{
 				UpdateOverlayScale();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -8294,7 +8247,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 				strncpy(camera->m_strName, Name, sizeof(camera->m_strName));
 				camera->m_strName[sizeof(camera->m_strName) - 1] = 0;
 
-				gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+				gMainWindow->UpdateCameraMenu(mCameras);
 
 				CheckPointString = "Camera";
 			}
@@ -8302,42 +8255,42 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 	}
 
 	if (CheckPointString)
-					{
+	{
 		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
-		ActivateOverlay(m_ActiveView, m_nCurAction, LC_OVERLAY_NONE);
-		UpdateAllViews();
+		ActivateOverlay(gMainWindow->mActiveView, m_nCurAction, LC_OVERLAY_NONE);
+		gMainWindow->UpdateAllViews();
 	}
 }
 
 void Project::ZoomActiveView(int Amount)
-						{
-	m_ActiveView->mCamera->DoZoom(Amount, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+{
+	gMainWindow->mActiveView->mCamera->DoZoom(Amount, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateOverlayScale();
-	UpdateAllViews();
-						}
+	gMainWindow->UpdateAllViews();
+}
 
 void Project::BeginPieceDrop(PieceInfo* Info)
-						{
+{
 	StartTracking(LC_TRACK_LEFT);
 
 	mDropPiece = Info;
 	mDropPiece->AddRef();
-			}
+}
 
 void Project::OnPieceDropMove(int x, int y)
-			{
+{
 	if (!mDropPiece)
 		return;
 
 	if (m_nDownX != x || m_nDownY != y)
-			{
+	{
 		m_nDownX = x;
 		m_nDownY = y;
 
-			UpdateAllViews();
+		gMainWindow->UpdateAllViews();
 	}
 }
 
@@ -8346,7 +8299,7 @@ void Project::EndPieceDrop(bool Accept)
 	StopTracking(Accept);
 
 	if (!Accept)
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 }
 
 void Project::BeginColorDrop()
@@ -8362,8 +8315,7 @@ void Project::OnLeftButtonDown(View* view)
 		if (StopTracking(false))
 			return;
 
-	if (SetActiveView(view))
-		return;
+	gMainWindow->SetActiveView(view);
 
 	int x = view->mInputState.x;
 	int y = view->mInputState.y;
@@ -8436,7 +8388,7 @@ void Project::OnLeftButtonDown(View* view)
 					SelectAndFocusNone(Control);
 
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				gMainWindow->UpdateFocusObject(Closest);
 
 				StartTracking(LC_TRACK_START_LEFT);
@@ -8466,15 +8418,15 @@ void Project::OnLeftButtonDown(View* view)
 
 						bool CanDelete = true;
 
-						for (int ViewIdx = 0; ViewIdx < m_ViewList.GetSize() && CanDelete; ViewIdx++)
-							CanDelete = pCamera != m_ViewList[ViewIdx]->mCamera;
+						for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize() && CanDelete; ViewIdx++)
+							CanDelete = pCamera != gMainWindow->mViews[ViewIdx]->mCamera;
 
 						if (CanDelete)
 						{
 							mCameras.Remove(pCamera);
 							delete pCamera;
 
-							gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
+							gMainWindow->UpdateCameraMenu(mCameras);
 						}
 					} break;
 
@@ -8488,7 +8440,7 @@ void Project::OnLeftButtonDown(View* view)
 				}
 
 				UpdateSelection();
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Deleting");
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
@@ -8505,7 +8457,7 @@ void Project::OnLeftButtonDown(View* view)
 					SetModifiedFlag(true);
 					CheckPoint("Painting");
 					gMainWindow->UpdateFocusObject(GetFocusObject());
-					UpdateAllViews();
+					gMainWindow->UpdateAllViews();
 				}
 			}
 		} break;
@@ -8566,7 +8518,7 @@ void Project::OnLeftButtonDown(View* view)
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Inserting");
 		} break;
@@ -8592,7 +8544,7 @@ void Project::OnLeftButtonDown(View* view)
       pLight->m_pNext = m_pLights;
       m_pLights = pLight;
       UpdateSelection();
-      UpdateAllViews();
+	  gMainWindow->UpdateAllViews();
 	  gMainWindow->UpdateFocusObject(pLight);
     } break;
 
@@ -8608,7 +8560,7 @@ void Project::OnLeftButtonDown(View* view)
 			mCameras.Add(NewCamera);
 
 			UpdateSelection();
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 			gMainWindow->UpdateFocusObject(NewCamera);
 		} break;
 
@@ -8683,8 +8635,7 @@ void Project::OnLeftButtonDown(View* view)
 
 void Project::OnLeftButtonDoubleClick(View* view)
 {
-	if (SetActiveView(view))
-		return;
+	gMainWindow->SetActiveView(view);
 
 	int x = view->mInputState.x;
 	int y = view->mInputState.y;
@@ -8731,7 +8682,7 @@ void Project::OnLeftButtonDoubleClick(View* view)
       }
 
     UpdateSelection();
-    UpdateAllViews();
+	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateFocusObject(Closest);
   }
 }
@@ -8746,8 +8697,7 @@ void Project::OnMiddleButtonDown(View* view)
 	if (StopTracking(false))
 		return;
 
-	if (SetActiveView(view))
-		return;
+	gMainWindow->SetActiveView(view);
 
 	int x = view->mInputState.x;
 	int y = view->mInputState.y;
@@ -8789,8 +8739,7 @@ void Project::OnRightButtonDown(View* view)
 	if (StopTracking(false))
 		return;
 
-	if (SetActiveView(view))
-		return;
+	gMainWindow->SetActiveView(view);
 
 	int x = view->mInputState.x;
 	int y = view->mInputState.y;
@@ -8927,7 +8876,7 @@ void Project::OnMouseMove(View* view)
 				UpdateOverlayScale();
 			}
 
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_INSERT:
@@ -8937,7 +8886,7 @@ void Project::OnMouseMove(View* view)
 				m_nDownX = x;
 				m_nDownY = y;
 
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 			}
 		}	break;
 
@@ -8957,7 +8906,7 @@ void Project::OnMouseMove(View* view)
 			pLight->UpdatePosition (1, m_bAnimation);
 
 			gMainWindow->UpdateFocusObject(pLight);
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_CAMERA:
@@ -8976,7 +8925,7 @@ void Project::OnMouseMove(View* view)
 			pCamera->UpdatePosition(1, m_bAnimation);
 
 			gMainWindow->UpdateFocusObject(pCamera);
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_MOVE:
@@ -9158,12 +9107,12 @@ void Project::OnMouseMove(View* view)
 				UpdateOverlayScale();
 
 			if (Redraw)
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_ROTATE:
 		{
-			Camera* Camera = m_ActiveView->mCamera;
+			Camera* Camera = gMainWindow->mActiveView->mCamera;
 			bool Redraw;
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_ROTATE_XYZ)) || (!Camera->IsSide()))
@@ -9319,7 +9268,7 @@ void Project::OnMouseMove(View* view)
 
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			if (Redraw)
-				UpdateAllViews();
+				gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_ZOOM:
@@ -9327,10 +9276,10 @@ void Project::OnMouseMove(View* view)
 			if (m_nDownY == y)
 				break;
 
-			m_ActiveView->mCamera->DoZoom(y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->DoZoom(y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownY = y;
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_ZOOM_REGION:
@@ -9340,7 +9289,7 @@ void Project::OnMouseMove(View* view)
 
 			m_nDownX = x;
 			m_nDownY = y;
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_PAN:
@@ -9348,11 +9297,11 @@ void Project::OnMouseMove(View* view)
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
 
-			m_ActiveView->mCamera->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			m_nDownY = y;
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_ROTATE_VIEW:
@@ -9367,30 +9316,31 @@ void Project::OnMouseMove(View* view)
 			bs[0] = (bs[0]+bs[3])/2;
 			bs[1] = (bs[1]+bs[4])/2;
 			bs[2] = (bs[2]+bs[5])/2;
+			Camera* camera = gMainWindow->mActiveView->mCamera;
 
 			switch (m_OverlayMode)
 			{
 				case LC_OVERLAY_ROTATE_VIEW_XYZ:
-					m_ActiveView->mCamera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					camera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_ROTATE_VIEW_X:
-					m_ActiveView->mCamera->DoRotate(x - m_nDownX, 0, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					camera->DoRotate(x - m_nDownX, 0, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_ROTATE_VIEW_Y:
-					m_ActiveView->mCamera->DoRotate(0, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
+					camera->DoRotate(0, y - m_nDownY, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, bs);
 					break;
 
 				case LC_OVERLAY_ROTATE_VIEW_Z:
-					m_ActiveView->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+					camera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 					break;
 			}
 
 			m_nDownX = x;
 			m_nDownY = y;
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_ACTION_ROLL:
@@ -9398,10 +9348,10 @@ void Project::OnMouseMove(View* view)
 			if (m_nDownX == x)
 				break;
 
-			m_ActiveView->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			gMainWindow->mActiveView->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
 			m_nDownX = x;
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		} break;
 		/*
     case LC_ACTION_CURVE:
@@ -9429,7 +9379,7 @@ void Project::OnMouseMove(View* view)
       pCurve->UpdatePosition(1, m_bAnimation);
 
 	  gMainWindow->UpdateFocusObject(GetFocusObject());
-      UpdateAllViews();
+	  gMainWindow->UpdateAllViews();
     } break;
                 */
 	}
@@ -9545,7 +9495,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		if (Mode != m_OverlayMode)
 		{
 			m_OverlayMode = Mode;
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		}
 	}
 	else if (m_nCurAction == LC_ACTION_ROTATE)
@@ -9707,7 +9657,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		if (Mode != m_OverlayMode)
 		{
 			m_OverlayMode = Mode;
-			UpdateAllViews();
+			gMainWindow->UpdateAllViews();
 		}
 	}
 	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
@@ -9782,9 +9732,10 @@ void Project::UpdateOverlayScale()
 	{
 		// Calculate the scaling factor by projecting the center to the front plane then
 		// projecting a point close to it back.
-		int Viewport[4] = { 0, 0, m_ActiveView->mWidth, m_ActiveView->mHeight };
+		View* ActiveView = gMainWindow->mActiveView;
+		int Viewport[4] = { 0, 0, ActiveView->mWidth, ActiveView->mHeight };
 		float Aspect = (float)Viewport[2]/(float)Viewport[3];
-		Camera* Cam = m_ActiveView->mCamera;
+		Camera* Cam = ActiveView->mCamera;
 
 		const lcMatrix44& ModelView = Cam->mWorldView;
 		lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
@@ -9794,6 +9745,6 @@ void Project::UpdateOverlayScale()
 		lcVector3 Point = lcUnprojectPoint(ScreenPos, ModelView, Projection, Viewport);
 
 		lcVector3 Dist(Point - m_OverlayCenter);
-		m_ActiveView->m_OverlayScale = Dist.Length() * 5.0f;
+		ActiveView->m_OverlayScale = Dist.Length() * 5.0f;
 	}
 }

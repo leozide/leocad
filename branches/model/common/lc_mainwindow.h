@@ -4,6 +4,7 @@
 #include "lc_basewindow.h"
 #include "lc_array.h"
 
+class View;
 class Object;
 class Camera;
 class PiecePreview;
@@ -16,6 +17,8 @@ class lcMainWindow : public lcBaseWindow
 	lcMainWindow();
 	~lcMainWindow();
 
+	void SetActiveView(View* ActiveView);
+	void UpdateAllViews();
 	void SetColorIndex(int ColorIndex);
 	void Close();
 
@@ -41,7 +44,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 	void UpdateTransformType(int NewType);
 	void UpdateCurrentCamera(int CameraIndex);
-	void UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera);
+	void UpdateCameraMenu(const lcArray<Camera*>& Cameras);
 	void UpdateCategories();
 	void UpdateTitle(const char* Title, bool Modified);
 	void UpdateModified(bool Modified);
@@ -51,6 +54,10 @@ class lcMainWindow : public lcBaseWindow
 	lcVector3 GetTransformAmount();
 
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
+
+	View* mActiveView;
+	lcArray<View*> mViews;
+
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
 };

@@ -22,4 +22,11 @@ class lcFile;
 class lcMemFile;
 class lcDiskFile;
 
+class lcModel;
+class lcObject;
+class lcPart;
+class lcCamera;
+class lcLight;
+class lcPartInfo;
+
 #endif // _LC_GLOBAL_H_

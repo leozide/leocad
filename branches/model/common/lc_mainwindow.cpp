@@ -2,11 +2,13 @@
 #include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include "preview.h"
+#include "view.h"
 
 lcMainWindow* gMainWindow;
 
 lcMainWindow::lcMainWindow()
-  {
+{
+	mActiveView = NULL;
 	mColorIndex = 0;
 	mPreviewWidget = NULL;
 
@@ -24,8 +26,23 @@ lcMainWindow::~lcMainWindow()
 	gMainWindow = NULL;
 }
 
+void lcMainWindow::SetActiveView(View* ActiveView)
+{
+	if (mActiveView == ActiveView)
+		return;
+
+	mActiveView = ActiveView;
+//todo:	UpdateCameraMenu();
+}
+
+void lcMainWindow::UpdateAllViews()
+{
+	for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
+		mViews[ViewIdx]->Redraw();
+}
+
 void lcMainWindow::SetColorIndex(int ColorIndex)
-  {
+{
 	mColorIndex = ColorIndex;
 
 	if (mPreviewWidget)

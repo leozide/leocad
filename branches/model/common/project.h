@@ -256,8 +256,7 @@ public:
 	void SetTitle (const char* lpszTitle);
 
 public:
-	// Special notifications
-	void DeleteContents(bool bUndo); // delete doc items etc
+	void DeleteContents(bool bUndo);
 	void LoadDefaults(bool cameras);
 	void BeginPieceDrop(PieceInfo* Info);
 	void OnPieceDropMove(int x, int y);
@@ -275,15 +274,9 @@ public:
 	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
 	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
+	void RenderInitialize();
 
-	void AddView(View* view);
-	void RemoveView(View* view);
-	void UpdateAllViews();
-	bool SetActiveView(View* view);
-	View* GetActiveView() const
-	{
-		return m_ActiveView;
-	}
+	lcModel* mActiveModel;
 
 	// Objects
 	Piece* m_pPieces;
@@ -298,9 +291,6 @@ public:
 
 // Implementation
 protected:
-	View* m_ActiveView;
-	lcArray<View*> m_ViewList;
-
 	char m_strAuthor[101];
 	char m_strDescription[101];
 	char m_strComments[256];
@@ -346,7 +336,6 @@ protected:
 	void RenderViewports(View* view);
 	void RenderOverlays(View* view);
 
-	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 	void Export3DStudio();
 	void ExportPOVRay(lcFile& File);

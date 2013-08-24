@@ -3,13 +3,13 @@
 
 #include "lc_config.h"
 
-// Version number.
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 80
 #define LC_VERSION_PATCH 0
 #define LC_VERSION_TEXT "0.80.0"
 
-// Forward declarations.
+typedef lcuint32 lcTime;
+
 class lcVector2;
 class lcVector3;
 class lcVector4;

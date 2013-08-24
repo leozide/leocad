@@ -1,29 +1,6 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
-// Assert macros.
-#ifdef LC_DEBUG
-
-extern bool lcAssert(const char* FileName, int Line, const char* Expression, const char* Description);
-
-#define LC_ASSERT(Expr, Desc) \
-do \
-{ \
-	static bool Ignore = false; \
-	if (!Expr && !Ignore) \
-		Ignore = lcAssert(__FILE__, __LINE__, #Expr, Desc); \
-} while (0)
-
-#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
-
-#else
-
-#define LC_ASSERT(...) do { } while(0)
-
-#define LC_ASSERT_FALSE(Desc) LC_ASSERT(0, Desc)
-
-#endif
-
 #if _MSC_VER >= 1600
 #define LC_CASSERT(x) static_assert(x, "Assertion failed: " #x)
 #else

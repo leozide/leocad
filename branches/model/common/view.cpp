@@ -120,7 +120,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 			return LC_CURSOR_ROLL;
 
 		default:
-			LC_ASSERT_FALSE("Unknown cursor type.");
+			LC_ASSERT(false);
 			return LC_CURSOR_DEFAULT;
 	}
 }

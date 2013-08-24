@@ -208,7 +208,7 @@ void Project::LoadDefaults(bool cameras)
 
 	// Default values
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
-	SetAction(LC_ACTION_SELECT);
+	SetAction(LC_TOOL_SELECT);
 	m_bAnimation = false;
 	m_bAddKeys = false;
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
@@ -1486,7 +1486,7 @@ void Project::Render(View* View, bool ToMemory)
 */
 		mActiveModel->RenderObjects(View);
 /*
-		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view)))
+		if (m_OverlayActive || ((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view)))
 			RenderOverlays(view);
 
 		RenderViewports(view);
@@ -1979,7 +1979,7 @@ void Project::RenderSceneObjects(View* view)
 #endif
 
 	// Draw cameras & lights
-	if (m_nCurAction == LC_ACTION_INSERT || mDropPiece)
+	if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
 	{
 		lcVector3 Pos;
 		lcVector4 Rot;
@@ -2098,8 +2098,8 @@ void Project::RenderOverlays(View* view)
 	if (mDropPiece)
 		return;
 
-	if (((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
-	    (m_nCurAction == LC_ACTION_ZOOM_REGION))
+	if (((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
+	    (m_nCurAction == LC_TOOL_ZOOM_REGION))
 	{
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -2114,7 +2114,7 @@ void Project::RenderOverlays(View* view)
 		float pt1y = (float)m_nDownY;
 		float pt2x, pt2y;
 
-		if (m_nCurAction == LC_ACTION_ZOOM_REGION)
+		if (m_nCurAction == LC_TOOL_ZOOM_REGION)
 		{
 			pt2x = m_OverlayTrackStart[0];
 			pt2y = m_OverlayTrackStart[1];
@@ -2190,7 +2190,7 @@ void Project::RenderOverlays(View* view)
 
 	const float OverlayScale = view->m_OverlayScale;
 
-	if ((m_nCurAction == LC_ACTION_MOVE || m_nCurAction == LC_ACTION_SELECT) && (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
+	if ((m_nCurAction == LC_TOOL_MOVE || m_nCurAction == LC_TOOL_SELECT) && (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
 	{
 		const float OverlayMovePlaneSize = 0.5f * OverlayScale;
 		const float OverlayMoveArrowSize = 1.5f * OverlayScale;
@@ -2313,7 +2313,7 @@ void Project::RenderOverlays(View* view)
 			}
 
 			// Rotation arrows.
-			if (m_nCurAction == LC_ACTION_SELECT && m_nTracking == LC_TRACK_NONE)
+			if (m_nCurAction == LC_TOOL_SELECT && m_nTracking == LC_TRACK_NONE)
 			{
 				switch (i)
 				{
@@ -2397,7 +2397,7 @@ void Project::RenderOverlays(View* view)
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	if (m_nCurAction == LC_ACTION_ROTATE || (m_nCurAction == LC_ACTION_SELECT && m_nTracking != LC_TRACK_NONE && m_OverlayMode >= LC_OVERLAY_ROTATE_X && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
+	if (m_nCurAction == LC_TOOL_ROTATE || (m_nCurAction == LC_TOOL_SELECT && m_nTracking != LC_TRACK_NONE && m_OverlayMode >= LC_OVERLAY_ROTATE_X && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
 	{
 		const float OverlayRotateRadius = 2.0f;
 
@@ -2529,7 +2529,7 @@ void Project::RenderOverlays(View* view)
 		Mat.SetTranslation(m_OverlayCenter);
 
 		// Draw the circles.
-		if (m_nCurAction == LC_ACTION_ROTATE && !HasAngle && m_nTracking == LC_TRACK_NONE)
+		if (m_nCurAction == LC_TOOL_ROTATE && !HasAngle && m_nTracking == LC_TRACK_NONE)
 		{
 			lcVector3 Verts[32];
 
@@ -2577,7 +2577,7 @@ void Project::RenderOverlays(View* view)
 			}
 			else
 			{
-				if (m_nCurAction != LC_ACTION_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE)
+				if (m_nCurAction != LC_TOOL_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE)
 					continue;
 
 				switch (i)
@@ -2619,7 +2619,7 @@ void Project::RenderOverlays(View* view)
 					break;
 				}
 
-				if (m_nCurAction != LC_ACTION_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
+				if (m_nCurAction != LC_TOOL_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
 				{
 					Verts[NumVerts++] = v1 * (OverlayRotateRadius * OverlayScale);
 					Verts[NumVerts++] = v2 * (OverlayRotateRadius * OverlayScale);
@@ -2744,7 +2744,7 @@ void Project::RenderOverlays(View* view)
 
 		glEnable(GL_DEPTH_TEST);
 	}
-	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	else if (m_nCurAction == LC_TOOL_ROTATE_VIEW)
 	{
 		int x, y, w, h;
 
@@ -6725,72 +6725,72 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_ACTION_SELECT:
 		{
-			SetAction(LC_ACTION_SELECT);
+			SetAction(LC_TOOL_SELECT);
 		} break;
 
 		case LC_EDIT_ACTION_INSERT:
 		{
-			SetAction(LC_ACTION_INSERT);
+			SetAction(LC_TOOL_INSERT);
 		} break;
 
 		case LC_EDIT_ACTION_LIGHT:
 		{
-			SetAction(LC_ACTION_LIGHT);
+			SetAction(LC_TOOL_LIGHT);
 		} break;
 
 		case LC_EDIT_ACTION_SPOTLIGHT:
 		{
-			SetAction(LC_ACTION_SPOTLIGHT);
+			SetAction(LC_TOOL_SPOTLIGHT);
 		} break;
 
 		case LC_EDIT_ACTION_CAMERA:
 		{
-			SetAction(LC_ACTION_CAMERA);
+			SetAction(LC_TOOL_CAMERA);
 		} break;
 
 		case LC_EDIT_ACTION_MOVE:
 		{
-			SetAction(LC_ACTION_MOVE);
+			SetAction(LC_TOOL_MOVE);
 		} break;
 
 		case LC_EDIT_ACTION_ROTATE:
 		{
-			SetAction(LC_ACTION_ROTATE);
+			SetAction(LC_TOOL_ROTATE);
 		} break;
 
 		case LC_EDIT_ACTION_DELETE:
 		{
-			SetAction(LC_ACTION_ERASER);
+			SetAction(LC_TOOL_ERASER);
 		} break;
 
 		case LC_EDIT_ACTION_PAINT:
 		{
-			SetAction(LC_ACTION_PAINT);
+			SetAction(LC_TOOL_PAINT);
 		} break;
 
 		case LC_EDIT_ACTION_ZOOM:
 		{
-			SetAction(LC_ACTION_ZOOM);
+			SetAction(LC_TOOL_ZOOM);
 		} break;
 
 		case LC_EDIT_ACTION_ZOOM_REGION:
 		{
-			SetAction(LC_ACTION_ZOOM_REGION);
+			SetAction(LC_TOOL_ZOOM_REGION);
 		} break;
 
 		case LC_EDIT_ACTION_PAN:
 		{
-			SetAction(LC_ACTION_PAN);
+			SetAction(LC_TOOL_PAN);
 		} break;
 
 		case LC_EDIT_ACTION_ROTATE_VIEW:
 		{
-			SetAction(LC_ACTION_ROTATE_VIEW);
+			SetAction(LC_TOOL_ROTATE_VIEW);
 		} break;
 
 		case LC_EDIT_ACTION_ROLL:
 		{
-			SetAction(LC_ACTION_ROLL);
+			SetAction(LC_TOOL_ROLL);
 		} break;
 
 		case LC_EDIT_CANCEL:
@@ -6840,7 +6840,7 @@ int Project::GetAction() const
 		case LC_OVERLAY_MOVE_XZ:
 		case LC_OVERLAY_MOVE_YZ:
 		case LC_OVERLAY_MOVE_XYZ:
-			Action = LC_ACTION_MOVE;
+			Action = LC_TOOL_MOVE;
 			break;
 
 		case LC_OVERLAY_ROTATE_X:
@@ -6850,22 +6850,22 @@ int Project::GetAction() const
 		case LC_OVERLAY_ROTATE_XZ:
 		case LC_OVERLAY_ROTATE_YZ:
 		case LC_OVERLAY_ROTATE_XYZ:
-			Action = LC_ACTION_ROTATE;
+			Action = LC_TOOL_ROTATE;
 			break;
 
 		case LC_OVERLAY_ZOOM:
-			Action = LC_ACTION_ZOOM;
+			Action = LC_TOOL_ZOOM;
 			break;
 
 		case LC_OVERLAY_PAN:
-			Action = LC_ACTION_PAN;
+			Action = LC_TOOL_PAN;
 			break;
 
 		case LC_OVERLAY_ROTATE_VIEW_X:
 		case LC_OVERLAY_ROTATE_VIEW_Y:
 		case LC_OVERLAY_ROTATE_VIEW_Z:
 		case LC_OVERLAY_ROTATE_VIEW_XYZ:
-			Action = LC_ACTION_ROTATE_VIEW;
+			Action = LC_TOOL_ROTATE_VIEW;
 			break;
 		}
 	}
@@ -7340,7 +7340,7 @@ bool Project::StopTracking(bool bAccept)
 		{
 		switch (Action)
 		{
-			case LC_ACTION_SELECT:
+			case LC_TOOL_SELECT:
 			{
 				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
@@ -7380,35 +7380,35 @@ bool Project::StopTracking(bool bAccept)
 
 			} break;
 
-			case LC_ACTION_MOVE:
+			case LC_TOOL_MOVE:
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Moving");
 			} break;
 
-			case LC_ACTION_ROTATE:
+			case LC_TOOL_ROTATE:
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
 			} break;
 
-			case LC_ACTION_CAMERA:
+			case LC_TOOL_CAMERA:
 			{
 				gMainWindow->UpdateCameraMenu(mCameras);
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
 
-			case LC_ACTION_SPOTLIGHT:
+			case LC_TOOL_SPOTLIGHT:
 			{
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			} break;
 
-			case LC_ACTION_ZOOM:
-			case LC_ACTION_PAN:
-			case LC_ACTION_ROTATE_VIEW:
-			case LC_ACTION_ROLL:
+			case LC_TOOL_ZOOM:
+			case LC_TOOL_PAN:
+			case LC_TOOL_ROTATE_VIEW:
+			case LC_TOOL_ROLL:
 			{
 				// For some reason the scene doesn't get redrawn when changing a camera but it does
 				// when moving things around, so manually get the full scene rendered again.
@@ -7416,7 +7416,7 @@ bool Project::StopTracking(bool bAccept)
 					gMainWindow->UpdateAllViews();
 			} break;
 
-			case LC_ACTION_ZOOM_REGION:
+			case LC_TOOL_ZOOM_REGION:
 			{
 				// Find the top-left and bottom-right corners in screen coordinates.
 				float Left, Top, Bottom, Right;
@@ -7449,17 +7449,17 @@ bool Project::StopTracking(bool bAccept)
 				gMainWindow->UpdateAllViews();
 			} break;
 
-			case LC_ACTION_INSERT:
-			case LC_ACTION_LIGHT:
-			case LC_ACTION_ERASER:
-			case LC_ACTION_PAINT:
+			case LC_TOOL_INSERT:
+			case LC_TOOL_LIGHT:
+			case LC_TOOL_ERASER:
+			case LC_TOOL_PAINT:
 				break;
 		}
 		}
 	}
 	else if (m_pTrackFile != NULL)
 	{
-		if ((Action == LC_ACTION_SELECT) || (Action == LC_ACTION_ZOOM_REGION))
+		if ((Action == LC_TOOL_SELECT) || (Action == LC_TOOL_ZOOM_REGION))
 		{
 			gMainWindow->UpdateAllViews();
 		}
@@ -8314,7 +8314,7 @@ void Project::EndPieceDrop(bool Accept)
 void Project::BeginColorDrop()
 {
 	StartTracking(LC_TRACK_LEFT);
-	SetAction(LC_ACTION_PAINT);
+	SetAction(LC_TOOL_PAINT);
 //	m_RestoreAction = true;
 }
 
@@ -8348,19 +8348,19 @@ void Project::OnLeftButtonDown(View* view)
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Alt)
-		ActivateOverlay(view, LC_ACTION_ROTATE_VIEW, LC_OVERLAY_ROTATE_VIEW_XYZ);
+		ActivateOverlay(view, LC_TOOL_ROTATE_VIEW, LC_OVERLAY_ROTATE_VIEW_XYZ);
 
 	int Action = GetAction();
 
 	switch (Action)
 	{
-		case LC_ACTION_SELECT:
-		case LC_ACTION_ERASER:
-		case LC_ACTION_PAINT:
+		case LC_TOOL_SELECT:
+		case LC_TOOL_ERASER:
+		case LC_TOOL_PAINT:
 		{
 			Object* Closest = FindObjectFromPoint(view, x, y);
 
-			if (Action == LC_ACTION_SELECT)
+			if (Action == LC_TOOL_SELECT)
 			{
 				if (Closest != NULL)
 				{
@@ -8403,7 +8403,7 @@ void Project::OnLeftButtonDown(View* view)
 				StartTracking(LC_TRACK_START_LEFT);
 			}
 
-			if ((Action == LC_ACTION_ERASER) && (Closest != NULL))
+			if ((Action == LC_TOOL_ERASER) && (Closest != NULL))
 			{
 				switch (Closest->GetType ())
 				{
@@ -8455,7 +8455,7 @@ void Project::OnLeftButtonDown(View* view)
 //				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
 			}
 
-			if ((Action == LC_ACTION_PAINT) && (Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
+			if ((Action == LC_TOOL_PAINT) && (Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
 			{
 				Piece* pPiece = (Piece*)Closest;
 
@@ -8471,10 +8471,10 @@ void Project::OnLeftButtonDown(View* view)
 			}
 		} break;
 
-		case LC_ACTION_INSERT:
-		case LC_ACTION_LIGHT:
+		case LC_TOOL_INSERT:
+		case LC_TOOL_LIGHT:
 		{
-			if (Action == LC_ACTION_INSERT)
+			if (Action == LC_TOOL_INSERT)
 			{
 				lcVector3 Pos;
 				lcVector4 Rot;
@@ -8498,9 +8498,9 @@ void Project::OnLeftButtonDown(View* view)
 				gMainWindow->UpdateFocusObject(pPiece);
 
 				if (!Control)
-					SetAction(LC_ACTION_SELECT);
+					SetAction(LC_TOOL_SELECT);
 			}
-			else if (Action == LC_ACTION_LIGHT)
+			else if (Action == LC_TOOL_LIGHT)
 			{
 				GLint max;
 				int count = 0;
@@ -8532,7 +8532,7 @@ void Project::OnLeftButtonDown(View* view)
 			CheckPoint("Inserting");
 		} break;
 
-    case LC_ACTION_SPOTLIGHT:
+    case LC_TOOL_SPOTLIGHT:
     {
       GLint max;
       int count = 0;
@@ -8557,7 +8557,7 @@ void Project::OnLeftButtonDown(View* view)
 	  gMainWindow->UpdateFocusObject(pLight);
     } break;
 
-		case LC_ACTION_CAMERA:
+		case LC_TOOL_CAMERA:
 		{
 			lcVector3 Position(m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 			lcVector3 TargetPosition = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
@@ -8587,7 +8587,7 @@ void Project::OnLeftButtonDown(View* view)
 			gMainWindow->_UpdateFocusObject(Camera);
 		} break;
 
-		case LC_ACTION_MOVE:
+		case LC_TOOL_MOVE:
 		{
 			bool sel = false;
 
@@ -8623,7 +8623,7 @@ void Project::OnLeftButtonDown(View* view)
 			}
 		} break;
 
-		case LC_ACTION_ROTATE:
+		case LC_TOOL_ROTATE:
 		{
 			Piece* pPiece;
 
@@ -8638,7 +8638,7 @@ void Project::OnLeftButtonDown(View* view)
 			}
 		} break;
 
-		case LC_ACTION_ZOOM_REGION:
+		case LC_TOOL_ZOOM_REGION:
 		{
 			m_OverlayTrackStart[0] = (float)x;
 			m_OverlayTrackStart[1] = (float)y;
@@ -8646,10 +8646,10 @@ void Project::OnLeftButtonDown(View* view)
 			ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
 		} break;
 
-		case LC_ACTION_ZOOM:
-		case LC_ACTION_ROLL:
-		case LC_ACTION_PAN:
-		case LC_ACTION_ROTATE_VIEW:
+		case LC_TOOL_ZOOM:
+		case LC_TOOL_ROLL:
+		case LC_TOOL_PAN:
+		case LC_TOOL_ROTATE_VIEW:
 		{
 			StartTracking(LC_TRACK_START_LEFT);
 		} break;
@@ -8676,7 +8676,7 @@ void Project::OnLeftButtonDoubleClick(View* view)
 
 	Object* Closest = FindObjectFromPoint(view, x, y);
 
-//  if (m_nCurAction == LC_ACTION_SELECT)
+//  if (m_nCurAction == LC_TOOL_SELECT)
   {
 	SelectAndFocusNone(Control);
 
@@ -8741,11 +8741,11 @@ void Project::OnMiddleButtonDown(View* view)
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Alt)
-		ActivateOverlay(view, LC_ACTION_PAN, LC_OVERLAY_PAN);
+		ActivateOverlay(view, LC_TOOL_PAN, LC_OVERLAY_PAN);
 
 	switch (GetAction())
 	{
-		case LC_ACTION_PAN:
+		case LC_TOOL_PAN:
 		{
 			StartTracking(LC_TRACK_START_RIGHT);
 		} break;
@@ -8783,11 +8783,11 @@ void Project::OnRightButtonDown(View* view)
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
 	if (Alt)
-		ActivateOverlay(view, LC_ACTION_ZOOM, LC_OVERLAY_ZOOM);
+		ActivateOverlay(view, LC_TOOL_ZOOM, LC_OVERLAY_ZOOM);
 
 	switch (GetAction())
 	{
-		case LC_ACTION_MOVE:
+		case LC_TOOL_MOVE:
 		{
 			bool sel = false;
 
@@ -8816,7 +8816,7 @@ void Project::OnRightButtonDown(View* view)
 			}
 		} break;
 
-		case LC_ACTION_ROTATE:
+		case LC_TOOL_ROTATE:
 		{
 			Piece* pPiece;
 
@@ -8829,7 +8829,7 @@ void Project::OnRightButtonDown(View* view)
 				}
 		} break;
 
-		case LC_ACTION_ZOOM:
+		case LC_TOOL_ZOOM:
 		{
 			StartTracking(LC_TRACK_START_RIGHT);
 		} break;
@@ -8848,7 +8848,7 @@ void Project::OnMouseMove(View* view)
 	int x = view->mInputState.x;
 	int y = view->mInputState.y;
 
-	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_ACTION_INSERT))
+	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_TOOL_INSERT))
 	{
 		if (m_OverlayActive)
 			MouseUpdateOverlays(view, x, y);
@@ -8876,7 +8876,7 @@ void Project::OnMouseMove(View* view)
 
 	switch (GetAction())
 	{
-		case LC_ACTION_SELECT:
+		case LC_TOOL_SELECT:
 		{
 			int ClampX = x, ClampY = y;
 
@@ -8902,7 +8902,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_INSERT:
+		case LC_TOOL_INSERT:
 		{
 			if (m_nDownX != x || m_nDownY != y)
 			{
@@ -8913,7 +8913,7 @@ void Project::OnMouseMove(View* view)
 			}
 		}	break;
 
-		case LC_ACTION_SPOTLIGHT:
+		case LC_TOOL_SPOTLIGHT:
 		{
 			float mouse = 10.0f/(21 - m_nMouse);
 			float delta[3] = { (ptx - m_fTrack[0])*mouse,
@@ -8932,7 +8932,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_CAMERA:
+		case LC_TOOL_CAMERA:
 		{
 			float mouse = 10.0f/(21 - m_nMouse);
 			float delta[3] = { (ptx - m_fTrack[0])*mouse,
@@ -8951,7 +8951,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_MOVE:
+		case LC_TOOL_MOVE:
 		{
 			// Check if the mouse moved since the last update.
 			if ((x == m_nDownX) && (y == m_nDownY))
@@ -9133,7 +9133,7 @@ void Project::OnMouseMove(View* view)
 				gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_ROTATE:
+		case LC_TOOL_ROTATE:
 		{
 			Camera* Camera = gMainWindow->mActiveView->mCamera;
 			bool Redraw;
@@ -9294,7 +9294,7 @@ void Project::OnMouseMove(View* view)
 				gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_ZOOM:
+		case LC_TOOL_ZOOM:
 		{
 			if (m_nDownY == y)
 				break;
@@ -9305,7 +9305,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_ZOOM_REGION:
+		case LC_TOOL_ZOOM_REGION:
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
@@ -9315,7 +9315,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_PAN:
+		case LC_TOOL_PAN:
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
@@ -9327,7 +9327,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_ROTATE_VIEW:
+		case LC_TOOL_ROTATE_VIEW:
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
 				break;
@@ -9366,7 +9366,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_ACTION_ROLL:
+		case LC_TOOL_ROLL:
 		{
 			if (m_nDownX == x)
 				break;
@@ -9377,7 +9377,7 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateAllViews();
 		} break;
 		/*
-    case LC_ACTION_CURVE:
+    case LC_TOOL_CURVE:
     {
       float mouse = 10.0f/(21 - m_nMouse);
       float dx = (ptx - m_fTrack[0])*mouse;
@@ -9418,7 +9418,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 {
 	const float OverlayScale = view->m_OverlayScale;
 
-	if (m_nCurAction == LC_ACTION_SELECT || m_nCurAction == LC_ACTION_MOVE)
+	if (m_nCurAction == LC_TOOL_SELECT || m_nCurAction == LC_TOOL_MOVE)
 	{
 		const float OverlayMovePlaneSize = 0.5f * OverlayScale;
 		const float OverlayMoveArrowSize = 1.5f * OverlayScale;
@@ -9455,7 +9455,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			}
 		}
 
-		int Mode = (m_nCurAction == LC_ACTION_MOVE) ? LC_OVERLAY_MOVE_XYZ : LC_OVERLAY_NONE;
+		int Mode = (m_nCurAction == LC_TOOL_MOVE) ? LC_OVERLAY_MOVE_XYZ : LC_OVERLAY_NONE;
 		lcVector3 Start = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
 		lcVector3 End = lcUnprojectPoint(lcVector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 		float ClosestIntersectionDistance = FLT_MAX;
@@ -9521,7 +9521,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			gMainWindow->UpdateAllViews();
 		}
 	}
-	else if (m_nCurAction == LC_ACTION_ROTATE)
+	else if (m_nCurAction == LC_TOOL_ROTATE)
 	{
 		const float OverlayRotateRadius = 2.0f;
 
@@ -9683,7 +9683,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 			gMainWindow->UpdateAllViews();
 		}
 	}
-	else if (m_nCurAction == LC_ACTION_ROTATE_VIEW)
+	else if (m_nCurAction == LC_TOOL_ROTATE_VIEW)
 	{
 		int vx, vy, vw, vh;
 
@@ -9722,7 +9722,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 
 void Project::ActivateOverlay(View* view, int Action, int OverlayMode)
 {
-	if ((Action == LC_ACTION_SELECT) || (Action == LC_ACTION_MOVE) || (Action == LC_ACTION_ROTATE))
+	if ((Action == LC_TOOL_SELECT) || (Action == LC_TOOL_MOVE) || (Action == LC_TOOL_ROTATE))
 	{
 		if (GetFocusPosition(m_OverlayCenter))
 			m_OverlayActive = true;
@@ -9731,9 +9731,9 @@ void Project::ActivateOverlay(View* view, int Action, int OverlayMode)
 		else
 			m_OverlayActive = false;
 	}
-	else if ((Action == LC_ACTION_ZOOM_REGION) && (m_nTracking == LC_TRACK_START_LEFT))
+	else if ((Action == LC_TOOL_ZOOM_REGION) && (m_nTracking == LC_TRACK_START_LEFT))
 		m_OverlayActive = true;
-	else if (Action == LC_ACTION_ZOOM || Action == LC_ACTION_PAN || Action == LC_ACTION_ROTATE_VIEW)
+	else if (Action == LC_TOOL_ZOOM || Action == LC_TOOL_PAN || Action == LC_TOOL_ROTATE_VIEW)
 		m_OverlayActive = true;
 	else
 		m_OverlayActive = false;

@@ -181,7 +181,7 @@ void lcModel::RenderObjects(View* View)
 #endif
 
 	// Draw cameras & lights
-	if (m_nCurAction == LC_ACTION_INSERT || mDropPiece)
+	if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
 	{
 		lcVector3 Pos;
 		lcVector4 Rot;

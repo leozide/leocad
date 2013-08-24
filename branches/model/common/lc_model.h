@@ -3,8 +3,9 @@
 
 #include "lc_array.h"
 #include "lc_math.h"
+#include "lc_object.h"
 
-class PieceInfo;
+class View;
 
 class lcModel
 {
@@ -13,6 +14,12 @@ public:
 	~lcModel();
 
 	void DeleteContents();
+	void AddCamera(lcCamera* Camera);
+
+	void Update(lcKeyTime Time);
+
+	void RenderBackground(View* View);
+	void RenderObjects(View* View);
 
 	lcArray<lcPart*> mParts;
 	lcArray<lcCamera*> mCameras;

@@ -31,6 +31,9 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "lc_model.h"
+#include "lc_part.h"
+#include "lc_camera.h"
+#include "lc_light.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Project construction/destruction
@@ -1461,12 +1464,13 @@ void Project::CheckPoint (const char* text)
 // Project rendering
 
 // Only this function should be called.
-void Project::Render(View* view, bool ToMemory)
+void Project::Render(View* View, bool ToMemory)
 {
-	glViewport(0, 0, view->mWidth, view->mHeight);
+	glViewport(0, 0, View->mWidth, View->mHeight);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
-	RenderBackground(view);
-
+	mActiveModel->RenderBackground(View);
+/*
 	// Setup the projection and camera matrices.
 	float ratio = (float)view->mWidth / (float)view->mHeight;
 	view->mCamera->LoadProjection(ratio);
@@ -1479,14 +1483,17 @@ void Project::Render(View* view, bool ToMemory)
 			RenderSceneBoxes(view);
 		else
 			RenderScenePieces(view);
-
-		RenderSceneObjects(view);
-
+*/
+		mActiveModel->RenderObjects(View);
+/*
 		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view)))
 			RenderOverlays(view);
 
 		RenderViewports(view);
 	}
+	*/
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Project::RenderBackground(View* view)
@@ -2931,6 +2938,8 @@ void Project::RemovePiece(Piece* pPiece)
 
 void Project::CalculateStep()
 {
+	mActiveModel->Update(m_nCurStep);
+
 	Piece* pPiece;
 	Light* pLight;
 
@@ -8550,18 +8559,32 @@ void Project::OnLeftButtonDown(View* view)
 
 		case LC_ACTION_CAMERA:
 		{
-			lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
+			lcVector3 Position(m_fTrack[0], m_fTrack[1], m_fTrack[2]);
+			lcVector3 TargetPosition = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
 			SelectAndFocusNone(false);
 			StartTracking(LC_TRACK_START_LEFT);
 
-			Camera* NewCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-			NewCamera->GetTarget()->Select (true, true, false);
-			NewCamera->CreateName(mCameras);
-			mCameras.Add(NewCamera);
+			lcCamera* Camera = new lcCamera(false);
+			mActiveModel->AddCamera(Camera);
+
+			lcVector3 FrontVector(lcNormalize(TargetPosition - Position));
+			lcVector3 UpVector(0, 0, 1);
+			lcVector3 SideVector = lcCross(FrontVector, UpVector);
+
+			if (fabsf(lcDot(UpVector, SideVector)) > 0.99f)
+				SideVector = lcVector3(1, 0, 0);
+
+			UpVector = lcCross(SideVector, FrontVector);
+			UpVector.Normalize();
+
+			Camera->mPosition = Position;
+			Camera->mTargetPosition = TargetPosition;
+			Camera->mUpVector = UpVector;
+			Camera->FocusTarget();
 
 			UpdateSelection();
 			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateFocusObject(NewCamera);
+			gMainWindow->_UpdateFocusObject(Camera);
 		} break;
 
 		case LC_ACTION_MOVE:

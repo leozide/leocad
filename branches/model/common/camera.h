@@ -5,12 +5,12 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-#define LC_CAMERA_HIDDEN            0x01
-#define LC_CAMERA_SELECTED          0x02
-#define LC_CAMERA_FOCUSED           0x04
-#define LC_CAMERA_TARGET_SELECTED   0x08
-#define LC_CAMERA_TARGET_FOCUSED    0x10
-#define LC_CAMERA_SIMPLE            0x20
+#define LC_CAMERA_HIDDEN            0x0001
+#define LC_CAMERA_SIMPLE            0x0002
+#define LC_CAMERA_SELECTED          0x0010
+#define LC_CAMERA_FOCUSED           0x0020
+#define LC_CAMERA_TARGET_SELECTED   0x0040
+#define LC_CAMERA_TARGET_FOCUSED    0x0080
 
 class Camera;
 class CameraTarget;

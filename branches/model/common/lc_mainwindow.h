@@ -34,6 +34,7 @@ class lcMainWindow : public lcBaseWindow
 	void ToggleFullScreen();
 
 	void UpdateFocusObject(Object* Focus);
+	void _UpdateFocusObject(lcObject* Focus);
 	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);

@@ -387,6 +387,8 @@ public:
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id);
 
+	float m_fLineWidth;
+
 protected:
 	// State variables
 	int mTransformType;
@@ -406,7 +408,6 @@ protected:
 	lcuint16 m_nMoveSnap;
 	lcuint16 m_nAngleSnap;
 	lcuint16 m_nGridSize;
-	float m_fLineWidth;
 	float m_fFogDensity;
 	float m_fFogColor[4];
 	float m_fAmbient[4];

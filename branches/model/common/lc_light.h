@@ -7,6 +7,11 @@ class lcLight : public lcObject
 {
 public:
 	lcLight();
+
+	void Update(lcKeyTime Time)
+	{
+
+	}
 };
 
 #endif // LC_LIGHT_H

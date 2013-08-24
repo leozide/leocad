@@ -788,7 +788,7 @@ void lcQMainWindow::print(QPrinter *printer)
 	float aspectRatio = (float)stepWidth / (float)stepHeight;
 
 	View view(project);
-	view.SetCamera(project->GetActiveView()->mCamera, false);
+	view.SetCamera(gMainWindow->mActiveView->mCamera, false);
 	view.mWidth = tileWidth;
 	view.mHeight = tileHeight;
 

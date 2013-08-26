@@ -19,12 +19,15 @@ View::View(Project *project)
 
 View::~View()
 {
-	gMainWindow->mViews.Remove(this);
-
-	if (gMainWindow->mActiveView == this)
+	if (gMainWindow)
 	{
-		if (gMainWindow->mViews.GetSize() > 0)
-			gMainWindow->SetActiveView(gMainWindow->mViews[0]);
+		gMainWindow->mViews.Remove(this);
+
+		if (gMainWindow->mActiveView == this)
+		{
+			if (gMainWindow->mViews.GetSize() > 0)
+				gMainWindow->SetActiveView(gMainWindow->mViews[0]);
+		}
 	}
 
 	if (mCamera && mCamera->IsSimple())

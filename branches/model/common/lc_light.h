@@ -3,12 +3,12 @@
 
 #include "lc_object.h"
 
-class lcLight : public lcObject
+class lcLight //: public lcObject
 {
 public:
 	lcLight();
 
-	void Update(lcKeyTime Time)
+	void Update(lcTime Time)
 	{
 
 	}

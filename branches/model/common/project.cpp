@@ -1470,11 +1470,11 @@ void Project::Render(View* View, bool ToMemory)
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	mActiveModel->RenderBackground(View);
-/*
-	// Setup the projection and camera matrices.
-	float ratio = (float)view->mWidth / (float)view->mHeight;
-	view->mCamera->LoadProjection(ratio);
 
+	// Setup the projection and camera matrices.
+	float ratio = (float)View->mWidth / (float)View->mHeight;
+	View->mCamera->LoadProjection(ratio);
+/*
 	if (ToMemory)
 		RenderScenePieces(view);
 	else
@@ -2938,7 +2938,7 @@ void Project::RemovePiece(Piece* pPiece)
 
 void Project::CalculateStep()
 {
-	mActiveModel->Update(m_nCurStep);
+	mActiveModel->SetCurrentTime(m_nCurStep);
 
 	Piece* pPiece;
 	Light* pLight;
@@ -7128,6 +7128,31 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 
+lcObjectSection Project::FindClosestObject(View* View, int x, int y) const
+{
+	int Viewport[4] = { 0, 0, View->mWidth, View->mHeight };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Camera = View->mCamera;
+
+	const lcMatrix44& ModelView = Camera->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Camera->m_fovy, Aspect, Camera->m_zNear, Camera->m_zFar);
+
+	lcVector3 Start = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
+	lcVector3 End = lcUnprojectPoint(lcVector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
+
+	lcObjectHitTest HitTest;
+
+	HitTest.Start = Start;
+	HitTest.End = End;
+	HitTest.Distance = FLT_MAX;
+	HitTest.ObjectSection.Object = NULL;
+	HitTest.ObjectSection.Section = 0;
+
+	mActiveModel->FindClosestObject(HitTest);
+
+	return HitTest.ObjectSection;
+}
+
 Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 {
 	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
@@ -7262,12 +7287,21 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<O
 // Mouse handling
 
 // Returns true if the mouse was being tracked.
-bool Project::StopTracking(bool bAccept)
+bool Project::StopTracking(bool Accept)
 {
 	if (m_nTracking == LC_TRACK_NONE)
 		return false;
 
 	int Action = GetAction();
+
+	switch (Action)
+	{
+	case LC_TOOL_CAMERA:
+		mActiveModel->EndCameraTool(Accept);
+		break;
+	}
+
+
 	View* ActiveView = gMainWindow->mActiveView;
 
 	if ((m_nTracking == LC_TRACK_START_LEFT) || (m_nTracking == LC_TRACK_START_RIGHT))
@@ -7294,7 +7328,7 @@ bool Project::StopTracking(bool bAccept)
 		gMainWindow->UpdateAllViews();
 	}
 
-	if (bAccept)
+	if (Accept)
 	{
 		if (mDropPiece)
 		{
@@ -8056,7 +8090,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 	switch (Property)
 	{
-	case LC_PART_POSITION:
+	case LC_PROPERTY_PART_POSITION:
 		{
 			const lcVector3& Position = *(lcVector3*)Value;
 			Piece* Part = (Piece*)Object;
@@ -8070,7 +8104,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_ROTATION:
+	case LC_PROPERTY_PART_ROTATION:
 		{
 			const lcVector4& Rotation = *(lcVector4*)Value;
 			Piece* Part = (Piece*)Object;
@@ -8084,7 +8118,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_SHOW:
+	case LC_PROPERTY_PART_SHOW:
 		{
 			lcuint32 Show = *(lcuint32*)Value;
 			Piece* Part = (Piece*)Object;
@@ -8109,7 +8143,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 				}
 		} break;
 
-	case LC_PART_HIDE:
+	case LC_PROPERTY_PART_HIDE:
 			{
 			lcuint32 Hide = *(lcuint32*)Value;
 			Piece* Part = (Piece*)Object;
@@ -8134,7 +8168,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_COLOR:
+	case LC_PROPERTY_PART_COLOR:
 			{
 			int ColorIndex = *(int*)Value;
 			Piece* Part = (Piece*)Object;
@@ -8147,7 +8181,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_ID:
+	case LC_PROPERTY_PART_ID:
 		{
 			Piece* Part = (Piece*)Object;
 			PieceInfo* Info = (PieceInfo*)Value;
@@ -8162,13 +8196,13 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_POSITION:
+	case LC_PROPERTY_CAMERA_POSITION:
 			{
 			const lcVector3& Position = *(lcVector3*)Value;
 			Camera* camera = (Camera*)Object;
 
 			if (camera->mPosition != Position)
-{
+			{
 				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
 				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
@@ -8176,7 +8210,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_TARGET:
+	case LC_PROPERTY_CAMERA_TARGET:
 			{
 			const lcVector3& TargetPosition = *(lcVector3*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8190,7 +8224,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 				}
 		} break;
 
-	case LC_CAMERA_UP:
+	case LC_PROPERTY_CAMERA_UP:
 				{
 			const lcVector3& Up = *(lcVector3*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8204,7 +8238,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_FOV:
+	case LC_PROPERTY_CAMERA_FOV:
 		{
 			float FOV = *(float*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8218,7 +8252,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 					}
 		} break;
 
-	case LC_CAMERA_NEAR:
+	case LC_PROPERTY_CAMERA_NEAR:
 				{
 			float Near = *(float*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8232,7 +8266,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 					}
 		} break;
 
-	case LC_CAMERA_FAR:
+	case LC_PROPERTY_CAMERA_FAR:
 		{
 			float Far = *(float*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8246,7 +8280,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_NAME:
+	case LC_PROPERTY_CAMERA_NAME:
 		{
 			const char* Name = (const char*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8354,54 +8388,37 @@ void Project::OnLeftButtonDown(View* view)
 
 	switch (Action)
 	{
-		case LC_TOOL_SELECT:
+	case LC_TOOL_SELECT:
+		{
+			lcObjectSection ObjectSection = FindClosestObject(view, x, y);
+
+			if (Control)
+			{
+				if (!ObjectSection.Object)
+					break;
+
+				mActiveModel->ToggleSelection(ObjectSection);
+			}
+			else
+			{
+				mActiveModel->ClearSelection();
+
+				if (ObjectSection.Object)
+					mActiveModel->SetFocus(ObjectSection);
+			}
+
+			gMainWindow->UpdateAllViews();
+			gMainWindow->UpdateSelection();
+			gMainWindow->UpdateFocusObject();
+
+			StartTracking(LC_TRACK_START_LEFT);
+		}
+		break;
+
 		case LC_TOOL_ERASER:
 		case LC_TOOL_PAINT:
 		{
 			Object* Closest = FindObjectFromPoint(view, x, y);
-
-			if (Action == LC_TOOL_SELECT)
-			{
-				if (Closest != NULL)
-				{
-					switch (Closest->GetType ())
-					{
-						case LC_OBJECT_PIECE:
-						{
-							Piece* pPiece = (Piece*)Closest;
-							Group* pGroup = pPiece->GetTopGroup();
-							bool bFocus = pPiece->IsFocused ();
-
-							SelectAndFocusNone(Control);
-
-							// if a piece has focus deselect it, otherwise set the focus
-							pPiece->Select (!bFocus, !bFocus, false);
-
-							if (pGroup != NULL)
-								for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-									if (pPiece->GetTopGroup() == pGroup)
-										pPiece->Select (!bFocus, false, false);
-						} break;
-
-						case LC_OBJECT_CAMERA:
-						case LC_OBJECT_CAMERA_TARGET:
-						case LC_OBJECT_LIGHT:
-						case LC_OBJECT_LIGHT_TARGET:
-						{
-							SelectAndFocusNone(Control);
-							Closest->Select(true, true, Control);
-						} break;
-					}
-				}
-				else
-					SelectAndFocusNone(Control);
-
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				gMainWindow->UpdateFocusObject(Closest);
-
-				StartTracking(LC_TRACK_START_LEFT);
-			}
 
 			if ((Action == LC_TOOL_ERASER) && (Closest != NULL))
 			{
@@ -8561,11 +8578,6 @@ void Project::OnLeftButtonDown(View* view)
 		{
 			lcVector3 Position(m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 			lcVector3 TargetPosition = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
-			SelectAndFocusNone(false);
-			StartTracking(LC_TRACK_START_LEFT);
-
-			lcCamera* Camera = new lcCamera(false);
-			mActiveModel->AddCamera(Camera);
 
 			lcVector3 FrontVector(lcNormalize(TargetPosition - Position));
 			lcVector3 UpVector(0, 0, 1);
@@ -8577,14 +8589,9 @@ void Project::OnLeftButtonDown(View* view)
 			UpVector = lcCross(SideVector, FrontVector);
 			UpVector.Normalize();
 
-			Camera->mPosition = Position;
-			Camera->mTargetPosition = TargetPosition;
-			Camera->mUpVector = UpVector;
-			Camera->FocusTarget();
+			mActiveModel->BeginCameraTool(Position, TargetPosition, UpVector);
 
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-			gMainWindow->_UpdateFocusObject(Camera);
+			StartTracking(LC_TRACK_START_LEFT);
 		} break;
 
 		case LC_TOOL_MOVE:
@@ -8934,21 +8941,14 @@ void Project::OnMouseMove(View* view)
 
 		case LC_TOOL_CAMERA:
 		{
-			float mouse = 10.0f/(21 - m_nMouse);
-			float delta[3] = { (ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
+			float Mouse = 10.0f / (21 - m_nMouse);
+			lcVector3 Delta((ptx - m_fTrack[0]) * Mouse, (pty - m_fTrack[1]) * Mouse, (ptz - m_fTrack[2]) * Mouse);
 
 			m_fTrack[0] = ptx;
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 
-			Camera* pCamera = mCameras[mCameras.GetSize() - 1];
-
-			pCamera->Move(1, m_bAnimation, false, delta[0], delta[1], delta[2]);
-			pCamera->UpdatePosition(1, m_bAnimation);
-
-			gMainWindow->UpdateFocusObject(pCamera);
-			gMainWindow->UpdateAllViews();
+			mActiveModel->UpdateCameraTool(Delta);
 		} break;
 
 		case LC_TOOL_MOVE:

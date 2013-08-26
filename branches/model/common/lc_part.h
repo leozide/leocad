@@ -5,12 +5,12 @@
 #include "lc_array.h"
 #include "lc_math.h"
 
-class lcPart : public lcObject
+class lcPart //: public lcObject
 {
 public:
 	lcPart();
 
-	void Update(lcKeyTime Time)
+	void Update(lcTime Time)
 	{
 
 	}

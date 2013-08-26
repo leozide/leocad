@@ -130,6 +130,7 @@ class PieceInfo;
 class View;
 class Image;
 class TexFont;
+struct lcObjectSection;
 
 // Undo support
 
@@ -168,19 +169,19 @@ struct lcSearchOptions
 
 enum lcObjectProperty
 {
-	LC_PART_POSITION,
-	LC_PART_ROTATION,
-	LC_PART_SHOW,
-	LC_PART_HIDE,
-	LC_PART_COLOR,
-	LC_PART_ID,
-	LC_CAMERA_POSITION,
-	LC_CAMERA_TARGET,
-	LC_CAMERA_UP,
-	LC_CAMERA_FOV,
-	LC_CAMERA_NEAR,
-	LC_CAMERA_FAR,
-	LC_CAMERA_NAME
+	LC_PROPERTY_PART_POSITION,
+	LC_PROPERTY_PART_ROTATION,
+	LC_PROPERTY_PART_SHOW,
+	LC_PROPERTY_PART_HIDE,
+	LC_PROPERTY_PART_COLOR,
+	LC_PROPERTY_PART_ID,
+	LC_PROPERTY_CAMERA_POSITION,
+	LC_PROPERTY_CAMERA_TARGET,
+	LC_PROPERTY_CAMERA_UP,
+	LC_PROPERTY_CAMERA_FOV,
+	LC_PROPERTY_CAMERA_NEAR,
+	LC_PROPERTY_CAMERA_FAR,
+	LC_PROPERTY_CAMERA_NAME
 };
 
 enum lcTool
@@ -309,6 +310,7 @@ protected:
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
+	lcObjectSection FindClosestObject(View* View, int x, int y) const;
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);

@@ -1,12 +1,29 @@
 #include "lc_global.h"
 #include "lc_model.h"
+#include "lc_mainwindow.h"
 #include "view.h"
+#include "lc_object.h"
 #include "lc_part.h"
 #include "lc_camera.h"
 #include "lc_light.h"
+#include "lc_file.h"
+
+class lcCheckpoint
+{
+public:
+	lcCheckpoint(const char* Name)
+	{
+		strcpy(mName, Name);
+	}
+
+	char mName[64];
+	lcMemFile mAction;
+};
 
 lcModel::lcModel()
 {
+	mCurrentCheckpoint = NULL;
+	mFocusObject = NULL;
 }
 
 lcModel::~lcModel()
@@ -16,60 +33,238 @@ lcModel::~lcModel()
 
 void lcModel::DeleteContents()
 {
-	for (int PartIdx = 0; PartIdx < mParts.GetSize(); PartIdx++)
-		delete mParts[PartIdx];
-	mParts.RemoveAll();
+	delete mCurrentCheckpoint;
+	mCurrentCheckpoint = NULL;
+	mUndoCheckpoints.DeleteAll();
+	mRedoCheckpoints.DeleteAll();
 
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		delete mCameras[CameraIdx];
-	mCameras.RemoveAll();
+	mFocusObject = NULL;
+	mSelectedObjects.RemoveAll();
+	mObjects.DeleteAll();
 
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		delete mLights[LightIdx];
-	mLights.RemoveAll();
+//	mParts.DeleteAll();
+//	mCameras.DeleteAll();
+//	mLights.DeleteAll();
 }
 
-void lcModel::AddCamera(lcCamera* NewCamera)
+void lcModel::Update(lcTime Time)
 {
-	if (!NewCamera->mName[0])
+//	for (int PartIdx = 0; PartIdx < mParts.GetSize(); PartIdx++)
+//		mParts[PartIdx]->Update(Time);
+
+//	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+//		mCameras[CameraIdx]->Update(Time);
+
+//	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+//		mLights[LightIdx]->Update(Time);
+}
+
+void lcModel::BeginCheckpoint(const char* Name)
+{
+	LC_ASSERT(!mCurrentCheckpoint);
+	mCurrentCheckpoint = new lcCheckpoint(Name);
+}
+
+void lcModel::EndCheckpoint(bool Accept)
+{
+	LC_ASSERT(mCurrentCheckpoint);
+
+	if (Accept)
 	{
-		const char* Prefix = "Camera ";
-		const int PrefixLength = strlen(Prefix);
-		int Index, MaxIndex = 0;
-
-		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		{
-			lcCamera* Camera = mCameras[CameraIdx];
-
-			if (strncmp(Camera->mName, Prefix, PrefixLength))
-				continue;
-
-			if (sscanf(Camera->mName + PrefixLength, " %d", &Index) != 1)
-				continue;
-
-			if (Index > MaxIndex)
-				MaxIndex = Index;
-		}
-
-		sprintf(NewCamera->mName, "%s %d", Prefix, MaxIndex + 1);
+		mUndoCheckpoints.Add(mCurrentCheckpoint);
+		mRedoCheckpoints.DeleteAll();
+	}
+	else
+	{
+		RevertCheckpoint(mCurrentCheckpoint);
+		delete mCurrentCheckpoint;
 	}
 
-	mCameras.Add(NewCamera);
+	mCurrentCheckpoint = NULL;
 }
 
-void lcModel::Update(lcKeyTime Time)
+void lcModel::ClearSelection()
 {
-	for (int PartIdx = 0; PartIdx < mParts.GetSize(); PartIdx++)
-		mParts[PartIdx]->Update(Time);
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->ClearSelection();
+	mSelectedObjects.RemoveAll();
 
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->Update(Time);
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->Update(Time);
+	mFocusObject = NULL;
 }
 
-void lcModel::RenderBackground(View* View)
+void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
+{
+	bool WasSelected = ObjectSection.Object->IsSelected();
+
+	ObjectSection.Object->ToggleSelection(ObjectSection.Section);
+
+	if (mFocusObject && !mFocusObject->IsFocused())
+		mFocusObject = NULL;
+
+	bool IsSelected  = ObjectSection.Object->IsSelected();
+
+	if (WasSelected && !IsSelected)
+		mSelectedObjects.Remove(ObjectSection.Object);
+	else if (!WasSelected && IsSelected)
+		mSelectedObjects.Add(ObjectSection.Object);
+}
+
+void lcModel::SetFocus(const lcObjectSection& ObjectSection)
+{
+	bool WasSelected = ObjectSection.Object->IsSelected();
+
+	if (mFocusObject)
+		mFocusObject->ClearFocus();
+
+	if (ObjectSection.Object)
+		ObjectSection.Object->SetFocus(ObjectSection.Section, true);
+
+	if (!WasSelected)
+		mSelectedObjects.Add(ObjectSection.Object);
+
+	mFocusObject = ObjectSection.Object;
+}
+
+void lcModel::SetCurrentTime(lcTime Time)
+{
+}
+
+//void lcModel::MoveSelectedObjects(const lcVector3& Distance)
+//{
+//}
+
+void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector)
+{
+	BeginCheckpoint("Create camera");
+	lcMemFile& Action = mCurrentCheckpoint->mAction;
+
+	Action.WriteU32(LC_ACTION_CREATE_CAMERA);
+	Action.WriteFloats(Position, 3);
+	Action.WriteFloats(TargetPosition, 3);
+	Action.WriteFloats(UpVector, 3);
+
+	ApplyCheckpoint(mCurrentCheckpoint);
+}
+
+void lcModel::UpdateCameraTool(const lcVector3& Distance)
+{
+	lcMemFile& Action = mCurrentCheckpoint->mAction;
+
+	lcCamera* NewCamera = (lcCamera*)mFocusObject;
+
+	NewCamera->mTargetPosition += Distance;
+	NewCamera->Update();
+
+	Action.Seek(0, SEEK_SET);
+	LC_ASSERT(Action.ReadU32() == LC_ACTION_CREATE_CAMERA);
+
+	Action.Seek(3 * sizeof(float), SEEK_CUR);
+	Action.WriteFloats(NewCamera->mTargetPosition, 3);
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateFocusObject();
+}
+
+void lcModel::EndCameraTool(bool Accept)
+{
+	EndCheckpoint(Accept);
+	if (Accept)
+	{
+//		gMainWindow->UpdateCameraMenu(mCameras);
+//		SetModifiedFlag(true);
+	}
+}
+
+void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
+{
+	lcMemFile& Action = Checkpoint->mAction;
+
+	Action.Seek(0, SEEK_SET);
+	lcActionType ActionType = (lcActionType)Action.ReadU32();
+
+	switch (ActionType)
+	{
+	case LC_ACTION_CREATE_CAMERA:
+		{
+			lcVector3 Position, TargetPosition, UpVector;
+			Action.ReadFloats(Position, 3);
+			Action.ReadFloats(TargetPosition, 3);
+			Action.ReadFloats(UpVector, 3);
+
+			const char* Prefix = "Camera ";
+			const int PrefixLength = strlen(Prefix);
+			int Index, MaxIndex = 0;
+
+			for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+			{
+				lcObject* Object = mObjects[ObjectIdx];
+
+				if (!Object->IsCamera())
+					continue;
+
+				lcCamera* Camera = (lcCamera*)Object;
+
+				if (strncmp(Camera->mName, Prefix, PrefixLength))
+					continue;
+
+				if (sscanf(Camera->mName + PrefixLength, " %d", &Index) != 1)
+					continue;
+
+				if (Index > MaxIndex)
+					MaxIndex = Index;
+			}
+
+			ClearSelection();
+
+			lcCamera* NewCamera = new lcCamera(false);
+			mObjects.Add(NewCamera);
+
+			NewCamera->mPosition = Position;
+			NewCamera->mTargetPosition = TargetPosition;
+			NewCamera->mUpVector = UpVector;
+			sprintf(NewCamera->mName, "%s %d", Prefix, MaxIndex + 1);
+
+			NewCamera->Update();
+
+			NewCamera->SetFocus(LC_CAMERA_TARGET, true);
+			mFocusObject = NewCamera;
+			mSelectedObjects.Add(NewCamera);
+
+			gMainWindow->UpdateAllViews();
+			gMainWindow->UpdateSelection();
+			gMainWindow->UpdateFocusObject();
+		}
+		break;
+	}
+
+}
+
+void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
+{
+	lcMemFile& Action = Checkpoint->mAction;
+
+	Action.Seek(0, SEEK_SET);
+	lcActionType ActionType = (lcActionType)Action.ReadU32();
+
+	switch (ActionType)
+	{
+	case LC_ACTION_CREATE_CAMERA:
+		{
+			ClearSelection();
+
+			delete mObjects[mObjects.GetSize() - 1];
+			mObjects.RemoveIndex(mObjects.GetSize() - 1);
+
+			gMainWindow->UpdateAllViews();
+			gMainWindow->UpdateSelection();
+			gMainWindow->UpdateFocusObject();
+//			gMainWindow->UpdateCameraMenu();
+		}
+		break;
+	}
+}
+
+void lcModel::RenderBackground(View* View) const
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -173,8 +368,17 @@ void lcModel::RenderBackground(View* View)
 	*/
 }
 
-void lcModel::RenderObjects(View* View)
+//void lcModel::GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const
+//{
+//	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+//		mObjects[ObjectIdx]->GetRenderMeshes(View, PartsOnly, OpaqueMeshes, TranslucentMeshes);
+//}
+
+void lcModel::RenderObjects(View* View) const
 {
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+		mObjects[ObjectIdx]->RenderExtra(View);
+
 	/*
 #ifdef LC_DEBUG
 	RenderDebugPrimitives();
@@ -206,7 +410,7 @@ void lcModel::RenderObjects(View* View)
 		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
 			glDisable ((GLenum)(GL_LIGHT0+index));
 	}
-*/
+
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
 		lcCamera* Camera = mCameras[CameraIdx];
@@ -216,7 +420,7 @@ void lcModel::RenderObjects(View* View)
 
 		Camera->Render();
 	}
-/*
+
 	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 		if (pLight->IsVisible ())
 			pLight->Render(m_fLineWidth);
@@ -294,4 +498,13 @@ void lcModel::RenderObjects(View* View)
 		glDisable(GL_ALPHA_TEST);
 	}
 */
+}
+
+void lcModel::FindClosestObject(lcObjectHitTest& HitTest) const
+{
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+//		if (visible)
+		mObjects[ObjectIdx]->ClosestHitTest(HitTest);
+	}
 }

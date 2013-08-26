@@ -468,20 +468,21 @@ void lcMainWindow::ToggleFullScreen()
 		window->toggleFullScreen();
 }
 
+void lcMainWindow::UpdateSelection()
+{
+}
+
+void lcMainWindow::UpdateFocusObject()
+{
+}
+
+
 void lcMainWindow::UpdateFocusObject(Object* Focus)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
 		window->updateFocusObject(Focus);
-}
-
-void lcMainWindow::_UpdateFocusObject(lcObject* Focus)
-{
-//	lcQMainWindow* window = (lcQMainWindow*)mHandle;
-
-//	if (window)
-//		window->updateFocusObject(Focus);
 }
 
 void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus)

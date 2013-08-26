@@ -3,6 +3,7 @@
 
 #include "lc_object.h"
 #include "lc_math.h"
+#include "lc_file.h"
 
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002
@@ -12,26 +13,153 @@
 #define LC_CAMERA_TARGET_FOCUSED    0x0080
 #define LC_CAMERA_UPVECTOR_SELECTED 0x0100
 #define LC_CAMERA_UPVECTOR_FOCUSED  0x0200
-#define LC_CAMERA_SELECTION_MASK	0x03f0
+
+#define LC_CAMERA_SELECTION_MASK	(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
+#define LC_CAMERA_FOCUS_MASK		(LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
+
+enum lcCameraSection
+{
+	LC_CAMERA_POSITION,
+	LC_CAMERA_TARGET,
+	LC_CAMERA_UPVECTOR
+};
 
 class lcCamera : public lcObject
 {
 public:
 	lcCamera(bool Simple);
+	virtual ~lcCamera();
 
 	bool IsVisible() const
 	{
 		return (mState & LC_CAMERA_HIDDEN) == 0;
 	}
 
-	void FocusTarget()
+	virtual bool IsSelected() const
 	{
-		mState &= ~LC_CAMERA_SELECTION_MASK;
-		mState |= LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED;
+		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
-	void Update(lcKeyTime Time);
-	void Render();
+	virtual bool IsFocused() const
+	{
+		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
+	}
+
+	virtual void ClearSelection()
+	{
+		mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
+	}
+
+	virtual void ClearFocus()
+	{
+		mState &= ~LC_CAMERA_FOCUS_MASK;
+	}
+
+	virtual void SetSelection(lcuint32 Section, bool Selection)
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_POSITION:
+			if (Selection)
+				mState |= LC_CAMERA_POSITION_SELECTED;
+			else
+				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
+			break;
+
+		case LC_CAMERA_TARGET:
+			if (Selection)
+				mState |= LC_CAMERA_TARGET_SELECTED;
+			else
+				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
+			break;
+
+		case LC_CAMERA_UPVECTOR:
+			if (Selection)
+				mState |= LC_CAMERA_UPVECTOR_SELECTED;
+			else
+				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
+			break;
+		}
+	}
+
+	virtual void SetFocus(lcuint32 Section, bool Focus)
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_POSITION:
+			if (Focus)
+				mState |= LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED;
+			else
+				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
+			break;
+
+		case LC_CAMERA_TARGET:
+			if (Focus)
+				mState |= LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED;
+			else
+				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
+			break;
+
+		case LC_CAMERA_UPVECTOR:
+			if (Focus)
+				mState |= LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED;
+			else
+				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
+			break;
+		}
+	}
+
+	virtual void ToggleSelection(lcuint32 Section)
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_POSITION:
+			if (mState & (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED))
+				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
+			else
+				mState |= LC_CAMERA_POSITION_SELECTED;
+			break;
+
+		case LC_CAMERA_TARGET:
+			if (mState & (LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED))
+				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
+			else
+				mState |= LC_CAMERA_TARGET_SELECTED;
+			break;
+
+		case LC_CAMERA_UPVECTOR:
+			if (mState & (LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED))
+				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
+			else
+				mState |= LC_CAMERA_UPVECTOR_SELECTED;
+			break;
+		}
+	}
+
+	virtual void SaveSelectionState(lcMemFile& File) const
+	{
+		File.WriteU32(mState & (LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK));
+	}
+
+	virtual void SetCurrentTime(lcTime Time)
+	{
+		if (mPositionKeys.GetSize())
+			mPosition = CalculateKey(mPositionKeys, Time);
+
+		if (mTargetPositionKeys.GetSize())
+			mTargetPosition = CalculateKey(mTargetPositionKeys, Time);
+
+		if (mUpVectorKeys.GetSize())
+			mUpVector = CalculateKey(mUpVectorKeys, Time);
+
+		Update();
+	}
+
+	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
+//	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
+	virtual void RenderExtra(View* View) const;
+
+	void Update();
 
 	lcMatrix44 mWorldView;
 	lcVector3 mPosition;
@@ -46,6 +174,8 @@ public:
 	char mName[81];
 
 protected:
+	lcMesh* mMesh;
+
 	lcArray<lcObjectVector3Key> mPositionKeys;
 	lcArray<lcObjectVector3Key> mTargetPositionKeys;
 	lcArray<lcObjectVector3Key> mUpVectorKeys;

@@ -165,5 +165,13 @@ public:
 	int mNumTexturedVertices;
 	int mIndexType;
 };
-
+/*
+struct lcRenderMesh
+{
+	lcMatrix44 ModelWorld;
+	lcMesh* Mesh;
+	int DefaultColorIndex;
+	float Distance;
+};
+*/
 #endif // _LC_MESH_H_

@@ -1,10 +1,12 @@
 #include "lc_global.h"
 #include "lc_camera.h"
+#include "lc_mesh.h"
 #include "lc_colors.h"
 #include "lc_application.h"
 #include "project.h"
 
-lcCamera::lcCamera(bool Simple)
+lcCamera::lcCamera(bool Simple) :
+	lcObject(LC_OBJECT_TYPE_CAMERA)
 {
 	mFOV = 30.0f;
 	mNear = 1.0f;
@@ -12,29 +14,73 @@ lcCamera::lcCamera(bool Simple)
 
 	mState = Simple ? LC_CAMERA_SIMPLE : 0;
 	mName[0] = 0;
+
+	mMesh = NULL;
 }
 
-void lcCamera::Update(lcKeyTime Time)
+lcCamera::~lcCamera()
 {
-	if (mPositionKeys.GetSize())
-		mPosition = CalculateKey(mPositionKeys, Time);
+}
 
-	if (mTargetPositionKeys.GetSize())
-		mTargetPosition = CalculateKey(mTargetPositionKeys, Time);
-
-	if (mUpVectorKeys.GetSize())
-		mUpVector = CalculateKey(mUpVectorKeys, Time);
-
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
-
+void lcCamera::Update()
+{
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 }
 
-void lcCamera::Render()
+void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest)
 {
-	lcVector3 UpVectorPosition(mPosition + mUpVector);
+	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
+	lcVector3 Max = lcVector3(0.3f, 0.3f, 0.3f);
+
+	lcVector3 Start = lcMul31(HitTest.Start, mWorldView);
+	lcVector3 End = lcMul31(HitTest.End, mWorldView);
+
+	float Distance;
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < HitTest.Distance))
+	{
+		HitTest.ObjectSection.Object = this;
+		HitTest.ObjectSection.Section = LC_CAMERA_POSITION;
+		HitTest.Distance = Distance;
+	}
+
+	Min = lcVector3(-0.2f, -0.2f, -0.2f);
+	Max = lcVector3(0.2f, 0.2f, 0.2f);
+
+	lcMatrix44 WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-mTargetPosition, WorldView));
+
+	Start = lcMul31(HitTest.Start, WorldView);
+	End = lcMul31(HitTest.End, WorldView);
+
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < HitTest.Distance))
+	{
+		HitTest.ObjectSection.Object = this;
+		HitTest.ObjectSection.Section = LC_CAMERA_TARGET;
+		HitTest.Distance = Distance;
+	}
+
+	WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-(mPosition + mUpVector), WorldView));
+
+	Start = lcMul31(HitTest.Start, WorldView);
+	End = lcMul31(HitTest.End, WorldView);
+
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < HitTest.Distance))
+	{
+		HitTest.ObjectSection.Object = this;
+		HitTest.ObjectSection.Section = LC_CAMERA_UPVECTOR;
+		HitTest.Distance = Distance;
+	}
+}
+
+void lcCamera::RenderExtra(View* View) const
+{
+//		if ((Camera == View->mCamera) || !Camera->IsVisible())
+//			continue;
+
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+
 	float Verts[34 + 24 + 4][3] =
 	{
 		{  0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f,  0.3f },
@@ -75,8 +121,6 @@ void lcCamera::Render()
 	};
 
 	float LineWidth = lcGetActiveProject()->m_fLineWidth;
-
-	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
 
 	// Camera.
 	glPushMatrix();
@@ -190,27 +234,7 @@ void lcCamera::Render()
 
 
 
-
 /*
-void CameraTarget::MinIntersectDist(lcClickLine* ClickLine)
-{
-	lcVector3 Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	lcVector3 Max = lcVector3(0.2f, 0.2f, 0.2f);
-
-	lcMatrix44 WorldView = ((Camera*)m_pParent)->mWorldView;
-	WorldView.SetTranslation(lcMul30(-((Camera*)m_pParent)->mTargetPosition, WorldView));
-
-	lcVector3 Start = lcMul31(ClickLine->Start, WorldView);
-	lcVector3 End = lcMul31(ClickLine->End, WorldView);
-
-	float Dist;
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) && (Dist < ClickLine->MinDist))
-	{
-		ClickLine->Closest = this;
-		ClickLine->MinDist = Dist;
-	}
-}
-
 bool CameraTarget::IntersectsVolume(const lcVector4 Planes[6]) const
 {
 	lcVector3 Min(-0.2f, -0.2f, -0.2f);
@@ -598,24 +622,6 @@ void Camera::CopyPosition(const Camera* camera)
 	mPosition = camera->mPosition;
 	mTargetPosition = camera->mTargetPosition;
 	mUpVector = camera->mUpVector;
-}
-
-void Camera::MinIntersectDist(lcClickLine* ClickLine)
-{
-	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
-	lcVector3 Max = lcVector3(0.3f, 0.3f, 0.3f);
-
-	lcVector3 Start = lcMul31(ClickLine->Start, mWorldView);
-	lcVector3 End = lcMul31(ClickLine->End, mWorldView);
-
-	float Dist;
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) && (Dist < ClickLine->MinDist))
-	{
-		ClickLine->Closest = this;
-		ClickLine->MinDist = Dist;
-	}
-
-	m_pTarget->MinIntersectDist(ClickLine);
 }
 
 bool Camera::IntersectsVolume(const lcVector4 Planes[6]) const

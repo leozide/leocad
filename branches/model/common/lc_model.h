@@ -11,8 +11,8 @@ struct lcObjectSection;
 
 enum lcActionType
 {
-	LC_ACTION_CREATE_CAMERA,
-	LC_NUM_ACTIONS
+	LC_ACTION_CREATE_CAMERA
+//	LC_NUM_ACTIONS
 };
 
 class lcModel

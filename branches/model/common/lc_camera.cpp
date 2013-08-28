@@ -59,8 +59,11 @@ void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest)
 		HitTest.Distance = Distance;
 	}
 
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+
 	WorldView = mWorldView;
-	WorldView.SetTranslation(lcMul30(-(mPosition + mUpVector), WorldView));
+	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
 
 	Start = lcMul31(HitTest.Start, WorldView);
 	End = lcMul31(HitTest.End, WorldView);

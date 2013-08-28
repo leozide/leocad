@@ -83,17 +83,11 @@ void lcModel::EndCheckpoint(bool Accept)
 	mCurrentCheckpoint = NULL;
 }
 
-void lcModel::ClearSelection()
-{
-	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
-		mSelectedObjects[ObjectIdx]->ClearSelection();
-	mSelectedObjects.RemoveAll();
-
-	mFocusObject = NULL;
-}
-
 void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
 {
+	if (!ObjectSection.Object)
+		return;
+
 	bool WasSelected = ObjectSection.Object->IsSelected();
 
 	ObjectSection.Object->ToggleSelection(ObjectSection.Section);
@@ -107,22 +101,29 @@ void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
 		mSelectedObjects.Remove(ObjectSection.Object);
 	else if (!WasSelected && IsSelected)
 		mSelectedObjects.Add(ObjectSection.Object);
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+	gMainWindow->UpdateFocusObject();
 }
 
 void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 {
-	bool WasSelected = ObjectSection.Object->IsSelected();
-
-	if (mFocusObject)
-		mFocusObject->ClearFocus();
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->ClearSelection();
+	mSelectedObjects.RemoveAll();
+	mFocusObject = NULL;
 
 	if (ObjectSection.Object)
-		ObjectSection.Object->SetFocus(ObjectSection.Section, true);
-
-	if (!WasSelected)
+	{
 		mSelectedObjects.Add(ObjectSection.Object);
+		ObjectSection.Object->SetFocus(ObjectSection.Section, true);
+		mFocusObject = ObjectSection.Object;
+	}
 
-	mFocusObject = ObjectSection.Object;
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+	gMainWindow->UpdateFocusObject();
 }
 
 void lcModel::SetCurrentTime(lcTime Time)
@@ -214,8 +215,6 @@ void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
 					MaxIndex = Index;
 			}
 
-			ClearSelection();
-
 			lcCamera* NewCamera = new lcCamera(false);
 			mObjects.Add(NewCamera);
 
@@ -226,17 +225,13 @@ void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
 
 			NewCamera->Update();
 
-			NewCamera->SetFocus(LC_CAMERA_TARGET, true);
-			mFocusObject = NewCamera;
-			mSelectedObjects.Add(NewCamera);
-
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateSelection();
-			gMainWindow->UpdateFocusObject();
+			lcObjectSection ObjectSection;
+			ObjectSection.Object = NewCamera;
+			ObjectSection.Section = LC_CAMERA_TARGET;
+			SetFocus(ObjectSection);
 		}
 		break;
 	}
-
 }
 
 void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
@@ -250,14 +245,25 @@ void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
 	{
 	case LC_ACTION_CREATE_CAMERA:
 		{
-			ClearSelection();
+			lcCamera* Camera = (lcCamera*)mObjects[mObjects.GetSize() - 1];
 
-			delete mObjects[mObjects.GetSize() - 1];
+			if (mFocusObject == Camera)
+			{
+				mFocusObject = NULL;
+				gMainWindow->UpdateFocusObject();
+			}
+
+			int SelectedIndex = mSelectedObjects.FindIndex(Camera);
+			if (SelectedIndex != -1)
+			{
+				mSelectedObjects.RemoveIndex(SelectedIndex);
+				gMainWindow->UpdateSelection();
+			}
+
+			delete Camera;
 			mObjects.RemoveIndex(mObjects.GetSize() - 1);
 
 			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateSelection();
-			gMainWindow->UpdateFocusObject();
 //			gMainWindow->UpdateCameraMenu();
 		}
 		break;
@@ -505,6 +511,7 @@ void lcModel::FindClosestObject(lcObjectHitTest& HitTest) const
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 	{
 //		if (visible)
+//		if (camera != viewcamera)
 		mObjects[ObjectIdx]->ClosestHitTest(HitTest);
 	}
 }

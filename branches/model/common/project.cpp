@@ -8393,23 +8393,9 @@ void Project::OnLeftButtonDown(View* view)
 			lcObjectSection ObjectSection = FindClosestObject(view, x, y);
 
 			if (Control)
-			{
-				if (!ObjectSection.Object)
-					break;
-
 				mActiveModel->ToggleSelection(ObjectSection);
-			}
 			else
-			{
-				mActiveModel->ClearSelection();
-
-				if (ObjectSection.Object)
-					mActiveModel->SetFocus(ObjectSection);
-			}
-
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateSelection();
-			gMainWindow->UpdateFocusObject();
+				mActiveModel->SetFocus(ObjectSection);
 
 			StartTracking(LC_TRACK_START_LEFT);
 		}

@@ -24,7 +24,6 @@ public:
 	void RenderBackground(View* View) const;
 	void RenderObjects(View* View) const;
 
-	void ClearSelection();
 	void ToggleSelection(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
 

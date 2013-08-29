@@ -3539,10 +3539,6 @@ void Project::Export3DStudio()
 	File.WriteU32(10);
 	File.WriteU32(3);
 
-	File.WriteU16(0x0100); // CHK_MASTER_SCALE
-	File.WriteU32(10);
-	File.WriteFloat(1.0f);
-
 	const int MaterialNameLength = 11;
 	char MaterialName[32];
 
@@ -3643,11 +3639,6 @@ void Project::Export3DStudio()
 
 		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
 
-		File.WriteU16(0xA100); // CHK_MAT_SHADING
-		File.WriteU32(8);
-
-		File.WriteS16(3);
-
 		File.WriteU16(0xA053); // CHK_MAT_REFBLUR
 		File.WriteU32(14);
 
@@ -3655,6 +3646,19 @@ void Project::Export3DStudio()
 		File.WriteU32(8);
 
 		File.WriteS16((lcuint8)floor(100.0 * 0.2 + 0.5));
+
+		File.WriteU16(0xA100); // CHK_MAT_SHADING
+		File.WriteU32(8);
+
+		File.WriteS16(3);
+
+		File.WriteU16(0xA084); // CHK_MAT_SELF_ILPCT
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
 
 		File.WriteU16(0xA081); // CHK_MAT_TWO_SIDE
 		File.WriteU32(6);
@@ -3664,21 +3668,190 @@ void Project::Export3DStudio()
 
 		File.WriteFloat(1.0f);
 
-		File.WriteU16(0xA310); // CHK_MAT_ACUBIC
-		File.WriteU32(18);
-
-		File.WriteS8(0);
-		File.WriteS8(0);
-		File.WriteS16(0);
-		File.WriteS32(0);
-		File.WriteS32(0);
-
 		long MaterialEnd = File.GetPosition();
 		File.Seek(MaterialStart + 2, SEEK_SET);
 		File.WriteU32(MaterialEnd - MaterialStart);
 		File.Seek(MaterialEnd, SEEK_SET);
 	}
 
+	File.WriteU16(0x0100); // CHK_MASTER_SCALE
+	File.WriteU32(10);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x1400); // CHK_LO_SHADOW_BIAS
+	File.WriteU32(10);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x1420); // CHK_SHADOW_MAP_SIZE
+	File.WriteU32(8);
+
+	File.WriteS16(512);
+
+	File.WriteU16(0x1450); // CHK_SHADOW_FILTER
+	File.WriteU32(10);
+
+	File.WriteFloat(3.0f);
+
+	File.WriteU16(0x1460); // CHK_RAY_BIAS
+	File.WriteU32(10);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x1500); // CHK_O_CONSTS
+	File.WriteU32(18);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+
+	File.WriteU16(0x2100); // CHK_AMBIENT_LIGHT
+	File.WriteU32(42);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fAmbient[0]);
+	File.WriteFloat(m_fAmbient[1]);
+	File.WriteFloat(m_fAmbient[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fAmbient[0]);
+	File.WriteFloat(m_fAmbient[1]);
+	File.WriteFloat(m_fAmbient[2]);
+
+	File.WriteU16(0x1200); // CHK_SOLID_BGND
+	File.WriteU32(42);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fBackground[0]);
+	File.WriteFloat(m_fBackground[1]);
+	File.WriteFloat(m_fBackground[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fBackground[0]);
+	File.WriteFloat(m_fBackground[1]);
+	File.WriteFloat(m_fBackground[2]);
+
+	File.WriteU16(0x1100); // CHK_BIT_MAP
+	File.WriteU32(6 + 1 + strlen(m_strBackground));
+	File.WriteBuffer(m_strBackground, strlen(m_strBackground) + 1);
+
+	File.WriteU16(0x1300); // CHK_V_GRADIENT
+	File.WriteU32(118);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient1[0]);
+	File.WriteFloat(m_fGradient1[1]);
+	File.WriteFloat(m_fGradient1[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient1[0]);
+	File.WriteFloat(m_fGradient1[1]);
+	File.WriteFloat(m_fGradient1[2]);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat((m_fGradient1[0] + m_fGradient2[0]) / 2.0f);
+	File.WriteFloat((m_fGradient1[1] + m_fGradient2[1]) / 2.0f);
+	File.WriteFloat((m_fGradient1[2] + m_fGradient2[2]) / 2.0f);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat((m_fGradient1[0] + m_fGradient2[0]) / 2.0f);
+	File.WriteFloat((m_fGradient1[1] + m_fGradient2[1]) / 2.0f);
+	File.WriteFloat((m_fGradient1[2] + m_fGradient2[2]) / 2.0f);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient2[0]);
+	File.WriteFloat(m_fGradient2[1]);
+	File.WriteFloat(m_fGradient2[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient2[0]);
+	File.WriteFloat(m_fGradient2[1]);
+	File.WriteFloat(m_fGradient2[2]);
+
+	if (m_nScene & LC_SCENE_GRADIENT)
+	{
+		File.WriteU16(0x1301); // LIB3DS_USE_V_GRADIENT
+		File.WriteU32(6);
+	}
+	else if (m_nScene & LC_SCENE_BG)
+	{
+		File.WriteU16(0x1101); // LIB3DS_USE_BIT_MAP
+		File.WriteU32(6);
+	}
+	else
+	{
+		File.WriteU16(0x1201); // LIB3DS_USE_SOLID_BGND
+		File.WriteU32(6);
+	}
+
+	File.WriteU16(0x2200); // CHK_FOG
+	File.WriteU32(46);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+	File.WriteFloat(1000.0f);
+	File.WriteFloat(100.0f);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fFogColor[0]);
+	File.WriteFloat(m_fFogColor[1]);
+	File.WriteFloat(m_fFogColor[2]);
+
+	File.WriteU16(0x2210); // CHK_FOG_BGND
+	File.WriteU32(6);
+
+	File.WriteU16(0x2302); // CHK_LAYER_FOG
+	File.WriteU32(40);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(100.0f);
+	File.WriteFloat(50.0f);
+	File.WriteU32(0x00100000);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fFogColor[0]);
+	File.WriteFloat(m_fFogColor[1]);
+	File.WriteFloat(m_fFogColor[2]);
+
+	File.WriteU16(0x2300); // CHK_DISTANCE_CUE
+	File.WriteU32(28);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+	File.WriteFloat(1000.0f);
+	File.WriteFloat(100.0f);
+
+	File.WriteU16(0x2310); // CHK_DICHK_DCUE_BGNDSTANCE_CUE
+	File.WriteU32(6);
+
+	int NumPieces = 0;
 	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 	{
 		PieceInfo* Info = piece->mPieceInfo;
@@ -3691,7 +3864,10 @@ void Project::Export3DStudio()
 		File.WriteU16(0x4000); // CHK_NAMED_OBJECT
 		File.WriteU32(0);
 
-		File.WriteBuffer(Info->m_strName, strlen(Info->m_strName) + 1);
+		char Name[32];
+		sprintf(Name, "Piece%.3d", NumPieces);
+		NumPieces++;
+		File.WriteBuffer(Name, strlen(Name) + 1);
 
 		long TriObjectStart = File.GetPosition();
 		File.WriteU16(0x4100); // CHK_N_TRI_OBJECT
@@ -3722,6 +3898,11 @@ void Project::Export3DStudio()
 		File.WriteFloats(Matrix[1], 3);
 		File.WriteFloats(Matrix[2], 3);
 		File.WriteFloats(Matrix[3], 3);
+
+		File.WriteU16(0x4165); // CHK_MESH_COLOR
+		File.WriteU32(7);
+
+		File.WriteU8(0);
 
 		long FaceArrayStart = File.GetPosition();
 		File.WriteU16(0x4120); // CHK_FACE_ARRAY
@@ -3780,12 +3961,6 @@ void Project::Export3DStudio()
 
 			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
 				File.WriteU16(NumTriangles++);
-
-			File.WriteU16(0x4150); // CHK_SMOOTH_GROUP
-			File.WriteU32(6 + 4 * Section->NumIndices / 3);
-
-			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
-				File.WriteU32(0);
 		}
 
 		long FaceArrayEnd = File.GetPosition();
@@ -3813,109 +3988,12 @@ void Project::Export3DStudio()
 	File.WriteU16(0xB000); // CHK_KFDATA
 	File.WriteU32(0);
 
-	const char* Name = "LEOCAD";
-	const int NameLength = 6;
-
 	File.WriteU16(0xB00A); // LIB3DS_KFHDR
-	File.WriteU32(6 + 2 + NameLength + 1 + 4);
+	File.WriteU32(6 + 2 + 1 + 4);
 
 	File.WriteS16(5);
-	File.WriteBuffer(Name, NameLength + 1);
+	File.WriteU8(0);
 	File.WriteS32(100);
-
-	File.WriteU16(0xB008); // CHK_KFSEG
-	File.WriteU32(14);
-
-	File.WriteU32(0);
-	File.WriteU32(100);
-
-	File.WriteU16(0xB009); // CHK_KFCURTIME
-	File.WriteU32(10);
-
-	File.WriteU32(0);
-
-	int NodeIdx = 0;
-
-	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
-	{
-		PieceInfo* Info = piece->mPieceInfo;
-		lcMesh* Mesh = Info->mMesh;
-
-		if (Mesh->mIndexType == GL_UNSIGNED_INT)
-			continue;
-
-		long NodeStart = File.GetPosition();
-		File.WriteU16(0xB002); // CHK_OBJECT_NODE_TAG
-		File.WriteU32(0);
-
-		File.WriteU16(0xB030); // CHK_NODE_ID
-		File.WriteU32(8);
-
-		File.WriteS16(NodeIdx++);
-
-		File.WriteU16(0xB010); // CHK_NODE_HDR
-		File.WriteU32(6 + 1 + strlen(Info->m_strName) + 2 + 2 + 2);
-
-		File.WriteBuffer(Info->m_strName, strlen(Info->m_strName) + 1);
-		File.WriteU16(0);
-		File.WriteU16(0);
-		File.WriteU16(65535);
-
-		File.WriteU16(0xB013); // CHK_PIVOT
-		File.WriteU32(18);
-
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-
-		File.WriteU16(0xB020); // CHK_POS_TRACK_TAG
-		File.WriteU32(38);
-
-		File.WriteU16(0);
-		File.WriteU32(0);
-		File.WriteU32(0);
-		File.WriteU32(1);
-
-		File.WriteS32(0);
-		File.WriteU16(0);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-
-		File.WriteU16(0xB021); // CHK_ROT_TRACK_TAG
-		File.WriteU32(42);
-
-		File.WriteU16(0);
-		File.WriteU32(0);
-		File.WriteU32(0);
-		File.WriteU32(1);
-
-		File.WriteS32(0);
-		File.WriteU16(0);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-
-		File.WriteU16(0xB022); // CHK_SCL_TRACK_TAG
-		File.WriteU32(38);
-
-		File.WriteU16(0);
-		File.WriteU32(0);
-		File.WriteU32(0);
-		File.WriteU32(1);
-
-		File.WriteS32(0);
-		File.WriteU16(0);
-		File.WriteFloat(1.0f);
-		File.WriteFloat(1.0f);
-		File.WriteFloat(1.0f);
-
-		long NodeEnd = File.GetPosition();
-		File.Seek(NodeStart + 2, SEEK_SET);
-		File.WriteU32(NodeEnd - NodeStart);
-		File.Seek(NodeEnd, SEEK_SET);
-	}
 
 	long KFDataEnd = File.GetPosition();
 	File.Seek(KFDataStart + 2, SEEK_SET);

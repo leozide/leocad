@@ -62,7 +62,9 @@ public:
 	}
 
 	virtual bool IsSelected() const = 0;
+	virtual bool IsSelected(lcuint32 Section) const = 0;
 	virtual bool IsFocused() const = 0;
+	virtual bool IsFocused(lcuint32 Section) const = 0;
 	virtual void ClearSelection() = 0;
 	virtual void ClearFocus() = 0;
 	virtual void SetSelection(lcuint32 Section, bool Selection) = 0;
@@ -71,6 +73,7 @@ public:
 	virtual void SaveSelectionState(lcMemFile& File) const = 0;
 
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
+	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) = 0;
 
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const = 0;
 	virtual void RenderExtra(View* View) const = 0;

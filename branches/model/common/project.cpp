@@ -7153,6 +7153,70 @@ lcObjectSection Project::FindClosestObject(View* View, int x, int y) const
 	return HitTest.ObjectSection;
 }
 
+void Project::FindObjectsInRectangle(View* View, float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const
+{
+	int Viewport[4] = { 0, 0, View->mWidth, View->mHeight };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+	Camera* Camera = View->mCamera;
+
+	const lcMatrix44& ModelView = Camera->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(Camera->m_fovy, Aspect, Camera->m_zNear, Camera->m_zFar);
+
+	// Find out the top-left and bottom-right corners in screen coordinates.
+	float Left, Top, Bottom, Right;
+
+	if (x1 < x2)
+	{
+		Left = x1;
+		Right = x2;
+	}
+	else
+	{
+		Left = x2;
+		Right = x1;
+	}
+
+	if (y1 > y2)
+	{
+		Top = y1;
+		Bottom = y2;
+	}
+	else
+	{
+		Top = y2;
+		Bottom = y1;
+	}
+
+	// Unproject 6 points to world space.
+	lcVector3 Corners[6] =
+	{
+		lcVector3(Left, Top, 0), lcVector3(Left, Bottom, 0), lcVector3(Right, Bottom, 0),
+		lcVector3(Right, Top, 0), lcVector3(Left, Top, 1), lcVector3(Right, Bottom, 1)
+	};
+
+	lcUnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
+
+	// Build the box planes.
+	lcVector3 PlaneNormals[6];
+
+	PlaneNormals[0] = lcNormalize(lcCross(Corners[4] - Corners[0], Corners[1] - Corners[0])); // Left
+	PlaneNormals[1] = lcNormalize(lcCross(Corners[5] - Corners[2], Corners[3] - Corners[2])); // Right
+	PlaneNormals[2] = lcNormalize(lcCross(Corners[3] - Corners[0], Corners[4] - Corners[0])); // Top
+	PlaneNormals[3] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[5] - Corners[2])); // Bottom
+	PlaneNormals[4] = lcNormalize(lcCross(Corners[1] - Corners[0], Corners[3] - Corners[0])); // Front
+	PlaneNormals[5] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[3] - Corners[2])); // Back
+
+	lcVector4 Planes[6];
+	Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
+	Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
+	Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
+	Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
+	Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
+	Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
+
+	mActiveModel->FindObjectsInBox(Planes, Objects);
+}
+
 Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 {
 	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
@@ -7299,6 +7363,33 @@ bool Project::StopTracking(bool Accept)
 	case LC_TOOL_CAMERA:
 		mActiveModel->EndCameraTool(Accept);
 		break;
+
+	case LC_TOOL_SELECT:
+		if (Accept && m_nTracking == LC_TRACK_LEFT)
+		{
+			float x1 = (float)m_nDownX;
+			float y1 = (float)m_nDownY;
+			float x2 = m_fTrack[0];
+			float y2 = m_fTrack[1];
+
+			if (x1 != x2 && y1 != y2)
+			{
+				lcArray<lcObjectSection> ObjectSections;
+				View* View = gMainWindow->mActiveView;
+
+				FindObjectsInRectangle(View, x1, y1, x2, y2, ObjectSections);
+
+				if (View->mInputState.Control)
+					mActiveModel->AddToSelection(ObjectSections);
+				else
+					mActiveModel->SetSelection(ObjectSections);
+			}
+			else
+				gMainWindow->UpdateAllViews();
+		}
+		else
+			gMainWindow->UpdateAllViews();
+		break;
 	}
 
 
@@ -7374,46 +7465,6 @@ bool Project::StopTracking(bool Accept)
 		{
 		switch (Action)
 		{
-			case LC_TOOL_SELECT:
-			{
-				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
-				{
-					// Find objects inside the rectangle.
-					lcArray<Object*> Objects;
-					FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1], Objects);
-
-					// Deselect old pieces.
-					bool Control = ActiveView->mInputState.Control;
-					SelectAndFocusNone(Control);
-
-					// Select new pieces.
-					for (int i = 0; i < Objects.GetSize(); i++)
-					{
-						if (Objects[i]->GetType() == LC_OBJECT_PIECE)
-						{
-							Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
-							if (pGroup != NULL)
-							{
-								for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-									if ((pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation)) &&
-											(pPiece->GetTopGroup() == pGroup))
-										pPiece->Select (true, false, false);
-							}
-							else
-								Objects[i]->Select(true, false, true);
-						}
-						else
-							Objects[i]->Select(true, false, true);
-					}
-				}
-
-				// Update screen and UI.
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-					gMainWindow->UpdateFocusObject(GetFocusObject());
-
-			} break;
-
 			case LC_TOOL_MOVE:
 			{
 				SetModifiedFlag(true);
@@ -8388,12 +8439,12 @@ void Project::OnLeftButtonDown(View* view)
 
 	switch (Action)
 	{
-	case LC_TOOL_SELECT:
+		case LC_TOOL_SELECT:
 		{
 			lcObjectSection ObjectSection = FindClosestObject(view, x, y);
 
 			if (Control)
-				mActiveModel->ToggleSelection(ObjectSection);
+				mActiveModel->ToggleFocus(ObjectSection);
 			else
 				mActiveModel->SetFocus(ObjectSection);
 
@@ -8704,7 +8755,7 @@ void Project::OnLeftButtonDoubleClick(View* view)
 }
 
 void Project::OnLeftButtonUp(View* view)
-		{
+{
 	StopTracking(true);
 }
 
@@ -8893,7 +8944,8 @@ void Project::OnMouseMove(View* view)
 			}
 
 			gMainWindow->UpdateAllViews();
-		} break;
+		}
+		break;
 
 		case LC_TOOL_INSERT:
 		{

@@ -292,6 +292,9 @@ public:
 
 // Implementation
 protected:
+	lcObjectSection FindClosestObject(View* View, int x, int y) const;
+	void FindObjectsInRectangle(View* View, float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const;
+
 	char m_strAuthor[101];
 	char m_strDescription[101];
 	char m_strComments[256];
@@ -310,7 +313,6 @@ protected:
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
-	lcObjectSection FindClosestObject(View* View, int x, int y) const;
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);

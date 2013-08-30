@@ -85,22 +85,92 @@ void lcModel::EndCheckpoint(bool Accept)
 
 void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
 {
-	if (!ObjectSection.Object)
+	lcObject* Object = ObjectSection.Object;
+	lcuint32 Section = ObjectSection.Section;
+
+	if (!Object)
 		return;
 
-	bool WasSelected = ObjectSection.Object->IsSelected();
+	bool WasSelected = Object->IsSelected();
 
-	ObjectSection.Object->ToggleSelection(ObjectSection.Section);
+	Object->ToggleSelection(Section);
 
 	if (mFocusObject && !mFocusObject->IsFocused())
 		mFocusObject = NULL;
 
-	bool IsSelected  = ObjectSection.Object->IsSelected();
+	bool IsSelected = Object->IsSelected();
 
 	if (WasSelected && !IsSelected)
-		mSelectedObjects.Remove(ObjectSection.Object);
+		mSelectedObjects.Remove(Object);
 	else if (!WasSelected && IsSelected)
-		mSelectedObjects.Add(ObjectSection.Object);
+		mSelectedObjects.Add(Object);
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+	gMainWindow->UpdateFocusObject();
+}
+
+void lcModel::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
+{
+	for (int ObjectIdx = 0; ObjectIdx < ObjectSections.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = ObjectSections[ObjectIdx].Object;
+
+		bool WasSelected = Object->IsSelected();
+
+		Object->SetSelection(ObjectSections[ObjectIdx].Section, true);
+
+		if (!WasSelected)
+			mSelectedObjects.Add(Object);
+	}
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+}
+
+void lcModel::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
+{
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->ClearSelection();
+	mSelectedObjects.RemoveAll();
+
+	AddToSelection(ObjectSections);
+
+	if (mFocusObject)
+	{
+		mFocusObject = NULL;
+		gMainWindow->UpdateFocusObject();
+	}
+}
+
+void lcModel::ToggleFocus(const lcObjectSection& ObjectSection)
+{
+	lcObject* Object = ObjectSection.Object;
+	lcuint32 Section = ObjectSection.Section;
+
+	if (!Object)
+		return;
+
+	bool WasSelected = Object->IsSelected();
+
+	if (Object->IsFocused(Section))
+	{
+		Object->SetFocus(Section, false);
+		mFocusObject = NULL;
+	}
+	else
+	{
+		if (mFocusObject)
+			mFocusObject->ClearFocus();
+
+		Object->SetFocus(Section, true);
+		mFocusObject = Object;
+	}
+
+	bool IsSelected = Object->IsSelected();
+
+	if (!WasSelected && IsSelected)
+		mSelectedObjects.Add(Object);
 
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateSelection();
@@ -109,16 +179,19 @@ void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
 
 void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 {
+	lcObject* Object = ObjectSection.Object;
+	lcuint32 Section = ObjectSection.Section;
+
 	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
 		mSelectedObjects[ObjectIdx]->ClearSelection();
 	mSelectedObjects.RemoveAll();
 	mFocusObject = NULL;
 
-	if (ObjectSection.Object)
+	if (Object)
 	{
-		mSelectedObjects.Add(ObjectSection.Object);
-		ObjectSection.Object->SetFocus(ObjectSection.Section, true);
-		mFocusObject = ObjectSection.Object;
+		mSelectedObjects.Add(Object);
+		Object->SetFocus(Section, true);
+		mFocusObject = Object;
 	}
 
 	gMainWindow->UpdateAllViews();
@@ -513,5 +586,15 @@ void lcModel::FindClosestObject(lcObjectHitTest& HitTest) const
 //		if (visible)
 //		if (camera != viewcamera)
 		mObjects[ObjectIdx]->ClosestHitTest(HitTest);
+	}
+}
+
+void lcModel::FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const
+{
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+//		if (visible)
+//		if (camera != viewcamera)
+		mObjects[ObjectIdx]->BoxTest(BoxPlanes, ObjectSections);
 	}
 }

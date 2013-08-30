@@ -76,6 +76,65 @@ void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest)
 	}
 }
 
+void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections)
+{
+	lcVector3 Min(-0.3f, -0.3f, -0.3f);
+	lcVector3 Max(0.3f, 0.3f, 0.3f);
+
+	lcVector4 LocalPlanes[6];
+
+	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	{
+		lcVector3 Normal = lcMul30(BoxPlanes[PlaneIdx], mWorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxPlanes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
+	}
+
+	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectSections.Add();
+		ObjectSection.Object = this;
+		ObjectSection.Section = LC_CAMERA_POSITION;
+	}
+
+	Min = lcVector3(-0.2f, -0.2f, -0.2f);
+	Max = lcVector3(0.2f, 0.2f, 0.2f);
+
+	lcMatrix44 WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-mTargetPosition, WorldView));
+
+	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	{
+		lcVector3 Normal = lcMul30(BoxPlanes[PlaneIdx], WorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxPlanes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
+	}
+
+	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectSections.Add();
+		ObjectSection.Object = this;
+		ObjectSection.Section = LC_CAMERA_TARGET;
+	}
+
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+
+	WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
+
+	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	{
+		lcVector3 Normal = lcMul30(BoxPlanes[PlaneIdx], WorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxPlanes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
+	}
+
+	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectSections.Add();
+		ObjectSection.Object = this;
+		ObjectSection.Section = LC_CAMERA_UPVECTOR;
+	}
+}
+
 void lcCamera::RenderExtra(View* View) const
 {
 //		if ((Camera == View->mCamera) || !Camera->IsVisible())
@@ -238,35 +297,6 @@ void lcCamera::RenderExtra(View* View) const
 
 
 /*
-bool CameraTarget::IntersectsVolume(const lcVector4 Planes[6]) const
-{
-	lcVector3 Min(-0.2f, -0.2f, -0.2f);
-	lcVector3 Max(0.2f, 0.2f, 0.2f);
-
-	// Transform the planes to local space.
-	lcVector4 LocalPlanes[6];
-
-	lcMatrix44 WorldView = m_pParent->mWorldView;
-	WorldView.SetTranslation(lcMul30(-m_pParent->mTargetPosition, WorldView));
-
-	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
-	{
-		lcVector3 Normal = lcMul30(lcVector3(Planes[PlaneIdx][0], Planes[PlaneIdx][1], Planes[PlaneIdx][2]), WorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
-	}
-
-	return lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes);
-}
-
-void CameraTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
-{
-	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Camera construction/destruction
-
 Camera::Camera(bool Simple)
 	: Object(LC_OBJECT_CAMERA)
 {
@@ -629,19 +659,6 @@ void Camera::CopyPosition(const Camera* camera)
 
 bool Camera::IntersectsVolume(const lcVector4 Planes[6]) const
 {
-	lcVector3 Min(-0.3f, -0.3f, -0.3f);
-	lcVector3 Max(0.3f, 0.3f, 0.3f);
-
-	// Transform the planes to local space.
-	lcVector4 LocalPlanes[6];
-
-	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
-	{
-		lcVector3 Normal = lcMul30(Planes[PlaneIdx], mWorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, Planes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
-	}
-
-	return lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes);
 }
 
 void Camera::LoadProjection(float fAspect)

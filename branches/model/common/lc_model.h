@@ -25,9 +25,13 @@ public:
 	void RenderObjects(View* View) const;
 
 	void ToggleSelection(const lcObjectSection& ObjectSection);
+	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void ToggleFocus(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
 
 	void FindClosestObject(lcObjectHitTest& HitTest) const;
+	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 
 //	void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
 

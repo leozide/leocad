@@ -40,9 +40,47 @@ public:
 		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
+	virtual bool IsSelected(lcuint32 Section) const
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_POSITION:
+			return (mState & LC_CAMERA_POSITION_SELECTED) != 0;
+			break;
+
+		case LC_CAMERA_TARGET:
+			return (mState & LC_CAMERA_TARGET_SELECTED) != 0;
+			break;
+
+		case LC_CAMERA_UPVECTOR:
+			return (mState & LC_CAMERA_UPVECTOR_SELECTED) != 0;
+			break;
+		}
+		return false;
+	}
+
 	virtual bool IsFocused() const
 	{
 		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
+	}
+
+	virtual bool IsFocused(lcuint32 Section) const
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_POSITION:
+			return (mState & LC_CAMERA_POSITION_FOCUSED) != 0;
+			break;
+
+		case LC_CAMERA_TARGET:
+			return (mState & LC_CAMERA_TARGET_FOCUSED) != 0;
+			break;
+
+		case LC_CAMERA_UPVECTOR:
+			return (mState & LC_CAMERA_UPVECTOR_FOCUSED) != 0;
+			break;
+		}
+		return false;
 	}
 
 	virtual void ClearSelection()
@@ -156,6 +194,8 @@ public:
 	}
 
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
+	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
+
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
 	virtual void RenderExtra(View* View) const;
 

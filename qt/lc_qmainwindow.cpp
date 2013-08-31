@@ -1046,9 +1046,9 @@ void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* 
 {
 	actions[LC_EDIT_CUT]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
 	actions[LC_EDIT_COPY]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
-	actions[LC_EDIT_FIND]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
-	actions[LC_EDIT_FIND_NEXT]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
-	actions[LC_EDIT_FIND_PREVIOUS]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_EDIT_FIND]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
+	actions[LC_EDIT_FIND_NEXT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
+	actions[LC_EDIT_FIND_PREVIOUS]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_SELECT_INVERT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_SELECT_BY_NAME]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_SELECT_NONE]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));

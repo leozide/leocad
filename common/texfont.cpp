@@ -211,4 +211,6 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	delete[] Verts;
 }

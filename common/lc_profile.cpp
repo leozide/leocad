@@ -49,7 +49,11 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_XYZ),           // LC_PROFILE_SNAP
 	lcProfileEntry("Settings", "AngleSnap", 30),                                     // LC_PROFILE_ANGLE_SNAP
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                   // LC_PROFILE_LINE_WIDTH
-	lcProfileEntry("Settings", "GridSize", 20),                                      // LC_PROFILE_GRID_SIZE
+	lcProfileEntry("Settings", "GridStuds", 1),                                      // LC_PROFILE_GRID_STUDS
+	lcProfileEntry("Settings", "GridStudColor", LC_RGBA(64, 64, 64, 128)),           // LC_PROFILE_GRID_STUD_COLOR
+	lcProfileEntry("Settings", "GridLines", 1),                                      // LC_PROFILE_GRID_LINES
+	lcProfileEntry("Settings", "GridLineSpacing", 5),                                // LC_PROFILE_GRID_LINE_SPACING
+	lcProfileEntry("Settings", "GridLineColor", LC_RGBA(0, 0, 0, 255)),              // LC_PROFILE_GRID_LINE_COLOR
 	lcProfileEntry("Settings", "AASamples", 1),                                      // LC_PROFILE_ANTIALIASING_SAMPLES
 
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                   // LC_PROFILE_CHECK_UPDATES

@@ -42,6 +42,8 @@ GLFRAMEBUFFERTEXTURELAYERARBPROC lcFramebufferTextureLayerARB;
 bool GL_SupportsVertexBufferObject;
 bool GL_UseVertexBufferObject;
 bool GL_SupportsFramebufferObject;
+bool GL_SupportsAnisotropic;
+GLfloat GL_MaxAnisotropy;
 
 bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 {
@@ -75,6 +77,13 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 void GL_InitializeSharedExtensions(lcGLWidget* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
+
+	if (GL_ExtensionSupported(Extensions, "GL_EXT_texture_filter_anisotropic"))
+	{
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &GL_MaxAnisotropy);
+
+		GL_SupportsAnisotropic = true;
+	}
 
 	if (GL_ExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{

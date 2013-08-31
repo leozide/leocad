@@ -3,9 +3,17 @@
 
 #include "opengl.h"
 
-#define LC_TEXTURE_WRAPU   0x01
-#define LC_TEXTURE_WRAPV   0x02
-#define LC_TEXTURE_MIPMAPS 0x04
+#define LC_TEXTURE_WRAPU         0x01
+#define LC_TEXTURE_WRAPV         0x02
+#define LC_TEXTURE_MIPMAPS       0x04
+
+#define LC_TEXTURE_POINT         0x00
+#define LC_TEXTURE_LINEAR        0x10
+#define LC_TEXTURE_BILINEAR      0x20
+#define LC_TEXTURE_TRILINEAR     0x30
+#define LC_TEXTURE_ANISOTROPIC   0x40
+#define LC_TEXTURE_FILTER_MASK   0xf0
+#define LC_TEXTURE_FILTER_SHIFT  4
 
 #define LC_TEXTURE_NAME_LEN 256
 
@@ -20,6 +28,7 @@ public:
 	bool Load(const char* FileName, int Flags = 0);
 	bool Load(lcMemFile& File, int Flags = 0);
 	bool Load(Image& image, int Flags);
+	bool Load(Image* images, int NumLevels, int Flags);
 	void Unload();
 
 	int AddRef()

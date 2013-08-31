@@ -47,12 +47,12 @@ Project::Project()
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_nGridList = 0;
 	m_pTrackFile = NULL;
 	m_nCurAction = 0;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
+	mGridTexture = new lcTexture();
 	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
 	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	m_nDownX = 0;
@@ -69,6 +69,7 @@ Project::~Project()
     delete m_pTrackFile;
 	delete m_pTerrain;
 	delete m_pBackground;
+	delete mGridTexture;
 	delete m_pScreenFont;
 }
 
@@ -222,7 +223,11 @@ void Project::LoadDefaults(bool cameras)
 	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fFogColor[3] = 1.0f;
-	m_nGridSize = (unsigned short)lcGetProfileInt(LC_PROFILE_GRID_SIZE);
+	mGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
+	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
+	mGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
+	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
+	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
 	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR);
 	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
@@ -646,7 +651,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->ReadU8(&m_nFPS, 1);
 				file->ReadS32(&i, 1); m_nCurFrame = i;
 				file->ReadU16(&m_nTotalFrames, 1);
-				file->ReadS32(&i, 1); m_nGridSize = i;
+				file->ReadS32(&i, 1); //m_nGridSize = i;
 				file->ReadS32(&i, 1); //m_nMoveSnap = i;
 			}
 			else
@@ -656,7 +661,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->ReadU8(&m_nFPS, 1);
 				file->ReadU16(&m_nCurFrame, 1);
 				file->ReadU16(&m_nTotalFrames, 1);
-				file->ReadU16(&m_nGridSize, 1);
+				file->ReadU16(&sh, 1); // m_nGridSize = sh;
 				file->ReadU16(&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
@@ -827,7 +832,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU8 (&m_nFPS, 1);
 	file->WriteU16(&m_nCurFrame, 1);
 	file->WriteU16(&m_nTotalFrames, 1);
-	file->WriteU16(&m_nGridSize, 1);
+	file->WriteU16(0); // m_nGridSize
 	file->WriteU16(&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = LC_FLOATRGB(m_fGradient1);
@@ -1667,12 +1672,6 @@ void Project::RenderScenePieces(View* view)
 	float AspectRatio = (float)view->mWidth / (float)view->mHeight;
 	view->mCamera->LoadProjection(AspectRatio);
 
-	if (m_nSnap & LC_DRAW_GRID)
-	{
-		glColor4f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2], 1.0f);
-		glCallList (m_nGridList);
-	}
-
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
@@ -2063,6 +2062,104 @@ void Project::RenderSceneObjects(View* view)
 	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 		if (pLight->IsVisible ())
 			pLight->Render(m_fLineWidth);
+
+	if (mGridStuds || mGridLines)
+	{
+		float m_nGridSize = 20;
+
+		if (mGridLines)
+		{
+			float Left = -m_nGridSize*0.8f;
+			float Right = m_nGridSize*0.8f;
+			float Top = -m_nGridSize*0.8f;
+			float Bottom = m_nGridSize*0.8f;
+			float Z = 0;
+			float U = m_nGridSize * 2;
+			float V = m_nGridSize * 2;
+
+			float Verts[4 * 5];
+			float* CurVert = Verts;
+
+			*CurVert++ = Left;
+			*CurVert++ = Top;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = V;
+
+			*CurVert++ = Left;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = 0.0f;
+
+			*CurVert++ = Right;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = 0.0f;
+
+			*CurVert++ = Right;
+			*CurVert++ = Top;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = V;
+
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
+			glEnable(GL_TEXTURE_2D);
+			glEnable(GL_ALPHA_TEST);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+
+			glColor4fv(lcVector4FromColor(mGridStudColor));
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
+
+			glDrawArrays(GL_QUADS, 0, 4);
+
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_BLEND);
+			glDisable(GL_ALPHA_TEST);
+		}
+
+		if (mGridLines)
+		{
+			glColor4fv(lcVector4FromColor(mGridLineColor));
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			int GridStep = 5;
+			int NumVerts = 2 * 2 * (2 * m_nGridSize / GridStep + 1);
+			float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
+			float x = m_nGridSize * 0.8f;
+
+			for (int Step = 0; Step < 2 * m_nGridSize / GridStep + 1; Step++)
+			{
+				Verts[Step * 12] = x;
+				Verts[Step * 12 + 1] = m_nGridSize * 0.8f;
+				Verts[Step * 12 + 2] = 0;
+				Verts[Step * 12 + 3] = x;
+				Verts[Step * 12 + 4] = -m_nGridSize * 0.8f;
+				Verts[Step * 12 + 5] = 0;
+				Verts[Step * 12 + 6] = m_nGridSize * 0.8f;
+				Verts[Step * 12 + 7] = x;
+				Verts[Step * 12 + 8] = 0;
+				Verts[Step * 12 + 9] = -m_nGridSize * 0.8f;
+				Verts[Step * 12 + 10] = x;
+				Verts[Step * 12 + 11] = 0;
+				x -= GridStep * 0.8f;
+			}
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINES, 0, NumVerts);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			free(Verts);
+		}
+	}
 
 	// Draw axis icon
 	if (m_nSnap & LC_DRAW_AXIS)
@@ -2891,8 +2988,6 @@ void Project::RenderViewports(View* view)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
-	int i;
-
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 
@@ -2916,35 +3011,86 @@ void Project::RenderInitialize()
 //			AfxMessageBox ("Could not load background");
 		}
 
-	// Grid display list
-	if (m_nGridList == 0)
-		m_nGridList = glGenLists(1);
-	glNewList (m_nGridList, GL_COMPILE);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	i = 2*(4*m_nGridSize+2); // verts needed (2*lines)
-	float *grid = (float*)malloc(i*sizeof(float[3]));
-	float x = m_nGridSize*0.8f;
-
-	for (int j = 0; j <= m_nGridSize*2; j++)
+	if (!mGridTexture->mTexture)
 	{
-		grid[j*12] = x;
-		grid[j*12+1] = m_nGridSize*0.8f;
-		grid[j*12+2] = 0;
-		grid[j*12+3] = x;
-		grid[j*12+4] = -m_nGridSize*0.8f;
-		grid[j*12+5] = 0;
-		grid[j*12+6] = m_nGridSize*0.8f;
-		grid[j*12+7] = x;
-		grid[j*12+8] = 0;
-		grid[j*12+9] = -m_nGridSize*0.8f;
-		grid[j*12+10] = x;
-		grid[j*12+11] = 0;
-		x -= 0.8f;
+		const int NumLevels = 9;
+		Image GridImages[NumLevels];
+
+		for (int ImageLevel = 0; ImageLevel < NumLevels; ImageLevel++)
+		{
+			Image& GridImage = GridImages[ImageLevel];
+
+			const int GridSize = 256 >> ImageLevel;
+			const float Radius1 = (80 >> ImageLevel) * (80 >> ImageLevel);
+			const float Radius2 = (72 >> ImageLevel) * (72 >> ImageLevel);
+
+			GridImage.Allocate(GridSize, GridSize, LC_PIXEL_FORMAT_A8);
+			lcuint8* BlurBuffer = new lcuint8[GridSize * GridSize];
+
+			for (int y = 0; y < GridSize; y++)
+			{
+				lcuint8* Pixel = GridImage.mData + y * GridSize;
+				memset(Pixel, 0, GridSize);
+
+				const float y2 = (y - GridSize / 2) * (y - GridSize / 2);
+
+				if (Radius1 <= y2)
+					continue;
+
+				if (Radius2 <= y2)
+				{
+					int x1 = sqrtf(Radius1 - y2);
+
+					for (int x = GridSize / 2 - x1; x < GridSize / 2 + x1; x++)
+						Pixel[x] = 255;
+				}
+				else
+				{
+					int x1 = sqrtf(Radius1 - y2);
+					int x2 = sqrtf(Radius2 - y2);
+
+					for (int x = GridSize / 2 - x1; x < GridSize / 2 - x2; x++)
+						Pixel[x] = 255;
+
+					for (int x = GridSize / 2 + x2; x < GridSize / 2 + x1; x++)
+						Pixel[x] = 255;
+				}
+			}
+
+			for (int y = 0; y < GridSize - 1; y++)
+			{
+				for (int x = 0; x < GridSize - 1; x++)
+				{
+					lcuint8 a = GridImage.mData[x + y * GridSize];
+					lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
+					lcuint8 c = GridImage.mData[x + (y + 1) * GridSize];
+					lcuint8 d = GridImage.mData[x + 1 + (y + 1) * GridSize];
+					BlurBuffer[x + y * GridSize] = (a + b + c + d) / 4;
+				}
+
+				int x = GridSize - 1;
+				lcuint8 a = GridImage.mData[x + y * GridSize];
+				lcuint8 c = GridImage.mData[x + (y + 1) * GridSize];
+				BlurBuffer[x + y * GridSize] = (a + c) / 2;
+			}
+
+			int y = GridSize - 1;
+			for (int x = 0; x < GridSize - 1; x++)
+			{
+				lcuint8 a = GridImage.mData[x + y * GridSize];
+				lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
+				BlurBuffer[x + y * GridSize] = (a + b) / 2;
+			}
+
+			int x = GridSize - 1;
+			BlurBuffer[x + y * GridSize] = GridImage.mData[x + y * GridSize];
+
+			memcpy(GridImage.mData, BlurBuffer, GridSize * GridSize);
+			delete[] BlurBuffer;
+		}
+
+		mGridTexture->Load(GridImages, NumLevels, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC);
 	}
-	glVertexPointer(3, GL_FLOAT, 0, grid);
-	glDrawArrays(GL_LINES, 0, i);
-	glEndList();
-	free(grid);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -6201,7 +6347,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Options.Snap = m_nSnap;
 			Options.LineWidth = m_fLineWidth;
 			Options.AASamples = CurrentAASamples;
-			Options.GridSize = m_nGridSize;
+			Options.GridStuds = mGridStuds;
+			Options.GridStudColor = mGridStudColor;
+			Options.GridLines = mGridLines;
+			Options.GridLineSpacing = mGridLineSpacing;
+			Options.GridLineColor = mGridLineColor;
 
 			Options.Categories = gCategories;
 			Options.CategoriesModified = false;
@@ -6221,7 +6371,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			m_nSnap = Options.Snap;
 			m_nDetail = Options.Detail;
 			m_fLineWidth = Options.LineWidth;
-			m_nGridSize = Options.GridSize;
+			mGridStuds = Options.GridStuds;
+			mGridStudColor = Options.GridStudColor;
+			mGridLines = Options.GridLines;
+			mGridLineSpacing = Options.GridLineSpacing;
+			mGridLineColor = Options.GridLineColor;
 
 			lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 			lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
@@ -6232,7 +6386,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 			lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);
 			lcSetProfileInt(LC_PROFILE_DETAIL, Options.Detail);
-			lcSetProfileInt(LC_PROFILE_GRID_SIZE, Options.GridSize);
+			lcSetProfileInt(LC_PROFILE_GRID_STUDS, Options.GridStuds);
+			lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, Options.GridStudColor);
+			lcSetProfileInt(LC_PROFILE_GRID_LINES, Options.GridLines);
+			lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, Options.GridLineSpacing);
+			lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, Options.GridLineColor);
 			lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, Options.LineWidth);
 			lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 
@@ -6276,7 +6434,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			*/
 
 			for (int i = 0; i < m_ViewList.GetSize (); i++)
-		{
+			{
 				m_ViewList[i]->MakeCurrent();
 				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
 			}
@@ -6633,6 +6791,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Info += GL_HasVertexBufferObject() ? "supported" : "not supported";
 			Info += "\nGL_ARB_framebuffer_object extension: ";
 			Info += GL_HasFramebufferObject() ? "supported" : "not supported";
+			Info += "\nGL_EXT_texture_filter_anisotropic extension: ";
+			if (GL_SupportsAnisotropic)
+			{
+				sprintf(Text, "supported (max %d)", (int)GL_MaxAnisotropy);
+				Info += Text;
+			}
+			else
+				Info += "not supported";
 
 			gMainWindow->DoDialog(LC_DIALOG_ABOUT, (char*)Info);
 		} break;
@@ -7213,7 +7379,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
 	lcVector3 Intersection;
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, 0)))
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, m_pCurPiece->m_fDimensions[5])))
 	{
 		SnapVector(Intersection);
 		Position = Intersection;

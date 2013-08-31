@@ -5895,26 +5895,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				CheckPoint("Array");
 		} break;
 
-		case LC_PIECE_COPY_KEYS:
-		{
-			float move[3], rot[4];
-			Piece* pPiece;
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-				{
-					pPiece->CalculateSingleKey (m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, LC_PK_POSITION, move);
-					pPiece->CalculateSingleKey (m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, LC_PK_ROTATION, rot);
-					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, move, LC_PK_POSITION);
-					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
-				}
-
-			// TODO: cameras and lights
-
-			CalculateStep();
-			UpdateAllViews();
-		} break;
-
 		case LC_PIECE_GROUP:
 		{
 			Group* pGroup;

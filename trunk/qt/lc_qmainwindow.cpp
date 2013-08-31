@@ -331,12 +331,11 @@ void lcQMainWindow::createMenus()
 	menuToolBars->addAction(timeToolBar->toggleViewAction());
 	menuView->addAction(actions[LC_VIEW_FULLSCREEN]);
 
-	menuPiece = menuBar()->addMenu(tr("&Part"));
+	menuPiece = menuBar()->addMenu(tr("&Piece"));
 	menuPiece->addAction(actions[LC_PIECE_INSERT]);
 	menuPiece->addAction(actions[LC_PIECE_DELETE]);
 	menuPiece->addAction(actions[LC_PIECE_ARRAY]);
 	menuPiece->addAction(actions[LC_PIECE_MINIFIG_WIZARD]);
-	//	LC_PIECE_COPY_KEYS
 	menuPiece->addSeparator();
 	menuPiece->addAction(actions[LC_PIECE_GROUP]);
 	menuPiece->addAction(actions[LC_PIECE_UNGROUP]);
@@ -1058,7 +1057,6 @@ void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* 
 	actions[LC_EDIT_SELECT_ALL]->setEnabled(flags & LC_SEL_UNSELECTED);
 
 	actions[LC_PIECE_DELETE]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
-	actions[LC_PIECE_COPY_KEYS]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
 	actions[LC_PIECE_ARRAY]->setEnabled(flags & LC_SEL_PIECE);
 	actions[LC_PIECE_HIDE_SELECTED]->setEnabled(flags & LC_SEL_PIECE);
 	actions[LC_PIECE_UNHIDE_ALL]->setEnabled(flags & LC_SEL_HIDDEN);
@@ -1128,8 +1126,6 @@ void lcQMainWindow::updateAnimation(bool animation, bool addKeys)
 	gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-	gpointer item = gtk_object_get_data (GTK_OBJECT (((GtkWidget*)(*main_window))), "menu_piece_copykeys");
-	gtk_label_set_text (GTK_LABEL (GTK_BIN (item)->child), bAnimation ? "Copy Keys from Instructions" : "Copy Keys from Animation");
 	*/
 }
 

@@ -199,7 +199,8 @@ public:
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
 	virtual void RenderExtra(View* View) const;
 
-	void Update();
+	virtual void SaveCheckpoint(lcFile& File);
+	virtual void LoadCheckpoint(lcFile& File);
 
 	lcMatrix44 mWorldView;
 	lcVector3 mPosition;
@@ -214,6 +215,8 @@ public:
 	char mName[81];
 
 protected:
+	void Update();
+
 	lcMesh* mMesh;
 
 	lcArray<lcObjectVector3Key> mPositionKeys;

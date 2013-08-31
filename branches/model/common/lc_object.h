@@ -78,6 +78,9 @@ public:
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const = 0;
 	virtual void RenderExtra(View* View) const = 0;
 
+	virtual void SaveCheckpoint(lcFile& File) = 0;
+	virtual void LoadCheckpoint(lcFile& File) = 0;
+
 protected:
 	template<typename T>
 	const T& CalculateKey(const lcArray< lcObjectPropertyKey<T> >& Keys, lcTime Time)

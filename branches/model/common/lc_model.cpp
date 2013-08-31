@@ -209,7 +209,7 @@ void lcModel::SetCurrentTime(lcTime Time)
 
 void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector)
 {
-	BeginCheckpoint("Create camera");
+	BeginCheckpoint("Create Camera");
 	lcMemFile& Action = mCurrentCheckpoint->mAction;
 
 	Action.WriteU32(LC_ACTION_CREATE_CAMERA);
@@ -244,7 +244,43 @@ void lcModel::EndCameraTool(bool Accept)
 	EndCheckpoint(Accept);
 	if (Accept)
 	{
-//		gMainWindow->UpdateCameraMenu(mCameras);
+		gMainWindow->UpdateCameraMenu();
+//		SetModifiedFlag(true);
+	}
+}
+
+void lcModel::BeginMoveTool()
+{
+	BeginCheckpoint("Move Objects");
+	lcMemFile& Action = mCurrentCheckpoint->mAction;
+
+	Action.WriteU32(LC_ACTION_MOVE_OBJECTS);
+	Action.WriteFloats(lcVector3(0.0f, 0.0f, 0.0f), 3);
+
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		Action.WriteU32(ObjectIdx);
+		mObjects[ObjectIdx]->SaveCheckpoint(Action);
+	}
+
+	ApplyCheckpoint(mCurrentCheckpoint);
+}
+
+void lcModel::UpdateMoveTool(const lcVector3& Distance)
+{
+	lcMemFile& Action = mCurrentCheckpoint->mAction;
+
+	Action.Seek(0, SEEK_SET);
+	LC_ASSERT(Action.ReadU32() == LC_ACTION_MOVE_OBJECTS);
+
+	Action.WriteFloats(Distance, 3);
+}
+
+void lcModel::EndMoveTool(bool Accept)
+{
+	EndCheckpoint(Accept);
+	if (Accept)
+	{
 //		SetModifiedFlag(true);
 	}
 }
@@ -302,6 +338,8 @@ void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
 			ObjectSection.Object = NewCamera;
 			ObjectSection.Section = LC_CAMERA_TARGET;
 			SetFocus(ObjectSection);
+
+			gMainWindow->UpdateCameraMenu();
 		}
 		break;
 	}
@@ -337,7 +375,7 @@ void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
 			mObjects.RemoveIndex(mObjects.GetSize() - 1);
 
 			gMainWindow->UpdateAllViews();
-//			gMainWindow->UpdateCameraMenu();
+			gMainWindow->UpdateCameraMenu();
 		}
 		break;
 	}

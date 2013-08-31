@@ -476,6 +476,10 @@ void lcMainWindow::UpdateFocusObject()
 {
 }
 
+void lcMainWindow::UpdateCameraMenu()
+{
+}
+
 
 void lcMainWindow::UpdateFocusObject(Object* Focus)
 {

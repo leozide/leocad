@@ -76,10 +76,9 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 	QSettings settings;
 	settings.beginGroup("MainWindow");
-	QPoint pos = settings.value("Position", QPoint(200, 200)).toPoint();
-	QSize size = settings.value("Size", QSize(800, 600)).toSize();
-	resize(size);
-	move(pos);
+	resize(QSize(800, 600));
+	move(QPoint(200, 200));
+	restoreGeometry(settings.value("Geometry").toByteArray());
 	restoreState(settings.value("State").toByteArray());
 	settings.endGroup();
 }
@@ -525,8 +524,7 @@ void lcQMainWindow::closeEvent(QCloseEvent *event)
 
 		QSettings settings;
 		settings.beginGroup("MainWindow");
-		settings.setValue("Position", pos());
-		settings.setValue("Size", size());
+		settings.setValue("Geometry", saveGeometry());
 		settings.setValue("State", saveState());
 		settings.endGroup();
 	}

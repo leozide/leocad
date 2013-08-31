@@ -15,6 +15,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
     ui->setupUi(this);
 
 	ui->lineWidth->setValidator(new QDoubleValidator());
+	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
+	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
@@ -41,15 +43,25 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked((options->Detail & LC_DET_BRICKEDGES) != 0);
 	ui->lineWidth->setText(QString::number(options->LineWidth));
-	ui->baseGrid->setChecked((options->Snap & LC_DRAW_GRID) != 0);
-	ui->gridUnits->setText(QString::number(options->GridSize));
+	ui->gridStuds->setChecked(options->GridStuds);
+	ui->gridLines->setChecked(options->GridLines);
+	ui->gridLineSpacing->setText(QString::number(options->GridLineSpacing));
 	ui->axisIcon->setChecked((options->Snap & LC_DRAW_AXIS) != 0);
 	ui->enableLighting->setChecked((options->Detail & LC_DET_LIGHTING) != 0);
 	ui->fastRendering->setChecked((options->Detail & LC_DET_FAST) != 0);
 
+	QPixmap pix(12, 12);
+
+	pix.fill(QColor(LC_RGBA_RED(options->GridStudColor), LC_RGBA_GREEN(options->GridStudColor), LC_RGBA_BLUE(options->GridStudColor)));
+	ui->gridStudColor->setIcon(pix);
+
+	pix.fill(QColor(LC_RGBA_RED(options->GridLineColor), LC_RGBA_GREEN(options->GridLineColor), LC_RGBA_BLUE(options->GridLineColor)));
+	ui->gridLineColor->setIcon(pix);
+
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
-	on_baseGrid_toggled();
+	on_gridStuds_toggled();
+	on_gridLines_toggled();
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
@@ -102,11 +114,9 @@ void lcQPreferencesDialog::accept()
 		options->LineWidth = ui->lineWidth->text().toFloat();
 	}
 
-	if (ui->baseGrid->isChecked())
-	{
-		options->Snap |= LC_DRAW_GRID;
-		options->GridSize = ui->gridUnits->text().toInt();
-	}
+	options->GridStuds = ui->gridStuds->isChecked();
+	options->GridLines = ui->gridLines->isChecked();
+	options->GridLineSpacing = ui->gridLineSpacing->text().toInt();
 
 	if (ui->axisIcon->isChecked())
 		options->Snap |= LC_DRAW_AXIS;
@@ -158,6 +168,40 @@ void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 		ui->lgeoPathBrowse->setText(QDir::toNativeSeparators(result));
 }
 
+void lcQPreferencesDialog::colorClicked()
+{
+	QObject *button = sender();
+	QString title;
+	lcuint32 *color = NULL;
+	QColorDialog::ColorDialogOptions dialogOptions;
+
+	if (button == ui->gridStudColor)
+	{
+		color = &options->GridStudColor;
+		title = tr("Select Grid Stud Color");
+		dialogOptions = QColorDialog::ShowAlphaChannel;
+	}
+	else if (button == ui->gridLineColor)
+	{
+		color = &options->GridLineColor;
+		title = tr("Select Grid Line Color");
+		dialogOptions = 0;
+	}
+
+	QColor oldColor = QColor(LC_RGBA_RED(*color), LC_RGBA_GREEN(*color), LC_RGBA_BLUE(*color), LC_RGBA_ALPHA(*color));
+	QColor newColor = QColorDialog::getColor(oldColor, this, title, dialogOptions);
+
+	if (newColor == oldColor || !newColor.isValid())
+		return;
+
+	*color = LC_RGBA(newColor.red(), newColor.green(), newColor.blue(), newColor.alpha());
+
+	QPixmap pix(12, 12);
+
+	pix.fill(newColor);
+	((QToolButton*)button)->setIcon(pix);
+}
+
 void lcQPreferencesDialog::on_antiAliasing_toggled()
 {
 	ui->antiAliasingSamples->setEnabled(ui->antiAliasing->isChecked());
@@ -168,9 +212,14 @@ void lcQPreferencesDialog::on_edgeLines_toggled()
 	ui->lineWidth->setEnabled(ui->edgeLines->isChecked());
 }
 
-void lcQPreferencesDialog::on_baseGrid_toggled()
+void lcQPreferencesDialog::on_gridStuds_toggled()
 {
-	ui->gridUnits->setEnabled(ui->baseGrid->isChecked());
+	ui->gridStudColor->setEnabled(ui->gridStuds->isChecked());
+}
+
+void lcQPreferencesDialog::on_gridLines_toggled()
+{
+	ui->gridLineColor->setEnabled(ui->gridLines->isChecked());
 }
 
 void lcQPreferencesDialog::updateCategories()

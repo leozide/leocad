@@ -151,7 +151,11 @@ struct lcPreferencesDialogOptions
 	lcuint32 Detail;
 	float LineWidth;
 	int AASamples;
-	int GridSize;
+	bool GridStuds;
+	lcuint32 GridStudColor;
+	bool GridLines;
+	int GridLineSpacing;
+	lcuint32 GridLineColor;
 
 	lcArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;

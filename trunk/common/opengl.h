@@ -9,6 +9,8 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name);
 extern bool GL_SupportsVertexBufferObject;
 extern bool GL_UseVertexBufferObject;
 extern bool GL_SupportsFramebufferObject;
+extern bool GL_SupportsAnisotropic;
+extern GLfloat GL_MaxAnisotropy;
 
 inline void GL_DisableVertexBufferObject()
 {
@@ -86,6 +88,11 @@ typedef ptrdiff_t GLsizeiptr;
 // GL types for handling large vertex buffer objects
 typedef ptrdiff_t GLintptrARB;
 typedef ptrdiff_t GLsizeiptrARB;
+#endif
+
+#ifndef GL_EXT_texture_filter_anisotropic
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT                0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT            0x84FF
 #endif
 
 #ifndef GL_ARB_vertex_buffer_object

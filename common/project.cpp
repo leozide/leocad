@@ -2068,13 +2068,47 @@ void Project::RenderSceneObjects(View* view)
 		const int Spacing = lcMax(mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
 
-		if (m_pPieces)
+		if (m_pPieces || mDropPiece)
 		{
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
 			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 					pPiece->CompareBoundingBox(bs);
+
+			if (mDropPiece)
+			{
+				lcVector3 Position;
+				lcVector4 Rotation;
+				GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
+
+				lcVector3 Points[8] =
+				{
+					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[5]),
+					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[5]),
+					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[2]),
+					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[5]),
+					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[2]),
+					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[2]),
+					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[5]),
+					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[2])
+				};
+
+				lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+				ModelWorld.SetTranslation(Position);
+
+				for (int i = 0; i < 8; i++)
+				{
+					lcVector3 Point = lcMul31(Points[i], ModelWorld);
+
+					if (Point[0] < bs[0]) bs[0] = Point[0];
+					if (Point[1] < bs[1]) bs[1] = Point[1];
+					if (Point[2] < bs[2]) bs[2] = Point[2];
+					if (Point[0] > bs[3]) bs[3] = Point[0];
+					if (Point[1] > bs[4]) bs[4] = Point[1];
+					if (Point[2] > bs[5]) bs[5] = Point[2];
+				}
+			}
 
 			MinX = (int)(floorf(bs[0] / (0.8f * Spacing))) - 1;
 			MinY = (int)(floorf(bs[1] / (0.8f * Spacing))) - 1;

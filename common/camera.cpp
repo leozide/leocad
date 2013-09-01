@@ -820,7 +820,7 @@ void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAn
 		lcVector3(  0.0f,   0.0f, -50.0f), // LC_VIEWPOINT_BOTTOM
 		lcVector3( 50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_LEFT
 		lcVector3(-50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3(-10.0f, -10.0f,   5.0f)  // LC_VIEWPOINT_HOME
+		lcVector3(-15.0f, -15.0f,   7.5f)  // LC_VIEWPOINT_HOME
 	};
 
 	lcVector3 Ups[] =

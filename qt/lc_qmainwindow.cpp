@@ -457,8 +457,11 @@ void lcQMainWindow::createToolBars()
 	piecePreview->preferredSize = QSize(200, 100);
 	previewLayout->addWidget(piecePreview, 0, 0, 1, 1);
 
+	QSizePolicy treePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	treePolicy.setVerticalStretch(1);
+
 	partsTree = new lcQPartsTree(partsSplitter);
-	partsTree->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	partsTree->setSizePolicy(treePolicy);
 	connect(partsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(partsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
 	partSearch = new QLineEdit(partsSplitter);

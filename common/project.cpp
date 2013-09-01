@@ -2068,7 +2068,7 @@ void Project::RenderSceneObjects(View* view)
 		const int Spacing = lcMax(mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
 
-		if (m_pPieces || mDropPiece)
+		if (m_pPieces || (m_nCurAction == LC_ACTION_INSERT || mDropPiece))
 		{
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
@@ -2076,22 +2076,24 @@ void Project::RenderSceneObjects(View* view)
 				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
 					pPiece->CompareBoundingBox(bs);
 
-			if (mDropPiece)
+			if (m_nCurAction == LC_ACTION_INSERT || mDropPiece)
 			{
 				lcVector3 Position;
 				lcVector4 Rotation;
 				GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
 
+				PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
+
 				lcVector3 Points[8] =
 				{
-					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[5]),
-					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[5]),
-					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[2]),
-					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[5]),
-					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[2]),
-					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[2]),
-					lcVector3(mDropPiece->m_fDimensions[0], mDropPiece->m_fDimensions[4], mDropPiece->m_fDimensions[5]),
-					lcVector3(mDropPiece->m_fDimensions[3], mDropPiece->m_fDimensions[1], mDropPiece->m_fDimensions[2])
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2])
 				};
 
 				lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);

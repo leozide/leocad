@@ -2065,17 +2065,37 @@ void Project::RenderSceneObjects(View* view)
 
 	if (mGridStuds || mGridLines)
 	{
-		float m_nGridSize = 20;
+		const int Spacing = lcMax(mGridLineSpacing, 1);
+		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
+
+		if (m_pPieces)
+		{
+			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+					pPiece->CompareBoundingBox(bs);
+
+			MinX = (int)(floorf(bs[0] / (0.8f * Spacing))) - 1;
+			MinY = (int)(floorf(bs[1] / (0.8f * Spacing))) - 1;
+			MaxX = (int)(ceilf(bs[3] / (0.8f * Spacing))) + 1;
+			MaxY = (int)(ceilf(bs[4] / (0.8f * Spacing))) + 1;
+		}
+
+		MinX = lcMin(MinX, -2);
+		MinY = lcMin(MinY, -2);
+		MaxX = lcMax(MaxX, 2);
+		MaxY = lcMax(MaxY, 2);
 
 		if (mGridLines)
 		{
-			float Left = -m_nGridSize*0.8f;
-			float Right = m_nGridSize*0.8f;
-			float Top = -m_nGridSize*0.8f;
-			float Bottom = m_nGridSize*0.8f;
+			float Left = MinX * 0.8f * Spacing;
+			float Right = MaxX * 0.8f * Spacing;
+			float Top = MinY * 0.8f * Spacing;
+			float Bottom = MaxY * 0.8f * Spacing;
 			float Z = 0;
-			float U = m_nGridSize * 2;
-			float V = m_nGridSize * 2;
+			float U = (MaxX - MinX) * Spacing;
+			float V = (MaxY - MinY) * Spacing;
 
 			float Verts[4 * 5];
 			float* CurVert = Verts;
@@ -2133,27 +2153,31 @@ void Project::RenderSceneObjects(View* view)
 			glColor4fv(lcVector4FromColor(mGridLineColor));
 
 			glEnableClientState(GL_VERTEX_ARRAY);
-			int GridStep = 5;
-			int NumVerts = 2 * 2 * (2 * m_nGridSize / GridStep + 1);
+			int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
 			float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
-			float x = m_nGridSize * 0.8f;
+			float* Vert = Verts;
+			float LineSpacing = Spacing * 0.8f;
 
-			for (int Step = 0; Step < 2 * m_nGridSize / GridStep + 1; Step++)
+			for (int Step = MinX; Step < MaxX + 1; Step++)
 			{
-				Verts[Step * 12] = x;
-				Verts[Step * 12 + 1] = m_nGridSize * 0.8f;
-				Verts[Step * 12 + 2] = 0;
-				Verts[Step * 12 + 3] = x;
-				Verts[Step * 12 + 4] = -m_nGridSize * 0.8f;
-				Verts[Step * 12 + 5] = 0;
-				Verts[Step * 12 + 6] = m_nGridSize * 0.8f;
-				Verts[Step * 12 + 7] = x;
-				Verts[Step * 12 + 8] = 0;
-				Verts[Step * 12 + 9] = -m_nGridSize * 0.8f;
-				Verts[Step * 12 + 10] = x;
-				Verts[Step * 12 + 11] = 0;
-				x -= GridStep * 0.8f;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = MinY * LineSpacing;
+				*Vert++ = 0.0f;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = MaxY * LineSpacing;
+				*Vert++ = 0.0f;
 			}
+
+			for (int Step = MinY; Step < MaxY + 1; Step++)
+			{
+				*Vert++ = MinX * LineSpacing;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = 0.0f;
+				*Vert++ = MaxX * LineSpacing;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = 0.0f;
+			}
+
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINES, 0, NumVerts);
 			glDisableClientState(GL_VERTEX_ARRAY);

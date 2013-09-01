@@ -79,6 +79,13 @@ lcQPreferencesDialog::~lcQPreferencesDialog()
 
 void lcQPreferencesDialog::accept()
 {
+	int gridLineSpacing = ui->gridLineSpacing->text().toInt();
+	if (gridLineSpacing < 1)
+	{
+		QMessageBox::information(this, "LeoCAD", tr("Grid spacing must be greater than 0."));
+		return;
+	}
+
 	options->Detail &= ~(LC_DET_BRICKEDGES | LC_DET_LIGHTING | LC_DET_FAST);
 	options->Snap &= ~(LC_DRAW_CM_UNITS | LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS | LC_DRAW_GRID | LC_DRAW_AXIS);
 
@@ -116,7 +123,7 @@ void lcQPreferencesDialog::accept()
 
 	options->GridStuds = ui->gridStuds->isChecked();
 	options->GridLines = ui->gridLines->isChecked();
-	options->GridLineSpacing = ui->gridLineSpacing->text().toInt();
+	options->GridLineSpacing = gridLineSpacing;
 
 	if (ui->axisIcon->isChecked())
 		options->Snap |= LC_DRAW_AXIS;

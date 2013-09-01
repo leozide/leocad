@@ -42,8 +42,8 @@ public:
 	{
 		AllocGrow(Array.mLength);
 
-		for (int i = mLength; i < mLength + Array.mLength; i++)
-			mData[i] = Array.mData[i];
+		for (int i = 0; i < Array.mLength; i++)
+			mData[mLength + i] = Array.mData[i];
 
 		mLength += Array.mLength;
 		return *this;

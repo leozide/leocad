@@ -4,6 +4,7 @@
 #include "lc_application.h"
 #include "lc_library.h"
 #include "image.h"
+#include "system.h"
 
 lcTexture::lcTexture()
 {
@@ -71,7 +72,12 @@ bool lcTexture::Load(Image* images, int NumLevels, int Flags)
 	int Format;
 	switch (images[0].mFormat)
 	{
-	case LC_PIXEL_FORMAT_A8:
+    default:
+    case LC_PIXEL_FORMAT_INVALID:
+        LC_ASSERT(false);
+        Format = 0;
+        break;
+    case LC_PIXEL_FORMAT_A8:
 		Format = GL_ALPHA;
 		break;
 	case LC_PIXEL_FORMAT_L8A8:

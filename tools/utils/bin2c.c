@@ -33,7 +33,7 @@ int main (int argc, char **argv)
   i = 0;
   while ((ch = fgetc(inFile)) != EOF)
   {
-    if (i++ % 12 == 0)
+    if (i++ % 32 == 0)
        fputs ("\n  ", outFile);
     fprintf (outFile, "0x%02X,", ch);
   }

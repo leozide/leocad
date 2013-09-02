@@ -14,7 +14,7 @@ static const char sDefaultColorConfig[] =
 	"0 LDraw.org Configuration File\n"
 	"0 Name: LDConfig.ldr\n"
 	"0 Author: LDraw.org\n"
-	"0 !LDRAW_ORG Configuration UPDATE 2012-09-13\n"
+	"0 !LDRAW_ORG Configuration UPDATE 2013-03-08\n"
 	"\n"
 	"0 // LDraw Solid Colours\n"
 	"0 !COLOUR Black                                                 CODE   0   VALUE #05131D   EDGE #595959\n"
@@ -125,7 +125,7 @@ static const char sDefaultColorConfig[] =
 	"\n"
 	"0 // LDraw Pearl Colours\n"
 	"0 !COLOUR Pearl_White                                           CODE 183   VALUE #F2F3F2   EDGE #333333                               PEARLESCENT\n"
-	"0 !COLOUR Pearl_Very_Light_Grey                                 CODE 150   VALUE #BBBDBC   EDGE #333333                               PEARLESCENT\n"
+	"0 !COLOUR Pearl_Very_Light_Gray                                 CODE 150   VALUE #BBBDBC   EDGE #333333                               PEARLESCENT\n"
 	"0 !COLOUR Pearl_Light_Gray                                      CODE 135   VALUE #9CA3A8   EDGE #333333                               PEARLESCENT\n"
 	"0 !COLOUR Flat_Silver                                           CODE 179   VALUE #898788   EDGE #333333                               PEARLESCENT\n"
 	"0 !COLOUR Pearl_Dark_Gray                                       CODE 148   VALUE #575857   EDGE #333333                               PEARLESCENT\n"
@@ -138,7 +138,7 @@ static const char sDefaultColorConfig[] =
 	"0 // LDraw Metallic Colours\n"
 	"0 !COLOUR Metallic_Silver                                       CODE  80   VALUE #A5A9B4   EDGE #333333                               METAL\n"
 	"0 !COLOUR Metallic_Green                                        CODE  81   VALUE #899B5F   EDGE #333333                               METAL\n"
-	"0 !COLOUR Metallic_Gold                                         CODE  82   VALUE #8C5C20   EDGE #333333                               METAL\n"
+	"0 !COLOUR Metallic_Gold                                         CODE  82   VALUE #DBAC34   EDGE #333333                               METAL\n"
 	"0 !COLOUR Metallic_Black                                        CODE  83   VALUE #1A2831   EDGE #333333                               METAL\n"
 	"0 !COLOUR Metallic_Dark_Gray                                    CODE  87   VALUE #6D6E5C   EDGE #333333                               METAL\n"
 	"\n"
@@ -315,7 +315,7 @@ int lcGetBrickLinkColor(int ColorIndex)
 		{ 115, "Pearl Gold" },
 		{  61, "Pearl Light Gold" },
 		{  66, "Pearl Light Gray" },
-		{ 119, "Pearl Very Light Grey" },           // Pearl Very Light Gray
+		{ 119, "Pearl Very Light Gray" },
 		{  83, "Pearl White" },
 		{  65, "Metallic Gold" },
 		{  70, "Metallic Green" },

@@ -1,34 +1,37 @@
 #include "lc_global.h"
 #include "image.h"
 #include "lc_file.h"
+#include "system.h"
 
 static void copyToQImage(const Image& src, QImage& dest, bool transparent)
 {
-	dest = QImage(src.mWidth, src.mWidth, src.mAlpha ? QImage::Format_ARGB32 : QImage::Format_RGB32);
+	bool alpha = src.HasAlpha();
+	dest = QImage(src.mWidth, src.mHeight, alpha ? QImage::Format_ARGB32 : QImage::Format_RGB32);
 
 	lcuint8* bytes = (lcuint8*)src.mData;
+	int bpp = src.GetBPP();
 
-	if (transparent && src.mAlpha)
+	LC_ASSERT(src.mFormat == LC_PIXEL_FORMAT_R8G8B8 || src.mFormat == LC_PIXEL_FORMAT_R8G8B8A8);
+
+	if (transparent && alpha)
 	{
 		for (int y = 0; y < src.mHeight; y++)
 		{
 			for (int x = 0; x < src.mWidth; x++)
 			{
 				dest.setPixel(x, y, qRgba(bytes[0], bytes[1], bytes[2], bytes[3]));
-				bytes += 4;
+				bytes += bpp;
 			}
 		}
 	}
 	else
 	{
-		int pixelSize = src.mAlpha ? 4 : 3;
-
 		for (int y = 0; y < src.mHeight; y++)
 		{
 			for (int x = 0; x < src.mWidth; x++)
 			{
 				dest.setPixel(x, y, qRgb(bytes[0], bytes[1], bytes[2]));
-				bytes += pixelSize;
+				bytes += bpp;
 			}
 		}
 	}
@@ -36,7 +39,8 @@ static void copyToQImage(const Image& src, QImage& dest, bool transparent)
 
 static void copyFromQImage(const QImage& src, Image& dest)
 {
-	dest.Allocate(src.width(), src.height(), src.hasAlphaChannel());
+	bool alpha = src.hasAlphaChannel();
+	dest.Allocate(src.width(), src.height(), alpha ? LC_PIXEL_FORMAT_R8G8B8A8 : LC_PIXEL_FORMAT_R8G8B8);
 
 	lcuint8* bytes = (lcuint8*)dest.mData;
 
@@ -50,7 +54,7 @@ static void copyFromQImage(const QImage& src, Image& dest)
 			*bytes++ = qGreen(pixel);
 			*bytes++ = qBlue(pixel);
 
-			if (dest.mAlpha)
+			if (alpha)
 				*bytes++ = qAlpha(pixel);
 		}
 	}

@@ -292,14 +292,14 @@ void lcCamera::RenderExtra(View* View) const
 	}
 }
 
-void lcModel::SaveCheckpoint(lcFile& File)
+void lcCamera::SaveCheckpoint(lcFile& File)
 {
 	File.WriteFloats(mPosition, 3);
 	File.WriteFloats(mTargetPosition, 3);
 	File.WriteFloats(mUpVector, 3);
 }
 
-void lcModel::LoadCheckpoint(lcFile& File)
+void lcCamera::LoadCheckpoint(lcFile& File)
 {
 }
 

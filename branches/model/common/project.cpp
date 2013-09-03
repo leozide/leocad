@@ -52,12 +52,12 @@ Project::Project()
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_nGridList = 0;
 	m_pTrackFile = NULL;
 	m_nCurAction = 0;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
+	mGridTexture = new lcTexture();
 	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
 	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	m_nDownX = 0;
@@ -74,6 +74,7 @@ Project::~Project()
     delete m_pTrackFile;
 	delete m_pTerrain;
 	delete m_pBackground;
+	delete mGridTexture;
 	delete m_pScreenFont;
 }
 
@@ -227,7 +228,11 @@ void Project::LoadDefaults(bool cameras)
 	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_fFogColor[3] = 1.0f;
-	m_nGridSize = (unsigned short)lcGetProfileInt(LC_PROFILE_GRID_SIZE);
+	mGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
+	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
+	mGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
+	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
+	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
 	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR);
 	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
 	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
@@ -651,7 +656,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->ReadU8(&m_nFPS, 1);
 				file->ReadS32(&i, 1); m_nCurFrame = i;
 				file->ReadU16(&m_nTotalFrames, 1);
-				file->ReadS32(&i, 1); m_nGridSize = i;
+				file->ReadS32(&i, 1); //m_nGridSize = i;
 				file->ReadS32(&i, 1); //m_nMoveSnap = i;
 			}
 			else
@@ -661,7 +666,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->ReadU8(&m_nFPS, 1);
 				file->ReadU16(&m_nCurFrame, 1);
 				file->ReadU16(&m_nTotalFrames, 1);
-				file->ReadU16(&m_nGridSize, 1);
+				file->ReadU16(&sh, 1); // m_nGridSize = sh;
 				file->ReadU16(&sh, 1);
 				if (fv >= 1.4f)
 					m_nMoveSnap = sh;
@@ -832,7 +837,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU8 (&m_nFPS, 1);
 	file->WriteU16(&m_nCurFrame, 1);
 	file->WriteU16(&m_nTotalFrames, 1);
-	file->WriteU16(&m_nGridSize, 1);
+	file->WriteU16(0); // m_nGridSize
 	file->WriteU16(&m_nMoveSnap, 1);
 	// 0.62 (1.1)
 	rgb = LC_FLOATRGB(m_fGradient1);
@@ -1622,12 +1627,6 @@ void Project::RenderScenePieces(View* view)
 	float AspectRatio = (float)view->mWidth / (float)view->mHeight;
 	view->mCamera->LoadProjection(AspectRatio);
 
-	if (m_nSnap & LC_DRAW_GRID)
-	{
-		glColor4f(1.0f - m_fBackground[0], 1.0f - m_fBackground[1], 1.0f - m_fBackground[2], 1.0f);
-		glCallList (m_nGridList);
-	}
-
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
@@ -2018,6 +2017,164 @@ void Project::RenderSceneObjects(View* view)
 	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 		if (pLight->IsVisible ())
 			pLight->Render(m_fLineWidth);
+
+	if (mGridStuds || mGridLines)
+	{
+		const int Spacing = lcMax(mGridLineSpacing, 1);
+		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
+
+		if (m_pPieces || (m_nCurAction == LC_TOOL_INSERT || mDropPiece))
+		{
+			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+
+			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+					pPiece->CompareBoundingBox(bs);
+
+			if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
+			{
+				lcVector3 Position;
+				lcVector4 Rotation;
+				GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
+
+				PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
+
+				lcVector3 Points[8] =
+				{
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
+					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
+					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2])
+				};
+
+				lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+				ModelWorld.SetTranslation(Position);
+
+				for (int i = 0; i < 8; i++)
+				{
+					lcVector3 Point = lcMul31(Points[i], ModelWorld);
+
+					if (Point[0] < bs[0]) bs[0] = Point[0];
+					if (Point[1] < bs[1]) bs[1] = Point[1];
+					if (Point[2] < bs[2]) bs[2] = Point[2];
+					if (Point[0] > bs[3]) bs[3] = Point[0];
+					if (Point[1] > bs[4]) bs[4] = Point[1];
+					if (Point[2] > bs[5]) bs[5] = Point[2];
+				}
+			}
+
+			MinX = (int)(floorf(bs[0] / (0.8f * Spacing))) - 1;
+			MinY = (int)(floorf(bs[1] / (0.8f * Spacing))) - 1;
+			MaxX = (int)(ceilf(bs[3] / (0.8f * Spacing))) + 1;
+			MaxY = (int)(ceilf(bs[4] / (0.8f * Spacing))) + 1;
+		}
+
+		MinX = lcMin(MinX, -2);
+		MinY = lcMin(MinY, -2);
+		MaxX = lcMax(MaxX, 2);
+		MaxY = lcMax(MaxY, 2);
+
+		if (mGridLines)
+		{
+			float Left = MinX * 0.8f * Spacing;
+			float Right = MaxX * 0.8f * Spacing;
+			float Top = MinY * 0.8f * Spacing;
+			float Bottom = MaxY * 0.8f * Spacing;
+			float Z = 0;
+			float U = (MaxX - MinX) * Spacing;
+			float V = (MaxY - MinY) * Spacing;
+
+			float Verts[4 * 5];
+			float* CurVert = Verts;
+
+			*CurVert++ = Left;
+			*CurVert++ = Top;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = V;
+
+			*CurVert++ = Left;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = 0.0f;
+
+			*CurVert++ = Right;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = 0.0f;
+
+			*CurVert++ = Right;
+			*CurVert++ = Top;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = V;
+
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
+			glEnable(GL_TEXTURE_2D);
+			glEnable(GL_ALPHA_TEST);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+
+			glColor4fv(lcVector4FromColor(mGridStudColor));
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
+
+			glDrawArrays(GL_QUADS, 0, 4);
+
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_BLEND);
+			glDisable(GL_ALPHA_TEST);
+		}
+
+		if (mGridLines)
+		{
+			glColor4fv(lcVector4FromColor(mGridLineColor));
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
+			float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
+			float* Vert = Verts;
+			float LineSpacing = Spacing * 0.8f;
+
+			for (int Step = MinX; Step < MaxX + 1; Step++)
+			{
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = MinY * LineSpacing;
+				*Vert++ = 0.0f;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = MaxY * LineSpacing;
+				*Vert++ = 0.0f;
+			}
+
+			for (int Step = MinY; Step < MaxY + 1; Step++)
+			{
+				*Vert++ = MinX * LineSpacing;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = 0.0f;
+				*Vert++ = MaxX * LineSpacing;
+				*Vert++ = Step * LineSpacing;
+				*Vert++ = 0.0f;
+			}
+
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINES, 0, NumVerts);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			free(Verts);
+		}
+	}
 
 	// Draw axis icon
 	if (m_nSnap & LC_DRAW_AXIS)
@@ -2846,8 +3003,6 @@ void Project::RenderViewports(View* view)
 // Initialize OpenGL
 void Project::RenderInitialize()
 {
-	int i;
-
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 
@@ -2871,35 +3026,86 @@ void Project::RenderInitialize()
 //			AfxMessageBox ("Could not load background");
 		}
 
-	// Grid display list
-	if (m_nGridList == 0)
-		m_nGridList = glGenLists(1);
-	glNewList (m_nGridList, GL_COMPILE);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	i = 2*(4*m_nGridSize+2); // verts needed (2*lines)
-	float *grid = (float*)malloc(i*sizeof(float[3]));
-	float x = m_nGridSize*0.8f;
-
-	for (int j = 0; j <= m_nGridSize*2; j++)
+	if (!mGridTexture->mTexture)
 	{
-		grid[j*12] = x;
-		grid[j*12+1] = m_nGridSize*0.8f;
-		grid[j*12+2] = 0;
-		grid[j*12+3] = x;
-		grid[j*12+4] = -m_nGridSize*0.8f;
-		grid[j*12+5] = 0;
-		grid[j*12+6] = m_nGridSize*0.8f;
-		grid[j*12+7] = x;
-		grid[j*12+8] = 0;
-		grid[j*12+9] = -m_nGridSize*0.8f;
-		grid[j*12+10] = x;
-		grid[j*12+11] = 0;
-		x -= 0.8f;
+		const int NumLevels = 9;
+		Image GridImages[NumLevels];
+
+		for (int ImageLevel = 0; ImageLevel < NumLevels; ImageLevel++)
+		{
+			Image& GridImage = GridImages[ImageLevel];
+
+			const int GridSize = 256 >> ImageLevel;
+			const float Radius1 = (80 >> ImageLevel) * (80 >> ImageLevel);
+			const float Radius2 = (72 >> ImageLevel) * (72 >> ImageLevel);
+
+			GridImage.Allocate(GridSize, GridSize, LC_PIXEL_FORMAT_A8);
+			lcuint8* BlurBuffer = new lcuint8[GridSize * GridSize];
+
+			for (int y = 0; y < GridSize; y++)
+			{
+				lcuint8* Pixel = GridImage.mData + y * GridSize;
+				memset(Pixel, 0, GridSize);
+
+				const float y2 = (y - GridSize / 2) * (y - GridSize / 2);
+
+				if (Radius1 <= y2)
+					continue;
+
+				if (Radius2 <= y2)
+				{
+					int x1 = sqrtf(Radius1 - y2);
+
+					for (int x = GridSize / 2 - x1; x < GridSize / 2 + x1; x++)
+						Pixel[x] = 255;
+				}
+				else
+				{
+					int x1 = sqrtf(Radius1 - y2);
+					int x2 = sqrtf(Radius2 - y2);
+
+					for (int x = GridSize / 2 - x1; x < GridSize / 2 - x2; x++)
+						Pixel[x] = 255;
+
+					for (int x = GridSize / 2 + x2; x < GridSize / 2 + x1; x++)
+						Pixel[x] = 255;
+				}
+			}
+
+			for (int y = 0; y < GridSize - 1; y++)
+			{
+				for (int x = 0; x < GridSize - 1; x++)
+				{
+					lcuint8 a = GridImage.mData[x + y * GridSize];
+					lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
+					lcuint8 c = GridImage.mData[x + (y + 1) * GridSize];
+					lcuint8 d = GridImage.mData[x + 1 + (y + 1) * GridSize];
+					BlurBuffer[x + y * GridSize] = (a + b + c + d) / 4;
+				}
+
+				int x = GridSize - 1;
+				lcuint8 a = GridImage.mData[x + y * GridSize];
+				lcuint8 c = GridImage.mData[x + (y + 1) * GridSize];
+				BlurBuffer[x + y * GridSize] = (a + c) / 2;
+			}
+
+			int y = GridSize - 1;
+			for (int x = 0; x < GridSize - 1; x++)
+			{
+				lcuint8 a = GridImage.mData[x + y * GridSize];
+				lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
+				BlurBuffer[x + y * GridSize] = (a + b) / 2;
+			}
+
+			int x = GridSize - 1;
+			BlurBuffer[x + y * GridSize] = GridImage.mData[x + y * GridSize];
+
+			memcpy(GridImage.mData, BlurBuffer, GridSize * GridSize);
+			delete[] BlurBuffer;
+		}
+
+		mGridTexture->Load(GridImages, NumLevels, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC);
 	}
-	glVertexPointer(3, GL_FLOAT, 0, grid);
-	glDrawArrays(GL_LINES, 0, i);
-	glEndList();
-	free(grid);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3496,10 +3702,6 @@ void Project::Export3DStudio()
 	File.WriteU32(10);
 	File.WriteU32(3);
 
-	File.WriteU16(0x0100); // CHK_MASTER_SCALE
-	File.WriteU32(10);
-	File.WriteFloat(1.0f);
-
 	const int MaterialNameLength = 11;
 	char MaterialName[32];
 
@@ -3600,11 +3802,6 @@ void Project::Export3DStudio()
 
 		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
 
-		File.WriteU16(0xA100); // CHK_MAT_SHADING
-		File.WriteU32(8);
-
-		File.WriteS16(3);
-
 		File.WriteU16(0xA053); // CHK_MAT_REFBLUR
 		File.WriteU32(14);
 
@@ -3612,6 +3809,19 @@ void Project::Export3DStudio()
 		File.WriteU32(8);
 
 		File.WriteS16((lcuint8)floor(100.0 * 0.2 + 0.5));
+
+		File.WriteU16(0xA100); // CHK_MAT_SHADING
+		File.WriteU32(8);
+
+		File.WriteS16(3);
+
+		File.WriteU16(0xA084); // CHK_MAT_SELF_ILPCT
+		File.WriteU32(14);
+
+		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
+		File.WriteU32(8);
+
+		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
 
 		File.WriteU16(0xA081); // CHK_MAT_TWO_SIDE
 		File.WriteU32(6);
@@ -3621,21 +3831,190 @@ void Project::Export3DStudio()
 
 		File.WriteFloat(1.0f);
 
-		File.WriteU16(0xA310); // CHK_MAT_ACUBIC
-		File.WriteU32(18);
-
-		File.WriteS8(0);
-		File.WriteS8(0);
-		File.WriteS16(0);
-		File.WriteS32(0);
-		File.WriteS32(0);
-
 		long MaterialEnd = File.GetPosition();
 		File.Seek(MaterialStart + 2, SEEK_SET);
 		File.WriteU32(MaterialEnd - MaterialStart);
 		File.Seek(MaterialEnd, SEEK_SET);
 	}
 
+	File.WriteU16(0x0100); // CHK_MASTER_SCALE
+	File.WriteU32(10);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x1400); // CHK_LO_SHADOW_BIAS
+	File.WriteU32(10);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x1420); // CHK_SHADOW_MAP_SIZE
+	File.WriteU32(8);
+
+	File.WriteS16(512);
+
+	File.WriteU16(0x1450); // CHK_SHADOW_FILTER
+	File.WriteU32(10);
+
+	File.WriteFloat(3.0f);
+
+	File.WriteU16(0x1460); // CHK_RAY_BIAS
+	File.WriteU32(10);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x1500); // CHK_O_CONSTS
+	File.WriteU32(18);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+
+	File.WriteU16(0x2100); // CHK_AMBIENT_LIGHT
+	File.WriteU32(42);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fAmbient[0]);
+	File.WriteFloat(m_fAmbient[1]);
+	File.WriteFloat(m_fAmbient[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fAmbient[0]);
+	File.WriteFloat(m_fAmbient[1]);
+	File.WriteFloat(m_fAmbient[2]);
+
+	File.WriteU16(0x1200); // CHK_SOLID_BGND
+	File.WriteU32(42);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fBackground[0]);
+	File.WriteFloat(m_fBackground[1]);
+	File.WriteFloat(m_fBackground[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fBackground[0]);
+	File.WriteFloat(m_fBackground[1]);
+	File.WriteFloat(m_fBackground[2]);
+
+	File.WriteU16(0x1100); // CHK_BIT_MAP
+	File.WriteU32(6 + 1 + strlen(m_strBackground));
+	File.WriteBuffer(m_strBackground, strlen(m_strBackground) + 1);
+
+	File.WriteU16(0x1300); // CHK_V_GRADIENT
+	File.WriteU32(118);
+
+	File.WriteFloat(1.0f);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient1[0]);
+	File.WriteFloat(m_fGradient1[1]);
+	File.WriteFloat(m_fGradient1[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient1[0]);
+	File.WriteFloat(m_fGradient1[1]);
+	File.WriteFloat(m_fGradient1[2]);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat((m_fGradient1[0] + m_fGradient2[0]) / 2.0f);
+	File.WriteFloat((m_fGradient1[1] + m_fGradient2[1]) / 2.0f);
+	File.WriteFloat((m_fGradient1[2] + m_fGradient2[2]) / 2.0f);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat((m_fGradient1[0] + m_fGradient2[0]) / 2.0f);
+	File.WriteFloat((m_fGradient1[1] + m_fGradient2[1]) / 2.0f);
+	File.WriteFloat((m_fGradient1[2] + m_fGradient2[2]) / 2.0f);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient2[0]);
+	File.WriteFloat(m_fGradient2[1]);
+	File.WriteFloat(m_fGradient2[2]);
+
+	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fGradient2[0]);
+	File.WriteFloat(m_fGradient2[1]);
+	File.WriteFloat(m_fGradient2[2]);
+
+	if (m_nScene & LC_SCENE_GRADIENT)
+	{
+		File.WriteU16(0x1301); // LIB3DS_USE_V_GRADIENT
+		File.WriteU32(6);
+	}
+	else if (m_nScene & LC_SCENE_BG)
+	{
+		File.WriteU16(0x1101); // LIB3DS_USE_BIT_MAP
+		File.WriteU32(6);
+	}
+	else
+	{
+		File.WriteU16(0x1201); // LIB3DS_USE_SOLID_BGND
+		File.WriteU32(6);
+	}
+
+	File.WriteU16(0x2200); // CHK_FOG
+	File.WriteU32(46);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+	File.WriteFloat(1000.0f);
+	File.WriteFloat(100.0f);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fFogColor[0]);
+	File.WriteFloat(m_fFogColor[1]);
+	File.WriteFloat(m_fFogColor[2]);
+
+	File.WriteU16(0x2210); // CHK_FOG_BGND
+	File.WriteU32(6);
+
+	File.WriteU16(0x2302); // CHK_LAYER_FOG
+	File.WriteU32(40);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(100.0f);
+	File.WriteFloat(50.0f);
+	File.WriteU32(0x00100000);
+
+	File.WriteU16(0x0010); // CHK_COLOR_F
+	File.WriteU32(18);
+
+	File.WriteFloat(m_fFogColor[0]);
+	File.WriteFloat(m_fFogColor[1]);
+	File.WriteFloat(m_fFogColor[2]);
+
+	File.WriteU16(0x2300); // CHK_DISTANCE_CUE
+	File.WriteU32(28);
+
+	File.WriteFloat(0.0f);
+	File.WriteFloat(0.0f);
+	File.WriteFloat(1000.0f);
+	File.WriteFloat(100.0f);
+
+	File.WriteU16(0x2310); // CHK_DICHK_DCUE_BGNDSTANCE_CUE
+	File.WriteU32(6);
+
+	int NumPieces = 0;
 	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
 	{
 		PieceInfo* Info = piece->mPieceInfo;
@@ -3648,7 +4027,10 @@ void Project::Export3DStudio()
 		File.WriteU16(0x4000); // CHK_NAMED_OBJECT
 		File.WriteU32(0);
 
-		File.WriteBuffer(Info->m_strName, strlen(Info->m_strName) + 1);
+		char Name[32];
+		sprintf(Name, "Piece%.3d", NumPieces);
+		NumPieces++;
+		File.WriteBuffer(Name, strlen(Name) + 1);
 
 		long TriObjectStart = File.GetPosition();
 		File.WriteU16(0x4100); // CHK_N_TRI_OBJECT
@@ -3679,6 +4061,11 @@ void Project::Export3DStudio()
 		File.WriteFloats(Matrix[1], 3);
 		File.WriteFloats(Matrix[2], 3);
 		File.WriteFloats(Matrix[3], 3);
+
+		File.WriteU16(0x4165); // CHK_MESH_COLOR
+		File.WriteU32(7);
+
+		File.WriteU8(0);
 
 		long FaceArrayStart = File.GetPosition();
 		File.WriteU16(0x4120); // CHK_FACE_ARRAY
@@ -3737,12 +4124,6 @@ void Project::Export3DStudio()
 
 			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
 				File.WriteU16(NumTriangles++);
-
-			File.WriteU16(0x4150); // CHK_SMOOTH_GROUP
-			File.WriteU32(6 + 4 * Section->NumIndices / 3);
-
-			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
-				File.WriteU32(0);
 		}
 
 		long FaceArrayEnd = File.GetPosition();
@@ -3770,109 +4151,12 @@ void Project::Export3DStudio()
 	File.WriteU16(0xB000); // CHK_KFDATA
 	File.WriteU32(0);
 
-	const char* Name = "LEOCAD";
-	const int NameLength = 6;
-
 	File.WriteU16(0xB00A); // LIB3DS_KFHDR
-	File.WriteU32(6 + 2 + NameLength + 1 + 4);
+	File.WriteU32(6 + 2 + 1 + 4);
 
 	File.WriteS16(5);
-	File.WriteBuffer(Name, NameLength + 1);
+	File.WriteU8(0);
 	File.WriteS32(100);
-
-	File.WriteU16(0xB008); // CHK_KFSEG
-	File.WriteU32(14);
-
-	File.WriteU32(0);
-	File.WriteU32(100);
-
-	File.WriteU16(0xB009); // CHK_KFCURTIME
-	File.WriteU32(10);
-
-	File.WriteU32(0);
-
-	int NodeIdx = 0;
-
-	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
-	{
-		PieceInfo* Info = piece->mPieceInfo;
-		lcMesh* Mesh = Info->mMesh;
-
-		if (Mesh->mIndexType == GL_UNSIGNED_INT)
-			continue;
-
-		long NodeStart = File.GetPosition();
-		File.WriteU16(0xB002); // CHK_OBJECT_NODE_TAG
-		File.WriteU32(0);
-
-		File.WriteU16(0xB030); // CHK_NODE_ID
-		File.WriteU32(8);
-
-		File.WriteS16(NodeIdx++);
-
-		File.WriteU16(0xB010); // CHK_NODE_HDR
-		File.WriteU32(6 + 1 + strlen(Info->m_strName) + 2 + 2 + 2);
-
-		File.WriteBuffer(Info->m_strName, strlen(Info->m_strName) + 1);
-		File.WriteU16(0);
-		File.WriteU16(0);
-		File.WriteU16(65535);
-
-		File.WriteU16(0xB013); // CHK_PIVOT
-		File.WriteU32(18);
-
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-
-		File.WriteU16(0xB020); // CHK_POS_TRACK_TAG
-		File.WriteU32(38);
-
-		File.WriteU16(0);
-		File.WriteU32(0);
-		File.WriteU32(0);
-		File.WriteU32(1);
-
-		File.WriteS32(0);
-		File.WriteU16(0);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-
-		File.WriteU16(0xB021); // CHK_ROT_TRACK_TAG
-		File.WriteU32(42);
-
-		File.WriteU16(0);
-		File.WriteU32(0);
-		File.WriteU32(0);
-		File.WriteU32(1);
-
-		File.WriteS32(0);
-		File.WriteU16(0);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-		File.WriteFloat(0.0f);
-
-		File.WriteU16(0xB022); // CHK_SCL_TRACK_TAG
-		File.WriteU32(38);
-
-		File.WriteU16(0);
-		File.WriteU32(0);
-		File.WriteU32(0);
-		File.WriteU32(1);
-
-		File.WriteS32(0);
-		File.WriteU16(0);
-		File.WriteFloat(1.0f);
-		File.WriteFloat(1.0f);
-		File.WriteFloat(1.0f);
-
-		long NodeEnd = File.GetPosition();
-		File.Seek(NodeStart + 2, SEEK_SET);
-		File.WriteU32(NodeEnd - NodeStart);
-		File.Seek(NodeEnd, SEEK_SET);
-	}
 
 	long KFDataEnd = File.GetPosition();
 	File.Seek(KFDataStart + 2, SEEK_SET);
@@ -5776,26 +6060,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				CheckPoint("Array");
 		} break;
 
-		case LC_PIECE_COPY_KEYS:
-		{
-			float move[3], rot[4];
-			Piece* pPiece;
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-				{
-					pPiece->CalculateSingleKey (m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, LC_PK_POSITION, move);
-					pPiece->CalculateSingleKey (m_bAnimation ? m_nCurStep : m_nCurFrame, !m_bAnimation, LC_PK_ROTATION, rot);
-					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, move, LC_PK_POSITION);
-					pPiece->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
-				}
-
-			// TODO: cameras and lights
-
-			CalculateStep();
-			gMainWindow->UpdateAllViews();
-		} break;
-
 		case LC_PIECE_GROUP:
 		{
 			Group* pGroup;
@@ -6102,7 +6366,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Options.Snap = m_nSnap;
 			Options.LineWidth = m_fLineWidth;
 			Options.AASamples = CurrentAASamples;
-			Options.GridSize = m_nGridSize;
+			Options.GridStuds = mGridStuds;
+			Options.GridStudColor = mGridStudColor;
+			Options.GridLines = mGridLines;
+			Options.GridLineSpacing = mGridLineSpacing;
+			Options.GridLineColor = mGridLineColor;
 
 			Options.Categories = gCategories;
 			Options.CategoriesModified = false;
@@ -6122,7 +6390,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			m_nSnap = Options.Snap;
 			m_nDetail = Options.Detail;
 			m_fLineWidth = Options.LineWidth;
-			m_nGridSize = Options.GridSize;
+			mGridStuds = Options.GridStuds;
+			mGridStudColor = Options.GridStudColor;
+			mGridLines = Options.GridLines;
+			mGridLineSpacing = Options.GridLineSpacing;
+			mGridLineColor = Options.GridLineColor;
 
 			lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 			lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
@@ -6133,7 +6405,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 			lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);
 			lcSetProfileInt(LC_PROFILE_DETAIL, Options.Detail);
-			lcSetProfileInt(LC_PROFILE_GRID_SIZE, Options.GridSize);
+			lcSetProfileInt(LC_PROFILE_GRID_STUDS, Options.GridStuds);
+			lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, Options.GridStudColor);
+			lcSetProfileInt(LC_PROFILE_GRID_LINES, Options.GridLines);
+			lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, Options.GridLineSpacing);
+			lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, Options.GridLineColor);
 			lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, Options.LineWidth);
 			lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 
@@ -6177,7 +6453,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			*/
 
 			for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-		{
+			{
 				gMainWindow->mViews[i]->MakeCurrent();
 				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
 			}
@@ -6535,6 +6811,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Info += GL_HasVertexBufferObject() ? "supported" : "not supported";
 			Info += "\nGL_ARB_framebuffer_object extension: ";
 			Info += GL_HasFramebufferObject() ? "supported" : "not supported";
+			Info += "\nGL_EXT_texture_filter_anisotropic extension: ";
+			if (GL_SupportsAnisotropic)
+			{
+				sprintf(Text, "supported (max %d)", (int)GL_MaxAnisotropy);
+				Info += Text;
+			}
+			else
+				Info += "not supported";
 
 			gMainWindow->DoDialog(LC_DIALOG_ABOUT, (char*)Info);
 		} break;
@@ -7115,7 +7399,7 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
 	lcVector3 Intersection;
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, 0)))
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, m_pCurPiece->m_fDimensions[5])))
 	{
 		SnapVector(Intersection);
 		Position = Intersection;

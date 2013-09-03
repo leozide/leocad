@@ -202,6 +202,8 @@ public:
 	virtual void SaveCheckpoint(lcFile& File);
 	virtual void LoadCheckpoint(lcFile& File);
 
+	void Update();
+
 	lcMatrix44 mWorldView;
 	lcVector3 mPosition;
 	lcVector3 mTargetPosition;
@@ -215,8 +217,6 @@ public:
 	char mName[81];
 
 protected:
-	void Update();
-
 	lcMesh* mMesh;
 
 	lcArray<lcObjectVector3Key> mPositionKeys;

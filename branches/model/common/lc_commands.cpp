@@ -218,7 +218,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.SelectAll",
 		"Select &All",
-		"Select all parts in the project",
+		"Select all pieces in the project",
 		"Ctrl+A"
 	},
 	// LC_EDIT_SELECT_NONE
@@ -575,7 +575,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Insert",
 		"Insert",
-		"Add new parts to the model",
+		"Add new pieces to the model",
 		""
 	},
 	// LC_EDIT_ACTION_LIGHT
@@ -617,7 +617,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Rotate",
 		"Rotate",
-		"Rotate selected parts",
+		"Rotate selected pieces",
 		"Shift+R"
 	},
 	// LC_EDIT_ACTION_DELETE
@@ -631,7 +631,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Paint",
 		"Paint",
-		"Change part color",
+		"Change piece color",
 		"Shift+N"
 	},
 	// LC_EDIT_ACTION_ZOOM
@@ -701,7 +701,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"View.ZoomExtents",
 		"Zoom E&xtents",
-		"Fit all parts in current the view (hold the CTRL key down to zoom all views)",
+		"Fit all pieces in current the view (hold the CTRL key down to zoom all views)",
 		""
 	},
 	// LC_VIEW_VIEWPOINT_FRONT
@@ -986,191 +986,184 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	},
 	// LC_PIECE_INSERT
 	{
-		"Part.Insert",
+		"Piece.Insert",
 		"&Insert",
-		"Add a new part to the model",
+		"Add a new piece to the model",
 		"Insert"
 	},
 	// LC_PIECE_DELETE
 	{
-		"Part.Delete",
+		"Piece.Delete",
 		"&Delete",
 		"Delete selected objects",
 		"Delete"
 	},
 	// LC_PIECE_MOVE_PLUSX
 	{
-		"Part.Move.PlusX",
+		"Piece.Move.PlusX",
 		"Move +X",
 		"Move selected objects along the X axis",
 		"Down"
 	},
 	// LC_PIECE_MOVE_MINUSX
 	{
-		"Part.Move.MinusX",
+		"Piece.Move.MinusX",
 		"Move -X",
 		"Move selected objects along the X axis",
 		"Up"
 	},
 	// LC_PIECE_MOVE_PLUSY
 	{
-		"Part.Move.PlusY",
+		"Piece.Move.PlusY",
 		"Move +Y",
 		"Move selected objects along the Y axis",
 		"Right"
 	},
 	// LC_PIECE_MOVE_MINUSY
 	{
-		"Part.Move.MinusY",
+		"Piece.Move.MinusY",
 		"Move -Y",
 		"Move selected objects along the Y axis",
 		"Left"
 	},
 	// LC_PIECE_MOVE_PLUSZ
 	{
-		"Part.Move.PlusZ",
+		"Piece.Move.PlusZ",
 		"Move +Z",
 		"Move selected objects along the Z axis",
 		"PgUp"
 	},
 	// LC_PIECE_MOVE_MINUSZ
 	{
-		"Part.Move.MinusZ",
+		"Piece.Move.MinusZ",
 		"Move -Z",
 		"Move selected objects along the Z axis",
 		"PgDown"
 	},
 	// LC_PIECE_ROTATE_PLUSX
 	{
-		"Part.Rotate.PlusX",
+		"Piece.Rotate.PlusX",
 		"Rotate +X",
 		"Rotate selected objects along the X axis",
 		"Shift+Down"
 	},
 	// LC_PIECE_ROTATE_MINUSX
 	{
-		"Part.Rotate.MinusX",
+		"Piece.Rotate.MinusX",
 		"Rotate -X",
 		"Rotate selected objects along the X axis",
 		"Shift+Up"
 	},
 	// LC_PIECE_ROTATE_PLUSY
 	{
-		"Part.Rotate.PlusY",
+		"Piece.Rotate.PlusY",
 		"Rotate +Y",
 		"Rotate selected objects along the Y axis",
 		"Shift+Right"
 	},
 	// LC_PIECE_ROTATE_MINUSY
 	{
-		"Part.Rotate.MinusY",
+		"Piece.Rotate.MinusY",
 		"Rotate -Y",
 		"Rotate selected objects along the Y axis",
 		"Shift+Left"
 	},
 	// LC_PIECE_ROTATE_PLUSZ
 	{
-		"Part.Rotate.PlusZ",
+		"Piece.Rotate.PlusZ",
 		"Rotate +Z",
 		"Rotate selected objects along the Z axis",
 		"Shift+PgUp"
 	},
 	// LC_PIECE_ROTATE_MINUSZ
 	{
-		"Part.Rotate.MinusZ",
+		"Piece.Rotate.MinusZ",
 		"Rotate -Z",
 		"Rotate selected objects along the Z axis",
 		"Shift+PgDown"
 	},
 	// LC_PIECE_MINIFIG_WIZARD
 	{
-		"Part.MinifigWizard",
+		"Piece.MinifigWizard",
 		"Minifig &Wizard...",
 		"Add a new minifig to the model",
 		""
 	},
 	// LC_PIECE_ARRAY
 	{
-		"Part.Array",
+		"Piece.Array",
 		"A&rray...",
-		"Make copies of the selected parts",
-		""
-	},
-	// LC_PIECE_COPY_KEYS
-	{
-		"Part.CopyKeys",
-		"Copy Keys",
-		"Copy keys between animation and instruction modes",
+		"Make copies of the selected pieces",
 		""
 	},
 	// LC_PIECE_GROUP
 	{
-		"Part.Group",
+		"Piece.Group",
 		"&Group...",
-		"Group selected parts together",
+		"Group selected pieces together",
 		"Ctrl+G"
 	},
 	// LC_PIECE_UNGROUP
 	{
-		"Part.Ungroup",
+		"Piece.Ungroup",
 		"&Ungroup",
 		"Ungroup selected group",
 		"Ctrl+U"
 	},
 	// LC_PIECE_GROUP_ADD
 	{
-		"Part.GroupAdd",
+		"Piece.GroupAdd",
 		"&Add to Group",
-		"Add focused part to selected group",
+		"Add focused piece to selected group",
 		""
 	},
 	// LC_PIECE_GROUP_REMOVE
 	{
-		"Part.GroupRemove",
+		"Piece.GroupRemove",
 		"Re&move from Group",
-		"Remove focused part from group",
+		"Remove focused piece from group",
 		""
 	},
 	// LC_PIECE_GROUP_EDIT
 	{
-		"Part.GroupEdit",
+		"Piece.GroupEdit",
 		"&Edit Groups...",
 		"Edit groups",
 		""
 	},
 	// LC_PIECE_HIDE_SELECTED
 	{
-		"Part.HideSelected",
+		"Piece.HideSelected",
 		"&Hide Selected",
 		"Hide selected objects",
 		"Ctrl+H"
 	},
 	// LC_PIECE_HIDE_UNSELECTED
 	{
-		"Part.HideUnselected",
+		"Piece.HideUnselected",
 		"Hide &Unselected",
 		"Hide objects that are not selected",
 		""
 	},
 	// LC_PIECE_UNHIDE_ALL
 	{
-		"Part.UnhideAll",
+		"Piece.UnhideAll",
 		"U&nhide All",
 		"Show all hidden objects",
 		""
 	},
 	// LC_PIECE_SHOW_EARLIER
 	{
-		"Part.ShowEarlier",
+		"Piece.ShowEarlier",
 		"Show Earlier",
-		"Show selected parts one step earlier",
+		"Show selected pieces one step earlier",
 		""
 	},
 	// LC_PIECE_SHOW_LATER
 	{
-		"Part.ShowLater",
+		"Piece.ShowLater",
 		"Show Later",
-		"Show selected parts one step later",
+		"Show selected pieces one step later",
 		""
 	},
 	// LC_HELP_HOMEPAGE

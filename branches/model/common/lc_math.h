@@ -9,7 +9,12 @@
 #define LC_PI   3.141592f
 #define LC_2PI  6.283185f
 
-#define LC_RGB(r,g,b) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8))|(((lcuint32) (lcuint8) (b)) << 16))) 
+#define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
+#define LC_RGBA(r,g,b,a) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8)) | (((lcuint32) (lcuint8) (b)) << 16) | (((lcuint32) (lcuint8) (a)) << 24))) 
+#define LC_RGBA_RED(rgba)   ((lcuint8)(((rgba) >>  0) & 0xff))
+#define LC_RGBA_GREEN(rgba) ((lcuint8)(((rgba) >>  8) & 0xff))
+#define LC_RGBA_BLUE(rgba)  ((lcuint8)(((rgba) >> 16) & 0xff))
+#define LC_RGBA_ALPHA(rgba) ((lcuint8)(((rgba) >> 24) & 0xff))
 #define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
 
 template <typename T, typename U>
@@ -440,6 +445,13 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	a.w /= b;
 
 	return a;
+}
+
+inline lcVector4 lcVector4FromColor(lcuint32 Color)
+{
+	lcVector4 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color), LC_RGBA_ALPHA(Color));
+	v /= 255.0f;
+	return v;
 }
 
 inline lcVector3 lcMul31(const lcVector3& a, const lcMatrix44& b)

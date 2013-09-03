@@ -406,12 +406,17 @@ protected:
 	lcuint16 m_nCurFrame;
 	lcuint16 m_nTotalFrames;
 
+	bool mGridStuds;
+	lcuint32 mGridStudColor;
+	bool mGridLines;
+	int mGridLineSpacing;
+	lcuint32 mGridLineColor;
+
 	lcuint32 m_nScene;
 	lcuint32 m_nDetail;
 	lcuint32 m_nSnap;
 	lcuint16 m_nMoveSnap;
 	lcuint16 m_nAngleSnap;
-	lcuint16 m_nGridSize;
 	float m_fFogDensity;
 	float m_fFogColor[4];
 	float m_fAmbient[4];
@@ -421,11 +426,11 @@ protected:
 	char m_strFooter[256];
 	char m_strHeader[256];
 
-	GLuint m_nGridList;
 	unsigned long m_nAutosave;
 	unsigned long m_nSaveTimer;
 	char m_strBackground[LC_MAXPATH];
 	lcTexture* m_pBackground;
+	lcTexture* mGridTexture;
 
 protected:
 	// File load/save implementation.

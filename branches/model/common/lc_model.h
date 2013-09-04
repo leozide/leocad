@@ -22,6 +22,17 @@ public:
 	lcModel();
 	~lcModel();
 
+	lcObject* GetFocusObject() const
+	{
+		return mFocusObject;
+	}
+
+	const lcArray<lcObject*>& GetSelectedObjects() const
+	{
+		return mSelectedObjects;
+	}
+
+
 	void RenderBackground(View* View) const;
 	void RenderObjects(View* View) const;
 
@@ -42,7 +53,7 @@ public:
 	void UpdateCameraTool(const lcVector3& Distance);
 	void EndCameraTool(bool Accept);
 
-	void BeginMoveTool();
+	void BeginMoveTool(lcTime Time, bool AddKeys);
 	void UpdateMoveTool(const lcVector3& Distance);
 	void EndMoveTool(bool Accept);
 

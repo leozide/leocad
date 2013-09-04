@@ -249,7 +249,7 @@ void lcModel::EndCameraTool(bool Accept)
 	}
 }
 
-void lcModel::BeginMoveTool()
+void lcModel::BeginMoveTool(lcTime Time, bool AddKeys)
 {
 	BeginCheckpoint("Move Objects");
 	lcMemFile& Action = mCurrentCheckpoint->mAction;
@@ -257,10 +257,14 @@ void lcModel::BeginMoveTool()
 	Action.WriteU32(LC_ACTION_MOVE_OBJECTS);
 	Action.WriteFloats(lcVector3(0.0f, 0.0f, 0.0f), 3);
 
+	Action.WriteU32(Time);
+	Action.WriteU32(AddKeys);
+
+	Action.WriteU32(mObjects.GetSize());
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 	{
 		Action.WriteU32(ObjectIdx);
-		mObjects[ObjectIdx]->SaveCheckpoint(Action);
+		mObjects[ObjectIdx]->Save(Action);
 	}
 
 	ApplyCheckpoint(mCurrentCheckpoint);
@@ -273,7 +277,16 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance)
 	Action.Seek(0, SEEK_SET);
 	LC_ASSERT(Action.ReadU32() == LC_ACTION_MOVE_OBJECTS);
 
+	lcVector3 PreviousDistance;
+	Action.ReadFloats(PreviousDistance, 3);
+
+	if (PreviousDistance == Distance)
+		return;
+
+	Action.Seek(4, SEEK_SET);
 	Action.WriteFloats(Distance, 3);
+
+	ApplyCheckpoint(mCurrentCheckpoint);
 }
 
 void lcModel::EndMoveTool(bool Accept)
@@ -342,6 +355,29 @@ void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
 			gMainWindow->UpdateCameraMenu();
 		}
 		break;
+
+	case LC_ACTION_MOVE_OBJECTS:
+		{
+			lcVector3 Distance;
+			Action.ReadFloats(Distance, 3);
+
+			lcTime Time = Action.ReadU32();
+			bool AddKeys = Action.ReadU32() != 0;
+
+			lcuint32 NumObjects = Action.ReadU32();
+			while (NumObjects--)
+			{
+				lcuint32 ObjectIndex = Action.ReadU32();
+				mObjects[ObjectIndex]->Load(Action);
+				mObjects[ObjectIndex]->Move(Time, AddKeys, Distance);
+				mObjects[ObjectIndex]->Update();
+			}
+
+			if (mFocusObject)
+				gMainWindow->UpdateFocusObject();
+			gMainWindow->UpdateAllViews();
+		}
+		break;
 	}
 }
 
@@ -376,6 +412,25 @@ void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
 
 			gMainWindow->UpdateAllViews();
 			gMainWindow->UpdateCameraMenu();
+		}
+		break;
+
+	case LC_ACTION_MOVE_OBJECTS:
+		{
+			Action.Seek(3 * sizeof(float), SEEK_CUR);
+
+			lcuint32 NumObjects = Action.ReadU32();
+
+			while (NumObjects--)
+			{
+				lcuint32 ObjectIndex = Action.ReadU32();
+				mObjects[ObjectIndex]->Load(Action);
+				mObjects[ObjectIndex]->Update();
+			}
+
+			if (mFocusObject)
+				gMainWindow->UpdateFocusObject();
+			gMainWindow->UpdateAllViews();
 		}
 		break;
 	}

@@ -22,6 +22,20 @@ lcCamera::~lcCamera()
 {
 }
 
+void lcCamera::Save(lcFile& File)
+{
+	File.WriteFloats(mPosition, 3);
+	File.WriteFloats(mTargetPosition, 3);
+	File.WriteFloats(mUpVector, 3);
+}
+
+void lcCamera::Load(lcFile& File)
+{
+	File.ReadFloats(mPosition, 3);
+	File.ReadFloats(mTargetPosition, 3);
+	File.ReadFloats(mUpVector, 3);
+}
+
 void lcCamera::Update()
 {
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
@@ -292,17 +306,42 @@ void lcCamera::RenderExtra(View* View) const
 	}
 }
 
-void lcCamera::SaveCheckpoint(lcFile& File)
+void lcCamera::Move(lcTime Time, bool AddKeys, const lcVector3& Distance)
 {
-	File.WriteFloats(mPosition, 3);
-	File.WriteFloats(mTargetPosition, 3);
-	File.WriteFloats(mUpVector, 3);
-}
+	if (mState & LC_CAMERA_POSITION_SELECTED)
+	{
+		mPosition += Distance;
 
-void lcCamera::LoadCheckpoint(lcFile& File)
-{
-}
+		if (!IsSimple() && AddKeys)
+			AddKey(mPositionKeys, Time, mPosition);
+	}
 
+	if (mState & LC_CAMERA_TARGET_SELECTED)
+	{
+		mTargetPosition += Distance;
+
+		if (!IsSimple() && AddKeys)
+			AddKey(mTargetPositionKeys, Time, mTargetPosition);
+	}
+
+	if (mState & LC_CAMERA_UPVECTOR_SELECTED)
+	{
+		mUpVector += Distance;
+		mUpVector.Normalize();
+
+		if (!IsSimple() && AddKeys)
+			AddKey(mUpVectorKeys, Time, mUpVector);
+	}
+
+	lcVector3 FrontVector(lcNormalize(mTargetPosition - mPosition));
+	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
+
+	if (fabsf(lcDot(mUpVector, SideVector)) > 0.99f)
+		SideVector = lcVector3(1, 0, 0);
+
+	mUpVector = lcCross(SideVector, FrontVector);
+	mUpVector.Normalize();
+}
 
 
 

@@ -3091,7 +3091,7 @@ void Project::RenderInitialize()
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
-			{
+	{
 				lcuint8 a = GridImage.mData[x + y * GridSize];
 				lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
 				BlurBuffer[x + y * GridSize] = (a + b) / 2;
@@ -6453,7 +6453,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			*/
 
 			for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-			{
+		{
 				gMainWindow->mViews[i]->MakeCurrent();
 				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
 			}
@@ -7673,6 +7673,10 @@ bool Project::StopTracking(bool Accept)
 		}
 		else
 			gMainWindow->UpdateAllViews();
+		break;
+
+	case LC_TOOL_MOVE:
+		mActiveModel->EndMoveTool(Accept);
 		break;
 	}
 
@@ -8913,43 +8917,21 @@ void Project::OnLeftButtonDown(View* view)
 			mActiveModel->BeginCameraTool(Position, TargetPosition, UpVector);
 
 			StartTracking(LC_TRACK_START_LEFT);
-		} break;
+		}
+		break;
 
 		case LC_TOOL_MOVE:
 		{
-			bool sel = false;
-
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			if (mActiveModel->GetSelectedObjects().GetSize())
 			{
-				if (pPiece->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-			}
+				mActiveModel->BeginMoveTool(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize() && !sel; CameraIdx++)
-				sel = mCameras[CameraIdx]->IsSelected();
-
-			if (!sel)
-			{
-				for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				{
-					if (pLight->IsSelected())
-					{
-						sel = true;
-						break;
-					}
-				}
-			}
-
-			if (sel)
-			{
 				StartTracking(LC_TRACK_START_LEFT);
-				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
-				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
+//				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
+//				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
+				}
 			}
-		} break;
+						break;
 
 		case LC_TOOL_ROTATE:
 		{
@@ -9275,12 +9257,8 @@ void Project::OnMouseMove(View* view)
 
 		case LC_TOOL_MOVE:
 		{
-			// Check if the mouse moved since the last update.
-			if ((x == m_nDownX) && (y == m_nDownY))
-				break;
-
 			Camera* Camera = view->mCamera;
-			bool Redraw;
+			lcVector3 Distance;
 
 			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_MOVE_XYZ)) || (!Camera->IsSide()))
 			{
@@ -9406,12 +9384,7 @@ void Project::OnMouseMove(View* view)
 				MoveX *= (float)(x - m_nDownX) * 0.25f / (21 - m_nMouse);
 				MoveY *= (float)(y - m_nDownY) * 0.25f / (21 - m_nMouse);
 
-				m_nDownX = x;
-				m_nDownY = y;
-
-				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
-				m_MouseTotalDelta += Delta;
+				Distance = MoveX + MoveY;
 			}
 			else
 			{
@@ -9440,20 +9413,32 @@ void Project::OnMouseMove(View* view)
 					TotalMove = MoveZ + m_MouseSnapLeftover;
 				}
 
-				m_nDownX = x;
-				m_nDownY = y;
-
-				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true, true);
+				Distance = TotalMove;
 			}
 
-			gMainWindow->UpdateFocusObject(GetFocusObject());
+			// Transform the translation if we're in relative mode.
+			if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
+			{
+				Object* Focus = GetFocusObject();
+
+				if ((Focus != NULL) && Focus->IsPiece())
+					Distance = lcMul30(Distance, ((Piece*)Focus)->mModelWorld);
+			}
+
+			SnapVector(Distance);
+
+			mActiveModel->UpdateMoveTool(Distance);
+
+			if (m_OverlayActive)
+			{
+				if (!GetFocusPosition(m_OverlayCenter))
+					GetSelectionCenter(m_OverlayCenter);
+			}
 
 			if (m_nTracking != LC_TRACK_NONE)
 				UpdateOverlayScale();
-
-			if (Redraw)
-				gMainWindow->UpdateAllViews();
-		} break;
+		}
+		break;
 
 		case LC_TOOL_ROTATE:
 		{

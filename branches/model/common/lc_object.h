@@ -15,16 +15,16 @@ enum lcObjectType
 };
 
 template<typename T>
-struct lcObjectPropertyKey
+struct lcObjectKey
 {
 	lcTime Time;
-	T Property;
+	T Value;
 	// TODO: key in/out curves
 };
 
-typedef lcObjectPropertyKey<float> lcObjectFloatKey;
-typedef lcObjectPropertyKey<lcVector3> lcObjectVector3Key;
-typedef lcObjectPropertyKey<lcVector4> lcObjectVector4Key;
+typedef lcObjectKey<float> lcObjectFloatKey;
+typedef lcObjectKey<lcVector3> lcObjectVector3Key;
+typedef lcObjectKey<lcVector4> lcObjectVector4Key;
 
 struct lcObjectSection
 {
@@ -72,20 +72,23 @@ public:
 	virtual void ToggleSelection(lcuint32 Section) = 0;
 	virtual void SaveSelectionState(lcMemFile& File) const = 0;
 
+	virtual void Save(lcFile& File) = 0;
+	virtual void Load(lcFile& File) = 0;
+	virtual void Update() = 0;
+
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) = 0;
 
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const = 0;
 	virtual void RenderExtra(View* View) const = 0;
 
-	virtual void SaveCheckpoint(lcFile& File) = 0;
-	virtual void LoadCheckpoint(lcFile& File) = 0;
+	virtual void Move(lcTime Time, bool AddKeys, const lcVector3& Distance) = 0;
 
 protected:
 	template<typename T>
-	const T& CalculateKey(const lcArray< lcObjectPropertyKey<T> >& Keys, lcTime Time)
+	const T& CalculateKey(const lcArray< lcObjectKey<T> >& Keys, lcTime Time)
 	{
-		lcObjectPropertyKey<T>* PreviousKey = &Keys[0];
+		lcObjectKey<T>* PreviousKey = &Keys[0];
 
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{
@@ -95,7 +98,31 @@ protected:
 			PreviousKey = &Keys[KeyIdx];
 		}
 
-		return PreviousKey->Property;
+		return PreviousKey->Value;
+	}
+
+	template<typename T>
+	void AddKey(lcArray< lcObjectKey<T> >& Keys, lcTime Time, const T& Value)
+	{
+		lcObjectKey<T>* Key = &Keys[0];
+
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			if (Keys[KeyIdx].Time == Time)
+			{
+				Key = &Keys[KeyIdx];
+				break;
+			}
+
+			if (Keys[KeyIdx].Time > Time)
+			{
+				Key = &Keys.InsertAt(KeyIdx);
+				break;
+			}
+		}
+
+		Key->Time = Time;
+		Key->Value = Value;
 	}
 
 	lcObjectType mObjectType;

@@ -30,6 +30,11 @@ public:
 	lcCamera(bool Simple);
 	virtual ~lcCamera();
 
+	bool IsSimple() const
+	{
+		return (mState & LC_CAMERA_SIMPLE) != 0;
+	}
+
 	bool IsVisible() const
 	{
 		return (mState & LC_CAMERA_HIDDEN) == 0;
@@ -193,16 +198,17 @@ public:
 		Update();
 	}
 
+	virtual void Save(lcFile& File);
+	virtual void Load(lcFile& File);
+	virtual void Update();
+
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
 	virtual void RenderExtra(View* View) const;
 
-	virtual void SaveCheckpoint(lcFile& File);
-	virtual void LoadCheckpoint(lcFile& File);
-
-	void Update();
+	virtual void Move(lcTime Time, bool AddKeys, const lcVector3& Distance);
 
 	lcMatrix44 mWorldView;
 	lcVector3 mPosition;
@@ -245,10 +251,6 @@ public:
 		return m_pTarget;
 	}
 
-	bool IsSimple() const
-	{
-		return (m_nState & LC_CAMERA_SIMPLE) != 0;
-	}
 
 
 

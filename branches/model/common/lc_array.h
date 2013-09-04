@@ -123,6 +123,20 @@ public:
 		mData[Index] = NewItem;
 	}
 
+	T& InsertAt(int Index)
+	{
+		if (Index >= mLength)
+			AllocGrow(Index - mLength + 1);
+		else
+			AllocGrow(1);
+
+		mLength++;
+		for (int i = mLength - 1; i > Index; i--)
+			mData[i] = mData[i - 1];
+
+		return mData[Index];
+	}
+
 	void RemoveIndex(int Index)
 	{
 		mLength--;

@@ -102,13 +102,14 @@ bool lcTexture::Load(Image* images, int NumLevels, int Flags)
 
 		for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
 		{
+			int RowStride = Width * Components;
+
 			Width = lcMax(1, Width >> 1);
 			Height = lcMax(1, Height >> 1);
 
 			if (NumLevels == 1)
 			{
 				GLubyte *Out, *In;
-				int RowStride = Width * Components;
 
 				In = Out = (GLubyte*)Data;
 

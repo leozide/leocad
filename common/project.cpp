@@ -2123,7 +2123,7 @@ void Project::RenderSceneObjects(View* view)
 		MaxX = lcMax(MaxX, 2);
 		MaxY = lcMax(MaxY, 2);
 
-		if (mGridLines)
+		if (mGridStuds)
 		{
 			float Left = MinX * 0.8f * Spacing;
 			float Right = MaxX * 0.8f * Spacing;

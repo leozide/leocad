@@ -2163,7 +2163,6 @@ void Project::RenderSceneObjects(View* view)
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
 			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_ALPHA_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 
@@ -2181,7 +2180,6 @@ void Project::RenderSceneObjects(View* view)
 
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_BLEND);
-			glDisable(GL_ALPHA_TEST);
 		}
 
 		if (mGridLines)
@@ -2240,9 +2238,11 @@ void Project::RenderSceneObjects(View* view)
 		};
 
 		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
 		glLoadIdentity();
 		glOrtho(0, view->mWidth, 0, view->mHeight, -50, 50);
 		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
 		glLoadIdentity();
 		glTranslatef(25.375f, 25.375f, 0.0f);
 
@@ -2283,15 +2283,21 @@ void Project::RenderSceneObjects(View* view)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		m_pScreenFont->MakeCurrent();
 		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_ALPHA_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
 
 		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
 		m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
 		m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
 
+		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_ALPHA_TEST);
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
 	}
 }
 
@@ -2923,7 +2929,8 @@ void Project::RenderOverlays(View* view)
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 				m_pScreenFont->MakeCurrent();
 				glEnable(GL_TEXTURE_2D);
-				glEnable(GL_ALPHA_TEST);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glEnable(GL_BLEND);
 
 				char buf[32];
 				sprintf(buf, "[%.2f]", fabsf(Angle));
@@ -2934,8 +2941,8 @@ void Project::RenderOverlays(View* view)
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				m_pScreenFont->PrintText(ScreenPos[0] - Viewport[0] - (cx / 2), ScreenPos[1] - Viewport[1] + (cy / 2), 0.0f, buf);
 
+				glDisable(GL_BLEND);
 				glDisable(GL_TEXTURE_2D);
-				glDisable(GL_ALPHA_TEST);
 
 				glMatrixMode(GL_PROJECTION);
 				glPopMatrix();
@@ -3034,11 +3041,12 @@ void Project::RenderViewports(View* view)
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	m_pScreenFont->MakeCurrent();
-	glEnable(GL_ALPHA_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
 	m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, view->mCamera->GetName());
 
-	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 
 	glDepthMask(GL_TRUE);
@@ -3058,8 +3066,6 @@ void Project::RenderInitialize()
 	// Load font
 	if (!m_pScreenFont->IsLoaded())
 		m_pScreenFont->Initialize();
-
-	glAlphaFunc(GL_GREATER, 0.0625);
 
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->LoadTexture();

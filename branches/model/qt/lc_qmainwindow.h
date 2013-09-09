@@ -79,6 +79,7 @@ private:
 	QMenu *menuEdit;
 	QMenu *menuView;
 	QMenu *menuPiece;
+	QMenu *menuModel;
 	QMenu *menuHelp;
 
 	QToolBar *standardToolBar;

@@ -88,13 +88,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Export the project in Wavefront OBJ format",
 		""
 	},
-	// LC_FILE_PROPERTIES
-	{
-		"File.Properties",
-		"Prope&rties...",
-		"Display project properties",
-		""
-	},
 	// LC_FILE_TERRAIN_EDITOR
 	{
 		"File.TerrainEditor",
@@ -1164,6 +1157,139 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Piece.ShowLater",
 		"Show Later",
 		"Show selected pieces one step later",
+		""
+	},
+	// LC_MODEL_NEW
+	{
+		"Model.New",
+		"&New Model...",
+		"Create a new model",
+		""
+	},
+	// LC_MODEL_DELETE
+	{
+		"Model.Delete",
+		"&Delete Model...",
+		"Delete the current model",
+		""
+	},
+	// LC_MODEL_PROPERTIES
+	{
+		"Model.Properties",
+		"Prope&rties...",
+		"Display model properties",
+		""
+	},
+	// LC_MODEL_MODEL1
+	{
+		"Model.Models.Model01",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL2
+	{
+		"Model.Models.Model02",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL3
+	{
+		"Model.Models.Model03",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL4
+	{
+		"Model.Models.Model04",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL5
+	{
+		"Model.Models.Model05",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL6
+	{
+		"Model.Models.Model06",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL7
+	{
+		"Model.Models.Model07",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL8
+	{
+		"Model.Models.Model08",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL9
+	{
+		"Model.Models.Model09",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL10
+	{
+		"Model.Models.Model10",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL11
+	{
+		"Model.Models.Model11",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL12
+	{
+		"Model.Models.Model12",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL13
+	{
+		"Model.Models.Model13",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL14
+	{
+		"Model.Models.Model14",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL15
+	{
+		"Model.Models.Model15",
+		"Model",
+		"Switch to this model",
+		""
+	},
+	// LC_MODEL_MODEL16
+	{
+		"Model.Models.Model16",
+		"Model",
+		"Switch to this model",
 		""
 	},
 	// LC_HELP_HOMEPAGE

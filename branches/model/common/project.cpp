@@ -5172,149 +5172,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			setlocale(LC_NUMERIC, OldLocale);
 		} break;
 
-		case LC_FILE_PROPERTIES:
-		{
-			lcPropertiesDialogOptions Options;
-
-			Options.Title = m_strTitle;
-
-			strcpy(Options.Author, m_strAuthor);
-			strcpy(Options.Description, m_strDescription);
-			strcpy(Options.Comments, m_strComments);
-
-			if (m_nScene & LC_SCENE_BG)
-				Options.BackgroundType = 2;
-			else if (m_nScene & LC_SCENE_GRADIENT)
-				Options.BackgroundType = 1;
-			else
-				Options.BackgroundType = 0;
-
-			Options.SolidColor = lcVector3(m_fBackground[0], m_fBackground[1], m_fBackground[2]);
-			Options.GradientColor1 = lcVector3(m_fGradient1[0], m_fGradient1[1], m_fGradient1[2]);
-			Options.GradientColor2 = lcVector3(m_fGradient2[0], m_fGradient2[1], m_fGradient2[2]);
-			strcpy(Options.BackgroundFileName, m_strBackground);
-			Options.BackgroundTile = (m_nScene & LC_SCENE_BG_TILE) != 0;
-			Options.FogEnabled = (m_nScene & LC_SCENE_FOG) != 0;
-			Options.FogDensity = m_fFogDensity * 100.0f;
-			Options.FogColor = lcVector3(m_fFogColor[0], m_fFogColor[1], m_fFogColor[2]);
-			Options.AmbientColor = lcVector3(m_fAmbient[0], m_fAmbient[1], m_fAmbient[2]);
-			Options.DrawFloor = (m_nScene & LC_SCENE_FLOOR) != 0;
-			Options.SetDefault = false;
-
-			GetPiecesUsed(Options.PartsUsed);
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
-				break;
-
-			bool Modified = false;
-			
-			if (strcmp(m_strAuthor, Options.Author))
-			{
-				strcpy(m_strAuthor, Options.Author);
-				Modified = true;
-			}
-
-			if (strcmp(m_strDescription, Options.Description))
-			{
-				strcpy(m_strDescription, Options.Description);
-				Modified = true;
-			}
-
-			if (strcmp(m_strComments, Options.Comments))
-			{
-				strcpy(m_strComments, Options.Comments);
-				Modified = true;
-			}
-
-			lcuint32 Scene = 0;
-
-			if (Options.BackgroundType == 2)
-				Scene |= LC_SCENE_BG;
-			else if (Options.BackgroundType == 1)
-				Scene |= LC_SCENE_GRADIENT;
-
-			if (Options.BackgroundTile)
-				Scene |= LC_SCENE_BG_TILE;
-
-			if (Options.FogEnabled)
-				Scene |= LC_SCENE_FOG;
-
-			if (Options.DrawFloor)
-				Scene |= LC_SCENE_FLOOR;
-
-			if (m_nScene != Scene)
-			{
-				m_nScene = Scene;
-				Modified = true;
-			}
-
-			if (strcmp(m_strBackground, Options.BackgroundFileName))
-			{
-				strcpy(m_strBackground, Options.BackgroundFileName);
-				Modified = true;
-			}
-
-			if (m_fFogDensity * 100.0f != Options.FogDensity)
-			{
-				m_fFogDensity = Options.FogDensity / 100.0f;
-				Modified = true;
-			}
-
-			if (memcmp(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor)))
-			{
-				memcpy(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor));
-				Modified = true;
-			}
-
-			if (memcmp(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1)))
-			{
-				memcpy(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1));
-				Modified = true;
-			}
-
-			if (memcmp(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2)))
-				{
-				memcpy(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2));
-				Modified = true;
-				}
-
-			if (memcmp(m_fFogColor, Options.FogColor, sizeof(Options.FogColor)))
-			{
-				memcpy(m_fFogColor, Options.FogColor, sizeof(Options.FogColor));
-				Modified = true;
-			}
-
-			if (memcmp(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor)))
-			{
-				memcpy(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor));
-				Modified = true;
-			}
-
-			if (Options.SetDefault)
-		{
-				lcSetProfileInt(LC_PROFILE_DEFAULT_SCENE, Scene);
-				lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, Options.FogDensity);
-				lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, Options.BackgroundFileName);
-				lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, LC_RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, LC_RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, LC_RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, LC_RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, LC_RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-			}
-
-			if (Modified)
-			{
-				for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-				{
-					gMainWindow->mViews[i]->MakeCurrent();
-					RenderInitialize();
-				}
-
-				SetModifiedFlag(true);
-				CheckPoint("Properties");
-			}
-		} break;
-
 		case LC_FILE_PRINT_PREVIEW:
 			gMainWindow->TogglePrintPreview();
 			break;
@@ -6762,6 +6619,148 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Reset Cameras");
+		} break;
+
+		case LC_MODEL_PROPERTIES:
+		{
+			lcPropertiesDialogOptions Options;
+
+			strcpy(Options.Name, "");
+			strcpy(Options.Author, m_strAuthor);
+			strcpy(Options.Description, m_strDescription);
+			strcpy(Options.Comments, m_strComments);
+
+			if (m_nScene & LC_SCENE_BG)
+				Options.BackgroundType = 2;
+			else if (m_nScene & LC_SCENE_GRADIENT)
+				Options.BackgroundType = 1;
+			else
+				Options.BackgroundType = 0;
+
+			Options.SolidColor = lcVector3(m_fBackground[0], m_fBackground[1], m_fBackground[2]);
+			Options.GradientColor1 = lcVector3(m_fGradient1[0], m_fGradient1[1], m_fGradient1[2]);
+			Options.GradientColor2 = lcVector3(m_fGradient2[0], m_fGradient2[1], m_fGradient2[2]);
+			strcpy(Options.BackgroundFileName, m_strBackground);
+			Options.BackgroundTile = (m_nScene & LC_SCENE_BG_TILE) != 0;
+			Options.FogEnabled = (m_nScene & LC_SCENE_FOG) != 0;
+			Options.FogDensity = m_fFogDensity * 100.0f;
+			Options.FogColor = lcVector3(m_fFogColor[0], m_fFogColor[1], m_fFogColor[2]);
+			Options.AmbientColor = lcVector3(m_fAmbient[0], m_fAmbient[1], m_fAmbient[2]);
+			Options.DrawFloor = (m_nScene & LC_SCENE_FLOOR) != 0;
+			Options.SetDefault = false;
+
+			GetPiecesUsed(Options.PartsUsed);
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
+				break;
+
+			bool Modified = false;
+
+			if (strcmp(m_strAuthor, Options.Author))
+			{
+				strcpy(m_strAuthor, Options.Author);
+				Modified = true;
+			}
+
+			if (strcmp(m_strDescription, Options.Description))
+			{
+				strcpy(m_strDescription, Options.Description);
+				Modified = true;
+			}
+
+			if (strcmp(m_strComments, Options.Comments))
+			{
+				strcpy(m_strComments, Options.Comments);
+				Modified = true;
+			}
+
+			lcuint32 Scene = 0;
+
+			if (Options.BackgroundType == 2)
+				Scene |= LC_SCENE_BG;
+			else if (Options.BackgroundType == 1)
+				Scene |= LC_SCENE_GRADIENT;
+
+			if (Options.BackgroundTile)
+				Scene |= LC_SCENE_BG_TILE;
+
+			if (Options.FogEnabled)
+				Scene |= LC_SCENE_FOG;
+
+			if (Options.DrawFloor)
+				Scene |= LC_SCENE_FLOOR;
+
+			if (m_nScene != Scene)
+			{
+				m_nScene = Scene;
+				Modified = true;
+			}
+
+			if (strcmp(m_strBackground, Options.BackgroundFileName))
+			{
+				strcpy(m_strBackground, Options.BackgroundFileName);
+				Modified = true;
+			}
+
+			if (m_fFogDensity * 100.0f != Options.FogDensity)
+			{
+				m_fFogDensity = Options.FogDensity / 100.0f;
+				Modified = true;
+			}
+
+			if (memcmp(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor)))
+			{
+				memcpy(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor));
+				Modified = true;
+			}
+
+			if (memcmp(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1)))
+			{
+				memcpy(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1));
+				Modified = true;
+			}
+
+			if (memcmp(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2)))
+				{
+				memcpy(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2));
+				Modified = true;
+				}
+
+			if (memcmp(m_fFogColor, Options.FogColor, sizeof(Options.FogColor)))
+			{
+				memcpy(m_fFogColor, Options.FogColor, sizeof(Options.FogColor));
+				Modified = true;
+			}
+
+			if (memcmp(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor)))
+			{
+				memcpy(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor));
+				Modified = true;
+			}
+
+			if (Options.SetDefault)
+			{
+				lcSetProfileInt(LC_PROFILE_DEFAULT_SCENE, Scene);
+				lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, Options.FogDensity);
+				lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, Options.BackgroundFileName);
+				lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, LC_RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, LC_RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, LC_RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, LC_RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, LC_RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
+			}
+
+			if (Modified)
+			{
+				for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
+				{
+					gMainWindow->mViews[i]->MakeCurrent();
+					RenderInitialize();
+				}
+
+				SetModifiedFlag(true);
+				CheckPoint("Properties");
+			}
 		} break;
 
 		case LC_HELP_HOMEPAGE:

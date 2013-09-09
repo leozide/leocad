@@ -97,8 +97,7 @@ struct lcPOVRayDialogOptions
 
 struct lcPropertiesDialogOptions
 {
-	const char* Title;
-
+	char Name[101];
 	char Author[101];
 	char Description[101];
 	char Comments[256];

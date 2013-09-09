@@ -261,9 +261,7 @@ void lcQMainWindow::createMenus()
 	exportMenu->addAction(actions[LC_FILE_EXPORT_POVRAY]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);
 	menuFile->addSeparator();
-	menuFile->addAction(actions[LC_FILE_PROPERTIES]);
 //	menuFile->addAction(actions[LC_FILE_TERRAIN_EDITOR]);
-	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PRINT]);
 	menuFile->addAction(actions[LC_FILE_PRINT_PREVIEW]);
 //	menuFile->addAction(actions[LC_FILE_PRINT_BOM]);
@@ -347,6 +345,15 @@ void lcQMainWindow::createMenus()
 	menuPiece->addAction(actions[LC_PIECE_HIDE_SELECTED]);
 	menuPiece->addAction(actions[LC_PIECE_HIDE_UNSELECTED]);
 	menuPiece->addAction(actions[LC_PIECE_UNHIDE_ALL]);
+
+	menuModel = menuBar()->addMenu(tr("&Model"));
+	menuModel->addAction(actions[LC_MODEL_NEW]);
+	menuModel->addAction(actions[LC_MODEL_DELETE]);
+	menuModel->addAction(actions[LC_MODEL_PROPERTIES]);
+	menuModel->addSeparator();
+
+	for (int actionIdx = LC_MODEL_FIRST; actionIdx <= LC_MODEL_LAST; actionIdx++)
+		menuModel->addAction(actions[actionIdx]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 	menuHelp->addAction(actions[LC_HELP_HOMEPAGE]);

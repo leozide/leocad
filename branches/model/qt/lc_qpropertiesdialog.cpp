@@ -23,8 +23,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	options = (lcPropertiesDialogOptions*)data;
 
-	setWindowTitle(QString(tr("%1 Properties")).arg(options->Title));
-
+	ui->nameEdit->setText(options->Name);
 	ui->descriptionEdit->setText(options->Description);
 	ui->authorEdit->setText(options->Author);
 	ui->commentsEdit->setText(options->Comments);
@@ -123,9 +122,14 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	strcpy(options->Description, ui->descriptionEdit->text().toLocal8Bit().data());
-	strcpy(options->Author, ui->authorEdit->text().toLocal8Bit().data());
-	strcpy(options->Comments, ui->commentsEdit->toPlainText().toLocal8Bit().data());
+	strncpy(options->Name, ui->nameEdit->text().toLocal8Bit().data(), sizeof(options->Name));
+	options->Name[sizeof(options->Name) - 1] = 0;
+	strncpy(options->Author, ui->authorEdit->text().toLocal8Bit().data(), sizeof(options->Author));
+	options->Author[sizeof(options->Author) - 1] = 0;
+	strncpy(options->Description, ui->descriptionEdit->text().toLocal8Bit().data(), sizeof(options->Description));
+	options->Description[sizeof(options->Description) - 1] = 0;
+	strncpy(options->Comments, ui->commentsEdit->toPlainText().toLocal8Bit().data(), sizeof(options->Comments));
+	options->Comments[sizeof(options->Comments) - 1] = 0;
 
 	if (ui->imageRadio->isChecked())
 		 options->BackgroundType = 2;
